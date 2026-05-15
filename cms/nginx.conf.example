@@ -1,0 +1,60 @@
+# nginx配置示例 - 将/res路径映射到前端构建目录
+server {
+    listen 80;
+    server_name localhost;  # 修改为你的域名或IP
+
+    # 静态资源 - 前端构建结果
+    location /res/ {
+        alias /path/to/your/dist/;  # 修改为实际的dist目录路径
+        try_files $uri $uri/ /res/index.html;  # 支持Vue Router的history模式
+        
+        # 设置静态资源缓存
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        
+        # 防止访问隐藏文件（如.git等）
+        location ~ /\. {
+            deny all;
+        }
+    }
+
+    # API请求代理到后端服务
+    location /api/ {
+        proxy_pass http://127.0.0.1:8898/;  # 修改为实际的后端地址
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # 其他API请求（根据实际后端API路径调整）
+    location /globalCfg/ {
+        proxy_pass http://127.0.0.1:8898/;  # 修改为实际的后端地址
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /auth/ {
+        proxy_pass http://127.0.0.1:8898/;  # 修改为实际的后端地址
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /account/ {
+        proxy_pass http://127.0.0.1:8898/;  # 修改为实际的后端地址
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # 错误页面
+    error_page 500 502 503 504 /50x.html;
+    location = /50x.html {
+        root html;
+    }
+}
