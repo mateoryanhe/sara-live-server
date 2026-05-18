@@ -18,4 +18,5 @@ func Init() {
 	userinfodao.InitUserInfoDao()
 	guilddao.InitGuildDao()
 	liveroomdao.InitLiveRoomDao()
+	liveroomdao.InitLiveRoomOnlineDao()
 }

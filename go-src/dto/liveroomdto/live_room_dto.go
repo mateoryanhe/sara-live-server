@@ -54,6 +54,50 @@ type UpdateNoticeRes struct {
 	Success bool `json:"success"`
 }
 
+// JoinRoomReq 加入直播间(在线玩家登记)
+type JoinRoomReq struct {
+	g.Meta `path:"/join" method:"post" summary:"加入直播间" tags:"直播间"`
+	RoomId uint64 `json:"roomId" v:"required#直播间ID不能为空" dc:"直播间ID"`
+}
+
+type JoinRoomRes struct {
+	OnlineId    string `json:"onlineId"    dc:"在线记录ID(userId_roomId)"`
+	OnlineCount int    `json:"onlineCount" dc:"当前在线人数"`
+}
+
+// LeaveRoomReq 离开直播间
+type LeaveRoomReq struct {
+	g.Meta `path:"/leave" method:"post" summary:"离开直播间" tags:"直播间"`
+	RoomId uint64 `json:"roomId" v:"required#直播间ID不能为空" dc:"直播间ID"`
+}
+
+type LeaveRoomRes struct {
+	OnlineCount int `json:"onlineCount" dc:"当前在线人数"`
+}
+
+// GetOnlineUserListReq 分页查询直播间在线玩家列表
+type GetOnlineUserListReq struct {
+	g.Meta   `path:"/onlineList" method:"post" summary:"分页查询直播间在线玩家" tags:"直播间"`
+	RoomId   uint64 `json:"roomId"   v:"required#直播间ID不能为空" dc:"直播间ID"`
+	Page     int    `json:"page"     v:"min:1#页码从1开始" dc:"页码(从1开始,默认1)"`
+	PageSize int    `json:"pageSize" v:"max:100#单页最多100条" dc:"每页数量(默认20,最大100)"`
+}
+
+// OnlineUserItem 在线玩家条目
+type OnlineUserItem struct {
+	UserId   string `json:"userId"   dc:"用户ID"`
+	Nickname string `json:"nickname" dc:"昵称"`
+	Avatar   string `json:"avatar"   dc:"头像URL(已拼资源域名)"`
+	JoinedAt int64  `json:"joinedAt" dc:"最近一次加入时间(秒)"`
+}
+
+type GetOnlineUserListRes struct {
+	Total    int               `json:"total"    dc:"在线总人数"`
+	Page     int               `json:"page"     dc:"当前页码"`
+	PageSize int               `json:"pageSize" dc:"每页数量"`
+	List     []*OnlineUserItem `json:"list"     dc:"玩家列表"`
+}
+
 // GetLiveRoomReq 查询直播间(公开)
 type GetLiveRoomReq struct {
 	g.Meta `path:"/get" method:"post" summary:"查询直播间" tags:"直播间"`

@@ -107,6 +107,100 @@ func UpdateNotice(ctx context.Context, req *liveroomdto.UpdateNoticeReq) (*liver
 	return &liveroomdto.UpdateNoticeRes{Success: true}, nil
 }
 
+// JoinRoom 玩家加入直播间,记录状态置为 Online
+func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.JoinRoomRes, error) {
+	userId := httpserver.GetAuthId(ctx)
+
+	if liveroomdao.GetRoomById(req.RoomId) == nil {
+		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
+	}
+
+	onlineId := entity.BuildLiveRoomOnlineId(userId, req.RoomId)
+	existing := liveroomdao.GetOnlineById(onlineId)
+	if existing == nil {
+		// 历史无记录,首次加入
+		o := entity.NewLiveRoomOnline(userId, req.RoomId)
+		liveroomdao.AddOnlineToRoomCache(o)
+	} else if existing.Status != entity.LiveRoomOnlineStatusOnline {
+		// 历史有记录(此前离开过),状态切回 Online
+		existing.SetStatus(entity.LiveRoomOnlineStatusOnline)
+		liveroomdao.AddOnlineToRoomCache(existing)
+	}
+
+	return &liveroomdto.JoinRoomRes{
+		OnlineId:    onlineId,
+		OnlineCount: len(liveroomdao.GetOnlinesByRoom(req.RoomId)),
+	}, nil
+}
+
+// LeaveRoom 玩家离开直播间,记录状态置为 Offline(保留行)
+func LeaveRoom(ctx context.Context, req *liveroomdto.LeaveRoomReq) (*liveroomdto.LeaveRoomRes, error) {
+	userId := httpserver.GetAuthId(ctx)
+	onlineId := entity.BuildLiveRoomOnlineId(userId, req.RoomId)
+
+	if existing := liveroomdao.GetOnlineById(onlineId); existing != nil &&
+		existing.Status != entity.LiveRoomOnlineStatusOffline {
+		existing.SetStatus(entity.LiveRoomOnlineStatusOffline)
+		liveroomdao.RemoveOnlineFromRoomCache(existing)
+	}
+
+	return &liveroomdto.LeaveRoomRes{
+		OnlineCount: len(liveroomdao.GetOnlinesByRoom(req.RoomId)),
+	}, nil
+}
+
+// GetOnlineUserList 分页查询直播间在线玩家(附用户基础信息)
+func GetOnlineUserList(_ context.Context, req *liveroomdto.GetOnlineUserListReq) (*liveroomdto.GetOnlineUserListRes, error) {
+	if liveroomdao.GetRoomById(req.RoomId) == nil {
+		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
+	}
+
+	page := req.Page
+	if page <= 0 {
+		page = 1
+	}
+	pageSize := req.PageSize
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
+
+	all := liveroomdao.GetOnlinesByRoom(req.RoomId)
+	total := len(all)
+
+	start := (page - 1) * pageSize
+	end := start + pageSize
+	if start > total {
+		start = total
+	}
+	if end > total {
+		end = total
+	}
+	pageData := all[start:end]
+
+	list := make([]*liveroomdto.OnlineUserItem, 0, len(pageData))
+	for _, o := range pageData {
+		item := &liveroomdto.OnlineUserItem{
+			UserId:   strconv.FormatUint(o.UserId, 10),
+			JoinedAt: o.UpdatedAt.Unix(),
+		}
+		if u := userinfodao.GetUserInfoByUserId(o.UserId); u != nil {
+			item.Nickname = u.Nickname
+			item.Avatar = globalcfg.BuildResourceUrl(u.Avatar)
+		}
+		list = append(list, item)
+	}
+
+	return &liveroomdto.GetOnlineUserListRes{
+		Total:    total,
+		Page:     page,
+		PageSize: pageSize,
+		List:     list,
+	}, nil
+}
+
 // GetRoom 查询直播间(公开接口,任意登录用户可调用)
 func GetRoom(_ context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto.GetLiveRoomRes, error) {
 	room := liveroomdao.GetRoomById(req.RoomId)

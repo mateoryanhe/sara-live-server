@@ -42,6 +42,21 @@ func (c *LiveRoomAppController) UpdateNotice(ctx context.Context, req *liveroomd
 	return liveroom.UpdateNotice(ctx, req)
 }
 
+// JoinRoom 加入直播间
+func (c *LiveRoomAppController) JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (res *liveroomdto.JoinRoomRes, err error) {
+	return liveroom.JoinRoom(ctx, req)
+}
+
+// LeaveRoom 离开直播间
+func (c *LiveRoomAppController) LeaveRoom(ctx context.Context, req *liveroomdto.LeaveRoomReq) (res *liveroomdto.LeaveRoomRes, err error) {
+	return liveroom.LeaveRoom(ctx, req)
+}
+
+// GetOnlineUserList 分页查询直播间在线玩家
+func (c *LiveRoomAppController) GetOnlineUserList(ctx context.Context, req *liveroomdto.GetOnlineUserListReq) (res *liveroomdto.GetOnlineUserListRes, err error) {
+	return liveroom.GetOnlineUserList(ctx, req)
+}
+
 // GetRoom 查询直播间
 func (c *LiveRoomAppController) GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (res *liveroomdto.GetLiveRoomRes, err error) {
 	return liveroom.GetRoom(ctx, req)
