@@ -8,4 +8,5 @@ func Init() {
 	initName()
 	InitCMSRole()
 	InitPermission()
+	initUserInfo()
 }

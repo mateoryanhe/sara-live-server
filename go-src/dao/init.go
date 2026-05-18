@@ -5,6 +5,7 @@ import (
 	"xr-game-server/dao/cmsuserdao"
 	"xr-game-server/dao/globalcfgdao"
 	"xr-game-server/dao/namedao"
+	"xr-game-server/dao/userinfodao"
 )
 
 func Init() {
@@ -12,4 +13,5 @@ func Init() {
 	namedao.InitName()
 	globalcfgdao.InitGlobalCfg()
 	cmsuserdao.InitCMSUser()
+	userinfodao.InitUserInfoDao()
 }

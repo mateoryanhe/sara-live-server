@@ -11,8 +11,9 @@ func Init() {
 	initWebSocket()
 	initRank()
 	initGlobalCfgController()
-	initRoleController()    // 添加角色控制器初始化
-	initCMSUserController() // 添加CMS用户控制器初始化
+	initRoleController()     // 添加角色控制器初始化
+	initCMSUserController()  // 添加CMS用户控制器初始化
+	initUserInfoController() // 用户基础信息(App)
 	httpserver.InitWebsocket()
 	go httpserver.InitHttpServer()
 }

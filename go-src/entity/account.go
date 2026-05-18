@@ -46,7 +46,7 @@ func NewAccount(openId string, channel uint) *Account {
 
 func (this *Account) SetOpenId(openId string) {
 	this.OpenId = openId
-	syndb.AddDataToLazyChan(TbAccount, AccountOpenId, &syndb.ColData{
+	syndb.AddDataToQuickChan(TbAccount, AccountOpenId, &syndb.ColData{
 		IdVal:  this.ID,
 		ColVal: openId,
 	})
@@ -55,7 +55,7 @@ func (this *Account) SetOpenId(openId string) {
 func (receiver *Account) SetIp(ip string) {
 	receiver.IP = ip
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToLazyChan(TbAccount, AccountIP, &syndb.ColData{
+	syndb.AddDataToQuickChan(TbAccount, AccountIP, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: ip,
 	})
@@ -64,7 +64,7 @@ func (receiver *Account) SetIp(ip string) {
 func (receiver *Account) SetChannel(channel uint) {
 	receiver.Channel = channel
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToLazyChan(TbAccount, AccountChannel, &syndb.ColData{
+	syndb.AddDataToQuickChan(TbAccount, AccountChannel, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: channel,
 	})
@@ -72,7 +72,7 @@ func (receiver *Account) SetChannel(channel uint) {
 
 func (receiver *Account) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
-	syndb.AddDataToLazyChan(TbAccount, db.CreatedAtName, &syndb.ColData{
+	syndb.AddDataToQuickChan(TbAccount, db.CreatedAtName, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -80,7 +80,7 @@ func (receiver *Account) SetCreatedAt(val time.Time) {
 
 func (receiver *Account) SetUpdatedAt(val time.Time) {
 	receiver.UpdatedAt = val
-	syndb.AddDataToLazyChan(TbAccount, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddDataToQuickChan(TbAccount, db.UpdatedAtName, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -89,7 +89,7 @@ func (receiver *Account) SetUpdatedAt(val time.Time) {
 func (this *Account) SetBan(ban bool) {
 	this.Ban = ban
 	this.SetUpdatedAt(time.Now())
-	syndb.AddDataToLazyChan(TbAccount, AccountBan, &syndb.ColData{
+	syndb.AddDataToQuickChan(TbAccount, AccountBan, &syndb.ColData{
 		IdVal:  this.ID,
 		ColVal: ban,
 	})
@@ -98,7 +98,7 @@ func (this *Account) SetBan(ban bool) {
 func (receiver *Account) SetBanTime(banTime *time.Time) {
 	receiver.BanTime = banTime
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToLazyChan(TbAccount, AccountBanTime, &syndb.ColData{
+	syndb.AddDataToQuickChan(TbAccount, AccountBanTime, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: banTime,
 	})
@@ -107,7 +107,7 @@ func (receiver *Account) SetBanTime(banTime *time.Time) {
 func (receiver *Account) SetBanApplyTime(banApplyTime *time.Time) {
 	receiver.BanApplyTime = banApplyTime
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToLazyChan(TbAccount, AccountBanApplyTime, &syndb.ColData{
+	syndb.AddDataToQuickChan(TbAccount, AccountBanApplyTime, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: banApplyTime,
 	})
@@ -116,24 +116,24 @@ func (receiver *Account) SetBanApplyTime(banApplyTime *time.Time) {
 func (this *Account) SetCancel(cancel bool) {
 	this.Cancel = cancel
 	this.SetUpdatedAt(time.Now())
-	syndb.AddDataToLazyChan(TbAccount, AccountCancel, &syndb.ColData{
+	syndb.AddDataToQuickChan(TbAccount, AccountCancel, &syndb.ColData{
 		IdVal:  this.ID,
 		ColVal: cancel,
 	})
 }
 func initAccount() {
-	syndb.RegLazyWithSmall(TbAccount, db.CreatedAtName)
-	syndb.RegLazyWithSmall(TbAccount, db.UpdatedAtName)
-	syndb.RegLazyWithSmall(TbAccount, db.DeletedAtName)
-	syndb.RegLazyWithSmall(TbAccount, db.IsDeletedName)
+	syndb.RegQuickWithLarge(TbAccount, db.CreatedAtName)
+	syndb.RegQuickWithLarge(TbAccount, db.UpdatedAtName)
+	syndb.RegQuickWithLarge(TbAccount, db.DeletedAtName)
+	syndb.RegQuickWithLarge(TbAccount, db.IsDeletedName)
 
-	syndb.RegLazyWithSmall(TbAccount, AccountOpenId)
-	syndb.RegLazyWithSmall(TbAccount, AccountChannel)
-	syndb.RegLazyWithSmall(TbAccount, AccountIP)
-	syndb.RegLazyWithSmall(TbAccount, AccountBan)
-	syndb.RegLazyWithSmall(TbAccount, AccountBanTime)
-	syndb.RegLazyWithSmall(TbAccount, AccountBanApplyTime)
-	syndb.RegLazyWithSmall(TbAccount, AccountCancel)
+	syndb.RegQuickWithLarge(TbAccount, AccountOpenId)
+	syndb.RegQuickWithLarge(TbAccount, AccountChannel)
+	syndb.RegQuickWithLarge(TbAccount, AccountIP)
+	syndb.RegQuickWithLarge(TbAccount, AccountBan)
+	syndb.RegQuickWithLarge(TbAccount, AccountBanTime)
+	syndb.RegQuickWithLarge(TbAccount, AccountBanApplyTime)
+	syndb.RegQuickWithLarge(TbAccount, AccountCancel)
 
 	migrate.AutoMigrate(&Account{})
 }
