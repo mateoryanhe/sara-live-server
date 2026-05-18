@@ -4,6 +4,7 @@ import (
 	"context"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/userinfodto"
+	"xr-game-server/module/currencylog"
 	"xr-game-server/module/userinfo"
 )
 
@@ -24,4 +25,8 @@ func (c *UserInfoController) Get(ctx context.Context, req *userinfodto.GetUserIn
 
 func (c *UserInfoController) UpdateNickname(ctx context.Context, req *userinfodto.UpdateNicknameReq) (res *userinfodto.UpdateNicknameRes, err error) {
 	return userinfo.UpdateNickname(ctx, req)
+}
+
+func (c *UserInfoController) GetCurrencyLog(ctx context.Context, req *userinfodto.GetCurrencyLogReq) (res *userinfodto.GetCurrencyLogRes, err error) {
+	return currencylog.GetByUserId(ctx, req)
 }

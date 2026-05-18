@@ -5,6 +5,8 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/event"
+	"xr-game-server/dao/currencylogdao"
+	"xr-game-server/dto/userinfodto"
 	"xr-game-server/entity"
 	"xr-game-server/gameevent"
 )
@@ -33,4 +35,27 @@ func onCurrencyChange(val any) {
 		"currency log userId=%d type=%d action=%d amount=%v before=%v after=%v reason=%s",
 		data.UserId, data.Type, data.Action, data.Amount, data.Before, data.After, data.Reason,
 	)
+}
+
+// GetByUserId 查询用户的货币流水(分页)
+func GetByUserId(ctx context.Context, req *userinfodto.GetCurrencyLogReq) (*userinfodto.GetCurrencyLogRes, error) {
+	total, list := currencylogdao.GetByUserId(req.UserId, req.PageIndex, req.PageSize)
+	items := make([]*userinfodto.CurrencyLogItem, 0, len(list))
+	for _, v := range list {
+		items = append(items, &userinfodto.CurrencyLogItem{
+			Id:       v.ID,
+			UserId:   v.UserId,
+			Type:     v.Type,
+			Action:   v.Action,
+			Amount:   v.Amount,
+			Before:   v.Before,
+			After:    v.After,
+			Reason:   v.Reason,
+			CreateAt: v.CreatedAt.Unix(),
+		})
+	}
+	return &userinfodto.GetCurrencyLogRes{
+		Total: total,
+		List:  items,
+	}, nil
 }
