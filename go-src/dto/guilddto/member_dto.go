@@ -14,6 +14,16 @@ type ApplyJoinGuildRes struct {
 	MemberId string `json:"memberId" dc:"工会成员记录ID"`
 }
 
+// ApproveGuildMemberReq 审批通过工会申请(由会长操作)
+type ApproveGuildMemberReq struct {
+	g.Meta   `path:"/approveMember" method:"post" summary:"审批通过工会申请" tags:"直播工会"`
+	MemberId uint64 `json:"memberId" v:"required#成员记录ID不能为空" dc:"成员记录ID"`
+}
+
+type ApproveGuildMemberRes struct {
+	Success bool `json:"success"`
+}
+
 // RejectGuildMemberReq 拒绝工会申请(由会长操作)
 type RejectGuildMemberReq struct {
 	g.Meta   `path:"/rejectMember" method:"post" summary:"拒绝工会申请" tags:"直播工会"`

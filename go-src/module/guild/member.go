@@ -7,6 +7,7 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/snowflake"
 	"xr-game-server/dao/guilddao"
+	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/guilddto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
@@ -41,6 +42,41 @@ func ApplyJoin(ctx context.Context, req *guilddto.ApplyJoinGuildReq) (res *guild
 	return &guilddto.ApplyJoinGuildRes{
 		MemberId: strconv.FormatUint(m.ID, 10),
 	}, nil
+}
+
+// ApproveMember 审批通过工会申请(会长操作);通过后写入 user_info.guild_id
+func ApproveMember(ctx context.Context, req *guilddto.ApproveGuildMemberReq) (res *guilddto.ApproveGuildMemberRes, err error) {
+	operatorId := httpserver.GetAuthId(ctx)
+
+	m := guilddao.GetMember(req.MemberId)
+	if m == nil {
+		return nil, errercode.CreateCode(errercode.GuildNonExist)
+	}
+
+	g := guilddao.GetGuildByIdCached(m.GuildId)
+	if g == nil {
+		return nil, errercode.CreateCode(errercode.GuildNonExist)
+	}
+	if g.LeaderId != operatorId {
+		return nil, errercode.CreateCode(errercode.NoPermission)
+	}
+
+	// 仅"申请中"状态可以被通过
+	if m.Status != entity.GuildMemberStatusPending {
+		return nil, errercode.CreateCode(errercode.GuildApplyExist)
+	}
+
+	// 1) 成员表状态置为已加入
+	m.SetStatus(entity.GuildMemberStatusApproved)
+	guilddao.FlushMemberCache(m)
+
+	// 2) 将工会ID写入用户信息表(玩家成为主播,需要绑定工会)
+	user := userinfodao.GetUserInfoByUserId(m.UserId)
+	if user != nil {
+		user.SetGuildId(m.GuildId)
+	}
+
+	return &guilddto.ApproveGuildMemberRes{Success: true}, nil
 }
 
 // RejectMember 拒绝工会申请(会长操作)
@@ -100,6 +136,11 @@ func KickMember(ctx context.Context, req *guilddto.KickGuildMemberReq) (res *gui
 
 	m.SetStatus(entity.GuildMemberStatusKicked)
 	guilddao.FlushMemberCache(m)
+
+	// 被剔除后清空该用户的所属工会
+	if user := userinfodao.GetUserInfoByUserId(m.UserId); user != nil && user.GuildId == m.GuildId {
+		user.SetGuildId(0)
+	}
 
 	return &guilddto.KickGuildMemberRes{Success: true}, nil
 }

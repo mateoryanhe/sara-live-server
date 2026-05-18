@@ -28,6 +28,11 @@ func (c *GuildAppController) ApplyJoin(ctx context.Context, req *guilddto.ApplyJ
 	return guild.ApplyJoin(ctx, req)
 }
 
+// ApproveMember 审批通过工会申请
+func (c *GuildAppController) ApproveMember(ctx context.Context, req *guilddto.ApproveGuildMemberReq) (res *guilddto.ApproveGuildMemberRes, err error) {
+	return guild.ApproveMember(ctx, req)
+}
+
 // RejectMember 拒绝工会申请
 func (c *GuildAppController) RejectMember(ctx context.Context, req *guilddto.RejectGuildMemberReq) (res *guilddto.RejectGuildMemberRes, err error) {
 	return guild.RejectMember(ctx, req)

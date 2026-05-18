@@ -19,6 +19,7 @@ const (
 	UserInfoGold      db.TbCol = "gold"
 	UserInfoDiamond   db.TbCol = "diamond"
 	UserInfoShareCode db.TbCol = "share_code"
+	UserInfoGuildId   db.TbCol = "guild_id"
 )
 
 // UserInfo 用户基础信息
@@ -31,6 +32,7 @@ type UserInfo struct {
 	Gold      float64 `gorm:"default:0;comment:金币"`
 	Diamond   float64 `gorm:"default:0;comment:钻石"`
 	ShareCode string  `gorm:"uniqueIndex;default:'';comment:分享码"`
+	GuildId   uint64  `gorm:"index;default:0;comment:所属工会ID(0为未加入)"`
 }
 
 func NewUserInfo(userId uint64) *UserInfo {
@@ -104,6 +106,15 @@ func (receiver *UserInfo) SetShareCode(shareCode string) {
 	})
 }
 
+func (receiver *UserInfo) SetGuildId(guildId uint64) {
+	receiver.GuildId = guildId
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddDataToQuickChan(TbUserInfo, UserInfoGuildId, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: guildId,
+	})
+}
+
 func (receiver *UserInfo) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
 	syndb.AddDataToQuickChan(TbUserInfo, db.CreatedAtName, &syndb.ColData{
@@ -131,6 +142,7 @@ func initUserInfo() {
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoGold)
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoDiamond)
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoShareCode)
+	syndb.RegQuickWithLarge(TbUserInfo, UserInfoGuildId)
 
 	migrate.AutoMigrate(&UserInfo{})
 }
