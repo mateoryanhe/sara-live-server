@@ -10,4 +10,5 @@ func Init() {
 	InitPermission()
 	initUserInfo()
 	initCurrencyLog()
+	InitLiveGuild()
 }

@@ -119,6 +119,22 @@ export interface Permission {
     updatedAt?: string
 }
 
+// 直播工会相关类型
+export interface Guild {
+    id: string
+    name: string
+    leaderId: string
+    contact: string
+    description: string
+    status: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GuildQuery extends PageQuery {
+    name?: string
+}
+
 // CMS用户相关类型
 export interface CMSUser {
     id: string

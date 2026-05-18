@@ -56,6 +56,21 @@ const routes: Array<RouteRecordRaw> = [
             }
         ]
     },
+    // 直播工会管理路由
+    {
+        path: '/guild',
+        component: Layout,
+        redirect: '/guild/guild-list',
+        meta: {title: '直播工会', icon: 'OfficeBuilding'},
+        children: [
+            {
+                path: '/guild/guild-list',
+                name: 'GuildManagement',
+                component: () => import('@/views/guild/guild-list.vue'),
+                meta: {title: '工会管理'}
+            }
+        ]
+    },
     // 角色权限管理路由
     {
         path: '/role',
