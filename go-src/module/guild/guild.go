@@ -2,12 +2,12 @@ package guild
 
 import (
 	"context"
-	"errors"
 	"strconv"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/guilddao"
 	"xr-game-server/dto/guilddto"
 	"xr-game-server/entity"
+	"xr-game-server/errercode"
 )
 
 // GetGuildList 获取直播工会列表
@@ -22,7 +22,7 @@ func GetGuildList(ctx context.Context, req *guilddto.GuildListReq) (res *httpser
 // CreateGuild 创建直播工会
 func CreateGuild(ctx context.Context, req *guilddto.CreateGuildReq) (res *guilddto.CreateGuildRes, err error) {
 	if existing := guilddao.GetGuildByName(req.Name); existing != nil {
-		return nil, errors.New("工会名称已存在")
+		return nil, errercode.CreateCode(errercode.GuildExist)
 	}
 
 	guild := entity.LiveGuild{
@@ -44,11 +44,11 @@ func CreateGuild(ctx context.Context, req *guilddto.CreateGuildReq) (res *guildd
 func UpdateGuild(ctx context.Context, req *guilddto.UpdateGuildReq) (res *guilddto.UpdateGuildRes, err error) {
 	guild := guilddao.GetGuildById(req.ID)
 	if guild == nil {
-		return nil, errors.New("工会不存在")
+		return nil, errercode.CreateCode(errercode.GuildNonExist)
 	}
 
 	if existing := guilddao.GetGuildByName(req.Name); existing != nil && existing.ID != req.ID {
-		return nil, errors.New("工会名称已存在")
+		return nil, errercode.CreateCode(errercode.GuildExist)
 	}
 
 	guild.Name = req.Name
@@ -60,6 +60,7 @@ func UpdateGuild(ctx context.Context, req *guilddto.UpdateGuildReq) (res *guildd
 	if err = guilddao.UpdateGuild(guild); err != nil {
 		return nil, err
 	}
+	guilddao.RemoveGuildCache(req.ID)
 
 	return &guilddto.UpdateGuildRes{Success: true}, nil
 }
@@ -69,5 +70,22 @@ func DeleteGuild(ctx context.Context, req *guilddto.DeleteGuildReq) (res *guildd
 	if err = guilddao.DeleteGuild(req.ID); err != nil {
 		return nil, err
 	}
+	guilddao.RemoveGuildCache(req.ID)
 	return &guilddto.DeleteGuildRes{Success: true}, nil
+}
+
+// GetGuild App端获取工会信息(走缓存)
+func GetGuild(ctx context.Context, req *guilddto.GetGuildReq) (res *guilddto.GetGuildRes, err error) {
+	guild := guilddao.GetGuildByIdCached(req.ID)
+	if guild == nil {
+		return nil, errercode.CreateCode(errercode.GuildNonExist)
+	}
+	return &guilddto.GetGuildRes{
+		ID:          strconv.FormatUint(guild.ID, 10),
+		Name:        guild.Name,
+		LeaderId:    strconv.FormatUint(guild.LeaderId, 10),
+		Contact:     guild.Contact,
+		Description: guild.Description,
+		Status:      guild.Status,
+	}, nil
 }
