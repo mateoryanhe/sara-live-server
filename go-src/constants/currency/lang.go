@@ -1,39 +1,18 @@
 package currency
 
-import "strings"
+import "xr-game-server/constants/lang"
 
-// Lang 语言代码
-type Lang string
+// Lang 语言代码(转发至通用 constants/lang 包,保持本包 API 兼容)
+type Lang = lang.Lang
 
 const (
-	LangZHCN Lang = "zh-CN" // 简体中文
-	LangZHTW Lang = "zh-TW" // 繁体中文
-	LangEN   Lang = "en"    // 英文(默认)
+	LangZHCN = lang.LangZHCN
+	LangZHTW = lang.LangZHTW
+	LangEN   = lang.LangEN
 )
 
 // DefaultLang 默认语言
-const DefaultLang = LangEN
+const DefaultLang = lang.DefaultLang
 
-// ParseLang 解析前端传入的语言标识(支持 Accept-Language 风格,如 "zh-CN,zh;q=0.9,en;q=0.8"),
-// 不识别时回落到默认语言
-func ParseLang(s string) Lang {
-	if s == "" {
-		return DefaultLang
-	}
-	// 取第一段(忽略 q=权重)
-	first := strings.SplitN(s, ",", 2)[0]
-	first = strings.SplitN(first, ";", 2)[0]
-	first = strings.TrimSpace(first)
-	low := strings.ToLower(first)
-
-	switch {
-	case strings.HasPrefix(low, "zh-tw"), strings.HasPrefix(low, "zh-hk"), strings.HasPrefix(low, "zh-hant"):
-		return LangZHTW
-	case strings.HasPrefix(low, "zh"):
-		return LangZHCN
-	case strings.HasPrefix(low, "en"):
-		return LangEN
-	default:
-		return DefaultLang
-	}
-}
+// ParseLang 解析 Accept-Language 风格字符串
+func ParseLang(s string) Lang { return lang.Parse(s) }

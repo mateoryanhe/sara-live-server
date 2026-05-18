@@ -26,7 +26,7 @@ func middlewareCORS(r *ghttp.Request) {
 func middlewareLogReq(r *ghttp.Request) {
 	//收到关机指令,服务器不再接受请求
 	if !canDo {
-		r.Response.WriteJson(CreateFail(int(errercode.ServerClose)))
+		WriteFailJson(r, int(errercode.ServerClose))
 		return
 	}
 	//设置请求时间

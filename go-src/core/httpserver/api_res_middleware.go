@@ -45,7 +45,9 @@ func apiResponseMiddleware(r *ghttp.Request) {
 	var respData any
 	//发现有错误码
 	if err != nil {
-		respData = CreateFailAndParam(code, param)
+		failResp := CreateFailAndParam(code, param)
+		failResp.Message = errercode.GetMsg(errercode.XRCode(code), GetLang(r))
+		respData = failResp
 	} else {
 		respData = CreateSuccess(res)
 	}

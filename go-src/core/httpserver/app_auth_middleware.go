@@ -17,15 +17,15 @@ func MiddlewareAppAuth(r *ghttp.Request) {
 	tokenStr := r.GetHeader(Token)
 	userId := r.GetHeader(AuthId)
 	if len(tokenStr) == common.Zero {
-		r.Response.WriteJson(CreateFail(errercode.EmptyToken))
+		WriteFailJson(r, errercode.EmptyToken)
 		return
 	}
 	if len(userId) == common.Zero {
-		r.Response.WriteJson(CreateFail(errercode.EmptyUserId))
+		WriteFailJson(r, errercode.EmptyUserId)
 		return
 	}
 	if flag := xrtoken.HasAppToken(gconv.Uint64(userId)); !flag {
-		r.Response.WriteJson(CreateFail(errercode.Token))
+		WriteFailJson(r, errercode.Token)
 		return
 	}
 	r.Middleware.Next()
