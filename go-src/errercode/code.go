@@ -28,6 +28,12 @@ const (
 	GoldAmountInvalid XRCode = 42
 	// GoldNotEnough 金币余额不足
 	GoldNotEnough XRCode = 43
+	// LiveRoomExist 主播已存在直播间
+	LiveRoomExist XRCode = 50
+	// LiveRoomNotAnchor 用户尚未成为主播(未加入工会)
+	LiveRoomNotAnchor XRCode = 51
+	// LiveRoomNotExist 直播间不存在
+	LiveRoomNotExist XRCode = 52
 )
 
 type XError struct {

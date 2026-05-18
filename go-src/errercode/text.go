@@ -25,6 +25,9 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		DiamondNotEnough:     "Insufficient diamond balance",
 		GoldAmountInvalid:    "Gold amount must be positive",
 		GoldNotEnough:        "Insufficient gold balance",
+		LiveRoomExist:        "Live room already exists",
+		LiveRoomNotAnchor:    "You are not an anchor yet",
+		LiveRoomNotExist:     "Live room does not exist",
 	},
 	lang.LangZHCN: {
 		Success:              "成功",
@@ -46,6 +49,9 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		DiamondNotEnough:     "钻石余额不足",
 		GoldAmountInvalid:    "金币数量必须为正数",
 		GoldNotEnough:        "金币余额不足",
+		LiveRoomExist:        "直播间已存在",
+		LiveRoomNotAnchor:    "您尚未成为主播",
+		LiveRoomNotExist:     "直播间不存在",
 	},
 	lang.LangZHTW: {
 		Success:              "成功",
@@ -67,6 +73,9 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		DiamondNotEnough:     "鑽石餘額不足",
 		GoldAmountInvalid:    "金幣數量必須為正數",
 		GoldNotEnough:        "金幣餘額不足",
+		LiveRoomExist:        "直播間已存在",
+		LiveRoomNotAnchor:    "您尚未成為主播",
+		LiveRoomNotExist:     "直播間不存在",
 	},
 }
 

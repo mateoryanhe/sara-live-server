@@ -5,6 +5,7 @@ import (
 	"xr-game-server/dao/cmsuserdao"
 	"xr-game-server/dao/globalcfgdao"
 	"xr-game-server/dao/guilddao"
+	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/namedao"
 	"xr-game-server/dao/userinfodao"
 )
@@ -16,4 +17,5 @@ func Init() {
 	cmsuserdao.InitCMSUser()
 	userinfodao.InitUserInfoDao()
 	guilddao.InitGuildDao()
+	liveroomdao.InitLiveRoomDao()
 }
