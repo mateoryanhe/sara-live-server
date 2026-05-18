@@ -16,15 +16,19 @@ const (
 	UserInfoPhone    db.TbCol = "phone"
 	UserInfoAvatar   db.TbCol = "avatar"
 	UserInfoRemark   db.TbCol = "remark"
+	UserInfoGold     db.TbCol = "gold"
+	UserInfoDiamond  db.TbCol = "diamond"
 )
 
 // UserInfo 用户基础信息
 type UserInfo struct {
 	migrate.OneModel
-	Nickname string `gorm:"default:'';comment:用户昵称"`
-	Phone    string `gorm:"default:'';comment:手机号"`
-	Avatar   string `gorm:"default:'';comment:头像"`
-	Remark   string `gorm:"default:'';comment:备注"`
+	Nickname string  `gorm:"default:'';comment:用户昵称"`
+	Phone    string  `gorm:"default:'';comment:手机号"`
+	Avatar   string  `gorm:"default:'';comment:头像"`
+	Remark   string  `gorm:"default:'';comment:备注"`
+	Gold     float64 `gorm:"default:0;comment:金币"`
+	Diamond  float64 `gorm:"default:0;comment:钻石"`
 }
 
 func NewUserInfo(userId uint64) *UserInfo {
@@ -71,6 +75,24 @@ func (receiver *UserInfo) SetRemark(remark string) {
 	})
 }
 
+func (receiver *UserInfo) SetGold(gold float64) {
+	receiver.Gold = gold
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddDataToQuickChan(TbUserInfo, UserInfoGold, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: gold,
+	})
+}
+
+func (receiver *UserInfo) SetDiamond(diamond float64) {
+	receiver.Diamond = diamond
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddDataToQuickChan(TbUserInfo, UserInfoDiamond, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: diamond,
+	})
+}
+
 func (receiver *UserInfo) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
 	syndb.AddDataToQuickChan(TbUserInfo, db.CreatedAtName, &syndb.ColData{
@@ -95,6 +117,8 @@ func initUserInfo() {
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoPhone)
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoAvatar)
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoRemark)
+	syndb.RegQuickWithLarge(TbUserInfo, UserInfoGold)
+	syndb.RegQuickWithLarge(TbUserInfo, UserInfoDiamond)
 
 	migrate.AutoMigrate(&UserInfo{})
 }

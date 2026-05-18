@@ -47,6 +47,14 @@ const (
 	MailIsReceived   XRCode = 37
 	SysBuyLimit      XRCode = 38
 	GuildMasterRole  XRCode = 39
+	// DiamondAmountInvalid 钻石数量必须为正数
+	DiamondAmountInvalid XRCode = 40
+	// DiamondNotEnough 钻石余额不足
+	DiamondNotEnough XRCode = 41
+	// GoldAmountInvalid 金币数量必须为正数
+	GoldAmountInvalid XRCode = 42
+	// GoldNotEnough 金币余额不足
+	GoldNotEnough XRCode = 43
 )
 
 type XError struct {

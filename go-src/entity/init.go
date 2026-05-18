@@ -9,4 +9,5 @@ func Init() {
 	InitCMSRole()
 	InitPermission()
 	initUserInfo()
+	initCurrencyLog()
 }
