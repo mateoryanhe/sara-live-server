@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	QuickSynPeriod = 100
+	QuickSynPeriod = 10
 )
 
 var quickMap = make(map[string]*ColSynCache)
