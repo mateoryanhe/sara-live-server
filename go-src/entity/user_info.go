@@ -12,23 +12,25 @@ const (
 )
 
 const (
-	UserInfoNickname db.TbCol = "nickname"
-	UserInfoPhone    db.TbCol = "phone"
-	UserInfoAvatar   db.TbCol = "avatar"
-	UserInfoRemark   db.TbCol = "remark"
-	UserInfoGold     db.TbCol = "gold"
-	UserInfoDiamond  db.TbCol = "diamond"
+	UserInfoNickname  db.TbCol = "nickname"
+	UserInfoPhone     db.TbCol = "phone"
+	UserInfoAvatar    db.TbCol = "avatar"
+	UserInfoRemark    db.TbCol = "remark"
+	UserInfoGold      db.TbCol = "gold"
+	UserInfoDiamond   db.TbCol = "diamond"
+	UserInfoShareCode db.TbCol = "share_code"
 )
 
 // UserInfo 用户基础信息
 type UserInfo struct {
 	migrate.OneModel
-	Nickname string  `gorm:"default:'';comment:用户昵称"`
-	Phone    string  `gorm:"default:'';comment:手机号"`
-	Avatar   string  `gorm:"default:'';comment:头像"`
-	Remark   string  `gorm:"default:'';comment:备注"`
-	Gold     float64 `gorm:"default:0;comment:金币"`
-	Diamond  float64 `gorm:"default:0;comment:钻石"`
+	Nickname  string  `gorm:"default:'';comment:用户昵称"`
+	Phone     string  `gorm:"default:'';comment:手机号"`
+	Avatar    string  `gorm:"default:'';comment:头像"`
+	Remark    string  `gorm:"default:'';comment:备注"`
+	Gold      float64 `gorm:"default:0;comment:金币"`
+	Diamond   float64 `gorm:"default:0;comment:钻石"`
+	ShareCode string  `gorm:"uniqueIndex;default:'';comment:分享码"`
 }
 
 func NewUserInfo(userId uint64) *UserInfo {
@@ -93,6 +95,15 @@ func (receiver *UserInfo) SetDiamond(diamond float64) {
 	})
 }
 
+func (receiver *UserInfo) SetShareCode(shareCode string) {
+	receiver.ShareCode = shareCode
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddDataToQuickChan(TbUserInfo, UserInfoShareCode, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: shareCode,
+	})
+}
+
 func (receiver *UserInfo) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
 	syndb.AddDataToQuickChan(TbUserInfo, db.CreatedAtName, &syndb.ColData{
@@ -119,6 +130,7 @@ func initUserInfo() {
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoRemark)
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoGold)
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoDiamond)
+	syndb.RegQuickWithLarge(TbUserInfo, UserInfoShareCode)
 
 	migrate.AutoMigrate(&UserInfo{})
 }

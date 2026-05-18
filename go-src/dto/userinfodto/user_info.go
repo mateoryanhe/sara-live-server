@@ -10,11 +10,14 @@ type GetUserInfoReq struct {
 }
 
 type GetUserInfoRes struct {
-	UserId   uint64 `json:"userId"`
-	Nickname string `json:"nickname"`
-	Phone    string `json:"phone"`
-	Avatar   string `json:"avatar"`
-	Remark   string `json:"remark"`
+	UserId    uint64  `json:"userId"`
+	Nickname  string  `json:"nickname"`
+	Phone     string  `json:"phone"`
+	Avatar    string  `json:"avatar"`
+	Remark    string  `json:"remark"`
+	Gold      float64 `json:"gold"`
+	Diamond   float64 `json:"diamond"`
+	ShareCode string  `json:"shareCode"`
 }
 
 // UpdateNicknameReq 修改昵称
