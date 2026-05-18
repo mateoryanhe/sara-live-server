@@ -14,4 +14,5 @@ func Init() {
 	initGuildMember()
 	initLiveRoom()
 	initLiveRoomOnline()
+	InitLiveGift()
 }

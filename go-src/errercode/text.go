@@ -28,6 +28,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		LiveRoomExist:        "Live room already exists",
 		LiveRoomNotAnchor:    "You are not an anchor yet",
 		LiveRoomNotExist:     "Live room does not exist",
+		GiftExist:            "Gift name already exists",
+		GiftNonExist:         "Gift does not exist",
 	},
 	lang.LangZHCN: {
 		Success:              "成功",
@@ -52,6 +54,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		LiveRoomExist:        "直播间已存在",
 		LiveRoomNotAnchor:    "您尚未成为主播",
 		LiveRoomNotExist:     "直播间不存在",
+		GiftExist:            "礼物名称已存在",
+		GiftNonExist:         "礼物不存在",
 	},
 	lang.LangZHTW: {
 		Success:              "成功",
@@ -76,6 +80,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		LiveRoomExist:        "直播間已存在",
 		LiveRoomNotAnchor:    "您尚未成為主播",
 		LiveRoomNotExist:     "直播間不存在",
+		GiftExist:            "禮物名稱已存在",
+		GiftNonExist:         "禮物不存在",
 	},
 }
 

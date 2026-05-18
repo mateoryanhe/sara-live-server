@@ -34,6 +34,10 @@ const (
 	LiveRoomNotAnchor XRCode = 51
 	// LiveRoomNotExist 直播间不存在
 	LiveRoomNotExist XRCode = 52
+	// GiftExist 礼物名称已存在
+	GiftExist XRCode = 60
+	// GiftNonExist 礼物不存在
+	GiftNonExist XRCode = 61
 )
 
 type XError struct {

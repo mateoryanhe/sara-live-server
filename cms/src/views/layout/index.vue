@@ -39,6 +39,20 @@
             <span>全局配置</span>
           </el-menu-item>
         </el-sub-menu>
+        <el-sub-menu v-if="hasMenuPermission('GiftManagement')" index="/gift">
+          <template #title>
+            <el-icon>
+              <Present/>
+            </el-icon>
+            <span>礼物管理</span>
+          </template>
+          <el-menu-item index="/gift/gift-list">
+            <el-icon>
+              <Present/>
+            </el-icon>
+            <span>礼物列表</span>
+          </el-menu-item>
+        </el-sub-menu>
         <!-- 角色权限管理菜单 -->
         <el-sub-menu
             v-if="hasMenuPermission('RoleManagement') || hasMenuPermission('ModuleList') || hasMenuPermission('CMSUserManagement')"
@@ -107,7 +121,7 @@
 <script lang="ts" setup>
 import {computed, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {ArrowDown, Expand, Fold, Lock, Monitor, Setting, User} from '@element-plus/icons-vue'
+import {ArrowDown, Expand, Fold, Lock, Monitor, Present, Setting, User} from '@element-plus/icons-vue'
 import {clearPermissions, getIsAdmin, hasPermission} from '@/utils/permission'
 
 const route = useRoute()

@@ -71,6 +71,21 @@ const routes: Array<RouteRecordRaw> = [
             }
         ]
     },
+    // 礼物管理路由
+    {
+        path: '/gift',
+        component: Layout,
+        redirect: '/gift/gift-list',
+        meta: {title: '礼物管理', icon: 'Present'},
+        children: [
+            {
+                path: '/gift/gift-list',
+                name: 'GiftManagement',
+                component: () => import('@/views/gift/gift-list.vue'),
+                meta: {title: '礼物列表'}
+            }
+        ]
+    },
     // 角色权限管理路由
     {
         path: '/role',

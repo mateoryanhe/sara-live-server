@@ -4,6 +4,8 @@ import globalCfgApi from './modules/globalCfg'
 import {roleApi} from './modules/role'
 import {cmsUserApi} from './modules/cmsuser'
 import {guildApi} from './modules/guild'
+import {giftApi} from './modules/gift'
+import {uploadApi} from './modules/upload'
 
 export {
     authApi,
@@ -12,6 +14,8 @@ export {
     roleApi,
     cmsUserApi,
     guildApi,
+    giftApi,
+    uploadApi,
 }
 
 export default {
@@ -21,4 +25,6 @@ export default {
     roleApi,
     cmsUserApi,
     guildApi,
+    giftApi,
+    uploadApi,
 }

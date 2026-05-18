@@ -135,6 +135,27 @@ export interface GuildQuery extends PageQuery {
     name?: string
 }
 
+// 礼物相关类型
+export interface Gift {
+    id: string
+    name: string
+    icon: string
+    animation: string
+    price: number
+    category: string
+    sort: number
+    status: number
+    description: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GiftQuery extends PageQuery {
+    name?: string
+    category?: string
+    statusFilter?: number
+}
+
 // CMS用户相关类型
 export interface CMSUser {
     id: string
