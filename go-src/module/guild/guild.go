@@ -71,6 +71,7 @@ func DeleteGuild(ctx context.Context, req *guilddto.DeleteGuildReq) (res *guildd
 		return nil, err
 	}
 	guilddao.RemoveGuildCache(req.ID)
+	guilddao.RemoveGuildMembersCache(req.ID)
 	return &guilddto.DeleteGuildRes{Success: true}, nil
 }
 

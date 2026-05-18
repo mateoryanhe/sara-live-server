@@ -12,6 +12,7 @@ var guildCacheMgr *cache.CacheMgr
 
 func InitGuildDao() {
 	guildCacheMgr = cache.NewCacheMgr()
+	InitGuildMemberDao()
 }
 
 // GetGuildByIdCached 走缓存读取工会信息(给app使用)

@@ -11,4 +11,5 @@ func Init() {
 	initUserInfo()
 	initCurrencyLog()
 	InitLiveGuild()
+	initGuildMember()
 }
