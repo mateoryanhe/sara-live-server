@@ -2,6 +2,7 @@ package userinfodto
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/net/ghttp"
 )
 
 // GetUserInfoReq 查询当前登录用户的基础信息
@@ -53,4 +54,14 @@ type CurrencyLogItem struct {
 type GetCurrencyLogRes struct {
 	Total int                `json:"total"`
 	List  []*CurrencyLogItem `json:"list"`
+}
+
+// UploadAvatarReq 上传头像
+type UploadAvatarReq struct {
+	g.Meta `path:"/uploadAvatar" method:"post" mime:"multipart/form-data" summary:"上传用户头像" tags:"用户基础信息"`
+	File   *ghttp.UploadFile `json:"file" type:"file" v:"required#请选择头像图片" dc:"头像图片文件"`
+}
+
+type UploadAvatarRes struct {
+	Avatar string `json:"avatar" dc:"头像文件名"`
 }

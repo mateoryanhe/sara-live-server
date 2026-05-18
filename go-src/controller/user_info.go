@@ -30,3 +30,7 @@ func (c *UserInfoController) UpdateNickname(ctx context.Context, req *userinfodt
 func (c *UserInfoController) GetCurrencyLog(ctx context.Context, req *userinfodto.GetCurrencyLogReq) (res *userinfodto.GetCurrencyLogRes, err error) {
 	return currencylog.GetByUserId(ctx, req)
 }
+
+func (c *UserInfoController) UploadAvatar(ctx context.Context, req *userinfodto.UploadAvatarReq) (res *userinfodto.UploadAvatarRes, err error) {
+	return userinfo.UploadAvatar(ctx, req)
+}
