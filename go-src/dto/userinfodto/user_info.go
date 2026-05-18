@@ -47,7 +47,7 @@ type CurrencyLogItem struct {
 	Amount   float64 `json:"amount"`
 	Before   float64 `json:"before"`
 	After    float64 `json:"after"`
-	Reason   string  `json:"reason"`
+	Reason   uint8   `json:"reason"` // 货币变动原因枚举,参见 constants/currency.Reason
 	CreateAt int64   `json:"createAt"`
 }
 

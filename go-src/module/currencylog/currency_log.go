@@ -32,8 +32,8 @@ func onCurrencyChange(val any) {
 		data.Reason,
 	)
 	g.Log().Debugf(context.Background(),
-		"currency log userId=%d type=%d action=%d amount=%v before=%v after=%v reason=%s",
-		data.UserId, data.Type, data.Action, data.Amount, data.Before, data.After, data.Reason,
+		"currency log userId=%d type=%d action=%d amount=%v before=%v after=%v reason=%d(%s)",
+		data.UserId, data.Type, data.Action, data.Amount, data.Before, data.After, uint8(data.Reason), data.Reason.String(),
 	)
 }
 

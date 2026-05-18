@@ -2,6 +2,7 @@ package entity
 
 import (
 	"time"
+	"xr-game-server/constants/currency"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/migrate"
 	"xr-game-server/core/snowflake"
@@ -31,10 +32,10 @@ type CurrencyLog struct {
 	Amount float64 `gorm:"default:0;comment:变动数量"`
 	Before float64 `gorm:"default:0;comment:变动前余额"`
 	After  float64 `gorm:"default:0;comment:变动后余额"`
-	Reason string  `gorm:"default:'';comment:变动原因"`
+	Reason uint8   `gorm:"default:0;comment:变动原因(枚举,参见 constants/currency.Reason)"`
 }
 
-func NewCurrencyLog(userId uint64, currencyType, action uint8, amount, before, after float64, reason string) *CurrencyLog {
+func NewCurrencyLog(userId uint64, currencyType, action uint8, amount, before, after float64, reason currency.Reason) *CurrencyLog {
 	ret := &CurrencyLog{}
 	ret.ID = snowflake.GetId()
 	ret.SetCreatedAt(time.Now())
@@ -97,11 +98,11 @@ func (receiver *CurrencyLog) SetAfter(after float64) {
 	})
 }
 
-func (receiver *CurrencyLog) SetReason(reason string) {
-	receiver.Reason = reason
+func (receiver *CurrencyLog) SetReason(reason currency.Reason) {
+	receiver.Reason = uint8(reason)
 	syndb.AddDataToQuickChan(TbCurrencyLog, CurrencyLogReason, &syndb.ColData{
 		IdVal:  receiver.ID,
-		ColVal: reason,
+		ColVal: uint8(reason),
 	})
 }
 
