@@ -32,6 +32,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		LiveRoomNotExist:     "Live room does not exist",
 		GiftExist:            "Gift name already exists",
 		GiftNonExist:         "Gift does not exist",
+		GiftCountInvalid:     "Invalid gift count",
+		GiftOffShelf:         "Gift is off shelf",
 	},
 	lang.LangZHCN: {
 		Success:              "成功",
@@ -60,6 +62,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		LiveRoomNotExist:     "直播间不存在",
 		GiftExist:            "礼物名称已存在",
 		GiftNonExist:         "礼物不存在",
+		GiftCountInvalid:     "送礼数量不合法",
+		GiftOffShelf:         "礼物已下架",
 	},
 	lang.LangZHTW: {
 		Success:              "成功",
@@ -88,6 +92,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		LiveRoomNotExist:     "直播間不存在",
 		GiftExist:            "禮物名稱已存在",
 		GiftNonExist:         "禮物不存在",
+		GiftCountInvalid:     "送禮數量不合法",
+		GiftOffShelf:         "禮物已下架",
 	},
 }
 

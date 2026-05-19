@@ -42,6 +42,10 @@ const (
 	GiftExist XRCode = 60
 	// GiftNonExist 礼物不存在
 	GiftNonExist XRCode = 61
+	// GiftCountInvalid 送礼数量非法
+	GiftCountInvalid XRCode = 62
+	// GiftOffShelf 礼物已下架
+	GiftOffShelf XRCode = 63
 )
 
 type XError struct {

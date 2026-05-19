@@ -98,6 +98,36 @@ type GetOnlineUserListRes struct {
 	List     []*OnlineUserItem `json:"list"     dc:"玩家列表"`
 }
 
+// SendGiftReq App端送礼请求
+type SendGiftReq struct {
+	g.Meta `path:"/sendGift" method:"post" summary:"直播间送礼" tags:"直播间"`
+	RoomId uint64 `json:"roomId" v:"required#直播间ID不能为空" dc:"直播间ID"`
+	GiftId uint64 `json:"giftId" v:"required#礼物ID不能为空" dc:"礼物ID"`
+	Count  int    `json:"count"  v:"required|min:1|max:9999#送礼数量不合法|送礼数量需大于0|单次最多9999" dc:"送礼数量"`
+}
+
+// SendGiftRes App端送礼响应
+type SendGiftRes struct {
+	Cost    uint64  `json:"cost"    dc:"本次实际消耗钻石数"`
+	Diamond float64 `json:"diamond" dc:"剩余钻石余额"`
+}
+
+// GiftPushItem 推送给房间在线用户的送礼广播载荷
+type GiftPushItem struct {
+	RoomId       string `json:"roomId"      dc:"直播间ID"`
+	SenderId     string `json:"senderId"    dc:"送礼用户ID"`
+	SenderName   string `json:"senderName"  dc:"送礼用户昵称"`
+	SenderAvatar string `json:"senderAvatar" dc:"送礼用户头像"`
+	GiftId       string `json:"giftId"      dc:"礼物ID"`
+	GiftName     string `json:"giftName"    dc:"礼物名称"`
+	GiftIcon     string `json:"giftIcon"    dc:"礼物图标"`
+	GiftAnim     string `json:"giftAnim"    dc:"礼物动画"`
+	UnitPrice    uint64 `json:"unitPrice"   dc:"礼物单价"`
+	Count        int    `json:"count"       dc:"赠送数量"`
+	TotalCost    uint64 `json:"totalCost"   dc:"总消耗钻石数"`
+	SentAt       int64  `json:"sentAt"      dc:"发送时间(秒)"`
+}
+
 // GetLiveRoomReq 查询直播间(公开)
 type GetLiveRoomReq struct {
 	g.Meta `path:"/get" method:"post" summary:"查询直播间" tags:"直播间"`

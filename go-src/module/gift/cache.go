@@ -57,6 +57,23 @@ func getGiftCache() []*giftdto.AppGiftItem {
 	return loadGiftCache()
 }
 
+// GetGiftFromCacheById 通过礼物 ID 从缓存获取礼物配置(供其它模块使用,例如送礼)
+// 缓存只包含已上架礼物;若未加载则触发加载;命中失败返回 nil
+func GetGiftFromCacheById(id uint64) *giftdto.AppGiftItem {
+	giftCacheMu.RLock()
+	if giftCacheLoaded {
+		item := giftCacheMap[id]
+		giftCacheMu.RUnlock()
+		return item
+	}
+	giftCacheMu.RUnlock()
+	loadGiftCache()
+	giftCacheMu.RLock()
+	item := giftCacheMap[id]
+	giftCacheMu.RUnlock()
+	return item
+}
+
 func toAppGiftItem(g *entity.LiveGift) *giftdto.AppGiftItem {
 	return &giftdto.AppGiftItem{
 		ID:          strconv.FormatUint(g.ID, 10),

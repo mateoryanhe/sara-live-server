@@ -14,6 +14,7 @@ var reasonTextMap = map[Lang]map[Reason]string{
 		ReasonGuildContribute: "工会贡献",
 		ReasonRefund:          "退款返还",
 		ReasonSystemGrant:     "系统发放",
+		ReasonGiftSend:        "直播间送礼",
 	},
 	LangZHTW: {
 		ReasonUnknown:         "未知",
@@ -26,6 +27,7 @@ var reasonTextMap = map[Lang]map[Reason]string{
 		ReasonGuildContribute: "公會貢獻",
 		ReasonRefund:          "退款返還",
 		ReasonSystemGrant:     "系統發放",
+		ReasonGiftSend:        "直播間送禮",
 	},
 	LangEN: {
 		ReasonUnknown:         "Unknown",
@@ -38,6 +40,7 @@ var reasonTextMap = map[Lang]map[Reason]string{
 		ReasonGuildContribute: "Guild Contribution",
 		ReasonRefund:          "Refund",
 		ReasonSystemGrant:     "System Grant",
+		ReasonGiftSend:        "Live Room Gift",
 	},
 }
 

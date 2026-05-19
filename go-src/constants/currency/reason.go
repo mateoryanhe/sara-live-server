@@ -24,6 +24,8 @@ const (
 	ReasonRefund Reason = 8
 	// ReasonSystemGrant 系统发放(活动/补偿)
 	ReasonSystemGrant Reason = 9
+	// ReasonGiftSend 直播间送礼消耗
+	ReasonGiftSend Reason = 10
 )
 
 // String 返回枚举的英文标识(用于日志/调试,不参与多语言展示;
@@ -48,6 +50,8 @@ func (r Reason) String() string {
 		return "Refund"
 	case ReasonSystemGrant:
 		return "SystemGrant"
+	case ReasonGiftSend:
+		return "GiftSend"
 	default:
 		return "Unknown"
 	}

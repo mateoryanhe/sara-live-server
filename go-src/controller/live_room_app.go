@@ -61,3 +61,8 @@ func (c *LiveRoomAppController) GetOnlineUserList(ctx context.Context, req *live
 func (c *LiveRoomAppController) GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (res *liveroomdto.GetLiveRoomRes, err error) {
 	return liveroom.GetRoom(ctx, req)
 }
+
+// SendGift 直播间送礼
+func (c *LiveRoomAppController) SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (res *liveroomdto.SendGiftRes, err error) {
+	return liveroom.SendGift(ctx, req)
+}
