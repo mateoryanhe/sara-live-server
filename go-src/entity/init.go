@@ -15,4 +15,5 @@ func Init() {
 	initLiveRoom()
 	initLiveRoomOnline()
 	InitLiveGift()
+	initLiveFollow()
 }
