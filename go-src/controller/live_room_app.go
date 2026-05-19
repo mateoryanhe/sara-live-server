@@ -66,3 +66,8 @@ func (c *LiveRoomAppController) GetRoom(ctx context.Context, req *liveroomdto.Ge
 func (c *LiveRoomAppController) SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (res *liveroomdto.SendGiftRes, err error) {
 	return liveroom.SendGift(ctx, req)
 }
+
+// SendChat 直播间文字消息
+func (c *LiveRoomAppController) SendChat(ctx context.Context, req *liveroomdto.SendChatReq) (res *liveroomdto.SendChatRes, err error) {
+	return liveroom.SendChat(ctx, req)
+}

@@ -13,4 +13,6 @@ const (
 	ErrorParam = 7
 	//直播间送礼推送(房间内全体在线用户)
 	LiveRoomGift = 8
+	//直播间文字消息推送(房间内全体在线用户)
+	LiveRoomChat = 9
 )

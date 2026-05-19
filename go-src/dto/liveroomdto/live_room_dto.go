@@ -128,6 +128,28 @@ type GiftPushItem struct {
 	SentAt       int64  `json:"sentAt"      dc:"发送时间(秒)"`
 }
 
+// SendChatReq App端向直播间发送文字消息
+type SendChatReq struct {
+	g.Meta  `path:"/sendChat" method:"post" summary:"直播间文字消息" tags:"直播间"`
+	RoomId  uint64 `json:"roomId"  v:"required#直播间ID不能为空" dc:"直播间ID"`
+	Content string `json:"content" v:"required|length:1,256#消息不能为空|消息长度需在1到256之间" dc:"文字内容"`
+}
+
+// SendChatRes App端发送文字消息响应
+type SendChatRes struct {
+	Success bool `json:"success"`
+}
+
+// ChatPushItem 推送给房间在线用户的文字消息载荷
+type ChatPushItem struct {
+	RoomId       string `json:"roomId"       dc:"直播间ID"`
+	SenderId     string `json:"senderId"     dc:"发送用户ID"`
+	SenderName   string `json:"senderName"   dc:"发送用户昵称"`
+	SenderAvatar string `json:"senderAvatar" dc:"发送用户头像"`
+	Content      string `json:"content"      dc:"文字内容"`
+	SentAt       int64  `json:"sentAt"       dc:"发送时间(秒)"`
+}
+
 // GetLiveRoomReq 查询直播间(公开)
 type GetLiveRoomReq struct {
 	g.Meta `path:"/get" method:"post" summary:"查询直播间" tags:"直播间"`
