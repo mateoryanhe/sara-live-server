@@ -6,10 +6,10 @@ import (
 	"strconv"
 	"time"
 	"xr-game-server/constants/common"
-	"xr-game-server/core/cfg"
 	"xr-game-server/core/xrtoken"
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/cmsuserdao"
+	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/authdto"
 	"xr-game-server/errercode"
 )
@@ -19,9 +19,9 @@ const (
 )
 
 func TestLogin(ctx context.Context, req *authdto.TestLoginReq) (res *authdto.TestLoginRes, err error) {
-	if !cfg.GetAuthCfg().LoginOff {
-		return nil, errercode.CreateCode(errercode.TestEnvClose)
-	}
+	//if !cfg.GetAuthCfg().LoginOff {
+	//	return nil, errercode.CreateCode(errercode.TestEnvClose)
+	//}
 	data := accountdao.GetAccountBy(req.OpenId, Test)
 	if data.Ban && data.BanApplyTime.After(time.Now()) {
 		return nil, errercode.CreateCode(errercode.Ban)
@@ -32,6 +32,7 @@ func TestLogin(ctx context.Context, req *authdto.TestLoginReq) (res *authdto.Tes
 		data.SetIp(httpReq.Host)
 		data.SetUpdatedAt(time.Now())
 	}
+	userinfodao.GetUserInfoByUserId(data.ID)
 	res = &authdto.TestLoginRes{
 		Token:  tokenStr,
 		AuthId: strconv.FormatUint(data.ID, 10),

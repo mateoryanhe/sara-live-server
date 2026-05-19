@@ -4,7 +4,7 @@ import "github.com/gogf/gf/v2/frame/g"
 
 // AppGiftListReq App端查询礼物列表(仅返回已上架礼物,带缓存)
 type AppGiftListReq struct {
-	g.Meta `path:"/giftList" method:"post" summary:"App查询礼物列表(已上架)" tags:"礼物"`
+	g.Meta `path:"/giftListForApp" method:"post" summary:"App查询礼物列表(已上架)" tags:"礼物"`
 }
 
 // AppGiftItem App端礼物列表元素
