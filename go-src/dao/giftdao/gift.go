@@ -62,6 +62,19 @@ func UpdateGiftStatus(id uint64, status uint8) error {
 	return err
 }
 
+// GetOnShelfGifts 获取所有已上架礼物(按 sort desc, created_at desc 排序)
+func GetOnShelfGifts() []*entity.LiveGift {
+	ret := make([]*entity.LiveGift, 0)
+	err := g.DB().Model(string(entity.TbLiveGift)).
+		Where("status = ?", entity.LiveGiftStatusOnShelf).
+		Order("sort desc, created_at desc").
+		Scan(&ret)
+	if err != nil {
+		return nil
+	}
+	return ret
+}
+
 // GetGiftList 分页获取礼物列表
 func GetGiftList(req *giftdto.GiftListReq) (int, []*giftdto.GiftListRes) {
 	sql := `select id, name, icon, animation, price, category, sort, status, description, created_at, updated_at

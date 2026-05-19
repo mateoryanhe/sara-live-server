@@ -1,0 +1,71 @@
+package gift
+
+import (
+	"strconv"
+	"sync"
+	"xr-game-server/dao/giftdao"
+	"xr-game-server/dto/giftdto"
+	"xr-game-server/entity"
+)
+
+// 礼物缓存(仅缓存已上架礼物,供 App 查询使用)
+// 以礼物 ID 作为主键,任何创建/修改/删除/上下架变更都会清空缓存,下一次读取时重新加载。
+var (
+	giftCacheMu     sync.RWMutex
+	giftCacheMap    map[uint64]*giftdto.AppGiftItem // id -> item
+	giftCacheSorted []*giftdto.AppGiftItem          // 按 sort desc, created_at desc 排序的列表
+	giftCacheLoaded bool
+)
+
+// invalidateGiftCache 清除礼物缓存
+func invalidateGiftCache() {
+	giftCacheMu.Lock()
+	giftCacheMap = nil
+	giftCacheSorted = nil
+	giftCacheLoaded = false
+	giftCacheMu.Unlock()
+}
+
+// loadGiftCache 从 DB 重新加载已上架礼物到缓存
+func loadGiftCache() []*giftdto.AppGiftItem {
+	rows := giftdao.GetOnShelfGifts()
+	m := make(map[uint64]*giftdto.AppGiftItem, len(rows))
+	list := make([]*giftdto.AppGiftItem, 0, len(rows))
+	for _, r := range rows {
+		item := toAppGiftItem(r)
+		m[r.ID] = item
+		list = append(list, item)
+	}
+
+	giftCacheMu.Lock()
+	giftCacheMap = m
+	giftCacheSorted = list
+	giftCacheLoaded = true
+	giftCacheMu.Unlock()
+	return list
+}
+
+// getGiftCache 获取缓存列表,未加载则触发加载
+func getGiftCache() []*giftdto.AppGiftItem {
+	giftCacheMu.RLock()
+	if giftCacheLoaded {
+		list := giftCacheSorted
+		giftCacheMu.RUnlock()
+		return list
+	}
+	giftCacheMu.RUnlock()
+	return loadGiftCache()
+}
+
+func toAppGiftItem(g *entity.LiveGift) *giftdto.AppGiftItem {
+	return &giftdto.AppGiftItem{
+		ID:          strconv.FormatUint(g.ID, 10),
+		Name:        g.Name,
+		Icon:        g.Icon,
+		Animation:   g.Animation,
+		Price:       g.Price,
+		Category:    g.Category,
+		Sort:        g.Sort,
+		Description: g.Description,
+	}
+}

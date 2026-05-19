@@ -19,6 +19,12 @@ func GetGiftList(_ context.Context, req *giftdto.GiftListReq) (*httpserver.CMSQu
 	}, nil
 }
 
+// GetAppGiftList App端查询礼物列表(仅返回已上架礼物,带缓存)
+// 缓存以礼物 ID 为主键,在礼物创建/修改/删除/上下架时清空,下次访问时重新加载。
+func GetAppGiftList(_ context.Context, _ *giftdto.AppGiftListReq) (*giftdto.AppGiftListRes, error) {
+	return &giftdto.AppGiftListRes{List: getGiftCache()}, nil
+}
+
 // CreateGift 创建礼物
 func CreateGift(_ context.Context, req *giftdto.CreateGiftReq) (*giftdto.CreateGiftRes, error) {
 	if existing := giftdao.GetGiftByName(req.Name); existing != nil {
@@ -38,6 +44,7 @@ func CreateGift(_ context.Context, req *giftdto.CreateGiftReq) (*giftdto.CreateG
 	if err := giftdao.CreateGift(g); err != nil {
 		return nil, err
 	}
+	invalidateGiftCache()
 	return &giftdto.CreateGiftRes{ID: strconv.FormatUint(g.ID, 10)}, nil
 }
 
@@ -62,6 +69,7 @@ func UpdateGift(_ context.Context, req *giftdto.UpdateGiftReq) (*giftdto.UpdateG
 	if err := giftdao.UpdateGift(g); err != nil {
 		return nil, err
 	}
+	invalidateGiftCache()
 	return &giftdto.UpdateGiftRes{Success: true}, nil
 }
 
@@ -73,6 +81,7 @@ func DeleteGift(_ context.Context, req *giftdto.DeleteGiftReq) (*giftdto.DeleteG
 	if err := giftdao.DeleteGift(req.ID); err != nil {
 		return nil, err
 	}
+	invalidateGiftCache()
 	return &giftdto.DeleteGiftRes{Success: true}, nil
 }
 
@@ -86,6 +95,7 @@ func OnShelfGift(_ context.Context, req *giftdto.OnShelfGiftReq) (*giftdto.OnShe
 		if err := giftdao.UpdateGiftStatus(req.ID, entity.LiveGiftStatusOnShelf); err != nil {
 			return nil, err
 		}
+		invalidateGiftCache()
 	}
 	return &giftdto.OnShelfGiftRes{Success: true, Status: entity.LiveGiftStatusOnShelf}, nil
 }
@@ -100,6 +110,7 @@ func OffShelfGift(_ context.Context, req *giftdto.OffShelfGiftReq) (*giftdto.Off
 		if err := giftdao.UpdateGiftStatus(req.ID, entity.LiveGiftStatusOffShelf); err != nil {
 			return nil, err
 		}
+		invalidateGiftCache()
 	}
 	return &giftdto.OffShelfGiftRes{Success: true, Status: entity.LiveGiftStatusOffShelf}, nil
 }

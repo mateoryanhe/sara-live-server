@@ -18,6 +18,7 @@ func Init() {
 	initGuildAppController()    // 直播工会查询(App)
 	initLiveRoomAppController() // 直播间(App)
 	initGiftController()        // 礼物配置(CMS)
+	initGiftAppController()     // 礼物列表(App)
 	initUploadController()      // CMS文件上传
 	httpserver.InitWebsocket()
 	go httpserver.InitHttpServer()
