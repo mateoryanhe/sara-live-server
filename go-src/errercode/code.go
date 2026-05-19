@@ -28,6 +28,10 @@ const (
 	GoldAmountInvalid XRCode = 42
 	// GoldNotEnough 金币余额不足
 	GoldNotEnough XRCode = 43
+	// DiamondOverflow 钻石数量溢出
+	DiamondOverflow XRCode = 44
+	// GoldOverflow 金币数量溢出
+	GoldOverflow XRCode = 45
 	// LiveRoomExist 主播已存在直播间
 	LiveRoomExist XRCode = 50
 	// LiveRoomNotAnchor 用户尚未成为主播(未加入工会)
