@@ -67,8 +67,11 @@ func InitAccountDao() {
 }
 
 func GetUserInfo(req *accountdto.QueryUserInfoReq) (int, []*accountdto.UserInfoDto) {
-	sql := `select  a.*
+	sql := `select  a.*,
+                    u.nickname, u.phone, u.avatar, u.remark,
+                    u.gold, u.diamond, u.share_code, u.guild_id
                     from accounts a
+                    left join user_infos u on u.id = a.id
                     where 1=1 `
 	param := make([]any, 0)
 	ctx := gctx.New()

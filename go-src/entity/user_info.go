@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"fmt"
 	"time"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/migrate"
@@ -39,6 +40,7 @@ func NewUserInfo(userId uint64) *UserInfo {
 	ret := &UserInfo{}
 	ret.ID = userId
 	ret.SetCreatedAt(time.Now())
+	ret.SetShareCode(fmt.Sprintf("%d", userId))
 	ret.SetUpdatedAt(time.Now())
 	return ret
 }

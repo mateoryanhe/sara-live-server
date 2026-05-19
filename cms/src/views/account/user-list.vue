@@ -40,9 +40,44 @@
       <div class="content">
         <el-table v-loading="loading" :data="userList" height="500" style="width: 100%">
           <el-table-column label="ID" prop="id" width="200"/>
+          <el-table-column label="昵称" prop="nickname" width="140">
+            <template #default="scope">{{ scope.row.nickname || '-' }}</template>
+          </el-table-column>
+          <el-table-column label="头像" prop="avatar" width="80">
+            <template #default="scope">
+              <el-image
+                  v-if="scope.row.avatar"
+                  :preview-src-list="[scope.row.avatar]"
+                  :src="scope.row.avatar"
+                  fit="cover"
+                  hide-on-click-modal
+                  preview-teleported
+                  style="width:40px;height:40px;border-radius:50%"
+              />
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
           <el-table-column label="OpenId" prop="openId" width="200"/>
+          <el-table-column label="手机号" prop="phone" width="140">
+            <template #default="scope">{{ scope.row.phone || '-' }}</template>
+          </el-table-column>
           <el-table-column label="IP" prop="ip" width="150"/>
           <el-table-column label="渠道" prop="channel" width="100"/>
+          <el-table-column label="金币" prop="gold" width="120">
+            <template #default="scope">{{ formatAmount(scope.row.gold) }}</template>
+          </el-table-column>
+          <el-table-column label="钻石" prop="diamond" width="120">
+            <template #default="scope">{{ formatAmount(scope.row.diamond) }}</template>
+          </el-table-column>
+          <el-table-column label="所属工会" prop="guildId" width="140">
+            <template #default="scope">{{ scope.row.guildId && String(scope.row.guildId) !== '0' ? scope.row.guildId : '-' }}</template>
+          </el-table-column>
+          <el-table-column label="分享码" prop="shareCode" width="140">
+            <template #default="scope">{{ scope.row.shareCode || '-' }}</template>
+          </el-table-column>
+          <el-table-column label="备注" prop="remark" min-width="160" show-overflow-tooltip>
+            <template #default="scope">{{ scope.row.remark || '-' }}</template>
+          </el-table-column>
           <el-table-column label="封号状态" prop="ban" width="120">
             <template #default="scope">
               <el-tag v-if="scope.row.ban" type="danger">已封号</el-tag>
@@ -296,6 +331,18 @@ const toggleCancelStatus = async (row: UserInfo) => {
       console.log('取消注销操作')
     }
   }
+}
+
+// 格式化金额(金币/钻石)，保留3位小数并去掉多余的0
+const formatAmount = (val: number | null | undefined) => {
+  if (val === null || val === undefined) {
+    return '-'
+  }
+  const n = Number(val)
+  if (Number.isNaN(n)) {
+    return '-'
+  }
+  return n.toLocaleString('zh-CN', {maximumFractionDigits: 3})
 }
 
 // 格式化日期函数

@@ -10,8 +10,8 @@ import (
 
 const (
 	Ws              = "/ws"
-	Token           = "Token"
-	AuthId          = "AuthId"
+	Token           = "token"
+	AuthId          = "authId"
 	DoTime          = "1ea75a33e32449c67dfd40fe8e23232d-doTime"
 	LongDoTime      = 400
 	contentTypeJson = "application/json"

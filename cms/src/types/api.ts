@@ -78,6 +78,15 @@ export interface UserInfo {
     banTime?: string | null
     banApplyTime?: string | null
     cancel: boolean
+    // 来自 user_infos 表(LEFT JOIN，可能为空)
+    nickname?: string
+    phone?: string
+    avatar?: string
+    remark?: string
+    gold?: number
+    diamond?: number
+    shareCode?: string
+    guildId?: string | number
 }
 
 
