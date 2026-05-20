@@ -50,6 +50,16 @@ const (
 	RechargeCfgExist XRCode = 70
 	// RechargeCfgNonExist 充值配置不存在
 	RechargeCfgNonExist XRCode = 71
+	// RechargeOrderNonExist 充值订单不存在
+	RechargeOrderNonExist XRCode = 80
+	// RechargeAmountInvalid 充值金额非法(必须为正)
+	RechargeAmountInvalid XRCode = 81
+	// RechargeGoldInvalid 充值发放金币数非法(必须为正)
+	RechargeGoldInvalid XRCode = 82
+	// RechargeOrderStateInvalid 订单状态不允许此操作(如重复完成)
+	RechargeOrderStateInvalid XRCode = 83
+	// RechargeCfgOffShelf 引用的充值配置已下架
+	RechargeCfgOffShelf XRCode = 84
 )
 
 type XError struct {

@@ -17,4 +17,5 @@ func Init() {
 	InitLiveGift()
 	initLiveFollow()
 	initRechargeCfg()
+	initRechargeOrder()
 }
