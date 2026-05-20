@@ -16,4 +16,5 @@ func Init() {
 	initLiveRoomOnline()
 	InitLiveGift()
 	initLiveFollow()
+	initRechargeCfg()
 }

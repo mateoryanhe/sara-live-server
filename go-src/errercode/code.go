@@ -46,6 +46,10 @@ const (
 	GiftCountInvalid XRCode = 62
 	// GiftOffShelf 礼物已下架
 	GiftOffShelf XRCode = 63
+	// RechargeCfgExist 充值配置名称已存在
+	RechargeCfgExist XRCode = 70
+	// RechargeCfgNonExist 充值配置不存在
+	RechargeCfgNonExist XRCode = 71
 )
 
 type XError struct {

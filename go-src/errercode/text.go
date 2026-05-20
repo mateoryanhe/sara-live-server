@@ -34,6 +34,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		GiftNonExist:         "Gift does not exist",
 		GiftCountInvalid:     "Invalid gift count",
 		GiftOffShelf:         "Gift is off shelf",
+		RechargeCfgExist:     "Recharge config name already exists",
+		RechargeCfgNonExist:  "Recharge config does not exist",
 	},
 	lang.LangZHCN: {
 		Success:              "成功",
@@ -64,6 +66,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		GiftNonExist:         "礼物不存在",
 		GiftCountInvalid:     "送礼数量不合法",
 		GiftOffShelf:         "礼物已下架",
+		RechargeCfgExist:     "充值配置名称已存在",
+		RechargeCfgNonExist:  "充值配置不存在",
 	},
 	lang.LangZHTW: {
 		Success:              "成功",
@@ -94,6 +98,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		GiftNonExist:         "禮物不存在",
 		GiftCountInvalid:     "送禮數量不合法",
 		GiftOffShelf:         "禮物已下架",
+		RechargeCfgExist:     "充值配置名稱已存在",
+		RechargeCfgNonExist:  "充值配置不存在",
 	},
 }
 
