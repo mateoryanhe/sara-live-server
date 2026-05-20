@@ -105,7 +105,7 @@ type OffShelfRechargeCfgRes struct {
 
 // AppRechargeCfgListReq App端查询充值配置(仅返回已上架)
 type AppRechargeCfgListReq struct {
-	g.Meta `path:"/rechargeCfgList" method:"post" summary:"App查询充值配置列表(已上架)" tags:"充值配置"`
+	g.Meta `path:"/rechargeCfgListForApp" method:"post" summary:"App查询充值配置列表(已上架)" tags:"充值配置"`
 }
 
 // AppRechargeCfgItem App端单条
