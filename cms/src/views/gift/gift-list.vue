@@ -49,7 +49,7 @@
             </template>
           </el-table-column>
           <el-table-column label="动画资源" prop="animation" min-width="180" show-overflow-tooltip/>
-          <el-table-column label="价格(钻石)" prop="price" width="110"/>
+          <el-table-column label="价格" prop="price" width="110"/>
           <el-table-column label="分类" prop="category" width="120"/>
           <el-table-column label="排序" prop="sort" width="80"/>
           <el-table-column label="状态" width="90">

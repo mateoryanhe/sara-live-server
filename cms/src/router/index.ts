@@ -24,7 +24,7 @@ const routes: Array<RouteRecordRaw> = [
         path: '/account',
         component: Layout,
         redirect: '/account/user-list',
-        meta: {title: '账号管理', icon: 'User'},
+        meta: {title: '运营管理', icon: 'User'},
         children: [
             {
                 path: '/account/user-list',
@@ -38,6 +38,12 @@ const routes: Array<RouteRecordRaw> = [
                 name: 'BanUser',
                 component: () => import('@/views/account/ban-user.vue'),
                 meta: {title: '封禁用户', hidden: true} // hidden: true 表示不在菜单中显示
+            },
+            {
+                path: '/guild/guild-list',
+                name: 'GuildManagement',
+                component: () => import('@/views/guild/guild-list.vue'),
+                meta: {title: '工会管理'}
             }
         ]
     },
@@ -53,21 +59,6 @@ const routes: Array<RouteRecordRaw> = [
                 name: 'GlobalConfig',
                 component: () => import('@/views/config/global.vue'),
                 meta: {title: '全局配置'}
-            }
-        ]
-    },
-    // 直播工会管理路由
-    {
-        path: '/guild',
-        component: Layout,
-        redirect: '/guild/guild-list',
-        meta: {title: '直播工会', icon: 'OfficeBuilding'},
-        children: [
-            {
-                path: '/guild/guild-list',
-                name: 'GuildManagement',
-                component: () => import('@/views/guild/guild-list.vue'),
-                meta: {title: '工会管理'}
             }
         ]
     },

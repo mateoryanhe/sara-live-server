@@ -11,13 +11,12 @@ import (
 	"path/filepath"
 	"strings"
 	"xr-game-server/core/snowflake"
+	"xr-game-server/module/globalcfg"
 )
 
 const (
 	// ImageSubDir 图片相对 serverRoot 的子目录
 	ImageSubDir = "upload/images"
-	// CMSSubDir CMS后台上传资源(图片/礼物动画)相对 serverRoot 的子目录
-	CMSSubDir = "upload/images"
 	// MaxImageSize 单张图片最大字节数(5MB)
 	MaxImageSize int64 = 5 * 1024 * 1024
 	// MaxCMSFileSize CMS后台单个文件最大字节数(50MB),用于礼物动画等较大资源
@@ -95,7 +94,7 @@ func getImageDir() string {
 
 // getCMSDir 计算CMS上传资源保存的绝对目录
 func getCMSDir() string {
-	return getUploadDir(CMSSubDir)
+	return getUploadDir(ImageSubDir)
 }
 
 // getUploadDir 计算上传保存的绝对目录,优先使用 server.serverRoot 配置
@@ -107,6 +106,10 @@ func getUploadDir(subDir string) string {
 		base = "."
 	}
 	return filepath.Join(base, subDir)
+}
+
+func GetUrlByName(name string) string {
+	return globalcfg.BuildResourceUrl(fmt.Sprintf("/%s/%s", ImageSubDir, name))
 }
 
 // UploadCMSFile 保存CMS后台上传的图片或礼物动画资源到 <serverRoot>/upload/cms,返回保存后的文件名

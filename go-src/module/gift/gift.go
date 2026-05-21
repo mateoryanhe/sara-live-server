@@ -8,11 +8,16 @@ import (
 	"xr-game-server/dto/giftdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
+	"xr-game-server/module/upload"
 )
 
 // GetGiftList 分页获取礼物列表(CMS)
 func GetGiftList(_ context.Context, req *giftdto.GiftListReq) (*httpserver.CMSQueryResp, error) {
 	total, list := giftdao.GetGiftList(req)
+	for _, res := range list {
+		res.Icon = upload.GetUrlByName(res.Icon)
+		res.Animation = upload.GetUrlByName(res.Animation)
+	}
 	return &httpserver.CMSQueryResp{
 		Total: total,
 		Data:  list,

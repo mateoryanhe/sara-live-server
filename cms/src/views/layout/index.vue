@@ -11,18 +11,32 @@
           class="sidebar-menu"
       >
         <!-- 移除仪表盘菜单项 -->
-        <el-sub-menu v-if="hasMenuPermission('UserList')" index="/account">
+        <el-sub-menu
+            v-if="hasMenuPermission('UserList') || hasMenuPermission('GuildManagement')"
+            index="/account">
           <template #title>
             <el-icon>
               <User/>
             </el-icon>
-            <span>账号管理</span>
+            <span>运营管理</span>
           </template>
-          <el-menu-item index="/account/user-list">
+          <el-menu-item v-if="hasMenuPermission('UserList')" index="/account/user-list">
             <el-icon>
               <User/>
             </el-icon>
             <span>用户列表</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('GuildManagement')" index="/guild/guild-list">
+            <el-icon>
+              <User/>
+            </el-icon>
+            <span>工会管理</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('GiftManagement')" index="/gift/gift-list">
+            <el-icon>
+              <User/>
+            </el-icon>
+            <span>礼物管理</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu v-if="hasMenuPermission('GlobalConfig')" index="/config">
@@ -37,20 +51,6 @@
               <Monitor/>
             </el-icon>
             <span>全局配置</span>
-          </el-menu-item>
-        </el-sub-menu>
-        <el-sub-menu v-if="hasMenuPermission('GiftManagement')" index="/gift">
-          <template #title>
-            <el-icon>
-              <Present/>
-            </el-icon>
-            <span>礼物管理</span>
-          </template>
-          <el-menu-item index="/gift/gift-list">
-            <el-icon>
-              <Present/>
-            </el-icon>
-            <span>礼物列表</span>
           </el-menu-item>
         </el-sub-menu>
         <!-- 角色权限管理菜单 -->

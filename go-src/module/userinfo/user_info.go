@@ -5,7 +5,6 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/userinfodto"
-	"xr-game-server/module/globalcfg"
 	"xr-game-server/module/upload"
 )
 
@@ -17,7 +16,7 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		UserId:    data.ID,
 		Nickname:  data.Nickname,
 		Phone:     data.Phone,
-		Avatar:    globalcfg.BuildResourceUrl(data.Avatar),
+		Avatar:    upload.GetUrlByName(data.Avatar),
 		Remark:    data.Remark,
 		Gold:      data.Gold,
 		Diamond:   data.Diamond,

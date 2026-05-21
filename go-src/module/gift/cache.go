@@ -6,6 +6,7 @@ import (
 	"xr-game-server/dao/giftdao"
 	"xr-game-server/dto/giftdto"
 	"xr-game-server/entity"
+	"xr-game-server/module/upload"
 )
 
 // 礼物缓存(仅缓存已上架礼物,供 App 查询使用)
@@ -78,8 +79,8 @@ func toAppGiftItem(g *entity.LiveGift) *giftdto.AppGiftItem {
 	return &giftdto.AppGiftItem{
 		ID:          strconv.FormatUint(g.ID, 10),
 		Name:        g.Name,
-		Icon:        g.Icon,
-		Animation:   g.Animation,
+		Icon:        upload.GetUrlByName(g.Icon),
+		Animation:   upload.GetUrlByName(g.Animation),
 		Price:       g.Price,
 		Category:    g.Category,
 		Sort:        g.Sort,
