@@ -62,6 +62,11 @@ func (c *LiveRoomAppController) GetRoom(ctx context.Context, req *liveroomdto.Ge
 	return liveroom.GetRoom(ctx, req)
 }
 
+// RoomList 分页查询直播间列表
+func (c *LiveRoomAppController) RoomList(ctx context.Context, req *liveroomdto.GetLiveRoomListReq) (res *liveroomdto.GetLiveRoomListRes, err error) {
+	return liveroom.GetRoomList(ctx, req)
+}
+
 // SendGift 直播间送礼
 func (c *LiveRoomAppController) SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (res *liveroomdto.SendGiftRes, err error) {
 	return liveroom.SendGift(ctx, req)

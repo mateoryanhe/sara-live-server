@@ -31,6 +31,6 @@ func middlewareLogReq(r *ghttp.Request) {
 	}
 	//设置请求时间
 	r.Header.Set(DoTime, strconv.FormatInt(time.Now().UnixMilli(), 10))
-	g.Log().Infof(gctx.New(), "收到前端请求,url=%v,ip=%v,authId=%v,请求数据=%v", r.URL.RequestURI(), r.Host, r.GetHeader(AuthId), r.GetBodyString())
+	g.Log().Infof(gctx.New(), "收到前端请求,url=%v,ip=%v,authId=%v,请求数据=%v", r.URL.RequestURI(), r.Host, r.GetHeader(AuthId), requestBodyForLog(r))
 	r.Middleware.Next()
 }
