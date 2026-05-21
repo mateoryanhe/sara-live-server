@@ -87,6 +87,11 @@ export interface UserInfo {
     diamond?: number
     shareCode?: string
     guildId?: string | number
+    isAnchor?: boolean
+}
+
+export interface SetAnchorReq {
+    accountId: string
 }
 
 

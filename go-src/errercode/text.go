@@ -49,6 +49,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		AccountAlreadyExists:      "Account already exists",
 		BannerExist:               "Banner title already exists",
 		BannerNonExist:            "Banner does not exist",
+		UserAlreadyAnchor:         "User is already an anchor",
 	},
 	lang.LangZHCN: {
 		Success:                   "成功",
@@ -94,6 +95,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		AccountAlreadyExists:      "账号已存在",
 		BannerExist:               "Banner标题已存在",
 		BannerNonExist:            "Banner不存在",
+		UserAlreadyAnchor:         "用户已是主播",
 	},
 	lang.LangZHTW: {
 		Success:                   "成功",
@@ -139,6 +141,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		AccountAlreadyExists:      "帳號已存在",
 		BannerExist:               "Banner標題已存在",
 		BannerNonExist:            "Banner不存在",
+		UserAlreadyAnchor:         "用戶已是主播",
 	},
 }
 

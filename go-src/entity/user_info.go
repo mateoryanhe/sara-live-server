@@ -21,6 +21,7 @@ const (
 	UserInfoDiamond   db.TbCol = "diamond"
 	UserInfoShareCode db.TbCol = "share_code"
 	UserInfoGuildId   db.TbCol = "guild_id"
+	UserInfoIsAnchor  db.TbCol = "is_anchor"
 )
 
 // UserInfo 用户基础信息
@@ -34,6 +35,7 @@ type UserInfo struct {
 	Diamond   float64 `gorm:"default:0;comment:钻石"`
 	ShareCode string  `gorm:"uniqueIndex;default:'';comment:分享码"`
 	GuildId   uint64  `gorm:"index;default:0;comment:所属工会ID(0为未加入)"`
+	IsAnchor  bool    `gorm:"default:0;comment:是否主播(设为true后不可回退)"`
 }
 
 func NewUserInfo(userId uint64) *UserInfo {
@@ -117,6 +119,15 @@ func (receiver *UserInfo) SetGuildId(guildId uint64) {
 	})
 }
 
+func (receiver *UserInfo) SetIsAnchor(isAnchor bool) {
+	receiver.IsAnchor = isAnchor
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddDataToQuickChan(TbUserInfo, UserInfoIsAnchor, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: isAnchor,
+	})
+}
+
 func (receiver *UserInfo) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
 	syndb.AddDataToQuickChan(TbUserInfo, db.CreatedAtName, &syndb.ColData{
@@ -145,6 +156,7 @@ func initUserInfo() {
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoDiamond)
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoShareCode)
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoGuildId)
+	syndb.RegQuickWithLarge(TbUserInfo, UserInfoIsAnchor)
 
 	migrate.AutoMigrate(&UserInfo{})
 }

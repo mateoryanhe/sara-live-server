@@ -74,8 +74,11 @@
           <el-table-column label="钻石" prop="diamond" width="120">
             <template #default="scope">{{ formatAmount(scope.row.diamond) }}</template>
           </el-table-column>
-          <el-table-column label="所属工会" prop="guildId" width="140">
-            <template #default="scope">{{ scope.row.guildId && String(scope.row.guildId) !== '0' ? scope.row.guildId : '-' }}</template>
+          <el-table-column label="主播" prop="isAnchor" width="90">
+            <template #default="scope">
+              <el-tag v-if="scope.row.isAnchor" type="success">是</el-tag>
+              <el-tag v-else type="info">否</el-tag>
+            </template>
           </el-table-column>
           <el-table-column label="分享码" prop="shareCode" width="140">
             <template #default="scope">{{ scope.row.shareCode || '-' }}</template>
@@ -105,8 +108,16 @@
               {{ formatDate(scope.row.banApplyTime) }}
             </template>
           </el-table-column>
-          <el-table-column fixed="right" label="操作" min-width="560">
+          <el-table-column fixed="right" label="操作" min-width="660">
             <template #default="scope">
+              <el-button
+                  v-if="!scope.row.isAnchor"
+                  size="small"
+                  type="primary"
+                  @click="handleSetAnchor(scope.row)"
+              >
+                设为主播
+              </el-button>
               <el-button size="small" type="primary" @click="openCurrencyDialog(scope.row, 'gold', 'add')">
                 加金币
               </el-button>
@@ -382,6 +393,27 @@ const submitCurrencyChange = async () => {
       currencySubmitting.value = false
     }
   })
+}
+
+const handleSetAnchor = async (row: UserInfo) => {
+  try {
+    await ElMessageBox.confirm(
+        `确定将用户 ${row.id} 设为主播吗？设为主播后不可撤销。`,
+        '设为主播',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+    )
+    await accountApi.setAnchor({accountId: row.id})
+    ElMessage.success('已设为主播')
+    fetchUserList()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('设为主播失败:', error)
+    }
+  }
 }
 
 // 切换封号状态

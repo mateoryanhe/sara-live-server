@@ -33,4 +33,14 @@ type UserInfoDto struct {
 	Diamond   float64 `json:"diamond"`
 	ShareCode string  `json:"shareCode"`
 	GuildId   uint64  `json:"guildId"`
+	IsAnchor  bool    `json:"isAnchor"`
+}
+
+type SetAnchorReq struct {
+	g.Meta    `path:"/setAnchor" method:"post" summary:"设为用户主播(不可回退)" tags:"账号"`
+	AccountId uint64 `json:"accountId" v:"required#用户ID不能为空" dc:"用户ID"`
+}
+
+type SetAnchorRes struct {
+	Success bool `json:"success"`
 }

@@ -14,13 +14,13 @@ import (
 
 // CreateRoom 创建直播间
 // 业务规则:
-//  1. 调用者必须已通过工会审批(UserInfo.GuildId != 0),即已成为主播
+//  1. 调用者必须已是主播(UserInfo.IsAnchor == true)
 //  2. 同一主播只能拥有一个直播间(再次调用直接返回已有信息)
 func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *liveroomdto.CreateLiveRoomRes, err error) {
 	anchorId := httpserver.GetAuthId(ctx)
 
 	user := userinfodao.GetUserInfoByUserId(anchorId)
-	if user == nil || user.GuildId == 0 {
+	if user == nil || !user.IsAnchor {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotAnchor)
 	}
 

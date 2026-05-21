@@ -27,7 +27,7 @@ func Follow(ctx context.Context, req *livefollowdto.FollowReq) (*livefollowdto.F
 	if req.AnchorId == 0 || req.AnchorId == userId {
 		return nil, errercode.CreateCode(errercode.SysError)
 	}
-	if anchor := userinfodao.GetUserInfoByUserId(req.AnchorId); anchor == nil {
+	if anchor := userinfodao.GetUserInfoByUserId(req.AnchorId); anchor == nil || !anchor.IsAnchor {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotAnchor)
 	}
 

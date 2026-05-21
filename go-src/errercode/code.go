@@ -76,6 +76,8 @@ const (
 	BannerExist XRCode = 96
 	// BannerNonExist Banner不存在
 	BannerNonExist XRCode = 97
+	// UserAlreadyAnchor 用户已是主播
+	UserAlreadyAnchor XRCode = 98
 )
 
 type XError struct {

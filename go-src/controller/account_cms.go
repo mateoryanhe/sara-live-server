@@ -37,3 +37,7 @@ func (a *AccountController) UnCancelUser(ctx context.Context, req *accountdto.Un
 func (a *AccountController) QueryUserInfo(ctx context.Context, req *accountdto.QueryUserInfoReq) (res *httpserver.CMSQueryResp, err error) {
 	return account.QueryUserInfo(ctx, req)
 }
+
+func (a *AccountController) SetAnchor(ctx context.Context, req *accountdto.SetAnchorReq) (*accountdto.SetAnchorRes, error) {
+	return account.SetAnchor(ctx, req)
+}

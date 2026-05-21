@@ -1,5 +1,14 @@
 import {request} from '../request'
-import type {BanReq, CancelReq, PageResponse, QueryUserInfoReq, UnBanReq, UnCancelReq, UserInfo} from '@/types/api'
+import type {
+    BanReq,
+    CancelReq,
+    PageResponse,
+    QueryUserInfoReq,
+    SetAnchorReq,
+    UnBanReq,
+    UnCancelReq,
+    UserInfo
+} from '@/types/api'
 
 const accountApi = {
     // 封号
@@ -25,6 +34,10 @@ const accountApi = {
     // 获取用户信息
     getUserInfo: (data: QueryUserInfoReq) => {
         return request.post<PageResponse<UserInfo>>('/account/getUserInfo', data)
+    },
+
+    setAnchor: (data: SetAnchorReq) => {
+        return request.post<boolean>('/account/setAnchor', data)
     }
 }
 
