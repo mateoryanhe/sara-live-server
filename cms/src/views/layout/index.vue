@@ -26,17 +26,23 @@
             </el-icon>
             <span>用户列表</span>
           </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('GuildManagement')" index="/guild/guild-list">
+          <el-menu-item v-if="hasMenuPermission('BannerManagement')" index="/config/banner-list">
             <el-icon>
-              <User/>
+              <Picture/>
             </el-icon>
-            <span>工会管理</span>
+            <span>首页Banner</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('GiftManagement')" index="/gift/gift-list">
             <el-icon>
               <User/>
             </el-icon>
             <span>礼物管理</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('GuildManagement')" index="/guild/guild-list">
+            <el-icon>
+              <User/>
+            </el-icon>
+            <span>工会管理</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -53,12 +59,6 @@
               <Monitor/>
             </el-icon>
             <span>全局配置</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('BannerManagement')" index="/config/banner-list">
-            <el-icon>
-              <Picture/>
-            </el-icon>
-            <span>首页Banner</span>
           </el-menu-item>
         </el-sub-menu>
         <!-- 角色权限管理菜单 -->

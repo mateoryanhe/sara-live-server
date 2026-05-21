@@ -15,7 +15,8 @@ type BannerListReq struct {
 type BannerListRes struct {
 	ID        string `json:"id"`
 	Title     string `json:"title"`
-	Image     string `json:"image"`
+	Image     string `json:"image" dc:"图片完整URL(列表展示)"`
+	ImageName string `json:"imageName" dc:"图片资源文件名(编辑保存用)"`
 	Link      string `json:"link"`
 	Sort      int    `json:"sort"`
 	Status    uint8  `json:"status"`

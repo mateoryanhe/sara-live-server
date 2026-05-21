@@ -14,7 +14,8 @@ import (
 func GetBannerList(_ context.Context, req *bannerdto.BannerListReq) (*httpserver.CMSQueryResp, error) {
 	total, list := bannerdao.GetBannerList(req)
 	for _, row := range list {
-		row.Image = upload.GetUrlByName(row.Image)
+		row.ImageName = row.Image
+		row.Image = upload.GetUrlByName(row.ImageName)
 	}
 	return &httpserver.CMSQueryResp{Total: total, Data: list}, nil
 }

@@ -99,17 +99,33 @@
           <el-input v-model="currentRow.title" placeholder="请输入标题"/>
         </el-form-item>
         <el-form-item label="图片" prop="image">
-          <div class="upload-field">
-            <el-input v-model="currentRow.image" placeholder="点击右侧按钮上传或手动输入文件名"/>
+          <div class="image-upload-wrap">
             <el-upload
                 :before-upload="beforeImageUpload"
+                :disabled="imageUploading"
                 :http-request="doUpload"
                 :show-file-list="false"
                 accept="image/*"
                 action="#"
+                class="banner-uploader"
             >
-              <el-button :loading="imageUploading" type="primary">上传图片</el-button>
+              <img v-if="imagePreviewUrl" :src="imagePreviewUrl" alt="banner" class="banner-preview"/>
+              <div v-else class="banner-uploader-placeholder">
+                <el-icon class="banner-uploader-icon">
+                  <Plus/>
+                </el-icon>
+                <span>点击上传图片</span>
+              </div>
             </el-upload>
+            <el-button
+                v-if="imagePreviewUrl"
+                class="banner-remove-btn"
+                link
+                type="danger"
+                @click="clearImage"
+            >
+              移除图片
+            </el-button>
           </div>
         </el-form-item>
         <el-form-item label="跳转链接" prop="link">
@@ -128,8 +144,9 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
+import {Plus} from '@element-plus/icons-vue'
 import {bannerApi, uploadApi} from '@/api'
 import type {Banner} from '@/types/api'
 
@@ -169,6 +186,36 @@ const defaultForm = (): BannerForm => ({
 const currentRow = ref<BannerForm>(defaultForm())
 const formRef = ref<FormInstance>()
 const imageUploading = ref(false)
+const imagePreviewUrl = ref('')
+let objectPreviewUrl: string | null = null
+
+const revokeObjectPreview = () => {
+  if (objectPreviewUrl) {
+    URL.revokeObjectURL(objectPreviewUrl)
+    objectPreviewUrl = null
+  }
+}
+
+const setImagePreview = (url: string, fromObject = false) => {
+  revokeObjectPreview()
+  imagePreviewUrl.value = url
+  if (fromObject) {
+    objectPreviewUrl = url
+  }
+}
+
+const clearImage = () => {
+  currentRow.value.image = ''
+  setImagePreview('')
+  formRef.value?.validateField('image').catch(() => undefined)
+}
+
+watch(dialogVisible, (visible) => {
+  if (!visible) {
+    revokeObjectPreview()
+    imagePreviewUrl.value = ''
+  }
+})
 
 const beforeImageUpload = (file: File): boolean => {
   if (!file.type.startsWith('image/')) {
@@ -183,10 +230,13 @@ const beforeImageUpload = (file: File): boolean => {
 }
 
 const doUpload = async (options: UploadRequestOptions) => {
+  const file = options.file as File
   imageUploading.value = true
   try {
-    const res = await uploadApi.uploadFile(options.file as File)
+    const res = await uploadApi.uploadFile(file)
     currentRow.value.image = res.fileName
+    setImagePreview(URL.createObjectURL(file), true)
+    formRef.value?.validateField('image').catch(() => undefined)
     ElMessage.success('上传成功')
   } catch (error) {
     console.error('上传失败:', error)
@@ -201,7 +251,7 @@ const formRules: FormRules = {
     {required: true, message: '请输入标题', trigger: 'blur'},
     {min: 1, max: 64, message: '标题长度在1-64个字符', trigger: 'blur'}
   ],
-  image: [{max: 255, message: '图片资源名最长255字符', trigger: 'blur'}],
+  image: [{required: true, message: '请上传图片', trigger: 'change'}],
   link: [{max: 512, message: '跳转链接最长512字符', trigger: 'blur'}]
 }
 
@@ -242,6 +292,7 @@ const handleCurrentChange = (page: number) => {
 const handleAdd = () => {
   dialogTitle.value = '新增 Banner'
   currentRow.value = defaultForm()
+  setImagePreview('')
   dialogVisible.value = true
 }
 
@@ -250,10 +301,11 @@ const handleEdit = (row: Banner) => {
   currentRow.value = {
     id: row.id,
     title: row.title,
-    image: row.image,
+    image: row.imageName || '',
     link: row.link,
     sort: Number(row.sort) || 0
   }
+  setImagePreview(row.image || '')
   dialogVisible.value = true
 }
 
@@ -358,14 +410,49 @@ onMounted(() => {
   text-align: right;
 }
 
-.upload-field {
+.image-upload-wrap {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 8px;
-  width: 100%;
 }
 
-.upload-field .el-input {
-  flex: 1;
+.banner-uploader :deep(.el-upload) {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.banner-uploader :deep(.el-upload:hover) {
+  border-color: var(--el-color-primary);
+}
+
+.banner-uploader-placeholder {
+  width: 240px;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
+  gap: 8px;
+}
+
+.banner-uploader-icon {
+  font-size: 28px;
+}
+
+.banner-preview {
+  width: 240px;
+  height: 120px;
+  display: block;
+  object-fit: cover;
+}
+
+.banner-remove-btn {
+  padding: 0;
 }
 </style>

@@ -170,6 +170,7 @@ export interface Banner {
     id: string
     title: string
     image: string
+    imageName: string
     link: string
     sort: number
     status: number
