@@ -1,0 +1,55 @@
+package auth
+
+import (
+	"context"
+	"github.com/gogf/gf/v2/crypto/gmd5"
+	"github.com/gogf/gf/v2/frame/g"
+	"strconv"
+	"time"
+	"xr-game-server/constants/common"
+	"xr-game-server/core/xrtoken"
+	"xr-game-server/dao/accountdao"
+	"xr-game-server/dao/userinfodao"
+	"xr-game-server/dto/authdto"
+	"xr-game-server/errercode"
+	"xr-game-server/module/verification_code"
+)
+
+func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *authdto.PhoneRegisterRes, err error) {
+	// 验证验证码
+	valid, err := verification_code.VerifyCode(req.Phone, req.Code)
+	if err != nil {
+		return nil, err
+	}
+	if !valid {
+		return nil, errercode.CreateCode(errercode.VerifyCodeInvalid)
+	}
+
+	// 检查手机号是否已注册
+	account := accountdao.GetAccountBy(req.Phone, PhoneChannel)
+	if account.ID != 0 && account.Password != "" {
+		return nil, errercode.CreateCode(errercode.AccountAlreadyExists)
+	}
+
+	// 设置密码
+	account.SetPassword(gmd5.MustEncryptString(req.Password))
+
+	// 设置IP
+	httpReq := g.RequestFromCtx(ctx)
+	if len(account.IP) == common.Zero {
+		account.SetIp(httpReq.Host)
+		account.SetUpdatedAt(time.Now())
+	}
+
+	// 生成token
+	tokenStr := xrtoken.AddAppToken(account.ID)
+
+	// 初始化用户信息
+	data := userinfodao.GetUserInfoByUserId(account.ID)
+	data.SetPhone(req.Phone)
+	res = &authdto.PhoneRegisterRes{
+		Token:  tokenStr,
+		AuthId: strconv.FormatUint(account.ID, 10),
+	}
+	return res, nil
+}

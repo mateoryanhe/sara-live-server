@@ -46,6 +46,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		DailyLimitExceeded:        "Daily limit exceeded, please try again tomorrow",
 		VerifyCodeInvalid:         "Invalid verification code",
 		VerifyCodeExpired:         "Verification code expired",
+		AccountAlreadyExists:      "Account already exists",
 	},
 	lang.LangZHCN: {
 		Success:                   "成功",
@@ -88,6 +89,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		DailyLimitExceeded:        "超过每日发送限制，请明天再试",
 		VerifyCodeInvalid:         "验证码无效",
 		VerifyCodeExpired:         "验证码已过期",
+		AccountAlreadyExists:      "账号已存在",
 	},
 	lang.LangZHTW: {
 		Success:                   "成功",
@@ -130,6 +132,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		DailyLimitExceeded:        "超過每日發送限制，請明天再試",
 		VerifyCodeInvalid:         "驗證碼無效",
 		VerifyCodeExpired:         "驗證碼已過期",
+		AccountAlreadyExists:      "帳號已存在",
 	},
 }
 

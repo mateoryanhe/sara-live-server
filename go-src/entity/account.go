@@ -20,6 +20,7 @@ const (
 	AccountBanTime      db.TbCol = "ban_time"
 	AccountBanApplyTime db.TbCol = "ban_apply_time"
 	AccountCancel       db.TbCol = "cancel"
+	AccountPassword     db.TbCol = "password"
 )
 
 type Account struct {
@@ -31,6 +32,7 @@ type Account struct {
 	BanTime      *time.Time `gorm:"comment:封号时间"`
 	BanApplyTime *time.Time `gorm:"comment:封号生效时间"`
 	Cancel       bool       `gorm:"default:0;comment:注销"`
+	Password     string     `gorm:"default:'';comment:密码"`
 }
 
 func NewAccount(openId string, channel uint) *Account {
@@ -121,6 +123,15 @@ func (this *Account) SetCancel(cancel bool) {
 		ColVal: cancel,
 	})
 }
+
+func (receiver *Account) SetPassword(password string) {
+	receiver.Password = password
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddDataToQuickChan(TbAccount, AccountPassword, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: password,
+	})
+}
 func initAccount() {
 	syndb.RegQuickWithLarge(TbAccount, db.CreatedAtName)
 	syndb.RegQuickWithLarge(TbAccount, db.UpdatedAtName)
@@ -134,6 +145,7 @@ func initAccount() {
 	syndb.RegQuickWithLarge(TbAccount, AccountBanTime)
 	syndb.RegQuickWithLarge(TbAccount, AccountBanApplyTime)
 	syndb.RegQuickWithLarge(TbAccount, AccountCancel)
+	syndb.RegQuickWithLarge(TbAccount, AccountPassword)
 
 	migrate.AutoMigrate(&Account{})
 }

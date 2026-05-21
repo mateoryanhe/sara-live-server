@@ -32,3 +32,11 @@ func (s *AuthController) SendCode(ctx context.Context, req *verificationcodedto.
 	req.IP = g.RequestFromCtx(ctx).GetClientIp()
 	return verification_code.SendCode(ctx, req)
 }
+
+func (s *AuthController) PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (*authdto.PhoneRegisterRes, error) {
+	return auth.PhoneRegister(ctx, req)
+}
+
+func (s *AuthController) PhoneLogin(ctx context.Context, req *authdto.PhoneLoginReq) (*authdto.PhoneLoginRes, error) {
+	return auth.PhoneLogin(ctx, req)
+}
