@@ -165,6 +165,23 @@ export interface GiftQuery extends PageQuery {
     statusFilter?: number
 }
 
+// 首页 Banner
+export interface Banner {
+    id: string
+    title: string
+    image: string
+    link: string
+    sort: number
+    status: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface BannerQuery extends PageQuery {
+    title?: string
+    statusFilter?: number
+}
+
 // CMS用户相关类型
 export interface CMSUser {
     id: string

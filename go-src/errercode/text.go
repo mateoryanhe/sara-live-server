@@ -47,6 +47,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		VerifyCodeInvalid:         "Invalid verification code",
 		VerifyCodeExpired:         "Verification code expired",
 		AccountAlreadyExists:      "Account already exists",
+		BannerExist:               "Banner title already exists",
+		BannerNonExist:            "Banner does not exist",
 	},
 	lang.LangZHCN: {
 		Success:                   "成功",
@@ -90,6 +92,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		VerifyCodeInvalid:         "验证码无效",
 		VerifyCodeExpired:         "验证码已过期",
 		AccountAlreadyExists:      "账号已存在",
+		BannerExist:               "Banner标题已存在",
+		BannerNonExist:            "Banner不存在",
 	},
 	lang.LangZHTW: {
 		Success:                   "成功",
@@ -133,6 +137,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		VerifyCodeInvalid:         "驗證碼無效",
 		VerifyCodeExpired:         "驗證碼已過期",
 		AccountAlreadyExists:      "帳號已存在",
+		BannerExist:               "Banner標題已存在",
+		BannerNonExist:            "Banner不存在",
 	},
 }
 

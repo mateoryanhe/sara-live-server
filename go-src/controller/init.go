@@ -19,6 +19,8 @@ func Init() {
 	initLiveRoomAppController()      // 直播间(App)
 	initGiftController()             // 礼物配置(CMS)
 	initGiftAppController()          // 礼物列表(App)
+	initBannerController()           // 首页Banner(CMS)
+	initBannerAppController()        // 首页Banner(App)
 	initLiveFollowAppController()    // 关注主播(App)
 	initRechargeCfgController()      // 充值配置管理(CMS)
 	initRechargeCfgAppController()   // 充值配置查询(App)

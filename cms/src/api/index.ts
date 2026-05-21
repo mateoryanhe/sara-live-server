@@ -5,6 +5,7 @@ import {roleApi} from './modules/role'
 import {cmsUserApi} from './modules/cmsuser'
 import {guildApi} from './modules/guild'
 import {giftApi} from './modules/gift'
+import {bannerApi} from './modules/banner'
 import {uploadApi} from './modules/upload'
 
 export {
@@ -15,6 +16,7 @@ export {
     cmsUserApi,
     guildApi,
     giftApi,
+    bannerApi,
     uploadApi,
 }
 
@@ -26,5 +28,6 @@ export default {
     cmsUserApi,
     guildApi,
     giftApi,
+    bannerApi,
     uploadApi,
 }

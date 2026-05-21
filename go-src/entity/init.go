@@ -15,6 +15,7 @@ func Init() {
 	initLiveRoom()
 	initLiveRoomOnline()
 	InitLiveGift()
+	initHomeBanner()
 	initLiveFollow()
 	initRechargeCfg()
 	initRechargeOrder()

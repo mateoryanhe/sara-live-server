@@ -2,6 +2,7 @@ package module
 
 import (
 	"xr-game-server/module/auth"
+	"xr-game-server/module/banner"
 	"xr-game-server/module/currencylog"
 	"xr-game-server/module/name"
 	"xr-game-server/module/rank"
@@ -15,5 +16,6 @@ func Init() {
 	name.Init()
 	currencylog.Init()
 	rechargecfg.Init()
+	banner.Init()
 	verification_code.Init()
 }

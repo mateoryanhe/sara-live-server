@@ -59,6 +59,12 @@ const routes: Array<RouteRecordRaw> = [
                 name: 'GlobalConfig',
                 component: () => import('@/views/config/global.vue'),
                 meta: {title: '全局配置'}
+            },
+            {
+                path: '/config/banner-list',
+                name: 'BannerManagement',
+                component: () => import('@/views/config/banner-list.vue'),
+                meta: {title: '首页Banner'}
             }
         ]
     },

@@ -39,18 +39,26 @@
             <span>礼物管理</span>
           </el-menu-item>
         </el-sub-menu>
-        <el-sub-menu v-if="hasMenuPermission('GlobalConfig')" index="/config">
+        <el-sub-menu
+            v-if="hasMenuPermission('GlobalConfig') || hasMenuPermission('BannerManagement')"
+            index="/config">
           <template #title>
             <el-icon>
               <Setting/>
             </el-icon>
             <span>系统配置</span>
           </template>
-          <el-menu-item index="/config/global">
+          <el-menu-item v-if="hasMenuPermission('GlobalConfig')" index="/config/global">
             <el-icon>
               <Monitor/>
             </el-icon>
             <span>全局配置</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('BannerManagement')" index="/config/banner-list">
+            <el-icon>
+              <Picture/>
+            </el-icon>
+            <span>首页Banner</span>
           </el-menu-item>
         </el-sub-menu>
         <!-- 角色权限管理菜单 -->
@@ -121,7 +129,7 @@
 <script lang="ts" setup>
 import {computed, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {ArrowDown, Expand, Fold, Lock, Monitor, Present, Setting, User} from '@element-plus/icons-vue'
+import {ArrowDown, Expand, Fold, Lock, Monitor, Picture, Present, Setting, User} from '@element-plus/icons-vue'
 import {clearPermissions, getIsAdmin, hasPermission} from '@/utils/permission'
 
 const route = useRoute()

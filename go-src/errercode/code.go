@@ -72,6 +72,10 @@ const (
 	VerifyCodeExpired XRCode = 94
 	// AccountAlreadyExists 账号已存在
 	AccountAlreadyExists XRCode = 95
+	// BannerExist Banner标题已存在
+	BannerExist XRCode = 96
+	// BannerNonExist Banner不存在
+	BannerNonExist XRCode = 97
 )
 
 type XError struct {
