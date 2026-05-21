@@ -41,6 +41,11 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		RechargeGoldInvalid:       "Recharge gold amount must be positive",
 		RechargeOrderStateInvalid: "Recharge order state does not allow this operation",
 		RechargeCfgOffShelf:       "Recharge config is off shelf",
+		InvalidParam:              "Invalid parameter",
+		RequestTooFrequent:        "Request too frequent, please try again later",
+		DailyLimitExceeded:        "Daily limit exceeded, please try again tomorrow",
+		VerifyCodeInvalid:         "Invalid verification code",
+		VerifyCodeExpired:         "Verification code expired",
 	},
 	lang.LangZHCN: {
 		Success:                   "成功",
@@ -78,6 +83,11 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		RechargeGoldInvalid:       "充值发放金币数必须为正数",
 		RechargeOrderStateInvalid: "订单状态不允许此操作",
 		RechargeCfgOffShelf:       "充值配置已下架",
+		InvalidParam:              "参数无效",
+		RequestTooFrequent:        "请求过于频繁，请稍后再试",
+		DailyLimitExceeded:        "超过每日发送限制，请明天再试",
+		VerifyCodeInvalid:         "验证码无效",
+		VerifyCodeExpired:         "验证码已过期",
 	},
 	lang.LangZHTW: {
 		Success:                   "成功",
@@ -115,6 +125,11 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		RechargeGoldInvalid:       "充值發放金幣數必須為正數",
 		RechargeOrderStateInvalid: "訂單狀態不允許此操作",
 		RechargeCfgOffShelf:       "充值配置已下架",
+		InvalidParam:              "參數無效",
+		RequestTooFrequent:        "請求過於頻繁，請稍後再試",
+		DailyLimitExceeded:        "超過每日發送限制，請明天再試",
+		VerifyCodeInvalid:         "驗證碼無效",
+		VerifyCodeExpired:         "驗證碼已過期",
 	},
 }
 

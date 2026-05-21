@@ -2,9 +2,12 @@ package controller
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/authdto"
+	"xr-game-server/dto/verificationcodedto"
 	"xr-game-server/module/auth"
+	"xr-game-server/module/verification_code"
 )
 
 type AuthController struct {
@@ -23,4 +26,9 @@ func (a *AuthController) CMSLogin(ctx context.Context, req *authdto.CMSLoginReq)
 
 func (s *AuthController) PushAgainLoginReq(ctx context.Context, req *authdto.PushAgainLoginReq) (res *httpserver.PushResp, err error) {
 	return nil, nil
+}
+
+func (s *AuthController) SendCode(ctx context.Context, req *verificationcodedto.SendCodeReq) (*verificationcodedto.SendCodeRes, error) {
+	req.IP = g.RequestFromCtx(ctx).GetClientIp()
+	return verification_code.SendCode(ctx, req)
 }

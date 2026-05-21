@@ -60,6 +60,16 @@ const (
 	RechargeOrderStateInvalid XRCode = 83
 	// RechargeCfgOffShelf 引用的充值配置已下架
 	RechargeCfgOffShelf XRCode = 84
+	// InvalidParam 参数无效
+	InvalidParam XRCode = 90
+	// RequestTooFrequent 请求过于频繁
+	RequestTooFrequent XRCode = 91
+	// DailyLimitExceeded 超过每日发送限制
+	DailyLimitExceeded XRCode = 92
+	// VerifyCodeInvalid 验证码无效
+	VerifyCodeInvalid XRCode = 93
+	// VerifyCodeExpired 验证码已过期
+	VerifyCodeExpired XRCode = 94
 )
 
 type XError struct {
