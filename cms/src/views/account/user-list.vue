@@ -1,5 +1,10 @@
 <template>
-  <div class="page-container">
+  <div
+      v-loading="pageWaiting"
+      class="page-container"
+      element-loading-background="rgba(255, 255, 255, 0.75)"
+      :element-loading-text="pageWaitingText"
+  >
     <el-card>
       <template #header>
         <div class="card-header">
@@ -100,8 +105,20 @@
               {{ formatDate(scope.row.banApplyTime) }}
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="300">
+          <el-table-column fixed="right" label="操作" min-width="560">
             <template #default="scope">
+              <el-button size="small" type="primary" @click="openCurrencyDialog(scope.row, 'gold', 'add')">
+                加金币
+              </el-button>
+              <el-button size="small" type="warning" @click="openCurrencyDialog(scope.row, 'gold', 'sub')">
+                减金币
+              </el-button>
+              <el-button size="small" type="primary" @click="openCurrencyDialog(scope.row, 'diamond', 'add')">
+                加钻石
+              </el-button>
+              <el-button size="small" type="warning" @click="openCurrencyDialog(scope.row, 'diamond', 'sub')">
+                减钻石
+              </el-button>
               <el-button
                   :type="scope.row.ban ? 'warning' : 'success'"
                   size="small"
@@ -130,19 +147,106 @@
         </div>
       </div>
     </el-card>
+
+    <el-dialog
+        v-model="currencyDialogVisible"
+        :title="currencyDialogTitle"
+        width="440px"
+        @closed="resetCurrencyForm"
+    >
+      <el-form ref="currencyFormRef" :model="currencyForm" :rules="currencyFormRules" label-width="100px">
+        <el-form-item label="用户ID">
+          <el-input v-model="currencyForm.userId" disabled/>
+        </el-form-item>
+        <el-form-item label="昵称">
+          <el-input v-model="currencyForm.nickname" disabled/>
+        </el-form-item>
+        <el-form-item :label="currencyBalanceLabel">
+          <el-input v-model="currencyForm.currentBalanceText" disabled/>
+        </el-form-item>
+        <el-form-item :label="currencyAmountLabel" prop="amount">
+          <el-input-number
+              v-model="currencyForm.amount"
+              :min="0.001"
+              :precision="3"
+              :step="1"
+              controls-position="right"
+              style="width: 100%"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="currencyDialogVisible = false">取消</el-button>
+        <el-button :loading="currencySubmitting" type="primary" @click="submitCurrencyChange">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref, watch} from 'vue'
-import {accountApi} from '@/api'
-import {ElMessage, ElMessageBox} from 'element-plus'
+import {computed, onMounted, reactive, ref, watch} from 'vue'
+import {accountApi, diamondApi, goldApi} from '@/api'
+import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {useRoute, useRouter} from 'vue-router'
 import type {CancelReq, UnBanReq, UnCancelReq, UserInfo} from '@/types/api'
 
 // 用户列表数据
 const userList = ref<UserInfo[]>([])
 const loading = ref(false)
+type CurrencyType = 'gold' | 'diamond'
+type CurrencyMode = 'add' | 'sub'
+
+const pageWaiting = ref(false)
+const currencyDialogVisible = ref(false)
+const currencyType = ref<CurrencyType>('gold')
+const currencyMode = ref<CurrencyMode>('add')
+const currencySubmitting = ref(false)
+const currencyFormRef = ref<FormInstance>()
+
+interface CurrencyForm {
+  userId: string
+  nickname: string
+  currentBalanceText: string
+  amount: number
+}
+
+const currencyForm = reactive<CurrencyForm>({
+  userId: '',
+  nickname: '',
+  currentBalanceText: '',
+  amount: 1
+})
+
+const currencyName = computed(() => (currencyType.value === 'gold' ? '金币' : '钻石'))
+
+const currencyDialogTitle = computed(() =>
+    `${currencyMode.value === 'add' ? '增加' : '扣减'}${currencyName.value}`
+)
+
+const currencyBalanceLabel = computed(() => `当前${currencyName.value}`)
+
+const currencyAmountLabel = computed(() =>
+    currencyMode.value === 'add' ? '增加数量' : '扣减数量'
+)
+
+const pageWaitingText = computed(() => `${currencyName.value}变更处理中，请稍候...`)
+
+const currencyFormRules: FormRules = {
+  amount: [
+    {required: true, message: '请输入数量', trigger: 'blur'},
+    {
+      validator: (_rule, value, callback) => {
+        const n = Number(value)
+        if (!n || n <= 0) {
+          callback(new Error('数量必须大于0'))
+          return
+        }
+        callback()
+      },
+      trigger: 'blur'
+    }
+  ]
+}
 
 // 搜索表单
 const searchForm = reactive({
@@ -226,6 +330,60 @@ const handleSizeChange = (size: number) => {
   fetchUserList()
 }
 
+const resetCurrencyForm = () => {
+  currencyForm.userId = ''
+  currencyForm.nickname = ''
+  currencyForm.currentBalanceText = ''
+  currencyForm.amount = 1
+  currencyFormRef.value?.clearValidate()
+}
+
+const openCurrencyDialog = (row: UserInfo, type: CurrencyType, mode: CurrencyMode) => {
+  currencyType.value = type
+  currencyMode.value = mode
+  currencyForm.userId = String(row.id)
+  currencyForm.nickname = row.nickname || '-'
+  currencyForm.currentBalanceText = formatAmount(type === 'gold' ? row.gold : row.diamond)
+  currencyForm.amount = 1
+  currencyDialogVisible.value = true
+}
+
+const afterCurrencyChangeSuccess = () => {
+  currencyDialogVisible.value = false
+  ElMessage.success('操作成功')
+  pageWaiting.value = true
+  setTimeout(() => {
+    fetchUserList().finally(() => {
+      pageWaiting.value = false
+    })
+  }, 5000)
+}
+
+const submitCurrencyChange = async () => {
+  if (!currencyFormRef.value) return
+  await currencyFormRef.value.validate(async (valid) => {
+    if (!valid) return
+    currencySubmitting.value = true
+    try {
+      const payload = {
+        userId: currencyForm.userId,
+        amount: currencyForm.amount
+      }
+      const api = currencyType.value === 'gold' ? goldApi : diamondApi
+      if (currencyMode.value === 'add') {
+        await api.add(payload)
+      } else {
+        await api.sub(payload)
+      }
+      afterCurrencyChangeSuccess()
+    } catch (error) {
+      console.error(`${currencyName.value}变更失败:`, error)
+    } finally {
+      currencySubmitting.value = false
+    }
+  })
+}
+
 // 切换封号状态
 const toggleBanStatus = async (row: UserInfo) => {
   if (row.ban) {
@@ -249,7 +407,7 @@ const toggleBanStatus = async (row: UserInfo) => {
         // 重新加载数据以确保显示最新状态
         setTimeout(() => {
           fetchUserList()
-        }, 500) // 添加短暂延迟以确保后端状态已更新
+        }, 5000) // 添加短暂延迟以确保后端状态已更新
       } else {
         ElMessage.error('解封失败')
       }

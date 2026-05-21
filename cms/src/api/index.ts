@@ -7,6 +7,8 @@ import {guildApi} from './modules/guild'
 import {giftApi} from './modules/gift'
 import {bannerApi} from './modules/banner'
 import {uploadApi} from './modules/upload'
+import {goldApi} from './modules/gold'
+import {diamondApi} from './modules/diamond'
 
 export {
     authApi,
@@ -18,6 +20,8 @@ export {
     giftApi,
     bannerApi,
     uploadApi,
+    goldApi,
+    diamondApi,
 }
 
 export default {
@@ -30,4 +34,6 @@ export default {
     giftApi,
     bannerApi,
     uploadApi,
+    goldApi,
+    diamondApi,
 }

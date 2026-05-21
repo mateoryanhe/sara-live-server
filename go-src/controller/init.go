@@ -7,6 +7,8 @@ import (
 func Init() {
 	initAuthApi()
 	initAccountController()
+	initGoldController()
+	initDiamondController()
 	initIndex()
 	initWebSocket()
 	initRank()
