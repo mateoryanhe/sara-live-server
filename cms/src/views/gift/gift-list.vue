@@ -107,31 +107,72 @@
           <el-input v-model="currentRow.name" placeholder="请输入礼物名称"/>
         </el-form-item>
         <el-form-item label="图标" prop="icon">
-          <div class="upload-field">
-            <el-input v-model="currentRow.icon" placeholder="点击右侧按钮上传或手动输入文件名"/>
+          <div class="asset-upload-wrap">
             <el-upload
                 :before-upload="beforeIconUpload"
+                :disabled="iconUploading"
                 :http-request="(opt: UploadRequestOptions) => doUpload(opt, 'icon')"
                 :show-file-list="false"
                 accept="image/*"
                 action="#"
+                class="icon-uploader"
             >
-              <el-button :loading="iconUploading" type="primary">上传图标</el-button>
+              <img v-if="iconPreviewUrl" :src="iconPreviewUrl" alt="icon" class="icon-preview"/>
+              <div v-else class="asset-uploader-placeholder icon-placeholder">
+                <el-icon class="asset-uploader-icon">
+                  <Plus/>
+                </el-icon>
+                <span>点击上传图标</span>
+              </div>
             </el-upload>
+            <el-button
+                v-if="iconPreviewUrl || currentRow.icon"
+                link
+                type="danger"
+                @click="clearAsset('icon')"
+            >
+              移除图标
+            </el-button>
           </div>
         </el-form-item>
         <el-form-item label="动画资源" prop="animation">
-          <div class="upload-field">
-            <el-input v-model="currentRow.animation" placeholder="点击右侧按钮上传或手动输入文件名"/>
+          <div class="asset-upload-wrap">
             <el-upload
                 :before-upload="beforeAnimationUpload"
+                :disabled="animationUploading"
                 :http-request="(opt: UploadRequestOptions) => doUpload(opt, 'animation')"
                 :show-file-list="false"
-                accept=".svga,.pag,.json,.lottie,.mp4,.webm,.zip,.gif,.apng,.png,.webp"
+                accept=".svga,.pag,.json,.lottie,.mp4,.webm,.zip,.gif,.apng,.png,.webp,.jpg,.jpeg,.bmp"
                 action="#"
+                class="animation-uploader"
             >
-              <el-button :loading="animationUploading" type="primary">上传动画</el-button>
+              <img
+                  v-if="animationPreviewUrl"
+                  :src="animationPreviewUrl"
+                  alt="animation"
+                  class="animation-preview"
+              />
+              <div v-else-if="animationFileLabel" class="asset-file-label">
+                <el-icon class="asset-uploader-icon">
+                  <Document/>
+                </el-icon>
+                <span class="file-name">{{ animationFileLabel }}</span>
+              </div>
+              <div v-else class="asset-uploader-placeholder animation-placeholder">
+                <el-icon class="asset-uploader-icon">
+                  <Plus/>
+                </el-icon>
+                <span>点击上传动画资源</span>
+              </div>
             </el-upload>
+            <el-button
+                v-if="animationPreviewUrl || animationFileLabel || currentRow.animation"
+                link
+                type="danger"
+                @click="clearAsset('animation')"
+            >
+              移除动画
+            </el-button>
           </div>
         </el-form-item>
         <el-form-item label="价格(钻石)" prop="price">
@@ -156,8 +197,9 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
+import {Document, Plus} from '@element-plus/icons-vue'
 import {giftApi, uploadApi} from '@/api'
 import type {Gift} from '@/types/api'
 
@@ -208,6 +250,77 @@ const formRef = ref<FormInstance>()
 
 const iconUploading = ref(false)
 const animationUploading = ref(false)
+const iconPreviewUrl = ref('')
+const animationPreviewUrl = ref('')
+const animationFileLabel = ref('')
+const objectPreviewUrls: Partial<Record<'icon' | 'animation', string>> = {}
+
+const imageExts = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.apng']
+
+const revokeObjectPreview = (field: 'icon' | 'animation') => {
+  const url = objectPreviewUrls[field]
+  if (url) {
+    URL.revokeObjectURL(url)
+    delete objectPreviewUrls[field]
+  }
+}
+
+const revokeAllObjectPreviews = () => {
+  revokeObjectPreview('icon')
+  revokeObjectPreview('animation')
+}
+
+const isImageFile = (fileName: string): boolean => imageExts.includes(getExt(fileName))
+
+const isImageUrl = (url: string): boolean => {
+  if (!url) return false
+  try {
+    const pathname = new URL(url, window.location.origin).pathname
+    return isImageFile(pathname)
+  } catch {
+    return isImageFile(url)
+  }
+}
+
+const resetAssetPreview = () => {
+  revokeAllObjectPreviews()
+  iconPreviewUrl.value = ''
+  animationPreviewUrl.value = ''
+  animationFileLabel.value = ''
+}
+
+const setIconPreview = (url: string, fromObject = false) => {
+  revokeObjectPreview('icon')
+  iconPreviewUrl.value = url
+  if (fromObject && url) {
+    objectPreviewUrls.icon = url
+  }
+}
+
+const setAnimationPreview = (url: string, fileLabel: string, fromObject = false) => {
+  revokeObjectPreview('animation')
+  animationPreviewUrl.value = url
+  animationFileLabel.value = fileLabel
+  if (fromObject && url) {
+    objectPreviewUrls.animation = url
+  }
+}
+
+const clearAsset = (field: 'icon' | 'animation') => {
+  currentRow.value[field] = ''
+  if (field === 'icon') {
+    setIconPreview('')
+  } else {
+    setAnimationPreview('', '')
+  }
+  formRef.value?.validateField(field).catch(() => undefined)
+}
+
+watch(dialogVisible, (visible) => {
+  if (!visible) {
+    resetAssetPreview()
+  }
+})
 
 // CMS后台允许上传的扩展名(与后端 allowedCMSExt 保持一致)
 const allowedAnimationExt = [
@@ -249,11 +362,20 @@ const doUpload = async (
     options: UploadRequestOptions,
     field: 'icon' | 'animation'
 ) => {
+  const file = options.file as File
   const flag = field === 'icon' ? iconUploading : animationUploading
   flag.value = true
   try {
-    const res = await uploadApi.uploadFile(options.file as File)
+    const res = await uploadApi.uploadFile(file)
     currentRow.value[field] = res.fileName
+    if (field === 'icon') {
+      setIconPreview(URL.createObjectURL(file), true)
+    } else if (isImageFile(file.name)) {
+      setAnimationPreview(URL.createObjectURL(file), '', true)
+    } else {
+      setAnimationPreview('', res.fileName)
+    }
+    formRef.value?.validateField(field).catch(() => undefined)
     ElMessage.success('上传成功')
   } catch (error) {
     console.error('上传失败:', error)
@@ -268,12 +390,8 @@ const formRules: FormRules = {
     {required: true, message: '请输入礼物名称', trigger: 'blur'},
     {min: 1, max: 64, message: '礼物名称长度在1-64个字符', trigger: 'blur'}
   ],
-  icon: [
-    {max: 255, message: '图标URL最长255字符', trigger: 'blur'}
-  ],
-  animation: [
-    {max: 255, message: '动画URL最长255字符', trigger: 'blur'}
-  ],
+  icon: [],
+  animation: [],
   category: [
     {max: 32, message: '分类最长32字符', trigger: 'blur'}
   ],
@@ -323,20 +441,31 @@ const handleCurrentChange = (page: number) => {
 const handleAdd = () => {
   dialogTitle.value = '新增礼物'
   currentRow.value = defaultForm()
+  resetAssetPreview()
   dialogVisible.value = true
 }
 
 const handleEdit = (row: Gift) => {
   dialogTitle.value = '编辑礼物'
+  const iconName = row.iconName || ''
+  const animationName = row.animationName || ''
   currentRow.value = {
     id: row.id,
     name: row.name,
-    icon: row.icon,
-    animation: row.animation,
+    icon: iconName,
+    animation: animationName,
     price: Number(row.price) || 0,
     category: row.category,
     sort: Number(row.sort) || 0,
     description: row.description
+  }
+  setIconPreview(row.icon || '')
+  if (animationName && isImageUrl(row.animation)) {
+    setAnimationPreview(row.animation || '', '')
+  } else if (animationName) {
+    setAnimationPreview('', animationName)
+  } else {
+    setAnimationPreview('', '')
   }
   dialogVisible.value = true
 }
@@ -449,14 +578,82 @@ onMounted(() => {
   text-align: right;
 }
 
-.upload-field {
+.asset-upload-wrap {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 8px;
-  width: 100%;
 }
 
-.upload-field .el-input {
-  flex: 1;
+.icon-uploader :deep(.el-upload),
+.animation-uploader :deep(.el-upload) {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.icon-uploader :deep(.el-upload:hover),
+.animation-uploader :deep(.el-upload:hover) {
+  border-color: var(--el-color-primary);
+}
+
+.asset-uploader-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
+  gap: 8px;
+}
+
+.icon-placeholder {
+  width: 96px;
+  height: 96px;
+}
+
+.animation-placeholder {
+  width: 240px;
+  height: 120px;
+}
+
+.asset-uploader-icon {
+  font-size: 28px;
+}
+
+.icon-preview {
+  width: 96px;
+  height: 96px;
+  display: block;
+  object-fit: cover;
+}
+
+.animation-preview {
+  width: 240px;
+  height: 120px;
+  display: block;
+  object-fit: cover;
+}
+
+.asset-file-label {
+  width: 240px;
+  height: 120px;
+  padding: 12px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.asset-file-label .file-name {
+  font-size: 13px;
+  color: var(--el-text-color-regular);
+  word-break: break-all;
+  line-height: 1.4;
 }
 </style>

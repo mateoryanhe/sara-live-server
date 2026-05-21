@@ -149,7 +149,9 @@ export interface Gift {
     id: string
     name: string
     icon: string
+    iconName: string
     animation: string
+    animationName: string
     price: number
     category: string
     sort: number

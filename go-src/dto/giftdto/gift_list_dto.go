@@ -15,15 +15,17 @@ type GiftListReq struct {
 }
 
 type GiftListRes struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Icon        string `json:"icon"`
-	Animation   string `json:"animation"`
-	Price       uint64 `json:"price"`
-	Category    string `json:"category"`
-	Sort        int    `json:"sort"`
-	Status      uint8  `json:"status"`
-	Description string `json:"description"`
-	CreatedAt   string `json:"createdAt"`
-	UpdatedAt   string `json:"updatedAt"`
+	ID            string `json:"id"`
+	Name          string `json:"name"`
+	Icon          string `json:"icon" dc:"图标完整URL(列表展示)"`
+	IconName      string `json:"iconName" dc:"图标资源文件名(编辑保存用)"`
+	Animation     string `json:"animation" dc:"动画完整URL(列表展示)"`
+	AnimationName string `json:"animationName" dc:"动画资源文件名(编辑保存用)"`
+	Price         uint64 `json:"price"`
+	Category      string `json:"category"`
+	Sort          int    `json:"sort"`
+	Status        uint8  `json:"status"`
+	Description   string `json:"description"`
+	CreatedAt     string `json:"createdAt"`
+	UpdatedAt     string `json:"updatedAt"`
 }

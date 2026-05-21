@@ -15,8 +15,10 @@ import (
 func GetGiftList(_ context.Context, req *giftdto.GiftListReq) (*httpserver.CMSQueryResp, error) {
 	total, list := giftdao.GetGiftList(req)
 	for _, res := range list {
-		res.Icon = upload.GetUrlByName(res.Icon)
-		res.Animation = upload.GetUrlByName(res.Animation)
+		res.IconName = res.Icon
+		res.AnimationName = res.Animation
+		res.Icon = upload.GetUrlByName(res.IconName)
+		res.Animation = upload.GetUrlByName(res.AnimationName)
 	}
 	return &httpserver.CMSQueryResp{
 		Total: total,
