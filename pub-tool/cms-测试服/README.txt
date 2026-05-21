@@ -1,31 +1,31 @@
-Hangzhou Server CMS Upload Instructions
+CMS 一键构建上传说明（PuTTY + .ppk 密钥）
 
-One-click build and upload script:
-   upload.bat - Double-click to execute, builds the Vue project and uploads the output to server
-   The script will:
-   1. Build the Vue project (D:\go-project\xrgameserver\cms) with dev environment
-   2. Compress the built files to a zip file
-   3. Upload it to hzaicoin.fun server and extract to /root/p-cms directory
-   This approach reduces upload time and ensures latest build is deployed
-   Note: plink.exe and pscp.exe (PuTTY tools) must be in the current directory
+脚本说明
+  upload.bat [test|prod]  - 构建 Vue 并上传到远程服务器
+  config.bat              - 服务器、密钥、目录等配置（修改配置请编辑此文件）
 
-Configuration:
-   All configuration parameters (server IP, username, password, directories, build settings, etc.) are defined directly in the upload.bat script
-   To modify configuration:
-   - SERVER_IP: Server IP address
-   - SERVER_USER: Server username
-   - SERVER_PASSWORD: Server password
-   - SERVER_PORT: SSH port
-   - VUE_PROJECT_DIR: Vue project directory to build
-   - BUILD_OUTPUT_DIR: Directory containing build output (typically same as project dir)
-   - BUILD_ENV: Build environment (dev/prod/staging)
-   - REMOTE_DIR: Target directory on server
+环境对应
+  test  - npm run build:test  -> 加载 cms/.env.test
+  prod  - npm run build:prod  -> 加载 cms/.env.production
 
-Usage:
-   1. Ensure plink.exe and pscp.exe are in the current directory
-   2. Make sure Node.js and npm are installed and available in PATH
-   3. The script will try to use 7-Zip for compression if available, otherwise PowerShell compression
-   4. Double-click the upload.bat file to execute the build and upload
-   5. No manual password input required, the script will automatically use the preset password
+默认不传参数时为 test 环境。
 
-Note: Ensure PuTTY tools (plink.exe and pscp.exe) are in the current directory before use
+前置条件
+  1. 本目录放置 plink.exe、pscp.exe（PuTTY 工具）
+  2. config.bat 中 SSH_KEY_PATH 指向有效的 .ppk 私钥
+  3. 已安装 Node.js / npm，且 cms 目录可正常构建
+  4. 远程服务器已安装 unzip
+
+配置项（config.bat）
+  REMOTE_HOST / REMOTE_USER / REMOTE_PORT  - SSH 连接
+  SSH_KEY_PATH                             - PuTTY .ppk 密钥路径
+  VUE_PROJECT_DIR / BUILD_OUTPUT_DIR       - 项目与构建输出目录
+  REMOTE_DIR_TEST / REMOTE_DIR_PROD        - 各环境远程部署目录
+
+用法示例
+  upload.bat           部署测试环境（默认）
+  upload.bat test      部署测试环境
+  upload.bat prod      部署生产环境
+
+密钥格式
+  若密钥为 OpenSSH (.pem)，请用 PuTTYgen 转为 .ppk 后写入 SSH_KEY_PATH。

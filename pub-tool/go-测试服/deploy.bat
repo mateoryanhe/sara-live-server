@@ -135,18 +135,23 @@ REM Send SIGKILL signal (kill -9) to force stop any remaining processes
 echo Sending force stop command...
 plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "sudo pkill -9 %APP_NAME% 2>nul || pkill -KILL %APP_NAME% 2>nul"
 
-REM Ensure remote directory exists and clear it
-echo Clearing remote directory...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "mkdir -p %REMOTE_DIR% && rm -f %REMOTE_DIR%/%APP_NAME% %REMOTE_DIR%/config.yaml %REMOTE_DIR%/%APP_NAME%.log"
+REM Ensure remote directory exists, fix ownership (sudo 启动可能导致目录属主为 root)
+echo Preparing remote directory...
+plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "sudo mkdir -p %REMOTE_DIR% && sudo chown -R %REMOTE_USER%:%REMOTE_USER% %REMOTE_DIR% && rm -f %REMOTE_DIR%/%APP_NAME% %REMOTE_DIR%/config.yaml %REMOTE_DIR%/%APP_NAME%.log %REMOTE_DIR%/deploy_package.zip"
+if %errorlevel% neq 0 (
+    echo Error: Failed to prepare remote directory %REMOTE_DIR%
+    pause
+    exit /b 1
+)
 
 echo.
 echo ================================
 echo Step 4: Upload new files
 echo ================================
-echo Uploading deployment package...
+echo Uploading deployment package to /tmp...
 
-REM Upload deployment package
-pscp.exe -i "%SSH_KEY_PATH%" "%DEPLOY_PACKAGE%" %REMOTE_USER%@%REMOTE_HOST%:"%REMOTE_DIR%/deploy_package.zip"
+REM Upload to /tmp first (ec2-user always writable), avoid permission denied on app dir
+pscp.exe -i "%SSH_KEY_PATH%" "%DEPLOY_PACKAGE%" %REMOTE_USER%@%REMOTE_HOST%:/tmp/deploy_package.zip
 if %errorlevel% neq 0 (
     echo Error: File upload failed
     pause
@@ -157,9 +162,15 @@ echo.
 echo ================================
 echo Step 5: Extract and start program
 echo ================================
-REM Extract deployment package
+REM Extract deployment package from /tmp into target directory
 echo Extracting deployment package...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "cd %REMOTE_DIR% && unzip -o deploy_package.zip && rm deploy_package.zip"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "unzip -o /tmp/deploy_package.zip -d %REMOTE_DIR% && rm -f /tmp/deploy_package.zip"
+if %errorlevel% neq 0 (
+    echo Error: Remote extraction failed
+    plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "rm -f /tmp/deploy_package.zip"
+    pause
+    exit /b 1
+)
 
 REM Set execution permissions
 echo Setting execution permissions...

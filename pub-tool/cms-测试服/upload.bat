@@ -1,91 +1,134 @@
 @echo off
-REM Change to the script's directory
+setlocal EnableDelayedExpansion
 cd /d "%~dp0"
 
-REM Configuration parameters
-set SERVER_IP=hzaicoin.fun
-set SERVER_USER=root
-set SERVER_PASSWORD=Appledev882116
-set SERVER_PORT=22
-set VUE_PROJECT_DIR=D:\go-project\xrgameserver\cms
-set BUILD_OUTPUT_DIR=D:\root\cms
-set BUILD_ENV=dev
-set REMOTE_DIR=/root/p-cms
-set ZIP_FILE=upload_package.zip
+REM 用法: upload.bat [test|prod]  默认 test
+set DEPLOY_ENV=%~1
+if "%DEPLOY_ENV%"=="" set DEPLOY_ENV=test
 
-echo Starting build and upload process...
-echo Vue Project Directory: %VUE_PROJECT_DIR%
-echo Build Output Directory: %BUILD_OUTPUT_DIR%
-echo Build Environment: %BUILD_ENV%
-echo Remote Directory: %REMOTE_DIR%
-
-REM Check if Vue project directory exists
-if not exist "%VUE_PROJECT_DIR%" (
-    echo Error: Vue project directory %VUE_PROJECT_DIR% does not exist
+if /i not "%DEPLOY_ENV%"=="test" if /i not "%DEPLOY_ENV%"=="prod" (
+    echo Usage: %~nx0 [test^|prod]
+    echo   test - 使用 cms/.env.test 构建并部署到测试目录
+    echo   prod - 使用 cms/.env.production 构建并部署到生产目录
     pause
     exit /b 1
 )
 
-REM Build Vue project
-echo Building Vue project with environment %BUILD_ENV%...
+call "%~dp0config.bat"
+
+if /i "%DEPLOY_ENV%"=="prod" (
+    set BUILD_CMD=build:prod
+    set REMOTE_DIR=%REMOTE_DIR_PROD%
+    set ZIP_FILE=upload_package_prod.zip
+) else (
+    set BUILD_CMD=build:test
+    set REMOTE_DIR=%REMOTE_DIR_TEST%
+    set ZIP_FILE=upload_package_test.zip
+)
+
+echo ========================================
+echo CMS Build and Upload
+echo Environment: %DEPLOY_ENV%
+echo Build command: npm run %BUILD_CMD%
+echo Target server: %REMOTE_USER%@%REMOTE_HOST%:%REMOTE_PORT%
+echo Remote directory: %REMOTE_DIR%
+echo SSH key: %SSH_KEY_PATH%
+echo ========================================
+echo.
+
+if not exist "%VUE_PROJECT_DIR%" (
+    echo Error: Vue project directory does not exist: %VUE_PROJECT_DIR%
+    pause
+    exit /b 1
+)
+
+if not exist "%SSH_KEY_PATH%" (
+    echo Error: SSH key file does not exist: %SSH_KEY_PATH%
+    echo Please set SSH_KEY_PATH in config.bat to your .ppk file.
+    pause
+    exit /b 1
+)
+
+if not exist "plink.exe" (
+    echo Error: plink.exe not found in %~dp0
+    pause
+    exit /b 1
+)
+
+if not exist "pscp.exe" (
+    echo Error: pscp.exe not found in %~dp0
+    pause
+    exit /b 1
+)
+
+REM ---------- Build Vue ----------
+echo [1/4] Building Vue project...
 cd /d "%VUE_PROJECT_DIR%"
 
-REM Check if package.json exists
 if not exist "package.json" (
     echo Error: package.json not found in %VUE_PROJECT_DIR%
     pause
     exit /b 1
 )
 
-REM Determine the build command based on environment
-if "%BUILD_ENV%"=="prod" (
-    set BUILD_CMD=build:prod
-) else (
-    set BUILD_CMD=build:dev
-)
-
-echo Running build command: npm run %BUILD_CMD%
+echo Running: npm run %BUILD_CMD%
 call npm run %BUILD_CMD%
-
-if %ERRORLEVEL% NEQ 0 (
+if errorlevel 1 (
     echo Error: Vue build failed
     cd /d "%~dp0"
     pause
     exit /b 1
 )
 
-REM Return to script directory
 cd /d "%~dp0"
 
-REM Check if PuTTY tools exist in current directory
-if not exist "plink.exe" (
-    echo Error: plink.exe not found, please ensure plink.exe is in current directory
-    pause
-    exit /b 1
-)
-
-if not exist "pscp.exe" (
-    echo Error: pscp.exe not found, please ensure pscp.exe is in current directory
-    pause
-    exit /b 1
-)
-
-REM Check if build output directory exists
 if not exist "%BUILD_OUTPUT_DIR%" (
-    echo Error: Build output directory %BUILD_OUTPUT_DIR% does not exist
+    echo Error: Build output directory does not exist: %BUILD_OUTPUT_DIR%
     pause
     exit /b 1
 )
 
-REM Compress the built files
-echo Compressing built files from %BUILD_OUTPUT_DIR%...
+REM ---------- SSH connect (ppk) ----------
+echo [2/4] Testing SSH connection...
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -hostkey "*" %REMOTE_USER%@%REMOTE_HOST% "echo ok" >nul 2>&1
+if errorlevel 1 (
+    echo First connection, accepting host key...
+    echo y | plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% %REMOTE_USER%@%REMOTE_HOST% "exit" >nul 2>&1
+)
+
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "echo Connection successful"
+if errorlevel 1 (
+    echo Error: Cannot connect to %REMOTE_HOST% with key %SSH_KEY_PATH%
+    pause
+    exit /b 1
+)
+
+REM ---------- Zip ----------
+echo [3/4] Compressing build output...
+if exist "%ZIP_FILE%" del /f /q "%ZIP_FILE%"
+
+set ZIP_TOOL=
 where 7z >nul 2>&1
-if %ERRORLEVEL% EQU 0 (
-    echo Compressing using 7-Zip...
-    7z a -tzip "%ZIP_FILE%" "%BUILD_OUTPUT_DIR%\*"
+if %ERRORLEVEL% EQU 0 set ZIP_TOOL=7z
+if not defined ZIP_TOOL if exist "C:\Program Files\7-Zip\7z.exe" set "ZIP_TOOL=C:\Program Files\7-Zip\7z.exe"
+
+set "ZIP_PATH=%~dp0%ZIP_FILE%"
+if defined ZIP_TOOL (
+    "%ZIP_TOOL%" a -tzip "!ZIP_PATH!" "!BUILD_OUTPUT_DIR!\*" >nul
+    if errorlevel 1 (
+        echo Error: Failed to create zip with 7-Zip
+        echo Zip path: !ZIP_PATH!
+        pause
+        exit /b 1
+    )
 ) else (
-    echo 7-Zip not found, using PowerShell compression...
-    powershell -Command "if (Test-Path '%ZIP_FILE%') { Remove-Item '%ZIP_FILE%' }; Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::CreateFromDirectory('%BUILD_OUTPUT_DIR%', '%ZIP_FILE%')"
+    where tar >nul 2>&1
+    if %ERRORLEVEL% EQU 0 (
+        tar -a -cf "%ZIP_FILE%" -C "%BUILD_OUTPUT_DIR%" .
+    ) else (
+        echo Warning: 7-Zip/tar not found, using PowerShell zip ^(Linux unzip may warn^)
+        powershell -NoProfile -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::CreateFromDirectory('%BUILD_OUTPUT_DIR%', '%CD%\%ZIP_FILE%')"
+    )
 )
 
 if not exist "%ZIP_FILE%" (
@@ -94,46 +137,36 @@ if not exist "%ZIP_FILE%" (
     exit /b 1
 )
 
-echo Deleting remote directory %REMOTE_DIR%...
-plink.exe -ssh -l %SERVER_USER% -pw "%SERVER_PASSWORD%" -P %SERVER_PORT% -batch %SERVER_IP% "if [ -d '%REMOTE_DIR%' ]; then rm -rf '%REMOTE_DIR%'; echo 'Directory deleted'; else echo 'Directory does not exist'; fi"
-
-if %ERRORLEVEL% EQU 0 (
-    echo Remote directory operation successful, uploading zip file...
-    
-    REM Upload zip file to server
-    pscp.exe -pw "%SERVER_PASSWORD%" "%ZIP_FILE%" %SERVER_USER%@%SERVER_IP%:/tmp/%ZIP_FILE%
-    
-    if %ERRORLEVEL% EQU 0 (
-        echo Zip file uploaded successfully, extracting on server...
-        
-        REM Create remote directory and extract
-        plink.exe -ssh -l %SERVER_USER% -pw "%SERVER_PASSWORD%" -P %SERVER_PORT% -batch %SERVER_IP% "mkdir -p '%REMOTE_DIR%' && cd '%REMOTE_DIR%' && unzip -o /tmp/%ZIP_FILE% && rm /tmp/%ZIP_FILE%"
-        
-        if %ERRORLEVEL% EQU 0 (
-            echo Files extracted successfully!
-        ) else (
-            echo File extraction failed!
-            REM Clean up uploaded zip file in case of extraction failure
-            plink.exe -ssh -l %SERVER_USER% -pw "%SERVER_PASSWORD%" -P %SERVER_PORT% -batch %SERVER_IP% "rm /tmp/%ZIP_FILE%"
-            pause
-            del "%ZIP_FILE%"
-            exit /b 1
-        )
-    ) else (
-        echo Zip file upload failed!
-        del "%ZIP_FILE%"
-        pause
-        exit /b 1
-    )
-) else (
-    echo Delete remote directory failed!
+REM ---------- Upload and extract ----------
+echo [4/4] Uploading to server...
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "if [ -d '%REMOTE_DIR%' ]; then rm -rf '%REMOTE_DIR%'; fi && mkdir -p '%REMOTE_DIR%'"
+if errorlevel 1 (
+    echo Error: Failed to prepare remote directory
     del "%ZIP_FILE%"
     pause
     exit /b 1
 )
 
-REM Clean up local zip file
-del "%ZIP_FILE%"
+pscp.exe -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% "%ZIP_FILE%" %REMOTE_USER%@%REMOTE_HOST%:/tmp/%ZIP_FILE%
+if errorlevel 1 (
+    echo Error: Zip upload failed
+    del "%ZIP_FILE%"
+    pause
+    exit /b 1
+)
 
-echo Build and upload completed!
+REM unzip 在仅有 warning（如路径反斜杠）时返回 1，需与真正失败区分
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "unzip -o /tmp/%ZIP_FILE% -d '%REMOTE_DIR%'; ec=$?; rm -f /tmp/%ZIP_FILE%; if [ $ec -eq 0 ] || [ $ec -eq 1 ]; then exit 0; else exit $ec; fi"
+if errorlevel 1 (
+    echo Error: Remote extraction failed. Details:
+    plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "ls -la /tmp/%ZIP_FILE% 2>&1; unzip -t /tmp/%ZIP_FILE% 2>&1 || true"
+    del "%ZIP_FILE%"
+    pause
+    exit /b 1
+)
+
+del "%ZIP_FILE%"
+echo.
+echo Build and upload completed! [%DEPLOY_ENV%] -^> %REMOTE_DIR%
 pause
+endlocal
