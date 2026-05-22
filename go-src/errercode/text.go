@@ -50,6 +50,9 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		BannerExist:               "Banner title already exists",
 		BannerNonExist:            "Banner does not exist",
 		UserAlreadyAnchor:         "User is already an anchor",
+		ShortVideoExist:           "Short video title already exists",
+		ShortVideoNonExist:        "Short video does not exist",
+		ShortVideoAlreadyLiked:    "Short video already liked",
 	},
 	lang.LangZHCN: {
 		Success:                   "成功",
@@ -96,6 +99,9 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		BannerExist:               "Banner标题已存在",
 		BannerNonExist:            "Banner不存在",
 		UserAlreadyAnchor:         "用户已是主播",
+		ShortVideoExist:           "短视频标题已存在",
+		ShortVideoNonExist:        "短视频不存在",
+		ShortVideoAlreadyLiked:    "已点赞,请勿重复操作",
 	},
 	lang.LangZHTW: {
 		Success:                   "成功",
@@ -142,6 +148,9 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		BannerExist:               "Banner標題已存在",
 		BannerNonExist:            "Banner不存在",
 		UserAlreadyAnchor:         "用戶已是主播",
+		ShortVideoExist:           "短視頻標題已存在",
+		ShortVideoNonExist:        "短視頻不存在",
+		ShortVideoAlreadyLiked:    "已點讚,請勿重複操作",
 	},
 }
 

@@ -6,6 +6,7 @@ import {cmsUserApi} from './modules/cmsuser'
 import {guildApi} from './modules/guild'
 import {giftApi} from './modules/gift'
 import {bannerApi} from './modules/banner'
+import {shortVideoApi} from './modules/shortVideo'
 import {uploadApi} from './modules/upload'
 import {goldApi} from './modules/gold'
 import {diamondApi} from './modules/diamond'
@@ -19,6 +20,7 @@ export {
     guildApi,
     giftApi,
     bannerApi,
+    shortVideoApi,
     uploadApi,
     goldApi,
     diamondApi,
@@ -33,6 +35,7 @@ export default {
     guildApi,
     giftApi,
     bannerApi,
+    shortVideoApi,
     uploadApi,
     goldApi,
     diamondApi,

@@ -19,8 +19,8 @@ const (
 	ImageSubDir = "upload/images"
 	// MaxImageSize 单张图片最大字节数(5MB)
 	MaxImageSize int64 = 5 * 1024 * 1024
-	// MaxCMSFileSize CMS后台单个文件最大字节数(50MB),用于礼物动画等较大资源
-	MaxCMSFileSize int64 = 50 * 1024 * 1024
+	// MaxCMSFileSize CMS后台单个文件最大字节数(100MB),用于短视频等资源
+	MaxCMSFileSize int64 = 100 * 1024 * 1024
 )
 
 // allowedImageExt 允许的图片扩展名
@@ -50,6 +50,7 @@ var allowedCMSExt = map[string]struct{}{
 	".lottie": {},
 	".mp4":    {},
 	".webm":   {},
+	".mov":    {},
 	".zip":    {},
 }
 

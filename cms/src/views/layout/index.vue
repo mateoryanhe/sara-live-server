@@ -56,6 +56,22 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
+            v-if="hasMenuPermission('ShortVideoManagement')"
+            index="/shortvideo">
+          <template #title>
+            <el-icon>
+              <VideoCamera/>
+            </el-icon>
+            <span>短视频</span>
+          </template>
+          <el-menu-item v-if="hasMenuPermission('ShortVideoManagement')" index="/shortvideo/short-video-list">
+            <el-icon>
+              <VideoCamera/>
+            </el-icon>
+            <span>短视频管理</span>
+          </el-menu-item>
+        </el-sub-menu>
+        <el-sub-menu
             v-if="hasMenuPermission('GlobalConfig')"
             index="/config">
           <template #title>
@@ -139,7 +155,7 @@
 <script lang="ts" setup>
 import {computed, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {ArrowDown, Expand, Fold, Lock, Monitor, Picture, Present, Setting, Stamp, User} from '@element-plus/icons-vue'
+import {ArrowDown, Expand, Fold, Lock, Monitor, Picture, Present, Setting, Stamp, User, VideoCamera} from '@element-plus/icons-vue'
 import {clearPermissions, getIsAdmin, hasPermission} from '@/utils/permission'
 
 const route = useRoute()

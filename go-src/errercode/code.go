@@ -78,6 +78,12 @@ const (
 	BannerNonExist XRCode = 97
 	// UserAlreadyAnchor 用户已是主播
 	UserAlreadyAnchor XRCode = 98
+	// ShortVideoExist 短视频标题已存在
+	ShortVideoExist XRCode = 99
+	// ShortVideoNonExist 短视频不存在
+	ShortVideoNonExist XRCode = 100
+	// ShortVideoAlreadyLiked 短视频已点赞
+	ShortVideoAlreadyLiked XRCode = 101
 )
 
 type XError struct {

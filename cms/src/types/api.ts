@@ -192,6 +192,25 @@ export interface BannerQuery extends PageQuery {
     statusFilter?: number
 }
 
+export interface ShortVideo {
+    id: string
+    title: string
+    video: string
+    videoName: string
+    cover: string
+    coverName: string
+    sort: number
+    status: number
+    description: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface ShortVideoQuery extends PageQuery {
+    title?: string
+    statusFilter?: number
+}
+
 // CMS用户相关类型
 export interface CMSUser {
     id: string
