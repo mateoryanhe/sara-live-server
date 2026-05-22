@@ -11,6 +11,7 @@ import (
 	"xr-game-server/dao/shortvideodao"
 	"xr-game-server/dao/shortvideolikedao"
 	"xr-game-server/dao/userinfodao"
+	"xr-game-server/dao/userlogindevicedao"
 )
 
 func Init() {
@@ -19,6 +20,7 @@ func Init() {
 	globalcfgdao.InitGlobalCfg()
 	cmsuserdao.InitCMSUser()
 	userinfodao.InitUserInfoDao()
+	userlogindevicedao.InitUserLoginDeviceDao()
 	guilddao.InitGuildDao()
 	liveroomdao.InitLiveRoomDao()
 	liveroomdao.InitLiveRoomOnlineDao()

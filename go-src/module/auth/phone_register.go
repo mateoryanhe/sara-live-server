@@ -10,6 +10,7 @@ import (
 	"xr-game-server/core/xrtoken"
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/userinfodao"
+	"xr-game-server/dao/userlogindevicedao"
 	"xr-game-server/dto/authdto"
 	"xr-game-server/errercode"
 	"xr-game-server/module/verification_code"
@@ -47,6 +48,7 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 	// 初始化用户信息
 	data := userinfodao.GetUserInfoByUserId(account.ID)
 	data.SetPhone(req.Phone)
+	userlogindevicedao.RefreshLoginDevice(account.ID, req.DeviceInfo)
 	if req.InviteCode != "" {
 		inviterId := userinfodao.GetUserIdByShareCode(req.InviteCode)
 		if inviterId == 0 {

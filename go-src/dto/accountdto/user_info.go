@@ -25,16 +25,17 @@ type UserInfoDto struct {
 	BanApplyTime *time.Time `json:"banApplyTime"`
 	Cancel       bool       `json:"cancel"`
 	// 以下字段来自 user_infos 表(LEFT JOIN,可能为空)
-	Nickname  string  `json:"nickname"`
-	Phone     string  `json:"phone"`
-	Avatar    string  `json:"avatar"`
-	Remark    string  `json:"remark"`
-	Gold      float64 `json:"gold"`
-	Diamond   float64 `json:"diamond"`
-	ShareCode string  `json:"shareCode"`
-	GuildId   uint64  `json:"guildId"`
-	IsAnchor  bool    `json:"isAnchor"`
-	VipLevel  uint32  `json:"vipLevel"`
+	Nickname   string  `json:"nickname"`
+	Phone      string  `json:"phone"`
+	Avatar     string  `json:"avatar"`
+	Remark     string  `json:"remark"`
+	Gold       float64 `json:"gold"`
+	Diamond    float64 `json:"diamond"`
+	ShareCode  string  `json:"shareCode"`
+	GuildId    uint64  `json:"guildId"`
+	IsAnchor   bool    `json:"isAnchor"`
+	VipLevel   uint32  `json:"vipLevel"`
+	DeviceType string  `json:"deviceType"`
 }
 
 type SetAnchorReq struct {

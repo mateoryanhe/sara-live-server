@@ -67,11 +67,14 @@
             <template #default="scope">{{ scope.row.phone || '-' }}</template>
           </el-table-column>
           <el-table-column label="IP" prop="ip" width="150"/>
+          <el-table-column label="设备类型" prop="deviceType" width="100">
+            <template #default="scope">{{ scope.row.deviceType || '-' }}</template>
+          </el-table-column>
           <el-table-column label="渠道" prop="channel" width="100"/>
-          <el-table-column label="金币" prop="gold" width="120">
+          <el-table-column label="金币余额" prop="gold" width="120">
             <template #default="scope">{{ formatAmount(scope.row.gold) }}</template>
           </el-table-column>
-          <el-table-column label="钻石" prop="diamond" width="120">
+          <el-table-column label="钻石余额" prop="diamond" width="120">
             <template #default="scope">{{ formatAmount(scope.row.diamond) }}</template>
           </el-table-column>
           <el-table-column label="VIP等级" prop="vipLevel" width="100">

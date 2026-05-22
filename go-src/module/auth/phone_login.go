@@ -10,6 +10,7 @@ import (
 	"xr-game-server/core/xrtoken"
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/userinfodao"
+	"xr-game-server/dao/userlogindevicedao"
 	"xr-game-server/dto/authdto"
 	"xr-game-server/errercode"
 )
@@ -32,6 +33,7 @@ func PhoneLogin(ctx context.Context, req *authdto.PhoneLoginReq) (res *authdto.P
 	}
 	tokenStr := xrtoken.AddAppToken(account.ID)
 	userinfodao.GetUserInfoByUserId(account.ID)
+	userlogindevicedao.RefreshLoginDevice(account.ID, req.DeviceInfo)
 
 	return &authdto.PhoneLoginRes{
 		Token:  tokenStr,

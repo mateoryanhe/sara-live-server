@@ -89,6 +89,7 @@ export interface UserInfo {
     guildId?: string | number
     isAnchor?: boolean
     vipLevel?: number
+    deviceType?: string
 }
 
 export interface SetAnchorReq {

@@ -9,6 +9,7 @@ func Init() {
 	InitCMSRole()
 	InitPermission()
 	initUserInfo()
+	initUserLoginDevice()
 	initCurrencyLog()
 	InitLiveGuild()
 	initGuildMember()
