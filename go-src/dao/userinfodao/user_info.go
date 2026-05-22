@@ -14,6 +14,7 @@ var shareCodeUserIdCacheMgr *cache.CacheMgr
 func InitUserInfoDao() {
 	userInfoCacheMgr = cache.NewCacheMgr()
 	shareCodeUserIdCacheMgr = cache.NewCacheMgr()
+	initUserCumulativeStatDao()
 }
 
 // GetUserIdByShareCode 根据分享码获取玩家ID,不存在则返回 0

@@ -10,6 +10,7 @@ func Init() {
 	InitPermission()
 	initUserInfo()
 	initUserLoginDevice()
+	initUserCumulativeStat()
 	initCurrencyLog()
 	InitLiveGuild()
 	initGuildMember()
