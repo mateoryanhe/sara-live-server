@@ -10,7 +10,7 @@ import (
 )
 
 func GetGlobalCfg(ctx context.Context, req *globalcfgdto.GetGlobalCfgReq) (*httpserver.CMSQueryResp, error) {
-	ret := globalcfgdao.GetCfgByModule(req.Module)
+	ret := globalcfgdao.GetCfgList(req.Module, req.ModuleName)
 	data := make([]*globalcfgdto.GlobalCfgDto, 0)
 	for _, v := range ret {
 		data = append(data, globalcfgdto.NewGlobalCfgDto(v))

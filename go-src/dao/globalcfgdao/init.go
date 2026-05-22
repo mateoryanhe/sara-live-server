@@ -3,6 +3,7 @@ package globalcfgdao
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
+	"strings"
 	"xr-game-server/core/event"
 	"xr-game-server/entity"
 	"xr-game-server/gameevent"
@@ -36,7 +37,23 @@ func DelById(id uint64) {
 	InitGlobalCfg()
 }
 
-func GetCfgByModule(module string) []*entity.GlobalCfg {
+func GetCfgList(module, moduleName string) []*entity.GlobalCfg {
+	source := getCfgByModule(module)
+	if moduleName == "" {
+		return source
+	}
+	keyword := strings.ToLower(strings.TrimSpace(moduleName))
+	ret := make([]*entity.GlobalCfg, 0, len(source))
+	for _, v := range source {
+		if strings.Contains(strings.ToLower(v.ModuleName), keyword) ||
+			strings.Contains(strings.ToLower(v.Module), keyword) {
+			ret = append(ret, v)
+		}
+	}
+	return ret
+}
+
+func getCfgByModule(module string) []*entity.GlobalCfg {
 	// 如果module为空字符串，返回所有配置
 	if module == "" {
 		ret := make([]*entity.GlobalCfg, 0)

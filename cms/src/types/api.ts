@@ -99,6 +99,7 @@ export interface SetAnchorReq {
 export interface GlobalCfg {
     id: string  // 根据API返回的实际数据，ID 是字符串类型
     module: string
+    moduleName: string
     key: string
     value: string
     desc: string
@@ -106,6 +107,7 @@ export interface GlobalCfg {
 
 export interface GetGlobalCfgReq {
     module?: string
+    moduleName?: string
 }
 
 export interface SaveGlobalCfgReq extends GlobalCfg {

@@ -1,9 +1,9 @@
 import {request} from '../request'
-import type {DelGlobalCfgReq, GlobalCfg, PageResponse, SaveGlobalCfgReq} from '@/types/api'
+import type {DelGlobalCfgReq, GetGlobalCfgReq, GlobalCfg, PageResponse, SaveGlobalCfgReq} from '@/types/api'
 
 const globalCfgApi = {
     // 获取全局配置
-    getGlobalCfg: (data?: any) => {
+    getGlobalCfg: (data?: GetGlobalCfgReq) => {
         return request.post<PageResponse<GlobalCfg>>('/globalCfg/getGlobalCfg', data)
     },
 

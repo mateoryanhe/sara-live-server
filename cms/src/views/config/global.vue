@@ -7,13 +7,50 @@
         </div>
       </template>
       <div class="content">
+        <el-form :model="searchForm" class="search-form" inline>
+          <el-form-item label="模块编码">
+            <el-select
+                v-model="searchForm.module"
+                allow-create
+                default-first-option
+                filterable
+                placeholder="请选择模块编码"
+                style="width: 200px"
+            >
+              <el-option label="全部" :value="ALL_MODULE"/>
+              <el-option
+                  v-for="item in moduleOptionList"
+                  :key="item.module"
+                  :label="formatModuleLabel(item)"
+                  :value="item.module"
+              >
+                <span>{{ item.module }}</span>
+                <span v-if="item.moduleName" class="option-desc">{{ item.moduleName }}</span>
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="模块名称">
+            <el-input
+                :model-value="displaySearchModuleName"
+                disabled
+                placeholder="选择模块编码后自动显示"
+                style="width: 200px"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="handleSearch">查询</el-button>
+            <el-button @click="handleReset">重置</el-button>
+          </el-form-item>
+        </el-form>
+
         <div class="table-header">
           <el-button type="primary" @click="handleAdd">新增配置</el-button>
         </div>
         <el-table v-loading="loading" :data="tableData" style="width: 100%">
           <el-table-column label="序号" type="index" width="80"/>
           <el-table-column label="ID" prop="id" width="200"/>
-          <el-table-column label="模块" prop="module" width="150"/>
+          <el-table-column label="模块编码" prop="module" width="120"/>
+          <el-table-column label="模块名称" prop="moduleName" width="150"/>
           <el-table-column label="配置键" prop="key" width="200"/>
           <el-table-column label="配置值" prop="value" show-overflow-tooltip/>
           <el-table-column label="描述" prop="desc" show-overflow-tooltip width="200"/>
@@ -42,8 +79,33 @@
     <!-- 编辑/新增弹窗 -->
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px">
       <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="100px">
-        <el-form-item label="模块" prop="module">
-          <el-input v-model="currentRow.module" placeholder="请输入模块名称"/>
+        <el-form-item label="模块编码" prop="module">
+          <el-select
+              v-model="currentRow.module"
+              allow-create
+              default-first-option
+              filterable
+              placeholder="请选择或输入模块编码"
+              style="width: 100%"
+              @change="handleFormModuleChange"
+          >
+            <el-option
+                v-for="item in moduleOptionList"
+                :key="item.module"
+                :label="formatModuleLabel(item)"
+                :value="item.module"
+            >
+              <span>{{ item.module }}</span>
+              <span v-if="item.moduleName" class="option-desc">{{ item.moduleName }}</span>
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="模块名称" prop="moduleName">
+          <el-input
+              v-model="currentRow.moduleName"
+              :disabled="isExistingModuleWithName(currentRow.module)"
+              placeholder="新模块请填写名称，已有模块自动带出"
+          />
         </el-form-item>
         <el-form-item label="配置键" prop="key">
           <el-input v-model="currentRow.key" placeholder="请输入配置键"/>
@@ -64,10 +126,17 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {computed, onMounted, reactive, ref} from 'vue'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import globalCfgApi from '@/api/modules/globalCfg'
-import type {GlobalCfg} from '@/types/api'
+import type {GetGlobalCfgReq, GlobalCfg} from '@/types/api'
+
+interface ModuleOption {
+  module: string
+  moduleName: string
+}
+
+const ALL_MODULE = ''
 
 // 表格数据
 const tableData = ref<GlobalCfg[]>([])
@@ -75,6 +144,22 @@ const loading = ref(false)
 const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(20)
+const moduleOptionList = ref<ModuleOption[]>([])
+
+const searchForm = reactive<GetGlobalCfgReq>({
+  module: ALL_MODULE,
+})
+
+const getModuleNameByCode = (module: string) => {
+  return moduleOptionList.value.find(item => item.module === module)?.moduleName || ''
+}
+
+const displaySearchModuleName = computed(() => {
+  if (!searchForm.module) {
+    return '全部'
+  }
+  return getModuleNameByCode(searchForm.module) || '-'
+})
 
 // 弹窗相关
 const dialogVisible = ref(false)
@@ -82,6 +167,7 @@ const dialogTitle = ref('编辑配置')
 const currentRow = ref<GlobalCfg>({
   id: '0',
   module: '',
+  moduleName: '',
   key: '',
   value: '',
   desc: ''
@@ -91,6 +177,9 @@ const formRef = ref()
 // 表单验证规则
 const formRules = reactive({
   module: [
+    {required: true, message: '请输入模块编码', trigger: 'blur'}
+  ],
+  moduleName: [
     {required: true, message: '请输入模块名称', trigger: 'blur'}
   ],
   key: [
@@ -101,13 +190,55 @@ const formRules = reactive({
   ]
 })
 
+// 从已有配置中提取模块编码与名称映射（module 字段已在库中）
+const fetchModuleOptions = async () => {
+  try {
+    const response = await globalCfgApi.getGlobalCfg()
+    const moduleMap = new Map<string, string>()
+    ;(response.data || []).forEach(item => {
+      if (!item.module) {
+        return
+      }
+      const currentName = moduleMap.get(item.module) || ''
+      if (!moduleMap.has(item.module) || (!currentName && item.moduleName)) {
+        moduleMap.set(item.module, item.moduleName || currentName)
+      }
+    })
+    moduleOptionList.value = Array.from(moduleMap.entries())
+        .map(([module, moduleName]) => ({module, moduleName}))
+        .sort((a, b) => a.module.localeCompare(b.module))
+  } catch (error) {
+    console.error('获取模块列表失败:', error)
+  }
+}
+
+const formatModuleLabel = (item: ModuleOption) => {
+  return item.moduleName ? `${item.module}（${item.moduleName}）` : item.module
+}
+
+const isExistingModuleWithName = (module: string) => {
+  const item = moduleOptionList.value.find(option => option.module === module)
+  return !!(item && item.moduleName)
+}
+
+const handleFormModuleChange = (module: string) => {
+  const moduleName = getModuleNameByCode(module)
+  if (moduleName) {
+    currentRow.value.moduleName = moduleName
+    return
+  }
+  if (!module) {
+    currentRow.value.moduleName = ''
+  }
+}
+
 // 获取全局配置列表
 const fetchGlobalCfgList = async () => {
   loading.value = true
   try {
-    // 使用POST请求获取数据
-    const response = await globalCfgApi.getGlobalCfg()
-    // 直接处理PageResponse<GlobalCfg>格式的响应
+    const response = await globalCfgApi.getGlobalCfg({
+      module: searchForm.module || undefined,
+    })
     tableData.value = response.data || []
     total.value = response.total || 0
   } catch (error) {
@@ -116,6 +247,17 @@ const fetchGlobalCfgList = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const handleSearch = () => {
+  currentPage.value = 1
+  fetchGlobalCfgList()
+}
+
+const handleReset = () => {
+  searchForm.module = ALL_MODULE
+  currentPage.value = 1
+  fetchGlobalCfgList()
 }
 
 // 分页大小变化
@@ -134,8 +276,9 @@ const handleCurrentChange = (page: number) => {
 const handleAdd = () => {
   dialogTitle.value = '新增配置'
   currentRow.value = {
-    id: '0',  // 设置默认ID为'0'字符串
+    id: '0',
     module: '',
+    moduleName: '',
     key: '',
     value: '',
     desc: ''
@@ -162,7 +305,8 @@ const handleDelete = async (row: GlobalCfg) => {
     const response = await globalCfgApi.delGlobalCfg(row)
     if (response) {
       ElMessage.success('删除成功')
-      await fetchGlobalCfgList() // 重新获取数据
+      await fetchModuleOptions()
+      await fetchGlobalCfgList()
     } else {
       ElMessage.error('删除失败')
     }
@@ -188,7 +332,8 @@ const handleSave = async () => {
     if (response) {
       ElMessage.success('保存成功')
       dialogVisible.value = false
-      await fetchGlobalCfgList() // 重新获取数据
+      await fetchModuleOptions()
+      await fetchGlobalCfgList()
     } else {
       ElMessage.error('保存失败')
     }
@@ -199,8 +344,9 @@ const handleSave = async () => {
 }
 
 // 初始化数据
-onMounted(() => {
-  fetchGlobalCfgList()
+onMounted(async () => {
+  await fetchModuleOptions()
+  await fetchGlobalCfgList()
 })
 </script>
 
@@ -227,5 +373,15 @@ onMounted(() => {
 
 .table-header {
   margin-bottom: 15px;
+}
+
+.search-form {
+  margin-bottom: 15px;
+}
+
+.option-desc {
+  margin-left: 8px;
+  color: #909399;
+  font-size: 12px;
 }
 </style>
