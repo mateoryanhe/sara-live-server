@@ -21,6 +21,7 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		Gold:      data.Gold,
 		Diamond:   data.Diamond,
 		ShareCode: data.ShareCode,
+		VipLevel:  data.VipLevel,
 	}, nil
 }
 

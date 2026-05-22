@@ -19,6 +19,7 @@ type GetUserInfoRes struct {
 	Gold      float64 `json:"gold"`
 	Diamond   float64 `json:"diamond"`
 	ShareCode string  `json:"shareCode"`
+	VipLevel  uint32  `json:"vipLevel"`
 }
 
 // UpdateNicknameReq 修改昵称

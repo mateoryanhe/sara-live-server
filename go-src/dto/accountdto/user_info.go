@@ -34,6 +34,7 @@ type UserInfoDto struct {
 	ShareCode string  `json:"shareCode"`
 	GuildId   uint64  `json:"guildId"`
 	IsAnchor  bool    `json:"isAnchor"`
+	VipLevel  uint32  `json:"vipLevel"`
 }
 
 type SetAnchorReq struct {

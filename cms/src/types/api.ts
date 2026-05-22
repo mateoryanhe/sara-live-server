@@ -88,6 +88,7 @@ export interface UserInfo {
     shareCode?: string
     guildId?: string | number
     isAnchor?: boolean
+    vipLevel?: number
 }
 
 export interface SetAnchorReq {

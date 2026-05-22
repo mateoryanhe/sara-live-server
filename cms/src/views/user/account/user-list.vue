@@ -74,6 +74,9 @@
           <el-table-column label="钻石" prop="diamond" width="120">
             <template #default="scope">{{ formatAmount(scope.row.diamond) }}</template>
           </el-table-column>
+          <el-table-column label="VIP等级" prop="vipLevel" width="100">
+            <template #default="scope">{{ formatVipLevel(scope.row.vipLevel) }}</template>
+          </el-table-column>
           <el-table-column label="主播" prop="isAnchor" width="90">
             <template #default="scope">
               <el-tag v-if="scope.row.isAnchor" type="success">是</el-tag>
@@ -533,6 +536,13 @@ const formatAmount = (val: number | null | undefined) => {
     return '-'
   }
   return n.toLocaleString('zh-CN', {maximumFractionDigits: 3})
+}
+
+const formatVipLevel = (val: number | null | undefined) => {
+  if (val === null || val === undefined || val <= 0) {
+    return '-'
+  }
+  return String(val)
 }
 
 // 格式化日期函数
