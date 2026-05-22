@@ -13,12 +13,6 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {title: '首页Banner'},
         },
         {
-            path: 'gift/gift-list',
-            name: 'GiftManagement',
-            component: () => import('@/views/operation/gift/gift-list.vue'),
-            meta: {title: '礼物列表'},
-        },
-        {
             path: 'guild/guild-list',
             name: 'GuildManagement',
             component: () => import('@/views/operation/guild/guild-list.vue'),

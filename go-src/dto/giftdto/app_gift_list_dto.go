@@ -16,6 +16,7 @@ type AppGiftItem struct {
 	Price       uint64 `json:"price"`
 	Category    string `json:"category"`
 	Sort        int    `json:"sort"`
+	PublishedAt int64  `json:"publishedAt" dc:"发布时间(秒,0表示未设置)"`
 	Description string `json:"description"`
 }
 

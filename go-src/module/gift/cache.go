@@ -76,6 +76,10 @@ func GetGiftFromCacheById(id uint64) *giftdto.AppGiftItem {
 }
 
 func toAppGiftItem(g *entity.LiveGift) *giftdto.AppGiftItem {
+	var publishedAt int64
+	if g.PublishedAt != nil {
+		publishedAt = g.PublishedAt.Unix()
+	}
 	return &giftdto.AppGiftItem{
 		ID:          strconv.FormatUint(g.ID, 10),
 		Name:        g.Name,
@@ -84,6 +88,7 @@ func toAppGiftItem(g *entity.LiveGift) *giftdto.AppGiftItem {
 		Price:       g.Price,
 		Category:    g.Category,
 		Sort:        g.Sort,
+		PublishedAt: publishedAt,
 		Description: g.Description,
 	}
 }

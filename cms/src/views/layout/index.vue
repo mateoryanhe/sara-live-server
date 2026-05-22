@@ -28,7 +28,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('GiftManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('RechargeCfgManagement')"
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('RechargeCfgManagement')"
             index="/operation">
           <template #title>
             <el-icon>
@@ -42,12 +42,6 @@
             </el-icon>
             <span>首页Banner</span>
           </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('GiftManagement')" index="/operation/gift/gift-list">
-            <el-icon>
-              <Present/>
-            </el-icon>
-            <span>礼物管理</span>
-          </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('GuildManagement')" index="/operation/guild/guild-list">
             <el-icon>
               <User/>
@@ -59,6 +53,22 @@
               <Wallet/>
             </el-icon>
             <span>充值配置</span>
+          </el-menu-item>
+        </el-sub-menu>
+        <el-sub-menu
+            v-if="hasMenuPermission('GiftManagement')"
+            index="/live">
+          <template #title>
+            <el-icon>
+              <VideoPlay/>
+            </el-icon>
+            <span>直播管理</span>
+          </template>
+          <el-menu-item v-if="hasMenuPermission('GiftManagement')" index="/live/gift/gift-list">
+            <el-icon>
+              <Present/>
+            </el-icon>
+            <span>礼物管理</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -161,7 +171,7 @@
 <script lang="ts" setup>
 import {computed, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {ArrowDown, Expand, Fold, Lock, Monitor, Picture, Present, Setting, Stamp, User, VideoCamera, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Expand, Fold, Lock, Monitor, Picture, Present, Setting, Stamp, User, VideoCamera, VideoPlay, Wallet} from '@element-plus/icons-vue'
 import {clearPermissions, getIsAdmin, hasPermission} from '@/utils/permission'
 
 const route = useRoute()

@@ -2,6 +2,8 @@ package giftdao
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"strconv"
@@ -62,12 +64,13 @@ func UpdateGiftStatus(id uint64, status uint8) error {
 	return err
 }
 
-// GetOnShelfGifts 获取所有已上架礼物(按 sort desc, created_at desc 排序)
+// GetOnShelfGifts 获取所有已上架且已到发布时间的礼物
 func GetOnShelfGifts() []*entity.LiveGift {
 	ret := make([]*entity.LiveGift, 0)
+	now := time.Now()
 	err := g.DB().Model(string(entity.TbLiveGift)).
-		Where("status = ?", entity.LiveGiftStatusOnShelf).
-		Order("sort desc, created_at desc").
+		Where("status = ? AND (published_at IS NULL OR published_at <= ?)", entity.LiveGiftStatusOnShelf, now).
+		Order("sort desc, published_at desc, created_at desc").
 		Scan(&ret)
 	if err != nil {
 		return nil
@@ -77,7 +80,7 @@ func GetOnShelfGifts() []*entity.LiveGift {
 
 // GetGiftList 分页获取礼物列表
 func GetGiftList(req *giftdto.GiftListReq) (int, []*giftdto.GiftListRes) {
-	sql := `select id, name, icon, animation, price, category, sort, status, description, created_at, updated_at
+	sql := `select id, name, icon, animation, price, category, sort, status, published_at, description, created_at, updated_at
             from live_gifts
             where 1=1 `
 	param := make([]any, 0)

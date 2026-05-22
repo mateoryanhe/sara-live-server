@@ -25,6 +25,7 @@ type GiftListRes struct {
 	Category      string `json:"category"`
 	Sort          int    `json:"sort"`
 	Status        uint8  `json:"status"`
+	PublishedAt   string `json:"publishedAt"`
 	Description   string `json:"description"`
 	CreatedAt     string `json:"createdAt"`
 	UpdatedAt     string `json:"updatedAt"`

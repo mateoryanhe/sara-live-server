@@ -163,6 +163,7 @@ export interface Gift {
     category: string
     sort: number
     status: number
+    publishedAt?: string | null
     description: string
     createdAt: string
     updatedAt: string
