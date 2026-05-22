@@ -30,6 +30,7 @@
 import {onMounted, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import router from '@/router'
+import {layoutRouteGroups} from '@/router/routes'
 import {useRoute} from 'vue-router'
 // 从role API模块导入Permission接口
 import {roleApi} from '@/api/modules/role'
@@ -59,14 +60,7 @@ const treeProps = {
 const generateModuleTreeFromRoutes = () => {
   const routeModules: ModuleNode[] = []
 
-  // 遍历路由配置，提取模块信息
-  router.options.routes.forEach(route => {
-    // 跳过登录页面等特殊路由
-    if (route.path === '/login' || route.path === '/') {
-      return
-    }
-
-    // 检查路由是否有meta信息和子路由
+  layoutRouteGroups.forEach(route => {
     if (route.children && route.meta) {
       const module: ModuleNode = {
         id: `module_${route.path.replace('/', '')}`,
@@ -74,7 +68,6 @@ const generateModuleTreeFromRoutes = () => {
         children: []
       }
 
-      // 遍历子路由，添加为模块的子节点
       route.children.forEach(child => {
         if (child.name && child.meta && !child.meta.hidden) {
           module.children?.push({
@@ -84,7 +77,6 @@ const generateModuleTreeFromRoutes = () => {
         }
       })
 
-      // 只有当模块有子节点时才添加
       if (module.children && module.children.length > 0) {
         routeModules.push(module)
       }

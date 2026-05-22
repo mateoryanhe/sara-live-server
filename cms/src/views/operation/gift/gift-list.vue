@@ -201,7 +201,7 @@ import {onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
 import {Document, Plus} from '@element-plus/icons-vue'
 import {giftApi, uploadApi} from '@/api'
-import type {Gift} from '@/types/api'
+import type {Gift} from '@/types/api.ts'
 
 interface SearchForm {
   name: string

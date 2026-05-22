@@ -148,7 +148,7 @@ import {onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
 import {Plus} from '@element-plus/icons-vue'
 import {bannerApi, uploadApi} from '@/api'
-import type {Banner} from '@/types/api'
+import type {Banner} from '@/types/api.ts'
 
 interface SearchForm {
   title: string

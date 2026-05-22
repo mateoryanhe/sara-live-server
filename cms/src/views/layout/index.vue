@@ -12,33 +12,43 @@
       >
         <!-- 移除仪表盘菜单项 -->
         <el-sub-menu
-            v-if="hasMenuPermission('UserList') || hasMenuPermission('GuildManagement')"
-            index="/account">
+            v-if="hasMenuPermission('UserList')"
+            index="/user/account">
           <template #title>
             <el-icon>
               <User/>
             </el-icon>
-            <span>运营管理</span>
+            <span>用户管理</span>
           </template>
-          <el-menu-item v-if="hasMenuPermission('UserList')" index="/account/user-list">
+          <el-menu-item v-if="hasMenuPermission('UserList')" index="/user/account/user-list">
             <el-icon>
               <User/>
             </el-icon>
             <span>用户列表</span>
           </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('BannerManagement')" index="/config/banner-list">
+        </el-sub-menu>
+        <el-sub-menu
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('GiftManagement') || hasMenuPermission('GuildManagement')"
+            index="/operation">
+          <template #title>
+            <el-icon>
+              <Stamp/>
+            </el-icon>
+            <span>运营管理</span>
+          </template>
+          <el-menu-item v-if="hasMenuPermission('BannerManagement')" index="/operation/banner/banner-list">
             <el-icon>
               <Picture/>
             </el-icon>
             <span>首页Banner</span>
           </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('GiftManagement')" index="/gift/gift-list">
+          <el-menu-item v-if="hasMenuPermission('GiftManagement')" index="/operation/gift/gift-list">
             <el-icon>
-              <User/>
+              <Present/>
             </el-icon>
             <span>礼物管理</span>
           </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('GuildManagement')" index="/guild/guild-list">
+          <el-menu-item v-if="hasMenuPermission('GuildManagement')" index="/operation/guild/guild-list">
             <el-icon>
               <User/>
             </el-icon>
@@ -46,7 +56,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('GlobalConfig') || hasMenuPermission('BannerManagement')"
+            v-if="hasMenuPermission('GlobalConfig')"
             index="/config">
           <template #title>
             <el-icon>
@@ -129,7 +139,7 @@
 <script lang="ts" setup>
 import {computed, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {ArrowDown, Expand, Fold, Lock, Monitor, Picture, Present, Setting, User} from '@element-plus/icons-vue'
+import {ArrowDown, Expand, Fold, Lock, Monitor, Picture, Present, Setting, Stamp, User} from '@element-plus/icons-vue'
 import {clearPermissions, getIsAdmin, hasPermission} from '@/utils/permission'
 
 const route = useRoute()

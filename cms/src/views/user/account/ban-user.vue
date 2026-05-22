@@ -49,7 +49,7 @@ import {onMounted, reactive, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {ElForm, ElMessage} from 'element-plus'
 import {accountApi} from '@/api'
-import type {BanReq} from '@/types/api'
+import type {BanReq} from '@/types/api.ts'
 
 const router = useRouter()
 const route = useRoute()
@@ -97,7 +97,7 @@ onMounted(() => {
     form.banApplyTime = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
   } else {
     // 如果没有传入用户数据，返回用户列表
-    router.push('/account/user-list')
+    router.push('/user/account/user-list')
   }
 })
 
@@ -118,7 +118,7 @@ const submitForm = async () => {
         if (response) {
           ElMessage.success('封号成功')
           // 封号成功后跳转回用户列表并强制刷新
-          router.push('/account/user-list?refresh=' + Date.now())
+          router.push('/user/account/user-list?refresh=' + Date.now())
         } else {
           ElMessage.error('封号失败')
         }
@@ -136,7 +136,7 @@ const submitForm = async () => {
 
 // 返回用户列表
 const goBack = () => {
-  router.push('/account/user-list')
+  router.push('/user/account/user-list')
 }
 </script>
 

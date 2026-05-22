@@ -199,7 +199,7 @@ import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {accountApi, diamondApi, goldApi} from '@/api'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {useRoute, useRouter} from 'vue-router'
-import type {CancelReq, UnBanReq, UnCancelReq, UserInfo} from '@/types/api'
+import type {CancelReq, UnBanReq, UnCancelReq, UserInfo} from '@/types/api.ts'
 
 // 用户列表数据
 const userList = ref<UserInfo[]>([])
@@ -449,7 +449,7 @@ const toggleBanStatus = async (row: UserInfo) => {
   } else {
     // 跳转到封号界面
     router.push({
-      path: '/account/ban-user',
+      path: '/user/account/ban-user',
       query: {
         id: row.id,
         openId: row.openId,

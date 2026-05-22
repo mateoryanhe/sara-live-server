@@ -93,7 +93,7 @@
 import {onMounted, reactive, ref} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {guildApi} from '@/api'
-import type {Guild} from '@/types/api'
+import type {Guild} from '@/types/api.ts'
 
 interface SearchForm {
   name: string

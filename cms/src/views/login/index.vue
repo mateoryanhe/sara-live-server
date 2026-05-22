@@ -103,7 +103,7 @@ const handleLogin = async () => {
 
             ElMessage.success('登录成功')
             // 登录成功后跳转到用户列表页面，而不是仪表盘
-            router.push('/account/user-list')
+            router.push('/user/account/user-list')
           })
           .catch(err => {
             console.error('Login error:', err)
