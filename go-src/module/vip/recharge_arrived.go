@@ -13,7 +13,7 @@ import (
 
 const rechargeCurrencyUSD = "USD"
 
-// Init 订阅充值到账事件,累计充值并判断VIP升级
+// Init 订阅充值到账事件,判断VIP升级
 func Init() {
 	event.Sub(gameevent.RechargeArrivedEvent, onRechargeArrived)
 }
@@ -29,9 +29,7 @@ func onRechargeArrived(val any) {
 	}
 
 	stat := userinfodao.GetUserCumulativeStatByUserId(data.UserId)
-	newTotalRecharge := stat.TotalRecharge
-
-	totalRechargeCents := toRechargeCents(newTotalRecharge)
+	totalRechargeCents := toRechargeCents(stat.TotalRecharge)
 	targetLevel := calcTargetVipLevel(totalRechargeCents)
 	if targetLevel == 0 {
 		return
@@ -51,6 +49,7 @@ func onRechargeArrived(val any) {
 	}
 
 	user.SetVipLevel(targetLevel)
+	pushVipLevelToApp(data.UserId, targetLevel)
 	g.Log().Infof(gctx.New(), "vip upgrade userId=%d level=%d totalRechargeCents=%d",
 		data.UserId, targetLevel, totalRechargeCents)
 }

@@ -9,15 +9,15 @@ import (
 	"xr-game-server/gameevent"
 )
 
-// 货币精度:统一以 1000 为缩放系数,float 仅用于存储,运算使用 int64 避免精度丢失
-const currencyScale = 1000
+// 货币精度:统一以 10000 为缩放系数,float 仅用于存储,运算使用 int64 避免精度丢失
+const currencyScale = 10000
 
-// scale 将 float 金额按 1000 缩放并四舍五入为 int64
+// scale 将 float 金额按 10000 缩放并四舍五入为 int64
 func scale(v float64) int64 {
 	return int64(math.Round(v * currencyScale))
 }
 
-// unscale 将缩放后的 int64 还原为 float(/1000),并四舍五入到 3 位小数
+// unscale 将缩放后的 int64 还原为 float(/10000),并四舍五入到 4 位小数
 func unscale(v int64) float64 {
 	return math.Round(float64(v)) / currencyScale
 }
@@ -48,6 +48,7 @@ func Add(userId uint64, amount float64, reason currency.Reason) (float64, error)
 		userId, gameevent.CurrencyTypeGold, gameevent.CurrencyActionAdd,
 		unscale(amountScaled), before, after, reason,
 	))
+	pushGoldToApp(userId, after)
 	return after, nil
 }
 
@@ -73,5 +74,6 @@ func Sub(userId uint64, amount float64, reason currency.Reason) (float64, error)
 		userId, gameevent.CurrencyTypeGold, gameevent.CurrencyActionSub,
 		unscale(amountScaled), before, after, reason,
 	))
+	pushGoldToApp(userId, after)
 	return after, nil
 }

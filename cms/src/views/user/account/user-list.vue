@@ -184,9 +184,9 @@
         <el-form-item :label="currencyAmountLabel" prop="amount">
           <el-input-number
               v-model="currencyForm.amount"
-              :min="0.001"
-              :precision="3"
-              :step="1"
+              :min="0.0001"
+              :precision="4"
+              :step="0.0001"
               controls-position="right"
               style="width: 100%"
           />
@@ -529,7 +529,7 @@ const toggleCancelStatus = async (row: UserInfo) => {
   }
 }
 
-// 格式化金额(金币/钻石)，保留3位小数并去掉多余的0
+// 格式化金额(金币/钻石)，保留4位小数
 const formatAmount = (val: number | null | undefined) => {
   if (val === null || val === undefined) {
     return '-'
@@ -538,7 +538,7 @@ const formatAmount = (val: number | null | undefined) => {
   if (Number.isNaN(n)) {
     return '-'
   }
-  return n.toLocaleString('zh-CN', {maximumFractionDigits: 3})
+  return n.toLocaleString('zh-CN', {maximumFractionDigits: 4})
 }
 
 const formatVipLevel = (val: number | null | undefined) => {

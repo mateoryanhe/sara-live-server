@@ -21,3 +21,9 @@ type AppVipDetailRes struct {
 	CurrentCfg          *vipcfgdto.AppVipCfgItem `json:"currentCfg" dc:"当前等级权益配置"`
 	NextCfg             *vipcfgdto.AppVipCfgItem `json:"nextCfg" dc:"下一等级权益配置"`
 }
+
+// VipLevelPushItem VIP等级变更推送载荷
+type VipLevelPushItem struct {
+	VipLevel  string `json:"vipLevel" dc:"最新VIP等级"`
+	LevelName string `json:"levelName" dc:"等级名称"`
+}

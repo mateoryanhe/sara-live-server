@@ -15,4 +15,10 @@ const (
 	LiveRoomGift = 8
 	//直播间文字消息推送(房间内全体在线用户)
 	LiveRoomChat = 9
+	//钻石余额推送(推送给指定用户)
+	DiamondPush = 10
+	//金币余额推送(推送给指定用户)
+	GoldPush = 11
+	//VIP等级推送(推送给指定用户)
+	VipLevelPush = 12
 )
