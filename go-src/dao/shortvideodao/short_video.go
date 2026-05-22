@@ -84,6 +84,19 @@ func UpdateStatus(id uint64, status uint8) error {
 	return err
 }
 
+// GetOnShelfShortVideos 获取全部已上架短视频(按点赞数降序,再按ID降序)
+func GetOnShelfShortVideos() []*entity.ShortVideo {
+	ret := make([]*entity.ShortVideo, 0)
+	err := g.DB().Model(string(entity.TbShortVideo)).
+		Where("status = ?", entity.ShortVideoStatusOnShelf).
+		Order("like_count desc, id desc").
+		Scan(&ret)
+	if err != nil {
+		return nil
+	}
+	return ret
+}
+
 func GetShortVideoList(req *shortvideodto.ShortVideoListReq) (int, []*shortvideodto.ShortVideoListRes) {
 	sql := `select id, title, video, cover, sort, status, description, like_count, created_at, updated_at
             from short_videos
