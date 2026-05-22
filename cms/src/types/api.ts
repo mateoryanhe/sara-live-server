@@ -174,6 +174,34 @@ export interface GiftQuery extends PageQuery {
     statusFilter?: number
 }
 
+// 充值配置
+export interface RechargeCfg {
+    id: string
+    name: string
+    cfgType: number
+    icon: string
+    iconName: string
+    /** 基础到账金币数(接口字段仍为 diamond) */
+    diamond: number
+    /** 额外赠送金币数(接口字段仍为 extraDiamond) */
+    extraDiamond: number
+    price: number
+    /** 固定 USD，仅列表展示用 */
+    currency?: string
+    productId: string
+    sort: number
+    status: number
+    description: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface RechargeCfgQuery extends PageQuery {
+    name?: string
+    typeFilter?: number
+    statusFilter?: number
+}
+
 // 首页 Banner
 export interface Banner {
     id: string

@@ -7,6 +7,7 @@ import {guildApi} from './modules/guild'
 import {giftApi} from './modules/gift'
 import {bannerApi} from './modules/banner'
 import {shortVideoApi} from './modules/shortVideo'
+import {rechargeCfgApi} from './modules/rechargeCfg'
 import {uploadApi} from './modules/upload'
 import {goldApi} from './modules/gold'
 import {diamondApi} from './modules/diamond'
@@ -21,6 +22,7 @@ export {
     giftApi,
     bannerApi,
     shortVideoApi,
+    rechargeCfgApi,
     uploadApi,
     goldApi,
     diamondApi,
@@ -36,6 +38,7 @@ export default {
     giftApi,
     bannerApi,
     shortVideoApi,
+    rechargeCfgApi,
     uploadApi,
     goldApi,
     diamondApi,

@@ -20,11 +20,16 @@ func GetById(id uint64) *entity.RechargeCfg {
 	return &cfg
 }
 
-// GetByName 按名称获取(用于唯一性校验)
-func GetByName(name string) *entity.RechargeCfg {
+// GetByNameAndType 按名称+类型获取(用于唯一性校验)
+func GetByNameAndType(name string, cfgType uint8) *entity.RechargeCfg {
 	var cfg entity.RechargeCfg
-	err := g.DB().Model(string(entity.TbRechargeCfg)).Where("name = ?", name).Scan(&cfg)
+	err := g.DB().Model(string(entity.TbRechargeCfg)).
+		Where("name = ? AND cfg_type = ?", name, cfgType).
+		Scan(&cfg)
 	if err != nil {
+		return nil
+	}
+	if cfg.ID == 0 {
 		return nil
 	}
 	return &cfg
@@ -72,7 +77,7 @@ func GetOnShelf() []*entity.RechargeCfg {
 
 // GetList CMS 分页查询(支持名称模糊、上下架过滤)
 func GetList(req *rechargecfgdto.RechargeCfgListReq) (int, []*rechargecfgdto.RechargeCfgListRes) {
-	sql := `select id, name, icon, diamond, extra_diamond, price, currency, product_id,
+	sql := `select id, name, cfg_type, icon, diamond, extra_diamond, price, currency, product_id,
                    sort, status, description, created_at, updated_at
             from recharge_cfgs
             where 1=1 `
@@ -83,6 +88,11 @@ func GetList(req *rechargecfgdto.RechargeCfgListReq) (int, []*rechargecfgdto.Rec
 	if req.Name != "" {
 		sql += ` and name LIKE ?`
 		param = append(param, fmt.Sprintf("%%%s%%", req.Name))
+	}
+	switch req.TypeFilter {
+	case 1, 2, 3:
+		sql += ` and cfg_type = ?`
+		param = append(param, req.TypeFilter)
 	}
 	switch req.StatusFilter {
 	case 1: // 只看下架

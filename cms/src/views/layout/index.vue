@@ -28,7 +28,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('GiftManagement') || hasMenuPermission('GuildManagement')"
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('GiftManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('RechargeCfgManagement')"
             index="/operation">
           <template #title>
             <el-icon>
@@ -53,6 +53,12 @@
               <User/>
             </el-icon>
             <span>工会管理</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('RechargeCfgManagement')" index="/operation/recharge/recharge-cfg-list">
+            <el-icon>
+              <Wallet/>
+            </el-icon>
+            <span>充值配置</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -155,7 +161,7 @@
 <script lang="ts" setup>
 import {computed, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {ArrowDown, Expand, Fold, Lock, Monitor, Picture, Present, Setting, Stamp, User, VideoCamera} from '@element-plus/icons-vue'
+import {ArrowDown, Expand, Fold, Lock, Monitor, Picture, Present, Setting, Stamp, User, VideoCamera, Wallet} from '@element-plus/icons-vue'
 import {clearPermissions, getIsAdmin, hasPermission} from '@/utils/permission'
 
 const route = useRoute()

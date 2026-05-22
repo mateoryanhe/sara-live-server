@@ -15,7 +15,7 @@ import (
 )
 
 // defaultCurrency 默认结算货币
-const defaultCurrency = "CNY"
+const defaultCurrency = "USD"
 
 // toItem 将 entity 转换为对外 DTO
 func toItem(o *entity.RechargeOrder) *rechargeorderdto.RechargeOrderItem {

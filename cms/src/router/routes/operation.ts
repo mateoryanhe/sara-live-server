@@ -24,5 +24,11 @@ export const operationRoutes: RouteRecordRaw = {
             component: () => import('@/views/operation/guild/guild-list.vue'),
             meta: {title: '工会管理'},
         },
+        {
+            path: 'recharge/recharge-cfg-list',
+            name: 'RechargeCfgManagement',
+            component: () => import('@/views/operation/recharge/recharge-cfg-list.vue'),
+            meta: {title: '充值配置'},
+        },
     ],
 }

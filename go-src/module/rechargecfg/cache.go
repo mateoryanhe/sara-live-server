@@ -27,6 +27,7 @@ func toAppItem(r *entity.RechargeCfg) *rechargecfgdto.AppRechargeCfgItem {
 	return &rechargecfgdto.AppRechargeCfgItem{
 		ID:           strconv.FormatUint(r.ID, 10),
 		Name:         r.Name,
+		CfgType:      r.CfgType,
 		Icon:         r.Icon,
 		Diamond:      r.Diamond,
 		ExtraDiamond: r.ExtraDiamond,

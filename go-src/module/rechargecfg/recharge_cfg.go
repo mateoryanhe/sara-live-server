@@ -8,6 +8,7 @@ import (
 	"xr-game-server/dto/rechargecfgdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
+	"xr-game-server/module/upload"
 )
 
 // ===== CMS =====
@@ -15,25 +16,26 @@ import (
 // GetList CMS分页查询(全部状态)
 func GetList(_ context.Context, req *rechargecfgdto.RechargeCfgListReq) (*httpserver.CMSQueryResp, error) {
 	total, list := rechargecfgdao.GetList(req)
+	for _, row := range list {
+		row.IconName = row.Icon
+		row.Icon = upload.GetUrlByName(row.IconName)
+	}
 	return &httpserver.CMSQueryResp{Total: total, Data: list}, nil
 }
 
 // Create 创建充值配置(默认下架,需手动上架)
 func Create(_ context.Context, req *rechargecfgdto.CreateRechargeCfgReq) (*rechargecfgdto.CreateRechargeCfgRes, error) {
-	if existing := rechargecfgdao.GetByName(req.Name); existing != nil {
+	if existing := rechargecfgdao.GetByNameAndType(req.Name, req.CfgType); existing != nil {
 		return nil, errercode.CreateCode(errercode.RechargeCfgExist)
-	}
-	currency := req.Currency
-	if currency == "" {
-		currency = "CNY"
 	}
 	cfg := &entity.RechargeCfg{
 		Name:         req.Name,
+		CfgType:      req.CfgType,
 		Icon:         req.Icon,
 		Diamond:      req.Diamond,
 		ExtraDiamond: req.ExtraDiamond,
 		Price:        req.Price,
-		Currency:     currency,
+		Currency:     entity.RechargeCfgCurrencyUSD,
 		ProductId:    req.ProductId,
 		Sort:         req.Sort,
 		Status:       entity.RechargeCfgStatusOffShelf,
@@ -52,18 +54,17 @@ func Update(_ context.Context, req *rechargecfgdto.UpdateRechargeCfgReq) (*recha
 	if cfg == nil {
 		return nil, errercode.CreateCode(errercode.RechargeCfgNonExist)
 	}
-	if existing := rechargecfgdao.GetByName(req.Name); existing != nil && existing.ID != req.ID {
+	if existing := rechargecfgdao.GetByNameAndType(req.Name, req.CfgType); existing != nil && existing.ID != req.ID {
 		return nil, errercode.CreateCode(errercode.RechargeCfgExist)
 	}
 
 	cfg.Name = req.Name
+	cfg.CfgType = req.CfgType
 	cfg.Icon = req.Icon
 	cfg.Diamond = req.Diamond
 	cfg.ExtraDiamond = req.ExtraDiamond
 	cfg.Price = req.Price
-	if req.Currency != "" {
-		cfg.Currency = req.Currency
-	}
+	cfg.Currency = entity.RechargeCfgCurrencyUSD
 	cfg.ProductId = req.ProductId
 	cfg.Sort = req.Sort
 	cfg.Description = req.Description
@@ -121,6 +122,13 @@ func OffShelf(_ context.Context, req *rechargecfgdto.OffShelfRechargeCfgReq) (*r
 
 // GetAppList App端查询(仅返回已上架,走内存缓存)
 // 缓存在服务启动时加载,CMS 端创建/修改/删除/上下架时重新从 DB 加载。
-func GetAppList(_ context.Context, _ *rechargecfgdto.AppRechargeCfgListReq) (*rechargecfgdto.AppRechargeCfgListRes, error) {
-	return &rechargecfgdto.AppRechargeCfgListRes{List: getRechargeCfgCache()}, nil
+func GetAppList(_ context.Context, req *rechargecfgdto.AppRechargeCfgListReq) (*rechargecfgdto.AppRechargeCfgListRes, error) {
+	all := getRechargeCfgCache()
+	list := make([]*rechargecfgdto.AppRechargeCfgItem, 0)
+	for _, item := range all {
+		if item.CfgType == req.CfgType {
+			list = append(list, item)
+		}
+	}
+	return &rechargecfgdto.AppRechargeCfgListRes{List: list}, nil
 }
