@@ -40,3 +40,7 @@ func (s *AuthController) PhoneRegister(ctx context.Context, req *authdto.PhoneRe
 func (s *AuthController) PhoneLogin(ctx context.Context, req *authdto.PhoneLoginReq) (*authdto.PhoneLoginRes, error) {
 	return auth.PhoneLogin(ctx, req)
 }
+
+func (s *AuthController) PhoneResetPassword(ctx context.Context, req *authdto.PhoneResetPasswordReq) (*authdto.PhoneResetPasswordRes, error) {
+	return auth.PhoneResetPassword(ctx, req)
+}
