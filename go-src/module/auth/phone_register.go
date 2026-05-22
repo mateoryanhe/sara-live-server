@@ -47,6 +47,18 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 	// 初始化用户信息
 	data := userinfodao.GetUserInfoByUserId(account.ID)
 	data.SetPhone(req.Phone)
+	if req.InviteCode != "" {
+		inviterId := userinfodao.GetUserIdByShareCode(req.InviteCode)
+		if inviterId == 0 {
+			return nil, errercode.CreateCode(errercode.InvalidParam)
+		}
+		if inviterId == account.ID {
+			return nil, errercode.CreateCode(errercode.InvalidParam)
+		}
+		if data.InviterId == 0 {
+			data.SetInviterId(inviterId)
+		}
+	}
 	res = &authdto.PhoneRegisterRes{
 		Token:  tokenStr,
 		AuthId: strconv.FormatUint(account.ID, 10),
