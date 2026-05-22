@@ -5,12 +5,14 @@ import (
 	"strconv"
 	"time"
 	"xr-game-server/constants/currency"
+	"xr-game-server/core/event"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/rechargecfgdao"
 	"xr-game-server/dao/rechargeorderdao"
 	"xr-game-server/dto/rechargeorderdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
+	"xr-game-server/gameevent"
 	"xr-game-server/module/gold"
 )
 
@@ -54,9 +56,16 @@ func completeOrder(o *entity.RechargeOrder, reason currency.Reason) (float64, er
 	if err != nil {
 		return 0, err
 	}
+	paidAt := time.Now()
 	o.SetStatus(entity.RechargeOrderStatusCompleted)
-	o.SetPaidAt(time.Now())
-	o.SetUpdatedAt(time.Now())
+	o.SetPaidAt(paidAt)
+	o.SetUpdatedAt(paidAt)
+	event.Pub(gameevent.RechargeArrivedEvent, gameevent.NewRechargeArrivedEventData(
+		o.ID, o.UserId, o.CfgId, o.Price,
+		o.Currency, o.Gold, o.Source,
+		o.PayChannel, o.ThirdOrderId,
+		after, paidAt,
+	))
 	return after, nil
 }
 

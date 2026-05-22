@@ -13,7 +13,6 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     ElAside: typeof import('element-plus/es')['ElAside']
-    ElAutocomplete: typeof import('element-plus/es')['ElAutocomplete']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
     ElContainer: typeof import('element-plus/es')['ElContainer']
@@ -64,7 +63,6 @@ declare module 'vue' {
 // For TSX support
 declare global {
   const ElAside: typeof import('element-plus/es')['ElAside']
-  const ElAutocomplete: typeof import('element-plus/es')['ElAutocomplete']
   const ElButton: typeof import('element-plus/es')['ElButton']
   const ElCard: typeof import('element-plus/es')['ElCard']
   const ElContainer: typeof import('element-plus/es')['ElContainer']
