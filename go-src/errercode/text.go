@@ -53,6 +53,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ShortVideoExist:           "Short video title already exists",
 		ShortVideoNonExist:        "Short video does not exist",
 		ShortVideoAlreadyLiked:    "Short video already liked",
+		VipCfgExist:               "VIP level already exists",
+		VipCfgNonExist:            "VIP config does not exist",
 	},
 	lang.LangZHCN: {
 		Success:                   "成功",
@@ -102,6 +104,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ShortVideoExist:           "短视频标题已存在",
 		ShortVideoNonExist:        "短视频不存在",
 		ShortVideoAlreadyLiked:    "已点赞,请勿重复操作",
+		VipCfgExist:               "VIP等级已存在",
+		VipCfgNonExist:            "VIP配置不存在",
 	},
 	lang.LangZHTW: {
 		Success:                   "成功",
@@ -151,6 +155,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ShortVideoExist:           "短視頻標題已存在",
 		ShortVideoNonExist:        "短視頻不存在",
 		ShortVideoAlreadyLiked:    "已點讚,請勿重複操作",
+		VipCfgExist:               "VIP等級已存在",
+		VipCfgNonExist:            "VIP配置不存在",
 	},
 }
 

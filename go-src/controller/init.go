@@ -30,6 +30,8 @@ func Init() {
 	initRechargeCfgAppController()   // 充值配置查询(App)
 	initRechargeOrderController()    // 充值订单(CMS:查询/手动充值)
 	initRechargeOrderAppController() // 充值订单(App:发起/查询)
+	initVipCfgController()           // VIP配置(CMS)
+	initVipCfgAppController()        // VIP配置查询(App)
 	initUploadController()           // CMS文件上传
 	httpserver.InitWebsocket()
 	go httpserver.InitHttpServer()

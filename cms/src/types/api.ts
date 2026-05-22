@@ -203,6 +203,25 @@ export interface RechargeCfgQuery extends PageQuery {
     statusFilter?: number
 }
 
+// VIP配置
+export interface VipCfg {
+    id: string
+    level: number
+    levelName: string
+    status: number
+    upgradeRechargeLimit: number
+    minWithdrawAmount: number
+    maxWithdrawAmount: number
+    fee: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface VipCfgQuery extends PageQuery {
+    levelName?: string
+    statusFilter?: number
+}
+
 // 首页 Banner
 export interface Banner {
     id: string

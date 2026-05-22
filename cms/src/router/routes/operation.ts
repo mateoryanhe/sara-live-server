@@ -24,5 +24,11 @@ export const operationRoutes: RouteRecordRaw = {
             component: () => import('@/views/operation/recharge/recharge-cfg-list.vue'),
             meta: {title: '充值配置'},
         },
+        {
+            path: 'vip/vip-cfg-list',
+            name: 'VipCfgManagement',
+            component: () => import('@/views/operation/vip/vip-cfg-list.vue'),
+            meta: {title: 'VIP配置'},
+        },
     ],
 }

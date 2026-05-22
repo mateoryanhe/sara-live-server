@@ -21,4 +21,5 @@ func Init() {
 	initLiveFollow()
 	initRechargeCfg()
 	initRechargeOrder()
+	initVipCfg()
 }

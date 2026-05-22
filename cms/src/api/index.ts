@@ -8,6 +8,7 @@ import {giftApi} from './modules/gift'
 import {bannerApi} from './modules/banner'
 import {shortVideoApi} from './modules/shortVideo'
 import {rechargeCfgApi} from './modules/rechargeCfg'
+import {vipCfgApi} from './modules/vipCfg'
 import {uploadApi} from './modules/upload'
 import {goldApi} from './modules/gold'
 import {diamondApi} from './modules/diamond'
@@ -23,6 +24,7 @@ export {
     bannerApi,
     shortVideoApi,
     rechargeCfgApi,
+    vipCfgApi,
     uploadApi,
     goldApi,
     diamondApi,
@@ -39,6 +41,7 @@ export default {
     bannerApi,
     shortVideoApi,
     rechargeCfgApi,
+    vipCfgApi,
     uploadApi,
     goldApi,
     diamondApi,

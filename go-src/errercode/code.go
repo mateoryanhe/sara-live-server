@@ -84,6 +84,10 @@ const (
 	ShortVideoNonExist XRCode = 100
 	// ShortVideoAlreadyLiked 短视频已点赞
 	ShortVideoAlreadyLiked XRCode = 101
+	// VipCfgExist VIP等级已存在
+	VipCfgExist XRCode = 102
+	// VipCfgNonExist VIP配置不存在
+	VipCfgNonExist XRCode = 103
 )
 
 type XError struct {
