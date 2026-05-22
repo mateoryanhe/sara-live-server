@@ -29,11 +29,15 @@ func CreateBanner(_ context.Context, req *bannerdto.CreateBannerReq) (*bannerdto
 		return nil, errercode.CreateCode(errercode.BannerExist)
 	}
 	row := &entity.HomeBanner{
-		Title:  req.Title,
-		Image:  req.Image,
-		Link:   req.Link,
-		Sort:   req.Sort,
-		Status: entity.HomeBannerStatusOffShelf,
+		Title:     req.Title,
+		Image:     req.Image,
+		Link:      req.Link,
+		Direction: req.Direction,
+		Sort:      req.Sort,
+		Status:    entity.HomeBannerStatusOffShelf,
+	}
+	if row.Direction == 0 {
+		row.Direction = entity.HomeBannerPositionHomeTop
 	}
 	if err := bannerdao.Create(row); err != nil {
 		return nil, err
@@ -53,6 +57,7 @@ func UpdateBanner(_ context.Context, req *bannerdto.UpdateBannerReq) (*bannerdto
 	row.Title = req.Title
 	row.Image = req.Image
 	row.Link = req.Link
+	row.Direction = req.Direction
 	row.Sort = req.Sort
 	if err := bannerdao.Update(row); err != nil {
 		return nil, err

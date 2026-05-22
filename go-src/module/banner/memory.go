@@ -81,10 +81,11 @@ func GetBannerFromMemoryById(id uint64) *entity.HomeBanner {
 
 func toAppBannerItem(b *entity.HomeBanner) *bannerdto.AppBannerItem {
 	return &bannerdto.AppBannerItem{
-		ID:    strconv.FormatUint(b.ID, 10),
-		Title: b.Title,
-		Image: upload.GetUrlByName(b.Image),
-		Link:  b.Link,
-		Sort:  b.Sort,
+		ID:        strconv.FormatUint(b.ID, 10),
+		Title:     b.Title,
+		Image:     upload.GetUrlByName(b.Image),
+		Link:      b.Link,
+		Direction: b.Direction,
+		Sort:      b.Sort,
 	}
 }

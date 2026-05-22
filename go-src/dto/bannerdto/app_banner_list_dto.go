@@ -7,11 +7,12 @@ type AppBannerListReq struct {
 }
 
 type AppBannerItem struct {
-	ID    string `json:"id"`
-	Title string `json:"title"`
-	Image string `json:"image"`
-	Link  string `json:"link"`
-	Sort  int    `json:"sort"`
+	ID        string `json:"id"`
+	Title     string `json:"title"`
+	Image     string `json:"image"`
+	Link      string `json:"link"`
+	Direction uint8  `json:"direction"`
+	Sort      int    `json:"sort"`
 }
 
 type AppBannerListRes struct {

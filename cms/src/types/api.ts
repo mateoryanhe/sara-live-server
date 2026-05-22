@@ -181,6 +181,7 @@ export interface Banner {
     image: string
     imageName: string
     link: string
+    direction: number
     sort: number
     status: number
     createdAt: string

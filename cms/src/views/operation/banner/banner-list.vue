@@ -45,6 +45,11 @@
             </template>
           </el-table-column>
           <el-table-column label="跳转链接" prop="link" min-width="200" show-overflow-tooltip/>
+          <el-table-column label="展示位置" width="110">
+            <template #default="{ row }">
+              {{ directionLabel(row.direction) }}
+            </template>
+          </el-table-column>
           <el-table-column label="排序" prop="sort" width="80"/>
           <el-table-column label="状态" width="90">
             <template #default="{ row }">
@@ -131,6 +136,16 @@
         <el-form-item label="跳转链接" prop="link">
           <el-input v-model="currentRow.link" placeholder="请输入跳转链接"/>
         </el-form-item>
+        <el-form-item label="展示位置" prop="direction">
+          <el-select v-model="currentRow.direction" placeholder="请选择展示位置" style="width: 100%">
+            <el-option
+                v-for="item in directionOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item label="排序" prop="sort">
           <el-input-number v-model="currentRow.sort" controls-position="right"/>
         </el-form-item>
@@ -160,7 +175,19 @@ interface BannerForm {
   title: string
   image: string
   link: string
+  direction: number
   sort: number
+}
+
+const directionOptions = [
+  {value: 1, label: '首页顶部'},
+  {value: 2, label: '首页中部'},
+  {value: 3, label: '首页底部'},
+  {value: 4, label: '直播大厅'}
+]
+
+const directionLabel = (direction: number) => {
+  return directionOptions.find((item) => item.value === direction)?.label ?? '未知'
 }
 
 const loading = ref(false)
@@ -181,6 +208,7 @@ const defaultForm = (): BannerForm => ({
   title: '',
   image: '',
   link: '',
+  direction: 1,
   sort: 0
 })
 const currentRow = ref<BannerForm>(defaultForm())
@@ -252,7 +280,8 @@ const formRules: FormRules = {
     {min: 1, max: 64, message: '标题长度在1-64个字符', trigger: 'blur'}
   ],
   image: [{required: true, message: '请上传图片', trigger: 'change'}],
-  link: [{max: 512, message: '跳转链接最长512字符', trigger: 'blur'}]
+  link: [{max: 512, message: '跳转链接最长512字符', trigger: 'blur'}],
+  direction: [{required: true, message: '请选择展示位置', trigger: 'change'}]
 }
 
 const fetchBannerList = async () => {
@@ -303,6 +332,7 @@ const handleEdit = (row: Banner) => {
     title: row.title,
     image: row.imageName || '',
     link: row.link,
+    direction: Number(row.direction) || 1,
     sort: Number(row.sort) || 0
   }
   setImagePreview(row.image || '')
@@ -358,8 +388,8 @@ const handleSave = async () => {
       if (currentRow.value.id) {
         await bannerApi.updateBanner(currentRow.value)
       } else {
-        const {title, image, link, sort} = currentRow.value
-        await bannerApi.createBanner({title, image, link, sort})
+        const {title, image, link, direction, sort} = currentRow.value
+        await bannerApi.createBanner({title, image, link, direction, sort})
       }
       ElMessage.success(currentRow.value.id ? '更新成功' : '创建成功')
       dialogVisible.value = false

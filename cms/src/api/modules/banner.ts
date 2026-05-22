@@ -10,6 +10,7 @@ export const bannerApi = {
         title: string
         image: string
         link: string
+        direction: number
         sort: number
     }) => {
         return request.post<{ id: string }>('/banner/createBanner', data)
@@ -20,6 +21,7 @@ export const bannerApi = {
         title: string
         image: string
         link: string
+        direction: number
         sort: number
     }) => {
         return request.post<boolean>('/banner/updateBanner', data)

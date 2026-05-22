@@ -18,6 +18,7 @@ type BannerListRes struct {
 	Image     string `json:"image" dc:"图片完整URL(列表展示)"`
 	ImageName string `json:"imageName" dc:"图片资源文件名(编辑保存用)"`
 	Link      string `json:"link"`
+	Direction uint8  `json:"direction"`
 	Sort      int    `json:"sort"`
 	Status    uint8  `json:"status"`
 	CreatedAt string `json:"createdAt"`
