@@ -40,6 +40,10 @@ func DiamondSub(userId uint64, amount float64, reason currency.Reason) (float64,
 	before := data.Diamond
 	data.SubDiamond(amount)
 	after := data.Diamond
+	//统计钻石消耗
+	stat := userinfodao.GetUserCumulativeStatByUserId(userId)
+	stat.AddTotalDiamondConsume(amount)
+
 	event.Pub(gameevent.CurrencyChangeEvent, gameevent.NewCurrencyChangeEventData(
 		userId, gameevent.CurrencyTypeDiamond, gameevent.CurrencyActionSub,
 		amount, before, after, reason,
@@ -78,6 +82,9 @@ func GoldSub(userId uint64, amount float64, reason currency.Reason) (float64, er
 	before := data.Gold
 	data.SubGold(amount)
 	after := data.Gold
+	//统计金币消耗
+	stat := userinfodao.GetUserCumulativeStatByUserId(userId)
+	stat.AddTotalGoldConsume(amount)
 	event.Pub(gameevent.CurrencyChangeEvent, gameevent.NewCurrencyChangeEventData(
 		userId, gameevent.CurrencyTypeGold, gameevent.CurrencyActionSub,
 		amount, before, after, reason,

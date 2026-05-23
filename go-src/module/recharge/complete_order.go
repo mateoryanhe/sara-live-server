@@ -32,10 +32,8 @@ func completeOrder(o *entity.RechargeOrder, reason currency.Reason) (float64, er
 	o.SetUpdatedAt(paidAt)
 
 	stat := userinfodao.GetUserCumulativeStatByUserId(o.UserId)
-	newTotalRecharge := stat.TotalRecharge + o.Price
-	if !stat.AddTotalRecharge(newTotalRecharge) {
-		return 0, errercode.CreateCode(errercode.InvalidParam)
-	}
+	stat.AddTotalRecharge(o.Price)
+	stat.AddTotalPayCount(1)
 
 	event.Pub(gameevent.RechargeArrivedEvent, gameevent.NewRechargeArrivedEventData(
 		o.ID, o.UserId, o.CfgId, o.Price,

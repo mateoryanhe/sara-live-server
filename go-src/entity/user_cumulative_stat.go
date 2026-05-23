@@ -84,16 +84,16 @@ func (receiver *UserCumulativeStat) AddTotalFollow(val uint64) bool {
 }
 
 func (receiver *UserCumulativeStat) AddTotalPayCount(val uint64) bool {
-	receiver.TotalPayCount = val
+	receiver.TotalPayCount = math.Add(receiver.TotalPayCount, val)
 	receiver.SetUpdatedAt(time.Now())
 	syndb.AddDataToLazyChan(TbUserCumulativeStat, UserCumulativeStatTotalPayCount, &syndb.ColData{
 		IdVal:  receiver.ID,
-		ColVal: val,
+		ColVal: receiver.TotalPayCount,
 	})
 	return true
 }
 
-func (receiver *UserCumulativeStat) SetTotalDiamondConsume(val float64) bool {
+func (receiver *UserCumulativeStat) AddTotalDiamondConsume(val float64) bool {
 
 	receiver.TotalDiamondConsume = math.AddFloat64(val, receiver.TotalDiamondConsume)
 	receiver.SetUpdatedAt(time.Now())
@@ -104,7 +104,7 @@ func (receiver *UserCumulativeStat) SetTotalDiamondConsume(val float64) bool {
 	return true
 }
 
-func (receiver *UserCumulativeStat) SetTotalGoldConsume(val float64) bool {
+func (receiver *UserCumulativeStat) AddTotalGoldConsume(val float64) bool {
 	receiver.TotalGoldConsume = math.AddFloat64(val, receiver.TotalGoldConsume)
 	receiver.SetUpdatedAt(time.Now())
 	syndb.AddDataToLazyChan(TbUserCumulativeStat, UserCumulativeStatTotalGoldConsume, &syndb.ColData{
