@@ -9,17 +9,21 @@ import (
 	"xr-game-server/dao/rechargeorderdao"
 	"xr-game-server/dto/rechargeorderdto"
 	"xr-game-server/entity"
+	"xr-game-server/errercode"
 )
 
-// ManualRecharge 后台手动给玩家充值到账(创建已完成订单 + 立即发放金币)
-// 支持两种方式:
-//  1. CfgId>0: 从配置取 Price/Gold/Currency(配置必须存在,允许下架状态以便补单)
-//  2. CfgId=0: 使用入参 Price 与 Gold(均必须>0)
+// ManualRecharge 后台手动给玩家充值到账(完成待支付订单并发放金币)
 func ManualRecharge(ctx context.Context, req *rechargeorderdto.CMSManualRechargeReq) (*rechargeorderdto.CMSManualRechargeRes, error) {
+	orderId, err := strconv.ParseUint(req.OrderId, 10, 64)
+	if err != nil || orderId == 0 {
+		return nil, errercode.CreateCode(errercode.RechargeOrderNonExist)
+	}
+	order := rechargeorderdao.GetById(orderId)
+	if order == nil {
+		return nil, errercode.CreateCode(errercode.RechargeOrderNonExist)
+	}
+
 	operatorId := httpserver.GetAuthId(ctx)
-
-	order := rechargeorderdao.GetById(req.OrderId)
-
 	order.SetOperatorId(operatorId)
 
 	after, err := completeOrder(order, currency.ReasonGmAdjust)

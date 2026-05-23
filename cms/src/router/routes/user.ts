@@ -18,5 +18,11 @@ export const userRoutes: RouteRecordRaw = {
             component: () => import('@/views/user/account/ban-user.vue'),
             meta: {title: '封禁用户', hidden: true},
         },
+        {
+            path: 'recharge-order/recharge-order-list',
+            name: 'RechargeOrderList',
+            component: () => import('@/views/user/recharge-order/recharge-order-list.vue'),
+            meta: {title: '充值订单'},
+        },
     ],
 }

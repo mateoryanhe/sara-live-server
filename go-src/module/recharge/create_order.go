@@ -43,6 +43,7 @@ func CreateOrder(ctx context.Context, req *rechargeorderdto.AppCreateRechargeOrd
 		//自定义金额
 		order = entity.NewRechargeOrder(userId, 0, req.Amount, defaultCurrency, 0, entity.RechargeOrderSourceApp)
 		order.SetPayChannel(req.PayChannel)
+		order.SetGold(req.Amount * 100)
 	}
 
 	rechargeorderdao.AddOrderToCache(order)

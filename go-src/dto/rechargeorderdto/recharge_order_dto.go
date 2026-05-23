@@ -31,12 +31,31 @@ type RechargeOrderItem struct {
 type CMSRechargeOrderListReq struct {
 	g.Meta `path:"/rechargeOrderList" method:"post" summary:"分页查询充值订单" tags:"充值订单"`
 	httpserver.CMSQueryReq
-	UserId       uint64 `json:"userId"       dc:"按用户ID过滤(0=全部)"`
-	OrderId      uint64 `json:"orderId"      dc:"按订单ID精确查询(0=不过滤)"`
+	UserId       string `json:"userId"       dc:"按用户ID过滤(空=全部)"`
+	OrderId      string `json:"orderId"      dc:"按订单ID精确查询(空=不过滤)"`
 	StatusFilter int    `json:"statusFilter" dc:"状态过滤(0=全部,1=待支付,2=已完成,3=已取消)"`
 	Source       int    `json:"source"       dc:"来源过滤(0=全部,1=App,2=后台手动)"`
 	StartTime    int64  `json:"startTime"    dc:"创建时间起(秒, 0=不过滤)"`
 	EndTime      int64  `json:"endTime"      dc:"创建时间止(秒, 0=不过滤)"`
+}
+
+// CMSRechargeOrderListItem CMS充值订单列表项
+type CMSRechargeOrderListItem struct {
+	ID           string  `json:"id"`
+	UserId       string  `json:"userId"`
+	Nickname     string  `json:"nickname"`
+	CfgId        string  `json:"cfgId"`
+	Price        float64 `json:"price"`
+	Currency     string  `json:"currency"`
+	Gold         float64 `json:"gold"`
+	Status       uint8   `json:"status"`
+	Source       uint8   `json:"source"`
+	PayChannel   uint8   `json:"payChannel"`
+	ThirdOrderId string  `json:"thirdOrderId"`
+	Remark       string  `json:"remark"`
+	OperatorId   string  `json:"operatorId"`
+	CreatedAt    int64   `json:"createdAt"`
+	PaidAt       int64   `json:"paidAt"`
 }
 
 // CMSManualRechargeReq 后台手动给玩家充值到账
@@ -45,7 +64,7 @@ type CMSRechargeOrderListReq struct {
 //  2. 手动输入(CfgId=0): 必须提供 Price 与 Gold,Currency 可选(默认 CNY)
 type CMSManualRechargeReq struct {
 	g.Meta  `path:"/manualRecharge" method:"post" summary:"后台手动给玩家充值到账" tags:"充值订单"`
-	OrderId uint64 `json:"orderId"   v:"required|min:1#订单ID不能为空|订单ID非法" dc:"订单ID"`
+	OrderId string `json:"orderId" v:"required#订单ID不能为空" dc:"订单ID"`
 }
 
 type CMSManualRechargeRes struct {

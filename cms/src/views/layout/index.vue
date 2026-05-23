@@ -12,7 +12,7 @@
       >
         <!-- 移除仪表盘菜单项 -->
         <el-sub-menu
-            v-if="hasMenuPermission('UserList')"
+            v-if="hasMenuPermission('UserList') || hasMenuPermission('RechargeOrderList')"
             index="/user/account">
           <template #title>
             <el-icon>
@@ -25,6 +25,12 @@
               <User/>
             </el-icon>
             <span>用户列表</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('RechargeOrderList')" index="/user/recharge-order/recharge-order-list">
+            <el-icon>
+              <Wallet/>
+            </el-icon>
+            <span>充值订单</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu

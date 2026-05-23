@@ -31,6 +31,7 @@ func completeOrder(o *entity.RechargeOrder, reason currency.Reason) (float64, er
 	o.SetPaidAt(paidAt)
 	o.SetUpdatedAt(paidAt)
 
+	//充值成功完成
 	stat := userinfodao.GetUserCumulativeStatByUserId(o.UserId)
 	stat.AddTotalRecharge(o.Price)
 	stat.AddTotalPayCount(1)

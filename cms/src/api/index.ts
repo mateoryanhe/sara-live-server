@@ -12,6 +12,7 @@ import {vipCfgApi} from './modules/vipCfg'
 import {uploadApi} from './modules/upload'
 import {goldApi} from './modules/gold'
 import {diamondApi} from './modules/diamond'
+import {rechargeOrderApi} from './modules/rechargeOrder'
 
 export {
     authApi,
@@ -28,6 +29,7 @@ export {
     uploadApi,
     goldApi,
     diamondApi,
+    rechargeOrderApi,
 }
 
 export default {
@@ -45,4 +47,5 @@ export default {
     uploadApi,
     goldApi,
     diamondApi,
+    rechargeOrderApi,
 }

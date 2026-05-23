@@ -262,6 +262,34 @@ export interface ShortVideoQuery extends PageQuery {
     statusFilter?: number
 }
 
+// 充值订单
+export interface RechargeOrder {
+    id: string
+    userId: string
+    nickname: string
+    cfgId: string
+    price: number
+    currency: string
+    gold: number
+    status: number
+    source: number
+    payChannel: number
+    thirdOrderId: string
+    remark: string
+    operatorId: string
+    createdAt: number
+    paidAt: number
+}
+
+export interface RechargeOrderQuery extends PageQuery {
+    orderId?: string
+    userId?: string
+    statusFilter?: number
+    source?: number
+    startTime?: number
+    endTime?: number
+}
+
 // CMS用户相关类型
 export interface CMSUser {
     id: string
