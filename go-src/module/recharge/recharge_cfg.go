@@ -1,4 +1,4 @@
-package rechargecfg
+package recharge
 
 import (
 	"context"
@@ -29,17 +29,17 @@ func Create(_ context.Context, req *rechargecfgdto.CreateRechargeCfgReq) (*recha
 		return nil, errercode.CreateCode(errercode.RechargeCfgExist)
 	}
 	cfg := &entity.RechargeCfg{
-		Name:         req.Name,
-		CfgType:      req.CfgType,
-		Icon:         req.Icon,
-		Diamond:      req.Diamond,
-		ExtraDiamond: req.ExtraDiamond,
-		Price:        req.Price,
-		Currency:     entity.RechargeCfgCurrencyUSD,
-		ProductId:    req.ProductId,
-		Sort:         req.Sort,
-		Status:       entity.RechargeCfgStatusOffShelf,
-		Description:  req.Description,
+		Name:        req.Name,
+		CfgType:     req.CfgType,
+		Icon:        req.Icon,
+		Gold:        req.Gold,
+		ExtraGold:   req.ExtraGold,
+		Price:       req.Price,
+		Currency:    entity.RechargeCfgCurrencyUSD,
+		ProductId:   req.ProductId,
+		Sort:        req.Sort,
+		Status:      entity.RechargeCfgStatusOffShelf,
+		Description: req.Description,
 	}
 	if err := rechargecfgdao.Create(cfg); err != nil {
 		return nil, err
@@ -61,8 +61,8 @@ func Update(_ context.Context, req *rechargecfgdto.UpdateRechargeCfgReq) (*recha
 	cfg.Name = req.Name
 	cfg.CfgType = req.CfgType
 	cfg.Icon = req.Icon
-	cfg.Diamond = req.Diamond
-	cfg.ExtraDiamond = req.ExtraDiamond
+	cfg.Gold = req.Gold
+	cfg.ExtraGold = req.ExtraGold
 	cfg.Price = req.Price
 	cfg.Currency = entity.RechargeCfgCurrencyUSD
 	cfg.ProductId = req.ProductId

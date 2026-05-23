@@ -18,35 +18,35 @@ type RechargeCfgListReq struct {
 
 // RechargeCfgListRes 单条列表项
 type RechargeCfgListRes struct {
-	ID           string `json:"id"`
-	Name         string `json:"name"`
-	CfgType      uint8  `json:"cfgType"`
-	Icon         string `json:"icon" dc:"图标完整URL(列表展示)"`
-	IconName     string `json:"iconName" dc:"图标资源文件名(编辑保存用)"`
-	Diamond      uint64 `json:"diamond" dc:"基础到账金币数"`
-	ExtraDiamond uint64 `json:"extraDiamond" dc:"额外赠送金币数"`
-	Price        uint64 `json:"price"`
-	Currency     string `json:"currency"`
-	ProductId    string `json:"productId"`
-	Sort         int    `json:"sort"`
-	Status       uint8  `json:"status"`
-	Description  string `json:"description"`
-	CreatedAt    string `json:"createdAt"`
-	UpdatedAt    string `json:"updatedAt"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	CfgType     uint8  `json:"cfgType"`
+	Icon        string `json:"icon" dc:"图标完整URL(列表展示)"`
+	IconName    string `json:"iconName" dc:"图标资源文件名(编辑保存用)"`
+	Gold        uint64 `json:"gold" dc:"基础到账金币数"`
+	ExtraGold   uint64 `json:"extraGold" dc:"额外赠送金币数"`
+	Price       uint64 `json:"price"`
+	Currency    string `json:"currency"`
+	ProductId   string `json:"productId"`
+	Sort        int    `json:"sort"`
+	Status      uint8  `json:"status"`
+	Description string `json:"description"`
+	CreatedAt   string `json:"createdAt"`
+	UpdatedAt   string `json:"updatedAt"`
 }
 
 // CreateRechargeCfgReq 创建充值配置
 type CreateRechargeCfgReq struct {
-	g.Meta       `path:"/createRechargeCfg" method:"post" summary:"创建充值配置" tags:"充值配置"`
-	Name         string `json:"name"         v:"required|length:1,64#名称不能为空|名称长度需在1到64之间" dc:"档位名称"`
-	CfgType      uint8  `json:"cfgType"      v:"required|in:1,2,3#类型不能为空|类型无效" dc:"类型(1iOS,2Google,3渠道)"`
-	Icon         string `json:"icon"         v:"max-length:255#图标URL最长255字符" dc:"图标URL"`
-	Diamond      uint64 `json:"diamond"      v:"required|min:1#基础到账金币数不能为空|基础到账金币数需大于0" dc:"基础到账金币数"`
-	ExtraDiamond uint64 `json:"extraDiamond" dc:"额外赠送金币数"`
-	Price        uint64 `json:"price"        v:"required|min:1#价格不能为空|价格需大于0" dc:"现实货币价格(单位:美分,USD)"`
-	ProductId    string `json:"productId"    v:"max-length:64#商品ID最长64字符" dc:"第三方商品SKU"`
-	Sort         int    `json:"sort"         dc:"排序值(越大越靠前)"`
-	Description  string `json:"description"  v:"max-length:255#描述最长255字符" dc:"描述"`
+	g.Meta      `path:"/createRechargeCfg" method:"post" summary:"创建充值配置" tags:"充值配置"`
+	Name        string `json:"name"         v:"required|length:1,64#名称不能为空|名称长度需在1到64之间" dc:"档位名称"`
+	CfgType     uint8  `json:"cfgType"      v:"required|in:1,2,3#类型不能为空|类型无效" dc:"类型(1iOS,2Google,3渠道)"`
+	Icon        string `json:"icon"         v:"max-length:255#图标URL最长255字符" dc:"图标URL"`
+	Gold        uint64 `json:"gold"      v:"required|min:1#基础到账金币数不能为空|基础到账金币数需大于0" dc:"基础到账金币数"`
+	ExtraGold   uint64 `json:"extraGold" dc:"额外赠送金币数"`
+	Price       uint64 `json:"price"        v:"required|min:1#价格不能为空|价格需大于0" dc:"现实货币价格(单位:美分,USD)"`
+	ProductId   string `json:"productId"    v:"max-length:64#商品ID最长64字符" dc:"第三方商品SKU"`
+	Sort        int    `json:"sort"         dc:"排序值(越大越靠前)"`
+	Description string `json:"description"  v:"max-length:255#描述最长255字符" dc:"描述"`
 }
 
 type CreateRechargeCfgRes struct {
@@ -55,17 +55,17 @@ type CreateRechargeCfgRes struct {
 
 // UpdateRechargeCfgReq 更新充值配置(不修改上下架状态)
 type UpdateRechargeCfgReq struct {
-	g.Meta       `path:"/updateRechargeCfg" method:"post" summary:"修改充值配置" tags:"充值配置"`
-	ID           uint64 `json:"id"           v:"required#ID不能为空" dc:"档位ID"`
-	Name         string `json:"name"         v:"required|length:1,64#名称不能为空|名称长度需在1到64之间" dc:"档位名称"`
-	CfgType      uint8  `json:"cfgType"      v:"required|in:1,2,3#类型不能为空|类型无效" dc:"类型(1iOS,2Google,3渠道)"`
-	Icon         string `json:"icon"         v:"max-length:255#图标URL最长255字符" dc:"图标URL"`
-	Diamond      uint64 `json:"diamond"      v:"required|min:1#基础到账金币数不能为空|基础到账金币数需大于0" dc:"基础到账金币数"`
-	ExtraDiamond uint64 `json:"extraDiamond" dc:"额外赠送金币数"`
-	Price        uint64 `json:"price"        v:"required|min:1#价格不能为空|价格需大于0" dc:"现实货币价格(单位:美分,USD)"`
-	ProductId    string `json:"productId"    v:"max-length:64#商品ID最长64字符" dc:"第三方商品SKU"`
-	Sort         int    `json:"sort"         dc:"排序值"`
-	Description  string `json:"description"  v:"max-length:255#描述最长255字符" dc:"描述"`
+	g.Meta      `path:"/updateRechargeCfg" method:"post" summary:"修改充值配置" tags:"充值配置"`
+	ID          uint64 `json:"id"           v:"required#ID不能为空" dc:"档位ID"`
+	Name        string `json:"name"         v:"required|length:1,64#名称不能为空|名称长度需在1到64之间" dc:"档位名称"`
+	CfgType     uint8  `json:"cfgType"      v:"required|in:1,2,3#类型不能为空|类型无效" dc:"类型(1iOS,2Google,3渠道)"`
+	Icon        string `json:"icon"         v:"max-length:255#图标URL最长255字符" dc:"图标URL"`
+	Gold        uint64 `json:"gold"      v:"required|min:1#基础到账金币数不能为空|基础到账金币数需大于0" dc:"基础到账金币数"`
+	ExtraGold   uint64 `json:"extraGold" dc:"额外赠送金币数"`
+	Price       uint64 `json:"price"        v:"required|min:1#价格不能为空|价格需大于0" dc:"现实货币价格(单位:美分,USD)"`
+	ProductId   string `json:"productId"    v:"max-length:64#商品ID最长64字符" dc:"第三方商品SKU"`
+	Sort        int    `json:"sort"         dc:"排序值"`
+	Description string `json:"description"  v:"max-length:255#描述最长255字符" dc:"描述"`
 }
 
 type UpdateRechargeCfgRes struct {
@@ -114,17 +114,17 @@ type AppRechargeCfgListReq struct {
 
 // AppRechargeCfgItem App端单条
 type AppRechargeCfgItem struct {
-	ID           string `json:"id"`
-	Name         string `json:"name"`
-	CfgType      uint8  `json:"cfgType"`
-	Icon         string `json:"icon"`
-	Diamond      uint64 `json:"diamond" dc:"基础到账金币数"`
-	ExtraDiamond uint64 `json:"extraDiamond" dc:"额外赠送金币数"`
-	Price        uint64 `json:"price"`
-	Currency     string `json:"currency"`
-	ProductId    string `json:"productId"`
-	Sort         int    `json:"sort"`
-	Description  string `json:"description"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	CfgType     uint8  `json:"cfgType"`
+	Icon        string `json:"icon"`
+	Gold        uint64 `json:"gold" dc:"基础到账金币数"`
+	ExtraGold   uint64 `json:"extraGold" dc:"额外赠送金币数"`
+	Price       uint64 `json:"price"`
+	Currency    string `json:"currency"`
+	ProductId   string `json:"productId"`
+	Sort        int    `json:"sort"`
+	Description string `json:"description"`
 }
 
 type AppRechargeCfgListRes struct {

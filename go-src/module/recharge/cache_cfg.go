@@ -1,4 +1,4 @@
-package rechargecfg
+package recharge
 
 import (
 	"strconv"
@@ -25,17 +25,17 @@ func Init() {
 // toAppItem 将 entity 转换为 App 端 DTO
 func toAppItem(r *entity.RechargeCfg) *rechargecfgdto.AppRechargeCfgItem {
 	return &rechargecfgdto.AppRechargeCfgItem{
-		ID:           strconv.FormatUint(r.ID, 10),
-		Name:         r.Name,
-		CfgType:      r.CfgType,
-		Icon:         r.Icon,
-		Diamond:      r.Diamond,
-		ExtraDiamond: r.ExtraDiamond,
-		Price:        r.Price,
-		Currency:     r.Currency,
-		ProductId:    r.ProductId,
-		Sort:         r.Sort,
-		Description:  r.Description,
+		ID:          strconv.FormatUint(r.ID, 10),
+		Name:        r.Name,
+		CfgType:     r.CfgType,
+		Icon:        r.Icon,
+		Gold:        r.Gold,
+		ExtraGold:   r.ExtraGold,
+		Price:       r.Price,
+		Currency:    r.Currency,
+		ProductId:   r.ProductId,
+		Sort:        r.Sort,
+		Description: r.Description,
 	}
 }
 

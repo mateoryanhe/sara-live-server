@@ -6,7 +6,7 @@ import (
 	"xr-game-server/module/currencylog"
 	"xr-game-server/module/name"
 	"xr-game-server/module/rank"
-	"xr-game-server/module/rechargecfg"
+	"xr-game-server/module/recharge"
 	"xr-game-server/module/shortvideo"
 	"xr-game-server/module/verification_code"
 	"xr-game-server/module/vip"
@@ -17,7 +17,7 @@ func Init() {
 	rank.Init()
 	name.Init()
 	currencylog.Init()
-	rechargecfg.Init()
+	recharge.Init()
 	banner.Init()
 	shortvideo.Init()
 	vip.Init()

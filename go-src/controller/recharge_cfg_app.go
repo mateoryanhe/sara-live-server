@@ -4,7 +4,7 @@ import (
 	"context"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/rechargecfgdto"
-	"xr-game-server/module/rechargecfg"
+	"xr-game-server/module/recharge"
 )
 
 const (
@@ -19,5 +19,5 @@ func initRechargeCfgAppController() {
 
 // RechargeCfgList App端查询充值配置列表(仅已上架)
 func (c *RechargeCfgAppController) RechargeCfgList(ctx context.Context, req *rechargecfgdto.AppRechargeCfgListReq) (res *rechargecfgdto.AppRechargeCfgListRes, err error) {
-	return rechargecfg.GetAppList(ctx, req)
+	return recharge.GetAppList(ctx, req)
 }
