@@ -10,7 +10,6 @@ import (
 	"xr-game-server/module/shortvideo"
 	"xr-game-server/module/verification_code"
 	"xr-game-server/module/vip"
-	"xr-game-server/module/vipcfg"
 )
 
 func Init() {
@@ -21,7 +20,7 @@ func Init() {
 	rechargecfg.Init()
 	banner.Init()
 	shortvideo.Init()
-	vipcfg.Init()
+	vip.Init()
 	vip.Init()
 	verification_code.Init()
 }

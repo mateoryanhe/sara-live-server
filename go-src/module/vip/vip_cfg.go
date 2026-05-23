@@ -1,4 +1,4 @@
-package vipcfg
+package vip
 
 import (
 	"context"

@@ -1,4 +1,4 @@
-package vipcfg
+package vip
 
 import (
 	"context"
@@ -19,11 +19,6 @@ var (
 	vipCfgCache     atomic.Value // *vipCfgSnapshot
 	emptyVipCfgList = make([]*vipcfgdto.AppVipCfgItem, 0)
 )
-
-// Init 服务启动时加载VIP配置到内存
-func Init() {
-	reloadVipCfgMemory()
-}
 
 // reloadVipCfgMemory 从DB重新加载并整体替换内存快照
 func reloadVipCfgMemory() {

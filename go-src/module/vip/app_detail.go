@@ -6,7 +6,6 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/vipcfgdto"
 	"xr-game-server/dto/vipdto"
-	"xr-game-server/module/vipcfg"
 )
 
 // GetAppVipDetail App端查询当前登录用户VIP详情
@@ -22,7 +21,7 @@ func GetAppVipDetail(ctx context.Context, _ *vipdto.AppVipDetailReq) (*vipdto.Ap
 	}
 
 	if user.VipLevel > 0 {
-		if cfg := vipcfg.GetVipCfgFromMemoryByLevel(user.VipLevel); cfg != nil {
+		if cfg := GetVipCfgFromMemoryByLevel(user.VipLevel); cfg != nil {
 			res.CurrentCfg = cfg
 			res.LevelName = cfg.LevelName
 		}
@@ -45,7 +44,7 @@ func GetAppVipDetail(ctx context.Context, _ *vipdto.AppVipDetailReq) (*vipdto.Ap
 
 func findNextEnabledVipCfg(currentLevel uint32) *vipcfgdto.AppVipCfgItem {
 	var next *vipcfgdto.AppVipCfgItem
-	for _, cfg := range vipcfg.GetAllVipCfgFromMemory() {
+	for _, cfg := range GetAllVipCfgFromMemory() {
 		//if cfg.Status != entity.VipCfgStatusEnabled {
 		//	continue
 		//}

@@ -5,6 +5,7 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/accountdto"
 	"xr-game-server/module/account"
+	"xr-game-server/module/userinfo"
 )
 
 const (
@@ -39,5 +40,5 @@ func (a *AccountController) QueryUserInfo(ctx context.Context, req *accountdto.Q
 }
 
 func (a *AccountController) SetAnchor(ctx context.Context, req *accountdto.SetAnchorReq) (*accountdto.SetAnchorRes, error) {
-	return account.SetAnchor(ctx, req)
+	return userinfo.SetAnchor(ctx, req)
 }

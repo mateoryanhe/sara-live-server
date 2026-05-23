@@ -5,18 +5,11 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"xr-game-server/core/event"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/gameevent"
-	"xr-game-server/module/vipcfg"
 )
 
 const rechargeCurrencyUSD = "USD"
-
-// Init 订阅充值到账事件,判断VIP升级
-func Init() {
-	event.Sub(gameevent.RechargeArrivedEvent, onRechargeArrived)
-}
 
 func onRechargeArrived(val any) {
 	data, ok := val.(*gameevent.RechargeArrivedEventData)
@@ -57,7 +50,7 @@ func onRechargeArrived(val any) {
 // calcTargetVipLevel 根据累计充值(美分)计算应达到的VIP等级
 func calcTargetVipLevel(totalRechargeCents uint64) uint32 {
 	var target uint32
-	for _, cfg := range vipcfg.GetAllVipCfgFromMemory() {
+	for _, cfg := range GetAllVipCfgFromMemory() {
 		//if cfg.Status != entity.VipCfgStatusEnabled {
 		//	continue
 		//}
@@ -71,7 +64,7 @@ func calcTargetVipLevel(totalRechargeCents uint64) uint32 {
 // getMaxEnabledVipLevel 获取已开启配置中的最高VIP等级
 func getMaxEnabledVipLevel() uint32 {
 	var maxLevel uint32
-	for _, cfg := range vipcfg.GetAllVipCfgFromMemory() {
+	for _, cfg := range GetAllVipCfgFromMemory() {
 		//if cfg.Status != entity.VipCfgStatusEnabled {
 		//	continue
 		//}
