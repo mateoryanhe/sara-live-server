@@ -15,7 +15,7 @@ type RechargeArrivedEventData struct {
 	OrderId      uint64  // 充值订单ID
 	UserId       uint64  // 充值用户ID
 	CfgId        uint64  // 充值档位ID(0=手动输入金额)
-	Price        uint64  // 实付金额(单位:分)
+	Price        float64 // 实付金额(单位:分)
 	Currency     string  // 结算货币
 	Gold         float64 // 到账金币数
 	Source       uint8   // 来源(1-App,2-后台手动)
@@ -26,7 +26,8 @@ type RechargeArrivedEventData struct {
 }
 
 func NewRechargeArrivedEventData(
-	orderId, userId, cfgId, price uint64,
+	orderId, userId, cfgId uint64,
+	price float64,
 	currency string,
 	gold float64,
 	source uint8,

@@ -62,7 +62,7 @@
               {{ totalGold(row) }}
             </template>
           </el-table-column>
-          <el-table-column label="价格(USD)" width="120">
+          <el-table-column label="价格" width="120">
             <template #default="{ row }">
               {{ formatPrice(row.price) }}
             </template>
@@ -163,9 +163,9 @@
           <el-input-number v-model="currentRow.extraGold" :min="0" controls-position="right"/>
           <div class="form-tip">充值成功后玩家实际到账金币 = 基础金币 + 赠送金币</div>
         </el-form-item>
-        <el-form-item label="价格(美分)" prop="price">
-          <el-input-number v-model="currentRow.price" :min="1" controls-position="right"/>
-          <div class="form-tip">充值货币固定为美元(USD)，价格单位为美分（例如 600 表示 $6.00）</div>
+        <el-form-item label="价格" prop="price">
+          <el-input-number v-model="currentRow.price" :min="0.0001" :precision="4" :step="0.01" controls-position="right"/>
+          <div class="form-tip">充值货币固定，支持4位小数</div>
         </el-form-item>
         <el-form-item label="商品SKU" prop="productId">
           <el-input v-model="currentRow.productId" placeholder="第三方商品SKU(可选)"/>
@@ -242,7 +242,7 @@ const defaultForm = (): RechargeCfgForm => ({
   icon: '',
   gold: 1,
   extraGold: 0,
-  price: 1,
+  price: 0.99,
   productId: '',
   sort: 0,
   description: ''
@@ -254,8 +254,7 @@ const iconPreviewUrl = ref('')
 let objectPreviewUrl: string | null = null
 
 const formatPrice = (price: number) => {
-  const amount = (Number(price) / 100).toFixed(2)
-  return `$${amount}`
+  return `$${Number(price).toFixed(4)}`
 }
 
 const totalGold = (row: RechargeCfg) => {
@@ -381,7 +380,7 @@ const handleEdit = (row: RechargeCfg) => {
     icon: row.iconName || '',
     gold: Number(row.gold) || 1,
     extraGold: Number(row.extraGold) || 0,
-    price: Number(row.price) || 1,
+    price: Number(row.price) || 0.99,
     productId: row.productId || '',
     sort: Number(row.sort) || 0,
     description: row.description || ''

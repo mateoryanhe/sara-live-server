@@ -46,7 +46,7 @@ type RechargeOrder struct {
 	migrate.OneModel
 	UserId       uint64    `gorm:"index;default:0;comment:充值用户ID" json:"userId"`
 	CfgId        uint64    `gorm:"index;default:0;comment:充值档位ID(0=手动输入金额)" json:"cfgId"`
-	Price        uint64    `gorm:"default:0;comment:实付金额(单位:分)" json:"price"`
+	Price        float64   `gorm:"type:decimal(10,4);default:0;comment:实付金额(单位:USD)" json:"price"`
 	Currency     string    `gorm:"size:8;default:'CNY';comment:货币(CNY/USD等)" json:"currency"`
 	Gold         float64   `gorm:"default:0;comment:发放金币数(订单完成时增加到玩家金币)" json:"gold"`
 	Status       uint8     `gorm:"index;default:0;comment:状态(0-待支付,1-已完成,2-已取消)" json:"status"`
@@ -59,7 +59,7 @@ type RechargeOrder struct {
 }
 
 // NewRechargeOrder 构造一条新订单(ID 由 snowflake 生成,各字段通过 Setter 推入 syndb 缓冲)
-func NewRechargeOrder(userId, cfgId uint64, price uint64, currency string, gold float64, source uint8) *RechargeOrder {
+func NewRechargeOrder(userId, cfgId uint64, price float64, currency string, gold float64, source uint8) *RechargeOrder {
 	ret := &RechargeOrder{}
 	ret.ID = snowflake.GetId()
 	now := time.Now()
@@ -85,7 +85,7 @@ func (r *RechargeOrder) SetCfgId(v uint64) {
 	syndb.AddDataToQuickChan(TbRechargeOrder, RechargeOrderCfgId, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
-func (r *RechargeOrder) SetPrice(v uint64) {
+func (r *RechargeOrder) SetPrice(v float64) {
 	r.Price = v
 	syndb.AddDataToQuickChan(TbRechargeOrder, RechargeOrderPrice, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }

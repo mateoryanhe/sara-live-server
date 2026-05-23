@@ -20,7 +20,7 @@ func ManualRecharge(ctx context.Context, req *rechargeorderdto.CMSManualRecharge
 	operatorId := httpserver.GetAuthId(ctx)
 
 	var (
-		price      uint64
+		price      float64
 		cur        string
 		goldAmount float64
 	)
