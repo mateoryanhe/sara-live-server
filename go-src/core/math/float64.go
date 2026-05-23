@@ -25,6 +25,25 @@ func AddFloat64(a, b float64) float64 {
 	return fromScaledInt64(aScaled + bScaled)
 }
 
+// SubFloat64 两个 float64 安全相减(a-b),结果四舍五入保留4位小数,溢出时返回边界值
+func SubFloat64(a, b float64) float64 {
+	if !isValidFloat64(a) || !isValidFloat64(b) {
+		return 0
+	}
+
+	aScaled := toScaledInt64(a)
+	bScaled := toScaledInt64(b)
+
+	if bScaled < 0 && aScaled > stdmath.MaxInt64+bScaled {
+		return maxFloat64With4Decimals
+	}
+	if bScaled > 0 && aScaled < stdmath.MinInt64+bScaled {
+		return fromScaledInt64(stdmath.MinInt64)
+	}
+
+	return fromScaledInt64(aScaled - bScaled)
+}
+
 func isValidFloat64(v float64) bool {
 	return !stdmath.IsNaN(v) && !stdmath.IsInf(v, 0)
 }

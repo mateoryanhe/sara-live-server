@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 	"xr-game-server/constants/db"
+	"xr-game-server/core/math"
 	"xr-game-server/core/migrate"
 	"xr-game-server/core/syndb"
 )
@@ -87,21 +88,39 @@ func (receiver *UserInfo) SetRemark(remark string) {
 	})
 }
 
-func (receiver *UserInfo) SetGold(gold float64) {
-	receiver.Gold = gold
+func (receiver *UserInfo) AddGold(gold float64) {
+	receiver.Gold = math.AddFloat64(gold, receiver.Gold)
 	receiver.SetUpdatedAt(time.Now())
 	syndb.AddDataToQuickChan(TbUserInfo, UserInfoGold, &syndb.ColData{
 		IdVal:  receiver.ID,
-		ColVal: gold,
+		ColVal: receiver.Gold,
 	})
 }
 
-func (receiver *UserInfo) SetDiamond(diamond float64) {
-	receiver.Diamond = diamond
+func (receiver *UserInfo) SubGold(gold float64) {
+	receiver.Gold = math.SubFloat64(receiver.Gold, gold)
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddDataToQuickChan(TbUserInfo, UserInfoGold, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: receiver.Gold,
+	})
+}
+
+func (receiver *UserInfo) AddDiamond(diamond float64) {
+	receiver.Diamond = math.AddFloat64(diamond, receiver.Diamond)
 	receiver.SetUpdatedAt(time.Now())
 	syndb.AddDataToQuickChan(TbUserInfo, UserInfoDiamond, &syndb.ColData{
 		IdVal:  receiver.ID,
-		ColVal: diamond,
+		ColVal: receiver.Diamond,
+	})
+}
+
+func (receiver *UserInfo) SubDiamond(diamond float64) {
+	receiver.Diamond = math.SubFloat64(receiver.Diamond, diamond)
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddDataToQuickChan(TbUserInfo, UserInfoDiamond, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: receiver.Diamond,
 	})
 }
 

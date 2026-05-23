@@ -10,6 +10,14 @@ func Add(a, b uint64) uint64 {
 	return a + b
 }
 
+// Sub 两个 uint64 安全相减(a-b),结果为负时返回 0
+func Sub(a, b uint64) uint64 {
+	if a <= b {
+		return 0
+	}
+	return a - b
+}
+
 // AddMax 计算 current 在不超过 max 时最多还能加多少
 func AddMax(current, add, max uint64) uint64 {
 	ret := Add(current, add)
