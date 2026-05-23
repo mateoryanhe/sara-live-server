@@ -17,7 +17,7 @@ type RechargeOrderItem struct {
 	Gold         float64 `json:"gold"`     // 充值发放金币数
 	Status       uint8   `json:"status"`   // 0待支付 1已完成 2已取消
 	Source       uint8   `json:"source"`   // 1App 2后台手动
-	PayChannel   string  `json:"payChannel"`
+	PayChannel   uint8   `json:"payChannel"`
 	ThirdOrderId string  `json:"thirdOrderId"`
 	Remark       string  `json:"remark"`
 	OperatorId   uint64  `json:"operatorId"`
@@ -61,8 +61,9 @@ type CMSManualRechargeRes struct {
 // 不允许 App 自由指定金额,防止刷单
 type AppCreateRechargeOrderReq struct {
 	g.Meta     `path:"/createRechargeOrder" method:"post" summary:"App创建充值订单" tags:"充值订单"`
-	CfgId      uint64 `json:"cfgId"      v:"required|min:1#档位ID不能为空|档位ID非法" dc:"充值档位ID(来自已上架的 rechargeCfg)"`
-	PayChannel string `json:"payChannel" v:"max-length:32#支付渠道最长32字符" dc:"支付渠道(wechat/alipay/applepay 等)"`
+	CfgId      uint64  `json:"cfgId"       dc:"充值档位ID(来自已上架的 rechargeCfg)"`
+	PayChannel uint8   `json:"payChannel"  dc:"支付渠道(wechat/alipay/applepay 等)"`
+	Amount     float64 `json:"amount" dc:"自定义金额"`
 }
 
 type AppCreateRechargeOrderRes struct {

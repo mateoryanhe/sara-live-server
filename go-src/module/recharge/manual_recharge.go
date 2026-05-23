@@ -19,7 +19,7 @@ func ManualRecharge(ctx context.Context, req *rechargeorderdto.CMSManualRecharge
 	operatorId := httpserver.GetAuthId(ctx)
 
 	order := rechargeorderdao.GetById(req.OrderId)
-	order.SetPayChannel("manual")
+
 	order.SetOperatorId(operatorId)
 
 	after, err := completeOrder(order, currency.ReasonGmAdjust)

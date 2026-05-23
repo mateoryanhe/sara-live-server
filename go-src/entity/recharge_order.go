@@ -51,7 +51,7 @@ type RechargeOrder struct {
 	Gold         float64   `gorm:"default:0;comment:发放金币数(订单完成时增加到玩家金币)" json:"gold"`
 	Status       uint8     `gorm:"index;default:0;comment:状态(0-待支付,1-已完成,2-已取消)" json:"status"`
 	Source       uint8     `gorm:"default:0;comment:来源(1-App玩家发起,2-后台手动)" json:"source"`
-	PayChannel   string    `gorm:"size:32;default:'';comment:支付渠道" json:"payChannel"`
+	PayChannel   uint8     `gorm:"size:32;default:0;comment:支付渠道" json:"payChannel"`
 	ThirdOrderId string    `gorm:"size:64;default:'';comment:第三方订单号" json:"thirdOrderId"`
 	Remark       string    `gorm:"size:255;default:'';comment:备注" json:"remark"`
 	OperatorId   uint64    `gorm:"default:0;comment:后台操作员ID(手动充值时记录)" json:"operatorId"`
@@ -110,7 +110,7 @@ func (r *RechargeOrder) SetSource(v uint8) {
 	syndb.AddDataToQuickChan(TbRechargeOrder, RechargeOrderSource, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
-func (r *RechargeOrder) SetPayChannel(v string) {
+func (r *RechargeOrder) SetPayChannel(v uint8) {
 	r.PayChannel = v
 	syndb.AddDataToQuickChan(TbRechargeOrder, RechargeOrderPayChannel, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }

@@ -114,7 +114,7 @@ type AppRechargeCfgListReq struct {
 
 // AppRechargeCfgItem App端单条
 type AppRechargeCfgItem struct {
-	ID          string  `json:"id"`
+	ID          uint64  `json:"id"`
 	Name        string  `json:"name"`
 	CfgType     uint8   `json:"cfgType"`
 	Icon        string  `json:"icon"`
@@ -125,6 +125,7 @@ type AppRechargeCfgItem struct {
 	ProductId   string  `json:"productId"`
 	Sort        int     `json:"sort"`
 	Description string  `json:"description"`
+	Status      uint8   `gorm:"default:0;comment:状态(0-下架,1-上架)" json:"status"`
 }
 
 type AppRechargeCfgListRes struct {

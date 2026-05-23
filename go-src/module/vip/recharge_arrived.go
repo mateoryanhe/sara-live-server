@@ -5,6 +5,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"xr-game-server/dao/rechargeorderdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/gameevent"
 )
@@ -13,22 +14,23 @@ const rechargeCurrencyUSD = "USD"
 
 func onRechargeArrived(val any) {
 	data, ok := val.(*gameevent.RechargeArrivedEventData)
-	if !ok || data == nil {
+	if !ok || data == nil || data.OrderId == 0 {
 		g.Log().Errorf(gctx.New(), "RechargeArrivedEvent payload type error: %T", val)
 		return
 	}
-	if data.UserId == 0 || data.Price == 0 {
+	order := rechargeorderdao.GetById(data.OrderId)
+	if order == nil || order.UserId == 0 || order.Price == 0 {
 		return
 	}
 
-	stat := userinfodao.GetUserCumulativeStatByUserId(data.UserId)
+	stat := userinfodao.GetUserCumulativeStatByUserId(order.UserId)
 	totalRechargeCents := toRechargeCents(stat.TotalRecharge)
 	targetLevel := calcTargetVipLevel(totalRechargeCents)
 	if targetLevel == 0 {
 		return
 	}
 
-	user := userinfodao.GetUserInfoByUserId(data.UserId)
+	user := userinfodao.GetUserInfoByUserId(order.UserId)
 	if targetLevel <= user.VipLevel {
 		return
 	}
@@ -42,9 +44,9 @@ func onRechargeArrived(val any) {
 	}
 
 	user.SetVipLevel(targetLevel)
-	pushVipLevelToApp(data.UserId, targetLevel)
+	pushVipLevelToApp(order.UserId, targetLevel)
 	g.Log().Infof(gctx.New(), "vip upgrade userId=%d level=%d totalRechargeCents=%d",
-		data.UserId, targetLevel, totalRechargeCents)
+		order.UserId, targetLevel, totalRechargeCents)
 }
 
 // calcTargetVipLevel 根据累计充值(美分)计算应达到的VIP等级
