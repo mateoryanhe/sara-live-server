@@ -4,7 +4,6 @@ import (
 	"context"
 	"strconv"
 	"xr-game-server/core/httpserver"
-	coremath "xr-game-server/core/math"
 	"xr-game-server/dao/vipcfgdao"
 	"xr-game-server/dto/vipcfgdto"
 	"xr-game-server/entity"
@@ -17,12 +16,7 @@ func GetList(_ context.Context, req *vipcfgdto.VipCfgListReq) (*httpserver.CMSQu
 }
 
 func Create(_ context.Context, req *vipcfgdto.CreateVipCfgReq) (*vipcfgdto.CreateVipCfgRes, error) {
-	normalizeVipCfgAmounts(
-		&req.UpgradeRechargeLimit,
-		&req.MinWithdrawAmount,
-		&req.MaxWithdrawAmount,
-		&req.Fee,
-	)
+
 	if err := validateWithdrawRange(req.MinWithdrawAmount, req.MaxWithdrawAmount); err != nil {
 		return nil, err
 	}
@@ -46,12 +40,7 @@ func Create(_ context.Context, req *vipcfgdto.CreateVipCfgReq) (*vipcfgdto.Creat
 }
 
 func Update(_ context.Context, req *vipcfgdto.UpdateVipCfgReq) (*vipcfgdto.UpdateVipCfgRes, error) {
-	normalizeVipCfgAmounts(
-		&req.UpgradeRechargeLimit,
-		&req.MinWithdrawAmount,
-		&req.MaxWithdrawAmount,
-		&req.Fee,
-	)
+
 	if err := validateWithdrawRange(req.MinWithdrawAmount, req.MaxWithdrawAmount); err != nil {
 		return nil, err
 	}
@@ -85,15 +74,6 @@ func Delete(_ context.Context, req *vipcfgdto.DeleteVipCfgReq) (*vipcfgdto.Delet
 	}
 	reloadVipCfgMemory()
 	return &vipcfgdto.DeleteVipCfgRes{Success: true}, nil
-}
-
-func normalizeVipCfgAmounts(values ...*float64) {
-	for _, v := range values {
-		if v == nil {
-			continue
-		}
-		*v = coremath.RoundFloat64(*v)
-	}
 }
 
 func validateWithdrawRange(minAmount, maxAmount float64) error {

@@ -3,7 +3,7 @@ package vip
 import (
 	"context"
 	"xr-game-server/core/httpserver"
-	coremath "xr-game-server/core/ma
+	coremath "xr-game-server/core/math"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/vipcfgdto"
 	"xr-game-server/dto/vipdto"
@@ -15,7 +15,7 @@ func GetAppVipDetail(ctx context.Context, _ *vipdto.AppVipDetailReq) (*vipdto.Ap
 	user := userinfodao.GetUserInfoByUserId(userId)
 	stat := userinfodao.GetUserCumulativeStatByUserId(userId)
 
-	totalRecharge := coremath.RoundFloat64(stat.TotalRecharge)
+	totalRecharge := stat.TotalRecharge
 	res := &vipdto.AppVipDetailRes{
 		VipLevel:      user.VipLevel,
 		TotalRecharge: totalRecharge,

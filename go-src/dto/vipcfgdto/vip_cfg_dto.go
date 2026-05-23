@@ -19,10 +19,10 @@ type VipCfgListRes struct {
 	Level                uint32  `json:"level"`
 	LevelName            string  `json:"levelName"`
 	Status               uint8   `json:"status"`
-	UpgradeRechargeLimit float64 `json:"upgradeRechargeLimit"`
-	MinWithdrawAmount    float64 `json:"minWithdrawAmount"`
-	MaxWithdrawAmount    float64 `json:"maxWithdrawAmount"`
-	Fee                  float64 `json:"fee"`
+	UpgradeRechargeLimit float64 `json:"upgradeRechargeLimit,string"`
+	MinWithdrawAmount    float64 `json:"minWithdrawAmount,string"`
+	MaxWithdrawAmount    float64 `json:"maxWithdrawAmount,string"`
+	Fee                  float64 `json:"fee,string"`
 	CreatedAt            string  `json:"createdAt"`
 	UpdatedAt            string  `json:"updatedAt"`
 }

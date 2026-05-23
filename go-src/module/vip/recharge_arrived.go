@@ -3,7 +3,6 @@ package vip
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	coremath "xr-game-server/core/math"
 	"xr-game-server/dao/rechargeorderdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/gameevent"
@@ -21,7 +20,7 @@ func onRechargeArrived(val any) {
 	}
 
 	stat := userinfodao.GetUserCumulativeStatByUserId(order.UserId)
-	totalRecharge := coremath.RoundFloat64(stat.TotalRecharge)
+	totalRecharge := stat.TotalRecharge
 	targetLevel := calcTargetVipLevel(totalRecharge)
 	if targetLevel == 0 {
 		return

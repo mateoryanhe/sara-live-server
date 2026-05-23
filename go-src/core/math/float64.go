@@ -44,14 +44,6 @@ func SubFloat64(a, b float64) float64 {
 	return fromScaledInt64(aScaled - bScaled)
 }
 
-// RoundFloat64 四舍五入保留4位小数
-func RoundFloat64(v float64) float64 {
-	if !isValidFloat64(v) {
-		return 0
-	}
-	return fromScaledInt64(toScaledInt64(v))
-}
-
 func isValidFloat64(v float64) bool {
 	return !stdmath.IsNaN(v) && !stdmath.IsInf(v, 0)
 }
