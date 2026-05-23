@@ -1,4 +1,4 @@
-package cmsrole
+package cmsuser
 
 import (
 	"context"
