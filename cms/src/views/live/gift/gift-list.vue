@@ -189,17 +189,6 @@
         <el-form-item label="排序" prop="sort">
           <el-input-number v-model="currentRow.sort" controls-position="right"/>
         </el-form-item>
-        <el-form-item label="发布时间" prop="publishedAt">
-          <el-date-picker
-              v-model="currentRow.publishedAt"
-              clearable
-              format="YYYY-MM-DD HH:mm:ss"
-              placeholder="选择发布时间(可选)"
-              style="width: 100%"
-              type="datetime"
-              value-format="YYYY-MM-DD HH:mm:ss"
-          />
-        </el-form-item>
         <el-form-item label="描述" prop="description">
           <el-input v-model="currentRow.description" placeholder="请输入描述" type="textarea"/>
         </el-form-item>
@@ -233,7 +222,6 @@ interface GiftForm {
   price: number
   category: string
   sort: number
-  publishedAt: string | null
   description: string
 }
 
@@ -259,7 +247,6 @@ const defaultForm = (): GiftForm => ({
   price: 0,
   category: '',
   sort: 0,
-  publishedAt: null,
   description: ''
 })
 const currentRow = ref<GiftForm>(defaultForm())
@@ -475,7 +462,6 @@ const handleEdit = (row: Gift) => {
     price: Number(row.price) || 0,
     category: row.category,
     sort: Number(row.sort) || 0,
-    publishedAt: row.publishedAt || null,
     description: row.description
   }
   setIconPreview(row.icon || '')
@@ -541,8 +527,8 @@ const handleSave = async () => {
         if (currentRow.value.id) {
           await giftApi.updateGift(currentRow.value)
         } else {
-          const {name, icon, animation, price, category, sort, publishedAt, description} = currentRow.value
-          await giftApi.createGift({name, icon, animation, price, category, sort, publishedAt, description})
+          const {name, icon, animation, price, category, sort, description} = currentRow.value
+          await giftApi.createGift({name, icon, animation, price, category, sort, description})
         }
 
         ElMessage.success(currentRow.value.id ? '更新成功' : '创建成功')

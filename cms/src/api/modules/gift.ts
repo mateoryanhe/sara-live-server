@@ -16,7 +16,6 @@ export const giftApi = {
         price: number
         category: string
         sort: number
-        publishedAt?: string | null
         description: string
     }) => {
         return request.post<{ id: string }>('/gift/createGift', data)
@@ -31,7 +30,6 @@ export const giftApi = {
         price: number
         category: string
         sort: number
-        publishedAt?: string | null
         description: string
     }) => {
         return request.post<boolean>('/gift/updateGift', data)

@@ -46,7 +46,6 @@ func CreateGift(_ context.Context, req *giftdto.CreateGiftReq) (*giftdto.CreateG
 		Price:       req.Price,
 		Category:    req.Category,
 		Sort:        req.Sort,
-		PublishedAt: req.PublishedAt,
 		Status:      entity.LiveGiftStatusOffShelf, // 新建默认下架,需手动上架
 		Description: req.Description,
 	}
@@ -73,7 +72,6 @@ func UpdateGift(_ context.Context, req *giftdto.UpdateGiftReq) (*giftdto.UpdateG
 	g.Price = req.Price
 	g.Category = req.Category
 	g.Sort = req.Sort
-	g.PublishedAt = req.PublishedAt
 	g.Description = req.Description
 
 	if err := giftdao.UpdateGift(g); err != nil {
@@ -102,14 +100,10 @@ func OnShelfGift(_ context.Context, req *giftdto.OnShelfGiftReq) (*giftdto.OnShe
 		return nil, errercode.CreateCode(errercode.GiftNonExist)
 	}
 	if g.Status != entity.LiveGiftStatusOnShelf {
-		if g.PublishedAt == nil {
-			now := time.Now()
-			g.PublishedAt = &now
-			if err := giftdao.UpdateGift(g); err != nil {
-				return nil, err
-			}
-		}
-		if err := giftdao.UpdateGiftStatus(req.ID, entity.LiveGiftStatusOnShelf); err != nil {
+		now := time.Now()
+		g.PublishedAt = &now
+		g.Status = entity.LiveGiftStatusOnShelf
+		if err := giftdao.UpdateGift(g); err != nil {
 			return nil, err
 		}
 		invalidateGiftCache()
