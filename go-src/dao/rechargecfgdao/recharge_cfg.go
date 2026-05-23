@@ -77,7 +77,7 @@ func GetOnShelf() []*entity.RechargeCfg {
 
 // GetList CMS 分页查询(支持名称模糊、上下架过滤)
 func GetList(req *rechargecfgdto.RechargeCfgListReq) (int, []*rechargecfgdto.RechargeCfgListRes) {
-	sql := `select id, name, cfg_type, icon, diamond, extra_diamond, price, currency, product_id,
+	sql := `select id, name, cfg_type, icon, gold, extra_gold, price, currency, product_id,
                    sort, status, description, created_at, updated_at
             from recharge_cfgs
             where 1=1 `

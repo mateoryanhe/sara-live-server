@@ -55,8 +55,8 @@
               <span v-else>-</span>
             </template>
           </el-table-column>
-          <el-table-column label="基础金币" prop="diamond" width="100"/>
-          <el-table-column label="赠送金币" prop="extraDiamond" width="100"/>
+          <el-table-column label="基础金币" prop="gold" width="100"/>
+          <el-table-column label="赠送金币" prop="extraGold" width="100"/>
           <el-table-column label="合计金币" width="100">
             <template #default="{ row }">
               {{ totalGold(row) }}
@@ -156,11 +156,11 @@
             </el-button>
           </div>
         </el-form-item>
-        <el-form-item label="基础金币" prop="diamond">
-          <el-input-number v-model="currentRow.diamond" :min="1" controls-position="right"/>
+        <el-form-item label="基础金币" prop="gold">
+          <el-input-number v-model="currentRow.gold" :min="1" controls-position="right"/>
         </el-form-item>
-        <el-form-item label="赠送金币" prop="extraDiamond">
-          <el-input-number v-model="currentRow.extraDiamond" :min="0" controls-position="right"/>
+        <el-form-item label="赠送金币" prop="extraGold">
+          <el-input-number v-model="currentRow.extraGold" :min="0" controls-position="right"/>
           <div class="form-tip">充值成功后玩家实际到账金币 = 基础金币 + 赠送金币</div>
         </el-form-item>
         <el-form-item label="价格(美分)" prop="price">
@@ -203,8 +203,8 @@ interface RechargeCfgForm {
   name: string
   cfgType: number
   icon: string
-  diamond: number
-  extraDiamond: number
+  gold: number
+  extraGold: number
   price: number
   productId: string
   sort: number
@@ -240,8 +240,8 @@ const defaultForm = (): RechargeCfgForm => ({
   name: '',
   cfgType: 1,
   icon: '',
-  diamond: 1,
-  extraDiamond: 0,
+  gold: 1,
+  extraGold: 0,
   price: 1,
   productId: '',
   sort: 0,
@@ -259,7 +259,7 @@ const formatPrice = (price: number) => {
 }
 
 const totalGold = (row: RechargeCfg) => {
-  return (Number(row.diamond) || 0) + (Number(row.extraDiamond) || 0)
+  return (Number(row.gold) || 0) + (Number(row.extraGold) || 0)
 }
 
 const revokeObjectPreview = () => {
@@ -324,7 +324,7 @@ const formRules: FormRules = {
     {min: 1, max: 64, message: '名称长度在1-64个字符', trigger: 'blur'}
   ],
   cfgType: [{required: true, message: '请选择类型', trigger: 'change'}],
-  diamond: [{required: true, message: '请输入基础金币数', trigger: 'change'}],
+  gold: [{required: true, message: '请输入基础金币数', trigger: 'change'}],
   price: [{required: true, message: '请输入价格', trigger: 'change'}],
   productId: [{max: 64, message: '商品SKU最长64字符', trigger: 'blur'}],
   description: [{max: 255, message: '描述最长255字符', trigger: 'blur'}]
@@ -379,8 +379,8 @@ const handleEdit = (row: RechargeCfg) => {
     name: row.name,
     cfgType: Number(row.cfgType) || 1,
     icon: row.iconName || '',
-    diamond: Number(row.diamond) || 1,
-    extraDiamond: Number(row.extraDiamond) || 0,
+    gold: Number(row.gold) || 1,
+    extraGold: Number(row.extraGold) || 0,
     price: Number(row.price) || 1,
     productId: row.productId || '',
     sort: Number(row.sort) || 0,
@@ -440,8 +440,8 @@ const handleSave = async () => {
         name: currentRow.value.name,
         cfgType: currentRow.value.cfgType,
         icon: currentRow.value.icon,
-        diamond: currentRow.value.diamond,
-        extraDiamond: currentRow.value.extraDiamond,
+        gold: currentRow.value.gold,
+        extraGold: currentRow.value.extraGold,
         price: currentRow.value.price,
         productId: currentRow.value.productId,
         sort: currentRow.value.sort,
