@@ -12,7 +12,7 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/errercode"
-	"xr-game-server/module/globalcfg"
+	"xr-game-server/module/upload"
 )
 
 // SendChat 直播间文字消息
@@ -41,7 +41,7 @@ func SendChat(ctx context.Context, req *liveroomdto.SendChatReq) (*liveroomdto.S
 	}
 	if sender != nil {
 		payload.SenderName = sender.Nickname
-		payload.SenderAvatar = globalcfg.BuildResourceUrl(sender.Avatar)
+		payload.SenderAvatar = upload.GetUrlByName(sender.Avatar)
 	}
 
 	for _, o := range liveroomdao.GetOnlinesByRoom(req.RoomId) {

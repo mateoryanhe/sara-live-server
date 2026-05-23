@@ -10,7 +10,7 @@ import (
 	"xr-game-server/dto/livefollowdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
-	"xr-game-server/module/globalcfg"
+	"xr-game-server/module/upload"
 )
 
 const (
@@ -95,7 +95,7 @@ func FollowingList(ctx context.Context, req *livefollowdto.FollowingListReq) (*l
 		}
 		if u := userinfodao.GetUserInfoByUserId(f.AnchorId); u != nil {
 			item.Nickname = u.Nickname
-			item.Avatar = globalcfg.BuildResourceUrl(u.Avatar)
+			item.Avatar = upload.GetUrlByName(u.Avatar)
 			item.GuildId = strconv.FormatUint(u.GuildId, 10)
 		}
 		list = append(list, item)
@@ -127,7 +127,7 @@ func FollowerList(ctx context.Context, req *livefollowdto.FollowerListReq) (*liv
 		}
 		if u := userinfodao.GetUserInfoByUserId(f.UserId); u != nil {
 			item.Nickname = u.Nickname
-			item.Avatar = globalcfg.BuildResourceUrl(u.Avatar)
+			item.Avatar = upload.GetUrlByName(u.Avatar)
 		}
 		list = append(list, item)
 	}

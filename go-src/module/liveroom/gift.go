@@ -12,9 +12,9 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/errercode"
-	"xr-game-server/module/diamond"
 	"xr-game-server/module/gift"
-	"xr-game-server/module/globalcfg"
+	"xr-game-server/module/upload"
+	"xr-game-server/module/wallet"
 )
 
 // SendGift 直播间送礼
@@ -45,7 +45,7 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 		return nil, errercode.CreateCode(errercode.GiftCountInvalid)
 	}
 	totalCost := giftItem.Price * uint64(req.Count)
-	remaining, err := diamond.Sub(senderId, float64(totalCost), currency.ReasonGiftSend)
+	remaining, err := wallet.DiamondSub(senderId, float64(totalCost), currency.ReasonGiftSend)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 	}
 	if sender != nil {
 		payload.SenderName = sender.Nickname
-		payload.SenderAvatar = globalcfg.BuildResourceUrl(sender.Avatar)
+		payload.SenderAvatar = upload.GetUrlByName(sender.Avatar)
 	}
 
 	for _, o := range liveroomdao.GetOnlinesByRoom(req.RoomId) {

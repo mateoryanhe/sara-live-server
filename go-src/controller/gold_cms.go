@@ -4,7 +4,7 @@ import (
 	"context"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/golddto"
-	"xr-game-server/module/gold"
+	"xr-game-server/module/wallet"
 )
 
 const GoldUrl = "/gold"
@@ -16,9 +16,9 @@ func initGoldController() {
 }
 
 func (c *GoldController) Add(ctx context.Context, req *golddto.CMSAddGoldReq) (*golddto.CMSAddGoldRes, error) {
-	return gold.CMSAdd(ctx, req)
+	return wallet.GoldCMSAdd(ctx, req)
 }
 
 func (c *GoldController) Sub(ctx context.Context, req *golddto.CMSSubGoldReq) (*golddto.CMSSubGoldRes, error) {
-	return gold.CMSSub(ctx, req)
+	return wallet.GoldCMSSub(ctx, req)
 }

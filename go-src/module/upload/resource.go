@@ -1,17 +1,18 @@
-package globalcfg
+package upload
 
 import (
 	"strings"
 	"xr-game-server/dao/globalcfgdao"
+	"xr-game-server/module/globalcfg"
 )
 
 // GetResourceDomain 获取静态资源域名(从 GlobalCfg Resource.Domain 读取),未配置返回空串
 func GetResourceDomain() string {
-	return globalcfgdao.GetStr(Resource, ResourceKeyDomain, "")
+	return globalcfgdao.GetStr(globalcfg.Resource, globalcfg.ResourceKeyDomain, "")
 }
 
 // BuildResourceUrl 给资源文件名拼接域名,若 name 为空则返回空,若域名未配置则原样返回 name
-func BuildResourceUrl(name string) string {
+func buildResourceUrl(name string) string {
 	if name == "" {
 		return ""
 	}

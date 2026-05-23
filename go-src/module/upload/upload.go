@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"strings"
 	"xr-game-server/core/snowflake"
-	"xr-game-server/module/globalcfg"
 )
 
 const (
@@ -110,7 +109,7 @@ func getUploadDir(subDir string) string {
 }
 
 func GetUrlByName(name string) string {
-	return globalcfg.BuildResourceUrl(fmt.Sprintf("/%s/%s", ImageSubDir, name))
+	return buildResourceUrl(fmt.Sprintf("/%s/%s", ImageSubDir, name))
 }
 
 // UploadCMSFile 保存CMS后台上传的图片或礼物动画资源到 <serverRoot>/upload/cms,返回保存后的文件名

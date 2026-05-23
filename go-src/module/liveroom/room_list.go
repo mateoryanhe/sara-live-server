@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/liveroomdto"
-	"xr-game-server/module/globalcfg"
+	"xr-game-server/module/upload"
 )
 
 // GetRoomList App 分页查询直播间列表(直连数据库)
@@ -26,12 +26,12 @@ func GetRoomList(_ context.Context, req *liveroomdto.GetLiveRoomListReq) (*liver
 			RoomId:         strconv.FormatUint(row.ID, 10),
 			GuildId:        strconv.FormatUint(row.GuildId, 10),
 			Title:          row.Title,
-			Cover:          globalcfg.BuildResourceUrl(row.Cover),
+			Cover:          upload.GetUrlByName(row.Cover),
 			Notice:         row.Notice,
 			Status:         row.Status,
 			CreateAt:       row.CreatedAt,
 			AnchorNickname: row.Nickname,
-			AnchorAvatar:   globalcfg.BuildResourceUrl(row.Avatar),
+			AnchorAvatar:   upload.GetUrlByName(row.Avatar),
 		})
 	}
 

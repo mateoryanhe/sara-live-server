@@ -9,7 +9,7 @@ import (
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
-	"xr-game-server/module/globalcfg"
+	"xr-game-server/module/upload"
 )
 
 // CreateRoom 创建直播间
@@ -188,7 +188,7 @@ func GetOnlineUserList(_ context.Context, req *liveroomdto.GetOnlineUserListReq)
 		}
 		if u := userinfodao.GetUserInfoByUserId(o.UserId); u != nil {
 			item.Nickname = u.Nickname
-			item.Avatar = globalcfg.BuildResourceUrl(u.Avatar)
+			item.Avatar = upload.GetUrlByName(u.Avatar)
 		}
 		list = append(list, item)
 	}
@@ -211,7 +211,7 @@ func GetRoom(_ context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto.G
 		RoomId:   strconv.FormatUint(room.ID, 10),
 		GuildId:  strconv.FormatUint(room.GuildId, 10),
 		Title:    room.Title,
-		Cover:    globalcfg.BuildResourceUrl(room.Cover),
+		Cover:    upload.GetUrlByName(room.Cover),
 		Notice:   room.Notice,
 		Status:   room.Status,
 		CreateAt: room.CreatedAt.Unix(),

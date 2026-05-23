@@ -13,7 +13,7 @@ import (
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
 	"xr-game-server/gameevent"
-	"xr-game-server/module/gold"
+	"xr-game-server/module/wallet"
 )
 
 // defaultCurrency 默认结算货币
@@ -52,7 +52,7 @@ func completeOrder(o *entity.RechargeOrder, reason currency.Reason) (float64, er
 	if o.Gold <= 0 {
 		return 0, errercode.CreateCode(errercode.RechargeGoldInvalid)
 	}
-	after, err := gold.Add(o.UserId, o.Gold, reason)
+	after, err := wallet.GoldAdd(o.UserId, o.Gold, reason)
 	if err != nil {
 		return 0, err
 	}
