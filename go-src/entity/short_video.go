@@ -3,6 +3,7 @@ package entity
 import (
 	"time"
 	"xr-game-server/constants/db"
+	xrmath "xr-game-server/core/math"
 	"xr-game-server/core/migrate"
 	"xr-game-server/core/syndb"
 )
@@ -33,7 +34,7 @@ type ShortVideo struct {
 }
 
 func (receiver *ShortVideo) AddLikeCount(val uint64) {
-	receiver.LikeCount += val
+	receiver.LikeCount = xrmath.Add(receiver.LikeCount, val)
 	receiver.SetUpdatedAt(time.Now())
 	syndb.AddDataToLazyChan(TbShortVideo, ShortVideoLikeCount, &syndb.ColData{
 		IdVal:  receiver.ID,

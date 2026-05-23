@@ -1,23 +1,62 @@
 package rechargeorderdao
 
 import (
+	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"time"
+	"xr-game-server/core/cache"
 	"xr-game-server/entity"
 )
 
-// GetById 按主键查询充值订单
+var orderCacheMgr *cache.CacheMgr
+
+func InitRechargeOrderDao() {
+	orderCacheMgr = cache.NewCacheMgr()
+}
+
+// GetById 按主键查询充值订单(走缓存)
 func GetById(id uint64) *entity.RechargeOrder {
-	var ret entity.RechargeOrder
-	err := g.DB().Model(string(entity.TbRechargeOrder)).WherePri(id).Scan(&ret)
-	if err != nil {
+	if id == 0 {
 		return nil
 	}
-	if ret.ID == 0 {
+	v := orderCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
+		var ret entity.RechargeOrder
+		err = g.DB().Model(string(entity.TbRechargeOrder)).WherePri(id).Scan(&ret)
+		if err != nil || ret.ID == 0 {
+			return nil, err
+		}
+		return &ret, nil
+	})
+	if v == nil {
 		return nil
 	}
-	return &ret
+	o, _ := v.(*entity.RechargeOrder)
+	return o
+}
+
+// AddOrderToCache 新建订单后写入缓存
+func AddOrderToCache(o *entity.RechargeOrder) {
+	if o == nil {
+		return
+	}
+	orderCacheMgr.FlushCache(o.ID, o)
+}
+
+// FlushOrderCache 订单变更后刷新缓存
+func FlushOrderCache(o *entity.RechargeOrder) {
+	if o == nil {
+		return
+	}
+	orderCacheMgr.FlushCache(o.ID, o)
+}
+
+// RemoveOrderCache 移除指定订单缓存
+func RemoveOrderCache(orderId uint64) {
+	if orderCacheMgr == nil || orderId == 0 {
+		return
+	}
+	_, _ = orderCacheMgr.Cache.Remove(gctx.New(), orderId)
 }
 
 // ListByUserId App 端按用户分页查询(按 id 倒序,可按状态过滤)

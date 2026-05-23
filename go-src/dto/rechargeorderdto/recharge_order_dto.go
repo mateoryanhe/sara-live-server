@@ -44,13 +44,8 @@ type CMSRechargeOrderListReq struct {
 //  1. 引用充值配置(CfgId>0): 自动取 Price/Gold/Currency
 //  2. 手动输入(CfgId=0): 必须提供 Price 与 Gold,Currency 可选(默认 CNY)
 type CMSManualRechargeReq struct {
-	g.Meta   `path:"/manualRecharge" method:"post" summary:"后台手动给玩家充值到账" tags:"充值订单"`
-	UserId   uint64  `json:"userId"   v:"required|min:1#玩家ID不能为空|玩家ID非法" dc:"目标玩家ID"`
-	CfgId    uint64  `json:"cfgId"    dc:"充值档位ID,>0时从配置取价格与金币;=0时使用 price/gold"`
-	Price    float64 `json:"price"    dc:"实付金额(单位:USD),CfgId=0时必填"`
-	Currency string  `json:"currency" v:"max-length:8#货币代码最长8字符" dc:"币种(默认CNY)"`
-	Gold     float64 `json:"gold"     dc:"发放金币数,CfgId=0时必填"`
-	Remark   string  `json:"remark"   v:"max-length:255#备注最长255字符" dc:"备注"`
+	g.Meta  `path:"/manualRecharge" method:"post" summary:"后台手动给玩家充值到账" tags:"充值订单"`
+	OrderId uint64 `json:"orderId"   v:"required|min:1#订单ID不能为空|订单ID非法" dc:"订单ID"`
 }
 
 type CMSManualRechargeRes struct {

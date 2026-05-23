@@ -13,8 +13,7 @@ type ObjModel struct {
 }
 
 func (receiver *ObjModel) Add(val uint64) {
-	ret := math.ChkUInt64(receiver.Val, val)
-	receiver.Val += ret
+	receiver.Val = math.Add(receiver.Val, val)
 	receiver.UpdateTime = time.Now()
 }
 func (receiver *ObjModel) Reduce(val uint64) {

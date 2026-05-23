@@ -50,8 +50,8 @@ func initRank() {
 }
 
 func (receiver *PlayerRank) AddVal(val uint64) {
-	ret := math.ChkUInt64(receiver.Val, val)
-	receiver.SetVal(ret + receiver.Val)
+	ret := math.Add(receiver.Val, val)
+	receiver.SetVal(ret)
 }
 func (receiver *PlayerRank) ReduceVal(val uint64) {
 	if receiver.Val < val {

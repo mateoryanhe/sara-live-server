@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/rechargecfgdao"
+	"xr-game-server/dao/rechargeorderdao"
 	"xr-game-server/dto/rechargeorderdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
@@ -37,6 +38,7 @@ func CreateOrder(ctx context.Context, req *rechargeorderdto.AppCreateRechargeOrd
 	if req.PayChannel != "" {
 		order.SetPayChannel(req.PayChannel)
 	}
+	rechargeorderdao.AddOrderToCache(order)
 
 	return &rechargeorderdto.AppCreateRechargeOrderRes{
 		OrderId:  strconv.FormatUint(order.ID, 10),

@@ -1,9 +1,9 @@
 package entity
 
 import (
-	"math"
 	"time"
 	"xr-game-server/constants/db"
+	"xr-game-server/core/math"
 	"xr-game-server/core/migrate"
 	"xr-game-server/core/syndb"
 )
@@ -20,11 +20,6 @@ const (
 	UserCumulativeStatTotalPayCount       db.TbCol = "total_pay_count"
 	UserCumulativeStatTotalDiamondConsume db.TbCol = "total_diamond_consume"
 	UserCumulativeStatTotalGoldConsume    db.TbCol = "total_gold_consume"
-)
-
-const (
-	cumulativeStatFloatScale        = 1000
-	cumulativeStatFloatDecimalScale = 10000 // 保留4位小数
 )
 
 // UserCumulativeStat 玩家累计数值(与用户一一对应,主键ID即用户ID)
@@ -48,68 +43,47 @@ func NewUserCumulativeStat(userId uint64) *UserCumulativeStat {
 	return ret
 }
 
-// normalizeCumulativeFloat 截断到4位小数后按1000倍缩放校验,防止浮点溢出
-func normalizeCumulativeFloat(val float64) (float64, bool) {
-	if math.IsNaN(val) || math.IsInf(val, 0) || val < 0 {
-		return 0, false
-	}
-	truncated := math.Floor(val*cumulativeStatFloatDecimalScale) / cumulativeStatFloatDecimalScale
-	scaled := truncated * cumulativeStatFloatScale
-	if scaled > float64(math.MaxInt64) {
-		return 0, false
-	}
-	return truncated, true
-}
-
-func (receiver *UserCumulativeStat) SetTotalRecharge(val float64) bool {
-	normalized, ok := normalizeCumulativeFloat(val)
-	if !ok {
-		return false
-	}
-	receiver.TotalRecharge = normalized
+func (receiver *UserCumulativeStat) AddTotalRecharge(val float64) bool {
+	receiver.TotalRecharge = math.AddFloat64(receiver.TotalRecharge, val)
 	receiver.SetUpdatedAt(time.Now())
 	syndb.AddDataToLazyChan(TbUserCumulativeStat, UserCumulativeStatTotalRecharge, &syndb.ColData{
 		IdVal:  receiver.ID,
-		ColVal: normalized,
+		ColVal: receiver.TotalRecharge,
 	})
 	return true
 }
 
-func (receiver *UserCumulativeStat) SetTotalWithdraw(val float64) bool {
-	normalized, ok := normalizeCumulativeFloat(val)
-	if !ok {
-		return false
-	}
-	receiver.TotalWithdraw = normalized
+func (receiver *UserCumulativeStat) AddTotalWithdraw(val float64) bool {
+	receiver.TotalWithdraw = math.AddFloat64(receiver.TotalWithdraw, val)
 	receiver.SetUpdatedAt(time.Now())
 	syndb.AddDataToLazyChan(TbUserCumulativeStat, UserCumulativeStatTotalWithdraw, &syndb.ColData{
 		IdVal:  receiver.ID,
-		ColVal: normalized,
+		ColVal: receiver.TotalWithdraw,
 	})
 	return true
 }
 
-func (receiver *UserCumulativeStat) SetTotalFans(val uint64) bool {
-	receiver.TotalFans = val
+func (receiver *UserCumulativeStat) AddTotalFans(val uint64) bool {
+	receiver.TotalFans = math.Add(receiver.TotalFans, val)
 	receiver.SetUpdatedAt(time.Now())
 	syndb.AddDataToLazyChan(TbUserCumulativeStat, UserCumulativeStatTotalFans, &syndb.ColData{
 		IdVal:  receiver.ID,
-		ColVal: val,
+		ColVal: receiver.TotalFans,
 	})
 	return true
 }
 
-func (receiver *UserCumulativeStat) SetTotalFollow(val uint64) bool {
-	receiver.TotalFollow = val
+func (receiver *UserCumulativeStat) AddTotalFollow(val uint64) bool {
+	receiver.TotalFollow = math.Add(receiver.TotalFollow, val)
 	receiver.SetUpdatedAt(time.Now())
 	syndb.AddDataToLazyChan(TbUserCumulativeStat, UserCumulativeStatTotalFollow, &syndb.ColData{
 		IdVal:  receiver.ID,
-		ColVal: val,
+		ColVal: receiver.TotalFollow,
 	})
 	return true
 }
 
-func (receiver *UserCumulativeStat) SetTotalPayCount(val uint64) bool {
+func (receiver *UserCumulativeStat) AddTotalPayCount(val uint64) bool {
 	receiver.TotalPayCount = val
 	receiver.SetUpdatedAt(time.Now())
 	syndb.AddDataToLazyChan(TbUserCumulativeStat, UserCumulativeStatTotalPayCount, &syndb.ColData{
@@ -120,29 +94,22 @@ func (receiver *UserCumulativeStat) SetTotalPayCount(val uint64) bool {
 }
 
 func (receiver *UserCumulativeStat) SetTotalDiamondConsume(val float64) bool {
-	normalized, ok := normalizeCumulativeFloat(val)
-	if !ok {
-		return false
-	}
-	receiver.TotalDiamondConsume = normalized
+
+	receiver.TotalDiamondConsume = math.AddFloat64(val, receiver.TotalDiamondConsume)
 	receiver.SetUpdatedAt(time.Now())
 	syndb.AddDataToLazyChan(TbUserCumulativeStat, UserCumulativeStatTotalDiamondConsume, &syndb.ColData{
 		IdVal:  receiver.ID,
-		ColVal: normalized,
+		ColVal: receiver.TotalDiamondConsume,
 	})
 	return true
 }
 
 func (receiver *UserCumulativeStat) SetTotalGoldConsume(val float64) bool {
-	normalized, ok := normalizeCumulativeFloat(val)
-	if !ok {
-		return false
-	}
-	receiver.TotalGoldConsume = normalized
+	receiver.TotalGoldConsume = math.AddFloat64(val, receiver.TotalGoldConsume)
 	receiver.SetUpdatedAt(time.Now())
 	syndb.AddDataToLazyChan(TbUserCumulativeStat, UserCumulativeStatTotalGoldConsume, &syndb.ColData{
 		IdVal:  receiver.ID,
-		ColVal: normalized,
+		ColVal: receiver.TotalGoldConsume,
 	})
 	return true
 }

@@ -8,6 +8,7 @@ import (
 	"xr-game-server/dao/livefollowdao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/namedao"
+	"xr-game-server/dao/rechargeorderdao"
 	"xr-game-server/dao/shortvideodao"
 	"xr-game-server/dao/shortvideolikedao"
 	"xr-game-server/dao/userinfodao"
@@ -27,4 +28,5 @@ func Init() {
 	livefollowdao.InitLiveFollowDao()
 	shortvideodao.InitShortVideoDao()
 	shortvideolikedao.InitShortVideoLikeDao()
+	rechargeorderdao.InitRechargeOrderDao()
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"strconv"
 	"xr-game-server/core/httpserver"
-	xrmath "xr-game-server/core/math"
 	"xr-game-server/dao/shortvideodao"
 	"xr-game-server/dao/shortvideolikedao"
 	"xr-game-server/dto/shortvideodto"
@@ -117,10 +116,6 @@ func LikeShortVideo(ctx context.Context, req *shortvideodto.LikeShortVideoReq) (
 		existing.SetStatus(entity.ShortVideoLikeStatusLiked)
 		shortvideolikedao.AddLikeToCache(existing)
 	}
-	addVal := xrmath.ChkUInt64(row.LikeCount, 1)
-	if addVal == 0 {
-		return nil, errercode.CreateCode(errercode.InvalidParam)
-	}
-	row.AddLikeCount(addVal)
+	row.AddLikeCount(1)
 	return &shortvideodto.LikeShortVideoRes{LikeCount: row.LikeCount}, nil
 }
