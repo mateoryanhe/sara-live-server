@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 	"sync/atomic"
+	coremath "xr-game-server/core/math"
 	"xr-game-server/dao/vipcfgdao"
 	"xr-game-server/dto/vipcfgdto"
 	"xr-game-server/entity"
@@ -53,10 +54,10 @@ func toAppVipCfgItem(row *entity.VipCfg) *vipcfgdto.AppVipCfgItem {
 		Level:                row.Level,
 		LevelName:            row.LevelName,
 		Status:               row.Status,
-		UpgradeRechargeLimit: row.UpgradeRechargeLimit,
-		MinWithdrawAmount:    row.MinWithdrawAmount,
-		MaxWithdrawAmount:    row.MaxWithdrawAmount,
-		Fee:                  row.Fee,
+		UpgradeRechargeLimit: coremath.RoundFloat64(row.UpgradeRechargeLimit),
+		MinWithdrawAmount:    coremath.RoundFloat64(row.MinWithdrawAmount),
+		MaxWithdrawAmount:    coremath.RoundFloat64(row.MaxWithdrawAmount),
+		Fee:                  coremath.RoundFloat64(row.Fee),
 	}
 }
 

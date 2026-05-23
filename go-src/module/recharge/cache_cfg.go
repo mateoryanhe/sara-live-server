@@ -19,11 +19,6 @@ var (
 	emptyRechargeCfgList = make([]*rechargecfgdto.AppRechargeCfgItem, 0)
 )
 
-// Init 服务启动时预加载充值配置缓存
-func Init() {
-	loadRechargeCfgCache()
-}
-
 // toAppItem 将 entity 转换为 App 端 DTO
 func toAppItem(r *entity.RechargeCfg) *rechargecfgdto.AppRechargeCfgItem {
 	return &rechargecfgdto.AppRechargeCfgItem{

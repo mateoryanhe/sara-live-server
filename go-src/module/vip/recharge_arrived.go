@@ -1,16 +1,13 @@
 package vip
 
 import (
-	"math"
-
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	coremath "xr-game-server/core/math"
 	"xr-game-server/dao/rechargeorderdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/gameevent"
 )
-
-const rechargeCurrencyUSD = "USD"
 
 func onRechargeArrived(val any) {
 	data, ok := val.(*gameevent.RechargeArrivedEventData)
@@ -24,8 +21,8 @@ func onRechargeArrived(val any) {
 	}
 
 	stat := userinfodao.GetUserCumulativeStatByUserId(order.UserId)
-	totalRechargeCents := toRechargeCents(stat.TotalRecharge)
-	targetLevel := calcTargetVipLevel(totalRechargeCents)
+	totalRecharge := coremath.RoundFloat64(stat.TotalRecharge)
+	targetLevel := calcTargetVipLevel(totalRecharge)
 	if targetLevel == 0 {
 		return
 	}
@@ -45,18 +42,15 @@ func onRechargeArrived(val any) {
 
 	user.SetVipLevel(targetLevel)
 	pushVipLevelToApp(order.UserId, targetLevel)
-	g.Log().Infof(gctx.New(), "vip upgrade userId=%d level=%d totalRechargeCents=%d",
-		order.UserId, targetLevel, totalRechargeCents)
+	g.Log().Infof(gctx.New(), "vip upgrade userId=%d level=%d totalRecharge=%.4f",
+		order.UserId, targetLevel, totalRecharge)
 }
 
-// calcTargetVipLevel 根据累计充值(美分)计算应达到的VIP等级
-func calcTargetVipLevel(totalRechargeCents uint64) uint32 {
+// calcTargetVipLevel 根据累计充值(USD)计算应达到的VIP等级
+func calcTargetVipLevel(totalRecharge float64) uint32 {
 	var target uint32
 	for _, cfg := range GetAllVipCfgFromMemory() {
-		//if cfg.Status != entity.VipCfgStatusEnabled {
-		//	continue
-		//}
-		if totalRechargeCents >= cfg.UpgradeRechargeLimit && cfg.Level > target {
+		if totalRecharge >= cfg.UpgradeRechargeLimit && cfg.Level > target {
 			target = cfg.Level
 		}
 	}
@@ -67,19 +61,9 @@ func calcTargetVipLevel(totalRechargeCents uint64) uint32 {
 func getMaxEnabledVipLevel() uint32 {
 	var maxLevel uint32
 	for _, cfg := range GetAllVipCfgFromMemory() {
-		//if cfg.Status != entity.VipCfgStatusEnabled {
-		//	continue
-		//}
 		if cfg.Level > maxLevel {
 			maxLevel = cfg.Level
 		}
 	}
 	return maxLevel
-}
-
-func toRechargeCents(totalRecharge float64) uint64 {
-	if totalRecharge <= 0 {
-		return 0
-	}
-	return uint64(math.Floor(totalRecharge))
 }

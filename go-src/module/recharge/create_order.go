@@ -40,6 +40,9 @@ func CreateOrder(ctx context.Context, req *rechargeorderdto.AppCreateRechargeOrd
 		order = entity.NewRechargeOrder(userId, cfg.ID, cfg.Price, cur, goldAmount, entity.RechargeOrderSourceApp)
 		order.SetPayChannel(cfg.CfgType)
 	} else {
+		if 0 >= req.Amount {
+			return nil, errercode.CreateCode(errercode.RechargeAmountInvalid)
+		}
 		//自定义金额
 		order = entity.NewRechargeOrder(userId, 0, req.Amount, defaultCurrency, 0, entity.RechargeOrderSourceApp)
 		order.SetPayChannel(req.PayChannel)

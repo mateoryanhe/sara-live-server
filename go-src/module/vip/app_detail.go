@@ -3,6 +3,7 @@ package vip
 import (
 	"context"
 	"xr-game-server/core/httpserver"
+	coremath "xr-game-server/core/ma
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/vipcfgdto"
 	"xr-game-server/dto/vipdto"
@@ -14,10 +15,10 @@ func GetAppVipDetail(ctx context.Context, _ *vipdto.AppVipDetailReq) (*vipdto.Ap
 	user := userinfodao.GetUserInfoByUserId(userId)
 	stat := userinfodao.GetUserCumulativeStatByUserId(userId)
 
-	totalRechargeCents := toRechargeCents(stat.TotalRecharge)
+	totalRecharge := coremath.RoundFloat64(stat.TotalRecharge)
 	res := &vipdto.AppVipDetailRes{
 		VipLevel:      user.VipLevel,
-		TotalRecharge: totalRechargeCents,
+		TotalRecharge: totalRecharge,
 	}
 
 	if user.VipLevel > 0 {
@@ -36,8 +37,8 @@ func GetAppVipDetail(ctx context.Context, _ *vipdto.AppVipDetailReq) (*vipdto.Ap
 	res.NextLevel = nextCfg.Level
 	res.NextCfg = nextCfg
 	res.NextUpgradeLimit = nextCfg.UpgradeRechargeLimit
-	if totalRechargeCents < nextCfg.UpgradeRechargeLimit {
-		res.RechargeToNextLevel = nextCfg.UpgradeRechargeLimit - totalRechargeCents
+	if totalRecharge < nextCfg.UpgradeRechargeLimit {
+		res.RechargeToNextLevel = coremath.SubFloat64(nextCfg.UpgradeRechargeLimit, totalRecharge)
 	}
 	return res, nil
 }
@@ -45,9 +46,6 @@ func GetAppVipDetail(ctx context.Context, _ *vipdto.AppVipDetailReq) (*vipdto.Ap
 func findNextEnabledVipCfg(currentLevel uint32) *vipcfgdto.AppVipCfgItem {
 	var next *vipcfgdto.AppVipCfgItem
 	for _, cfg := range GetAllVipCfgFromMemory() {
-		//if cfg.Status != entity.VipCfgStatusEnabled {
-		//	continue
-		//}
 		if cfg.Level <= currentLevel {
 			continue
 		}

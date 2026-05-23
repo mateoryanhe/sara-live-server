@@ -41,22 +41,22 @@
           </el-table-column>
           <el-table-column label="升级充值上限" width="130">
             <template #default="{ row }">
-              {{ formatUsd(row.upgradeRechargeLimit) }}
+              {{ formatAmount(row.upgradeRechargeLimit) }}
             </template>
           </el-table-column>
           <el-table-column label="最低提现金额" width="130">
             <template #default="{ row }">
-              {{ formatUsd(row.minWithdrawAmount) }}
+              {{ formatAmount(row.minWithdrawAmount) }}
             </template>
           </el-table-column>
           <el-table-column label="最高提现金额" width="130">
             <template #default="{ row }">
-              {{ formatUsd(row.maxWithdrawAmount) }}
+              {{ formatAmount(row.maxWithdrawAmount) }}
             </template>
           </el-table-column>
           <el-table-column label="手续费" width="100">
             <template #default="{ row }">
-              {{ formatFee(row.fee) }}
+              {{ formatAmount(row.fee) }}
             </template>
           </el-table-column>
           <el-table-column label="创建时间" prop="createdAt" width="160"/>
@@ -98,20 +98,44 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="升级充值上限" prop="upgradeRechargeLimit">
-          <el-input-number v-model="currentRow.upgradeRechargeLimit" :min="0" controls-position="right"/>
-          <div class="form-tip">累计充值达到该值(美分)可升级到此等级，例如 10000 = $100.00</div>
+          <el-input-number
+              v-model="currentRow.upgradeRechargeLimit"
+              :min="0"
+              :precision="4"
+              :step="0.0001"
+              controls-position="right"
+          />
+          <div class="form-tip">保留4位小数，例如 100.0000</div>
         </el-form-item>
         <el-form-item label="最低提现金额" prop="minWithdrawAmount">
-          <el-input-number v-model="currentRow.minWithdrawAmount" :min="0" controls-position="right"/>
-          <div class="form-tip">单位：美分(USD)</div>
+          <el-input-number
+              v-model="currentRow.minWithdrawAmount"
+              :min="0"
+              :precision="4"
+              :step="0.0001"
+              controls-position="right"
+          />
+          <div class="form-tip">保留4位小数</div>
         </el-form-item>
         <el-form-item label="最高提现金额" prop="maxWithdrawAmount">
-          <el-input-number v-model="currentRow.maxWithdrawAmount" :min="0" controls-position="right"/>
-          <div class="form-tip">单位：美分(USD)，0 表示不限制</div>
+          <el-input-number
+              v-model="currentRow.maxWithdrawAmount"
+              :min="0"
+              :precision="4"
+              :step="0.0001"
+              controls-position="right"
+          />
+          <div class="form-tip">保留4位小数，0 表示不限制</div>
         </el-form-item>
         <el-form-item label="手续费" prop="fee">
-          <el-input-number v-model="currentRow.fee" :min="0" controls-position="right"/>
-          <div class="form-tip">万分比，100 = 1%，1000 = 10%</div>
+          <el-input-number
+              v-model="currentRow.fee"
+              :min="0"
+              :precision="4"
+              :step="0.0001"
+              controls-position="right"
+          />
+          <div class="form-tip">保留4位小数</div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -170,13 +194,15 @@ const defaultForm = (): VipCfgForm => ({
 const currentRow = ref<VipCfgForm>(defaultForm())
 const formRef = ref<FormInstance>()
 
-const formatUsd = (cents: number) => {
-  const amount = (Number(cents) / 100).toFixed(2)
-  return `$${amount}`
-}
-
-const formatFee = (fee: number) => {
-  return `${(Number(fee) / 100).toFixed(2)}%`
+const formatAmount = (val: number | null | undefined) => {
+  if (val === null || val === undefined) {
+    return '-'
+  }
+  const n = Number(val)
+  if (Number.isNaN(n)) {
+    return '-'
+  }
+  return n.toLocaleString('zh-CN', {minimumFractionDigits: 0, maximumFractionDigits: 4})
 }
 
 const validateWithdrawRange = (_rule: unknown, _value: unknown, callback: (error?: Error) => void) => {
