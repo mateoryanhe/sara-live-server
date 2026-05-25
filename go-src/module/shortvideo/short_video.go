@@ -33,6 +33,7 @@ func CreateShortVideo(_ context.Context, req *shortvideodto.CreateShortVideoReq)
 		Cover:       req.Cover,
 		Sort:        req.Sort,
 		Status:      entity.ShortVideoStatusOffShelf,
+		IsPaid:      req.IsPaid,
 		Description: req.Description,
 	}
 	if err := shortvideodao.Create(row); err != nil {
@@ -53,6 +54,7 @@ func UpdateShortVideo(_ context.Context, req *shortvideodto.UpdateShortVideoReq)
 	row.Video = req.Video
 	row.Cover = req.Cover
 	row.Sort = req.Sort
+	row.IsPaid = req.IsPaid
 	row.Description = req.Description
 	if err := shortvideodao.Update(row); err != nil {
 		return nil, err

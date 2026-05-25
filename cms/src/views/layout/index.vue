@@ -84,7 +84,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('ShortVideoManagement')"
+            v-if="hasMenuPermission('ShortVideoManagement') || hasMenuPermission('ShortVideoCfgManagement')"
             index="/shortvideo">
           <template #title>
             <el-icon>
@@ -97,6 +97,12 @@
               <VideoCamera/>
             </el-icon>
             <span>短视频管理</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('ShortVideoCfgManagement')" index="/shortvideo/short-video-cfg">
+            <el-icon>
+              <Setting/>
+            </el-icon>
+            <span>短视频配置</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu

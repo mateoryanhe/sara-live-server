@@ -21,6 +21,7 @@ type ShortVideoListRes struct {
 	CoverName   string `json:"coverName" dc:"封面资源文件名(编辑保存用)"`
 	Sort        int    `json:"sort"`
 	Status      uint8  `json:"status"`
+	IsPaid      uint8  `json:"isPaid"`
 	Description string `json:"description"`
 	LikeCount   uint64 `json:"likeCount"`
 	CreatedAt   string `json:"createdAt"`

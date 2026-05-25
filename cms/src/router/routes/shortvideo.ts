@@ -12,5 +12,11 @@ export const shortVideoRoutes: RouteRecordRaw = {
             component: () => import('@/views/shortvideo/short-video-list.vue'),
             meta: {title: '短视频管理'},
         },
+        {
+            path: 'short-video-cfg',
+            name: 'ShortVideoCfgManagement',
+            component: () => import('@/views/shortvideo/short-video-cfg.vue'),
+            meta: {title: '短视频配置'},
+        },
     ],
 }

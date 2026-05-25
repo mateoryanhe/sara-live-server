@@ -89,7 +89,7 @@ func GetOnShelfShortVideos() []*entity.ShortVideo {
 	ret := make([]*entity.ShortVideo, 0)
 	err := g.DB().Model(string(entity.TbShortVideo)).
 		Where("status = ?", entity.ShortVideoStatusOnShelf).
-		Order("like_count desc, id desc").
+		Order("updated_at   desc").
 		Scan(&ret)
 	if err != nil {
 		return nil
@@ -98,7 +98,7 @@ func GetOnShelfShortVideos() []*entity.ShortVideo {
 }
 
 func GetShortVideoList(req *shortvideodto.ShortVideoListReq) (int, []*shortvideodto.ShortVideoListRes) {
-	sql := `select id, title, video, cover, sort, status, description, like_count, created_at, updated_at
+	sql := `select id, title, video, cover, sort, status, is_paid, description, like_count, created_at, updated_at
             from short_videos
             where 1=1 `
 	param := make([]any, 0)

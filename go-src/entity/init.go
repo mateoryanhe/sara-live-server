@@ -19,6 +19,7 @@ func Init() {
 	InitLiveGift()
 	initHomeBanner()
 	initShortVideo()
+	initShortVideoCfg()
 	initShortVideoLike()
 	initLiveFollow()
 	initRechargeCfg()

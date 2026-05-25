@@ -57,6 +57,13 @@
             </template>
           </el-table-column>
           <el-table-column label="排序" prop="sort" width="80"/>
+          <el-table-column label="是否付费" width="90">
+            <template #default="{ row }">
+              <el-tag :type="row.isPaid === 1 ? 'warning' : 'success'">
+                {{ row.isPaid === 1 ? '付费' : '免费' }}
+              </el-tag>
+            </template>
+          </el-table-column>
           <el-table-column label="状态" width="90">
             <template #default="{ row }">
               <el-tag :type="row.status === 1 ? 'success' : 'info'">
@@ -153,6 +160,12 @@
         <el-form-item label="排序" prop="sort">
           <el-input-number v-model="currentRow.sort" controls-position="right"/>
         </el-form-item>
+        <el-form-item label="是否付费" prop="isPaid">
+          <el-radio-group v-model="currentRow.isPaid">
+            <el-radio :label="0">免费</el-radio>
+            <el-radio :label="1">付费</el-radio>
+          </el-radio-group>
+        </el-form-item>
         <el-form-item label="描述" prop="description">
           <el-input v-model="currentRow.description" placeholder="请输入描述" type="textarea"/>
         </el-form-item>
@@ -183,6 +196,7 @@ interface ShortVideoForm {
   video: string
   cover: string
   sort: number
+  isPaid: number
   description: string
 }
 
@@ -207,6 +221,7 @@ const defaultForm = (): ShortVideoForm => ({
   video: '',
   cover: '',
   sort: 0,
+  isPaid: 0,
   description: ''
 })
 const currentRow = ref<ShortVideoForm>(defaultForm())
@@ -374,6 +389,7 @@ const handleEdit = (row: ShortVideo) => {
     video: row.videoName || '',
     cover: row.coverName || '',
     sort: Number(row.sort) || 0,
+    isPaid: row.isPaid ?? 0,
     description: row.description || ''
   }
   videoPreviewUrl.value = row.video || ''
@@ -432,6 +448,7 @@ const handleSave = async () => {
         video: currentRow.value.video,
         cover: currentRow.value.cover,
         sort: currentRow.value.sort,
+        isPaid: currentRow.value.isPaid,
         description: currentRow.value.description
       }
       if (currentRow.value.id) {

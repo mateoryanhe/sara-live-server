@@ -16,6 +16,7 @@ type AppShortVideoItem struct {
 	Video       string `json:"video" dc:"视频完整URL"`
 	Cover       string `json:"cover" dc:"封面完整URL"`
 	Description string `json:"description"`
+	IsPaid      uint8  `json:"isPaid" dc:"是否付费(0免费,1付费)"`
 	LikeCount   uint64 `json:"likeCount"`
 }
 

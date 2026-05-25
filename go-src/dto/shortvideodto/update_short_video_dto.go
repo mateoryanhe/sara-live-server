@@ -9,6 +9,7 @@ type UpdateShortVideoReq struct {
 	Video       string `json:"video" v:"required|max-length:255#视频不能为空|视频资源名最长255字符" dc:"视频资源名"`
 	Cover       string `json:"cover" v:"max-length:255#封面资源名最长255字符" dc:"封面资源名"`
 	Sort        int    `json:"sort" dc:"排序值(越大越靠前)"`
+	IsPaid      uint8  `json:"isPaid" v:"in:0,1#是否付费取值无效" dc:"是否付费(0免费,1付费)"`
 	Description string `json:"description" v:"max-length:255#描述最长255字符" dc:"描述"`
 }
 

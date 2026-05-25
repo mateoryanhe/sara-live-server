@@ -38,3 +38,11 @@ func (c *ShortVideoController) OnShelfShortVideo(ctx context.Context, req *short
 func (c *ShortVideoController) OffShelfShortVideo(ctx context.Context, req *shortvideodto.OffShelfShortVideoReq) (*shortvideodto.OffShelfShortVideoRes, error) {
 	return shortvideo.OffShelfShortVideo(ctx, req)
 }
+
+func (c *ShortVideoController) GetShortVideoCfg(ctx context.Context, req *shortvideodto.GetShortVideoCfgReq) (*shortvideodto.GetShortVideoCfgRes, error) {
+	return shortvideo.GetShortVideoCfg(ctx, req)
+}
+
+func (c *ShortVideoController) SaveShortVideoCfg(ctx context.Context, req *shortvideodto.SaveShortVideoCfgReq) (*shortvideodto.SaveShortVideoCfgRes, error) {
+	return shortvideo.SaveShortVideoCfg(ctx, req)
+}

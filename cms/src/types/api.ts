@@ -252,6 +252,7 @@ export interface ShortVideo {
     coverName: string
     sort: number
     status: number
+    isPaid: number
     description: string
     createdAt: string
     updatedAt: string
@@ -260,6 +261,33 @@ export interface ShortVideo {
 export interface ShortVideoQuery extends PageQuery {
     title?: string
     statusFilter?: number
+}
+
+export interface ShortVideoCfg {
+    id: string
+    maxFileSize: number
+    maxDuration: number
+    freeWatchSeconds: number
+    entryEnabled: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetShortVideoCfgRes {
+    cfg: ShortVideoCfg | null
+}
+
+export interface SaveShortVideoCfgReq {
+    id?: string
+    maxFileSize: number
+    maxDuration: number
+    freeWatchSeconds: number
+    entryEnabled: number
+}
+
+export interface SaveShortVideoCfgRes {
+    success: boolean
+    id: string
 }
 
 // 充值订单

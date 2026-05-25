@@ -27,6 +27,7 @@ var (
 
 // Init App端短视频列表缓存初始化,并每15分钟整体替换一次
 func Init() {
+	reloadShortVideoCfgMemory()
 	loadAppShortVideoListCache()
 	xrtimer.AddSingleton(gctx.New(), appListRefreshInterval, func(ctx context.Context) {
 		loadAppShortVideoListCache()
@@ -62,6 +63,7 @@ func toAppShortVideoItem(row *entity.ShortVideo) *shortvideodto.AppShortVideoIte
 		Video:       upload.GetUrlByName(row.Video),
 		Cover:       upload.GetUrlByName(row.Cover),
 		Description: row.Description,
+		IsPaid:      row.IsPaid,
 		LikeCount:   row.LikeCount,
 	}
 }

@@ -1,9 +1,24 @@
 import {request} from '../request'
-import type {PageResponse, ShortVideo, ShortVideoQuery} from '@/types/api'
+import type {
+    GetShortVideoCfgRes,
+    PageResponse,
+    SaveShortVideoCfgReq,
+    SaveShortVideoCfgRes,
+    ShortVideo,
+    ShortVideoQuery,
+} from '@/types/api'
 
 export const shortVideoApi = {
     getShortVideoList: (params: ShortVideoQuery) => {
         return request.post<PageResponse<ShortVideo>>('/shortVideo/shortVideoList', params)
+    },
+
+    getShortVideoCfg: () => {
+        return request.post<GetShortVideoCfgRes>('/shortVideo/getShortVideoCfg', {})
+    },
+
+    saveShortVideoCfg: (data: SaveShortVideoCfgReq) => {
+        return request.post<SaveShortVideoCfgRes>('/shortVideo/saveShortVideoCfg', data)
     },
 
     createShortVideo: (data: {
@@ -11,6 +26,7 @@ export const shortVideoApi = {
         video: string
         cover: string
         sort: number
+        isPaid: number
         description: string
     }) => {
         return request.post<{ id: string }>('/shortVideo/createShortVideo', data)
@@ -22,6 +38,7 @@ export const shortVideoApi = {
         video: string
         cover: string
         sort: number
+        isPaid: number
         description: string
     }) => {
         return request.post<boolean>('/shortVideo/updateShortVideo', data)

@@ -10,6 +10,7 @@ import (
 	"xr-game-server/dao/messagedao"
 	"xr-game-server/dao/namedao"
 	"xr-game-server/dao/rechargeorderdao"
+	"xr-game-server/dao/shortvideocfgdao"
 	"xr-game-server/dao/shortvideodao"
 	"xr-game-server/dao/shortvideolikedao"
 	"xr-game-server/dao/userinfodao"
@@ -28,6 +29,7 @@ func Init() {
 	liveroomdao.InitLiveRoomOnlineDao()
 	livefollowdao.InitLiveFollowDao()
 	shortvideodao.InitShortVideoDao()
+	shortvideocfgdao.InitShortVideoCfgDao()
 	shortvideolikedao.InitShortVideoLikeDao()
 	rechargeorderdao.InitRechargeOrderDao()
 	messagedao.InitPrivateMessageDao()
