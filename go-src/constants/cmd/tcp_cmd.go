@@ -21,4 +21,8 @@ const (
 	GoldPush = 11
 	//VIP等级推送(推送给指定用户)
 	VipLevelPush = 12
+	//私信推送(推送给接收者)
+	PrivateMessagePush = 13
+	//系统消息推送(推送给接收者)
+	SystemMessagePush = 14
 )

@@ -34,6 +34,7 @@ func Init() {
 	initVipCfgController()           // VIP配置(CMS)
 	initVipCfgAppController()        // VIP配置查询(App)
 	initVipAppController()           // VIP详情(App)
+	initMessageAppController()       // 私信(App)
 	initUploadController()           // CMS文件上传
 	httpserver.InitWebsocket()
 	go httpserver.InitHttpServer()

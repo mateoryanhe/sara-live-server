@@ -24,4 +24,5 @@ func Init() {
 	initRechargeCfg()
 	initRechargeOrder()
 	initVipCfg()
+	initUserMessage()
 }
