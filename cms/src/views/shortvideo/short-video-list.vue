@@ -64,6 +64,11 @@
               </el-tag>
             </template>
           </el-table-column>
+          <el-table-column label="每秒钻石" width="100">
+            <template #default="{ row }">
+              {{ row.isPaid === 1 ? row.diamondPerSecond : '-' }}
+            </template>
+          </el-table-column>
           <el-table-column label="状态" width="90">
             <template #default="{ row }">
               <el-tag :type="row.status === 1 ? 'success' : 'info'">
@@ -167,6 +172,16 @@
             <el-radio :label="1">付费</el-radio>
           </el-radio-group>
         </el-form-item>
+        <el-form-item v-if="currentRow.isPaid === 1" label="每秒钻石" prop="diamondPerSecond">
+          <el-input-number
+              v-model="currentRow.diamondPerSecond"
+              :min="1"
+              :precision="0"
+              controls-position="right"
+              style="width: 220px"
+          />
+          <span class="form-tip">付费视频按观看秒数 × 每秒钻石数扣费</span>
+        </el-form-item>
         <el-form-item label="描述" prop="description">
           <el-input v-model="currentRow.description" placeholder="请输入描述" type="textarea"/>
         </el-form-item>
@@ -198,6 +213,7 @@ interface ShortVideoForm {
   cover: string
   sort: number
   isPaid: number
+  diamondPerSecond: number
   description: string
 }
 
@@ -226,6 +242,7 @@ const defaultForm = (): ShortVideoForm => ({
   cover: '',
   sort: 0,
   isPaid: 0,
+  diamondPerSecond: 0,
   description: ''
 })
 const currentRow = ref<ShortVideoForm>(defaultForm())
@@ -330,12 +347,34 @@ watch(dialogVisible, (visible) => {
   }
 })
 
+watch(() => currentRow.value.isPaid, (paid) => {
+  if (paid === 1) {
+    if (!currentRow.value.diamondPerSecond || currentRow.value.diamondPerSecond < 1) {
+      currentRow.value.diamondPerSecond = 10
+    }
+    return
+  }
+  currentRow.value.diamondPerSecond = 0
+})
+
 const formRules: FormRules = {
   title: [
     {required: true, message: '请输入标题', trigger: 'blur'},
     {min: 1, max: 64, message: '标题长度在1-64个字符', trigger: 'blur'}
   ],
   video: [{required: true, message: '请上传视频', trigger: 'change'}],
+  diamondPerSecond: [
+    {
+      validator: (_rule, value, callback) => {
+        if (currentRow.value.isPaid === 1 && (!value || value < 1)) {
+          callback(new Error('付费视频请填写每秒钻石数'))
+          return
+        }
+        callback()
+      },
+      trigger: 'change',
+    },
+  ],
   description: [{max: 255, message: '描述最长255字符', trigger: 'blur'}]
 }
 
@@ -408,6 +447,7 @@ const handleEdit = (row: ShortVideo) => {
     cover: row.coverName || '',
     sort: Number(row.sort) || 0,
     isPaid: row.isPaid ?? 0,
+    diamondPerSecond: row.isPaid === 1 ? (row.diamondPerSecond || 10) : 0,
     description: row.description || ''
   }
   videoPreviewUrl.value = row.video || ''
@@ -467,6 +507,7 @@ const handleSave = async () => {
         cover: currentRow.value.cover,
         sort: currentRow.value.sort,
         isPaid: currentRow.value.isPaid,
+        diamondPerSecond: currentRow.value.isPaid === 1 ? currentRow.value.diamondPerSecond : 0,
         description: currentRow.value.description
       }
       if (currentRow.value.id) {

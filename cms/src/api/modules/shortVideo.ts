@@ -35,6 +35,7 @@ export const shortVideoApi = {
         cover: string
         sort: number
         isPaid: number
+        diamondPerSecond: number
         description: string
     }) => {
         return request.post<{ id: string }>('/shortVideo/createShortVideo', data)
@@ -47,6 +48,7 @@ export const shortVideoApi = {
         cover: string
         sort: number
         isPaid: number
+        diamondPerSecond: number
         description: string
     }) => {
         return request.post<boolean>('/shortVideo/updateShortVideo', data)

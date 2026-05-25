@@ -13,6 +13,7 @@ import (
 	"xr-game-server/dao/shortvideocfgdao"
 	"xr-game-server/dao/shortvideodao"
 	"xr-game-server/dao/shortvideolikedao"
+	"xr-game-server/dao/shortvideowatchdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dao/userlogindevicedao"
 )
@@ -31,6 +32,7 @@ func Init() {
 	shortvideodao.InitShortVideoDao()
 	shortvideocfgdao.InitShortVideoCfgDao()
 	shortvideolikedao.InitShortVideoLikeDao()
+	shortvideowatchdao.InitShortVideoWatchDao()
 	rechargeorderdao.InitRechargeOrderDao()
 	messagedao.InitPrivateMessageDao()
 	messagedao.InitSystemMessageDao()

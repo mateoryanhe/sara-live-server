@@ -16,6 +16,7 @@ var reasonTextMap = map[Lang]map[Reason]string{
 		ReasonSystemGrant:     "系统发放",
 		ReasonGiftSend:        "直播间送礼",
 		ReasonGoldExchange:    "金币兑换钻石",
+		ReasonShortVideoWatch: "短视频观看",
 	},
 	LangZHTW: {
 		ReasonUnknown:         "未知",
@@ -30,6 +31,7 @@ var reasonTextMap = map[Lang]map[Reason]string{
 		ReasonSystemGrant:     "系統發放",
 		ReasonGiftSend:        "直播間送禮",
 		ReasonGoldExchange:    "金幣兌換鑽石",
+		ReasonShortVideoWatch: "短視頻觀看",
 	},
 	LangEN: {
 		ReasonUnknown:         "Unknown",
@@ -44,6 +46,7 @@ var reasonTextMap = map[Lang]map[Reason]string{
 		ReasonSystemGrant:     "System Grant",
 		ReasonGiftSend:        "Live Room Gift",
 		ReasonGoldExchange:    "Gold to Diamond Exchange",
+		ReasonShortVideoWatch: "Short Video Watch",
 	},
 }
 

@@ -26,3 +26,7 @@ func (c *ShortVideoAppController) LikeShortVideo(ctx context.Context, req *short
 func (c *ShortVideoAppController) AppShortVideoCfg(ctx context.Context, req *shortvideodto.AppShortVideoCfgReq) (*shortvideodto.AppShortVideoCfgRes, error) {
 	return shortvideo.GetAppShortVideoCfg(ctx, req)
 }
+
+func (c *ShortVideoAppController) WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortVideoReq) (*shortvideodto.WatchBillShortVideoRes, error) {
+	return shortvideo.WatchBillShortVideo(ctx, req)
+}

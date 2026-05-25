@@ -58,13 +58,14 @@ func getAppShortVideoListCache() []*shortvideodto.AppShortVideoItem {
 
 func toAppShortVideoItem(row *entity.ShortVideo) *shortvideodto.AppShortVideoItem {
 	return &shortvideodto.AppShortVideoItem{
-		ID:          strconv.FormatUint(row.ID, 10),
-		Title:       row.Title,
-		Video:       upload.GetUrlByName(row.Video),
-		Cover:       upload.GetUrlByName(row.Cover),
-		Description: row.Description,
-		IsPaid:      row.IsPaid,
-		LikeCount:   row.LikeCount,
+		ID:               strconv.FormatUint(row.ID, 10),
+		Title:            row.Title,
+		Video:            upload.GetUrlByName(row.Video),
+		Cover:            upload.GetUrlByName(row.Cover),
+		Description:      row.Description,
+		IsPaid:           row.IsPaid,
+		DiamondPerSecond: row.DiamondPerSecond,
+		LikeCount:        row.LikeCount,
 	}
 }
 

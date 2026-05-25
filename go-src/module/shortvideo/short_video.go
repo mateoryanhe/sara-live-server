@@ -27,14 +27,19 @@ func CreateShortVideo(_ context.Context, req *shortvideodto.CreateShortVideoReq)
 	if existing := shortvideodao.GetByTitle(req.Title); existing != nil {
 		return nil, errercode.CreateCode(errercode.ShortVideoExist)
 	}
+	isPaid, diamondPerSecond, err := normalizeShortVideoPaid(req.IsPaid, req.DiamondPerSecond)
+	if err != nil {
+		return nil, err
+	}
 	row := &entity.ShortVideo{
-		Title:       req.Title,
-		Video:       req.Video,
-		Cover:       req.Cover,
-		Sort:        req.Sort,
-		Status:      entity.ShortVideoStatusOffShelf,
-		IsPaid:      req.IsPaid,
-		Description: req.Description,
+		Title:            req.Title,
+		Video:            req.Video,
+		Cover:            req.Cover,
+		Sort:             req.Sort,
+		Status:           entity.ShortVideoStatusOffShelf,
+		IsPaid:           isPaid,
+		DiamondPerSecond: diamondPerSecond,
+		Description:      req.Description,
 	}
 	if err := shortvideodao.Create(row); err != nil {
 		return nil, err
@@ -50,11 +55,16 @@ func UpdateShortVideo(_ context.Context, req *shortvideodto.UpdateShortVideoReq)
 	if existing := shortvideodao.GetByTitle(req.Title); existing != nil && existing.ID != req.ID {
 		return nil, errercode.CreateCode(errercode.ShortVideoExist)
 	}
+	isPaid, diamondPerSecond, err := normalizeShortVideoPaid(req.IsPaid, req.DiamondPerSecond)
+	if err != nil {
+		return nil, err
+	}
 	row.Title = req.Title
 	row.Video = req.Video
 	row.Cover = req.Cover
 	row.Sort = req.Sort
-	row.IsPaid = req.IsPaid
+	row.IsPaid = isPaid
+	row.DiamondPerSecond = diamondPerSecond
 	row.Description = req.Description
 	if err := shortvideodao.Update(row); err != nil {
 		return nil, err
@@ -120,4 +130,14 @@ func LikeShortVideo(ctx context.Context, req *shortvideodto.LikeShortVideoReq) (
 	}
 	row.AddLikeCount(1)
 	return &shortvideodto.LikeShortVideoRes{LikeCount: row.LikeCount}, nil
+}
+
+func normalizeShortVideoPaid(isPaid uint8, diamondPerSecond uint64) (uint8, uint64, error) {
+	if isPaid != entity.ShortVideoPaidYes {
+		return entity.ShortVideoPaidNo, 0, nil
+	}
+	if diamondPerSecond == 0 {
+		return 0, 0, errercode.CreateCode(errercode.InvalidParam)
+	}
+	return isPaid, diamondPerSecond, nil
 }

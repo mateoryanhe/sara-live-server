@@ -29,14 +29,15 @@ const (
 // ShortVideo 短视频(CMS 管理)
 type ShortVideo struct {
 	migrate.OneModel
-	Title       string `gorm:"size:64;comment:标题" json:"title"`
-	Video       string `gorm:"size:255;default:'';comment:视频资源名" json:"video"`
-	Cover       string `gorm:"size:255;default:'';comment:封面资源名" json:"cover"`
-	Sort        int    `gorm:"default:0;comment:排序值(越大越靠前)" json:"sort"`
-	Status      uint8  `gorm:"default:0;comment:状态(0-下架,1-上架)" json:"status"`
-	IsPaid      uint8  `gorm:"default:0;comment:是否付费(0免费,1付费)" json:"isPaid"`
-	Description string `gorm:"size:255;default:'';comment:描述" json:"description"`
-	LikeCount   uint64 `gorm:"default:0;comment:点赞累计数量" json:"likeCount"`
+	Title            string `gorm:"size:64;comment:标题" json:"title"`
+	Video            string `gorm:"size:255;default:'';comment:视频资源名" json:"video"`
+	Cover            string `gorm:"size:255;default:'';comment:封面资源名" json:"cover"`
+	Sort             int    `gorm:"default:0;comment:排序值(越大越靠前)" json:"sort"`
+	Status           uint8  `gorm:"default:0;comment:状态(0-下架,1-上架)" json:"status"`
+	IsPaid           uint8  `gorm:"default:0;comment:是否付费(0免费,1付费)" json:"isPaid"`
+	DiamondPerSecond uint64 `gorm:"default:0;comment:每秒钻石数(付费时有效)" json:"diamondPerSecond"`
+	Description      string `gorm:"size:255;default:'';comment:描述" json:"description"`
+	LikeCount        uint64 `gorm:"default:0;comment:点赞累计数量" json:"likeCount"`
 }
 
 func (receiver *ShortVideo) AddLikeCount(val uint64) {

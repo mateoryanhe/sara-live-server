@@ -21,6 +21,7 @@ func Init() {
 	initShortVideo()
 	initShortVideoCfg()
 	initShortVideoLike()
+	initShortVideoWatch()
 	initLiveFollow()
 	initRechargeCfg()
 	initRechargeOrder()

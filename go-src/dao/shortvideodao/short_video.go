@@ -98,7 +98,7 @@ func GetOnShelfShortVideos() []*entity.ShortVideo {
 }
 
 func GetShortVideoList(req *shortvideodto.ShortVideoListReq) (int, []*shortvideodto.ShortVideoListRes) {
-	sql := `select id, title, video, cover, sort, status, is_paid, description, like_count, created_at, updated_at
+	sql := `select id, title, video, cover, sort, status, is_paid, diamond_per_second, description, like_count, created_at, updated_at
             from short_videos
             where 1=1 `
 	param := make([]any, 0)

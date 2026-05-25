@@ -28,6 +28,8 @@ const (
 	ReasonGiftSend Reason = 10
 	// ReasonGoldExchange 金币兑换钻石
 	ReasonGoldExchange Reason = 11
+	// ReasonShortVideoWatch 短视频观看扣费
+	ReasonShortVideoWatch Reason = 12
 )
 
 // String 返回枚举的英文标识(用于日志/调试,不参与多语言展示;
@@ -56,6 +58,8 @@ func (r Reason) String() string {
 		return "GiftSend"
 	case ReasonGoldExchange:
 		return "GoldExchange"
+	case ReasonShortVideoWatch:
+		return "ShortVideoWatch"
 	default:
 		return "Unknown"
 	}
