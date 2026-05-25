@@ -88,6 +88,8 @@ const (
 	VipCfgExist XRCode = 102
 	// VipCfgNonExist VIP配置不存在
 	VipCfgNonExist XRCode = 103
+	// ShortVideoFileTooLarge 短视频文件超过大小限制
+	ShortVideoFileTooLarge XRCode = 104
 )
 
 type XError struct {

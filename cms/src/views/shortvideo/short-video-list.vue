@@ -133,6 +133,7 @@
               <el-button link type="danger" @click="clearAsset('video')">移除视频</el-button>
             </div>
             <div v-else-if="currentRow.video" class="file-name">{{ currentRow.video }}</div>
+            <div class="form-tip">最大 {{ maxVideoSizeMB }}MB，可在「短视频配置」中调整</div>
           </div>
         </el-form-item>
         <el-form-item label="封面" prop="cover">
@@ -201,8 +202,11 @@ interface ShortVideoForm {
 }
 
 const allowedVideoExt = ['.mp4', '.webm', '.mov']
+const MB = 1024 * 1024
 
 const loading = ref(false)
+const maxVideoSizeBytes = ref(100 * MB)
+const maxVideoSizeMB = ref(100)
 const tableData = ref<ShortVideo[]>([])
 const total = ref(0)
 const currentPage = ref(1)
@@ -272,8 +276,8 @@ const beforeVideoUpload = (file: File): boolean => {
     ElMessage.error('视频仅支持 mp4、webm、mov 格式')
     return false
   }
-  if (file.size > 100 * 1024 * 1024) {
-    ElMessage.error('视频不能超过100MB')
+  if (file.size > maxVideoSizeBytes.value) {
+    ElMessage.error(`视频不能超过${maxVideoSizeMB.value}MB`)
     return false
   }
   return true
@@ -284,7 +288,9 @@ const doUpload = async (options: UploadRequestOptions, field: 'video' | 'cover')
   const uploading = field === 'video' ? videoUploading : coverUploading
   uploading.value = true
   try {
-    const res = await uploadApi.uploadFile(file)
+    const res = field === 'video'
+        ? await shortVideoApi.uploadShortVideo(file)
+        : await uploadApi.uploadFile(file)
     currentRow.value[field] = res.fileName
     const objectUrl = URL.createObjectURL(file)
     if (field === 'video') {
@@ -331,6 +337,18 @@ const formRules: FormRules = {
   ],
   video: [{required: true, message: '请上传视频', trigger: 'change'}],
   description: [{max: 255, message: '描述最长255字符', trigger: 'blur'}]
+}
+
+const fetchShortVideoCfg = async () => {
+  try {
+    const response = await shortVideoApi.getShortVideoCfg()
+    if (response.cfg?.maxFileSize) {
+      maxVideoSizeBytes.value = response.cfg.maxFileSize
+      maxVideoSizeMB.value = Math.max(1, Math.round(response.cfg.maxFileSize / MB))
+    }
+  } catch (error) {
+    console.error('获取短视频配置失败:', error)
+  }
 }
 
 const fetchShortVideoList = async () => {
@@ -467,6 +485,7 @@ const handleSave = async () => {
 }
 
 onMounted(() => {
+  fetchShortVideoCfg()
   fetchShortVideoList()
 })
 </script>
@@ -509,6 +528,12 @@ onMounted(() => {
 }
 
 .file-name {
+  margin-top: 8px;
+  color: #909399;
+  font-size: 12px;
+}
+
+.form-tip {
   margin-top: 8px;
   color: #909399;
   font-size: 12px;

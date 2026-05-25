@@ -55,6 +55,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ShortVideoAlreadyLiked:    "Short video already liked",
 		VipCfgExist:               "VIP level already exists",
 		VipCfgNonExist:            "VIP config does not exist",
+		ShortVideoFileTooLarge:    "Short video file exceeds size limit",
 	},
 	lang.LangZHCN: {
 		Success:                   "成功",
@@ -106,6 +107,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ShortVideoAlreadyLiked:    "已点赞,请勿重复操作",
 		VipCfgExist:               "VIP等级已存在",
 		VipCfgNonExist:            "VIP配置不存在",
+		ShortVideoFileTooLarge:    "短视频文件超过大小限制",
 	},
 	lang.LangZHTW: {
 		Success:                   "成功",
@@ -157,6 +159,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ShortVideoAlreadyLiked:    "已點讚,請勿重複操作",
 		VipCfgExist:               "VIP等級已存在",
 		VipCfgNonExist:            "VIP配置不存在",
+		ShortVideoFileTooLarge:    "短視頻文件超過大小限制",
 	},
 }
 

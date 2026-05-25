@@ -53,6 +53,12 @@ var allowedCMSExt = map[string]struct{}{
 	".zip":    {},
 }
 
+var allowedShortVideoExt = map[string]struct{}{
+	".mp4":  {},
+	".webm": {},
+	".mov":  {},
+}
+
 // UploadImage 保存单张图片到 <serverRoot>/upload/images,返回保存后的文件名
 func UploadImage(file *ghttp.UploadFile) (string, error) {
 	if file == nil {
@@ -126,6 +132,43 @@ func UploadCMSFile(file *ghttp.UploadFile) (string, error) {
 	}
 
 	dir := getCMSDir()
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return "", err
+	}
+	newName := fmt.Sprintf("%d%s", snowflake.GetId(), ext)
+	src, err := file.Open()
+	if err != nil {
+		return "", err
+	}
+	defer src.Close()
+	dst, err := os.Create(filepath.Join(dir, newName))
+	if err != nil {
+		return "", err
+	}
+	defer dst.Close()
+	if _, err := io.Copy(dst, src); err != nil {
+		return "", err
+	}
+	return newName, nil
+}
+
+// UploadShortVideoFile 保存短视频文件,按传入大小限制校验
+func UploadShortVideoFile(file *ghttp.UploadFile, maxSize uint64) (string, error) {
+	if file == nil {
+		return "", errors.New("upload file is empty")
+	}
+	if maxSize == 0 {
+		maxSize = uint64(MaxCMSFileSize)
+	}
+	if file.Size > int64(maxSize) {
+		return "", fmt.Errorf("file too large, max=%d bytes", maxSize)
+	}
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	if _, ok := allowedShortVideoExt[ext]; !ok {
+		return "", fmt.Errorf("video ext not allowed: %s", ext)
+	}
+
+	dir := getImageDir()
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return "", err
 	}

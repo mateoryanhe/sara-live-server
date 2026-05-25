@@ -21,6 +21,14 @@ export const shortVideoApi = {
         return request.post<SaveShortVideoCfgRes>('/shortVideo/saveShortVideoCfg', data)
     },
 
+    uploadShortVideo: (file: File) => {
+        const formData = new FormData()
+        formData.append('file', file)
+        return request.post<{ fileName: string; url: string }>('/shortVideo/uploadShortVideo', formData, {
+            headers: {'Content-Type': 'multipart/form-data'},
+        })
+    },
+
     createShortVideo: (data: {
         title: string
         video: string

@@ -46,3 +46,7 @@ func (c *ShortVideoController) GetShortVideoCfg(ctx context.Context, req *shortv
 func (c *ShortVideoController) SaveShortVideoCfg(ctx context.Context, req *shortvideodto.SaveShortVideoCfgReq) (*shortvideodto.SaveShortVideoCfgRes, error) {
 	return shortvideo.SaveShortVideoCfg(ctx, req)
 }
+
+func (c *ShortVideoController) UploadShortVideo(ctx context.Context, req *shortvideodto.UploadShortVideoCMSReq) (*shortvideodto.UploadShortVideoCMSRes, error) {
+	return shortvideo.UploadShortVideoCMS(ctx, req)
+}

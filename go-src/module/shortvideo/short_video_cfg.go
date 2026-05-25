@@ -129,3 +129,11 @@ func formatShortVideoCfgTime(t time.Time) string {
 	}
 	return t.Format("2006-01-02 15:04:05")
 }
+
+func getShortVideoMaxFileSize() uint64 {
+	cfg := getAppShortVideoCfgCache()
+	if cfg == nil || cfg.MaxFileSize == 0 {
+		return defaultMaxFileSize
+	}
+	return cfg.MaxFileSize
+}
