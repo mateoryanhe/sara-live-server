@@ -50,3 +50,7 @@ func (c *ShortVideoController) SaveShortVideoCfg(ctx context.Context, req *short
 func (c *ShortVideoController) UploadShortVideo(ctx context.Context, req *shortvideodto.UploadShortVideoCMSReq) (*shortvideodto.UploadShortVideoCMSRes, error) {
 	return shortvideo.UploadShortVideoCMS(ctx, req)
 }
+
+func (c *ShortVideoController) ShortVideoWatchList(ctx context.Context, req *shortvideodto.ShortVideoWatchListReq) (*httpserver.CMSQueryResp, error) {
+	return shortvideo.GetShortVideoWatchList(ctx, req)
+}

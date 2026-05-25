@@ -13,7 +13,7 @@ import (
 	"xr-game-server/module/wallet"
 )
 
-const watchBillIntervalSeconds uint32 = 5
+const watchBillIntervalSeconds uint32 = 3
 
 // WatchBillShortVideo App端短视频观看扣费,每次按5秒进度计费
 func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortVideoReq) (*shortvideodto.WatchBillShortVideoRes, error) {

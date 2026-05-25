@@ -6,11 +6,17 @@ import type {
     SaveShortVideoCfgRes,
     ShortVideo,
     ShortVideoQuery,
+    ShortVideoWatchQuery,
+    ShortVideoWatchRecord,
 } from '@/types/api'
 
 export const shortVideoApi = {
     getShortVideoList: (params: ShortVideoQuery) => {
         return request.post<PageResponse<ShortVideo>>('/shortVideo/shortVideoList', params)
+    },
+
+    getShortVideoWatchList: (params: ShortVideoWatchQuery) => {
+        return request.post<PageResponse<ShortVideoWatchRecord>>('/shortVideo/shortVideoWatchList', params)
     },
 
     getShortVideoCfg: () => {

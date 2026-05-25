@@ -264,6 +264,23 @@ export interface ShortVideoQuery extends PageQuery {
     statusFilter?: number
 }
 
+export interface ShortVideoWatchRecord {
+    id: string
+    userId: string
+    nickname: string
+    videoId: string
+    videoTitle: string
+    billedSeconds: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface ShortVideoWatchQuery extends PageQuery {
+    userId?: string
+    startTime?: number
+    endTime?: number
+}
+
 export interface ShortVideoCfg {
     id: string
     maxFileSize: number

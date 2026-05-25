@@ -84,7 +84,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('ShortVideoManagement') || hasMenuPermission('ShortVideoCfgManagement')"
+            v-if="hasMenuPermission('ShortVideoManagement') || hasMenuPermission('ShortVideoCfgManagement') || hasMenuPermission('ShortVideoWatchManagement')"
             index="/shortvideo">
           <template #title>
             <el-icon>
@@ -103,6 +103,12 @@
               <Setting/>
             </el-icon>
             <span>短视频配置</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('ShortVideoWatchManagement')" index="/shortvideo/short-video-watch-list">
+            <el-icon>
+              <View/>
+            </el-icon>
+            <span>观看记录</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -189,7 +195,7 @@
 <script lang="ts" setup>
 import {computed, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {ArrowDown, Expand, Fold, Lock, Medal, Monitor, Picture, Present, Setting, Stamp, User, VideoCamera, VideoPlay, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Expand, Fold, Lock, Medal, Monitor, Picture, Present, Setting, Stamp, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {clearPermissions, getIsAdmin, hasPermission} from '@/utils/permission'
 
 const route = useRoute()
