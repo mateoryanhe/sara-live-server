@@ -26,6 +26,8 @@ const (
 	ReasonSystemGrant Reason = 9
 	// ReasonGiftSend 直播间送礼消耗
 	ReasonGiftSend Reason = 10
+	// ReasonGoldExchange 金币兑换钻石
+	ReasonGoldExchange Reason = 11
 )
 
 // String 返回枚举的英文标识(用于日志/调试,不参与多语言展示;
@@ -52,6 +54,8 @@ func (r Reason) String() string {
 		return "SystemGrant"
 	case ReasonGiftSend:
 		return "GiftSend"
+	case ReasonGoldExchange:
+		return "GoldExchange"
 	default:
 		return "Unknown"
 	}

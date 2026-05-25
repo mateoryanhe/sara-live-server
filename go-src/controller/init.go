@@ -8,6 +8,7 @@ func Init() {
 	initAuthApi()
 	initAccountController()
 	initGoldController()
+	initGoldAppController()
 	initDiamondController()
 	initIndex()
 	initWebSocket()
