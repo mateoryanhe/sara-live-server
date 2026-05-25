@@ -18,12 +18,12 @@ server:
 bufferSize:
   db:
     lazy:
-      period: 15 #懒缓冲池频率,15秒同步数据库
+      period: 15000 #懒缓冲池频率,15秒同步数据库
       small: 2000  #数据库更新数据缓冲-->对应sysdb->单行数据写入缓冲池 eg角色表
       middle: 15000 #数据库更新数据缓冲-->对应sysdb->多行数据写入缓冲池  eg背包表 邮件表
       large: 50000 #数据库更新数据缓冲-->对应sysdb->多行数据写入缓冲池 eg item_log表,
     fast:
-      period: 50 #快速缓冲池频率,50毫秒同步数据库
+      period: 30 #快速缓冲池频率,50毫秒同步数据库
       small: 20 #数据库更新数据缓冲-->对应sysdb->单行数据写入缓冲池 eg角色表
       middle: 150 #数据库更新数据缓冲-->对应sysdb->多行数据写入缓冲池 eg背包表 邮件表
       large: 500 #数据库更新数据缓冲-->对应sysdb->多行数据写入缓冲池 eg item_log表,邮件表

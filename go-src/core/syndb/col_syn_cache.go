@@ -73,15 +73,15 @@ func SysExit(sig os.Signal) {
 func consume() {
 	for _, val := range lazyMap {
 		gutil.TryCatch(gctx.New(), func(ctx context.Context) {
-			val.Syn()
 			val.PullData()
+			val.Syn()
 		}, func(ctx context.Context, exception error) {
 		})
 	}
 	for _, quick := range quickMap {
 		gutil.TryCatch(gctx.New(), func(ctx context.Context) {
-			quick.Syn()
 			quick.PullData()
+			quick.Syn()
 		}, func(ctx context.Context, exception error) {
 		})
 	}
@@ -94,6 +94,10 @@ func (colCache *ColSynCache) PullData() {
 	case data := <-colCache.DataQueue:
 		{
 			colCache.TempData = append(colCache.TempData, data)
+			//如果是第一个数据
+			if len(colCache.TempData) == 1 {
+				colCache.LastTime = time.Now()
+			}
 		}
 		//防止堵塞
 	case <-time.After(time.Nanosecond):
@@ -106,10 +110,10 @@ func (colCache *ColSynCache) PullData() {
 func (colCache *ColSynCache) Syn() {
 	//时间到,强制同步
 	now := time.Now()
-	diff := now.Sub(colCache.LastTime)
-	if diff > colCache.Period {
+	targetTime := colCache.LastTime.Add(colCache.Period)
+
+	if len(colCache.TempData) > 0 && targetTime.Before(now) {
 		colCache.batchSave()
-		colCache.LastTime = now
 	}
 	//到达最大数量,强制同步
 	if len(colCache.TempData) >= Max {

@@ -91,7 +91,7 @@ func (receiver *UserInfo) SetRemark(remark string) {
 func (receiver *UserInfo) AddGold(gold float64) {
 	receiver.Gold = math.AddFloat64(gold, receiver.Gold)
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserInfo, UserInfoGold, &syndb.ColData{
+	syndb.AddDataToLazyChan(TbUserInfo, UserInfoGold, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.Gold,
 	})
@@ -100,7 +100,7 @@ func (receiver *UserInfo) AddGold(gold float64) {
 func (receiver *UserInfo) SubGold(gold float64) {
 	receiver.Gold = math.SubFloat64(receiver.Gold, gold)
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserInfo, UserInfoGold, &syndb.ColData{
+	syndb.AddDataToLazyChan(TbUserInfo, UserInfoGold, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.Gold,
 	})
@@ -109,7 +109,7 @@ func (receiver *UserInfo) SubGold(gold float64) {
 func (receiver *UserInfo) AddDiamond(diamond float64) {
 	receiver.Diamond = math.AddFloat64(diamond, receiver.Diamond)
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserInfo, UserInfoDiamond, &syndb.ColData{
+	syndb.AddDataToLazyChan(TbUserInfo, UserInfoDiamond, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.Diamond,
 	})
@@ -118,7 +118,7 @@ func (receiver *UserInfo) AddDiamond(diamond float64) {
 func (receiver *UserInfo) SubDiamond(diamond float64) {
 	receiver.Diamond = math.SubFloat64(receiver.Diamond, diamond)
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserInfo, UserInfoDiamond, &syndb.ColData{
+	syndb.AddDataToLazyChan(TbUserInfo, UserInfoDiamond, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.Diamond,
 	})
@@ -179,7 +179,7 @@ func (receiver *UserInfo) SetCreatedAt(val time.Time) {
 
 func (receiver *UserInfo) SetUpdatedAt(val time.Time) {
 	receiver.UpdatedAt = val
-	syndb.AddDataToQuickChan(TbUserInfo, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddDataToLazyChan(TbUserInfo, db.UpdatedAtName, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -187,14 +187,14 @@ func (receiver *UserInfo) SetUpdatedAt(val time.Time) {
 
 func initUserInfo() {
 	syndb.RegQuickWithLarge(TbUserInfo, db.CreatedAtName)
-	syndb.RegQuickWithLarge(TbUserInfo, db.UpdatedAtName)
+	syndb.RegLazyWithLarge(TbUserInfo, db.UpdatedAtName)
 
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoNickname)
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoPhone)
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoAvatar)
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoRemark)
-	syndb.RegQuickWithLarge(TbUserInfo, UserInfoGold)
-	syndb.RegQuickWithLarge(TbUserInfo, UserInfoDiamond)
+	syndb.RegLazyWithLarge(TbUserInfo, UserInfoGold)
+	syndb.RegLazyWithLarge(TbUserInfo, UserInfoDiamond)
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoShareCode)
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoGuildId)
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoIsAnchor)

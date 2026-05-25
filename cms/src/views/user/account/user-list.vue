@@ -373,7 +373,7 @@ const afterCurrencyChangeSuccess = () => {
     fetchUserList().finally(() => {
       pageWaiting.value = false
     })
-  }, 5000)
+  }, 1000*16)
 }
 
 const submitCurrencyChange = async () => {
