@@ -3,7 +3,7 @@ package liveroom
 import (
 	"context"
 	"strconv"
-	"xr-game-server/constants/roomstatus"
+	"xr-game-server/constants/userstatus"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
@@ -182,9 +182,9 @@ func GetRoom(_ context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto.G
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
 
-	status := roomstatus.LiveRoomStatusClosed
+	status := userstatus.LiveRoomStatusClosed
 	if room.LiveRecordId > 0 {
-		status = roomstatus.LiveRoomStatusLive
+		status = userstatus.LiveRoomStatusLive
 	}
 
 	return &liveroomdto.GetLiveRoomRes{

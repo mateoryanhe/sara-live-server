@@ -33,7 +33,7 @@ type UserCumulativeStat struct {
 	TotalPayCount       uint64  `gorm:"default:0;comment:累计付费次数" json:"totalPayCount"`
 	TotalDiamondConsume float64 `gorm:"default:0;comment:累计钻石消费" json:"totalDiamondConsume"`
 	TotalGoldConsume    float64 `gorm:"default:0;comment:累计金币消费" json:"totalGoldConsume"`
-	TotalLiveDuration   uint64  `gorm:"default:0;comment:累计直播时长(秒)" json:"totalLiveDuration"`
+	TotalLiveDuration   float64 `gorm:"default:0;comment:累计直播时长(秒)" json:"totalLiveDuration"`
 }
 
 func NewUserCumulativeStat(userId uint64) *UserCumulativeStat {
@@ -116,8 +116,8 @@ func (receiver *UserCumulativeStat) AddTotalGoldConsume(val float64) bool {
 	return true
 }
 
-func (receiver *UserCumulativeStat) AddTotalLiveDuration(val uint64) bool {
-	receiver.TotalLiveDuration = math.Add(receiver.TotalLiveDuration, val)
+func (receiver *UserCumulativeStat) AddTotalLiveDuration(val float64) bool {
+	receiver.TotalLiveDuration = math.AddFloat64(receiver.TotalLiveDuration, val)
 	receiver.SetUpdatedAt(time.Now())
 	syndb.AddDataToLazyChan(TbUserCumulativeStat, UserCumulativeStatTotalLiveDuration, &syndb.ColData{
 		IdVal:  receiver.ID,

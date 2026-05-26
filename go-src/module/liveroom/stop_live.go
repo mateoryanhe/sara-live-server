@@ -5,6 +5,7 @@ import (
 	"time"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/liveroomdao"
+	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
 )
 
@@ -30,5 +31,8 @@ func stopLive(anchorId uint64) {
 	if liveRecord.EndTime == nil {
 		liveRecord.SetEndTime(&now)
 	}
-	liveRecord.SetTotalLiveDuration(liveRecord.EndTime.Sub(liveRecord.StartTime).Seconds())
+	liveDuration := liveRecord.EndTime.Sub(liveRecord.StartTime).Seconds()
+	liveRecord.SetTotalLiveDuration(liveDuration)
+	userStat := userinfodao.GetUserCumulativeStatByUserId(anchorId)
+	userStat.AddTotalLiveDuration(liveDuration)
 }

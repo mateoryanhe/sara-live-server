@@ -1,4 +1,4 @@
-package roomstatus
+package userstatus
 
 // 直播间状态
 const (
