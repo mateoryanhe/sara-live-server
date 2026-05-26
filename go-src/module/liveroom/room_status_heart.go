@@ -49,22 +49,28 @@ func heart(ctx context.Context) {
 	temp = append(temp, taskMap.Slice())
 	for _, data := range temp {
 		userId := data.(uint64)
-		room := liveroomdao.GetRoomById(userId)
-		//如果达到1分钟不上报,直播计时停止
-		if room.FailNum >= StartFailNum {
-			if room.LiveRecordId > 0 {
-				liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId)
-				if liveRecord.EndTime == nil {
-					now := time.Now()
-					liveRecord.SetEndTime(&now)
-				}
+		chkOne(userId)
+	}
+}
+
+func chkOne(userId uint64) {
+	room := liveroomdao.GetRoomById(userId)
+	//如果达到1分钟不上报,直播计时停止
+	if room.FailNum >= StartFailNum {
+		if room.LiveRecordId > 0 {
+			liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId)
+			if liveRecord.EndTime == nil {
+				now := time.Now()
+				liveRecord.SetEndTime(&now)
 			}
 		}
-		//如果达到最大值
-		if room.FailNum >= MaxFailNum {
-			//开始停止直播
-			stopLive(userId)
-			taskMap.Remove(userId)
-		}
 	}
+	//如果达到最大值
+	if room.FailNum >= MaxFailNum {
+		//开始停止直播
+		stopLive(userId)
+		taskMap.Remove(userId)
+		return
+	}
+	room.AddFailNum()
 }

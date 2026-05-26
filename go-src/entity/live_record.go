@@ -60,7 +60,6 @@ func (r *LiveRecord) SetStartTime(v time.Time) {
 
 func (r *LiveRecord) SetEndTime(v *time.Time) {
 	r.EndTime = v
-	r.touchUpdatedAt()
 	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordEndTime, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.EndTime,
