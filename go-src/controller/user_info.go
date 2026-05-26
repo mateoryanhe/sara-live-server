@@ -34,3 +34,7 @@ func (c *UserInfoController) GetCurrencyLog(ctx context.Context, req *userinfodt
 func (c *UserInfoController) UploadAvatar(ctx context.Context, req *userinfodto.UploadAvatarReq) (res *userinfodto.UploadAvatarRes, err error) {
 	return userinfo.UploadAvatar(ctx, req)
 }
+
+func (c *UserInfoController) CancelAccount(ctx context.Context, req *userinfodto.CancelAccountReq) (res *userinfodto.CancelAccountRes, err error) {
+	return userinfo.CancelAccount(ctx, req)
+}

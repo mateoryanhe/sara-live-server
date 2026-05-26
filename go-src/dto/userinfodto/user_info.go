@@ -66,3 +66,12 @@ type UploadAvatarReq struct {
 type UploadAvatarRes struct {
 	Avatar string `json:"avatar" dc:"头像文件名"`
 }
+
+// CancelAccountReq App端销户
+type CancelAccountReq struct {
+	g.Meta `path:"/cancelAccount" method:"post" summary:"销户" tags:"用户基础信息"`
+}
+
+type CancelAccountRes struct {
+	Success bool `json:"success"`
+}
