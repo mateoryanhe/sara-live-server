@@ -90,6 +90,10 @@ const (
 	VipCfgNonExist XRCode = 103
 	// ShortVideoFileTooLarge 短视频文件超过大小限制
 	ShortVideoFileTooLarge XRCode = 104
+	// GameCfgExist 游戏编码已存在
+	GameCfgExist XRCode = 105
+	// GameCfgNonExist 游戏配置不存在
+	GameCfgNonExist XRCode = 106
 )
 
 type XError struct {

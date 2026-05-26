@@ -56,6 +56,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		VipCfgExist:               "VIP level already exists",
 		VipCfgNonExist:            "VIP config does not exist",
 		ShortVideoFileTooLarge:    "Short video file exceeds size limit",
+		GameCfgExist:              "Game code already exists",
+		GameCfgNonExist:           "Game config does not exist",
 	},
 	lang.LangZHCN: {
 		Success:                   "成功",
@@ -108,6 +110,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		VipCfgExist:               "VIP等级已存在",
 		VipCfgNonExist:            "VIP配置不存在",
 		ShortVideoFileTooLarge:    "短视频文件超过大小限制",
+		GameCfgExist:              "游戏编码已存在",
+		GameCfgNonExist:           "游戏配置不存在",
 	},
 	lang.LangZHTW: {
 		Success:                   "成功",
@@ -160,6 +164,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		VipCfgExist:               "VIP等級已存在",
 		VipCfgNonExist:            "VIP配置不存在",
 		ShortVideoFileTooLarge:    "短視頻文件超過大小限制",
+		GameCfgExist:              "遊戲編碼已存在",
+		GameCfgNonExist:           "遊戲配置不存在",
 	},
 }
 

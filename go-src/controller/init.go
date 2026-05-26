@@ -32,6 +32,8 @@ func Init() {
 	initRechargeOrderController()    // 充值订单(CMS:查询/手动充值)
 	initRechargeOrderAppController() // 充值订单(App:发起/查询)
 	initVipCfgController()           // VIP配置(CMS)
+	initGameCfgController()          // 游戏配置(CMS)
+	initGameCfgAppController()       // 游戏配置(App)
 	initVipCfgAppController()        // VIP配置查询(App)
 	initVipAppController()           // VIP详情(App)
 	initMessageAppController()       // 私信(App)

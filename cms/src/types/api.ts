@@ -224,6 +224,26 @@ export interface VipCfgQuery extends PageQuery {
     statusFilter?: number
 }
 
+// 游戏配置
+export interface GameCfg {
+    id: string
+    name: string
+    code: string
+    liveCover: string
+    liveCoverUrl?: string
+    link: string
+    sort: number
+    status: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GameCfgQuery extends PageQuery {
+    name?: string
+    code?: string
+    statusFilter?: number
+}
+
 // 首页 Banner
 export interface Banner {
     id: string

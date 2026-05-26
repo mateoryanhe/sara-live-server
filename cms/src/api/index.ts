@@ -13,6 +13,7 @@ import {uploadApi} from './modules/upload'
 import {goldApi} from './modules/gold'
 import {diamondApi} from './modules/diamond'
 import {rechargeOrderApi} from './modules/rechargeOrder'
+import {gameCfgApi} from './modules/gameCfg'
 
 export {
     authApi,
@@ -30,6 +31,7 @@ export {
     goldApi,
     diamondApi,
     rechargeOrderApi,
+    gameCfgApi,
 }
 
 export default {
@@ -48,4 +50,5 @@ export default {
     goldApi,
     diamondApi,
     rechargeOrderApi,
+    gameCfgApi,
 }

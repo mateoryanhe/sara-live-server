@@ -26,6 +26,7 @@ func Init() {
 	initRechargeCfg()
 	initRechargeOrder()
 	initVipCfg()
+	initGameCfg()
 	initUserMessage()
 	initUserMessageUnread()
 	initUserMessageUnreadDetail()

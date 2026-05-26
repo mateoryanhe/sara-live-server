@@ -112,6 +112,22 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
+            v-if="hasMenuPermission('GameCfgManagement')"
+            index="/game">
+          <template #title>
+            <el-icon>
+              <Cpu/>
+            </el-icon>
+            <span>游戏管理</span>
+          </template>
+          <el-menu-item v-if="hasMenuPermission('GameCfgManagement')" index="/game/game-cfg-list">
+            <el-icon>
+              <Cpu/>
+            </el-icon>
+            <span>游戏配置</span>
+          </el-menu-item>
+        </el-sub-menu>
+        <el-sub-menu
             v-if="hasMenuPermission('GlobalConfig')"
             index="/config">
           <template #title>
@@ -195,7 +211,7 @@
 <script lang="ts" setup>
 import {computed, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {ArrowDown, Expand, Fold, Lock, Medal, Monitor, Picture, Present, Setting, Stamp, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Cpu, Expand, Fold, Lock, Medal, Monitor, Picture, Present, Setting, Stamp, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {clearPermissions, getIsAdmin, hasPermission} from '@/utils/permission'
 
 const route = useRoute()

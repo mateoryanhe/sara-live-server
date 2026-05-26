@@ -4,6 +4,7 @@ import (
 	"xr-game-server/module/auth"
 	"xr-game-server/module/banner"
 	"xr-game-server/module/currencylog"
+	"xr-game-server/module/game"
 	"xr-game-server/module/message"
 	"xr-game-server/module/name"
 	"xr-game-server/module/rank"
@@ -23,6 +24,6 @@ func Init() {
 	banner.Init()
 	shortvideo.Init()
 	vip.Init()
-	vip.Init()
+	game.Init()
 	verification_code.Init()
 }
