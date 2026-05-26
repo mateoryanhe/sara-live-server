@@ -2,6 +2,7 @@ package messagedao
 
 func Init() {
 	initPrivateMessageDao()
+	initSystemMessageDao()
 	initMessageUnreadDao()
-	initMessageUnreadDao()
+	initMessageUnreadDetailDao()
 }

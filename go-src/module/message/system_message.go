@@ -10,6 +10,7 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/messagedto"
 	"xr-game-server/entity"
+	"xr-game-server/errercode"
 	"xr-game-server/gameevent"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -59,6 +60,24 @@ func ListSystemMessage(ctx context.Context, req *messagedto.AppSystemMessageList
 		list = append(list, toSystemMessageItem(row))
 	}
 	return &messagedto.AppSystemMessageListRes{List: list}, nil
+}
+
+// ClearSystemMessageUnread App端清除系统消息未读,每次按1条已读清1条
+func ClearSystemMessageUnread(ctx context.Context, _ *messagedto.AppClearSystemMessageUnreadReq) (*messagedto.AppClearSystemMessageUnreadRes, error) {
+	userId := httpserver.GetAuthId(ctx)
+	if userId == 0 {
+		return nil, errercode.CreateCode(errercode.EmptyUserId)
+	}
+
+	unReadData := messagedao.GetUnReadByUserId(userId)
+	if unReadData.SystemUnread > 0 {
+		unReadData.SubSystemUnread(1)
+	}
+
+	return &messagedto.AppClearSystemMessageUnreadRes{
+		Success:      true,
+		SystemUnread: unReadData.SystemUnread,
+	}, nil
 }
 
 func buildSystemMessagePushItem(msg *entity.UserMessage) *messagedto.SystemMessagePushItem {

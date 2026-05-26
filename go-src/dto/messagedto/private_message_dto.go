@@ -34,6 +34,18 @@ type AppPrivateMessageListRes struct {
 	List []*AppPrivateMessageItem `json:"list"`
 }
 
+// AppClearPrivateMessageUnreadReq App端清除指定玩家私信未读
+type AppClearPrivateMessageUnreadReq struct {
+	g.Meta   `path:"/clearPrivateMessageUnread" method:"post" summary:"清除指定玩家私信未读" tags:"私信"`
+	SenderId uint64 `json:"senderId,string" v:"required|min:1#发送者ID不能为空|发送者ID非法" dc:"指定聊天对象用户ID"`
+}
+
+type AppClearPrivateMessageUnreadRes struct {
+	Success       bool   `json:"success"`
+	ClearedCount  uint64 `json:"clearedCount" dc:"本次清除的未读数"`
+	PrivateUnread uint64 `json:"privateUnread" dc:"剩余私信未读总数"`
+}
+
 // PrivateMessagePushItem 私信推送载荷
 type PrivateMessagePushItem struct {
 	Id           uint64 `json:"id,string"`

@@ -42,11 +42,15 @@ func (m *UserMessageUnread) AddSystemUnread(v uint64) {
 	})
 }
 
-func (m *UserMessageUnread) ClearSystemUnread(v uint64) {
-	m.SystemUnread = 0
+func (m *UserMessageUnread) SubSystemUnread(v uint64) {
+	if v >= m.SystemUnread {
+		m.SystemUnread = 0
+	} else {
+		m.SystemUnread -= v
+	}
 	m.SetUpdatedAt(time.Now())
 	syndb.AddDataToQuickChan(TbUserMessageUnread, UserMessageUnreadSystemUnread, &syndb.ColData{
-		IdVal: m.ID, ColVal: 0,
+		IdVal: m.ID, ColVal: m.SystemUnread,
 	})
 }
 

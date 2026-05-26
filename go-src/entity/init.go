@@ -28,4 +28,5 @@ func Init() {
 	initVipCfg()
 	initUserMessage()
 	initUserMessageUnread()
+	initUserMessageUnreadDetail()
 }

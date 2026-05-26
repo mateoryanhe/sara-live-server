@@ -20,6 +20,16 @@ type AppSystemMessageListRes struct {
 	List []*AppSystemMessageItem `json:"list"`
 }
 
+// AppClearSystemMessageUnreadReq App端清除系统消息未读(每次1条)
+type AppClearSystemMessageUnreadReq struct {
+	g.Meta `path:"/clearSystemMessageUnread" method:"post" summary:"清除系统消息未读" tags:"系统消息"`
+}
+
+type AppClearSystemMessageUnreadRes struct {
+	Success      bool   `json:"success"`
+	SystemUnread uint64 `json:"systemUnread" dc:"剩余系统消息未读数"`
+}
+
 // SystemMessagePushItem 系统消息推送载荷
 type SystemMessagePushItem struct {
 	Id         uint64 `json:"id,string"`

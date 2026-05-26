@@ -41,6 +41,9 @@ func SendPrivateMessage(ctx context.Context, req *messagedto.AppSendPrivateMessa
 	unReadData := messagedao.GetUnReadByUserId(req.ReceiverId)
 	unReadData.AddPrivateUnread(1)
 
+	unReadDetail := messagedao.GetUnreadDetailByReceiverSender(req.ReceiverId, senderId)
+	unReadDetail.AddUnread(1)
+
 	return &messagedto.AppSendPrivateMessageRes{
 		MessageId: msg.ID,
 		Success:   true,
@@ -64,6 +67,33 @@ func ListPrivateMessage(ctx context.Context, req *messagedto.AppPrivateMessageLi
 		list = append(list, toPrivateMessageItem(row))
 	}
 	return &messagedto.AppPrivateMessageListRes{List: list}, nil
+}
+
+// ClearPrivateMessageUnread App端清除指定玩家的私信未读
+func ClearPrivateMessageUnread(ctx context.Context, req *messagedto.AppClearPrivateMessageUnreadReq) (*messagedto.AppClearPrivateMessageUnreadRes, error) {
+	userId := httpserver.GetAuthId(ctx)
+	if userId == 0 {
+		return nil, errercode.CreateCode(errercode.EmptyUserId)
+	}
+	if req.SenderId == 0 {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+
+	unReadData := messagedao.GetUnReadByUserId(userId)
+	clearedCount := uint64(0)
+
+	unReadDetail := messagedao.GetUnreadDetailByReceiverSender(userId, req.SenderId)
+	if unReadDetail != nil && unReadDetail.UnreadCount > 0 {
+		clearedCount = unReadDetail.UnreadCount
+		unReadDetail.ClearUnread()
+		unReadData.SubPrivateUnread(clearedCount)
+	}
+
+	return &messagedto.AppClearPrivateMessageUnreadRes{
+		Success:       true,
+		ClearedCount:  clearedCount,
+		PrivateUnread: unReadData.PrivateUnread,
+	}, nil
 }
 
 func buildPrivateMessagePushItem(msg *entity.UserMessage) *messagedto.PrivateMessagePushItem {
