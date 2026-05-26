@@ -4,7 +4,6 @@ import (
 	"context"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/accountdto"
-	"xr-game-server/module/account"
 	"xr-game-server/module/userinfo"
 )
 
@@ -20,23 +19,23 @@ func initAccountController() {
 }
 
 func (a *AccountController) Ban(ctx context.Context, req *accountdto.BanReq) (resp *accountdto.BanRes, e error) {
-	return account.Ban(ctx, req)
+	return userinfo.Ban(ctx, req)
 }
 
 func (a *AccountController) UnBan(ctx context.Context, req *accountdto.UnBanReq) (bool, error) {
-	return account.UnBan(ctx, req)
+	return userinfo.UnBan(ctx, req)
 }
 
 func (a *AccountController) CancelUser(ctx context.Context, req *accountdto.CancelReq) (bool, error) {
-	return account.CancelUser(ctx, req)
+	return userinfo.CancelUser(ctx, req)
 }
 
 func (a *AccountController) UnCancelUser(ctx context.Context, req *accountdto.UnCancelReq) (bool, error) {
-	return account.UnCancelUser(ctx, req)
+	return userinfo.UnCancelUser(ctx, req)
 }
 
 func (a *AccountController) QueryUserInfo(ctx context.Context, req *accountdto.QueryUserInfoReq) (res *httpserver.CMSQueryResp, err error) {
-	return account.QueryUserInfo(ctx, req)
+	return userinfo.QueryUserInfo(ctx, req)
 }
 
 func (a *AccountController) SetAnchor(ctx context.Context, req *accountdto.SetAnchorReq) (*accountdto.SetAnchorRes, error) {

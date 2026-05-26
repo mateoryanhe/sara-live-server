@@ -15,7 +15,7 @@ type QueryUserInfoReq struct {
 }
 
 type UserInfoDto struct {
-	ID           string     `json:"id"`
+	ID           uint64     `json:"id,string"`
 	CreatedAt    *time.Time `json:"createdAt"`
 	OpenId       string     `json:"openId"`
 	IP           string     `json:"ip"`

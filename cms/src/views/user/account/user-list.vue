@@ -373,7 +373,7 @@ const afterCurrencyChangeSuccess = () => {
     fetchUserList().finally(() => {
       pageWaiting.value = false
     })
-  }, 1000*16)
+  }, 1000)
 }
 
 const submitCurrencyChange = async () => {
@@ -445,7 +445,7 @@ const toggleBanStatus = async (row: UserInfo) => {
         // 重新加载数据以确保显示最新状态
         setTimeout(() => {
           fetchUserList()
-        }, 5000) // 添加短暂延迟以确保后端状态已更新
+        }, 1000) // 添加短暂延迟以确保后端状态已更新
       } else {
         ElMessage.error('解封失败')
       }
@@ -491,7 +491,7 @@ const toggleCancelStatus = async (row: UserInfo) => {
         // 重新加载数据以确保显示最新状态
         setTimeout(() => {
           fetchUserList()
-        }, 500) // 添加短暂延迟以确保后端状态已更新
+        }, 1000) // 添加短暂延迟以确保后端状态已更新
       } else {
         ElMessage.error('取消注销失败')
       }
@@ -519,7 +519,7 @@ const toggleCancelStatus = async (row: UserInfo) => {
         // 重新加载数据以确保显示最新状态
         setTimeout(() => {
           fetchUserList()
-        }, 500) // 添加短暂延迟以确保后端状态已更新
+        }, 1000) // 添加短暂延迟以确保后端状态已更新
       } else {
         ElMessage.error('注销失败')
       }
