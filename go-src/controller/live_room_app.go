@@ -76,3 +76,8 @@ func (c *LiveRoomAppController) SendGift(ctx context.Context, req *liveroomdto.S
 func (c *LiveRoomAppController) SendChat(ctx context.Context, req *liveroomdto.SendChatReq) (res *liveroomdto.SendChatRes, err error) {
 	return liveroom.SendChat(ctx, req)
 }
+
+// ReportLiveStartStatus 主播上报开播状态
+func (c *LiveRoomAppController) ReportLiveStartStatus(ctx context.Context, req *liveroomdto.ReportLiveStartStatusReq) (res *liveroomdto.ReportLiveStartStatusRes, err error) {
+	return liveroom.ReportLiveStartStatus(ctx, req)
+}

@@ -13,19 +13,21 @@ const (
 )
 
 const (
-	LiveRecordAnchorId      db.TbCol = "anchor_id"
-	LiveRecordStartTime     db.TbCol = "start_time"
-	LiveRecordEndTime       db.TbCol = "end_time"
-	LiveRecordTotalAudience db.TbCol = "total_audience"
+	LiveRecordAnchorId          db.TbCol = "anchor_id"
+	LiveRecordStartTime         db.TbCol = "start_time"
+	LiveRecordEndTime           db.TbCol = "end_time"
+	LiveRecordTotalAudience     db.TbCol = "total_audience"
+	LiveRecordTotalLiveDuration db.TbCol = "total_live_duration"
 )
 
 // LiveRecord 单场直播数据记录
 type LiveRecord struct {
 	migrate.OneModel
-	AnchorId      uint64    `gorm:"index;default:0;comment:主播ID" json:"anchorId"`
-	StartTime     time.Time `gorm:"comment:直播开始时间" json:"startTime"`
-	EndTime       time.Time `gorm:"comment:直播结束时间" json:"endTime"`
-	TotalAudience uint64    `gorm:"default:0;comment:累计观众人数" json:"totalAudience"`
+	AnchorId          uint64     `gorm:"index;default:0;comment:主播ID" json:"anchorId"`
+	StartTime         time.Time  `gorm:"comment:直播开始时间" json:"startTime"`
+	EndTime           *time.Time `gorm:"comment:直播结束时间" json:"endTime"`
+	TotalAudience     uint64     `gorm:"default:0;comment:累计观众人数" json:"totalAudience"`
+	TotalLiveDuration float64    `gorm:"default:0;comment:累计直播时长(秒)" json:"totalLiveDuration"`
 }
 
 // NewLiveRecord 构造一条直播记录,字段写入通过 syndb 异步入库
@@ -56,12 +58,12 @@ func (r *LiveRecord) SetStartTime(v time.Time) {
 	})
 }
 
-func (r *LiveRecord) SetEndTime(v time.Time) {
+func (r *LiveRecord) SetEndTime(v *time.Time) {
 	r.EndTime = v
 	r.touchUpdatedAt()
 	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordEndTime, &syndb.ColData{
 		IdVal:  r.ID,
-		ColVal: v,
+		ColVal: r.EndTime,
 	})
 }
 
@@ -78,6 +80,15 @@ func (r *LiveRecord) SetTotalAudience(v uint64) {
 	r.TotalAudience = v
 	r.touchUpdatedAt()
 	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalAudience, &syndb.ColData{
+		IdVal:  r.ID,
+		ColVal: v,
+	})
+}
+
+func (r *LiveRecord) SetTotalLiveDuration(v float64) {
+	r.TotalLiveDuration = v
+	r.touchUpdatedAt()
+	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalLiveDuration, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: v,
 	})
@@ -114,5 +125,6 @@ func initLiveRecord() {
 	syndb.RegLazyWithMiddle(TbLiveRecord, LiveRecordStartTime)
 	syndb.RegLazyWithMiddle(TbLiveRecord, LiveRecordEndTime)
 	syndb.RegLazyWithMiddle(TbLiveRecord, LiveRecordTotalAudience)
+	syndb.RegLazyWithMiddle(TbLiveRecord, LiveRecordTotalLiveDuration)
 	migrate.AutoMigrate(&LiveRecord{})
 }

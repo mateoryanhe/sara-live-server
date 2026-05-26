@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"xr-game-server/constants/roomstatus"
 	"xr-game-server/core/httpserver"
-	"xr-game-server/core/snowflake"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
@@ -55,33 +54,6 @@ func loadOwnRoom(ctx context.Context) (*entity.LiveRoom, error) {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
 	return room, nil
-}
-
-// StartLive 开播
-func StartLive(ctx context.Context, _ *liveroomdto.StartLiveReq) (*liveroomdto.StartLiveRes, error) {
-	room, err := loadOwnRoom(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if room.LiveRecordId > 0 {
-		//重置
-	}
-	liveRecordId := snowflake.GetId()
-	liveroomdao.GetLiveRecordById(liveRecordId)
-	room.SetLiveRecordId(liveRecordId)
-	return &liveroomdto.StartLiveRes{}, nil
-}
-
-// StopLive 下播
-func StopLive(ctx context.Context, _ *liveroomdto.StopLiveReq) (*liveroomdto.StopLiveRes, error) {
-	room, err := loadOwnRoom(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	room.SetLiveRecordId(0)
-
-	return &liveroomdto.StopLiveRes{}, nil
 }
 
 // UpdateCover 修改封面

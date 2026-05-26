@@ -3,6 +3,7 @@ package entity
 import (
 	"time"
 	"xr-game-server/constants/db"
+	"xr-game-server/core/math"
 	"xr-game-server/core/migrate"
 	"xr-game-server/core/syndb"
 )
@@ -17,6 +18,7 @@ const (
 	LiveRoomCover   db.TbCol = "cover"
 	LiveRoomNotice  db.TbCol = "notice"
 	LiveRoomLiveId  db.TbCol = "live_record_id"
+	LiveRoomFailNum db.TbCol = "fail_num"
 )
 
 // LiveRoom 直播间(LiveRoom.ID 与 UserInfo.ID 均为主播用户ID,每个主播仅一个直播间)
@@ -27,6 +29,7 @@ type LiveRoom struct {
 	Cover        string `gorm:"size:255;default:'';comment:封面图URL" json:"cover"`
 	Notice       string `gorm:"size:512;default:'';comment:公告" json:"notice"`
 	LiveRecordId uint64 `gorm:"default:0;comment:直播记录id" json:"liveRecordId"`
+	FailNum      uint64 `gorm:"default:0;comment:房间心跳状态,大于5分钟，判断下播" json:"fail_num"`
 }
 
 // NewLiveRoom 构造内存对象,字段写入通过 syndb 异步入库
@@ -56,6 +59,20 @@ func (r *LiveRoom) SetTitle(v string) {
 	r.touchUpdatedAt()
 	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomTitle, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
+	})
+}
+
+func (r *LiveRoom) ClearFailNum() {
+	r.FailNum = 0
+	syndb.AddDataToLazyChan(TbLiveRoom, LiveRoomFailNum, &syndb.ColData{
+		IdVal: r.ID, ColVal: 0,
+	})
+}
+
+func (r *LiveRoom) AddFailNum() {
+	r.FailNum = math.Add(r.FailNum, 1)
+	syndb.AddDataToLazyChan(TbLiveRoom, LiveRoomFailNum, &syndb.ColData{
+		IdVal: r.ID, ColVal: r.FailNum,
 	})
 }
 
@@ -112,5 +129,8 @@ func initLiveRoom() {
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomCover)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomNotice)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomLiveId)
+
+	syndb.RegLazyWithLarge(TbLiveRoom, LiveRoomFailNum)
+
 	migrate.AutoMigrate(&LiveRoom{})
 }
