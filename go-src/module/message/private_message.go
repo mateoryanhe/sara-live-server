@@ -37,12 +37,12 @@ func SendPrivateMessage(ctx context.Context, req *messagedto.AppSendPrivateMessa
 	push.Data(req.ReceiverId, cmd.PrivateMessagePush, pushItem)
 	push.Data(senderId, cmd.PrivateMessagePush, pushItem)
 
-	//加入未读数
 	unReadData := messagedao.GetUnReadByUserId(req.ReceiverId)
 	unReadData.AddPrivateUnread(1)
 
 	unReadDetail := messagedao.GetUnreadDetailByReceiverSender(req.ReceiverId, senderId)
 	unReadDetail.AddUnread(1)
+	messagedao.UpsertUnreadDetailToListCache(unReadDetail)
 
 	return &messagedto.AppSendPrivateMessageRes{
 		MessageId: msg.ID,
@@ -50,23 +50,26 @@ func SendPrivateMessage(ctx context.Context, req *messagedto.AppSendPrivateMessa
 	}, nil
 }
 
-// ListPrivateMessage App端分页查询当前用户收到的私信
-func ListPrivateMessage(ctx context.Context, req *messagedto.AppPrivateMessageListReq) (*messagedto.AppPrivateMessageListRes, error) {
+// ListPrivateMessageUnread App端分页查询私信未读明细
+func ListPrivateMessageUnread(ctx context.Context, req *messagedto.AppPrivateMessageUnreadListReq) (*messagedto.AppPrivateMessageUnreadListRes, error) {
 	userId := httpserver.GetAuthId(ctx)
+	if userId == 0 {
+		return nil, errercode.CreateCode(errercode.EmptyUserId)
+	}
 	pageIndex := req.PageIndex
 	if pageIndex <= 0 {
 		pageIndex = 1
 	}
 
-	rows := messagedao.ListByReceiverId(userId, pageIndex)
-	list := make([]*messagedto.AppPrivateMessageItem, 0, len(rows))
+	rows := messagedao.ListUnreadDetailByReceiverId(userId, pageIndex)
+	list := make([]*messagedto.AppPrivateMessageUnreadDetailItem, 0, len(rows))
 	for _, row := range rows {
 		if row == nil {
 			continue
 		}
-		list = append(list, toPrivateMessageItem(row))
+		list = append(list, toPrivateMessageUnreadDetailItem(row))
 	}
-	return &messagedto.AppPrivateMessageListRes{List: list}, nil
+	return &messagedto.AppPrivateMessageUnreadListRes{List: list}, nil
 }
 
 // ClearPrivateMessageUnread App端清除指定玩家的私信未读
@@ -87,6 +90,7 @@ func ClearPrivateMessageUnread(ctx context.Context, req *messagedto.AppClearPriv
 		clearedCount = unReadDetail.UnreadCount
 		unReadDetail.ClearUnread()
 		unReadData.SubPrivateUnread(clearedCount)
+		messagedao.UpsertUnreadDetailToListCache(unReadDetail)
 	}
 
 	return &messagedto.AppClearPrivateMessageUnreadRes{
@@ -111,15 +115,14 @@ func buildPrivateMessagePushItem(msg *entity.UserMessage) *messagedto.PrivateMes
 	return item
 }
 
-func toPrivateMessageItem(msg *entity.UserMessage) *messagedto.AppPrivateMessageItem {
-	item := &messagedto.AppPrivateMessageItem{
-		Id:         msg.ID,
-		SenderId:   msg.SenderId,
-		ReceiverId: msg.ReceiverId,
-		Content:    msg.Content,
-		CreatedAt:  formatMessageTime(msg.CreatedAt),
+func toPrivateMessageUnreadDetailItem(row *entity.UserMessageUnreadDetail) *messagedto.AppPrivateMessageUnreadDetailItem {
+	item := &messagedto.AppPrivateMessageUnreadDetailItem{
+		SenderId:    row.SenderId,
+		ReceiverId:  row.ReceiverId,
+		UnreadCount: row.UnreadCount,
+		UpdatedAt:   formatMessageTime(row.UpdatedAt),
 	}
-	if sender := userinfodao.GetUserInfoByUserId(msg.SenderId); sender != nil {
+	if sender := userinfodao.GetUserInfoByUserId(row.SenderId); sender != nil {
 		item.SenderName = sender.Nickname
 		item.SenderAvatar = upload.GetUrlByName(sender.Avatar)
 	}

@@ -14,24 +14,23 @@ type AppSendPrivateMessageRes struct {
 	Success   bool   `json:"success"`
 }
 
-// AppPrivateMessageListReq App端查询收到的私信
-type AppPrivateMessageListReq struct {
-	g.Meta    `path:"/privateMessageList" method:"post" summary:"查询私信列表" tags:"私信"`
+// AppPrivateMessageUnreadListReq App端分页查询私信未读明细
+type AppPrivateMessageUnreadListReq struct {
+	g.Meta    `path:"/privateMessageUnreadList" method:"post" summary:"查询私信未读明细列表" tags:"私信"`
 	PageIndex int `json:"pageIndex" dc:"页码(从1开始)"`
 }
 
-type AppPrivateMessageItem struct {
-	Id           uint64 `json:"id,string"`
+type AppPrivateMessageUnreadDetailItem struct {
 	SenderId     uint64 `json:"senderId,string"`
 	ReceiverId   uint64 `json:"receiverId,string"`
-	Content      string `json:"content"`
+	UnreadCount  uint64 `json:"unreadCount"`
 	SenderName   string `json:"senderName"`
 	SenderAvatar string `json:"senderAvatar"`
-	CreatedAt    string `json:"createdAt"`
+	UpdatedAt    string `json:"updatedAt"`
 }
 
-type AppPrivateMessageListRes struct {
-	List []*AppPrivateMessageItem `json:"list"`
+type AppPrivateMessageUnreadListRes struct {
+	List []*AppPrivateMessageUnreadDetailItem `json:"list"`
 }
 
 // AppClearPrivateMessageUnreadReq App端清除指定玩家私信未读

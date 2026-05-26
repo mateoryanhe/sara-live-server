@@ -20,9 +20,9 @@ func (c *MessageAppController) SendPrivateMessage(ctx context.Context, req *mess
 	return message.SendPrivateMessage(ctx, req)
 }
 
-// PrivateMessageList App端查询收到的私信列表
-func (c *MessageAppController) PrivateMessageList(ctx context.Context, req *messagedto.AppPrivateMessageListReq) (*messagedto.AppPrivateMessageListRes, error) {
-	return message.ListPrivateMessage(ctx, req)
+// PrivateMessageUnreadList App端查询私信未读明细列表
+func (c *MessageAppController) PrivateMessageUnreadList(ctx context.Context, req *messagedto.AppPrivateMessageUnreadListReq) (*messagedto.AppPrivateMessageUnreadListRes, error) {
+	return message.ListPrivateMessageUnread(ctx, req)
 }
 
 // ClearPrivateMessageUnread App端清除指定玩家私信未读
