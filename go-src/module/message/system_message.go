@@ -36,6 +36,10 @@ func onSystemMessage(val any) {
 
 	pushItem := buildSystemMessagePushItem(msg)
 	push.Data(data.ReceiverId, cmd.SystemMessagePush, pushItem)
+
+	//加入未读数
+	unReadData := messagedao.GetUnReadByUserId(data.ReceiverId)
+	unReadData.AddSystemUnread(1)
 }
 
 // ListSystemMessage App端分页查询当前用户的系统消息

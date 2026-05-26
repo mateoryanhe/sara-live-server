@@ -17,7 +17,7 @@ const (
 var receiverCacheMgr *cache.CacheMgr
 
 // InitPrivateMessageDao 初始化私信缓存
-func InitPrivateMessageDao() {
+func initPrivateMessageDao() {
 	receiverCacheMgr = cache.NewCacheMgr()
 }
 

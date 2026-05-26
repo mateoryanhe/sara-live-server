@@ -17,7 +17,7 @@ const (
 var systemReceiverCacheMgr *cache.CacheMgr
 
 // InitSystemMessageDao 初始化系统消息缓存
-func InitSystemMessageDao() {
+func initSystemMessageDao() {
 	systemReceiverCacheMgr = cache.NewCacheMgr()
 }
 

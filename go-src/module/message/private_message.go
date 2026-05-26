@@ -37,6 +37,10 @@ func SendPrivateMessage(ctx context.Context, req *messagedto.AppSendPrivateMessa
 	push.Data(req.ReceiverId, cmd.PrivateMessagePush, pushItem)
 	push.Data(senderId, cmd.PrivateMessagePush, pushItem)
 
+	//加入未读数
+	unReadData := messagedao.GetUnReadByUserId(req.ReceiverId)
+	unReadData.AddPrivateUnread(1)
+
 	return &messagedto.AppSendPrivateMessageRes{
 		MessageId: msg.ID,
 		Success:   true,

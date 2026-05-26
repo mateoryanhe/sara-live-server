@@ -34,6 +34,5 @@ func Init() {
 	shortvideolikedao.InitShortVideoLikeDao()
 	shortvideowatchdao.InitShortVideoWatchDao()
 	rechargeorderdao.InitRechargeOrderDao()
-	messagedao.InitPrivateMessageDao()
-	messagedao.InitSystemMessageDao()
+	messagedao.Init()
 }

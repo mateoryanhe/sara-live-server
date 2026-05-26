@@ -27,4 +27,5 @@ func Init() {
 	initRechargeOrder()
 	initVipCfg()
 	initUserMessage()
+	initUserMessageUnread()
 }
