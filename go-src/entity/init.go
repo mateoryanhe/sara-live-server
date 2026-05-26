@@ -16,6 +16,7 @@ func Init() {
 	initGuildMember()
 	initLiveRoom()
 	initLiveRoomOnline()
+	initLiveRecord()
 	InitLiveGift()
 	initHomeBanner()
 	initShortVideo()

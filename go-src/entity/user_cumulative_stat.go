@@ -20,6 +20,7 @@ const (
 	UserCumulativeStatTotalPayCount       db.TbCol = "total_pay_count"
 	UserCumulativeStatTotalDiamondConsume db.TbCol = "total_diamond_consume"
 	UserCumulativeStatTotalGoldConsume    db.TbCol = "total_gold_consume"
+	UserCumulativeStatTotalLiveDuration   db.TbCol = "total_live_duration"
 )
 
 // UserCumulativeStat 玩家累计数值(与用户一一对应,主键ID即用户ID)
@@ -32,6 +33,7 @@ type UserCumulativeStat struct {
 	TotalPayCount       uint64  `gorm:"default:0;comment:累计付费次数" json:"totalPayCount"`
 	TotalDiamondConsume float64 `gorm:"default:0;comment:累计钻石消费" json:"totalDiamondConsume"`
 	TotalGoldConsume    float64 `gorm:"default:0;comment:累计金币消费" json:"totalGoldConsume"`
+	TotalLiveDuration   uint64  `gorm:"default:0;comment:累计直播时长(秒)" json:"totalLiveDuration"`
 }
 
 func NewUserCumulativeStat(userId uint64) *UserCumulativeStat {
@@ -114,6 +116,16 @@ func (receiver *UserCumulativeStat) AddTotalGoldConsume(val float64) bool {
 	return true
 }
 
+func (receiver *UserCumulativeStat) AddTotalLiveDuration(val uint64) bool {
+	receiver.TotalLiveDuration = math.Add(receiver.TotalLiveDuration, val)
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddDataToLazyChan(TbUserCumulativeStat, UserCumulativeStatTotalLiveDuration, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: receiver.TotalLiveDuration,
+	})
+	return true
+}
+
 func (receiver *UserCumulativeStat) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
 	syndb.AddDataToLazyChan(TbUserCumulativeStat, db.CreatedAtName, &syndb.ColData{
@@ -140,6 +152,7 @@ func initUserCumulativeStat() {
 	syndb.RegLazyWithMiddle(TbUserCumulativeStat, UserCumulativeStatTotalPayCount)
 	syndb.RegLazyWithMiddle(TbUserCumulativeStat, UserCumulativeStatTotalDiamondConsume)
 	syndb.RegLazyWithMiddle(TbUserCumulativeStat, UserCumulativeStatTotalGoldConsume)
+	syndb.RegLazyWithMiddle(TbUserCumulativeStat, UserCumulativeStatTotalLiveDuration)
 
 	migrate.AutoMigrate(&UserCumulativeStat{})
 }
