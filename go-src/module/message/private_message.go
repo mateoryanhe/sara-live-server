@@ -32,6 +32,7 @@ func SendPrivateMessage(ctx context.Context, req *messagedto.AppSendPrivateMessa
 	msg := entity.NewUserMessage(entity.UserMessageTypePrivate, senderId, req.ReceiverId, "", content)
 	messagedao.AddToCache(msg, req.ReceiverId)
 	messagedao.AddToCache(msg, senderId)
+	messagedao.InvalidateSenderReceiverMessageCache(req.ReceiverId, senderId)
 
 	pushItem := buildPrivateMessagePushItem(msg)
 	push.Data(req.ReceiverId, cmd.PrivateMessagePush, pushItem)
@@ -70,6 +71,36 @@ func ListPrivateMessageUnread(ctx context.Context, req *messagedto.AppPrivateMes
 		list = append(list, toPrivateMessageUnreadDetailItem(row))
 	}
 	return &messagedto.AppPrivateMessageUnreadListRes{List: list}, nil
+}
+
+// ListPrivateMessageBySender App端按发送者查询私信内容(最多200条,超出返回空列表)
+func ListPrivateMessageBySender(ctx context.Context, req *messagedto.AppPrivateMessageBySenderReq) (*messagedto.AppPrivateMessageBySenderRes, error) {
+	userId := httpserver.GetAuthId(ctx)
+	if userId == 0 {
+		return nil, errercode.CreateCode(errercode.EmptyUserId)
+	}
+	if req.SenderId == 0 {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+
+	pageIndex := req.PageIndex
+	if pageIndex <= 0 {
+		pageIndex = 1
+	}
+	pageSize := req.PageSize
+	if pageSize <= 0 {
+		pageSize = 40
+	}
+
+	rows := messagedao.ListByReceiverAndSender(userId, req.SenderId, pageIndex, pageSize)
+	list := make([]*messagedto.AppPrivateMessageItem, 0, len(rows))
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		list = append(list, toPrivateMessageItem(row))
+	}
+	return &messagedto.AppPrivateMessageBySenderRes{List: list}, nil
 }
 
 // ClearPrivateMessageUnread App端清除指定玩家的私信未读
@@ -123,6 +154,21 @@ func toPrivateMessageUnreadDetailItem(row *entity.UserMessageUnreadDetail) *mess
 		UpdatedAt:   formatMessageTime(row.UpdatedAt),
 	}
 	if sender := userinfodao.GetUserInfoByUserId(row.SenderId); sender != nil {
+		item.SenderName = sender.Nickname
+		item.SenderAvatar = upload.GetUrlByName(sender.Avatar)
+	}
+	return item
+}
+
+func toPrivateMessageItem(msg *entity.UserMessage) *messagedto.AppPrivateMessageItem {
+	item := &messagedto.AppPrivateMessageItem{
+		Id:         msg.ID,
+		SenderId:   msg.SenderId,
+		ReceiverId: msg.ReceiverId,
+		Content:    msg.Content,
+		CreatedAt:  formatMessageTime(msg.CreatedAt),
+	}
+	if sender := userinfodao.GetUserInfoByUserId(msg.SenderId); sender != nil {
 		item.SenderName = sender.Nickname
 		item.SenderAvatar = upload.GetUrlByName(sender.Avatar)
 	}

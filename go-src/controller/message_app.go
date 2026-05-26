@@ -25,6 +25,11 @@ func (c *MessageAppController) PrivateMessageUnreadList(ctx context.Context, req
 	return message.ListPrivateMessageUnread(ctx, req)
 }
 
+// PrivateMessageBySender App端按发送者查询私信内容
+func (c *MessageAppController) PrivateMessageBySender(ctx context.Context, req *messagedto.AppPrivateMessageBySenderReq) (*messagedto.AppPrivateMessageBySenderRes, error) {
+	return message.ListPrivateMessageBySender(ctx, req)
+}
+
 // ClearPrivateMessageUnread App端清除指定玩家私信未读
 func (c *MessageAppController) ClearPrivateMessageUnread(ctx context.Context, req *messagedto.AppClearPrivateMessageUnreadReq) (*messagedto.AppClearPrivateMessageUnreadRes, error) {
 	return message.ClearPrivateMessageUnread(ctx, req)

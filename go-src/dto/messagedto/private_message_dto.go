@@ -33,6 +33,28 @@ type AppPrivateMessageUnreadListRes struct {
 	List []*AppPrivateMessageUnreadDetailItem `json:"list"`
 }
 
+// AppPrivateMessageBySenderReq App端按发送者查询私信内容
+type AppPrivateMessageBySenderReq struct {
+	g.Meta    `path:"/privateMessageBySender" method:"post" summary:"按发送者查询私信" tags:"私信"`
+	SenderId  uint64 `json:"senderId,string" v:"required|min:1#发送者ID不能为空|发送者ID非法" dc:"发送者用户ID"`
+	PageIndex int    `json:"pageIndex" dc:"页码(从1开始)"`
+	PageSize  int    `json:"pageSize" dc:"每页条数"`
+}
+
+type AppPrivateMessageItem struct {
+	Id           uint64 `json:"id,string"`
+	SenderId     uint64 `json:"senderId,string"`
+	ReceiverId   uint64 `json:"receiverId,string"`
+	Content      string `json:"content"`
+	SenderName   string `json:"senderName"`
+	SenderAvatar string `json:"senderAvatar"`
+	CreatedAt    string `json:"createdAt"`
+}
+
+type AppPrivateMessageBySenderRes struct {
+	List []*AppPrivateMessageItem `json:"list"`
+}
+
 // AppClearPrivateMessageUnreadReq App端清除指定玩家私信未读
 type AppClearPrivateMessageUnreadReq struct {
 	g.Meta   `path:"/clearPrivateMessageUnread" method:"post" summary:"清除指定玩家私信未读" tags:"私信"`
