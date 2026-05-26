@@ -3,6 +3,7 @@ package livefollow
 import (
 	"context"
 	"strconv"
+	"xr-game-server/constants/roomstatus"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/livefollowdao"
 	"xr-game-server/dao/liveroomdao"
@@ -143,9 +144,12 @@ func FollowerList(ctx context.Context, req *livefollowdto.FollowerListReq) (*liv
 // roomStatus 返回直播间状态;无直播间返回 2
 func roomStatus(anchorId uint64) uint8 {
 	if r := liveroomdao.GetRoomById(anchorId); r != nil {
-		return r.Status
+		if r.LiveRecordId > 0 {
+			return roomstatus.LiveRoomStatusLive
+		}
+		return roomstatus.LiveRoomStatusClosed
 	}
-	return 2
+	return roomstatus.Empty
 }
 
 func normalizePage(page, pageSize int) (int, int) {

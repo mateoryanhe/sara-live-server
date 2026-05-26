@@ -16,23 +16,17 @@ const (
 	LiveRoomTitle   db.TbCol = "title"
 	LiveRoomCover   db.TbCol = "cover"
 	LiveRoomNotice  db.TbCol = "notice"
-	LiveRoomStatus  db.TbCol = "status"
-)
-
-// 直播间状态
-const (
-	LiveRoomStatusClosed uint8 = 0 // 未开播/已下播
-	LiveRoomStatusLive   uint8 = 1 // 直播中
+	LiveRoomLiveId  db.TbCol = "live_record_id"
 )
 
 // LiveRoom 直播间(LiveRoom.ID 与 UserInfo.ID 均为主播用户ID,每个主播仅一个直播间)
 type LiveRoom struct {
 	migrate.OneModel
-	GuildId uint64 `gorm:"index;default:0;comment:所属工会ID" json:"guildId"`
-	Title   string `gorm:"size:128;default:'';comment:直播间标题" json:"title"`
-	Cover   string `gorm:"size:255;default:'';comment:封面图URL" json:"cover"`
-	Notice  string `gorm:"size:512;default:'';comment:公告" json:"notice"`
-	Status  uint8  `gorm:"default:0;comment:状态(0未开播,1直播中)" json:"status"`
+	GuildId      uint64 `gorm:"index;default:0;comment:所属工会ID" json:"guildId"`
+	Title        string `gorm:"size:128;default:'';comment:直播间标题" json:"title"`
+	Cover        string `gorm:"size:255;default:'';comment:封面图URL" json:"cover"`
+	Notice       string `gorm:"size:512;default:'';comment:公告" json:"notice"`
+	LiveRecordId uint64 `gorm:"default:0;comment:直播记录id" json:"liveRecordId"`
 }
 
 // NewLiveRoom 构造内存对象,字段写入通过 syndb 异步入库
@@ -47,7 +41,6 @@ func NewLiveRoom(anchorId, guildId uint64, title, cover, notice string) *LiveRoo
 	r.SetTitle(title)
 	r.SetCover(cover)
 	r.SetNotice(notice)
-	r.SetStatus(LiveRoomStatusClosed)
 	return r
 }
 
@@ -74,18 +67,18 @@ func (r *LiveRoom) SetCover(v string) {
 	})
 }
 
-func (r *LiveRoom) SetNotice(v string) {
-	r.Notice = v
+func (r *LiveRoom) SetLiveRecordId(v uint64) {
+	r.LiveRecordId = v
 	r.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomNotice, &syndb.ColData{
+	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomLiveId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
-func (r *LiveRoom) SetStatus(v uint8) {
-	r.Status = v
+func (r *LiveRoom) SetNotice(v string) {
+	r.Notice = v
 	r.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomStatus, &syndb.ColData{
+	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomNotice, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -112,12 +105,12 @@ func (r *LiveRoom) touchUpdatedAt() {
 }
 
 func initLiveRoom() {
-	syndb.RegQuickWithLarge(TbLiveRoom, db.CreatedAtName)
-	syndb.RegQuickWithLarge(TbLiveRoom, db.UpdatedAtName)
-	syndb.RegQuickWithLarge(TbLiveRoom, LiveRoomGuildId)
-	syndb.RegQuickWithLarge(TbLiveRoom, LiveRoomTitle)
-	syndb.RegQuickWithLarge(TbLiveRoom, LiveRoomCover)
-	syndb.RegQuickWithLarge(TbLiveRoom, LiveRoomNotice)
-	syndb.RegQuickWithLarge(TbLiveRoom, LiveRoomStatus)
+	syndb.RegQuickWithMiddle(TbLiveRoom, db.CreatedAtName)
+	syndb.RegQuickWithMiddle(TbLiveRoom, db.UpdatedAtName)
+	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomGuildId)
+	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomTitle)
+	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomCover)
+	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomNotice)
+	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomLiveId)
 	migrate.AutoMigrate(&LiveRoom{})
 }

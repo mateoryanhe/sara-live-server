@@ -5,7 +5,6 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"strconv"
 	"xr-game-server/core/str"
-	"xr-game-server/entity"
 )
 
 // RoomListRow 直播间列表查询行(直连 DB)
@@ -23,7 +22,7 @@ type RoomListRow struct {
 
 // ListRooms 分页查询直播间列表(直连数据库,不走缓存)
 // statusFilter: 0=全部, 1=仅直播中, 2=仅未开播/已下播
-func ListRooms(page, pageSize, statusFilter int) (int, []*RoomListRow) {
+func ListRooms(page, pageSize int) (int, []*RoomListRow) {
 	if page <= 0 {
 		page = 1
 	}
@@ -42,15 +41,6 @@ func ListRooms(page, pageSize, statusFilter int) (int, []*RoomListRow) {
             LEFT JOIN user_infos u ON u.id = r.id
             WHERE 1=1 `
 	param := make([]any, 0)
-
-	switch statusFilter {
-	case 1:
-		sql += ` AND r.status = ?`
-		param = append(param, entity.LiveRoomStatusLive)
-	case 2:
-		sql += ` AND r.status = ?`
-		param = append(param, entity.LiveRoomStatusClosed)
-	}
 
 	sql += ` ORDER BY r.status DESC, r.updated_at DESC`
 

@@ -19,7 +19,7 @@ func GetRoomList(_ context.Context, req *liveroomdto.GetLiveRoomListReq) (*liver
 		pageSize = 20
 	}
 
-	total, rows := liveroomdao.ListRooms(page, pageSize, req.StatusFilter)
+	total, rows := liveroomdao.ListRooms(page, pageSize)
 	list := make([]*liveroomdto.LiveRoomListItem, 0, len(rows))
 	for _, row := range rows {
 		list = append(list, &liveroomdto.LiveRoomListItem{

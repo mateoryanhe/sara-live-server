@@ -5,7 +5,6 @@ import (
 	"xr-game-server/constants/db"
 	"xr-game-server/core/math"
 	"xr-game-server/core/migrate"
-	"xr-game-server/core/snowflake"
 	"xr-game-server/core/syndb"
 )
 
@@ -30,14 +29,13 @@ type LiveRecord struct {
 }
 
 // NewLiveRecord 构造一条直播记录,字段写入通过 syndb 异步入库
-func NewLiveRecord(anchorId uint64, startTime time.Time) *LiveRecord {
+func NewLiveRecord(id uint64) *LiveRecord {
 	ret := &LiveRecord{}
-	ret.ID = snowflake.GetId()
+	ret.ID = id
 	now := time.Now()
 	ret.SetCreatedAt(now)
 	ret.SetUpdatedAt(now)
-	ret.SetAnchorId(anchorId)
-	ret.SetStartTime(startTime)
+	ret.SetStartTime(now)
 	return ret
 }
 

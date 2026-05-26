@@ -3,7 +3,9 @@ package liveroom
 import (
 	"context"
 	"strconv"
+	"xr-game-server/constants/roomstatus"
 	"xr-game-server/core/httpserver"
+	"xr-game-server/core/snowflake"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
@@ -42,7 +44,6 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 	return &liveroomdto.CreateLiveRoomRes{
 		RoomId:  strconv.FormatUint(room.ID, 10),
 		GuildId: strconv.FormatUint(room.GuildId, 10),
-		Status:  room.Status,
 	}, nil
 }
 
@@ -62,11 +63,13 @@ func StartLive(ctx context.Context, _ *liveroomdto.StartLiveReq) (*liveroomdto.S
 	if err != nil {
 		return nil, err
 	}
-	if room.Status != entity.LiveRoomStatusLive {
-		room.SetStatus(entity.LiveRoomStatusLive)
-		//liveroomdao.FlushRoomCache(room)
+	if room.LiveRecordId > 0 {
+		//重置
 	}
-	return &liveroomdto.StartLiveRes{Status: room.Status}, nil
+	liveRecordId := snowflake.GetId()
+	liveroomdao.GetLiveRecordById(liveRecordId)
+	room.SetLiveRecordId(liveRecordId)
+	return &liveroomdto.StartLiveRes{}, nil
 }
 
 // StopLive 下播
@@ -75,11 +78,10 @@ func StopLive(ctx context.Context, _ *liveroomdto.StopLiveReq) (*liveroomdto.Sto
 	if err != nil {
 		return nil, err
 	}
-	if room.Status != entity.LiveRoomStatusClosed {
-		room.SetStatus(entity.LiveRoomStatusClosed)
-		//liveroomdao.FlushRoomCache(room)
-	}
-	return &liveroomdto.StopLiveRes{Status: room.Status}, nil
+
+	room.SetLiveRecordId(0)
+
+	return &liveroomdto.StopLiveRes{}, nil
 }
 
 // UpdateCover 修改封面
@@ -207,13 +209,19 @@ func GetRoom(_ context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto.G
 	if room == nil {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
+
+	status := roomstatus.LiveRoomStatusClosed
+	if room.LiveRecordId > 0 {
+		status = roomstatus.LiveRoomStatusLive
+	}
+
 	return &liveroomdto.GetLiveRoomRes{
 		RoomId:   strconv.FormatUint(room.ID, 10),
 		GuildId:  strconv.FormatUint(room.GuildId, 10),
 		Title:    room.Title,
 		Cover:    upload.GetUrlByName(room.Cover),
 		Notice:   room.Notice,
-		Status:   room.Status,
+		Status:   status,
 		CreateAt: room.CreatedAt.Unix(),
 	}, nil
 }

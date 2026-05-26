@@ -13,7 +13,6 @@ type CreateLiveRoomReq struct {
 type CreateLiveRoomRes struct {
 	RoomId  string `json:"roomId"  dc:"直播间ID"`
 	GuildId string `json:"guildId" dc:"所属工会ID"`
-	Status  uint8  `json:"status"  dc:"状态(0未开播,1直播中)"`
 }
 
 // StartLiveReq 开播(主播自身)
@@ -22,7 +21,6 @@ type StartLiveReq struct {
 }
 
 type StartLiveRes struct {
-	Status uint8 `json:"status" dc:"状态(0未开播,1直播中)"`
 }
 
 // StopLiveReq 下播(主播自身)
@@ -31,7 +29,6 @@ type StopLiveReq struct {
 }
 
 type StopLiveRes struct {
-	Status uint8 `json:"status" dc:"状态(0未开播,1直播中)"`
 }
 
 // UpdateCoverReq 修改封面(主播自身)

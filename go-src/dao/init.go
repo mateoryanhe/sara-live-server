@@ -28,6 +28,7 @@ func Init() {
 	guilddao.InitGuildDao()
 	liveroomdao.InitLiveRoomDao()
 	liveroomdao.InitLiveRoomOnlineDao()
+	liveroomdao.InitLiveRecordDao()
 	livefollowdao.InitLiveFollowDao()
 	shortvideodao.InitShortVideoDao()
 	shortvideocfgdao.InitShortVideoCfgDao()
