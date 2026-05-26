@@ -254,7 +254,7 @@ const iconPreviewUrl = ref('')
 let objectPreviewUrl: string | null = null
 
 const formatPrice = (price: number) => {
-  return `$${Number(price).toFixed(4)}`
+  return `${Number(price).toFixed(4)}`
 }
 
 const totalGold = (row: RechargeCfg) => {

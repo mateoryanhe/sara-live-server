@@ -43,7 +43,7 @@
         </el-form>
       </div>
       <div class="content">
-        <el-table v-loading="loading" :data="userList" height="500" style="width: 100%">
+        <el-table v-loading="loading" :data="userList" style="width: 100%">
           <el-table-column label="ID" prop="id" width="200"/>
           <el-table-column label="昵称" prop="nickname" width="140">
             <template #default="scope">{{ scope.row.nickname || '-' }}</template>
@@ -579,10 +579,6 @@ onMounted(() => {
 
 .search-form {
   margin-bottom: 20px;
-}
-
-.content {
-  min-height: 500px;
 }
 
 .pagination {
