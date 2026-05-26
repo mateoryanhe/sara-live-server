@@ -29,7 +29,7 @@ func TestLogin(ctx context.Context, req *authdto.TestLoginReq) (res *authdto.Tes
 	httpReq := g.RequestFromCtx(ctx)
 	tokenStr := xrtoken.AddAppToken(data.ID)
 	if len(data.IP) == common.Zero {
-		data.SetIp(httpReq.Host)
+		data.SetIp(httpReq.GetClientIp())
 		data.SetUpdatedAt(time.Now())
 	}
 	userinfodao.GetUserInfoByUserId(data.ID)

@@ -29,7 +29,7 @@ func PhoneLogin(ctx context.Context, req *authdto.PhoneLoginReq) (res *authdto.P
 
 	httpReq := g.RequestFromCtx(ctx)
 	if len(account.IP) == common.Zero {
-		account.SetIp(httpReq.Host)
+		account.SetIp(httpReq.GetClientIp())
 	}
 	tokenStr := xrtoken.AddAppToken(account.ID)
 	userinfodao.GetUserInfoByUserId(account.ID)

@@ -74,6 +74,22 @@ type CMSManualRechargeRes struct {
 	Success bool    `json:"success"`
 }
 
+// CMSCreateRechargeOrderReq 后台人工创建充值订单(待支付)
+type CMSCreateRechargeOrderReq struct {
+	g.Meta `path:"/manualCreateOrder" method:"post" summary:"后台人工创建充值订单" tags:"充值订单"`
+	UserId string  `json:"userId" v:"required#玩家ID不能为空" dc:"玩家用户ID"`
+	Amount float64 `json:"amount" v:"required#订单金额不能为空" dc:"订单金额(USD)"`
+}
+
+type CMSCreateRechargeOrderRes struct {
+	OrderId  string  `json:"orderId"`
+	Price    float64 `json:"price"`
+	Gold     float64 `json:"gold"`
+	Currency string  `json:"currency"`
+	Status   uint8   `json:"status"`
+	Success  bool    `json:"success"`
+}
+
 // ===== App =====
 
 // AppCreateRechargeOrderReq App 端创建充值订单(根据 cfgId 取价格与金币)

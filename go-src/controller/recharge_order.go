@@ -26,3 +26,8 @@ func (c *RechargeOrderController) RechargeOrderList(ctx context.Context, req *re
 func (c *RechargeOrderController) ManualRecharge(ctx context.Context, req *rechargeorderdto.CMSManualRechargeReq) (res *rechargeorderdto.CMSManualRechargeRes, err error) {
 	return recharge.ManualRecharge(ctx, req)
 }
+
+// ManualCreateOrder 后台人工创建充值订单
+func (c *RechargeOrderController) ManualCreateOrder(ctx context.Context, req *rechargeorderdto.CMSCreateRechargeOrderReq) (res *rechargeorderdto.CMSCreateRechargeOrderRes, err error) {
+	return recharge.CMSCreateOrder(ctx, req)
+}

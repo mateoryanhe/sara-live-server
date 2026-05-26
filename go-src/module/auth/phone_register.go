@@ -38,7 +38,7 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 	// 设置IP
 	httpReq := g.RequestFromCtx(ctx)
 	if len(account.IP) == common.Zero {
-		account.SetIp(httpReq.Host)
+		account.SetIp(httpReq.GetClientIp())
 		account.SetUpdatedAt(time.Now())
 	}
 

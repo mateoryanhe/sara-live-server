@@ -12,4 +12,15 @@ export const rechargeOrderApi = {
             {orderId},
         )
     },
+
+    manualCreateOrder: (params: { userId: string; amount: number }) => {
+        return request.post<{
+            orderId: string
+            price: number
+            gold: number
+            currency: string
+            status: number
+            success: boolean
+        }>('/rechargeOrder/manualCreateOrder', params)
+    },
 }

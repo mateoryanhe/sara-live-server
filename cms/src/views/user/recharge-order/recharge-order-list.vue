@@ -3,12 +3,13 @@
       v-loading="pageWaiting"
       class="page-container"
       element-loading-background="rgba(255, 255, 255, 0.75)"
-      element-loading-text="人工补单处理中，请稍候..."
+      element-loading-text="pageWaitingText"
   >
     <el-card>
       <template #header>
         <div class="card-header">
           <span>充值订单</span>
+          <el-button type="primary" @click="openCreateOrderDialog">人工创建订单</el-button>
         </div>
       </template>
 
@@ -58,7 +59,6 @@
         <el-table-column label="金额" prop="price" width="120">
           <template #default="{ row }">{{ formatAmount(row.price) }}</template>
         </el-table-column>
-        <el-table-column label="币种" prop="currency" width="80"/>
         <el-table-column label="金币" prop="gold" width="120">
           <template #default="{ row }">{{ formatAmount(row.gold) }}</template>
         </el-table-column>
@@ -110,12 +110,36 @@
         />
       </div>
     </el-card>
+
+    <el-dialog v-model="createOrderDialogVisible" title="人工创建订单" width="420px" @closed="resetCreateOrderForm">
+      <el-form ref="createOrderFormRef" :model="createOrderForm" :rules="createOrderRules" label-width="90px">
+        <el-form-item label="玩家ID" prop="userId">
+          <el-input v-model="createOrderForm.userId" clearable placeholder="请输入玩家ID"/>
+        </el-form-item>
+        <el-form-item label="订单金额" prop="amount">
+          <el-input-number
+              v-model="createOrderForm.amount"
+              :min="0.01"
+              :precision="2"
+              :step="1"
+              controls-position="right"
+              placeholder="请输入订单金额"
+              style="width: 100%"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="createOrderDialogVisible = false">取消</el-button>
+        <el-button :loading="creatingOrder" type="primary" @click="handleCreateOrder">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
 import {onMounted, reactive, ref} from 'vue'
 import {ElMessage, ElMessageBox} from 'element-plus'
+import type {FormInstance, FormRules} from 'element-plus'
 import {rechargeOrderApi} from '@/api'
 import type {RechargeOrder} from '@/types/api.ts'
 
@@ -128,7 +152,11 @@ interface SearchForm {
 
 const loading = ref(false)
 const pageWaiting = ref(false)
+const pageWaitingText = ref('处理中，请稍候...')
 const manualRechargingId = ref('')
+const createOrderDialogVisible = ref(false)
+const creatingOrder = ref(false)
+const createOrderFormRef = ref<FormInstance>()
 const tableData = ref<RechargeOrder[]>([])
 const total = ref(0)
 const currentPage = ref(1)
@@ -140,6 +168,16 @@ const searchForm = reactive<SearchForm>({
   dateRange: [],
   statusFilter: 0,
 })
+
+const createOrderForm = reactive({
+  userId: '',
+  amount: undefined as number | undefined,
+})
+
+const createOrderRules: FormRules = {
+  userId: [{required: true, message: '请输入玩家ID', trigger: 'blur'}],
+  amount: [{required: true, message: '请输入订单金额', trigger: 'change'}],
+}
 
 const toDayStartUnix = (dateStr: string): number => {
   return Math.floor(new Date(`${dateStr}T00:00:00`).getTime() / 1000)
@@ -202,6 +240,7 @@ const handleCurrentChange = (page: number) => {
 
 const afterManualRechargeSuccess = (after: number) => {
   ElMessage.success(`补单成功，玩家当前金币余额：${formatAmount(after)}`)
+  pageWaitingText.value = '人工补单处理中，请稍候...'
   pageWaiting.value = true
   setTimeout(() => {
     fetchOrderList().finally(() => {
@@ -230,6 +269,49 @@ const handleManualRecharge = async (row: RechargeOrder) => {
     }
   } finally {
     manualRechargingId.value = ''
+  }
+}
+
+const openCreateOrderDialog = () => {
+  createOrderDialogVisible.value = true
+}
+
+const resetCreateOrderForm = () => {
+  createOrderForm.userId = ''
+  createOrderForm.amount = undefined
+  createOrderFormRef.value?.clearValidate()
+}
+
+const handleCreateOrder = async () => {
+  if (!createOrderFormRef.value) {
+    return
+  }
+  try {
+    await createOrderFormRef.value.validate()
+  } catch {
+    return
+  }
+
+  creatingOrder.value = true
+  try {
+    const res = await rechargeOrderApi.manualCreateOrder({
+      userId: createOrderForm.userId.trim(),
+      amount: Number(createOrderForm.amount),
+    })
+    createOrderDialogVisible.value = false
+    ElMessage.success(`创建成功，订单ID：${res.orderId}，金额：${formatAmount(res.price)}，金币：${formatAmount(res.gold)}`)
+    currentPage.value = 1
+    pageWaitingText.value = '人工创建订单处理中，请稍候...'
+    pageWaiting.value = true
+    setTimeout(() => {
+      fetchOrderList().finally(() => {
+        pageWaiting.value = false
+      })
+    }, 3000)
+  } catch (error) {
+    console.error('人工创建订单失败:', error)
+  } finally {
+    creatingOrder.value = false
   }
 }
 
@@ -293,6 +375,9 @@ onMounted(() => {
 }
 
 .card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   font-size: 16px;
   font-weight: bold;
 }

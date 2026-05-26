@@ -6,6 +6,7 @@ import (
 	"xr-game-server/core/event"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/rechargeorderdao"
+	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/rechargeorderdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
@@ -58,5 +59,38 @@ func CreateOrder(ctx context.Context, req *rechargeorderdto.AppCreateRechargeOrd
 		Price:    order.Price,
 		Currency: order.Currency,
 		Status:   order.Status,
+	}, nil
+}
+
+// CMSCreateOrder 后台人工创建充值订单(待支付,后续可人工补单完成)
+func CMSCreateOrder(ctx context.Context, req *rechargeorderdto.CMSCreateRechargeOrderReq) (*rechargeorderdto.CMSCreateRechargeOrderRes, error) {
+	userId, err := strconv.ParseUint(req.UserId, 10, 64)
+	if err != nil || userId == 0 {
+		return nil, errercode.CreateCode(errercode.EmptyUserId)
+	}
+	if userinfodao.GetUserInfoByUserId(userId) == nil {
+		return nil, errercode.CreateCode(errercode.SysError)
+	}
+	if req.Amount <= 0 {
+		return nil, errercode.CreateCode(errercode.RechargeAmountInvalid)
+	}
+
+	goldAmount := req.Amount * 100
+	order := entity.NewRechargeOrder(userId, 0, req.Amount, defaultCurrency, goldAmount, entity.RechargeOrderSourceManual)
+	order.SetRemark("CMS人工创建")
+	if operatorId := httpserver.GetAuthId(ctx); operatorId > 0 {
+		order.SetOperatorId(operatorId)
+	}
+
+	rechargeorderdao.AddOrderToCache(order)
+	event.Pub(gameevent.RechargeOrderCreatedEvent, gameevent.NewRechargeOrderCreatedEventData(order.ID))
+
+	return &rechargeorderdto.CMSCreateRechargeOrderRes{
+		OrderId:  strconv.FormatUint(order.ID, 10),
+		Price:    order.Price,
+		Gold:     order.Gold,
+		Currency: order.Currency,
+		Status:   order.Status,
+		Success:  true,
 	}, nil
 }
