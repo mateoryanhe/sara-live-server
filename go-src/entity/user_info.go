@@ -14,35 +14,37 @@ const (
 )
 
 const (
-	UserInfoNickname    db.TbCol = "nickname"
-	UserInfoPhone       db.TbCol = "phone"
-	UserInfoAvatar      db.TbCol = "avatar"
-	UserInfoRemark      db.TbCol = "remark"
-	UserInfoGold        db.TbCol = "gold"
-	UserInfoDiamond     db.TbCol = "diamond"
-	UserInfoShareCode   db.TbCol = "share_code"
-	UserInfoGuildId     db.TbCol = "guild_id"
-	UserInfoIsAnchor    db.TbCol = "is_anchor"
-	UserInfoHasLiveRoom db.TbCol = "has_live_room"
-	UserInfoInviterId   db.TbCol = "inviter_id"
-	UserInfoVipLevel    db.TbCol = "vip_level"
+	UserInfoNickname      db.TbCol = "nickname"
+	UserInfoPhone         db.TbCol = "phone"
+	UserInfoAvatar        db.TbCol = "avatar"
+	UserInfoRemark        db.TbCol = "remark"
+	UserInfoGold          db.TbCol = "gold"
+	UserInfoDiamond       db.TbCol = "diamond"
+	UserInfoShareCode     db.TbCol = "share_code"
+	UserInfoGuildId       db.TbCol = "guild_id"
+	UserInfoIsAnchor      db.TbCol = "is_anchor"
+	UserInfoHasLiveRoom   db.TbCol = "has_live_room"
+	UserInfoInviterId     db.TbCol = "inviter_id"
+	UserInfoVipLevel      db.TbCol = "vip_level"
+	UserInfoLastLoginTime db.TbCol = "last_login_time"
 )
 
 // UserInfo 用户基础信息
 type UserInfo struct {
 	migrate.OneModel
-	Nickname    string  `gorm:"default:'';comment:用户昵称"`
-	Phone       string  `gorm:"default:'';comment:手机号"`
-	Avatar      string  `gorm:"default:'';comment:头像"`
-	Remark      string  `gorm:"default:'';comment:备注"`
-	Gold        float64 `gorm:"default:0;comment:金币"`
-	Diamond     float64 `gorm:"default:0;comment:钻石"`
-	ShareCode   string  `gorm:"uniqueIndex;default:'';comment:分享码"`
-	GuildId     uint64  `gorm:"index;default:0;comment:所属工会ID(0为未加入)"`
-	IsAnchor    bool    `gorm:"default:0;comment:是否主播(设为true后不可回退)"`
-	HasLiveRoom bool    `gorm:"default:0;comment:是否已创建直播间(App端完善资料后为true)"`
-	InviterId   uint64  `gorm:"index;default:0;comment:邀请人用户ID(0为无)"`
-	VipLevel    uint32  `gorm:"default:0;comment:VIP等级(0为无)"`
+	Nickname      string     `gorm:"default:'';comment:用户昵称"`
+	Phone         string     `gorm:"default:'';comment:手机号"`
+	Avatar        string     `gorm:"default:'';comment:头像"`
+	Remark        string     `gorm:"default:'';comment:备注"`
+	Gold          float64    `gorm:"default:0;comment:金币"`
+	Diamond       float64    `gorm:"default:0;comment:钻石"`
+	ShareCode     string     `gorm:"uniqueIndex;default:'';comment:分享码"`
+	GuildId       uint64     `gorm:"index;default:0;comment:所属工会ID(0为未加入)"`
+	IsAnchor      bool       `gorm:"default:0;comment:是否主播(设为true后不可回退)"`
+	HasLiveRoom   bool       `gorm:"default:0;comment:是否已创建直播间(App端完善资料后为true)"`
+	InviterId     uint64     `gorm:"index;default:0;comment:邀请人用户ID(0为无)"`
+	VipLevel      uint32     `gorm:"default:0;comment:VIP等级(0为无)"`
+	LastLoginTime *time.Time `gorm:"comment:最后登录时间" json:"lastLoginTime"`
 }
 
 func NewUserInfo(userId uint64) *UserInfo {
@@ -180,6 +182,14 @@ func (receiver *UserInfo) SetVipLevel(vipLevel uint32) {
 	})
 }
 
+func (receiver *UserInfo) SetLastLoginTime(val *time.Time) {
+	receiver.LastLoginTime = val
+	syndb.AddDataToLazyChan(TbUserInfo, UserInfoLastLoginTime, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: val,
+	})
+}
+
 func (receiver *UserInfo) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
 	syndb.AddDataToQuickChan(TbUserInfo, db.CreatedAtName, &syndb.ColData{
@@ -212,6 +222,7 @@ func initUserInfo() {
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoHasLiveRoom)
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoInviterId)
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoVipLevel)
+	syndb.RegLazyWithLarge(TbUserInfo, UserInfoLastLoginTime)
 
 	migrate.AutoMigrate(&UserInfo{})
 }

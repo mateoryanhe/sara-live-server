@@ -126,6 +126,24 @@ export interface AnchorListItem {
     registeredAt?: string | null
 }
 
+export interface CurrencyLogQuery extends PageQuery {
+    userId?: string
+    currencyType: number
+}
+
+export interface CurrencyLogItem {
+    id: string
+    userId: string
+    nickname?: string
+    action: number
+    amount: number
+    before: number
+    after: number
+    reason: number
+    reasonText?: string
+    createdAt?: string | null
+}
+
 
 // 全局配置相关类型
 export interface GlobalCfg {

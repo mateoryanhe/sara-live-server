@@ -12,7 +12,7 @@
       >
         <!-- 移除仪表盘菜单项 -->
         <el-sub-menu
-            v-if="hasMenuPermission('UserList') || hasMenuPermission('AnchorListManagement') || hasMenuPermission('RechargeOrderList')"
+            v-if="hasMenuPermission('UserList') || hasMenuPermission('AnchorListManagement') || hasMenuPermission('RechargeOrderList') || hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList')"
             index="/user/account">
           <template #title>
             <el-icon>
@@ -37,6 +37,18 @@
               <Wallet/>
             </el-icon>
             <span>充值订单</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('GoldCurrencyLogList')" index="/user/currency-log/gold-log-list">
+            <el-icon>
+              <Coin/>
+            </el-icon>
+            <span>金币流水</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('DiamondCurrencyLogList')" index="/user/currency-log/diamond-log-list">
+            <el-icon>
+              <Money/>
+            </el-icon>
+            <span>钻石流水</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -223,7 +235,7 @@
 <script lang="ts" setup>
 import {computed, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {ArrowDown, Cpu, Expand, Fold, Lock, Medal, Monitor, Picture, Present, Setting, Stamp, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Coin, Cpu, Expand, Fold, Lock, Medal, Money, Monitor, Picture, Present, Setting, Stamp, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {clearPermissions, getIsAdmin, hasPermission} from '@/utils/permission'
 
 const route = useRoute()

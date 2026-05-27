@@ -13,6 +13,7 @@ import {uploadApi} from './modules/upload'
 import {goldApi} from './modules/gold'
 import {diamondApi} from './modules/diamond'
 import {rechargeOrderApi} from './modules/rechargeOrder'
+import {currencyLogApi} from './modules/currencyLog'
 import {gameCfgApi} from './modules/gameCfg'
 import {agoraApi} from './modules/agora'
 
@@ -32,6 +33,7 @@ export {
     goldApi,
     diamondApi,
     rechargeOrderApi,
+    currencyLogApi,
     gameCfgApi,
     agoraApi,
 }
@@ -52,6 +54,7 @@ export default {
     goldApi,
     diamondApi,
     rechargeOrderApi,
+    currencyLogApi,
     gameCfgApi,
     agoraApi,
 }

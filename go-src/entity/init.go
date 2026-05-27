@@ -13,6 +13,8 @@ func Init() {
 	initUserInfo()
 	initUserLoginDevice()
 	initUserCumulativeStat()
+	initDailyLoginStat()
+	initDailyUserLogin()
 	initCurrencyLog()
 	InitLiveGuild()
 	initGuildMember()

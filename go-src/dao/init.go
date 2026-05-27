@@ -3,6 +3,8 @@ package dao
 import (
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/cmsuserdao"
+	"xr-game-server/dao/dailyloginstatdao"
+	"xr-game-server/dao/dailyuserlogindao"
 	"xr-game-server/dao/globalcfgdao"
 	"xr-game-server/dao/guilddao"
 	"xr-game-server/dao/livefollowdao"
@@ -24,6 +26,8 @@ func Init() {
 	globalcfgdao.InitGlobalCfg()
 	cmsuserdao.InitCMSUser()
 	userinfodao.InitUserInfoDao()
+	dailyloginstatdao.InitDailyLoginStatDao()
+	dailyuserlogindao.InitDailyUserLoginDao()
 	userlogindevicedao.InitUserLoginDeviceDao()
 	guilddao.InitGuildDao()
 	liveroomdao.InitLiveRoomDao()
