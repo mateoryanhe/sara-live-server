@@ -19,8 +19,8 @@ func GetLiveRoomToken(ctx context.Context, req *agoradto.GetLiveRoomTokenReq) (*
 	}
 
 	agoraCfg := getAgoraCfgCache()
-	if agoraCfg == nil || agoraCfg.AppId == "" || agoraCfg.AppCertificate == "" {
-		return nil, errercode.CreateCode(errercode.AgoraCfgInvalid)
+	if err := validateAgoraCfg(agoraCfg); err != nil {
+		return nil, err
 	}
 
 	userId := httpserver.GetAuthId(ctx)

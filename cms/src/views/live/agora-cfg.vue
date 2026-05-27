@@ -22,6 +22,22 @@
           />
         </el-form-item>
 
+        <el-form-item label="REST CustomerId" prop="restCustomerId">
+          <el-input v-model="formData.restCustomerId" clearable placeholder="请输入声网 REST CustomerId"/>
+          <span class="form-tip">可选，查询用户在线状态时需要配置</span>
+        </el-form-item>
+
+        <el-form-item label="REST CustomerSecret" prop="restCustomerSecret">
+          <el-input
+              v-model="formData.restCustomerSecret"
+              clearable
+              placeholder="请输入声网 REST CustomerSecret"
+              show-password
+              type="password"
+          />
+          <span class="form-tip">可选，查询用户在线状态时需要配置</span>
+        </el-form-item>
+
         <el-form-item label="Token有效期" prop="tokenExpireSeconds">
           <el-input-number
               v-model="formData.tokenExpireSeconds"
@@ -59,6 +75,8 @@ const formData = reactive({
   id: '0',
   appId: '',
   appCertificate: '',
+  restCustomerId: '',
+  restCustomerSecret: '',
   tokenExpireSeconds: 21600,
 })
 
@@ -76,6 +94,12 @@ const formRules = reactive({
     {required: true, message: '请输入 AppCertificate', trigger: 'blur'},
     {min: 1, max: 128, message: 'AppCertificate 长度在 1-128 个字符', trigger: 'blur'},
   ],
+  restCustomerId: [
+    {max: 64, message: 'REST CustomerId 长度不能超过 64 个字符', trigger: 'blur'},
+  ],
+  restCustomerSecret: [
+    {max: 128, message: 'REST CustomerSecret 长度不能超过 128 个字符', trigger: 'blur'},
+  ],
   tokenExpireSeconds: [
     {required: true, message: '请输入 Token 有效期', trigger: 'blur'},
     {type: 'number', min: 60, message: 'Token 有效期不能小于 60 秒', trigger: 'blur'},
@@ -87,6 +111,8 @@ const applyCfg = (cfg: AgoraCfg | null | undefined) => {
     formData.id = '0'
     formData.appId = ''
     formData.appCertificate = ''
+    formData.restCustomerId = ''
+    formData.restCustomerSecret = ''
     formData.tokenExpireSeconds = 21600
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
@@ -95,6 +121,8 @@ const applyCfg = (cfg: AgoraCfg | null | undefined) => {
   formData.id = cfg.id || '0'
   formData.appId = cfg.appId || ''
   formData.appCertificate = cfg.appCertificate || ''
+  formData.restCustomerId = cfg.restCustomerId || ''
+  formData.restCustomerSecret = cfg.restCustomerSecret || ''
   formData.tokenExpireSeconds = cfg.tokenExpireSeconds || 21600
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
@@ -121,6 +149,8 @@ const handleSave = async () => {
       id: formData.id === '0' ? 0 : Number(formData.id),
       appId: formData.appId.trim(),
       appCertificate: formData.appCertificate.trim(),
+      restCustomerId: formData.restCustomerId.trim(),
+      restCustomerSecret: formData.restCustomerSecret.trim(),
       tokenExpireSeconds: formData.tokenExpireSeconds,
     })
     if (response?.success) {

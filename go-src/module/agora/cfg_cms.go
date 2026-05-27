@@ -23,6 +23,8 @@ func SaveAgoraCfg(_ context.Context, req *agoradto.SaveAgoraCfgReq) (*agoradto.S
 	row := &entity.AgoraCfg{
 		AppId:              req.AppId,
 		AppCertificate:     req.AppCertificate,
+		RestCustomerId:     req.RestCustomerId,
+		RestCustomerSecret: req.RestCustomerSecret,
 		TokenExpireSeconds: req.TokenExpireSeconds,
 	}
 	if req.ID > 0 {
@@ -57,6 +59,8 @@ func toAgoraCfgItem(cfg *entity.AgoraCfg) *agoradto.AgoraCfgItem {
 		ID:                 strconv.FormatUint(cfg.ID, 10),
 		AppId:              cfg.AppId,
 		AppCertificate:     cfg.AppCertificate,
+		RestCustomerId:     cfg.RestCustomerId,
+		RestCustomerSecret: cfg.RestCustomerSecret,
 		TokenExpireSeconds: cfg.TokenExpireSeconds,
 		CreatedAt:          formatAgoraCfgTime(cfg.CreatedAt),
 		UpdatedAt:          formatAgoraCfgTime(cfg.UpdatedAt),

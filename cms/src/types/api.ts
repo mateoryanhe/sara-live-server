@@ -332,6 +332,8 @@ export interface AgoraCfg {
     id: string
     appId: string
     appCertificate: string
+    restCustomerId: string
+    restCustomerSecret: string
     tokenExpireSeconds: number
     createdAt: string
     updatedAt: string
@@ -345,6 +347,8 @@ export interface SaveAgoraCfgReq {
     id?: number
     appId: string
     appCertificate: string
+    restCustomerId: string
+    restCustomerSecret: string
     tokenExpireSeconds: number
 }
 

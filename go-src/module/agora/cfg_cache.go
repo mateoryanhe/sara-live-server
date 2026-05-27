@@ -11,6 +11,8 @@ const defaultTokenExpireSeconds uint32 = 21600
 type agoraCfgSnapshot struct {
 	AppId              string
 	AppCertificate     string
+	RestCustomerId     string
+	RestCustomerSecret string
 	TokenExpireSeconds uint32
 }
 
@@ -48,6 +50,8 @@ func toAgoraCfgSnapshot(row *entity.AgoraCfg) *agoraCfgSnapshot {
 	return &agoraCfgSnapshot{
 		AppId:              row.AppId,
 		AppCertificate:     row.AppCertificate,
+		RestCustomerId:     row.RestCustomerId,
+		RestCustomerSecret: row.RestCustomerSecret,
 		TokenExpireSeconds: expireSeconds,
 	}
 }

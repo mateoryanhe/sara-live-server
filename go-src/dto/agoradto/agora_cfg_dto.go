@@ -10,6 +10,8 @@ type AgoraCfgItem struct {
 	ID                 string `json:"id"`
 	AppId              string `json:"appId"`
 	AppCertificate     string `json:"appCertificate"`
+	RestCustomerId     string `json:"restCustomerId"`
+	RestCustomerSecret string `json:"restCustomerSecret"`
 	TokenExpireSeconds uint32 `json:"tokenExpireSeconds"`
 	CreatedAt          string `json:"createdAt"`
 	UpdatedAt          string `json:"updatedAt"`
@@ -24,6 +26,8 @@ type SaveAgoraCfgReq struct {
 	ID                 uint64 `json:"id" dc:"配置ID,首次保存可为0"`
 	AppId              string `json:"appId" v:"required|length:1,64#AppId不能为空|AppId长度需在1到64之间"`
 	AppCertificate     string `json:"appCertificate" v:"required|length:1,128#AppCertificate不能为空|AppCertificate长度需在1到128之间"`
+	RestCustomerId     string `json:"restCustomerId" v:"max-length:64#RestCustomerId长度不能超过64"`
+	RestCustomerSecret string `json:"restCustomerSecret" v:"max-length:128#RestCustomerSecret长度不能超过128"`
 	TokenExpireSeconds uint32 `json:"tokenExpireSeconds" v:"required|min:60#TokenExpireSeconds不能为空|TokenExpireSeconds不能小于60"`
 }
 
