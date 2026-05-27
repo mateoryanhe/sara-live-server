@@ -14,6 +14,7 @@ import {goldApi} from './modules/gold'
 import {diamondApi} from './modules/diamond'
 import {rechargeOrderApi} from './modules/rechargeOrder'
 import {gameCfgApi} from './modules/gameCfg'
+import {agoraApi} from './modules/agora'
 
 export {
     authApi,
@@ -32,6 +33,7 @@ export {
     diamondApi,
     rechargeOrderApi,
     gameCfgApi,
+    agoraApi,
 }
 
 export default {
@@ -51,4 +53,5 @@ export default {
     diamondApi,
     rechargeOrderApi,
     gameCfgApi,
+    agoraApi,
 }

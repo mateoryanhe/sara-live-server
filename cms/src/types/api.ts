@@ -328,6 +328,31 @@ export interface SaveShortVideoCfgRes {
     id: string
 }
 
+export interface AgoraCfg {
+    id: string
+    appId: string
+    appCertificate: string
+    tokenExpireSeconds: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetAgoraCfgRes {
+    cfg: AgoraCfg | null
+}
+
+export interface SaveAgoraCfgReq {
+    id?: number
+    appId: string
+    appCertificate: string
+    tokenExpireSeconds: number
+}
+
+export interface SaveAgoraCfgRes {
+    success: boolean
+    id: string
+}
+
 // 充值订单
 export interface RechargeOrder {
     id: string

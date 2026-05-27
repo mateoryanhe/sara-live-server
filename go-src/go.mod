@@ -15,6 +15,7 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/AgoraIO/Tools/DynamicKey/AgoraDynamicKey/go/src v0.0.0-20250825033728-374cd21f5220 // indirect
 	github.com/BurntSushi/toml v1.4.0 // indirect
 	github.com/bits-and-blooms/bitset v1.24.0 // indirect
 	github.com/clbanning/mxj/v2 v2.7.0 // indirect

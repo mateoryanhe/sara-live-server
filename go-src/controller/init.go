@@ -20,6 +20,8 @@ func Init() {
 	initGuildController()            // 直播工会管理(CMS)
 	initGuildAppController()         // 直播工会查询(App)
 	initLiveRoomAppController()      // 直播间(App)
+	initAgoraAppController()         // 声网(App)
+	initAgoraCMSController()         // 声网(CMS)
 	initGiftController()             // 礼物配置(CMS)
 	initGiftAppController()          // 礼物列表(App)
 	initBannerController()           // 首页Banner(CMS)

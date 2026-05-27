@@ -12,5 +12,11 @@ export const liveRoutes: RouteRecordRaw = {
             component: () => import('@/views/live/gift/gift-list.vue'),
             meta: {title: '礼物管理'},
         },
+        {
+            path: 'agora-cfg',
+            name: 'AgoraCfgManagement',
+            component: () => import('@/views/live/agora-cfg.vue'),
+            meta: {title: '声网配置'},
+        },
     ],
 }

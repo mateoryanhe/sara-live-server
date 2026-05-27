@@ -68,7 +68,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('GiftManagement')"
+            v-if="hasMenuPermission('GiftManagement') || hasMenuPermission('AgoraCfgManagement')"
             index="/live">
           <template #title>
             <el-icon>
@@ -81,6 +81,12 @@
               <Present/>
             </el-icon>
             <span>礼物管理</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('AgoraCfgManagement')" index="/live/agora-cfg">
+            <el-icon>
+              <Setting/>
+            </el-icon>
+            <span>声网配置</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu

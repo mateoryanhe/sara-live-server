@@ -94,6 +94,8 @@ const (
 	GameCfgExist XRCode = 105
 	// GameCfgNonExist 游戏配置不存在
 	GameCfgNonExist XRCode = 106
+	// AgoraCfgInvalid 声网配置无效
+	AgoraCfgInvalid XRCode = 107
 )
 
 type XError struct {
