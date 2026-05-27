@@ -5,7 +5,6 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/util/gutil"
-	"xr-game-server/constants/common"
 )
 
 const (
@@ -13,30 +12,11 @@ const (
 	Offline     Type = "Offline"
 	ClientEnter Type = "ClientEnter"
 	ClientLeave Type = "ClientLeave"
+	AppToken    Type = "AppToken"
 )
 
 type Handler func(val any)
 type Type string
-
-type OnlineData struct {
-	RoleId uint64
-}
-
-func NewOnlineData(roleId uint64) *OnlineData {
-	return &OnlineData{
-		RoleId: roleId,
-	}
-}
-
-type OfflineData struct {
-	RoleId uint64
-}
-
-func NewOfflineData(roleId uint64) *OfflineData {
-	return &OfflineData{
-		RoleId: roleId,
-	}
-}
 
 var eventHandlerMap = make(map[Type][]Handler)
 
@@ -44,7 +24,7 @@ var eventHandlerMap = make(map[Type][]Handler)
 func Sub(eventType Type, handler Handler) {
 	lst, ok := eventHandlerMap[eventType]
 	if !ok {
-		lst = make([]Handler, common.Zero)
+		lst = make([]Handler, 0)
 	}
 	eventHandlerMap[eventType] = append(lst, handler)
 }

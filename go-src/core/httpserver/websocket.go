@@ -88,7 +88,7 @@ func InitWebsocket() {
 				ws.WriteMessage(websocket.BinaryMessage, newError(errercode.EmptyToken))
 				return
 			}
-			flag := xrtoken.HasAppToken(gconv.Uint64(userId))
+			flag := xrtoken.HasAppToken(gconv.Uint64(userId), token)
 			if !flag {
 				ws.WriteMessage(websocket.BinaryMessage, newError(errercode.Token))
 				return

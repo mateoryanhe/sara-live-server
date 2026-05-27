@@ -24,7 +24,7 @@ func MiddlewareAppAuth(r *ghttp.Request) {
 		WriteFailJson(r, errercode.EmptyUserId)
 		return
 	}
-	if flag := xrtoken.HasAppToken(gconv.Uint64(userId)); !flag {
+	if flag := xrtoken.HasAppToken(gconv.Uint64(userId), tokenStr); !flag {
 		WriteFailJson(r, errercode.Token)
 		return
 	}
