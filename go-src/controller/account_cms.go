@@ -38,6 +38,10 @@ func (a *AccountController) QueryUserInfo(ctx context.Context, req *accountdto.Q
 	return userinfo.QueryUserInfo(ctx, req)
 }
 
+func (a *AccountController) QueryAnchorList(ctx context.Context, req *accountdto.QueryAnchorListReq) (res *httpserver.CMSQueryResp, err error) {
+	return userinfo.QueryAnchorList(ctx, req)
+}
+
 func (a *AccountController) SetAnchor(ctx context.Context, req *accountdto.SetAnchorReq) (*accountdto.SetAnchorRes, error) {
 	return userinfo.SetAnchor(ctx, req)
 }

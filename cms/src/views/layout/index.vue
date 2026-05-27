@@ -12,7 +12,7 @@
       >
         <!-- 移除仪表盘菜单项 -->
         <el-sub-menu
-            v-if="hasMenuPermission('UserList') || hasMenuPermission('RechargeOrderList')"
+            v-if="hasMenuPermission('UserList') || hasMenuPermission('AnchorListManagement') || hasMenuPermission('RechargeOrderList')"
             index="/user/account">
           <template #title>
             <el-icon>
@@ -25,6 +25,12 @@
               <User/>
             </el-icon>
             <span>用户列表</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('AnchorListManagement')" index="/user/anchor/anchor-list">
+            <el-icon>
+              <VideoPlay/>
+            </el-icon>
+            <span>主播列表</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('RechargeOrderList')" index="/user/recharge-order/recharge-order-list">
             <el-icon>

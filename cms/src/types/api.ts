@@ -96,6 +96,23 @@ export interface SetAnchorReq {
     accountId: string
 }
 
+export interface QueryAnchorListReq extends PageQuery {
+    key?: string
+}
+
+export interface AnchorListItem {
+    id: string
+    nickname?: string
+    phone?: string
+    avatar?: string
+    guildId?: string | number
+    ip?: string
+    roomTitle?: string
+    liveStatus?: number
+    createdAt?: string | null
+    registeredAt?: string | null
+}
+
 
 // 全局配置相关类型
 export interface GlobalCfg {

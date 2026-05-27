@@ -1,8 +1,10 @@
 import {request} from '../request'
 import type {
+    AnchorListItem,
     BanReq,
     CancelReq,
     PageResponse,
+    QueryAnchorListReq,
     QueryUserInfoReq,
     SetAnchorReq,
     UnBanReq,
@@ -34,6 +36,10 @@ const accountApi = {
     // 获取用户信息
     getUserInfo: (data: QueryUserInfoReq) => {
         return request.post<PageResponse<UserInfo>>('/account/getUserInfo', data)
+    },
+
+    getAnchorList: (data: QueryAnchorListReq) => {
+        return request.post<PageResponse<AnchorListItem>>('/account/getAnchorList', data)
     },
 
     setAnchor: (data: SetAnchorReq) => {
