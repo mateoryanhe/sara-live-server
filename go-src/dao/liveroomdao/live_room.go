@@ -35,6 +35,26 @@ func GetRoomByAnchor(anchorId uint64) *entity.LiveRoom {
 	return GetRoomById(anchorId)
 }
 
+// ListLivingRoomIds 查询正在直播的直播间ID(live_record_id > 0),仅返回 id 列
+func ListLivingRoomIds() []uint64 {
+	type idRow struct {
+		ID uint64 `json:"id"`
+	}
+	rows := make([]*idRow, 0)
+	_ = g.Model(string(entity.TbLiveRoom)).
+		Fields("id").
+		Where("live_record_id > ?", 0).
+		Scan(&rows)
+	ids := make([]uint64, 0, len(rows))
+	for _, row := range rows {
+		if row == nil || row.ID == 0 {
+			continue
+		}
+		ids = append(ids, row.ID)
+	}
+	return ids
+}
+
 // AddRoomToCache 新建直播间后写入缓存
 func AddRoomToCache(r *entity.LiveRoom) {
 	if r == nil {

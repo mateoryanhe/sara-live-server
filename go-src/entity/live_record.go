@@ -75,21 +75,11 @@ func (r *LiveRecord) AddTotalAudience(val uint64) {
 	})
 }
 
-func (r *LiveRecord) SetTotalAudience(v uint64) {
-	r.TotalAudience = v
-	r.touchUpdatedAt()
-	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalAudience, &syndb.ColData{
-		IdVal:  r.ID,
-		ColVal: v,
-	})
-}
-
-func (r *LiveRecord) SetTotalLiveDuration(v float64) {
-	r.TotalLiveDuration = v
-	r.touchUpdatedAt()
+func (r *LiveRecord) AddTotalLiveDuration(v float64) {
+	r.TotalLiveDuration = math.AddFloat64(r.TotalLiveDuration, v)
 	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalLiveDuration, &syndb.ColData{
 		IdVal:  r.ID,
-		ColVal: v,
+		ColVal: r.TotalLiveDuration,
 	})
 }
 

@@ -5,7 +5,6 @@ import (
 	"time"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/liveroomdao"
-	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
 )
 
@@ -23,16 +22,11 @@ func stopLive(anchorId uint64) {
 		return
 	}
 	//清除房间状态
+	taskMap.Remove(anchorId)
 	room.SetLiveRecordId(0)
-	room.ClearFailNum()
+	room.SetHeartTime(nil)
 	//开始计算直播时长
 	liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId)
 	now := time.Now()
-	if liveRecord.EndTime == nil {
-		liveRecord.SetEndTime(&now)
-	}
-	liveDuration := liveRecord.EndTime.Sub(liveRecord.StartTime).Seconds()
-	liveRecord.SetTotalLiveDuration(liveDuration)
-	userStat := userinfodao.GetUserCumulativeStatByUserId(anchorId)
-	userStat.AddTotalLiveDuration(liveDuration)
+	liveRecord.SetEndTime(&now)
 }

@@ -7,22 +7,26 @@ import (
 	"time"
 	"xr-game-server/core/xrtimer"
 	"xr-game-server/dao/liveroomdao"
+	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
 )
 
 const (
-	MaxFailNum   = 60 * 5
-	StartFailNum = 60
+	TimeOut = 5 * time.Minute
 )
 
 var taskMap = gset.New(true)
 
 func initHeart() {
+	ids := liveroomdao.ListLivingRoomIds()
+	for _, id := range ids {
+		taskMap.Add(id)
+	}
 	xrtimer.AddSingleton(gctx.New(), time.Second, heart)
 }
 
 // ReportLiveStartStatus 主播开播时上报开播状态
-// 前端无需传参,后续在此补充开播记录等业务逻辑
+// 前端无需传参,后续在此补充开播记录等业务逻辑,每秒上报一次,形成开播时间
 func ReportLiveStartStatus(ctx context.Context, _ *liveroomdto.ReportLiveStartStatusReq) (*liveroomdto.ReportLiveStartStatusRes, error) {
 	//先重置失败次数，防止被判断下播了
 	room, _ := loadOwnRoom(ctx)
@@ -30,9 +34,15 @@ func ReportLiveStartStatus(ctx context.Context, _ *liveroomdto.ReportLiveStartSt
 		//没有开播
 		return &liveroomdto.ReportLiveStartStatusRes{Success: true}, nil
 	}
-	room.ClearFailNum()
+	//刷新房间状态,防止离线
+	now := time.Now()
+	room.SetHeartTime(&now)
+	//记录本次直播
 	liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId)
-	liveRecord.SetEndTime(nil)
+	liveRecord.AddTotalLiveDuration(1)
+	//累计全部直播
+	stat := userinfodao.GetUserCumulativeStatByUserId(room.ID)
+	stat.AddTotalLiveDuration(1)
 	return &liveroomdto.ReportLiveStartStatusRes{Success: true}, nil
 }
 
@@ -55,22 +65,14 @@ func heart(ctx context.Context) {
 
 func chkOne(userId uint64) {
 	room := liveroomdao.GetRoomById(userId)
-	//如果达到1分钟不上报,直播计时停止
-	if room.FailNum >= StartFailNum {
-		if room.LiveRecordId > 0 {
-			liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId)
-			if liveRecord.EndTime == nil {
-				now := time.Now()
-				liveRecord.SetEndTime(&now)
-			}
-		}
+	now := time.Now()
+	if room.HeartTime == nil {
+		room.SetHeartTime(&now)
 	}
-	//如果达到最大值
-	if room.FailNum >= MaxFailNum {
-		//开始停止直播
-		stopLive(userId)
-		taskMap.Remove(userId)
+	diff := now.Sub(*room.HeartTime)
+	//如果相差超过5分钟,判定离线
+	if TimeOut > diff {
 		return
 	}
-	room.AddFailNum()
+	stopLive(userId)
 }
