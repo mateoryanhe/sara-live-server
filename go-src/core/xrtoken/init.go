@@ -31,7 +31,16 @@ func InitAppToken(authId uint64, token string, val time.Time) {
 func AddCmsToken(authId uint64) string {
 	token := guid.S()
 	cmsCache.Set(gctx.New(), authId, token, Time)
+	event.Pub(event.CmsToken, &event.CmsTokenData{Token: token, Id: authId})
 	return token
+}
+
+func InitCmsToken(authId uint64, token string, val time.Time) {
+	expire := val.Sub(time.Now())
+	if expire <= 0 {
+		return
+	}
+	cmsCache.Set(gctx.New(), authId, token, expire)
 }
 
 func HasAppToken(authId uint64, token string) bool {
@@ -48,13 +57,15 @@ func HasAppToken(authId uint64, token string) bool {
 	return false
 }
 
-func HasCmsToken(authId uint64) bool {
+func HasCmsToken(authId uint64, token string) bool {
 	ctx := gctx.New()
 	if cfg.GetAuthCfg().LoginOff {
 		return true
 	}
-	if flag, _ := cmsCache.Contains(ctx, authId); flag {
+	cacheToken, e := cmsCache.Get(gctx.New(), authId)
+	if e == nil && cacheToken.String() == token {
 		cmsCache.UpdateExpire(ctx, authId, Time)
+		event.Pub(event.CmsToken, &event.CmsTokenData{Token: token, Id: authId})
 		return true
 	}
 	return false

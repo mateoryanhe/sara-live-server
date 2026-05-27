@@ -13,6 +13,7 @@ const (
 	ClientEnter Type = "ClientEnter"
 	ClientLeave Type = "ClientLeave"
 	AppToken    Type = "AppToken"
+	CmsToken    Type = "CmsToken"
 )
 
 type Handler func(val any)

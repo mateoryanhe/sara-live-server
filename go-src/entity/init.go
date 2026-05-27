@@ -3,6 +3,7 @@ package entity
 func Init() {
 	initAccount()
 	initAppToken()
+	initCmsToken()
 	InitCMSUser()
 	initGlobalCfg()
 	initRank()

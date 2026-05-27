@@ -4,3 +4,8 @@ type AppTokenData struct {
 	Id    uint64 `json:"id"`
 	Token string `json:"token"`
 }
+
+type CmsTokenData struct {
+	Id    uint64 `json:"id"`
+	Token string `json:"token"`
+}
