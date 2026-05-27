@@ -19,7 +19,7 @@ const (
 	//发送超时
 	SendTimeOut = 100 * time.Millisecond
 	//写入超时
-	IdleTime = 5000 * time.Millisecond
+	IdleTime = 3000 * time.Millisecond
 	ChkTime  = 2 * time.Nanosecond
 	MaxSize  = 10
 	BuffSize = 100
