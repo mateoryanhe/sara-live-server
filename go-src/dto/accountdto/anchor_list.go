@@ -1,0 +1,28 @@
+package accountdto
+
+import (
+	"github.com/gogf/gf/v2/frame/g"
+	"time"
+	"xr-game-server/core/httpserver"
+)
+
+// QueryAnchorListReq CMS分页查询主播列表
+type QueryAnchorListReq struct {
+	g.Meta `path:"/getAnchorList" method:"post" summary:"获取主播列表" tags:"账号"`
+	httpserver.CMSQueryReq
+	Key string `json:"key" dc:"查询关键字(用户ID/昵称/手机号/分享码)"`
+}
+
+// AnchorListItem 主播列表项(基于 user_infos)
+type AnchorListItem struct {
+	ID           uint64     `json:"id,string"`
+	Nickname     string     `json:"nickname"`
+	Phone        string     `json:"phone"`
+	Avatar       string     `json:"avatar"`
+	GuildId      uint64     `json:"guildId,string"`
+	IP           string     `json:"ip" dc:"登录IP"`
+	RoomTitle    string     `json:"roomTitle"`
+	LiveStatus   uint8      `json:"liveStatus" dc:"直播状态(0未开播,1直播中)"`
+	CreatedAt    *time.Time `json:"createdAt"`
+	RegisteredAt *time.Time `json:"registeredAt" dc:"账号注册时间"`
+}
