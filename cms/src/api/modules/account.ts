@@ -1,12 +1,15 @@
 import {request} from '../request'
 import type {
     AnchorListItem,
+    BanAnchorReq,
+    BanAnchorReq,
     BanReq,
     CancelReq,
     PageResponse,
     QueryAnchorListReq,
     QueryUserInfoReq,
     SetAnchorReq,
+    UnBanAnchorReq,
     UnBanReq,
     UnCancelReq,
     UserInfo
@@ -16,6 +19,16 @@ const accountApi = {
     // 封号
     ban: (data: BanReq) => {
         return request.post<boolean>('/account/ban', data)
+    },
+
+    // 封禁主播(含App推送)
+    banAnchor: (data: BanAnchorReq) => {
+        return request.post<boolean>('/account/banAnchor', data)
+    },
+
+    // 解封主播直播间
+    unBanAnchor: (data: UnBanAnchorReq) => {
+        return request.post<boolean>('/account/unBanAnchor', data)
     },
 
     // 解封

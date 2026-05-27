@@ -12,12 +12,15 @@ const (
 )
 
 const (
-	LiveRoomGuildId   db.TbCol = "guild_id"
-	LiveRoomTitle     db.TbCol = "title"
-	LiveRoomCover     db.TbCol = "cover"
-	LiveRoomNotice    db.TbCol = "notice"
-	LiveRoomLiveId    db.TbCol = "live_record_id"
-	LiveRoomHeartTime db.TbCol = "heart_time"
+	LiveRoomGuildId      db.TbCol = "guild_id"
+	LiveRoomTitle        db.TbCol = "title"
+	LiveRoomCover        db.TbCol = "cover"
+	LiveRoomNotice       db.TbCol = "notice"
+	LiveRoomLiveId       db.TbCol = "live_record_id"
+	LiveRoomHeartTime    db.TbCol = "heart_time"
+	LiveRoomBan          db.TbCol = "ban"
+	LiveRoomBanApplyTime db.TbCol = "ban_apply_time"
+	LiveRoomBanReason    db.TbCol = "ban_reason"
 )
 
 // LiveRoom 直播间(LiveRoom.ID 与 UserInfo.ID 均为主播用户ID,每个主播仅一个直播间)
@@ -29,6 +32,9 @@ type LiveRoom struct {
 	Notice       string     `gorm:"size:512;default:'';comment:公告" json:"notice"`
 	LiveRecordId uint64     `gorm:"default:0;comment:直播记录id" json:"liveRecordId"`
 	HeartTime    *time.Time `gorm:"comment:房间心跳状态,大于5分钟，判断下播" json:"heart_time"`
+	Ban          bool       `gorm:"default:0;comment:封禁状态" json:"ban"`
+	BanApplyTime *time.Time `gorm:"comment:封禁截止时间" json:"banApplyTime"`
+	BanReason    string     `gorm:"size:512;default:'';comment:封禁原因" json:"banReason"`
 }
 
 // NewLiveRoom 构造内存对象,字段写入通过 syndb 异步入库
@@ -92,6 +98,30 @@ func (r *LiveRoom) SetNotice(v string) {
 	})
 }
 
+func (r *LiveRoom) SetBan(v bool) {
+	r.Ban = v
+	r.touchUpdatedAt()
+	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomBan, &syndb.ColData{
+		IdVal: r.ID, ColVal: v,
+	})
+}
+
+func (r *LiveRoom) SetBanApplyTime(v *time.Time) {
+	r.BanApplyTime = v
+	r.touchUpdatedAt()
+	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomBanApplyTime, &syndb.ColData{
+		IdVal: r.ID, ColVal: v,
+	})
+}
+
+func (r *LiveRoom) SetBanReason(v string) {
+	r.BanReason = v
+	r.touchUpdatedAt()
+	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomBanReason, &syndb.ColData{
+		IdVal: r.ID, ColVal: v,
+	})
+}
+
 func (r *LiveRoom) SetCreatedAt(v time.Time) {
 	r.CreatedAt = v
 	syndb.AddDataToQuickChan(TbLiveRoom, db.CreatedAtName, &syndb.ColData{
@@ -121,6 +151,9 @@ func initLiveRoom() {
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomCover)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomNotice)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomLiveId)
+	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomBan)
+	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomBanApplyTime)
+	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomBanReason)
 
 	syndb.RegLazyWithLarge(TbLiveRoom, LiveRoomHeartTime)
 

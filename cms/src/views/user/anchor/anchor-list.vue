@@ -55,11 +55,34 @@
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column label="封禁状态" prop="ban" width="100">
+          <template #default="{ row }">
+            <el-tag v-if="row.ban" type="danger">已封禁</el-tag>
+            <el-tag v-else type="success">正常</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="封禁截止" prop="banApplyTime" width="170">
+          <template #default="{ row }">{{ formatDate(row.banApplyTime) }}</template>
+        </el-table-column>
+        <el-table-column label="封禁原因" min-width="160" prop="banReason" show-overflow-tooltip>
+          <template #default="{ row }">{{ row.banReason || '-' }}</template>
+        </el-table-column>
         <el-table-column label="注册时间" prop="registeredAt" width="170">
           <template #default="{ row }">{{ formatDate(row.registeredAt) }}</template>
         </el-table-column>
         <el-table-column label="资料更新时间" prop="createdAt" width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
+        </el-table-column>
+        <el-table-column fixed="right" label="操作" width="120">
+          <template #default="{ row }">
+            <el-button
+                :type="row.ban ? 'warning' : 'danger'"
+                link
+                @click="toggleBanStatus(row)"
+            >
+              {{ row.ban ? '解封' : '封禁' }}
+            </el-button>
+          </template>
         </el-table-column>
       </el-table>
 
@@ -75,17 +98,63 @@
         />
       </div>
     </el-card>
+
+    <el-dialog
+        v-model="banDialogVisible"
+        :close-on-click-modal="false"
+        destroy-on-close
+        title="封禁主播"
+        width="520px"
+        @closed="resetBanForm"
+    >
+      <el-form ref="banFormRef" :model="banForm" :rules="banRules" label-width="100px">
+        <el-form-item label="主播ID">
+          <el-input v-model="banForm.accountId" disabled/>
+        </el-form-item>
+        <el-form-item label="昵称">
+          <el-input v-model="banForm.nickname" disabled/>
+        </el-form-item>
+        <el-form-item label="封禁截止" prop="banApplyTime">
+          <el-date-picker
+              v-model="banForm.banApplyTime"
+              :disabled-date="disabledDate"
+              format="YYYY-MM-DD HH:mm:ss"
+              placeholder="选择封禁截止时间"
+              style="width: 100%"
+              type="datetime"
+              value-format="YYYY-MM-DD HH:mm:ss"
+          />
+        </el-form-item>
+        <el-form-item label="封禁原因" prop="banReason">
+          <el-input
+              v-model="banForm.banReason"
+              :maxlength="512"
+              :rows="4"
+              placeholder="请输入封禁原因"
+              show-word-limit
+              type="textarea"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="banDialogVisible = false">取消</el-button>
+        <el-button :loading="banSubmitting" type="primary" @click="submitBan">确认封禁</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
 import {onMounted, reactive, ref} from 'vue'
-import {ElMessage} from 'element-plus'
+import {ElForm, ElMessage, ElMessageBox} from 'element-plus'
 import {accountApi} from '@/api'
-import type {AnchorListItem} from '@/types/api'
+import type {AnchorListItem, BanAnchorReq, UnBanAnchorReq} from '@/types/api'
 
 const loading = ref(false)
 const tableData = ref<AnchorListItem[]>([])
+const banDialogVisible = ref(false)
+const banSubmitting = ref(false)
+const banFormRef = ref<InstanceType<typeof ElForm>>()
 
 const searchForm = reactive({
   key: '',
@@ -96,6 +165,31 @@ const pagination = reactive({
   pageSize: 10,
   total: 0,
 })
+
+const banForm = reactive({
+  accountId: '',
+  nickname: '',
+  banApplyTime: '',
+  banReason: '',
+})
+
+const banRules = {
+  banApplyTime: [
+    {required: true, message: '请选择封禁截止时间', trigger: 'change'},
+  ],
+  banReason: [
+    {required: true, message: '请输入封禁原因', trigger: 'blur'},
+    {min: 1, max: 512, message: '封禁原因长度需在1到512之间', trigger: 'blur'},
+  ],
+}
+
+const defaultBanApplyTime = () => {
+  const date = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+}
+
+const disabledDate = (time: Date) => time.getTime() < Date.now()
 
 const fetchList = async () => {
   loading.value = true
@@ -146,6 +240,83 @@ const formatDate = (dateString: string | null | undefined) => {
   } catch {
     return '-'
   }
+}
+
+const resetBanForm = () => {
+  banForm.accountId = ''
+  banForm.nickname = ''
+  banForm.banApplyTime = ''
+  banForm.banReason = ''
+  banFormRef.value?.clearValidate()
+}
+
+const openBanDialog = (row: AnchorListItem) => {
+  banForm.accountId = row.id
+  banForm.nickname = row.nickname || '-'
+  banForm.banApplyTime = defaultBanApplyTime()
+  banForm.banReason = ''
+  banDialogVisible.value = true
+}
+
+const submitBan = async () => {
+  if (!banFormRef.value) {
+    return
+  }
+  await banFormRef.value.validate(async (valid: boolean) => {
+    if (!valid) {
+      return
+    }
+    banSubmitting.value = true
+    try {
+      const banData: BanAnchorReq = {
+        accountId: banForm.accountId,
+        banApplyTime: banForm.banApplyTime,
+        banReason: banForm.banReason.trim(),
+      }
+      const response = await accountApi.banAnchor(banData)
+      if (response) {
+        ElMessage.success('封禁成功，已通知App端')
+        banDialogVisible.value = false
+        fetchList()
+      } else {
+        ElMessage.error('封禁失败')
+      }
+    } catch (error) {
+      console.error('封禁主播失败:', error)
+      ElMessage.error('封禁请求失败')
+    } finally {
+      banSubmitting.value = false
+    }
+  })
+}
+
+const toggleBanStatus = async (row: AnchorListItem) => {
+  if (row.ban) {
+    try {
+      await ElMessageBox.confirm(
+          `确定要解封主播 ${row.id} 吗？`,
+          '确认解封',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+          }
+      )
+      const unBanData: UnBanAnchorReq = {accountId: row.id}
+      const response = await accountApi.unBanAnchor(unBanData)
+      if (response) {
+        ElMessage.success('解封成功')
+        fetchList()
+      } else {
+        ElMessage.error('解封失败')
+      }
+    } catch {
+      // 用户取消
+    }
+    return
+  }
+
+  openBanDialog(row)
 }
 
 onMounted(() => {

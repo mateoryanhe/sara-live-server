@@ -15,6 +15,7 @@ func GetAnchorList(req *accountdto.QueryAnchorListReq) (int, []*accountdto.Ancho
                    u.nickname, u.phone, u.avatar, u.guild_id,
                    u.created_at,
                    a.ip, a.created_at as registered_at,
+                   ifnull(r.ban, 0) as ban, r.ban_apply_time, ifnull(r.ban_reason, '') as ban_reason,
                    ifnull(r.title, '') as room_title,
                    if(r.live_record_id > 0, 1, 0) as live_status
             from user_infos u

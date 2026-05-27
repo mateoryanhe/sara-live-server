@@ -11,15 +11,17 @@ type GetUserInfoReq struct {
 }
 
 type GetUserInfoRes struct {
-	UserId    uint64  `json:"userId"`
-	Nickname  string  `json:"nickname"`
-	Phone     string  `json:"phone"`
-	Avatar    string  `json:"avatar"`
-	Remark    string  `json:"remark"`
-	Gold      float64 `json:"gold"`
-	Diamond   float64 `json:"diamond"`
-	ShareCode string  `json:"shareCode"`
-	VipLevel  uint32  `json:"vipLevel"`
+	UserId      uint64  `json:"userId"`
+	Nickname    string  `json:"nickname"`
+	Phone       string  `json:"phone"`
+	Avatar      string  `json:"avatar"`
+	Remark      string  `json:"remark"`
+	Gold        float64 `json:"gold"`
+	Diamond     float64 `json:"diamond"`
+	ShareCode   string  `json:"shareCode"`
+	VipLevel    uint32  `json:"vipLevel"`
+	IsAnchor    bool    `json:"isAnchor" dc:"是否主播"`
+	HasLiveRoom bool    `json:"hasLiveRoom" dc:"是否已创建直播间"`
 }
 
 // UpdateNicknameReq 修改昵称

@@ -6,6 +6,7 @@ import (
 	"xr-game-server/core/snowflake"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/liveroomdto"
+	"xr-game-server/errercode"
 )
 
 // StartLive 开播
@@ -13,6 +14,9 @@ func StartLive(ctx context.Context, _ *liveroomdto.StartLiveReq) (*liveroomdto.S
 	room, err := loadOwnRoom(ctx)
 	if err != nil {
 		return nil, err
+	}
+	if IsRoomBanned(room) {
+		return nil, errercode.CreateCode(errercode.LiveRoomBanned)
 	}
 	if room.LiveRecordId > 0 {
 		//重置

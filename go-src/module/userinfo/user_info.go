@@ -13,15 +13,17 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 	userId := httpserver.GetAuthId(ctx)
 	data := userinfodao.GetUserInfoByUserId(userId)
 	return &userinfodto.GetUserInfoRes{
-		UserId:    data.ID,
-		Nickname:  data.Nickname,
-		Phone:     data.Phone,
-		Avatar:    upload.GetUrlByName(data.Avatar),
-		Remark:    data.Remark,
-		Gold:      data.Gold,
-		Diamond:   data.Diamond,
-		ShareCode: data.ShareCode,
-		VipLevel:  data.VipLevel,
+		UserId:      data.ID,
+		Nickname:    data.Nickname,
+		Phone:       data.Phone,
+		Avatar:      upload.GetUrlByName(data.Avatar),
+		Remark:      data.Remark,
+		Gold:        data.Gold,
+		Diamond:     data.Diamond,
+		ShareCode:   data.ShareCode,
+		VipLevel:    data.VipLevel,
+		IsAnchor:    data.IsAnchor,
+		HasLiveRoom: data.HasLiveRoom,
 	}, nil
 }
 

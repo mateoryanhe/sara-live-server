@@ -25,9 +25,22 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 		return nil, errercode.CreateCode(errercode.LiveRoomNotAnchor)
 	}
 
-	// 同一主播仅允许一个直播间(roomId == anchorId)
+	// 同一主播仅允许一个直播间(roomId == anchorId);CMS预创建的空直播间允许App完善资料
 	if existing := liveroomdao.GetRoomById(anchorId); existing != nil {
-		return nil, errercode.CreateCode(errercode.LiveRoomExist)
+		if req.Title != "" && existing.Title != req.Title {
+			existing.SetTitle(req.Title)
+		}
+		if req.Cover != "" && existing.Cover != req.Cover {
+			existing.SetCover(req.Cover)
+		}
+		if req.Notice != "" && existing.Notice != req.Notice {
+			existing.SetNotice(req.Notice)
+		}
+		markLiveRoomCreated(user)
+		return &liveroomdto.CreateLiveRoomRes{
+			RoomId:  strconv.FormatUint(existing.ID, 10),
+			GuildId: strconv.FormatUint(existing.GuildId, 10),
+		}, nil
 	}
 
 	// 通过 syndb 异步入库,不直接 INSERT;LiveRoom.ID 复用主播用户ID
@@ -39,6 +52,7 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 		req.Notice,
 	)
 	liveroomdao.AddRoomToCache(room)
+	markLiveRoomCreated(user)
 
 	return &liveroomdto.CreateLiveRoomRes{
 		RoomId:  strconv.FormatUint(room.ID, 10),

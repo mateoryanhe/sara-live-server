@@ -3,7 +3,7 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>封号用户</span>
+          <span>{{ isAnchorBan ? '封禁主播' : '封号用户' }}</span>
         </div>
       </template>
 
@@ -36,7 +36,9 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button :loading="loading" type="primary" @click="submitForm">确认封号</el-button>
+          <el-button :loading="loading" type="primary" @click="submitForm">
+            {{ isAnchorBan ? '确认封禁' : '确认封号' }}
+          </el-button>
           <el-button @click="goBack">返回</el-button>
         </el-form-item>
       </el-form>
@@ -45,14 +47,23 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {computed, onMounted, reactive, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {ElForm, ElMessage} from 'element-plus'
 import {accountApi} from '@/api'
-import type {BanReq} from '@/types/api.ts'
+import type {BanAnchorReq, BanReq} from '@/types/api.ts'
 
 const router = useRouter()
 const route = useRoute()
+
+const isAnchorBan = computed(() => route.query.type === 'anchor')
+const returnPath = computed(() => {
+  const path = route.query.returnPath
+  if (typeof path === 'string' && path.startsWith('/')) {
+    return path
+  }
+  return '/user/account/user-list'
+})
 
 // 表单引用
 const formRef = ref<InstanceType<typeof ElForm>>()
@@ -96,8 +107,7 @@ onMounted(() => {
     // 默认设置为7天后
     form.banApplyTime = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
   } else {
-    // 如果没有传入用户数据，返回用户列表
-    router.push('/user/account/user-list')
+    router.push(returnPath.value)
   }
 })
 
@@ -109,18 +119,30 @@ const submitForm = async () => {
     if (valid) {
       loading.value = true
       try {
-        const banData: BanReq = {
-          accountId: form.userId,
-          banApplyTime: form.banApplyTime
-        }
-
-        const response = await accountApi.ban(banData)
-        if (response) {
-          ElMessage.success('封号成功')
-          // 封号成功后跳转回用户列表并强制刷新
-          router.push('/user/account/user-list?refresh=' + Date.now())
+        if (isAnchorBan.value) {
+          const banData: BanAnchorReq = {
+            accountId: form.userId,
+            banApplyTime: form.banApplyTime,
+          }
+          const response = await accountApi.banAnchor(banData)
+          if (response) {
+            ElMessage.success('封禁成功，已通知App端')
+            router.push(returnPath.value + '?refresh=' + Date.now())
+          } else {
+            ElMessage.error('封禁失败')
+          }
         } else {
-          ElMessage.error('封号失败')
+          const banData: BanReq = {
+            accountId: form.userId,
+            banApplyTime: form.banApplyTime,
+          }
+          const response = await accountApi.ban(banData)
+          if (response) {
+            ElMessage.success('封号成功')
+            router.push(returnPath.value + '?refresh=' + Date.now())
+          } else {
+            ElMessage.error('封号失败')
+          }
         }
       } catch (error) {
         console.error('封号请求失败:', error)
@@ -134,9 +156,9 @@ const submitForm = async () => {
   })
 }
 
-// 返回用户列表
+// 返回列表
 const goBack = () => {
-  router.push('/user/account/user-list')
+  router.push(returnPath.value)
 }
 </script>
 

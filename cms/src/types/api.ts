@@ -50,6 +50,16 @@ export interface BanReq {
     banApplyTime?: string
 }
 
+export interface BanAnchorReq {
+    accountId: string
+    banApplyTime: string
+    banReason: string
+}
+
+export interface UnBanAnchorReq {
+    accountId: string
+}
+
 export interface UnBanReq {
     accountId: string
 }
@@ -109,6 +119,9 @@ export interface AnchorListItem {
     ip?: string
     roomTitle?: string
     liveStatus?: number
+    ban?: boolean
+    banApplyTime?: string | null
+    banReason?: string
     createdAt?: string | null
     registeredAt?: string | null
 }

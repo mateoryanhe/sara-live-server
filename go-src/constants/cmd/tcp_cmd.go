@@ -25,4 +25,6 @@ const (
 	PrivateMessagePush = 13
 	//系统消息推送(推送给接收者)
 	SystemMessagePush = 14
+	//主播封禁推送(推送给主播及直播间在线观众)
+	LiveRoomAnchorBan = 15
 )

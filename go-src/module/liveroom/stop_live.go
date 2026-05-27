@@ -21,12 +21,17 @@ func stopLive(anchorId uint64) {
 	if room == nil {
 		return
 	}
-	//清除房间状态
 	taskMap.Remove(anchorId)
+	liveRecordId := room.LiveRecordId
 	room.SetLiveRecordId(0)
 	room.SetHeartTime(nil)
-	//开始计算直播时长
-	liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId)
+	if liveRecordId == 0 {
+		return
+	}
+	liveRecord := liveroomdao.GetLiveRecordById(liveRecordId)
+	if liveRecord == nil {
+		return
+	}
 	now := time.Now()
 	liveRecord.SetEndTime(&now)
 }

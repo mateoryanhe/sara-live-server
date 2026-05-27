@@ -162,3 +162,12 @@ type GetLiveRoomRes struct {
 	Status   uint8  `json:"status"   dc:"状态(0未开播,1直播中)"`
 	CreateAt int64  `json:"createAt" dc:"创建时间(秒)"`
 }
+
+// AnchorBanPushItem 主播封禁推送载荷(推送给主播及直播间在线观众)
+type AnchorBanPushItem struct {
+	RoomId       string `json:"roomId"       dc:"直播间ID"`
+	AnchorId     string `json:"anchorId"     dc:"主播用户ID"`
+	BanApplyTime int64  `json:"banApplyTime" dc:"封禁截止时间(秒)"`
+	BannedAt     int64  `json:"bannedAt"     dc:"封禁操作时间(秒)"`
+	BanReason    string `json:"banReason"    dc:"封禁原因"`
+}

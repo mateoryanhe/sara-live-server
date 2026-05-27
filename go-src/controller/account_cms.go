@@ -4,6 +4,7 @@ import (
 	"context"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/accountdto"
+	"xr-game-server/module/liveroom"
 	"xr-game-server/module/userinfo"
 )
 
@@ -20,6 +21,14 @@ func initAccountController() {
 
 func (a *AccountController) Ban(ctx context.Context, req *accountdto.BanReq) (resp *accountdto.BanRes, e error) {
 	return userinfo.Ban(ctx, req)
+}
+
+func (a *AccountController) BanAnchor(ctx context.Context, req *accountdto.BanAnchorReq) (resp *accountdto.BanRes, e error) {
+	return liveroom.BanAnchor(ctx, req)
+}
+
+func (a *AccountController) UnBanAnchor(ctx context.Context, req *accountdto.UnBanAnchorReq) (bool, error) {
+	return liveroom.UnBanAnchor(ctx, req)
 }
 
 func (a *AccountController) UnBan(ctx context.Context, req *accountdto.UnBanReq) (bool, error) {
