@@ -1,5 +1,6 @@
 package userinfo
 
 func Init() {
-	initEvent()
+	initLoginEvent()
+	initRegisterEvent()
 }

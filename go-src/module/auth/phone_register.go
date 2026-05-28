@@ -7,12 +7,14 @@ import (
 	"strconv"
 	"time"
 	"xr-game-server/constants/common"
+	"xr-game-server/core/event"
 	"xr-game-server/core/xrtoken"
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dao/userlogindevicedao"
 	"xr-game-server/dto/authdto"
 	"xr-game-server/errercode"
+	"xr-game-server/gameevent"
 	"xr-game-server/module/verification_code"
 )
 
@@ -61,6 +63,8 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 			data.SetInviterId(inviterId)
 		}
 	}
+	now := time.Now()
+	event.Pub(gameevent.RegisterEvent, gameevent.NewRegisterEventData(account.ID, now))
 	res = &authdto.PhoneRegisterRes{
 		Token:  tokenStr,
 		AuthId: strconv.FormatUint(account.ID, 10),

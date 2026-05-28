@@ -5,11 +5,15 @@ import (
 	"xr-game-server/core/event"
 	"xr-game-server/dao/dailyloginstatdao"
 	"xr-game-server/dao/dailyuserlogindao"
+	"xr-game-server/dao/monthlyloginstatdao"
+	"xr-game-server/dao/monthlyuserlogindao"
 	"xr-game-server/dao/userinfodao"
+	"xr-game-server/dao/weeklyloginstatdao"
+	"xr-game-server/dao/weeklyuserlogindao"
 	"xr-game-server/entity"
 )
 
-func initEvent() {
+func initLoginEvent() {
 	event.Sub(event.AppToken, onLoginEvent)
 }
 
@@ -19,9 +23,31 @@ func onLoginEvent(data any) {
 	now := time.Now()
 	userInfo.SetLastLoginTime(&now)
 
+	recordDailyLogin(now, val.Id)
+	recordWeeklyLogin(now, val.Id)
+	recordMonthlyLogin(now, val.Id)
+}
+
+func recordDailyLogin(now time.Time, userId uint64) {
 	date := entity.FormatDailyLoginStatDate(now)
-	if dailyuserlogindao.TryRecordLogin(date, val.Id) {
+	if dailyuserlogindao.TryRecordLogin(date, userId) {
 		stat := dailyloginstatdao.GetByDate(date)
+		stat.AddLoginCount(1)
+	}
+}
+
+func recordWeeklyLogin(now time.Time, userId uint64) {
+	week := entity.FormatWeeklyLoginStatKey(now)
+	if weeklyuserlogindao.TryRecordLogin(week, userId) {
+		stat := weeklyloginstatdao.GetByWeek(week)
+		stat.AddLoginCount(1)
+	}
+}
+
+func recordMonthlyLogin(now time.Time, userId uint64) {
+	month := entity.FormatMonthlyLoginStatKey(now)
+	if monthlyuserlogindao.TryRecordLogin(month, userId) {
+		stat := monthlyloginstatdao.GetByMonth(month)
 		stat.AddLoginCount(1)
 	}
 }

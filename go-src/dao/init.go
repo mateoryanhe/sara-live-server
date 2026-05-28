@@ -10,6 +10,8 @@ import (
 	"xr-game-server/dao/livefollowdao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/messagedao"
+	"xr-game-server/dao/monthlyloginstatdao"
+	"xr-game-server/dao/month
 	"xr-game-server/dao/namedao"
 	"xr-game-server/dao/rechargeorderdao"
 	"xr-game-server/dao/shortvideocfgdao"
@@ -19,6 +21,7 @@ import (
 	"xr-game-server/dao/statdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dao/userlogindevicedao"
+og
 )
 
 func Init() {
@@ -29,6 +32,10 @@ func Init() {
 	userinfodao.InitUserInfoDao()
 	dailyloginstatdao.InitDailyLoginStatDao()
 	dailyuserlogindao.InitDailyUserLoginDao()
+	weeklyloginstatdao.InitWeeklyLoginStatDao()
+	weeklyuserlogindao.InitWeeklyUserLoginDao()
+	monthlyloginstatdao.InitMonthlyLoginStatDao()
+	monthlyuserlogindao.InitMonthlyUserLoginDao()
 	userlogindevicedao.InitUserLoginDeviceDao()
 	guilddao.InitGuildDao()
 	liveroomdao.InitLiveRoomDao()
