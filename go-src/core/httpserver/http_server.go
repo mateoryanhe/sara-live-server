@@ -21,8 +21,8 @@ var httpServer = g.Server()
 
 // InitHttpServer 初始化http服务器
 func InitHttpServer() {
-	//添加静态路径
 	shutdown.RegCommonShutDownHandler(closeServer)
+	setupDomainSites()
 	httpServer.BindHookHandler("/*", ghttp.HookBeforeServe, beforeServeHook)
 	httpServer.Run()
 }

@@ -8,6 +8,7 @@ func InitCfg() {
 	//日志异步输出
 	g.Log().SetAsync(true)
 	initServerCfg()
+	initDomainSiteCfg()
 	initDbBufferCfg()
 	initDbCfg()
 	initGoPoolCfg()

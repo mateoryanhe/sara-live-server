@@ -13,6 +13,13 @@ server:
   debugEnv: true #是否开启debug环境,不会检查权限
   exitTime: 5 #退出系统等待多少秒，开始发送kill -9
   dumpRouterMap: false
+  # 多域名静态目录与HTTPS证书(SNI),详见 config/local/config.yaml 示例
+  # 多域名静态目录与HTTPS证书(SNI), 不同域名指向不同静态目录
+  # domainSites:
+  #   - domain: "cms.bigtktool.shop"
+   #    root: "/home/ec2-user/cdn/cms"
+   #    certFile: "/root/.acme.sh/cms.bigtktool.shop_ecc/fullchain.pem"
+    #   keyFile: "/root/.acme.sh/cms.bigtktool.shop_ecc/privkey.pem"
 
 
 bufferSize:

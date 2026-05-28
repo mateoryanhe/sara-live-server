@@ -11,6 +11,12 @@ server:
   debugEnv: true #是否开启debug环境,不会检查权限
   exitTime: 5 #退出系统等待多少秒，开始发送kill -9
   dumpRouterMap: false
+  # 多域名静态目录与HTTPS证书(SNI)
+  # domainSites:
+  #   - domain: "cdn.example.com"
+  #     root: "D:/cdn/site1"
+  #     certFile: "D:/certs/cdn.example.com/fullchain.pem"
+  #     keyFile: "D:/certs/cdn.example.com/privkey.pem"
 
 
 bufferSize:
