@@ -35,21 +35,56 @@
         </el-col>
       </el-row>
     </el-card>
+
+    <el-card class="user-stat-card">
+      <template #header>
+        <div class="card-header">
+          <span>用户数据</span>
+          <el-button :loading="trendLoading" @click="fetchUserStatTrend">刷新</el-button>
+        </div>
+      </template>
+
+      <el-tabs v-model="activePeriod" @tab-change="handleTabChange">
+        <el-tab-pane label="日" name="daily">
+          <UserStatChart ref="dailyChartRef" :data="userStatTrend.daily" title="最近30天"/>
+        </el-tab-pane>
+        <el-tab-pane label="周" name="weekly">
+          <UserStatChart ref="weeklyChartRef" :data="userStatTrend.weekly" title="最近12周"/>
+        </el-tab-pane>
+        <el-tab-pane label="月" name="monthly">
+          <UserStatChart ref="monthlyChartRef" :data="userStatTrend.monthly" title="最近12月"/>
+        </el-tab-pane>
+      </el-tabs>
+    </el-card>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {nextTick, onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {sysStatApi} from '@/api'
-import type {SysStat} from '@/types/api'
+import type {SysStat, UserStatTrend} from '@/types/api'
+import UserStatChart from './components/user-stat-chart.vue'
 
 const loading = ref(false)
+const trendLoading = ref(false)
+const activePeriod = ref('daily')
+
+const dailyChartRef = ref<InstanceType<typeof UserStatChart>>()
+const weeklyChartRef = ref<InstanceType<typeof UserStatChart>>()
+const monthlyChartRef = ref<InstanceType<typeof UserStatChart>>()
+
 const sysStat = reactive<SysStat>({
   totalGold: 0,
   totalRecharge: 0,
   totalWithdraw: 0,
   totalRegisterUser: 0,
+})
+
+const userStatTrend = reactive<UserStatTrend>({
+  daily: [],
+  weekly: [],
+  monthly: [],
 })
 
 const fetchSysStat = async () => {
@@ -66,6 +101,44 @@ const fetchSysStat = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const fetchUserStatTrend = async () => {
+  trendLoading.value = true
+  try {
+    const data = await sysStatApi.getUserStatTrend()
+    userStatTrend.daily = data.daily || []
+    userStatTrend.weekly = data.weekly || []
+    userStatTrend.monthly = data.monthly || []
+    await nextTick()
+    setTimeout(() => {
+      dailyChartRef.value?.resize()
+      weeklyChartRef.value?.resize()
+      monthlyChartRef.value?.resize()
+    }, 0)
+  } catch (error) {
+    console.error('获取用户数据趋势失败:', error)
+    ElMessage.error('获取用户数据趋势失败')
+  } finally {
+    trendLoading.value = false
+  }
+}
+
+const resizeActiveChart = () => {
+  if (activePeriod.value === 'daily') {
+    dailyChartRef.value?.resize()
+    return
+  }
+  if (activePeriod.value === 'weekly') {
+    weeklyChartRef.value?.resize()
+    return
+  }
+  monthlyChartRef.value?.resize()
+}
+
+const handleTabChange = async () => {
+  await nextTick()
+  resizeActiveChart()
 }
 
 const formatAmount = (value: number | null | undefined) => {
@@ -87,6 +160,7 @@ const formatCount = (value: string | number | null | undefined) => {
 
 onMounted(() => {
   fetchSysStat()
+  fetchUserStatTrend()
 })
 </script>
 
@@ -99,6 +173,10 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.user-stat-card {
+  margin-top: 20px;
 }
 
 .stat-card {

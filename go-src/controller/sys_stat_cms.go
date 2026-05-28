@@ -19,3 +19,8 @@ func initSysStatController() {
 func (c *SysStatController) GetSysStat(ctx context.Context, req *statdto.CMSSysStatReq) (res *statdto.CMSSysStatRes, err error) {
 	return stat.GetCMSSysStat(ctx, req)
 }
+
+// GetUserStatTrend CMS获取用户数据趋势
+func (c *SysStatController) GetUserStatTrend(ctx context.Context, req *statdto.CMSUserStatTrendReq) (res *statdto.CMSUserStatTrendRes, err error) {
+	return stat.GetCMSUserStatTrend(ctx, req)
+}

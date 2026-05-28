@@ -37,6 +37,18 @@ export interface SysStat {
     totalRegisterUser: string | number
 }
 
+export interface UserStatTrendPoint {
+    time: string
+    activeUserCount: number
+    registerUserCount: number
+}
+
+export interface UserStatTrend {
+    daily: UserStatTrendPoint[]
+    weekly: UserStatTrendPoint[]
+    monthly: UserStatTrendPoint[]
+}
+
 // 登录请求类型
 export interface LoginReq {
     userName: string
