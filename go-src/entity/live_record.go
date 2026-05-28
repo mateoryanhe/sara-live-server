@@ -72,7 +72,7 @@ func (r *LiveRecord) SetEndTime(v *time.Time) {
 
 func (r *LiveRecord) AddTotalAudience(val uint64) {
 	r.TotalAudience = math.Add(r.TotalAudience, val)
-	r.touchUpdatedAt()
+
 	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalAudience, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.TotalAudience,
@@ -89,7 +89,7 @@ func (r *LiveRecord) AddTotalLiveDuration(v float64) {
 
 func (r *LiveRecord) AddTotalIncome(v float64) {
 	r.TotalIncome = math.AddFloat64(r.TotalIncome, v)
-	r.touchUpdatedAt()
+
 	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalIncome, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.TotalIncome,
@@ -98,7 +98,7 @@ func (r *LiveRecord) AddTotalIncome(v float64) {
 
 func (r *LiveRecord) AddTotalGameBet(v float64) {
 	r.TotalGameBet = math.AddFloat64(r.TotalGameBet, v)
-	r.touchUpdatedAt()
+
 	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalGameBet, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.TotalGameBet,

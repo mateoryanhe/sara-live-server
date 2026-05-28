@@ -111,8 +111,8 @@ type SendGiftRes struct {
 
 // GiftPushItem 推送给房间在线用户的送礼广播载荷
 type GiftPushItem struct {
-	RoomId       string `json:"roomId"      dc:"直播间ID"`
-	SenderId     string `json:"senderId"    dc:"送礼用户ID"`
+	RoomId       uint64 `json:"roomId,string"      dc:"直播间ID"`
+	SenderId     uint64 `json:"senderId,string"    dc:"送礼用户ID"`
 	SenderName   string `json:"senderName"  dc:"送礼用户昵称"`
 	SenderAvatar string `json:"senderAvatar" dc:"送礼用户头像"`
 	GiftId       uint64 `json:"giftId,string"      dc:"礼物ID"`
