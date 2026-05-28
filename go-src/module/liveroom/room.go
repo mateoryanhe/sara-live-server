@@ -95,32 +95,6 @@ func UpdateNotice(ctx context.Context, req *liveroomdto.UpdateNoticeReq) (*liver
 	return &liveroomdto.UpdateNoticeRes{Success: true}, nil
 }
 
-// JoinRoom 玩家加入直播间,记录状态置为 Online
-func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.JoinRoomRes, error) {
-	userId := httpserver.GetAuthId(ctx)
-
-	if liveroomdao.GetRoomById(req.RoomId) == nil {
-		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
-	}
-
-	onlineId := entity.BuildLiveRoomOnlineId(userId, req.RoomId)
-	existing := liveroomdao.GetOnlineById(onlineId)
-	if existing == nil {
-		// 历史无记录,首次加入
-		o := entity.NewLiveRoomOnline(userId, req.RoomId)
-		liveroomdao.AddOnlineToRoomCache(o)
-	} else if existing.Status != entity.LiveRoomOnlineStatusOnline {
-		// 历史有记录(此前离开过),状态切回 Online
-		existing.SetStatus(entity.LiveRoomOnlineStatusOnline)
-		liveroomdao.AddOnlineToRoomCache(existing)
-	}
-
-	return &liveroomdto.JoinRoomRes{
-		OnlineId:    onlineId,
-		OnlineCount: len(liveroomdao.GetOnlinesByRoom(req.RoomId)),
-	}, nil
-}
-
 // LeaveRoom 玩家离开直播间,记录状态置为 Offline(保留行)
 func LeaveRoom(ctx context.Context, req *liveroomdto.LeaveRoomReq) (*liveroomdto.LeaveRoomRes, error) {
 	userId := httpserver.GetAuthId(ctx)

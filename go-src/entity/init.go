@@ -21,6 +21,7 @@ func Init() {
 	initLiveRoom()
 	initLiveRoomOnline()
 	initLiveRecord()
+	initLiveRecordAudience()
 	InitLiveGift()
 	initHomeBanner()
 	initShortVideo()
