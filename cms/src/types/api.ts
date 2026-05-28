@@ -186,6 +186,26 @@ export interface SaveGlobalCfgReq extends GlobalCfg {
 export interface DelGlobalCfgReq extends GlobalCfg {
 }
 
+// App Token相关类型
+export interface AppToken {
+    id: string
+    token: string
+    expireAt?: string | null
+    expired?: boolean
+}
+
+export interface GetAppTokenReq {
+    userId?: string
+    pageIndex?: number
+    pageSize?: number
+}
+
+export interface SaveAppTokenReq {
+    id: string
+    token?: string
+    expireAt?: string | null
+}
+
 // 角色相关类型
 export interface Role {
     id: string

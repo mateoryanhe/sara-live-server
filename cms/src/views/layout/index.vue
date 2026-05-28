@@ -188,7 +188,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('GlobalConfig')"
+            v-if="hasMenuPermission('GlobalConfig') || hasMenuPermission('AppTokenConfig')"
             index="/config">
           <template #title>
             <el-icon>
@@ -201,6 +201,12 @@
               <Monitor/>
             </el-icon>
             <span>全局配置</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('AppTokenConfig')" index="/config/app-token">
+            <el-icon>
+              <Key/>
+            </el-icon>
+            <span>App Token</span>
           </el-menu-item>
         </el-sub-menu>
         <!-- 角色权限管理菜单 -->
@@ -271,7 +277,7 @@
 <script lang="ts" setup>
 import {computed, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {ArrowDown, Coin, Cpu, Document, Expand, Fold, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Setting, Stamp, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Coin, Cpu, Document, Expand, Fold, Key, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Setting, Stamp, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {clearPermissions, getIsAdmin, hasPermission} from '@/utils/permission'
 
 const route = useRoute()

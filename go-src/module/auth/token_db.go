@@ -36,3 +36,19 @@ func onCmsToken(val any) {
 	expireAt := time.Now().Add(xrtoken.Time)
 	entity.NewCmsToken(data.Id, data.Token, expireAt)
 }
+
+// ReloadAppTokenCache 从数据库重新加载App Token缓存
+func ReloadAppTokenCache() {
+	tokens := accountdao.ListValidAppTokens()
+	items := make([]xrtoken.AppTokenCacheItem, 0, len(tokens))
+	for _, token := range tokens {
+		items = append(items, xrtoken.AppTokenCacheItem{
+			UserId:   token.ID,
+			Token:    token.Token,
+			ExpireAt: token.ExpireAt,
+		})
+	}
+	xrtoken.ReloadAppTokenCache(func() []xrtoken.AppTokenCacheItem {
+		return items
+	})
+}

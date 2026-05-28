@@ -25,7 +25,31 @@ func AddAppToken(authId uint64) string {
 
 func InitAppToken(authId uint64, token string, val time.Time) {
 	expire := val.Sub(time.Now())
+	if expire <= 0 {
+		return
+	}
 	appCache.Set(gctx.New(), authId, token, expire)
+}
+
+// ReloadAppTokenCache 清空并重新加载App Token内存缓存
+func ReloadAppTokenCache(load func() []AppTokenCacheItem) {
+	ctx := gctx.New()
+	keys, _ := appCache.Keys(ctx)
+	if len(keys) > 0 {
+		_, _ = appCache.Remove(ctx, keys...)
+	}
+	if load == nil {
+		return
+	}
+	for _, item := range load() {
+		InitAppToken(item.UserId, item.Token, item.ExpireAt)
+	}
+}
+
+type AppTokenCacheItem struct {
+	UserId   uint64
+	Token    string
+	ExpireAt time.Time
 }
 
 func AddCmsToken(authId uint64) string {

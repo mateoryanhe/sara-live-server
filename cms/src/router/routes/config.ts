@@ -12,5 +12,11 @@ export const configRoutes: RouteRecordRaw = {
             component: () => import('@/views/config/global.vue'),
             meta: {title: '全局配置'},
         },
+        {
+            path: 'app-token',
+            name: 'AppTokenConfig',
+            component: () => import('@/views/config/app-token.vue'),
+            meta: {title: 'App Token'},
+        },
     ],
 }
