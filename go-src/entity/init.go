@@ -38,4 +38,5 @@ func Init() {
 	initUserMessage()
 	initUserMessageUnread()
 	initUserMessageUnreadDetail()
+	initSystemTotalStat()
 }
