@@ -18,6 +18,7 @@ import {liveGiftLogApi} from './modules/liveGiftLog'
 import {liveRecordApi} from './modules/liveRecord'
 import {gameCfgApi} from './modules/gameCfg'
 import {agoraApi} from './modules/agora'
+import {sysStatApi} from './modules/sysStat'
 
 export {
     authApi,
@@ -40,6 +41,7 @@ export {
     liveRecordApi,
     gameCfgApi,
     agoraApi,
+    sysStatApi,
 }
 
 export default {
@@ -63,4 +65,5 @@ export default {
     liveRecordApi,
     gameCfgApi,
     agoraApi,
+    sysStatApi,
 }

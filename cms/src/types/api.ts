@@ -30,6 +30,13 @@ export interface PageResponse<T = any> {
     data: T[]
 }
 
+export interface SysStat {
+    totalGold: number
+    totalRecharge: number
+    totalWithdraw: number
+    totalRegisterUser: string | number
+}
+
 // 登录请求类型
 export interface LoginReq {
     userName: string

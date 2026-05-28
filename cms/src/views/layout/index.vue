@@ -10,7 +10,13 @@
           :unique-opened="true"
           class="sidebar-menu"
       >
-        <!-- 移除仪表盘菜单项 -->
+        <!-- 仪表盘 -->
+        <el-menu-item v-if="hasMenuPermission('Dashboard')" index="/dashboard">
+          <el-icon>
+            <Odometer/>
+          </el-icon>
+          <span>仪表盘</span>
+        </el-menu-item>
         <el-sub-menu
             v-if="hasMenuPermission('UserList') || hasMenuPermission('AnchorListManagement') || hasMenuPermission('RechargeOrderList') || hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList')"
             index="/user/account">
@@ -265,7 +271,7 @@
 <script lang="ts" setup>
 import {computed, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {ArrowDown, Coin, Cpu, Document, Expand, Fold, Lock, Medal, Money, Monitor, Picture, Present, Setting, Stamp, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Coin, Cpu, Document, Expand, Fold, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Setting, Stamp, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {clearPermissions, getIsAdmin, hasPermission} from '@/utils/permission'
 
 const route = useRoute()

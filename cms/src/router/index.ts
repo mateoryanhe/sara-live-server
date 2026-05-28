@@ -15,7 +15,7 @@ const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
         component: Layout,
-        redirect: '/user/account/user-list',
+        redirect: '/dashboard',
         children: layoutRouteGroups,
     },
 ]
