@@ -11,7 +11,7 @@ import (
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/messagedao"
 	"xr-game-server/dao/monthlyloginstatdao"
-	"xr-game-server/dao/month
+	"xr-game-server/dao/monthlyuserlogindao"
 	"xr-game-server/dao/namedao"
 	"xr-game-server/dao/rechargeorderdao"
 	"xr-game-server/dao/shortvideocfgdao"
@@ -21,7 +21,8 @@ import (
 	"xr-game-server/dao/statdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dao/userlogindevicedao"
-og
+	"xr-game-server/dao/weeklyloginstatdao"
+	"xr-game-server/dao/weeklyuserlogindao"
 )
 
 func Init() {
