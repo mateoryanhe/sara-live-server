@@ -19,14 +19,8 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 	}
 
 	onlineId := entity.BuildLiveRoomOnlineId(userId, req.RoomId)
-	existing := liveroomdao.GetOnlineById(onlineId)
-	if existing == nil {
-		o := entity.NewLiveRoomOnline(userId, req.RoomId)
-		liveroomdao.AddOnlineToRoomCache(o)
-	} else if existing.Status != entity.LiveRoomOnlineStatusOnline {
-		existing.SetStatus(entity.LiveRoomOnlineStatusOnline)
-		liveroomdao.AddOnlineToRoomCache(existing)
-	}
+	existing := liveroomdao.GetOnlineById(onlineId, userId, room.ID)
+	existing.SetStatus(entity.LiveRoomOnlineStatusOnline)
 
 	// 直播中且非主播本人:观众人数去重 +1
 	if room.LiveRecordId > 0 && userId != req.RoomId {

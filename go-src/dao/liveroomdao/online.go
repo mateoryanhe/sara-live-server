@@ -2,6 +2,7 @@ package liveroomdao
 
 import (
 	"context"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/core/cache"
 	"xr-game-server/entity"
@@ -20,11 +21,17 @@ func InitLiveRoomOnlineDao() {
 	roomOnlineCacheMgr = cache.NewCacheMgr()
 }
 
-// GetOnlineById 按复合ID获取在线记录(走缓存)
-func GetOnlineById(id string) *entity.LiveRoomOnline {
+// GetOnlineById 按复合ID获取在线记录(走缓存);数据库不存在则返回占位实例
+func GetOnlineById(id string, userId, roomId uint64) *entity.LiveRoomOnline {
+	if id == "" || onlineCacheMgr == nil {
+		return nil
+	}
 	v := onlineCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
 		var o *entity.LiveRoomOnline
 		_ = g.Model(string(entity.TbLiveRoomOnline)).Where("id = ?", id).Scan(&o)
+		if o == nil {
+			return entity.NewLiveRoomOnline(userId, roomId), nil
+		}
 		return o, nil
 	})
 	if v == nil {
@@ -48,22 +55,6 @@ func GetOnlinesByRoom(roomId uint64) []*entity.LiveRoomOnline {
 	}
 	list, _ := v.([]*entity.LiveRoomOnline)
 	return list
-}
-
-// AddOnlineToRoomCache 将"在线"记录写入房间在线列表缓存(去重)
-func AddOnlineToRoomCache(o *entity.LiveRoomOnline) {
-	if o == nil {
-		return
-	}
-	onlineCacheMgr.FlushCache(o.ID, o)
-	list := GetOnlinesByRoom(o.RoomId)
-	for _, item := range list {
-		if item.ID == o.ID {
-			return
-		}
-	}
-	list = append(list, o)
-	roomOnlineCacheMgr.FlushCache(o.RoomId, list)
 }
 
 // RemoveOnlineFromRoomCache 将记录从房间在线列表缓存中剔除(单条缓存保留,便于下次加入复用)

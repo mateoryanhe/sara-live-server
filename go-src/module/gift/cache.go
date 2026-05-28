@@ -1,7 +1,6 @@
 package gift
 
 import (
-	"strconv"
 	"sync"
 	"xr-game-server/dao/giftdao"
 	"xr-game-server/dto/giftdto"
@@ -81,7 +80,7 @@ func toAppGiftItem(g *entity.LiveGift) *giftdto.AppGiftItem {
 		publishedAt = g.PublishedAt.Unix()
 	}
 	return &giftdto.AppGiftItem{
-		ID:          strconv.FormatUint(g.ID, 10),
+		ID:          g.ID,
 		Name:        g.Name,
 		Icon:        upload.GetUrlByName(g.Icon),
 		Animation:   upload.GetUrlByName(g.Animation),

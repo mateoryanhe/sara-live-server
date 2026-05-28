@@ -115,7 +115,7 @@ type GiftPushItem struct {
 	SenderId     string `json:"senderId"    dc:"送礼用户ID"`
 	SenderName   string `json:"senderName"  dc:"送礼用户昵称"`
 	SenderAvatar string `json:"senderAvatar" dc:"送礼用户头像"`
-	GiftId       string `json:"giftId"      dc:"礼物ID"`
+	GiftId       uint64 `json:"giftId,string"      dc:"礼物ID"`
 	GiftName     string `json:"giftName"    dc:"礼物名称"`
 	GiftIcon     string `json:"giftIcon"    dc:"礼物图标"`
 	GiftAnim     string `json:"giftAnim"    dc:"礼物动画"`

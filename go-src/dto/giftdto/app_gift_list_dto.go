@@ -9,7 +9,7 @@ type AppGiftListReq struct {
 
 // AppGiftItem App端礼物列表元素
 type AppGiftItem struct {
-	ID          string `json:"id"`
+	ID          uint64 `json:"id,string"`
 	Name        string `json:"name"`
 	Icon        string `json:"icon"`
 	Animation   string `json:"animation"`

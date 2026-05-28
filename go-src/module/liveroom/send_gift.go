@@ -11,6 +11,7 @@ import (
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
+	"xr-game-server/entity"
 	"xr-game-server/errercode"
 	"xr-game-server/module/gift"
 	"xr-game-server/module/upload"
@@ -49,6 +50,9 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 	if err != nil {
 		return nil, err
 	}
+
+	//记录礼物流水日志
+	entity.NewLiveGiftLogRecord(room.ID, room.LiveRecordId, senderId, req.GiftId, req.Count, giftItem.Price, totalCost)
 
 	// 4. 构造推送载荷,广播给房间内所有在线用户
 	sender := userinfodao.GetUserInfoByUserId(senderId)

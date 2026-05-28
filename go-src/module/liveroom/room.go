@@ -100,7 +100,7 @@ func LeaveRoom(ctx context.Context, req *liveroomdto.LeaveRoomReq) (*liveroomdto
 	userId := httpserver.GetAuthId(ctx)
 	onlineId := entity.BuildLiveRoomOnlineId(userId, req.RoomId)
 
-	if existing := liveroomdao.GetOnlineById(onlineId); existing != nil &&
+	if existing := liveroomdao.GetOnlineById(onlineId, userId, req.RoomId); existing != nil &&
 		existing.Status != entity.LiveRoomOnlineStatusOffline {
 		existing.SetStatus(entity.LiveRoomOnlineStatusOffline)
 		liveroomdao.RemoveOnlineFromRoomCache(existing)
