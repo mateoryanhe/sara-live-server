@@ -18,6 +18,8 @@ const (
 	LiveRecordEndTime           db.TbCol = "end_time"
 	LiveRecordTotalAudience     db.TbCol = "total_audience"
 	LiveRecordTotalLiveDuration db.TbCol = "total_live_duration"
+	LiveRecordTotalIncome       db.TbCol = "total_income"
+	LiveRecordTotalGameBet      db.TbCol = "total_game_bet"
 )
 
 // LiveRecord 单场直播数据记录
@@ -28,6 +30,8 @@ type LiveRecord struct {
 	EndTime           *time.Time `gorm:"comment:直播结束时间" json:"endTime"`
 	TotalAudience     uint64     `gorm:"default:0;comment:累计观众人数" json:"totalAudience"`
 	TotalLiveDuration float64    `gorm:"default:0;comment:累计直播时长(秒)" json:"totalLiveDuration"`
+	TotalIncome       float64    `gorm:"default:0;comment:总收益" json:"totalIncome"`
+	TotalGameBet      float64    `gorm:"default:0;comment:游戏下注总金额" json:"totalGameBet"`
 }
 
 // NewLiveRecord 构造一条直播记录,字段写入通过 syndb 异步入库
@@ -83,6 +87,24 @@ func (r *LiveRecord) AddTotalLiveDuration(v float64) {
 	})
 }
 
+func (r *LiveRecord) AddTotalIncome(v float64) {
+	r.TotalIncome = math.AddFloat64(r.TotalIncome, v)
+	r.touchUpdatedAt()
+	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalIncome, &syndb.ColData{
+		IdVal:  r.ID,
+		ColVal: r.TotalIncome,
+	})
+}
+
+func (r *LiveRecord) AddTotalGameBet(v float64) {
+	r.TotalGameBet = math.AddFloat64(r.TotalGameBet, v)
+	r.touchUpdatedAt()
+	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalGameBet, &syndb.ColData{
+		IdVal:  r.ID,
+		ColVal: r.TotalGameBet,
+	})
+}
+
 func (r *LiveRecord) SetCreatedAt(v time.Time) {
 	r.CreatedAt = v
 	syndb.AddDataToLazyChan(TbLiveRecord, db.CreatedAtName, &syndb.ColData{
@@ -115,5 +137,7 @@ func initLiveRecord() {
 	syndb.RegLazyWithMiddle(TbLiveRecord, LiveRecordEndTime)
 	syndb.RegLazyWithMiddle(TbLiveRecord, LiveRecordTotalAudience)
 	syndb.RegLazyWithMiddle(TbLiveRecord, LiveRecordTotalLiveDuration)
+	syndb.RegLazyWithMiddle(TbLiveRecord, LiveRecordTotalIncome)
+	syndb.RegLazyWithMiddle(TbLiveRecord, LiveRecordTotalGameBet)
 	migrate.AutoMigrate(&LiveRecord{})
 }
