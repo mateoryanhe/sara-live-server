@@ -35,6 +35,7 @@ export interface SysStat {
     totalRecharge: number
     totalWithdraw: number
     totalRegisterUser: string | number
+    todayRegisterUser: string | number
 }
 
 export interface UserStatTrendPoint {

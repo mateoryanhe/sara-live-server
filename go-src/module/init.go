@@ -13,6 +13,7 @@ import (
 	"xr-game-server/module/recharge"
 	"xr-game-server/module/richrank"
 	"xr-game-server/module/shortvideo"
+	"xr-game-server/module/stat"
 	"xr-game-server/module/userinfo"
 	"xr-game-server/module/verification_code"
 	"xr-game-server/module/vip"
@@ -34,4 +35,5 @@ func Init() {
 	verification_code.Init()
 	liveroom.Init()
 	userinfo.Init()
+	stat.Init()
 }

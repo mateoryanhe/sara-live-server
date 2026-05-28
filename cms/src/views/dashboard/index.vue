@@ -3,7 +3,7 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>系统总数据</span>
+          <span>基础数据</span>
           <el-button :loading="loading" @click="fetchSysStat">刷新</el-button>
         </div>
       </template>
@@ -31,6 +31,12 @@
           <div class="stat-card stat-card-register">
             <div class="stat-label">总注册用户数</div>
             <div class="stat-value">{{ formatCount(sysStat.totalRegisterUser) }}</div>
+          </div>
+        </el-col>
+        <el-col :lg="6" :md="12" :sm="24" :xs="24">
+          <div class="stat-card stat-card-today-register">
+            <div class="stat-label">今日注册用户数</div>
+            <div class="stat-value">{{ formatCount(sysStat.todayRegisterUser) }}</div>
           </div>
         </el-col>
       </el-row>
@@ -79,6 +85,7 @@ const sysStat = reactive<SysStat>({
   totalRecharge: 0,
   totalWithdraw: 0,
   totalRegisterUser: 0,
+  todayRegisterUser: 0,
 })
 
 const userStatTrend = reactive<UserStatTrend>({
@@ -95,6 +102,7 @@ const fetchSysStat = async () => {
     sysStat.totalRecharge = data.totalRecharge ?? 0
     sysStat.totalWithdraw = data.totalWithdraw ?? 0
     sysStat.totalRegisterUser = data.totalRegisterUser ?? 0
+    sysStat.todayRegisterUser = data.todayRegisterUser ?? 0
   } catch (error) {
     console.error('获取系统总数据失败:', error)
     ElMessage.error('获取系统总数据失败')
@@ -215,5 +223,9 @@ onMounted(() => {
 
 .stat-card-register {
   background: linear-gradient(135deg, #b794f4, #805ad5);
+}
+
+.stat-card-today-register {
+  background: linear-gradient(135deg, #f687b3, #d53f8c);
 }
 </style>

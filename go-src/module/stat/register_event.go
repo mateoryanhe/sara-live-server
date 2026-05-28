@@ -1,4 +1,4 @@
-package userinfo
+package stat
 
 import (
 	"time"

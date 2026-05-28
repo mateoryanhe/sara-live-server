@@ -13,4 +13,5 @@ type CMSSysStatRes struct {
 	TotalRecharge     float64 `json:"totalRecharge"`
 	TotalWithdraw     float64 `json:"totalWithdraw"`
 	TotalRegisterUser uint64  `json:"totalRegisterUser,string"`
+	TodayRegisterUser uint64  `json:"todayRegisterUser,string"`
 }
