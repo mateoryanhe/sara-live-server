@@ -14,6 +14,8 @@ import {goldApi} from './modules/gold'
 import {diamondApi} from './modules/diamond'
 import {rechargeOrderApi} from './modules/rechargeOrder'
 import {currencyLogApi} from './modules/currencyLog'
+import {liveGiftLogApi} from './modules/liveGiftLog'
+import {liveRecordApi} from './modules/liveRecord'
 import {gameCfgApi} from './modules/gameCfg'
 import {agoraApi} from './modules/agora'
 
@@ -34,6 +36,8 @@ export {
     diamondApi,
     rechargeOrderApi,
     currencyLogApi,
+    liveGiftLogApi,
+    liveRecordApi,
     gameCfgApi,
     agoraApi,
 }
@@ -55,6 +59,8 @@ export default {
     diamondApi,
     rechargeOrderApi,
     currencyLogApi,
+    liveGiftLogApi,
+    liveRecordApi,
     gameCfgApi,
     agoraApi,
 }

@@ -16,6 +16,7 @@ const (
 	LiveGiftLogRoomId       db.TbCol = "room_id"
 	LiveGiftLogLiveRecordId db.TbCol = "live_record_id"
 	LiveGiftLogSenderId     db.TbCol = "sender_id"
+	LiveGiftLogReceiverId   db.TbCol = "receiver_id"
 	LiveGiftLogGiftId       db.TbCol = "gift_id"
 	LiveGiftLogCount        db.TbCol = "count"
 	LiveGiftLogUnitPrice    db.TbCol = "unit_price"
@@ -28,6 +29,7 @@ type LiveGiftLog struct {
 	RoomId       uint64 `gorm:"index;default:0;comment:直播间ID" json:"roomId"`
 	LiveRecordId uint64 `gorm:"index;default:0;comment:直播记录ID" json:"liveRecordId"`
 	SenderId     uint64 `gorm:"index;default:0;comment:送礼用户ID" json:"senderId"`
+	ReceiverId   uint64 `gorm:"index;default:0;comment:接收者ID(主播)" json:"receiverId"`
 	GiftId       uint64 `gorm:"index;default:0;comment:礼物ID" json:"giftId"`
 	Count        int    `gorm:"default:0;comment:赠送数量" json:"count"`
 	UnitPrice    uint64 `gorm:"default:0;comment:礼物单价(钻石)" json:"unitPrice"`
@@ -43,11 +45,12 @@ func NewLiveGiftLog(id uint64) *LiveGiftLog {
 	return ret
 }
 
-func NewLiveGiftLogRecord(roomId, liveRecordId, senderId, giftId uint64, count int, unitPrice, totalCost uint64) *LiveGiftLog {
+func NewLiveGiftLogRecord(roomId, liveRecordId, senderId, receiverId, giftId uint64, count int, unitPrice, totalCost uint64) *LiveGiftLog {
 	ret := NewLiveGiftLog(snowflake.GetId())
 	ret.SetRoomId(roomId)
 	ret.SetLiveRecordId(liveRecordId)
 	ret.SetSenderId(senderId)
+	ret.SetReceiverId(receiverId)
 	ret.SetGiftId(giftId)
 	ret.SetCount(count)
 	ret.SetUnitPrice(unitPrice)
@@ -72,6 +75,13 @@ func (r *LiveGiftLog) SetLiveRecordId(v uint64) {
 func (r *LiveGiftLog) SetSenderId(v uint64) {
 	r.SenderId = v
 	syndb.AddDataToQuickChan(TbLiveGiftLog, LiveGiftLogSenderId, &syndb.ColData{
+		IdVal: r.ID, ColVal: v,
+	})
+}
+
+func (r *LiveGiftLog) SetReceiverId(v uint64) {
+	r.ReceiverId = v
+	syndb.AddDataToQuickChan(TbLiveGiftLog, LiveGiftLogReceiverId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -124,6 +134,7 @@ func initLiveGiftLog() {
 	syndb.RegQuickWithLarge(TbLiveGiftLog, LiveGiftLogRoomId)
 	syndb.RegQuickWithLarge(TbLiveGiftLog, LiveGiftLogLiveRecordId)
 	syndb.RegQuickWithLarge(TbLiveGiftLog, LiveGiftLogSenderId)
+	syndb.RegQuickWithLarge(TbLiveGiftLog, LiveGiftLogReceiverId)
 	syndb.RegQuickWithLarge(TbLiveGiftLog, LiveGiftLogGiftId)
 	syndb.RegQuickWithLarge(TbLiveGiftLog, LiveGiftLogCount)
 	syndb.RegQuickWithLarge(TbLiveGiftLog, LiveGiftLogUnitPrice)

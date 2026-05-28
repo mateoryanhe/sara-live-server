@@ -33,6 +33,8 @@ func Init() {
 	initRechargeCfgAppController()   // 充值配置查询(App)
 	initRechargeOrderController()    // 充值订单(CMS:查询/手动充值)
 	initCurrencyLogController()      // 货币流水(CMS)
+	initLiveGiftLogController()      // 礼物流水(CMS)
+	initLiveRecordCMSController()    // 直播记录(CMS)
 	initRechargeOrderAppController() // 充值订单(App:发起/查询)
 	initVipCfgController()           // VIP配置(CMS)
 	initGameCfgController()          // 游戏配置(CMS)

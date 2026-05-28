@@ -72,7 +72,7 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 	}
 
 	//记录礼物流水日志
-	entity.NewLiveGiftLogRecord(room.ID, room.LiveRecordId, senderId, req.GiftId, req.Count, giftItem.Price, totalCost)
+	entity.NewLiveGiftLogRecord(room.ID, room.LiveRecordId, senderId, room.ID, req.GiftId, req.Count, giftItem.Price, totalCost)
 
 	//防止并发,主播可以收到多个人的礼物
 	actorGift := actorMap[room.ID/Max]

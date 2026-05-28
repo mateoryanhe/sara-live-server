@@ -108,6 +108,36 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
+            v-if="hasMenuPermission('LiveGiftLogList') || hasMenuPermission('LiveRecordList')"
+            index="/log">
+          <template #title>
+            <el-icon>
+              <Document/>
+            </el-icon>
+            <span>日志</span>
+          </template>
+          <el-sub-menu index="/log/live">
+            <template #title>
+              <el-icon>
+                <VideoPlay/>
+              </el-icon>
+              <span>直播日志</span>
+            </template>
+            <el-menu-item v-if="hasMenuPermission('LiveGiftLogList')" index="/log/live/gift-log-list">
+              <el-icon>
+                <Present/>
+              </el-icon>
+              <span>礼物流水</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('LiveRecordList')" index="/log/live/live-record-list">
+              <el-icon>
+                <Monitor/>
+              </el-icon>
+              <span>直播记录</span>
+            </el-menu-item>
+          </el-sub-menu>
+        </el-sub-menu>
+        <el-sub-menu
             v-if="hasMenuPermission('ShortVideoManagement') || hasMenuPermission('ShortVideoCfgManagement') || hasMenuPermission('ShortVideoWatchManagement')"
             index="/shortvideo">
           <template #title>
@@ -235,7 +265,7 @@
 <script lang="ts" setup>
 import {computed, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {ArrowDown, Coin, Cpu, Expand, Fold, Lock, Medal, Money, Monitor, Picture, Present, Setting, Stamp, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Coin, Cpu, Document, Expand, Fold, Lock, Medal, Money, Monitor, Picture, Present, Setting, Stamp, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {clearPermissions, getIsAdmin, hasPermission} from '@/utils/permission'
 
 const route = useRoute()

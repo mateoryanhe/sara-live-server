@@ -2,6 +2,7 @@ import type {RouteRecordRaw} from 'vue-router'
 import {userRoutes} from './user'
 import {operationRoutes} from './operation'
 import {liveRoutes} from './live'
+import {logRoutes} from './log'
 import {configRoutes} from './config'
 import {roleRoutes} from './role'
 import {shortVideoRoutes} from './shortvideo'
@@ -12,6 +13,7 @@ export const layoutRouteGroups: RouteRecordRaw[] = [
     userRoutes,
     operationRoutes,
     liveRoutes,
+    logRoutes,
     shortVideoRoutes,
     gameRoutes,
     configRoutes,

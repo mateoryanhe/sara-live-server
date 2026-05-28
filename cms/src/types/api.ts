@@ -433,6 +433,47 @@ export interface RechargeOrderQuery extends PageQuery {
     endTime?: number
 }
 
+export interface LiveGiftLogQuery extends PageQuery {
+    receiverId?: string
+    startTime?: number
+    endTime?: number
+}
+
+export interface LiveGiftLogItem {
+    id: string
+    roomId: string
+    liveRecordId: string
+    senderId: string
+    senderNickname?: string
+    receiverId: string
+    receiverNickname?: string
+    giftId: string
+    giftName?: string
+    count: number
+    unitPrice: number
+    totalCost: number
+    createdAt?: string | null
+}
+
+export interface LiveRecordQuery extends PageQuery {
+    anchorId?: string
+    startTime?: number
+    endTime?: number
+}
+
+export interface LiveRecordItem {
+    id: string
+    anchorId: string
+    nickname?: string
+    startTime?: string | null
+    endTime?: string | null
+    totalAudience: number
+    totalLiveDuration: number
+    totalIncome: number
+    totalGameBet: number
+    createdAt?: string | null
+}
+
 // CMS用户相关类型
 export interface CMSUser {
     id: string
