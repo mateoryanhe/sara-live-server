@@ -35,6 +35,7 @@ func Init() {
 	initCurrencyLogController()      // 货币流水(CMS)
 	initLiveGiftLogController()      // 礼物流水(CMS)
 	initLiveRecordCMSController()    // 直播记录(CMS)
+	initRichRankAppController()      // 富豪榜(App)
 	initRechargeOrderAppController() // 充值订单(App:发起/查询)
 	initVipCfgController()           // VIP配置(CMS)
 	initGameCfgController()          // 游戏配置(CMS)

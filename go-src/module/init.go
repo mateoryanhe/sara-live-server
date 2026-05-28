@@ -11,6 +11,7 @@ import (
 	"xr-game-server/module/name"
 	"xr-game-server/module/rank"
 	"xr-game-server/module/recharge"
+	"xr-game-server/module/richrank"
 	"xr-game-server/module/shortvideo"
 	"xr-game-server/module/userinfo"
 	"xr-game-server/module/verification_code"
@@ -24,6 +25,7 @@ func Init() {
 	currencylog.Init()
 	message.Init()
 	recharge.Init()
+	richrank.Init()
 	banner.Init()
 	shortvideo.Init()
 	vip.Init()

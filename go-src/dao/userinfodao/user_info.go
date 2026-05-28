@@ -92,3 +92,39 @@ func GetNicknameMapByUserIds(userIds []uint64) map[uint64]string {
 	}
 	return ret
 }
+
+// GetUserProfileMapByUserIds 批量查询用户昵称与头像
+func GetUserProfileMapByUserIds(userIds []uint64) map[uint64]*entity.UserInfo {
+	ret := make(map[uint64]*entity.UserInfo)
+	if len(userIds) == 0 {
+		return ret
+	}
+	uniqueIds := make([]uint64, 0, len(userIds))
+	seen := make(map[uint64]struct{}, len(userIds))
+	for _, id := range userIds {
+		if id == 0 {
+			continue
+		}
+		if _, ok := seen[id]; ok {
+			continue
+		}
+		seen[id] = struct{}{}
+		uniqueIds = append(uniqueIds, id)
+	}
+	if len(uniqueIds) == 0 {
+		return ret
+	}
+	rows := make([]*entity.UserInfo, 0, len(uniqueIds))
+	ctx := gctx.New()
+	_ = g.Model(string(entity.TbUserInfo)).Ctx(ctx).Unscoped().
+		Fields(string(db.IdName), string(entity.UserInfoNickname), string(entity.UserInfoAvatar)).
+		WhereIn(string(db.IdName), uniqueIds).
+		Scan(&rows)
+	for _, row := range rows {
+		if row == nil || row.ID == 0 {
+			continue
+		}
+		ret[row.ID] = row
+	}
+	return ret
+}
