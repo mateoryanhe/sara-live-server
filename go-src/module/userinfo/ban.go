@@ -3,6 +3,7 @@ package userinfo
 import (
 	"context"
 	"time"
+	"xr-game-server/core/push"
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dto/accountdto"
 )
@@ -16,6 +17,8 @@ func Ban(ctx context.Context, req *accountdto.BanReq) (resp *accountdto.BanRes, 
 	now := time.Now()
 	data.SetBanTime(&now)
 	data.SetBanApplyTime(req.BanApplyTime)
+	AddIdToCache(req.AccountId)
+	push.Kick(req.AccountId)
 	//踢掉用户
 	//roles := roledao.GetRoleBy(req.AccountId)
 	//for _, role := range roles {

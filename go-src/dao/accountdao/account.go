@@ -48,20 +48,6 @@ func GetAccountById(accountId uint64) *entity.Account {
 	}
 }
 
-func CancelAccount(accountId uint64) {
-	account := GetAccountById(accountId)
-	account.Cancel = true
-	g.Model(string(entity.TbAccount)).Save(account)
-	key := fmt.Sprintf("%v:%v", account.OpenId, account.Channel)
-	accountCacheMgr.Cache.Remove(gctx.New(), key)
-}
-
-func UnCancelAccount(accountId uint64) {
-	account := GetAccountById(accountId)
-	account.Cancel = false
-	g.Model(string(entity.TbAccount)).Save(account)
-}
-
 func InitAccountDao() {
 	accountCacheMgr = cache.NewCacheMgr()
 }

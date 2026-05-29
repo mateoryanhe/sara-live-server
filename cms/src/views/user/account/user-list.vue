@@ -139,7 +139,7 @@
               <el-button
                   :type="scope.row.ban ? 'warning' : 'success'"
                   size="small"
-                  @click="toggleBanStatus(scope.row)">
+                  @click="handleBanAction(scope.row)">
                 {{ scope.row.ban ? '解封' : '封号' }}
               </el-button>
               <el-button
@@ -197,6 +197,37 @@
         <el-button :loading="currencySubmitting" type="primary" @click="submitCurrencyChange">确定</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog
+        v-model="banDialogVisible"
+        title="封号"
+        width="480px"
+        @closed="resetBanForm"
+    >
+      <el-form ref="banFormRef" :model="banForm" :rules="banFormRules" label-width="110px">
+        <el-form-item label="用户ID">
+          <el-input v-model="banForm.userId" disabled/>
+        </el-form-item>
+        <el-form-item label="昵称">
+          <el-input v-model="banForm.nickname" disabled/>
+        </el-form-item>
+        <el-form-item label="封号截止时间" prop="banApplyTime">
+          <el-date-picker
+              v-model="banForm.banApplyTime"
+              :disabled-date="disabledBanDate"
+              format="YYYY-MM-DD HH:mm:ss"
+              placeholder="选择封号截止时间"
+              style="width: 100%"
+              type="datetime"
+              value-format="YYYY-MM-DD HH:mm:ss"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="banDialogVisible = false">取消</el-button>
+        <el-button :loading="banSubmitting" type="primary" @click="submitBan">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -205,7 +236,7 @@ import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {accountApi, diamondApi, goldApi} from '@/api'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {useRoute, useRouter} from 'vue-router'
-import type {CancelReq, UnBanReq, UnCancelReq, UserInfo} from '@/types/api.ts'
+import type {BanReq, CancelReq, UnBanReq, UnCancelReq, UserInfo} from '@/types/api.ts'
 
 // 用户列表数据
 const userList = ref<UserInfo[]>([])
@@ -219,6 +250,27 @@ const currencyType = ref<CurrencyType>('gold')
 const currencyMode = ref<CurrencyMode>('add')
 const currencySubmitting = ref(false)
 const currencyFormRef = ref<FormInstance>()
+const banDialogVisible = ref(false)
+const banSubmitting = ref(false)
+const banFormRef = ref<FormInstance>()
+
+interface BanForm {
+  userId: string
+  nickname: string
+  banApplyTime: string
+}
+
+const banForm = reactive<BanForm>({
+  userId: '',
+  nickname: '',
+  banApplyTime: ''
+})
+
+const banFormRules: FormRules = {
+  banApplyTime: [
+    {required: true, message: '请选择封号截止时间', trigger: 'change'}
+  ]
+}
 
 interface CurrencyForm {
   userId: string
@@ -422,12 +474,58 @@ const handleSetAnchor = async (row: UserInfo) => {
   }
 }
 
-// 切换封号状态
-const toggleBanStatus = async (row: UserInfo) => {
-  if (row.ban) {
-    // 解封操作
+const defaultBanApplyTime = () => {
+  const d = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+}
+
+const disabledBanDate = (time: Date) => time.getTime() < Date.now()
+
+const resetBanForm = () => {
+  banForm.userId = ''
+  banForm.nickname = ''
+  banForm.banApplyTime = ''
+  banFormRef.value?.clearValidate()
+}
+
+const openBanDialog = (row: UserInfo) => {
+  banForm.userId = String(row.id)
+  banForm.nickname = row.nickname || '-'
+  banForm.banApplyTime = defaultBanApplyTime()
+  banDialogVisible.value = true
+}
+
+const submitBan = async () => {
+  if (!banFormRef.value) return
+  await banFormRef.value.validate(async (valid) => {
+    if (!valid) return
+    banSubmitting.value = true
     try {
-      const result = await ElMessageBox.confirm(
+      const banData: BanReq = {
+        accountId: banForm.userId,
+        banApplyTime: banForm.banApplyTime
+      }
+      const response = await accountApi.ban(banData)
+      if (response) {
+        banDialogVisible.value = false
+        ElMessage.success('封号成功')
+        await fetchUserList()
+      } else {
+        ElMessage.error('封号失败')
+      }
+    } catch (error) {
+      console.error('封号失败:', error)
+    } finally {
+      banSubmitting.value = false
+    }
+  })
+}
+
+const handleBanAction = async (row: UserInfo) => {
+  if (row.ban) {
+    try {
+      await ElMessageBox.confirm(
           `确定要解封用户 ${row.id} 吗？`,
           '确认解封',
           {
@@ -437,35 +535,22 @@ const toggleBanStatus = async (row: UserInfo) => {
           }
       )
 
-      const unBanData: UnBanReq = {accountId: row.id}
-      const response = await accountApi.unBan(unBanData)
+      const response = await accountApi.unBan({accountId: row.id})
 
       if (response) {
         ElMessage.success('解封成功')
-        // 重新加载数据以确保显示最新状态
-        setTimeout(() => {
-          fetchUserList()
-        }, 1000) // 添加短暂延迟以确保后端状态已更新
+        await fetchUserList()
       } else {
         ElMessage.error('解封失败')
       }
     } catch (error) {
-      console.log('取消解封操作')
-    }
-  } else {
-    // 跳转到封号界面
-    router.push({
-      path: '/user/account/ban-user',
-      query: {
-        id: row.id,
-        openId: row.openId,
-        ip: row.ip,
-        channel: String(row.channel),
-        ban: String(row.ban),
-        cancel: String(row.cancel)
+      if (error !== 'cancel') {
+        console.error('解封失败:', error)
       }
-    });
+    }
+    return
   }
+  openBanDialog(row)
 }
 
 // 切换注销状态

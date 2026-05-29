@@ -19,7 +19,7 @@ func QueryUserInfo(ctx context.Context, req *accountdto.QueryUserInfoReq) (res *
 			val.Diamond = userInfoCache.Diamond
 			val.Gold = userInfoCache.Gold
 			val.IsAnchor = userInfoCache.IsAnchor
-			accountCache := accountdao.GetAccountById(val.ID)
+			accountCache := accountdao.GetAccountBy(val.OpenId, val.Channel)
 			val.Cancel = accountCache.Cancel
 			val.Ban = accountCache.Ban
 			val.BanApplyTime = accountCache.BanApplyTime
