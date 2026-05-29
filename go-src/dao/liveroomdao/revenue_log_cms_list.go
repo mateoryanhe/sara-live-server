@@ -8,18 +8,19 @@ import (
 	"xr-game-server/entity"
 )
 
-// GiftLogCMSListFilter CMS礼物流水查询条件
-type GiftLogCMSListFilter struct {
-	ReceiverId uint64
-	StartTime  int64
-	EndTime    int64
-	PageIndex  int
-	PageSize   int
+// RevenueLogCMSListFilter CMS直播收益流水查询条件
+type RevenueLogCMSListFilter struct {
+	ReceiverId  uint64
+	RevenueType uint8
+	StartTime   int64
+	EndTime     int64
+	PageIndex   int
+	PageSize    int
 }
 
-// GiftLogCMSList CMS分页查询礼物流水(按ID倒序)
-func GiftLogCMSList(f *GiftLogCMSListFilter) (int, []*entity.LiveGiftLog) {
-	list := make([]*entity.LiveGiftLog, 0)
+// RevenueLogCMSList CMS分页查询直播收益流水(按ID倒序)
+func RevenueLogCMSList(f *RevenueLogCMSListFilter) (int, []*entity.LiveRevenueLog) {
+	list := make([]*entity.LiveRevenueLog, 0)
 	if f == nil {
 		return 0, list
 	}
@@ -30,9 +31,12 @@ func GiftLogCMSList(f *GiftLogCMSListFilter) (int, []*entity.LiveGiftLog) {
 		f.PageSize = 20
 	}
 	ctx := gctx.New()
-	m := g.Model(string(entity.TbLiveGiftLog)).Ctx(ctx)
+	m := g.Model(string(entity.TbLiveRevenueLog)).Ctx(ctx)
 	if f.ReceiverId > 0 {
-		m = m.Where(string(entity.LiveGiftLogReceiverId)+" = ?", f.ReceiverId)
+		m = m.Where(string(entity.LiveRevenueLogReceiverId)+" = ?", f.ReceiverId)
+	}
+	if f.RevenueType > 0 {
+		m = m.Where(string(entity.LiveRevenueLogRevenueType)+" = ?", f.RevenueType)
 	}
 	if f.StartTime > 0 {
 		m = m.Where("created_at >= ?", time.Unix(f.StartTime, 0))

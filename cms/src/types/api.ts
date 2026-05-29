@@ -473,25 +473,28 @@ export interface RechargeOrderQuery extends PageQuery {
     endTime?: number
 }
 
-export interface LiveGiftLogQuery extends PageQuery {
+export interface LiveRevenueLogQuery extends PageQuery {
     receiverId?: string
+    revenueType?: number
     startTime?: number
     endTime?: number
 }
 
-export interface LiveGiftLogItem {
+export interface LiveRevenueLogItem {
     id: string
+    revenueType: number
+    revenueTypeText?: string
     roomId: string
     liveRecordId: string
     senderId: string
     senderNickname?: string
     receiverId: string
     receiverNickname?: string
-    giftId: string
-    giftName?: string
+    bizId: string
+    bizName?: string
     count: number
     unitPrice: number
-    totalCost: number
+    totalAmount: number
     createdAt?: string | null
 }
 

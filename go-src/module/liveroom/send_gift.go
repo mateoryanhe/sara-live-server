@@ -5,7 +5,8 @@ import (
 	"time"
 	"xr-game-server/constants/cmd"
 	"xr-game-server/constants/currency"
-	"xr-game-server/core/actor"
+	"xr-game-server/constants/liverevenue"
+	"xr-game-server/core/event"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/push"
 	"xr-game-server/dao/liveroomdao"
@@ -13,25 +14,11 @@ import (
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
+	"xr-game-server/gameevent"
 	"xr-game-server/module/gift"
 	"xr-game-server/module/upload"
 	"xr-game-server/module/wallet"
 )
-
-const (
-	Max  = 5
-	Size = 100
-)
-
-var actorMap = make(map[uint64]*actor.Actor)
-
-func initGiftActor() {
-	for i := 0; i < Max; i++ {
-		val := actor.NewActor(Size)
-		val.Start()
-		actorMap[uint64(i)] = val
-	}
-}
 
 type GiftActorData struct {
 	totalCost uint64
@@ -71,18 +58,16 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 		return nil, err
 	}
 
-	//记录礼物流水日志
-	entity.NewLiveGiftLogRecord(room.ID, room.LiveRecordId, senderId, room.ID, req.GiftId, req.Count, giftItem.Price, totalCost)
+	//记录直播收益流水(礼物)
+	eventData := entity.NewLiveRevenueLogRecord(room.ID, room.LiveRecordId, senderId, room.ID, req.GiftId, req.Count, giftItem.Price, totalCost, uint8(liverevenue.Gift))
 
 	//防止并发,主播可以收到多个人的礼物
-	actorGift := actorMap[room.ID/Max]
-	actorGift.Send(&GiftActorData{
-		RoomId:    room.ID,
-		totalCost: totalCost,
-	}, func(val any) {
+	actorGift := actorMap[room.ID%Max]
+	actorGift.Send(nil, func(val any) {
 		liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId)
 		//添加本次直播收到的礼物总额
 		liveRecord.AddTotalIncome(float64(totalCost))
+		event.Pub(gameevent.RevenueEventEvent, eventData)
 	})
 
 	// 4. 构造推送载荷,广播给房间内所有在线用户

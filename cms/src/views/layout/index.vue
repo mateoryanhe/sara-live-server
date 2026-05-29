@@ -114,7 +114,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('LiveGiftLogList') || hasMenuPermission('LiveRecordList')"
+            v-if="hasMenuPermission('LiveRevenueLogList') || hasMenuPermission('LiveRecordList')"
             index="/log">
           <template #title>
             <el-icon>
@@ -129,11 +129,11 @@
               </el-icon>
               <span>直播日志</span>
             </template>
-            <el-menu-item v-if="hasMenuPermission('LiveGiftLogList')" index="/log/live/gift-log-list">
+            <el-menu-item v-if="hasMenuPermission('LiveRevenueLogList')" index="/log/live/revenue-log-list">
               <el-icon>
                 <Present/>
               </el-icon>
-              <span>礼物流水</span>
+              <span>直播收益流水</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('LiveRecordList')" index="/log/live/live-record-list">
               <el-icon>

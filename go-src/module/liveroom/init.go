@@ -2,6 +2,6 @@ package liveroom
 
 func Init() {
 	initHeart()
-	initGiftActor()
+	initRoomActor()
 	initRoomList()
 }
