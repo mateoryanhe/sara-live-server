@@ -1,6 +1,8 @@
 package syndb
 
 import (
+	"context"
+	"github.com/gogf/gf/v2/os/gctx"
 	"time"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/shutdown"
@@ -10,7 +12,9 @@ import (
 // InitSynCache 初始化同步数据库缓存
 func InitSynCache() {
 	//先注册好通道,固定10毫秒处理一下缓冲数据
-	xrtimer.ModuleLoop(10*time.Millisecond, consume)
+	xrtimer.AddOnce(gctx.New(), 2*time.Minute, func(ctx context.Context) {
+		xrtimer.ModuleLoop(10*time.Millisecond, consume)
+	})
 	shutdown.RegCommonShutDownHandler(SysExit)
 }
 

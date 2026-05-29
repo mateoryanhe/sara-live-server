@@ -1,33 +1,32 @@
 package liveroomdao
 
 import (
-	"context"
+	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gctx"
-	"xr-game-server/core/cache"
 	"xr-game-server/entity"
 )
 
 // roomCacheMgr 按 roomId(== 主播用户ID) 缓存
-var roomCacheMgr *cache.CacheMgr
+var roomCacheMgr = gmap.NewKVMap[uint64, *entity.LiveRoom](false)
 
 // InitLiveRoomDao 初始化直播间相关缓存
 func InitLiveRoomDao() {
-	roomCacheMgr = cache.NewCacheMgr()
+	//启动的时候,加载全部主播
+	all := make([]*entity.LiveRoom, 0)
+	g.Model(string(entity.TbLiveRoom)).Scan(&all)
+	for _, v := range all {
+		roomCacheMgr.Set(v.ID, v)
+	}
 }
 
 // GetRoomById 按 roomId 获取直播间(走缓存)
 func GetRoomById(roomId uint64) *entity.LiveRoom {
-	v := roomCacheMgr.GetData(roomId, func(ctx context.Context) (value interface{}, err error) {
-		var r *entity.LiveRoom
-		_ = g.Model(string(entity.TbLiveRoom)).Where("id = ?", roomId).Scan(&r)
-		return r, nil
-	})
-	if v == nil {
+	if !roomCacheMgr.Contains(roomId) {
 		return nil
 	}
-	r, _ := v.(*entity.LiveRoom)
-	return r
+	v := roomCacheMgr.Get(roomId)
+
+	return v
 }
 
 // GetRoomByAnchor 按主播ID(== roomId)获取直播间;保留函数名以明语义
@@ -55,12 +54,17 @@ func ListLivingRoomIds() []uint64 {
 	return ids
 }
 
+func GetAllLiveRoom() []*entity.LiveRoom {
+	data := roomCacheMgr.Values()
+	return data
+}
+
 // AddRoomToCache 新建直播间后写入缓存
 func AddRoomToCache(r *entity.LiveRoom) {
 	if r == nil {
 		return
 	}
-	roomCacheMgr.FlushCache(r.ID, r)
+	roomCacheMgr.Set(r.ID, r)
 }
 
 // FlushRoomCache 直播间字段变更后刷新缓存
@@ -68,13 +72,5 @@ func FlushRoomCache(r *entity.LiveRoom) {
 	if r == nil {
 		return
 	}
-	roomCacheMgr.FlushCache(r.ID, r)
-}
-
-// RemoveRoomCache 移除指定直播间的缓存
-func RemoveRoomCache(roomId uint64) {
-	if roomCacheMgr == nil {
-		return
-	}
-	_, _ = roomCacheMgr.Cache.Remove(gctx.New(), roomId)
+	roomCacheMgr.Set(r.ID, r)
 }
