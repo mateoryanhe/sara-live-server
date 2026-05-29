@@ -51,6 +51,8 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 	data := userinfodao.GetUserInfoByUserId(account.ID)
 	data.SetPhone(req.Phone)
 	userlogindevicedao.RefreshLoginDevice(account.ID, req.DeviceInfo)
+	now := time.Now()
+	event.Pub(gameevent.RegisterEvent, gameevent.NewRegisterEventData(account.ID, now))
 	if req.InviteCode != "" {
 		inviterId := userinfodao.GetUserIdByShareCode(req.InviteCode)
 		if inviterId == 0 {
@@ -63,8 +65,7 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 			data.SetInviterId(inviterId)
 		}
 	}
-	now := time.Now()
-	event.Pub(gameevent.RegisterEvent, gameevent.NewRegisterEventData(account.ID, now))
+
 	res = &authdto.PhoneRegisterRes{
 		Token:  tokenStr,
 		AuthId: strconv.FormatUint(account.ID, 10),

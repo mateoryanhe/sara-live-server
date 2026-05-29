@@ -8,11 +8,15 @@ import (
 	"xr-game-server/module/upload"
 )
 
+const (
+	Def_Url = "https://img.yonogames.com/headimg/man/147.png"
+)
+
 // GetUserInfo 查询当前登录用户的基础信息
 func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *userinfodto.GetUserInfoRes, err error) {
 	userId := httpserver.GetAuthId(ctx)
 	data := userinfodao.GetUserInfoByUserId(userId)
-	return &userinfodto.GetUserInfoRes{
+	ret := &userinfodto.GetUserInfoRes{
 		UserId:      data.ID,
 		Nickname:    data.Nickname,
 		Phone:       data.Phone,
@@ -26,7 +30,11 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		HasLiveRoom: data.HasLiveRoom,
 		Gender:      data.Gender,
 		Birthday:    formatBirthday(data.Birthday),
-	}, nil
+	}
+	if data.Avatar == "" {
+		ret.Avatar = Def_Url
+	}
+	return ret, nil
 }
 
 // UpdateNickname 修改昵称
