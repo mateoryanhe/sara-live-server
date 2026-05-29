@@ -5,7 +5,6 @@ import (
 	"xr-game-server/constants/currency"
 	"xr-game-server/core/event"
 	"xr-game-server/dao/rechargeorderdao"
-	"xr-game-server/dao/userinfodao"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
 	"xr-game-server/gameevent"
@@ -31,12 +30,7 @@ func completeOrder(o *entity.RechargeOrder, reason currency.Reason) (float64, er
 	o.SetPaidAt(paidAt)
 	o.SetUpdatedAt(paidAt)
 
-	//充值成功完成
-	stat := userinfodao.GetUserCumulativeStatByUserId(o.UserId)
-	stat.AddTotalRecharge(o.Price)
-	stat.AddTotalPayCount(1)
-
-	event.Pub(gameevent.RechargeArrivedEvent, gameevent.NewRechargeArrivedEventData(o.ID))
+	event.Pub(gameevent.RechargeArrivedEvent, o)
 	rechargeorderdao.FlushOrderCache(o)
 	return after, nil
 }

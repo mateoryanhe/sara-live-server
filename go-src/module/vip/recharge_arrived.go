@@ -3,24 +3,25 @@ package vip
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"xr-game-server/dao/rechargeorderdao"
 	"xr-game-server/dao/userinfodao"
-	"xr-game-server/gameevent"
+	"xr-game-server/entity"
 )
 
 func onRechargeArrived(val any) {
-	data, ok := val.(*gameevent.RechargeArrivedEventData)
-	if !ok || data == nil || data.OrderId == 0 {
+	data, ok := val.(*entity.RechargeOrder)
+	if !ok || data == nil {
 		g.Log().Errorf(gctx.New(), "RechargeArrivedEvent payload type error: %T", val)
 		return
 	}
-	order := rechargeorderdao.GetById(data.OrderId)
-	if order == nil || order.UserId == 0 || order.Price == 0 {
-		return
-	}
+	order := data
 
+	//充值成功完成
 	stat := userinfodao.GetUserCumulativeStatByUserId(order.UserId)
+	stat.AddTotalRecharge(order.Price)
+	stat.AddTotalPayCount(1)
+
 	totalRecharge := stat.TotalRecharge
+
 	targetLevel := calcTargetVipLevel(totalRecharge)
 	if targetLevel == 0 {
 		return

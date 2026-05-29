@@ -2,7 +2,6 @@ import {request} from '../request'
 import type {
     AnchorListItem,
     BanAnchorReq,
-    BanAnchorReq,
     BanReq,
     CancelReq,
     PageResponse,
