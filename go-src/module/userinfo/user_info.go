@@ -24,6 +24,8 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		VipLevel:    data.VipLevel,
 		IsAnchor:    data.IsAnchor,
 		HasLiveRoom: data.HasLiveRoom,
+		Gender:      data.Gender,
+		Birthday:    formatBirthday(data.Birthday),
 	}, nil
 }
 

@@ -22,6 +22,28 @@ type GetUserInfoRes struct {
 	VipLevel    uint32  `json:"vipLevel"`
 	IsAnchor    bool    `json:"isAnchor" dc:"是否主播"`
 	HasLiveRoom bool    `json:"hasLiveRoom" dc:"是否已创建直播间"`
+	Gender      uint8   `json:"gender" dc:"性别(0未知,1男,2女)"`
+	Birthday    string  `json:"birthday" dc:"出生日期(YYYY-MM-DD,空表示未设置)"`
+}
+
+// UpdateGenderReq 修改性别
+type UpdateGenderReq struct {
+	g.Meta `path:"/updateGender" method:"post" summary:"修改用户性别" tags:"用户基础信息"`
+	Gender uint8 `json:"gender" v:"required#性别不能为空" dc:"性别(0未知,1男,2女)"`
+}
+
+type UpdateGenderRes struct {
+	Gender uint8 `json:"gender"`
+}
+
+// UpdateBirthdayReq 修改出生日期
+type UpdateBirthdayReq struct {
+	g.Meta   `path:"/updateBirthday" method:"post" summary:"修改用户出生日期" tags:"用户基础信息"`
+	Birthday string `json:"birthday" v:"required#出生日期不能为空" dc:"出生日期,格式YYYY-MM-DD"`
+}
+
+type UpdateBirthdayRes struct {
+	Birthday string `json:"birthday"`
 }
 
 // UpdateNicknameReq 修改昵称

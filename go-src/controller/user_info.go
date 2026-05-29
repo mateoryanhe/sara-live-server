@@ -27,6 +27,14 @@ func (c *UserInfoController) UpdateNickname(ctx context.Context, req *userinfodt
 	return userinfo.UpdateNickname(ctx, req)
 }
 
+func (c *UserInfoController) UpdateGender(ctx context.Context, req *userinfodto.UpdateGenderReq) (res *userinfodto.UpdateGenderRes, err error) {
+	return userinfo.UpdateGender(ctx, req)
+}
+
+func (c *UserInfoController) UpdateBirthday(ctx context.Context, req *userinfodto.UpdateBirthdayReq) (res *userinfodto.UpdateBirthdayRes, err error) {
+	return userinfo.UpdateBirthday(ctx, req)
+}
+
 func (c *UserInfoController) GetCurrencyLog(ctx context.Context, req *userinfodto.GetCurrencyLogReq) (res *userinfodto.GetCurrencyLogRes, err error) {
 	return currencylog.GetByUserId(ctx, req)
 }

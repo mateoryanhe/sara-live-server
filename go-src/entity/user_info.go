@@ -27,6 +27,8 @@ const (
 	UserInfoInviterId     db.TbCol = "inviter_id"
 	UserInfoVipLevel      db.TbCol = "vip_level"
 	UserInfoLastLoginTime db.TbCol = "last_login_time"
+	UserInfoGender        db.TbCol = "gender"
+	UserInfoBirthday      db.TbCol = "birthday"
 )
 
 // UserInfo 用户基础信息
@@ -45,6 +47,8 @@ type UserInfo struct {
 	InviterId     uint64     `gorm:"index;default:0;comment:邀请人用户ID(0为无)"`
 	VipLevel      uint32     `gorm:"default:0;comment:VIP等级(0为无)"`
 	LastLoginTime *time.Time `gorm:"comment:最后登录时间" json:"lastLoginTime"`
+	Gender        uint8      `gorm:"default:0;comment:性别(0未知,1男,2女)" json:"gender"`
+	Birthday      *time.Time `gorm:"type:date;comment:出生日期" json:"birthday"`
 }
 
 func NewUserInfo(userId uint64) *UserInfo {
@@ -190,6 +194,24 @@ func (receiver *UserInfo) SetLastLoginTime(val *time.Time) {
 	})
 }
 
+func (receiver *UserInfo) SetGender(gender uint8) {
+	receiver.Gender = gender
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddDataToQuickChan(TbUserInfo, UserInfoGender, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: gender,
+	})
+}
+
+func (receiver *UserInfo) SetBirthday(val *time.Time) {
+	receiver.Birthday = val
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddDataToQuickChan(TbUserInfo, UserInfoBirthday, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: val,
+	})
+}
+
 func (receiver *UserInfo) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
 	syndb.AddDataToQuickChan(TbUserInfo, db.CreatedAtName, &syndb.ColData{
@@ -223,6 +245,8 @@ func initUserInfo() {
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoInviterId)
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoVipLevel)
 	syndb.RegLazyWithLarge(TbUserInfo, UserInfoLastLoginTime)
+	syndb.RegQuickWithLarge(TbUserInfo, UserInfoGender)
+	syndb.RegQuickWithLarge(TbUserInfo, UserInfoBirthday)
 
 	migrate.AutoMigrate(&UserInfo{})
 }
