@@ -2,6 +2,7 @@ package module
 
 import (
 	"xr-game-server/module/agora"
+	"xr-game-server/module/anchorrank"
 	"xr-game-server/module/auth"
 	"xr-game-server/module/banner"
 	"xr-game-server/module/currencylog"
@@ -27,6 +28,7 @@ func Init() {
 	message.Init()
 	recharge.Init()
 	richrank.Init()
+	anchorrank.Init()
 	banner.Init()
 	vip.Init()
 	game.Init()

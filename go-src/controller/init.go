@@ -37,6 +37,7 @@ func Init() {
 	initLiveRevenueLogController()   // 直播收益流水(CMS)
 	initLiveRecordCMSController()    // 直播记录(CMS)
 	initRichRankAppController()      // 富豪榜(App)
+	initAnchorRankAppController()    // 主播红人榜(App)
 	initRechargeOrderAppController() // 充值订单(App:发起/查询)
 	initVipCfgController()           // VIP配置(CMS)
 	initGameCfgController()          // 游戏配置(CMS)
