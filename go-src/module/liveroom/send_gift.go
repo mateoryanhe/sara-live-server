@@ -2,7 +2,8 @@ package liveroom
 
 import (
 	"context"
-	"sync"
+	"fmt"
+	"github.com/gogf/gf/v2/os/gmlock"
 	"time"
 	"xr-game-server/constants/cmd"
 	"xr-game-server/constants/currency"
@@ -19,10 +20,6 @@ import (
 	"xr-game-server/module/gift"
 	"xr-game-server/module/upload"
 	"xr-game-server/module/wallet"
-)
-
-var (
-	sendGift sync.Mutex
 )
 
 // SendGift 直播间送礼
@@ -84,8 +81,9 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 		push.Data(o.UserId, cmd.LiveRoomGift, payload)
 	}
 
-	sendGift.Lock()
-	defer sendGift.Unlock()
+	lockName := fmt.Sprintf("send_gift_%v", req.RoomId)
+	gmlock.Lock(lockName)
+	defer gmlock.Unlock(lockName)
 
 	//防止并发,主播可以收到多个人的礼物
 	liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId)
