@@ -28,7 +28,6 @@ func Init() {
 	recharge.Init()
 	richrank.Init()
 	banner.Init()
-	shortvideo.Init()
 	vip.Init()
 	game.Init()
 	agora.Init()
@@ -36,4 +35,5 @@ func Init() {
 	liveroom.Init()
 	userinfo.Init()
 	stat.Init()
+	shortvideo.Init()
 }

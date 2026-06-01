@@ -9,4 +9,5 @@ type LikeShortVideoReq struct {
 
 type LikeShortVideoRes struct {
 	LikeCount uint64 `json:"likeCount" dc:"点赞累计数量"`
+	VideoId   uint64 `json:"videoId,string" v:"required#视频ID不能为空" dc:"短视频ID"`
 }

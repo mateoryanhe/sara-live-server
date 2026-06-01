@@ -26,7 +26,7 @@ var (
 )
 
 // Init App端短视频列表缓存初始化,并每15分钟整体替换一次
-func Init() {
+func initAppListCache() {
 
 	loadAppShortVideoListCache()
 	xrtimer.AddSingleton(gctx.New(), appListRefreshInterval, func(ctx context.Context) {
