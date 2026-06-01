@@ -2,6 +2,7 @@ package liveroom
 
 import (
 	"context"
+	"sync"
 	"time"
 	"xr-game-server/constants/cmd"
 	"xr-game-server/constants/currency"
@@ -20,10 +21,9 @@ import (
 	"xr-game-server/module/wallet"
 )
 
-type GiftActorData struct {
-	totalCost uint64
-	RoomId    uint64
-}
+var (
+	sendGift sync.Mutex
+)
 
 // SendGift 直播间送礼
 //  1. 校验房间存在、礼物存在(命中礼物缓存,即默认已上架)、数量合法
@@ -61,15 +61,6 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 	//记录直播收益流水(礼物)
 	eventData := entity.NewLiveRevenueLogRecord(room.ID, room.LiveRecordId, senderId, room.ID, req.GiftId, req.Count, giftItem.Price, totalCost, uint8(liverevenue.Gift))
 
-	//防止并发,主播可以收到多个人的礼物
-	actorGift := actorMap[room.ID%Max]
-	actorGift.Send(nil, func(val any) {
-		liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId)
-		//添加本次直播收到的礼物总额
-		liveRecord.AddTotalIncome(float64(totalCost))
-		event.Pub(gameevent.RevenueEventEvent, eventData)
-	})
-
 	// 4. 构造推送载荷,广播给房间内所有在线用户
 	sender := userinfodao.GetUserInfoByUserId(senderId)
 	payload := &liveroomdto.GiftPushItem{
@@ -92,6 +83,15 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 	for _, o := range liveroomdao.GetOnlinesByRoom(req.RoomId) {
 		push.Data(o.UserId, cmd.LiveRoomGift, payload)
 	}
+
+	sendGift.Lock()
+	defer sendGift.Unlock()
+
+	//防止并发,主播可以收到多个人的礼物
+	liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId)
+	//添加本次直播收到的礼物总额
+	liveRecord.AddTotalIncome(float64(totalCost))
+	event.Pub(gameevent.RevenueEventEvent, eventData)
 
 	return &liveroomdto.SendGiftRes{
 		Cost:    totalCost,

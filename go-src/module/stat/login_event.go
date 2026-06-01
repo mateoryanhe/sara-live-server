@@ -1,6 +1,7 @@
 package stat
 
 import (
+	"sync"
 	"time"
 	"xr-game-server/core/event"
 	"xr-game-server/dao/dailyloginstatdao"
@@ -13,6 +14,10 @@ import (
 	"xr-game-server/entity"
 )
 
+var (
+	loginLock sync.Mutex
+)
+
 func initLoginEvent() {
 	event.Sub(event.AppToken, onLoginEvent)
 }
@@ -22,6 +27,9 @@ func onLoginEvent(data any) {
 	userInfo := userinfodao.GetUserInfoByUserId(val.Id)
 	now := time.Now()
 	userInfo.SetLastLoginTime(&now)
+
+	loginLock.Lock()
+	defer loginLock.Unlock()
 
 	recordDailyLogin(now, val.Id)
 	recordWeeklyLogin(now, val.Id)
