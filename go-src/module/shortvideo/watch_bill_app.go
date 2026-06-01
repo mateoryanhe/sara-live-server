@@ -5,7 +5,6 @@ import (
 	"xr-game-server/constants/currency"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/shortvideodao"
-	"xr-game-server/dao/shortvideowatchdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/shortvideodto"
 	"xr-game-server/entity"
@@ -13,7 +12,7 @@ import (
 	"xr-game-server/module/wallet"
 )
 
-const watchBillIntervalSeconds uint32 = 3
+const watchBillIntervalSeconds uint32 = 1
 
 // WatchBillShortVideo App端短视频观看扣费,每次按5秒进度计费
 func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortVideoReq) (*shortvideodto.WatchBillShortVideoRes, error) {
@@ -42,15 +41,13 @@ func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortV
 		}, nil
 	}
 
-	watch := shortvideowatchdao.GetByUserVideo(userId, req.VideoId)
+	watch := shortvideodao.GetShortVideoWatchByUserVideo(userId, req.VideoId)
 	billedSeconds := uint32(0)
 	if watch != nil {
 		billedSeconds = watch.BilledSeconds
 	}
 
-	freeWatchSeconds := getAppShortVideoCfgCache().FreeWatchSeconds
-	chargeableSeconds := calcChargeableSeconds(billedSeconds, watchBillIntervalSeconds, freeWatchSeconds)
-	cost := float64(chargeableSeconds) * float64(video.DiamondPerSecond)
+	cost := float64(video.DiamondPerSecond)
 
 	diamond := user.Diamond
 	deducted := float64(0)
@@ -69,13 +66,13 @@ func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortV
 		watch = entity.NewShortVideoWatch(userId, req.VideoId)
 	}
 	watch.SetBilledSeconds(newBilledSeconds)
-	shortvideowatchdao.SaveToCache(watch)
+	//shortvideodao.SaveToCache(watch)
 
 	return &shortvideodto.WatchBillShortVideoRes{
 		Deducted:          deducted,
 		Diamond:           diamond,
 		BilledSeconds:     newBilledSeconds,
-		ChargeableSeconds: chargeableSeconds,
+		ChargeableSeconds: 0,
 		CanContinue:       true,
 	}, nil
 }

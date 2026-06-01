@@ -30,6 +30,7 @@ func Init() {
 	InitLiveGift()
 	initHomeBanner()
 	initShortVideo()
+	initShortVideoStat()
 	initShortVideoCfg()
 	initShortVideoLike()
 	initShortVideoWatch()

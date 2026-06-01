@@ -4,14 +4,15 @@ import (
 	"context"
 	"strconv"
 	"xr-game-server/core/httpserver"
+	"xr-game-server/core/snowflake"
 	"xr-game-server/dao/shortvideodao"
-	"xr-game-server/dao/shortvideolikedao"
 	"xr-game-server/dto/shortvideodto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
 	"xr-game-server/module/upload"
 )
 
+// 后台对短视频的管理
 func GetShortVideoList(_ context.Context, req *shortvideodto.ShortVideoListReq) (*httpserver.CMSQueryResp, error) {
 	total, list := shortvideodao.GetShortVideoList(req)
 	for _, row := range list {
@@ -41,9 +42,12 @@ func CreateShortVideo(_ context.Context, req *shortvideodto.CreateShortVideoReq)
 		DiamondPerSecond: diamondPerSecond,
 		Description:      req.Description,
 	}
+	row.ID = snowflake.GetId()
 	if err := shortvideodao.Create(row); err != nil {
 		return nil, err
 	}
+	loadAppShortVideoListCache()
+
 	return &shortvideodto.CreateShortVideoRes{ID: strconv.FormatUint(row.ID, 10)}, nil
 }
 
@@ -69,6 +73,7 @@ func UpdateShortVideo(_ context.Context, req *shortvideodto.UpdateShortVideoReq)
 	if err := shortvideodao.Update(row); err != nil {
 		return nil, err
 	}
+	loadAppShortVideoListCache()
 	return &shortvideodto.UpdateShortVideoRes{Success: true}, nil
 }
 
@@ -79,6 +84,8 @@ func DeleteShortVideo(_ context.Context, req *shortvideodto.DeleteShortVideoReq)
 	if err := shortvideodao.Delete(req.ID); err != nil {
 		return nil, err
 	}
+	_ = shortvideodao.DeleteByVideoId(req.ID)
+	loadAppShortVideoListCache()
 	return &shortvideodto.DeleteShortVideoRes{Success: true}, nil
 }
 
@@ -88,9 +95,11 @@ func OnShelfShortVideo(_ context.Context, req *shortvideodto.OnShelfShortVideoRe
 		return nil, errercode.CreateCode(errercode.ShortVideoNonExist)
 	}
 	if row.Status != entity.ShortVideoStatusOnShelf {
-		if err := shortvideodao.UpdateStatus(req.ID, entity.ShortVideoStatusOnShelf); err != nil {
-			return nil, err
-		}
+		shortvideodao.UpdateStatus(req.ID, entity.ShortVideoStatusOnShelf)
+		row.Status = entity.ShortVideoStatusOnShelf
+		loadAppShortVideoListCache()
+		shortvideodao.FlushShortVideo(row)
+		return nil, nil
 	}
 	return &shortvideodto.OnShelfShortVideoRes{Success: true, Status: entity.ShortVideoStatusOnShelf}, nil
 }
@@ -101,35 +110,13 @@ func OffShelfShortVideo(_ context.Context, req *shortvideodto.OffShelfShortVideo
 		return nil, errercode.CreateCode(errercode.ShortVideoNonExist)
 	}
 	if row.Status != entity.ShortVideoStatusOffShelf {
-		if err := shortvideodao.UpdateStatus(req.ID, entity.ShortVideoStatusOffShelf); err != nil {
-			return nil, err
-		}
+		shortvideodao.UpdateStatus(req.ID, entity.ShortVideoStatusOffShelf)
+		row.Status = entity.ShortVideoStatusOffShelf
+		loadAppShortVideoListCache()
+		shortvideodao.FlushShortVideo(row)
+		return nil, nil
 	}
 	return &shortvideodto.OffShelfShortVideoRes{Success: true, Status: entity.ShortVideoStatusOffShelf}, nil
-}
-
-func LikeShortVideo(ctx context.Context, req *shortvideodto.LikeShortVideoReq) (*shortvideodto.LikeShortVideoRes, error) {
-	userId := httpserver.GetAuthId(ctx)
-	if userId == 0 {
-		return nil, errercode.CreateCode(errercode.EmptyUserId)
-	}
-	row := shortvideodao.GetShortVideoById(req.VideoId)
-	if row == nil || row.Status != entity.ShortVideoStatusOnShelf {
-		return nil, errercode.CreateCode(errercode.ShortVideoNonExist)
-	}
-	existing := shortvideolikedao.GetByUserVideo(userId, req.VideoId)
-	if existing != nil && existing.Status == entity.ShortVideoLikeStatusLiked {
-		return nil, errercode.CreateCode(errercode.ShortVideoAlreadyLiked)
-	}
-	if existing == nil {
-		like := entity.NewShortVideoLike(userId, req.VideoId)
-		shortvideolikedao.AddLikeToCache(like)
-	} else {
-		existing.SetStatus(entity.ShortVideoLikeStatusLiked)
-		shortvideolikedao.AddLikeToCache(existing)
-	}
-	row.AddLikeCount(1)
-	return &shortvideodto.LikeShortVideoRes{LikeCount: row.LikeCount}, nil
 }
 
 func normalizeShortVideoPaid(isPaid uint8, diamondPerSecond uint64) (uint8, uint64, error) {

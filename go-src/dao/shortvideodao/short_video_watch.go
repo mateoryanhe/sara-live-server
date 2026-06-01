@@ -1,4 +1,4 @@
-package shortvideowatchdao
+package shortvideodao
 
 import (
 	"context"
@@ -14,7 +14,7 @@ func InitShortVideoWatchDao() {
 	watchCacheMgr = cache.NewCacheMgr()
 }
 
-func GetByUserVideo(userId, videoId uint64) *entity.ShortVideoWatch {
+func GetShortVideoWatchByUserVideo(userId, videoId uint64) *entity.ShortVideoWatch {
 	if userId == 0 || videoId == 0 || watchCacheMgr == nil {
 		return nil
 	}

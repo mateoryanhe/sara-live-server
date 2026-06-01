@@ -5,13 +5,12 @@ import (
 	"strconv"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/shortvideodao"
-	"xr-game-server/dao/shortvideowatchdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/shortvideodto"
 )
 
 func GetShortVideoWatchList(_ context.Context, req *shortvideodto.ShortVideoWatchListReq) (*httpserver.CMSQueryResp, error) {
-	total, rows := shortvideowatchdao.GetList(&shortvideowatchdao.WatchListFilter{
+	total, rows := shortvideodao.GetList(&shortvideodao.WatchListFilter{
 		UserId:    parseUint64Filter(req.UserId),
 		StartTime: req.StartTime,
 		EndTime:   req.EndTime,

@@ -1,4 +1,4 @@
-package shortvideowatchdao
+package shortvideodao
 
 import (
 	"time"

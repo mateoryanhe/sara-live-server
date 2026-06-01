@@ -27,7 +27,7 @@ var (
 
 // Init App端短视频列表缓存初始化,并每15分钟整体替换一次
 func Init() {
-	reloadShortVideoCfgMemory()
+
 	loadAppShortVideoListCache()
 	xrtimer.AddSingleton(gctx.New(), appListRefreshInterval, func(ctx context.Context) {
 		loadAppShortVideoListCache()
@@ -37,9 +37,11 @@ func Init() {
 // loadAppShortVideoListCache 构建新列表后整体替换,刷新过程中请求仍读取旧列表
 func loadAppShortVideoListCache() {
 	rows := shortvideodao.GetOnShelfShortVideos()
+
 	list := make([]*shortvideodto.AppShortVideoItem, 0, len(rows))
 	for _, row := range rows {
-		list = append(list, toAppShortVideoItem(row))
+		stat := shortvideodao.GetStatByVideoId(row.ID)
+		list = append(list, toAppShortVideoItem(row, stat))
 	}
 	appListCache.Store(list)
 }
@@ -56,7 +58,11 @@ func getAppShortVideoListCache() []*shortvideodto.AppShortVideoItem {
 	return list
 }
 
-func toAppShortVideoItem(row *entity.ShortVideo) *shortvideodto.AppShortVideoItem {
+func toAppShortVideoItem(row *entity.ShortVideo, stat *entity.ShortVideoStat) *shortvideodto.AppShortVideoItem {
+	var likeCount uint64
+	if stat != nil {
+		likeCount = stat.LikeCount
+	}
 	return &shortvideodto.AppShortVideoItem{
 		ID:               strconv.FormatUint(row.ID, 10),
 		Title:            row.Title,
@@ -65,7 +71,7 @@ func toAppShortVideoItem(row *entity.ShortVideo) *shortvideodto.AppShortVideoIte
 		Description:      row.Description,
 		IsPaid:           row.IsPaid,
 		DiamondPerSecond: row.DiamondPerSecond,
-		LikeCount:        row.LikeCount,
+		LikeCount:        likeCount,
 	}
 }
 

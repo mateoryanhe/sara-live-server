@@ -14,10 +14,7 @@ import (
 	"xr-game-server/dao/monthlyuserlogindao"
 	"xr-game-server/dao/namedao"
 	"xr-game-server/dao/rechargeorderdao"
-	"xr-game-server/dao/shortvideocfgdao"
 	"xr-game-server/dao/shortvideodao"
-	"xr-game-server/dao/shortvideolikedao"
-	"xr-game-server/dao/shortvideowatchdao"
 	"xr-game-server/dao/statdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dao/userlogindevicedao"
@@ -44,9 +41,10 @@ func Init() {
 	liveroomdao.InitLiveRecordDao()
 	livefollowdao.InitLiveFollowDao()
 	shortvideodao.InitShortVideoDao()
-	shortvideocfgdao.InitShortVideoCfgDao()
-	shortvideolikedao.InitShortVideoLikeDao()
-	shortvideowatchdao.InitShortVideoWatchDao()
+	shortvideodao.InitShortVideoStatDao()
+	shortvideodao.InitShortVideoCfgDao()
+	shortvideodao.InitShortVideoLikeDao()
+	shortvideodao.InitShortVideoWatchDao()
 	rechargeorderdao.InitRechargeOrderDao()
 	messagedao.Init()
 	statdao.Init()

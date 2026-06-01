@@ -1,4 +1,4 @@
-package shortvideolikedao
+package shortvideodao
 
 import (
 	"context"
@@ -13,7 +13,7 @@ func InitShortVideoLikeDao() {
 	likeCacheMgr = cache.NewCacheMgr()
 }
 
-func GetById(id string) *entity.ShortVideoLike {
+func GetShortVideoLikeById(id string) *entity.ShortVideoLike {
 	v := likeCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
 		var like *entity.ShortVideoLike
 		_ = g.Model(string(entity.TbShortVideoLike)).Where("id = ?", id).Scan(&like)
@@ -26,8 +26,8 @@ func GetById(id string) *entity.ShortVideoLike {
 	return like
 }
 
-func GetByUserVideo(userId, videoId uint64) *entity.ShortVideoLike {
-	return GetById(entity.BuildShortVideoLikeId(userId, videoId))
+func GetShortVideoLikeByUserVideo(userId, videoId uint64) *entity.ShortVideoLike {
+	return GetShortVideoLikeById(entity.BuildShortVideoLikeId(userId, videoId))
 }
 
 func AddLikeToCache(like *entity.ShortVideoLike) {
