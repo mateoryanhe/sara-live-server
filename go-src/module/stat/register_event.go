@@ -1,7 +1,7 @@
 package stat
 
 import (
-	"sync"
+	"github.com/gogf/gf/v2/os/gmlock"
 	"time"
 	"xr-game-server/core/event"
 	"xr-game-server/dao/dailyloginstatdao"
@@ -9,10 +9,6 @@ import (
 	"xr-game-server/dao/weeklyloginstatdao"
 	"xr-game-server/entity"
 	"xr-game-server/gameevent"
-)
-
-var (
-	regLock sync.Mutex
 )
 
 func initRegisterEvent() {
@@ -29,8 +25,9 @@ func onRegisterEvent(data any) {
 		now = time.Now()
 	}
 
-	regLock.Lock()
-	defer regLock.Unlock()
+	lockName := "stat_register"
+	gmlock.Lock(lockName)
+	defer gmlock.Unlock(lockName)
 
 	recordDailyRegister(now)
 	recordWeeklyRegister(now)

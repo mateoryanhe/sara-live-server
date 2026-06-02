@@ -1,7 +1,7 @@
 package stat
 
 import (
-	"sync"
+	"github.com/gogf/gf/v2/os/gmlock"
 	"time"
 	"xr-game-server/core/event"
 	"xr-game-server/dao/dailyloginstatdao"
@@ -14,10 +14,6 @@ import (
 	"xr-game-server/entity"
 )
 
-var (
-	loginLock sync.Mutex
-)
-
 func initLoginEvent() {
 	event.Sub(event.AppToken, onLoginEvent)
 }
@@ -28,8 +24,9 @@ func onLoginEvent(data any) {
 	now := time.Now()
 	userInfo.SetLastLoginTime(&now)
 
-	loginLock.Lock()
-	defer loginLock.Unlock()
+	lockName := "stat_login"
+	gmlock.Lock(lockName)
+	defer gmlock.Unlock(lockName)
 
 	recordDailyLogin(now, val.Id)
 	recordWeeklyLogin(now, val.Id)

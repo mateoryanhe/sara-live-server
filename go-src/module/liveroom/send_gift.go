@@ -91,6 +91,10 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 	liveRecord.AddTotalIncome(float64(totalCost))
 	event.Pub(gameevent.RevenueEventEvent, eventData)
 
+	//主播分成
+	amount := float64(req.Count) * 0.4
+	wallet.GoldAdd(req.RoomId, amount, currency.ReasonAnchorGiftRevenue)
+
 	return &liveroomdto.SendGiftRes{
 		Cost:    totalCost,
 		Diamond: remaining,
