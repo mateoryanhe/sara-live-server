@@ -8,44 +8,25 @@
         </div>
       </template>
 
-      <el-row :gutter="20">
-        <el-col :lg="6" :md="12" :sm="24" :xs="24">
-          <div class="stat-card stat-card-gold">
-            <div class="stat-label">金币总额</div>
-            <div class="stat-value">{{ formatAmount(sysStat.totalGold) }}</div>
+      <div class="basic-stat-rows">
+        <div
+            v-for="(row, rowIndex) in basicStatCardRows"
+            :key="rowIndex"
+            class="basic-stat-row"
+        >
+          <div
+              v-for="card in row"
+              :key="card.key"
+              class="stat-card"
+              :class="card.theme"
+          >
+            <div class="stat-label">{{ card.label }}</div>
+            <div class="stat-value">
+              {{ card.format === 'count' ? formatCount(card.value) : formatAmount(card.value) }}
+            </div>
           </div>
-        </el-col>
-        <el-col :lg="6" :md="12" :sm="24" :xs="24">
-          <div class="stat-card stat-card-recharge">
-            <div class="stat-label">总充值金额</div>
-            <div class="stat-value">{{ formatAmount(sysStat.totalRecharge) }}</div>
-          </div>
-        </el-col>
-        <el-col :lg="6" :md="12" :sm="24" :xs="24">
-          <div class="stat-card stat-card-withdraw">
-            <div class="stat-label">总提现金额</div>
-            <div class="stat-value">{{ formatAmount(sysStat.totalWithdraw) }}</div>
-          </div>
-        </el-col>
-        <el-col :lg="6" :md="12" :sm="24" :xs="24">
-          <div class="stat-card stat-card-register">
-            <div class="stat-label">总注册用户数</div>
-            <div class="stat-value">{{ formatCount(sysStat.totalRegisterUser) }}</div>
-          </div>
-        </el-col>
-        <el-col :lg="6" :md="12" :sm="24" :xs="24">
-          <div class="stat-card stat-card-today-recharge">
-            <div class="stat-label">今日充值金额</div>
-            <div class="stat-value">{{ formatAmount(sysStat.todayRecharge) }}</div>
-          </div>
-        </el-col>
-        <el-col :lg="6" :md="12" :sm="24" :xs="24">
-          <div class="stat-card stat-card-today-register">
-            <div class="stat-label">今日注册用户数</div>
-            <div class="stat-value">{{ formatCount(sysStat.todayRegisterUser) }}</div>
-          </div>
-        </el-col>
-      </el-row>
+        </div>
+      </div>
     </el-card>
 
     <el-card class="user-stat-card">
@@ -72,7 +53,7 @@
 </template>
 
 <script lang="ts" setup>
-import {nextTick, onMounted, reactive, ref} from 'vue'
+import {computed, nextTick, onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {sysStatApi} from '@/api'
 import type {SysStat, UserStatTrend} from '@/types/api'
@@ -88,10 +69,14 @@ const monthlyChartRef = ref<InstanceType<typeof UserStatChart>>()
 
 const sysStat = reactive<SysStat>({
   totalGold: 0,
+  totalGoldConsume: 0,
+  totalDiamondConsume: 0,
   totalRecharge: 0,
   totalWithdraw: 0,
   totalRegisterUser: 0,
   todayRecharge: 0,
+  todayGoldConsume: 0,
+  todayDiamondConsume: 0,
   todayRegisterUser: 0,
 })
 
@@ -101,15 +86,76 @@ const userStatTrend = reactive<UserStatTrend>({
   monthly: [],
 })
 
+type BasicStatCardKey = keyof Pick<
+    SysStat,
+    | 'totalGold'
+    | 'todayRecharge'
+    | 'todayGoldConsume'
+    | 'todayDiamondConsume'
+    | 'todayRegisterUser'
+    | 'totalRecharge'
+    | 'totalWithdraw'
+    | 'totalGoldConsume'
+    | 'totalDiamondConsume'
+    | 'totalRegisterUser'
+>
+
+type BasicStatCardConfig = {
+  key: BasicStatCardKey
+  label: string
+  theme: string
+  format: 'amount' | 'count'
+}
+
+type BasicStatCard = BasicStatCardConfig & {
+  value: number | string
+}
+
+/** 基础数据展示顺序(自上而下、从左到右); 每 5 项一行 */
+const BASIC_STAT_CARD_CONFIG: BasicStatCardConfig[] = [
+  {key: 'totalGold', label: '金币钱包现存总金额', theme: 'stat-card-gold', format: 'amount'},
+  {key: 'todayRecharge', label: '今日充值金额', theme: 'stat-card-today-recharge', format: 'amount'},
+  {key: 'todayGoldConsume', label: '今日消费金额-金币', theme: 'stat-card-today-gold-consume', format: 'amount'},
+  {key: 'todayDiamondConsume', label: '今日消费金额-钻石', theme: 'stat-card-today-diamond-consume', format: 'amount'},
+  {key: 'todayRegisterUser', label: '今日注册用户数', theme: 'stat-card-today-register', format: 'count'},
+  {key: 'totalRecharge', label: '总充值金额', theme: 'stat-card-recharge', format: 'amount'},
+  {key: 'totalWithdraw', label: '总提现金额', theme: 'stat-card-withdraw', format: 'amount'},
+  {key: 'totalGoldConsume', label: '总消费金额-金币', theme: 'stat-card-total-gold-consume', format: 'amount'},
+  {key: 'totalDiamondConsume', label: '总消费金额-钻石', theme: 'stat-card-total-diamond-consume', format: 'amount'},
+  {key: 'totalRegisterUser', label: '总注册用户数', theme: 'stat-card-register', format: 'count'},
+]
+
+const BASIC_STAT_ROW_SIZE = 5
+
+const buildBasicStatCards = (): BasicStatCard[] =>
+    BASIC_STAT_CARD_CONFIG.map((cfg) => ({
+      ...cfg,
+      value: sysStat[cfg.key] ?? 0,
+    }))
+
+/** 按配置顺序拆成 2 行 × 5 列 */
+const basicStatCardRows = computed<BasicStatCard[][]>(() => {
+  const cards = buildBasicStatCards()
+  const rows: BasicStatCard[][] = []
+  for (let i = 0; i < cards.length; i += BASIC_STAT_ROW_SIZE) {
+    rows.push(cards.slice(i, i + BASIC_STAT_ROW_SIZE))
+  }
+  return rows
+})
+
 const fetchSysStat = async () => {
   loading.value = true
   try {
     const data = await sysStatApi.getSysStat()
     sysStat.totalGold = data.totalGold ?? 0
+    sysStat.totalGoldConsume = data.totalGoldConsume ?? 0
+    sysStat.totalDiamondConsume = data.totalDiamondConsume ?? 0
     sysStat.totalRecharge = data.totalRecharge ?? 0
     sysStat.totalWithdraw = data.totalWithdraw ?? 0
     sysStat.totalRegisterUser = data.totalRegisterUser ?? 0
     sysStat.todayRecharge = data.todayRecharge ?? 0
+    sysStat.todayGoldConsume = data.todayGoldConsume ?? 0
+    sysStat.todayDiamondConsume = data.todayDiamondConsume ?? 0
     sysStat.todayRegisterUser = data.todayRegisterUser ?? 0
   } catch (error) {
     console.error('获取系统总数据失败:', error)
@@ -195,12 +241,23 @@ onMounted(() => {
   margin-top: 20px;
 }
 
+.basic-stat-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.basic-stat-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 20px;
+}
+
 .stat-card {
   border-radius: 12px;
-  padding: 24px 20px;
-  margin-bottom: 20px;
+  padding: 20px 16px;
   color: #fff;
-  min-height: 120px;
+  min-height: 108px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
@@ -211,10 +268,26 @@ onMounted(() => {
 }
 
 .stat-value {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   line-height: 1.2;
   word-break: break-all;
+}
+
+@media (max-width: 1200px) {
+  .basic-stat-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .basic-stat-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stat-value {
+    font-size: 20px;
+  }
 }
 
 .stat-card-gold {
@@ -239,5 +312,21 @@ onMounted(() => {
 
 .stat-card-today-register {
   background: linear-gradient(135deg, #f687b3, #d53f8c);
+}
+
+.stat-card-total-gold-consume {
+  background: linear-gradient(135deg, #fbd38d, #dd6b20);
+}
+
+.stat-card-today-gold-consume {
+  background: linear-gradient(135deg, #fc8181, #c53030);
+}
+
+.stat-card-total-diamond-consume {
+  background: linear-gradient(135deg, #9f7aea, #6b46c1);
+}
+
+.stat-card-today-diamond-consume {
+  background: linear-gradient(135deg, #76e4f7, #3182ce);
 }
 </style>

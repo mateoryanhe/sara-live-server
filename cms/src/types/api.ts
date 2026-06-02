@@ -32,10 +32,14 @@ export interface PageResponse<T = any> {
 
 export interface SysStat {
     totalGold: number
+    totalGoldConsume: number
+    totalDiamondConsume: number
     totalRecharge: number
     totalWithdraw: number
     totalRegisterUser: string | number
     todayRecharge: number
+    todayGoldConsume: number
+    todayDiamondConsume: number
     todayRegisterUser: string | number
 }
 

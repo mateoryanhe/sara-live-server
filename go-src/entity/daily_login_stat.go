@@ -13,17 +13,21 @@ const (
 )
 
 const (
-	DailyLoginStatCount          db.TbCol = "count"
-	DailyLoginStatRegisterCount  db.TbCol = "register_count"
-	DailyLoginStatRechargeAmount db.TbCol = "recharge_amount"
+	DailyLoginStatCount                db.TbCol = "count"
+	DailyLoginStatRegisterCount        db.TbCol = "register_count"
+	DailyLoginStatRechargeAmount       db.TbCol = "recharge_amount"
+	DailyLoginStatGoldConsumeAmount    db.TbCol = "gold_consume_amount"
+	DailyLoginStatDiamondConsumeAmount db.TbCol = "diamond_consume_amount"
 )
 
 // DailyLoginStat 每日登录统计(主键ID即日期 YYYY-MM-DD)
 type DailyLoginStat struct {
-	ID             string  `gorm:"primaryKey;size:10;comment:日期(YYYY-MM-DD)" json:"date"`
-	Count          uint64  `gorm:"default:0;comment:登录数量" json:"count"`
-	RegisterCount  uint64  `gorm:"default:0;comment:注册人数" json:"registerCount"`
-	RechargeAmount float64 `gorm:"type:decimal(10,4);default:0;comment:充值金额(USD)" json:"rechargeAmount"`
+	ID                   string  `gorm:"primaryKey;size:10;comment:日期(YYYY-MM-DD)" json:"date"`
+	Count                uint64  `gorm:"default:0;comment:登录数量" json:"count"`
+	RegisterCount        uint64  `gorm:"default:0;comment:注册人数" json:"registerCount"`
+	RechargeAmount       float64 `gorm:"type:decimal(10,4);default:0;comment:充值金额(USD)" json:"rechargeAmount"`
+	GoldConsumeAmount    float64 `gorm:"default:0;comment:金币消费金额" json:"goldConsumeAmount"`
+	DiamondConsumeAmount float64 `gorm:"default:0;comment:钻石消费金额" json:"diamondConsumeAmount"`
 }
 
 // FormatDailyLoginStatDate 格式化统计日期
@@ -33,10 +37,12 @@ func FormatDailyLoginStatDate(t time.Time) string {
 
 func NewDailyLoginStat(date string) *DailyLoginStat {
 	return &DailyLoginStat{
-		ID:             date,
-		Count:          0,
-		RegisterCount:  0,
-		RechargeAmount: 0,
+		ID:                   date,
+		Count:                0,
+		RegisterCount:        0,
+		RechargeAmount:       0,
+		GoldConsumeAmount:    0,
+		DiamondConsumeAmount: 0,
 	}
 }
 
@@ -64,9 +70,27 @@ func (receiver *DailyLoginStat) AddRechargeAmount(val float64) {
 	})
 }
 
+func (receiver *DailyLoginStat) AddGoldConsumeAmount(val float64) {
+	receiver.GoldConsumeAmount = math.AddFloat64(receiver.GoldConsumeAmount, val)
+	syndb.AddDataToLazyChan(TbDailyLoginStat, DailyLoginStatGoldConsumeAmount, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: receiver.GoldConsumeAmount,
+	})
+}
+
+func (receiver *DailyLoginStat) AddDiamondConsumeAmount(val float64) {
+	receiver.DiamondConsumeAmount = math.AddFloat64(receiver.DiamondConsumeAmount, val)
+	syndb.AddDataToLazyChan(TbDailyLoginStat, DailyLoginStatDiamondConsumeAmount, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: receiver.DiamondConsumeAmount,
+	})
+}
+
 func initDailyLoginStat() {
 	syndb.RegLazyWithMiddle(TbDailyLoginStat, DailyLoginStatCount)
 	syndb.RegLazyWithMiddle(TbDailyLoginStat, DailyLoginStatRegisterCount)
 	syndb.RegLazyWithMiddle(TbDailyLoginStat, DailyLoginStatRechargeAmount)
+	syndb.RegLazyWithMiddle(TbDailyLoginStat, DailyLoginStatGoldConsumeAmount)
+	syndb.RegLazyWithMiddle(TbDailyLoginStat, DailyLoginStatDiamondConsumeAmount)
 	migrate.AutoMigrate(&DailyLoginStat{})
 }
