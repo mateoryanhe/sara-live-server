@@ -34,6 +34,12 @@
           </div>
         </el-col>
         <el-col :lg="6" :md="12" :sm="24" :xs="24">
+          <div class="stat-card stat-card-today-recharge">
+            <div class="stat-label">今日充值金额</div>
+            <div class="stat-value">{{ formatAmount(sysStat.todayRecharge) }}</div>
+          </div>
+        </el-col>
+        <el-col :lg="6" :md="12" :sm="24" :xs="24">
           <div class="stat-card stat-card-today-register">
             <div class="stat-label">今日注册用户数</div>
             <div class="stat-value">{{ formatCount(sysStat.todayRegisterUser) }}</div>
@@ -85,6 +91,7 @@ const sysStat = reactive<SysStat>({
   totalRecharge: 0,
   totalWithdraw: 0,
   totalRegisterUser: 0,
+  todayRecharge: 0,
   todayRegisterUser: 0,
 })
 
@@ -102,6 +109,7 @@ const fetchSysStat = async () => {
     sysStat.totalRecharge = data.totalRecharge ?? 0
     sysStat.totalWithdraw = data.totalWithdraw ?? 0
     sysStat.totalRegisterUser = data.totalRegisterUser ?? 0
+    sysStat.todayRecharge = data.todayRecharge ?? 0
     sysStat.todayRegisterUser = data.todayRegisterUser ?? 0
   } catch (error) {
     console.error('获取系统总数据失败:', error)
@@ -223,6 +231,10 @@ onMounted(() => {
 
 .stat-card-register {
   background: linear-gradient(135deg, #b794f4, #805ad5);
+}
+
+.stat-card-today-recharge {
+  background: linear-gradient(135deg, #4fd1c5, #319795);
 }
 
 .stat-card-today-register {

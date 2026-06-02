@@ -21,6 +21,7 @@ func GetCMSSysStat(_ context.Context, _ *statdto.CMSSysStatReq) (*statdto.CMSSys
 		TotalRecharge:     stat.TotalRecharge,
 		TotalWithdraw:     stat.TotalWithdraw,
 		TotalRegisterUser: stat.TotalRegisterUser,
+		TodayRecharge:     todayStat.RechargeAmount,
 		TodayRegisterUser: todayStat.RegisterCount,
 	}, nil
 }

@@ -13,5 +13,6 @@ type CMSSysStatRes struct {
 	TotalRecharge     float64 `json:"totalRecharge"`
 	TotalWithdraw     float64 `json:"totalWithdraw"`
 	TotalRegisterUser uint64  `json:"totalRegisterUser,string"`
-	TodayRegisterUser uint64  `json:"todayRegisterUser,string"`
+	TodayRecharge     float64 `json:"todayRecharge"       dc:"今日充值金额(USD)"`
+	TodayRegisterUser uint64  `json:"todayRegisterUser,string" dc:"今日注册用户数"`
 }
