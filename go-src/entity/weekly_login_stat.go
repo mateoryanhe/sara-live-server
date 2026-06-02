@@ -30,7 +30,7 @@ type WeeklyLoginStat struct {
 // FormatWeeklyLoginStatKey 格式化周统计标识(ISO周)
 func FormatWeeklyLoginStatKey(t time.Time) string {
 	year, week := t.ISOWeek()
-	return fmt.Sprintf("%d-W%02d", year, week)
+	return fmt.Sprintf("%d-%02d", year, week)
 }
 
 func NewWeeklyLoginStat(week string) *WeeklyLoginStat {
