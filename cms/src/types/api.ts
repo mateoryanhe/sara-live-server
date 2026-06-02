@@ -47,6 +47,8 @@ export interface UserStatTrendPoint {
     time: string
     activeUserCount: number
     registerUserCount: number
+    /** 柱形图指标, key 见 user-stat-bar-series.ts */
+    barMetrics?: Record<string, number>
 }
 
 export interface UserStatTrend {

@@ -39,6 +39,7 @@ func onGoldConsumeEvent(data any) {
 		stat.AddTotalGoldConsume(ev.Amount)
 	}
 	recordPeriodGoldConsume(statAt, ev.Amount)
+	recordPeriodGoldConsumeUser(statAt, ev.UserId)
 }
 
 func recordPeriodGoldConsume(statAt time.Time, amount float64) {

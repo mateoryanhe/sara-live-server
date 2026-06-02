@@ -34,6 +34,9 @@ func toDailyTrendPoints(rows []*entity.DailyLoginStat) []*statdto.CMSUserStatTre
 			Time:              row.ID,
 			ActiveUserCount:   row.Count,
 			RegisterUserCount: row.RegisterCount,
+			BarMetrics: statdto.BuildUserStatBarMetrics(
+				row.RechargeUserCount, row.GoldConsumeUserCount, row.DiamondConsumeUserCount,
+			),
 		})
 	}
 	return list
@@ -49,6 +52,9 @@ func toWeeklyTrendPoints(rows []*entity.WeeklyLoginStat) []*statdto.CMSUserStatT
 			Time:              row.ID,
 			ActiveUserCount:   row.Count,
 			RegisterUserCount: row.RegisterCount,
+			BarMetrics: statdto.BuildUserStatBarMetrics(
+				row.RechargeUserCount, row.GoldConsumeUserCount, row.DiamondConsumeUserCount,
+			),
 		})
 	}
 	return list
@@ -64,6 +70,9 @@ func toMonthlyTrendPoints(rows []*entity.MonthlyLoginStat) []*statdto.CMSUserSta
 			Time:              row.ID,
 			ActiveUserCount:   row.Count,
 			RegisterUserCount: row.RegisterCount,
+			BarMetrics: statdto.BuildUserStatBarMetrics(
+				row.RechargeUserCount, row.GoldConsumeUserCount, row.DiamondConsumeUserCount,
+			),
 		})
 	}
 	return list

@@ -39,6 +39,7 @@ func onDiamondConsumeEvent(data any) {
 		stat.AddTotalDiamondConsume(ev.Amount)
 	}
 	recordPeriodDiamondConsume(statAt, ev.Amount)
+	recordPeriodDiamondConsumeUser(statAt, ev.UserId)
 }
 
 func recordPeriodDiamondConsume(statAt time.Time, amount float64) {

@@ -13,21 +13,27 @@ const (
 )
 
 const (
-	MonthlyLoginStatCount                db.TbCol = "count"
-	MonthlyLoginStatRegisterCount        db.TbCol = "register_count"
-	MonthlyLoginStatRechargeAmount       db.TbCol = "recharge_amount"
-	MonthlyLoginStatGoldConsumeAmount    db.TbCol = "gold_consume_amount"
-	MonthlyLoginStatDiamondConsumeAmount db.TbCol = "diamond_consume_amount"
+	MonthlyLoginStatCount                   db.TbCol = "count"
+	MonthlyLoginStatRegisterCount           db.TbCol = "register_count"
+	MonthlyLoginStatRechargeAmount          db.TbCol = "recharge_amount"
+	MonthlyLoginStatGoldConsumeAmount       db.TbCol = "gold_consume_amount"
+	MonthlyLoginStatDiamondConsumeAmount    db.TbCol = "diamond_consume_amount"
+	MonthlyLoginStatRechargeUserCount       db.TbCol = "recharge_user_count"
+	MonthlyLoginStatGoldConsumeUserCount    db.TbCol = "gold_consume_user_count"
+	MonthlyLoginStatDiamondConsumeUserCount db.TbCol = "diamond_consume_user_count"
 )
 
 // MonthlyLoginStat 每月登录统计(主键ID即月标识,如 2026-05)
 type MonthlyLoginStat struct {
-	ID                   string  `gorm:"primaryKey;size:10;comment:月标识(YYYY-MM)" json:"month"`
-	Count                uint64  `gorm:"default:0;comment:登录数量" json:"count"`
-	RegisterCount        uint64  `gorm:"default:0;comment:注册人数" json:"registerCount"`
-	RechargeAmount       float64 `gorm:"type:decimal(10,4);default:0;comment:充值金额(USD)" json:"rechargeAmount"`
-	GoldConsumeAmount    float64 `gorm:"default:0;comment:金币消费金额" json:"goldConsumeAmount"`
-	DiamondConsumeAmount float64 `gorm:"default:0;comment:钻石消费金额" json:"diamondConsumeAmount"`
+	ID                      string  `gorm:"primaryKey;size:10;comment:月标识(YYYY-MM)" json:"month"`
+	Count                   uint64  `gorm:"default:0;comment:登录数量" json:"count"`
+	RegisterCount           uint64  `gorm:"default:0;comment:注册人数" json:"registerCount"`
+	RechargeAmount          float64 `gorm:"type:decimal(10,4);default:0;comment:充值金额(USD)" json:"rechargeAmount"`
+	GoldConsumeAmount       float64 `gorm:"default:0;comment:金币消费金额" json:"goldConsumeAmount"`
+	DiamondConsumeAmount    float64 `gorm:"default:0;comment:钻石消费金额" json:"diamondConsumeAmount"`
+	RechargeUserCount       uint64  `gorm:"default:0;comment:充值人数(去重)" json:"rechargeUserCount"`
+	GoldConsumeUserCount    uint64  `gorm:"default:0;comment:金币消费人数(去重)" json:"goldConsumeUserCount"`
+	DiamondConsumeUserCount uint64  `gorm:"default:0;comment:钻石消费人数(去重)" json:"diamondConsumeUserCount"`
 }
 
 // FormatMonthlyLoginStatKey 格式化月统计标识
@@ -37,12 +43,15 @@ func FormatMonthlyLoginStatKey(t time.Time) string {
 
 func NewMonthlyLoginStat(month string) *MonthlyLoginStat {
 	return &MonthlyLoginStat{
-		ID:                   month,
-		Count:                0,
-		RegisterCount:        0,
-		RechargeAmount:       0,
-		GoldConsumeAmount:    0,
-		DiamondConsumeAmount: 0,
+		ID:                      month,
+		Count:                   0,
+		RegisterCount:           0,
+		RechargeAmount:          0,
+		GoldConsumeAmount:       0,
+		DiamondConsumeAmount:    0,
+		RechargeUserCount:       0,
+		GoldConsumeUserCount:    0,
+		DiamondConsumeUserCount: 0,
 	}
 }
 
@@ -86,11 +95,38 @@ func (r *MonthlyLoginStat) AddDiamondConsumeAmount(val float64) {
 	})
 }
 
+func (r *MonthlyLoginStat) AddRechargeUserCount(n uint64) {
+	r.RechargeUserCount = math.Add(r.RechargeUserCount, n)
+	syndb.AddDataToLazyChan(TbMonthlyLoginStat, MonthlyLoginStatRechargeUserCount, &syndb.ColData{
+		IdVal:  r.ID,
+		ColVal: r.RechargeUserCount,
+	})
+}
+
+func (r *MonthlyLoginStat) AddGoldConsumeUserCount(n uint64) {
+	r.GoldConsumeUserCount = math.Add(r.GoldConsumeUserCount, n)
+	syndb.AddDataToLazyChan(TbMonthlyLoginStat, MonthlyLoginStatGoldConsumeUserCount, &syndb.ColData{
+		IdVal:  r.ID,
+		ColVal: r.GoldConsumeUserCount,
+	})
+}
+
+func (r *MonthlyLoginStat) AddDiamondConsumeUserCount(n uint64) {
+	r.DiamondConsumeUserCount = math.Add(r.DiamondConsumeUserCount, n)
+	syndb.AddDataToLazyChan(TbMonthlyLoginStat, MonthlyLoginStatDiamondConsumeUserCount, &syndb.ColData{
+		IdVal:  r.ID,
+		ColVal: r.DiamondConsumeUserCount,
+	})
+}
+
 func initMonthlyLoginStat() {
 	syndb.RegLazyWithMiddle(TbMonthlyLoginStat, MonthlyLoginStatCount)
 	syndb.RegLazyWithMiddle(TbMonthlyLoginStat, MonthlyLoginStatRegisterCount)
 	syndb.RegLazyWithMiddle(TbMonthlyLoginStat, MonthlyLoginStatRechargeAmount)
 	syndb.RegLazyWithMiddle(TbMonthlyLoginStat, MonthlyLoginStatGoldConsumeAmount)
 	syndb.RegLazyWithMiddle(TbMonthlyLoginStat, MonthlyLoginStatDiamondConsumeAmount)
+	syndb.RegLazyWithMiddle(TbMonthlyLoginStat, MonthlyLoginStatRechargeUserCount)
+	syndb.RegLazyWithMiddle(TbMonthlyLoginStat, MonthlyLoginStatGoldConsumeUserCount)
+	syndb.RegLazyWithMiddle(TbMonthlyLoginStat, MonthlyLoginStatDiamondConsumeUserCount)
 	migrate.AutoMigrate(&MonthlyLoginStat{})
 }

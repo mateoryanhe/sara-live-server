@@ -39,13 +39,46 @@
 
       <el-tabs v-model="activePeriod" @tab-change="handleTabChange">
         <el-tab-pane label="日" name="daily">
-          <UserStatChart ref="dailyChartRef" :data="userStatTrend.daily" title="最近30天"/>
+          <UserStatChart ref="dailyLineChartRef" :data="userStatTrend.daily" title="活跃用户 / 新注册 (最近30天)"/>
+          <BarMetricSection
+              :metric-key="activeBarMetric"
+              @update:metric-key="(v) => { activeBarMetric = v; handleBarMetricChange() }"
+          >
+            <UserStatBarChart
+                ref="dailyBarChartRef"
+                :data="userStatTrend.daily"
+                :metric-key="activeBarMetric"
+                :title="barChartTitle"
+            />
+          </BarMetricSection>
         </el-tab-pane>
         <el-tab-pane label="周" name="weekly">
-          <UserStatChart ref="weeklyChartRef" :data="userStatTrend.weekly" title="最近12周"/>
+          <UserStatChart ref="weeklyLineChartRef" :data="userStatTrend.weekly" title="活跃用户 / 新注册 (最近12周)"/>
+          <BarMetricSection
+              :metric-key="activeBarMetric"
+              @update:metric-key="(v) => { activeBarMetric = v; handleBarMetricChange() }"
+          >
+            <UserStatBarChart
+                ref="weeklyBarChartRef"
+                :data="userStatTrend.weekly"
+                :metric-key="activeBarMetric"
+                :title="barChartTitle"
+            />
+          </BarMetricSection>
         </el-tab-pane>
         <el-tab-pane label="月" name="monthly">
-          <UserStatChart ref="monthlyChartRef" :data="userStatTrend.monthly" title="最近12月"/>
+          <UserStatChart ref="monthlyLineChartRef" :data="userStatTrend.monthly" title="活跃用户 / 新注册 (最近12月)"/>
+          <BarMetricSection
+              :metric-key="activeBarMetric"
+              @update:metric-key="(v) => { activeBarMetric = v; handleBarMetricChange() }"
+          >
+            <UserStatBarChart
+                ref="monthlyBarChartRef"
+                :data="userStatTrend.monthly"
+                :metric-key="activeBarMetric"
+                :title="barChartTitle"
+            />
+          </BarMetricSection>
         </el-tab-pane>
       </el-tabs>
     </el-card>
@@ -58,14 +91,37 @@ import {ElMessage} from 'element-plus'
 import {sysStatApi} from '@/api'
 import type {SysStat, UserStatTrend} from '@/types/api'
 import UserStatChart from './components/user-stat-chart.vue'
+import UserStatBarChart from './components/user-stat-bar-chart.vue'
+import BarMetricSection from './components/bar-metric-section.vue'
+import {getUserStatBarMetricTabs, USER_STAT_BAR_SERIES} from './user-stat-bar-series'
 
 const loading = ref(false)
 const trendLoading = ref(false)
 const activePeriod = ref('daily')
+const barMetricTabs = getUserStatBarMetricTabs()
+const activeBarMetric = ref(barMetricTabs[0]?.key ?? 'rechargeUser')
 
-const dailyChartRef = ref<InstanceType<typeof UserStatChart>>()
-const weeklyChartRef = ref<InstanceType<typeof UserStatChart>>()
-const monthlyChartRef = ref<InstanceType<typeof UserStatChart>>()
+const barChartPeriodSuffix = computed(() => {
+  if (activePeriod.value === 'weekly') {
+    return '最近12周'
+  }
+  if (activePeriod.value === 'monthly') {
+    return '最近12月'
+  }
+  return '最近30天'
+})
+
+const barChartTitle = computed(() => {
+  const metric = USER_STAT_BAR_SERIES.find((item) => item.key === activeBarMetric.value)
+  return `${metric?.label ?? ''} (${barChartPeriodSuffix.value})`
+})
+
+const dailyLineChartRef = ref<InstanceType<typeof UserStatChart>>()
+const weeklyLineChartRef = ref<InstanceType<typeof UserStatChart>>()
+const monthlyLineChartRef = ref<InstanceType<typeof UserStatChart>>()
+const dailyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
+const weeklyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
+const monthlyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
 
 const sysStat = reactive<SysStat>({
   totalGold: 0,
@@ -174,9 +230,7 @@ const fetchUserStatTrend = async () => {
     userStatTrend.monthly = data.monthly || []
     await nextTick()
     setTimeout(() => {
-      dailyChartRef.value?.resize()
-      weeklyChartRef.value?.resize()
-      monthlyChartRef.value?.resize()
+      resizeActiveChart()
     }, 0)
   } catch (error) {
     console.error('获取用户数据趋势失败:', error)
@@ -188,17 +242,25 @@ const fetchUserStatTrend = async () => {
 
 const resizeActiveChart = () => {
   if (activePeriod.value === 'daily') {
-    dailyChartRef.value?.resize()
+    dailyLineChartRef.value?.resize()
+    dailyBarChartRef.value?.resize()
     return
   }
   if (activePeriod.value === 'weekly') {
-    weeklyChartRef.value?.resize()
+    weeklyLineChartRef.value?.resize()
+    weeklyBarChartRef.value?.resize()
     return
   }
-  monthlyChartRef.value?.resize()
+  monthlyLineChartRef.value?.resize()
+  monthlyBarChartRef.value?.resize()
 }
 
 const handleTabChange = async () => {
+  await nextTick()
+  resizeActiveChart()
+}
+
+const handleBarMetricChange = async () => {
   await nextTick()
   resizeActiveChart()
 }
