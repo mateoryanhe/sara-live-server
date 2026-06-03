@@ -27,6 +27,8 @@ const (
 	SystemMessagePush = 14
 	//主播封禁推送(推送给主播及直播间在线观众)
 	LiveRoomAnchorBan = 15
+	//观众禁言状态推送(推送给被禁言/解禁的用户)
+	LiveRoomAudienceMute = 17
 	//短视频点赞
 	LikeShortVideo = 16
 )

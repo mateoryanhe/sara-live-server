@@ -16,6 +16,7 @@ const (
 	LiveRoomOnlineRoomId      db.TbCol = "room_id"
 	LiveRoomOnlineUserId      db.TbCol = "user_id"
 	LiveRoomOnlineStatus      db.TbCol = "status"
+	LiveRoomOnlineMuted       db.TbCol = "muted"
 	TbLiveRoomOnlineHeartTime db.TbCol = "heart_time"
 )
 
@@ -33,6 +34,7 @@ type LiveRoomOnline struct {
 	RoomId    uint64     `gorm:"index:idx_room_status,priority:1;default:0;comment:直播间ID" json:"roomId"`
 	UserId    uint64     `gorm:"index;default:0;comment:用户ID" json:"userId"`
 	Status    uint8      `gorm:"index:idx_room_status,priority:2;default:0;comment:状态(0已离开,1在线)" json:"status"`
+	Muted     bool       `gorm:"default:0;comment:禁言标记" json:"muted"`
 	CreatedAt time.Time  `json:"createdAt"`
 	UpdatedAt time.Time  `json:"-"`
 	HeartTime *time.Time `gorm:"comment:房间心跳状态,大于5分钟，判断下播" json:"heart_time"`
@@ -81,6 +83,17 @@ func (o *LiveRoomOnline) SetStatus(v uint8) {
 	})
 }
 
+func (o *LiveRoomOnline) SetMuted(v bool) {
+	o.Muted = v
+	o.UpdatedAt = time.Now()
+	syndb.AddDataToQuickChan(TbLiveRoomOnline, LiveRoomOnlineMuted, &syndb.ColData{
+		IdVal: o.ID, ColVal: v,
+	})
+	syndb.AddDataToQuickChan(TbLiveRoomOnline, db.UpdatedAtName, &syndb.ColData{
+		IdVal: o.ID, ColVal: o.UpdatedAt,
+	})
+}
+
 func (o *LiveRoomOnline) SetCreatedAt(v time.Time) {
 	o.CreatedAt = v
 	syndb.AddDataToQuickChan(TbLiveRoomOnline, db.CreatedAtName, &syndb.ColData{
@@ -108,6 +121,7 @@ func initLiveRoomOnline() {
 	syndb.RegQuickWithLarge(TbLiveRoomOnline, LiveRoomOnlineRoomId)
 	syndb.RegQuickWithLarge(TbLiveRoomOnline, LiveRoomOnlineUserId)
 	syndb.RegQuickWithLarge(TbLiveRoomOnline, LiveRoomOnlineStatus)
+	syndb.RegQuickWithLarge(TbLiveRoomOnline, LiveRoomOnlineMuted)
 
 	syndb.RegLazyWithLarge(TbLiveRoomOnline, TbLiveRoomOnlineHeartTime)
 

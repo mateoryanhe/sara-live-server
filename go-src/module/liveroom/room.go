@@ -131,6 +131,7 @@ func GetOnlineUserList(_ context.Context, req *liveroomdto.GetOnlineUserListReq)
 		item := &liveroomdto.OnlineUserItem{
 			UserId:   strconv.FormatUint(o.UserId, 10),
 			JoinedAt: o.UpdatedAt.Unix(),
+			Muted:    o.Muted,
 		}
 		if u := userinfodao.GetUserInfoByUserId(o.UserId); u != nil {
 			item.Nickname = u.Nickname

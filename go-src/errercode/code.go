@@ -98,6 +98,12 @@ const (
 	GameCfgNonExist XRCode = 106
 	// AgoraCfgInvalid 声网配置无效
 	AgoraCfgInvalid XRCode = 107
+	// LiveRoomChatMuted 您已被禁言
+	LiveRoomChatMuted XRCode = 108
+	// LiveRoomCannotMuteSelf 不能禁言自己
+	LiveRoomCannotMuteSelf XRCode = 109
+	// LiveRoomAudienceNotOnline 观众不在该直播间
+	LiveRoomAudienceNotOnline XRCode = 110
 )
 
 type XError struct {

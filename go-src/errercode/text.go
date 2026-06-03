@@ -60,6 +60,9 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		GameCfgExist:              "Game code already exists",
 		GameCfgNonExist:           "Game config does not exist",
 		AgoraCfgInvalid:           "Agora config is invalid",
+		LiveRoomChatMuted:         "You are muted in this room",
+		LiveRoomCannotMuteSelf:    "You cannot mute yourself",
+		LiveRoomAudienceNotOnline: "Audience is not in this room",
 	},
 	lang.LangZHCN: {
 		Success:                   "成功",
@@ -116,6 +119,9 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		GameCfgExist:              "游戏编码已存在",
 		GameCfgNonExist:           "游戏配置不存在",
 		AgoraCfgInvalid:           "声网配置无效",
+		LiveRoomChatMuted:         "您已被禁言",
+		LiveRoomCannotMuteSelf:    "不能禁言自己",
+		LiveRoomAudienceNotOnline: "该观众不在直播间",
 	},
 	lang.LangZHTW: {
 		Success:                   "成功",
@@ -172,6 +178,9 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		GameCfgExist:              "遊戲編碼已存在",
 		GameCfgNonExist:           "遊戲配置不存在",
 		AgoraCfgInvalid:           "聲網配置無效",
+		LiveRoomChatMuted:         "您已被禁言",
+		LiveRoomCannotMuteSelf:    "不能禁言自己",
+		LiveRoomAudienceNotOnline: "該觀眾不在直播間",
 	},
 }
 

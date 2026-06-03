@@ -86,6 +86,7 @@ type OnlineUserItem struct {
 	Nickname string `json:"nickname" dc:"昵称"`
 	Avatar   string `json:"avatar"   dc:"头像URL(已拼资源域名)"`
 	JoinedAt int64  `json:"joinedAt" dc:"最近一次加入时间(秒)"`
+	Muted    bool   `json:"muted"    dc:"是否被禁言"`
 }
 
 type GetOnlineUserListRes struct {
@@ -123,6 +124,25 @@ type GiftPushItem struct {
 	Count        int    `json:"count"       dc:"赠送数量"`
 	TotalCost    uint64 `json:"totalCost"   dc:"总消耗钻石数"`
 	SentAt       int64  `json:"sentAt"      dc:"发送时间(秒)"`
+}
+
+// SetAudienceMuteReq 主播对指定观众禁言/解禁
+type SetAudienceMuteReq struct {
+	g.Meta `path:"/setAudienceMute" method:"post" summary:"主播对观众禁言/解禁" tags:"直播间"`
+	RoomId uint64 `json:"roomId" v:"required#直播间ID不能为空" dc:"直播间ID(须为本主播房间)"`
+	UserId uint64 `json:"userId" v:"required#观众用户ID不能为空" dc:"被操作的观众用户ID"`
+	Muted  bool   `json:"muted"  dc:"true禁言,false解禁"`
+}
+
+type SetAudienceMuteRes struct {
+	Success bool `json:"success"`
+}
+
+// AudienceMutePushItem 观众禁言状态推送载荷
+type AudienceMutePushItem struct {
+	RoomId string `json:"roomId" dc:"直播间ID"`
+	UserId string `json:"userId" dc:"观众用户ID"`
+	Muted  bool   `json:"muted"  dc:"是否被禁言"`
 }
 
 // SendChatReq App端向直播间发送文字消息

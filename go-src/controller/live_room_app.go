@@ -77,6 +77,11 @@ func (c *LiveRoomAppController) SendChat(ctx context.Context, req *liveroomdto.S
 	return liveroom.SendChat(ctx, req)
 }
 
+// SetAudienceMute 主播对指定观众禁言/解禁
+func (c *LiveRoomAppController) SetAudienceMute(ctx context.Context, req *liveroomdto.SetAudienceMuteReq) (res *liveroomdto.SetAudienceMuteRes, err error) {
+	return liveroom.SetAudienceMute(ctx, req)
+}
+
 // ReportLiveStartStatus 主播上报开播状态
 func (c *LiveRoomAppController) ReportLiveStartStatus(ctx context.Context, req *liveroomdto.ReportLiveStartStatusReq) (res *liveroomdto.ReportLiveStartStatusRes, err error) {
 	return liveroom.ReportLiveStartStatus(ctx, req)

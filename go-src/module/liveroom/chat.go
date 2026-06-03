@@ -11,6 +11,7 @@ import (
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
+	"xr-game-server/entity"
 	"xr-game-server/errercode"
 	"xr-game-server/module/upload"
 )
@@ -30,6 +31,14 @@ func SendChat(ctx context.Context, req *liveroomdto.SendChatReq) (*liveroomdto.S
 
 	if liveroomdao.GetRoomById(req.RoomId) == nil {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
+	}
+
+	// 主播本人不受禁言限制;观众需校验在线记录上的禁言标记
+	if senderId != req.RoomId {
+		onlineId := entity.BuildLiveRoomOnlineId(senderId, req.RoomId)
+		if online := liveroomdao.GetOnlineById(onlineId, senderId, req.RoomId); online != nil && online.Muted {
+			return nil, errercode.CreateCode(errercode.LiveRoomChatMuted)
+		}
 	}
 
 	sender := userinfodao.GetUserInfoByUserId(senderId)
