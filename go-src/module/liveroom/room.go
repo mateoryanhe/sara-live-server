@@ -95,22 +95,6 @@ func UpdateNotice(ctx context.Context, req *liveroomdto.UpdateNoticeReq) (*liver
 	return &liveroomdto.UpdateNoticeRes{Success: true}, nil
 }
 
-// LeaveRoom 玩家离开直播间,记录状态置为 Offline(保留行)
-func LeaveRoom(ctx context.Context, req *liveroomdto.LeaveRoomReq) (*liveroomdto.LeaveRoomRes, error) {
-	userId := httpserver.GetAuthId(ctx)
-	onlineId := entity.BuildLiveRoomOnlineId(userId, req.RoomId)
-
-	if existing := liveroomdao.GetOnlineById(onlineId, userId, req.RoomId); existing != nil &&
-		existing.Status != entity.LiveRoomOnlineStatusOffline {
-		existing.SetStatus(entity.LiveRoomOnlineStatusOffline)
-		liveroomdao.RemoveOnlineFromRoomCache(existing)
-	}
-
-	return &liveroomdto.LeaveRoomRes{
-		OnlineCount: len(liveroomdao.GetOnlinesByRoom(req.RoomId)),
-	}, nil
-}
-
 // GetOnlineUserList 分页查询直播间在线玩家(附用户基础信息)
 func GetOnlineUserList(_ context.Context, req *liveroomdto.GetOnlineUserListReq) (*liveroomdto.GetOnlineUserListRes, error) {
 	if liveroomdao.GetRoomById(req.RoomId) == nil {

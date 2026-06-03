@@ -46,7 +46,7 @@ func GetOnlinesByRoom(roomId uint64) []*entity.LiveRoomOnline {
 	v := roomOnlineCacheMgr.GetData(roomId, func(ctx context.Context) (value interface{}, err error) {
 		list := make([]*entity.LiveRoomOnline, 0)
 		_ = g.Model(string(entity.TbLiveRoomOnline)).
-			Where("room_id = ? AND status = ?", roomId, entity.LiveRoomOnlineStatusOnline).
+			Where("room_id = ? AND status = ?", roomId, entity.LiveRoomOnlineStatusOnline).OrderDesc("UpdatedAt").
 			Scan(&list)
 		return list, nil
 	})
@@ -55,6 +55,14 @@ func GetOnlinesByRoom(roomId uint64) []*entity.LiveRoomOnline {
 	}
 	list, _ := v.([]*entity.LiveRoomOnline)
 	return list
+}
+
+func AddOnlineData(o *entity.LiveRoomOnline) {
+	allOnline := GetOnlinesByRoom(o.RoomId)
+	newList := make([]*entity.LiveRoomOnline, 0)
+	newList = append(newList, o)
+	newList = append(newList, allOnline...)
+	roomOnlineCacheMgr.FlushCache(o.RoomId, newList)
 }
 
 // RemoveOnlineFromRoomCache 将记录从房间在线列表缓存中剔除(单条缓存保留,便于下次加入复用)

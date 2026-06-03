@@ -5,10 +5,12 @@ import (
 	"github.com/gogf/gf/v2/container/gset"
 	"github.com/gogf/gf/v2/os/gctx"
 	"time"
+	"xr-game-server/core/httpserver"
 	"xr-game-server/core/xrtimer"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
+	"xr-game-server/entity"
 )
 
 const (
@@ -27,13 +29,26 @@ func initHeart() {
 
 // ReportLiveStartStatus 主播开播时上报开播状态
 // 前端无需传参,后续在此补充开播记录等业务逻辑,每秒上报一次,形成开播时间
-func ReportLiveStartStatus(ctx context.Context, _ *liveroomdto.ReportLiveStartStatusReq) (*liveroomdto.ReportLiveStartStatusRes, error) {
+func ReportLiveStartStatus(ctx context.Context, req *liveroomdto.ReportLiveStartStatusReq) (*liveroomdto.ReportLiveStartStatusRes, error) {
 	//先重置失败次数，防止被判断下播了
-	room, _ := loadOwnRoom(ctx)
+	userId := httpserver.GetAuthId(ctx)
+	room := liveroomdao.GetRoomById(req.RoomId)
 	if room.LiveRecordId == 0 {
 		//没有开播
 		return &liveroomdto.ReportLiveStartStatusRes{Success: true}, nil
 	}
+	//刷新主播逻辑
+	if userId == room.ID {
+		flushAnchorId(room)
+	}
+	//刷新观众逻辑
+	if room.ID != userId {
+		flushAudience(userId, room)
+	}
+	return &liveroomdto.ReportLiveStartStatusRes{Success: true}, nil
+}
+
+func flushAnchorId(room *entity.LiveRoom) {
 	//刷新房间状态,防止离线
 	now := time.Now()
 	room.SetHeartTime(&now)
@@ -43,7 +58,16 @@ func ReportLiveStartStatus(ctx context.Context, _ *liveroomdto.ReportLiveStartSt
 	//累计全部直播
 	stat := userinfodao.GetUserCumulativeStatByUserId(room.ID)
 	stat.AddTotalLiveDuration(1)
-	return &liveroomdto.ReportLiveStartStatusRes{Success: true}, nil
+}
+
+func flushAudience(userId uint64, room *entity.LiveRoom) {
+	timeNow := time.Now()
+	onlineId := entity.BuildLiveRoomOnlineId(userId, room.ID)
+	onlineData := liveroomdao.GetOnlineById(onlineId, userId, room.ID)
+	if onlineData == nil {
+		return
+	}
+	onlineData.SetHeartTime(&timeNow)
 }
 
 func addTask(userId uint64) {
@@ -58,13 +82,14 @@ func heart(ctx context.Context) {
 	temp := make([]any, 0)
 	temp = append(temp, taskMap.Slice())
 	for _, data := range temp {
-		userId := data.(uint64)
-		chkOne(userId)
+		roomId := data.(uint64)
+		chkAnchor(roomId)
+		chkAudience(roomId)
 	}
 }
 
-func chkOne(userId uint64) {
-	room := liveroomdao.GetRoomById(userId)
+func chkAnchor(roomId uint64) {
+	room := liveroomdao.GetRoomById(roomId)
 	now := time.Now()
 	if room.HeartTime == nil {
 		room.SetHeartTime(&now)
@@ -74,5 +99,21 @@ func chkOne(userId uint64) {
 	if TimeOut > diff {
 		return
 	}
-	stopLive(userId)
+	stopLive(roomId)
+}
+
+func chkAudience(roomId uint64) {
+	allOnline := liveroomdao.GetOnlinesByRoom(roomId)
+	now := time.Now()
+	for _, data := range allOnline {
+		if data.HeartTime == nil {
+			data.SetHeartTime(&now)
+		}
+		diff := now.Sub(*data.HeartTime)
+		//如果相差超过5分钟,判定离线
+		if TimeOut > diff {
+			return
+		}
+		exitRoom(data.UserId, roomId)
+	}
 }

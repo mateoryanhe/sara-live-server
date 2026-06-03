@@ -13,9 +13,10 @@ const (
 )
 
 const (
-	LiveRoomOnlineRoomId db.TbCol = "room_id"
-	LiveRoomOnlineUserId db.TbCol = "user_id"
-	LiveRoomOnlineStatus db.TbCol = "status"
+	LiveRoomOnlineRoomId      db.TbCol = "room_id"
+	LiveRoomOnlineUserId      db.TbCol = "user_id"
+	LiveRoomOnlineStatus      db.TbCol = "status"
+	TbLiveRoomOnlineHeartTime db.TbCol = "heart_time"
 )
 
 // 在线状态
@@ -28,12 +29,13 @@ const (
 // 主键 ID 使用复合字符串: "{userId}_{roomId}",方便唯一定位以及前端拼接
 // 玩家加入/离开通过 Status 字段切换,记录长期保留
 type LiveRoomOnline struct {
-	ID        string    `gorm:"primaryKey;size:64;comment:复合ID(userId_roomId)" json:"id"`
-	RoomId    uint64    `gorm:"index:idx_room_status,priority:1;default:0;comment:直播间ID" json:"roomId"`
-	UserId    uint64    `gorm:"index;default:0;comment:用户ID" json:"userId"`
-	Status    uint8     `gorm:"index:idx_room_status,priority:2;default:0;comment:状态(0已离开,1在线)" json:"status"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"-"`
+	ID        string     `gorm:"primaryKey;size:64;comment:复合ID(userId_roomId)" json:"id"`
+	RoomId    uint64     `gorm:"index:idx_room_status,priority:1;default:0;comment:直播间ID" json:"roomId"`
+	UserId    uint64     `gorm:"index;default:0;comment:用户ID" json:"userId"`
+	Status    uint8      `gorm:"index:idx_room_status,priority:2;default:0;comment:状态(0已离开,1在线)" json:"status"`
+	CreatedAt time.Time  `json:"createdAt"`
+	UpdatedAt time.Time  `json:"-"`
+	HeartTime *time.Time `gorm:"comment:房间心跳状态,大于5分钟，判断下播" json:"heart_time"`
 }
 
 // BuildLiveRoomOnlineId 拼接复合主键
@@ -93,11 +95,21 @@ func (o *LiveRoomOnline) SetUpdatedAt(v time.Time) {
 	})
 }
 
+func (o *LiveRoomOnline) SetHeartTime(v *time.Time) {
+	o.HeartTime = v
+	syndb.AddDataToLazyChan(TbLiveRoomOnline, TbLiveRoomOnlineHeartTime, &syndb.ColData{
+		IdVal: o.ID, ColVal: v,
+	})
+}
+
 func initLiveRoomOnline() {
 	syndb.RegQuickWithLarge(TbLiveRoomOnline, db.CreatedAtName)
 	syndb.RegQuickWithLarge(TbLiveRoomOnline, db.UpdatedAtName)
 	syndb.RegQuickWithLarge(TbLiveRoomOnline, LiveRoomOnlineRoomId)
 	syndb.RegQuickWithLarge(TbLiveRoomOnline, LiveRoomOnlineUserId)
 	syndb.RegQuickWithLarge(TbLiveRoomOnline, LiveRoomOnlineStatus)
+
+	syndb.RegLazyWithLarge(TbLiveRoomOnline, TbLiveRoomOnlineHeartTime)
+
 	migrate.AutoMigrate(&LiveRoomOnline{})
 }

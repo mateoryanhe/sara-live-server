@@ -24,6 +24,8 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 	onlineId := entity.BuildLiveRoomOnlineId(userId, req.RoomId)
 	existing := liveroomdao.GetOnlineById(onlineId, userId, room.ID)
 	existing.SetStatus(entity.LiveRoomOnlineStatusOnline)
+	//刷新在线列表
+	liveroomdao.AddOnlineData(existing)
 
 	// 直播中且非主播本人:有效观众(单场去重 + 日/周/月跨直播间去重)
 	if room.LiveRecordId > 0 && userId != req.RoomId {
