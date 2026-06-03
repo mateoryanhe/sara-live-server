@@ -22,6 +22,7 @@ const (
 	WeeklyLoginStatRechargeUserCount       db.TbCol = "recharge_user_count"
 	WeeklyLoginStatGoldConsumeUserCount    db.TbCol = "gold_consume_user_count"
 	WeeklyLoginStatDiamondConsumeUserCount db.TbCol = "diamond_consume_user_count"
+	WeeklyLoginStatAudienceUserCount       db.TbCol = "audience_user_count"
 )
 
 // WeeklyLoginStat 每周登录统计(主键ID即周标识,如 2026-W21)
@@ -35,6 +36,7 @@ type WeeklyLoginStat struct {
 	RechargeUserCount       uint64  `gorm:"default:0;comment:充值人数(去重)" json:"rechargeUserCount"`
 	GoldConsumeUserCount    uint64  `gorm:"default:0;comment:金币消费人数(去重)" json:"goldConsumeUserCount"`
 	DiamondConsumeUserCount uint64  `gorm:"default:0;comment:钻石消费人数(去重)" json:"diamondConsumeUserCount"`
+	AudienceUserCount       uint64  `gorm:"default:0;comment:有效观众人数(去重,跨直播间)" json:"audienceUserCount"`
 }
 
 // FormatWeeklyLoginStatKey 格式化周统计标识(ISO周)
@@ -54,6 +56,7 @@ func NewWeeklyLoginStat(week string) *WeeklyLoginStat {
 		RechargeUserCount:       0,
 		GoldConsumeUserCount:    0,
 		DiamondConsumeUserCount: 0,
+		AudienceUserCount:       0,
 	}
 }
 
@@ -121,6 +124,14 @@ func (r *WeeklyLoginStat) AddDiamondConsumeUserCount(n uint64) {
 	})
 }
 
+func (r *WeeklyLoginStat) AddAudienceUserCount(n uint64) {
+	r.AudienceUserCount = math.Add(r.AudienceUserCount, n)
+	syndb.AddDataToLazyChan(TbWeeklyLoginStat, WeeklyLoginStatAudienceUserCount, &syndb.ColData{
+		IdVal:  r.ID,
+		ColVal: r.AudienceUserCount,
+	})
+}
+
 func initWeeklyLoginStat() {
 	syndb.RegLazyWithMiddle(TbWeeklyLoginStat, WeeklyLoginStatCount)
 	syndb.RegLazyWithMiddle(TbWeeklyLoginStat, WeeklyLoginStatRegisterCount)
@@ -130,5 +141,6 @@ func initWeeklyLoginStat() {
 	syndb.RegLazyWithMiddle(TbWeeklyLoginStat, WeeklyLoginStatRechargeUserCount)
 	syndb.RegLazyWithMiddle(TbWeeklyLoginStat, WeeklyLoginStatGoldConsumeUserCount)
 	syndb.RegLazyWithMiddle(TbWeeklyLoginStat, WeeklyLoginStatDiamondConsumeUserCount)
+	syndb.RegLazyWithMiddle(TbWeeklyLoginStat, WeeklyLoginStatAudienceUserCount)
 	migrate.AutoMigrate(&WeeklyLoginStat{})
 }

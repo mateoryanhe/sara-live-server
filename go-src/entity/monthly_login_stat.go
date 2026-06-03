@@ -21,6 +21,7 @@ const (
 	MonthlyLoginStatRechargeUserCount       db.TbCol = "recharge_user_count"
 	MonthlyLoginStatGoldConsumeUserCount    db.TbCol = "gold_consume_user_count"
 	MonthlyLoginStatDiamondConsumeUserCount db.TbCol = "diamond_consume_user_count"
+	MonthlyLoginStatAudienceUserCount       db.TbCol = "audience_user_count"
 )
 
 // MonthlyLoginStat 每月登录统计(主键ID即月标识,如 2026-05)
@@ -34,6 +35,7 @@ type MonthlyLoginStat struct {
 	RechargeUserCount       uint64  `gorm:"default:0;comment:充值人数(去重)" json:"rechargeUserCount"`
 	GoldConsumeUserCount    uint64  `gorm:"default:0;comment:金币消费人数(去重)" json:"goldConsumeUserCount"`
 	DiamondConsumeUserCount uint64  `gorm:"default:0;comment:钻石消费人数(去重)" json:"diamondConsumeUserCount"`
+	AudienceUserCount       uint64  `gorm:"default:0;comment:有效观众人数(去重,跨直播间)" json:"audienceUserCount"`
 }
 
 // FormatMonthlyLoginStatKey 格式化月统计标识
@@ -52,6 +54,7 @@ func NewMonthlyLoginStat(month string) *MonthlyLoginStat {
 		RechargeUserCount:       0,
 		GoldConsumeUserCount:    0,
 		DiamondConsumeUserCount: 0,
+		AudienceUserCount:       0,
 	}
 }
 
@@ -119,6 +122,14 @@ func (r *MonthlyLoginStat) AddDiamondConsumeUserCount(n uint64) {
 	})
 }
 
+func (r *MonthlyLoginStat) AddAudienceUserCount(n uint64) {
+	r.AudienceUserCount = math.Add(r.AudienceUserCount, n)
+	syndb.AddDataToLazyChan(TbMonthlyLoginStat, MonthlyLoginStatAudienceUserCount, &syndb.ColData{
+		IdVal:  r.ID,
+		ColVal: r.AudienceUserCount,
+	})
+}
+
 func initMonthlyLoginStat() {
 	syndb.RegLazyWithMiddle(TbMonthlyLoginStat, MonthlyLoginStatCount)
 	syndb.RegLazyWithMiddle(TbMonthlyLoginStat, MonthlyLoginStatRegisterCount)
@@ -128,5 +139,6 @@ func initMonthlyLoginStat() {
 	syndb.RegLazyWithMiddle(TbMonthlyLoginStat, MonthlyLoginStatRechargeUserCount)
 	syndb.RegLazyWithMiddle(TbMonthlyLoginStat, MonthlyLoginStatGoldConsumeUserCount)
 	syndb.RegLazyWithMiddle(TbMonthlyLoginStat, MonthlyLoginStatDiamondConsumeUserCount)
+	syndb.RegLazyWithMiddle(TbMonthlyLoginStat, MonthlyLoginStatAudienceUserCount)
 	migrate.AutoMigrate(&MonthlyLoginStat{})
 }

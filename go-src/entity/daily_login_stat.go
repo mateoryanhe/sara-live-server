@@ -21,6 +21,7 @@ const (
 	DailyLoginStatRechargeUserCount       db.TbCol = "recharge_user_count"
 	DailyLoginStatGoldConsumeUserCount    db.TbCol = "gold_consume_user_count"
 	DailyLoginStatDiamondConsumeUserCount db.TbCol = "diamond_consume_user_count"
+	DailyLoginStatAudienceUserCount       db.TbCol = "audience_user_count"
 )
 
 // DailyLoginStat 每日登录统计(主键ID即日期 YYYY-MM-DD)
@@ -34,6 +35,7 @@ type DailyLoginStat struct {
 	RechargeUserCount       uint64  `gorm:"default:0;comment:充值人数(去重)" json:"rechargeUserCount"`
 	GoldConsumeUserCount    uint64  `gorm:"default:0;comment:金币消费人数(去重)" json:"goldConsumeUserCount"`
 	DiamondConsumeUserCount uint64  `gorm:"default:0;comment:钻石消费人数(去重)" json:"diamondConsumeUserCount"`
+	AudienceUserCount       uint64  `gorm:"default:0;comment:有效观众人数(去重,跨直播间)" json:"audienceUserCount"`
 }
 
 // FormatDailyLoginStatDate 格式化统计日期
@@ -52,6 +54,7 @@ func NewDailyLoginStat(date string) *DailyLoginStat {
 		RechargeUserCount:       0,
 		GoldConsumeUserCount:    0,
 		DiamondConsumeUserCount: 0,
+		AudienceUserCount:       0,
 	}
 }
 
@@ -119,6 +122,14 @@ func (receiver *DailyLoginStat) AddDiamondConsumeUserCount(n uint64) {
 	})
 }
 
+func (receiver *DailyLoginStat) AddAudienceUserCount(n uint64) {
+	receiver.AudienceUserCount = math.Add(receiver.AudienceUserCount, n)
+	syndb.AddDataToLazyChan(TbDailyLoginStat, DailyLoginStatAudienceUserCount, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: receiver.AudienceUserCount,
+	})
+}
+
 func initDailyLoginStat() {
 	syndb.RegLazyWithMiddle(TbDailyLoginStat, DailyLoginStatCount)
 	syndb.RegLazyWithMiddle(TbDailyLoginStat, DailyLoginStatRegisterCount)
@@ -128,5 +139,6 @@ func initDailyLoginStat() {
 	syndb.RegLazyWithMiddle(TbDailyLoginStat, DailyLoginStatRechargeUserCount)
 	syndb.RegLazyWithMiddle(TbDailyLoginStat, DailyLoginStatGoldConsumeUserCount)
 	syndb.RegLazyWithMiddle(TbDailyLoginStat, DailyLoginStatDiamondConsumeUserCount)
+	syndb.RegLazyWithMiddle(TbDailyLoginStat, DailyLoginStatAudienceUserCount)
 	migrate.AutoMigrate(&DailyLoginStat{})
 }

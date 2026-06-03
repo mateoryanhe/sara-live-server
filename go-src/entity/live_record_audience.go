@@ -32,8 +32,6 @@ func BuildLiveRecordAudienceId(liveRecordId, userId uint64) string {
 func NewLiveRecordAudience(liveRecordId, userId uint64) *LiveRecordAudience {
 	r := &LiveRecordAudience{}
 	r.ID = BuildLiveRecordAudienceId(liveRecordId, userId)
-	now := time.Now()
-	r.SetCreatedAt(now)
 	r.SetLiveRecordId(liveRecordId)
 	r.SetUserId(userId)
 	return r

@@ -2,11 +2,14 @@ package liveroom
 
 import (
 	"context"
+	"time"
+
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
+	"xr-game-server/module/stat"
 )
 
 // JoinRoom 玩家加入直播间,记录状态置为 Online
@@ -22,8 +25,9 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 	existing := liveroomdao.GetOnlineById(onlineId, userId, room.ID)
 	existing.SetStatus(entity.LiveRoomOnlineStatusOnline)
 
-	// 直播中且非主播本人:观众人数去重 +1
+	// 直播中且非主播本人:有效观众(单场去重 + 日/周/月跨直播间去重)
 	if room.LiveRecordId > 0 && userId != req.RoomId {
+		stat.RecordValidAudience(userId, time.Now())
 		if liveroomdao.TryRecordLiveRecordAudience(room.LiveRecordId, userId) {
 			if liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId); liveRecord != nil {
 				liveRecord.AddTotalAudience(1)

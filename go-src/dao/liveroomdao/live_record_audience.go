@@ -2,6 +2,7 @@ package liveroomdao
 
 import (
 	"context"
+	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/core/cache"
@@ -33,14 +34,17 @@ func getLiveRecordAudienceById(id string, liveRecordId, userId uint64) *entity.L
 	return row
 }
 
-// TryRecordLiveRecordAudience 记录观众进入本场直播;已统计过返回 false
+// TryRecordLiveRecordAudience 记录观众进入本场直播;本场已统计过返回 false
 func TryRecordLiveRecordAudience(liveRecordId, userId uint64) bool {
 	if liveRecordId == 0 || userId == 0 {
 		return false
 	}
 	id := entity.BuildLiveRecordAudienceId(liveRecordId, userId)
-	if getLiveRecordAudienceById(id, liveRecordId, userId) != nil {
+	data := getLiveRecordAudienceById(id, liveRecordId, userId)
+	if data == nil || !data.CreatedAt.IsZero() {
 		return false
 	}
+	now := time.Now()
+	data.SetCreatedAt(now)
 	return true
 }
