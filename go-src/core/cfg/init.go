@@ -13,4 +13,5 @@ func InitCfg() {
 	initDbCfg()
 	initGoPoolCfg()
 	initWebSocketBufferCfg()
+	initSensitiveWordCfg()
 }

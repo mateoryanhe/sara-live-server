@@ -12,6 +12,7 @@ import (
 	"xr-game-server/dto/messagedto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
+	"xr-game-server/module/sensitiveword"
 	"xr-game-server/module/upload"
 )
 
@@ -21,6 +22,9 @@ func SendPrivateMessage(ctx context.Context, req *messagedto.AppSendPrivateMessa
 	content := strings.TrimSpace(req.Content)
 	if content == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if err := sensitiveword.RequireTextCompliant(content); err != nil {
+		return nil, err
 	}
 	if req.ReceiverId == senderId {
 		return nil, errercode.CreateCode(errercode.InvalidParam)

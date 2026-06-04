@@ -63,6 +63,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		LiveRoomChatMuted:         "You are muted in this room",
 		LiveRoomCannotMuteSelf:    "You cannot mute yourself",
 		LiveRoomAudienceNotOnline: "Audience is not in this room",
+		TextSensitiveWord:         "Text contains sensitive words",
 	},
 	lang.LangZHCN: {
 		Success:                   "成功",
@@ -122,6 +123,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		LiveRoomChatMuted:         "您已被禁言",
 		LiveRoomCannotMuteSelf:    "不能禁言自己",
 		LiveRoomAudienceNotOnline: "该观众不在直播间",
+		TextSensitiveWord:         "内容包含敏感词",
 	},
 	lang.LangZHTW: {
 		Success:                   "成功",
@@ -181,6 +183,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		LiveRoomChatMuted:         "您已被禁言",
 		LiveRoomCannotMuteSelf:    "不能禁言自己",
 		LiveRoomAudienceNotOnline: "該觀眾不在直播間",
+		TextSensitiveWord:         "內容包含敏感詞",
 	},
 }
 

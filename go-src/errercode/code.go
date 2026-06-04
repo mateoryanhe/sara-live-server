@@ -104,6 +104,8 @@ const (
 	LiveRoomCannotMuteSelf XRCode = 109
 	// LiveRoomAudienceNotOnline 观众不在该直播间
 	LiveRoomAudienceNotOnline XRCode = 110
+	// TextSensitiveWord 文本包含铭感词
+	TextSensitiveWord XRCode = 111
 )
 
 type XError struct {

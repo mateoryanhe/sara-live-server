@@ -13,6 +13,7 @@ import (
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
+	"xr-game-server/module/sensitiveword"
 	"xr-game-server/module/upload"
 )
 
@@ -31,6 +32,10 @@ func SendChat(ctx context.Context, req *liveroomdto.SendChatReq) (*liveroomdto.S
 
 	if liveroomdao.GetRoomById(req.RoomId) == nil {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
+	}
+
+	if err := sensitiveword.RequireTextCompliant(content); err != nil {
+		return nil, err
 	}
 
 	// 主播本人不受禁言限制;观众需校验在线记录上的禁言标记

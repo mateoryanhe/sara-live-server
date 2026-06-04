@@ -2,9 +2,13 @@ package userinfo
 
 import (
 	"context"
+	"strings"
+
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/userinfodto"
+	"xr-game-server/errercode"
+	"xr-game-server/module/sensitiveword"
 	"xr-game-server/module/upload"
 )
 
@@ -39,9 +43,17 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 
 // UpdateNickname 修改昵称
 func UpdateNickname(ctx context.Context, req *userinfodto.UpdateNicknameReq) (res *userinfodto.UpdateNicknameRes, err error) {
+	nickname := strings.TrimSpace(req.Nickname)
+	if nickname == "" {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if err := sensitiveword.RequireTextCompliant(nickname); err != nil {
+		return nil, err
+	}
+
 	userId := httpserver.GetAuthId(ctx)
 	data := userinfodao.GetUserInfoByUserId(userId)
-	data.SetNickname(req.Nickname)
+	data.SetNickname(nickname)
 	return &userinfodto.UpdateNicknameRes{
 		Nickname: data.Nickname,
 	}, nil

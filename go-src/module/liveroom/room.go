@@ -10,6 +10,7 @@ import (
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
+	"xr-game-server/module/sensitiveword"
 	"xr-game-server/module/upload"
 )
 
@@ -23,6 +24,9 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 	user := userinfodao.GetUserInfoByUserId(anchorId)
 	if user == nil || !user.IsAnchor {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotAnchor)
+	}
+	if err := sensitiveword.RequireTextCompliant(req.Title, req.Notice); err != nil {
+		return nil, err
 	}
 
 	// 同一主播仅允许一个直播间(roomId == anchorId);CMS预创建的空直播间允许App完善资料
@@ -86,6 +90,9 @@ func UpdateCover(ctx context.Context, req *liveroomdto.UpdateCoverReq) (*liveroo
 func UpdateNotice(ctx context.Context, req *liveroomdto.UpdateNoticeReq) (*liveroomdto.UpdateNoticeRes, error) {
 	room, err := loadOwnRoom(ctx)
 	if err != nil {
+		return nil, err
+	}
+	if err := sensitiveword.RequireTextCompliant(req.Notice); err != nil {
 		return nil, err
 	}
 	if room.Notice != req.Notice {

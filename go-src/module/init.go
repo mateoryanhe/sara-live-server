@@ -13,6 +13,7 @@ import (
 	"xr-game-server/module/rank"
 	"xr-game-server/module/recharge"
 	"xr-game-server/module/richrank"
+	"xr-game-server/module/sensitiveword"
 	"xr-game-server/module/shortvideo"
 	"xr-game-server/module/stat"
 	"xr-game-server/module/userinfo"
@@ -34,6 +35,7 @@ func Init() {
 	game.Init()
 	agora.Init()
 	verification_code.Init()
+	sensitiveword.Init()
 	liveroom.Init()
 	userinfo.Init()
 	stat.Init()

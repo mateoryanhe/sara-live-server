@@ -2,9 +2,9 @@ package liveroomdao
 
 import (
 	"context"
-
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/core/cache"
+	"xr-game-server/core/lambda"
 	"xr-game-server/entity"
 )
 
@@ -59,6 +59,9 @@ func GetOnlinesByRoom(roomId uint64) []*entity.LiveRoomOnline {
 
 func AddOnlineData(o *entity.LiveRoomOnline) {
 	allOnline := GetOnlinesByRoom(o.RoomId)
+	allOnline = lambda.Filter(allOnline, func(item *entity.LiveRoomOnline) bool {
+		return item.ID != o.ID
+	})
 	newList := make([]*entity.LiveRoomOnline, 0)
 	newList = append(newList, o)
 	newList = append(newList, allOnline...)
