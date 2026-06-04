@@ -53,10 +53,6 @@ logger:
   stdoutColorDisabled: false                 # 关闭终端的颜色打印。默认开启
   writerColorEnable: true                 # 日志文件是否带上颜色。默认false，表示不带颜色
 
-sensitiveWord:
-  localDir: "data/sensitive_words"
-  downloadUrls:
-    en: "https://raw.githubusercontent.com/readme-SVG/Banned-words/main/Banned-words-list/en.txt"
 
 database:
   logger:

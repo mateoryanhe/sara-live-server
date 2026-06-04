@@ -188,7 +188,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('GlobalConfig') || hasMenuPermission('AppTokenConfig')"
+            v-if="hasMenuPermission('GlobalConfig') || hasMenuPermission('AppTokenConfig') || hasMenuPermission('TextModerationCfgManagement')"
             index="/config">
           <template #title>
             <el-icon>
@@ -207,6 +207,12 @@
               <Key/>
             </el-icon>
             <span>App Token</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('TextModerationCfgManagement')" index="/config/text-moderation">
+            <el-icon>
+              <Document/>
+            </el-icon>
+            <span>敏感词过滤</span>
           </el-menu-item>
         </el-sub-menu>
         <!-- 角色权限管理菜单 -->

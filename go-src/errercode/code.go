@@ -106,6 +106,10 @@ const (
 	LiveRoomAudienceNotOnline XRCode = 110
 	// TextSensitiveWord 文本包含铭感词
 	TextSensitiveWord XRCode = 111
+	// AliyunTextModerationCfgInvalid 阿里云文本审核配置无效
+	AliyunTextModerationCfgInvalid XRCode = 112
+	// AliyunTextModerationFailed 阿里云文本审核调用失败
+	AliyunTextModerationFailed XRCode = 113
 )
 
 type XError struct {

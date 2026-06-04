@@ -18,5 +18,11 @@ export const configRoutes: RouteRecordRaw = {
             component: () => import('@/views/config/app-token.vue'),
             meta: {title: 'App Token'},
         },
+        {
+            path: 'text-moderation',
+            name: 'TextModerationCfgManagement',
+            component: () => import('@/views/config/text-moderation.vue'),
+            meta: {title: '敏感词过滤'},
+        },
     ],
 }

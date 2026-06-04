@@ -452,6 +452,41 @@ export interface SaveAgoraCfgRes {
     id: string
 }
 
+export interface TextModerationCfg {
+    id: string
+    enabled: boolean
+    accessKeyId: string
+    accessKeySecret: string
+    regionId: string
+    endpoint: string
+    chatService: string
+    nicknameService: string
+    commentService: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetTextModerationCfgRes {
+    cfg: TextModerationCfg | null
+}
+
+export interface SaveTextModerationCfgReq {
+    id?: number
+    enabled: boolean
+    accessKeyId: string
+    accessKeySecret: string
+    regionId: string
+    endpoint: string
+    chatService: string
+    nicknameService: string
+    commentService: string
+}
+
+export interface SaveTextModerationCfgRes {
+    success: boolean
+    id: string
+}
+
 // 充值订单
 export interface RechargeOrder {
     id: string

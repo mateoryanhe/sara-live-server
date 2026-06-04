@@ -8,7 +8,7 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/userinfodto"
 	"xr-game-server/errercode"
-	"xr-game-server/module/sensitiveword"
+	"xr-game-server/module/aliyunmoderation"
 	"xr-game-server/module/upload"
 )
 
@@ -47,7 +47,7 @@ func UpdateNickname(ctx context.Context, req *userinfodto.UpdateNicknameReq) (re
 	if nickname == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	if err := sensitiveword.RequireTextCompliant(nickname); err != nil {
+	if err := aliyunmoderation.RequireTextCompliant(aliyunmoderation.SceneNickname, nickname); err != nil {
 		return nil, err
 	}
 

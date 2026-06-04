@@ -52,6 +52,7 @@ func Init() {
 	initVipCfg()
 	initGameCfg()
 	initAgoraCfg()
+	initAliyunTextModerationCfg()
 	initUserMessage()
 	initUserMessageUnread()
 	initUserMessageUnreadDetail()

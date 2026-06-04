@@ -13,7 +13,7 @@ import (
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
-	"xr-game-server/module/sensitiveword"
+	"xr-game-server/module/aliyunmoderation"
 	"xr-game-server/module/upload"
 )
 
@@ -34,7 +34,7 @@ func SendChat(ctx context.Context, req *liveroomdto.SendChatReq) (*liveroomdto.S
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
 
-	if err := sensitiveword.RequireTextCompliant(content); err != nil {
+	if err := aliyunmoderation.RequireTextCompliant(aliyunmoderation.SceneChat, content); err != nil {
 		return nil, err
 	}
 

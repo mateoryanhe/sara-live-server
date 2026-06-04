@@ -10,7 +10,7 @@ import (
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
-	"xr-game-server/module/sensitiveword"
+	"xr-game-server/module/aliyunmoderation"
 	"xr-game-server/module/upload"
 )
 
@@ -25,7 +25,7 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 	if user == nil || !user.IsAnchor {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotAnchor)
 	}
-	if err := sensitiveword.RequireTextCompliant(req.Title, req.Notice); err != nil {
+	if err := aliyunmoderation.RequireTextCompliant(aliyunmoderation.SceneComment, req.Title, req.Notice); err != nil {
 		return nil, err
 	}
 
@@ -92,7 +92,7 @@ func UpdateNotice(ctx context.Context, req *liveroomdto.UpdateNoticeReq) (*liver
 	if err != nil {
 		return nil, err
 	}
-	if err := sensitiveword.RequireTextCompliant(req.Notice); err != nil {
+	if err := aliyunmoderation.RequireTextCompliant(aliyunmoderation.SceneComment, req.Notice); err != nil {
 		return nil, err
 	}
 	if room.Notice != req.Notice {

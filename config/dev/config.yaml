@@ -56,13 +56,6 @@ logger:
   stdoutColorDisabled: false                 # 关闭终端的颜色打印。默认开启
   writerColorEnable: true                 # 日志文件是否带上颜色。默认false，表示不带颜色
 
-# 铭感词库: 本地无文件或无有效词条时按 downloadUrls 下载一次, 之后只读 localDir 下 txt
-sensitiveWord:
-  localDir: "data/sensitive_words"
-  downloadUrls:
-    zh-CN: ""   # 例: https://cdn.example.com/words/zh-CN.txt
-    zh-TW: ""
-    en: "https://raw.githubusercontent.com/readme-SVG/Banned-words/main/Banned-words-list/en.txt"
 
 database:
   logger:
