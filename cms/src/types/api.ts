@@ -491,6 +491,12 @@ export interface UploadResourceCfg {
     id: string
     resourceDomain: string
     defaultAvatarUrl: string
+    imageModerationEnabled: boolean
+    imageModerationAccessKeyId: string
+    imageModerationAccessKeySecret: string
+    imageModerationRegionId: string
+    imageModerationEndpoint: string
+    imageModerationService: string
     createdAt: string
     updatedAt: string
 }
@@ -503,6 +509,12 @@ export interface SaveUploadResourceCfgReq {
     id?: number
     resourceDomain: string
     defaultAvatarUrl: string
+    imageModerationEnabled: boolean
+    imageModerationAccessKeyId: string
+    imageModerationAccessKeySecret: string
+    imageModerationRegionId: string
+    imageModerationEndpoint: string
+    imageModerationService: string
 }
 
 export interface SaveUploadResourceCfgRes {

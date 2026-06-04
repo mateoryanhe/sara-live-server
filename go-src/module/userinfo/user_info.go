@@ -55,7 +55,7 @@ func UpdateNickname(ctx context.Context, req *userinfodto.UpdateNicknameReq) (re
 // UploadAvatar 上传头像,保存图片并写回 user_infos.avatar
 func UploadAvatar(ctx context.Context, req *userinfodto.UploadAvatarReq) (res *userinfodto.UploadAvatarRes, err error) {
 	userId := httpserver.GetAuthId(ctx)
-	name, err := upload.UploadImage(req.File)
+	name, err := upload.UploadImageForApp(ctx, req.File)
 	if err != nil {
 		return nil, err
 	}

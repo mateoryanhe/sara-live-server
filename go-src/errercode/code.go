@@ -110,6 +110,12 @@ const (
 	AliyunTextModerationCfgInvalid XRCode = 112
 	// AliyunTextModerationFailed 阿里云文本审核调用失败
 	AliyunTextModerationFailed XRCode = 113
+	// ImageSensitiveContent 图片内容不合规
+	ImageSensitiveContent XRCode = 114
+	// ImageModerationCfgInvalid 图片审核配置无效
+	ImageModerationCfgInvalid XRCode = 115
+	// ImageModerationFailed 图片审核服务调用失败
+	ImageModerationFailed XRCode = 116
 )
 
 type XError struct {

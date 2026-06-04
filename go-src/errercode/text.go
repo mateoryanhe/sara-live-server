@@ -66,6 +66,9 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		TextSensitiveWord:              "Text contains sensitive words",
 		AliyunTextModerationCfgInvalid: "Text moderation config is invalid",
 		AliyunTextModerationFailed:     "Text moderation service unavailable",
+		ImageSensitiveContent:          "Image content is not compliant",
+		ImageModerationCfgInvalid:      "Image moderation config is invalid",
+		ImageModerationFailed:          "Image moderation service unavailable",
 	},
 	lang.LangZHCN: {
 		Success:                        "成功",
@@ -128,6 +131,9 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		TextSensitiveWord:              "内容包含敏感词",
 		AliyunTextModerationCfgInvalid: "文本审核未配置或配置无效",
 		AliyunTextModerationFailed:     "文本审核服务暂不可用",
+		ImageSensitiveContent:          "图片内容不合规",
+		ImageModerationCfgInvalid:      "图片审核未配置或配置无效",
+		ImageModerationFailed:          "图片审核服务暂不可用",
 	},
 	lang.LangZHTW: {
 		Success:                        "成功",
@@ -190,6 +196,9 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		TextSensitiveWord:              "內容包含敏感詞",
 		AliyunTextModerationCfgInvalid: "文本審核未配置或配置無效",
 		AliyunTextModerationFailed:     "文本審核服務暫不可用",
+		ImageSensitiveContent:          "圖片內容不合規",
+		ImageModerationCfgInvalid:      "圖片審核未配置或配置無效",
+		ImageModerationFailed:          "圖片審核服務暫不可用",
 	},
 }
 

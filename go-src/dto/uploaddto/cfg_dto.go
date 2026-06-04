@@ -7,11 +7,17 @@ type GetUploadResourceCfgReq struct {
 }
 
 type UploadResourceCfgItem struct {
-	ID               string `json:"id"`
-	ResourceDomain   string `json:"resourceDomain"`
-	DefaultAvatarUrl string `json:"defaultAvatarUrl"`
-	CreatedAt        string `json:"createdAt"`
-	UpdatedAt        string `json:"updatedAt"`
+	ID                             string `json:"id"`
+	ResourceDomain                 string `json:"resourceDomain"`
+	DefaultAvatarUrl               string `json:"defaultAvatarUrl"`
+	ImageModerationEnabled         bool   `json:"imageModerationEnabled"`
+	ImageModerationAccessKeyId     string `json:"imageModerationAccessKeyId"`
+	ImageModerationAccessKeySecret string `json:"imageModerationAccessKeySecret"`
+	ImageModerationRegionId        string `json:"imageModerationRegionId"`
+	ImageModerationEndpoint        string `json:"imageModerationEndpoint"`
+	ImageModerationService         string `json:"imageModerationService"`
+	CreatedAt                      string `json:"createdAt"`
+	UpdatedAt                      string `json:"updatedAt"`
 }
 
 type GetUploadResourceCfgRes struct {
@@ -19,10 +25,16 @@ type GetUploadResourceCfgRes struct {
 }
 
 type SaveUploadResourceCfgReq struct {
-	g.Meta           `path:"/saveUploadResourceCfg" method:"post" summary:"保存上传资源配置" tags:"上传配置"`
-	ID               uint64 `json:"id"`
-	ResourceDomain   string `json:"resourceDomain"`
-	DefaultAvatarUrl string `json:"defaultAvatarUrl"`
+	g.Meta                         `path:"/saveUploadResourceCfg" method:"post" summary:"保存上传资源配置" tags:"上传配置"`
+	ID                             uint64 `json:"id"`
+	ResourceDomain                 string `json:"resourceDomain"`
+	DefaultAvatarUrl               string `json:"defaultAvatarUrl"`
+	ImageModerationEnabled         bool   `json:"imageModerationEnabled"`
+	ImageModerationAccessKeyId     string `json:"imageModerationAccessKeyId"`
+	ImageModerationAccessKeySecret string `json:"imageModerationAccessKeySecret"`
+	ImageModerationRegionId        string `json:"imageModerationRegionId"`
+	ImageModerationEndpoint        string `json:"imageModerationEndpoint"`
+	ImageModerationService         string `json:"imageModerationService"`
 }
 
 type SaveUploadResourceCfgRes struct {

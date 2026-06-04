@@ -14,8 +14,14 @@ const (
 )
 
 type resourceCfgSnapshot struct {
-	ResourceDomain   string
-	DefaultAvatarUrl string
+	ResourceDomain                 string
+	DefaultAvatarUrl               string
+	ImageModerationEnabled         bool
+	ImageModerationAccessKeyId     string
+	ImageModerationAccessKeySecret string
+	ImageModerationRegionId        string
+	ImageModerationEndpoint        string
+	ImageModerationService         string
 }
 
 var (
@@ -47,11 +53,26 @@ func toResourceCfgSnapshot(row *entity.UploadResourceCfg) *resourceCfgSnapshot {
 		return emptyResourceCfg
 	}
 	s := &resourceCfgSnapshot{
-		ResourceDomain:   normalizeDomain(row.ResourceDomain),
-		DefaultAvatarUrl: strings.TrimSpace(row.DefaultAvatarUrl),
+		ResourceDomain:                 normalizeDomain(row.ResourceDomain),
+		DefaultAvatarUrl:               strings.TrimSpace(row.DefaultAvatarUrl),
+		ImageModerationEnabled:         row.ImageModerationEnabled,
+		ImageModerationAccessKeyId:     strings.TrimSpace(row.ImageModerationAccessKeyId),
+		ImageModerationAccessKeySecret: strings.TrimSpace(row.ImageModerationAccessKeySecret),
+		ImageModerationRegionId:        strings.TrimSpace(row.ImageModerationRegionId),
+		ImageModerationEndpoint:        strings.TrimSpace(row.ImageModerationEndpoint),
+		ImageModerationService:         strings.TrimSpace(row.ImageModerationService),
 	}
 	if s.DefaultAvatarUrl == "" {
 		s.DefaultAvatarUrl = defaultAvatarURL
+	}
+	if s.ImageModerationRegionId == "" {
+		s.ImageModerationRegionId = defaultImageModerationRegion
+	}
+	if s.ImageModerationEndpoint == "" {
+		s.ImageModerationEndpoint = defaultImageModerationEndpoint
+	}
+	if s.ImageModerationService == "" {
+		s.ImageModerationService = defaultImageModerationService
 	}
 	return s
 }

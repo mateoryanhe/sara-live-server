@@ -59,38 +59,10 @@ var allowedShortVideoExt = map[string]struct{}{
 	".mov":  {},
 }
 
-// UploadImage 保存单张图片到 <serverRoot>/upload/images,返回保存后的文件名
+// UploadImage 保存单张图片(CMS 等后台使用,不做内容审核)
 func UploadImage(file *ghttp.UploadFile) (string, error) {
-	if file == nil {
-		return "", errors.New("upload file is empty")
-	}
-	if file.Size > MaxImageSize {
-		return "", fmt.Errorf("image too large, max=%d bytes", MaxImageSize)
-	}
-	ext := strings.ToLower(filepath.Ext(file.Filename))
-	if _, ok := allowedImageExt[ext]; !ok {
-		return "", fmt.Errorf("image ext not allowed: %s", ext)
-	}
-
-	dir := getImageDir()
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return "", err
-	}
-	newName := fmt.Sprintf("%d%s", snowflake.GetId(), ext)
-	src, err := file.Open()
-	if err != nil {
-		return "", err
-	}
-	defer src.Close()
-	dst, err := os.Create(filepath.Join(dir, newName))
-	if err != nil {
-		return "", err
-	}
-	defer dst.Close()
-	if _, err := io.Copy(dst, src); err != nil {
-		return "", err
-	}
-	return newName, nil
+	name, _, err := saveUploadedImageFile(file)
+	return name, err
 }
 
 // getImageDir 计算图片保存的绝对目录,优先使用 server.serverRoot 配置
