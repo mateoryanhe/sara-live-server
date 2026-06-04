@@ -26,11 +26,13 @@ func Init() {
 	if cfg.WebSocketBufferCfgModel.Period > common.Zero {
 		period = cfg.WebSocketBufferCfgModel.Period
 	}
-	xrtimer.ModuleLoop(time.Duration(period)*time.Millisecond, consumeBuff)
-	xrtimer.ModuleLoop(time.Duration(period)*time.Millisecond, chkLife)
+
+	xrtimer.AddSingleton(gctx.New(), time.Duration(period)*time.Millisecond, consumeBuff)
+	xrtimer.AddSingleton(gctx.New(), time.Duration(period)*time.Millisecond, chkLife)
+
 }
 
-func consumeBuff() {
+func consumeBuff(ctx context.Context) {
 	clients := clientMap.Values()
 	if len(clients) > common.Zero {
 		for _, tempClient := range clients {
@@ -40,7 +42,7 @@ func consumeBuff() {
 	}
 }
 
-func chkLife() {
+func chkLife(ctx context.Context) {
 	clients := clientMap.Values()
 	if len(clients) > common.Zero {
 		for _, tempClient := range clients {

@@ -29,6 +29,4 @@ const (
 	LiveRoomAnchorBan = 15
 	//观众禁言状态推送(推送给被禁言/解禁的用户)
 	LiveRoomAudienceMute = 17
-	//短视频点赞
-	LikeShortVideo = 16
 )

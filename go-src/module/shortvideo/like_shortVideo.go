@@ -2,20 +2,17 @@ package shortvideo
 
 import (
 	"context"
-	"xr-game-server/constants/cmd"
-	"xr-game-server/core/actor"
+	"fmt"
+	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/core/httpserver"
-	"xr-game-server/core/push"
 	"xr-game-server/dao/shortvideodao"
 	"xr-game-server/dto/shortvideodto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
 )
 
-var likeActor = actor.NewActor(30)
-
 func initLikeActor() {
-	likeActor.Start()
+
 }
 
 func LikeShortVideo(ctx context.Context, req *shortvideodto.LikeShortVideoReq) (*shortvideodto.LikeShortVideoRes, error) {
@@ -38,18 +35,16 @@ func LikeShortVideo(ctx context.Context, req *shortvideodto.LikeShortVideoReq) (
 		existing.SetStatus(entity.ShortVideoLikeStatusLiked)
 		shortvideodao.AddLikeToCache(existing)
 	}
-	//防止多人同时点赞并发
-	likeActor.Send(nil, func(msg any) {
-		stat := shortvideodao.GetStatByVideoId(req.VideoId)
-		if stat == nil {
-			return
-		}
-		stat.AddLikeCount(1)
-		push.Data(userId, cmd.LikeShortVideo, &shortvideodto.LikeShortVideoRes{
-			LikeCount: stat.LikeCount,
-			VideoId:   req.VideoId,
-		})
-	})
 
-	return &shortvideodto.LikeShortVideoRes{LikeCount: 0}, nil
+	lockName := fmt.Sprintf("like_shortvideo_%v", req.VideoId)
+	gmlock.Lock(lockName)
+	defer gmlock.Unlock(lockName)
+	//防止多人同时点赞并发
+	stat := shortvideodao.GetStatByVideoId(req.VideoId)
+	if stat == nil {
+		return &shortvideodto.LikeShortVideoRes{LikeCount: 0}, nil
+	}
+	stat.AddLikeCount(1)
+
+	return &shortvideodto.LikeShortVideoRes{LikeCount: stat.LikeCount}, nil
 }

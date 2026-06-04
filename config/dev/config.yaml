@@ -36,7 +36,7 @@ bufferSize:
       large: 500 #数据库更新数据缓冲-->对应sysdb->多行数据写入缓冲池 eg item_log表,邮件表
   websocket: #websocket缓冲池大小--个人玩家缓冲池
     size: 30 #推送缓冲池大小
-    period: 10 #推送缓冲池频率
+    period: 100 #推送缓冲池频率
   goPool: #协程池大小
     size: 100
 

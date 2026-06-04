@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gtimer"
 	"github.com/gogf/gf/v2/util/gutil"
 	"time"
@@ -44,21 +43,4 @@ func AddOnce(ctx context.Context, taskTime time.Duration, job gtimer.JobFunc) *g
 		})
 	})
 	return entry
-}
-
-// ModuleLoop 添加任务,可以取消,有防panic,避免程序崩溃,定时任务会循环执行,会一直占用一个go协程内存,只容许执行模块循环任务
-// 时间间隔小于秒,请使用这种类型,可以避免频繁创建go 占用内存,cpu,触发gc,模块循环任务,请使用AddLoopTask
-// job: 任务
-// interval: 间隔时间
-func ModuleLoop(interval time.Duration, job func()) {
-	go func() {
-		for true {
-			gutil.TryCatch(gctx.New(), func(ctx context.Context) {
-				job()
-			}, func(ctx context.Context, exception error) {
-				g.Log().Errorf(ctx, "循环任务 ModuleLoop error %v", gerror.Stack(exception))
-			})
-			time.Sleep(interval)
-		}
-	}()
 }

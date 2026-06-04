@@ -70,7 +70,7 @@ func SysExit(sig os.Signal) {
 	}
 }
 
-func consume() {
+func consume(ctx context.Context) {
 	for _, val := range lazyMap {
 		gutil.TryCatch(gctx.New(), func(ctx context.Context) {
 			val.PullData()
