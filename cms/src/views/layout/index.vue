@@ -188,7 +188,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('GlobalConfig') || hasMenuPermission('AppTokenConfig') || hasMenuPermission('TextModerationCfgManagement')"
+            v-if="hasMenuPermission('GlobalConfig') || hasMenuPermission('AppTokenConfig') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('UploadResourceCfgManagement')"
             index="/config">
           <template #title>
             <el-icon>
@@ -213,6 +213,12 @@
               <Document/>
             </el-icon>
             <span>敏感词过滤</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('UploadResourceCfgManagement')" index="/config/upload-resource">
+            <el-icon>
+              <Picture/>
+            </el-icon>
+            <span>资源域名</span>
           </el-menu-item>
         </el-sub-menu>
         <!-- 角色权限管理菜单 -->

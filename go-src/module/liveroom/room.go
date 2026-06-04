@@ -142,7 +142,7 @@ func GetOnlineUserList(_ context.Context, req *liveroomdto.GetOnlineUserListReq)
 		}
 		if u := userinfodao.GetUserInfoByUserId(o.UserId); u != nil {
 			item.Nickname = u.Nickname
-			item.Avatar = upload.GetUrlByName(u.Avatar)
+			item.Avatar = upload.ResolveAvatarUrl(u.Avatar)
 		}
 		list = append(list, item)
 	}

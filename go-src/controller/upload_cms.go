@@ -25,3 +25,11 @@ func (c *UploadController) UploadFile(_ context.Context, req *uploaddto.UploadCM
 	}
 	return &uploaddto.UploadCMSFileRes{FileName: name}, nil
 }
+
+func (c *UploadController) GetUploadResourceCfg(ctx context.Context, req *uploaddto.GetUploadResourceCfgReq) (*uploaddto.GetUploadResourceCfgRes, error) {
+	return upload.GetUploadResourceCfg(ctx, req)
+}
+
+func (c *UploadController) SaveUploadResourceCfg(ctx context.Context, req *uploaddto.SaveUploadResourceCfgReq) (*uploaddto.SaveUploadResourceCfgRes, error) {
+	return upload.SaveUploadResourceCfg(ctx, req)
+}

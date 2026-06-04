@@ -487,6 +487,29 @@ export interface SaveTextModerationCfgRes {
     id: string
 }
 
+export interface UploadResourceCfg {
+    id: string
+    resourceDomain: string
+    defaultAvatarUrl: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetUploadResourceCfgRes {
+    cfg: UploadResourceCfg | null
+}
+
+export interface SaveUploadResourceCfgReq {
+    id?: number
+    resourceDomain: string
+    defaultAvatarUrl: string
+}
+
+export interface SaveUploadResourceCfgRes {
+    success: boolean
+    id: string
+}
+
 // 充值订单
 export interface RechargeOrder {
     id: string

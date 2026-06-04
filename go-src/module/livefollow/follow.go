@@ -96,7 +96,7 @@ func FollowingList(ctx context.Context, req *livefollowdto.FollowingListReq) (*l
 		}
 		if u := userinfodao.GetUserInfoByUserId(f.AnchorId); u != nil {
 			item.Nickname = u.Nickname
-			item.Avatar = upload.GetUrlByName(u.Avatar)
+			item.Avatar = upload.ResolveAvatarUrl(u.Avatar)
 			item.GuildId = strconv.FormatUint(u.GuildId, 10)
 		}
 		list = append(list, item)
@@ -128,7 +128,7 @@ func FollowerList(ctx context.Context, req *livefollowdto.FollowerListReq) (*liv
 		}
 		if u := userinfodao.GetUserInfoByUserId(f.UserId); u != nil {
 			item.Nickname = u.Nickname
-			item.Avatar = upload.GetUrlByName(u.Avatar)
+			item.Avatar = upload.ResolveAvatarUrl(u.Avatar)
 		}
 		list = append(list, item)
 	}

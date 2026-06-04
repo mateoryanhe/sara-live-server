@@ -19,7 +19,7 @@ func QueryAnchorList(_ context.Context, req *accountdto.QueryAnchorListReq) (*ht
 		if val == nil {
 			continue
 		}
-		val.Avatar = upload.GetUrlByName(val.Avatar)
+		val.Avatar = upload.ResolveAvatarUrl(val.Avatar)
 		guildId := val.GuildId
 		if InCache(val.ID) {
 			userInfoCache := userinfodao.GetUserInfoByUserId(val.ID)

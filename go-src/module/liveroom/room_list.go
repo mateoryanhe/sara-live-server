@@ -80,7 +80,7 @@ func toLiveRoomListItem(room *entity.LiveRoom) *liveroomdto.LiveRoomListItem {
 	}
 	if u := userinfodao.GetUserInfoByUserId(room.ID); u != nil {
 		item.AnchorNickname = u.Nickname
-		item.AnchorAvatar = upload.GetUrlByName(u.Avatar)
+		item.AnchorAvatar = upload.ResolveAvatarUrl(u.Avatar)
 	}
 	return item
 }

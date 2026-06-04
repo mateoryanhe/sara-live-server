@@ -74,7 +74,7 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 	}
 	if sender != nil {
 		payload.SenderName = sender.Nickname
-		payload.SenderAvatar = upload.GetUrlByName(sender.Avatar)
+		payload.SenderAvatar = upload.ResolveAvatarUrl(sender.Avatar)
 	}
 
 	for _, o := range liveroomdao.GetOnlinesByRoom(req.RoomId) {

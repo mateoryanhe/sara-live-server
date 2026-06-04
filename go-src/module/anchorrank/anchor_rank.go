@@ -86,7 +86,7 @@ func buildRankItems(rows []*liveroomdao.AnchorRevenueStatRow) []*rankItem {
 		}
 		if profile := userinfodao.GetUserInfoByUserId(row.ReceiverId); profile != nil {
 			item.Nickname = profile.Nickname
-			item.Avatar = upload.GetUrlByName(profile.Avatar)
+			item.Avatar = upload.ResolveAvatarUrl(profile.Avatar)
 		}
 		list = append(list, item)
 	}

@@ -94,7 +94,7 @@ func buildRankItems(rows []*currencylogdao.DiamondConsumeStatRow) []*rankItem {
 		}
 		if profile := userinfodao.GetUserInfoByUserId(row.UserId); profile != nil {
 			item.Nickname = profile.Nickname
-			item.Avatar = upload.GetUrlByName(profile.Avatar)
+			item.Avatar = upload.ResolveAvatarUrl(profile.Avatar)
 		}
 		list = append(list, item)
 	}
