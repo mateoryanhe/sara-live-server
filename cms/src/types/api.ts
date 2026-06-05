@@ -386,6 +386,7 @@ export interface ShortVideoWatchRecord {
     videoId: string
     videoTitle: string
     billedSeconds: number
+    watchSeconds: number
     createdAt: string
     updatedAt: string
 }

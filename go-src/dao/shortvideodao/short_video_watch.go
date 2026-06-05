@@ -22,7 +22,9 @@ func GetOneShortVideoWatch(userId, videoId uint64) *entity.ShortVideoWatch {
 	})
 	if !ok {
 		one = entity.NewShortVideoWatch(userId, videoId)
-		all = append(all, one)
+		newTemp := make([]*entity.ShortVideoWatch, 0)
+		newTemp = append(newTemp, one)
+		all = append(newTemp, newTemp...)
 		watchCacheMgr.FlushCache(userId, one)
 		return one
 	}
@@ -32,7 +34,7 @@ func GetOneShortVideoWatch(userId, videoId uint64) *entity.ShortVideoWatch {
 func GetShortVideoWatch(userId uint64) []*entity.ShortVideoWatch {
 	v := watchCacheMgr.GetData(userId, func(ctx context.Context) (value interface{}, err error) {
 		watch := make([]*entity.ShortVideoWatch, 0)
-		_ = g.Model(string(entity.TbShortVideoWatch)).Where("user_id = ?", userId).Scan(&watch)
+		_ = g.Model(string(entity.TbShortVideoWatch)).Where("user_id = ?", userId).OrderDesc("updated_at").Scan(&watch)
 		return watch, nil
 	})
 	return v.([]*entity.ShortVideoWatch)

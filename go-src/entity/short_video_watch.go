@@ -17,6 +17,7 @@ const (
 	ShortVideoWatchUserId        db.TbCol = "user_id"
 	ShortVideoWatchVideoId       db.TbCol = "video_id"
 	ShortVideoWatchBilledSeconds db.TbCol = "billed_seconds"
+	ShortVideoWatchWatchSeconds  db.TbCol = "watch_seconds"
 	ShortVideoWatchViewCounted   db.TbCol = "view_counted"
 	ShortVideoLikeStatus         db.TbCol = "status"
 )
@@ -35,6 +36,7 @@ type ShortVideoWatch struct {
 	UserId        uint64    `gorm:"index:idx_user_video,priority:1;default:0;comment:用户ID" json:"userId"`
 	VideoId       uint64    `gorm:"index:idx_user_video,priority:2;default:0;comment:短视频ID" json:"videoId"`
 	BilledSeconds uint64    `gorm:"default:0;comment:已累计计费观看秒数" json:"billedSeconds"`
+	WatchSeconds  uint64    `gorm:"default:0;comment:累计观看时长(秒,含免费与付费)" json:"watchSeconds"`
 	ViewCounted   uint8     `gorm:"default:0;comment:是否已计入观看人数(0否,1是)" json:"viewCounted"`
 	Status        uint8     `gorm:"index:idx_user_video,priority:3;default:0;comment:状态(0已取消,1已点赞)" json:"status"`
 	CreatedAt     time.Time `json:"createdAt"`
@@ -86,6 +88,13 @@ func (watch *ShortVideoWatch) AddBilledSeconds(v uint64) {
 	})
 }
 
+func (watch *ShortVideoWatch) AddWatchSeconds(v uint64) {
+	watch.WatchSeconds = math.Add(watch.WatchSeconds, v)
+	syndb.AddDataToLazyChan(TbShortVideoWatch, ShortVideoWatchWatchSeconds, &syndb.ColData{
+		IdVal: watch.ID, ColVal: watch.WatchSeconds,
+	})
+}
+
 func (like *ShortVideoWatch) SetStatus(v uint8) {
 	like.Status = v
 	like.SetUpdatedAt(time.Now())
@@ -103,17 +112,19 @@ func (watch *ShortVideoWatch) SetCreatedAt(v time.Time) {
 
 func (watch *ShortVideoWatch) SetUpdatedAt(v time.Time) {
 	watch.UpdatedAt = v
-	syndb.AddDataToQuickChan(TbShortVideoWatch, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddDataToLazyChan(TbShortVideoWatch, db.UpdatedAtName, &syndb.ColData{
 		IdVal: watch.ID, ColVal: v,
 	})
 }
 
 func initShortVideoWatch() {
 	syndb.RegQuickWithLarge(TbShortVideoWatch, db.CreatedAtName)
-	syndb.RegQuickWithLarge(TbShortVideoWatch, db.UpdatedAtName)
+	syndb.RegLazyWithLarge(TbShortVideoWatch, db.UpdatedAtName)
+
 	syndb.RegQuickWithLarge(TbShortVideoWatch, ShortVideoWatchUserId)
 	syndb.RegQuickWithLarge(TbShortVideoWatch, ShortVideoWatchVideoId)
 	syndb.RegQuickWithLarge(TbShortVideoWatch, ShortVideoWatchBilledSeconds)
+	syndb.RegLazyWithLarge(TbShortVideoWatch, ShortVideoWatchWatchSeconds)
 	syndb.RegQuickWithLarge(TbShortVideoWatch, ShortVideoWatchViewCounted)
 
 	syndb.RegQuickWithLarge(TbShortVideoWatch, ShortVideoLikeStatus)

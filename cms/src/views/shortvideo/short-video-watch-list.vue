@@ -41,6 +41,7 @@
           <template #default="{ row }">{{ row.videoTitle || '-' }}</template>
         </el-table-column>
         <el-table-column label="已计费秒数" prop="billedSeconds" width="110"/>
+        <el-table-column label="观看时长(秒)" prop="watchSeconds" width="120"/>
         <el-table-column label="创建时间" prop="createdAt" width="170"/>
         <el-table-column label="更新时间" prop="updatedAt" width="170"/>
       </el-table>

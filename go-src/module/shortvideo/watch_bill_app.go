@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/os/gmlock"
+	"time"
 	"xr-game-server/constants/currency"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/shortvideodao"
@@ -45,7 +46,11 @@ func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortV
 		if stat != nil {
 			stat.AddViewCount(1)
 		}
+	} else {
+		watch.SetUpdatedAt(time.Now())
 	}
+
+	watch.AddWatchSeconds(watchBillIntervalSeconds)
 
 	if video.IsPaid != entity.ShortVideoPaidYes {
 		return &shortvideodto.WatchBillShortVideoRes{
