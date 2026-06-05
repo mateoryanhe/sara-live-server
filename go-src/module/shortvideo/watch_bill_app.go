@@ -2,9 +2,6 @@ package shortvideo
 
 import (
 	"context"
-	"fmt"
-
-	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/constants/currency"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/shortvideodao"
@@ -81,55 +78,4 @@ func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortV
 		ChargeableSeconds: 0,
 		CanContinue:       true,
 	}, nil
-}
-
-// ensureShortVideoWatch 按用户+视频维度获取观看记录,未计入观看人数时累加统计
-func ensureShortVideoWatch(userId, videoId uint64) *entity.ShortVideoWatch {
-	watch := shortvideodao.GetOneShortVideoWatch(userId, videoId)
-	if watch != nil {
-		tryIncrViewCount(watch)
-		return watch
-	}
-
-	lockName := fmt.Sprintf("watch_first_%d_%d", userId, videoId)
-	gmlock.Lock(lockName)
-	defer gmlock.Unlock(lockName)
-
-	tryIncrViewCount(watch)
-	return watch
-}
-
-func tryIncrViewCount(watch *entity.ShortVideoWatch) {
-	if watch == nil || watch.ViewCounted == entity.ShortVideoWatchViewCountedYes {
-		return
-	}
-
-	lockName := fmt.Sprintf("watch_view_count_%s", watch.ID)
-	gmlock.Lock(lockName)
-	defer gmlock.Unlock(lockName)
-
-	if watch.ViewCounted == entity.ShortVideoWatchViewCountedYes {
-		return
-	}
-
-	statLock := fmt.Sprintf("view_shortvideo_%v", watch.VideoId)
-	gmlock.Lock(statLock)
-	stat := shortvideodao.GetStatByVideoId(watch.VideoId)
-	if stat != nil {
-		stat.AddViewCount(1)
-	}
-	gmlock.Unlock(statLock)
-
-	watch.SetViewCounted(entity.ShortVideoWatchViewCountedYes)
-}
-
-func calcChargeableSeconds(billedSeconds, interval, freeWatchSeconds uint32) uint32 {
-	end := billedSeconds + interval
-	if end <= freeWatchSeconds {
-		return 0
-	}
-	if billedSeconds >= freeWatchSeconds {
-		return interval
-	}
-	return end - freeWatchSeconds
 }
