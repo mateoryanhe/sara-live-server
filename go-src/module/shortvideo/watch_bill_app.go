@@ -2,6 +2,8 @@ package shortvideo
 
 import (
 	"context"
+	"fmt"
+	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/constants/currency"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/shortvideodao"
@@ -12,7 +14,7 @@ import (
 	"xr-game-server/module/wallet"
 )
 
-const watchBillIntervalSeconds uint32 = 1
+const watchBillIntervalSeconds uint64 = 1
 
 // WatchBillShortVideo App端短视频观看扣费,每次按5秒进度计费
 func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortVideoReq) (*shortvideodto.WatchBillShortVideoRes, error) {
@@ -36,6 +38,9 @@ func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortV
 	//记录视频观看人数
 	if watch.ViewCounted == entity.ShortVideoWatchViewCountedNo {
 		watch.SetViewCounted(entity.ShortVideoWatchViewCountedYes)
+		lockName := fmt.Sprintf("watch_shortvideo_%v", req.VideoId)
+		gmlock.Lock(lockName)
+		defer gmlock.Unlock(lockName)
 		stat := shortvideodao.GetStatByVideoId(watch.VideoId)
 		if stat != nil {
 			stat.AddViewCount(1)
@@ -52,8 +57,6 @@ func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortV
 		}, nil
 	}
 
-	billedSeconds := watch.BilledSeconds
-
 	cost := float64(video.DiamondPerSecond)
 
 	diamond := user.Diamond
@@ -68,13 +71,12 @@ func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortV
 		deducted = cost
 	}
 
-	newBilledSeconds := billedSeconds + watchBillIntervalSeconds
-	watch.SetBilledSeconds(newBilledSeconds)
+	watch.AddBilledSeconds(watchBillIntervalSeconds)
 
 	return &shortvideodto.WatchBillShortVideoRes{
 		Deducted:          deducted,
 		Diamond:           diamond,
-		BilledSeconds:     newBilledSeconds,
+		BilledSeconds:     0,
 		ChargeableSeconds: 0,
 		CanContinue:       true,
 	}, nil

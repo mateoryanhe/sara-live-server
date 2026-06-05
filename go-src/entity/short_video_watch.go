@@ -3,6 +3,7 @@ package entity
 import (
 	"time"
 	"xr-game-server/constants/db"
+	"xr-game-server/core/math"
 	"xr-game-server/core/migrate"
 	"xr-game-server/core/snowflake"
 	"xr-game-server/core/syndb"
@@ -33,7 +34,7 @@ type ShortVideoWatch struct {
 	ID            uint64    `gorm:"primaryKey;comment:复合ID(userId_videoId)" json:"id"`
 	UserId        uint64    `gorm:"index:idx_user_video,priority:1;default:0;comment:用户ID" json:"userId"`
 	VideoId       uint64    `gorm:"index:idx_user_video,priority:2;default:0;comment:短视频ID" json:"videoId"`
-	BilledSeconds uint32    `gorm:"default:0;comment:已累计计费观看秒数" json:"billedSeconds"`
+	BilledSeconds uint64    `gorm:"default:0;comment:已累计计费观看秒数" json:"billedSeconds"`
 	ViewCounted   uint8     `gorm:"default:0;comment:是否已计入观看人数(0否,1是)" json:"viewCounted"`
 	Status        uint8     `gorm:"index:idx_user_video,priority:3;default:0;comment:状态(0已取消,1已点赞)" json:"status"`
 	CreatedAt     time.Time `json:"createdAt"`
@@ -48,7 +49,7 @@ func NewShortVideoWatch(userId, videoId uint64) *ShortVideoWatch {
 	watch.SetUpdatedAt(now)
 	watch.SetUserId(userId)
 	watch.SetVideoId(videoId)
-	watch.SetBilledSeconds(0)
+
 	watch.SetViewCounted(ShortVideoWatchViewCountedNo)
 	return watch
 }
@@ -78,14 +79,10 @@ func (watch *ShortVideoWatch) SetViewCounted(v uint8) {
 	})
 }
 
-func (watch *ShortVideoWatch) SetBilledSeconds(v uint32) {
-	watch.BilledSeconds = v
-	watch.UpdatedAt = time.Now()
+func (watch *ShortVideoWatch) AddBilledSeconds(v uint64) {
+	watch.BilledSeconds = math.Add(watch.BilledSeconds, v)
 	syndb.AddDataToQuickChan(TbShortVideoWatch, ShortVideoWatchBilledSeconds, &syndb.ColData{
-		IdVal: watch.ID, ColVal: v,
-	})
-	syndb.AddDataToQuickChan(TbShortVideoWatch, db.UpdatedAtName, &syndb.ColData{
-		IdVal: watch.ID, ColVal: watch.UpdatedAt,
+		IdVal: watch.ID, ColVal: watch.BilledSeconds,
 	})
 }
 

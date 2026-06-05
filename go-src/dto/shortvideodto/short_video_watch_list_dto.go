@@ -19,7 +19,7 @@ type ShortVideoWatchListItem struct {
 	Nickname      string `json:"nickname"`
 	VideoId       string `json:"videoId"`
 	VideoTitle    string `json:"videoTitle"`
-	BilledSeconds uint32 `json:"billedSeconds"`
+	BilledSeconds uint64 `json:"billedSeconds,string"`
 	CreatedAt     string `json:"createdAt"`
 	UpdatedAt     string `json:"updatedAt"`
 }
