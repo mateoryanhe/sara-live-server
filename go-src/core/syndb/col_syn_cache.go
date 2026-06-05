@@ -9,6 +9,7 @@ import (
 	"time"
 	"xr-game-server/constants/common"
 	"xr-game-server/constants/db"
+	"xr-game-server/core/lambda"
 )
 
 const (
@@ -125,8 +126,23 @@ func (colCache *ColSynCache) batchSave() {
 	if len(colCache.TempData) == common.Zero {
 		return
 	}
+	//过滤一下重复的
+	list := make([]*ColData, 0)
+	for _, data := range colCache.TempData {
+		if lambda.AnyMatch(list, func(val *ColData) bool {
+			return val.IdVal == data.IdVal
+		}) {
+			list = lambda.Filter(list, func(val *ColData) bool {
+				return val.IdVal != data.IdVal
+			})
+			list = append(list, data)
+		} else {
+			list = append(list, data)
+		}
+	}
 	dataMap := make([]map[string]interface{}, common.Zero)
-	for _, val := range colCache.TempData {
+	for _, val := range list {
+		//检查是否重复
 		dataMap = append(dataMap, g.Map{
 			colCache.IdName:  val.IdVal,
 			colCache.ColName: val.ColVal,

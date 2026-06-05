@@ -41,7 +41,6 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 	httpReq := g.RequestFromCtx(ctx)
 	if len(account.IP) == common.Zero {
 		account.SetIp(httpReq.GetClientIp())
-		account.SetUpdatedAt(time.Now())
 	}
 
 	// 生成token

@@ -59,9 +59,15 @@ func GetOnlinesByRoom(roomId uint64) []*entity.LiveRoomOnline {
 
 func AddOnlineData(o *entity.LiveRoomOnline) {
 	allOnline := GetOnlinesByRoom(o.RoomId)
-	allOnline = lambda.Filter(allOnline, func(item *entity.LiveRoomOnline) bool {
-		return item.ID != o.ID
-	})
+	if lambda.AnyMatch(allOnline, func(online *entity.LiveRoomOnline) bool {
+		return o.UserId == online.UserId
+	}) {
+		//数据存在
+		allOnline = lambda.Filter(allOnline, func(item *entity.LiveRoomOnline) bool {
+			return item.ID != o.ID
+		})
+	}
+
 	newList := make([]*entity.LiveRoomOnline, 0)
 	newList = append(newList, o)
 	newList = append(newList, allOnline...)
