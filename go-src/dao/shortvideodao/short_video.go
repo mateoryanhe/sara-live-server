@@ -13,7 +13,7 @@ import (
 
 var shortVideoCacheMgr = gmap.NewKVMap[uint64, *entity.ShortVideo](false)
 
-func InitShortVideoDao() {
+func initShortVideoDao() {
 	all := make([]*entity.ShortVideo, 0)
 	g.Model(string(entity.TbShortVideo)).Scan(&all)
 	for _, v := range all {

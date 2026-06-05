@@ -2,6 +2,7 @@ package shortvideodao
 
 import (
 	"context"
+	"xr-game-server/core/lambda"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/core/cache"
@@ -10,36 +11,29 @@ import (
 
 var watchCacheMgr *cache.CacheMgr
 
-func InitShortVideoWatchDao() {
+func initShortVideoWatchDao() {
 	watchCacheMgr = cache.NewCacheMgr()
 }
 
-func GetShortVideoWatchByUserVideo(userId, videoId uint64) *entity.ShortVideoWatch {
-	if userId == 0 || videoId == 0 || watchCacheMgr == nil {
-		return nil
-	}
-	id := entity.BuildShortVideoWatchId(userId, videoId)
-	v := watchCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
-		var watch *entity.ShortVideoWatch
-		_ = g.Model(string(entity.TbShortVideoWatch)).Where("id = ?", id).Scan(&watch)
-		if watch == nil || watch.ID == "" {
-			return nil, nil
-		}
-		return watch, nil
+func GetOneShortVideoWatch(userId, videoId uint64) *entity.ShortVideoWatch {
+	all := GetShortVideoWatch(userId)
+	one, ok := lambda.Find(all, func(watch *entity.ShortVideoWatch) bool {
+		return watch.VideoId == videoId
 	})
-	if v == nil {
-		return nil
+	if !ok {
+		one = entity.NewShortVideoWatch(userId, videoId)
+		all = append(all, one)
+		watchCacheMgr.FlushCache(userId, one)
+		return one
 	}
-	watch, _ := v.(*entity.ShortVideoWatch)
-	if watch == nil || watch.ID == "" {
-		return nil
-	}
-	return watch
+	return one
 }
 
-func SaveToCache(watch *entity.ShortVideoWatch) {
-	if watch == nil || watchCacheMgr == nil || watch.ID == "" {
-		return
-	}
-	watchCacheMgr.FlushCache(watch.ID, watch)
+func GetShortVideoWatch(userId uint64) []*entity.ShortVideoWatch {
+	v := watchCacheMgr.GetData(userId, func(ctx context.Context) (value interface{}, err error) {
+		watch := make([]*entity.ShortVideoWatch, 0)
+		_ = g.Model(string(entity.TbShortVideoWatch)).Where("user_id = ?", userId).Scan(&watch)
+		return watch, nil
+	})
+	return v.([]*entity.ShortVideoWatch)
 }

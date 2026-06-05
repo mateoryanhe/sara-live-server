@@ -34,8 +34,18 @@ func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortV
 		return nil, errercode.CreateCode(errercode.SysError)
 	}
 
+	watch := shortvideodao.GetOneShortVideoWatch(userId, req.VideoId)
+
+	//记录视频观看人数
+	if watch.ViewCounted == entity.ShortVideoWatchViewCountedNo {
+		watch.SetViewCounted(entity.ShortVideoWatchViewCountedYes)
+		stat := shortvideodao.GetStatByVideoId(watch.VideoId)
+		if stat != nil {
+			stat.AddViewCount(1)
+		}
+	}
+
 	if video.IsPaid != entity.ShortVideoPaidYes {
-		ensureShortVideoWatch(userId, req.VideoId)
 		return &shortvideodto.WatchBillShortVideoRes{
 			Deducted:          0,
 			Diamond:           user.Diamond,
@@ -45,7 +55,6 @@ func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortV
 		}, nil
 	}
 
-	watch := ensureShortVideoWatch(userId, req.VideoId)
 	billedSeconds := watch.BilledSeconds
 
 	cost := float64(video.DiamondPerSecond)
@@ -64,7 +73,6 @@ func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortV
 
 	newBilledSeconds := billedSeconds + watchBillIntervalSeconds
 	watch.SetBilledSeconds(newBilledSeconds)
-	//shortvideodao.SaveToCache(watch)
 
 	return &shortvideodto.WatchBillShortVideoRes{
 		Deducted:          deducted,
@@ -75,10 +83,11 @@ func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortV
 	}, nil
 }
 
-// ensureShortVideoWatch 按用户+视频维度获取观看记录,首次观看时创建记录并累加观看人数
+// ensureShortVideoWatch 按用户+视频维度获取观看记录,未计入观看人数时累加统计
 func ensureShortVideoWatch(userId, videoId uint64) *entity.ShortVideoWatch {
-	watch := shortvideodao.GetShortVideoWatchByUserVideo(userId, videoId)
+	watch := shortvideodao.GetOneShortVideoWatch(userId, videoId)
 	if watch != nil {
+		tryIncrViewCount(watch)
 		return watch
 	}
 
@@ -86,22 +95,32 @@ func ensureShortVideoWatch(userId, videoId uint64) *entity.ShortVideoWatch {
 	gmlock.Lock(lockName)
 	defer gmlock.Unlock(lockName)
 
-	watch = shortvideodao.GetShortVideoWatchByUserVideo(userId, videoId)
-	if watch != nil {
-		return watch
+	tryIncrViewCount(watch)
+	return watch
+}
+
+func tryIncrViewCount(watch *entity.ShortVideoWatch) {
+	if watch == nil || watch.ViewCounted == entity.ShortVideoWatchViewCountedYes {
+		return
 	}
 
-	watch = entity.NewShortVideoWatch(userId, videoId)
+	lockName := fmt.Sprintf("watch_view_count_%s", watch.ID)
+	gmlock.Lock(lockName)
+	defer gmlock.Unlock(lockName)
 
-	statLock := fmt.Sprintf("view_shortvideo_%v", videoId)
+	if watch.ViewCounted == entity.ShortVideoWatchViewCountedYes {
+		return
+	}
+
+	statLock := fmt.Sprintf("view_shortvideo_%v", watch.VideoId)
 	gmlock.Lock(statLock)
-	defer gmlock.Unlock(statLock)
-	stat := shortvideodao.GetStatByVideoId(videoId)
+	stat := shortvideodao.GetStatByVideoId(watch.VideoId)
 	if stat != nil {
 		stat.AddViewCount(1)
 	}
+	gmlock.Unlock(statLock)
 
-	return watch
+	watch.SetViewCounted(entity.ShortVideoWatchViewCountedYes)
 }
 
 func calcChargeableSeconds(billedSeconds, interval, freeWatchSeconds uint32) uint32 {

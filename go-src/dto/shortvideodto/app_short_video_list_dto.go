@@ -29,6 +29,13 @@ type AppShortVideoViewListReq struct {
 	PageSize int `json:"pageSize" dc:"每页数量(默认20,最大100)"`
 }
 
+// AppShortVideoPublishListReq App端分页查询短视频列表(仅已上架,按发布时间降序,走缓存)
+type AppShortVideoPublishListReq struct {
+	g.Meta   `path:"/appShortVideoPublishList" method:"post" summary:"App分页查询短视频列表(已上架,按发布时间降序)" tags:"短视频"`
+	Page     int `json:"page" dc:"页码(从1开始,默认1)"`
+	PageSize int `json:"pageSize" dc:"每页数量(默认20,最大100)"`
+}
+
 // AppShortVideoListRes App端短视频分页列表响应
 type AppShortVideoListRes struct {
 	Total    int                  `json:"total" dc:"总条数"`

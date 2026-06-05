@@ -10,7 +10,7 @@ import (
 
 var shortVideoStatCacheMgr *cache.CacheMgr
 
-func InitShortVideoStatDao() {
+func initShortVideoStatDao() {
 	shortVideoStatCacheMgr = cache.NewCacheMgr()
 }
 
@@ -34,30 +34,6 @@ func GetStatByVideoId(videoId uint64) *entity.ShortVideoStat {
 	}
 	stat, _ := cacheData.(*entity.ShortVideoStat)
 	return stat
-}
-
-// GetMapByVideoIds 批量获取统计数据,key为视频ID,缺失项视为0
-func GetMapByVideoIds(videoIds []uint64) map[uint64]*entity.ShortVideoStat {
-	ret := make(map[uint64]*entity.ShortVideoStat, len(videoIds))
-	if len(videoIds) == 0 {
-		return ret
-	}
-	rows := make([]*entity.ShortVideoStat, 0)
-	_ = g.Model(string(entity.TbShortVideoStat)).WhereIn(string(db.IdName), videoIds).Scan(&rows)
-	for _, row := range rows {
-		if row != nil && row.ID != 0 {
-			ret[row.ID] = row
-		}
-	}
-	for _, id := range videoIds {
-		if id == 0 {
-			continue
-		}
-		if _, ok := ret[id]; !ok {
-			ret[id] = entity.NewShortVideoStat(id)
-		}
-	}
-	return ret
 }
 
 func DeleteByVideoId(videoId uint64) error {

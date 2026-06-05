@@ -16,7 +16,7 @@ var (
 )
 
 // InitLiveRoomOnlineDao 初始化在线玩家相关缓存
-func InitLiveRoomOnlineDao() {
+func initLiveRoomOnlineDao() {
 	onlineCacheMgr = cache.NewCacheMgr()
 	roomOnlineCacheMgr = cache.NewCacheMgr()
 }

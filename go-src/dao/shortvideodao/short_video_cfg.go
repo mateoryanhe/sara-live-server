@@ -7,7 +7,7 @@ import (
 
 var cfg *entity.ShortVideoCfg
 
-func InitShortVideoCfgDao() {
+func initShortVideoCfgDao() {
 	g.DB().Model(string(entity.TbShortVideoCfg)).Order("id asc").Limit(1).Scan(&cfg)
 }
 
