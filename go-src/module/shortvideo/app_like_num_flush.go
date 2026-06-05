@@ -63,9 +63,10 @@ func getAppShortVideoListCache() []*shortvideodto.AppShortVideoItem {
 }
 
 func toAppShortVideoItem(row *entity.ShortVideo, stat *entity.ShortVideoStat) *shortvideodto.AppShortVideoItem {
-	var likeCount uint64
+	var likeCount, viewCount uint64
 	if stat != nil {
 		likeCount = stat.LikeCount
+		viewCount = stat.ViewCount
 	}
 	return &shortvideodto.AppShortVideoItem{
 		ID:               strconv.FormatUint(row.ID, 10),
@@ -76,6 +77,7 @@ func toAppShortVideoItem(row *entity.ShortVideo, stat *entity.ShortVideoStat) *s
 		IsPaid:           row.IsPaid,
 		DiamondPerSecond: row.DiamondPerSecond,
 		LikeCount:        likeCount,
+		ViewCount:        viewCount,
 	}
 }
 

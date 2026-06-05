@@ -19,6 +19,10 @@ func (c *ShortVideoAppController) AppShortVideoList(ctx context.Context, req *sh
 	return shortvideo.GetAppShortVideoList(ctx, req)
 }
 
+func (c *ShortVideoAppController) AppShortVideoViewList(ctx context.Context, req *shortvideodto.AppShortVideoViewListReq) (*shortvideodto.AppShortVideoListRes, error) {
+	return shortvideo.GetAppShortVideoViewList(ctx, req)
+}
+
 func (c *ShortVideoAppController) LikeShortVideo(ctx context.Context, req *shortvideodto.LikeShortVideoReq) (*shortvideodto.LikeShortVideoRes, error) {
 	return shortvideo.LikeShortVideo(ctx, req)
 }
