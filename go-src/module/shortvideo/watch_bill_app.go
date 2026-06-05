@@ -2,6 +2,9 @@ package shortvideo
 
 import (
 	"context"
+	"fmt"
+
+	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/constants/currency"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/shortvideodao"
@@ -31,7 +34,8 @@ func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortV
 		return nil, errercode.CreateCode(errercode.SysError)
 	}
 
-	if video.IsPaid != entity.ShortVideoPaidYes || video.DiamondPerSecond == 0 {
+	if video.IsPaid != entity.ShortVideoPaidYes {
+		ensureShortVideoWatch(userId, req.VideoId)
 		return &shortvideodto.WatchBillShortVideoRes{
 			Deducted:          0,
 			Diamond:           user.Diamond,
@@ -41,11 +45,8 @@ func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortV
 		}, nil
 	}
 
-	watch := shortvideodao.GetShortVideoWatchByUserVideo(userId, req.VideoId)
-	billedSeconds := uint32(0)
-	if watch != nil {
-		billedSeconds = watch.BilledSeconds
-	}
+	watch := ensureShortVideoWatch(userId, req.VideoId)
+	billedSeconds := watch.BilledSeconds
 
 	cost := float64(video.DiamondPerSecond)
 
@@ -62,9 +63,6 @@ func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortV
 	}
 
 	newBilledSeconds := billedSeconds + watchBillIntervalSeconds
-	if watch == nil {
-		watch = entity.NewShortVideoWatch(userId, req.VideoId)
-	}
 	watch.SetBilledSeconds(newBilledSeconds)
 	//shortvideodao.SaveToCache(watch)
 
@@ -75,6 +73,35 @@ func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortV
 		ChargeableSeconds: 0,
 		CanContinue:       true,
 	}, nil
+}
+
+// ensureShortVideoWatch 按用户+视频维度获取观看记录,首次观看时创建记录并累加观看人数
+func ensureShortVideoWatch(userId, videoId uint64) *entity.ShortVideoWatch {
+	watch := shortvideodao.GetShortVideoWatchByUserVideo(userId, videoId)
+	if watch != nil {
+		return watch
+	}
+
+	lockName := fmt.Sprintf("watch_first_%d_%d", userId, videoId)
+	gmlock.Lock(lockName)
+	defer gmlock.Unlock(lockName)
+
+	watch = shortvideodao.GetShortVideoWatchByUserVideo(userId, videoId)
+	if watch != nil {
+		return watch
+	}
+
+	watch = entity.NewShortVideoWatch(userId, videoId)
+
+	statLock := fmt.Sprintf("view_shortvideo_%v", videoId)
+	gmlock.Lock(statLock)
+	defer gmlock.Unlock(statLock)
+	stat := shortvideodao.GetStatByVideoId(videoId)
+	if stat != nil {
+		stat.AddViewCount(1)
+	}
+
+	return watch
 }
 
 func calcChargeableSeconds(billedSeconds, interval, freeWatchSeconds uint32) uint32 {

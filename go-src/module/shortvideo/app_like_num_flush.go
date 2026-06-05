@@ -2,6 +2,7 @@ package shortvideo
 
 import (
 	"context"
+	"sort"
 	"strconv"
 	"sync/atomic"
 	"time"
@@ -43,6 +44,9 @@ func loadAppShortVideoListCache() {
 		stat := shortvideodao.GetStatByVideoId(row.ID)
 		list = append(list, toAppShortVideoItem(row, stat))
 	}
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].LikeCount > list[j].LikeCount
+	})
 	appListCache.Store(list)
 }
 

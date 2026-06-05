@@ -47,6 +47,7 @@ logger:
   ctxKeys: [ ]                    # 自定义Context上下文变量名称，自动打印Context的变量到日志中。默认为空
   header: true                  # 是否打印日志的头信息。默认true
   stdout: true                  # 日志是否同时输出到终端。默认true
+  flags: true    # 文件异步写入
   rotateBackupExpire: 0                     # 按照切分的文件有效期清理切分文件，当滚动切分特性开启时有效。默认为0，表示不备份，切分则删除
   rotateBackupCompress: 0                     # 滚动切分文件的压缩比（0-9）。默认为0，表示不压缩
   rotateCheckInterval: "1h"                  # 滚动切分的时间检测间隔，一般不需要设置。默认为1小时
