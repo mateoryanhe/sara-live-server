@@ -3,6 +3,7 @@ package shortvideo
 import (
 	"context"
 	"strconv"
+	"time"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/snowflake"
 	"xr-game-server/dao/shortvideodao"
@@ -43,6 +44,8 @@ func CreateShortVideo(_ context.Context, req *shortvideodto.CreateShortVideoReq)
 		Description:      req.Description,
 	}
 	row.ID = snowflake.GetId()
+	row.CreatedAt = time.Now()
+	row.UpdatedAt = time.Now()
 	if err := shortvideodao.Create(row); err != nil {
 		return nil, err
 	}
@@ -97,6 +100,7 @@ func OnShelfShortVideo(_ context.Context, req *shortvideodto.OnShelfShortVideoRe
 	if row.Status != entity.ShortVideoStatusOnShelf {
 		shortvideodao.UpdateStatus(req.ID, entity.ShortVideoStatusOnShelf)
 		row.Status = entity.ShortVideoStatusOnShelf
+		row.UpdatedAt = time.Now()
 		loadAppShortVideoListCache()
 		shortvideodao.FlushShortVideo(row)
 		return nil, nil
@@ -112,6 +116,7 @@ func OffShelfShortVideo(_ context.Context, req *shortvideodto.OffShelfShortVideo
 	if row.Status != entity.ShortVideoStatusOffShelf {
 		shortvideodao.UpdateStatus(req.ID, entity.ShortVideoStatusOffShelf)
 		row.Status = entity.ShortVideoStatusOffShelf
+		row.UpdatedAt = time.Now()
 		loadAppShortVideoListCache()
 		shortvideodao.FlushShortVideo(row)
 		return nil, nil

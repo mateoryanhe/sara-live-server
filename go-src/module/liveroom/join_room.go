@@ -21,11 +21,13 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
 
+	now := time.Now()
 	onlineId := entity.BuildLiveRoomOnlineId(userId, req.RoomId)
 	existing := liveroomdao.GetOnlineById(onlineId, userId, room.ID)
 	existing.SetStatus(entity.LiveRoomOnlineStatusOnline)
+	existing.SetJoinTime(&now)
 	//刷新在线列表
-	liveroomdao.AddOnlineData(existing)
+	addToOnline(userId, room.ID)
 
 	// 直播中且非主播本人:有效观众(单场去重 + 日/周/月跨直播间去重)
 	if room.LiveRecordId > 0 && userId != req.RoomId {
@@ -39,6 +41,6 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 
 	return &liveroomdto.JoinRoomRes{
 		OnlineId:    onlineId,
-		OnlineCount: len(liveroomdao.GetOnlinesByRoom(req.RoomId)),
+		OnlineCount: getLenForRoom(room.ID),
 	}, nil
 }

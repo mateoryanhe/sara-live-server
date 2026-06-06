@@ -37,8 +37,8 @@ func NotifyAnchorBanned(anchorId uint64, banApplyTime *time.Time, banReason stri
 	}
 
 	pushTo(anchorId)
-	for _, o := range liveroomdao.GetOnlinesByRoom(roomId) {
-		pushTo(o.UserId)
+	for _, o := range getOnline(roomId) {
+		pushTo(o)
 	}
 
 	room := liveroomdao.GetRoomByAnchor(anchorId)

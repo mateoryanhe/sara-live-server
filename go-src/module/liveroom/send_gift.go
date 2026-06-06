@@ -77,8 +77,8 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 		payload.SenderAvatar = upload.ResolveAvatarUrl(sender.Avatar)
 	}
 
-	for _, o := range liveroomdao.GetOnlinesByRoom(req.RoomId) {
-		push.Data(o.UserId, cmd.LiveRoomGift, payload)
+	for _, o := range getOnline(req.RoomId) {
+		push.Data(o, cmd.LiveRoomGift, payload)
 	}
 
 	lockName := fmt.Sprintf("send_gift_%v", req.RoomId)

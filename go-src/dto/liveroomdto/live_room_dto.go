@@ -85,7 +85,7 @@ type OnlineUserItem struct {
 	UserId   string `json:"userId"   dc:"用户ID"`
 	Nickname string `json:"nickname" dc:"昵称"`
 	Avatar   string `json:"avatar"   dc:"头像URL(已拼资源域名)"`
-	JoinedAt int64  `json:"joinedAt" dc:"最近一次加入时间(秒)"`
+	JoinedAt string `json:"joinedAt" dc:"最近一次加入时间(秒)"`
 	Muted    bool   `json:"muted"    dc:"是否被禁言"`
 }
 

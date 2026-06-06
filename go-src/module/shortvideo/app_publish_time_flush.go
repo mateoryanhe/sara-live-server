@@ -26,7 +26,7 @@ func initAppPublishListCache() {
 func loadAppShortVideoPublishListCache() {
 	rows := shortvideodao.GetOnShelfShortVideos()
 	sort.Slice(rows, func(i, j int) bool {
-		return rows[i].CreatedAt.After(rows[j].CreatedAt)
+		return rows[i].UpdatedAt.After(rows[j].UpdatedAt)
 	})
 
 	list := make([]*shortvideodto.AppShortVideoItem, 0, len(rows))

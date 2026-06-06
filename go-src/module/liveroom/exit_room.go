@@ -13,7 +13,7 @@ func LeaveRoom(ctx context.Context, req *liveroomdto.LeaveRoomReq) (*liveroomdto
 	userId := httpserver.GetAuthId(ctx)
 	exitRoom(userId, req.RoomId)
 	return &liveroomdto.LeaveRoomRes{
-		OnlineCount: len(liveroomdao.GetOnlinesByRoom(req.RoomId)),
+		OnlineCount: getLenForRoom(req.RoomId),
 	}, nil
 }
 
@@ -23,6 +23,6 @@ func exitRoom(userId uint64, roomId uint64) {
 	if existing := liveroomdao.GetOnlineById(onlineId, userId, roomId); existing != nil &&
 		existing.Status != entity.LiveRoomOnlineStatusOffline {
 		existing.SetStatus(entity.LiveRoomOnlineStatusOffline)
-		liveroomdao.RemoveOnlineFromRoomCache(existing)
+		removeOnline(userId, roomId)
 	}
 }

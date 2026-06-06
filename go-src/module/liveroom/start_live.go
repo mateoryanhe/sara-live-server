@@ -23,6 +23,9 @@ func StartLive(ctx context.Context, _ *liveroomdto.StartLiveReq) (*liveroomdto.S
 
 	}
 	addTask(room.ID)
+	//初始在线列表
+	initRoomOnline(room.ID)
+
 	liveRecordId := snowflake.GetId()
 
 	room.SetLiveRecordId(liveRecordId)

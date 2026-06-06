@@ -120,7 +120,7 @@ func GetOnlineUserList(_ context.Context, req *liveroomdto.GetOnlineUserListReq)
 		pageSize = 100
 	}
 
-	all := liveroomdao.GetOnlinesByRoom(req.RoomId)
+	all := getOnline(req.RoomId)
 	total := len(all)
 
 	start := (page - 1) * pageSize
@@ -135,12 +135,18 @@ func GetOnlineUserList(_ context.Context, req *liveroomdto.GetOnlineUserListReq)
 
 	list := make([]*liveroomdto.OnlineUserItem, 0, len(pageData))
 	for _, o := range pageData {
-		item := &liveroomdto.OnlineUserItem{
-			UserId:   strconv.FormatUint(o.UserId, 10),
-			JoinedAt: o.UpdatedAt.Unix(),
-			Muted:    o.Muted,
+		onlineId := entity.BuildLiveRoomOnlineId(o, req.RoomId)
+		onlineData := liveroomdao.GetOnlineById(onlineId, o, req.RoomId)
+		joinTime := ""
+		if onlineData.JoinTime != nil {
+			joinTime = onlineData.JoinTime.Format("2006-01-02 15:04:05")
 		}
-		if u := userinfodao.GetUserInfoByUserId(o.UserId); u != nil {
+		item := &liveroomdto.OnlineUserItem{
+			UserId:   strconv.FormatUint(o, 10),
+			JoinedAt: joinTime,
+			Muted:    onlineData.Muted,
+		}
+		if u := userinfodao.GetUserInfoByUserId(o); u != nil {
 			item.Nickname = u.Nickname
 			item.Avatar = upload.ResolveAvatarUrl(u.Avatar)
 		}

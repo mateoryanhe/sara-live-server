@@ -24,6 +24,11 @@ func initHeart() {
 	for _, id := range ids {
 		taskMap.Add(id)
 	}
+	allOnline := liveroomdao.GetAllOnline()
+	for _, data := range allOnline {
+		initRoomOnline(data.RoomId)
+		addToOnline(data.UserId, data.RoomId)
+	}
 	xrtimer.AddSingleton(gctx.New(), time.Second, heart)
 }
 
@@ -103,17 +108,19 @@ func chkAnchor(roomId uint64) {
 }
 
 func chkAudience(roomId uint64) {
-	allOnline := liveroomdao.GetOnlinesByRoom(roomId)
+	allOnline := getOnline(roomId)
 	now := time.Now()
 	for _, data := range allOnline {
-		if data.HeartTime == nil {
-			data.SetHeartTime(&now)
+		onlineId := entity.BuildLiveRoomOnlineId(data, roomId)
+		onlineData := liveroomdao.GetOnlineById(onlineId, data, roomId)
+		if onlineData.HeartTime == nil {
+			onlineData.SetHeartTime(&now)
 		}
-		diff := now.Sub(*data.HeartTime)
+		diff := now.Sub(*onlineData.HeartTime)
 		//如果相差超过5分钟,判定离线
 		if TimeOut > diff {
 			return
 		}
-		exitRoom(data.UserId, roomId)
+		exitRoom(data, roomId)
 	}
 }

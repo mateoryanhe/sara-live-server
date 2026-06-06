@@ -58,8 +58,8 @@ func SendChat(ctx context.Context, req *liveroomdto.SendChatReq) (*liveroomdto.S
 		payload.SenderAvatar = upload.ResolveAvatarUrl(sender.Avatar)
 	}
 
-	for _, o := range liveroomdao.GetOnlinesByRoom(req.RoomId) {
-		push.Data(o.UserId, cmd.LiveRoomChat, payload)
+	for _, o := range getOnline(req.RoomId) {
+		push.Data(o, cmd.LiveRoomChat, payload)
 	}
 
 	return &liveroomdto.SendChatRes{Success: true}, nil
