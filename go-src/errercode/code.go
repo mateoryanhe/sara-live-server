@@ -104,6 +104,10 @@ const (
 	LiveRoomCannotMuteSelf XRCode = 109
 	// LiveRoomAudienceNotOnline 观众不在该直播间
 	LiveRoomAudienceNotOnline XRCode = 110
+	// LiveRoomCannotKickSelf 不能踢出自己
+	LiveRoomCannotKickSelf XRCode = 117
+	// LiveRoomKickBanned 被踢出后暂不可进入直播间
+	LiveRoomKickBanned XRCode = 118
 	// TextSensitiveWord 文本包含铭感词
 	TextSensitiveWord XRCode = 111
 	// AliyunTextModerationCfgInvalid 阿里云文本审核配置无效

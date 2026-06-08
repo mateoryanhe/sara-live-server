@@ -82,6 +82,26 @@ func (c *LiveRoomAppController) SetAudienceMute(ctx context.Context, req *livero
 	return liveroom.SetAudienceMute(ctx, req)
 }
 
+// CancelAudienceMute 主播取消观众禁言
+func (c *LiveRoomAppController) CancelAudienceMute(ctx context.Context, req *liveroomdto.CancelAudienceMuteReq) (res *liveroomdto.CancelAudienceMuteRes, err error) {
+	return liveroom.CancelAudienceMute(ctx, req)
+}
+
+// GetAudienceRestrictStatus 查询观众禁言与被踢状态
+func (c *LiveRoomAppController) GetAudienceRestrictStatus(ctx context.Context, req *liveroomdto.GetAudienceRestrictStatusReq) (res *liveroomdto.GetAudienceRestrictStatusRes, err error) {
+	return liveroom.GetAudienceRestrictStatus(ctx, req)
+}
+
+// KickAudience 主播踢出指定观众
+func (c *LiveRoomAppController) KickAudience(ctx context.Context, req *liveroomdto.KickAudienceReq) (res *liveroomdto.KickAudienceRes, err error) {
+	return liveroom.KickAudience(ctx, req)
+}
+
+// CancelKickBan 主播取消观众进入限制
+func (c *LiveRoomAppController) CancelKickBan(ctx context.Context, req *liveroomdto.CancelKickBanReq) (res *liveroomdto.CancelKickBanRes, err error) {
+	return liveroom.CancelKickBan(ctx, req)
+}
+
 // ReportLiveStartStatus 主播上报开播状态
 func (c *LiveRoomAppController) ReportLiveStartStatus(ctx context.Context, req *liveroomdto.ReportLiveStartStatusReq) (res *liveroomdto.ReportLiveStartStatusRes, err error) {
 	return liveroom.ReportLiveStartStatus(ctx, req)

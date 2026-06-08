@@ -29,4 +29,8 @@ const (
 	LiveRoomAnchorBan = 15
 	//观众禁言状态推送(推送给被禁言/解禁的用户)
 	LiveRoomAudienceMute = 17
+	//观众被踢出推送(推送给被踢出的用户)
+	LiveRoomAudienceKick = 18
+	//取消观众进入限制推送(推送给被取消限制的用户)
+	LiveRoomAudienceKickCancel = 19
 )

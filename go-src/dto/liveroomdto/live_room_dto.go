@@ -145,6 +145,70 @@ type AudienceMutePushItem struct {
 	Muted  bool   `json:"muted"  dc:"是否被禁言"`
 }
 
+// CancelAudienceMuteReq 主播取消观众禁言
+type CancelAudienceMuteReq struct {
+	g.Meta `path:"/cancelAudienceMute" method:"post" summary:"主播取消观众禁言" tags:"直播间"`
+	RoomId uint64 `json:"roomId" v:"required#直播间ID不能为空" dc:"直播间ID(须为本主播房间)"`
+	UserId uint64 `json:"userId" v:"required#观众用户ID不能为空" dc:"被取消禁言的观众用户ID"`
+}
+
+type CancelAudienceMuteRes struct {
+	Success bool `json:"success"`
+}
+
+// GetAudienceRestrictStatusReq 查询观众禁言与被踢状态
+type GetAudienceRestrictStatusReq struct {
+	g.Meta `path:"/getAudienceRestrictStatus" method:"post" summary:"查询观众禁言与被踢状态" tags:"直播间"`
+	RoomId uint64 `json:"roomId" v:"required#直播间ID不能为空" dc:"直播间ID"`
+	UserId uint64 `json:"userId" v:"required#观众用户ID不能为空" dc:"观众用户ID(主播可查任意观众,观众仅可查自己)"`
+}
+
+type GetAudienceRestrictStatusRes struct {
+	RoomId            string `json:"roomId"            dc:"直播间ID"`
+	UserId            string `json:"userId"            dc:"观众用户ID"`
+	Muted             bool   `json:"muted"             dc:"是否被禁言"`
+	KickBanned        bool   `json:"kickBanned"        dc:"是否处于踢出封禁期"`
+	KickTime          int64  `json:"kickTime"          dc:"最近踢出时间(秒,0表示无)"`
+	KickBanExpireAt   int64  `json:"kickBanExpireAt"   dc:"踢出封禁截止时间(秒,0表示无)"`
+	KickRemainSeconds int64  `json:"kickRemainSeconds" dc:"踢出封禁剩余秒数"`
+}
+
+// KickAudienceReq 主播踢出指定观众
+type KickAudienceReq struct {
+	g.Meta `path:"/kickAudience" method:"post" summary:"主播踢出观众" tags:"直播间"`
+	RoomId uint64 `json:"roomId" v:"required#直播间ID不能为空" dc:"直播间ID(须为本主播房间)"`
+	UserId uint64 `json:"userId" v:"required#观众用户ID不能为空" dc:"被踢出的观众用户ID"`
+}
+
+type KickAudienceRes struct {
+	Success bool `json:"success"`
+}
+
+// AudienceKickPushItem 观众被踢出推送载荷
+type AudienceKickPushItem struct {
+	RoomId     string `json:"roomId"     dc:"直播间ID"`
+	UserId     string `json:"userId"     dc:"观众用户ID"`
+	KickTime   int64  `json:"kickTime"   dc:"踢出时间(秒)"`
+	BanSeconds int64  `json:"banSeconds" dc:"禁止再次进入时长(秒)"`
+}
+
+// CancelKickBanReq 主播取消观众进入限制
+type CancelKickBanReq struct {
+	g.Meta `path:"/cancelKickBan" method:"post" summary:"主播取消观众进入限制" tags:"直播间"`
+	RoomId uint64 `json:"roomId" v:"required#直播间ID不能为空" dc:"直播间ID(须为本主播房间)"`
+	UserId uint64 `json:"userId" v:"required#观众用户ID不能为空" dc:"被取消限制的观众用户ID"`
+}
+
+type CancelKickBanRes struct {
+	Success bool `json:"success"`
+}
+
+// AudienceKickCancelPushItem 取消进入限制推送载荷
+type AudienceKickCancelPushItem struct {
+	RoomId string `json:"roomId" dc:"直播间ID"`
+	UserId string `json:"userId" dc:"观众用户ID"`
+}
+
 // SendChatReq App端向直播间发送文字消息
 type SendChatReq struct {
 	g.Meta  `path:"/sendChat" method:"post" summary:"直播间文字消息" tags:"直播间"`

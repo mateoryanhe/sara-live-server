@@ -3,6 +3,7 @@ package liveroom
 import (
 	"context"
 	"strconv"
+	"time"
 
 	"xr-game-server/constants/cmd"
 	"xr-game-server/core/httpserver"
@@ -13,14 +14,14 @@ import (
 	"xr-game-server/errercode"
 )
 
-// SetAudienceMute 主播对指定观众禁言或解禁
-func SetAudienceMute(ctx context.Context, req *liveroomdto.SetAudienceMuteReq) (*liveroomdto.SetAudienceMuteRes, error) {
+// KickAudience 主播踢出指定观众,默认30分钟内不可再次进入
+func KickAudience(ctx context.Context, req *liveroomdto.KickAudienceReq) (*liveroomdto.KickAudienceRes, error) {
 	anchorId := httpserver.GetAuthId(ctx)
 	if anchorId != req.RoomId {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
 	if req.UserId == anchorId {
-		return nil, errercode.CreateCode(errercode.LiveRoomCannotMuteSelf)
+		return nil, errercode.CreateCode(errercode.LiveRoomCannotKickSelf)
 	}
 	if liveroomdao.GetRoomById(req.RoomId) == nil {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
@@ -31,28 +32,26 @@ func SetAudienceMute(ctx context.Context, req *liveroomdto.SetAudienceMuteReq) (
 	if online == nil || online.Status != entity.LiveRoomOnlineStatusOnline {
 		return nil, errercode.CreateCode(errercode.LiveRoomAudienceNotOnline)
 	}
-	if online.Muted == req.Muted {
-		return &liveroomdto.SetAudienceMuteRes{Success: true}, nil
-	}
 
-	online.SetMuted(req.Muted)
-	push.Data(req.UserId, cmd.LiveRoomAudienceMute, &liveroomdto.AudienceMutePushItem{
-		RoomId: strconv.FormatUint(req.RoomId, 10),
-		UserId: strconv.FormatUint(req.UserId, 10),
-		Muted:  req.Muted,
+	now := time.Now()
+	online.SetKickTime(&now)
+	exitRoom(req.UserId, req.RoomId)
+
+	push.Data(req.UserId, cmd.LiveRoomAudienceKick, &liveroomdto.AudienceKickPushItem{
+		RoomId:     strconv.FormatUint(req.RoomId, 10),
+		UserId:     strconv.FormatUint(req.UserId, 10),
+		KickTime:   now.Unix(),
+		BanSeconds: int64(entity.LiveRoomKickBanDuration / time.Second),
 	})
 
-	return &liveroomdto.SetAudienceMuteRes{Success: true}, nil
+	return &liveroomdto.KickAudienceRes{Success: true}, nil
 }
 
-// CancelAudienceMute 主播取消指定观众的禁言
-func CancelAudienceMute(ctx context.Context, req *liveroomdto.CancelAudienceMuteReq) (*liveroomdto.CancelAudienceMuteRes, error) {
+// CancelKickBan 主播取消指定观众的进入限制
+func CancelKickBan(ctx context.Context, req *liveroomdto.CancelKickBanReq) (*liveroomdto.CancelKickBanRes, error) {
 	anchorId := httpserver.GetAuthId(ctx)
 	if anchorId != req.RoomId {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
-	}
-	if req.UserId == anchorId {
-		return nil, errercode.CreateCode(errercode.LiveRoomCannotMuteSelf)
 	}
 	if liveroomdao.GetRoomById(req.RoomId) == nil {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
@@ -60,16 +59,15 @@ func CancelAudienceMute(ctx context.Context, req *liveroomdto.CancelAudienceMute
 
 	onlineId := entity.BuildLiveRoomOnlineId(req.UserId, req.RoomId)
 	online := liveroomdao.GetOnlineById(onlineId, req.UserId, req.RoomId)
-	if online == nil || !online.Muted {
-		return &liveroomdto.CancelAudienceMuteRes{Success: true}, nil
+	if online == nil || online.KickTime == nil {
+		return &liveroomdto.CancelKickBanRes{Success: true}, nil
 	}
 
-	online.SetMuted(false)
-	push.Data(req.UserId, cmd.LiveRoomAudienceMute, &liveroomdto.AudienceMutePushItem{
+	online.SetKickTime(nil)
+	push.Data(req.UserId, cmd.LiveRoomAudienceKickCancel, &liveroomdto.AudienceKickCancelPushItem{
 		RoomId: strconv.FormatUint(req.RoomId, 10),
 		UserId: strconv.FormatUint(req.UserId, 10),
-		Muted:  false,
 	})
 
-	return &liveroomdto.CancelAudienceMuteRes{Success: true}, nil
+	return &liveroomdto.CancelKickBanRes{Success: true}, nil
 }

@@ -19,7 +19,10 @@ const (
 	LiveRoomOnlineMuted       db.TbCol = "muted"
 	TbLiveRoomOnlineHeartTime db.TbCol = "heart_time"
 	TbLiveRoomOnlineJoinTime  db.TbCol = "join_time"
+	TbLiveRoomOnlineKickTime  db.TbCol = "kick_time"
 )
+
+const LiveRoomKickBanDuration = 30 * time.Minute
 
 // 在线状态
 const (
@@ -39,6 +42,7 @@ type LiveRoomOnline struct {
 	CreatedAt time.Time  `json:"createdAt"`
 	JoinTime  *time.Time `gorm:"comment:进入直播间时间" json:"join_time"`
 	HeartTime *time.Time `gorm:"comment:房间心跳状态,大于5分钟，判断下播" json:"heart_time"`
+	KickTime  *time.Time `gorm:"comment:被主播踢出时间" json:"kickTime"`
 }
 
 // BuildLiveRoomOnlineId 拼接复合主键
@@ -111,6 +115,21 @@ func (o *LiveRoomOnline) SetHeartTime(v *time.Time) {
 	})
 }
 
+func (o *LiveRoomOnline) SetKickTime(v *time.Time) {
+	o.KickTime = v
+	syndb.AddDataToQuickChan(TbLiveRoomOnline, TbLiveRoomOnlineKickTime, &syndb.ColData{
+		IdVal: o.ID, ColVal: v,
+	})
+}
+
+// IsKickBanned 是否在踢出封禁期内
+func (o *LiveRoomOnline) IsKickBanned() bool {
+	if o == nil || o.KickTime == nil {
+		return false
+	}
+	return time.Now().Before(o.KickTime.Add(LiveRoomKickBanDuration))
+}
+
 func initLiveRoomOnline() {
 	syndb.RegQuickWithLarge(TbLiveRoomOnline, db.CreatedAtName)
 	syndb.RegQuickWithLarge(TbLiveRoomOnline, db.UpdatedAtName)
@@ -119,6 +138,7 @@ func initLiveRoomOnline() {
 	syndb.RegQuickWithLarge(TbLiveRoomOnline, LiveRoomOnlineStatus)
 	syndb.RegQuickWithLarge(TbLiveRoomOnline, LiveRoomOnlineMuted)
 	syndb.RegQuickWithMiddle(TbLiveRoomOnline, TbLiveRoomOnlineJoinTime)
+	syndb.RegQuickWithLarge(TbLiveRoomOnline, TbLiveRoomOnlineKickTime)
 
 	syndb.RegLazyWithLarge(TbLiveRoomOnline, TbLiveRoomOnlineHeartTime)
 

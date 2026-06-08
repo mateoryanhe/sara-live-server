@@ -24,6 +24,9 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 	now := time.Now()
 	onlineId := entity.BuildLiveRoomOnlineId(userId, req.RoomId)
 	existing := liveroomdao.GetOnlineById(onlineId, userId, room.ID)
+	if existing.IsKickBanned() {
+		return nil, errercode.CreateCode(errercode.LiveRoomKickBanned)
+	}
 	existing.SetStatus(entity.LiveRoomOnlineStatusOnline)
 	existing.SetJoinTime(&now)
 	//刷新在线列表
