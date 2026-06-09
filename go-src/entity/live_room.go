@@ -3,6 +3,7 @@ package entity
 import (
 	"time"
 	"xr-game-server/constants/db"
+	"xr-game-server/core/math"
 	"xr-game-server/core/migrate"
 	"xr-game-server/core/syndb"
 )
@@ -21,6 +22,7 @@ const (
 	LiveRoomBan          db.TbCol = "ban"
 	LiveRoomBanApplyTime db.TbCol = "ban_apply_time"
 	LiveRoomBanReason    db.TbCol = "ban_reason"
+	LiveRoomTotalIncome  db.TbCol = "total_income"
 )
 
 // LiveRoom 直播间(LiveRoom.ID 与 UserInfo.ID 均为主播用户ID,每个主播仅一个直播间)
@@ -35,6 +37,7 @@ type LiveRoom struct {
 	Ban          bool       `gorm:"default:0;comment:封禁状态" json:"ban"`
 	BanApplyTime *time.Time `gorm:"comment:封禁截止时间" json:"banApplyTime"`
 	BanReason    string     `gorm:"size:512;default:'';comment:封禁原因" json:"banReason"`
+	TotalIncome  float64    `gorm:"default:0;comment:直播收益" json:"totalIncome"`
 }
 
 // NewLiveRoom 构造内存对象,字段写入通过 syndb 异步入库
@@ -122,6 +125,13 @@ func (r *LiveRoom) SetBanReason(v string) {
 	})
 }
 
+func (r *LiveRoom) AddTotalIncome(v float64) {
+	r.TotalIncome = math.AddFloat64(r.TotalIncome, v)
+	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomTotalIncome, &syndb.ColData{
+		IdVal: r.ID, ColVal: r.TotalIncome,
+	})
+}
+
 func (r *LiveRoom) SetCreatedAt(v time.Time) {
 	r.CreatedAt = v
 	syndb.AddDataToQuickChan(TbLiveRoom, db.CreatedAtName, &syndb.ColData{
@@ -154,6 +164,7 @@ func initLiveRoom() {
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomBan)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomBanApplyTime)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomBanReason)
+	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomTotalIncome)
 
 	syndb.RegLazyWithLarge(TbLiveRoom, LiveRoomHeartTime)
 
