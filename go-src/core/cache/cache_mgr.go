@@ -24,7 +24,7 @@ func NewCacheMgr() *CacheMgr {
 func (mgr *CacheMgr) GetData(key interface{}, f gcache.Func) any {
 	ctx := gctx.New()
 	//缓存30分钟，让变更数据,有时间同步到数据库
-	data, _ := mgr.Cache.GetOrSetFunc(ctx, key, f, CacheTime)
+	data, _ := mgr.Cache.GetOrSetFuncLock(ctx, key, f, CacheTime)
 	//延迟缓存失效时间
 	_, _ = mgr.Cache.UpdateExpire(ctx, key, CacheTime)
 	return data.Val()

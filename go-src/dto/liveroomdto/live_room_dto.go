@@ -1,13 +1,16 @@
 package liveroomdto
 
-import "github.com/gogf/gf/v2/frame/g"
+import (
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/net/ghttp"
+)
 
 // CreateLiveRoomReq 创建直播间(主播ID由鉴权中间件提供)
 type CreateLiveRoomReq struct {
-	g.Meta `path:"/create" method:"post" summary:"创建直播间" tags:"直播间"`
-	Title  string `json:"title"  v:"required|length:1,128#标题不能为空|标题长度需在1到128之间" dc:"直播间标题"`
-	Cover  string `json:"cover"  dc:"封面图URL"`
-	Notice string `json:"notice" dc:"公告"`
+	g.Meta `path:"/create" method:"post" mime:"multipart/form-data" summary:"创建直播间" tags:"直播间"`
+	Title  string            `json:"title"  v:"required|length:1,128#标题不能为空|标题长度需在1到128之间" dc:"直播间标题"`
+	Cover  *ghttp.UploadFile `json:"cover"  type:"file" dc:"封面图片文件"`
+	Notice string            `json:"notice" dc:"公告"`
 }
 
 type CreateLiveRoomRes struct {

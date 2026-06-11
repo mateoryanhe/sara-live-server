@@ -14,10 +14,10 @@ import (
 )
 
 const (
-	TimeOut = 5 * time.Minute
+	TimeOut = 1050000 * time.Minute
 )
 
-var taskMap = gset.New(true)
+var taskMap = gset.NewTSet[uint64](true)
 
 func initHeart() {
 	ids := liveroomdao.ListLivingRoomIds()
@@ -84,10 +84,7 @@ func heart(ctx context.Context) {
 		return
 	}
 	//每秒检查一下直播间
-	temp := make([]any, 0)
-	temp = append(temp, taskMap.Slice())
-	for _, data := range temp {
-		roomId := data.(uint64)
+	for _, roomId := range taskMap.Slice() {
 		chkAnchor(roomId)
 		chkAudience(roomId)
 	}

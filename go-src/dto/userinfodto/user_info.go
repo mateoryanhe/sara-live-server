@@ -8,22 +8,26 @@ import (
 // GetUserInfoReq 查询当前登录用户的基础信息
 type GetUserInfoReq struct {
 	g.Meta `path:"/get" method:"post" summary:"获取用户基础信息" tags:"用户基础信息"`
+	UserId uint64 `json:"userId"`
 }
 
 type GetUserInfoRes struct {
-	UserId      uint64  `json:"userId"`
-	Nickname    string  `json:"nickname"`
-	Phone       string  `json:"phone"`
-	Avatar      string  `json:"avatar"`
-	Remark      string  `json:"remark"`
-	Gold        float64 `json:"gold"`
-	Diamond     float64 `json:"diamond"`
-	ShareCode   string  `json:"shareCode"`
-	VipLevel    uint32  `json:"vipLevel"`
-	IsAnchor    bool    `json:"isAnchor" dc:"是否主播"`
-	HasLiveRoom bool    `json:"hasLiveRoom" dc:"是否已创建直播间"`
-	Gender      uint8   `json:"gender" dc:"性别(0未知,1男,2女)"`
-	Birthday    string  `json:"birthday" dc:"出生日期(YYYY-MM-DD,空表示未设置)"`
+	UserId        uint64  `json:"userId"`
+	Nickname      string  `json:"nickname"`
+	Phone         string  `json:"phone"`
+	Avatar        string  `json:"avatar"`
+	Remark        string  `json:"remark"`
+	Gold          float64 `json:"gold"`
+	Diamond       float64 `json:"diamond"`
+	ShareCode     string  `json:"shareCode"`
+	VipLevel      uint32  `json:"vipLevel"`
+	IsAnchor      bool    `json:"isAnchor" dc:"是否主播"`
+	HasLiveRoom   bool    `json:"hasLiveRoom" dc:"是否已创建直播间"`
+	Gender        uint8   `json:"gender" dc:"性别(0未知,1男,2女)"`
+	Birthday      string  `json:"birthday" dc:"出生日期(YYYY-MM-DD,空表示未设置)"`
+	FollowCount   int     `json:"followCount" dc:"用户关注数"`
+	FollowerCount int     `json:"followerCount" dc:"用户粉丝数"`
+	TotalIncome   float64 `json:"totalIncome" dc:"主播总收益"`
 }
 
 // UpdateGenderReq 修改性别
