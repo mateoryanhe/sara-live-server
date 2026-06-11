@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	TimeOut = 1050000 * time.Minute
+	TimeOut = 5 * time.Minute
 )
 
 var taskMap = gset.NewTSet[uint64](true)
