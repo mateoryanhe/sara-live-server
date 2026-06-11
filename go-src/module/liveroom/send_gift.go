@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/os/gmlock"
 	"time"
 	"xr-game-server/constants/cmd"
+	"xr-game-server/constants/common"
 	"xr-game-server/constants/currency"
 	"xr-game-server/constants/liverevenue"
 	"xr-game-server/core/event"
@@ -95,7 +96,7 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 	room.AddTotalIncome(float64(totalCost))
 
 	//主播分成
-	amount := float64(req.Count) * 0.4
+	amount := float64(totalCost) * 4 / (10 * common.GoldToDiamondRate)
 	wallet.GoldAdd(req.RoomId, amount, currency.ReasonAnchorGiftRevenue)
 
 	return &liveroomdto.SendGiftRes{

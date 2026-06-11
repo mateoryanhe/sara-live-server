@@ -2,13 +2,12 @@ package wallet
 
 import (
 	"context"
+	"xr-game-server/constants/common"
 	"xr-game-server/constants/currency"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/golddto"
 	"xr-game-server/errercode"
 )
-
-const goldToDiamondRate = 100
 
 // AppExchangeGoldToDiamond App端金币兑换钻石,兑换比例 1 金币 = 100 钻石
 func AppExchangeGoldToDiamond(ctx context.Context, req *golddto.AppExchangeGoldToDiamondReq) (*golddto.AppExchangeGoldToDiamondRes, error) {
@@ -17,7 +16,7 @@ func AppExchangeGoldToDiamond(ctx context.Context, req *golddto.AppExchangeGoldT
 	if goldAmount <= 0 {
 		return nil, errercode.CreateCode(errercode.GoldAmountInvalid)
 	}
-	diamondAmount := goldAmount * goldToDiamondRate
+	diamondAmount := goldAmount * common.GoldToDiamondRate
 
 	goldAfter, err := GoldSub(userId, goldAmount, currency.ReasonGoldExchange)
 	if err != nil {

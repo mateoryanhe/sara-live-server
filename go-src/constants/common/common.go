@@ -9,6 +9,8 @@ const (
 	Add = 0
 	//减类型
 	Subtract = 1
+
+	GoldToDiamondRate = 100
 )
 
 const (
