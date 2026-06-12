@@ -1,6 +1,7 @@
 package apptokendto
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/gogf/gf/v2/util/gconv"
@@ -30,7 +31,7 @@ func NewAppTokenDto(token *entity.AppToken) *AppTokenDto {
 func NewAppTokenDtoFromCache(userId uint64, token string, expireAt time.Time) *AppTokenDto {
 	ret := &AppTokenDto{
 		Id:       gconv.String(userId),
-		Token:    token,
+		Token:    fmt.Sprintf("%v.%s", userId, token),
 		ExpireAt: &expireAt,
 		Expired:  expireAt.Before(time.Now()),
 	}
