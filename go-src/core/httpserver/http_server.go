@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/util/gconv"
+	"strings"
 	"xr-game-server/core/shutdown"
 )
 
@@ -28,8 +29,15 @@ func InitHttpServer() {
 }
 
 func GetAuthId(ctx context.Context) uint64 {
-	authId := g.RequestFromCtx(ctx).GetHeader(AuthId)
-	return gconv.Uint64(authId)
+	tokenStr := g.RequestFromCtx(ctx).GetHeader("Authorization", "")
+	if tokenStr == "" {
+		return 0
+	}
+	auth := strings.Split(tokenStr, ".")
+	if 2 > len(auth) {
+		return 0
+	}
+	return gconv.Uint64(auth[0])
 }
 
 func beforeServeHook(r *ghttp.Request) {
