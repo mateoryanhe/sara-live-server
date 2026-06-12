@@ -15,6 +15,5 @@ type PhoneRegisterReq struct {
 }
 
 type PhoneRegisterRes struct {
-	AuthId string `json:"authId"`
-	Token  string `json:"token"`
+	Token string `json:"token"`
 }

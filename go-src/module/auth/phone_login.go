@@ -2,9 +2,9 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/crypto/gmd5"
 	"github.com/gogf/gf/v2/frame/g"
-	"strconv"
 	"time"
 	"xr-game-server/constants/common"
 	"xr-game-server/core/xrtoken"
@@ -36,7 +36,6 @@ func PhoneLogin(ctx context.Context, req *authdto.PhoneLoginReq) (res *authdto.P
 	userlogindevicedao.RefreshLoginDevice(account.ID, req.DeviceInfo)
 
 	return &authdto.PhoneLoginRes{
-		Token:  tokenStr,
-		AuthId: strconv.FormatUint(account.ID, 10),
+		Token: fmt.Sprintf("%v.%s", account.ID, tokenStr),
 	}, nil
 }

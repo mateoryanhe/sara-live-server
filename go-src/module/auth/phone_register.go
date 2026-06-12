@@ -2,9 +2,9 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/crypto/gmd5"
 	"github.com/gogf/gf/v2/frame/g"
-	"strconv"
 	"time"
 	"xr-game-server/constants/common"
 	"xr-game-server/core/event"
@@ -66,8 +66,7 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 	}
 
 	res = &authdto.PhoneRegisterRes{
-		Token:  tokenStr,
-		AuthId: strconv.FormatUint(account.ID, 10),
+		Token: fmt.Sprintf("%v.%s", account.ID, tokenStr),
 	}
 	return res, nil
 }

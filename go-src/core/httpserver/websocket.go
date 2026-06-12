@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/gorilla/websocket"
 	"net/http"
+	"strings"
 	"time"
 	"xr-game-server/constants/cmd"
 	"xr-game-server/constants/common"
@@ -77,22 +78,17 @@ func InitWebsocket() {
 			return
 		}
 		//开始检查token
-		userId := r.GetQuery(AuthId).String()
-		if len(userId) == common.Zero {
-			ws.WriteMessage(websocket.BinaryMessage, newError(errercode.EmptyUserId))
+		authStr := r.GetHeader("Authorization", "")
+		if authStr == "" || len(strings.Split(authStr, ".")) != 2 {
+			ws.WriteMessage(websocket.BinaryMessage, newError(errercode.Token))
 			return
 		}
-		if !cfg.GetAuthCfg().LoginOff {
-			token := r.GetQuery(Token).String()
-			if len(token) == common.Zero {
-				ws.WriteMessage(websocket.BinaryMessage, newError(errercode.EmptyToken))
-				return
-			}
-			flag := xrtoken.HasAppToken(gconv.Uint64(userId), token)
-			if !flag {
-				ws.WriteMessage(websocket.BinaryMessage, newError(errercode.Token))
-				return
-			}
+		userId := strings.Split(authStr, ".")[0]
+		token := strings.Split(authStr, ".")[1]
+		flag := xrtoken.HasAppToken(gconv.Uint64(userId), token)
+		if !flag {
+			ws.WriteMessage(websocket.BinaryMessage, newError(errercode.Token))
+			return
 		}
 		client := newClient(gconv.Uint64(userId), ws)
 		client.init()
