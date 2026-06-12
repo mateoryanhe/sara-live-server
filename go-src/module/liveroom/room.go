@@ -3,6 +3,7 @@ package liveroom
 import (
 	"context"
 	"strconv"
+	"time"
 
 	"github.com/gogf/gf/v2/net/ghttp"
 	"xr-game-server/constants/userstatus"
@@ -163,6 +164,9 @@ func GetOnlineUserList(_ context.Context, req *liveroomdto.GetOnlineUserListReq)
 		if u := userinfodao.GetUserInfoByUserId(o); u != nil {
 			item.Nickname = u.Nickname
 			item.Avatar = upload.ResolveAvatarUrl(u.Avatar)
+			item.VipLevel = u.VipLevel
+			item.Gender = u.Gender
+			item.Age = calcAge(u.Birthday)
 		}
 		list = append(list, item)
 	}
@@ -173,6 +177,22 @@ func GetOnlineUserList(_ context.Context, req *liveroomdto.GetOnlineUserListReq)
 		PageSize: pageSize,
 		List:     list,
 	}, nil
+}
+
+func calcAge(birthday *time.Time) int {
+	if birthday == nil || birthday.IsZero() {
+		return 0
+	}
+	now := time.Now()
+	age := now.Year() - birthday.Year()
+	anniversary := time.Date(now.Year(), birthday.Month(), birthday.Day(), 0, 0, 0, 0, now.Location())
+	if now.Before(anniversary) {
+		age--
+	}
+	if age < 0 {
+		return 0
+	}
+	return age
 }
 
 // GetRoom 查询直播间(公开接口,任意登录用户可调用)

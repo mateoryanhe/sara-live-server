@@ -26,6 +26,9 @@ type rankItem struct {
 	Nickname      string
 	Avatar        string
 	RevenueAmount uint64
+	VipLevel      uint32
+	Gender        uint8
+	Age           int
 }
 
 type rankSnapshot struct {
@@ -87,6 +90,9 @@ func buildRankItems(rows []*liveroomdao.AnchorRevenueStatRow) []*rankItem {
 		if profile := userinfodao.GetUserInfoByUserId(row.ReceiverId); profile != nil {
 			item.Nickname = profile.Nickname
 			item.Avatar = upload.ResolveAvatarUrl(profile.Avatar)
+			item.VipLevel = profile.VipLevel
+			item.Gender = profile.Gender
+			item.Age = calcAge(profile.Birthday)
 		}
 		list = append(list, item)
 	}
@@ -144,6 +150,9 @@ func GetAppAnchorRankList(_ context.Context, req *anchorrankdto.AppAnchorRankLis
 			Nickname:      row.Nickname,
 			Avatar:        row.Avatar,
 			RevenueAmount: row.RevenueAmount,
+			VipLevel:      row.VipLevel,
+			Gender:        row.Gender,
+			Age:           row.Age,
 		})
 	}
 	return &anchorrankdto.AppAnchorRankListRes{
@@ -167,6 +176,22 @@ func normalizePage(page, pageSize int) (int, int) {
 		pageSize = maxPageSize
 	}
 	return page, pageSize
+}
+
+func calcAge(birthday *time.Time) int {
+	if birthday == nil || birthday.IsZero() {
+		return 0
+	}
+	now := time.Now()
+	age := now.Year() - birthday.Year()
+	anniversary := time.Date(now.Year(), birthday.Month(), birthday.Day(), 0, 0, 0, 0, now.Location())
+	if now.Before(anniversary) {
+		age--
+	}
+	if age < 0 {
+		return 0
+	}
+	return age
 }
 
 func pageRange(total, page, pageSize int) (int, int) {

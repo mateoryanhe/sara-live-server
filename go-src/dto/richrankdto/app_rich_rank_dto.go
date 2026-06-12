@@ -23,6 +23,9 @@ type AppRichRankItem struct {
 	Nickname      string  `json:"nickname"      dc:"用户昵称"`
 	Avatar        string  `json:"avatar"        dc:"用户头像URL"`
 	ConsumeAmount float64 `json:"consumeAmount,string" dc:"钻石消费总额"`
+	VipLevel      uint32  `json:"vipLevel"      dc:"VIP等级"`
+	Gender        uint8   `json:"gender"        dc:"性别(0未知,1男,2女)"`
+	Age           int     `json:"age"           dc:"年龄(未设置出生日期时为0)"`
 }
 
 // AppRichRankListRes App端富豪榜响应

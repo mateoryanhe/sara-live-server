@@ -3,6 +3,7 @@ package livefollow
 import (
 	"context"
 	"strconv"
+	"time"
 	"xr-game-server/constants/userstatus"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/livefollowdao"
@@ -98,6 +99,9 @@ func FollowingList(ctx context.Context, req *livefollowdto.FollowingListReq) (*l
 			item.Nickname = u.Nickname
 			item.Avatar = upload.ResolveAvatarUrl(u.Avatar)
 			item.GuildId = strconv.FormatUint(u.GuildId, 10)
+			item.VipLevel = u.VipLevel
+			item.Gender = u.Gender
+			item.Age = calcAge(u.Birthday)
 		}
 		list = append(list, item)
 	}
@@ -129,6 +133,9 @@ func FollowerList(ctx context.Context, req *livefollowdto.FollowerListReq) (*liv
 		if u := userinfodao.GetUserInfoByUserId(f.UserId); u != nil {
 			item.Nickname = u.Nickname
 			item.Avatar = upload.ResolveAvatarUrl(u.Avatar)
+			item.VipLevel = u.VipLevel
+			item.Gender = u.Gender
+			item.Age = calcAge(u.Birthday)
 		}
 		list = append(list, item)
 	}
@@ -163,6 +170,22 @@ func normalizePage(page, pageSize int) (int, int) {
 		pageSize = maxPageSize
 	}
 	return page, pageSize
+}
+
+func calcAge(birthday *time.Time) int {
+	if birthday == nil || birthday.IsZero() {
+		return 0
+	}
+	now := time.Now()
+	age := now.Year() - birthday.Year()
+	anniversary := time.Date(now.Year(), birthday.Month(), birthday.Day(), 0, 0, 0, 0, now.Location())
+	if now.Before(anniversary) {
+		age--
+	}
+	if age < 0 {
+		return 0
+	}
+	return age
 }
 
 func pageRange(total, page, pageSize int) (int, int) {

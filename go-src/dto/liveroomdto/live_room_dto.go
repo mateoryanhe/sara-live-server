@@ -90,6 +90,9 @@ type OnlineUserItem struct {
 	Avatar   string `json:"avatar"   dc:"头像URL(已拼资源域名)"`
 	JoinedAt string `json:"joinedAt" dc:"最近一次加入时间(秒)"`
 	Muted    bool   `json:"muted"    dc:"是否被禁言"`
+	VipLevel uint32 `json:"vipLevel" dc:"VIP等级"`
+	Gender   uint8  `json:"gender"   dc:"性别(0未知,1男,2女)"`
+	Age      int    `json:"age"      dc:"年龄(未设置出生日期时为0)"`
 }
 
 type GetOnlineUserListRes struct {

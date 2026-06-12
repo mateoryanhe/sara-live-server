@@ -23,6 +23,9 @@ type AppAnchorRankItem struct {
 	Nickname      string `json:"nickname"      dc:"主播昵称"`
 	Avatar        string `json:"avatar"        dc:"主播头像URL"`
 	RevenueAmount uint64 `json:"revenueAmount" dc:"收益总额(钻石)"`
+	VipLevel      uint32 `json:"vipLevel"      dc:"VIP等级"`
+	Gender        uint8  `json:"gender"        dc:"性别(0未知,1男,2女)"`
+	Age           int    `json:"age"           dc:"年龄(未设置出生日期时为0)"`
 }
 
 // AppAnchorRankListRes App端主播红人榜响应

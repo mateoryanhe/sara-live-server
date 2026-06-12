@@ -49,6 +49,9 @@ type AnchorItem struct {
 	GuildId    string `json:"guildId"    dc:"主播所属工会ID"`
 	RoomStatus uint8  `json:"roomStatus" dc:"主播直播间状态(0未开播,1直播中,2无直播间)"`
 	FollowedAt int64  `json:"followedAt" dc:"关注时间(秒)"`
+	VipLevel   uint32 `json:"vipLevel"   dc:"VIP等级"`
+	Gender     uint8  `json:"gender"     dc:"性别(0未知,1男,2女)"`
+	Age        int    `json:"age"        dc:"年龄(未设置出生日期时为0)"`
 }
 
 type FollowingListRes struct {
@@ -71,6 +74,9 @@ type FollowerItem struct {
 	Nickname   string `json:"nickname"   dc:"粉丝昵称"`
 	Avatar     string `json:"avatar"     dc:"粉丝头像URL(已拼资源域名)"`
 	FollowedAt int64  `json:"followedAt" dc:"关注时间(秒)"`
+	VipLevel   uint32 `json:"vipLevel"   dc:"VIP等级"`
+	Gender     uint8  `json:"gender"     dc:"性别(0未知,1男,2女)"`
+	Age        int    `json:"age"        dc:"年龄(未设置出生日期时为0)"`
 }
 
 type FollowerListRes struct {
