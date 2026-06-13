@@ -36,5 +36,11 @@ export const operationRoutes: RouteRecordRaw = {
             component: () => import('@/views/operation/ticket/ticket-list.vue'),
             meta: {title: '门票管理'},
         },
+        {
+            path: 'private-room-billing/billing-list',
+            name: 'PrivateRoomBillingManagement',
+            component: () => import('@/views/operation/private-room-billing/billing-list.vue'),
+            meta: {title: '私密直播间计费'},
+        },
     ],
 }

@@ -51,6 +51,7 @@ func Init() {
 	initVipCfg()
 	initGameCfg()
 	initLiveTicket()
+	initLivePrivateRoomBilling()
 	initAgoraCfg()
 	initAliyunTextModerationCfg()
 	initUploadResourceCfg()

@@ -124,6 +124,8 @@ const (
 	TicketExist XRCode = 119
 	// TicketNonExist 门票不存在
 	TicketNonExist XRCode = 121
+	// PrivateRoomBillingNonExist 私密直播间计费配置不存在
+	PrivateRoomBillingNonExist XRCode = 123
 )
 
 type XError struct {

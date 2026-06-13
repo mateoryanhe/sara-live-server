@@ -371,6 +371,19 @@ export interface TicketQuery extends PageQuery {
     statusFilter?: number
 }
 
+export interface PrivateRoomBilling {
+    id: string
+    pricePerMinute: number
+    sort: number
+    status: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface PrivateRoomBillingQuery extends PageQuery {
+    statusFilter?: number
+}
+
 export interface ShortVideo {
     id: string
     title: string

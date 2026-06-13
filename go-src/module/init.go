@@ -11,6 +11,7 @@ import (
 	"xr-game-server/module/liveroom"
 	"xr-game-server/module/message"
 	"xr-game-server/module/name"
+	"xr-game-server/module/privateroombilling"
 	"xr-game-server/module/rank"
 	"xr-game-server/module/recharge"
 	"xr-game-server/module/richrank"
@@ -34,6 +35,7 @@ func Init() {
 	anchorrank.Init()
 	banner.Init()
 	ticket.Init()
+	privateroombilling.Init()
 	vip.Init()
 	game.Init()
 	agora.Init()
