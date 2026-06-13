@@ -20,6 +20,11 @@ func (c *AgoraAppController) LiveRoomToken(ctx context.Context, req *agoradto.Ge
 	return agora.GetLiveRoomToken(ctx, req)
 }
 
+// AppId App端获取声网AppId
+func (c *AgoraAppController) AppId(ctx context.Context, req *agoradto.GetAppIdReq) (*agoradto.GetAppIdRes, error) {
+	return agora.GetAppId(ctx, req)
+}
+
 // CheckUserOnline 查询用户是否在直播间(声网)
 func (c *AgoraAppController) CheckUserOnline(ctx context.Context, req *agoradto.CheckUserOnlineReq) (*agoradto.CheckUserOnlineRes, error) {
 	return agora.CheckUserOnline(ctx, req)

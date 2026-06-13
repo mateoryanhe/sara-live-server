@@ -51,6 +51,15 @@ func GetLiveRoomToken(ctx context.Context, req *agoradto.GetLiveRoomTokenReq) (*
 	}, nil
 }
 
+// GetAppId App端获取声网AppId
+func GetAppId(_ context.Context, _ *agoradto.GetAppIdReq) (*agoradto.GetAppIdRes, error) {
+	agoraCfg := getAgoraCfgCache()
+	if agoraCfg == nil || agoraCfg.AppId == "" {
+		return nil, errercode.CreateCode(errercode.AgoraCfgInvalid)
+	}
+	return &agoradto.GetAppIdRes{AppId: agoraCfg.AppId}, nil
+}
+
 func buildChannelName(roomId uint64) string {
 	return strconv.FormatUint(roomId, 10)
 }

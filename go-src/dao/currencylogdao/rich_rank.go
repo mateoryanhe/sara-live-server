@@ -24,17 +24,24 @@ func SumDiamondConsumeByUser(startTime, endTime time.Time) []*DiamondConsumeStat
 		return list
 	}
 	ctx := gctx.New()
+	now := time.Now()
 	err := g.DB().Ctx(ctx).Raw(`
-SELECT user_id, SUM(amount) AS total
-FROM `+string(entity.TbCurrencyLog)+`
-WHERE `+string(entity.CurrencyLogType)+` = ?
-  AND `+string(entity.CurrencyLogAction)+` = ?
-  AND created_at >= ?
-  AND created_at <= ?
-GROUP BY user_id
+SELECT cl.user_id, SUM(cl.amount) AS total
+FROM `+string(entity.TbCurrencyLog)+` cl
+INNER JOIN `+string(entity.TbAccount)+` a ON a.id = cl.user_id
+WHERE cl.`+string(entity.CurrencyLogType)+` = ?
+  AND cl.`+string(entity.CurrencyLogAction)+` = ?
+  AND cl.created_at >= ?
+  AND cl.created_at <= ?
+  AND IFNULL(a.`+string(entity.AccountCancel)+`, 0) = 0
+  AND (
+    IFNULL(a.`+string(entity.AccountBan)+`, 0) = 0
+    OR (a.`+string(entity.AccountBanApplyTime)+` IS NOT NULL AND a.`+string(entity.AccountBanApplyTime)+` <= ?)
+  )
+GROUP BY cl.user_id
 ORDER BY total DESC
 LIMIT ?
-`, gameevent.CurrencyTypeDiamond, gameevent.CurrencyActionSub, startTime, endTime, richRankTopLimit).Scan(&list)
+`, gameevent.CurrencyTypeDiamond, gameevent.CurrencyActionSub, startTime, endTime, now, richRankTopLimit).Scan(&list)
 	if err != nil {
 		g.Log().Errorf(ctx, "SumDiamondConsumeByUser error: %v", err)
 		return make([]*DiamondConsumeStatRow, 0)
