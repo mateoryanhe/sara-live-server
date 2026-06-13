@@ -74,6 +74,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		TicketExist:                    "Ticket name already exists",
 		TicketNonExist:                 "Ticket does not exist",
 		PrivateRoomBillingNonExist:     "Private room billing config does not exist",
+		LiveRoomPrivateAudienceFull:    "Private room audience is full",
 	},
 	lang.LangZHCN: {
 		Success:                        "成功",
@@ -144,6 +145,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		TicketExist:                    "门票名称已存在",
 		TicketNonExist:                 "门票不存在",
 		PrivateRoomBillingNonExist:     "私密直播间计费配置不存在",
+		LiveRoomPrivateAudienceFull:    "私密直播间观众已满",
 	},
 	lang.LangZHTW: {
 		Success:                        "成功",
@@ -214,6 +216,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		TicketExist:                    "門票名稱已存在",
 		TicketNonExist:                 "門票不存在",
 		PrivateRoomBillingNonExist:     "私密直播間計費配置不存在",
+		LiveRoomPrivateAudienceFull:    "私密直播間觀眾已滿",
 	},
 }
 

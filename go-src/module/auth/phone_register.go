@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/crypto/gmd5"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gmlock"
 	"time"
 	"xr-game-server/constants/common"
 	"xr-game-server/core/event"
@@ -19,6 +20,8 @@ import (
 )
 
 func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *authdto.PhoneRegisterRes, err error) {
+	gmlock.Lock(req.Phone)
+	defer gmlock.Unlock(req.Phone)
 	// 验证验证码
 	valid, err := verification_code.VerifyCode(req.Phone, req.Code)
 	if err != nil {

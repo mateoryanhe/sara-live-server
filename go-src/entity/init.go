@@ -36,6 +36,7 @@ func Init() {
 	initGuildMember()
 	initLiveRoom()
 	initLiveRoomOnline()
+	initLiveRoomTicketPay()
 	initLiveRecord()
 	initLiveRecordAudience()
 	initLiveRevenueLog()

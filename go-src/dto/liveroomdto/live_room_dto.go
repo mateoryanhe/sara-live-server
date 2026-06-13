@@ -64,8 +64,9 @@ type JoinRoomReq struct {
 }
 
 type JoinRoomRes struct {
-	OnlineId    string `json:"onlineId"    dc:"在线记录ID(userId_roomId)"`
-	OnlineCount int    `json:"onlineCount" dc:"当前在线人数"`
+	OnlineId       string  `json:"onlineId"       dc:"在线记录ID(userId_roomId)"`
+	OnlineCount    int     `json:"onlineCount"    dc:"当前在线人数"`
+	TicketDeducted float64 `json:"ticketDeducted" dc:"本次扣除门票钻石(未扣为0)"`
 }
 
 // LeaveRoomReq 离开直播间
@@ -115,24 +116,24 @@ type SendGiftReq struct {
 
 // SendGiftRes App端送礼响应
 type SendGiftRes struct {
-	Cost    uint64  `json:"cost"    dc:"本次实际消耗钻石数"`
+	Cost    float64 `json:"cost"    dc:"本次实际消耗钻石数"`
 	Diamond float64 `json:"diamond" dc:"剩余钻石余额"`
 }
 
 // GiftPushItem 推送给房间在线用户的送礼广播载荷
 type GiftPushItem struct {
-	RoomId       uint64 `json:"roomId,string"      dc:"直播间ID"`
-	SenderId     uint64 `json:"senderId,string"    dc:"送礼用户ID"`
-	SenderName   string `json:"senderName"  dc:"送礼用户昵称"`
-	SenderAvatar string `json:"senderAvatar" dc:"送礼用户头像"`
-	GiftId       uint64 `json:"giftId,string"      dc:"礼物ID"`
-	GiftName     string `json:"giftName"    dc:"礼物名称"`
-	GiftIcon     string `json:"giftIcon"    dc:"礼物图标"`
-	GiftAnim     string `json:"giftAnim"    dc:"礼物动画"`
-	UnitPrice    uint64 `json:"unitPrice"   dc:"礼物单价"`
-	Count        int    `json:"count"       dc:"赠送数量"`
-	TotalCost    uint64 `json:"totalCost"   dc:"总消耗钻石数"`
-	SentAt       int64  `json:"sentAt"      dc:"发送时间(秒)"`
+	RoomId       uint64  `json:"roomId,string"      dc:"直播间ID"`
+	SenderId     uint64  `json:"senderId,string"    dc:"送礼用户ID"`
+	SenderName   string  `json:"senderName"  dc:"送礼用户昵称"`
+	SenderAvatar string  `json:"senderAvatar" dc:"送礼用户头像"`
+	GiftId       uint64  `json:"giftId,string"      dc:"礼物ID"`
+	GiftName     string  `json:"giftName"    dc:"礼物名称"`
+	GiftIcon     string  `json:"giftIcon"    dc:"礼物图标"`
+	GiftAnim     string  `json:"giftAnim"    dc:"礼物动画"`
+	UnitPrice    float64 `json:"unitPrice"   dc:"礼物单价"`
+	Count        int     `json:"count"       dc:"赠送数量"`
+	TotalCost    float64 `json:"totalCost"   dc:"总消耗钻石数"`
+	SentAt       int64   `json:"sentAt"      dc:"发送时间(秒)"`
 }
 
 // SetAudienceMuteReq 主播对指定观众禁言/解禁

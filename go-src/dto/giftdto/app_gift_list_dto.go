@@ -9,15 +9,15 @@ type AppGiftListReq struct {
 
 // AppGiftItem App端礼物列表元素
 type AppGiftItem struct {
-	ID          uint64 `json:"id,string"`
-	Name        string `json:"name"`
-	Icon        string `json:"icon"`
-	Animation   string `json:"animation"`
-	Price       uint64 `json:"price"`
-	Category    string `json:"category"`
-	Sort        int    `json:"sort"`
-	PublishedAt int64  `json:"publishedAt" dc:"发布时间(秒,0表示未设置)"`
-	Description string `json:"description"`
+	ID          uint64  `json:"id,string"`
+	Name        string  `json:"name"`
+	Icon        string  `json:"icon"`
+	Animation   string  `json:"animation"`
+	Price       float64 `json:"price"`
+	Category    string  `json:"category"`
+	Sort        int     `json:"sort"`
+	PublishedAt int64   `json:"publishedAt" dc:"发布时间(秒,0表示未设置)"`
+	Description string  `json:"description"`
 }
 
 // AppGiftListRes App端礼物列表响应

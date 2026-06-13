@@ -3,10 +3,11 @@ package liveroom
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/os/gmlock"
+	"math"
 	"time"
+
+	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/constants/cmd"
-	"xr-game-server/constants/common"
 	"xr-game-server/constants/currency"
 	"xr-game-server/constants/liverevenue"
 	"xr-game-server/core/event"
@@ -46,12 +47,12 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 		return nil, errercode.CreateCode(errercode.GiftOffShelf)
 	}
 
-	// 3. 计算总价并扣减钻石(uint64 防溢出)
-	if giftItem.Price > 0 && uint64(req.Count) > (^uint64(0))/giftItem.Price {
-		return nil, errercode.CreateCode(errercode.GiftCountInvalid)
+	// 3. 计算总价并扣减钻石
+	totalCost, err := calcSendGiftTotalCost(giftItem.Price, req.Count)
+	if err != nil {
+		return nil, err
 	}
-	totalCost := giftItem.Price * uint64(req.Count)
-	remaining, err := wallet.DiamondSub(senderId, float64(totalCost), currency.ReasonGiftSend)
+	remaining, err := wallet.DiamondSub(senderId, totalCost, currency.ReasonGiftSend)
 	if err != nil {
 		return nil, err
 	}
@@ -89,18 +90,31 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 	//防止并发,主播可以收到多个人的礼物
 	liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId)
 	//添加本次直播收到的礼物总额
-	liveRecord.AddTotalIncome(float64(totalCost))
-	event.Pub(gameevent.RevenueEventEvent, eventData)
-
+	liveRecord.AddTotalIncome(totalCost)
 	//记录主播总收益
-	room.AddTotalIncome(float64(totalCost))
+	room.AddTotalIncome(totalCost)
 
-	//主播分成
-	amount := float64(totalCost) * 4 / (10 * common.GoldToDiamondRate)
-	wallet.GoldAdd(req.RoomId, amount, currency.ReasonAnchorGiftRevenue)
+	event.Pub(gameevent.RevenueEventEvent, eventData)
 
 	return &liveroomdto.SendGiftRes{
 		Cost:    totalCost,
 		Diamond: remaining,
 	}, nil
+}
+
+func calcSendGiftTotalCost(unitPrice float64, count int) (float64, error) {
+	if count <= 0 {
+		return 0, errercode.CreateCode(errercode.GiftCountInvalid)
+	}
+	if unitPrice <= 0 {
+		return 0, nil
+	}
+	if float64(count) > math.MaxFloat64/unitPrice {
+		return 0, errercode.CreateCode(errercode.GiftCountInvalid)
+	}
+	total := unitPrice * float64(count)
+	if total <= 0 || math.IsInf(total, 0) || math.IsNaN(total) {
+		return 0, errercode.CreateCode(errercode.GiftCountInvalid)
+	}
+	return total, nil
 }

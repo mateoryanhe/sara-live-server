@@ -31,7 +31,7 @@ type CMSLiveRevenueLogItem struct {
 	BizId            uint64     `json:"bizId,string"`
 	BizName          string     `json:"bizName"`
 	Count            int        `json:"count"`
-	UnitPrice        uint64     `json:"unitPrice"`
-	TotalAmount      uint64     `json:"totalAmount"`
+	UnitPrice        float64    `json:"unitPrice"`
+	TotalAmount      float64    `json:"totalAmount"`
 	CreatedAt        *time.Time `json:"createdAt"`
 }

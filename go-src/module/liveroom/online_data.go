@@ -47,3 +47,18 @@ func getOnline(roomId uint64) []uint64 {
 	}
 	return roomMap.Keys()
 }
+
+func isUserInOnlineMap(userId, roomId uint64) bool {
+	roomMap := onlineMap.Get(roomId)
+	return roomMap != nil && roomMap.Contains(userId)
+}
+
+func countAudienceInRoom(roomId uint64) int {
+	count := 0
+	for _, uid := range getOnline(roomId) {
+		if uid != roomId {
+			count++
+		}
+	}
+	return count
+}
