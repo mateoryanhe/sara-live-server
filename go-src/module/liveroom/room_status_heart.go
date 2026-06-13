@@ -11,6 +11,7 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/entity"
+	"xr-game-server/errercode"
 )
 
 const (
@@ -35,22 +36,36 @@ func initHeart() {
 // ReportLiveStartStatus 主播开播时上报开播状态
 // 前端无需传参,后续在此补充开播记录等业务逻辑,每秒上报一次,形成开播时间
 func ReportLiveStartStatus(ctx context.Context, req *liveroomdto.ReportLiveStartStatusReq) (*liveroomdto.ReportLiveStartStatusRes, error) {
-	//先重置失败次数，防止被判断下播了
 	userId := httpserver.GetAuthId(ctx)
 	room := liveroomdao.GetRoomById(req.RoomId)
+	if room == nil {
+		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
+	}
 	if room.LiveRecordId == 0 {
-		//没有开播
 		return &liveroomdto.ReportLiveStartStatusRes{Success: true}, nil
 	}
-	//刷新主播逻辑
+
+	now := time.Now()
+	var billingDeducted float64
+
 	if userId == room.ID {
 		flushAnchorId(room)
-	}
-	//刷新观众逻辑
-	if room.ID != userId {
+	} else {
+		onlineId := entity.BuildLiveRoomOnlineId(userId, room.ID)
+		onlineData := liveroomdao.GetOnlineById(onlineId, userId, room.ID)
+		deducted, err := chargePrivateRoomBillingIfNeeded(userId, room, onlineData, now)
+		if err != nil {
+			exitRoom(userId, room.ID)
+			return nil, err
+		}
+		billingDeducted = deducted
 		flushAudience(userId, room)
 	}
-	return &liveroomdto.ReportLiveStartStatusRes{Success: true}, nil
+
+	return &liveroomdto.ReportLiveStartStatusRes{
+		Success:         true,
+		BillingDeducted: billingDeducted,
+	}, nil
 }
 
 func flushAnchorId(room *entity.LiveRoom) {

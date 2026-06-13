@@ -6,6 +6,7 @@ import (
 
 func Init() {
 	initAuthApi()
+	initAuthAppController()
 	initAccountController()
 	initGoldController()
 	initGoldAppController()

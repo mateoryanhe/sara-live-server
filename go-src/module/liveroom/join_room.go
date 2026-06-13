@@ -81,6 +81,61 @@ func chargePrivateRoomTicketIfNeeded(userId uint64, room *entity.LiveRoom, now t
 	return ticketPrice, nil
 }
 
+// chargePrivateRoomBillingIfNeeded 私密直播间按分钟扣观众钻石(每场直播独立计费)
+func chargePrivateRoomBillingIfNeeded(userId uint64, room *entity.LiveRoom, online *entity.LiveRoomOnline, now time.Time) (float64, error) {
+	if room == nil || room.Category != entity.LiveRoomCategoryPrivate {
+		return 0, nil
+	}
+	if userId == room.ID || room.LiveRecordId == 0 {
+		return 0, nil
+	}
+	billingPrice := room.Billing
+	if billingPrice <= 0 {
+		return 0, nil
+	}
+
+	lockKey := fmt.Sprintf("liveRoomBilling:%d:%d:%d", userId, room.ID, room.LiveRecordId)
+	gmlock.Lock(lockKey)
+	defer gmlock.Unlock(lockKey)
+
+	pay := liveroomdao.GetLiveRoomBillingPay(userId, room.ID, room.LiveRecordId)
+	if pay == nil {
+		return 0, nil
+	}
+	anchor := pay.BillingAnchor(onlineJoinTime(online))
+	if !pay.ShouldChargeMinute(anchor, now) {
+		return 0, nil
+	}
+
+	if _, err := wallet.DiamondSub(userId, billingPrice, currency.ReasonPrivateRoomBilling); err != nil {
+		return 0, err
+	}
+	pay.SetLastBilledAt(now)
+	recordPrivateRoomBillingRevenue(room, userId, billingPrice)
+	return billingPrice, nil
+}
+
+func onlineJoinTime(online *entity.LiveRoomOnline) *time.Time {
+	if online == nil {
+		return nil
+	}
+	return online.JoinTime
+}
+
+func recordPrivateRoomBillingRevenue(room *entity.LiveRoom, userId uint64, amount float64) {
+	if amount <= 0 || room == nil || room.LiveRecordId == 0 {
+		return
+	}
+	if liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId); liveRecord != nil {
+		liveRecord.AddTotalIncome(amount)
+	}
+	room.AddTotalIncome(amount)
+	eventData := entity.NewLiveRevenueLogRecord(
+		room.ID, room.LiveRecordId, userId, room.ID, 0, 1, amount, amount, uint8(liverevenue.PrivateRoom),
+	)
+	event.Pub(gameevent.RevenueEventEvent, eventData)
+}
+
 // JoinRoom 玩家加入直播间,记录状态置为 Online
 func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.JoinRoomRes, error) {
 	userId := httpserver.GetAuthId(ctx)

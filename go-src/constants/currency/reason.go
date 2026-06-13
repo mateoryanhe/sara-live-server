@@ -34,6 +34,8 @@ const (
 	ReasonAnchorGiftRevenue Reason = 13
 	// ReasonPrivateRoomTicket 私密直播间门票
 	ReasonPrivateRoomTicket Reason = 14
+	// ReasonPrivateRoomBilling 私密直播间按分钟计费
+	ReasonPrivateRoomBilling Reason = 15
 )
 
 // String 返回枚举的英文标识(用于日志/调试,不参与多语言展示;
@@ -68,6 +70,8 @@ func (r Reason) String() string {
 		return "AnchorGiftRevenue"
 	case ReasonPrivateRoomTicket:
 		return "PrivateRoomTicket"
+	case ReasonPrivateRoomBilling:
+		return "PrivateRoomBilling"
 	default:
 		return "Unknown"
 	}
