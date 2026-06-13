@@ -12,15 +12,18 @@ type GetLiveRoomListReq struct {
 
 // LiveRoomListItem 直播间列表条目
 type LiveRoomListItem struct {
-	RoomId         string `json:"roomId" dc:"直播间ID(同主播用户ID)"`
-	GuildId        string `json:"guildId" dc:"所属工会ID"`
-	Title          string `json:"title" dc:"直播间标题"`
-	Cover          string `json:"cover" dc:"封面图URL(已拼资源域名)"`
-	Notice         string `json:"notice" dc:"公告"`
-	Status         uint8  `json:"status" dc:"状态(0未开播,1直播中)"`
-	CreateAt       int64  `json:"createAt" dc:"创建时间(秒)"`
-	AnchorNickname string `json:"anchorNickname" dc:"主播昵称"`
-	AnchorAvatar   string `json:"anchorAvatar" dc:"主播头像URL(已拼资源域名)"`
+	RoomId         string  `json:"roomId" dc:"直播间ID(同主播用户ID)"`
+	GuildId        string  `json:"guildId" dc:"所属工会ID"`
+	Title          string  `json:"title" dc:"直播间标题"`
+	Cover          string  `json:"cover" dc:"封面图URL(已拼资源域名)"`
+	Notice         string  `json:"notice" dc:"公告"`
+	Status         uint8   `json:"status" dc:"状态(0未开播,1直播中)"`
+	Category       uint8   `json:"category" dc:"分类(1=hot,2=game,3=私密)"`
+	Ticket         float64 `json:"ticket" dc:"门票价格(钻石)"`
+	Billing        float64 `json:"billing" dc:"计费价格(每分钟钻石)"`
+	CreateAt       int64   `json:"createAt" dc:"创建时间(秒)"`
+	AnchorNickname string  `json:"anchorNickname" dc:"主播昵称"`
+	AnchorAvatar   string  `json:"anchorAvatar" dc:"主播头像URL(已拼资源域名)"`
 }
 
 type GetLiveRoomListRes struct {

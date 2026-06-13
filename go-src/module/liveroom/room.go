@@ -17,6 +17,22 @@ import (
 	"xr-game-server/module/upload"
 )
 
+func normalizeLiveRoomCategory(category uint8) uint8 {
+	if category == entity.LiveRoomCategoryGame || category == entity.LiveRoomCategoryPrivate {
+		return category
+	}
+	return entity.LiveRoomCategoryHot
+}
+
+func applyRoomPricing(room *entity.LiveRoom, ticket, billing float64) {
+	if room.Ticket != ticket {
+		room.SetTicket(ticket)
+	}
+	if room.Billing != billing {
+		room.SetBilling(billing)
+	}
+}
+
 // CreateRoom 创建直播间
 // 业务规则:
 //  1. 调用者必须已是主播(UserInfo.IsAnchor == true)
@@ -37,6 +53,8 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 		return nil, err
 	}
 
+	category := normalizeLiveRoomCategory(req.Category)
+
 	// 同一主播仅允许一个直播间(roomId == anchorId);CMS预创建的空直播间允许App完善资料
 	if existing := liveroomdao.GetRoomById(anchorId); existing != nil {
 		if req.Title != "" && existing.Title != req.Title {
@@ -48,6 +66,10 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 		if req.Notice != "" && existing.Notice != req.Notice {
 			existing.SetNotice(req.Notice)
 		}
+		if req.Category > 0 && existing.Category != category {
+			existing.SetCategory(category)
+		}
+		applyRoomPricing(existing, req.Ticket, req.Billing)
 		markLiveRoomCreated(user)
 		return &liveroomdto.CreateLiveRoomRes{
 			RoomId:  strconv.FormatUint(existing.ID, 10),
@@ -63,6 +85,9 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 		coverName,
 		req.Notice,
 	)
+	room.SetCategory(category)
+	room.SetTicket(req.Ticket)
+	room.SetBilling(req.Billing)
 	liveroomdao.AddRoomToCache(room)
 	markLiveRoomCreated(user)
 
@@ -214,6 +239,9 @@ func GetRoom(_ context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto.G
 		Cover:    upload.GetUrlByName(room.Cover),
 		Notice:   room.Notice,
 		Status:   status,
+		Category: room.Category,
+		Ticket:   room.Ticket,
+		Billing:  room.Billing,
 		CreateAt: room.CreatedAt.Unix(),
 	}, nil
 }

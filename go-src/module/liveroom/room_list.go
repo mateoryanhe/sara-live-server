@@ -76,6 +76,9 @@ func toLiveRoomListItem(room *entity.LiveRoom) *liveroomdto.LiveRoomListItem {
 		Cover:    upload.GetUrlByName(room.Cover),
 		Notice:   room.Notice,
 		Status:   status,
+		Category: room.Category,
+		Ticket:   room.Ticket,
+		Billing:  room.Billing,
 		CreateAt: room.CreatedAt.Unix(),
 	}
 	if u := userinfodao.GetUserInfoByUserId(room.ID); u != nil {

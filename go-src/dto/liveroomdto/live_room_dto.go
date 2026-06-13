@@ -7,10 +7,13 @@ import (
 
 // CreateLiveRoomReq 创建直播间(主播ID由鉴权中间件提供)
 type CreateLiveRoomReq struct {
-	g.Meta `path:"/create" method:"post" mime:"multipart/form-data" summary:"创建直播间" tags:"直播间"`
-	Title  string            `json:"title"  v:"required|length:1,128#标题不能为空|标题长度需在1到128之间" dc:"直播间标题"`
-	Cover  *ghttp.UploadFile `json:"cover"  type:"file" dc:"封面图片文件"`
-	Notice string            `json:"notice" dc:"公告"`
+	g.Meta   `path:"/create" method:"post" mime:"multipart/form-data" summary:"创建直播间" tags:"直播间"`
+	Title    string            `json:"title"  v:"required|length:1,128#标题不能为空|标题长度需在1到128之间" dc:"直播间标题"`
+	Cover    *ghttp.UploadFile `json:"cover"  type:"file" dc:"封面图片文件"`
+	Notice   string            `json:"notice" dc:"公告"`
+	Category uint8             `json:"category" v:"in:1,2,3#分类无效" dc:"分类(1=hot,2=game,3=私密,默认1)"`
+	Ticket   float64           `json:"ticket" dc:"门票价格(钻石)"`
+	Billing  float64           `json:"billing" dc:"计费价格(每分钟钻石)"`
 }
 
 type CreateLiveRoomRes struct {
@@ -244,13 +247,16 @@ type GetLiveRoomReq struct {
 }
 
 type GetLiveRoomRes struct {
-	RoomId   string `json:"roomId"   dc:"直播间ID(同主播用户ID)"`
-	GuildId  string `json:"guildId"  dc:"所属工会ID"`
-	Title    string `json:"title"    dc:"直播间标题"`
-	Cover    string `json:"cover"    dc:"封面图URL"`
-	Notice   string `json:"notice"   dc:"公告"`
-	Status   uint8  `json:"status"   dc:"状态(0未开播,1直播中)"`
-	CreateAt int64  `json:"createAt" dc:"创建时间(秒)"`
+	RoomId   string  `json:"roomId"   dc:"直播间ID(同主播用户ID)"`
+	GuildId  string  `json:"guildId"  dc:"所属工会ID"`
+	Title    string  `json:"title"    dc:"直播间标题"`
+	Cover    string  `json:"cover"    dc:"封面图URL"`
+	Notice   string  `json:"notice"   dc:"公告"`
+	Status   uint8   `json:"status"   dc:"状态(0未开播,1直播中)"`
+	Category uint8   `json:"category" dc:"分类(1=hot,2=game,3=私密)"`
+	Ticket   float64 `json:"ticket" dc:"门票价格(钻石)"`
+	Billing  float64 `json:"billing" dc:"计费价格(每分钟钻石)"`
+	CreateAt int64   `json:"createAt" dc:"创建时间(秒)"`
 }
 
 // AnchorBanPushItem 主播封禁推送载荷(推送给主播及直播间在线观众)
