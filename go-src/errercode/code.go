@@ -120,6 +120,10 @@ const (
 	ImageModerationCfgInvalid XRCode = 115
 	// ImageModerationFailed 图片审核服务调用失败
 	ImageModerationFailed XRCode = 116
+	// TicketExist 门票名称已存在
+	TicketExist XRCode = 119
+	// TicketNonExist 门票不存在
+	TicketNonExist XRCode = 121
 )
 
 type XError struct {

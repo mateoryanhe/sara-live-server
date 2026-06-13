@@ -16,6 +16,7 @@ import (
 	"xr-game-server/module/richrank"
 	"xr-game-server/module/shortvideo"
 	"xr-game-server/module/stat"
+	"xr-game-server/module/ticket"
 	"xr-game-server/module/upload"
 	"xr-game-server/module/userinfo"
 	"xr-game-server/module/verification_code"
@@ -32,6 +33,7 @@ func Init() {
 	richrank.Init()
 	anchorrank.Init()
 	banner.Init()
+	ticket.Init()
 	vip.Init()
 	game.Init()
 	agora.Init()

@@ -28,6 +28,8 @@ func Init() {
 	initGiftAppController()                 // 礼物列表(App)
 	initBannerController()                  // 首页Banner(CMS)
 	initBannerAppController()               // 首页Banner(App)
+	initTicketController()                  // 门票(CMS)
+	initTicketAppController()               // 门票(App)
 	initShortVideoController()              // 短视频(CMS)
 	initShortVideoAppController()           // 短视频(App)
 	initLiveFollowAppController()           // 关注主播(App)

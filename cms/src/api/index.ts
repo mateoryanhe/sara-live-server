@@ -6,6 +6,7 @@ import {cmsUserApi} from './modules/cmsuser'
 import {guildApi} from './modules/guild'
 import {giftApi} from './modules/gift'
 import {bannerApi} from './modules/banner'
+import {ticketApi} from './modules/ticket'
 import {shortVideoApi} from './modules/shortVideo'
 import {rechargeCfgApi} from './modules/rechargeCfg'
 import {vipCfgApi} from './modules/vipCfg'
@@ -31,6 +32,7 @@ export {
     guildApi,
     giftApi,
     bannerApi,
+    ticketApi,
     shortVideoApi,
     rechargeCfgApi,
     vipCfgApi,
@@ -57,6 +59,7 @@ export default {
     guildApi,
     giftApi,
     bannerApi,
+    ticketApi,
     shortVideoApi,
     rechargeCfgApi,
     vipCfgApi,

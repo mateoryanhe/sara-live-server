@@ -50,6 +50,7 @@ func Init() {
 	initRechargeOrder()
 	initVipCfg()
 	initGameCfg()
+	initLiveTicket()
 	initAgoraCfg()
 	initAliyunTextModerationCfg()
 	initUploadResourceCfg()

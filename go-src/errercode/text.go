@@ -71,6 +71,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ImageSensitiveContent:          "Image content is not compliant",
 		ImageModerationCfgInvalid:      "Image moderation config is invalid",
 		ImageModerationFailed:          "Image moderation service unavailable",
+		TicketExist:                    "Ticket name already exists",
+		TicketNonExist:                 "Ticket does not exist",
 	},
 	lang.LangZHCN: {
 		Success:                        "成功",
@@ -138,6 +140,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ImageSensitiveContent:          "图片内容不合规",
 		ImageModerationCfgInvalid:      "图片审核未配置或配置无效",
 		ImageModerationFailed:          "图片审核服务暂不可用",
+		TicketExist:                    "门票名称已存在",
+		TicketNonExist:                 "门票不存在",
 	},
 	lang.LangZHTW: {
 		Success:                        "成功",
@@ -205,6 +209,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ImageSensitiveContent:          "圖片內容不合規",
 		ImageModerationCfgInvalid:      "圖片審核未配置或配置無效",
 		ImageModerationFailed:          "圖片審核服務暫不可用",
+		TicketExist:                    "門票名稱已存在",
+		TicketNonExist:                 "門票不存在",
 	},
 }
 

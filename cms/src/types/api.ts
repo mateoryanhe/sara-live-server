@@ -358,6 +358,19 @@ export interface BannerQuery extends PageQuery {
     statusFilter?: number
 }
 
+export interface Ticket {
+    id: string
+    price: number
+    sort: number
+    status: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface TicketQuery extends PageQuery {
+    statusFilter?: number
+}
+
 export interface ShortVideo {
     id: string
     title: string

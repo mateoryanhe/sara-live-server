@@ -30,5 +30,11 @@ export const operationRoutes: RouteRecordRaw = {
             component: () => import('@/views/operation/vip/vip-cfg-list.vue'),
             meta: {title: 'VIP配置'},
         },
+        {
+            path: 'ticket/ticket-list',
+            name: 'TicketManagement',
+            component: () => import('@/views/operation/ticket/ticket-list.vue'),
+            meta: {title: '门票管理'},
+        },
     ],
 }

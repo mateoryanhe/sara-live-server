@@ -58,7 +58,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement')"
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('TicketManagement')"
             index="/operation">
           <template #title>
             <el-icon>
@@ -89,6 +89,12 @@
               <Medal/>
             </el-icon>
             <span>VIP配置</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('TicketManagement')" index="/operation/ticket/ticket-list">
+            <el-icon>
+              <Tickets/>
+            </el-icon>
+            <span>门票管理</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -289,7 +295,7 @@
 <script lang="ts" setup>
 import {computed, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {ArrowDown, Coin, Cpu, Document, Expand, Fold, Key, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Setting, Stamp, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Coin, Cpu, Document, Expand, Fold, Key, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {clearPermissions, getIsAdmin, hasPermission} from '@/utils/permission'
 
 const route = useRoute()
