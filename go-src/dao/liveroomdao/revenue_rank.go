@@ -23,16 +23,23 @@ func SumRevenueByReceiver(startTime, endTime time.Time) []*AnchorRevenueStatRow 
 		return list
 	}
 	ctx := gctx.New()
+	now := time.Now()
 	err := g.DB().Ctx(ctx).Raw(`
-SELECT receiver_id, SUM(total_amount) AS total_amount
-FROM `+string(entity.TbLiveRevenueLog)+`
-WHERE receiver_id > 0
-  AND created_at >= ?
-  AND created_at <= ?
-GROUP BY receiver_id
+SELECT rl.receiver_id, SUM(rl.total_amount) AS total_amount
+FROM `+string(entity.TbLiveRevenueLog)+` rl
+INNER JOIN `+string(entity.TbAccount)+` a ON a.id = rl.receiver_id
+WHERE rl.receiver_id > 0
+  AND rl.created_at >= ?
+  AND rl.created_at <= ?
+  AND IFNULL(a.`+string(entity.AccountCancel)+`, 0) = 0
+  AND (
+    IFNULL(a.`+string(entity.AccountBan)+`, 0) = 0
+    OR (a.`+string(entity.AccountBanApplyTime)+` IS NOT NULL AND a.`+string(entity.AccountBanApplyTime)+` <= ?)
+  )
+GROUP BY rl.receiver_id
 ORDER BY total_amount DESC
 LIMIT ?
-`, startTime, endTime, anchorRankTopLimit).Scan(&list)
+`, startTime, endTime, now, anchorRankTopLimit).Scan(&list)
 	if err != nil {
 		g.Log().Errorf(ctx, "SumRevenueByReceiver error: %v", err)
 		return make([]*AnchorRevenueStatRow, 0)
