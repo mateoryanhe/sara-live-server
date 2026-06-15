@@ -102,8 +102,7 @@ func chargePrivateRoomBillingIfNeeded(userId uint64, room *entity.LiveRoom, onli
 	if pay == nil {
 		return 0, nil
 	}
-	anchor := pay.BillingAnchor(onlineJoinTime(online))
-	if !pay.ShouldChargeMinute(anchor, now) {
+	if !pay.ShouldChargeMinute(onlineJoinTime(online), now) {
 		return 0, nil
 	}
 

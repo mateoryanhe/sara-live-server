@@ -142,6 +142,14 @@ func UpdateNotice(ctx context.Context, req *liveroomdto.UpdateNoticeReq) (*liver
 	return &liveroomdto.UpdateNoticeRes{Success: true}, nil
 }
 
+// markLiveRoomCreated App端创建/完善直播间后,标记 user_infos.has_live_room = true
+func markLiveRoomCreated(user *entity.UserInfo) {
+	if user == nil || user.HasLiveRoom {
+		return
+	}
+	user.SetHasLiveRoom(true)
+}
+
 // GetOnlineUserList 分页查询直播间在线玩家(附用户基础信息)
 func GetOnlineUserList(_ context.Context, req *liveroomdto.GetOnlineUserListReq) (*liveroomdto.GetOnlineUserListRes, error) {
 	if liveroomdao.GetRoomById(req.RoomId) == nil {
@@ -244,4 +252,14 @@ func GetRoom(_ context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto.G
 		Billing:  room.Billing,
 		CreateAt: room.CreatedAt.Unix(),
 	}, nil
+}
+
+// EnsureAnchorRoom 确保主播拥有直播间记录(CMS设为主播时预创建,App端后续可完善资料)
+func EnsureAnchorRoom(anchorId, guildId uint64) *entity.LiveRoom {
+	if room := liveroomdao.GetRoomByAnchor(anchorId); room != nil {
+		return room
+	}
+	room := entity.NewLiveRoom(anchorId, guildId, "", "", "")
+	liveroomdao.AddRoomToCache(room)
+	return room
 }
