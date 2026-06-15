@@ -33,4 +33,8 @@ const (
 	LiveRoomAudienceKick = 18
 	//取消观众进入限制推送(推送给被取消限制的用户)
 	LiveRoomAudienceKickCancel = 19
+	//观众进入直播间推送(房间内全体在线用户)
+	LiveRoomAudienceJoin = 20
+	//观众离开直播间推送(房间内全体在线用户)
+	LiveRoomAudienceLeave = 21
 )

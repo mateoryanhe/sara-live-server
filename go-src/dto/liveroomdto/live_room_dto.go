@@ -219,6 +219,28 @@ type AudienceKickCancelPushItem struct {
 	UserId string `json:"userId" dc:"观众用户ID"`
 }
 
+// AudienceJoinPushItem 观众进入直播间广播载荷
+type AudienceJoinPushItem struct {
+	RoomId      string `json:"roomId"       dc:"直播间ID"`
+	UserId      string `json:"userId"       dc:"观众用户ID"`
+	Nickname    string `json:"nickname"     dc:"观众昵称"`
+	Avatar      string `json:"avatar"       dc:"观众头像"`
+	VipLevel    uint32 `json:"vipLevel"     dc:"VIP等级"`
+	OnlineCount int    `json:"onlineCount"  dc:"当前在线人数"`
+	JoinedAt    int64  `json:"joinedAt"     dc:"进入时间(秒)"`
+}
+
+// AudienceLeavePushItem 观众离开直播间广播载荷
+type AudienceLeavePushItem struct {
+	RoomId      string `json:"roomId"      dc:"直播间ID"`
+	UserId      string `json:"userId"      dc:"观众用户ID"`
+	Nickname    string `json:"nickname"    dc:"观众昵称"`
+	Avatar      string `json:"avatar"      dc:"观众头像"`
+	VipLevel    uint32 `json:"vipLevel"    dc:"VIP等级"`
+	OnlineCount int    `json:"onlineCount" dc:"当前在线人数"`
+	LeftAt      int64  `json:"leftAt"      dc:"离开时间(秒)"`
+}
+
 // SendChatReq App端向直播间发送文字消息
 type SendChatReq struct {
 	g.Meta  `path:"/sendChat" method:"post" summary:"直播间文字消息" tags:"直播间"`

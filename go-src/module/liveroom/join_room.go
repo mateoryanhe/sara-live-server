@@ -160,10 +160,14 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 		return nil, err
 	}
 
+	//alreadyOnline := existing.Status == entity.LiveRoomOnlineStatusOnline
 	existing.SetStatus(entity.LiveRoomOnlineStatusOnline)
 	existing.SetJoinTime(&now)
-	//刷新在线列表
 	addToOnline(userId, room.ID)
+
+	if userId != room.ID {
+		broadcastAudienceJoin(room.ID, userId, getLenForRoom(room.ID))
+	}
 
 	// 直播中且非主播本人:有效观众(单场去重 + 日/周/月跨直播间去重)
 	if room.LiveRecordId > 0 && userId != req.RoomId {
