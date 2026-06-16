@@ -39,7 +39,7 @@ func Init() {
 	initLiveRoomTicketPay()
 	initLiveRoomBillingPay()
 	initLiveRecord()
-	initLiveRecordAudience()
+	initLiveRecordUser()
 	initLiveRevenueLog()
 	InitLiveGift()
 	initHomeBanner()

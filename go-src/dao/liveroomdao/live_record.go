@@ -13,7 +13,7 @@ var liveRecordCacheMgr *cache.CacheMgr
 // InitLiveRecordDao 初始化直播记录缓存
 func initLiveRecordDao() {
 	liveRecordCacheMgr = cache.NewCacheMgr()
-	initLiveRecordAudienceDao()
+	initLiveRecordUserDao()
 	initRevenueLogDao()
 }
 
