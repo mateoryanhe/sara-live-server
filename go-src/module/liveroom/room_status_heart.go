@@ -16,6 +16,7 @@ import (
 
 const (
 	TimeOut = 5 * time.Minute
+	Period  = 30
 )
 
 var taskMap = gset.NewTSet[uint64](true)
@@ -34,7 +35,7 @@ func initHeart() {
 }
 
 // ReportLiveStartStatus 主播开播时上报开播状态
-// 前端无需传参,后续在此补充开播记录等业务逻辑,每秒上报一次,形成开播时间
+// 前端无需传参,后续在此补充开播记录等业务逻辑,每30秒上报一次,形成开播时间
 func ReportLiveStartStatus(ctx context.Context, req *liveroomdto.ReportLiveStartStatusReq) (*liveroomdto.ReportLiveStartStatusRes, error) {
 	userId := httpserver.GetAuthId(ctx)
 	room := liveroomdao.GetRoomById(req.RoomId)
@@ -74,10 +75,10 @@ func flushAnchorId(room *entity.LiveRoom) {
 	room.SetHeartTime(&now)
 	//记录本次直播
 	liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId)
-	liveRecord.AddTotalLiveDuration(1)
+	liveRecord.AddTotalLiveDuration(Period)
 	//累计全部直播
 	stat := userinfodao.GetUserCumulativeStatByUserId(room.ID)
-	stat.AddTotalLiveDuration(1)
+	stat.AddTotalLiveDuration(Period)
 }
 
 func flushAudience(userId uint64, room *entity.LiveRoom) {

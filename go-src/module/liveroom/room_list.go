@@ -73,7 +73,7 @@ func toLiveRoomListItem(room *entity.LiveRoom) *liveroomdto.LiveRoomListItem {
 		RoomId:   strconv.FormatUint(room.ID, 10),
 		GuildId:  strconv.FormatUint(room.GuildId, 10),
 		Title:    room.Title,
-		Cover:    upload.GetUrlByName(room.Cover),
+		Cover:    room.Cover,
 		Notice:   room.Notice,
 		Status:   status,
 		Category: room.Category,
@@ -81,6 +81,10 @@ func toLiveRoomListItem(room *entity.LiveRoom) *liveroomdto.LiveRoomListItem {
 		Billing:  room.Billing,
 		CreateAt: room.CreatedAt.Unix(),
 	}
+	if item.Cover != "" {
+		item.Cover = upload.GetUrlByName(room.Cover)
+	}
+
 	if u := userinfodao.GetUserInfoByUserId(room.ID); u != nil {
 		item.AnchorNickname = u.Nickname
 		item.AnchorAvatar = upload.ResolveAvatarUrl(u.Avatar)
