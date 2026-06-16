@@ -56,6 +56,7 @@
           <template #default="{ row }">{{ formatAmount(row.totalPrivateRoomIncome) }}</template>
         </el-table-column>
         <el-table-column label="送礼人数" prop="totalGiftSender" width="100"/>
+        <el-table-column label="新加粉丝" prop="totalNewFollower" width="100"/>
         <el-table-column label="游戏下注总额" width="130">
           <template #default="{ row }">{{ formatAmount(row.totalGameBet) }}</template>
         </el-table-column>

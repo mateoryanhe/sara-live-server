@@ -621,6 +621,7 @@ export interface LiveRecordItem {
     totalPrivateRoomIncome: number
     totalGameBet: number
     totalGiftSender: number
+    totalNewFollower: number
     createdAt?: string | null
 }
 

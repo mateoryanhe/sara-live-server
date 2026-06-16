@@ -61,3 +61,17 @@ func TryRecordLiveRecordGiftSender(liveRecordId, userId uint64) bool {
 	data.SetGiftSenderAt(time.Now())
 	return true
 }
+
+// TryRecordLiveRecordNewFollower 记录本场直播新加粉丝;本场已统计过返回 false
+func TryRecordLiveRecordNewFollower(liveRecordId, userId uint64) bool {
+	if liveRecordId == 0 || userId == 0 {
+		return false
+	}
+	id := entity.BuildLiveRecordUserId(liveRecordId, userId)
+	data := getLiveRecordUserById(id, liveRecordId, userId)
+	if data == nil || !data.FollowerAt.IsZero() {
+		return false
+	}
+	data.SetFollowerAt(time.Now())
+	return true
+}

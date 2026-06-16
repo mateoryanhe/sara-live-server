@@ -21,6 +21,7 @@ type AppLiveRecordItem struct {
 	TotalPrivateRoomIncome float64 `json:"totalPrivateRoomIncome" dc:"私密直播间收入(钻石)"`
 	TotalGameBet           float64 `json:"totalGameBet"           dc:"游戏下注总金额"`
 	TotalGiftSender        uint64  `json:"totalGiftSender"   dc:"送礼人数(去重)"`
+	TotalNewFollower       uint64  `json:"totalNewFollower"  dc:"新加粉丝数(去重)"`
 }
 
 // AppLiveRecordListRes App端直播记录分页响应

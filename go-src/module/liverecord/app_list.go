@@ -29,6 +29,7 @@ func toAppItem(v *entity.LiveRecord) *liverecorddto.AppLiveRecordItem {
 		TotalPrivateRoomIncome: v.TotalPrivateRoomIncome,
 		TotalGameBet:           v.TotalGameBet,
 		TotalGiftSender:        v.TotalGiftSender,
+		TotalNewFollower:       v.TotalNewFollower,
 	}
 	if v.EndTime != nil && !v.EndTime.IsZero() {
 		item.EndTime = v.EndTime.Format("2006/01/02 15:04:05")

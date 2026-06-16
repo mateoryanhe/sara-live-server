@@ -48,6 +48,7 @@ func toCMSItem(v *entity.LiveRecord, nicknameMap map[uint64]string) *liverecordd
 		TotalPrivateRoomIncome: v.TotalPrivateRoomIncome,
 		TotalGameBet:           v.TotalGameBet,
 		TotalGiftSender:        v.TotalGiftSender,
+		TotalNewFollower:       v.TotalNewFollower,
 		CreatedAt:              &v.CreatedAt,
 	}
 	if nicknameMap != nil {

@@ -17,6 +17,7 @@ const (
 	LiveRecordUserUserId       db.TbCol = "user_id"
 	LiveRecordUserAudienceAt   db.TbCol = "audience_at"
 	LiveRecordUserGiftSenderAt db.TbCol = "gift_sender_at"
+	LiveRecordUserFollowerAt   db.TbCol = "follower_at"
 )
 
 // LiveRecordUser 单场直播用户去重记录(主键 ID = liveRecordId_userId)
@@ -26,6 +27,7 @@ type LiveRecordUser struct {
 	UserId       uint64    `gorm:"index;default:0;comment:用户ID" json:"userId"`
 	AudienceAt   time.Time `gorm:"comment:观众统计时间(零值表示未统计)" json:"audienceAt"`
 	GiftSenderAt time.Time `gorm:"comment:送礼人统计时间(零值表示未统计)" json:"giftSenderAt"`
+	FollowerAt   time.Time `gorm:"comment:新加粉丝统计时间(零值表示未统计)" json:"followerAt"`
 }
 
 func BuildLiveRecordUserId(liveRecordId, userId uint64) string {
@@ -68,10 +70,18 @@ func (r *LiveRecordUser) SetGiftSenderAt(v time.Time) {
 	})
 }
 
+func (r *LiveRecordUser) SetFollowerAt(v time.Time) {
+	r.FollowerAt = v
+	syndb.AddDataToLazyChan(TbLiveRecordUser, LiveRecordUserFollowerAt, &syndb.ColData{
+		IdVal: r.ID, ColVal: v,
+	})
+}
+
 func initLiveRecordUser() {
 	syndb.RegLazyWithMiddle(TbLiveRecordUser, LiveRecordUserLiveRecordId)
 	syndb.RegLazyWithMiddle(TbLiveRecordUser, LiveRecordUserUserId)
 	syndb.RegLazyWithMiddle(TbLiveRecordUser, LiveRecordUserAudienceAt)
 	syndb.RegLazyWithMiddle(TbLiveRecordUser, LiveRecordUserGiftSenderAt)
+	syndb.RegLazyWithMiddle(TbLiveRecordUser, LiveRecordUserFollowerAt)
 	migrate.AutoMigrate(&LiveRecordUser{})
 }

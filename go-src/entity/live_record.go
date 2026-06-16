@@ -23,6 +23,7 @@ const (
 	LiveRecordTotalPrivateRoomIncome db.TbCol = "total_private_room_income"
 	LiveRecordTotalGameBet           db.TbCol = "total_game_bet"
 	LiveRecordTotalGiftSender        db.TbCol = "total_gift_sender"
+	LiveRecordTotalNewFollower       db.TbCol = "total_new_follower"
 )
 
 // LiveRecord 单场直播数据记录
@@ -38,6 +39,7 @@ type LiveRecord struct {
 	TotalPrivateRoomIncome float64    `gorm:"default:0;comment:私密直播间收入" json:"totalPrivateRoomIncome"`
 	TotalGameBet           float64    `gorm:"default:0;comment:游戏下注总金额" json:"totalGameBet"`
 	TotalGiftSender        uint64     `gorm:"default:0;comment:送礼人数(去重)" json:"totalGiftSender"`
+	TotalNewFollower       uint64     `gorm:"default:0;comment:新加粉丝数(去重)" json:"totalNewFollower"`
 }
 
 // NewLiveRecord 构造一条直播记录,字段写入通过 syndb 异步入库
@@ -138,6 +140,15 @@ func (r *LiveRecord) AddTotalGiftSender(val uint64) {
 	})
 }
 
+func (r *LiveRecord) AddTotalNewFollower(val uint64) {
+	r.TotalNewFollower = math.Add(r.TotalNewFollower, val)
+
+	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalNewFollower, &syndb.ColData{
+		IdVal:  r.ID,
+		ColVal: r.TotalNewFollower,
+	})
+}
+
 func (r *LiveRecord) SetCreatedAt(v time.Time) {
 	r.CreatedAt = v
 	syndb.AddDataToLazyChan(TbLiveRecord, db.CreatedAtName, &syndb.ColData{
@@ -175,5 +186,6 @@ func initLiveRecord() {
 	syndb.RegLazyWithMiddle(TbLiveRecord, LiveRecordTotalPrivateRoomIncome)
 	syndb.RegLazyWithMiddle(TbLiveRecord, LiveRecordTotalGameBet)
 	syndb.RegLazyWithMiddle(TbLiveRecord, LiveRecordTotalGiftSender)
+	syndb.RegLazyWithMiddle(TbLiveRecord, LiveRecordTotalNewFollower)
 	migrate.AutoMigrate(&LiveRecord{})
 }

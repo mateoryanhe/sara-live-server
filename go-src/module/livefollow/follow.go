@@ -34,6 +34,7 @@ func Follow(ctx context.Context, req *livefollowdto.FollowReq) (*livefollowdto.F
 	}
 
 	existing := livefollowdao.GetByUserAnchor(userId, req.AnchorId)
+	wasFollowing := existing != nil && existing.Status == entity.LiveFollowStatusFollow
 	if existing == nil {
 		f := entity.NewLiveFollow(userId, req.AnchorId)
 		livefollowdao.AddFollowToCache(f)
@@ -42,10 +43,27 @@ func Follow(ctx context.Context, req *livefollowdto.FollowReq) (*livefollowdto.F
 		livefollowdao.AddFollowToCache(existing)
 	}
 
+	if !wasFollowing {
+		recordNewFollowerDuringLive(req.AnchorId, userId)
+	}
+
 	return &livefollowdto.FollowRes{
 		Following:     true,
 		FollowerCount: len(livefollowdao.GetFollowersByAnchor(req.AnchorId)),
 	}, nil
+}
+
+func recordNewFollowerDuringLive(anchorId, userId uint64) {
+	room := liveroomdao.GetRoomById(anchorId)
+	if room == nil || room.LiveRecordId == 0 {
+		return
+	}
+	if !liveroomdao.TryRecordLiveRecordNewFollower(room.LiveRecordId, userId) {
+		return
+	}
+	if liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId); liveRecord != nil {
+		liveRecord.AddTotalNewFollower(1)
+	}
 }
 
 // Unfollow 取消关注;不存在或已是未关注状态都按幂等处理
