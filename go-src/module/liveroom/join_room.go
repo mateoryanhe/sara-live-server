@@ -146,6 +146,10 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
 
+	if userId != room.ID && room.LiveRecordId == 0 {
+		return nil, errercode.CreateCode(errercode.LiveRoomNotLive)
+	}
+
 	now := time.Now()
 	onlineId := entity.BuildLiveRoomOnlineId(userId, req.RoomId)
 	existing := liveroomdao.GetOnlineById(onlineId, userId, room.ID)

@@ -128,6 +128,8 @@ const (
 	PrivateRoomBillingNonExist XRCode = 123
 	// LiveRoomPrivateAudienceFull 私密直播间观众已满
 	LiveRoomPrivateAudienceFull XRCode = 124
+	// LiveRoomNotLive 直播间未在直播中(未开播或已关播)
+	LiveRoomNotLive XRCode = 125
 )
 
 type XError struct {
