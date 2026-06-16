@@ -37,15 +37,18 @@ func toCMSItem(v *entity.LiveRecord, nicknameMap map[uint64]string) *liverecordd
 		return nil
 	}
 	item := &liverecorddto.CMSLiveRecordItem{
-		Id:                v.ID,
-		AnchorId:          v.AnchorId,
-		StartTime:         &v.StartTime,
-		EndTime:           v.EndTime,
-		TotalAudience:     v.TotalAudience,
-		TotalLiveDuration: v.TotalLiveDuration,
-		TotalIncome:       v.TotalIncome,
-		TotalGameBet:      v.TotalGameBet,
-		CreatedAt:         &v.CreatedAt,
+		Id:                     v.ID,
+		AnchorId:               v.AnchorId,
+		StartTime:              &v.StartTime,
+		EndTime:                v.EndTime,
+		TotalAudience:          v.TotalAudience,
+		TotalLiveDuration:      v.TotalLiveDuration,
+		TotalIncome:            v.TotalIncome,
+		TotalGiftIncome:        v.TotalGiftIncome,
+		TotalPrivateRoomIncome: v.TotalPrivateRoomIncome,
+		TotalGameBet:           v.TotalGameBet,
+		TotalGiftSender:        v.TotalGiftSender,
+		CreatedAt:              &v.CreatedAt,
 	}
 	if nicknameMap != nil {
 		item.Nickname = nicknameMap[v.AnchorId]

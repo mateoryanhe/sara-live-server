@@ -91,6 +91,7 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 	liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId)
 	//添加本次直播收到的礼物总额
 	liveRecord.AddTotalIncome(totalCost)
+	liveRecord.AddTotalGiftIncome(totalCost)
 	if room.LiveRecordId > 0 && liveroomdao.TryRecordLiveRecordGiftSender(room.LiveRecordId, senderId) {
 		liveRecord.AddTotalGiftSender(1)
 	}

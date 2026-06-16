@@ -42,6 +42,7 @@ func Init() {
 	initCurrencyLogController()             // 货币流水(CMS)
 	initLiveRevenueLogController()          // 直播收益流水(CMS)
 	initLiveRecordCMSController()           // 直播记录(CMS)
+	initLiveRecordAppController()           // 直播记录(App)
 	initRichRankAppController()             // 富豪榜(App)
 	initAnchorRankAppController()           // 主播红人榜(App)
 	initRechargeOrderAppController()        // 充值订单(App:发起/查询)

@@ -17,14 +17,17 @@ type CMSLiveRecordListReq struct {
 
 // CMSLiveRecordItem CMS直播记录列表项
 type CMSLiveRecordItem struct {
-	Id                uint64     `json:"id,string"`
-	AnchorId          uint64     `json:"anchorId,string"`
-	Nickname          string     `json:"nickname"`
-	StartTime         *time.Time `json:"startTime"`
-	EndTime           *time.Time `json:"endTime"`
-	TotalAudience     uint64     `json:"totalAudience"`
-	TotalLiveDuration float64    `json:"totalLiveDuration"`
-	TotalIncome       float64    `json:"totalIncome"`
-	TotalGameBet      float64    `json:"totalGameBet"`
-	CreatedAt         *time.Time `json:"createdAt"`
+	Id                     uint64     `json:"id,string"`
+	AnchorId               uint64     `json:"anchorId,string"`
+	Nickname               string     `json:"nickname"`
+	StartTime              *time.Time `json:"startTime"`
+	EndTime                *time.Time `json:"endTime"`
+	TotalAudience          uint64     `json:"totalAudience"`
+	TotalLiveDuration      float64    `json:"totalLiveDuration"`
+	TotalIncome            float64    `json:"totalIncome"`
+	TotalGiftIncome        float64    `json:"totalGiftIncome"`
+	TotalPrivateRoomIncome float64    `json:"totalPrivateRoomIncome"`
+	TotalGameBet           float64    `json:"totalGameBet"`
+	TotalGiftSender        uint64     `json:"totalGiftSender"`
+	CreatedAt              *time.Time `json:"createdAt"`
 }

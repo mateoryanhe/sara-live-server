@@ -49,6 +49,13 @@
         <el-table-column label="总收益" width="120">
           <template #default="{ row }">{{ formatAmount(row.totalIncome) }}</template>
         </el-table-column>
+        <el-table-column label="礼物收入" width="120">
+          <template #default="{ row }">{{ formatAmount(row.totalGiftIncome) }}</template>
+        </el-table-column>
+        <el-table-column label="私密房收入" width="120">
+          <template #default="{ row }">{{ formatAmount(row.totalPrivateRoomIncome) }}</template>
+        </el-table-column>
+        <el-table-column label="送礼人数" prop="totalGiftSender" width="100"/>
         <el-table-column label="游戏下注总额" width="130">
           <template #default="{ row }">{{ formatAmount(row.totalGameBet) }}</template>
         </el-table-column>

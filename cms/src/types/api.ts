@@ -617,7 +617,10 @@ export interface LiveRecordItem {
     totalAudience: number
     totalLiveDuration: number
     totalIncome: number
+    totalGiftIncome: number
+    totalPrivateRoomIncome: number
     totalGameBet: number
+    totalGiftSender: number
     createdAt?: string | null
 }
 
