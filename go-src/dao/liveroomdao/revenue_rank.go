@@ -8,7 +8,7 @@ import (
 	"xr-game-server/entity"
 )
 
-const anchorRankTopLimit = 500
+const anchorRankTopLimit = 5500
 
 // AnchorRevenueStatRow 主播收益聚合结果
 type AnchorRevenueStatRow struct {

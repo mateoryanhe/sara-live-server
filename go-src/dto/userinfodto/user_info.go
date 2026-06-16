@@ -27,7 +27,8 @@ type GetUserInfoRes struct {
 	Birthday      string  `json:"birthday" dc:"出生日期(YYYY-MM-DD,空表示未设置)"`
 	FollowCount   int     `json:"followCount" dc:"用户关注数"`
 	FollowerCount int     `json:"followerCount" dc:"用户粉丝数"`
-	TotalIncome   float64 `json:"totalIncome" dc:"主播总收益"`
+	FollowStatus  uint8   `json:"followStatus" dc:"关注状态(0未关注,1已关注,2互为好友)"`
+	TotalIncome   float64 `json:"totalIncome" dc:"最近30天收益(钻石,来自主播红人榜,未上榜为0)"`
 }
 
 // UpdateGenderReq 修改性别

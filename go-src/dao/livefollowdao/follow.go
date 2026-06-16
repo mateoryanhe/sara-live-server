@@ -82,6 +82,15 @@ func GetFollowersByAnchor(anchorId uint64) []*entity.LiveFollow {
 	return list
 }
 
+// IsFollowing 查询 userId 是否已关注 anchorId
+func IsFollowing(userId, anchorId uint64) bool {
+	if userId == 0 || anchorId == 0 || userId == anchorId {
+		return false
+	}
+	existing := GetByUserAnchor(userId, anchorId)
+	return existing != nil && existing.Status == entity.LiveFollowStatusFollow
+}
+
 // AddFollowToCache 关注成功后写入(单条 + 双向列表)
 func AddFollowToCache(f *entity.LiveFollow) {
 	if f == nil {

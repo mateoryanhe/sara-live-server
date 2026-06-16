@@ -73,8 +73,7 @@ func IsFollowing(ctx context.Context, req *livefollowdto.IsFollowingReq) (*livef
 	if req.AnchorId == 0 {
 		return &livefollowdto.IsFollowingRes{Following: false}, nil
 	}
-	existing := livefollowdao.GetByUserAnchor(userId, req.AnchorId)
-	follow := existing != nil && existing.Status == entity.LiveFollowStatusFollow
+	follow := livefollowdao.IsFollowing(userId, req.AnchorId)
 	return &livefollowdto.IsFollowingRes{Following: follow}, nil
 }
 

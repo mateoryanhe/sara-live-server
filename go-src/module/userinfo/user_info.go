@@ -4,23 +4,25 @@ import (
 	"context"
 	"strings"
 
+	"xr-game-server/constants/followstatus"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/livefollowdao"
-	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/userinfodto"
 	"xr-game-server/errercode"
 	"xr-game-server/module/aliyunmoderation"
+	"xr-game-server/module/anchorrank"
 	"xr-game-server/module/upload"
 )
 
-// GetUserInfo 查询当前登录用户的基础信息
+// GetUserInfo 查询用户基础信息(不传 userId 时查当前登录用户)
 func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *userinfodto.GetUserInfoRes, err error) {
-	userId := httpserver.GetAuthId(ctx)
+	authUserId := httpserver.GetAuthId(ctx)
+	targetUserId := authUserId
 	if req.UserId > 0 {
-		userId = req.UserId
+		targetUserId = req.UserId
 	}
-	data := userinfodao.GetUserInfoByUserId(userId)
+	data := userinfodao.GetUserInfoByUserId(targetUserId)
 	ret := &userinfodto.GetUserInfoRes{
 		UserId:        data.ID,
 		Nickname:      data.Nickname,
@@ -35,13 +37,27 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		HasLiveRoom:   data.HasLiveRoom,
 		Gender:        data.Gender,
 		Birthday:      formatBirthday(data.Birthday),
-		FollowCount:   len(livefollowdao.GetFollowingsByUser(userId)),
-		FollowerCount: len(livefollowdao.GetFollowersByAnchor(userId)),
-	}
-	if room := liveroomdao.GetRoomByAnchor(userId); room != nil {
-		ret.TotalIncome = room.TotalIncome
+		FollowCount:   len(livefollowdao.GetFollowingsByUser(targetUserId)),
+		FollowerCount: len(livefollowdao.GetFollowersByAnchor(targetUserId)),
+		FollowStatus:  resolveFollowStatus(authUserId, targetUserId),
+		TotalIncome:   float64(anchorrank.GetUserLast30DayRevenue(targetUserId)),
 	}
 	return ret, nil
+}
+
+func resolveFollowStatus(viewerId, targetUserId uint64) uint8 {
+	if viewerId == 0 || targetUserId == 0 || viewerId == targetUserId {
+		return followstatus.NotFollowing
+	}
+	iFollow := livefollowdao.IsFollowing(viewerId, targetUserId)
+	theyFollow := livefollowdao.IsFollowing(targetUserId, viewerId)
+	if iFollow && theyFollow {
+		return followstatus.Mutual
+	}
+	if iFollow {
+		return followstatus.Following
+	}
+	return followstatus.NotFollowing
 }
 
 // UpdateNickname 修改昵称

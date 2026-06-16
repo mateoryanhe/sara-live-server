@@ -205,3 +205,16 @@ func pageRange(total, page, pageSize int) (int, int) {
 	}
 	return start, end
 }
+
+// GetUserLast30DayRevenue 从主播红人榜缓存获取用户最近30天收益,未上榜返回0
+func GetUserLast30DayRevenue(userId uint64) uint64 {
+	if userId == 0 {
+		return 0
+	}
+	for _, item := range getSnapshot().Last30 {
+		if item != nil && item.UserId == userId {
+			return item.RevenueAmount
+		}
+	}
+	return 0
+}
