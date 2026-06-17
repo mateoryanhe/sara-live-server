@@ -77,6 +77,11 @@ func (c *LiveRoomAppController) SendChat(ctx context.Context, req *liveroomdto.S
 	return liveroom.SendChat(ctx, req)
 }
 
+// SendPaidDanmaku 直播间付费弹幕
+func (c *LiveRoomAppController) SendPaidDanmaku(ctx context.Context, req *liveroomdto.SendPaidDanmakuReq) (res *liveroomdto.SendPaidDanmakuRes, err error) {
+	return liveroom.SendPaidDanmaku(ctx, req)
+}
+
 // SetAudienceMute 主播对指定观众禁言/解禁
 func (c *LiveRoomAppController) SetAudienceMute(ctx context.Context, req *liveroomdto.SetAudienceMuteReq) (res *liveroomdto.SetAudienceMuteRes, err error) {
 	return liveroom.SetAudienceMute(ctx, req)

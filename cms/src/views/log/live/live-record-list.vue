@@ -52,6 +52,9 @@
         <el-table-column label="礼物收入" width="120">
           <template #default="{ row }">{{ formatAmount(row.totalGiftIncome) }}</template>
         </el-table-column>
+        <el-table-column label="付费弹幕收入" width="120">
+          <template #default="{ row }">{{ formatAmount(row.totalPaidDanmakuIncome) }}</template>
+        </el-table-column>
         <el-table-column label="私密房收入" width="120">
           <template #default="{ row }">{{ formatAmount(row.totalPrivateRoomIncome) }}</template>
         </el-table-column>

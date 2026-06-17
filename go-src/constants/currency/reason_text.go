@@ -20,6 +20,7 @@ var reasonTextMap = map[Lang]map[Reason]string{
 		ReasonAnchorGiftRevenue:  "主播收到礼物收益",
 		ReasonPrivateRoomTicket:  "私密直播间门票",
 		ReasonPrivateRoomBilling: "私密直播间计费",
+		ReasonPaidDanmaku:        "直播间付费弹幕",
 	},
 	LangZHTW: {
 		ReasonUnknown:            "未知",
@@ -38,6 +39,7 @@ var reasonTextMap = map[Lang]map[Reason]string{
 		ReasonAnchorGiftRevenue:  "主播收到禮物收益",
 		ReasonPrivateRoomTicket:  "私密直播間門票",
 		ReasonPrivateRoomBilling: "私密直播間計費",
+		ReasonPaidDanmaku:        "直播間付費彈幕",
 	},
 	LangEN: {
 		ReasonUnknown:            "Unknown",
@@ -56,6 +58,7 @@ var reasonTextMap = map[Lang]map[Reason]string{
 		ReasonAnchorGiftRevenue:  "Anchor Gift Revenue",
 		ReasonPrivateRoomTicket:  "Private Room Ticket",
 		ReasonPrivateRoomBilling: "Private Room Billing",
+		ReasonPaidDanmaku:        "Live Room Paid Danmaku",
 	},
 }
 

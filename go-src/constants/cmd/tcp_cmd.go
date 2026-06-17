@@ -37,4 +37,6 @@ const (
 	LiveRoomAudienceJoin = 20
 	//观众离开直播间推送(房间内全体在线用户)
 	LiveRoomAudienceLeave = 21
+	//直播间付费弹幕推送(房间内全体在线用户)
+	LiveRoomPaidDanmaku = 22
 )

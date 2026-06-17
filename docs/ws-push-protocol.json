@@ -1,0 +1,366 @@
+{
+  "version": "1.0.0",
+  "description": "WebSocket 下行推送协议。客户端收到的是 PushResp 对象数组(JSON 序列化后通过 BinaryMessage 发送)。",
+  "envelope": {
+    "type": "PushResp[]",
+    "item": {
+      "cmd": "int，命令字，见 commands",
+      "data": "any，业务载荷；部分命令无 data 或为原始类型"
+    },
+    "example": [
+      {
+        "cmd": 9,
+        "data": {
+          "roomId": "10001",
+          "senderId": "20002",
+          "senderName": "昵称",
+          "senderAvatar": "https://example.com/avatar.jpg",
+          "content": "你好",
+          "sentAt": 1717603200
+        }
+      }
+    ]
+  },
+  "commands": [
+    {
+      "cmd": 1,
+      "name": "Enter",
+      "description": "连接鉴权失败时返回(非 push.Data 常规推送)",
+      "dataType": "AuthResp",
+      "data": {
+        "code": { "type": "int", "json": "code", "description": "错误码" }
+      }
+    },
+    {
+      "cmd": 2,
+      "name": "Heart",
+      "description": "服务端心跳(空闲保活)",
+      "dataType": "int64",
+      "data": { "type": "int64", "description": "当前 Unix 时间戳(秒)" }
+    },
+    {
+      "cmd": 3,
+      "name": "Kick",
+      "description": "踢下线",
+      "dataType": "int64",
+      "data": { "type": "int64", "description": "踢出时间 Unix 毫秒时间戳" }
+    },
+    {
+      "cmd": 4,
+      "name": "CloseServer",
+      "description": "关服通知(仅 cmd，无 data)",
+      "dataType": null,
+      "data": null
+    },
+    {
+      "cmd": 5,
+      "name": "RepeatLogin",
+      "description": "重复登录，通知旧连接下线(仅 cmd，无 data)",
+      "dataType": null,
+      "data": null
+    },
+    {
+      "cmd": 6,
+      "name": "Error",
+      "description": "无参数错误",
+      "dataType": "int",
+      "data": { "type": "int", "description": "错误码 XRCode" }
+    },
+    {
+      "cmd": 7,
+      "name": "ErrorParam",
+      "description": "带参数错误",
+      "dataType": "ErrorDto",
+      "data": {
+        "code": { "type": "int", "json": "code", "description": "错误码" },
+        "param": { "type": "any", "json": "param", "description": "附加参数" }
+      }
+    },
+    {
+      "cmd": 8,
+      "name": "LiveRoomGift",
+      "description": "直播间送礼广播",
+      "target": "房间内全体在线用户(含送礼人)",
+      "dataType": "GiftPushItem",
+      "data": {
+        "roomId": { "type": "string", "json": "roomId,string", "description": "直播间ID" },
+        "senderId": { "type": "string", "json": "senderId,string", "description": "送礼用户ID" },
+        "senderName": { "type": "string", "json": "senderName", "description": "送礼用户昵称" },
+        "senderAvatar": { "type": "string", "json": "senderAvatar", "description": "送礼用户头像URL" },
+        "giftId": { "type": "string", "json": "giftId,string", "description": "礼物ID" },
+        "giftName": { "type": "string", "json": "giftName", "description": "礼物名称" },
+        "giftIcon": { "type": "string", "json": "giftIcon", "description": "礼物图标" },
+        "giftAnim": { "type": "string", "json": "giftAnim", "description": "礼物动画" },
+        "unitPrice": { "type": "number", "json": "unitPrice", "description": "礼物单价(钻石)" },
+        "count": { "type": "int", "json": "count", "description": "赠送数量" },
+        "totalCost": { "type": "number", "json": "totalCost", "description": "总消耗钻石数" },
+        "sentAt": { "type": "int64", "json": "sentAt", "description": "发送时间(秒)" }
+      },
+      "example": {
+        "roomId": "10001",
+        "senderId": "20002",
+        "senderName": "用户A",
+        "senderAvatar": "https://cdn.example.com/a.jpg",
+        "giftId": "1",
+        "giftName": "玫瑰",
+        "giftIcon": "rose.png",
+        "giftAnim": "rose.svga",
+        "unitPrice": 10,
+        "count": 5,
+        "totalCost": 50,
+        "sentAt": 1717603200
+      }
+    },
+    {
+      "cmd": 9,
+      "name": "LiveRoomChat",
+      "description": "直播间免费文字消息",
+      "target": "房间内全体在线用户(含发送者)",
+      "dataType": "ChatPushItem",
+      "data": {
+        "roomId": { "type": "string", "json": "roomId", "description": "直播间ID" },
+        "senderId": { "type": "string", "json": "senderId", "description": "发送用户ID" },
+        "senderName": { "type": "string", "json": "senderName", "description": "发送用户昵称" },
+        "senderAvatar": { "type": "string", "json": "senderAvatar", "description": "发送用户头像URL" },
+        "content": { "type": "string", "json": "content", "description": "文字内容" },
+        "sentAt": { "type": "int64", "json": "sentAt", "description": "发送时间(秒)" }
+      },
+      "example": {
+        "roomId": "10001",
+        "senderId": "20002",
+        "senderName": "用户A",
+        "senderAvatar": "https://cdn.example.com/a.jpg",
+        "content": "大家好",
+        "sentAt": 1717603200
+      }
+    },
+    {
+      "cmd": 10,
+      "name": "DiamondPush",
+      "description": "钻石余额变更",
+      "target": "指定用户",
+      "dataType": "DiamondPushItem",
+      "data": {
+        "diamond": { "type": "number", "json": "diamond", "description": "最新钻石余额" }
+      },
+      "example": { "diamond": 999.5 }
+    },
+    {
+      "cmd": 11,
+      "name": "GoldPush",
+      "description": "金币余额变更",
+      "target": "指定用户",
+      "dataType": "GoldPushItem",
+      "data": {
+        "gold": { "type": "number", "json": "gold,string", "description": "最新金币余额" }
+      },
+      "example": { "gold": 1000 }
+    },
+    {
+      "cmd": 12,
+      "name": "VipLevelPush",
+      "description": "VIP等级变更",
+      "target": "指定用户",
+      "dataType": "VipLevelPushItem",
+      "data": {
+        "vipLevel": { "type": "string", "json": "vipLevel", "description": "最新VIP等级" },
+        "levelName": { "type": "string", "json": "levelName", "description": "等级名称" }
+      },
+      "example": { "vipLevel": "3", "levelName": "VIP3" }
+    },
+    {
+      "cmd": 13,
+      "name": "PrivateMessagePush",
+      "description": "私信消息",
+      "target": "接收者(发送者也会收到同一条推送)",
+      "dataType": "PrivateMessagePushItem",
+      "data": {
+        "id": { "type": "string", "json": "id,string", "description": "消息ID" },
+        "senderId": { "type": "string", "json": "senderId,string", "description": "发送者ID" },
+        "receiverId": { "type": "string", "json": "receiverId,string", "description": "接收者ID" },
+        "content": { "type": "string", "json": "content,string", "description": "消息内容" },
+        "senderName": { "type": "string", "json": "senderName", "description": "发送者昵称" },
+        "senderAvatar": { "type": "string", "json": "senderAvatar", "description": "发送者头像URL" },
+        "sentAt": { "type": "string", "json": "sentAt", "description": "发送时间" }
+      },
+      "example": {
+        "id": "123456789",
+        "senderId": "20002",
+        "receiverId": "20003",
+        "content": "在吗",
+        "senderName": "用户A",
+        "senderAvatar": "https://cdn.example.com/a.jpg",
+        "sentAt": "2024-06-05 12:00:00"
+      }
+    },
+    {
+      "cmd": 14,
+      "name": "SystemMessagePush",
+      "description": "系统消息",
+      "target": "接收者",
+      "dataType": "SystemMessagePushItem",
+      "data": {
+        "id": { "type": "string", "json": "id,string", "description": "消息ID" },
+        "receiverId": { "type": "string", "json": "receiverId,string", "description": "接收者ID" },
+        "title": { "type": "string", "json": "title", "description": "标题" },
+        "content": { "type": "string", "json": "content", "description": "内容" },
+        "sentAt": { "type": "string", "json": "sentAt", "description": "发送时间" }
+      },
+      "example": {
+        "id": "987654321",
+        "receiverId": "20002",
+        "title": "系统通知",
+        "content": "欢迎使用",
+        "sentAt": "2024-06-05 12:00:00"
+      }
+    },
+    {
+      "cmd": 15,
+      "name": "LiveRoomAnchorBan",
+      "description": "主播封禁",
+      "target": "主播及直播间在线观众",
+      "dataType": "AnchorBanPushItem",
+      "data": {
+        "roomId": { "type": "string", "json": "roomId", "description": "直播间ID" },
+        "anchorId": { "type": "string", "json": "anchorId", "description": "主播用户ID" },
+        "banApplyTime": { "type": "int64", "json": "banApplyTime", "description": "封禁截止时间(秒)" },
+        "bannedAt": { "type": "int64", "json": "bannedAt", "description": "封禁操作时间(秒)" },
+        "banReason": { "type": "string", "json": "banReason", "description": "封禁原因" }
+      },
+      "example": {
+        "roomId": "10001",
+        "anchorId": "10001",
+        "banApplyTime": 1717689600,
+        "bannedAt": 1717603200,
+        "banReason": "违规直播"
+      }
+    },
+    {
+      "cmd": 17,
+      "name": "LiveRoomAudienceMute",
+      "description": "观众禁言/解禁状态",
+      "target": "被操作的观众",
+      "dataType": "AudienceMutePushItem",
+      "data": {
+        "roomId": { "type": "string", "json": "roomId", "description": "直播间ID" },
+        "userId": { "type": "string", "json": "userId", "description": "观众用户ID" },
+        "muted": { "type": "bool", "json": "muted", "description": "是否被禁言" }
+      },
+      "example": { "roomId": "10001", "userId": "20002", "muted": true }
+    },
+    {
+      "cmd": 18,
+      "name": "LiveRoomAudienceKick",
+      "description": "观众被踢出",
+      "target": "被踢出的观众",
+      "dataType": "AudienceKickPushItem",
+      "data": {
+        "roomId": { "type": "string", "json": "roomId", "description": "直播间ID" },
+        "userId": { "type": "string", "json": "userId", "description": "观众用户ID" },
+        "kickTime": { "type": "int64", "json": "kickTime", "description": "踢出时间(秒)" },
+        "banSeconds": { "type": "int64", "json": "banSeconds", "description": "禁止再次进入时长(秒)" }
+      },
+      "example": { "roomId": "10001", "userId": "20002", "kickTime": 1717603200, "banSeconds": 1800 }
+    },
+    {
+      "cmd": 19,
+      "name": "LiveRoomAudienceKickCancel",
+      "description": "取消观众进入限制",
+      "target": "被取消限制的观众",
+      "dataType": "AudienceKickCancelPushItem",
+      "data": {
+        "roomId": { "type": "string", "json": "roomId", "description": "直播间ID" },
+        "userId": { "type": "string", "json": "userId", "description": "观众用户ID" }
+      },
+      "example": { "roomId": "10001", "userId": "20002" }
+    },
+    {
+      "cmd": 20,
+      "name": "LiveRoomAudienceJoin",
+      "description": "观众进入直播间",
+      "target": "房间内全体在线用户",
+      "dataType": "AudienceJoinPushItem",
+      "data": {
+        "roomId": { "type": "string", "json": "roomId", "description": "直播间ID" },
+        "userId": { "type": "string", "json": "userId", "description": "观众用户ID" },
+        "nickname": { "type": "string", "json": "nickname", "description": "观众昵称" },
+        "avatar": { "type": "string", "json": "avatar", "description": "观众头像URL" },
+        "vipLevel": { "type": "uint32", "json": "vipLevel", "description": "VIP等级" },
+        "onlineCount": { "type": "int", "json": "onlineCount", "description": "当前在线人数" },
+        "joinedAt": { "type": "int64", "json": "joinedAt", "description": "进入时间(秒)" }
+      },
+      "example": {
+        "roomId": "10001",
+        "userId": "20002",
+        "nickname": "用户A",
+        "avatar": "https://cdn.example.com/a.jpg",
+        "vipLevel": 2,
+        "onlineCount": 128,
+        "joinedAt": 1717603200
+      }
+    },
+    {
+      "cmd": 21,
+      "name": "LiveRoomAudienceLeave",
+      "description": "观众离开直播间",
+      "target": "房间内剩余在线用户",
+      "dataType": "AudienceLeavePushItem",
+      "data": {
+        "roomId": { "type": "string", "json": "roomId", "description": "直播间ID" },
+        "userId": { "type": "string", "json": "userId", "description": "观众用户ID" },
+        "nickname": { "type": "string", "json": "nickname", "description": "观众昵称" },
+        "avatar": { "type": "string", "json": "avatar", "description": "观众头像URL" },
+        "vipLevel": { "type": "uint32", "json": "vipLevel", "description": "VIP等级" },
+        "onlineCount": { "type": "int", "json": "onlineCount", "description": "当前在线人数" },
+        "leftAt": { "type": "int64", "json": "leftAt", "description": "离开时间(秒)" }
+      },
+      "example": {
+        "roomId": "10001",
+        "userId": "20002",
+        "nickname": "用户A",
+        "avatar": "https://cdn.example.com/a.jpg",
+        "vipLevel": 2,
+        "onlineCount": 127,
+        "leftAt": 1717603300
+      }
+    },
+    {
+      "cmd": 22,
+      "name": "LiveRoomPaidDanmaku",
+      "description": "付费弹幕",
+      "target": "房间内全体在线用户(含发送者)",
+      "dataType": "PaidDanmakuPushItem",
+      "data": {
+        "roomId": { "type": "string", "json": "roomId", "description": "直播间ID" },
+        "senderId": { "type": "string", "json": "senderId", "description": "发送用户ID" },
+        "senderName": { "type": "string", "json": "senderName", "description": "发送用户昵称" },
+        "senderAvatar": { "type": "string", "json": "senderAvatar", "description": "发送用户头像URL" },
+        "vipLevel": { "type": "uint32", "json": "vipLevel", "description": "VIP等级" },
+        "content": { "type": "string", "json": "content", "description": "弹幕内容" },
+        "unitPrice": { "type": "number", "json": "unitPrice", "description": "单价(钻石)" },
+        "cost": { "type": "number", "json": "cost", "description": "本次消耗(钻石)" },
+        "sentAt": { "type": "int64", "json": "sentAt", "description": "发送时间(秒)" }
+      },
+      "example": {
+        "roomId": "10001",
+        "senderId": "20002",
+        "senderName": "用户A",
+        "senderAvatar": "https://cdn.example.com/a.jpg",
+        "vipLevel": 2,
+        "content": "666",
+        "unitPrice": 1.5,
+        "cost": 1.5,
+        "sentAt": 1717603200
+      }
+    }
+  ],
+  "sourceFiles": {
+    "cmdConstants": "go-src/constants/cmd/tcp_cmd.go",
+    "envelope": "go-src/core/httpserver/websocket.go (PushResp)",
+    "errorDto": "go-src/core/push/error_dto.go",
+    "liveroomPayloads": "go-src/dto/liveroomdto/live_room_dto.go",
+    "messagePayloads": "go-src/dto/messagedto/private_message_dto.go, system_message_dto.go",
+    "walletPayloads": "go-src/dto/diamonddto/cms_diamond_dto.go, go-src/dto/golddto/cms_gold_dto.go",
+    "vipPayload": "go-src/dto/vipdto/vip_detail_dto.go"
+  }
+}

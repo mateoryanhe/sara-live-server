@@ -26,6 +26,7 @@ type CMSLiveRecordItem struct {
 	TotalLiveDuration      float64    `json:"totalLiveDuration"`
 	TotalIncome            float64    `json:"totalIncome"`
 	TotalGiftIncome        float64    `json:"totalGiftIncome"`
+	TotalPaidDanmakuIncome float64    `json:"totalPaidDanmakuIncome"`
 	TotalPrivateRoomIncome float64    `json:"totalPrivateRoomIncome"`
 	TotalGameBet           float64    `json:"totalGameBet"`
 	TotalGiftSender        uint64     `json:"totalGiftSender"`

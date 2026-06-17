@@ -76,6 +76,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		PrivateRoomBillingNonExist:     "Private room billing config does not exist",
 		LiveRoomPrivateAudienceFull:    "Private room audience is full",
 		LiveRoomNotLive:                "Live room is not live",
+		LiveRoomPaidDanmakuDisabled:    "Paid danmaku is not enabled",
 	},
 	lang.LangZHCN: {
 		Success:                        "成功",
@@ -148,6 +149,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		PrivateRoomBillingNonExist:     "私密直播间计费配置不存在",
 		LiveRoomPrivateAudienceFull:    "私密直播间观众已满",
 		LiveRoomNotLive:                "直播间未在直播中",
+		LiveRoomPaidDanmakuDisabled:    "付费弹幕未开启",
 	},
 	lang.LangZHTW: {
 		Success:                        "成功",
@@ -220,6 +222,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		PrivateRoomBillingNonExist:     "私密直播間計費配置不存在",
 		LiveRoomPrivateAudienceFull:    "私密直播間觀眾已滿",
 		LiveRoomNotLive:                "直播間未在直播中",
+		LiveRoomPaidDanmakuDisabled:    "付費彈幕未開啟",
 	},
 }
 

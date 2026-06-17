@@ -45,6 +45,7 @@ func toCMSItem(v *entity.LiveRecord, nicknameMap map[uint64]string) *liverecordd
 		TotalLiveDuration:      v.TotalLiveDuration,
 		TotalIncome:            v.TotalIncome,
 		TotalGiftIncome:        v.TotalGiftIncome,
+		TotalPaidDanmakuIncome: v.TotalPaidDanmakuIncome,
 		TotalPrivateRoomIncome: v.TotalPrivateRoomIncome,
 		TotalGameBet:           v.TotalGameBet,
 		TotalGiftSender:        v.TotalGiftSender,

@@ -130,6 +130,8 @@ const (
 	LiveRoomPrivateAudienceFull XRCode = 124
 	// LiveRoomNotLive 直播间未在直播中(未开播或已关播)
 	LiveRoomNotLive XRCode = 125
+	// LiveRoomPaidDanmakuDisabled 付费弹幕未开启(价格未配置)
+	LiveRoomPaidDanmakuDisabled XRCode = 126
 )
 
 type XError struct {

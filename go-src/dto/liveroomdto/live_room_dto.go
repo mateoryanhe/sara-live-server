@@ -253,6 +253,33 @@ type SendChatRes struct {
 	Success bool `json:"success"`
 }
 
+// SendPaidDanmakuReq App端发送付费弹幕
+type SendPaidDanmakuReq struct {
+	g.Meta  `path:"/sendPaidDanmaku" method:"post" summary:"直播间付费弹幕" tags:"直播间"`
+	RoomId  uint64 `json:"roomId"  v:"required#直播间ID不能为空" dc:"直播间ID"`
+	Content string `json:"content" v:"required|length:1,256#消息不能为空|消息长度需在1到256之间" dc:"弹幕内容"`
+}
+
+// SendPaidDanmakuRes App端发送付费弹幕响应
+type SendPaidDanmakuRes struct {
+	Success bool    `json:"success"`
+	Cost    float64 `json:"cost"    dc:"本次消耗钻石数"`
+	Diamond float64 `json:"diamond" dc:"剩余钻石余额"`
+}
+
+// PaidDanmakuPushItem 推送给房间在线用户的付费弹幕载荷
+type PaidDanmakuPushItem struct {
+	RoomId       string  `json:"roomId"       dc:"直播间ID"`
+	SenderId     string  `json:"senderId"     dc:"发送用户ID"`
+	SenderName   string  `json:"senderName"   dc:"发送用户昵称"`
+	SenderAvatar string  `json:"senderAvatar" dc:"发送用户头像"`
+	VipLevel     uint32  `json:"vipLevel"     dc:"VIP等级"`
+	Content      string  `json:"content"      dc:"弹幕内容"`
+	UnitPrice    float64 `json:"unitPrice"    dc:"单价(钻石)"`
+	Cost         float64 `json:"cost"         dc:"本次消耗(钻石)"`
+	SentAt       int64   `json:"sentAt"       dc:"发送时间(秒)"`
+}
+
 // ChatPushItem 推送给房间在线用户的文字消息载荷
 type ChatPushItem struct {
 	RoomId       string `json:"roomId"       dc:"直播间ID"`
