@@ -86,9 +86,14 @@ func HasCmsToken(authId uint64, token string) bool {
 	ctx := gctx.New()
 
 	cacheToken, e := cmsCache.Get(gctx.New(), authId)
+	duration, _ := cmsCache.GetExpire(gctx.New(), authId)
 	if e == nil && cacheToken.String() == token {
-		cmsCache.UpdateExpire(ctx, authId, Time)
-		event.Pub(event.CmsToken, &event.CmsTokenData{Token: token, Id: authId})
+
+		if (7 * 24 * time.Hour) > duration {
+			//2天快失效了,才刷新
+			cmsCache.UpdateExpire(ctx, authId, Time)
+			event.Pub(event.CmsToken, &event.CmsTokenData{Token: token, Id: authId})
+		}
 		return true
 	}
 	return false
