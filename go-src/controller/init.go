@@ -5,6 +5,7 @@ import (
 )
 
 func Init() {
+	initPushController()
 	initAuthApi()
 	initAuthAppController()
 	initAccountController()
