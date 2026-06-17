@@ -10,6 +10,7 @@ import (
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/agoradto"
 	"xr-game-server/errercode"
+	"xr-game-server/module/livecfg"
 )
 
 // GetLiveRoomToken App端上报房间ID,返回进直播间声网Token
@@ -57,7 +58,11 @@ func GetAppId(_ context.Context, _ *agoradto.GetAppIdReq) (*agoradto.GetAppIdRes
 	if agoraCfg == nil || agoraCfg.AppId == "" {
 		return nil, errercode.CreateCode(errercode.AgoraCfgInvalid)
 	}
-	return &agoradto.GetAppIdRes{AppId: agoraCfg.AppId}, nil
+	return &agoradto.GetAppIdRes{
+		AppId:                       agoraCfg.AppId,
+		PrivateRoomFreeWatchSeconds: livecfg.GetPrivateRoomFreeWatchSeconds(),
+		PaidDanmakuPrice:            livecfg.GetPaidDanmakuPrice(),
+	}, nil
 }
 
 func buildChannelName(roomId uint64) string {

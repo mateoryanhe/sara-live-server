@@ -482,6 +482,7 @@ export interface SaveAgoraCfgRes {
 export interface LiveCfg {
     id: string
     paidDanmakuPrice: number
+    privateRoomFreeWatchSeconds: number
     createdAt: string
     updatedAt: string
 }
@@ -493,6 +494,7 @@ export interface GetLiveCfgRes {
 export interface SaveLiveCfgReq {
     id?: number
     paidDanmakuPrice: number
+    privateRoomFreeWatchSeconds: number
 }
 
 export interface SaveLiveCfgRes {

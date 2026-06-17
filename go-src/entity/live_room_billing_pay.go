@@ -10,8 +10,6 @@ import (
 
 const (
 	TbLiveRoomBillingPay db.TbName = "live_room_billing_pays"
-	// LiveRoomBillingFreeDuration 私密直播间观众免费观看时长
-	LiveRoomBillingFreeDuration = 7 * time.Minute
 )
 
 const (
@@ -43,11 +41,11 @@ func NewLiveRoomBillingPay(userId, roomId, liveRecordId uint64) *LiveRoomBilling
 	return r
 }
 
-func (r *LiveRoomBillingPay) ShouldChargeMinute(joinTime *time.Time, now time.Time) bool {
-	if joinTime == nil || joinTime.IsZero() {
+func (r *LiveRoomBillingPay) ShouldChargeMinute(joinTime *time.Time, now time.Time, freeDuration time.Duration) bool {
+	if joinTime == nil || joinTime.IsZero() || freeDuration < 0 {
 		return false
 	}
-	freeUntil := joinTime.Add(LiveRoomBillingFreeDuration)
+	freeUntil := joinTime.Add(freeDuration)
 	if now.Before(freeUntil) {
 		return false
 	}

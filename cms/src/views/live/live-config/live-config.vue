@@ -20,6 +20,17 @@
           <span class="form-tip">钻石，保留 4 位小数</span>
         </el-form-item>
 
+        <el-form-item label="私密房免费时长" prop="privateRoomFreeWatchSeconds">
+          <el-input-number
+              v-model="formData.privateRoomFreeWatchSeconds"
+              :min="0"
+              :precision="0"
+              controls-position="right"
+              style="width: 220px"
+          />
+          <span class="form-tip">秒，进房后该时长内不按分钟扣费</span>
+        </el-form-item>
+
         <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
@@ -45,6 +56,7 @@ const formRef = ref()
 const formData = reactive({
   id: '0',
   paidDanmakuPrice: 0,
+  privateRoomFreeWatchSeconds: 420,
 })
 
 const metaInfo = reactive({
@@ -57,18 +69,24 @@ const formRules = reactive({
     {required: true, message: '请输入付费弹幕价格', trigger: 'blur'},
     {type: 'number', min: 0, message: '价格不能小于 0', trigger: 'blur'},
   ],
+  privateRoomFreeWatchSeconds: [
+    {required: true, message: '请输入私密直播间免费观看时长', trigger: 'blur'},
+    {type: 'number', min: 0, message: '免费观看时长不能小于 0', trigger: 'blur'},
+  ],
 })
 
 const applyCfg = (cfg: LiveCfg | null | undefined) => {
   if (!cfg) {
     formData.id = '0'
     formData.paidDanmakuPrice = 0
+    formData.privateRoomFreeWatchSeconds = 420
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
     return
   }
   formData.id = cfg.id || '0'
   formData.paidDanmakuPrice = cfg.paidDanmakuPrice ?? 0
+  formData.privateRoomFreeWatchSeconds = cfg.privateRoomFreeWatchSeconds ?? 420
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
 }
@@ -93,6 +111,7 @@ const handleSave = async () => {
     const response = await liveCfgApi.saveLiveCfg({
       id: formData.id === '0' ? 0 : Number(formData.id),
       paidDanmakuPrice: formData.paidDanmakuPrice,
+      privateRoomFreeWatchSeconds: formData.privateRoomFreeWatchSeconds,
     })
     if (response?.success) {
       ElMessage.success('保存成功')

@@ -11,6 +11,7 @@ import (
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
 	"xr-game-server/gameevent"
+	"xr-game-server/module/livecfg"
 	"xr-game-server/module/wallet"
 )
 
@@ -98,7 +99,7 @@ func chargePrivateRoomBillingIfNeeded(userId uint64, room *entity.LiveRoom, onli
 	if pay == nil {
 		return 0, nil
 	}
-	if !pay.ShouldChargeMinute(onlineJoinTime(online), now) {
+	if !pay.ShouldChargeMinute(onlineJoinTime(online), now, livecfg.GetPrivateRoomFreeWatchDuration()) {
 		return 0, nil
 	}
 

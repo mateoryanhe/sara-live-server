@@ -9,5 +9,7 @@ type GetAppIdReq struct {
 
 // GetAppIdRes App端声网AppId
 type GetAppIdRes struct {
-	AppId string `json:"appId" dc:"声网AppId"`
+	AppId                       string  `json:"appId" dc:"声网AppId"`
+	PrivateRoomFreeWatchSeconds uint32  `json:"privateRoomFreeWatchSeconds" dc:"私密直播间免费观看时长(秒)"`
+	PaidDanmakuPrice            float64 `json:"paidDanmakuPrice" dc:"付费弹幕价格(钻石)"`
 }
