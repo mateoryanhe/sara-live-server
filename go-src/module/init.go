@@ -8,6 +8,7 @@ import (
 	"xr-game-server/module/banner"
 	"xr-game-server/module/currencylog"
 	"xr-game-server/module/game"
+	"xr-game-server/module/livecfg"
 	"xr-game-server/module/liveroom"
 	"xr-game-server/module/message"
 	"xr-game-server/module/name"
@@ -39,6 +40,7 @@ func Init() {
 	vip.Init()
 	game.Init()
 	agora.Init()
+	livecfg.Init()
 	verification_code.Init()
 	aliyunmoderation.Init()
 	upload.Init()

@@ -55,6 +55,7 @@ func Init() {
 	initLiveTicket()
 	initLivePrivateRoomBilling()
 	initAgoraCfg()
+	initLiveCfg()
 	initAliyunTextModerationCfg()
 	initUploadResourceCfg()
 	initUserMessage()

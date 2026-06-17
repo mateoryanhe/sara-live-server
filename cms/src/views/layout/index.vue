@@ -58,7 +58,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('TicketManagement') || hasMenuPermission('PrivateRoomBillingManagement')"
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement')"
             index="/operation">
           <template #title>
             <el-icon>
@@ -90,21 +90,9 @@
             </el-icon>
             <span>VIP配置</span>
           </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('TicketManagement')" index="/operation/ticket/ticket-list">
-            <el-icon>
-              <Tickets/>
-            </el-icon>
-            <span>门票管理</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('PrivateRoomBillingManagement')" index="/operation/private-room-billing/billing-list">
-            <el-icon>
-              <Lock/>
-            </el-icon>
-            <span>私密直播间计费</span>
-          </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('GiftManagement') || hasMenuPermission('AgoraCfgManagement')"
+            v-if="hasMenuPermission('GiftManagement') || hasMenuPermission('AgoraCfgManagement') || hasMenuPermission('TicketManagement') || hasMenuPermission('PrivateRoomBillingManagement') || hasMenuPermission('LiveCfgManagement')"
             index="/live">
           <template #title>
             <el-icon>
@@ -123,6 +111,24 @@
               <Setting/>
             </el-icon>
             <span>声网配置</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('TicketManagement')" index="/live/ticket/ticket-list">
+            <el-icon>
+              <Tickets/>
+            </el-icon>
+            <span>门票管理</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('PrivateRoomBillingManagement')" index="/live/private-room-billing/billing-list">
+            <el-icon>
+              <Lock/>
+            </el-icon>
+            <span>私密直播间计费</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('LiveCfgManagement')" index="/live/live-config/live-config">
+            <el-icon>
+              <VideoCamera/>
+            </el-icon>
+            <span>直播配置</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu

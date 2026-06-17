@@ -18,5 +18,23 @@ export const liveRoutes: RouteRecordRaw = {
             component: () => import('@/views/live/agora-cfg.vue'),
             meta: {title: '声网配置'},
         },
+        {
+            path: 'ticket/ticket-list',
+            name: 'TicketManagement',
+            component: () => import('@/views/live/ticket/ticket-list.vue'),
+            meta: {title: '门票管理'},
+        },
+        {
+            path: 'private-room-billing/billing-list',
+            name: 'PrivateRoomBillingManagement',
+            component: () => import('@/views/live/private-room-billing/billing-list.vue'),
+            meta: {title: '私密直播间计费'},
+        },
+        {
+            path: 'live-config/live-config',
+            name: 'LiveCfgManagement',
+            component: () => import('@/views/live/live-config/live-config.vue'),
+            meta: {title: '直播配置'},
+        },
     ],
 }

@@ -479,6 +479,27 @@ export interface SaveAgoraCfgRes {
     id: string
 }
 
+export interface LiveCfg {
+    id: string
+    paidDanmakuPrice: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetLiveCfgRes {
+    cfg: LiveCfg | null
+}
+
+export interface SaveLiveCfgReq {
+    id?: number
+    paidDanmakuPrice: number
+}
+
+export interface SaveLiveCfgRes {
+    success: boolean
+    id: string
+}
+
 export interface TextModerationCfg {
     id: string
     enabled: boolean
