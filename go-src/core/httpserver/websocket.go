@@ -78,7 +78,7 @@ func InitWebsocket() {
 			return
 		}
 		//开始检查token
-		authStr := r.GetHeader("Authorization", "")
+		authStr := r.GetQuery("Authorization", "").String()
 		if authStr == "" || len(strings.Split(authStr, ".")) != 2 {
 			ws.WriteMessage(websocket.BinaryMessage, newError(errercode.Token))
 			return

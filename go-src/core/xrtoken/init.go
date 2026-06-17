@@ -71,10 +71,12 @@ func HasAppToken(authId uint64, token string) bool {
 
 	cacheToken, e := appCache.Get(gctx.New(), authId)
 	duration, _ := appCache.GetExpire(gctx.New(), authId)
-	if e == nil && cacheToken.String() == token && (2*24*time.Hour) > duration {
-		//2天快失效了,才刷新
-		appCache.UpdateExpire(ctx, authId, Time)
-		event.Pub(event.AppToken, &event.AppTokenData{Token: token, Id: authId})
+	if e == nil && cacheToken.String() == token {
+		if (7 * 24 * time.Hour) > duration {
+			//2天快失效了,才刷新
+			appCache.UpdateExpire(ctx, authId, Time)
+			event.Pub(event.AppToken, &event.AppTokenData{Token: token, Id: authId})
+		}
 		return true
 	}
 	return false
