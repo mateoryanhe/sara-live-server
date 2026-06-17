@@ -5,12 +5,11 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/util/guid"
 	"time"
-	"xr-game-server/core/cfg"
 	"xr-game-server/core/event"
 )
 
 const (
-	Time = 7 * 24 * time.Hour
+	Time = 30 * 24 * time.Hour
 )
 
 var appCache = gcache.New()
@@ -69,11 +68,11 @@ func InitCmsToken(authId uint64, token string, val time.Time) {
 
 func HasAppToken(authId uint64, token string) bool {
 	ctx := gctx.New()
-	if cfg.GetAuthCfg().LoginOff {
-		return true
-	}
+
 	cacheToken, e := appCache.Get(gctx.New(), authId)
-	if e == nil && cacheToken.String() == token {
+	duration, _ := appCache.GetExpire(gctx.New(), authId)
+	if e == nil && cacheToken.String() == token && (2*24*time.Hour) > duration {
+		//2天快失效了,才刷新
 		appCache.UpdateExpire(ctx, authId, Time)
 		event.Pub(event.AppToken, &event.AppTokenData{Token: token, Id: authId})
 		return true
@@ -83,9 +82,7 @@ func HasAppToken(authId uint64, token string) bool {
 
 func HasCmsToken(authId uint64, token string) bool {
 	ctx := gctx.New()
-	if cfg.GetAuthCfg().LoginOff {
-		return true
-	}
+
 	cacheToken, e := cmsCache.Get(gctx.New(), authId)
 	if e == nil && cacheToken.String() == token {
 		cmsCache.UpdateExpire(ctx, authId, Time)

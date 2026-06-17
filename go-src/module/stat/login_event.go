@@ -12,15 +12,16 @@ import (
 	"xr-game-server/dao/weeklyloginstatdao"
 	"xr-game-server/dao/weeklyuserlogindao"
 	"xr-game-server/entity"
+	"xr-game-server/gameevent"
 )
 
 func initLoginEvent() {
-	event.Sub(event.AppToken, onLoginEvent)
+	event.Sub(gameevent.LoginEvent, onLoginEvent)
 }
 
 func onLoginEvent(data any) {
-	val := data.(*event.AppTokenData)
-	userInfo := userinfodao.GetUserInfoByUserId(val.Id)
+	val := data.(uint64)
+	userInfo := userinfodao.GetUserInfoByUserId(val)
 	now := time.Now()
 	userInfo.SetLastLoginTime(&now)
 
@@ -28,9 +29,9 @@ func onLoginEvent(data any) {
 	gmlock.Lock(lockName)
 	defer gmlock.Unlock(lockName)
 
-	recordDailyLogin(now, val.Id)
-	recordWeeklyLogin(now, val.Id)
-	recordMonthlyLogin(now, val.Id)
+	recordDailyLogin(now, val)
+	recordWeeklyLogin(now, val)
+	recordMonthlyLogin(now, val)
 }
 
 func recordDailyLogin(now time.Time, userId uint64) {

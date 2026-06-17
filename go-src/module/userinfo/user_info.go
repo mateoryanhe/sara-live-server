@@ -3,6 +3,8 @@ package userinfo
 import (
 	"context"
 	"strings"
+	"xr-game-server/core/event"
+	"xr-game-server/gameevent"
 
 	"xr-game-server/constants/followstatus"
 	"xr-game-server/core/httpserver"
@@ -41,6 +43,9 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		FollowerCount: len(livefollowdao.GetFollowersByAnchor(targetUserId)),
 		FollowStatus:  resolveFollowStatus(authUserId, targetUserId),
 		TotalIncome:   float64(anchorrank.GetUserLast30DayRevenue(targetUserId)),
+	}
+	if req.UserId == authUserId {
+		event.Pub(gameevent.LoginEvent, authUserId)
 	}
 	return ret, nil
 }
