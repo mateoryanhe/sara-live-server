@@ -7,6 +7,7 @@ import (
 
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/liveroomdao"
+	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
@@ -48,6 +49,9 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 	addToOnline(userId, room.ID)
 
 	if userId != room.ID {
+		if user := userinfodao.GetUserInfoByUserId(userId); user != nil {
+			user.SetLiveRoomId(room.ID)
+		}
 		broadcastAudienceJoin(room.ID, userId, getLenForRoom(room.ID))
 	}
 

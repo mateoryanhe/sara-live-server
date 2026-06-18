@@ -72,7 +72,6 @@ type JoinRoomRes struct {
 // LeaveRoomReq 离开直播间
 type LeaveRoomReq struct {
 	g.Meta `path:"/leave" method:"post" summary:"离开直播间" tags:"直播间"`
-	RoomId uint64 `json:"roomId" v:"required#直播间ID不能为空" dc:"直播间ID"`
 }
 
 type LeaveRoomRes struct {
@@ -139,7 +138,6 @@ type GiftPushItem struct {
 // SetAudienceMuteReq 主播对指定观众禁言/解禁
 type SetAudienceMuteReq struct {
 	g.Meta `path:"/setAudienceMute" method:"post" summary:"主播对观众禁言/解禁" tags:"直播间"`
-	RoomId uint64 `json:"roomId" v:"required#直播间ID不能为空" dc:"直播间ID(须为本主播房间)"`
 	UserId uint64 `json:"userId" v:"required#观众用户ID不能为空" dc:"被操作的观众用户ID"`
 	Muted  bool   `json:"muted"  dc:"true禁言,false解禁"`
 }
@@ -158,7 +156,7 @@ type AudienceMutePushItem struct {
 // CancelAudienceMuteReq 主播取消观众禁言
 type CancelAudienceMuteReq struct {
 	g.Meta `path:"/cancelAudienceMute" method:"post" summary:"主播取消观众禁言" tags:"直播间"`
-	RoomId uint64 `json:"roomId" v:"required#直播间ID不能为空" dc:"直播间ID(须为本主播房间)"`
+
 	UserId uint64 `json:"userId" v:"required#观众用户ID不能为空" dc:"被取消禁言的观众用户ID"`
 }
 
@@ -186,7 +184,6 @@ type GetAudienceRestrictStatusRes struct {
 // KickAudienceReq 主播踢出指定观众
 type KickAudienceReq struct {
 	g.Meta `path:"/kickAudience" method:"post" summary:"主播踢出观众" tags:"直播间"`
-	RoomId uint64 `json:"roomId" v:"required#直播间ID不能为空" dc:"直播间ID(须为本主播房间)"`
 	UserId uint64 `json:"userId" v:"required#观众用户ID不能为空" dc:"被踢出的观众用户ID"`
 }
 
@@ -205,7 +202,6 @@ type AudienceKickPushItem struct {
 // CancelKickBanReq 主播取消观众进入限制
 type CancelKickBanReq struct {
 	g.Meta `path:"/cancelKickBan" method:"post" summary:"主播取消观众进入限制" tags:"直播间"`
-	RoomId uint64 `json:"roomId" v:"required#直播间ID不能为空" dc:"直播间ID(须为本主播房间)"`
 	UserId uint64 `json:"userId" v:"required#观众用户ID不能为空" dc:"被取消限制的观众用户ID"`
 }
 

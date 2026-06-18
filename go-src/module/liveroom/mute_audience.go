@@ -58,18 +58,16 @@ func GetAudienceRestrictStatus(ctx context.Context, req *liveroomdto.GetAudience
 // SetAudienceMute 主播对指定观众禁言或解禁
 func SetAudienceMute(ctx context.Context, req *liveroomdto.SetAudienceMuteReq) (*liveroomdto.SetAudienceMuteRes, error) {
 	anchorId := httpserver.GetAuthId(ctx)
-	if anchorId != req.RoomId {
-		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
-	}
+
 	if req.UserId == anchorId {
 		return nil, errercode.CreateCode(errercode.LiveRoomCannotMuteSelf)
 	}
-	if liveroomdao.GetRoomById(req.RoomId) == nil {
+	if liveroomdao.GetRoomById(anchorId) == nil {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
 
-	onlineId := entity.BuildLiveRoomOnlineId(req.UserId, req.RoomId)
-	online := liveroomdao.GetOnlineById(onlineId, req.UserId, req.RoomId)
+	onlineId := entity.BuildLiveRoomOnlineId(req.UserId, anchorId)
+	online := liveroomdao.GetOnlineById(onlineId, req.UserId, anchorId)
 	if online == nil || online.Status != entity.LiveRoomOnlineStatusOnline {
 		return nil, errercode.CreateCode(errercode.LiveRoomAudienceNotOnline)
 	}
@@ -79,7 +77,7 @@ func SetAudienceMute(ctx context.Context, req *liveroomdto.SetAudienceMuteReq) (
 
 	online.SetMuted(req.Muted)
 	push.Data(req.UserId, cmd.LiveRoomAudienceMute, &liveroomdto.AudienceMutePushItem{
-		RoomId: strconv.FormatUint(req.RoomId, 10),
+		RoomId: strconv.FormatUint(anchorId, 10),
 		UserId: strconv.FormatUint(req.UserId, 10),
 		Muted:  req.Muted,
 	})
@@ -90,25 +88,23 @@ func SetAudienceMute(ctx context.Context, req *liveroomdto.SetAudienceMuteReq) (
 // CancelAudienceMute 主播取消指定观众的禁言
 func CancelAudienceMute(ctx context.Context, req *liveroomdto.CancelAudienceMuteReq) (*liveroomdto.CancelAudienceMuteRes, error) {
 	anchorId := httpserver.GetAuthId(ctx)
-	if anchorId != req.RoomId {
-		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
-	}
+
 	if req.UserId == anchorId {
 		return nil, errercode.CreateCode(errercode.LiveRoomCannotMuteSelf)
 	}
-	if liveroomdao.GetRoomById(req.RoomId) == nil {
+	if liveroomdao.GetRoomById(anchorId) == nil {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
 
-	onlineId := entity.BuildLiveRoomOnlineId(req.UserId, req.RoomId)
-	online := liveroomdao.GetOnlineById(onlineId, req.UserId, req.RoomId)
+	onlineId := entity.BuildLiveRoomOnlineId(req.UserId, anchorId)
+	online := liveroomdao.GetOnlineById(onlineId, req.UserId, anchorId)
 	if online == nil || !online.Muted {
 		return &liveroomdto.CancelAudienceMuteRes{Success: true}, nil
 	}
 
 	online.SetMuted(false)
 	push.Data(req.UserId, cmd.LiveRoomAudienceMute, &liveroomdto.AudienceMutePushItem{
-		RoomId: strconv.FormatUint(req.RoomId, 10),
+		RoomId: strconv.FormatUint(anchorId, 10),
 		UserId: strconv.FormatUint(req.UserId, 10),
 		Muted:  false,
 	})
