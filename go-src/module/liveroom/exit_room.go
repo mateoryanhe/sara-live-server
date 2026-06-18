@@ -22,18 +22,16 @@ func LeaveRoom(ctx context.Context, req *liveroomdto.LeaveRoomReq) (*liveroomdto
 func exitRoom(userId uint64, roomId uint64) {
 	onlineId := entity.BuildLiveRoomOnlineId(userId, roomId)
 	existing := liveroomdao.GetOnlineById(onlineId, userId, roomId)
-	wasAudienceOnline := userId != roomId && existing != nil &&
-		existing.Status == entity.LiveRoomOnlineStatusOnline
+	//wasAudienceOnline := userId != roomId && existing != nil &&
+	//	existing.Status == entity.LiveRoomOnlineStatusOnline
 
-	removeOnline(userId, roomId)
+	//先广播
+	broadcastAudienceLeave(roomId, userId, getLenForRoom(roomId))
 	if existing != nil && existing.Status != entity.LiveRoomOnlineStatusOffline {
 		existing.SetStatus(entity.LiveRoomOnlineStatusOffline)
 	}
-
-	if wasAudienceOnline {
-		if user := userinfodao.GetUserInfoByUserId(userId); user != nil && user.LiveRoomId == roomId {
-			user.SetLiveRoomId(0)
-		}
-		broadcastAudienceLeave(roomId, userId, getLenForRoom(roomId))
+	if user := userinfodao.GetUserInfoByUserId(userId); user != nil && user.LiveRoomId == roomId {
+		user.SetLiveRoomId(0)
 	}
+	removeOnline(userId, roomId)
 }

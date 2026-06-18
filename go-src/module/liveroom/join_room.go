@@ -46,6 +46,7 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 	//alreadyOnline := existing.Status == entity.LiveRoomOnlineStatusOnline
 	existing.SetStatus(entity.LiveRoomOnlineStatusOnline)
 	existing.SetJoinTime(&now)
+	existing.SetHeartTime(&now)
 	addToOnline(userId, room.ID)
 
 	if userId != room.ID {
