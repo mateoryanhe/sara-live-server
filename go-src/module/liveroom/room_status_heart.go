@@ -52,6 +52,10 @@ func ReportLiveStartStatus(ctx context.Context, req *liveroomdto.ReportLiveStart
 	if userId == room.ID {
 		flushAnchorId(room)
 	} else {
+		//检查是否加入房间
+		if !isUserInOnlineMap(userId, room.ID) {
+			return &liveroomdto.ReportLiveStartStatusRes{Success: true}, nil
+		}
 		onlineId := entity.BuildLiveRoomOnlineId(userId, room.ID)
 		onlineData := liveroomdao.GetOnlineById(onlineId, userId, room.ID)
 		deducted, err := chargePrivateRoomBillingIfNeeded(userId, room, onlineData, now)

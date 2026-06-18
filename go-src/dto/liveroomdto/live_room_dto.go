@@ -317,3 +317,11 @@ type AnchorBanPushItem struct {
 	BannedAt     int64  `json:"bannedAt"     dc:"封禁操作时间(秒)"`
 	BanReason    string `json:"banReason"    dc:"封禁原因"`
 }
+
+// AnchorStopLivePushItem 主播下播推送载荷(推送给直播间在线观众)
+type AnchorStopLivePushItem struct {
+	RoomId       string `json:"roomId"       dc:"直播间ID"`
+	AnchorId     string `json:"anchorId"     dc:"主播用户ID"`
+	LiveRecordId string `json:"liveRecordId" dc:"本场直播记录ID"`
+	StoppedAt    int64  `json:"stoppedAt"    dc:"下播时间(秒)"`
+}

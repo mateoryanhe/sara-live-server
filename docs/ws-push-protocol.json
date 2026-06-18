@@ -352,6 +352,25 @@
         "cost": 1.5,
         "sentAt": 1717603200
       }
+    },
+    {
+      "cmd": 23,
+      "name": "LiveRoomStopLive",
+      "description": "主播下播",
+      "target": "直播间在线观众(不含主播)",
+      "dataType": "AnchorStopLivePushItem",
+      "data": {
+        "roomId": { "type": "string", "json": "roomId", "description": "直播间ID" },
+        "anchorId": { "type": "string", "json": "anchorId", "description": "主播用户ID" },
+        "liveRecordId": { "type": "string", "json": "liveRecordId", "description": "本场直播记录ID" },
+        "stoppedAt": { "type": "int64", "json": "stoppedAt", "description": "下播时间(秒)" }
+      },
+      "example": {
+        "roomId": "10001",
+        "anchorId": "10001",
+        "liveRecordId": "90001",
+        "stoppedAt": 1717603200
+      }
     }
   ],
   "sourceFiles": {

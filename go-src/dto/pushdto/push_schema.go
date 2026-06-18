@@ -218,3 +218,13 @@ type LiveRoomPaidDanmakuPushResp struct {
 	Cmd  int                              `json:"cmd" dc:"命令字 22"`
 	Data *liveroomdto.PaidDanmakuPushItem `json:"data"`
 }
+
+// LiveRoomStopLivePushReq cmd=23 主播下播
+type LiveRoomStopLivePushReq struct {
+	g.Meta `path:"/liveRoomStopLive" method:"post" summary:"推送 cmd=23 LiveRoomStopLive" description:"主播下播(推送给直播间在线观众,不含主播)" tags:"推送协议"`
+}
+
+type LiveRoomStopLivePushResp struct {
+	Cmd  int                                 `json:"cmd" dc:"命令字 23"`
+	Data *liveroomdto.AnchorStopLivePushItem `json:"data"`
+}
