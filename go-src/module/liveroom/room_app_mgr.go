@@ -190,9 +190,10 @@ func GetOnlineUserList(_ context.Context, req *liveroomdto.GetOnlineUserListReq)
 			joinTime = onlineData.JoinTime.Format("2006-01-02 15:04:05")
 		}
 		item := &liveroomdto.OnlineUserItem{
-			UserId:   strconv.FormatUint(o, 10),
-			JoinedAt: joinTime,
-			Muted:    onlineData.Muted,
+			UserId:     strconv.FormatUint(o, 10),
+			JoinedAt:   joinTime,
+			JoinedUnix: onlineData.JoinTime.UnixMilli(),
+			Muted:      onlineData.Muted,
 		}
 		if u := userinfodao.GetUserInfoByUserId(o); u != nil {
 			item.Nickname = u.Nickname
@@ -209,6 +210,7 @@ func GetOnlineUserList(_ context.Context, req *liveroomdto.GetOnlineUserListReq)
 		Page:     page,
 		PageSize: pageSize,
 		List:     list,
+		SysTime:  time.Now().UnixMilli(),
 	}, nil
 }
 

@@ -70,5 +70,6 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 		OnlineId:       onlineId,
 		OnlineCount:    getLenForRoom(room.ID),
 		TicketDeducted: ticketDeducted,
+		SysTime:        now.Unix(),
 	}, nil
 }

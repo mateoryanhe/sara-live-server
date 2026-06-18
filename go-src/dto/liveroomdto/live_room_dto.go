@@ -67,6 +67,7 @@ type JoinRoomRes struct {
 	OnlineId       string  `json:"onlineId"       dc:"在线记录ID(userId_roomId)"`
 	OnlineCount    int     `json:"onlineCount"    dc:"当前在线人数"`
 	TicketDeducted float64 `json:"ticketDeducted" dc:"本次扣除门票钻石(未扣为0)"`
+	SysTime        int64   `json:"sysTime,string"`
 }
 
 // LeaveRoomReq 离开直播间
@@ -75,7 +76,8 @@ type LeaveRoomReq struct {
 }
 
 type LeaveRoomRes struct {
-	OnlineCount int `json:"onlineCount" dc:"当前在线人数"`
+	OnlineCount int   `json:"onlineCount" dc:"当前在线人数"`
+	SysTime     int64 `json:"sysTime,string"`
 }
 
 // GetOnlineUserListReq 分页查询直播间在线玩家列表
@@ -88,14 +90,15 @@ type GetOnlineUserListReq struct {
 
 // OnlineUserItem 在线玩家条目
 type OnlineUserItem struct {
-	UserId   string `json:"userId"   dc:"用户ID"`
-	Nickname string `json:"nickname" dc:"昵称"`
-	Avatar   string `json:"avatar"   dc:"头像URL(已拼资源域名)"`
-	JoinedAt string `json:"joinedAt" dc:"最近一次加入时间(秒)"`
-	Muted    bool   `json:"muted"    dc:"是否被禁言"`
-	VipLevel uint32 `json:"vipLevel" dc:"VIP等级"`
-	Gender   uint8  `json:"gender"   dc:"性别(0未知,1男,2女)"`
-	Age      int    `json:"age"      dc:"年龄(未设置出生日期时为0)"`
+	UserId     string `json:"userId"   dc:"用户ID"`
+	Nickname   string `json:"nickname" dc:"昵称"`
+	Avatar     string `json:"avatar"   dc:"头像URL(已拼资源域名)"`
+	JoinedAt   string `json:"joinedAt" dc:"最近一次加入时间(秒)"`
+	JoinedUnix int64  `json:"joinedUnix" dc:"最近一次加入时间(秒)"`
+	Muted      bool   `json:"muted"    dc:"是否被禁言"`
+	VipLevel   uint32 `json:"vipLevel" dc:"VIP等级"`
+	Gender     uint8  `json:"gender"   dc:"性别(0未知,1男,2女)"`
+	Age        int    `json:"age"      dc:"年龄(未设置出生日期时为0)"`
 }
 
 type GetOnlineUserListRes struct {
@@ -103,6 +106,7 @@ type GetOnlineUserListRes struct {
 	Page     int               `json:"page"     dc:"当前页码"`
 	PageSize int               `json:"pageSize" dc:"每页数量"`
 	List     []*OnlineUserItem `json:"list"     dc:"玩家列表"`
+	SysTime  int64             `json:"sysTime"`
 }
 
 // SendGiftReq App端送礼请求

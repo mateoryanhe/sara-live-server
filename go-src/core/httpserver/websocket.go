@@ -52,7 +52,7 @@ func newHeart() []byte {
 	ret := []*PushResp{
 		&PushResp{
 			Cmd:  cmd.Heart,
-			Data: time.Now().Unix(),
+			Data: time.Now().UnixMilli(),
 		},
 	}
 	data, _ := json.Marshal(ret)

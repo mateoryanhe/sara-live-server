@@ -23,7 +23,7 @@ func broadcastAudienceLeave(roomId, userId uint64, onlineCount int) {
 		RoomId:      strconv.FormatUint(roomId, 10),
 		UserId:      strconv.FormatUint(userId, 10),
 		OnlineCount: onlineCount,
-		LeftAt:      time.Now().Unix(),
+		LeftAt:      time.Now().UnixMilli(),
 	}
 	if u := userinfodao.GetUserInfoByUserId(userId); u != nil {
 		payload.Nickname = u.Nickname
@@ -40,7 +40,7 @@ func buildAudiencePresencePayload(roomId, userId uint64, onlineCount int) *liver
 		RoomId:      strconv.FormatUint(roomId, 10),
 		UserId:      strconv.FormatUint(userId, 10),
 		OnlineCount: onlineCount,
-		JoinedAt:    time.Now().Unix(),
+		JoinedAt:    time.Now().UnixMilli(),
 	}
 	if u := userinfodao.GetUserInfoByUserId(userId); u != nil {
 		payload.Nickname = u.Nickname
