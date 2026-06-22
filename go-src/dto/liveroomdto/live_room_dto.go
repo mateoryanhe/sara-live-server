@@ -91,15 +91,16 @@ type GetOnlineUserListReq struct {
 
 // OnlineUserItem 在线玩家条目
 type OnlineUserItem struct {
-	UserId     string `json:"userId"   dc:"用户ID"`
-	Nickname   string `json:"nickname" dc:"昵称"`
-	Avatar     string `json:"avatar"   dc:"头像URL(已拼资源域名)"`
-	JoinedAt   string `json:"joinedAt" dc:"最近一次加入时间(秒)"`
-	JoinedUnix int64  `json:"joinedUnix" dc:"最近一次加入时间(秒)"`
-	Muted      bool   `json:"muted"    dc:"是否被禁言"`
-	VipLevel   uint32 `json:"vipLevel" dc:"VIP等级"`
-	Gender     uint8  `json:"gender"   dc:"性别(0未知,1男,2女)"`
-	Age        int    `json:"age"      dc:"年龄(未设置出生日期时为0)"`
+	UserId      string  `json:"userId"   dc:"用户ID"`
+	Nickname    string  `json:"nickname" dc:"昵称"`
+	Avatar      string  `json:"avatar"   dc:"头像URL(已拼资源域名)"`
+	JoinedAt    string  `json:"joinedAt" dc:"最近一次加入时间(秒)"`
+	JoinedUnix  int64   `json:"joinedUnix" dc:"最近一次加入时间(秒)"`
+	Muted       bool    `json:"muted"    dc:"是否被禁言"`
+	VipLevel    uint32  `json:"vipLevel" dc:"VIP等级"`
+	TotalReward float64 `json:"totalReward" dc:"打赏累计(钻石,含礼物与付费弹幕)"`
+	Gender      uint8   `json:"gender"   dc:"性别(0未知,1男,2女)"`
+	Age         int     `json:"age"      dc:"年龄(未设置出生日期时为0)"`
 }
 
 type GetOnlineUserListRes struct {
@@ -109,6 +110,16 @@ type GetOnlineUserListRes struct {
 	List     []*OnlineUserItem `json:"list"     dc:"玩家列表"`
 	SysTime  int64             `json:"sysTime"`
 }
+
+// GetVipOnlineUserListReq 分页查询直播间VIP在线玩家列表
+type GetVipOnlineUserListReq struct {
+	g.Meta   `path:"/vipOnlineList" method:"post" summary:"分页查询直播间VIP在线玩家" tags:"直播间"`
+	RoomId   uint64 `json:"roomId"   v:"required#直播间ID不能为空" dc:"直播间ID"`
+	Page     int    `json:"page"     v:"min:1#页码从1开始" dc:"页码(从1开始,默认1)"`
+	PageSize int    `json:"pageSize" v:"max:100#单页最多100条" dc:"每页数量(默认20,最大100)"`
+}
+
+type GetVipOnlineUserListRes = GetOnlineUserListRes
 
 // SendGiftReq App端送礼请求
 type SendGiftReq struct {

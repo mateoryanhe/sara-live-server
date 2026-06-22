@@ -105,7 +105,7 @@ func SendPaidDanmaku(ctx context.Context, req *liveroomdto.SendPaidDanmakuReq) (
 	if online := liveroomdao.GetOnlineById(onlineId, senderId, req.RoomId); online != nil {
 		online.AddTotalReward(price)
 	}
-	flushCommonOnlineMap(req.RoomId)
+	flushOnlineLists(req.RoomId)
 
 	return &liveroomdto.SendPaidDanmakuRes{
 		Success: true,

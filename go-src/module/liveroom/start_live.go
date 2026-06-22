@@ -37,6 +37,6 @@ func StartLive(ctx context.Context, _ *liveroomdto.StartLiveReq) (*liveroomdto.S
 	liveRecord.SetStartTime(time.Now())
 	liveRecord.SetAnchorId(room.ID)
 	//
-	flushCommonOnlineMap(room.ID)
+	flushOnlineLists(room.ID)
 	return &liveroomdto.StartLiveRes{}, nil
 }

@@ -48,7 +48,7 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 	existing.SetJoinTime(&now)
 	existing.SetHeartTime(&now)
 	addToOnline(userId, room.ID)
-	flushCommonOnlineMap(room.ID)
+	flushOnlineLists(room.ID)
 
 	if userId != room.ID {
 		if user := userinfodao.GetUserInfoByUserId(userId); user != nil {

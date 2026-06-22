@@ -57,6 +57,11 @@ func (c *LiveRoomAppController) GetOnlineUserList(ctx context.Context, req *live
 	return liveroom.GetOnlineUserList(ctx, req)
 }
 
+// GetVipOnlineUserList 分页查询直播间VIP在线玩家
+func (c *LiveRoomAppController) GetVipOnlineUserList(ctx context.Context, req *liveroomdto.GetVipOnlineUserListReq) (res *liveroomdto.GetVipOnlineUserListRes, err error) {
+	return liveroom.GetVipOnlineUserList(ctx, req)
+}
+
 // GetRoom 查询直播间
 func (c *LiveRoomAppController) GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (res *liveroomdto.GetLiveRoomRes, err error) {
 	return liveroom.GetRoom(ctx, req)
