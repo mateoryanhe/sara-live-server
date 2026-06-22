@@ -111,6 +111,14 @@ type GetOnlineUserListRes struct {
 	SysTime  int64             `json:"sysTime"`
 }
 
+// AudienceListRefreshPushItem 观众列表刷新推送载荷(排序后的在线观众列表)
+type AudienceListRefreshPushItem struct {
+	RoomId      string            `json:"roomId"      dc:"直播间ID"`
+	OnlineCount int               `json:"onlineCount" dc:"当前在线人数"`
+	UpdatedAt   int64             `json:"updatedAt"   dc:"列表刷新时间(毫秒)"`
+	List        []*OnlineUserItem `json:"list"        dc:"排序后的在线观众列表"`
+}
+
 // GetVipOnlineUserListReq 分页查询直播间VIP在线玩家列表
 type GetVipOnlineUserListReq struct {
 	g.Meta   `path:"/vipOnlineList" method:"post" summary:"分页查询直播间VIP在线玩家" tags:"直播间"`
@@ -257,7 +265,7 @@ type AudienceLeavePushItem struct {
 type SendChatReq struct {
 	g.Meta  `path:"/sendChat" method:"post" summary:"直播间文字消息" tags:"直播间"`
 	RoomId  uint64 `json:"roomId"  v:"required#直播间ID不能为空" dc:"直播间ID"`
-	Content string `json:"content" v:"required|length:1,256#消息不能为空|消息长度需在1到256之间" dc:"文字内容"`
+	Content string `json:"content"  dc:"文字内容"`
 }
 
 // SendChatRes App端发送文字消息响应
@@ -269,7 +277,7 @@ type SendChatRes struct {
 type SendPaidDanmakuReq struct {
 	g.Meta  `path:"/sendPaidDanmaku" method:"post" summary:"直播间付费弹幕" tags:"直播间"`
 	RoomId  uint64 `json:"roomId"  v:"required#直播间ID不能为空" dc:"直播间ID"`
-	Content string `json:"content" v:"required|length:1,256#消息不能为空|消息长度需在1到256之间" dc:"弹幕内容"`
+	Content string `json:"content"  dc:"弹幕内容"`
 }
 
 // SendPaidDanmakuRes App端发送付费弹幕响应

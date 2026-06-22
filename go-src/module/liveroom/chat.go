@@ -61,6 +61,7 @@ func SendChat(ctx context.Context, req *liveroomdto.SendChatReq) (*liveroomdto.S
 	for _, o := range getOnline(req.RoomId) {
 		push.Data(o, cmd.LiveRoomChat, payload)
 	}
+	push.Data(req.RoomId, cmd.LiveRoomChat, payload)
 
 	return &liveroomdto.SendChatRes{Success: true}, nil
 }

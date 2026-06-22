@@ -12,5 +12,5 @@ func GetVipOnlineUserList(_ context.Context, req *liveroomdto.GetVipOnlineUserLi
 	if liveroomdao.GetRoomById(req.RoomId) == nil {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
-	return queryOnlineUserListPage(req.RoomId, req.Page, req.PageSize, vipOnlineMap, flushVipOnlineMap), nil
+	return queryOnlineUserListPage(req.RoomId, req.Page, req.PageSize, vipOnlineMap), nil
 }

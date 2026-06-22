@@ -104,7 +104,7 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 	if online := liveroomdao.GetOnlineById(onlineId, senderId, req.RoomId); online != nil {
 		online.AddTotalReward(totalCost)
 	}
-	flushOnlineLists(req.RoomId)
+	refreshRoomAudienceCaches(req.RoomId)
 
 	return &liveroomdto.SendGiftRes{
 		Cost:    totalCost,

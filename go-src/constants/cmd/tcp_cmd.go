@@ -41,4 +41,6 @@ const (
 	LiveRoomPaidDanmaku = 22
 	//主播下播推送(推送给直播间在线观众,不含主播)
 	LiveRoomStopLive = 23
+	//观众列表刷新推送(房间内全体在线用户,含主播)
+	LiveRoomAudienceListRefresh = 24
 )

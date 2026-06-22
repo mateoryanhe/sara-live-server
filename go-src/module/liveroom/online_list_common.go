@@ -153,13 +153,12 @@ func buildOnlineUserItems(roomId uint64, userIds []uint64) []*liveroomdto.Online
 	return list
 }
 
-func queryOnlineUserListPage(roomId uint64, page, pageSize int, cached *gmap.KVMap[uint64, []uint64], flush func(uint64)) *liveroomdto.GetOnlineUserListRes {
+func queryOnlineUserListPage(roomId uint64, page, pageSize int, cached *gmap.KVMap[uint64, []uint64]) *liveroomdto.GetOnlineUserListRes {
 	page, pageSize = normalizeOnlineListPage(page, pageSize)
 
 	all := cached.Get(roomId)
 	if all == nil {
-		flush(roomId)
-		all = cached.Get(roomId)
+		all = make([]uint64, 0)
 	}
 	total := len(all)
 
@@ -186,5 +185,5 @@ func GetOnlineUserList(_ context.Context, req *liveroomdto.GetOnlineUserListReq)
 	if liveroomdao.GetRoomById(req.RoomId) == nil {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
-	return queryOnlineUserListPage(req.RoomId, req.Page, req.PageSize, commonOnlineMap, flushCommonOnlineMap), nil
+	return queryOnlineUserListPage(req.RoomId, req.Page, req.PageSize, commonOnlineMap), nil
 }

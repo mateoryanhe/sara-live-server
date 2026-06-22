@@ -62,6 +62,11 @@ func (c *LiveRoomAppController) GetVipOnlineUserList(ctx context.Context, req *l
 	return liveroom.GetVipOnlineUserList(ctx, req)
 }
 
+// GetContributionRank 查询直播间观众贡献榜
+func (c *LiveRoomAppController) GetContributionRank(ctx context.Context, req *liveroomdto.GetContributionRankReq) (res *liveroomdto.GetContributionRankRes, err error) {
+	return liveroom.GetContributionRank(ctx, req)
+}
+
 // GetRoom 查询直播间
 func (c *LiveRoomAppController) GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (res *liveroomdto.GetLiveRoomRes, err error) {
 	return liveroom.GetRoom(ctx, req)

@@ -371,6 +371,36 @@
         "liveRecordId": "90001",
         "stoppedAt": 1717603200
       }
+    },
+    {
+      "cmd": 24,
+      "name": "LiveRoomAudienceListRefresh",
+      "description": "观众列表刷新",
+      "target": "房间内全体在线用户(含主播)",
+      "dataType": "AudienceListRefreshPushItem",
+      "data": {
+        "roomId": { "type": "string", "json": "roomId", "description": "直播间ID" },
+        "onlineCount": { "type": "int", "json": "onlineCount", "description": "当前在线人数" },
+        "updatedAt": { "type": "int64", "json": "updatedAt", "description": "列表刷新时间(毫秒)" },
+        "list": { "type": "OnlineUserItem[]", "json": "list", "description": "排序后的在线观众列表" }
+      },
+      "example": {
+        "roomId": "10001",
+        "onlineCount": 128,
+        "updatedAt": 1717603200000,
+        "list": [{
+          "userId": "20002",
+          "nickname": "用户A",
+          "avatar": "https://cdn.example.com/a.jpg",
+          "joinedAt": "2024-06-05 12:00:00",
+          "joinedUnix": 1717603200000,
+          "muted": false,
+          "vipLevel": 2,
+          "totalReward": 50,
+          "gender": 1,
+          "age": 25
+        }]
+      }
     }
   ],
   "sourceFiles": {

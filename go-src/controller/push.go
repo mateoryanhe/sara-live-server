@@ -99,3 +99,7 @@ func (c *PushController) LiveRoomPaidDanmaku(_ context.Context, _ *pushdto.LiveR
 func (c *PushController) LiveRoomStopLive(_ context.Context, _ *pushdto.LiveRoomStopLivePushReq) (*pushdto.LiveRoomStopLivePushResp, error) {
 	return nil, nil
 }
+
+func (c *PushController) LiveRoomAudienceListRefresh(_ context.Context, _ *pushdto.LiveRoomAudienceListRefreshPushReq) (*pushdto.LiveRoomAudienceListRefreshPushResp, error) {
+	return nil, nil
+}

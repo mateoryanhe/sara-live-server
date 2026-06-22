@@ -228,3 +228,13 @@ type LiveRoomStopLivePushResp struct {
 	Cmd  int                                 `json:"cmd" dc:"命令字 23"`
 	Data *liveroomdto.AnchorStopLivePushItem `json:"data"`
 }
+
+// LiveRoomAudienceListRefreshPushReq cmd=24 观众列表刷新
+type LiveRoomAudienceListRefreshPushReq struct {
+	g.Meta `path:"/liveRoomAudienceListRefresh" method:"post" summary:"推送 cmd=24 LiveRoomAudienceListRefresh" description:"观众列表刷新(房间内全体在线用户,含主播)" tags:"推送协议"`
+}
+
+type LiveRoomAudienceListRefreshPushResp struct {
+	Cmd  int                                      `json:"cmd" dc:"命令字 24"`
+	Data *liveroomdto.AudienceListRefreshPushItem `json:"data"`
+}
