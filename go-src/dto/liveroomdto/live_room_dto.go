@@ -73,6 +73,7 @@ type JoinRoomRes struct {
 // LeaveRoomReq 离开直播间
 type LeaveRoomReq struct {
 	g.Meta `path:"/leave" method:"post" summary:"离开直播间" tags:"直播间"`
+	RoomId uint64 `json:"roomId" v:"required#直播间ID不能为空" dc:"直播间ID"`
 }
 
 type LeaveRoomRes struct {

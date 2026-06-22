@@ -12,7 +12,7 @@ type GetUserInfoReq struct {
 }
 
 type GetUserInfoRes struct {
-	UserId        uint64  `json:"userId"`
+	UserId        uint64  `json:"userId,string"`
 	Nickname      string  `json:"nickname"`
 	Phone         string  `json:"phone"`
 	Avatar        string  `json:"avatar"`

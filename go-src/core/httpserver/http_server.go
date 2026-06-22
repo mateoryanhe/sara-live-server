@@ -16,6 +16,7 @@ const (
 	DoTime          = "1ea75a33e32449c67dfd40fe8e23232d-doTime"
 	LongDoTime      = 400
 	contentTypeJson = "application/json"
+	ReqId           = "reqId"
 )
 
 var httpServer = g.Server()
@@ -46,4 +47,12 @@ func GetAuthId(ctx context.Context) uint64 {
 func beforeServeHook(r *ghttp.Request) {
 	g.Log().Debugf(r.GetCtx(), "beforeServeHook [is file:%v] URI:%s", r.IsFileRequest(), r.RequestURI)
 	r.Response.CORSDefault()
+}
+
+func GetReqId(ctx context.Context) uint64 {
+	tokenStr := g.RequestFromCtx(ctx).GetHeader(ReqId, "")
+	if tokenStr == "" {
+		return 0
+	}
+	return gconv.Uint64(tokenStr)
 }

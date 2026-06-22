@@ -13,7 +13,7 @@ func Init() {
 	initGoldAppController()
 	initDiamondController()
 	initIndex()
-	initWebSocket()
+	initSysController()
 	initRank()
 	initGlobalCfgController()
 	initAppTokenController()

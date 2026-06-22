@@ -10,7 +10,7 @@ import (
 
 const (
 	defaultResourceDomain = "http://127.0.0.1"
-	defaultAvatarURL      = "https://img.yonogames.com/headimg/man/147.png"
+	defaultAvatarURL      = "https://www.bigtktool.shop/upload/images/2058072499773509632.jpg"
 )
 
 type resourceCfgSnapshot struct {

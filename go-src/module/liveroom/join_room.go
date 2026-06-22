@@ -52,6 +52,7 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 	if userId != room.ID {
 		if user := userinfodao.GetUserInfoByUserId(userId); user != nil {
 			user.SetLiveRoomId(room.ID)
+			user.SetLiveRoomVer(httpserver.GetReqId(ctx))
 		}
 		broadcastAudienceJoin(room.ID, userId, getLenForRoom(room.ID))
 	}

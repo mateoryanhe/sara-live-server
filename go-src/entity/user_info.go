@@ -28,6 +28,7 @@ const (
 	UserInfoVipLevel      db.TbCol = "vip_level"
 	UserInfoLastLoginTime db.TbCol = "last_login_time"
 	UserInfoLiveRoomId    db.TbCol = "live_room_id"
+	UserInfoLiveRoomVer   db.TbCol = "live_room_ver"
 	UserInfoGender        db.TbCol = "gender"
 	UserInfoBirthday      db.TbCol = "birthday"
 )
@@ -49,6 +50,7 @@ type UserInfo struct {
 	VipLevel      uint32     `gorm:"default:0;comment:VIP等级(0为无)"`
 	LastLoginTime *time.Time `gorm:"comment:最后登录时间" json:"lastLoginTime"`
 	LiveRoomId    uint64     `gorm:"index;default:0;comment:当前所在直播间ID(观众,0为不在直播间)" json:"liveRoomId"`
+	LiveRoomVer   uint64     `gorm:"default:0;comment:当前所在直播间版本(观众,0为无,通常为liveRecordId)" json:"liveRoomVer"`
 	Gender        uint8      `gorm:"default:0;comment:性别(0未知,1男,2女)" json:"gender"`
 	Birthday      *time.Time `gorm:"type:date;comment:出生日期" json:"birthday"`
 }
@@ -205,6 +207,15 @@ func (receiver *UserInfo) SetLiveRoomId(liveRoomId uint64) {
 	})
 }
 
+func (receiver *UserInfo) SetLiveRoomVer(liveRoomVer uint64) {
+	receiver.LiveRoomVer = liveRoomVer
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddDataToQuickChan(TbUserInfo, UserInfoLiveRoomVer, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: liveRoomVer,
+	})
+}
+
 func (receiver *UserInfo) SetGender(gender uint8) {
 	receiver.Gender = gender
 	receiver.SetUpdatedAt(time.Now())
@@ -257,6 +268,7 @@ func initUserInfo() {
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoVipLevel)
 	syndb.RegLazyWithLarge(TbUserInfo, UserInfoLastLoginTime)
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoLiveRoomId)
+	syndb.RegQuickWithLarge(TbUserInfo, UserInfoLiveRoomVer)
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoGender)
 	syndb.RegQuickWithLarge(TbUserInfo, UserInfoBirthday)
 
