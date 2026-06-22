@@ -20,6 +20,10 @@ func StopLive(ctx context.Context, _ *liveroomdto.StopLiveReq) (*liveroomdto.Sto
 }
 
 func stopLive(anchorId uint64) {
+
+	//移除在线列表
+	clearCommonOnlineMap(anchorId)
+
 	room := liveroomdao.GetRoomById(anchorId)
 	if room == nil {
 		return

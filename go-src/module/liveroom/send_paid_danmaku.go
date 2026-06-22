@@ -101,6 +101,12 @@ func SendPaidDanmaku(ctx context.Context, req *liveroomdto.SendPaidDanmakuReq) (
 
 	event.Pub(gameevent.RevenueEventEvent, eventData)
 
+	onlineId := entity.BuildLiveRoomOnlineId(senderId, req.RoomId)
+	if online := liveroomdao.GetOnlineById(onlineId, senderId, req.RoomId); online != nil {
+		online.AddTotalReward(price)
+	}
+	flushCommonOnlineMap(req.RoomId)
+
 	return &liveroomdto.SendPaidDanmakuRes{
 		Success: true,
 		Cost:    price,

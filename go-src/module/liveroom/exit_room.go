@@ -42,4 +42,5 @@ func exitRoom(userId uint64, roomId uint64) {
 	//	user.SetLiveRoomVer(0)
 	//}
 	removeOnline(userId, roomId)
+	flushCommonOnlineMap(roomId)
 }

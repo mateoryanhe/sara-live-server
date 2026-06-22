@@ -100,6 +100,12 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 
 	event.Pub(gameevent.RevenueEventEvent, eventData)
 
+	onlineId := entity.BuildLiveRoomOnlineId(senderId, req.RoomId)
+	if online := liveroomdao.GetOnlineById(onlineId, senderId, req.RoomId); online != nil {
+		online.AddTotalReward(totalCost)
+	}
+	flushCommonOnlineMap(req.RoomId)
+
 	return &liveroomdto.SendGiftRes{
 		Cost:    totalCost,
 		Diamond: remaining,

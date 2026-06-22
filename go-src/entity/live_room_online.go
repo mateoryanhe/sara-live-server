@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 	"xr-game-server/constants/db"
+	"xr-game-server/core/math"
 	"xr-game-server/core/migrate"
 	"xr-game-server/core/syndb"
 )
@@ -20,6 +21,7 @@ const (
 	TbLiveRoomOnlineHeartTime db.TbCol = "heart_time"
 	TbLiveRoomOnlineJoinTime  db.TbCol = "join_time"
 	TbLiveRoomOnlineKickTime  db.TbCol = "kick_time"
+	LiveRoomOnlineTotalReward db.TbCol = "total_reward"
 )
 
 const LiveRoomKickBanDuration = 30 * time.Minute
@@ -34,15 +36,16 @@ const (
 // 主键 ID 使用复合字符串: "{userId}_{roomId}",方便唯一定位以及前端拼接
 // 玩家加入/离开通过 Status 字段切换,记录长期保留
 type LiveRoomOnline struct {
-	ID        string     `gorm:"primaryKey;size:64;comment:复合ID(userId_roomId)" json:"id"`
-	RoomId    uint64     `gorm:"index:idx_room_status,priority:1;default:0;comment:直播间ID" json:"roomId"`
-	UserId    uint64     `gorm:"index;default:0;comment:用户ID" json:"userId"`
-	Status    uint8      `gorm:"index:idx_room_status,priority:2;default:0;comment:状态(0已离开,1在线)" json:"status"`
-	Muted     bool       `gorm:"default:0;comment:禁言标记" json:"muted"`
-	CreatedAt time.Time  `json:"createdAt"`
-	JoinTime  *time.Time `gorm:"comment:进入直播间时间" json:"join_time"`
-	HeartTime *time.Time `gorm:"comment:房间心跳状态,大于5分钟，判断下播" json:"heart_time"`
-	KickTime  *time.Time `gorm:"comment:被主播踢出时间" json:"kickTime"`
+	ID          string     `gorm:"primaryKey;size:64;comment:复合ID(userId_roomId)" json:"id"`
+	RoomId      uint64     `gorm:"index:idx_room_status,priority:1;default:0;comment:直播间ID" json:"roomId"`
+	UserId      uint64     `gorm:"index;default:0;comment:用户ID" json:"userId"`
+	Status      uint8      `gorm:"index:idx_room_status,priority:2;default:0;comment:状态(0已离开,1在线)" json:"status"`
+	Muted       bool       `gorm:"default:0;comment:禁言标记" json:"muted"`
+	CreatedAt   time.Time  `json:"createdAt"`
+	JoinTime    *time.Time `gorm:"comment:进入直播间时间" json:"join_time"`
+	HeartTime   *time.Time `gorm:"comment:房间心跳状态,大于5分钟，判断下播" json:"heart_time"`
+	KickTime    *time.Time `gorm:"comment:被主播踢出时间" json:"kickTime"`
+	TotalReward float64    `gorm:"type:decimal(16,4);default:0;comment:打赏累计(钻石)" json:"totalReward"`
 }
 
 // BuildLiveRoomOnlineId 拼接复合主键
@@ -122,6 +125,16 @@ func (o *LiveRoomOnline) SetKickTime(v *time.Time) {
 	})
 }
 
+func (o *LiveRoomOnline) AddTotalReward(amount float64) {
+	if amount <= 0 {
+		return
+	}
+	o.TotalReward = math.AddFloat64(o.TotalReward, amount)
+	syndb.AddDataToLazyChan(TbLiveRoomOnline, LiveRoomOnlineTotalReward, &syndb.ColData{
+		IdVal: o.ID, ColVal: o.TotalReward,
+	})
+}
+
 // IsKickBanned 是否在踢出封禁期内
 func (o *LiveRoomOnline) IsKickBanned() bool {
 	if o == nil || o.KickTime == nil {
@@ -139,6 +152,7 @@ func initLiveRoomOnline() {
 	syndb.RegQuickWithLarge(TbLiveRoomOnline, LiveRoomOnlineMuted)
 	syndb.RegQuickWithMiddle(TbLiveRoomOnline, TbLiveRoomOnlineJoinTime)
 	syndb.RegQuickWithLarge(TbLiveRoomOnline, TbLiveRoomOnlineKickTime)
+	syndb.RegLazyWithLarge(TbLiveRoomOnline, LiveRoomOnlineTotalReward)
 
 	syndb.RegLazyWithLarge(TbLiveRoomOnline, TbLiveRoomOnlineHeartTime)
 

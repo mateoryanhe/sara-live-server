@@ -2,8 +2,11 @@ package liveroom
 
 import (
 	"context"
+	"sort"
 	"strconv"
 	"time"
+
+	"github.com/gogf/gf/v2/container/gmap"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
@@ -11,6 +14,72 @@ import (
 	"xr-game-server/errercode"
 	"xr-game-server/module/upload"
 )
+
+var commonOnlineMap = gmap.NewKVMap[uint64, []uint64](true)
+
+func flushCommonOnlineMap(roomId uint64) {
+	all := getOnline(roomId)
+	if len(all) == 0 {
+		commonOnlineMap.Set(roomId, all)
+		return
+	}
+
+	type onlineSortKey struct {
+		userId      uint64
+		totalReward float64
+		vipLevel    uint32
+	}
+
+	keys := make([]onlineSortKey, 0, len(all))
+	for _, userId := range all {
+		onlineId := entity.BuildLiveRoomOnlineId(userId, roomId)
+		online := liveroomdao.GetOnlineById(onlineId, userId, roomId)
+		key := onlineSortKey{userId: userId}
+		if online != nil {
+			key.totalReward = online.TotalReward
+		}
+		if u := userinfodao.GetUserInfoByUserId(userId); u != nil {
+			key.vipLevel = u.VipLevel
+		}
+		keys = append(keys, key)
+	}
+
+	rewarded := make([]onlineSortKey, 0, len(keys))
+	noReward := make([]onlineSortKey, 0, len(keys))
+	for _, key := range keys {
+		if key.totalReward > 0 {
+			rewarded = append(rewarded, key)
+		} else {
+			noReward = append(noReward, key)
+		}
+	}
+
+	sort.Slice(rewarded, func(i, j int) bool {
+		if rewarded[i].totalReward != rewarded[j].totalReward {
+			return rewarded[i].totalReward > rewarded[j].totalReward
+		}
+		return rewarded[i].userId < rewarded[j].userId
+	})
+	sort.Slice(noReward, func(i, j int) bool {
+		if noReward[i].vipLevel != noReward[j].vipLevel {
+			return noReward[i].vipLevel > noReward[j].vipLevel
+		}
+		return noReward[i].userId < noReward[j].userId
+	})
+
+	sorted := make([]uint64, 0, len(all))
+	for _, key := range rewarded {
+		sorted = append(sorted, key.userId)
+	}
+	for _, key := range noReward {
+		sorted = append(sorted, key.userId)
+	}
+	commonOnlineMap.Set(roomId, sorted)
+}
+
+func clearCommonOnlineMap(roomId uint64) {
+	commonOnlineMap.Remove(roomId)
+}
 
 // GetOnlineUserList 分页查询直播间在线玩家(附用户基础信息)
 func GetOnlineUserList(_ context.Context, req *liveroomdto.GetOnlineUserListReq) (*liveroomdto.GetOnlineUserListRes, error) {
@@ -30,7 +99,11 @@ func GetOnlineUserList(_ context.Context, req *liveroomdto.GetOnlineUserListReq)
 		pageSize = 100
 	}
 
-	all := getOnline(req.RoomId)
+	all := commonOnlineMap.Get(req.RoomId)
+	if all == nil {
+		flushCommonOnlineMap(req.RoomId)
+		all = commonOnlineMap.Get(req.RoomId)
+	}
 	total := len(all)
 
 	start := (page - 1) * pageSize
