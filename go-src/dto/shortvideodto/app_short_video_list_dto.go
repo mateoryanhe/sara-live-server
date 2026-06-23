@@ -23,6 +23,7 @@ type AppShortVideoItem struct {
 	AuthorNickname   string  `json:"authorNickname" dc:"作者昵称"`
 	LikeCount        uint64  `json:"likeCount"`
 	ViewCount        uint64  `json:"viewCount" dc:"观看人数"`
+	Duration         uint32  `json:"duration" dc:"视频时长(秒)"`
 }
 
 // AppShortVideoViewListReq App端分页查询短视频列表(仅已上架,按观看人数排序,走缓存)
@@ -56,17 +57,19 @@ type AppShortVideoUploadRecordListReq struct {
 
 // AppShortVideoUploadRecordItem App端短视频上传记录
 type AppShortVideoUploadRecordItem struct {
-	ID         string `json:"id"`
-	Title      string `json:"title"`
-	Video      string `json:"video" dc:"视频完整URL"`
-	Cover      string `json:"cover" dc:"封面完整URL"`
-	Status     uint8  `json:"status" dc:"状态(0下架,1上架)"`
-	CategoryId int    `json:"categoryId" dc:"视频分类ID"`
-	Source     uint8  `json:"source" dc:"视频来源(1原创,2转发,3AI生成)"`
-	LikeCount  uint64 `json:"likeCount"`
-	ViewCount  uint64 `json:"viewCount" dc:"观看人数"`
-	CreatedAt  string `json:"createdAt" dc:"上传时间"`
-	UpdatedAt  string `json:"updatedAt" dc:"审核时间"`
+	ID                 string  `json:"id"`
+	Title              string  `json:"title"`
+	Video              string  `json:"video" dc:"视频完整URL"`
+	Cover              string  `json:"cover" dc:"封面完整URL"`
+	Status             uint8   `json:"status" dc:"状态(0下架,1上架)"`
+	CategoryId         int     `json:"categoryId" dc:"视频分类ID"`
+	Source             uint8   `json:"source" dc:"视频来源(1原创,2转发,3AI生成)"`
+	LikeCount          uint64  `json:"likeCount"`
+	ViewCount          uint64  `json:"viewCount" dc:"观看人数"`
+	Duration           uint32  `json:"duration" dc:"视频时长(秒)"`
+	TotalDiamondIncome float64 `json:"totalDiamondIncome" dc:"累计钻石收益"`
+	CreatedAt          string  `json:"createdAt" dc:"上传时间"`
+	UpdatedAt          string  `json:"updatedAt" dc:"审核时间"`
 }
 
 // AppShortVideoUploadRecordListRes App端短视频上传记录分页响应

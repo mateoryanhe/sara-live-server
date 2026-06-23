@@ -72,18 +72,16 @@ func (watch *ShortVideoWatch) SetVideoId(v uint64) {
 
 func (watch *ShortVideoWatch) SetViewCounted(v uint8) {
 	watch.ViewCounted = v
-	watch.UpdatedAt = time.Now()
-	syndb.AddDataToQuickChan(TbShortVideoWatch, ShortVideoWatchViewCounted, &syndb.ColData{
+
+	syndb.AddDataToLazyChan(TbShortVideoWatch, ShortVideoWatchViewCounted, &syndb.ColData{
 		IdVal: watch.ID, ColVal: v,
 	})
-	syndb.AddDataToQuickChan(TbShortVideoWatch, db.UpdatedAtName, &syndb.ColData{
-		IdVal: watch.ID, ColVal: watch.UpdatedAt,
-	})
+
 }
 
 func (watch *ShortVideoWatch) AddBilledSeconds(v uint64) {
 	watch.BilledSeconds = math.Add(watch.BilledSeconds, v)
-	syndb.AddDataToQuickChan(TbShortVideoWatch, ShortVideoWatchBilledSeconds, &syndb.ColData{
+	syndb.AddDataToLazyChan(TbShortVideoWatch, ShortVideoWatchBilledSeconds, &syndb.ColData{
 		IdVal: watch.ID, ColVal: watch.BilledSeconds,
 	})
 }
@@ -97,7 +95,7 @@ func (watch *ShortVideoWatch) AddWatchSeconds(v uint64) {
 
 func (like *ShortVideoWatch) SetStatus(v uint8) {
 	like.Status = v
-	like.SetUpdatedAt(time.Now())
+
 	syndb.AddDataToQuickChan(TbShortVideoWatch, ShortVideoLikeStatus, &syndb.ColData{
 		IdVal: like.ID, ColVal: v,
 	})
@@ -123,7 +121,7 @@ func initShortVideoWatch() {
 
 	syndb.RegQuickWithLarge(TbShortVideoWatch, ShortVideoWatchUserId)
 	syndb.RegQuickWithLarge(TbShortVideoWatch, ShortVideoWatchVideoId)
-	syndb.RegQuickWithLarge(TbShortVideoWatch, ShortVideoWatchBilledSeconds)
+	syndb.RegLazyWithLarge(TbShortVideoWatch, ShortVideoWatchBilledSeconds)
 	syndb.RegLazyWithLarge(TbShortVideoWatch, ShortVideoWatchWatchSeconds)
 	syndb.RegQuickWithLarge(TbShortVideoWatch, ShortVideoWatchViewCounted)
 

@@ -399,6 +399,7 @@ export interface ShortVideo {
     source: number
     authorId: string
     authorNickname: string
+    duration: number
     createdAt: string
     updatedAt: string
 }

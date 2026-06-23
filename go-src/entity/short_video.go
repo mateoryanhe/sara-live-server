@@ -22,6 +22,7 @@ const (
 	ShortVideoCategoryId       db.TbCol = "category_id"
 	ShortVideoSource           db.TbCol = "source"
 	ShortVideoAuthorId         db.TbCol = "author_id"
+	ShortVideoDuration         db.TbCol = "duration"
 )
 
 const (
@@ -54,10 +55,11 @@ type ShortVideo struct {
 	CategoryId       int     `gorm:"default:0;comment:视频分类ID" json:"categoryId"`
 	Source           uint8   `gorm:"default:1;comment:视频来源(1原创,2转发,3AI生成)" json:"source"`
 	AuthorId         uint64  `gorm:"default:0;comment:作者用户ID" json:"authorId"`
+	Duration         uint32  `gorm:"default:0;comment:视频时长(秒)" json:"duration"`
 }
 
 // NewShortVideo 构造内存对象,字段通过 syndb 异步入库
-func NewShortVideo(id uint64, title, video, cover string, sort int, isPaid uint8, diamondPerMinute float64, categoryId int, source uint8, authorId uint64) *ShortVideo {
+func NewShortVideo(id uint64, title, video, cover string, sort int, isPaid uint8, diamondPerMinute float64, categoryId int, source uint8, authorId uint64, duration uint32) *ShortVideo {
 	v := &ShortVideo{}
 	v.ID = id
 	now := time.Now()
@@ -73,6 +75,7 @@ func NewShortVideo(id uint64, title, video, cover string, sort int, isPaid uint8
 	v.SetCategoryId(categoryId)
 	v.SetSource(source)
 	v.SetAuthorId(authorId)
+	v.SetDuration(duration)
 	return v
 }
 
@@ -156,6 +159,14 @@ func (v *ShortVideo) SetAuthorId(val uint64) {
 	})
 }
 
+func (v *ShortVideo) SetDuration(val uint32) {
+	v.Duration = val
+	v.touchUpdatedAt()
+	syndb.AddDataToQuickChan(TbShortVideo, ShortVideoDuration, &syndb.ColData{
+		IdVal: v.ID, ColVal: val,
+	})
+}
+
 func (v *ShortVideo) SetCreatedAt(val time.Time) {
 	v.CreatedAt = val
 	syndb.AddDataToQuickChan(TbShortVideo, db.CreatedAtName, &syndb.ColData{
@@ -190,5 +201,6 @@ func initShortVideo() {
 	syndb.RegQuickWithMiddle(TbShortVideo, ShortVideoCategoryId)
 	syndb.RegQuickWithMiddle(TbShortVideo, ShortVideoSource)
 	syndb.RegQuickWithMiddle(TbShortVideo, ShortVideoAuthorId)
+	syndb.RegQuickWithMiddle(TbShortVideo, ShortVideoDuration)
 	migrate.AutoMigrate(&ShortVideo{})
 }

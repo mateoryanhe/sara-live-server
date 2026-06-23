@@ -14,6 +14,7 @@ type AppPublishShortVideoReq struct {
 	DiamondPerMinute float64           `json:"diamondPerMinute" dc:"每分钟钻石数(付费时必填)"`
 	CategoryId       int               `json:"categoryId" dc:"视频分类ID"`
 	Source           uint8             `json:"source" v:"required|in:1,2,3#视频来源不能为空|视频来源取值无效" dc:"视频来源(1原创,2转发,3AI生成)"`
+	Duration         uint32            `json:"duration" v:"required|min:1#视频时长不能为空|视频时长无效" dc:"视频时长(秒)"`
 }
 
 type AppPublishShortVideoRes struct {

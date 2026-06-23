@@ -13,21 +13,23 @@ type ShortVideoListReq struct {
 }
 
 type ShortVideoListRes struct {
-	ID               string  `json:"id"`
-	Title            string  `json:"title"`
-	Video            string  `json:"video" dc:"视频完整URL(列表展示)"`
-	VideoName        string  `json:"videoName" dc:"视频资源文件名(编辑保存用)"`
-	Cover            string  `json:"cover" dc:"封面完整URL(列表展示)"`
-	CoverName        string  `json:"coverName" dc:"封面资源文件名(编辑保存用)"`
-	Sort             int     `json:"sort"`
-	Status           uint8   `json:"status"`
-	IsPaid           uint8   `json:"isPaid"`
-	DiamondPerMinute float64 `json:"diamondPerMinute"`
-	CategoryId       int     `json:"categoryId"`
-	Source           uint8   `json:"source"`
-	AuthorId         string  `json:"authorId"`
-	AuthorNickname   string  `json:"authorNickname"`
-	LikeCount        uint64  `json:"likeCount"`
-	CreatedAt        string  `json:"createdAt"`
-	UpdatedAt        string  `json:"updatedAt"`
+	ID                 string  `json:"id"`
+	Title              string  `json:"title"`
+	Video              string  `json:"video" dc:"视频完整URL(列表展示)"`
+	VideoName          string  `json:"videoName" dc:"视频资源文件名(编辑保存用)"`
+	Cover              string  `json:"cover" dc:"封面完整URL(列表展示)"`
+	CoverName          string  `json:"coverName" dc:"封面资源文件名(编辑保存用)"`
+	Sort               int     `json:"sort"`
+	Status             uint8   `json:"status"`
+	IsPaid             uint8   `json:"isPaid"`
+	DiamondPerMinute   float64 `json:"diamondPerMinute"`
+	CategoryId         int     `json:"categoryId"`
+	Source             uint8   `json:"source"`
+	AuthorId           string  `json:"authorId"`
+	AuthorNickname     string  `json:"authorNickname"`
+	LikeCount          uint64  `json:"likeCount"`
+	TotalDiamondIncome float64 `json:"totalDiamondIncome" dc:"累计钻石收益"`
+	Duration           uint32  `json:"duration" dc:"视频时长(秒)"`
+	CreatedAt          string  `json:"createdAt"`
+	UpdatedAt          string  `json:"updatedAt"`
 }

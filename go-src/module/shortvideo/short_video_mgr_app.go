@@ -36,6 +36,9 @@ func PublishShortVideoApp(ctx context.Context, req *shortvideodto.AppPublishShor
 	if err := validateShortVideoCategoryId(req.CategoryId); err != nil {
 		return nil, err
 	}
+	if err := validateShortVideoDuration(req.Duration); err != nil {
+		return nil, err
+	}
 	videoName, err := uploadShortVideoFile(req.File)
 	if err != nil {
 		return nil, err
@@ -56,6 +59,7 @@ func PublishShortVideoApp(ctx context.Context, req *shortvideodto.AppPublishShor
 		req.CategoryId,
 		req.Source,
 		authorId,
+		req.Duration,
 	)
 	shortvideodao.AddShortVideoToCache(row)
 	loadAppShortVideoListCache()
@@ -107,22 +111,26 @@ func compareShortVideoByCreatedAt(a, b *entity.ShortVideo) bool {
 
 func toAppShortVideoUploadRecordItem(row *entity.ShortVideo) *shortvideodto.AppShortVideoUploadRecordItem {
 	var likeCount, viewCount uint64
+	var totalDiamondIncome float64
 	if stat := shortvideodao.GetStatByVideoId(row.ID); stat != nil {
 		likeCount = stat.LikeCount
 		viewCount = stat.ViewCount
+		totalDiamondIncome = stat.TotalDiamondIncome
 	}
 	return &shortvideodto.AppShortVideoUploadRecordItem{
-		ID:         strconv.FormatUint(row.ID, 10),
-		Title:      row.Title,
-		Video:      upload.GetUrlByName(row.Video),
-		Cover:      upload.GetUrlByName(row.Cover),
-		Status:     row.Status,
-		CategoryId: row.CategoryId,
-		Source:     row.Source,
-		LikeCount:  likeCount,
-		ViewCount:  viewCount,
-		CreatedAt:  formatShortVideoUploadTime(row.CreatedAt),
-		UpdatedAt:  formatShortVideoUploadTime(row.UpdatedAt),
+		ID:                 strconv.FormatUint(row.ID, 10),
+		Title:              row.Title,
+		Video:              upload.GetUrlByName(row.Video),
+		Cover:              upload.GetUrlByName(row.Cover),
+		Status:             row.Status,
+		CategoryId:         row.CategoryId,
+		Source:             row.Source,
+		Duration:           row.Duration,
+		LikeCount:          likeCount,
+		ViewCount:          viewCount,
+		TotalDiamondIncome: totalDiamondIncome,
+		CreatedAt:          formatShortVideoUploadTime(row.CreatedAt),
+		UpdatedAt:          formatShortVideoUploadTime(row.UpdatedAt),
 	}
 }
 
@@ -139,6 +147,17 @@ func validateShortVideoAuthorId(authorId uint64) error {
 	}
 	if userinfodao.GetUserInfoByUserId(authorId) == nil {
 		return errercode.CreateCode(errercode.SysError)
+	}
+	return nil
+}
+
+func validateShortVideoDuration(duration uint32) error {
+	if duration == 0 {
+		return errercode.CreateCode(errercode.InvalidParam)
+	}
+	maxDuration := getShortVideoMaxDuration()
+	if maxDuration > 0 && duration > maxDuration {
+		return errercode.CreateCode(errercode.InvalidParam)
 	}
 	return nil
 }

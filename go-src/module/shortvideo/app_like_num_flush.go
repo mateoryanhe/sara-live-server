@@ -81,6 +81,7 @@ func toAppShortVideoItem(row *entity.ShortVideo, stat *entity.ShortVideoStat) *s
 		AuthorId:         strconv.FormatUint(row.AuthorId, 10),
 		LikeCount:        likeCount,
 		ViewCount:        viewCount,
+		Duration:         row.Duration,
 	}
 	if row.AuthorId > 0 {
 		if u := userinfodao.GetUserInfoByUserId(row.AuthorId); u != nil {

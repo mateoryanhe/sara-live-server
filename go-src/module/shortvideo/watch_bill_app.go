@@ -15,9 +15,9 @@ import (
 	"xr-game-server/module/wallet"
 )
 
-const watchBillIntervalSeconds uint64 = 1
+const watchBillIntervalSeconds = 1
 
-// WatchBillShortVideo App端短视频观看扣费,每次按5秒进度计费
+// WatchBillShortVideo App端短视频观看扣费,每次按1秒进度计费
 func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortVideoReq) (*shortvideodto.WatchBillShortVideoRes, error) {
 	userId := httpserver.GetAuthId(ctx)
 	if userId == 0 {
@@ -53,16 +53,18 @@ func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortV
 	watch.AddWatchSeconds(watchBillIntervalSeconds)
 
 	if video.IsPaid != entity.ShortVideoPaidYes {
-		return &shortvideodto.WatchBillShortVideoRes{
-			Deducted:          0,
-			Diamond:           user.Diamond,
-			BilledSeconds:     0,
-			ChargeableSeconds: 0,
-			CanContinue:       true,
-		}, nil
+		return buildWatchBillShortVideoRes(user.Diamond, 0, watch, true), nil
 	}
 
-	cost := video.DiamondPerMinute
+	if isWithinShortVideoFreeWatch(watch.WatchSeconds) {
+		return buildWatchBillShortVideoRes(user.Diamond, 0, watch, true), nil
+	}
+
+	if isShortVideoBillingCompleted(video.Duration, watch.BilledSeconds) {
+		return buildWatchBillShortVideoRes(user.Diamond, 0, watch, true), nil
+	}
+
+	cost := video.DiamondPerMinute / watchBillIntervalSeconds
 
 	diamond := user.Diamond
 	deducted := float64(0)
@@ -74,15 +76,37 @@ func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortV
 		}
 		diamond = remaining
 		deducted = cost
+		if stat := shortvideodao.GetStatByVideoId(req.VideoId); stat != nil {
+			stat.AddTotalDiamondIncome(cost)
+		}
 	}
 
 	watch.AddBilledSeconds(watchBillIntervalSeconds)
 
+	return buildWatchBillShortVideoRes(diamond, deducted, watch, true), nil
+}
+
+func isShortVideoBillingCompleted(duration uint32, billedSeconds uint64) bool {
+	if duration == 0 {
+		return false
+	}
+	return billedSeconds >= uint64(duration)
+}
+
+func isWithinShortVideoFreeWatch(watchSeconds uint64) bool {
+	freeWatchSeconds := getShortVideoFreeWatchSeconds()
+	if freeWatchSeconds == 0 {
+		return false
+	}
+	return watchSeconds <= uint64(freeWatchSeconds)
+}
+
+func buildWatchBillShortVideoRes(diamond, deducted float64, watch *entity.ShortVideoWatch, canContinue bool) *shortvideodto.WatchBillShortVideoRes {
 	return &shortvideodto.WatchBillShortVideoRes{
 		Deducted:          deducted,
 		Diamond:           diamond,
-		BilledSeconds:     0,
+		BilledSeconds:     uint32(watch.BilledSeconds),
 		ChargeableSeconds: 0,
-		CanContinue:       true,
-	}, nil
+		CanContinue:       canContinue,
+	}
 }

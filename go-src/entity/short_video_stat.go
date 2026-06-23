@@ -13,15 +13,17 @@ const (
 )
 
 const (
-	ShortVideoStatLikeCount db.TbCol = "like_count"
-	ShortVideoStatViewCount db.TbCol = "view_count"
+	ShortVideoStatLikeCount          db.TbCol = "like_count"
+	ShortVideoStatViewCount          db.TbCol = "view_count"
+	ShortVideoStatTotalDiamondIncome db.TbCol = "total_diamond_income"
 )
 
 // ShortVideoStat 短视频统计数据(与短视频一一对应,主键ID即视频ID)
 type ShortVideoStat struct {
 	migrate.OneModel
-	LikeCount uint64 `gorm:"default:0;comment:点赞累计数量" json:"likeCount"`
-	ViewCount uint64 `gorm:"default:0;comment:观看人数" json:"viewCount"`
+	LikeCount          uint64  `gorm:"default:0;comment:点赞累计数量" json:"likeCount"`
+	ViewCount          uint64  `gorm:"default:0;comment:观看人数" json:"viewCount"`
+	TotalDiamondIncome float64 `gorm:"type:decimal(16,4);default:0;comment:累计钻石收益" json:"totalDiamondIncome"`
 }
 
 func NewShortVideoStat(videoId uint64) *ShortVideoStat {
@@ -51,6 +53,18 @@ func (s *ShortVideoStat) AddViewCount(val uint64) {
 	})
 }
 
+func (s *ShortVideoStat) AddTotalDiamondIncome(val float64) {
+	if val <= 0 {
+		return
+	}
+	s.TotalDiamondIncome = xrmath.AddFloat64(s.TotalDiamondIncome, val)
+
+	syndb.AddDataToLazyChan(TbShortVideoStat, ShortVideoStatTotalDiamondIncome, &syndb.ColData{
+		IdVal:  s.ID,
+		ColVal: s.TotalDiamondIncome,
+	})
+}
+
 func (s *ShortVideoStat) SetCreatedAt(val time.Time) {
 	s.CreatedAt = val
 	syndb.AddDataToLazyChan(TbShortVideoStat, db.CreatedAtName, &syndb.ColData{
@@ -72,5 +86,6 @@ func initShortVideoStat() {
 	syndb.RegLazyWithMiddle(TbShortVideoStat, db.UpdatedAtName)
 	syndb.RegLazyWithMiddle(TbShortVideoStat, ShortVideoStatLikeCount)
 	syndb.RegLazyWithMiddle(TbShortVideoStat, ShortVideoStatViewCount)
+	syndb.RegLazyWithMiddle(TbShortVideoStat, ShortVideoStatTotalDiamondIncome)
 	migrate.AutoMigrate(&ShortVideoStat{})
 }

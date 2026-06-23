@@ -158,24 +158,28 @@ func GetShortVideoList(req *shortvideodto.ShortVideoListReq) (int, []*shortvideo
 
 func toShortVideoListRes(video *entity.ShortVideo) *shortvideodto.ShortVideoListRes {
 	var likeCount uint64
+	var totalDiamondIncome float64
 	if stat := GetStatByVideoId(video.ID); stat != nil {
 		likeCount = stat.LikeCount
+		totalDiamondIncome = stat.TotalDiamondIncome
 	}
 	return &shortvideodto.ShortVideoListRes{
-		ID:               strconv.FormatUint(video.ID, 10),
-		Title:            video.Title,
-		Video:            video.Video,
-		Cover:            video.Cover,
-		Sort:             video.Sort,
-		Status:           video.Status,
-		IsPaid:           video.IsPaid,
-		DiamondPerMinute: video.DiamondPerMinute,
-		CategoryId:       video.CategoryId,
-		Source:           video.Source,
-		AuthorId:         strconv.FormatUint(video.AuthorId, 10),
-		LikeCount:        likeCount,
-		CreatedAt:        formatShortVideoTime(video.CreatedAt),
-		UpdatedAt:        formatShortVideoTime(video.UpdatedAt),
+		ID:                 strconv.FormatUint(video.ID, 10),
+		Title:              video.Title,
+		Video:              video.Video,
+		Cover:              video.Cover,
+		Sort:               video.Sort,
+		Status:             video.Status,
+		IsPaid:             video.IsPaid,
+		DiamondPerMinute:   video.DiamondPerMinute,
+		CategoryId:         video.CategoryId,
+		Source:             video.Source,
+		AuthorId:           strconv.FormatUint(video.AuthorId, 10),
+		LikeCount:          likeCount,
+		TotalDiamondIncome: totalDiamondIncome,
+		Duration:           video.Duration,
+		CreatedAt:          formatShortVideoTime(video.CreatedAt),
+		UpdatedAt:          formatShortVideoTime(video.UpdatedAt),
 	}
 }
 

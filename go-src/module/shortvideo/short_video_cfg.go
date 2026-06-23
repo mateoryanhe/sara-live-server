@@ -126,3 +126,19 @@ func getShortVideoMaxCoverFileSize() uint32 {
 	}
 	return cfg.MaxCoverFileSize
 }
+
+func getShortVideoMaxDuration() uint32 {
+	cfg := shortvideodao.Get()
+	if cfg == nil || cfg.MaxDuration == 0 {
+		return defaultMaxDuration
+	}
+	return cfg.MaxDuration
+}
+
+func getShortVideoFreeWatchSeconds() uint32 {
+	cfg := shortvideodao.Get()
+	if cfg == nil || cfg.FreeWatchSeconds == 0 {
+		return defaultFreeWatchSeconds
+	}
+	return cfg.FreeWatchSeconds
+}
