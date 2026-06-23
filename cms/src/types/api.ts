@@ -426,6 +426,7 @@ export interface ShortVideoWatchQuery extends PageQuery {
 export interface ShortVideoCfg {
     id: string
     maxFileSize: number
+    maxCoverFileSize: number
     maxDuration: number
     freeWatchSeconds: number
     entryEnabled: number
@@ -440,6 +441,7 @@ export interface GetShortVideoCfgRes {
 export interface SaveShortVideoCfgReq {
     id?: string
     maxFileSize: number
+    maxCoverFileSize: number
     maxDuration: number
     freeWatchSeconds: number
     entryEnabled: number

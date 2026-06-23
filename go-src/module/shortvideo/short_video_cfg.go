@@ -13,6 +13,7 @@ import (
 // 配置短视频大小,计费等
 const (
 	defaultMaxFileSize      uint64 = 100 * 1024 * 1024
+	defaultMaxCoverFileSize uint32 = 5
 	defaultMaxDuration      uint32 = 60
 	defaultFreeWatchSeconds uint32 = 7
 	defaultEntryEnabled     uint8  = entity.ShortVideoCfgEntryEnabled
@@ -21,6 +22,7 @@ const (
 func defaultAppShortVideoCfg() *shortvideodto.AppShortVideoCfgRes {
 	return &shortvideodto.AppShortVideoCfgRes{
 		MaxFileSize:      defaultMaxFileSize,
+		MaxCoverFileSize: defaultMaxCoverFileSize,
 		MaxDuration:      defaultMaxDuration,
 		FreeWatchSeconds: defaultFreeWatchSeconds,
 		EntryEnabled:     defaultEntryEnabled,
@@ -32,6 +34,7 @@ func GetShortVideoCfg(_ context.Context, _ *shortvideodto.GetShortVideoCfgReq) (
 	if cfg == nil {
 		return &shortvideodto.GetShortVideoCfgRes{Cfg: &shortvideodto.ShortVideoCfgItem{
 			MaxFileSize:      defaultMaxFileSize,
+			MaxCoverFileSize: defaultMaxCoverFileSize,
 			MaxDuration:      defaultMaxDuration,
 			FreeWatchSeconds: defaultFreeWatchSeconds,
 			EntryEnabled:     defaultEntryEnabled,
@@ -44,6 +47,7 @@ func SaveShortVideoCfg(_ context.Context, req *shortvideodto.SaveShortVideoCfgRe
 	existing := shortvideodao.Get()
 	row := &entity.ShortVideoCfg{
 		MaxFileSize:      req.MaxFileSize,
+		MaxCoverFileSize: req.MaxCoverFileSize,
 		MaxDuration:      req.MaxDuration,
 		FreeWatchSeconds: req.FreeWatchSeconds,
 		EntryEnabled:     req.EntryEnabled,
@@ -73,6 +77,7 @@ func GetAppShortVideoCfg(_ context.Context, _ *shortvideodto.AppShortVideoCfgReq
 	}
 	return &shortvideodto.AppShortVideoCfgRes{
 		MaxFileSize:      cfg.MaxFileSize,
+		MaxCoverFileSize: getShortVideoMaxCoverFileSize(),
 		MaxDuration:      cfg.MaxDuration,
 		FreeWatchSeconds: cfg.FreeWatchSeconds,
 		EntryEnabled:     cfg.EntryEnabled,
@@ -83,9 +88,14 @@ func toShortVideoCfgItem(cfg *entity.ShortVideoCfg) *shortvideodto.ShortVideoCfg
 	if cfg == nil {
 		return nil
 	}
+	maxCoverFileSize := cfg.MaxCoverFileSize
+	if maxCoverFileSize == 0 {
+		maxCoverFileSize = defaultMaxCoverFileSize
+	}
 	return &shortvideodto.ShortVideoCfgItem{
 		ID:               strconv.FormatUint(cfg.ID, 10),
 		MaxFileSize:      cfg.MaxFileSize,
+		MaxCoverFileSize: maxCoverFileSize,
 		MaxDuration:      cfg.MaxDuration,
 		FreeWatchSeconds: cfg.FreeWatchSeconds,
 		EntryEnabled:     cfg.EntryEnabled,
@@ -107,4 +117,12 @@ func getShortVideoMaxFileSize() uint64 {
 		return defaultMaxFileSize
 	}
 	return cfg.MaxFileSize
+}
+
+func getShortVideoMaxCoverFileSize() uint32 {
+	cfg := shortvideodao.Get()
+	if cfg == nil || cfg.MaxCoverFileSize == 0 {
+		return defaultMaxCoverFileSize
+	}
+	return cfg.MaxCoverFileSize
 }

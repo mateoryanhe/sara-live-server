@@ -19,6 +19,17 @@
           <span class="form-tip">MB，保存后按字节写入数据库</span>
         </el-form-item>
 
+        <el-form-item label="封面图片大小" prop="maxCoverFileSize">
+          <el-input-number
+              v-model="formData.maxCoverFileSize"
+              :min="1"
+              :precision="0"
+              controls-position="right"
+              style="width: 220px"
+          />
+          <span class="form-tip">MB，封面上传大小上限</span>
+        </el-form-item>
+
         <el-form-item label="最大时长" prop="maxDuration">
           <el-input-number
               v-model="formData.maxDuration"
@@ -78,6 +89,7 @@ const formRef = ref()
 const formData = reactive({
   id: '0',
   maxFileSizeMB: 100,
+  maxCoverFileSize: 5,
   maxDuration: 60,
   freeWatchSeconds: 7,
   entryEnabled: 1,
@@ -92,6 +104,10 @@ const formRules = reactive({
   maxFileSizeMB: [
     {required: true, message: '请输入最大文件大小', trigger: 'blur'},
     {type: 'number', min: 1, message: '最大文件大小必须大于0', trigger: 'blur'},
+  ],
+  maxCoverFileSize: [
+    {required: true, message: '请输入封面图片大小', trigger: 'blur'},
+    {type: 'number', min: 1, message: '封面图片大小必须大于0', trigger: 'blur'},
   ],
   maxDuration: [
     {required: true, message: '请输入最大时长', trigger: 'blur'},
@@ -110,6 +126,7 @@ const applyCfg = (cfg: ShortVideoCfg | null | undefined) => {
   if (!cfg) {
     formData.id = '0'
     formData.maxFileSizeMB = 100
+    formData.maxCoverFileSize = 5
     formData.maxDuration = 60
     formData.freeWatchSeconds = 7
     formData.entryEnabled = 1
@@ -119,6 +136,7 @@ const applyCfg = (cfg: ShortVideoCfg | null | undefined) => {
   }
   formData.id = cfg.id || '0'
   formData.maxFileSizeMB = Math.max(1, Math.round(cfg.maxFileSize / MB))
+  formData.maxCoverFileSize = cfg.maxCoverFileSize ?? 5
   formData.maxDuration = cfg.maxDuration || 60
   formData.freeWatchSeconds = cfg.freeWatchSeconds ?? 7
   formData.entryEnabled = cfg.entryEnabled ?? 1
@@ -146,6 +164,7 @@ const handleSave = async () => {
     const response = await shortVideoApi.saveShortVideoCfg({
       id: formData.id,
       maxFileSize: formData.maxFileSizeMB * MB,
+      maxCoverFileSize: formData.maxCoverFileSize,
       maxDuration: formData.maxDuration,
       freeWatchSeconds: formData.freeWatchSeconds,
       entryEnabled: formData.entryEnabled,

@@ -223,6 +223,7 @@ const MB = 1024 * 1024
 const loading = ref(false)
 const maxVideoSizeBytes = ref(100 * MB)
 const maxVideoSizeMB = ref(100)
+const maxCoverSizeMB = ref(5)
 const tableData = ref<ShortVideo[]>([])
 const total = ref(0)
 const currentPage = ref(1)
@@ -280,8 +281,8 @@ const beforeCoverUpload = (file: File): boolean => {
     ElMessage.error('封面只能上传图片文件')
     return false
   }
-  if (file.size > 5 * 1024 * 1024) {
-    ElMessage.error('封面不能超过5MB')
+  if (file.size > maxCoverSizeMB.value * MB) {
+    ElMessage.error(`封面不能超过${maxCoverSizeMB.value}MB`)
     return false
   }
   return true
@@ -384,6 +385,9 @@ const fetchShortVideoCfg = async () => {
     if (response.cfg?.maxFileSize) {
       maxVideoSizeBytes.value = response.cfg.maxFileSize
       maxVideoSizeMB.value = Math.max(1, Math.round(response.cfg.maxFileSize / MB))
+    }
+    if (response.cfg?.maxCoverFileSize) {
+      maxCoverSizeMB.value = Math.max(1, response.cfg.maxCoverFileSize)
     }
   } catch (error) {
     console.error('获取短视频配置失败:', error)
