@@ -136,6 +136,8 @@ const (
 	ShortVideoCategoryExist XRCode = 127
 	// ShortVideoCategoryNonExist 短视频分类不存在
 	ShortVideoCategoryNonExist XRCode = 128
+	// ShortVideoDailyUploadLimit 短视频每日上传次数已达上限
+	ShortVideoDailyUploadLimit XRCode = 129
 )
 
 type XError struct {

@@ -79,6 +79,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		LiveRoomPaidDanmakuDisabled:    "Paid danmaku is not enabled",
 		ShortVideoCategoryExist:        "Short video category name already exists",
 		ShortVideoCategoryNonExist:     "Short video category does not exist",
+		ShortVideoDailyUploadLimit:     "Daily short video upload limit reached",
 	},
 	lang.LangZHCN: {
 		Success:                        "成功",
@@ -154,6 +155,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		LiveRoomPaidDanmakuDisabled:    "付费弹幕未开启",
 		ShortVideoCategoryExist:        "短视频分类名称已存在",
 		ShortVideoCategoryNonExist:     "短视频分类不存在",
+		ShortVideoDailyUploadLimit:     "今日上传次数已达上限,请明天再试",
 	},
 	lang.LangZHTW: {
 		Success:                        "成功",
@@ -229,6 +231,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		LiveRoomPaidDanmakuDisabled:    "付費彈幕未開啟",
 		ShortVideoCategoryExist:        "短視頻分類名稱已存在",
 		ShortVideoCategoryNonExist:     "短視頻分類不存在",
+		ShortVideoDailyUploadLimit:     "今日上傳次數已達上限,請明天再試",
 	},
 }
 

@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"xr-game-server/core/xrtime"
 	"xr-game-server/dto/shortvideodto"
 	"xr-game-server/entity"
 )
@@ -50,6 +51,38 @@ func GetByTitle(title string) *entity.ShortVideo {
 		}
 	}
 	return nil
+}
+
+// HasAuthorPublishedToday 作者当天是否已发布短视频(走内存缓存,按创建时间判断)
+func HasAuthorPublishedToday(authorId uint64) bool {
+	if authorId == 0 {
+		return false
+	}
+	now := time.Now()
+	for _, video := range shortVideoCacheMgr.Values() {
+		if video == nil || video.AuthorId != authorId {
+			continue
+		}
+		if xrtime.IsSameDay(video.CreatedAt, now) {
+			return true
+		}
+	}
+	return false
+}
+
+// GetAuthorShortVideos 查询指定作者的全部短视频(走内存缓存,不排序不分页)
+func GetAuthorShortVideos(authorId uint64) []*entity.ShortVideo {
+	if authorId == 0 {
+		return nil
+	}
+	filtered := make([]*entity.ShortVideo, 0)
+	for _, video := range shortVideoCacheMgr.Values() {
+		if video == nil || video.AuthorId != authorId {
+			continue
+		}
+		filtered = append(filtered, video)
+	}
+	return filtered
 }
 
 func AddShortVideoToCache(row *entity.ShortVideo) {
