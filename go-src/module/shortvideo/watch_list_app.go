@@ -54,6 +54,10 @@ func toAppShortVideoWatchListItem(row *entity.ShortVideoWatch) *shortvideodto.Ap
 	if video := shortvideodao.GetShortVideoById(row.VideoId); video != nil {
 		item.Title = video.Title
 		item.Cover = upload.GetUrlByName(video.Cover)
+		author := getShortVideoAuthorInfo(video.AuthorId)
+		item.AuthorId = author.AuthorId
+		item.AuthorNickname = author.AuthorNickname
+		item.AuthorAvatar = author.AuthorAvatar
 	}
 	return item
 }

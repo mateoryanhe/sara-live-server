@@ -117,6 +117,7 @@ func toAppShortVideoUploadRecordItem(row *entity.ShortVideo) *shortvideodto.AppS
 		viewCount = stat.ViewCount
 		totalDiamondIncome = stat.TotalDiamondIncome
 	}
+	author := getShortVideoAuthorInfo(row.AuthorId)
 	return &shortvideodto.AppShortVideoUploadRecordItem{
 		ID:                 strconv.FormatUint(row.ID, 10),
 		Title:              row.Title,
@@ -125,6 +126,9 @@ func toAppShortVideoUploadRecordItem(row *entity.ShortVideo) *shortvideodto.AppS
 		Status:             row.Status,
 		CategoryId:         row.CategoryId,
 		Source:             row.Source,
+		AuthorId:           author.AuthorId,
+		AuthorNickname:     author.AuthorNickname,
+		AuthorAvatar:       author.AuthorAvatar,
 		Duration:           row.Duration,
 		LikeCount:          likeCount,
 		ViewCount:          viewCount,

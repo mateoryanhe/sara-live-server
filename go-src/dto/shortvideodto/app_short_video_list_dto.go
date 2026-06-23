@@ -21,6 +21,7 @@ type AppShortVideoItem struct {
 	Source           uint8   `json:"source" dc:"视频来源(1原创,2转发,3AI生成)"`
 	AuthorId         string  `json:"authorId" dc:"作者用户ID"`
 	AuthorNickname   string  `json:"authorNickname" dc:"作者昵称"`
+	AuthorAvatar     string  `json:"authorAvatar" dc:"作者头像URL"`
 	LikeCount        uint64  `json:"likeCount"`
 	ViewCount        uint64  `json:"viewCount" dc:"观看人数"`
 	Duration         uint32  `json:"duration" dc:"视频时长(秒)"`
@@ -64,6 +65,9 @@ type AppShortVideoUploadRecordItem struct {
 	Status             uint8   `json:"status" dc:"状态(0下架,1上架)"`
 	CategoryId         int     `json:"categoryId" dc:"视频分类ID"`
 	Source             uint8   `json:"source" dc:"视频来源(1原创,2转发,3AI生成)"`
+	AuthorId           string  `json:"authorId" dc:"作者用户ID"`
+	AuthorNickname     string  `json:"authorNickname" dc:"作者昵称"`
+	AuthorAvatar       string  `json:"authorAvatar" dc:"作者头像URL"`
 	LikeCount          uint64  `json:"likeCount"`
 	ViewCount          uint64  `json:"viewCount" dc:"观看人数"`
 	Duration           uint32  `json:"duration" dc:"视频时长(秒)"`

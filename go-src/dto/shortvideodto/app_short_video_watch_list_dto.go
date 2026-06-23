@@ -11,13 +11,16 @@ type AppShortVideoWatchListReq struct {
 
 // AppShortVideoWatchListItem App端短视频观看记录
 type AppShortVideoWatchListItem struct {
-	ID            string `json:"id"`
-	VideoId       string `json:"videoId"`
-	Title         string `json:"title"`
-	Cover         string `json:"cover" dc:"封面完整URL"`
-	BilledSeconds uint64 `json:"billedSeconds" dc:"已累计计费观看秒数"`
-	WatchSeconds  uint64 `json:"watchSeconds" dc:"累计观看时长(秒,含免费与付费)"`
-	UpdatedAt     string `json:"updatedAt" dc:"最近观看时间"`
+	ID             string `json:"id"`
+	VideoId        string `json:"videoId"`
+	Title          string `json:"title"`
+	Cover          string `json:"cover" dc:"封面完整URL"`
+	AuthorId       string `json:"authorId" dc:"作者用户ID"`
+	AuthorNickname string `json:"authorNickname" dc:"作者昵称"`
+	AuthorAvatar   string `json:"authorAvatar" dc:"作者头像URL"`
+	BilledSeconds  uint64 `json:"billedSeconds" dc:"已累计计费观看秒数"`
+	WatchSeconds   uint64 `json:"watchSeconds" dc:"累计观看时长(秒,含免费与付费)"`
+	UpdatedAt      string `json:"updatedAt" dc:"最近观看时间"`
 }
 
 // AppShortVideoWatchListRes App端短视频观看记录分页响应

@@ -69,6 +69,7 @@ func toAppShortVideoItem(row *entity.ShortVideo, stat *entity.ShortVideoStat) *s
 		likeCount = stat.LikeCount
 		viewCount = stat.ViewCount
 	}
+	author := getShortVideoAuthorInfo(row.AuthorId)
 	item := &shortvideodto.AppShortVideoItem{
 		ID:               strconv.FormatUint(row.ID, 10),
 		Title:            row.Title,
@@ -78,17 +79,32 @@ func toAppShortVideoItem(row *entity.ShortVideo, stat *entity.ShortVideoStat) *s
 		DiamondPerMinute: row.DiamondPerMinute,
 		CategoryId:       row.CategoryId,
 		Source:           row.Source,
-		AuthorId:         strconv.FormatUint(row.AuthorId, 10),
+		AuthorId:         author.AuthorId,
+		AuthorNickname:   author.AuthorNickname,
+		AuthorAvatar:     author.AuthorAvatar,
 		LikeCount:        likeCount,
 		ViewCount:        viewCount,
 		Duration:         row.Duration,
 	}
-	if row.AuthorId > 0 {
-		if u := userinfodao.GetUserInfoByUserId(row.AuthorId); u != nil {
-			item.AuthorNickname = u.Nickname
-		}
-	}
 	return item
+}
+
+func getShortVideoAuthorInfo(authorId uint64) shortVideoAuthorInfo {
+	ret := shortVideoAuthorInfo{AuthorId: strconv.FormatUint(authorId, 10)}
+	if authorId == 0 {
+		return ret
+	}
+	if u := userinfodao.GetUserInfoByUserId(authorId); u != nil {
+		ret.AuthorNickname = u.Nickname
+		ret.AuthorAvatar = upload.ResolveAvatarUrl(u.Avatar)
+	}
+	return ret
+}
+
+type shortVideoAuthorInfo struct {
+	AuthorId       string
+	AuthorNickname string
+	AuthorAvatar   string
 }
 
 // GetAppShortVideoList App端分页查询短视频列表(仅已上架,按点赞数排序,走内存缓存)
