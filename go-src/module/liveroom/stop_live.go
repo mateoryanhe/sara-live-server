@@ -2,6 +2,7 @@ package liveroom
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/os/gctx"
 	"strconv"
 	"time"
 	"xr-game-server/constants/cmd"
@@ -28,11 +29,15 @@ func stopLive(anchorId uint64) {
 	if room == nil {
 		return
 	}
+	//清除直播间
 	taskMap.Remove(anchorId)
 	liveRecordId := room.LiveRecordId
 	broadcastAnchorStopLive(anchorId, liveRecordId)
 	room.SetLiveRecordId(0)
 	room.SetHeartTime(nil)
+	flushRoomList(gctx.New())
+
+	//清除直播记录
 	if liveRecordId == 0 {
 		return
 	}
