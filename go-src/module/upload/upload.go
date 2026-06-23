@@ -160,3 +160,17 @@ func UploadShortVideoFile(file *ghttp.UploadFile, maxSize uint64) (string, error
 	}
 	return newName, nil
 }
+
+// DeleteUploadedFile 删除 upload/images 下的资源文件;无效文件名或文件不存在时忽略
+func DeleteUploadedFile(name string) {
+	if name == "" {
+		return
+	}
+	if strings.HasPrefix(name, "http://") || strings.HasPrefix(name, "https://") {
+		return
+	}
+	if strings.Contains(name, "/") || strings.Contains(name, "\\") {
+		return
+	}
+	_ = os.Remove(filepath.Join(getImageDir(), name))
+}

@@ -62,7 +62,7 @@ func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortV
 		}, nil
 	}
 
-	cost := float64(video.DiamondPerSecond)
+	cost := video.DiamondPerMinute
 
 	diamond := user.Diamond
 	deducted := float64(0)

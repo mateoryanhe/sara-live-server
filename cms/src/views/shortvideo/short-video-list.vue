@@ -8,7 +8,7 @@
       </template>
       <div class="content">
         <div class="table-header">
-          <el-button type="primary" @click="handleAdd">新增短视频</el-button>
+          <span class="table-tip">短视频由 App 端上传发布，CMS 仅做审核与管理</span>
         </div>
 
         <el-form :model="searchForm" class="search-form" inline>
@@ -56,6 +56,11 @@
               <span v-else>-</span>
             </template>
           </el-table-column>
+          <el-table-column label="作者" min-width="120">
+            <template #default="{ row }">
+              {{ row.authorNickname || row.authorId || '-' }}
+            </template>
+          </el-table-column>
           <el-table-column label="排序" prop="sort" width="80"/>
           <el-table-column label="是否付费" width="90">
             <template #default="{ row }">
@@ -64,9 +69,19 @@
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="每秒钻石" width="100">
+          <el-table-column label="每分钟钻石" width="110">
             <template #default="{ row }">
-              {{ row.isPaid === 1 ? row.diamondPerSecond : '-' }}
+              {{ row.isPaid === 1 ? formatPrice(row.diamondPerMinute) : '-' }}
+            </template>
+          </el-table-column>
+          <el-table-column label="分类" width="100">
+            <template #default="{ row }">
+              {{ categoryName(row.categoryId) }}
+            </template>
+          </el-table-column>
+          <el-table-column label="来源" width="90">
+            <template #default="{ row }">
+              {{ sourceLabel(row.source) }}
             </template>
           </el-table-column>
           <el-table-column label="状态" width="90">
@@ -76,7 +91,6 @@
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="描述" prop="description" min-width="160" show-overflow-tooltip/>
           <el-table-column label="创建时间" prop="createdAt" width="160"/>
           <el-table-column fixed="right" label="操作" width="260">
             <template #default="{ row }">
@@ -121,32 +135,21 @@
         <el-form-item label="标题" prop="title">
           <el-input v-model="currentRow.title" placeholder="请输入标题"/>
         </el-form-item>
-        <el-form-item label="视频" prop="video">
-          <div class="upload-wrap">
-            <el-upload
-                :before-upload="beforeVideoUpload"
-                :disabled="videoUploading"
-                :http-request="(options) => doUpload(options, 'video')"
-                :show-file-list="false"
-                accept="video/*,.mp4,.webm,.mov"
-                action="#"
-            >
-              <el-button :loading="videoUploading" type="primary">上传视频</el-button>
-            </el-upload>
-            <div v-if="videoPreviewUrl" class="preview-box">
-              <video :src="videoPreviewUrl" controls preload="metadata" style="width: 100%; max-height: 220px"/>
-              <el-button link type="danger" @click="clearAsset('video')">移除视频</el-button>
-            </div>
-            <div v-else-if="currentRow.video" class="file-name">{{ currentRow.video }}</div>
-            <div class="form-tip">最大 {{ maxVideoSizeMB }}MB，可在「短视频配置」中调整</div>
+        <el-form-item v-if="videoPreviewUrl" label="视频">
+          <div class="preview-box">
+            <video :src="videoPreviewUrl" controls preload="metadata" style="width: 100%; max-height: 220px"/>
           </div>
+          <div class="form-tip">视频由 App 端上传，CMS 不可修改</div>
+        </el-form-item>
+        <el-form-item label="作者ID" prop="authorId">
+          <el-input v-model="currentRow.authorId" placeholder="请输入作者用户ID"/>
         </el-form-item>
         <el-form-item label="封面" prop="cover">
           <div class="upload-wrap">
             <el-upload
                 :before-upload="beforeCoverUpload"
                 :disabled="coverUploading"
-                :http-request="(options) => doUpload(options, 'cover')"
+                :http-request="doUpload"
                 :show-file-list="false"
                 accept="image/*"
                 action="#"
@@ -158,7 +161,7 @@
                 <span>上传封面</span>
               </div>
             </el-upload>
-            <el-button v-if="coverPreviewUrl || currentRow.cover" link type="danger" @click="clearAsset('cover')">
+            <el-button v-if="coverPreviewUrl || currentRow.cover" link type="danger" @click="clearAsset">
               移除封面
             </el-button>
           </div>
@@ -172,18 +175,33 @@
             <el-radio :label="1">付费</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item v-if="currentRow.isPaid === 1" label="每秒钻石" prop="diamondPerSecond">
+        <el-form-item v-if="currentRow.isPaid === 1" label="每分钟钻石" prop="diamondPerMinute">
           <el-input-number
-              v-model="currentRow.diamondPerSecond"
-              :min="1"
-              :precision="0"
+              v-model="currentRow.diamondPerMinute"
+              :min="0.0001"
+              :precision="4"
+              :step="0.0001"
               controls-position="right"
               style="width: 220px"
           />
-          <span class="form-tip">付费视频按观看秒数 × 每秒钻石数扣费</span>
+          <span class="form-tip">付费视频按观看秒数折算分钟扣费</span>
         </el-form-item>
-        <el-form-item label="描述" prop="description">
-          <el-input v-model="currentRow.description" placeholder="请输入描述" type="textarea"/>
+        <el-form-item label="视频分类" prop="categoryId">
+          <el-select v-model="currentRow.categoryId" clearable placeholder="请选择分类" style="width: 220px">
+            <el-option
+                v-for="item in categoryOptions"
+                :key="item.id"
+                :label="item.name"
+                :value="Number(item.id)"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="视频来源" prop="source">
+          <el-radio-group v-model="currentRow.source">
+            <el-radio :label="1">原创</el-radio>
+            <el-radio :label="2">转发</el-radio>
+            <el-radio :label="3">AI生成</el-radio>
+          </el-radio-group>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -199,7 +217,7 @@ import {onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
 import {Plus} from '@element-plus/icons-vue'
 import {shortVideoApi, uploadApi} from '@/api'
-import type {ShortVideo} from '@/types/api.ts'
+import type {ShortVideo, ShortVideoCategory} from '@/types/api.ts'
 
 interface SearchForm {
   title: string
@@ -209,22 +227,27 @@ interface SearchForm {
 interface ShortVideoForm {
   id: string
   title: string
-  video: string
   cover: string
   sort: number
   isPaid: number
-  diamondPerSecond: number
-  description: string
+  diamondPerMinute: number
+  categoryId: number
+  source: number
+  authorId: string
 }
 
-const allowedVideoExt = ['.mp4', '.webm', '.mov']
+const sourceLabelMap: Record<number, string> = {
+  1: '原创',
+  2: '转发',
+  3: 'AI生成',
+}
+
 const MB = 1024 * 1024
 
 const loading = ref(false)
-const maxVideoSizeBytes = ref(100 * MB)
-const maxVideoSizeMB = ref(100)
 const maxCoverSizeMB = ref(5)
 const tableData = ref<ShortVideo[]>([])
+const categoryOptions = ref<ShortVideoCategory[]>([])
 const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
@@ -239,30 +262,36 @@ const dialogTitle = ref('')
 const defaultForm = (): ShortVideoForm => ({
   id: '',
   title: '',
-  video: '',
   cover: '',
   sort: 0,
   isPaid: 0,
-  diamondPerSecond: 0,
-  description: ''
+  diamondPerMinute: 0,
+  categoryId: 0,
+  source: 1,
+  authorId: '',
 })
 const currentRow = ref<ShortVideoForm>(defaultForm())
 const formRef = ref<FormInstance>()
-const videoUploading = ref(false)
 const coverUploading = ref(false)
 const videoPreviewUrl = ref('')
 const coverPreviewUrl = ref('')
-const objectPreviewUrls = reactive<{ video: string | null; cover: string | null }>({
-  video: null,
+const objectPreviewUrls = reactive<{ cover: string | null }>({
   cover: null
 })
 
-const getExt = (name: string): string => {
-  const idx = name.lastIndexOf('.')
-  return idx >= 0 ? name.slice(idx).toLowerCase() : ''
+const formatPrice = (price: number) => Number(price || 0).toFixed(4)
+
+const sourceLabel = (source: number) => sourceLabelMap[source] || '-'
+
+const categoryName = (categoryId: number) => {
+  if (!categoryId) {
+    return '-'
+  }
+  const item = categoryOptions.value.find((c) => Number(c.id) === categoryId)
+  return item?.name || String(categoryId)
 }
 
-const revokeObjectPreview = (field: 'video' | 'cover') => {
+const revokeObjectPreview = (field: 'cover') => {
   if (objectPreviewUrls[field]) {
     URL.revokeObjectURL(objectPreviewUrls[field]!)
     objectPreviewUrls[field] = null
@@ -270,7 +299,6 @@ const revokeObjectPreview = (field: 'video' | 'cover') => {
 }
 
 const resetAssetPreview = () => {
-  revokeObjectPreview('video')
   revokeObjectPreview('cover')
   videoPreviewUrl.value = ''
   coverPreviewUrl.value = ''
@@ -288,58 +316,31 @@ const beforeCoverUpload = (file: File): boolean => {
   return true
 }
 
-const beforeVideoUpload = (file: File): boolean => {
-  const ext = getExt(file.name)
-  if (!allowedVideoExt.includes(ext) && !file.type.startsWith('video/')) {
-    ElMessage.error('视频仅支持 mp4、webm、mov 格式')
-    return false
-  }
-  if (file.size > maxVideoSizeBytes.value) {
-    ElMessage.error(`视频不能超过${maxVideoSizeMB.value}MB`)
-    return false
-  }
-  return true
-}
-
-const doUpload = async (options: UploadRequestOptions, field: 'video' | 'cover') => {
+const doUpload = async (options: UploadRequestOptions) => {
   const file = options.file as File
-  const uploading = field === 'video' ? videoUploading : coverUploading
-  uploading.value = true
+  coverUploading.value = true
   try {
-    const res = field === 'video'
-        ? await shortVideoApi.uploadShortVideo(file)
-        : await uploadApi.uploadFile(file)
-    currentRow.value[field] = res.fileName
+    const res = await uploadApi.uploadFile(file)
+    currentRow.value.cover = res.fileName
     const objectUrl = URL.createObjectURL(file)
-    if (field === 'video') {
-      revokeObjectPreview('video')
-      videoPreviewUrl.value = objectUrl
-      objectPreviewUrls.video = objectUrl
-    } else {
-      revokeObjectPreview('cover')
-      coverPreviewUrl.value = objectUrl
-      objectPreviewUrls.cover = objectUrl
-    }
-    formRef.value?.validateField(field).catch(() => undefined)
+    revokeObjectPreview('cover')
+    coverPreviewUrl.value = objectUrl
+    objectPreviewUrls.cover = objectUrl
+    formRef.value?.validateField('cover').catch(() => undefined)
     ElMessage.success('上传成功')
   } catch (error) {
     console.error('上传失败:', error)
     ElMessage.error('上传失败')
   } finally {
-    uploading.value = false
+    coverUploading.value = false
   }
 }
 
-const clearAsset = (field: 'video' | 'cover') => {
-  currentRow.value[field] = ''
-  if (field === 'video') {
-    revokeObjectPreview('video')
-    videoPreviewUrl.value = ''
-  } else {
-    revokeObjectPreview('cover')
-    coverPreviewUrl.value = ''
-  }
-  formRef.value?.validateField(field).catch(() => undefined)
+const clearAsset = () => {
+  currentRow.value.cover = ''
+  revokeObjectPreview('cover')
+  coverPreviewUrl.value = ''
+  formRef.value?.validateField('cover').catch(() => undefined)
 }
 
 watch(dialogVisible, (visible) => {
@@ -350,12 +351,12 @@ watch(dialogVisible, (visible) => {
 
 watch(() => currentRow.value.isPaid, (paid) => {
   if (paid === 1) {
-    if (!currentRow.value.diamondPerSecond || currentRow.value.diamondPerSecond < 1) {
-      currentRow.value.diamondPerSecond = 10
+    if (!currentRow.value.diamondPerMinute || currentRow.value.diamondPerMinute <= 0) {
+      currentRow.value.diamondPerMinute = 1
     }
     return
   }
-  currentRow.value.diamondPerSecond = 0
+  currentRow.value.diamondPerMinute = 0
 })
 
 const formRules: FormRules = {
@@ -363,12 +364,12 @@ const formRules: FormRules = {
     {required: true, message: '请输入标题', trigger: 'blur'},
     {min: 1, max: 64, message: '标题长度在1-64个字符', trigger: 'blur'}
   ],
-  video: [{required: true, message: '请上传视频', trigger: 'change'}],
-  diamondPerSecond: [
+  authorId: [{required: true, message: '请输入作者ID', trigger: 'blur'}],
+  diamondPerMinute: [
     {
       validator: (_rule, value, callback) => {
-        if (currentRow.value.isPaid === 1 && (!value || value < 1)) {
-          callback(new Error('付费视频请填写每秒钻石数'))
+        if (currentRow.value.isPaid === 1 && (!value || value <= 0)) {
+          callback(new Error('付费视频请填写每分钟钻石数'))
           return
         }
         callback()
@@ -376,16 +377,24 @@ const formRules: FormRules = {
       trigger: 'change',
     },
   ],
-  description: [{max: 255, message: '描述最长255字符', trigger: 'blur'}]
+  source: [{required: true, message: '请选择视频来源', trigger: 'change'}],
+}
+
+const fetchCategoryOptions = async () => {
+  try {
+    const response = await shortVideoApi.getShortVideoCategoryList({
+      pageIndex: 1,
+      pageSize: 100,
+    })
+    categoryOptions.value = response.data || []
+  } catch (error) {
+    console.error('获取短视频分类失败:', error)
+  }
 }
 
 const fetchShortVideoCfg = async () => {
   try {
     const response = await shortVideoApi.getShortVideoCfg()
-    if (response.cfg?.maxFileSize) {
-      maxVideoSizeBytes.value = response.cfg.maxFileSize
-      maxVideoSizeMB.value = Math.max(1, Math.round(response.cfg.maxFileSize / MB))
-    }
     if (response.cfg?.maxCoverFileSize) {
       maxCoverSizeMB.value = Math.max(1, response.cfg.maxCoverFileSize)
     }
@@ -435,24 +444,18 @@ const handleCurrentChange = (page: number) => {
   fetchShortVideoList()
 }
 
-const handleAdd = () => {
-  dialogTitle.value = '新增短视频'
-  currentRow.value = defaultForm()
-  resetAssetPreview()
-  dialogVisible.value = true
-}
-
 const handleEdit = (row: ShortVideo) => {
   dialogTitle.value = '编辑短视频'
   currentRow.value = {
     id: row.id,
     title: row.title,
-    video: row.videoName || '',
     cover: row.coverName || '',
     sort: Number(row.sort) || 0,
     isPaid: row.isPaid ?? 0,
-    diamondPerSecond: row.isPaid === 1 ? (row.diamondPerSecond || 10) : 0,
-    description: row.description || ''
+    diamondPerMinute: row.isPaid === 1 ? (Number(row.diamondPerMinute) || 1) : 0,
+    categoryId: Number(row.categoryId) || 0,
+    source: row.source || 1,
+    authorId: row.authorId || '',
   }
   videoPreviewUrl.value = row.video || ''
   coverPreviewUrl.value = row.cover || ''
@@ -507,19 +510,16 @@ const handleSave = async () => {
     try {
       const payload = {
         title: currentRow.value.title,
-        video: currentRow.value.video,
         cover: currentRow.value.cover,
         sort: currentRow.value.sort,
         isPaid: currentRow.value.isPaid,
-        diamondPerSecond: currentRow.value.isPaid === 1 ? currentRow.value.diamondPerSecond : 0,
-        description: currentRow.value.description
+        diamondPerMinute: currentRow.value.isPaid === 1 ? currentRow.value.diamondPerMinute : 0,
+        categoryId: currentRow.value.categoryId || 0,
+        source: currentRow.value.source,
+        authorId: Number(currentRow.value.authorId) || 0,
       }
-      if (currentRow.value.id) {
-        await shortVideoApi.updateShortVideo({id: currentRow.value.id, ...payload})
-      } else {
-        await shortVideoApi.createShortVideo(payload)
-      }
-      ElMessage.success(currentRow.value.id ? '更新成功' : '创建成功')
+      await shortVideoApi.updateShortVideo({id: currentRow.value.id, ...payload})
+      ElMessage.success('更新成功')
       dialogVisible.value = false
       fetchShortVideoList()
     } catch (error) {
@@ -530,6 +530,7 @@ const handleSave = async () => {
 }
 
 onMounted(() => {
+  fetchCategoryOptions()
   fetchShortVideoCfg()
   fetchShortVideoList()
 })
@@ -552,6 +553,11 @@ onMounted(() => {
 
 .table-header {
   margin-bottom: 15px;
+}
+
+.table-tip {
+  color: #909399;
+  font-size: 13px;
 }
 
 .search-form {

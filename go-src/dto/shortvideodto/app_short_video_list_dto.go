@@ -11,15 +11,18 @@ type AppShortVideoListReq struct {
 
 // AppShortVideoItem App端短视频列表元素
 type AppShortVideoItem struct {
-	ID               string `json:"id"`
-	Title            string `json:"title"`
-	Video            string `json:"video" dc:"视频完整URL"`
-	Cover            string `json:"cover" dc:"封面完整URL"`
-	Description      string `json:"description"`
-	IsPaid           uint8  `json:"isPaid" dc:"是否付费(0免费,1付费)"`
-	DiamondPerSecond uint64 `json:"diamondPerSecond" dc:"每秒钻石数"`
-	LikeCount        uint64 `json:"likeCount"`
-	ViewCount        uint64 `json:"viewCount" dc:"观看人数"`
+	ID               string  `json:"id"`
+	Title            string  `json:"title"`
+	Video            string  `json:"video" dc:"视频完整URL"`
+	Cover            string  `json:"cover" dc:"封面完整URL"`
+	IsPaid           uint8   `json:"isPaid" dc:"是否付费(0免费,1付费)"`
+	DiamondPerMinute float64 `json:"diamondPerMinute" dc:"每分钟钻石数"`
+	CategoryId       int     `json:"categoryId" dc:"视频分类ID"`
+	Source           uint8   `json:"source" dc:"视频来源(1原创,2转发,3AI生成)"`
+	AuthorId         string  `json:"authorId" dc:"作者用户ID"`
+	AuthorNickname   string  `json:"authorNickname" dc:"作者昵称"`
+	LikeCount        uint64  `json:"likeCount"`
+	ViewCount        uint64  `json:"viewCount" dc:"观看人数"`
 }
 
 // AppShortVideoViewListReq App端分页查询短视频列表(仅已上架,按观看人数排序,走缓存)

@@ -394,8 +394,11 @@ export interface ShortVideo {
     sort: number
     status: number
     isPaid: number
-    diamondPerSecond: number
-    description: string
+    diamondPerMinute: number
+    categoryId: number
+    source: number
+    authorId: string
+    authorNickname: string
     createdAt: string
     updatedAt: string
 }

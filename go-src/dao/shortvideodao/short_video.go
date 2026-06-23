@@ -1,12 +1,12 @@
 package shortvideodao
 
 import (
-	"fmt"
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gctx"
+	"sort"
 	"strconv"
-	"xr-game-server/core/str"
+	"strings"
+	"time"
 	"xr-game-server/dto/shortvideodto"
 	"xr-game-server/entity"
 )
@@ -26,12 +26,13 @@ func GetShortVideoById(videoId uint64) *entity.ShortVideo {
 	if videoId == 0 || shortVideoCacheMgr == nil {
 		return nil
 	}
-	v := shortVideoCacheMgr.Get(videoId)
-
-	return v
+	return shortVideoCacheMgr.Get(videoId)
 }
 
 func FlushShortVideo(data *entity.ShortVideo) {
+	if data == nil {
+		return
+	}
 	shortVideoCacheMgr.Set(data.ID, data)
 }
 
@@ -40,26 +41,19 @@ func GetById(id uint64) *entity.ShortVideo {
 }
 
 func GetByTitle(title string) *entity.ShortVideo {
-	var row entity.ShortVideo
-	if err := g.DB().Model(string(entity.TbShortVideo)).Where("title = ?", title).Scan(&row); err != nil {
+	if title == "" {
 		return nil
 	}
-	if row.ID == 0 {
-		return nil
+	for _, row := range shortVideoCacheMgr.Values() {
+		if row != nil && row.Title == title {
+			return row
+		}
 	}
-	return &row
+	return nil
 }
 
-func Create(row *entity.ShortVideo) error {
-	_, err := g.DB().Model(string(entity.TbShortVideo)).Save(row)
+func AddShortVideoToCache(row *entity.ShortVideo) {
 	FlushShortVideo(row)
-	return err
-}
-
-func Update(row *entity.ShortVideo) error {
-	_, err := g.DB().Model(string(entity.TbShortVideo)).Save(row)
-	FlushShortVideo(row)
-	return err
 }
 
 func Delete(id uint64) error {
@@ -68,19 +62,20 @@ func Delete(id uint64) error {
 	return err
 }
 
-func UpdateStatus(id uint64, status uint8) error {
-	_, err := g.DB().Model(string(entity.TbShortVideo)).
-		WherePri(id).
-		Data(g.Map{"status": status}).
-		Update()
-	return err
+func UpdateStatus(id uint64, status uint8) {
+	row := GetShortVideoById(id)
+	if row == nil {
+		return
+	}
+	row.SetStatus(status)
+	FlushShortVideo(row)
 }
 
-// GetOnShelfShortVideos 获取全部已上架短视频(按点赞数降序,再按ID降序)
+// GetOnShelfShortVideos 获取全部已上架短视频
 func GetOnShelfShortVideos() []*entity.ShortVideo {
 	ret := make([]*entity.ShortVideo, 0)
 	for _, video := range shortVideoCacheMgr.Values() {
-		if video.Status == entity.ShortVideoStatusOnShelf {
+		if video != nil && video.Status == entity.ShortVideoStatusOnShelf {
 			ret = append(ret, video)
 		}
 	}
@@ -88,32 +83,94 @@ func GetOnShelfShortVideos() []*entity.ShortVideo {
 }
 
 func GetShortVideoList(req *shortvideodto.ShortVideoListReq) (int, []*shortvideodto.ShortVideoListRes) {
-	sql := `select v.id, v.title, v.video, v.cover, v.sort, v.status, v.is_paid, v.diamond_per_second, v.description,
-                   coalesce(s.like_count, 0) as like_count, v.created_at, v.updated_at
-            from short_videos v
-            left join short_video_stats s on s.id = v.id
-            where 1=1 `
-	param := make([]any, 0)
-	ctx := gctx.New()
-	ret := make([]*shortvideodto.ShortVideoListRes, 0)
-
-	if req.Title != "" {
-		sql += ` and v.title LIKE ?`
-		param = append(param, fmt.Sprintf("%%%s%%", req.Title))
+	titleKeyword := strings.ToLower(strings.TrimSpace(req.Title))
+	filtered := make([]*entity.ShortVideo, 0)
+	for _, video := range shortVideoCacheMgr.Values() {
+		if video == nil {
+			continue
+		}
+		if titleKeyword != "" && !strings.Contains(strings.ToLower(video.Title), titleKeyword) {
+			continue
+		}
+		switch req.StatusFilter {
+		case 1:
+			if video.Status != entity.ShortVideoStatusOffShelf {
+				continue
+			}
+		case 2:
+			if video.Status != entity.ShortVideoStatusOnShelf {
+				continue
+			}
+		}
+		filtered = append(filtered, video)
 	}
-	switch req.StatusFilter {
-	case 1:
-		sql += ` and v.status = ?`
-		param = append(param, entity.ShortVideoStatusOffShelf)
-	case 2:
-		sql += ` and v.status = ?`
-		param = append(param, entity.ShortVideoStatusOnShelf)
-	}
 
-	sql += ` order by v.sort desc, v.created_at desc`
-	countSql := str.GetCountSQL(sql)
-	total, _ := g.DB().GetCount(ctx, countSql, param)
-	sql += ` limit ` + strconv.Itoa(req.PageSize) + ` offset ` + strconv.Itoa(req.PageIndex-1)
-	g.DB().GetScan(ctx, &ret, sql, param)
+	sort.Slice(filtered, func(i, j int) bool {
+		if filtered[i].Sort != filtered[j].Sort {
+			return filtered[i].Sort > filtered[j].Sort
+		}
+		return filtered[i].CreatedAt.After(filtered[j].CreatedAt)
+	})
+
+	total := len(filtered)
+	pageIndex, pageSize := normalizeShortVideoListPage(req.PageIndex, req.PageSize)
+	start, end := shortVideoListPageRange(total, pageIndex, pageSize)
+
+	ret := make([]*shortvideodto.ShortVideoListRes, 0, end-start)
+	for _, video := range filtered[start:end] {
+		ret = append(ret, toShortVideoListRes(video))
+	}
 	return total, ret
+}
+
+func toShortVideoListRes(video *entity.ShortVideo) *shortvideodto.ShortVideoListRes {
+	var likeCount uint64
+	if stat := GetStatByVideoId(video.ID); stat != nil {
+		likeCount = stat.LikeCount
+	}
+	return &shortvideodto.ShortVideoListRes{
+		ID:               strconv.FormatUint(video.ID, 10),
+		Title:            video.Title,
+		Video:            video.Video,
+		Cover:            video.Cover,
+		Sort:             video.Sort,
+		Status:           video.Status,
+		IsPaid:           video.IsPaid,
+		DiamondPerMinute: video.DiamondPerMinute,
+		CategoryId:       video.CategoryId,
+		Source:           video.Source,
+		AuthorId:         strconv.FormatUint(video.AuthorId, 10),
+		LikeCount:        likeCount,
+		CreatedAt:        formatShortVideoTime(video.CreatedAt),
+		UpdatedAt:        formatShortVideoTime(video.UpdatedAt),
+	}
+}
+
+func normalizeShortVideoListPage(pageIndex, pageSize int) (int, int) {
+	if pageIndex <= 0 {
+		pageIndex = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 10
+	}
+	return pageIndex, pageSize
+}
+
+func shortVideoListPageRange(total, pageIndex, pageSize int) (int, int) {
+	start := (pageIndex - 1) * pageSize
+	end := start + pageSize
+	if start > total {
+		start = total
+	}
+	if end > total {
+		end = total
+	}
+	return start, end
+}
+
+func formatShortVideoTime(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+	return t.Format("2006-01-02 15:04:05")
 }

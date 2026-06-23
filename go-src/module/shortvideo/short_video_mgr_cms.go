@@ -3,10 +3,9 @@ package shortvideo
 import (
 	"context"
 	"strconv"
-	"time"
 	"xr-game-server/core/httpserver"
-	"xr-game-server/core/snowflake"
 	"xr-game-server/dao/shortvideodao"
+	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/shortvideodto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
@@ -21,37 +20,15 @@ func GetShortVideoList(_ context.Context, req *shortvideodto.ShortVideoListReq) 
 		row.CoverName = row.Cover
 		row.Video = upload.GetUrlByName(row.VideoName)
 		row.Cover = upload.GetUrlByName(row.CoverName)
+		if row.AuthorId != "" && row.AuthorId != "0" {
+			if authorId, err := strconv.ParseUint(row.AuthorId, 10, 64); err == nil {
+				if u := userinfodao.GetUserInfoByUserId(authorId); u != nil {
+					row.AuthorNickname = u.Nickname
+				}
+			}
+		}
 	}
 	return &httpserver.CMSQueryResp{Total: total, Data: list}, nil
-}
-
-func CreateShortVideo(_ context.Context, req *shortvideodto.CreateShortVideoReq) (*shortvideodto.CreateShortVideoRes, error) {
-	if existing := shortvideodao.GetByTitle(req.Title); existing != nil {
-		return nil, errercode.CreateCode(errercode.ShortVideoExist)
-	}
-	isPaid, diamondPerSecond, err := normalizeShortVideoPaid(req.IsPaid, req.DiamondPerSecond)
-	if err != nil {
-		return nil, err
-	}
-	row := &entity.ShortVideo{
-		Title:            req.Title,
-		Video:            req.Video,
-		Cover:            req.Cover,
-		Sort:             req.Sort,
-		Status:           entity.ShortVideoStatusOffShelf,
-		IsPaid:           isPaid,
-		DiamondPerSecond: diamondPerSecond,
-		Description:      req.Description,
-	}
-	row.ID = snowflake.GetId()
-	row.CreatedAt = time.Now()
-	row.UpdatedAt = time.Now()
-	if err := shortvideodao.Create(row); err != nil {
-		return nil, err
-	}
-	loadAppShortVideoListCache()
-
-	return &shortvideodto.CreateShortVideoRes{ID: strconv.FormatUint(row.ID, 10)}, nil
 }
 
 func UpdateShortVideo(_ context.Context, req *shortvideodto.UpdateShortVideoReq) (*shortvideodto.UpdateShortVideoRes, error) {
@@ -62,32 +39,42 @@ func UpdateShortVideo(_ context.Context, req *shortvideodto.UpdateShortVideoReq)
 	if existing := shortvideodao.GetByTitle(req.Title); existing != nil && existing.ID != req.ID {
 		return nil, errercode.CreateCode(errercode.ShortVideoExist)
 	}
-	isPaid, diamondPerSecond, err := normalizeShortVideoPaid(req.IsPaid, req.DiamondPerSecond)
+	isPaid, diamondPerMinute, err := normalizeShortVideoPaid(req.IsPaid, req.DiamondPerMinute)
 	if err != nil {
 		return nil, err
 	}
-	row.Title = req.Title
-	row.Video = req.Video
-	row.Cover = req.Cover
-	row.Sort = req.Sort
-	row.IsPaid = isPaid
-	row.DiamondPerSecond = diamondPerSecond
-	row.Description = req.Description
-	if err := shortvideodao.Update(row); err != nil {
+	if err := validateShortVideoCategoryId(req.CategoryId); err != nil {
 		return nil, err
 	}
+	if err := validateShortVideoAuthorId(req.AuthorId); err != nil {
+		return nil, err
+	}
+	row.SetTitle(req.Title)
+	row.SetCover(req.Cover)
+	row.SetSort(req.Sort)
+	row.SetIsPaid(isPaid)
+	row.SetDiamondPerMinute(diamondPerMinute)
+	row.SetCategoryId(req.CategoryId)
+	row.SetSource(req.Source)
+	row.SetAuthorId(req.AuthorId)
+	shortvideodao.FlushShortVideo(row)
 	loadAppShortVideoListCache()
 	return &shortvideodto.UpdateShortVideoRes{Success: true}, nil
 }
 
 func DeleteShortVideo(_ context.Context, req *shortvideodto.DeleteShortVideoReq) (*shortvideodto.DeleteShortVideoRes, error) {
-	if row := shortvideodao.GetShortVideoById(req.ID); row == nil {
+	row := shortvideodao.GetShortVideoById(req.ID)
+	if row == nil {
 		return nil, errercode.CreateCode(errercode.ShortVideoNonExist)
 	}
+	videoName := row.Video
+	coverName := row.Cover
 	if err := shortvideodao.Delete(req.ID); err != nil {
 		return nil, err
 	}
 	_ = shortvideodao.DeleteByVideoId(req.ID)
+	upload.DeleteUploadedFile(videoName)
+	upload.DeleteUploadedFile(coverName)
 	loadAppShortVideoListCache()
 	return &shortvideodto.DeleteShortVideoRes{Success: true}, nil
 }
@@ -97,13 +84,12 @@ func OnShelfShortVideo(_ context.Context, req *shortvideodto.OnShelfShortVideoRe
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.ShortVideoNonExist)
 	}
+	if row.Video == "" {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 	if row.Status != entity.ShortVideoStatusOnShelf {
 		shortvideodao.UpdateStatus(req.ID, entity.ShortVideoStatusOnShelf)
-		row.Status = entity.ShortVideoStatusOnShelf
-		row.UpdatedAt = time.Now()
 		loadAppShortVideoListCache()
-		shortvideodao.FlushShortVideo(row)
-		return nil, nil
 	}
 	return &shortvideodto.OnShelfShortVideoRes{Success: true, Status: entity.ShortVideoStatusOnShelf}, nil
 }
@@ -115,21 +101,27 @@ func OffShelfShortVideo(_ context.Context, req *shortvideodto.OffShelfShortVideo
 	}
 	if row.Status != entity.ShortVideoStatusOffShelf {
 		shortvideodao.UpdateStatus(req.ID, entity.ShortVideoStatusOffShelf)
-		row.Status = entity.ShortVideoStatusOffShelf
-		row.UpdatedAt = time.Now()
 		loadAppShortVideoListCache()
-		shortvideodao.FlushShortVideo(row)
-		return nil, nil
 	}
 	return &shortvideodto.OffShelfShortVideoRes{Success: true, Status: entity.ShortVideoStatusOffShelf}, nil
 }
 
-func normalizeShortVideoPaid(isPaid uint8, diamondPerSecond uint64) (uint8, uint64, error) {
+func normalizeShortVideoPaid(isPaid uint8, diamondPerMinute float64) (uint8, float64, error) {
 	if isPaid != entity.ShortVideoPaidYes {
 		return entity.ShortVideoPaidNo, 0, nil
 	}
-	if diamondPerSecond == 0 {
+	if diamondPerMinute <= 0 {
 		return 0, 0, errercode.CreateCode(errercode.InvalidParam)
 	}
-	return isPaid, diamondPerSecond, nil
+	return isPaid, diamondPerMinute, nil
+}
+
+func validateShortVideoCategoryId(categoryId int) error {
+	if categoryId <= 0 {
+		return nil
+	}
+	if GetCategoryFromMemoryById(uint64(categoryId)) == nil {
+		return errercode.CreateCode(errercode.ShortVideoCategoryNonExist)
+	}
+	return nil
 }

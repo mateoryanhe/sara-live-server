@@ -8,6 +8,7 @@ import (
 	"time"
 	"xr-game-server/core/xrtimer"
 	"xr-game-server/dao/shortvideodao"
+	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/shortvideodto"
 	"xr-game-server/entity"
 	"xr-game-server/module/upload"
@@ -68,17 +69,25 @@ func toAppShortVideoItem(row *entity.ShortVideo, stat *entity.ShortVideoStat) *s
 		likeCount = stat.LikeCount
 		viewCount = stat.ViewCount
 	}
-	return &shortvideodto.AppShortVideoItem{
+	item := &shortvideodto.AppShortVideoItem{
 		ID:               strconv.FormatUint(row.ID, 10),
 		Title:            row.Title,
 		Video:            upload.GetUrlByName(row.Video),
 		Cover:            upload.GetUrlByName(row.Cover),
-		Description:      row.Description,
 		IsPaid:           row.IsPaid,
-		DiamondPerSecond: row.DiamondPerSecond,
+		DiamondPerMinute: row.DiamondPerMinute,
+		CategoryId:       row.CategoryId,
+		Source:           row.Source,
+		AuthorId:         strconv.FormatUint(row.AuthorId, 10),
 		LikeCount:        likeCount,
 		ViewCount:        viewCount,
 	}
+	if row.AuthorId > 0 {
+		if u := userinfodao.GetUserInfoByUserId(row.AuthorId); u != nil {
+			item.AuthorNickname = u.Nickname
+		}
+	}
+	return item
 }
 
 // GetAppShortVideoList App端分页查询短视频列表(仅已上架,按点赞数排序,走内存缓存)
