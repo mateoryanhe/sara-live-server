@@ -2,10 +2,8 @@ package agora
 
 import (
 	"context"
-	"strconv"
-	"time"
-
 	rtctokenbuilder "github.com/AgoraIO/Tools/DynamicKey/AgoraDynamicKey/go/src/rtctokenbuilder2"
+	"strconv"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/agoradto"
@@ -13,24 +11,23 @@ import (
 	"xr-game-server/module/livecfg"
 )
 
-// GetLiveRoomToken App端上报房间ID,返回进直播间声网Token
-func GetLiveRoomToken(ctx context.Context, req *agoradto.GetLiveRoomTokenReq) (*agoradto.GetLiveRoomTokenRes, error) {
-	if liveroomdao.GetRoomById(req.RoomId) == nil {
-		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
+// BuildLiveRoomToken 为指定用户生成进直播间声网 Token
+func BuildLiveRoomToken(userId, roomId uint64) (token string, expireAt int64, err error) {
+	if liveroomdao.GetRoomById(roomId) == nil {
+		return "", 0, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
 
 	agoraCfg := getAgoraCfgCache()
 	if err := validateAgoraCfg(agoraCfg); err != nil {
-		return nil, err
+		return "", 0, err
 	}
 
-	userId := httpserver.GetAuthId(ctx)
-	channelName := buildChannelName(req.RoomId)
+	channelName := buildChannelName(roomId)
 	userAccount := buildUserAccount(userId)
-	role := resolveRole(userId, req.RoomId)
+	role := resolveRole(userId, roomId)
 	expireSeconds := agoraCfg.TokenExpireSeconds
 
-	token, err := rtctokenbuilder.BuildTokenWithUserAccount(
+	token, err = rtctokenbuilder.BuildTokenWithUserAccount(
 		agoraCfg.AppId,
 		agoraCfg.AppCertificate,
 		channelName,
@@ -40,15 +37,27 @@ func GetLiveRoomToken(ctx context.Context, req *agoradto.GetLiveRoomTokenReq) (*
 		expireSeconds,
 	)
 	if err != nil {
+		return "", 0, err
+	}
+
+	return token, int64(expireSeconds), nil
+}
+
+// GetLiveRoomToken App端上报房间ID,返回进直播间声网Token
+func GetLiveRoomToken(ctx context.Context, req *agoradto.GetLiveRoomTokenReq) (*agoradto.GetLiveRoomTokenRes, error) {
+	userId := httpserver.GetAuthId(ctx)
+	token, expireAt, err := BuildLiveRoomToken(userId, req.RoomId)
+	if err != nil {
 		return nil, err
 	}
 
+	agoraCfg := getAgoraCfgCache()
 	return &agoradto.GetLiveRoomTokenRes{
 		Token:       token,
 		AppId:       agoraCfg.AppId,
-		ChannelName: channelName,
-		UserAccount: userAccount,
-		ExpireAt:    time.Now().Unix() + int64(expireSeconds),
+		ChannelName: buildChannelName(req.RoomId),
+		UserAccount: buildUserAccount(userId),
+		ExpireAt:    expireAt,
 	}, nil
 }
 

@@ -7,11 +7,14 @@ import (
 	"sync/atomic"
 	"time"
 	"xr-game-server/constants/userstatus"
+	"xr-game-server/core/httpserver"
 	"xr-game-server/core/xrtimer"
+	"xr-game-server/dao/livefollowdao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/entity"
+	"xr-game-server/module/agora"
 	"xr-game-server/module/upload"
 
 	"github.com/gogf/gf/v2/os/gctx"
@@ -24,8 +27,8 @@ const (
 )
 
 var (
-	roomListCache      atomic.Value // []*liveroomdto.LiveRoomListItem
-	emptyRoomListCache = make([]*liveroomdto.LiveRoomListItem, 0)
+	roomListCache      atomic.Value // []*entity.LiveRoom
+	emptyRoomListCache = make([]*entity.LiveRoom, 0)
 )
 
 func initRoomList() {
@@ -50,11 +53,7 @@ func flushRoomList(ctx context.Context) {
 		return liveRoomHeartTimeUnix(filtered[i]) > liveRoomHeartTimeUnix(filtered[j])
 	})
 
-	list := make([]*liveroomdto.LiveRoomListItem, 0, len(filtered))
-	for _, room := range filtered {
-		list = append(list, toLiveRoomListItem(room))
-	}
-	roomListCache.Store(list)
+	roomListCache.Store(filtered)
 }
 
 func liveRoomHeartTimeUnix(room *entity.LiveRoom) int64 {
@@ -64,7 +63,7 @@ func liveRoomHeartTimeUnix(room *entity.LiveRoom) int64 {
 	return room.HeartTime.Unix()
 }
 
-func toLiveRoomListItem(room *entity.LiveRoom) *liveroomdto.LiveRoomListItem {
+func toLiveRoomListItem(room *entity.LiveRoom, userId uint64) *liveroomdto.LiveRoomListItem {
 	status := userstatus.LiveRoomStatusClosed
 	if room.LiveRecordId > 0 {
 		status = userstatus.LiveRoomStatusLive
@@ -89,41 +88,63 @@ func toLiveRoomListItem(room *entity.LiveRoom) *liveroomdto.LiveRoomListItem {
 		item.AnchorNickname = u.Nickname
 		item.AnchorAvatar = upload.ResolveAvatarUrl(u.Avatar)
 	}
+
+	if userId > 0 {
+		if token, expireAt, err := agora.BuildLiveRoomToken(userId, room.ID); err == nil {
+			item.AgoraToken = token
+			item.AgoraTokenExpireAt = expireAt
+		}
+	}
 	return item
 }
 
-func getRoomListCache() []*liveroomdto.LiveRoomListItem {
+func buildLiveRoomListItems(rooms []*entity.LiveRoom, userId uint64) []*liveroomdto.LiveRoomListItem {
+	list := make([]*liveroomdto.LiveRoomListItem, 0, len(rooms))
+	for _, room := range rooms {
+		if room == nil {
+			continue
+		}
+		list = append(list, toLiveRoomListItem(room, userId))
+	}
+	return list
+}
+
+func getRoomListCache() []*entity.LiveRoom {
 	v := roomListCache.Load()
 	if v == nil {
 		return nil
 	}
-	list, ok := v.([]*liveroomdto.LiveRoomListItem)
+	list, ok := v.([]*entity.LiveRoom)
 	if !ok || len(list) == 0 {
 		return nil
 	}
 	return list
 }
 
-func filterRoomListByStatus(all []*liveroomdto.LiveRoomListItem, statusFilter int) []*liveroomdto.LiveRoomListItem {
+func filterRoomsByStatus(rooms []*entity.LiveRoom, statusFilter int) []*entity.LiveRoom {
 	if statusFilter == 0 {
-		return all
+		return rooms
 	}
-	filtered := make([]*liveroomdto.LiveRoomListItem, 0, len(all))
-	for _, item := range all {
-		if item == nil {
+	filtered := make([]*entity.LiveRoom, 0, len(rooms))
+	for _, room := range rooms {
+		if room == nil {
 			continue
+		}
+		status := userstatus.LiveRoomStatusClosed
+		if room.LiveRecordId > 0 {
+			status = userstatus.LiveRoomStatusLive
 		}
 		switch statusFilter {
 		case 1:
-			if item.Status == userstatus.LiveRoomStatusLive {
-				filtered = append(filtered, item)
+			if status == userstatus.LiveRoomStatusLive {
+				filtered = append(filtered, room)
 			}
 		case 2:
-			if item.Status == userstatus.LiveRoomStatusClosed {
-				filtered = append(filtered, item)
+			if status == userstatus.LiveRoomStatusClosed {
+				filtered = append(filtered, room)
 			}
 		default:
-			filtered = append(filtered, item)
+			filtered = append(filtered, room)
 		}
 	}
 	return filtered
@@ -155,27 +176,63 @@ func roomListPageRange(total, page, pageSize int) (int, int) {
 }
 
 // GetRoomList App 分页查询直播间列表(走内存缓存)
-func GetRoomList(_ context.Context, req *liveroomdto.GetLiveRoomListReq) (*liveroomdto.GetLiveRoomListRes, error) {
+func GetRoomList(ctx context.Context, req *liveroomdto.GetLiveRoomListReq) (*liveroomdto.GetLiveRoomListRes, error) {
+	userId := httpserver.GetAuthId(ctx)
 	page, pageSize := normalizeRoomListPage(req.Page, req.PageSize)
 
-	all := getRoomListCache()
-	if all == nil {
+	cached := getRoomListCache()
+	if cached == nil {
 		return &liveroomdto.GetLiveRoomListRes{
 			Total:    0,
 			Page:     page,
 			PageSize: pageSize,
-			List:     emptyRoomListCache,
+			List:     make([]*liveroomdto.LiveRoomListItem, 0),
 		}, nil
 	}
 
-	all = filterRoomListByStatus(all, req.StatusFilter)
-	total := len(all)
+	filtered := filterRoomsByStatus(cached, req.StatusFilter)
+	total := len(filtered)
 	start, end := roomListPageRange(total, page, pageSize)
 
 	return &liveroomdto.GetLiveRoomListRes{
 		Total:    total,
 		Page:     page,
 		PageSize: pageSize,
-		List:     all[start:end],
+		List:     buildLiveRoomListItems(filtered[start:end], userId),
+	}, nil
+}
+
+// GetFollowedRoomList App 分页查询当前用户关注的直播间(按关注时间倒序)
+func GetFollowedRoomList(ctx context.Context, req *liveroomdto.GetFollowedLiveRoomListReq) (*liveroomdto.GetLiveRoomListRes, error) {
+	userId := httpserver.GetAuthId(ctx)
+	page, pageSize := normalizeRoomListPage(req.Page, req.PageSize)
+
+	followings := livefollowdao.GetFollowingsByUser(userId)
+	rooms := make([]*entity.LiveRoom, 0, len(followings))
+	for _, f := range followings {
+		if f == nil {
+			continue
+		}
+		room := liveroomdao.GetRoomById(f.AnchorId)
+		if room == nil || IsRoomBanned(room) {
+			continue
+		}
+		rooms = append(rooms, room)
+	}
+
+	filtered := filterRoomsByStatus(rooms, req.StatusFilter)
+	total := len(filtered)
+	start, end := roomListPageRange(total, page, pageSize)
+
+	list := buildLiveRoomListItems(filtered[start:end], userId)
+	if len(list) == 0 {
+		list = make([]*liveroomdto.LiveRoomListItem, 0)
+	}
+
+	return &liveroomdto.GetLiveRoomListRes{
+		Total:    total,
+		Page:     page,
+		PageSize: pageSize,
+		List:     list,
 	}, nil
 }
