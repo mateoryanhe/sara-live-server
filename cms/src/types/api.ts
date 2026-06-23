@@ -452,6 +452,17 @@ export interface SaveShortVideoCfgRes {
     id: string
 }
 
+export interface ShortVideoCategory {
+    id: string
+    name: string
+    sort: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface ShortVideoCategoryQuery extends PageQuery {
+}
+
 export interface AgoraCfg {
     id: string
     appId: string

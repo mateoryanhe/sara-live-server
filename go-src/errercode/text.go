@@ -77,6 +77,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		LiveRoomPrivateAudienceFull:    "Private room audience is full",
 		LiveRoomNotLive:                "Live room is not live",
 		LiveRoomPaidDanmakuDisabled:    "Paid danmaku is not enabled",
+		ShortVideoCategoryExist:        "Short video category name already exists",
+		ShortVideoCategoryNonExist:     "Short video category does not exist",
 	},
 	lang.LangZHCN: {
 		Success:                        "成功",
@@ -150,6 +152,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		LiveRoomPrivateAudienceFull:    "私密直播间观众已满",
 		LiveRoomNotLive:                "直播间未在直播中",
 		LiveRoomPaidDanmakuDisabled:    "付费弹幕未开启",
+		ShortVideoCategoryExist:        "短视频分类名称已存在",
+		ShortVideoCategoryNonExist:     "短视频分类不存在",
 	},
 	lang.LangZHTW: {
 		Success:                        "成功",
@@ -223,6 +227,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		LiveRoomPrivateAudienceFull:    "私密直播間觀眾已滿",
 		LiveRoomNotLive:                "直播間未在直播中",
 		LiveRoomPaidDanmakuDisabled:    "付費彈幕未開啟",
+		ShortVideoCategoryExist:        "短視頻分類名稱已存在",
+		ShortVideoCategoryNonExist:     "短視頻分類不存在",
 	},
 }
 

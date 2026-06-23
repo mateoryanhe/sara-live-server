@@ -5,6 +5,8 @@ import type {
     SaveShortVideoCfgReq,
     SaveShortVideoCfgRes,
     ShortVideo,
+    ShortVideoCategory,
+    ShortVideoCategoryQuery,
     ShortVideoQuery,
     ShortVideoWatchQuery,
     ShortVideoWatchRecord,
@@ -70,5 +72,21 @@ export const shortVideoApi = {
 
     offShelfShortVideo: (id: string | number) => {
         return request.post<{ success: boolean; status: number }>('/shortVideo/offShelfShortVideo', {id})
+    },
+
+    getShortVideoCategoryList: (params: ShortVideoCategoryQuery) => {
+        return request.post<PageResponse<ShortVideoCategory>>('/shortVideo/shortVideoCategoryList', params)
+    },
+
+    createShortVideoCategory: (data: { name: string; sort: number }) => {
+        return request.post<{ id: string }>('/shortVideo/createShortVideoCategory', data)
+    },
+
+    updateShortVideoCategory: (data: { id: string | number; name: string; sort: number }) => {
+        return request.post<boolean>('/shortVideo/updateShortVideoCategory', data)
+    },
+
+    deleteShortVideoCategory: (id: string | number) => {
+        return request.post<boolean>('/shortVideo/deleteShortVideoCategory', {id})
     },
 }

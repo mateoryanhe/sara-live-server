@@ -42,3 +42,7 @@ func (c *ShortVideoAppController) WatchBillShortVideo(ctx context.Context, req *
 func (c *ShortVideoAppController) AppShortVideoWatchList(ctx context.Context, req *shortvideodto.AppShortVideoWatchListReq) (*shortvideodto.AppShortVideoWatchListRes, error) {
 	return shortvideo.GetAppShortVideoWatchList(ctx, req)
 }
+
+func (c *ShortVideoAppController) AppShortVideoCategoryList(ctx context.Context, req *shortvideodto.AppShortVideoCategoryListReq) (*shortvideodto.AppShortVideoCategoryListRes, error) {
+	return shortvideo.GetAppShortVideoCategoryList(ctx, req)
+}

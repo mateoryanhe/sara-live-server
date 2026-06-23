@@ -162,7 +162,7 @@
           </el-sub-menu>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('ShortVideoManagement') || hasMenuPermission('ShortVideoCfgManagement') || hasMenuPermission('ShortVideoWatchManagement')"
+            v-if="hasMenuPermission('ShortVideoManagement') || hasMenuPermission('ShortVideoCategoryManagement') || hasMenuPermission('ShortVideoCfgManagement') || hasMenuPermission('ShortVideoWatchManagement')"
             index="/shortvideo">
           <template #title>
             <el-icon>
@@ -175,6 +175,12 @@
               <VideoCamera/>
             </el-icon>
             <span>短视频管理</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('ShortVideoCategoryManagement')" index="/shortvideo/short-video-category-list">
+            <el-icon>
+              <Collection/>
+            </el-icon>
+            <span>短视频分类</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('ShortVideoCfgManagement')" index="/shortvideo/short-video-cfg">
             <el-icon>
@@ -307,7 +313,7 @@
 <script lang="ts" setup>
 import {computed, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {ArrowDown, Coin, Cpu, Document, Expand, Fold, Key, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Coin, Collection, Cpu, Document, Expand, Fold, Key, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {clearPermissions, getIsAdmin, hasPermission} from '@/utils/permission'
 
 const route = useRoute()

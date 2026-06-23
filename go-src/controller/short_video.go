@@ -54,3 +54,19 @@ func (c *ShortVideoController) UploadShortVideo(ctx context.Context, req *shortv
 func (c *ShortVideoController) ShortVideoWatchList(ctx context.Context, req *shortvideodto.ShortVideoWatchListReq) (*httpserver.CMSQueryResp, error) {
 	return shortvideo.GetShortVideoWatchList(ctx, req)
 }
+
+func (c *ShortVideoController) ShortVideoCategoryList(ctx context.Context, req *shortvideodto.ShortVideoCategoryListReq) (*httpserver.CMSQueryResp, error) {
+	return shortvideo.GetShortVideoCategoryList(ctx, req)
+}
+
+func (c *ShortVideoController) CreateShortVideoCategory(ctx context.Context, req *shortvideodto.CreateShortVideoCategoryReq) (*shortvideodto.CreateShortVideoCategoryRes, error) {
+	return shortvideo.CreateShortVideoCategory(ctx, req)
+}
+
+func (c *ShortVideoController) UpdateShortVideoCategory(ctx context.Context, req *shortvideodto.UpdateShortVideoCategoryReq) (*shortvideodto.UpdateShortVideoCategoryRes, error) {
+	return shortvideo.UpdateShortVideoCategory(ctx, req)
+}
+
+func (c *ShortVideoController) DeleteShortVideoCategory(ctx context.Context, req *shortvideodto.DeleteShortVideoCategoryReq) (*shortvideodto.DeleteShortVideoCategoryRes, error) {
+	return shortvideo.DeleteShortVideoCategory(ctx, req)
+}

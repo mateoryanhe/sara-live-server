@@ -132,6 +132,10 @@ const (
 	LiveRoomNotLive XRCode = 125
 	// LiveRoomPaidDanmakuDisabled 付费弹幕未开启(价格未配置)
 	LiveRoomPaidDanmakuDisabled XRCode = 126
+	// ShortVideoCategoryExist 短视频分类名称已存在
+	ShortVideoCategoryExist XRCode = 127
+	// ShortVideoCategoryNonExist 短视频分类不存在
+	ShortVideoCategoryNonExist XRCode = 128
 )
 
 type XError struct {

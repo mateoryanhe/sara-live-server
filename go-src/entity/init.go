@@ -46,6 +46,7 @@ func Init() {
 	initShortVideo()
 	initShortVideoStat()
 	initShortVideoCfg()
+	initShortVideoCategory()
 	initShortVideoWatch()
 	initLiveFollow()
 	initRechargeCfg()
