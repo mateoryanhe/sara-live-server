@@ -113,7 +113,7 @@ type GetOnlineUserListRes struct {
 
 // AudienceListRefreshPushItem 观众列表刷新推送载荷(排序后的在线观众列表)
 type AudienceListRefreshPushItem struct {
-	RoomId      string            `json:"roomId"      dc:"直播间ID"`
+	RoomId      uint64            `json:"roomId,string"      dc:"直播间ID"`
 	OnlineCount int               `json:"onlineCount" dc:"当前在线人数"`
 	UpdatedAt   int64             `json:"updatedAt"   dc:"列表刷新时间(毫秒)"`
 	List        []*OnlineUserItem `json:"list"        dc:"排序后的在线观众列表"`

@@ -3,10 +3,12 @@ package liveroom
 import (
 	"context"
 	"github.com/gogf/gf/v2/container/gmap"
+	"github.com/gogf/gf/v2/os/gctx"
 	"strconv"
 	"time"
 	"xr-game-server/constants/cmd"
 	"xr-game-server/core/push"
+	"xr-game-server/core/xrpool"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
@@ -46,11 +48,12 @@ func clearContributionRankCache(roomId uint64) {
 }
 
 func refreshRoomAudienceCaches(roomId uint64) {
-	go func() {
+	xrpool.AddWithRecover(gctx.New(), func(ctx context.Context) {
 		flushContributionRankCache(roomId)
 		flushOnlineLists(roomId)
 		broadcastAudienceListRefresh(roomId)
-	}()
+	})
+
 }
 
 func broadcastAudienceListRefresh(roomId uint64) {
@@ -64,9 +67,14 @@ func broadcastAudienceListRefresh(roomId uint64) {
 		userIds = make([]uint64, 0)
 	}
 
-	for _, userId := range online {
-		push.Data(userId, cmd.LiveRoomAudienceListRefresh, nil)
+	payload := &liveroomdto.AudienceListRefreshPushItem{
+		RoomId: roomId,
 	}
+
+	for _, userId := range online {
+		push.Data(userId, cmd.LiveRoomAudienceListRefresh, payload)
+	}
+	push.Data(roomId, cmd.LiveRoomAudienceListRefresh, payload)
 }
 
 func clearRoomAudienceCaches(roomId uint64) {

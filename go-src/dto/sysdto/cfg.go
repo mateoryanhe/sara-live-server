@@ -7,5 +7,5 @@ type SysCfgReq struct {
 }
 
 type SysCfgResp struct {
-	SysTime int64 `json:"sysTime,string"`
+	SysTime int64 `json:"sysTime"`
 }
