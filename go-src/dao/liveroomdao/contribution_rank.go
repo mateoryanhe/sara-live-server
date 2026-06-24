@@ -1,6 +1,7 @@
 package liveroomdao
 
 import (
+	"strings"
 	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -25,24 +26,44 @@ func SumAudienceContributionByRoom(roomId uint64, startTime, endTime time.Time, 
 	}
 	ctx := gctx.New()
 	now := time.Now()
-	err := g.DB().Ctx(ctx).Model(string(entity.TbLiveRevenueLog)+" rl").
-		InnerJoin(string(entity.TbAccount)+" a", "a.id = rl.sender_id").
-		Fields("rl.sender_id, SUM(rl.total_amount) AS total_amount").
-		Where("rl.room_id", roomId).
-		WhereIn("rl.sender_id", onlineUserIds).
-		WhereIn("rl.revenue_type", []uint8{uint8(liverevenueconst.Gift), uint8(liverevenueconst.PaidDanmaku)}).
-		WhereGTE("rl.created_at", startTime).
-		WhereLTE("rl.created_at", endTime).
-		Where("IFNULL(a."+string(entity.AccountCancel)+", 0)", 0).
-		Wheref(`(
-    IFNULL(a.`+string(entity.AccountBan)+`, 0) = 0
-    OR (a.`+string(entity.AccountBanApplyTime)+` IS NOT NULL AND a.`+string(entity.AccountBanApplyTime)+` <= ?)
-  )`, now).
-		Group("rl.sender_id").
-		Having("total_amount > 0").
-		OrderDesc("total_amount").
-		Limit(contributionRankTopLimit).
-		Scan(&list)
+
+	inPlaceholders := strings.Repeat("?,", len(onlineUserIds))
+	inPlaceholders = inPlaceholders[:len(inPlaceholders)-1]
+
+	args := make([]any, 0, 6+len(onlineUserIds))
+	args = append(args, roomId)
+	for _, userId := range onlineUserIds {
+		args = append(args, userId)
+	}
+	args = append(args,
+		uint8(liverevenueconst.Gift),
+		uint8(liverevenueconst.PaidDanmaku),
+		startTime,
+		endTime,
+		now,
+		contributionRankTopLimit,
+	)
+
+	sql := `
+SELECT rl.sender_id, SUM(rl.total_amount) AS total_amount
+FROM ` + string(entity.TbLiveRevenueLog) + ` rl
+INNER JOIN ` + string(entity.TbAccount) + ` a ON a.id = rl.sender_id
+WHERE rl.room_id = ?
+  AND rl.sender_id IN (` + inPlaceholders + `)
+  AND rl.revenue_type IN (?, ?)
+  AND rl.created_at >= ?
+  AND rl.created_at <= ?
+  AND IFNULL(a.` + string(entity.AccountCancel) + `, 0) = 0
+  AND (
+    IFNULL(a.` + string(entity.AccountBan) + `, 0) = 0
+    OR (a.` + string(entity.AccountBanApplyTime) + ` IS NOT NULL AND a.` + string(entity.AccountBanApplyTime) + ` <= ?)
+  )
+GROUP BY rl.sender_id
+HAVING SUM(rl.total_amount) > 0
+ORDER BY total_amount DESC
+LIMIT ?
+`
+	err := g.DB().Ctx(ctx).Raw(sql, args...).Scan(&list)
 	if err != nil {
 		g.Log().Errorf(ctx, "SumAudienceContributionByRoom roomId=%d error: %v", roomId, err)
 		return make([]*AudienceContributionStatRow, 0)

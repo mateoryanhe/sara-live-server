@@ -31,6 +31,9 @@ func initHeart() {
 		initRoomOnline(data.RoomId)
 		addToOnline(data.UserId, data.RoomId)
 	}
+	for _, data := range ids {
+		refreshRoomAudienceCaches(data)
+	}
 	xrtimer.AddOnce(gctx.New(), time.Minute, func(ctx context.Context) {
 		xrtimer.AddSingleton(gctx.New(), time.Second, heart)
 	})
