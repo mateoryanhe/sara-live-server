@@ -147,6 +147,10 @@ export interface AnchorListItem {
     roomTitle?: string
     liveStatus?: number
     totalIncome?: number
+    totalGiftIncome?: number
+    totalPaidDanmakuIncome?: number
+    totalPrivateRoomTicketIncome?: number
+    totalPrivateRoomWatchIncome?: number
     ban?: boolean
     banApplyTime?: string | null
     banReason?: string

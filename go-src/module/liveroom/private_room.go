@@ -70,6 +70,7 @@ func chargePrivateRoomTicketIfNeeded(userId uint64, room *entity.LiveRoom, now t
 	liveRecord.AddTotalPrivateRoomIncome(ticketPrice)
 	//记录主播总收益
 	room.AddTotalIncome(ticketPrice)
+	room.AddTotalPrivateRoomTicketIncome(ticketPrice)
 
 	//记录直播收益流水(礼物)
 	eventData := entity.NewLiveRevenueLogRecord(room.ID, room.LiveRecordId, 0, room.ID, 0, 0, 0, ticketPrice, uint8(liverevenue.Gift))
@@ -127,6 +128,7 @@ func recordPrivateRoomBillingRevenue(room *entity.LiveRoom, userId uint64, amoun
 		liveRecord.AddTotalPrivateRoomIncome(amount)
 	}
 	room.AddTotalIncome(amount)
+	room.AddTotalPrivateRoomWatchIncome(amount)
 	eventData := entity.NewLiveRevenueLogRecord(
 		room.ID, room.LiveRecordId, userId, room.ID, 0, 1, amount, amount, uint8(liverevenue.PrivateRoom),
 	)

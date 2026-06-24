@@ -98,6 +98,7 @@ func SendPaidDanmaku(ctx context.Context, req *liveroomdto.SendPaidDanmakuReq) (
 		liveRecord.AddTotalPaidDanmakuIncome(price)
 	}
 	room.AddTotalIncome(price)
+	room.AddTotalPaidDanmakuIncome(price)
 
 	event.Pub(gameevent.RevenueEventEvent, eventData)
 

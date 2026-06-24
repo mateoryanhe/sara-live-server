@@ -97,6 +97,7 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 	}
 	//记录主播总收益
 	room.AddTotalIncome(totalCost)
+	room.AddTotalGiftIncome(totalCost)
 
 	event.Pub(gameevent.RevenueEventEvent, eventData)
 

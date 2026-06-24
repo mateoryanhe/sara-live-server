@@ -13,19 +13,23 @@ const (
 )
 
 const (
-	LiveRoomGuildId      db.TbCol = "guild_id"
-	LiveRoomTitle        db.TbCol = "title"
-	LiveRoomCover        db.TbCol = "cover"
-	LiveRoomNotice       db.TbCol = "notice"
-	LiveRoomLiveId       db.TbCol = "live_record_id"
-	LiveRoomHeartTime    db.TbCol = "heart_time"
-	LiveRoomBan          db.TbCol = "ban"
-	LiveRoomBanApplyTime db.TbCol = "ban_apply_time"
-	LiveRoomBanReason    db.TbCol = "ban_reason"
-	LiveRoomTotalIncome  db.TbCol = "total_income"
-	LiveRoomCategory     db.TbCol = "category"
-	LiveRoomTicket       db.TbCol = "ticket"
-	LiveRoomBilling      db.TbCol = "billing"
+	LiveRoomGuildId                      db.TbCol = "guild_id"
+	LiveRoomTitle                        db.TbCol = "title"
+	LiveRoomCover                        db.TbCol = "cover"
+	LiveRoomNotice                       db.TbCol = "notice"
+	LiveRoomLiveId                       db.TbCol = "live_record_id"
+	LiveRoomHeartTime                    db.TbCol = "heart_time"
+	LiveRoomBan                          db.TbCol = "ban"
+	LiveRoomBanApplyTime                 db.TbCol = "ban_apply_time"
+	LiveRoomBanReason                    db.TbCol = "ban_reason"
+	LiveRoomTotalIncome                  db.TbCol = "total_income"
+	LiveRoomTotalGiftIncome              db.TbCol = "total_gift_income"
+	LiveRoomTotalPaidDanmakuIncome       db.TbCol = "total_paid_danmaku_income"
+	LiveRoomTotalPrivateRoomTicketIncome db.TbCol = "total_private_room_ticket_income"
+	LiveRoomTotalPrivateRoomWatchIncome  db.TbCol = "total_private_room_watch_income"
+	LiveRoomCategory                     db.TbCol = "category"
+	LiveRoomTicket                       db.TbCol = "ticket"
+	LiveRoomBilling                      db.TbCol = "billing"
 )
 
 const (
@@ -37,19 +41,23 @@ const (
 // LiveRoom 直播间(LiveRoom.ID 与 UserInfo.ID 均为主播用户ID,每个主播仅一个直播间)
 type LiveRoom struct {
 	migrate.OneModel
-	GuildId      uint64     `gorm:"index;default:0;comment:所属工会ID" json:"guildId"`
-	Title        string     `gorm:"size:128;default:'';comment:直播间标题" json:"title"`
-	Cover        string     `gorm:"size:255;default:'';comment:封面图URL" json:"cover"`
-	Notice       string     `gorm:"size:512;default:'';comment:公告" json:"notice"`
-	LiveRecordId uint64     `gorm:"default:0;comment:直播记录id" json:"liveRecordId"`
-	HeartTime    *time.Time `gorm:"comment:房间心跳状态,大于5分钟，判断下播" json:"heart_time"`
-	Ban          bool       `gorm:"default:0;comment:封禁状态" json:"ban"`
-	BanApplyTime *time.Time `gorm:"comment:封禁截止时间" json:"banApplyTime"`
-	BanReason    string     `gorm:"size:512;default:'';comment:封禁原因" json:"banReason"`
-	TotalIncome  float64    `gorm:"default:0;comment:直播收益" json:"totalIncome"`
-	Category     uint8      `gorm:"default:1;comment:分类(1=hot,2=game,3=私密)" json:"category"`
-	Ticket       float64    `gorm:"type:decimal(10,4);default:0;comment:门票价格(钻石)" json:"ticket"`
-	Billing      float64    `gorm:"type:decimal(10,4);default:0;comment:计费价格(每分钟钻石)" json:"billing"`
+	GuildId                      uint64     `gorm:"index;default:0;comment:所属工会ID" json:"guildId"`
+	Title                        string     `gorm:"size:128;default:'';comment:直播间标题" json:"title"`
+	Cover                        string     `gorm:"size:255;default:'';comment:封面图URL" json:"cover"`
+	Notice                       string     `gorm:"size:512;default:'';comment:公告" json:"notice"`
+	LiveRecordId                 uint64     `gorm:"default:0;comment:直播记录id" json:"liveRecordId"`
+	HeartTime                    *time.Time `gorm:"comment:房间心跳状态,大于5分钟，判断下播" json:"heart_time"`
+	Ban                          bool       `gorm:"default:0;comment:封禁状态" json:"ban"`
+	BanApplyTime                 *time.Time `gorm:"comment:封禁截止时间" json:"banApplyTime"`
+	BanReason                    string     `gorm:"size:512;default:'';comment:封禁原因" json:"banReason"`
+	TotalIncome                  float64    `gorm:"default:0;comment:直播收益" json:"totalIncome"`
+	TotalGiftIncome              float64    `gorm:"default:0;comment:累计礼物收益" json:"totalGiftIncome"`
+	TotalPaidDanmakuIncome       float64    `gorm:"default:0;comment:累计付费弹幕收益" json:"totalPaidDanmakuIncome"`
+	TotalPrivateRoomTicketIncome float64    `gorm:"default:0;comment:累计私密直播间门票收益" json:"totalPrivateRoomTicketIncome"`
+	TotalPrivateRoomWatchIncome  float64    `gorm:"default:0;comment:累计私密房观看收益" json:"totalPrivateRoomWatchIncome"`
+	Category                     uint8      `gorm:"default:1;comment:分类(1=hot,2=game,3=私密)" json:"category"`
+	Ticket                       float64    `gorm:"type:decimal(10,4);default:0;comment:门票价格(钻石)" json:"ticket"`
+	Billing                      float64    `gorm:"type:decimal(10,4);default:0;comment:计费价格(每分钟钻石)" json:"billing"`
 }
 
 // NewLiveRoom 构造内存对象,字段写入通过 syndb 异步入库
@@ -145,6 +153,46 @@ func (r *LiveRoom) AddTotalIncome(v float64) {
 	})
 }
 
+func (r *LiveRoom) AddTotalGiftIncome(v float64) {
+	if v <= 0 {
+		return
+	}
+	r.TotalGiftIncome = math.AddFloat64(r.TotalGiftIncome, v)
+	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomTotalGiftIncome, &syndb.ColData{
+		IdVal: r.ID, ColVal: r.TotalGiftIncome,
+	})
+}
+
+func (r *LiveRoom) AddTotalPaidDanmakuIncome(v float64) {
+	if v <= 0 {
+		return
+	}
+	r.TotalPaidDanmakuIncome = math.AddFloat64(r.TotalPaidDanmakuIncome, v)
+	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomTotalPaidDanmakuIncome, &syndb.ColData{
+		IdVal: r.ID, ColVal: r.TotalPaidDanmakuIncome,
+	})
+}
+
+func (r *LiveRoom) AddTotalPrivateRoomTicketIncome(v float64) {
+	if v <= 0 {
+		return
+	}
+	r.TotalPrivateRoomTicketIncome = math.AddFloat64(r.TotalPrivateRoomTicketIncome, v)
+	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomTotalPrivateRoomTicketIncome, &syndb.ColData{
+		IdVal: r.ID, ColVal: r.TotalPrivateRoomTicketIncome,
+	})
+}
+
+func (r *LiveRoom) AddTotalPrivateRoomWatchIncome(v float64) {
+	if v <= 0 {
+		return
+	}
+	r.TotalPrivateRoomWatchIncome = math.AddFloat64(r.TotalPrivateRoomWatchIncome, v)
+	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomTotalPrivateRoomWatchIncome, &syndb.ColData{
+		IdVal: r.ID, ColVal: r.TotalPrivateRoomWatchIncome,
+	})
+}
+
 func (r *LiveRoom) SetCategory(v uint8) {
 	if v != LiveRoomCategoryHot && v != LiveRoomCategoryGame && v != LiveRoomCategoryPrivate {
 		v = LiveRoomCategoryHot
@@ -205,6 +253,10 @@ func initLiveRoom() {
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomBanApplyTime)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomBanReason)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomTotalIncome)
+	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomTotalGiftIncome)
+	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomTotalPaidDanmakuIncome)
+	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomTotalPrivateRoomTicketIncome)
+	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomTotalPrivateRoomWatchIncome)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomCategory)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomTicket)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomBilling)

@@ -58,6 +58,18 @@
         <el-table-column label="直播收益" min-width="110">
           <template #default="{ row }">{{ formatAmount(row.totalIncome) }}</template>
         </el-table-column>
+        <el-table-column label="礼物收益" min-width="110">
+          <template #default="{ row }">{{ formatAmount(row.totalGiftIncome) }}</template>
+        </el-table-column>
+        <el-table-column label="付费弹幕收益" min-width="120">
+          <template #default="{ row }">{{ formatAmount(row.totalPaidDanmakuIncome) }}</template>
+        </el-table-column>
+        <el-table-column label="私密门票收益" min-width="120">
+          <template #default="{ row }">{{ formatAmount(row.totalPrivateRoomTicketIncome) }}</template>
+        </el-table-column>
+        <el-table-column label="私密观看收益" min-width="120">
+          <template #default="{ row }">{{ formatAmount(row.totalPrivateRoomWatchIncome) }}</template>
+        </el-table-column>
         <el-table-column label="封禁状态" prop="ban" width="100">
           <template #default="{ row }">
             <el-tag v-if="row.ban" type="danger">已封禁</el-tag>

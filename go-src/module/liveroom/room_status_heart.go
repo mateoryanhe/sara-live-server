@@ -31,7 +31,10 @@ func initHeart() {
 		initRoomOnline(data.RoomId)
 		addToOnline(data.UserId, data.RoomId)
 	}
-	xrtimer.AddSingleton(gctx.New(), time.Second, heart)
+	xrtimer.AddOnce(gctx.New(), time.Minute, func(ctx context.Context) {
+		xrtimer.AddSingleton(gctx.New(), time.Second, heart)
+	})
+
 }
 
 // ReportLiveStartStatus 主播开播时上报开播状态
