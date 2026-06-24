@@ -63,7 +63,7 @@ func UpdateStatus(id uint64, status uint8) error {
 }
 
 func GetBannerList(req *bannerdto.BannerListReq) (int, []*bannerdto.BannerListRes) {
-	sql := `select id, title, image, link, direction, sort, status, created_at, updated_at
+	sql := `select id, title, image, link, scene, direction, sort, status, created_at, updated_at
             from home_banners
             where 1=1 `
 	param := make([]any, 0)
@@ -73,6 +73,14 @@ func GetBannerList(req *bannerdto.BannerListReq) (int, []*bannerdto.BannerListRe
 	if req.Title != "" {
 		sql += ` and title LIKE ?`
 		param = append(param, fmt.Sprintf("%%%s%%", req.Title))
+	}
+	switch req.SceneFilter {
+	case int(entity.HomeBannerSceneHome):
+		sql += ` and scene = ?`
+		param = append(param, entity.HomeBannerSceneHome)
+	case int(entity.HomeBannerSceneLiveRoom):
+		sql += ` and scene = ?`
+		param = append(param, entity.HomeBannerSceneLiveRoom)
 	}
 	switch req.StatusFilter {
 	case 1:

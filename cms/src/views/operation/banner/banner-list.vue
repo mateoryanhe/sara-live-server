@@ -3,7 +3,7 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>首页 Banner 管理</span>
+          <span>Banner 管理</span>
         </div>
       </template>
       <div class="content">
@@ -14,6 +14,13 @@
         <el-form :model="searchForm" class="search-form" inline>
           <el-form-item label="标题">
             <el-input v-model="searchForm.title" clearable placeholder="标题(模糊匹配)"/>
+          </el-form-item>
+          <el-form-item label="展示场景">
+            <el-select v-model="searchForm.sceneFilter" placeholder="全部" style="width: 140px">
+              <el-option :value="0" label="全部"/>
+              <el-option :value="1" label="首页"/>
+              <el-option :value="2" label="直播间"/>
+            </el-select>
           </el-form-item>
           <el-form-item label="状态">
             <el-select v-model="searchForm.statusFilter" placeholder="全部" style="width: 140px">
@@ -45,9 +52,14 @@
             </template>
           </el-table-column>
           <el-table-column label="跳转链接" prop="link" min-width="200" show-overflow-tooltip/>
+          <el-table-column label="展示场景" width="100">
+            <template #default="{ row }">
+              {{ sceneLabel(row.scene) }}
+            </template>
+          </el-table-column>
           <el-table-column label="展示位置" width="110">
             <template #default="{ row }">
-              {{ directionLabel(row.direction) }}
+              {{ directionLabel(row.direction, row.scene) }}
             </template>
           </el-table-column>
           <el-table-column label="排序" prop="sort" width="80"/>
@@ -136,10 +148,16 @@
         <el-form-item label="跳转链接" prop="link">
           <el-input v-model="currentRow.link" placeholder="请输入跳转链接"/>
         </el-form-item>
+        <el-form-item label="展示场景" prop="scene">
+          <el-radio-group v-model="currentRow.scene">
+            <el-radio :label="1">首页</el-radio>
+            <el-radio :label="2">直播间</el-radio>
+          </el-radio-group>
+        </el-form-item>
         <el-form-item label="展示位置" prop="direction">
           <el-select v-model="currentRow.direction" placeholder="请选择展示位置" style="width: 100%">
             <el-option
-                v-for="item in directionOptions"
+                v-for="item in currentDirectionOptions"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value"
@@ -159,7 +177,7 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref, watch} from 'vue'
+import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
 import {Plus} from '@element-plus/icons-vue'
 import {bannerApi, uploadApi} from '@/api'
@@ -167,6 +185,7 @@ import type {Banner} from '@/types/api.ts'
 
 interface SearchForm {
   title: string
+  sceneFilter: number
   statusFilter: number
 }
 
@@ -175,20 +194,38 @@ interface BannerForm {
   title: string
   image: string
   link: string
+  scene: number
   direction: number
   sort: number
 }
 
-const directionOptions = [
+const homeDirectionOptions = [
   {value: 1, label: '首页顶部'},
   {value: 2, label: '首页中部'},
   {value: 3, label: '首页底部'},
-  {value: 4, label: '直播大厅'}
 ]
 
-const directionLabel = (direction: number) => {
-  return directionOptions.find((item) => item.value === direction)?.label ?? '未知'
+const liveRoomDirectionOptions = [
+  {value: 4, label: '直播大厅'},
+]
+
+const sceneOptions = [
+  {value: 1, label: '首页'},
+  {value: 2, label: '直播间'},
+]
+
+const sceneLabel = (scene: number) => {
+  return sceneOptions.find((item) => item.value === Number(scene))?.label ?? '首页'
 }
+
+const directionLabel = (direction: number, scene = 1) => {
+  const options = Number(scene) === 2 ? liveRoomDirectionOptions : homeDirectionOptions
+  return options.find((item) => item.value === direction)?.label ?? '未知'
+}
+
+const currentDirectionOptions = computed(() => {
+  return currentRow.value.scene === 2 ? liveRoomDirectionOptions : homeDirectionOptions
+})
 
 const loading = ref(false)
 const tableData = ref<Banner[]>([])
@@ -198,6 +235,7 @@ const pageSize = ref(10)
 
 const searchForm = reactive<SearchForm>({
   title: '',
+  sceneFilter: 0,
   statusFilter: 0
 })
 
@@ -208,6 +246,7 @@ const defaultForm = (): BannerForm => ({
   title: '',
   image: '',
   link: '',
+  scene: 1,
   direction: 1,
   sort: 0
 })
@@ -237,6 +276,16 @@ const clearImage = () => {
   setImagePreview('')
   formRef.value?.validateField('image').catch(() => undefined)
 }
+
+watch(() => currentRow.value.scene, (scene) => {
+  if (scene === 2) {
+    currentRow.value.direction = 4
+    return
+  }
+  if (![1, 2, 3].includes(currentRow.value.direction)) {
+    currentRow.value.direction = 1
+  }
+})
 
 watch(dialogVisible, (visible) => {
   if (!visible) {
@@ -281,6 +330,7 @@ const formRules: FormRules = {
   ],
   image: [{required: true, message: '请上传图片', trigger: 'change'}],
   link: [{max: 512, message: '跳转链接最长512字符', trigger: 'blur'}],
+  scene: [{required: true, message: '请选择展示场景', trigger: 'change'}],
   direction: [{required: true, message: '请选择展示位置', trigger: 'change'}]
 }
 
@@ -289,6 +339,7 @@ const fetchBannerList = async () => {
   try {
     const response = await bannerApi.getBannerList({
       title: searchForm.title,
+      sceneFilter: searchForm.sceneFilter,
       statusFilter: searchForm.statusFilter,
       pageIndex: currentPage.value,
       pageSize: pageSize.value
@@ -332,6 +383,7 @@ const handleEdit = (row: Banner) => {
     title: row.title,
     image: row.imageName || '',
     link: row.link,
+    scene: Number(row.scene) || 1,
     direction: Number(row.direction) || 1,
     sort: Number(row.sort) || 0
   }
@@ -388,8 +440,8 @@ const handleSave = async () => {
       if (currentRow.value.id) {
         await bannerApi.updateBanner(currentRow.value)
       } else {
-        const {title, image, link, direction, sort} = currentRow.value
-        await bannerApi.createBanner({title, image, link, direction, sort})
+        const {title, image, link, scene, direction, sort} = currentRow.value
+        await bannerApi.createBanner({title, image, link, scene, direction, sort})
       }
       ElMessage.success(currentRow.value.id ? '更新成功' : '创建成功')
       dialogVisible.value = false
@@ -403,6 +455,7 @@ const handleSave = async () => {
 
 const resetSearch = () => {
   searchForm.title = ''
+  searchForm.sceneFilter = 0
   searchForm.statusFilter = 0
   currentPage.value = 1
   fetchBannerList()

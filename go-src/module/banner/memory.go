@@ -49,19 +49,30 @@ func reloadBannerMemory() {
 	loadBannerMemory()
 }
 
-func getAppBannerList() []*bannerdto.AppBannerItem {
+func getAppBannerList(scene uint8) []*bannerdto.AppBannerItem {
 	bannerMu.RLock()
 	if bannerLoaded {
-		list := bannerOnShelfSorted
+		list := filterAppBannerListByScene(bannerOnShelfSorted, scene)
 		bannerMu.RUnlock()
 		return list
 	}
 	bannerMu.RUnlock()
 	loadBannerMemory()
 	bannerMu.RLock()
-	list := bannerOnShelfSorted
+	list := filterAppBannerListByScene(bannerOnShelfSorted, scene)
 	bannerMu.RUnlock()
 	return list
+}
+
+func filterAppBannerListByScene(list []*bannerdto.AppBannerItem, scene uint8) []*bannerdto.AppBannerItem {
+	ret := make([]*bannerdto.AppBannerItem, 0, len(list))
+	for _, item := range list {
+		if item == nil || item.Scene != scene {
+			continue
+		}
+		ret = append(ret, item)
+	}
+	return ret
 }
 
 func GetBannerFromMemoryById(id uint64) *entity.HomeBanner {
@@ -80,11 +91,16 @@ func GetBannerFromMemoryById(id uint64) *entity.HomeBanner {
 }
 
 func toAppBannerItem(b *entity.HomeBanner) *bannerdto.AppBannerItem {
+	scene := b.Scene
+	if scene == 0 {
+		scene = entity.HomeBannerSceneHome
+	}
 	return &bannerdto.AppBannerItem{
 		ID:        strconv.FormatUint(b.ID, 10),
 		Title:     b.Title,
 		Image:     upload.GetUrlByName(b.Image),
 		Link:      b.Link,
+		Scene:     scene,
 		Direction: b.Direction,
 		Sort:      b.Sort,
 	}

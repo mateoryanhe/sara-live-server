@@ -351,6 +351,7 @@ export interface Banner {
     image: string
     imageName: string
     link: string
+    scene: number
     direction: number
     sort: number
     status: number
@@ -360,6 +361,7 @@ export interface Banner {
 
 export interface BannerQuery extends PageQuery {
     title?: string
+    sceneFilter?: number
     statusFilter?: number
 }
 

@@ -20,24 +20,41 @@ func GetBannerList(_ context.Context, req *bannerdto.BannerListReq) (*httpserver
 	return &httpserver.CMSQueryResp{Total: total, Data: list}, nil
 }
 
-func GetAppBannerList(_ context.Context, _ *bannerdto.AppBannerListReq) (*bannerdto.AppBannerListRes, error) {
-	return &bannerdto.AppBannerListRes{List: getAppBannerList()}, nil
+func GetAppBannerList(_ context.Context, req *bannerdto.AppBannerListReq) (*bannerdto.AppBannerListRes, error) {
+	scene := normalizeBannerScene(req.Scene)
+	return &bannerdto.AppBannerListRes{List: getAppBannerList(scene)}, nil
+}
+
+func normalizeBannerScene(scene uint8) uint8 {
+	if scene == entity.HomeBannerSceneLiveRoom {
+		return entity.HomeBannerSceneLiveRoom
+	}
+	return entity.HomeBannerSceneHome
+}
+
+func normalizeBannerDirection(scene, direction uint8) uint8 {
+	if direction != 0 {
+		return direction
+	}
+	if scene == entity.HomeBannerSceneLiveRoom {
+		return entity.HomeBannerPositionLiveHall
+	}
+	return entity.HomeBannerPositionHomeTop
 }
 
 func CreateBanner(_ context.Context, req *bannerdto.CreateBannerReq) (*bannerdto.CreateBannerRes, error) {
 	if existing := bannerdao.GetByTitle(req.Title); existing != nil {
 		return nil, errercode.CreateCode(errercode.BannerExist)
 	}
+	scene := normalizeBannerScene(req.Scene)
 	row := &entity.HomeBanner{
 		Title:     req.Title,
 		Image:     req.Image,
 		Link:      req.Link,
-		Direction: req.Direction,
+		Scene:     scene,
+		Direction: normalizeBannerDirection(scene, req.Direction),
 		Sort:      req.Sort,
 		Status:    entity.HomeBannerStatusOffShelf,
-	}
-	if row.Direction == 0 {
-		row.Direction = entity.HomeBannerPositionHomeTop
 	}
 	if err := bannerdao.Create(row); err != nil {
 		return nil, err
@@ -57,7 +74,8 @@ func UpdateBanner(_ context.Context, req *bannerdto.UpdateBannerReq) (*bannerdto
 	row.Title = req.Title
 	row.Image = req.Image
 	row.Link = req.Link
-	row.Direction = req.Direction
+	row.Scene = normalizeBannerScene(req.Scene)
+	row.Direction = normalizeBannerDirection(row.Scene, req.Direction)
 	row.Sort = req.Sort
 	if err := bannerdao.Update(row); err != nil {
 		return nil, err

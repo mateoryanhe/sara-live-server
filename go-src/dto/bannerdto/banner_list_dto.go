@@ -9,6 +9,7 @@ type BannerListReq struct {
 	g.Meta `path:"/bannerList" method:"post" summary:"获取首页Banner列表" tags:"首页Banner"`
 	httpserver.CMSQueryReq
 	Title        string `json:"title" dc:"标题(模糊匹配)"`
+	SceneFilter  int    `json:"sceneFilter" dc:"场景过滤(0=全部, 1=首页, 2=直播间)"`
 	StatusFilter int    `json:"statusFilter" dc:"状态过滤(0=全部, 1=只看下架, 2=只看上架)"`
 }
 
@@ -18,6 +19,7 @@ type BannerListRes struct {
 	Image     string `json:"image" dc:"图片完整URL(列表展示)"`
 	ImageName string `json:"imageName" dc:"图片资源文件名(编辑保存用)"`
 	Link      string `json:"link"`
+	Scene     uint8  `json:"scene"`
 	Direction uint8  `json:"direction"`
 	Sort      int    `json:"sort"`
 	Status    uint8  `json:"status"`

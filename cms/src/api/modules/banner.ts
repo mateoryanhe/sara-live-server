@@ -10,6 +10,7 @@ export const bannerApi = {
         title: string
         image: string
         link: string
+        scene: number
         direction: number
         sort: number
     }) => {
@@ -21,6 +22,7 @@ export const bannerApi = {
         title: string
         image: string
         link: string
+        scene: number
         direction: number
         sort: number
     }) => {
