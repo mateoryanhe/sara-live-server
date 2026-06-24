@@ -146,6 +146,7 @@ export interface AnchorListItem {
     ip?: string
     roomTitle?: string
     liveStatus?: number
+    totalIncome?: number
     ban?: boolean
     banApplyTime?: string | null
     banReason?: string
@@ -401,12 +402,16 @@ export interface ShortVideo {
     authorNickname: string
     duration: number
     freeWatchSeconds: number
+    likeCount: number
+    viewCount: number
+    totalDiamondIncome: number
     createdAt: string
     updatedAt: string
 }
 
 export interface ShortVideoQuery extends PageQuery {
     title?: string
+    authorNickname?: string
     statusFilter?: number
 }
 

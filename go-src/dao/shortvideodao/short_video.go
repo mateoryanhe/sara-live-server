@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 	"xr-game-server/core/xrtime"
+	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/shortvideodto"
 	"xr-game-server/entity"
 )
@@ -117,6 +118,8 @@ func GetOnShelfShortVideos() []*entity.ShortVideo {
 
 func GetShortVideoList(req *shortvideodto.ShortVideoListReq) (int, []*shortvideodto.ShortVideoListRes) {
 	titleKeyword := strings.ToLower(strings.TrimSpace(req.Title))
+	authorKeyword := strings.TrimSpace(req.AuthorNickname)
+	authorIdSet := userinfodao.GetUserIdsByNicknameKeyword(authorKeyword)
 	filtered := make([]*entity.ShortVideo, 0)
 	for _, video := range shortVideoCacheMgr.Values() {
 		if video == nil {
@@ -124,6 +127,14 @@ func GetShortVideoList(req *shortvideodto.ShortVideoListReq) (int, []*shortvideo
 		}
 		if titleKeyword != "" && !strings.Contains(strings.ToLower(video.Title), titleKeyword) {
 			continue
+		}
+		if authorKeyword != "" {
+			if video.AuthorId == 0 {
+				continue
+			}
+			if _, ok := authorIdSet[video.AuthorId]; !ok {
+				continue
+			}
 		}
 		switch req.StatusFilter {
 		case 1:
@@ -150,19 +161,29 @@ func GetShortVideoList(req *shortvideodto.ShortVideoListReq) (int, []*shortvideo
 	start, end := shortVideoListPageRange(total, pageIndex, pageSize)
 
 	ret := make([]*shortvideodto.ShortVideoListRes, 0, end-start)
-	for _, video := range filtered[start:end] {
-		ret = append(ret, toShortVideoListRes(video))
+	pageVideos := filtered[start:end]
+	authorIds := make([]uint64, 0, len(pageVideos))
+	for _, video := range pageVideos {
+		if video.AuthorId != 0 {
+			authorIds = append(authorIds, video.AuthorId)
+		}
+	}
+	nicknameMap := userinfodao.GetNicknameMapByUserIds(authorIds)
+	for _, video := range pageVideos {
+		ret = append(ret, toShortVideoListRes(video, nicknameMap))
 	}
 	return total, ret
 }
 
-func toShortVideoListRes(video *entity.ShortVideo) *shortvideodto.ShortVideoListRes {
-	var likeCount uint64
+func toShortVideoListRes(video *entity.ShortVideo, nicknameMap map[uint64]string) *shortvideodto.ShortVideoListRes {
+	var likeCount, viewCount uint64
 	var totalDiamondIncome float64
 	if stat := GetStatByVideoId(video.ID); stat != nil {
 		likeCount = stat.LikeCount
+		viewCount = stat.ViewCount
 		totalDiamondIncome = stat.TotalDiamondIncome
 	}
+	authorNickname := nicknameMap[video.AuthorId]
 	return &shortvideodto.ShortVideoListRes{
 		ID:                 strconv.FormatUint(video.ID, 10),
 		Title:              video.Title,
@@ -175,7 +196,9 @@ func toShortVideoListRes(video *entity.ShortVideo) *shortvideodto.ShortVideoList
 		CategoryId:         video.CategoryId,
 		Source:             video.Source,
 		AuthorId:           strconv.FormatUint(video.AuthorId, 10),
+		AuthorNickname:     authorNickname,
 		LikeCount:          likeCount,
+		ViewCount:          viewCount,
 		TotalDiamondIncome: totalDiamondIncome,
 		Duration:           video.Duration,
 		FreeWatchSeconds:   video.FreeWatchSeconds,

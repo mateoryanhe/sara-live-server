@@ -8,8 +8,9 @@ import (
 type ShortVideoListReq struct {
 	g.Meta `path:"/shortVideoList" method:"post" summary:"获取短视频列表" tags:"短视频"`
 	httpserver.CMSQueryReq
-	Title        string `json:"title" dc:"标题(模糊匹配)"`
-	StatusFilter int    `json:"statusFilter" dc:"状态过滤(0=全部, 1=只看下架, 2=只看上架)"`
+	Title          string `json:"title" dc:"标题(模糊匹配)"`
+	AuthorNickname string `json:"authorNickname" dc:"作者昵称(模糊匹配)"`
+	StatusFilter   int    `json:"statusFilter" dc:"状态过滤(0=全部, 1=只看下架, 2=只看上架)"`
 }
 
 type ShortVideoListRes struct {
@@ -27,7 +28,8 @@ type ShortVideoListRes struct {
 	Source             uint8   `json:"source"`
 	AuthorId           string  `json:"authorId"`
 	AuthorNickname     string  `json:"authorNickname"`
-	LikeCount          uint64  `json:"likeCount"`
+	LikeCount          uint64  `json:"likeCount" dc:"点赞数"`
+	ViewCount          uint64  `json:"viewCount" dc:"观看人数"`
 	TotalDiamondIncome float64 `json:"totalDiamondIncome" dc:"累计钻石收益"`
 	Duration           uint32  `json:"duration" dc:"视频时长(秒)"`
 	FreeWatchSeconds   uint32  `json:"freeWatchSeconds" dc:"免费观看时长(秒)"`

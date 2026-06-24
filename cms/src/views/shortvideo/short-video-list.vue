@@ -15,6 +15,9 @@
           <el-form-item label="标题">
             <el-input v-model="searchForm.title" clearable placeholder="标题(模糊匹配)"/>
           </el-form-item>
+          <el-form-item label="作者昵称">
+            <el-input v-model="searchForm.authorNickname" clearable placeholder="作者昵称(模糊匹配)"/>
+          </el-form-item>
           <el-form-item label="状态">
             <el-select v-model="searchForm.statusFilter" placeholder="全部" style="width: 140px">
               <el-option :value="0" label="全部"/>
@@ -56,11 +59,12 @@
               <span v-else>-</span>
             </template>
           </el-table-column>
-          <el-table-column label="作者" min-width="120">
+          <el-table-column label="作者昵称" min-width="120">
             <template #default="{ row }">
-              {{ row.authorNickname || row.authorId || '-' }}
+              {{ row.authorNickname || '-' }}
             </template>
           </el-table-column>
+          <el-table-column label="作者ID" prop="authorId" width="100"/>
           <el-table-column label="排序" prop="sort" width="80"/>
           <el-table-column label="是否付费" width="90">
             <template #default="{ row }">
@@ -87,6 +91,13 @@
           <el-table-column label="来源" width="90">
             <template #default="{ row }">
               {{ sourceLabel(row.source) }}
+            </template>
+          </el-table-column>
+          <el-table-column label="点赞数" prop="likeCount" width="90"/>
+          <el-table-column label="观看人数" prop="viewCount" width="90"/>
+          <el-table-column label="累计钻石收益" width="120">
+            <template #default="{ row }">
+              {{ formatPrice(row.totalDiamondIncome) }}
             </template>
           </el-table-column>
           <el-table-column label="状态" width="90">
@@ -146,8 +157,9 @@
           </div>
           <div class="form-tip">视频由 App 端上传，CMS 不可修改</div>
         </el-form-item>
-        <el-form-item label="作者">
-          <span>{{ currentRow.authorNickname || currentRow.authorId || '-' }}</span>
+        <el-form-item label="作者昵称">
+          <span>{{ currentRow.authorNickname || '-' }}</span>
+          <div v-if="currentRow.authorId" class="form-tip">作者ID：{{ currentRow.authorId }}</div>
           <div class="form-tip">作者由 App 端上传时确定，CMS 不可修改</div>
         </el-form-item>
         <el-form-item label="封面" prop="cover">
@@ -237,6 +249,7 @@ import type {ShortVideo, ShortVideoCategory} from '@/types/api.ts'
 
 interface SearchForm {
   title: string
+  authorNickname: string
   statusFilter: number
 }
 
@@ -272,6 +285,7 @@ const pageSize = ref(10)
 
 const searchForm = reactive<SearchForm>({
   title: '',
+  authorNickname: '',
   statusFilter: 0
 })
 
@@ -443,6 +457,7 @@ const fetchShortVideoList = async () => {
   try {
     const response = await shortVideoApi.getShortVideoList({
       title: searchForm.title,
+      authorNickname: searchForm.authorNickname,
       statusFilter: searchForm.statusFilter,
       pageIndex: currentPage.value,
       pageSize: pageSize.value
@@ -464,6 +479,7 @@ const handleSearch = () => {
 
 const resetSearch = () => {
   searchForm.title = ''
+  searchForm.authorNickname = ''
   searchForm.statusFilter = 0
   currentPage.value = 1
   fetchShortVideoList()

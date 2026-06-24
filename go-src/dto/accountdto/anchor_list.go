@@ -23,6 +23,7 @@ type AnchorListItem struct {
 	IP           string     `json:"ip" dc:"登录IP"`
 	RoomTitle    string     `json:"roomTitle"`
 	LiveStatus   uint8      `json:"liveStatus" dc:"直播状态(0未开播,1直播中)"`
+	TotalIncome  float64    `json:"totalIncome" dc:"直播收益"`
 	Ban          bool       `json:"ban" dc:"是否封禁"`
 	BanApplyTime *time.Time `json:"banApplyTime" dc:"封禁截止时间"`
 	BanReason    string     `json:"banReason" dc:"封禁原因"`

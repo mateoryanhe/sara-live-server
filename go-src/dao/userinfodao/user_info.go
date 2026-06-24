@@ -5,6 +5,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"strings"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/cache"
 	"xr-game-server/entity"
@@ -125,6 +126,28 @@ func GetUserProfileMapByUserIds(userIds []uint64) map[uint64]*entity.UserInfo {
 			continue
 		}
 		ret[row.ID] = row
+	}
+	return ret
+}
+
+// GetUserIdsByNicknameKeyword 根据昵称关键字从数据库模糊匹配用户ID(CMS列表筛选等场景)
+func GetUserIdsByNicknameKeyword(keyword string) map[uint64]struct{} {
+	ret := make(map[uint64]struct{})
+	keyword = strings.TrimSpace(keyword)
+	if keyword == "" {
+		return ret
+	}
+	rows := make([]*entity.UserInfo, 0)
+	ctx := gctx.New()
+	_ = g.Model(string(entity.TbUserInfo)).Ctx(ctx).Unscoped().
+		Fields(string(db.IdName)).
+		WhereLike(string(entity.UserInfoNickname), "%"+keyword+"%").
+		Scan(&rows)
+	for _, row := range rows {
+		if row == nil || row.ID == 0 {
+			continue
+		}
+		ret[row.ID] = struct{}{}
 	}
 	return ret
 }

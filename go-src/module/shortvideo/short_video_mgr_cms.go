@@ -2,10 +2,8 @@ package shortvideo
 
 import (
 	"context"
-	"strconv"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/shortvideodao"
-	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/shortvideodto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
@@ -20,13 +18,6 @@ func GetShortVideoList(_ context.Context, req *shortvideodto.ShortVideoListReq) 
 		row.CoverName = row.Cover
 		row.Video = upload.GetUrlByName(row.VideoName)
 		row.Cover = upload.GetUrlByName(row.CoverName)
-		if row.AuthorId != "" && row.AuthorId != "0" {
-			if authorId, err := strconv.ParseUint(row.AuthorId, 10, 64); err == nil {
-				if u := userinfodao.GetUserInfoByUserId(authorId); u != nil {
-					row.AuthorNickname = u.Nickname
-				}
-			}
-		}
 	}
 	return &httpserver.CMSQueryResp{Total: total, Data: list}, nil
 }

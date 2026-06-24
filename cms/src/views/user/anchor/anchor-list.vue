@@ -55,6 +55,9 @@
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column label="直播收益" min-width="110">
+          <template #default="{ row }">{{ formatAmount(row.totalIncome) }}</template>
+        </el-table-column>
         <el-table-column label="封禁状态" prop="ban" width="100">
           <template #default="{ row }">
             <el-tag v-if="row.ban" type="danger">已封禁</el-tag>
@@ -240,6 +243,13 @@ const formatDate = (dateString: string | null | undefined) => {
   } catch {
     return '-'
   }
+}
+
+const formatAmount = (value: number | null | undefined) => {
+  if (value === null || value === undefined) {
+    return '-'
+  }
+  return Number(value).toFixed(2)
 }
 
 const resetBanForm = () => {
