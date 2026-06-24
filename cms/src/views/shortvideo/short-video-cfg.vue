@@ -49,7 +49,7 @@
               controls-position="right"
               style="width: 220px"
           />
-          <span class="form-tip">秒，观看前该时长免费</span>
+          <span class="form-tip">秒，观看前该时长免费（0 表示无免费时长）</span>
         </el-form-item>
 
         <el-form-item label="短视频入口" prop="entryEnabled">
@@ -91,7 +91,7 @@ const formData = reactive({
   maxFileSizeMB: 100,
   maxCoverFileSize: 5,
   maxDuration: 60,
-  freeWatchSeconds: 7,
+  freeWatchSeconds: 8,
   entryEnabled: 1,
 })
 
@@ -114,7 +114,6 @@ const formRules = reactive({
     {type: 'number', min: 1, message: '最大时长必须大于0', trigger: 'blur'},
   ],
   freeWatchSeconds: [
-    {required: true, message: '请输入免费观看时长', trigger: 'blur'},
     {type: 'number', min: 0, message: '免费观看时长不能小于0', trigger: 'blur'},
   ],
   entryEnabled: [
@@ -128,7 +127,7 @@ const applyCfg = (cfg: ShortVideoCfg | null | undefined) => {
     formData.maxFileSizeMB = 100
     formData.maxCoverFileSize = 5
     formData.maxDuration = 60
-    formData.freeWatchSeconds = 7
+    formData.freeWatchSeconds = 8
     formData.entryEnabled = 1
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
@@ -138,7 +137,7 @@ const applyCfg = (cfg: ShortVideoCfg | null | undefined) => {
   formData.maxFileSizeMB = Math.max(1, Math.round(cfg.maxFileSize / MB))
   formData.maxCoverFileSize = cfg.maxCoverFileSize ?? 5
   formData.maxDuration = cfg.maxDuration || 60
-  formData.freeWatchSeconds = cfg.freeWatchSeconds ?? 7
+  formData.freeWatchSeconds = cfg.freeWatchSeconds ?? 8
   formData.entryEnabled = cfg.entryEnabled ?? 1
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''

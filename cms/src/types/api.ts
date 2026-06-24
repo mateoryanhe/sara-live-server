@@ -400,6 +400,7 @@ export interface ShortVideo {
     authorId: string
     authorNickname: string
     duration: number
+    freeWatchSeconds: number
     createdAt: string
     updatedAt: string
 }

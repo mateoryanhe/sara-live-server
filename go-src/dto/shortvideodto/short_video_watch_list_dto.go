@@ -14,7 +14,7 @@ type ShortVideoWatchListReq struct {
 }
 
 type ShortVideoWatchListItem struct {
-	ID            uint64 `json:"id,string"`
+	ID            string `json:"id"`
 	UserId        string `json:"userId"`
 	Nickname      string `json:"nickname"`
 	VideoId       string `json:"videoId"`

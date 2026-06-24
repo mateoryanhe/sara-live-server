@@ -30,6 +30,7 @@ type ShortVideoListRes struct {
 	LikeCount          uint64  `json:"likeCount"`
 	TotalDiamondIncome float64 `json:"totalDiamondIncome" dc:"累计钻石收益"`
 	Duration           uint32  `json:"duration" dc:"视频时长(秒)"`
+	FreeWatchSeconds   uint32  `json:"freeWatchSeconds" dc:"免费观看时长(秒)"`
 	CreatedAt          string  `json:"createdAt"`
 	UpdatedAt          string  `json:"updatedAt"`
 }

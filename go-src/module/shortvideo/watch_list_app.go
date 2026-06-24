@@ -45,7 +45,7 @@ func GetAppShortVideoWatchList(ctx context.Context, req *shortvideodto.AppShortV
 
 func toAppShortVideoWatchListItem(row *entity.ShortVideoWatch) *shortvideodto.AppShortVideoWatchListItem {
 	item := &shortvideodto.AppShortVideoWatchListItem{
-		ID:            strconv.FormatUint(row.ID, 10),
+		ID:            row.ID,
 		VideoId:       strconv.FormatUint(row.VideoId, 10),
 		BilledSeconds: row.BilledSeconds,
 		WatchSeconds:  row.WatchSeconds,

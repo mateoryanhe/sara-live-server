@@ -27,7 +27,7 @@ type SaveShortVideoCfgReq struct {
 	MaxFileSize      uint64 `json:"maxFileSize" v:"required|min:1#最大文件大小不能为空|最大文件大小必须大于0" dc:"最大文件大小(字节)"`
 	MaxCoverFileSize uint32 `json:"maxCoverFileSize" v:"required|min:1#封面图片大小不能为空|封面图片大小必须大于0" dc:"封面图片最大大小(M)"`
 	MaxDuration      uint32 `json:"maxDuration" v:"required|min:1#最大时长不能为空|最大时长必须大于0" dc:"最大时长(秒)"`
-	FreeWatchSeconds uint32 `json:"freeWatchSeconds" v:"required|min:0#免费观看时长不能为空|免费观看时长不能小于0" dc:"免费观看时长(秒)"`
+	FreeWatchSeconds uint32 `json:"freeWatchSeconds" v:"min:0#免费观看时长不能小于0" dc:"免费观看时长(秒),0表示无免费时长"`
 	EntryEnabled     uint8  `json:"entryEnabled" v:"in:0,1#入口开关取值无效" dc:"入口开关(0关闭,1开启)"`
 }
 

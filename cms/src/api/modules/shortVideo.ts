@@ -36,9 +36,9 @@ export const shortVideoApi = {
         sort: number
         isPaid: number
         diamondPerMinute: number
+        freeWatchSeconds: number
         categoryId: number
         source: number
-        authorId: string | number
     }) => {
         return request.post<boolean>('/shortVideo/updateShortVideo', data)
     },

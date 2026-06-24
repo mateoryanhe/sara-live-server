@@ -12,7 +12,7 @@ type UpdateShortVideoReq struct {
 	DiamondPerMinute float64 `json:"diamondPerMinute" dc:"每分钟钻石数(付费时必填)"`
 	CategoryId       int     `json:"categoryId" dc:"视频分类ID"`
 	Source           uint8   `json:"source" v:"required|in:1,2,3#视频来源不能为空|视频来源取值无效" dc:"视频来源(1原创,2转发,3AI生成)"`
-	AuthorId         uint64  `json:"authorId" v:"required#作者ID不能为空" dc:"作者用户ID"`
+	FreeWatchSeconds uint32  `json:"freeWatchSeconds" v:"min:0#免费观看时长不能小于0" dc:"免费观看时长(秒)"`
 }
 
 type UpdateShortVideoRes struct {

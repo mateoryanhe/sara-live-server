@@ -24,8 +24,8 @@ func GetOneShortVideoWatch(userId, videoId uint64) *entity.ShortVideoWatch {
 		one = entity.NewShortVideoWatch(userId, videoId)
 		newTemp := make([]*entity.ShortVideoWatch, 0)
 		newTemp = append(newTemp, one)
-		all = append(newTemp, newTemp...)
-		watchCacheMgr.FlushCache(userId, one)
+		all = append(newTemp, all...)
+		watchCacheMgr.FlushCache(userId, all)
 		return one
 	}
 	return one

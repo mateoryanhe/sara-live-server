@@ -15,7 +15,7 @@ const (
 	defaultMaxFileSize      uint64 = 100 * 1024 * 1024
 	defaultMaxCoverFileSize uint32 = 5
 	defaultMaxDuration      uint32 = 60
-	defaultFreeWatchSeconds uint32 = 7
+	defaultFreeWatchSeconds uint32 = 8
 	defaultEntryEnabled     uint8  = entity.ShortVideoCfgEntryEnabled
 )
 
@@ -137,7 +137,7 @@ func getShortVideoMaxDuration() uint32 {
 
 func getShortVideoFreeWatchSeconds() uint32 {
 	cfg := shortvideodao.Get()
-	if cfg == nil || cfg.FreeWatchSeconds == 0 {
+	if cfg == nil {
 		return defaultFreeWatchSeconds
 	}
 	return cfg.FreeWatchSeconds

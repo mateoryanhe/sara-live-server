@@ -2,7 +2,7 @@ package shortvideodto
 
 import "github.com/gogf/gf/v2/frame/g"
 
-// WatchBillShortVideoReq App端短视频观看扣费(建议每5秒调用一次)
+// WatchBillShortVideoReq App端短视频观看扣费(建议每秒调用一次)
 type WatchBillShortVideoReq struct {
 	g.Meta  `path:"/watchBillShortVideo" method:"post" summary:"短视频观看扣费" tags:"短视频"`
 	VideoId uint64 `json:"videoId,string" v:"required#视频ID不能为空" dc:"短视频ID"`

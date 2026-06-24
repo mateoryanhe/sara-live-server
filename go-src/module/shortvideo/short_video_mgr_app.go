@@ -60,6 +60,7 @@ func PublishShortVideoApp(ctx context.Context, req *shortvideodto.AppPublishShor
 		req.Source,
 		authorId,
 		req.Duration,
+		entity.ShortVideoDefaultFreeWatchSeconds,
 	)
 	shortvideodao.AddShortVideoToCache(row)
 	loadAppShortVideoListCache()

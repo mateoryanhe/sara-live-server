@@ -178,6 +178,7 @@ func toShortVideoListRes(video *entity.ShortVideo) *shortvideodto.ShortVideoList
 		LikeCount:          likeCount,
 		TotalDiamondIncome: totalDiamondIncome,
 		Duration:           video.Duration,
+		FreeWatchSeconds:   video.FreeWatchSeconds,
 		CreatedAt:          formatShortVideoTime(video.CreatedAt),
 		UpdatedAt:          formatShortVideoTime(video.UpdatedAt),
 	}

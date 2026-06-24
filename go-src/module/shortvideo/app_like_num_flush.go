@@ -85,6 +85,7 @@ func toAppShortVideoItem(row *entity.ShortVideo, stat *entity.ShortVideoStat) *s
 		LikeCount:        likeCount,
 		ViewCount:        viewCount,
 		Duration:         row.Duration,
+		FreeWatchSeconds: row.FreeWatchSeconds,
 	}
 	return item
 }

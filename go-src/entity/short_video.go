@@ -23,7 +23,10 @@ const (
 	ShortVideoSource           db.TbCol = "source"
 	ShortVideoAuthorId         db.TbCol = "author_id"
 	ShortVideoDuration         db.TbCol = "duration"
+	ShortVideoFreeWatchSeconds db.TbCol = "free_watch_seconds"
 )
+
+const ShortVideoDefaultFreeWatchSeconds uint32 = 15
 
 const (
 	ShortVideoStatusOffShelf uint8 = 0
@@ -56,10 +59,11 @@ type ShortVideo struct {
 	Source           uint8   `gorm:"default:1;comment:视频来源(1原创,2转发,3AI生成)" json:"source"`
 	AuthorId         uint64  `gorm:"default:0;comment:作者用户ID" json:"authorId"`
 	Duration         uint32  `gorm:"default:0;comment:视频时长(秒)" json:"duration"`
+	FreeWatchSeconds uint32  `gorm:"default:15;comment:免费观看时长(秒)" json:"freeWatchSeconds"`
 }
 
 // NewShortVideo 构造内存对象,字段通过 syndb 异步入库
-func NewShortVideo(id uint64, title, video, cover string, sort int, isPaid uint8, diamondPerMinute float64, categoryId int, source uint8, authorId uint64, duration uint32) *ShortVideo {
+func NewShortVideo(id uint64, title, video, cover string, sort int, isPaid uint8, diamondPerMinute float64, categoryId int, source uint8, authorId uint64, duration, freeWatchSeconds uint32) *ShortVideo {
 	v := &ShortVideo{}
 	v.ID = id
 	now := time.Now()
@@ -76,6 +80,7 @@ func NewShortVideo(id uint64, title, video, cover string, sort int, isPaid uint8
 	v.SetSource(source)
 	v.SetAuthorId(authorId)
 	v.SetDuration(duration)
+	v.SetFreeWatchSeconds(freeWatchSeconds)
 	return v
 }
 
@@ -167,6 +172,14 @@ func (v *ShortVideo) SetDuration(val uint32) {
 	})
 }
 
+func (v *ShortVideo) SetFreeWatchSeconds(val uint32) {
+	v.FreeWatchSeconds = val
+	v.touchUpdatedAt()
+	syndb.AddDataToQuickChan(TbShortVideo, ShortVideoFreeWatchSeconds, &syndb.ColData{
+		IdVal: v.ID, ColVal: val,
+	})
+}
+
 func (v *ShortVideo) SetCreatedAt(val time.Time) {
 	v.CreatedAt = val
 	syndb.AddDataToQuickChan(TbShortVideo, db.CreatedAtName, &syndb.ColData{
@@ -202,5 +215,6 @@ func initShortVideo() {
 	syndb.RegQuickWithMiddle(TbShortVideo, ShortVideoSource)
 	syndb.RegQuickWithMiddle(TbShortVideo, ShortVideoAuthorId)
 	syndb.RegQuickWithMiddle(TbShortVideo, ShortVideoDuration)
+	syndb.RegQuickWithMiddle(TbShortVideo, ShortVideoFreeWatchSeconds)
 	migrate.AutoMigrate(&ShortVideo{})
 }

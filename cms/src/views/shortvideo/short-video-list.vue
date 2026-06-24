@@ -74,6 +74,11 @@
               {{ row.isPaid === 1 ? formatPrice(row.diamondPerMinute) : '-' }}
             </template>
           </el-table-column>
+          <el-table-column label="免费时长(秒)" width="110">
+            <template #default="{ row }">
+              {{ row.isPaid === 1 ? (row.freeWatchSeconds != null ? row.freeWatchSeconds : 15) : '-' }}
+            </template>
+          </el-table-column>
           <el-table-column label="分类" width="100">
             <template #default="{ row }">
               {{ categoryName(row.categoryId) }}
@@ -141,8 +146,9 @@
           </div>
           <div class="form-tip">视频由 App 端上传，CMS 不可修改</div>
         </el-form-item>
-        <el-form-item label="作者ID" prop="authorId">
-          <el-input v-model="currentRow.authorId" placeholder="请输入作者用户ID"/>
+        <el-form-item label="作者">
+          <span>{{ currentRow.authorNickname || currentRow.authorId || '-' }}</span>
+          <div class="form-tip">作者由 App 端上传时确定，CMS 不可修改</div>
         </el-form-item>
         <el-form-item label="封面" prop="cover">
           <div class="upload-wrap">
@@ -185,6 +191,16 @@
               style="width: 220px"
           />
           <span class="form-tip">付费视频按观看秒数折算分钟扣费</span>
+        </el-form-item>
+        <el-form-item v-if="currentRow.isPaid === 1" label="免费观看时长" prop="freeWatchSeconds">
+          <el-input-number
+              v-model="currentRow.freeWatchSeconds"
+              :min="0"
+              :step="1"
+              controls-position="right"
+              style="width: 220px"
+          />
+          <span class="form-tip">单位：秒，0 表示无免费时长，默认 15 秒</span>
         </el-form-item>
         <el-form-item label="视频分类" prop="categoryId">
           <el-select v-model="currentRow.categoryId" clearable placeholder="请选择分类" style="width: 220px">
@@ -231,9 +247,11 @@ interface ShortVideoForm {
   sort: number
   isPaid: number
   diamondPerMinute: number
+  freeWatchSeconds: number
   categoryId: number
   source: number
   authorId: string
+  authorNickname: string
 }
 
 const sourceLabelMap: Record<number, string> = {
@@ -266,9 +284,11 @@ const defaultForm = (): ShortVideoForm => ({
   sort: 0,
   isPaid: 0,
   diamondPerMinute: 0,
+  freeWatchSeconds: 15,
   categoryId: 0,
   source: 1,
   authorId: '',
+  authorNickname: '',
 })
 const currentRow = ref<ShortVideoForm>(defaultForm())
 const formRef = ref<FormInstance>()
@@ -354,9 +374,13 @@ watch(() => currentRow.value.isPaid, (paid) => {
     if (!currentRow.value.diamondPerMinute || currentRow.value.diamondPerMinute <= 0) {
       currentRow.value.diamondPerMinute = 1
     }
+    if (currentRow.value.freeWatchSeconds == null || currentRow.value.freeWatchSeconds < 0) {
+      currentRow.value.freeWatchSeconds = 15
+    }
     return
   }
   currentRow.value.diamondPerMinute = 0
+  currentRow.value.freeWatchSeconds = 0
 })
 
 const formRules: FormRules = {
@@ -364,12 +388,23 @@ const formRules: FormRules = {
     {required: true, message: '请输入标题', trigger: 'blur'},
     {min: 1, max: 64, message: '标题长度在1-64个字符', trigger: 'blur'}
   ],
-  authorId: [{required: true, message: '请输入作者ID', trigger: 'blur'}],
   diamondPerMinute: [
     {
       validator: (_rule, value, callback) => {
         if (currentRow.value.isPaid === 1 && (!value || value <= 0)) {
           callback(new Error('付费视频请填写每分钟钻石数'))
+          return
+        }
+        callback()
+      },
+      trigger: 'change',
+    },
+  ],
+  freeWatchSeconds: [
+    {
+      validator: (_rule, value, callback) => {
+        if (currentRow.value.isPaid === 1 && (value == null || value < 0)) {
+          callback(new Error('免费观看时长不能小于0'))
           return
         }
         callback()
@@ -453,9 +488,11 @@ const handleEdit = (row: ShortVideo) => {
     sort: Number(row.sort) || 0,
     isPaid: row.isPaid ?? 0,
     diamondPerMinute: row.isPaid === 1 ? (Number(row.diamondPerMinute) || 1) : 0,
+    freeWatchSeconds: row.isPaid === 1 ? (row.freeWatchSeconds != null ? Number(row.freeWatchSeconds) : 15) : 0,
     categoryId: Number(row.categoryId) || 0,
     source: row.source || 1,
     authorId: row.authorId || '',
+    authorNickname: row.authorNickname || '',
   }
   videoPreviewUrl.value = row.video || ''
   coverPreviewUrl.value = row.cover || ''
@@ -514,9 +551,9 @@ const handleSave = async () => {
         sort: currentRow.value.sort,
         isPaid: currentRow.value.isPaid,
         diamondPerMinute: currentRow.value.isPaid === 1 ? currentRow.value.diamondPerMinute : 0,
+        freeWatchSeconds: currentRow.value.isPaid === 1 ? currentRow.value.freeWatchSeconds : 0,
         categoryId: currentRow.value.categoryId || 0,
         source: currentRow.value.source,
-        authorId: Number(currentRow.value.authorId) || 0,
       }
       await shortVideoApi.updateShortVideo({id: currentRow.value.id, ...payload})
       ElMessage.success('更新成功')

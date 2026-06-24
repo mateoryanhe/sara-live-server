@@ -25,6 +25,7 @@ type AppShortVideoItem struct {
 	LikeCount        uint64  `json:"likeCount"`
 	ViewCount        uint64  `json:"viewCount" dc:"观看人数"`
 	Duration         uint32  `json:"duration" dc:"视频时长(秒)"`
+	FreeWatchSeconds uint32  `json:"freeWatchSeconds" dc:"免费观看时长(秒)"`
 }
 
 // AppShortVideoViewListReq App端分页查询短视频列表(仅已上架,按观看人数排序,走缓存)

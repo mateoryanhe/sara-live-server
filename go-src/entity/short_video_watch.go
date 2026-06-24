@@ -1,11 +1,11 @@
 package entity
 
 import (
+	"fmt"
 	"time"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/math"
 	"xr-game-server/core/migrate"
-	"xr-game-server/core/snowflake"
 	"xr-game-server/core/syndb"
 )
 
@@ -32,7 +32,7 @@ const (
 
 // ShortVideoWatch 短视频观看扣费进度(按用户+视频维度累计)
 type ShortVideoWatch struct {
-	ID            uint64    `gorm:"primaryKey;comment:复合ID(userId_videoId)" json:"id"`
+	ID            string    `gorm:"primaryKey;comment:复合ID(userId_videoId)" json:"id"`
 	UserId        uint64    `gorm:"index:idx_user_video,priority:1;default:0;comment:用户ID" json:"userId"`
 	VideoId       uint64    `gorm:"index:idx_user_video,priority:2;default:0;comment:短视频ID" json:"videoId"`
 	BilledSeconds uint64    `gorm:"default:0;comment:已累计计费观看秒数" json:"billedSeconds"`
@@ -45,7 +45,7 @@ type ShortVideoWatch struct {
 
 func NewShortVideoWatch(userId, videoId uint64) *ShortVideoWatch {
 	watch := &ShortVideoWatch{}
-	watch.ID = snowflake.GetId()
+	watch.ID = fmt.Sprintf("%v_%v", userId, videoId)
 	now := time.Now()
 	watch.SetCreatedAt(now)
 	watch.SetUpdatedAt(now)
@@ -93,6 +93,20 @@ func (watch *ShortVideoWatch) AddWatchSeconds(v uint64) {
 	})
 }
 
+func (watch *ShortVideoWatch) SubWatchSeconds(v uint64) {
+	watch.WatchSeconds = math.Sub(watch.WatchSeconds, v)
+	syndb.AddDataToLazyChan(TbShortVideoWatch, ShortVideoWatchWatchSeconds, &syndb.ColData{
+		IdVal: watch.ID, ColVal: watch.WatchSeconds,
+	})
+}
+
+func (watch *ShortVideoWatch) ResetWatchSeconds() {
+	watch.WatchSeconds = 0
+	syndb.AddDataToLazyChan(TbShortVideoWatch, ShortVideoWatchWatchSeconds, &syndb.ColData{
+		IdVal: watch.ID, ColVal: 0,
+	})
+}
+
 func (like *ShortVideoWatch) SetStatus(v uint8) {
 	like.Status = v
 
@@ -123,7 +137,7 @@ func initShortVideoWatch() {
 	syndb.RegQuickWithLarge(TbShortVideoWatch, ShortVideoWatchVideoId)
 	syndb.RegLazyWithLarge(TbShortVideoWatch, ShortVideoWatchBilledSeconds)
 	syndb.RegLazyWithLarge(TbShortVideoWatch, ShortVideoWatchWatchSeconds)
-	syndb.RegQuickWithLarge(TbShortVideoWatch, ShortVideoWatchViewCounted)
+	syndb.RegLazyWithLarge(TbShortVideoWatch, ShortVideoWatchViewCounted)
 
 	syndb.RegQuickWithLarge(TbShortVideoWatch, ShortVideoLikeStatus)
 

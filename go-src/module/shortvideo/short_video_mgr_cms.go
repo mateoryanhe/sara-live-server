@@ -43,10 +43,8 @@ func UpdateShortVideo(_ context.Context, req *shortvideodto.UpdateShortVideoReq)
 	if err != nil {
 		return nil, err
 	}
+	freeWatchSeconds := normalizeShortVideoFreeWatchSeconds(isPaid, req.FreeWatchSeconds)
 	if err := validateShortVideoCategoryId(req.CategoryId); err != nil {
-		return nil, err
-	}
-	if err := validateShortVideoAuthorId(req.AuthorId); err != nil {
 		return nil, err
 	}
 	row.SetTitle(req.Title)
@@ -56,7 +54,7 @@ func UpdateShortVideo(_ context.Context, req *shortvideodto.UpdateShortVideoReq)
 	row.SetDiamondPerMinute(diamondPerMinute)
 	row.SetCategoryId(req.CategoryId)
 	row.SetSource(req.Source)
-	row.SetAuthorId(req.AuthorId)
+	row.SetFreeWatchSeconds(freeWatchSeconds)
 	shortvideodao.FlushShortVideo(row)
 	loadAppShortVideoListCache()
 	return &shortvideodto.UpdateShortVideoRes{Success: true}, nil
@@ -114,6 +112,13 @@ func normalizeShortVideoPaid(isPaid uint8, diamondPerMinute float64) (uint8, flo
 		return 0, 0, errercode.CreateCode(errercode.InvalidParam)
 	}
 	return isPaid, diamondPerMinute, nil
+}
+
+func normalizeShortVideoFreeWatchSeconds(isPaid uint8, freeWatchSeconds uint32) uint32 {
+	if isPaid != entity.ShortVideoPaidYes {
+		return 0
+	}
+	return freeWatchSeconds
 }
 
 func validateShortVideoCategoryId(categoryId int) error {
