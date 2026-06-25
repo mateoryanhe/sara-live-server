@@ -2,7 +2,9 @@ package shortvideodao
 
 import (
 	"context"
+
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/cache"
 	"xr-game-server/entity"
@@ -41,5 +43,11 @@ func DeleteByVideoId(videoId uint64) error {
 		return nil
 	}
 	_, err := g.DB().Model(string(entity.TbShortVideoStat)).WherePri(videoId).Delete()
-	return err
+	if err != nil {
+		return err
+	}
+	if shortVideoStatCacheMgr != nil {
+		_, _ = shortVideoStatCacheMgr.Cache.Remove(gctx.New(), videoId)
+	}
+	return nil
 }

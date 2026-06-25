@@ -61,7 +61,12 @@ func DeleteShortVideo(_ context.Context, req *shortvideodto.DeleteShortVideoReq)
 	if err := shortvideodao.Delete(req.ID); err != nil {
 		return nil, err
 	}
-	_ = shortvideodao.DeleteByVideoId(req.ID)
+	if err := shortvideodao.DeleteByVideoId(req.ID); err != nil {
+		return nil, err
+	}
+	if err := shortvideodao.DeleteWatchByVideoId(req.ID); err != nil {
+		return nil, err
+	}
 	upload.DeleteUploadedFile(videoName)
 	upload.DeleteUploadedFile(coverName)
 	loadAppShortVideoListCache()
