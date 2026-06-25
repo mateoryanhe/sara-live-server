@@ -47,9 +47,9 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 	if err := aliyunmoderation.RequireTextCompliant(aliyunmoderation.SceneComment, req.Title, req.Notice); err != nil {
 		return nil, err
 	}
-	if err := validateLiveRoomTag(req.TagId); err != nil {
-		return nil, err
-	}
+	//if err := validateLiveRoomTag(req.TagId); err != nil {
+	//	return nil, err
+	//}
 
 	coverName, err := uploadCreateRoomCover(ctx, req.Cover)
 	if err != nil {
