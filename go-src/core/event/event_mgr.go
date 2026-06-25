@@ -2,6 +2,7 @@ package event
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/util/gutil"
@@ -43,7 +44,7 @@ func Pub(eventType Type, eventVal any) {
 		gutil.TryCatch(gctx.New(), func(ctx context.Context) {
 			handler(eventVal)
 		}, func(ctx context.Context, exception error) {
-			g.Log().Errorf(ctx, "event %s handler error %v", eventType, exception)
+			g.Log().Errorf(ctx, "event %s handler error %v", eventType, gerror.Stack(exception))
 		})
 	}
 }
