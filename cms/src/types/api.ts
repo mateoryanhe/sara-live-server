@@ -479,6 +479,17 @@ export interface ShortVideoCategory {
 export interface ShortVideoCategoryQuery extends PageQuery {
 }
 
+export interface LiveRoomTag {
+    id: string
+    name: string
+    sort: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface LiveRoomTagQuery extends PageQuery {
+}
+
 export interface AgoraCfg {
     id: string
     appId: string

@@ -138,6 +138,10 @@ const (
 	ShortVideoCategoryNonExist XRCode = 128
 	// ShortVideoDailyUploadLimit 短视频每日上传次数已达上限
 	ShortVideoDailyUploadLimit XRCode = 129
+	// LiveRoomTagExist 直播间标签名称已存在
+	LiveRoomTagExist XRCode = 130
+	// LiveRoomTagNonExist 直播间标签不存在
+	LiveRoomTagNonExist XRCode = 131
 )
 
 type XError struct {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"sort"
 	"strconv"
+	"strings"
 	"sync/atomic"
 	"time"
 	"xr-game-server/constants/userstatus"
@@ -80,6 +81,10 @@ func toLiveRoomListItem(room *entity.LiveRoom, userId uint64) *liveroomdto.LiveR
 		Billing:  room.Billing,
 		CreateAt: room.CreatedAt.Unix(),
 	}
+	if room.TagId > 0 {
+		item.TagId = strconv.FormatUint(room.TagId, 10)
+		item.TagName = getRoomTagName(room.TagId)
+	}
 	if item.Cover != "" {
 		item.Cover = upload.GetUrlByName(room.Cover)
 	}
@@ -150,6 +155,31 @@ func filterRoomsByStatus(rooms []*entity.LiveRoom, statusFilter int) []*entity.L
 	return filtered
 }
 
+func filterRoomsByQuery(rooms []*entity.LiveRoom, tagId uint64, title, notice string) []*entity.LiveRoom {
+	titleKey := strings.ToLower(strings.TrimSpace(title))
+	noticeKey := strings.ToLower(strings.TrimSpace(notice))
+	if tagId == 0 && titleKey == "" && noticeKey == "" {
+		return rooms
+	}
+	filtered := make([]*entity.LiveRoom, 0, len(rooms))
+	for _, room := range rooms {
+		if room == nil {
+			continue
+		}
+		if tagId > 0 && room.TagId != tagId {
+			continue
+		}
+		if titleKey != "" && !strings.Contains(strings.ToLower(room.Title), titleKey) {
+			continue
+		}
+		if noticeKey != "" && !strings.Contains(strings.ToLower(room.Notice), noticeKey) {
+			continue
+		}
+		filtered = append(filtered, room)
+	}
+	return filtered
+}
+
 func normalizeRoomListPage(page, pageSize int) (int, int) {
 	if page <= 0 {
 		page = 1
@@ -191,6 +221,7 @@ func GetRoomList(ctx context.Context, req *liveroomdto.GetLiveRoomListReq) (*liv
 	}
 
 	filtered := filterRoomsByStatus(cached, req.StatusFilter)
+	filtered = filterRoomsByQuery(filtered, req.TagId, req.Title, req.Notice)
 	total := len(filtered)
 	start, end := roomListPageRange(total, page, pageSize)
 

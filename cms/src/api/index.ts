@@ -21,6 +21,7 @@ import {liveRecordApi} from './modules/liveRecord'
 import {gameCfgApi} from './modules/gameCfg'
 import {agoraApi} from './modules/agora'
 import {liveCfgApi} from './modules/liveCfg'
+import {liveRoomTagApi} from './modules/liveRoomTag'
 import {textModerationApi} from './modules/text-moderation'
 import {uploadResourceApi} from './modules/upload-resource'
 import {sysStatApi} from './modules/sysStat'
@@ -49,6 +50,7 @@ export {
     gameCfgApi,
     agoraApi,
     liveCfgApi,
+    liveRoomTagApi,
     textModerationApi,
     uploadResourceApi,
     sysStatApi,
@@ -78,6 +80,7 @@ export default {
     gameCfgApi,
     agoraApi,
     liveCfgApi,
+    liveRoomTagApi,
     textModerationApi,
     uploadResourceApi,
     sysStatApi,

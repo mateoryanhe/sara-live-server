@@ -36,5 +36,11 @@ export const liveRoutes: RouteRecordRaw = {
             component: () => import('@/views/live/live-config/live-config.vue'),
             meta: {title: '直播配置'},
         },
+        {
+            path: 'live-room-tag/live-room-tag-list',
+            name: 'LiveRoomTagManagement',
+            component: () => import('@/views/live/live-room-tag/live-room-tag-list.vue'),
+            meta: {title: '直播间标签'},
+        },
     ],
 }

@@ -80,6 +80,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ShortVideoCategoryExist:        "Short video category name already exists",
 		ShortVideoCategoryNonExist:     "Short video category does not exist",
 		ShortVideoDailyUploadLimit:     "Daily short video upload limit reached",
+		LiveRoomTagExist:               "Live room tag name already exists",
+		LiveRoomTagNonExist:            "Live room tag does not exist",
 	},
 	lang.LangZHCN: {
 		Success:                        "成功",
@@ -156,6 +158,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ShortVideoCategoryExist:        "短视频分类名称已存在",
 		ShortVideoCategoryNonExist:     "短视频分类不存在",
 		ShortVideoDailyUploadLimit:     "今日上传次数已达上限,请明天再试",
+		LiveRoomTagExist:               "直播间标签名称已存在",
+		LiveRoomTagNonExist:            "直播间标签不存在",
 	},
 	lang.LangZHTW: {
 		Success:                        "成功",
@@ -232,6 +236,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ShortVideoCategoryExist:        "短視頻分類名稱已存在",
 		ShortVideoCategoryNonExist:     "短視頻分類不存在",
 		ShortVideoDailyUploadLimit:     "今日上傳次數已達上限,請明天再試",
+		LiveRoomTagExist:               "直播間標籤名稱已存在",
+		LiveRoomTagNonExist:            "直播間標籤不存在",
 	},
 }
 

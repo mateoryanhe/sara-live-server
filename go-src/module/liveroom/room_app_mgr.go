@@ -47,6 +47,9 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 	if err := aliyunmoderation.RequireTextCompliant(aliyunmoderation.SceneComment, req.Title, req.Notice); err != nil {
 		return nil, err
 	}
+	if err := validateLiveRoomTag(req.TagId); err != nil {
+		return nil, err
+	}
 
 	coverName, err := uploadCreateRoomCover(ctx, req.Cover)
 	if err != nil {
@@ -69,6 +72,9 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 		if req.Category > 0 && existing.Category != category {
 			existing.SetCategory(category)
 		}
+		if existing.TagId != req.TagId {
+			existing.SetTagId(req.TagId)
+		}
 		applyRoomPricing(existing, req.Ticket, req.Billing)
 		markLiveRoomCreated(user)
 		return &liveroomdto.CreateLiveRoomRes{
@@ -86,6 +92,7 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 		req.Notice,
 	)
 	room.SetCategory(category)
+	room.SetTagId(req.TagId)
 	room.SetTicket(req.Ticket)
 	room.SetBilling(req.Billing)
 	liveroomdao.AddRoomToCache(room)
@@ -186,6 +193,8 @@ func GetRoom(_ context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto.G
 		Notice:   room.Notice,
 		Status:   status,
 		Category: room.Category,
+		TagId:    strconv.FormatUint(room.TagId, 10),
+		TagName:  getRoomTagName(room.TagId),
 		Ticket:   room.Ticket,
 		Billing:  room.Billing,
 		CreateAt: room.CreatedAt.Unix(),

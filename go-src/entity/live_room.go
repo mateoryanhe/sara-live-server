@@ -28,6 +28,7 @@ const (
 	LiveRoomTotalPrivateRoomTicketIncome db.TbCol = "total_private_room_ticket_income"
 	LiveRoomTotalPrivateRoomWatchIncome  db.TbCol = "total_private_room_watch_income"
 	LiveRoomCategory                     db.TbCol = "category"
+	LiveRoomTagId                        db.TbCol = "tag_id"
 	LiveRoomTicket                       db.TbCol = "ticket"
 	LiveRoomBilling                      db.TbCol = "billing"
 )
@@ -56,6 +57,7 @@ type LiveRoom struct {
 	TotalPrivateRoomTicketIncome float64    `gorm:"default:0;comment:累计私密直播间门票收益" json:"totalPrivateRoomTicketIncome"`
 	TotalPrivateRoomWatchIncome  float64    `gorm:"default:0;comment:累计私密房观看收益" json:"totalPrivateRoomWatchIncome"`
 	Category                     uint8      `gorm:"default:1;comment:分类(1=hot,2=game,3=私密)" json:"category"`
+	TagId                        uint64     `gorm:"default:0;comment:直播间标签ID" json:"tagId"`
 	Ticket                       float64    `gorm:"type:decimal(10,4);default:0;comment:门票价格(钻石)" json:"ticket"`
 	Billing                      float64    `gorm:"type:decimal(10,4);default:0;comment:计费价格(每分钟钻石)" json:"billing"`
 }
@@ -204,6 +206,14 @@ func (r *LiveRoom) SetCategory(v uint8) {
 	})
 }
 
+func (r *LiveRoom) SetTagId(v uint64) {
+	r.TagId = v
+	r.touchUpdatedAt()
+	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomTagId, &syndb.ColData{
+		IdVal: r.ID, ColVal: v,
+	})
+}
+
 func (r *LiveRoom) SetTicket(v float64) {
 	r.Ticket = v
 	r.touchUpdatedAt()
@@ -258,6 +268,7 @@ func initLiveRoom() {
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomTotalPrivateRoomTicketIncome)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomTotalPrivateRoomWatchIncome)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomCategory)
+	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomTagId)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomTicket)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomBilling)
 
