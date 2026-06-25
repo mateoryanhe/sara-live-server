@@ -26,6 +26,7 @@ import (
 )
 
 func Init() {
+	upload.Init()
 	auth.InitAuth()
 	rank.Init()
 	name.Init()
@@ -43,7 +44,7 @@ func Init() {
 	livecfg.Init()
 	verification_code.Init()
 	aliyunmoderation.Init()
-	upload.Init()
+
 	liveroom.Init()
 	userinfo.Init()
 	stat.Init()
