@@ -102,10 +102,14 @@ popd
 
 echo Deployment package prepared!
 
+
+
 echo.
 echo ================================
-echo Step 3: Connect to remote server and stop old program
+echo Step 4: Upload new files
 echo ================================
+
+
 
 REM First, accept the host key by running a command with Auto_AcceptHostKeys option
 echo Accepting host key for server...
@@ -125,29 +129,6 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-echo Stopping old program on remote server...
-REM Send SIGTERM signal (kill -15, equivalent to kill -13)
-plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "sudo  pkill -15 %APP_NAME% 2>nul || pkill -TERM %APP_NAME% 2>nul"
-echo Waiting %SHUTDOWN_WAIT_TIME% seconds for graceful shutdown...
-timeout /t %SHUTDOWN_WAIT_TIME% /nobreak >nul
-
-REM Send SIGKILL signal (kill -9) to force stop any remaining processes
-echo Sending force stop command...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "sudo pkill -9 %APP_NAME% 2>nul || pkill -KILL %APP_NAME% 2>nul"
-
-REM Ensure remote directory exists, fix ownership (sudo 启动可能导致目录属主为 root)
-echo Preparing remote directory...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "sudo mkdir -p %REMOTE_DIR% && sudo chown -R %REMOTE_USER%:%REMOTE_USER% %REMOTE_DIR% && rm -f %REMOTE_DIR%/%APP_NAME% %REMOTE_DIR%/config.yaml %REMOTE_DIR%/%APP_NAME%.log %REMOTE_DIR%/deploy_package.zip"
-if %errorlevel% neq 0 (
-    echo Error: Failed to prepare remote directory %REMOTE_DIR%
-    pause
-    exit /b 1
-)
-
-echo.
-echo ================================
-echo Step 4: Upload new files
-echo ================================
 echo Uploading deployment package to /tmp...
 
 REM Upload to /tmp first (ec2-user always writable), avoid permission denied on app dir
@@ -158,10 +139,15 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-echo.
-echo ================================
-echo Step 5: Extract and start program
-echo ================================
+REM Ensure remote directory exists, fix ownership (sudo 启动可能导致目录属主为 root)
+echo Preparing remote directory...
+plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "sudo mkdir -p %REMOTE_DIR% && sudo chown -R %REMOTE_USER%:%REMOTE_USER% %REMOTE_DIR% && rm -f %REMOTE_DIR%/%APP_NAME% %REMOTE_DIR%/config.yaml %REMOTE_DIR%/%APP_NAME%.log %REMOTE_DIR%/deploy_package.zip"
+if %errorlevel% neq 0 (
+    echo Error: Failed to prepare remote directory %REMOTE_DIR%
+    pause
+    exit /b 1
+)
+
 REM Extract deployment package from /tmp into target directory
 echo Extracting deployment package...
 plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "unzip -o /tmp/deploy_package.zip -d %REMOTE_DIR% && rm -f /tmp/deploy_package.zip"
@@ -171,6 +157,32 @@ if %errorlevel% neq 0 (
     pause
     exit /b 1
 )
+
+
+echo.
+echo ================================
+echo Step 3: Connect to remote server and stop old program
+echo ================================
+
+
+
+echo Stopping old program on remote server...
+REM Send SIGTERM signal (kill -15, equivalent to kill -13)
+plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "sudo  pkill -15 %APP_NAME% 2>nul || pkill -TERM %APP_NAME% 2>nul"
+echo Waiting %SHUTDOWN_WAIT_TIME% seconds for graceful shutdown...
+timeout /t %SHUTDOWN_WAIT_TIME% /nobreak >nul
+
+REM Send SIGKILL signal (kill -9) to force stop any remaining processes
+echo Sending force stop command...
+plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "sudo pkill -9 %APP_NAME% 2>nul || pkill -KILL %APP_NAME% 2>nul"
+
+
+
+
+echo.
+echo ================================
+echo Step 5: Extract and start program
+echo ================================
 
 REM Set execution permissions
 echo Setting execution permissions...

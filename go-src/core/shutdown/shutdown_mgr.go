@@ -1,6 +1,7 @@
 package shutdown
 
 import (
+	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gproc"
@@ -8,6 +9,7 @@ import (
 	"time"
 	"xr-game-server/constants/common"
 	"xr-game-server/core/cfg"
+	"xr-game-server/core/xrpool"
 )
 
 const (
@@ -15,7 +17,6 @@ const (
 )
 
 var commonHandler = make([]gproc.SigHandler, 0)
-var loopHandler = make([]gproc.SigHandler, 0)
 
 // ListenShutdown 监听程序退出
 func ListenShutdown() {
@@ -31,7 +32,9 @@ func doWhenAppExit(sig os.Signal) {
 	}
 	//普通退出,占用时间少
 	for _, handler := range commonHandler {
-		handler(sig)
+		xrpool.AddWithRecover(gctx.New(), func(ctx context.Context) {
+			handler(sig)
+		})
 	}
 	//数据库同步任务,防止程序退出,有数据没有同步到
 	select {

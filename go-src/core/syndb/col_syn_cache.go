@@ -57,18 +57,22 @@ func AddDataToQuickChan(tbName db.TbName, tbCol db.TbCol, colData *ColData) {
 // SysExit 调整全部数据库同步组件同步时间到最小
 func SysExit(sig os.Signal) {
 	g.Log().Warning(gctx.New(), "准备关机,开始强制同步内存数据到数据库")
-	for _, val := range lazyMap {
-		gutil.TryCatch(gctx.New(), func(ctx context.Context) {
-			val.ChangeSynTime()
-		}, func(ctx context.Context, exception error) {
-		})
+
+	for true {
+		for _, val := range lazyMap {
+			gutil.TryCatch(gctx.New(), func(ctx context.Context) {
+				val.ChangeSynTime()
+			}, func(ctx context.Context, exception error) {
+			})
+		}
+		for _, quick := range quickMap {
+			gutil.TryCatch(gctx.New(), func(ctx context.Context) {
+				quick.ChangeSynTime()
+			}, func(ctx context.Context, exception error) {
+			})
+		}
 	}
-	for _, quick := range quickMap {
-		gutil.TryCatch(gctx.New(), func(ctx context.Context) {
-			quick.ChangeSynTime()
-		}, func(ctx context.Context, exception error) {
-		})
-	}
+
 }
 
 func consume(ctx context.Context) {

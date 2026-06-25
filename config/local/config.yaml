@@ -11,7 +11,7 @@ server:
   pprofPattern: "/66dcd8e25ab3b339546ea1de5eb2d443e6fca76c76d11709f10533be8bd87d7d/pprof"    # 开启PProf时有效，表示PProf特性的页面访问路径，对当前Server绑定的所有域名有效
   ####自定义配置
   debugEnv: true #是否开启debug环境,不会检查权限
-  exitTime: 5 #退出系统等待多少秒，开始发送kill -9
+  exitTime: 30 #退出系统等待多少秒，开始发送kill -9
   dumpRouterMap: false
   # 多域名静态目录与HTTPS证书(SNI)
   # domainSites:
