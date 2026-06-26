@@ -33,18 +33,18 @@ bufferSize:
     lazy:
       period: 15000 #懒缓冲池频率,15秒同步数据库
       small: 2000  #数据库更新数据缓冲-->对应sysdb->单行数据写入缓冲池 eg角色表
-      middle: 15000 #数据库更新数据缓冲-->对应sysdb->多行数据写入缓冲池  eg背包表 邮件表
-      large: 50000 #数据库更新数据缓冲-->对应sysdb->多行数据写入缓冲池 eg item_log表,
+      middle: 7000 #数据库更新数据缓冲-->对应sysdb->多行数据写入缓冲池  eg背包表 邮件表
+      large: 10000 #数据库更新数据缓冲-->对应sysdb->多行数据写入缓冲池 eg item_log表,
     fast:
       period: 30 #快速缓冲池频率,50毫秒同步数据库
-      small: 20 #数据库更新数据缓冲-->对应sysdb->单行数据写入缓冲池 eg角色表
-      middle: 150 #数据库更新数据缓冲-->对应sysdb->多行数据写入缓冲池 eg背包表 邮件表
-      large: 500 #数据库更新数据缓冲-->对应sysdb->多行数据写入缓冲池 eg item_log表,邮件表
+      small: 1000 #数据库更新数据缓冲-->对应sysdb->单行数据写入缓冲池 eg角色表
+      middle: 1500 #数据库更新数据缓冲-->对应sysdb->多行数据写入缓冲池 eg背包表 邮件表
+      large: 5000 #数据库更新数据缓冲-->对应sysdb->多行数据写入缓冲池 eg item_log表,邮件表
   websocket: #websocket缓冲池大小--个人玩家缓冲池
-    size: 30 #推送缓冲池大小
+    size: 400 #推送缓冲池大小
     period: 100 #推送缓冲池频率
   goPool: #协程池大小
-    size: 100
+    size: 300
 
 
 logger:
@@ -52,7 +52,7 @@ logger:
   file: "{Y-m-d}.log"         # 日志文件格式。默认为"{Y-m-d}.log"
   prefix: ""                    # 日志内容输出前缀。默认为空
   level: "all"                 # 日志输出级别
-  timeFormat: "2006-01-02T15:04:05" # 自定义日志输出的时间格式，使用Golang标准的时间格式配置
+  timeFormat: "2006-01-02T15:04:05.000" # 自定义日志输出的时间格式，精确到毫秒
   ctxKeys: [ ]                    # 自定义Context上下文变量名称，自动打印Context的变量到日志中。默认为空
   header: true                  # 是否打印日志的头信息。默认true
   stdout: true                  # 日志是否同时输出到终端。默认true

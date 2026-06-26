@@ -5,46 +5,44 @@ import (
 	"errors"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/gctx"
-	"github.com/gogf/gf/v2/util/gconv"
-	"strconv"
 	"strings"
 	"time"
-	"xr-game-server/constants/common"
 	"xr-game-server/errercode"
 )
 
 func apiResponseMiddleware(r *ghttp.Request) {
 	r.Middleware.Next()
-	doTime := r.GetHeader(DoTime)
+
 	userId := ""
 	token := r.GetHeader("Authorization", "")
 	if token != "" {
 		userId = strings.Split(token, ".")[0]
 	}
-	if len(doTime) == common.Zero {
-		doTime = strconv.FormatInt(time.Now().UnixMilli(), 10)
+	startTime := time.Now()
+	if r.EnterTime != nil {
+		startTime = r.EnterTime.Time
 	}
-	retTime := time.Now().UnixMilli() - gconv.Int64(doTime)
+
 	var (
 		res   = r.GetHandlerResponse()
 		err   = r.GetError()
-		ctx   = gctx.New()
+		ctx   = r.Context()
 		param any
 	)
 	code := errercode.Success
 	if err != nil {
 		var gErr *errercode.XError
 		errors.As(err, &gErr)
+		retTime := time.Now().Sub(startTime).Milliseconds()
 		if gErr != nil {
 			code = int(gErr.Code())
 			param = gErr.Param
-			g.Log().Infof(ctx, "错误码应答,处理时间=%vms,url=%v,ip=%v,authId=%v，响应错误码数据=%v", retTime, r.URL.RequestURI(), r.GetClientIp(), userId, code)
+			g.Log().Infof(ctx, "reqId=%v,错误码应答,处理时间=%vms,url=%v,ip=%v,authId=%v，响应错误码数据=%v,", r.GetHeader(ReqId, ""), retTime, r.URL.RequestURI(), r.GetClientIp(), userId, code)
 		} else {
 			//清除系统自带的错误日志输出
 			r.Response.ClearBuffer()
 			code = errercode.SysError
-			g.Log().Infof(ctx, "出现无法捕获的错误,处理时间=%vms,url=%v,ip=%v,authId=%v,请求数据=%v", retTime, r.URL.RequestURI(), r.GetClientIp(), userId, requestBodyForLog(r))
+			g.Log().Infof(ctx, "reqId=%v,出现无法捕获的错误,处理时间=%vms,url=%v,ip=%v,authId=%v,请求数据=%v,", r.GetHeader(ReqId, ""), retTime, r.URL.RequestURI(), r.GetClientIp(), userId, requestBodyForLog(r))
 		}
 	}
 	r.Response.Header().Set("Content-Type", contentTypeJson)
@@ -59,11 +57,12 @@ func apiResponseMiddleware(r *ghttp.Request) {
 	}
 	resp, _ := json.MarshalIndent(respData, "", " ")
 	r.Response.Write(resp)
+	retTime := time.Now().Sub(startTime).Milliseconds()
 	if err == nil {
 		if retTime >= LongDoTime {
-			g.Log().Infof(ctx, "请求处理时间过长,处理时间=%vms,url=%v,ip=%v,authId=%v,响应数据=%v", retTime, r.URL.RequestURI(), r.GetClientIp(), userId, responseBodyForLog(r, resp))
+			g.Log().Infof(ctx, "reqId=%v,请求处理时间过长,处理时间=%vms,url=%v,ip=%v,authId=%v,响应数据=%v", r.GetHeader(ReqId, ""), retTime, r.URL.RequestURI(), r.GetClientIp(), userId, responseBodyForLog(r, resp))
 		} else {
-			g.Log().Infof(ctx, "正常响应,处理时间=%vms,url=%v,ip=%v,authId=%v，响应数据=%v", retTime, r.URL.RequestURI(), r.GetClientIp(), userId, responseBodyForLog(r, resp))
+			g.Log().Infof(ctx, "reqId=%v,正常响应,处理时间=%vms,url=%v,ip=%v,authId=%v，响应数据=%v", r.GetHeader(ReqId, ""), retTime, r.URL.RequestURI(), r.GetClientIp(), userId, responseBodyForLog(r, resp))
 		}
 	}
 
