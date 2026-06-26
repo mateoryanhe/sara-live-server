@@ -13,7 +13,7 @@ import (
 var (
 	giftCacheMu     sync.RWMutex
 	giftCacheMap    map[uint64]*giftdto.AppGiftItem // id -> item
-	giftCacheSorted []*giftdto.AppGiftItem          // 按 sort desc, created_at desc 排序的列表
+	giftCacheSorted []*giftdto.AppGiftItem          // 按 price asc, created_at asc 排序的列表
 	giftCacheLoaded bool
 )
 
@@ -82,6 +82,10 @@ func toAppGiftItem(g *entity.LiveGift) *giftdto.AppGiftItem {
 	return &giftdto.AppGiftItem{
 		ID:          g.ID,
 		Name:        g.Name,
+		NameEn:      g.NameEn,
+		NameEs:      g.NameEs,
+		NamePt:      g.NamePt,
+		NameHi:      g.NameHi,
 		Icon:        upload.GetUrlByName(g.Icon),
 		Animation:   upload.GetUrlByName(g.Animation),
 		Price:       g.Price,

@@ -41,6 +41,10 @@ func CreateGift(_ context.Context, req *giftdto.CreateGiftReq) (*giftdto.CreateG
 
 	g := &entity.LiveGift{
 		Name:        req.Name,
+		NameEn:      req.NameEn,
+		NameEs:      req.NameEs,
+		NamePt:      req.NamePt,
+		NameHi:      req.NameHi,
 		Icon:        req.Icon,
 		Animation:   req.Animation,
 		Price:       req.Price,
@@ -67,6 +71,10 @@ func UpdateGift(_ context.Context, req *giftdto.UpdateGiftReq) (*giftdto.UpdateG
 	}
 
 	g.Name = req.Name
+	g.NameEn = req.NameEn
+	g.NameEs = req.NameEs
+	g.NamePt = req.NamePt
+	g.NameHi = req.NameHi
 	g.Icon = req.Icon
 	g.Animation = req.Animation
 	g.Price = req.Price

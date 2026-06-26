@@ -257,6 +257,10 @@ export interface GuildQuery extends PageQuery {
 export interface Gift {
     id: string
     name: string
+    nameEn: string
+    nameEs: string
+    namePt: string
+    nameHi: string
     icon: string
     iconName: string
     animation: string

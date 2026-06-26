@@ -1,0 +1,36 @@
+  magis stick（魔法棒）	varita mágica	varinha mágica	जादुई छड़ी	10
+  party cake（派对蛋糕）	pastel de fiesta	bolo de festa	पार्टी केक	20
+  lemon Tea（柠檬茶）	té de limón	chá de limão	नींबू चाय	40
+  chocolate（黑巧克力）	chocolate negro	chocolate amargo	डार्क चॉकलेट	50
+  Ice Cream（冰淇凌）	helado	sorvete	आइसक्रीम	60
+  finger heart（比心）	corazón con los dedos	coração com os dedos	उंगली से दिल बनाना	70
+  lipstick（口红）	labial	batom	लिपस्टिक	80
+  kiss（吻）	beso	beijo	चुंबन	100
+  bubble shoot（吹泡泡）	soplar burbujas	soprar bolhas	बुलबुले उड़ाना	120
+  loveU（一箭穿心）	flecha atravesando el corazón	flecha atravessando o coração	दिल में तीर	150
+  birthday gift（生日祝福）	regalo de cumpleaños	presente de aniversário	जन्मदिन उपहार	170
+  blue rose（爱心蓝玫瑰）	rosa azul con corazón	rosa azul com coração	दिल वाला नीला गुलाब	200
+  royal salute（礼炮）	salva real	salva real	शाही तोप का सलाम	250
+  love baloon（爱心气球）	globo de corazón	balão de coração	दिल वाला गुब्बारा	300
+  gown（婚纱）	vestido de novia	vestido de noiva	शादी का गाउन	350
+  lollipop（棒棒糖）	paleta de caramelo	pirulito	लॉलीपॉप	400
+  carousel（旋转木马）	carrusel	carrossel	घूमता हुआ घोड़ा	500
+  ring box（戒指盒子）	caja de anillo	caixa de anel	अंगूठी का डिब्बा	600
+  carriage（马车）	carruaje	carruagem	घोड़ा गाड़ी	700
+  ametyhst（紫水晶）	amatista	ametista	जामुनिया रत्न	850
+  heart of sea（海洋之心）	corazón del mar	coração do mar	समुद्र का दिल	1000
+  moonlight（月光）	luz de luna	luz da lua	चंद्रमा की रोशनी	1300
+  cupid's bow（丘比特之剑）	flecha de cupido	flecha de cupido	कामदेव का तीर	1500
+  ferris wheel（摩天轮）	noria	roda gigante	फेरिस व्हील	2000
+  sea castle（海洋城堡）	castillo marítimo	castelo marinho	समुद्री महल	2500
+  shooting star（流星雨）	lluvia de estrellas	chuva de estrelas	उल्का बारिश	3200
+  fantasy city（城堡）	ciudad fantástica	cidade fantasia	काल्पनिक शहर	4500
+  lamborghini（兰博基尼）	lamborghini	lamborghini	लैंबोर्गिनी	6500
+  helicopter（直升机）	helicóptero	helicóptero	हेलीकॉप्टर	9000
+  summer yacth（夏季游艇）	yate de verano	iate de verão	गर्मी की यॉट	12500
+  rolls royce（劳斯莱斯）	rolls royce	rolls royce	रोल्स रॉयस	17500
+  air plane（飞机）	avión	avião	हवाई जहाज	25000
+  air balloon（热气球）	globo aerostático	balão de ar quente	गर्म हवा का गुब्बारा	35000
+  luxury yacth（豪华邮轮）	yate de lujo	iate de luxo	लक्जरी यॉट	50000
+  star ship（宇宙飞船）	nave estelar	nave estelar	तारों का जहाज	75000
+  rocket（火箭）	cohete	foguete	रॉकेट	120000

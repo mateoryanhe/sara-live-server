@@ -35,6 +35,10 @@
         <el-table v-loading="loading" :data="tableData" style="width: 100%">
           <el-table-column label="ID" prop="id" width="100"/>
           <el-table-column label="礼物名称" prop="name" min-width="120"/>
+          <el-table-column label="名称(英文)" prop="nameEn" min-width="120" show-overflow-tooltip/>
+          <el-table-column label="名称(西班牙语)" prop="nameEs" min-width="120" show-overflow-tooltip/>
+          <el-table-column label="名称(葡萄牙语)" prop="namePt" min-width="120" show-overflow-tooltip/>
+          <el-table-column label="名称(印地语)" prop="nameHi" min-width="120" show-overflow-tooltip/>
           <el-table-column label="图标" width="90">
             <template #default="{ row }">
               <el-image
@@ -110,6 +114,18 @@
       <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="100px">
         <el-form-item label="礼物名称" prop="name">
           <el-input v-model="currentRow.name" placeholder="请输入礼物名称"/>
+        </el-form-item>
+        <el-form-item label="名称(英文)" prop="nameEn">
+          <el-input v-model="currentRow.nameEn" placeholder="请输入英文名称"/>
+        </el-form-item>
+        <el-form-item label="名称(西班牙语)" prop="nameEs">
+          <el-input v-model="currentRow.nameEs" placeholder="请输入西班牙语名称"/>
+        </el-form-item>
+        <el-form-item label="名称(葡萄牙语)" prop="namePt">
+          <el-input v-model="currentRow.namePt" placeholder="请输入葡萄牙语名称"/>
+        </el-form-item>
+        <el-form-item label="名称(印地语)" prop="nameHi">
+          <el-input v-model="currentRow.nameHi" placeholder="请输入印地语名称"/>
         </el-form-item>
         <el-form-item label="图标" prop="icon">
           <div class="asset-upload-wrap">
@@ -217,6 +233,10 @@ interface SearchForm {
 interface GiftForm {
   id: string
   name: string
+  nameEn: string
+  nameEs: string
+  namePt: string
+  nameHi: string
   icon: string
   animation: string
   price: number
@@ -242,6 +262,10 @@ const dialogTitle = ref('')
 const defaultForm = (): GiftForm => ({
   id: '',
   name: '',
+  nameEn: '',
+  nameEs: '',
+  namePt: '',
+  nameHi: '',
   icon: '',
   animation: '',
   price: 0,
@@ -395,6 +419,10 @@ const formRules: FormRules = {
     {required: true, message: '请输入礼物名称', trigger: 'blur'},
     {min: 1, max: 64, message: '礼物名称长度在1-64个字符', trigger: 'blur'}
   ],
+  nameEn: [{max: 64, message: '英文名称最长64字符', trigger: 'blur'}],
+  nameEs: [{max: 64, message: '西班牙语名称最长64字符', trigger: 'blur'}],
+  namePt: [{max: 64, message: '葡萄牙语名称最长64字符', trigger: 'blur'}],
+  nameHi: [{max: 64, message: '印地语名称最长64字符', trigger: 'blur'}],
   icon: [],
   animation: [],
   category: [
@@ -457,6 +485,10 @@ const handleEdit = (row: Gift) => {
   currentRow.value = {
     id: row.id,
     name: row.name,
+    nameEn: row.nameEn || '',
+    nameEs: row.nameEs || '',
+    namePt: row.namePt || '',
+    nameHi: row.nameHi || '',
     icon: iconName,
     animation: animationName,
     price: Number(row.price) || 0,
@@ -527,8 +559,8 @@ const handleSave = async () => {
         if (currentRow.value.id) {
           await giftApi.updateGift(currentRow.value)
         } else {
-          const {name, icon, animation, price, category, sort, description} = currentRow.value
-          await giftApi.createGift({name, icon, animation, price, category, sort, description})
+          const {name, nameEn, nameEs, namePt, nameHi, icon, animation, price, category, sort, description} = currentRow.value
+          await giftApi.createGift({name, nameEn, nameEs, namePt, nameHi, icon, animation, price, category, sort, description})
         }
 
         ElMessage.success(currentRow.value.id ? '更新成功' : '创建成功')

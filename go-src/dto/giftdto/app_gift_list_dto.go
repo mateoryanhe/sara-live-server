@@ -11,6 +11,10 @@ type AppGiftListReq struct {
 type AppGiftItem struct {
 	ID          uint64  `json:"id,string"`
 	Name        string  `json:"name"`
+	NameEn      string  `json:"nameEn"`
+	NameEs      string  `json:"nameEs"`
+	NamePt      string  `json:"namePt"`
+	NameHi      string  `json:"nameHi"`
 	Icon        string  `json:"icon"`
 	Animation   string  `json:"animation"`
 	Price       float64 `json:"price"`
