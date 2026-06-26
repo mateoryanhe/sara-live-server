@@ -70,7 +70,7 @@ func GetOnShelfGifts() []*entity.LiveGift {
 	now := time.Now()
 	err := g.DB().Model(string(entity.TbLiveGift)).
 		Where("status = ? AND (published_at IS NULL OR published_at <= ?)", entity.LiveGiftStatusOnShelf, now).
-		Order("price asc, created_at asc").
+		Order("sort desc, published_at desc, created_at desc").
 		Scan(&ret)
 	if err != nil {
 		return nil
@@ -104,7 +104,7 @@ func GetGiftList(req *giftdto.GiftListReq) (int, []*giftdto.GiftListRes) {
 		param = append(param, entity.LiveGiftStatusOnShelf)
 	}
 
-	sql += ` order by price asc, created_at asc`
+	sql += ` order by sort desc, created_at desc`
 	countSql := str.GetCountSQL(sql)
 	total, _ := g.DB().GetCount(ctx, countSql, param)
 	sql += ` limit ` + strconv.Itoa(req.PageSize) + ` offset ` + strconv.Itoa(req.PageIndex-1)
