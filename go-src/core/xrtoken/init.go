@@ -22,6 +22,10 @@ func AddAppToken(authId uint64) string {
 	return token
 }
 
+func DelToken(authId uint64) {
+	appCache.Remove(gctx.New(), authId)
+}
+
 func InitAppToken(authId uint64, token string, val time.Time) {
 	expire := val.Sub(time.Now())
 	if expire <= 0 {

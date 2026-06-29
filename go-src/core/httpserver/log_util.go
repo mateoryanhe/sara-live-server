@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"strings"
+	"time"
 
 	"github.com/gogf/gf/v2/net/ghttp"
 )
@@ -41,4 +42,12 @@ func responseBodyForLog(r *ghttp.Request, resp []byte) any {
 		return logBodySkipped
 	}
 	return string(resp)
+}
+
+// requestElapsedMs 从请求进入到当前时刻的耗时(毫秒),与 GoFrame EnterTime 保持一致
+func requestElapsedMs(r *ghttp.Request) int64 {
+	if r == nil || r.EnterTime == nil {
+		return 0
+	}
+	return time.Since(r.EnterTime.Time).Milliseconds()
 }

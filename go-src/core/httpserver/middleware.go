@@ -22,17 +22,18 @@ func middlewareCORS(r *ghttp.Request) {
 
 // 记录前端请求日志
 func middlewareLogReq(r *ghttp.Request) {
-	//收到关机指令,服务器不再接受请求
-	if !canDo {
-		WriteFailJson(r, int(errercode.ServerClose))
-		return
-	}
 	userId := ""
 	token := r.GetHeader("Authorization", "")
 	if token != "" {
 		userId = strings.Split(token, ".")[0]
 	}
-	//设置请求时间
+	//收到关机指令,服务器不再接受请求
+	if !canDo {
+		g.Log().Infof(r.Context(), "关机了,收到前端请求,reqId=%v,url=%v,ip=%v,authId=%v,请求数据=%v", r.GetHeader(ReqId, ""), r.URL.RequestURI(), r.GetClientIp(), userId, requestBodyForLog(r))
+		WriteFailJson(r, int(errercode.ServerClose))
+		return
+	}
+
 	g.Log().Infof(r.Context(), "收到前端请求,reqId=%v,url=%v,ip=%v,authId=%v,请求数据=%v", r.GetHeader(ReqId, ""), r.URL.RequestURI(), r.GetClientIp(), userId, requestBodyForLog(r))
 	r.Middleware.Next()
 }
