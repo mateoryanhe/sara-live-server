@@ -31,11 +31,13 @@ type ContributionRankItem struct {
 
 // GetContributionRankRes App端直播间观众贡献榜响应
 type GetContributionRankRes struct {
-	RoomId    string                  `json:"roomId"    dc:"直播间ID"`
-	Period    int                     `json:"period"    dc:"统计维度"`
-	Total     int                     `json:"total"     dc:"榜单总数(最多500)"`
-	Page      int                     `json:"page"      dc:"当前页码"`
-	PageSize  int                     `json:"pageSize"  dc:"每页数量"`
-	UpdatedAt int64                   `json:"updatedAt" dc:"查询时间(秒)"`
-	List      []*ContributionRankItem `json:"list"      dc:"榜单列表"`
+	RoomId             string                  `json:"roomId"             dc:"直播间ID"`
+	Period             int                     `json:"period"             dc:"统计维度"`
+	MyRank             int                     `json:"myRank"             dc:"请求者在榜单中的排名,未上榜为-1"`
+	ContributionAmount float64                 `json:"contributionAmount" dc:"请求者贡献总额(钻石,礼物+付费弹幕,未上榜为0)"`
+	Total              int                     `json:"total"              dc:"榜单总数(最多500)"`
+	Page               int                     `json:"page"               dc:"当前页码"`
+	PageSize           int                     `json:"pageSize"           dc:"每页数量"`
+	UpdatedAt          int64                   `json:"updatedAt"          dc:"查询时间(秒)"`
+	List               []*ContributionRankItem `json:"list"               dc:"榜单列表"`
 }

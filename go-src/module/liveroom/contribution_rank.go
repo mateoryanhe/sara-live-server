@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 	"xr-game-server/constants/cmd"
+	"xr-game-server/core/httpserver"
 	"xr-game-server/core/push"
 	"xr-game-server/core/xrpool"
 	"xr-game-server/dao/liveroomdao"
@@ -126,11 +127,12 @@ func getContributionRankRows(snapshot *contributionRankSnapshot, period int) []*
 }
 
 // GetContributionRank App端分页查询直播间观众贡献榜(礼物+付费弹幕)
-func GetContributionRank(_ context.Context, req *liveroomdto.GetContributionRankReq) (*liveroomdto.GetContributionRankRes, error) {
+func GetContributionRank(ctx context.Context, req *liveroomdto.GetContributionRankReq) (*liveroomdto.GetContributionRankRes, error) {
 	if liveroomdao.GetRoomById(req.RoomId) == nil {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
 
+	requestUserId := httpserver.GetAuthId(ctx)
 	page, pageSize := normalizeOnlineListPage(req.Page, req.PageSize)
 	snapshot := getContributionRankSnapshot(req.RoomId)
 	rows := getContributionRankRows(snapshot, req.Period)
@@ -139,6 +141,7 @@ func GetContributionRank(_ context.Context, req *liveroomdto.GetContributionRank
 	}
 
 	total := len(rows)
+	myRank, myContributionAmount := findMyContribution(rows, requestUserId)
 	start := (page - 1) * pageSize
 	end := start + pageSize
 	if start > total {
@@ -175,14 +178,29 @@ func GetContributionRank(_ context.Context, req *liveroomdto.GetContributionRank
 	}
 
 	return &liveroomdto.GetContributionRankRes{
-		RoomId:    strconv.FormatUint(req.RoomId, 10),
-		Period:    req.Period,
-		Total:     total,
-		Page:      page,
-		PageSize:  pageSize,
-		UpdatedAt: updatedAt,
-		List:      list,
+		RoomId:             strconv.FormatUint(req.RoomId, 10),
+		Period:             req.Period,
+		MyRank:             myRank,
+		ContributionAmount: myContributionAmount,
+		Total:              total,
+		Page:               page,
+		PageSize:           pageSize,
+		UpdatedAt:          updatedAt,
+		List:               list,
 	}, nil
+}
+
+func findMyContribution(rows []*contributionRankRow, userId uint64) (rank int, amount float64) {
+	rank = -1
+	if userId == 0 {
+		return rank, 0
+	}
+	for i, row := range rows {
+		if row != nil && row.SenderId == userId {
+			return i + 1, row.TotalAmount
+		}
+	}
+	return rank, 0
 }
 
 func contributionRankStartTime(now time.Time, period int) time.Time {
