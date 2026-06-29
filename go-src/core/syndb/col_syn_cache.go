@@ -18,6 +18,8 @@ const (
 	ChanMax = 1000
 	// CloseTime 服务器关闭,同步周期变更
 	CloseTime = 50 * time.Millisecond
+	// chanWriteSlowMs 写入缓冲通道超过该耗时(毫秒)时打印日志
+	chanWriteSlowMs = 3
 	// QuickSynPeriod 快速同步
 )
 
@@ -46,12 +48,22 @@ type ColSynCache struct {
 
 // AddDataToLazyChan 加入变更数据到延迟缓存区
 func AddDataToLazyChan(tbName db.TbName, tbCol db.TbCol, colData *ColData) {
-	lazyMap[string(tbName)+":"+string(tbCol)].DataQueue <- colData
+	addDataToChan("lazy", lazyMap, tbName, tbCol, colData)
 }
 
 // AddDataToQuickChan 加入变更数据到快速缓存区
 func AddDataToQuickChan(tbName db.TbName, tbCol db.TbCol, colData *ColData) {
-	quickMap[string(tbName)+":"+string(tbCol)].DataQueue <- colData
+	addDataToChan("quick", quickMap, tbName, tbCol, colData)
+}
+
+func addDataToChan(queueType string, cacheMap map[string]*ColSynCache, tbName db.TbName, tbCol db.TbCol, colData *ColData) {
+	key := string(tbName) + ":" + string(tbCol)
+	start := time.Now()
+	cacheMap[key].DataQueue <- colData
+	costMs := time.Since(start).Milliseconds()
+	if costMs > chanWriteSlowMs {
+		g.Log().Infof(gctx.New(), "syndb写入%s缓冲耗时=%vms,tb=%v,col=%v,id=%v", queueType, costMs, tbName, tbCol, colData.IdVal)
+	}
 }
 
 // SysExit 调整全部数据库同步组件同步时间到最小

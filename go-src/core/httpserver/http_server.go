@@ -28,6 +28,7 @@ func InitHttpServer() {
 		httpServer.Use(ghttp.MiddlewareGzip)
 	}
 	httpServer.BindHookHandler("/*", ghttp.HookBeforeServe, beforeServeHook)
+	httpServer.BindHookHandler("/*", ghttp.HookAfterOutput, hookAPIRequestEndLog)
 	httpServer.Run()
 }
 
@@ -44,7 +45,7 @@ func GetAuthId(ctx context.Context) uint64 {
 }
 
 func beforeServeHook(r *ghttp.Request) {
-	g.Log().Infof(r.Context(), "beforeServeHook [is file:%v] URI:%s", r.IsFileRequest(), r.RequestURI)
+	g.Log().Infof(r.Context(), "beforeServeHook [is file:%v] URI:%s ip:%s", r.IsFileRequest(), r.RequestURI, r.GetClientIp())
 	r.Response.CORSDefault()
 }
 
