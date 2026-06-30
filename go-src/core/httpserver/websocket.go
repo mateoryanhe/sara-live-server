@@ -140,17 +140,34 @@ func (w *WebSocketClient) ChkClose() {
 }
 
 func (w *WebSocketClient) exit() {
-	w.Loop = false
-	event.Pub(event.ClientLeave, w)
-	err := w.Conn.Close()
-	if err != nil {
+	if !w.Loop {
 		return
+	}
+	w.Loop = false
+	w.clearPendingData()
+
+	event.Pub(event.ClientLeave, w)
+	if w.Conn != nil {
+		_ = w.Conn.Close()
+		w.Conn = nil
+	}
+}
+
+func (w *WebSocketClient) clearPendingData() {
+	w.sendData = nil
+	w.Num = 0
+	for {
+		select {
+		case <-w.dataBuffer:
+		default:
+			return
+		}
 	}
 }
 
 // 发送缓存区数据
 func (w *WebSocketClient) flushDataBuffer() {
-	if len(w.sendData) == common.Zero {
+	if !w.Loop || len(w.sendData) == common.Zero {
 		return
 	}
 	w.sendTime = time.Now()
@@ -167,6 +184,9 @@ func (w *WebSocketClient) flushDataBuffer() {
 }
 
 func (w *WebSocketClient) Consume() {
+	if !w.Loop {
+		return
+	}
 	//如果到点了,开始发送数据
 	if w.Num > common.Zero && time.Now().After(w.sendTime) {
 		w.flushDataBuffer()
@@ -188,6 +208,9 @@ func (w *WebSocketClient) consumeData() {
 		select {
 		case data, ok := <-w.dataBuffer:
 			{
+				if !w.Loop {
+					return
+				}
 				if ok {
 					//检查数据是否过多
 					if w.Num >= MaxSize {
@@ -219,5 +242,8 @@ func (c *WebSocketClient) Send(data any) {
 	if !c.Loop {
 		return
 	}
-	c.dataBuffer <- data
+	select {
+	case c.dataBuffer <- data:
+	default:
+	}
 }

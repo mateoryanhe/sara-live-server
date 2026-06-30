@@ -77,5 +77,5 @@ type PrivateMessagePushItem struct {
 	Content      string `json:"content,string"`
 	SenderName   string `json:"senderName"`
 	SenderAvatar string `json:"senderAvatar"`
-	SentAt       string `json:"sentAt"`
+	SentAt       int64  `json:"sentAt"`
 }

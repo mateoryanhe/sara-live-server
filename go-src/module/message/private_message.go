@@ -161,7 +161,7 @@ func buildPrivateMessagePushItem(msg *entity.UserMessage) *messagedto.PrivateMes
 		SenderId:   msg.SenderId,
 		ReceiverId: msg.ReceiverId,
 		Content:    msg.Content,
-		SentAt:     formatMessageTime(msg.CreatedAt),
+		SentAt:     msg.CreatedAt.UnixMilli(),
 	}
 	if sender := userinfodao.GetUserInfoByUserId(msg.SenderId); sender != nil {
 		item.SenderName = sender.Nickname
