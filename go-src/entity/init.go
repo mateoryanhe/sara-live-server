@@ -61,6 +61,7 @@ func Init() {
 	initAliyunTextModerationCfg()
 	initUploadResourceCfg()
 	initUserMessage()
+	initUserMessageSession()
 	initUserMessageUnread()
 	initUserMessageUnreadDetail()
 	initSystemTotalStat()

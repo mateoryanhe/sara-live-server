@@ -7,7 +7,7 @@ import (
 )
 
 // 接受请求
-var canDo = true
+var canDo = false
 
 func closeServer(sig os.Signal) {
 	canDo = false
@@ -29,4 +29,8 @@ func middlewareLogReq(r *ghttp.Request) {
 
 	logAPIRequestStart(r, authId, "收到前端请求")
 	r.Middleware.Next()
+}
+
+func Ready() {
+	canDo = true
 }

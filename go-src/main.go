@@ -3,6 +3,7 @@ package main
 import (
 	"xr-game-server/controller"
 	"xr-game-server/core"
+	"xr-game-server/core/httpserver"
 	"xr-game-server/core/shutdown"
 	"xr-game-server/dao"
 	"xr-game-server/entity"
@@ -20,6 +21,8 @@ func main() {
 	module.Init()
 	//httpserver服务器模块启动
 	controller.Init()
+	httpserver.Ready()
 	//开始监听程序退出
 	shutdown.ListenShutdown()
+
 }

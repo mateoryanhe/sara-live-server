@@ -29,6 +29,7 @@ type GetUserInfoRes struct {
 	FollowerCount int     `json:"followerCount" dc:"用户粉丝数"`
 	FollowStatus  uint8   `json:"followStatus" dc:"关注状态(0未关注,1已关注,2互为好友)"`
 	TotalIncome   float64 `json:"totalIncome" dc:"最近30天收益(钻石,来自主播红人榜,未上榜为0)"`
+	Age           int64   `json:"age"`
 }
 
 // UpdateGenderReq 修改性别

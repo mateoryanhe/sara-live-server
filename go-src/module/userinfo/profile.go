@@ -53,3 +53,19 @@ func formatBirthday(val *time.Time) string {
 	}
 	return val.Format(birthdayLayout)
 }
+
+func calcAge(birthday *time.Time) int64 {
+	if birthday == nil || birthday.IsZero() {
+		return 0
+	}
+	now := time.Now()
+	age := now.Year() - birthday.Year()
+	anniversary := time.Date(now.Year(), birthday.Month(), birthday.Day(), 0, 0, 0, 0, time.Local)
+	if now.Before(anniversary) {
+		age--
+	}
+	if age < 0 {
+		return 0
+	}
+	return int64(age)
+}

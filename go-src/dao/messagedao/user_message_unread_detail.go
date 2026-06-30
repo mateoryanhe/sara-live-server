@@ -23,18 +23,16 @@ func initMessageUnreadDetailDao() {
 }
 
 // GetUnreadDetailByReceiverSender 按接收者与发送者查询未读明细,优先读缓存,缓存未命中再查库
-func GetUnreadDetailByReceiverSender(receiverId, senderId uint64) *entity.UserMessageUnreadDetail {
-	if receiverId == 0 || senderId == 0 || messageUnreadDetailCacheMgr == nil {
-		return nil
-	}
-	id := entity.BuildUserMessageUnreadDetailId(receiverId, senderId)
+func GetUnreadDetailByReceiverSender(senderId, userId uint64) *entity.UserMessageUnreadDetail {
+
+	id := entity.BuildUserMessageUnreadDetailId(userId, senderId)
 	v := messageUnreadDetailCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
 		var row *entity.UserMessageUnreadDetail
 		if err = g.Model(string(entity.TbUserMessageUnreadDetail)).Where("id = ?", id).Scan(&row); err != nil {
-			return entity.NewUserMessageUnreadDetail(receiverId, senderId), err
+			return entity.NewUserMessageUnreadDetail(userId, senderId), err
 		}
 		if row == nil || row.ID == "" {
-			return entity.NewUserMessageUnreadDetail(receiverId, senderId), nil
+			return entity.NewUserMessageUnreadDetail(userId, senderId), nil
 		}
 		return row, nil
 	})
@@ -59,7 +57,7 @@ func ListUnreadDetailByReceiverId(receiverId uint64, pageIndex int) []*entity.Us
 	}
 
 	if pageIndex <= unreadDetailCachedPages {
-		list := getCachedUnreadDetails(receiverId)
+		list := GetCachedUnreadDetails(receiverId)
 		start := (pageIndex - 1) * unreadDetailPageSize
 		if start >= len(list) {
 			return make([]*entity.UserMessageUnreadDetail, 0)
@@ -77,12 +75,12 @@ func ListUnreadDetailByReceiverId(receiverId uint64, pageIndex int) []*entity.Us
 
 // UpsertUnreadDetailToListCache 未读明细变更后刷新单条缓存及接收者列表缓存
 func UpsertUnreadDetailToListCache(detail *entity.UserMessageUnreadDetail) {
-	if detail == nil || detail.ID == "" || detail.ReceiverId == 0 || messageUnreadDetailCacheMgr == nil || receiverUnreadDetailListCacheMgr == nil {
+	if detail == nil || detail.ID == "" || messageUnreadDetailCacheMgr == nil || receiverUnreadDetailListCacheMgr == nil {
 		return
 	}
 	//messageUnreadDetailCacheMgr.FlushCache(detail.ID, detail)
 
-	list := getCachedUnreadDetails(detail.ReceiverId)
+	list := GetCachedUnreadDetails(detail.UserId)
 	newList := make([]*entity.UserMessageUnreadDetail, 0, len(list)+1)
 	newList = append(newList, detail)
 	for _, item := range list {
@@ -94,12 +92,12 @@ func UpsertUnreadDetailToListCache(detail *entity.UserMessageUnreadDetail) {
 	if len(newList) > unreadDetailCacheSize {
 		newList = newList[:unreadDetailCacheSize]
 	}
-	receiverUnreadDetailListCacheMgr.FlushCache(detail.ReceiverId, newList)
+	receiverUnreadDetailListCacheMgr.FlushCache(detail.UserId, newList)
 }
 
-func getCachedUnreadDetails(receiverId uint64) []*entity.UserMessageUnreadDetail {
-	v := receiverUnreadDetailListCacheMgr.GetData(receiverId, func(ctx context.Context) (value interface{}, err error) {
-		return loadUnreadDetailsFromDB(receiverId, 0, unreadDetailCacheSize), nil
+func GetCachedUnreadDetails(userId uint64) []*entity.UserMessageUnreadDetail {
+	v := receiverUnreadDetailListCacheMgr.GetData(userId, func(ctx context.Context) (value interface{}, err error) {
+		return loadUnreadDetailsFromDB(userId, 0, unreadDetailCacheSize), nil
 	})
 	if v == nil {
 		return make([]*entity.UserMessageUnreadDetail, 0)
@@ -111,10 +109,10 @@ func getCachedUnreadDetails(receiverId uint64) []*entity.UserMessageUnreadDetail
 	return list
 }
 
-func loadUnreadDetailsFromDB(receiverId uint64, offset, limit int) []*entity.UserMessageUnreadDetail {
+func loadUnreadDetailsFromDB(userId uint64, offset, limit int) []*entity.UserMessageUnreadDetail {
 	list := make([]*entity.UserMessageUnreadDetail, 0)
 	_ = g.Model(string(entity.TbUserMessageUnreadDetail)).Ctx(context.Background()).
-		Where("receiver_id = ?", receiverId).
+		Where("user_id = ?", userId).
 		Order("updated_at desc").
 		Limit(limit).
 		Offset(offset).

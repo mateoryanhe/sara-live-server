@@ -43,6 +43,7 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		FollowerCount: len(livefollowdao.GetFollowersByAnchor(targetUserId)),
 		FollowStatus:  resolveFollowStatus(authUserId, targetUserId),
 		TotalIncome:   float64(anchorrank.GetUserLast30DayRevenue(targetUserId)),
+		Age:           calcAge(data.Birthday),
 	}
 	if req.UserId == authUserId {
 		event.Pub(gameevent.LoginEvent, authUserId)

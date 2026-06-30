@@ -21,8 +21,7 @@ type AppPrivateMessageUnreadListReq struct {
 }
 
 type AppPrivateMessageUnreadDetailItem struct {
-	SenderId     uint64 `json:"senderId,string"`
-	ReceiverId   uint64 `json:"receiverId,string"`
+	SenderId     uint64 `json:"sender_id,string"`
 	UnreadCount  uint64 `json:"unreadCount"`
 	SenderName   string `json:"senderName"`
 	SenderAvatar string `json:"senderAvatar"`
@@ -35,10 +34,10 @@ type AppPrivateMessageUnreadListRes struct {
 
 // AppPrivateMessageBySenderReq App端按发送者查询私信内容
 type AppPrivateMessageBySenderReq struct {
-	g.Meta    `path:"/privateMessageBySender" method:"post" summary:"按发送者查询私信" tags:"私信"`
-	SenderId  uint64 `json:"senderId,string" v:"required|min:1#发送者ID不能为空|发送者ID非法" dc:"发送者用户ID"`
-	PageIndex int    `json:"pageIndex" dc:"页码(从1开始)"`
-	PageSize  int    `json:"pageSize" dc:"每页条数"`
+	g.Meta        `path:"/privateMessageBySender" method:"post" summary:"按目标用户id查询私信" tags:"私信"`
+	TargetId      uint64 `json:"targetId,string" v:"required|min:1#发送者ID不能为空|发送者ID非法" dc:"目标用户ID"`
+	LastCreatedAt int64  `json:"lastCreatedAt" dc:"游标(毫秒时间戳);传0从最新消息开始,传上一页最后一条消息的创建时间戳拉取更早消息"`
+	PageSize      int    `json:"pageSize" dc:"每页条数(默认40)"`
 }
 
 type AppPrivateMessageItem struct {
@@ -49,16 +48,19 @@ type AppPrivateMessageItem struct {
 	SenderName   string `json:"senderName"`
 	SenderAvatar string `json:"senderAvatar"`
 	CreatedAt    string `json:"createdAt"`
+	CreatedAtMs  int64  `json:"createdAtMs" dc:"创建时间(毫秒),用作下一页 lastCreatedAt 游标"`
 }
 
 type AppPrivateMessageBySenderRes struct {
-	List []*AppPrivateMessageItem `json:"list"`
+	List    []*AppPrivateMessageItem `json:"list"`
+	HasMore bool                     `json:"hasMore" dc:"是否还有更早消息"`
 }
 
 // AppClearPrivateMessageUnreadReq App端清除指定玩家私信未读
 type AppClearPrivateMessageUnreadReq struct {
-	g.Meta   `path:"/clearPrivateMessageUnread" method:"post" summary:"清除指定玩家私信未读" tags:"私信"`
-	SenderId uint64 `json:"senderId,string" v:"required|min:1#发送者ID不能为空|发送者ID非法" dc:"指定聊天对象用户ID"`
+	g.Meta       `path:"/clearPrivateMessageUnread" method:"post" summary:"清除指定玩家私信未读" tags:"私信"`
+	TargetId     uint64 `json:"targetId,string" v:"required|min:1#发送者ID不能为空|发送者ID非法" dc:"目标用户ID"`
+	ClearedCount uint64 `json:"clearedCount" dc:"本次清除的未读数"`
 }
 
 type AppClearPrivateMessageUnreadRes struct {

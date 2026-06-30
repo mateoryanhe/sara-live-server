@@ -63,12 +63,7 @@ func (m *UserMessageUnread) AddPrivateUnread(v uint64) {
 }
 
 func (m *UserMessageUnread) SubPrivateUnread(v uint64) {
-	if v >= m.PrivateUnread {
-		m.PrivateUnread = 0
-	} else {
-		m.PrivateUnread -= v
-	}
-	m.SetUpdatedAt(time.Now())
+	m.PrivateUnread = math.Sub(m.SystemUnread, v)
 	syndb.AddDataToQuickChan(TbUserMessageUnread, UserMessageUnreadPrivateUnread, &syndb.ColData{
 		IdVal: m.ID, ColVal: m.PrivateUnread,
 	})
