@@ -55,9 +55,9 @@ func toScaledInt64(v float64) int64 {
 	if v <= float64(stdmath.MinInt64)/float64DecimalScale {
 		return stdmath.MinInt64
 	}
-	return int64(stdmath.Round(v * float64DecimalScale))
+	return int64(v * float64DecimalScale)
 }
 
 func fromScaledInt64(scaled int64) float64 {
-	return stdmath.Round(float64(scaled)) / float64DecimalScale
+	return float64(scaled) / float64DecimalScale
 }
