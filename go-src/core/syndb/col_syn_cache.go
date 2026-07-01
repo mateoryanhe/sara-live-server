@@ -2,6 +2,7 @@ package syndb
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/container/gqueue"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/util/gutil"
@@ -14,13 +15,11 @@ import (
 
 const (
 	// Max 批量同步数量
-	Max     = 150
-	ChanMax = 1000
+	Max = 150
 	// CloseTime 服务器关闭,同步周期变更
 	CloseTime = 50 * time.Millisecond
-	// chanWriteSlowMs 写入缓冲通道超过该耗时(毫秒)时打印日志
-	chanWriteSlowMs = 3
-	// QuickSynPeriod 快速同步
+	// queuePopTimeout Pop 超时,避免消费端阻塞
+	queuePopTimeout = time.Millisecond
 )
 
 type ColData struct {
@@ -30,8 +29,8 @@ type ColData struct {
 
 // ColSynCache 内存同步数据库工具
 type ColSynCache struct {
-	//缓冲数据
-	DataQueue chan *ColData
+	// 无界队列,Push 写入链表不阻塞
+	DataQueue *gqueue.TQueue[*ColData]
 	//准备同步数据
 	TempData []*ColData
 	//同步频率
@@ -46,24 +45,31 @@ type ColSynCache struct {
 	IdName string
 }
 
+func newColSynCache(tbName string, tbCol string, period time.Duration) *ColSynCache {
+	return &ColSynCache{
+		TbName:    tbName,
+		ColName:   tbCol,
+		DataQueue: gqueue.NewTQueue[*ColData](),
+		TempData:  make([]*ColData, 0),
+		Period:    period,
+		LastTime:  time.Now(),
+		IdName:    string(db.IdName),
+	}
+}
+
 // AddDataToLazyChan 加入变更数据到延迟缓存区
 func AddDataToLazyChan(tbName db.TbName, tbCol db.TbCol, colData *ColData) {
-	addDataToChan("lazy", lazyMap, tbName, tbCol, colData)
+	addDataToQueue(lazyMap, tbName, tbCol, colData)
 }
 
 // AddDataToQuickChan 加入变更数据到快速缓存区
 func AddDataToQuickChan(tbName db.TbName, tbCol db.TbCol, colData *ColData) {
-	addDataToChan("quick", quickMap, tbName, tbCol, colData)
+	addDataToQueue(quickMap, tbName, tbCol, colData)
 }
 
-func addDataToChan(queueType string, cacheMap map[string]*ColSynCache, tbName db.TbName, tbCol db.TbCol, colData *ColData) {
+func addDataToQueue(cacheMap map[string]*ColSynCache, tbName db.TbName, tbCol db.TbCol, colData *ColData) {
 	key := string(tbName) + ":" + string(tbCol)
-	start := time.Now()
-	cacheMap[key].DataQueue <- colData
-	costMs := time.Since(start).Milliseconds()
-	if costMs > chanWriteSlowMs {
-		g.Log().Infof(gctx.New(), "syndb写入%s缓冲耗时=%vms,tb=%v,col=%v,id=%v", queueType, costMs, tbName, tbCol, colData.IdVal)
-	}
+	cacheMap[key].DataQueue.Push(colData)
 }
 
 // SysExit 调整全部数据库同步组件同步时间到最小
@@ -104,23 +110,16 @@ func consume(ctx context.Context) {
 	}
 }
 
-// PullData 拉取数据到同步队列
+// PullData 拉取数据到同步队列(Pop 超时 1ms,无数据则直接返回)
 func (colCache *ColSynCache) PullData() {
 	select {
-	//拉取一个数据到同步队列中
-	case data := <-colCache.DataQueue:
-		{
-			colCache.TempData = append(colCache.TempData, data)
-			//如果是第一个数据
-			if len(colCache.TempData) == 1 {
-				colCache.LastTime = time.Now()
-			}
+	case data := <-colCache.DataQueue.C:
+		colCache.TempData = append(colCache.TempData, data)
+		if len(colCache.TempData) == 1 {
+			colCache.LastTime = time.Now()
 		}
-		//防止堵塞
-	case <-time.After(time.Nanosecond):
-		{
-			return
-		}
+	case <-time.After(queuePopTimeout):
+		return
 	}
 }
 

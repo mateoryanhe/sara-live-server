@@ -20,16 +20,8 @@ func InitSynCache() {
 	shutdown.RegCommonShutDownHandler(SysExit)
 }
 
-// RegWithSelf 指定同步频率,缓冲大小
-func RegWithSelf(tbName db.TbName, tbCol db.TbCol, synTime time.Duration, bufferSize int) {
+// RegWithSelf 指定同步频率
+func RegWithSelf(tbName db.TbName, tbCol db.TbCol, synTime time.Duration, _ int) {
 	colKey := string(tbName) + ":" + string(tbCol)
-	lazyMap[colKey] = &ColSynCache{
-		ColName:   string(tbCol),
-		TbName:    string(tbName),
-		DataQueue: make(chan *ColData, bufferSize),
-		TempData:  make([]*ColData, 0),
-		Period:    synTime,
-		LastTime:  time.Now(),
-		IdName:    string(db.IdName),
-	}
+	lazyMap[colKey] = newColSynCache(string(tbName), string(tbCol), synTime)
 }

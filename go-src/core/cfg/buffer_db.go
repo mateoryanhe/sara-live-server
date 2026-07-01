@@ -14,9 +14,6 @@ const (
 type DbBufferCfg struct {
 	//单行数据配置
 	Period int
-	Small  int
-	Middle int
-	Large  int
 }
 
 var LazyDbBufferCfg = &DbBufferCfg{}
