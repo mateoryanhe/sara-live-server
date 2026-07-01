@@ -82,6 +82,7 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 	for _, o := range getOnline(req.RoomId) {
 		push.Data(o, cmd.LiveRoomGift, payload)
 	}
+	push.Data(req.RoomId, cmd.LiveRoomGift, payload)
 
 	lockName := fmt.Sprintf("send_gift_%v", req.RoomId)
 	gmlock.Lock(lockName)

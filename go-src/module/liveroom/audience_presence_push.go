@@ -12,10 +12,12 @@ import (
 )
 
 func broadcastAudienceJoin(roomId, userId uint64, onlineCount int) {
+	//g.Log().Infof(gctx.New(), "参加====roId%v,usid,%v", roomId, userId)
 	payload := buildAudiencePresencePayload(roomId, userId, onlineCount)
 	for _, o := range getOnline(roomId) {
 		push.Data(o, cmd.LiveRoomAudienceJoin, payload)
 	}
+	push.Data(roomId, cmd.LiveRoomAudienceJoin, payload)
 }
 
 func broadcastAudienceLeave(roomId, userId uint64, onlineCount int) {

@@ -6,11 +6,11 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gctx"
+	"github.com/gogf/gf/v2/util/guid"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
-	"xr-game-server/core/snowflake"
 )
 
 const (
@@ -90,6 +90,10 @@ func GetUrlByName(name string) string {
 	return buildResourceUrl(fmt.Sprintf("/%s/%s", ImageSubDir, name))
 }
 
+func newStoredFileName(ext string) string {
+	return guid.S() + ext
+}
+
 // UploadCMSFile 保存CMS后台上传的图片或礼物动画资源到 <serverRoot>/upload/cms,返回保存后的文件名
 func UploadCMSFile(file *ghttp.UploadFile) (string, error) {
 	if file == nil {
@@ -107,7 +111,7 @@ func UploadCMSFile(file *ghttp.UploadFile) (string, error) {
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return "", err
 	}
-	newName := fmt.Sprintf("%d%s", snowflake.GetId(), ext)
+	newName := newStoredFileName(ext)
 	src, err := file.Open()
 	if err != nil {
 		return "", err
@@ -144,7 +148,7 @@ func UploadShortVideoFile(file *ghttp.UploadFile, maxSize uint64) (string, error
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return "", err
 	}
-	newName := fmt.Sprintf("%d%s", snowflake.GetId(), ext)
+	newName := newStoredFileName(ext)
 	src, err := file.Open()
 	if err != nil {
 		return "", err

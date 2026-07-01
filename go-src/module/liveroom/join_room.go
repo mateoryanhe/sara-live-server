@@ -55,9 +55,8 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 			user.SetLiveRoomId(room.ID)
 			user.SetLiveRoomVer(httpserver.GetReqId(ctx))
 		}
-		broadcastAudienceJoin(room.ID, userId, getLenForRoom(room.ID))
 	}
-
+	broadcastAudienceJoin(room.ID, userId, getLenForRoom(room.ID))
 	// 直播中且非主播本人:有效观众(单场去重 + 日/周/月跨直播间去重)
 	if room.LiveRecordId > 0 && userId != req.RoomId {
 		stat.RecordValidAudience(userId, time.Now())

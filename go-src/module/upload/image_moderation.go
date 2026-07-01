@@ -20,7 +20,6 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/google/uuid"
 
-	"xr-game-server/core/snowflake"
 	"xr-game-server/errercode"
 )
 
@@ -302,7 +301,7 @@ func saveUploadedImageFile(file *ghttp.UploadFile) (name, fullPath string, err e
 	if err = os.MkdirAll(dir, 0755); err != nil {
 		return "", "", err
 	}
-	name = fmt.Sprintf("%d%s", snowflake.GetId(), ext)
+	name = newStoredFileName(ext)
 	fullPath = filepath.Join(dir, name)
 	src, err := file.Open()
 	if err != nil {
