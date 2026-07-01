@@ -19,7 +19,7 @@ const (
 	// CloseTime 服务器关闭,同步周期变更
 	CloseTime = 50 * time.Millisecond
 	// queuePopTimeout Pop 超时,避免消费端阻塞
-	queuePopTimeout = time.Millisecond
+	queuePopTimeout = time.Nanosecond
 )
 
 type ColData struct {

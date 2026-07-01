@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"encoding/json"
+	"github.com/gogf/gf/v2/container/gqueue"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/gorilla/websocket"
@@ -10,7 +11,6 @@ import (
 	"time"
 	"xr-game-server/constants/cmd"
 	"xr-game-server/constants/common"
-	"xr-game-server/core/cfg"
 	"xr-game-server/core/event"
 	"xr-game-server/core/xrtoken"
 	"xr-game-server/errercode"
@@ -23,7 +23,6 @@ const (
 	IdleTime = 3000 * time.Millisecond
 	ChkTime  = 2 * time.Nanosecond
 	MaxSize  = 10
-	BuffSize = 100
 )
 
 type PushResp struct {
@@ -105,23 +104,19 @@ type WebSocketClient struct {
 	sendTime time.Time
 	//上次数据发送时间
 	lastTime   time.Time
-	dataBuffer chan any
+	dataBuffer *gqueue.TQueue[any]
 	sendData   []any
 	Loop       bool
 	Num        uint
 }
 
 func newClient(id uint64, conn *websocket.Conn) *WebSocketClient {
-	buffSize := BuffSize
-	if cfg.WebSocketBufferCfgModel.Period > common.Zero {
-		buffSize = cfg.WebSocketBufferCfgModel.Period
-	}
 	return &WebSocketClient{
 		Id:         id,
 		Conn:       conn,
 		sendTime:   time.Now(),
 		lastTime:   time.Now(),
-		dataBuffer: make(chan any, buffSize),
+		dataBuffer: gqueue.NewTQueue[any](),
 		sendData:   make([]any, common.Zero),
 		Loop:       true,
 	}
@@ -158,8 +153,8 @@ func (w *WebSocketClient) clearPendingData() {
 	w.Num = 0
 	for {
 		select {
-		case <-w.dataBuffer:
-		default:
+		case <-w.dataBuffer.C:
+		case <-time.After(ChkTime):
 			return
 		}
 	}
@@ -206,44 +201,28 @@ func (w *WebSocketClient) Consume() {
 func (w *WebSocketClient) consumeData() {
 	for {
 		select {
-		case data, ok := <-w.dataBuffer:
-			{
-				if !w.Loop {
-					return
-				}
-				if ok {
-					//检查数据是否过多
-					if w.Num >= MaxSize {
-						//开始发送数据
-						w.flushDataBuffer()
-						return
-					} else {
-						w.sendData = append(w.sendData, data)
-						//检查超时时间是否设置
-						if w.Num == common.Zero {
-							w.sendTime = time.Now().Add(SendTimeOut)
-						}
-						w.Num++
-					}
-				}
+		case data := <-w.dataBuffer.C:
+			if !w.Loop {
+				return
 			}
-			break
+			if w.Num >= MaxSize {
+				w.flushDataBuffer()
+				return
+			}
+			w.sendData = append(w.sendData, data)
+			if w.Num == common.Zero {
+				w.sendTime = time.Now().Add(SendTimeOut)
+			}
+			w.Num++
 		case <-time.After(ChkTime):
-			{
-
-			}
 			return
 		}
 	}
-
 }
 
 func (c *WebSocketClient) Send(data any) {
 	if !c.Loop {
 		return
 	}
-	select {
-	case c.dataBuffer <- data:
-	default:
-	}
+	c.dataBuffer.Push(data)
 }
