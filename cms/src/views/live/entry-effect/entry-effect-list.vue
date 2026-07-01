@@ -3,21 +3,17 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>礼物管理</span>
+          <span>进场特效</span>
         </div>
       </template>
       <div class="content">
         <div class="table-header">
-          <el-button type="primary" @click="handleAdd">新增礼物</el-button>
+          <el-button type="primary" @click="handleAdd">新增进场特效</el-button>
         </div>
 
-        <!-- 搜索表单 -->
         <el-form :model="searchForm" class="search-form" inline>
-          <el-form-item label="礼物名称">
-            <el-input v-model="searchForm.name" clearable placeholder="礼物名称(模糊匹配)"/>
-          </el-form-item>
-          <el-form-item label="分类">
-            <el-input v-model="searchForm.category" clearable placeholder="分类"/>
+          <el-form-item label="名称">
+            <el-input v-model="searchForm.name" clearable placeholder="名称(模糊匹配)"/>
           </el-form-item>
           <el-form-item label="状态">
             <el-select v-model="searchForm.statusFilter" placeholder="全部" style="width: 140px">
@@ -34,24 +30,9 @@
 
         <el-table v-loading="loading" :data="tableData" style="width: 100%">
           <el-table-column label="ID" prop="id" width="100"/>
-          <el-table-column label="礼物名称" prop="name" min-width="120"/>
-          <el-table-column label="名称(英文)" prop="nameEn" min-width="120" show-overflow-tooltip/>
-          <el-table-column label="名称(西班牙语)" prop="nameEs" min-width="120" show-overflow-tooltip/>
-          <el-table-column label="名称(葡萄牙语)" prop="namePt" min-width="120" show-overflow-tooltip/>
-          <el-table-column label="名称(印地语)" prop="nameHi" min-width="120" show-overflow-tooltip/>
-          <el-table-column label="图标" width="90">
-            <template #default="{ row }">
-              <el-image
-                  v-if="row.icon"
-                  :preview-src-list="[row.icon]"
-                  :src="row.icon"
-                  fit="cover"
-                  preview-teleported
-                  style="width: 48px; height: 48px"
-              />
-              <span v-else>-</span>
-            </template>
-          </el-table-column>
+          <el-table-column label="名称" prop="name" min-width="140"/>
+          <el-table-column label="等级开始" prop="levelStart" width="100"/>
+          <el-table-column label="等级结束" prop="levelEnd" width="100"/>
           <el-table-column label="动画资源" min-width="220">
             <template #default="{ row }">
               <video
@@ -72,20 +53,11 @@
               <span v-else class="media-url-text">{{ row.animationName || row.animation || '-' }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="价格" prop="price" width="110"/>
-          <el-table-column label="分类" prop="category" width="120"/>
-          <el-table-column label="排序" prop="sort" width="80"/>
           <el-table-column label="状态" width="90">
             <template #default="{ row }">
               <el-tag :type="row.status === 1 ? 'success' : 'info'">
                 {{ row.status === 1 ? '上架' : '下架' }}
               </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="描述" prop="description" min-width="160" show-overflow-tooltip/>
-          <el-table-column label="发布时间" prop="publishedAt" width="160">
-            <template #default="{ row }">
-              {{ row.publishedAt || '-' }}
             </template>
           </el-table-column>
           <el-table-column label="创建时间" prop="createdAt" width="160"/>
@@ -128,59 +100,23 @@
       </div>
     </el-card>
 
-    <!-- 礼物编辑对话框 -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="640px">
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="560px">
       <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="100px">
-        <el-form-item label="礼物名称" prop="name">
-          <el-input v-model="currentRow.name" placeholder="请输入礼物名称"/>
+        <el-form-item label="名称" prop="name">
+          <el-input v-model="currentRow.name" placeholder="请输入名称"/>
         </el-form-item>
-        <el-form-item label="名称(英文)" prop="nameEn">
-          <el-input v-model="currentRow.nameEn" placeholder="请输入英文名称"/>
+        <el-form-item label="等级开始" prop="levelStart">
+          <el-input-number v-model="currentRow.levelStart" :min="1" controls-position="right"/>
         </el-form-item>
-        <el-form-item label="名称(西班牙语)" prop="nameEs">
-          <el-input v-model="currentRow.nameEs" placeholder="请输入西班牙语名称"/>
-        </el-form-item>
-        <el-form-item label="名称(葡萄牙语)" prop="namePt">
-          <el-input v-model="currentRow.namePt" placeholder="请输入葡萄牙语名称"/>
-        </el-form-item>
-        <el-form-item label="名称(印地语)" prop="nameHi">
-          <el-input v-model="currentRow.nameHi" placeholder="请输入印地语名称"/>
-        </el-form-item>
-        <el-form-item label="图标" prop="icon">
-          <div class="asset-upload-wrap">
-            <el-upload
-                :before-upload="beforeIconUpload"
-                :disabled="iconUploading"
-                :http-request="(opt: UploadRequestOptions) => doUpload(opt, 'icon')"
-                :show-file-list="false"
-                accept="image/*"
-                action="#"
-                class="icon-uploader"
-            >
-              <img v-if="iconPreviewUrl" :src="iconPreviewUrl" alt="icon" class="icon-preview"/>
-              <div v-else class="asset-uploader-placeholder icon-placeholder">
-                <el-icon class="asset-uploader-icon">
-                  <Plus/>
-                </el-icon>
-                <span>点击上传图标</span>
-              </div>
-            </el-upload>
-            <el-button
-                v-if="iconPreviewUrl || currentRow.icon"
-                link
-                type="danger"
-                @click="clearAsset('icon')"
-            >
-              移除图标
-            </el-button>
-          </div>
+        <el-form-item label="等级结束" prop="levelEnd">
+          <el-input-number v-model="currentRow.levelEnd" :min="1" controls-position="right"/>
         </el-form-item>
         <el-form-item label="动画资源" prop="animation">
           <div class="asset-upload-wrap">
             <el-upload
                 :before-upload="beforeAnimationUpload"
                 :disabled="animationUploading"
-                :http-request="(opt: UploadRequestOptions) => doUpload(opt, 'animation')"
+                :http-request="doUpload"
                 :show-file-list="false"
                 accept=".svga,.pag,.json,.lottie,.mp4,.webm,.zip,.gif,.apng,.png,.webp,.jpg,.jpeg,.bmp"
                 action="#"
@@ -216,23 +152,11 @@
                 v-if="animationPreviewType !== 'none' || currentRow.animation"
                 link
                 type="danger"
-                @click="clearAsset('animation')"
+                @click="clearAnimation"
             >
               移除动画
             </el-button>
           </div>
-        </el-form-item>
-        <el-form-item label="价格(钻石)" prop="price">
-          <el-input-number v-model="currentRow.price" :min="0" controls-position="right"/>
-        </el-form-item>
-        <el-form-item label="分类" prop="category">
-          <el-input v-model="currentRow.category" placeholder="请输入分类"/>
-        </el-form-item>
-        <el-form-item label="排序" prop="sort">
-          <el-input-number v-model="currentRow.sort" controls-position="right"/>
-        </el-form-item>
-        <el-form-item label="描述" prop="description">
-          <el-input v-model="currentRow.description" placeholder="请输入描述" type="textarea"/>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -247,8 +171,8 @@
 import {onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
 import {Document, Plus} from '@element-plus/icons-vue'
-import {giftApi, uploadApi} from '@/api'
-import type {Gift} from '@/types/api.ts'
+import {entryEffectApi, uploadApi} from '@/api'
+import type {EntryEffect} from '@/types/api.ts'
 import {
   getExt,
   isImageUrl,
@@ -260,92 +184,63 @@ import {
 
 interface SearchForm {
   name: string
-  category: string
   statusFilter: number
 }
 
-interface GiftForm {
+interface EntryEffectForm {
   id: string
   name: string
-  nameEn: string
-  nameEs: string
-  namePt: string
-  nameHi: string
-  icon: string
+  levelStart: number
+  levelEnd: number
   animation: string
-  price: number
-  category: string
-  sort: number
-  description: string
 }
 
 const loading = ref(false)
-const tableData = ref<Gift[]>([])
+const tableData = ref<EntryEffect[]>([])
 const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
 
 const searchForm = reactive<SearchForm>({
   name: '',
-  category: '',
   statusFilter: 0
 })
 
 const dialogVisible = ref(false)
 const dialogTitle = ref('')
-const defaultForm = (): GiftForm => ({
+const defaultForm = (): EntryEffectForm => ({
   id: '',
   name: '',
-  nameEn: '',
-  nameEs: '',
-  namePt: '',
-  nameHi: '',
-  icon: '',
-  animation: '',
-  price: 0,
-  category: '',
-  sort: 0,
-  description: ''
+  levelStart: 1,
+  levelEnd: 1,
+  animation: ''
 })
-const currentRow = ref<GiftForm>(defaultForm())
-
+const currentRow = ref<EntryEffectForm>(defaultForm())
 const formRef = ref<FormInstance>()
 
-const iconUploading = ref(false)
 const animationUploading = ref(false)
-const iconPreviewUrl = ref('')
 const animationPreviewUrl = ref('')
 const animationPreviewType = ref<MediaPreviewType>('none')
 const animationFileLabel = ref('')
-const objectPreviewUrls: Partial<Record<'icon' | 'animation', string>> = {}
+let objectPreviewUrl = ''
 
-const revokeObjectPreview = (field: 'icon' | 'animation') => {
-  const url = objectPreviewUrls[field]
-  if (url) {
-    URL.revokeObjectURL(url)
-    delete objectPreviewUrls[field]
+const allowedAnimationExt = [
+  '.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.apng',
+  '.svga', '.pag', '.json', '.lottie', '.mp4', '.webm', '.zip'
+]
+
+const revokeObjectPreview = () => {
+  if (objectPreviewUrl) {
+    URL.revokeObjectURL(objectPreviewUrl)
+    objectPreviewUrl = ''
   }
 }
 
-const revokeAllObjectPreviews = () => {
-  revokeObjectPreview('icon')
-  revokeObjectPreview('animation')
-}
-
-const resetAssetPreview = () => {
-  revokeAllObjectPreviews()
-  iconPreviewUrl.value = ''
+const resetAnimationPreview = () => {
+  revokeObjectPreview()
   animationPreviewUrl.value = ''
   animationPreviewType.value = 'none'
   animationFileLabel.value = ''
-}
-
-const setIconPreview = (url: string, fromObject = false) => {
-  revokeObjectPreview('icon')
-  iconPreviewUrl.value = url
-  if (fromObject && url) {
-    objectPreviewUrls.icon = url
-  }
 }
 
 const setAnimationPreview = (
@@ -354,49 +249,27 @@ const setAnimationPreview = (
     type?: MediaPreviewType,
     fromObject = false
 ) => {
-  revokeObjectPreview('animation')
+  revokeObjectPreview()
   const previewType = type ?? resolveMediaPreviewType(url, fileLabel)
   animationPreviewType.value = previewType
   animationPreviewUrl.value = previewType === 'image' || previewType === 'video' ? url : ''
   animationFileLabel.value = previewType === 'file' ? fileLabel : ''
   if (fromObject && url) {
-    objectPreviewUrls.animation = url
+    objectPreviewUrl = url
   }
 }
 
-const clearAsset = (field: 'icon' | 'animation') => {
-  currentRow.value[field] = ''
-  if (field === 'icon') {
-    setIconPreview('')
-  } else {
-    setAnimationPreview('', '', 'none')
-  }
-  formRef.value?.validateField(field).catch(() => undefined)
+const clearAnimation = () => {
+  currentRow.value.animation = ''
+  resetAnimationPreview()
+  formRef.value?.validateField('animation').catch(() => undefined)
 }
 
 watch(dialogVisible, (visible) => {
   if (!visible) {
-    resetAssetPreview()
+    resetAnimationPreview()
   }
 })
-
-// CMS后台允许上传的扩展名(与后端 allowedCMSExt 保持一致)
-const allowedAnimationExt = [
-  '.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.apng',
-  '.svga', '.pag', '.json', '.lottie', '.mp4', '.webm', '.zip'
-]
-
-const beforeIconUpload = (file: File): boolean => {
-  if (!file.type.startsWith('image/')) {
-    ElMessage.error('图标只能上传图片文件')
-    return false
-  }
-  if (file.size > 5 * 1024 * 1024) {
-    ElMessage.error('图标文件不能超过5MB')
-    return false
-  }
-  return true
-}
 
 const beforeAnimationUpload = (file: File): boolean => {
   const ext = getExt(file.name)
@@ -411,62 +284,55 @@ const beforeAnimationUpload = (file: File): boolean => {
   return true
 }
 
-const doUpload = async (
-    options: UploadRequestOptions,
-    field: 'icon' | 'animation'
-) => {
+const doUpload = async (options: UploadRequestOptions) => {
   const file = options.file as File
-  const flag = field === 'icon' ? iconUploading : animationUploading
-  flag.value = true
+  animationUploading.value = true
   try {
     const res = await uploadApi.uploadFile(file)
-    currentRow.value[field] = res.fileName
-    if (field === 'icon') {
-      setIconPreview(URL.createObjectURL(file), true)
+    currentRow.value.animation = res.fileName
+    const previewType = resolveFilePreviewType(file.name)
+    if (previewType === 'image' || previewType === 'video') {
+      setAnimationPreview(URL.createObjectURL(file), '', previewType, true)
     } else {
-      const previewType = resolveFilePreviewType(file.name)
-      if (previewType === 'image' || previewType === 'video') {
-        setAnimationPreview(URL.createObjectURL(file), '', previewType, true)
-      } else {
-        setAnimationPreview('', res.fileName, 'file')
-      }
+      setAnimationPreview('', res.fileName, 'file')
     }
-    formRef.value?.validateField(field).catch(() => undefined)
+    formRef.value?.validateField('animation').catch(() => undefined)
     ElMessage.success('上传成功')
   } catch (error) {
     console.error('上传失败:', error)
     ElMessage.error('上传失败')
   } finally {
-    flag.value = false
+    animationUploading.value = false
   }
 }
 
 const formRules: FormRules = {
   name: [
-    {required: true, message: '请输入礼物名称', trigger: 'blur'},
-    {min: 1, max: 64, message: '礼物名称长度在1-64个字符', trigger: 'blur'}
+    {required: true, message: '请输入名称', trigger: 'blur'},
+    {min: 1, max: 64, message: '名称长度在1-64个字符', trigger: 'blur'}
   ],
-  nameEn: [{max: 64, message: '英文名称最长64字符', trigger: 'blur'}],
-  nameEs: [{max: 64, message: '西班牙语名称最长64字符', trigger: 'blur'}],
-  namePt: [{max: 64, message: '葡萄牙语名称最长64字符', trigger: 'blur'}],
-  nameHi: [{max: 64, message: '印地语名称最长64字符', trigger: 'blur'}],
-  icon: [],
-  animation: [],
-  category: [
-    {max: 32, message: '分类最长32字符', trigger: 'blur'}
+  levelStart: [{required: true, message: '请输入等级开始', trigger: 'change'}],
+  levelEnd: [
+    {required: true, message: '请输入等级结束', trigger: 'change'},
+    {
+      validator: (_rule, value, callback) => {
+        if (value < currentRow.value.levelStart) {
+          callback(new Error('等级结束不能小于等级开始'))
+          return
+        }
+        callback()
+      },
+      trigger: 'change'
+    }
   ],
-  description: [
-    {max: 255, message: '描述最长255字符', trigger: 'blur'}
-  ]
+  animation: [{required: true, message: '请上传动画资源', trigger: 'change'}]
 }
 
-// 获取礼物列表
-const fetchGiftList = async () => {
+const fetchList = async () => {
   loading.value = true
   try {
-    const response = await giftApi.getGiftList({
+    const response = await entryEffectApi.getEntryEffectList({
       name: searchForm.name,
-      category: searchForm.category,
       statusFilter: searchForm.statusFilter,
       pageIndex: currentPage.value,
       pageSize: pageSize.value
@@ -474,8 +340,8 @@ const fetchGiftList = async () => {
     tableData.value = response.data
     total.value = response.total
   } catch (error) {
-    console.error('获取礼物列表失败:', error)
-    ElMessage.error('获取礼物列表失败')
+    console.error('获取进场特效列表失败:', error)
+    ElMessage.error('获取进场特效列表失败')
   } finally {
     loading.value = false
   }
@@ -483,47 +349,36 @@ const fetchGiftList = async () => {
 
 const handleSearch = () => {
   currentPage.value = 1
-  fetchGiftList()
+  fetchList()
 }
 
-// 分页处理
 const handleSizeChange = (size: number) => {
   pageSize.value = size
-  fetchGiftList()
+  fetchList()
 }
 
 const handleCurrentChange = (page: number) => {
   currentPage.value = page
-  fetchGiftList()
+  fetchList()
 }
 
-// 操作处理
 const handleAdd = () => {
-  dialogTitle.value = '新增礼物'
+  dialogTitle.value = '新增进场特效'
   currentRow.value = defaultForm()
-  resetAssetPreview()
+  resetAnimationPreview()
   dialogVisible.value = true
 }
 
-const handleEdit = (row: Gift) => {
-  dialogTitle.value = '编辑礼物'
-  const iconName = row.iconName || ''
+const handleEdit = (row: EntryEffect) => {
+  dialogTitle.value = '编辑进场特效'
   const animationName = row.animationName || ''
   currentRow.value = {
     id: row.id,
     name: row.name,
-    nameEn: row.nameEn || '',
-    nameEs: row.nameEs || '',
-    namePt: row.namePt || '',
-    nameHi: row.nameHi || '',
-    icon: iconName,
-    animation: animationName,
-    price: Number(row.price) || 0,
-    category: row.category,
-    sort: Number(row.sort) || 0,
-    description: row.description
+    levelStart: Number(row.levelStart) || 1,
+    levelEnd: Number(row.levelEnd) || 1,
+    animation: animationName
   }
-  setIconPreview(row.icon || '')
   if (animationName) {
     const previewType = resolveMediaPreviewType(row.animation || '', animationName)
     if (previewType === 'image' || previewType === 'video') {
@@ -532,89 +387,87 @@ const handleEdit = (row: Gift) => {
       setAnimationPreview('', animationName, 'file')
     }
   } else {
-    setAnimationPreview('', '', 'none')
+    resetAnimationPreview()
   }
   dialogVisible.value = true
 }
 
-const handleDelete = async (row: Gift) => {
+const handleDelete = async (row: EntryEffect) => {
   try {
-    await ElMessageBox.confirm(`确定要删除礼物 "${row.name}" 吗？`, '确认删除', {
+    await ElMessageBox.confirm(`确定要删除进场特效 "${row.name}" 吗？`, '确认删除', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
     })
-
-    await giftApi.deleteGift(row.id)
+    await entryEffectApi.deleteEntryEffect(row.id)
     ElMessage.success('删除成功')
-    fetchGiftList()
+    fetchList()
   } catch (error) {
     console.error('删除失败:', error)
   }
 }
 
-const handleOnShelf = async (row: Gift) => {
+const handleOnShelf = async (row: EntryEffect) => {
   try {
-    await giftApi.onShelfGift(row.id)
+    await entryEffectApi.onShelfEntryEffect(row.id)
     ElMessage.success('上架成功')
-    fetchGiftList()
+    fetchList()
   } catch (error) {
     console.error('上架失败:', error)
     ElMessage.error('上架失败')
   }
 }
 
-const handleOffShelf = async (row: Gift) => {
+const handleOffShelf = async (row: EntryEffect) => {
   try {
-    await ElMessageBox.confirm(`确定要下架礼物 "${row.name}" 吗？`, '确认下架', {
+    await ElMessageBox.confirm(`确定要下架进场特效 "${row.name}" 吗？`, '确认下架', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
     })
-    await giftApi.offShelfGift(row.id)
+    await entryEffectApi.offShelfEntryEffect(row.id)
     ElMessage.success('下架成功')
-    fetchGiftList()
+    fetchList()
   } catch (error) {
     console.error('下架失败:', error)
   }
 }
 
-// 保存操作
 const handleSave = async () => {
   if (!formRef.value) return
-
   await formRef.value.validate(async (valid) => {
-    if (valid) {
-      try {
-        if (currentRow.value.id) {
-          await giftApi.updateGift(currentRow.value)
-        } else {
-          const {name, nameEn, nameEs, namePt, nameHi, icon, animation, price, category, sort, description} = currentRow.value
-          await giftApi.createGift({name, nameEn, nameEs, namePt, nameHi, icon, animation, price, category, sort, description})
-        }
-
-        ElMessage.success(currentRow.value.id ? '更新成功' : '创建成功')
-        dialogVisible.value = false
-        fetchGiftList()
-      } catch (error) {
-        console.error(currentRow.value.id ? '更新失败:' : '创建失败:', error)
-        ElMessage.error(currentRow.value.id ? '更新失败' : '创建失败')
+    if (!valid) return
+    try {
+      const payload = {
+        name: currentRow.value.name,
+        levelStart: currentRow.value.levelStart,
+        levelEnd: currentRow.value.levelEnd,
+        animation: currentRow.value.animation
       }
+      if (currentRow.value.id) {
+        await entryEffectApi.updateEntryEffect({id: currentRow.value.id, ...payload})
+      } else {
+        await entryEffectApi.createEntryEffect(payload)
+      }
+      ElMessage.success(currentRow.value.id ? '更新成功' : '创建成功')
+      dialogVisible.value = false
+      fetchList()
+    } catch (error) {
+      console.error('保存失败:', error)
+      ElMessage.error('保存失败')
     }
   })
 }
 
-// 重置搜索
 const resetSearch = () => {
   searchForm.name = ''
-  searchForm.category = ''
   searchForm.statusFilter = 0
   currentPage.value = 1
-  fetchGiftList()
+  fetchList()
 }
 
 onMounted(() => {
-  fetchGiftList()
+  fetchList()
 })
 </script>
 
@@ -652,7 +505,6 @@ onMounted(() => {
   gap: 8px;
 }
 
-.icon-uploader :deep(.el-upload),
 .animation-uploader :deep(.el-upload) {
   border: 1px dashed var(--el-border-color);
   border-radius: 8px;
@@ -661,7 +513,6 @@ onMounted(() => {
   transition: border-color 0.2s;
 }
 
-.icon-uploader :deep(.el-upload:hover),
 .animation-uploader :deep(.el-upload:hover) {
   border-color: var(--el-color-primary);
 }
@@ -676,11 +527,6 @@ onMounted(() => {
   gap: 8px;
 }
 
-.icon-placeholder {
-  width: 96px;
-  height: 96px;
-}
-
 .animation-placeholder {
   width: 240px;
   height: 120px;
@@ -688,13 +534,6 @@ onMounted(() => {
 
 .asset-uploader-icon {
   font-size: 28px;
-}
-
-.icon-preview {
-  width: 96px;
-  height: 96px;
-  display: block;
-  object-fit: cover;
 }
 
 .animation-preview {

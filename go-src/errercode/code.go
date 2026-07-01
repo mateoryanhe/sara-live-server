@@ -142,6 +142,10 @@ const (
 	LiveRoomTagExist XRCode = 130
 	// LiveRoomTagNonExist 直播间标签不存在
 	LiveRoomTagNonExist XRCode = 131
+	// EntryEffectExist 进场特效名称已存在
+	EntryEffectExist XRCode = 132
+	// EntryEffectNonExist 进场特效不存在
+	EntryEffectNonExist XRCode = 133
 )
 
 type XError struct {

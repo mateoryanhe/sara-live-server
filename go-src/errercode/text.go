@@ -82,6 +82,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ShortVideoDailyUploadLimit:     "Daily short video upload limit reached",
 		LiveRoomTagExist:               "Live room tag name already exists",
 		LiveRoomTagNonExist:            "Live room tag does not exist",
+		EntryEffectExist:               "Entry effect name already exists",
+		EntryEffectNonExist:            "Entry effect does not exist",
 	},
 	lang.LangZHCN: {
 		Success:                        "成功",
@@ -160,6 +162,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ShortVideoDailyUploadLimit:     "今日上传次数已达上限,请明天再试",
 		LiveRoomTagExist:               "直播间标签名称已存在",
 		LiveRoomTagNonExist:            "直播间标签不存在",
+		EntryEffectExist:               "进场特效名称已存在",
+		EntryEffectNonExist:            "进场特效不存在",
 	},
 	lang.LangZHTW: {
 		Success:                        "成功",
@@ -238,6 +242,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ShortVideoDailyUploadLimit:     "今日上傳次數已達上限,請明天再試",
 		LiveRoomTagExist:               "直播間標籤名稱已存在",
 		LiveRoomTagNonExist:            "直播間標籤不存在",
+		EntryEffectExist:               "進場特效名稱已存在",
+		EntryEffectNonExist:            "進場特效不存在",
 	},
 }
 

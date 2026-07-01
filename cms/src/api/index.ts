@@ -7,6 +7,7 @@ import {guildApi} from './modules/guild'
 import {giftApi} from './modules/gift'
 import {bannerApi} from './modules/banner'
 import {ticketApi} from './modules/ticket'
+import {entryEffectApi} from './modules/entryEffect'
 import {privateRoomBillingApi} from './modules/privateRoomBilling'
 import {shortVideoApi} from './modules/shortVideo'
 import {rechargeCfgApi} from './modules/rechargeCfg'
@@ -36,6 +37,7 @@ export {
     giftApi,
     bannerApi,
     ticketApi,
+    entryEffectApi,
     privateRoomBillingApi,
     shortVideoApi,
     rechargeCfgApi,
@@ -66,6 +68,7 @@ export default {
     giftApi,
     bannerApi,
     ticketApi,
+    entryEffectApi,
     privateRoomBillingApi,
     shortVideoApi,
     rechargeCfgApi,

@@ -92,7 +92,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('GiftManagement') || hasMenuPermission('AgoraCfgManagement') || hasMenuPermission('TicketManagement') || hasMenuPermission('PrivateRoomBillingManagement') || hasMenuPermission('LiveCfgManagement') || hasMenuPermission('LiveRoomTagManagement')"
+            v-if="hasMenuPermission('GiftManagement') || hasMenuPermission('EntryEffectManagement') || hasMenuPermission('AgoraCfgManagement') || hasMenuPermission('TicketManagement') || hasMenuPermission('PrivateRoomBillingManagement') || hasMenuPermission('LiveCfgManagement') || hasMenuPermission('LiveRoomTagManagement')"
             index="/live">
           <template #title>
             <el-icon>
@@ -105,6 +105,12 @@
               <Present/>
             </el-icon>
             <span>礼物管理</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('EntryEffectManagement')" index="/live/entry-effect/entry-effect-list">
+            <el-icon>
+              <MagicStick/>
+            </el-icon>
+            <span>进场特效</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('AgoraCfgManagement')" index="/live/agora-cfg">
             <el-icon>
@@ -319,7 +325,7 @@
 <script lang="ts" setup>
 import {computed, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {ArrowDown, Coin, Collection, CollectionTag, Cpu, Document, Expand, Fold, Key, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Coin, Collection, CollectionTag, Cpu, Document, Expand, Fold, Key, Lock, MagicStick, Medal, Money, Monitor, Odometer, Picture, Present, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {clearPermissions, getIsAdmin, hasPermission} from '@/utils/permission'
 
 const route = useRoute()

@@ -7,6 +7,7 @@ import (
 	"xr-game-server/module/auth"
 	"xr-game-server/module/banner"
 	"xr-game-server/module/currencylog"
+	"xr-game-server/module/entryeffect"
 	"xr-game-server/module/game"
 	"xr-game-server/module/livecfg"
 	"xr-game-server/module/liveroom"
@@ -37,6 +38,7 @@ func Init() {
 	anchorrank.Init()
 	banner.Init()
 	ticket.Init()
+	entryeffect.Init()
 	privateroombilling.Init()
 	vip.Init()
 	game.Init()

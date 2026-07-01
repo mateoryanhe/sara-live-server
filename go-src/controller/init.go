@@ -35,6 +35,8 @@ func Init() {
 	initBannerAppController()               // 首页Banner(App)
 	initTicketController()                  // 门票(CMS)
 	initTicketAppController()               // 门票(App)
+	initEntryEffectController()             // 进场特效(CMS)
+	initEntryEffectAppController()          // 进场特效(App)
 	initPrivateRoomBillingController()      // 私密直播间计费(CMS)
 	initPrivateRoomBillingAppController()   // 私密直播间计费(App)
 	initShortVideoController()              // 短视频(CMS)

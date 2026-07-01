@@ -281,6 +281,23 @@ export interface GiftQuery extends PageQuery {
     statusFilter?: number
 }
 
+export interface EntryEffect {
+    id: string
+    name: string
+    levelStart: number
+    levelEnd: number
+    animation: string
+    animationName: string
+    status: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface EntryEffectQuery extends PageQuery {
+    name?: string
+    statusFilter?: number
+}
+
 // 充值配置
 export interface RechargeCfg {
     id: string
