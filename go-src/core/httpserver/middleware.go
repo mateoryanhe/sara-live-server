@@ -20,7 +20,7 @@ func middlewareCORS(r *ghttp.Request) {
 
 // 记录前端请求日志
 func middlewareLogReq(r *ghttp.Request) {
-	authId := authIdFromToken(r)
+	authId := authIdFromRequest(r)
 	if !canDo {
 		logAPIRequestStart(r, authId, "关机了,收到前端请求")
 		WriteFailJson(r, int(errercode.ServerClose))

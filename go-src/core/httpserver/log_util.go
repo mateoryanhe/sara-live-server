@@ -177,3 +177,11 @@ func authIdFromToken(r *ghttp.Request) string {
 	}
 	return strings.Split(token, ".")[0]
 }
+
+// authIdFromRequest App 从 Authorization 解析,CMS 从 authId header 读取
+func authIdFromRequest(r *ghttp.Request) string {
+	if id := authIdFromToken(r); id != "" {
+		return id
+	}
+	return r.GetHeader(AuthId)
+}

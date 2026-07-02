@@ -7,5 +7,5 @@ import (
 // cms应答结果
 func customResponseMiddleware(r *ghttp.Request) {
 	r.Middleware.Next()
-	writeResponseAndLog(r, r.GetHeader(AuthId), nil)
+	writeResponseAndLog(r, authIdFromRequest(r), nil)
 }

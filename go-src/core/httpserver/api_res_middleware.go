@@ -6,7 +6,7 @@ import (
 
 func apiResponseMiddleware(r *ghttp.Request) {
 	r.Middleware.Next()
-	writeResponseAndLog(r, authIdFromToken(r), func(res any) any {
+	writeResponseAndLog(r, authIdFromRequest(r), func(res any) any {
 		return CreateSuccess(res)
 	})
 }
