@@ -6,6 +6,7 @@ import (
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/accountdto"
+	"xr-game-server/module/upload"
 )
 
 func QueryUserInfo(ctx context.Context, req *accountdto.QueryUserInfoReq) (res *httpserver.CMSQueryResp, err error) {
@@ -19,6 +20,7 @@ func QueryUserInfo(ctx context.Context, req *accountdto.QueryUserInfoReq) (res *
 			val.Diamond = userInfoCache.Diamond
 			val.Gold = userInfoCache.Gold
 			val.IsAnchor = userInfoCache.IsAnchor
+			val.Avatar = userInfoCache.Avatar
 			accountCache := accountdao.GetAccountBy(val.OpenId, val.Channel)
 			val.Cancel = accountCache.Cancel
 			val.Ban = accountCache.Ban
@@ -26,6 +28,7 @@ func QueryUserInfo(ctx context.Context, req *accountdto.QueryUserInfoReq) (res *
 			val.BanTime = accountCache.BanTime
 			val.VipLevel = userInfoCache.VipLevel
 		}
+		val.Avatar = upload.ResolveAvatarUrlForUser(val.ID, val.Avatar)
 	}
 	return httpserver.NewCMSQueryResp(total, data), nil
 }

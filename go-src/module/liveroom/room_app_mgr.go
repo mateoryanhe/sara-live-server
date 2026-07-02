@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gogf/gf/v2/net/ghttp"
 	"xr-game-server/constants/userstatus"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/liveroomdao"
@@ -51,9 +50,12 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 	//	return nil, err
 	//}
 
-	coverName, err := uploadCreateRoomCover(ctx, req.Cover)
-	if err != nil {
-		return nil, err
+	coverName := ""
+	if req.Cover != nil && req.Cover.Size > 0 {
+		coverName, err = upload.UploadImageForApp(ctx, req.Cover)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	category := normalizeLiveRoomCategory(req.Category)
@@ -87,14 +89,15 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 	room := entity.NewLiveRoom(
 		anchorId,
 		user.GuildId,
-		req.Title,
 		coverName,
+		req.Title,
 		req.Notice,
 	)
 	room.SetCategory(category)
 	room.SetTagId(req.TagId)
 	room.SetTicket(req.Ticket)
 	room.SetBilling(req.Billing)
+
 	liveroomdao.AddRoomToCache(room)
 	markLiveRoomCreated(user)
 
@@ -102,13 +105,6 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 		RoomId:  strconv.FormatUint(room.ID, 10),
 		GuildId: strconv.FormatUint(room.GuildId, 10),
 	}, nil
-}
-
-func uploadCreateRoomCover(ctx context.Context, file *ghttp.UploadFile) (string, error) {
-	if file == nil {
-		return "", nil
-	}
-	return upload.UploadImageForApp(ctx, file)
 }
 
 // loadOwnRoom 获取调用者(主播)自己的直播间;不存在则返回 LiveRoomNotExist

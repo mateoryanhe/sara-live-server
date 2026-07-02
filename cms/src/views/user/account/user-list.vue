@@ -59,7 +59,7 @@
                   preview-teleported
                   style="width:40px;height:40px;border-radius:50%"
               />
-              <span v-else>-</span>
+              <span v-else class="avatar-empty">-</span>
             </template>
           </el-table-column>
           <el-table-column label="OpenId" prop="openId" width="200"/>

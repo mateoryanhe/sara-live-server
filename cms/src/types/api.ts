@@ -601,7 +601,6 @@ export interface SaveTextModerationCfgRes {
 export interface UploadResourceCfg {
     id: string
     resourceDomain: string
-    defaultAvatarUrl: string
     imageModerationEnabled: boolean
     imageModerationAccessKeyId: string
     imageModerationAccessKeySecret: string
@@ -619,7 +618,6 @@ export interface GetUploadResourceCfgRes {
 export interface SaveUploadResourceCfgReq {
     id?: number
     resourceDomain: string
-    defaultAvatarUrl: string
     imageModerationEnabled: boolean
     imageModerationAccessKeyId: string
     imageModerationAccessKeySecret: string

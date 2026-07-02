@@ -29,7 +29,7 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		UserId:        data.ID,
 		Nickname:      data.Nickname,
 		Phone:         data.Phone,
-		Avatar:        upload.ResolveAvatarUrl(data.Avatar),
+		Avatar:        upload.ResolveAvatarUrlForUser(data.ID, data.Avatar),
 		Remark:        data.Remark,
 		Gold:          data.Gold,
 		Diamond:       data.Diamond,

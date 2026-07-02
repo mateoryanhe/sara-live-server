@@ -24,7 +24,6 @@ func SaveUploadResourceCfg(_ context.Context, req *uploaddto.SaveUploadResourceC
 	existing := uploadresourcecfgdao.Load()
 	row := &entity.UploadResourceCfg{
 		ResourceDomain:                 strings.TrimSpace(req.ResourceDomain),
-		DefaultAvatarUrl:               strings.TrimSpace(req.DefaultAvatarUrl),
 		ImageModerationEnabled:         req.ImageModerationEnabled,
 		ImageModerationAccessKeyId:     strings.TrimSpace(req.ImageModerationAccessKeyId),
 		ImageModerationAccessKeySecret: strings.TrimSpace(req.ImageModerationAccessKeySecret),
@@ -76,7 +75,6 @@ func toUploadResourceCfgItem(cfg *entity.UploadResourceCfg) *uploaddto.UploadRes
 	return &uploaddto.UploadResourceCfgItem{
 		ID:                             strconv.FormatUint(cfg.ID, 10),
 		ResourceDomain:                 snap.ResourceDomain,
-		DefaultAvatarUrl:               snap.DefaultAvatarUrl,
 		ImageModerationEnabled:         snap.ImageModerationEnabled,
 		ImageModerationAccessKeyId:     cfg.ImageModerationAccessKeyId,
 		ImageModerationAccessKeySecret: maskCfgSecret(cfg.ImageModerationAccessKeySecret),

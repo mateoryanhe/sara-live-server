@@ -9,7 +9,6 @@ type GetUploadResourceCfgReq struct {
 type UploadResourceCfgItem struct {
 	ID                             string `json:"id"`
 	ResourceDomain                 string `json:"resourceDomain"`
-	DefaultAvatarUrl               string `json:"defaultAvatarUrl"`
 	ImageModerationEnabled         bool   `json:"imageModerationEnabled"`
 	ImageModerationAccessKeyId     string `json:"imageModerationAccessKeyId"`
 	ImageModerationAccessKeySecret string `json:"imageModerationAccessKeySecret"`
@@ -28,7 +27,6 @@ type SaveUploadResourceCfgReq struct {
 	g.Meta                         `path:"/saveUploadResourceCfg" method:"post" summary:"保存上传资源配置" tags:"上传配置"`
 	ID                             uint64 `json:"id"`
 	ResourceDomain                 string `json:"resourceDomain"`
-	DefaultAvatarUrl               string `json:"defaultAvatarUrl"`
 	ImageModerationEnabled         bool   `json:"imageModerationEnabled"`
 	ImageModerationAccessKeyId     string `json:"imageModerationAccessKeyId"`
 	ImageModerationAccessKeySecret string `json:"imageModerationAccessKeySecret"`

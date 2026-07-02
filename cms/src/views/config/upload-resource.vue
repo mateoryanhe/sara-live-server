@@ -3,7 +3,7 @@
     <el-card v-loading="loading">
       <template #header>
         <div class="card-header">
-          <span>资源与头像配置</span>
+          <span>资源与上传配置</span>
         </div>
       </template>
 
@@ -17,15 +17,6 @@
               placeholder="如 http://127.0.0.1 或 https://cdn.example.com"
           />
           <span class="form-tip">留空默认 http://127.0.0.1；开启图片审核时须填写阿里云可公网访问的域名（不能是 127.0.0.1/内网 IP）</span>
-        </el-form-item>
-
-        <el-form-item label="默认头像 URL" prop="defaultAvatarUrl">
-          <el-input
-              v-model="formData.defaultAvatarUrl"
-              clearable
-              placeholder="用户未上传头像时展示的完整图片地址"
-          />
-          <span class="form-tip">留空则使用系统内置默认头像</span>
         </el-form-item>
 
         <el-divider content-position="left">App 图片审核（阿里云）</el-divider>
@@ -98,7 +89,6 @@ const imageSecretTouched = ref(false)
 const formData = reactive({
   id: '0',
   resourceDomain: 'http://127.0.0.1',
-  defaultAvatarUrl: '',
   imageModerationEnabled: false,
   imageModerationAccessKeyId: '',
   imageModerationAccessKeySecret: '',
@@ -114,7 +104,6 @@ const metaInfo = reactive({
 
 const formRules = reactive({
   resourceDomain: [{max: 256, message: '域名长度不能超过 256', trigger: 'blur'}],
-  defaultAvatarUrl: [{max: 512, message: 'URL 长度不能超过 512', trigger: 'blur'}],
   imageModerationAccessKeyId: [
     {
       validator: (_: unknown, value: string, callback: (e?: Error) => void) => {
@@ -145,7 +134,6 @@ const applyCfg = (cfg: UploadResourceCfg | null | undefined) => {
   if (!cfg) {
     formData.id = '0'
     formData.resourceDomain = 'http://127.0.0.1'
-    formData.defaultAvatarUrl = ''
     formData.imageModerationEnabled = false
     formData.imageModerationAccessKeyId = ''
     formData.imageModerationAccessKeySecret = ''
@@ -158,7 +146,6 @@ const applyCfg = (cfg: UploadResourceCfg | null | undefined) => {
   }
   formData.id = cfg.id || '0'
   formData.resourceDomain = cfg.resourceDomain || 'http://127.0.0.1'
-  formData.defaultAvatarUrl = cfg.defaultAvatarUrl || ''
   formData.imageModerationEnabled = !!cfg.imageModerationEnabled
   formData.imageModerationAccessKeyId = cfg.imageModerationAccessKeyId || ''
   formData.imageModerationAccessKeySecret = ''
@@ -189,7 +176,6 @@ const handleSave = async () => {
     const response = await uploadResourceApi.saveUploadResourceCfg({
       id: formData.id === '0' ? 0 : Number(formData.id),
       resourceDomain: formData.resourceDomain.trim(),
-      defaultAvatarUrl: formData.defaultAvatarUrl.trim(),
       imageModerationEnabled: formData.imageModerationEnabled,
       imageModerationAccessKeyId: formData.imageModerationAccessKeyId.trim(),
       imageModerationAccessKeySecret: imageSecretTouched.value
