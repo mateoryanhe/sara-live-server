@@ -143,7 +143,7 @@ func buildOnlineUserItems(roomId uint64, userIds []uint64) []*liveroomdto.Online
 		}
 		if u := userinfodao.GetUserInfoByUserId(userId); u != nil {
 			item.Nickname = u.Nickname
-			item.Avatar = upload.ResolveAvatarUrl(u.Avatar)
+			item.Avatar = upload.ResolveAvatarUrlForUser(userId, u.Avatar)
 			item.VipLevel = u.VipLevel
 			item.Gender = u.Gender
 			item.Age = calcAge(u.Birthday)

@@ -97,7 +97,7 @@ func getShortVideoAuthorInfo(authorId uint64) shortVideoAuthorInfo {
 	}
 	if u := userinfodao.GetUserInfoByUserId(authorId); u != nil {
 		ret.AuthorNickname = u.Nickname
-		ret.AuthorAvatar = upload.ResolveAvatarUrl(u.Avatar)
+		ret.AuthorAvatar = upload.ResolveAvatarUrlForUser(authorId, u.Avatar)
 	}
 	return ret
 }

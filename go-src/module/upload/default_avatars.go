@@ -1,7 +1,5 @@
 package upload
 
-import "math/rand"
-
 // 默认头像列表(文件位于 upload/images,由 pub-tool/avatars 上传)
 var defaultAvatarNames = []string{
 	"demo_avatar_1.jpg",
@@ -23,18 +21,9 @@ func PickDefaultAvatarName(userId uint64) string {
 		return ""
 	}
 	if userId == 0 {
-		return PickRandomDefaultAvatarName()
+		return defaultAvatarNames[0]
 	}
 	return defaultAvatarNames[userId%uint64(n)]
-}
-
-// PickRandomDefaultAvatarName 从默认头像列表中随机取一个
-func PickRandomDefaultAvatarName() string {
-	n := len(defaultAvatarNames)
-	if n == 0 {
-		return ""
-	}
-	return defaultAvatarNames[rand.Intn(n)]
 }
 
 // defaultAvatarUrl 默认头像完整 URL

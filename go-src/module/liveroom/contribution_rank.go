@@ -164,7 +164,7 @@ func GetContributionRank(ctx context.Context, req *liveroomdto.GetContributionRa
 		}
 		if u := userinfodao.GetUserInfoByUserId(row.SenderId); u != nil {
 			item.Nickname = u.Nickname
-			item.Avatar = upload.ResolveAvatarUrl(u.Avatar)
+			item.Avatar = upload.ResolveAvatarUrlForUser(row.SenderId, u.Avatar)
 			item.VipLevel = u.VipLevel
 			item.Gender = u.Gender
 			item.Age = calcAge(u.Birthday)

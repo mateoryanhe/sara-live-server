@@ -81,7 +81,7 @@ func SendPaidDanmaku(ctx context.Context, req *liveroomdto.SendPaidDanmakuReq) (
 	}
 	if sender != nil {
 		payload.SenderName = sender.Nickname
-		payload.SenderAvatar = upload.ResolveAvatarUrl(sender.Avatar)
+		payload.SenderAvatar = upload.ResolveAvatarUrlForUser(sender.ID, sender.Avatar)
 		payload.VipLevel = sender.VipLevel
 	}
 

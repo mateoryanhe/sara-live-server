@@ -29,7 +29,7 @@ func broadcastAudienceLeave(roomId, userId uint64, onlineCount int) {
 	}
 	if u := userinfodao.GetUserInfoByUserId(userId); u != nil {
 		payload.Nickname = u.Nickname
-		payload.Avatar = upload.ResolveAvatarUrl(u.Avatar)
+		payload.Avatar = upload.ResolveAvatarUrlForUser(userId, u.Avatar)
 		payload.VipLevel = u.VipLevel
 	}
 	for _, o := range getOnline(roomId) {
@@ -46,7 +46,7 @@ func buildAudiencePresencePayload(roomId, userId uint64, onlineCount int) *liver
 	}
 	if u := userinfodao.GetUserInfoByUserId(userId); u != nil {
 		payload.Nickname = u.Nickname
-		payload.Avatar = upload.ResolveAvatarUrl(u.Avatar)
+		payload.Avatar = upload.ResolveAvatarUrlForUser(userId, u.Avatar)
 		payload.VipLevel = u.VipLevel
 	}
 	return payload

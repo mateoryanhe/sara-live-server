@@ -165,7 +165,7 @@ func buildPrivateMessagePushItem(msg *entity.UserMessage) *messagedto.PrivateMes
 	}
 	if sender := userinfodao.GetUserInfoByUserId(msg.SenderId); sender != nil {
 		item.SenderName = sender.Nickname
-		item.SenderAvatar = upload.ResolveAvatarUrl(sender.Avatar)
+		item.SenderAvatar = upload.ResolveAvatarUrlForUser(msg.SenderId, sender.Avatar)
 	}
 	return item
 }
@@ -178,7 +178,7 @@ func toPrivateMessageUnreadDetailItem(row *entity.UserMessageUnreadDetail) *mess
 	}
 	if sender := userinfodao.GetUserInfoByUserId(row.SenderId); sender != nil {
 		item.SenderName = sender.Nickname
-		item.SenderAvatar = upload.ResolveAvatarUrl(sender.Avatar)
+		item.SenderAvatar = upload.ResolveAvatarUrlForUser(row.SenderId, sender.Avatar)
 	}
 	return item
 }
@@ -194,7 +194,7 @@ func toPrivateMessageItem(msg *entity.UserMessage) *messagedto.AppPrivateMessage
 	}
 	if sender := userinfodao.GetUserInfoByUserId(msg.SenderId); sender != nil {
 		item.SenderName = sender.Nickname
-		item.SenderAvatar = upload.ResolveAvatarUrl(sender.Avatar)
+		item.SenderAvatar = upload.ResolveAvatarUrlForUser(msg.SenderId, sender.Avatar)
 	}
 	return item
 }
