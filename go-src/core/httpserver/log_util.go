@@ -3,6 +3,7 @@ package httpserver
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
@@ -25,6 +26,7 @@ type apiRequestLog struct {
 	DurationMs int64
 	Code       int
 	Response   any
+	Err        error
 }
 
 // shouldSkipLogBody 请求体为 multipart 文件/图片上传时,日志不输出原始报文
@@ -62,24 +64,39 @@ func responseBodyForLog(r *ghttp.Request, resp []byte) any {
 	return string(resp)
 }
 
+func logTimeNow() string {
+	return time.Now().Format("2006-01-02 15:04:05.000")
+}
+
 func logAPIRequest(ctx context.Context, entry apiRequestLog) {
+	now := logTimeNow()
 	if entry.Phase == "start" {
-		g.Log().Infof(ctx, "%v,reqId=%v,url=%v,ip=%v,authId=%v,请求数据=%v",
-			entry.Message, entry.ReqId, entry.Url, entry.Ip, entry.AuthId, entry.Body)
+		g.Log().Infof(ctx, "time=%v,%v,reqId=%v,url=%v,ip=%v,authId=%v,请求数据=%v",
+			now, entry.Message, entry.ReqId, entry.Url, entry.Ip, entry.AuthId, entry.Body)
 		return
 	}
 	if entry.Body != nil {
-		g.Log().Infof(ctx, "reqId=%v,%v,处理时间=%vms,url=%v,ip=%v,authId=%v,请求数据=%v,",
-			entry.ReqId, entry.Message, entry.DurationMs, entry.Url, entry.Ip, entry.AuthId, entry.Body)
+		if entry.Err != nil {
+			g.Log().Infof(ctx, "time=%v,reqId=%v,%v,处理时间=%vms,url=%v,ip=%v,authId=%v,请求数据=%v,错误信息=%v",
+				now, entry.ReqId, entry.Message, entry.DurationMs, entry.Url, entry.Ip, entry.AuthId, entry.Body, entry.Err)
+			return
+		}
+		g.Log().Infof(ctx, "time=%v,reqId=%v,%v,处理时间=%vms,url=%v,ip=%v,authId=%v,请求数据=%v,",
+			now, entry.ReqId, entry.Message, entry.DurationMs, entry.Url, entry.Ip, entry.AuthId, entry.Body)
 		return
 	}
 	if entry.Code != 0 {
-		g.Log().Infof(ctx, "reqId=%v,%v,处理时间=%vms,url=%v,ip=%v,authId=%v，响应错误码数据=%v,",
-			entry.ReqId, entry.Message, entry.DurationMs, entry.Url, entry.Ip, entry.AuthId, entry.Code)
+		if entry.Err != nil {
+			g.Log().Infof(ctx, "time=%v,reqId=%v,%v,处理时间=%vms,url=%v,ip=%v,authId=%v,响应错误码=%v,错误信息=%v,",
+				now, entry.ReqId, entry.Message, entry.DurationMs, entry.Url, entry.Ip, entry.AuthId, entry.Code, entry.Err)
+			return
+		}
+		g.Log().Infof(ctx, "time=%v,reqId=%v,%v,处理时间=%vms,url=%v,ip=%v,authId=%v,响应错误码=%v,",
+			now, entry.ReqId, entry.Message, entry.DurationMs, entry.Url, entry.Ip, entry.AuthId, entry.Code)
 		return
 	}
-	g.Log().Infof(ctx, "reqId=%v,%v,处理时间=%vms,url=%v,ip=%v,authId=%v，响应数据=%v",
-		entry.ReqId, entry.Message, entry.DurationMs, entry.Url, entry.Ip, entry.AuthId, entry.Response)
+	g.Log().Infof(ctx, "time=%v,reqId=%v,%v,处理时间=%vms,url=%v,ip=%v,authId=%v,响应数据=%v",
+		now, entry.ReqId, entry.Message, entry.DurationMs, entry.Url, entry.Ip, entry.AuthId, entry.Response)
 }
 
 func logAPIRequestStart(r *ghttp.Request, authId, message string) {
@@ -94,7 +111,7 @@ func logAPIRequestStart(r *ghttp.Request, authId, message string) {
 	})
 }
 
-func logAPIRequestEnd(r *ghttp.Request, authId, message string, durationMs int64, code int, body, response any) {
+func logAPIRequestEnd(r *ghttp.Request, authId, message string, durationMs int64, code int, body, response any, err error) {
 	entry := apiRequestLog{
 		Phase:      "end",
 		Message:    message,
@@ -103,6 +120,7 @@ func logAPIRequestEnd(r *ghttp.Request, authId, message string, durationMs int64
 		Ip:         r.GetClientIp(),
 		AuthId:     authId,
 		DurationMs: durationMs,
+		Err:        err,
 	}
 	if code != 0 {
 		entry.Code = code
@@ -143,10 +161,10 @@ func hookAPIRequestEndLog(r *ghttp.Request) {
 	err := r.GetError()
 	if err != nil {
 		if pending.SysError {
-			logAPIRequestEnd(r, pending.AuthId, "出现无法捕获的错误", durationMs, 0, requestBodyForLog(r), nil)
+			logAPIRequestEnd(r, pending.AuthId, "出现无法捕获的错误", durationMs, 0, requestBodyForLog(r), nil, err)
 			return
 		}
-		logAPIRequestEnd(r, pending.AuthId, "错误码应答", durationMs, pending.Code, nil, nil)
+		logAPIRequestEnd(r, pending.AuthId, "错误码应答", durationMs, pending.Code, nil, nil, err)
 		return
 	}
 
@@ -154,7 +172,7 @@ func hookAPIRequestEndLog(r *ghttp.Request) {
 	if durationMs >= LongDoTime {
 		message = "请求处理时间过长"
 	}
-	logAPIRequestEnd(r, pending.AuthId, message, durationMs, 0, nil, responseBodyForLog(r, pending.Resp))
+	logAPIRequestEnd(r, pending.AuthId, message, durationMs, 0, nil, responseBodyForLog(r, pending.Resp), nil)
 }
 
 // requestDurationMs 与 GoFrame Access Log 一致: LeaveTime - EnterTime(毫秒)

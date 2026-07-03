@@ -11,7 +11,6 @@ var roomCacheMgr = gmap.NewKVMap[uint64, *entity.LiveRoom](false)
 
 // InitLiveRoomDao 初始化直播间相关缓存
 func initLiveRoomDao() {
-	initLiveRoomTicketPayDao()
 	initLiveRoomBillingPayDao()
 	//启动的时候,加载全部主播
 	all := make([]*entity.LiveRoom, 0)

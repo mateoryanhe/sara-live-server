@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 	"time"
+	"xr-game-server/module/livecfg"
 
 	"xr-game-server/constants/userstatus"
 	"xr-game-server/core/httpserver"
@@ -170,7 +171,8 @@ func calcAge(birthday *time.Time) int {
 }
 
 // GetRoom 查询直播间(公开接口,任意登录用户可调用)
-func GetRoom(_ context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto.GetLiveRoomRes, error) {
+func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto.GetLiveRoomRes, error) {
+	userId := httpserver.GetAuthId(ctx)
 	room := liveroomdao.GetRoomById(req.RoomId)
 	if room == nil {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
@@ -181,7 +183,7 @@ func GetRoom(_ context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto.G
 		status = userstatus.LiveRoomStatusLive
 	}
 
-	return &liveroomdto.GetLiveRoomRes{
+	res := &liveroomdto.GetLiveRoomRes{
 		RoomId:   strconv.FormatUint(room.ID, 10),
 		GuildId:  strconv.FormatUint(room.GuildId, 10),
 		Title:    room.Title,
@@ -194,7 +196,16 @@ func GetRoom(_ context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto.G
 		Ticket:   room.Ticket,
 		Billing:  room.Billing,
 		CreateAt: room.CreatedAt.Unix(),
-	}, nil
+	}
+	//判断一下房间类型
+	if room.Category == entity.LiveRoomCategoryPrivate {
+		//私密房免费时长
+		pay := liveroomdao.GetLiveRoomBillingPay(userId, req.RoomId)
+
+		res.FreeTime = pay.GetFreeTime(uint64(livecfg.GetPrivateRoomFreeWatchSeconds()))
+	}
+
+	return res, nil
 }
 
 // EnsureAnchorRoom 确保主播拥有直播间记录(CMS设为主播时预创建,App端后续可完善资料)

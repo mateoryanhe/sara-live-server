@@ -69,6 +69,7 @@ type JoinRoomRes struct {
 	OnlineCount    int     `json:"onlineCount"    dc:"当前在线人数"`
 	TicketDeducted float64 `json:"ticketDeducted" dc:"本次扣除门票钻石(未扣为0)"`
 	SysTime        int64   `json:"sysTime,string"`
+	FreeTime       uint64  `json:"freeTime"`
 }
 
 // LeaveRoomReq 离开直播间
@@ -330,6 +331,7 @@ type GetLiveRoomRes struct {
 	Ticket   float64 `json:"ticket" dc:"门票价格(钻石)"`
 	Billing  float64 `json:"billing" dc:"计费价格(每分钟钻石)"`
 	CreateAt int64   `json:"createAt" dc:"创建时间(秒)"`
+	FreeTime uint64  `json:"freeTime" dc:"私密房免费时间"`
 }
 
 // AnchorBanPushItem 主播封禁推送载荷(推送给主播及直播间在线观众)

@@ -36,11 +36,7 @@ func exitRoom(userId uint64, roomId uint64) {
 	if existing != nil && existing.Status != entity.LiveRoomOnlineStatusOffline {
 		existing.SetStatus(entity.LiveRoomOnlineStatusOffline)
 	}
-
-	//if user := userinfodao.GetUserInfoByUserId(userId); user != nil && user.LiveRoomId == roomId {
-	//	user.SetLiveRoomId(0)
-	//	user.SetLiveRoomVer(0)
-	//}
+	exitChargePrivateRoom(userId, roomId)
 	removeOnline(userId, roomId)
 	refreshRoomAudienceCaches(roomId)
 }

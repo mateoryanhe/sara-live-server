@@ -24,5 +24,5 @@ type CMSSubGoldRes struct {
 
 // GoldPushItem 金币余额推送载荷
 type GoldPushItem struct {
-	Gold float64 `json:"gold,string" dc:"最新金币余额"`
+	Gold uint64 `json:"gold,string" dc:"最新金币余额"`
 }

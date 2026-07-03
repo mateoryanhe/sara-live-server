@@ -7,5 +7,7 @@ type SysCfgReq struct {
 }
 
 type SysCfgResp struct {
-	SysTime int64 `json:"sysTime"`
+	SysTime                     int64   `json:"sysTime"`
+	PaidDanmakuPrice            float64 `json:"paidDanmakuPrice" dc:"直播间付费弹幕价格(钻石)"`
+	PrivateRoomFreeWatchSeconds uint32  `json:"privateRoomFreeWatchSeconds" dc:"私密直播间免费观看时长(秒)"`
 }

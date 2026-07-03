@@ -24,5 +24,5 @@ type CMSSubDiamondRes struct {
 
 // DiamondPushItem 钻石余额推送载荷
 type DiamondPushItem struct {
-	Diamond float64 `json:"diamond" dc:"最新钻石余额"`
+	Diamond uint64 `json:"diamond" dc:"最新钻石余额"`
 }

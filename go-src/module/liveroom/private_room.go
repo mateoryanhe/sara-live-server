@@ -4,18 +4,29 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/os/gmlock"
 	"time"
+	"xr-game-server/constants/cmd"
 	"xr-game-server/constants/currency"
 	"xr-game-server/constants/liverevenue"
 	"xr-game-server/core/event"
+	"xr-game-server/core/math"
+	"xr-game-server/core/push"
 	"xr-game-server/dao/liveroomdao"
+	"xr-game-server/dao/userinfodao"
+	"xr-game-server/dto/diamonddto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
 	"xr-game-server/gameevent"
-	"xr-game-server/module/livecfg"
 	"xr-game-server/module/wallet"
 )
 
-const privateRoomMaxAudience = 1
+const (
+	privateRoomMaxAudience = 1
+	BillPeriodTime         = 5
+)
+
+func initPrivateRoom() {
+	event.Sub(gameevent.LoginEvent, onLoginEvent)
+}
 
 // ensureCanJoinPrivateRoom 私密直播间仅允许1名观众(不含主播);已在房间内可重复进入
 func ensureCanJoinPrivateRoom(userId uint64, room *entity.LiveRoom) error {
@@ -51,7 +62,7 @@ func chargePrivateRoomTicketIfNeeded(userId uint64, room *entity.LiveRoom, now t
 	gmlock.Lock(lockKey)
 	defer gmlock.Unlock(lockKey)
 
-	pay := liveroomdao.GetLiveRoomTicketPay(userId, room.ID)
+	pay := liveroomdao.GetLiveRoomBillingPay(userId, room.ID)
 	if pay == nil {
 		return 0, nil
 	}
@@ -73,7 +84,7 @@ func chargePrivateRoomTicketIfNeeded(userId uint64, room *entity.LiveRoom, now t
 	room.AddTotalPrivateRoomTicketIncome(ticketPrice)
 
 	//记录直播收益流水(礼物)
-	eventData := entity.NewLiveRevenueLogRecord(room.ID, room.LiveRecordId, 0, room.ID, 0, 0, 0, ticketPrice, uint8(liverevenue.Gift))
+	eventData := entity.NewLiveRevenueLogRecord(room.ID, room.LiveRecordId, 0, room.ID, 0, 0, 0, ticketPrice, uint8(liverevenue.Ticket))
 
 	event.Pub(gameevent.RevenueEventEvent, eventData)
 	return ticketPrice, nil
@@ -87,7 +98,7 @@ func chargePrivateRoomBillingIfNeeded(userId uint64, room *entity.LiveRoom, onli
 	if userId == room.ID || room.LiveRecordId == 0 {
 		return 0, nil
 	}
-	billingPrice := room.Billing
+	billingPrice := room.Billing / 60
 	if billingPrice <= 0 {
 		return 0, nil
 	}
@@ -96,27 +107,66 @@ func chargePrivateRoomBillingIfNeeded(userId uint64, room *entity.LiveRoom, onli
 	gmlock.Lock(lockKey)
 	defer gmlock.Unlock(lockKey)
 
-	pay := liveroomdao.GetLiveRoomBillingPay(userId, room.ID, room.LiveRecordId)
+	pay := liveroomdao.GetLiveRoomBillingPay(userId, room.ID)
 	if pay == nil {
 		return 0, nil
 	}
-	if !pay.ShouldChargeMinute(onlineJoinTime(online), now, livecfg.GetPrivateRoomFreeWatchDuration()) {
-		return 0, nil
-	}
 
-	if _, err := wallet.DiamondSub(userId, billingPrice, currency.ReasonPrivateRoomBilling); err != nil {
-		return 0, err
+	//开始判断免费时长
+	if 0 >= pay.FreeTime {
+		//开始计费
+		userData := userinfodao.GetUserInfoByUserId(userId)
+		diamond := userData.Diamond
+		err := wallet.DiamondNotEnough(userId, billingPrice)
+		if err != nil {
+			push.Data(userId, cmd.DiamondPush, &diamonddto.DiamondPushItem{
+				Diamond: uint64(math.AddFloat64(diamond, billingPrice)),
+			})
+			return 0, err
+		}
+		//开始预扣费
+		pay.AddBillTime(PrivatePeriod)
+		//检查是否足够5分钟
+		size := pay.BillTime / 60
+		if size >= BillPeriodTime {
+			//真正扣钱
+			price := float64(size) * room.Billing
+			if _, err := wallet.DiamondSub(userId, price, currency.ReasonPrivateRoomBilling); err != nil {
+				return 0, err
+			}
+			pay.SubBillTime(size * 60)
+			recordPrivateRoomBillingRevenue(room, userId, price)
+		}
+	} else {
+		pay.SubFreeTime(PrivatePeriod)
 	}
-	pay.SetLastBilledAt(now)
-	recordPrivateRoomBillingRevenue(room, userId, billingPrice)
 	return billingPrice, nil
 }
 
-func onlineJoinTime(online *entity.LiveRoomOnline) *time.Time {
-	if online == nil {
-		return nil
+func exitChargePrivateRoom(userId uint64, roomId uint64) {
+	room := liveroomdao.GetRoomById(roomId)
+	//开始全部计费清0
+	if room == nil || room.Category != entity.LiveRoomCategoryPrivate {
+		return
 	}
-	return online.JoinTime
+	if userId == room.ID {
+		return
+	}
+	lockKey := fmt.Sprintf("liveRoom:%d:%d", userId, room.ID)
+	gmlock.Lock(lockKey)
+	defer gmlock.Unlock(lockKey)
+	pay := liveroomdao.GetLiveRoomBillingPay(userId, room.ID)
+	if pay == nil {
+		return
+	}
+	if 0 >= pay.BillTime {
+		return
+	}
+	billTime := pay.BillTime
+	price := room.Billing * float64(pay.BillTime) / 60
+	wallet.DiamondSub(userId, price, currency.ReasonPrivateRoomBilling)
+	pay.SubBillTime(billTime)
+	recordPrivateRoomBillingRevenue(room, userId, price)
 }
 
 func recordPrivateRoomBillingRevenue(room *entity.LiveRoom, userId uint64, amount float64) {
@@ -133,4 +183,16 @@ func recordPrivateRoomBillingRevenue(room *entity.LiveRoom, userId uint64, amoun
 		room.ID, room.LiveRecordId, userId, room.ID, 0, 1, amount, amount, uint8(liverevenue.PrivateRoom),
 	)
 	event.Pub(gameevent.RevenueEventEvent, eventData)
+}
+
+func onLoginEvent(data any) {
+	userId := data.(uint64)
+	userData := userinfodao.GetUserInfoByUserId(userId)
+	if userData == nil {
+		return
+	}
+	if 0 >= userData.LiveRoomId {
+		return
+	}
+	exitChargePrivateRoom(userId, userData.LiveRoomId)
 }

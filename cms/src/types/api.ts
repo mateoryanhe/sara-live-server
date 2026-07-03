@@ -145,6 +145,10 @@ export interface AnchorListItem {
     guildId?: string | number
     ip?: string
     roomTitle?: string
+    roomId?: string
+    category?: number
+    ticket?: number
+    billing?: number
     liveStatus?: number
     totalIncome?: number
     totalGiftIncome?: number

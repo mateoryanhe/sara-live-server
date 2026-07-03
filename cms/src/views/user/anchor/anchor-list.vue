@@ -45,6 +45,24 @@
         <el-table-column label="登录IP" min-width="140" prop="ip">
           <template #default="{ row }">{{ row.ip || '-' }}</template>
         </el-table-column>
+        <el-table-column label="直播间" prop="roomId" width="180">
+          <template #default="{ row }">{{ row.roomId || row.id || '-' }}</template>
+        </el-table-column>
+        <el-table-column label="房间类型" width="100">
+          <template #default="{ row }">
+            <el-tag :type="categoryTagType(row.category)">{{ categoryLabel(row.category) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="门票价格" min-width="100">
+          <template #default="{ row }">
+            {{ isPrivateRoom(row.category) ? formatAmount(row.ticket) : '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column label="计费价格(每分钟钻石)" min-width="110">
+          <template #default="{ row }">
+            {{ isPrivateRoom(row.category) ? formatAmount(row.billing) : '-' }}
+          </template>
+        </el-table-column>
         <el-table-column label="直播间标题" min-width="140" prop="roomTitle" show-overflow-tooltip>
           <template #default="{ row }">{{ row.roomTitle || '-' }}</template>
         </el-table-column>
@@ -205,6 +223,38 @@ const defaultBanApplyTime = () => {
 }
 
 const disabledDate = (time: Date) => time.getTime() < Date.now()
+
+const LIVE_ROOM_CATEGORY_HOT = 1
+const LIVE_ROOM_CATEGORY_GAME = 2
+const LIVE_ROOM_CATEGORY_PRIVATE = 3
+
+const isPrivateRoom = (category?: number) => category === LIVE_ROOM_CATEGORY_PRIVATE
+
+const categoryLabel = (category?: number) => {
+  if (category === LIVE_ROOM_CATEGORY_HOT) {
+    return 'Hot'
+  }
+  if (category === LIVE_ROOM_CATEGORY_GAME) {
+    return 'Game'
+  }
+  if (category === LIVE_ROOM_CATEGORY_PRIVATE) {
+    return '私密'
+  }
+  return '-'
+}
+
+const categoryTagType = (category?: number) => {
+  if (category === LIVE_ROOM_CATEGORY_PRIVATE) {
+    return 'warning'
+  }
+  if (category === LIVE_ROOM_CATEGORY_GAME) {
+    return 'success'
+  }
+  if (category === LIVE_ROOM_CATEGORY_HOT) {
+    return 'danger'
+  }
+  return 'info'
+}
 
 const fetchList = async () => {
   loading.value = true

@@ -14,7 +14,7 @@ func initLiveRoomBillingPayDao() {
 	liveRoomBillingPayCacheMgr = cache.NewCacheMgr()
 }
 
-func getLiveRoomBillingPayById(id string, userId, roomId, liveRecordId uint64) *entity.LiveRoomBillingPay {
+func getLiveRoomBillingPayById(id string, userId, roomId uint64) *entity.LiveRoomBillingPay {
 	if liveRoomBillingPayCacheMgr == nil {
 		return nil
 	}
@@ -22,7 +22,7 @@ func getLiveRoomBillingPayById(id string, userId, roomId, liveRecordId uint64) *
 		var row *entity.LiveRoomBillingPay
 		_ = g.Model(string(entity.TbLiveRoomBillingPay)).Where("id = ?", id).Scan(&row)
 		if row == nil {
-			return entity.NewLiveRoomBillingPay(userId, roomId, liveRecordId), nil
+			return entity.NewLiveRoomBillingPay(userId, roomId), nil
 		}
 		return row, nil
 	})
@@ -34,12 +34,12 @@ func getLiveRoomBillingPayById(id string, userId, roomId, liveRecordId uint64) *
 }
 
 // GetLiveRoomBillingPay 获取观众在某场直播的按分钟计费记录
-func GetLiveRoomBillingPay(userId, roomId, liveRecordId uint64) *entity.LiveRoomBillingPay {
-	if userId == 0 || roomId == 0 || liveRecordId == 0 {
+func GetLiveRoomBillingPay(userId, roomId uint64) *entity.LiveRoomBillingPay {
+	if userId == 0 || roomId == 0 {
 		return nil
 	}
 	return getLiveRoomBillingPayById(
-		entity.BuildLiveRoomBillingPayId(userId, roomId, liveRecordId),
-		userId, roomId, liveRecordId,
+		entity.BuildLiveRoomBillingPayId(userId, roomId),
+		userId, roomId,
 	)
 }

@@ -15,8 +15,9 @@ import (
 )
 
 const (
-	TimeOut = 5 * time.Minute
-	Period  = 30
+	TimeOut              = 5 * time.Minute
+	PrivatePeriod uint64 = 1
+	CommonPeriod  uint64 = 30
 )
 
 var taskMap = gset.NewTSet[uint64](true)
@@ -83,12 +84,16 @@ func flushAnchorId(room *entity.LiveRoom) {
 	//刷新房间状态,防止离线
 	now := time.Now()
 	room.SetHeartTime(&now)
+	period := CommonPeriod
+	if room.Category == entity.LiveRoomCategoryPrivate {
+		period = PrivatePeriod
+	}
 	//记录本次直播
 	liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId)
-	liveRecord.AddTotalLiveDuration(Period)
+	liveRecord.AddTotalLiveDuration(float64(period))
 	//累计全部直播
 	stat := userinfodao.GetUserCumulativeStatByUserId(room.ID)
-	stat.AddTotalLiveDuration(Period)
+	stat.AddTotalLiveDuration(float64(period))
 }
 
 func flushAudience(userId uint64, room *entity.LiveRoom) {

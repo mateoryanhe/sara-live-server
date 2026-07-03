@@ -48,6 +48,10 @@ func fillAnchorRoomFields(item *accountdto.AnchorListItem, room *entity.LiveRoom
 		return
 	}
 	item.RoomTitle = room.Title
+	item.RoomId = room.ID
+	item.Category = room.Category
+	item.Ticket = room.Ticket
+	item.Billing = room.Billing
 	item.TotalIncome = room.TotalIncome
 	item.TotalGiftIncome = room.TotalGiftIncome
 	item.TotalPaidDanmakuIncome = room.TotalPaidDanmakuIncome

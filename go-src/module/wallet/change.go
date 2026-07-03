@@ -27,6 +27,14 @@ func DiamondAdd(userId uint64, amount float64, reason currency.Reason) (float64,
 	return after, nil
 }
 
+func DiamondNotEnough(userId uint64, amount float64) error {
+	data := userinfodao.GetUserInfoByUserId(userId)
+	if data.Diamond >= amount {
+		return nil
+	}
+	return errercode.CreateCode(errercode.DiamondNotEnough)
+}
+
 // DiamondSub 扣减指定用户钻石,amount 必须为正数,余额不足返回错误,reason 流水原因枚举
 func DiamondSub(userId uint64, amount float64, reason currency.Reason) (float64, error) {
 	if amount <= 0 {
