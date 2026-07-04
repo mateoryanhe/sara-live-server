@@ -54,11 +54,6 @@ func isUserInOnlineMap(userId, roomId uint64) bool {
 }
 
 func countAudienceInRoom(roomId uint64) int {
-	count := 0
-	for _, uid := range getOnline(roomId) {
-		if uid != roomId {
-			count++
-		}
-	}
+	count := len(getOnline(roomId))
 	return count
 }

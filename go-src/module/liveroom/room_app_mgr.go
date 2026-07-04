@@ -182,18 +182,19 @@ func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto
 	}
 
 	res := &liveroomdto.GetLiveRoomRes{
-		RoomId:   strconv.FormatUint(room.ID, 10),
-		GuildId:  strconv.FormatUint(room.GuildId, 10),
-		Title:    room.Title,
-		Cover:    upload.GetUrlByName(room.Cover),
-		Notice:   room.Notice,
-		Status:   status,
-		Category: room.Category,
-		TagId:    strconv.FormatUint(room.TagId, 10),
-		TagName:  getRoomTagName(room.TagId),
-		Ticket:   room.Ticket,
-		Billing:  room.Billing,
-		CreateAt: room.CreatedAt.Unix(),
+		RoomId:      strconv.FormatUint(room.ID, 10),
+		GuildId:     strconv.FormatUint(room.GuildId, 10),
+		Title:       room.Title,
+		Cover:       upload.GetUrlByName(room.Cover),
+		Notice:      room.Notice,
+		Status:      status,
+		Category:    room.Category,
+		TagId:       strconv.FormatUint(room.TagId, 10),
+		TagName:     getRoomTagName(room.TagId),
+		Ticket:      room.Ticket,
+		Billing:     room.Billing,
+		CreateAt:    room.CreatedAt.Unix(),
+		OnlineCount: countAudienceInRoom(room.ID),
 	}
 	//判断一下房间类型
 	if room.Category == entity.LiveRoomCategoryPrivate {

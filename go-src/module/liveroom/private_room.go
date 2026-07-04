@@ -180,6 +180,9 @@ func recordPrivateRoomBillingRevenue(room *entity.LiveRoom, userId uint64, amoun
 	if amount <= 0 || room == nil || room.LiveRecordId == 0 {
 		return
 	}
+	lockKey := fmt.Sprintf("%d", room.ID)
+	gmlock.Lock(lockKey)
+	defer gmlock.Unlock(lockKey)
 	if liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId); liveRecord != nil {
 		liveRecord.AddTotalIncome(amount)
 		liveRecord.AddTotalPrivateRoomIncome(amount)

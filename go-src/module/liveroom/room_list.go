@@ -93,6 +93,7 @@ func toLiveRoomListItem(room *entity.LiveRoom, userId uint64) *liveroomdto.LiveR
 		item.AnchorNickname = u.Nickname
 		item.AnchorAvatar = upload.ResolveAvatarUrlForUser(room.ID, u.Avatar)
 	}
+	item.OnlineCount = countAudienceInRoom(room.ID)
 
 	if userId > 0 {
 		if token, expireAt, err := agora.BuildLiveRoomToken(userId, room.ID); err == nil {

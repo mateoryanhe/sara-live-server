@@ -29,6 +29,7 @@ type LiveRoomListItem struct {
 	CreateAt           int64   `json:"createAt" dc:"创建时间(秒)"`
 	AnchorNickname     string  `json:"anchorNickname" dc:"主播昵称"`
 	AnchorAvatar       string  `json:"anchorAvatar" dc:"主播头像URL(已拼资源域名)"`
+	OnlineCount        int     `json:"onlineCount" dc:"在线观众人数(不含主播)"`
 	AgoraToken         string  `json:"agoraToken" dc:"声网RTC Token"`
 	AgoraTokenExpireAt int64   `json:"agoraTokenExpireAt" dc:"声网Token过期时间(Unix秒)"`
 }
