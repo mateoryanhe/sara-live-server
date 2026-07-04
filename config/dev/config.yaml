@@ -32,16 +32,9 @@ bufferSize:
   db:
     lazy:
       period: 15000 #懒缓冲池频率,15秒同步数据库
-      small: 2000  #数据库更新数据缓冲-->对应sysdb->单行数据写入缓冲池 eg角色表
-      middle: 7000 #数据库更新数据缓冲-->对应sysdb->多行数据写入缓冲池  eg背包表 邮件表
-      large: 10000 #数据库更新数据缓冲-->对应sysdb->多行数据写入缓冲池 eg item_log表,
     fast:
       period: 30 #快速缓冲池频率,50毫秒同步数据库
-      small: 1000 #数据库更新数据缓冲-->对应sysdb->单行数据写入缓冲池 eg角色表
-      middle: 1500 #数据库更新数据缓冲-->对应sysdb->多行数据写入缓冲池 eg背包表 邮件表
-      large: 5000 #数据库更新数据缓冲-->对应sysdb->多行数据写入缓冲池 eg item_log表,邮件表
   websocket: #websocket缓冲池大小--个人玩家缓冲池
-    size: 400 #推送缓冲池大小
     period: 100 #推送缓冲池频率
   goPool: #协程池大小
     size: 300

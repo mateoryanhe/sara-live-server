@@ -15,7 +15,8 @@ const (
 	appMaxPageSize     = 100
 )
 
-func toAppItem(v *entity.LiveRecord) *liverecorddto.AppLiveRecordItem {
+// ToAppItem 将直播记录实体转为 App 端条目
+func ToAppItem(v *entity.LiveRecord) *liverecorddto.AppLiveRecordItem {
 	if v == nil {
 		return nil
 	}
@@ -51,7 +52,7 @@ func GetAppList(ctx context.Context, req *liverecorddto.AppLiveRecordListReq) (*
 
 	list := make([]*liverecorddto.AppLiveRecordItem, 0, len(rows))
 	for _, row := range rows {
-		list = append(list, toAppItem(row))
+		list = append(list, ToAppItem(row))
 	}
 
 	return &liverecorddto.AppLiveRecordListRes{

@@ -10,24 +10,28 @@ import (
 	"xr-game-server/core/push"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/liveroomdto"
+	"xr-game-server/entity"
+	"xr-game-server/module/liverecord"
 )
 
 // StopLive 下播
 func StopLive(ctx context.Context, _ *liveroomdto.StopLiveReq) (*liveroomdto.StopLiveRes, error) {
 
 	userId := httpserver.GetAuthId(ctx)
-	stopLive(userId)
-	return &liveroomdto.StopLiveRes{}, nil
+	liveRecord := stopLive(userId)
+	return &liveroomdto.StopLiveRes{
+		LiveRecord: liverecord.ToAppItem(liveRecord),
+	}, nil
 }
 
-func stopLive(anchorId uint64) {
+func stopLive(anchorId uint64) *entity.LiveRecord {
 
 	//移除在线列表
 	clearRoomAudienceCaches(anchorId)
 
 	room := liveroomdao.GetRoomById(anchorId)
 	if room == nil {
-		return
+		return nil
 	}
 	//清除直播间
 	taskMap.Remove(anchorId)
@@ -39,14 +43,15 @@ func stopLive(anchorId uint64) {
 
 	//清除直播记录
 	if liveRecordId == 0 {
-		return
+		return nil
 	}
 	liveRecord := liveroomdao.GetLiveRecordById(liveRecordId)
 	if liveRecord == nil {
-		return
+		return nil
 	}
 	now := time.Now()
 	liveRecord.SetEndTime(&now)
+	return liveRecord
 }
 
 func broadcastAnchorStopLive(roomId, liveRecordId uint64) {

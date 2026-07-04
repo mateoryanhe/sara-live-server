@@ -3,6 +3,7 @@ package liveroomdto
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"xr-game-server/dto/liverecorddto"
 )
 
 // CreateLiveRoomReq 创建直播间(主播ID由鉴权中间件提供)
@@ -36,6 +37,7 @@ type StopLiveReq struct {
 }
 
 type StopLiveRes struct {
+	LiveRecord *liverecorddto.AppLiveRecordItem `json:"liveRecord" dc:"本场直播记录数据"`
 }
 
 // UpdateCoverReq 修改封面(主播自身)

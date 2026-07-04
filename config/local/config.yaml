@@ -28,7 +28,6 @@ bufferSize:
     fast:
       period: 30 #快速缓冲池频率,50毫秒同步数据库
   websocket: #websocket缓冲池大小--个人玩家缓冲池
-    size: 30 #推送缓冲池大小
     period: 10 #推送缓冲池频率
   goPool: #协程池大小
     size: 100
