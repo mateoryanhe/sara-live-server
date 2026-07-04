@@ -197,7 +197,7 @@ func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto
 	}
 	//判断一下房间类型
 	if room.Category == entity.LiveRoomCategoryPrivate {
-
+		clearFreeTime(userId, room.ID)
 		//私密房免费时长
 		pay := liveroomdao.GetLiveRoomBillingPay(userId, req.RoomId)
 

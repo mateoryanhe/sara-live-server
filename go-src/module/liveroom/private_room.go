@@ -121,7 +121,7 @@ func chargePrivateRoomBillingIfNeeded(userId uint64, room *entity.LiveRoom) (flo
 	return billingPrice, nil
 }
 
-// 清除私密房免费时间
+// 结算私密房免费时间
 func clearFreeTime(userId uint64, roomId uint64) {
 	room := liveroomdao.GetRoomById(roomId)
 	//开始全部计费清0
@@ -138,12 +138,16 @@ func clearFreeTime(userId uint64, roomId uint64) {
 	if 0 >= pay.FreeTime {
 		return
 	}
+	if !pay.FreeUsed {
+		return
+	}
 	onlineId := entity.BuildLiveRoomOnlineId(userId, roomId)
 	existing := liveroomdao.GetOnlineById(onlineId, userId, roomId)
 
 	now := time.Now()
 	diff := now.Sub(*existing.JoinTime)
 	pay.SubFreeTime(uint64(diff.Seconds()))
+	pay.SetFreeUsed(false)
 }
 
 func joinChargePrivateRoom(userId uint64, roomId uint64) error {

@@ -18,6 +18,7 @@ const (
 	LiveRoomBillingPayUserId       db.TbCol = "user_id"
 	LiveRoomBillingPayRoomId       db.TbCol = "room_id"
 	LiveRoomBillingPayFreeTime     db.TbCol = "free_time"
+	LiveRoomBillingPayFreeUsed     db.TbCol = "free_used"
 	LiveRoomBillingPayLastPaidAt   db.TbCol = "last_paid_at"
 	LiveRoomBillingPayLastTicketAt db.TbCol = "last_ticket_at"
 )
@@ -28,6 +29,7 @@ type LiveRoomBillingPay struct {
 	UserId       uint64     `gorm:"index;default:0;comment:用户ID" json:"userId"`
 	RoomId       uint64     `gorm:"index;default:0;comment:直播间ID" json:"roomId"`
 	FreeTime     uint64     `gorm:"index;default:0;comment:免费时长" json:"freeTime"`
+	FreeUsed     bool       `gorm:"default:0;comment:免费使用标记" json:"freeUsed"`
 	LastPaidAt   *time.Time `gorm:"comment:最近一次观看时间" json:"lastPaidAt"`
 	LastTicketAt *time.Time `gorm:"comment:最近一次扣门票时间" json:"lastTicketAt"`
 }
@@ -90,6 +92,13 @@ func (r *LiveRoomBillingPay) SetFreeTime(v uint64) {
 	})
 }
 
+func (r *LiveRoomBillingPay) SetFreeUsed(v bool) {
+	r.FreeUsed = v
+	syndb.AddDataToQuickChan(TbLiveRoomBillingPay, LiveRoomBillingPayFreeUsed, &syndb.ColData{
+		IdVal: r.ID, ColVal: v,
+	})
+}
+
 func (r *LiveRoomBillingPay) SetLastTicketAt(v time.Time) {
 	r.LastTicketAt = &v
 	syndb.AddDataToQuickChan(TbLiveRoomBillingPay, LiveRoomBillingPayLastTicketAt, &syndb.ColData{
@@ -108,6 +117,7 @@ func initLiveRoomBillingPay() {
 	syndb.RegQuickWithLarge(TbLiveRoomBillingPay, LiveRoomBillingPayUserId)
 	syndb.RegQuickWithLarge(TbLiveRoomBillingPay, LiveRoomBillingPayRoomId)
 	syndb.RegQuickWithLarge(TbLiveRoomBillingPay, LiveRoomBillingPayFreeTime)
+	syndb.RegQuickWithLarge(TbLiveRoomBillingPay, LiveRoomBillingPayFreeUsed)
 	syndb.RegQuickWithLarge(TbLiveRoomBillingPay, LiveRoomBillingPayLastPaidAt)
 	syndb.RegQuickWithLarge(TbLiveRoomBillingPay, LiveRoomBillingPayLastTicketAt)
 	migrate.AutoMigrate(&LiveRoomBillingPay{})

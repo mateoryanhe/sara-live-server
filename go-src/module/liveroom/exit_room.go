@@ -15,7 +15,7 @@ func LeaveRoom(ctx context.Context, req *liveroomdto.LeaveRoomReq) (*liveroomdto
 	//需要判断前端上传的房间号
 	reqId := httpserver.GetReqId(ctx)
 	user := userinfodao.GetUserInfoByUserId(userId)
-
+	clearFreeTime(userId, req.RoomId)
 	if reqId > 0 && user.LiveRoomId == req.RoomId && user.LiveRoomVer > reqId {
 		return &liveroomdto.LeaveRoomRes{}, nil
 	}
