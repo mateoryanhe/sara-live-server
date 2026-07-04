@@ -8,11 +8,20 @@ server:
   httpsKeyPath: "/root/.acme.sh/www.bigtktool.shop_ecc/privkey.pem"
   clientMaxBodySize: "300m" # HTTP 请求体/文件上传上限
   gzipEnabled: true         # 开启 gzip 响应压缩
+  logPath: "/home/ec2-user/log/"        # 服务器访问/错误日志目录
+  logStdout: false                       # 访问日志同时输出到终端
+  accessLogEnabled: true                # 开启访问日志(执行时间、IP、URL)
+  errorLogEnabled: true
+  logger:
+    timeFormat: "2006-01-02T15:04:05.000"
+    rotateExpire: "1d"
+    rotateBackupLimit: 1
+    rotateBackupExpire: "2d"
+    flags: 45
   # PProf配置
   pprofEnabled: true # 是否开启PProf性能调试特性。默认为false
   pprofPattern: "/66dcd8e25ab3b339546ea1de5eb2d443e6fca76c76d11709f10533be8bd87d7d/pprof"    # 开启PProf时有效，表示PProf特性的页面访问路径，对当前Server绑定的所有域名有效
   ####自定义配置
-  debugEnv: true #是否开启debug环境,不会检查权限
   exitTime: 5 #退出系统等待多少秒，开始发送kill -9
   dumpRouterMap: false
   # 多域名静态目录与HTTPS证书(SNI),详见 config/local/config.yaml 示例
@@ -49,7 +58,7 @@ logger:
   ctxKeys: [ ]                    # 自定义Context上下文变量名称，自动打印Context的变量到日志中。默认为空
   header: true                  # 是否打印日志的头信息。默认true
   stdout: true                  # 日志是否同时输出到终端。默认true
-  flags: 4    # 文件异步写入
+  flags: 45    # 文件异步写入
   rotateExpire: "1d"
   rotateBackupLimit: 1
   rotateBackupExpire: "2d"
