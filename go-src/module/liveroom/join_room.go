@@ -2,8 +2,6 @@ package liveroom
 
 import (
 	"context"
-	"xr-game-server/module/livecfg"
-
 	"time"
 
 	"xr-game-server/core/httpserver"
@@ -76,10 +74,16 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 	}
 	//判断一下房间类型
 	if room.Category == entity.LiveRoomCategoryPrivate {
+
 		//私密房免费时长
 		pay := liveroomdao.GetLiveRoomBillingPay(userId, req.RoomId)
 
-		res.FreeTime = pay.GetFreeTime(uint64(livecfg.GetPrivateRoomFreeWatchSeconds()))
+		res.FreeTime = pay.FreeTime
+		res.TicketTime = pay.GetTicketTime()
+		err := joinChargePrivateRoom(userId, room.ID)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return res, nil

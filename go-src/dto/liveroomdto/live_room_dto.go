@@ -70,6 +70,7 @@ type JoinRoomRes struct {
 	TicketDeducted float64 `json:"ticketDeducted" dc:"本次扣除门票钻石(未扣为0)"`
 	SysTime        int64   `json:"sysTime,string"`
 	FreeTime       uint64  `json:"freeTime"`
+	TicketTime     int64   `json:"ticketTime"`
 }
 
 // LeaveRoomReq 离开直播间
@@ -319,19 +320,21 @@ type GetLiveRoomReq struct {
 }
 
 type GetLiveRoomRes struct {
-	RoomId   string  `json:"roomId"   dc:"直播间ID(同主播用户ID)"`
-	GuildId  string  `json:"guildId"  dc:"所属工会ID"`
-	Title    string  `json:"title"    dc:"直播间标题"`
-	Cover    string  `json:"cover"    dc:"封面图URL"`
-	Notice   string  `json:"notice"   dc:"公告"`
-	Status   uint8   `json:"status"   dc:"状态(0未开播,1直播中)"`
-	Category uint8   `json:"category" dc:"分类(1=hot,2=game,3=私密)"`
-	TagId    string  `json:"tagId" dc:"直播间标签ID"`
-	TagName  string  `json:"tagName" dc:"直播间标签名称"`
-	Ticket   float64 `json:"ticket" dc:"门票价格(钻石)"`
-	Billing  float64 `json:"billing" dc:"计费价格(每分钟钻石)"`
-	CreateAt int64   `json:"createAt" dc:"创建时间(秒)"`
-	FreeTime uint64  `json:"freeTime" dc:"私密房免费时间"`
+	RoomId     string  `json:"roomId"   dc:"直播间ID(同主播用户ID)"`
+	GuildId    string  `json:"guildId"  dc:"所属工会ID"`
+	Title      string  `json:"title"    dc:"直播间标题"`
+	Cover      string  `json:"cover"    dc:"封面图URL"`
+	Notice     string  `json:"notice"   dc:"公告"`
+	Status     uint8   `json:"status"   dc:"状态(0未开播,1直播中)"`
+	Category   uint8   `json:"category" dc:"分类(1=hot,2=game,3=私密)"`
+	TagId      string  `json:"tagId" dc:"直播间标签ID"`
+	TagName    string  `json:"tagName" dc:"直播间标签名称"`
+	Ticket     float64 `json:"ticket" dc:"门票价格(钻石)"`
+	Billing    float64 `json:"billing" dc:"计费价格(每分钟钻石)"`
+	CreateAt   int64   `json:"createAt" dc:"创建时间(秒)"`
+	FreeTime   uint64  `json:"freeTime" dc:"私密房免费时间"`
+	TicketTime int64   `json:"TicketTime" dc:"私密房门票倒计时"`
+	HasTicket  bool    `json:"hasTicket"`
 }
 
 // AnchorBanPushItem 主播封禁推送载荷(推送给主播及直播间在线观众)

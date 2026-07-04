@@ -16,7 +16,7 @@ import (
 
 const (
 	TimeOut              = 5 * time.Minute
-	PrivatePeriod uint64 = 1
+	PrivatePeriod uint64 = 30
 	CommonPeriod  uint64 = 30
 )
 
@@ -53,7 +53,6 @@ func ReportLiveStartStatus(ctx context.Context, req *liveroomdto.ReportLiveStart
 		return &liveroomdto.ReportLiveStartStatusRes{Success: true}, nil
 	}
 
-	now := time.Now()
 	var billingDeducted float64
 
 	if userId == room.ID {
@@ -63,9 +62,7 @@ func ReportLiveStartStatus(ctx context.Context, req *liveroomdto.ReportLiveStart
 		if !isUserInOnlineMap(userId, room.ID) {
 			return &liveroomdto.ReportLiveStartStatusRes{Success: true}, nil
 		}
-		onlineId := entity.BuildLiveRoomOnlineId(userId, room.ID)
-		onlineData := liveroomdao.GetOnlineById(onlineId, userId, room.ID)
-		deducted, err := chargePrivateRoomBillingIfNeeded(userId, room, onlineData, now)
+		deducted, err := chargePrivateRoomBillingIfNeeded(userId, room)
 		if err != nil {
 			exitRoom(userId, room.ID)
 			return nil, err

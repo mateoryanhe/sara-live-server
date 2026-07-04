@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 	"xr-game-server/constants/db"
+	"xr-game-server/core/math"
 	"xr-game-server/core/migrate"
 	"xr-game-server/core/syndb"
-	"xr-game-server/core/xrtime"
 )
 
 const (
@@ -15,23 +15,21 @@ const (
 )
 
 const (
-	LiveRoomBillingPayUserId         db.TbCol = "user_id"
-	LiveRoomBillingPayRoomId         db.TbCol = "room_id"
-	LiveRoomBillingPayFreeTime       db.TbCol = "free_time"
-	LiveRoomBillingPayLastLastFreeAt db.TbCol = "last_free_at"
-	LiveRoomBillingPayLastPaidAt     db.TbCol = "last_paid_at"
-	LiveRoomBillingPayBillTime       db.TbCol = "bill_time"
+	LiveRoomBillingPayUserId       db.TbCol = "user_id"
+	LiveRoomBillingPayRoomId       db.TbCol = "room_id"
+	LiveRoomBillingPayFreeTime     db.TbCol = "free_time"
+	LiveRoomBillingPayLastPaidAt   db.TbCol = "last_paid_at"
+	LiveRoomBillingPayLastTicketAt db.TbCol = "last_ticket_at"
 )
 
-// LiveRoomBillingPay 私密直播间按分钟计费记录(主键 ID = userId_roomId_liveRecordId)
+// LiveRoomBillingPay 私密直播间计费记录(主键 ID = userId_roomId)
 type LiveRoomBillingPay struct {
-	ID         string     `gorm:"primaryKey;size:96;comment:复合ID(userId_roomId)" json:"id"`
-	UserId     uint64     `gorm:"index;default:0;comment:用户ID" json:"userId"`
-	RoomId     uint64     `gorm:"index;default:0;comment:直播间ID" json:"roomId"`
-	FreeTime   uint64     `gorm:"index;default:0;comment:免费时长" json:"free_time"`
-	BillTime   uint64     `gorm:"index;default:0;comment:计费时长" json:"bill_time"`
-	LastFreeAt *time.Time `gorm:"comment:最近一次按分钟扣费时间" json:"lastBilledAt"`
-	LastPaidAt *time.Time `gorm:"comment:最近一次扣门票时间" json:"lastPaidAt"`
+	ID           string     `gorm:"primaryKey;size:96;comment:复合ID(userId_roomId)" json:"id"`
+	UserId       uint64     `gorm:"index;default:0;comment:用户ID" json:"userId"`
+	RoomId       uint64     `gorm:"index;default:0;comment:直播间ID" json:"roomId"`
+	FreeTime     uint64     `gorm:"index;default:0;comment:免费时长" json:"freeTime"`
+	LastPaidAt   *time.Time `gorm:"comment:最近一次观看时间" json:"lastPaidAt"`
+	LastTicketAt *time.Time `gorm:"comment:最近一次扣门票时间" json:"lastTicketAt"`
 }
 
 func BuildLiveRoomBillingPayId(userId, roomId uint64) string {
@@ -48,69 +46,53 @@ func NewLiveRoomBillingPay(userId, roomId uint64) *LiveRoomBillingPay {
 
 func (r *LiveRoomBillingPay) SetUserId(v uint64) {
 	r.UserId = v
-	syndb.AddDataToLazyChan(TbLiveRoomBillingPay, LiveRoomBillingPayUserId, &syndb.ColData{
+	syndb.AddDataToQuickChan(TbLiveRoomBillingPay, LiveRoomBillingPayUserId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRoomBillingPay) SetRoomId(v uint64) {
 	r.RoomId = v
-	syndb.AddDataToLazyChan(TbLiveRoomBillingPay, LiveRoomBillingPayRoomId, &syndb.ColData{
+	syndb.AddDataToQuickChan(TbLiveRoomBillingPay, LiveRoomBillingPayRoomId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRoomBillingPay) SubFreeTime(v uint64) {
-	r.FreeTime -= v
-	if r.FreeTime < 0 {
-		r.FreeTime = 0
-	}
+	r.FreeTime = math.Sub(r.FreeTime, v)
 	r.SetFreeTime(r.FreeTime)
 }
 
-func (r *LiveRoomBillingPay) GetFreeTime(freeTimeCfg uint64) uint64 {
-	now := time.Now()
-	if r.LastFreeAt == nil || (!xrtime.IsSameDay(now, *r.LastFreeAt)) {
-		r.SetLastFreeAt(now)
-		r.SetFreeTime(freeTimeCfg)
-	}
-	return r.FreeTime
-}
-
-func (r *LiveRoomBillingPay) IsValidWithin24h(now time.Time) bool {
-	if r.LastPaidAt == nil {
+func (r *LiveRoomBillingPay) IsValidWithin24h() bool {
+	if r.LastTicketAt == nil {
 		return false
 	}
-	return now.Sub(*r.LastPaidAt) < LiveRoomTicketValidDuration
+	now := time.Now()
+	return now.Sub(*r.LastTicketAt) < LiveRoomTicketValidDuration
+}
+
+func (r *LiveRoomBillingPay) GetTicketTime() int64 {
+	if r.LastTicketAt == nil {
+		return 0
+	}
+	expireTime := r.LastTicketAt.Add(LiveRoomTicketValidDuration)
+	sec := time.Since(expireTime).Seconds()
+	if sec > 0 {
+		return 0
+	}
+	return int64(-sec)
 }
 
 func (r *LiveRoomBillingPay) SetFreeTime(v uint64) {
 	r.FreeTime = v
-	syndb.AddDataToLazyChan(TbLiveRoomBillingPay, LiveRoomBillingPayFreeTime, &syndb.ColData{
+	syndb.AddDataToQuickChan(TbLiveRoomBillingPay, LiveRoomBillingPayFreeTime, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
-func (r *LiveRoomBillingPay) SetBillTime(v uint64) {
-	r.FreeTime = v
-	syndb.AddDataToLazyChan(TbLiveRoomBillingPay, LiveRoomBillingPayBillTime, &syndb.ColData{
-		IdVal: r.ID, ColVal: v,
-	})
-}
-
-func (r *LiveRoomBillingPay) SubBillTime(v uint64) {
-	r.BillTime -= v
-	r.SetBillTime(r.BillTime)
-}
-
-func (r *LiveRoomBillingPay) AddBillTime(v uint64) {
-	r.BillTime += v
-	r.SetBillTime(r.BillTime)
-}
-
-func (r *LiveRoomBillingPay) SetLastFreeAt(v time.Time) {
-	r.LastFreeAt = &v
-	syndb.AddDataToQuickChan(TbLiveRoomBillingPay, LiveRoomBillingPayLastLastFreeAt, &syndb.ColData{
+func (r *LiveRoomBillingPay) SetLastTicketAt(v time.Time) {
+	r.LastTicketAt = &v
+	syndb.AddDataToQuickChan(TbLiveRoomBillingPay, LiveRoomBillingPayLastTicketAt, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -123,13 +105,10 @@ func (r *LiveRoomBillingPay) SetLastPaidAt(v time.Time) {
 }
 
 func initLiveRoomBillingPay() {
-	syndb.RegLazyWithMiddle(TbLiveRoomBillingPay, LiveRoomBillingPayUserId)
-	syndb.RegLazyWithMiddle(TbLiveRoomBillingPay, LiveRoomBillingPayRoomId)
-	syndb.RegLazyWithMiddle(TbLiveRoomBillingPay, LiveRoomBillingPayFreeTime)
-	syndb.RegQuickWithMiddle(TbLiveRoomBillingPay, LiveRoomBillingPayLastLastFreeAt)
-	syndb.RegQuickWithMiddle(TbLiveRoomBillingPay, LiveRoomBillingPayLastPaidAt)
-
-	syndb.RegQuickWithMiddle(TbLiveRoomBillingPay, LiveRoomBillingPayBillTime)
-
+	syndb.RegQuickWithLarge(TbLiveRoomBillingPay, LiveRoomBillingPayUserId)
+	syndb.RegQuickWithLarge(TbLiveRoomBillingPay, LiveRoomBillingPayRoomId)
+	syndb.RegQuickWithLarge(TbLiveRoomBillingPay, LiveRoomBillingPayFreeTime)
+	syndb.RegQuickWithLarge(TbLiveRoomBillingPay, LiveRoomBillingPayLastPaidAt)
+	syndb.RegQuickWithLarge(TbLiveRoomBillingPay, LiveRoomBillingPayLastTicketAt)
 	migrate.AutoMigrate(&LiveRoomBillingPay{})
 }

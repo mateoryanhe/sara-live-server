@@ -4,5 +4,4 @@ func Init() {
 	initHeart()
 	initRoomList()
 	initRoomTagMemory()
-	initPrivateRoom()
 }

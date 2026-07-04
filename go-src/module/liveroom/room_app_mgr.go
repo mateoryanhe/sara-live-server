@@ -4,8 +4,6 @@ import (
 	"context"
 	"strconv"
 	"time"
-	"xr-game-server/module/livecfg"
-
 	"xr-game-server/constants/userstatus"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/liveroomdao"
@@ -199,10 +197,13 @@ func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto
 	}
 	//判断一下房间类型
 	if room.Category == entity.LiveRoomCategoryPrivate {
+
 		//私密房免费时长
 		pay := liveroomdao.GetLiveRoomBillingPay(userId, req.RoomId)
 
-		res.FreeTime = pay.GetFreeTime(uint64(livecfg.GetPrivateRoomFreeWatchSeconds()))
+		res.FreeTime = pay.FreeTime
+		res.TicketTime = pay.GetTicketTime()
+		res.HasTicket = res.TicketTime > 0
 	}
 
 	return res, nil
