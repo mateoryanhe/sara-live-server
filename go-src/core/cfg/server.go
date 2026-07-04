@@ -23,6 +23,8 @@ type XRServerCfg struct {
 	Id int64
 	//程序最长退出时间
 	ExitTime int
+	// Go堆内存软上限(MB),0或未设置时默认400M
+	MemoryLimitM int
 }
 
 var serverCfg *XRServerCfg
@@ -38,6 +40,7 @@ func initServerCfg() {
 	if err != nil {
 		g.Log().Error(gctx.New(), "无法加载到基础配置文件数据")
 	} else {
+		applyMemoryLimit(serverCfg.MemoryLimitM)
 		cfgJson := xrjson.MustMarshalIndent(serverCfg)
 		g.Log().Warningf(gctx.New(), "成功加载到基础配置数据:%s", cfgJson)
 	}
