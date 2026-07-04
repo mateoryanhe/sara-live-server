@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"xr-game-server/constants/lang"
+	"xr-game-server/core/xrjson"
 	"xr-game-server/errercode"
 )
 
@@ -30,5 +31,6 @@ func GetLangFromContext(ctx context.Context) lang.Lang {
 func WriteFailJson(r *ghttp.Request, code int) {
 	resp := CreateFail(code)
 	resp.Message = errercode.GetMsg(errercode.XRCode(code), GetLang(r))
-	r.Response.WriteJson(resp)
+	r.Response.Header().Set("Content-Type", contentTypeJson)
+	r.Response.Write(xrjson.MustMarshal(resp))
 }
