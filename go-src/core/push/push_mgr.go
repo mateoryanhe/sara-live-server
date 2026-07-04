@@ -2,7 +2,6 @@ package push
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -13,6 +12,8 @@ import (
 	"xr-game-server/core/cfg"
 	"xr-game-server/core/event"
 	"xr-game-server/core/httpserver"
+	"xr-game-server/core/xrjson"
+
 	"xr-game-server/core/xrtimer"
 	"xr-game-server/errercode"
 )
@@ -66,7 +67,7 @@ func Data(clientId uint64, cmd int, msg any) {
 	if client == nil {
 		return
 	}
-	jStr, _ := json.MarshalIndent(msg, "", " ")
+	jStr := xrjson.MustMarshalIndent(msg)
 	g.Log().Infof(gctx.New(), "userid=%v,发送数据cmd=%v,data=%s", clientId, cmd, jStr)
 	client.Send(&httpserver.PushResp{
 		Data: msg,

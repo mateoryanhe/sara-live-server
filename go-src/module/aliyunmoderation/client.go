@@ -2,7 +2,6 @@ package aliyunmoderation
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"strings"
 	"sync"
@@ -12,6 +11,7 @@ import (
 	util "github.com/alibabacloud-go/tea-utils/v2/service"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/gogf/gf/v2/frame/g"
+	"xr-game-server/core/xrjson"
 )
 
 type reasonPayload struct {
@@ -65,7 +65,7 @@ func moderateText(ctx context.Context, cfg *cfgSnapshot, service, content string
 	if err != nil {
 		return false, err
 	}
-	params, err := json.Marshal(map[string]string{"content": content})
+	params, err := xrjson.Marshal(map[string]string{"content": content})
 	if err != nil {
 		return false, err
 	}
@@ -113,7 +113,7 @@ func hasRiskLabels(labels, reason *string) bool {
 		return false
 	}
 	var rp reasonPayload
-	if err := json.Unmarshal([]byte(reasonStr), &rp); err != nil {
+	if err := xrjson.Unmarshal([]byte(reasonStr), &rp); err != nil {
 		return true
 	}
 	switch strings.ToLower(strings.TrimSpace(rp.RiskLevel)) {

@@ -20,6 +20,8 @@ const (
 	CloseTime = 50 * time.Millisecond
 	// queuePopTimeout Pop 超时,避免消费端阻塞
 	queuePopTimeout = time.Nanosecond
+	// syndbPushSlowLogMs Push 超过该阈值(毫秒)时记录慢日志
+	syndbPushSlowLogMs = int64(5)
 )
 
 type ColData struct {
@@ -69,7 +71,11 @@ func AddDataToQuickChan(tbName db.TbName, tbCol db.TbCol, colData *ColData) {
 
 func addDataToQueue(cacheMap map[string]*ColSynCache, tbName db.TbName, tbCol db.TbCol, colData *ColData) {
 	key := string(tbName) + ":" + string(tbCol)
+	start := time.Now()
 	cacheMap[key].DataQueue.Push(colData)
+	if costMs := time.Since(start).Milliseconds(); costMs >= syndbPushSlowLogMs {
+		g.Log().Warningf(gctx.New(), "syndb Push慢,table=%v,col=%v,耗时=%vms,id=%v", tbName, tbCol, costMs, colData.IdVal)
+	}
 }
 
 // SysExit 调整全部数据库同步组件同步时间到最小

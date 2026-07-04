@@ -1,9 +1,9 @@
 package cfg
 
 import (
-	"encoding/json"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"xr-game-server/core/xrjson"
 )
 
 const (
@@ -38,7 +38,7 @@ func initServerCfg() {
 	if err != nil {
 		g.Log().Error(gctx.New(), "无法加载到基础配置文件数据")
 	} else {
-		cfgJson, _ := json.MarshalIndent(serverCfg, "", " ")
+		cfgJson := xrjson.MustMarshalIndent(serverCfg)
 		g.Log().Warningf(gctx.New(), "成功加载到基础配置数据:%s", cfgJson)
 	}
 }

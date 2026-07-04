@@ -8,13 +8,14 @@ import (
 	"net/url"
 
 	"github.com/gogf/gf/v2/net/gclient"
+	"xr-game-server/core/xrjson"
 )
 
 const agoraRestBaseURL = "https://api.agora.io"
 
 type agoraRestResp struct {
-	Success bool            `json:"success"`
-	Data    json.RawMessage `json:"data"`
+	Success bool   `json:"success"`
+	Data    []byte `json:"data"`
 }
 
 type agoraUserStatusData struct {
@@ -56,7 +57,7 @@ func agoraRestGet(ctx context.Context, cfg *agoraCfgSnapshot, path string) (*ago
 	}
 
 	var ret agoraRestResp
-	if err = json.Unmarshal(body, &ret); err != nil {
+	if err = xrjson.Unmarshal(body, &ret); err != nil {
 		return nil, err
 	}
 	return &ret, nil
@@ -79,7 +80,7 @@ func queryUserStatus(ctx context.Context, cfg *agoraCfgSnapshot, channelName str
 		return &agoraUserStatusData{InChannel: false}, nil
 	}
 	var data agoraUserStatusData
-	if err = json.Unmarshal(resp.Data, &data); err != nil {
+	if err = xrjson.Unmarshal(resp.Data, &data); err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -101,7 +102,7 @@ func queryChannelUserList(ctx context.Context, cfg *agoraCfgSnapshot, channelNam
 		return &agoraChannelUserListData{ChannelExist: false}, nil
 	}
 	var data agoraChannelUserListData
-	if err = json.Unmarshal(resp.Data, &data); err != nil {
+	if err = xrjson.Unmarshal(resp.Data, &data); err != nil {
 		return nil, err
 	}
 	return &data, nil

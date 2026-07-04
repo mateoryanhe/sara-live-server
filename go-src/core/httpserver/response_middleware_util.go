@@ -1,8 +1,9 @@
 package httpserver
 
 import (
-	"encoding/json"
 	"errors"
+	"time"
+	"xr-game-server/core/xrjson"
 
 	"github.com/gogf/gf/v2/net/ghttp"
 	"xr-game-server/errercode"
@@ -38,14 +39,18 @@ func buildResponseResult(r *ghttp.Request, wrapSuccess func(any) any) responseBu
 	var respData any
 	if err != nil {
 		failResp := CreateFailAndParam(code, param)
-		failResp.Message = errercode.GetMsg(errercode.XRCode(code), GetLang(r))
+		if sysError {
+			failResp.Message = err.Error()
+		} else {
+			failResp.Message = errercode.GetMsg(errercode.XRCode(code), GetLang(r))
+		}
 		respData = failResp
 	} else if wrapSuccess != nil {
 		respData = wrapSuccess(res)
 	} else {
 		respData = res
 	}
-	resp, _ := json.MarshalIndent(respData, "", " ")
+	resp := xrjson.MustMarshal(respData)
 	return responseBuildResult{
 		resp:     resp,
 		code:     code,
@@ -53,15 +58,25 @@ func buildResponseResult(r *ghttp.Request, wrapSuccess func(any) any) responseBu
 	}
 }
 
-func writeResponseAndLog(r *ghttp.Request, authId string, wrapSuccess func(any) any) {
+func preHandlerDurationMs(r *ghttp.Request) int64 {
+	return requestDurationMs(r)
+}
+
+func writeResponseAndLog(r *ghttp.Request, authId string, preHandlerMs, handlerMs int64, wrapSuccess func(any) any) {
+	serializeStart := time.Now()
 	result := buildResponseResult(r, wrapSuccess)
 	r.Response.Header().Set("Content-Type", contentTypeJson)
 	r.Response.Write(result.resp)
+	serializeMs := time.Since(serializeStart).Milliseconds()
 
 	stashAPIRequestEndLog(r, &apiRequestEndPending{
-		AuthId:   authId,
-		SysError: result.sysError,
-		Code:     result.code,
-		Resp:     result.resp,
+		AuthId:       authId,
+		SysError:     result.sysError,
+		Code:         result.code,
+		Resp:         result.resp,
+		PreHandlerMs: preHandlerMs,
+		HandlerMs:    handlerMs,
+		SerializeMs:  serializeMs,
+		RespBytes:    len(result.resp),
 	})
 }

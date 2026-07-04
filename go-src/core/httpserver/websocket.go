@@ -1,9 +1,10 @@
 package httpserver
 
 import (
-	"encoding/json"
 	"github.com/gogf/gf/v2/container/gqueue"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/gorilla/websocket"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 	"xr-game-server/constants/cmd"
 	"xr-game-server/constants/common"
 	"xr-game-server/core/event"
+	"xr-game-server/core/xrjson"
 	"xr-game-server/core/xrtoken"
 	"xr-game-server/errercode"
 )
@@ -20,9 +22,10 @@ const (
 	//发送超时
 	SendTimeOut = 100 * time.Millisecond
 	//写入超时
-	IdleTime = 3000 * time.Millisecond
-	ChkTime  = 2 * time.Nanosecond
-	MaxSize  = 10
+	IdleTime        = 3000 * time.Millisecond
+	ChkTime         = 2 * time.Nanosecond
+	MaxSize         = 10
+	wsPushSlowLogMs = int64(5)
 )
 
 type PushResp struct {
@@ -42,7 +45,7 @@ func newError(code errercode.XRCode) []byte {
 			Data: &AuthResp{Code: int(code)},
 		},
 	}
-	data, _ := json.Marshal(ret)
+	data := xrjson.MustMarshal(ret)
 	return data
 }
 
@@ -54,7 +57,7 @@ func newHeart() []byte {
 			Data: time.Now().UnixMilli(),
 		},
 	}
-	data, _ := json.Marshal(ret)
+	data := xrjson.MustMarshal(ret)
 	return data
 }
 
@@ -168,7 +171,7 @@ func (w *WebSocketClient) flushDataBuffer() {
 	w.sendTime = time.Now()
 	w.lastTime = time.Now()
 	w.Num = common.Zero
-	ret, _ := json.Marshal(w.sendData)
+	ret := xrjson.MustMarshal(w.sendData)
 	//开始发送数据
 	err := w.Conn.WriteMessage(websocket.BinaryMessage, ret)
 	if err != nil {
@@ -224,5 +227,9 @@ func (c *WebSocketClient) Send(data any) {
 	if !c.Loop {
 		return
 	}
+	start := time.Now()
 	c.dataBuffer.Push(data)
+	if costMs := time.Since(start).Milliseconds(); costMs >= wsPushSlowLogMs {
+		g.Log().Warningf(gctx.New(), "websocket Push慢,userId=%v,耗时=%vms,data=%v", c.Id, costMs, data)
+	}
 }

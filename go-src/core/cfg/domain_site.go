@@ -1,11 +1,11 @@
 package cfg
 
 import (
-	"encoding/json"
 	"strings"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"xr-game-server/core/xrjson"
 )
 
 // DomainSiteCfg 域名静态站点配置
@@ -29,7 +29,7 @@ func initDomainSiteCfg() {
 	_ = g.Cfg().MustGet(ctx, "server.domainSites").Scan(&list)
 	domainSiteCfgs = normalizeDomainSiteCfgs(list)
 	if len(domainSiteCfgs) > 0 {
-		cfgJson, _ := json.MarshalIndent(domainSiteCfgs, "", " ")
+		cfgJson := xrjson.MustMarshalIndent(domainSiteCfgs)
 		g.Log().Warningf(ctx, "成功加载域名站点配置:%s", cfgJson)
 	}
 }

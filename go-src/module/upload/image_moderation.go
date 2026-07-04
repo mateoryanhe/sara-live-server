@@ -19,6 +19,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/google/uuid"
+	"xr-game-server/core/xrjson"
 
 	"xr-game-server/errercode"
 )
@@ -147,7 +148,7 @@ func callImageModeration(ctx context.Context, cfg imageModerationCfg, imageURL s
 	if service == "" {
 		service = defaultImageModerationService
 	}
-	serviceParams, err := json.Marshal(map[string]string{
+	serviceParams, err := xrjson.Marshal(map[string]string{
 		"imageUrl": imageURL,
 		"dataId":   uuid.New().String(),
 	})
@@ -198,12 +199,12 @@ func callImageModeration(ctx context.Context, cfg imageModerationCfg, imageURL s
 	if err != nil {
 		return nil, err
 	}
-	raw, err := json.Marshal(bodyMap)
+	raw, err := xrjson.Marshal(bodyMap)
 	if err != nil {
 		return nil, err
 	}
 	var parsed imageModerationAPIResp
-	if err = json.Unmarshal(raw, &parsed); err != nil {
+	if err = xrjson.Unmarshal(raw, &parsed); err != nil {
 		return nil, err
 	}
 	return &parsed, nil
