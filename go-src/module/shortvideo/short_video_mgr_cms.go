@@ -30,7 +30,7 @@ func UpdateShortVideo(_ context.Context, req *shortvideodto.UpdateShortVideoReq)
 	if existing := shortvideodao.GetByTitle(req.Title); existing != nil && existing.ID != req.ID {
 		return nil, errercode.CreateCode(errercode.ShortVideoExist)
 	}
-	isPaid, diamondPerMinute, err := normalizeShortVideoPaid(req.IsPaid, req.DiamondPerMinute)
+	isPaid, payDiamond, err := normalizeShortVideoPaid(req.IsPaid, req.PayDiamond)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func UpdateShortVideo(_ context.Context, req *shortvideodto.UpdateShortVideoReq)
 	row.SetCover(req.Cover)
 	row.SetSort(req.Sort)
 	row.SetIsPaid(isPaid)
-	row.SetDiamondPerMinute(diamondPerMinute)
+	row.SetPayDiamond(payDiamond)
 	row.SetCategoryId(req.CategoryId)
 	row.SetSource(req.Source)
 	row.SetFreeWatchSeconds(freeWatchSeconds)
@@ -100,14 +100,14 @@ func OffShelfShortVideo(_ context.Context, req *shortvideodto.OffShelfShortVideo
 	return &shortvideodto.OffShelfShortVideoRes{Success: true, Status: entity.ShortVideoStatusOffShelf}, nil
 }
 
-func normalizeShortVideoPaid(isPaid uint8, diamondPerMinute float64) (uint8, float64, error) {
+func normalizeShortVideoPaid(isPaid uint8, payDiamond float64) (uint8, float64, error) {
 	if isPaid != entity.ShortVideoPaidYes {
 		return entity.ShortVideoPaidNo, 0, nil
 	}
-	if diamondPerMinute <= 0 {
+	if payDiamond <= 0 {
 		return 0, 0, errercode.CreateCode(errercode.InvalidParam)
 	}
-	return isPaid, diamondPerMinute, nil
+	return isPaid, payDiamond, nil
 }
 
 func normalizeShortVideoFreeWatchSeconds(isPaid uint8, freeWatchSeconds uint32) uint32 {

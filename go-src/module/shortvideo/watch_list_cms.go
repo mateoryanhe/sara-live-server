@@ -24,13 +24,15 @@ func GetShortVideoWatchList(_ context.Context, req *shortvideodto.ShortVideoWatc
 			continue
 		}
 		item := &shortvideodto.ShortVideoWatchListItem{
-			ID:            row.ID,
-			UserId:        strconv.FormatUint(row.UserId, 10),
-			VideoId:       strconv.FormatUint(row.VideoId, 10),
-			BilledSeconds: row.BilledSeconds,
-			WatchSeconds:  row.WatchSeconds,
-			CreatedAt:     formatShortVideoCfgTime(row.CreatedAt),
-			UpdatedAt:     formatShortVideoCfgTime(row.UpdatedAt),
+			ID:        row.ID,
+			UserId:    strconv.FormatUint(row.UserId, 10),
+			VideoId:   strconv.FormatUint(row.VideoId, 10),
+			FreeTime:  row.FreeTime,
+			CreatedAt: formatShortVideoCfgTime(row.CreatedAt),
+			UpdatedAt: formatShortVideoCfgTime(row.UpdatedAt),
+		}
+		if row.PaidTime != nil {
+			item.PaidTime = formatShortVideoCfgTime(*row.PaidTime)
 		}
 		if user := userinfodao.GetUserInfoByUserId(row.UserId); user != nil {
 			item.Nickname = user.Nickname

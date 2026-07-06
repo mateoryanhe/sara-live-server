@@ -64,10 +64,11 @@ func getAppShortVideoListCache() []*shortvideodto.AppShortVideoItem {
 }
 
 func toAppShortVideoItem(row *entity.ShortVideo, stat *entity.ShortVideoStat) *shortvideodto.AppShortVideoItem {
-	var likeCount, viewCount uint64
+	var likeCount, viewCount, watchCount uint64
 	if stat != nil {
 		likeCount = stat.LikeCount
 		viewCount = stat.ViewCount
+		watchCount = stat.WatchCount
 	}
 	author := getShortVideoAuthorInfo(row.AuthorId)
 	item := &shortvideodto.AppShortVideoItem{
@@ -76,7 +77,7 @@ func toAppShortVideoItem(row *entity.ShortVideo, stat *entity.ShortVideoStat) *s
 		Video:            upload.GetUrlByName(row.Video),
 		Cover:            upload.GetUrlByName(row.Cover),
 		IsPaid:           row.IsPaid,
-		DiamondPerMinute: row.DiamondPerMinute,
+		PayDiamond:       row.PayDiamond,
 		CategoryId:       row.CategoryId,
 		Source:           row.Source,
 		AuthorId:         author.AuthorId,
@@ -84,6 +85,7 @@ func toAppShortVideoItem(row *entity.ShortVideo, stat *entity.ShortVideoStat) *s
 		AuthorAvatar:     author.AuthorAvatar,
 		LikeCount:        likeCount,
 		ViewCount:        viewCount,
+		WatchCount:       watchCount,
 		Duration:         row.Duration,
 		FreeWatchSeconds: row.FreeWatchSeconds,
 	}

@@ -16,14 +16,15 @@ type AppShortVideoItem struct {
 	Video            string  `json:"video" dc:"视频完整URL"`
 	Cover            string  `json:"cover" dc:"封面完整URL"`
 	IsPaid           uint8   `json:"isPaid" dc:"是否付费(0免费,1付费)"`
-	DiamondPerMinute float64 `json:"diamondPerMinute" dc:"每分钟钻石数"`
+	PayDiamond       float64 `json:"payDiamond" dc:"付费钻石(一次性)"`
 	CategoryId       int     `json:"categoryId" dc:"视频分类ID"`
 	Source           uint8   `json:"source" dc:"视频来源(1原创,2转发,3AI生成)"`
 	AuthorId         string  `json:"authorId" dc:"作者用户ID"`
 	AuthorNickname   string  `json:"authorNickname" dc:"作者昵称"`
 	AuthorAvatar     string  `json:"authorAvatar" dc:"作者头像URL"`
 	LikeCount        uint64  `json:"likeCount"`
-	ViewCount        uint64  `json:"viewCount" dc:"观看人数"`
+	ViewCount        uint64  `json:"viewCount" dc:"观看人数(去重)"`
+	WatchCount       uint64  `json:"watchCount" dc:"观看次数(累计)"`
 	Duration         uint32  `json:"duration" dc:"视频时长(秒)"`
 	FreeWatchSeconds uint32  `json:"freeWatchSeconds" dc:"免费观看时长(秒)"`
 }
@@ -70,7 +71,8 @@ type AppShortVideoUploadRecordItem struct {
 	AuthorNickname     string  `json:"authorNickname" dc:"作者昵称"`
 	AuthorAvatar       string  `json:"authorAvatar" dc:"作者头像URL"`
 	LikeCount          uint64  `json:"likeCount"`
-	ViewCount          uint64  `json:"viewCount" dc:"观看人数"`
+	ViewCount          uint64  `json:"viewCount" dc:"观看人数(去重)"`
+	WatchCount         uint64  `json:"watchCount" dc:"观看次数(累计)"`
 	Duration           uint32  `json:"duration" dc:"视频时长(秒)"`
 	TotalDiamondIncome float64 `json:"totalDiamondIncome" dc:"累计钻石收益"`
 	CreatedAt          string  `json:"createdAt" dc:"上传时间"`

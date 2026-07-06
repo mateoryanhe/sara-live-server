@@ -14,13 +14,13 @@ type ShortVideoWatchListReq struct {
 }
 
 type ShortVideoWatchListItem struct {
-	ID            string `json:"id"`
-	UserId        string `json:"userId"`
-	Nickname      string `json:"nickname"`
-	VideoId       string `json:"videoId"`
-	VideoTitle    string `json:"videoTitle"`
-	BilledSeconds uint64 `json:"billedSeconds,string"`
-	WatchSeconds  uint64 `json:"watchSeconds,string"`
-	CreatedAt     string `json:"createdAt"`
-	UpdatedAt     string `json:"updatedAt"`
+	ID         string `json:"id"`
+	UserId     string `json:"userId"`
+	Nickname   string `json:"nickname"`
+	VideoId    string `json:"videoId"`
+	VideoTitle string `json:"videoTitle"`
+	PaidTime   string `json:"paidTime" dc:"付费时间(空表示未付费)"`
+	FreeTime   uint64 `json:"freeTime,string" dc:"剩余免费时长(秒)"`
+	CreatedAt  string `json:"createdAt"`
+	UpdatedAt  string `json:"updatedAt"`
 }

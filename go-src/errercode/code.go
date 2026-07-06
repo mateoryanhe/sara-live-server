@@ -146,6 +146,8 @@ const (
 	EntryEffectExist XRCode = 132
 	// EntryEffectNonExist 进场特效不存在
 	EntryEffectNonExist XRCode = 133
+	// ShortVideoMustPayToWatch 短视频必须付费观看
+	ShortVideoMustPayToWatch XRCode = 134
 )
 
 type XError struct {

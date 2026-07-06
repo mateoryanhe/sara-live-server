@@ -84,6 +84,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		LiveRoomTagNonExist:            "Live room tag does not exist",
 		EntryEffectExist:               "Entry effect name already exists",
 		EntryEffectNonExist:            "Entry effect does not exist",
+		ShortVideoMustPayToWatch:       "This short video requires payment to watch",
 	},
 	lang.LangZHCN: {
 		Success:                        "成功",
@@ -164,6 +165,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		LiveRoomTagNonExist:            "直播间标签不存在",
 		EntryEffectExist:               "进场特效名称已存在",
 		EntryEffectNonExist:            "进场特效不存在",
+		ShortVideoMustPayToWatch:       "短视频必须付费观看",
 	},
 	lang.LangZHTW: {
 		Success:                        "成功",
@@ -244,6 +246,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		LiveRoomTagNonExist:            "直播間標籤不存在",
 		EntryEffectExist:               "進場特效名稱已存在",
 		EntryEffectNonExist:            "進場特效不存在",
+		ShortVideoMustPayToWatch:       "短視頻必須付費觀看",
 	},
 }
 

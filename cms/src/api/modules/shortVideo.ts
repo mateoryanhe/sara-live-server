@@ -35,7 +35,7 @@ export const shortVideoApi = {
         cover: string
         sort: number
         isPaid: number
-        diamondPerMinute: number
+        payDiamond: number
         freeWatchSeconds: number
         categoryId: number
         source: number

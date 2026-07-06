@@ -23,13 +23,14 @@ type ShortVideoListRes struct {
 	Sort               int     `json:"sort"`
 	Status             uint8   `json:"status"`
 	IsPaid             uint8   `json:"isPaid"`
-	DiamondPerMinute   float64 `json:"diamondPerMinute"`
+	PayDiamond         float64 `json:"payDiamond"`
 	CategoryId         int     `json:"categoryId"`
 	Source             uint8   `json:"source"`
 	AuthorId           string  `json:"authorId"`
 	AuthorNickname     string  `json:"authorNickname"`
 	LikeCount          uint64  `json:"likeCount" dc:"点赞数"`
-	ViewCount          uint64  `json:"viewCount" dc:"观看人数"`
+	ViewCount          uint64  `json:"viewCount" dc:"观看人数(去重)"`
+	WatchCount         uint64  `json:"watchCount" dc:"观看次数(累计)"`
 	TotalDiamondIncome float64 `json:"totalDiamondIncome" dc:"累计钻石收益"`
 	Duration           uint32  `json:"duration" dc:"视频时长(秒)"`
 	FreeWatchSeconds   uint32  `json:"freeWatchSeconds" dc:"免费观看时长(秒)"`

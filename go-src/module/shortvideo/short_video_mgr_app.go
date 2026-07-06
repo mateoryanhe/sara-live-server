@@ -31,7 +31,7 @@ func PublishShortVideoApp(ctx context.Context, req *shortvideodto.AppPublishShor
 	if existing := shortvideodao.GetByTitle(req.Title); existing != nil {
 		return nil, errercode.CreateCode(errercode.ShortVideoExist)
 	}
-	isPaid, diamondPerMinute := entity.ShortVideoPaidNo, float64(0)
+	isPaid, payDiamond := entity.ShortVideoPaidNo, float64(0)
 
 	if err := validateShortVideoCategoryId(req.CategoryId); err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func PublishShortVideoApp(ctx context.Context, req *shortvideodto.AppPublishShor
 		coverName,
 		0,
 		isPaid,
-		diamondPerMinute,
+		payDiamond,
 		req.CategoryId,
 		req.Source,
 		authorId,
@@ -111,11 +111,12 @@ func compareShortVideoByCreatedAt(a, b *entity.ShortVideo) bool {
 }
 
 func toAppShortVideoUploadRecordItem(row *entity.ShortVideo) *shortvideodto.AppShortVideoUploadRecordItem {
-	var likeCount, viewCount uint64
+	var likeCount, viewCount, watchCount uint64
 	var totalDiamondIncome float64
 	if stat := shortvideodao.GetStatByVideoId(row.ID); stat != nil {
 		likeCount = stat.LikeCount
 		viewCount = stat.ViewCount
+		watchCount = stat.WatchCount
 		totalDiamondIncome = stat.TotalDiamondIncome
 	}
 	author := getShortVideoAuthorInfo(row.AuthorId)
@@ -133,6 +134,7 @@ func toAppShortVideoUploadRecordItem(row *entity.ShortVideo) *shortvideodto.AppS
 		Duration:           row.Duration,
 		LikeCount:          likeCount,
 		ViewCount:          viewCount,
+		WatchCount:         watchCount,
 		TotalDiamondIncome: totalDiamondIncome,
 		CreatedAt:          formatShortVideoUploadTime(row.CreatedAt),
 		UpdatedAt:          formatShortVideoUploadTime(row.UpdatedAt),

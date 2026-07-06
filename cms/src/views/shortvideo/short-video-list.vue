@@ -73,9 +73,9 @@
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="每分钟钻石" width="110">
+          <el-table-column label="付费钻石" width="110">
             <template #default="{ row }">
-              {{ row.isPaid === 1 ? formatPrice(row.diamondPerMinute) : '-' }}
+              {{ row.isPaid === 1 ? formatPrice(row.payDiamond) : '-' }}
             </template>
           </el-table-column>
           <el-table-column label="免费时长(秒)" width="110">
@@ -95,6 +95,7 @@
           </el-table-column>
           <el-table-column label="点赞数" prop="likeCount" width="90"/>
           <el-table-column label="观看人数" prop="viewCount" width="90"/>
+          <el-table-column label="观看次数" prop="watchCount" width="90"/>
           <el-table-column label="累计钻石收益" width="120">
             <template #default="{ row }">
               {{ formatPrice(row.totalDiamondIncome) }}
@@ -193,16 +194,16 @@
             <el-radio :label="1">付费</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item v-if="currentRow.isPaid === 1" label="每分钟钻石" prop="diamondPerMinute">
+        <el-form-item v-if="currentRow.isPaid === 1" label="付费钻石" prop="payDiamond">
           <el-input-number
-              v-model="currentRow.diamondPerMinute"
+              v-model="currentRow.payDiamond"
               :min="0.0001"
               :precision="4"
               :step="0.0001"
               controls-position="right"
               style="width: 220px"
           />
-          <span class="form-tip">付费视频按观看秒数折算分钟扣费</span>
+          <span class="form-tip">付费视频一次性解锁价格</span>
         </el-form-item>
         <el-form-item v-if="currentRow.isPaid === 1" label="免费观看时长" prop="freeWatchSeconds">
           <el-input-number
@@ -259,7 +260,7 @@ interface ShortVideoForm {
   cover: string
   sort: number
   isPaid: number
-  diamondPerMinute: number
+  payDiamond: number
   freeWatchSeconds: number
   categoryId: number
   source: number
@@ -297,7 +298,7 @@ const defaultForm = (): ShortVideoForm => ({
   cover: '',
   sort: 0,
   isPaid: 0,
-  diamondPerMinute: 0,
+  payDiamond: 0,
   freeWatchSeconds: 15,
   categoryId: 0,
   source: 1,
@@ -385,15 +386,15 @@ watch(dialogVisible, (visible) => {
 
 watch(() => currentRow.value.isPaid, (paid) => {
   if (paid === 1) {
-    if (!currentRow.value.diamondPerMinute || currentRow.value.diamondPerMinute <= 0) {
-      currentRow.value.diamondPerMinute = 1
+    if (!currentRow.value.payDiamond || currentRow.value.payDiamond <= 0) {
+      currentRow.value.payDiamond = 1
     }
     if (currentRow.value.freeWatchSeconds == null || currentRow.value.freeWatchSeconds < 0) {
       currentRow.value.freeWatchSeconds = 15
     }
     return
   }
-  currentRow.value.diamondPerMinute = 0
+  currentRow.value.payDiamond = 0
   currentRow.value.freeWatchSeconds = 0
 })
 
@@ -402,11 +403,11 @@ const formRules: FormRules = {
     {required: true, message: '请输入标题', trigger: 'blur'},
     {min: 1, max: 64, message: '标题长度在1-64个字符', trigger: 'blur'}
   ],
-  diamondPerMinute: [
+  payDiamond: [
     {
       validator: (_rule, value, callback) => {
         if (currentRow.value.isPaid === 1 && (!value || value <= 0)) {
-          callback(new Error('付费视频请填写每分钟钻石数'))
+          callback(new Error('付费视频请填写付费钻石'))
           return
         }
         callback()
@@ -503,7 +504,7 @@ const handleEdit = (row: ShortVideo) => {
     cover: row.coverName || '',
     sort: Number(row.sort) || 0,
     isPaid: row.isPaid ?? 0,
-    diamondPerMinute: row.isPaid === 1 ? (Number(row.diamondPerMinute) || 1) : 0,
+    payDiamond: row.isPaid === 1 ? (Number(row.payDiamond) || 1) : 0,
     freeWatchSeconds: row.isPaid === 1 ? (row.freeWatchSeconds != null ? Number(row.freeWatchSeconds) : 15) : 0,
     categoryId: Number(row.categoryId) || 0,
     source: row.source || 1,
@@ -566,7 +567,7 @@ const handleSave = async () => {
         cover: currentRow.value.cover,
         sort: currentRow.value.sort,
         isPaid: currentRow.value.isPaid,
-        diamondPerMinute: currentRow.value.isPaid === 1 ? currentRow.value.diamondPerMinute : 0,
+        payDiamond: currentRow.value.isPaid === 1 ? currentRow.value.payDiamond : 0,
         freeWatchSeconds: currentRow.value.isPaid === 1 ? currentRow.value.freeWatchSeconds : 0,
         categoryId: currentRow.value.categoryId || 0,
         source: currentRow.value.source,

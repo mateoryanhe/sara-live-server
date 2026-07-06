@@ -426,7 +426,7 @@ export interface ShortVideo {
     sort: number
     status: number
     isPaid: number
-    diamondPerMinute: number
+    payDiamond: number
     categoryId: number
     source: number
     authorId: string
@@ -435,6 +435,7 @@ export interface ShortVideo {
     freeWatchSeconds: number
     likeCount: number
     viewCount: number
+    watchCount: number
     totalDiamondIncome: number
     createdAt: string
     updatedAt: string
@@ -452,8 +453,8 @@ export interface ShortVideoWatchRecord {
     nickname: string
     videoId: string
     videoTitle: string
-    billedSeconds: number
-    watchSeconds: number
+    paidTime: string
+    freeTime: number
     createdAt: string
     updatedAt: string
 }

@@ -19,3 +19,14 @@ type WatchShortVideoEndReq struct {
 
 type WatchShortVideoEndRes struct {
 }
+
+// PayShortVideoReq App端短视频付费观看
+type PayShortVideoReq struct {
+	g.Meta  `path:"/payShortVideo" method:"post" summary:"短视频付费观看" tags:"短视频"`
+	VideoId uint64 `json:"videoId,string" v:"required#视频ID不能为空" dc:"短视频ID"`
+}
+
+type PayShortVideoRes struct {
+	Deducted float64 `json:"deducted" dc:"本次扣除钻石数"`
+	Diamond  float64 `json:"diamond" dc:"扣费后钻石余额"`
+}

@@ -40,8 +40,10 @@
         <el-table-column label="视频标题" min-width="160" prop="videoTitle" show-overflow-tooltip>
           <template #default="{ row }">{{ row.videoTitle || '-' }}</template>
         </el-table-column>
-        <el-table-column label="已计费秒数" prop="billedSeconds" width="110"/>
-        <el-table-column label="观看时长(秒)" prop="watchSeconds" width="120"/>
+        <el-table-column label="付费时间" prop="paidTime" width="170">
+          <template #default="{ row }">{{ row.paidTime || '-' }}</template>
+        </el-table-column>
+        <el-table-column label="剩余免费(秒)" prop="freeTime" width="120"/>
         <el-table-column label="创建时间" prop="createdAt" width="170"/>
         <el-table-column label="更新时间" prop="updatedAt" width="170"/>
       </el-table>

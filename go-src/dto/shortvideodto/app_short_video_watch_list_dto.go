@@ -18,8 +18,8 @@ type AppShortVideoWatchListItem struct {
 	AuthorId       string `json:"authorId" dc:"作者用户ID"`
 	AuthorNickname string `json:"authorNickname" dc:"作者昵称"`
 	AuthorAvatar   string `json:"authorAvatar" dc:"作者头像URL"`
-	BilledSeconds  uint64 `json:"billedSeconds" dc:"已累计计费观看秒数"`
-	WatchSeconds   uint64 `json:"watchSeconds" dc:"累计观看时长(秒,含免费与付费)"`
+	PaidTime       string `json:"paidTime" dc:"付费时间(空表示未付费)"`
+	FreeTime       uint64 `json:"freeTime" dc:"剩余免费时长(秒)"`
 	UpdatedAt      string `json:"updatedAt" dc:"最近观看时间"`
 }
 

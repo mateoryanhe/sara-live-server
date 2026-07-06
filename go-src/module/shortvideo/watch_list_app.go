@@ -45,11 +45,13 @@ func GetAppShortVideoWatchList(ctx context.Context, req *shortvideodto.AppShortV
 
 func toAppShortVideoWatchListItem(row *entity.ShortVideoWatch) *shortvideodto.AppShortVideoWatchListItem {
 	item := &shortvideodto.AppShortVideoWatchListItem{
-		ID:            row.ID,
-		VideoId:       strconv.FormatUint(row.VideoId, 10),
-		BilledSeconds: row.BilledSeconds,
-		WatchSeconds:  row.WatchSeconds,
-		UpdatedAt:     formatShortVideoCfgTime(row.UpdatedAt),
+		ID:        row.ID,
+		VideoId:   strconv.FormatUint(row.VideoId, 10),
+		FreeTime:  row.FreeTime,
+		UpdatedAt: formatShortVideoCfgTime(row.UpdatedAt),
+	}
+	if row.PaidTime != nil {
+		item.PaidTime = formatShortVideoCfgTime(*row.PaidTime)
 	}
 	if video := shortvideodao.GetShortVideoById(row.VideoId); video != nil {
 		item.Title = video.Title

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/os/gmlock"
+	"time"
 	"xr-game-server/constants/currency"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/shortvideodao"
@@ -13,69 +14,6 @@ import (
 	"xr-game-server/errercode"
 	"xr-game-server/module/wallet"
 )
-
-const (
-	watchBillCallIntervalSeconds uint64 = 1  // App 每秒调用一次
-	watchBillTickSeconds         uint64 = 10 // 每累计 10 秒可计费观看时长扣一次费
-)
-
-// WatchBillShortVideo App端短视频观看扣费,App 每秒调用一次,每 10 秒扣一次费
-func WatchBillShortVideo(ctx context.Context, req *shortvideodto.WatchBillShortVideoReq) (*shortvideodto.WatchBillShortVideoRes, error) {
-	userId := httpserver.GetAuthId(ctx)
-	if userId == 0 {
-		return nil, errercode.CreateCode(errercode.EmptyUserId)
-	}
-
-	video := shortvideodao.GetShortVideoById(req.VideoId)
-	if video == nil || video.Status != entity.ShortVideoStatusOnShelf {
-		return nil, nil
-	}
-
-	watch := shortvideodao.GetOneShortVideoWatch(userId, req.VideoId)
-
-	if video.IsPaid != entity.ShortVideoPaidYes {
-		return buildWatchBillShortVideoRes(0, 0, watch, 0, true), nil
-	}
-	user := userinfodao.GetUserInfoByUserId(userId)
-	if user == nil {
-		return nil, errercode.CreateCode(errercode.SysError)
-	}
-	//只扣费一次
-	if isShortVideoBillingCompleted(video.Duration-video.FreeWatchSeconds, watch.BilledSeconds) {
-		return buildWatchBillShortVideoRes(user.Diamond, 0, watch, 0, true), nil
-	}
-	//判断是否进入扣费环节
-	if uint64(video.FreeWatchSeconds) > watch.WatchSeconds {
-		watch.AddWatchSeconds(watchBillCallIntervalSeconds)
-		return buildWatchBillShortVideoRes(user.Diamond, 0, watch, 0, false), nil
-	}
-	//观看视频叠加
-	watch.AddWatchSeconds(watchBillCallIntervalSeconds)
-
-	billSeconds := (watch.WatchSeconds - uint64(video.FreeWatchSeconds)) / watchBillTickSeconds
-
-	if 0 >= billSeconds {
-		return buildWatchBillShortVideoRes(user.Diamond, 0, watch, 0, true), nil
-	}
-
-	cost := calcShortVideoWatchCost(video.DiamondPerMinute, billSeconds*watchBillTickSeconds)
-	if cost <= 0 {
-		return buildWatchBillShortVideoRes(user.Diamond, 0, watch, 0, true), nil
-	}
-
-	remaining, err := wallet.DiamondSub(userId, cost, currency.ReasonShortVideoWatch)
-
-	if err != nil {
-		return nil, err
-	}
-	watch.SubWatchSeconds(billSeconds * watchBillTickSeconds)
-	if stat := shortvideodao.GetStatByVideoId(req.VideoId); stat != nil {
-		stat.AddTotalDiamondIncome(cost)
-	}
-	watch.AddBilledSeconds(billSeconds * watchBillTickSeconds)
-
-	return buildWatchBillShortVideoRes(remaining, cost, watch, uint32(billSeconds), true), nil
-}
 
 // WatchShortVideoStart App端开始观看短视频
 func WatchShortVideoStart(ctx context.Context, req *shortvideodto.WatchShortVideoStartReq) (*shortvideodto.WatchShortVideoStartRes, error) {
@@ -88,6 +26,26 @@ func WatchShortVideoStart(ctx context.Context, req *shortvideodto.WatchShortVide
 		return nil, errercode.CreateCode(errercode.EmptyUserId)
 	}
 	watch := shortvideodao.GetOneShortVideoWatch(userId, req.VideoId)
+	initFreeTime(userId, req.VideoId)
+	clearFreeTime(userId, req.VideoId)
+	//检查是否是付费视频
+	if video.IsPaid == entity.ShortVideoPaidYes && watch.PaidTime == nil {
+		//开始检查是否有免费时间
+		freeTime := watch.GetFreeTime(video.FreeWatchSeconds)
+		if freeTime == 0 {
+			//需要购买才可以观看
+			return nil, errercode.CreateCode(errercode.ShortVideoMustPayToWatch)
+		} else {
+			now := time.Now()
+			watch.SetFreeStartTime(&now)
+			watch.SetFreeUsing(true)
+		}
+	}
+
+	// 累计观看次数(不去重,每次开始观看+1)
+	if stat := shortvideodao.GetStatByVideoId(req.VideoId); stat != nil {
+		stat.AddWatchCount(1)
+	}
 
 	//记录视频观看人数
 	if watch.ViewCounted == entity.ShortVideoWatchViewCountedNo {
@@ -102,72 +60,98 @@ func WatchShortVideoStart(ctx context.Context, req *shortvideodto.WatchShortVide
 	} else {
 		//watch.SetUpdatedAt(time.Now())
 	}
-	watch.ResetWatchSeconds()
+
 	if video.IsPaid != entity.ShortVideoPaidYes {
 		return &shortvideodto.WatchShortVideoStartRes{}, nil
 	}
+
 	return &shortvideodto.WatchShortVideoStartRes{}, nil
 }
 
+func initFreeTime(userId uint64, videoId uint64) {
+	video := shortvideodao.GetShortVideoById(videoId)
+	watch := shortvideodao.GetOneShortVideoWatch(userId, videoId)
+	if video.IsPaid == entity.ShortVideoPaidYes {
+		if watch.FirstWatchTime == nil {
+			now := time.Now()
+			watch.SetFreeTime(uint64(video.FreeWatchSeconds))
+			watch.SetFirstWatchTime(&now)
+		}
+	}
+}
+
+func clearFreeTime(userId uint64, videoId uint64) {
+	video := shortvideodao.GetShortVideoById(videoId)
+	watch := shortvideodao.GetOneShortVideoWatch(userId, videoId)
+	if video.IsPaid == entity.ShortVideoPaidYes {
+		if watch.FreeUsing {
+			diff := time.Since(*watch.FreeStartTime)
+			watch.SetFreeUsing(false)
+			watch.SubFreeTime(uint64(diff.Seconds()))
+		}
+	}
+}
+
 // WatchShortVideoEnd App端结束观看短视频
-func WatchShortVideoEnd(_ context.Context, _ *shortvideodto.WatchShortVideoEndReq) (*shortvideodto.WatchShortVideoEndRes, error) {
+func WatchShortVideoEnd(ctx context.Context, req *shortvideodto.WatchShortVideoEndReq) (*shortvideodto.WatchShortVideoEndRes, error) {
+	userId := httpserver.GetAuthId(ctx)
+	clearFreeTime(userId, req.VideoId)
 	return &shortvideodto.WatchShortVideoEndRes{}, nil
 }
 
-func isShortVideoBillingCompleted(duration uint32, billedSeconds uint64) bool {
-	if duration == 0 {
-		return true
+// PayShortVideo App端短视频付费观看,按视频付费价格一次性扣除钻石
+func PayShortVideo(ctx context.Context, req *shortvideodto.PayShortVideoReq) (*shortvideodto.PayShortVideoRes, error) {
+	userId := httpserver.GetAuthId(ctx)
+	if userId == 0 {
+		return nil, errercode.CreateCode(errercode.EmptyUserId)
 	}
-	return billedSeconds >= uint64(duration)
+
+	video := shortvideodao.GetShortVideoById(req.VideoId)
+	if video == nil || video.Status != entity.ShortVideoStatusOnShelf {
+		return nil, errercode.CreateCode(errercode.ShortVideoNonExist)
+	}
+	if video.IsPaid != entity.ShortVideoPaidYes {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+
+	price := video.PayDiamond
+	if price <= 0 {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+
+	watch := shortvideodao.GetOneShortVideoWatch(userId, req.VideoId)
+	user := userinfodao.GetUserInfoByUserId(userId)
+	if watch.PaidTime != nil {
+		return &shortvideodto.PayShortVideoRes{
+			Deducted: 0,
+			Diamond:  user.Diamond,
+		}, nil
+	}
+
+	clearFreeTime(userId, req.VideoId)
+
+	diamond, err := wallet.DiamondSub(userId, price, currency.ReasonShortVideoWatch)
+	if err != nil {
+		return nil, err
+	}
+
+	now := time.Now()
+	watch.SetPaidTime(&now)
+
+	lockName := fmt.Sprintf("pay_shortvideo_%v", req.VideoId)
+	gmlock.Lock(lockName)
+	defer gmlock.Unlock(lockName)
+	if stat := shortvideodao.GetStatByVideoId(req.VideoId); stat != nil {
+		stat.AddTotalDiamondIncome(price)
+	}
+
+	return &shortvideodto.PayShortVideoRes{
+		Deducted: price,
+		Diamond:  diamond,
+	}, nil
 }
 
-func calcChargeableWatchSeconds(watchSeconds uint64, freeWatchSeconds uint32) uint64 {
-	if freeWatchSeconds == 0 {
-		return watchSeconds
-	}
-	if watchSeconds <= uint64(freeWatchSeconds) {
-		return 0
-	}
-	return watchSeconds - uint64(freeWatchSeconds)
-}
-
-// calcPendingShortVideoBillSeconds 计算本次是否达到 10 秒扣费点,返回本次应计费秒数(0 表示暂不扣费)
-func calcPendingShortVideoBillSeconds(watchSeconds, billedSeconds uint64, freeWatchSeconds uint32, videoDuration uint32) uint64 {
-	chargeableWatchSeconds := calcChargeableWatchSeconds(watchSeconds, freeWatchSeconds)
-	if chargeableWatchSeconds <= billedSeconds {
-		return 0
-	}
-	pendingSeconds := chargeableWatchSeconds - billedSeconds
-	if pendingSeconds < watchBillTickSeconds {
-		return 0
-	}
-
-	billSeconds := watchBillTickSeconds
-	if videoDuration > 0 {
-		remaining := uint64(videoDuration) - billedSeconds
-		if remaining == 0 {
-			return 0
-		}
-		if remaining < billSeconds {
-			billSeconds = remaining
-		}
-	}
-	return billSeconds
-}
-
-func buildWatchBillShortVideoRes(diamond, deducted float64, watch *entity.ShortVideoWatch, chargeableSeconds uint32, canContinue bool) *shortvideodto.WatchBillShortVideoRes {
-	return &shortvideodto.WatchBillShortVideoRes{
-		Deducted:          deducted,
-		Diamond:           diamond,
-		BilledSeconds:     uint32(watch.BilledSeconds),
-		ChargeableSeconds: chargeableSeconds,
-		CanContinue:       canContinue,
-	}
-}
-
-func calcShortVideoWatchCost(diamondPerMinute float64, billSeconds uint64) float64 {
-	if diamondPerMinute <= 0 || billSeconds == 0 {
-		return 0
-	}
-	return diamondPerMinute * float64(billSeconds) / 60
+// WatchBillShortVideo 已废弃,短视频改为一次性付费
+func WatchBillShortVideo(_ context.Context, _ *shortvideodto.WatchBillShortVideoReq) (*shortvideodto.WatchBillShortVideoRes, error) {
+	return nil, errercode.CreateCode(errercode.InvalidParam)
 }

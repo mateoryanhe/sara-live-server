@@ -26,7 +26,6 @@ func InitHttpServer() {
 	if g.Cfg().MustGet(context.Background(), "server.gzipEnabled").Bool() {
 		httpServer.Use(ghttp.MiddlewareGzip)
 	}
-	httpServer.BindHookHandler("/*", ghttp.HookBeforeServe, beforeServeHook)
 	httpServer.BindHookHandler("/*", ghttp.HookAfterOutput, hookAPIRequestEndLog)
 	httpServer.Run()
 }

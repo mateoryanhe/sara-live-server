@@ -18,7 +18,7 @@ const (
 	ShortVideoSort             db.TbCol = "sort"
 	ShortVideoStatusCol        db.TbCol = "status"
 	ShortVideoIsPaid           db.TbCol = "is_paid"
-	ShortVideoDiamondPerMinute db.TbCol = "diamond_per_minute"
+	ShortVideoPayDiamond       db.TbCol = "pay_diamond"
 	ShortVideoCategoryId       db.TbCol = "category_id"
 	ShortVideoSource           db.TbCol = "source"
 	ShortVideoAuthorId         db.TbCol = "author_id"
@@ -54,7 +54,7 @@ type ShortVideo struct {
 	Sort             int     `gorm:"default:0;comment:排序值(越大越靠前)" json:"sort"`
 	Status           uint8   `gorm:"default:0;comment:状态(0-下架,1-上架)" json:"status"`
 	IsPaid           uint8   `gorm:"default:0;comment:是否付费(0免费,1付费)" json:"isPaid"`
-	DiamondPerMinute float64 `gorm:"type:decimal(10,4);default:0;comment:每分钟钻石数(付费时有效)" json:"diamondPerMinute"`
+	PayDiamond       float64 `gorm:"type:decimal(10,4);default:0;comment:付费钻石(一次性,付费时有效)" json:"payDiamond"`
 	CategoryId       int     `gorm:"default:0;comment:视频分类ID" json:"categoryId"`
 	Source           uint8   `gorm:"default:1;comment:视频来源(1原创,2转发,3AI生成)" json:"source"`
 	AuthorId         uint64  `gorm:"default:0;comment:作者用户ID" json:"authorId"`
@@ -63,7 +63,7 @@ type ShortVideo struct {
 }
 
 // NewShortVideo 构造内存对象,字段通过 syndb 异步入库
-func NewShortVideo(id uint64, title, video, cover string, sort int, isPaid uint8, diamondPerMinute float64, categoryId int, source uint8, authorId uint64, duration, freeWatchSeconds uint32) *ShortVideo {
+func NewShortVideo(id uint64, title, video, cover string, sort int, isPaid uint8, payDiamond float64, categoryId int, source uint8, authorId uint64, duration, freeWatchSeconds uint32) *ShortVideo {
 	v := &ShortVideo{}
 	v.ID = id
 	now := time.Now()
@@ -75,7 +75,7 @@ func NewShortVideo(id uint64, title, video, cover string, sort int, isPaid uint8
 	v.SetSort(sort)
 	v.SetStatus(ShortVideoStatusOffShelf)
 	v.SetIsPaid(isPaid)
-	v.SetDiamondPerMinute(diamondPerMinute)
+	v.SetPayDiamond(payDiamond)
 	v.SetCategoryId(categoryId)
 	v.SetSource(source)
 	v.SetAuthorId(authorId)
@@ -132,10 +132,10 @@ func (v *ShortVideo) SetIsPaid(val uint8) {
 	})
 }
 
-func (v *ShortVideo) SetDiamondPerMinute(val float64) {
-	v.DiamondPerMinute = val
+func (v *ShortVideo) SetPayDiamond(val float64) {
+	v.PayDiamond = val
 	v.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbShortVideo, ShortVideoDiamondPerMinute, &syndb.ColData{
+	syndb.AddDataToQuickChan(TbShortVideo, ShortVideoPayDiamond, &syndb.ColData{
 		IdVal: v.ID, ColVal: val,
 	})
 }
@@ -210,7 +210,7 @@ func initShortVideo() {
 	syndb.RegQuickWithMiddle(TbShortVideo, ShortVideoSort)
 	syndb.RegQuickWithMiddle(TbShortVideo, ShortVideoStatusCol)
 	syndb.RegQuickWithMiddle(TbShortVideo, ShortVideoIsPaid)
-	syndb.RegQuickWithMiddle(TbShortVideo, ShortVideoDiamondPerMinute)
+	syndb.RegQuickWithMiddle(TbShortVideo, ShortVideoPayDiamond)
 	syndb.RegQuickWithMiddle(TbShortVideo, ShortVideoCategoryId)
 	syndb.RegQuickWithMiddle(TbShortVideo, ShortVideoSource)
 	syndb.RegQuickWithMiddle(TbShortVideo, ShortVideoAuthorId)
