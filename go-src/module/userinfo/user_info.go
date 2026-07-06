@@ -94,6 +94,6 @@ func UploadAvatar(ctx context.Context, req *userinfodto.UploadAvatarReq) (res *u
 	data := userinfodao.GetUserInfoByUserId(userId)
 	data.SetAvatar(name)
 	return &userinfodto.UploadAvatarRes{
-		Avatar: name,
+		Avatar: upload.ResolveAvatarUrlForUser(data.ID, data.Avatar),
 	}, nil
 }

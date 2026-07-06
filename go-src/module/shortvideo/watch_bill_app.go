@@ -29,7 +29,7 @@ func WatchShortVideoStart(ctx context.Context, req *shortvideodto.WatchShortVide
 	initFreeTime(userId, req.VideoId)
 	clearFreeTime(userId, req.VideoId)
 	//检查是否是付费视频
-	if video.IsPaid == entity.ShortVideoPaidYes && watch.PaidTime == nil {
+	if video.AuthorId != userId && video.IsPaid == entity.ShortVideoPaidYes && watch.PaidTime == nil {
 		//开始检查是否有免费时间
 		freeTime := watch.GetFreeTime(video.FreeWatchSeconds)
 		if freeTime == 0 {
@@ -149,9 +149,4 @@ func PayShortVideo(ctx context.Context, req *shortvideodto.PayShortVideoReq) (*s
 		Deducted: price,
 		Diamond:  diamond,
 	}, nil
-}
-
-// WatchBillShortVideo 已废弃,短视频改为一次性付费
-func WatchBillShortVideo(_ context.Context, _ *shortvideodto.WatchBillShortVideoReq) (*shortvideodto.WatchBillShortVideoRes, error) {
-	return nil, errercode.CreateCode(errercode.InvalidParam)
 }

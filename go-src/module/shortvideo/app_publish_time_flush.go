@@ -32,7 +32,7 @@ func loadAppShortVideoPublishListCache() {
 	list := make([]*shortvideodto.AppShortVideoItem, 0, len(rows))
 	for _, row := range rows {
 		stat := shortvideodao.GetStatByVideoId(row.ID)
-		list = append(list, toAppShortVideoItem(row, stat))
+		list = append(list, toAppShortVideoItem(row, stat, 0))
 	}
 	appPublishListCache.Store(list)
 }
@@ -50,17 +50,6 @@ func getAppShortVideoPublishListCache() []*shortvideodto.AppShortVideoItem {
 }
 
 // GetAppShortVideoPublishList App端分页查询短视频列表(仅已上架,按发布时间降序,走内存缓存)
-func GetAppShortVideoPublishList(_ context.Context, req *shortvideodto.AppShortVideoPublishListReq) (*shortvideodto.AppShortVideoListRes, error) {
-	page, pageSize := normalizeAppListPage(req.Page, req.PageSize)
-	all := getAppShortVideoPublishListCache()
-	total := len(all)
-	start, end := appListPageRange(total, page, pageSize)
-	pageData := all[start:end]
-
-	return &shortvideodto.AppShortVideoListRes{
-		Total:    total,
-		Page:     page,
-		PageSize: pageSize,
-		List:     pageData,
-	}, nil
+func GetAppShortVideoPublishList(ctx context.Context, req *shortvideodto.AppShortVideoPublishListReq) (*shortvideodto.AppShortVideoListRes, error) {
+	return paginateAppShortVideoList(ctx, getAppShortVideoPublishListCache(), req.Page, req.PageSize), nil
 }
