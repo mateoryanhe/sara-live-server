@@ -224,7 +224,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('GlobalConfig') || hasMenuPermission('AppTokenConfig') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('UploadResourceCfgManagement')"
+            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('UploadResourceCfgManagement')"
             index="/config">
           <template #title>
             <el-icon>
@@ -232,12 +232,6 @@
             </el-icon>
             <span>系统配置</span>
           </template>
-          <el-menu-item v-if="hasMenuPermission('GlobalConfig')" index="/config/global">
-            <el-icon>
-              <Monitor/>
-            </el-icon>
-            <span>全局配置</span>
-          </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('AppTokenConfig')" index="/config/app-token">
             <el-icon>
               <Key/>

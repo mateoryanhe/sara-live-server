@@ -181,27 +181,6 @@ export interface CurrencyLogItem {
 }
 
 
-// 全局配置相关类型
-export interface GlobalCfg {
-    id: string  // 根据API返回的实际数据，ID 是字符串类型
-    module: string
-    moduleName: string
-    key: string
-    value: string
-    desc: string
-}
-
-export interface GetGlobalCfgReq {
-    module?: string
-    moduleName?: string
-}
-
-export interface SaveGlobalCfgReq extends GlobalCfg {
-}
-
-export interface DelGlobalCfgReq extends GlobalCfg {
-}
-
 // App Token相关类型
 export interface AppToken {
     id: string

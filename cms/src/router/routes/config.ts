@@ -4,14 +4,8 @@ import type {RouteRecordRaw} from 'vue-router'
 export const configRoutes: RouteRecordRaw = {
     path: '/config',
     meta: {title: '系统配置', icon: 'Setting'},
-    redirect: '/config/global',
+    redirect: '/config/app-token',
     children: [
-        {
-            path: 'global',
-            name: 'GlobalConfig',
-            component: () => import('@/views/config/global.vue'),
-            meta: {title: '全局配置'},
-        },
         {
             path: 'app-token',
             name: 'AppTokenConfig',
