@@ -85,6 +85,9 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		EntryEffectExist:               "Entry effect name already exists",
 		EntryEffectNonExist:            "Entry effect does not exist",
 		ShortVideoMustPayToWatch:       "This short video requires payment to watch",
+		CallUserInCall:                 "You are already in a call",
+		CallOrderNonExist:              "Call order does not exist",
+		CallOrderStateInvalid:          "Call order state does not allow this operation",
 	},
 	lang.LangZHCN: {
 		Success:                        "成功",
@@ -166,6 +169,9 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		EntryEffectExist:               "进场特效名称已存在",
 		EntryEffectNonExist:            "进场特效不存在",
 		ShortVideoMustPayToWatch:       "短视频必须付费观看",
+		CallUserInCall:                 "您正在通话中,无法发起新通话",
+		CallOrderNonExist:              "通话订单不存在",
+		CallOrderStateInvalid:          "通话订单状态不允许此操作",
 	},
 	lang.LangZHTW: {
 		Success:                        "成功",
@@ -247,6 +253,9 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		EntryEffectExist:               "進場特效名稱已存在",
 		EntryEffectNonExist:            "進場特效不存在",
 		ShortVideoMustPayToWatch:       "短視頻必須付費觀看",
+		CallUserInCall:                 "您正在通話中,無法發起新通話",
+		CallOrderNonExist:              "通話訂單不存在",
+		CallOrderStateInvalid:          "通話訂單狀態不允許此操作",
 	},
 }
 

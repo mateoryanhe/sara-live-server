@@ -38,6 +38,10 @@ const (
 	ReasonPrivateRoomBilling Reason = 15
 	// ReasonPaidDanmaku 直播间付费弹幕消耗
 	ReasonPaidDanmaku Reason = 16
+	// ReasonLiveRoomVideoCallTicket 直播间视频通话门票
+	ReasonLiveRoomVideoCallTicket Reason = 17
+	// ReasonLiveRoomVideoCallBilling 直播间视频通话计费
+	ReasonLiveRoomVideoCallBilling Reason = 18
 )
 
 // String 返回枚举的英文标识(用于日志/调试,不参与多语言展示;
@@ -76,6 +80,10 @@ func (r Reason) String() string {
 		return "PrivateRoomBilling"
 	case ReasonPaidDanmaku:
 		return "PaidDanmaku"
+	case ReasonLiveRoomVideoCallTicket:
+		return "LiveRoomVideoCallTicket"
+	case ReasonLiveRoomVideoCallBilling:
+		return "LiveRoomVideoCallBilling"
 	default:
 		return "Unknown"
 	}

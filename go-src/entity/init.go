@@ -66,5 +66,6 @@ func Init() {
 	initUserMessageUnreadDetail()
 	initCallOrder()
 	initCallUser()
+	initUserChannelToken()
 	initSystemTotalStat()
 }

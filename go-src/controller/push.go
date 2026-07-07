@@ -103,3 +103,27 @@ func (c *PushController) LiveRoomStopLive(_ context.Context, _ *pushdto.LiveRoom
 func (c *PushController) LiveRoomAudienceListRefresh(_ context.Context, _ *pushdto.LiveRoomAudienceListRefreshPushReq) (*pushdto.LiveRoomAudienceListRefreshPushResp, error) {
 	return nil, nil
 }
+
+func (c *PushController) LiveRoomCallRequest(_ context.Context, _ *pushdto.LiveRoomCallRequestPushReq) (*pushdto.LiveRoomCallRequestPushResp, error) {
+	return nil, nil
+}
+
+func (c *PushController) LiveRoomCallRejected(_ context.Context, _ *pushdto.LiveRoomCallRejectedPushReq) (*pushdto.LiveRoomCallRejectedPushResp, error) {
+	return nil, nil
+}
+
+func (c *PushController) LiveRoomCallAccepted(_ context.Context, _ *pushdto.LiveRoomCallAcceptedPushReq) (*pushdto.LiveRoomCallAcceptedPushResp, error) {
+	return nil, nil
+}
+
+func (c *PushController) LiveRoomCallEnded(_ context.Context, _ *pushdto.LiveRoomCallEndedPushReq) (*pushdto.LiveRoomCallEndedPushResp, error) {
+	return nil, nil
+}
+
+func (c *PushController) LiveRoomPrivateChat(_ context.Context, _ *pushdto.LiveRoomPrivateChatPushReq) (*pushdto.LiveRoomPrivateChatPushResp, error) {
+	return nil, nil
+}
+
+func (c *PushController) LiveRoomPrivateGift(_ context.Context, _ *pushdto.LiveRoomPrivateGiftPushReq) (*pushdto.LiveRoomPrivateGiftPushResp, error) {
+	return nil, nil
+}

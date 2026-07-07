@@ -4,6 +4,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/push"
+	"xr-game-server/dto/calldto"
 	"xr-game-server/dto/diamonddto"
 	"xr-game-server/dto/golddto"
 	"xr-game-server/dto/liveroomdto"
@@ -237,4 +238,64 @@ type LiveRoomAudienceListRefreshPushReq struct {
 type LiveRoomAudienceListRefreshPushResp struct {
 	Cmd  int                                      `json:"cmd" dc:"命令字 24"`
 	Data *liveroomdto.AudienceListRefreshPushItem `json:"data"`
+}
+
+// LiveRoomCallRequestPushReq cmd=25 直播间通话请求
+type LiveRoomCallRequestPushReq struct {
+	g.Meta `path:"/liveRoomCallRequest" method:"post" summary:"推送 cmd=25 LiveRoomCallRequest" description:"直播间通话请求(推送给主播)" tags:"推送协议"`
+}
+
+type LiveRoomCallRequestPushResp struct {
+	Cmd  int                          `json:"cmd" dc:"命令字 25"`
+	Data *calldto.CallRequestPushItem `json:"data"`
+}
+
+// LiveRoomCallRejectedPushReq cmd=26 直播间通话被拒接
+type LiveRoomCallRejectedPushReq struct {
+	g.Meta `path:"/liveRoomCallRejected" method:"post" summary:"推送 cmd=26 LiveRoomCallRejected" description:"直播间通话被拒接(推送给呼叫者)" tags:"推送协议"`
+}
+
+type LiveRoomCallRejectedPushResp struct {
+	Cmd  int                           `json:"cmd" dc:"命令字 26"`
+	Data *calldto.CallRejectedPushItem `json:"data"`
+}
+
+// LiveRoomCallAcceptedPushReq cmd=27 直播间通话被接听
+type LiveRoomCallAcceptedPushReq struct {
+	g.Meta `path:"/liveRoomCallAccepted" method:"post" summary:"推送 cmd=27 LiveRoomCallAccepted" description:"直播间通话被接听(推送给呼叫者)" tags:"推送协议"`
+}
+
+type LiveRoomCallAcceptedPushResp struct {
+	Cmd  int                           `json:"cmd" dc:"命令字 27"`
+	Data *calldto.CallAcceptedPushItem `json:"data"`
+}
+
+// LiveRoomCallEndedPushReq cmd=28 直播间通话结束
+type LiveRoomCallEndedPushReq struct {
+	g.Meta `path:"/liveRoomCallEnded" method:"post" summary:"推送 cmd=28 LiveRoomCallEnded" description:"直播间通话结束(推送给对方)" tags:"推送协议"`
+}
+
+type LiveRoomCallEndedPushResp struct {
+	Cmd  int                        `json:"cmd" dc:"命令字 28"`
+	Data *calldto.CallEndedPushItem `json:"data"`
+}
+
+// LiveRoomPrivateChatPushReq cmd=29 私密房文字消息
+type LiveRoomPrivateChatPushReq struct {
+	g.Meta `path:"/liveRoomPrivateChat" method:"post" summary:"推送 cmd=29 LiveRoomPrivateChat" description:"私密房文字消息(推送给发送者与目标用户)" tags:"推送协议"`
+}
+
+type LiveRoomPrivateChatPushResp struct {
+	Cmd  int                                  `json:"cmd" dc:"命令字 29"`
+	Data *liveroomdto.PrivateRoomChatPushItem `json:"data"`
+}
+
+// LiveRoomPrivateGiftPushReq cmd=30 给指定主播送礼
+type LiveRoomPrivateGiftPushReq struct {
+	g.Meta `path:"/liveRoomPrivateGift" method:"post" summary:"推送 cmd=30 LiveRoomPrivateGift" description:"给指定主播送礼(推送给发送者与主播)" tags:"推送协议"`
+}
+
+type LiveRoomPrivateGiftPushResp struct {
+	Cmd  int                              `json:"cmd" dc:"命令字 30"`
+	Data *liveroomdto.PrivateGiftPushItem `json:"data"`
 }

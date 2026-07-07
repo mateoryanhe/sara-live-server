@@ -44,3 +44,8 @@ func (c *MessageAppController) SystemMessageList(ctx context.Context, req *messa
 func (c *MessageAppController) ClearSystemMessageUnread(ctx context.Context, req *messagedto.AppClearSystemMessageUnreadReq) (*messagedto.AppClearSystemMessageUnreadRes, error) {
 	return message.ClearSystemMessageUnread(ctx, req)
 }
+
+// MessageUnreadCount App端查询系统消息与私信未读数
+func (c *MessageAppController) MessageUnreadCount(ctx context.Context, req *messagedto.AppMessageUnreadCountReq) (*messagedto.AppMessageUnreadCountRes, error) {
+	return message.GetMessageUnreadCount(ctx, req)
+}

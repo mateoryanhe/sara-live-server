@@ -29,7 +29,9 @@ import (
 	"xr-game-server/dao/rechargeorderdao"
 	"xr-game-server/dao/shortvideodao"
 	"xr-game-server/dao/statdao"
+	"xr-game-server/dao/userchanneltokendao"
 	"xr-game-server/dao/userinfodao"
+	"xr-g
 	"xr-game-server/dao/weeklyloginstatdao"
 	"xr-game-server/dao/weeklyuseraudiencedao"
 	"xr-game-server/dao/weeklyuserlogindao"
@@ -70,6 +72,7 @@ func Init() {
 	shortvideodao.Init()
 	rechargeorderdao.InitRechargeOrderDao()
 	calldao.Init()
+	userchanneltokendao.Init()
 	messagedao.Init()
 	statdao.Init()
 }

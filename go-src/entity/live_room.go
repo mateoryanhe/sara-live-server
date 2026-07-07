@@ -27,6 +27,8 @@ const (
 	LiveRoomTotalPaidDanmakuIncome       db.TbCol = "total_paid_danmaku_income"
 	LiveRoomTotalPrivateRoomTicketIncome db.TbCol = "total_private_room_ticket_income"
 	LiveRoomTotalPrivateRoomWatchIncome  db.TbCol = "total_private_room_watch_income"
+	LiveRoomTotalVideoCallTicketIncome   db.TbCol = "total_video_call_ticket_income"
+	LiveRoomTotalVideoCallBillingIncome  db.TbCol = "total_video_call_billing_income"
 	LiveRoomCategory                     db.TbCol = "category"
 	LiveRoomTagId                        db.TbCol = "tag_id"
 	LiveRoomTicket                       db.TbCol = "ticket"
@@ -56,6 +58,8 @@ type LiveRoom struct {
 	TotalPaidDanmakuIncome       float64    `gorm:"default:0;comment:累计付费弹幕收益" json:"totalPaidDanmakuIncome"`
 	TotalPrivateRoomTicketIncome float64    `gorm:"default:0;comment:累计私密直播间门票收益" json:"totalPrivateRoomTicketIncome"`
 	TotalPrivateRoomWatchIncome  float64    `gorm:"default:0;comment:累计私密房观看收益" json:"totalPrivateRoomWatchIncome"`
+	TotalVideoCallTicketIncome   float64    `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话门票收益" json:"totalVideoCallTicketIncome"`
+	TotalVideoCallBillingIncome  float64    `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话计费收益" json:"totalVideoCallBillingIncome"`
 	Category                     uint8      `gorm:"default:1;comment:分类(1=hot,2=game,3=私密)" json:"category"`
 	TagId                        uint64     `gorm:"default:0;comment:直播间标签ID" json:"tagId"`
 	Ticket                       float64    `gorm:"type:decimal(10,4);default:0;comment:门票价格(钻石)" json:"ticket"`
@@ -195,6 +199,26 @@ func (r *LiveRoom) AddTotalPrivateRoomWatchIncome(v float64) {
 	})
 }
 
+func (r *LiveRoom) AddTotalVideoCallTicketIncome(v float64) {
+	if v <= 0 {
+		return
+	}
+	r.TotalVideoCallTicketIncome = math.AddFloat64(r.TotalVideoCallTicketIncome, v)
+	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomTotalVideoCallTicketIncome, &syndb.ColData{
+		IdVal: r.ID, ColVal: r.TotalVideoCallTicketIncome,
+	})
+}
+
+func (r *LiveRoom) AddTotalVideoCallBillingIncome(v float64) {
+	if v <= 0 {
+		return
+	}
+	r.TotalVideoCallBillingIncome = math.AddFloat64(r.TotalVideoCallBillingIncome, v)
+	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomTotalVideoCallBillingIncome, &syndb.ColData{
+		IdVal: r.ID, ColVal: r.TotalVideoCallBillingIncome,
+	})
+}
+
 func (r *LiveRoom) SetCategory(v uint8) {
 	if v != LiveRoomCategoryHot && v != LiveRoomCategoryGame && v != LiveRoomCategoryPrivate {
 		v = LiveRoomCategoryHot
@@ -267,6 +291,8 @@ func initLiveRoom() {
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomTotalPaidDanmakuIncome)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomTotalPrivateRoomTicketIncome)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomTotalPrivateRoomWatchIncome)
+	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomTotalVideoCallTicketIncome)
+	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomTotalVideoCallBillingIncome)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomCategory)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomTagId)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomTicket)

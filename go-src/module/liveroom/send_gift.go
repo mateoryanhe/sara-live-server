@@ -29,26 +29,76 @@ import (
 //  2. 计算总消耗 = 礼物单价 * 数量,使用钻石支付(diamond.Sub)
 //  3. 扣款成功后,向房间内全体在线用户(含送礼人自身)推送 cmd.LiveRoomGift
 func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.SendGiftRes, error) {
-	if req.Count <= 0 {
+	result, err := prepareSendGift(ctx, req.RoomId, req.GiftId, req.Count)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, o := range getOnline(req.RoomId) {
+		push.Data(o, cmd.LiveRoomGift, result.payload)
+	}
+	push.Data(req.RoomId, cmd.LiveRoomGift, result.payload)
+
+	recordSendGiftStats(result)
+	return &liveroomdto.SendGiftRes{
+		Cost:    result.totalCost,
+		Diamond: result.remaining,
+	}, nil
+}
+
+// SendGiftToAnchor 给指定主播送礼(仅推送给发送方与主播)
+func SendGiftToAnchor(ctx context.Context, req *liveroomdto.SendGiftToAnchorReq) (*liveroomdto.SendGiftToAnchorRes, error) {
+	anchorId := req.AnchorId
+	if anchorId == 0 {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+
+	result, err := prepareSendGift(ctx, anchorId, req.GiftId, req.Count)
+	if err != nil {
+		return nil, err
+	}
+	if result.senderId == anchorId {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+
+	payload := buildPrivateGiftPushItem(result.payload, anchorId)
+	push.Data(result.senderId, cmd.LiveRoomPrivateGift, payload)
+	push.Data(anchorId, cmd.LiveRoomPrivateGift, payload)
+
+	recordSendGiftStats(result)
+	return &liveroomdto.SendGiftToAnchorRes{
+		Cost:    result.totalCost,
+		Diamond: result.remaining,
+	}, nil
+}
+
+type sendGiftResult struct {
+	senderId  uint64
+	room      *entity.LiveRoom
+	giftId    uint64
+	totalCost float64
+	remaining float64
+	payload   *liveroomdto.GiftPushItem
+	eventData *entity.LiveRevenueLog
+}
+
+func prepareSendGift(ctx context.Context, roomId, giftId uint64, count int) (*sendGiftResult, error) {
+	if count <= 0 {
 		return nil, errercode.CreateCode(errercode.GiftCountInvalid)
 	}
 
 	senderId := httpserver.GetAuthId(ctx)
-
-	// 1. 房间存在性校验
-	room := liveroomdao.GetRoomById(req.RoomId)
+	room := liveroomdao.GetRoomById(roomId)
 	if room == nil {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
 
-	// 2. 礼物配置(从缓存读取,缓存仅包含已上架礼物)
-	giftItem := gift.GetGiftFromCacheById(req.GiftId)
+	giftItem := gift.GetGiftFromCacheById(giftId)
 	if giftItem == nil {
 		return nil, errercode.CreateCode(errercode.GiftOffShelf)
 	}
 
-	// 3. 计算总价并扣减钻石
-	totalCost, err := calcSendGiftTotalCost(giftItem.Price, req.Count)
+	totalCost, err := calcSendGiftTotalCost(giftItem.Price, count)
 	if err != nil {
 		return nil, err
 	}
@@ -57,20 +107,18 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 		return nil, err
 	}
 
-	//记录直播收益流水(礼物)
-	eventData := entity.NewLiveRevenueLogRecord(room.ID, room.LiveRecordId, senderId, room.ID, req.GiftId, req.Count, giftItem.Price, totalCost, uint8(liverevenue.Gift))
+	eventData := entity.NewLiveRevenueLogRecord(room.ID, room.LiveRecordId, senderId, room.ID, giftId, count, giftItem.Price, totalCost, uint8(liverevenue.Gift))
 
-	// 4. 构造推送载荷,广播给房间内所有在线用户
 	sender := userinfodao.GetUserInfoByUserId(senderId)
 	payload := &liveroomdto.GiftPushItem{
-		RoomId:    req.RoomId,
+		RoomId:    roomId,
 		SenderId:  senderId,
 		GiftId:    giftItem.ID,
 		GiftName:  giftItem.Name,
 		GiftIcon:  giftItem.Icon,
 		GiftAnim:  giftItem.Animation,
 		UnitPrice: giftItem.Price,
-		Count:     req.Count,
+		Count:     count,
 		TotalCost: totalCost,
 		SentAt:    time.Now().Unix(),
 	}
@@ -79,39 +127,44 @@ func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.S
 		payload.SenderAvatar = upload.ResolveAvatarUrlForUser(sender.ID, sender.Avatar)
 	}
 
-	for _, o := range getOnline(req.RoomId) {
-		push.Data(o, cmd.LiveRoomGift, payload)
-	}
-	push.Data(req.RoomId, cmd.LiveRoomGift, payload)
+	return &sendGiftResult{
+		senderId:  senderId,
+		room:      room,
+		giftId:    giftId,
+		totalCost: totalCost,
+		remaining: remaining,
+		payload:   payload,
+		eventData: eventData,
+	}, nil
+}
 
-	lockName := fmt.Sprintf("%v", req.RoomId)
+func recordSendGiftStats(result *sendGiftResult) {
+	if result == nil || result.room == nil {
+		return
+	}
+
+	lockName := fmt.Sprintf("room_%v", result.room.ID)
 	gmlock.Lock(lockName)
 	defer gmlock.Unlock(lockName)
 
-	//防止并发,主播可以收到多个人的礼物
-	liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId)
-	//添加本次直播收到的礼物总额
-	liveRecord.AddTotalIncome(totalCost)
-	liveRecord.AddTotalGiftIncome(totalCost)
-	if room.LiveRecordId > 0 && liveroomdao.TryRecordLiveRecordGiftSender(room.LiveRecordId, senderId) {
-		liveRecord.AddTotalGiftSender(1)
+	liveRecord := liveroomdao.GetLiveRecordById(result.room.LiveRecordId)
+	if liveRecord != nil {
+		liveRecord.AddTotalIncome(result.totalCost)
+		liveRecord.AddTotalGiftIncome(result.totalCost)
+		if result.room.LiveRecordId > 0 && liveroomdao.TryRecordLiveRecordGiftSender(result.room.LiveRecordId, result.senderId) {
+			liveRecord.AddTotalGiftSender(1)
+		}
 	}
-	//记录主播总收益
-	room.AddTotalIncome(totalCost)
-	room.AddTotalGiftIncome(totalCost)
+	result.room.AddTotalIncome(result.totalCost)
+	result.room.AddTotalGiftIncome(result.totalCost)
 
-	event.Pub(gameevent.RevenueEventEvent, eventData)
+	event.Pub(gameevent.RevenueEventEvent, result.eventData)
 
-	onlineId := entity.BuildLiveRoomOnlineId(senderId, req.RoomId)
-	if online := liveroomdao.GetOnlineById(onlineId, senderId, req.RoomId); online != nil {
-		online.AddTotalReward(totalCost)
+	onlineId := entity.BuildLiveRoomOnlineId(result.senderId, result.room.ID)
+	if online := liveroomdao.GetOnlineById(onlineId, result.senderId, result.room.ID); online != nil {
+		online.AddTotalReward(result.totalCost)
 	}
-	refreshRoomAudienceCaches(req.RoomId)
-
-	return &liveroomdto.SendGiftRes{
-		Cost:    totalCost,
-		Diamond: remaining,
-	}, nil
+	refreshRoomAudienceCaches(result.room.ID)
 }
 
 func calcSendGiftTotalCost(unitPrice float64, count int) (float64, error) {
@@ -129,4 +182,25 @@ func calcSendGiftTotalCost(unitPrice float64, count int) (float64, error) {
 		return 0, errercode.CreateCode(errercode.GiftCountInvalid)
 	}
 	return total, nil
+}
+
+func buildPrivateGiftPushItem(gift *liveroomdto.GiftPushItem, anchorId uint64) *liveroomdto.PrivateGiftPushItem {
+	if gift == nil {
+		return nil
+	}
+	return &liveroomdto.PrivateGiftPushItem{
+		RoomId:       gift.RoomId,
+		AnchorId:     anchorId,
+		SenderId:     gift.SenderId,
+		SenderName:   gift.SenderName,
+		SenderAvatar: gift.SenderAvatar,
+		GiftId:       gift.GiftId,
+		GiftName:     gift.GiftName,
+		GiftIcon:     gift.GiftIcon,
+		GiftAnim:     gift.GiftAnim,
+		UnitPrice:    gift.UnitPrice,
+		Count:        gift.Count,
+		TotalCost:    gift.TotalCost,
+		SentAt:       gift.SentAt,
+	}
 }

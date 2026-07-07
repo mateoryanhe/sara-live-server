@@ -22,6 +22,7 @@ const (
 	LiveRecordTotalGiftIncome        db.TbCol = "total_gift_income"
 	LiveRecordTotalPaidDanmakuIncome db.TbCol = "total_paid_danmaku_income"
 	LiveRecordTotalPrivateRoomIncome db.TbCol = "total_private_room_income"
+	LiveRecordTotalVideoCallIncome   db.TbCol = "total_video_call_income"
 	LiveRecordTotalGameBet           db.TbCol = "total_game_bet"
 	LiveRecordTotalGiftSender        db.TbCol = "total_gift_sender"
 	LiveRecordTotalNewFollower       db.TbCol = "total_new_follower"
@@ -39,6 +40,7 @@ type LiveRecord struct {
 	TotalGiftIncome        float64    `gorm:"default:0;comment:礼物收入" json:"totalGiftIncome"`
 	TotalPaidDanmakuIncome float64    `gorm:"default:0;comment:付费弹幕收入" json:"totalPaidDanmakuIncome"`
 	TotalPrivateRoomIncome float64    `gorm:"default:0;comment:私密直播间收入" json:"totalPrivateRoomIncome"`
+	TotalVideoCallIncome   float64    `gorm:"type:decimal(10,4);default:0;comment:直播间视频通话收入" json:"totalVideoCallIncome"`
 	TotalGameBet           float64    `gorm:"default:0;comment:游戏下注总金额" json:"totalGameBet"`
 	TotalGiftSender        uint64     `gorm:"default:0;comment:送礼人数(去重)" json:"totalGiftSender"`
 	TotalNewFollower       uint64     `gorm:"default:0;comment:新加粉丝数(去重)" json:"totalNewFollower"`
@@ -133,6 +135,15 @@ func (r *LiveRecord) AddTotalPrivateRoomIncome(v float64) {
 	})
 }
 
+func (r *LiveRecord) AddTotalVideoCallIncome(v float64) {
+	r.TotalVideoCallIncome = math.AddFloat64(r.TotalVideoCallIncome, v)
+
+	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalVideoCallIncome, &syndb.ColData{
+		IdVal:  r.ID,
+		ColVal: r.TotalVideoCallIncome,
+	})
+}
+
 func (r *LiveRecord) AddTotalGameBet(v float64) {
 	r.TotalGameBet = math.AddFloat64(r.TotalGameBet, v)
 
@@ -196,6 +207,7 @@ func initLiveRecord() {
 	syndb.RegLazyWithMiddle(TbLiveRecord, LiveRecordTotalGiftIncome)
 	syndb.RegLazyWithMiddle(TbLiveRecord, LiveRecordTotalPaidDanmakuIncome)
 	syndb.RegLazyWithMiddle(TbLiveRecord, LiveRecordTotalPrivateRoomIncome)
+	syndb.RegLazyWithMiddle(TbLiveRecord, LiveRecordTotalVideoCallIncome)
 	syndb.RegLazyWithMiddle(TbLiveRecord, LiveRecordTotalGameBet)
 	syndb.RegLazyWithMiddle(TbLiveRecord, LiveRecordTotalGiftSender)
 	syndb.RegLazyWithMiddle(TbLiveRecord, LiveRecordTotalNewFollower)

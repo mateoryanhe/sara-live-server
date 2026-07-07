@@ -87,9 +87,19 @@ func (c *LiveRoomAppController) SendGift(ctx context.Context, req *liveroomdto.S
 	return liveroom.SendGift(ctx, req)
 }
 
+// SendGiftToAnchor 给指定主播送礼
+func (c *LiveRoomAppController) SendGiftToAnchor(ctx context.Context, req *liveroomdto.SendGiftToAnchorReq) (res *liveroomdto.SendGiftToAnchorRes, err error) {
+	return liveroom.SendGiftToAnchor(ctx, req)
+}
+
 // SendChat 直播间文字消息
 func (c *LiveRoomAppController) SendChat(ctx context.Context, req *liveroomdto.SendChatReq) (res *liveroomdto.SendChatRes, err error) {
 	return liveroom.SendChat(ctx, req)
+}
+
+// SendPrivateRoomChat 私密房文字消息
+func (c *LiveRoomAppController) SendPrivateRoomChat(ctx context.Context, req *liveroomdto.SendPrivateRoomChatReq) (res *liveroomdto.SendPrivateRoomChatRes, err error) {
+	return liveroom.SendPrivateRoomChat(ctx, req)
 }
 
 // SendPaidDanmaku 直播间付费弹幕

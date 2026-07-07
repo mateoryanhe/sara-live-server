@@ -72,13 +72,13 @@ func ListPrivateMessageUnread(ctx context.Context, req *messagedto.AppPrivateMes
 		pageIndex = 1
 	}
 
-	rows := messagedao.ListUnreadDetailByReceiverId(userId, pageIndex)
+	rows := messagedao.ListPrivateMessageUnreadWithLastMessageFromDB(userId, pageIndex)
 	list := make([]*messagedto.AppPrivateMessageUnreadDetailItem, 0, len(rows))
 	for _, row := range rows {
 		if row == nil {
 			continue
 		}
-		list = append(list, toPrivateMessageUnreadDetailItem(row))
+		list = append(list, toPrivateMessageUnreadDetailItemFromRow(row))
 	}
 	return &messagedto.AppPrivateMessageUnreadListRes{List: list}, nil
 }
@@ -170,7 +170,7 @@ func buildPrivateMessagePushItem(msg *entity.UserMessage) *messagedto.PrivateMes
 	return item
 }
 
-func toPrivateMessageUnreadDetailItem(row *entity.UserMessageUnreadDetail) *messagedto.AppPrivateMessageUnreadDetailItem {
+func toPrivateMessageUnreadDetailItemFromRow(row *messagedao.PrivateMessageUnreadListRow) *messagedto.AppPrivateMessageUnreadDetailItem {
 	item := &messagedto.AppPrivateMessageUnreadDetailItem{
 		SenderId:    row.SenderId,
 		UnreadCount: row.UnreadCount,
@@ -179,6 +179,20 @@ func toPrivateMessageUnreadDetailItem(row *entity.UserMessageUnreadDetail) *mess
 	if sender := userinfodao.GetUserInfoByUserId(row.SenderId); sender != nil {
 		item.SenderName = sender.Nickname
 		item.SenderAvatar = upload.ResolveAvatarUrlForUser(row.SenderId, sender.Avatar)
+	}
+	if row.MessageId > 0 {
+		item.LastMessage = &messagedto.AppPrivateMessageItem{
+			Id:          row.MessageId,
+			SenderId:    row.MessageSenderId,
+			ReceiverId:  row.MessageReceiverId,
+			Content:     row.MessageContent,
+			CreatedAt:   formatMessageTime(row.MessageCreatedAt),
+			CreatedAtMs: row.MessageCreatedAt.UnixMilli(),
+		}
+		if msgSender := userinfodao.GetUserInfoByUserId(row.MessageSenderId); msgSender != nil {
+			item.LastMessage.SenderName = msgSender.Nickname
+			item.LastMessage.SenderAvatar = upload.ResolveAvatarUrlForUser(row.MessageSenderId, msgSender.Avatar)
+		}
 	}
 	return item
 }
@@ -203,5 +217,5 @@ func formatMessageTime(t time.Time) string {
 	if t.IsZero() {
 		return ""
 	}
-	return t.Format("2006-01-02 15:04:05")
+	return t.Format("2006/01/02 15:04:05")
 }

@@ -89,7 +89,7 @@ func SendPaidDanmaku(ctx context.Context, req *liveroomdto.SendPaidDanmakuReq) (
 		push.Data(o, cmd.LiveRoomPaidDanmaku, payload)
 	}
 
-	lockName := fmt.Sprintf("%v", req.RoomId)
+	lockName := fmt.Sprintf("room_%v", req.RoomId)
 	gmlock.Lock(lockName)
 	defer gmlock.Unlock(lockName)
 

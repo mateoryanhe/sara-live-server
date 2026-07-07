@@ -29,6 +29,7 @@ func ToAppItem(v *entity.LiveRecord) *liverecorddto.AppLiveRecordItem {
 		TotalGiftIncome:        v.TotalGiftIncome,
 		TotalPaidDanmakuIncome: v.TotalPaidDanmakuIncome,
 		TotalPrivateRoomIncome: v.TotalPrivateRoomIncome,
+		TotalVideoCallIncome:   v.TotalVideoCallIncome,
 		TotalGameBet:           v.TotalGameBet,
 		TotalGiftSender:        v.TotalGiftSender,
 		TotalNewFollower:       v.TotalNewFollower,

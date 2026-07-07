@@ -6,6 +6,7 @@ import (
 	"xr-game-server/module/anchorrank"
 	"xr-game-server/module/auth"
 	"xr-game-server/module/banner"
+	"xr-game-server/module/call"
 	"xr-game-server/module/currencylog"
 	"xr-game-server/module/entryeffect"
 	"xr-game-server/module/game"
@@ -43,6 +44,7 @@ func Init() {
 	vip.Init()
 	game.Init()
 	agora.Init()
+	call.Init()
 	livecfg.Init()
 	verification_code.Init()
 	aliyunmoderation.Init()

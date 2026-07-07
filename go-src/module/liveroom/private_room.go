@@ -64,7 +64,7 @@ func chargePrivateRoomTicketIfNeeded(userId uint64, room *entity.LiveRoom, now t
 	pay.SetLastTicketAt(now)
 	pay.SetFreeTime(uint64(livecfg.GetPrivateRoomFreeWatchDuration().Seconds()))
 
-	lockKey := fmt.Sprintf("%d", room.ID)
+	lockKey := fmt.Sprintf("room_%v", room.ID)
 	gmlock.Lock(lockKey)
 	defer gmlock.Unlock(lockKey)
 	//防止并发,主播可以收到多个人的礼物

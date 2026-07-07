@@ -26,6 +26,7 @@ func Init() {
 	initLiveRoomTagController()             // 直播间标签(CMS)
 	initLiveRoomTagAppController()          // 直播间标签(App)
 	initAgoraAppController()                // 声网(App)
+	initCallAppController()                 // 通话(App)
 	initAgoraCMSController()                // 声网(CMS)
 	initLiveCfgCMSController()              // 直播配置(CMS)
 	initAliyunTextModerationCMSController() // 阿里云文本审核(CMS)

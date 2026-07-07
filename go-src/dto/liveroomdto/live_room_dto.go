@@ -148,9 +148,40 @@ type SendGiftRes struct {
 	Diamond float64 `json:"diamond" dc:"剩余钻石余额"`
 }
 
+// SendGiftToAnchorReq App端给指定主播送礼
+type SendGiftToAnchorReq struct {
+	g.Meta   `path:"/sendGiftToAnchor" method:"post" summary:"给指定主播送礼" tags:"直播间"`
+	AnchorId uint64 `json:"anchorId,string" v:"required|min:1#主播ID不能为空|主播ID无效" dc:"主播用户ID"`
+	GiftId   uint64 `json:"giftId" v:"required#礼物ID不能为空" dc:"礼物ID"`
+	Count    int    `json:"count"  v:"required|min:1|max:9999#送礼数量不合法|送礼数量需大于0|单次最多9999" dc:"送礼数量"`
+}
+
+// SendGiftToAnchorRes App端给指定主播送礼响应
+type SendGiftToAnchorRes struct {
+	Cost    float64 `json:"cost"    dc:"本次实际消耗钻石数"`
+	Diamond float64 `json:"diamond" dc:"剩余钻石余额"`
+}
+
 // GiftPushItem 推送给房间在线用户的送礼广播载荷
 type GiftPushItem struct {
 	RoomId       uint64  `json:"roomId,string"      dc:"直播间ID"`
+	SenderId     uint64  `json:"senderId,string"    dc:"送礼用户ID"`
+	SenderName   string  `json:"senderName"  dc:"送礼用户昵称"`
+	SenderAvatar string  `json:"senderAvatar" dc:"送礼用户头像"`
+	GiftId       uint64  `json:"giftId,string"      dc:"礼物ID"`
+	GiftName     string  `json:"giftName"    dc:"礼物名称"`
+	GiftIcon     string  `json:"giftIcon"    dc:"礼物图标"`
+	GiftAnim     string  `json:"giftAnim"    dc:"礼物动画"`
+	UnitPrice    float64 `json:"unitPrice"   dc:"礼物单价"`
+	Count        int     `json:"count"       dc:"赠送数量"`
+	TotalCost    float64 `json:"totalCost"   dc:"总消耗钻石数"`
+	SentAt       int64   `json:"sentAt"      dc:"发送时间(秒)"`
+}
+
+// PrivateGiftPushItem 给指定主播送礼推送载荷(仅发送者与主播可见)
+type PrivateGiftPushItem struct {
+	RoomId       uint64  `json:"roomId,string"      dc:"直播间ID(主播ID)"`
+	AnchorId     uint64  `json:"anchorId,string"    dc:"主播用户ID"`
 	SenderId     uint64  `json:"senderId,string"    dc:"送礼用户ID"`
 	SenderName   string  `json:"senderName"  dc:"送礼用户昵称"`
 	SenderAvatar string  `json:"senderAvatar" dc:"送礼用户头像"`
@@ -276,6 +307,29 @@ type SendChatReq struct {
 // SendChatRes App端发送文字消息响应
 type SendChatRes struct {
 	Success bool `json:"success"`
+}
+
+// SendPrivateRoomChatReq App端私密房文字消息
+type SendPrivateRoomChatReq struct {
+	g.Meta   `path:"/sendPrivateRoomChat" method:"post" summary:"私密房文字消息" tags:"直播间"`
+	TargetId uint64 `json:"targetId,string" v:"required|min:1#目标用户ID不能为空|目标用户ID无效" dc:"目标用户ID"`
+	Content  string `json:"content"  dc:"文字内容"`
+}
+
+// SendPrivateRoomChatRes App端私密房文字消息响应
+type SendPrivateRoomChatRes struct {
+	Success bool `json:"success"`
+}
+
+// PrivateRoomChatPushItem 私密房文字消息推送载荷(仅发送者与目标用户可见)
+type PrivateRoomChatPushItem struct {
+	RoomId       string `json:"roomId"       dc:"私密房直播间ID(主播ID)"`
+	TargetId     string `json:"targetId"     dc:"目标用户ID"`
+	SenderId     string `json:"senderId"     dc:"发送用户ID"`
+	SenderName   string `json:"senderName"   dc:"发送用户昵称"`
+	SenderAvatar string `json:"senderAvatar" dc:"发送用户头像"`
+	Content      string `json:"content"      dc:"文字内容"`
+	SentAt       int64  `json:"sentAt"       dc:"发送时间(秒)"`
 }
 
 // SendPaidDanmakuReq App端发送付费弹幕

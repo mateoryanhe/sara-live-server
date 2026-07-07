@@ -148,6 +148,12 @@ const (
 	EntryEffectNonExist XRCode = 133
 	// ShortVideoMustPayToWatch 短视频必须付费观看
 	ShortVideoMustPayToWatch XRCode = 134
+	// CallUserInCall 用户正在通话中
+	CallUserInCall XRCode = 135
+	// CallOrderNonExist 通话订单不存在
+	CallOrderNonExist XRCode = 136
+	// CallOrderStateInvalid 通话订单状态不允许此操作
+	CallOrderStateInvalid XRCode = 137
 )
 
 type XError struct {

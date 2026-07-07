@@ -14,11 +14,12 @@ const (
 
 // 通话状态
 const (
-	CallOrderStatusCalling  uint8 = 1 // 呼叫中
-	CallOrderStatusInCall   uint8 = 2 // 通话中
-	CallOrderStatusEnded    uint8 = 3 // 通话结束
-	CallOrderStatusRejected uint8 = 4 // 拒接
-	CallOrderStatusTimeout  uint8 = 5 // 呼叫超时
+	CallOrderStatusCalling     uint8 = 1 // 呼叫中
+	CallOrderStatusInCall      uint8 = 2 // 通话中
+	CallOrderStatusEnded       uint8 = 3 // 通话结束
+	CallOrderStatusRejected    uint8 = 4 // 拒接
+	CallOrderStatusTimeout     uint8 = 5 // 呼叫超时
+	CallOrderStatusAbnormalEnd uint8 = 6 // 异常结束
 )
 
 // 通话类型
@@ -49,6 +50,8 @@ const (
 	CallOrderTicketPrice        db.TbCol = "ticket_price"
 	CallOrderPricePerMinute     db.TbCol = "price_per_minute"
 	CallOrderTotalCost          db.TbCol = "total_cost"
+	CallOrderChargeTime         db.TbCol = "charge_time"
+	CallOrderBillingDuration    db.TbCol = "billing_duration"
 )
 
 // CallOrder 通话订单
@@ -63,13 +66,15 @@ type CallOrder struct {
 	ReceiverHangUpTime *time.Time `gorm:"index;comment:接听者挂断时间" json:"receiverHangUpTime"`
 	OrderEndTime       *time.Time `gorm:"index;comment:订单结束时间" json:"orderEndTime"`
 	CallDuration       uint32     `gorm:"default:0;comment:通话时长(秒)" json:"callDuration"`
-	CallStatus         uint8      `gorm:"index;default:1;comment:通话状态(1-呼叫中,2-通话中,3-通话结束,4-拒接,5-呼叫超时)" json:"callStatus"`
+	CallStatus         uint8      `gorm:"index;default:1;comment:通话状态(1-呼叫中,2-通话中,3-通话结束,4-拒接,5-呼叫超时,6-异常结束)" json:"callStatus"`
 	CallType           uint8      `gorm:"default:1;comment:通话类型(1-语音,2-视频)" json:"callType"`
 	Source             uint8      `gorm:"default:1;comment:来源(1-直播间,2-私信)" json:"source"`
 	Params             string     `gorm:"size:512;default:'';comment:扩展参数" json:"params"`
 	TicketPrice        float64    `gorm:"type:decimal(10,4);default:0;comment:门票价格" json:"ticketPrice"`
 	PricePerMinute     float64    `gorm:"type:decimal(10,4);default:0;comment:分钟计费价格(每分钟)" json:"pricePerMinute"`
 	TotalCost          float64    `gorm:"type:decimal(10,4);default:0;comment:总费用" json:"totalCost"`
+	ChargeTime         *time.Time `gorm:"index;comment:扣费时间" json:"chargeTime"`
+	BillingDuration    uint32     `gorm:"default:0;comment:计费时长(分钟)" json:"billingDuration"`
 }
 
 func NewCallOrder(callerId, receiverId uint64, callType, source uint8, params string, ticketPrice, pricePerMinute float64) *CallOrder {
@@ -165,6 +170,25 @@ func (m *CallOrder) SetTotalCost(v float64) {
 	syndb.AddDataToQuickChan(TbCallOrder, CallOrderTotalCost, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
+func (m *CallOrder) SetChargeTime(v *time.Time) {
+	m.ChargeTime = v
+	syndb.AddDataToQuickChan(TbCallOrder, CallOrderChargeTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
+}
+
+func (m *CallOrder) AddBillingDuration(v uint32) {
+	m.BillingDuration += v
+	syndb.AddDataToQuickChan(TbCallOrder, CallOrderBillingDuration, &syndb.ColData{IdVal: m.ID, ColVal: m.BillingDuration})
+}
+
+func (m *CallOrder) SubBillingDuration(v uint32) {
+	if v >= m.BillingDuration {
+		m.BillingDuration = 0
+	} else {
+		m.BillingDuration -= v
+	}
+	syndb.AddDataToQuickChan(TbCallOrder, CallOrderBillingDuration, &syndb.ColData{IdVal: m.ID, ColVal: m.BillingDuration})
+}
+
 func (m *CallOrder) SetCreatedAt(v time.Time) {
 	m.CreatedAt = v
 	syndb.AddDataToQuickChan(TbCallOrder, db.CreatedAtName, &syndb.ColData{IdVal: m.ID, ColVal: v})
@@ -193,5 +217,7 @@ func initCallOrder() {
 	syndb.RegQuickWithMiddle(TbCallOrder, CallOrderTicketPrice)
 	syndb.RegQuickWithMiddle(TbCallOrder, CallOrderPricePerMinute)
 	syndb.RegQuickWithMiddle(TbCallOrder, CallOrderTotalCost)
+	syndb.RegQuickWithMiddle(TbCallOrder, CallOrderChargeTime)
+	syndb.RegQuickWithMiddle(TbCallOrder, CallOrderBillingDuration)
 	migrate.AutoMigrate(&CallOrder{})
 }

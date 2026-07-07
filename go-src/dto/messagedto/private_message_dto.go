@@ -21,11 +21,12 @@ type AppPrivateMessageUnreadListReq struct {
 }
 
 type AppPrivateMessageUnreadDetailItem struct {
-	SenderId     uint64 `json:"sender_id,string"`
-	UnreadCount  uint64 `json:"unreadCount"`
-	SenderName   string `json:"senderName"`
-	SenderAvatar string `json:"senderAvatar"`
-	UpdatedAt    string `json:"updatedAt"`
+	SenderId     uint64                 `json:"sender_id,string"`
+	UnreadCount  uint64                 `json:"unreadCount"`
+	SenderName   string                 `json:"senderName"`
+	SenderAvatar string                 `json:"senderAvatar"`
+	UpdatedAt    string                 `json:"updatedAt"`
+	LastMessage  *AppPrivateMessageItem `json:"lastMessage,omitempty" dc:"会话最后一条消息"`
 }
 
 type AppPrivateMessageUnreadListRes struct {

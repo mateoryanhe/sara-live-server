@@ -20,6 +20,7 @@ type AppLiveRecordItem struct {
 	TotalGiftIncome        float64 `json:"totalGiftIncome"          dc:"礼物收入(钻石)"`
 	TotalPaidDanmakuIncome float64 `json:"totalPaidDanmakuIncome"   dc:"付费弹幕收入(钻石)"`
 	TotalPrivateRoomIncome float64 `json:"totalPrivateRoomIncome" dc:"私密直播间收入(钻石)"`
+	TotalVideoCallIncome   float64 `json:"totalVideoCallIncome"   dc:"直播间视频通话收入(钻石)"`
 	TotalGameBet           float64 `json:"totalGameBet"           dc:"游戏下注总金额"`
 	TotalGiftSender        uint64  `json:"totalGiftSender"   dc:"送礼人数(去重)"`
 	TotalNewFollower       uint64  `json:"totalNewFollower"  dc:"新加粉丝数(去重)"`

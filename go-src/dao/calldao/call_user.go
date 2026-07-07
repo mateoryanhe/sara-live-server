@@ -29,3 +29,16 @@ func GetUserById(userId uint64) *entity.CallUser {
 	u, _ := v.(*entity.CallUser)
 	return u
 }
+
+// AddUserToCache 新建通话用户后写入缓存
+func AddUserToCache(u *entity.CallUser) {
+	if u == nil || userCacheMgr == nil {
+		return
+	}
+	userCacheMgr.FlushCache(u.ID, u)
+}
+
+// FlushUserCache 通话用户变更后刷新缓存
+func FlushUserCache(u *entity.CallUser) {
+	AddUserToCache(u)
+}

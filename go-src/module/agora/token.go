@@ -43,6 +43,30 @@ func BuildLiveRoomToken(userId, roomId uint64) (token string, expireAt int64, er
 	return token, int64(expireSeconds), nil
 }
 
+// BuildCallToken 为通话频道生成声网 Token
+func BuildCallToken(userId uint64, channelName string) (token string, expireAt int64, err error) {
+	agoraCfg := getAgoraCfgCache()
+	if err := validateAgoraCfg(agoraCfg); err != nil {
+		return "", 0, err
+	}
+
+	userAccount := buildUserAccount(userId)
+	expireSeconds := agoraCfg.TokenExpireSeconds
+	token, err = rtctokenbuilder.BuildTokenWithUserAccount(
+		agoraCfg.AppId,
+		agoraCfg.AppCertificate,
+		channelName,
+		userAccount,
+		rtctokenbuilder.RolePublisher,
+		expireSeconds,
+		expireSeconds,
+	)
+	if err != nil {
+		return "", 0, err
+	}
+	return token, int64(expireSeconds), nil
+}
+
 // GetLiveRoomToken App端上报房间ID,返回进直播间声网Token
 func GetLiveRoomToken(ctx context.Context, req *agoradto.GetLiveRoomTokenReq) (*agoradto.GetLiveRoomTokenRes, error) {
 	userId := httpserver.GetAuthId(ctx)

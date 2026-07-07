@@ -35,3 +35,16 @@ func GetOrderById(id uint64) *entity.CallOrder {
 	o, _ := v.(*entity.CallOrder)
 	return o
 }
+
+// AddOrderToCache 新建通话订单后写入缓存
+func AddOrderToCache(o *entity.CallOrder) {
+	if o == nil || orderCacheMgr == nil {
+		return
+	}
+	orderCacheMgr.FlushCache(o.ID, o)
+}
+
+// FlushOrderCache 通话订单变更后刷新缓存
+func FlushOrderCache(o *entity.CallOrder) {
+	AddOrderToCache(o)
+}
