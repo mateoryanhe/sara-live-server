@@ -4,10 +4,12 @@ import (
 	"context"
 	"strings"
 	"time"
+
+	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/constants/cmd"
 	"xr-game-server/core/httpserver"
-	"xr-game-server/core/lambda"
 	"xr-game-server/core/push"
+	"xr-game-server/core/xrpool"
 	"xr-game-server/dao/messagedao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/messagedto"
@@ -53,7 +55,7 @@ func SendPrivateMessage(ctx context.Context, req *messagedto.AppSendPrivateMessa
 
 	unReadDetail := messagedao.GetUnreadDetailByReceiverSender(senderId, req.ReceiverId)
 	unReadDetail.AddUnread(1)
-	messagedao.UpsertUnreadDetailToListCache(unReadDetail)
+	messagedao.FlushUnreadDetailCache(unReadDetail)
 
 	return &messagedto.AppSendPrivateMessageRes{
 		MessageId: msg.ID,
@@ -136,22 +138,45 @@ func ClearPrivateMessageUnread(ctx context.Context, req *messagedto.AppClearPriv
 		clearedCount = unReadDetail.UnreadCount
 		unReadDetail.ClearUnread(req.ClearedCount)
 		unReadData.SubPrivateUnread(clearedCount)
-		messagedao.UpsertUnreadDetailToListCache(unReadDetail)
+		messagedao.FlushUnreadDetailCache(unReadDetail)
 	}
-
-	//刷新一下缓存列表
-	list := messagedao.GetCachedUnreadDetails(userId)
-	lambda.Filter(list, func(detail *entity.UserMessageUnreadDetail) bool {
-		if detail.ID == unReadDetail.ID {
-			detail.UnreadCount = unReadDetail.UnreadCount
-		}
-		return true
-	})
 
 	return &messagedto.AppClearPrivateMessageUnreadRes{
 		Success:       true,
 		ClearedCount:  clearedCount,
 		PrivateUnread: unReadData.PrivateUnread,
+	}, nil
+}
+
+// ClearAllPrivateMessageUnread App端清除当前用户全部私信未读(异步直接更新数据库)
+func ClearAllPrivateMessageUnread(ctx context.Context, req *messagedto.AppClearAllPrivateMessageUnreadReq) (*messagedto.AppClearAllPrivateMessageUnreadRes, error) {
+	userId := httpserver.GetAuthId(ctx)
+	if userId == 0 {
+		return nil, errercode.CreateCode(errercode.EmptyUserId)
+	}
+
+	unReadData := messagedao.GetUnReadByUserId(userId)
+	clearedCount := uint64(0)
+	if unReadData != nil {
+		clearedCount = unReadData.PrivateUnread
+	}
+
+	xrpool.AddWithRecover(ctx, func(poolCtx context.Context) {
+		if err := messagedao.ClearAllPrivateUnreadInDB(poolCtx, userId); err != nil {
+			g.Log().Errorf(poolCtx, "ClearAllPrivateUnreadInDB userId=%d err=%v", userId, err)
+			return
+		}
+		messagedao.ClearAllPrivateUnreadCache(userId)
+	})
+
+	if unReadData != nil && clearedCount > 0 {
+		unReadData.SubPrivateUnread(clearedCount)
+	}
+
+	return &messagedto.AppClearAllPrivateMessageUnreadRes{
+		Success:       true,
+		ClearedCount:  clearedCount,
+		PrivateUnread: 0,
 	}, nil
 }
 

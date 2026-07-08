@@ -35,6 +35,11 @@ func (c *MessageAppController) ClearPrivateMessageUnread(ctx context.Context, re
 	return message.ClearPrivateMessageUnread(ctx, req)
 }
 
+// ClearAllPrivateMessageUnread App端清除全部私信未读
+func (c *MessageAppController) ClearAllPrivateMessageUnread(ctx context.Context, req *messagedto.AppClearAllPrivateMessageUnreadReq) (*messagedto.AppClearAllPrivateMessageUnreadRes, error) {
+	return message.ClearAllPrivateMessageUnread(ctx, req)
+}
+
 // SystemMessageList App端查询系统消息列表
 func (c *MessageAppController) SystemMessageList(ctx context.Context, req *messagedto.AppSystemMessageListReq) (*messagedto.AppSystemMessageListRes, error) {
 	return message.ListSystemMessage(ctx, req)

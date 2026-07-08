@@ -70,6 +70,17 @@ type AppClearPrivateMessageUnreadRes struct {
 	PrivateUnread uint64 `json:"privateUnread" dc:"剩余私信未读总数"`
 }
 
+// AppClearAllPrivateMessageUnreadReq App端清除全部私信未读
+type AppClearAllPrivateMessageUnreadReq struct {
+	g.Meta `path:"/clearAllPrivateMessageUnread" method:"post" summary:"清除全部私信未读" tags:"私信"`
+}
+
+type AppClearAllPrivateMessageUnreadRes struct {
+	Success       bool   `json:"success"`
+	ClearedCount  uint64 `json:"clearedCount" dc:"本次清除的私信未读总数"`
+	PrivateUnread uint64 `json:"privateUnread" dc:"剩余私信未读总数"`
+}
+
 // PrivateMessagePushItem 私信推送载荷
 type PrivateMessagePushItem struct {
 	Id           uint64 `json:"id,string"`

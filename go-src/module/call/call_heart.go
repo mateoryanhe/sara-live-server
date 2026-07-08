@@ -30,9 +30,13 @@ func CallHeart(ctx context.Context, req *calldto.CallHeartReq) (*calldto.CallHea
 	}
 
 	now := time.Now()
+	lastHeartTime := getCallUserHeartTime(userId)
 	upsertCallUser(userId, order.ID, now)
 
 	if order.CallStatus == entity.CallOrderStatusInCall {
+		if !isCallHeartIntervalExceeded(lastHeartTime, now) {
+			return &calldto.CallHeartRes{Success: true}, nil
+		}
 		addCallDurationOnHeart(order, now)
 		if err := chargeLiveRoomCallBillingIfDue(order, now); err != nil {
 			return nil, err
@@ -41,6 +45,23 @@ func CallHeart(ctx context.Context, req *calldto.CallHeartReq) (*calldto.CallHea
 	}
 
 	return &calldto.CallHeartRes{Success: true}, nil
+}
+
+const callHeartProcessInterval = 10 * time.Second
+
+func getCallUserHeartTime(userId uint64) *time.Time {
+	callUser := calldao.GetUserById(userId)
+	if callUser == nil {
+		return nil
+	}
+	return callUser.HeartTime
+}
+
+func isCallHeartIntervalExceeded(lastHeartTime *time.Time, now time.Time) bool {
+	if lastHeartTime == nil || lastHeartTime.IsZero() {
+		return false
+	}
+	return now.Sub(*lastHeartTime) > callHeartProcessInterval
 }
 
 // addCallDurationOnHeart 每次心跳增加10秒通话时长(按接听时间对齐,避免双方重复累加)
