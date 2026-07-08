@@ -55,8 +55,14 @@
         <el-table-column label="付费弹幕收入" width="120">
           <template #default="{ row }">{{ formatAmount(row.totalPaidDanmakuIncome) }}</template>
         </el-table-column>
-        <el-table-column label="私密房收入" width="120">
-          <template #default="{ row }">{{ formatAmount(row.totalPrivateRoomIncome) }}</template>
+        <el-table-column label="视频门票收入" width="120">
+          <template #default="{ row }">{{ formatAmount(row.totalVideoCallTicketIncome) }}</template>
+        </el-table-column>
+        <el-table-column label="视频通话计费收入" width="140">
+          <template #default="{ row }">{{ formatAmount(row.totalVideoCallBillingIncome) }}</template>
+        </el-table-column>
+        <el-table-column label="视频通话收入" width="120">
+          <template #default="{ row }">{{ formatAmount(row.totalVideoCallIncome) }}</template>
         </el-table-column>
         <el-table-column label="送礼人数" prop="totalGiftSender" width="100"/>
         <el-table-column label="新加粉丝" prop="totalNewFollower" width="100"/>

@@ -107,6 +107,12 @@ func recordLiveRoomCallRevenue(roomId, liveRecordId, callerId uint64, amount flo
 	if liveRecord := liveroomdao.GetLiveRecordById(liveRecordId); liveRecord != nil {
 		liveRecord.AddTotalIncome(amount)
 		liveRecord.AddTotalVideoCallIncome(amount)
+		switch revenueType {
+		case liverevenue.LiveRoomVideoCallTicket:
+			liveRecord.AddTotalVideoCallTicketIncome(amount)
+		case liverevenue.LiveRoomVideoCallBilling:
+			liveRecord.AddTotalVideoCallBillingIncome(amount)
+		}
 	}
 	room.AddTotalIncome(amount)
 	switch revenueType {

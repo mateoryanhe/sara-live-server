@@ -72,6 +72,7 @@ func chargePrivateRoomTicketIfNeeded(userId uint64, room *entity.LiveRoom, now t
 	//添加本次直播收到的礼物总额
 	liveRecord.AddTotalIncome(ticketPrice)
 	liveRecord.AddTotalPrivateRoomIncome(ticketPrice)
+	liveRecord.AddTotalPrivateRoomTicketIncome(ticketPrice)
 	//记录主播总收益
 	room.AddTotalIncome(ticketPrice)
 	room.AddTotalPrivateRoomTicketIncome(ticketPrice)
@@ -186,6 +187,7 @@ func recordPrivateRoomBillingRevenue(room *entity.LiveRoom, userId uint64, amoun
 	if liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId); liveRecord != nil {
 		liveRecord.AddTotalIncome(amount)
 		liveRecord.AddTotalPrivateRoomIncome(amount)
+		liveRecord.AddTotalPrivateRoomWatchIncome(amount)
 	}
 	room.AddTotalIncome(amount)
 	room.AddTotalPrivateRoomWatchIncome(amount)

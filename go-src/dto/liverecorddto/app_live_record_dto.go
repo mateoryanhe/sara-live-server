@@ -11,19 +11,23 @@ type AppLiveRecordListReq struct {
 
 // AppLiveRecordItem App端直播记录条目
 type AppLiveRecordItem struct {
-	Id                     string  `json:"id"                dc:"直播记录ID"`
-	StartTime              string  `json:"startTime"         dc:"开播时间(秒)"`
-	EndTime                string  `json:"endTime"           dc:"下播时间(秒,0表示未结束)"`
-	TotalAudience          uint64  `json:"totalAudience"     dc:"累计观众人数(去重)"`
-	TotalLiveDuration      float64 `json:"totalLiveDuration" dc:"累计直播时长(秒)"`
-	TotalIncome            float64 `json:"totalIncome"       dc:"总收益(钻石)"`
-	TotalGiftIncome        float64 `json:"totalGiftIncome"          dc:"礼物收入(钻石)"`
-	TotalPaidDanmakuIncome float64 `json:"totalPaidDanmakuIncome"   dc:"付费弹幕收入(钻石)"`
-	TotalPrivateRoomIncome float64 `json:"totalPrivateRoomIncome" dc:"私密直播间收入(钻石)"`
-	TotalVideoCallIncome   float64 `json:"totalVideoCallIncome"   dc:"直播间视频通话收入(钻石)"`
-	TotalGameBet           float64 `json:"totalGameBet"           dc:"游戏下注总金额"`
-	TotalGiftSender        uint64  `json:"totalGiftSender"   dc:"送礼人数(去重)"`
-	TotalNewFollower       uint64  `json:"totalNewFollower"  dc:"新加粉丝数(去重)"`
+	Id                           string  `json:"id"                dc:"直播记录ID"`
+	StartTime                    string  `json:"startTime"         dc:"开播时间(秒)"`
+	EndTime                      string  `json:"endTime"           dc:"下播时间(秒,0表示未结束)"`
+	TotalAudience                uint64  `json:"totalAudience"     dc:"累计观众人数(去重)"`
+	TotalLiveDuration            float64 `json:"totalLiveDuration" dc:"累计直播时长(秒)"`
+	TotalIncome                  float64 `json:"totalIncome"       dc:"总收益(钻石)"`
+	TotalGiftIncome              float64 `json:"totalGiftIncome"          dc:"礼物收入(钻石)"`
+	TotalPaidDanmakuIncome       float64 `json:"totalPaidDanmakuIncome"   dc:"付费弹幕收入(钻石)"`
+	TotalPrivateRoomIncome       float64 `json:"totalPrivateRoomIncome"       dc:"私密直播间收入(钻石)"`
+	TotalPrivateRoomTicketIncome float64 `json:"totalPrivateRoomTicketIncome" dc:"私密直播间门票收入(钻石)"`
+	TotalPrivateRoomWatchIncome  float64 `json:"totalPrivateRoomWatchIncome"  dc:"私密房观看收入(钻石)"`
+	TotalVideoCallIncome         float64 `json:"totalVideoCallIncome"         dc:"直播间视频通话收入(钻石)"`
+	TotalVideoCallTicketIncome   float64 `json:"totalVideoCallTicketIncome"   dc:"直播间视频通话门票收入(钻石)"`
+	TotalVideoCallBillingIncome  float64 `json:"totalVideoCallBillingIncome"  dc:"直播间视频通话计费收入(钻石)"`
+	TotalGameBet                 float64 `json:"totalGameBet"                 dc:"游戏下注总金额"`
+	TotalGiftSender              uint64  `json:"totalGiftSender"   dc:"送礼人数(去重)"`
+	TotalNewFollower             uint64  `json:"totalNewFollower"  dc:"新加粉丝数(去重)"`
 }
 
 // AppLiveRecordListRes App端直播记录分页响应

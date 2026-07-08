@@ -687,6 +687,11 @@ export interface LiveRecordItem {
     totalGiftIncome: number
     totalPaidDanmakuIncome: number
     totalPrivateRoomIncome: number
+    totalPrivateRoomTicketIncome: number
+    totalPrivateRoomWatchIncome: number
+    totalVideoCallIncome: number
+    totalVideoCallTicketIncome: number
+    totalVideoCallBillingIncome: number
     totalGameBet: number
     totalGiftSender: number
     totalNewFollower: number
