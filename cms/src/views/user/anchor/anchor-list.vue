@@ -53,6 +53,14 @@
             <el-tag :type="categoryTagType(row.category)">{{ categoryLabel(row.category) }}</el-tag>
           </template>
         </el-table-column>
+        <el-table-column label="私密邀请类型" min-width="120">
+          <template #default="{ row }">
+            <el-tag v-if="row.category === LIVE_ROOM_CATEGORY_HOT" :type="privateInviteTagType(row.privateInviteType)">
+              {{ privateInviteLabel(row.privateInviteType) }}
+            </el-tag>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
         <el-table-column label="门票价格" min-width="100">
           <template #default="{ row }">
             {{ isPrivateRoom(row.category) ? formatAmount(row.ticket) : '-' }}
@@ -228,7 +236,37 @@ const LIVE_ROOM_CATEGORY_HOT = 1
 const LIVE_ROOM_CATEGORY_GAME = 2
 const LIVE_ROOM_CATEGORY_PRIVATE = 3
 
+const LIVE_ROOM_PRIVATE_INVITE_ALL = 1
+const LIVE_ROOM_PRIVATE_INVITE_VIP = 2
+const LIVE_ROOM_PRIVATE_INVITE_REJECT = 3
+
 const isPrivateRoom = (category?: number) => category === LIVE_ROOM_CATEGORY_PRIVATE
+
+const privateInviteLabel = (type?: number) => {
+  if (type === LIVE_ROOM_PRIVATE_INVITE_VIP) {
+    return '仅VIP'
+  }
+  if (type === LIVE_ROOM_PRIVATE_INVITE_REJECT) {
+    return '拒绝所有人'
+  }
+  if (type === LIVE_ROOM_PRIVATE_INVITE_ALL) {
+    return '接受所有人'
+  }
+  return '-'
+}
+
+const privateInviteTagType = (type?: number) => {
+  if (type === LIVE_ROOM_PRIVATE_INVITE_VIP) {
+    return 'warning'
+  }
+  if (type === LIVE_ROOM_PRIVATE_INVITE_REJECT) {
+    return 'danger'
+  }
+  if (type === LIVE_ROOM_PRIVATE_INVITE_ALL) {
+    return 'success'
+  }
+  return 'info'
+}
 
 const categoryLabel = (category?: number) => {
   if (category === LIVE_ROOM_CATEGORY_HOT) {

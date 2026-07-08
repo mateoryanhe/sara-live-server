@@ -24,6 +24,7 @@ type AnchorListItem struct {
 	RoomTitle                    string     `json:"roomTitle"`
 	RoomId                       uint64     `json:"roomId,string" dc:"直播间ID"`
 	Category                     uint8      `json:"category" dc:"分类(1=hot,2=game,3=私密)"`
+	PrivateInviteType            uint8      `json:"privateInviteType" dc:"私密邀请类型(1=接受所有人,2=仅VIP,3=拒绝所有人)"`
 	Ticket                       float64    `json:"ticket" dc:"门票价格(钻石,私密直播间)"`
 	Billing                      float64    `json:"billing" dc:"计费价格(每分钟钻石,私密直播间)"`
 	LiveStatus                   uint8      `json:"liveStatus" dc:"直播状态(0未开播,1直播中)"`

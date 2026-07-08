@@ -147,6 +147,7 @@ export interface AnchorListItem {
     roomTitle?: string
     roomId?: string
     category?: number
+    privateInviteType?: number
     ticket?: number
     billing?: number
     liveStatus?: number
