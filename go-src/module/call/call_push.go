@@ -104,3 +104,16 @@ func pushCallStarted(order *entity.CallOrder, startedAt int64) {
 	push.Data(order.CallerId, cmd.LiveRoomCallStarted, item)
 	push.Data(order.ReceiverId, cmd.LiveRoomCallStarted, item)
 }
+
+const liveRoomCallTimeoutMessage = "呼叫超时"
+
+func pushCallTimeout(callerId, receiverId, orderId uint64) {
+	item := &calldto.CallTimeoutPushItem{
+		OrderId:    strconv.FormatUint(orderId, 10),
+		CallerId:   strconv.FormatUint(callerId, 10),
+		ReceiverId: strconv.FormatUint(receiverId, 10),
+		Message:    liveRoomCallTimeoutMessage,
+	}
+	push.Data(callerId, cmd.LiveRoomCallTimeout, item)
+	push.Data(receiverId, cmd.LiveRoomCallTimeout, item)
+}

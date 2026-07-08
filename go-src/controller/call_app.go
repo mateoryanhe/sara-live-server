@@ -40,6 +40,11 @@ func (c *CallAppController) ConfirmCall(ctx context.Context, req *calldto.Confir
 	return call.ConfirmCall(ctx, req)
 }
 
+// CallTimeout 呼叫超时
+func (c *CallAppController) CallTimeout(ctx context.Context, req *calldto.CallTimeoutReq) (*calldto.CallTimeoutRes, error) {
+	return call.CallTimeout(ctx, req)
+}
+
 // CallHeart 通话心跳
 func (c *CallAppController) CallHeart(ctx context.Context, req *calldto.CallHeartReq) (*calldto.CallHeartRes, error) {
 	return call.CallHeart(ctx, req)

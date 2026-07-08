@@ -131,3 +131,7 @@ func (c *PushController) LiveRoomPrivateGift(_ context.Context, _ *pushdto.LiveR
 func (c *PushController) LiveRoomCallStarted(_ context.Context, _ *pushdto.LiveRoomCallStartedPushReq) (*pushdto.LiveRoomCallStartedPushResp, error) {
 	return nil, nil
 }
+
+func (c *PushController) LiveRoomCallTimeout(_ context.Context, _ *pushdto.LiveRoomCallTimeoutPushReq) (*pushdto.LiveRoomCallTimeoutPushResp, error) {
+	return nil, nil
+}

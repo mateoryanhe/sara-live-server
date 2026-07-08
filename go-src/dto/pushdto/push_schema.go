@@ -309,3 +309,13 @@ type LiveRoomCallStartedPushResp struct {
 	Cmd  int                          `json:"cmd" dc:"命令字 31"`
 	Data *calldto.CallStartedPushItem `json:"data"`
 }
+
+// LiveRoomCallTimeoutPushReq cmd=32 直播间通话呼叫超时
+type LiveRoomCallTimeoutPushReq struct {
+	g.Meta `path:"/liveRoomCallTimeout" method:"post" summary:"推送 cmd=32 LiveRoomCallTimeout" description:"直播间通话呼叫超时(推送给呼叫者与接听者)" tags:"推送协议"`
+}
+
+type LiveRoomCallTimeoutPushResp struct {
+	Cmd  int                          `json:"cmd" dc:"命令字 32"`
+	Data *calldto.CallTimeoutPushItem `json:"data"`
+}

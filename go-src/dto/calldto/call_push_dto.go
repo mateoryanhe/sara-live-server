@@ -54,3 +54,11 @@ type CallStartedPushItem struct {
 	StartedAt   int64  `json:"startedAt" dc:"通话开始时间(秒)"`
 	Message     string `json:"message" dc:"提示文案"`
 }
+
+// CallTimeoutPushItem 呼叫超时推送载荷(推送给呼叫者与接听者)
+type CallTimeoutPushItem struct {
+	OrderId    string `json:"orderId" dc:"通话订单ID"`
+	CallerId   string `json:"callerId" dc:"呼叫者ID"`
+	ReceiverId string `json:"receiverId" dc:"接听者ID"`
+	Message    string `json:"message" dc:"提示文案"`
+}

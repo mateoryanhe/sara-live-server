@@ -57,4 +57,6 @@ const (
 	LiveRoomPrivateGift = 30
 	//直播间通话开始推送(推送给呼叫者与接听者)
 	LiveRoomCallStarted = 31
+	//直播间通话呼叫超时推送(推送给呼叫者与接听者)
+	LiveRoomCallTimeout = 32
 )
