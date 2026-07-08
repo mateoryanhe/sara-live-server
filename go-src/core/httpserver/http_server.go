@@ -23,6 +23,7 @@ var httpServer = g.Server()
 func InitHttpServer() {
 	shutdown.RegCommonShutDownHandler(closeServer)
 	setupDomainSites()
+	httpServer.Use(middlewareCORS)
 	if g.Cfg().MustGet(context.Background(), "server.gzipEnabled").Bool() {
 		httpServer.Use(ghttp.MiddlewareGzip)
 	}
