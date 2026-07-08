@@ -58,6 +58,9 @@ func fillAnchorRoomFields(item *accountdto.AnchorListItem, room *entity.LiveRoom
 	item.TotalPaidDanmakuIncome = room.TotalPaidDanmakuIncome
 	item.TotalPrivateRoomTicketIncome = room.TotalPrivateRoomTicketIncome
 	item.TotalPrivateRoomWatchIncome = room.TotalPrivateRoomWatchIncome
+	item.TotalVideoCallIncome = room.TotalVideoCallIncome
+	item.TotalVideoCallTicketIncome = room.TotalVideoCallTicketIncome
+	item.TotalVideoCallBillingIncome = room.TotalVideoCallBillingIncome
 	if room.LiveRecordId > 0 {
 		item.LiveStatus = 1
 	} else {

@@ -115,6 +115,7 @@ func recordLiveRoomCallRevenue(roomId, liveRecordId, callerId uint64, amount flo
 		}
 	}
 	room.AddTotalIncome(amount)
+	room.AddTotalVideoCallIncome(amount)
 	switch revenueType {
 	case liverevenue.LiveRoomVideoCallTicket:
 		room.AddTotalVideoCallTicketIncome(amount)

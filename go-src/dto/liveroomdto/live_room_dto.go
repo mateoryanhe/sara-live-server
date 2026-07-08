@@ -377,24 +377,27 @@ type GetLiveRoomReq struct {
 }
 
 type GetLiveRoomRes struct {
-	RoomId            string  `json:"roomId"   dc:"直播间ID(同主播用户ID)"`
-	GuildId           string  `json:"guildId"  dc:"所属工会ID"`
-	Title             string  `json:"title"    dc:"直播间标题"`
-	Cover             string  `json:"cover"    dc:"封面图URL"`
-	Notice            string  `json:"notice"   dc:"公告"`
-	Status            uint8   `json:"status"   dc:"状态(0未开播,1直播中)"`
-	Category          uint8   `json:"category" dc:"分类(1=hot,2=game,3=私密)"`
-	TagId             string  `json:"tagId" dc:"直播间标签ID"`
-	TagName           string  `json:"tagName" dc:"直播间标签名称"`
-	Ticket            float64 `json:"ticket" dc:"门票价格(钻石)"`
-	Billing           float64 `json:"billing" dc:"计费价格(每分钟钻石)"`
-	PrivateInviteType uint8   `json:"privateInviteType" dc:"私密邀请类型(1=接受所有人,2=仅VIP,3=拒绝所有人)"`
-	AllowCallIcon     bool    `json:"allowCallIcon" dc:"是否允许显示电话图标按钮(仅category=1时按私密邀请类型判断)"`
-	CreateAt          int64   `json:"createAt" dc:"创建时间(秒)"`
-	OnlineCount       int     `json:"onlineCount" dc:"在线观众人数(不含主播)"`
-	FreeTime          uint64  `json:"freeTime" dc:"私密房免费时间"`
-	TicketTime        int64   `json:"TicketTime" dc:"私密房门票倒计时"`
-	HasTicket         bool    `json:"hasTicket"`
+	RoomId                      string  `json:"roomId"   dc:"直播间ID(同主播用户ID)"`
+	GuildId                     string  `json:"guildId"  dc:"所属工会ID"`
+	Title                       string  `json:"title"    dc:"直播间标题"`
+	Cover                       string  `json:"cover"    dc:"封面图URL"`
+	Notice                      string  `json:"notice"   dc:"公告"`
+	Status                      uint8   `json:"status"   dc:"状态(0未开播,1直播中)"`
+	Category                    uint8   `json:"category" dc:"分类(1=hot,2=game,3=私密)"`
+	TagId                       string  `json:"tagId" dc:"直播间标签ID"`
+	TagName                     string  `json:"tagName" dc:"直播间标签名称"`
+	Ticket                      float64 `json:"ticket" dc:"门票价格(钻石)"`
+	Billing                     float64 `json:"billing" dc:"计费价格(每分钟钻石)"`
+	PrivateInviteType           uint8   `json:"privateInviteType" dc:"私密邀请类型(1=接受所有人,2=仅VIP,3=拒绝所有人)"`
+	AllowCallIcon               bool    `json:"allowCallIcon" dc:"是否允许显示电话图标按钮(仅category=1时按私密邀请类型判断)"`
+	CreateAt                    int64   `json:"createAt" dc:"创建时间(秒)"`
+	OnlineCount                 int     `json:"onlineCount" dc:"在线观众人数(不含主播)"`
+	FreeTime                    uint64  `json:"freeTime" dc:"私密房免费时间"`
+	TicketTime                  int64   `json:"TicketTime" dc:"私密房门票倒计时"`
+	HasTicket                   bool    `json:"hasTicket"`
+	TotalVideoCallIncome        float64 `json:"totalVideoCallIncome" dc:"累计视频通话收益(仅主播本人查询时返回)"`
+	TotalVideoCallTicketIncome  float64 `json:"totalVideoCallTicketIncome" dc:"累计视频通话门票收益(仅主播本人查询时返回)"`
+	TotalVideoCallBillingIncome float64 `json:"totalVideoCallBillingIncome" dc:"累计视频通话计费收益(仅主播本人查询时返回)"`
 }
 
 // AnchorBanPushItem 主播封禁推送载荷(推送给主播及直播间在线观众)

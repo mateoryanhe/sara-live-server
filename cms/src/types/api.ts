@@ -156,6 +156,9 @@ export interface AnchorListItem {
     totalPaidDanmakuIncome?: number
     totalPrivateRoomTicketIncome?: number
     totalPrivateRoomWatchIncome?: number
+    totalVideoCallIncome?: number
+    totalVideoCallTicketIncome?: number
+    totalVideoCallBillingIncome?: number
     ban?: boolean
     banApplyTime?: string | null
     banReason?: string

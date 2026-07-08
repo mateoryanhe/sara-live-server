@@ -33,6 +33,9 @@ type AnchorListItem struct {
 	TotalPaidDanmakuIncome       float64    `json:"totalPaidDanmakuIncome" dc:"累计付费弹幕收益"`
 	TotalPrivateRoomTicketIncome float64    `json:"totalPrivateRoomTicketIncome" dc:"累计私密直播间门票收益"`
 	TotalPrivateRoomWatchIncome  float64    `json:"totalPrivateRoomWatchIncome" dc:"累计私密房观看收益"`
+	TotalVideoCallIncome         float64    `json:"totalVideoCallIncome" dc:"累计直播间视频通话收益"`
+	TotalVideoCallTicketIncome   float64    `json:"totalVideoCallTicketIncome" dc:"累计直播间视频通话门票收益"`
+	TotalVideoCallBillingIncome  float64    `json:"totalVideoCallBillingIncome" dc:"累计直播间视频通话计费收益"`
 	Ban                          bool       `json:"ban" dc:"是否封禁"`
 	BanApplyTime                 *time.Time `json:"banApplyTime" dc:"封禁截止时间"`
 	BanReason                    string     `json:"banReason" dc:"封禁原因"`
