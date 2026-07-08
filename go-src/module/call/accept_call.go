@@ -39,7 +39,7 @@ func AcceptCall(ctx context.Context, req *calldto.AcceptCallReq) (*calldto.Accep
 	}
 
 	now := time.Now()
-	if err := chargeLiveRoomCallOnAccept(order, now); err != nil {
+	if err := checkLiveRoomCallDiamondOnAccept(order); err != nil {
 		return nil, err
 	}
 	order.SetCallStatus(entity.CallOrderStatusInCall)

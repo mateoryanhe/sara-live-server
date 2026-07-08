@@ -35,6 +35,11 @@ func (c *CallAppController) AcceptCall(ctx context.Context, req *calldto.AcceptC
 	return call.AcceptCall(ctx, req)
 }
 
+// ConfirmCall 通话应答确认
+func (c *CallAppController) ConfirmCall(ctx context.Context, req *calldto.ConfirmCallReq) (*calldto.ConfirmCallRes, error) {
+	return call.ConfirmCall(ctx, req)
+}
+
 // CallHeart 通话心跳
 func (c *CallAppController) CallHeart(ctx context.Context, req *calldto.CallHeartReq) (*calldto.CallHeartRes, error) {
 	return call.CallHeart(ctx, req)

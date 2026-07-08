@@ -299,3 +299,13 @@ type LiveRoomPrivateGiftPushResp struct {
 	Cmd  int                              `json:"cmd" dc:"命令字 30"`
 	Data *liveroomdto.PrivateGiftPushItem `json:"data"`
 }
+
+// LiveRoomCallStartedPushReq cmd=31 直播间通话开始
+type LiveRoomCallStartedPushReq struct {
+	g.Meta `path:"/liveRoomCallStarted" method:"post" summary:"推送 cmd=31 LiveRoomCallStarted" description:"直播间通话开始(推送给呼叫者与接听者)" tags:"推送协议"`
+}
+
+type LiveRoomCallStartedPushResp struct {
+	Cmd  int                          `json:"cmd" dc:"命令字 31"`
+	Data *calldto.CallStartedPushItem `json:"data"`
+}

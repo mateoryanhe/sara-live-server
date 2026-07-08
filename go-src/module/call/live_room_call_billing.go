@@ -16,6 +16,22 @@ import (
 	"xr-game-server/module/wallet"
 )
 
+// checkLiveRoomCallDiamondOnAccept 接听时仅校验呼叫者钻石是否足够(门票+首分钟)
+func checkLiveRoomCallDiamondOnAccept(order *entity.CallOrder) error {
+	if order == nil || order.Source != entity.CallOrderSourceLiveRoom {
+		return nil
+	}
+
+	requiredDiamond := order.TicketPrice
+	if order.PricePerMinute > 0 {
+		requiredDiamond += order.PricePerMinute
+	}
+	if requiredDiamond <= 0 {
+		return nil
+	}
+	return wallet.DiamondNotEnough(order.CallerId, requiredDiamond)
+}
+
 // chargeLiveRoomCallOnAccept 直播间来源通话接听后开始扣费(门票+首分钟)
 func chargeLiveRoomCallOnAccept(order *entity.CallOrder, now time.Time) error {
 	if order == nil || order.Source != entity.CallOrderSourceLiveRoom {

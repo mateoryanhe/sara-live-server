@@ -39,6 +39,7 @@ const (
 	CallOrderReceiverId         db.TbCol = "receiver_id"
 	CallOrderCallStartTime      db.TbCol = "call_start_time"
 	CallOrderAnswerTime         db.TbCol = "answer_time"
+	CallOrderAnswerConfirmCount db.TbCol = "answer_confirm_count"
 	CallOrderCallerHangUpTime   db.TbCol = "caller_hang_up_time"
 	CallOrderReceiverHangUpTime db.TbCol = "receiver_hang_up_time"
 	CallOrderOrderEndTime       db.TbCol = "order_end_time"
@@ -62,6 +63,7 @@ type CallOrder struct {
 	ReceiverId         uint64     `gorm:"index;default:0;comment:接收者ID" json:"receiverId"`
 	CallStartTime      time.Time  `gorm:"index;comment:呼叫开始时间" json:"callStartTime"`
 	AnswerTime         *time.Time `gorm:"index;comment:接听时间" json:"answerTime"`
+	AnswerConfirmCount uint32     `gorm:"default:0;comment:应答确认次数" json:"answerConfirmCount"`
 	CallerHangUpTime   *time.Time `gorm:"index;comment:呼叫者挂断时间" json:"callerHangUpTime"`
 	ReceiverHangUpTime *time.Time `gorm:"index;comment:接听者挂断时间" json:"receiverHangUpTime"`
 	OrderEndTime       *time.Time `gorm:"index;comment:订单结束时间" json:"orderEndTime"`
@@ -113,6 +115,14 @@ func (m *CallOrder) SetCallStartTime(v time.Time) {
 func (m *CallOrder) SetAnswerTime(v *time.Time) {
 	m.AnswerTime = v
 	syndb.AddDataToQuickChan(TbCallOrder, CallOrderAnswerTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
+}
+
+func (m *CallOrder) AddAnswerConfirmCount(v uint32) {
+	if v == 0 {
+		return
+	}
+	m.AnswerConfirmCount += v
+	syndb.AddDataToQuickChan(TbCallOrder, CallOrderAnswerConfirmCount, &syndb.ColData{IdVal: m.ID, ColVal: m.AnswerConfirmCount})
 }
 
 func (m *CallOrder) SetCallerHangUpTime(v *time.Time) {
@@ -206,6 +216,7 @@ func initCallOrder() {
 	syndb.RegQuickWithMiddle(TbCallOrder, CallOrderReceiverId)
 	syndb.RegQuickWithMiddle(TbCallOrder, CallOrderCallStartTime)
 	syndb.RegQuickWithMiddle(TbCallOrder, CallOrderAnswerTime)
+	syndb.RegQuickWithMiddle(TbCallOrder, CallOrderAnswerConfirmCount)
 	syndb.RegQuickWithMiddle(TbCallOrder, CallOrderCallerHangUpTime)
 	syndb.RegQuickWithMiddle(TbCallOrder, CallOrderReceiverHangUpTime)
 	syndb.RegQuickWithMiddle(TbCallOrder, CallOrderOrderEndTime)

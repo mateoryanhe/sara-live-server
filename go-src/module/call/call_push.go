@@ -7,6 +7,7 @@ import (
 	"xr-game-server/core/push"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/calldto"
+	"xr-game-server/entity"
 	"xr-game-server/module/upload"
 )
 
@@ -82,4 +83,24 @@ func pushCallEnded(peerId, endUserId, orderId uint64, callDuration, billingDurat
 		item.EndUserAvatar = upload.ResolveAvatarUrlForUser(endUserId, u.Avatar)
 	}
 	push.Data(peerId, cmd.LiveRoomCallEnded, item)
+}
+
+const liveRoomCallStartedMessage = "通话已开始"
+
+func pushCallStarted(order *entity.CallOrder, startedAt int64) {
+	if order == nil {
+		return
+	}
+	channelName := buildCallChannelName(order.CallerId, order.ReceiverId)
+	item := &calldto.CallStartedPushItem{
+		OrderId:     strconv.FormatUint(order.ID, 10),
+		CallerId:    strconv.FormatUint(order.CallerId, 10),
+		ReceiverId:  strconv.FormatUint(order.ReceiverId, 10),
+		ChannelName: channelName,
+		CallType:    order.CallType,
+		StartedAt:   startedAt,
+		Message:     liveRoomCallStartedMessage,
+	}
+	push.Data(order.CallerId, cmd.LiveRoomCallStarted, item)
+	push.Data(order.ReceiverId, cmd.LiveRoomCallStarted, item)
 }

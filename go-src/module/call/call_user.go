@@ -40,6 +40,7 @@ func finishCallOrderIfHeartTimeout(callUser *entity.CallUser) {
 		order.SetCallStatus(entity.CallOrderStatusAbnormalEnd)
 		order.SetOrderEndTime(&now)
 	}
+	clearCallAnswerConfirmState(order.ID)
 	calldao.FlushOrderCache(order)
 }
 

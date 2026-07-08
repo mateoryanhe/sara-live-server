@@ -55,4 +55,6 @@ const (
 	LiveRoomPrivateChat = 29
 	//私密房/指定主播送礼推送(推送给发送者与主播)
 	LiveRoomPrivateGift = 30
+	//直播间通话开始推送(推送给呼叫者与接听者)
+	LiveRoomCallStarted = 31
 )

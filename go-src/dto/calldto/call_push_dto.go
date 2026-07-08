@@ -43,3 +43,14 @@ type CallEndedPushItem struct {
 	TotalCost       float64 `json:"totalCost" dc:"总费用(钻石)"`
 	Message         string  `json:"message" dc:"提示文案"`
 }
+
+// CallStartedPushItem 通话开始推送载荷(推送给呼叫者与接听者)
+type CallStartedPushItem struct {
+	OrderId     string `json:"orderId" dc:"通话订单ID"`
+	CallerId    string `json:"callerId" dc:"呼叫者ID"`
+	ReceiverId  string `json:"receiverId" dc:"接听者ID"`
+	ChannelName string `json:"channelName" dc:"声网频道名"`
+	CallType    uint8  `json:"callType" dc:"通话类型(1-语音,2-视频)"`
+	StartedAt   int64  `json:"startedAt" dc:"通话开始时间(秒)"`
+	Message     string `json:"message" dc:"提示文案"`
+}

@@ -32,6 +32,7 @@ func AnchorRejectCall(ctx context.Context, req *calldto.AnchorRejectCallReq) (*c
 	order.SetOrderEndTime(&now)
 	calldao.FlushOrderCache(order)
 
+	clearCallAnswerConfirmState(order.ID)
 	resetCallUser(order.CallerId)
 	pushCallRejected(order.CallerId, anchorId, order.ID)
 

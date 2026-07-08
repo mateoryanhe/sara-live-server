@@ -48,6 +48,7 @@ func EndCall(ctx context.Context, req *calldto.EndCallReq) (*calldto.EndCallRes,
 	order.SetOrderEndTime(&now)
 	calldao.FlushOrderCache(order)
 
+	clearCallAnswerConfirmState(order.ID)
 	resetCallUser(order.CallerId)
 	resetCallUser(order.ReceiverId)
 
