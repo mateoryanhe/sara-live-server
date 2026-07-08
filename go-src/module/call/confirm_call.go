@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"sync"
 	"time"
 
 	"github.com/gogf/gf/v2/os/gmlock"
@@ -17,9 +16,7 @@ import (
 
 const callAnswerConfirmChargeThreshold uint32 = 2
 
-var callAnswerConfirmFirstUser sync.Map // orderId -> userId
-
-// ConfirmCall 通话应答确认;双方各确认一次,累计达到2次时发起首次扣费
+// ConfirmCall 通话应答确认;双方各确认一次,均确认后发起首次扣费
 func ConfirmCall(ctx context.Context, req *calldto.ConfirmCallReq) (*calldto.ConfirmCallRes, error) {
 	userId := httpserver.GetAuthId(ctx)
 	if userId == 0 {
@@ -37,11 +34,14 @@ func ConfirmCall(ctx context.Context, req *calldto.ConfirmCallReq) (*calldto.Con
 	if order.CallerId != userId && order.ReceiverId != userId {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	if order.CallStatus != entity.CallOrderStatusInCall {
+	if !order.IsAccepted() {
 		return nil, errercode.CreateCode(errercode.CallOrderStateInvalid)
 	}
 
-	if order.AnswerConfirmCount >= callAnswerConfirmChargeThreshold {
+	if order.AnswerConfirmCount() >= callAnswerConfirmChargeThreshold {
+		return buildConfirmCallRes(order, false), nil
+	}
+	if order.HasUserConfirmed(userId) {
 		return buildConfirmCallRes(order, false), nil
 	}
 
@@ -55,27 +55,39 @@ func ConfirmCall(ctx context.Context, req *calldto.ConfirmCallReq) (*calldto.Con
 }
 
 func applyCallAnswerConfirm(order *entity.CallOrder, userId uint64, now time.Time) (bool, error) {
-	switch order.AnswerConfirmCount {
-	case 0:
-		callAnswerConfirmFirstUser.Store(order.ID, userId)
-		order.AddAnswerConfirmCount(1)
+	otherConfirmed := (userId == order.CallerId && order.ReceiverConfirmTime != nil) ||
+		(userId == order.ReceiverId && order.CallerConfirmTime != nil)
+
+	order.SetUserConfirmTime(userId, now)
+	if !otherConfirmed {
 		return false, nil
-	case 1:
-		if firstUser, ok := callAnswerConfirmFirstUser.Load(order.ID); ok && firstUser.(uint64) == userId {
-			return false, errercode.CreateCode(errercode.CallOrderStateInvalid)
-		}
-		if err := checkLiveRoomCallDiamondOnAccept(order); err != nil {
-			return false, err
-		}
-		if err := chargeLiveRoomCallOnAccept(order, now); err != nil {
-			return false, err
-		}
-		order.AddAnswerConfirmCount(1)
-		clearCallAnswerConfirmState(order.ID)
-		pushCallStarted(order, now.Unix())
-		return true, nil
-	default:
-		return false, errercode.CreateCode(errercode.CallOrderStateInvalid)
+	}
+	if order.ChargeTime != nil {
+		return false, nil
+	}
+
+	if err := checkLiveRoomCallDiamondOnAccept(order); err != nil {
+		clearUserConfirmTime(order, userId)
+		return false, err
+	}
+	if err := chargeLiveRoomCallOnAccept(order, now); err != nil {
+		clearUserConfirmTime(order, userId)
+		return false, err
+	}
+	pushCallStarted(order, now.Unix())
+	return true, nil
+}
+
+func clearUserConfirmTime(order *entity.CallOrder, userId uint64) {
+	if order == nil {
+		return
+	}
+	if userId == order.CallerId {
+		order.SetCallerConfirmTime(nil)
+		return
+	}
+	if userId == order.ReceiverId {
+		order.SetReceiverConfirmTime(nil)
 	}
 }
 
@@ -83,11 +95,7 @@ func buildConfirmCallRes(order *entity.CallOrder, firstChargeExecuted bool) *cal
 	return &calldto.ConfirmCallRes{
 		Success:             true,
 		OrderId:             strconv.FormatUint(order.ID, 10),
-		AnswerConfirmCount:  order.AnswerConfirmCount,
+		AnswerConfirmCount:  order.AnswerConfirmCount(),
 		FirstChargeExecuted: firstChargeExecuted,
 	}
-}
-
-func clearCallAnswerConfirmState(orderId uint64) {
-	callAnswerConfirmFirstUser.Delete(orderId)
 }

@@ -25,7 +25,7 @@ func CallHeart(ctx context.Context, req *calldto.CallHeartReq) (*calldto.CallHea
 	if order.CallerId != userId && order.ReceiverId != userId {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	if order.CallStatus != entity.CallOrderStatusCalling && order.CallStatus != entity.CallOrderStatusInCall {
+	if order.HasEnded() || (!order.IsCalling() && !order.IsAccepted()) {
 		return nil, errercode.CreateCode(errercode.CallOrderStateInvalid)
 	}
 
@@ -33,7 +33,7 @@ func CallHeart(ctx context.Context, req *calldto.CallHeartReq) (*calldto.CallHea
 	lastHeartTime := getCallUserHeartTime(userId)
 	upsertCallUser(userId, order.ID, now)
 
-	if order.CallStatus == entity.CallOrderStatusInCall {
+	if order.IsCallStarted() {
 		if !isCallHeartIntervalExceeded(lastHeartTime, now) {
 			return &calldto.CallHeartRes{Success: true}, nil
 		}

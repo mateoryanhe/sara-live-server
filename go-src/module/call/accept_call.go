@@ -28,7 +28,7 @@ func AcceptCall(ctx context.Context, req *calldto.AcceptCallReq) (*calldto.Accep
 		return nil, errercode.CreateCode(errercode.CallOrderNonExist)
 	}
 
-	if order.CallStatus != entity.CallOrderStatusCalling {
+	if !order.IsCalling() {
 		return nil, errercode.CreateCode(errercode.CallOrderStateInvalid)
 	}
 
@@ -42,7 +42,6 @@ func AcceptCall(ctx context.Context, req *calldto.AcceptCallReq) (*calldto.Accep
 	if err := checkLiveRoomCallDiamondOnAccept(order); err != nil {
 		return nil, err
 	}
-	order.SetCallStatus(entity.CallOrderStatusInCall)
 	order.SetAnswerTime(&now)
 	calldao.FlushOrderCache(order)
 

@@ -72,7 +72,7 @@ func chargeLiveRoomCallBillingIfDue(order *entity.CallOrder, now time.Time) erro
 	if order == nil || order.Source != entity.CallOrderSourceLiveRoom {
 		return nil
 	}
-	if order.CallStatus != entity.CallOrderStatusInCall || order.PricePerMinute <= 0 {
+	if !order.IsCallStarted() || order.PricePerMinute <= 0 {
 		return nil
 	}
 	if order.ChargeTime == nil || now.Before(*order.ChargeTime) {

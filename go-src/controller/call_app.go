@@ -40,6 +40,11 @@ func (c *CallAppController) ConfirmCall(ctx context.Context, req *calldto.Confir
 	return call.ConfirmCall(ctx, req)
 }
 
+// GetCallConfirmStatus 查询对方应答确认状态
+func (c *CallAppController) GetCallConfirmStatus(ctx context.Context, req *calldto.GetCallConfirmStatusReq) (*calldto.GetCallConfirmStatusRes, error) {
+	return call.GetCallConfirmStatus(ctx, req)
+}
+
 // CallTimeout 呼叫超时
 func (c *CallAppController) CallTimeout(ctx context.Context, req *calldto.CallTimeoutReq) (*calldto.CallTimeoutRes, error) {
 	return call.CallTimeout(ctx, req)

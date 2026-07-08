@@ -20,12 +20,12 @@ func finishCallOrderIfHeartTimeout(callUser *entity.CallUser) {
 	}
 
 	order := calldao.GetOrderById(callUser.CallOrderId)
-	if order == nil || isCallOrderFinished(order.CallStatus) {
+	if order == nil || order.HasEnded() {
 		return
 	}
 
 	now := time.Now()
-	if order.CallStatus == entity.CallOrderStatusInCall {
+	if order.IsCallStarted() {
 		_ = refundLiveRoomCallLastMinuteIfNeeded(order, now)
 	}
 	callUser.SetHeartTime(nil)
@@ -36,19 +36,10 @@ func finishCallOrderIfHeartTimeout(callUser *entity.CallUser) {
 	if order.CallerId == callUser.ID {
 		order.SetCallerHangUpTime(&now)
 	}
-	if order.CallStatus == entity.CallOrderStatusCalling || order.CallStatus == entity.CallOrderStatusInCall {
-		order.SetCallStatus(entity.CallOrderStatusAbnormalEnd)
+	if !order.HasEnded() {
 		order.SetOrderEndTime(&now)
 	}
-	clearCallAnswerConfirmState(order.ID)
 	calldao.FlushOrderCache(order)
-}
-
-func isCallOrderFinished(status uint8) bool {
-	return status == entity.CallOrderStatusEnded ||
-		status == entity.CallOrderStatusRejected ||
-		status == entity.CallOrderStatusTimeout ||
-		status == entity.CallOrderStatusAbnormalEnd
 }
 
 // ensureNotInCall 校验用户是否正在通话中

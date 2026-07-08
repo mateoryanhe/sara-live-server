@@ -7,7 +7,6 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/calldao"
 	"xr-game-server/dto/calldto"
-	"xr-game-server/entity"
 	"xr-game-server/errercode"
 )
 
@@ -25,19 +24,17 @@ func CallTimeout(ctx context.Context, req *calldto.CallTimeoutReq) (*calldto.Cal
 	if order.CallerId != userId && order.ReceiverId != userId {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	if order.CallStatus == entity.CallOrderStatusTimeout {
+	if order.HasEnded() {
 		return &calldto.CallTimeoutRes{Success: true}, nil
 	}
-	if order.CallStatus != entity.CallOrderStatusCalling {
+	if !order.IsCalling() {
 		return nil, errercode.CreateCode(errercode.CallOrderStateInvalid)
 	}
 
 	now := time.Now()
-	order.SetCallStatus(entity.CallOrderStatusTimeout)
 	order.SetOrderEndTime(&now)
 	calldao.FlushOrderCache(order)
 
-	clearCallAnswerConfirmState(order.ID)
 	resetCallUser(order.CallerId)
 	resetCallUser(order.ReceiverId)
 	pushCallTimeout(order.CallerId, order.ReceiverId, order.ID)

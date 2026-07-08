@@ -8,7 +8,6 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/calldao"
 	"xr-game-server/dto/calldto"
-	"xr-game-server/entity"
 	"xr-game-server/errercode"
 )
 
@@ -26,15 +25,15 @@ func EndCall(ctx context.Context, req *calldto.EndCallReq) (*calldto.EndCallRes,
 	if order.CallerId != userId && order.ReceiverId != userId {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	if isCallOrderFinished(order.CallStatus) {
+	if order.HasEnded() {
 		return nil, errercode.CreateCode(errercode.CallOrderStateInvalid)
 	}
-	if order.CallStatus != entity.CallOrderStatusCalling && order.CallStatus != entity.CallOrderStatusInCall {
+	if !order.IsCalling() && !order.IsAccepted() {
 		return nil, errercode.CreateCode(errercode.CallOrderStateInvalid)
 	}
 
 	now := time.Now()
-	if order.CallStatus == entity.CallOrderStatusInCall {
+	if order.IsCallStarted() {
 		if err := refundLiveRoomCallLastMinuteIfNeeded(order, now); err != nil {
 			return nil, err
 		}
@@ -44,11 +43,9 @@ func EndCall(ctx context.Context, req *calldto.EndCallReq) (*calldto.EndCallRes,
 	} else {
 		order.SetReceiverHangUpTime(&now)
 	}
-	order.SetCallStatus(entity.CallOrderStatusEnded)
 	order.SetOrderEndTime(&now)
 	calldao.FlushOrderCache(order)
 
-	clearCallAnswerConfirmState(order.ID)
 	resetCallUser(order.CallerId)
 	resetCallUser(order.ReceiverId)
 
