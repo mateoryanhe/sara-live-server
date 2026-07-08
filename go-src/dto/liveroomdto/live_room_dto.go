@@ -8,14 +8,15 @@ import (
 
 // CreateLiveRoomReq 创建直播间(主播ID由鉴权中间件提供)
 type CreateLiveRoomReq struct {
-	g.Meta   `path:"/create" method:"post" mime:"multipart/form-data" summary:"创建直播间" tags:"直播间"`
-	Title    string            `json:"title"   dc:"直播间标题"`
-	Cover    *ghttp.UploadFile `json:"cover"  type:"file" dc:"封面图片文件"`
-	Notice   string            `json:"notice" dc:"公告"`
-	Category uint8             `json:"category"  dc:"分类(1=hot,2=game,3=私密,默认1)"`
-	TagId    uint64            `json:"tagId,string"  dc:"直播间标签ID"`
-	Ticket   float64           `json:"ticket" dc:"门票价格(钻石)"`
-	Billing  float64           `json:"billing" dc:"计费价格(每分钟钻石)"`
+	g.Meta            `path:"/create" method:"post" mime:"multipart/form-data" summary:"创建直播间" tags:"直播间"`
+	Title             string            `json:"title"   dc:"直播间标题"`
+	Cover             *ghttp.UploadFile `json:"cover"  type:"file" dc:"封面图片文件"`
+	Notice            string            `json:"notice" dc:"公告"`
+	Category          uint8             `json:"category"  dc:"分类(1=hot,2=game,3=私密,默认1)"`
+	TagId             uint64            `json:"tagId,string"  dc:"直播间标签ID"`
+	Ticket            float64           `json:"ticket" dc:"门票价格(钻石)"`
+	Billing           float64           `json:"billing" dc:"计费价格(每分钟钻石)"`
+	PrivateInviteType uint8             `json:"privateInviteType" v:"in:0,1,2,3#私密邀请类型不合法" dc:"私密邀请类型(1=接受所有人,2=仅VIP,3=拒绝所有人,0或不传默认1)"`
 }
 
 type CreateLiveRoomRes struct {
@@ -376,22 +377,24 @@ type GetLiveRoomReq struct {
 }
 
 type GetLiveRoomRes struct {
-	RoomId      string  `json:"roomId"   dc:"直播间ID(同主播用户ID)"`
-	GuildId     string  `json:"guildId"  dc:"所属工会ID"`
-	Title       string  `json:"title"    dc:"直播间标题"`
-	Cover       string  `json:"cover"    dc:"封面图URL"`
-	Notice      string  `json:"notice"   dc:"公告"`
-	Status      uint8   `json:"status"   dc:"状态(0未开播,1直播中)"`
-	Category    uint8   `json:"category" dc:"分类(1=hot,2=game,3=私密)"`
-	TagId       string  `json:"tagId" dc:"直播间标签ID"`
-	TagName     string  `json:"tagName" dc:"直播间标签名称"`
-	Ticket      float64 `json:"ticket" dc:"门票价格(钻石)"`
-	Billing     float64 `json:"billing" dc:"计费价格(每分钟钻石)"`
-	CreateAt    int64   `json:"createAt" dc:"创建时间(秒)"`
-	OnlineCount int     `json:"onlineCount" dc:"在线观众人数(不含主播)"`
-	FreeTime    uint64  `json:"freeTime" dc:"私密房免费时间"`
-	TicketTime  int64   `json:"TicketTime" dc:"私密房门票倒计时"`
-	HasTicket   bool    `json:"hasTicket"`
+	RoomId            string  `json:"roomId"   dc:"直播间ID(同主播用户ID)"`
+	GuildId           string  `json:"guildId"  dc:"所属工会ID"`
+	Title             string  `json:"title"    dc:"直播间标题"`
+	Cover             string  `json:"cover"    dc:"封面图URL"`
+	Notice            string  `json:"notice"   dc:"公告"`
+	Status            uint8   `json:"status"   dc:"状态(0未开播,1直播中)"`
+	Category          uint8   `json:"category" dc:"分类(1=hot,2=game,3=私密)"`
+	TagId             string  `json:"tagId" dc:"直播间标签ID"`
+	TagName           string  `json:"tagName" dc:"直播间标签名称"`
+	Ticket            float64 `json:"ticket" dc:"门票价格(钻石)"`
+	Billing           float64 `json:"billing" dc:"计费价格(每分钟钻石)"`
+	PrivateInviteType uint8   `json:"privateInviteType" dc:"私密邀请类型(1=接受所有人,2=仅VIP,3=拒绝所有人)"`
+	AllowCallIcon     bool    `json:"allowCallIcon" dc:"是否允许显示电话图标按钮(仅category=1时按私密邀请类型判断)"`
+	CreateAt          int64   `json:"createAt" dc:"创建时间(秒)"`
+	OnlineCount       int     `json:"onlineCount" dc:"在线观众人数(不含主播)"`
+	FreeTime          uint64  `json:"freeTime" dc:"私密房免费时间"`
+	TicketTime        int64   `json:"TicketTime" dc:"私密房门票倒计时"`
+	HasTicket         bool    `json:"hasTicket"`
 }
 
 // AnchorBanPushItem 主播封禁推送载荷(推送给主播及直播间在线观众)

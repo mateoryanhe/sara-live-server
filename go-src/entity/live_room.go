@@ -21,6 +21,7 @@ const (
 	LiveRoomHeartTime                    db.TbCol = "heart_time"
 	LiveRoomBan                          db.TbCol = "ban"
 	LiveRoomBanApplyTime                 db.TbCol = "ban_apply_time"
+	LiveRoomPrivateInviteType            db.TbCol = "private_invite_type"
 	LiveRoomBanReason                    db.TbCol = "ban_reason"
 	LiveRoomTotalIncome                  db.TbCol = "total_income"
 	LiveRoomTotalGiftIncome              db.TbCol = "total_gift_income"
@@ -41,6 +42,12 @@ const (
 	LiveRoomCategoryPrivate uint8 = 3 // 私密
 )
 
+const (
+	LiveRoomPrivateInviteAll    uint8 = 1 // 接受所有人
+	LiveRoomPrivateInviteVip    uint8 = 2 // 仅VIP
+	LiveRoomPrivateInviteReject uint8 = 3 // 拒绝所有人
+)
+
 // LiveRoom 直播间(LiveRoom.ID 与 UserInfo.ID 均为主播用户ID,每个主播仅一个直播间)
 type LiveRoom struct {
 	migrate.OneModel
@@ -52,6 +59,7 @@ type LiveRoom struct {
 	HeartTime                    *time.Time `gorm:"comment:房间心跳状态,大于5分钟，判断下播" json:"heart_time"`
 	Ban                          bool       `gorm:"default:0;comment:封禁状态" json:"ban"`
 	BanApplyTime                 *time.Time `gorm:"comment:封禁截止时间" json:"banApplyTime"`
+	PrivateInviteType            uint8      `gorm:"default:1;comment:私密邀请类型(1=接受所有人,2=仅VIP,3=拒绝所有人)" json:"privateInviteType"`
 	BanReason                    string     `gorm:"size:512;default:'';comment:封禁原因" json:"banReason"`
 	TotalIncome                  float64    `gorm:"default:0;comment:直播收益" json:"totalIncome"`
 	TotalGiftIncome              float64    `gorm:"default:0;comment:累计礼物收益" json:"totalGiftIncome"`
@@ -140,6 +148,17 @@ func (r *LiveRoom) SetBanApplyTime(v *time.Time) {
 	r.BanApplyTime = v
 	r.touchUpdatedAt()
 	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomBanApplyTime, &syndb.ColData{
+		IdVal: r.ID, ColVal: v,
+	})
+}
+
+func (r *LiveRoom) SetPrivateInviteType(v uint8) {
+	if v != LiveRoomPrivateInviteAll && v != LiveRoomPrivateInviteVip && v != LiveRoomPrivateInviteReject {
+		v = LiveRoomPrivateInviteAll
+	}
+	r.PrivateInviteType = v
+	r.touchUpdatedAt()
+	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomPrivateInviteType, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -285,6 +304,7 @@ func initLiveRoom() {
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomLiveId)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomBan)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomBanApplyTime)
+	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomPrivateInviteType)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomBanReason)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomTotalIncome)
 	syndb.RegQuickWithMiddle(TbLiveRoom, LiveRoomTotalGiftIncome)

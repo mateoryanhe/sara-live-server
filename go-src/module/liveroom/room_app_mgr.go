@@ -4,6 +4,8 @@ import (
 	"context"
 	"strconv"
 	"time"
+
+	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/constants/userstatus"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/liveroomdao"
@@ -31,12 +33,22 @@ func applyRoomPricing(room *entity.LiveRoom, ticket, billing float64) {
 	}
 }
 
+func applyPrivateInviteType(room *entity.LiveRoom, privateInviteType uint8) {
+	if privateInviteType == 0 {
+		privateInviteType = entity.LiveRoomPrivateInviteAll
+	}
+	if room.PrivateInviteType != privateInviteType {
+		room.SetPrivateInviteType(privateInviteType)
+	}
+}
+
 // CreateRoom 创建直播间
 // 业务规则:
 //  1. 调用者必须已是主播(UserInfo.IsAnchor == true)
 //  2. 同一主播只能拥有一个直播间(再次调用直接返回已有信息)
 func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *liveroomdto.CreateLiveRoomRes, err error) {
 	anchorId := httpserver.GetAuthId(ctx)
+	logCreateRoomAppUpload(ctx, anchorId, req)
 
 	user := userinfodao.GetUserInfoByUserId(anchorId)
 	if user == nil || !user.IsAnchor {
@@ -77,6 +89,7 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 			existing.SetTagId(req.TagId)
 		}
 		applyRoomPricing(existing, req.Ticket, req.Billing)
+		applyPrivateInviteType(existing, req.PrivateInviteType)
 		markLiveRoomCreated(user)
 		return &liveroomdto.CreateLiveRoomRes{
 			RoomId:  strconv.FormatUint(existing.ID, 10),
@@ -96,6 +109,7 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 	room.SetTagId(req.TagId)
 	room.SetTicket(req.Ticket)
 	room.SetBilling(req.Billing)
+	applyPrivateInviteType(room, req.PrivateInviteType)
 
 	liveroomdao.AddRoomToCache(room)
 	markLiveRoomCreated(user)
@@ -104,6 +118,24 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 		RoomId:  strconv.FormatUint(room.ID, 10),
 		GuildId: strconv.FormatUint(room.GuildId, 10),
 	}, nil
+}
+
+func logCreateRoomAppUpload(ctx context.Context, anchorId uint64, req *liveroomdto.CreateLiveRoomReq) {
+	if req == nil {
+		return
+	}
+	hasCover := req.Cover != nil && req.Cover.Size > 0
+	coverFilename := ""
+	var coverSize int64
+	if hasCover {
+		coverFilename = req.Cover.Filename
+		coverSize = req.Cover.Size
+	}
+	g.Log().Infof(ctx,
+		"CreateRoom app upload anchorId=%d title=%q notice=%q category=%d tagId=%d ticket=%.4f billing=%.4f privateInviteType=%d hasCover=%v coverFilename=%q coverSize=%d",
+		anchorId, req.Title, req.Notice, req.Category, req.TagId, req.Ticket, req.Billing, req.PrivateInviteType,
+		hasCover, coverFilename, coverSize,
+	)
 }
 
 // loadOwnRoom 获取调用者(主播)自己的直播间;不存在则返回 LiveRoomNotExist
@@ -168,6 +200,31 @@ func calcAge(birthday *time.Time) int {
 	return age
 }
 
+func allowShowCallIcon(room *entity.LiveRoom, userId uint64) bool {
+	if room == nil || room.Category != entity.LiveRoomCategoryHot {
+		return false
+	}
+	if userId == 0 || userId == room.ID {
+		return false
+	}
+
+	inviteType := room.PrivateInviteType
+	if inviteType == 0 {
+		inviteType = entity.LiveRoomPrivateInviteAll
+	}
+	switch inviteType {
+	case entity.LiveRoomPrivateInviteAll:
+		return true
+	case entity.LiveRoomPrivateInviteVip:
+		user := userinfodao.GetUserInfoByUserId(userId)
+		return user != nil && user.VipLevel > 0
+	case entity.LiveRoomPrivateInviteReject:
+		return false
+	default:
+		return true
+	}
+}
+
 // GetRoom 查询直播间(公开接口,任意登录用户可调用)
 func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto.GetLiveRoomRes, error) {
 	userId := httpserver.GetAuthId(ctx)
@@ -182,19 +239,21 @@ func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto
 	}
 
 	res := &liveroomdto.GetLiveRoomRes{
-		RoomId:      strconv.FormatUint(room.ID, 10),
-		GuildId:     strconv.FormatUint(room.GuildId, 10),
-		Title:       room.Title,
-		Cover:       upload.GetUrlByName(room.Cover),
-		Notice:      room.Notice,
-		Status:      status,
-		Category:    room.Category,
-		TagId:       strconv.FormatUint(room.TagId, 10),
-		TagName:     getRoomTagName(room.TagId),
-		Ticket:      room.Ticket,
-		Billing:     room.Billing,
-		CreateAt:    room.CreatedAt.Unix(),
-		OnlineCount: countAudienceInRoom(room.ID),
+		RoomId:            strconv.FormatUint(room.ID, 10),
+		GuildId:           strconv.FormatUint(room.GuildId, 10),
+		Title:             room.Title,
+		Cover:             upload.GetUrlByName(room.Cover),
+		Notice:            room.Notice,
+		Status:            status,
+		Category:          room.Category,
+		TagId:             strconv.FormatUint(room.TagId, 10),
+		TagName:           getRoomTagName(room.TagId),
+		Ticket:            room.Ticket,
+		Billing:           room.Billing,
+		PrivateInviteType: room.PrivateInviteType,
+		AllowCallIcon:     allowShowCallIcon(room, userId),
+		CreateAt:          room.CreatedAt.Unix(),
+		OnlineCount:       countAudienceInRoom(room.ID),
 	}
 	//判断一下房间类型
 	if room.Category == entity.LiveRoomCategoryPrivate {

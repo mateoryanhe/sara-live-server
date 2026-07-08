@@ -70,16 +70,17 @@ func toLiveRoomListItem(room *entity.LiveRoom, userId uint64) *liveroomdto.LiveR
 		status = userstatus.LiveRoomStatusLive
 	}
 	item := &liveroomdto.LiveRoomListItem{
-		RoomId:   strconv.FormatUint(room.ID, 10),
-		GuildId:  strconv.FormatUint(room.GuildId, 10),
-		Title:    room.Title,
-		Cover:    room.Cover,
-		Notice:   room.Notice,
-		Status:   status,
-		Category: room.Category,
-		Ticket:   room.Ticket,
-		Billing:  room.Billing,
-		CreateAt: room.CreatedAt.Unix(),
+		RoomId:        strconv.FormatUint(room.ID, 10),
+		GuildId:       strconv.FormatUint(room.GuildId, 10),
+		Title:         room.Title,
+		Cover:         room.Cover,
+		Notice:        room.Notice,
+		Status:        status,
+		Category:      room.Category,
+		Ticket:        room.Ticket,
+		Billing:       room.Billing,
+		AllowCallIcon: allowShowCallIcon(room, userId),
+		CreateAt:      room.CreatedAt.Unix(),
 	}
 	if room.TagId > 0 {
 		item.TagId = strconv.FormatUint(room.TagId, 10)
