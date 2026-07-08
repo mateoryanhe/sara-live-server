@@ -16,26 +16,34 @@ const (
 	logBodySkipped       = "[文件/图片上传,已省略报文]"
 	logRespSkippedBySize = "[响应体已省略,大小=%v字节]"
 	apiRequestEndLogKey  = "apiRequestEndLog"
+	apiRequestTimingKey  = "apiRequestTiming"
 )
 
+type apiRequestTiming struct {
+	EnterTime              string
+	WaitBeforeMiddlewareMs int64
+}
+
 type apiRequestLog struct {
-	Phase         string
-	Message       string
-	ReqId         string
-	Url           string
-	Ip            string
-	AuthId        string
-	Body          any
-	DurationMs    int64
-	PreHandlerMs  int64
-	HandlerMs     int64
-	SerializeMs   int64
-	RespBytes     int
-	Code          int
-	Response      any
-	Err           error
-	Stack         string
-	SlowBreakdown bool
+	Phase                  string
+	Message                string
+	ReqId                  string
+	Url                    string
+	Ip                     string
+	AuthId                 string
+	EnterTime              string
+	WaitBeforeMiddlewareMs int64
+	Body                   any
+	DurationMs             int64
+	PreHandlerMs           int64
+	HandlerMs              int64
+	SerializeMs            int64
+	RespBytes              int
+	Code                   int
+	Response               any
+	Err                    error
+	Stack                  string
+	SlowBreakdown          bool
 }
 
 // shouldSkipLogBody 请求体为 multipart 文件/图片上传时,日志不输出原始报文
@@ -80,8 +88,40 @@ func slowTimingSuffix(entry apiRequestLog) string {
 	if !entry.SlowBreakdown {
 		return ""
 	}
-	return fmt.Sprintf(",preHandlerMs=%vms,handlerMs=%vms,serializeMs=%vms,respBytes=%v",
-		entry.PreHandlerMs, entry.HandlerMs, entry.SerializeMs, entry.RespBytes)
+	return fmt.Sprintf(",enterTime=%v,waitBeforeMiddlewareMs=%vms,preHandlerMs=%vms,handlerMs=%vms,serializeMs=%vms,respBytes=%v",
+		entry.EnterTime, entry.WaitBeforeMiddlewareMs, entry.PreHandlerMs, entry.HandlerMs, entry.SerializeMs, entry.RespBytes)
+}
+
+func requestEnterTimeStr(r *ghttp.Request) string {
+	if r == nil || r.EnterTime == nil {
+		return ""
+	}
+	return r.EnterTime.Format("2006-01-02 15:04:05.000")
+}
+
+func stashRequestTiming(r *ghttp.Request) {
+	if r == nil || r.EnterTime == nil {
+		return
+	}
+	r.SetCtxVar(apiRequestTimingKey, &apiRequestTiming{
+		EnterTime:              requestEnterTimeStr(r),
+		WaitBeforeMiddlewareMs: gtime.Now().Sub(r.EnterTime).Milliseconds(),
+	})
+}
+
+func getRequestTiming(r *ghttp.Request) apiRequestTiming {
+	if r == nil {
+		return apiRequestTiming{}
+	}
+	v := r.GetCtxVar(apiRequestTimingKey)
+	if v.IsNil() {
+		return apiRequestTiming{EnterTime: requestEnterTimeStr(r)}
+	}
+	timing, ok := v.Val().(*apiRequestTiming)
+	if !ok || timing == nil {
+		return apiRequestTiming{EnterTime: requestEnterTimeStr(r)}
+	}
+	return *timing
 }
 
 func logTimeNow() string {
@@ -91,8 +131,8 @@ func logTimeNow() string {
 func logAPIRequest(ctx context.Context, entry apiRequestLog) {
 	now := logTimeNow()
 	if entry.Phase == "start" {
-		g.Log().Infof(ctx, "time=%v,%v,reqId=%v,url=%v,ip=%v,authId=%v,请求数据=%v",
-			now, entry.Message, entry.ReqId, entry.Url, entry.Ip, entry.AuthId, entry.Body)
+		g.Log().Infof(ctx, "time=%v,%v,enterTime=%v,waitBeforeMiddlewareMs=%vms,reqId=%v,url=%v,ip=%v,authId=%v",
+			now, entry.Message, entry.EnterTime, entry.WaitBeforeMiddlewareMs, entry.ReqId, entry.Url, entry.Ip, entry.AuthId)
 		return
 	}
 	if entry.Body != nil {
@@ -123,33 +163,38 @@ func logAPIRequest(ctx context.Context, entry apiRequestLog) {
 }
 
 func logAPIRequestStart(r *ghttp.Request, authId, message string) {
+	timing := getRequestTiming(r)
 	logAPIRequest(r.Context(), apiRequestLog{
-		Phase:   "start",
-		Message: message,
-		ReqId:   r.GetHeader(ReqId, ""),
-		Url:     r.URL.RequestURI(),
-		Ip:      r.GetClientIp(),
-		AuthId:  authId,
-		Body:    requestBodyForLog(r),
+		Phase:                  "start",
+		Message:                message,
+		ReqId:                  r.GetHeader(ReqId, ""),
+		Url:                    r.URL.RequestURI(),
+		Ip:                     r.GetClientIp(),
+		AuthId:                 authId,
+		EnterTime:              timing.EnterTime,
+		WaitBeforeMiddlewareMs: timing.WaitBeforeMiddlewareMs,
 	})
 }
 
 func logAPIRequestEnd(r *ghttp.Request, authId, message string, durationMs, preHandlerMs, handlerMs, serializeMs int64, respBytes int, slowBreakdown bool, code int, body, response any, err error, stack string) {
+	timing := getRequestTiming(r)
 	entry := apiRequestLog{
-		Phase:         "end",
-		Message:       message,
-		ReqId:         r.GetHeader(ReqId, ""),
-		Url:           r.URL.RequestURI(),
-		Ip:            r.GetClientIp(),
-		AuthId:        authId,
-		DurationMs:    durationMs,
-		PreHandlerMs:  preHandlerMs,
-		HandlerMs:     handlerMs,
-		SerializeMs:   serializeMs,
-		RespBytes:     respBytes,
-		SlowBreakdown: slowBreakdown,
-		Err:           err,
-		Stack:         stack,
+		Phase:                  "end",
+		Message:                message,
+		ReqId:                  r.GetHeader(ReqId, ""),
+		Url:                    r.URL.RequestURI(),
+		Ip:                     r.GetClientIp(),
+		AuthId:                 authId,
+		EnterTime:              timing.EnterTime,
+		WaitBeforeMiddlewareMs: timing.WaitBeforeMiddlewareMs,
+		DurationMs:             durationMs,
+		PreHandlerMs:           preHandlerMs,
+		HandlerMs:              handlerMs,
+		SerializeMs:            serializeMs,
+		RespBytes:              respBytes,
+		SlowBreakdown:          slowBreakdown,
+		Err:                    err,
+		Stack:                  stack,
 	}
 	if code != 0 {
 		entry.Code = code
