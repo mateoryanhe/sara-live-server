@@ -11,10 +11,15 @@ import (
 
 func initAppToken() {
 	event.Sub(event.AppToken, onAppToken)
-	tokens := accountdao.ListValidAppTokens()
-	for _, token := range tokens {
-		xrtoken.InitAppToken(token.ID, token.Token, token.ExpireAt)
+	xrtoken.SetAppTokenLoader(loadAppTokenFromDB)
+}
+
+func loadAppTokenFromDB(authId uint64) (string, time.Time, bool) {
+	row := accountdao.GetAppTokenByUserId(authId)
+	if row == nil || row.Token == "" || !row.ExpireAt.After(time.Now()) {
+		return "", time.Time{}, false
 	}
+	return row.Token, row.ExpireAt, true
 }
 
 func initCmsToken() {

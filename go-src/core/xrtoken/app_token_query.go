@@ -26,13 +26,17 @@ func QueryAppTokens(userId uint64, pageIndex, pageSize int) (int, []AppTokenCach
 		if err != nil || tokenVar.IsNil() {
 			continue
 		}
+		token := tokenVar.String()
+		if isAppTokenNegativeCache(token) {
+			continue
+		}
 		ttl, err := appCache.GetExpire(ctx, key)
 		if err != nil || ttl <= 0 {
 			continue
 		}
 		items = append(items, AppTokenCacheItem{
 			UserId:   uid,
-			Token:    tokenVar.String(),
+			Token:    token,
 			ExpireAt: time.Now().Add(ttl),
 		})
 	}

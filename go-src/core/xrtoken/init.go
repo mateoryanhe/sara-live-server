@@ -10,6 +10,8 @@ import (
 
 const (
 	Time = 30 * 24 * time.Hour
+	// appTokenNegativeCacheTTL 不存在/无效用户负缓存,防止缓存穿透
+	appTokenNegativeCacheTTL = 5 * time.Minute
 )
 
 var appCache = gcache.New()
@@ -27,11 +29,22 @@ func DelToken(authId uint64) {
 }
 
 func InitAppToken(authId uint64, token string, val time.Time) {
+	if token == "" {
+		return
+	}
 	expire := val.Sub(time.Now())
 	if expire <= 0 {
 		return
 	}
 	appCache.Set(gctx.New(), authId, token, expire)
+}
+
+func setAppTokenNegativeCache(authId uint64) {
+	appCache.Set(gctx.New(), authId, "", appTokenNegativeCacheTTL)
+}
+
+func isAppTokenNegativeCache(token string) bool {
+	return token == ""
 }
 
 // ReloadAppTokenCache 清空并重新加载App Token内存缓存
@@ -55,6 +68,15 @@ type AppTokenCacheItem struct {
 	ExpireAt time.Time
 }
 
+// AppTokenLoader 缓存未命中时从数据库加载App Token
+type AppTokenLoader func(authId uint64) (token string, expireAt time.Time, ok bool)
+
+var loadAppToken AppTokenLoader
+
+func SetAppTokenLoader(loader AppTokenLoader) {
+	loadAppToken = loader
+}
+
 func AddCmsToken(authId uint64) string {
 	token := guid.S()
 	cmsCache.Set(gctx.New(), authId, token, Time)
@@ -71,19 +93,38 @@ func InitCmsToken(authId uint64, token string, val time.Time) {
 }
 
 func HasAppToken(authId uint64, token string) bool {
+	if authId == 0 || token == "" {
+		return false
+	}
 	ctx := gctx.New()
 
-	cacheToken, e := appCache.Get(gctx.New(), authId)
-	duration, _ := appCache.GetExpire(gctx.New(), authId)
-	if e == nil && cacheToken.String() == token {
+	cacheToken, err := appCache.Get(ctx, authId)
+	if err == nil && !cacheToken.IsNil() {
+		cached := cacheToken.String()
+		if isAppTokenNegativeCache(cached) {
+			return false
+		}
+		if cached != token {
+			return false
+		}
+		duration, _ := appCache.GetExpire(ctx, authId)
 		if (7 * 24 * time.Hour) > duration {
-			//2天快失效了,才刷新
 			appCache.UpdateExpire(ctx, authId, Time)
 			event.Pub(event.AppToken, &event.AppTokenData{Token: token, Id: authId})
 		}
 		return true
 	}
-	return false
+
+	if loadAppToken == nil {
+		return false
+	}
+	dbToken, expireAt, ok := loadAppToken(authId)
+	if !ok {
+		setAppTokenNegativeCache(authId)
+		return false
+	}
+	InitAppToken(authId, dbToken, expireAt)
+	return dbToken == token
 }
 
 func HasCmsToken(authId uint64, token string) bool {
