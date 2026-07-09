@@ -70,7 +70,7 @@ func BuildCallToken(userId uint64, channelName string) (token string, expireAt i
 // GetLiveRoomToken App端上报房间ID,返回进直播间声网Token
 func GetLiveRoomToken(ctx context.Context, req *agoradto.GetLiveRoomTokenReq) (*agoradto.GetLiveRoomTokenRes, error) {
 	userId := httpserver.GetAuthId(ctx)
-	token, expireAt, err := BuildLiveRoomToken(userId, req.RoomId)
+	token, expireAt, err := ResolveLiveRoomToken(userId, req.RoomId)
 	if err != nil {
 		return nil, err
 	}

@@ -8,13 +8,14 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/calldto"
 	"xr-game-server/entity"
+	"xr-game-server/module/agora"
 	"xr-game-server/module/upload"
 )
 
 const liveRoomCallRequestMessage = "有人请求跟你通话"
 
 func pushLiveRoomCallRequest(receiverId, callerId, orderId uint64, channelName string, callType uint8) error {
-	receiverToken, _, err := resolveChannelToken(receiverId, channelName)
+	receiverToken, _, err := agora.ResolveCallToken(receiverId, channelName)
 	if err != nil {
 		return err
 	}

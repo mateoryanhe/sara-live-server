@@ -71,7 +71,7 @@ func LiveRoomCall(ctx context.Context, req *calldto.LiveRoomCallReq) (*calldto.L
 		return nil, err
 	}
 
-	token, tokenExpireAt, err := resolveChannelToken(callerId, channelName)
+	token, tokenExpireAt, err := agora.ResolveCallToken(callerId, channelName)
 	if err != nil {
 		return nil, err
 	}
@@ -93,6 +93,6 @@ func LiveRoomCall(ctx context.Context, req *calldto.LiveRoomCallReq) (*calldto.L
 		Token:       token,
 		AppId:       appId,
 		UserAccount: strconv.FormatUint(callerId, 10),
-		ExpireAt:    tokenExpireAt.Unix(),
+		ExpireAt:    tokenExpireAt,
 	}, nil
 }

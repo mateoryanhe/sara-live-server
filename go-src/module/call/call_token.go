@@ -3,50 +3,12 @@ package call
 import (
 	"context"
 	"strconv"
-	"time"
 
-	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/httpserver"
-	"xr-game-server/core/xrpool"
-	"xr-game-server/dao/userchanneltokendao"
 	"xr-game-server/dto/calldto"
-	"xr-game-server/entity"
 	"xr-game-server/errercode"
 	"xr-game-server/module/agora"
 )
-
-const channelTokenReuseMinRemain = 2 * time.Hour
-
-// resolveChannelToken 优先复用 user_channel_tokens 中仍有效的 Token
-func resolveChannelToken(userId uint64, channelName string) (token string, tokenExpireAt time.Time, err error) {
-	now := time.Now()
-	if existing := userchanneltokendao.GetByUserChannel(userId, channelName); existing != nil && existing.Token != "" {
-		if existing.ExpireAt.After(now.Add(channelTokenReuseMinRemain)) {
-			scheduleChannelTokenRefresh(userId, channelName)
-			return existing.Token, existing.ExpireAt, nil
-		}
-	}
-
-	return refreshChannelToken(userId, channelName)
-}
-
-func scheduleChannelTokenRefresh(userId uint64, channelName string) {
-	xrpool.AddWithRecover(gctx.New(), func(ctx context.Context) {
-		_, _, _ = refreshChannelToken(userId, channelName)
-	})
-}
-
-func refreshChannelToken(userId uint64, channelName string) (token string, tokenExpireAt time.Time, err error) {
-	now := time.Now()
-	token, expireSeconds, err := agora.BuildCallToken(userId, channelName)
-	if err != nil {
-		return "", time.Time{}, err
-	}
-	tokenExpireAt = now.Add(time.Duration(expireSeconds) * time.Second)
-	row := entity.NewUserChannelToken(userId, channelName, token, tokenExpireAt)
-	userchanneltokendao.AddToCache(row)
-	return token, tokenExpireAt, nil
-}
 
 // GetCallToken App端上报 channelName 获取通话频道 Token
 func GetCallToken(ctx context.Context, req *calldto.CallTokenReq) (*calldto.CallTokenRes, error) {
@@ -55,7 +17,7 @@ func GetCallToken(ctx context.Context, req *calldto.CallTokenReq) (*calldto.Call
 		return nil, errercode.CreateCode(errercode.EmptyUserId)
 	}
 
-	token, tokenExpireAt, err := resolveChannelToken(userId, req.ChannelName)
+	token, tokenExpireAt, err := agora.ResolveCallToken(userId, req.ChannelName)
 	if err != nil {
 		return nil, err
 	}
@@ -70,6 +32,6 @@ func GetCallToken(ctx context.Context, req *calldto.CallTokenReq) (*calldto.Call
 		AppId:       appId,
 		ChannelName: req.ChannelName,
 		UserAccount: strconv.FormatUint(userId, 10),
-		ExpireAt:    tokenExpireAt.Unix(),
+		ExpireAt:    tokenExpireAt,
 	}, nil
 }

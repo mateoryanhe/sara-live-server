@@ -33,7 +33,7 @@ func AcceptCall(ctx context.Context, req *calldto.AcceptCallReq) (*calldto.Accep
 	}
 
 	channelName := buildCallChannelName(order.CallerId, order.ReceiverId)
-	token, tokenExpireAt, err := resolveChannelToken(receiverId, channelName)
+	token, tokenExpireAt, err := agora.ResolveCallToken(receiverId, channelName)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func AcceptCall(ctx context.Context, req *calldto.AcceptCallReq) (*calldto.Accep
 		Token:       token,
 		AppId:       appId,
 		UserAccount: strconv.FormatUint(receiverId, 10),
-		ExpireAt:    tokenExpireAt.Unix(),
+		ExpireAt:    tokenExpireAt,
 	}, nil
 }
 

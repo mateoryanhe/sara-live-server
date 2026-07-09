@@ -97,7 +97,7 @@ func toLiveRoomListItem(room *entity.LiveRoom, userId uint64) *liveroomdto.LiveR
 	item.OnlineCount = countAudienceInRoom(room.ID)
 
 	if userId > 0 {
-		if token, expireAt, err := agora.BuildLiveRoomToken(userId, room.ID); err == nil {
+		if token, expireAt, err := agora.ResolveLiveRoomToken(userId, room.ID); err == nil {
 			item.AgoraToken = token
 			item.AgoraTokenExpireAt = expireAt
 		}
