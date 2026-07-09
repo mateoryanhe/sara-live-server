@@ -1,17 +1,19 @@
 package httpserver
 
 import (
+	"context"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/gogf/gf/v2/container/gqueue"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/gorilla/websocket"
-	"net/http"
-	"strings"
-	"time"
 	"xr-game-server/constants/cmd"
-	"xr-game-server/constants/common"
+	"xr-game-server/core/cfg"
 	"xr-game-server/core/event"
 	"xr-game-server/core/xrjson"
 	"xr-game-server/core/xrtoken"
@@ -19,12 +21,11 @@ import (
 )
 
 const (
-	//发送超时
-	SendTimeOut = 100 * time.Millisecond
-	//写入超时
+	// SendTimeOut 批量发送等待窗口,窗口内消息合并一次发送
+	SendTimeOut = 10 * time.Millisecond
+	// IdleTime 空闲超过该时间才发送心跳
 	IdleTime        = 5000 * time.Millisecond
-	ChkTime         = 2 * time.Nanosecond
-	MaxSize         = 10
+	defaultMaxBatch = 10
 	wsPushSlowLogMs = int64(5)
 )
 
@@ -101,39 +102,36 @@ func InitWebsocket() {
 
 type WebSocketClient struct {
 	//用户唯一标识
-	Id   uint64
-	Conn *websocket.Conn
-	//数据发送时间
-	sendTime time.Time
-	//上次数据发送时间
-	lastTime   time.Time
+	Id         uint64
+	Conn       *websocket.Conn
 	dataBuffer *gqueue.TQueue[any]
-	sendData   []any
 	Loop       bool
-	Num        uint
+	cancel     context.CancelFunc
 }
 
 func newClient(id uint64, conn *websocket.Conn) *WebSocketClient {
 	return &WebSocketClient{
 		Id:         id,
 		Conn:       conn,
-		sendTime:   time.Now(),
-		lastTime:   time.Now(),
 		dataBuffer: gqueue.NewTQueue[any](),
-		sendData:   make([]any, common.Zero),
 		Loop:       true,
 	}
 }
+
 func (w *WebSocketClient) init() {
-	//go w.ChkClose()
-	//go w.consume()
+	ctx, cancel := context.WithCancel(context.Background())
+	w.cancel = cancel
+	go w.readPump()
+	go w.consumeData(ctx)
 }
 
-func (w *WebSocketClient) ChkClose() {
-	_, _, err := w.Conn.ReadMessage()
-	if err != nil {
-		w.exit()
-		return // Connection closed or error occurred
+// readPump 独立读协程,连接断开时 ReadMessage 返回错误并触发 exit
+func (w *WebSocketClient) readPump() {
+	defer w.exit()
+	for w.Loop && w.Conn != nil {
+		if _, _, err := w.Conn.ReadMessage(); err != nil {
+			return
+		}
 	}
 }
 
@@ -143,6 +141,9 @@ func (w *WebSocketClient) exit() {
 	}
 	w.Loop = false
 	w.clearPendingData()
+	if w.cancel != nil {
+		w.cancel()
+	}
 
 	event.Pub(event.ClientLeave, w)
 	if w.Conn != nil {
@@ -152,73 +153,99 @@ func (w *WebSocketClient) exit() {
 }
 
 func (w *WebSocketClient) clearPendingData() {
-	w.sendData = nil
-	w.Num = 0
 	for {
 		select {
 		case <-w.dataBuffer.C:
-		case <-time.After(ChkTime):
+		default:
 			return
 		}
 	}
 }
 
-// 发送缓存区数据
-func (w *WebSocketClient) flushDataBuffer() {
-	if !w.Loop || len(w.sendData) == common.Zero {
+func getMaxBatchSize() int {
+	if cfg.WebSocketBufferCfgModel.Size > 0 {
+		return cfg.WebSocketBufferCfgModel.Size
+	}
+	return defaultMaxBatch
+}
+
+func (w *WebSocketClient) flushBatch(batch []any, idleTimer *time.Timer) {
+	if !w.Loop || len(batch) == 0 || w.Conn == nil {
 		return
 	}
-	w.sendTime = time.Now()
-	w.lastTime = time.Now()
-	w.Num = common.Zero
-	ret := xrjson.MustMarshal(w.sendData)
-	//开始发送数据
-	err := w.Conn.WriteMessage(websocket.BinaryMessage, ret)
+	err := w.Conn.WriteMessage(websocket.BinaryMessage, xrjson.MustMarshal(batch))
 	if err != nil {
 		w.exit()
 		return
 	}
-	w.sendData = make([]any, common.Zero)
+	resetIdleTimer(idleTimer)
 }
 
-func (w *WebSocketClient) Consume() {
-	if !w.Loop {
+func (w *WebSocketClient) sendHeart(idleTimer *time.Timer) {
+	if !w.Loop || w.Conn == nil {
 		return
 	}
-	//如果到点了,开始发送数据
-	if w.Num > common.Zero && time.Now().After(w.sendTime) {
-		w.flushDataBuffer()
+	if err := w.Conn.WriteMessage(websocket.BinaryMessage, newHeart()); err != nil {
+		w.exit()
+		return
 	}
-	//好久没有发数据了,发一下数据,防止客户端重连
-	if w.lastTime.Add(IdleTime).Before(time.Now()) {
-		err := w.Conn.WriteMessage(websocket.BinaryMessage, newHeart())
-		if err != nil {
-			w.exit()
-			return
-		}
-		w.lastTime = time.Now()
-	}
-	w.consumeData()
+	resetIdleTimer(idleTimer)
 }
 
-func (w *WebSocketClient) consumeData() {
+func resetIdleTimer(idleTimer *time.Timer) {
+	stopTimer(idleTimer)
+	idleTimer.Reset(IdleTime)
+}
+
+func stopTimer(timer *time.Timer) {
+	if !timer.Stop() {
+		select {
+		case <-timer.C:
+		default:
+		}
+	}
+}
+
+func (w *WebSocketClient) consumeData(ctx context.Context) {
+	maxBatch := getMaxBatchSize()
+	batch := make([]any, 0, maxBatch)
+	flushTimer := time.NewTimer(time.Hour)
+	stopTimer(flushTimer)
+	defer flushTimer.Stop()
+
+	idleTimer := time.NewTimer(IdleTime)
+	defer idleTimer.Stop()
+
 	for {
 		select {
-		case data := <-w.dataBuffer.C:
-			if !w.Loop {
-				return
-			}
-			if w.Num >= MaxSize {
-				w.flushDataBuffer()
-				return
-			}
-			w.sendData = append(w.sendData, data)
-			if w.Num == common.Zero {
-				w.sendTime = time.Now().Add(SendTimeOut)
-			}
-			w.Num++
-		case <-time.After(ChkTime):
+		case <-ctx.Done():
+			w.flushBatch(batch, idleTimer)
 			return
+		case <-idleTimer.C:
+			if w.Loop {
+				w.sendHeart(idleTimer)
+			}
+		case data, ok := <-w.dataBuffer.C:
+			if !ok {
+				w.flushBatch(batch, idleTimer)
+				return
+			}
+			if !w.Loop {
+				w.flushBatch(batch, idleTimer)
+				return
+			}
+			batch = append(batch, data)
+			if len(batch) == 1 {
+				flushTimer.Reset(SendTimeOut)
+			}
+			if len(batch) >= maxBatch {
+				stopTimer(flushTimer)
+				w.flushBatch(batch, idleTimer)
+				batch = batch[:0]
+			}
+		case <-flushTimer.C:
+			w.flushBatch(batch, idleTimer)
+			batch = batch[:0]
 		}
 	}
 }

@@ -1,20 +1,15 @@
 package push
 
 import (
-	"context"
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"github.com/gogf/gf/v2/util/gutil"
 	"time"
 	"xr-game-server/constants/cmd"
-	"xr-game-server/constants/common"
-	"xr-game-server/core/cfg"
 	"xr-game-server/core/event"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/xrjson"
 
-	"xr-game-server/core/xrtimer"
 	"xr-game-server/errercode"
 )
 
@@ -23,38 +18,6 @@ var clientMap = gmap.New(true)
 func Init() {
 	event.Sub(event.ClientEnter, addClient)
 	event.Sub(event.ClientLeave, rmClient)
-	period := 10
-	if cfg.WebSocketBufferCfgModel.Period > common.Zero {
-		period = cfg.WebSocketBufferCfgModel.Period
-	}
-
-	xrtimer.AddSingleton(gctx.New(), time.Duration(period)*time.Millisecond, consumeBuff)
-	xrtimer.AddSingleton(gctx.New(), time.Duration(period)*time.Millisecond, chkLife)
-
-}
-
-func consumeBuff(ctx context.Context) {
-	clients := clientMap.Values()
-	if len(clients) > common.Zero {
-		for _, tempClient := range clients {
-			client := tempClient.(*httpserver.WebSocketClient)
-			client.Consume()
-		}
-	}
-}
-
-func chkLife(ctx context.Context) {
-	clients := clientMap.Values()
-	if len(clients) > common.Zero {
-		for _, tempClient := range clients {
-			gutil.TryCatch(gctx.New(), func(try context.Context) {
-				client := tempClient.(*httpserver.WebSocketClient)
-				client.ChkClose()
-			}, func(catch context.Context, err error) {
-
-			})
-		}
-	}
 }
 
 // Data 推送消息给指定玩家
@@ -139,7 +102,7 @@ func rmClient(data any) {
 	if leaveClient == nil {
 		return
 	}
-	g.Log().Infof(gctx.New(), "ip=%v,玩家=%v,离线了", leaveClient.Conn.RemoteAddr(), leaveClient.Id)
+	g.Log().Infof(gctx.New(), "ip=%v,玩家=%v,离线了", clientRemoteAddr(leaveClient), leaveClient.Id)
 	//
 	event.Pub(event.Offline, event.NewOfflineData(leaveClient.Id))
 	mapClient := (clientMap.Get(leaveClient.Id)).(*httpserver.WebSocketClient)
@@ -157,7 +120,7 @@ func addClient(data any) {
 		return
 	}
 	client := data.(*httpserver.WebSocketClient)
-	g.Log().Infof(gctx.New(), "ip=%v,玩家=%v,上线了", client.Conn.RemoteAddr(), client.Id)
+	g.Log().Infof(gctx.New(), "ip=%v,玩家=%v,上线了", clientRemoteAddr(client), client.Id)
 	//尝试下线当前客户端,由客户端主动登出
 	OutData(client.Id, cmd.RepeatLogin)
 	clientMap.Set(client.Id, client)
@@ -187,4 +150,11 @@ func ErrorWithParam(clientId uint64, err errercode.XRCode, param any) {
 		Data: NewErrorDto(err, param),
 		Cmd:  cmd.ErrorParam,
 	})
+}
+
+func clientRemoteAddr(client *httpserver.WebSocketClient) string {
+	if client == nil || client.Conn == nil {
+		return ""
+	}
+	return client.Conn.RemoteAddr().String()
 }
