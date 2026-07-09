@@ -5,7 +5,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/httpserver"
+	"xr-game-server/core/xrpool"
 	"xr-game-server/dao/userchanneltokendao"
 	"xr-game-server/dto/calldto"
 	"xr-game-server/entity"
@@ -20,10 +22,22 @@ func resolveChannelToken(userId uint64, channelName string) (token string, token
 	now := time.Now()
 	if existing := userchanneltokendao.GetByUserChannel(userId, channelName); existing != nil && existing.Token != "" {
 		if existing.ExpireAt.After(now.Add(channelTokenReuseMinRemain)) {
+			scheduleChannelTokenRefresh(userId, channelName)
 			return existing.Token, existing.ExpireAt, nil
 		}
 	}
 
+	return refreshChannelToken(userId, channelName)
+}
+
+func scheduleChannelTokenRefresh(userId uint64, channelName string) {
+	xrpool.AddWithRecover(gctx.New(), func(ctx context.Context) {
+		_, _, _ = refreshChannelToken(userId, channelName)
+	})
+}
+
+func refreshChannelToken(userId uint64, channelName string) (token string, tokenExpireAt time.Time, err error) {
+	now := time.Now()
 	token, expireSeconds, err := agora.BuildCallToken(userId, channelName)
 	if err != nil {
 		return "", time.Time{}, err

@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 	"xr-game-server/dao/agoracfgdao"
+	"xr-game-server/dao/userchanneltokendao"
 	"xr-game-server/dto/agoradto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
@@ -44,6 +45,9 @@ func SaveAgoraCfg(_ context.Context, req *agoradto.SaveAgoraCfgReq) (*agoradto.S
 	if err := agoracfgdao.Save(row); err != nil {
 		return nil, err
 	}
+	if isAgoraTokenCfgChanged(existing, row) {
+		userchanneltokendao.FlushCache(nil)
+	}
 	reloadAgoraCfgMemory()
 	return &agoradto.SaveAgoraCfgRes{
 		Success: true,
@@ -72,4 +76,11 @@ func formatAgoraCfgTime(t time.Time) string {
 		return ""
 	}
 	return t.Format("2006-01-02 15:04:05")
+}
+
+func isAgoraTokenCfgChanged(before, after *entity.AgoraCfg) bool {
+	if before == nil || after == nil {
+		return false
+	}
+	return before.AppId != after.AppId || before.AppCertificate != after.AppCertificate
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/cache"
 	"xr-game-server/entity"
 )
@@ -52,7 +53,24 @@ func AddToCache(row *entity.UserChannelToken) {
 	tokenCacheMgr.FlushCache(buildCacheKey(row.UserId, row.ChannelName), row)
 }
 
-// FlushCache 记录变更后刷新缓存
+// FlushCache 记录变更后刷新缓存; row为nil时表示声网配置变更,清空全部Token
 func FlushCache(row *entity.UserChannelToken) {
+	if row == nil {
+		flushAllOnAgoraCfgChanged()
+		return
+	}
 	AddToCache(row)
+}
+
+func flushAllOnAgoraCfgChanged() {
+	if tokenCacheMgr == nil {
+		return
+	}
+	_, _ = g.DB().Model(string(entity.TbUserChannelToken)).Delete()
+	refreshTokenCacheAfterDelete()
+}
+
+func refreshTokenCacheAfterDelete() {
+	ctx := gctx.New()
+	tokenCacheMgr.Cache.Clear(ctx)
 }
