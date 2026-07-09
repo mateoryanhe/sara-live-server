@@ -28,7 +28,7 @@ type SaveAgoraCfgReq struct {
 	AppCertificate     string `json:"appCertificate" v:"required|length:1,128#AppCertificate不能为空|AppCertificate长度需在1到128之间"`
 	RestCustomerId     string `json:"restCustomerId" v:"max-length:64#RestCustomerId长度不能超过64"`
 	RestCustomerSecret string `json:"restCustomerSecret" v:"max-length:128#RestCustomerSecret长度不能超过128"`
-	TokenExpireSeconds uint32 `json:"tokenExpireSeconds" v:"required|min:60#TokenExpireSeconds不能为空|TokenExpireSeconds不能小于60"`
+	TokenExpireSeconds uint32 `json:"tokenExpireSeconds" v:"required|between:21600,64800#TokenExpireSeconds不能为空|TokenExpireSeconds需在6到18小时之间"`
 }
 
 type SaveAgoraCfgRes struct {

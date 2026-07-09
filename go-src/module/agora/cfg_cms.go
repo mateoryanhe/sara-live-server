@@ -20,6 +20,9 @@ func GetAgoraCfg(_ context.Context, _ *agoradto.GetAgoraCfgReq) (*agoradto.GetAg
 }
 
 func SaveAgoraCfg(_ context.Context, req *agoradto.SaveAgoraCfgReq) (*agoradto.SaveAgoraCfgRes, error) {
+	if !isValidTokenExpireSeconds(req.TokenExpireSeconds) {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 	existing := agoracfgdao.Load()
 	row := &entity.AgoraCfg{
 		AppId:              req.AppId,

@@ -41,12 +41,13 @@
         <el-form-item label="Token有效期" prop="tokenExpireSeconds">
           <el-input-number
               v-model="formData.tokenExpireSeconds"
-              :min="60"
+              :max="64800"
+              :min="21600"
               :precision="0"
               controls-position="right"
               style="width: 220px"
           />
-          <span class="form-tip">秒，默认 6 小时(21600 秒)，最小 60 秒</span>
+          <span class="form-tip">秒，范围 6-18 小时(21600-64800 秒)，默认 6 小时(21600 秒)</span>
         </el-form-item>
 
         <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
@@ -102,7 +103,7 @@ const formRules = reactive({
   ],
   tokenExpireSeconds: [
     {required: true, message: '请输入 Token 有效期', trigger: 'blur'},
-    {type: 'number', min: 60, message: 'Token 有效期不能小于 60 秒', trigger: 'blur'},
+    {type: 'number', min: 21600, max: 64800, message: 'Token 有效期需在 6-18 小时之间', trigger: 'blur'},
   ],
 })
 

@@ -12,14 +12,19 @@ import (
 	"xr-game-server/errercode"
 )
 
-const channelTokenReuseMinRemain = 2 * time.Hour
-
 type channelTokenBuilder func() (token string, expireSeconds int64, err error)
 
+func getChannelTokenReuseMinRemain() time.Duration {
+	return time.Duration(getAgoraCfgCache().TokenExpireSeconds) * time.Second
+}
+
+// resolveChannelToken 查询时百分百刷新 Token:
+// 剩余有效期大于配置时间则先返回缓存并后台静默刷新,否则同步生成
 func resolveChannelToken(userId uint64, channelName string, build channelTokenBuilder) (token string, expireAt int64, err error) {
+	minRemain := getChannelTokenReuseMinRemain()
 	now := time.Now()
 	if existing := userchanneltokendao.GetByUserChannel(userId, channelName); existing != nil && existing.Token != "" {
-		if existing.ExpireAt.After(now.Add(channelTokenReuseMinRemain)) {
+		if existing.ExpireAt.After(now.Add(minRemain)) {
 			scheduleChannelTokenRefresh(userId, channelName, build)
 			return existing.Token, existing.ExpireAt.Unix(), nil
 		}
@@ -44,7 +49,7 @@ func refreshChannelToken(userId uint64, channelName string, build channelTokenBu
 	return token, tokenExpireAt.Unix(), nil
 }
 
-// ResolveLiveRoomToken 优先复用缓存中的直播间声网 Token
+// ResolveLiveRoomToken 查询直播间声网 Token(按配置时间决定同步/后台刷新)
 func ResolveLiveRoomToken(userId, roomId uint64) (token string, expireAt int64, err error) {
 	if liveroomdao.GetRoomById(roomId) == nil {
 		return "", 0, errercode.CreateCode(errercode.LiveRoomNotExist)
@@ -55,7 +60,7 @@ func ResolveLiveRoomToken(userId, roomId uint64) (token string, expireAt int64, 
 	})
 }
 
-// ResolveCallToken 优先复用缓存中的通话频道声网 Token
+// ResolveCallToken 查询通话频道声网 Token(按配置时间决定同步/后台刷新)
 func ResolveCallToken(userId uint64, channelName string) (token string, expireAt int64, err error) {
 	return resolveChannelToken(userId, channelName, func() (string, int64, error) {
 		return BuildCallToken(userId, channelName)

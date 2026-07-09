@@ -16,7 +16,7 @@ type AgoraCfg struct {
 	AppCertificate     string `gorm:"size:128;default:'';comment:声网AppCertificate" json:"appCertificate"`
 	RestCustomerId     string `gorm:"size:64;default:'';comment:声网REST CustomerId" json:"restCustomerId"`
 	RestCustomerSecret string `gorm:"size:128;default:'';comment:声网REST CustomerSecret" json:"restCustomerSecret"`
-	TokenExpireSeconds uint32 `gorm:"default:21600;comment:Token有效期(秒,默认6小时)" json:"tokenExpireSeconds"`
+	TokenExpireSeconds uint32 `gorm:"default:21600;comment:Token刷新阈值(秒,6-18小时,默认6小时)" json:"tokenExpireSeconds"`
 }
 
 func initAgoraCfg() {

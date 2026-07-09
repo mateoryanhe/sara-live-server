@@ -6,7 +6,11 @@ import (
 	"xr-game-server/entity"
 )
 
-const defaultTokenExpireSeconds uint32 = 21600
+const (
+	defaultTokenExpireSeconds uint32 = 6 * 60 * 60
+	minTokenExpireSeconds     uint32 = 6 * 60 * 60
+	maxTokenExpireSeconds     uint32 = 18 * 60 * 60
+)
 
 type agoraCfgSnapshot struct {
 	AppId              string
@@ -43,10 +47,7 @@ func toAgoraCfgSnapshot(row *entity.AgoraCfg) *agoraCfgSnapshot {
 	if row == nil {
 		return emptyAgoraCfgSnapshot
 	}
-	expireSeconds := row.TokenExpireSeconds
-	if expireSeconds == 0 {
-		expireSeconds = defaultTokenExpireSeconds
-	}
+	expireSeconds := normalizeTokenExpireSeconds(row.TokenExpireSeconds)
 	return &agoraCfgSnapshot{
 		AppId:              row.AppId,
 		AppCertificate:     row.AppCertificate,
@@ -54,4 +55,21 @@ func toAgoraCfgSnapshot(row *entity.AgoraCfg) *agoraCfgSnapshot {
 		RestCustomerSecret: row.RestCustomerSecret,
 		TokenExpireSeconds: expireSeconds,
 	}
+}
+
+func normalizeTokenExpireSeconds(seconds uint32) uint32 {
+	if seconds == 0 {
+		return defaultTokenExpireSeconds
+	}
+	if seconds < minTokenExpireSeconds {
+		return minTokenExpireSeconds
+	}
+	if seconds > maxTokenExpireSeconds {
+		return maxTokenExpireSeconds
+	}
+	return seconds
+}
+
+func isValidTokenExpireSeconds(seconds uint32) bool {
+	return seconds >= minTokenExpireSeconds && seconds <= maxTokenExpireSeconds
 }

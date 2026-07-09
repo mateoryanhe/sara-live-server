@@ -11,6 +11,8 @@ import (
 	"xr-game-server/module/livecfg"
 )
 
+const channelTokenExpireSeconds uint32 = 24 * 60 * 60
+
 // BuildLiveRoomToken 为指定用户生成进直播间声网 Token
 func BuildLiveRoomToken(userId, roomId uint64) (token string, expireAt int64, err error) {
 	if liveroomdao.GetRoomById(roomId) == nil {
@@ -25,7 +27,7 @@ func BuildLiveRoomToken(userId, roomId uint64) (token string, expireAt int64, er
 	channelName := buildChannelName(roomId)
 	userAccount := buildUserAccount(userId)
 	role := resolveRole(userId, roomId)
-	expireSeconds := agoraCfg.TokenExpireSeconds
+	expireSeconds := channelTokenExpireSeconds
 
 	token, err = rtctokenbuilder.BuildTokenWithUserAccount(
 		agoraCfg.AppId,
@@ -51,7 +53,7 @@ func BuildCallToken(userId uint64, channelName string) (token string, expireAt i
 	}
 
 	userAccount := buildUserAccount(userId)
-	expireSeconds := agoraCfg.TokenExpireSeconds
+	expireSeconds := channelTokenExpireSeconds
 	token, err = rtctokenbuilder.BuildTokenWithUserAccount(
 		agoraCfg.AppId,
 		agoraCfg.AppCertificate,
