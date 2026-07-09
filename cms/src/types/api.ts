@@ -491,6 +491,7 @@ export interface AgoraCfg {
     restCustomerId: string
     restCustomerSecret: string
     tokenExpireSeconds: number
+    tokenRefreshSeconds: number
     createdAt: string
     updatedAt: string
 }
@@ -506,6 +507,7 @@ export interface SaveAgoraCfgReq {
     restCustomerId: string
     restCustomerSecret: string
     tokenExpireSeconds: number
+    tokenRefreshSeconds: number
 }
 
 export interface SaveAgoraCfgRes {

@@ -20,16 +20,17 @@ func GetAgoraCfg(_ context.Context, _ *agoradto.GetAgoraCfgReq) (*agoradto.GetAg
 }
 
 func SaveAgoraCfg(_ context.Context, req *agoradto.SaveAgoraCfgReq) (*agoradto.SaveAgoraCfgRes, error) {
-	if !isValidTokenExpireSeconds(req.TokenExpireSeconds) {
+	if !isValidAgoraTokenCfg(req.TokenExpireSeconds, req.TokenRefreshSeconds) {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	existing := agoracfgdao.Load()
 	row := &entity.AgoraCfg{
-		AppId:              req.AppId,
-		AppCertificate:     req.AppCertificate,
-		RestCustomerId:     req.RestCustomerId,
-		RestCustomerSecret: req.RestCustomerSecret,
-		TokenExpireSeconds: req.TokenExpireSeconds,
+		AppId:               req.AppId,
+		AppCertificate:      req.AppCertificate,
+		RestCustomerId:      req.RestCustomerId,
+		RestCustomerSecret:  req.RestCustomerSecret,
+		TokenExpireSeconds:  req.TokenExpireSeconds,
+		TokenRefreshSeconds: req.TokenRefreshSeconds,
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -62,15 +63,17 @@ func toAgoraCfgItem(cfg *entity.AgoraCfg) *agoradto.AgoraCfgItem {
 	if cfg == nil {
 		return nil
 	}
+	expireSeconds, refreshSeconds := normalizeAgoraTokenCfg(cfg.TokenExpireSeconds, cfg.TokenRefreshSeconds)
 	return &agoradto.AgoraCfgItem{
-		ID:                 strconv.FormatUint(cfg.ID, 10),
-		AppId:              cfg.AppId,
-		AppCertificate:     cfg.AppCertificate,
-		RestCustomerId:     cfg.RestCustomerId,
-		RestCustomerSecret: cfg.RestCustomerSecret,
-		TokenExpireSeconds: cfg.TokenExpireSeconds,
-		CreatedAt:          formatAgoraCfgTime(cfg.CreatedAt),
-		UpdatedAt:          formatAgoraCfgTime(cfg.UpdatedAt),
+		ID:                  strconv.FormatUint(cfg.ID, 10),
+		AppId:               cfg.AppId,
+		AppCertificate:      cfg.AppCertificate,
+		RestCustomerId:      cfg.RestCustomerId,
+		RestCustomerSecret:  cfg.RestCustomerSecret,
+		TokenExpireSeconds:  expireSeconds,
+		TokenRefreshSeconds: refreshSeconds,
+		CreatedAt:           formatAgoraCfgTime(cfg.CreatedAt),
+		UpdatedAt:           formatAgoraCfgTime(cfg.UpdatedAt),
 	}
 }
 
@@ -85,5 +88,8 @@ func isAgoraTokenCfgChanged(before, after *entity.AgoraCfg) bool {
 	if before == nil || after == nil {
 		return false
 	}
-	return before.AppId != after.AppId || before.AppCertificate != after.AppCertificate
+	return before.AppId != after.AppId ||
+		before.AppCertificate != after.AppCertificate ||
+		before.TokenExpireSeconds != after.TokenExpireSeconds ||
+		before.TokenRefreshSeconds != after.TokenRefreshSeconds
 }

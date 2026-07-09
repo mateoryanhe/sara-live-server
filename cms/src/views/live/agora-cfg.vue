@@ -38,16 +38,28 @@
           <span class="form-tip">可选，查询用户在线状态时需要配置</span>
         </el-form-item>
 
-        <el-form-item label="Token有效期" prop="tokenExpireSeconds">
+        <el-form-item label="Token有效期" prop="tokenExpireHours">
           <el-input-number
-              v-model="formData.tokenExpireSeconds"
-              :max="64800"
-              :min="21600"
+              v-model="formData.tokenExpireHours"
+              :max="TOKEN_EXPIRE_MAX_HOURS"
+              :min="TOKEN_EXPIRE_MIN_HOURS"
               :precision="0"
               controls-position="right"
               style="width: 220px"
           />
-          <span class="form-tip">秒，范围 6-18 小时(21600-64800 秒)，默认 6 小时(21600 秒)</span>
+          <span class="form-tip">小时，范围 {{ TOKEN_EXPIRE_MIN_HOURS }}-{{ TOKEN_EXPIRE_MAX_HOURS }} 小时，默认 {{ TOKEN_EXPIRE_DEFAULT_HOURS }} 小时</span>
+        </el-form-item>
+
+        <el-form-item label="提前刷新阈值" prop="tokenRefreshHours">
+          <el-input-number
+              v-model="formData.tokenRefreshHours"
+              :max="maxTokenRefreshHours"
+              :min="TOKEN_REFRESH_MIN_HOURS"
+              :precision="0"
+              controls-position="right"
+              style="width: 220px"
+          />
+          <span class="form-tip">小时，范围 {{ TOKEN_REFRESH_MIN_HOURS }}-{{ maxTokenRefreshHours }} 小时，且比 Token 有效期至少少 {{ TOKEN_REFRESH_AHEAD_GAP_HOURS }} 小时</span>
         </el-form-item>
 
         <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
@@ -64,10 +76,18 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage} from 'element-plus'
 import {agoraApi} from '@/api/modules/agora'
 import type {AgoraCfg} from '@/types/api'
+
+const TOKEN_EXPIRE_MIN_HOURS = 4
+const TOKEN_EXPIRE_MAX_HOURS = 24
+const TOKEN_EXPIRE_DEFAULT_HOURS = 24
+const TOKEN_REFRESH_MIN_HOURS = 2
+const TOKEN_REFRESH_AHEAD_GAP_HOURS = 2
+const TOKEN_REFRESH_DEFAULT_HOURS = TOKEN_EXPIRE_DEFAULT_HOURS - TOKEN_REFRESH_AHEAD_GAP_HOURS
+const SECONDS_PER_HOUR = 3600
 
 const loading = ref(false)
 const formRef = ref()
@@ -78,12 +98,49 @@ const formData = reactive({
   appCertificate: '',
   restCustomerId: '',
   restCustomerSecret: '',
-  tokenExpireSeconds: 21600,
+  tokenExpireHours: TOKEN_EXPIRE_DEFAULT_HOURS,
+  tokenRefreshHours: TOKEN_REFRESH_DEFAULT_HOURS,
 })
 
 const metaInfo = reactive({
   createdAt: '',
   updatedAt: '',
+})
+
+const maxTokenRefreshHours = computed(() => {
+  return Math.max(TOKEN_REFRESH_MIN_HOURS, formData.tokenExpireHours - TOKEN_REFRESH_AHEAD_GAP_HOURS)
+})
+
+const clampTokenExpireHours = (hours: number) => {
+  if (!Number.isFinite(hours) || hours <= 0) {
+    return TOKEN_EXPIRE_DEFAULT_HOURS
+  }
+  return Math.min(TOKEN_EXPIRE_MAX_HOURS, Math.max(TOKEN_EXPIRE_MIN_HOURS, Math.round(hours)))
+}
+
+const clampTokenRefreshHours = (hours: number, expireHours: number) => {
+  const maxHours = Math.max(TOKEN_REFRESH_MIN_HOURS, expireHours - TOKEN_REFRESH_AHEAD_GAP_HOURS)
+  if (!Number.isFinite(hours)) {
+    return maxHours
+  }
+  return Math.min(maxHours, Math.max(TOKEN_REFRESH_MIN_HOURS, Math.round(hours)))
+}
+
+const secondsToHours = (seconds: number, fallback: number) => {
+  if (!Number.isFinite(seconds) || seconds < 0) {
+    return fallback
+  }
+  return Math.round(seconds / SECONDS_PER_HOUR)
+}
+
+const hoursToSeconds = (hours: number) => Math.round(hours) * SECONDS_PER_HOUR
+
+const syncTokenRefreshHours = () => {
+  formData.tokenRefreshHours = clampTokenRefreshHours(formData.tokenRefreshHours, formData.tokenExpireHours)
+}
+
+watch(() => formData.tokenExpireHours, () => {
+  syncTokenRefreshHours()
 })
 
 const formRules = reactive({
@@ -101,9 +158,29 @@ const formRules = reactive({
   restCustomerSecret: [
     {max: 128, message: 'REST CustomerSecret 长度不能超过 128 个字符', trigger: 'blur'},
   ],
-  tokenExpireSeconds: [
+  tokenExpireHours: [
     {required: true, message: '请输入 Token 有效期', trigger: 'blur'},
-    {type: 'number', min: 21600, max: 64800, message: 'Token 有效期需在 6-18 小时之间', trigger: 'blur'},
+    {
+      type: 'number',
+      min: TOKEN_EXPIRE_MIN_HOURS,
+      max: TOKEN_EXPIRE_MAX_HOURS,
+      message: `Token 有效期需在 ${TOKEN_EXPIRE_MIN_HOURS}-${TOKEN_EXPIRE_MAX_HOURS} 小时之间`,
+      trigger: 'blur',
+    },
+  ],
+  tokenRefreshHours: [
+    {required: true, message: '请输入提前刷新阈值', trigger: 'blur'},
+    {
+      validator: (_rule: unknown, value: number, callback: (error?: Error) => void) => {
+        const max = maxTokenRefreshHours.value
+        if (!Number.isFinite(value) || value < TOKEN_REFRESH_MIN_HOURS || value > max) {
+          callback(new Error(`提前刷新阈值需在 ${TOKEN_REFRESH_MIN_HOURS}-${max} 小时之间`))
+          return
+        }
+        callback()
+      },
+      trigger: 'blur',
+    },
   ],
 })
 
@@ -114,7 +191,8 @@ const applyCfg = (cfg: AgoraCfg | null | undefined) => {
     formData.appCertificate = ''
     formData.restCustomerId = ''
     formData.restCustomerSecret = ''
-    formData.tokenExpireSeconds = 21600
+    formData.tokenExpireHours = TOKEN_EXPIRE_DEFAULT_HOURS
+    formData.tokenRefreshHours = TOKEN_REFRESH_DEFAULT_HOURS
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
     return
@@ -124,7 +202,11 @@ const applyCfg = (cfg: AgoraCfg | null | undefined) => {
   formData.appCertificate = cfg.appCertificate || ''
   formData.restCustomerId = cfg.restCustomerId || ''
   formData.restCustomerSecret = cfg.restCustomerSecret || ''
-  formData.tokenExpireSeconds = cfg.tokenExpireSeconds || 21600
+  formData.tokenExpireHours = clampTokenExpireHours(secondsToHours(cfg.tokenExpireSeconds, TOKEN_EXPIRE_DEFAULT_HOURS))
+  formData.tokenRefreshHours = clampTokenRefreshHours(
+      secondsToHours(cfg.tokenRefreshSeconds, TOKEN_REFRESH_DEFAULT_HOURS),
+      formData.tokenExpireHours,
+  )
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
 }
@@ -152,7 +234,8 @@ const handleSave = async () => {
       appCertificate: formData.appCertificate.trim(),
       restCustomerId: formData.restCustomerId.trim(),
       restCustomerSecret: formData.restCustomerSecret.trim(),
-      tokenExpireSeconds: formData.tokenExpireSeconds,
+      tokenExpireSeconds: hoursToSeconds(formData.tokenExpireHours),
+      tokenRefreshSeconds: hoursToSeconds(formData.tokenRefreshHours),
     })
     if (response?.success) {
       ElMessage.success('保存成功')

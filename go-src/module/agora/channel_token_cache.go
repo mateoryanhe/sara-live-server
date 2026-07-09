@@ -15,11 +15,11 @@ import (
 type channelTokenBuilder func() (token string, expireSeconds int64, err error)
 
 func getChannelTokenReuseMinRemain() time.Duration {
-	return time.Duration(getAgoraCfgCache().TokenExpireSeconds) * time.Second
+	return time.Duration(getAgoraCfgCache().TokenRefreshSeconds) * time.Second
 }
 
 // resolveChannelToken 查询时百分百刷新 Token:
-// 剩余有效期大于配置时间则先返回缓存并后台静默刷新,否则同步生成
+// 剩余有效期大于提前刷新阈值则先返回缓存并后台静默刷新,否则同步生成
 func resolveChannelToken(userId uint64, channelName string, build channelTokenBuilder) (token string, expireAt int64, err error) {
 	minRemain := getChannelTokenReuseMinRemain()
 	now := time.Now()

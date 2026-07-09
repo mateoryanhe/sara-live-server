@@ -7,23 +7,27 @@ import (
 )
 
 const (
-	defaultTokenExpireSeconds uint32 = 6 * 60 * 60
-	minTokenExpireSeconds     uint32 = 6 * 60 * 60
-	maxTokenExpireSeconds     uint32 = 18 * 60 * 60
+	defaultTokenExpireSeconds   uint32 = 24 * 60 * 60
+	minTokenExpireSeconds       uint32 = 4 * 60 * 60
+	maxTokenExpireSeconds       uint32 = 24 * 60 * 60
+	minTokenRefreshSeconds      uint32 = 2 * 60 * 60
+	tokenRefreshAheadGapSeconds uint32 = 2 * 60 * 60
 )
 
 type agoraCfgSnapshot struct {
-	AppId              string
-	AppCertificate     string
-	RestCustomerId     string
-	RestCustomerSecret string
-	TokenExpireSeconds uint32
+	AppId               string
+	AppCertificate      string
+	RestCustomerId      string
+	RestCustomerSecret  string
+	TokenExpireSeconds  uint32
+	TokenRefreshSeconds uint32
 }
 
 var (
 	agoraCfgCache         atomic.Value // *agoraCfgSnapshot
 	emptyAgoraCfgSnapshot = &agoraCfgSnapshot{
-		TokenExpireSeconds: defaultTokenExpireSeconds,
+		TokenExpireSeconds:  defaultTokenExpireSeconds,
+		TokenRefreshSeconds: defaultTokenExpireSeconds - tokenRefreshAheadGapSeconds,
 	}
 )
 
@@ -47,14 +51,24 @@ func toAgoraCfgSnapshot(row *entity.AgoraCfg) *agoraCfgSnapshot {
 	if row == nil {
 		return emptyAgoraCfgSnapshot
 	}
-	expireSeconds := normalizeTokenExpireSeconds(row.TokenExpireSeconds)
+	expireSeconds, refreshSeconds := normalizeAgoraTokenCfg(row.TokenExpireSeconds, row.TokenRefreshSeconds)
 	return &agoraCfgSnapshot{
-		AppId:              row.AppId,
-		AppCertificate:     row.AppCertificate,
-		RestCustomerId:     row.RestCustomerId,
-		RestCustomerSecret: row.RestCustomerSecret,
-		TokenExpireSeconds: expireSeconds,
+		AppId:               row.AppId,
+		AppCertificate:      row.AppCertificate,
+		RestCustomerId:      row.RestCustomerId,
+		RestCustomerSecret:  row.RestCustomerSecret,
+		TokenExpireSeconds:  expireSeconds,
+		TokenRefreshSeconds: refreshSeconds,
 	}
+}
+
+func normalizeAgoraTokenCfg(expireSeconds, refreshSeconds uint32) (uint32, uint32) {
+	expireSeconds = normalizeTokenExpireSeconds(expireSeconds)
+	if refreshSeconds == 0 {
+		refreshSeconds = expireSeconds - tokenRefreshAheadGapSeconds
+	}
+	refreshSeconds = normalizeTokenRefreshSeconds(expireSeconds, refreshSeconds)
+	return expireSeconds, refreshSeconds
 }
 
 func normalizeTokenExpireSeconds(seconds uint32) uint32 {
@@ -70,6 +84,28 @@ func normalizeTokenExpireSeconds(seconds uint32) uint32 {
 	return seconds
 }
 
-func isValidTokenExpireSeconds(seconds uint32) bool {
-	return seconds >= minTokenExpireSeconds && seconds <= maxTokenExpireSeconds
+func normalizeTokenRefreshSeconds(expireSeconds, refreshSeconds uint32) uint32 {
+	maxRefresh := expireSeconds - tokenRefreshAheadGapSeconds
+	if refreshSeconds < minTokenRefreshSeconds {
+		refreshSeconds = minTokenRefreshSeconds
+	}
+	if refreshSeconds > maxRefresh {
+		return maxRefresh
+	}
+	return refreshSeconds
+}
+
+func isValidAgoraTokenCfg(expireSeconds, refreshSeconds uint32) bool {
+	if expireSeconds < minTokenExpireSeconds || expireSeconds > maxTokenExpireSeconds {
+		return false
+	}
+	maxRefresh := expireSeconds - tokenRefreshAheadGapSeconds
+	if maxRefresh < minTokenRefreshSeconds {
+		return false
+	}
+	return refreshSeconds >= minTokenRefreshSeconds && refreshSeconds <= maxRefresh
+}
+
+func getChannelTokenExpireSeconds() uint32 {
+	return getAgoraCfgCache().TokenExpireSeconds
 }
