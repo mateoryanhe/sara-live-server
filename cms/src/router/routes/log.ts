@@ -18,5 +18,11 @@ export const logRoutes: RouteRecordRaw = {
             component: () => import('@/views/log/live/live-record-list.vue'),
             meta: {title: '直播记录', parentTitle: '直播日志'},
         },
+        {
+            path: 'call/video-call-log-list',
+            name: 'VideoCallLogList',
+            component: () => import('@/views/log/call/video-call-log-list.vue'),
+            meta: {title: '视频通话日志', parentTitle: '通话日志'},
+        },
     ],
 }

@@ -19,12 +19,6 @@ export const liveRoutes: RouteRecordRaw = {
             meta: {title: '声网配置'},
         },
         {
-            path: 'entry-effect/entry-effect-list',
-            name: 'EntryEffectManagement',
-            component: () => import('@/views/live/entry-effect/entry-effect-list.vue'),
-            meta: {title: '进场特效'},
-        },
-        {
             path: 'ticket/ticket-list',
             name: 'TicketManagement',
             component: () => import('@/views/live/ticket/ticket-list.vue'),

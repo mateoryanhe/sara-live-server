@@ -54,7 +54,6 @@ func Init() {
 	initVipCfg()
 	initGameCfg()
 	initLiveTicket()
-	initLiveEntryEffect()
 	initLivePrivateRoomBilling()
 	initAgoraCfg()
 	initLiveCfg()

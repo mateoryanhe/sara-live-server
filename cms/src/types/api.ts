@@ -268,23 +268,6 @@ export interface GiftQuery extends PageQuery {
     statusFilter?: number
 }
 
-export interface EntryEffect {
-    id: string
-    name: string
-    levelStart: number
-    levelEnd: number
-    animation: string
-    animationName: string
-    status: number
-    createdAt: string
-    updatedAt: string
-}
-
-export interface EntryEffectQuery extends PageQuery {
-    name?: string
-    statusFilter?: number
-}
-
 // 充值配置
 export interface RechargeCfg {
     id: string
@@ -323,6 +306,8 @@ export interface VipCfg {
     minWithdrawAmount: number
     maxWithdrawAmount: number
     fee: number
+    animation?: string
+    animationName?: string
     createdAt: string
     updatedAt: string
 }
@@ -698,6 +683,37 @@ export interface LiveRecordItem {
     totalGameBet: number
     totalGiftSender: number
     totalNewFollower: number
+    createdAt?: string | null
+}
+
+export interface VideoCallLogQuery extends PageQuery {
+    callerId?: string
+    receiverId?: string
+    source?: number
+    startTime?: number
+    endTime?: number
+}
+
+export interface VideoCallLogItem {
+    id: string
+    callerId: string
+    callerNickname?: string
+    receiverId: string
+    receiverNickname?: string
+    callType: number
+    callTypeText?: string
+    source: number
+    sourceText?: string
+    statusText?: string
+    callStartTime?: string | null
+    answerTime?: string | null
+    orderEndTime?: string | null
+    callDuration: number
+    ticketPrice: number
+    pricePerMinute: number
+    totalCost: number
+    billingDuration: number
+    chargeTime?: string | null
     createdAt?: string | null
 }
 

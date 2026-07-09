@@ -55,7 +55,7 @@ func GetAll() []*entity.VipCfg {
 
 func GetList(req *vipcfgdto.VipCfgListReq) (int, []*vipcfgdto.VipCfgListRes) {
 	sql := `select id, level, level_name, status, upgrade_recharge_limit, min_withdraw_amount,
-                   max_withdraw_amount, fee, created_at, updated_at
+                   max_withdraw_amount, fee, animation, created_at, updated_at
             from vip_cfgs
             where 1=1 `
 	param := make([]any, 0)

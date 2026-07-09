@@ -32,6 +32,18 @@
           <el-table-column label="ID" prop="id" width="100"/>
           <el-table-column label="等级" prop="level" width="80"/>
           <el-table-column label="等级名称" prop="levelName" min-width="120"/>
+          <el-table-column label="进场特效" min-width="200">
+            <template #default="{ row }">
+              <video
+                  v-if="isVideoUrl(row.animation)"
+                  :src="row.animation"
+                  class="table-media-preview"
+                  controls
+                  preload="metadata"
+              />
+              <span v-else class="media-url-text">{{ row.animationName || '-' }}</span>
+            </template>
+          </el-table-column>
           <el-table-column label="状态" width="90">
             <template #default="{ row }">
               <el-tag :type="row.status === 1 ? 'success' : 'info'">
@@ -91,6 +103,41 @@
         <el-form-item label="等级名称" prop="levelName">
           <el-input v-model="currentRow.levelName" placeholder="请输入等级名称"/>
         </el-form-item>
+        <el-form-item label="进场特效动画" prop="animation">
+          <div class="asset-upload-wrap">
+            <el-upload
+                :before-upload="beforeAnimationUpload"
+                :disabled="animationUploading"
+                :http-request="doUpload"
+                :show-file-list="false"
+                accept=".mp4"
+                action="#"
+                class="animation-uploader"
+            >
+              <video
+                  v-if="animationPreviewUrl"
+                  :src="animationPreviewUrl"
+                  class="animation-preview"
+                  controls
+                  preload="metadata"
+              />
+              <div v-else class="asset-uploader-placeholder animation-placeholder">
+                <el-icon class="asset-uploader-icon">
+                  <Plus/>
+                </el-icon>
+                <span>点击上传 MP4 动画</span>
+              </div>
+            </el-upload>
+            <el-button
+                v-if="animationPreviewUrl || currentRow.animation"
+                link
+                type="danger"
+                @click="clearAnimation"
+            >
+              移除动画
+            </el-button>
+          </div>
+        </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-radio-group v-model="currentRow.status">
             <el-radio :label="1">开启</el-radio>
@@ -147,10 +194,12 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
-import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
-import {vipCfgApi} from '@/api'
+import {onMounted, reactive, ref, watch} from 'vue'
+import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
+import {Plus} from '@element-plus/icons-vue'
+import {uploadApi, vipCfgApi} from '@/api'
 import type {VipCfg} from '@/types/api.ts'
+import {getExt, isVideoUrl, resolveMediaPreviewType} from '@/utils/media-preview'
 
 interface SearchForm {
   levelName: string
@@ -166,6 +215,7 @@ interface VipCfgForm {
   minWithdrawAmount: number
   maxWithdrawAmount: number
   fee: number
+  animation: string
 }
 
 const loading = ref(false)
@@ -189,10 +239,75 @@ const defaultForm = (): VipCfgForm => ({
   upgradeRechargeLimit: 0,
   minWithdrawAmount: 0,
   maxWithdrawAmount: 0,
-  fee: 0
+  fee: 0,
+  animation: ''
 })
 const currentRow = ref<VipCfgForm>(defaultForm())
 const formRef = ref<FormInstance>()
+
+const animationUploading = ref(false)
+const animationPreviewUrl = ref('')
+let objectPreviewUrl = ''
+
+const revokeObjectPreview = () => {
+  if (objectPreviewUrl) {
+    URL.revokeObjectURL(objectPreviewUrl)
+    objectPreviewUrl = ''
+  }
+}
+
+const resetAnimationPreview = () => {
+  revokeObjectPreview()
+  animationPreviewUrl.value = ''
+}
+
+const setAnimationPreview = (url: string, fromObject = false) => {
+  revokeObjectPreview()
+  animationPreviewUrl.value = url
+  if (fromObject && url) {
+    objectPreviewUrl = url
+  }
+}
+
+const clearAnimation = () => {
+  currentRow.value.animation = ''
+  resetAnimationPreview()
+}
+
+watch(dialogVisible, (visible) => {
+  if (!visible) {
+    resetAnimationPreview()
+  }
+})
+
+const beforeAnimationUpload = (file: File): boolean => {
+  const ext = getExt(file.name)
+  if (ext !== '.mp4') {
+    ElMessage.error('仅支持 MP4 格式')
+    return false
+  }
+  if (file.size > 50 * 1024 * 1024) {
+    ElMessage.error('文件不能超过50MB')
+    return false
+  }
+  return true
+}
+
+const doUpload = async (options: UploadRequestOptions) => {
+  const file = options.file as File
+  animationUploading.value = true
+  try {
+    const res = await uploadApi.uploadFile(file)
+    currentRow.value.animation = res.fileName
+    setAnimationPreview(URL.createObjectURL(file), true)
+    ElMessage.success('上传成功')
+  } catch (error) {
+    console.error('上传失败:', error)
+    ElMessage.error('上传失败')
+  } finally {
+    animationUploading.value = false
+  }
+}
 
 const formatAmount = (val: number | null | undefined) => {
   if (val === null || val === undefined) {
@@ -262,11 +377,13 @@ const handleCurrentChange = (page: number) => {
 const handleAdd = () => {
   dialogTitle.value = '新增VIP等级'
   currentRow.value = defaultForm()
+  resetAnimationPreview()
   dialogVisible.value = true
 }
 
 const handleEdit = (row: VipCfg) => {
   dialogTitle.value = '编辑VIP等级'
+  const animationName = row.animationName || ''
   currentRow.value = {
     id: row.id,
     level: Number(row.level) || 1,
@@ -275,7 +392,13 @@ const handleEdit = (row: VipCfg) => {
     upgradeRechargeLimit: Number(row.upgradeRechargeLimit) || 0,
     minWithdrawAmount: Number(row.minWithdrawAmount) || 0,
     maxWithdrawAmount: Number(row.maxWithdrawAmount) || 0,
-    fee: Number(row.fee) || 0
+    fee: Number(row.fee) || 0,
+    animation: animationName
+  }
+  if (animationName && resolveMediaPreviewType(row.animation || '', animationName) === 'video') {
+    setAnimationPreview(row.animation || '')
+  } else {
+    resetAnimationPreview()
   }
   dialogVisible.value = true
 }
@@ -307,7 +430,8 @@ const handleSave = async () => {
         upgradeRechargeLimit: currentRow.value.upgradeRechargeLimit,
         minWithdrawAmount: currentRow.value.minWithdrawAmount,
         maxWithdrawAmount: currentRow.value.maxWithdrawAmount,
-        fee: currentRow.value.fee
+        fee: currentRow.value.fee,
+        animation: currentRow.value.animation
       }
       if (currentRow.value.id) {
         await vipCfgApi.updateVipCfg({id: currentRow.value.id, ...payload})
@@ -367,5 +491,63 @@ onMounted(() => {
   margin-top: 4px;
   font-size: 12px;
   color: var(--el-text-color-secondary);
+}
+
+.asset-upload-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.animation-uploader :deep(.el-upload) {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.animation-uploader :deep(.el-upload:hover) {
+  border-color: var(--el-color-primary);
+}
+
+.asset-uploader-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
+  gap: 8px;
+}
+
+.animation-placeholder {
+  width: 240px;
+  height: 120px;
+}
+
+.asset-uploader-icon {
+  font-size: 28px;
+}
+
+.animation-preview {
+  width: 240px;
+  height: 120px;
+  display: block;
+  object-fit: cover;
+}
+
+.table-media-preview {
+  width: 160px;
+  max-height: 90px;
+  display: block;
+  background: #000;
+  border-radius: 4px;
+}
+
+.media-url-text {
+  word-break: break-all;
+  line-height: 1.4;
 }
 </style>

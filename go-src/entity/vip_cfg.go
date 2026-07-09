@@ -24,6 +24,7 @@ type VipCfg struct {
 	MinWithdrawAmount    float64 `gorm:"type:decimal(18,4);default:0;comment:最低提现金额(USD)" json:"minWithdrawAmount"`
 	MaxWithdrawAmount    float64 `gorm:"type:decimal(18,4);default:0;comment:最高提现金额(USD)" json:"maxWithdrawAmount"`
 	Fee                  float64 `gorm:"type:decimal(18,4);default:0;comment:手续费" json:"fee"`
+	Animation            string  `gorm:"size:255;default:'';comment:进场特效动画资源文件名" json:"animation"`
 }
 
 func initVipCfg() {

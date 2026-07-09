@@ -6,7 +6,6 @@ import {guildApi} from './modules/guild'
 import {giftApi} from './modules/gift'
 import {bannerApi} from './modules/banner'
 import {ticketApi} from './modules/ticket'
-import {entryEffectApi} from './modules/entryEffect'
 import {privateRoomBillingApi} from './modules/privateRoomBilling'
 import {shortVideoApi} from './modules/shortVideo'
 import {rechargeCfgApi} from './modules/rechargeCfg'
@@ -18,6 +17,7 @@ import {rechargeOrderApi} from './modules/rechargeOrder'
 import {currencyLogApi} from './modules/currencyLog'
 import {liveRevenueLogApi} from './modules/liveRevenueLog'
 import {liveRecordApi} from './modules/liveRecord'
+import {videoCallLogApi} from './modules/videoCallLog'
 import {gameCfgApi} from './modules/gameCfg'
 import {agoraApi} from './modules/agora'
 import {liveCfgApi} from './modules/liveCfg'
@@ -35,7 +35,6 @@ export {
     giftApi,
     bannerApi,
     ticketApi,
-    entryEffectApi,
     privateRoomBillingApi,
     shortVideoApi,
     rechargeCfgApi,
@@ -47,6 +46,7 @@ export {
     currencyLogApi,
     liveRevenueLogApi,
     liveRecordApi,
+    videoCallLogApi,
     gameCfgApi,
     agoraApi,
     liveCfgApi,
@@ -65,7 +65,6 @@ export default {
     giftApi,
     bannerApi,
     ticketApi,
-    entryEffectApi,
     privateRoomBillingApi,
     shortVideoApi,
     rechargeCfgApi,
@@ -77,6 +76,7 @@ export default {
     currencyLogApi,
     liveRevenueLogApi,
     liveRecordApi,
+    videoCallLogApi,
     gameCfgApi,
     agoraApi,
     liveCfgApi,

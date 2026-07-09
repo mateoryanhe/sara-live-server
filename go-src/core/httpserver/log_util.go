@@ -96,7 +96,7 @@ func requestEnterTimeStr(r *ghttp.Request) string {
 	if r == nil || r.EnterTime == nil {
 		return ""
 	}
-	return r.EnterTime.Format("2006-01-02 15:04:05.000")
+	return r.EnterTime.Time.Format("2006-01-02 15:04:05.000")
 }
 
 func stashRequestTiming(r *ghttp.Request) {

@@ -14,6 +14,7 @@ export const vipCfgApi = {
         minWithdrawAmount: number
         maxWithdrawAmount: number
         fee: number
+        animation?: string
     }) => {
         return request.post<{ id: string }>('/vipCfg/createVipCfg', data)
     },
@@ -27,6 +28,7 @@ export const vipCfgApi = {
         minWithdrawAmount: number
         maxWithdrawAmount: number
         fee: number
+        animation?: string
     }) => {
         return request.post<boolean>('/vipCfg/updateVipCfg', data)
     },

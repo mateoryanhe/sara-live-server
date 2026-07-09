@@ -23,6 +23,8 @@ type VipCfgListRes struct {
 	MinWithdrawAmount    float64 `json:"minWithdrawAmount,string"`
 	MaxWithdrawAmount    float64 `json:"maxWithdrawAmount,string"`
 	Fee                  float64 `json:"fee,string"`
+	Animation            string  `json:"animation" dc:"动画完整URL(列表展示)"`
+	AnimationName        string  `json:"animationName" dc:"动画资源文件名(编辑保存用)"`
 	CreatedAt            string  `json:"createdAt"`
 	UpdatedAt            string  `json:"updatedAt"`
 }
@@ -37,6 +39,7 @@ type CreateVipCfgReq struct {
 	MinWithdrawAmount    float64 `json:"minWithdrawAmount" dc:"最低提现金额(USD,保留4位小数)"`
 	MaxWithdrawAmount    float64 `json:"maxWithdrawAmount" dc:"最高提现金额(USD,保留4位小数)"`
 	Fee                  float64 `json:"fee" dc:"手续费(保留4位小数)"`
+	Animation            string  `json:"animation" dc:"进场特效动画资源文件名(mp4)"`
 }
 
 type CreateVipCfgRes struct {
@@ -54,6 +57,7 @@ type UpdateVipCfgReq struct {
 	MinWithdrawAmount    float64 `json:"minWithdrawAmount" dc:"最低提现金额(USD,保留4位小数)"`
 	MaxWithdrawAmount    float64 `json:"maxWithdrawAmount" dc:"最高提现金额(USD,保留4位小数)"`
 	Fee                  float64 `json:"fee" dc:"手续费(保留4位小数)"`
+	Animation            string  `json:"animation" dc:"进场特效动画资源文件名(mp4)"`
 }
 
 type UpdateVipCfgRes struct {
@@ -80,6 +84,7 @@ type AppVipCfgItem struct {
 	MinWithdrawAmount    float64 `json:"minWithdrawAmount"`
 	MaxWithdrawAmount    float64 `json:"maxWithdrawAmount"`
 	Fee                  float64 `json:"fee"`
+	Animation            string  `json:"animation" dc:"进场特效动画完整URL"`
 }
 
 // AppVipCfgByLevelReq App端按等级查询VIP配置

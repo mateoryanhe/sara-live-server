@@ -8,6 +8,7 @@ import (
 	"xr-game-server/dto/vipcfgdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
+	"xr-game-server/module/upload"
 )
 
 type vipCfgSnapshot struct {
@@ -57,6 +58,7 @@ func toAppVipCfgItem(row *entity.VipCfg) *vipcfgdto.AppVipCfgItem {
 		MinWithdrawAmount:    row.MinWithdrawAmount,
 		MaxWithdrawAmount:    row.MaxWithdrawAmount,
 		Fee:                  row.Fee,
+		Animation:            upload.GetUrlByName(row.Animation),
 	}
 }
 

@@ -8,10 +8,15 @@ import (
 	"xr-game-server/dto/vipcfgdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
+	"xr-game-server/module/upload"
 )
 
 func GetList(_ context.Context, req *vipcfgdto.VipCfgListReq) (*httpserver.CMSQueryResp, error) {
 	total, list := vipcfgdao.GetList(req)
+	for _, res := range list {
+		res.AnimationName = res.Animation
+		res.Animation = upload.GetUrlByName(res.AnimationName)
+	}
 	return &httpserver.CMSQueryResp{Total: total, Data: list}, nil
 }
 
@@ -31,6 +36,7 @@ func Create(_ context.Context, req *vipcfgdto.CreateVipCfgReq) (*vipcfgdto.Creat
 		MinWithdrawAmount:    req.MinWithdrawAmount,
 		MaxWithdrawAmount:    req.MaxWithdrawAmount,
 		Fee:                  req.Fee,
+		Animation:            req.Animation,
 	}
 	if err := vipcfgdao.Create(row); err != nil {
 		return nil, err
@@ -58,6 +64,7 @@ func Update(_ context.Context, req *vipcfgdto.UpdateVipCfgReq) (*vipcfgdto.Updat
 	row.MinWithdrawAmount = req.MinWithdrawAmount
 	row.MaxWithdrawAmount = req.MaxWithdrawAmount
 	row.Fee = req.Fee
+	row.Animation = req.Animation
 	if err := vipcfgdao.Update(row); err != nil {
 		return nil, err
 	}
