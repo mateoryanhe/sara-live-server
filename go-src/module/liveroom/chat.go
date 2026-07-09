@@ -53,6 +53,7 @@ func SendChat(ctx context.Context, req *liveroomdto.SendChatReq) (*liveroomdto.S
 // SendPrivateRoomChat 私密房文字消息(不执行禁言逻辑,仅发送者与目标用户可见)
 func SendPrivateRoomChat(ctx context.Context, req *liveroomdto.SendPrivateRoomChatReq) (*liveroomdto.SendPrivateRoomChatRes, error) {
 	content := strings.TrimSpace(req.Content)
+
 	if content == "" {
 		return nil, errercode.CreateCode(errercode.SysError)
 	}
@@ -66,16 +67,11 @@ func SendPrivateRoomChat(ctx context.Context, req *liveroomdto.SendPrivateRoomCh
 		return nil, errercode.CreateCode(errercode.SysError)
 	}
 
-	anchorRoomId := resolvePrivateRoomAnchorId(senderId, targetId)
-	if anchorRoomId == 0 {
-		return nil, errercode.CreateCode(errercode.InvalidParam)
-	}
-
 	if err := aliyunmoderation.RequireTextCompliant(aliyunmoderation.SceneChat, content); err != nil {
 		return nil, err
 	}
 
-	pushPrivateRoomChat(anchorRoomId, senderId, targetId, content)
+	pushPrivateRoomChat(senderId, targetId, content)
 	return &liveroomdto.SendPrivateRoomChatRes{Success: true}, nil
 }
 
@@ -89,10 +85,9 @@ func resolvePrivateRoomAnchorId(userId, targetId uint64) uint64 {
 	return 0
 }
 
-func pushPrivateRoomChat(anchorRoomId, senderId, targetId uint64, content string) {
+func pushPrivateRoomChat(senderId, targetId uint64, content string) {
 	sender := userinfodao.GetUserInfoByUserId(senderId)
 	payload := &liveroomdto.PrivateRoomChatPushItem{
-		RoomId:   strconv.FormatUint(anchorRoomId, 10),
 		TargetId: strconv.FormatUint(targetId, 10),
 		SenderId: strconv.FormatUint(senderId, 10),
 		Content:  content,
