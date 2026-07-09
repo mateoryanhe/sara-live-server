@@ -1,17 +1,16 @@
 package httpserver
 
 import (
-	"time"
-
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
 func apiResponseMiddleware(r *ghttp.Request) {
-	preHandlerMs := preHandlerDurationMs(r)
-	handlerStart := time.Now()
+	logRequestBodyBeforeHandler(r)
+	handlerStart := gtime.Now()
 	r.Middleware.Next()
-	handlerMs := time.Since(handlerStart).Milliseconds()
-	writeResponseAndLog(r, authIdFromRequest(r), preHandlerMs, handlerMs, func(res any) any {
+	logAPIRequestHandler(r, elapsedMs(handlerStart))
+	writeResponse(r, func(res any) any {
 		return CreateSuccess(res)
 	})
 }

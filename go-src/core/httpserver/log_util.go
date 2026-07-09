@@ -1,95 +1,36 @@
 package httpserver
 
 import (
-	"context"
-	"fmt"
 	"strings"
-	"time"
+	"xr-game-server/core/xrjson"
 
-	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
+// 日志记录链条
+// 收到前端请求 → 鉴权完成 → 读取请求Body → Handler执行完成 → 应答写入缓冲区 → 应答输出完成(gzip+写出)
 const (
-	logBodySkipped       = "[文件/图片上传,已省略报文]"
-	logRespSkippedBySize = "[响应体已省略,大小=%v字节]"
-	apiRequestEndLogKey  = "apiRequestEndLog"
-	apiRequestTimingKey  = "apiRequestTiming"
+	logBodyFileSkipped            = "[文件已省略,不输出内容]"
+	logBodySkippedNonJSON         = "[非JSON报文,已省略内容]"
+	apiResponseBufferWrittenAtKey = "apiResponseBufferWrittenAt"
 )
 
-type apiRequestTiming struct {
-	EnterTime              string
-	WaitBeforeMiddlewareMs int64
-}
-
-type apiRequestLog struct {
-	Phase                  string
-	Message                string
-	ReqId                  string
-	Url                    string
-	Ip                     string
-	AuthId                 string
-	EnterTime              string
-	WaitBeforeMiddlewareMs int64
-	Body                   any
-	DurationMs             int64
-	PreHandlerMs           int64
-	HandlerMs              int64
-	SerializeMs            int64
-	RespBytes              int
-	Code                   int
-	Response               any
-	Err                    error
-	Stack                  string
-	SlowBreakdown          bool
-}
-
-// shouldSkipLogBody 请求体为 multipart 文件/图片上传时,日志不输出原始报文
-func shouldSkipLogBody(r *ghttp.Request) bool {
+func logAPIRequestStart(r *ghttp.Request) {
 	if r == nil {
-		return false
+		return
 	}
-	ct := strings.ToLower(r.Header.Get("Content-Type"))
-	if strings.HasPrefix(ct, "multipart/form-data") {
-		return true
-	}
-	if strings.HasPrefix(ct, "image/") {
-		return true
-	}
-	if strings.HasPrefix(ct, "application/octet-stream") {
-		return true
-	}
-	if r.GetUploadFile("file") != nil {
-		return true
-	}
-	return false
-}
-
-func requestBodyForLog(r *ghttp.Request) any {
-	if shouldSkipLogBody(r) {
-		return logBodySkipped
-	}
-	return r.GetBodyString()
-}
-
-func responseBodyForLog(r *ghttp.Request, resp []byte, slowBreakdown bool) any {
-	if shouldSkipLogBody(r) {
-		return logBodySkipped
-	}
-	if slowBreakdown {
-		return fmt.Sprintf(logRespSkippedBySize, len(resp))
-	}
-	return string(resp)
-}
-
-func slowTimingSuffix(entry apiRequestLog) string {
-	if !entry.SlowBreakdown {
-		return ""
-	}
-	return fmt.Sprintf(",enterTime=%v,waitBeforeMiddlewareMs=%vms,preHandlerMs=%vms,handlerMs=%vms,serializeMs=%vms,respBytes=%v",
-		entry.EnterTime, entry.WaitBeforeMiddlewareMs, entry.PreHandlerMs, entry.HandlerMs, entry.SerializeMs, entry.RespBytes)
+	g.Log().Infof(r.Context(),
+		"收到前端请求,time=%v,enterTime=%v,从队列进入到中间件时间间隔Ms=%vms,method=%v,url=%v,ip=%v,headers=%s",
+		gtime.Now().Time.Format("2006-01-02 15:04:05.000"),
+		requestEnterTimeStr(r),
+		waitBeforeMiddlewareMs(r),
+		r.Method,
+		r.RequestURI,
+		r.GetClientIp(),
+		requestHeadersForLog(r),
+	)
 }
 
 func requestEnterTimeStr(r *ghttp.Request) string {
@@ -99,193 +40,263 @@ func requestEnterTimeStr(r *ghttp.Request) string {
 	return r.EnterTime.Time.Format("2006-01-02 15:04:05.000")
 }
 
-func stashRequestTiming(r *ghttp.Request) {
+func waitBeforeMiddlewareMs(r *ghttp.Request) int64 {
 	if r == nil || r.EnterTime == nil {
-		return
+		return -1
 	}
-	r.SetCtxVar(apiRequestTimingKey, &apiRequestTiming{
-		EnterTime:              requestEnterTimeStr(r),
-		WaitBeforeMiddlewareMs: gtime.Now().Sub(r.EnterTime).Milliseconds(),
-	})
+	return gtime.Now().Sub(r.EnterTime).Milliseconds()
 }
 
-func getRequestTiming(r *ghttp.Request) apiRequestTiming {
+func requestHeadersForLog(r *ghttp.Request) string {
+	if r == nil || r.Request == nil {
+		return "{}"
+	}
+	headers := make(map[string][]string, len(r.Request.Header))
+	for k, v := range r.Request.Header {
+		headers[k] = v
+	}
+	return string(xrjson.MustMarshal(headers))
+}
+
+func logAPIRequestAuth(r *ghttp.Request, authMs int64) {
 	if r == nil {
-		return apiRequestTiming{}
-	}
-	v := r.GetCtxVar(apiRequestTimingKey)
-	if v.IsNil() {
-		return apiRequestTiming{EnterTime: requestEnterTimeStr(r)}
-	}
-	timing, ok := v.Val().(*apiRequestTiming)
-	if !ok || timing == nil {
-		return apiRequestTiming{EnterTime: requestEnterTimeStr(r)}
-	}
-	return *timing
-}
-
-func logTimeNow() string {
-	return time.Now().Format("2006-01-02 15:04:05.000")
-}
-
-func logAPIRequest(ctx context.Context, entry apiRequestLog) {
-	now := logTimeNow()
-	if entry.Phase == "start" {
-		g.Log().Infof(ctx, "time=%v,%v,enterTime=%v,waitBeforeMiddlewareMs=%vms,reqId=%v,url=%v,ip=%v,authId=%v",
-			now, entry.Message, entry.EnterTime, entry.WaitBeforeMiddlewareMs, entry.ReqId, entry.Url, entry.Ip, entry.AuthId)
 		return
 	}
-	if entry.Body != nil {
-		if entry.Err != nil {
-			g.Log().Infof(ctx, "time=%v,reqId=%v,%v,处理时间=%vms,url=%v,ip=%v,authId=%v,请求数据=%v,错误信息=%v",
-				now, entry.ReqId, entry.Message, entry.DurationMs, entry.Url, entry.Ip, entry.AuthId, entry.Body, entry.Err)
-			if entry.Stack != "" {
-				g.Log().Errorf(ctx, "time=%v,reqId=%v,url=%v,堆栈信息=%v", now, entry.ReqId, entry.Url, entry.Stack)
-			}
-			return
+	g.Log().Infof(r.Context(),
+		"鉴权完成,time=%v,reqId=%v,authId=%v,authMs=%vms",
+		gtime.Now().Time.Format("2006-01-02 15:04:05.000"),
+		r.GetHeader(ReqId, ""),
+		authIdFromRequest(r),
+		authMs,
+	)
+}
+
+func elapsedMs(start *gtime.Time) int64 {
+	if start == nil {
+		return -1
+	}
+	return gtime.Now().Sub(start).Milliseconds()
+}
+
+func logRequestBodyBeforeHandler(r *ghttp.Request) {
+	if r == nil {
+		return
+	}
+	bodyStart := gtime.Now()
+	bodyContent, bodyLength := requestBodyContentForLog(r)
+	logAPIRequestBody(r, elapsedMs(bodyStart), bodyLength, bodyContent)
+}
+
+func requestBodyContentForLog(r *ghttp.Request) (string, int) {
+	if r == nil {
+		return "", 0
+	}
+	ct := strings.ToLower(r.Header.Get("Content-Type"))
+	if isMultipartRequest(ct) {
+		return multipartFormContentForLog(r)
+	}
+	if strings.Contains(ct, "application/x-www-form-urlencoded") {
+		return formContentForLog(r)
+	}
+	if isBinaryUploadContentType(ct) {
+		return logBodyFileSkipped, int(r.ContentLength)
+	}
+
+	body := r.GetBodyString()
+	bodyLength := len(body)
+	if bodyLength == 0 {
+		return "", 0
+	}
+	if isJSONRequestBody(r, body) {
+		return body, bodyLength
+	}
+	return logBodySkippedNonJSON, bodyLength
+}
+
+func formContentForLog(r *ghttp.Request) (string, int) {
+	formMap := r.GetFormMap()
+	if len(formMap) == 0 {
+		return "", 0
+	}
+	content := string(xrjson.MustMarshal(formMap))
+	return content, len(content)
+}
+
+func multipartFormContentForLog(r *ghttp.Request) (string, int) {
+	form := r.GetMultipartForm()
+	logMap := make(map[string]any)
+
+	for k, v := range r.GetFormMap() {
+		logMap[k] = v
+	}
+	if form != nil {
+		for name, values := range form.Value {
+			logMap[name] = multipartValuesForLog(values)
 		}
-		g.Log().Infof(ctx, "time=%v,reqId=%v,%v,处理时间=%vms,url=%v,ip=%v,authId=%v,请求数据=%v,",
-			now, entry.ReqId, entry.Message, entry.DurationMs, entry.Url, entry.Ip, entry.AuthId, entry.Body)
-		return
-	}
-	if entry.Code != 0 {
-		if entry.Err != nil {
-			g.Log().Infof(ctx, "time=%v,reqId=%v,%v,处理时间=%vms,url=%v,ip=%v,authId=%v,响应错误码=%v,错误信息=%v,",
-				now, entry.ReqId, entry.Message, entry.DurationMs, entry.Url, entry.Ip, entry.AuthId, entry.Code, entry.Err)
-			return
+		for name := range form.File {
+			logMap[name] = uploadFilesMetaForLog(r.GetUploadFiles(name))
 		}
-		g.Log().Infof(ctx, "time=%v,reqId=%v,%v,处理时间=%vms,url=%v,ip=%v,authId=%v,响应错误码=%v,",
-			now, entry.ReqId, entry.Message, entry.DurationMs, entry.Url, entry.Ip, entry.AuthId, entry.Code)
+	}
+	if len(logMap) == 0 {
+		return "", 0
+	}
+	content := string(xrjson.MustMarshal(logMap))
+	bodyLength := int(r.ContentLength)
+	if bodyLength <= 0 {
+		bodyLength = len(content)
+	}
+	return content, bodyLength
+}
+
+func multipartValuesForLog(values []string) any {
+	if len(values) == 0 {
+		return ""
+	}
+	if len(values) == 1 {
+		return values[0]
+	}
+	return values
+}
+
+func isMultipartRequest(contentType string) bool {
+	return strings.Contains(contentType, "multipart/")
+}
+
+func uploadFilesMetaForLog(files ghttp.UploadFiles) any {
+	if len(files) == 0 {
+		return map[string]any{"skipped": logBodyFileSkipped}
+	}
+	if len(files) == 1 {
+		return uploadFileMetaForLog(files[0])
+	}
+	metas := make([]map[string]any, 0, len(files))
+	for _, file := range files {
+		metas = append(metas, uploadFileMetaForLog(file))
+	}
+	return metas
+}
+
+func uploadFileMetaForLog(file *ghttp.UploadFile) map[string]any {
+	if file == nil {
+		return map[string]any{"skipped": logBodyFileSkipped}
+	}
+	return map[string]any{
+		"filename": file.Filename,
+		"size":     file.Size,
+		"skipped":  logBodyFileSkipped,
+	}
+}
+
+func isBinaryUploadContentType(contentType string) bool {
+	return strings.HasPrefix(contentType, "image/") || contentType == "application/octet-stream"
+}
+
+func logAPIRequestBody(r *ghttp.Request, bodyMs int64, bodyLength int, bodyContent string) {
+	if r == nil {
 		return
 	}
-	g.Log().Infof(ctx, "time=%v,reqId=%v,%v,处理时间=%vms%s,url=%v,ip=%v,authId=%v,响应数据=%v",
-		now, entry.ReqId, entry.Message, entry.DurationMs, slowTimingSuffix(entry), entry.Url, entry.Ip, entry.AuthId, entry.Response)
+	g.Log().Infof(r.Context(),
+		"读取请求Body,time=%v,reqId=%v,authId=%v,bodyMs=%vms,bodyLength=%v,bodyContent=%s",
+		gtime.Now().Time.Format("2006-01-02 15:04:05.000"),
+		r.GetHeader(ReqId, ""),
+		authIdFromRequest(r),
+		bodyMs,
+		bodyLength,
+		bodyContent,
+	)
 }
 
-func logAPIRequestStart(r *ghttp.Request, authId, message string) {
-	timing := getRequestTiming(r)
-	logAPIRequest(r.Context(), apiRequestLog{
-		Phase:                  "start",
-		Message:                message,
-		ReqId:                  r.GetHeader(ReqId, ""),
-		Url:                    r.URL.RequestURI(),
-		Ip:                     r.GetClientIp(),
-		AuthId:                 authId,
-		EnterTime:              timing.EnterTime,
-		WaitBeforeMiddlewareMs: timing.WaitBeforeMiddlewareMs,
-	})
-}
-
-func logAPIRequestEnd(r *ghttp.Request, authId, message string, durationMs, preHandlerMs, handlerMs, serializeMs int64, respBytes int, slowBreakdown bool, code int, body, response any, err error, stack string) {
-	timing := getRequestTiming(r)
-	entry := apiRequestLog{
-		Phase:                  "end",
-		Message:                message,
-		ReqId:                  r.GetHeader(ReqId, ""),
-		Url:                    r.URL.RequestURI(),
-		Ip:                     r.GetClientIp(),
-		AuthId:                 authId,
-		EnterTime:              timing.EnterTime,
-		WaitBeforeMiddlewareMs: timing.WaitBeforeMiddlewareMs,
-		DurationMs:             durationMs,
-		PreHandlerMs:           preHandlerMs,
-		HandlerMs:              handlerMs,
-		SerializeMs:            serializeMs,
-		RespBytes:              respBytes,
-		SlowBreakdown:          slowBreakdown,
-		Err:                    err,
-		Stack:                  stack,
+func logAPIRequestHandler(r *ghttp.Request, handlerMs int64) {
+	if r == nil {
+		return
 	}
-	if code != 0 {
-		entry.Code = code
-	}
-	if body != nil {
-		entry.Body = body
-	}
-	if response != nil {
-		entry.Response = response
-	}
-	logAPIRequest(r.Context(), entry)
+	g.Log().Infof(r.Context(),
+		"Handler执行完成,time=%v,reqId=%v,authId=%v,handlerMs=%vms,url=%v",
+		gtime.Now().Time.Format("2006-01-02 15:04:05.000"),
+		r.GetHeader(ReqId, ""),
+		authIdFromRequest(r),
+		handlerMs,
+		r.RequestURI,
+	)
 }
 
-type apiRequestEndPending struct {
-	AuthId       string
-	SysError     bool
-	Code         int
-	Resp         []byte
-	PreHandlerMs int64
-	HandlerMs    int64
-	SerializeMs  int64
-	RespBytes    int
+func logAPIRequestResponseWrite(r *ghttp.Request, writeMs int64, respBytes int) {
+	if r == nil {
+		return
+	}
+	g.Log().Infof(r.Context(),
+		"应答写入缓冲区,time=%v,reqId=%v,authId=%v,writeMs=%vms,respBytes=%v,url=%v",
+		gtime.Now().Time.Format("2006-01-02 15:04:05.000"),
+		r.GetHeader(ReqId, ""),
+		authIdFromRequest(r),
+		writeMs,
+		respBytes,
+		r.RequestURI,
+	)
 }
 
-func stashAPIRequestEndLog(r *ghttp.Request, pending *apiRequestEndPending) {
-	r.SetCtxVar(apiRequestEndLogKey, pending)
+func stashAPIResponseBufferWrittenAt(r *ghttp.Request) {
+	if r == nil {
+		return
+	}
+	r.SetCtxVar(apiResponseBufferWrittenAtKey, gtime.Now())
 }
 
-func hookAPIRequestEndLog(r *ghttp.Request) {
-	v := r.GetCtxVar(apiRequestEndLogKey)
+func hookAPIRequestAfterOutput(r *ghttp.Request) {
+	if r == nil {
+		return
+	}
+	v := r.GetCtxVar(apiResponseBufferWrittenAtKey)
 	if v.IsNil() {
 		return
 	}
-	pending, ok := v.Val().(*apiRequestEndPending)
-	if !ok || pending == nil {
+	writtenAt, ok := v.Val().(*gtime.Time)
+	if !ok || writtenAt == nil {
 		return
 	}
 	if r.LeaveTime == nil {
 		r.LeaveTime = gtime.Now()
 	}
-	durationMs := requestDurationMs(r)
-	slowBreakdown := durationMs >= LongDoTime
-	err := r.GetError()
-	if err != nil {
-		if pending.SysError {
-			logAPIRequestEnd(r, pending.AuthId, "出现无法捕获的错误", durationMs,
-				pending.PreHandlerMs, pending.HandlerMs, pending.SerializeMs, pending.RespBytes, slowBreakdown,
-				0, requestBodyForLog(r), nil, err, gerror.Stack(err))
-			return
-		}
-		logAPIRequestEnd(r, pending.AuthId, "错误码应答", durationMs,
-			pending.PreHandlerMs, pending.HandlerMs, pending.SerializeMs, pending.RespBytes, slowBreakdown,
-			pending.Code, nil, nil, err, "")
-		return
-	}
-
-	message := "正常响应"
-	if slowBreakdown {
-		message = "请求处理时间过长"
-	}
-	logAPIRequestEnd(r, pending.AuthId, message, durationMs,
-		pending.PreHandlerMs, pending.HandlerMs, pending.SerializeMs, pending.RespBytes, slowBreakdown,
-		0, nil, responseBodyForLog(r, pending.Resp, slowBreakdown), nil, "")
+	logAPIRequestAfterOutput(r, elapsedMs(writtenAt))
 }
 
-// requestDurationMs 从请求进入到当前时刻/LeaveTime 的耗时(毫秒).
-// HookAfterOutput 中的总耗时包含:读请求体、鉴权、业务处理、JSON序列化、写响应、gzip 等.
+func logAPIRequestAfterOutput(r *ghttp.Request, afterOutputMs int64) {
+	if r == nil {
+		return
+	}
+	g.Log().Infof(r.Context(),
+		"应答输出完成,time=%v,reqId=%v,authId=%v,afterOutputMs=%vms,gzip=%v,totalMs=%vms,url=%v",
+		gtime.Now().Time.Format("2006-01-02 15:04:05.000"),
+		r.GetHeader(ReqId, ""),
+		authIdFromRequest(r),
+		afterOutputMs,
+		strings.EqualFold(r.Response.Header().Get("Content-Encoding"), "gzip"),
+		requestDurationMs(r),
+		r.RequestURI,
+	)
+}
+
 func requestDurationMs(r *ghttp.Request) int64 {
 	if r == nil || r.EnterTime == nil {
 		return -1
 	}
 	if r.LeaveTime != nil {
-
 		return r.LeaveTime.Sub(r.EnterTime).Milliseconds()
 	}
-
 	return gtime.Now().Sub(r.EnterTime).Milliseconds()
 }
 
-func authIdFromToken(r *ghttp.Request) string {
-	token := r.GetHeader("Authorization", "")
-	if token == "" {
-		return ""
+func isJSONRequestBody(r *ghttp.Request, body string) bool {
+	ct := strings.ToLower(r.Header.Get("Content-Type"))
+	if strings.Contains(ct, "application/json") || strings.Contains(ct, "+json") {
+		return true
 	}
-	return strings.Split(token, ".")[0]
-}
-
-// authIdFromRequest App 从 Authorization 解析,CMS 从 authId header 读取
-func authIdFromRequest(r *ghttp.Request) string {
-	if id := authIdFromToken(r); id != "" {
-		return id
+	body = strings.TrimSpace(body)
+	if len(body) >= 2 && body[0] == '{' && body[len(body)-1] == '}' {
+		return true
 	}
-	return r.GetHeader(AuthId)
+	if len(body) >= 2 && body[0] == '[' && body[len(body)-1] == ']' {
+		return true
+	}
+	return false
 }

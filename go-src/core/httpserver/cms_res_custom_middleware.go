@@ -1,16 +1,15 @@
 package httpserver
 
 import (
-	"time"
-
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
 // cms应答结果
 func customResponseMiddleware(r *ghttp.Request) {
-	preHandlerMs := preHandlerDurationMs(r)
-	handlerStart := time.Now()
+	logRequestBodyBeforeHandler(r)
+	handlerStart := gtime.Now()
 	r.Middleware.Next()
-	handlerMs := time.Since(handlerStart).Milliseconds()
-	writeResponseAndLog(r, authIdFromRequest(r), preHandlerMs, handlerMs, nil)
+	logAPIRequestHandler(r, elapsedMs(handlerStart))
+	writeResponse(r, nil)
 }

@@ -33,4 +33,5 @@ func WriteFailJson(r *ghttp.Request, code int) {
 	resp.Message = errercode.GetMsg(errercode.XRCode(code), GetLang(r))
 	r.Response.Header().Set("Content-Type", contentTypeJson)
 	r.Response.Write(xrjson.MustMarshal(resp))
+	stashAPIResponseBufferWrittenAt(r)
 }

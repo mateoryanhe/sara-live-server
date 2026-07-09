@@ -2,10 +2,10 @@ package httpserver
 
 import (
 	"errors"
-	"time"
 	"xr-game-server/core/xrjson"
 
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/os/gtime"
 	"xr-game-server/errercode"
 )
 
@@ -58,25 +58,11 @@ func buildResponseResult(r *ghttp.Request, wrapSuccess func(any) any) responseBu
 	}
 }
 
-func preHandlerDurationMs(r *ghttp.Request) int64 {
-	return requestDurationMs(r)
-}
-
-func writeResponseAndLog(r *ghttp.Request, authId string, preHandlerMs, handlerMs int64, wrapSuccess func(any) any) {
-	serializeStart := time.Now()
+func writeResponse(r *ghttp.Request, wrapSuccess func(any) any) {
+	writeStart := gtime.Now()
 	result := buildResponseResult(r, wrapSuccess)
 	r.Response.Header().Set("Content-Type", contentTypeJson)
 	r.Response.Write(result.resp)
-	serializeMs := time.Since(serializeStart).Milliseconds()
-
-	stashAPIRequestEndLog(r, &apiRequestEndPending{
-		AuthId:       authId,
-		SysError:     result.sysError,
-		Code:         result.code,
-		Resp:         result.resp,
-		PreHandlerMs: preHandlerMs,
-		HandlerMs:    handlerMs,
-		SerializeMs:  serializeMs,
-		RespBytes:    len(result.resp),
-	})
+	stashAPIResponseBufferWrittenAt(r)
+	logAPIRequestResponseWrite(r, elapsedMs(writeStart), len(result.resp))
 }

@@ -2,6 +2,8 @@ package httpserver
 
 import (
 	"context"
+	"strings"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/util/gconv"
@@ -12,7 +14,6 @@ const (
 	Ws              = "/ws"
 	Token           = "token"
 	AuthId          = "authId"
-	LongDoTime      = 400
 	contentTypeJson = "application/json"
 	ReqId           = "reqId"
 )
@@ -27,7 +28,7 @@ func InitHttpServer() {
 	if g.Cfg().MustGet(context.Background(), "server.gzipEnabled").Bool() {
 		httpServer.Use(ghttp.MiddlewareGzip)
 	}
-	httpServer.BindHookHandler("/*", ghttp.HookAfterOutput, hookAPIRequestEndLog)
+	httpServer.BindHookHandler("/*", ghttp.HookAfterOutput, hookAPIRequestAfterOutput)
 	httpServer.Run()
 }
 
@@ -37,6 +38,22 @@ func GetAuthId(ctx context.Context) uint64 {
 		return 0
 	}
 	return gconv.Uint64(authIdFromRequest(r))
+}
+
+func authIdFromToken(r *ghttp.Request) string {
+	token := r.GetHeader("Authorization", "")
+	if token == "" {
+		return ""
+	}
+	return strings.Split(token, ".")[0]
+}
+
+// authIdFromRequest App 从 Authorization 解析,CMS 从 authId header 读取
+func authIdFromRequest(r *ghttp.Request) string {
+	if id := authIdFromToken(r); id != "" {
+		return id
+	}
+	return r.GetHeader(AuthId)
 }
 
 func beforeServeHook(r *ghttp.Request) {

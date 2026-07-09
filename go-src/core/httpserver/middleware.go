@@ -27,17 +27,13 @@ func middlewareCORS(r *ghttp.Request) {
 	r.Middleware.Next()
 }
 
-// 记录前端请求日志
+// 请求入口:收到 header 后记录日志,关机时拒绝新请求
 func middlewareLogReq(r *ghttp.Request) {
-	stashRequestTiming(r)
-	authId := authIdFromRequest(r)
+	logAPIRequestStart(r)
 	if !canDo {
-		logAPIRequestStart(r, authId, "关机了,收到前端请求")
 		WriteFailJson(r, int(errercode.ServerClose))
 		return
 	}
-
-	logAPIRequestStart(r, authId, "收到前端请求")
 	r.Middleware.Next()
 }
 
