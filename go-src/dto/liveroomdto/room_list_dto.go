@@ -49,3 +49,20 @@ type GetFollowedLiveRoomListReq struct {
 	PageSize     int `json:"pageSize" dc:"每页数量(默认20,最大100)"`
 	StatusFilter int `json:"statusFilter" dc:"状态过滤(0=全部,1=仅直播中,2=仅未开播/已下播)"`
 }
+
+const (
+	NearbyLiveRoomDirectionDown = 1 // 往下列表序号更大的直播间(在线人数更少)
+	NearbyLiveRoomDirectionUp   = 2 // 往下列表序号更小的直播间(在线人数更多)
+)
+
+// GetNearbyLiveRoomListReq App 以当前直播间为锚点,按列表顺序获取相邻的直播中直播间
+type GetNearbyLiveRoomListReq struct {
+	g.Meta    `path:"/nearbyRoomList" method:"post" summary:"查询相邻直播间列表" tags:"直播间"`
+	RoomId    uint64 `json:"roomId,string" v:"required#直播间ID不能为空" dc:"当前直播间ID"`
+	Direction int    `json:"direction" v:"required|in:1,2#方向不能为空|方向无效" dc:"方向(1=往下,2=往上)"`
+	Count     int    `json:"count" dc:"获取数量(默认1,最大20)"`
+}
+
+type GetNearbyLiveRoomListRes struct {
+	List []*LiveRoomListItem `json:"list" dc:"相邻直播间列表(不含当前房间,仅直播中)"`
+}

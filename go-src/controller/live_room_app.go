@@ -77,6 +77,11 @@ func (c *LiveRoomAppController) RoomList(ctx context.Context, req *liveroomdto.G
 	return liveroom.GetRoomList(ctx, req)
 }
 
+// NearbyRoomList 以当前直播间为锚点查询相邻直播中直播间
+func (c *LiveRoomAppController) NearbyRoomList(ctx context.Context, req *liveroomdto.GetNearbyLiveRoomListReq) (res *liveroomdto.GetNearbyLiveRoomListRes, err error) {
+	return liveroom.GetNearbyLiveRoomList(ctx, req)
+}
+
 // FollowedRoomList 分页查询我关注的直播间列表
 func (c *LiveRoomAppController) FollowedRoomList(ctx context.Context, req *liveroomdto.GetFollowedLiveRoomListReq) (res *liveroomdto.GetLiveRoomListRes, err error) {
 	return liveroom.GetFollowedRoomList(ctx, req)

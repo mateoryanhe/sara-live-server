@@ -39,7 +39,7 @@ const (
 	LiveRoomAudienceLeave = 21
 	//直播间付费弹幕推送(房间内全体在线用户)
 	LiveRoomPaidDanmaku = 22
-	//主播下播推送(推送给直播间在线观众,不含主播)
+	//主播下播推送(全服广播)
 	LiveRoomStopLive = 23
 	//观众列表刷新推送(房间内全体在线用户,含主播)
 	LiveRoomAudienceListRefresh = 24
@@ -61,6 +61,6 @@ const (
 	LiveRoomCallTimeout = 32
 	//直播间主播接听通话推送(推送给直播间在线观众,不含主播与呼叫者)
 	LiveRoomCallAnchorAcceptedAudience = 33
-	//主播开播推送(推送给直播间在线观众,不含主播)
+	//主播开播推送(全服广播)
 	LiveRoomStartLive = 34
 )

@@ -25,6 +25,9 @@ const (
 	roomListDefaultPageSize = 20
 	roomListMaxPageSize     = 100
 	roomListRefreshInterval = 10 * time.Minute
+
+	nearbyLiveRoomDefaultCount = 1
+	nearbyLiveRoomMaxCount     = 20
 )
 
 var (
@@ -50,11 +53,39 @@ func flushRoomList(ctx context.Context) {
 		filtered = append(filtered, room)
 	}
 
+	onlineCounts := make(map[uint64]int, len(filtered))
+	for _, room := range filtered {
+		onlineCounts[room.ID] = countAudienceInRoom(room.ID)
+	}
+
 	sort.Slice(filtered, func(i, j int) bool {
-		return liveRoomHeartTimeUnix(filtered[i]) > liveRoomHeartTimeUnix(filtered[j])
+		return compareLiveRoomsForList(filtered[i], filtered[j], onlineCounts)
 	})
 
 	roomListCache.Store(filtered)
+}
+
+func compareLiveRoomsForList(a, b *entity.LiveRoom, onlineCounts map[uint64]int) bool {
+	if a == nil {
+		return false
+	}
+	if b == nil {
+		return true
+	}
+	liveA := a.LiveRecordId > 0
+	liveB := b.LiveRecordId > 0
+	if liveA != liveB {
+		return liveA
+	}
+	onlineA := onlineCounts[a.ID]
+	onlineB := onlineCounts[b.ID]
+	if onlineA != onlineB {
+		return onlineA > onlineB
+	}
+	if liveRoomHeartTimeUnix(a) != liveRoomHeartTimeUnix(b) {
+		return liveRoomHeartTimeUnix(a) > liveRoomHeartTimeUnix(b)
+	}
+	return a.ID > b.ID
 }
 
 func liveRoomHeartTimeUnix(room *entity.LiveRoom) int64 {
@@ -268,4 +299,64 @@ func GetFollowedRoomList(ctx context.Context, req *liveroomdto.GetFollowedLiveRo
 		PageSize: pageSize,
 		List:     list,
 	}, nil
+}
+
+func normalizeNearbyLiveRoomCount(count int) int {
+	if count <= 0 {
+		return nearbyLiveRoomDefaultCount
+	}
+	if count > nearbyLiveRoomMaxCount {
+		return nearbyLiveRoomMaxCount
+	}
+	return count
+}
+
+func findLiveRoomIndex(rooms []*entity.LiveRoom, roomId uint64) int {
+	for i, room := range rooms {
+		if room != nil && room.ID == roomId {
+			return i
+		}
+	}
+	return -1
+}
+
+func collectNearbyLiveRooms(rooms []*entity.LiveRoom, currentIdx, direction, count int) []*entity.LiveRoom {
+	if currentIdx < 0 || len(rooms) == 0 || count <= 0 {
+		return make([]*entity.LiveRoom, 0)
+	}
+	result := make([]*entity.LiveRoom, 0, count)
+	switch direction {
+	case liveroomdto.NearbyLiveRoomDirectionDown:
+		for i := currentIdx + 1; i < len(rooms) && len(result) < count; i++ {
+			result = append(result, rooms[i])
+		}
+	case liveroomdto.NearbyLiveRoomDirectionUp:
+		for i := currentIdx - 1; i >= 0 && len(result) < count; i-- {
+			result = append(result, rooms[i])
+		}
+	}
+	return result
+}
+
+// GetNearbyLiveRoomList App 以当前直播间为锚点,获取列表中相邻的直播中直播间(走内存缓存排序)
+func GetNearbyLiveRoomList(ctx context.Context, req *liveroomdto.GetNearbyLiveRoomListReq) (*liveroomdto.GetNearbyLiveRoomListRes, error) {
+	userId := httpserver.GetAuthId(ctx)
+	count := normalizeNearbyLiveRoomCount(req.Count)
+
+	cached := getRoomListCache()
+	if cached == nil {
+		return &liveroomdto.GetNearbyLiveRoomListRes{
+			List: make([]*liveroomdto.LiveRoomListItem, 0),
+		}, nil
+	}
+
+	liveRooms := filterRoomsByStatus(cached, int(userstatus.LiveRoomStatusLive))
+	currentIdx := findLiveRoomIndex(liveRooms, req.RoomId)
+	nearbyRooms := collectNearbyLiveRooms(liveRooms, currentIdx, req.Direction, count)
+
+	list := buildLiveRoomListItems(nearbyRooms, userId)
+	if len(list) == 0 {
+		list = make([]*liveroomdto.LiveRoomListItem, 0)
+	}
+	return &liveroomdto.GetNearbyLiveRoomListRes{List: list}, nil
 }

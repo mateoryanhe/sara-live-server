@@ -122,7 +122,7 @@ type LiveRoomPrivateChatPushResp struct {
 
 // LiveRoomStartLivePushReq cmd=34 主播开播
 type LiveRoomStartLivePushReq struct {
-	g.Meta `path:"/liveRoomStartLive" method:"post" summary:"推送 cmd=34 主播开播(推送给直播间在线观众,不含主播)" description:"主播开播(推送给直播间在线观众,不含主播)" tags:"推送-直播间"`
+	g.Meta `path:"/liveRoomStartLive" method:"post" summary:"推送 cmd=34 主播开播(全服广播)" description:"主播开播(全服广播)" tags:"推送-直播间"`
 }
 
 type LiveRoomStartLivePushResp struct {
@@ -142,7 +142,7 @@ type LiveRoomAudienceListRefreshPushResp struct {
 
 // LiveRoomStopLivePushReq cmd=23 主播下播
 type LiveRoomStopLivePushReq struct {
-	g.Meta `path:"/liveRoomStopLive" method:"post" summary:"推送 cmd=23 主播下播(推送给直播间在线观众,不含主播)" description:"主播下播(推送给直播间在线观众,不含主播)" tags:"推送-直播间"`
+	g.Meta `path:"/liveRoomStopLive" method:"post" summary:"推送 cmd=23 主播下播(全服广播)" description:"主播下播(全服广播)" tags:"推送-直播间"`
 }
 
 type LiveRoomStopLivePushResp struct {

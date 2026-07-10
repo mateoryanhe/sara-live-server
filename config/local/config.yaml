@@ -68,6 +68,6 @@ database:
     level: "all"
     stdout: true
   default:
-    link: "mysql:root:123456@tcp(127.0.0.1:3306)/live_db"
+    link: "mysql:root:root123456@tcp(127.0.0.1:3307)/live_db"
     extra: "charset=utf8mb4&parseTime=True&loc=Local"
     debug: true

@@ -409,7 +409,7 @@ type AnchorBanPushItem struct {
 	BanReason    string `json:"banReason"    dc:"封禁原因"`
 }
 
-// AnchorStopLivePushItem 主播下播推送载荷(推送给直播间在线观众)
+// AnchorStopLivePushItem 主播下播推送载荷(全服广播)
 type AnchorStopLivePushItem struct {
 	RoomId       string `json:"roomId"       dc:"直播间ID"`
 	AnchorId     string `json:"anchorId"     dc:"主播用户ID"`
@@ -417,7 +417,7 @@ type AnchorStopLivePushItem struct {
 	StoppedAt    int64  `json:"stoppedAt"    dc:"下播时间(秒)"`
 }
 
-// AnchorStartLivePushItem 主播开播推送载荷(推送给直播间在线观众)
+// AnchorStartLivePushItem 主播开播推送载荷(全服广播)
 type AnchorStartLivePushItem struct {
 	RoomId       string `json:"roomId"       dc:"直播间ID"`
 	AnchorId     string `json:"anchorId"     dc:"主播用户ID"`

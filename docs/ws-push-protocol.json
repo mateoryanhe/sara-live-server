@@ -357,7 +357,7 @@
       "cmd": 23,
       "name": "LiveRoomStopLive",
       "description": "主播下播",
-      "target": "直播间在线观众(不含主播)",
+      "target": "全服在线用户",
       "dataType": "AnchorStopLivePushItem",
       "data": {
         "roomId": { "type": "string", "json": "roomId", "description": "直播间ID" },
@@ -639,7 +639,7 @@
       "cmd": 34,
       "name": "LiveRoomStartLive",
       "description": "主播开播",
-      "target": "直播间在线观众(不含主播)",
+      "target": "全服在线用户",
       "dataType": "AnchorStartLivePushItem",
       "data": {
         "roomId": { "type": "string", "json": "roomId", "description": "直播间ID" },

@@ -64,10 +64,5 @@ func broadcastAnchorStopLive(roomId, liveRecordId uint64) {
 		LiveRecordId: strconv.FormatUint(liveRecordId, 10),
 		StoppedAt:    time.Now().Unix(),
 	}
-	for _, o := range getOnline(roomId) {
-		if o == roomId {
-			continue
-		}
-		push.Data(o, cmd.LiveRoomStopLive, payload)
-	}
+	push.Broadcast(cmd.LiveRoomStopLive, payload)
 }

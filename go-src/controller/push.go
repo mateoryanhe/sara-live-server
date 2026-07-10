@@ -65,7 +65,7 @@ func (c *PushController) LiveRoomPrivateChat(_ context.Context, _ *pushdto.LiveR
 
 // --- 推送-直播间 ---
 
-// LiveRoomStartLive cmd=34 主播开播
+// LiveRoomStartLive cmd=34 主播开播(全服广播)
 func (c *PushController) LiveRoomStartLive(_ context.Context, _ *pushdto.LiveRoomStartLivePushReq) (*pushdto.LiveRoomStartLivePushResp, error) {
 	return nil, nil
 }
@@ -75,7 +75,7 @@ func (c *PushController) LiveRoomAudienceListRefresh(_ context.Context, _ *pushd
 	return nil, nil
 }
 
-// LiveRoomStopLive cmd=23 主播下播
+// LiveRoomStopLive cmd=23 主播下播(全服广播)
 func (c *PushController) LiveRoomStopLive(_ context.Context, _ *pushdto.LiveRoomStopLivePushReq) (*pushdto.LiveRoomStopLivePushResp, error) {
 	return nil, nil
 }

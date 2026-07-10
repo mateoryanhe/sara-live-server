@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 	"xr-game-server/constants/cmd"
+	"xr-game-server/core/push"
 	"xr-game-server/core/snowflake"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/liveroomdto"
@@ -40,11 +41,11 @@ func StartLive(ctx context.Context, _ *liveroomdto.StartLiveReq) (*liveroomdto.S
 	liveRecord.SetAnchorId(room.ID)
 	//
 	flushOnlineLists(room.ID)
-	pushAnchorStartLiveToAudience(room.ID, liveRecordId, liveRecord.StartTime.Unix())
+	broadcastAnchorStartLive(room.ID, liveRecordId, liveRecord.StartTime.Unix())
 	return &liveroomdto.StartLiveRes{}, nil
 }
 
-func pushAnchorStartLiveToAudience(roomId, liveRecordId uint64, startedAt int64) {
+func broadcastAnchorStartLive(roomId, liveRecordId uint64, startedAt int64) {
 	if roomId == 0 || liveRecordId == 0 {
 		return
 	}
@@ -54,5 +55,5 @@ func pushAnchorStartLiveToAudience(roomId, liveRecordId uint64, startedAt int64)
 		LiveRecordId: strconv.FormatUint(liveRecordId, 10),
 		StartedAt:    startedAt,
 	}
-	PushToRoomAudience(roomId, cmd.LiveRoomStartLive, payload, roomId)
+	push.Broadcast(cmd.LiveRoomStartLive, payload)
 }
