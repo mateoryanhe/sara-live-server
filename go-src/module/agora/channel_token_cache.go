@@ -6,7 +6,6 @@ import (
 
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/xrpool"
-	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userchanneltokendao"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
@@ -49,20 +48,12 @@ func refreshChannelToken(userId uint64, channelName string, build channelTokenBu
 	return token, tokenExpireAt.Unix(), nil
 }
 
-// ResolveLiveRoomToken 查询直播间声网 Token(按配置时间决定同步/后台刷新)
-func ResolveLiveRoomToken(userId, roomId uint64) (token string, expireAt int64, err error) {
-	if liveroomdao.GetRoomById(roomId) == nil {
-		return "", 0, errercode.CreateCode(errercode.LiveRoomNotExist)
+// ResolveChannelToken 按频道名查询声网 Token(频道名与角色由业务方决定)
+func ResolveChannelToken(userId uint64, channelName string, role uint8) (token string, expireAt int64, err error) {
+	if channelName == "" {
+		return "", 0, errercode.CreateCode(errercode.InvalidParam)
 	}
-	channelName := buildChannelName(roomId)
 	return resolveChannelToken(userId, channelName, func() (string, int64, error) {
-		return BuildLiveRoomToken(userId, roomId)
-	})
-}
-
-// ResolveCallToken 查询通话频道声网 Token(按配置时间决定同步/后台刷新)
-func ResolveCallToken(userId uint64, channelName string) (token string, expireAt int64, err error) {
-	return resolveChannelToken(userId, channelName, func() (string, int64, error) {
-		return BuildCallToken(userId, channelName)
+		return BuildChannelToken(userId, channelName, role)
 	})
 }

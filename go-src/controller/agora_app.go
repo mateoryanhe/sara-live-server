@@ -15,7 +15,7 @@ func initAgoraAppController() {
 	httpserver.RegAPI(AgoraAppUrl, &AgoraAppController{})
 }
 
-// LiveRoomToken App端获取进直播间声网Token
+// LiveRoomToken App端上报频道名获取声网Token
 func (c *AgoraAppController) LiveRoomToken(ctx context.Context, req *agoradto.GetLiveRoomTokenReq) (*agoradto.GetLiveRoomTokenRes, error) {
 	return agora.GetLiveRoomToken(ctx, req)
 }

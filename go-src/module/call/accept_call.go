@@ -7,7 +7,8 @@ import (
 
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/calldao"
-	"xr-game-server/dto/calldto"
+	"xr-game-server/dto/agoradto"
+	"xr-game-server/dto/cal
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
 	"xr-game-server/module/agora"
@@ -33,7 +34,7 @@ func AcceptCall(ctx context.Context, req *calldto.AcceptCallReq) (*calldto.Accep
 	}
 
 	channelName := buildCallChannelName(order.CallerId, order.ReceiverId)
-	token, tokenExpireAt, err := agora.ResolveCallToken(receiverId, channelName)
+	token, tokenExpireAt, err := agora.ResolveChannelToken(receiverId, channelName, agoradto.RTCRolePublisher)
 	if err != nil {
 		return nil, err
 	}

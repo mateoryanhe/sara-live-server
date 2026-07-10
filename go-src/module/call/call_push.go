@@ -6,6 +6,7 @@ import (
 	"xr-game-server/constants/cmd"
 	"xr-game-server/core/push"
 	"xr-game-server/dao/userinfodao"
+	"xr-game-server/dto/agoradto"
 	"xr-game-server/dto/calldto"
 	"xr-game-server/entity"
 	"xr-game-server/module/agora"
@@ -16,7 +17,7 @@ import (
 const liveRoomCallRequestMessage = "有人请求跟你通话"
 
 func pushLiveRoomCallRequest(receiverId, callerId, orderId uint64, channelName string, callType uint8) error {
-	receiverToken, _, err := agora.ResolveCallToken(receiverId, channelName)
+	receiverToken, _, err := agora.ResolveChannelToken(receiverId, channelName, agoradto.RTCRolePublisher)
 	if err != nil {
 		return err
 	}

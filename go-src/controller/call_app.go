@@ -20,11 +20,6 @@ func (c *CallAppController) LiveRoomCall(ctx context.Context, req *calldto.LiveR
 	return call.LiveRoomCall(ctx, req)
 }
 
-// CallToken App端获取通话频道Token
-func (c *CallAppController) CallToken(ctx context.Context, req *calldto.CallTokenReq) (*calldto.CallTokenRes, error) {
-	return call.GetCallToken(ctx, req)
-}
-
 // AnchorRejectCall 拒接通话
 func (c *CallAppController) AnchorRejectCall(ctx context.Context, req *calldto.AnchorRejectCallReq) (*calldto.AnchorRejectCallRes, error) {
 	return call.AnchorRejectCall(ctx, req)

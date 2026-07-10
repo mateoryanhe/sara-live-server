@@ -13,6 +13,7 @@ import (
 	"xr-game-server/dao/livefollowdao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
+	"xr-game-server/dto/agoradto"
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/entity"
 	"xr-game-server/module/agora"
@@ -128,7 +129,12 @@ func toLiveRoomListItem(room *entity.LiveRoom, userId uint64) *liveroomdto.LiveR
 	item.OnlineCount = countAudienceInRoom(room.ID)
 
 	if userId > 0 {
-		if token, expireAt, err := agora.ResolveLiveRoomToken(userId, room.ID); err == nil {
+		channelName := strconv.FormatUint(room.ID, 10)
+		role := agoradto.RTCRoleSubscriber
+		if userId == room.ID {
+			role = agoradto.RTCRolePublisher
+		}
+		if token, expireAt, err := agora.ResolveChannelToken(userId, channelName, role); err == nil {
 			item.AgoraToken = token
 			item.AgoraTokenExpireAt = expireAt
 		}

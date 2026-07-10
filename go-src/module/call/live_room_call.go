@@ -9,6 +9,7 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/calldao"
 	"xr-game-server/dao/liveroomdao"
+	"xr-game-server/dto/agoradto"
 	"xr-game-server/dto/calldto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
@@ -71,7 +72,7 @@ func LiveRoomCall(ctx context.Context, req *calldto.LiveRoomCallReq) (*calldto.L
 		return nil, err
 	}
 
-	token, tokenExpireAt, err := agora.ResolveCallToken(callerId, channelName)
+	token, tokenExpireAt, err := agora.ResolveChannelToken(callerId, channelName, agoradto.RTCRolePublisher)
 	if err != nil {
 		return nil, err
 	}

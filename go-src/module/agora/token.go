@@ -2,49 +2,22 @@ package agora
 
 import (
 	"context"
-	rtctokenbuilder "github.com/AgoraIO/Tools/DynamicKey/AgoraDynamicKey/go/src/rtctokenbuilder2"
 	"strconv"
+
+	rtctokenbuilder "github.com/AgoraIO/Tools/DynamicKey/AgoraDynamicKey/go/src/rtctokenbuilder2"
 	"xr-game-server/core/httpserver"
-	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/agoradto"
 	"xr-game-server/errercode"
 	"xr-game-server/module/livecfg"
 )
 
-// BuildLiveRoomToken 为指定用户生成进直播间声网 Token
-func BuildLiveRoomToken(userId, roomId uint64) (token string, expireAt int64, err error) {
-	if liveroomdao.GetRoomById(roomId) == nil {
-		return "", 0, errercode.CreateCode(errercode.LiveRoomNotExist)
-	}
-
-	agoraCfg := getAgoraCfgCache()
-	if err := validateAgoraCfg(agoraCfg); err != nil {
-		return "", 0, err
-	}
-
-	channelName := buildChannelName(roomId)
-	userAccount := buildUserAccount(userId)
-	role := resolveRole(userId, roomId)
-	expireSeconds := getChannelTokenExpireSeconds()
-
-	token, err = rtctokenbuilder.BuildTokenWithUserAccount(
-		agoraCfg.AppId,
-		agoraCfg.AppCertificate,
-		channelName,
-		userAccount,
-		role,
-		expireSeconds,
-		expireSeconds,
-	)
+// BuildChannelToken 为指定频道生成声网 Token(频道名与角色由业务方决定)
+func BuildChannelToken(userId uint64, channelName string, role uint8) (token string, expireAt int64, err error) {
+	rtcRole, err := toRTCRole(role)
 	if err != nil {
 		return "", 0, err
 	}
 
-	return token, int64(expireSeconds), nil
-}
-
-// BuildCallToken 为通话频道生成声网 Token
-func BuildCallToken(userId uint64, channelName string) (token string, expireAt int64, err error) {
 	agoraCfg := getAgoraCfgCache()
 	if err := validateAgoraCfg(agoraCfg); err != nil {
 		return "", 0, err
@@ -57,7 +30,7 @@ func BuildCallToken(userId uint64, channelName string) (token string, expireAt i
 		agoraCfg.AppCertificate,
 		channelName,
 		userAccount,
-		rtctokenbuilder.RolePublisher,
+		rtcRole,
 		expireSeconds,
 		expireSeconds,
 	)
@@ -67,10 +40,24 @@ func BuildCallToken(userId uint64, channelName string) (token string, expireAt i
 	return token, int64(expireSeconds), nil
 }
 
-// GetLiveRoomToken App端上报房间ID,返回进直播间声网Token
+func toRTCRole(role uint8) (rtctokenbuilder.Role, error) {
+	switch role {
+	case agoradto.RTCRolePublisher:
+		return rtctokenbuilder.RolePublisher, nil
+	case agoradto.RTCRoleSubscriber:
+		return rtctokenbuilder.RoleSubscriber, nil
+	default:
+		return 0, errercode.CreateCode(errercode.InvalidParam)
+	}
+}
+
+// GetLiveRoomToken App端上报频道名与角色,返回最新声网Token
 func GetLiveRoomToken(ctx context.Context, req *agoradto.GetLiveRoomTokenReq) (*agoradto.GetLiveRoomTokenRes, error) {
 	userId := httpserver.GetAuthId(ctx)
-	token, expireAt, err := ResolveLiveRoomToken(userId, req.RoomId)
+	if userId == 0 {
+		return nil, errercode.CreateCode(errercode.EmptyUserId)
+	}
+	token, expireAt, err := ResolveChannelToken(userId, req.ChannelName, req.Role)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +66,7 @@ func GetLiveRoomToken(ctx context.Context, req *agoradto.GetLiveRoomTokenReq) (*
 	return &agoradto.GetLiveRoomTokenRes{
 		Token:       token,
 		AppId:       agoraCfg.AppId,
-		ChannelName: buildChannelName(req.RoomId),
+		ChannelName: req.ChannelName,
 		UserAccount: buildUserAccount(userId),
 		ExpireAt:    expireAt,
 	}, nil
@@ -104,11 +91,4 @@ func buildChannelName(roomId uint64) string {
 
 func buildUserAccount(userId uint64) string {
 	return strconv.FormatUint(userId, 10)
-}
-
-func resolveRole(userId, roomId uint64) rtctokenbuilder.Role {
-	if userId == roomId {
-		return rtctokenbuilder.RolePublisher
-	}
-	return rtctokenbuilder.RoleSubscriber
 }

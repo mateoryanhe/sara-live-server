@@ -3,6 +3,7 @@ package userchanneltokendao
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -53,7 +54,7 @@ func AddToCache(row *entity.UserChannelToken) {
 	tokenCacheMgr.FlushCache(buildCacheKey(row.UserId, row.ChannelName), row)
 }
 
-// FlushCache 记录变更后刷新缓存; row为nil时表示声网配置变更,清空全部Token
+// FlushCache 记录变更后刷新缓存; row为nil时表示声网配置变更,批量失效未过期Token
 func FlushCache(row *entity.UserChannelToken) {
 	if row == nil {
 		flushAllOnAgoraCfgChanged()
@@ -66,7 +67,11 @@ func flushAllOnAgoraCfgChanged() {
 	if tokenCacheMgr == nil {
 		return
 	}
-	_, _ = g.DB().Model(string(entity.TbUserChannelToken)).Delete()
+	now := time.Now()
+	_, _ = g.DB().Model(string(entity.TbUserChannelToken)).
+		Data(string(entity.UserChannelTokenExpireAt), now.Add(-time.Hour)).
+		Where(string(entity.UserChannelTokenExpireAt)+" > ?", now).
+		Update()
 	refreshTokenCacheAfterDelete()
 }
 
