@@ -62,3 +62,15 @@ type CallTimeoutPushItem struct {
 	ReceiverId string `json:"receiverId" dc:"接听者ID"`
 	Message    string `json:"message" dc:"提示文案"`
 }
+
+// CallAnchorAcceptedAudiencePushItem 主播接听通话推送载荷(推送给直播间在线观众)
+type CallAnchorAcceptedAudiencePushItem struct {
+	RoomId         string `json:"roomId" dc:"直播间ID"`
+	AnchorId       string `json:"anchorId" dc:"主播ID"`
+	OrderId        string `json:"orderId" dc:"通话订单ID"`
+	CallerId       string `json:"callerId" dc:"呼叫者ID"`
+	CallType       uint8  `json:"callType" dc:"通话类型(1-语音,2-视频)"`
+	AnchorNickname string `json:"anchorNickname" dc:"主播昵称"`
+	AnchorAvatar   string `json:"anchorAvatar" dc:"主播头像"`
+	Message        string `json:"message" dc:"提示文案"`
+}

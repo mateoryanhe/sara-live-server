@@ -26,6 +26,16 @@ const (
 
 // --- 推送-通话 ---
 
+// LiveRoomCallAnchorAcceptedAudiencePushReq cmd=33 主播开始接听视频通话(推送给直播间观众)
+type LiveRoomCallAnchorAcceptedAudiencePushReq struct {
+	g.Meta `path:"/liveRoomCallAnchorAcceptedAudience" method:"post" summary:"推送 cmd=33 主播开始接听视频通话(推送给直播间观众)" description:"主播开始接听视频通话(推送给直播间在线观众,不含主播与呼叫者)" tags:"推送-通话"`
+}
+
+type LiveRoomCallAnchorAcceptedAudiencePushResp struct {
+	Cmd  int                                         `json:"cmd" dc:"命令字 33"`
+	Data *calldto.CallAnchorAcceptedAudiencePushItem `json:"data"`
+}
+
 // LiveRoomCallTimeoutPushReq cmd=32 直播间通话呼叫超时
 type LiveRoomCallTimeoutPushReq struct {
 	g.Meta `path:"/liveRoomCallTimeout" method:"post" summary:"推送 cmd=32 直播间通话呼叫超时(推送给呼叫者与接听者)" description:"直播间通话呼叫超时(推送给呼叫者与接听者)" tags:"推送-通话"`

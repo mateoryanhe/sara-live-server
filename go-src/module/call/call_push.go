@@ -9,6 +9,7 @@ import (
 	"xr-game-server/dto/calldto"
 	"xr-game-server/entity"
 	"xr-game-server/module/agora"
+	"xr-game-server/module/liveroom"
 	"xr-game-server/module/upload"
 )
 
@@ -66,6 +67,32 @@ func pushCallAccepted(callerId, receiverId, orderId uint64, channelName string, 
 		item.ReceiverAvatar = upload.ResolveAvatarUrlForUser(receiverId, u.Avatar)
 	}
 	push.Data(callerId, cmd.LiveRoomCallAccepted, item)
+}
+
+const liveRoomCallAnchorAcceptedAudienceMessage = "主播开始接听视频通话"
+
+func pushLiveRoomCallAcceptedToAudience(order *entity.CallOrder) {
+	if order == nil || order.Source != entity.CallOrderSourceLiveRoom {
+		return
+	}
+	if order.CallType != entity.CallOrderTypeVideo {
+		return
+	}
+
+	roomId := order.ReceiverId
+	item := &calldto.CallAnchorAcceptedAudiencePushItem{
+		RoomId:   strconv.FormatUint(roomId, 10),
+		AnchorId: strconv.FormatUint(roomId, 10),
+		OrderId:  strconv.FormatUint(order.ID, 10),
+		CallerId: strconv.FormatUint(order.CallerId, 10),
+		CallType: order.CallType,
+		Message:  liveRoomCallAnchorAcceptedAudienceMessage,
+	}
+	if u := userinfodao.GetUserInfoByUserId(roomId); u != nil {
+		item.AnchorNickname = u.Nickname
+		item.AnchorAvatar = upload.ResolveAvatarUrlForUser(roomId, u.Avatar)
+	}
+	liveroom.PushToRoomAudience(roomId, cmd.LiveRoomCallAnchorAcceptedAudience, item, roomId, order.CallerId)
 }
 
 const liveRoomCallEndedMessage = "通话已结束"

@@ -52,6 +52,7 @@ func AcceptCall(ctx context.Context, req *calldto.AcceptCallReq) (*calldto.Accep
 	}
 
 	pushCallAccepted(order.CallerId, receiverId, order.ID, channelName, order.CallType)
+	pushLiveRoomCallAcceptedToAudience(order)
 
 	appId := ""
 	if agoraCfg, err := agora.GetAppId(ctx, nil); err == nil && agoraCfg != nil {

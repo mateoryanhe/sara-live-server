@@ -16,6 +16,11 @@ func initPushController() {
 
 // --- 推送-通话 ---
 
+// LiveRoomCallAnchorAcceptedAudience cmd=33 主播开始接听视频通话(推送给直播间观众)
+func (c *PushController) LiveRoomCallAnchorAcceptedAudience(_ context.Context, _ *pushdto.LiveRoomCallAnchorAcceptedAudiencePushReq) (*pushdto.LiveRoomCallAnchorAcceptedAudiencePushResp, error) {
+	return nil, nil
+}
+
 // LiveRoomCallTimeout cmd=32 直播间通话呼叫超时
 func (c *PushController) LiveRoomCallTimeout(_ context.Context, _ *pushdto.LiveRoomCallTimeoutPushReq) (*pushdto.LiveRoomCallTimeoutPushResp, error) {
 	return nil, nil
