@@ -1,5 +1,7 @@
 package errercode
 
+import "errors"
+
 type XRCode int
 
 const (
@@ -182,4 +184,10 @@ func CreateCodeAndParam(code XRCode, param any) error {
 		xcode: code,
 		Param: param,
 	}
+}
+
+// IsBusiness 是否为业务预期错误(如参数非法、余额不足等),此类错误无需记录堆栈
+func IsBusiness(err error) bool {
+	var bizErr *XError
+	return errors.As(err, &bizErr)
 }
