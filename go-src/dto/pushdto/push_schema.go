@@ -120,6 +120,16 @@ type LiveRoomPrivateChatPushResp struct {
 
 // --- 推送-直播间 ---
 
+// LiveRoomStartLivePushReq cmd=34 主播开播
+type LiveRoomStartLivePushReq struct {
+	g.Meta `path:"/liveRoomStartLive" method:"post" summary:"推送 cmd=34 主播开播(推送给直播间在线观众,不含主播)" description:"主播开播(推送给直播间在线观众,不含主播)" tags:"推送-直播间"`
+}
+
+type LiveRoomStartLivePushResp struct {
+	Cmd  int                                  `json:"cmd" dc:"命令字 34"`
+	Data *liveroomdto.AnchorStartLivePushItem `json:"data"`
+}
+
 // LiveRoomAudienceListRefreshPushReq cmd=24 观众列表刷新
 type LiveRoomAudienceListRefreshPushReq struct {
 	g.Meta `path:"/liveRoomAudienceListRefresh" method:"post" summary:"推送 cmd=24 观众列表刷新(房间内全体在线用户,含主播)" description:"观众列表刷新(房间内全体在线用户,含主播)" tags:"推送-直播间"`

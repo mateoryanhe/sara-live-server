@@ -65,6 +65,11 @@ func (c *PushController) LiveRoomPrivateChat(_ context.Context, _ *pushdto.LiveR
 
 // --- 推送-直播间 ---
 
+// LiveRoomStartLive cmd=34 主播开播
+func (c *PushController) LiveRoomStartLive(_ context.Context, _ *pushdto.LiveRoomStartLivePushReq) (*pushdto.LiveRoomStartLivePushResp, error) {
+	return nil, nil
+}
+
 // LiveRoomAudienceListRefresh cmd=24 观众列表刷新
 func (c *PushController) LiveRoomAudienceListRefresh(_ context.Context, _ *pushdto.LiveRoomAudienceListRefreshPushReq) (*pushdto.LiveRoomAudienceListRefreshPushResp, error) {
 	return nil, nil

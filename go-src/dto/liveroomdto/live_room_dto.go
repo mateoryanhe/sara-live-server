@@ -416,3 +416,11 @@ type AnchorStopLivePushItem struct {
 	LiveRecordId string `json:"liveRecordId" dc:"本场直播记录ID"`
 	StoppedAt    int64  `json:"stoppedAt"    dc:"下播时间(秒)"`
 }
+
+// AnchorStartLivePushItem 主播开播推送载荷(推送给直播间在线观众)
+type AnchorStartLivePushItem struct {
+	RoomId       string `json:"roomId"       dc:"直播间ID"`
+	AnchorId     string `json:"anchorId"     dc:"主播用户ID"`
+	LiveRecordId string `json:"liveRecordId" dc:"本场直播记录ID"`
+	StartedAt    int64  `json:"startedAt"    dc:"开播时间(秒)"`
+}

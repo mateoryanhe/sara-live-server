@@ -61,4 +61,6 @@ const (
 	LiveRoomCallTimeout = 32
 	//直播间主播接听通话推送(推送给直播间在线观众,不含主播与呼叫者)
 	LiveRoomCallAnchorAcceptedAudience = 33
+	//主播开播推送(推送给直播间在线观众,不含主播)
+	LiveRoomStartLive = 34
 )
