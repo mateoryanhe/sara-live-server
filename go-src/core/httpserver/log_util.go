@@ -220,18 +220,19 @@ func logAPIRequestHandler(r *ghttp.Request, handlerMs int64) {
 	)
 }
 
-func logAPIRequestResponseWrite(r *ghttp.Request, writeMs int64, respBytes int) {
+func logAPIRequestResponseWrite(r *ghttp.Request, writeMs int64, respBytes int, respContent string) {
 	if r == nil {
 		return
 	}
 	g.Log().Infof(r.Context(),
-		"应答序列化,写入框架缓冲区,time=%v,reqId=%v,authId=%v,writeMs=%vms,respBytes=%v,url=%v",
+		"应答序列化,写入框架缓冲区,time=%v,reqId=%v,authId=%v,writeMs=%vms,respBytes=%v,url=%v,respContent=%s",
 		gtime.Now().Time.Format("2006-01-02 15:04:05.000"),
 		r.GetHeader(ReqId, ""),
 		authIdFromRequest(r),
 		writeMs,
 		respBytes,
 		r.RequestURI,
+		respContent,
 	)
 }
 

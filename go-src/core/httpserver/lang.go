@@ -5,6 +5,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/os/gtime"
 	"xr-game-server/constants/lang"
 	"xr-game-server/core/xrjson"
 	"xr-game-server/errercode"
@@ -29,9 +30,13 @@ func GetLangFromContext(ctx context.Context) lang.Lang {
 
 // WriteFailJson 将错误码与本地化文字写回客户端(供中间件等无法借助主响应中间件的场景使用)
 func WriteFailJson(r *ghttp.Request, code int) {
+	writeStart := gtime.Now()
 	resp := CreateFail(code)
 	resp.Message = errercode.GetMsg(errercode.XRCode(code), GetLang(r))
+	respBody := xrjson.MustMarshal(resp)
+	respContent := string(respBody)
 	r.Response.Header().Set("Content-Type", contentTypeJson)
-	r.Response.Write(xrjson.MustMarshal(resp))
+	r.Response.Write(respBody)
 	stashAPIResponseBufferWrittenAt(r)
+	logAPIRequestResponseWrite(r, elapsedMs(writeStart), len(respBody), respContent)
 }

@@ -61,8 +61,9 @@ func buildResponseResult(r *ghttp.Request, wrapSuccess func(any) any) responseBu
 func writeResponse(r *ghttp.Request, wrapSuccess func(any) any) {
 	writeStart := gtime.Now()
 	result := buildResponseResult(r, wrapSuccess)
+	respContent := string(result.resp)
 	r.Response.Header().Set("Content-Type", contentTypeJson)
 	r.Response.Write(result.resp)
 	stashAPIResponseBufferWrittenAt(r)
-	logAPIRequestResponseWrite(r, elapsedMs(writeStart), len(result.resp))
+	logAPIRequestResponseWrite(r, elapsedMs(writeStart), len(result.resp), respContent)
 }
