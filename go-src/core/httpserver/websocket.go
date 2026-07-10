@@ -22,7 +22,7 @@ import (
 
 const (
 	// SendTimeOut 批量发送等待窗口,窗口内消息合并一次发送
-	SendTimeOut = 10 * time.Millisecond
+	SendTimeOut = 1 * time.Millisecond
 	// IdleTime 空闲超过该时间才发送心跳
 	IdleTime        = 5000 * time.Millisecond
 	defaultMaxBatch = 10
