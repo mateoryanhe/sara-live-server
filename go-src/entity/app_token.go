@@ -52,7 +52,7 @@ func (t *AppToken) SetExpireAt(v time.Time) {
 
 func initAppToken() {
 
-	syndb.RegLazyWithLarge(TbAppToken, AppTokenToken)
-	syndb.RegLazyWithLarge(TbAppToken, AppTokenExpireAt)
+	syndb.RegLazy(TbAppToken, AppTokenToken)
+	syndb.RegLazy(TbAppToken, AppTokenExpireAt)
 	migrate.AutoMigrate(&AppToken{})
 }

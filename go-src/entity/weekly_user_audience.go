@@ -51,8 +51,8 @@ func (r *WeeklyUserAudience) SetCreatedAt(v *time.Time) {
 }
 
 func initWeeklyUserAudience() {
-	syndb.RegLazyWithMiddle(TbWeeklyUserAudience, db.CreatedAtName)
-	syndb.RegLazyWithMiddle(TbWeeklyUserAudience, WeeklyUserAudienceUserId)
-	syndb.RegLazyWithMiddle(TbWeeklyUserAudience, WeeklyUserAudienceAudienceWeek)
+	syndb.RegLazy(TbWeeklyUserAudience, db.CreatedAtName)
+	syndb.RegLazy(TbWeeklyUserAudience, WeeklyUserAudienceUserId)
+	syndb.RegLazy(TbWeeklyUserAudience, WeeklyUserAudienceAudienceWeek)
 	migrate.AutoMigrate(&WeeklyUserAudience{})
 }

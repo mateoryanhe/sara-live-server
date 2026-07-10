@@ -41,10 +41,10 @@ func NewName(val string, typeId DbNameType) *Name {
 func initName() {
 	migrate.AutoMigrate(&Name{})
 
-	syndb.RegLazyWithSmall(TbName, NameVal)
-	syndb.RegLazyWithSmall(TbName, NameTypeId)
-	syndb.RegLazyWithSmall(TbName, db.CreatedAtName)
-	syndb.RegLazyWithSmall(TbName, db.UpdatedAtName)
+	syndb.RegLazy(TbName, NameVal)
+	syndb.RegLazy(TbName, NameTypeId)
+	syndb.RegLazy(TbName, db.CreatedAtName)
+	syndb.RegLazy(TbName, db.UpdatedAtName)
 }
 
 func (receiver *Name) SetVal(val string) {

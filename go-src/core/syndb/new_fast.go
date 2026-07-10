@@ -8,24 +8,14 @@ import (
 )
 
 const (
-	QuickSynPeriod = 10
+	// QuickSynPeriod 快速缓冲默认 500ms 落库(配合 500ms consume,目标约 1 秒内入库)
+	QuickSynPeriod = 500
 )
 
 var quickMap = make(map[string]*ColSynCache)
 
-func RegQuickWithSmall(tbName db.TbName, tbCol db.TbCol) {
-	regQuick(tbName, tbCol)
-}
-
-func RegQuickWithMiddle(tbName db.TbName, tbCol db.TbCol) {
-	regQuick(tbName, tbCol)
-}
-
-func RegQuickWithLarge(tbName db.TbName, tbCol db.TbCol) {
-	regQuick(tbName, tbCol)
-}
-
-func regQuick(tbName db.TbName, tbCol db.TbCol) {
+// RegQuick 注册快速缓冲列(约 1 秒内落库,周期见 bufferSize.db.fast.period)
+func RegQuick(tbName db.TbName, tbCol db.TbCol) {
 	colKey := string(tbName) + ":" + string(tbCol)
 	period := QuickSynPeriod
 	if cfg.FastDbBufferCfg.Period > common.Zero {

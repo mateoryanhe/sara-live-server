@@ -34,14 +34,14 @@ type PlayerRank struct {
 }
 
 func initPlayerRankChan() {
-	syndb.RegLazyWithMiddle(TbPlayerRank, PlayerRankRoleId)
-	syndb.RegLazyWithMiddle(TbPlayerRank, PlayerRankVal)
-	syndb.RegLazyWithMiddle(TbPlayerRank, PlayerRankTypeId)
-	syndb.RegLazyWithMiddle(TbPlayerRank, PlayerRankLock)
-	syndb.RegLazyWithMiddle(TbPlayerRank, PlayerRankLockTime)
+	syndb.RegLazy(TbPlayerRank, PlayerRankRoleId)
+	syndb.RegLazy(TbPlayerRank, PlayerRankVal)
+	syndb.RegLazy(TbPlayerRank, PlayerRankTypeId)
+	syndb.RegLazy(TbPlayerRank, PlayerRankLock)
+	syndb.RegLazy(TbPlayerRank, PlayerRankLockTime)
 
-	syndb.RegLazyWithMiddle(TbPlayerRank, db.CreatedAtName)
-	syndb.RegLazyWithMiddle(TbPlayerRank, db.UpdatedAtName)
+	syndb.RegLazy(TbPlayerRank, db.CreatedAtName)
+	syndb.RegLazy(TbPlayerRank, db.UpdatedAtName)
 }
 
 func initRank() {

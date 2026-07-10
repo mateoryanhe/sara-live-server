@@ -36,13 +36,13 @@ server:
 bufferSize:
   db:
     lazy:
-      period: 15000 #懒缓冲池频率,15秒同步数据库
+      period: 15000 # 懒缓冲落库周期(毫秒),15秒
     fast:
-      period: 30 #快速缓冲池频率,50毫秒同步数据库
-  websocket: #websocket缓冲池大小--个人玩家缓冲池
-    period: 10 #推送缓冲池频率
-  goPool: #协程池大小
-    size: 100
+      period: 500 # 快速缓冲落库周期(毫秒),配合500ms调度,约1秒内入库
+  websocket:
+    size: 30 # 推送批量大小(未配置时默认10)
+  goPool:
+    size: 100 # 协程池大小(未配置时走默认池)
 
 
 logger:

@@ -97,10 +97,10 @@ func (m *LiveGuildMember) SetUpdatedAtOnly(v time.Time) {
 }
 
 func initGuildMember() {
-	syndb.RegQuickWithLarge(TbLiveGuildMember, db.CreatedAtName)
-	syndb.RegQuickWithLarge(TbLiveGuildMember, db.UpdatedAtName)
-	syndb.RegQuickWithLarge(TbLiveGuildMember, GuildMemberGuildId)
-	syndb.RegQuickWithLarge(TbLiveGuildMember, GuildMemberUserId)
-	syndb.RegQuickWithLarge(TbLiveGuildMember, GuildMemberStatus)
+	syndb.RegQuick(TbLiveGuildMember, db.CreatedAtName)
+	syndb.RegQuick(TbLiveGuildMember, db.UpdatedAtName)
+	syndb.RegQuick(TbLiveGuildMember, GuildMemberGuildId)
+	syndb.RegQuick(TbLiveGuildMember, GuildMemberUserId)
+	syndb.RegQuick(TbLiveGuildMember, GuildMemberStatus)
 	migrate.AutoMigrate(&LiveGuildMember{})
 }

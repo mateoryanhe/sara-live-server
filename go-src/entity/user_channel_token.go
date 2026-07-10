@@ -53,8 +53,8 @@ func (m *UserChannelToken) SetChannelName(v string) {
 }
 
 func initUserChannelToken() {
-	syndb.RegQuickWithLarge(TbUserChannelToken, UserChannelTokenToken)
-	syndb.RegQuickWithMiddle(TbUserChannelToken, UserChannelTokenExpireAt)
-	syndb.RegQuickWithMiddle(TbUserChannelToken, UserChannelTokenChannelName)
+	syndb.RegQuick(TbUserChannelToken, UserChannelTokenToken)
+	syndb.RegQuick(TbUserChannelToken, UserChannelTokenExpireAt)
+	syndb.RegQuick(TbUserChannelToken, UserChannelTokenChannelName)
 	migrate.AutoMigrate(&UserChannelToken{})
 }

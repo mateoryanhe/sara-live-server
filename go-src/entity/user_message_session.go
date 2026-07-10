@@ -72,9 +72,9 @@ func (m *UserMessageSession) SetUpdatedAt(v time.Time) {
 }
 
 func initUserMessageSession() {
-	syndb.RegQuickWithLarge(TbUserMessageSession, db.CreatedAtName)
-	syndb.RegQuickWithLarge(TbUserMessageSession, db.UpdatedAtName)
-	syndb.RegQuickWithLarge(TbUserMessageSession, UserMessageSessionMessageId)
-	syndb.RegQuickWithLarge(TbUserMessageSession, UserMessageSessionSessionId)
+	syndb.RegQuick(TbUserMessageSession, db.CreatedAtName)
+	syndb.RegQuick(TbUserMessageSession, db.UpdatedAtName)
+	syndb.RegQuick(TbUserMessageSession, UserMessageSessionMessageId)
+	syndb.RegQuick(TbUserMessageSession, UserMessageSessionSessionId)
 	migrate.AutoMigrate(&UserMessageSession{})
 }

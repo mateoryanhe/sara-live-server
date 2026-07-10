@@ -146,21 +146,21 @@ func (r *RechargeOrder) SetUpdatedAt(v time.Time) {
 }
 
 func initRechargeOrder() {
-	syndb.RegQuickWithMiddle(TbRechargeOrder, db.CreatedAtName)
-	syndb.RegQuickWithMiddle(TbRechargeOrder, db.UpdatedAtName)
+	syndb.RegQuick(TbRechargeOrder, db.CreatedAtName)
+	syndb.RegQuick(TbRechargeOrder, db.UpdatedAtName)
 
-	syndb.RegQuickWithMiddle(TbRechargeOrder, RechargeOrderUserId)
-	syndb.RegQuickWithMiddle(TbRechargeOrder, RechargeOrderCfgId)
-	syndb.RegQuickWithMiddle(TbRechargeOrder, RechargeOrderPrice)
-	syndb.RegQuickWithMiddle(TbRechargeOrder, RechargeOrderCurrency)
-	syndb.RegQuickWithMiddle(TbRechargeOrder, RechargeOrderGold)
-	syndb.RegQuickWithMiddle(TbRechargeOrder, RechargeOrderStatus)
-	syndb.RegQuickWithMiddle(TbRechargeOrder, RechargeOrderSource)
-	syndb.RegQuickWithMiddle(TbRechargeOrder, RechargeOrderPayChannel)
-	syndb.RegQuickWithMiddle(TbRechargeOrder, RechargeOrderThirdOrderId)
-	syndb.RegQuickWithMiddle(TbRechargeOrder, RechargeOrderRemark)
-	syndb.RegQuickWithMiddle(TbRechargeOrder, RechargeOrderOperatorId)
-	syndb.RegQuickWithMiddle(TbRechargeOrder, RechargeOrderPaidAt)
+	syndb.RegQuick(TbRechargeOrder, RechargeOrderUserId)
+	syndb.RegQuick(TbRechargeOrder, RechargeOrderCfgId)
+	syndb.RegQuick(TbRechargeOrder, RechargeOrderPrice)
+	syndb.RegQuick(TbRechargeOrder, RechargeOrderCurrency)
+	syndb.RegQuick(TbRechargeOrder, RechargeOrderGold)
+	syndb.RegQuick(TbRechargeOrder, RechargeOrderStatus)
+	syndb.RegQuick(TbRechargeOrder, RechargeOrderSource)
+	syndb.RegQuick(TbRechargeOrder, RechargeOrderPayChannel)
+	syndb.RegQuick(TbRechargeOrder, RechargeOrderThirdOrderId)
+	syndb.RegQuick(TbRechargeOrder, RechargeOrderRemark)
+	syndb.RegQuick(TbRechargeOrder, RechargeOrderOperatorId)
+	syndb.RegQuick(TbRechargeOrder, RechargeOrderPaidAt)
 
 	migrate.AutoMigrate(&RechargeOrder{})
 }

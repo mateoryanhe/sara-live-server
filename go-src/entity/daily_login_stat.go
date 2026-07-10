@@ -131,14 +131,14 @@ func (receiver *DailyLoginStat) AddAudienceUserCount(n uint64) {
 }
 
 func initDailyLoginStat() {
-	syndb.RegLazyWithMiddle(TbDailyLoginStat, DailyLoginStatCount)
-	syndb.RegLazyWithMiddle(TbDailyLoginStat, DailyLoginStatRegisterCount)
-	syndb.RegLazyWithMiddle(TbDailyLoginStat, DailyLoginStatRechargeAmount)
-	syndb.RegLazyWithMiddle(TbDailyLoginStat, DailyLoginStatGoldConsumeAmount)
-	syndb.RegLazyWithMiddle(TbDailyLoginStat, DailyLoginStatDiamondConsumeAmount)
-	syndb.RegLazyWithMiddle(TbDailyLoginStat, DailyLoginStatRechargeUserCount)
-	syndb.RegLazyWithMiddle(TbDailyLoginStat, DailyLoginStatGoldConsumeUserCount)
-	syndb.RegLazyWithMiddle(TbDailyLoginStat, DailyLoginStatDiamondConsumeUserCount)
-	syndb.RegLazyWithMiddle(TbDailyLoginStat, DailyLoginStatAudienceUserCount)
+	syndb.RegLazy(TbDailyLoginStat, DailyLoginStatCount)
+	syndb.RegLazy(TbDailyLoginStat, DailyLoginStatRegisterCount)
+	syndb.RegLazy(TbDailyLoginStat, DailyLoginStatRechargeAmount)
+	syndb.RegLazy(TbDailyLoginStat, DailyLoginStatGoldConsumeAmount)
+	syndb.RegLazy(TbDailyLoginStat, DailyLoginStatDiamondConsumeAmount)
+	syndb.RegLazy(TbDailyLoginStat, DailyLoginStatRechargeUserCount)
+	syndb.RegLazy(TbDailyLoginStat, DailyLoginStatGoldConsumeUserCount)
+	syndb.RegLazy(TbDailyLoginStat, DailyLoginStatDiamondConsumeUserCount)
+	syndb.RegLazy(TbDailyLoginStat, DailyLoginStatAudienceUserCount)
 	migrate.AutoMigrate(&DailyLoginStat{})
 }

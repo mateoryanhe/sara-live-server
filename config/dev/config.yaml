@@ -23,35 +23,22 @@ server:
   # PProf配置
   pprofEnabled: true # 是否开启PProf性能调试特性。默认为false
   pprofPattern: "/66dcd8e25ab3b339546ea1de5eb2d443e6fca76c76d11709f10533be8bd87d7d/pprof"    # 开启PProf时有效，表示PProf特性的页面访问路径，对当前Server绑定的所有域名有效
-  # memoryLimitM: 512 # Go堆内存软上限(MB),不设置则默认400M
   ####自定义配置
   exitTime: 5 #退出系统等待多少秒，开始发送kill -9
   dumpRouterMap: false
   memoryLimitM: 300
-  # 多域名静态目录与HTTPS证书(SNI),详见 config/local/config.yaml 示例
-  # 多域名静态目录与HTTPS证书(SNI), 不同域名指向不同静态目录
-  # domainSites:
-  #   - domain: "cms.bigtktool.shop"
-   #    root: "/home/ec2-user/cdn/cms"
-   #    certFile: "/root/.acme.sh/cms.bigtktool.shop_ecc/fullchain.pem"
-    #   keyFile: "/root/.acme.sh/cms.bigtktool.shop_ecc/privkey.pem"
-
-
-
-
-
+  # domainSites 多域名示例见 config/local/config.yaml
 
 bufferSize:
   db:
     lazy:
-      period: 15000 #懒缓冲池频率,15秒同步数据库
+      period: 15000 # 懒缓冲落库周期(毫秒),15秒
     fast:
-      period: 30 #快速缓冲池频率,50毫秒同步数据库
-  websocket: #websocket缓冲池大小--个人玩家缓冲池
-    period: 100 #推送缓冲池频率
-  goPool: #协程池大小
-    size: 300
-
+      period: 500 # 快速缓冲落库周期(毫秒),配合500ms调度,约1秒内入库
+  websocket:
+    size: 30 # 推送批量大小(未配置时默认10)
+  goPool:
+    size: 300 # 协程池大小(未配置时走默认池)
 
 logger:
   path: "/home/ec2-user/log/"           # 日志文件路径。默认为空，表示关闭，仅输出到终端
@@ -68,7 +55,6 @@ logger:
   rotateBackupExpire: "2d"
   stdoutColorDisabled: false                 # 关闭终端的颜色打印。默认开启
   writerColorEnable: true                 # 日志文件是否带上颜色。默认false，表示不带颜色
-
 
 database:
   logger:

@@ -59,8 +59,8 @@ func (r *MonthlyUserLogin) SetCreatedAt(v *time.Time) {
 }
 
 func initMonthlyUserLogin() {
-	syndb.RegLazyWithMiddle(TbMonthlyUserLogin, db.CreatedAtName)
-	syndb.RegLazyWithMiddle(TbMonthlyUserLogin, MonthlyUserLoginUserId)
-	syndb.RegLazyWithMiddle(TbMonthlyUserLogin, MonthlyUserLoginLoginMonth)
+	syndb.RegLazy(TbMonthlyUserLogin, db.CreatedAtName)
+	syndb.RegLazy(TbMonthlyUserLogin, MonthlyUserLoginUserId)
+	syndb.RegLazy(TbMonthlyUserLogin, MonthlyUserLoginLoginMonth)
 	migrate.AutoMigrate(&MonthlyUserLogin{})
 }

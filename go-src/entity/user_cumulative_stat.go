@@ -142,16 +142,16 @@ func (receiver *UserCumulativeStat) SetUpdatedAt(val time.Time) {
 }
 
 func initUserCumulativeStat() {
-	syndb.RegLazyWithMiddle(TbUserCumulativeStat, db.CreatedAtName)
-	syndb.RegLazyWithMiddle(TbUserCumulativeStat, db.UpdatedAtName)
-	syndb.RegLazyWithMiddle(TbUserCumulativeStat, UserCumulativeStatTotalRecharge)
-	syndb.RegLazyWithMiddle(TbUserCumulativeStat, UserCumulativeStatTotalWithdraw)
-	syndb.RegLazyWithMiddle(TbUserCumulativeStat, UserCumulativeStatTotalFans)
-	syndb.RegLazyWithMiddle(TbUserCumulativeStat, UserCumulativeStatTotalFollow)
-	syndb.RegLazyWithMiddle(TbUserCumulativeStat, UserCumulativeStatTotalPayCount)
-	syndb.RegLazyWithMiddle(TbUserCumulativeStat, UserCumulativeStatTotalDiamondConsume)
-	syndb.RegLazyWithMiddle(TbUserCumulativeStat, UserCumulativeStatTotalGoldConsume)
-	syndb.RegLazyWithMiddle(TbUserCumulativeStat, UserCumulativeStatTotalLiveDuration)
+	syndb.RegLazy(TbUserCumulativeStat, db.CreatedAtName)
+	syndb.RegLazy(TbUserCumulativeStat, db.UpdatedAtName)
+	syndb.RegLazy(TbUserCumulativeStat, UserCumulativeStatTotalRecharge)
+	syndb.RegLazy(TbUserCumulativeStat, UserCumulativeStatTotalWithdraw)
+	syndb.RegLazy(TbUserCumulativeStat, UserCumulativeStatTotalFans)
+	syndb.RegLazy(TbUserCumulativeStat, UserCumulativeStatTotalFollow)
+	syndb.RegLazy(TbUserCumulativeStat, UserCumulativeStatTotalPayCount)
+	syndb.RegLazy(TbUserCumulativeStat, UserCumulativeStatTotalDiamondConsume)
+	syndb.RegLazy(TbUserCumulativeStat, UserCumulativeStatTotalGoldConsume)
+	syndb.RegLazy(TbUserCumulativeStat, UserCumulativeStatTotalLiveDuration)
 
 	migrate.AutoMigrate(&UserCumulativeStat{})
 }

@@ -59,8 +59,8 @@ func (r *WeeklyUserRecharge) SetCreatedAt(v *time.Time) {
 }
 
 func initWeeklyUserRecharge() {
-	syndb.RegLazyWithMiddle(TbWeeklyUserRecharge, db.CreatedAtName)
-	syndb.RegLazyWithMiddle(TbWeeklyUserRecharge, WeeklyUserRechargeUserId)
-	syndb.RegLazyWithMiddle(TbWeeklyUserRecharge, WeeklyUserRechargeRechargeWeek)
+	syndb.RegLazy(TbWeeklyUserRecharge, db.CreatedAtName)
+	syndb.RegLazy(TbWeeklyUserRecharge, WeeklyUserRechargeUserId)
+	syndb.RegLazy(TbWeeklyUserRecharge, WeeklyUserRechargeRechargeWeek)
 	migrate.AutoMigrate(&WeeklyUserRecharge{})
 }

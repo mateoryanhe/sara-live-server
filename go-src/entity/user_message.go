@@ -88,12 +88,12 @@ func (m *UserMessage) SetUpdatedAt(v time.Time) {
 }
 
 func initUserMessage() {
-	syndb.RegQuickWithLarge(TbUserMessage, db.CreatedAtName)
-	syndb.RegQuickWithLarge(TbUserMessage, db.UpdatedAtName)
-	syndb.RegQuickWithLarge(TbUserMessage, UserMessageType)
-	syndb.RegQuickWithLarge(TbUserMessage, UserMessageSenderId)
-	syndb.RegQuickWithLarge(TbUserMessage, UserMessageReceiverId)
-	syndb.RegQuickWithLarge(TbUserMessage, UserMessageTitle)
-	syndb.RegQuickWithLarge(TbUserMessage, UserMessageContent)
+	syndb.RegQuick(TbUserMessage, db.CreatedAtName)
+	syndb.RegQuick(TbUserMessage, db.UpdatedAtName)
+	syndb.RegQuick(TbUserMessage, UserMessageType)
+	syndb.RegQuick(TbUserMessage, UserMessageSenderId)
+	syndb.RegQuick(TbUserMessage, UserMessageReceiverId)
+	syndb.RegQuick(TbUserMessage, UserMessageTitle)
+	syndb.RegQuick(TbUserMessage, UserMessageContent)
 	migrate.AutoMigrate(&UserMessage{})
 }

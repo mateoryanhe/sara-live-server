@@ -128,13 +128,13 @@ func (s *SystemTotalStat) touchUpdatedAt() {
 }
 
 func initSystemTotalStat() {
-	syndb.RegLazyWithMiddle(TbSystemTotalStat, db.CreatedAtName)
-	syndb.RegLazyWithMiddle(TbSystemTotalStat, db.UpdatedAtName)
-	syndb.RegLazyWithMiddle(TbSystemTotalStat, SystemTotalStatTotalGold)
-	syndb.RegLazyWithMiddle(TbSystemTotalStat, SystemTotalStatTotalGoldConsume)
-	syndb.RegLazyWithMiddle(TbSystemTotalStat, SystemTotalStatTotalDiamondConsume)
-	syndb.RegLazyWithMiddle(TbSystemTotalStat, SystemTotalStatTotalRecharge)
-	syndb.RegLazyWithMiddle(TbSystemTotalStat, SystemTotalStatTotalWithdraw)
-	syndb.RegLazyWithMiddle(TbSystemTotalStat, SystemTotalStatTotalRegisterUser)
+	syndb.RegLazy(TbSystemTotalStat, db.CreatedAtName)
+	syndb.RegLazy(TbSystemTotalStat, db.UpdatedAtName)
+	syndb.RegLazy(TbSystemTotalStat, SystemTotalStatTotalGold)
+	syndb.RegLazy(TbSystemTotalStat, SystemTotalStatTotalGoldConsume)
+	syndb.RegLazy(TbSystemTotalStat, SystemTotalStatTotalDiamondConsume)
+	syndb.RegLazy(TbSystemTotalStat, SystemTotalStatTotalRecharge)
+	syndb.RegLazy(TbSystemTotalStat, SystemTotalStatTotalWithdraw)
+	syndb.RegLazy(TbSystemTotalStat, SystemTotalStatTotalRegisterUser)
 	migrate.AutoMigrate(&SystemTotalStat{})
 }

@@ -114,11 +114,11 @@ func (r *LiveRoomBillingPay) SetLastPaidAt(v time.Time) {
 }
 
 func initLiveRoomBillingPay() {
-	syndb.RegQuickWithLarge(TbLiveRoomBillingPay, LiveRoomBillingPayUserId)
-	syndb.RegQuickWithLarge(TbLiveRoomBillingPay, LiveRoomBillingPayRoomId)
-	syndb.RegQuickWithLarge(TbLiveRoomBillingPay, LiveRoomBillingPayFreeTime)
-	syndb.RegQuickWithLarge(TbLiveRoomBillingPay, LiveRoomBillingPayFreeUsed)
-	syndb.RegQuickWithLarge(TbLiveRoomBillingPay, LiveRoomBillingPayLastPaidAt)
-	syndb.RegQuickWithLarge(TbLiveRoomBillingPay, LiveRoomBillingPayLastTicketAt)
+	syndb.RegQuick(TbLiveRoomBillingPay, LiveRoomBillingPayUserId)
+	syndb.RegQuick(TbLiveRoomBillingPay, LiveRoomBillingPayRoomId)
+	syndb.RegQuick(TbLiveRoomBillingPay, LiveRoomBillingPayFreeTime)
+	syndb.RegQuick(TbLiveRoomBillingPay, LiveRoomBillingPayFreeUsed)
+	syndb.RegQuick(TbLiveRoomBillingPay, LiveRoomBillingPayLastPaidAt)
+	syndb.RegQuick(TbLiveRoomBillingPay, LiveRoomBillingPayLastTicketAt)
 	migrate.AutoMigrate(&LiveRoomBillingPay{})
 }

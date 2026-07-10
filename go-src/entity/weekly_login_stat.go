@@ -133,14 +133,14 @@ func (r *WeeklyLoginStat) AddAudienceUserCount(n uint64) {
 }
 
 func initWeeklyLoginStat() {
-	syndb.RegLazyWithMiddle(TbWeeklyLoginStat, WeeklyLoginStatCount)
-	syndb.RegLazyWithMiddle(TbWeeklyLoginStat, WeeklyLoginStatRegisterCount)
-	syndb.RegLazyWithMiddle(TbWeeklyLoginStat, WeeklyLoginStatRechargeAmount)
-	syndb.RegLazyWithMiddle(TbWeeklyLoginStat, WeeklyLoginStatGoldConsumeAmount)
-	syndb.RegLazyWithMiddle(TbWeeklyLoginStat, WeeklyLoginStatDiamondConsumeAmount)
-	syndb.RegLazyWithMiddle(TbWeeklyLoginStat, WeeklyLoginStatRechargeUserCount)
-	syndb.RegLazyWithMiddle(TbWeeklyLoginStat, WeeklyLoginStatGoldConsumeUserCount)
-	syndb.RegLazyWithMiddle(TbWeeklyLoginStat, WeeklyLoginStatDiamondConsumeUserCount)
-	syndb.RegLazyWithMiddle(TbWeeklyLoginStat, WeeklyLoginStatAudienceUserCount)
+	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatCount)
+	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatRegisterCount)
+	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatRechargeAmount)
+	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatGoldConsumeAmount)
+	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatDiamondConsumeAmount)
+	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatRechargeUserCount)
+	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatGoldConsumeUserCount)
+	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatDiamondConsumeUserCount)
+	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatAudienceUserCount)
 	migrate.AutoMigrate(&WeeklyLoginStat{})
 }

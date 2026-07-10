@@ -49,7 +49,7 @@ func (t *CmsToken) SetExpireAt(v time.Time) {
 }
 
 func initCmsToken() {
-	syndb.RegLazyWithLarge(TbCmsToken, CmsTokenToken)
-	syndb.RegLazyWithLarge(TbCmsToken, CmsTokenExpireAt)
+	syndb.RegLazy(TbCmsToken, CmsTokenToken)
+	syndb.RegLazy(TbCmsToken, CmsTokenExpireAt)
 	migrate.AutoMigrate(&CmsToken{})
 }

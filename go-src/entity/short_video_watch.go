@@ -157,19 +157,19 @@ func (watch *ShortVideoWatch) SetUpdatedAt(v time.Time) {
 }
 
 func initShortVideoWatch() {
-	syndb.RegQuickWithLarge(TbShortVideoWatch, db.CreatedAtName)
-	syndb.RegLazyWithLarge(TbShortVideoWatch, db.UpdatedAtName)
+	syndb.RegQuick(TbShortVideoWatch, db.CreatedAtName)
+	syndb.RegLazy(TbShortVideoWatch, db.UpdatedAtName)
 
-	syndb.RegQuickWithLarge(TbShortVideoWatch, ShortVideoWatchUserId)
-	syndb.RegQuickWithLarge(TbShortVideoWatch, ShortVideoWatchVideoId)
-	syndb.RegLazyWithLarge(TbShortVideoWatch, ShortVideoWatchFirstWatchTime)
-	syndb.RegLazyWithLarge(TbShortVideoWatch, ShortVideoWatchFreeTime)
-	syndb.RegLazyWithLarge(TbShortVideoWatch, ShortVideoWatchFreeUsing)
-	syndb.RegLazyWithLarge(TbShortVideoWatch, ShortVideoWatchFreeStartTime)
-	syndb.RegLazyWithLarge(TbShortVideoWatch, ShortVideoWatchPaidTime)
-	syndb.RegLazyWithLarge(TbShortVideoWatch, ShortVideoWatchViewCounted)
+	syndb.RegQuick(TbShortVideoWatch, ShortVideoWatchUserId)
+	syndb.RegQuick(TbShortVideoWatch, ShortVideoWatchVideoId)
+	syndb.RegLazy(TbShortVideoWatch, ShortVideoWatchFirstWatchTime)
+	syndb.RegLazy(TbShortVideoWatch, ShortVideoWatchFreeTime)
+	syndb.RegLazy(TbShortVideoWatch, ShortVideoWatchFreeUsing)
+	syndb.RegLazy(TbShortVideoWatch, ShortVideoWatchFreeStartTime)
+	syndb.RegLazy(TbShortVideoWatch, ShortVideoWatchPaidTime)
+	syndb.RegLazy(TbShortVideoWatch, ShortVideoWatchViewCounted)
 
-	syndb.RegQuickWithLarge(TbShortVideoWatch, ShortVideoLikeStatus)
+	syndb.RegQuick(TbShortVideoWatch, ShortVideoLikeStatus)
 
 	migrate.AutoMigrate(&ShortVideoWatch{})
 }

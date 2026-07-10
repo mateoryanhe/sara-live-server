@@ -93,11 +93,11 @@ func (s *ShortVideoStat) SetUpdatedAt(val time.Time) {
 }
 
 func initShortVideoStat() {
-	syndb.RegLazyWithMiddle(TbShortVideoStat, db.CreatedAtName)
-	syndb.RegLazyWithMiddle(TbShortVideoStat, db.UpdatedAtName)
-	syndb.RegLazyWithMiddle(TbShortVideoStat, ShortVideoStatLikeCount)
-	syndb.RegLazyWithMiddle(TbShortVideoStat, ShortVideoStatViewCount)
-	syndb.RegLazyWithMiddle(TbShortVideoStat, ShortVideoStatWatchCount)
-	syndb.RegLazyWithMiddle(TbShortVideoStat, ShortVideoStatTotalDiamondIncome)
+	syndb.RegLazy(TbShortVideoStat, db.CreatedAtName)
+	syndb.RegLazy(TbShortVideoStat, db.UpdatedAtName)
+	syndb.RegLazy(TbShortVideoStat, ShortVideoStatLikeCount)
+	syndb.RegLazy(TbShortVideoStat, ShortVideoStatViewCount)
+	syndb.RegLazy(TbShortVideoStat, ShortVideoStatWatchCount)
+	syndb.RegLazy(TbShortVideoStat, ShortVideoStatTotalDiamondIncome)
 	migrate.AutoMigrate(&ShortVideoStat{})
 }

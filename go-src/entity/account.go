@@ -133,19 +133,19 @@ func (receiver *Account) SetPassword(password string) {
 	})
 }
 func initAccount() {
-	syndb.RegQuickWithLarge(TbAccount, db.CreatedAtName)
-	syndb.RegQuickWithLarge(TbAccount, db.UpdatedAtName)
-	syndb.RegQuickWithLarge(TbAccount, db.DeletedAtName)
-	syndb.RegQuickWithLarge(TbAccount, db.IsDeletedName)
+	syndb.RegQuick(TbAccount, db.CreatedAtName)
+	syndb.RegQuick(TbAccount, db.UpdatedAtName)
+	syndb.RegQuick(TbAccount, db.DeletedAtName)
+	syndb.RegQuick(TbAccount, db.IsDeletedName)
 
-	syndb.RegQuickWithLarge(TbAccount, AccountOpenId)
-	syndb.RegQuickWithLarge(TbAccount, AccountChannel)
-	syndb.RegQuickWithLarge(TbAccount, AccountIP)
-	syndb.RegQuickWithLarge(TbAccount, AccountBan)
-	syndb.RegQuickWithLarge(TbAccount, AccountBanTime)
-	syndb.RegQuickWithLarge(TbAccount, AccountBanApplyTime)
-	syndb.RegQuickWithLarge(TbAccount, AccountCancel)
-	syndb.RegQuickWithLarge(TbAccount, AccountPassword)
+	syndb.RegQuick(TbAccount, AccountOpenId)
+	syndb.RegQuick(TbAccount, AccountChannel)
+	syndb.RegQuick(TbAccount, AccountIP)
+	syndb.RegQuick(TbAccount, AccountBan)
+	syndb.RegQuick(TbAccount, AccountBanTime)
+	syndb.RegQuick(TbAccount, AccountBanApplyTime)
+	syndb.RegQuick(TbAccount, AccountCancel)
+	syndb.RegQuick(TbAccount, AccountPassword)
 
 	migrate.AutoMigrate(&Account{})
 }

@@ -144,17 +144,17 @@ func (o *LiveRoomOnline) IsKickBanned() bool {
 }
 
 func initLiveRoomOnline() {
-	syndb.RegQuickWithLarge(TbLiveRoomOnline, db.CreatedAtName)
-	syndb.RegQuickWithLarge(TbLiveRoomOnline, db.UpdatedAtName)
-	syndb.RegQuickWithLarge(TbLiveRoomOnline, LiveRoomOnlineRoomId)
-	syndb.RegQuickWithLarge(TbLiveRoomOnline, LiveRoomOnlineUserId)
-	syndb.RegQuickWithLarge(TbLiveRoomOnline, LiveRoomOnlineStatus)
-	syndb.RegQuickWithLarge(TbLiveRoomOnline, LiveRoomOnlineMuted)
-	syndb.RegQuickWithMiddle(TbLiveRoomOnline, TbLiveRoomOnlineJoinTime)
-	syndb.RegQuickWithLarge(TbLiveRoomOnline, TbLiveRoomOnlineKickTime)
-	syndb.RegLazyWithLarge(TbLiveRoomOnline, LiveRoomOnlineTotalReward)
+	syndb.RegQuick(TbLiveRoomOnline, db.CreatedAtName)
+	syndb.RegQuick(TbLiveRoomOnline, db.UpdatedAtName)
+	syndb.RegQuick(TbLiveRoomOnline, LiveRoomOnlineRoomId)
+	syndb.RegQuick(TbLiveRoomOnline, LiveRoomOnlineUserId)
+	syndb.RegQuick(TbLiveRoomOnline, LiveRoomOnlineStatus)
+	syndb.RegQuick(TbLiveRoomOnline, LiveRoomOnlineMuted)
+	syndb.RegQuick(TbLiveRoomOnline, TbLiveRoomOnlineJoinTime)
+	syndb.RegQuick(TbLiveRoomOnline, TbLiveRoomOnlineKickTime)
+	syndb.RegLazy(TbLiveRoomOnline, LiveRoomOnlineTotalReward)
 
-	syndb.RegLazyWithLarge(TbLiveRoomOnline, TbLiveRoomOnlineHeartTime)
+	syndb.RegLazy(TbLiveRoomOnline, TbLiveRoomOnlineHeartTime)
 
 	migrate.AutoMigrate(&LiveRoomOnline{})
 }

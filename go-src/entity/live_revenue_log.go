@@ -144,16 +144,16 @@ func (r *LiveRevenueLog) SetUpdatedAt(v time.Time) {
 }
 
 func initLiveRevenueLog() {
-	syndb.RegQuickWithLarge(TbLiveRevenueLog, db.CreatedAtName)
-	syndb.RegQuickWithLarge(TbLiveRevenueLog, db.UpdatedAtName)
-	syndb.RegQuickWithLarge(TbLiveRevenueLog, LiveRevenueLogRevenueType)
-	syndb.RegQuickWithLarge(TbLiveRevenueLog, LiveRevenueLogRoomId)
-	syndb.RegQuickWithLarge(TbLiveRevenueLog, LiveRevenueLogLiveRecordId)
-	syndb.RegQuickWithLarge(TbLiveRevenueLog, LiveRevenueLogSenderId)
-	syndb.RegQuickWithLarge(TbLiveRevenueLog, LiveRevenueLogReceiverId)
-	syndb.RegQuickWithLarge(TbLiveRevenueLog, LiveRevenueLogBizId)
-	syndb.RegQuickWithLarge(TbLiveRevenueLog, LiveRevenueLogCount)
-	syndb.RegQuickWithLarge(TbLiveRevenueLog, LiveRevenueLogUnitPrice)
-	syndb.RegQuickWithLarge(TbLiveRevenueLog, LiveRevenueLogTotalAmount)
+	syndb.RegQuick(TbLiveRevenueLog, db.CreatedAtName)
+	syndb.RegQuick(TbLiveRevenueLog, db.UpdatedAtName)
+	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogRevenueType)
+	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogRoomId)
+	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogLiveRecordId)
+	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogSenderId)
+	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogReceiverId)
+	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogBizId)
+	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogCount)
+	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogUnitPrice)
+	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogTotalAmount)
 	migrate.AutoMigrate(&LiveRevenueLog{})
 }

@@ -2,24 +2,26 @@ package syndb
 
 import (
 	"context"
+	"os"
+	"time"
+
 	"github.com/gogf/gf/v2/container/gqueue"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/util/gutil"
-	"os"
-	"time"
 	"xr-game-server/constants/common"
 	"xr-game-server/constants/db"
-	"xr-game-server/core/lambda"
 )
 
 const (
-	// Max 批量同步数量
-	Max = 150
-	// CloseTime 服务器关闭,同步周期变更
+	// Max 单表单批最大落库行数(内存换批量,减少 SQL 次数)
+	Max = 500
+	// maxQuickFlushPerTick quick 每轮最多落库次数(独立配额,保障约 1 秒内入库)
+	maxQuickFlushPerTick = 10
+	// maxLazyFlushPerTick lazy 每轮最多落库次数(独立配额,不抢占 quick)
+	maxLazyFlushPerTick = 4
+	// CloseTime 服务器关闭时缩短同步周期
 	CloseTime = 50 * time.Millisecond
-	// queuePopTimeout Pop 超时,避免消费端阻塞
-	queuePopTimeout = time.Nanosecond
 	// syndbPushSlowLogMs Push 超过该阈值(毫秒)时记录慢日志
 	syndbPushSlowLogMs = int64(5)
 )
@@ -33,17 +35,17 @@ type ColData struct {
 type ColSynCache struct {
 	// 无界队列,Push 写入链表不阻塞
 	DataQueue *gqueue.TQueue[*ColData]
-	//准备同步数据
-	TempData []*ColData
-	//同步频率
+	// Pending 待落库数据(按主键去重,只保留最新值)
+	Pending map[any]*ColData
+	// 同步频率
 	Period time.Duration
-	//上次同步时间
+	// 本批 Pending 首次写入时间
 	LastTime time.Time
-	//表名
+	// 表名
 	TbName string
-	//列名
+	// 列名
 	ColName string
-	//主键列名
+	// 主键列名
 	IdName string
 }
 
@@ -52,7 +54,7 @@ func newColSynCache(tbName string, tbCol string, period time.Duration) *ColSynCa
 		TbName:    tbName,
 		ColName:   tbCol,
 		DataQueue: gqueue.NewTQueue[*ColData](),
-		TempData:  make([]*ColData, 0),
+		Pending:   make(map[any]*ColData),
 		Period:    period,
 		LastTime:  time.Now(),
 		IdName:    string(db.IdName),
@@ -96,84 +98,111 @@ func SysExit(sig os.Signal) {
 			})
 		}
 	}
-
 }
 
 func consume(ctx context.Context) {
-	for _, val := range lazyMap {
-		gutil.TryCatch(gctx.New(), func(ctx context.Context) {
-			val.PullData()
-			val.Syn()
-		}, func(ctx context.Context, exception error) {
-		})
-	}
-	for _, quick := range quickMap {
-		gutil.TryCatch(gctx.New(), func(ctx context.Context) {
-			quick.PullData()
-			quick.Syn()
-		}, func(ctx context.Context, exception error) {
-		})
+	_ = ctx
+	pullCaches(quickMap)
+	pullCaches(lazyMap)
+	flushCaches(quickMap, maxQuickFlushPerTick)
+	flushCaches(lazyMap, maxLazyFlushPerTick)
+}
+
+func pullCaches(cacheMap map[string]*ColSynCache) {
+	for _, colCache := range cacheMap {
+		if colCache.isIdle() {
+			continue
+		}
+		safePullData(colCache)
 	}
 }
 
-// PullData 拉取数据到同步队列(Pop 超时 1ms,无数据则直接返回)
+func flushCaches(cacheMap map[string]*ColSynCache, flushBudget int) {
+	for _, colCache := range cacheMap {
+		if flushBudget <= 0 {
+			break
+		}
+		if len(colCache.Pending) == 0 {
+			continue
+		}
+		if safeSyn(colCache) {
+			flushBudget--
+		}
+	}
+}
+
+func safePullData(colCache *ColSynCache) {
+	gutil.TryCatch(gctx.New(), func(ctx context.Context) {
+		colCache.PullData()
+	}, func(ctx context.Context, exception error) {
+		g.Log().Errorf(ctx, "syndb PullData异常,table=%v,col=%v,err=%v", colCache.TbName, colCache.ColName, exception)
+	})
+}
+
+func safeSyn(colCache *ColSynCache) bool {
+	var flushed bool
+	gutil.TryCatch(gctx.New(), func(ctx context.Context) {
+		flushed = colCache.Syn()
+	}, func(ctx context.Context, exception error) {
+		g.Log().Errorf(ctx, "syndb Syn异常,table=%v,col=%v,err=%v", colCache.TbName, colCache.ColName, exception)
+	})
+	return flushed
+}
+
+func (colCache *ColSynCache) isIdle() bool {
+	return colCache.DataQueue.Len() == 0 && len(colCache.Pending) == 0
+}
+
+// PullData 批量拉取队列数据到 Pending(内存按主键去重)
 func (colCache *ColSynCache) PullData() {
-	select {
-	case data := <-colCache.DataQueue.C:
-		colCache.TempData = append(colCache.TempData, data)
-		if len(colCache.TempData) == 1 {
-			colCache.LastTime = time.Now()
+	for len(colCache.Pending) < Max {
+		select {
+		case data := <-colCache.DataQueue.C:
+			if len(colCache.Pending) == 0 {
+				colCache.LastTime = time.Now()
+			}
+			colCache.Pending[data.IdVal] = data
+		default:
+			return
 		}
-	case <-time.After(queuePopTimeout):
-		return
 	}
 }
 
-func (colCache *ColSynCache) Syn() {
-	//时间到,强制同步
-	now := time.Now()
-	targetTime := colCache.LastTime.Add(colCache.Period)
-
-	if len(colCache.TempData) > 0 && targetTime.Before(now) {
-		colCache.batchSave()
+func (colCache *ColSynCache) shouldFlush(now time.Time) bool {
+	if len(colCache.Pending) == 0 {
+		return false
 	}
-	//到达最大数量,强制同步
-	if len(colCache.TempData) >= Max {
-		colCache.batchSave()
+	if len(colCache.Pending) >= Max {
+		return true
 	}
+	return !now.Before(colCache.LastTime.Add(colCache.Period))
 }
 
-func (colCache *ColSynCache) batchSave() {
-	if len(colCache.TempData) == common.Zero {
-		return
+func (colCache *ColSynCache) Syn() bool {
+	if !colCache.shouldFlush(time.Now()) {
+		return false
 	}
-	//过滤一下重复的
-	list := make([]*ColData, 0)
-	for _, data := range colCache.TempData {
-		if lambda.AnyMatch(list, func(val *ColData) bool {
-			return val.IdVal == data.IdVal
-		}) {
-			list = lambda.Filter(list, func(val *ColData) bool {
-				return val.IdVal != data.IdVal
-			})
-			list = append(list, data)
-		} else {
-			list = append(list, data)
-		}
+	return colCache.batchSave()
+}
+
+func (colCache *ColSynCache) batchSave() bool {
+	if len(colCache.Pending) == common.Zero {
+		return false
 	}
-	dataMap := make([]map[string]interface{}, common.Zero)
-	for _, val := range list {
-		//检查是否重复
+	dataMap := make([]map[string]interface{}, 0, len(colCache.Pending))
+	for idVal, val := range colCache.Pending {
 		dataMap = append(dataMap, g.Map{
-			colCache.IdName:  val.IdVal,
+			colCache.IdName:  idVal,
 			colCache.ColName: val.ColVal,
 		})
 	}
 	_, err := g.DB().Model(colCache.TbName).Data(dataMap).Batch(len(dataMap)).Save()
 	if err != nil {
-		return
+		g.Log().Errorf(gctx.New(), "syndb batchSave失败,table=%v,col=%v,rows=%v,err=%v", colCache.TbName, colCache.ColName, len(dataMap), err)
+		return false
 	}
-	colCache.TempData = make([]*ColData, common.Zero)
+	colCache.Pending = make(map[any]*ColData)
+	return true
 }
 
 // ChangeSynTime 变更同步时间

@@ -78,10 +78,10 @@ func (r *LiveRecordUser) SetFollowerAt(v time.Time) {
 }
 
 func initLiveRecordUser() {
-	syndb.RegLazyWithMiddle(TbLiveRecordUser, LiveRecordUserLiveRecordId)
-	syndb.RegLazyWithMiddle(TbLiveRecordUser, LiveRecordUserUserId)
-	syndb.RegLazyWithMiddle(TbLiveRecordUser, LiveRecordUserAudienceAt)
-	syndb.RegLazyWithMiddle(TbLiveRecordUser, LiveRecordUserGiftSenderAt)
-	syndb.RegLazyWithMiddle(TbLiveRecordUser, LiveRecordUserFollowerAt)
+	syndb.RegLazy(TbLiveRecordUser, LiveRecordUserLiveRecordId)
+	syndb.RegLazy(TbLiveRecordUser, LiveRecordUserUserId)
+	syndb.RegLazy(TbLiveRecordUser, LiveRecordUserAudienceAt)
+	syndb.RegLazy(TbLiveRecordUser, LiveRecordUserGiftSenderAt)
+	syndb.RegLazy(TbLiveRecordUser, LiveRecordUserFollowerAt)
 	migrate.AutoMigrate(&LiveRecordUser{})
 }

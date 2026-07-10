@@ -112,13 +112,13 @@ func (receiver *UserLoginDevice) SetUpdatedAt(val time.Time) {
 }
 
 func initUserLoginDevice() {
-	syndb.RegQuickWithLarge(TbUserLoginDevice, db.CreatedAtName)
-	syndb.RegQuickWithLarge(TbUserLoginDevice, db.UpdatedAtName)
-	syndb.RegQuickWithLarge(TbUserLoginDevice, UserLoginDeviceType)
-	syndb.RegQuickWithLarge(TbUserLoginDevice, UserLoginDeviceModel)
-	syndb.RegQuickWithLarge(TbUserLoginDevice, UserLoginDeviceOsVer)
-	syndb.RegQuickWithLarge(TbUserLoginDevice, UserLoginDeviceAppVer)
-	syndb.RegQuickWithLarge(TbUserLoginDevice, UserLoginDeviceId)
+	syndb.RegQuick(TbUserLoginDevice, db.CreatedAtName)
+	syndb.RegQuick(TbUserLoginDevice, db.UpdatedAtName)
+	syndb.RegQuick(TbUserLoginDevice, UserLoginDeviceType)
+	syndb.RegQuick(TbUserLoginDevice, UserLoginDeviceModel)
+	syndb.RegQuick(TbUserLoginDevice, UserLoginDeviceOsVer)
+	syndb.RegQuick(TbUserLoginDevice, UserLoginDeviceAppVer)
+	syndb.RegQuick(TbUserLoginDevice, UserLoginDeviceId)
 
 	migrate.AutoMigrate(&UserLoginDevice{})
 }

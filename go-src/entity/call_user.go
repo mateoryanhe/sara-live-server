@@ -43,7 +43,7 @@ func (m *CallUser) SetHeartTime(v *time.Time) {
 }
 
 func initCallUser() {
-	syndb.RegQuickWithMiddle(TbCallUser, CallUserCallOrderId)
-	syndb.RegQuickWithMiddle(TbCallUser, CallUserHeartTime)
+	syndb.RegQuick(TbCallUser, CallUserCallOrderId)
+	syndb.RegQuick(TbCallUser, CallUserHeartTime)
 	migrate.AutoMigrate(&CallUser{})
 }

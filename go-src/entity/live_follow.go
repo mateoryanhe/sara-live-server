@@ -93,10 +93,10 @@ func (f *LiveFollow) SetUpdatedAt(v time.Time) {
 }
 
 func initLiveFollow() {
-	syndb.RegQuickWithLarge(TbLiveFollow, db.CreatedAtName)
-	syndb.RegQuickWithLarge(TbLiveFollow, db.UpdatedAtName)
-	syndb.RegQuickWithLarge(TbLiveFollow, LiveFollowUserId)
-	syndb.RegQuickWithLarge(TbLiveFollow, LiveFollowAnchorId)
-	syndb.RegQuickWithLarge(TbLiveFollow, LiveFollowStatus)
+	syndb.RegQuick(TbLiveFollow, db.CreatedAtName)
+	syndb.RegQuick(TbLiveFollow, db.UpdatedAtName)
+	syndb.RegQuick(TbLiveFollow, LiveFollowUserId)
+	syndb.RegQuick(TbLiveFollow, LiveFollowAnchorId)
+	syndb.RegQuick(TbLiveFollow, LiveFollowStatus)
 	migrate.AutoMigrate(&LiveFollow{})
 }

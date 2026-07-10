@@ -89,10 +89,10 @@ func (m *UserMessageUnreadDetail) SetUpdatedAt(v time.Time) {
 }
 
 func initUserMessageUnreadDetail() {
-	syndb.RegQuickWithLarge(TbUserMessageUnreadDetail, db.CreatedAtName)
-	syndb.RegQuickWithLarge(TbUserMessageUnreadDetail, db.UpdatedAtName)
-	syndb.RegQuickWithLarge(TbUserMessageUnreadDetail, UserMessageUnreadDetailSenderId)
-	syndb.RegQuickWithLarge(TbUserMessageUnreadDetail, UserMessageUnreadDetailUserId)
-	syndb.RegQuickWithLarge(TbUserMessageUnreadDetail, UserMessageUnreadDetailUnreadCount)
+	syndb.RegQuick(TbUserMessageUnreadDetail, db.CreatedAtName)
+	syndb.RegQuick(TbUserMessageUnreadDetail, db.UpdatedAtName)
+	syndb.RegQuick(TbUserMessageUnreadDetail, UserMessageUnreadDetailSenderId)
+	syndb.RegQuick(TbUserMessageUnreadDetail, UserMessageUnreadDetailUserId)
+	syndb.RegQuick(TbUserMessageUnreadDetail, UserMessageUnreadDetailUnreadCount)
 	migrate.AutoMigrate(&UserMessageUnreadDetail{})
 }

@@ -123,16 +123,16 @@ func (receiver *CurrencyLog) SetUpdatedAt(val time.Time) {
 }
 
 func initCurrencyLog() {
-	syndb.RegQuickWithLarge(TbCurrencyLog, db.CreatedAtName)
-	syndb.RegQuickWithLarge(TbCurrencyLog, db.UpdatedAtName)
+	syndb.RegQuick(TbCurrencyLog, db.CreatedAtName)
+	syndb.RegQuick(TbCurrencyLog, db.UpdatedAtName)
 
-	syndb.RegQuickWithLarge(TbCurrencyLog, CurrencyLogUserId)
-	syndb.RegQuickWithLarge(TbCurrencyLog, CurrencyLogType)
-	syndb.RegQuickWithLarge(TbCurrencyLog, CurrencyLogAction)
-	syndb.RegQuickWithLarge(TbCurrencyLog, CurrencyLogAmount)
-	syndb.RegQuickWithLarge(TbCurrencyLog, CurrencyLogBefore)
-	syndb.RegQuickWithLarge(TbCurrencyLog, CurrencyLogAfter)
-	syndb.RegQuickWithLarge(TbCurrencyLog, CurrencyLogReason)
+	syndb.RegQuick(TbCurrencyLog, CurrencyLogUserId)
+	syndb.RegQuick(TbCurrencyLog, CurrencyLogType)
+	syndb.RegQuick(TbCurrencyLog, CurrencyLogAction)
+	syndb.RegQuick(TbCurrencyLog, CurrencyLogAmount)
+	syndb.RegQuick(TbCurrencyLog, CurrencyLogBefore)
+	syndb.RegQuick(TbCurrencyLog, CurrencyLogAfter)
+	syndb.RegQuick(TbCurrencyLog, CurrencyLogReason)
 
 	migrate.AutoMigrate(&CurrencyLog{})
 }

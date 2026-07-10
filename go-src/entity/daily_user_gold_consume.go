@@ -51,8 +51,8 @@ func (r *DailyUserGoldConsume) SetCreatedAt(v *time.Time) {
 }
 
 func initDailyUserGoldConsume() {
-	syndb.RegLazyWithMiddle(TbDailyUserGoldConsume, db.CreatedAtName)
-	syndb.RegLazyWithMiddle(TbDailyUserGoldConsume, DailyUserGoldConsumeUserId)
-	syndb.RegLazyWithMiddle(TbDailyUserGoldConsume, DailyUserGoldConsumeConsumeDate)
+	syndb.RegLazy(TbDailyUserGoldConsume, db.CreatedAtName)
+	syndb.RegLazy(TbDailyUserGoldConsume, DailyUserGoldConsumeUserId)
+	syndb.RegLazy(TbDailyUserGoldConsume, DailyUserGoldConsumeConsumeDate)
 	migrate.AutoMigrate(&DailyUserGoldConsume{})
 }

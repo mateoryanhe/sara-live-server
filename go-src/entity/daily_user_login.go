@@ -60,8 +60,8 @@ func (r *DailyUserLogin) SetCreatedAt(v *time.Time) {
 }
 
 func initDailyUserLogin() {
-	syndb.RegLazyWithMiddle(TbDailyUserLogin, db.CreatedAtName)
-	syndb.RegLazyWithMiddle(TbDailyUserLogin, DailyUserLoginUserId)
-	syndb.RegLazyWithMiddle(TbDailyUserLogin, DailyUserLoginLoginDate)
+	syndb.RegLazy(TbDailyUserLogin, db.CreatedAtName)
+	syndb.RegLazy(TbDailyUserLogin, DailyUserLoginUserId)
+	syndb.RegLazy(TbDailyUserLogin, DailyUserLoginLoginDate)
 	migrate.AutoMigrate(&DailyUserLogin{})
 }

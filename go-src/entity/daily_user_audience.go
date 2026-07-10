@@ -51,8 +51,8 @@ func (r *DailyUserAudience) SetCreatedAt(v *time.Time) {
 }
 
 func initDailyUserAudience() {
-	syndb.RegLazyWithMiddle(TbDailyUserAudience, db.CreatedAtName)
-	syndb.RegLazyWithMiddle(TbDailyUserAudience, DailyUserAudienceUserId)
-	syndb.RegLazyWithMiddle(TbDailyUserAudience, DailyUserAudienceAudienceDate)
+	syndb.RegLazy(TbDailyUserAudience, db.CreatedAtName)
+	syndb.RegLazy(TbDailyUserAudience, DailyUserAudienceUserId)
+	syndb.RegLazy(TbDailyUserAudience, DailyUserAudienceAudienceDate)
 	migrate.AutoMigrate(&DailyUserAudience{})
 }
