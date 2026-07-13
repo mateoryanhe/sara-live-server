@@ -29,6 +29,7 @@ type CMSVideoCallLogItem struct {
 	CallTypeText     string     `json:"callTypeText"`
 	Source           uint8      `json:"source"`
 	SourceText       string     `json:"sourceText"`
+	Status           uint8      `json:"status"`
 	StatusText       string     `json:"statusText"`
 	CallStartTime    *time.Time `json:"callStartTime"`
 	AnswerTime       *time.Time `json:"answerTime"`

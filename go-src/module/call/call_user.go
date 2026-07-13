@@ -38,6 +38,7 @@ func finishCallOrderIfHeartTimeout(callUser *entity.CallUser) {
 	}
 	if !order.HasEnded() {
 		order.SetOrderEndTime(&now)
+		order.SetStatus(entity.CallOrderStatusEnded)
 	}
 	calldao.FlushOrderCache(order)
 }

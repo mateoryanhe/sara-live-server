@@ -7,6 +7,7 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/calldao"
 	"xr-game-server/dto/calldto"
+	"xr-game-server/entity"
 	"xr-game-server/errercode"
 )
 
@@ -28,6 +29,7 @@ func AnchorRejectCall(ctx context.Context, req *calldto.AnchorRejectCallReq) (*c
 	now := time.Now()
 	order.SetReceiverHangUpTime(&now)
 	order.SetOrderEndTime(&now)
+	order.SetStatus(entity.CallOrderStatusRejected)
 	calldao.FlushOrderCache(order)
 
 	resetCallUser(order.CallerId)

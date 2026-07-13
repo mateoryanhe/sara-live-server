@@ -24,9 +24,20 @@ const (
 	CallOrderSourcePrivateMessage uint8 = 2 // 私信
 )
 
+// 通话订单状态
+const (
+	CallOrderStatusCalling     uint8 = 1 // 呼叫中
+	CallOrderStatusAccepted    uint8 = 2 // 已接听(待双方确认)
+	CallOrderStatusInCall      uint8 = 3 // 通话中
+	CallOrderStatusEnded       uint8 = 4 // 已结束
+	CallOrderStatusRejected    uint8 = 5 // 拒接
+	CallOrderStatusCallTimeout uint8 = 6 // 呼叫超时未接听
+)
+
 const (
 	CallOrderCallerId            db.TbCol = "caller_id"
 	CallOrderReceiverId          db.TbCol = "receiver_id"
+	CallOrderStatusCol           db.TbCol = "status"
 	CallOrderCallStartTime       db.TbCol = "call_start_time"
 	CallOrderAnswerTime          db.TbCol = "answer_time"
 	CallOrderCallerConfirmTime   db.TbCol = "caller_confirm_time"
@@ -51,6 +62,7 @@ type CallOrder struct {
 	migrate.OneModel
 	CallerId            uint64     `gorm:"index;default:0;comment:呼叫者ID" json:"callerId"`
 	ReceiverId          uint64     `gorm:"index;default:0;comment:接收者ID" json:"receiverId"`
+	Status              uint8      `gorm:"index;default:1;comment:订单状态(1-呼叫中,2-已接听,3-通话中,4-已结束,5-拒接,6-呼叫超时未接听)" json:"status"`
 	CallStartTime       time.Time  `gorm:"index;comment:呼叫开始时间" json:"callStartTime"`
 	AnswerTime          *time.Time `gorm:"index;comment:接听时间" json:"answerTime"`
 	CallerConfirmTime   *time.Time `gorm:"index;comment:呼叫者确认时间" json:"callerConfirmTime"`
@@ -83,23 +95,74 @@ func NewCallOrder(callerId, receiverId uint64, callType, source uint8, params st
 	ret.SetParams(params)
 	ret.SetTicketPrice(ticketPrice)
 	ret.SetPricePerMinute(pricePerMinute)
+	ret.SetStatus(CallOrderStatusCalling)
 	return ret
 }
 
+func CallOrderStatusText(status uint8) string {
+	switch status {
+	case CallOrderStatusCalling:
+		return "呼叫中"
+	case CallOrderStatusAccepted:
+		return "已接听"
+	case CallOrderStatusInCall:
+		return "通话中"
+	case CallOrderStatusEnded:
+		return "已结束"
+	case CallOrderStatusRejected:
+		return "拒接"
+	case CallOrderStatusCallTimeout:
+		return "呼叫超时未接听"
+	default:
+		return "未知"
+	}
+}
+
+func (m *CallOrder) GetStatus() uint8 {
+	if m == nil {
+		return 0
+	}
+	return m.Status
+}
+
+func (m *CallOrder) StatusText() string {
+	return CallOrderStatusText(m.GetStatus())
+}
+
 func (m *CallOrder) HasEnded() bool {
-	return m != nil && m.OrderEndTime != nil
+	if m == nil {
+		return false
+	}
+	switch m.Status {
+	case CallOrderStatusEnded, CallOrderStatusRejected, CallOrderStatusCallTimeout:
+		return true
+	default:
+		return false
+	}
 }
 
 func (m *CallOrder) IsCalling() bool {
-	return m != nil && !m.HasEnded() && m.AnswerTime == nil
+	return m != nil && m.Status == CallOrderStatusCalling
 }
 
 func (m *CallOrder) IsAccepted() bool {
-	return m != nil && !m.HasEnded() && m.AnswerTime != nil
+	return m != nil && m.Status == CallOrderStatusAccepted
+}
+
+func (m *CallOrder) HasAnswered() bool {
+	if m == nil {
+		return false
+	}
+	switch m.Status {
+	case CallOrderStatusAccepted, CallOrderStatusInCall:
+		return true
+	default:
+		return false
+	}
 }
 
 func (m *CallOrder) IsCallStarted() bool {
-	return m.IsAccepted() && m.CallerConfirmTime != nil && m.ReceiverConfirmTime != nil
+	return m != nil && m.Status == CallOrderStatusInCall
 }
 
 func (m *CallOrder) AnswerConfirmCount() uint32 {
@@ -177,6 +240,11 @@ func (m *CallOrder) SetCallerId(v uint64) {
 func (m *CallOrder) SetReceiverId(v uint64) {
 	m.ReceiverId = v
 	syndb.AddDataToQuickChan(TbCallOrder, CallOrderReceiverId, &syndb.ColData{IdVal: m.ID, ColVal: v})
+}
+
+func (m *CallOrder) SetStatus(v uint8) {
+	m.Status = v
+	syndb.AddDataToQuickChan(TbCallOrder, CallOrderStatusCol, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetCallStartTime(v time.Time) {
@@ -283,6 +351,7 @@ func initCallOrder() {
 	syndb.RegQuick(TbCallOrder, db.UpdatedAtName)
 	syndb.RegQuick(TbCallOrder, CallOrderCallerId)
 	syndb.RegQuick(TbCallOrder, CallOrderReceiverId)
+	syndb.RegQuick(TbCallOrder, CallOrderStatusCol)
 	syndb.RegQuick(TbCallOrder, CallOrderCallStartTime)
 	syndb.RegQuick(TbCallOrder, CallOrderAnswerTime)
 	syndb.RegQuick(TbCallOrder, CallOrderCallerConfirmTime)

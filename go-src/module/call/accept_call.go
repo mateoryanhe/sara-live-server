@@ -44,6 +44,7 @@ func AcceptCall(ctx context.Context, req *calldto.AcceptCallReq) (*calldto.Accep
 		return nil, err
 	}
 	order.SetAnswerTime(&now)
+	order.SetStatus(entity.CallOrderStatusAccepted)
 	calldao.FlushOrderCache(order)
 
 	upsertCallUser(receiverId, order.ID, now)

@@ -7,6 +7,7 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/calldao"
 	"xr-game-server/dto/calldto"
+	"xr-game-server/entity"
 	"xr-game-server/errercode"
 )
 
@@ -33,6 +34,7 @@ func CallTimeout(ctx context.Context, req *calldto.CallTimeoutReq) (*calldto.Cal
 
 	now := time.Now()
 	order.SetOrderEndTime(&now)
+	order.SetStatus(entity.CallOrderStatusCallTimeout)
 	calldao.FlushOrderCache(order)
 
 	resetCallUser(order.CallerId)

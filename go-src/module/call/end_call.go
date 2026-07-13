@@ -8,6 +8,7 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/calldao"
 	"xr-game-server/dto/calldto"
+	"xr-game-server/entity"
 	"xr-game-server/errercode"
 )
 
@@ -28,7 +29,7 @@ func EndCall(ctx context.Context, req *calldto.EndCallReq) (*calldto.EndCallRes,
 	if order.HasEnded() {
 		return nil, errercode.CreateCode(errercode.CallOrderStateInvalid)
 	}
-	if !order.IsCalling() && !order.IsAccepted() {
+	if !order.IsCalling() && !order.HasAnswered() {
 		return nil, errercode.CreateCode(errercode.CallOrderStateInvalid)
 	}
 
@@ -44,6 +45,7 @@ func EndCall(ctx context.Context, req *calldto.EndCallReq) (*calldto.EndCallRes,
 		order.SetReceiverHangUpTime(&now)
 	}
 	order.SetOrderEndTime(&now)
+	order.SetStatus(entity.CallOrderStatusEnded)
 	calldao.FlushOrderCache(order)
 
 	resetCallUser(order.CallerId)

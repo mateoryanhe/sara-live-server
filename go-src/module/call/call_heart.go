@@ -25,7 +25,7 @@ func CallHeart(ctx context.Context, req *calldto.CallHeartReq) (*calldto.CallHea
 	if order.CallerId != userId && order.ReceiverId != userId {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	if order.HasEnded() || (!order.IsCalling() && !order.IsAccepted()) {
+	if order.HasEnded() || (!order.IsCalling() && !order.HasAnswered()) {
 		return nil, errercode.CreateCode(errercode.CallOrderStateInvalid)
 	}
 

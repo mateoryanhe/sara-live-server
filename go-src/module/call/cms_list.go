@@ -63,19 +63,7 @@ func callOrderStatusText(o *entity.CallOrder) string {
 	if o == nil {
 		return ""
 	}
-	if o.HasEnded() {
-		return "已结束"
-	}
-	if o.IsCallStarted() {
-		return "通话中"
-	}
-	if o.IsAccepted() {
-		return "已接听"
-	}
-	if o.IsCalling() {
-		return "呼叫中"
-	}
-	return "未知"
+	return o.StatusText()
 }
 
 func toCMSVideoCallItem(v *entity.CallOrder, nicknameMap map[uint64]string) *calldto.CMSVideoCallLogItem {
@@ -90,6 +78,7 @@ func toCMSVideoCallItem(v *entity.CallOrder, nicknameMap map[uint64]string) *cal
 		CallTypeText:    callTypeText(v.CallType),
 		Source:          v.Source,
 		SourceText:      callSourceText(v.Source),
+		Status:          v.GetStatus(),
 		StatusText:      callOrderStatusText(v),
 		CallStartTime:   &v.CallStartTime,
 		AnswerTime:      v.AnswerTime,

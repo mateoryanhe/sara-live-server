@@ -74,6 +74,7 @@ func applyCallAnswerConfirm(order *entity.CallOrder, userId uint64, now time.Tim
 		clearUserConfirmTime(order, userId)
 		return false, err
 	}
+	order.SetStatus(entity.CallOrderStatusInCall)
 	pushCallStarted(order, now.Unix())
 	return true, nil
 }
