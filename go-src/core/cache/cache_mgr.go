@@ -37,3 +37,15 @@ func (mgr *CacheMgr) FlushCache(key interface{}, data any) {
 		return
 	}
 }
+
+// GetFromCache 仅从内存缓存读取,未命中不访问数据库
+func (mgr *CacheMgr) GetFromCache(key interface{}) any {
+	if mgr == nil || mgr.Cache == nil {
+		return nil
+	}
+	v, err := mgr.Cache.Get(gctx.New(), key)
+	if err != nil || v.IsNil() {
+		return nil
+	}
+	return v.Val()
+}

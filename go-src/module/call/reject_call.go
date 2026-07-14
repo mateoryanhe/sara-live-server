@@ -34,6 +34,7 @@ func AnchorRejectCall(ctx context.Context, req *calldto.AnchorRejectCallReq) (*c
 
 	resetCallUser(order.CallerId)
 	pushCallRejected(order.CallerId, anchorId, order.ID)
+	untrackActiveCallOrder(order.ID)
 
 	return &calldto.AnchorRejectCallRes{Success: true}, nil
 }

@@ -21,6 +21,19 @@
             <el-option :value="2" label="私信"/>
           </el-select>
         </el-form-item>
+        <el-form-item label="状态">
+          <el-select v-model="searchForm.status" clearable placeholder="全部" style="width: 160px">
+            <el-option :value="0" label="全部"/>
+            <el-option :value="1" label="呼叫中"/>
+            <el-option :value="2" label="已接听"/>
+            <el-option :value="3" label="通话中"/>
+            <el-option :value="4" label="已结束"/>
+            <el-option :value="5" label="拒接"/>
+            <el-option :value="6" label="呼叫超时"/>
+            <el-option :value="7" label="心跳超时"/>
+            <el-option :value="8" label="钻石不足"/>
+          </el-select>
+        </el-form-item>
         <el-form-item label="呼叫时间">
           <el-date-picker
               v-model="searchForm.dateRange"
@@ -42,7 +55,7 @@
 
       <el-table v-loading="loading" :data="tableData" style="width: 100%">
         <el-table-column label="订单ID" min-width="180" prop="id"/>
-        <el-table-column label="状态" prop="statusText" width="90"/>
+        <el-table-column label="状态" prop="statusText" width="140"/>
         <el-table-column label="来源" prop="sourceText" width="90"/>
         <el-table-column label="呼叫者ID" min-width="180" prop="callerId"/>
         <el-table-column label="呼叫者昵称" min-width="120">
@@ -110,6 +123,7 @@ const searchForm = reactive({
   callerId: '',
   receiverId: '',
   source: 0,
+  status: 0,
   dateRange: [] as string[],
 })
 
@@ -135,6 +149,7 @@ const buildQueryParams = () => {
     callerId: searchForm.callerId.trim(),
     receiverId: searchForm.receiverId.trim(),
     source: searchForm.source || 0,
+    status: searchForm.status || 0,
     startTime: startDate ? toDayStartUnix(startDate) : 0,
     endTime: endDate ? toDayEndUnix(endDate) : 0,
   }
@@ -163,6 +178,7 @@ const handleReset = () => {
   searchForm.callerId = ''
   searchForm.receiverId = ''
   searchForm.source = 0
+  searchForm.status = 0
   searchForm.dateRange = []
   pagination.pageIndex = 1
   fetchList()

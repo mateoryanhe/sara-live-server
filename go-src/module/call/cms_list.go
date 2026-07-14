@@ -104,6 +104,7 @@ func GetCMSVideoCallLogList(_ context.Context, req *calldto.CMSVideoCallLogListR
 		CallerId:   parseUint64Filter(req.CallerId),
 		ReceiverId: parseUint64Filter(req.ReceiverId),
 		Source:     req.Source,
+		Status:     req.Status,
 		CallType:   entity.CallOrderTypeVideo,
 		StartTime:  req.StartTime,
 		EndTime:    req.EndTime,

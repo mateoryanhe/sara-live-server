@@ -14,6 +14,7 @@ type CMSVideoCallLogListReq struct {
 	CallerId   string `json:"callerId"   dc:"呼叫者ID(可选,留空查全部)"`
 	ReceiverId string `json:"receiverId" dc:"接收者ID(可选,留空查全部)"`
 	Source     uint8  `json:"source"     dc:"来源(0=全部,1=直播间,2=私信)"`
+	Status     uint8  `json:"status"     dc:"订单状态(0=全部,7=心跳超时,8=钻石不足等)"`
 	StartTime  int64  `json:"startTime"  dc:"呼叫开始时间起(秒, 0=不过滤)"`
 	EndTime    int64  `json:"endTime"    dc:"呼叫开始时间止(秒, 0=不过滤)"`
 }

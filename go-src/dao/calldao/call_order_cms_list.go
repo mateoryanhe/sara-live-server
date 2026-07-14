@@ -13,6 +13,7 @@ type CallOrderCMSListFilter struct {
 	CallerId   uint64
 	ReceiverId uint64
 	Source     uint8
+	Status     uint8
 	CallType   uint8
 	StartTime  int64
 	EndTime    int64
@@ -42,6 +43,9 @@ func CallOrderCMSList(f *CallOrderCMSListFilter) (int, []*entity.CallOrder) {
 	}
 	if f.Source > 0 {
 		m = m.Where(string(entity.CallOrderSource)+" = ?", f.Source)
+	}
+	if f.Status > 0 {
+		m = m.Where(string(entity.CallOrderStatusCol)+" = ?", f.Status)
 	}
 	if f.CallType > 0 {
 		m = m.Where(string(entity.CallOrderCallType)+" = ?", f.CallType)

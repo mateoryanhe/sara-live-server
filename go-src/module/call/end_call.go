@@ -57,6 +57,7 @@ func EndCall(ctx context.Context, req *calldto.EndCallReq) (*calldto.EndCallRes,
 		peerId = order.CallerId
 	}
 	pushCallEnded(peerId, userId, order.ID, order.CallDuration, order.BillingDuration, order.TotalCost)
+	untrackActiveCallOrder(order.ID)
 
 	return &calldto.EndCallRes{
 		Success:         true,
@@ -77,7 +78,7 @@ func finishCallOrderOnBillingFailed(order *entity.CallOrder, now time.Time) {
 	}
 	order.SetCallerHangUpTime(&now)
 	order.SetOrderEndTime(&now)
-	order.SetStatus(entity.CallOrderStatusEnded)
+	order.SetStatus(entity.CallOrderStatusBillingFailed)
 	calldao.FlushOrderCache(order)
 
 	resetCallUser(order.CallerId)
@@ -86,6 +87,7 @@ func finishCallOrderOnBillingFailed(order *entity.CallOrder, now time.Time) {
 	endUserId := order.CallerId
 	pushCallEndedDueToBillingFailed(order.ReceiverId, endUserId, order.ID, order.CallDuration, order.BillingDuration, order.TotalCost)
 	pushCallEndedDueToBillingFailed(order.CallerId, endUserId, order.ID, order.CallDuration, order.BillingDuration, order.TotalCost)
+	untrackActiveCallOrder(order.ID)
 }
 
 func isDiamondNotEnough(err error) bool {

@@ -24,23 +24,7 @@ func finishCallOrderIfHeartTimeout(callUser *entity.CallUser) {
 		return
 	}
 
-	now := time.Now()
-	if order.IsCallStarted() {
-		_ = refundLiveRoomCallLastMinuteIfNeeded(order, now)
-	}
-	callUser.SetHeartTime(nil)
-	callUser.SetCallOrderId(0)
-	if order.ReceiverId == callUser.ID {
-		order.SetReceiverHangUpTime(&now)
-	}
-	if order.CallerId == callUser.ID {
-		order.SetCallerHangUpTime(&now)
-	}
-	if !order.HasEnded() {
-		order.SetOrderEndTime(&now)
-		order.SetStatus(entity.CallOrderStatusEnded)
-	}
-	calldao.FlushOrderCache(order)
+	finishCallOrderOnHeartTimeout(order, time.Now())
 }
 
 // ensureNotInCall 校验用户是否正在通话中

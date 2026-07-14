@@ -26,12 +26,14 @@ const (
 
 // 通话订单状态
 const (
-	CallOrderStatusCalling     uint8 = 1 // 呼叫中
-	CallOrderStatusAccepted    uint8 = 2 // 已接听(待双方确认)
-	CallOrderStatusInCall      uint8 = 3 // 通话中
-	CallOrderStatusEnded       uint8 = 4 // 已结束
-	CallOrderStatusRejected    uint8 = 5 // 拒接
-	CallOrderStatusCallTimeout uint8 = 6 // 呼叫超时未接听
+	CallOrderStatusCalling       uint8 = 1 // 呼叫中
+	CallOrderStatusAccepted      uint8 = 2 // 已接听(待双方确认)
+	CallOrderStatusInCall        uint8 = 3 // 通话中
+	CallOrderStatusEnded         uint8 = 4 // 已结束
+	CallOrderStatusRejected      uint8 = 5 // 拒接
+	CallOrderStatusCallTimeout   uint8 = 6 // 呼叫超时未接听
+	CallOrderStatusHeartTimeout  uint8 = 7 // 心跳超时异常结束
+	CallOrderStatusBillingFailed uint8 = 8 // 钻石不足已结束
 )
 
 const (
@@ -62,7 +64,7 @@ type CallOrder struct {
 	migrate.OneModel
 	CallerId            uint64     `gorm:"index;default:0;comment:呼叫者ID" json:"callerId"`
 	ReceiverId          uint64     `gorm:"index;default:0;comment:接收者ID" json:"receiverId"`
-	Status              uint8      `gorm:"index;default:1;comment:订单状态(1-呼叫中,2-已接听,3-通话中,4-已结束,5-拒接,6-呼叫超时未接听)" json:"status"`
+	Status              uint8      `gorm:"index;default:1;comment:订单状态(1-呼叫中,2-已接听,3-通话中,4-已结束,5-拒接,6-呼叫超时,7-心跳超时,8-钻石不足)" json:"status"`
 	CallStartTime       time.Time  `gorm:"index;comment:呼叫开始时间" json:"callStartTime"`
 	AnswerTime          *time.Time `gorm:"index;comment:接听时间" json:"answerTime"`
 	CallerConfirmTime   *time.Time `gorm:"index;comment:呼叫者确认时间" json:"callerConfirmTime"`
@@ -113,6 +115,10 @@ func CallOrderStatusText(status uint8) string {
 		return "拒接"
 	case CallOrderStatusCallTimeout:
 		return "呼叫超时未接听"
+	case CallOrderStatusHeartTimeout:
+		return "心跳超时异常结束"
+	case CallOrderStatusBillingFailed:
+		return "钻石不足已结束"
 	default:
 		return "未知"
 	}
@@ -134,7 +140,8 @@ func (m *CallOrder) HasEnded() bool {
 		return false
 	}
 	switch m.Status {
-	case CallOrderStatusEnded, CallOrderStatusRejected, CallOrderStatusCallTimeout:
+	case CallOrderStatusEnded, CallOrderStatusRejected, CallOrderStatusCallTimeout,
+		CallOrderStatusHeartTimeout, CallOrderStatusBillingFailed:
 		return true
 	default:
 		return false

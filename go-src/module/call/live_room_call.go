@@ -66,6 +66,7 @@ func LiveRoomCall(ctx context.Context, req *calldto.LiveRoomCallReq) (*calldto.L
 		room.Billing,
 	)
 	calldao.AddOrderToCache(order)
+	trackActiveCallOrder(order.ID)
 
 	channelName := buildCallChannelName(callerId, anchorId)
 	if err := pushLiveRoomCallRequest(anchorId, callerId, order.ID, channelName, order.CallType); err != nil {
