@@ -43,6 +43,7 @@ func DiamondSub(userId uint64, amount float64, reason currency.Reason) (float64,
 
 	data := userinfodao.GetUserInfoByUserId(userId)
 	if amount > data.Diamond {
+		pushDiamondToApp(userId, data.Diamond)
 		return 0, errercode.CreateCode(errercode.DiamondNotEnough)
 	}
 	before := data.Diamond
@@ -85,6 +86,7 @@ func GoldSub(userId uint64, amount float64, reason currency.Reason) (float64, er
 	}
 	data := userinfodao.GetUserInfoByUserId(userId)
 	if amount > data.Gold {
+		pushGoldToApp(userId, data.Gold)
 		return 0, errercode.CreateCode(errercode.GoldNotEnough)
 	}
 	before := data.Gold
