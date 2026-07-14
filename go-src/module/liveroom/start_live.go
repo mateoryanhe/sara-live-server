@@ -39,6 +39,7 @@ func StartLive(ctx context.Context, _ *liveroomdto.StartLiveReq) (*liveroomdto.S
 	liveRecord := liveroomdao.GetLiveRecordById(liveRecordId)
 	liveRecord.SetStartTime(time.Now())
 	liveRecord.SetAnchorId(room.ID)
+	flushRoomList(ctx)
 	//
 	flushOnlineLists(room.ID)
 	broadcastAnchorStartLive(room.ID, liveRecordId, liveRecord.StartTime.Unix())
