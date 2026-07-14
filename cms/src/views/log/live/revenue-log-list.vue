@@ -60,6 +60,13 @@
         <el-table-column label="数量" prop="count" width="80"/>
         <el-table-column label="单价(钻石)" prop="unitPrice" width="110"/>
         <el-table-column label="流水金额(钻石)" prop="totalAmount" width="120"/>
+        <el-table-column label="状态" prop="statusText" width="90">
+          <template #default="{ row }">
+            <el-tag :type="row.status === 1 ? 'warning' : 'success'" size="small">
+              {{ row.statusText || (row.status === 1 ? '已退款' : '正常') }}
+            </el-tag>
+          </template>
+        </el-table-column>
         <el-table-column label="创建时间" width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>

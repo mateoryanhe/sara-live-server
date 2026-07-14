@@ -39,6 +39,15 @@ func collectRevenueLogUserIds(rows []*entity.LiveRevenueLog) []uint64 {
 	return userIds
 }
 
+func revenueLogStatusText(status uint8) string {
+	switch status {
+	case entity.LiveRevenueLogStatusRefunded:
+		return "已退款"
+	default:
+		return "正常"
+	}
+}
+
 func toCMSItem(v *entity.LiveRevenueLog, nicknameMap map[uint64]string) *liverevenuedto.CMSLiveRevenueLogItem {
 	if v == nil {
 		return nil
@@ -55,6 +64,8 @@ func toCMSItem(v *entity.LiveRevenueLog, nicknameMap map[uint64]string) *liverev
 		Count:           v.Count,
 		UnitPrice:       v.UnitPrice,
 		TotalAmount:     v.TotalAmount,
+		Status:          v.Status,
+		StatusText:      revenueLogStatusText(v.Status),
 		CreatedAt:       &v.CreatedAt,
 	}
 	if nicknameMap != nil {

@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gmlock"
+	"xr-game-server/constants/currency"
 	"xr-game-server/core/event"
 	"xr-game-server/dao/dailyloginstatdao"
 	"xr-game-server/dao/monthlyloginstatdao"
@@ -25,7 +26,20 @@ func onDiamondConsumeEvent(data any) {
 		g.Log().Errorf(gctx.New(), "CurrencyChangeEvent payload type error: %T", data)
 		return
 	}
-	if ev.Type != gameevent.CurrencyTypeDiamond || ev.Action != gameevent.CurrencyActionSub || ev.Amount <= 0 {
+	if ev.Type != gameevent.CurrencyTypeDiamond || ev.Amount <= 0 {
+		return
+	}
+
+	var delta float64
+	switch ev.Action {
+	case gameevent.CurrencyActionSub:
+		delta = ev.Amount
+	case gameevent.CurrencyActionAdd:
+		if ev.Reason != currency.ReasonRefund {
+			return
+		}
+		delta = -ev.Amount
+	default:
 		return
 	}
 
@@ -36,10 +50,12 @@ func onDiamondConsumeEvent(data any) {
 	defer gmlock.Unlock(lockName)
 
 	if stat := statdao.GetSysStat(); stat != nil {
-		stat.AddTotalDiamondConsume(ev.Amount)
+		stat.AddTotalDiamondConsume(delta)
 	}
-	recordPeriodDiamondConsume(statAt, ev.Amount)
-	recordPeriodDiamondConsumeUser(statAt, ev.UserId)
+	recordPeriodDiamondConsume(statAt, delta)
+	if delta > 0 {
+		recordPeriodDiamondConsumeUser(statAt, ev.UserId)
+	}
 }
 
 func recordPeriodDiamondConsume(statAt time.Time, amount float64) {

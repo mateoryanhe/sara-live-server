@@ -14,6 +14,11 @@ const (
 )
 
 const (
+	LiveRevenueLogStatusNormal   uint8 = 0 // 正常
+	LiveRevenueLogStatusRefunded uint8 = 1 // 已退款
+)
+
+const (
 	LiveRevenueLogRevenueType  db.TbCol = "revenue_type"
 	LiveRevenueLogRoomId       db.TbCol = "room_id"
 	LiveRevenueLogLiveRecordId db.TbCol = "live_record_id"
@@ -23,6 +28,7 @@ const (
 	LiveRevenueLogCount        db.TbCol = "count"
 	LiveRevenueLogUnitPrice    db.TbCol = "unit_price"
 	LiveRevenueLogTotalAmount  db.TbCol = "total_amount"
+	LiveRevenueLogStatus       db.TbCol = "status"
 )
 
 // LiveRevenueLog 直播收益流水(礼物/付费弹幕/游戏下注等)
@@ -37,6 +43,7 @@ type LiveRevenueLog struct {
 	Count        int     `gorm:"default:0;comment:数量" json:"count"`
 	UnitPrice    float64 `gorm:"default:0;comment:单价(钻石)" json:"unitPrice"`
 	TotalAmount  float64 `gorm:"default:0;comment:流水金额(钻石)" json:"totalAmount"`
+	Status       uint8   `gorm:"index;default:0;comment:状态(0正常,1已退款)" json:"status"`
 }
 
 func NewLiveRevenueLog(id uint64) *LiveRevenueLog {
@@ -63,7 +70,12 @@ func NewLiveRevenueLogRecord(roomId, liveRecordId, senderId, receiverId, bizId u
 	ret.SetCount(count)
 	ret.SetUnitPrice(unitPrice)
 	ret.SetTotalAmount(totalAmount)
+	ret.SetStatus(LiveRevenueLogStatusNormal)
 	return ret
+}
+
+func (r *LiveRevenueLog) IsRefunded() bool {
+	return r != nil && r.Status == LiveRevenueLogStatusRefunded
 }
 
 func (r *LiveRevenueLog) SetRevenueType(v uint8) {
@@ -129,6 +141,13 @@ func (r *LiveRevenueLog) SetTotalAmount(v float64) {
 	})
 }
 
+func (r *LiveRevenueLog) SetStatus(v uint8) {
+	r.Status = v
+	syndb.AddDataToQuickChan(TbLiveRevenueLog, LiveRevenueLogStatus, &syndb.ColData{
+		IdVal: r.ID, ColVal: v,
+	})
+}
+
 func (r *LiveRevenueLog) SetCreatedAt(v time.Time) {
 	r.CreatedAt = v
 	syndb.AddDataToQuickChan(TbLiveRevenueLog, db.CreatedAtName, &syndb.ColData{
@@ -155,5 +174,6 @@ func initLiveRevenueLog() {
 	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogCount)
 	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogUnitPrice)
 	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogTotalAmount)
+	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogStatus)
 	migrate.AutoMigrate(&LiveRevenueLog{})
 }

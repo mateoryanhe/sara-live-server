@@ -29,6 +29,7 @@ SELECT rl.receiver_id, SUM(rl.total_amount) AS total_amount
 FROM `+string(entity.TbLiveRevenueLog)+` rl
 INNER JOIN `+string(entity.TbAccount)+` a ON a.id = rl.receiver_id
 WHERE rl.receiver_id > 0
+  AND IFNULL(rl.`+string(entity.LiveRevenueLogStatus)+`, 0) = 0
   AND rl.created_at >= ?
   AND rl.created_at <= ?
   AND IFNULL(a.`+string(entity.AccountCancel)+`, 0) = 0

@@ -49,6 +49,7 @@ SELECT rl.sender_id, SUM(rl.total_amount) AS total_amount
 FROM ` + string(entity.TbLiveRevenueLog) + ` rl
 INNER JOIN ` + string(entity.TbAccount) + ` a ON a.id = rl.sender_id
 WHERE rl.room_id = ?
+  AND IFNULL(rl.` + string(entity.LiveRevenueLogStatus) + `, 0) = 0
   AND rl.sender_id IN (` + inPlaceholders + `)
   AND rl.revenue_type IN (?, ?)
   AND rl.created_at >= ?

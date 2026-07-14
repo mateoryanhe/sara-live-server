@@ -19,6 +19,10 @@ func DiamondAdd(userId uint64, amount float64, reason currency.Reason) (float64,
 	before := data.Diamond
 	data.AddDiamond(amount)
 	after := data.Diamond
+	if reason == currency.ReasonRefund {
+		stat := userinfodao.GetUserCumulativeStatByUserId(userId)
+		stat.AddTotalDiamondConsume(-amount)
+	}
 	event.Pub(gameevent.CurrencyChangeEvent, gameevent.NewCurrencyChangeEventData(
 		userId, gameevent.CurrencyTypeDiamond, gameevent.CurrencyActionAdd,
 		amount, before, after, reason,

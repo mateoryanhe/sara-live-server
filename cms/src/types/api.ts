@@ -656,6 +656,8 @@ export interface LiveRevenueLogItem {
     count: number
     unitPrice: number
     totalAmount: number
+    status?: number
+    statusText?: string
     createdAt?: string | null
 }
 

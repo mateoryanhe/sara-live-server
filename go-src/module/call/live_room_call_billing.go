@@ -10,6 +10,7 @@ import (
 	"xr-game-server/constants/liverevenue"
 	"xr-game-server/core/event"
 	"xr-game-server/core/math"
+	"xr-game-server/core/syndb"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/entity"
 	"xr-game-server/gameevent"
@@ -49,7 +50,7 @@ func chargeLiveRoomCallOnAccept(order *entity.CallOrder, now time.Time) error {
 			return err
 		}
 		totalCost += order.TicketPrice
-		recordLiveRoomCallRevenue(roomId, liveRecordId, callerId, order.TicketPrice, liverevenue.LiveRoomVideoCallTicket)
+		recordLiveRoomCallRevenue(roomId, liveRecordId, callerId, order.ID, order.TicketPrice, liverevenue.LiveRoomVideoCallTicket)
 	}
 
 	if order.PricePerMinute > 0 {
@@ -57,7 +58,7 @@ func chargeLiveRoomCallOnAccept(order *entity.CallOrder, now time.Time) error {
 			return err
 		}
 		totalCost += order.PricePerMinute
-		recordLiveRoomCallRevenue(roomId, liveRecordId, callerId, order.PricePerMinute, liverevenue.LiveRoomVideoCallBilling)
+		recordLiveRoomCallRevenue(roomId, liveRecordId, callerId, order.ID, order.PricePerMinute, liverevenue.LiveRoomVideoCallBilling)
 		order.AddBillingDuration(1)
 		nextCharge := now.Add(time.Minute)
 		order.SetChargeTime(&nextCharge)
@@ -83,7 +84,7 @@ func chargeLiveRoomCallBillingIfDue(order *entity.CallOrder, now time.Time) erro
 	if _, err := wallet.DiamondSub(order.CallerId, order.PricePerMinute, currency.ReasonLiveRoomVideoCallBilling); err != nil {
 		return err
 	}
-	recordLiveRoomCallRevenue(order.ReceiverId, liveRecordId, order.CallerId, order.PricePerMinute, liverevenue.LiveRoomVideoCallBilling)
+	recordLiveRoomCallRevenue(order.ReceiverId, liveRecordId, order.CallerId, order.ID, order.PricePerMinute, liverevenue.LiveRoomVideoCallBilling)
 	order.SetTotalCost(math.AddFloat64(order.TotalCost, order.PricePerMinute))
 	order.AddBillingDuration(1)
 	nextCharge := now.Add(time.Minute)
@@ -91,7 +92,11 @@ func chargeLiveRoomCallBillingIfDue(order *entity.CallOrder, now time.Time) erro
 	return nil
 }
 
-func recordLiveRoomCallRevenue(roomId, liveRecordId, callerId uint64, amount float64, revenueType liverevenue.Type) {
+func recordLiveRoomCallRevenue(roomId, liveRecordId, callerId, orderId uint64, amount float64, revenueType liverevenue.Type) {
+	applyLiveRoomCallRevenue(roomId, liveRecordId, callerId, orderId, amount, revenueType)
+}
+
+func applyLiveRoomCallRevenue(roomId, liveRecordId, callerId, orderId uint64, amount float64, revenueType liverevenue.Type) {
 	if amount <= 0 || liveRecordId == 0 {
 		return
 	}
@@ -105,34 +110,89 @@ func recordLiveRoomCallRevenue(roomId, liveRecordId, callerId uint64, amount flo
 		return
 	}
 	if liveRecord := liveroomdao.GetLiveRecordById(liveRecordId); liveRecord != nil {
-		liveRecord.AddTotalIncome(amount)
-		liveRecord.AddTotalVideoCallIncome(amount)
-		switch revenueType {
-		case liverevenue.LiveRoomVideoCallTicket:
-			liveRecord.AddTotalVideoCallTicketIncome(amount)
-		case liverevenue.LiveRoomVideoCallBilling:
-			liveRecord.AddTotalVideoCallBillingIncome(amount)
-		}
+		applyLiveRecordCallRevenueDelta(liveRecord, amount, revenueType)
 	}
-	room.AddTotalIncome(amount)
-	room.AddTotalVideoCallIncome(amount)
-	switch revenueType {
-	case liverevenue.LiveRoomVideoCallTicket:
-		room.AddTotalVideoCallTicketIncome(amount)
-	case liverevenue.LiveRoomVideoCallBilling:
-		room.AddTotalVideoCallBillingIncome(amount)
-	}
+	applyRoomCallRevenueDelta(room, amount, revenueType)
 
 	var eventData *entity.LiveRevenueLog
 	switch revenueType {
 	case liverevenue.LiveRoomVideoCallTicket:
-		eventData = entity.NewLiveRevenueLogRecord(roomId, liveRecordId, callerId, roomId, 0, 0, 0, amount, uint8(liverevenue.LiveRoomVideoCallTicket))
+		eventData = entity.NewLiveRevenueLogRecord(roomId, liveRecordId, callerId, roomId, orderId, 0, 0, amount, uint8(liverevenue.LiveRoomVideoCallTicket))
 	case liverevenue.LiveRoomVideoCallBilling:
-		eventData = entity.NewLiveRevenueLogRecord(roomId, liveRecordId, callerId, roomId, 0, 1, amount, amount, uint8(liverevenue.LiveRoomVideoCallBilling))
+		eventData = entity.NewLiveRevenueLogRecord(roomId, liveRecordId, callerId, roomId, orderId, 1, amount, amount, uint8(liverevenue.LiveRoomVideoCallBilling))
 	default:
 		return
 	}
 	event.Pub(gameevent.RevenueEventEvent, eventData)
+}
+
+func refundLiveRoomCallRevenue(order *entity.CallOrder, liveRecordId uint64, refundAmount float64) {
+	if order == nil || refundAmount <= 0 || liveRecordId == 0 {
+		return
+	}
+
+	lockKey := fmt.Sprintf("room_%d", order.ReceiverId)
+	gmlock.Lock(lockKey)
+	defer gmlock.Unlock(lockKey)
+
+	if log := liveroomdao.FindLatestUnrefundedVideoCallBillingLog(order.ID, order.CallerId); log != nil {
+		log.SetStatus(entity.LiveRevenueLogStatusRefunded)
+	}
+
+	room := liveroomdao.GetRoomById(order.ReceiverId)
+	if room == nil {
+		return
+	}
+	if liveRecord := liveroomdao.GetLiveRecordById(liveRecordId); liveRecord != nil {
+		applyLiveRecordCallRevenueDelta(liveRecord, -refundAmount, liverevenue.LiveRoomVideoCallBilling)
+	}
+	applyRoomCallRevenueDelta(room, -refundAmount, liverevenue.LiveRoomVideoCallBilling)
+}
+
+func applyLiveRecordCallRevenueDelta(liveRecord *entity.LiveRecord, amount float64, revenueType liverevenue.Type) {
+	liveRecord.TotalIncome = math.AddFloat64(liveRecord.TotalIncome, amount)
+	syndb.AddDataToLazyChan(entity.TbLiveRecord, entity.LiveRecordTotalIncome, &syndb.ColData{
+		IdVal: liveRecord.ID, ColVal: liveRecord.TotalIncome,
+	})
+	liveRecord.TotalVideoCallIncome = math.AddFloat64(liveRecord.TotalVideoCallIncome, amount)
+	syndb.AddDataToLazyChan(entity.TbLiveRecord, entity.LiveRecordTotalVideoCallIncome, &syndb.ColData{
+		IdVal: liveRecord.ID, ColVal: liveRecord.TotalVideoCallIncome,
+	})
+	switch revenueType {
+	case liverevenue.LiveRoomVideoCallTicket:
+		liveRecord.TotalVideoCallTicketIncome = math.AddFloat64(liveRecord.TotalVideoCallTicketIncome, amount)
+		syndb.AddDataToLazyChan(entity.TbLiveRecord, entity.LiveRecordTotalVideoCallTicketIncome, &syndb.ColData{
+			IdVal: liveRecord.ID, ColVal: liveRecord.TotalVideoCallTicketIncome,
+		})
+	case liverevenue.LiveRoomVideoCallBilling:
+		liveRecord.TotalVideoCallBillingIncome = math.AddFloat64(liveRecord.TotalVideoCallBillingIncome, amount)
+		syndb.AddDataToLazyChan(entity.TbLiveRecord, entity.LiveRecordTotalVideoCallBillingIncome, &syndb.ColData{
+			IdVal: liveRecord.ID, ColVal: liveRecord.TotalVideoCallBillingIncome,
+		})
+	}
+}
+
+func applyRoomCallRevenueDelta(room *entity.LiveRoom, amount float64, revenueType liverevenue.Type) {
+	room.TotalIncome = math.AddFloat64(room.TotalIncome, amount)
+	syndb.AddDataToQuickChan(entity.TbLiveRoom, entity.LiveRoomTotalIncome, &syndb.ColData{
+		IdVal: room.ID, ColVal: room.TotalIncome,
+	})
+	room.TotalVideoCallIncome = math.AddFloat64(room.TotalVideoCallIncome, amount)
+	syndb.AddDataToQuickChan(entity.TbLiveRoom, entity.LiveRoomTotalVideoCallIncome, &syndb.ColData{
+		IdVal: room.ID, ColVal: room.TotalVideoCallIncome,
+	})
+	switch revenueType {
+	case liverevenue.LiveRoomVideoCallTicket:
+		room.TotalVideoCallTicketIncome = math.AddFloat64(room.TotalVideoCallTicketIncome, amount)
+		syndb.AddDataToQuickChan(entity.TbLiveRoom, entity.LiveRoomTotalVideoCallTicketIncome, &syndb.ColData{
+			IdVal: room.ID, ColVal: room.TotalVideoCallTicketIncome,
+		})
+	case liverevenue.LiveRoomVideoCallBilling:
+		room.TotalVideoCallBillingIncome = math.AddFloat64(room.TotalVideoCallBillingIncome, amount)
+		syndb.AddDataToQuickChan(entity.TbLiveRoom, entity.LiveRoomTotalVideoCallBillingIncome, &syndb.ColData{
+			IdVal: room.ID, ColVal: room.TotalVideoCallBillingIncome,
+		})
+	}
 }
 
 const callBillingRefundGrace = 30 * time.Second
@@ -153,6 +213,10 @@ func refundLiveRoomCallLastMinuteIfNeeded(order *entity.CallOrder, endTime time.
 	if _, err := wallet.DiamondAdd(order.CallerId, refundAmount, currency.ReasonRefund); err != nil {
 		return err
 	}
+
+	liveRecordId, _ := strconv.ParseUint(order.Params, 10, 64)
+	refundLiveRoomCallRevenue(order, liveRecordId, refundAmount)
+
 	order.SetTotalCost(math.SubFloat64(order.TotalCost, refundAmount))
 	order.SubBillingDuration(1)
 	return nil

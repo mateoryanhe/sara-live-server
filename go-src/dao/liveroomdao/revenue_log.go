@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
+	liverevenueconst "xr-game-server/constants/liverevenue"
 	"xr-game-server/core/cache"
 	"xr-game-server/entity"
 )
@@ -32,4 +34,43 @@ func GetRevenueLogById(id uint64) *entity.LiveRevenueLog {
 	}
 	r, _ := v.(*entity.LiveRevenueLog)
 	return r
+}
+
+// FindLatestUnrefundedVideoCallBillingLog 查询通话订单最近一条未退款的分钟计费流水
+func FindLatestUnrefundedVideoCallBillingLog(orderId, callerId uint64) *entity.LiveRevenueLog {
+	if orderId == 0 || callerId == 0 {
+		return nil
+	}
+	ctx := gctx.New()
+	var row entity.LiveRevenueLog
+	err := g.DB().Model(string(entity.TbLiveRevenueLog)).Ctx(ctx).
+		Where(string(entity.LiveRevenueLogBizId)+" = ?", orderId).
+		Where(string(entity.LiveRevenueLogSenderId)+" = ?", callerId).
+		Where(string(entity.LiveRevenueLogRevenueType)+" = ?", uint8(liverevenueconst.LiveRoomVideoCallBilling)).
+		Where(string(entity.LiveRevenueLogStatus)+" = ?", entity.LiveRevenueLogStatusNormal).
+		Where(string(entity.LiveRevenueLogTotalAmount)+" > ?", 0).
+		OrderDesc("id").
+		Limit(1).
+		Scan(&row)
+	if err != nil || row.ID == 0 {
+		return nil
+	}
+	log := GetRevenueLogById(row.ID)
+	if log == nil {
+		return nil
+	}
+	log.ID = row.ID
+	log.RevenueType = row.RevenueType
+	log.RoomId = row.RoomId
+	log.LiveRecordId = row.LiveRecordId
+	log.SenderId = row.SenderId
+	log.ReceiverId = row.ReceiverId
+	log.BizId = row.BizId
+	log.Count = row.Count
+	log.UnitPrice = row.UnitPrice
+	log.TotalAmount = row.TotalAmount
+	log.Status = row.Status
+	log.CreatedAt = row.CreatedAt
+	log.UpdatedAt = row.UpdatedAt
+	return log
 }
