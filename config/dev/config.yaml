@@ -57,10 +57,6 @@ logger:
   writerColorEnable: true                 # 日志文件是否带上颜色。默认false，表示不带颜色
 
 database:
-  logger:
-    path: "/home/ec2-user/log"
-    level: "all"
-    stdout: true
   default:
     link: "mysql:root:Appledev882116@tcp(127.0.0.1:3306)/live_db"
     extra: "charset=utf8mb4&parseTime=True&loc=Local"

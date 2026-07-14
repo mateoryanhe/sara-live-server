@@ -34,6 +34,7 @@ func InitAppToken(authId uint64, token string, val time.Time) {
 	}
 	expire := val.Sub(time.Now())
 	if expire <= 0 {
+		appCache.Remove(gctx.New(), authId)
 		return
 	}
 	appCache.Set(gctx.New(), authId, token, expire)

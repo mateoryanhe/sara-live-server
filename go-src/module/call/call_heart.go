@@ -34,13 +34,17 @@ func CallHeart(ctx context.Context, req *calldto.CallHeartReq) (*calldto.CallHea
 	upsertCallUser(userId, order.ID, now)
 
 	if order.IsCallStarted() {
+		if err := chargeLiveRoomCallBillingIfDue(order, now); err != nil {
+			if isDiamondNotEnough(err) {
+				finishCallOrderOnBillingFailed(order, now)
+				return &calldto.CallHeartRes{Success: true}, nil
+			}
+			return nil, err
+		}
 		if !isCallHeartIntervalExceeded(lastHeartTime, now) {
 			return &calldto.CallHeartRes{Success: true}, nil
 		}
 		addCallDurationOnHeart(order, now)
-		if err := chargeLiveRoomCallBillingIfDue(order, now); err != nil {
-			return nil, err
-		}
 		calldao.FlushOrderCache(order)
 	}
 

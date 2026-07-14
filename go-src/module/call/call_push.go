@@ -97,15 +97,24 @@ func pushLiveRoomCallAcceptedToAudience(order *entity.CallOrder) {
 }
 
 const liveRoomCallEndedMessage = "通话已结束"
+const liveRoomCallBillingFailedMessage = "钻石不足,通话已结束"
 
 func pushCallEnded(peerId, endUserId, orderId uint64, callDuration, billingDuration uint32, totalCost float64) {
+	pushCallEndedWithMessage(peerId, endUserId, orderId, callDuration, billingDuration, totalCost, liveRoomCallEndedMessage)
+}
+
+func pushCallEndedDueToBillingFailed(peerId, endUserId, orderId uint64, callDuration, billingDuration uint32, totalCost float64) {
+	pushCallEndedWithMessage(peerId, endUserId, orderId, callDuration, billingDuration, totalCost, liveRoomCallBillingFailedMessage)
+}
+
+func pushCallEndedWithMessage(peerId, endUserId, orderId uint64, callDuration, billingDuration uint32, totalCost float64, message string) {
 	item := &calldto.CallEndedPushItem{
 		OrderId:         strconv.FormatUint(orderId, 10),
 		EndUserId:       strconv.FormatUint(endUserId, 10),
 		CallDuration:    callDuration,
 		BillingDuration: billingDuration,
 		TotalCost:       totalCost,
-		Message:         liveRoomCallEndedMessage,
+		Message:         message,
 	}
 	if u := userinfodao.GetUserInfoByUserId(endUserId); u != nil {
 		item.EndUserNickname = u.Nickname

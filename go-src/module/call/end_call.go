@@ -2,6 +2,7 @@ package call
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"time"
 
@@ -64,4 +65,30 @@ func EndCall(ctx context.Context, req *calldto.EndCallReq) (*calldto.EndCallRes,
 		BillingDuration: order.BillingDuration,
 		TotalCost:       order.TotalCost,
 	}, nil
+}
+
+// finishCallOrderOnBillingFailed 钻石不足续费时结束通话,并通知双方
+func finishCallOrderOnBillingFailed(order *entity.CallOrder, now time.Time) {
+	if order == nil || order.HasEnded() {
+		return
+	}
+	if order.IsCallStarted() {
+		_ = refundLiveRoomCallLastMinuteIfNeeded(order, now)
+	}
+	order.SetCallerHangUpTime(&now)
+	order.SetOrderEndTime(&now)
+	order.SetStatus(entity.CallOrderStatusEnded)
+	calldao.FlushOrderCache(order)
+
+	resetCallUser(order.CallerId)
+	resetCallUser(order.ReceiverId)
+
+	endUserId := order.CallerId
+	pushCallEndedDueToBillingFailed(order.ReceiverId, endUserId, order.ID, order.CallDuration, order.BillingDuration, order.TotalCost)
+	pushCallEndedDueToBillingFailed(order.CallerId, endUserId, order.ID, order.CallDuration, order.BillingDuration, order.TotalCost)
+}
+
+func isDiamondNotEnough(err error) bool {
+	var bizErr *errercode.XError
+	return errors.As(err, &bizErr) && bizErr.Code() == errercode.DiamondNotEnough
 }

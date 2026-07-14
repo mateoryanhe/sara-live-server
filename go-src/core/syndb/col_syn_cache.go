@@ -101,11 +101,16 @@ func SysExit(sig os.Signal) {
 }
 
 func consume(ctx context.Context) {
-	_ = ctx
 	pullCaches(quickMap)
 	pullCaches(lazyMap)
-	flushCaches(quickMap, maxQuickFlushPerTick)
-	flushCaches(lazyMap, maxLazyFlushPerTick)
+	start := time.Now()
+	quickRows := flushCaches(quickMap, maxQuickFlushPerTick)
+	lazyRows := flushCaches(lazyMap, maxLazyFlushPerTick)
+	totalRows := quickRows + lazyRows
+	if totalRows > 0 {
+		g.Log().Infof(ctx, "syndb刷盘成功,quick=%v,lazy=%v,total=%v,costMs=%v",
+			quickRows, lazyRows, totalRows, time.Since(start).Milliseconds())
+	}
 }
 
 func pullCaches(cacheMap map[string]*ColSynCache) {
@@ -117,7 +122,8 @@ func pullCaches(cacheMap map[string]*ColSynCache) {
 	}
 }
 
-func flushCaches(cacheMap map[string]*ColSynCache, flushBudget int) {
+func flushCaches(cacheMap map[string]*ColSynCache, flushBudget int) int {
+	flushedRows := 0
 	for _, colCache := range cacheMap {
 		if flushBudget <= 0 {
 			break
@@ -125,10 +131,12 @@ func flushCaches(cacheMap map[string]*ColSynCache, flushBudget int) {
 		if len(colCache.Pending) == 0 {
 			continue
 		}
-		if safeSyn(colCache) {
+		if rows := safeSyn(colCache); rows > 0 {
+			flushedRows += rows
 			flushBudget--
 		}
 	}
+	return flushedRows
 }
 
 func safePullData(colCache *ColSynCache) {
@@ -139,14 +147,18 @@ func safePullData(colCache *ColSynCache) {
 	})
 }
 
-func safeSyn(colCache *ColSynCache) bool {
-	var flushed bool
+func safeSyn(colCache *ColSynCache) int {
+	var flushedRows int
 	gutil.TryCatch(gctx.New(), func(ctx context.Context) {
-		flushed = colCache.Syn()
+		var flushed bool
+		flushedRows, flushed = colCache.Syn()
+		if !flushed {
+			flushedRows = 0
+		}
 	}, func(ctx context.Context, exception error) {
 		g.Log().Errorf(ctx, "syndb Syn异常,table=%v,col=%v,err=%v", colCache.TbName, colCache.ColName, exception)
 	})
-	return flushed
+	return flushedRows
 }
 
 func (colCache *ColSynCache) isIdle() bool {
@@ -178,16 +190,16 @@ func (colCache *ColSynCache) shouldFlush(now time.Time) bool {
 	return !now.Before(colCache.LastTime.Add(colCache.Period))
 }
 
-func (colCache *ColSynCache) Syn() bool {
+func (colCache *ColSynCache) Syn() (int, bool) {
 	if !colCache.shouldFlush(time.Now()) {
-		return false
+		return 0, false
 	}
 	return colCache.batchSave()
 }
 
-func (colCache *ColSynCache) batchSave() bool {
+func (colCache *ColSynCache) batchSave() (int, bool) {
 	if len(colCache.Pending) == common.Zero {
-		return false
+		return 0, false
 	}
 	dataMap := make([]map[string]interface{}, 0, len(colCache.Pending))
 	for idVal, val := range colCache.Pending {
@@ -196,13 +208,14 @@ func (colCache *ColSynCache) batchSave() bool {
 			colCache.ColName: val.ColVal,
 		})
 	}
-	_, err := g.DB().Model(colCache.TbName).Data(dataMap).Batch(len(dataMap)).Save()
+	rows := len(dataMap)
+	_, err := g.DB().Model(colCache.TbName).Data(dataMap).Batch(rows).Save()
 	if err != nil {
-		g.Log().Errorf(gctx.New(), "syndb batchSave失败,table=%v,col=%v,rows=%v,err=%v", colCache.TbName, colCache.ColName, len(dataMap), err)
-		return false
+		g.Log().Errorf(gctx.New(), "syndb batchSave失败,table=%v,col=%v,rows=%v,err=%v", colCache.TbName, colCache.ColName, rows, err)
+		return 0, false
 	}
 	colCache.Pending = make(map[any]*ColData)
-	return true
+	return rows, true
 }
 
 // ChangeSynTime 变更同步时间
