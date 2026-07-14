@@ -3,6 +3,7 @@ package liveroom
 import (
 	"sort"
 	"strconv"
+	"strings"
 	"sync/atomic"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/liveroomdto"
@@ -67,6 +68,22 @@ func getRoomTagName(tagId uint64) string {
 		return tag.Name
 	}
 	return ""
+}
+
+func getRoomTagIdByName(name string) uint64 {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return 0
+	}
+	for _, item := range getAppRoomTagList() {
+		if strings.EqualFold(item.Name, name) {
+			id, err := strconv.ParseUint(item.ID, 10, 64)
+			if err == nil {
+				return id
+			}
+		}
+	}
+	return 0
 }
 
 func toAppLiveRoomTagItem(tag *entity.LiveRoomTag) *liveroomdto.AppLiveRoomTagItem {

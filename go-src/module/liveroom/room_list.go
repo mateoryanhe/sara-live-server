@@ -344,6 +344,72 @@ func collectNearbyLiveRooms(rooms []*entity.LiveRoom, currentIdx, direction, cou
 	return result
 }
 
+func filterHotLiveRooms(rooms []*entity.LiveRoom) []*entity.LiveRoom {
+	hotTagId := getRoomTagIdByName("Hot")
+	filtered := make([]*entity.LiveRoom, 0, len(rooms))
+	for _, room := range rooms {
+		if room == nil || room.LiveRecordId == 0 {
+			continue
+		}
+		if hotTagId > 0 {
+			if room.TagId != hotTagId {
+				continue
+			}
+		} else if room.Category != entity.LiveRoomCategoryHot {
+			continue
+		}
+		filtered = append(filtered, room)
+	}
+	return filtered
+}
+
+func buildHotLiveRoomListItems(rooms []*entity.LiveRoom, userId uint64, startRank int) []*liveroomdto.HotLiveRoomListItem {
+	list := make([]*liveroomdto.HotLiveRoomListItem, 0, len(rooms))
+	rank := startRank
+	for _, room := range rooms {
+		if room == nil {
+			continue
+		}
+		list = append(list, &liveroomdto.HotLiveRoomListItem{
+			LiveRoomListItem: *toLiveRoomListItem(room, userId),
+			Rank:             rank,
+		})
+		rank++
+	}
+	return list
+}
+
+// GetHotLiveRoomList App 分页查询 Hot 分类直播中房间列表(走内存缓存排序,含排名)
+func GetHotLiveRoomList(ctx context.Context, req *liveroomdto.GetHotLiveRoomListReq) (*liveroomdto.GetHotLiveRoomListRes, error) {
+	userId := httpserver.GetAuthId(ctx)
+	pageIndex, pageSize := normalizeRoomListPage(req.PageIndex, req.PageSize)
+
+	cached := getRoomListCache()
+	if cached == nil {
+		return &liveroomdto.GetHotLiveRoomListRes{
+			Total:     0,
+			PageIndex: pageIndex,
+			PageSize:  pageSize,
+			List:      make([]*liveroomdto.HotLiveRoomListItem, 0),
+		}, nil
+	}
+
+	filtered := filterHotLiveRooms(cached)
+	total := len(filtered)
+	start, end := roomListPageRange(total, pageIndex, pageSize)
+	list := buildHotLiveRoomListItems(filtered[start:end], userId, start+1)
+	if len(list) == 0 {
+		list = make([]*liveroomdto.HotLiveRoomListItem, 0)
+	}
+
+	return &liveroomdto.GetHotLiveRoomListRes{
+		Total:     total,
+		PageIndex: pageIndex,
+		PageSize:  pageSize,
+		List:      list,
+	}, nil
+}
+
 // GetNearbyLiveRoomList App 以当前直播间为锚点,获取列表中相邻的直播中直播间(走内存缓存排序)
 func GetNearbyLiveRoomList(ctx context.Context, req *liveroomdto.GetNearbyLiveRoomListReq) (*liveroomdto.GetNearbyLiveRoomListRes, error) {
 	userId := httpserver.GetAuthId(ctx)

@@ -66,3 +66,23 @@ type GetNearbyLiveRoomListReq struct {
 type GetNearbyLiveRoomListRes struct {
 	List []*LiveRoomListItem `json:"list" dc:"相邻直播间列表(不含当前房间,仅直播中)"`
 }
+
+// GetHotLiveRoomListReq App 分页查询 Hot 分类直播中房间列表(走内存缓存排序)
+type GetHotLiveRoomListReq struct {
+	g.Meta    `path:"/hotRoomList" method:"post" summary:"查询Hot直播中房间列表" tags:"直播间"`
+	PageIndex int `json:"pageIndex" dc:"页码(从1开始,默认1)"`
+	PageSize  int `json:"pageSize" dc:"每页数量(默认20,最大100)"`
+}
+
+// HotLiveRoomListItem Hot 直播间列表条目(含排名)
+type HotLiveRoomListItem struct {
+	LiveRoomListItem
+	Rank int `json:"rank" dc:"排名(基于列表缓存排序,从1开始)"`
+}
+
+type GetHotLiveRoomListRes struct {
+	Total     int                    `json:"total" dc:"总条数"`
+	PageIndex int                    `json:"pageIndex" dc:"当前页码"`
+	PageSize  int                    `json:"pageSize" dc:"每页数量"`
+	List      []*HotLiveRoomListItem `json:"list" dc:"Hot直播中房间列表"`
+}

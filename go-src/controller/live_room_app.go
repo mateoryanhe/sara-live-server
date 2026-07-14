@@ -82,6 +82,11 @@ func (c *LiveRoomAppController) NearbyRoomList(ctx context.Context, req *liveroo
 	return liveroom.GetNearbyLiveRoomList(ctx, req)
 }
 
+// HotRoomList 分页查询 Hot 分类直播中房间列表
+func (c *LiveRoomAppController) HotRoomList(ctx context.Context, req *liveroomdto.GetHotLiveRoomListReq) (res *liveroomdto.GetHotLiveRoomListRes, err error) {
+	return liveroom.GetHotLiveRoomList(ctx, req)
+}
+
 // FollowedRoomList 分页查询我关注的直播间列表
 func (c *LiveRoomAppController) FollowedRoomList(ctx context.Context, req *liveroomdto.GetFollowedLiveRoomListReq) (res *liveroomdto.GetLiveRoomListRes, err error) {
 	return liveroom.GetFollowedRoomList(ctx, req)
