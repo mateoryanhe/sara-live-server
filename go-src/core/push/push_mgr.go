@@ -30,8 +30,8 @@ func Data(clientId uint64, cmd int, msg any) {
 	if client == nil {
 		return
 	}
-	jStr := xrjson.MustMarshalIndent(msg)
-	g.Log().Infof(gctx.New(), "userid=%v,发送数据cmd=%v,data=%s", clientId, cmd, jStr)
+	jStr, _ := xrjson.Marshal(msg)
+	g.Log().Infof(gctx.New(), "authId=%v,发送数据cmd=%v,data=%s", clientId, cmd, jStr)
 	client.Send(&httpserver.PushResp{
 		Data: msg,
 		Cmd:  cmd,

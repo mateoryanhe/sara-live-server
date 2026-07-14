@@ -12,12 +12,11 @@ import (
 )
 
 func broadcastAudienceJoin(roomId, userId uint64, onlineCount int) {
-	//g.Log().Infof(gctx.New(), "参加====roId%v,usid,%v", roomId, userId)
 	payload := buildAudiencePresencePayload(roomId, userId, onlineCount)
 	for _, o := range getOnline(roomId) {
 		push.Data(o, cmd.LiveRoomAudienceJoin, payload)
 	}
-	push.Data(roomId, cmd.LiveRoomAudienceJoin, payload)
+	pushAudiencePresenceToAnchor(roomId, cmd.LiveRoomAudienceJoin, payload)
 }
 
 func broadcastAudienceLeave(roomId, userId uint64, onlineCount int) {
@@ -35,6 +34,15 @@ func broadcastAudienceLeave(roomId, userId uint64, onlineCount int) {
 	for _, o := range getOnline(roomId) {
 		push.Data(o, cmd.LiveRoomAudienceLeave, payload)
 	}
+	pushAudiencePresenceToAnchor(roomId, cmd.LiveRoomAudienceLeave, payload)
+}
+
+// pushAudiencePresenceToAnchor 单独通知主播(主播可能未在观众在线列表中)
+func pushAudiencePresenceToAnchor(roomId uint64, pushCmd int, payload any) {
+	if roomId == 0 {
+		return
+	}
+	push.Data(roomId, pushCmd, payload)
 }
 
 func buildAudiencePresencePayload(roomId, userId uint64, onlineCount int) *liveroomdto.AudienceJoinPushItem {

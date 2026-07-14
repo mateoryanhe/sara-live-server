@@ -59,9 +59,6 @@ func refreshRoomAudienceCaches(roomId uint64) {
 
 func broadcastAudienceListRefresh(roomId uint64) {
 	online := getOnline(roomId)
-	if len(online) == 0 {
-		return
-	}
 
 	userIds := commonOnlineMap.Get(roomId)
 	if userIds == nil {
