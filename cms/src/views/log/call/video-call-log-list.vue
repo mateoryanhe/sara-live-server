@@ -71,6 +71,12 @@
         <el-table-column label="接听时间" width="170">
           <template #default="{ row }">{{ formatDate(row.answerTime) }}</template>
         </el-table-column>
+        <el-table-column label="呼叫者最后心跳" width="170">
+          <template #default="{ row }">{{ formatDate(row.callerHeartTime) }}</template>
+        </el-table-column>
+        <el-table-column label="接听者最后心跳" width="170">
+          <template #default="{ row }">{{ formatDate(row.receiverHeartTime) }}</template>
+        </el-table-column>
         <el-table-column label="结束时间" width="170">
           <template #default="{ row }">{{ formatDate(row.orderEndTime) }}</template>
         </el-table-column>

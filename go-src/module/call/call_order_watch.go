@@ -80,8 +80,7 @@ func processAbnormalCallOrder(order *entity.CallOrder, now time.Time) bool {
 			finishCallOrderOnRingTimeout(order, now)
 			return true
 		}
-		caller := calldao.GetUserFromCache(order.CallerId)
-		if isCallUserHeartOffline(caller, order.ID, now) {
+		if isCallPartyHeartOffline(order.CallerHeartTime, now) {
 			finishCallOrderOnHeartTimeout(order, now)
 			return true
 		}
@@ -103,17 +102,15 @@ func processAbnormalCallOrder(order *entity.CallOrder, now time.Time) bool {
 }
 
 func shouldFinishCallOrderOnHeartTimeout(order *entity.CallOrder, now time.Time) bool {
-	caller := calldao.GetUserFromCache(order.CallerId)
-	receiver := calldao.GetUserFromCache(order.ReceiverId)
-	return isCallUserHeartOffline(caller, order.ID, now) ||
-		isCallUserHeartOffline(receiver, order.ID, now)
+	return isCallPartyHeartOffline(order.CallerHeartTime, now) ||
+		isCallPartyHeartOffline(order.ReceiverHeartTime, now)
 }
 
-func isCallUserHeartOffline(callUser *entity.CallUser, orderId uint64, now time.Time) bool {
-	if callUser == nil || callUser.CallOrderId != orderId || callUser.HeartTime == nil || callUser.HeartTime.IsZero() {
+func isCallPartyHeartOffline(heartTime *time.Time, now time.Time) bool {
+	if heartTime == nil || heartTime.IsZero() {
 		return true
 	}
-	return now.Sub(*callUser.HeartTime) > callActiveHeartInterval
+	return now.Sub(*heartTime) > callActiveHeartInterval
 }
 
 func finishCallOrderOnRingTimeout(order *entity.CallOrder, now time.Time) {
@@ -156,12 +153,10 @@ func finishCallOrderOnHeartTimeout(order *entity.CallOrder, now time.Time) {
 }
 
 func resolveCallOfflineUserId(order *entity.CallOrder, now time.Time) uint64 {
-	caller := calldao.GetUserFromCache(order.CallerId)
-	receiver := calldao.GetUserFromCache(order.ReceiverId)
-	if isCallUserHeartOffline(caller, order.ID, now) {
+	if isCallPartyHeartOffline(order.CallerHeartTime, now) {
 		return order.CallerId
 	}
-	if isCallUserHeartOffline(receiver, order.ID, now) {
+	if isCallPartyHeartOffline(order.ReceiverHeartTime, now) {
 		return order.ReceiverId
 	}
 	return order.CallerId

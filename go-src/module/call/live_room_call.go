@@ -79,9 +79,11 @@ func LiveRoomCall(ctx context.Context, req *calldto.LiveRoomCallReq) (*calldto.L
 	}
 
 	now := time.Now()
+	order.SetUserHeartTime(callerId, now)
 	callUser := entity.NewCallUser(callerId, order.ID)
 	callUser.SetHeartTime(&now)
 	calldao.AddUserToCache(callUser)
+	calldao.FlushOrderCache(order)
 
 	agoraCfg, _ := agora.GetAppId(ctx, nil)
 	appId := ""

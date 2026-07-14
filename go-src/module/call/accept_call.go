@@ -51,6 +51,8 @@ func AcceptCall(ctx context.Context, req *calldto.AcceptCallReq) (*calldto.Accep
 	if callerUser := calldao.GetUserById(order.CallerId); callerUser != nil {
 		callerUser.SetHeartTime(&now)
 		calldao.FlushUserCache(callerUser)
+		order.SetUserHeartTime(order.CallerId, now)
+		calldao.FlushOrderCache(order)
 	}
 
 	pushCallAccepted(order.CallerId, receiverId, order.ID, channelName, order.CallType)
@@ -81,4 +83,9 @@ func upsertCallUser(userId, orderId uint64, now time.Time) {
 	}
 	callUser.SetHeartTime(&now)
 	calldao.FlushUserCache(callUser)
+
+	if order := calldao.GetOrderById(orderId); order != nil {
+		order.SetUserHeartTime(userId, now)
+		calldao.FlushOrderCache(order)
+	}
 }

@@ -44,6 +44,8 @@ const (
 	CallOrderAnswerTime          db.TbCol = "answer_time"
 	CallOrderCallerConfirmTime   db.TbCol = "caller_confirm_time"
 	CallOrderReceiverConfirmTime db.TbCol = "receiver_confirm_time"
+	CallOrderCallerHeartTime     db.TbCol = "caller_heart_time"
+	CallOrderReceiverHeartTime   db.TbCol = "receiver_heart_time"
 	CallOrderCallerHangUpTime    db.TbCol = "caller_hang_up_time"
 	CallOrderReceiverHangUpTime  db.TbCol = "receiver_hang_up_time"
 	CallOrderOrderEndTime        db.TbCol = "order_end_time"
@@ -69,6 +71,8 @@ type CallOrder struct {
 	AnswerTime          *time.Time `gorm:"index;comment:接听时间" json:"answerTime"`
 	CallerConfirmTime   *time.Time `gorm:"index;comment:呼叫者确认时间" json:"callerConfirmTime"`
 	ReceiverConfirmTime *time.Time `gorm:"index;comment:接听者确认时间" json:"receiverConfirmTime"`
+	CallerHeartTime     *time.Time `gorm:"index;comment:呼叫者最后心跳时间" json:"callerHeartTime"`
+	ReceiverHeartTime   *time.Time `gorm:"index;comment:接听者最后心跳时间" json:"receiverHeartTime"`
 	CallerHangUpTime    *time.Time `gorm:"index;comment:呼叫者挂断时间" json:"callerHangUpTime"`
 	ReceiverHangUpTime  *time.Time `gorm:"index;comment:接听者挂断时间" json:"receiverHangUpTime"`
 	OrderEndTime        *time.Time `gorm:"index;comment:订单结束时间" json:"orderEndTime"`
@@ -239,6 +243,33 @@ func (m *CallOrder) SetUserConfirmTime(userId uint64, confirmTime time.Time) {
 	}
 }
 
+func (m *CallOrder) UserHeartTime(userId uint64) *time.Time {
+	if m == nil {
+		return nil
+	}
+	if userId == m.CallerId {
+		return m.CallerHeartTime
+	}
+	if userId == m.ReceiverId {
+		return m.ReceiverHeartTime
+	}
+	return nil
+}
+
+func (m *CallOrder) SetUserHeartTime(userId uint64, heartTime time.Time) {
+	if m == nil {
+		return
+	}
+	t := heartTime
+	if userId == m.CallerId {
+		m.SetCallerHeartTime(&t)
+		return
+	}
+	if userId == m.ReceiverId {
+		m.SetReceiverHeartTime(&t)
+	}
+}
+
 func (m *CallOrder) SetCallerId(v uint64) {
 	m.CallerId = v
 	syndb.AddDataToQuickChan(TbCallOrder, CallOrderCallerId, &syndb.ColData{IdVal: m.ID, ColVal: v})
@@ -272,6 +303,16 @@ func (m *CallOrder) SetCallerConfirmTime(v *time.Time) {
 func (m *CallOrder) SetReceiverConfirmTime(v *time.Time) {
 	m.ReceiverConfirmTime = v
 	syndb.AddDataToQuickChan(TbCallOrder, CallOrderReceiverConfirmTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
+}
+
+func (m *CallOrder) SetCallerHeartTime(v *time.Time) {
+	m.CallerHeartTime = v
+	syndb.AddDataToQuickChan(TbCallOrder, CallOrderCallerHeartTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
+}
+
+func (m *CallOrder) SetReceiverHeartTime(v *time.Time) {
+	m.ReceiverHeartTime = v
+	syndb.AddDataToQuickChan(TbCallOrder, CallOrderReceiverHeartTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetCallerHangUpTime(v *time.Time) {
@@ -363,6 +404,8 @@ func initCallOrder() {
 	syndb.RegQuick(TbCallOrder, CallOrderAnswerTime)
 	syndb.RegQuick(TbCallOrder, CallOrderCallerConfirmTime)
 	syndb.RegQuick(TbCallOrder, CallOrderReceiverConfirmTime)
+	syndb.RegQuick(TbCallOrder, CallOrderCallerHeartTime)
+	syndb.RegQuick(TbCallOrder, CallOrderReceiverHeartTime)
 	syndb.RegQuick(TbCallOrder, CallOrderCallerHangUpTime)
 	syndb.RegQuick(TbCallOrder, CallOrderReceiverHangUpTime)
 	syndb.RegQuick(TbCallOrder, CallOrderOrderEndTime)

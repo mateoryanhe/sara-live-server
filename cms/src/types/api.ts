@@ -711,6 +711,8 @@ export interface VideoCallLogItem {
     statusText?: string
     callStartTime?: string | null
     answerTime?: string | null
+    callerHeartTime?: string | null
+    receiverHeartTime?: string | null
     orderEndTime?: string | null
     callDuration: number
     ticketPrice: number
