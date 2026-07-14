@@ -36,7 +36,7 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button :loading="loading" type="primary" @click="submitForm">
+          <el-button type="primary" @click="submitForm">
             {{ isAnchorBan ? '确认封禁' : '确认封号' }}
           </el-button>
           <el-button @click="goBack">返回</el-button>
@@ -67,9 +67,6 @@ const returnPath = computed(() => {
 
 // 表单引用
 const formRef = ref<InstanceType<typeof ElForm>>()
-
-// 加载状态
-const loading = ref(false)
 
 // 表单数据
 const form = reactive({
@@ -117,7 +114,6 @@ const submitForm = async () => {
 
   await formRef.value.validate(async (valid: boolean) => {
     if (valid) {
-      loading.value = true
       try {
         if (isAnchorBan.value) {
           const banData: BanAnchorReq = {
@@ -147,8 +143,6 @@ const submitForm = async () => {
       } catch (error) {
         console.error('封号请求失败:', error)
         ElMessage.error('封号请求失败')
-      } finally {
-        loading.value = false
       }
     } else {
       ElMessage.error('请填写正确的表单信息')

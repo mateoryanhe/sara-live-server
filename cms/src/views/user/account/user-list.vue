@@ -1,10 +1,5 @@
 <template>
-  <div
-      v-loading="pageWaiting"
-      class="page-container"
-      element-loading-background="rgba(255, 255, 255, 0.75)"
-      :element-loading-text="pageWaitingText"
-  >
+  <div class="page-container">
     <el-card>
       <template #header>
         <div class="card-header">
@@ -194,7 +189,7 @@
       </el-form>
       <template #footer>
         <el-button @click="currencyDialogVisible = false">取消</el-button>
-        <el-button :loading="currencySubmitting" type="primary" @click="submitCurrencyChange">确定</el-button>
+        <el-button type="primary" @click="submitCurrencyChange">确定</el-button>
       </template>
     </el-dialog>
 
@@ -244,11 +239,9 @@ const loading = ref(false)
 type CurrencyType = 'gold' | 'diamond'
 type CurrencyMode = 'add' | 'sub'
 
-const pageWaiting = ref(false)
 const currencyDialogVisible = ref(false)
 const currencyType = ref<CurrencyType>('gold')
 const currencyMode = ref<CurrencyMode>('add')
-const currencySubmitting = ref(false)
 const currencyFormRef = ref<FormInstance>()
 const banDialogVisible = ref(false)
 const banSubmitting = ref(false)
@@ -298,8 +291,6 @@ const currencyAmountLabel = computed(() =>
     currencyMode.value === 'add' ? '增加数量' : '扣减数量'
 )
 
-const pageWaitingText = computed(() => `${currencyName.value}变更处理中，请稍候...`)
-
 const currencyFormRules: FormRules = {
   amount: [
     {required: true, message: '请输入数量', trigger: 'blur'},
@@ -343,8 +334,10 @@ watch(() => route.query.refresh, (newRefresh) => {
 }, {immediate: false})
 
 // 获取用户列表
-const fetchUserList = async () => {
-  loading.value = true
+const fetchUserList = async (silent = false) => {
+  if (!silent) {
+    loading.value = true
+  }
   try {
     // 构建查询参数
     const params = {
@@ -364,7 +357,9 @@ const fetchUserList = async () => {
     console.error('获取用户列表失败:', error)
     ElMessage.error('获取用户列表失败')
   } finally {
-    loading.value = false
+    if (!silent) {
+      loading.value = false
+    }
   }
 }
 
@@ -420,19 +415,13 @@ const openCurrencyDialog = (row: UserInfo, type: CurrencyType, mode: CurrencyMod
 const afterCurrencyChangeSuccess = () => {
   currencyDialogVisible.value = false
   ElMessage.success('操作成功')
-  pageWaiting.value = true
-  setTimeout(() => {
-    fetchUserList().finally(() => {
-      pageWaiting.value = false
-    })
-  }, 1000)
+  fetchUserList(true)
 }
 
 const submitCurrencyChange = async () => {
   if (!currencyFormRef.value) return
   await currencyFormRef.value.validate(async (valid) => {
     if (!valid) return
-    currencySubmitting.value = true
     try {
       const payload = {
         userId: currencyForm.userId,
@@ -447,8 +436,6 @@ const submitCurrencyChange = async () => {
       afterCurrencyChangeSuccess()
     } catch (error) {
       console.error(`${currencyName.value}变更失败:`, error)
-    } finally {
-      currencySubmitting.value = false
     }
   })
 }
