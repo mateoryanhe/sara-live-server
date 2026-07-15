@@ -1,4 +1,4 @@
-package weeklyusergoldconsumdao
+package statdao
 
 import (
 	"context"
@@ -9,18 +9,19 @@ import (
 	"xr-game-server/entity"
 )
 
-var cacheMgr *cache.CacheMgr
+var weeklyUserGoldConsumeCacheMgr *cache.CacheMgr
 
-func InitWeeklyUserGoldConsumeDao() {
-	cacheMgr = cache.NewCacheMgr()
+func initWeeklyUserGoldConsumeDao() {
+	weeklyUserGoldConsumeCacheMgr = cache.NewCacheMgr()
 }
 
-func TryRecordConsume(week string, userId uint64) bool {
+// TryRecordWeeklyGoldConsume 记录用户当周首次金币消费;已消费过返回 false
+func TryRecordWeeklyGoldConsume(week string, userId uint64) bool {
 	if userId == 0 || week == "" {
 		return false
 	}
 	id := entity.BuildWeeklyUserGoldConsumeId(week, userId)
-	v := cacheMgr.GetData(id, func(ctx context.Context) (interface{}, error) {
+	v := weeklyUserGoldConsumeCacheMgr.GetData(id, func(ctx context.Context) (interface{}, error) {
 		var row *entity.WeeklyUserGoldConsume
 		_ = g.Model(string(entity.TbWeeklyUserGoldConsume)).Where("id = ?", id).Scan(&row)
 		if row == nil {

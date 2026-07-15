@@ -2,9 +2,7 @@ package stat
 
 import (
 	"context"
-	"xr-game-server/dao/monthlyloginstatdao"
 	"xr-game-server/dao/statdao"
-	"xr-game-server/dao/weeklyloginstatdao"
 	"xr-game-server/dto/statdto"
 	"xr-game-server/entity"
 )
@@ -19,8 +17,8 @@ const (
 func GetCMSUserStatTrend(_ context.Context, _ *statdto.CMSUserStatTrendReq) (*statdto.CMSUserStatTrendRes, error) {
 	return &statdto.CMSUserStatTrendRes{
 		Daily:   toDailyTrendPoints(statdao.ListRecentDailyLoginStats(userStatDailyLimit)),
-		Weekly:  toWeeklyTrendPoints(weeklyloginstatdao.ListRecent(userStatWeeklyLimit)),
-		Monthly: toMonthlyTrendPoints(monthlyloginstatdao.ListRecent(userStatMonthlyLimit)),
+		Weekly:  toWeeklyTrendPoints(statdao.ListRecentWeeklyLoginStats(userStatWeeklyLimit)),
+		Monthly: toMonthlyTrendPoints(statdao.ListRecentMonthlyLoginStats(userStatMonthlyLimit)),
 	}, nil
 }
 

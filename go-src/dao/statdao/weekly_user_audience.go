@@ -1,4 +1,4 @@
-package weeklyuseraudiencedao
+package statdao
 
 import (
 	"context"
@@ -9,18 +9,19 @@ import (
 	"xr-game-server/entity"
 )
 
-var cacheMgr *cache.CacheMgr
+var weeklyUserAudienceCacheMgr *cache.CacheMgr
 
-func InitWeeklyUserAudienceDao() {
-	cacheMgr = cache.NewCacheMgr()
+func initWeeklyUserAudienceDao() {
+	weeklyUserAudienceCacheMgr = cache.NewCacheMgr()
 }
 
-func TryRecordAudience(week string, userId uint64) bool {
+// TryRecordWeeklyAudience 记录用户当周首次成为观众;已记录过返回 false
+func TryRecordWeeklyAudience(week string, userId uint64) bool {
 	if userId == 0 || week == "" {
 		return false
 	}
 	id := entity.BuildWeeklyUserAudienceId(week, userId)
-	v := cacheMgr.GetData(id, func(ctx context.Context) (interface{}, error) {
+	v := weeklyUserAudienceCacheMgr.GetData(id, func(ctx context.Context) (interface{}, error) {
 		var row *entity.WeeklyUserAudience
 		_ = g.Model(string(entity.TbWeeklyUserAudience)).Where("id = ?", id).Scan(&row)
 		if row == nil {

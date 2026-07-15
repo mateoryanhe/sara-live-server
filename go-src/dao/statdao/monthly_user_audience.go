@@ -1,4 +1,4 @@
-package monthlyuseraudiencedao
+package statdao
 
 import (
 	"context"
@@ -9,18 +9,19 @@ import (
 	"xr-game-server/entity"
 )
 
-var cacheMgr *cache.CacheMgr
+var monthlyUserAudienceCacheMgr *cache.CacheMgr
 
-func InitMonthlyUserAudienceDao() {
-	cacheMgr = cache.NewCacheMgr()
+func initMonthlyUserAudienceDao() {
+	monthlyUserAudienceCacheMgr = cache.NewCacheMgr()
 }
 
-func TryRecordAudience(month string, userId uint64) bool {
+// TryRecordMonthlyAudience 记录用户当月首次成为观众;已记录过返回 false
+func TryRecordMonthlyAudience(month string, userId uint64) bool {
 	if userId == 0 || month == "" {
 		return false
 	}
 	id := entity.BuildMonthlyUserAudienceId(month, userId)
-	v := cacheMgr.GetData(id, func(ctx context.Context) (interface{}, error) {
+	v := monthlyUserAudienceCacheMgr.GetData(id, func(ctx context.Context) (interface{}, error) {
 		var row *entity.MonthlyUserAudience
 		_ = g.Model(string(entity.TbMonthlyUserAudience)).Where("id = ?", id).Scan(&row)
 		if row == nil {

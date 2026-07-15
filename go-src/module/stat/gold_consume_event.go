@@ -7,9 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/core/event"
-	"xr-game-server/dao/monthlyloginstatdao"
 	"xr-game-server/dao/statdao"
-	"xr-game-server/dao/weeklyloginstatdao"
 	"xr-game-server/entity"
 	"xr-game-server/gameevent"
 )
@@ -45,9 +43,9 @@ func recordPeriodGoldConsume(statAt time.Time, amount float64) {
 	daily := statdao.GetDailyLoginStatByDate(entity.FormatDailyLoginStatDate(statAt))
 	daily.AddGoldConsumeAmount(amount)
 
-	weekly := weeklyloginstatdao.GetByWeek(entity.FormatWeeklyLoginStatKey(statAt))
+	weekly := statdao.GetWeeklyLoginStatByWeek(entity.FormatWeeklyLoginStatKey(statAt))
 	weekly.AddGoldConsumeAmount(amount)
 
-	monthly := monthlyloginstatdao.GetByMonth(entity.FormatMonthlyLoginStatKey(statAt))
+	monthly := statdao.GetMonthlyLoginStatByMonth(entity.FormatMonthlyLoginStatKey(statAt))
 	monthly.AddGoldConsumeAmount(amount)
 }

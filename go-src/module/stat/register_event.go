@@ -4,9 +4,7 @@ import (
 	"github.com/gogf/gf/v2/os/gmlock"
 	"time"
 	"xr-game-server/core/event"
-	"xr-game-server/dao/monthlyloginstatdao"
 	"xr-game-server/dao/statdao"
-	"xr-game-server/dao/weeklyloginstatdao"
 	"xr-game-server/entity"
 	"xr-game-server/gameevent"
 )
@@ -42,12 +40,12 @@ func recordDailyRegister(now time.Time) {
 
 func recordWeeklyRegister(now time.Time) {
 	week := entity.FormatWeeklyLoginStatKey(now)
-	stat := weeklyloginstatdao.GetByWeek(week)
+	stat := statdao.GetWeeklyLoginStatByWeek(week)
 	stat.AddRegisterCount(1)
 }
 
 func recordMonthlyRegister(now time.Time) {
 	month := entity.FormatMonthlyLoginStatKey(now)
-	stat := monthlyloginstatdao.GetByMonth(month)
+	stat := statdao.GetMonthlyLoginStatByMonth(month)
 	stat.AddRegisterCount(1)
 }

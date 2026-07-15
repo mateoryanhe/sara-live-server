@@ -1,4 +1,4 @@
-package monthlyuserlogindao
+package statdao
 
 import (
 	"context"
@@ -11,11 +11,11 @@ import (
 
 var monthlyUserLoginCacheMgr *cache.CacheMgr
 
-func InitMonthlyUserLoginDao() {
+func initMonthlyUserLoginDao() {
 	monthlyUserLoginCacheMgr = cache.NewCacheMgr()
 }
 
-func getById(id string, month string, userId uint64) *entity.MonthlyUserLogin {
+func getMonthlyUserLoginById(id string, month string, userId uint64) *entity.MonthlyUserLogin {
 	v := monthlyUserLoginCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
 		var row *entity.MonthlyUserLogin
 		_ = g.Model(string(entity.TbMonthlyUserLogin)).Where("id = ?", id).Scan(&row)
@@ -31,10 +31,10 @@ func getById(id string, month string, userId uint64) *entity.MonthlyUserLogin {
 	return row
 }
 
-// TryRecordLogin 记录用户当月首次登录;已登录过返回 false
-func TryRecordLogin(month string, userId uint64) bool {
+// TryRecordMonthlyLogin 记录用户当月首次登录;已登录过返回 false
+func TryRecordMonthlyLogin(month string, userId uint64) bool {
 	id := entity.BuildMonthlyUserLoginId(month, userId)
-	data := getById(id, month, userId)
+	data := getMonthlyUserLoginById(id, month, userId)
 	if data.CreatedAt != nil {
 		return false
 	}

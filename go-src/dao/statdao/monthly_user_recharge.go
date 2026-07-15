@@ -1,4 +1,4 @@
-package monthlyuserrechargdao
+package statdao
 
 import (
 	"context"
@@ -11,11 +11,11 @@ import (
 
 var monthlyUserRechargeCacheMgr *cache.CacheMgr
 
-func InitMonthlyUserRechargeDao() {
+func initMonthlyUserRechargeDao() {
 	monthlyUserRechargeCacheMgr = cache.NewCacheMgr()
 }
 
-func getById(id string, month string, userId uint64) *entity.MonthlyUserRecharge {
+func getMonthlyUserRechargeById(id string, month string, userId uint64) *entity.MonthlyUserRecharge {
 	v := monthlyUserRechargeCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
 		var row *entity.MonthlyUserRecharge
 		_ = g.Model(string(entity.TbMonthlyUserRecharge)).Where("id = ?", id).Scan(&row)
@@ -31,13 +31,13 @@ func getById(id string, month string, userId uint64) *entity.MonthlyUserRecharge
 	return row
 }
 
-// TryRecordRecharge 记录用户当月首次充值;本月已充值过返回 false
-func TryRecordRecharge(month string, userId uint64) bool {
+// TryRecordMonthlyRecharge 记录用户当月首次充值;本月已充值过返回 false
+func TryRecordMonthlyRecharge(month string, userId uint64) bool {
 	if userId == 0 || month == "" {
 		return false
 	}
 	id := entity.BuildMonthlyUserRechargeId(month, userId)
-	data := getById(id, month, userId)
+	data := getMonthlyUserRechargeById(id, month, userId)
 	if data == nil || data.CreatedAt != nil {
 		return false
 	}

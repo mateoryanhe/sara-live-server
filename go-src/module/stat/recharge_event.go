@@ -7,11 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/core/event"
-	"xr-game-server/dao/monthlyloginstatdao"
-	"xr-game-server/dao/monthlyuserrechargdao"
 	"xr-game-server/dao/statdao"
-	"xr-game-server/dao/weeklyloginstatdao"
-	"xr-game-server/dao/weeklyuserrechargdao"
 	"xr-game-server/entity"
 	"xr-game-server/gameevent"
 )
@@ -50,10 +46,10 @@ func recordPeriodRecharge(statAt time.Time, amount float64) {
 	daily := statdao.GetDailyLoginStatByDate(entity.FormatDailyLoginStatDate(statAt))
 	daily.AddRechargeAmount(amount)
 
-	weekly := weeklyloginstatdao.GetByWeek(entity.FormatWeeklyLoginStatKey(statAt))
+	weekly := statdao.GetWeeklyLoginStatByWeek(entity.FormatWeeklyLoginStatKey(statAt))
 	weekly.AddRechargeAmount(amount)
 
-	monthly := monthlyloginstatdao.GetByMonth(entity.FormatMonthlyLoginStatKey(statAt))
+	monthly := statdao.GetMonthlyLoginStatByMonth(entity.FormatMonthlyLoginStatKey(statAt))
 	monthly.AddRechargeAmount(amount)
 }
 
@@ -66,11 +62,11 @@ func recordPeriodRechargeUser(statAt time.Time, userId uint64) {
 		statdao.GetDailyLoginStatByDate(date).AddRechargeUserCount(1)
 	}
 	week := entity.FormatWeeklyLoginStatKey(statAt)
-	if weeklyuserrechargdao.TryRecordRecharge(week, userId) {
-		weeklyloginstatdao.GetByWeek(week).AddRechargeUserCount(1)
+	if statdao.TryRecordWeeklyRecharge(week, userId) {
+		statdao.GetWeeklyLoginStatByWeek(week).AddRechargeUserCount(1)
 	}
 	month := entity.FormatMonthlyLoginStatKey(statAt)
-	if monthlyuserrechargdao.TryRecordRecharge(month, userId) {
-		monthlyloginstatdao.GetByMonth(month).AddRechargeUserCount(1)
+	if statdao.TryRecordMonthlyRecharge(month, userId) {
+		statdao.GetMonthlyLoginStatByMonth(month).AddRechargeUserCount(1)
 	}
 }
