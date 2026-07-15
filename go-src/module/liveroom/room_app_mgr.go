@@ -35,7 +35,7 @@ func applyRoomPricing(room *entity.LiveRoom, ticket, billing float64) {
 
 func applyPrivateInviteType(room *entity.LiveRoom, privateInviteType uint8) {
 	if privateInviteType == 0 {
-		privateInviteType = entity.LiveRoomPrivateInviteAll
+		privateInviteType = entity.DefaultPrivateInviteType(room.Category)
 	}
 	if room.PrivateInviteType != privateInviteType {
 		room.SetPrivateInviteType(privateInviteType)
@@ -44,14 +44,14 @@ func applyPrivateInviteType(room *entity.LiveRoom, privateInviteType uint8) {
 
 // CreateRoom 创建直播间
 // 业务规则:
-//  1. 调用者必须已是主播(UserInfo.IsAnchor == true)
+//  1. 调用者必须已是主播(UserInfo.UserType 为普通主播或机器人主播)
 //  2. 同一主播只能拥有一个直播间(再次调用直接返回已有信息)
 func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *liveroomdto.CreateLiveRoomRes, err error) {
 	anchorId := httpserver.GetAuthId(ctx)
 	logCreateRoomAppUpload(ctx, anchorId, req)
 
 	user := userinfodao.GetUserInfoByUserId(anchorId)
-	if user == nil || !user.IsAnchor {
+	if user == nil || !user.IsAnchor() {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotAnchor)
 	}
 	if err := aliyunmoderation.RequireTextCompliant(aliyunmoderation.SceneComment, req.Title, req.Notice); err != nil {
@@ -210,7 +210,7 @@ func allowShowCallIcon(room *entity.LiveRoom, userId uint64) bool {
 
 	inviteType := room.PrivateInviteType
 	if inviteType == 0 {
-		inviteType = entity.LiveRoomPrivateInviteAll
+		inviteType = entity.DefaultPrivateInviteType(room.Category)
 	}
 	switch inviteType {
 	case entity.LiveRoomPrivateInviteAll:

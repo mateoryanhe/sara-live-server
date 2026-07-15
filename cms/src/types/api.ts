@@ -166,6 +166,56 @@ export interface AnchorListItem {
     registeredAt?: string | null
 }
 
+export interface QueryBotAnchorListReq extends PageQuery {
+    key?: string
+}
+
+export interface BotAnchorListItem {
+    id: string
+    nickname?: string
+    avatar?: string
+    guildId?: string | number
+    roomId?: string
+    roomTitle?: string
+    category?: number
+    tagId?: string | number
+    tagName?: string
+    cloudPlayerVideo?: string
+    cloudPlayerVideoFile?: string
+    pushStream?: boolean
+    botAnchorStatus?: number
+    liveStatus?: number
+    createdAt?: string | null
+    updatedAt?: string | null
+}
+
+export interface CreateBotAnchorReq {
+    nickname: string
+    avatar?: string
+    guildId?: string | number
+    roomTitle?: string
+    category: number
+    tagId?: string | number
+    cloudPlayerVideo?: string
+    pushStream?: boolean
+}
+
+export interface UpdateBotAnchorReq {
+    id: string
+    nickname: string
+    avatar?: string
+    roomTitle?: string
+    category: number
+    tagId?: string | number
+    cloudPlayerVideo?: string
+    pushStream?: boolean
+}
+
+export interface SetBotAnchorStatusReq {
+    id: string
+    status: number
+}
+
 export interface CurrencyLogQuery extends PageQuery {
     userId?: string
     currencyType: number

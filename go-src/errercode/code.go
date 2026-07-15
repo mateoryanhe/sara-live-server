@@ -156,6 +156,10 @@ const (
 	CallOrderNonExist XRCode = 136
 	// CallOrderStateInvalid 通话订单状态不允许此操作
 	CallOrderStateInvalid XRCode = 137
+	// BotAnchorNonExist 机器人主播不存在
+	BotAnchorNonExist XRCode = 138
+	// NotBotAnchor 用户不是机器人主播
+	NotBotAnchor XRCode = 139
 )
 
 type XError struct {

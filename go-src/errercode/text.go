@@ -88,6 +88,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		CallUserInCall:                 "You are already in a call",
 		CallOrderNonExist:              "Call order does not exist",
 		CallOrderStateInvalid:          "Call order state does not allow this operation",
+		BotAnchorNonExist:              "Bot anchor does not exist",
+		NotBotAnchor:                   "User is not a bot anchor",
 	},
 	lang.LangZHCN: {
 		Success:                        "成功",
@@ -172,6 +174,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		CallUserInCall:                 "您正在通话中,无法发起新通话",
 		CallOrderNonExist:              "通话订单不存在",
 		CallOrderStateInvalid:          "通话订单状态不允许此操作",
+		BotAnchorNonExist:              "机器人主播不存在",
+		NotBotAnchor:                   "该用户不是机器人主播",
 	},
 	lang.LangZHTW: {
 		Success:                        "成功",
@@ -256,6 +260,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		CallUserInCall:                 "您正在通話中,無法發起新通話",
 		CallOrderNonExist:              "通話訂單不存在",
 		CallOrderStateInvalid:          "通話訂單狀態不允許此操作",
+		BotAnchorNonExist:              "機器人主播不存在",
+		NotBotAnchor:                   "該用戶不是機器人主播",
 	},
 }
 

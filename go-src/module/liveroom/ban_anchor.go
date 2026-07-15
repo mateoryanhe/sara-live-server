@@ -68,7 +68,7 @@ func IsRoomBanned(room *entity.LiveRoom) bool {
 // BanAnchor CMS封禁主播:写入 live_rooms 封禁状态并向 App 推送
 func BanAnchor(_ context.Context, req *accountdto.BanAnchorReq) (*accountdto.BanRes, error) {
 	user := userinfodao.GetUserInfoByUserId(req.AccountId)
-	if user == nil || !user.IsAnchor {
+	if user == nil || !user.IsAnchor() {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotAnchor)
 	}
 	if req.BanApplyTime == nil || !req.BanApplyTime.After(time.Now()) {

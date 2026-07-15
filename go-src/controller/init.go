@@ -9,6 +9,7 @@ func Init() {
 	initAuthApi()
 	initAuthAppController()
 	initAccountController()
+	initBotAnchorController()
 	initGoldController()
 	initGoldAppController()
 	initDiamondController()

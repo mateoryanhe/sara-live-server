@@ -3,6 +3,9 @@ package entity
 import (
 	"fmt"
 	"time"
+
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/math"
 	"xr-game-server/core/migrate"
@@ -14,45 +17,59 @@ const (
 )
 
 const (
-	UserInfoNickname      db.TbCol = "nickname"
-	UserInfoPhone         db.TbCol = "phone"
-	UserInfoAvatar        db.TbCol = "avatar"
-	UserInfoRemark        db.TbCol = "remark"
-	UserInfoGold          db.TbCol = "gold"
-	UserInfoDiamond       db.TbCol = "diamond"
-	UserInfoShareCode     db.TbCol = "share_code"
-	UserInfoGuildId       db.TbCol = "guild_id"
-	UserInfoIsAnchor      db.TbCol = "is_anchor"
-	UserInfoHasLiveRoom   db.TbCol = "has_live_room"
-	UserInfoInviterId     db.TbCol = "inviter_id"
-	UserInfoVipLevel      db.TbCol = "vip_level"
-	UserInfoLastLoginTime db.TbCol = "last_login_time"
-	UserInfoLiveRoomId    db.TbCol = "live_room_id"
-	UserInfoLiveRoomVer   db.TbCol = "live_room_ver"
-	UserInfoGender        db.TbCol = "gender"
-	UserInfoBirthday      db.TbCol = "birthday"
+	UserInfoNickname        db.TbCol = "nickname"
+	UserInfoPhone           db.TbCol = "phone"
+	UserInfoAvatar          db.TbCol = "avatar"
+	UserInfoRemark          db.TbCol = "remark"
+	UserInfoGold            db.TbCol = "gold"
+	UserInfoDiamond         db.TbCol = "diamond"
+	UserInfoShareCode       db.TbCol = "share_code"
+	UserInfoGuildId         db.TbCol = "guild_id"
+	UserInfoUserType        db.TbCol = "user_type"
+	UserInfoHasLiveRoom     db.TbCol = "has_live_room"
+	UserInfoInviterId       db.TbCol = "inviter_id"
+	UserInfoVipLevel        db.TbCol = "vip_level"
+	UserInfoLastLoginTime   db.TbCol = "last_login_time"
+	UserInfoLiveRoomId      db.TbCol = "live_room_id"
+	UserInfoLiveRoomVer     db.TbCol = "live_room_ver"
+	UserInfoGender          db.TbCol = "gender"
+	UserInfoBirthday        db.TbCol = "birthday"
+	UserInfoBotAnchorStatus db.TbCol = "bot_anchor_status"
+)
+
+const (
+	UserTypeNormal      uint8 = 0 // 普通用户
+	UserTypeAnchor      uint8 = 1 // 普通主播
+	UserTypeBotAnchor   uint8 = 2 // 机器人主播
+	UserTypeBotAudience uint8 = 3 // 机器人观众(预留)
+)
+
+const (
+	BotAnchorStatusDisabled uint8 = 0 // 停用
+	BotAnchorStatusEnabled  uint8 = 1 // 启用
 )
 
 // UserInfo 用户基础信息
 type UserInfo struct {
 	migrate.OneModel
-	Nickname      string     `gorm:"default:'';comment:用户昵称"`
-	Phone         string     `gorm:"default:'';comment:手机号"`
-	Avatar        string     `gorm:"default:'';comment:头像"`
-	Remark        string     `gorm:"default:'';comment:备注"`
-	Gold          float64    `gorm:"default:0;comment:金币"`
-	Diamond       float64    `gorm:"default:0;comment:钻石"`
-	ShareCode     string     `gorm:"uniqueIndex;default:'';comment:分享码"`
-	GuildId       uint64     `gorm:"index;default:0;comment:所属工会ID(0为未加入)"`
-	IsAnchor      bool       `gorm:"default:0;comment:是否主播(设为true后不可回退)"`
-	HasLiveRoom   bool       `gorm:"default:0;comment:是否已创建直播间(App端完善资料后为true)"`
-	InviterId     uint64     `gorm:"index;default:0;comment:邀请人用户ID(0为无)"`
-	VipLevel      uint32     `gorm:"default:0;comment:VIP等级(0为无)"`
-	LastLoginTime *time.Time `gorm:"comment:最后登录时间" json:"lastLoginTime"`
-	LiveRoomId    uint64     `gorm:"index;default:0;comment:当前所在直播间ID(观众,0为不在直播间)" json:"liveRoomId"`
-	LiveRoomVer   uint64     `gorm:"default:0;comment:当前所在直播间版本(观众,0为无,通常为liveRecordId)" json:"liveRoomVer"`
-	Gender        uint8      `gorm:"default:0;comment:性别(0未知,1男,2女)" json:"gender"`
-	Birthday      *time.Time `gorm:"type:date;comment:出生日期" json:"birthday"`
+	Nickname        string     `gorm:"default:'';comment:用户昵称"`
+	Phone           string     `gorm:"default:'';comment:手机号"`
+	Avatar          string     `gorm:"default:'';comment:头像"`
+	Remark          string     `gorm:"default:'';comment:备注"`
+	Gold            float64    `gorm:"default:0;comment:金币"`
+	Diamond         float64    `gorm:"default:0;comment:钻石"`
+	ShareCode       string     `gorm:"uniqueIndex;default:'';comment:分享码"`
+	GuildId         uint64     `gorm:"index;default:0;comment:所属工会ID(0为未加入)"`
+	UserType        uint8      `gorm:"default:0;comment:用户类型(0普通用户,1普通主播,2机器人主播,3机器人观众)" json:"userType"`
+	HasLiveRoom     bool       `gorm:"default:0;comment:是否已创建直播间(App端完善资料后为true)"`
+	InviterId       uint64     `gorm:"index;default:0;comment:邀请人用户ID(0为无)"`
+	VipLevel        uint32     `gorm:"default:0;comment:VIP等级(0为无)"`
+	LastLoginTime   *time.Time `gorm:"comment:最后登录时间" json:"lastLoginTime"`
+	LiveRoomId      uint64     `gorm:"index;default:0;comment:当前所在直播间ID(观众,0为不在直播间)" json:"liveRoomId"`
+	LiveRoomVer     uint64     `gorm:"default:0;comment:当前所在直播间版本(观众,0为无,通常为liveRecordId)" json:"liveRoomVer"`
+	Gender          uint8      `gorm:"default:0;comment:性别(0未知,1男,2女)" json:"gender"`
+	Birthday        *time.Time `gorm:"type:date;comment:出生日期" json:"birthday"`
+	BotAnchorStatus uint8      `gorm:"default:1;comment:机器人主播状态(0停用,1启用)" json:"botAnchorStatus"`
 }
 
 func NewUserInfo(userId uint64) *UserInfo {
@@ -154,12 +171,29 @@ func (receiver *UserInfo) SetGuildId(guildId uint64) {
 	})
 }
 
-func (receiver *UserInfo) SetIsAnchor(isAnchor bool) {
-	receiver.IsAnchor = isAnchor
+func UserTypeIsAnchor(userType uint8) bool {
+	return userType == UserTypeAnchor || userType == UserTypeBotAnchor
+}
+
+func (receiver *UserInfo) IsAnchor() bool {
+	return UserTypeIsAnchor(receiver.UserType)
+}
+
+func (receiver *UserInfo) IsBotAnchor() bool {
+	return receiver.UserType == UserTypeBotAnchor
+}
+
+func (receiver *UserInfo) SetUserType(userType uint8) {
+	switch userType {
+	case UserTypeNormal, UserTypeAnchor, UserTypeBotAnchor, UserTypeBotAudience:
+	default:
+		userType = UserTypeNormal
+	}
+	receiver.UserType = userType
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserInfo, UserInfoIsAnchor, &syndb.ColData{
+	syndb.AddDataToQuickChan(TbUserInfo, UserInfoUserType, &syndb.ColData{
 		IdVal:  receiver.ID,
-		ColVal: isAnchor,
+		ColVal: userType,
 	})
 }
 
@@ -234,6 +268,15 @@ func (receiver *UserInfo) SetBirthday(val *time.Time) {
 	})
 }
 
+func (receiver *UserInfo) SetBotAnchorStatus(status uint8) {
+	receiver.BotAnchorStatus = status
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddDataToQuickChan(TbUserInfo, UserInfoBotAnchorStatus, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: status,
+	})
+}
+
 func (receiver *UserInfo) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
 	syndb.AddDataToQuickChan(TbUserInfo, db.CreatedAtName, &syndb.ColData{
@@ -262,7 +305,7 @@ func initUserInfo() {
 	syndb.RegLazy(TbUserInfo, UserInfoDiamond)
 	syndb.RegQuick(TbUserInfo, UserInfoShareCode)
 	syndb.RegQuick(TbUserInfo, UserInfoGuildId)
-	syndb.RegQuick(TbUserInfo, UserInfoIsAnchor)
+	syndb.RegQuick(TbUserInfo, UserInfoUserType)
 	syndb.RegQuick(TbUserInfo, UserInfoHasLiveRoom)
 	syndb.RegQuick(TbUserInfo, UserInfoInviterId)
 	syndb.RegQuick(TbUserInfo, UserInfoVipLevel)
@@ -271,6 +314,15 @@ func initUserInfo() {
 	syndb.RegQuick(TbUserInfo, UserInfoLiveRoomVer)
 	syndb.RegQuick(TbUserInfo, UserInfoGender)
 	syndb.RegQuick(TbUserInfo, UserInfoBirthday)
+	syndb.RegQuick(TbUserInfo, UserInfoBotAnchorStatus)
 
 	migrate.AutoMigrate(&UserInfo{})
+	migrateUserTypeFromLegacy()
+}
+
+func migrateUserTypeFromLegacy() {
+	ctx := gctx.New()
+	_, _ = g.DB().Exec(ctx, `UPDATE user_infos SET user_type = anchor_type WHERE user_type = 0 AND anchor_type > 0`)
+	_, _ = g.DB().Exec(ctx, `UPDATE user_infos SET user_type = 2 WHERE is_bot_anchor = 1 AND user_type = 0`)
+	_, _ = g.DB().Exec(ctx, `UPDATE user_infos SET user_type = 1 WHERE is_anchor = 1 AND user_type = 0`)
 }

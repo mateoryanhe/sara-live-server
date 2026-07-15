@@ -35,6 +35,8 @@ const (
 	LiveRoomTagId                        db.TbCol = "tag_id"
 	LiveRoomTicket                       db.TbCol = "ticket"
 	LiveRoomBilling                      db.TbCol = "billing"
+	LiveRoomCloudPlayerVideo             db.TbCol = "cloud_player_video"
+	LiveRoomPushStream                   db.TbCol = "push_stream"
 )
 
 const (
@@ -48,6 +50,14 @@ const (
 	LiveRoomPrivateInviteVip    uint8 = 2 // 仅VIP
 	LiveRoomPrivateInviteReject uint8 = 3 // 拒绝所有人
 )
+
+// DefaultPrivateInviteType 按直播间分类返回私密邀请类型默认值
+func DefaultPrivateInviteType(category uint8) uint8 {
+	if category == LiveRoomCategoryHot {
+		return LiveRoomPrivateInviteReject
+	}
+	return LiveRoomPrivateInviteAll
+}
 
 // LiveRoom 直播间(LiveRoom.ID 与 UserInfo.ID 均为主播用户ID,每个主播仅一个直播间)
 type LiveRoom struct {
@@ -74,6 +84,8 @@ type LiveRoom struct {
 	TagId                        uint64     `gorm:"default:0;comment:直播间标签ID" json:"tagId"`
 	Ticket                       float64    `gorm:"type:decimal(10,4);default:0;comment:门票价格(钻石)" json:"ticket"`
 	Billing                      float64    `gorm:"type:decimal(10,4);default:0;comment:计费价格(每分钟钻石)" json:"billing"`
+	CloudPlayerVideo             string     `gorm:"size:512;default:'';comment:云播放器MP4视频URL/路径" json:"cloudPlayerVideo"`
+	PushStream                   bool       `gorm:"default:0;comment:是否推流" json:"pushStream"`
 }
 
 // NewLiveRoom 构造内存对象,字段写入通过 syndb 异步入库
@@ -89,6 +101,7 @@ func NewLiveRoom(anchorId, guildId uint64, title, cover, notice string) *LiveRoo
 	r.SetCover(cover)
 	r.SetNotice(notice)
 	r.SetCategory(LiveRoomCategoryHot)
+	r.SetPrivateInviteType(DefaultPrivateInviteType(LiveRoomCategoryHot))
 	return r
 }
 
@@ -285,6 +298,22 @@ func (r *LiveRoom) SetBilling(v float64) {
 	})
 }
 
+func (r *LiveRoom) SetCloudPlayerVideo(v string) {
+	r.CloudPlayerVideo = v
+	r.touchUpdatedAt()
+	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomCloudPlayerVideo, &syndb.ColData{
+		IdVal: r.ID, ColVal: v,
+	})
+}
+
+func (r *LiveRoom) SetPushStream(v bool) {
+	r.PushStream = v
+	r.touchUpdatedAt()
+	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomPushStream, &syndb.ColData{
+		IdVal: r.ID, ColVal: v,
+	})
+}
+
 func (r *LiveRoom) SetCreatedAt(v time.Time) {
 	r.CreatedAt = v
 	syndb.AddDataToQuickChan(TbLiveRoom, db.CreatedAtName, &syndb.ColData{
@@ -330,6 +359,8 @@ func initLiveRoom() {
 	syndb.RegQuick(TbLiveRoom, LiveRoomTagId)
 	syndb.RegQuick(TbLiveRoom, LiveRoomTicket)
 	syndb.RegQuick(TbLiveRoom, LiveRoomBilling)
+	syndb.RegQuick(TbLiveRoom, LiveRoomCloudPlayerVideo)
+	syndb.RegQuick(TbLiveRoom, LiveRoomPushStream)
 
 	syndb.RegLazy(TbLiveRoom, LiveRoomHeartTime)
 

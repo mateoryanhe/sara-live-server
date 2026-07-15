@@ -18,7 +18,7 @@
           <span>仪表盘</span>
         </el-menu-item>
         <el-sub-menu
-            v-if="hasMenuPermission('UserList') || hasMenuPermission('AnchorListManagement') || hasMenuPermission('RechargeOrderList') || hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList')"
+            v-if="hasMenuPermission('UserList') || hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('RechargeOrderList') || hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList')"
             index="/user/account">
           <template #title>
             <el-icon>
@@ -37,6 +37,12 @@
               <VideoPlay/>
             </el-icon>
             <span>主播列表</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('BotAnchorManagement')" index="/user/bot-anchor/bot-anchor-list">
+            <el-icon>
+              <Cpu/>
+            </el-icon>
+            <span>机器人主播</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('RechargeOrderList')" index="/user/recharge-order/recharge-order-list">
             <el-icon>

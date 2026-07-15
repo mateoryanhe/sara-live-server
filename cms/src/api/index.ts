@@ -25,6 +25,7 @@ import {liveRoomTagApi} from './modules/liveRoomTag'
 import {textModerationApi} from './modules/text-moderation'
 import {uploadResourceApi} from './modules/upload-resource'
 import {sysStatApi} from './modules/sysStat'
+import {botAnchorApi} from './modules/bot-anchor'
 
 export {
     authApi,
@@ -54,6 +55,7 @@ export {
     textModerationApi,
     uploadResourceApi,
     sysStatApi,
+    botAnchorApi,
 }
 
 export default {
@@ -84,4 +86,5 @@ export default {
     textModerationApi,
     uploadResourceApi,
     sysStatApi,
+    botAnchorApi,
 }

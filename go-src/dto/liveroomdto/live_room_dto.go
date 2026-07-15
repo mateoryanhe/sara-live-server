@@ -16,7 +16,7 @@ type CreateLiveRoomReq struct {
 	TagId             uint64            `json:"tagId,string"  dc:"直播间标签ID"`
 	Ticket            float64           `json:"ticket" dc:"门票价格(钻石)"`
 	Billing           float64           `json:"billing" dc:"计费价格(每分钟钻石)"`
-	PrivateInviteType uint8             `json:"privateInviteType" v:"in:0,1,2,3#私密邀请类型不合法" dc:"私密邀请类型(1=接受所有人,2=仅VIP,3=拒绝所有人,0或不传默认1)"`
+	PrivateInviteType uint8             `json:"privateInviteType" v:"in:0,1,2,3#私密邀请类型不合法" dc:"私密邀请类型(1=接受所有人,2=仅VIP,3=拒绝所有人,0或不传时category=1默认3其他默认1)"`
 }
 
 type CreateLiveRoomRes struct {

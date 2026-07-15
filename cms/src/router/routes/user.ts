@@ -19,6 +19,12 @@ export const userRoutes: RouteRecordRaw = {
             meta: {title: '主播列表'},
         },
         {
+            path: 'bot-anchor/bot-anchor-list',
+            name: 'BotAnchorManagement',
+            component: () => import('@/views/user/bot-anchor/bot-anchor-list.vue'),
+            meta: {title: '机器人主播'},
+        },
+        {
             path: 'account/ban-user',
             name: 'BanUser',
             component: () => import('@/views/user/account/ban-user.vue'),

@@ -9,7 +9,7 @@ import (
 	"xr-game-server/dto/accountdto"
 )
 
-// GetAnchorList CMS分页查询主播列表(基于 user_infos.is_anchor = 1)
+// GetAnchorList CMS分页查询主播列表(基于 user_infos.user_type = 1,不含机器人主播)
 func GetAnchorList(req *accountdto.QueryAnchorListReq) (int, []*accountdto.AnchorListItem) {
 	sql := `select u.id,
                    u.nickname, u.phone, u.avatar, u.guild_id,
@@ -21,7 +21,7 @@ func GetAnchorList(req *accountdto.QueryAnchorListReq) (int, []*accountdto.Ancho
             from user_infos u
             inner join accounts a on a.id = u.id
             left join live_rooms r on r.id = u.id
-            where u.is_anchor = 1 `
+            where u.user_type = 1 `
 	param := make([]any, 0)
 	ctx := gctx.New()
 	ret := make([]*accountdto.AnchorListItem, 0)

@@ -6,6 +6,7 @@ import (
 	"xr-game-server/module/anchorrank"
 	"xr-game-server/module/auth"
 	"xr-game-server/module/banner"
+	"xr-game-server/module/botanchor"
 	"xr-game-server/module/call"
 	"xr-game-server/module/currencylog"
 	"xr-game-server/module/game"
@@ -49,6 +50,7 @@ func Init() {
 
 	liveroom.Init()
 	userinfo.Init()
+	botanchor.Init()
 	stat.Init()
 	shortvideo.Init()
 }
