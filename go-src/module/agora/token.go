@@ -11,6 +11,13 @@ import (
 	"xr-game-server/module/livecfg"
 )
 
+func validateAgoraCfg(cfg *agoraCfgSnapshot) error {
+	if cfg == nil || cfg.AppId == "" || cfg.AppCertificate == "" {
+		return errercode.CreateCode(errercode.AgoraCfgInvalid)
+	}
+	return nil
+}
+
 // BuildChannelToken 为指定频道生成声网 Token(频道名与角色由业务方决定)
 func BuildChannelToken(userId uint64, channelName string, role uint8) (token string, expireAt int64, err error) {
 	rtcRole, err := toRTCRole(role)
@@ -83,10 +90,6 @@ func GetAppId(_ context.Context, _ *agoradto.GetAppIdReq) (*agoradto.GetAppIdRes
 		PrivateRoomFreeWatchSeconds: livecfg.GetPrivateRoomFreeWatchSeconds(),
 		PaidDanmakuPrice:            livecfg.GetPaidDanmakuPrice(),
 	}, nil
-}
-
-func buildChannelName(roomId uint64) string {
-	return strconv.FormatUint(roomId, 10)
 }
 
 func buildUserAccount(userId uint64) string {
