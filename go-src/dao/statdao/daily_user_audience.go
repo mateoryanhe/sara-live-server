@@ -1,4 +1,4 @@
-package dailyuseraudiencedao
+package statdao
 
 import (
 	"context"
@@ -9,18 +9,19 @@ import (
 	"xr-game-server/entity"
 )
 
-var cacheMgr *cache.CacheMgr
+var dailyUserAudienceCacheMgr *cache.CacheMgr
 
-func InitDailyUserAudienceDao() {
-	cacheMgr = cache.NewCacheMgr()
+func initDailyUserAudienceDao() {
+	dailyUserAudienceCacheMgr = cache.NewCacheMgr()
 }
 
-func TryRecordAudience(date string, userId uint64) bool {
+// TryRecordDailyAudience 记录用户当日首次成为观众;已记录过返回 false
+func TryRecordDailyAudience(date string, userId uint64) bool {
 	if userId == 0 || date == "" {
 		return false
 	}
 	id := entity.BuildDailyUserAudienceId(date, userId)
-	v := cacheMgr.GetData(id, func(ctx context.Context) (interface{}, error) {
+	v := dailyUserAudienceCacheMgr.GetData(id, func(ctx context.Context) (interface{}, error) {
 		var row *entity.DailyUserAudience
 		_ = g.Model(string(entity.TbDailyUserAudience)).Where("id = ?", id).Scan(&row)
 		if row == nil {

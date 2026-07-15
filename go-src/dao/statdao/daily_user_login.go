@@ -1,20 +1,21 @@
-package dailyuserlogindao
+package statdao
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/frame/g"
 	"time"
+
+	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/core/cache"
 	"xr-game-server/entity"
 )
 
 var dailyUserLoginCacheMgr *cache.CacheMgr
 
-func InitDailyUserLoginDao() {
+func initDailyUserLoginDao() {
 	dailyUserLoginCacheMgr = cache.NewCacheMgr()
 }
 
-func GetById(id string, date string, userId uint64) *entity.DailyUserLogin {
+func getDailyUserLoginById(id string, date string, userId uint64) *entity.DailyUserLogin {
 	v := dailyUserLoginCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
 		var row *entity.DailyUserLogin
 		_ = g.Model(string(entity.TbDailyUserLogin)).Where("id = ?", id).Scan(&row)
@@ -30,10 +31,10 @@ func GetById(id string, date string, userId uint64) *entity.DailyUserLogin {
 	return row
 }
 
-// TryRecordLogin 记录用户当日首次登录;已登录过返回 false
-func TryRecordLogin(date string, userId uint64) bool {
+// TryRecordDailyLogin 记录用户当日首次登录;已登录过返回 false
+func TryRecordDailyLogin(date string, userId uint64) bool {
 	id := entity.BuildDailyUserLoginId(date, userId)
-	data := GetById(id, date, userId)
+	data := getDailyUserLoginById(id, date, userId)
 	if data.CreatedAt != nil {
 		return false
 	}

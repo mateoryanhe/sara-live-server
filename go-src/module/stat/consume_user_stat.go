@@ -2,12 +2,10 @@ package stat
 
 import (
 	"time"
-	"xr-game-server/dao/dailyloginstatdao"
-	"xr-game-server/dao/dailyuserdiamondconsumdao"
-	"xr-game-server/dao/dailyusergoldconsumdao"
 	"xr-game-server/dao/monthlyloginstatdao"
 	"xr-game-server/dao/monthlyuserdiamondconsumdao"
 	"xr-game-server/dao/monthlyusergoldconsumdao"
+	"xr-game-server/dao/statdao"
 	"xr-game-server/dao/weeklyloginstatdao"
 	"xr-game-server/dao/weeklyuserdiamondconsumdao"
 	"xr-game-server/dao/weeklyusergoldconsumdao"
@@ -19,8 +17,8 @@ func recordPeriodGoldConsumeUser(statAt time.Time, userId uint64) {
 		return
 	}
 	date := entity.FormatDailyLoginStatDate(statAt)
-	if dailyusergoldconsumdao.TryRecordConsume(date, userId) {
-		dailyloginstatdao.GetByDate(date).AddGoldConsumeUserCount(1)
+	if statdao.TryRecordDailyGoldConsume(date, userId) {
+		statdao.GetDailyLoginStatByDate(date).AddGoldConsumeUserCount(1)
 	}
 	week := entity.FormatWeeklyLoginStatKey(statAt)
 	if weeklyusergoldconsumdao.TryRecordConsume(week, userId) {
@@ -37,8 +35,8 @@ func recordPeriodDiamondConsumeUser(statAt time.Time, userId uint64) {
 		return
 	}
 	date := entity.FormatDailyLoginStatDate(statAt)
-	if dailyuserdiamondconsumdao.TryRecordConsume(date, userId) {
-		dailyloginstatdao.GetByDate(date).AddDiamondConsumeUserCount(1)
+	if statdao.TryRecordDailyDiamondConsume(date, userId) {
+		statdao.GetDailyLoginStatByDate(date).AddDiamondConsumeUserCount(1)
 	}
 	week := entity.FormatWeeklyLoginStatKey(statAt)
 	if weeklyuserdiamondconsumdao.TryRecordConsume(week, userId) {

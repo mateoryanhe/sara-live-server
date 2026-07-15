@@ -4,10 +4,10 @@ import (
 	"time"
 
 	"github.com/gogf/gf/v2/os/gmlock"
-	"xr-game-server/dao/dailyloginstatdao"
-	"xr-game-server/dao/dailyuseraudiencedao"
 	"xr-game-server/dao/monthlyloginstatdao"
 	"xr-game-server/dao/monthlyuseraudiencedao"
+	"xr-game-server/dao/statdao"
+	"xr-game-
 	"xr-game-server/dao/weeklyloginstatdao"
 	"xr-game-server/dao/weeklyuseraudiencedao"
 	"xr-game-server/entity"
@@ -31,8 +31,8 @@ func RecordValidAudience(userId uint64, statAt time.Time) {
 
 func recordPeriodAudienceUser(statAt time.Time, userId uint64) {
 	date := entity.FormatDailyLoginStatDate(statAt)
-	if dailyuseraudiencedao.TryRecordAudience(date, userId) {
-		dailyloginstatdao.GetByDate(date).AddAudienceUserCount(1)
+	if statdao.TryRecordDailyAudience(date, userId) {
+		statdao.GetDailyLoginStatByDate(date).AddAudienceUserCount(1)
 	}
 	week := entity.FormatWeeklyLoginStatKey(statAt)
 	if weeklyuseraudiencedao.TryRecordAudience(week, userId) {

@@ -7,8 +7,6 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/core/event"
-	"xr-game-server/dao/dailyloginstatdao"
-	"xr-game-server/dao/dailyuserrechargdao"
 	"xr-game-server/dao/monthlyloginstatdao"
 	"xr-game-server/dao/monthlyuserrechargdao"
 	"xr-game-server/dao/statdao"
@@ -49,7 +47,7 @@ func onRechargeArrivedEvent(data any) {
 }
 
 func recordPeriodRecharge(statAt time.Time, amount float64) {
-	daily := dailyloginstatdao.GetByDate(entity.FormatDailyLoginStatDate(statAt))
+	daily := statdao.GetDailyLoginStatByDate(entity.FormatDailyLoginStatDate(statAt))
 	daily.AddRechargeAmount(amount)
 
 	weekly := weeklyloginstatdao.GetByWeek(entity.FormatWeeklyLoginStatKey(statAt))
@@ -64,8 +62,8 @@ func recordPeriodRechargeUser(statAt time.Time, userId uint64) {
 		return
 	}
 	date := entity.FormatDailyLoginStatDate(statAt)
-	if dailyuserrechargdao.TryRecordRecharge(date, userId) {
-		dailyloginstatdao.GetByDate(date).AddRechargeUserCount(1)
+	if statdao.TryRecordDailyRecharge(date, userId) {
+		statdao.GetDailyLoginStatByDate(date).AddRechargeUserCount(1)
 	}
 	week := entity.FormatWeeklyLoginStatKey(statAt)
 	if weeklyuserrechargdao.TryRecordRecharge(week, userId) {

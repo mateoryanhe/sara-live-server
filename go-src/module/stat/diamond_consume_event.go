@@ -8,7 +8,6 @@ import (
 	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/constants/currency"
 	"xr-game-server/core/event"
-	"xr-game-server/dao/dailyloginstatdao"
 	"xr-game-server/dao/monthlyloginstatdao"
 	"xr-game-server/dao/statdao"
 	"xr-game-server/dao/weeklyloginstatdao"
@@ -59,7 +58,7 @@ func onDiamondConsumeEvent(data any) {
 }
 
 func recordPeriodDiamondConsume(statAt time.Time, amount float64) {
-	daily := dailyloginstatdao.GetByDate(entity.FormatDailyLoginStatDate(statAt))
+	daily := statdao.GetDailyLoginStatByDate(entity.FormatDailyLoginStatDate(statAt))
 	daily.AddDiamondConsumeAmount(amount)
 
 	weekly := weeklyloginstatdao.GetByWeek(entity.FormatWeeklyLoginStatKey(statAt))

@@ -1,4 +1,4 @@
-package dailyuserrechargdao
+package statdao
 
 import (
 	"context"
@@ -11,11 +11,11 @@ import (
 
 var dailyUserRechargeCacheMgr *cache.CacheMgr
 
-func InitDailyUserRechargeDao() {
+func initDailyUserRechargeDao() {
 	dailyUserRechargeCacheMgr = cache.NewCacheMgr()
 }
 
-func getById(id string, date string, userId uint64) *entity.DailyUserRecharge {
+func getDailyUserRechargeById(id string, date string, userId uint64) *entity.DailyUserRecharge {
 	v := dailyUserRechargeCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
 		var row *entity.DailyUserRecharge
 		_ = g.Model(string(entity.TbDailyUserRecharge)).Where("id = ?", id).Scan(&row)
@@ -31,13 +31,13 @@ func getById(id string, date string, userId uint64) *entity.DailyUserRecharge {
 	return row
 }
 
-// TryRecordRecharge 记录用户当日首次充值;本日已充值过返回 false
-func TryRecordRecharge(date string, userId uint64) bool {
+// TryRecordDailyRecharge 记录用户当日首次充值;本日已充值过返回 false
+func TryRecordDailyRecharge(date string, userId uint64) bool {
 	if userId == 0 || date == "" {
 		return false
 	}
 	id := entity.BuildDailyUserRechargeId(date, userId)
-	data := getById(id, date, userId)
+	data := getDailyUserRechargeById(id, date, userId)
 	if data == nil || data.CreatedAt != nil {
 		return false
 	}

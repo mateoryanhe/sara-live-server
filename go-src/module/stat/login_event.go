@@ -4,10 +4,9 @@ import (
 	"github.com/gogf/gf/v2/os/gmlock"
 	"time"
 	"xr-game-server/core/event"
-	"xr-game-server/dao/dailyloginstatdao"
-	"xr-game-server/dao/dailyuserlogindao"
 	"xr-game-server/dao/monthlyloginstatdao"
 	"xr-game-server/dao/monthlyuserlogindao"
+	"xr-game-server/dao/statdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dao/weeklyloginstatdao"
 	"xr-game-server/dao/weeklyuserlogindao"
@@ -36,8 +35,8 @@ func onLoginEvent(data any) {
 
 func recordDailyLogin(now time.Time, userId uint64) {
 	date := entity.FormatDailyLoginStatDate(now)
-	if dailyuserlogindao.TryRecordLogin(date, userId) {
-		stat := dailyloginstatdao.GetByDate(date)
+	if statdao.TryRecordDailyLogin(date, userId) {
+		stat := statdao.GetDailyLoginStatByDate(date)
 		stat.AddLoginCount(1)
 	}
 }

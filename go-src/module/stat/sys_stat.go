@@ -3,7 +3,6 @@ package stat
 import (
 	"context"
 	"time"
-	"xr-game-server/dao/dailyloginstatdao"
 	"xr-game-server/dao/statdao"
 	"xr-game-server/dto/statdto"
 	"xr-game-server/entity"
@@ -15,7 +14,7 @@ func GetCMSSysStat(_ context.Context, _ *statdto.CMSSysStatReq) (*statdto.CMSSys
 	if stat == nil {
 		stat = entity.NewSystemTotalStat(entity.SystemTotalStatDefaultID)
 	}
-	todayStat := dailyloginstatdao.GetByDate(entity.FormatDailyLoginStatDate(time.Now()))
+	todayStat := statdao.GetDailyLoginStatByDate(entity.FormatDailyLoginStatDate(time.Now()))
 	return &statdto.CMSSysStatRes{
 		TotalGold:           stat.TotalGold,
 		TotalGoldConsume:    stat.TotalGoldConsume,

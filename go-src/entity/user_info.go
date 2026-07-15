@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/math"
 	"xr-game-server/core/migrate"
@@ -317,12 +315,5 @@ func initUserInfo() {
 	syndb.RegQuick(TbUserInfo, UserInfoBotAnchorStatus)
 
 	migrate.AutoMigrate(&UserInfo{})
-	migrateUserTypeFromLegacy()
-}
 
-func migrateUserTypeFromLegacy() {
-	ctx := gctx.New()
-	_, _ = g.DB().Exec(ctx, `UPDATE user_infos SET user_type = anchor_type WHERE user_type = 0 AND anchor_type > 0`)
-	_, _ = g.DB().Exec(ctx, `UPDATE user_infos SET user_type = 2 WHERE is_bot_anchor = 1 AND user_type = 0`)
-	_, _ = g.DB().Exec(ctx, `UPDATE user_infos SET user_type = 1 WHERE is_anchor = 1 AND user_type = 0`)
 }

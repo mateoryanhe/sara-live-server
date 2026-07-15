@@ -4,17 +4,11 @@ import (
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/calldao"
 	"xr-game-server/dao/cmsuserdao"
-	"xr-game-server/dao/dailyloginstatdao"
-	"xr-game-server/dao/dailyuseraudiencedao"
-	"xr-game-server/dao/dailyuserdiamondconsumdao"
-	"xr-game-server/dao/dailyusergoldconsumdao"
-	"xr-game-server/dao/dailyuserlogindao"
 	"xr-game-server/dao/messagedao"
 	"xr-game-server/dao/monthlyloginstatdao"
 	"xr-game-server/dao/monthlyuserdiamondconsumdao"
 	"xr-game-server/dao/userlogindevicedao"
 
-	"xr-game-server/dao/dailyuserrechargdao"
 	"xr-game-server/dao/globalcfgdao"
 	"xr-game-server/dao/guilddao"
 	"xr-game-server/dao/livefollowdao"
@@ -46,12 +40,6 @@ func Init() {
 	globalcfgdao.InitGlobalCfg()
 	cmsuserdao.InitCMSUser()
 	userinfodao.InitUserInfoDao()
-	dailyloginstatdao.InitDailyLoginStatDao()
-	dailyuserlogindao.InitDailyUserLoginDao()
-	dailyuserrechargdao.InitDailyUserRechargeDao()
-	dailyusergoldconsumdao.InitDailyUserGoldConsumeDao()
-	dailyuserdiamondconsumdao.InitDailyUserDiamondConsumeDao()
-	dailyuseraudiencedao.InitDailyUserAudienceDao()
 	weeklyloginstatdao.InitWeeklyLoginStatDao()
 	weeklyuserlogindao.InitWeeklyUserLoginDao()
 	weeklyuserrechargdao.InitWeeklyUserRechargeDao()
