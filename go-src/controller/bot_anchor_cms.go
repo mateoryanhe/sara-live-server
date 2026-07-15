@@ -33,3 +33,11 @@ func (c *BotAnchorController) UpdateBotAnchor(ctx context.Context, req *botancho
 func (c *BotAnchorController) SetBotAnchorStatus(ctx context.Context, req *botanchordto.SetBotAnchorStatusReq) (res *botanchordto.SetBotAnchorStatusRes, err error) {
 	return botanchor.SetBotAnchorStatus(ctx, req)
 }
+
+func (c *BotAnchorController) StartBotAnchorLive(ctx context.Context, req *botanchordto.StartBotAnchorLiveReq) (res *botanchordto.StartBotAnchorLiveRes, err error) {
+	return botanchor.StartBotAnchorLive(ctx, req)
+}
+
+func (c *BotAnchorController) StopBotAnchorLive(ctx context.Context, req *botanchordto.StopBotAnchorLiveReq) (res *botanchordto.StopBotAnchorLiveRes, err error) {
+	return botanchor.StopBotAnchorLive(ctx, req)
+}

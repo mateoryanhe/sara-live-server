@@ -48,7 +48,7 @@ func flushRoomList(ctx context.Context) {
 	allData := liveroomdao.GetAllLiveRoom()
 	filtered := make([]*entity.LiveRoom, 0, len(allData))
 	for _, room := range allData {
-		if room == nil || IsRoomBanned(room) {
+		if room == nil || IsRoomBanned(room) || isDisabledBotAnchorRoom(room) {
 			continue
 		}
 		filtered = append(filtered, room)
@@ -64,6 +64,19 @@ func flushRoomList(ctx context.Context) {
 	})
 
 	roomListCache.Store(filtered)
+}
+
+// RefreshRoomListCache 主动刷新直播间列表缓存
+func RefreshRoomListCache(ctx context.Context) {
+	flushRoomList(ctx)
+}
+
+func isDisabledBotAnchorRoom(room *entity.LiveRoom) bool {
+	if room == nil {
+		return false
+	}
+	user := userinfodao.GetUserInfoByUserId(room.ID)
+	return user != nil && user.IsBotAnchor() && user.BotAnchorStatus != entity.BotAnchorStatusEnabled
 }
 
 func compareLiveRoomsForList(a, b *entity.LiveRoom, onlineCounts map[uint64]int) bool {

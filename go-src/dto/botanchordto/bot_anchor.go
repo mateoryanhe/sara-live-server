@@ -81,3 +81,25 @@ type SetBotAnchorStatusReq struct {
 type SetBotAnchorStatusRes struct {
 	Success bool `json:"success"`
 }
+
+// StartBotAnchorLiveReq CMS机器人主播开播
+type StartBotAnchorLiveReq struct {
+	g.Meta `path:"/startBotAnchorLive" method:"post" summary:"机器人主播开播" tags:"机器人主播"`
+	ID     uint64 `json:"id,string" v:"required" dc:"用户ID"`
+}
+
+// StartBotAnchorLiveRes CMS机器人主播开播响应
+type StartBotAnchorLiveRes struct {
+	Success bool `json:"success"`
+}
+
+// StopBotAnchorLiveReq CMS机器人主播下播
+type StopBotAnchorLiveReq struct {
+	g.Meta `path:"/stopBotAnchorLive" method:"post" summary:"机器人主播下播" tags:"机器人主播"`
+	ID     uint64 `json:"id,string" v:"required" dc:"用户ID"`
+}
+
+// StopBotAnchorLiveRes CMS机器人主播下播响应
+type StopBotAnchorLiveRes struct {
+	Success bool `json:"success"`
+}

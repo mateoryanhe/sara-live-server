@@ -63,6 +63,8 @@ func CreateBotAnchor(_ context.Context, req *botanchordto.CreateBotAnchorReq) (*
 	room.SetPushStream(req.PushStream)
 	userinfodao.GetUserCumulativeStatByUserId(account.ID)
 	addBotAnchorId(account.ID)
+	addEnabledBotAnchorId(account.ID)
+	liveroomdao.FlushRoomCache(room)
 	userinfo.AddIdToCache(account.ID)
 
 	return &botanchordto.CreateBotAnchorRes{ID: account.ID}, nil
@@ -105,7 +107,7 @@ func UpdateBotAnchor(_ context.Context, req *botanchordto.UpdateBotAnchorReq) (*
 }
 
 // SetBotAnchorStatus CMS启用/停用机器人主播
-func SetBotAnchorStatus(_ context.Context, req *botanchordto.SetBotAnchorStatusReq) (*botanchordto.SetBotAnchorStatusRes, error) {
+func SetBotAnchorStatus(ctx context.Context, req *botanchordto.SetBotAnchorStatusReq) (*botanchordto.SetBotAnchorStatusRes, error) {
 	user, err := getBotAnchorUser(req.ID)
 	if err != nil {
 		return nil, err
@@ -115,7 +117,40 @@ func SetBotAnchorStatus(_ context.Context, req *botanchordto.SetBotAnchorStatusR
 	}
 	user.SetBotAnchorStatus(req.Status)
 	userinfo.AddIdToCache(req.ID)
+	switch req.Status {
+	case entity.BotAnchorStatusEnabled:
+		enableBotAnchorRoomCache(req.ID, user.GuildId)
+	case entity.BotAnchorStatusDisabled:
+		disableBotAnchorRoomCache(req.ID)
+	}
+	liveroom.RefreshRoomListCache(ctx)
 	return &botanchordto.SetBotAnchorStatusRes{Success: true}, nil
+}
+
+// StartBotAnchorLive CMS机器人主播开播(不调声网,心跳写入10年后)
+func StartBotAnchorLive(ctx context.Context, req *botanchordto.StartBotAnchorLiveReq) (*botanchordto.StartBotAnchorLiveRes, error) {
+	user, err := getBotAnchorUser(req.ID)
+	if err != nil {
+		return nil, err
+	}
+	if user.BotAnchorStatus != entity.BotAnchorStatusEnabled {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if err := liveroom.StartLiveForBotAnchor(ctx, req.ID, user.GuildId); err != nil {
+		return nil, err
+	}
+	return &botanchordto.StartBotAnchorLiveRes{Success: true}, nil
+}
+
+// StopBotAnchorLive CMS机器人主播下播
+func StopBotAnchorLive(ctx context.Context, req *botanchordto.StopBotAnchorLiveReq) (*botanchordto.StopBotAnchorLiveRes, error) {
+	if _, err := getBotAnchorUser(req.ID); err != nil {
+		return nil, err
+	}
+	if err := liveroom.StopLiveForBotAnchor(ctx, req.ID); err != nil {
+		return nil, err
+	}
+	return &botanchordto.StopBotAnchorLiveRes{Success: true}, nil
 }
 
 func getBotAnchorUser(userId uint64) (*entity.UserInfo, error) {

@@ -216,6 +216,14 @@ export interface SetBotAnchorStatusReq {
     status: number
 }
 
+export interface StartBotAnchorLiveReq {
+    id: string
+}
+
+export interface StopBotAnchorLiveReq {
+    id: string
+}
+
 export interface CurrencyLogQuery extends PageQuery {
     userId?: string
     currencyType: number

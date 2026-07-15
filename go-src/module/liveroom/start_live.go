@@ -9,6 +9,7 @@ import (
 	"xr-game-server/core/snowflake"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/liveroomdto"
+	"xr-game-server/entity"
 	"xr-game-server/errercode"
 )
 
@@ -18,32 +19,48 @@ func StartLive(ctx context.Context, _ *liveroomdto.StartLiveReq) (*liveroomdto.S
 	if err != nil {
 		return nil, err
 	}
-	if IsRoomBanned(room) {
-		return nil, errercode.CreateCode(errercode.LiveRoomBanned)
+	_, err = startAnchorLive(ctx, room, time.Now())
+	if err != nil {
+		return nil, err
 	}
-	if room.LiveRecordId > 0 {
-		//重置
+	return &liveroomdto.StartLiveRes{}, nil
+}
 
+// StartLiveForBotAnchor CMS机器人主播开播(不调声网,心跳写入10年后防止被心跳任务下播)
+func StartLiveForBotAnchor(ctx context.Context, anchorId, guildId uint64) error {
+	room := liveroomdao.GetRoomByAnchor(anchorId)
+	if room == nil {
+		room = EnsureAnchorRoom(anchorId, guildId)
+	}
+	heartTime := time.Now().AddDate(botAnchorLiveHeartYears, 0, 0)
+	_, err := startAnchorLive(ctx, room, heartTime)
+	return err
+}
+
+const botAnchorLiveHeartYears = 10
+
+func startAnchorLive(ctx context.Context, room *entity.LiveRoom, heartTime time.Time) (uint64, error) {
+	if room == nil {
+		return 0, errercode.CreateCode(errercode.LiveRoomNotExist)
+	}
+	if IsRoomBanned(room) {
+		return 0, errercode.CreateCode(errercode.LiveRoomBanned)
 	}
 	addTask(room.ID)
-	//初始在线列表
 	initRoomOnline(room.ID)
 
 	liveRecordId := snowflake.GetId()
-
 	room.SetLiveRecordId(liveRecordId)
-	now := time.Now()
-	room.SetHeartTime(&now)
+	room.SetHeartTime(&heartTime)
 
-	//记录开播
 	liveRecord := liveroomdao.GetLiveRecordById(liveRecordId)
 	liveRecord.SetStartTime(time.Now())
 	liveRecord.SetAnchorId(room.ID)
+	liveroomdao.FlushRoomCache(room)
 	flushRoomList(ctx)
-	//
 	flushOnlineLists(room.ID)
 	broadcastAnchorStartLive(room.ID, liveRecordId, liveRecord.StartTime.Unix())
-	return &liveroomdto.StartLiveRes{}, nil
+	return liveRecordId, nil
 }
 
 func broadcastAnchorStartLive(roomId, liveRecordId uint64, startedAt int64) {

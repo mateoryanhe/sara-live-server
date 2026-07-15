@@ -11,6 +11,7 @@ import (
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/entity"
+	"xr-game-server/errercode"
 	"xr-game-server/module/liverecord"
 )
 
@@ -22,6 +23,18 @@ func StopLive(ctx context.Context, _ *liveroomdto.StopLiveReq) (*liveroomdto.Sto
 	return &liveroomdto.StopLiveRes{
 		LiveRecord: liverecord.ToAppItem(liveRecord),
 	}, nil
+}
+
+// StopLiveForBotAnchor CMS机器人主播下播
+func StopLiveForBotAnchor(ctx context.Context, anchorId uint64) error {
+	_ = ctx
+	room := liveroomdao.GetRoomByAnchor(anchorId)
+	if room == nil || room.LiveRecordId == 0 {
+		return errercode.CreateCode(errercode.LiveRoomNotLive)
+	}
+	stopLive(anchorId)
+	liveroomdao.FlushRoomCache(room)
+	return nil
 }
 
 func stopLive(anchorId uint64) *entity.LiveRecord {

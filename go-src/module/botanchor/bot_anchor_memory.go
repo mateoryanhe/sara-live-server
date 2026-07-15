@@ -6,18 +6,21 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/dao/botanchordao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/botanchordto"
+	"xr-game-server/entity"
 	"xr-game-server/module/liveroom"
 	"xr-game-server/module/upload"
 )
 
 var (
-	botAnchorIdMu  sync.RWMutex
-	botAnchorIds   []uint64
-	botAnchorIdSet map[uint64]struct{}
+	botAnchorIdMu         sync.RWMutex
+	botAnchorIds          []uint64
+	botAnchorIdSet        map[uint64]struct{}
+	enabledBotAnchorIdSet map[uint64]struct{}
 )
 
 func initBotAnchorMemory() {
@@ -27,19 +30,29 @@ func initBotAnchorMemory() {
 func reloadBotAnchorMemory() {
 	ids := botanchordao.LoadAllBotAnchorIds()
 	set := make(map[uint64]struct{}, len(ids))
+	enabledSet := make(map[uint64]struct{}, len(ids))
 	for _, id := range ids {
 		if id == 0 {
 			continue
 		}
 		set[id] = struct{}{}
-		preloadBotAnchorCache(id)
+		user := userinfodao.GetUserInfoByUserId(id)
+		if user != nil && user.BotAnchorStatus == entity.BotAnchorStatusEnabled {
+			enabledSet[id] = struct{}{}
+			preloadBotAnchorCache(id)
+			continue
+		}
+		liveroomdao.RemoveRoomFromCache(id)
 	}
 	sort.Slice(ids, func(i, j int) bool { return ids[i] > ids[j] })
 
 	botAnchorIdMu.Lock()
 	botAnchorIds = ids
 	botAnchorIdSet = set
+	enabledBotAnchorIdSet = enabledSet
 	botAnchorIdMu.Unlock()
+
+	liveroom.RefreshRoomListCache(gctx.New())
 }
 
 func preloadBotAnchorCache(userId uint64) {
@@ -59,6 +72,39 @@ func addBotAnchorId(userId uint64) {
 	botAnchorIds = append(botAnchorIds, userId)
 	botAnchorIdSet[userId] = struct{}{}
 	sort.Slice(botAnchorIds, func(i, j int) bool { return botAnchorIds[i] > botAnchorIds[j] })
+}
+
+func addEnabledBotAnchorId(userId uint64) {
+	if userId == 0 {
+		return
+	}
+	botAnchorIdMu.Lock()
+	defer botAnchorIdMu.Unlock()
+	if enabledBotAnchorIdSet == nil {
+		enabledBotAnchorIdSet = make(map[uint64]struct{})
+	}
+	enabledBotAnchorIdSet[userId] = struct{}{}
+}
+
+func removeEnabledBotAnchorId(userId uint64) {
+	if userId == 0 {
+		return
+	}
+	botAnchorIdMu.Lock()
+	defer botAnchorIdMu.Unlock()
+	delete(enabledBotAnchorIdSet, userId)
+}
+
+func enableBotAnchorRoomCache(anchorId, guildId uint64) {
+	addEnabledBotAnchorId(anchorId)
+	room := liveroom.EnsureAnchorRoom(anchorId, guildId)
+	liveroomdao.FlushRoomCache(room)
+	preloadBotAnchorCache(anchorId)
+}
+
+func disableBotAnchorRoomCache(anchorId uint64) {
+	removeEnabledBotAnchorId(anchorId)
+	liveroomdao.RemoveRoomFromCache(anchorId)
 }
 
 func isBotAnchorId(userId uint64) bool {

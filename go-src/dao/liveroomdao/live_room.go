@@ -75,3 +75,11 @@ func FlushRoomCache(r *entity.LiveRoom) {
 	}
 	roomCacheMgr.Set(r.ID, r)
 }
+
+// RemoveRoomFromCache 从直播间缓存移除(停用机器人主播等场景)
+func RemoveRoomFromCache(roomId uint64) {
+	if roomId == 0 {
+		return
+	}
+	roomCacheMgr.Remove(roomId)
+}

@@ -1,5 +1,5 @@
 import {request} from '../request'
-import type {BotAnchorListItem, CreateBotAnchorReq, PageResponse, QueryBotAnchorListReq, SetBotAnchorStatusReq, UpdateBotAnchorReq} from '@/types/api'
+import type {BotAnchorListItem, CreateBotAnchorReq, PageResponse, QueryBotAnchorListReq, SetBotAnchorStatusReq, StartBotAnchorLiveReq, StopBotAnchorLiveReq, UpdateBotAnchorReq} from '@/types/api'
 
 export const botAnchorApi = {
     getBotAnchorList: (data: QueryBotAnchorListReq) => {
@@ -16,6 +16,14 @@ export const botAnchorApi = {
 
     setBotAnchorStatus: (data: SetBotAnchorStatusReq) => {
         return request.post<{ success: boolean }>('/botAnchor/setBotAnchorStatus', data)
+    },
+
+    startBotAnchorLive: (data: StartBotAnchorLiveReq) => {
+        return request.post<{ success: boolean }>('/botAnchor/startBotAnchorLive', data)
+    },
+
+    stopBotAnchorLive: (data: StopBotAnchorLiveReq) => {
+        return request.post<{ success: boolean }>('/botAnchor/stopBotAnchorLive', data)
     },
 }
 

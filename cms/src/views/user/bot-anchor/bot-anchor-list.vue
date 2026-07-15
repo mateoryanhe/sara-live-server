@@ -98,9 +98,25 @@
         <el-table-column label="更新时间" prop="updatedAt" width="170">
           <template #default="{ row }">{{ formatDate(row.updatedAt) }}</template>
         </el-table-column>
-        <el-table-column fixed="right" label="操作" width="180">
+        <el-table-column fixed="right" label="操作" width="280">
           <template #default="{ row }">
             <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
+            <el-button
+                v-if="row.botAnchorStatus === 1 && row.liveStatus !== 1"
+                link
+                type="success"
+                @click="handleStartLive(row)"
+            >
+              开播
+            </el-button>
+            <el-button
+                v-if="row.botAnchorStatus === 1 && row.liveStatus === 1"
+                link
+                type="danger"
+                @click="handleStopLive(row)"
+            >
+              下播
+            </el-button>
             <el-button
                 :type="row.botAnchorStatus === 1 ? 'warning' : 'success'"
                 link
@@ -147,7 +163,7 @@
         </el-form-item>
         <el-form-item label="房间类型" prop="category">
           <el-select v-model="formData.category" placeholder="请选择房间类型" style="width: 220px">
-            <el-option :value="LIVE_ROOM_CATEGORY_HOT" label="热门"/>
+            <el-option :value="LIVE_ROOM_CATEGORY_HOT" label="秀场"/>
             <el-option :value="LIVE_ROOM_CATEGORY_GAME" label="游戏"/>
           </el-select>
         </el-form-item>
@@ -589,6 +605,42 @@ const handleSave = async () => {
       saving.value = false
     }
   })
+}
+
+const handleStopLive = async (row: BotAnchorListItem) => {
+  try {
+    await ElMessageBox.confirm(`确定要让机器人主播「${row.nickname || row.id}」下播吗？`, '确认下播', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    await botAnchorApi.stopBotAnchorLive({id: row.id})
+    ElMessage.success('下播成功')
+    fetchList()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('下播失败:', error)
+      ElMessage.error('下播失败')
+    }
+  }
+}
+
+const handleStartLive = async (row: BotAnchorListItem) => {
+  try {
+    await ElMessageBox.confirm(`确定要让机器人主播「${row.nickname || row.id}」开播吗？`, '确认开播', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    await botAnchorApi.startBotAnchorLive({id: row.id})
+    ElMessage.success('开播成功')
+    fetchList()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('开播失败:', error)
+      ElMessage.error('开播失败')
+    }
+  }
 }
 
 const toggleStatus = async (row: BotAnchorListItem) => {
