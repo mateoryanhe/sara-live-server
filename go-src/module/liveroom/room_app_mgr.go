@@ -255,6 +255,7 @@ func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto
 		CreateAt:          room.CreatedAt.Unix(),
 		OnlineCount:       countAudienceInRoom(room.ID),
 	}
+	res.IsBotAnchor, res.CloudPlayerVideo = resolveBotAnchorRoomInfo(room.ID, room.CloudPlayerVideo)
 	//判断一下房间类型
 	if room.Category == entity.LiveRoomCategoryPrivate {
 		clearFreeTime(userId, room.ID)

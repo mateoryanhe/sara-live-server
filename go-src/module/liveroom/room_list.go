@@ -79,6 +79,16 @@ func isDisabledBotAnchorRoom(room *entity.LiveRoom) bool {
 	return user != nil && user.IsBotAnchor() && user.BotAnchorStatus != entity.BotAnchorStatusEnabled
 }
 
+func resolveBotAnchorRoomInfo(anchorId uint64, cloudPlayerVideo string) (isBotAnchor bool, cloudPlayerVideoUrl string) {
+	if anchorId > 0 {
+		if user := userinfodao.GetUserInfoByUserId(anchorId); user != nil {
+			isBotAnchor = user.IsBotAnchor()
+		}
+	}
+	cloudPlayerVideoUrl = upload.ResolveCloudPlayerVideoUrl(cloudPlayerVideo)
+	return
+}
+
 func compareLiveRoomsForList(a, b *entity.LiveRoom, onlineCounts map[uint64]int) bool {
 	if a == nil {
 		return false
@@ -139,6 +149,7 @@ func toLiveRoomListItem(room *entity.LiveRoom, userId uint64) *liveroomdto.LiveR
 		item.AnchorNickname = u.Nickname
 		item.AnchorAvatar = upload.ResolveAvatarUrlForUser(room.ID, u.Avatar)
 	}
+	item.IsBotAnchor, item.CloudPlayerVideo = resolveBotAnchorRoomInfo(room.ID, room.CloudPlayerVideo)
 	item.OnlineCount = countAudienceInRoom(room.ID)
 
 	if userId > 0 {

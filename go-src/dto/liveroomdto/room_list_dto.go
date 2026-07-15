@@ -33,6 +33,8 @@ type LiveRoomListItem struct {
 	OnlineCount        int     `json:"onlineCount" dc:"在线观众人数(不含主播)"`
 	AgoraToken         string  `json:"agoraToken" dc:"声网RTC Token"`
 	AgoraTokenExpireAt int64   `json:"agoraTokenExpireAt" dc:"声网Token过期时间(Unix秒)"`
+	IsBotAnchor        bool    `json:"isBotAnchor" dc:"是否机器人主播"`
+	CloudPlayerVideo   string  `json:"cloudPlayerVideo" dc:"云播视频地址"`
 }
 
 type GetLiveRoomListRes struct {
