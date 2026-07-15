@@ -37,6 +37,7 @@ const (
 	LiveRoomBilling                      db.TbCol = "billing"
 	LiveRoomCloudPlayerVideo             db.TbCol = "cloud_player_video"
 	LiveRoomPushStream                   db.TbCol = "push_stream"
+	LiveRoomCloudPlayerId                db.TbCol = "cloud_player_id"
 )
 
 const (
@@ -86,6 +87,7 @@ type LiveRoom struct {
 	Billing                      float64    `gorm:"type:decimal(10,4);default:0;comment:计费价格(每分钟钻石)" json:"billing"`
 	CloudPlayerVideo             string     `gorm:"size:512;default:'';comment:云播放器MP4视频URL/路径" json:"cloudPlayerVideo"`
 	PushStream                   bool       `gorm:"default:0;comment:是否推流" json:"pushStream"`
+	CloudPlayerId                string     `gorm:"size:64;default:'';comment:声网云播放器ID" json:"cloudPlayerId"`
 }
 
 // NewLiveRoom 构造内存对象,字段写入通过 syndb 异步入库
@@ -314,6 +316,14 @@ func (r *LiveRoom) SetPushStream(v bool) {
 	})
 }
 
+func (r *LiveRoom) SetCloudPlayerId(v string) {
+	r.CloudPlayerId = v
+	r.touchUpdatedAt()
+	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomCloudPlayerId, &syndb.ColData{
+		IdVal: r.ID, ColVal: v,
+	})
+}
+
 func (r *LiveRoom) SetCreatedAt(v time.Time) {
 	r.CreatedAt = v
 	syndb.AddDataToQuickChan(TbLiveRoom, db.CreatedAtName, &syndb.ColData{
@@ -361,6 +371,7 @@ func initLiveRoom() {
 	syndb.RegQuick(TbLiveRoom, LiveRoomBilling)
 	syndb.RegQuick(TbLiveRoom, LiveRoomCloudPlayerVideo)
 	syndb.RegQuick(TbLiveRoom, LiveRoomPushStream)
+	syndb.RegQuick(TbLiveRoom, LiveRoomCloudPlayerId)
 
 	syndb.RegLazy(TbLiveRoom, LiveRoomHeartTime)
 

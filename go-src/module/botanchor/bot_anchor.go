@@ -127,7 +127,7 @@ func SetBotAnchorStatus(ctx context.Context, req *botanchordto.SetBotAnchorStatu
 	return &botanchordto.SetBotAnchorStatusRes{Success: true}, nil
 }
 
-// StartBotAnchorLive CMS机器人主播开播(不调声网,心跳写入10年后)
+// StartBotAnchorLive CMS机器人主播开播(按是否推流决定是否调用声网云播放)
 func StartBotAnchorLive(ctx context.Context, req *botanchordto.StartBotAnchorLiveReq) (*botanchordto.StartBotAnchorLiveRes, error) {
 	user, err := getBotAnchorUser(req.ID)
 	if err != nil {

@@ -24,7 +24,7 @@
 
         <el-form-item label="REST CustomerId" prop="restCustomerId">
           <el-input v-model="formData.restCustomerId" clearable placeholder="请输入声网 REST CustomerId"/>
-          <span class="form-tip">可选，查询用户在线状态时需要配置</span>
+          <span class="form-tip">云播放器接口需要配置</span>
         </el-form-item>
 
         <el-form-item label="REST CustomerSecret" prop="restCustomerSecret">
@@ -35,7 +35,16 @@
               show-password
               type="password"
           />
-          <span class="form-tip">可选，查询用户在线状态时需要配置</span>
+          <span class="form-tip">云播放器接口需要配置</span>
+        </el-form-item>
+
+        <el-form-item label="云播放器区域" prop="cloudPlayerRegion">
+          <el-select v-model="formData.cloudPlayerRegion" placeholder="请选择区域" style="width: 220px">
+            <el-option label="中国大陆 (cn)" value="cn"/>
+            <el-option label="亚太 (ap)" value="ap"/>
+            <el-option label="欧洲 (eu)" value="eu"/>
+            <el-option label="北美 (na)" value="na"/>
+          </el-select>
         </el-form-item>
 
         <el-form-item label="Token有效期" prop="tokenExpireHours">
@@ -98,6 +107,7 @@ const formData = reactive({
   appCertificate: '',
   restCustomerId: '',
   restCustomerSecret: '',
+  cloudPlayerRegion: 'cn',
   tokenExpireHours: TOKEN_EXPIRE_DEFAULT_HOURS,
   tokenRefreshHours: TOKEN_REFRESH_DEFAULT_HOURS,
 })
@@ -191,6 +201,7 @@ const applyCfg = (cfg: AgoraCfg | null | undefined) => {
     formData.appCertificate = ''
     formData.restCustomerId = ''
     formData.restCustomerSecret = ''
+    formData.cloudPlayerRegion = 'cn'
     formData.tokenExpireHours = TOKEN_EXPIRE_DEFAULT_HOURS
     formData.tokenRefreshHours = TOKEN_REFRESH_DEFAULT_HOURS
     metaInfo.createdAt = ''
@@ -202,6 +213,7 @@ const applyCfg = (cfg: AgoraCfg | null | undefined) => {
   formData.appCertificate = cfg.appCertificate || ''
   formData.restCustomerId = cfg.restCustomerId || ''
   formData.restCustomerSecret = cfg.restCustomerSecret || ''
+  formData.cloudPlayerRegion = cfg.cloudPlayerRegion || 'cn'
   formData.tokenExpireHours = clampTokenExpireHours(secondsToHours(cfg.tokenExpireSeconds, TOKEN_EXPIRE_DEFAULT_HOURS))
   formData.tokenRefreshHours = clampTokenRefreshHours(
       secondsToHours(cfg.tokenRefreshSeconds, TOKEN_REFRESH_DEFAULT_HOURS),
@@ -234,6 +246,7 @@ const handleSave = async () => {
       appCertificate: formData.appCertificate.trim(),
       restCustomerId: formData.restCustomerId.trim(),
       restCustomerSecret: formData.restCustomerSecret.trim(),
+      cloudPlayerRegion: formData.cloudPlayerRegion || 'cn',
       tokenExpireSeconds: hoursToSeconds(formData.tokenExpireHours),
       tokenRefreshSeconds: hoursToSeconds(formData.tokenRefreshHours),
     })

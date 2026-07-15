@@ -12,6 +12,7 @@ type AgoraCfgItem struct {
 	AppCertificate      string `json:"appCertificate"`
 	RestCustomerId      string `json:"restCustomerId"`
 	RestCustomerSecret  string `json:"restCustomerSecret"`
+	CloudPlayerRegion   string `json:"cloudPlayerRegion"`
 	TokenExpireSeconds  uint32 `json:"tokenExpireSeconds"`
 	TokenRefreshSeconds uint32 `json:"tokenRefreshSeconds"`
 	CreatedAt           string `json:"createdAt"`
@@ -29,6 +30,7 @@ type SaveAgoraCfgReq struct {
 	AppCertificate      string `json:"appCertificate" v:"required|length:1,128#AppCertificate不能为空|AppCertificate长度需在1到128之间"`
 	RestCustomerId      string `json:"restCustomerId" v:"max-length:64#RestCustomerId长度不能超过64"`
 	RestCustomerSecret  string `json:"restCustomerSecret" v:"max-length:128#RestCustomerSecret长度不能超过128"`
+	CloudPlayerRegion   string `json:"cloudPlayerRegion" dc:"云播放器区域(cn/ap/eu/na,默认cn)"`
 	TokenExpireSeconds  uint32 `json:"tokenExpireSeconds" v:"required|between:14400,86400#TokenExpireSeconds不能为空|TokenExpireSeconds需在4到24小时之间"`
 	TokenRefreshSeconds uint32 `json:"tokenRefreshSeconds" v:"required|min:7200#TokenRefreshSeconds不能为空|TokenRefreshSeconds不能小于2小时"`
 }

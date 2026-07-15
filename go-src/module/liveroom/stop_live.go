@@ -12,6 +12,7 @@ import (
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
+	"xr-game-server/module/agora"
 	"xr-game-server/module/liverecord"
 )
 
@@ -27,10 +28,15 @@ func StopLive(ctx context.Context, _ *liveroomdto.StopLiveReq) (*liveroomdto.Sto
 
 // StopLiveForBotAnchor CMS机器人主播下播
 func StopLiveForBotAnchor(ctx context.Context, anchorId uint64) error {
-	_ = ctx
 	room := liveroomdao.GetRoomByAnchor(anchorId)
 	if room == nil || room.LiveRecordId == 0 {
 		return errercode.CreateCode(errercode.LiveRoomNotLive)
+	}
+	if room.CloudPlayerId != "" {
+		if err := agora.StopBotAnchorCloudPlayer(ctx, room.CloudPlayerId); err != nil {
+			return err
+		}
+		room.SetCloudPlayerId("")
 	}
 	stopLive(anchorId)
 	liveroomdao.FlushRoomCache(room)

@@ -90,6 +90,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		CallOrderStateInvalid:          "Call order state does not allow this operation",
 		BotAnchorNonExist:              "Bot anchor does not exist",
 		NotBotAnchor:                   "User is not a bot anchor",
+		AgoraCloudPlayerFailed:         "Agora cloud player request failed",
 	},
 	lang.LangZHCN: {
 		Success:                        "成功",
@@ -176,6 +177,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		CallOrderStateInvalid:          "通话订单状态不允许此操作",
 		BotAnchorNonExist:              "机器人主播不存在",
 		NotBotAnchor:                   "该用户不是机器人主播",
+		AgoraCloudPlayerFailed:         "声网云播放器调用失败",
 	},
 	lang.LangZHTW: {
 		Success:                        "成功",
@@ -262,6 +264,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		CallOrderStateInvalid:          "通話訂單狀態不允許此操作",
 		BotAnchorNonExist:              "機器人主播不存在",
 		NotBotAnchor:                   "該用戶不是機器人主播",
+		AgoraCloudPlayerFailed:         "聲網雲播放器調用失敗",
 	},
 }
 

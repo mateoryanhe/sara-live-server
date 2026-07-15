@@ -11,6 +11,7 @@ import (
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
+	"xr-game-server/module/agora"
 )
 
 // StartLive 开播
@@ -26,7 +27,7 @@ func StartLive(ctx context.Context, _ *liveroomdto.StartLiveReq) (*liveroomdto.S
 	return &liveroomdto.StartLiveRes{}, nil
 }
 
-// StartLiveForBotAnchor CMS机器人主播开播(不调声网,心跳写入10年后防止被心跳任务下播)
+// StartLiveForBotAnchor CMS机器人主播开播(按是否推流决定是否调用声网云播放)
 func StartLiveForBotAnchor(ctx context.Context, anchorId, guildId uint64) error {
 	room := liveroomdao.GetRoomByAnchor(anchorId)
 	if room == nil {
@@ -34,7 +35,20 @@ func StartLiveForBotAnchor(ctx context.Context, anchorId, guildId uint64) error 
 	}
 	heartTime := time.Now().AddDate(botAnchorLiveHeartYears, 0, 0)
 	_, err := startAnchorLive(ctx, room, heartTime)
-	return err
+	if err != nil {
+		return err
+	}
+	if !room.PushStream {
+		return nil
+	}
+	playerId, err := agora.StartBotAnchorCloudPlayer(ctx, anchorId, room.CloudPlayerVideo)
+	if err != nil {
+		stopLive(anchorId)
+		return err
+	}
+	room.SetCloudPlayerId(playerId)
+	liveroomdao.FlushRoomCache(room)
+	return nil
 }
 
 const botAnchorLiveHeartYears = 10

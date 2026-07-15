@@ -29,6 +29,7 @@ func SaveAgoraCfg(_ context.Context, req *agoradto.SaveAgoraCfgReq) (*agoradto.S
 		AppCertificate:      req.AppCertificate,
 		RestCustomerId:      req.RestCustomerId,
 		RestCustomerSecret:  req.RestCustomerSecret,
+		CloudPlayerRegion:   normalizeCloudPlayerRegion(req.CloudPlayerRegion),
 		TokenExpireSeconds:  req.TokenExpireSeconds,
 		TokenRefreshSeconds: req.TokenRefreshSeconds,
 	}
@@ -70,6 +71,7 @@ func toAgoraCfgItem(cfg *entity.AgoraCfg) *agoradto.AgoraCfgItem {
 		AppCertificate:      cfg.AppCertificate,
 		RestCustomerId:      cfg.RestCustomerId,
 		RestCustomerSecret:  cfg.RestCustomerSecret,
+		CloudPlayerRegion:   normalizeCloudPlayerRegion(cfg.CloudPlayerRegion),
 		TokenExpireSeconds:  expireSeconds,
 		TokenRefreshSeconds: refreshSeconds,
 		CreatedAt:           formatAgoraCfgTime(cfg.CreatedAt),

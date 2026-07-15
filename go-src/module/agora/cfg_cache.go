@@ -12,6 +12,7 @@ const (
 	maxTokenExpireSeconds       uint32 = 24 * 60 * 60
 	minTokenRefreshSeconds      uint32 = 2 * 60 * 60
 	tokenRefreshAheadGapSeconds uint32 = 2 * 60 * 60
+	defaultCloudPlayerRegion           = "cn"
 )
 
 type agoraCfgSnapshot struct {
@@ -19,6 +20,7 @@ type agoraCfgSnapshot struct {
 	AppCertificate      string
 	RestCustomerId      string
 	RestCustomerSecret  string
+	CloudPlayerRegion   string
 	TokenExpireSeconds  uint32
 	TokenRefreshSeconds uint32
 }
@@ -57,8 +59,18 @@ func toAgoraCfgSnapshot(row *entity.AgoraCfg) *agoraCfgSnapshot {
 		AppCertificate:      row.AppCertificate,
 		RestCustomerId:      row.RestCustomerId,
 		RestCustomerSecret:  row.RestCustomerSecret,
+		CloudPlayerRegion:   normalizeCloudPlayerRegion(row.CloudPlayerRegion),
 		TokenExpireSeconds:  expireSeconds,
 		TokenRefreshSeconds: refreshSeconds,
+	}
+}
+
+func normalizeCloudPlayerRegion(region string) string {
+	switch region {
+	case "cn", "ap", "eu", "na":
+		return region
+	default:
+		return defaultCloudPlayerRegion
 	}
 }
 

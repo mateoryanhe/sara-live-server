@@ -160,6 +160,8 @@ const (
 	BotAnchorNonExist XRCode = 138
 	// NotBotAnchor 用户不是机器人主播
 	NotBotAnchor XRCode = 139
+	// AgoraCloudPlayerFailed 声网云播放器调用失败
+	AgoraCloudPlayerFailed XRCode = 140
 )
 
 type XError struct {

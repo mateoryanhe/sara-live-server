@@ -548,6 +548,7 @@ export interface AgoraCfg {
     appCertificate: string
     restCustomerId: string
     restCustomerSecret: string
+    cloudPlayerRegion?: string
     tokenExpireSeconds: number
     tokenRefreshSeconds: number
     createdAt: string
@@ -564,6 +565,7 @@ export interface SaveAgoraCfgReq {
     appCertificate: string
     restCustomerId: string
     restCustomerSecret: string
+    cloudPlayerRegion?: string
     tokenExpireSeconds: number
     tokenRefreshSeconds: number
 }
