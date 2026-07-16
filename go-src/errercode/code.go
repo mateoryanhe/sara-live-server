@@ -162,6 +162,8 @@ const (
 	NotBotAnchor XRCode = 139
 	// AgoraCloudPlayerFailed 声网云播放器调用失败
 	AgoraCloudPlayerFailed XRCode = 140
+	// PhoneVerifyBlocked 手机号验证码校验失败次数过多已临时拉黑
+	PhoneVerifyBlocked XRCode = 141
 )
 
 type XError struct {

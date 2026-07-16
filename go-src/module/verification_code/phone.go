@@ -14,14 +14,16 @@ import (
 const (
 	// 验证码有效期
 	CodeExpireTime = 5 * time.Minute
-	// IP限制时间：同一IP 1分钟内只能发送1次
-	IPExpireTime = 1 * time.Minute
 	// 手机号限制时间：同一手机号 1分钟内只能发送1次
 	PhoneExpireTime = 1 * time.Minute
 	// 每日限制：同一手机号每天最多发送10次
 	DailyLimit = 10
 	// 每日限制过期时间
 	DailyExpireTime = 24 * time.Hour
+	// 验证码连续失败上限
+	VerifyFailLimit = 5
+	// 手机号校验失败拉黑时间
+	PhoneBlacklistTime = 2 * time.Hour
 )
 
 var (
@@ -35,16 +37,7 @@ func Init() {
 
 // SendCode 发送验证码
 func SendCode(ctx context.Context, req *verificationcodedto.SendCodeReq) (*verificationcodedto.SendCodeRes, error) {
-	// 获取客户端IP
-	ip := req.IP
-	if ip == "" {
-		return nil, errercode.CreateCode(errercode.InvalidParam)
-	}
-
-	// 检查IP限制
-	if err := checkIPLimit(ip); err != nil {
-		return nil, err
-	}
+	_ = ctx
 
 	// 检查手机号限制
 	if err := checkPhoneLimit(req.Phone); err != nil {
@@ -56,15 +49,11 @@ func SendCode(ctx context.Context, req *verificationcodedto.SendCodeReq) (*verif
 
 	// 存储验证码
 	cacheKey := getVerifyCodeKey(req.Phone)
-	cacheMgr.FlushCache(cacheKey, code)
-
-	// 存储IP限制
-	ipKey := getIPKey(ip)
-	cacheMgr.FlushCache(ipKey, time.Now().Unix())
+	setCacheWithTTL(cacheKey, code, CodeExpireTime)
 
 	// 存储手机号限制
 	phoneKey := getPhoneKey(req.Phone)
-	cacheMgr.FlushCache(phoneKey, time.Now().Unix())
+	setCacheWithTTL(phoneKey, time.Now().Unix(), PhoneExpireTime)
 
 	// 存储每日发送次数
 	dailyKey := getDailyKey(req.Phone)
@@ -78,25 +67,13 @@ func SendCode(ctx context.Context, req *verificationcodedto.SendCodeReq) (*verif
 	}, nil
 }
 
-// checkIPLimit 检查IP限制
-func checkIPLimit(ip string) error {
-	ipKey := getIPKey(ip)
-	ctx := gctx.New()
-
-	// 检查是否存在记录
-	if ok, _ := cacheMgr.Cache.Contains(ctx, ipKey); !ok {
-		return errercode.CreateCode(errercode.RequestTooFrequent)
-	}
-	return nil
-}
-
 // checkPhoneLimit 检查手机号限制
 func checkPhoneLimit(phone string) error {
 	phoneKey := getPhoneKey(phone)
 	ctx := gctx.New()
 
-	// 检查1分钟内是否已发送
-	if ok, _ := cacheMgr.Cache.Contains(ctx, phoneKey); !ok {
+	// 1分钟内已发送则拒绝
+	if ok, _ := cacheMgr.Cache.Contains(ctx, phoneKey); ok {
 		return errercode.CreateCode(errercode.RequestTooFrequent)
 	}
 
@@ -123,14 +100,13 @@ func sendSMS(phone, code string) {
 	// 目前短信运营商还未确定，留空
 }
 
+func setCacheWithTTL(key interface{}, data any, ttl time.Duration) {
+	_ = cacheMgr.Cache.Set(gctx.New(), key, data, ttl)
+}
+
 // getVerifyCodeKey 获取验证码缓存key
 func getVerifyCodeKey(phone string) string {
 	return "verify_code:" + phone
-}
-
-// getIPKey 获取IP限制缓存key
-func getIPKey(ip string) string {
-	return "verify_ip:" + ip
 }
 
 // getPhoneKey 获取手机号限制缓存key
@@ -144,12 +120,19 @@ func getDailyKey(phone string) string {
 	return "verify_daily:" + phone + ":" + date
 }
 
+func getVerifyFailCountKey(phone string) string {
+	return "verify_fail_count:" + phone
+}
+
+func getPhoneBlacklistKey(phone string) string {
+	return "verify_blacklist:" + phone
+}
+
 // incrementDailyCount 增加每日发送次数
 func incrementDailyCount(key string) {
-
 	count := getDailyCount(key)
 	count++
-	cacheMgr.FlushCache(key, count)
+	setCacheWithTTL(key, count, DailyExpireTime)
 }
 
 // getDailyCount 获取每日发送次数
@@ -166,31 +149,76 @@ func getDailyCount(key string) int {
 	return count
 }
 
+func isPhoneBlacklisted(phone string) bool {
+	ctx := gctx.New()
+	ok, _ := cacheMgr.Cache.Contains(ctx, getPhoneBlacklistKey(phone))
+	return ok
+}
+
+func clearVerifyFailCount(phone string) {
+	_, _ = cacheMgr.Cache.Remove(gctx.New(), getVerifyFailCountKey(phone))
+}
+
+func onVerifyFailure(phone string, failCode errercode.XRCode) (bool, error) {
+	if blockedErr := markVerifyFailure(phone); blockedErr != nil {
+		return false, blockedErr
+	}
+	return false, errercode.CreateCode(failCode)
+}
+
+func markVerifyFailure(phone string) error {
+	ctx := gctx.New()
+	key := getVerifyFailCountKey(phone)
+	count := 1
+
+	val, _ := cacheMgr.Cache.Get(ctx, key)
+	if val != nil {
+		if current, ok := val.Val().(int); ok && current > 0 {
+			count = current + 1
+		}
+	}
+
+	if count >= VerifyFailLimit {
+		setCacheWithTTL(getPhoneBlacklistKey(phone), time.Now().Unix(), PhoneBlacklistTime)
+		_, _ = cacheMgr.Cache.Remove(ctx, key)
+		return errercode.CreateCode(errercode.PhoneVerifyBlocked)
+	}
+
+	setCacheWithTTL(key, count, PhoneBlacklistTime)
+	return nil
+}
+
 // VerifyCode 验证验证码
 func VerifyCode(phone string, code string) (bool, error) {
+	if isPhoneBlacklisted(phone) {
+		return false, errercode.CreateCode(errercode.PhoneVerifyBlocked)
+	}
+
 	//强制验证码,系统内定验证码，方便调试
 	if code == "981200" {
+		clearVerifyFailCount(phone)
 		return true, nil
 	}
+
 	cacheKey := getVerifyCodeKey(phone)
 	cacheCtx := gctx.New()
 
 	val, _ := cacheMgr.Cache.Get(cacheCtx, cacheKey)
 	if val == nil {
-		return false, errercode.CreateCode(errercode.VerifyCodeExpired)
+		return onVerifyFailure(phone, errercode.VerifyCodeExpired)
 	}
 
 	storedCode, ok := val.Val().(string)
 	if !ok {
-		return false, errercode.CreateCode(errercode.VerifyCodeInvalid)
+		return onVerifyFailure(phone, errercode.VerifyCodeInvalid)
 	}
 
 	if storedCode != code {
-		return false, errercode.CreateCode(errercode.VerifyCodeInvalid)
+		return onVerifyFailure(phone, errercode.VerifyCodeInvalid)
 	}
 
-	// 验证成功后删除验证码
-	cacheMgr.Cache.Remove(cacheCtx, cacheKey)
+	clearVerifyFailCount(phone)
+	_, _ = cacheMgr.Cache.Remove(cacheCtx, cacheKey)
 
 	return true, nil
 }
