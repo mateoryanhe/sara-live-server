@@ -41,3 +41,11 @@ func (c *BotAnchorController) StartBotAnchorLive(ctx context.Context, req *botan
 func (c *BotAnchorController) StopBotAnchorLive(ctx context.Context, req *botanchordto.StopBotAnchorLiveReq) (res *botanchordto.StopBotAnchorLiveRes, err error) {
 	return botanchor.StopBotAnchorLive(ctx, req)
 }
+
+func (c *BotAnchorController) BatchStartBotAnchorLive(ctx context.Context, req *botanchordto.BatchStartBotAnchorLiveReq) (res *botanchordto.BatchBotAnchorLiveRes, err error) {
+	return botanchor.BatchStartBotAnchorLive(ctx, req)
+}
+
+func (c *BotAnchorController) BatchStopBotAnchorLive(ctx context.Context, req *botanchordto.BatchStopBotAnchorLiveReq) (res *botanchordto.BatchBotAnchorLiveRes, err error) {
+	return botanchor.BatchStopBotAnchorLive(ctx, req)
+}

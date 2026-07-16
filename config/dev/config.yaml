@@ -52,7 +52,7 @@ logger:
   flags: 45    # 文件异步写入
   rotateExpire: "1d"
   rotateBackupLimit: 1
-  rotateBackupExpire: "2d"
+  rotateBackupExpire: "3d"
   stdoutColorDisabled: false                 # 关闭终端的颜色打印。默认开启
   writerColorEnable: true                 # 日志文件是否带上颜色。默认false，表示不带颜色
 

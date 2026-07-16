@@ -9,6 +9,23 @@
 
       <div class="table-header">
         <el-button type="primary" @click="handleAdd">新增机器人主播</el-button>
+        <el-button
+            :disabled="!canBatchStartLive"
+            :loading="batchOperating"
+            type="success"
+            @click="handleBatchStartLive"
+        >
+          批量开播
+        </el-button>
+        <el-button
+            :disabled="!canBatchStopLive"
+            :loading="batchOperating"
+            type="danger"
+            @click="handleBatchStopLive"
+        >
+          批量下播
+        </el-button>
+        <span v-if="selectedRows.length" class="selection-tip">已选 {{ selectedRows.length }} 项</span>
       </div>
 
       <el-form :model="searchForm" class="search-form" inline label-width="80px">
@@ -21,7 +38,15 @@
         </el-form-item>
       </el-form>
 
-      <el-table v-loading="loading" :data="tableData" style="width: 100%">
+      <el-table
+          ref="tableRef"
+          v-loading="loading"
+          :data="tableData"
+          row-key="id"
+          style="width: 100%"
+          @selection-change="handleSelectionChange"
+      >
+        <el-table-column :selectable="isRowSelectable" type="selection" width="48"/>
         <el-table-column label="用户ID" prop="id" width="180"/>
         <el-table-column label="昵称" min-width="120" prop="nickname">
           <template #default="{ row }">{{ row.nickname || '-' }}</template>
@@ -262,8 +287,8 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref, watch} from 'vue'
-import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
+import {computed, onMounted, reactive, ref, watch} from 'vue'
+import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type TableInstance, type UploadRequestOptions} from 'element-plus'
 import {Plus} from '@element-plus/icons-vue'
 import {botAnchorApi, liveRoomTagApi, uploadApi} from '@/api'
 import type {BotAnchorListItem, LiveRoomTag} from '@/types/api'
@@ -290,9 +315,12 @@ interface BotAnchorForm {
 
 const loading = ref(false)
 const saving = ref(false)
+const batchOperating = ref(false)
 const avatarUploading = ref(false)
 const videoUploading = ref(false)
 const tableData = ref<BotAnchorListItem[]>([])
+const selectedRows = ref<BotAnchorListItem[]>([])
+const tableRef = ref<TableInstance>()
 const tagOptions = ref<LiveRoomTag[]>([])
 const searchForm = reactive<SearchForm>({key: ''})
 const pagination = reactive({
@@ -331,6 +359,24 @@ const formRules: FormRules = {
   ],
   roomTitle: [{max: 128, message: '直播间标题最长128个字符', trigger: 'blur'}],
   category: [{required: true, message: '请选择房间类型', trigger: 'change'}]
+}
+
+const isStartableRow = (row: BotAnchorListItem) => row.botAnchorStatus === 1 && row.liveStatus !== 1
+const isStoppableRow = (row: BotAnchorListItem) => row.botAnchorStatus === 1 && row.liveStatus === 1
+const isRowSelectable = (row: BotAnchorListItem) => isStartableRow(row) || isStoppableRow(row)
+
+const startableSelectedRows = computed(() => selectedRows.value.filter(isStartableRow))
+const stoppableSelectedRows = computed(() => selectedRows.value.filter(isStoppableRow))
+const canBatchStartLive = computed(() => startableSelectedRows.value.length > 0 && !batchOperating.value)
+const canBatchStopLive = computed(() => stoppableSelectedRows.value.length > 0 && !batchOperating.value)
+
+const handleSelectionChange = (rows: BotAnchorListItem[]) => {
+  selectedRows.value = rows
+}
+
+const clearSelection = () => {
+  tableRef.value?.clearSelection()
+  selectedRows.value = []
 }
 
 const categoryLabel = (category?: number) => {
@@ -432,12 +478,14 @@ const handleReset = () => {
 
 const handlePageChange = (page: number) => {
   pagination.pageIndex = page
+  clearSelection()
   fetchList()
 }
 
 const handleSizeChange = (size: number) => {
   pagination.pageSize = size
   pagination.pageIndex = 1
+  clearSelection()
   fetchList()
 }
 
@@ -625,6 +673,68 @@ const handleStopLive = async (row: BotAnchorListItem) => {
   }
 }
 
+const handleBatchStartLive = async () => {
+  const rows = startableSelectedRows.value
+  if (!rows.length) {
+    ElMessage.warning('请选择可开播的机器人主播')
+    return
+  }
+  try {
+    await ElMessageBox.confirm(`确定要批量开播 ${rows.length} 个机器人主播吗？`, '确认批量开播', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    batchOperating.value = true
+    const response = await botAnchorApi.batchStartBotAnchorLive({ids: rows.map((row) => row.id)})
+    if (response.failCount > 0) {
+      ElMessage.warning(`批量开播完成：成功 ${response.successCount} 个，失败 ${response.failCount} 个`)
+    } else {
+      ElMessage.success(`批量开播成功，共 ${response.successCount} 个`)
+    }
+    clearSelection()
+    fetchList()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('批量开播失败:', error)
+      ElMessage.error('批量开播失败')
+    }
+  } finally {
+    batchOperating.value = false
+  }
+}
+
+const handleBatchStopLive = async () => {
+  const rows = stoppableSelectedRows.value
+  if (!rows.length) {
+    ElMessage.warning('请选择可下播的机器人主播')
+    return
+  }
+  try {
+    await ElMessageBox.confirm(`确定要批量下播 ${rows.length} 个机器人主播吗？`, '确认批量下播', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    batchOperating.value = true
+    const response = await botAnchorApi.batchStopBotAnchorLive({ids: rows.map((row) => row.id)})
+    if (response.failCount > 0) {
+      ElMessage.warning(`批量下播完成：成功 ${response.successCount} 个，失败 ${response.failCount} 个`)
+    } else {
+      ElMessage.success(`批量下播成功，共 ${response.successCount} 个`)
+    }
+    clearSelection()
+    fetchList()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('批量下播失败:', error)
+      ElMessage.error('批量下播失败')
+    }
+  } finally {
+    batchOperating.value = false
+  }
+}
+
 const handleStartLive = async (row: BotAnchorListItem) => {
   try {
     await ElMessageBox.confirm(`确定要让机器人主播「${row.nickname || row.id}」开播吗？`, '确认开播', {
@@ -689,6 +799,14 @@ onMounted(() => {
 
 .table-header {
   margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.selection-tip {
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
 }
 
 .search-form {

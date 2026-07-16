@@ -224,6 +224,20 @@ export interface StopBotAnchorLiveReq {
     id: string
 }
 
+export interface BatchStartBotAnchorLiveReq {
+    ids: string[]
+}
+
+export interface BatchStopBotAnchorLiveReq {
+    ids: string[]
+}
+
+export interface BatchBotAnchorLiveRes {
+    successCount: number
+    failCount: number
+    failIds?: string[]
+}
+
 export interface CurrencyLogQuery extends PageQuery {
     userId?: string
     currencyType: number

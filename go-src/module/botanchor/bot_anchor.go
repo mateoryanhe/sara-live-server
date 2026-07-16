@@ -153,6 +153,46 @@ func StopBotAnchorLive(ctx context.Context, req *botanchordto.StopBotAnchorLiveR
 	return &botanchordto.StopBotAnchorLiveRes{Success: true}, nil
 }
 
+// BatchStartBotAnchorLive CMS批量机器人主播开播
+func BatchStartBotAnchorLive(ctx context.Context, req *botanchordto.BatchStartBotAnchorLiveReq) (*botanchordto.BatchBotAnchorLiveRes, error) {
+	return batchBotAnchorLive(ctx, req.IDs, func(id uint64) error {
+		_, err := StartBotAnchorLive(ctx, &botanchordto.StartBotAnchorLiveReq{ID: id})
+		return err
+	})
+}
+
+// BatchStopBotAnchorLive CMS批量机器人主播下播
+func BatchStopBotAnchorLive(ctx context.Context, req *botanchordto.BatchStopBotAnchorLiveReq) (*botanchordto.BatchBotAnchorLiveRes, error) {
+	return batchBotAnchorLive(ctx, req.IDs, func(id uint64) error {
+		_, err := StopBotAnchorLive(ctx, &botanchordto.StopBotAnchorLiveReq{ID: id})
+		return err
+	})
+}
+
+func batchBotAnchorLive(ctx context.Context, ids []uint64, action func(uint64) error) (*botanchordto.BatchBotAnchorLiveRes, error) {
+	res := &botanchordto.BatchBotAnchorLiveRes{}
+	seen := make(map[uint64]struct{}, len(ids))
+	for _, id := range ids {
+		if id == 0 {
+			continue
+		}
+		if _, ok := seen[id]; ok {
+			continue
+		}
+		seen[id] = struct{}{}
+		if err := action(id); err != nil {
+			res.FailCount++
+			res.FailIds = append(res.FailIds, id)
+			continue
+		}
+		res.SuccessCount++
+	}
+	if res.SuccessCount > 0 {
+		liveroom.RefreshRoomListCache(ctx)
+	}
+	return res, nil
+}
+
 func getBotAnchorUser(userId uint64) (*entity.UserInfo, error) {
 	if userId == 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)

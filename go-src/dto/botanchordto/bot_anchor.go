@@ -103,3 +103,22 @@ type StopBotAnchorLiveReq struct {
 type StopBotAnchorLiveRes struct {
 	Success bool `json:"success"`
 }
+
+// BatchStartBotAnchorLiveReq CMS批量机器人主播开播
+type BatchStartBotAnchorLiveReq struct {
+	g.Meta `path:"/batchStartBotAnchorLive" method:"post" summary:"批量机器人主播开播" tags:"机器人主播"`
+	IDs    []uint64 `json:"ids,string" v:"required|min-length:1#请至少选择一个机器人主播"`
+}
+
+// BatchStopBotAnchorLiveReq CMS批量机器人主播下播
+type BatchStopBotAnchorLiveReq struct {
+	g.Meta `path:"/batchStopBotAnchorLive" method:"post" summary:"批量机器人主播下播" tags:"机器人主播"`
+	IDs    []uint64 `json:"ids,string" v:"required|min-length:1#请至少选择一个机器人主播"`
+}
+
+// BatchBotAnchorLiveRes CMS批量开播/下播响应
+type BatchBotAnchorLiveRes struct {
+	SuccessCount int      `json:"successCount"`
+	FailCount    int      `json:"failCount"`
+	FailIds      []uint64 `json:"failIds,string"`
+}
