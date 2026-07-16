@@ -238,7 +238,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('UploadResourceCfgManagement')"
+            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('ResourceMonitor')"
             index="/config">
           <template #title>
             <el-icon>
@@ -263,6 +263,12 @@
               <Picture/>
             </el-icon>
             <span>资源域名</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('ResourceMonitor')" index="/config/resource-monitor">
+            <el-icon>
+              <Monitor/>
+            </el-icon>
+            <span>资源监控</span>
           </el-menu-item>
         </el-sub-menu>
         <!-- 角色权限管理菜单 -->

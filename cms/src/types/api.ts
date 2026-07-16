@@ -57,6 +57,25 @@ export interface UserStatTrend {
     monthly: UserStatTrendPoint[]
 }
 
+export interface ResourceMetricPoint {
+    time: string
+    procMemMb: number
+    procHeapAllocMb: number
+    procHeapInuseMb: number
+    procHeapSysMb: number
+    procHeapUsedPercent: number
+    procHeapIdlePercent: number
+    procCpuPercent: number
+    sysMemUsedMb: number
+    sysMemTotalMb: number
+    sysMemUsedPercent: number
+    sysCpuPercent: number
+}
+
+export interface ResourceMetricTrend {
+    points: ResourceMetricPoint[]
+}
+
 // 登录请求类型
 export interface LoginReq {
     userName: string

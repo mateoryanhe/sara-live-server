@@ -24,5 +24,11 @@ export const configRoutes: RouteRecordRaw = {
             component: () => import('@/views/config/upload-resource.vue'),
             meta: {title: '资源域名'},
         },
+        {
+            path: 'resource-monitor',
+            name: 'ResourceMonitor',
+            component: () => import('@/views/config/resource-monitor.vue'),
+            meta: {title: '资源监控'},
+        },
     ],
 }

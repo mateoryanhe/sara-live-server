@@ -24,3 +24,8 @@ func (c *SysStatController) GetSysStat(ctx context.Context, req *statdto.CMSSysS
 func (c *SysStatController) GetUserStatTrend(ctx context.Context, req *statdto.CMSUserStatTrendReq) (res *statdto.CMSUserStatTrendRes, err error) {
 	return stat.GetCMSUserStatTrend(ctx, req)
 }
+
+// GetResourceMetricTrend CMS获取系统资源趋势
+func (c *SysStatController) GetResourceMetricTrend(ctx context.Context, req *statdto.CMSResourceMetricTrendReq) (res *statdto.CMSResourceMetricTrendRes, err error) {
+	return stat.GetCMSResourceMetricTrend(ctx, req)
+}

@@ -1,5 +1,5 @@
 import {request} from '../request'
-import type {SysStat, UserStatTrend} from '@/types/api'
+import type {ResourceMetricTrend, SysStat, UserStatTrend} from '@/types/api'
 
 export const sysStatApi = {
     getSysStat: () => {
@@ -7,6 +7,9 @@ export const sysStatApi = {
     },
     getUserStatTrend: () => {
         return request.post<UserStatTrend>('/sysStat/getUserStatTrend', {})
+    },
+    getResourceMetricTrend: () => {
+        return request.post<ResourceMetricTrend>('/sysStat/getResourceMetricTrend', {})
     },
 }
 

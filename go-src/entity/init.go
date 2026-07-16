@@ -68,4 +68,5 @@ func Init() {
 	initCallUser()
 	initUserChannelToken()
 	initSystemTotalStat()
+	initSysResourceMetric()
 }

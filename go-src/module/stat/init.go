@@ -7,4 +7,5 @@ func Init() {
 	initGoldChangeEvent()
 	initGoldConsumeEvent()
 	initDiamondConsumeEvent()
+	initResourceMonitor()
 }
