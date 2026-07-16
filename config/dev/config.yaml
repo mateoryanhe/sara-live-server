@@ -17,8 +17,8 @@ server:
   logger:
     timeFormat: "2006-01-02T15:04:05.000"
     rotateExpire: "1d"
-    rotateBackupLimit: 1
-    rotateBackupExpire: "2d"
+    rotateBackupLimit: 3
+    rotateBackupExpire: "3d"
     flags: 45
   # PProf配置
   pprofEnabled: true # 是否开启PProf性能调试特性。默认为false
@@ -51,7 +51,7 @@ logger:
   stdout: true                  # 日志是否同时输出到终端。默认true
   flags: 45    # 文件异步写入
   rotateExpire: "1d"
-  rotateBackupLimit: 1
+  rotateBackupLimit: 3
   rotateBackupExpire: "3d"
   stdoutColorDisabled: false                 # 关闭终端的颜色打印。默认开启
   writerColorEnable: true                 # 日志文件是否带上颜色。默认false，表示不带颜色
