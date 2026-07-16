@@ -12,13 +12,17 @@ const (
 )
 
 const (
-	UserExtCanRank db.TbCol = "can_rank"
+	UserExtCanRank     db.TbCol = "can_rank"
+	UserExtPackageName db.TbCol = "package_name"
+	UserExtAppVersion  db.TbCol = "app_version"
 )
 
 // UserExt 用户扩展信息(与用户一一对应,主键ID即用户ID)
 type UserExt struct {
 	migrate.OneModel
-	CanRank bool `gorm:"default:1;comment:是否可上排行榜" json:"canRank"`
+	CanRank     bool   `gorm:"default:1;comment:是否可上排行榜" json:"canRank"`
+	PackageName string `gorm:"default:'';comment:注册包名" json:"packageName"`
+	AppVersion  string `gorm:"default:'';comment:注册版本号" json:"appVersion"`
 }
 
 func NewUserExt(userId uint64) *UserExt {
@@ -37,6 +41,24 @@ func (receiver *UserExt) SetCanRank(canRank bool) {
 	syndb.AddDataToQuickChan(TbUserExt, UserExtCanRank, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: canRank,
+	})
+}
+
+func (receiver *UserExt) SetPackageName(packageName string) {
+	receiver.PackageName = packageName
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddDataToQuickChan(TbUserExt, UserExtPackageName, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: packageName,
+	})
+}
+
+func (receiver *UserExt) SetAppVersion(appVersion string) {
+	receiver.AppVersion = appVersion
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddDataToQuickChan(TbUserExt, UserExtAppVersion, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: appVersion,
 	})
 }
 
@@ -60,6 +82,8 @@ func initUserExt() {
 	syndb.RegQuick(TbUserExt, db.CreatedAtName)
 	syndb.RegQuick(TbUserExt, db.UpdatedAtName)
 	syndb.RegQuick(TbUserExt, UserExtCanRank)
+	syndb.RegQuick(TbUserExt, UserExtPackageName)
+	syndb.RegQuick(TbUserExt, UserExtAppVersion)
 
 	migrate.AutoMigrate(&UserExt{})
 }

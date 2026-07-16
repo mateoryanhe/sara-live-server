@@ -28,6 +28,7 @@ func SumRevenueByReceiver(startTime, endTime time.Time) []*AnchorRevenueStatRow 
 SELECT rl.receiver_id, SUM(rl.total_amount) AS total_amount
 FROM `+string(entity.TbLiveRevenueLog)+` rl
 INNER JOIN `+string(entity.TbAccount)+` a ON a.id = rl.receiver_id
+LEFT JOIN `+string(entity.TbUserExt)+` ue ON ue.id = rl.receiver_id
 WHERE rl.receiver_id > 0
   AND IFNULL(rl.`+string(entity.LiveRevenueLogStatus)+`, 0) = 0
   AND rl.created_at >= ?
@@ -37,6 +38,7 @@ WHERE rl.receiver_id > 0
     IFNULL(a.`+string(entity.AccountBan)+`, 0) = 0
     OR (a.`+string(entity.AccountBanApplyTime)+` IS NOT NULL AND a.`+string(entity.AccountBanApplyTime)+` <= ?)
   )
+  AND (ue.id IS NULL OR IFNULL(ue.`+string(entity.UserExtCanRank)+`, 1) = 1)
 GROUP BY rl.receiver_id
 ORDER BY total_amount DESC
 LIMIT ?

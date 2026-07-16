@@ -10,7 +10,7 @@ var idCache = gcache.New()
 
 func AddIdToCache(userId uint64) {
 	//缓存一分钟
-	idCache.Set(gctx.New(), userId, userId, 1*time.Minute)
+	idCache.Set(gctx.New(), userId, userId, 3*time.Minute)
 }
 
 func InCache(userId uint64) bool {

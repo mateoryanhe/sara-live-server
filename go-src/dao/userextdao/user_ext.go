@@ -2,6 +2,7 @@ package userextdao
 
 import (
 	"context"
+	"strings"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/constants/db"
@@ -28,4 +29,14 @@ func GetByUserId(userId uint64) *entity.UserExt {
 		return entity.NewUserExt(userId), nil
 	})
 	return cacheData.(*entity.UserExt)
+}
+
+// SaveRegisterInfo 保存注册时的包名与版本号(可为空)
+func SaveRegisterInfo(userId uint64, info *entity.DeviceInfo) {
+	if userId == 0 || info == nil {
+		return
+	}
+	ext := GetByUserId(userId)
+	ext.SetPackageName(strings.TrimSpace(info.PackageName))
+	ext.SetAppVersion(strings.TrimSpace(info.AppVersion))
 }

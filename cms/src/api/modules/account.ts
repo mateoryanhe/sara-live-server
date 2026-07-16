@@ -8,6 +8,7 @@ import type {
     QueryAnchorListReq,
     QueryUserInfoReq,
     SetAnchorReq,
+    SetUserTypeReq,
     UnBanAnchorReq,
     UnBanReq,
     UnCancelReq,
@@ -56,6 +57,10 @@ const accountApi = {
 
     setAnchor: (data: SetAnchorReq) => {
         return request.post<boolean>('/account/setAnchor', data)
+    },
+
+    setUserType: (data: SetUserTypeReq) => {
+        return request.post<boolean>('/account/setUserType', data)
     }
 }
 

@@ -40,6 +40,11 @@
       <div class="content">
         <el-table v-loading="loading" :data="userList" style="width: 100%">
           <el-table-column label="ID" prop="id" width="200"/>
+          <el-table-column label="创建时间" prop="createdAt" width="200">
+            <template #default="scope">
+              {{ formatDate(scope.row.createdAt) }}
+            </template>
+          </el-table-column>
           <el-table-column label="昵称" prop="nickname" width="140">
             <template #default="scope">{{ scope.row.nickname || '-' }}</template>
           </el-table-column>
@@ -57,15 +62,9 @@
               <span v-else class="avatar-empty">-</span>
             </template>
           </el-table-column>
-          <el-table-column label="OpenId" prop="openId" width="200"/>
-          <el-table-column label="手机号" prop="phone" width="140">
+           <el-table-column label="手机号" prop="phone" width="140">
             <template #default="scope">{{ scope.row.phone || '-' }}</template>
           </el-table-column>
-          <el-table-column label="IP" prop="ip" width="150"/>
-          <el-table-column label="设备类型" prop="deviceType" width="100">
-            <template #default="scope">{{ scope.row.deviceType || '-' }}</template>
-          </el-table-column>
-          <el-table-column label="渠道" prop="channel" width="100"/>
           <el-table-column label="金币余额" prop="gold" width="120">
             <template #default="scope">{{ formatAmount(scope.row.gold) }}</template>
           </el-table-column>
@@ -74,6 +73,9 @@
           </el-table-column>
           <el-table-column label="VIP等级" prop="vipLevel" width="100">
             <template #default="scope">{{ formatVipLevel(scope.row.vipLevel) }}</template>
+          </el-table-column>
+          <el-table-column label="用户类型" prop="userType" width="120">
+            <template #default="scope">{{ formatUserType(scope.row.userType) }}</template>
           </el-table-column>
           <el-table-column label="主播" prop="isAnchor" width="90">
             <template #default="scope">
@@ -84,9 +86,19 @@
           <el-table-column label="分享码" prop="shareCode" width="140">
             <template #default="scope">{{ scope.row.shareCode || '-' }}</template>
           </el-table-column>
-          <el-table-column label="备注" prop="remark" min-width="160" show-overflow-tooltip>
-            <template #default="scope">{{ scope.row.remark || '-' }}</template>
+         
+         
+          <el-table-column label="IP" prop="ip" width="150"/>
+          <el-table-column label="设备类型" prop="deviceType" width="100">
+            <template #default="scope">{{ scope.row.deviceType || '-' }}</template>
           </el-table-column>
+           <el-table-column label="包名" prop="packageName" width="180" show-overflow-tooltip>
+            <template #default="scope">{{ scope.row.packageName || '-' }}</template>
+          </el-table-column>
+          <el-table-column label="版本号" prop="appVersion" width="120" show-overflow-tooltip>
+            <template #default="scope">{{ scope.row.appVersion || '-' }}</template>
+          </el-table-column>
+          
           <el-table-column label="封号状态" prop="ban" width="120">
             <template #default="scope">
               <el-tag v-if="scope.row.ban" type="danger">已封号</el-tag>
@@ -99,50 +111,44 @@
               <el-tag v-else type="success">正常</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" prop="createdAt" width="200">
-            <template #default="scope">
-              {{ formatDate(scope.row.createdAt) }}
-            </template>
-          </el-table-column>
+          
           <el-table-column label="封禁时间" prop="banApplyTime" width="200">
             <template #default="scope">
               {{ formatDate(scope.row.banApplyTime) }}
             </template>
           </el-table-column>
-          <el-table-column fixed="right" label="操作" min-width="660">
+           <el-table-column label="OpenId" prop="openId" width="200"/>
+          <el-table-column label="渠道" prop="channel" width="100"/>
+          <el-table-column label="备注" prop="remark" min-width="160" show-overflow-tooltip>
+            <template #default="scope">{{ scope.row.remark || '-' }}</template>
+          </el-table-column>
+          <el-table-column fixed="right" label="操作" width="100">
             <template #default="scope">
-              <el-button
-                  v-if="!scope.row.isAnchor"
-                  size="small"
-                  type="primary"
-                  @click="handleSetAnchor(scope.row)"
-              >
-                设为主播
-              </el-button>
-              <el-button size="small" type="primary" @click="openCurrencyDialog(scope.row, 'gold', 'add')">
-                加金币
-              </el-button>
-              <el-button size="small" type="warning" @click="openCurrencyDialog(scope.row, 'gold', 'sub')">
-                减金币
-              </el-button>
-              <el-button size="small" type="primary" @click="openCurrencyDialog(scope.row, 'diamond', 'add')">
-                加钻石
-              </el-button>
-              <el-button size="small" type="warning" @click="openCurrencyDialog(scope.row, 'diamond', 'sub')">
-                减钻石
-              </el-button>
-              <el-button
-                  :type="scope.row.ban ? 'warning' : 'success'"
-                  size="small"
-                  @click="handleBanAction(scope.row)">
-                {{ scope.row.ban ? '解封' : '封号' }}
-              </el-button>
-              <el-button
-                  :type="scope.row.cancel ? 'info' : 'danger'"
-                  size="small"
-                  @click="toggleCancelStatus(scope.row)">
-                {{ scope.row.cancel ? '取消注销' : '注销' }}
-              </el-button>
+              <el-dropdown trigger="click" @command="(cmd: string) => handleRowCommand(scope.row, cmd)">
+                <el-button size="small" type="primary">
+                  操作
+                  <el-icon class="el-icon--right">
+                    <ArrowDown/>
+                  </el-icon>
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item v-if="!scope.row.isAnchor" command="setUserType">修改用户类型</el-dropdown-item>
+                    <el-dropdown-item :divided="!scope.row.isAnchor" command="gold-add">
+                      加金币
+                    </el-dropdown-item>
+                    <el-dropdown-item command="gold-sub">减金币</el-dropdown-item>
+                    <el-dropdown-item divided command="diamond-add">加钻石</el-dropdown-item>
+                    <el-dropdown-item command="diamond-sub">减钻石</el-dropdown-item>
+                    <el-dropdown-item divided command="ban">
+                      {{ scope.row.ban ? '解封' : '封号' }}
+                    </el-dropdown-item>
+                    <el-dropdown-item command="cancel">
+                      {{ scope.row.cancel ? '取消注销' : '注销' }}
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
             </template>
           </el-table-column>
 
@@ -223,12 +229,43 @@
         <el-button :loading="banSubmitting" type="primary" @click="submitBan">确定</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog
+        v-model="userTypeDialogVisible"
+        title="修改用户类型"
+        width="440px"
+        @closed="resetUserTypeForm"
+    >
+      <el-form ref="userTypeFormRef" :model="userTypeForm" :rules="userTypeFormRules" label-width="100px">
+        <el-form-item label="用户ID">
+          <el-input v-model="userTypeForm.userId" disabled/>
+        </el-form-item>
+        <el-form-item label="昵称">
+          <el-input v-model="userTypeForm.nickname" disabled/>
+        </el-form-item>
+        <el-form-item label="用户类型" prop="userType">
+          <el-select v-model="userTypeForm.userType" placeholder="请选择用户类型" style="width: 100%">
+            <el-option
+                v-for="item in userTypeOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="userTypeDialogVisible = false">取消</el-button>
+        <el-button :loading="userTypeSubmitting" type="primary" @click="submitUserType">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
 import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {accountApi, diamondApi, goldApi} from '@/api'
+import {ArrowDown} from '@element-plus/icons-vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {useRoute, useRouter} from 'vue-router'
 import type {BanReq, CancelReq, UnBanReq, UnCancelReq, UserInfo} from '@/types/api.ts'
@@ -246,6 +283,40 @@ const currencyFormRef = ref<FormInstance>()
 const banDialogVisible = ref(false)
 const banSubmitting = ref(false)
 const banFormRef = ref<FormInstance>()
+const userTypeDialogVisible = ref(false)
+const userTypeSubmitting = ref(false)
+const userTypeFormRef = ref<FormInstance>()
+
+const userTypeLabelMap: Record<number, string> = {
+  0: '普通用户',
+  1: '普通主播',
+  2: '机器人主播',
+  3: '机器人观众',
+  4: '测试人员'
+}
+
+const userTypeOptions = [
+  {label: '普通用户', value: 0},
+  {label: '测试人员', value: 4}
+]
+
+interface UserTypeForm {
+  userId: string
+  nickname: string
+  userType: number
+}
+
+const userTypeForm = reactive<UserTypeForm>({
+  userId: '',
+  nickname: '',
+  userType: 0
+})
+
+const userTypeFormRules: FormRules = {
+  userType: [
+    {required: true, message: '请选择用户类型', trigger: 'change'}
+  ]
+}
 
 interface BanForm {
   userId: string
@@ -412,6 +483,68 @@ const openCurrencyDialog = (row: UserInfo, type: CurrencyType, mode: CurrencyMod
   currencyDialogVisible.value = true
 }
 
+const handleRowCommand = (row: UserInfo, command: string) => {
+  switch (command) {
+    case 'setUserType':
+      openUserTypeDialog(row)
+      break
+    case 'gold-add':
+      openCurrencyDialog(row, 'gold', 'add')
+      break
+    case 'gold-sub':
+      openCurrencyDialog(row, 'gold', 'sub')
+      break
+    case 'diamond-add':
+      openCurrencyDialog(row, 'diamond', 'add')
+      break
+    case 'diamond-sub':
+      openCurrencyDialog(row, 'diamond', 'sub')
+      break
+    case 'ban':
+      handleBanAction(row)
+      break
+    case 'cancel':
+      toggleCancelStatus(row)
+      break
+  }
+}
+
+const resetUserTypeForm = () => {
+  userTypeForm.userId = ''
+  userTypeForm.nickname = ''
+  userTypeForm.userType = 0
+  userTypeFormRef.value?.clearValidate()
+}
+
+const openUserTypeDialog = (row: UserInfo) => {
+  userTypeForm.userId = String(row.id)
+  userTypeForm.nickname = row.nickname || '-'
+  const currentType = row.userType ?? 0
+  userTypeForm.userType = currentType === 4 ? 4 : 0
+  userTypeDialogVisible.value = true
+}
+
+const submitUserType = async () => {
+  if (!userTypeFormRef.value) return
+  await userTypeFormRef.value.validate(async (valid) => {
+    if (!valid) return
+    userTypeSubmitting.value = true
+    try {
+      await accountApi.setUserType({
+        accountId: userTypeForm.userId,
+        userType: userTypeForm.userType
+      })
+      userTypeDialogVisible.value = false
+      ElMessage.success('用户类型已更新')
+      await fetchUserList()
+    } catch (error) {
+      console.error('修改用户类型失败:', error)
+    } finally {
+      userTypeSubmitting.value = false
+    }
+  })
+}
+
 const afterCurrencyChangeSuccess = () => {
   currencyDialogVisible.value = false
   ElMessage.success('操作成功')
@@ -438,27 +571,6 @@ const submitCurrencyChange = async () => {
       console.error(`${currencyName.value}变更失败:`, error)
     }
   })
-}
-
-const handleSetAnchor = async (row: UserInfo) => {
-  try {
-    await ElMessageBox.confirm(
-        `确定将用户 ${row.id} 设为主播吗？设为主播后不可撤销。`,
-        '设为主播',
-        {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }
-    )
-    await accountApi.setAnchor({accountId: row.id})
-    ElMessage.success('已设为主播')
-    fetchUserList()
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('设为主播失败:', error)
-    }
-  }
 }
 
 const defaultBanApplyTime = () => {
@@ -611,6 +723,13 @@ const formatAmount = (val: number | null | undefined) => {
     return '-'
   }
   return n.toLocaleString('zh-CN', {maximumFractionDigits: 4})
+}
+
+const formatUserType = (val: number | null | undefined) => {
+  if (val === null || val === undefined) {
+    return '普通用户'
+  }
+  return userTypeLabelMap[val] || '普通用户'
 }
 
 const formatVipLevel = (val: number | null | undefined) => {

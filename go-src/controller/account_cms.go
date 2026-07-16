@@ -54,3 +54,7 @@ func (a *AccountController) QueryAnchorList(ctx context.Context, req *accountdto
 func (a *AccountController) SetAnchor(ctx context.Context, req *accountdto.SetAnchorReq) (*accountdto.SetAnchorRes, error) {
 	return userinfo.SetAnchor(ctx, req)
 }
+
+func (a *AccountController) SetUserType(ctx context.Context, req *accountdto.SetUserTypeReq) (*accountdto.SetUserTypeRes, error) {
+	return userinfo.SetUserType(ctx, req)
+}

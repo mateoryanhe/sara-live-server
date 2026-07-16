@@ -124,13 +124,21 @@ export interface UserInfo {
     diamond?: number
     shareCode?: string
     guildId?: string | number
+    userType?: number
     isAnchor?: boolean
     vipLevel?: number
     deviceType?: string
+    packageName?: string
+    appVersion?: string
 }
 
 export interface SetAnchorReq {
     accountId: string
+}
+
+export interface SetUserTypeReq {
+    accountId: string
+    userType: number
 }
 
 export interface QueryAnchorListReq extends PageQuery {
