@@ -18,8 +18,8 @@ func PhoneResetPassword(ctx context.Context, req *authdto.PhoneResetPasswordReq)
 		return nil, errercode.CreateCode(errercode.VerifyCodeInvalid)
 	}
 
-	account := accountdao.GetAccountBy(req.Phone, PhoneChannel)
-	if account.Password == "" {
+	account := accountdao.FindAccountBy(req.Phone, PhoneChannel)
+	if account == nil || account.Password == "" {
 		return nil, errercode.CreateCode(errercode.LoginFail)
 	}
 

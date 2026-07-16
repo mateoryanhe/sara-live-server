@@ -16,9 +16,11 @@ import (
 
 var accountCacheMgr *cache.CacheMgr
 
-// GetAccountBy 根据玩家id拉取数据
+const accountMissCacheTime = 10 * time.Minute
+
+// GetAccountBy 根据玩家id拉取数据，不存在时创建内存账号并异步落库（仅用于注册等写场景）
 func GetAccountBy(openId string, channel uint) *entity.Account {
-	key := fmt.Sprintf("%v:%v", openId, channel)
+	key := accountCacheKey(openId, channel)
 	//命中不了缓存，从数据库拉取数据
 	cacheData := accountCacheMgr.GetData(key, func(ctx context.Context) (value interface{}, err error) {
 		//从数据库拉取数据
@@ -35,6 +37,41 @@ func GetAccountBy(openId string, channel uint) *entity.Account {
 
 	})
 	return cacheData.(*entity.Account)
+}
+
+// FindAccountBy 只读查询账号，不存在时返回 nil，不会创建新记录
+func FindAccountBy(openId string, channel uint) *entity.Account {
+	key := accountCacheKey(openId, channel)
+	ctx := gctx.New()
+
+	if ok, _ := accountCacheMgr.Cache.Contains(ctx, accountMissCacheKey(key)); ok {
+		return nil
+	}
+
+	if cached := accountCacheMgr.GetFromCache(key); cached != nil {
+		return cached.(*entity.Account)
+	}
+
+	var account *entity.Account
+	_ = g.Model(string(entity.TbAccount)).Unscoped().Where(g.Map{
+		string(entity.AccountOpenId):  openId,
+		string(entity.AccountChannel): channel,
+	}).Scan(&account)
+	if account == nil {
+		_ = accountCacheMgr.Cache.Set(ctx, accountMissCacheKey(key), 1, accountMissCacheTime)
+		return nil
+	}
+
+	accountCacheMgr.FlushCache(key, account)
+	return account
+}
+
+func accountCacheKey(openId string, channel uint) string {
+	return fmt.Sprintf("%v:%v", openId, channel)
+}
+
+func accountMissCacheKey(key string) string {
+	return "miss:" + key
 }
 
 func GetAccountById(accountId uint64) *entity.Account {

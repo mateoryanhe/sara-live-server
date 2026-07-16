@@ -3,9 +3,10 @@ package auth
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/gogf/gf/v2/crypto/gmd5"
 	"github.com/gogf/gf/v2/frame/g"
-	"time"
 	"xr-game-server/constants/common"
 	"xr-game-server/core/xrtoken"
 	"xr-game-server/dao/accountdao"
@@ -16,18 +17,29 @@ import (
 )
 
 func PhoneLogin(ctx context.Context, req *authdto.PhoneLoginReq) (res *authdto.PhoneLoginRes, err error) {
-	account := accountdao.GetAccountBy(req.Phone, PhoneChannel)
-	if account.Password == "" {
+	httpReq := g.RequestFromCtx(ctx)
+	if err = checkPhoneLoginLimit(req.Phone); err != nil {
+		return nil, err
+	}
+
+	account := accountdao.FindAccountBy(req.Phone, PhoneChannel)
+	if account == nil || account.Password == "" {
+		if blockErr := markPhoneLoginFailure(req.Phone); blockErr != nil {
+			return nil, blockErr
+		}
 		return nil, errercode.CreateCode(errercode.LoginFail)
 	}
 	if account.Password != gmd5.MustEncryptString(req.Password) {
+		if blockErr := markPhoneLoginFailure(req.Phone); blockErr != nil {
+			return nil, blockErr
+		}
 		return nil, errercode.CreateCode(errercode.LoginFail)
 	}
+	clearPhoneLoginFailure(req.Phone)
 	if account.Ban && account.BanApplyTime != nil && account.BanApplyTime.After(time.Now()) {
 		return nil, errercode.CreateCode(errercode.Ban)
 	}
 
-	httpReq := g.RequestFromCtx(ctx)
 	if len(account.IP) == common.Zero {
 		account.SetIp(httpReq.GetClientIp())
 	}
