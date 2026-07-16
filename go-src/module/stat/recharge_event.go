@@ -25,6 +25,9 @@ func onRechargeArrivedEvent(data any) {
 	if order.Price <= 0 {
 		return
 	}
+	if !shouldCountUserStat(order.UserId) {
+		return
+	}
 
 	statAt := order.PaidAt
 	if statAt.IsZero() {
@@ -54,7 +57,7 @@ func recordPeriodRecharge(statAt time.Time, amount float64) {
 }
 
 func recordPeriodRechargeUser(statAt time.Time, userId uint64) {
-	if userId == 0 {
+	if !shouldCountUserStat(userId) {
 		return
 	}
 	date := entity.FormatDailyLoginStatDate(statAt)

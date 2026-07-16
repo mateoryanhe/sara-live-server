@@ -22,7 +22,7 @@ type GetUserInfoRes struct {
 	ShareCode     string  `json:"shareCode"`
 	VipLevel      uint32  `json:"vipLevel"`
 	IsAnchor      bool    `json:"isAnchor" dc:"是否主播"`
-	UserType      uint8   `json:"userType" dc:"用户类型(0普通用户,1普通主播,2机器人主播,3机器人观众)"`
+	UserType      uint8   `json:"userType" dc:"用户类型(0普通用户,1普通主播,2机器人主播,3机器人观众,4测试人员)"`
 	HasLiveRoom   bool    `json:"hasLiveRoom" dc:"是否已创建直播间"`
 	Gender        uint8   `json:"gender" dc:"性别(0未知,1男,2女)"`
 	Birthday      string  `json:"birthday" dc:"出生日期(YYYY-MM-DD,空表示未设置)"`

@@ -3,11 +3,20 @@ package stat
 import (
 	"time"
 	"xr-game-server/dao/statdao"
+	"xr-game-server/dao/userinfodao"
 	"xr-game-server/entity"
 )
 
-func recordPeriodGoldConsumeUser(statAt time.Time, userId uint64) {
+func shouldCountUserStat(userId uint64) bool {
 	if userId == 0 {
+		return false
+	}
+	user := userinfodao.GetUserInfoByUserId(userId)
+	return !entity.UserTypeExcludedFromStat(user.UserType)
+}
+
+func recordPeriodGoldConsumeUser(statAt time.Time, userId uint64) {
+	if !shouldCountUserStat(userId) {
 		return
 	}
 	date := entity.FormatDailyLoginStatDate(statAt)
@@ -25,7 +34,7 @@ func recordPeriodGoldConsumeUser(statAt time.Time, userId uint64) {
 }
 
 func recordPeriodDiamondConsumeUser(statAt time.Time, userId uint64) {
-	if userId == 0 {
+	if !shouldCountUserStat(userId) {
 		return
 	}
 	date := entity.FormatDailyLoginStatDate(statAt)

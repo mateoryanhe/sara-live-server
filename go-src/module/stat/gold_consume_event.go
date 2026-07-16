@@ -25,6 +25,9 @@ func onGoldConsumeEvent(data any) {
 	if ev.Type != gameevent.CurrencyTypeGold || ev.Action != gameevent.CurrencyActionSub || ev.Amount <= 0 {
 		return
 	}
+	if !shouldCountUserStat(ev.UserId) {
+		return
+	}
 
 	statAt := time.Now()
 

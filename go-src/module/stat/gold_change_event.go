@@ -23,6 +23,9 @@ func onGoldChangeEvent(data any) {
 	if ev.Type != gameevent.CurrencyTypeGold || ev.Amount <= 0 {
 		return
 	}
+	if !shouldCountUserStat(ev.UserId) {
+		return
+	}
 
 	var delta float64
 	switch ev.Action {
