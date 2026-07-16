@@ -25,6 +25,14 @@
               title="进程堆内存 (最近3天, 每10分钟采样)"
           />
         </el-tab-pane>
+        <el-tab-pane label="比例" name="ratio">
+          <ResourceMetricChart
+              ref="ratioChartRef"
+              :data="resourceMetricTrend.points"
+              metric-type="ratio"
+              title="堆使用/空闲比例 (最近3天, 每10分钟采样)"
+          />
+        </el-tab-pane>
         <el-tab-pane label="CPU" name="cpu">
           <ResourceMetricChart
               ref="cpuChartRef"
@@ -49,6 +57,7 @@ const loading = ref(false)
 const activeTab = ref('memory')
 const memoryChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
 const heapChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
+const ratioChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
 const cpuChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
 
 const resourceMetricTrend = reactive<ResourceMetricTrend>({
@@ -62,6 +71,10 @@ const resizeActiveChart = () => {
   }
   if (activeTab.value === 'heap') {
     heapChartRef.value?.resize()
+    return
+  }
+  if (activeTab.value === 'ratio') {
+    ratioChartRef.value?.resize()
     return
   }
   memoryChartRef.value?.resize()
