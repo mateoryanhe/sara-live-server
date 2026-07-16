@@ -27,3 +27,26 @@ func GetAppTokenByUserId(userId uint64) *entity.AppToken {
 	}
 	return ret
 }
+
+// QueryAppTokens CMS分页查询App Token数据库记录
+func QueryAppTokens(userId uint64, pageIndex, pageSize int) (int, []*entity.AppToken) {
+	if pageIndex <= 0 {
+		pageIndex = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+	list := make([]*entity.AppToken, 0)
+	m := g.Model(string(entity.TbAppToken))
+	if userId > 0 {
+		m = m.Where(db.IdName, userId)
+	}
+	total, err := m.Clone().Count()
+	if err != nil {
+		return 0, list
+	}
+	_ = m.Clone().Order(db.IdName + " desc").
+		Limit(pageSize).Offset((pageIndex - 1) * pageSize).
+		Scan(&list)
+	return total, list
+}

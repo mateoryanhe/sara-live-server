@@ -60,7 +60,7 @@
       </div>
     </el-card>
 
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="560px">
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" destroy-on-close width="560px">
       <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="100px">
         <el-form-item label="用户ID" prop="id">
           <el-input
@@ -81,11 +81,12 @@
               v-model="currentRow.expireAt"
               clearable
               format="YYYY-MM-DD HH:mm:ss"
-              placeholder="留空则默认7天或保持原值"
+              placeholder="请选择过期时间"
               style="width: 100%"
               type="datetime"
               value-format="YYYY-MM-DD HH:mm:ss"
           />
+          <div v-if="!isEdit" class="form-tip">默认有效期 30 天，过期时间：{{ currentRow.expireAt || '-' }}</div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -97,7 +98,7 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {nextTick, onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import appTokenApi from '@/api/modules/appToken'
 import type {AppToken, SaveAppTokenReq} from '@/types/api'
@@ -131,6 +132,13 @@ const formatDate = (value?: string | null) => {
     return '-'
   }
   return value.replace('T', ' ').slice(0, 19)
+}
+
+const defaultExpireAt = () => {
+  const date = new Date()
+  date.setDate(date.getDate() + 30)
+  const pad = (value: number) => String(value).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
 }
 
 const fetchList = async () => {
@@ -172,7 +180,7 @@ const handleCurrentChange = (page: number) => {
   fetchList()
 }
 
-const handleAdd = () => {
+const handleAdd = async () => {
   dialogTitle.value = '新增 Token'
   isEdit.value = false
   currentRow.value = {
@@ -181,6 +189,8 @@ const handleAdd = () => {
     expireAt: '',
   }
   dialogVisible.value = true
+  await nextTick()
+  currentRow.value.expireAt = defaultExpireAt()
 }
 
 const handleEdit = (row: AppToken) => {
@@ -236,6 +246,13 @@ onMounted(() => {
 
 .table-header {
   margin-bottom: 15px;
+}
+
+.form-tip {
+  margin-top: 8px;
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .pagination-container {
