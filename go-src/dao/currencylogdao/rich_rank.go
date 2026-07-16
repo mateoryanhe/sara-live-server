@@ -29,6 +29,7 @@ func SumDiamondConsumeByUser(startTime, endTime time.Time) []*DiamondConsumeStat
 SELECT cl.user_id, SUM(cl.amount) AS total
 FROM `+string(entity.TbCurrencyLog)+` cl
 INNER JOIN `+string(entity.TbAccount)+` a ON a.id = cl.user_id
+LEFT JOIN `+string(entity.TbUserExt)+` ue ON ue.id = cl.user_id
 WHERE cl.`+string(entity.CurrencyLogType)+` = ?
   AND cl.`+string(entity.CurrencyLogAction)+` = ?
   AND cl.created_at >= ?
@@ -38,6 +39,7 @@ WHERE cl.`+string(entity.CurrencyLogType)+` = ?
     IFNULL(a.`+string(entity.AccountBan)+`, 0) = 0
     OR (a.`+string(entity.AccountBanApplyTime)+` IS NOT NULL AND a.`+string(entity.AccountBanApplyTime)+` <= ?)
   )
+  AND (ue.id IS NULL OR IFNULL(ue.`+string(entity.UserExtCanRank)+`, 1) = 1)
 GROUP BY cl.user_id
 ORDER BY total DESC
 LIMIT ?

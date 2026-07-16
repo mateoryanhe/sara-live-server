@@ -12,6 +12,7 @@ func Init() {
 	InitPermission()
 	initUserInfo()
 	initUserLoginDevice()
+	initUserExt()
 	initUserCumulativeStat()
 	initDailyLoginStat()
 	initDailyUserLogin()

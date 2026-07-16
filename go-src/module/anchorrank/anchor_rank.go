@@ -5,19 +5,23 @@ import (
 	"strconv"
 	"sync/atomic"
 	"time"
+	"xr-game-server/core/event"
 	"xr-game-server/core/xrtimer"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/anchorrankdto"
+	"xr-game-server/entity"
+	"xr-game-server/gameevent"
 	"xr-game-server/module/upload"
 
 	"github.com/gogf/gf/v2/os/gctx"
 )
 
 const (
-	defaultPageSize           = 20
-	maxPageSize               = 100
-	anchorRankRefreshInterval = 10 * time.Minute
+	defaultPageSize        = 20
+	maxPageSize            = 100
+	anchorRankTickInterval = 3 * time.Minute
+	anchorRankRefreshDelay = 10 * time.Minute
 )
 
 type rankItem struct {
@@ -39,6 +43,7 @@ type rankSnapshot struct {
 }
 
 var anchorRankCache atomic.Value
+var dataRefreshDeadline atomic.Int64
 
 func init() {
 	anchorRankCache.Store(&rankSnapshot{
@@ -48,12 +53,44 @@ func init() {
 	})
 }
 
-// Init 初始化主播红人榜缓存,并每10分钟刷新一次
+// Init 初始化主播红人榜缓存,订阅收益事件,每3分钟检查是否需要刷新
 func Init() {
 	loadAnchorRankCache()
-	xrtimer.AddSingleton(gctx.New(), anchorRankRefreshInterval, func(ctx context.Context) {
-		loadAnchorRankCache()
+	event.Sub(gameevent.RevenueEventEvent, onRevenueEvent)
+	xrtimer.AddSingleton(gctx.New(), anchorRankTickInterval, func(ctx context.Context) {
+		tryRefreshAnchorRankCache()
 	})
+}
+
+func onRevenueEvent(data any) {
+	log, ok := data.(*entity.LiveRevenueLog)
+	if !ok || log == nil {
+		return
+	}
+	if log.ReceiverId == 0 || log.TotalAmount <= 0 {
+		return
+	}
+	if log.Status != entity.LiveRevenueLogStatusNormal {
+		return
+	}
+	markAnchorRankDataChanged()
+}
+
+func markAnchorRankDataChanged() {
+	dataRefreshDeadline.Store(time.Now().Add(anchorRankRefreshDelay).Unix())
+}
+
+func tryRefreshAnchorRankCache() {
+	deadlineUnix := dataRefreshDeadline.Load()
+	if deadlineUnix == 0 {
+		return
+	}
+	now := time.Now()
+	if now.After(time.Unix(deadlineUnix, 0)) {
+		dataRefreshDeadline.Store(0)
+		return
+	}
+	loadAnchorRankCache()
 }
 
 func loadAnchorRankCache() {

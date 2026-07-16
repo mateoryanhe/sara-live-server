@@ -5,19 +5,22 @@ import (
 	"strconv"
 	"sync/atomic"
 	"time"
+	"xr-game-server/core/event"
 	"xr-game-server/core/xrtimer"
 	"xr-game-server/dao/currencylogdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/richrankdto"
+	"xr-game-server/gameevent"
 	"xr-game-server/module/upload"
 
 	"github.com/gogf/gf/v2/os/gctx"
 )
 
 const (
-	defaultPageSize         = 20
-	maxPageSize             = 100
-	richRankRefreshInterval = 10 * time.Minute
+	defaultPageSize      = 20
+	maxPageSize          = 100
+	richRankTickInterval = 3 * time.Minute
+	richRankRefreshDelay = 10 * time.Minute
 )
 
 type rankItem struct {
@@ -39,6 +42,7 @@ type rankSnapshot struct {
 }
 
 var richRankCache atomic.Value
+var dataRefreshDeadline atomic.Int64
 
 func init() {
 	richRankCache.Store(&rankSnapshot{
@@ -48,12 +52,41 @@ func init() {
 	})
 }
 
-// Init 初始化富豪榜缓存,并每10分钟刷新一次
+// Init 初始化富豪榜缓存,订阅钻石消费事件,每3分钟检查是否需要刷新
 func Init() {
 	loadRichRankCache()
-	xrtimer.AddSingleton(gctx.New(), richRankRefreshInterval, func(ctx context.Context) {
-		loadRichRankCache()
+	event.Sub(gameevent.CurrencyChangeEvent, onDiamondConsumeEvent)
+	xrtimer.AddSingleton(gctx.New(), richRankTickInterval, func(ctx context.Context) {
+		tryRefreshRichRankCache()
 	})
+}
+
+func onDiamondConsumeEvent(data any) {
+	ev, ok := data.(*gameevent.CurrencyChangeEventData)
+	if !ok || ev == nil {
+		return
+	}
+	if ev.Type != gameevent.CurrencyTypeDiamond || ev.Action != gameevent.CurrencyActionSub || ev.Amount <= 0 {
+		return
+	}
+	markRichRankDataChanged()
+}
+
+func markRichRankDataChanged() {
+	dataRefreshDeadline.Store(time.Now().Add(richRankRefreshDelay).Unix())
+}
+
+func tryRefreshRichRankCache() {
+	deadlineUnix := dataRefreshDeadline.Load()
+	if deadlineUnix == 0 {
+		return
+	}
+	now := time.Now()
+	if now.After(time.Unix(deadlineUnix, 0)) {
+		dataRefreshDeadline.Store(0)
+		return
+	}
+	loadRichRankCache()
 }
 
 func loadRichRankCache() {
@@ -74,13 +107,6 @@ func startOfDay(t time.Time) time.Time {
 func buildRankItems(rows []*currencylogdao.DiamondConsumeStatRow) []*rankItem {
 	if len(rows) == 0 {
 		return make([]*rankItem, 0)
-	}
-	userIds := make([]uint64, 0, len(rows))
-	for _, row := range rows {
-		if row == nil || row.UserId == 0 {
-			continue
-		}
-		userIds = append(userIds, row.UserId)
 	}
 
 	list := make([]*rankItem, 0, len(rows))
