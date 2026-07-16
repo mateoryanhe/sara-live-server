@@ -56,6 +56,7 @@ func init() {
 func Init() {
 	loadRichRankCache()
 	event.Sub(gameevent.CurrencyChangeEvent, onDiamondConsumeEvent)
+	event.Sub(gameevent.RankListRefreshEvent, onRankListRefreshEvent)
 	xrtimer.AddSingleton(gctx.New(), richRankTickInterval, func(ctx context.Context) {
 		tryRefreshRichRankCache()
 	})
@@ -74,6 +75,10 @@ func onDiamondConsumeEvent(data any) {
 
 func markRichRankDataChanged() {
 	dataRefreshDeadline.Store(time.Now().Add(richRankRefreshDelay).Unix())
+}
+
+func onRankListRefreshEvent(_ any) {
+	markRichRankDataChanged()
 }
 
 func tryRefreshRichRankCache() {

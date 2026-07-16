@@ -57,6 +57,7 @@ func init() {
 func Init() {
 	loadAnchorRankCache()
 	event.Sub(gameevent.RevenueEventEvent, onRevenueEvent)
+	event.Sub(gameevent.RankListRefreshEvent, onRankListRefreshEvent)
 	xrtimer.AddSingleton(gctx.New(), anchorRankTickInterval, func(ctx context.Context) {
 		tryRefreshAnchorRankCache()
 	})
@@ -78,6 +79,10 @@ func onRevenueEvent(data any) {
 
 func markAnchorRankDataChanged() {
 	dataRefreshDeadline.Store(time.Now().Add(anchorRankRefreshDelay).Unix())
+}
+
+func onRankListRefreshEvent(_ any) {
+	markAnchorRankDataChanged()
 }
 
 func tryRefreshAnchorRankCache() {

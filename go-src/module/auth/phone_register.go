@@ -12,9 +12,8 @@ import (
 	"xr-game-server/core/xrtoken"
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/userextdao"
-
 	"xr-game-server/dao/userinfodao"
-	"xr-game-server/dao/userextdao"
+	"xr-game-server/dao/userlogindevicedao"
 	"xr-game-server/dto/authdto"
 	"xr-game-server/errercode"
 	"xr-game-server/gameevent"

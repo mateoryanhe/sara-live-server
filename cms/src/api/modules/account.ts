@@ -8,6 +8,7 @@ import type {
     QueryAnchorListReq,
     QueryUserInfoReq,
     SetAnchorReq,
+    SetCanRankReq,
     SetUserTypeReq,
     UnBanAnchorReq,
     UnBanReq,
@@ -61,6 +62,10 @@ const accountApi = {
 
     setUserType: (data: SetUserTypeReq) => {
         return request.post<boolean>('/account/setUserType', data)
+    },
+
+    setCanRank: (data: SetCanRankReq) => {
+        return request.post<boolean>('/account/setCanRank', data)
     }
 }
 

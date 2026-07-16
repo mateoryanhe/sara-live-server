@@ -130,6 +130,7 @@ export interface UserInfo {
     deviceType?: string
     packageName?: string
     appVersion?: string
+    canRank?: boolean
 }
 
 export interface SetAnchorReq {
@@ -139,6 +140,11 @@ export interface SetAnchorReq {
 export interface SetUserTypeReq {
     accountId: string
     userType: number
+}
+
+export interface SetCanRankReq {
+    accountId: string
+    canRank: boolean
 }
 
 export interface QueryAnchorListReq extends PageQuery {

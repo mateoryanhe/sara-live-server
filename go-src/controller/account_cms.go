@@ -58,3 +58,7 @@ func (a *AccountController) SetAnchor(ctx context.Context, req *accountdto.SetAn
 func (a *AccountController) SetUserType(ctx context.Context, req *accountdto.SetUserTypeReq) (*accountdto.SetUserTypeRes, error) {
 	return userinfo.SetUserType(ctx, req)
 }
+
+func (a *AccountController) SetCanRank(ctx context.Context, req *accountdto.SetCanRankReq) (*accountdto.SetCanRankRes, error) {
+	return userinfo.SetCanRank(ctx, req)
+}

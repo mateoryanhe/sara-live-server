@@ -39,6 +39,7 @@ type UserInfoDto struct {
 	DeviceType  string  `json:"deviceType"`
 	PackageName string  `json:"packageName"`
 	AppVersion  string  `json:"appVersion"`
+	CanRank     bool    `json:"canRank"`
 }
 
 type SetAnchorReq struct {
@@ -57,5 +58,15 @@ type SetUserTypeReq struct {
 }
 
 type SetUserTypeRes struct {
+	Success bool `json:"success"`
+}
+
+type SetCanRankReq struct {
+	g.Meta    `path:"/setCanRank" method:"post" summary:"设置用户是否可上排行榜" tags:"账号"`
+	AccountId uint64 `json:"accountId" v:"required#用户ID不能为空" dc:"用户ID"`
+	CanRank   bool   `json:"canRank" dc:"是否可上排行榜"`
+}
+
+type SetCanRankRes struct {
 	Success bool `json:"success"`
 }

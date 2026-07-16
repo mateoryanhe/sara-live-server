@@ -143,6 +143,8 @@
                     <el-dropdown-item divided command="ban">
                       {{ scope.row.ban ? '解封' : '封号' }}
                     </el-dropdown-item>
+                    <el-dropdown-item v-if="scope.row.canRank !== false" command="rank-off">下榜</el-dropdown-item>
+                    <el-dropdown-item v-if="scope.row.canRank === false" command="rank-on">上榜</el-dropdown-item>
                     <el-dropdown-item command="cancel">
                       {{ scope.row.cancel ? '取消注销' : '注销' }}
                     </el-dropdown-item>
@@ -503,6 +505,12 @@ const handleRowCommand = (row: UserInfo, command: string) => {
     case 'ban':
       handleBanAction(row)
       break
+    case 'rank-on':
+      handleCanRankAction(row, true)
+      break
+    case 'rank-off':
+      handleCanRankAction(row, false)
+      break
     case 'cancel':
       toggleCancelStatus(row)
       break
@@ -619,6 +627,35 @@ const submitBan = async () => {
       banSubmitting.value = false
     }
   })
+}
+
+const handleCanRankAction = async (row: UserInfo, canRank: boolean) => {
+  const actionText = canRank ? '上榜' : '下榜'
+  try {
+    await ElMessageBox.confirm(
+        `确定要将用户 ${row.id} ${actionText}吗？`,
+        `确认${actionText}`,
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+    )
+    const response = await accountApi.setCanRank({
+      accountId: row.id,
+      canRank
+    })
+    if (response) {
+      ElMessage.success(`${actionText}成功`)
+      await fetchUserList()
+    } else {
+      ElMessage.error(`${actionText}失败`)
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error(`${actionText}失败:`, error)
+    }
+  }
 }
 
 const handleBanAction = async (row: UserInfo) => {

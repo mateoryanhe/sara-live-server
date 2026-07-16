@@ -93,7 +93,8 @@ func GetUserInfo(req *accountdto.QueryUserInfoReq) (int, []*accountdto.UserInfoD
 	sql := `select  a.*,
                     u.nickname, u.phone, u.avatar, u.remark,
                     u.gold, u.diamond, u.share_code, u.guild_id, u.user_type, u.vip_level,
-                    d.device_type, e.package_name, e.app_version
+                    d.device_type, e.package_name, e.app_version,
+                    IFNULL(e.can_rank, 1) as can_rank
                     from accounts a
                     left join user_infos u on u.id = a.id
                     left join user_login_devices d on d.id = a.id
