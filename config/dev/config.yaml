@@ -24,7 +24,7 @@ server:
   ####自定义配置
   exitTime: 5 #退出系统等待多少秒，开始发送kill -9
   dumpRouterMap: false
-  memoryLimitM: 300
+  memoryLimitM: 700
   # domainSites 多域名示例见 config/local/config.yaml
 
 bufferSize:

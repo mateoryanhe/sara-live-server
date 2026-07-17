@@ -14,11 +14,20 @@ import (
 const (
 	logBodyFileSkipped            = "[文件已省略,不输出内容]"
 	logBodySkippedNonJSON         = "[非JSON报文,已省略内容]"
-	logLogQueryRespSkipped        = "[日志查询响应,已省略内容]"
 	apiResponseBufferWrittenAtKey = "apiResponseBufferWrittenAt"
 )
 
+func shouldSkipAPILogChain(r *ghttp.Request) bool {
+	if r == nil {
+		return true
+	}
+	return strings.Contains(r.RequestURI, "/logQuery/")
+}
+
 func logAPIRequestStart(r *ghttp.Request) {
+	if shouldSkipAPILogChain(r) {
+		return
+	}
 	if r == nil {
 		return
 	}
@@ -59,6 +68,9 @@ func requestHeadersForLog(r *ghttp.Request) string {
 }
 
 func logAPIRequestAuth(r *ghttp.Request, authMs int64) {
+	if shouldSkipAPILogChain(r) {
+		return
+	}
 	if r == nil {
 		return
 	}
@@ -79,6 +91,9 @@ func elapsedMs(start *gtime.Time) int64 {
 }
 
 func logRequestBodyBeforeHandler(r *ghttp.Request) {
+	if shouldSkipAPILogChain(r) {
+		return
+	}
 	if r == nil {
 		return
 	}
@@ -207,6 +222,9 @@ func logAPIRequestBody(r *ghttp.Request, bodyMs int64, bodyLength int, bodyConte
 }
 
 func logAPIRequestHandler(r *ghttp.Request, handlerMs int64) {
+	if shouldSkipAPILogChain(r) {
+		return
+	}
 	if r == nil {
 		return
 	}
@@ -220,6 +238,9 @@ func logAPIRequestHandler(r *ghttp.Request, handlerMs int64) {
 }
 
 func logAPIRequestResponseWrite(r *ghttp.Request, writeMs int64, respBytes int, respContent string) {
+	if shouldSkipAPILogChain(r) {
+		return
+	}
 	if r == nil {
 		return
 	}
@@ -230,11 +251,14 @@ func logAPIRequestResponseWrite(r *ghttp.Request, writeMs int64, respBytes int, 
 		writeMs,
 		respBytes,
 		r.RequestURI,
-		apiRespContentForLog(r, respContent),
+		respContent,
 	)
 }
 
 func stashAPIResponseBufferWrittenAt(r *ghttp.Request) {
+	if shouldSkipAPILogChain(r) {
+		return
+	}
 	if r == nil {
 		return
 	}
@@ -242,6 +266,9 @@ func stashAPIResponseBufferWrittenAt(r *ghttp.Request) {
 }
 
 func hookAPIRequestAfterOutput(r *ghttp.Request) {
+	if shouldSkipAPILogChain(r) {
+		return
+	}
 	if r == nil {
 		return
 	}
@@ -297,18 +324,4 @@ func isJSONRequestBody(r *ghttp.Request, body string) bool {
 		return true
 	}
 	return false
-}
-
-func isLogQueryRequest(r *ghttp.Request) bool {
-	if r == nil {
-		return false
-	}
-	return strings.Contains(r.RequestURI, "/logQuery/")
-}
-
-func apiRespContentForLog(r *ghttp.Request, respContent string) string {
-	if isLogQueryRequest(r) {
-		return logLogQueryRespSkipped
-	}
-	return respContent
 }

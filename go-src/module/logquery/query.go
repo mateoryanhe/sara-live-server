@@ -48,7 +48,7 @@ func QueryDetailLogs(_ context.Context, req *logquerydto.CMSQueryDetailLogsReq) 
 			if !matchDetailEntry(entry, req.TraceId, req.ReqId, req.AuthId, req.Url, req.Keyword) {
 				return true
 			}
-			matched = append(matched, entry)
+			matched = append(matched, trimDetailLogEntryForQuery(entry))
 			return true
 		})
 	}
@@ -157,7 +157,7 @@ func GetTraceLogs(_ context.Context, req *logquerydto.CMSGetTraceLogsReq) (*logq
 				return true
 			}
 			if matchTraceId(entry.TraceId, req.TraceId) {
-				detailLogs = append(detailLogs, entry)
+				detailLogs = append(detailLogs, trimDetailLogEntryForQuery(entry))
 			}
 			return true
 		})

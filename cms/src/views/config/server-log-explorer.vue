@@ -9,11 +9,11 @@
       </template>
 
       <el-tabs v-model="activeTab">
-        <el-tab-pane label="详情日志" name="detail">
-          <el-form :model="detailForm" class="search-form" inline label-width="90px">
+        <el-tab-pane label="访问统计" name="stats">
+          <el-form :model="statsForm" class="search-form" inline label-width="90px">
             <el-form-item label="日期范围">
               <el-date-picker
-                  v-model="detailForm.dateRange"
+                  v-model="statsForm.dateRange"
                   end-placeholder="结束日期"
                   format="YYYY-MM-DD"
                   range-separator="至"
@@ -23,56 +23,36 @@
                   value-format="YYYY-MM-DD"
               />
             </el-form-item>
-            <el-form-item label="TraceId">
-              <el-input v-model="detailForm.traceId" clearable placeholder="支持模糊匹配" style="width: 280px"/>
-            </el-form-item>
-            <el-form-item label="ReqId">
-              <el-input v-model="detailForm.reqId" clearable placeholder="支持模糊匹配" style="width: 180px"/>
-            </el-form-item>
-            <el-form-item label="AuthId">
-              <el-input v-model="detailForm.authId" clearable placeholder="支持模糊匹配(含推送)" style="width: 180px"/>
-            </el-form-item>
-            <el-form-item label="URL">
-              <el-input v-model="detailForm.url" clearable placeholder="支持模糊匹配" style="width: 220px"/>
-            </el-form-item>
-            <el-form-item label="关键词">
-              <el-input v-model="detailForm.keyword" clearable placeholder="ErrorLog/内容模糊匹配" style="width: 180px"/>
+            <el-form-item label="TopN">
+              <el-input-number v-model="statsForm.topN" :max="100" :min="1" controls-position="right" style="width: 120px"/>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="handleDetailSearch">查询</el-button>
-              <el-button @click="resetDetailForm">重置</el-button>
+              <el-button type="primary" @click="fetchAccessStats">查询</el-button>
             </el-form-item>
           </el-form>
 
-          <el-table v-loading="detailLoading" :data="detailTableData" style="width: 100%">
-            <el-table-column label="时间" prop="time" width="210"/>
-            <el-table-column label="级别" prop="level" width="80"/>
-            <el-table-column label="TraceId" min-width="280">
-              <template #default="{ row }">
-                <el-link type="primary" @click="openTraceDetail(row.traceId, row.time)">{{ row.traceId }}</el-link>
-              </template>
-            </el-table-column>
-            <el-table-column label="ReqId" prop="reqId" width="160"/>
-            <el-table-column label="AuthId" prop="authId" width="180"/>
-            <el-table-column label="URL" min-width="180" prop="url" show-overflow-tooltip/>
-            <el-table-column label="耗时(ms)" width="100">
-              <template #default="{ row }">{{ formatHandlerMs(row.elapsedMs) }}</template>
-            </el-table-column>
-            <el-table-column label="内容" min-width="320" prop="message" show-overflow-tooltip/>
-          </el-table>
-
-          <div class="pagination-wrap">
-            <el-pagination
-                v-model:current-page="detailPageIndex"
-                v-model:page-size="detailPageSize"
-                :page-sizes="[20, 50, 100, 200]"
-                :total="detailTotal"
-                background
-                layout="total, sizes, prev, pager, next"
-                @current-change="fetchDetailLogs"
-                @size-change="handleDetailSearch"
-            />
-          </div>
+          <el-row v-loading="statsLoading" :gutter="20">
+            <el-col :span="12">
+              <el-card shadow="never">
+                <template #header>接口访问 TopN</template>
+                <el-table :data="urlTopData" size="small">
+                  <el-table-column label="#" type="index" width="50"/>
+                  <el-table-column label="URL" min-width="220" prop="key" show-overflow-tooltip/>
+                  <el-table-column label="访问数" prop="count" width="100"/>
+                </el-table>
+              </el-card>
+            </el-col>
+            <el-col :span="12">
+              <el-card shadow="never">
+                <template #header>IP访问 TopN</template>
+                <el-table :data="ipTopData" size="small">
+                  <el-table-column label="#" type="index" width="50"/>
+                  <el-table-column label="IP" min-width="180" prop="key" show-overflow-tooltip/>
+                  <el-table-column label="访问数" prop="count" width="100"/>
+                </el-table>
+              </el-card>
+            </el-col>
+          </el-row>
         </el-tab-pane>
 
         <el-tab-pane label="Access日志" name="access">
@@ -227,11 +207,11 @@
           </div>
         </el-tab-pane>
 
-        <el-tab-pane label="访问统计" name="stats">
-          <el-form :model="statsForm" class="search-form" inline label-width="90px">
+        <el-tab-pane label="详情日志" name="detail">
+          <el-form :model="detailForm" class="search-form" inline label-width="90px">
             <el-form-item label="日期范围">
               <el-date-picker
-                  v-model="statsForm.dateRange"
+                  v-model="detailForm.dateRange"
                   end-placeholder="结束日期"
                   format="YYYY-MM-DD"
                   range-separator="至"
@@ -241,36 +221,56 @@
                   value-format="YYYY-MM-DD"
               />
             </el-form-item>
-            <el-form-item label="TopN">
-              <el-input-number v-model="statsForm.topN" :max="100" :min="1" controls-position="right" style="width: 120px"/>
+            <el-form-item label="TraceId">
+              <el-input v-model="detailForm.traceId" clearable placeholder="支持模糊匹配" style="width: 280px"/>
+            </el-form-item>
+            <el-form-item label="ReqId">
+              <el-input v-model="detailForm.reqId" clearable placeholder="支持模糊匹配" style="width: 180px"/>
+            </el-form-item>
+            <el-form-item label="AuthId">
+              <el-input v-model="detailForm.authId" clearable placeholder="支持模糊匹配(含推送)" style="width: 180px"/>
+            </el-form-item>
+            <el-form-item label="URL">
+              <el-input v-model="detailForm.url" clearable placeholder="支持模糊匹配" style="width: 220px"/>
+            </el-form-item>
+            <el-form-item label="关键词">
+              <el-input v-model="detailForm.keyword" clearable placeholder="ErrorLog/内容模糊匹配" style="width: 180px"/>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="fetchAccessStats">查询</el-button>
+              <el-button type="primary" @click="handleDetailSearch">查询</el-button>
+              <el-button @click="resetDetailForm">重置</el-button>
             </el-form-item>
           </el-form>
 
-          <el-row v-loading="statsLoading" :gutter="20">
-            <el-col :span="12">
-              <el-card shadow="never">
-                <template #header>接口访问 TopN</template>
-                <el-table :data="urlTopData" size="small">
-                  <el-table-column label="#" type="index" width="50"/>
-                  <el-table-column label="URL" min-width="220" prop="key" show-overflow-tooltip/>
-                  <el-table-column label="访问数" prop="count" width="100"/>
-                </el-table>
-              </el-card>
-            </el-col>
-            <el-col :span="12">
-              <el-card shadow="never">
-                <template #header>IP访问 TopN</template>
-                <el-table :data="ipTopData" size="small">
-                  <el-table-column label="#" type="index" width="50"/>
-                  <el-table-column label="IP" min-width="180" prop="key" show-overflow-tooltip/>
-                  <el-table-column label="访问数" prop="count" width="100"/>
-                </el-table>
-              </el-card>
-            </el-col>
-          </el-row>
+          <el-table v-loading="detailLoading" :data="detailTableData" style="width: 100%">
+            <el-table-column label="时间" prop="time" width="210"/>
+            <el-table-column label="级别" prop="level" width="80"/>
+            <el-table-column label="TraceId" min-width="280">
+              <template #default="{ row }">
+                <el-link type="primary" @click="openTraceDetail(row.traceId, row.time)">{{ row.traceId }}</el-link>
+              </template>
+            </el-table-column>
+            <el-table-column label="ReqId" prop="reqId" width="160"/>
+            <el-table-column label="AuthId" prop="authId" width="180"/>
+            <el-table-column label="URL" min-width="180" prop="url" show-overflow-tooltip/>
+            <el-table-column label="耗时(ms)" width="100">
+              <template #default="{ row }">{{ formatHandlerMs(row.elapsedMs) }}</template>
+            </el-table-column>
+            <el-table-column label="内容" min-width="320" prop="message" show-overflow-tooltip/>
+          </el-table>
+
+          <div class="pagination-wrap">
+            <el-pagination
+                v-model:current-page="detailPageIndex"
+                v-model:page-size="detailPageSize"
+                :page-sizes="[20, 50, 100, 200]"
+                :total="detailTotal"
+                background
+                layout="total, sizes, prev, pager, next"
+                @current-change="fetchDetailLogs"
+                @size-change="handleDetailSearch"
+            />
+          </div>
         </el-tab-pane>
       </el-tabs>
     </el-card>
@@ -344,7 +344,7 @@ import {logQueryApi} from '@/api'
 import AccessTrendChart from './components/access-trend-chart.vue'
 import type {AccessLogItem, AccessTrendData, DetailLogItem, ErrorLogItem, TopStatItem, TraceLogDetail} from '@/types/api'
 
-const activeTab = ref('detail')
+const activeTab = ref('stats')
 const serverTimeLoading = ref(false)
 const serverTimeDisplay = ref('-')
 let serverTimeBaseMs = 0
@@ -486,6 +486,9 @@ const getActiveTabDateRange = () => {
   }
   if (activeTab.value === 'error') {
     return errorForm.dateRange
+  }
+  if (activeTab.value === 'stats') {
+    return statsForm.dateRange
   }
   return detailForm.dateRange
 }
@@ -882,7 +885,7 @@ const resolveTraceAuthId = () => {
 onMounted(async () => {
   await syncServerTime()
   startServerTimeClock()
-  await fetchDetailLogs()
+  await fetchAccessStats()
 })
 
 onUnmounted(() => {
