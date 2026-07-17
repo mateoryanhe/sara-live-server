@@ -30,5 +30,11 @@ export const configRoutes: RouteRecordRaw = {
             component: () => import('@/views/config/resource-monitor.vue'),
             meta: {title: '资源监控'},
         },
+        {
+            path: 'server-log',
+            name: 'ServerLogExplorer',
+            component: () => import('@/views/config/server-log-explorer.vue'),
+            meta: {title: '服务器日志'},
+        },
     ],
 }

@@ -238,7 +238,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('ResourceMonitor')"
+            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
             index="/config">
           <template #title>
             <el-icon>
@@ -269,6 +269,12 @@
               <Monitor/>
             </el-icon>
             <span>资源监控</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('ServerLogExplorer')" index="/config/server-log">
+            <el-icon>
+              <Search/>
+            </el-icon>
+            <span>服务器日志</span>
           </el-menu-item>
         </el-sub-menu>
         <!-- 角色权限管理菜单 -->
@@ -339,7 +345,7 @@
 <script lang="ts" setup>
 import {computed, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {ArrowDown, Coin, Collection, CollectionTag, Cpu, Document, Expand, Fold, Key, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Coin, Collection, CollectionTag, Cpu, Document, Expand, Fold, Key, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Search, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {clearPermissions, getIsAdmin, hasPermission} from '@/utils/permission'
 
 const route = useRoute()

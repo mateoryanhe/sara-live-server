@@ -26,6 +26,7 @@ import {textModerationApi} from './modules/text-moderation'
 import {uploadResourceApi} from './modules/upload-resource'
 import {sysStatApi} from './modules/sysStat'
 import {botAnchorApi} from './modules/bot-anchor'
+import {logQueryApi} from './modules/logQuery'
 
 export {
     authApi,
@@ -56,6 +57,7 @@ export {
     uploadResourceApi,
     sysStatApi,
     botAnchorApi,
+    logQueryApi,
 }
 
 export default {
@@ -87,4 +89,5 @@ export default {
     uploadResourceApi,
     sysStatApi,
     botAnchorApi,
+    logQueryApi,
 }

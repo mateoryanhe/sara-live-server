@@ -61,6 +61,7 @@ func Init() {
 	initUploadController()                  // CMS文件上传
 	initSysStatController()                 // 系统总数据/仪表盘(CMS)
 	initResourceMetricController()          // 系统资源监控(CMS)
+	initLogQueryController()                // 日志查询(CMS)
 	httpserver.InitWebsocket()
 	go httpserver.InitHttpServer()
 }

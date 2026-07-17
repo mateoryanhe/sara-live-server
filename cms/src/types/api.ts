@@ -832,6 +832,103 @@ export interface VideoCallLogItem {
     createdAt?: string | null
 }
 
+export interface LogPathsConfig {
+    detailLogDir: string
+    detailLogPattern: string
+    accessLogDir: string
+    accessLogPattern: string
+}
+
+export interface DetailLogQuery {
+    pageIndex?: number
+    pageSize?: number
+    startDate: string
+    endDate: string
+    traceId?: string
+    reqId?: string
+    authId?: string
+    url?: string
+    keyword?: string
+}
+
+export interface DetailLogItem {
+    time: string
+    level: string
+    traceId: string
+    reqId: string
+    authId: string
+    url: string
+    message: string
+    raw: string
+}
+
+export interface AccessLogQuery {
+    pageIndex?: number
+    pageSize?: number
+    startDate: string
+    endDate: string
+    traceId?: string
+    url?: string
+    ip?: string
+    statusCode?: number
+    minHandlerMs?: number
+    maxHandlerMs?: number
+}
+
+export interface AccessLogItem {
+    time: string
+    traceId: string
+    statusCode: number
+    method: string
+    url: string
+    handlerMs: number
+    ip: string
+    userAgent: string
+    raw: string
+}
+
+export interface TraceLogDetail {
+    traceId: string
+    date: string
+    detailLogs: DetailLogItem[]
+    accessLogs: AccessLogItem[]
+}
+
+export interface TopStatItem {
+    key: string
+    count: number
+}
+
+export interface AccessLogStats {
+    urlTop: TopStatItem[]
+    ipTop: TopStatItem[]
+}
+
+export interface AccessTrendPoint {
+    time: string
+    count: number
+}
+
+export interface AccessTrendData {
+    intervalMinutes: number
+    points: AccessTrendPoint[]
+    totalCount: number
+    peakTime: string
+    peakCount: number
+}
+
+export interface AccessTrendQuery {
+    startDate: string
+    endDate: string
+    traceId?: string
+    url?: string
+    ip?: string
+    statusCode?: number
+    minHandlerMs?: number
+    maxHandlerMs?: number
+    intervalMinutes?: number
+}
+
 // CMS用户相关类型
 export interface CMSUser {
     id: string

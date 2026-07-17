@@ -1,7 +1,6 @@
 package cfg
 
 func InitCfg() {
-	//日志异步输出
 	initServerCfg()
 	initDomainSiteCfg()
 	initDbBufferCfg()
@@ -9,4 +8,5 @@ func InitCfg() {
 	initGoPoolCfg()
 	initWebSocketBufferCfg()
 	initSensitiveWordCfg()
+	logConfigContent()
 }
