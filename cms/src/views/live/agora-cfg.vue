@@ -59,18 +59,6 @@
           <span class="form-tip">小时，范围 {{ TOKEN_EXPIRE_MIN_HOURS }}-{{ TOKEN_EXPIRE_MAX_HOURS }} 小时，默认 {{ TOKEN_EXPIRE_DEFAULT_HOURS }} 小时</span>
         </el-form-item>
 
-        <el-form-item label="提前刷新阈值" prop="tokenRefreshHours">
-          <el-input-number
-              v-model="formData.tokenRefreshHours"
-              :max="maxTokenRefreshHours"
-              :min="TOKEN_REFRESH_MIN_HOURS"
-              :precision="0"
-              controls-position="right"
-              style="width: 220px"
-          />
-          <span class="form-tip">小时，范围 {{ TOKEN_REFRESH_MIN_HOURS }}-{{ maxTokenRefreshHours }} 小时，且比 Token 有效期至少少 {{ TOKEN_REFRESH_AHEAD_GAP_HOURS }} 小时</span>
-        </el-form-item>
-
         <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
@@ -85,7 +73,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, reactive, ref, watch} from 'vue'
+import {onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {agoraApi} from '@/api/modules/agora'
 import type {AgoraCfg} from '@/types/api'
@@ -93,9 +81,8 @@ import type {AgoraCfg} from '@/types/api'
 const TOKEN_EXPIRE_MIN_HOURS = 4
 const TOKEN_EXPIRE_MAX_HOURS = 24
 const TOKEN_EXPIRE_DEFAULT_HOURS = 24
-const TOKEN_REFRESH_MIN_HOURS = 2
 const TOKEN_REFRESH_AHEAD_GAP_HOURS = 2
-const TOKEN_REFRESH_DEFAULT_HOURS = TOKEN_EXPIRE_DEFAULT_HOURS - TOKEN_REFRESH_AHEAD_GAP_HOURS
+const TOKEN_REFRESH_MIN_HOURS = 2
 const SECONDS_PER_HOUR = 3600
 
 const loading = ref(false)
@@ -109,7 +96,6 @@ const formData = reactive({
   restCustomerSecret: '',
   cloudPlayerRegion: 'cn',
   tokenExpireHours: TOKEN_EXPIRE_DEFAULT_HOURS,
-  tokenRefreshHours: TOKEN_REFRESH_DEFAULT_HOURS,
 })
 
 const metaInfo = reactive({
@@ -117,23 +103,11 @@ const metaInfo = reactive({
   updatedAt: '',
 })
 
-const maxTokenRefreshHours = computed(() => {
-  return Math.max(TOKEN_REFRESH_MIN_HOURS, formData.tokenExpireHours - TOKEN_REFRESH_AHEAD_GAP_HOURS)
-})
-
 const clampTokenExpireHours = (hours: number) => {
   if (!Number.isFinite(hours) || hours <= 0) {
     return TOKEN_EXPIRE_DEFAULT_HOURS
   }
   return Math.min(TOKEN_EXPIRE_MAX_HOURS, Math.max(TOKEN_EXPIRE_MIN_HOURS, Math.round(hours)))
-}
-
-const clampTokenRefreshHours = (hours: number, expireHours: number) => {
-  const maxHours = Math.max(TOKEN_REFRESH_MIN_HOURS, expireHours - TOKEN_REFRESH_AHEAD_GAP_HOURS)
-  if (!Number.isFinite(hours)) {
-    return maxHours
-  }
-  return Math.min(maxHours, Math.max(TOKEN_REFRESH_MIN_HOURS, Math.round(hours)))
 }
 
 const secondsToHours = (seconds: number, fallback: number) => {
@@ -145,13 +119,10 @@ const secondsToHours = (seconds: number, fallback: number) => {
 
 const hoursToSeconds = (hours: number) => Math.round(hours) * SECONDS_PER_HOUR
 
-const syncTokenRefreshHours = () => {
-  formData.tokenRefreshHours = clampTokenRefreshHours(formData.tokenRefreshHours, formData.tokenExpireHours)
+const buildLegacyTokenRefreshSeconds = (expireHours: number) => {
+  const refreshHours = Math.max(TOKEN_REFRESH_MIN_HOURS, expireHours - TOKEN_REFRESH_AHEAD_GAP_HOURS)
+  return hoursToSeconds(refreshHours)
 }
-
-watch(() => formData.tokenExpireHours, () => {
-  syncTokenRefreshHours()
-})
 
 const formRules = reactive({
   appId: [
@@ -178,20 +149,6 @@ const formRules = reactive({
       trigger: 'blur',
     },
   ],
-  tokenRefreshHours: [
-    {required: true, message: '请输入提前刷新阈值', trigger: 'blur'},
-    {
-      validator: (_rule: unknown, value: number, callback: (error?: Error) => void) => {
-        const max = maxTokenRefreshHours.value
-        if (!Number.isFinite(value) || value < TOKEN_REFRESH_MIN_HOURS || value > max) {
-          callback(new Error(`提前刷新阈值需在 ${TOKEN_REFRESH_MIN_HOURS}-${max} 小时之间`))
-          return
-        }
-        callback()
-      },
-      trigger: 'blur',
-    },
-  ],
 })
 
 const applyCfg = (cfg: AgoraCfg | null | undefined) => {
@@ -203,7 +160,6 @@ const applyCfg = (cfg: AgoraCfg | null | undefined) => {
     formData.restCustomerSecret = ''
     formData.cloudPlayerRegion = 'cn'
     formData.tokenExpireHours = TOKEN_EXPIRE_DEFAULT_HOURS
-    formData.tokenRefreshHours = TOKEN_REFRESH_DEFAULT_HOURS
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
     return
@@ -215,10 +171,6 @@ const applyCfg = (cfg: AgoraCfg | null | undefined) => {
   formData.restCustomerSecret = cfg.restCustomerSecret || ''
   formData.cloudPlayerRegion = cfg.cloudPlayerRegion || 'cn'
   formData.tokenExpireHours = clampTokenExpireHours(secondsToHours(cfg.tokenExpireSeconds, TOKEN_EXPIRE_DEFAULT_HOURS))
-  formData.tokenRefreshHours = clampTokenRefreshHours(
-      secondsToHours(cfg.tokenRefreshSeconds, TOKEN_REFRESH_DEFAULT_HOURS),
-      formData.tokenExpireHours,
-  )
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
 }
@@ -248,7 +200,7 @@ const handleSave = async () => {
       restCustomerSecret: formData.restCustomerSecret.trim(),
       cloudPlayerRegion: formData.cloudPlayerRegion || 'cn',
       tokenExpireSeconds: hoursToSeconds(formData.tokenExpireHours),
-      tokenRefreshSeconds: hoursToSeconds(formData.tokenRefreshHours),
+      tokenRefreshSeconds: buildLegacyTokenRefreshSeconds(formData.tokenExpireHours),
     })
     if (response?.success) {
       ElMessage.success('保存成功')
