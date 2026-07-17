@@ -125,9 +125,18 @@ func (w *WebSocketClient) init() {
 	go w.consumeData(ctx)
 }
 
+func (w *WebSocketClient) recoverExit() {
+	if recover() != nil {
+		w.exit()
+	}
+}
+
 // readPump 独立读协程,连接断开时 ReadMessage 返回错误并触发 exit
 func (w *WebSocketClient) readPump() {
-	defer w.exit()
+	defer func() {
+		w.recoverExit()
+		w.exit()
+	}()
 	for w.Loop && w.Conn != nil {
 		if _, _, err := w.Conn.ReadMessage(); err != nil {
 			return
@@ -212,6 +221,7 @@ func (w *WebSocketClient) consumeData(ctx context.Context) {
 	flushTimer := time.NewTimer(time.Hour)
 	stopTimer(flushTimer)
 	defer flushTimer.Stop()
+	defer w.recoverExit()
 
 	idleTimer := time.NewTimer(IdleTime)
 	defer idleTimer.Stop()
