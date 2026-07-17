@@ -891,7 +891,8 @@ export interface AccessLogItem {
 
 export interface TraceLogDetail {
     traceId: string
-    date: string
+    startDate: string
+    endDate: string
     detailLogs: DetailLogItem[]
     accessLogs: AccessLogItem[]
     errorLogs: ErrorLogItem[]

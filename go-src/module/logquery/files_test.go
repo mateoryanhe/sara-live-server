@@ -46,6 +46,27 @@ func TestFilterDetailLogFiles(t *testing.T) {
 	}
 }
 
+func TestFilterAccessLogFiles(t *testing.T) {
+	files := filterAccessLogFiles([]string{
+		"/log/access-2026-07-17.log",
+		"/log/access.20260717.log",
+		"/log/error-20260717.log",
+		"/log/2026-07-17.log",
+	})
+	if len(files) != 2 {
+		t.Fatalf("unexpected filtered access files: %#v", files)
+	}
+}
+
+func TestMatchTraceId(t *testing.T) {
+	if !matchTraceId("abc123", "abc123") {
+		t.Fatal("exact traceId should match")
+	}
+	if !matchTraceId("abc123def", "abc123") {
+		t.Fatal("fuzzy traceId should match")
+	}
+}
+
 func TestDetailEntryToErrorEntry(t *testing.T) {
 	line := `2026-07-06T10:00:00.000 [ERRO] {abc123} response_middleware_util.go:95: ErrorLog source=Handler time=2026-07-06 10:00:00.000,reqId=1,authId=2,method=POST,url=/api/test err=panic stack=main.go:10`
 	detail, ok := parseDetailLogLine(line)

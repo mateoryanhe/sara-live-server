@@ -53,7 +53,7 @@
             <el-table-column label="级别" prop="level" width="80"/>
             <el-table-column label="TraceId" min-width="280">
               <template #default="{ row }">
-                <el-link type="primary" @click="openTraceDetail(row.traceId)">{{ row.traceId }}</el-link>
+                <el-link type="primary" @click="openTraceDetail(row.traceId, row.time)">{{ row.traceId }}</el-link>
               </template>
             </el-table-column>
             <el-table-column label="ReqId" prop="reqId" width="160"/>
@@ -135,7 +135,7 @@
             <el-table-column label="时间" prop="time" width="210"/>
             <el-table-column label="TraceId" min-width="280">
               <template #default="{ row }">
-                <el-link type="primary" @click="openTraceDetail(row.traceId)">{{ row.traceId }}</el-link>
+                <el-link type="primary" @click="openTraceDetail(row.traceId, row.time)">{{ row.traceId }}</el-link>
               </template>
             </el-table-column>
             <el-table-column label="状态码" prop="statusCode" width="90"/>
@@ -201,7 +201,7 @@
             <el-table-column label="时间" prop="time" width="210"/>
             <el-table-column label="TraceId" min-width="280">
               <template #default="{ row }">
-                <el-link type="primary" @click="openTraceDetail(row.traceId)">{{ row.traceId }}</el-link>
+                <el-link type="primary" @click="openTraceDetail(row.traceId, row.time)">{{ row.traceId }}</el-link>
               </template>
             </el-table-column>
             <el-table-column label="状态码" prop="statusCode" width="90"/>
@@ -278,7 +278,7 @@
 
     <el-drawer v-model="traceDrawerVisible" :title="`TraceId: ${traceDetail.traceId}`" size="60%">
       <div v-loading="traceLoading" class="trace-drawer">
-        <p class="trace-meta">日期: {{ traceDetail.date }}</p>
+        <p class="trace-meta">日期范围: {{ traceDetail.startDate }} 至 {{ traceDetail.endDate }}</p>
 
         <h4>Error日志</h4>
         <div v-for="(item, index) in traceDetail.errorLogs" :key="'error-' + index" class="trace-log-line">
@@ -333,7 +333,101 @@ const formatLocalDate = (date: Date) => {
   return `${year}-${month}-${day}`
 }
 
-const today = () => formatLocalDate(new Date())
+const MS_DAY = 86400000
+const MAX_TRACE_RANGE_DAYS = 7
+
+const parseLocalDate = (dateStr: string) => {
+  const [year, month, day] = dateStr.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
+const normalizeDateRange = (startDate: string, endDate: string): string[] | null => {
+  if (!startDate || !endDate) {
+    return null
+  }
+  let start = startDate
+  let end = endDate
+  if (start > end) {
+    [start, end] = [end, start]
+  }
+  const startTime = parseLocalDate(start)
+  const endTime = parseLocalDate(end)
+  const days = Math.floor((endTime.getTime() - startTime.getTime()) / MS_DAY) + 1
+  if (days > MAX_TRACE_RANGE_DAYS) {
+    const clippedEnd = new Date(startTime)
+    clippedEnd.setDate(startTime.getDate() + MAX_TRACE_RANGE_DAYS - 1)
+    return [start, formatLocalDate(clippedEnd)]
+  }
+  return [start, end]
+}
+
+const extractLogDate = (time?: string) => {
+  if (!time || time.length < 10) {
+    return ''
+  }
+  return time.slice(0, 10)
+}
+
+const expandRangeToIncludeDate = (range: string[], logDate: string) => {
+  const normalized = normalizeDateRange(range[0], range[1])
+  if (!normalized) {
+    return null
+  }
+  if (!logDate) {
+    return normalized
+  }
+  let [start, end] = normalized
+  if (logDate < start) {
+    start = logDate
+  }
+  if (logDate > end) {
+    end = logDate
+  }
+  return normalizeDateRange(start, end)
+}
+
+const getActiveTabDateRange = () => {
+  if (activeTab.value === 'access') {
+    return accessForm.dateRange
+  }
+  if (activeTab.value === 'error') {
+    return errorForm.dateRange
+  }
+  return detailForm.dateRange
+}
+
+const buildTraceSearchRanges = (tabRange: string[] | undefined, logTime?: string) => {
+  const ranges: string[][] = []
+  const seen = new Set<string>()
+  const pushRange = (start?: string, end?: string) => {
+    const normalized = normalizeDateRange(start || '', end || '')
+    if (!normalized) {
+      return
+    }
+    const key = normalized.join('|')
+    if (seen.has(key)) {
+      return
+    }
+    seen.add(key)
+    ranges.push(normalized)
+  }
+
+  const logDate = extractLogDate(logTime)
+  const tab = tabRange && tabRange.length === 2 ? tabRange : defaultDateRange()
+  const expandedTab = expandRangeToIncludeDate(tab, logDate)
+  if (expandedTab) {
+    pushRange(expandedTab[0], expandedTab[1])
+  }
+  if (logDate) {
+    pushRange(logDate, logDate)
+  }
+  pushRange(...defaultDateRange())
+
+  return ranges
+}
+
+const hasTraceData = (data: TraceLogDetail) =>
+    (data.detailLogs?.length || 0) + (data.accessLogs?.length || 0) + (data.errorLogs?.length || 0) > 0
 
 /** 默认过去7天; 结束日期+2天,兼容不同时区日志时间 */
 const defaultDateRange = () => {
@@ -403,7 +497,8 @@ const traceDrawerVisible = ref(false)
 const traceLoading = ref(false)
 const traceDetail = reactive<TraceLogDetail>({
   traceId: '',
-  date: '',
+  startDate: '',
+  endDate: '',
   detailLogs: [],
   accessLogs: [],
   errorLogs: [],
@@ -565,30 +660,40 @@ const fetchAccessStats = async () => {
   }
 }
 
-const openTraceDetail = async (traceId: string) => {
+const openTraceDetail = async (traceId: string, logTime?: string) => {
   if (!traceId) {
     return
   }
-  const range = activeTab.value === 'access'
-      ? accessForm.dateRange
-      : activeTab.value === 'error'
-          ? errorForm.dateRange
-          : detailForm.dateRange
-  const date = range?.[0] || today()
+  const searchRanges = buildTraceSearchRanges(getActiveTabDateRange(), logTime)
   traceDrawerVisible.value = true
   traceLoading.value = true
   traceDetail.traceId = traceId
-  traceDetail.date = date
+  traceDetail.startDate = searchRanges[0]?.[0] || ''
+  traceDetail.endDate = searchRanges[0]?.[1] || ''
   traceDetail.detailLogs = []
   traceDetail.accessLogs = []
   traceDetail.errorLogs = []
   try {
-    const data = await logQueryApi.getTraceLogs(traceId, date)
-    traceDetail.traceId = data.traceId
-    traceDetail.date = data.date
-    traceDetail.detailLogs = data.detailLogs || []
-    traceDetail.accessLogs = data.accessLogs || []
-    traceDetail.errorLogs = data.errorLogs || []
+    let finalData: TraceLogDetail | null = null
+    for (const range of searchRanges) {
+      const data = await logQueryApi.getTraceLogs(traceId, range[0], range[1])
+      finalData = data
+      traceDetail.startDate = data.startDate || range[0]
+      traceDetail.endDate = data.endDate || range[1]
+      if (hasTraceData(data)) {
+        traceDetail.traceId = data.traceId
+        traceDetail.detailLogs = data.detailLogs || []
+        traceDetail.accessLogs = data.accessLogs || []
+        traceDetail.errorLogs = data.errorLogs || []
+        return
+      }
+    }
+    if (finalData) {
+      traceDetail.traceId = finalData.traceId
+      traceDetail.detailLogs = finalData.detailLogs || []
+      traceDetail.accessLogs = finalData.accessLogs || []
+      traceDetail.errorLogs = finalData.errorLogs || []
+    }
   } catch (error) {
     console.error('查询Trace日志失败:', error)
     ElMessage.error('查询Trace日志失败')

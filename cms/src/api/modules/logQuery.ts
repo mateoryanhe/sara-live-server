@@ -31,8 +31,8 @@ export const logQueryApi = {
         return request.post<PageResponse<ErrorLogItem>>('/logQuery/queryErrorLogs', params)
     },
 
-    getTraceLogs: (traceId: string, date: string) => {
-        return request.post<TraceLogDetail>('/logQuery/getTraceLogs', {traceId, date})
+    getTraceLogs: (traceId: string, startDate: string, endDate: string) => {
+        return request.post<TraceLogDetail>('/logQuery/getTraceLogs', {traceId, startDate, endDate})
     },
 
     getAccessStats: (params: { startDate: string; endDate: string; topN?: number }) => {

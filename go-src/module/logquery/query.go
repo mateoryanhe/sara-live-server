@@ -141,7 +141,7 @@ func GetTraceLogs(_ context.Context, req *logquerydto.CMSGetTraceLogsReq) (*logq
 	if req.TraceId == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	rangeStart, rangeEnd, err := buildTimeRange(req.Date, req.Date)
+	rangeStart, rangeEnd, err := buildTimeRange(req.StartDate, req.EndDate)
 	if err != nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
@@ -152,7 +152,7 @@ func GetTraceLogs(_ context.Context, req *logquerydto.CMSGetTraceLogsReq) (*logq
 			if !logTimeInRange(entry.Time, rangeStart, rangeEnd) {
 				return true
 			}
-			if fuzzyMatch(entry.TraceId, req.TraceId) || fuzzyMatch(entry.Raw, req.TraceId) {
+			if matchTraceId(entry.TraceId, req.TraceId) || fuzzyMatch(entry.Raw, req.TraceId) {
 				detailLogs = append(detailLogs, entry)
 			}
 			return true
@@ -165,7 +165,7 @@ func GetTraceLogs(_ context.Context, req *logquerydto.CMSGetTraceLogsReq) (*logq
 			if !logTimeInRange(entry.Time, rangeStart, rangeEnd) {
 				return true
 			}
-			if fuzzyMatch(entry.TraceId, req.TraceId) || fuzzyMatch(entry.Raw, req.TraceId) {
+			if matchTraceId(entry.TraceId, req.TraceId) || fuzzyMatch(entry.Raw, req.TraceId) {
 				accessLogs = append(accessLogs, entry)
 			}
 			return true
@@ -177,19 +177,20 @@ func GetTraceLogs(_ context.Context, req *logquerydto.CMSGetTraceLogsReq) (*logq
 		if !logTimeInRange(entry.Time, rangeStart, rangeEnd) {
 			return true
 		}
-		if fuzzyMatch(entry.TraceId, req.TraceId) || fuzzyMatch(entry.Raw, req.TraceId) {
+		if matchTraceId(entry.TraceId, req.TraceId) || fuzzyMatch(entry.Raw, req.TraceId) {
 			errorLogs = append(errorLogs, entry)
 		}
 		return true
 	})
 
-	sortDetailLogsByTimeDesc(detailLogs)
-	sortAccessLogsByTimeDesc(accessLogs)
-	sortErrorLogsByTimeDesc(errorLogs)
+	sortDetailLogsByTimeAsc(detailLogs)
+	sortAccessLogsByTimeAsc(accessLogs)
+	sortErrorLogsByTimeAsc(errorLogs)
 
 	return &logquerydto.CMSGetTraceLogsRes{
 		TraceId:    req.TraceId,
-		Date:       req.Date,
+		StartDate:  req.StartDate,
+		EndDate:    req.EndDate,
 		DetailLogs: detailLogs,
 		AccessLogs: accessLogs,
 		ErrorLogs:  errorLogs,

@@ -153,6 +153,16 @@ func fuzzyMatch(value, needle string) bool {
 	return strings.Contains(strings.ToLower(value), strings.ToLower(needle))
 }
 
+func matchTraceId(entryTraceId, reqTraceId string) bool {
+	if reqTraceId == "" {
+		return false
+	}
+	if entryTraceId == reqTraceId {
+		return true
+	}
+	return fuzzyMatch(entryTraceId, reqTraceId)
+}
+
 func extractUserAgent(line string) string {
 	lastQuote := strings.LastIndex(line, `"`)
 	if lastQuote <= 0 {

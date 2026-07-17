@@ -17,6 +17,10 @@ func compareLogTimeDesc(a, b string) bool {
 	return a > b
 }
 
+func compareLogTimeAsc(a, b string) bool {
+	return compareLogTimeDesc(b, a)
+}
+
 func sortDetailLogsByTimeDesc(entries []*DetailLogEntry) {
 	sort.Slice(entries, func(i, j int) bool {
 		return compareLogTimeDesc(entries[i].Time, entries[j].Time)
@@ -32,5 +36,23 @@ func sortAccessLogsByTimeDesc(entries []*AccessLogEntry) {
 func sortErrorLogsByTimeDesc(entries []*ErrorLogEntry) {
 	sort.Slice(entries, func(i, j int) bool {
 		return compareLogTimeDesc(entries[i].Time, entries[j].Time)
+	})
+}
+
+func sortDetailLogsByTimeAsc(entries []*DetailLogEntry) {
+	sort.Slice(entries, func(i, j int) bool {
+		return compareLogTimeAsc(entries[i].Time, entries[j].Time)
+	})
+}
+
+func sortAccessLogsByTimeAsc(entries []*AccessLogEntry) {
+	sort.Slice(entries, func(i, j int) bool {
+		return compareLogTimeAsc(entries[i].Time, entries[j].Time)
+	})
+}
+
+func sortErrorLogsByTimeAsc(entries []*ErrorLogEntry) {
+	sort.Slice(entries, func(i, j int) bool {
+		return compareLogTimeAsc(entries[i].Time, entries[j].Time)
 	})
 }

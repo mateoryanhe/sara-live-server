@@ -56,14 +56,16 @@ type CMSQueryErrorLogsReq struct {
 }
 
 type CMSGetTraceLogsReq struct {
-	g.Meta  `path:"/getTraceLogs" method:"post" summary:"CMS按TraceId查询日志详情" tags:"日志查询"`
-	TraceId string `json:"traceId" v:"required#TraceId不能为空"`
-	Date    string `json:"date" v:"required|date-format:Y-m-d#日期不能为空|日期格式应为Y-m-d"`
+	g.Meta    `path:"/getTraceLogs" method:"post" summary:"CMS按TraceId查询日志详情" tags:"日志查询"`
+	TraceId   string `json:"traceId" v:"required#TraceId不能为空"`
+	StartDate string `json:"startDate" v:"required|date-format:Y-m-d#开始日期不能为空|开始日期格式应为Y-m-d"`
+	EndDate   string `json:"endDate" v:"required|date-format:Y-m-d#结束日期不能为空|结束日期格式应为Y-m-d"`
 }
 
 type CMSGetTraceLogsRes struct {
 	TraceId    string `json:"traceId"`
-	Date       string `json:"date"`
+	StartDate  string `json:"startDate"`
+	EndDate    string `json:"endDate"`
 	DetailLogs any    `json:"detailLogs"`
 	AccessLogs any    `json:"accessLogs"`
 	ErrorLogs  any    `json:"errorLogs"`
