@@ -9,7 +9,7 @@ export const sysStatApi = {
         return request.post<UserStatTrend>('/sysStat/getUserStatTrend', {})
     },
     getResourceMetricTrend: () => {
-        return request.post<ResourceMetricTrend>('/sysStat/getResourceMetricTrend', {})
+        return request.post<ResourceMetricTrend>('/resourceMetric/getResourceMetricTrend', {})
     },
 }
 

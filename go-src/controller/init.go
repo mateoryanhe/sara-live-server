@@ -60,6 +60,7 @@ func Init() {
 	initMessageAppController()              // 私信(App)
 	initUploadController()                  // CMS文件上传
 	initSysStatController()                 // 系统总数据/仪表盘(CMS)
+	initResourceMetricController()          // 系统资源监控(CMS)
 	httpserver.InitWebsocket()
 	go httpserver.InitHttpServer()
 }

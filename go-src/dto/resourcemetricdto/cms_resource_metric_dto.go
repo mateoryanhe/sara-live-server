@@ -1,9 +1,9 @@
-package statdto
+package resourcemetricdto
 
 import "github.com/gogf/gf/v2/frame/g"
 
 type CMSResourceMetricTrendReq struct {
-	g.Meta `path:"/getResourceMetricTrend" method:"post" summary:"获取系统资源趋势" tags:"系统统计"`
+	g.Meta `path:"/getResourceMetricTrend" method:"post" summary:"获取系统资源趋势" tags:"资源监控"`
 }
 
 type CMSResourceMetricPoint struct {

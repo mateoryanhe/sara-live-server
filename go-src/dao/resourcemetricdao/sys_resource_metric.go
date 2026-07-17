@@ -1,4 +1,4 @@
-package statdao
+package resourcemetricdao
 
 import (
 	"time"
@@ -8,8 +8,8 @@ import (
 	"xr-game-server/entity"
 )
 
-// DeleteSysResourceMetricsBefore 删除采样时间早于指定时刻的记录(保留最近数据)
-func DeleteSysResourceMetricsBefore(before time.Time) {
+// DeleteBefore 删除采样时间早于指定时刻的记录(保留最近数据)
+func DeleteBefore(before time.Time) {
 	result, err := g.Model(string(entity.TbSysResourceMetric)).Ctx(gctx.New()).
 		Where("recorded_at < ?", before).
 		Delete()
@@ -23,8 +23,8 @@ func DeleteSysResourceMetricsBefore(before time.Time) {
 	}
 }
 
-// ListSysResourceMetricsSince 查询指定时间以来的采样记录(按时间升序)
-func ListSysResourceMetricsSince(since time.Time) []*entity.SysResourceMetric {
+// ListSince 查询指定时间以来的采样记录(按时间升序)
+func ListSince(since time.Time) []*entity.SysResourceMetric {
 	ret := make([]*entity.SysResourceMetric, 0)
 	_ = g.Model(string(entity.TbSysResourceMetric)).Ctx(gctx.New()).
 		Where("recorded_at >= ?", since).

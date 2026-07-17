@@ -17,6 +17,7 @@ import (
 	"xr-game-server/module/privateroombilling"
 	"xr-game-server/module/rank"
 	"xr-game-server/module/recharge"
+	"xr-game-server/module/resourcemonitor"
 	"xr-game-server/module/richrank"
 	"xr-game-server/module/shortvideo"
 	"xr-game-server/module/stat"
@@ -52,5 +53,6 @@ func Init() {
 	userinfo.Init()
 	botanchor.Init()
 	stat.Init()
+	resourcemonitor.Init()
 	shortvideo.Init()
 }

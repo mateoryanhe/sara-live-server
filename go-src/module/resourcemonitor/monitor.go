@@ -1,4 +1,4 @@
-package stat
+package resourcemonitor
 
 import (
 	"context"
@@ -12,20 +12,14 @@ import (
 	"github.com/shirou/gopsutil/v3/process"
 	"xr-game-server/core/event"
 	"xr-game-server/core/xrtimer"
-	"xr-game-server/dao/statdao"
+	"xr-game-server/dao/resourcemetricdao"
 	"xr-game-server/entity"
 	"xr-game-server/gameevent"
 )
 
-const (
-	resourceMetricInterval  = 10 * time.Minute
-	resourceMetricRetention = 3 * 24 * time.Hour
-	resourceCpuSample       = 500 * time.Millisecond
-)
-
 var currentProcess *process.Process
 
-func initResourceMonitor() {
+func initMonitor() {
 	var err error
 	currentProcess, err = process.NewProcess(int32(os.Getpid()))
 	if err != nil {
@@ -34,7 +28,7 @@ func initResourceMonitor() {
 	xrtimer.AddOnce(gctx.New(), time.Minute, func(ctx context.Context) {
 		recordResourceMetric()
 	})
-	xrtimer.AddSingleton(gctx.New(), resourceMetricInterval, func(ctx context.Context) {
+	xrtimer.AddSingleton(gctx.New(), MetricInterval, func(ctx context.Context) {
 		recordResourceMetric()
 	})
 	event.Sub(gameevent.DayEvent, onDayCleanupResourceMetrics)
@@ -49,7 +43,7 @@ func onDayCleanupResourceMetrics(_ any) {
 }
 
 func cleanupExpiredResourceMetrics() {
-	statdao.DeleteSysResourceMetricsBefore(time.Now().Add(-resourceMetricRetention))
+	resourcemetricdao.DeleteBefore(time.Now().Add(-MetricRetention))
 }
 
 func enqueueResourceMetric(now time.Time) {
@@ -67,7 +61,7 @@ func collectProcessMetrics() (procMemMb, procHeapAllocMb, procHeapInuseMb, procH
 		if memInfo, err := currentProcess.MemoryInfo(); err == nil && memInfo != nil {
 			procMemMb = bytesToMb(memInfo.RSS)
 		}
-		if cpuPct, err := currentProcess.Percent(resourceCpuSample); err == nil {
+		if cpuPct, err := currentProcess.Percent(cpuSample); err == nil {
 			procCpuPercent = cpuPct
 		}
 	}
@@ -90,7 +84,7 @@ func collectSystemMetrics() (sysMemUsedMb, sysMemTotalMb, sysMemUsedPercent, sys
 		sysMemTotalMb = bytesToMb(vm.Total)
 		sysMemUsedPercent = vm.UsedPercent
 	}
-	if percents, err := cpu.Percent(resourceCpuSample, false); err == nil && len(percents) > 0 {
+	if percents, err := cpu.Percent(cpuSample, false); err == nil && len(percents) > 0 {
 		sysCpuPercent = percents[0]
 	}
 	return
