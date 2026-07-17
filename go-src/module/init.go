@@ -15,7 +15,6 @@ import (
 	"xr-game-server/module/message"
 	"xr-game-server/module/name"
 	"xr-game-server/module/privateroombilling"
-	"xr-game-server/module/rank"
 	"xr-game-server/module/recharge"
 	"xr-game-server/module/resourcemonitor"
 	"xr-game-server/module/richrank"
@@ -31,7 +30,6 @@ import (
 func Init() {
 	upload.Init()
 	auth.InitAuth()
-	rank.Init()
 	name.Init()
 	currencylog.Init()
 	message.Init()

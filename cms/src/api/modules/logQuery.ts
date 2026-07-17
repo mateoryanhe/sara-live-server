@@ -7,6 +7,8 @@ import type {
     AccessTrendQuery,
     DetailLogItem,
     DetailLogQuery,
+    ErrorLogItem,
+    ErrorLogQuery,
     LogPathsConfig,
     PageResponse,
     TraceLogDetail,
@@ -23,6 +25,10 @@ export const logQueryApi = {
 
     queryAccessLogs: (params: AccessLogQuery) => {
         return request.post<PageResponse<AccessLogItem>>('/logQuery/queryAccessLogs', params)
+    },
+
+    queryErrorLogs: (params: ErrorLogQuery) => {
+        return request.post<PageResponse<ErrorLogItem>>('/logQuery/queryErrorLogs', params)
     },
 
     getTraceLogs: (traceId: string, date: string) => {

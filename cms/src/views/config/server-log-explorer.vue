@@ -6,7 +6,8 @@
           <span>服务器日志</span>
           <span v-if="logPaths.detailLogDir" class="path-tip">
             详情: {{ logPaths.detailLogDir }}{{ logPaths.detailLogPattern }} |
-            Access: {{ logPaths.accessLogDir }}{{ logPaths.accessLogPattern }}
+            Access: {{ logPaths.accessLogDir }}{{ logPaths.accessLogPattern }} |
+            Error: {{ logPaths.errorLogDir }}{{ logPaths.errorLogPattern }}（含详情日志内 ErrorLog/[ERRO]）
           </span>
         </div>
       </template>
@@ -39,7 +40,7 @@
               <el-input v-model="detailForm.url" clearable placeholder="支持模糊匹配" style="width: 220px"/>
             </el-form-item>
             <el-form-item label="关键词">
-              <el-input v-model="detailForm.keyword" clearable placeholder="日志内容模糊匹配" style="width: 180px"/>
+              <el-input v-model="detailForm.keyword" clearable placeholder="ErrorLog/内容模糊匹配" style="width: 180px"/>
             </el-form-item>
             <el-form-item>
               <el-button type="primary" @click="handleDetailSearch">查询</el-button>
@@ -161,6 +162,72 @@
           </div>
         </el-tab-pane>
 
+        <el-tab-pane label="Error日志" name="error">
+          <el-form :model="errorForm" class="search-form" inline label-width="100px">
+            <el-form-item label="日期范围">
+              <el-date-picker
+                  v-model="errorForm.dateRange"
+                  end-placeholder="结束日期"
+                  format="YYYY-MM-DD"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  style="width: 260px"
+                  type="daterange"
+                  value-format="YYYY-MM-DD"
+              />
+            </el-form-item>
+            <el-form-item label="TraceId">
+              <el-input v-model="errorForm.traceId" clearable placeholder="支持模糊匹配" style="width: 280px"/>
+            </el-form-item>
+            <el-form-item label="URL">
+              <el-input v-model="errorForm.url" clearable placeholder="支持模糊匹配" style="width: 220px"/>
+            </el-form-item>
+            <el-form-item label="IP">
+              <el-input v-model="errorForm.ip" clearable placeholder="支持模糊匹配" style="width: 180px"/>
+            </el-form-item>
+            <el-form-item label="状态码">
+              <el-input-number v-model="errorForm.statusCode" :controls="false" :min="0" placeholder="全部" style="width: 120px"/>
+            </el-form-item>
+            <el-form-item label="关键词">
+              <el-input v-model="errorForm.keyword" clearable placeholder="ErrorLog/堆栈/错误信息" style="width: 200px"/>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" @click="handleErrorSearch">查询</el-button>
+              <el-button @click="resetErrorForm">重置</el-button>
+            </el-form-item>
+          </el-form>
+
+          <el-table v-loading="errorLoading" :data="errorTableData" style="width: 100%">
+            <el-table-column label="时间" prop="time" width="210"/>
+            <el-table-column label="TraceId" min-width="280">
+              <template #default="{ row }">
+                <el-link type="primary" @click="openTraceDetail(row.traceId)">{{ row.traceId }}</el-link>
+              </template>
+            </el-table-column>
+            <el-table-column label="状态码" prop="statusCode" width="90"/>
+            <el-table-column label="方法" prop="method" width="90"/>
+            <el-table-column label="URL" min-width="200" prop="url" show-overflow-tooltip/>
+            <el-table-column label="IP" min-width="140" prop="ip" show-overflow-tooltip/>
+            <el-table-column label="错误码" prop="errorCode" width="90"/>
+            <el-table-column label="错误信息" min-width="160" prop="errorMessage" show-overflow-tooltip/>
+            <el-table-column label="详情" min-width="180" prop="detail" show-overflow-tooltip/>
+            <el-table-column label="堆栈" min-width="220" prop="stack" show-overflow-tooltip/>
+          </el-table>
+
+          <div class="pagination-wrap">
+            <el-pagination
+                v-model:current-page="errorPageIndex"
+                v-model:page-size="errorPageSize"
+                :page-sizes="[20, 50, 100, 200]"
+                :total="errorTotal"
+                background
+                layout="total, sizes, prev, pager, next"
+                @current-change="fetchErrorLogs"
+                @size-change="handleErrorSearch"
+            />
+          </div>
+        </el-tab-pane>
+
         <el-tab-pane label="访问统计" name="stats">
           <el-form :model="statsForm" class="search-form" inline label-width="90px">
             <el-form-item label="日期范围">
@@ -213,6 +280,12 @@
       <div v-loading="traceLoading" class="trace-drawer">
         <p class="trace-meta">日期: {{ traceDetail.date }}</p>
 
+        <h4>Error日志</h4>
+        <div v-for="(item, index) in traceDetail.errorLogs" :key="'error-' + index" class="trace-log-line">
+          <div class="trace-log-meta">{{ item.time }} [{{ item.level }}] {{ item.errorMessage }}</div>
+          <pre class="trace-log-content">{{ item.raw || item.stack }}</pre>
+        </div>
+
         <h4>Access日志</h4>
         <el-table :data="traceDetail.accessLogs" size="small" style="margin-bottom: 20px">
           <el-table-column label="时间" prop="time" width="210"/>
@@ -229,7 +302,7 @@
           <div class="trace-log-meta">{{ item.time }} [{{ item.level }}]</div>
           <pre class="trace-log-content">{{ item.raw }}</pre>
         </div>
-        <el-empty v-if="!traceLoading && traceDetail.detailLogs.length === 0 && traceDetail.accessLogs.length === 0" description="未找到日志"/>
+        <el-empty v-if="!traceLoading && traceDetail.detailLogs.length === 0 && traceDetail.accessLogs.length === 0 && traceDetail.errorLogs.length === 0" description="未找到日志"/>
       </div>
     </el-drawer>
   </div>
@@ -240,7 +313,7 @@ import {nextTick, onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage} from 'element-plus'
 import {logQueryApi} from '@/api'
 import AccessTrendChart from './components/access-trend-chart.vue'
-import type {AccessLogItem, AccessTrendData, DetailLogItem, LogPathsConfig, TopStatItem, TraceLogDetail} from '@/types/api'
+import type {AccessLogItem, AccessTrendData, DetailLogItem, ErrorLogItem, LogPathsConfig, TopStatItem, TraceLogDetail} from '@/types/api'
 
 const activeTab = ref('detail')
 const pathsLoading = ref(false)
@@ -249,6 +322,8 @@ const logPaths = reactive<LogPathsConfig>({
   detailLogPattern: '',
   accessLogDir: '',
   accessLogPattern: '',
+  errorLogDir: '',
+  errorLogPattern: '',
 })
 
 const formatLocalDate = (date: Date) => {
@@ -302,6 +377,20 @@ const accessTotal = ref(0)
 const accessPageIndex = ref(1)
 const accessPageSize = ref(50)
 
+const errorForm = reactive({
+  dateRange: defaultDateRange() as string[],
+  traceId: '',
+  url: '',
+  ip: '',
+  statusCode: undefined as number | undefined,
+  keyword: '',
+})
+const errorLoading = ref(false)
+const errorTableData = ref<ErrorLogItem[]>([])
+const errorTotal = ref(0)
+const errorPageIndex = ref(1)
+const errorPageSize = ref(50)
+
 const statsForm = reactive({
   dateRange: defaultDateRange() as string[],
   topN: 20,
@@ -317,6 +406,7 @@ const traceDetail = reactive<TraceLogDetail>({
   date: '',
   detailLogs: [],
   accessLogs: [],
+  errorLogs: [],
 })
 
 const ensureDateRange = (range?: string[]) => {
@@ -335,6 +425,8 @@ const fetchLogPaths = async () => {
     logPaths.detailLogPattern = data.detailLogPattern || ''
     logPaths.accessLogDir = data.accessLogDir || ''
     logPaths.accessLogPattern = data.accessLogPattern || ''
+    logPaths.errorLogDir = data.errorLogDir || ''
+    logPaths.errorLogPattern = data.errorLogPattern || ''
   } catch (error) {
     console.error('获取日志目录失败:', error)
     ElMessage.error('获取日志目录失败')
@@ -423,6 +515,34 @@ const fetchAccessLogs = async () => {
   }
 }
 
+const fetchErrorLogs = async () => {
+  const range = ensureDateRange(errorForm.dateRange)
+  if (!range) {
+    return
+  }
+  errorLoading.value = true
+  try {
+    const response = await logQueryApi.queryErrorLogs({
+      pageIndex: errorPageIndex.value,
+      pageSize: errorPageSize.value,
+      startDate: range[0],
+      endDate: range[1],
+      traceId: errorForm.traceId.trim(),
+      url: errorForm.url.trim(),
+      ip: errorForm.ip.trim(),
+      statusCode: errorForm.statusCode || undefined,
+      keyword: errorForm.keyword.trim(),
+    })
+    errorTableData.value = response.data || []
+    errorTotal.value = response.total || 0
+  } catch (error) {
+    console.error('查询Error日志失败:', error)
+    ElMessage.error('查询Error日志失败')
+  } finally {
+    errorLoading.value = false
+  }
+}
+
 const fetchAccessStats = async () => {
   const range = ensureDateRange(statsForm.dateRange)
   if (!range) {
@@ -451,7 +571,9 @@ const openTraceDetail = async (traceId: string) => {
   }
   const range = activeTab.value === 'access'
       ? accessForm.dateRange
-      : detailForm.dateRange
+      : activeTab.value === 'error'
+          ? errorForm.dateRange
+          : detailForm.dateRange
   const date = range?.[0] || today()
   traceDrawerVisible.value = true
   traceLoading.value = true
@@ -459,12 +581,14 @@ const openTraceDetail = async (traceId: string) => {
   traceDetail.date = date
   traceDetail.detailLogs = []
   traceDetail.accessLogs = []
+  traceDetail.errorLogs = []
   try {
     const data = await logQueryApi.getTraceLogs(traceId, date)
     traceDetail.traceId = data.traceId
     traceDetail.date = data.date
     traceDetail.detailLogs = data.detailLogs || []
     traceDetail.accessLogs = data.accessLogs || []
+    traceDetail.errorLogs = data.errorLogs || []
   } catch (error) {
     console.error('查询Trace日志失败:', error)
     ElMessage.error('查询Trace日志失败')
@@ -482,6 +606,11 @@ const handleAccessSearch = () => {
   accessPageIndex.value = 1
   fetchAccessTrend()
   fetchAccessLogs()
+}
+
+const handleErrorSearch = () => {
+  errorPageIndex.value = 1
+  fetchErrorLogs()
 }
 
 const resetDetailForm = () => {
@@ -506,6 +635,16 @@ const resetAccessForm = () => {
   handleAccessSearch()
 }
 
+const resetErrorForm = () => {
+  errorForm.dateRange = defaultDateRange()
+  errorForm.traceId = ''
+  errorForm.url = ''
+  errorForm.ip = ''
+  errorForm.statusCode = undefined
+  errorForm.keyword = ''
+  handleErrorSearch()
+}
+
 const formatHandlerMs = (value: number) => {
   if (value === null || value === undefined) {
     return '-'
@@ -519,10 +658,12 @@ onMounted(async () => {
 })
 
 watch(activeTab, async (tab) => {
-  if (tab !== 'access' || accessTrendData.value) {
-    return
+  if (tab === 'access' && !accessTrendData.value) {
+    await fetchAccessTrend()
   }
-  await fetchAccessTrend()
+  if (tab === 'error' && errorTableData.value.length === 0) {
+    await fetchErrorLogs()
+  }
 })
 </script>
 

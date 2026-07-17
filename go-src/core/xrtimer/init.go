@@ -2,11 +2,11 @@ package xrtimer
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
+	"time"
+	"xr-game-server/core/xrlog"
+
 	"github.com/gogf/gf/v2/os/gtimer"
 	"github.com/gogf/gf/v2/util/gutil"
-	"time"
 )
 
 func Init() {
@@ -22,7 +22,7 @@ func AddSingleton(ctx context.Context, interval time.Duration, job gtimer.JobFun
 		gutil.TryCatch(ctx, func(try context.Context) {
 			job(ctx)
 		}, func(catch context.Context, exception error) {
-			g.Log().Errorf(catch, "循环-定时器报错 AddSingleton error %v", gerror.Stack(exception))
+			xrlog.ErrorWithErr(catch, "TimerSingleton", "AddSingleton", exception)
 		})
 	})
 	return entry
@@ -39,7 +39,7 @@ func AddOnce(ctx context.Context, taskTime time.Duration, job gtimer.JobFunc) *g
 		gutil.TryCatch(ctx, func(try context.Context) {
 			job(ctx)
 		}, func(catch context.Context, exception error) {
-			g.Log().Errorf(catch, "单次-定时器报错 AddOnce error %v", gerror.Stack(exception))
+			xrlog.ErrorWithErr(catch, "TimerOnce", "AddOnce", exception)
 		})
 	})
 	return entry

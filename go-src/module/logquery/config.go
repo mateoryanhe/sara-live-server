@@ -13,6 +13,8 @@ type logPaths struct {
 	DetailLogPattern string
 	AccessLogDir     string
 	AccessLogPattern string
+	ErrorLogDir      string
+	ErrorLogPattern  string
 }
 
 func loadLogPaths() logPaths {
@@ -21,6 +23,7 @@ func loadLogPaths() logPaths {
 	detailPattern := strings.TrimSpace(g.Cfg().MustGet(ctx, "logger.file").String())
 	accessDir := strings.TrimSpace(g.Cfg().MustGet(ctx, "server.logPath").String())
 	accessPattern := strings.TrimSpace(g.Cfg().MustGet(ctx, "server.accessLogPattern").String())
+	errorPattern := strings.TrimSpace(g.Cfg().MustGet(ctx, "server.errorLogPattern").String())
 
 	if detailPattern == "" {
 		detailPattern = "{Y-m-d}.log"
@@ -31,12 +34,17 @@ func loadLogPaths() logPaths {
 	if accessPattern == "" {
 		accessPattern = "access-{Y-m-d}.log"
 	}
+	if errorPattern == "" {
+		errorPattern = "error-{Ymd}.log"
+	}
 
 	return logPaths{
 		DetailLogDir:     normalizeDir(detailDir),
 		DetailLogPattern: detailPattern,
 		AccessLogDir:     normalizeDir(accessDir),
 		AccessLogPattern: accessPattern,
+		ErrorLogDir:      normalizeDir(accessDir),
+		ErrorLogPattern:  errorPattern,
 	}
 }
 

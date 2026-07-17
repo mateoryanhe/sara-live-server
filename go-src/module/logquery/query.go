@@ -1,9 +1,7 @@
 package logquery
 
 import (
-	"bufio"
 	"context"
-	"os"
 	"sort"
 	"time"
 
@@ -28,6 +26,8 @@ func GetLogPaths(_ context.Context, _ *logquerydto.CMSGetLogPathsReq) (*logquery
 		DetailLogPattern: paths.DetailLogPattern,
 		AccessLogDir:     paths.AccessLogDir,
 		AccessLogPattern: paths.AccessLogPattern,
+		ErrorLogDir:      paths.ErrorLogDir,
+		ErrorLogPattern:  paths.ErrorLogPattern,
 	}, nil
 }
 
@@ -55,6 +55,7 @@ func QueryDetailLogs(_ context.Context, req *logquerydto.CMSQueryDetailLogsReq) 
 		}
 	}
 
+	sortDetailLogsByTimeDesc(matched)
 	total := len(matched)
 	start := (pageIndex - 1) * pageSize
 	if start >= total {
@@ -91,10 +92,43 @@ func QueryAccessLogs(_ context.Context, req *logquerydto.CMSQueryAccessLogsReq) 
 		}
 	}
 
+	sortAccessLogsByTimeDesc(matched)
 	total := len(matched)
 	start := (pageIndex - 1) * pageSize
 	if start >= total {
 		return httpserver.NewCMSQueryResp(total, []*AccessLogEntry{}), nil
+	}
+	end := start + pageSize
+	if end > total {
+		end = total
+	}
+	return httpserver.NewCMSQueryResp(total, matched[start:end]), nil
+}
+
+func QueryErrorLogs(_ context.Context, req *logquerydto.CMSQueryErrorLogsReq) (*httpserver.CMSQueryResp, error) {
+	rangeStart, rangeEnd, err := buildTimeRange(req.StartDate, req.EndDate)
+	if err != nil {
+		return nil, err
+	}
+	pageIndex, pageSize := normalizePage(req.PageIndex, req.PageSize)
+
+	var matched []*ErrorLogEntry
+	scanAllErrorLogEntries(func(entry *ErrorLogEntry) bool {
+		if !logTimeInRange(entry.Time, rangeStart, rangeEnd) {
+			return true
+		}
+		if !matchErrorEntry(entry, req.TraceId, req.Url, req.Ip, req.Keyword, req.StatusCode) {
+			return true
+		}
+		matched = append(matched, entry)
+		return len(matched) < maxMatchLines
+	})
+
+	sortErrorLogsByTimeDesc(matched)
+	total := len(matched)
+	start := (pageIndex - 1) * pageSize
+	if start >= total {
+		return httpserver.NewCMSQueryResp(total, []*ErrorLogEntry{}), nil
 	}
 	end := start + pageSize
 	if end > total {
@@ -138,11 +172,27 @@ func GetTraceLogs(_ context.Context, req *logquerydto.CMSGetTraceLogsReq) (*logq
 		})
 	}
 
+	var errorLogs []*ErrorLogEntry
+	scanAllErrorLogEntries(func(entry *ErrorLogEntry) bool {
+		if !logTimeInRange(entry.Time, rangeStart, rangeEnd) {
+			return true
+		}
+		if fuzzyMatch(entry.TraceId, req.TraceId) || fuzzyMatch(entry.Raw, req.TraceId) {
+			errorLogs = append(errorLogs, entry)
+		}
+		return true
+	})
+
+	sortDetailLogsByTimeDesc(detailLogs)
+	sortAccessLogsByTimeDesc(accessLogs)
+	sortErrorLogsByTimeDesc(errorLogs)
+
 	return &logquerydto.CMSGetTraceLogsRes{
 		TraceId:    req.TraceId,
 		Date:       req.Date,
 		DetailLogs: detailLogs,
 		AccessLogs: accessLogs,
+		ErrorLogs:  errorLogs,
 	}, nil
 }
 
@@ -194,27 +244,6 @@ func scanAccessLogFile(filePath string, fn func(entry *AccessLogEntry) bool) err
 		}
 		return fn(entry)
 	})
-}
-
-func scanLogFile(filePath string, fn func(line string) bool) error {
-	file, err := os.Open(filePath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil
-		}
-		return err
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	buf := make([]byte, 0, 1024*1024)
-	scanner.Buffer(buf, 1024*1024)
-	for scanner.Scan() {
-		if !fn(scanner.Text()) {
-			break
-		}
-	}
-	return scanner.Err()
 }
 
 func validateDateRange(startDate, endDate string) error {

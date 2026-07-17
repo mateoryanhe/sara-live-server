@@ -2,11 +2,11 @@ package xrpool
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
+
 	"github.com/gogf/gf/v2/os/grpool"
 	"xr-game-server/constants/common"
 	"xr-game-server/core/cfg"
+	"xr-game-server/core/xrlog"
 )
 
 var pool *grpool.Pool
@@ -22,6 +22,6 @@ func Init() {
 // GetGoPool 防止go 过多,消耗内存
 func AddWithRecover(ctx context.Context, userFunc grpool.Func) {
 	pool.AddWithRecover(ctx, userFunc, func(ctx context.Context, exception error) {
-		g.Log().Errorf(ctx, "协程池发生错误 AddWithRecover error %v", gerror.Stack(exception))
+		xrlog.ErrorWithErr(ctx, "GoPool", "AddWithRecover", exception)
 	})
 }

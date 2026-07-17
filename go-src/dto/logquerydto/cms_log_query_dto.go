@@ -14,6 +14,8 @@ type CMSGetLogPathsRes struct {
 	DetailLogPattern string `json:"detailLogPattern"`
 	AccessLogDir     string `json:"accessLogDir"`
 	AccessLogPattern string `json:"accessLogPattern"`
+	ErrorLogDir      string `json:"errorLogDir"`
+	ErrorLogPattern  string `json:"errorLogPattern"`
 }
 
 type CMSQueryDetailLogsReq struct {
@@ -41,6 +43,18 @@ type CMSQueryAccessLogsReq struct {
 	MaxHandlerMs *float64 `json:"maxHandlerMs"`
 }
 
+type CMSQueryErrorLogsReq struct {
+	g.Meta `path:"/queryErrorLogs" method:"post" summary:"CMS查询Error日志" tags:"日志查询"`
+	httpserver.CMSQueryReq
+	StartDate  string `json:"startDate" v:"required|date-format:Y-m-d#开始日期不能为空|开始日期格式应为Y-m-d"`
+	EndDate    string `json:"endDate" v:"required|date-format:Y-m-d#结束日期不能为空|结束日期格式应为Y-m-d"`
+	TraceId    string `json:"traceId"`
+	Url        string `json:"url"`
+	Ip         string `json:"ip"`
+	StatusCode int    `json:"statusCode"`
+	Keyword    string `json:"keyword"`
+}
+
 type CMSGetTraceLogsReq struct {
 	g.Meta  `path:"/getTraceLogs" method:"post" summary:"CMS按TraceId查询日志详情" tags:"日志查询"`
 	TraceId string `json:"traceId" v:"required#TraceId不能为空"`
@@ -52,6 +66,7 @@ type CMSGetTraceLogsRes struct {
 	Date       string `json:"date"`
 	DetailLogs any    `json:"detailLogs"`
 	AccessLogs any    `json:"accessLogs"`
+	ErrorLogs  any    `json:"errorLogs"`
 }
 
 type CMSGetAccessStatsReq struct {

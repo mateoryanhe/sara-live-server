@@ -11,6 +11,7 @@ import (
 	"github.com/gogf/gf/v2/util/gutil"
 	"xr-game-server/constants/common"
 	"xr-game-server/constants/db"
+	"xr-game-server/core/xrlog"
 )
 
 const (
@@ -143,7 +144,7 @@ func safePullData(colCache *ColSynCache) {
 	gutil.TryCatch(gctx.New(), func(ctx context.Context) {
 		colCache.PullData()
 	}, func(ctx context.Context, exception error) {
-		g.Log().Errorf(ctx, "syndb PullData异常,table=%v,col=%v,err=%v", colCache.TbName, colCache.ColName, exception)
+		xrlog.ErrorWithErr(ctx, "SynDb", "PullData,table="+colCache.TbName+",col="+colCache.ColName, exception)
 	})
 }
 
@@ -156,7 +157,7 @@ func safeSyn(colCache *ColSynCache) int {
 			flushedRows = 0
 		}
 	}, func(ctx context.Context, exception error) {
-		g.Log().Errorf(ctx, "syndb Syn异常,table=%v,col=%v,err=%v", colCache.TbName, colCache.ColName, exception)
+		xrlog.ErrorWithErr(ctx, "SynDb", "Syn,table="+colCache.TbName+",col="+colCache.ColName, exception)
 	})
 	return flushedRows
 }

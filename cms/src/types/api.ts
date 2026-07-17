@@ -837,6 +837,8 @@ export interface LogPathsConfig {
     detailLogPattern: string
     accessLogDir: string
     accessLogPattern: string
+    errorLogDir: string
+    errorLogPattern: string
 }
 
 export interface DetailLogQuery {
@@ -892,6 +894,35 @@ export interface TraceLogDetail {
     date: string
     detailLogs: DetailLogItem[]
     accessLogs: AccessLogItem[]
+    errorLogs: ErrorLogItem[]
+}
+
+export interface ErrorLogQuery {
+    pageIndex?: number
+    pageSize?: number
+    startDate: string
+    endDate: string
+    traceId?: string
+    url?: string
+    ip?: string
+    statusCode?: number
+    keyword?: string
+}
+
+export interface ErrorLogItem {
+    time: string
+    level: string
+    traceId: string
+    statusCode: number
+    method: string
+    url: string
+    handlerMs: number
+    ip: string
+    errorCode: number
+    errorMessage: string
+    detail: string
+    stack: string
+    raw: string
 }
 
 export interface TopStatItem {

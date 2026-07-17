@@ -4,9 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"xr-game-server/core/xrjson"
+	"xr-game-server/core/xrlog"
 
-	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
 	"xr-game-server/errercode"
@@ -88,18 +87,14 @@ func logUnexpectedHandlerError(r *ghttp.Request, err error) {
 	if r == nil || err == nil {
 		return
 	}
-	stack := gerror.Stack(err)
-	if stack == "" {
-		stack = fmt.Sprintf("%+v", err)
-	}
-	g.Log().Errorf(r.Context(),
-		"Handler未预期错误,time=%v,reqId=%v,authId=%v,method=%v,url=%v,err=%v,stack=%s",
-		gtime.Now().Time.Format("2006-01-02 15:04:05.000"),
-		r.GetHeader(ReqId, ""),
-		authIdFromRequest(r),
-		r.Method,
-		r.RequestURI,
+	xrlog.ErrorWithErr(r.Context(), "Handler",
+		fmt.Sprintf("time=%v,reqId=%v,authId=%v,method=%v,url=%v",
+			gtime.Now().Time.Format("2006-01-02 15:04:05.000"),
+			r.GetHeader(ReqId, ""),
+			authIdFromRequest(r),
+			r.Method,
+			r.RequestURI,
+		),
 		err,
-		stack,
 	)
 }

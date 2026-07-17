@@ -27,6 +27,10 @@ func (c *LogQueryController) QueryAccessLogs(ctx context.Context, req *logqueryd
 	return logquery.QueryAccessLogs(ctx, req)
 }
 
+func (c *LogQueryController) QueryErrorLogs(ctx context.Context, req *logquerydto.CMSQueryErrorLogsReq) (res *httpserver.CMSQueryResp, err error) {
+	return logquery.QueryErrorLogs(ctx, req)
+}
+
 func (c *LogQueryController) GetTraceLogs(ctx context.Context, req *logquerydto.CMSGetTraceLogsReq) (res *logquerydto.CMSGetTraceLogsRes, err error) {
 	return logquery.GetTraceLogs(ctx, req)
 }

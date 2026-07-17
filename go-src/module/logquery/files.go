@@ -21,20 +21,126 @@ func listDirLogFiles(dir string) []string {
 
 func listDetailLogFiles() []string {
 	paths := loadLogPaths()
-	files := listDirLogFiles(paths.DetailLogDir)
-	if len(files) > 0 {
-		return files
+	return listDetailLogFilesInDir(paths.DetailLogDir, paths.DetailLogPattern)
+}
+
+func listDetailLogFilesInDir(dir, pattern string) []string {
+	dir = normalizeDir(dir)
+	if dir == "" {
+		return nil
 	}
-	return listLogFilesByPattern(paths.DetailLogDir, paths.DetailLogPattern)
+	fileSet := make(map[string]struct{})
+	addFiles := func(list []string) {
+		for _, filePath := range list {
+			if filePath == "" {
+				continue
+			}
+			fileSet[filePath] = struct{}{}
+		}
+	}
+	addFiles(filterDetailLogFiles(listDirLogFiles(dir)))
+	addFiles(filterDetailLogFiles(listLogFilesByPattern(dir, pattern)))
+	addFiles(listLogFilesByPattern(dir, pattern))
+
+	files := make([]string, 0, len(fileSet))
+	for filePath := range fileSet {
+		files = append(files, filePath)
+	}
+	sort.Strings(files)
+	return files
+}
+
+func listDetailLogDirs() []string {
+	paths := loadLogPaths()
+	return uniqueNonEmptyDirs(paths.DetailLogDir, paths.ErrorLogDir)
+}
+
+func listErrorLogFiles() []string {
+	paths := loadLogPaths()
+	dirs := uniqueNonEmptyDirs(paths.ErrorLogDir, paths.DetailLogDir)
+	fileSet := make(map[string]struct{})
+	addFiles := func(list []string) {
+		for _, filePath := range list {
+			if filePath == "" {
+				continue
+			}
+			fileSet[filePath] = struct{}{}
+		}
+	}
+	for _, dir := range dirs {
+		addFiles(filterErrorLogFiles(listDirLogFiles(dir)))
+		addFiles(listLogFilesByPattern(dir, paths.ErrorLogPattern))
+		addFiles(listLogFilesByPattern(dir, "error-*.log"))
+		addFiles(listLogFilesByPattern(dir, "error.*.log"))
+	}
+
+	files := make([]string, 0, len(fileSet))
+	for filePath := range fileSet {
+		files = append(files, filePath)
+	}
+	sort.Strings(files)
+	return files
 }
 
 func listAccessLogFiles() []string {
 	paths := loadLogPaths()
-	files := listDirLogFiles(paths.AccessLogDir)
-	if len(files) > 0 {
-		return files
-	}
 	return listLogFilesByPattern(paths.AccessLogDir, paths.AccessLogPattern)
+}
+
+func filterErrorLogFiles(files []string) []string {
+	ret := make([]string, 0, len(files))
+	for _, filePath := range files {
+		if isErrorLogFileName(filepath.Base(filePath)) {
+			ret = append(ret, filePath)
+		}
+	}
+	return ret
+}
+
+func filterDetailLogFiles(files []string) []string {
+	ret := make([]string, 0, len(files))
+	for _, filePath := range files {
+		name := filepath.Base(filePath)
+		if isDetailLogFileName(name) {
+			ret = append(ret, filePath)
+		}
+	}
+	return ret
+}
+
+func isErrorLogFileName(name string) bool {
+	name = strings.ToLower(strings.TrimSpace(name))
+	return strings.HasPrefix(name, "error") && strings.HasSuffix(name, ".log")
+}
+
+func isAccessLogFileName(name string) bool {
+	name = strings.ToLower(strings.TrimSpace(name))
+	return strings.HasPrefix(name, "access") && strings.HasSuffix(name, ".log")
+}
+
+func isDetailLogFileName(name string) bool {
+	name = strings.ToLower(strings.TrimSpace(name))
+	if !strings.HasSuffix(name, ".log") {
+		return false
+	}
+	return !isErrorLogFileName(name) && !isAccessLogFileName(name)
+}
+
+func uniqueNonEmptyDirs(dirs ...string) []string {
+	seen := make(map[string]struct{})
+	ret := make([]string, 0, len(dirs))
+	for _, dir := range dirs {
+		dir = normalizeDir(dir)
+		if dir == "" {
+			continue
+		}
+		if _, ok := seen[dir]; ok {
+			continue
+		}
+		seen[dir] = struct{}{}
+		ret = append(ret, dir)
+	}
+	return ret
 }
 
 func listLogFilesByPattern(dir, pattern string) []string {

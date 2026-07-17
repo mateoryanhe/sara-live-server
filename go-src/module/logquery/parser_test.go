@@ -1,6 +1,9 @@
 package logquery
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestParseDetailLogLine(t *testing.T) {
 	line := `2026-07-06T00:00:13.764 [INFO] {a2ebcfb5468abf18bff439322487c3ed} log_util.go:94: time=2026-07-06 00:00:13.764,收到前端请求,reqId=1783160418858,url=/liveRoom/reportLiveStartStatus,ip=113.109.204.237,authId=2070436154057953280,请求数据={"RoomId":"2070436154057953280"}`
@@ -39,6 +42,39 @@ func TestParseAccessLogLine(t *testing.T) {
 	}
 	if entry.Ip != "113.109.204.237" {
 		t.Fatalf("unexpected ip: %s", entry.Ip)
+	}
+}
+
+func TestParseErrorLogBlock(t *testing.T) {
+	line1 := `2026-07-06T00:00:13.765 [ERRO] {a2ebcfb5468abf18bff439322487c3ed} 500 "POST https www.bigtktool.shop /liveRoom/reportLiveStartStatus HTTP/1.1" 0.123, 113.109.204.237, "", "Dart/3.11", -1, "INTERNAL PANIC", "exception recovered: custom error"`
+	line2 := `Stack:`
+	line3 := `main.go:10`
+	var entry *ErrorLogEntry
+	body := strings.Builder{}
+	for i, line := range []string{line1, line2, line3} {
+		if header, ok := parseErrorLogHeader(line); ok {
+			entry = header
+			body.Reset()
+			body.WriteString(line)
+			continue
+		}
+		if entry != nil && i > 0 {
+			body.WriteByte('\n')
+			body.WriteString(line)
+		}
+	}
+	if entry == nil {
+		t.Fatal("expected parse success")
+	}
+	finalizeErrorLogEntry(entry, body.String())
+	if entry.StatusCode != 500 {
+		t.Fatalf("unexpected status: %d", entry.StatusCode)
+	}
+	if entry.ErrorMessage != "INTERNAL PANIC" {
+		t.Fatalf("unexpected error message: %s", entry.ErrorMessage)
+	}
+	if !strings.Contains(entry.Stack, "main.go:10") {
+		t.Fatalf("unexpected stack: %s", entry.Stack)
 	}
 }
 
