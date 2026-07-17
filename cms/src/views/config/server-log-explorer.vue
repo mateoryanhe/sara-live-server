@@ -1,14 +1,10 @@
 <template>
   <div class="page-container">
-    <el-card v-loading="pathsLoading">
+    <el-card v-loading="serverTimeLoading">
       <template #header>
         <div class="card-header">
           <span>服务器日志</span>
-          <span v-if="logPaths.detailLogDir" class="path-tip">
-            详情: {{ logPaths.detailLogDir }}{{ logPaths.detailLogPattern }} |
-            Access: {{ logPaths.accessLogDir }}{{ logPaths.accessLogPattern }} |
-            Error: {{ logPaths.errorLogDir }}{{ logPaths.errorLogPattern }}（含详情日志内 ErrorLog/[ERRO]）
-          </span>
+          <span class="server-time-tip">服务器时间: {{ serverTimeDisplay }}</span>
         </div>
       </template>
 
@@ -59,6 +55,9 @@
             <el-table-column label="ReqId" prop="reqId" width="160"/>
             <el-table-column label="AuthId" prop="authId" width="180"/>
             <el-table-column label="URL" min-width="180" prop="url" show-overflow-tooltip/>
+            <el-table-column label="耗时(ms)" width="100">
+              <template #default="{ row }">{{ formatHandlerMs(row.elapsedMs) }}</template>
+            </el-table-column>
             <el-table-column label="内容" min-width="320" prop="message" show-overflow-tooltip/>
           </el-table>
 
@@ -279,27 +278,57 @@
     <el-drawer v-model="traceDrawerVisible" :title="`TraceId: ${traceDetail.traceId}`" size="60%">
       <div v-loading="traceLoading" class="trace-drawer">
         <p class="trace-meta">日期范围: {{ traceDetail.startDate }} 至 {{ traceDetail.endDate }}</p>
+        <p v-if="resolveTraceAuthId()" class="trace-meta">AuthId: {{ resolveTraceAuthId() }}</p>
 
         <h4>Error日志</h4>
         <div v-for="(item, index) in traceDetail.errorLogs" :key="'error-' + index" class="trace-log-line">
-          <div class="trace-log-meta">{{ item.time }} [{{ item.level }}] {{ item.errorMessage }}</div>
+          <div class="trace-log-meta">
+            <div class="trace-log-meta-main">
+              <span>{{ item.time }}</span>
+              <span v-if="hasElapsedMs(item.handlerMs)" :class="elapsedMsClass(item.handlerMs)" class="trace-elapsed">
+                {{ formatElapsedMs(item.handlerMs) }}
+              </span>
+              <span v-if="item.authId" class="trace-auth-id">AuthId: {{ item.authId }}</span>
+              <span>[{{ item.level }}] {{ item.errorMessage }}</span>
+            </div>
+          </div>
           <pre class="trace-log-content">{{ item.raw || item.stack }}</pre>
         </div>
 
         <h4>Access日志</h4>
         <el-table :data="traceDetail.accessLogs" size="small" style="margin-bottom: 20px">
           <el-table-column label="时间" prop="time" width="210"/>
+          <el-table-column label="耗时(ms)" width="100">
+            <template #default="{ row }">
+              <span v-if="hasElapsedMs(row.handlerMs)" :class="elapsedMsClass(row.handlerMs)" class="trace-elapsed">
+                {{ formatElapsedMs(row.handlerMs) }}
+              </span>
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
           <el-table-column label="状态码" prop="statusCode" width="80"/>
           <el-table-column label="URL" min-width="180" prop="url" show-overflow-tooltip/>
-          <el-table-column label="耗时(ms)" width="90">
-            <template #default="{ row }">{{ formatHandlerMs(row.handlerMs) }}</template>
-          </el-table-column>
           <el-table-column label="IP" prop="ip" width="140"/>
         </el-table>
 
         <h4>详情日志</h4>
         <div v-for="(item, index) in traceDetail.detailLogs" :key="index" class="trace-log-line">
-          <div class="trace-log-meta">{{ item.time }} [{{ item.level }}]</div>
+          <div class="trace-log-meta">
+            <div class="trace-log-meta-main">
+              <span>{{ item.time }}</span>
+              <span v-if="hasElapsedMs(item.elapsedMs)" :class="elapsedMsClass(item.elapsedMs)" class="trace-elapsed">
+                {{ formatElapsedMs(item.elapsedMs) }}
+              </span>
+              <span v-if="item.authId" class="trace-auth-id">AuthId: {{ item.authId }}</span>
+              <span>[{{ item.level }}]</span>
+            </div>
+            <el-button link size="small" type="primary" @click="copyTraceLog(item.raw || item.message)">
+              <el-icon>
+                <CopyDocument/>
+              </el-icon>
+              复制
+            </el-button>
+          </div>
           <pre class="trace-log-content">{{ item.raw }}</pre>
         </div>
         <el-empty v-if="!traceLoading && traceDetail.detailLogs.length === 0 && traceDetail.accessLogs.length === 0 && traceDetail.errorLogs.length === 0" description="未找到日志"/>
@@ -309,28 +338,93 @@
 </template>
 
 <script lang="ts" setup>
-import {nextTick, onMounted, reactive, ref, watch} from 'vue'
+import {nextTick, onMounted, onUnmounted, reactive, ref, watch} from 'vue'
 import {ElMessage} from 'element-plus'
 import {logQueryApi} from '@/api'
 import AccessTrendChart from './components/access-trend-chart.vue'
-import type {AccessLogItem, AccessTrendData, DetailLogItem, ErrorLogItem, LogPathsConfig, TopStatItem, TraceLogDetail} from '@/types/api'
+import type {AccessLogItem, AccessTrendData, DetailLogItem, ErrorLogItem, TopStatItem, TraceLogDetail} from '@/types/api'
 
 const activeTab = ref('detail')
-const pathsLoading = ref(false)
-const logPaths = reactive<LogPathsConfig>({
-  detailLogDir: '',
-  detailLogPattern: '',
-  accessLogDir: '',
-  accessLogPattern: '',
-  errorLogDir: '',
-  errorLogPattern: '',
-})
+const serverTimeLoading = ref(false)
+const serverTimeDisplay = ref('-')
+let serverTimeBaseMs = 0
+let serverTimeSyncClientMs = 0
+let serverTimeTickTimer: ReturnType<typeof setInterval> | null = null
 
 const formatLocalDate = (date: Date) => {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
+}
+
+const formatServerDateTime = (date: Date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hour = String(date.getHours()).padStart(2, '0')
+  const minute = String(date.getMinutes()).padStart(2, '0')
+  const second = String(date.getSeconds()).padStart(2, '0')
+  const millisecond = String(date.getMilliseconds()).padStart(3, '0')
+  return `${year}-${month}-${day} ${hour}:${minute}:${second}.${millisecond}`
+}
+
+const parseServerTime = (value?: string) => {
+  if (!value) {
+    return null
+  }
+  const match = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?$/)
+  if (!match) {
+    return null
+  }
+  const [, year, month, day, hour, minute, second, millisecond = '0'] = match
+  return new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+      Number(hour),
+      Number(minute),
+      Number(second),
+      Number(millisecond.padEnd(3, '0')),
+  )
+}
+
+const updateServerTimeDisplay = () => {
+  if (!serverTimeBaseMs) {
+    serverTimeDisplay.value = '-'
+    return
+  }
+  serverTimeDisplay.value = formatServerDateTime(new Date(serverTimeBaseMs + Date.now() - serverTimeSyncClientMs))
+}
+
+const syncServerTime = async () => {
+  serverTimeLoading.value = true
+  try {
+    const data = await logQueryApi.getLogPaths()
+    const parsed = parseServerTime(data.serverTime)
+    if (!parsed) {
+      throw new Error('invalid server time')
+    }
+    serverTimeBaseMs = parsed.getTime()
+    serverTimeSyncClientMs = Date.now()
+    updateServerTimeDisplay()
+  } catch (error) {
+    console.error('获取服务器时间失败:', error)
+    ElMessage.error('获取服务器时间失败')
+  } finally {
+    serverTimeLoading.value = false
+  }
+}
+
+const startServerTimeClock = () => {
+  serverTimeTickTimer = setInterval(updateServerTimeDisplay, 1000)
+}
+
+const stopServerTimeClock = () => {
+  if (serverTimeTickTimer) {
+    clearInterval(serverTimeTickTimer)
+    serverTimeTickTimer = null
+  }
 }
 
 const MS_DAY = 86400000
@@ -510,24 +604,6 @@ const ensureDateRange = (range?: string[]) => {
     return null
   }
   return range
-}
-
-const fetchLogPaths = async () => {
-  pathsLoading.value = true
-  try {
-    const data = await logQueryApi.getLogPaths()
-    logPaths.detailLogDir = data.detailLogDir || ''
-    logPaths.detailLogPattern = data.detailLogPattern || ''
-    logPaths.accessLogDir = data.accessLogDir || ''
-    logPaths.accessLogPattern = data.accessLogPattern || ''
-    logPaths.errorLogDir = data.errorLogDir || ''
-    logPaths.errorLogPattern = data.errorLogPattern || ''
-  } catch (error) {
-    console.error('获取日志目录失败:', error)
-    ElMessage.error('获取日志目录失败')
-  } finally {
-    pathsLoading.value = false
-  }
 }
 
 const fetchDetailLogs = async () => {
@@ -757,9 +833,60 @@ const formatHandlerMs = (value: number) => {
   return Number(value).toFixed(1)
 }
 
+const TRACE_ELAPSED_THRESHOLD_MS = 200
+
+const hasElapsedMs = (value?: number | null) => value !== null && value !== undefined
+
+const formatElapsedMs = (value?: number | null) => {
+  if (!hasElapsedMs(value)) {
+    return ''
+  }
+  return `${Number(value).toFixed(1)}ms`
+}
+
+const elapsedMsClass = (value?: number | null) => {
+  if (!hasElapsedMs(value)) {
+    return ''
+  }
+  return Number(value) > TRACE_ELAPSED_THRESHOLD_MS ? 'elapsed-slow' : 'elapsed-fast'
+}
+
+const copyTraceLog = async (content?: string) => {
+  if (!content) {
+    ElMessage.warning('无可复制内容')
+    return
+  }
+  try {
+    await navigator.clipboard.writeText(content)
+    ElMessage.success('已复制')
+  } catch (error) {
+    console.error('复制日志失败:', error)
+    ElMessage.error('复制失败')
+  }
+}
+
+const resolveTraceAuthId = () => {
+  for (const item of traceDetail.detailLogs) {
+    if (item.authId) {
+      return item.authId
+    }
+  }
+  for (const item of traceDetail.errorLogs) {
+    if (item.authId) {
+      return item.authId
+    }
+  }
+  return ''
+}
+
 onMounted(async () => {
-  await fetchLogPaths()
+  await syncServerTime()
+  startServerTimeClock()
   await fetchDetailLogs()
+})
+
+onUnmounted(() => {
+  stopServerTimeClock()
 })
 
 watch(activeTab, async (tab) => {
@@ -784,7 +911,8 @@ watch(activeTab, async (tab) => {
   gap: 12px;
 }
 
-.path-tip {
+.path-tip,
+.server-time-tip {
   color: #909399;
   font-size: 12px;
   word-break: break-all;
@@ -832,10 +960,39 @@ watch(activeTab, async (tab) => {
 }
 
 .trace-log-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 8px 12px;
   background: #f5f7fa;
   color: #606266;
   font-size: 12px;
+}
+
+.trace-log-meta-main {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.trace-elapsed {
+  font-weight: 600;
+}
+
+.trace-auth-id {
+  color: #409eff;
+  font-weight: 500;
+}
+
+.elapsed-fast {
+  color: #67c23a;
+}
+
+.elapsed-slow {
+  color: #f56c6c;
 }
 
 .trace-log-content {

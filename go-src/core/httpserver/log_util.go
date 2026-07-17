@@ -22,8 +22,7 @@ func logAPIRequestStart(r *ghttp.Request) {
 		return
 	}
 	g.Log().Infof(r.Context(),
-		"收到前端请求,time=%v,enterTime=%v,从队列进入到中间件时间间隔Ms=%vms,method=%v,url=%v,ip=%v,headers=%s",
-		gtime.Now().Time.Format("2006-01-02 15:04:05.000"),
+		"收到前端请求,enterTime=%v,从队列进入到中间件时间间隔Ms=%vms,method=%v,url=%v,ip=%v,headers=%s",
 		requestEnterTimeStr(r),
 		waitBeforeMiddlewareMs(r),
 		r.Method,
@@ -63,11 +62,11 @@ func logAPIRequestAuth(r *ghttp.Request, authMs int64) {
 		return
 	}
 	g.Log().Infof(r.Context(),
-		"鉴权完成,time=%v,reqId=%v,authId=%v,authMs=%vms",
-		gtime.Now().Time.Format("2006-01-02 15:04:05.000"),
+		"鉴权完成,reqId=%v,authId=%v,authMs=%vms,url=%v",
 		r.GetHeader(ReqId, ""),
 		authIdFromRequest(r),
 		authMs,
+		r.RequestURI,
 	)
 }
 
@@ -196,12 +195,12 @@ func logAPIRequestBody(r *ghttp.Request, bodyMs int64, bodyLength int, bodyConte
 		return
 	}
 	g.Log().Infof(r.Context(),
-		"读取请求Body,time=%v,reqId=%v,authId=%v,bodyMs=%vms,bodyLength=%v,bodyContent=%s",
-		gtime.Now().Time.Format("2006-01-02 15:04:05.000"),
+		"读取请求Body,reqId=%v,authId=%v,bodyMs=%vms,bodyLength=%v,url=%v,bodyContent=%s",
 		r.GetHeader(ReqId, ""),
 		authIdFromRequest(r),
 		bodyMs,
 		bodyLength,
+		r.RequestURI,
 		bodyContent,
 	)
 }
@@ -211,8 +210,7 @@ func logAPIRequestHandler(r *ghttp.Request, handlerMs int64) {
 		return
 	}
 	g.Log().Infof(r.Context(),
-		"Handler执行完成,time=%v,reqId=%v,authId=%v,handlerMs=%vms,url=%v",
-		gtime.Now().Time.Format("2006-01-02 15:04:05.000"),
+		"Handler执行完成,reqId=%v,authId=%v,handlerMs=%vms,url=%v",
 		r.GetHeader(ReqId, ""),
 		authIdFromRequest(r),
 		handlerMs,
@@ -225,8 +223,7 @@ func logAPIRequestResponseWrite(r *ghttp.Request, writeMs int64, respBytes int, 
 		return
 	}
 	g.Log().Infof(r.Context(),
-		"应答序列化,写入框架缓冲区,time=%v,reqId=%v,authId=%v,writeMs=%vms,respBytes=%v,url=%v,respContent=%s",
-		gtime.Now().Time.Format("2006-01-02 15:04:05.000"),
+		"应答序列化,写入框架缓冲区,reqId=%v,authId=%v,writeMs=%vms,respBytes=%v,url=%v,respContent=%s",
 		r.GetHeader(ReqId, ""),
 		authIdFromRequest(r),
 		writeMs,
@@ -266,8 +263,7 @@ func logAPIRequestAfterOutput(r *ghttp.Request, afterOutputMs int64) {
 		return
 	}
 	g.Log().Infof(r.Context(),
-		"应答写入到系统缓冲区,输出完成,time=%v,reqId=%v,authId=%v,afterOutputMs=%vms,gzip=%v,totalMs=%vms,url=%v",
-		gtime.Now().Time.Format("2006-01-02 15:04:05.000"),
+		"应答写入到系统缓冲区,输出完成,reqId=%v,authId=%v,afterOutputMs=%vms,gzip=%v,totalMs=%vms,url=%v",
 		r.GetHeader(ReqId, ""),
 		authIdFromRequest(r),
 		afterOutputMs,

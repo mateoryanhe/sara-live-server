@@ -833,6 +833,7 @@ export interface VideoCallLogItem {
 }
 
 export interface LogPathsConfig {
+    serverTime?: string
     detailLogDir: string
     detailLogPattern: string
     accessLogDir: string
@@ -860,6 +861,7 @@ export interface DetailLogItem {
     reqId: string
     authId: string
     url: string
+    elapsedMs?: number
     message: string
     raw: string
 }
@@ -919,6 +921,7 @@ export interface ErrorLogItem {
     url: string
     handlerMs: number
     ip: string
+    authId?: string
     errorCode: number
     errorMessage: string
     detail: string

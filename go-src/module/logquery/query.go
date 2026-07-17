@@ -22,6 +22,7 @@ const (
 func GetLogPaths(_ context.Context, _ *logquerydto.CMSGetLogPathsReq) (*logquerydto.CMSGetLogPathsRes, error) {
 	paths := loadLogPaths()
 	return &logquerydto.CMSGetLogPathsRes{
+		ServerTime:       time.Now().Format("2006-01-02 15:04:05.000"),
 		DetailLogDir:     paths.DetailLogDir,
 		DetailLogPattern: paths.DetailLogPattern,
 		AccessLogDir:     paths.AccessLogDir,
@@ -152,7 +153,7 @@ func GetTraceLogs(_ context.Context, req *logquerydto.CMSGetTraceLogsReq) (*logq
 			if !logTimeInRange(entry.Time, rangeStart, rangeEnd) {
 				return true
 			}
-			if matchTraceId(entry.TraceId, req.TraceId) || fuzzyMatch(entry.Raw, req.TraceId) {
+			if matchTraceId(entry.TraceId, req.TraceId) {
 				detailLogs = append(detailLogs, entry)
 			}
 			return true
@@ -165,7 +166,7 @@ func GetTraceLogs(_ context.Context, req *logquerydto.CMSGetTraceLogsReq) (*logq
 			if !logTimeInRange(entry.Time, rangeStart, rangeEnd) {
 				return true
 			}
-			if matchTraceId(entry.TraceId, req.TraceId) || fuzzyMatch(entry.Raw, req.TraceId) {
+			if matchTraceId(entry.TraceId, req.TraceId) {
 				accessLogs = append(accessLogs, entry)
 			}
 			return true
@@ -177,7 +178,7 @@ func GetTraceLogs(_ context.Context, req *logquerydto.CMSGetTraceLogsReq) (*logq
 		if !logTimeInRange(entry.Time, rangeStart, rangeEnd) {
 			return true
 		}
-		if matchTraceId(entry.TraceId, req.TraceId) || fuzzyMatch(entry.Raw, req.TraceId) {
+		if matchTraceId(entry.TraceId, req.TraceId) {
 			errorLogs = append(errorLogs, entry)
 		}
 		return true

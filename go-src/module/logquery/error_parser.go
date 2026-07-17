@@ -25,6 +25,7 @@ type ErrorLogEntry struct {
 	Url          string  `json:"url"`
 	HandlerMs    float64 `json:"handlerMs"`
 	Ip           string  `json:"ip"`
+	AuthId       string  `json:"authId"`
 	ErrorCode    int     `json:"errorCode"`
 	ErrorMessage string  `json:"errorMessage"`
 	Detail       string  `json:"detail"`
@@ -82,10 +83,22 @@ func finalizeErrorLogEntry(entry *ErrorLogEntry, body string) {
 		if entry.Detail == "" {
 			entry.Detail = strings.TrimSpace(body[:stackIdx])
 		}
+		fillErrorLogAuthId(entry)
 		return
 	}
 	if stackIdx := strings.Index(body, "Stack:\n"); stackIdx >= 0 {
 		entry.Stack = strings.TrimSpace(body[stackIdx+len("Stack:\n"):])
+	}
+	fillErrorLogAuthId(entry)
+}
+
+func fillErrorLogAuthId(entry *ErrorLogEntry) {
+	if entry == nil || entry.AuthId != "" {
+		return
+	}
+	entry.AuthId = extractAuthIdFromMessage(entry.Detail)
+	if entry.AuthId == "" {
+		entry.AuthId = extractAuthIdFromMessage(entry.Raw)
 	}
 }
 
@@ -93,7 +106,7 @@ func matchErrorEntry(entry *ErrorLogEntry, traceId, url, ip, keyword string, sta
 	if entry == nil {
 		return false
 	}
-	if traceId != "" && !fuzzyMatch(entry.TraceId, traceId) && !fuzzyMatch(entry.Raw, traceId) {
+	if traceId != "" && !matchTraceId(entry.TraceId, traceId) {
 		return false
 	}
 	if url != "" && !fuzzyMatch(entry.Url, url) && !fuzzyMatch(entry.Raw, url) {
@@ -181,6 +194,7 @@ func detailEntryToErrorEntry(entry *DetailLogEntry) *ErrorLogEntry {
 		TraceId: entry.TraceId,
 		Url:     entry.Url,
 		Ip:      extractIpFromMessage(entry.Message),
+		AuthId:  entry.AuthId,
 		Detail:  entry.Message,
 		Raw:     entry.Raw,
 		Stack:   extractStackFromMessage(entry.Message),
@@ -192,6 +206,9 @@ func detailEntryToErrorEntry(entry *DetailLogEntry) *ErrorLogEntry {
 		}
 	} else {
 		errEntry.ErrorMessage = entry.Level
+	}
+	if entry.ElapsedMs != nil {
+		errEntry.HandlerMs = *entry.ElapsedMs
 	}
 	return errEntry
 }

@@ -10,6 +10,7 @@ type CMSGetLogPathsReq struct {
 }
 
 type CMSGetLogPathsRes struct {
+	ServerTime       string `json:"serverTime"`
 	DetailLogDir     string `json:"detailLogDir"`
 	DetailLogPattern string `json:"detailLogPattern"`
 	AccessLogDir     string `json:"accessLogDir"`

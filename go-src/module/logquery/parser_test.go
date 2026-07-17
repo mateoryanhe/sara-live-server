@@ -25,6 +25,77 @@ func TestParseDetailLogLine(t *testing.T) {
 	}
 }
 
+func TestParseDetailLogLineWithHeaders(t *testing.T) {
+	line := `2026-07-17T13:36:53.170 [INFO] {a1c6e4392fd2d251trace001} log_util.go:24: 收到前端请求,enterTime=2026-07-17 05:36:53.170,从队列进入到中间件时间间隔Ms=0ms,method=POST,url=/liveRoom/roomList,ip=113.109.204.150,headers={"Accept":["application/json"],"Authorization":["2076611433029701632.1ghdc9jjdqcdjzuxiqh8ogq100qvd5z7"],"Reqid":["1784266609644"],"User-Agent":["Dart/3.11 (dart:io)"]}`
+	entry, ok := parseDetailLogLine(line)
+	if !ok {
+		t.Fatal("expected parse success")
+	}
+	if entry.ReqId != "1784266609644" {
+		t.Fatalf("unexpected reqId: %s", entry.ReqId)
+	}
+	if entry.AuthId != "2076611433029701632" {
+		t.Fatalf("unexpected authId: %s", entry.AuthId)
+	}
+	if entry.Url != "/liveRoom/roomList" {
+		t.Fatalf("unexpected url: %s", entry.Url)
+	}
+	if !matchDetailEntry(entry, "", "1784266609644", "2076611433029701632", "", "") {
+		t.Fatal("expected reqId/authId filter to match")
+	}
+	if entry.ElapsedMs == nil || *entry.ElapsedMs != 0 {
+		t.Fatalf("unexpected elapsedMs: %#v", entry.ElapsedMs)
+	}
+}
+
+func TestParseDetailLogLineElapsedMs(t *testing.T) {
+	cases := []struct {
+		line string
+		want float64
+	}{
+		{
+			line: `2026-07-17T13:36:53.171 [INFO] {abc} log_util.go:65: 鉴权完成,reqId=1,authId=2,authMs=3ms,url=/api/test`,
+			want: 3,
+		},
+		{
+			line: `2026-07-17T13:36:53.172 [INFO] {abc} log_util.go:213: Handler执行完成,reqId=1,authId=2,handlerMs=85ms,url=/api/test`,
+			want: 85,
+		},
+		{
+			line: `2026-07-17T13:36:53.175 [INFO] {abc} log_util.go:266: 应答写入到系统缓冲区,输出完成,reqId=1,authId=2,afterOutputMs=5ms,gzip=false,totalMs=120ms,url=/api/test`,
+			want: 120,
+		},
+	}
+	for _, tc := range cases {
+		entry, ok := parseDetailLogLine(tc.line)
+		if !ok {
+			t.Fatalf("parse failed: %s", tc.line)
+		}
+		if entry.ElapsedMs == nil || *entry.ElapsedMs != tc.want {
+			t.Fatalf("unexpected elapsedMs %#v, want %v, line=%s", entry.ElapsedMs, tc.want, tc.line)
+		}
+	}
+}
+
+func TestMatchTraceIdIgnoresEmbeddedTraceIdInRaw(t *testing.T) {
+	targetTraceId := "137dc2d8f1ffc218c7c68d668ff9b246"
+	embeddedTraceId := "4436506d2fb4c218c410ce7cfde6e067"
+	line := `2026-07-17T06:30:16.638 [INFO] {` + targetTraceId + `} log_util.go:227: 应答序列化,writeMs=4ms,url=/logQuery/queryDetailLogs,respContent={"data":[{"traceId":"` + embeddedTraceId + `"}]}`
+	entry, ok := parseDetailLogLine(line)
+	if !ok {
+		t.Fatal("expected parse success")
+	}
+	if !matchTraceId(entry.TraceId, targetTraceId) {
+		t.Fatal("expected target traceId to match")
+	}
+	if matchTraceId(entry.TraceId, embeddedTraceId) {
+		t.Fatal("embedded traceId must not match parsed traceId field")
+	}
+	if !fuzzyMatch(entry.Raw, embeddedTraceId) {
+		t.Fatal("embedded traceId exists in raw content")
+	}
+}
+
 func TestParseAccessLogLine(t *testing.T) {
 	line := `2026-07-06T00:00:13.765 {a2ebcfb5468abf18bff439322487c3ed} 200 "POST https www.bigtktool.shop /liveRoom/reportLiveStartStatus HTTP/1.1" 0.123, 113.109.204.237, "", "Dart/3.11 (dart:io)"`
 	entry, ok := parseAccessLogLine(line)

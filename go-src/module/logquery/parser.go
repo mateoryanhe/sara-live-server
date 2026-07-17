@@ -1,6 +1,7 @@
 package logquery
 
 import (
+	"encoding/json"
 	"regexp"
 	"strconv"
 	"strings"
@@ -8,24 +9,35 @@ import (
 )
 
 var (
-	detailLogRe = regexp.MustCompile(`^(\S+)\s+\[(\w+)\]\s+\{([a-f0-9]+)\}\s+(.+)$`)
-	accessLogRe = regexp.MustCompile(`^(\S+)\s+\{([a-f0-9]+)\}\s+(\d+)\s+"(\w+)\s+\S+\s+\S+\s+(\S+)\s+HTTP/[\d.]+"\s+([\d.]+),\s+([^,]+),`)
-	reqIdRe     = regexp.MustCompile(`reqId=(\d+)`)
-	authIdRe    = regexp.MustCompile(`authId=(\d+)`)
-	userIdRe    = regexp.MustCompile(`userid=(\d+)`)
-	playerRe    = regexp.MustCompile(`玩家=(\d+)`)
-	urlRe       = regexp.MustCompile(`url=([^,\s]+)`)
+	detailLogRe  = regexp.MustCompile(`^(\S+)\s+\[(\w+)\]\s+\{([a-f0-9]+)\}\s+(.+)$`)
+	accessLogRe  = regexp.MustCompile(`^(\S+)\s+\{([a-f0-9]+)\}\s+(\d+)\s+"(\w+)\s+\S+\s+\S+\s+(\S+)\s+HTTP/[\d.]+"\s+([\d.]+),\s+([^,]+),`)
+	reqIdRe      = regexp.MustCompile(`reqId=(\d+)`)
+	authIdRe     = regexp.MustCompile(`authId=(\d+)`)
+	userIdRe     = regexp.MustCompile(`userid=(\d+)`)
+	playerRe     = regexp.MustCompile(`玩家=(\d+)`)
+	urlRe        = regexp.MustCompile(`url=([^,\s]+)`)
+	headersRe    = regexp.MustCompile(`headers=(\{.*\})$`)
+	elapsedMsRes = []*regexp.Regexp{
+		regexp.MustCompile(`totalMs=(-?\d+)ms`),
+		regexp.MustCompile(`handlerMs=(-?\d+)ms`),
+		regexp.MustCompile(`writeMs=(-?\d+)ms`),
+		regexp.MustCompile(`bodyMs=(-?\d+)ms`),
+		regexp.MustCompile(`authMs=(-?\d+)ms`),
+		regexp.MustCompile(`afterOutputMs=(-?\d+)ms`),
+		regexp.MustCompile(`从队列进入到中间件时间间隔Ms=(-?\d+)ms`),
+	}
 )
 
 type DetailLogEntry struct {
-	Time    string `json:"time"`
-	Level   string `json:"level"`
-	TraceId string `json:"traceId"`
-	ReqId   string `json:"reqId"`
-	AuthId  string `json:"authId"`
-	Url     string `json:"url"`
-	Message string `json:"message"`
-	Raw     string `json:"raw"`
+	Time      string   `json:"time"`
+	Level     string   `json:"level"`
+	TraceId   string   `json:"traceId"`
+	ReqId     string   `json:"reqId"`
+	AuthId    string   `json:"authId"`
+	Url       string   `json:"url"`
+	ElapsedMs *float64 `json:"elapsedMs,omitempty"`
+	Message   string   `json:"message"`
+	Raw       string   `json:"raw"`
 }
 
 type AccessLogEntry struct {
@@ -61,10 +73,35 @@ func parseDetailLogLine(line string) (*DetailLogEntry, bool) {
 		entry.ReqId = reqMatch[1]
 	}
 	entry.AuthId = extractAuthIdFromMessage(message)
+	if entry.ReqId == "" || entry.AuthId == "" {
+		headerReqId, headerAuthId := extractIdsFromLogHeaders(message)
+		if entry.ReqId == "" {
+			entry.ReqId = headerReqId
+		}
+		if entry.AuthId == "" {
+			entry.AuthId = headerAuthId
+		}
+	}
 	if urlMatch := urlRe.FindStringSubmatch(message); len(urlMatch) > 1 {
 		entry.Url = urlMatch[1]
 	}
+	if elapsedMs, ok := extractElapsedMsFromMessage(message); ok {
+		entry.ElapsedMs = &elapsedMs
+	}
 	return entry, true
+}
+
+func extractElapsedMsFromMessage(message string) (float64, bool) {
+	for _, re := range elapsedMsRes {
+		if match := re.FindStringSubmatch(message); len(match) > 1 {
+			value, err := strconv.ParseFloat(match[1], 64)
+			if err != nil {
+				continue
+			}
+			return value, true
+		}
+	}
+	return 0, false
 }
 
 func extractAuthIdFromMessage(message string) string {
@@ -78,6 +115,37 @@ func extractAuthIdFromMessage(message string) string {
 		return playerMatch[1]
 	}
 	return ""
+}
+
+func extractIdsFromLogHeaders(message string) (reqId, authId string) {
+	m := headersRe.FindStringSubmatch(message)
+	if len(m) < 2 {
+		return "", ""
+	}
+	var headers map[string][]string
+	if err := json.Unmarshal([]byte(m[1]), &headers); err != nil {
+		return "", ""
+	}
+	for key, values := range headers {
+		if len(values) == 0 || values[0] == "" {
+			continue
+		}
+		switch strings.ToLower(key) {
+		case "reqid":
+			if reqId == "" {
+				reqId = values[0]
+			}
+		case "authorization":
+			if authId == "" {
+				authId = strings.SplitN(values[0], ".", 2)[0]
+			}
+		case "authid":
+			if authId == "" {
+				authId = values[0]
+			}
+		}
+	}
+	return reqId, authId
 }
 
 func messageMatchesAuthId(entry *DetailLogEntry, authId string) bool {
@@ -179,7 +247,7 @@ func matchDetailEntry(entry *DetailLogEntry, traceId, reqId, authId, url, keywor
 	if entry == nil {
 		return false
 	}
-	if traceId != "" && !fuzzyMatch(entry.TraceId, traceId) && !fuzzyMatch(entry.Raw, traceId) {
+	if traceId != "" && !matchTraceId(entry.TraceId, traceId) {
 		return false
 	}
 	if reqId != "" && !fuzzyMatch(entry.ReqId, reqId) && !fuzzyMatch(entry.Message, reqId) {
@@ -201,7 +269,7 @@ func matchAccessEntry(entry *AccessLogEntry, traceId, url, ip string, statusCode
 	if entry == nil {
 		return false
 	}
-	if traceId != "" && !fuzzyMatch(entry.TraceId, traceId) && !fuzzyMatch(entry.Raw, traceId) {
+	if traceId != "" && !matchTraceId(entry.TraceId, traceId) {
 		return false
 	}
 	if url != "" && !fuzzyMatch(entry.Url, url) && !fuzzyMatch(entry.Raw, url) {
