@@ -41,6 +41,14 @@
               title="进程/系统CPU (最近3天, 每10分钟采样)"
           />
         </el-tab-pane>
+        <el-tab-pane label="在线人数" name="online">
+          <ResourceMetricChart
+              ref="onlineChartRef"
+              :data="resourceMetricTrend.points"
+              metric-type="online"
+              title="在线人数 (最近3天, 每10分钟采样)"
+          />
+        </el-tab-pane>
       </el-tabs>
     </el-card>
   </div>
@@ -59,6 +67,7 @@ const memoryChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
 const heapChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
 const ratioChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
 const cpuChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
+const onlineChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
 
 const resourceMetricTrend = reactive<ResourceMetricTrend>({
   points: [],
@@ -67,6 +76,10 @@ const resourceMetricTrend = reactive<ResourceMetricTrend>({
 const resizeActiveChart = () => {
   if (activeTab.value === 'cpu') {
     cpuChartRef.value?.resize()
+    return
+  }
+  if (activeTab.value === 'online') {
+    onlineChartRef.value?.resize()
     return
   }
   if (activeTab.value === 'heap') {

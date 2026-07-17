@@ -19,6 +19,7 @@ type CMSResourceMetricPoint struct {
 	SysMemTotalMb       float64 `json:"sysMemTotalMb"`
 	SysMemUsedPercent   float64 `json:"sysMemUsedPercent"`
 	SysCpuPercent       float64 `json:"sysCpuPercent"`
+	OnlineCount         uint64  `json:"onlineCount,string"`
 }
 
 type CMSResourceMetricTrendRes struct {

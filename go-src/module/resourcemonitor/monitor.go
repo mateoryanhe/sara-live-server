@@ -11,6 +11,7 @@ import (
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/shirou/gopsutil/v3/process"
 	"xr-game-server/core/event"
+	"xr-game-server/core/push"
 	"xr-game-server/core/xrtimer"
 	"xr-game-server/dao/resourcemetricdao"
 	"xr-game-server/entity"
@@ -53,6 +54,7 @@ func enqueueResourceMetric(now time.Time) {
 		now,
 		procMemMb, procHeapAllocMb, procHeapInuseMb, procHeapSysMb, procHeapUsedPercent, procHeapIdlePercent, procCpuPercent,
 		sysMemUsedMb, sysMemTotalMb, sysMemUsedPercent, sysCpuPercent,
+		uint64(push.OnlineCount()),
 	)
 }
 

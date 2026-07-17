@@ -81,6 +81,14 @@
           </BarMetricSection>
         </el-tab-pane>
       </el-tabs>
+
+      <ResourceMetricChart
+          ref="onlineChartRef"
+          :data="resourceMetricTrend.points"
+          metric-type="online"
+          title="在线人数 (最近3天, 每10分钟采样)"
+          class="online-chart"
+      />
     </el-card>
   </div>
 </template>
@@ -89,10 +97,11 @@
 import {computed, nextTick, onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {sysStatApi} from '@/api'
-import type {SysStat, UserStatTrend} from '@/types/api'
+import type {ResourceMetricTrend, SysStat, UserStatTrend} from '@/types/api'
 import UserStatChart from './components/user-stat-chart.vue'
 import UserStatBarChart from './components/user-stat-bar-chart.vue'
 import BarMetricSection from './components/bar-metric-section.vue'
+import ResourceMetricChart from '@/views/config/components/resource-metric-chart.vue'
 import {getUserStatBarMetricTabs, USER_STAT_BAR_SERIES} from './user-stat-bar-series'
 
 const loading = ref(false)
@@ -122,6 +131,7 @@ const monthlyLineChartRef = ref<InstanceType<typeof UserStatChart>>()
 const dailyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
 const weeklyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
 const monthlyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
+const onlineChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
 
 const sysStat = reactive<SysStat>({
   totalGold: 0,
@@ -134,6 +144,10 @@ const sysStat = reactive<SysStat>({
   todayGoldConsume: 0,
   todayDiamondConsume: 0,
   todayRegisterUser: 0,
+})
+
+const resourceMetricTrend = reactive<ResourceMetricTrend>({
+  points: [],
 })
 
 const userStatTrend = reactive<UserStatTrend>({
@@ -221,10 +235,22 @@ const fetchSysStat = async () => {
   }
 }
 
+const fetchResourceMetricTrend = async () => {
+  const data = await sysStatApi.getResourceMetricTrend()
+  resourceMetricTrend.points = data.points || []
+  await nextTick()
+  setTimeout(() => {
+    onlineChartRef.value?.resize()
+  }, 0)
+}
+
 const fetchUserStatTrend = async () => {
   trendLoading.value = true
   try {
-    const data = await sysStatApi.getUserStatTrend()
+    const [data] = await Promise.all([
+      sysStatApi.getUserStatTrend(),
+      fetchResourceMetricTrend(),
+    ])
     userStatTrend.daily = data.daily || []
     userStatTrend.weekly = data.weekly || []
     userStatTrend.monthly = data.monthly || []
@@ -241,6 +267,7 @@ const fetchUserStatTrend = async () => {
 }
 
 const resizeActiveChart = () => {
+  onlineChartRef.value?.resize()
   if (activePeriod.value === 'daily') {
     dailyLineChartRef.value?.resize()
     dailyBarChartRef.value?.resize()
@@ -300,6 +327,10 @@ onMounted(() => {
 }
 
 .user-stat-card {
+  margin-top: 20px;
+}
+
+.online-chart {
   margin-top: 20px;
 }
 

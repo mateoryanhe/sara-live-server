@@ -41,6 +41,7 @@ export interface SysStat {
     todayGoldConsume: number
     todayDiamondConsume: number
     todayRegisterUser: string | number
+    onlineCount: string | number
 }
 
 export interface UserStatTrendPoint {
@@ -70,6 +71,7 @@ export interface ResourceMetricPoint {
     sysMemTotalMb: number
     sysMemUsedPercent: number
     sysCpuPercent: number
+    onlineCount: number | string
 }
 
 export interface ResourceMetricTrend {

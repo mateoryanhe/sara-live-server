@@ -36,6 +36,7 @@ func toResourceMetricPoints(rows []*entity.SysResourceMetric) []*resourcemetricd
 			SysMemTotalMb:       row.SysMemTotalMb,
 			SysMemUsedPercent:   row.SysMemUsedPercent,
 			SysCpuPercent:       row.SysCpuPercent,
+			OnlineCount:         row.OnlineCount,
 		})
 	}
 	return list

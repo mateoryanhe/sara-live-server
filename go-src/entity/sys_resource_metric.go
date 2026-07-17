@@ -25,6 +25,7 @@ const (
 	SysResourceMetricSysMemTotalMb       db.TbCol = "sys_mem_total_mb"
 	SysResourceMetricSysMemUsedPercent   db.TbCol = "sys_mem_used_percent"
 	SysResourceMetricSysCpuPercent       db.TbCol = "sys_cpu_percent"
+	SysResourceMetricOnlineCount         db.TbCol = "online_count"
 )
 
 // SysResourceMetric 系统资源采样记录(每10分钟一条,保留3天,懒缓冲异步入库)
@@ -42,6 +43,7 @@ type SysResourceMetric struct {
 	SysMemTotalMb       float64   `gorm:"type:decimal(12,2);default:0;comment:系统总内存MB" json:"sysMemTotalMb"`
 	SysMemUsedPercent   float64   `gorm:"type:decimal(6,2);default:0;comment:系统内存使用率" json:"sysMemUsedPercent"`
 	SysCpuPercent       float64   `gorm:"type:decimal(6,2);default:0;comment:系统CPU使用率" json:"sysCpuPercent"`
+	OnlineCount         uint64    `gorm:"default:0;comment:在线人数" json:"onlineCount"`
 }
 
 // NewSysResourceMetric 创建资源采样记录并推送到懒缓冲队列
@@ -49,6 +51,7 @@ func NewSysResourceMetric(
 	recordedAt time.Time,
 	procMemMb, procHeapAllocMb, procHeapInuseMb, procHeapSysMb, procHeapUsedPercent, procHeapIdlePercent, procCpuPercent float64,
 	sysMemUsedMb, sysMemTotalMb, sysMemUsedPercent, sysCpuPercent float64,
+	onlineCount uint64,
 ) *SysResourceMetric {
 	ret := &SysResourceMetric{}
 	ret.ID = snowflake.GetId()
@@ -66,6 +69,7 @@ func NewSysResourceMetric(
 	ret.SetSysMemTotalMb(sysMemTotalMb)
 	ret.SetSysMemUsedPercent(sysMemUsedPercent)
 	ret.SetSysCpuPercent(sysCpuPercent)
+	ret.SetOnlineCount(onlineCount)
 	return ret
 }
 
@@ -165,6 +169,14 @@ func (receiver *SysResourceMetric) SetSysCpuPercent(val float64) {
 	})
 }
 
+func (receiver *SysResourceMetric) SetOnlineCount(val uint64) {
+	receiver.OnlineCount = val
+	syndb.AddDataToLazyChan(TbSysResourceMetric, SysResourceMetricOnlineCount, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: val,
+	})
+}
+
 func (receiver *SysResourceMetric) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
 	syndb.AddDataToLazyChan(TbSysResourceMetric, db.CreatedAtName, &syndb.ColData{
@@ -196,6 +208,7 @@ func initSysResourceMetric() {
 	syndb.RegLazy(TbSysResourceMetric, SysResourceMetricSysMemTotalMb)
 	syndb.RegLazy(TbSysResourceMetric, SysResourceMetricSysMemUsedPercent)
 	syndb.RegLazy(TbSysResourceMetric, SysResourceMetricSysCpuPercent)
+	syndb.RegLazy(TbSysResourceMetric, SysResourceMetricOnlineCount)
 
 	migrate.AutoMigrate(&SysResourceMetric{})
 }

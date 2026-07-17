@@ -7,7 +7,7 @@ import {nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue'
 import * as echarts from 'echarts'
 import type {ResourceMetricPoint} from '@/types/api'
 
-type MetricType = 'memory' | 'heap' | 'ratio' | 'cpu'
+type MetricType = 'memory' | 'heap' | 'ratio' | 'cpu' | 'online'
 
 const props = defineProps<{
   data: ResourceMetricPoint[]
@@ -242,6 +242,74 @@ const buildHeapRatioOption = (points: ResourceMetricPoint[]): echarts.EChartsOpt
   }
 }
 
+const formatCount = (value: number | string | null | undefined) => {
+  if (value === null || value === undefined || value === '') {
+    return '-'
+  }
+  return Number(value).toLocaleString('zh-CN')
+}
+
+const buildOnlineOption = (points: ResourceMetricPoint[]): echarts.EChartsOption => {
+  const times = points.map(item => item.time)
+  const onlineSeries = points.map(item => Number(item.onlineCount || 0))
+
+  return {
+    title: props.title
+        ? {
+          text: props.title,
+          left: 'center',
+          textStyle: {fontSize: 14, fontWeight: 500},
+        }
+        : undefined,
+    tooltip: {
+      trigger: 'axis',
+      formatter: (params) => {
+        const items = Array.isArray(params) ? params : [params]
+        if (!items.length) {
+          return ''
+        }
+        const index = items[0].dataIndex ?? 0
+        const point = points[index]
+        return [
+          items[0].name,
+          `在线人数: ${formatCount(point?.onlineCount)}`,
+        ].join('<br/>')
+      },
+    },
+    legend: {
+      data: ['在线人数'],
+      top: props.title ? 28 : 0,
+    },
+    grid: {
+      left: 56,
+      right: 24,
+      top: props.title ? 72 : 48,
+      bottom: 32,
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: times,
+      axisLabel: {rotate: times.length > 12 ? 35 : 0},
+    },
+    yAxis: {
+      type: 'value',
+      name: '人数',
+      min: 0,
+      minInterval: 1,
+    },
+    series: [
+      {
+        name: '在线人数',
+        type: 'line',
+        smooth: true,
+        data: onlineSeries,
+        itemStyle: {color: '#409EFF'},
+      },
+    ],
+  }
+}
+
 const buildCpuOption = (points: ResourceMetricPoint[]): echarts.EChartsOption => {
   const times = points.map(item => item.time)
   const procCpuSeries = points.map(item => Number(item.procCpuPercent || 0))
@@ -315,6 +383,9 @@ const buildCpuOption = (points: ResourceMetricPoint[]): echarts.EChartsOption =>
 const buildOption = (points: ResourceMetricPoint[]): echarts.EChartsOption => {
   if (props.metricType === 'cpu') {
     return buildCpuOption(points)
+  }
+  if (props.metricType === 'online') {
+    return buildOnlineOption(points)
   }
   if (props.metricType === 'heap') {
     return buildHeapOption(points)

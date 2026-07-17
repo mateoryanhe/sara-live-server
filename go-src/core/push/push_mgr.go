@@ -158,3 +158,11 @@ func clientRemoteAddr(client *httpserver.WebSocketClient) string {
 	}
 	return client.Conn.RemoteAddr().String()
 }
+
+// OnlineCount 当前在线连接数
+func OnlineCount() int {
+	if clientMap == nil {
+		return 0
+	}
+	return clientMap.Size()
+}

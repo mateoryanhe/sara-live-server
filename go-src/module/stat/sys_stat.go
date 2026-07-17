@@ -3,6 +3,7 @@ package stat
 import (
 	"context"
 	"time"
+	"xr-game-server/core/push"
 	"xr-game-server/dao/statdao"
 	"xr-game-server/dto/statdto"
 	"xr-game-server/entity"
@@ -26,5 +27,6 @@ func GetCMSSysStat(_ context.Context, _ *statdto.CMSSysStatReq) (*statdto.CMSSys
 		TodayGoldConsume:    todayStat.GoldConsumeAmount,
 		TodayDiamondConsume: todayStat.DiamondConsumeAmount,
 		TodayRegisterUser:   todayStat.RegisterCount,
+		OnlineCount:         uint64(push.OnlineCount()),
 	}, nil
 }
