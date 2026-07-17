@@ -2,7 +2,6 @@ package logquery
 
 import (
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -129,16 +128,6 @@ func matchErrorEntry(entry *ErrorLogEntry, traceId, url, ip, keyword string, sta
 }
 
 func scanErrorLogFile(filePath string, fn func(entry *ErrorLogEntry) bool) error {
-	file, err := openLogFile(filePath)
-	if err != nil {
-		return err
-	}
-	if file == nil {
-		return nil
-	}
-	defer file.Close()
-
-	scanner := newLogScanner(file)
 	var current *ErrorLogEntry
 	var body strings.Builder
 
@@ -150,24 +139,24 @@ func scanErrorLogFile(filePath string, fn func(entry *ErrorLogEntry) bool) error
 		return fn(current)
 	}
 
-	for scanner.Scan() {
-		line := scanner.Text()
+	err := scanLogFile(filePath, func(line string) bool {
 		if header, ok := parseErrorLogHeader(line); ok {
 			if !flush() {
-				break
+				return false
 			}
 			current = header
 			body.Reset()
 			body.WriteString(line)
-			continue
+			return true
 		}
 		if current == nil {
-			continue
+			return true
 		}
 		body.WriteByte('\n')
 		body.WriteString(line)
-	}
-	if err := scanner.Err(); err != nil {
+		return true
+	})
+	if err != nil {
 		return err
 	}
 	flush()
@@ -243,45 +232,15 @@ func scanDetailErrorLogFile(filePath string, fn func(entry *ErrorLogEntry) bool)
 	})
 }
 
-func listDetailLogFilesForErrors() []string {
-	paths := loadLogPaths()
-	dirs := listDetailLogDirs()
-	fileSet := make(map[string]struct{})
-	for _, dir := range dirs {
-		for _, filePath := range listDetailLogFilesInDir(dir, paths.DetailLogPattern) {
-			fileSet[filePath] = struct{}{}
+func scanErrorLogEntriesInRange(startDate, endDate string, fn func(entry *ErrorLogEntry) bool) {
+	for _, filePath := range listErrorLogFilesForRange(startDate, endDate) {
+		if err := scanErrorLogFile(filePath, fn); err != nil {
+			continue
 		}
 	}
-	files := make([]string, 0, len(fileSet))
-	for filePath := range fileSet {
-		files = append(files, filePath)
-	}
-	sort.Strings(files)
-	return files
-}
-
-func scanAllErrorLogEntries(fn func(entry *ErrorLogEntry) bool) {
-	continueScan := true
-	wrap := func(entry *ErrorLogEntry) bool {
-		if !continueScan {
-			return false
-		}
-		if !fn(entry) {
-			continueScan = false
-			return false
-		}
-		return true
-	}
-	for _, filePath := range listErrorLogFiles() {
-		_ = scanErrorLogFile(filePath, wrap)
-		if !continueScan {
-			return
-		}
-	}
-	for _, filePath := range listDetailLogFilesForErrors() {
-		_ = scanDetailErrorLogFile(filePath, wrap)
-		if !continueScan {
-			return
+	for _, filePath := range listDetailLogFilesForRange(startDate, endDate) {
+		if err := scanDetailErrorLogFile(filePath, fn); err != nil {
+			continue
 		}
 	}
 }

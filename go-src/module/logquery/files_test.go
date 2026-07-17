@@ -58,6 +58,32 @@ func TestFilterAccessLogFiles(t *testing.T) {
 	}
 }
 
+func TestExtractLogFileDate(t *testing.T) {
+	if date, ok := extractLogFileDate("/log/access-2026-07-17.log"); !ok || date != "2026-07-17" {
+		t.Fatalf("unexpected date: %s ok=%v", date, ok)
+	}
+	if date, ok := extractLogFileDate("/log/access.20260717.log"); !ok || date != "2026-07-17" {
+		t.Fatalf("unexpected date: %s ok=%v", date, ok)
+	}
+}
+
+func TestFilterLogFilesByDateRange(t *testing.T) {
+	files := filterLogFilesByDateRange([]string{
+		"/log/access-2026-07-16.log",
+		"/log/access-2026-07-17.log",
+		"/log/access-2026-07-18.log",
+	}, "2026-07-17", "2026-07-17")
+	if len(files) != 1 || files[0] != "/log/access-2026-07-17.log" {
+		t.Fatalf("unexpected filtered files: %#v", files)
+	}
+}
+
+func TestExtractLogFileDateErrorPattern(t *testing.T) {
+	if date, ok := extractLogFileDate("/log/error-20260717.log"); !ok || date != "2026-07-17" {
+		t.Fatalf("unexpected error log date: %s ok=%v", date, ok)
+	}
+}
+
 func TestMatchTraceId(t *testing.T) {
 	if !matchTraceId("abc123", "abc123") {
 		t.Fatal("exact traceId should match")

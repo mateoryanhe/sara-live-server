@@ -14,6 +14,7 @@ import (
 const (
 	logBodyFileSkipped            = "[文件已省略,不输出内容]"
 	logBodySkippedNonJSON         = "[非JSON报文,已省略内容]"
+	logLogQueryRespSkipped        = "[日志查询响应,已省略内容]"
 	apiResponseBufferWrittenAtKey = "apiResponseBufferWrittenAt"
 )
 
@@ -229,7 +230,7 @@ func logAPIRequestResponseWrite(r *ghttp.Request, writeMs int64, respBytes int, 
 		writeMs,
 		respBytes,
 		r.RequestURI,
-		respContent,
+		apiRespContentForLog(r, respContent),
 	)
 }
 
@@ -296,4 +297,18 @@ func isJSONRequestBody(r *ghttp.Request, body string) bool {
 		return true
 	}
 	return false
+}
+
+func isLogQueryRequest(r *ghttp.Request) bool {
+	if r == nil {
+		return false
+	}
+	return strings.Contains(r.RequestURI, "/logQuery/")
+}
+
+func apiRespContentForLog(r *ghttp.Request, respContent string) string {
+	if isLogQueryRequest(r) {
+		return logLogQueryRespSkipped
+	}
+	return respContent
 }

@@ -25,7 +25,8 @@ func GetAccessTrend(_ context.Context, req *logquerydto.CMSGetAccessTrendReq) (*
 	for {
 		counter := make(map[string]int64)
 		totalCount = 0
-		for _, filePath := range listAccessLogFiles() {
+		files := listAccessLogFilesForRange(req.StartDate, req.EndDate)
+		for _, filePath := range files {
 			_ = scanAccessLogFile(filePath, func(entry *AccessLogEntry) bool {
 				if !logTimeInRange(entry.Time, rangeStart, rangeEnd) {
 					return true

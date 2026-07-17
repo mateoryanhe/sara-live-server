@@ -2,9 +2,15 @@ package logquery
 
 import (
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 )
+
+var logFileDateRes = []*regexp.Regexp{
+	regexp.MustCompile(`(\d{4}-\d{2}-\d{2})`),
+	regexp.MustCompile(`(\d{4})(\d{2})(\d{2})`),
+}
 
 func listDirLogFiles(dir string) []string {
 	dir = normalizeDir(dir)
@@ -52,7 +58,6 @@ func listDetailLogFilesInDir(dir, pattern string) []string {
 	}
 	addFiles(filterDetailLogFiles(listDirLogFiles(dir)))
 	addFiles(filterDetailLogFiles(listLogFilesByPattern(dir, pattern)))
-	addFiles(listLogFilesByPattern(dir, pattern))
 
 	files := make([]string, 0, len(fileSet))
 	for filePath := range fileSet {
@@ -207,4 +212,87 @@ func patternToGlob(pattern string) string {
 		s = strings.ReplaceAll(s, placeholder, "*")
 	}
 	return s
+}
+
+func extractLogFileDate(filePath string) (string, bool) {
+	name := filepath.Base(filePath)
+	if match := logFileDateRes[0].FindStringSubmatch(name); len(match) > 1 {
+		return match[1], true
+	}
+	if match := logFileDateRes[1].FindStringSubmatch(name); len(match) > 3 {
+		return match[1] + "-" + match[2] + "-" + match[3], true
+	}
+	return "", false
+}
+
+func filterLogFilesByDateRange(files []string, startDate, endDate string) []string {
+	allowedDates := listDates(startDate, endDate)
+	if len(allowedDates) == 0 {
+		return files
+	}
+	allowed := make(map[string]struct{}, len(allowedDates))
+	for _, dateStr := range allowedDates {
+		allowed[dateStr] = struct{}{}
+	}
+
+	ret := make([]string, 0, len(files))
+	for _, filePath := range files {
+		fileDate, ok := extractLogFileDate(filePath)
+		if !ok {
+			ret = append(ret, filePath)
+			continue
+		}
+		if _, inRange := allowed[fileDate]; inRange {
+			ret = append(ret, filePath)
+		}
+	}
+	return ret
+}
+
+func sortLogFilesDesc(files []string) {
+	sort.Slice(files, func(i, j int) bool {
+		return files[i] > files[j]
+	})
+}
+
+func collectLogFilesForRange(startDate, endDate string, datedFiles func(string) string, fallbackFiles func() []string) []string {
+	fileSet := make(map[string]struct{})
+	addFile := func(filePath string) {
+		if filePath == "" {
+			return
+		}
+		fileSet[filePath] = struct{}{}
+	}
+	for _, dateStr := range listDates(startDate, endDate) {
+		addFile(datedFiles(dateStr))
+	}
+	for _, filePath := range filterLogFilesByDateRange(fallbackFiles(), startDate, endDate) {
+		addFile(filePath)
+	}
+	files := make([]string, 0, len(fileSet))
+	for filePath := range fileSet {
+		files = append(files, filePath)
+	}
+	sortLogFilesDesc(files)
+	return files
+}
+
+func listDetailLogFilesForRange(startDate, endDate string) []string {
+	files := collectLogFilesForRange(startDate, endDate, resolveDetailLogFile, listDetailLogFiles)
+	ret := make([]string, 0, len(files))
+	for _, filePath := range files {
+		if isDetailLogFileName(filepath.Base(filePath)) {
+			ret = append(ret, filePath)
+		}
+	}
+	sortLogFilesDesc(ret)
+	return ret
+}
+
+func listAccessLogFilesForRange(startDate, endDate string) []string {
+	return collectLogFilesForRange(startDate, endDate, resolveAccessLogFile, listAccessLogFiles)
+}
+
+func listErrorLogFilesForRange(startDate, endDate string) []string {
+	return collectLogFilesForRange(startDate, endDate, resolveErrorLogFile, listErrorLogFiles)
 }

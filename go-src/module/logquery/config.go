@@ -31,6 +31,9 @@ func loadLogPaths() logPaths {
 	if accessDir == "" {
 		accessDir = detailDir
 	}
+	if detailDir == "" {
+		detailDir = accessDir
+	}
 	if accessPattern == "" {
 		accessPattern = "access-{Y-m-d}.log"
 	}
@@ -85,4 +88,12 @@ func resolveAccessLogFile(dateStr string) string {
 		return ""
 	}
 	return filepath.Join(paths.AccessLogDir, formatLogFileName(paths.AccessLogPattern, dateStr))
+}
+
+func resolveErrorLogFile(dateStr string) string {
+	paths := loadLogPaths()
+	if paths.ErrorLogDir == "" {
+		return ""
+	}
+	return filepath.Join(paths.ErrorLogDir, formatLogFileName(paths.ErrorLogPattern, dateStr))
 }

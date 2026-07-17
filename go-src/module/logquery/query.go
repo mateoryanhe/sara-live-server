@@ -40,7 +40,7 @@ func QueryDetailLogs(_ context.Context, req *logquerydto.CMSQueryDetailLogsReq) 
 	pageIndex, pageSize := normalizePage(req.PageIndex, req.PageSize)
 
 	var matched []*DetailLogEntry
-	for _, filePath := range listDetailLogFiles() {
+	for _, filePath := range listDetailLogFilesForRange(req.StartDate, req.EndDate) {
 		_ = scanDetailLogFile(filePath, func(entry *DetailLogEntry) bool {
 			if !logTimeInRange(entry.Time, rangeStart, rangeEnd) {
 				return true
@@ -49,14 +49,14 @@ func QueryDetailLogs(_ context.Context, req *logquerydto.CMSQueryDetailLogsReq) 
 				return true
 			}
 			matched = append(matched, entry)
-			return len(matched) < maxMatchLines
+			return true
 		})
-		if len(matched) >= maxMatchLines {
-			break
-		}
 	}
 
 	sortDetailLogsByTimeDesc(matched)
+	if len(matched) > maxMatchLines {
+		matched = matched[:maxMatchLines]
+	}
 	total := len(matched)
 	start := (pageIndex - 1) * pageSize
 	if start >= total {
@@ -77,7 +77,7 @@ func QueryAccessLogs(_ context.Context, req *logquerydto.CMSQueryAccessLogsReq) 
 	pageIndex, pageSize := normalizePage(req.PageIndex, req.PageSize)
 
 	var matched []*AccessLogEntry
-	for _, filePath := range listAccessLogFiles() {
+	for _, filePath := range listAccessLogFilesForRange(req.StartDate, req.EndDate) {
 		_ = scanAccessLogFile(filePath, func(entry *AccessLogEntry) bool {
 			if !logTimeInRange(entry.Time, rangeStart, rangeEnd) {
 				return true
@@ -86,14 +86,14 @@ func QueryAccessLogs(_ context.Context, req *logquerydto.CMSQueryAccessLogsReq) 
 				return true
 			}
 			matched = append(matched, entry)
-			return len(matched) < maxMatchLines
+			return true
 		})
-		if len(matched) >= maxMatchLines {
-			break
-		}
 	}
 
 	sortAccessLogsByTimeDesc(matched)
+	if len(matched) > maxMatchLines {
+		matched = matched[:maxMatchLines]
+	}
 	total := len(matched)
 	start := (pageIndex - 1) * pageSize
 	if start >= total {
@@ -114,7 +114,7 @@ func QueryErrorLogs(_ context.Context, req *logquerydto.CMSQueryErrorLogsReq) (*
 	pageIndex, pageSize := normalizePage(req.PageIndex, req.PageSize)
 
 	var matched []*ErrorLogEntry
-	scanAllErrorLogEntries(func(entry *ErrorLogEntry) bool {
+	scanErrorLogEntriesInRange(req.StartDate, req.EndDate, func(entry *ErrorLogEntry) bool {
 		if !logTimeInRange(entry.Time, rangeStart, rangeEnd) {
 			return true
 		}
@@ -122,10 +122,13 @@ func QueryErrorLogs(_ context.Context, req *logquerydto.CMSQueryErrorLogsReq) (*
 			return true
 		}
 		matched = append(matched, entry)
-		return len(matched) < maxMatchLines
+		return true
 	})
 
 	sortErrorLogsByTimeDesc(matched)
+	if len(matched) > maxMatchLines {
+		matched = matched[:maxMatchLines]
+	}
 	total := len(matched)
 	start := (pageIndex - 1) * pageSize
 	if start >= total {
@@ -148,7 +151,7 @@ func GetTraceLogs(_ context.Context, req *logquerydto.CMSGetTraceLogsReq) (*logq
 	}
 
 	var detailLogs []*DetailLogEntry
-	for _, filePath := range listDetailLogFiles() {
+	for _, filePath := range listDetailLogFilesForRange(req.StartDate, req.EndDate) {
 		_ = scanDetailLogFile(filePath, func(entry *DetailLogEntry) bool {
 			if !logTimeInRange(entry.Time, rangeStart, rangeEnd) {
 				return true
@@ -161,7 +164,7 @@ func GetTraceLogs(_ context.Context, req *logquerydto.CMSGetTraceLogsReq) (*logq
 	}
 
 	var accessLogs []*AccessLogEntry
-	for _, filePath := range listAccessLogFiles() {
+	for _, filePath := range listAccessLogFilesForRange(req.StartDate, req.EndDate) {
 		_ = scanAccessLogFile(filePath, func(entry *AccessLogEntry) bool {
 			if !logTimeInRange(entry.Time, rangeStart, rangeEnd) {
 				return true
@@ -174,7 +177,7 @@ func GetTraceLogs(_ context.Context, req *logquerydto.CMSGetTraceLogsReq) (*logq
 	}
 
 	var errorLogs []*ErrorLogEntry
-	scanAllErrorLogEntries(func(entry *ErrorLogEntry) bool {
+	scanErrorLogEntriesInRange(req.StartDate, req.EndDate, func(entry *ErrorLogEntry) bool {
 		if !logTimeInRange(entry.Time, rangeStart, rangeEnd) {
 			return true
 		}
@@ -207,7 +210,7 @@ func GetAccessStats(_ context.Context, req *logquerydto.CMSGetAccessStatsReq) (*
 
 	urlCounter := make(map[string]int64)
 	ipCounter := make(map[string]int64)
-	for _, filePath := range listAccessLogFiles() {
+	for _, filePath := range listAccessLogFilesForRange(req.StartDate, req.EndDate) {
 		_ = scanAccessLogFile(filePath, func(entry *AccessLogEntry) bool {
 			if !logTimeInRange(entry.Time, rangeStart, rangeEnd) {
 				return true

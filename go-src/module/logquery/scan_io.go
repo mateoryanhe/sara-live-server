@@ -2,8 +2,12 @@ package logquery
 
 import (
 	"bufio"
+	"io"
 	"os"
+	"strings"
 )
+
+const maxLogLineBytes = 4 * 1024 * 1024
 
 func openLogFile(filePath string) (*os.File, error) {
 	file, err := os.Open(filePath)
@@ -16,11 +20,46 @@ func openLogFile(filePath string) (*os.File, error) {
 	return file, nil
 }
 
-func newLogScanner(file *os.File) *bufio.Scanner {
-	scanner := bufio.NewScanner(file)
-	buf := make([]byte, 0, 1024*1024)
-	scanner.Buffer(buf, 1024*1024)
-	return scanner
+func readLogLine(reader *bufio.Reader) (string, error) {
+	var builder strings.Builder
+	builder.Grow(4096)
+	truncated := false
+
+	for {
+		b, err := reader.ReadByte()
+		if err == io.EOF {
+			if builder.Len() == 0 {
+				return "", io.EOF
+			}
+			return builder.String(), nil
+		}
+		if err != nil {
+			return builder.String(), err
+		}
+		if b == '\n' {
+			break
+		}
+		if builder.Len() < maxLogLineBytes {
+			builder.WriteByte(b)
+			continue
+		}
+		truncated = true
+	}
+
+	if truncated {
+		for {
+			b, err := reader.ReadByte()
+			if err != nil {
+				break
+			}
+			if b == '\n' {
+				break
+			}
+		}
+		builder.WriteString("...[line truncated]")
+	}
+
+	return builder.String(), nil
 }
 
 func scanLogFile(filePath string, fn func(line string) bool) error {
@@ -33,11 +72,21 @@ func scanLogFile(filePath string, fn func(line string) bool) error {
 	}
 	defer file.Close()
 
-	scanner := newLogScanner(file)
-	for scanner.Scan() {
-		if !fn(scanner.Text()) {
-			break
+	reader := bufio.NewReaderSize(file, 256*1024)
+	for {
+		line, err := readLogLine(reader)
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		line = strings.TrimRight(line, "\r")
+		if line == "" {
+			continue
+		}
+		if !fn(line) {
+			return nil
 		}
 	}
-	return scanner.Err()
 }
