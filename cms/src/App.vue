@@ -1,8 +1,5 @@
 <script lang="ts" setup>
 import {RouterView} from 'vue-router'
-import {restoreAuthSession} from '@/utils/auth'
-
-restoreAuthSession()
 </script>
 
 <template>

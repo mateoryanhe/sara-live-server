@@ -6,8 +6,16 @@ import axios, {
 } from 'axios'
 import envConfig from '@/config/env'
 import {ElMessage} from "element-plus"
-import router from '@/router'
 import {clearAuthSession, getAuthId, getToken} from '@/utils/auth'
+
+function redirectToLogin(): void {
+    const basePath = '/cms'
+    const currentPath = window.location.pathname.replace(new RegExp(`^${basePath}`), '') || '/'
+    const redirect = currentPath !== '/login'
+        ? `?redirect=${encodeURIComponent(currentPath + window.location.search)}`
+        : ''
+    window.location.replace(`${basePath}/login${redirect}`)
+}
 
 // 创建axios实例
 const service: AxiosInstance = axios.create({
@@ -61,11 +69,7 @@ service.interceptors.response.use(
 
         if (error.response?.status === 401) {
             clearAuthSession()
-            const redirect = router.currentRoute.value.fullPath
-            router.replace({
-                path: '/login',
-                query: redirect && redirect !== '/login' ? {redirect} : undefined,
-            })
+            redirectToLogin()
         }
 
         return Promise.reject(error)

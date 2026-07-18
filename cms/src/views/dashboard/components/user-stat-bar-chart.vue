@@ -4,7 +4,8 @@
 
 <script lang="ts" setup>
 import {computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue'
-import * as echarts from 'echarts'
+import type {EChartsType} from 'echarts/core'
+import echarts, {type EChartsOption} from '@/utils/echarts'
 import type {UserStatTrendPoint} from '@/types/api'
 import {USER_STAT_BAR_SERIES, getEnabledUserStatBarSeries} from '../user-stat-bar-series'
 
@@ -16,7 +17,7 @@ const props = defineProps<{
 }>()
 
 const chartRef = ref<HTMLDivElement>()
-let chartInstance: echarts.ECharts | null = null
+let chartInstance: EChartsType | null = null
 
 const activeMetric = computed(() => {
   const found = USER_STAT_BAR_SERIES.find((s) => s.key === props.metricKey && s.enabled)
@@ -26,7 +27,7 @@ const activeMetric = computed(() => {
   return getEnabledUserStatBarSeries()[0]
 })
 
-const buildOption = (points: UserStatTrendPoint[]): echarts.EChartsOption => {
+const buildOption = (points: UserStatTrendPoint[]): EChartsOption => {
   const cfg = activeMetric.value
   if (!cfg) {
     return {}

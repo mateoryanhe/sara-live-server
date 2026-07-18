@@ -4,7 +4,8 @@
 
 <script lang="ts" setup>
 import {nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue'
-import * as echarts from 'echarts'
+import type {EChartsType} from 'echarts/core'
+import echarts, {type EChartsOption} from '@/utils/echarts'
 import type {AccessTrendData} from '@/types/api'
 
 const props = defineProps<{
@@ -13,9 +14,9 @@ const props = defineProps<{
 }>()
 
 const chartRef = ref<HTMLDivElement>()
-let chartInstance: echarts.ECharts | null = null
+let chartInstance: EChartsType | null = null
 
-const buildOption = (trend: AccessTrendData | null): echarts.EChartsOption => {
+const buildOption = (trend: AccessTrendData | null): EChartsOption => {
   const points = trend?.points || []
   const times = points.map(item => item.time)
   const counts = points.map(item => Number(item.count || 0))

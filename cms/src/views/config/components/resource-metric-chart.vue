@@ -4,7 +4,8 @@
 
 <script lang="ts" setup>
 import {nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue'
-import * as echarts from 'echarts'
+import type {EChartsType} from 'echarts/core'
+import echarts, {type EChartsOption} from '@/utils/echarts'
 import type {ResourceMetricPoint} from '@/types/api'
 
 type MetricType = 'memory' | 'heap' | 'ratio' | 'cpu' | 'online'
@@ -16,7 +17,7 @@ const props = defineProps<{
 }>()
 
 const chartRef = ref<HTMLDivElement>()
-let chartInstance: echarts.ECharts | null = null
+let chartInstance: EChartsType | null = null
 
 const formatNumber = (value: number | null | undefined, digits = 2) => {
   if (value === null || value === undefined) {
@@ -25,7 +26,7 @@ const formatNumber = (value: number | null | undefined, digits = 2) => {
   return Number(value).toFixed(digits)
 }
 
-const buildMemoryOption = (points: ResourceMetricPoint[]): echarts.EChartsOption => {
+const buildMemoryOption = (points: ResourceMetricPoint[]): EChartsOption => {
   const times = points.map(item => item.time)
   const procMemSeries = points.map(item => Number(item.procMemMb || 0))
   const sysMemSeries = points.map(item => Number(item.sysMemUsedMb || 0))
@@ -94,7 +95,7 @@ const buildMemoryOption = (points: ResourceMetricPoint[]): echarts.EChartsOption
   }
 }
 
-const buildHeapOption = (points: ResourceMetricPoint[]): echarts.EChartsOption => {
+const buildHeapOption = (points: ResourceMetricPoint[]): EChartsOption => {
   const times = points.map(item => item.time)
   const heapAllocSeries = points.map(item => Number(item.procHeapAllocMb || 0))
   const heapInuseSeries = points.map(item => Number(item.procHeapInuseMb || 0))
@@ -172,7 +173,7 @@ const buildHeapOption = (points: ResourceMetricPoint[]): echarts.EChartsOption =
   }
 }
 
-const buildHeapRatioOption = (points: ResourceMetricPoint[]): echarts.EChartsOption => {
+const buildHeapRatioOption = (points: ResourceMetricPoint[]): EChartsOption => {
   const times = points.map(item => item.time)
   const heapUsedPercentSeries = points.map(item => Number(item.procHeapUsedPercent || 0))
   const heapIdlePercentSeries = points.map(item => Number(item.procHeapIdlePercent || 0))
@@ -249,7 +250,7 @@ const formatCount = (value: number | string | null | undefined) => {
   return Number(value).toLocaleString('zh-CN')
 }
 
-const buildOnlineOption = (points: ResourceMetricPoint[]): echarts.EChartsOption => {
+const buildOnlineOption = (points: ResourceMetricPoint[]): EChartsOption => {
   const times = points.map(item => item.time)
   const onlineSeries = points.map(item => Number(item.onlineCount || 0))
 
@@ -310,7 +311,7 @@ const buildOnlineOption = (points: ResourceMetricPoint[]): echarts.EChartsOption
   }
 }
 
-const buildCpuOption = (points: ResourceMetricPoint[]): echarts.EChartsOption => {
+const buildCpuOption = (points: ResourceMetricPoint[]): EChartsOption => {
   const times = points.map(item => item.time)
   const procCpuSeries = points.map(item => Number(item.procCpuPercent || 0))
   const sysCpuSeries = points.map(item => Number(item.sysCpuPercent || 0))
@@ -380,7 +381,7 @@ const buildCpuOption = (points: ResourceMetricPoint[]): echarts.EChartsOption =>
   }
 }
 
-const buildOption = (points: ResourceMetricPoint[]): echarts.EChartsOption => {
+const buildOption = (points: ResourceMetricPoint[]): EChartsOption => {
   if (props.metricType === 'cpu') {
     return buildCpuOption(points)
   }

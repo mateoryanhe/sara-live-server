@@ -1,8 +1,6 @@
 import {createRouter, createWebHistory, type RouteRecordRaw} from 'vue-router'
-import Layout from '@/views/layout/index.vue'
-import Login from '@/views/login/index.vue'
 import {hasPermission} from '@/utils/permission'
-import {isAuthenticated, restoreAuthSession} from '@/utils/auth'
+import {clearAuthSession, isAuthenticated, restoreAuthSession} from '@/utils/auth'
 import {ElMessage} from 'element-plus'
 import {layoutRouteGroups} from './routes'
 
@@ -10,12 +8,12 @@ const routes: Array<RouteRecordRaw> = [
     {
         path: '/login',
         name: 'Login',
-        component: Login,
+        component: () => import('@/views/login/index.vue'),
         meta: {title: '登录', hidden: true},
     },
     {
         path: '/',
-        component: Layout,
+        component: () => import('@/views/layout/index.vue'),
         redirect: '/dashboard',
         children: layoutRouteGroups,
     },
@@ -63,7 +61,11 @@ router.beforeEach((to, from, next) => {
         next(false)
         return
     }
-    next('/dashboard')
+    clearAuthSession()
+    next({
+        path: '/login',
+        query: {redirect: to.fullPath},
+    })
 })
 
 export default router

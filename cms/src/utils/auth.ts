@@ -30,10 +30,6 @@ export function getAuthId(): string | null {
 }
 
 export function isAuthenticated(): boolean {
-    return Boolean(getToken())
-}
-
-export function restoreAuthSession(): boolean {
     const token = getToken()
     if (!token) {
         clearPermissions()
@@ -42,16 +38,45 @@ export function restoreAuthSession(): boolean {
 
     const admin = localStorage.getItem(ADMIN_KEY) === 'true'
     const rawModules = localStorage.getItem(PERMISSIONS_KEY)
-    if (!rawModules) {
-        clearPermissions()
+    if (admin) {
         return true
+    }
+    if (!rawModules) {
+        clearAuthSession()
+        return false
     }
 
     try {
         const modules = JSON.parse(rawModules) as Permission[]
-        setUserPermissions(Array.isArray(modules) ? modules : [], admin)
+        if (!Array.isArray(modules)) {
+            clearAuthSession()
+            return false
+        }
+        return true
+    } catch {
+        clearAuthSession()
+        return false
+    }
+}
+
+export function restoreAuthSession(): boolean {
+    if (!isAuthenticated()) {
+        return false
+    }
+
+    const admin = localStorage.getItem(ADMIN_KEY) === 'true'
+    const rawModules = localStorage.getItem(PERMISSIONS_KEY)
+    if (admin) {
+        setUserPermissions([], true)
+        return true
+    }
+
+    try {
+        const modules = JSON.parse(rawModules || '[]') as Permission[]
+        setUserPermissions(Array.isArray(modules) ? modules : [], false)
     } catch {
         clearPermissions()
+        return false
     }
     return true
 }

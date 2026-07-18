@@ -37,7 +37,7 @@
         </div>
       </template>
 
-      <el-tabs v-model="activePeriod" @tab-change="handleTabChange">
+      <el-tabs v-model="activePeriod" lazy @tab-change="handleTabChange">
         <el-tab-pane label="日" name="daily">
           <UserStatChart ref="dailyLineChartRef" :data="userStatTrend.daily" title="活跃用户 / 新注册 (最近30天)"/>
           <BarMetricSection
@@ -94,15 +94,16 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, nextTick, onMounted, reactive, ref} from 'vue'
+import {computed, defineAsyncComponent, nextTick, onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {sysStatApi} from '@/api'
 import type {ResourceMetricTrend, SysStat, UserStatTrend} from '@/types/api'
-import UserStatChart from './components/user-stat-chart.vue'
-import UserStatBarChart from './components/user-stat-bar-chart.vue'
 import BarMetricSection from './components/bar-metric-section.vue'
-import ResourceMetricChart from '@/views/config/components/resource-metric-chart.vue'
 import {getUserStatBarMetricTabs, USER_STAT_BAR_SERIES} from './user-stat-bar-series'
+
+const UserStatChart = defineAsyncComponent(() => import('./components/user-stat-chart.vue'))
+const UserStatBarChart = defineAsyncComponent(() => import('./components/user-stat-bar-chart.vue'))
+const ResourceMetricChart = defineAsyncComponent(() => import('@/views/config/components/resource-metric-chart.vue'))
 
 const loading = ref(false)
 const trendLoading = ref(false)

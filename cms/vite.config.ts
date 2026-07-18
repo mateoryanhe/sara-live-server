@@ -9,12 +9,12 @@ import Components from 'unplugin-vue-components/vite'
 import {ElementPlusResolver} from 'unplugin-vue-components/resolvers'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({mode}) => ({
     base: '/cms/',
     plugins: [
         vue(),
         vueJsx(),
-        vueDevTools(),
+        ...(mode === 'development' ? [vueDevTools()] : []),
         AutoImport({
             resolvers: [ElementPlusResolver()],
         }),
@@ -42,9 +42,17 @@ export default defineConfig({
                 chunkFileNames: 'assets/js/[name]-[hash].js',
                 entryFileNames: 'assets/js/[name]-[hash].js',
                 assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
+                manualChunks(id) {
+                    if (!id.includes('node_modules')) {
+                        return
+                    }
+                    // Only split echarts; splitting vue and element-plus causes circular chunk deps.
+                    if (id.includes('/echarts/') || id.includes('/zrender/')) {
+                        return 'echarts'
+                    }
+                },
             }
         },
-        // 针对PC端优化，可以适当增加chunk大小限制
         chunkSizeWarningLimit: 1000
     }
-})
+}))

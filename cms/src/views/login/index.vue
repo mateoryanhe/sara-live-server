@@ -20,7 +20,7 @@
           <el-input
               v-model="loginForm.userName"
               placeholder="用户名"
-              prefix-icon="User"
+              :prefix-icon="UserIcon"
               size="large"
           />
         </el-form-item>
@@ -28,7 +28,7 @@
           <el-input
               v-model="loginForm.pwd"
               placeholder="密码"
-              prefix-icon="Lock"
+              :prefix-icon="LockIcon"
               size="large"
               type="password"
               @keyup.enter="handleLogin"
@@ -53,7 +53,7 @@
 <script lang="ts" setup>
 import {onMounted, reactive, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {Platform} from '@element-plus/icons-vue'
+import {Platform, Lock as LockIcon, User as UserIcon} from '@element-plus/icons-vue'
 import {authApi} from '@/api'
 import {ElMessage} from 'element-plus'
 import type {LoginRes} from '@/types/api'
