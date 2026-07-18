@@ -1,7 +1,7 @@
 package core
 
 import (
-	_ "github.com/gogf/gf/contrib/drivers/mysql/v2"
+	_ "github.com/gogf/gf/contrib/drivers/pgsql/v2"
 	"xr-game-server/core/cfg"
 	"xr-game-server/core/push"
 	"xr-game-server/core/snowflake"

@@ -51,6 +51,6 @@ logger:
 
 database:
   default:
-    link: "mysql:root:Appledev882116@tcp(127.0.0.1:3306)/live_db"
-    extra: "charset=utf8mb4&parseTime=True&loc=Local"
+    link: "pgsql:postgres:1qaz2wsx@tcp(127.0.0.1:5432)/live_db"
+    extra: "sslmode=disable"
     debug: true

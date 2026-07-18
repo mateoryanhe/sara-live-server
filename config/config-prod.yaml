@@ -25,6 +25,6 @@ database:
     path: "/var/log/gf-app/sql"
     level: "all"
   default:
-    link: "mysql:root:123456@tcp(127.0.0.1:3306)/go-dev"
-    extra: "charset=utf8mb4&parseTime=True&loc=Local"
+    link: "pgsql:postgres:123456@tcp(127.0.0.1:5432)/go-dev"
+    extra: "sslmode=disable"
     debug: true
