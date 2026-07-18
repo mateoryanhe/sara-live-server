@@ -141,6 +141,47 @@ func buildDomainTLSConfig(ctx context.Context) *tls.Config {
 	}
 }
 
+func bindCMSStaticFallback(ctx context.Context) {
+	root := strings.TrimSpace(g.Cfg().MustGet(ctx, "server.serverRoot").String())
+	if root == "" {
+		return
+	}
+	indexPath := filepath.Join(filepath.Clean(root), "cms", "index.html")
+	if !gfile.Exists(indexPath) {
+		return
+	}
+	httpServer.BindHookHandler("/cms/*", ghttp.HookBeforeServe, func(r *ghttp.Request) {
+		serveCMSStaticFallback(r, root, indexPath)
+	})
+	httpServer.BindHookHandler("/cms", ghttp.HookBeforeServe, func(r *ghttp.Request) {
+		serveCMSStaticFallback(r, root, indexPath)
+	})
+	g.Log().Warning(ctx, "已启用 CMS SPA 路由回退 /cms -> index.html")
+}
+
+func serveCMSStaticFallback(r *ghttp.Request, root, indexPath string) {
+	if r == nil {
+		return
+	}
+	if r.Method != http.MethodGet && r.Method != http.MethodHead {
+		return
+	}
+	reqPath := r.URL.Path
+	if reqPath != "/cms" && !strings.HasPrefix(reqPath, "/cms/") {
+		return
+	}
+	filePath, ok := buildDomainStaticFilePath(root, reqPath)
+	if ok && gfile.Exists(filePath) && !gfile.IsDir(filePath) {
+		return
+	}
+	if r.Method == http.MethodHead {
+		r.Response.WriteHeader(http.StatusOK)
+	} else {
+		r.Response.ServeFile(indexPath)
+	}
+	r.ExitAll()
+}
+
 func buildDomainStaticFilePath(root, reqPath string) (string, bool) {
 	if reqPath == "" {
 		reqPath = "/"

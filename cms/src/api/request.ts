@@ -5,7 +5,9 @@ import axios, {
     type InternalAxiosRequestConfig
 } from 'axios'
 import envConfig from '@/config/env'
-import {ElMessage} from "element-plus";
+import {ElMessage} from "element-plus"
+import router from '@/router'
+import {clearAuthSession, getAuthId, getToken} from '@/utils/auth'
 
 // 创建axios实例
 const service: AxiosInstance = axios.create({
@@ -20,8 +22,8 @@ const service: AxiosInstance = axios.create({
 service.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
         // 在发送请求之前做些什么，比如添加token和authId
-        const token = localStorage.getItem('token')
-        const authId = localStorage.getItem('authId')
+        const token = getToken()
+        const authId = getAuthId()
 
         if (token) {
             config.headers!['token'] = token
@@ -58,10 +60,12 @@ service.interceptors.response.use(
         console.error('Response Error:', error)
 
         if (error.response?.status === 401) {
-            // token过期，跳转到登录页
-            localStorage.removeItem('token')
-            localStorage.removeItem('authId')
-            window.location.href = '/login'
+            clearAuthSession()
+            const redirect = router.currentRoute.value.fullPath
+            router.replace({
+                path: '/login',
+                query: redirect && redirect !== '/login' ? {redirect} : undefined,
+            })
         }
 
         return Promise.reject(error)

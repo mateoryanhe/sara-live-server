@@ -10,7 +10,7 @@ REM SSH 密钥（PuTTY 格式 .ppk）
 set SSH_KEY_PATH=D:\tools\ppk\live-test.ppk
 
 REM 本地路径
-set LOCAL_PROJECT_ROOT=D:\company-code\app-code\live-server
+set LOCAL_PROJECT_ROOT=D:\company-code\sara-live-server
 set VUE_PROJECT_DIR=%LOCAL_PROJECT_ROOT%\cms
 set BUILD_OUTPUT_DIR=D:\root\cms
 

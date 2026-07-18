@@ -5,7 +5,7 @@ set REMOTE_USER=ec2-user
 set REMOTE_DIR=/home/ec2-user/xgameserver
 
 REM Local path configuration
-set LOCAL_PROJECT_PATH=D:\company-code\app-code\live-server
+set LOCAL_PROJECT_PATH=D:\company-code\sara-live-server
 set LOCAL_GO_SRC=%LOCAL_PROJECT_PATH%\go-src
 set LOCAL_CONFIG_PATH=%LOCAL_PROJECT_PATH%\config\dev\config.yaml
 set LOCAL_BUILD_PATH=%LOCAL_PROJECT_PATH%\go-build

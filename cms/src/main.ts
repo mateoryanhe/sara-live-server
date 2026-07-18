@@ -3,6 +3,9 @@ import './assets/main.css'
 import {createApp} from 'vue'
 import App from './App.vue'
 import router from './router'
+import {restoreAuthSession} from '@/utils/auth'
+
+restoreAuthSession()
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'

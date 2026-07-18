@@ -51,13 +51,19 @@
 </template>
 
 <script lang="ts" setup>
-import {reactive, ref} from 'vue'
-import {useRouter} from 'vue-router'
+import {onMounted, reactive, ref} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
 import {Platform} from '@element-plus/icons-vue'
 import {authApi} from '@/api'
 import {ElMessage} from 'element-plus'
 import type {LoginRes} from '@/types/api'
-import {clearPermissions, setUserPermissions} from '@/utils/permission'
+import {clearPermissions} from '@/utils/permission'
+import {
+    getSavedCredentials,
+    isAuthenticated,
+    saveLoginCredentials,
+    setAuthSession,
+} from '@/utils/auth'
 
 interface LoginForm {
   userName: string
@@ -65,6 +71,7 @@ interface LoginForm {
 }
 
 const router = useRouter()
+const route = useRoute()
 const loading = ref(false)
 const loginForm = reactive<LoginForm>({
   userName: '',
@@ -83,6 +90,25 @@ const loginRules = {
   ]
 }
 
+const resolveRedirectPath = () => {
+  const redirect = route.query.redirect
+  if (typeof redirect === 'string' && redirect.startsWith('/')) {
+    return redirect
+  }
+  return '/dashboard'
+}
+
+onMounted(() => {
+  if (isAuthenticated()) {
+    router.replace(resolveRedirectPath())
+    return
+  }
+
+  const saved = getSavedCredentials()
+  loginForm.userName = saved.userName
+  loginForm.pwd = saved.pwd
+})
+
 const handleLogin = async () => {
   if (!loginFormRef.value) return
 
@@ -94,22 +120,20 @@ const handleLogin = async () => {
         pwd: loginForm.pwd
       })
           .then((res: LoginRes) => {
-            // 登录成功，保存token和authId
-            localStorage.setItem('token', res.token)
-            localStorage.setItem('authId', res.authId.toString())
-
-            // 设置用户权限信息
-            setUserPermissions(res.modules || [], res.admin)
+            setAuthSession({
+              token: res.token,
+              authId: res.authId.toString(),
+              admin: res.admin,
+              modules: res.modules || [],
+            })
+            saveLoginCredentials(loginForm.userName, loginForm.pwd)
 
             ElMessage.success('登录成功')
-            // 登录成功后跳转到用户列表页面，而不是仪表盘
-            router.push('/dashboard')
+            router.replace(resolveRedirectPath())
           })
           .catch(err => {
             console.error('Login error:', err)
-            // 登录失败时清除权限信息
             clearPermissions()
-            //ElMessage.error('登录失败: ' + (err.message || '网络错误'))
           })
           .finally(() => {
             loading.value = false

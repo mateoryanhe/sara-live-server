@@ -2,6 +2,7 @@ import {createRouter, createWebHistory, type RouteRecordRaw} from 'vue-router'
 import Layout from '@/views/layout/index.vue'
 import Login from '@/views/login/index.vue'
 import {hasPermission} from '@/utils/permission'
+import {isAuthenticated, restoreAuthSession} from '@/utils/auth'
 import {ElMessage} from 'element-plus'
 import {layoutRouteGroups} from './routes'
 
@@ -25,19 +26,28 @@ const router = createRouter({
     routes,
 })
 
-router.beforeEach((to, _from, next) => {
+router.beforeEach((to, from, next) => {
     document.title = to.meta.title
         ? `后台管理系统 - ${to.meta.title}`
         : '后台管理系统'
 
+    restoreAuthSession()
+
     if (to.name === 'Login') {
+        if (isAuthenticated()) {
+            const redirect = typeof to.query.redirect === 'string' ? to.query.redirect : '/dashboard'
+            next(redirect)
+            return
+        }
         next()
         return
     }
 
-    const token = localStorage.getItem('token')
-    if (!token) {
-        next('/login')
+    if (!isAuthenticated()) {
+        next({
+            path: '/login',
+            query: to.fullPath === '/' ? undefined : {redirect: to.fullPath},
+        })
         return
     }
 
@@ -49,7 +59,11 @@ router.beforeEach((to, _from, next) => {
 
     console.warn(`用户没有访问 ${moduleName} 模块的权限`)
     ElMessage.error('您没有权限访问该模块')
-    next('/login')
+    if (from.name && from.name !== 'Login') {
+        next(false)
+        return
+    }
+    next('/dashboard')
 })
 
 export default router

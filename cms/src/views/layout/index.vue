@@ -346,7 +346,8 @@
 import {computed, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {ArrowDown, Coin, Collection, CollectionTag, Cpu, Document, Expand, Fold, Key, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Search, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
-import {clearPermissions, getIsAdmin, hasPermission} from '@/utils/permission'
+import {getIsAdmin, hasPermission} from '@/utils/permission'
+import {clearAuthSession} from '@/utils/auth'
 
 const route = useRoute()
 const router = useRouter()
@@ -367,15 +368,7 @@ const toggleCollapse = () => {
 }
 
 const logout = () => {
-  // 清除登录信息
-  localStorage.removeItem('token')
-  localStorage.removeItem('authId')
-  localStorage.removeItem('username')
-
-  // 清除权限信息
-  clearPermissions()
-
-  // 跳转到登录页
+  clearAuthSession()
   router.push('/login')
 }
 
