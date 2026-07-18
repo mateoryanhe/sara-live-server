@@ -1,4 +1,14 @@
 import {request} from '../request'
+import {
+    buildPageResponse,
+    parseAccessLogLine,
+    parseDetailLogLine,
+    parseErrorLogLines,
+    parseLogExportPage,
+    parseStatsExport,
+    parseTraceExport,
+    parseTrendExport,
+} from '@/utils/logParsers'
 import type {
     AccessLogItem,
     AccessLogQuery,
@@ -10,6 +20,7 @@ import type {
     ErrorLogItem,
     ErrorLogQuery,
     LogPathsConfig,
+    LogQueryExportResult,
     LogQueryJobResult,
     LogQueryJobSubmitResult,
     PageResponse,
@@ -50,34 +61,85 @@ export async function runAsyncLogQuery<T>(
     throw new Error('日志查询超时，请稍后重试')
 }
 
+const resolveExportUrl = (fileUrl: string) => {
+    if (/^https?:\/\//i.test(fileUrl)) {
+        return fileUrl
+    }
+    const origin = window.location.origin.replace(/\/$/, '')
+    return `${origin}${fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`}`
+}
+
+const downloadExportFile = async (exportRes: LogQueryExportResult) => {
+    const response = await fetch(resolveExportUrl(exportRes.fileUrl))
+    if (!response.ok) {
+        throw new Error('下载日志导出文件失败')
+    }
+    return response.text()
+}
+
+const deleteExportFile = async (exportId: string) => {
+    await request.post('/logQuery/deleteExport', {exportId})
+}
+
+async function runExportQuery<T>(
+    queryType: string,
+    payload: object,
+    parse: (text: string, exportRes: LogQueryExportResult) => T,
+    onStatus?: LogQueryStatusHandler,
+): Promise<T> {
+    const exportRes = await runAsyncLogQuery<LogQueryExportResult>(queryType, payload, onStatus)
+    try {
+        const text = await downloadExportFile(exportRes)
+        return parse(text, exportRes)
+    } finally {
+        try {
+            await deleteExportFile(exportRes.exportId)
+        } catch (error) {
+            console.warn('删除日志导出文件失败:', error)
+        }
+    }
+}
+
 export const logQueryApi = {
     getLogPaths: () => {
         return request.post<LogPathsConfig>('/logQuery/getLogPaths', {})
     },
 
     queryDetailLogs: (params: DetailLogQuery, onStatus?: LogQueryStatusHandler) => {
-        return runAsyncLogQuery<PageResponse<DetailLogItem>>('detail', params, onStatus)
+        return runExportQuery<PageResponse<DetailLogItem>>('detail', params, (text, exportRes) => {
+            const items = parseLogExportPage(text, parseDetailLogLine)
+            return buildPageResponse(items, exportRes.total || items.length)
+        }, onStatus)
     },
 
     queryAccessLogs: (params: AccessLogQuery, onStatus?: LogQueryStatusHandler) => {
-        return runAsyncLogQuery<PageResponse<AccessLogItem>>('access', params, onStatus)
+        return runExportQuery<PageResponse<AccessLogItem>>('access', params, (text, exportRes) => {
+            const items = parseLogExportPage(text, parseAccessLogLine)
+            return buildPageResponse(items, exportRes.total || items.length)
+        }, onStatus)
     },
 
     queryErrorLogs: (params: ErrorLogQuery, onStatus?: LogQueryStatusHandler) => {
-        return runAsyncLogQuery<PageResponse<ErrorLogItem>>('error', params, onStatus)
+        return runExportQuery<PageResponse<ErrorLogItem>>('error', params, (text, exportRes) => {
+            const items = parseErrorLogLines(text)
+            return buildPageResponse(items, exportRes.total || items.length)
+        }, onStatus)
     },
 
     getTraceLogs: (traceId: string, startDate: string, endDate: string, onStatus?: LogQueryStatusHandler) => {
-        return runAsyncLogQuery<TraceLogDetail>('trace', {traceId, startDate, endDate}, onStatus)
+        return runExportQuery<TraceLogDetail>('trace', {traceId, startDate, endDate}, (text) =>
+            parseTraceExport(text, traceId, startDate, endDate), onStatus)
     },
 
     getAccessStats: (params: { startDate: string; endDate: string; topN?: number }, onStatus?: LogQueryStatusHandler) => {
-        return runAsyncLogQuery<AccessLogStats>('accessStats', params, onStatus)
+        return runExportQuery<AccessLogStats>('accessStats', params, (text) => parseStatsExport(text), onStatus)
     },
 
     getAccessTrend: (params: AccessTrendQuery, onStatus?: LogQueryStatusHandler) => {
-        return runAsyncLogQuery<AccessTrendData>('accessTrend', params, onStatus)
+        return runExportQuery<AccessTrendData>('accessTrend', params, (text) => parseTrendExport(text), onStatus)
     },
+
+    deleteExport: deleteExportFile,
 }
 
 export default logQueryApi

@@ -91,8 +91,7 @@ func logUnexpectedHandlerError(r *ghttp.Request, err error) {
 		return
 	}
 	xrlog.ErrorWithErr(r.Context(), "Handler",
-		fmt.Sprintf("time=%v,reqId=%v,authId=%v,method=%v,url=%v",
-			gtime.Now().Time.Format("2006-01-02 15:04:05.000"),
+		fmt.Sprintf("reqId=%v,authId=%v,method=%v,url=%v",
 			r.GetHeader(ReqId, ""),
 			authIdFromRequest(r),
 			r.Method,

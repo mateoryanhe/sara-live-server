@@ -12,13 +12,32 @@ type CMSGetLogPathsReq struct {
 }
 
 type CMSGetLogPathsRes struct {
-	ServerTime       string `json:"serverTime"`
-	DetailLogDir     string `json:"detailLogDir"`
-	DetailLogPattern string `json:"detailLogPattern"`
-	AccessLogDir     string `json:"accessLogDir"`
-	AccessLogPattern string `json:"accessLogPattern"`
-	ErrorLogDir      string `json:"errorLogDir"`
-	ErrorLogPattern  string `json:"errorLogPattern"`
+	ServerTime      string `json:"serverTime"`
+	LogDir          string `json:"logDir"`
+	AccessPrefix    string `json:"accessPrefix"`
+	DetailPrefix    string `json:"detailPrefix"`
+	ErrorPrefix     string `json:"errorPrefix"`
+	ExportSubDir    string `json:"exportSubDir"`
+	ExportURLPrefix string `json:"exportUrlPrefix"`
+	LinuxOnly       bool   `json:"linuxOnly"`
+}
+
+type CMSLogQueryExportRes struct {
+	ExportId  string `json:"exportId"`
+	FileName  string `json:"fileName"`
+	FileUrl   string `json:"fileUrl"`
+	Total     int    `json:"total"`
+	PageIndex int    `json:"pageIndex"`
+	PageSize  int    `json:"pageSize"`
+}
+
+type CMSDeleteLogQueryExportReq struct {
+	g.Meta   `path:"/deleteExport" method:"post" summary:"CMS删除日志查询导出文件" tags:"日志查询"`
+	ExportId string `json:"exportId" v:"required#导出ID不能为空"`
+}
+
+type CMSDeleteLogQueryExportRes struct {
+	Success bool `json:"success"`
 }
 
 type CMSQueryDetailLogsReq struct {
@@ -65,30 +84,11 @@ type CMSGetTraceLogsReq struct {
 	EndDate   string `json:"endDate" v:"required|date-format:Y-m-d#结束日期不能为空|结束日期格式应为Y-m-d"`
 }
 
-type CMSGetTraceLogsRes struct {
-	TraceId    string `json:"traceId"`
-	StartDate  string `json:"startDate"`
-	EndDate    string `json:"endDate"`
-	DetailLogs any    `json:"detailLogs"`
-	AccessLogs any    `json:"accessLogs"`
-	ErrorLogs  any    `json:"errorLogs"`
-}
-
 type CMSGetAccessStatsReq struct {
 	g.Meta    `path:"/getAccessStats" method:"post" summary:"CMS获取Access访问统计TopN" tags:"日志查询"`
 	StartDate string `json:"startDate" v:"required|date-format:Y-m-d#开始日期不能为空|开始日期格式应为Y-m-d"`
 	EndDate   string `json:"endDate" v:"required|date-format:Y-m-d#结束日期不能为空|结束日期格式应为Y-m-d"`
 	TopN      int    `json:"topN"`
-}
-
-type TopStatItem struct {
-	Key   string `json:"key"`
-	Count int64  `json:"count"`
-}
-
-type CMSGetAccessStatsRes struct {
-	UrlTop []TopStatItem `json:"urlTop"`
-	IpTop  []TopStatItem `json:"ipTop"`
 }
 
 type CMSGetAccessTrendReq struct {
@@ -102,19 +102,6 @@ type CMSGetAccessTrendReq struct {
 	MinHandlerMs    *float64 `json:"minHandlerMs"`
 	MaxHandlerMs    *float64 `json:"maxHandlerMs"`
 	IntervalMinutes int      `json:"intervalMinutes" dc:"聚合粒度(分钟),0表示自动:1天=1分钟,3天=5分钟,7天=15分钟"`
-}
-
-type AccessTrendPoint struct {
-	Time  string `json:"time"`
-	Count int64  `json:"count"`
-}
-
-type CMSGetAccessTrendRes struct {
-	IntervalMinutes int                `json:"intervalMinutes"`
-	Points          []AccessTrendPoint `json:"points"`
-	TotalCount      int64              `json:"totalCount"`
-	PeakTime        string             `json:"peakTime"`
-	PeakCount       int64              `json:"peakCount"`
 }
 
 type CMSSubmitLogQueryJobReq struct {

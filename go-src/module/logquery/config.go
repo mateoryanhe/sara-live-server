@@ -3,97 +3,129 @@ package logquery
 import (
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 )
 
-type logPaths struct {
-	DetailLogDir     string
-	DetailLogPattern string
-	AccessLogDir     string
-	AccessLogPattern string
-	ErrorLogDir      string
-	ErrorLogPattern  string
+const (
+	logTypeAccess = "access"
+	logTypeDetail = "detail"
+	logTypeError  = "error"
+
+	defaultExportSubDir     = "log-query-export"
+	defaultExportTTLMinutes = 30
+	defaultMaxMatchLines    = 5000
+	defaultMaxPageSize      = 200
+)
+
+type logQueryConfig struct {
+	LogDir           string
+	AccessPrefix     string
+	DetailPrefix     string
+	ErrorPrefix      string
+	ExportSubDir     string
+	ExportTTLMinutes int
+	MaxMatchLines    int
+	MaxPageSize      int
+	ServerRoot       string
 }
 
-func loadLogPaths() logPaths {
+func loadLogQueryConfig() logQueryConfig {
 	ctx := gctx.New()
-	detailDir := strings.TrimSpace(g.Cfg().MustGet(ctx, "logger.path").String())
-	detailPattern := strings.TrimSpace(g.Cfg().MustGet(ctx, "logger.file").String())
-	accessDir := strings.TrimSpace(g.Cfg().MustGet(ctx, "server.logPath").String())
-	accessPattern := strings.TrimSpace(g.Cfg().MustGet(ctx, "server.accessLogPattern").String())
-	errorPattern := strings.TrimSpace(g.Cfg().MustGet(ctx, "server.errorLogPattern").String())
-
-	if detailPattern == "" {
-		detailPattern = "{Y-m-d}.log"
+	logDir := strings.TrimSpace(g.Cfg().MustGet(ctx, "logger.detail.path").String())
+	if logDir == "" {
+		logDir = strings.TrimSpace(g.Cfg().MustGet(ctx, "logger.error.path").String())
 	}
-	if accessDir == "" {
-		accessDir = detailDir
+	if logDir == "" {
+		logDir = strings.TrimSpace(g.Cfg().MustGet(ctx, "server.logPath").String())
 	}
-	if detailDir == "" {
-		detailDir = accessDir
-	}
-	if accessPattern == "" {
-		accessPattern = "access-{Y-m-d}.log"
-	}
-	if errorPattern == "" {
-		errorPattern = "error-{Ymd}.log"
-	}
-
-	return logPaths{
-		DetailLogDir:     normalizeDir(detailDir),
-		DetailLogPattern: detailPattern,
-		AccessLogDir:     normalizeDir(accessDir),
-		AccessLogPattern: accessPattern,
-		ErrorLogDir:      normalizeDir(accessDir),
-		ErrorLogPattern:  errorPattern,
+	return logQueryConfig{
+		LogDir:           filepath.Clean(logDir),
+		AccessPrefix:     logFilePrefixFromPattern(g.Cfg().MustGet(ctx, "server.accessLogPattern").String()),
+		DetailPrefix:     logFilePrefixFromPattern(g.Cfg().MustGet(ctx, "logger.detail.file").String()),
+		ErrorPrefix:      logFilePrefixFromPattern(g.Cfg().MustGet(ctx, "logger.error.file").String()),
+		ExportSubDir:     defaultExportSubDir,
+		ExportTTLMinutes: defaultExportTTLMinutes,
+		MaxMatchLines:    defaultMaxMatchLines,
+		MaxPageSize:      defaultMaxPageSize,
+		ServerRoot:       filepath.Clean(g.Cfg().MustGet(ctx, "server.serverRoot").String()),
 	}
 }
 
-func normalizeDir(dir string) string {
-	dir = strings.TrimSpace(dir)
-	if dir == "" {
+func logFilePrefixFromPattern(pattern string) string {
+	pattern = strings.TrimSpace(pattern)
+	if pattern == "" {
 		return ""
 	}
-	return filepath.Clean(dir)
+	idx := strings.Index(pattern, "{")
+	prefix := pattern
+	if idx > 0 {
+		prefix = pattern[:idx]
+	} else {
+		prefix = strings.TrimSuffix(pattern, ".log")
+	}
+	return strings.TrimRight(prefix, "-")
+}
+
+func (c logQueryConfig) normalized() logQueryConfig {
+	if c.AccessPrefix == "" {
+		c.AccessPrefix = "access"
+	}
+	if c.DetailPrefix == "" {
+		c.DetailPrefix = "detail"
+	}
+	if c.ErrorPrefix == "" {
+		c.ErrorPrefix = "error"
+	}
+	return c
+}
+
+func (c logQueryConfig) prefixForType(logType string) string {
+	c = c.normalized()
+	switch logType {
+	case logTypeAccess:
+		return c.AccessPrefix
+	case logTypeError:
+		return c.ErrorPrefix
+	default:
+		return c.DetailPrefix
+	}
+}
+
+func (c logQueryConfig) exportAbsDir() string {
+	return filepath.Join(c.ServerRoot, c.ExportSubDir)
+}
+
+func (c logQueryConfig) exportURLPrefix() string {
+	sub := strings.Trim(strings.ReplaceAll(c.ExportSubDir, "\\", "/"), "/")
+	if sub == "" {
+		return "/log-query-export"
+	}
+	return "/" + sub
 }
 
 func formatLogFileName(pattern string, dateStr string) string {
-	t, err := parseDate(dateStr)
+	t, err := time.ParseInLocation("2006-01-02", dateStr, time.Local)
 	if err != nil {
 		return pattern
 	}
 	s := pattern
 	s = strings.ReplaceAll(s, "{Y-m-d}", t.Format("2006-01-02"))
 	s = strings.ReplaceAll(s, "{Ymd}", t.Format("20060102"))
-	s = strings.ReplaceAll(s, "{Y-m}", t.Format("2006-01"))
-	s = strings.ReplaceAll(s, "{Y}", t.Format("2006"))
-	s = strings.ReplaceAll(s, "{m}", t.Format("01"))
-	s = strings.ReplaceAll(s, "{d}", t.Format("02"))
 	return s
 }
 
-func resolveDetailLogFile(dateStr string) string {
-	paths := loadLogPaths()
-	if paths.DetailLogDir == "" {
-		return ""
+func listDates(startDate, endDate string) []string {
+	start, err1 := time.ParseInLocation("2006-01-02", startDate, time.Local)
+	end, err2 := time.ParseInLocation("2006-01-02", endDate, time.Local)
+	if err1 != nil || err2 != nil {
+		return nil
 	}
-	return filepath.Join(paths.DetailLogDir, formatLogFileName(paths.DetailLogPattern, dateStr))
-}
-
-func resolveAccessLogFile(dateStr string) string {
-	paths := loadLogPaths()
-	if paths.AccessLogDir == "" {
-		return ""
+	var dates []string
+	for d := start; !d.After(end); d = d.AddDate(0, 0, 1) {
+		dates = append(dates, d.Format("2006-01-02"))
 	}
-	return filepath.Join(paths.AccessLogDir, formatLogFileName(paths.AccessLogPattern, dateStr))
-}
-
-func resolveErrorLogFile(dateStr string) string {
-	paths := loadLogPaths()
-	if paths.ErrorLogDir == "" {
-		return ""
-	}
-	return filepath.Join(paths.ErrorLogDir, formatLogFileName(paths.ErrorLogPattern, dateStr))
+	return dates
 }

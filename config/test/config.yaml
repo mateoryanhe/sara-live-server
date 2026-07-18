@@ -6,6 +6,9 @@ server:
   serverRoot: "/home/ec2-user/cdn"
   httpsCertPath: "/etc/letsencrypt/live/cai.hzaicoin.fun/fullchain.pem"
   httpsKeyPath: "/etc/letsencrypt/live/cai.hzaicoin.fun/privkey.pem"
+  logPath: "/home/ec2-user/log/"
+  accessLogEnabled: true
+  accessLogPattern: "access-{Y-m-d}.log"
   # PProf配置
   pprofEnabled: true # 是否开启PProf性能调试特性。默认为false
   pprofPattern: "/66dcd8e25ab3b339546ea1de5eb2d443e6fca76c76d11709f10533be8bd87d7d/pprof"    # 开启PProf时有效，表示PProf特性的页面访问路径，对当前Server绑定的所有域名有效
@@ -37,19 +40,22 @@ bufferSize:
 
 
 logger:
-  path: "/home/ec2-user/log/"           # 日志文件路径。默认为空，表示关闭，仅输出到终端
-  file: "{Y-m-d}.log"         # 日志文件格式。默认为"{Y-m-d}.log"
-  prefix: ""                    # 日志内容输出前缀。默认为空
-  level: "all"                 # 日志输出级别
-  timeFormat: "2006-01-02T15:04:05" # 自定义日志输出的时间格式，使用Golang标准的时间格式配置
-  ctxKeys: [ ]                    # 自定义Context上下文变量名称，自动打印Context的变量到日志中。默认为空
-  header: true                  # 是否打印日志的头信息。默认true
-  stdout: true                  # 日志是否同时输出到终端。默认true
-  rotateBackupExpire: 0                     # 按照切分的文件有效期清理切分文件，当滚动切分特性开启时有效。默认为0，表示不备份，切分则删除
-  rotateBackupCompress: 0                     # 滚动切分文件的压缩比（0-9）。默认为0，表示不压缩
-  rotateCheckInterval: "1h"                  # 滚动切分的时间检测间隔，一般不需要设置。默认为1小时
-  stdoutColorDisabled: false                 # 关闭终端的颜色打印。默认开启
-  writerColorEnable: true                 # 日志文件是否带上颜色。默认false，表示不带颜色
+  timeFormat: "2006-01-02T15:04:05"
+  level: "all"
+  rotateBackupExpire: 0
+  rotateBackupCompress: 0
+  rotateCheckInterval: "1h"
+  stdoutColorDisabled: false
+  writerColorEnable: true
+  detail:
+    path: "/home/ec2-user/log/"
+    file: "detail-{Y-m-d}.log"
+    stdout: true
+    header: true
+  error:
+    path: "/home/ec2-user/log/"
+    file: "error-{Y-m-d}.log"
+    stdout: false
 
 database:
   logger:

@@ -1,6 +1,7 @@
 package cfg
 
 func InitCfg() {
+	initDefaultLoggerFromDetail()
 	initServerCfg()
 	initDomainSiteCfg()
 	initDbBufferCfg()

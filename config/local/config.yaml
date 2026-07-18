@@ -13,14 +13,6 @@ server:
   logStdout: false                       # 访问日志同时输出到终端
   accessLogEnabled: true                # 开启访问日志(执行时间、IP、URL)
   accessLogPattern: "access-{Y-m-d}.log"
-  errorLogEnabled: true
-  errorLogPattern: "error-{Ymd}.log"
-  logger:
-    timeFormat: "2006-01-02T15:04:05.000"
-    rotateExpire: "1d"
-    rotateBackupLimit: 1
-    rotateBackupExpire: "2d"
-    flags: 45
   ####自定义配置
   debugEnv: true #是否开启debug环境,不会检查权限
   exitTime: 30 #退出系统等待多少秒，开始发送kill -9
@@ -46,21 +38,23 @@ bufferSize:
 
 
 logger:
-  path: 'd:\log\'           # 日志文件路径。默认为空，表示关闭，仅输出到终端
-  file: "access-{Y-m-d}.log"         # 日志文件格式。默认为"{Y-m-d}.log"
-  prefix: ""                    # 日志内容输出前缀。默认为空
-  level: "all"                 # 日志输出级别
-  timeFormat: "2006-01-02T15:04:05" # 自定义日志输出的时间格式，使用Golang标准的时间格式配置
-  ctxKeys: [ ]                    # 自定义Context上下文变量名称，自动打印Context的变量到日志中。默认为空
-  header: true                  # 是否打印日志的头信息。默认true
-  stdout: true                  # 日志是否同时输出到终端。默认true
-  flags: 4    # 文件异步写入
+  timeFormat: "2006-01-02T15:04:05"
+  level: "all"
+  flags: 4
   rotateExpire: "1d"
   rotateBackupLimit: 1
   rotateBackupExpire: "2d"
-  stdoutColorDisabled: false                 # 关闭终端的颜色打印。默认开启
-  writerColorEnable: true                 # 日志文件是否带上颜色。默认false，表示不带颜色
-
+  stdoutColorDisabled: false
+  writerColorEnable: true
+  detail:
+    path: 'd:\log\'
+    file: "detail-{Y-m-d}.log"
+    stdout: true
+    header: true
+  error:
+    path: 'd:\log\'
+    file: "error-{Y-m-d}.log"
+    stdout: false
 
 database:
   logger:

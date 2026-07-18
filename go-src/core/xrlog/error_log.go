@@ -10,8 +10,10 @@ import (
 
 const Tag = "ErrorLog"
 
+const errorLoggerName = "error"
+
 func Error(ctx context.Context, source, msg string) {
-	g.Log().Errorf(ctx, "%s source=%s %s", Tag, source, msg)
+	g.Log(errorLoggerName).Error(ctx, fmt.Sprintf("%s source=%s %s", Tag, source, msg))
 }
 
 func ErrorWithErr(ctx context.Context, source, msg string, err error) {
@@ -19,7 +21,7 @@ func ErrorWithErr(ctx context.Context, source, msg string, err error) {
 		Error(ctx, source, msg)
 		return
 	}
-	g.Log().Errorf(ctx, "%s source=%s %s err=%v stack=%s", Tag, source, msg, err, formatStack(err))
+	g.Log(errorLoggerName).Error(ctx, fmt.Sprintf("%s source=%s %s err=%v stack=%s", Tag, source, msg, err, formatStack(err)))
 }
 
 func formatStack(err error) string {

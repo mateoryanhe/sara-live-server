@@ -19,28 +19,32 @@ func (c *LogQueryController) GetLogPaths(ctx context.Context, req *logquerydto.C
 	return logquery.GetLogPaths(ctx, req)
 }
 
-func (c *LogQueryController) QueryDetailLogs(ctx context.Context, req *logquerydto.CMSQueryDetailLogsReq) (res *httpserver.CMSQueryResp, err error) {
+func (c *LogQueryController) QueryDetailLogs(ctx context.Context, req *logquerydto.CMSQueryDetailLogsReq) (res *logquerydto.CMSLogQueryExportRes, err error) {
 	return logquery.QueryDetailLogs(ctx, req)
 }
 
-func (c *LogQueryController) QueryAccessLogs(ctx context.Context, req *logquerydto.CMSQueryAccessLogsReq) (res *httpserver.CMSQueryResp, err error) {
+func (c *LogQueryController) QueryAccessLogs(ctx context.Context, req *logquerydto.CMSQueryAccessLogsReq) (res *logquerydto.CMSLogQueryExportRes, err error) {
 	return logquery.QueryAccessLogs(ctx, req)
 }
 
-func (c *LogQueryController) QueryErrorLogs(ctx context.Context, req *logquerydto.CMSQueryErrorLogsReq) (res *httpserver.CMSQueryResp, err error) {
+func (c *LogQueryController) QueryErrorLogs(ctx context.Context, req *logquerydto.CMSQueryErrorLogsReq) (res *logquerydto.CMSLogQueryExportRes, err error) {
 	return logquery.QueryErrorLogs(ctx, req)
 }
 
-func (c *LogQueryController) GetTraceLogs(ctx context.Context, req *logquerydto.CMSGetTraceLogsReq) (res *logquerydto.CMSGetTraceLogsRes, err error) {
+func (c *LogQueryController) GetTraceLogs(ctx context.Context, req *logquerydto.CMSGetTraceLogsReq) (res *logquerydto.CMSLogQueryExportRes, err error) {
 	return logquery.GetTraceLogs(ctx, req)
 }
 
-func (c *LogQueryController) GetAccessStats(ctx context.Context, req *logquerydto.CMSGetAccessStatsReq) (res *logquerydto.CMSGetAccessStatsRes, err error) {
+func (c *LogQueryController) GetAccessStats(ctx context.Context, req *logquerydto.CMSGetAccessStatsReq) (res *logquerydto.CMSLogQueryExportRes, err error) {
 	return logquery.GetAccessStats(ctx, req)
 }
 
-func (c *LogQueryController) GetAccessTrend(ctx context.Context, req *logquerydto.CMSGetAccessTrendReq) (res *logquerydto.CMSGetAccessTrendRes, err error) {
+func (c *LogQueryController) GetAccessTrend(ctx context.Context, req *logquerydto.CMSGetAccessTrendReq) (res *logquerydto.CMSLogQueryExportRes, err error) {
 	return logquery.GetAccessTrend(ctx, req)
+}
+
+func (c *LogQueryController) DeleteLogQueryExport(ctx context.Context, req *logquerydto.CMSDeleteLogQueryExportReq) (res *logquerydto.CMSDeleteLogQueryExportRes, err error) {
+	return logquery.DeleteLogQueryExport(ctx, req)
 }
 
 func (c *LogQueryController) SubmitLogQueryJob(ctx context.Context, req *logquerydto.CMSSubmitLogQueryJobReq) (res *logquerydto.CMSSubmitLogQueryJobRes, err error) {

@@ -834,12 +834,22 @@ export interface VideoCallLogItem {
 
 export interface LogPathsConfig {
     serverTime?: string
-    detailLogDir: string
-    detailLogPattern: string
-    accessLogDir: string
-    accessLogPattern: string
-    errorLogDir: string
-    errorLogPattern: string
+    logDir: string
+    accessPrefix: string
+    detailPrefix: string
+    errorPrefix: string
+    exportSubDir: string
+    exportUrlPrefix: string
+    linuxOnly?: boolean
+}
+
+export interface LogQueryExportResult {
+    exportId: string
+    fileName: string
+    fileUrl: string
+    total: number
+    pageIndex: number
+    pageSize: number
 }
 
 export interface DetailLogQuery {
