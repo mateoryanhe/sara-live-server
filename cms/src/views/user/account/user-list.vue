@@ -133,7 +133,7 @@
                 </el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item v-if="!scope.row.isAnchor" command="setUserType">修改用户类型</el-dropdown-item>
+                    <el-dropdown-item v-if="!scope.row.isAnchor" command="setAnchor">设为主播</el-dropdown-item>
                     <el-dropdown-item :divided="!scope.row.isAnchor" command="gold-add">
                       加金币
                     </el-dropdown-item>
@@ -145,9 +145,10 @@
                     </el-dropdown-item>
                     <el-dropdown-item v-if="scope.row.canRank !== false" command="rank-off">下榜</el-dropdown-item>
                     <el-dropdown-item v-if="scope.row.canRank === false" command="rank-on">上榜</el-dropdown-item>
-                    <el-dropdown-item command="cancel">
+                    <el-dropdown-item divided command="cancel">
                       {{ scope.row.cancel ? '取消注销' : '注销' }}
                     </el-dropdown-item>
+                    <el-dropdown-item v-if="!scope.row.isAnchor" command="setUserType">修改用户类型</el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
@@ -514,6 +515,9 @@ const handleRowCommand = (row: UserInfo, command: string) => {
     case 'cancel':
       toggleCancelStatus(row)
       break
+    case 'setAnchor':
+      handleSetAnchor(row)
+      break
   }
 }
 
@@ -551,6 +555,27 @@ const submitUserType = async () => {
       userTypeSubmitting.value = false
     }
   })
+}
+
+const handleSetAnchor = async (row: UserInfo) => {
+  try {
+    await ElMessageBox.confirm(
+        `确定将用户 ${row.id} 设为主播吗？设为主播后不可撤销。`,
+        '设为主播',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+    )
+    await accountApi.setAnchor({accountId: String(row.id)})
+    ElMessage.success('已设为主播')
+    await fetchUserList()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('设为主播失败:', error)
+    }
+  }
 }
 
 const afterCurrencyChangeSuccess = () => {
