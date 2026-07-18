@@ -964,6 +964,22 @@ export interface AccessTrendQuery {
     intervalMinutes?: number
 }
 
+export type LogQueryJobStatus = 'pending' | 'running' | 'done' | 'failed'
+
+export interface LogQueryJobSubmitResult {
+    jobId: string
+    queuePosition: number
+}
+
+export interface LogQueryJobResult<T = unknown> {
+    jobId: string
+    queryType: string
+    status: LogQueryJobStatus
+    queuePosition: number
+    errorMessage?: string
+    result?: T
+}
+
 // CMS用户相关类型
 export interface CMSUser {
     id: string

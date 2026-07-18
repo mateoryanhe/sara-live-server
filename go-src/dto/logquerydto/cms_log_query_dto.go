@@ -1,6 +1,8 @@
 package logquerydto
 
 import (
+	"encoding/json"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/core/httpserver"
 )
@@ -113,4 +115,29 @@ type CMSGetAccessTrendRes struct {
 	TotalCount      int64              `json:"totalCount"`
 	PeakTime        string             `json:"peakTime"`
 	PeakCount       int64              `json:"peakCount"`
+}
+
+type CMSSubmitLogQueryJobReq struct {
+	g.Meta    `path:"/submitJob" method:"post" summary:"CMS提交异步日志查询任务" tags:"日志查询"`
+	QueryType string          `json:"queryType" v:"required#查询类型不能为空"`
+	Payload   json.RawMessage `json:"payload" v:"required#查询参数不能为空"`
+}
+
+type CMSSubmitLogQueryJobRes struct {
+	JobId         string `json:"jobId"`
+	QueuePosition int    `json:"queuePosition"`
+}
+
+type CMSGetLogQueryJobReq struct {
+	g.Meta `path:"/getJob" method:"post" summary:"CMS获取异步日志查询结果" tags:"日志查询"`
+	JobId  string `json:"jobId" v:"required#任务ID不能为空"`
+}
+
+type CMSGetLogQueryJobRes struct {
+	JobId         string `json:"jobId"`
+	QueryType     string `json:"queryType"`
+	Status        string `json:"status"`
+	QueuePosition int    `json:"queuePosition"`
+	ErrorMessage  string `json:"errorMessage"`
+	Result        any    `json:"result"`
 }

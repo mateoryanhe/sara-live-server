@@ -39,24 +39,7 @@ func QueryDetailLogs(_ context.Context, req *logquerydto.CMSQueryDetailLogsReq) 
 	}
 	pageIndex, pageSize := normalizePage(req.PageIndex, req.PageSize)
 
-	var matched []*DetailLogEntry
-	for _, filePath := range listDetailLogFilesForRange(req.StartDate, req.EndDate) {
-		_ = scanDetailLogFile(filePath, func(entry *DetailLogEntry) bool {
-			if !logTimeInRange(entry.Time, rangeStart, rangeEnd) {
-				return true
-			}
-			if !matchDetailEntry(entry, req.TraceId, req.ReqId, req.AuthId, req.Url, req.Keyword) {
-				return true
-			}
-			matched = append(matched, trimDetailLogEntryForQuery(entry))
-			return true
-		})
-	}
-
-	sortDetailLogsByTimeDesc(matched)
-	if len(matched) > maxMatchLines {
-		matched = matched[:maxMatchLines]
-	}
+	matched := queryDetailLogsMatched(req, rangeStart, rangeEnd)
 	total := len(matched)
 	start := (pageIndex - 1) * pageSize
 	if start >= total {
@@ -76,24 +59,7 @@ func QueryAccessLogs(_ context.Context, req *logquerydto.CMSQueryAccessLogsReq) 
 	}
 	pageIndex, pageSize := normalizePage(req.PageIndex, req.PageSize)
 
-	var matched []*AccessLogEntry
-	for _, filePath := range listAccessLogFilesForRange(req.StartDate, req.EndDate) {
-		_ = scanAccessLogFile(filePath, func(entry *AccessLogEntry) bool {
-			if !logTimeInRange(entry.Time, rangeStart, rangeEnd) {
-				return true
-			}
-			if !matchAccessEntry(entry, req.TraceId, req.Url, req.Ip, req.StatusCode, req.MinHandlerMs, req.MaxHandlerMs) {
-				return true
-			}
-			matched = append(matched, entry)
-			return true
-		})
-	}
-
-	sortAccessLogsByTimeDesc(matched)
-	if len(matched) > maxMatchLines {
-		matched = matched[:maxMatchLines]
-	}
+	matched := queryAccessLogsMatched(req, rangeStart, rangeEnd)
 	total := len(matched)
 	start := (pageIndex - 1) * pageSize
 	if start >= total {
@@ -113,22 +79,7 @@ func QueryErrorLogs(_ context.Context, req *logquerydto.CMSQueryErrorLogsReq) (*
 	}
 	pageIndex, pageSize := normalizePage(req.PageIndex, req.PageSize)
 
-	var matched []*ErrorLogEntry
-	scanErrorLogEntriesInRange(req.StartDate, req.EndDate, func(entry *ErrorLogEntry) bool {
-		if !logTimeInRange(entry.Time, rangeStart, rangeEnd) {
-			return true
-		}
-		if !matchErrorEntry(entry, req.TraceId, req.Url, req.Ip, req.Keyword, req.StatusCode) {
-			return true
-		}
-		matched = append(matched, entry)
-		return true
-	})
-
-	sortErrorLogsByTimeDesc(matched)
-	if len(matched) > maxMatchLines {
-		matched = matched[:maxMatchLines]
-	}
+	matched := queryErrorLogsMatched(req, rangeStart, rangeEnd)
 	total := len(matched)
 	start := (pageIndex - 1) * pageSize
 	if start >= total {
@@ -148,6 +99,10 @@ func GetTraceLogs(_ context.Context, req *logquerydto.CMSGetTraceLogsReq) (*logq
 	rangeStart, rangeEnd, err := buildTimeRange(req.StartDate, req.EndDate)
 	if err != nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+
+	if res, ok := getTraceLogsWithGrep(req, rangeStart, rangeEnd); ok {
+		return res, nil
 	}
 
 	var detailLogs []*DetailLogEntry
@@ -181,7 +136,7 @@ func GetTraceLogs(_ context.Context, req *logquerydto.CMSGetTraceLogsReq) (*logq
 		if !logTimeInRange(entry.Time, rangeStart, rangeEnd) {
 			return true
 		}
-		if matchTraceId(entry.TraceId, req.TraceId) {
+		if matchTraceId(entry.TraceId, req.TraceId) && !isLogQueryRelatedErrorEntry(entry) {
 			errorLogs = append(errorLogs, entry)
 		}
 		return true

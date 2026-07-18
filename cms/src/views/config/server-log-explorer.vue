@@ -31,7 +31,7 @@
             </el-form-item>
           </el-form>
 
-          <el-row v-loading="statsLoading" :gutter="20">
+          <el-row v-loading="statsLoading" :element-loading-text="queryStatusTip" :gutter="20">
             <el-col :span="12">
               <el-card shadow="never">
                 <template #header>接口访问 TopN</template>
@@ -101,7 +101,7 @@
             </el-form-item>
           </el-form>
 
-          <div v-loading="accessTrendLoading" class="access-trend-panel">
+          <div v-loading="accessTrendLoading" :element-loading-text="queryStatusTip" class="access-trend-panel">
             <AccessTrendChart ref="accessTrendChartRef" :data="accessTrendData"/>
             <div v-if="accessTrendData?.peakTime" class="trend-summary">
               总访问量 {{ accessTrendData.totalCount }}，
@@ -110,7 +110,7 @@
             </div>
           </div>
 
-          <el-table v-loading="accessLoading" :data="accessTableData" style="width: 100%">
+          <el-table v-loading="accessLoading" :data="accessTableData" :element-loading-text="queryStatusTip" style="width: 100%">
             <el-table-column label="时间" prop="time" width="210"/>
             <el-table-column label="TraceId" min-width="280">
               <template #default="{ row }">
@@ -176,7 +176,7 @@
             </el-form-item>
           </el-form>
 
-          <el-table v-loading="errorLoading" :data="errorTableData" style="width: 100%">
+          <el-table v-loading="errorLoading" :data="errorTableData" :element-loading-text="queryStatusTip" style="width: 100%">
             <el-table-column label="时间" prop="time" width="210"/>
             <el-table-column label="TraceId" min-width="280">
               <template #default="{ row }">
@@ -208,6 +208,7 @@
         </el-tab-pane>
 
         <el-tab-pane label="详情日志" name="detail">
+          <div class="detail-query-tip">查询已改为后台排队执行（单线程串行），通常 1 分钟内返回；建议填写 TraceId / URL 等条件</div>
           <el-form :model="detailForm" class="search-form" inline label-width="90px">
             <el-form-item label="日期范围">
               <el-date-picker
@@ -242,7 +243,7 @@
             </el-form-item>
           </el-form>
 
-          <el-table v-loading="detailLoading" :data="detailTableData" style="width: 100%">
+          <el-table v-loading="detailLoading" :data="detailTableData" :element-loading-text="queryStatusTip" style="width: 100%">
             <el-table-column label="时间" prop="time" width="210"/>
             <el-table-column label="级别" prop="level" width="80"/>
             <el-table-column label="TraceId" min-width="280">
@@ -276,7 +277,7 @@
     </el-card>
 
     <el-drawer v-model="traceDrawerVisible" :title="`TraceId: ${traceDetail.traceId}`" size="60%">
-      <div v-loading="traceLoading" class="trace-drawer">
+      <div v-loading="traceLoading" :element-loading-text="queryStatusTip" class="trace-drawer">
         <p class="trace-meta">日期范围: {{ traceDetail.startDate }} 至 {{ traceDetail.endDate }}</p>
         <p v-if="resolveTraceAuthId()" class="trace-meta">AuthId: {{ resolveTraceAuthId() }}</p>
 
@@ -342,9 +343,10 @@ import {nextTick, onMounted, onUnmounted, reactive, ref, watch} from 'vue'
 import {ElMessage} from 'element-plus'
 import {logQueryApi} from '@/api'
 import AccessTrendChart from './components/access-trend-chart.vue'
-import type {AccessLogItem, AccessTrendData, DetailLogItem, ErrorLogItem, TopStatItem, TraceLogDetail} from '@/types/api'
+import type {AccessLogItem, AccessTrendData, DetailLogItem, ErrorLogItem, LogQueryJobResult, TopStatItem, TraceLogDetail} from '@/types/api'
 
 const activeTab = ref('stats')
+const queryStatusTip = ref('查询中...')
 const serverTimeLoading = ref(false)
 const serverTimeDisplay = ref('-')
 let serverTimeBaseMs = 0
@@ -609,6 +611,18 @@ const ensureDateRange = (range?: string[]) => {
   return range
 }
 
+const handleLogQueryStatus = (job: LogQueryJobResult) => {
+  if (job.status === 'pending') {
+    queryStatusTip.value = job.queuePosition > 1
+        ? `排队中，前面还有 ${job.queuePosition - 1} 个查询...`
+        : '排队中，即将开始查询...'
+    return
+  }
+  if (job.status === 'running') {
+    queryStatusTip.value = '正在查询日志，请稍候...'
+  }
+}
+
 const fetchDetailLogs = async () => {
   const range = ensureDateRange(detailForm.dateRange)
   if (!range) {
@@ -626,7 +640,7 @@ const fetchDetailLogs = async () => {
       authId: detailForm.authId.trim(),
       url: detailForm.url.trim(),
       keyword: detailForm.keyword.trim(),
-    })
+    }, handleLogQueryStatus)
     detailTableData.value = response.data || []
     detailTotal.value = response.total || 0
   } catch (error) {
@@ -656,7 +670,7 @@ const fetchAccessTrend = async () => {
   }
   accessTrendLoading.value = true
   try {
-    accessTrendData.value = await logQueryApi.getAccessTrend(buildAccessQueryParams(range))
+    accessTrendData.value = await logQueryApi.getAccessTrend(buildAccessQueryParams(range), handleLogQueryStatus)
     await nextTick()
     accessTrendChartRef.value?.resize()
   } catch (error) {
@@ -678,7 +692,7 @@ const fetchAccessLogs = async () => {
       pageIndex: accessPageIndex.value,
       pageSize: accessPageSize.value,
       ...buildAccessQueryParams(range),
-    })
+    }, handleLogQueryStatus)
     accessTableData.value = response.data || []
     accessTotal.value = response.total || 0
   } catch (error) {
@@ -706,7 +720,7 @@ const fetchErrorLogs = async () => {
       ip: errorForm.ip.trim(),
       statusCode: errorForm.statusCode || undefined,
       keyword: errorForm.keyword.trim(),
-    })
+    }, handleLogQueryStatus)
     errorTableData.value = response.data || []
     errorTotal.value = response.total || 0
   } catch (error) {
@@ -728,7 +742,7 @@ const fetchAccessStats = async () => {
       startDate: range[0],
       endDate: range[1],
       topN: statsForm.topN,
-    })
+    }, handleLogQueryStatus)
     urlTopData.value = response.urlTop || []
     ipTopData.value = response.ipTop || []
   } catch (error) {
@@ -755,7 +769,7 @@ const openTraceDetail = async (traceId: string, logTime?: string) => {
   try {
     let finalData: TraceLogDetail | null = null
     for (const range of searchRanges) {
-      const data = await logQueryApi.getTraceLogs(traceId, range[0], range[1])
+      const data = await logQueryApi.getTraceLogs(traceId, range[0], range[1], handleLogQueryStatus)
       finalData = data
       traceDetail.startDate = data.startDate || range[0]
       traceDetail.endDate = data.endDate || range[1]
@@ -915,10 +929,15 @@ watch(activeTab, async (tab) => {
 }
 
 .path-tip,
-.server-time-tip {
+.server-time-tip,
+.detail-query-tip {
   color: #909399;
   font-size: 12px;
   word-break: break-all;
+}
+
+.detail-query-tip {
+  margin-bottom: 12px;
 }
 
 .search-form {

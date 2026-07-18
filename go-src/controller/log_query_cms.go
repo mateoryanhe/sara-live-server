@@ -42,3 +42,11 @@ func (c *LogQueryController) GetAccessStats(ctx context.Context, req *logquerydt
 func (c *LogQueryController) GetAccessTrend(ctx context.Context, req *logquerydto.CMSGetAccessTrendReq) (res *logquerydto.CMSGetAccessTrendRes, err error) {
 	return logquery.GetAccessTrend(ctx, req)
 }
+
+func (c *LogQueryController) SubmitLogQueryJob(ctx context.Context, req *logquerydto.CMSSubmitLogQueryJobReq) (res *logquerydto.CMSSubmitLogQueryJobRes, err error) {
+	return logquery.SubmitLogQueryJob(ctx, req)
+}
+
+func (c *LogQueryController) GetLogQueryJob(ctx context.Context, req *logquerydto.CMSGetLogQueryJobReq) (res *logquerydto.CMSGetLogQueryJobRes, err error) {
+	return logquery.GetLogQueryJob(ctx, req)
+}

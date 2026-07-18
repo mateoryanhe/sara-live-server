@@ -21,6 +21,13 @@ func openLogFile(filePath string) (*os.File, error) {
 }
 
 func readLogLine(reader *bufio.Reader) (string, error) {
+	return readLogLineLimited(reader, maxLogLineBytes)
+}
+
+func readLogLineLimited(reader *bufio.Reader, maxBytes int) (string, error) {
+	if maxBytes <= 0 {
+		maxBytes = maxLogLineBytes
+	}
 	var builder strings.Builder
 	builder.Grow(4096)
 	truncated := false
@@ -39,7 +46,7 @@ func readLogLine(reader *bufio.Reader) (string, error) {
 		if b == '\n' {
 			break
 		}
-		if builder.Len() < maxLogLineBytes {
+		if builder.Len() < maxBytes {
 			builder.WriteByte(b)
 			continue
 		}
@@ -63,6 +70,10 @@ func readLogLine(reader *bufio.Reader) (string, error) {
 }
 
 func scanLogFile(filePath string, fn func(line string) bool) error {
+	return scanLogFileWithMaxLineBytes(filePath, maxLogLineBytes, fn)
+}
+
+func scanLogFileWithMaxLineBytes(filePath string, maxLineBytes int, fn func(line string) bool) error {
 	file, err := openLogFile(filePath)
 	if err != nil {
 		return err
@@ -74,7 +85,7 @@ func scanLogFile(filePath string, fn func(line string) bool) error {
 
 	reader := bufio.NewReaderSize(file, 256*1024)
 	for {
-		line, err := readLogLine(reader)
+		line, err := readLogLineLimited(reader, maxLineBytes)
 		if err == io.EOF {
 			return nil
 		}

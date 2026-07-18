@@ -14,6 +14,29 @@ var (
 )
 
 const errorLogTag = "ErrorLog"
+const logQueryURLPath = "/logQuery/"
+
+func isLogQueryRelatedErrorEntry(entry *ErrorLogEntry) bool {
+	if entry == nil {
+		return false
+	}
+	for _, field := range []string{entry.Url, entry.Raw, entry.Detail, entry.Stack, entry.ErrorMessage} {
+		if strings.Contains(field, logQueryURLPath) {
+			return true
+		}
+	}
+	return false
+}
+
+func isLogQueryRelatedDetailEntry(entry *DetailLogEntry) bool {
+	if entry == nil {
+		return false
+	}
+	if strings.Contains(entry.Url, logQueryURLPath) {
+		return true
+	}
+	return strings.Contains(entry.Message, logQueryURLPath) || strings.Contains(entry.Raw, logQueryURLPath)
+}
 
 type ErrorLogEntry struct {
 	Time         string  `json:"time"`
@@ -105,6 +128,9 @@ func matchErrorEntry(entry *ErrorLogEntry, traceId, url, ip, keyword string, sta
 	if entry == nil {
 		return false
 	}
+	if isLogQueryRelatedErrorEntry(entry) {
+		return false
+	}
 	if traceId != "" && !matchTraceId(entry.TraceId, traceId) {
 		return false
 	}
@@ -175,6 +201,9 @@ func isDetailErrorEntry(entry *DetailLogEntry) bool {
 
 func detailEntryToErrorEntry(entry *DetailLogEntry) *ErrorLogEntry {
 	if !isDetailErrorEntry(entry) {
+		return nil
+	}
+	if isLogQueryRelatedDetailEntry(entry) {
 		return nil
 	}
 	errEntry := &ErrorLogEntry{

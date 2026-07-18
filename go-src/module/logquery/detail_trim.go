@@ -13,13 +13,20 @@ func trimDetailLogEntryForQuery(entry *DetailLogEntry) *DetailLogEntry {
 		return entry
 	}
 	entry.Message = truncateLogFieldValue(entry.Message, "respContent=", maxDetailLogRespContentBytes)
-	entry.Raw = truncateLogFieldValue(entry.Raw, "respContent=", maxDetailLogRespContentBytes)
+	if entry.Raw != "" {
+		entry.Raw = truncateLogFieldValue(entry.Raw, "respContent=", maxDetailLogRespContentBytes)
+	}
 	return entry
 }
 
 func isResponseWriteDetailLog(entry *DetailLogEntry) bool {
-	return strings.Contains(entry.Message, detailLogResponseWriteMarker) ||
-		strings.Contains(entry.Raw, detailLogResponseWriteMarker)
+	if entry == nil {
+		return false
+	}
+	if strings.Contains(entry.Message, detailLogResponseWriteMarker) {
+		return true
+	}
+	return entry.Raw != "" && strings.Contains(entry.Raw, detailLogResponseWriteMarker)
 }
 
 func truncateLogFieldValue(text, prefix string, maxBytes int) string {

@@ -113,3 +113,27 @@ func TestDetailEntryToErrorEntry(t *testing.T) {
 		t.Fatalf("unexpected url: %s", entry.Url)
 	}
 }
+
+func TestSkipLogQueryErrorEntries(t *testing.T) {
+	logQueryLine := `2026-07-06T10:00:00.000 [ERRO] {abc123} response_middleware_util.go:95: ErrorLog source=Handler time=2026-07-06 10:00:00.000,reqId=1,authId=2,method=POST,url=/logQuery/queryErrorLogs err=timeout`
+	detail, ok := parseDetailLogLine(logQueryLine)
+	if !ok {
+		t.Fatal("parse detail failed")
+	}
+	if detailEntryToErrorEntry(detail) != nil {
+		t.Fatal("logQuery detail error entry should be skipped")
+	}
+
+	headerLine := `2026-07-06T00:00:13.765 [ERRO] {abc123} 500 "POST https www.bigtktool.shop /logQuery/queryErrorLogs HTTP/1.1" 0.123, 113.109.204.237, "", "Dart/3.11", -1, "INTERNAL PANIC", "exception recovered"`
+	entry, ok := parseErrorLogHeader(headerLine)
+	if !ok {
+		t.Fatal("parse error header failed")
+	}
+	finalizeErrorLogEntry(entry, headerLine)
+	if !isLogQueryRelatedErrorEntry(entry) {
+		t.Fatal("expected logQuery error header to be detected")
+	}
+	if matchErrorEntry(entry, "", "", "", "", 0) {
+		t.Fatal("logQuery error entry should not match query")
+	}
+}

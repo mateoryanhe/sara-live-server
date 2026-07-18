@@ -73,7 +73,7 @@ func parseDetailLogLine(line string) (*DetailLogEntry, bool) {
 		entry.ReqId = reqMatch[1]
 	}
 	entry.AuthId = extractAuthIdFromMessage(message)
-	if entry.ReqId == "" || entry.AuthId == "" {
+	if (entry.ReqId == "" || entry.AuthId == "") && strings.Contains(message, "headers=") {
 		headerReqId, headerAuthId := extractIdsFromLogHeaders(message)
 		if entry.ReqId == "" {
 			entry.ReqId = headerReqId

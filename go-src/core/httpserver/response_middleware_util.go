@@ -87,6 +87,9 @@ func logUnexpectedHandlerError(r *ghttp.Request, err error) {
 	if r == nil || err == nil {
 		return
 	}
+	if shouldSkipAPILogChain(r) {
+		return
+	}
 	xrlog.ErrorWithErr(r.Context(), "Handler",
 		fmt.Sprintf("time=%v,reqId=%v,authId=%v,method=%v,url=%v",
 			gtime.Now().Time.Format("2006-01-02 15:04:05.000"),
