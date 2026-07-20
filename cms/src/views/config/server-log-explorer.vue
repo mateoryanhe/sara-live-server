@@ -11,15 +11,27 @@
       <el-tabs v-model="activeTab">
         <el-tab-pane label="访问统计" name="stats">
           <el-form :model="statsForm" class="search-form" inline label-width="90px">
-            <el-form-item label="日期范围">
+            <el-form-item label="开始日期">
               <el-date-picker
-                  v-model="statsForm.dateRange"
-                  end-placeholder="结束日期"
+                  v-model="statsForm.startDate"
+                  clearable
                   format="YYYY-MM-DD"
-                  range-separator="至"
-                  start-placeholder="开始日期"
-                  style="width: 260px"
-                  type="daterange"
+                  placeholder="开始日期"
+                  style="width: 140px"
+                  teleported
+                  type="date"
+                  value-format="YYYY-MM-DD"
+              />
+            </el-form-item>
+            <el-form-item label="结束日期">
+              <el-date-picker
+                  v-model="statsForm.endDate"
+                  clearable
+                  format="YYYY-MM-DD"
+                  placeholder="结束日期"
+                  style="width: 140px"
+                  teleported
+                  type="date"
                   value-format="YYYY-MM-DD"
               />
             </el-form-item>
@@ -57,15 +69,27 @@
 
         <el-tab-pane label="Access日志" name="access">
           <el-form :model="accessForm" class="search-form" inline label-width="100px">
-            <el-form-item label="日期范围">
+            <el-form-item label="开始日期">
               <el-date-picker
-                  v-model="accessForm.dateRange"
-                  end-placeholder="结束日期"
+                  v-model="accessForm.startDate"
+                  clearable
                   format="YYYY-MM-DD"
-                  range-separator="至"
-                  start-placeholder="开始日期"
-                  style="width: 260px"
-                  type="daterange"
+                  placeholder="开始日期"
+                  style="width: 140px"
+                  teleported
+                  type="date"
+                  value-format="YYYY-MM-DD"
+              />
+            </el-form-item>
+            <el-form-item label="结束日期">
+              <el-date-picker
+                  v-model="accessForm.endDate"
+                  clearable
+                  format="YYYY-MM-DD"
+                  placeholder="结束日期"
+                  style="width: 140px"
+                  teleported
+                  type="date"
                   value-format="YYYY-MM-DD"
               />
             </el-form-item>
@@ -143,15 +167,27 @@
 
         <el-tab-pane label="Error日志" name="error">
           <el-form :model="errorForm" class="search-form" inline label-width="100px">
-            <el-form-item label="日期范围">
+            <el-form-item label="开始日期">
               <el-date-picker
-                  v-model="errorForm.dateRange"
-                  end-placeholder="结束日期"
+                  v-model="errorForm.startDate"
+                  clearable
                   format="YYYY-MM-DD"
-                  range-separator="至"
-                  start-placeholder="开始日期"
-                  style="width: 260px"
-                  type="daterange"
+                  placeholder="开始日期"
+                  style="width: 140px"
+                  teleported
+                  type="date"
+                  value-format="YYYY-MM-DD"
+              />
+            </el-form-item>
+            <el-form-item label="结束日期">
+              <el-date-picker
+                  v-model="errorForm.endDate"
+                  clearable
+                  format="YYYY-MM-DD"
+                  placeholder="结束日期"
+                  style="width: 140px"
+                  teleported
+                  type="date"
                   value-format="YYYY-MM-DD"
               />
             </el-form-item>
@@ -210,17 +246,27 @@
         <el-tab-pane label="详情日志" lazy name="detail">
           <div class="detail-query-tip">查询已改为后台排队执行（单线程串行），通常 1 分钟内返回；建议填写 TraceId / URL 等条件</div>
           <el-form :model="detailForm" class="search-form" inline label-width="90px">
-            <el-form-item label="日期范围">
+            <el-form-item label="开始日期">
               <el-date-picker
-                  v-model="detailForm.dateRange"
+                  v-model="detailForm.startDate"
                   clearable
-                  end-placeholder="结束日期"
                   format="YYYY-MM-DD"
-                  range-separator="至"
-                  start-placeholder="开始日期"
-                  style="width: 260px"
+                  placeholder="开始日期"
+                  style="width: 140px"
                   teleported
-                  type="daterange"
+                  type="date"
+                  value-format="YYYY-MM-DD"
+              />
+            </el-form-item>
+            <el-form-item label="结束日期">
+              <el-date-picker
+                  v-model="detailForm.endDate"
+                  clearable
+                  format="YYYY-MM-DD"
+                  placeholder="结束日期"
+                  style="width: 140px"
+                  teleported
+                  type="date"
                   value-format="YYYY-MM-DD"
               />
             </el-form-item>
@@ -281,17 +327,27 @@
     <el-drawer v-model="traceDrawerVisible" :title="`TraceId: ${traceDetail.traceId}`" size="60%">
       <div class="trace-drawer">
         <el-form class="trace-search-form" inline label-width="90px">
-          <el-form-item label="日期范围">
+          <el-form-item label="开始日期">
             <el-date-picker
-                v-model="traceDateRange"
+                v-model="traceStartDate"
                 clearable
-                end-placeholder="结束日期"
                 format="YYYY-MM-DD"
-                range-separator="至"
-                start-placeholder="开始日期"
-                style="width: 260px"
+                placeholder="开始日期"
+                style="width: 140px"
                 teleported
-                type="daterange"
+                type="date"
+                value-format="YYYY-MM-DD"
+            />
+          </el-form-item>
+          <el-form-item label="结束日期">
+            <el-date-picker
+                v-model="traceEndDate"
+                clearable
+                format="YYYY-MM-DD"
+                placeholder="结束日期"
+                style="width: 140px"
+                teleported
+                type="date"
                 value-format="YYYY-MM-DD"
             />
           </el-form-item>
@@ -451,32 +507,19 @@ const stopServerTimeClock = () => {
   }
 }
 
-const MS_DAY = 86400000
-const MAX_TRACE_RANGE_DAYS = 7
-
-const parseLocalDate = (dateStr: string) => {
-  const [year, month, day] = dateStr.split('-').map(Number)
-  return new Date(year, month - 1, day)
+type DateRangeForm = {
+  startDate: string
+  endDate: string
 }
 
 const normalizeDateRange = (startDate: string, endDate: string): string[] | null => {
   if (!startDate || !endDate) {
     return null
   }
-  let start = startDate
-  let end = endDate
-  if (start > end) {
-    [start, end] = [end, start]
+  if (startDate > endDate) {
+    return [endDate, startDate]
   }
-  const startTime = parseLocalDate(start)
-  const endTime = parseLocalDate(end)
-  const days = Math.floor((endTime.getTime() - startTime.getTime()) / MS_DAY) + 1
-  if (days > MAX_TRACE_RANGE_DAYS) {
-    const clippedEnd = new Date(startTime)
-    clippedEnd.setDate(startTime.getDate() + MAX_TRACE_RANGE_DAYS - 1)
-    return [start, formatLocalDate(clippedEnd)]
-  }
-  return [start, end]
+  return [startDate, endDate]
 }
 
 const extractLogDate = (time?: string) => {
@@ -504,40 +547,54 @@ const expandRangeToIncludeDate = (range: string[], logDate: string) => {
   return normalizeDateRange(start, end)
 }
 
-const getActiveTabDateRange = () => {
+const getActiveTabDateRange = (): string[] => {
+  let form: DateRangeForm
   if (activeTab.value === 'access') {
-    return accessForm.dateRange
+    form = accessForm
+  } else if (activeTab.value === 'error') {
+    form = errorForm
+  } else if (activeTab.value === 'stats') {
+    form = statsForm
+  } else {
+    form = detailForm
   }
-  if (activeTab.value === 'error') {
-    return errorForm.dateRange
-  }
-  if (activeTab.value === 'stats') {
-    return statsForm.dateRange
-  }
-  return detailForm.dateRange
+  return [form.startDate, form.endDate]
 }
 
-/** 默认过去7天; 结束日期+2天,兼容不同时区日志时间 */
+/** 默认8天; 结束日期+2天,兼容不同时区日志时间 */
 const buildDefaultDateRange = (baseDate = new Date()) => {
   const end = new Date(baseDate)
   end.setDate(end.getDate() + 2)
   const start = new Date(end)
-  start.setDate(end.getDate() - 6)
+  start.setDate(end.getDate() - 7)
   return [formatLocalDate(start), formatLocalDate(end)]
 }
 
 const defaultDateRange = () => buildDefaultDateRange(serverTimeBaseMs ? new Date(serverTimeBaseMs) : new Date())
 
+const createDefaultDateRangeForm = (): DateRangeForm => {
+  const [startDate, endDate] = defaultDateRange()
+  return {startDate, endDate}
+}
+
+const resetFormDateRange = (form: DateRangeForm) => {
+  const [startDate, endDate] = defaultDateRange()
+  form.startDate = startDate
+  form.endDate = endDate
+}
+
 const applyDefaultDateRanges = () => {
-  const range = defaultDateRange()
-  statsForm.dateRange = [...range]
-  accessForm.dateRange = [...range]
-  errorForm.dateRange = [...range]
-  detailForm.dateRange = [...range]
+  resetFormDateRange(statsForm)
+  resetFormDateRange(accessForm)
+  resetFormDateRange(errorForm)
+  resetFormDateRange(detailForm)
+  const [startDate, endDate] = defaultDateRange()
+  traceStartDate.value = startDate
+  traceEndDate.value = endDate
 }
 
 const detailForm = reactive({
-  dateRange: defaultDateRange() as string[],
+  ...createDefaultDateRangeForm(),
   traceId: '',
   reqId: '',
   authId: '',
@@ -551,7 +608,7 @@ const detailPageIndex = ref(1)
 const detailPageSize = ref(50)
 
 const accessForm = reactive({
-  dateRange: defaultDateRange() as string[],
+  ...createDefaultDateRangeForm(),
   traceId: '',
   url: '',
   ip: '',
@@ -570,7 +627,7 @@ const accessPageIndex = ref(1)
 const accessPageSize = ref(50)
 
 const errorForm = reactive({
-  dateRange: defaultDateRange() as string[],
+  ...createDefaultDateRangeForm(),
   traceId: '',
   url: '',
   ip: '',
@@ -584,7 +641,7 @@ const errorPageIndex = ref(1)
 const errorPageSize = ref(50)
 
 const statsForm = reactive({
-  dateRange: defaultDateRange() as string[],
+  ...createDefaultDateRangeForm(),
   topN: 20,
 })
 const statsLoading = ref(false)
@@ -593,7 +650,9 @@ const ipTopData = ref<TopStatItem[]>([])
 
 const traceDrawerVisible = ref(false)
 const traceLoading = ref(false)
-const traceDateRange = ref<string[]>(defaultDateRange())
+const defaultTraceDates = createDefaultDateRangeForm()
+const traceStartDate = ref(defaultTraceDates.startDate)
+const traceEndDate = ref(defaultTraceDates.endDate)
 const traceDetail = reactive<TraceLogDetail>({
   traceId: '',
   startDate: '',
@@ -603,12 +662,18 @@ const traceDetail = reactive<TraceLogDetail>({
   errorLogs: [],
 })
 
-const ensureDateRange = (range?: string[]) => {
-  if (!range || range.length !== 2 || !range[0] || !range[1]) {
-    ElMessage.warning('请选择日期范围(默认过去7天,结束含+2天时区缓冲,最多7天)')
+const ensureFormDateRange = (form: DateRangeForm): string[] | null => {
+  if (!form.startDate || !form.endDate) {
+    ElMessage.warning('请选择开始和结束日期')
     return null
   }
-  return range
+  const normalized = normalizeDateRange(form.startDate, form.endDate)
+  if (!normalized) {
+    return null
+  }
+  form.startDate = normalized[0]
+  form.endDate = normalized[1]
+  return normalized
 }
 
 const handleLogQueryStatus = (job: LogQueryJobResult) => {
@@ -624,7 +689,7 @@ const handleLogQueryStatus = (job: LogQueryJobResult) => {
 }
 
 const fetchDetailLogs = async () => {
-  const range = ensureDateRange(detailForm.dateRange)
+  const range = ensureFormDateRange(detailForm)
   if (!range) {
     return
   }
@@ -664,7 +729,7 @@ const buildAccessQueryParams = (range: string[]) => ({
 })
 
 const fetchAccessTrend = async () => {
-  const range = ensureDateRange(accessForm.dateRange)
+  const range = ensureFormDateRange(accessForm)
   if (!range) {
     return
   }
@@ -682,7 +747,7 @@ const fetchAccessTrend = async () => {
 }
 
 const fetchAccessLogs = async () => {
-  const range = ensureDateRange(accessForm.dateRange)
+  const range = ensureFormDateRange(accessForm)
   if (!range) {
     return
   }
@@ -704,7 +769,7 @@ const fetchAccessLogs = async () => {
 }
 
 const fetchErrorLogs = async () => {
-  const range = ensureDateRange(errorForm.dateRange)
+  const range = ensureFormDateRange(errorForm)
   if (!range) {
     return
   }
@@ -732,7 +797,7 @@ const fetchErrorLogs = async () => {
 }
 
 const fetchAccessStats = async () => {
-  const range = ensureDateRange(statsForm.dateRange)
+  const range = ensureFormDateRange(statsForm)
   if (!range) {
     return
   }
@@ -777,29 +842,26 @@ const fetchTraceDetail = async () => {
   if (!traceDetail.traceId) {
     return
   }
-  const range = ensureDateRange(traceDateRange.value)
+  const range = ensureFormDateRange({
+    startDate: traceStartDate.value,
+    endDate: traceEndDate.value,
+  })
   if (!range) {
     return
   }
-  const normalized = normalizeDateRange(range[0], range[1])
-  if (!normalized) {
-    return
-  }
-  if (normalized[0] !== range[0] || normalized[1] !== range[1]) {
-    traceDateRange.value = [...normalized]
-    ElMessage.info('日期范围已自动调整为最多7天')
-  }
+  traceStartDate.value = range[0]
+  traceEndDate.value = range[1]
   traceLoading.value = true
-  traceDetail.startDate = normalized[0]
-  traceDetail.endDate = normalized[1]
+  traceDetail.startDate = range[0]
+  traceDetail.endDate = range[1]
   traceDetail.detailLogs = []
   traceDetail.accessLogs = []
   traceDetail.errorLogs = []
   try {
-    const data = await logQueryApi.getTraceLogs(traceDetail.traceId, normalized[0], normalized[1], handleLogQueryStatus)
+    const data = await logQueryApi.getTraceLogs(traceDetail.traceId, range[0], range[1], handleLogQueryStatus)
     traceDetail.traceId = data.traceId || traceDetail.traceId
-    traceDetail.startDate = data.startDate || normalized[0]
-    traceDetail.endDate = data.endDate || normalized[1]
+    traceDetail.startDate = data.startDate || range[0]
+    traceDetail.endDate = data.endDate || range[1]
     traceDetail.detailLogs = data.detailLogs || []
     traceDetail.accessLogs = data.accessLogs || []
     traceDetail.errorLogs = data.errorLogs || []
@@ -816,7 +878,9 @@ const openTraceDetail = async (traceId: string, logTime?: string) => {
     return
   }
   traceDetail.traceId = traceId
-  traceDateRange.value = resolveInitialTraceDateRange(logTime, getActiveTabDateRange())
+  const [startDate, endDate] = resolveInitialTraceDateRange(logTime, getActiveTabDateRange())
+  traceStartDate.value = startDate
+  traceEndDate.value = endDate
   traceDrawerVisible.value = true
   await fetchTraceDetail()
 }
@@ -838,7 +902,7 @@ const handleErrorSearch = () => {
 }
 
 const resetDetailForm = () => {
-  detailForm.dateRange = defaultDateRange()
+  resetFormDateRange(detailForm)
   detailForm.traceId = ''
   detailForm.reqId = ''
   detailForm.authId = ''
@@ -848,7 +912,7 @@ const resetDetailForm = () => {
 }
 
 const resetAccessForm = () => {
-  accessForm.dateRange = defaultDateRange()
+  resetFormDateRange(accessForm)
   accessForm.traceId = ''
   accessForm.url = ''
   accessForm.ip = ''
@@ -860,7 +924,7 @@ const resetAccessForm = () => {
 }
 
 const resetErrorForm = () => {
-  errorForm.dateRange = defaultDateRange()
+  resetFormDateRange(errorForm)
   errorForm.traceId = ''
   errorForm.url = ''
   errorForm.ip = ''
@@ -925,7 +989,6 @@ const resolveTraceAuthId = () => {
 onMounted(async () => {
   await syncServerTime()
   applyDefaultDateRanges()
-  traceDateRange.value = defaultDateRange()
   startServerTimeClock()
   await fetchAccessStats()
 })
