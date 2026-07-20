@@ -1,6 +1,6 @@
 module xr-game-server
 
-go 1.25.0
+go 1.26
 
 require (
 	github.com/AgoraIO/Tools/DynamicKey/AgoraDynamicKey/go/src v0.0.0-20250825033728-374cd21f5220
