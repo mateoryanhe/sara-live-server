@@ -25,6 +25,7 @@ func InitHttpServer() {
 	shutdown.RegCommonShutDownHandler(closeServer)
 	setupDomainSites()
 	bindCMSStaticFallback(context.Background())
+	initHTTPServerLogger()
 	httpServer.SetErrorStack(true)
 	httpServer.Use(middlewareCORS)
 	if g.Cfg().MustGet(context.Background(), "server.gzipEnabled").Bool() {

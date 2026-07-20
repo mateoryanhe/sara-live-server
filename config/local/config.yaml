@@ -13,6 +13,7 @@ server:
   logStdout: false                       # 访问日志同时输出到终端
   accessLogEnabled: true                # 开启访问日志(执行时间、IP、URL)
   accessLogPattern: "access-{Y-m-d}.log"
+  errorLogPattern: "error-{Y-m-d}.log"
   ####自定义配置
   debugEnv: true #是否开启debug环境,不会检查权限
   exitTime: 30 #退出系统等待多少秒，开始发送kill -9

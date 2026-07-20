@@ -9,6 +9,7 @@ server:
   logPath: "/home/ec2-user/log/"
   accessLogEnabled: true
   accessLogPattern: "access-{Y-m-d}.log"
+  errorLogPattern: "error-{Y-m-d}.log"
   # PProf配置
   pprofEnabled: true # 是否开启PProf性能调试特性。默认为false
   pprofPattern: "/66dcd8e25ab3b339546ea1de5eb2d443e6fca76c76d11709f10533be8bd87d7d/pprof"    # 开启PProf时有效，表示PProf特性的页面访问路径，对当前Server绑定的所有域名有效
