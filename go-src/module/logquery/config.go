@@ -16,7 +16,7 @@ const (
 
 	defaultExportSubDir     = "log-query-export"
 	defaultExportTTLMinutes = 30
-	defaultMaxMatchLines    = 5000
+	defaultMaxMatchLines    = 100000
 	defaultMaxPageSize      = 200
 )
 

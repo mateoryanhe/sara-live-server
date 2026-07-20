@@ -207,17 +207,19 @@
           </div>
         </el-tab-pane>
 
-        <el-tab-pane label="详情日志" name="detail">
+        <el-tab-pane label="详情日志" lazy name="detail">
           <div class="detail-query-tip">查询已改为后台排队执行（单线程串行），通常 1 分钟内返回；建议填写 TraceId / URL 等条件</div>
           <el-form :model="detailForm" class="search-form" inline label-width="90px">
             <el-form-item label="日期范围">
               <el-date-picker
                   v-model="detailForm.dateRange"
+                  clearable
                   end-placeholder="结束日期"
                   format="YYYY-MM-DD"
                   range-separator="至"
                   start-placeholder="开始日期"
                   style="width: 260px"
+                  teleported
                   type="daterange"
                   value-format="YYYY-MM-DD"
               />
@@ -277,10 +279,29 @@
     </el-card>
 
     <el-drawer v-model="traceDrawerVisible" :title="`TraceId: ${traceDetail.traceId}`" size="60%">
-      <div v-loading="traceLoading" :element-loading-text="queryStatusTip" class="trace-drawer">
-        <p class="trace-meta">日期范围: {{ traceDetail.startDate }} 至 {{ traceDetail.endDate }}</p>
+      <div class="trace-drawer">
+        <el-form class="trace-search-form" inline label-width="90px">
+          <el-form-item label="日期范围">
+            <el-date-picker
+                v-model="traceDateRange"
+                clearable
+                end-placeholder="结束日期"
+                format="YYYY-MM-DD"
+                range-separator="至"
+                start-placeholder="开始日期"
+                style="width: 260px"
+                teleported
+                type="daterange"
+                value-format="YYYY-MM-DD"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-button :loading="traceLoading" type="primary" @click="fetchTraceDetail">查询</el-button>
+          </el-form-item>
+        </el-form>
         <p v-if="resolveTraceAuthId()" class="trace-meta">AuthId: {{ resolveTraceAuthId() }}</p>
 
+        <div v-loading="traceLoading" :element-loading-text="queryStatusTip">
         <h4>Error日志</h4>
         <div v-for="(item, index) in traceDetail.errorLogs" :key="'error-' + index" class="trace-log-line">
           <div class="trace-log-meta">
@@ -333,6 +354,7 @@
           <pre class="trace-log-content">{{ item.raw }}</pre>
         </div>
         <el-empty v-if="!traceLoading && traceDetail.detailLogs.length === 0 && traceDetail.accessLogs.length === 0 && traceDetail.errorLogs.length === 0" description="未找到日志"/>
+        </div>
       </div>
     </el-drawer>
   </div>
@@ -495,46 +517,23 @@ const getActiveTabDateRange = () => {
   return detailForm.dateRange
 }
 
-const buildTraceSearchRanges = (tabRange: string[] | undefined, logTime?: string) => {
-  const ranges: string[][] = []
-  const seen = new Set<string>()
-  const pushRange = (start?: string, end?: string) => {
-    const normalized = normalizeDateRange(start || '', end || '')
-    if (!normalized) {
-      return
-    }
-    const key = normalized.join('|')
-    if (seen.has(key)) {
-      return
-    }
-    seen.add(key)
-    ranges.push(normalized)
-  }
-
-  const logDate = extractLogDate(logTime)
-  const tab = tabRange && tabRange.length === 2 ? tabRange : defaultDateRange()
-  const expandedTab = expandRangeToIncludeDate(tab, logDate)
-  if (expandedTab) {
-    pushRange(expandedTab[0], expandedTab[1])
-  }
-  if (logDate) {
-    pushRange(logDate, logDate)
-  }
-  pushRange(...defaultDateRange())
-
-  return ranges
-}
-
-const hasTraceData = (data: TraceLogDetail) =>
-    (data.detailLogs?.length || 0) + (data.accessLogs?.length || 0) + (data.errorLogs?.length || 0) > 0
-
 /** 默认过去7天; 结束日期+2天,兼容不同时区日志时间 */
-const defaultDateRange = () => {
-  const end = new Date()
+const buildDefaultDateRange = (baseDate = new Date()) => {
+  const end = new Date(baseDate)
   end.setDate(end.getDate() + 2)
   const start = new Date(end)
   start.setDate(end.getDate() - 6)
   return [formatLocalDate(start), formatLocalDate(end)]
+}
+
+const defaultDateRange = () => buildDefaultDateRange(serverTimeBaseMs ? new Date(serverTimeBaseMs) : new Date())
+
+const applyDefaultDateRanges = () => {
+  const range = defaultDateRange()
+  statsForm.dateRange = [...range]
+  accessForm.dateRange = [...range]
+  errorForm.dateRange = [...range]
+  detailForm.dateRange = [...range]
 }
 
 const detailForm = reactive({
@@ -594,6 +593,7 @@ const ipTopData = ref<TopStatItem[]>([])
 
 const traceDrawerVisible = ref(false)
 const traceLoading = ref(false)
+const traceDateRange = ref<string[]>(defaultDateRange())
 const traceDetail = reactive<TraceLogDetail>({
   traceId: '',
   startDate: '',
@@ -753,46 +753,72 @@ const fetchAccessStats = async () => {
   }
 }
 
-const openTraceDetail = async (traceId: string, logTime?: string) => {
-  if (!traceId) {
+const resolveInitialTraceDateRange = (logTime?: string, tabRange?: string[]) => {
+  const logDate = extractLogDate(logTime)
+  if (logDate) {
+    if (tabRange?.length === 2) {
+      const expanded = expandRangeToIncludeDate(tabRange, logDate)
+      if (expanded) {
+        return expanded
+      }
+    }
+    return [logDate, logDate]
+  }
+  if (tabRange?.length === 2) {
+    const normalized = normalizeDateRange(tabRange[0], tabRange[1])
+    if (normalized) {
+      return normalized
+    }
+  }
+  return defaultDateRange()
+}
+
+const fetchTraceDetail = async () => {
+  if (!traceDetail.traceId) {
     return
   }
-  const searchRanges = buildTraceSearchRanges(getActiveTabDateRange(), logTime)
-  traceDrawerVisible.value = true
+  const range = ensureDateRange(traceDateRange.value)
+  if (!range) {
+    return
+  }
+  const normalized = normalizeDateRange(range[0], range[1])
+  if (!normalized) {
+    return
+  }
+  if (normalized[0] !== range[0] || normalized[1] !== range[1]) {
+    traceDateRange.value = [...normalized]
+    ElMessage.info('日期范围已自动调整为最多7天')
+  }
   traceLoading.value = true
-  traceDetail.traceId = traceId
-  traceDetail.startDate = searchRanges[0]?.[0] || ''
-  traceDetail.endDate = searchRanges[0]?.[1] || ''
+  traceDetail.startDate = normalized[0]
+  traceDetail.endDate = normalized[1]
   traceDetail.detailLogs = []
   traceDetail.accessLogs = []
   traceDetail.errorLogs = []
   try {
-    let finalData: TraceLogDetail | null = null
-    for (const range of searchRanges) {
-      const data = await logQueryApi.getTraceLogs(traceId, range[0], range[1], handleLogQueryStatus)
-      finalData = data
-      traceDetail.startDate = data.startDate || range[0]
-      traceDetail.endDate = data.endDate || range[1]
-      if (hasTraceData(data)) {
-        traceDetail.traceId = data.traceId
-        traceDetail.detailLogs = data.detailLogs || []
-        traceDetail.accessLogs = data.accessLogs || []
-        traceDetail.errorLogs = data.errorLogs || []
-        return
-      }
-    }
-    if (finalData) {
-      traceDetail.traceId = finalData.traceId
-      traceDetail.detailLogs = finalData.detailLogs || []
-      traceDetail.accessLogs = finalData.accessLogs || []
-      traceDetail.errorLogs = finalData.errorLogs || []
-    }
+    const data = await logQueryApi.getTraceLogs(traceDetail.traceId, normalized[0], normalized[1], handleLogQueryStatus)
+    traceDetail.traceId = data.traceId || traceDetail.traceId
+    traceDetail.startDate = data.startDate || normalized[0]
+    traceDetail.endDate = data.endDate || normalized[1]
+    traceDetail.detailLogs = data.detailLogs || []
+    traceDetail.accessLogs = data.accessLogs || []
+    traceDetail.errorLogs = data.errorLogs || []
   } catch (error) {
     console.error('查询Trace日志失败:', error)
     ElMessage.error('查询Trace日志失败')
   } finally {
     traceLoading.value = false
   }
+}
+
+const openTraceDetail = async (traceId: string, logTime?: string) => {
+  if (!traceId) {
+    return
+  }
+  traceDetail.traceId = traceId
+  traceDateRange.value = resolveInitialTraceDateRange(logTime, getActiveTabDateRange())
+  traceDrawerVisible.value = true
+  await fetchTraceDetail()
 }
 
 const handleDetailSearch = () => {
@@ -898,6 +924,8 @@ const resolveTraceAuthId = () => {
 
 onMounted(async () => {
   await syncServerTime()
+  applyDefaultDateRanges()
+  traceDateRange.value = defaultDateRange()
   startServerTimeClock()
   await fetchAccessStats()
 })
@@ -912,6 +940,9 @@ watch(activeTab, async (tab) => {
   }
   if (tab === 'error' && errorTableData.value.length === 0) {
     await fetchErrorLogs()
+  }
+  if (tab === 'detail' && detailTableData.value.length === 0) {
+    await fetchDetailLogs()
   }
 })
 </script>
@@ -967,6 +998,10 @@ watch(activeTab, async (tab) => {
 
 .trace-drawer h4 {
   margin: 0 0 12px;
+}
+
+.trace-search-form {
+  margin-bottom: 12px;
 }
 
 .trace-meta {

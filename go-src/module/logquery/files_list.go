@@ -2,6 +2,7 @@ package logquery
 
 import (
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -31,7 +32,19 @@ func listLogFilesByPrefix(logDir, prefix, startDate, endDate string) []string {
 		}
 		ret = append(ret, filePath)
 	}
+	sortLogFilesByDate(ret)
 	return ret
+}
+
+func sortLogFilesByDate(files []string) {
+	sort.Slice(files, func(i, j int) bool {
+		di, iok := extractDateFromFileName(filepath.Base(files[i]))
+		dj, jok := extractDateFromFileName(filepath.Base(files[j]))
+		if iok && jok {
+			return di < dj
+		}
+		return files[i] < files[j]
+	})
 }
 
 func extractDateFromFileName(name string) (string, bool) {

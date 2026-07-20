@@ -2,7 +2,6 @@ package logquery
 
 import (
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -67,7 +66,7 @@ func createShellExport(logType string, patterns []string, startDate, endDate str
 	pagePath := filepath.Join(workDir, exportID+".page")
 	exportPath := filepath.Join(cfg.exportAbsDir(), fileName)
 
-	if err := grepFilesToFile(patterns, files, cfg.MaxMatchLines, rawPath); err != nil {
+	if err := grepFilesToReversedFile(patterns, files, cfg.MaxMatchLines, rawPath); err != nil {
 		return nil, err
 	}
 	total, err := countLines(rawPath)
@@ -402,13 +401,4 @@ func cleanExportDir(dir string, expireBefore time.Time) {
 		}
 		removeFile(filepath.Join(dir, entry.Name()))
 	}
-}
-
-func shellQuote(path string) string {
-	return "'" + strings.ReplaceAll(path, "'", `'\'\'\'`) + "'"
-}
-
-func runShellScript(script string) error {
-	_, err := exec.Command("bash", "-lc", script).Output()
-	return err
 }

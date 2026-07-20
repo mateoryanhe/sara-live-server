@@ -13,15 +13,13 @@ func runCommand(name string, args ...string) ([]byte, error) {
 	return cmd.Output()
 }
 
-func runCommandAllowNoMatch(name string, args ...string) ([]byte, error) {
-	out, err := runCommand(name, args...)
-	if err == nil {
-		return out, nil
-	}
-	if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 1 {
-		return nil, nil
-	}
-	return out, err
+func runShellScript(script string) error {
+	_, err := exec.Command("bash", "-lc", script).Output()
+	return err
+}
+
+func shellQuote(value string) string {
+	return "'" + strings.ReplaceAll(value, "'", `'\'\'\'`) + "'"
 }
 
 func writeFile(path string, content []byte) error {
@@ -66,56 +64,82 @@ func sanitizeShellPattern(pattern string) (string, bool) {
 	return pattern, true
 }
 
+func shellJoinPaths(paths []string) string {
+	if len(paths) == 0 {
+		return ""
+	}
+	quoted := make([]string, len(paths))
+	for i, path := range paths {
+		quoted[i] = shellQuote(path)
+	}
+	return strings.Join(quoted, " ")
+}
+
+func buildSearchPipeline(patterns []string, files []string) string {
+	patterns = uniqueNonEmpty(patterns)
+	fileArgs := shellJoinPaths(files)
+	if len(patterns) == 0 {
+		return "cat -- " + fileArgs
+	}
+	first, ok := sanitizeShellPattern(patterns[0])
+	if !ok {
+		return "cat -- " + fileArgs
+	}
+	var builder strings.Builder
+	builder.WriteString("grep -h -i -F -a -- ")
+	builder.WriteString(shellQuote(first))
+	builder.WriteString(" ")
+	builder.WriteString(fileArgs)
+	for _, pattern := range patterns[1:] {
+		pattern, ok := sanitizeShellPattern(pattern)
+		if !ok {
+			continue
+		}
+		builder.WriteString(" | grep -F -i -- ")
+		builder.WriteString(shellQuote(pattern))
+	}
+	return builder.String()
+}
+
+func writePipelineToFile(pipeline string, maxLines int, outPath string, reverse bool) error {
+	if err := os.MkdirAll(filepath.Dir(outPath), 0o755); err != nil {
+		return err
+	}
+	var script strings.Builder
+	script.WriteString("( ")
+	script.WriteString(pipeline)
+	script.WriteString(" || true )")
+	if maxLines > 0 {
+		script.WriteString(" | tail -n ")
+		script.WriteString(strconv.Itoa(maxLines))
+	}
+	if reverse {
+		script.WriteString(" | tac")
+	}
+	script.WriteString(" > ")
+	script.WriteString(shellQuote(outPath))
+	return runShellScript(script.String())
+}
+
 func concatFilesToFile(files []string, maxLines int, outPath string) error {
 	if len(files) == 0 {
 		return writeFile(outPath, nil)
 	}
-	args := append([]string{"--"}, files...)
-	out, err := runCommand("cat", args...)
-	if err != nil {
-		return err
-	}
-	lines := splitLines(out)
-	if len(lines) > maxLines {
-		lines = lines[:maxLines]
-	}
-	if len(lines) == 0 {
-		return writeFile(outPath, nil)
-	}
-	return writeFile(outPath, []byte(strings.Join(lines, "\n")+"\n"))
+	return writePipelineToFile(buildSearchPipeline(nil, files), maxLines, outPath, false)
 }
 
 func grepFilesToFile(patterns []string, files []string, maxLines int, outPath string) error {
 	if len(files) == 0 {
 		return writeFile(outPath, nil)
 	}
-	patterns = uniqueNonEmpty(patterns)
-	if len(patterns) == 0 {
-		return concatFilesToFile(files, maxLines, outPath)
-	}
-	first, ok := sanitizeShellPattern(patterns[0])
-	if !ok {
+	return writePipelineToFile(buildSearchPipeline(patterns, files), maxLines, outPath, false)
+}
+
+func grepFilesToReversedFile(patterns []string, files []string, maxLines int, outPath string) error {
+	if len(files) == 0 {
 		return writeFile(outPath, nil)
 	}
-
-	args := []string{"-h", "-i", "-F", "-a", "-m", strconv.Itoa(maxLines), "--", first}
-	args = append(args, files...)
-	out, err := runCommandAllowNoMatch("grep", args...)
-	if err != nil {
-		return err
-	}
-	lines := splitLines(out)
-	for _, pattern := range patterns[1:] {
-		pattern, ok := sanitizeShellPattern(pattern)
-		if !ok {
-			continue
-		}
-		lines = filterContains(lines, pattern)
-	}
-	if len(lines) > maxLines {
-		lines = lines[:maxLines]
-	}
-	return writeFile(outPath, []byte(strings.Join(lines, "\n")+"\n"))
+	return writePipelineToFile(buildSearchPipeline(patterns, files), maxLines, outPath, true)
 }
 
 func paginateFile(srcPath, dstPath string, pageIndex, pageSize int) error {
@@ -125,19 +149,14 @@ func paginateFile(srcPath, dstPath string, pageIndex, pageSize int) error {
 	if pageSize <= 0 {
 		pageSize = 50
 	}
+	if err := os.MkdirAll(filepath.Dir(dstPath), 0o755); err != nil {
+		return err
+	}
 	start := (pageIndex-1)*pageSize + 1
-	tailOut, err := runCommand("tail", "-n", "+"+strconv.Itoa(start), srcPath)
-	if err != nil {
-		return writeFile(dstPath, nil)
-	}
-	lines := splitLines(tailOut)
-	if len(lines) > pageSize {
-		lines = lines[:pageSize]
-	}
-	if len(lines) == 0 {
-		return writeFile(dstPath, nil)
-	}
-	return writeFile(dstPath, []byte(strings.Join(lines, "\n")+"\n"))
+	script := "tail -n +" + strconv.Itoa(start) + " " + shellQuote(srcPath) +
+		" | head -n " + strconv.Itoa(pageSize) +
+		" > " + shellQuote(dstPath) + " || true"
+	return runShellScript(script)
 }
 
 func splitLines(data []byte) []string {
@@ -149,20 +168,6 @@ func splitLines(data []byte) []string {
 	for _, line := range raw {
 		line = strings.TrimRight(line, "\r")
 		if line != "" {
-			ret = append(ret, line)
-		}
-	}
-	return ret
-}
-
-func filterContains(lines []string, pattern string) []string {
-	needle := strings.ToLower(strings.TrimSpace(pattern))
-	if needle == "" {
-		return lines
-	}
-	ret := make([]string, 0, len(lines))
-	for _, line := range lines {
-		if strings.Contains(strings.ToLower(line), needle) {
 			ret = append(ret, line)
 		}
 	}
