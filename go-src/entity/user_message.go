@@ -29,12 +29,26 @@ const (
 // UserMessage 用户消息(系统消息/私信)
 // 走 syndb 快速同步缓冲(quick chan),变更通过 Setter 推送到队列由 worker 周期性 Save 到 DB
 type UserMessage struct {
-	migrate.OneModel
+	migrate.MoreModel
 	Type       uint8  `gorm:"index:idx_receiver_type,priority:2;default:0;comment:消息类型(1-系统消息,2-私信)" json:"type"`
 	SenderId   uint64 `gorm:"index;default:0;comment:发送者ID(系统消息可为0)" json:"senderId"`
 	ReceiverId uint64 `gorm:"index:idx_receiver_type,priority:1;default:0;comment:接收者ID" json:"receiverId"`
 	Title      string `gorm:"size:128;default:'';comment:标题(系统消息使用)" json:"title"`
 	Content    string `gorm:"size:1024;default:'';comment:消息内容" json:"content"`
+}
+
+// SessionIdForUser 返回指定用户视角的私信会话ID
+func (m *UserMessage) SessionIdForUser(userId uint64) string {
+	if m == nil || m.Type != UserMessageTypePrivate {
+		return ""
+	}
+	if m.SenderId == userId {
+		return BuildUserMessageSessionId(userId, m.ReceiverId)
+	}
+	if m.ReceiverId == userId {
+		return BuildUserMessageSessionId(userId, m.SenderId)
+	}
+	return ""
 }
 
 // NewUserMessage 构造一条新消息
@@ -87,9 +101,39 @@ func (m *UserMessage) SetUpdatedAt(v time.Time) {
 	syndb.AddDataToQuickChan(TbUserMessage, db.UpdatedAtName, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
+func (m *UserMessage) SetIsDeleted(v bool) {
+	m.IsDeleted = v
+	syndb.AddDataToQuickChan(TbUserMessage, db.IsDeletedName, &syndb.ColData{IdVal: m.ID, ColVal: v})
+}
+
+func (m *UserMessage) SetDeletedAt(v time.Time) {
+	m.DeletedAt = v
+	syndb.AddDataToQuickChan(TbUserMessage, db.DeletedAtName, &syndb.ColData{IdVal: m.ID, ColVal: v})
+}
+
+// MarkDeleted 标记消息为已删除
+func (m *UserMessage) MarkDeleted() {
+	now := time.Now()
+	m.SetIsDeleted(true)
+	m.SetDeletedAt(now)
+	m.SetUpdatedAt(now)
+}
+
+// NewMarkDeletedUserMessage 标记消息删除(走 syndb,物理删库由定时任务执行)
+func NewMarkDeletedUserMessage(id uint64) {
+	if id == 0 {
+		return
+	}
+	row := &UserMessage{}
+	row.ID = id
+	row.MarkDeleted()
+}
+
 func initUserMessage() {
 	syndb.RegQuick(TbUserMessage, db.CreatedAtName)
 	syndb.RegQuick(TbUserMessage, db.UpdatedAtName)
+	syndb.RegQuick(TbUserMessage, db.IsDeletedName)
+	syndb.RegQuick(TbUserMessage, db.DeletedAtName)
 	syndb.RegQuick(TbUserMessage, UserMessageType)
 	syndb.RegQuick(TbUserMessage, UserMessageSenderId)
 	syndb.RegQuick(TbUserMessage, UserMessageReceiverId)

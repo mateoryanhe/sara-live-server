@@ -93,7 +93,7 @@ func prependSystemMessage(list []*entity.UserMessage, msg *entity.UserMessage) [
 func loadSystemFromDB(receiverId uint64, offset, limit int) []*entity.UserMessage {
 	list := make([]*entity.UserMessage, 0)
 	_ = g.Model(string(entity.TbUserMessage)).Ctx(context.Background()).
-		Where("receiver_id = ? AND type = ?", receiverId, entity.UserMessageTypeSystem).
+		Where("receiver_id = ? AND type = ? AND is_deleted = 0", receiverId, entity.UserMessageTypeSystem).
 		Order("created_at desc").
 		Limit(limit).
 		Offset(offset).

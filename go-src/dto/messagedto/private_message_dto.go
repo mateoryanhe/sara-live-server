@@ -11,6 +11,7 @@ type AppSendPrivateMessageReq struct {
 
 type AppSendPrivateMessageRes struct {
 	MessageId uint64 `json:"messageId,string" dc:"消息ID"`
+	SessionId uint64 `json:"sessionId,string" dc:"当前用户会话索引ID(user_message_sessions.id)"`
 	Success   bool   `json:"success"`
 }
 
@@ -42,7 +43,8 @@ type AppPrivateMessageBySenderReq struct {
 }
 
 type AppPrivateMessageItem struct {
-	Id           uint64 `json:"id,string"`
+	Id           uint64 `json:"id,string" dc:"消息ID"`
+	SessionId    uint64 `json:"sessionId,string" dc:"会话索引ID(user_message_sessions.id),删除时上报"`
 	SenderId     uint64 `json:"senderId,string"`
 	ReceiverId   uint64 `json:"receiverId,string"`
 	Content      string `json:"content"`
@@ -67,6 +69,17 @@ type AppClearPrivateMessageUnreadReq struct {
 type AppClearPrivateMessageUnreadRes struct {
 	Success       bool   `json:"success"`
 	ClearedCount  uint64 `json:"clearedCount" dc:"本次清除的未读数"`
+	PrivateUnread uint64 `json:"privateUnread" dc:"剩余私信未读总数"`
+}
+
+// AppBatchDeletePrivateMessageReq App端一键删除与目标用户的全部私信
+type AppBatchDeletePrivateMessageReq struct {
+	g.Meta   `path:"/batchDeletePrivateMessage" method:"post" summary:"一键删除私信" tags:"私信"`
+	TargetId uint64 `json:"targetId,string" v:"required|min:1#目标用户ID不能为空|目标用户ID非法" dc:"目标用户ID"`
+}
+
+type AppBatchDeletePrivateMessageRes struct {
+	Success       bool   `json:"success"`
 	PrivateUnread uint64 `json:"privateUnread" dc:"剩余私信未读总数"`
 }
 

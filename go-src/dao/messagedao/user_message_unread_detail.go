@@ -79,6 +79,7 @@ type PrivateMessageUnreadListRow struct {
 	SenderId          uint64    `json:"sender_id"`
 	UnreadCount       uint64    `json:"unread_count"`
 	UpdatedAt         time.Time `json:"updated_at"`
+	SessionRowId      uint64    `json:"session_row_id"`
 	MessageId         uint64    `json:"message_id"`
 	MessageSenderId   uint64    `json:"message_sender_id"`
 	MessageReceiverId uint64    `json:"message_receiver_id"`
@@ -91,20 +92,22 @@ SELECT
   d.sender_id,
   d.unread_count,
   d.updated_at,
+  ls.id AS session_row_id,
   lm.id AS message_id,
   lm.sender_id AS message_sender_id,
   lm.receiver_id AS message_receiver_id,
   lm.content AS message_content,
   lm.created_at AS message_created_at
 FROM ` + string(entity.TbUserMessageUnreadDetail) + ` d
-LEFT JOIN ` + string(entity.TbUserMessage) + ` lm ON lm.id = (
-  SELECT m.id
-  FROM ` + string(entity.TbUserMessage) + ` m
-  INNER JOIN ` + string(entity.TbUserMessageSession) + ` s ON s.message_id = m.id
-  WHERE s.session_id = d.id AND m.type = ?
+LEFT JOIN ` + string(entity.TbUserMessageSession) + ` ls ON ls.id = (
+  SELECT s.id
+  FROM ` + string(entity.TbUserMessageSession) + ` s
+  INNER JOIN ` + string(entity.TbUserMessage) + ` m ON s.message_id = m.id
+  WHERE s.session_id = d.id AND s.is_deleted = 0 AND m.is_deleted = 0 AND m.type = ?
   ORDER BY m.created_at DESC
   LIMIT 1
 )
+LEFT JOIN ` + string(entity.TbUserMessage) + ` lm ON lm.id = ls.message_id AND lm.is_deleted = 0
 WHERE d.user_id = ?
 ORDER BY d.updated_at DESC
 LIMIT ? OFFSET ?`

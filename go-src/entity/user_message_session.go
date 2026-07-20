@@ -21,7 +21,7 @@ const (
 // UserMessageSession 私信消息会话索引(消息ID -> 会话ID)
 // 走 syndb 快速同步缓冲(quick chan),变更通过 Setter 推送到队列由 worker 周期性 Save 到 DB
 type UserMessageSession struct {
-	migrate.OneModel
+	migrate.MoreModel
 	MessageId uint64 `gorm:"index;default:0;comment:消息ID" json:"messageId"`
 	SessionId string `gorm:"index;size:250;default:'';comment:会话ID(userId_targetId)" json:"sessionId"`
 }
@@ -71,9 +71,43 @@ func (m *UserMessageSession) SetUpdatedAt(v time.Time) {
 	})
 }
 
+func (m *UserMessageSession) SetIsDeleted(v bool) {
+	m.IsDeleted = v
+	syndb.AddDataToQuickChan(TbUserMessageSession, db.IsDeletedName, &syndb.ColData{
+		IdVal: m.ID, ColVal: v,
+	})
+}
+
+func (m *UserMessageSession) SetDeletedAt(v time.Time) {
+	m.DeletedAt = v
+	syndb.AddDataToQuickChan(TbUserMessageSession, db.DeletedAtName, &syndb.ColData{
+		IdVal: m.ID, ColVal: v,
+	})
+}
+
+// MarkDeleted 标记当前用户会话索引为已删除
+func (m *UserMessageSession) MarkDeleted() {
+	now := time.Now()
+	m.SetIsDeleted(true)
+	m.SetDeletedAt(now)
+	m.SetUpdatedAt(now)
+}
+
+// NewMarkDeletedUserMessageSession 标记会话索引删除(走 syndb,不物理删库)
+func NewMarkDeletedUserMessageSession(id uint64) {
+	if id == 0 {
+		return
+	}
+	row := &UserMessageSession{}
+	row.ID = id
+	row.MarkDeleted()
+}
+
 func initUserMessageSession() {
 	syndb.RegQuick(TbUserMessageSession, db.CreatedAtName)
 	syndb.RegQuick(TbUserMessageSession, db.UpdatedAtName)
+	syndb.RegQuick(TbUserMessageSession, db.IsDeletedName)
+	syndb.RegQuick(TbUserMessageSession, db.DeletedAtName)
 	syndb.RegQuick(TbUserMessageSession, UserMessageSessionMessageId)
 	syndb.RegQuick(TbUserMessageSession, UserMessageSessionSessionId)
 	migrate.AutoMigrate(&UserMessageSession{})

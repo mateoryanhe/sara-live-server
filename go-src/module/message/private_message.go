@@ -40,15 +40,13 @@ func SendPrivateMessage(ctx context.Context, req *messagedto.AppSendPrivateMessa
 
 	//往发送者写入消息
 	pushItem := buildPrivateMessagePushItem(msg)
-	//刷新消息缓存
-	entity.NewUserMessageSession(msg.ID, entity.BuildUserMessageSessionId(senderId, req.ReceiverId))
+	senderSession := entity.NewUserMessageSession(msg.ID, entity.BuildUserMessageSessionId(senderId, req.ReceiverId))
 	push.Data(senderId, cmd.PrivateMessagePush, pushItem)
 
 	//往接收者写入消息
 	entity.NewUserMessageSession(msg.ID, entity.BuildUserMessageSessionId(req.ReceiverId, senderId))
 
 	push.Data(req.ReceiverId, cmd.PrivateMessagePush, pushItem)
-	//刷新消息缓存
 	//刷新未读消息缓存
 	unReadData := messagedao.GetUnReadByUserId(req.ReceiverId)
 	unReadData.AddPrivateUnread(1)
@@ -59,6 +57,7 @@ func SendPrivateMessage(ctx context.Context, req *messagedto.AppSendPrivateMessa
 
 	return &messagedto.AppSendPrivateMessageRes{
 		MessageId: msg.ID,
+		SessionId: senderSession.ID,
 		Success:   true,
 	}, nil
 }
@@ -104,10 +103,10 @@ func ListPrivateMessageBySender(ctx context.Context, req *messagedto.AppPrivateM
 	rows, hasMore := messagedao.ListByReceiverAndSender(sessionId, req.LastCreatedAt, pageSize)
 	list := make([]*messagedto.AppPrivateMessageItem, 0, len(rows))
 	for _, row := range rows {
-		if row == nil {
+		if row == nil || row.Message == nil {
 			continue
 		}
-		list = append(list, toPrivateMessageItem(row))
+		list = append(list, toPrivateMessageItem(row.SessionId, row.Message))
 	}
 	return &messagedto.AppPrivateMessageBySenderRes{
 		List:    list,
@@ -145,6 +144,45 @@ func ClearPrivateMessageUnread(ctx context.Context, req *messagedto.AppClearPriv
 		Success:       true,
 		ClearedCount:  clearedCount,
 		PrivateUnread: unReadData.PrivateUnread,
+	}, nil
+}
+
+// BatchDeletePrivateMessage App端一键删除与目标用户的全部私信(异步物理删除)
+func BatchDeletePrivateMessage(ctx context.Context, req *messagedto.AppBatchDeletePrivateMessageReq) (*messagedto.AppBatchDeletePrivateMessageRes, error) {
+	userId := httpserver.GetAuthId(ctx)
+	if userId == 0 {
+		return nil, errercode.CreateCode(errercode.EmptyUserId)
+	}
+	if req.TargetId == userId {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+
+	unReadData := messagedao.GetUnReadByUserId(userId)
+	unReadDetail := messagedao.GetUnreadDetailByReceiverSender(req.TargetId, userId)
+	if unReadDetail != nil && unReadDetail.UnreadCount > 0 {
+		clearedCount := unReadDetail.UnreadCount
+		if unReadData != nil {
+			unReadData.SubPrivateUnread(clearedCount)
+		}
+		unReadDetail.ClearUnread(clearedCount)
+		messagedao.FlushUnreadDetailCache(unReadDetail)
+	}
+
+	targetId := req.TargetId
+	xrpool.AddWithRecover(ctx, func(poolCtx context.Context) {
+		if err := messagedao.DeletePrivateConversationByTarget(poolCtx, userId, targetId); err != nil {
+			g.Log().Errorf(poolCtx, "BatchDeletePrivateMessage userId=%d targetId=%d err=%v", userId, targetId, err)
+		}
+	})
+
+	privateUnread := uint64(0)
+	if unReadData != nil {
+		privateUnread = unReadData.PrivateUnread
+	}
+
+	return &messagedto.AppBatchDeletePrivateMessageRes{
+		Success:       true,
+		PrivateUnread: privateUnread,
 	}, nil
 }
 
@@ -206,25 +244,22 @@ func toPrivateMessageUnreadDetailItemFromRow(row *messagedao.PrivateMessageUnrea
 		item.SenderAvatar = upload.ResolveAvatarUrlForUser(row.SenderId, sender.Avatar)
 	}
 	if row.MessageId > 0 {
-		item.LastMessage = &messagedto.AppPrivateMessageItem{
-			Id:          row.MessageId,
-			SenderId:    row.MessageSenderId,
-			ReceiverId:  row.MessageReceiverId,
-			Content:     row.MessageContent,
-			CreatedAt:   formatMessageTime(row.MessageCreatedAt),
-			CreatedAtMs: row.MessageCreatedAt.UnixMilli(),
+		msg := &entity.UserMessage{
+			SenderId:   row.MessageSenderId,
+			ReceiverId: row.MessageReceiverId,
+			Content:    row.MessageContent,
 		}
-		if msgSender := userinfodao.GetUserInfoByUserId(row.MessageSenderId); msgSender != nil {
-			item.LastMessage.SenderName = msgSender.Nickname
-			item.LastMessage.SenderAvatar = upload.ResolveAvatarUrlForUser(row.MessageSenderId, msgSender.Avatar)
-		}
+		msg.ID = row.MessageId
+		msg.CreatedAt = row.MessageCreatedAt
+		item.LastMessage = toPrivateMessageItem(row.SessionRowId, msg)
 	}
 	return item
 }
 
-func toPrivateMessageItem(msg *entity.UserMessage) *messagedto.AppPrivateMessageItem {
+func toPrivateMessageItem(sessionId uint64, msg *entity.UserMessage) *messagedto.AppPrivateMessageItem {
 	item := &messagedto.AppPrivateMessageItem{
 		Id:          msg.ID,
+		SessionId:   sessionId,
 		SenderId:    msg.SenderId,
 		ReceiverId:  msg.ReceiverId,
 		Content:     msg.Content,

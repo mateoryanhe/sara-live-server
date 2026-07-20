@@ -40,6 +40,11 @@ func (c *MessageAppController) ClearAllPrivateMessageUnread(ctx context.Context,
 	return message.ClearAllPrivateMessageUnread(ctx, req)
 }
 
+// BatchDeletePrivateMessage App端批量删除私信
+func (c *MessageAppController) BatchDeletePrivateMessage(ctx context.Context, req *messagedto.AppBatchDeletePrivateMessageReq) (*messagedto.AppBatchDeletePrivateMessageRes, error) {
+	return message.BatchDeletePrivateMessage(ctx, req)
+}
+
 // SystemMessageList App端查询系统消息列表
 func (c *MessageAppController) SystemMessageList(ctx context.Context, req *messagedto.AppSystemMessageListReq) (*messagedto.AppSystemMessageListRes, error) {
 	return message.ListSystemMessage(ctx, req)
