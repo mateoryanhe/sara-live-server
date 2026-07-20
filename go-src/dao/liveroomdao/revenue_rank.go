@@ -30,15 +30,15 @@ FROM `+string(entity.TbLiveRevenueLog)+` rl
 INNER JOIN `+string(entity.TbAccount)+` a ON a.id = rl.receiver_id
 LEFT JOIN `+string(entity.TbUserExt)+` ue ON ue.id = rl.receiver_id
 WHERE rl.receiver_id > 0
-  AND COALESCE(rl.`+string(entity.LiveRevenueLogStatus)+`, 0) = 0
+  AND IFNULL(rl.`+string(entity.LiveRevenueLogStatus)+`, 0) = 0
   AND rl.created_at >= ?
   AND rl.created_at <= ?
-  AND COALESCE(a.`+string(entity.AccountCancel)+`, false) = false
+  AND IFNULL(a.`+string(entity.AccountCancel)+`, 0) = 0
   AND (
-    COALESCE(a.`+string(entity.AccountBan)+`, false) = false
+    IFNULL(a.`+string(entity.AccountBan)+`, 0) = 0
     OR (a.`+string(entity.AccountBanApplyTime)+` IS NOT NULL AND a.`+string(entity.AccountBanApplyTime)+` <= ?)
   )
-  AND (ue.id IS NULL OR COALESCE(ue.`+string(entity.UserExtCanRank)+`, true) = true)
+  AND (ue.id IS NULL OR IFNULL(ue.`+string(entity.UserExtCanRank)+`, 1) = 1)
 GROUP BY rl.receiver_id
 ORDER BY total_amount DESC
 LIMIT ?

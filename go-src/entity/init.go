@@ -1,5 +1,7 @@
 package entity
 
+import "xr-game-server/core/migrate"
+
 func Init() {
 	initAccount()
 	initAppToken()
@@ -68,4 +70,5 @@ func Init() {
 	initCallUser()
 	initSystemTotalStat()
 	initSysResourceMetric()
+	migrate.Close()
 }

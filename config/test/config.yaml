@@ -15,6 +15,7 @@ server:
   ####自定义配置
   debugEnv: true #是否开启debug环境,不会检查权限
   exitTime: 5 #退出系统等待多少秒，开始发送kill -9
+  memoryLimitM: 200
   # 多域名静态目录与HTTPS证书(SNI), 不同域名指向不同静态目录
   # domainSites:
   #   - domain: "cdn1.example.com"
@@ -63,6 +64,9 @@ database:
     level: "all"
     stdout: true
   default:
-    link: "pgsql:postgres:1qaz2wsx@tcp(127.0.0.1:5432)/live_db"
-    extra: "sslmode=disable"
+    link: "mysql:root:Appledev882116@tcp(127.0.0.1:3306)/live_db"
+    extra: "charset=utf8mb4&parseTime=True&loc=Local"
+    maxIdle: 2
+    maxOpen: 5
+    maxLifetime: "30s"
     debug: true

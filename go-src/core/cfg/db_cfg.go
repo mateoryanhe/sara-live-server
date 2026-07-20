@@ -1,6 +1,8 @@
 package cfg
 
 import (
+	"time"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 )
@@ -10,9 +12,12 @@ const (
 )
 
 type DBCfg struct {
-	Link  string
-	Extra string
-	Debug string
+	Link        string
+	Extra       string
+	Debug       string
+	MaxIdle     int           `json:"maxIdle"`
+	MaxOpen     int           `json:"maxOpen"`
+	MaxLifetime time.Duration `json:"maxLifetime"`
 }
 
 var DefaultDbCfg = &DBCfg{}

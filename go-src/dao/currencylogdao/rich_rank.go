@@ -34,12 +34,12 @@ WHERE cl.`+string(entity.CurrencyLogType)+` = ?
   AND cl.`+string(entity.CurrencyLogAction)+` = ?
   AND cl.created_at >= ?
   AND cl.created_at <= ?
-  AND COALESCE(a.`+string(entity.AccountCancel)+`, false) = false
+  AND IFNULL(a.`+string(entity.AccountCancel)+`, 0) = 0
   AND (
-    COALESCE(a.`+string(entity.AccountBan)+`, false) = false
+    IFNULL(a.`+string(entity.AccountBan)+`, 0) = 0
     OR (a.`+string(entity.AccountBanApplyTime)+` IS NOT NULL AND a.`+string(entity.AccountBanApplyTime)+` <= ?)
   )
-  AND (ue.id IS NULL OR COALESCE(ue.`+string(entity.UserExtCanRank)+`, true) = true)
+  AND (ue.id IS NULL OR IFNULL(ue.`+string(entity.UserExtCanRank)+`, 1) = 1)
 GROUP BY cl.user_id
 ORDER BY total DESC
 LIMIT ?

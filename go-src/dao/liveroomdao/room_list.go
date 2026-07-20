@@ -34,9 +34,9 @@ func ListRooms(page, pageSize int) (int, []*RoomListRow) {
 	}
 
 	sql := `SELECT r.id, r.guild_id, r.title, r.cover, r.notice, r.status,
-                   FLOOR(EXTRACT(EPOCH FROM r.created_at))::bigint AS created_at,
-                   COALESCE(u.nickname, '') AS nickname,
-                   COALESCE(u.avatar, '') AS avatar
+                   UNIX_TIMESTAMP(r.created_at) AS created_at,
+                   IFNULL(u.nickname, '') AS nickname,
+                   IFNULL(u.avatar, '') AS avatar
             FROM live_rooms r
             LEFT JOIN user_infos u ON u.id = r.id
             WHERE 1=1 `

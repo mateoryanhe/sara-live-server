@@ -28,7 +28,7 @@ bufferSize:
   websocket:
     size: 30 # 推送批量大小(未配置时默认10)
   goPool:
-    size: 300 # 协程池大小(未配置时走默认池)
+    size: 400 # 协程池大小(未配置时走默认池)
 
 logger:
   timeFormat: "2006-01-02T15:04:05.000"
@@ -51,6 +51,9 @@ logger:
 
 database:
   default:
-    link: "pgsql:postgres:1qaz2wsx@tcp(127.0.0.1:5432)/live_db"
-    extra: "sslmode=disable"
+    link: "mysql:root:Appledev882116@tcp(127.0.0.1:3306)/live_db"
+    extra: "charset=utf8mb4&parseTime=True&loc=Local"
+    maxIdle: 2
+    maxOpen: 8
+    maxLifetime: "30s"
     debug: true

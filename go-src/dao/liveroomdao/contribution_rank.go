@@ -49,14 +49,14 @@ SELECT rl.sender_id, SUM(rl.total_amount) AS total_amount
 FROM ` + string(entity.TbLiveRevenueLog) + ` rl
 INNER JOIN ` + string(entity.TbAccount) + ` a ON a.id = rl.sender_id
 WHERE rl.room_id = ?
-  AND COALESCE(rl.` + string(entity.LiveRevenueLogStatus) + `, 0) = 0
+  AND IFNULL(rl.` + string(entity.LiveRevenueLogStatus) + `, 0) = 0
   AND rl.sender_id IN (` + inPlaceholders + `)
   AND rl.revenue_type IN (?, ?)
   AND rl.created_at >= ?
   AND rl.created_at <= ?
-  AND COALESCE(a.` + string(entity.AccountCancel) + `, false) = false
+  AND IFNULL(a.` + string(entity.AccountCancel) + `, 0) = 0
   AND (
-    COALESCE(a.` + string(entity.AccountBan) + `, false) = false
+    IFNULL(a.` + string(entity.AccountBan) + `, 0) = 0
     OR (a.` + string(entity.AccountBanApplyTime) + ` IS NOT NULL AND a.` + string(entity.AccountBanApplyTime) + ` <= ?)
   )
 GROUP BY rl.sender_id
