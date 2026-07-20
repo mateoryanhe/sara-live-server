@@ -41,9 +41,12 @@ logger:
   timeFormat: "2006-01-02T15:04:05"
   level: "all"
   flags: 4
-  rotateExpire: "1d"
-  rotateBackupLimit: 1
-  rotateBackupExpire: "2d"
+  path: 'd:\log\'
+  file: "detail-{Y-m-d}.log"
+  rotateExpire: "3d"
+  rotateBackupLimit: 0
+  rotateBackupExpire: 0
+  rotateBackupCompress: 0
   stdoutColorDisabled: false
   writerColorEnable: true
   detail:

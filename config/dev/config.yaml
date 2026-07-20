@@ -34,9 +34,12 @@ logger:
   timeFormat: "2006-01-02T15:04:05.000"
   level: "all"
   flags: 45
-  rotateExpire: "1d"
-  rotateBackupLimit: 3
-  rotateBackupExpire: "3d"
+  path: "/home/ec2-user/log/"
+  file: "detail-{Y-m-d}.log"  # 与 detail 一致，避免产生 2026-07-20.log 等无前缀文件
+  rotateExpire: "3d"              # 保留最近3天的按日日志，过期直接删（不产生时间戳备份）
+  rotateBackupLimit: 0          # 0=不保留备份，过期直接删，不产生 detail-xxx.20260720....log
+  rotateBackupExpire: 0
+  rotateBackupCompress: 0
   stdoutColorDisabled: false
   writerColorEnable: true
   detail:                               # API详情日志；启动时同步为默认 g.Log()

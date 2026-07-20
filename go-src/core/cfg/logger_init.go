@@ -13,9 +13,8 @@ func initDefaultLoggerFromDetail() {
 	if g.Cfg().MustGet(ctx, "logger.detail").IsEmpty() {
 		return
 	}
-	_ = g.Log()
 	detailLogger := g.Log("detail")
-	defaultLogger := g.Log()
+	defaultLogger := glog.New()
 	if err := defaultLogger.SetConfig(detailLogger.GetConfig()); err != nil {
 		return
 	}
