@@ -106,3 +106,21 @@ type CancelAccountReq struct {
 type CancelAccountRes struct {
 	Success bool `json:"success"`
 }
+
+// AppFeedbackReq App端用户反馈(不解析body,占位接口)
+type AppFeedbackReq struct {
+	g.Meta `path:"/feedback" method:"post" summary:"用户反馈" tags:"用户反馈"`
+}
+
+type AppFeedbackRes struct {
+	Success bool `json:"success"`
+}
+
+// AppReportReq App端用户举报(不解析body,占位接口)
+type AppReportReq struct {
+	g.Meta `path:"/report" method:"post" summary:"用户举报" tags:"用户举报"`
+}
+
+type AppReportRes struct {
+	Success bool `json:"success"`
+}

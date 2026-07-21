@@ -46,3 +46,11 @@ func (c *UserInfoController) UploadAvatar(ctx context.Context, req *userinfodto.
 func (c *UserInfoController) CancelAccount(ctx context.Context, req *userinfodto.CancelAccountReq) (res *userinfodto.CancelAccountRes, err error) {
 	return userinfo.CancelAccount(ctx, req)
 }
+
+func (c *UserInfoController) Feedback(ctx context.Context, req *userinfodto.AppFeedbackReq) (res *userinfodto.AppFeedbackRes, err error) {
+	return userinfo.SubmitFeedback(ctx, req)
+}
+
+func (c *UserInfoController) Report(ctx context.Context, req *userinfodto.AppReportReq) (res *userinfodto.AppReportRes, err error) {
+	return userinfo.SubmitReport(ctx, req)
+}
