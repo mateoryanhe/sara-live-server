@@ -38,7 +38,7 @@ func KickAudience(ctx context.Context, req *liveroomdto.KickAudienceReq) (*liver
 	push.Data(req.UserId, cmd.LiveRoomAudienceKick, &liveroomdto.AudienceKickPushItem{
 		RoomId:     strconv.FormatUint(anchorId, 10),
 		UserId:     strconv.FormatUint(req.UserId, 10),
-		KickTime:   now.Unix(),
+		KickTime:   now.UnixMilli(),
 		BanSeconds: int64(entity.LiveRoomKickBanDuration / time.Second),
 	})
 
