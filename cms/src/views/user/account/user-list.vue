@@ -62,6 +62,9 @@
               <span v-else class="avatar-empty">-</span>
             </template>
           </el-table-column>
+          <el-table-column label="区号" prop="phoneAreaCode" width="90">
+            <template #default="scope">{{ formatPhoneAreaCode(scope.row.phoneAreaCode) }}</template>
+          </el-table-column>
            <el-table-column label="手机号" prop="phone" width="140">
             <template #default="scope">{{ scope.row.phone || '-' }}</template>
           </el-table-column>
@@ -773,6 +776,14 @@ const toggleCancelStatus = async (row: UserInfo) => {
       console.log('取消注销操作')
     }
   }
+}
+
+const formatPhoneAreaCode = (val?: string) => {
+  const code = (val || '').trim()
+  if (!code) {
+    return '-'
+  }
+  return code.startsWith('+') ? code : `+${code}`
 }
 
 // 格式化金额(金币/钻石)，保留4位小数

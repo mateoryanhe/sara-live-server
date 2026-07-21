@@ -26,21 +26,21 @@ func WatchShortVideoStart(ctx context.Context, req *shortvideodto.WatchShortVide
 		return nil, errercode.CreateCode(errercode.EmptyUserId)
 	}
 	watch := shortvideodao.GetOneShortVideoWatch(userId, req.VideoId)
-	initFreeTime(userId, req.VideoId)
-	clearFreeTime(userId, req.VideoId)
-	//检查是否是付费视频
-	if video.AuthorId != userId && video.IsPaid == entity.ShortVideoPaidYes && watch.PaidTime == nil {
-		//开始检查是否有免费时间
-		freeTime := watch.GetFreeTime(video.FreeWatchSeconds)
-		if freeTime == 0 {
-			//需要购买才可以观看
-			return nil, errercode.CreateCode(errercode.ShortVideoMustPayToWatch)
-		} else {
-			now := time.Now()
-			watch.SetFreeStartTime(&now)
-			watch.SetFreeUsing(true)
-		}
-	}
+	//initFreeTime(userId, req.VideoId)
+	//clearFreeTime(userId, req.VideoId)
+	////检查是否是付费视频
+	//if video.AuthorId != userId && video.IsPaid == entity.ShortVideoPaidYes && watch.PaidTime == nil {
+	//	//开始检查是否有免费时间
+	//	freeTime := watch.GetFreeTime(video.FreeWatchSeconds)
+	//	if freeTime == 0 {
+	//		//需要购买才可以观看
+	//		return nil, errercode.CreateCode(errercode.ShortVideoMustPayToWatch)
+	//	} else {
+	//		now := time.Now()
+	//		watch.SetFreeStartTime(&now)
+	//		watch.SetFreeUsing(true)
+	//	}
+	//}
 
 	// 累计观看次数(不去重,每次开始观看+1)
 	if stat := shortvideodao.GetStatByVideoId(req.VideoId); stat != nil {
@@ -127,8 +127,6 @@ func PayShortVideo(ctx context.Context, req *shortvideodto.PayShortVideoReq) (*s
 			Diamond:  user.Diamond,
 		}, nil
 	}
-
-	clearFreeTime(userId, req.VideoId)
 
 	diamond, err := wallet.DiamondSub(userId, price, currency.ReasonShortVideoWatch)
 	if err != nil {

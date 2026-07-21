@@ -29,6 +29,7 @@ type AppShortVideoItem struct {
 	Duration         uint32  `json:"duration" dc:"视频时长(秒)"`
 	FreeWatchSeconds uint32  `json:"freeWatchSeconds" dc:"免费观看时长(秒)"`
 	FreeTime         uint64  `json:"freeTime" dc:"剩余免费观看时长(秒,来自观看记录)"`
+	HasPaid          bool    `json:"hasPaid" dc:"当前用户是否已付费观看"`
 }
 
 // AppShortVideoViewListReq App端分页查询短视频列表(仅已上架,按观看人数排序,走缓存)

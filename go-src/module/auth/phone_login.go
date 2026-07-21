@@ -33,6 +33,9 @@ func PhoneLogin(ctx context.Context, req *authdto.PhoneLoginReq) (res *authdto.P
 		}
 		return nil, errercode.CreateCode(errercode.LoginFail)
 	}
+	if account.Cancel {
+		return nil, errercode.CreateCode(errercode.AccountCanceled)
+	}
 	if account.Password != gmd5.MustEncryptString(req.Password) {
 		if blockErr := markPhoneLoginFailure(phoneKey); blockErr != nil {
 			return nil, blockErr
@@ -42,9 +45,6 @@ func PhoneLogin(ctx context.Context, req *authdto.PhoneLoginReq) (res *authdto.P
 	clearPhoneLoginFailure(phoneKey)
 	if account.Ban && account.BanApplyTime != nil && account.BanApplyTime.After(time.Now()) {
 		return nil, errercode.CreateCode(errercode.Ban)
-	}
-	if account.Cancel {
-		return nil, errercode.CreateCode(errercode.AccountCanceled)
 	}
 
 	if len(account.IP) == common.Zero {

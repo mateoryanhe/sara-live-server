@@ -34,7 +34,7 @@ func GetAccountBy(openId string, channel uint, phoneAreaCode string) *entity.Acc
 			return account, nil
 		}
 		acc := entity.NewAccount(openId, channel)
-		acc.PhoneAreaCode = phoneAreaCode
+		acc.SetPhoneAreaCode(phoneAreaCode)
 		return acc, nil
 
 	})

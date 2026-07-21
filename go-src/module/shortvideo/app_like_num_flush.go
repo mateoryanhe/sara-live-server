@@ -76,10 +76,16 @@ func toAppShortVideoItem(row *entity.ShortVideo, stat *entity.ShortVideoStat, us
 		watchCount = stat.WatchCount
 	}
 	var freeTime uint64
-	if userId > 0 && row.IsPaid == entity.ShortVideoPaidYes {
-		initFreeTime(userId, row.ID)
+	hasPaid := false
+	if userId > 0 {
+		if row.IsPaid == entity.ShortVideoPaidYes {
+			initFreeTime(userId, row.ID)
+		}
 		watch := shortvideodao.GetOneShortVideoWatch(userId, row.ID)
-		freeTime = watch.FreeTime
+		hasPaid = watch.PaidTime != nil
+		if row.IsPaid == entity.ShortVideoPaidYes {
+			freeTime = watch.FreeTime
+		}
 	}
 	author := getShortVideoAuthorInfo(row.AuthorId)
 	return &shortvideodto.AppShortVideoItem{
@@ -101,6 +107,7 @@ func toAppShortVideoItem(row *entity.ShortVideo, stat *entity.ShortVideoStat, us
 		Duration:         row.Duration,
 		FreeWatchSeconds: row.FreeWatchSeconds,
 		FreeTime:         freeTime,
+		HasPaid:          hasPaid,
 	}
 }
 

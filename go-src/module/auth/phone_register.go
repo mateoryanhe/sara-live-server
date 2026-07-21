@@ -40,9 +40,7 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 	if account.ID != 0 && account.Password != "" {
 		return nil, errercode.CreateCode(errercode.AccountAlreadyExists)
 	}
-	if account.PhoneAreaCode == "" {
-		account.SetPhoneAreaCode(phoneAreaCode)
-	}
+	account.SetPhoneAreaCode(phoneAreaCode)
 
 	// 设置密码
 	account.SetPassword(gmd5.MustEncryptString(req.Password))

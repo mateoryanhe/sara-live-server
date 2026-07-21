@@ -136,6 +136,7 @@ export interface UserInfo {
     banTime?: string | null
     banApplyTime?: string | null
     cancel: boolean
+    phoneAreaCode?: string
     // 来自 user_infos 表(LEFT JOIN，可能为空)
     nickname?: string
     phone?: string
