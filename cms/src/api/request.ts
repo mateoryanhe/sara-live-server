@@ -8,13 +8,20 @@ import envConfig from '@/config/env'
 import {ElMessage} from "element-plus"
 import {clearAuthSession, getAuthId, getToken} from '@/utils/auth'
 
+const AUTH_ERROR_CODES = new Set([1, 2, 3])
+
 function redirectToLogin(): void {
+    clearAuthSession()
     const basePath = '/cms'
     const currentPath = window.location.pathname.replace(new RegExp(`^${basePath}`), '') || '/'
     const redirect = currentPath !== '/login'
         ? `?redirect=${encodeURIComponent(currentPath + window.location.search)}`
         : ''
     window.location.replace(`${basePath}/login${redirect}`)
+}
+
+function isAuthErrorCode(code: unknown): boolean {
+    return typeof code === 'number' && AUTH_ERROR_CODES.has(code)
 }
 
 // 创建axios实例
@@ -57,7 +64,11 @@ service.interceptors.response.use(
 
         // 如果自定义code不是0，则判断为错误
         if (res.code !== 0) {
-            ElMessage.error(`出现错误，错误码：${res.code}`)
+            if (isAuthErrorCode(res.code)) {
+                redirectToLogin()
+                return Promise.reject(new Error(String(res.code)))
+            }
+            ElMessage.error(res.message || `出现错误，错误码：${res.code}`)
             return Promise.reject(new Error(res.code || 'Error'))
         } else {
             return res.data
@@ -67,8 +78,7 @@ service.interceptors.response.use(
         // 对响应错误做点什么
         console.error('Response Error:', error)
 
-        if (error.response?.status === 401) {
-            clearAuthSession()
+        if (error.response?.status === 401 || isAuthErrorCode(error.response?.data?.code)) {
             redirectToLogin()
         }
 
