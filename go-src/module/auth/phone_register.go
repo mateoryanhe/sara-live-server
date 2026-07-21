@@ -11,7 +11,6 @@ import (
 	"xr-game-server/core/event"
 	"xr-game-server/core/xrtoken"
 	"xr-game-server/dao/accountdao"
-	"xr-game-server/dao/userextdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dao/userlogindevicedao"
 	"xr-game-server/dto/authdto"
@@ -54,7 +53,7 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 	data := userinfodao.GetUserInfoByUserId(account.ID)
 	data.SetPhone(req.Phone)
 	userlogindevicedao.RefreshLoginDevice(account.ID, req.DeviceInfo)
-	userextdao.SaveRegisterInfo(account.ID, req.DeviceInfo)
+	userinfodao.SaveRegisterInfo(account.ID, req.DeviceInfo)
 	now := time.Now()
 	event.Pub(gameevent.RegisterEvent, gameevent.NewRegisterEventData(account.ID, now))
 	if req.InviteCode != "" {

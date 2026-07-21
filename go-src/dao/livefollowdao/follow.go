@@ -2,32 +2,28 @@ package livefollowdao
 
 import (
 	"context"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/core/cache"
+	"xr-game-server/dao/userinfodao"
 	"xr-game-server/entity"
 )
 
 var (
 	// followCacheMgr 按复合ID(userId_anchorId)缓存单条关注记录
 	followCacheMgr *cache.CacheMgr
-	// userFollowsCacheMgr 按 userId 缓存"该用户关注的全部记录"列表
-	userFollowsCacheMgr *cache.CacheMgr
-	// anchorFollowersCacheMgr 按 anchorId 缓存"该主播的全部关注记录"列表
-	anchorFollowersCacheMgr *cache.CacheMgr
 )
 
 // InitLiveFollowDao 初始化关注主播相关缓存
 func InitLiveFollowDao() {
 	followCacheMgr = cache.NewCacheMgr()
-	userFollowsCacheMgr = cache.NewCacheMgr()
-	anchorFollowersCacheMgr = cache.NewCacheMgr()
 }
 
 // GetById 按复合ID获取(走缓存)
 func GetById(id string) *entity.LiveFollow {
 	v := followCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
 		var f *entity.LiveFollow
-		_ = g.Model(string(entity.TbLiveFollow)).Where("id = ?", id).Scan(&f)
+		_ = g.Model(string(entity.TbLiveFollow)).Ctx(ctx).Where("id = ?", id).Scan(&f)
 		return f, nil
 	})
 	if v == nil {
@@ -42,44 +38,58 @@ func GetByUserAnchor(userId, anchorId uint64) *entity.LiveFollow {
 	return GetById(entity.BuildLiveFollowId(userId, anchorId))
 }
 
-// GetFollowingsByUser 获取某用户当前已关注的全部记录(仅 Status == Follow)
-func GetFollowingsByUser(userId uint64) []*entity.LiveFollow {
-	v := userFollowsCacheMgr.GetData(userId, func(ctx context.Context) (value interface{}, err error) {
-		list := make([]*entity.LiveFollow, 0)
-		_ = g.Model(string(entity.TbLiveFollow)).
-			Where("user_id = ? AND status = ?", userId, entity.LiveFollowStatusFollow).
-			Order("updated_at desc").
-			Scan(&list)
-		return list, nil
-	})
-	if v == nil {
-		return make([]*entity.LiveFollow, 0)
+// GetFollowingsByUser 分页获取某用户当前已关注的记录(仅 Status == Follow)
+func GetFollowingsByUser(userId uint64, page, pageSize int) (int, []*entity.LiveFollow) {
+	list := make([]*entity.LiveFollow, 0)
+	if userId == 0 {
+		return 0, list
 	}
-	list, _ := v.([]*entity.LiveFollow)
-	if list == nil {
-		return make([]*entity.LiveFollow, 0)
+	if page <= 0 {
+		page = 1
 	}
-	return list
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+	m := g.Model(string(entity.TbLiveFollow)).
+		Where("user_id = ? AND status = ?", userId, entity.LiveFollowStatusFollow)
+	total := userinfodao.GetFollowCount(userId)
+	_ = m.Order("updated_at desc").
+		Limit(pageSize).
+		Offset((page - 1) * pageSize).
+		Scan(&list)
+	return total, list
 }
 
-// GetFollowersByAnchor 获取某主播的全部粉丝记录(仅 Status == Follow)
-func GetFollowersByAnchor(anchorId uint64) []*entity.LiveFollow {
-	v := anchorFollowersCacheMgr.GetData(anchorId, func(ctx context.Context) (value interface{}, err error) {
-		list := make([]*entity.LiveFollow, 0)
-		_ = g.Model(string(entity.TbLiveFollow)).
-			Where("anchor_id = ? AND status = ?", anchorId, entity.LiveFollowStatusFollow).
-			Order("updated_at desc").
-			Scan(&list)
-		return list, nil
-	})
-	if v == nil {
-		return make([]*entity.LiveFollow, 0)
+// GetFollowersByAnchor 分页获取某主播的粉丝记录(仅 Status == Follow)
+func GetFollowersByAnchor(anchorId uint64, page, pageSize int) (int, []*entity.LiveFollow) {
+	list := make([]*entity.LiveFollow, 0)
+	if anchorId == 0 {
+		return 0, list
 	}
-	list, _ := v.([]*entity.LiveFollow)
-	if list == nil {
-		return make([]*entity.LiveFollow, 0)
+	if page <= 0 {
+		page = 1
 	}
-	return list
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+	m := g.Model(string(entity.TbLiveFollow)).
+		Where("anchor_id = ? AND status = ?", anchorId, entity.LiveFollowStatusFollow)
+	total := userinfodao.GetFollowerCount(anchorId)
+	_ = m.Order("updated_at desc").
+		Limit(pageSize).
+		Offset((page - 1) * pageSize).
+		Scan(&list)
+	return total, list
+}
+
+// CountFollowingsByUser 统计用户当前关注数(读 user_ext 缓存)
+func CountFollowingsByUser(userId uint64) int {
+	return userinfodao.GetFollowCount(userId)
+}
+
+// CountFollowersByAnchor 统计主播当前粉丝数(读 user_ext 缓存)
+func CountFollowersByAnchor(anchorId uint64) int {
+	return userinfodao.GetFollowerCount(anchorId)
 }
 
 // IsFollowing 查询 userId 是否已关注 anchorId
@@ -91,70 +101,10 @@ func IsFollowing(userId, anchorId uint64) bool {
 	return existing != nil && existing.Status == entity.LiveFollowStatusFollow
 }
 
-// AddFollowToCache 关注成功后写入(单条 + 双向列表)
+// AddFollowToCache 关注成功后刷新单条缓存
 func AddFollowToCache(f *entity.LiveFollow) {
-	if f == nil {
+	if f == nil || followCacheMgr == nil {
 		return
 	}
 	followCacheMgr.FlushCache(f.ID, f)
-
-	// 用户关注列表
-	userList := GetFollowingsByUser(f.UserId)
-	exists := false
-	for _, item := range userList {
-		if item.ID == f.ID {
-			exists = true
-			break
-		}
-	}
-	if !exists {
-		userList = append([]*entity.LiveFollow{f}, userList...)
-		userFollowsCacheMgr.FlushCache(f.UserId, userList)
-	}
-
-	// 主播粉丝列表
-	anchorList := GetFollowersByAnchor(f.AnchorId)
-	exists = false
-	for _, item := range anchorList {
-		if item.ID == f.ID {
-			exists = true
-			break
-		}
-	}
-	if !exists {
-		anchorList = append([]*entity.LiveFollow{f}, anchorList...)
-		anchorFollowersCacheMgr.FlushCache(f.AnchorId, anchorList)
-	}
-}
-
-// RemoveFollowFromCache 取消关注后,从双向列表中剔除(单条缓存保留以便复用,Status 已切回 Unfollow)
-func RemoveFollowFromCache(f *entity.LiveFollow) {
-	if f == nil {
-		return
-	}
-	followCacheMgr.FlushCache(f.ID, f)
-
-	if userFollowsCacheMgr != nil {
-		userList := GetFollowingsByUser(f.UserId)
-		newList := make([]*entity.LiveFollow, 0, len(userList))
-		for _, item := range userList {
-			if item.ID == f.ID {
-				continue
-			}
-			newList = append(newList, item)
-		}
-		userFollowsCacheMgr.FlushCache(f.UserId, newList)
-	}
-
-	if anchorFollowersCacheMgr != nil {
-		anchorList := GetFollowersByAnchor(f.AnchorId)
-		newList := make([]*entity.LiveFollow, 0, len(anchorList))
-		for _, item := range anchorList {
-			if item.ID == f.ID {
-				continue
-			}
-			newList = append(newList, item)
-		}
-		anchorFollowersCacheMgr.FlushCache(f.AnchorId, newList)
-	}
 }

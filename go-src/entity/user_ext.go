@@ -3,6 +3,7 @@ package entity
 import (
 	"time"
 	"xr-game-server/constants/db"
+	"xr-game-server/core/math"
 	"xr-game-server/core/migrate"
 	"xr-game-server/core/syndb"
 )
@@ -12,17 +13,21 @@ const (
 )
 
 const (
-	UserExtCanRank     db.TbCol = "can_rank"
-	UserExtPackageName db.TbCol = "package_name"
-	UserExtAppVersion  db.TbCol = "app_version"
+	UserExtCanRank       db.TbCol = "can_rank"
+	UserExtPackageName   db.TbCol = "package_name"
+	UserExtAppVersion    db.TbCol = "app_version"
+	UserExtFollowCount   db.TbCol = "follow_count"
+	UserExtFollowerCount db.TbCol = "follower_count"
 )
 
 // UserExt 用户扩展信息(与用户一一对应,主键ID即用户ID)
 type UserExt struct {
 	migrate.OneModel
-	CanRank     bool   `gorm:"default:1;comment:是否可上排行榜" json:"canRank"`
-	PackageName string `gorm:"default:'';comment:注册包名" json:"packageName"`
-	AppVersion  string `gorm:"default:'';comment:注册版本号" json:"appVersion"`
+	CanRank       bool   `gorm:"default:1;comment:是否可上排行榜" json:"canRank"`
+	PackageName   string `gorm:"default:'';comment:注册包名" json:"packageName"`
+	AppVersion    string `gorm:"default:'';comment:注册版本号" json:"appVersion"`
+	FollowCount   uint64 `gorm:"default:0;comment:当前关注数" json:"followCount"`
+	FollowerCount uint64 `gorm:"default:0;comment:当前粉丝数" json:"followerCount"`
 }
 
 func NewUserExt(userId uint64) *UserExt {
@@ -62,6 +67,54 @@ func (receiver *UserExt) SetAppVersion(appVersion string) {
 	})
 }
 
+func (receiver *UserExt) AddFollowCount(val uint64) {
+	if val == 0 {
+		return
+	}
+	receiver.FollowCount = math.Add(receiver.FollowCount, val)
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddDataToQuickChan(TbUserExt, UserExtFollowCount, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: receiver.FollowCount,
+	})
+}
+
+func (receiver *UserExt) SubFollowCount(val uint64) {
+	if val == 0 {
+		return
+	}
+	receiver.FollowCount = math.Sub(receiver.FollowCount, val)
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddDataToQuickChan(TbUserExt, UserExtFollowCount, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: receiver.FollowCount,
+	})
+}
+
+func (receiver *UserExt) AddFollowerCount(val uint64) {
+	if val == 0 {
+		return
+	}
+	receiver.FollowerCount = math.Add(receiver.FollowerCount, val)
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddDataToQuickChan(TbUserExt, UserExtFollowerCount, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: receiver.FollowerCount,
+	})
+}
+
+func (receiver *UserExt) SubFollowerCount(val uint64) {
+	if val == 0 {
+		return
+	}
+	receiver.FollowerCount = math.Sub(receiver.FollowerCount, val)
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddDataToQuickChan(TbUserExt, UserExtFollowerCount, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: receiver.FollowerCount,
+	})
+}
+
 func (receiver *UserExt) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
 	syndb.AddDataToQuickChan(TbUserExt, db.CreatedAtName, &syndb.ColData{
@@ -84,6 +137,8 @@ func initUserExt() {
 	syndb.RegQuick(TbUserExt, UserExtCanRank)
 	syndb.RegQuick(TbUserExt, UserExtPackageName)
 	syndb.RegQuick(TbUserExt, UserExtAppVersion)
+	syndb.RegQuick(TbUserExt, UserExtFollowCount)
+	syndb.RegQuick(TbUserExt, UserExtFollowerCount)
 
 	migrate.AutoMigrate(&UserExt{})
 }

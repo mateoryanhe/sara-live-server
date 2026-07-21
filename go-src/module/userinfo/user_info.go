@@ -25,6 +25,7 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		targetUserId = req.UserId
 	}
 	data := userinfodao.GetUserInfoByUserId(targetUserId)
+	userExt := userinfodao.GetUserExtByUserId(targetUserId)
 	ret := &userinfodto.GetUserInfoRes{
 		UserId:        data.ID,
 		Nickname:      data.Nickname,
@@ -40,8 +41,8 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		HasLiveRoom:   data.HasLiveRoom,
 		Gender:        data.Gender,
 		Birthday:      formatBirthday(data.Birthday),
-		FollowCount:   len(livefollowdao.GetFollowingsByUser(targetUserId)),
-		FollowerCount: len(livefollowdao.GetFollowersByAnchor(targetUserId)),
+		FollowCount:   int(userExt.FollowCount),
+		FollowerCount: int(userExt.FollowerCount),
 		FollowStatus:  resolveFollowStatus(authUserId, targetUserId),
 		TotalIncome:   float64(anchorrank.GetUserLast30DayRevenue(targetUserId)),
 		Age:           calcAge(data.Birthday),

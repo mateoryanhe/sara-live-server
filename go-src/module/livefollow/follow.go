@@ -44,12 +44,13 @@ func Follow(ctx context.Context, req *livefollowdto.FollowReq) (*livefollowdto.F
 	}
 
 	if !wasFollowing {
+		userinfodao.IncFollowCount(userId, req.AnchorId)
 		recordNewFollowerDuringLive(req.AnchorId, userId)
 	}
 
 	return &livefollowdto.FollowRes{
 		Following:     true,
-		FollowerCount: len(livefollowdao.GetFollowersByAnchor(req.AnchorId)),
+		FollowerCount: livefollowdao.CountFollowersByAnchor(req.AnchorId),
 	}, nil
 }
 
@@ -76,12 +77,12 @@ func Unfollow(ctx context.Context, req *livefollowdto.UnfollowReq) (*livefollowd
 	existing := livefollowdao.GetByUserAnchor(userId, req.AnchorId)
 	if existing != nil && existing.Status != entity.LiveFollowStatusUnfollow {
 		existing.SetStatus(entity.LiveFollowStatusUnfollow)
-		livefollowdao.RemoveFollowFromCache(existing)
+		userinfodao.DecFollowCount(userId, req.AnchorId)
 	}
 
 	return &livefollowdto.UnfollowRes{
 		Following:     false,
-		FollowerCount: len(livefollowdao.GetFollowersByAnchor(req.AnchorId)),
+		FollowerCount: livefollowdao.CountFollowersByAnchor(req.AnchorId),
 	}, nil
 }
 
@@ -100,10 +101,7 @@ func FollowingList(ctx context.Context, req *livefollowdto.FollowingListReq) (*l
 	userId := httpserver.GetAuthId(ctx)
 	page, pageSize := normalizePage(req.Page, req.PageSize)
 
-	all := livefollowdao.GetFollowingsByUser(userId)
-	total := len(all)
-	start, end := pageRange(total, page, pageSize)
-	pageData := all[start:end]
+	total, pageData := livefollowdao.GetFollowingsByUser(userId, page, pageSize)
 
 	list := make([]*livefollowdto.AnchorItem, 0, len(pageData))
 	for _, f := range pageData {
@@ -136,10 +134,7 @@ func FollowerList(ctx context.Context, req *livefollowdto.FollowerListReq) (*liv
 	anchorId := httpserver.GetAuthId(ctx)
 	page, pageSize := normalizePage(req.Page, req.PageSize)
 
-	all := livefollowdao.GetFollowersByAnchor(anchorId)
-	total := len(all)
-	start, end := pageRange(total, page, pageSize)
-	pageData := all[start:end]
+	total, pageData := livefollowdao.GetFollowersByAnchor(anchorId, page, pageSize)
 
 	list := make([]*livefollowdto.FollowerItem, 0, len(pageData))
 	for _, f := range pageData {
@@ -203,16 +198,4 @@ func calcAge(birthday *time.Time) int {
 		return 0
 	}
 	return age
-}
-
-func pageRange(total, page, pageSize int) (int, int) {
-	start := (page - 1) * pageSize
-	end := start + pageSize
-	if start > total {
-		start = total
-	}
-	if end > total {
-		end = total
-	}
-	return start, end
 }

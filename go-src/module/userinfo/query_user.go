@@ -4,7 +4,6 @@ import (
 	"context"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/accountdao"
-	"xr-game-server/dao/userextdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/accountdto"
 	"xr-game-server/entity"
@@ -31,7 +30,7 @@ func QueryUserInfo(ctx context.Context, req *accountdto.QueryUserInfoReq) (res *
 			val.BanApplyTime = accountCache.BanApplyTime
 			val.BanTime = accountCache.BanTime
 			val.VipLevel = userInfoCache.VipLevel
-			val.CanRank = userextdao.GetByUserId(val.ID).CanRank
+			val.CanRank = userinfodao.GetUserExtByUserId(val.ID).CanRank
 		}
 		val.Avatar = upload.ResolveAvatarUrlForUser(val.ID, val.Avatar)
 	}
