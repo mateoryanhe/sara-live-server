@@ -330,35 +330,9 @@
 
     <el-drawer v-model="traceDrawerVisible" :title="`TraceId: ${traceDetail.traceId}`" size="60%">
       <div class="trace-drawer">
-        <el-form class="trace-search-form" inline label-width="90px">
-          <el-form-item label="开始日期">
-            <el-date-picker
-                v-model="traceStartDate"
-                clearable
-                format="YYYY-MM-DD"
-                placeholder="开始日期"
-                style="width: 140px"
-                teleported
-                type="date"
-                value-format="YYYY-MM-DD"
-            />
-          </el-form-item>
-          <el-form-item label="结束日期">
-            <el-date-picker
-                v-model="traceEndDate"
-                clearable
-                format="YYYY-MM-DD"
-                placeholder="结束日期"
-                style="width: 140px"
-                teleported
-                type="date"
-                value-format="YYYY-MM-DD"
-            />
-          </el-form-item>
-          <el-form-item>
-            <el-button :loading="traceLoading" type="primary" @click="fetchTraceDetail">查询</el-button>
-          </el-form-item>
-        </el-form>
+        <p v-if="traceStartDate && traceEndDate" class="trace-meta">
+          查询范围：{{ traceStartDate }} ~ {{ traceEndDate }}
+        </p>
         <p v-if="resolveTraceAuthId()" class="trace-meta">AuthId: {{ resolveTraceAuthId() }}</p>
 
         <div v-loading="traceLoading" :element-loading-text="queryStatusTip">
@@ -1066,10 +1040,6 @@ watch(activeTab, async (tab) => {
 
 .trace-drawer h4 {
   margin: 0 0 12px;
-}
-
-.trace-search-form {
-  margin-bottom: 12px;
 }
 
 .trace-meta {

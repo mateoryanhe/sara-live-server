@@ -108,8 +108,16 @@ const extractElapsedMsFromMessage = (message: string) => {
 }
 
 const stripLogHeader = (line: string) => {
-    const match = line.match(detailLogRe)
-    return match?.[4]?.trim() || line.trim()
+    const normalized = line.replace(/\r\n/g, '\n')
+    const newlineIdx = normalized.indexOf('\n')
+    const firstLine = newlineIdx >= 0 ? normalized.slice(0, newlineIdx) : normalized
+    const rest = newlineIdx >= 0 ? normalized.slice(newlineIdx + 1) : ''
+    const match = firstLine.match(detailLogRe)
+    if (match) {
+        const message = match[4].trim()
+        return rest ? `${message}\n${rest}` : message
+    }
+    return normalized.trim()
 }
 
 const parseLegacyInlineError = (message: string) => {
@@ -125,11 +133,19 @@ const parseLegacyInlineError = (message: string) => {
         return {summary, stack: ''}
     }
     let stack = message.slice(stackIdx + 7).trim()
-    stack = stack.replace(/^\d+\.\s*interface conversion:[^\n]*/, '').trim()
+    if (summary) {
+        const escaped = summary.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        stack = stack.replace(new RegExp(`^\\d+[.)\\]]?\\)?\\s*${escaped}`), '').trim()
+    }
     return {
         summary,
         stack: normalizeErrorStack(stack),
     }
+}
+
+const isStackSectionMarker = (line: string) => {
+    const trimmed = line.trim()
+    return trimmed === 'Stack:' || trimmed === 'Stack'
 }
 
 const isRawStackFrameLine = (line: string) => {
@@ -137,13 +153,16 @@ const isRawStackFrameLine = (line: string) => {
     if (!trimmed) {
         return false
     }
+    if (isStackSectionMarker(trimmed)) {
+        return true
+    }
     if (/^\d+[.)]\)?\s*\S/.test(trimmed)) {
         return true
     }
-    if (/^[A-Za-z]:[/\\]/.test(trimmed)) {
+    if (/^[A-Za-z]:[/\\]/.test(trimmed) || /^\/[\w./-]+/.test(trimmed)) {
         return true
     }
-    if (/^\s{2,}\S/.test(line) && !trimmed.includes('=')) {
+    if (/^\s+\S/.test(line) && !trimmed.includes('=')) {
         return true
     }
     return false
@@ -182,7 +201,7 @@ export const normalizeErrorStack = (stack: string) => {
         if (/^\d+[.)]\)?\s/.test(line)) {
             const frame = line.replace(/^\d+[.)]\)?\s*/, '')
             const location = lines[i + 1]?.trim()
-            if (location && !/^\d+[.)]\)?\s/.test(location) && !location.startsWith('Stack:')) {
+            if (location && !/^\d+[.)]\)?\s/.test(location) && !isStackSectionMarker(location)) {
                 normalized.push(`${frame}\n    ${location}`)
                 i++
             } else {
@@ -190,7 +209,13 @@ export const normalizeErrorStack = (stack: string) => {
             }
             continue
         }
-        if (line === 'Stack:' || line.startsWith('interface conversion:')) {
+        if (isStackSectionMarker(line)) {
+            if (normalized.length > 0) {
+                normalized.push('')
+            }
+            continue
+        }
+        if (line.startsWith('interface conversion:')) {
             continue
         }
         normalized.push(line)
@@ -206,6 +231,21 @@ export const formatErrorSummary = (item: Pick<ErrorLogItem, 'errorMessage' | 'de
     return parsed.summary || item.errorMessage || item.detail || item.raw || ''
 }
 
+const parseErrorStackFromText = (text: string): string => {
+    if (!text) {
+        return ''
+    }
+    const entry = parseErrorLogBlock(splitLines(text))
+    if (entry?.stack) {
+        return entry.stack
+    }
+    if (text.includes(' stack=')) {
+        return parseLegacyInlineError(stripLogHeader(text)).stack
+    }
+    const parsed = parseErrorLogMessage(stripLogHeader(text))
+    return parsed.stack
+}
+
 export const formatErrorStack = (item: Pick<ErrorLogItem, 'stack' | 'detail' | 'raw' | 'errorMessage'>) => {
     if (item.stack && !item.stack.includes('ErrorLog source=')) {
         const normalized = normalizeErrorStack(item.stack)
@@ -213,14 +253,7 @@ export const formatErrorStack = (item: Pick<ErrorLogItem, 'stack' | 'detail' | '
             return normalized
         }
     }
-    const parsed = parseErrorLogMessage(stripLogHeader(item.raw || item.detail || ''))
-    if (parsed.stack) {
-        return parsed.stack
-    }
-    if (item.raw?.includes(' stack=')) {
-        return parseLegacyInlineError(stripLogHeader(item.raw)).stack
-    }
-    return ''
+    return parseErrorStackFromText(item.raw || item.detail || '')
 }
 
 export const parseDetailLogLine = (line: string): DetailLogItem | null => {
@@ -311,7 +344,9 @@ const finalizeErrorLogEntry = (entry: ErrorLogItem, body: string) => {
     entry.detail = body
     entry.raw = body
     entry.errorMessage = formatErrorSummary(entry)
-    entry.stack = formatErrorStack(entry)
+    if (!entry.stack) {
+        entry.stack = parseErrorStackFromText(body)
+    }
 }
 
 const isErrorLogBlockStart = (line: string) => {
@@ -385,7 +420,7 @@ const parseErrorLogBlock = (lines: string[]): ErrorLogItem | null => {
         if (parsed.stack) {
             stackParts.push(parsed.stack)
         } else if (isRawStackFrameLine(body)) {
-            stackParts.push(body.trim())
+            stackParts.push(isStackSectionMarker(body) ? 'Stack:' : body.trim())
         }
     }
     const body = lines.join('\n')
@@ -407,9 +442,6 @@ const parseErrorLogBlock = (lines: string[]): ErrorLogItem | null => {
     }
     if (!entry.errorMessage) {
         entry.errorMessage = formatErrorSummary(entry)
-    }
-    if (!entry.stack) {
-        entry.stack = formatErrorStack(entry)
     }
     return entry
 }

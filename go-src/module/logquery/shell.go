@@ -142,6 +142,59 @@ func grepFilesToReversedFile(patterns []string, files []string, maxLines int, ou
 	return writePipelineToFile(buildSearchPipeline(patterns, files), maxLines, outPath, true)
 }
 
+func buildLogContinuationAwkScript(patterns []string) string {
+	patterns = uniqueNonEmpty(patterns)
+	var builder strings.Builder
+	builder.WriteString(`function is_log_header(line) {
+  return (line ~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}T/ && line ~ / \[[A-Z]+\] \{/)
+}
+function matches(line) {
+`)
+	for _, pattern := range patterns {
+		builder.WriteString("  if (index(line, ")
+		builder.WriteString(awkQuote(pattern))
+		builder.WriteString(") == 0) return 0\n")
+	}
+	builder.WriteString(`  return 1
+}
+BEGIN { capturing = 0 }
+{
+  if (is_log_header($0)) {
+    if (matches($0)) {
+      print $0
+      capturing = 1
+    } else {
+      capturing = 0
+    }
+    next
+  }
+  if (capturing) {
+    print $0
+  }
+}`)
+	return builder.String()
+}
+
+func awkQuote(value string) string {
+	return `"` + strings.ReplaceAll(strings.ReplaceAll(value, `\`, `\\`), `"`, `\"`) + `"`
+}
+
+func buildLogContinuationPipeline(patterns []string, files []string) string {
+	fileArgs := shellJoinPaths(files)
+	return "cat -- " + fileArgs + " | awk " + shellQuote(buildLogContinuationAwkScript(patterns))
+}
+
+func grepFilesWithLogContinuationToFile(patterns []string, files []string, maxLines int, outPath string, reverse bool) error {
+	patterns = uniqueNonEmpty(patterns)
+	if len(files) == 0 {
+		return writeFile(outPath, nil)
+	}
+	if len(patterns) == 0 {
+		return writePipelineToFile("cat -- "+shellJoinPaths(files), maxLines, outPath, reverse)
+	}
+	return writePipelineToFile(buildLogContinuationPipeline(patterns, files), maxLines, outPath, reverse)
+}
+
 func paginateFile(srcPath, dstPath string, pageIndex, pageSize int) error {
 	if pageIndex <= 0 {
 		pageIndex = 1

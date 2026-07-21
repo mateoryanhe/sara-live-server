@@ -66,7 +66,11 @@ func createShellExport(logType string, patterns []string, startDate, endDate str
 	pagePath := filepath.Join(workDir, exportID+".page")
 	exportPath := filepath.Join(cfg.exportAbsDir(), fileName)
 
-	if err := grepFilesToReversedFile(patterns, files, cfg.MaxMatchLines, rawPath); err != nil {
+	if logType == logTypeError {
+		if err := grepFilesWithLogContinuationToFile(patterns, files, cfg.MaxMatchLines, rawPath, true); err != nil {
+			return nil, err
+		}
+	} else if err := grepFilesToReversedFile(patterns, files, cfg.MaxMatchLines, rawPath); err != nil {
 		return nil, err
 	}
 	total, err := countLines(rawPath)
@@ -130,8 +134,14 @@ func createTraceShellExport(traceId, startDate, endDate string) (*shellExportRes
 	for _, section := range sections {
 		files := listLogFilesByPrefix(cfg.LogDir, section.prefix, startDate, endDate)
 		rawPath := filepath.Join(workDir, exportID+"-"+section.tag+".raw")
-		if err := grepFilesToFile(patterns, files, cfg.MaxMatchLines, rawPath); err != nil {
-			return nil, err
+		var grepErr error
+		if section.tag == "error" {
+			grepErr = grepFilesWithLogContinuationToFile(patterns, files, cfg.MaxMatchLines, rawPath, false)
+		} else {
+			grepErr = grepFilesToFile(patterns, files, cfg.MaxMatchLines, rawPath)
+		}
+		if grepErr != nil {
+			return nil, grepErr
 		}
 		data, _ := os.ReadFile(rawPath)
 		removeFile(rawPath)
