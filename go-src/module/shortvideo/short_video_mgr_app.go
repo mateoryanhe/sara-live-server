@@ -59,6 +59,7 @@ func PublishShortVideoApp(ctx context.Context, req *shortvideodto.AppPublishShor
 		req.CategoryId,
 		req.Source,
 		authorId,
+		entity.ShortVideoAuthorTypeApp,
 		req.Duration,
 		entity.ShortVideoDefaultFreeWatchSeconds,
 	)

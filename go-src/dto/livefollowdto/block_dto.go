@@ -11,7 +11,6 @@ type BlockReq struct {
 type BlockRes struct {
 	Success bool `json:"success" dc:"是否成功"`
 	Blocked bool `json:"blocked" dc:"当前是否已拉黑"`
-	Total   int  `json:"total"   dc:"当前拉黑总数"`
 }
 
 // UnblockReq 解除拉黑
@@ -23,7 +22,6 @@ type UnblockReq struct {
 type UnblockRes struct {
 	Success bool `json:"success" dc:"是否成功"`
 	Blocked bool `json:"blocked" dc:"当前是否仍被拉黑"`
-	Total   int  `json:"total"   dc:"当前拉黑总数"`
 }
 
 // BlockListReq 拉黑列表

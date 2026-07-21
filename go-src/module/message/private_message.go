@@ -10,6 +10,7 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/push"
 	"xr-game-server/core/xrpool"
+	"xr-game-server/dao/livefollowdao"
 	"xr-game-server/dao/messagedao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/messagedto"
@@ -34,6 +35,9 @@ func SendPrivateMessage(ctx context.Context, req *messagedto.AppSendPrivateMessa
 	}
 	if userinfodao.GetUserInfoByUserId(req.ReceiverId) == nil {
 		return nil, errercode.CreateCode(errercode.SysError)
+	}
+	if livefollowdao.IsBlocked(senderId, req.ReceiverId) || livefollowdao.IsBlocked(req.ReceiverId, senderId) {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 
 	msg := entity.NewUserMessage(entity.UserMessageTypePrivate, senderId, req.ReceiverId, "", content)

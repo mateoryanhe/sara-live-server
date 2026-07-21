@@ -30,7 +30,6 @@ func Block(ctx context.Context, req *livefollowdto.BlockReq) (*livefollowdto.Blo
 		return &livefollowdto.BlockRes{
 			Success: true,
 			Blocked: true,
-			Total:   livefollowdao.CountBlockedByUser(userId),
 		}, nil
 	}
 
@@ -50,7 +49,6 @@ func Block(ctx context.Context, req *livefollowdto.BlockReq) (*livefollowdto.Blo
 	return &livefollowdto.BlockRes{
 		Success: true,
 		Blocked: true,
-		Total:   livefollowdao.CountBlockedByUser(userId),
 	}, nil
 }
 
@@ -73,7 +71,6 @@ func Unblock(ctx context.Context, req *livefollowdto.UnblockReq) (*livefollowdto
 	return &livefollowdto.UnblockRes{
 		Success: true,
 		Blocked: false,
-		Total:   livefollowdao.CountBlockedByUser(userId),
 	}, nil
 }
 

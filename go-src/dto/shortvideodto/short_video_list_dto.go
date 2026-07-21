@@ -27,6 +27,7 @@ type ShortVideoListRes struct {
 	CategoryId         int     `json:"categoryId"`
 	Source             uint8   `json:"source"`
 	AuthorId           string  `json:"authorId"`
+	AuthorType         uint8   `json:"authorType" dc:"作者类型(0App用户,1CMS用户,仅展示不可编辑)"`
 	AuthorNickname     string  `json:"authorNickname"`
 	LikeCount          uint64  `json:"likeCount" dc:"点赞数"`
 	ViewCount          uint64  `json:"viewCount" dc:"观看人数(去重)"`

@@ -22,6 +22,7 @@ const (
 	ShortVideoCategoryId       db.TbCol = "category_id"
 	ShortVideoSource           db.TbCol = "source"
 	ShortVideoAuthorId         db.TbCol = "author_id"
+	ShortVideoAuthorType       db.TbCol = "author_type"
 	ShortVideoDuration         db.TbCol = "duration"
 	ShortVideoFreeWatchSeconds db.TbCol = "free_watch_seconds"
 )
@@ -45,6 +46,12 @@ const (
 	ShortVideoSourceAIGen    uint8 = 3 // AI生成
 )
 
+// 作者类型
+const (
+	ShortVideoAuthorTypeApp uint8 = 0 // App用户
+	ShortVideoAuthorTypeCMS uint8 = 1 // CMS用户
+)
+
 // ShortVideo 短视频(CMS 管理)
 type ShortVideo struct {
 	migrate.OneModel
@@ -58,12 +65,13 @@ type ShortVideo struct {
 	CategoryId       int     `gorm:"default:0;comment:视频分类ID" json:"categoryId"`
 	Source           uint8   `gorm:"default:1;comment:视频来源(1原创,2转发,3AI生成)" json:"source"`
 	AuthorId         uint64  `gorm:"default:0;comment:作者用户ID" json:"authorId"`
+	AuthorType       uint8   `gorm:"default:0;comment:作者类型(0App用户,1CMS用户)" json:"authorType"`
 	Duration         uint32  `gorm:"default:0;comment:视频时长(秒)" json:"duration"`
 	FreeWatchSeconds uint32  `gorm:"default:15;comment:免费观看时长(秒)" json:"freeWatchSeconds"`
 }
 
 // NewShortVideo 构造内存对象,字段通过 syndb 异步入库
-func NewShortVideo(id uint64, title, video, cover string, sort int, isPaid uint8, payDiamond float64, categoryId int, source uint8, authorId uint64, duration, freeWatchSeconds uint32) *ShortVideo {
+func NewShortVideo(id uint64, title, video, cover string, sort int, isPaid uint8, payDiamond float64, categoryId int, source uint8, authorId uint64, authorType uint8, duration, freeWatchSeconds uint32) *ShortVideo {
 	v := &ShortVideo{}
 	v.ID = id
 	now := time.Now()
@@ -79,6 +87,7 @@ func NewShortVideo(id uint64, title, video, cover string, sort int, isPaid uint8
 	v.SetCategoryId(categoryId)
 	v.SetSource(source)
 	v.SetAuthorId(authorId)
+	v.initAuthorType(authorType)
 	v.SetDuration(duration)
 	v.SetFreeWatchSeconds(freeWatchSeconds)
 	return v
@@ -164,6 +173,14 @@ func (v *ShortVideo) SetAuthorId(val uint64) {
 	})
 }
 
+// initAuthorType 仅在创建时写入,创建后不可修改
+func (v *ShortVideo) initAuthorType(val uint8) {
+	v.AuthorType = val
+	syndb.AddDataToQuickChan(TbShortVideo, ShortVideoAuthorType, &syndb.ColData{
+		IdVal: v.ID, ColVal: val,
+	})
+}
+
 func (v *ShortVideo) SetDuration(val uint32) {
 	v.Duration = val
 	v.touchUpdatedAt()
@@ -214,6 +231,7 @@ func initShortVideo() {
 	syndb.RegQuick(TbShortVideo, ShortVideoCategoryId)
 	syndb.RegQuick(TbShortVideo, ShortVideoSource)
 	syndb.RegQuick(TbShortVideo, ShortVideoAuthorId)
+	syndb.RegQuick(TbShortVideo, ShortVideoAuthorType)
 	syndb.RegQuick(TbShortVideo, ShortVideoDuration)
 	syndb.RegQuick(TbShortVideo, ShortVideoFreeWatchSeconds)
 	migrate.AutoMigrate(&ShortVideo{})

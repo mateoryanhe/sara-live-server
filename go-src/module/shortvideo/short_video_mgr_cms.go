@@ -2,8 +2,12 @@ package shortvideo
 
 import (
 	"context"
+	"strconv"
+
 	"xr-game-server/core/httpserver"
+	"xr-game-server/core/snowflake"
 	"xr-game-server/dao/shortvideodao"
+	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/shortvideodto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
@@ -22,7 +26,66 @@ func GetShortVideoList(_ context.Context, req *shortvideodto.ShortVideoListReq) 
 	return &httpserver.CMSQueryResp{Total: total, Data: list}, nil
 }
 
+// CreateShortVideo CMS上传短视频(作者类型为 CMS)
+func CreateShortVideo(ctx context.Context, req *shortvideodto.CreateShortVideoReq) (*shortvideodto.CreateShortVideoRes, error) {
+	_ = ctx
+	if existing := shortvideodao.GetByTitle(req.Title); existing != nil {
+		return nil, errercode.CreateCode(errercode.ShortVideoExist)
+	}
+	isPaid, payDiamond, err := normalizeShortVideoPaid(req.IsPaid, req.PayDiamond)
+	if err != nil {
+		return nil, err
+	}
+	freeWatchSeconds := normalizeShortVideoFreeWatchSeconds(isPaid, req.FreeWatchSeconds)
+	if err := validateShortVideoCategoryId(req.CategoryId); err != nil {
+		return nil, err
+	}
+	if err := validateShortVideoDuration(req.Duration); err != nil {
+		return nil, err
+	}
+	if req.AuthorId > 0 && userinfodao.GetUserInfoByUserId(req.AuthorId) == nil {
+		return nil, errercode.CreateCode(errercode.SysError)
+	}
+	videoName, err := uploadShortVideoFile(req.File)
+	if err != nil {
+		return nil, err
+	}
+	coverName, err := uploadShortVideoCoverFile(ctx, req.Cover)
+	if err != nil {
+		upload.DeleteUploadedFile(videoName)
+		return nil, err
+	}
+	row := entity.NewShortVideo(
+		snowflake.GetId(),
+		req.Title,
+		videoName,
+		coverName,
+		req.Sort,
+		isPaid,
+		payDiamond,
+		req.CategoryId,
+		req.Source,
+		req.AuthorId,
+		entity.ShortVideoAuthorTypeCMS,
+		req.Duration,
+		freeWatchSeconds,
+	)
+	shortvideodao.AddShortVideoToCache(row)
+	loadAppShortVideoListCache()
+	loadAppShortVideoPublishListCache()
+	loadAppShortVideoViewListCache()
+	res := &shortvideodto.CreateShortVideoRes{
+		ID:    strconv.FormatUint(row.ID, 10),
+		Video: upload.GetUrlByName(videoName),
+	}
+	if coverName != "" {
+		res.Cover = upload.GetUrlByName(coverName)
+	}
+	return res, nil
+}
+
 func UpdateShortVideo(_ context.Context, req *shortvideodto.UpdateShortVideoReq) (*shortvideodto.UpdateShortVideoRes, error) {
+	// authorType 仅在创建(App/CMS上传)时写入,此处不可修改
 	row := shortvideodao.GetShortVideoById(req.ID)
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.ShortVideoNonExist)

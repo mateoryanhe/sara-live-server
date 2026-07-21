@@ -243,6 +243,23 @@ func filterRoomsByQuery(rooms []*entity.LiveRoom, tagId uint64, title, notice st
 	return filtered
 }
 
+func filterRoomsByBlocked(rooms []*entity.LiveRoom, userId uint64) []*entity.LiveRoom {
+	if userId == 0 || len(rooms) == 0 {
+		return rooms
+	}
+	filtered := make([]*entity.LiveRoom, 0, len(rooms))
+	for _, room := range rooms {
+		if room == nil {
+			continue
+		}
+		if livefollowdao.IsBlocked(userId, room.ID) {
+			continue
+		}
+		filtered = append(filtered, room)
+	}
+	return filtered
+}
+
 func normalizeRoomListPage(page, pageSize int) (int, int) {
 	if page <= 0 {
 		page = 1
@@ -285,6 +302,7 @@ func GetRoomList(ctx context.Context, req *liveroomdto.GetLiveRoomListReq) (*liv
 
 	filtered := filterRoomsByStatus(cached, req.StatusFilter)
 	filtered = filterRoomsByQuery(filtered, req.TagId, req.Title, req.Notice)
+	filtered = filterRoomsByBlocked(filtered, userId)
 	total := len(filtered)
 	start, end := roomListPageRange(total, page, pageSize)
 
@@ -316,6 +334,7 @@ func GetFollowedRoomList(ctx context.Context, req *liveroomdto.GetFollowedLiveRo
 	}
 
 	filtered := filterRoomsByStatus(rooms, req.StatusFilter)
+	filtered = filterRoomsByBlocked(filtered, userId)
 	total := len(filtered)
 	start, end := roomListPageRange(total, page, pageSize)
 
@@ -420,6 +439,7 @@ func GetHotLiveRoomList(ctx context.Context, req *liveroomdto.GetHotLiveRoomList
 	}
 
 	filtered := filterHotLiveRooms(cached)
+	filtered = filterRoomsByBlocked(filtered, userId)
 	total := len(filtered)
 	start, end := roomListPageRange(total, pageIndex, pageSize)
 	list := buildHotLiveRoomListItems(filtered[start:end], userId, start+1)
@@ -448,6 +468,7 @@ func GetNearbyLiveRoomList(ctx context.Context, req *liveroomdto.GetNearbyLiveRo
 	}
 
 	liveRooms := filterRoomsByStatus(cached, int(userstatus.LiveRoomStatusLive))
+	liveRooms = filterRoomsByBlocked(liveRooms, userId)
 	currentIdx := findLiveRoomIndex(liveRooms, req.RoomId)
 	nearbyRooms := collectNearbyLiveRooms(liveRooms, currentIdx, req.Direction, count)
 

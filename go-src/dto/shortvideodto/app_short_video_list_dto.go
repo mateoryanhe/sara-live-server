@@ -20,6 +20,7 @@ type AppShortVideoItem struct {
 	CategoryId       int     `json:"categoryId" dc:"视频分类ID"`
 	Source           uint8   `json:"source" dc:"视频来源(1原创,2转发,3AI生成)"`
 	AuthorId         string  `json:"authorId" dc:"作者用户ID"`
+	AuthorType       uint8   `json:"authorType" dc:"作者类型(0App用户,1CMS用户)"`
 	AuthorNickname   string  `json:"authorNickname" dc:"作者昵称"`
 	AuthorAvatar     string  `json:"authorAvatar" dc:"作者头像URL"`
 	LikeCount        uint64  `json:"likeCount"`

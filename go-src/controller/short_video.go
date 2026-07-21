@@ -19,6 +19,10 @@ func (c *ShortVideoController) ShortVideoList(ctx context.Context, req *shortvid
 	return shortvideo.GetShortVideoList(ctx, req)
 }
 
+func (c *ShortVideoController) CreateShortVideo(ctx context.Context, req *shortvideodto.CreateShortVideoReq) (*shortvideodto.CreateShortVideoRes, error) {
+	return shortvideo.CreateShortVideo(ctx, req)
+}
+
 func (c *ShortVideoController) UpdateShortVideo(ctx context.Context, req *shortvideodto.UpdateShortVideoReq) (*shortvideodto.UpdateShortVideoRes, error) {
 	return shortvideo.UpdateShortVideo(ctx, req)
 }

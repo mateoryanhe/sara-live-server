@@ -8,6 +8,7 @@ import (
 	"time"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/xrtimer"
+	"xr-game-server/dao/livefollowdao"
 	"xr-game-server/dao/shortvideodao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/shortvideodto"
@@ -91,6 +92,7 @@ func toAppShortVideoItem(row *entity.ShortVideo, stat *entity.ShortVideoStat, us
 		CategoryId:       row.CategoryId,
 		Source:           row.Source,
 		AuthorId:         author.AuthorId,
+		AuthorType:       row.AuthorType,
 		AuthorNickname:   author.AuthorNickname,
 		AuthorAvatar:     author.AuthorAvatar,
 		LikeCount:        likeCount,
@@ -125,11 +127,38 @@ func GetAppShortVideoList(ctx context.Context, req *shortvideodto.AppShortVideoL
 	return paginateAppShortVideoList(ctx, getAppShortVideoListCache(), req.Page, req.PageSize), nil
 }
 
+func filterAppShortVideoListByBlocked(list []*shortvideodto.AppShortVideoItem, userId uint64) []*shortvideodto.AppShortVideoItem {
+	if userId == 0 || len(list) == 0 {
+		return list
+	}
+	filtered := make([]*shortvideodto.AppShortVideoItem, 0, len(list))
+	for _, item := range list {
+		if item == nil {
+			continue
+		}
+		if item.AuthorType == entity.ShortVideoAuthorTypeCMS {
+			filtered = append(filtered, item)
+			continue
+		}
+		authorId, err := strconv.ParseUint(item.AuthorId, 10, 64)
+		if err != nil || authorId == 0 {
+			filtered = append(filtered, item)
+			continue
+		}
+		if livefollowdao.IsBlocked(userId, authorId) {
+			continue
+		}
+		filtered = append(filtered, item)
+	}
+	return filtered
+}
+
 func paginateAppShortVideoList(ctx context.Context, all []*shortvideodto.AppShortVideoItem, page, pageSize int) *shortvideodto.AppShortVideoListRes {
+	userId := httpserver.GetAuthId(ctx)
+	all = filterAppShortVideoListByBlocked(all, userId)
 	page, pageSize = normalizeAppListPage(page, pageSize)
 	total := len(all)
 	start, end := appListPageRange(total, page, pageSize)
-	userId := httpserver.GetAuthId(ctx)
 	list := make([]*shortvideodto.AppShortVideoItem, 0, end-start)
 	for _, item := range all[start:end] {
 		if item == nil {

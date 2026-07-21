@@ -14,17 +14,6 @@ func IsBlocked(userId, targetId uint64) bool {
 	return existing != nil && existing.Status == entity.LiveFollowStatusBlock
 }
 
-// CountBlockedByUser 统计用户当前拉黑数量
-func CountBlockedByUser(userId uint64) int {
-	if userId == 0 {
-		return 0
-	}
-	n, _ := g.Model(string(entity.TbLiveFollow)).
-		Where("user_id = ? AND status = ?", userId, entity.LiveFollowStatusBlock).
-		Count()
-	return n
-}
-
 // GetBlockedListByUser 分页获取用户当前拉黑列表(仅 Status == Block)
 func GetBlockedListByUser(userId uint64, page, pageSize int) (int, []*entity.LiveFollow) {
 	list := make([]*entity.LiveFollow, 0)

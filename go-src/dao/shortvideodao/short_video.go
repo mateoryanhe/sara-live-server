@@ -197,6 +197,7 @@ func toShortVideoListRes(video *entity.ShortVideo, nicknameMap map[uint64]string
 		CategoryId:         video.CategoryId,
 		Source:             video.Source,
 		AuthorId:           strconv.FormatUint(video.AuthorId, 10),
+		AuthorType:         video.AuthorType,
 		AuthorNickname:     authorNickname,
 		LikeCount:          likeCount,
 		ViewCount:          viewCount,
