@@ -24,7 +24,7 @@ func QueryUserInfo(ctx context.Context, req *accountdto.QueryUserInfoReq) (res *
 			val.IsAnchor = userInfoCache.IsAnchor()
 			val.UserType = userInfoCache.UserType
 			val.Avatar = userInfoCache.Avatar
-			accountCache := accountdao.GetAccountById(val.ID)
+			accountCache := accountdao.GetAccountBy(val.OpenId, val.Channel, val.PhoneAreaCode)
 			val.Cancel = accountCache.Cancel
 			val.Ban = accountCache.Ban
 			val.BanApplyTime = accountCache.BanApplyTime

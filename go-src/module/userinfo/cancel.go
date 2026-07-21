@@ -3,6 +3,7 @@ package userinfo
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/util/guid"
 	"time"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/push"
@@ -19,7 +20,7 @@ func CancelUser(ctx context.Context, req *accountdto.CancelReq) (bool, error) {
 	db := accountdao.GetAccountById(req.AccountId)
 	accountCache := accountdao.GetAccountBy(db.OpenId, db.Channel, db.PhoneAreaCode)
 	accountCache.SetCancel(true)
-	xrtoken.DelToken(req.AccountId)
+	xrtoken.InitAppToken(req.AccountId, guid.S(), time.Now().Add(30*time.Minute))
 
 	expireTime := time.Now().Add(-24 * 100 * time.Hour)
 	entity.NewAppToken(req.AccountId, fmt.Sprintf("%v", req.AccountId), expireTime)

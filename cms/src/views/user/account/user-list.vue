@@ -717,12 +717,20 @@ const handleBanAction = async (row: UserInfo) => {
   openBanDialog(row)
 }
 
+const patchUserRow = (userId: number | string, patch: Partial<UserInfo>) => {
+  const id = String(userId)
+  const idx = userList.value.findIndex(item => String(item.id) === id)
+  if (idx >= 0) {
+    userList.value[idx] = {...userList.value[idx], ...patch}
+  }
+}
+
 // 切换注销状态
 const toggleCancelStatus = async (row: UserInfo) => {
   if (row.cancel) {
     // 取消注销操作
     try {
-      const result = await ElMessageBox.confirm(
+      await ElMessageBox.confirm(
           `确定要取消注销用户 ${row.id} 吗？`,
           '确认取消注销',
           {
@@ -736,21 +744,21 @@ const toggleCancelStatus = async (row: UserInfo) => {
       const response = await accountApi.unCancel(unCancelData)
 
       if (response) {
+        patchUserRow(row.id, {cancel: false})
         ElMessage.success('取消注销成功')
-        // 重新加载数据以确保显示最新状态
-        setTimeout(() => {
-          fetchUserList()
-        }, 1000) // 添加短暂延迟以确保后端状态已更新
+        await fetchUserList(true)
       } else {
         ElMessage.error('取消注销失败')
       }
     } catch (error) {
-      console.log('取消取消注销操作')
+      if (error !== 'cancel') {
+        console.error('取消注销失败:', error)
+      }
     }
   } else {
     // 注销操作
     try {
-      const result = await ElMessageBox.confirm(
+      await ElMessageBox.confirm(
           `确定要注销用户 ${row.id} 吗？注销后用户将无法登录系统`,
           '确认注销',
           {
@@ -764,16 +772,16 @@ const toggleCancelStatus = async (row: UserInfo) => {
       const response = await accountApi.cancel(cancelData)
 
       if (response) {
+        patchUserRow(row.id, {cancel: true})
         ElMessage.success('注销成功')
-        // 重新加载数据以确保显示最新状态
-        setTimeout(() => {
-          fetchUserList()
-        }, 1000) // 添加短暂延迟以确保后端状态已更新
+        await fetchUserList(true)
       } else {
         ElMessage.error('注销失败')
       }
     } catch (error) {
-      console.log('取消注销操作')
+      if (error !== 'cancel') {
+        console.error('注销失败:', error)
+      }
     }
   }
 }
