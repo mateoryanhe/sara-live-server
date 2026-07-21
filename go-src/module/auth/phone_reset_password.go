@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"github.com/gogf/gf/v2/crypto/gmd5"
+	"xr-game-server/core/phoneutil"
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dto/authdto"
 	"xr-game-server/errercode"
@@ -10,7 +11,7 @@ import (
 )
 
 func PhoneResetPassword(ctx context.Context, req *authdto.PhoneResetPasswordReq) (res *authdto.PhoneResetPasswordRes, err error) {
-	valid, err := verification_code.VerifyCode(req.Phone, req.Code)
+	valid, err := verification_code.VerifyCode(req.PhoneAreaCode, req.Phone, req.Code)
 	if err != nil {
 		return nil, err
 	}
@@ -18,7 +19,8 @@ func PhoneResetPassword(ctx context.Context, req *authdto.PhoneResetPasswordReq)
 		return nil, errercode.CreateCode(errercode.VerifyCodeInvalid)
 	}
 
-	account := accountdao.FindAccountBy(req.Phone, PhoneChannel)
+	phoneAreaCode := phoneutil.NormalizeAreaCode(req.PhoneAreaCode)
+	account := accountdao.FindAccountBy(req.Phone, PhoneChannel, phoneAreaCode)
 	if account == nil || account.Password == "" {
 		return nil, errercode.CreateCode(errercode.LoginFail)
 	}

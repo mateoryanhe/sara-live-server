@@ -7,13 +7,14 @@ type XRCode int
 const (
 	Success = 0
 
-	EmptyUserId         = 1
-	EmptyToken          = 2
-	Token               = 3
-	TestEnvClose        = 4
-	SysError            = 5
-	LoginFail    XRCode = 6
-	Ban          XRCode = 7
+	EmptyUserId            = 1
+	EmptyToken             = 2
+	Token                  = 3
+	TestEnvClose           = 4
+	SysError               = 5
+	LoginFail       XRCode = 6
+	Ban             XRCode = 7
+	AccountCanceled XRCode = 8
 
 	CMSLoginFail    XRCode = 16
 	ServerClose     XRCode = 24

@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/crypto/gmd5"
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/constants/common"
+	"xr-game-server/core/phoneutil"
 	"xr-game-server/core/xrtoken"
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/userinfodao"
@@ -18,26 +19,32 @@ import (
 
 func PhoneLogin(ctx context.Context, req *authdto.PhoneLoginReq) (res *authdto.PhoneLoginRes, err error) {
 	httpReq := g.RequestFromCtx(ctx)
-	if err = checkPhoneLoginLimit(req.Phone); err != nil {
+	phoneAreaCode := phoneutil.NormalizeAreaCode(req.PhoneAreaCode)
+	phone := req.Phone
+	phoneKey := phoneutil.UniqueKey(phoneAreaCode, phone)
+	if err = checkPhoneLoginLimit(phoneKey); err != nil {
 		return nil, err
 	}
 
-	account := accountdao.FindAccountBy(req.Phone, PhoneChannel)
+	account := accountdao.FindAccountBy(phone, PhoneChannel, phoneAreaCode)
 	if account == nil || account.Password == "" {
-		if blockErr := markPhoneLoginFailure(req.Phone); blockErr != nil {
+		if blockErr := markPhoneLoginFailure(phoneKey); blockErr != nil {
 			return nil, blockErr
 		}
 		return nil, errercode.CreateCode(errercode.LoginFail)
 	}
 	if account.Password != gmd5.MustEncryptString(req.Password) {
-		if blockErr := markPhoneLoginFailure(req.Phone); blockErr != nil {
+		if blockErr := markPhoneLoginFailure(phoneKey); blockErr != nil {
 			return nil, blockErr
 		}
 		return nil, errercode.CreateCode(errercode.LoginFail)
 	}
-	clearPhoneLoginFailure(req.Phone)
+	clearPhoneLoginFailure(phoneKey)
 	if account.Ban && account.BanApplyTime != nil && account.BanApplyTime.After(time.Now()) {
 		return nil, errercode.CreateCode(errercode.Ban)
+	}
+	if account.Cancel {
+		return nil, errercode.CreateCode(errercode.AccountCanceled)
 	}
 
 	if len(account.IP) == common.Zero {

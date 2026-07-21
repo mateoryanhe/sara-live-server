@@ -42,7 +42,7 @@ func buildResponseResult(r *ghttp.Request, wrapSuccess func(any) any) responseBu
 	if err != nil {
 		failResp := CreateFailAndParam(code, param)
 		if sysError {
-			failResp.Message = errercode.GetMsg(errercode.SysError, GetLang(r))
+			failResp.Message = err.Error() // errercode.GetMsg(errercode.SysError, GetLang(r))
 		} else {
 			failResp.Message = errercode.GetMsg(errercode.XRCode(code), GetLang(r))
 		}

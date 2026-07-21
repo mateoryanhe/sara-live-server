@@ -29,3 +29,9 @@ body {
     -moz-osx-font-smoothing: grayscale;
     background-color: #f5f7f8;
 }
+
+.el-overlay.is-message-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

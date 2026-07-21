@@ -18,30 +18,32 @@ var accountCacheMgr *cache.CacheMgr
 
 const accountMissCacheTime = 10 * time.Minute
 
-// GetAccountBy 根据玩家id拉取数据，不存在时创建内存账号并异步落库（仅用于注册等写场景）
-func GetAccountBy(openId string, channel uint) *entity.Account {
-	key := accountCacheKey(openId, channel)
+// GetAccountBy 根据 openId + 区号 + 渠道拉取数据，不存在时创建内存账号并异步落库（仅用于注册等写场景）
+func GetAccountBy(openId string, channel uint, phoneAreaCode string) *entity.Account {
+	key := accountCacheKey(openId, channel, phoneAreaCode)
 	//命中不了缓存，从数据库拉取数据
 	cacheData := accountCacheMgr.GetData(key, func(ctx context.Context) (value interface{}, err error) {
 		//从数据库拉取数据
 		var account *entity.Account
 		err = g.Model(string(entity.TbAccount)).Unscoped().Where(g.Map{
-			string(entity.AccountOpenId):  openId,
-			string(entity.AccountChannel): channel,
+			string(entity.AccountOpenId):        openId,
+			string(entity.AccountChannel):       channel,
+			string(entity.AccountPhoneAreaCode): phoneAreaCode,
 		}).Scan(&account)
 		if account != nil {
 			return account, nil
-		} else {
-			return entity.NewAccount(openId, channel), nil
 		}
+		acc := entity.NewAccount(openId, channel)
+		acc.PhoneAreaCode = phoneAreaCode
+		return acc, nil
 
 	})
 	return cacheData.(*entity.Account)
 }
 
 // FindAccountBy 只读查询账号，不存在时返回 nil，不会创建新记录
-func FindAccountBy(openId string, channel uint) *entity.Account {
-	key := accountCacheKey(openId, channel)
+func FindAccountBy(openId string, channel uint, phoneAreaCode string) *entity.Account {
+	key := accountCacheKey(openId, channel, phoneAreaCode)
 	ctx := gctx.New()
 
 	if ok, _ := accountCacheMgr.Cache.Contains(ctx, accountMissCacheKey(key)); ok {
@@ -54,8 +56,9 @@ func FindAccountBy(openId string, channel uint) *entity.Account {
 
 	var account *entity.Account
 	_ = g.Model(string(entity.TbAccount)).Unscoped().Where(g.Map{
-		string(entity.AccountOpenId):  openId,
-		string(entity.AccountChannel): channel,
+		string(entity.AccountOpenId):        openId,
+		string(entity.AccountChannel):       channel,
+		string(entity.AccountPhoneAreaCode): phoneAreaCode,
 	}).Scan(&account)
 	if account == nil {
 		_ = accountCacheMgr.Cache.Set(ctx, accountMissCacheKey(key), 1, accountMissCacheTime)
@@ -66,8 +69,8 @@ func FindAccountBy(openId string, channel uint) *entity.Account {
 	return account
 }
 
-func accountCacheKey(openId string, channel uint) string {
-	return fmt.Sprintf("%v:%v", openId, channel)
+func accountCacheKey(openId string, channel uint, phoneAreaCode string) string {
+	return fmt.Sprintf("%v:%v:%v", openId, channel, phoneAreaCode)
 }
 
 func accountMissCacheKey(key string) string {

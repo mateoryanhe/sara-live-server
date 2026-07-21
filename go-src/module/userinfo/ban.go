@@ -14,7 +14,7 @@ import (
 func Ban(ctx context.Context, req *accountdto.BanReq) (resp *accountdto.BanRes, e error) {
 	//默认永远封掉号
 	db := accountdao.GetAccountById(req.AccountId)
-	data := accountdao.GetAccountBy(db.OpenId, db.Channel)
+	data := accountdao.GetAccountBy(db.OpenId, db.Channel, db.PhoneAreaCode)
 	data.SetBan(true)
 	data.SetUpdatedAt(time.Now())
 	now := time.Now()
@@ -35,7 +35,7 @@ func Ban(ctx context.Context, req *accountdto.BanReq) (resp *accountdto.BanRes, 
 }
 func UnBan(ctx context.Context, req *accountdto.UnBanReq) (bool, error) {
 	db := accountdao.GetAccountById(req.AccountId)
-	data := accountdao.GetAccountBy(db.OpenId, db.Channel)
+	data := accountdao.GetAccountBy(db.OpenId, db.Channel, db.PhoneAreaCode)
 	data.SetBan(false)
 	data.SetBanTime(nil)
 	data.SetBanApplyTime(nil)

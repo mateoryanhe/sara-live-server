@@ -22,7 +22,7 @@ func TestLogin(ctx context.Context, req *authdto.TestLoginReq) (res *authdto.Tes
 	//if !cfg.GetAuthCfg().LoginOff {
 	//	return nil, errercode.CreateCode(errercode.TestEnvClose)
 	//}
-	data := accountdao.GetAccountBy(req.OpenId, Test)
+	data := accountdao.GetAccountBy(req.OpenId, Test, "")
 	if data.Ban && data.BanApplyTime.After(time.Now()) {
 		return nil, errercode.CreateCode(errercode.Ban)
 	}

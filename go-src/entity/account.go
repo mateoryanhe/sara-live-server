@@ -13,26 +13,28 @@ const (
 )
 
 const (
-	AccountOpenId       db.TbCol = "open_id"
-	AccountChannel      db.TbCol = "channel"
-	AccountIP           db.TbCol = "ip"
-	AccountBan          db.TbCol = "ban"
-	AccountBanTime      db.TbCol = "ban_time"
-	AccountBanApplyTime db.TbCol = "ban_apply_time"
-	AccountCancel       db.TbCol = "cancel"
-	AccountPassword     db.TbCol = "password"
+	AccountOpenId        db.TbCol = "open_id"
+	AccountChannel       db.TbCol = "channel"
+	AccountPhoneAreaCode db.TbCol = "phone_area_code"
+	AccountIP            db.TbCol = "ip"
+	AccountBan           db.TbCol = "ban"
+	AccountBanTime       db.TbCol = "ban_time"
+	AccountBanApplyTime  db.TbCol = "ban_apply_time"
+	AccountCancel        db.TbCol = "cancel"
+	AccountPassword      db.TbCol = "password"
 )
 
 type Account struct {
 	migrate.OneModel
-	OpenId       string     `gorm:"default:'';comment:开放id"`
-	IP           string     `gorm:"default:'';comment:ip地址"`
-	Channel      uint       `gorm:"default:0;comment:渠道id"`
-	Ban          bool       `gorm:"default:0;comment:封号"`
-	BanTime      *time.Time `gorm:"comment:封号时间"`
-	BanApplyTime *time.Time `gorm:"comment:封号生效时间"`
-	Cancel       bool       `gorm:"default:0;comment:注销"`
-	Password     string     `gorm:"default:'';comment:密码"`
+	OpenId        string     `gorm:"default:'';comment:开放id;uniqueIndex:uk_account_phone"`
+	PhoneAreaCode string     `gorm:"default:'';comment:手机区号;uniqueIndex:uk_account_phone"`
+	IP            string     `gorm:"default:'';comment:ip地址"`
+	Channel       uint       `gorm:"default:0;comment:渠道id;uniqueIndex:uk_account_phone"`
+	Ban           bool       `gorm:"default:0;comment:封号"`
+	BanTime       *time.Time `gorm:"comment:封号时间"`
+	BanApplyTime  *time.Time `gorm:"comment:封号生效时间"`
+	Cancel        bool       `gorm:"default:0;comment:注销"`
+	Password      string     `gorm:"default:'';comment:密码"`
 }
 
 func NewAccount(openId string, channel uint) *Account {
@@ -69,6 +71,15 @@ func (receiver *Account) SetChannel(channel uint) {
 	syndb.AddDataToQuickChan(TbAccount, AccountChannel, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: channel,
+	})
+}
+
+func (receiver *Account) SetPhoneAreaCode(phoneAreaCode string) {
+	receiver.PhoneAreaCode = phoneAreaCode
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddDataToQuickChan(TbAccount, AccountPhoneAreaCode, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: phoneAreaCode,
 	})
 }
 
@@ -139,6 +150,7 @@ func initAccount() {
 	syndb.RegQuick(TbAccount, db.IsDeletedName)
 
 	syndb.RegQuick(TbAccount, AccountOpenId)
+	syndb.RegQuick(TbAccount, AccountPhoneAreaCode)
 	syndb.RegQuick(TbAccount, AccountChannel)
 	syndb.RegQuick(TbAccount, AccountIP)
 	syndb.RegQuick(TbAccount, AccountBan)

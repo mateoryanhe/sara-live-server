@@ -83,7 +83,11 @@ func serveDomainStatic(r *ghttp.Request, root string) {
 	if r.Method != http.MethodGet && r.Method != http.MethodHead {
 		return
 	}
-	filePath, ok := buildDomainStaticFilePath(root, r.URL.Path)
+	reqPath := r.URL.Path
+	if reqPath == "/cms" || strings.HasPrefix(reqPath, "/cms/") {
+		return
+	}
+	filePath, ok := buildDomainStaticFilePath(root, reqPath)
 	if !ok || !gfile.Exists(filePath) {
 		r.Response.WriteStatus(http.StatusNotFound)
 		r.ExitAll()

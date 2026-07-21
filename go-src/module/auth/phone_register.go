@@ -9,6 +9,7 @@ import (
 	"time"
 	"xr-game-server/constants/common"
 	"xr-game-server/core/event"
+	"xr-game-server/core/phoneutil"
 	"xr-game-server/core/xrtoken"
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/userinfodao"
@@ -20,10 +21,13 @@ import (
 )
 
 func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *authdto.PhoneRegisterRes, err error) {
-	gmlock.Lock(req.Phone)
-	defer gmlock.Unlock(req.Phone)
+	phoneAreaCode := phoneutil.NormalizeAreaCode(req.PhoneAreaCode)
+	phone := req.Phone
+	phoneKey := phoneutil.UniqueKey(phoneAreaCode, phone)
+	gmlock.Lock(phoneKey)
+	defer gmlock.Unlock(phoneKey)
 	// 验证验证码
-	valid, err := verification_code.VerifyCode(req.Phone, req.Code)
+	valid, err := verification_code.VerifyCode(phoneAreaCode, phone, req.Code)
 	if err != nil {
 		return nil, err
 	}
@@ -32,9 +36,12 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 	}
 
 	// 检查手机号是否已注册
-	account := accountdao.GetAccountBy(req.Phone, PhoneChannel)
+	account := accountdao.GetAccountBy(phone, PhoneChannel, phoneAreaCode)
 	if account.ID != 0 && account.Password != "" {
 		return nil, errercode.CreateCode(errercode.AccountAlreadyExists)
+	}
+	if account.PhoneAreaCode == "" {
+		account.SetPhoneAreaCode(phoneAreaCode)
 	}
 
 	// 设置密码
@@ -51,7 +58,7 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 
 	// 初始化用户信息
 	data := userinfodao.GetUserInfoByUserId(account.ID)
-	data.SetPhone(req.Phone)
+	data.SetPhone(phone)
 	userlogindevicedao.RefreshLoginDevice(account.ID, req.DeviceInfo)
 	userinfodao.SaveRegisterInfo(account.ID, req.DeviceInfo)
 	now := time.Now()

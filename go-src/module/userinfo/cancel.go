@@ -17,7 +17,7 @@ import (
 func CancelUser(ctx context.Context, req *accountdto.CancelReq) (bool, error) {
 	AddIdToCache(req.AccountId)
 	db := accountdao.GetAccountById(req.AccountId)
-	accountCache := accountdao.GetAccountBy(db.OpenId, db.Channel)
+	accountCache := accountdao.GetAccountBy(db.OpenId, db.Channel, db.PhoneAreaCode)
 	accountCache.SetCancel(true)
 	xrtoken.DelToken(req.AccountId)
 
@@ -30,7 +30,7 @@ func CancelUser(ctx context.Context, req *accountdto.CancelReq) (bool, error) {
 func UnCancelUser(ctx context.Context, req *accountdto.UnCancelReq) (bool, error) {
 	AddIdToCache(req.AccountId)
 	db := accountdao.GetAccountById(req.AccountId)
-	accountCache := accountdao.GetAccountBy(db.OpenId, db.Channel)
+	accountCache := accountdao.GetAccountBy(db.OpenId, db.Channel, db.PhoneAreaCode)
 	accountCache.SetCancel(false)
 	return true, nil
 }
@@ -43,7 +43,7 @@ func CancelAccount(ctx context.Context, _ *userinfodto.CancelAccountReq) (*useri
 	}
 	AddIdToCache(userId)
 	db := accountdao.GetAccountById(userId)
-	accountCache := accountdao.GetAccountBy(db.OpenId, db.Channel)
+	accountCache := accountdao.GetAccountBy(db.OpenId, db.Channel, db.PhoneAreaCode)
 	accountCache.SetCancel(true)
 	push.Kick(userId)
 	return &userinfodto.CancelAccountRes{Success: true}, nil

@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"time"
 	"xr-game-server/core/cache"
+	"xr-game-server/core/phoneutil"
 	"xr-game-server/dto/verificationcodedto"
 	"xr-game-server/errercode"
 )
@@ -38,9 +39,10 @@ func Init() {
 // SendCode 发送验证码
 func SendCode(ctx context.Context, req *verificationcodedto.SendCodeReq) (*verificationcodedto.SendCodeRes, error) {
 	_ = ctx
+	phoneKey := phoneutil.UniqueKey(req.PhoneAreaCode, req.Phone)
 
 	// 检查手机号限制
-	if err := checkPhoneLimit(req.Phone); err != nil {
+	if err := checkPhoneLimit(phoneKey); err != nil {
 		return nil, err
 	}
 
@@ -48,19 +50,18 @@ func SendCode(ctx context.Context, req *verificationcodedto.SendCodeReq) (*verif
 	code := generateCode()
 
 	// 存储验证码
-	cacheKey := getVerifyCodeKey(req.Phone)
+	cacheKey := getVerifyCodeKey(phoneKey)
 	setCacheWithTTL(cacheKey, code, CodeExpireTime)
 
 	// 存储手机号限制
-	phoneKey := getPhoneKey(req.Phone)
-	setCacheWithTTL(phoneKey, time.Now().Unix(), PhoneExpireTime)
+	setCacheWithTTL(getPhoneKey(phoneKey), time.Now().Unix(), PhoneExpireTime)
 
 	// 存储每日发送次数
-	dailyKey := getDailyKey(req.Phone)
+	dailyKey := getDailyKey(phoneKey)
 	incrementDailyCount(dailyKey)
 
 	// 发送短信（留空，待实现）
-	sendSMS(req.Phone, code)
+	sendSMS(req.PhoneAreaCode, req.Phone, code)
 
 	return &verificationcodedto.SendCodeRes{
 		Success: true,
@@ -68,17 +69,17 @@ func SendCode(ctx context.Context, req *verificationcodedto.SendCodeReq) (*verif
 }
 
 // checkPhoneLimit 检查手机号限制
-func checkPhoneLimit(phone string) error {
-	phoneKey := getPhoneKey(phone)
+func checkPhoneLimit(phoneKey string) error {
+	phoneLimitKey := getPhoneKey(phoneKey)
 	ctx := gctx.New()
 
 	// 1分钟内已发送则拒绝
-	if ok, _ := cacheMgr.Cache.Contains(ctx, phoneKey); ok {
+	if ok, _ := cacheMgr.Cache.Contains(ctx, phoneLimitKey); ok {
 		return errercode.CreateCode(errercode.RequestTooFrequent)
 	}
 
 	// 检查每日限制
-	dailyKey := getDailyKey(phone)
+	dailyKey := getDailyKey(phoneKey)
 	count := getDailyCount(dailyKey)
 	if count >= DailyLimit {
 		return errercode.CreateCode(errercode.DailyLimitExceeded)
@@ -95,7 +96,10 @@ func generateCode() string {
 }
 
 // sendSMS 发送短信（留空，待实现）
-func sendSMS(phone, code string) {
+func sendSMS(areaCode, phone, code string) {
+	_ = areaCode
+	_ = phone
+	_ = code
 	// TODO: 实现短信发送逻辑
 	// 目前短信运营商还未确定，留空
 }
@@ -105,27 +109,27 @@ func setCacheWithTTL(key interface{}, data any, ttl time.Duration) {
 }
 
 // getVerifyCodeKey 获取验证码缓存key
-func getVerifyCodeKey(phone string) string {
-	return "verify_code:" + phone
+func getVerifyCodeKey(phoneKey string) string {
+	return "verify_code:" + phoneKey
 }
 
 // getPhoneKey 获取手机号限制缓存key
-func getPhoneKey(phone string) string {
-	return "verify_phone:" + phone
+func getPhoneKey(phoneKey string) string {
+	return "verify_phone:" + phoneKey
 }
 
 // getDailyKey 获取每日限制缓存key
-func getDailyKey(phone string) string {
+func getDailyKey(phoneKey string) string {
 	date := time.Now().Format("2006-01-02")
-	return "verify_daily:" + phone + ":" + date
+	return "verify_daily:" + phoneKey + ":" + date
 }
 
-func getVerifyFailCountKey(phone string) string {
-	return "verify_fail_count:" + phone
+func getVerifyFailCountKey(phoneKey string) string {
+	return "verify_fail_count:" + phoneKey
 }
 
-func getPhoneBlacklistKey(phone string) string {
-	return "verify_blacklist:" + phone
+func getPhoneBlacklistKey(phoneKey string) string {
+	return "verify_blacklist:" + phoneKey
 }
 
 // incrementDailyCount 增加每日发送次数
@@ -149,26 +153,26 @@ func getDailyCount(key string) int {
 	return count
 }
 
-func isPhoneBlacklisted(phone string) bool {
+func isPhoneBlacklisted(phoneKey string) bool {
 	ctx := gctx.New()
-	ok, _ := cacheMgr.Cache.Contains(ctx, getPhoneBlacklistKey(phone))
+	ok, _ := cacheMgr.Cache.Contains(ctx, getPhoneBlacklistKey(phoneKey))
 	return ok
 }
 
-func clearVerifyFailCount(phone string) {
-	_, _ = cacheMgr.Cache.Remove(gctx.New(), getVerifyFailCountKey(phone))
+func clearVerifyFailCount(phoneKey string) {
+	_, _ = cacheMgr.Cache.Remove(gctx.New(), getVerifyFailCountKey(phoneKey))
 }
 
-func onVerifyFailure(phone string, failCode errercode.XRCode) (bool, error) {
-	if blockedErr := markVerifyFailure(phone); blockedErr != nil {
+func onVerifyFailure(phoneKey string, failCode errercode.XRCode) (bool, error) {
+	if blockedErr := markVerifyFailure(phoneKey); blockedErr != nil {
 		return false, blockedErr
 	}
 	return false, errercode.CreateCode(failCode)
 }
 
-func markVerifyFailure(phone string) error {
+func markVerifyFailure(phoneKey string) error {
 	ctx := gctx.New()
-	key := getVerifyFailCountKey(phone)
+	key := getVerifyFailCountKey(phoneKey)
 	count := 1
 
 	val, _ := cacheMgr.Cache.Get(ctx, key)
@@ -179,7 +183,7 @@ func markVerifyFailure(phone string) error {
 	}
 
 	if count >= VerifyFailLimit {
-		setCacheWithTTL(getPhoneBlacklistKey(phone), time.Now().Unix(), PhoneBlacklistTime)
+		setCacheWithTTL(getPhoneBlacklistKey(phoneKey), time.Now().Unix(), PhoneBlacklistTime)
 		_, _ = cacheMgr.Cache.Remove(ctx, key)
 		return errercode.CreateCode(errercode.PhoneVerifyBlocked)
 	}
@@ -189,35 +193,36 @@ func markVerifyFailure(phone string) error {
 }
 
 // VerifyCode 验证验证码
-func VerifyCode(phone string, code string) (bool, error) {
-	if isPhoneBlacklisted(phone) {
+func VerifyCode(areaCode, phone, code string) (bool, error) {
+	phoneKey := phoneutil.UniqueKey(areaCode, phone)
+	if isPhoneBlacklisted(phoneKey) {
 		return false, errercode.CreateCode(errercode.PhoneVerifyBlocked)
 	}
 
 	//强制验证码,系统内定验证码，方便调试
 	if code == "981200" {
-		clearVerifyFailCount(phone)
+		clearVerifyFailCount(phoneKey)
 		return true, nil
 	}
 
-	cacheKey := getVerifyCodeKey(phone)
+	cacheKey := getVerifyCodeKey(phoneKey)
 	cacheCtx := gctx.New()
 
 	val, _ := cacheMgr.Cache.Get(cacheCtx, cacheKey)
 	if val == nil {
-		return onVerifyFailure(phone, errercode.VerifyCodeExpired)
+		return onVerifyFailure(phoneKey, errercode.VerifyCodeExpired)
 	}
 
 	storedCode, ok := val.Val().(string)
 	if !ok {
-		return onVerifyFailure(phone, errercode.VerifyCodeInvalid)
+		return onVerifyFailure(phoneKey, errercode.VerifyCodeInvalid)
 	}
 
 	if storedCode != code {
-		return onVerifyFailure(phone, errercode.VerifyCodeInvalid)
+		return onVerifyFailure(phoneKey, errercode.VerifyCodeInvalid)
 	}
 
-	clearVerifyFailCount(phone)
+	clearVerifyFailCount(phoneKey)
 	_, _ = cacheMgr.Cache.Remove(cacheCtx, cacheKey)
 
 	return true, nil

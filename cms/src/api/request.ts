@@ -6,18 +6,21 @@ import axios, {
 } from 'axios'
 import envConfig from '@/config/env'
 import {ElMessage} from "element-plus"
+import router from '@/router'
 import {clearAuthSession, getAuthId, getToken} from '@/utils/auth'
 
 const AUTH_ERROR_CODES = new Set([1, 2, 3])
 
 function redirectToLogin(): void {
     clearAuthSession()
-    const basePath = '/cms'
-    const currentPath = window.location.pathname.replace(new RegExp(`^${basePath}`), '') || '/'
-    const redirect = currentPath !== '/login'
-        ? `?redirect=${encodeURIComponent(currentPath + window.location.search)}`
-        : ''
-    window.location.replace(`${basePath}/login${redirect}`)
+    const current = router.currentRoute.value
+    if (current.name === 'Login') {
+        return
+    }
+    const query = current.path !== '/' && current.path !== '/login'
+        ? {redirect: current.fullPath}
+        : undefined
+    void router.replace({path: '/login', query})
 }
 
 function isAuthErrorCode(code: unknown): boolean {

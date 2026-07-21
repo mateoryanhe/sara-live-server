@@ -19,17 +19,17 @@ func initPhoneLoginGuard() {
 	phoneLoginCacheMgr = cache.NewCacheMgr()
 }
 
-func checkPhoneLoginLimit(phone string) error {
+func checkPhoneLoginLimit(phoneKey string) error {
 	ctx := gctx.New()
-	if blocked, _ := phoneLoginCacheMgr.Cache.Contains(ctx, phoneLoginBlockKey(phone)); blocked {
+	if blocked, _ := phoneLoginCacheMgr.Cache.Contains(ctx, phoneLoginBlockKey(phoneKey)); blocked {
 		return errercode.CreateCode(errercode.RequestTooFrequent)
 	}
 	return nil
 }
 
-func markPhoneLoginFailure(phone string) error {
+func markPhoneLoginFailure(phoneKey string) error {
 	ctx := gctx.New()
-	key := phoneLoginFailKey(phone)
+	key := phoneLoginFailKey(phoneKey)
 	count := 1
 
 	val, _ := phoneLoginCacheMgr.Cache.Get(ctx, key)
@@ -40,7 +40,7 @@ func markPhoneLoginFailure(phone string) error {
 	}
 
 	if count >= phoneLoginFailLimit {
-		setPhoneLoginCache(phoneLoginBlockKey(phone), time.Now().Unix(), phoneLoginFailExpire)
+		setPhoneLoginCache(phoneLoginBlockKey(phoneKey), time.Now().Unix(), phoneLoginFailExpire)
 		_, _ = phoneLoginCacheMgr.Cache.Remove(ctx, key)
 		return errercode.CreateCode(errercode.RequestTooFrequent)
 	}
@@ -49,18 +49,18 @@ func markPhoneLoginFailure(phone string) error {
 	return nil
 }
 
-func clearPhoneLoginFailure(phone string) {
+func clearPhoneLoginFailure(phoneKey string) {
 	ctx := gctx.New()
-	_, _ = phoneLoginCacheMgr.Cache.Remove(ctx, phoneLoginFailKey(phone))
-	_, _ = phoneLoginCacheMgr.Cache.Remove(ctx, phoneLoginBlockKey(phone))
+	_, _ = phoneLoginCacheMgr.Cache.Remove(ctx, phoneLoginFailKey(phoneKey))
+	_, _ = phoneLoginCacheMgr.Cache.Remove(ctx, phoneLoginBlockKey(phoneKey))
 }
 
-func phoneLoginFailKey(phone string) string {
-	return "phone_login_fail:" + phone
+func phoneLoginFailKey(phoneKey string) string {
+	return "phone_login_fail:" + phoneKey
 }
 
-func phoneLoginBlockKey(phone string) string {
-	return "phone_login_block:" + phone
+func phoneLoginBlockKey(phoneKey string) string {
+	return "phone_login_block:" + phoneKey
 }
 
 func setPhoneLoginCache(key string, data any, ttl time.Duration) {
