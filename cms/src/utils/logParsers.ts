@@ -15,6 +15,8 @@ const detailLogRe = /^(\S+)\s+\[(\w+)\]\s+\{([a-f0-9]+)\}\s+(.+)$/
 const accessLogRe = /^(\S+)\s+\{([a-f0-9]+)\}\s+(\d+)\s+"(\w+)\s+\S+\s+\S+\s+(\S+)\s+HTTP\/[\d.]+"\s+([\d.]+),\s+([^,]+),/
 const errorLogHeaderRe = /^(\S+)\s+\[(\w+)\]\s+\{([a-f0-9]+)\}\s+(\d+)\s+"(\w+)\s+\S+\s+\S+\s+(\S+)\s+HTTP\/[\d.]+"\s+([\d.]+),\s+([^,]+),/
 const errorMetaRe = /,\s*(-?\d+),\s*"([^"]*)"(?:,\s*(.*))?$/
+const errorLogBodyRe = /^ErrorLog\s+/
+const errorLogStackLineRe = /^ErrorLog\s+stack\|/
 const reqIdRe = /reqId=(\d+)/
 const authIdRe = /authId=(\d+)/
 const userIdRe = /userid=(\d+)/
@@ -105,6 +107,122 @@ const extractElapsedMsFromMessage = (message: string) => {
     return undefined
 }
 
+const stripLogHeader = (line: string) => {
+    const match = line.match(detailLogRe)
+    return match?.[4]?.trim() || line.trim()
+}
+
+const parseLegacyInlineError = (message: string) => {
+    const stackIdx = message.indexOf(' stack=')
+    const errIdx = message.indexOf('err=')
+    if (errIdx < 0) {
+        return {summary: message.trim(), stack: ''}
+    }
+    const summary = stackIdx < 0
+        ? message.slice(errIdx + 4).trim()
+        : message.slice(errIdx + 4, stackIdx).trim()
+    if (stackIdx < 0) {
+        return {summary, stack: ''}
+    }
+    let stack = message.slice(stackIdx + 7).trim()
+    stack = stack.replace(/^\d+\.\s*interface conversion:[^\n]*/, '').trim()
+    return {
+        summary,
+        stack: normalizeErrorStack(stack),
+    }
+}
+
+const isRawStackFrameLine = (line: string) => {
+    const trimmed = line.trim()
+    if (!trimmed) {
+        return false
+    }
+    if (/^\d+[.)]\)?\s*\S/.test(trimmed)) {
+        return true
+    }
+    if (/^[A-Za-z]:[/\\]/.test(trimmed)) {
+        return true
+    }
+    if (/^\s{2,}\S/.test(line) && !trimmed.includes('=')) {
+        return true
+    }
+    return false
+}
+
+const parseErrorLogMessage = (message: string) => {
+    const body = message.trim()
+    if (!errorLogBodyRe.test(body)) {
+        return {summary: body, stack: ''}
+    }
+    if (errorLogStackLineRe.test(body)) {
+        return {summary: '', stack: normalizeErrorStack(body.replace(errorLogStackLineRe, ''))}
+    }
+    if (body.includes(' stack=')) {
+        return parseLegacyInlineError(body)
+    }
+    const errMatch = body.match(/err=(.+)$/)
+    if (errMatch?.[1]) {
+        return {summary: errMatch[1].trim(), stack: ''}
+    }
+    return {summary: body.replace(/^ErrorLog\s+/, '').trim(), stack: ''}
+}
+
+export const normalizeErrorStack = (stack: string) => {
+    const lines = stack
+        .replace(/\r\n/g, '\n')
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0)
+    if (!lines.length) {
+        return ''
+    }
+    const normalized: string[] = []
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i]
+        if (/^\d+[.)]\)?\s/.test(line)) {
+            const frame = line.replace(/^\d+[.)]\)?\s*/, '')
+            const location = lines[i + 1]?.trim()
+            if (location && !/^\d+[.)]\)?\s/.test(location) && !location.startsWith('Stack:')) {
+                normalized.push(`${frame}\n    ${location}`)
+                i++
+            } else {
+                normalized.push(frame)
+            }
+            continue
+        }
+        if (line === 'Stack:' || line.startsWith('interface conversion:')) {
+            continue
+        }
+        normalized.push(line)
+    }
+    return normalized.join('\n')
+}
+
+export const formatErrorSummary = (item: Pick<ErrorLogItem, 'errorMessage' | 'detail' | 'raw'>) => {
+    if (item.errorMessage && !item.errorMessage.includes('ErrorLog')) {
+        return item.errorMessage
+    }
+    const parsed = parseErrorLogMessage(stripLogHeader(item.raw || item.detail || item.errorMessage || ''))
+    return parsed.summary || item.errorMessage || item.detail || item.raw || ''
+}
+
+export const formatErrorStack = (item: Pick<ErrorLogItem, 'stack' | 'detail' | 'raw' | 'errorMessage'>) => {
+    if (item.stack && !item.stack.includes('ErrorLog source=')) {
+        const normalized = normalizeErrorStack(item.stack)
+        if (normalized) {
+            return normalized
+        }
+    }
+    const parsed = parseErrorLogMessage(stripLogHeader(item.raw || item.detail || ''))
+    if (parsed.stack) {
+        return parsed.stack
+    }
+    if (item.raw?.includes(' stack=')) {
+        return parseLegacyInlineError(stripLogHeader(item.raw)).stack
+    }
+    return ''
+}
+
 export const parseDetailLogLine = (line: string): DetailLogItem | null => {
     const trimmed = line.trim()
     if (!trimmed) {
@@ -190,15 +308,27 @@ const finalizeErrorLogEntry = (entry: ErrorLogItem, body: string) => {
             entry.authId = authMatch[1]
         }
     }
-    entry.stack = body
+    entry.detail = body
     entry.raw = body
+    entry.errorMessage = formatErrorSummary(entry)
+    entry.stack = formatErrorStack(entry)
 }
 
-const isLogQueryRelatedError = (entry: ErrorLogItem) => {
-    for (const field of [entry.url, entry.raw, entry.detail, entry.stack, entry.errorMessage]) {
-        if (field.includes(LOG_QUERY_PATH)) {
-            return true
-        }
+const isErrorLogBlockStart = (line: string) => {
+    if (errorLogHeaderRe.test(line)) {
+        return true
+    }
+    const detail = parseDetailLogLine(line)
+    return !!detail && errorLogBodyRe.test(detail.message) && !errorLogStackLineRe.test(detail.message)
+}
+
+const isErrorLogStackContinuation = (line: string) => {
+    const detail = parseDetailLogLine(line)
+    if (detail && errorLogStackLineRe.test(detail.message)) {
+        return true
+    }
+    if (!detail && !isErrorLogBlockStart(line) && isRawStackFrameLine(line)) {
+        return true
     }
     return false
 }
@@ -241,8 +371,22 @@ const parseErrorLogBlock = (lines: string[]): ErrorLogItem | null => {
         return header
     }
     const detail = parseDetailLogLine(lines[0])
-    if (!detail || !detail.message.includes('ErrorLog')) {
+    if (!detail || !errorLogBodyRe.test(detail.message)) {
         return null
+    }
+    const stackParts: string[] = []
+    let summary = ''
+    for (const line of lines) {
+        const body = stripLogHeader(line)
+        const parsed = parseErrorLogMessage(body)
+        if (parsed.summary && errorLogBodyRe.test(body)) {
+            summary = parsed.summary
+        }
+        if (parsed.stack) {
+            stackParts.push(parsed.stack)
+        } else if (isRawStackFrameLine(body)) {
+            stackParts.push(body.trim())
+        }
     }
     const body = lines.join('\n')
     const entry: ErrorLogItem = {
@@ -256,10 +400,16 @@ const parseErrorLogBlock = (lines: string[]): ErrorLogItem | null => {
         ip: '',
         authId: detail.authId,
         errorCode: 0,
-        errorMessage: detail.message,
+        errorMessage: summary,
         detail: body,
-        stack: body,
+        stack: normalizeErrorStack(stackParts.join('\n')),
         raw: body,
+    }
+    if (!entry.errorMessage) {
+        entry.errorMessage = formatErrorSummary(entry)
+    }
+    if (!entry.stack) {
+        entry.stack = formatErrorStack(entry)
     }
     return entry
 }
@@ -278,13 +428,24 @@ export const parseErrorLogLines = (text: string): ErrorLogItem[] => {
         }
     }
     for (const line of splitLines(text)) {
-        if (errorLogHeaderRe.test(line) || (line.includes('ErrorLog') && detailLogRe.test(line))) {
+        if (isErrorLogBlockStart(line)) {
+            flush()
+        } else if (block.length && !isErrorLogStackContinuation(line)) {
             flush()
         }
         block.push(line)
     }
     flush()
     return entries
+}
+
+const isLogQueryRelatedError = (entry: ErrorLogItem) => {
+    for (const field of [entry.url, entry.raw, entry.detail, entry.stack, entry.errorMessage]) {
+        if (field.includes(LOG_QUERY_PATH)) {
+            return true
+        }
+    }
+    return false
 }
 
 export const parseLogExportPage = <T>(

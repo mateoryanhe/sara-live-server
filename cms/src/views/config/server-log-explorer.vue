@@ -224,9 +224,13 @@
             <el-table-column label="URL" min-width="200" prop="url" show-overflow-tooltip/>
             <el-table-column label="IP" min-width="140" prop="ip" show-overflow-tooltip/>
             <el-table-column label="错误码" prop="errorCode" width="90"/>
-            <el-table-column label="错误信息" min-width="160" prop="errorMessage" show-overflow-tooltip/>
+            <el-table-column label="错误信息" min-width="160" show-overflow-tooltip>
+              <template #default="{ row }">{{ formatErrorSummary(row) }}</template>
+            </el-table-column>
             <el-table-column label="详情" min-width="180" prop="detail" show-overflow-tooltip/>
-            <el-table-column label="堆栈" min-width="220" prop="stack" show-overflow-tooltip/>
+            <el-table-column label="堆栈" min-width="220" show-overflow-tooltip>
+              <template #default="{ row }">{{ formatErrorStack(row) }}</template>
+            </el-table-column>
           </el-table>
 
           <div class="pagination-wrap">
@@ -367,10 +371,10 @@
                 {{ formatElapsedMs(item.handlerMs) }}
               </span>
               <span v-if="item.authId" class="trace-auth-id">AuthId: {{ item.authId }}</span>
-              <span>[{{ item.level }}] {{ item.errorMessage }}</span>
+              <span>[{{ item.level }}] {{ formatErrorSummary(item) }}</span>
             </div>
           </div>
-          <pre class="trace-log-content">{{ item.raw || item.stack }}</pre>
+          <pre v-if="formatErrorStack(item)" class="trace-log-content">{{ formatErrorStack(item) }}</pre>
         </div>
 
         <h4>Access日志</h4>
@@ -421,6 +425,7 @@ import {nextTick, onMounted, onUnmounted, reactive, ref, watch} from 'vue'
 import {ElMessage} from 'element-plus'
 import {logQueryApi} from '@/api'
 import AccessTrendChart from './components/access-trend-chart.vue'
+import {formatErrorStack, formatErrorSummary} from '@/utils/logParsers'
 import type {AccessLogItem, AccessTrendData, DetailLogItem, ErrorLogItem, LogQueryJobResult, TopStatItem, TraceLogDetail} from '@/types/api'
 
 const activeTab = ref('stats')
