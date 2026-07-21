@@ -98,15 +98,18 @@ func rmClient(data any) {
 	if data == nil {
 		return
 	}
-	leaveClient := data.(*httpserver.WebSocketClient)
-	if leaveClient == nil {
+	leaveClient, ok := data.(*httpserver.WebSocketClient)
+	if !ok || leaveClient == nil {
 		return
 	}
 	g.Log().Infof(gctx.New(), "authId=%v,ip=%v,离线了", leaveClient.Id, clientRemoteAddr(leaveClient))
-	//
 	event.Pub(event.Offline, event.NewOfflineData(leaveClient.Id))
-	mapClient := (clientMap.Get(leaveClient.Id)).(*httpserver.WebSocketClient)
-	if mapClient == nil {
+	mapData := clientMap.Get(leaveClient.Id)
+	if mapData == nil {
+		return
+	}
+	mapClient, ok := mapData.(*httpserver.WebSocketClient)
+	if !ok || mapClient == nil {
 		return
 	}
 	if leaveClient.Conn != mapClient.Conn {
@@ -119,7 +122,10 @@ func addClient(data any) {
 	if data == nil {
 		return
 	}
-	client := data.(*httpserver.WebSocketClient)
+	client, ok := data.(*httpserver.WebSocketClient)
+	if !ok || client == nil {
+		return
+	}
 	g.Log().Infof(gctx.New(), "authId=%v,ip=%v,上线了", client.Id, clientRemoteAddr(client))
 	//尝试下线当前客户端,由客户端主动登出
 	OutData(client.Id, cmd.RepeatLogin)
