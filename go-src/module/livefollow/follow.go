@@ -34,6 +34,9 @@ func Follow(ctx context.Context, req *livefollowdto.FollowReq) (*livefollowdto.F
 	}
 
 	existing := livefollowdao.GetByUserAnchor(userId, req.AnchorId)
+	if existing != nil && existing.Status == entity.LiveFollowStatusBlock {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 	wasFollowing := existing != nil && existing.Status == entity.LiveFollowStatusFollow
 	if existing == nil {
 		f := entity.NewLiveFollow(userId, req.AnchorId)
@@ -75,8 +78,9 @@ func Unfollow(ctx context.Context, req *livefollowdto.UnfollowReq) (*livefollowd
 	}
 
 	existing := livefollowdao.GetByUserAnchor(userId, req.AnchorId)
-	if existing != nil && existing.Status != entity.LiveFollowStatusUnfollow {
+	if existing != nil && existing.Status == entity.LiveFollowStatusFollow {
 		existing.SetStatus(entity.LiveFollowStatusUnfollow)
+		livefollowdao.AddFollowToCache(existing)
 		userinfodao.DecFollowCount(userId, req.AnchorId)
 	}
 

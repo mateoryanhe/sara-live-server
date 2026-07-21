@@ -54,6 +54,10 @@ logger:
     stdout: false
 
 database:
+  logger:
+    path: '/home/ec2-user/log/gf_app'
+    level: "all"
+    stdout: true
   default:
     link: "mysql:root:Appledev882116@tcp(127.0.0.1:3306)/live_db"
     extra: "charset=utf8mb4&parseTime=True&loc=Local"

@@ -41,3 +41,18 @@ func (c *LiveFollowAppController) FollowingList(ctx context.Context, req *livefo
 func (c *LiveFollowAppController) FollowerList(ctx context.Context, req *livefollowdto.FollowerListReq) (res *livefollowdto.FollowerListRes, err error) {
 	return livefollow.FollowerList(ctx, req)
 }
+
+// Block 拉黑用户
+func (c *LiveFollowAppController) Block(ctx context.Context, req *livefollowdto.BlockReq) (res *livefollowdto.BlockRes, err error) {
+	return livefollow.Block(ctx, req)
+}
+
+// Unblock 解除拉黑
+func (c *LiveFollowAppController) Unblock(ctx context.Context, req *livefollowdto.UnblockReq) (res *livefollowdto.UnblockRes, err error) {
+	return livefollow.Unblock(ctx, req)
+}
+
+// BlockList 拉黑列表
+func (c *LiveFollowAppController) BlockList(ctx context.Context, req *livefollowdto.BlockListReq) (res *livefollowdto.BlockListRes, err error) {
+	return livefollow.BlockList(ctx, req)
+}
