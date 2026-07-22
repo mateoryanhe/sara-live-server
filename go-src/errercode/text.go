@@ -93,6 +93,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		NotBotAnchor:                   "User is not a bot anchor",
 		AgoraCloudPlayerFailed:         "Agora cloud player request failed",
 		PhoneVerifyBlocked:             "Too many verification failures, please try again in 2 hours",
+		AppPkgExist:                    "App package name already exists",
+		AppPkgNonExist:                 "App package config does not exist",
 	},
 	lang.LangZHCN: {
 		Success:                        "成功",
@@ -182,6 +184,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		NotBotAnchor:                   "该用户不是机器人主播",
 		AgoraCloudPlayerFailed:         "声网云播放器调用失败",
 		PhoneVerifyBlocked:             "验证码校验失败次数过多，请2小时后再试",
+		AppPkgExist:                    "App包名已存在",
+		AppPkgNonExist:                 "App包配置不存在",
 	},
 	lang.LangZHTW: {
 		Success:                        "成功",
@@ -271,6 +275,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		NotBotAnchor:                   "該用戶不是機器人主播",
 		AgoraCloudPlayerFailed:         "聲網雲播放器調用失敗",
 		PhoneVerifyBlocked:             "驗證碼校驗失敗次數過多，請2小時後再試",
+		AppPkgExist:                    "App包名已存在",
+		AppPkgNonExist:                 "App包配置不存在",
 	},
 }
 

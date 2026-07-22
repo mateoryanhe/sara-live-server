@@ -4,6 +4,7 @@ import (
 	"xr-game-server/module/agora"
 	"xr-game-server/module/aliyunmoderation"
 	"xr-game-server/module/anchorrank"
+	"xr-game-server/module/apppkg"
 	"xr-game-server/module/auth"
 	"xr-game-server/module/banner"
 	"xr-game-server/module/botanchor"
@@ -40,6 +41,7 @@ func Init() {
 	ticket.Init()
 	privateroombilling.Init()
 	vip.Init()
+	apppkg.Init()
 	game.Init()
 	agora.Init()
 	call.Init()

@@ -10,6 +10,7 @@ import {privateRoomBillingApi} from './modules/privateRoomBilling'
 import {shortVideoApi} from './modules/shortVideo'
 import {rechargeCfgApi} from './modules/rechargeCfg'
 import {vipCfgApi} from './modules/vipCfg'
+import {appPkgApi} from './modules/appPkg'
 import {uploadApi} from './modules/upload'
 import {goldApi} from './modules/gold'
 import {diamondApi} from './modules/diamond'
@@ -41,6 +42,7 @@ export {
     shortVideoApi,
     rechargeCfgApi,
     vipCfgApi,
+    appPkgApi,
     uploadApi,
     goldApi,
     diamondApi,
@@ -73,6 +75,7 @@ export default {
     shortVideoApi,
     rechargeCfgApi,
     vipCfgApi,
+    appPkgApi,
     uploadApi,
     goldApi,
     diamondApi,

@@ -64,7 +64,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement')"
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement')"
             index="/operation">
           <template #title>
             <el-icon>
@@ -95,6 +95,12 @@
               <Medal/>
             </el-icon>
             <span>VIP配置</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('AppPkgManagement')" index="/operation/app-pkg/app-pkg-list">
+            <el-icon>
+              <Box/>
+            </el-icon>
+            <span>App包管理</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -345,7 +351,7 @@
 <script lang="ts" setup>
 import {computed, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {ArrowDown, Coin, Collection, CollectionTag, Cpu, Document, Expand, Fold, Key, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Search, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Box, Coin, Collection, CollectionTag, Cpu, Document, Expand, Fold, Key, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Search, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {getIsAdmin, hasPermission} from '@/utils/permission'
 import {clearAuthSession} from '@/utils/auth'
 

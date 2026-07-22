@@ -425,6 +425,20 @@ export interface VipCfgQuery extends PageQuery {
     statusFilter?: number
 }
 
+// App包管理
+export interface AppPkg {
+    id: string
+    packageName: string
+    secretKey: string
+    remark: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface AppPkgQuery extends PageQuery {
+    packageName?: string
+}
+
 // 游戏配置
 export interface GameCfg {
     id: string

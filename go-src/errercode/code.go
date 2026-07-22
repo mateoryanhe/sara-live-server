@@ -165,6 +165,10 @@ const (
 	AgoraCloudPlayerFailed XRCode = 140
 	// PhoneVerifyBlocked 手机号验证码校验失败次数过多已临时拉黑
 	PhoneVerifyBlocked XRCode = 141
+	// AppPkgExist App包名已存在
+	AppPkgExist XRCode = 142
+	// AppPkgNonExist App包配置不存在
+	AppPkgNonExist XRCode = 143
 )
 
 type XError struct {

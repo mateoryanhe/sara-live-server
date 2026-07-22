@@ -30,5 +30,11 @@ export const operationRoutes: RouteRecordRaw = {
             component: () => import('@/views/operation/vip/vip-cfg-list.vue'),
             meta: {title: 'VIP配置'},
         },
+        {
+            path: 'app-pkg/app-pkg-list',
+            name: 'AppPkgManagement',
+            component: () => import('@/views/operation/app-pkg/app-pkg-list.vue'),
+            meta: {title: 'App包管理'},
+        },
     ],
 }

@@ -55,6 +55,7 @@ func Init() {
 	initRechargeCfg()
 	initRechargeOrder()
 	initVipCfg()
+	initAppPkg()
 	initGameCfg()
 	initLiveTicket()
 	initLivePrivateRoomBilling()

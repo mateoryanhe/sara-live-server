@@ -52,6 +52,7 @@ func Init() {
 	initAnchorRankAppController()           // 主播红人榜(App)
 	initRechargeOrderAppController()        // 充值订单(App:发起/查询)
 	initVipCfgController()                  // VIP配置(CMS)
+	initAppPkgController()                  // App包管理(CMS)
 	initGameCfgController()                 // 游戏配置(CMS)
 	initGameCfgAppController()              // 游戏配置(App)
 	initVipCfgAppController()               // VIP配置查询(App)
