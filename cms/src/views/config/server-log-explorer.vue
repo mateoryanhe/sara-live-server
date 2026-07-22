@@ -11,28 +11,28 @@
       <el-tabs v-model="activeTab">
         <el-tab-pane label="访问统计" name="stats">
           <el-form :model="statsForm" class="search-form" inline label-width="90px">
-            <el-form-item label="开始日期">
+            <el-form-item label="开始时间">
               <el-date-picker
                   v-model="statsForm.startDate"
                   clearable
-                  format="YYYY-MM-DD"
-                  placeholder="开始日期"
-                  style="width: 140px"
+                  format="YYYY-MM-DD HH:mm:ss"
+                  placeholder="开始时间"
+                  style="width: 190px"
                   teleported
-                  type="date"
-                  value-format="YYYY-MM-DD"
+                  type="datetime"
+                  value-format="YYYY-MM-DD HH:mm:ss"
               />
             </el-form-item>
-            <el-form-item label="结束日期">
+            <el-form-item label="结束时间">
               <el-date-picker
                   v-model="statsForm.endDate"
                   clearable
-                  format="YYYY-MM-DD"
-                  placeholder="结束日期"
-                  style="width: 140px"
+                  format="YYYY-MM-DD HH:mm:ss"
+                  placeholder="结束时间"
+                  style="width: 190px"
                   teleported
-                  type="date"
-                  value-format="YYYY-MM-DD"
+                  type="datetime"
+                  value-format="YYYY-MM-DD HH:mm:ss"
               />
             </el-form-item>
             <el-form-item label="TopN">
@@ -69,28 +69,28 @@
 
         <el-tab-pane label="Access日志" name="access">
           <el-form :model="accessForm" class="search-form" inline label-width="100px">
-            <el-form-item label="开始日期">
+            <el-form-item label="开始时间">
               <el-date-picker
                   v-model="accessForm.startDate"
                   clearable
-                  format="YYYY-MM-DD"
-                  placeholder="开始日期"
-                  style="width: 140px"
+                  format="YYYY-MM-DD HH:mm:ss"
+                  placeholder="开始时间"
+                  style="width: 190px"
                   teleported
-                  type="date"
-                  value-format="YYYY-MM-DD"
+                  type="datetime"
+                  value-format="YYYY-MM-DD HH:mm:ss"
               />
             </el-form-item>
-            <el-form-item label="结束日期">
+            <el-form-item label="结束时间">
               <el-date-picker
                   v-model="accessForm.endDate"
                   clearable
-                  format="YYYY-MM-DD"
-                  placeholder="结束日期"
-                  style="width: 140px"
+                  format="YYYY-MM-DD HH:mm:ss"
+                  placeholder="结束时间"
+                  style="width: 190px"
                   teleported
-                  type="date"
-                  value-format="YYYY-MM-DD"
+                  type="datetime"
+                  value-format="YYYY-MM-DD HH:mm:ss"
               />
             </el-form-item>
             <el-form-item label="TraceId">
@@ -167,28 +167,28 @@
 
         <el-tab-pane label="Error日志" name="error">
           <el-form :model="errorForm" class="search-form" inline label-width="100px">
-            <el-form-item label="开始日期">
+            <el-form-item label="开始时间">
               <el-date-picker
                   v-model="errorForm.startDate"
                   clearable
-                  format="YYYY-MM-DD"
-                  placeholder="开始日期"
-                  style="width: 140px"
+                  format="YYYY-MM-DD HH:mm:ss"
+                  placeholder="开始时间"
+                  style="width: 190px"
                   teleported
-                  type="date"
-                  value-format="YYYY-MM-DD"
+                  type="datetime"
+                  value-format="YYYY-MM-DD HH:mm:ss"
               />
             </el-form-item>
-            <el-form-item label="结束日期">
+            <el-form-item label="结束时间">
               <el-date-picker
                   v-model="errorForm.endDate"
                   clearable
-                  format="YYYY-MM-DD"
-                  placeholder="结束日期"
-                  style="width: 140px"
+                  format="YYYY-MM-DD HH:mm:ss"
+                  placeholder="结束时间"
+                  style="width: 190px"
                   teleported
-                  type="date"
-                  value-format="YYYY-MM-DD"
+                  type="datetime"
+                  value-format="YYYY-MM-DD HH:mm:ss"
               />
             </el-form-item>
             <el-form-item label="TraceId">
@@ -250,28 +250,28 @@
         <el-tab-pane label="详情日志" lazy name="detail">
           <div class="detail-query-tip">查询已改为后台排队执行（单线程串行），通常 1 分钟内返回；建议填写 TraceId / URL 等条件</div>
           <el-form :model="detailForm" class="search-form" inline label-width="90px">
-            <el-form-item label="开始日期">
+            <el-form-item label="开始时间">
               <el-date-picker
                   v-model="detailForm.startDate"
                   clearable
-                  format="YYYY-MM-DD"
-                  placeholder="开始日期"
-                  style="width: 140px"
+                  format="YYYY-MM-DD HH:mm:ss"
+                  placeholder="开始时间"
+                  style="width: 190px"
                   teleported
-                  type="date"
-                  value-format="YYYY-MM-DD"
+                  type="datetime"
+                  value-format="YYYY-MM-DD HH:mm:ss"
               />
             </el-form-item>
-            <el-form-item label="结束日期">
+            <el-form-item label="结束时间">
               <el-date-picker
                   v-model="detailForm.endDate"
                   clearable
-                  format="YYYY-MM-DD"
-                  placeholder="结束日期"
-                  style="width: 140px"
+                  format="YYYY-MM-DD HH:mm:ss"
+                  placeholder="结束时间"
+                  style="width: 190px"
                   teleported
-                  type="date"
-                  value-format="YYYY-MM-DD"
+                  type="datetime"
+                  value-format="YYYY-MM-DD HH:mm:ss"
               />
             </el-form-item>
             <el-form-item label="TraceId">
@@ -540,24 +540,32 @@ const getActiveTabDateRange = (): string[] => {
   return [form.startDate, form.endDate]
 }
 
-/** 默认8天; 结束日期+2天,兼容不同时区日志时间 */
-const buildDefaultDateRange = (baseDate = new Date()) => {
-  const end = new Date(baseDate)
-  end.setDate(end.getDate() + 2)
-  const start = new Date(end)
-  start.setDate(end.getDate() - 7)
-  return [formatLocalDate(start), formatLocalDate(end)]
+const formatLocalDateTime = (date: Date) => {
+  const hour = String(date.getHours()).padStart(2, '0')
+  const minute = String(date.getMinutes()).padStart(2, '0')
+  const second = String(date.getSeconds()).padStart(2, '0')
+  return `${formatLocalDate(date)} ${hour}:${minute}:${second}`
 }
 
-const defaultDateRange = () => buildDefaultDateRange(serverTimeBaseMs ? new Date(serverTimeBaseMs) : new Date())
+const buildDefaultLogQueryDateRange = (baseDate = new Date()) => {
+  const end = new Date(baseDate)
+  end.setDate(end.getDate() + 2)
+  end.setHours(23, 59, 59, 0)
+  const start = new Date(end)
+  start.setDate(end.getDate() - 7)
+  start.setHours(0, 0, 0, 0)
+  return [formatLocalDateTime(start), formatLocalDateTime(end)]
+}
+
+const defaultLogQueryDateRange = () => buildDefaultLogQueryDateRange(serverTimeBaseMs ? new Date(serverTimeBaseMs) : new Date())
 
 const createDefaultDateRangeForm = (): DateRangeForm => {
-  const [startDate, endDate] = defaultDateRange()
+  const [startDate, endDate] = defaultLogQueryDateRange()
   return {startDate, endDate}
 }
 
 const resetFormDateRange = (form: DateRangeForm) => {
-  const [startDate, endDate] = defaultDateRange()
+  const [startDate, endDate] = defaultLogQueryDateRange()
   form.startDate = startDate
   form.endDate = endDate
 }
@@ -567,9 +575,9 @@ const applyDefaultDateRanges = () => {
   resetFormDateRange(accessForm)
   resetFormDateRange(errorForm)
   resetFormDateRange(detailForm)
-  const [startDate, endDate] = defaultDateRange()
-  traceStartDate.value = startDate
-  traceEndDate.value = endDate
+  const [startDate, endDate] = defaultLogQueryDateRange()
+  traceStartDate.value = startDate.slice(0, 10)
+  traceEndDate.value = endDate.slice(0, 10)
 }
 
 const detailForm = reactive({
@@ -643,7 +651,7 @@ const traceDetail = reactive<TraceLogDetail>({
 
 const ensureFormDateRange = (form: DateRangeForm): string[] | null => {
   if (!form.startDate || !form.endDate) {
-    ElMessage.warning('请选择开始和结束日期')
+    ElMessage.warning('请选择开始和结束时间')
     return null
   }
   const normalized = normalizeDateRange(form.startDate, form.endDate)

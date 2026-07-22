@@ -117,15 +117,61 @@ func formatLogFileName(pattern string, dateStr string) string {
 	return s
 }
 
+const (
+	logQueryDateLayout      = "2006-01-02"
+	logQueryDateTimeLayout  = "2006-01-02 15:04:05"
+	logQueryDateTimeTLayout = "2006-01-02T15:04:05"
+)
+
+func parseLogQueryDateTime(value string) (time.Time, bool) {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return time.Time{}, false
+	}
+	for _, layout := range []string{logQueryDateTimeLayout, logQueryDateTimeTLayout, logQueryDateLayout} {
+		if t, err := time.ParseInLocation(layout, value, time.Local); err == nil {
+			return t, true
+		}
+	}
+	return time.Time{}, false
+}
+
+func isLogQueryDateOnly(value string) bool {
+	value = strings.TrimSpace(value)
+	return len(value) == len(logQueryDateLayout)
+}
+
+func hasLogQueryTimeComponent(value string) bool {
+	return len(strings.TrimSpace(value)) > len(logQueryDateLayout)
+}
+
+func shouldApplyLogTimeFilter(startDate, endDate string) bool {
+	return hasLogQueryTimeComponent(startDate) || hasLogQueryTimeComponent(endDate)
+}
+
+func normalizeLogQueryLogRange(startDate, endDate string) (startLog, endLog string, ok bool) {
+	start, ok1 := parseLogQueryDateTime(startDate)
+	end, ok2 := parseLogQueryDateTime(endDate)
+	if !ok1 || !ok2 {
+		return "", "", false
+	}
+	if isLogQueryDateOnly(endDate) {
+		end = end.Add(24*time.Hour - time.Second)
+	}
+	return start.Format(logQueryDateTimeTLayout), end.Format(logQueryDateTimeTLayout), true
+}
+
 func listDates(startDate, endDate string) []string {
-	start, err1 := time.ParseInLocation("2006-01-02", startDate, time.Local)
-	end, err2 := time.ParseInLocation("2006-01-02", endDate, time.Local)
-	if err1 != nil || err2 != nil {
+	start, ok1 := parseLogQueryDateTime(startDate)
+	end, ok2 := parseLogQueryDateTime(endDate)
+	if !ok1 || !ok2 {
 		return nil
 	}
+	startDay := time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, start.Location())
+	endDay := time.Date(end.Year(), end.Month(), end.Day(), 0, 0, 0, 0, end.Location())
 	var dates []string
-	for d := start; !d.After(end); d = d.AddDate(0, 0, 1) {
-		dates = append(dates, d.Format("2006-01-02"))
+	for d := startDay; !d.After(endDay); d = d.AddDate(0, 0, 1) {
+		dates = append(dates, d.Format(logQueryDateLayout))
 	}
 	return dates
 }

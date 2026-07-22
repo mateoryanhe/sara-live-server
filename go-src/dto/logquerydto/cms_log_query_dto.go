@@ -43,8 +43,8 @@ type CMSDeleteLogQueryExportRes struct {
 type CMSQueryDetailLogsReq struct {
 	g.Meta `path:"/queryDetailLogs" method:"post" summary:"CMS查询详情日志" tags:"日志查询"`
 	httpserver.CMSQueryReq
-	StartDate string `json:"startDate" v:"required|date-format:Y-m-d#开始日期不能为空|开始日期格式应为Y-m-d"`
-	EndDate   string `json:"endDate" v:"required|date-format:Y-m-d#结束日期不能为空|结束日期格式应为Y-m-d"`
+	StartDate string `json:"startDate" v:"required|regex:^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$#开始时间不能为空|开始时间格式应为Y-m-d或Y-m-d H:i:s"`
+	EndDate   string `json:"endDate" v:"required|regex:^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$#结束时间不能为空|结束时间格式应为Y-m-d或Y-m-d H:i:s"`
 	TraceId   string `json:"traceId"`
 	ReqId     string `json:"reqId"`
 	AuthId    string `json:"authId"`
@@ -55,8 +55,8 @@ type CMSQueryDetailLogsReq struct {
 type CMSQueryAccessLogsReq struct {
 	g.Meta `path:"/queryAccessLogs" method:"post" summary:"CMS查询Access日志" tags:"日志查询"`
 	httpserver.CMSQueryReq
-	StartDate    string   `json:"startDate" v:"required|date-format:Y-m-d#开始日期不能为空|开始日期格式应为Y-m-d"`
-	EndDate      string   `json:"endDate" v:"required|date-format:Y-m-d#结束日期不能为空|结束日期格式应为Y-m-d"`
+	StartDate    string   `json:"startDate" v:"required|regex:^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$#开始时间不能为空|开始时间格式应为Y-m-d或Y-m-d H:i:s"`
+	EndDate      string   `json:"endDate" v:"required|regex:^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$#结束时间不能为空|结束时间格式应为Y-m-d或Y-m-d H:i:s"`
 	TraceId      string   `json:"traceId"`
 	Url          string   `json:"url"`
 	Ip           string   `json:"ip"`
@@ -68,8 +68,8 @@ type CMSQueryAccessLogsReq struct {
 type CMSQueryErrorLogsReq struct {
 	g.Meta `path:"/queryErrorLogs" method:"post" summary:"CMS查询Error日志" tags:"日志查询"`
 	httpserver.CMSQueryReq
-	StartDate  string `json:"startDate" v:"required|date-format:Y-m-d#开始日期不能为空|开始日期格式应为Y-m-d"`
-	EndDate    string `json:"endDate" v:"required|date-format:Y-m-d#结束日期不能为空|结束日期格式应为Y-m-d"`
+	StartDate  string `json:"startDate" v:"required|regex:^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$#开始时间不能为空|开始时间格式应为Y-m-d或Y-m-d H:i:s"`
+	EndDate    string `json:"endDate" v:"required|regex:^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$#结束时间不能为空|结束时间格式应为Y-m-d或Y-m-d H:i:s"`
 	TraceId    string `json:"traceId"`
 	Url        string `json:"url"`
 	Ip         string `json:"ip"`
@@ -86,15 +86,15 @@ type CMSGetTraceLogsReq struct {
 
 type CMSGetAccessStatsReq struct {
 	g.Meta    `path:"/getAccessStats" method:"post" summary:"CMS获取Access访问统计TopN" tags:"日志查询"`
-	StartDate string `json:"startDate" v:"required|date-format:Y-m-d#开始日期不能为空|开始日期格式应为Y-m-d"`
-	EndDate   string `json:"endDate" v:"required|date-format:Y-m-d#结束日期不能为空|结束日期格式应为Y-m-d"`
+	StartDate string `json:"startDate" v:"required|regex:^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$#开始时间不能为空|开始时间格式应为Y-m-d或Y-m-d H:i:s"`
+	EndDate   string `json:"endDate" v:"required|regex:^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$#结束时间不能为空|结束时间格式应为Y-m-d或Y-m-d H:i:s"`
 	TopN      int    `json:"topN"`
 }
 
 type CMSGetAccessTrendReq struct {
 	g.Meta          `path:"/getAccessTrend" method:"post" summary:"CMS获取Access访问趋势" tags:"日志查询"`
-	StartDate       string   `json:"startDate" v:"required|date-format:Y-m-d#开始日期不能为空|开始日期格式应为Y-m-d"`
-	EndDate         string   `json:"endDate" v:"required|date-format:Y-m-d#结束日期不能为空|结束日期格式应为Y-m-d"`
+	StartDate       string   `json:"startDate" v:"required|regex:^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$#开始时间不能为空|开始时间格式应为Y-m-d或Y-m-d H:i:s"`
+	EndDate         string   `json:"endDate" v:"required|regex:^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$#结束时间不能为空|结束时间格式应为Y-m-d或Y-m-d H:i:s"`
 	TraceId         string   `json:"traceId"`
 	Url             string   `json:"url"`
 	Ip              string   `json:"ip"`

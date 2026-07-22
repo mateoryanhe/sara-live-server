@@ -73,6 +73,12 @@ func createShellExport(logType string, patterns []string, startDate, endDate str
 	} else if err := grepFilesToReversedFile(patterns, files, cfg.MaxMatchLines, rawPath); err != nil {
 		return nil, err
 	}
+	var filterErr error
+	rawPath, filterErr = applyLogTimeRangeFilter(rawPath, startDate, endDate, logType == logTypeError)
+	if filterErr != nil {
+		removeFile(rawPath)
+		return nil, filterErr
+	}
 	total, err := countLines(rawPath)
 	if err != nil {
 		removeFile(rawPath)
@@ -190,6 +196,11 @@ func createAccessStatsExport(startDate, endDate string, topN int) (*shellExportR
 	if err := grepFilesToFile(nil, files, cfg.MaxMatchLines, rawPath); err != nil {
 		return nil, err
 	}
+	var filterErr error
+	rawPath, filterErr = applyLogTimeRangeFilter(rawPath, startDate, endDate, false)
+	if filterErr != nil {
+		return nil, filterErr
+	}
 	// access 日志格式: time {traceId} status "METHOD scheme host /path HTTP/1.1" ...
 	script := `awk -F'"' 'NF>=2 {split($2,p," "); if (length(p)>=4) print p[4]}' ` + shellQuote(rawPath) +
 		` | grep -v '^/logQuery/' | sort | uniq -c | sort -rn | head -n ` + strconv.Itoa(topN) +
@@ -241,6 +252,12 @@ func createAccessTrendExport(req *logquerydto.CMSGetAccessTrendReq) (*shellExpor
 
 	if err := grepFilesToFile(patterns, files, cfg.MaxMatchLines, rawPath); err != nil {
 		return nil, err
+	}
+	var filterErr error
+	rawPath, filterErr = applyLogTimeRangeFilter(rawPath, req.StartDate, req.EndDate, false)
+	if filterErr != nil {
+		removeFile(rawPath)
+		return nil, filterErr
 	}
 
 	minMs := 0.0
@@ -336,12 +353,14 @@ func resolveTrendIntervalMinutes(startDate, endDate string, requested int) int {
 	if requested > 0 {
 		return normalizeTrendInterval(requested)
 	}
-	start, err1 := time.ParseInLocation("2006-01-02", startDate, time.Local)
-	end, err2 := time.ParseInLocation("2006-01-02", endDate, time.Local)
-	if err1 != nil || err2 != nil {
+	start, ok1 := parseLogQueryDateTime(startDate)
+	end, ok2 := parseLogQueryDateTime(endDate)
+	if !ok1 || !ok2 {
 		return 15
 	}
-	days := int(end.Sub(start).Hours()/24) + 1
+	startDay := time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, start.Location())
+	endDay := time.Date(end.Year(), end.Month(), end.Day(), 0, 0, 0, 0, end.Location())
+	days := int(endDay.Sub(startDay).Hours()/24) + 1
 	switch {
 	case days <= 1:
 		return 1

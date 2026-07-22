@@ -135,6 +135,68 @@ func grepFilesToFile(patterns []string, files []string, maxLines int, outPath st
 	return writePipelineToFile(buildSearchPipeline(patterns, files), maxLines, outPath, false)
 }
 
+func filterLogByTimeRange(inPath, outPath, startDate, endDate string, withContinuation bool) error {
+	if !shouldApplyLogTimeFilter(startDate, endDate) {
+		return copyFile(inPath, outPath)
+	}
+	startLog, endLog, ok := normalizeLogQueryLogRange(startDate, endDate)
+	if !ok {
+		return copyFile(inPath, outPath)
+	}
+	var script string
+	if withContinuation {
+		script = `awk -v start=` + shellQuote(startLog) + ` -v end=` + shellQuote(endLog) + ` '
+function log_ts_sec(line) {
+  if (match(line, /^[0-9]{4}-[0-9]{2}-[0-9]{2}[T ][0-9]{2}:[0-9]{2}:[0-9]{2}/)) {
+    ts = substr(line, RSTART, 19)
+    gsub(/ /, "T", ts)
+    return ts
+  }
+  return ""
+}
+function in_range(ts) {
+  return ts != "" && ts >= start && ts <= end
+}
+function is_log_header(line) {
+  return (line ~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}[T ]/ && line ~ / \[[A-Z]+\] \{/)
+}
+BEGIN { keep = 0 }
+{
+  if (is_log_header($0)) {
+    keep = in_range(log_ts_sec($0))
+  }
+  if (keep) print $0
+}' ` + shellQuote(inPath) + ` > ` + shellQuote(outPath)
+	} else {
+		script = `awk -v start=` + shellQuote(startLog) + ` -v end=` + shellQuote(endLog) + ` '
+function log_ts_sec(line) {
+  if (match(line, /^[0-9]{4}-[0-9]{2}-[0-9]{2}[T ][0-9]{2}:[0-9]{2}:[0-9]{2}/)) {
+    ts = substr(line, RSTART, 19)
+    gsub(/ /, "T", ts)
+    return ts
+  }
+  return ""
+}
+{
+  ts = log_ts_sec($0)
+  if (ts != "" && ts >= start && ts <= end) print $0
+}' ` + shellQuote(inPath) + ` > ` + shellQuote(outPath)
+	}
+	return runShellScript(script)
+}
+
+func applyLogTimeRangeFilter(rawPath, startDate, endDate string, withContinuation bool) (string, error) {
+	if !shouldApplyLogTimeFilter(startDate, endDate) {
+		return rawPath, nil
+	}
+	filteredPath := rawPath + ".filtered"
+	if err := filterLogByTimeRange(rawPath, filteredPath, startDate, endDate, withContinuation); err != nil {
+		return "", err
+	}
+	removeFile(rawPath)
+	return filteredPath, nil
+}
+
 func grepFilesToReversedFile(patterns []string, files []string, maxLines int, outPath string) error {
 	if len(files) == 0 {
 		return writeFile(outPath, nil)
