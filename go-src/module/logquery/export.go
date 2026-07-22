@@ -41,7 +41,7 @@ type shellExportResult struct {
 	PageSize  int    `json:"pageSize"`
 }
 
-func createShellExport(logType string, patterns []string, startDate, endDate string, pageIndex, pageSize int) (*shellExportResult, error) {
+func createShellExport(logType string, patterns []string, startDate, endDate string, pageIndex, pageSize int, minHandlerMs, maxHandlerMs float64) (*shellExportResult, error) {
 	if err := ensureLinuxLogQuery(); err != nil {
 		return nil, err
 	}
@@ -78,6 +78,18 @@ func createShellExport(logType string, patterns []string, startDate, endDate str
 	if filterErr != nil {
 		removeFile(rawPath)
 		return nil, filterErr
+	}
+	if logType == logTypeAccess {
+		rawPath, filterErr = applyAccessLogQueryExcludeFilter(rawPath)
+		if filterErr != nil {
+			removeFile(rawPath)
+			return nil, filterErr
+		}
+		rawPath, filterErr = applyAccessHandlerMsFilter(rawPath, minHandlerMs, maxHandlerMs)
+		if filterErr != nil {
+			removeFile(rawPath)
+			return nil, filterErr
+		}
 	}
 	total, err := countLines(rawPath)
 	if err != nil {
@@ -259,6 +271,11 @@ func createAccessTrendExport(req *logquerydto.CMSGetAccessTrendReq) (*shellExpor
 		removeFile(rawPath)
 		return nil, filterErr
 	}
+	rawPath, filterErr = applyAccessLogQueryExcludeFilter(rawPath)
+	if filterErr != nil {
+		removeFile(rawPath)
+		return nil, filterErr
+	}
 
 	minMs := 0.0
 	maxMs := 0.0
@@ -278,8 +295,8 @@ function handler_ms(line,   m) {
 }
 {
   ms = handler_ms($0)
-  if (minMs > 0 && ms >= 0 && ms < minMs) next
-  if (maxMs > 0 && ms >= 0 && ms > maxMs) next
+  if (minMs > 0 && (ms < 0 || ms <= minMs)) next
+  if (maxMs > 0 && (ms < 0 || ms > maxMs)) next
   if (match($0, /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}/)) {
     ts = substr($0, RSTART, RLENGTH)
     split(substr(ts, 12), parts, ":")

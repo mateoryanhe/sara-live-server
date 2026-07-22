@@ -105,10 +105,11 @@
             <el-form-item label="状态码">
               <el-input-number v-model="accessForm.statusCode" :controls="false" :min="0" placeholder="全部" style="width: 120px"/>
             </el-form-item>
-            <el-form-item label="处理耗时ms">
-              <el-input-number v-model="accessForm.minHandlerMs" :controls="false" :min="0" placeholder="最小" style="width: 100px"/>
-              <span class="range-sep">-</span>
-              <el-input-number v-model="accessForm.maxHandlerMs" :controls="false" :min="0" placeholder="最大" style="width: 100px"/>
+            <el-form-item>
+              <template #label>
+                <span class="clickable-label" title="点击设为400" @click="setAccessMinHandlerMsDefault">耗时大于(ms)</span>
+              </template>
+              <el-input-number v-model="accessForm.minHandlerMs" :controls="false" :min="0" placeholder="全部" style="width: 120px"/>
             </el-form-item>
             <el-form-item label="聚合粒度">
               <el-select v-model="accessForm.intervalMinutes" placeholder="自动" style="width: 120px">
@@ -141,11 +142,17 @@
                 <el-link type="primary" @click="openTraceDetail(row.traceId, row.time)">{{ row.traceId }}</el-link>
               </template>
             </el-table-column>
-            <el-table-column label="状态码" prop="statusCode" width="90"/>
+            <el-table-column label="状态码" width="90">
+              <template #default="{ row }">
+                <span :class="{ 'log-alert': isAbnormalStatusCode(row.statusCode) }">{{ row.statusCode }}</span>
+              </template>
+            </el-table-column>
             <el-table-column label="方法" prop="method" width="90"/>
             <el-table-column label="URL" min-width="220" prop="url" show-overflow-tooltip/>
             <el-table-column label="耗时(ms)" width="100">
-              <template #default="{ row }">{{ formatHandlerMs(row.handlerMs) }}</template>
+              <template #default="{ row }">
+                <span :class="{ 'log-alert': isSlowHandlerMs(row.handlerMs) }">{{ formatHandlerMs(row.handlerMs) }}</span>
+              </template>
             </el-table-column>
             <el-table-column label="IP" min-width="160" prop="ip" show-overflow-tooltip/>
             <el-table-column label="UserAgent" min-width="180" prop="userAgent" show-overflow-tooltip/>
@@ -601,7 +608,6 @@ const accessForm = reactive({
   ip: '',
   statusCode: undefined as number | undefined,
   minHandlerMs: undefined as number | undefined,
-  maxHandlerMs: undefined as number | undefined,
   intervalMinutes: 0,
 })
 const accessLoading = ref(false)
@@ -710,8 +716,7 @@ const buildAccessQueryParams = (range: string[]) => ({
   url: accessForm.url.trim(),
   ip: accessForm.ip.trim(),
   statusCode: accessForm.statusCode || undefined,
-  minHandlerMs: accessForm.minHandlerMs,
-  maxHandlerMs: accessForm.maxHandlerMs,
+  minHandlerMs: accessForm.minHandlerMs != null && accessForm.minHandlerMs > 0 ? accessForm.minHandlerMs : undefined,
   intervalMinutes: accessForm.intervalMinutes || undefined,
 })
 
@@ -905,7 +910,6 @@ const resetAccessForm = () => {
   accessForm.ip = ''
   accessForm.statusCode = undefined
   accessForm.minHandlerMs = undefined
-  accessForm.maxHandlerMs = undefined
   accessForm.intervalMinutes = 0
   handleAccessSearch()
 }
@@ -927,9 +931,18 @@ const formatHandlerMs = (value: number) => {
   return Number(value).toFixed(1)
 }
 
-const TRACE_ELAPSED_THRESHOLD_MS = 200
+const ACCESS_SLOW_MS_THRESHOLD = 400
+const TRACE_ELAPSED_THRESHOLD_MS = ACCESS_SLOW_MS_THRESHOLD
+
+const setAccessMinHandlerMsDefault = () => {
+  accessForm.minHandlerMs = ACCESS_SLOW_MS_THRESHOLD
+}
 
 const hasElapsedMs = (value?: number | null) => value !== null && value !== undefined
+
+const isSlowHandlerMs = (value?: number | null) => hasElapsedMs(value) && Number(value) > ACCESS_SLOW_MS_THRESHOLD
+
+const isAbnormalStatusCode = (statusCode?: number) => statusCode !== 200
 
 const formatElapsedMs = (value?: number | null) => {
   if (!hasElapsedMs(value)) {
@@ -1041,9 +1054,18 @@ watch(activeTab, async (tab) => {
   margin-top: 16px;
 }
 
-.range-sep {
-  margin: 0 8px;
-  color: #909399;
+.clickable-label {
+  cursor: pointer;
+  color: #409eff;
+}
+
+.clickable-label:hover {
+  text-decoration: underline;
+}
+
+.log-alert {
+  color: #f56c6c;
+  font-weight: 600;
 }
 
 .trace-drawer h4 {

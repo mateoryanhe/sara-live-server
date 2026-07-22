@@ -306,6 +306,9 @@ export const parseAccessLogLine = (line: string): AccessLogItem | null => {
     if (!trimmed) {
         return null
     }
+    if (trimmed.includes(LOG_QUERY_PATH)) {
+        return null
+    }
     const match = trimmed.match(accessLogRe)
     if (!match) {
         return null

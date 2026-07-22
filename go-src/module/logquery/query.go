@@ -30,8 +30,21 @@ func QueryDetailLogs(_ context.Context, req *logquerydto.CMSQueryDetailLogsReq) 
 		return nil, err
 	}
 	patterns := buildDetailPatterns(req.TraceId, req.ReqId, req.AuthId, req.Url, req.Keyword)
-	result, err := createShellExport(logTypeDetail, patterns, req.StartDate, req.EndDate, req.PageIndex, req.PageSize)
+	result, err := createShellExport(logTypeDetail, patterns, req.StartDate, req.EndDate, req.PageIndex, req.PageSize, 0, 0)
 	return toExportRes(result), err
+}
+
+func accessHandlerMsRange(req *logquerydto.CMSQueryAccessLogsReq) (minMs, maxMs float64) {
+	if req == nil {
+		return 0, 0
+	}
+	if req.MinHandlerMs != nil {
+		minMs = *req.MinHandlerMs
+	}
+	if req.MaxHandlerMs != nil {
+		maxMs = *req.MaxHandlerMs
+	}
+	return minMs, maxMs
 }
 
 func QueryAccessLogs(_ context.Context, req *logquerydto.CMSQueryAccessLogsReq) (*logquerydto.CMSLogQueryExportRes, error) {
@@ -42,7 +55,8 @@ func QueryAccessLogs(_ context.Context, req *logquerydto.CMSQueryAccessLogsReq) 
 		return nil, err
 	}
 	patterns := buildAccessPatterns(req.TraceId, req.Url, req.Ip, req.StatusCode)
-	result, err := createShellExport(logTypeAccess, patterns, req.StartDate, req.EndDate, req.PageIndex, req.PageSize)
+	minMs, maxMs := accessHandlerMsRange(req)
+	result, err := createShellExport(logTypeAccess, patterns, req.StartDate, req.EndDate, req.PageIndex, req.PageSize, minMs, maxMs)
 	return toExportRes(result), err
 }
 
@@ -54,7 +68,7 @@ func QueryErrorLogs(_ context.Context, req *logquerydto.CMSQueryErrorLogsReq) (*
 		return nil, err
 	}
 	patterns := buildErrorPatterns(req.TraceId, req.Url, req.Ip, req.Keyword, req.StatusCode)
-	result, err := createShellExport(logTypeError, patterns, req.StartDate, req.EndDate, req.PageIndex, req.PageSize)
+	result, err := createShellExport(logTypeError, patterns, req.StartDate, req.EndDate, req.PageIndex, req.PageSize, 0, 0)
 	return toExportRes(result), err
 }
 

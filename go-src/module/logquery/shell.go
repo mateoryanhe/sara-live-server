@@ -257,6 +257,54 @@ func grepFilesWithLogContinuationToFile(patterns []string, files []string, maxLi
 	return writePipelineToFile(buildLogContinuationPipeline(patterns, files), maxLines, outPath, reverse)
 }
 
+func filterAccessLogByHandlerMs(inPath, outPath string, minMs, maxMs float64) error {
+	if minMs <= 0 && maxMs <= 0 {
+		return copyFile(inPath, outPath)
+	}
+	script := `awk -v minMs=` + strconv.FormatFloat(minMs, 'f', -1, 64) +
+		` -v maxMs=` + strconv.FormatFloat(maxMs, 'f', -1, 64) + ` '
+function handler_ms(line,   m) {
+  if (match(line, /HTTP\/[0-9.]+\"[[:space:]]+([0-9.]+),/, m)) return m[1] * 1000
+  return -1
+}
+{
+  ms = handler_ms($0)
+  if (minMs > 0 && (ms < 0 || ms <= minMs)) next
+  if (maxMs > 0 && (ms < 0 || ms > maxMs)) next
+  print $0
+}' ` + shellQuote(inPath) + ` > ` + shellQuote(outPath)
+	return runShellScript(script)
+}
+
+func applyAccessHandlerMsFilter(rawPath string, minMs, maxMs float64) (string, error) {
+	if minMs <= 0 && maxMs <= 0 {
+		return rawPath, nil
+	}
+	filteredPath := rawPath + ".handler"
+	if err := filterAccessLogByHandlerMs(rawPath, filteredPath, minMs, maxMs); err != nil {
+		return "", err
+	}
+	removeFile(rawPath)
+	return filteredPath, nil
+}
+
+const accessLogQueryPathMarker = "/logQuery/"
+
+func filterAccessLogExcludeLogQuery(inPath, outPath string) error {
+	script := `grep -vF ` + shellQuote(accessLogQueryPathMarker) + ` ` + shellQuote(inPath) +
+		` > ` + shellQuote(outPath) + ` || true`
+	return runShellScript(script)
+}
+
+func applyAccessLogQueryExcludeFilter(rawPath string) (string, error) {
+	filteredPath := rawPath + ".noLogQuery"
+	if err := filterAccessLogExcludeLogQuery(rawPath, filteredPath); err != nil {
+		return "", err
+	}
+	removeFile(rawPath)
+	return filteredPath, nil
+}
+
 func paginateFile(srcPath, dstPath string, pageIndex, pageSize int) error {
 	if pageIndex <= 0 {
 		pageIndex = 1

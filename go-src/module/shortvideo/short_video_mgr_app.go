@@ -25,9 +25,9 @@ func PublishShortVideoApp(ctx context.Context, req *shortvideodto.AppPublishShor
 	if err := validateShortVideoAuthorId(authorId); err != nil {
 		return nil, err
 	}
-	if shortvideodao.HasAuthorPublishedToday(authorId) {
-		return nil, errercode.CreateCode(errercode.ShortVideoDailyUploadLimit)
-	}
+	//if shortvideodao.HasAuthorPublishedToday(authorId) {
+	//	return nil, errercode.CreateCode(errercode.ShortVideoDailyUploadLimit)
+	//}
 	if existing := shortvideodao.GetByTitle(req.Title); existing != nil {
 		return nil, errercode.CreateCode(errercode.ShortVideoExist)
 	}
