@@ -22,7 +22,7 @@ func ToAppItem(v *entity.LiveRecord) *liverecorddto.AppLiveRecordItem {
 	}
 	item := &liverecorddto.AppLiveRecordItem{
 		Id:                           strconv.FormatUint(v.ID, 10),
-		StartTime:                    v.StartTime.Format("2006/01/02 15:04:05"),
+		StartTime:                    v.StartTime.UnixMilli(),
 		TotalAudience:                v.TotalAudience,
 		TotalLiveDuration:            v.TotalLiveDuration,
 		TotalIncome:                  v.TotalIncome,
@@ -39,7 +39,7 @@ func ToAppItem(v *entity.LiveRecord) *liverecorddto.AppLiveRecordItem {
 		TotalNewFollower:             v.TotalNewFollower,
 	}
 	if v.EndTime != nil && !v.EndTime.IsZero() {
-		item.EndTime = v.EndTime.Format("2006/01/02 15:04:05")
+		item.EndTime = v.EndTime.UnixMilli()
 	}
 	return item
 }

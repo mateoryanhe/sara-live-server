@@ -26,6 +26,9 @@ func QueryDetailLogs(_ context.Context, req *logquerydto.CMSQueryDetailLogsReq) 
 	if req == nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
+	if err := validateLogQueryDateRange(req.StartDate, req.EndDate); err != nil {
+		return nil, err
+	}
 	patterns := buildDetailPatterns(req.TraceId, req.ReqId, req.AuthId, req.Url, req.Keyword)
 	result, err := createShellExport(logTypeDetail, patterns, req.StartDate, req.EndDate, req.PageIndex, req.PageSize)
 	return toExportRes(result), err
@@ -35,6 +38,9 @@ func QueryAccessLogs(_ context.Context, req *logquerydto.CMSQueryAccessLogsReq) 
 	if req == nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
+	if err := validateLogQueryDateRange(req.StartDate, req.EndDate); err != nil {
+		return nil, err
+	}
 	patterns := buildAccessPatterns(req.TraceId, req.Url, req.Ip, req.StatusCode)
 	result, err := createShellExport(logTypeAccess, patterns, req.StartDate, req.EndDate, req.PageIndex, req.PageSize)
 	return toExportRes(result), err
@@ -43,6 +49,9 @@ func QueryAccessLogs(_ context.Context, req *logquerydto.CMSQueryAccessLogsReq) 
 func QueryErrorLogs(_ context.Context, req *logquerydto.CMSQueryErrorLogsReq) (*logquerydto.CMSLogQueryExportRes, error) {
 	if req == nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if err := validateLogQueryDateRange(req.StartDate, req.EndDate); err != nil {
+		return nil, err
 	}
 	patterns := buildErrorPatterns(req.TraceId, req.Url, req.Ip, req.Keyword, req.StatusCode)
 	result, err := createShellExport(logTypeError, patterns, req.StartDate, req.EndDate, req.PageIndex, req.PageSize)
@@ -61,6 +70,9 @@ func GetAccessStats(_ context.Context, req *logquerydto.CMSGetAccessStatsReq) (*
 	if req == nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
+	if err := validateLogQueryDateRange(req.StartDate, req.EndDate); err != nil {
+		return nil, err
+	}
 	result, err := createAccessStatsExport(req.StartDate, req.EndDate, req.TopN)
 	return toExportRes(result), err
 }
@@ -68,6 +80,9 @@ func GetAccessStats(_ context.Context, req *logquerydto.CMSGetAccessStatsReq) (*
 func GetAccessTrend(_ context.Context, req *logquerydto.CMSGetAccessTrendReq) (*logquerydto.CMSLogQueryExportRes, error) {
 	if req == nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if err := validateLogQueryDateRange(req.StartDate, req.EndDate); err != nil {
+		return nil, err
 	}
 	result, err := createAccessTrendExport(req)
 	return toExportRes(result), err

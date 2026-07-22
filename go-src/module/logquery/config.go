@@ -7,6 +7,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"xr-game-server/errercode"
 )
 
 const (
@@ -174,4 +175,26 @@ func listDates(startDate, endDate string) []string {
 		dates = append(dates, d.Format(logQueryDateLayout))
 	}
 	return dates
+}
+
+func validateLogQueryDateTime(value string) error {
+	if _, ok := parseLogQueryDateTime(value); !ok {
+		return errercode.CreateCode(errercode.InvalidParam)
+	}
+	return nil
+}
+
+func validateLogQueryDateRange(startDate, endDate string) error {
+	if err := validateLogQueryDateTime(startDate); err != nil {
+		return err
+	}
+	if err := validateLogQueryDateTime(endDate); err != nil {
+		return err
+	}
+	start, _ := parseLogQueryDateTime(startDate)
+	end, _ := parseLogQueryDateTime(endDate)
+	if start.After(end) {
+		return errercode.CreateCode(errercode.InvalidParam)
+	}
+	return nil
 }

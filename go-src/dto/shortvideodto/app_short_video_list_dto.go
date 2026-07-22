@@ -9,6 +9,30 @@ type AppShortVideoListReq struct {
 	PageSize int `json:"pageSize" dc:"每页数量(默认20,最大100)"`
 }
 
+const (
+	AppShortVideoScrollNext = 1  // 向下(下一个)
+	AppShortVideoScrollPrev = -1 // 向上(上一个)
+
+	AppShortVideoSortLike    = 1 // 按点赞数(默认)
+	AppShortVideoSortView    = 2 // 按观看人数
+	AppShortVideoSortPublish = 3 // 按发布时间
+)
+
+// AppShortVideoScrollReq 以当前观看视频为锚点,向上/向下拉取n个短视频
+type AppShortVideoScrollReq struct {
+	g.Meta    `path:"/appShortVideoScroll" method:"post" summary:"App以当前视频为锚点拉取上下n个短视频" tags:"短视频"`
+	VideoId   string `json:"videoId" v:"required#当前视频ID不能为空" dc:"当前观看的视频ID"`
+	Direction int    `json:"direction" v:"required|in:1,-1#滑动方向不能为空|direction取值无效(1向下下一个,-1向上上一个)" dc:"滑动方向(1向下下一个,-1向上上一个)"`
+	Count     int    `json:"count" dc:"拉取数量(默认10,最大50)"`
+	SortType  int    `json:"sortType" v:"in:0,1,2,3#排序类型无效" dc:"列表排序(0或1点赞数,2观看人数,3发布时间)"`
+}
+
+// AppShortVideoScrollRes App端短视频滑动拉取响应
+type AppShortVideoScrollRes struct {
+	List    []*AppShortVideoItem `json:"list" dc:"短视频列表(不含锚点视频本身)"`
+	HasMore bool                 `json:"hasMore" dc:"该方向是否还有更多视频"`
+}
+
 // AppShortVideoItem App端短视频列表元素
 type AppShortVideoItem struct {
 	ID               string  `json:"id"`
@@ -57,6 +81,13 @@ type AppShortVideoListRes struct {
 // AppShortVideoUploadRecordListReq App端分页查询当前用户短视频上传记录(走内存缓存,按创建时间降序)
 type AppShortVideoUploadRecordListReq struct {
 	g.Meta   `path:"/appShortVideoUploadRecordList" method:"post" summary:"App分页查询短视频上传记录" tags:"短视频"`
+	Page     int `json:"page" dc:"页码(从1开始,默认1)"`
+	PageSize int `json:"pageSize" dc:"每页数量(默认20,最大100)"`
+}
+
+// AppShortVideoPendingReviewListReq App端分页查询本人审核中的短视频(未上架)
+type AppShortVideoPendingReviewListReq struct {
+	g.Meta   `path:"/appShortVideoPendingReviewList" method:"post" summary:"App分页查询本人审核中的短视频" tags:"短视频"`
 	Page     int `json:"page" dc:"页码(从1开始,默认1)"`
 	PageSize int `json:"pageSize" dc:"每页数量(默认20,最大100)"`
 }

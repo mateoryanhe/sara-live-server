@@ -31,8 +31,11 @@ func PublishShortVideoApp(ctx context.Context, req *shortvideodto.AppPublishShor
 	if existing := shortvideodao.GetByTitle(req.Title); existing != nil {
 		return nil, errercode.CreateCode(errercode.ShortVideoExist)
 	}
-	isPaid, payDiamond := entity.ShortVideoPaidNo, float64(0)
-
+	isPaid, payDiamond, err := normalizeShortVideoPaid(req.IsPaid, req.PayDiamond)
+	if err != nil {
+		return nil, err
+	}
+	freeWatchSeconds := normalizeShortVideoFreeWatchSeconds(isPaid, req.FreeWatchSeconds)
 	if err := validateShortVideoCategoryId(req.CategoryId); err != nil {
 		return nil, err
 	}
@@ -61,7 +64,7 @@ func PublishShortVideoApp(ctx context.Context, req *shortvideodto.AppPublishShor
 		authorId,
 		entity.ShortVideoAuthorTypeApp,
 		req.Duration,
-		entity.ShortVideoDefaultFreeWatchSeconds,
+		freeWatchSeconds,
 	)
 	shortvideodao.AddShortVideoToCache(row)
 	loadAppShortVideoListCache()
@@ -80,16 +83,34 @@ func GetAppShortVideoUploadRecordList(ctx context.Context, req *shortvideodto.Ap
 	if authorId == 0 {
 		return nil, errercode.CreateCode(errercode.EmptyUserId)
 	}
-	page, pageSize := normalizeAppListPage(req.Page, req.PageSize)
-	rows := shortvideodao.GetAuthorShortVideos(authorId)
+	return paginateAppShortVideoUploadRecordList(shortvideodao.GetAuthorShortVideos(authorId), req.Page, req.PageSize), nil
+}
+
+// GetAppShortVideoPendingReviewList App端分页查询本人审核中的短视频(未上架,status=0)
+func GetAppShortVideoPendingReviewList(ctx context.Context, req *shortvideodto.AppShortVideoPendingReviewListReq) (*shortvideodto.AppShortVideoUploadRecordListRes, error) {
+	authorId := httpserver.GetAuthId(ctx)
+	if authorId == 0 {
+		return nil, errercode.CreateCode(errercode.EmptyUserId)
+	}
+	all := shortvideodao.GetAuthorShortVideos(authorId)
+	pending := make([]*entity.ShortVideo, 0, len(all))
+	for _, row := range all {
+		if row != nil && row.Status == entity.ShortVideoStatusOffShelf {
+			pending = append(pending, row)
+		}
+	}
+	return paginateAppShortVideoUploadRecordList(pending, req.Page, req.PageSize), nil
+}
+
+func paginateAppShortVideoUploadRecordList(rows []*entity.ShortVideo, page, pageSize int) *shortvideodto.AppShortVideoUploadRecordListRes {
+	page, pageSize = normalizeAppListPage(page, pageSize)
 	sort.Slice(rows, func(i, j int) bool {
 		return compareShortVideoByCreatedAt(rows[i], rows[j])
 	})
 	total := len(rows)
 	start, end := appListPageRange(total, page, pageSize)
-	pageRows := rows[start:end]
-	list := make([]*shortvideodto.AppShortVideoUploadRecordItem, 0, len(pageRows))
-	for _, row := range pageRows {
+	list := make([]*shortvideodto.AppShortVideoUploadRecordItem, 0, end-start)
+	for _, row := range rows[start:end] {
 		list = append(list, toAppShortVideoUploadRecordItem(row))
 	}
 	return &shortvideodto.AppShortVideoUploadRecordListRes{
@@ -97,7 +118,7 @@ func GetAppShortVideoUploadRecordList(ctx context.Context, req *shortvideodto.Ap
 		Page:     page,
 		PageSize: pageSize,
 		List:     list,
-	}, nil
+	}
 }
 
 // compareShortVideoByCreatedAt 按创建时间降序,相同时间按 ID 降序

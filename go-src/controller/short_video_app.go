@@ -19,6 +19,10 @@ func (c *ShortVideoAppController) AppShortVideoList(ctx context.Context, req *sh
 	return shortvideo.GetAppShortVideoList(ctx, req)
 }
 
+func (c *ShortVideoAppController) AppShortVideoScroll(ctx context.Context, req *shortvideodto.AppShortVideoScrollReq) (*shortvideodto.AppShortVideoScrollRes, error) {
+	return shortvideo.GetAppShortVideoScrollList(ctx, req)
+}
+
 func (c *ShortVideoAppController) AppShortVideoViewList(ctx context.Context, req *shortvideodto.AppShortVideoViewListReq) (*shortvideodto.AppShortVideoListRes, error) {
 	return shortvideo.GetAppShortVideoViewList(ctx, req)
 }
@@ -47,7 +51,7 @@ func (c *ShortVideoAppController) PayShortVideo(ctx context.Context, req *shortv
 	return shortvideo.PayShortVideo(ctx, req)
 }
 
-func (c *ShortVideoAppController) AppShortVideoWatchList(ctx context.Context, req *shortvideodto.AppShortVideoWatchListReq) (*shortvideodto.AppShortVideoWatchListRes, error) {
+func (c *ShortVideoAppController) AppShortVideoWatchList(ctx context.Context, req *shortvideodto.AppShortVideoWatchListReq) (*shortvideodto.AppShortVideoListRes, error) {
 	return shortvideo.GetAppShortVideoWatchList(ctx, req)
 }
 
@@ -61,4 +65,8 @@ func (c *ShortVideoAppController) AppPublishShortVideo(ctx context.Context, req 
 
 func (c *ShortVideoAppController) AppShortVideoUploadRecordList(ctx context.Context, req *shortvideodto.AppShortVideoUploadRecordListReq) (*shortvideodto.AppShortVideoUploadRecordListRes, error) {
 	return shortvideo.GetAppShortVideoUploadRecordList(ctx, req)
+}
+
+func (c *ShortVideoAppController) AppShortVideoPendingReviewList(ctx context.Context, req *shortvideodto.AppShortVideoPendingReviewListReq) (*shortvideodto.AppShortVideoUploadRecordListRes, error) {
+	return shortvideo.GetAppShortVideoPendingReviewList(ctx, req)
 }

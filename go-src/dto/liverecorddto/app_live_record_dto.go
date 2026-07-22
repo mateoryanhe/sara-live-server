@@ -12,8 +12,8 @@ type AppLiveRecordListReq struct {
 // AppLiveRecordItem App端直播记录条目
 type AppLiveRecordItem struct {
 	Id                           string  `json:"id"                dc:"直播记录ID"`
-	StartTime                    string  `json:"startTime"         dc:"开播时间(秒)"`
-	EndTime                      string  `json:"endTime"           dc:"下播时间(秒,0表示未结束)"`
+	StartTime                    int64   `json:"startTime"         dc:"开播时间(秒)"`
+	EndTime                      int64   `json:"endTime"           dc:"下播时间(秒,0表示未结束)"`
 	TotalAudience                uint64  `json:"totalAudience"     dc:"累计观众人数(去重)"`
 	TotalLiveDuration            float64 `json:"totalLiveDuration" dc:"累计直播时长(秒)"`
 	TotalIncome                  float64 `json:"totalIncome"       dc:"总收益(钻石)"`
