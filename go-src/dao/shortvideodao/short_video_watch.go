@@ -2,7 +2,9 @@ package shortvideodao
 
 import (
 	"context"
-	"xr-game-server/core/lambda"
+	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -10,70 +12,70 @@ import (
 	"xr-game-server/entity"
 )
 
-var watchCacheMgr *cache.CacheMgr
+var watchOneCacheMgr *cache.CacheMgr
 
 func initShortVideoWatchDao() {
-	watchCacheMgr = cache.NewCacheMgr()
+	watchOneCacheMgr = cache.NewCacheMgr()
+}
+
+func watchCacheKey(userId, videoId uint64) string {
+	return fmt.Sprintf("%v_%v", userId, videoId)
 }
 
 func GetOneShortVideoWatch(userId, videoId uint64) *entity.ShortVideoWatch {
-	all := GetShortVideoWatch(userId)
-	one, ok := lambda.Find(all, func(watch *entity.ShortVideoWatch) bool {
-		return watch.VideoId == videoId
+	id := watchCacheKey(userId, videoId)
+	v := watchOneCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
+		var watch entity.ShortVideoWatch
+		if scanErr := g.DB().Model(string(entity.TbShortVideoWatch)).
+			Where("user_id = ? AND video_id = ?", userId, videoId).
+			Scan(&watch); scanErr == nil && watch.ID != "" {
+			return &watch, nil
+		}
+		return entity.NewShortVideoWatch(userId, videoId), nil
 	})
-	if !ok {
-		one = entity.NewShortVideoWatch(userId, videoId)
-		newTemp := make([]*entity.ShortVideoWatch, 0)
-		newTemp = append(newTemp, one)
-		all = append(newTemp, all...)
-		watchCacheMgr.FlushCache(userId, all)
-		return one
+	return v.(*entity.ShortVideoWatch)
+}
+
+// GetShortVideoWatch 分页查询用户可继续观看的记录(已上架且免费/已付费/作者本人/仍有试看)
+func GetShortVideoWatch(userId uint64, pageIndex, pageSize int) []*entity.ShortVideoWatch {
+	if userId == 0 {
+		return make([]*entity.ShortVideoWatch, 0)
 	}
-	return one
-}
-
-func GetShortVideoWatch(userId uint64) []*entity.ShortVideoWatch {
-	v := watchCacheMgr.GetData(userId, func(ctx context.Context) (value interface{}, err error) {
-		return loadShortVideoWatchByUserId(userId), nil
-	})
-	return v.([]*entity.ShortVideoWatch)
-}
-
-func loadShortVideoWatchByUserId(userId uint64) []*entity.ShortVideoWatch {
-	watch := make([]*entity.ShortVideoWatch, 0)
-	_ = g.Model(string(entity.TbShortVideoWatch)).Where("user_id = ?", userId).OrderDesc("updated_at").Scan(&watch)
-	return watch
-}
-
-func removeVideoFromWatchCache(videoId uint64) {
-	if videoId == 0 || watchCacheMgr == nil {
-		return
+	if pageIndex <= 0 {
+		pageIndex = 1
 	}
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+
 	ctx := gctx.New()
-	keys, err := watchCacheMgr.Cache.Keys(ctx)
-	if err != nil || len(keys) == 0 {
-		return
+	whereSQL := `FROM short_video_watches w
+INNER JOIN short_videos v ON v.id = w.video_id
+WHERE w.user_id = ?
+AND v.status = ?
+AND (
+	v.is_paid != ?
+	OR v.author_id = ?
+	OR w.paid_time IS NOT NULL
+	
+)`
+	args := []any{
+		userId,
+		entity.ShortVideoStatusOnShelf,
+		entity.ShortVideoPaidYes,
+		userId,
 	}
-	for _, key := range keys {
-		value, _ := watchCacheMgr.Cache.Get(ctx, key)
-		if value == nil || value.IsNil() {
-			continue
-		}
-		all, ok := value.Val().([]*entity.ShortVideoWatch)
-		if !ok || len(all) == 0 {
-			continue
-		}
-		filtered := lambda.Filter(all, func(watch *entity.ShortVideoWatch) bool {
-			return watch.VideoId != videoId
-		})
-		if len(filtered) == len(all) {
-			continue
-		}
-		watchCacheMgr.FlushCache(key, filtered)
-	}
+
+	list := make([]*entity.ShortVideoWatch, 0)
+	querySQL := `SELECT w.* ` + whereSQL + `
+ORDER BY w.updated_at DESC, w.id DESC
+LIMIT ? OFFSET ?`
+	queryArgs := append(append([]any{}, args...), pageSize, (pageIndex-1)*pageSize)
+	_ = g.DB().GetScan(ctx, &list, querySQL, queryArgs...)
+	return list
 }
 
-// DeleteWatchByVideoId 删除指定视频的观看/点赞记录,并刷新已加载的用户观看缓存
+// DeleteWatchByVideoId 删除指定视频的观看/点赞记录,并清理单条缓存
 func DeleteWatchByVideoId(videoId uint64) error {
 	if videoId == 0 {
 		return nil
@@ -82,6 +84,29 @@ func DeleteWatchByVideoId(videoId uint64) error {
 	if err != nil {
 		return err
 	}
-	removeVideoFromWatchCache(videoId)
+	removeWatchCacheByVideoId(videoId)
 	return nil
+}
+
+func removeWatchCacheByVideoId(videoId uint64) {
+	if watchOneCacheMgr == nil || videoId == 0 {
+		return
+	}
+	ctx := gctx.New()
+	keys, err := watchOneCacheMgr.Cache.Keys(ctx)
+	if err != nil || len(keys) == 0 {
+		return
+	}
+	videoIdStr := strconv.FormatUint(videoId, 10)
+	for _, key := range keys {
+		keyStr, ok := key.(string)
+		if !ok {
+			continue
+		}
+		idx := strings.LastIndex(keyStr, "_")
+		if idx < 0 || keyStr[idx+1:] != videoIdStr {
+			continue
+		}
+		_, _ = watchOneCacheMgr.Cache.Remove(ctx, key)
+	}
 }

@@ -2,7 +2,6 @@ package shortvideo
 
 import (
 	"context"
-	"sort"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/shortvideodao"
 	"xr-game-server/dto/shortvideodto"
@@ -17,15 +16,10 @@ func GetAppShortVideoWatchList(ctx context.Context, req *shortvideodto.AppShortV
 	}
 
 	page, pageSize := normalizeAppListPage(req.Page, req.PageSize)
-	all := shortvideodao.GetShortVideoWatch(userId)
-	sort.Slice(all, func(i, j int) bool {
-		return all[i].UpdatedAt.After(all[j].UpdatedAt)
-	})
-	total := len(all)
-	start, end := appListPageRange(total, page, pageSize)
+	rows := shortvideodao.GetShortVideoWatch(userId, page, pageSize)
 
-	list := make([]*shortvideodto.AppShortVideoItem, 0, end-start)
-	for _, row := range all[start:end] {
+	list := make([]*shortvideodto.AppShortVideoItem, 0, len(rows))
+	for _, row := range rows {
 		if row == nil {
 			continue
 		}
@@ -38,7 +32,6 @@ func GetAppShortVideoWatchList(ctx context.Context, req *shortvideodto.AppShortV
 	list = filterAppShortVideoListByBlocked(list, userId)
 
 	return &shortvideodto.AppShortVideoListRes{
-		Total:    total,
 		Page:     page,
 		PageSize: pageSize,
 		List:     list,
