@@ -1,0 +1,222 @@
+Sara Live 全套出海合规条款（中英双语完整版）
+一、用户服务协议（中英双语）Terms of Service
+【中文】
+本用户服务协议由 Sara Live 平台与所有注册、登录及使用本平台服务的用户订立。您下载、注册、使用直播、语聊房、私信、充值打赏等全部平台功能，即表示您已阅读、理解并同意无条件遵守本协议及平台隐私政策、社区规范。
+1. 准入年龄：平台服务分级为18+，付费直播、1V1私密连麦、成人房间等功能仅对18周岁及以上用户开放，未成年人禁止使用高风险付费功能。用户保证填报年龄信息真实有效，虚假年龄注册将被封禁账号、清空资产且不予退款。
+2. 账号权责：用户账号仅限本人使用，禁止租借、售卖、共享账号，严禁代注册、代开播。账号密码、设备验证码由用户自行保管，账号被盗、违规使用产生的一切损失由用户自行承担。
+3. 使用规范：用户不得发布色情、暴力、毒品、赌博、恐怖主义、宗教歧视、政治敏感、地域攻击等违规内容；禁止诱导线下交易、私加联系方式、恶意骚扰、刷屏辱骂、引流第三方平台。用户对自身发言、直播内容、公屏言论承担全部责任。
+4. 虚拟资产：平台金币、虚拟礼物均为场内虚拟道具，无现金价值、不可提现、不可兑换现金、不可转让、不予退款，仅可用于平台内互动消费。
+5. 平台权责：平台仅提供网络技术服务与互动场景，不承担用户线下见面、线下交易、私人纠纷产生的任何责任。平台有权依据合规规则对违规账号进行警告、禁言、限流、封禁、清空资产等处罚。
+6. 协议更新：平台可根据业务及监管要求更新本协议，更新后将在APP内公示，用户持续使用服务即视为接受新版协议。
+【English】
+This Terms of Service is concluded between Sara Live platform and all users who register, log in and use the platform services. By downloading, registering, and using all platform functions including live streaming, voice chat rooms, private messages, recharge and gifting, you confirm that you have read, understood, and unconditionally agreed to abide by this Agreement, the Privacy Policy and Community Guidelines.
+1. Age Access Rule: The platform is rated 18+. Paid live streaming, 1V1 private video chat and adult rooms are only available for users aged 18 and above. Minors are prohibited from using high-risk paid functions. Users shall guarantee the authenticity of age information. False age registration will result in account ban, asset clearance and no refund.
+2. Account Liability: User accounts are for personal use only. Account renting, selling, sharing, proxy registration and proxy broadcasting are prohibited. Users shall be solely responsible for account password and verification code management, and bear all losses caused by account theft or illegal use.
+3. Usage Rules: Users are forbidden to publish pornographic, violent, drug-related, gambling, terrorist, religious discriminatory, politically sensitive and regional offensive content. It is prohibited to induce offline transactions, share personal contact information, malicious harass, spam, insult or divert traffic to third-party platforms. Users take full responsibility for their speeches, live content and public screen comments.
+4. Virtual Assets: Platform diamonds and virtual gifts are in-platform virtual items with no cash value, non-withdrawable, non-convertible, non-transferable and non-refundable, which can only be used for in-platform interactive consumption.
+5. Platform Liability: The platform only provides network technical services and interactive scenarios, and is not responsible for any offline meetings, offline transactions or private disputes between users. The platform has the right to warn, mute, limit traffic, ban accounts or clear assets of violating accounts in accordance with compliance rules.
+6. Agreement Update: The platform may update this Agreement according to business and regulatory requirements. The updated version will be displayed in the APP, and continued use of the service shall be deemed acceptance of the new Agreement.
+二、隐私政策（中英双语）Privacy Policy
+【中文】
+本隐私政策用于说明 Sara Live 对用户个人信息的收集、使用、存储、共享与保护规则，适配全球各地合规要求（GDPR、LGPD、中东数据法规、印尼PSE合规等）。
+1. 信息收集：平台仅收集服务必要信息，包括注册账号信息、设备信息、麦克风/相机授权信息、直播及聊天交互数据、充值订单数据。位置、通讯录等信息为可选授权，默认不主动采集。
+2. 信息使用：用户信息仅用于账号登录、功能实现、安全风控、合规审核、交易结算、产品优化，不会用于非法营销、私自售卖用户数据。
+3. 数据存储与本地化：针对中东、印尼、欧盟、拉美地区用户，个人数据严格执行本地存储规则，不随意跨境传输；跨境传输将遵循当地法规并签署合规协议。
+4. 数据留存：直播音视频、聊天记录合规留存6–12个月，交易税务数据留存5–10年，用于监管核查与风险追溯，到期自动销毁。
+5. 用户权利：用户享有信息查看、更正、删除、撤回授权、注销账号、导出个人数据的权利，可在APP隐私中心自主操作。
+6. 未成年人保护：平台自动识别未成年账号，关闭付费、私密连麦、成人房间权限，严格限制未成年人充值行为。
+【English】
+This Privacy Policy explains the rules of Sara Live for the collection, use, storage, sharing and protection of user personal information, complying with global compliance requirements including GDPR, LGPD, Middle East data regulations and Indonesian PSE compliance.
+1. Information Collection: The platform only collects necessary service information, including account registration information, device information, microphone/camera authorization information, live streaming and chat interactive data, and recharge order data. Location and address book information are optional authorizations and will not be actively collected by default.
+2. Information Usage: User information is only used for account login, function implementation, security risk control, compliance review, transaction settlement and product optimization, and will not be used for illegal marketing or private data trading.
+3. Data Storage & Localization: For users in the Middle East, Indonesia, EU and Latin America, personal data is strictly stored locally without arbitrary cross-border transmission. Cross-border transmission will comply with local laws and sign compliance agreements.
+4. Data Retention: Live audio and video records and chat records are retained for 6–12 months for regulatory verification and risk traceability, and will be automatically destroyed upon expiration. Transaction and tax data are retained for 5–10 years.
+5. User Rights: Users have the right to view, correct, delete personal information, withdraw authorization, cancel accounts and export personal data, which can be operated independently in the APP privacy center.
+6. Minor Protection: The platform automatically identifies minor accounts, disables paid functions, private video chat and adult room access, and strictly restricts minor recharge behaviors.
+三、社区规范（中英双语）Community Guidelines
+【中文】
+为维护 Sara Live 绿色、安全、合规的社区环境，所有用户、主播、房主必须遵守以下社区行为规范，任何违规行为将受到平台处罚。
+1. 内容红线：严禁发布色情低俗、裸露暴露、暧昧诱导、暴力血腥、毒品赌博、恐怖主义内容；严禁调侃宗教、诋毁王室、挑起种族与地域对立、传播政治敏感言论。
+2. 互动规范：禁止恶意刷屏、辱骂他人、人身攻击、批量私信骚扰、恶意P图造谣；禁止引流第三方、诱导线下见面、私下交易诈骗。
+3. 直播与房间规范：所有直播间、语聊房禁止违规互动，房主及主播需主动管控房间内容，及时清理违规言论与违规用户。
+4. 处罚梯度：轻度违规予以警告、限时禁言；中度违规予以限流、房间封禁、短期账号冻结；重度违规予以永久封号、清空资产，情节严重者移交监管处理。
+【English】
+To maintain a green, safe and compliant community environment of Sara Live, all users, hosts and room owners must abide by the following community behavior specifications. Any violation will be penalized by the platform.
+1. Content Red Line: It is strictly prohibited to publish pornographic, vulgar, exposed, ambiguous, violent, bloody, drug-related, gambling and terrorist content; it is forbidden to tease religion, slander royal families, provoke racial and regional opposition, and spread politically sensitive remarks.
+2. Interaction Rules: Malicious scrolling, insulting, personal attack, bulk private message harassment, malicious photo editing and rumor spreading are prohibited; diverting traffic to third-party platforms, inducing offline meetings and private transaction fraud are forbidden.
+3. Live & Room Rules: All live rooms and voice chat rooms are prohibited from illegal interactions. Room owners and anchors shall actively manage room content and clean up illegal remarks and users in a timely manner.
+4. Penalty Gradient: Minor violations will result in warnings and temporary mute; moderate violations will result in traffic restriction, room ban and short-term account freeze; serious violations will result in permanent account ban and asset clearance, and serious cases will be handed over to regulatory authorities.
+四、充值与虚拟道具免责条款（中英双语）Recharge & Virtual Item Disclaimer
+【中文】
+1. Sara Live 平台内金币、虚拟礼物、特效道具、房间门票、付费麦位等均为平台虚拟互动道具，仅用于APP内娱乐互动，无任何现金价值。
+2. 所有充值消费均为用户自愿主动操作，一经充值、消费、送礼，不支持退款、折现、转让、兑现。
+3. 平台设置未成年人充值限额，未成年人冲动充值、误充值，将依据当地法规审核退款申请，不保证全额退款。
+4. 禁止任何用户私下交易、倒卖金币、线下兑换现金，违规操作导致的账号封禁、资产损失由用户自行承担。
+5. 平台有权根据运营规则调整道具样式、特效、价格及活动规则，无需单独告知用户。
+【English】
+1. Diamonds, virtual gifts, special effects props, room tickets and paid mic positions in Sara Live are all in-platform virtual interactive props for in-APP entertainment only, with no cash value.
+2. All recharge and consumption behaviors are voluntary operations by users. Once recharged, consumed or gifted, no refund, cash conversion, transfer or cashing is supported.
+3. The platform sets minor recharge limits. Refund applications for impulsive or mistaken recharge by minors will be reviewed in accordance with local laws, and full refund is not guaranteed.
+4. Private trading, reselling diamonds and offline cashing are prohibited. Users shall bear all account bans and asset losses caused by illegal operations.
+5. The platform has the right to adjust prop styles, special effects, prices and activity rules according to operation rules without separate notice to users.
+五、房间房主责任条款（中英双语）Room Owner Responsibility Terms
+【中文】
+1. Sara Live 语聊房、直播间房主为房间第一责任人，对房间内所有麦上用户发言、公屏弹幕、互动行为、直播内容承担全部监管责任。
+2. 房主需严格遵守平台社区规范及各地区合规政策，严禁在房间内出现色情、暴力、宗教违规、政治敏感、低俗暧昧等违规内容。
+3. 房主需及时管控违规用户，对违规发言、违规行为及时禁言、清退、拉黑；放任违规内容、长期不管控房间，平台将对房主进行处罚，包括限流、禁房、账号封禁。
+4. 禁止房主创建付费违规房、暧昧交友房、诱导线下交易房等违规房间，一经发现立即关停房间并追责。
+5. 房间所有音视频内容将合规留存，房主需配合平台及监管部门的合规核查与溯源工作。
+【English】
+1. The room owner of Sara Live voice chat rooms and live rooms is the primary person in charge of the room, and shall bear full supervision responsibility for all on-mic speeches, public screen bullet comments, interactive behaviors and live content in the room.
+2. Room owners shall strictly abide by the platform community guidelines and regional compliance policies. Illegal content such as pornography, violence, religious violations, political sensitivity and vulgar ambiguity is prohibited in all rooms.
+3. Room owners shall promptly manage violating users, and mute, remove or blacklist users for illegal speeches and behaviors. Failure to manage room violations will result in platform penalties including traffic restriction, room ban and account suspension.
+4. Room owners are prohibited from creating illegal rooms such as paid violation rooms, ambiguous dating rooms and offline transaction inducing rooms. Once discovered, the room will be closed immediately and the owner will be held responsible.
+5. All audio and video content of the room will be retained for compliance purposes. Room owners shall cooperate with compliance verification and traceability work of the platform and regulatory authorities.
+六、GDPR 欧盟专项合规条款（中英双语）EU GDPR Special Terms
+【中文】
+本条款适用于所有欧盟地区使用 Sara Live 的用户，严格遵循欧盟《通用数据保护条例（GDPR）》合规要求。
+1. 数据主体权利：欧盟用户完整享有知情权、访问权、更正权、删除权（被遗忘权）、数据限制处理权、数据可携带权、撤回同意权、投诉权。
+2. 数据存储：欧盟用户个人数据、直播数据、聊天数据仅存储于欧盟境内合规服务器，严禁无授权跨境传输，必要跨境传输将签署标准SCC合规合同。
+3. 授权合规：相机、麦克风、位置、推送、个性化推荐等权限均为独立单独授权，不捆绑、不强制，用户可随时在系统及APP内撤回授权。
+4. 生物识别合规：人脸核验仅用于年龄校验及账号安全，不用于用户画像建模、商业营销，采集与使用全程合规留痕。
+5. 营销退订：所有商业推送、营销通知均支持一键退订，退订后不再接收相关营销信息。
+6. 投诉通道：平台设立专职DPO数据保护官，负责处理欧盟用户数据合规咨询与投诉。
+【English】
+These special terms apply to all users of Sara Live in the European Union, strictly complying with the EU General Data Protection Regulation (GDPR).
+1. Data Subject Rights: EU users fully enjoy the right to know, access, correction, erasure (right to be forgotten), restriction of processing, data portability, withdrawal of consent and complaint.
+2. Data Storage: Personal data, live streaming data and chat data of EU users are only stored in compliant servers within the EU. Unauthorized cross-border transmission is strictly prohibited, and standard SCC compliance contracts will be signed for necessary cross-border transmission.
+3. Authorization Compliance: Permissions such as camera, microphone, location, push notification and personalized recommendation are independent and separate without bundling or compulsion. Users can withdraw authorization in the system and APP at any time.
+4. Biometric Compliance: Face verification is only used for age verification and account security, not for user portrait modeling or commercial marketing. The whole process of collection and usage is recorded for compliance.
+5. Marketing Unsubscribe: All commercial pushes and marketing notifications support one-click unsubscribe, and no relevant marketing information will be received after unsubscription.
+6. Complaint Channel: The platform sets up a full-time DPO (Data Protection Officer) to handle data compliance consultations and complaints from EU users.
+七、东南亚地区文化与合规专项条款（中英双语）Southeast Asia Compliance Terms
+【中文】
+本条款适用于印尼、马来西亚、泰国、越南等东南亚地区 Sara Live 用户、主播及MCN机构，适配当地监管与文化合规要求。
+1. 印尼PSE合规：平台已完成印尼Kominfo PSE电子系统备案，用户核心数据本地存储，严格遵循印尼电子政务法规及PP Tunas未成年人保护新规。
+2. 王室合规（泰国）：严禁调侃、诋毁、侮辱泰国王室及皇室相关内容，相关违规言论、画面将实时拦截并从严处罚。
+3. 宗教文化合规（印尼/马来）：尊重当地伊斯兰文化，禁止亵渎宗教、传播宗教对立、族群歧视言论，禁止违规宗教符号展示。
+4. 未成年人保护：严格限制未成年人开播、私密连麦、大额充值行为，自动拦截未成年人超额消费，支持家长合规退款申诉。
+5. 风控红线：严禁传播毒品、赌博、暴力、黑帮、政治敏感内容，严禁引流线下博彩、非法交易。
+【English】
+These terms apply to Sara Live users, anchors and MCN institutions in Southeast Asian regions including Indonesia, Malaysia, Thailand and Vietnam, adapting to local regulatory and cultural compliance requirements.
+1. Indonesian PSE Compliance: The platform has completed Indonesian Kominfo PSE electronic system filing. User core data is stored locally, strictly complying with Indonesian e-government regulations and the new PP Tunas minor protection rules.
+2. Royal Compliance (Thailand): It is strictly prohibited to tease, slander or insult the Thai royal family and related content. Relevant illegal remarks and images will be intercepted in real time and severely penalized.
+3. Religious & Cultural Compliance (Indonesia/Malaysia): Respect local Islamic culture. Blasphemy against religion, dissemination of religious opposition and ethnic discrimination remarks, and display of illegal religious symbols are prohibited.
+4. Minor Protection: Strictly restrict minors from live streaming, private video chat and large-value recharge. Excessive consumption by minors will be automatically intercepted, and parents are supported to file compliance refund appeals.
+5. Risk Control Red Line: Dissemination of drugs, gambling, violence, gangsters and politically sensitive content is prohibited. Offline gambling and illegal transaction diversion are strictly forbidden.
+八、MCN公会入驻合作协议（精简中英双语）MCN Partnership Agreement
+【中文】
+本协议为 Sara Live 平台与入驻MCN公会的标准化合作协议，公会提交入驻申请、开通后台权限即视为完全阅读、理解并接受本协议全部条款。
+1. 资质要求：入驻MCN必须为合法注册企业主体，具备真实有效营业执照、法人信息及对公账户。资质造假、信息伪造将直接驳回入驻、永久拉黑公会并冻结全部未结算收益。
+2. 主播管控：公会严禁招募18周岁以下人员作为付费主播、1V1私密主播；所有主播必须完成人脸实名核验，一人一号，禁止代播、租号、账号交易。
+3. 合规义务：公会需严格遵守平台全球社区规范及各地区本地化合规规则，管控旗下所有直播间、语聊房内容，及时整改主播违规行为，承担主播违规连带追责责任。
+4. 禁止行为：严禁公会诱导未成年人充值、恶意刷流水、虚假PK、线下导流、私单交易、克扣主播收益、恶意同行举报。
+5. 收益结算：所有结算数据以Sara Live官方后台统计为准，平台扣除服务费、渠道费及当地税费后进行分成结算。虚拟道具无现金价值，不支持线下兑现与退款。
+6. 账号与数据保密：所有主播账号归属平台，公会仅合作期内享有运营权限。公会严禁爬取、泄露、售卖用户及主播隐私数据，合作终止后保密义务持续有效。
+7. 合作终止：公会严重违规的，平台有权单方终止合作、冻结并没收全部未结算收益。公会主动解约需提前30天申请，完成全部结算与违规整改后方可退出。
+8. 区域合规：公会需适配中东、东南亚、拉美、欧盟各地区文化与隐私合规规则，严格执行本地化运营管控要求。
+【English】
+This is the standard partnership agreement between Sara Live platform and settled MCN institutions. By submitting the settlement application and activating backend permissions, the MCN confirms that it has fully read, understood and accepted all terms of this Agreement.
+1. Qualification Requirements: Settled MCNs must be legally registered corporate entities with valid business licenses, legal representative information and corporate accounts. Qualification fraud and information falsification will result in application rejection, permanent MCN blacklist and freezing of all unsettled revenue.
+2. Host Management: MCNs are strictly prohibited from recruiting persons under 18 as paid anchors or 1V1 private anchors. All anchors must complete facial real-name verification with one account per person. Proxy broadcasting, account renting and account trading are forbidden.
+3. Compliance Obligations: MCNs shall strictly abide by the platform’s global community guidelines and local regional compliance rules, manage all live room and voice chat room content under its agency, rectify anchor violations in a timely manner, and bear joint liability for anchor violations.
+4. Prohibited Behaviors: MCNs are forbidden from inducing minor recharge, malicious traffic brushing, fake PK, offline diversion, private transactions, deducting host income and maliciously reporting peers.
+5. Revenue Settlement: All settlement data is subject to Sara Live official backend statistics. The platform conducts revenue sharing after deducting service fees, channel fees and local taxes. Virtual props have no cash value, and offline cashing and refunds are not supported.
+6. Account & Data Confidentiality: All host accounts belong to the platform, and MCNs only have operation rights during the cooperation period. MCNs are prohibited from crawling, leaking or trading user and host privacy data, and the confidentiality obligation remains valid after cooperation termination.
+7. Cooperation Termination: In case of serious MCN violations, the platform has the right to unilaterally terminate cooperation and confiscate all unsettled revenue. MCNs applying for active termination shall submit a 30-day advance application and complete all settlements and violation rectification before exiting.
+8. Regional Compliance: MCNs shall adapt to the cultural and privacy compliance rules of the Middle East, Southeast Asia, Latin America and the EU, and strictly implement localized operation and management requirements.
+
+九、注册登录合规专项条款（中英文完整版）
+本条款为Sara Live 全球用户注册、登录、身份核验全流程合规规范，适配欧盟《通用数据保护条例》（GDPR）、美国《加州消费者隐私法》（CCPA）、印尼PSE 法规、中东数据相关法律及东南亚各地监管法规，用户注册账户前应当完整阅读并同意本条款。 
+注册主体资质 
+1.1 用户注册账号须具备完全民事行为能力；仅浏览平台基础内容的账号最低准入年龄为 13 周岁。如需开通直播、充值、私密连麦、短视频变现、公会入驻创作者权限，必须年满 18 周岁。13–17 周岁用户仅可浏览免费公开内容，无法开通付费、内容创作、直播相关权限，且使用账号需要监护人知情并同意。
+1.2 注册信息必须真实完整，包括邮箱、手机号码、绑定社交账号、出生日期等身份信息；严禁冒用他人身份、使用虚假信息、借用他人手机号代为注册、使用程序批量自动化注册账号。平台有权驳回虚假注册申请、注销虚假账号，并对相关设备实施永久封禁。
+1.3 禁止一人注册多个账号、买卖账号、出租账号、共享账号；同一设备、同一手机号仅可绑定一个主账号。批量注册营销账号、导流账号，将直接触发全设备风控并永久封禁。
+登录与身份核验合规 
+2.1 平台支持三种登录方式：手机号登录、邮箱登录、第三方社交账号授权登录（如谷歌、脸书）。通过第三方账号登录仅获取公开头像、昵称基础信息，不会强制索取额外隐私权限；所有权限均通过独立弹窗申请，不会捆绑平台基础服务使用。
+2.2 高风险操作（开播、大额充值、提现结算、短视频商业变现、账号换绑、账号注销）将强制触发人脸实名核验。人脸数据仅用作身份核验与风险管控，不用于搭建商业用户画像，并依照当地法律法规进行存储。
+2.3 账号登录安全由用户自行全权负责，用户应当妥善保管密码、验证码与登录设备。当账号出现异地登录、陌生设备登录时，平台将通过短信、应用推送发送风险提醒。用户发现账号被盗后，应当立即修改密码并联系客服冻结账号；盗号所产生的全部损失，均由用户自行承担。
+数据授权合规（适配GDPR） 
+3.1 注册阶段各项授权将通过独立弹窗分别展示：账号安全消息推送、个性化内容推荐、营销短信/ 邮件、相册存储、麦克风与摄像头访问权限。用户可单独拒绝某一项授权，不会影响基础浏览功能；严禁捆绑强制授权。 
+3.2 欧盟、加利福尼亚州用户可随时撤回全部营销相关授权，并申请删除登录行为日志；用户撤回同意后，平台应当停止发送商业推广信息。
+风控与账号处置 
+4.1 在注册、登录环节，系统将自动识别模拟器、批量注册脚本、代理IP 高频注册等行为。存在可疑特征的账号，将被限制注册、冻结登录权限。 
+4.2 用户多次违反注册相关规则（批量注册、盗用账号、租号导流等），平台有权永久封禁账号、清空账号内全部虚拟资产，且不支持申诉退款。 
+账号注销规则 
+5.1 用户可在隐私中心主动申请注销账号，注销设置 7–30 天冷静期（时长根据地区适用法律区分），冷静期内用户可撤回注销申请。账号注销完成后，除监管部门依法要求留存的交易记录、风控记录外，用户登录信息、头像、聊天记录、短视频数据将依照法规彻底清除。
+5.2 账号注销后，同一身份信息在规定期限内无法再次注册，以此防范用户恶意注销后重新注册实施违规导流行为。
+Sara Live Global User Registration, Login and Identity Verification Full-Process Compliance Specifications
+These Specifications govern the entire process of user registration, login and identity verification for Sara Live global users, and comply with the EU General Data Protection Regulation (GDPR), the California Consumer Privacy Act (CCPA) of the United States, Indonesia’s PSE regulations, Middle Eastern data-related legislation and regulatory requirements across Southeast Asian jurisdictions. Users shall read and agree to these Specifications in full prior to registering an account.
+Qualifications of Registering Entities
+1.1 Users registering an account must possess full capacity for civil conduct. The minimum age requirement for accounts that only browse basic platform content is 13 years old. To activate access to livestreaming, top-up payments, private audio calls, short video monetization and creator guild onboarding privileges, users must have reached the age of 18. Users aged 13 to 17 may only view free public content and cannot activate any privileges related to payment, content creation or livestreaming; their use of the account shall be known and approved by their legal guardians.
+1.2 Registration information including email addresses, mobile phone numbers, linked social accounts, date of birth and other identity details must be truthful and complete. It is prohibited to impersonate others, submit false information, register accounts using another person’s mobile phone number, or register accounts in bulk through automated programs. The Platform reserves the right to reject fraudulent registration applications, terminate fake accounts and impose permanent bans on relevant devices.
+1.3 It is forbidden for one individual to register multiple accounts, engage in account trading, account leasing or account sharing. One device and one mobile phone number may only be bound to one primary account. Bulk registration of marketing or traffic-diversion accounts will directly trigger full-device risk control and permanent account suspension.
+Compliance for Login and Identity Verification
+2.1 The Platform supports three login methods: mobile phone number login, email login, and authorized login via third-party social accounts (e.g., Google, Facebook). Login via third-party accounts only obtains basic public information including profile pictures and display names; no additional privacy permissions will be mandatorily requested. All permissions are requested via separate pop-up windows and are not tied to access to basic platform services.
+2.2 High-risk operations (initiating livestreams, large-value top-ups, withdrawal and settlement, commercial monetization of short videos, account binding modification and account deletion) will trigger mandatory facial identity verification. Facial biometric data shall only be used for identity verification and risk management, shall not be utilized to build commercial user profiles, and will be stored in compliance with applicable local laws and regulations.
+2.3 Users shall bear full responsibility for the security of their accounts upon login. Users shall properly safeguard their passwords, verification codes and login devices. The Platform will send risk alerts via SMS and in-app push notifications upon detecting logins from unfamiliar locations or unknown devices. If a user discovers account theft, they shall immediately change their password and contact customer service to freeze the account. All losses arising out of account theft shall be borne solely by the user.
+Data Authorization Compliance (GDPR-Aligned)
+3.1 Each authorization request during registration will be presented via separate pop-up windows, covering account security notifications, personalized content recommendations, marketing SMS/emails, photo album storage, as well as microphone and camera access permissions. Users may decline any single authorization without losing access to basic browsing functions. Mandatory bundled authorization is prohibited.
+3.2 Users located in the European Union and the State of California may withdraw all marketing-related consents at any time and submit requests to delete login activity logs. Following consent withdrawal, the Platform shall cease sending commercial promotional communications to such users.
+Risk Control and Account Disposition
+4.1 During registration and login, the system will automatically detect emulators, bulk registration scripts, high-frequency registration originating from proxy IPs and other anomalous behaviors. Accounts displaying suspicious characteristics will be subject to registration restrictions or suspended login access.
+4.2 Where a user repeatedly violates registration rules (including bulk account registration, account theft, account leasing for traffic diversion, etc.), the Platform reserves the right to permanently suspend the account, clear all virtual assets within the account, and reject any appeals for refunds.
+Account Deletion Rules
+5.1 Users may submit an active account deletion request via the Privacy Center. A cooling-off period of 7 to 30 days applies (the exact duration varies subject to applicable local laws). Users may revoke their deletion application within the cooling-off period. Upon completion of account deletion, the user’s login information, profile pictures, chat records and short video data will be permanently erased in accordance with applicable laws, save for transaction records and risk control records that the Platform is required to retain by competent regulatory authorities.
+5.2 After account deletion, the same identity information cannot be used for re-registration within a specified period, to prevent users from conducting illegal diversion activities by deleting and subsequently re-registering accounts maliciously.
+
+________________________________________
+十、短视频创作者内容上传合规专项条款（中英文完整版） 
+本条款适用于所有Sara Live 短视频创作者、MCN 公会旗下达人自主上传短视频作品，覆盖全球各区域内容合规、版权、商业推广、未成年人保护、文化宗教规范、广告信息披露要求，与社区规范、用户服务协议具备同等法律效力。 
+创作者上传资质要求 
+1.1 发布可产生收益的商业短视频、带货推广、付费植入内容的创作者，必须年满 18 周岁并完成人脸实名核验。未成年人仅可发布无商业收益的日常短视频，禁止发布广告、带货、付费合作类内容。
+1.2 MCN 公会旗下创作者上传短视频，公会对全部上传内容承担连带合规审核责任；若出现批量违规内容，平台将同步对公会后台收益、运营权限进行处罚。
+内容上传基础合规红线（全球统一标准） 
+2.1 严禁上传含有色情裸露、低俗暧昧、暴力血腥、涉毒、赌博、恐怖主义、仇恨煽动、种族/ 地域/ 宗教歧视、诋毁各国王室、政治敏感信息、虚假谣言、煽动线下冲突的短视频。 
+2.2 禁止上传侵犯第三方知识产权的内容：未经授权的影视片段、音乐、游戏画面、商标、肖像、音频素材；搬运抄袭他人原创短视频，以及无完整书面授权的 AI 换脸、AI 变声内容。
+2.3 禁止上传诱导线下交易、引导添加第三方联系方式、向外站导流、虚假理财宣传、医美虚假功效宣传、夸大保健品治疗效果、博彩引流、诈骗话术类短视频。
+2.4 禁止上传侵害他人隐私权、名誉权的短视频，包括恶意修图造谣、人肉曝光他人个人信息、网络暴力辱骂他人等内容。
+商业推广短视频强制披露规则（适配美国联邦贸易委员会FTC、欧盟广告相关法规） 
+3.1 所有品牌合作、付费植入、佣金带货、赞助类短视频，必须在视频开头、封面或者标题显着位置标注#ad、Sponsored、合作推广等清晰标识。含蓄致谢、小字备注等形式不满足合规要求。 
+3.2 短视频不得作出缺乏依据的医疗、瘦身、美白、理财、投资收益承诺；美妆、保健、金融类宣传必须具备真实资质佐证，违规视频将被下架，同时限制创作者变现权限。
+3.3 联盟分销、返利推广类内容需要完整披露收益分成模式，禁止隐瞒商业合作关系误导用户。
+分区域本地化上传合规细则 
+4.1 欧盟地区：未经许可，短视频不得拍摄路人肖像用于用户画像营销；数据留存遵守《通用数据保护条例》（GDPR），创作者可申请删除本人上传的全部作品数据。 
+4.2 印度尼西亚 / 马来西亚：短视频不得亵渎伊斯兰教宗教符号、经文、服饰，不得挑起族群对立；内容数据需本地存储，未经授权不得跨境传输。
+4.3 泰国：严禁调侃、侮辱、剪辑丑化和王室相关的画面、文字，违规短视频将立即下架，并从严处罚创作者账号。
+4.4 美国：营销短视频严格遵守《电话消费者保护法》（TCPA）与 FTC 广告披露规则，禁止虚假抽奖、诱导用户提交个人信息用于短信骚扰。
+上传内容平台处置规则
+5.1 创作者上传短视频后，平台启动多级内容审核；违规内容直接下架。轻度违规实施限流、封禁7–30 天上传权限；中度违规冻结短视频变现收益；严重违规永久关闭创作上传功能、封禁账号并清空账号资产。 
+5.2 合规短视频平台留存6–12 个月，用于监管核查，创作者可申请下架自有作品。若因创作者上传内容侵权引发第三方索赔，全部赔偿责任、法律责任由上传创作者及其所属MCN 共同承担。 
+创作者上传授权与知识产权约定
+6.1 创作者上传短视频，即授予Sara Live 全球非独占免费许可，允许平台在站内展示、播放、二次剪辑片段用于平台推广；创作者保留作品完整著作权。平台不得将短视频授权给外部第三方进行商业使用。 
+6.2 禁止创作者上传短视频用于非法洗钱、刷流水、人为炒作虚假流量，一经查实，平台将冻结全部短视频结算收益。 
+Sara Live Short Video Creator Content Upload Compliance Specifications
+These Specifications apply to all short video creators on Sara Live and influencers affiliated with MCN agencies who independently upload short video works. They cover regional content compliance, copyright, commercial promotion, minor protection, cultural and religious standards, and advertising disclosure requirements worldwide. These Specifications carry the same legal effect as the Community Guidelines and User Service Agreement.
+Eligibility Requirements for Creators Uploading Content
+1.1 Creators publishing revenue-generating commercial short videos, product sales promotions, and paid embedded content must be at least 18 years of age and complete facial identity verification. Minors may only post daily short videos without commercial revenue and are prohibited from publishing advertisements, product promotion content, or paid collaboration material.
+1.2 For short videos uploaded by creators under MCN agencies, the relevant MCN shall bear joint compliance review liability for all uploaded content. In the event of mass violations, the Platform will impose penalties on the MCN’s backend revenue and operational access concurrently.
+Baseline Compliance Red Lines for Content Upload (Globally Unified Standards)
+2.1 It is strictly prohibited to upload short videos containing pornography, nudity, vulgar suggestive content, violence, gore, drug-related material, gambling, terrorism, hate incitement, racial/regional/religious discrimination, defamation of royal families of any country, politically sensitive information, false rumors, or content inciting offline conflicts.
+2.2 Upload of content infringing third-party intellectual property rights is forbidden, including unauthorized film and television clips, music, game footage, trademarks, portraits and audio materials; reposted or plagiarized original short videos of others; as well as AI face-swapping and AI voice-changing content without complete written authorization.
+2.3 It is prohibited to upload short videos that induce offline transactions, encourage users to add third-party contact information, divert traffic to external platforms, promote false financial management, advertise unsubstantiated medical aesthetic effects, overstate the therapeutic effects of health supplements, link to gambling, or contain fraudulent scripts.
+2.4 Short videos violating others’ right to privacy or right to reputation are prohibited, including malicious photo manipulation for rumor-mongering, doxxing of others’ personal information, cyberbullying and verbal abuse.
+Mandatory Disclosure Rules for Commercial Promotion Short Videos (Aligned with U.S. FTC and EU Advertising Legislation)
+3.1 All short videos involving brand partnerships, paid placements, commission-based product sales, and sponsorship must carry clear labels such as #ad, Sponsored, or Partnership Promotion prominently at the start of the video, on the cover, or in the title. Subtle acknowledgements or small-font annotations do not satisfy compliance requirements.
+3.2 Short videos must not make unsupported claims regarding medical outcomes, weight loss, skin whitening, financial management, or investment returns. Promotions for beauty, health supplement and financial products must be supported by genuine qualification documentation. Non-compliant videos will be removed, and creators’ monetization privileges restricted.
+3.3 Content relating to affiliate distribution and rebate promotions must fully disclose the revenue sharing model. Concealing commercial partnerships to mislead users is prohibited.
+Regional Localized Compliance Rules for Content Upload
+4.1 European Union Region: Without consent, short videos may not capture passers-by’s portraits for user profiling marketing. Data retention shall comply with the General Data Protection Regulation (GDPR). Creators may submit requests to delete all data of works uploaded by themselves.
+4.2 Indonesia / Malaysia: Short videos must not profane Islamic religious symbols, scriptures and attire, or incite ethnic confrontation. Content data shall be stored locally and shall not be transmitted cross-border without authorization.
+4.3 Thailand: It is strictly prohibited to mock, insult, or use edited distorted footage or text related to the royal family. Non-compliant short videos will be removed immediately, and the creator’s account will be subject to severe penalties.
+4.4 United States: Marketing short videos shall strictly abide by the Telephone Consumer Protection Act (TCPA) and FTC advertising disclosure rules. False giveaways and inducing users to submit personal information for SMS harassment are forbidden.
+Platform Disposition Rules for Uploaded Content
+5.1 After creators upload short videos, the Platform implements multi-level content review; violating content will be directly removed. Minor violations will result in traffic restrictions and suspension of upload privileges for 7–30 days. Moderate violations will lead to freezing of short video monetization revenue. Severe violations will result in permanent revocation of creation and upload functions, account suspension and forfeiture of all account assets.
+5.2 Compliant short videos will be retained by the Platform for 6–12 months for regulatory verification purposes. Creators may apply to take down their own works. If third-party claims arise from infringing content uploaded by a creator, all compensation liabilities and legal liabilities shall be borne jointly by the uploading creator and their affiliated MCN.
+Creator Upload Authorization and Intellectual Property Agreements
+6.1 By uploading short videos, the creator grants Sara Live a global non-exclusive royalty-free license permitting the Platform to display, play the works within the platform, and create clipped segments for platform promotion. The creator retains full copyright of the work. The Platform shall not license such short videos to external third parties for commercial use.
+6.2 Creators are prohibited from uploading short videos for illegal money laundering, transaction volume boosting, or artificially generating fake traffic. Upon verification, the Platform will freeze all settlement revenue derived from such short videos.
+
+________________________________________
+
+

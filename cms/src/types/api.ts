@@ -701,6 +701,27 @@ export interface SaveTextModerationCfgRes {
     id: string
 }
 
+export interface PrivacyPolicyCfg {
+    id: string
+    privacyPolicyUrl: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetPrivacyPolicyCfgRes {
+    cfg: PrivacyPolicyCfg | null
+}
+
+export interface SavePrivacyPolicyCfgReq {
+    id?: number
+    privacyPolicyUrl: string
+}
+
+export interface SavePrivacyPolicyCfgRes {
+    success: boolean
+    id: string
+}
+
 export interface UploadResourceCfg {
     id: string
     resourceDomain: string

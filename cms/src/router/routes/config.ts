@@ -19,6 +19,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '敏感词过滤'},
         },
         {
+            path: 'privacy-policy',
+            name: 'PrivacyPolicyCfgManagement',
+            component: () => import('@/views/config/privacy-policy.vue'),
+            meta: {title: '隐私政策'},
+        },
+        {
             path: 'upload-resource',
             name: 'UploadResourceCfgManagement',
             component: () => import('@/views/config/upload-resource.vue'),

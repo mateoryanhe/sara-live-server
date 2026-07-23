@@ -63,6 +63,7 @@ func Init() {
 	initLiveCfg()
 	initAliyunTextModerationCfg()
 	initUploadResourceCfg()
+	initPrivacyPolicyCfg()
 	initUserMessage()
 	initUserMessageSession()
 	initUserMessageUnread()

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#6c3bff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="description" content="Sara Live legal compliance, privacy policy, terms of service, and community guidelines">
+  <title>Sara Live - Legal & Privacy</title>
+  <link rel="stylesheet" href="css/site.css">
+</head>
+<body data-page-title-key="privacyPageTitle" data-legal-page="true">
+  <header class="site-header">
+    <div class="container nav-bar">
+      <a class="brand" href="index.html">
+        <img src="assets/app-icon.png" alt="Sara Live">
+        <span>Sara Live</span>
+      </a>
+      <button class="menu-toggle" type="button" aria-label="Menu">☰</button>
+      <nav class="nav-links">
+        <a href="index.html" data-nav="home" data-i18n="navHome">Home</a>
+        <a href="index.html#features" data-nav="features" data-i18n="navFeatures">Features</a>
+        <a href="privacy.html" data-nav="privacy" class="active" data-i18n="navPrivacy">Privacy</a>
+        <a href="privacy.html#tos" data-nav="terms" data-i18n="navTerms">Terms</a>
+        <div class="lang-switch">
+          <button class="lang-btn active" data-lang="en" type="button">EN</button>
+          <button class="lang-btn" data-lang="es" type="button">ES</button>
+          <button class="lang-btn" data-lang="pt" type="button">PT</button>
+          <button class="lang-btn" data-lang="hi" type="button">HI</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="content-page">
+    <div class="container">
+      <div class="page-header">
+        <h1 data-i18n="privacyPageTitle">Legal & Privacy</h1>
+        <p data-i18n="privacyPageDesc">Sara Live global compliance documents for live streaming services.</p>
+        <p class="updated" data-i18n="lastUpdated">Last updated: July 23, 2026</p>
+      </div>
+
+      <div class="legal-layout">
+        <aside class="card legal-toc">
+          <button class="toc-toggle" type="button" id="toc-toggle" aria-expanded="false">
+            <span data-i18n="legalTocToggle">Table of contents</span>
+            <span class="toc-toggle-icon" aria-hidden="true">▼</span>
+          </button>
+          <div class="toc-panel" id="toc-panel">
+            <h3 data-i18n="legalTocTitle">Contents</h3>
+            <nav id="legal-toc"></nav>
+          </div>
+        </aside>
+        <article class="content-card" id="legal-content"></article>
+      </div>
+
+      <p class="legal-contact">
+        <span data-i18n="legalContactLabel">Contact:</span>
+        <a data-privacy-email href="mailto:privacy@saralive.app">privacy@saralive.app</a>
+      </p>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div data-i18n="footerRights">© 2026 Sara Live. All rights reserved.</div>
+      <div class="footer-links">
+        <a href="index.html" data-i18n="navHome">Home</a>
+        <a href="privacy.html#tos" data-i18n="navTerms">Terms</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/legal-content.js"></script>
+  <script src="js/site.js"></script>
+</body>
+</html>

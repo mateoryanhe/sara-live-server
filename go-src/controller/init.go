@@ -30,6 +30,7 @@ func Init() {
 	initAgoraCMSController()                // 声网(CMS)
 	initLiveCfgCMSController()              // 直播配置(CMS)
 	initAliyunTextModerationCMSController() // 阿里云文本审核(CMS)
+	initPrivacyPolicyCMSController()        // 隐私政策配置(CMS)
 	initGiftController()                    // 礼物配置(CMS)
 	initGiftAppController()                 // 礼物列表(App)
 	initBannerController()                  // 首页Banner(CMS)

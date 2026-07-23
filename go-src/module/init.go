@@ -15,6 +15,7 @@ import (
 	"xr-game-server/module/liveroom"
 	"xr-game-server/module/message"
 	"xr-game-server/module/name"
+	"xr-game-server/module/privacypolicy"
 	"xr-game-server/module/privateroombilling"
 	"xr-game-server/module/recharge"
 	"xr-game-server/module/resourcemonitor"
@@ -48,6 +49,7 @@ func Init() {
 	livecfg.Init()
 	verification_code.Init()
 	aliyunmoderation.Init()
+	privacypolicy.Init()
 
 	liveroom.Init()
 	userinfo.Init()

@@ -5,6 +5,7 @@ import (
 	"time"
 	"xr-game-server/dto/sysdto"
 	"xr-game-server/module/livecfg"
+	"xr-game-server/module/privacypolicy"
 )
 
 func GetSysCfg(ctx context.Context, req *sysdto.SysCfgReq) (*sysdto.SysCfgResp, error) {
@@ -12,5 +13,6 @@ func GetSysCfg(ctx context.Context, req *sysdto.SysCfgReq) (*sysdto.SysCfgResp, 
 		SysTime:                     time.Now().UnixMilli(),
 		PaidDanmakuPrice:            livecfg.GetPaidDanmakuPrice(),
 		PrivateRoomFreeWatchSeconds: livecfg.GetPrivateRoomFreeWatchSeconds(),
+		PrivacyPolicyUrl:            privacypolicy.GetPrivacyPolicyUrl(),
 	}, nil
 }
