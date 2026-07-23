@@ -26,6 +26,7 @@ func WatchShortVideoStart(ctx context.Context, req *shortvideodto.WatchShortVide
 		return nil, errercode.CreateCode(errercode.EmptyUserId)
 	}
 	watch := shortvideodao.GetOneShortVideoWatch(userId, req.VideoId)
+	watch.SetUpdatedAt(time.Now())
 	//initFreeTime(userId, req.VideoId)
 	//clearFreeTime(userId, req.VideoId)
 	////检查是否是付费视频
@@ -61,8 +62,8 @@ func WatchShortVideoStart(ctx context.Context, req *shortvideodto.WatchShortVide
 		//watch.SetUpdatedAt(time.Now())
 	}
 
-	if video.IsPaid != entity.ShortVideoPaidYes {
-		return &shortvideodto.WatchShortVideoStartRes{}, nil
+	if video.IsPaid != entity.ShortVideoPaidYes || video.AuthorId == userId {
+		shortvideodao.PrependWatchToWatchListCache(userId, watch)
 	}
 
 	return &shortvideodto.WatchShortVideoStartRes{}, nil
@@ -142,6 +143,8 @@ func PayShortVideo(ctx context.Context, req *shortvideodto.PayShortVideoReq) (*s
 	if stat := shortvideodao.GetStatByVideoId(req.VideoId); stat != nil {
 		stat.AddTotalDiamondIncome(price)
 	}
+
+	shortvideodao.PrependWatchToWatchListCache(userId, watch)
 
 	return &shortvideodto.PayShortVideoRes{
 		Deducted: price,

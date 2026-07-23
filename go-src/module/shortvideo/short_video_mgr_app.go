@@ -102,6 +102,28 @@ func GetAppShortVideoPendingReviewList(ctx context.Context, req *shortvideodto.A
 	return paginateAppShortVideoUploadRecordList(pending, req.Page, req.PageSize), nil
 }
 
+// DeleteShortVideoApp App端删除本人未审核通过的短视频(status=0)
+func DeleteShortVideoApp(ctx context.Context, req *shortvideodto.AppDeleteShortVideoReq) (*shortvideodto.AppDeleteShortVideoRes, error) {
+	authorId := httpserver.GetAuthId(ctx)
+	if authorId == 0 {
+		return nil, errercode.CreateCode(errercode.EmptyUserId)
+	}
+	row := shortvideodao.GetShortVideoById(req.ID)
+	if row == nil {
+		return nil, errercode.CreateCode(errercode.ShortVideoNonExist)
+	}
+	if row.AuthorId != authorId {
+		return nil, errercode.CreateCode(errercode.NoPermission)
+	}
+	if row.Status == entity.ShortVideoStatusOnShelf {
+		return nil, errercode.CreateCode(errercode.ShortVideoOnShelfCannotDelete)
+	}
+	if err := removeShortVideoRow(row); err != nil {
+		return nil, err
+	}
+	return &shortvideodto.AppDeleteShortVideoRes{Success: true}, nil
+}
+
 func paginateAppShortVideoUploadRecordList(rows []*entity.ShortVideo, page, pageSize int) *shortvideodto.AppShortVideoUploadRecordListRes {
 	page, pageSize = normalizeAppListPage(page, pageSize)
 	sort.Slice(rows, func(i, j int) bool {

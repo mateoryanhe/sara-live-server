@@ -70,3 +70,7 @@ func (c *ShortVideoAppController) AppShortVideoUploadRecordList(ctx context.Cont
 func (c *ShortVideoAppController) AppShortVideoPendingReviewList(ctx context.Context, req *shortvideodto.AppShortVideoPendingReviewListReq) (*shortvideodto.AppShortVideoUploadRecordListRes, error) {
 	return shortvideo.GetAppShortVideoPendingReviewList(ctx, req)
 }
+
+func (c *ShortVideoAppController) AppDeleteShortVideo(ctx context.Context, req *shortvideodto.AppDeleteShortVideoReq) (*shortvideodto.AppDeleteShortVideoRes, error) {
+	return shortvideo.DeleteShortVideoApp(ctx, req)
+}

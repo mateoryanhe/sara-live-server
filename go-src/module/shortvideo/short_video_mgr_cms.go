@@ -90,6 +90,9 @@ func UpdateShortVideo(_ context.Context, req *shortvideodto.UpdateShortVideoReq)
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.ShortVideoNonExist)
 	}
+	if row.Status == entity.ShortVideoStatusOnShelf {
+		return nil, errercode.CreateCode(errercode.ShortVideoOnShelfCannotUpdate)
+	}
 	if existing := shortvideodao.GetByTitle(req.Title); existing != nil && existing.ID != req.ID {
 		return nil, errercode.CreateCode(errercode.ShortVideoExist)
 	}
@@ -119,21 +122,31 @@ func DeleteShortVideo(_ context.Context, req *shortvideodto.DeleteShortVideoReq)
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.ShortVideoNonExist)
 	}
+	if err := removeShortVideoRow(row); err != nil {
+		return nil, err
+	}
+	return &shortvideodto.DeleteShortVideoRes{Success: true}, nil
+}
+
+func removeShortVideoRow(row *entity.ShortVideo) error {
+	if row == nil {
+		return errercode.CreateCode(errercode.ShortVideoNonExist)
+	}
 	videoName := row.Video
 	coverName := row.Cover
-	if err := shortvideodao.Delete(req.ID); err != nil {
-		return nil, err
+	if err := shortvideodao.Delete(row.ID); err != nil {
+		return err
 	}
-	if err := shortvideodao.DeleteByVideoId(req.ID); err != nil {
-		return nil, err
+	if err := shortvideodao.DeleteByVideoId(row.ID); err != nil {
+		return err
 	}
-	if err := shortvideodao.DeleteWatchByVideoId(req.ID); err != nil {
-		return nil, err
+	if err := shortvideodao.DeleteWatchByVideoId(row.ID); err != nil {
+		return err
 	}
 	upload.DeleteUploadedFile(videoName)
 	upload.DeleteUploadedFile(coverName)
 	loadAppShortVideoListCache()
-	return &shortvideodto.DeleteShortVideoRes{Success: true}, nil
+	return nil
 }
 
 func OnShelfShortVideo(_ context.Context, req *shortvideodto.OnShelfShortVideoReq) (*shortvideodto.OnShelfShortVideoRes, error) {

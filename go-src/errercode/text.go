@@ -95,6 +95,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		PhoneVerifyBlocked:             "Too many verification failures, please try again in 2 hours",
 		AppPkgExist:                    "App package name already exists",
 		AppPkgNonExist:                 "App package config does not exist",
+		ShortVideoOnShelfCannotDelete:  "Approved short videos cannot be deleted",
+		ShortVideoOnShelfCannotUpdate:  "Approved short videos cannot be updated",
 	},
 	lang.LangZHCN: {
 		Success:                        "成功",
@@ -186,6 +188,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		PhoneVerifyBlocked:             "验证码校验失败次数过多，请2小时后再试",
 		AppPkgExist:                    "App包名已存在",
 		AppPkgNonExist:                 "App包配置不存在",
+		ShortVideoOnShelfCannotDelete:  "已审核通过的短视频不可删除",
+		ShortVideoOnShelfCannotUpdate:  "已审核通过的短视频不可修改",
 	},
 	lang.LangZHTW: {
 		Success:                        "成功",
@@ -277,6 +281,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		PhoneVerifyBlocked:             "驗證碼校驗失敗次數過多，請2小時後再試",
 		AppPkgExist:                    "App包名已存在",
 		AppPkgNonExist:                 "App包配置不存在",
+		ShortVideoOnShelfCannotDelete:  "已審核通過的短視頻不可刪除",
+		ShortVideoOnShelfCannotUpdate:  "已審核通過的短視頻不可修改",
 	},
 }
 

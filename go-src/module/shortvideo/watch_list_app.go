@@ -15,7 +15,7 @@ func GetAppShortVideoWatchList(ctx context.Context, req *shortvideodto.AppShortV
 		return nil, errercode.CreateCode(errercode.EmptyUserId)
 	}
 
-	page, pageSize := normalizeAppListPage(req.Page, req.PageSize)
+	page, pageSize := normalizeWatchListPage(req.Page, req.PageSize)
 	rows := shortvideodao.GetShortVideoWatch(userId, page, pageSize)
 
 	list := make([]*shortvideodto.AppShortVideoItem, 0, len(rows))
@@ -36,4 +36,17 @@ func GetAppShortVideoWatchList(ctx context.Context, req *shortvideodto.AppShortV
 		PageSize: pageSize,
 		List:     list,
 	}, nil
+}
+
+func normalizeWatchListPage(page, pageSize int) (int, int) {
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = shortvideodao.WatchListCachePageSize
+	}
+	if pageSize > appListMaxPageSize {
+		pageSize = appListMaxPageSize
+	}
+	return page, pageSize
 }

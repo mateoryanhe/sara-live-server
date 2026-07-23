@@ -169,6 +169,10 @@ const (
 	AppPkgExist XRCode = 142
 	// AppPkgNonExist App包配置不存在
 	AppPkgNonExist XRCode = 143
+	// ShortVideoOnShelfCannotDelete 已审核上架的短视频不可删除
+	ShortVideoOnShelfCannotDelete XRCode = 144
+	// ShortVideoOnShelfCannotUpdate 已审核上架的短视频不可修改
+	ShortVideoOnShelfCannotUpdate XRCode = 145
 )
 
 type XError struct {
