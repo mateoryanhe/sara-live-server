@@ -602,3 +602,75 @@ export const buildPageResponse = <T>(items: T[], total: number): PageResponse<T>
     total,
     data: items,
 })
+
+export const LOG_JSON_FIELD_OPTIONS = [
+    {key: 'headers', label: 'Header'},
+    {key: 'respContent', label: '响应'},
+    {key: 'bodyContent', label: 'Body'},
+] as const
+
+export type LogJsonFieldKey = typeof LOG_JSON_FIELD_OPTIONS[number]['key']
+
+const logJsonFieldRe = (field: LogJsonFieldKey) => new RegExp(`(?:^|[,\\s])${field}=([\\s\\S]*)`)
+
+const tryParseJsonValue = (raw: string): unknown | null => {
+    const trimmed = raw.trim()
+    if (!trimmed) {
+        return null
+    }
+    try {
+        return JSON.parse(trimmed)
+    } catch {
+        const starts = [
+            trimmed.indexOf('{'),
+            trimmed.indexOf('['),
+        ].filter((index) => index >= 0)
+        if (!starts.length) {
+            return null
+        }
+        const start = Math.min(...starts)
+        const candidate = trimmed.slice(start)
+        for (let end = candidate.length; end > 0; end--) {
+            const slice = candidate.slice(0, end).trim()
+            if (!slice) {
+                continue
+            }
+            try {
+                return JSON.parse(slice)
+            } catch {
+                continue
+            }
+        }
+        return null
+    }
+}
+
+export const hasLogJsonField = (text: string, field: LogJsonFieldKey) => logJsonFieldRe(field).test(text)
+
+export const listLogJsonFields = (text?: string) => {
+    if (!text) {
+        return []
+    }
+    return LOG_JSON_FIELD_OPTIONS.filter((item) => hasLogJsonField(text, item.key))
+}
+
+export const extractAndFormatLogJsonField = (text: string, field: LogJsonFieldKey) => {
+    const match = text.match(logJsonFieldRe(field))
+    if (!match?.[1]) {
+        return null
+    }
+    const raw = match[1].trim()
+    const parsed = tryParseJsonValue(raw)
+    if (parsed === null) {
+        return {
+            raw,
+            formatted: raw,
+            parsed: false,
+        }
+    }
+    return {
+        raw,
+        formatted: JSON.stringify(parsed, null, 2),
+        parsed: true,
+    }
+}

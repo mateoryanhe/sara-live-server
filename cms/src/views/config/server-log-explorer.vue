@@ -376,7 +376,7 @@
 
         <h4>详情日志</h4>
         <div v-for="(item, index) in traceDetail.detailLogs" :key="index" class="trace-log-line">
-          <div class="trace-log-meta">
+            <div class="trace-log-meta">
             <div class="trace-log-meta-main">
               <span>{{ item.time }}</span>
               <span v-if="hasElapsedMs(item.elapsedMs)" :class="elapsedMsClass(item.elapsedMs)" class="trace-elapsed">
@@ -385,12 +385,24 @@
               <span v-if="item.authId" class="trace-auth-id">AuthId: {{ item.authId }}</span>
               <span>[{{ item.level }}]</span>
             </div>
-            <el-button link size="small" type="primary" @click="copyTraceLog(item.raw || item.message)">
-              <el-icon>
-                <CopyDocument/>
-              </el-icon>
-              复制
-            </el-button>
+            <div class="trace-log-actions">
+              <el-button
+                  v-for="field in listLogJsonFields(item.raw || item.message)"
+                  :key="field.key"
+                  link
+                  size="small"
+                  type="primary"
+                  @click="openLogJsonDialog(item.raw || item.message, field.key, field.label)"
+              >
+                {{ field.label }}
+              </el-button>
+              <el-button link size="small" type="primary" @click="copyTraceLog(item.raw || item.message)">
+                <el-icon>
+                  <CopyDocument/>
+                </el-icon>
+                复制
+              </el-button>
+            </div>
           </div>
           <pre class="trace-log-content">{{ item.raw }}</pre>
         </div>
@@ -398,6 +410,15 @@
         </div>
       </div>
     </el-drawer>
+
+    <el-dialog v-model="jsonDialogVisible" :title="jsonDialogTitle" destroy-on-close width="72%">
+      <div v-if="jsonDialogParseFailed" class="json-dialog-tip">JSON 解析失败，以下为原始内容</div>
+      <pre class="json-dialog-content">{{ jsonDialogContent }}</pre>
+      <template #footer>
+        <el-button @click="copyJsonDialogContent">复制</el-button>
+        <el-button type="primary" @click="jsonDialogVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -406,7 +427,8 @@ import {nextTick, onMounted, onUnmounted, reactive, ref, watch} from 'vue'
 import {ElMessage} from 'element-plus'
 import {logQueryApi} from '@/api'
 import AccessTrendChart from './components/access-trend-chart.vue'
-import {formatErrorStack, formatErrorSummary} from '@/utils/logParsers'
+import {formatErrorStack, formatErrorSummary, extractAndFormatLogJsonField, listLogJsonFields} from '@/utils/logParsers'
+import type {LogJsonFieldKey} from '@/utils/logParsers'
 import type {AccessLogItem, AccessTrendData, DetailLogItem, ErrorLogItem, LogQueryJobResult, TopStatItem, TraceLogDetail} from '@/types/api'
 
 const activeTab = ref('stats')
@@ -654,6 +676,11 @@ const traceDetail = reactive<TraceLogDetail>({
   accessLogs: [],
   errorLogs: [],
 })
+
+const jsonDialogVisible = ref(false)
+const jsonDialogTitle = ref('')
+const jsonDialogContent = ref('')
+const jsonDialogParseFailed = ref(false)
 
 const ensureFormDateRange = (form: DateRangeForm): string[] | null => {
   if (!form.startDate || !form.endDate) {
@@ -972,6 +999,32 @@ const copyTraceLog = async (content?: string) => {
   }
 }
 
+const openLogJsonDialog = (content: string, field: LogJsonFieldKey, label: string) => {
+  const result = extractAndFormatLogJsonField(content, field)
+  if (!result) {
+    ElMessage.warning(`未找到 ${label} 内容`)
+    return
+  }
+  jsonDialogTitle.value = `${label} JSON`
+  jsonDialogContent.value = result.formatted
+  jsonDialogParseFailed.value = !result.parsed
+  jsonDialogVisible.value = true
+}
+
+const copyJsonDialogContent = async () => {
+  if (!jsonDialogContent.value) {
+    ElMessage.warning('无可复制内容')
+    return
+  }
+  try {
+    await navigator.clipboard.writeText(jsonDialogContent.value)
+    ElMessage.success('已复制')
+  } catch (error) {
+    console.error('复制 JSON 失败:', error)
+    ElMessage.error('复制失败')
+  }
+}
+
 const resolveTraceAuthId = () => {
   for (const item of traceDetail.detailLogs) {
     if (item.authId) {
@@ -1118,6 +1171,37 @@ watch(activeTab, async (tab) => {
 
 .elapsed-slow {
   color: #f56c6c;
+}
+
+.trace-log-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.json-dialog-tip {
+  margin-bottom: 8px;
+  color: #e6a23c;
+  font-size: 12px;
+}
+
+.json-dialog-content {
+  margin: 0;
+  max-height: 65vh;
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid #ebeef5;
+  border-radius: 6px;
+  background: #1e1e1e;
+  color: #dcdcdc;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 12px;
+  line-height: 1.6;
+  font-family: Consolas, Monaco, 'Courier New', monospace;
 }
 
 .trace-log-content {
