@@ -19,6 +19,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/google/uuid"
+	"xr-game-server/core/cfg"
 	"xr-game-server/core/xrjson"
 
 	"xr-game-server/errercode"
@@ -120,7 +121,11 @@ func invalidateImageGreenClient() {
 }
 
 func buildImageURL(fileName string) string {
-	return buildResourceUrl(fmt.Sprintf("/%s/%s", ImageSubDir, fileName))
+	segment := cfg.GetImageStaticPathSegment()
+	if segment == "" {
+		return buildResourceUrl("/" + fileName)
+	}
+	return buildResourceUrl(fmt.Sprintf("/%s/%s", segment, fileName))
 }
 
 func isPublicResourceURL(rawURL string) bool {
@@ -286,7 +291,7 @@ func UploadImageForApp(ctx context.Context, file *ghttp.UploadFile) (string, err
 	return name, nil
 }
 
-// saveUploadedImageFile 校验并保存图片到 upload/images,返回文件名与绝对路径
+// saveUploadedImageFile 校验并保存图片到 images 目录,返回文件名与绝对路径
 func saveUploadedImageFile(file *ghttp.UploadFile) (name, fullPath string, err error) {
 	if file == nil {
 		return "", "", fmt.Errorf("upload file is empty")

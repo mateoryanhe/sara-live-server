@@ -1,6 +1,6 @@
 package upload
 
-// 默认头像列表(文件位于 upload/images,由 pub-tool/avatars 上传)
+// 默认头像列表(文件位于 images 目录,由 pub-tool/avatars 上传)
 var defaultAvatarNames = []string{
 	"demo_avatar_1.jpg",
 	"demo_avatar_2.jpg",

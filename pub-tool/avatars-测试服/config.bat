@@ -13,6 +13,6 @@ REM 本地路径
 set LOCAL_PROJECT_ROOT=D:\company-code\app-code\live-server
 set LOCAL_AVATARS_DIR=%LOCAL_PROJECT_ROOT%\pub-tool\avatars
 
-REM 远程头像目录（对应 serverRoot 下的 upload/images）
-set REMOTE_DIR_TEST=/home/ec2-user/cdn/upload/images
-set REMOTE_DIR_PROD=/home/ec2-user/cdn/upload/images
+REM 远程头像目录（对应 staticPaths /images）
+set REMOTE_DIR_TEST=/home/ec2-user/cdn/images
+set REMOTE_DIR_PROD=/home/ec2-user/cdn/images

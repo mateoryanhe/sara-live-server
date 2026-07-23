@@ -9,8 +9,8 @@
   将 demo 头像或业务头像文件放在该目录后执行 upload.bat
 
 远程目录
-  测试/生产默认: /home/ec2-user/cdn/upload/images
-  对应静态访问路径: /upload/images/文件名.jpg
+  测试/生产默认: /home/ec2-user/cdn/images
+  对应静态访问路径: /images/文件名.jpg
   说明: 该目录可能由 sudo 启动的服务创建(属主 root),脚本会使用 sudo unzip 写入
 
 前置条件
@@ -34,4 +34,4 @@
 说明
   - 脚本会压缩 pub-tool/avatars 下全部文件并覆盖上传到远程目录
   - 不会删除远程目录中未包含在本次压缩包里的其它文件
-  - 数据库 avatar 字段可存文件名: demo_avatar_1.jpg（走 upload/images）
+  - 数据库 avatar 字段可存文件名: demo_avatar_1.jpg（走 /images）

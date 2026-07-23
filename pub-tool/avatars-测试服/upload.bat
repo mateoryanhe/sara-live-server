@@ -130,7 +130,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM upload/images 可能属主为 root(服务 sudo 启动),需 sudo 解压
+REM images 目录可能属主为 root(服务 sudo 启动),需 sudo 解压
 plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "sudo unzip -o /tmp/%ZIP_FILE% -d '%REMOTE_DIR%'; ec=$?; rm -f /tmp/%ZIP_FILE%; if [ $ec -eq 0 ] || [ $ec -eq 1 ]; then exit 0; else exit $ec; fi"
 if errorlevel 1 (
     echo Error: Remote extraction failed. Details:
@@ -144,6 +144,6 @@ if errorlevel 1 (
 del "%ZIP_FILE%"
 echo.
 echo Avatar upload completed! [%DEPLOY_ENV%] -^> %REMOTE_DIR%
-echo Access example: /upload/images/demo_avatar_1.jpg
+echo Access example: /images/demo_avatar_1.jpg
 pause
 endlocal

@@ -1,7 +1,15 @@
 server:
   ###系统配置
   address: 443  #http服务端口
-  serverRoot: "/home/ec2-user/cdn"
+  serverRoot: "/home/ec2-user/cdn/official-site"  # 默认静态目录(官网)
+  imageStaticPrefix: "/images"  # 图片 URL 前缀,须在 staticPaths 中配置对应 path
+  staticPaths:
+    - prefix: "/cms"
+      path: "/home/ec2-user/cdn/cms"
+    - prefix: "/images"
+      path: "/home/ec2-user/cdn/images"
+    - prefix: "/official-site"
+      path: "/home/ec2-user/cdn/official-site"
   httpsCertPath: "/root/.acme.sh/www.bigtktool.shop_ecc/fullchain.pem"
   httpsKeyPath: "/root/.acme.sh/www.bigtktool.shop_ecc/privkey.pem"
   clientMaxBodySize: "300m" # HTTP 请求体/文件上传上限

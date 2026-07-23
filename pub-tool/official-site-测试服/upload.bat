@@ -149,11 +149,23 @@ if not exist "%ZIP_FILE%" (
     exit /b 1
 )
 
+if "%REMOTE_DIR%"=="" (
+    echo Error: REMOTE_DIR is not configured in config.bat
+    pause
+    exit /b 1
+)
+if /i "%REMOTE_DIR%"=="/" (
+    echo Error: REMOTE_DIR cannot be /
+    pause
+    exit /b 1
+)
+
 REM ---------- Upload and extract ----------
 echo [4/4] Uploading to server...
 plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "if [ -d '%REMOTE_DIR%' ]; then rm -rf '%REMOTE_DIR%'; fi && mkdir -p '%REMOTE_DIR%'"
 if errorlevel 1 (
-    echo Error: Failed to prepare remote directory
+    echo Error: Failed to prepare remote directory: %REMOTE_DIR%
+    plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "ls -ld '%REMOTE_DIR%' 2>&1"
     del "%ZIP_FILE%"
     pause
     exit /b 1

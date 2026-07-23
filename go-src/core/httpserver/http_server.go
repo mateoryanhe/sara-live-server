@@ -24,7 +24,7 @@ var httpServer = g.Server()
 func InitHttpServer() {
 	shutdown.RegCommonShutDownHandler(closeServer)
 	setupDomainSites()
-	bindCMSStaticFallback(context.Background())
+	setupStaticPaths()
 	initHTTPServerLogger()
 	httpServer.SetErrorStack(true)
 	httpServer.Use(middlewareCORS)

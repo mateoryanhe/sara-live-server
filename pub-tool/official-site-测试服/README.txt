@@ -32,7 +32,12 @@
 部署流程
   1. 复制 official-site 到 _staging 临时目录
   2. 按环境写入 js/site.js 中的 apiBaseUrl
-  3. 压缩后通过 SCP 上传并在远程 unzip
+  3. 压缩后 SCP 上传
+  4. 远程删除 REMOTE_DIR 后重新解压（目录独立,不影响 cms / upload）
+
+说明
+  REMOTE_DIR 默认 /home/ec2-user/cdn/official-site,与 server.staticPaths 中官网目录一致
+  cms、images 已拆分到独立目录,清空官网目录不会影响其他资源
 
 访问路径
   默认远程目录 /home/ec2-user/cdn/official-site

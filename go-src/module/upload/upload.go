@@ -3,19 +3,17 @@ package upload
 import (
 	"errors"
 	"fmt"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/gctx"
-	"github.com/gogf/gf/v2/util/guid"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/util/guid"
+	"xr-game-server/core/cfg"
 )
 
 const (
-	// ImageSubDir 图片相对 serverRoot 的子目录
-	ImageSubDir = "upload/images"
 	// MaxImageSize 单张图片最大字节数(5MB)
 	MaxImageSize int64 = 5 * 1024 * 1024
 	// MaxCMSFileSize CMS后台单个文件最大字节数(100MB),用于短视频等资源
@@ -65,29 +63,28 @@ func UploadImage(file *ghttp.UploadFile) (string, error) {
 	return name, err
 }
 
-// getImageDir 计算图片保存的绝对目录,优先使用 server.serverRoot 配置
+// getImageDir 计算图片保存目录,读取 server.imageStaticPrefix 与 staticPaths
 func getImageDir() string {
-	return getUploadDir(ImageSubDir)
+	if root := cfg.GetImageStaticRoot(); root != "" {
+		return root
+	}
+	if prefix := cfg.GetImageStaticPrefix(); prefix != "" {
+		return cfg.ResolvePhysicalDir(prefix)
+	}
+	return cfg.GetServerRoot()
 }
 
 // getCMSDir 计算CMS上传资源保存的绝对目录
 func getCMSDir() string {
-	return getUploadDir(ImageSubDir)
-}
-
-// getUploadDir 计算上传保存的绝对目录,优先使用 server.serverRoot 配置
-func getUploadDir(subDir string) string {
-	ctx := gctx.New()
-	root, _ := g.Cfg().Get(ctx, "server.serverRoot")
-	base := root.String()
-	if base == "" {
-		base = "."
-	}
-	return filepath.Join(base, subDir)
+	return getImageDir()
 }
 
 func GetUrlByName(name string) string {
-	return buildResourceUrl(fmt.Sprintf("/%s/%s", ImageSubDir, name))
+	segment := cfg.GetImageStaticPathSegment()
+	if segment == "" {
+		return buildResourceUrl("/" + name)
+	}
+	return buildResourceUrl(fmt.Sprintf("/%s/%s", segment, name))
 }
 
 func newStoredFileName(ext string) string {
@@ -165,7 +162,7 @@ func UploadShortVideoFile(file *ghttp.UploadFile, maxSize uint64) (string, error
 	return newName, nil
 }
 
-// DeleteUploadedFile 删除 upload/images 下的资源文件;无效文件名或文件不存在时忽略
+// DeleteUploadedFile 删除 images 目录下的资源文件;无效文件名或文件不存在时忽略
 func DeleteUploadedFile(name string) {
 	if name == "" {
 		return

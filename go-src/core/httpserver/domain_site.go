@@ -146,7 +146,10 @@ func buildDomainTLSConfig(ctx context.Context) *tls.Config {
 }
 
 func bindCMSStaticFallback(ctx context.Context) {
-	root := strings.TrimSpace(g.Cfg().MustGet(ctx, "server.serverRoot").String())
+	if len(cfg.GetStaticPathCfgs()) > 0 {
+		return
+	}
+	root := strings.TrimSpace(cfg.GetServerRoot())
 	if root == "" {
 		return
 	}

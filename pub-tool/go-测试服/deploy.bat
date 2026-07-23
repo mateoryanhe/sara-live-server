@@ -191,17 +191,17 @@ plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "chmod +x 
 REM No need to create session directory
 REM Skipping session directory creation as per requirement
 
-REM Start program
+REM Start program (日志写入 log 目录,便于排查启动失败)
 echo Starting program...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "sudo nohup %REMOTE_DIR%/%APP_NAME% > /dev/null 2>&1  &"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "sudo bash -c 'nohup %REMOTE_DIR%/%APP_NAME% >> /home/ec2-user/log/xr-game-server-stdout.log 2>&1 &'"
 
 echo.
 echo ================================
 echo Deployment Complete!
 echo ================================
 echo Server: %REMOTE_HOST%
-echo Program: %APP_NAME% is running
-echo Log file: %REMOTE_DIR%/%APP_NAME%.log
+echo Program: %APP_NAME%
+echo Startup log: /home/ec2-user/log/xr-game-server-stdout.log
 echo.
 
 REM Clean up local temporary files
@@ -210,7 +210,16 @@ if exist "%DEPLOY_PACKAGE%" del "%DEPLOY_PACKAGE%"
 
 echo Verifying if program is running...
 timeout /t 5 /nobreak >nul
-plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "sudo ps aux | grep %APP_NAME% | grep -v grep"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "pgrep -af %APP_NAME% || true; ss -tlnp | grep ':443' || true"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "pgrep -f %APP_NAME% >/dev/null && ss -tlnp | grep -q ':443'" 
+if errorlevel 1 (
+    echo.
+    echo ERROR: Program is NOT listening on port 443 after start!
+    echo Check remote log: /home/ec2-user/log/xr-game-server-stdout.log
+    plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "tail -30 /home/ec2-user/log/xr-game-server-stdout.log 2>/dev/null || true"
+    pause
+    exit /b 1
+)
 
 echo.
 echo Press any key to exit...

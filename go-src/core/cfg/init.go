@@ -4,6 +4,7 @@ func InitCfg() {
 	initDefaultLoggerFromDetail()
 	initServerCfg()
 	initDomainSiteCfg()
+	initStaticPathCfg()
 	initDbBufferCfg()
 	initDbCfg()
 	initGoPoolCfg()
