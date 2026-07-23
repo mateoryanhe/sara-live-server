@@ -54,21 +54,27 @@ func GetByTitle(title string) *entity.ShortVideo {
 	return nil
 }
 
-// HasAuthorPublishedToday 作者当天是否已发布短视频(走内存缓存,按创建时间判断)
-func HasAuthorPublishedToday(authorId uint64) bool {
+// CountAuthorPublishedToday 作者当天已发布短视频数量(走内存缓存,按创建时间判断)
+func CountAuthorPublishedToday(authorId uint64) int {
 	if authorId == 0 {
-		return false
+		return 0
 	}
 	now := time.Now()
+	count := 0
 	for _, video := range shortVideoCacheMgr.Values() {
 		if video == nil || video.AuthorId != authorId {
 			continue
 		}
 		if xrtime.IsSameDay(video.CreatedAt, now) {
-			return true
+			count++
 		}
 	}
-	return false
+	return count
+}
+
+// HasAuthorPublishedToday 作者当天是否已发布短视频(走内存缓存,按创建时间判断)
+func HasAuthorPublishedToday(authorId uint64) bool {
+	return CountAuthorPublishedToday(authorId) > 0
 }
 
 // GetAuthorShortVideos 查询指定作者的全部短视频(走内存缓存,不排序不分页)

@@ -52,6 +52,28 @@
           <span class="form-tip">秒，观看前该时长免费（0 表示无免费时长）</span>
         </el-form-item>
 
+        <el-form-item label="主播每日上传上限" prop="anchorDailyUploadLimit">
+          <el-input-number
+              v-model="formData.anchorDailyUploadLimit"
+              :min="1"
+              :precision="0"
+              controls-position="right"
+              style="width: 220px"
+          />
+          <span class="form-tip">条，用户类型为普通主播/机器人主播时生效</span>
+        </el-form-item>
+
+        <el-form-item label="普通用户每日上传上限" prop="normalUserDailyUploadLimit">
+          <el-input-number
+              v-model="formData.normalUserDailyUploadLimit"
+              :min="1"
+              :precision="0"
+              controls-position="right"
+              style="width: 220px"
+          />
+          <span class="form-tip">条，用户类型为 0（普通用户）时生效</span>
+        </el-form-item>
+
         <el-form-item label="短视频入口" prop="entryEnabled">
           <el-switch
               v-model="formData.entryEnabled"
@@ -92,6 +114,8 @@ const formData = reactive({
   maxCoverFileSize: 5,
   maxDuration: 60,
   freeWatchSeconds: 8,
+  anchorDailyUploadLimit: 100,
+  normalUserDailyUploadLimit: 1,
   entryEnabled: 1,
 })
 
@@ -116,6 +140,14 @@ const formRules = reactive({
   freeWatchSeconds: [
     {type: 'number', min: 0, message: '免费观看时长不能小于0', trigger: 'blur'},
   ],
+  anchorDailyUploadLimit: [
+    {required: true, message: '请输入主播每日上传上限', trigger: 'blur'},
+    {type: 'number', min: 1, message: '主播每日上传上限必须大于0', trigger: 'blur'},
+  ],
+  normalUserDailyUploadLimit: [
+    {required: true, message: '请输入普通用户每日上传上限', trigger: 'blur'},
+    {type: 'number', min: 1, message: '普通用户每日上传上限必须大于0', trigger: 'blur'},
+  ],
   entryEnabled: [
     {required: true, message: '请选择入口开关', trigger: 'change'},
   ],
@@ -128,6 +160,8 @@ const applyCfg = (cfg: ShortVideoCfg | null | undefined) => {
     formData.maxCoverFileSize = 5
     formData.maxDuration = 60
     formData.freeWatchSeconds = 8
+    formData.anchorDailyUploadLimit = 100
+    formData.normalUserDailyUploadLimit = 1
     formData.entryEnabled = 1
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
@@ -138,6 +172,8 @@ const applyCfg = (cfg: ShortVideoCfg | null | undefined) => {
   formData.maxCoverFileSize = cfg.maxCoverFileSize ?? 5
   formData.maxDuration = cfg.maxDuration || 60
   formData.freeWatchSeconds = cfg.freeWatchSeconds ?? 8
+  formData.anchorDailyUploadLimit = cfg.anchorDailyUploadLimit ?? 100
+  formData.normalUserDailyUploadLimit = cfg.normalUserDailyUploadLimit ?? 1
   formData.entryEnabled = cfg.entryEnabled ?? 1
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
@@ -166,6 +202,8 @@ const handleSave = async () => {
       maxCoverFileSize: formData.maxCoverFileSize,
       maxDuration: formData.maxDuration,
       freeWatchSeconds: formData.freeWatchSeconds,
+      anchorDailyUploadLimit: formData.anchorDailyUploadLimit,
+      normalUserDailyUploadLimit: formData.normalUserDailyUploadLimit,
       entryEnabled: formData.entryEnabled,
     })
     if (response?.success) {

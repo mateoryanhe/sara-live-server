@@ -562,6 +562,8 @@ export interface ShortVideoCfg {
     maxDuration: number
     freeWatchSeconds: number
     entryEnabled: number
+    anchorDailyUploadLimit: number
+    normalUserDailyUploadLimit: number
     createdAt: string
     updatedAt: string
 }
@@ -577,6 +579,8 @@ export interface SaveShortVideoCfgReq {
     maxDuration: number
     freeWatchSeconds: number
     entryEnabled: number
+    anchorDailyUploadLimit: number
+    normalUserDailyUploadLimit: number
 }
 
 export interface SaveShortVideoCfgRes {

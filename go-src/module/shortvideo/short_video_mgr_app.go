@@ -25,9 +25,14 @@ func PublishShortVideoApp(ctx context.Context, req *shortvideodto.AppPublishShor
 	if err := validateShortVideoAuthorId(authorId); err != nil {
 		return nil, err
 	}
-	//if shortvideodao.HasAuthorPublishedToday(authorId) {
-	//	return nil, errercode.CreateCode(errercode.ShortVideoDailyUploadLimit)
-	//}
+	user := userinfodao.GetUserInfoByUserId(authorId)
+	if user == nil {
+		return nil, errercode.CreateCode(errercode.SysError)
+	}
+	dailyLimit := getAuthorDailyUploadLimit(user.UserType)
+	if uint32(shortvideodao.CountAuthorPublishedToday(authorId)) >= dailyLimit {
+		return nil, errercode.CreateCode(errercode.ShortVideoDailyUploadLimit)
+	}
 	if existing := shortvideodao.GetByTitle(req.Title); existing != nil {
 		return nil, errercode.CreateCode(errercode.ShortVideoExist)
 	}

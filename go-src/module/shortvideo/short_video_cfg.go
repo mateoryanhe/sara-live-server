@@ -12,11 +12,13 @@ import (
 
 // 配置短视频大小,计费等
 const (
-	defaultMaxFileSize      uint64 = 100 * 1024 * 1024
-	defaultMaxCoverFileSize uint32 = 5
-	defaultMaxDuration      uint32 = 60
-	defaultFreeWatchSeconds uint32 = 8
-	defaultEntryEnabled     uint8  = entity.ShortVideoCfgEntryEnabled
+	defaultMaxFileSize                uint64 = 100 * 1024 * 1024
+	defaultMaxCoverFileSize           uint32 = 5
+	defaultMaxDuration                uint32 = 60
+	defaultFreeWatchSeconds           uint32 = 8
+	defaultEntryEnabled               uint8  = entity.ShortVideoCfgEntryEnabled
+	defaultAnchorDailyUploadLimit     uint32 = 100
+	defaultNormalUserDailyUploadLimit uint32 = 1
 )
 
 func defaultAppShortVideoCfg() *shortvideodto.AppShortVideoCfgRes {
@@ -33,11 +35,13 @@ func GetShortVideoCfg(_ context.Context, _ *shortvideodto.GetShortVideoCfgReq) (
 	cfg := shortvideodao.Get()
 	if cfg == nil {
 		return &shortvideodto.GetShortVideoCfgRes{Cfg: &shortvideodto.ShortVideoCfgItem{
-			MaxFileSize:      defaultMaxFileSize,
-			MaxCoverFileSize: defaultMaxCoverFileSize,
-			MaxDuration:      defaultMaxDuration,
-			FreeWatchSeconds: defaultFreeWatchSeconds,
-			EntryEnabled:     defaultEntryEnabled,
+			MaxFileSize:                defaultMaxFileSize,
+			MaxCoverFileSize:           defaultMaxCoverFileSize,
+			MaxDuration:                defaultMaxDuration,
+			FreeWatchSeconds:           defaultFreeWatchSeconds,
+			EntryEnabled:               defaultEntryEnabled,
+			AnchorDailyUploadLimit:     defaultAnchorDailyUploadLimit,
+			NormalUserDailyUploadLimit: defaultNormalUserDailyUploadLimit,
 		}}, nil
 	}
 	return &shortvideodto.GetShortVideoCfgRes{Cfg: toShortVideoCfgItem(cfg)}, nil
@@ -46,11 +50,13 @@ func GetShortVideoCfg(_ context.Context, _ *shortvideodto.GetShortVideoCfgReq) (
 func SaveShortVideoCfg(_ context.Context, req *shortvideodto.SaveShortVideoCfgReq) (*shortvideodto.SaveShortVideoCfgRes, error) {
 	existing := shortvideodao.Get()
 	row := &entity.ShortVideoCfg{
-		MaxFileSize:      req.MaxFileSize,
-		MaxCoverFileSize: req.MaxCoverFileSize,
-		MaxDuration:      req.MaxDuration,
-		FreeWatchSeconds: req.FreeWatchSeconds,
-		EntryEnabled:     req.EntryEnabled,
+		MaxFileSize:                req.MaxFileSize,
+		MaxCoverFileSize:           req.MaxCoverFileSize,
+		MaxDuration:                req.MaxDuration,
+		FreeWatchSeconds:           req.FreeWatchSeconds,
+		EntryEnabled:               req.EntryEnabled,
+		AnchorDailyUploadLimit:     req.AnchorDailyUploadLimit,
+		NormalUserDailyUploadLimit: req.NormalUserDailyUploadLimit,
 	}
 	if existing != nil {
 		row.ID = existing.ID
@@ -93,14 +99,16 @@ func toShortVideoCfgItem(cfg *entity.ShortVideoCfg) *shortvideodto.ShortVideoCfg
 		maxCoverFileSize = defaultMaxCoverFileSize
 	}
 	return &shortvideodto.ShortVideoCfgItem{
-		ID:               strconv.FormatUint(cfg.ID, 10),
-		MaxFileSize:      cfg.MaxFileSize,
-		MaxCoverFileSize: maxCoverFileSize,
-		MaxDuration:      cfg.MaxDuration,
-		FreeWatchSeconds: cfg.FreeWatchSeconds,
-		EntryEnabled:     cfg.EntryEnabled,
-		CreatedAt:        formatShortVideoCfgTime(cfg.CreatedAt),
-		UpdatedAt:        formatShortVideoCfgTime(cfg.UpdatedAt),
+		ID:                         strconv.FormatUint(cfg.ID, 10),
+		MaxFileSize:                cfg.MaxFileSize,
+		MaxCoverFileSize:           maxCoverFileSize,
+		MaxDuration:                cfg.MaxDuration,
+		FreeWatchSeconds:           cfg.FreeWatchSeconds,
+		EntryEnabled:               cfg.EntryEnabled,
+		AnchorDailyUploadLimit:     getAnchorDailyUploadLimit(),
+		NormalUserDailyUploadLimit: getNormalUserDailyUploadLimit(),
+		CreatedAt:                  formatShortVideoCfgTime(cfg.CreatedAt),
+		UpdatedAt:                  formatShortVideoCfgTime(cfg.UpdatedAt),
 	}
 }
 
@@ -141,4 +149,27 @@ func getShortVideoFreeWatchSeconds() uint32 {
 		return defaultFreeWatchSeconds
 	}
 	return cfg.FreeWatchSeconds
+}
+
+func getAnchorDailyUploadLimit() uint32 {
+	cfg := shortvideodao.Get()
+	if cfg == nil || cfg.AnchorDailyUploadLimit == 0 {
+		return defaultAnchorDailyUploadLimit
+	}
+	return cfg.AnchorDailyUploadLimit
+}
+
+func getNormalUserDailyUploadLimit() uint32 {
+	cfg := shortvideodao.Get()
+	if cfg == nil || cfg.NormalUserDailyUploadLimit == 0 {
+		return defaultNormalUserDailyUploadLimit
+	}
+	return cfg.NormalUserDailyUploadLimit
+}
+
+func getAuthorDailyUploadLimit(userType uint8) uint32 {
+	if entity.UserTypeIsAnchor(userType) {
+		return getAnchorDailyUploadLimit()
+	}
+	return getNormalUserDailyUploadLimit()
 }
