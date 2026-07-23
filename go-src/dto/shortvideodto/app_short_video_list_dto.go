@@ -85,9 +85,9 @@ type AppShortVideoUploadRecordListReq struct {
 	PageSize int `json:"pageSize" dc:"每页数量(默认20,最大100)"`
 }
 
-// AppShortVideoPendingReviewListReq App端分页查询本人审核中的短视频(未上架)
+// AppShortVideoPendingReviewListReq App端分页查询本人发布的全部短视频(审核中优先)
 type AppShortVideoPendingReviewListReq struct {
-	g.Meta   `path:"/appShortVideoPendingReviewList" method:"post" summary:"App分页查询本人审核中的短视频" tags:"短视频"`
+	g.Meta   `path:"/appShortVideoPendingReviewList" method:"post" summary:"App分页查询本人发布的短视频(审核中优先)" tags:"短视频"`
 	Page     int `json:"page" dc:"页码(从1开始,默认1)"`
 	PageSize int `json:"pageSize" dc:"每页数量(默认20,最大100)"`
 }

@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"strconv"
 	"time"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/migrate"
@@ -26,14 +27,14 @@ const (
 
 type Account struct {
 	migrate.OneModel
-	OpenId        string     `gorm:"default:'';comment:开放id;uniqueIndex:uk_account_phone"`
+	OpenId        string     `gorm:"default:'';comment:开放id;uniqueIndex:uk_account_phone;uniqueIndex:uk_device_account"`
 	PhoneAreaCode string     `gorm:"default:'';comment:手机区号;uniqueIndex:uk_account_phone"`
 	IP            string     `gorm:"default:'';comment:ip地址"`
-	Channel       uint       `gorm:"default:0;comment:渠道id;uniqueIndex:uk_account_phone"`
+	Channel       uint       `gorm:"default:0;comment:渠道id;uniqueIndex:uk_account_phone;uniqueIndex:uk_device_account"`
 	Ban           bool       `gorm:"default:0;comment:封号"`
 	BanTime       *time.Time `gorm:"comment:封号时间"`
 	BanApplyTime  *time.Time `gorm:"comment:封号生效时间"`
-	Cancel        bool       `gorm:"default:0;comment:注销"`
+	Cancel        bool       `gorm:"default:0;comment:注销;uniqueIndex:uk_device_account"`
 	Password      string     `gorm:"default:'';comment:密码"`
 }
 
@@ -127,6 +128,14 @@ func (receiver *Account) SetBanApplyTime(banApplyTime *time.Time) {
 }
 
 func (this *Account) SetCancel(cancel bool) {
+	if cancel && !this.Cancel && this.OpenId != "" {
+		// 注销时改写 open_id,释放 uk_account_phone / uk_device_account,允许多次注销后重新注册
+		this.OpenId = this.OpenId + "__canceled__" + strconv.FormatUint(this.ID, 10)
+		syndb.AddDataToQuickChan(TbAccount, AccountOpenId, &syndb.ColData{
+			IdVal:  this.ID,
+			ColVal: this.OpenId,
+		})
+	}
 	this.Cancel = cancel
 	this.SetUpdatedAt(time.Now())
 	syndb.AddDataToQuickChan(TbAccount, AccountCancel, &syndb.ColData{

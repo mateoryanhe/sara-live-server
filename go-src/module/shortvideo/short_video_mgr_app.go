@@ -88,23 +88,16 @@ func GetAppShortVideoUploadRecordList(ctx context.Context, req *shortvideodto.Ap
 	if authorId == 0 {
 		return nil, errercode.CreateCode(errercode.EmptyUserId)
 	}
-	return paginateAppShortVideoUploadRecordList(shortvideodao.GetAuthorShortVideos(authorId), req.Page, req.PageSize), nil
+	return paginateAppShortVideoUploadRecordList(shortvideodao.GetAuthorShortVideos(authorId), req.Page, req.PageSize, compareShortVideoByCreatedAt), nil
 }
 
-// GetAppShortVideoPendingReviewList App端分页查询本人审核中的短视频(未上架,status=0)
+// GetAppShortVideoPendingReviewList App端分页查询本人发布的全部短视频(审核中优先,同状态按创建时间降序)
 func GetAppShortVideoPendingReviewList(ctx context.Context, req *shortvideodto.AppShortVideoPendingReviewListReq) (*shortvideodto.AppShortVideoUploadRecordListRes, error) {
 	authorId := httpserver.GetAuthId(ctx)
 	if authorId == 0 {
 		return nil, errercode.CreateCode(errercode.EmptyUserId)
 	}
-	all := shortvideodao.GetAuthorShortVideos(authorId)
-	pending := make([]*entity.ShortVideo, 0, len(all))
-	for _, row := range all {
-		if row != nil && row.Status == entity.ShortVideoStatusOffShelf {
-			pending = append(pending, row)
-		}
-	}
-	return paginateAppShortVideoUploadRecordList(pending, req.Page, req.PageSize), nil
+	return paginateAppShortVideoUploadRecordList(shortvideodao.GetAuthorShortVideos(authorId), req.Page, req.PageSize, compareShortVideoByStatusThenCreatedAt), nil
 }
 
 // DeleteShortVideoApp App端删除本人未审核通过的短视频(status=0)
@@ -129,10 +122,10 @@ func DeleteShortVideoApp(ctx context.Context, req *shortvideodto.AppDeleteShortV
 	return &shortvideodto.AppDeleteShortVideoRes{Success: true}, nil
 }
 
-func paginateAppShortVideoUploadRecordList(rows []*entity.ShortVideo, page, pageSize int) *shortvideodto.AppShortVideoUploadRecordListRes {
+func paginateAppShortVideoUploadRecordList(rows []*entity.ShortVideo, page, pageSize int, less func(a, b *entity.ShortVideo) bool) *shortvideodto.AppShortVideoUploadRecordListRes {
 	page, pageSize = normalizeAppListPage(page, pageSize)
 	sort.Slice(rows, func(i, j int) bool {
-		return compareShortVideoByCreatedAt(rows[i], rows[j])
+		return less(rows[i], rows[j])
 	})
 	total := len(rows)
 	start, end := appListPageRange(total, page, pageSize)
@@ -157,6 +150,17 @@ func compareShortVideoByCreatedAt(a, b *entity.ShortVideo) bool {
 		return a.ID > b.ID
 	}
 	return a.CreatedAt.After(b.CreatedAt)
+}
+
+// compareShortVideoByStatusThenCreatedAt 审核中(status=0)优先,同状态按创建时间降序
+func compareShortVideoByStatusThenCreatedAt(a, b *entity.ShortVideo) bool {
+	if a == nil || b == nil {
+		return a != nil
+	}
+	if a.Status != b.Status {
+		return a.Status < b.Status
+	}
+	return compareShortVideoByCreatedAt(a, b)
 }
 
 func toAppShortVideoUploadRecordItem(row *entity.ShortVideo) *shortvideodto.AppShortVideoUploadRecordItem {

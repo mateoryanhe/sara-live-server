@@ -11,5 +11,6 @@ type DeviceLoginReq struct {
 }
 
 type DeviceLoginRes struct {
-	Token string `json:"token"`
+	Token     string `json:"token"`
+	IsNewUser bool   `json:"isNewUser" dc:"是否首次注册"`
 }

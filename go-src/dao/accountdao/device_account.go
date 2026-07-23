@@ -33,7 +33,7 @@ func clearDeviceAccountMissCache(key string) {
 	_, _ = deviceAccountCacheMgr.Cache.Remove(ctx, deviceAccountMissCacheKey(key))
 }
 
-// FindDeviceAccount 只读查询设备账号,不存在时返回 nil,不会创建新记录;未命中结果负缓存 10 分钟
+// FindDeviceAccount 只读查询未注销的设备账号,不存在或已注销时返回 nil,不会创建新记录;未命中结果负缓存 10 分钟
 func FindDeviceAccount(deviceId string, channel uint) *entity.Account {
 	deviceId = strings.TrimSpace(deviceId)
 	if deviceId == "" || channel == 0 {
@@ -48,15 +48,20 @@ func FindDeviceAccount(deviceId string, channel uint) *entity.Account {
 	}
 
 	if cached := deviceAccountCacheMgr.GetFromCache(key); cached != nil {
-		return cached.(*entity.Account)
+		account := cached.(*entity.Account)
+		if account != nil && !account.Cancel {
+			return account
+		}
+		return nil
 	}
 
 	var account *entity.Account
 	_ = g.Model(string(entity.TbAccount)).Unscoped().Where(g.Map{
 		string(entity.AccountOpenId):  deviceId,
 		string(entity.AccountChannel): channel,
+		string(entity.AccountCancel):  false,
 	}).Scan(&account)
-	if account == nil {
+	if account == nil || account.Cancel {
 		_ = deviceAccountCacheMgr.Cache.Set(ctx, deviceAccountMissCacheKey(key), 1, deviceAccountMissCacheTime)
 		return nil
 	}
@@ -65,7 +70,7 @@ func FindDeviceAccount(deviceId string, channel uint) *entity.Account {
 	return account
 }
 
-// GetDeviceAccount 根据设备码+渠道获取账号,不存在则创建并异步入库
+// GetDeviceAccount 根据设备码+渠道获取未注销账号;不存在则创建并异步入库(已注销视为未注册)
 func GetDeviceAccount(deviceId string, channel uint) (*entity.Account, bool) {
 	deviceId = strings.TrimSpace(deviceId)
 	if deviceId == "" || channel == 0 {
@@ -79,6 +84,7 @@ func GetDeviceAccount(deviceId string, channel uint) (*entity.Account, bool) {
 		err = g.Model(string(entity.TbAccount)).Unscoped().Where(g.Map{
 			string(entity.AccountOpenId):  deviceId,
 			string(entity.AccountChannel): channel,
+			string(entity.AccountCancel):  false,
 		}).Scan(&account)
 		if account != nil {
 			return account, nil
@@ -91,6 +97,12 @@ func GetDeviceAccount(deviceId string, channel uint) (*entity.Account, bool) {
 	if cacheData == nil {
 		return nil, false
 	}
+	account := cacheData.(*entity.Account)
+	if account.Cancel {
+		ctx := gctx.New()
+		_, _ = deviceAccountCacheMgr.Cache.Remove(ctx, key)
+		return GetDeviceAccount(deviceId, channel)
+	}
 	clearDeviceAccountMissCache(key)
-	return cacheData.(*entity.Account), isNew
+	return account, isNew
 }

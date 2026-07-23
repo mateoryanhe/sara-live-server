@@ -36,9 +36,6 @@ func DeviceLogin(ctx context.Context, req *authdto.DeviceLoginReq) (*authdto.Dev
 	if account == nil || account.ID == 0 {
 		return nil, errercode.CreateCode(errercode.LoginFail)
 	}
-	if account.Cancel {
-		return nil, errercode.CreateCode(errercode.AccountCanceled)
-	}
 	if account.Ban && account.BanApplyTime != nil && account.BanApplyTime.After(time.Now()) {
 		return nil, errercode.CreateCode(errercode.Ban)
 	}
@@ -58,6 +55,7 @@ func DeviceLogin(ctx context.Context, req *authdto.DeviceLoginReq) (*authdto.Dev
 	}
 
 	return &authdto.DeviceLoginRes{
-		Token: fmt.Sprintf("%v.%s", account.ID, tokenStr),
+		Token:     fmt.Sprintf("%v.%s", account.ID, tokenStr),
+		IsNewUser: isNewUser,
 	}, nil
 }
