@@ -2,6 +2,8 @@ package userlogindevicedao
 
 import (
 	"context"
+	"strings"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/cache"
@@ -34,6 +36,26 @@ func RefreshLoginDevice(userId uint64, info *entity.DeviceInfo) {
 	if info == nil {
 		return
 	}
-	device := entity.NewUserLoginDevice(userId)
+	device := GetByUserId(userId)
 	device.Refresh(info)
+}
+
+// FindUserIdByDeviceId 根据设备码查找最近在该设备登录的用户ID
+func FindUserIdByDeviceId(deviceId string) uint64 {
+	deviceId = strings.TrimSpace(deviceId)
+	if deviceId == "" {
+		return 0
+	}
+	var row struct {
+		ID uint64
+	}
+	err := g.Model(string(entity.TbUserLoginDevice)).
+		Where(string(entity.UserLoginDeviceId), deviceId).
+		OrderDesc(string(db.UpdatedAtName)).
+		Limit(1).
+		Scan(&row)
+	if err != nil || row.ID == 0 {
+		return 0
+	}
+	return row.ID
 }
