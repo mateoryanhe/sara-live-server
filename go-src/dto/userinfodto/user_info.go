@@ -33,6 +33,22 @@ type GetUserInfoRes struct {
 	Age           int64   `json:"age"`
 }
 
+// GetUserExtReq 查询用户扩展信息
+type GetUserExtReq struct {
+	g.Meta `path:"/getUserExt" method:"post" summary:"获取用户扩展信息" tags:"用户基础信息"`
+	UserId uint64 `json:"userId" dc:"用户ID,不传则查当前登录用户"`
+}
+
+type GetUserExtRes struct {
+	UserId        uint64 `json:"userId,string"`
+	CanRank       bool   `json:"canRank" dc:"是否可上排行榜"`
+	PackageName   string `json:"packageName" dc:"注册包名"`
+	AppVersion    string `json:"appVersion" dc:"注册版本号"`
+	FollowCount   uint64 `json:"followCount" dc:"当前关注数"`
+	FollowerCount uint64 `json:"followerCount" dc:"当前粉丝数"`
+	CancelCode    string `json:"cancelCode" dc:"注销码"`
+}
+
 // UpdateGenderReq 修改性别
 type UpdateGenderReq struct {
 	g.Meta `path:"/updateGender" method:"post" summary:"修改用户性别" tags:"用户基础信息"`
@@ -104,6 +120,16 @@ type CancelAccountReq struct {
 }
 
 type CancelAccountRes struct {
+	Success bool `json:"success"`
+}
+
+// CancelAccountByCodeReq 通过注销码注销账号(官网)
+type CancelAccountByCodeReq struct {
+	g.Meta     `path:"/cancelAccountByCode" method:"post" summary:"通过注销码注销账号" tags:"用户基础信息"`
+	CancelCode string `json:"cancelCode" v:"required#注销码不能为空" dc:"注销码"`
+}
+
+type CancelAccountByCodeRes struct {
 	Success bool `json:"success"`
 }
 

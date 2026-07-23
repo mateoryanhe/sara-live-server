@@ -18,6 +18,7 @@ const (
 	UserExtAppVersion    db.TbCol = "app_version"
 	UserExtFollowCount   db.TbCol = "follow_count"
 	UserExtFollowerCount db.TbCol = "follower_count"
+	UserExtCancelCode    db.TbCol = "cancel_code"
 )
 
 // UserExt 用户扩展信息(与用户一一对应,主键ID即用户ID)
@@ -28,6 +29,7 @@ type UserExt struct {
 	AppVersion    string `gorm:"default:'';comment:注册版本号" json:"appVersion"`
 	FollowCount   uint64 `gorm:"default:0;comment:当前关注数" json:"followCount"`
 	FollowerCount uint64 `gorm:"default:0;comment:当前粉丝数" json:"followerCount"`
+	CancelCode    string `gorm:"size:128;default:'';comment:注销码" json:"cancelCode"`
 }
 
 func NewUserExt(userId uint64) *UserExt {
@@ -64,6 +66,15 @@ func (receiver *UserExt) SetAppVersion(appVersion string) {
 	syndb.AddDataToQuickChan(TbUserExt, UserExtAppVersion, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: appVersion,
+	})
+}
+
+func (receiver *UserExt) SetCancelCode(cancelCode string) {
+	receiver.CancelCode = cancelCode
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddDataToQuickChan(TbUserExt, UserExtCancelCode, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: cancelCode,
 	})
 }
 
@@ -139,6 +150,7 @@ func initUserExt() {
 	syndb.RegQuick(TbUserExt, UserExtAppVersion)
 	syndb.RegQuick(TbUserExt, UserExtFollowCount)
 	syndb.RegQuick(TbUserExt, UserExtFollowerCount)
+	syndb.RegQuick(TbUserExt, UserExtCancelCode)
 
 	migrate.AutoMigrate(&UserExt{})
 }

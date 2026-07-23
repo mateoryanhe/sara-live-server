@@ -2,6 +2,7 @@ const APP_CONFIG = {
   appName: 'Sara Live',
   supportEmail: 'support@saralive.app',
   privacyEmail: 'privacy@saralive.app',
+  apiBaseUrl: '',
 };
 
 const SITE_I18N = {
@@ -10,6 +11,7 @@ const SITE_I18N = {
     navFeatures: 'Features',
     navPrivacy: 'Privacy',
     navTerms: 'Terms',
+    navCancel: 'Delete Account',
     heroTitle: 'Watch and Go Live Anytime',
     heroDesc: 'Sara Live is a mobile live streaming platform for hosts and audiences. Enjoy real-time video, interactive chat, virtual gifts, and short video content in one app.',
     badgeLive: 'HD Live Streaming',
@@ -32,12 +34,25 @@ const SITE_I18N = {
     termsPageTitle: 'Terms of Service',
     termsPageDesc: 'Rules and conditions for using Sara Live live streaming and related features.',
     lastUpdated: 'Last updated: July 23, 2026',
+    cancelPageTitle: 'Delete Account',
+    cancelPageDesc: 'Enter your deactivation code to permanently delete your Sara Live account. This action cannot be undone.',
+    cancelCodeLabel: 'Deactivation code',
+    cancelCodePlaceholder: 'Enter your deactivation code',
+    cancelCodeHint: 'Find your deactivation code in the Sara Live app under account settings.',
+    cancelSubmit: 'Delete my account',
+    cancelConfirm: 'Are you sure you want to permanently delete this account? This cannot be undone.',
+    cancelSuccess: 'Your account has been deleted successfully.',
+    cancelFail: 'Unable to delete account. Please check your deactivation code and try again.',
+    cancelBlocked: 'Too many failed attempts. Please try again in 2 hours.',
+    cancelAlready: 'This account has already been deleted.',
+    cancelNetworkError: 'Network error. Please try again later.',
   },
   es: {
     navHome: 'Inicio',
     navFeatures: 'Funciones',
     navPrivacy: 'Privacidad',
     navTerms: 'Términos',
+    navCancel: 'Eliminar cuenta',
     heroTitle: 'Mira y transmite en vivo en cualquier momento',
     heroDesc: 'Sara Live es una plataforma móvil de transmisión en vivo para anfitriones y audiencias. Disfruta video en tiempo real, chat interactivo, regalos virtuales y videos cortos.',
     badgeLive: 'Transmisión HD',
@@ -60,12 +75,25 @@ const SITE_I18N = {
     termsPageTitle: 'Términos de Servicio',
     termsPageDesc: 'Reglas y condiciones para usar Sara Live y sus funciones relacionadas.',
     lastUpdated: 'Última actualización: 23 de julio de 2026',
+    cancelPageTitle: 'Eliminar cuenta',
+    cancelPageDesc: 'Introduce tu código de desactivación para eliminar permanentemente tu cuenta de Sara Live. Esta acción no se puede deshacer.',
+    cancelCodeLabel: 'Código de desactivación',
+    cancelCodePlaceholder: 'Introduce tu código de desactivación',
+    cancelCodeHint: 'Encuentra tu código de desactivación en la app Sara Live, en ajustes de cuenta.',
+    cancelSubmit: 'Eliminar mi cuenta',
+    cancelConfirm: '¿Seguro que deseas eliminar permanentemente esta cuenta? Esta acción no se puede deshacer.',
+    cancelSuccess: 'Tu cuenta se eliminó correctamente.',
+    cancelFail: 'No se pudo eliminar la cuenta. Verifica el código e inténtalo de nuevo.',
+    cancelBlocked: 'Demasiados intentos fallidos. Inténtalo de nuevo en 2 horas.',
+    cancelAlready: 'Esta cuenta ya fue eliminada.',
+    cancelNetworkError: 'Error de red. Inténtalo más tarde.',
   },
   pt: {
     navHome: 'Início',
     navFeatures: 'Recursos',
     navPrivacy: 'Privacidade',
     navTerms: 'Termos',
+    navCancel: 'Excluir conta',
     heroTitle: 'Assista e transmita ao vivo a qualquer hora',
     heroDesc: 'A Sara Live é uma plataforma móvel de transmissão ao vivo para hosts e público. Aproveite vídeo em tempo real, chat interativo, presentes virtuais e vídeos curtos.',
     badgeLive: 'Transmissão HD',
@@ -88,12 +116,25 @@ const SITE_I18N = {
     termsPageTitle: 'Termos de Serviço',
     termsPageDesc: 'Regras e condições para usar a Sara Live e recursos relacionados.',
     lastUpdated: 'Última atualização: 23 de julho de 2026',
+    cancelPageTitle: 'Excluir conta',
+    cancelPageDesc: 'Digite seu código de desativação para excluir permanentemente sua conta Sara Live. Esta ação não pode ser desfeita.',
+    cancelCodeLabel: 'Código de desativação',
+    cancelCodePlaceholder: 'Digite seu código de desativação',
+    cancelCodeHint: 'Encontre seu código de desativação no app Sara Live, em configurações da conta.',
+    cancelSubmit: 'Excluir minha conta',
+    cancelConfirm: 'Tem certeza de que deseja excluir permanentemente esta conta? Esta ação não pode ser desfeita.',
+    cancelSuccess: 'Sua conta foi excluída com sucesso.',
+    cancelFail: 'Não foi possível excluir a conta. Verifique o código e tente novamente.',
+    cancelBlocked: 'Muitas tentativas falhadas. Tente novamente em 2 horas.',
+    cancelAlready: 'Esta conta já foi excluída.',
+    cancelNetworkError: 'Erro de rede. Tente novamente mais tarde.',
   },
   hi: {
     navHome: 'होम',
     navFeatures: 'फीचर्स',
     navPrivacy: 'गोपनीयता',
     navTerms: 'नियम',
+    navCancel: 'खाता हटाएँ',
     heroTitle: 'कभी भी देखें और लाइव जाएँ',
     heroDesc: 'Sara Live होस्ट और दर्शकों के लिए एक मोबाइल लाइव स्ट्रीमिंग प्लेटफ़ॉर्म है। रीयल-टाइम वीडियो, इंटरैक्टिव चैट, वर्चुअल गिफ्ट और शॉर्ट वीडियो का आनंद लें।',
     badgeLive: 'HD लाइव स्ट्रीमिंग',
@@ -116,6 +157,18 @@ const SITE_I18N = {
     termsPageTitle: 'सेवा की शर्तें',
     termsPageDesc: 'Sara Live और संबंधित सुविधाओं के उपयोग के नियम और शर्तें।',
     lastUpdated: 'अंतिम अपडेट: 23 जुलाई 2026',
+    cancelPageTitle: 'खाता हटाएँ',
+    cancelPageDesc: 'अपना Sara Live खाता स्थायी रूप से हटाने के लिए निष्क्रियकरण कोड दर्ज करें। यह क्रिया वापस नहीं की जा सकती।',
+    cancelCodeLabel: 'निष्क्रियकरण कोड',
+    cancelCodePlaceholder: 'अपना निष्क्रियकरण कोड दर्ज करें',
+    cancelCodeHint: 'अपना निष्क्रियकरण कोड Sara Live ऐप में खाता सेटिंग्स में देखें।',
+    cancelSubmit: 'मेरा खाता हटाएँ',
+    cancelConfirm: 'क्या आप वाकई इस खाते को स्थायी रूप से हटाना चाहते हैं? यह वापस नहीं किया जा सकता।',
+    cancelSuccess: 'आपका खाता सफलतापूर्वक हटा दिया गया है।',
+    cancelFail: 'खाता हटाया नहीं जा सका। कृपया कोड जाँचें और पुनः प्रयास करें।',
+    cancelBlocked: 'बहुत अधिक असफल प्रयास। कृपया 2 घंटे बाद पुनः प्रयास करें।',
+    cancelAlready: 'यह खाता पहले ही हटाया जा चुका है।',
+    cancelNetworkError: 'नेटवर्क त्रुटि। कृपया बाद में पुनः प्रयास करें।',
   },
 };
 
@@ -137,6 +190,11 @@ function setLang(lang) {
   document.querySelectorAll('[data-i18n]').forEach((el) => {
     const key = el.getAttribute('data-i18n');
     if (t[key]) el.textContent = t[key];
+  });
+
+  document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (t[key]) el.setAttribute('placeholder', t[key]);
   });
 
   document.querySelectorAll('.lang-btn').forEach((btn) => {
@@ -238,6 +296,81 @@ function initLegalToc() {
   }
 }
 
+function getApiBaseUrl() {
+  const base = (APP_CONFIG.apiBaseUrl || '').trim();
+  if (base) {
+    return base.replace(/\/+$/, '');
+  }
+  return window.location.origin;
+}
+
+function showCancelMessage(text, type) {
+  const messageEl = document.getElementById('cancel-message');
+  if (!messageEl) return;
+  messageEl.hidden = false;
+  messageEl.textContent = text;
+  messageEl.className = 'cancel-message cancel-message--' + (type || 'info');
+}
+
+async function submitCancelAccount(cancelCode) {
+  const lang = getLang();
+  const t = SITE_I18N[lang] || SITE_I18N.en;
+  const url = getApiBaseUrl() + '/userInfo/cancelAccountByCode';
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cancelCode }),
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(t.cancelNetworkError);
+  }
+  if (payload.code === 0 && payload.data && payload.data.success) {
+    return t.cancelSuccess;
+  }
+  if (payload.code === 8) {
+    throw new Error(t.cancelAlready);
+  }
+  if (payload.code === 91) {
+    throw new Error(t.cancelBlocked);
+  }
+  throw new Error(t.cancelFail);
+}
+
+function initCancelAccountForm() {
+  const form = document.getElementById('cancel-account-form');
+  if (!form || form.dataset.bound === 'true') return;
+  form.dataset.bound = 'true';
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const lang = getLang();
+    const t = SITE_I18N[lang] || SITE_I18N.en;
+    const input = document.getElementById('cancel-code');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const cancelCode = (input && input.value ? input.value : '').trim();
+    if (!cancelCode) {
+      showCancelMessage(t.cancelFail, 'error');
+      return;
+    }
+    if (!window.confirm(t.cancelConfirm)) {
+      return;
+    }
+
+    if (submitBtn) submitBtn.disabled = true;
+    showCancelMessage('', 'info');
+    try {
+      const message = await submitCancelAccount(cancelCode);
+      showCancelMessage(message, 'success');
+      form.reset();
+    } catch (error) {
+      showCancelMessage(error.message || t.cancelFail, 'error');
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  });
+}
+
 function scrollToLegalHash() {
   const hash = window.location.hash;
   if (!hash) return;
@@ -257,6 +390,7 @@ function initSite() {
 
   initMobileNav();
   initLegalToc();
+  initCancelAccountForm();
 
   const current = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
   document.querySelectorAll('.nav-links a[data-nav]').forEach((link) => {

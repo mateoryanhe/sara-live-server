@@ -90,6 +90,7 @@ func GetAccountById(accountId uint64) *entity.Account {
 
 func InitAccountDao() {
 	accountCacheMgr = cache.NewCacheMgr()
+	initDeviceAccountDao()
 }
 
 func GetUserInfo(req *accountdto.QueryUserInfoReq) (int, []*accountdto.UserInfoDto) {

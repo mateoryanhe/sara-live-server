@@ -23,6 +23,10 @@ func (c *UserInfoController) Get(ctx context.Context, req *userinfodto.GetUserIn
 	return userinfo.GetUserInfo(ctx, req)
 }
 
+func (c *UserInfoController) GetUserExt(ctx context.Context, req *userinfodto.GetUserExtReq) (res *userinfodto.GetUserExtRes, err error) {
+	return userinfo.GetUserExt(ctx, req)
+}
+
 func (c *UserInfoController) UpdateNickname(ctx context.Context, req *userinfodto.UpdateNicknameReq) (res *userinfodto.UpdateNicknameRes, err error) {
 	return userinfo.UpdateNickname(ctx, req)
 }

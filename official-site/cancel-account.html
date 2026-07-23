@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#6c3bff">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="description" content="Sara Live legal compliance, privacy policy, terms of service, and community guidelines">
-  <title>Sara Live - Legal & Privacy</title>
+  <meta name="description" content="Cancel your Sara Live account using your deactivation code">
+  <title>Sara Live</title>
   <link rel="stylesheet" href="css/site.css">
 </head>
-<body data-page-title-key="privacyPageTitle" data-legal-page="true">
+<body data-page-title-key="cancelPageTitle" data-cancel-page="true">
   <header class="site-header">
     <div class="container nav-bar">
       <a class="brand" href="index.html">
@@ -20,9 +20,9 @@
       <nav class="nav-links">
         <a href="index.html" data-nav="home" data-i18n="navHome">Home</a>
         <a href="index.html#features" data-nav="features" data-i18n="navFeatures">Features</a>
-        <a href="privacy.html" data-nav="privacy" class="active" data-i18n="navPrivacy">Privacy</a>
+        <a href="privacy.html" data-nav="privacy" data-i18n="navPrivacy">Privacy</a>
         <a href="privacy.html#tos" data-nav="terms" data-i18n="navTerms">Terms</a>
-        <a href="cancel-account.html" data-nav="cancel" data-i18n="navCancel">Delete Account</a>
+        <a href="cancel-account.html" data-nav="cancel" class="active" data-i18n="navCancel">Delete Account</a>
         <div class="lang-switch">
           <button class="lang-btn active" data-lang="en" type="button">EN</button>
           <button class="lang-btn" data-lang="es" type="button">ES</button>
@@ -34,30 +34,38 @@
   </header>
 
   <main class="content-page">
-    <div class="container">
+    <div class="container cancel-page">
       <div class="page-header">
-        <h1 data-i18n="privacyPageTitle">Legal & Privacy</h1>
-        <p data-i18n="privacyPageDesc">Sara Live global compliance documents for live streaming services.</p>
-        <p class="updated" data-i18n="lastUpdated">Last updated: July 23, 2026</p>
+        <h1 data-i18n="cancelPageTitle">Delete Account</h1>
+        <p data-i18n="cancelPageDesc">Enter your deactivation code to permanently delete your Sara Live account. This action cannot be undone.</p>
       </div>
 
-      <div class="legal-layout">
-        <aside class="card legal-toc">
-          <button class="toc-toggle" type="button" id="toc-toggle" aria-expanded="false">
-            <span data-i18n="legalTocToggle">Table of contents</span>
-            <span class="toc-toggle-icon" aria-hidden="true">▼</span>
-          </button>
-          <div class="toc-panel" id="toc-panel">
-            <h3 data-i18n="legalTocTitle">Contents</h3>
-            <nav id="legal-toc"></nav>
+      <article class="card cancel-card">
+        <form id="cancel-account-form" class="cancel-form" novalidate>
+          <label class="form-label" for="cancel-code" data-i18n="cancelCodeLabel">Deactivation code</label>
+          <input
+            id="cancel-code"
+            class="form-input"
+            type="text"
+            name="cancelCode"
+            autocomplete="off"
+            data-i18n-placeholder="cancelCodePlaceholder"
+            placeholder="Enter your deactivation code"
+            required
+          >
+          <p class="form-tip" data-i18n="cancelCodeHint">Find your deactivation code in the Sara Live app under account settings.</p>
+
+          <div class="form-actions">
+            <button class="btn btn-danger btn-block-mobile" type="submit" data-i18n="cancelSubmit">Delete my account</button>
           </div>
-        </aside>
-        <article class="content-card" id="legal-content"></article>
-      </div>
+        </form>
+
+        <p id="cancel-message" class="cancel-message" role="status" aria-live="polite" hidden></p>
+      </article>
 
       <p class="legal-contact">
         <span data-i18n="legalContactLabel">Contact:</span>
-        <a data-privacy-email href="mailto:privacy@saralive.app">privacy@saralive.app</a>
+        <a data-support-email href="mailto:support@saralive.app">support@saralive.app</a>
       </p>
     </div>
   </main>
@@ -66,13 +74,13 @@
     <div class="container footer-grid">
       <div data-i18n="footerRights">© 2026 Sara Live. All rights reserved.</div>
       <div class="footer-links">
-        <a href="index.html" data-i18n="navHome">Home</a>
+        <a href="privacy.html" data-i18n="navPrivacy">Privacy</a>
         <a href="privacy.html#tos" data-i18n="navTerms">Terms</a>
+        <a href="mailto:support@saralive.app" data-support-email>support@saralive.app</a>
       </div>
     </div>
   </footer>
 
-  <script src="js/legal-content.js"></script>
   <script src="js/site.js"></script>
 </body>
 </html>

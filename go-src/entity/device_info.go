@@ -7,5 +7,5 @@ type DeviceInfo struct {
 	OsVersion   string `json:"osVersion" v:"required|length:1,64#系统版本号不能为空" dc:"系统版本号"`
 	AppVersion  string `json:"appVersion" dc:"App/APK版本号"`
 	PackageName string `json:"packageName" dc:"App包名"`
-	DeviceId    string `json:"deviceId" dc:"设备唯一标识(可选)"`
+	DeviceId    string `json:"deviceId" dc:"设备唯一标识"`
 }
