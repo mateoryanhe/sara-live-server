@@ -37,7 +37,7 @@ func SendPrivateMessage(ctx context.Context, req *messagedto.AppSendPrivateMessa
 		return nil, errercode.CreateCode(errercode.SysError)
 	}
 	if livefollowdao.IsBlocked(senderId, req.ReceiverId) || livefollowdao.IsBlocked(req.ReceiverId, senderId) {
-		return nil, errercode.CreateCode(errercode.InvalidParam)
+		return nil, errercode.CreateCode(errercode.PrivateMessageUserBlocked)
 	}
 
 	msg := entity.NewUserMessage(entity.UserMessageTypePrivate, senderId, req.ReceiverId, "", content)
@@ -139,7 +139,7 @@ func ClearPrivateMessageUnread(ctx context.Context, req *messagedto.AppClearPriv
 
 	if unReadDetail.UnreadCount > 0 {
 		clearedCount = unReadDetail.UnreadCount
-		unReadDetail.ClearUnread(req.ClearedCount)
+		unReadDetail.ClearUnread(clearedCount)
 		unReadData.SubPrivateUnread(clearedCount)
 		messagedao.FlushUnreadDetailCache(unReadDetail)
 	}
