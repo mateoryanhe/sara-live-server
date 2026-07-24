@@ -567,13 +567,14 @@ export interface CreateShortVideoReq {
     source: number
     duration: number
     freeWatchSeconds?: number
-    authorId?: number
+    authorNickname?: string
 }
 
 export interface CreateShortVideoRes {
     id: string
     video: string
     cover?: string
+    authorId?: string
 }
 
 export interface ShortVideoCfg {

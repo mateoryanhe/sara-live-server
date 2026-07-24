@@ -14,7 +14,7 @@ func SetUserType(_ context.Context, req *accountdto.SetUserTypeReq) (*accountdto
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	user := userinfodao.GetUserInfoByUserId(req.AccountId)
-	if entity.UserTypeIsAnchor(user.UserType) {
+	if entity.UserTypeIsAnchor(user.UserType) || user.UserType == entity.UserTypeCMSAuthor {
 		return nil, errercode.CreateCode(errercode.UserAlreadyAnchor)
 	}
 	if user.UserType == req.UserType {

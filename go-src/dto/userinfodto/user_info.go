@@ -22,7 +22,7 @@ type GetUserInfoRes struct {
 	ShareCode     string  `json:"shareCode"`
 	VipLevel      uint32  `json:"vipLevel"`
 	IsAnchor      bool    `json:"isAnchor" dc:"是否主播"`
-	UserType      uint8   `json:"userType" dc:"用户类型(0普通用户,1普通主播,2机器人主播,3机器人观众,4测试人员)"`
+	UserType      uint8   `json:"userType" dc:"用户类型(0普通用户,1普通主播,2机器人主播,3机器人观众,4测试人员,5CMS短视频作者)"`
 	HasLiveRoom   bool    `json:"hasLiveRoom" dc:"是否已创建直播间"`
 	Gender        uint8   `json:"gender" dc:"性别(0未知,1男,2女)"`
 	Birthday      string  `json:"birthday" dc:"出生日期(YYYY-MM-DD,空表示未设置)"`
@@ -114,12 +114,24 @@ type UploadAvatarRes struct {
 	Avatar string `json:"avatar" dc:"头像文件名"`
 }
 
-// CancelAccountReq App端销户
+// CancelAccountReq App端销户(需登录)
 type CancelAccountReq struct {
-	g.Meta `path:"/cancelAccount" method:"post" summary:"销户" tags:"用户基础信息"`
+	g.Meta `path:"/cancelAccount" method:"post" summary:"App端销户(需登录)" tags:"用户基础信息"`
 }
 
 type CancelAccountRes struct {
+	Success bool `json:"success"`
+}
+
+// CancelAccountByPhoneReq 手机号+验证码注销
+type CancelAccountByPhoneReq struct {
+	g.Meta        `path:"/cancelAccountByPhone" method:"post" summary:"手机号注销" tags:"用户基础信息"`
+	PhoneAreaCode string `json:"phoneAreaCode" dc:"手机区号"`
+	Phone         string `json:"phone" v:"required#手机号不能为空" dc:"手机号"`
+	Code          string `json:"code" v:"required#验证码不能为空" dc:"短信验证码"`
+}
+
+type CancelAccountByPhoneRes struct {
 	Success bool `json:"success"`
 }
 

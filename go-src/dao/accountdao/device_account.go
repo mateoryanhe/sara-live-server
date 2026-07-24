@@ -70,6 +70,18 @@ func FindDeviceAccount(deviceId string, channel uint) *entity.Account {
 	return account
 }
 
+// FlushDeviceAccountCache 注销设备账号后清理设备账号缓存
+func FlushDeviceAccountCache(deviceId string, channel uint) {
+	deviceId = strings.TrimSpace(deviceId)
+	if deviceId == "" || channel == 0 {
+		return
+	}
+	key := deviceAccountCacheKey(deviceId, channel)
+	ctx := gctx.New()
+	_, _ = deviceAccountCacheMgr.Cache.Remove(ctx, key)
+	_, _ = deviceAccountCacheMgr.Cache.Remove(ctx, deviceAccountMissCacheKey(key))
+}
+
 // GetDeviceAccount 根据设备码+渠道获取未注销账号;不存在则创建并异步入库(已注销视为未注册)
 func GetDeviceAccount(deviceId string, channel uint) (*entity.Account, bool) {
 	deviceId = strings.TrimSpace(deviceId)

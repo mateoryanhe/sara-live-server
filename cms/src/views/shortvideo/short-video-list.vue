@@ -201,9 +201,9 @@
           </div>
           <div class="form-tip">视频文件不可修改，仅可编辑元数据</div>
         </el-form-item>
-        <el-form-item v-if="isCreateMode" label="作者ID">
-          <el-input v-model="currentRow.authorId" clearable placeholder="可选，展示用作者用户ID"/>
-          <div class="form-tip">留空表示不绑定作者；填写后须为有效用户ID</div>
+        <el-form-item v-if="isCreateMode" label="作者昵称">
+          <el-input v-model="currentRow.authorNickname" clearable maxlength="32" placeholder="可选，留空则从随机昵称库抽取"/>
+          <div class="form-tip">留空时从随机昵称库（默认英文）自动分配；系统将自动创建 CMS 短视频作者账号</div>
         </el-form-item>
         <el-form-item v-else label="作者昵称">
           <span>{{ currentRow.authorNickname || '-' }}</span>
@@ -327,8 +327,8 @@ interface ShortVideoForm {
   freeWatchSeconds: number
   categoryId: number
   source: number
-  authorId: string
   authorNickname: string
+  authorId: string
 }
 
 const sourceLabelMap: Record<number, string> = {
@@ -365,8 +365,8 @@ const defaultForm = (): ShortVideoForm => ({
   freeWatchSeconds: 15,
   categoryId: 0,
   source: 1,
-  authorId: '',
   authorNickname: '',
+  authorId: '',
 })
 const currentRow = ref<ShortVideoForm>(defaultForm())
 const formRef = ref<FormInstance>()
@@ -743,7 +743,7 @@ const handleSave = async () => {
           categoryId: payload.categoryId,
           source: payload.source,
           duration: videoDuration.value,
-          authorId: currentRow.value.authorId ? Number(currentRow.value.authorId) : undefined,
+          authorNickname: currentRow.value.authorNickname || undefined,
         })
         ElMessage.success('创建成功')
       } else {

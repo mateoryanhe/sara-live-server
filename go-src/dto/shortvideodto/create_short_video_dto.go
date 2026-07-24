@@ -20,11 +20,12 @@ type CreateShortVideoReq struct {
 	Source           uint8             `json:"source" v:"required|in:1,2,3#视频来源不能为空|视频来源取值无效" dc:"视频来源(1原创,2转发,3AI生成)"`
 	Duration         uint32            `json:"duration" v:"required|min:1#视频时长不能为空|视频时长无效" dc:"视频时长(秒)"`
 	FreeWatchSeconds uint32            `json:"freeWatchSeconds" v:"min:0#免费观看时长不能小于0" dc:"免费观看时长(秒)"`
-	AuthorId         uint64            `json:"authorId" dc:"展示用作者用户ID(可选,默认0)"`
+	AuthorNickname   string            `json:"authorNickname" dc:"作者昵称(可选,默认从随机昵称库抽取英文昵称)"`
 }
 
 type CreateShortVideoRes struct {
-	ID    string `json:"id" dc:"短视频 ID"`
-	Video string `json:"video" dc:"视频完整URL"`
-	Cover string `json:"cover" dc:"封面完整URL"`
+	ID       string `json:"id" dc:"短视频 ID"`
+	Video    string `json:"video" dc:"视频完整URL"`
+	Cover    string `json:"cover" dc:"封面完整URL"`
+	AuthorId string `json:"authorId" dc:"自动创建的CMS短视频作者用户ID"`
 }

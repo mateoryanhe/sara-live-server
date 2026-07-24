@@ -8,7 +8,6 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/snowflake"
 	"xr-game-server/dao/shortvideodao"
-	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/shortvideodto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
@@ -44,9 +43,6 @@ func CreateShortVideo(ctx context.Context, req *shortvideodto.CreateShortVideoRe
 	if err := validateShortVideoDuration(req.Duration); err != nil {
 		return nil, err
 	}
-	if req.AuthorId > 0 && userinfodao.GetUserInfoByUserId(req.AuthorId) == nil {
-		return nil, errercode.CreateCode(errercode.SysError)
-	}
 	videoName := strings.TrimSpace(req.Video)
 	if videoName == "" {
 		if req.File == nil {
@@ -67,6 +63,12 @@ func CreateShortVideo(ctx context.Context, req *shortvideodto.CreateShortVideoRe
 			return nil, err
 		}
 	}
+	authorId, err := createCMSAuthorUser(resolveCMSAuthorNickname(req.AuthorNickname), coverName)
+	if err != nil {
+		upload.DeleteUploadedFile(videoName)
+		upload.DeleteUploadedFile(coverName)
+		return nil, errercode.CreateCode(errercode.SysError)
+	}
 	row := entity.NewShortVideo(
 		snowflake.GetId(),
 		req.Title,
@@ -77,7 +79,7 @@ func CreateShortVideo(ctx context.Context, req *shortvideodto.CreateShortVideoRe
 		payDiamond,
 		req.CategoryId,
 		req.Source,
-		req.AuthorId,
+		authorId,
 		entity.ShortVideoAuthorTypeCMS,
 		req.Duration,
 		freeWatchSeconds,
@@ -87,8 +89,9 @@ func CreateShortVideo(ctx context.Context, req *shortvideodto.CreateShortVideoRe
 	loadAppShortVideoPublishListCache()
 	loadAppShortVideoViewListCache()
 	res := &shortvideodto.CreateShortVideoRes{
-		ID:    strconv.FormatUint(row.ID, 10),
-		Video: upload.GetUrlByName(videoName),
+		ID:       strconv.FormatUint(row.ID, 10),
+		Video:    upload.GetUrlByName(videoName),
+		AuthorId: strconv.FormatUint(authorId, 10),
 	}
 	if coverName != "" {
 		res.Cover = upload.GetUrlByName(coverName)

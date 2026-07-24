@@ -298,7 +298,8 @@ const userTypeLabelMap: Record<number, string> = {
   1: '普通主播',
   2: '机器人主播',
   3: '机器人观众',
-  4: '测试人员'
+  4: '测试人员',
+  5: 'CMS短视频作者',
 }
 
 const userTypeOptions = [
