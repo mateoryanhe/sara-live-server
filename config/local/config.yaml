@@ -3,13 +3,15 @@ server:
   address: 9443  #http服务端口
   openapiPath: "/f9acdb1da4ed11ecc115d613e291af14-api.json" # OpenAPI接口文档地址
   swaggerPath: "/f9acdb1da4ed11ecc115d613e291af14-swagger"  # 内置SwaggerUI展示地址
-  serverRoot: 'D:\company-code\app-code\live-server'
-  clientMaxBodySize: "30000m" # HTTP 请求体/文件上传上限
-  gzipEnabled: true         # 开启 gzip 响应压缩
+  serverRoot: 'D:/company-code/app-code/live-server'
+  clientMaxBodySize: "5g"   # HTTP 请求体/上传上限(唯一大小限制,Go业务层不再校验)
+  readTimeout: "120m"
+  writeTimeout: "120m"
+  gzipEnabled: true
   # PProf配置
-  pprofEnabled: true # 是否开启PProf性能调试特性。默认为false
-  pprofPattern: "/66dcd8e25ab3b339546ea1de5eb2d443e6fca76c76d11709f10533be8bd87d7d/pprof"    # 开启PProf时有效，表示PProf特性的页面访问路径，对当前Server绑定的所有域名有效
-  logPath: 'd:\log\'        # 服务器访问/错误日志目录
+  pprofEnabled: true
+  pprofPattern: "/66dcd8e25ab3b339546ea1de5eb2d443e6fca76c76d11709f10533be8bd87d7d/pprof"
+  logPath: "D:/log"
   logStdout: false                       # 访问日志同时输出到终端
   accessLogEnabled: true                # 开启访问日志(执行时间、IP、URL)
   accessLogPattern: "access-{Y-m-d}.log"
@@ -42,7 +44,7 @@ logger:
   timeFormat: "2006-01-02T15:04:05"
   level: "all"
   flags: 4
-  path: 'd:\log\'
+  path: "D:/log"
   file: "detail-{Y-m-d}.log"
   rotateExpire: "3d"
   rotateBackupLimit: 0
@@ -51,18 +53,18 @@ logger:
   stdoutColorDisabled: false
   writerColorEnable: true
   detail:
-    path: 'd:\log\'
+    path: "D:/log"
     file: "detail-{Y-m-d}.log"
     stdout: true
     header: true
   error:
-    path: 'd:\log\'
+    path: "D:/log"
     file: "error-{Y-m-d}.log"
     stdout: false
 
 database:
   logger:
-    path: 'd:\log\'
+    path: "D:/log/sql"
     level: "all"
     stdout: true
   default:

@@ -296,9 +296,6 @@ func saveUploadedImageFile(file *ghttp.UploadFile) (name, fullPath string, err e
 	if file == nil {
 		return "", "", fmt.Errorf("upload file is empty")
 	}
-	if file.Size > MaxImageSize {
-		return "", "", fmt.Errorf("image too large, max=%d bytes", MaxImageSize)
-	}
 	ext := strings.ToLower(filepath.Ext(file.Filename))
 	if _, ok := allowedImageExt[ext]; !ok {
 		return "", "", fmt.Errorf("image ext not allowed: %s", ext)

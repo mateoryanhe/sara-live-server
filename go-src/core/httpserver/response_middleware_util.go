@@ -17,9 +17,27 @@ type responseBuildResult struct {
 	sysError bool
 }
 
+const handlerResponseCtxKey = "httpserver.handlerResponse"
+
+func SetHandlerResponseData(r *ghttp.Request, data any) {
+	if r != nil {
+		r.SetCtxVar(handlerResponseCtxKey, data)
+	}
+}
+
+func getHandlerResponseData(r *ghttp.Request) any {
+	if r == nil {
+		return nil
+	}
+	if v := r.GetCtxVar(handlerResponseCtxKey); !v.IsNil() {
+		return v.Interface()
+	}
+	return r.GetHandlerResponse()
+}
+
 func buildResponseResult(r *ghttp.Request, wrapSuccess func(any) any) responseBuildResult {
 	var (
-		res   = r.GetHandlerResponse()
+		res   = getHandlerResponseData(r)
 		err   = r.GetError()
 		param any
 	)
@@ -69,7 +87,9 @@ func writeResponse(r *ghttp.Request, wrapSuccess func(any) any) {
 	r.Response.Header().Set("Content-Type", contentTypeJson)
 	r.Response.Write(result.resp)
 	stashAPIResponseBufferWrittenAt(r)
-	logAPIRequestResponseWrite(r, elapsedMs(writeStart), len(result.resp), respContent)
+	if !shouldSkipAPILogChain(r) {
+		logAPIRequestResponseWrite(r, elapsedMs(writeStart), len(result.resp), respContent)
+	}
 }
 
 func finalizeHandlerError(r *ghttp.Request, err error) {

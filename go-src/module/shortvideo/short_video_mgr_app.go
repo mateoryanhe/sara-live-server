@@ -5,7 +5,6 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"sort"
 	"strconv"
-	"strings"
 	"time"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/snowflake"
@@ -226,15 +225,8 @@ func uploadShortVideoFile(file *ghttp.UploadFile) (string, error) {
 	if file == nil {
 		return "", errercode.CreateCode(errercode.InvalidParam)
 	}
-	maxSize := getShortVideoMaxFileSize()
-	if file.Size > int64(maxSize) {
-		return "", errercode.CreateCode(errercode.ShortVideoFileTooLarge)
-	}
-	name, err := upload.UploadShortVideoFile(file, maxSize)
+	name, err := upload.UploadShortVideoFile(file)
 	if err != nil {
-		if strings.Contains(err.Error(), "file too large") {
-			return "", errercode.CreateCode(errercode.ShortVideoFileTooLarge)
-		}
 		return "", errercode.CreateCode(errercode.InvalidParam)
 	}
 	return name, nil
@@ -243,10 +235,6 @@ func uploadShortVideoFile(file *ghttp.UploadFile) (string, error) {
 func uploadShortVideoCoverFile(ctx context.Context, file *ghttp.UploadFile) (string, error) {
 	if file == nil {
 		return "", nil
-	}
-	maxSize := int64(getShortVideoMaxCoverFileSize()) * 1024 * 1024
-	if file.Size > maxSize {
-		return "", errercode.CreateCode(errercode.ShortVideoFileTooLarge)
 	}
 	name, err := upload.UploadImageForApp(ctx, file)
 	if err != nil {

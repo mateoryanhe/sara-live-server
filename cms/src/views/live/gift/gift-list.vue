@@ -391,10 +391,6 @@ const beforeIconUpload = (file: File): boolean => {
     ElMessage.error('图标只能上传图片文件')
     return false
   }
-  if (file.size > 5 * 1024 * 1024) {
-    ElMessage.error('图标文件不能超过5MB')
-    return false
-  }
   return true
 }
 
@@ -402,10 +398,6 @@ const beforeAnimationUpload = (file: File): boolean => {
   const ext = getExt(file.name)
   if (!allowedAnimationExt.includes(ext)) {
     ElMessage.error(`不支持的文件类型: ${ext || '未知'}`)
-    return false
-  }
-  if (file.size > 50 * 1024 * 1024) {
-    ElMessage.error('文件不能超过50MB')
     return false
   }
   return true

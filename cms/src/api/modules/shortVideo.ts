@@ -1,5 +1,7 @@
 import {request} from '../request'
 import type {
+    CreateShortVideoReq,
+    CreateShortVideoRes,
     GetShortVideoCfgRes,
     PageResponse,
     SaveShortVideoCfgReq,
@@ -15,6 +17,10 @@ import type {
 export const shortVideoApi = {
     getShortVideoList: (params: ShortVideoQuery) => {
         return request.post<PageResponse<ShortVideo>>('/shortVideo/shortVideoList', params)
+    },
+
+    createShortVideo: (data: CreateShortVideoReq) => {
+        return request.post<CreateShortVideoRes>('/shortVideo/createShortVideo', data)
     },
 
     getShortVideoWatchList: (params: ShortVideoWatchQuery) => {

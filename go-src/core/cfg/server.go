@@ -1,12 +1,16 @@
 package cfg
 
 import (
+	"strings"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"github.com/gogf/gf/v2/os/gfile"
 )
 
 const (
-	ServerCfg = "server"
+	ServerCfg                      = "server"
+	defaultClientMaxBodySize int64 = 8 * 1024 * 1024
 )
 
 // XRServerCfg 服务器配置
@@ -41,4 +45,17 @@ func initServerCfg() {
 		return
 	}
 	applyMemoryLimit(serverCfg.MemoryLimitM)
+}
+
+// GetClientMaxBodySize 读取 server.clientMaxBodySize,与 GoFrame HTTP 请求体上限一致
+func GetClientMaxBodySize() int64 {
+	raw := strings.TrimSpace(g.Cfg().MustGet(gctx.New(), "server.clientMaxBodySize").String())
+	if raw == "" {
+		return defaultClientMaxBodySize
+	}
+	size := gfile.StrToSize(raw)
+	if size <= 0 {
+		return defaultClientMaxBodySize
+	}
+	return size
 }

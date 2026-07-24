@@ -5,11 +5,13 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 )
 
-// CreateShortVideoReq CMS上传短视频
+// CreateShortVideoReq CMS上传短视频(作者类型为 CMS)
 type CreateShortVideoReq struct {
-	g.Meta           `path:"/createShortVideo" method:"post" mime:"multipart/form-data" summary:"CMS上传短视频" tags:"短视频"`
-	File             *ghttp.UploadFile `json:"file" type:"file" v:"required#请选择短视频文件" dc:"短视频文件"`
-	Cover            *ghttp.UploadFile `json:"cover" type:"file" dc:"封面图片(可选)"`
+	g.Meta           `path:"/createShortVideo" method:"post" summary:"CMS上传短视频" tags:"短视频"`
+	File             *ghttp.UploadFile `json:"file" type:"file" dc:"短视频文件(与 video 二选一)"`
+	Cover            *ghttp.UploadFile `json:"cover" type:"file" dc:"封面图片(可选,与 coverName 二选一)"`
+	Video            string            `json:"video" dc:"已上传视频文件名(与 file 二选一)"`
+	CoverName        string            `json:"coverName" dc:"已上传封面文件名(可选)"`
 	Title            string            `json:"title" v:"required|length:1,64#标题不能为空|标题长度需在1到64之间" dc:"标题"`
 	Sort             int               `json:"sort" dc:"排序值(越大越靠前)"`
 	IsPaid           uint8             `json:"isPaid" v:"in:0,1#是否付费取值无效" dc:"是否付费(0免费,1付费)"`

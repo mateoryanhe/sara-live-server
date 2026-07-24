@@ -206,6 +206,7 @@
         <el-form-item label="云播MP4" prop="cloudPlayerVideo">
           <div class="video-upload-wrap">
             <el-upload
+                action="#"
                 :before-upload="beforeVideoUpload"
                 :disabled="videoUploading"
                 :http-request="doVideoUpload"
@@ -213,16 +214,25 @@
                 accept=".mp4,video/mp4"
                 class="video-uploader"
             >
-              <el-button :loading="videoUploading" type="primary">上传MP4</el-button>
+              <video
+                  v-if="videoPreviewUrl"
+                  :key="videoPreviewUrl"
+                  :src="videoPreviewUrl"
+                  class="video-preview"
+                  controls
+                  preload="metadata"
+              />
+              <div v-else class="video-uploader-placeholder">
+                <el-button :loading="videoUploading" type="primary">上传MP4</el-button>
+              </div>
             </el-upload>
-            <video
-                v-if="videoPreviewUrl"
-                :src="videoPreviewUrl"
-                class="video-preview"
-                controls
-                preload="metadata"
-            />
             <span v-if="formData.cloudPlayerVideo" class="video-file-name">{{ formData.cloudPlayerVideo }}</span>
+            <el-progress
+                v-if="videoUploading && videoUploadProgress > 0"
+                :percentage="videoUploadProgress"
+                :stroke-width="8"
+                style="width: 100%; max-width: 480px"
+            />
             <el-button
                 v-if="formData.cloudPlayerVideo || videoPreviewUrl"
                 link
@@ -318,6 +328,7 @@ const saving = ref(false)
 const batchOperating = ref(false)
 const avatarUploading = ref(false)
 const videoUploading = ref(false)
+const videoUploadProgress = ref(0)
 const tableData = ref<BotAnchorListItem[]>([])
 const selectedRows = ref<BotAnchorListItem[]>([])
 const tableRef = ref<TableInstance>()
@@ -534,10 +545,6 @@ const beforeAvatarUpload = (file: File): boolean => {
     ElMessage.error('只能上传图片文件')
     return false
   }
-  if (file.size > 5 * 1024 * 1024) {
-    ElMessage.error('图片不能超过5MB')
-    return false
-  }
   return true
 }
 
@@ -577,17 +584,23 @@ const beforeVideoUpload = (file: File): boolean => {
 const doVideoUpload = async (options: UploadRequestOptions) => {
   const file = options.file as File
   videoUploading.value = true
+  videoUploadProgress.value = 0
   try {
-    const res = await uploadApi.uploadFile(file)
+    const res = await uploadApi.uploadFile(file, (percent) => {
+      videoUploadProgress.value = percent
+    })
     formData.value.cloudPlayerVideo = res.fileName
     videoChanged.value = true
-    setVideoPreview(URL.createObjectURL(file), true)
+    // 优先用服务端 URL 预览(大文件 blob URL 常无法播放)
+    const previewUrl = res.fileUrl || URL.createObjectURL(file)
+    setVideoPreview(previewUrl, !res.fileUrl)
     ElMessage.success('视频上传成功')
   } catch (error) {
     console.error('视频上传失败:', error)
     ElMessage.error('视频上传失败')
   } finally {
     videoUploading.value = false
+    videoUploadProgress.value = 0
   }
 }
 
@@ -854,9 +867,20 @@ onMounted(() => {
   gap: 12px;
 }
 
+.video-uploader :deep(.el-upload) {
+  display: block;
+  cursor: pointer;
+}
+
+.video-uploader-placeholder {
+  min-width: 120px;
+}
+
 .video-preview {
+  display: block;
   width: 100%;
   max-width: 480px;
+  min-height: 135px;
   max-height: 270px;
   border-radius: 6px;
   background: #000;

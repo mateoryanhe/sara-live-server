@@ -39,6 +39,13 @@ const service: AxiosInstance = axios.create({
 // 请求拦截器
 service.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
+        // FormData 须由浏览器自动设置 multipart boundary,不能沿用 application/json
+        if (config.data instanceof FormData) {
+            if (config.headers) {
+                delete config.headers['Content-Type']
+            }
+        }
+
         // 在发送请求之前做些什么，比如添加token和authId
         const token = getToken()
         const authId = getAuthId()

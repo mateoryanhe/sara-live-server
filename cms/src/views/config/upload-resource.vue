@@ -19,6 +19,11 @@
           <span class="form-tip">留空默认 http://127.0.0.1；开启图片审核时须填写阿里云可公网访问的域名（不能是 127.0.0.1/内网 IP）</span>
         </el-form-item>
 
+        <el-form-item label="App 图片大小上限" prop="appImageMaxSizeMB">
+          <el-input-number v-model="formData.appImageMaxSizeMB" :max="1024" :min="1" :step="1"/>
+          <span class="form-tip">MB，App 端上传图片（如头像）的大小上限，通过 GET /sys/cfg 下发给客户端</span>
+        </el-form-item>
+
         <el-divider content-position="left">App 图片审核（阿里云）</el-divider>
 
         <el-form-item label="开启图片审核">
@@ -89,6 +94,7 @@ const imageSecretTouched = ref(false)
 const formData = reactive({
   id: '0',
   resourceDomain: 'http://127.0.0.1',
+  appImageMaxSizeMB: 1,
   imageModerationEnabled: false,
   imageModerationAccessKeyId: '',
   imageModerationAccessKeySecret: '',
@@ -104,6 +110,10 @@ const metaInfo = reactive({
 
 const formRules = reactive({
   resourceDomain: [{max: 256, message: '域名长度不能超过 256', trigger: 'blur'}],
+  appImageMaxSizeMB: [
+    {required: true, message: '请输入 App 图片大小上限', trigger: 'blur'},
+    {type: 'number', min: 1, message: '大小必须大于 0MB', trigger: 'blur'},
+  ],
   imageModerationAccessKeyId: [
     {
       validator: (_: unknown, value: string, callback: (e?: Error) => void) => {
@@ -134,6 +144,7 @@ const applyCfg = (cfg: UploadResourceCfg | null | undefined) => {
   if (!cfg) {
     formData.id = '0'
     formData.resourceDomain = 'http://127.0.0.1'
+    formData.appImageMaxSizeMB = 1
     formData.imageModerationEnabled = false
     formData.imageModerationAccessKeyId = ''
     formData.imageModerationAccessKeySecret = ''
@@ -146,6 +157,7 @@ const applyCfg = (cfg: UploadResourceCfg | null | undefined) => {
   }
   formData.id = cfg.id || '0'
   formData.resourceDomain = cfg.resourceDomain || 'http://127.0.0.1'
+  formData.appImageMaxSizeMB = cfg.appImageMaxSizeMB || 1
   formData.imageModerationEnabled = !!cfg.imageModerationEnabled
   formData.imageModerationAccessKeyId = cfg.imageModerationAccessKeyId || ''
   formData.imageModerationAccessKeySecret = ''
@@ -176,6 +188,7 @@ const handleSave = async () => {
     const response = await uploadResourceApi.saveUploadResourceCfg({
       id: formData.id === '0' ? 0 : Number(formData.id),
       resourceDomain: formData.resourceDomain.trim(),
+      appImageMaxSizeMB: formData.appImageMaxSizeMB,
       imageModerationEnabled: formData.imageModerationEnabled,
       imageModerationAccessKeyId: formData.imageModerationAccessKeyId.trim(),
       imageModerationAccessKeySecret: imageSecretTouched.value

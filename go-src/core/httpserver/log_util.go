@@ -21,7 +21,10 @@ func shouldSkipAPILogChain(r *ghttp.Request) bool {
 	if r == nil {
 		return true
 	}
-	return strings.Contains(r.RequestURI, "/logQuery/")
+	if strings.Contains(r.RequestURI, "/logQuery/") {
+		return true
+	}
+	return isMultipartRequest(strings.ToLower(r.Header.Get("Content-Type")))
 }
 
 func logAPIRequestStart(r *ghttp.Request) {
@@ -139,25 +142,15 @@ func formContentForLog(r *ghttp.Request) (string, int) {
 }
 
 func multipartFormContentForLog(r *ghttp.Request) (string, int) {
-	form := r.GetMultipartForm()
-	logMap := make(map[string]any)
-
-	for k, v := range r.GetFormMap() {
-		logMap[k] = v
+	bodyLength := int(r.ContentLength)
+	logMap := map[string]any{"skipped": logBodyFileSkipped}
+	if ct := r.Header.Get("Content-Type"); ct != "" {
+		logMap["contentType"] = ct
 	}
-	if form != nil {
-		for name, values := range form.Value {
-			logMap[name] = multipartValuesForLog(values)
-		}
-		for name := range form.File {
-			logMap[name] = uploadFilesMetaForLog(r.GetUploadFiles(name))
-		}
-	}
-	if len(logMap) == 0 {
-		return "", 0
+	if bodyLength > 0 {
+		logMap["contentLength"] = bodyLength
 	}
 	content := string(xrjson.MustMarshal(logMap))
-	bodyLength := int(r.ContentLength)
 	if bodyLength <= 0 {
 		bodyLength = len(content)
 	}

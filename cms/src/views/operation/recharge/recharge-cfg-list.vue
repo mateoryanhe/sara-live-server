@@ -294,10 +294,6 @@ const beforeIconUpload = (file: File): boolean => {
     ElMessage.error('只能上传图片文件')
     return false
   }
-  if (file.size > 5 * 1024 * 1024) {
-    ElMessage.error('图片不能超过5MB')
-    return false
-  }
   return true
 }
 

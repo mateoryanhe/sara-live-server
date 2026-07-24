@@ -9,11 +9,13 @@ import (
 )
 
 const (
-	defaultResourceDomain = "http://127.0.0.1"
+	defaultResourceDomain  = "http://127.0.0.1"
+	defaultAppImageMaxSize = 1048576 // 1MB
 )
 
 type resourceCfgSnapshot struct {
 	ResourceDomain                 string
+	AppImageMaxSize                uint64
 	ImageModerationEnabled         bool
 	ImageModerationAccessKeyId     string
 	ImageModerationAccessKeySecret string
@@ -25,7 +27,8 @@ type resourceCfgSnapshot struct {
 var (
 	resourceCfgCache atomic.Value // *resourceCfgSnapshot
 	emptyResourceCfg = &resourceCfgSnapshot{
-		ResourceDomain: defaultResourceDomain,
+		ResourceDomain:  defaultResourceDomain,
+		AppImageMaxSize: defaultAppImageMaxSize,
 	}
 )
 
@@ -51,6 +54,7 @@ func toResourceCfgSnapshot(row *entity.UploadResourceCfg) *resourceCfgSnapshot {
 	}
 	s := &resourceCfgSnapshot{
 		ResourceDomain:                 normalizeDomain(row.ResourceDomain),
+		AppImageMaxSize:                normalizeAppImageMaxSize(row.AppImageMaxSize),
 		ImageModerationEnabled:         row.ImageModerationEnabled,
 		ImageModerationAccessKeyId:     strings.TrimSpace(row.ImageModerationAccessKeyId),
 		ImageModerationAccessKeySecret: strings.TrimSpace(row.ImageModerationAccessKeySecret),
@@ -80,4 +84,11 @@ func normalizeDomain(domain string) string {
 		domain = "http://" + domain
 	}
 	return strings.TrimRight(domain, "/")
+}
+
+func normalizeAppImageMaxSize(size uint64) uint64 {
+	if size == 0 {
+		return defaultAppImageMaxSize
+	}
+	return size
 }

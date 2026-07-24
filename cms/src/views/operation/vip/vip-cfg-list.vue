@@ -286,10 +286,6 @@ const beforeAnimationUpload = (file: File): boolean => {
     ElMessage.error('仅支持 MP4 格式')
     return false
   }
-  if (file.size > 50 * 1024 * 1024) {
-    ElMessage.error('文件不能超过50MB')
-    return false
-  }
   return true
 }
 

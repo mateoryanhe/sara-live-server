@@ -11,23 +11,32 @@ import (
 
 func MiddlewareCmsAuth(r *ghttp.Request) {
 	authStart := gtime.Now()
+	skipLog := shouldSkipAPILogChain(r)
 	tokenStr := r.GetHeader(Token)
 	userId := r.GetHeader(AuthId)
 	if len(tokenStr) == common.Zero {
-		logAPIRequestAuth(r, elapsedMs(authStart))
+		if !skipLog {
+			logAPIRequestAuth(r, elapsedMs(authStart))
+		}
 		WriteFailJson(r, errercode.EmptyToken)
 		return
 	}
 	if len(userId) == common.Zero {
-		logAPIRequestAuth(r, elapsedMs(authStart))
+		if !skipLog {
+			logAPIRequestAuth(r, elapsedMs(authStart))
+		}
 		WriteFailJson(r, errercode.EmptyUserId)
 		return
 	}
 	if flag := xrtoken.HasCmsToken(gconv.Uint64(userId), tokenStr); !flag {
-		logAPIRequestAuth(r, elapsedMs(authStart))
+		if !skipLog {
+			logAPIRequestAuth(r, elapsedMs(authStart))
+		}
 		WriteFailJson(r, errercode.Token)
 		return
 	}
-	logAPIRequestAuth(r, elapsedMs(authStart))
+	if !skipLog {
+		logAPIRequestAuth(r, elapsedMs(authStart))
+	}
 	r.Middleware.Next()
 }

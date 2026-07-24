@@ -521,6 +521,7 @@ export interface ShortVideo {
     source: number
     authorId: string
     authorNickname: string
+    authorType?: number
     duration: number
     freeWatchSeconds: number
     likeCount: number
@@ -553,6 +554,26 @@ export interface ShortVideoWatchQuery extends PageQuery {
     userId?: string
     startTime?: number
     endTime?: number
+}
+
+export interface CreateShortVideoReq {
+    video: string
+    coverName?: string
+    title: string
+    sort?: number
+    isPaid: number
+    payDiamond?: number
+    categoryId?: number
+    source: number
+    duration: number
+    freeWatchSeconds?: number
+    authorId?: number
+}
+
+export interface CreateShortVideoRes {
+    id: string
+    video: string
+    cover?: string
 }
 
 export interface ShortVideoCfg {
@@ -725,6 +746,7 @@ export interface SavePrivacyPolicyCfgRes {
 export interface UploadResourceCfg {
     id: string
     resourceDomain: string
+    appImageMaxSizeMB: number
     imageModerationEnabled: boolean
     imageModerationAccessKeyId: string
     imageModerationAccessKeySecret: string
@@ -742,6 +764,7 @@ export interface GetUploadResourceCfgRes {
 export interface SaveUploadResourceCfgReq {
     id?: number
     resourceDomain: string
+    appImageMaxSizeMB: number
     imageModerationEnabled: boolean
     imageModerationAccessKeyId: string
     imageModerationAccessKeySecret: string

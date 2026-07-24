@@ -12,6 +12,8 @@ import (
 	"xr-game-server/errercode"
 )
 
+const uploadCfgMB = 1024 * 1024
+
 func GetUploadResourceCfg(_ context.Context, _ *uploaddto.GetUploadResourceCfgReq) (*uploaddto.GetUploadResourceCfgRes, error) {
 	cfg := uploadresourcecfgdao.Load()
 	if cfg == nil {
@@ -21,9 +23,13 @@ func GetUploadResourceCfg(_ context.Context, _ *uploaddto.GetUploadResourceCfgRe
 }
 
 func SaveUploadResourceCfg(_ context.Context, req *uploaddto.SaveUploadResourceCfgReq) (*uploaddto.SaveUploadResourceCfgRes, error) {
+	if req.AppImageMaxSizeMB < 1 {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 	existing := uploadresourcecfgdao.Load()
 	row := &entity.UploadResourceCfg{
 		ResourceDomain:                 strings.TrimSpace(req.ResourceDomain),
+		AppImageMaxSize:                uint64(req.AppImageMaxSizeMB) * uploadCfgMB,
 		ImageModerationEnabled:         req.ImageModerationEnabled,
 		ImageModerationAccessKeyId:     strings.TrimSpace(req.ImageModerationAccessKeyId),
 		ImageModerationAccessKeySecret: strings.TrimSpace(req.ImageModerationAccessKeySecret),
@@ -75,6 +81,7 @@ func toUploadResourceCfgItem(cfg *entity.UploadResourceCfg) *uploaddto.UploadRes
 	return &uploaddto.UploadResourceCfgItem{
 		ID:                             strconv.FormatUint(cfg.ID, 10),
 		ResourceDomain:                 snap.ResourceDomain,
+		AppImageMaxSizeMB:              appImageMaxSizeMB(snap.AppImageMaxSize),
 		ImageModerationEnabled:         snap.ImageModerationEnabled,
 		ImageModerationAccessKeyId:     cfg.ImageModerationAccessKeyId,
 		ImageModerationAccessKeySecret: maskCfgSecret(cfg.ImageModerationAccessKeySecret),
@@ -102,4 +109,15 @@ func formatCfgTime(t time.Time) string {
 		return ""
 	}
 	return t.Format("2006-01-02 15:04:05")
+}
+
+func appImageMaxSizeMB(size uint64) uint32 {
+	if size == 0 {
+		size = uploadCfgMB
+	}
+	mb := size / uploadCfgMB
+	if mb < 1 {
+		return 1
+	}
+	return uint32(mb)
 }

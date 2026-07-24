@@ -36,6 +36,14 @@ func RegCMS(prefix string, handlerOrObject ...interface{}) {
 	})
 }
 
+// RegCMSHandler 绑定CMS原始Handler,不触发 GoFrame ParseMultipartForm
+func RegCMSHandler(prefix, pattern string, handler ghttp.HandlerFunc) {
+	httpServer.Group(prefix, func(group *ghttp.RouterGroup) {
+		group.Middleware(middlewareLogReq, MiddlewareCmsAuth, apiResponseMiddleware)
+		group.POST(pattern, handler)
+	})
+}
+
 // RegCMSCustomizeRes 绑定cms自定义结果 需要鉴权
 func RegCMSCustomizeRes(prefix string, handlerOrObject ...interface{}) {
 	httpServer.Group(prefix, func(group *ghttp.RouterGroup) {

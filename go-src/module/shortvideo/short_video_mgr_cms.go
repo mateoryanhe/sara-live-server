@@ -3,6 +3,7 @@ package shortvideo
 import (
 	"context"
 	"strconv"
+	"strings"
 
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/snowflake"
@@ -46,14 +47,25 @@ func CreateShortVideo(ctx context.Context, req *shortvideodto.CreateShortVideoRe
 	if req.AuthorId > 0 && userinfodao.GetUserInfoByUserId(req.AuthorId) == nil {
 		return nil, errercode.CreateCode(errercode.SysError)
 	}
-	videoName, err := uploadShortVideoFile(req.File)
-	if err != nil {
-		return nil, err
+	videoName := strings.TrimSpace(req.Video)
+	if videoName == "" {
+		if req.File == nil {
+			return nil, errercode.CreateCode(errercode.InvalidParam)
+		}
+		var err error
+		videoName, err = uploadShortVideoFile(req.File)
+		if err != nil {
+			return nil, err
+		}
 	}
-	coverName, err := uploadShortVideoCoverFile(ctx, req.Cover)
-	if err != nil {
-		upload.DeleteUploadedFile(videoName)
-		return nil, err
+	coverName := strings.TrimSpace(req.CoverName)
+	if coverName == "" && req.Cover != nil {
+		var err error
+		coverName, err = uploadShortVideoCoverFile(ctx, req.Cover)
+		if err != nil {
+			upload.DeleteUploadedFile(videoName)
+			return nil, err
+		}
 	}
 	row := entity.NewShortVideo(
 		snowflake.GetId(),

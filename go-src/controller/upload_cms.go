@@ -2,6 +2,8 @@ package controller
 
 import (
 	"context"
+
+	"github.com/gogf/gf/v2/net/ghttp"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/uploaddto"
 	"xr-game-server/module/upload"
@@ -14,16 +16,20 @@ const (
 type UploadController struct{}
 
 func initUploadController() {
+	httpserver.RegCMSHandler(UploadUrl, "/uploadFile", handleCMSUploadFile)
 	httpserver.RegCMS(UploadUrl, &UploadController{})
 }
 
-// UploadFile CMS后台上传图片或礼物动画资源,返回文件名
-func (c *UploadController) UploadFile(_ context.Context, req *uploaddto.UploadCMSFileReq) (res *uploaddto.UploadCMSFileRes, err error) {
-	name, err := upload.UploadCMSFile(req.File)
+func handleCMSUploadFile(r *ghttp.Request) {
+	name, err := upload.UploadCMSFileFromRequest(r)
 	if err != nil {
-		return nil, err
+		r.SetError(err)
+		return
 	}
-	return &uploaddto.UploadCMSFileRes{FileName: name}, nil
+	httpserver.SetHandlerResponseData(r, &uploaddto.UploadCMSFileRes{
+		FileName: name,
+		FileUrl:  upload.GetUrlByName(name),
+	})
 }
 
 func (c *UploadController) GetUploadResourceCfg(ctx context.Context, req *uploaddto.GetUploadResourceCfgReq) (*uploaddto.GetUploadResourceCfgRes, error) {

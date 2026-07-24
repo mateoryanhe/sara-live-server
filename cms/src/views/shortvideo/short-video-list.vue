@@ -8,7 +8,8 @@
       </template>
       <div class="content">
         <div class="table-header">
-          <span class="table-tip">短视频由 App 端上传发布，CMS 仅做审核与管理</span>
+          <el-button type="primary" @click="handleAdd">新增短视频</el-button>
+          <span class="table-tip">支持 App 端与 CMS 端上传；CMS 上传作者类型为 CMS</span>
         </div>
 
         <el-form :model="searchForm" class="search-form" inline>
@@ -47,21 +48,31 @@
               <span v-else>-</span>
             </template>
           </el-table-column>
-          <el-table-column label="视频" min-width="180">
+          <el-table-column label="视频" min-width="200">
             <template #default="{ row }">
-              <video
-                  v-if="row.video"
-                  :src="row.video"
-                  controls
-                  preload="metadata"
-                  style="width: 160px; max-height: 90px"
-              />
+              <div v-if="row.video" class="table-video-cell">
+                <video
+                    :key="row.video"
+                    :src="row.video"
+                    class="table-video-preview"
+                    controls
+                    preload="metadata"
+                />
+                <el-button link type="primary" @click="openVideoPreview(row.video)">放大预览</el-button>
+              </div>
               <span v-else>-</span>
             </template>
           </el-table-column>
           <el-table-column label="作者昵称" min-width="120">
             <template #default="{ row }">
               {{ row.authorNickname || '-' }}
+            </template>
+          </el-table-column>
+          <el-table-column label="作者类型" width="90">
+            <template #default="{ row }">
+              <el-tag :type="row.authorType === 1 ? 'warning' : 'success'">
+                {{ row.authorType === 1 ? 'CMS' : 'App' }}
+              </el-tag>
             </template>
           </el-table-column>
           <el-table-column label="作者ID" prop="authorId" width="100"/>
@@ -147,21 +158,56 @@
       </div>
     </el-card>
 
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="640px">
+    <el-dialog v-model="dialogVisible" :close-on-click-modal="false" :title="dialogTitle" destroy-on-close width="640px">
       <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="100px">
         <el-form-item label="标题" prop="title">
           <el-input v-model="currentRow.title" placeholder="请输入标题"/>
         </el-form-item>
-        <el-form-item v-if="videoPreviewUrl" label="视频">
-          <div class="preview-box">
-            <video :src="videoPreviewUrl" controls preload="metadata" style="width: 100%; max-height: 220px"/>
+        <el-form-item v-if="isCreateMode" label="视频">
+          <div class="video-upload-wrap">
+            <el-upload
+                :before-upload="beforeVideoSelect"
+                :disabled="saving"
+                :show-file-list="false"
+                accept=".mp4,.webm,.mov,video/mp4,video/webm,video/quicktime"
+                action="#"
+                class="video-uploader"
+            >
+              <video
+                  v-if="videoPreviewUrl"
+                  :key="videoPreviewUrl"
+                  :src="videoPreviewUrl"
+                  class="dialog-video-preview"
+                  controls
+                  preload="metadata"
+              />
+              <div v-else class="video-uploader-placeholder">
+                <el-button type="primary">选择视频</el-button>
+              </div>
+            </el-upload>
+            <span v-if="videoDuration > 0" class="form-tip">视频时长：{{ videoDuration }} 秒</span>
+            <el-button v-if="videoPreviewUrl" link type="danger" @click="clearCreateVideo">清除视频</el-button>
           </div>
-          <div class="form-tip">视频由 App 端上传，CMS 不可修改</div>
         </el-form-item>
-        <el-form-item label="作者昵称">
+        <el-form-item v-else-if="videoPreviewUrl" label="视频">
+          <div class="preview-box">
+            <video
+                :key="videoPreviewUrl"
+                :src="videoPreviewUrl"
+                class="dialog-video-preview"
+                controls
+                preload="metadata"
+            />
+          </div>
+          <div class="form-tip">视频文件不可修改，仅可编辑元数据</div>
+        </el-form-item>
+        <el-form-item v-if="isCreateMode" label="作者ID">
+          <el-input v-model="currentRow.authorId" clearable placeholder="可选，展示用作者用户ID"/>
+          <div class="form-tip">留空表示不绑定作者；填写后须为有效用户ID</div>
+        </el-form-item>
+        <el-form-item v-else label="作者昵称">
           <span>{{ currentRow.authorNickname || '-' }}</span>
           <div v-if="currentRow.authorId" class="form-tip">作者ID：{{ currentRow.authorId }}</div>
-          <div class="form-tip">作者由 App 端上传时确定，CMS 不可修改</div>
         </el-form-item>
         <el-form-item label="封面" prop="cover">
           <div class="upload-wrap">
@@ -235,14 +281,31 @@
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSave">保存</el-button>
+        <el-button :loading="saving" type="primary" @click="handleSave">保存</el-button>
       </template>
+    </el-dialog>
+
+    <el-dialog
+        v-model="videoDialogVisible"
+        destroy-on-close
+        title="视频预览"
+        width="720px"
+    >
+      <video
+          v-if="dialogVideoUrl"
+          :key="dialogVideoUrl"
+          :src="dialogVideoUrl"
+          class="dialog-video-preview"
+          controls
+          autoplay
+          preload="metadata"
+      />
     </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref, watch} from 'vue'
+import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
 import {Plus} from '@element-plus/icons-vue'
 import {shortVideoApi, uploadApi} from '@/api'
@@ -274,10 +337,8 @@ const sourceLabelMap: Record<number, string> = {
   3: 'AI生成',
 }
 
-const MB = 1024 * 1024
-
 const loading = ref(false)
-const maxCoverSizeMB = ref(5)
+const saving = ref(false)
 const tableData = ref<ShortVideo[]>([])
 const categoryOptions = ref<ShortVideoCategory[]>([])
 const total = ref(0)
@@ -291,6 +352,8 @@ const searchForm = reactive<SearchForm>({
 })
 
 const dialogVisible = ref(false)
+const videoDialogVisible = ref(false)
+const dialogVideoUrl = ref('')
 const dialogTitle = ref('')
 const defaultForm = (): ShortVideoForm => ({
   id: '',
@@ -310,9 +373,15 @@ const formRef = ref<FormInstance>()
 const coverUploading = ref(false)
 const videoPreviewUrl = ref('')
 const coverPreviewUrl = ref('')
+const videoFile = ref<File | null>(null)
+const videoDuration = ref(0)
+const maxVideoDuration = ref(60)
+let videoObjectPreviewUrl = ''
 const objectPreviewUrls = reactive<{ cover: string | null }>({
   cover: null
 })
+
+const isCreateMode = computed(() => !currentRow.value.id)
 
 const formatPrice = (price: number) => Number(price || 0).toFixed(4)
 
@@ -335,17 +404,89 @@ const revokeObjectPreview = (field: 'cover') => {
 
 const resetAssetPreview = () => {
   revokeObjectPreview('cover')
+  revokeVideoObjectPreview()
   videoPreviewUrl.value = ''
   coverPreviewUrl.value = ''
+  videoFile.value = null
+  videoDuration.value = 0
+}
+
+const revokeVideoObjectPreview = () => {
+  if (videoObjectPreviewUrl) {
+    URL.revokeObjectURL(videoObjectPreviewUrl)
+    videoObjectPreviewUrl = ''
+  }
+}
+
+const setCreateVideoPreview = (file: File) => {
+  revokeVideoObjectPreview()
+  const url = URL.createObjectURL(file)
+  videoObjectPreviewUrl = url
+  videoPreviewUrl.value = url
+}
+
+const detectVideoDuration = (file: File): Promise<number> => {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file)
+    const video = document.createElement('video')
+    video.preload = 'metadata'
+    video.onloadedmetadata = () => {
+      URL.revokeObjectURL(url)
+      resolve(Math.max(1, Math.ceil(video.duration || 0)))
+    }
+    video.onerror = () => {
+      URL.revokeObjectURL(url)
+      reject(new Error('无法读取视频时长'))
+    }
+    video.src = url
+  })
+}
+
+const allowedVideoExt = ['.mp4', '.webm', '.mov']
+
+const getFileExt = (name: string) => {
+  const idx = name.lastIndexOf('.')
+  return idx >= 0 ? name.slice(idx).toLowerCase() : ''
+}
+
+const beforeVideoSelect = async (file: File): boolean | Promise<boolean> => {
+  const ext = getFileExt(file.name)
+  if (!allowedVideoExt.includes(ext)) {
+    ElMessage.error('仅支持 MP4 / WebM / MOV 格式')
+    return false
+  }
+  try {
+    const duration = await detectVideoDuration(file)
+    if (maxVideoDuration.value > 0 && duration > maxVideoDuration.value) {
+      ElMessage.error(`视频时长不能超过 ${maxVideoDuration.value} 秒`)
+      return false
+    }
+    videoFile.value = file
+    videoDuration.value = duration
+    setCreateVideoPreview(file)
+  } catch (error) {
+    console.error('读取视频失败:', error)
+    ElMessage.error('无法读取视频信息')
+    return false
+  }
+  return false
+}
+
+const clearCreateVideo = () => {
+  videoFile.value = null
+  videoDuration.value = 0
+  revokeVideoObjectPreview()
+  videoPreviewUrl.value = ''
+}
+
+const openVideoPreview = (url: string) => {
+  dialogVideoUrl.value = url
+  videoDialogVisible.value = true
 }
 
 const beforeCoverUpload = (file: File): boolean => {
   if (!file.type.startsWith('image/')) {
     ElMessage.error('封面只能上传图片文件')
-    return false
-  }
-  if (file.size > maxCoverSizeMB.value * MB) {
-    ElMessage.error(`封面不能超过${maxCoverSizeMB.value}MB`)
     return false
   }
   return true
@@ -357,10 +498,12 @@ const doUpload = async (options: UploadRequestOptions) => {
   try {
     const res = await uploadApi.uploadFile(file)
     currentRow.value.cover = res.fileName
-    const objectUrl = URL.createObjectURL(file)
+    const previewUrl = res.fileUrl || URL.createObjectURL(file)
     revokeObjectPreview('cover')
-    coverPreviewUrl.value = objectUrl
-    objectPreviewUrls.cover = objectUrl
+    coverPreviewUrl.value = previewUrl
+    if (!res.fileUrl) {
+      objectPreviewUrls.cover = previewUrl
+    }
     formRef.value?.validateField('cover').catch(() => undefined)
     ElMessage.success('上传成功')
   } catch (error) {
@@ -430,6 +573,17 @@ const formRules: FormRules = {
   source: [{required: true, message: '请选择视频来源', trigger: 'change'}],
 }
 
+const fetchShortVideoCfg = async () => {
+  try {
+    const response = await shortVideoApi.getShortVideoCfg()
+    if (response.cfg?.maxDuration) {
+      maxVideoDuration.value = Math.max(1, response.cfg.maxDuration)
+    }
+  } catch (error) {
+    console.error('获取短视频配置失败:', error)
+  }
+}
+
 const fetchCategoryOptions = async () => {
   try {
     const response = await shortVideoApi.getShortVideoCategoryList({
@@ -439,17 +593,6 @@ const fetchCategoryOptions = async () => {
     categoryOptions.value = response.data || []
   } catch (error) {
     console.error('获取短视频分类失败:', error)
-  }
-}
-
-const fetchShortVideoCfg = async () => {
-  try {
-    const response = await shortVideoApi.getShortVideoCfg()
-    if (response.cfg?.maxCoverFileSize) {
-      maxCoverSizeMB.value = Math.max(1, response.cfg.maxCoverFileSize)
-    }
-  } catch (error) {
-    console.error('获取短视频配置失败:', error)
   }
 }
 
@@ -496,6 +639,13 @@ const handleCurrentChange = (page: number) => {
   fetchShortVideoList()
 }
 
+const handleAdd = () => {
+  dialogTitle.value = '新增短视频'
+  currentRow.value = defaultForm()
+  resetAssetPreview()
+  dialogVisible.value = true
+}
+
 const handleEdit = (row: ShortVideo) => {
   dialogTitle.value = '编辑短视频'
   currentRow.value = {
@@ -511,6 +661,8 @@ const handleEdit = (row: ShortVideo) => {
     authorId: row.authorId || '',
     authorNickname: row.authorNickname || '',
   }
+  videoFile.value = null
+  videoDuration.value = Number(row.duration) || 0
   videoPreviewUrl.value = row.video || ''
   coverPreviewUrl.value = row.cover || ''
   dialogVisible.value = true
@@ -561,6 +713,7 @@ const handleSave = async () => {
   if (!formRef.value) return
   await formRef.value.validate(async (valid) => {
     if (!valid) return
+    saving.value = true
     try {
       const payload = {
         title: currentRow.value.title,
@@ -572,20 +725,45 @@ const handleSave = async () => {
         categoryId: currentRow.value.categoryId || 0,
         source: currentRow.value.source,
       }
-      await shortVideoApi.updateShortVideo({id: currentRow.value.id, ...payload})
-      ElMessage.success('更新成功')
+      if (isCreateMode.value) {
+        if (!videoFile.value) {
+          ElMessage.error('请选择视频文件')
+          return
+        }
+        ElMessage.info('正在上传视频，请稍候...')
+        const videoRes = await uploadApi.uploadFile(videoFile.value)
+        await shortVideoApi.createShortVideo({
+          video: videoRes.fileName,
+          coverName: currentRow.value.cover || undefined,
+          title: payload.title,
+          sort: payload.sort,
+          isPaid: payload.isPaid,
+          payDiamond: payload.payDiamond,
+          freeWatchSeconds: payload.freeWatchSeconds,
+          categoryId: payload.categoryId,
+          source: payload.source,
+          duration: videoDuration.value,
+          authorId: currentRow.value.authorId ? Number(currentRow.value.authorId) : undefined,
+        })
+        ElMessage.success('创建成功')
+      } else {
+        await shortVideoApi.updateShortVideo({id: currentRow.value.id, ...payload})
+        ElMessage.success('更新成功')
+      }
       dialogVisible.value = false
       fetchShortVideoList()
     } catch (error) {
       console.error('保存失败:', error)
       ElMessage.error('保存失败')
+    } finally {
+      saving.value = false
     }
   })
 }
 
 onMounted(() => {
-  fetchCategoryOptions()
   fetchShortVideoCfg()
+  fetchCategoryOptions()
   fetchShortVideoList()
 })
 </script>
@@ -630,6 +808,49 @@ onMounted(() => {
 
 .preview-box {
   margin-top: 12px;
+  width: 100%;
+}
+
+.video-upload-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+
+.video-uploader :deep(.el-upload) {
+  display: block;
+  cursor: pointer;
+}
+
+.video-uploader-placeholder {
+  min-width: 120px;
+}
+
+.table-video-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.table-video-preview {
+  display: block;
+  width: 160px;
+  min-height: 90px;
+  max-height: 90px;
+  border-radius: 4px;
+  background: #000;
+}
+
+.dialog-video-preview {
+  display: block;
+  width: 100%;
+  min-height: 220px;
+  max-height: 480px;
+  border-radius: 6px;
+  background: #000;
 }
 
 .file-name {

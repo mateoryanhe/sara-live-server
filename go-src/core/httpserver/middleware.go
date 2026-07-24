@@ -29,7 +29,9 @@ func middlewareCORS(r *ghttp.Request) {
 
 // 请求入口:收到 header 后记录日志,关机时拒绝新请求
 func middlewareLogReq(r *ghttp.Request) {
-	logAPIRequestStart(r)
+	if !shouldSkipAPILogChain(r) {
+		logAPIRequestStart(r)
+	}
 	if !canDo {
 		WriteFailJson(r, int(errercode.ServerClose))
 		return

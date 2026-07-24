@@ -12,7 +12,8 @@ const (
 // UploadResourceCfg 静态资源域名与 App 图片审核(CMS 管理,通常仅一条)
 type UploadResourceCfg struct {
 	migrate.OneModel
-	ResourceDomain string `gorm:"size:256;default:'';comment:资源访问域名" json:"resourceDomain"`
+	ResourceDomain  string `gorm:"size:256;default:'';comment:资源访问域名" json:"resourceDomain"`
+	AppImageMaxSize uint64 `gorm:"default:1048576;comment:App端图片上传大小上限(字节)" json:"appImageMaxSize"`
 	// App 端图片审核(阿里云 ImageModeration)
 	ImageModerationEnabled         bool   `gorm:"default:0;comment:是否开启App图片审核" json:"imageModerationEnabled"`
 	ImageModerationAccessKeyId     string `gorm:"size:128;default:'';comment:图片审核AccessKeyId" json:"imageModerationAccessKeyId"`

@@ -3,7 +3,14 @@ server:
   address: 9443  #http服务端口
   openapiPath: "/f9acdb1da4ed11ecc115d613e291af14-api.json" # OpenAPI接口文档地址
   swaggerPath: "/f9acdb1da4ed11ecc115d613e291af14-swagger"  # 内置SwaggerUI展示地址
-  serverRoot: "D:\company-code\app-code\live-server"
+  serverRoot: "D:/company-code/app-code/live-server"
+  clientMaxBodySize: "5g"   # HTTP 请求体/上传上限(唯一大小限制,Go业务层不再校验)
+  readTimeout: "120m"       # 大文件上传读超时
+  writeTimeout: "120m"      # 大文件上传写超时
+  logPath: "D:/log"         # 访问/错误日志目录(勿用末尾反斜杠)
+  accessLogEnabled: true
+  accessLogPattern: "access-{Y-m-d}.log"
+  errorLogPattern: "error-{Y-m-d}.log"
   # PProf配置
   pprofEnabled: true # 是否开启PProf性能调试特性。默认为false
   pprofPattern: "/66dcd8e25ab3b339546ea1de5eb2d443e6fca76c76d11709f10533be8bd87d7d/pprof"    # 开启PProf时有效，表示PProf特性的页面访问路径，对当前Server绑定的所有域名有效
@@ -32,7 +39,7 @@ bufferSize:
 
 
 logger:
-  path: "d:\log/"           # 日志文件路径。默认为空，表示关闭，仅输出到终端
+  path: "D:/log"
   file: "{Y-m-d}.log"         # 日志文件格式。默认为"{Y-m-d}.log"
   prefix: ""                    # 日志内容输出前缀。默认为空
   level: "all"                 # 日志输出级别
