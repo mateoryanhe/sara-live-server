@@ -108,7 +108,8 @@ func requestBodyContentForLog(r *ghttp.Request) (string, int) {
 	}
 	ct := strings.ToLower(r.Header.Get("Content-Type"))
 	if isMultipartRequest(ct) {
-		return multipartFormContentForLog(r)
+		return "", 0
+		//return multipartFormContentForLog(r)
 	}
 	if strings.Contains(ct, "application/x-www-form-urlencoded") {
 		return formContentForLog(r)

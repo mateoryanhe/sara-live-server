@@ -13,6 +13,7 @@ const (
 )
 
 const (
+	ShortVideoStatTitle              db.TbCol = "title"
 	ShortVideoStatLikeCount          db.TbCol = "like_count"
 	ShortVideoStatViewCount          db.TbCol = "view_count"
 	ShortVideoStatWatchCount         db.TbCol = "watch_count"
@@ -22,19 +23,31 @@ const (
 // ShortVideoStat 短视频统计数据(与短视频一一对应,主键ID即视频ID)
 type ShortVideoStat struct {
 	migrate.OneModel
+	Title              string  `gorm:"size:64;default:'';comment:视频标题" json:"title"`
 	LikeCount          uint64  `gorm:"default:0;comment:点赞累计数量" json:"likeCount"`
 	ViewCount          uint64  `gorm:"default:0;comment:观看人数(去重)" json:"viewCount"`
 	WatchCount         uint64  `gorm:"default:0;comment:观看次数(累计,不去重)" json:"watchCount"`
 	TotalDiamondIncome float64 `gorm:"type:decimal(16,4);default:0;comment:累计钻石收益" json:"totalDiamondIncome"`
 }
 
-func NewShortVideoStat(videoId uint64) *ShortVideoStat {
+func NewShortVideoStat(videoId uint64, title string, publishedAt time.Time) *ShortVideoStat {
 	ret := &ShortVideoStat{}
 	ret.ID = videoId
-	now := time.Now()
-	ret.SetCreatedAt(now)
-	ret.SetUpdatedAt(now)
+	if publishedAt.IsZero() {
+		publishedAt = time.Now()
+	}
+	ret.SetCreatedAt(publishedAt)
+	ret.SetUpdatedAt(time.Now())
+	ret.SetTitle(title)
 	return ret
+}
+
+func (s *ShortVideoStat) SetTitle(val string) {
+	s.Title = val
+	syndb.AddDataToLazyChan(TbShortVideoStat, ShortVideoStatTitle, &syndb.ColData{
+		IdVal:  s.ID,
+		ColVal: s.Title,
+	})
 }
 
 func (s *ShortVideoStat) AddLikeCount(val uint64) {
@@ -95,6 +108,7 @@ func (s *ShortVideoStat) SetUpdatedAt(val time.Time) {
 func initShortVideoStat() {
 	syndb.RegLazy(TbShortVideoStat, db.CreatedAtName)
 	syndb.RegLazy(TbShortVideoStat, db.UpdatedAtName)
+	syndb.RegLazy(TbShortVideoStat, ShortVideoStatTitle)
 	syndb.RegLazy(TbShortVideoStat, ShortVideoStatLikeCount)
 	syndb.RegLazy(TbShortVideoStat, ShortVideoStatViewCount)
 	syndb.RegLazy(TbShortVideoStat, ShortVideoStatWatchCount)

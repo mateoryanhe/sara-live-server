@@ -570,10 +570,7 @@ const beforeVideoUpload = (file: File): boolean => {
     ElMessage.error('只能上传MP4视频')
     return false
   }
-  if (file.size > 100 * 1024 * 1024) {
-    ElMessage.error('视频不能超过100MB')
-    return false
-  }
+  
   return true
 }
 

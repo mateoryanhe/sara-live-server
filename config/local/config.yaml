@@ -4,7 +4,7 @@ server:
   openapiPath: "/f9acdb1da4ed11ecc115d613e291af14-api.json" # OpenAPI接口文档地址
   swaggerPath: "/f9acdb1da4ed11ecc115d613e291af14-swagger"  # 内置SwaggerUI展示地址
   serverRoot: 'D:\company-code\app-code\live-server'
-  clientMaxBodySize: "300m" # HTTP 请求体/文件上传上限
+  clientMaxBodySize: "30000m" # HTTP 请求体/文件上传上限
   gzipEnabled: true         # 开启 gzip 响应压缩
   # PProf配置
   pprofEnabled: true # 是否开启PProf性能调试特性。默认为false
