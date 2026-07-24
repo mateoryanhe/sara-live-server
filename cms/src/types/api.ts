@@ -153,6 +153,7 @@ export interface UserInfo {
     packageName?: string
     appVersion?: string
     canRank?: boolean
+    cancelCode?: string
 }
 
 export interface SetAnchorReq {

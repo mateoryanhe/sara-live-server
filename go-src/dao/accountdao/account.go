@@ -21,9 +21,7 @@ const accountMissCacheTime = 10 * time.Minute
 // GetAccountBy 根据 openId + 区号 + 渠道拉取数据，不存在时创建内存账号并异步落库（仅用于注册等写场景）
 func GetAccountBy(openId string, channel uint, phoneAreaCode string) *entity.Account {
 	key := accountCacheKey(openId, channel, phoneAreaCode)
-	//命中不了缓存，从数据库拉取数据
 	cacheData := accountCacheMgr.GetData(key, func(ctx context.Context) (value interface{}, err error) {
-		//从数据库拉取数据
 		var account *entity.Account
 		err = g.Model(string(entity.TbAccount)).Unscoped().Where(g.Map{
 			string(entity.AccountOpenId):        openId,
@@ -36,7 +34,6 @@ func GetAccountBy(openId string, channel uint, phoneAreaCode string) *entity.Acc
 		acc := entity.NewAccount(openId, channel)
 		acc.SetPhoneAreaCode(phoneAreaCode)
 		return acc, nil
-
 	})
 	return cacheData.(*entity.Account)
 }
@@ -97,7 +94,7 @@ func GetUserInfo(req *accountdto.QueryUserInfoReq) (int, []*accountdto.UserInfoD
 	sql := `select  a.*,
                     u.nickname, u.phone, u.avatar, u.remark,
                     u.gold, u.diamond, u.share_code, u.guild_id, u.user_type, u.vip_level,
-                    d.device_type, e.package_name, e.app_version,
+                    d.device_type, e.package_name, e.app_version, e.cancel_code,
                     IFNULL(e.can_rank, 1) as can_rank
                     from accounts a
                     left join user_infos u on u.id = a.id
