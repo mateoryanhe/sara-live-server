@@ -33,7 +33,7 @@
   1. 复制 official-site 到 _staging 临时目录
   2. 按环境写入 js/site.js 中的 apiBaseUrl
   3. 压缩后 SCP 上传
-  4. 远程删除 REMOTE_DIR 后重新解压（目录独立,不影响 cms / upload）
+  4. 远程解压到临时目录，仅覆盖包内文件（不 rm -rf 整目录，避免无关子目录权限导致失败）
 
 说明
   REMOTE_DIR 默认 /home/ec2-user/cdn/official-site,与 server.staticPaths 中官网目录一致

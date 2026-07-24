@@ -122,12 +122,14 @@ func toAppPkgListRes(row *entity.AppPkg) *apppkgdto.AppPkgListRes {
 		return nil
 	}
 	return &apppkgdto.AppPkgListRes{
-		ID:          strconv.FormatUint(row.ID, 10),
-		PackageName: row.PackageName,
-		SecretKey:   row.SecretKey,
-		Remark:      row.Remark,
-		CreatedAt:   formatAppPkgTime(row.CreatedAt),
-		UpdatedAt:   formatAppPkgTime(row.UpdatedAt),
+		ID:                strconv.FormatUint(row.ID, 10),
+		PackageName:       row.PackageName,
+		SecretKey:         row.SecretKey,
+		PrivacyPolicyUrl:  row.PrivacyPolicyUrl,
+		TermsOfServiceUrl: row.TermsOfServiceUrl,
+		Remark:            row.Remark,
+		CreatedAt:         formatAppPkgTime(row.CreatedAt),
+		UpdatedAt:         formatAppPkgTime(row.UpdatedAt),
 	}
 }
 

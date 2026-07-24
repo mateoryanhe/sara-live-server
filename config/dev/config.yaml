@@ -30,6 +30,10 @@ server:
   memoryLimitM: 300
   # domainSites 多域名示例见 config/local/config.yaml
 
+logQuery:
+  exportStaticPrefix: "/cms"           # 日志导出静态 URL 前缀,对应 staticPaths 中的 /cms
+  exportSubDir: "log-query-export"     # 导出目录: /home/ec2-user/cdn/cms/log-query-export
+
 bufferSize:
   db:
     lazy:

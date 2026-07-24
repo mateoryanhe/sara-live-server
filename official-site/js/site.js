@@ -26,8 +26,8 @@ const SITE_I18N = {
     feat3Title: 'Privacy & Safety',
     feat3Desc: 'We use moderation tools and clear policies to protect users and content.',
     footerRights: '© 2026 Sara Live. All rights reserved.',
-    privacyPageTitle: 'Legal & Privacy',
-    privacyPageDesc: 'Sara Live global compliance documents including privacy policy, terms of service, community guidelines, and regional compliance.',
+    privacyPageTitle: 'Privacy Policy',
+    privacyPageDesc: 'This Privacy Policy explains how Sara Live collects, uses, stores, shares and protects personal information, in compliance with global requirements including GDPR, LGPD, Middle East data regulations and Indonesian PSE rules.',
     legalTocTitle: 'Contents',
     legalTocToggle: 'Table of contents',
     legalContactLabel: 'Contact',
@@ -67,8 +67,8 @@ const SITE_I18N = {
     feat3Title: 'Privacidad y seguridad',
     feat3Desc: 'Usamos moderación y políticas claras para proteger usuarios y contenido.',
     footerRights: '© 2026 Sara Live. Todos los derechos reservados.',
-    privacyPageTitle: 'Legal y Privacidad',
-    privacyPageDesc: 'Documentos de cumplimiento global de Sara Live, incluida política de privacidad, términos de servicio y directrices comunitarias.',
+    privacyPageTitle: 'Política de Privacidad',
+    privacyPageDesc: 'Esta Política de Privacidad explica cómo Sara Live recopila, utiliza, almacena, comparte y protege la información personal, cumpliendo requisitos globales como GDPR, LGPD, normativas de datos de Oriente Medio y cumplimiento PSE de Indonesia.',
     legalTocTitle: 'Contenido',
     legalTocToggle: 'Tabla de contenido',
     legalContactLabel: 'Contacto',
@@ -108,8 +108,8 @@ const SITE_I18N = {
     feat3Title: 'Privacidade e segurança',
     feat3Desc: 'Usamos moderação e políticas claras para proteger usuários e conteúdo.',
     footerRights: '© 2026 Sara Live. Todos os direitos reservados.',
-    privacyPageTitle: 'Legal e Privacidade',
-    privacyPageDesc: 'Documentos de conformidade global da Sara Live, incluindo política de privacidade, termos de serviço e diretrizes da comunidade.',
+    privacyPageTitle: 'Política de Privacidade',
+    privacyPageDesc: 'Esta Política de Privacidade explica como a Sara Live coleta, usa, armazena, compartilha e protege informações pessoais, em conformidade com requisitos globais incluindo GDPR, LGPD, regulamentos de dados do Oriente Médio e conformidade PSE da Indonésia.',
     legalTocTitle: 'Conteúdo',
     legalTocToggle: 'Índice',
     legalContactLabel: 'Contato',
@@ -149,8 +149,8 @@ const SITE_I18N = {
     feat3Title: 'गोपनीयता और सुरक्षा',
     feat3Desc: 'हम उपयोगकर्ताओं और सामग्री की सुरक्षा के लिए मॉडरेशन और स्पष्ट नीतियाँ उपयोग करते हैं।',
     footerRights: '© 2026 Sara Live. सर्वाधिकार सुरक्षित।',
-    privacyPageTitle: 'कानूनी और गोपनीयता',
-    privacyPageDesc: 'Sara Live वैश्विक अनुपालन दस्तावेज़, जिनमें गोपनीयता नीति, सेवा की शर्तें और समुदाय दिशानिर्देश शामिल हैं।',
+    privacyPageTitle: 'गोपनीयता नीति',
+    privacyPageDesc: 'यह गोपनीयता नीति बताती है कि Sara Live GDPR, LGPD, मध्य पूर्व डेटा विनियमों और इंडोनेशियाई PSE अनुपालन सहित वैश्विक आवश्यकताओं के अनुसार व्यक्तिगत जानकारी कैसे एकत्र, उपयोग, संग्रहीत, साझा और सुरक्षित करती है।',
     legalTocTitle: 'विषय सूची',
     legalTocToggle: 'विषय सूची',
     legalContactLabel: 'संपर्क',
@@ -223,17 +223,30 @@ function setLang(lang) {
     document.title = (t[key] || APP_CONFIG.appName) + ' | ' + APP_CONFIG.appName;
   }
 
-  if (document.body.dataset.legalPage === 'true' && typeof renderLegalDocument === 'function') {
+  if (document.body.dataset.legalPage === 'true') {
     const contentEl = document.getElementById('legal-content');
-    const tocEl = document.getElementById('legal-toc');
+    const legalSection = document.body.dataset.legalSection || '';
     if (contentEl) {
-      contentEl.innerHTML = renderLegalDocument(lang);
+      let html = '';
+      if (legalSection === 'privacy' && typeof renderPrivacyContent === 'function') {
+        html = renderPrivacyContent(lang);
+      } else if (legalSection === 'tos' && typeof renderTermsContent === 'function') {
+        html = renderTermsContent(lang);
+      } else if (typeof renderLegalDocument === 'function') {
+        html = renderLegalDocument(lang, legalSection || undefined, { showTitle: false });
+      }
+      if (html) {
+        contentEl.innerHTML = `<section class="legal-section" id="${legalSection || 'legal'}">${html}</section>`;
+      }
     }
-    if (tocEl) {
-      tocEl.innerHTML = renderLegalToc(lang);
-      bindLegalTocLinks();
+    if (!legalSection) {
+      const tocEl = document.getElementById('legal-toc');
+      if (tocEl && typeof renderLegalToc === 'function') {
+        tocEl.innerHTML = renderLegalToc(lang);
+        bindLegalTocLinks();
+      }
+      scrollToLegalHash();
     }
-    scrollToLegalHash();
   }
 }
 
@@ -372,15 +385,26 @@ function initCancelAccountForm() {
 }
 
 function scrollToLegalHash() {
-  const hash = window.location.hash;
-  if (!hash) return;
+  if (document.body.dataset.legalSection) {
+    return;
+  }
+  const hash = window.location.hash || '#privacy';
   const target = document.querySelector(hash);
   if (target) {
     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 }
 
+function redirectLegacyLegalUrls() {
+  const page = (window.location.pathname.split('/').pop() || '').toLowerCase();
+  const hash = window.location.hash;
+  if (page === 'privacy.html' && hash === '#tos') {
+    window.location.replace('terms.html' + window.location.search);
+  }
+}
+
 function initSite() {
+  redirectLegacyLegalUrls();
   const lang = getLang();
   setLang(lang);
 

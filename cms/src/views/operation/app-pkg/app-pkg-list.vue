@@ -63,8 +63,8 @@
       </div>
     </el-card>
 
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="560px">
-      <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="90px">
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="640px">
+      <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="120px">
         <el-form-item label="包名" prop="packageName">
           <el-input v-model="currentRow.packageName" placeholder="例如 com.example.app"/>
         </el-form-item>
@@ -73,6 +73,12 @@
             <el-input v-model="currentRow.secretKey" placeholder="请输入密钥或自动生成" show-password type="password"/>
             <el-button @click="generateSecretKeyForForm">自动生成</el-button>
           </div>
+        </el-form-item>
+        <el-form-item label="隐私政策 URL" prop="privacyPolicyUrl">
+          <el-input v-model="currentRow.privacyPolicyUrl" clearable placeholder="留空则使用全局法律合规配置"/>
+        </el-form-item>
+        <el-form-item label="用户协议 URL" prop="termsOfServiceUrl">
+          <el-input v-model="currentRow.termsOfServiceUrl" clearable placeholder="留空则使用全局法律合规配置"/>
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="currentRow.remark" :rows="3" placeholder="可选" type="textarea"/>
@@ -100,6 +106,8 @@ interface AppPkgForm {
   id: string
   packageName: string
   secretKey: string
+  privacyPolicyUrl: string
+  termsOfServiceUrl: string
   remark: string
 }
 
@@ -119,6 +127,8 @@ const defaultForm = (): AppPkgForm => ({
   id: '',
   packageName: '',
   secretKey: '',
+  privacyPolicyUrl: '',
+  termsOfServiceUrl: '',
   remark: ''
 })
 const currentRow = ref<AppPkgForm>(defaultForm())
@@ -175,6 +185,23 @@ const clearVisibleSecretKeys = () => {
   visibleSecretKeyIds.value = new Set()
 }
 
+const validateOptionalUrl = (_: unknown, value: string, callback: (e?: Error) => void) => {
+  const url = value?.trim()
+  if (!url) {
+    callback()
+    return
+  }
+  if (url.length > 512) {
+    callback(new Error('URL 长度不能超过 512'))
+    return
+  }
+  if (!/^https?:\/\//i.test(url)) {
+    callback(new Error('URL 需以 http:// 或 https:// 开头'))
+    return
+  }
+  callback()
+}
+
 const formRules: FormRules = {
   packageName: [
     {required: true, message: '请输入包名', trigger: 'blur'},
@@ -183,7 +210,9 @@ const formRules: FormRules = {
   secretKey: [
     {required: true, message: '请输入密钥', trigger: 'blur'},
     {min: 1, max: 256, message: '密钥长度在1-256个字符', trigger: 'blur'}
-  ]
+  ],
+  privacyPolicyUrl: [{validator: validateOptionalUrl, trigger: 'blur'}],
+  termsOfServiceUrl: [{validator: validateOptionalUrl, trigger: 'blur'}]
 }
 
 const fetchList = async () => {
@@ -237,6 +266,8 @@ const handleEdit = (row: AppPkg) => {
     id: row.id,
     packageName: row.packageName,
     secretKey: row.secretKey,
+    privacyPolicyUrl: row.privacyPolicyUrl || '',
+    termsOfServiceUrl: row.termsOfServiceUrl || '',
     remark: row.remark || ''
   }
   dialogVisible.value = true
@@ -254,6 +285,8 @@ const handleSave = async () => {
       const payload = {
         packageName: currentRow.value.packageName.trim(),
         secretKey: currentRow.value.secretKey.trim(),
+        privacyPolicyUrl: currentRow.value.privacyPolicyUrl.trim(),
+        termsOfServiceUrl: currentRow.value.termsOfServiceUrl.trim(),
         remark: currentRow.value.remark.trim()
       }
       if (currentRow.value.id) {

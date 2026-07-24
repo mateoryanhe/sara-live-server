@@ -11,14 +11,16 @@ import (
 func GetLogPaths(_ context.Context, _ *logquerydto.CMSGetLogPathsReq) (*logquerydto.CMSGetLogPathsRes, error) {
 	cfg := loadLogQueryConfig().normalized()
 	return &logquerydto.CMSGetLogPathsRes{
-		ServerTime:      time.Now().Format("2006-01-02 15:04:05.000"),
-		LogDir:          cfg.LogDir,
-		AccessPrefix:    cfg.AccessPrefix,
-		DetailPrefix:    cfg.DetailPrefix,
-		ErrorPrefix:     cfg.ErrorPrefix,
-		ExportSubDir:    cfg.ExportSubDir,
-		ExportURLPrefix: cfg.exportURLPrefix(),
-		LinuxOnly:       true,
+		ServerTime:         time.Now().Format("2006-01-02 15:04:05.000"),
+		LogDir:             cfg.LogDir,
+		AccessPrefix:       cfg.AccessPrefix,
+		DetailPrefix:       cfg.DetailPrefix,
+		ErrorPrefix:        cfg.ErrorPrefix,
+		ExportSubDir:       cfg.ExportSubDir,
+		ExportStaticPrefix: cfg.ExportStaticPrefix,
+		ExportAbsDir:       cfg.exportAbsDir(),
+		ExportURLPrefix:    cfg.exportURLPrefix(),
+		LinuxOnly:          true,
 	}, nil
 }
 

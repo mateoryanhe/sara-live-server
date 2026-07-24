@@ -430,6 +430,8 @@ export interface AppPkg {
     id: string
     packageName: string
     secretKey: string
+    privacyPolicyUrl?: string
+    termsOfServiceUrl?: string
     remark: string
     createdAt: string
     updatedAt: string
@@ -726,6 +728,7 @@ export interface SaveTextModerationCfgRes {
 export interface PrivacyPolicyCfg {
     id: string
     privacyPolicyUrl: string
+    termsOfServiceUrl: string
     createdAt: string
     updatedAt: string
 }
@@ -737,6 +740,7 @@ export interface GetPrivacyPolicyCfgRes {
 export interface SavePrivacyPolicyCfgReq {
     id?: number
     privacyPolicyUrl: string
+    termsOfServiceUrl: string
 }
 
 export interface SavePrivacyPolicyCfgRes {
@@ -903,6 +907,8 @@ export interface LogPathsConfig {
     detailPrefix: string
     errorPrefix: string
     exportSubDir: string
+    exportStaticPrefix?: string
+    exportAbsDir?: string
     exportUrlPrefix: string
     linuxOnly?: boolean
 }

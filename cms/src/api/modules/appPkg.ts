@@ -9,6 +9,8 @@ export const appPkgApi = {
     createAppPkg: (data: {
         packageName: string
         secretKey: string
+        privacyPolicyUrl?: string
+        termsOfServiceUrl?: string
         remark?: string
     }) => {
         return request.post<{ id: string }>('/appPkg/createAppPkg', data)
@@ -18,6 +20,8 @@ export const appPkgApi = {
         id: string | number
         packageName: string
         secretKey: string
+        privacyPolicyUrl?: string
+        termsOfServiceUrl?: string
         remark?: string
     }) => {
         return request.post<boolean>('/appPkg/updateAppPkg', data)

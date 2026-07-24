@@ -11,11 +11,12 @@ import (
 )
 
 const (
-	Ws              = "/ws"
-	Token           = "token"
-	AuthId          = "authId"
-	contentTypeJson = "application/json"
-	ReqId           = "reqId"
+	Ws                = "/ws"
+	Token             = "token"
+	AuthId            = "authId"
+	PackageNameHeader = "packageName"
+	contentTypeJson   = "application/json"
+	ReqId             = "reqId"
 )
 
 var httpServer = g.Server()
@@ -70,4 +71,13 @@ func GetReqId(ctx context.Context) uint64 {
 		return 0
 	}
 	return gconv.Uint64(tokenStr)
+}
+
+// GetPackageNameFromContext 从请求头读取 App 包名
+func GetPackageNameFromContext(ctx context.Context) string {
+	r := g.RequestFromCtx(ctx)
+	if r == nil {
+		return ""
+	}
+	return strings.TrimSpace(r.GetHeader(PackageNameHeader, ""))
 }

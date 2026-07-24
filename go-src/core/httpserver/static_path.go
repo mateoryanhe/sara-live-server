@@ -77,6 +77,11 @@ func serveCMSStaticPath(r *ghttp.Request, root, rel string) {
 		r.ExitAll()
 		return
 	}
+	if isCMSAssetRequest(rel) {
+		r.Response.WriteStatus(http.StatusNotFound)
+		r.ExitAll()
+		return
+	}
 	indexPath := filepath.Join(root, "index.html")
 	if !gfile.Exists(indexPath) {
 		r.Response.WriteStatus(http.StatusNotFound)
@@ -85,6 +90,17 @@ func serveCMSStaticPath(r *ghttp.Request, root, rel string) {
 	}
 	writeStaticFile(r, indexPath)
 	r.ExitAll()
+}
+
+func isCMSAssetRequest(rel string) bool {
+	rel = strings.TrimSpace(strings.ReplaceAll(rel, "\\", "/"))
+	if rel == "" {
+		return false
+	}
+	if strings.HasPrefix(rel, "log-query-export/") {
+		return true
+	}
+	return strings.Contains(filepath.Base(rel), ".")
 }
 
 func writeStaticFile(r *ghttp.Request, filePath string) {

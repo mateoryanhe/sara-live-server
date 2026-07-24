@@ -3,18 +3,25 @@ package sys
 import (
 	"context"
 	"time"
+	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/sysdto"
+	"xr-game-server/module/apppkg"
 	"xr-game-server/module/livecfg"
 	"xr-game-server/module/privacypolicy"
 	"xr-game-server/module/upload"
 )
 
 func GetSysCfg(ctx context.Context, req *sysdto.SysCfgReq) (*sysdto.SysCfgResp, error) {
+	_ = req
+	packageName := httpserver.GetPackageNameFromContext(ctx)
+	globalPrivacy := privacypolicy.GetPrivacyPolicyUrl()
+	globalTerms := privacypolicy.GetTermsOfServiceUrl()
 	return &sysdto.SysCfgResp{
 		SysTime:                     time.Now().UnixMilli(),
 		PaidDanmakuPrice:            livecfg.GetPaidDanmakuPrice(),
 		PrivateRoomFreeWatchSeconds: livecfg.GetPrivateRoomFreeWatchSeconds(),
-		PrivacyPolicyUrl:            privacypolicy.GetPrivacyPolicyUrl(),
+		PrivacyPolicyUrl:            apppkg.ResolvePrivacyPolicyUrl(packageName, globalPrivacy),
+		TermsOfServiceUrl:           apppkg.ResolveTermsOfServiceUrl(packageName, globalTerms),
 		AppImageMaxSize:             upload.GetAppImageMaxSize(),
 	}, nil
 }

@@ -3,7 +3,7 @@
     <el-card v-loading="loading">
       <template #header>
         <div class="card-header">
-          <span>隐私政策配置</span>
+          <span>法律合规配置</span>
         </div>
       </template>
 
@@ -12,9 +12,18 @@
           <el-input
               v-model="formData.privacyPolicyUrl"
               clearable
-              placeholder="如 https://cdn.example.com/privacy.html"
+              placeholder="如 https://example.com/privacy.html"
           />
-          <span class="form-tip">App 将通过系统配置接口读取该地址，用于展示隐私政策页面</span>
+          <span class="form-tip">App 请求 GET /sysInfo/cfg 时在 header 携带 packageName；包级未配置时使用此处全局值</span>
+        </el-form-item>
+
+        <el-form-item label="用户服务协议 URL" prop="termsOfServiceUrl">
+          <el-input
+              v-model="formData.termsOfServiceUrl"
+              clearable
+              placeholder="如 https://example.com/terms.html"
+          />
+          <span class="form-tip">App 请求 GET /sysInfo/cfg 时在 header 携带 packageName；包级未配置时使用此处全局值</span>
         </el-form-item>
 
         <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
@@ -42,6 +51,7 @@ const formRef = ref()
 const formData = reactive({
   id: '0',
   privacyPolicyUrl: '',
+  termsOfServiceUrl: '',
 })
 
 const metaInfo = reactive({
@@ -68,18 +78,38 @@ const formRules = reactive({
       trigger: 'blur',
     },
   ],
+  termsOfServiceUrl: [
+    {max: 512, message: 'URL 长度不能超过 512', trigger: 'blur'},
+    {
+      validator: (_: unknown, value: string, callback: (e?: Error) => void) => {
+        const url = value?.trim()
+        if (!url) {
+          callback()
+          return
+        }
+        if (!/^https?:\/\//i.test(url)) {
+          callback(new Error('URL 需以 http:// 或 https:// 开头'))
+          return
+        }
+        callback()
+      },
+      trigger: 'blur',
+    },
+  ],
 })
 
 const applyCfg = (cfg: PrivacyPolicyCfg | null | undefined) => {
   if (!cfg) {
     formData.id = '0'
     formData.privacyPolicyUrl = ''
+    formData.termsOfServiceUrl = ''
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
     return
   }
   formData.id = cfg.id || '0'
   formData.privacyPolicyUrl = cfg.privacyPolicyUrl || ''
+  formData.termsOfServiceUrl = cfg.termsOfServiceUrl || ''
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
 }
@@ -104,6 +134,7 @@ const handleSave = async () => {
     const response = await privacyPolicyApi.savePrivacyPolicyCfg({
       id: formData.id === '0' ? 0 : Number(formData.id),
       privacyPolicyUrl: formData.privacyPolicyUrl.trim(),
+      termsOfServiceUrl: formData.termsOfServiceUrl.trim(),
     })
     if (response?.success) {
       ElMessage.success('保存成功')

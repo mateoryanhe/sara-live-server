@@ -10,26 +10,18 @@
   <link rel="stylesheet" href="css/site.css">
 </head>
 <body data-page-title-key="cancelPageTitle" data-cancel-page="true">
-  <header class="site-header">
-    <div class="container nav-bar">
-      <a class="brand" href="index.html">
+  <header class="site-header cancel-standalone-header">
+    <div class="container cancel-standalone-bar">
+      <div class="brand brand-static">
         <img src="assets/app-icon.png" alt="Sara Live">
         <span>Sara Live</span>
-      </a>
-      <button class="menu-toggle" type="button" aria-label="Menu">☰</button>
-      <nav class="nav-links">
-        <a href="index.html" data-nav="home" data-i18n="navHome">Home</a>
-        <a href="index.html#features" data-nav="features" data-i18n="navFeatures">Features</a>
-        <a href="privacy.html" data-nav="privacy" data-i18n="navPrivacy">Privacy</a>
-        <a href="privacy.html#tos" data-nav="terms" data-i18n="navTerms">Terms</a>
-        <a href="cancel-account.html" data-nav="cancel" class="active" data-i18n="navCancel">Delete Account</a>
-        <div class="lang-switch">
-          <button class="lang-btn active" data-lang="en" type="button">EN</button>
-          <button class="lang-btn" data-lang="es" type="button">ES</button>
-          <button class="lang-btn" data-lang="pt" type="button">PT</button>
-          <button class="lang-btn" data-lang="hi" type="button">HI</button>
-        </div>
-      </nav>
+      </div>
+      <div class="lang-switch">
+        <button class="lang-btn active" data-lang="en" type="button">EN</button>
+        <button class="lang-btn" data-lang="es" type="button">ES</button>
+        <button class="lang-btn" data-lang="pt" type="button">PT</button>
+        <button class="lang-btn" data-lang="hi" type="button">HI</button>
+      </div>
     </div>
   </header>
 
@@ -70,12 +62,10 @@
     </div>
   </main>
 
-  <footer class="site-footer">
+  <footer class="site-footer cancel-standalone-footer">
     <div class="container footer-grid">
       <div data-i18n="footerRights">© 2026 Sara Live. All rights reserved.</div>
       <div class="footer-links">
-        <a href="privacy.html" data-i18n="navPrivacy">Privacy</a>
-        <a href="privacy.html#tos" data-i18n="navTerms">Terms</a>
         <a href="mailto:support@saralive.app" data-support-email>support@saralive.app</a>
       </div>
     </div>

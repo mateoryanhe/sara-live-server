@@ -8,7 +8,8 @@ import (
 )
 
 type cfgSnapshot struct {
-	PrivacyPolicyUrl string
+	PrivacyPolicyUrl  string
+	TermsOfServiceUrl string
 }
 
 var (
@@ -37,10 +38,15 @@ func toCfgSnapshot(row *entity.PrivacyPolicyCfg) *cfgSnapshot {
 		return emptyCfgSnapshot
 	}
 	return &cfgSnapshot{
-		PrivacyPolicyUrl: row.PrivacyPolicyUrl,
+		PrivacyPolicyUrl:  row.PrivacyPolicyUrl,
+		TermsOfServiceUrl: row.TermsOfServiceUrl,
 	}
 }
 
 func GetPrivacyPolicyUrl() string {
 	return getCfgCache().PrivacyPolicyUrl
+}
+
+func GetTermsOfServiceUrl() string {
+	return getCfgCache().TermsOfServiceUrl
 }

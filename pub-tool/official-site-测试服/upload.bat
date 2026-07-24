@@ -162,7 +162,7 @@ if /i "%REMOTE_DIR%"=="/" (
 
 REM ---------- Upload and extract ----------
 echo [4/4] Uploading to server...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "if [ -d '%REMOTE_DIR%' ]; then rm -rf '%REMOTE_DIR%'; fi && mkdir -p '%REMOTE_DIR%'"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "mkdir -p '%REMOTE_DIR%'"
 if errorlevel 1 (
     echo Error: Failed to prepare remote directory: %REMOTE_DIR%
     plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "ls -ld '%REMOTE_DIR%' 2>&1"
@@ -179,8 +179,9 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM unzip 在仅有 warning（如路径反斜杠）时返回 1，需与真正失败区分
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "unzip -o /tmp/%ZIP_FILE% -d '%REMOTE_DIR%'; ec=$?; rm -f /tmp/%ZIP_FILE%; if [ $ec -eq 0 ] || [ $ec -eq 1 ]; then exit 0; else exit $ec; fi"
+REM 解压到临时目录后仅覆盖包内文件，避免 rm -rf 整目录时因无关子目录权限失败
+REM unzip 在仅有 warning 时返回 1，需与真正失败区分
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "STAGE=/tmp/official-site-stage-$$; REMOTE='%REMOTE_DIR%'; ZIP=/tmp/%ZIP_FILE%; rm -rf $STAGE; mkdir -p $STAGE $REMOTE; unzip -o $ZIP -d $STAGE; ec=$?; if [ $ec -ne 0 ] && [ $ec -ne 1 ]; then rm -rf $STAGE; rm -f $ZIP; exit $ec; fi; for f in $STAGE/*; do [ -e $f ] || continue; rm -rf $REMOTE/$(basename $f); done; cp -a $STAGE/. $REMOTE/; rm -rf $STAGE; rm -f $ZIP; exit 0"
 if errorlevel 1 (
     echo Error: Remote extraction failed. Details:
     plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "ls -la /tmp/%ZIP_FILE% 2>&1; unzip -t /tmp/%ZIP_FILE% 2>&1 || true"

@@ -16,7 +16,7 @@ func closeServer(sig os.Signal) {
 func middlewareCORS(r *ghttp.Request) {
 	options := r.Response.DefaultCORSOptions()
 	// CMS/App 自定义鉴权头
-	for _, header := range []string{"token", "authId", "reqId"} {
+	for _, header := range []string{"token", "authId", "reqId", PackageNameHeader} {
 		if options.AllowHeaders == "" {
 			options.AllowHeaders = header
 			continue

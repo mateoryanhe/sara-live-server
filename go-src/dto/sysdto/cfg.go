@@ -11,5 +11,6 @@ type SysCfgResp struct {
 	PaidDanmakuPrice            float64 `json:"paidDanmakuPrice" dc:"直播间付费弹幕价格(钻石)"`
 	PrivateRoomFreeWatchSeconds uint32  `json:"privateRoomFreeWatchSeconds" dc:"私密直播间免费观看时长(秒)"`
 	PrivacyPolicyUrl            string  `json:"privacyPolicyUrl" dc:"隐私政策页面URL"`
+	TermsOfServiceUrl           string  `json:"termsOfServiceUrl" dc:"用户服务协议页面URL"`
 	AppImageMaxSize             uint64  `json:"appImageMaxSize" dc:"App端图片上传大小上限(字节)"`
 }

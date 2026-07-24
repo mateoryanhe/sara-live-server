@@ -7,6 +7,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"xr-game-server/core/cfg"
 	"xr-game-server/errercode"
 )
 
@@ -15,22 +16,24 @@ const (
 	logTypeDetail = "detail"
 	logTypeError  = "error"
 
-	defaultExportSubDir     = "log-query-export"
-	defaultExportTTLMinutes = 30
-	defaultMaxMatchLines    = 100000
-	defaultMaxPageSize      = 200
+	defaultExportStaticPrefix = "/cms"
+	defaultExportSubDir       = "log-query-export"
+	defaultExportTTLMinutes   = 30
+	defaultMaxMatchLines      = 100000
+	defaultMaxPageSize        = 200
 )
 
 type logQueryConfig struct {
-	LogDir           string
-	AccessPrefix     string
-	DetailPrefix     string
-	ErrorPrefix      string
-	ExportSubDir     string
-	ExportTTLMinutes int
-	MaxMatchLines    int
-	MaxPageSize      int
-	ServerRoot       string
+	LogDir             string
+	AccessPrefix       string
+	DetailPrefix       string
+	ErrorPrefix        string
+	ExportStaticPrefix string
+	ExportSubDir       string
+	ExportRoot         string
+	ExportTTLMinutes   int
+	MaxMatchLines      int
+	MaxPageSize        int
 }
 
 func loadLogQueryConfig() logQueryConfig {
@@ -42,17 +45,47 @@ func loadLogQueryConfig() logQueryConfig {
 	if logDir == "" {
 		logDir = strings.TrimSpace(g.Cfg().MustGet(ctx, "server.logPath").String())
 	}
-	return logQueryConfig{
-		LogDir:           filepath.Clean(logDir),
-		AccessPrefix:     logFilePrefixFromPattern(g.Cfg().MustGet(ctx, "server.accessLogPattern").String()),
-		DetailPrefix:     logFilePrefixFromPattern(g.Cfg().MustGet(ctx, "logger.detail.file").String()),
-		ErrorPrefix:      logFilePrefixFromPattern(g.Cfg().MustGet(ctx, "logger.error.file").String()),
-		ExportSubDir:     defaultExportSubDir,
-		ExportTTLMinutes: defaultExportTTLMinutes,
-		MaxMatchLines:    defaultMaxMatchLines,
-		MaxPageSize:      defaultMaxPageSize,
-		ServerRoot:       filepath.Clean(g.Cfg().MustGet(ctx, "server.serverRoot").String()),
+
+	exportStaticPrefix := normalizeLogQueryURLPrefix(g.Cfg().MustGet(ctx, "logQuery.exportStaticPrefix").String())
+	if exportStaticPrefix == "" {
+		exportStaticPrefix = defaultExportStaticPrefix
 	}
+	exportSubDir := strings.TrimSpace(g.Cfg().MustGet(ctx, "logQuery.exportSubDir").String())
+	if exportSubDir == "" {
+		exportSubDir = defaultExportSubDir
+	}
+
+	exportRoot := strings.TrimSpace(cfg.GetStaticPathRoot(exportStaticPrefix))
+	if exportRoot == "" {
+		exportRoot = strings.TrimSpace(cfg.ResolvePhysicalDir(exportStaticPrefix))
+	}
+	if exportRoot == "" {
+		exportRoot = filepath.Clean(cfg.GetServerRoot())
+	}
+
+	return logQueryConfig{
+		LogDir:             filepath.Clean(logDir),
+		AccessPrefix:       logFilePrefixFromPattern(g.Cfg().MustGet(ctx, "server.accessLogPattern").String()),
+		DetailPrefix:       logFilePrefixFromPattern(g.Cfg().MustGet(ctx, "logger.detail.file").String()),
+		ErrorPrefix:        logFilePrefixFromPattern(g.Cfg().MustGet(ctx, "logger.error.file").String()),
+		ExportStaticPrefix: exportStaticPrefix,
+		ExportSubDir:       exportSubDir,
+		ExportRoot:         filepath.Clean(exportRoot),
+		ExportTTLMinutes:   defaultExportTTLMinutes,
+		MaxMatchLines:      defaultMaxMatchLines,
+		MaxPageSize:        defaultMaxPageSize,
+	}
+}
+
+func normalizeLogQueryURLPrefix(prefix string) string {
+	prefix = strings.TrimSpace(prefix)
+	if prefix == "" {
+		return ""
+	}
+	if !strings.HasPrefix(prefix, "/") {
+		prefix = "/" + prefix
+	}
+	return strings.TrimRight(prefix, "/")
 }
 
 func logFilePrefixFromPattern(pattern string) string {
@@ -96,15 +129,19 @@ func (c logQueryConfig) prefixForType(logType string) string {
 }
 
 func (c logQueryConfig) exportAbsDir() string {
-	return filepath.Join(c.ServerRoot, c.ExportSubDir)
+	return filepath.Join(c.ExportRoot, c.ExportSubDir)
 }
 
 func (c logQueryConfig) exportURLPrefix() string {
+	prefix := normalizeLogQueryURLPrefix(c.ExportStaticPrefix)
+	if prefix == "" {
+		prefix = defaultExportStaticPrefix
+	}
 	sub := strings.Trim(strings.ReplaceAll(c.ExportSubDir, "\\", "/"), "/")
 	if sub == "" {
-		return "/log-query-export"
+		sub = defaultExportSubDir
 	}
-	return "/" + sub
+	return prefix + "/" + sub
 }
 
 func formatLogFileName(pattern string, dateStr string) string {

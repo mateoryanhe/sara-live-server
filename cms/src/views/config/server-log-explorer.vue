@@ -4,7 +4,10 @@
       <template #header>
         <div class="card-header">
           <span>服务器日志</span>
-          <span class="server-time-tip">服务器时间: {{ serverTimeDisplay }}</span>
+          <span class="server-time-tip">
+            服务器时间: {{ serverTimeDisplay }}
+            <template v-if="exportPathTip"> · 导出: {{ exportPathTip }}</template>
+          </span>
         </div>
       </template>
 
@@ -435,6 +438,7 @@ const activeTab = ref('stats')
 const queryStatusTip = ref('查询中...')
 const serverTimeLoading = ref(false)
 const serverTimeDisplay = ref('-')
+const exportPathTip = ref('')
 let serverTimeBaseMs = 0
 let serverTimeSyncClientMs = 0
 let serverTimeTickTimer: ReturnType<typeof setInterval> | null = null
@@ -496,6 +500,7 @@ const syncServerTime = async () => {
     serverTimeBaseMs = parsed.getTime()
     serverTimeSyncClientMs = Date.now()
     updateServerTimeDisplay()
+    exportPathTip.value = data.exportUrlPrefix || ''
   } catch (error) {
     console.error('获取服务器时间失败:', error)
     ElMessage.error('获取服务器时间失败')

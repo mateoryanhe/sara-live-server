@@ -30,9 +30,11 @@ func Create(_ context.Context, req *apppkgdto.CreateAppPkgReq) (*apppkgdto.Creat
 		return nil, errercode.CreateCode(errercode.AppPkgExist)
 	}
 	row := &entity.AppPkg{
-		PackageName: packageName,
-		SecretKey:   secretKey,
-		Remark:      strings.TrimSpace(req.Remark),
+		PackageName:       packageName,
+		SecretKey:         secretKey,
+		PrivacyPolicyUrl:  strings.TrimSpace(req.PrivacyPolicyUrl),
+		TermsOfServiceUrl: strings.TrimSpace(req.TermsOfServiceUrl),
+		Remark:            strings.TrimSpace(req.Remark),
 	}
 	if err := apppkgdao.Create(row); err != nil {
 		return nil, err
@@ -57,6 +59,8 @@ func Update(_ context.Context, req *apppkgdto.UpdateAppPkgReq) (*apppkgdto.Updat
 	updated := *row
 	updated.PackageName = packageName
 	updated.SecretKey = secretKey
+	updated.PrivacyPolicyUrl = strings.TrimSpace(req.PrivacyPolicyUrl)
+	updated.TermsOfServiceUrl = strings.TrimSpace(req.TermsOfServiceUrl)
 	updated.Remark = strings.TrimSpace(req.Remark)
 	if err := apppkgdao.Update(&updated); err != nil {
 		return nil, err

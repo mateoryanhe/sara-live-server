@@ -36,6 +36,9 @@ server:
   #     certFile: "/etc/letsencrypt/live/cdn2.example.com/fullchain.pem"
   #     keyFile: "/etc/letsencrypt/live/cdn2.example.com/privkey.pem"
 
+logQuery:
+  exportStaticPrefix: "/cms"
+  exportSubDir: "log-query-export"
 
 bufferSize:
   db:

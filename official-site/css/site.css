@@ -260,6 +260,32 @@ img { max-width: 100%; display: block; }
   max-width: 640px;
 }
 
+.cancel-standalone-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+}
+
+.brand-static {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.brand-static img {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+.cancel-standalone-footer .footer-links a:only-child {
+  margin-left: auto;
+}
+
 .cancel-card {
   padding: 28px 24px;
 }
