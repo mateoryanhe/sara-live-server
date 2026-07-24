@@ -17,6 +17,7 @@ import (
 	"xr-game-server/module/name"
 	"xr-game-server/module/privacypolicy"
 	"xr-game-server/module/privateroombilling"
+	"xr-game-server/module/randomnick"
 	"xr-game-server/module/recharge"
 	"xr-game-server/module/resourcemonitor"
 	"xr-game-server/module/richrank"
@@ -31,6 +32,7 @@ import (
 
 func Init() {
 	upload.Init()
+	randomnick.Init()
 	auth.InitAuth()
 	name.Init()
 	currencylog.Init()

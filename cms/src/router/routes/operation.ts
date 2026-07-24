@@ -36,5 +36,11 @@ export const operationRoutes: RouteRecordRaw = {
             component: () => import('@/views/operation/app-pkg/app-pkg-list.vue'),
             meta: {title: 'App包管理'},
         },
+        {
+            path: 'random-nickname/random-nickname-cfg',
+            name: 'RandomNicknameManagement',
+            component: () => import('@/views/operation/random-nickname/random-nickname-cfg.vue'),
+            meta: {title: '随机昵称库'},
+        },
     ],
 }

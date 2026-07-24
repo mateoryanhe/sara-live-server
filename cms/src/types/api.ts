@@ -1065,3 +1065,37 @@ export interface CMSUser {
     createdAt: string
     updatedAt: string
 }
+
+// 随机昵称库
+export interface RandomNicknameLangItem {
+    lang: number
+    langCode: string
+    langLabel: string
+    count: number
+    samples: string[]
+}
+
+export interface GetRandomNicknameCfgRes {
+    useDB: boolean
+    langs: RandomNicknameLangItem[]
+}
+
+export interface ImportRandomNicknamesReq {
+    lang: number
+    content: string
+    replace: boolean
+}
+
+export interface ImportRandomNicknamesRes {
+    imported: number
+    total: number
+}
+
+export interface ClearRandomNicknamesReq {
+    lang: number
+}
+
+export interface ClearRandomNicknamesRes {
+    success: boolean
+    total: number
+}

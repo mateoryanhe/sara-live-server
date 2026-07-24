@@ -10,6 +10,7 @@ func Init() {
 	initGlobalCfg()
 	initRank()
 	initName()
+	initRandomNickname()
 	InitCMSRole()
 	InitPermission()
 	initUserInfo()

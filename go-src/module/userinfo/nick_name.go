@@ -1,17 +1,10 @@
 package userinfo
 
 import (
-	"crypto/rand"
-	"math/big"
-
 	"xr-game-server/core/event"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/gameevent"
-)
-
-const (
-	randomNicknameLength  = 8
-	randomNicknameCharset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
+	"xr-game-server/module/randomnick"
 )
 
 func initNicknameEvent() {
@@ -27,19 +20,9 @@ func onRegisterAssignNickname(data any) {
 	if user == nil || user.Nickname != "" {
 		return
 	}
-	user.SetNickname(genRandomNickname())
-}
-
-func genRandomNickname() string {
-	charsetLen := big.NewInt(int64(len(randomNicknameCharset)))
-	b := make([]byte, randomNicknameLength)
-	for i := 0; i < randomNicknameLength; i++ {
-		n, err := rand.Int(rand.Reader, charsetLen)
-		if err != nil {
-			b[i] = randomNicknameCharset[i%len(randomNicknameCharset)]
-			continue
-		}
-		b[i] = randomNicknameCharset[n.Int64()]
+	lang := val.NickLang
+	if lang == 0 {
+		lang = randomnick.DefaultLang
 	}
-	return string(b)
+	user.SetNickname(randomnick.PickRandom(lang))
 }
