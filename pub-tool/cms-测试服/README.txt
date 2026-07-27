@@ -22,10 +22,17 @@ CMS 一键构建上传说明（PuTTY + .ppk 密钥）
   VUE_PROJECT_DIR / BUILD_OUTPUT_DIR       - 项目与构建输出目录
   REMOTE_DIR_TEST / REMOTE_DIR_PROD        - 各环境远程部署目录
 
-用法示例
-  upload.bat           部署测试环境（默认）
-  upload.bat test      部署测试环境
-  upload.bat prod      部署生产环境
+部署流程
+  1. npm run build:test / build:prod
+  2. 压缩 D:\root\cms 构建产物（优先 tar，路径兼容 Linux）
+  3. 上传到 /tmp 后解压到临时目录
+  4. 仅覆盖包内顶层文件/目录到 REMOTE_DIR，保留 log-query-export 等服务器目录
+  5. 校验远程 index.html 存在
+
+注意
+  旧脚本会先 rm -rf 整个 REMOTE_DIR，若解压失败会导致 /cms 目录被清空。
+  服务器 staticPaths 映射: /cms -> /home/ec2-user/cdn/cms
+  访问示例: https://www.bigtktool.shop/cms/
 
 密钥格式
   若密钥为 OpenSSH (.pem)，请用 PuTTYgen 转为 .ppk 后写入 SSH_KEY_PATH。

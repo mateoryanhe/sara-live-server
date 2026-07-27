@@ -62,7 +62,7 @@ if not exist "pscp.exe" (
 )
 
 REM ---------- Build Vue ----------
-echo [1/4] Building Vue project...
+echo [1/5] Building Vue project...
 cd /d "%VUE_PROJECT_DIR%"
 
 if not exist "package.json" (
@@ -88,8 +88,14 @@ if not exist "%BUILD_OUTPUT_DIR%" (
     exit /b 1
 )
 
+if not exist "%BUILD_OUTPUT_DIR%\index.html" (
+    echo Error: index.html not found in build output: %BUILD_OUTPUT_DIR%
+    pause
+    exit /b 1
+)
+
 REM ---------- SSH connect (ppk) ----------
-echo [2/4] Testing SSH connection...
+echo [2/5] Testing SSH connection...
 plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -hostkey "*" %REMOTE_USER%@%REMOTE_HOST% "echo ok" >nul 2>&1
 if errorlevel 1 (
     echo First connection, accepting host key...
@@ -103,32 +109,35 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM ---------- Zip ----------
-echo [3/4] Compressing build output...
+REM ---------- Zip (prefer tar for Linux-friendly paths) ----------
+echo [3/5] Compressing build output...
 if exist "%ZIP_FILE%" del /f /q "%ZIP_FILE%"
 
-set ZIP_TOOL=
-where 7z >nul 2>&1
-if %ERRORLEVEL% EQU 0 set ZIP_TOOL=7z
-if not defined ZIP_TOOL if exist "C:\Program Files\7-Zip\7z.exe" set "ZIP_TOOL=C:\Program Files\7-Zip\7z.exe"
+set ZIP_OK=0
+where tar >nul 2>&1
+if %ERRORLEVEL% EQU 0 (
+    tar -a -cf "%ZIP_FILE%" -C "%BUILD_OUTPUT_DIR%" .
+    if not errorlevel 1 set ZIP_OK=1
+)
 
-set "ZIP_PATH=%~dp0%ZIP_FILE%"
-if defined ZIP_TOOL (
-    "%ZIP_TOOL%" a -tzip "!ZIP_PATH!" "!BUILD_OUTPUT_DIR!\*" >nul
-    if errorlevel 1 (
-        echo Error: Failed to create zip with 7-Zip
-        echo Zip path: !ZIP_PATH!
-        pause
-        exit /b 1
+if !ZIP_OK! EQU 0 (
+    set ZIP_TOOL=
+    where 7z >nul 2>&1
+    if %ERRORLEVEL% EQU 0 set ZIP_TOOL=7z
+    if not defined ZIP_TOOL if exist "C:\Program Files\7-Zip\7z.exe" set "ZIP_TOOL=C:\Program Files\7-Zip\7z.exe"
+    if defined ZIP_TOOL (
+        set "ZIP_PATH=%~dp0%ZIP_FILE%"
+        pushd "%BUILD_OUTPUT_DIR%"
+        "%ZIP_TOOL%" a -tzip "!ZIP_PATH!" * >nul
+        popd
+        if exist "%~dp0%ZIP_FILE%" set ZIP_OK=1
     )
-) else (
-    where tar >nul 2>&1
-    if %ERRORLEVEL% EQU 0 (
-        tar -a -cf "%ZIP_FILE%" -C "%BUILD_OUTPUT_DIR%" .
-    ) else (
-        echo Warning: 7-Zip/tar not found, using PowerShell zip ^(Linux unzip may warn^)
-        powershell -NoProfile -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::CreateFromDirectory('%BUILD_OUTPUT_DIR%', '%CD%\%ZIP_FILE%')"
-    )
+)
+
+if !ZIP_OK! EQU 0 (
+    echo Error: Failed to create zip file. Please install tar or 7-Zip.
+    pause
+    exit /b 1
 )
 
 if not exist "%ZIP_FILE%" (
@@ -137,9 +146,22 @@ if not exist "%ZIP_FILE%" (
     exit /b 1
 )
 
+if "%REMOTE_DIR%"=="" (
+    echo Error: REMOTE_DIR is not configured in config.bat
+    del "%ZIP_FILE%"
+    pause
+    exit /b 1
+)
+if /i "%REMOTE_DIR%"=="/" (
+    echo Error: REMOTE_DIR cannot be /
+    del "%ZIP_FILE%"
+    pause
+    exit /b 1
+)
+
 REM ---------- Upload and extract ----------
-echo [4/4] Uploading to server...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "if [ -d '%REMOTE_DIR%' ]; then rm -rf '%REMOTE_DIR%'; fi && mkdir -p '%REMOTE_DIR%'"
+echo [4/5] Uploading to server...
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "mkdir -p '%REMOTE_DIR%'"
 if errorlevel 1 (
     echo Error: Failed to prepare remote directory
     del "%ZIP_FILE%"
@@ -155,18 +177,26 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM unzip 在仅有 warning（如路径反斜杠）时返回 1，需与真正失败区分
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "unzip -o /tmp/%ZIP_FILE% -d '%REMOTE_DIR%'; ec=$?; rm -f /tmp/%ZIP_FILE%; if [ $ec -eq 0 ] || [ $ec -eq 1 ]; then exit 0; else exit $ec; fi"
+REM 解压到临时目录后仅覆盖包内顶层文件/目录，保留 log-query-export 等服务器侧目录
+REM unzip 在仅有 warning 时返回 1，需与真正失败区分
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "STAGE=/tmp/cms-stage-$$; REMOTE='%REMOTE_DIR%'; ZIP=/tmp/%ZIP_FILE%; rm -rf $STAGE; mkdir -p $STAGE $REMOTE; unzip -o $ZIP -d $STAGE; ec=$?; if [ $ec -ne 0 ] && [ $ec -ne 1 ]; then rm -rf $STAGE; rm -f $ZIP; exit $ec; fi; for f in $STAGE/*; do [ -e $f ] || continue; rm -rf $REMOTE/$(basename $f); done; cp -a $STAGE/. $REMOTE/; rm -rf $STAGE; rm -f $ZIP; test -f $REMOTE/index.html"
 if errorlevel 1 (
-    echo Error: Remote extraction failed. Details:
-    plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "ls -la /tmp/%ZIP_FILE% 2>&1; unzip -t /tmp/%ZIP_FILE% 2>&1 || true"
+    echo Error: Remote extraction failed or index.html missing. Details:
+    plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "ls -la '%REMOTE_DIR%' 2>&1; ls -la /tmp/%ZIP_FILE% 2>&1; unzip -t /tmp/%ZIP_FILE% 2>&1 || true"
     del "%ZIP_FILE%"
     pause
     exit /b 1
 )
 
+echo [5/5] Verifying remote deployment...
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "ls -la '%REMOTE_DIR%' | head -20"
+if errorlevel 1 (
+    echo Warning: Could not list remote directory after deploy
+)
+
 del "%ZIP_FILE%"
 echo.
 echo Build and upload completed! [%DEPLOY_ENV%] -^> %REMOTE_DIR%
+echo Access: https://www.bigtktool.shop/cms/
 pause
 endlocal

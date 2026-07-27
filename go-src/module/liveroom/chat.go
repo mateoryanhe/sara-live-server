@@ -96,6 +96,7 @@ func pushPrivateRoomChat(senderId, targetId uint64, content string) {
 	if sender != nil {
 		payload.SenderName = sender.Nickname
 		payload.SenderAvatar = upload.ResolveAvatarUrlForUser(sender.ID, sender.Avatar)
+		payload.VipLevel = sender.VipLevel
 	}
 
 	push.Data(senderId, cmd.LiveRoomPrivateChat, payload)
@@ -113,6 +114,7 @@ func pushRoomChat(roomId, senderId uint64, content string) {
 	if sender != nil {
 		payload.SenderName = sender.Nickname
 		payload.SenderAvatar = upload.ResolveAvatarUrlForUser(sender.ID, sender.Avatar)
+		payload.VipLevel = sender.VipLevel
 	}
 
 	for _, o := range getOnline(roomId) {

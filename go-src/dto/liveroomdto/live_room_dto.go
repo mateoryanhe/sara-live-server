@@ -169,6 +169,7 @@ type GiftPushItem struct {
 	SenderId     uint64  `json:"senderId,string"    dc:"送礼用户ID"`
 	SenderName   string  `json:"senderName"  dc:"送礼用户昵称"`
 	SenderAvatar string  `json:"senderAvatar" dc:"送礼用户头像"`
+	VipLevel     uint32  `json:"vipLevel"    dc:"VIP等级"`
 	GiftId       uint64  `json:"giftId,string"      dc:"礼物ID"`
 	GiftName     string  `json:"giftName"    dc:"礼物名称"`
 	GiftIcon     string  `json:"giftIcon"    dc:"礼物图标"`
@@ -186,6 +187,7 @@ type PrivateGiftPushItem struct {
 	SenderId     uint64  `json:"senderId,string"    dc:"送礼用户ID"`
 	SenderName   string  `json:"senderName"  dc:"送礼用户昵称"`
 	SenderAvatar string  `json:"senderAvatar" dc:"送礼用户头像"`
+	VipLevel     uint32  `json:"vipLevel"    dc:"VIP等级"`
 	GiftId       uint64  `json:"giftId,string"      dc:"礼物ID"`
 	GiftName     string  `json:"giftName"    dc:"礼物名称"`
 	GiftIcon     string  `json:"giftIcon"    dc:"礼物图标"`
@@ -329,6 +331,7 @@ type PrivateRoomChatPushItem struct {
 	SenderId     string `json:"senderId"     dc:"发送用户ID"`
 	SenderName   string `json:"senderName"   dc:"发送用户昵称"`
 	SenderAvatar string `json:"senderAvatar" dc:"发送用户头像"`
+	VipLevel     uint32 `json:"vipLevel"     dc:"VIP等级"`
 	Content      string `json:"content"      dc:"文字内容"`
 	SentAt       int64  `json:"sentAt"       dc:"发送时间(秒)"`
 }
@@ -366,6 +369,7 @@ type ChatPushItem struct {
 	SenderId     string `json:"senderId"     dc:"发送用户ID"`
 	SenderName   string `json:"senderName"   dc:"发送用户昵称"`
 	SenderAvatar string `json:"senderAvatar" dc:"发送用户头像"`
+	VipLevel     uint32 `json:"vipLevel"     dc:"VIP等级"`
 	Content      string `json:"content"      dc:"文字内容"`
 	SentAt       int64  `json:"sentAt"       dc:"发送时间(秒)"`
 }

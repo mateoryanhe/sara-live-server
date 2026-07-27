@@ -125,6 +125,7 @@ func prepareSendGift(ctx context.Context, roomId, giftId uint64, count int) (*se
 	if sender != nil {
 		payload.SenderName = sender.Nickname
 		payload.SenderAvatar = upload.ResolveAvatarUrlForUser(sender.ID, sender.Avatar)
+		payload.VipLevel = sender.VipLevel
 	}
 
 	return &sendGiftResult{
@@ -194,6 +195,7 @@ func buildPrivateGiftPushItem(gift *liveroomdto.GiftPushItem, anchorId uint64) *
 		SenderId:     gift.SenderId,
 		SenderName:   gift.SenderName,
 		SenderAvatar: gift.SenderAvatar,
+		VipLevel:     gift.VipLevel,
 		GiftId:       gift.GiftId,
 		GiftName:     gift.GiftName,
 		GiftIcon:     gift.GiftIcon,
