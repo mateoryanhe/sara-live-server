@@ -25,7 +25,6 @@ server:
   #     certFile: "D:/certs/cdn.example.com/fullchain.pem"
   #     keyFile: "D:/certs/cdn.example.com/privkey.pem"
 
-
 bufferSize:
   db:
     lazy:

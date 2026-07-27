@@ -9,10 +9,14 @@ import (
 	"xr-game-server/dto/accountdto"
 	"xr-game-server/dto/userinfodto"
 	"xr-game-server/errercode"
+	"xr-game-server/module/accountcfg"
 )
 
 // CancelAccountByCode 通过注销码注销账号(官网公开接口)
 func CancelAccountByCode(ctx context.Context, req *userinfodto.CancelAccountByCodeReq) (*userinfodto.CancelAccountByCodeRes, error) {
+	if !accountcfg.IsCancelAccountByCodeEnabled() {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 	cancelCode := strings.TrimSpace(req.CancelCode)
 	if cancelCode == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
@@ -22,8 +26,15 @@ func CancelAccountByCode(ctx context.Context, req *userinfodto.CancelAccountByCo
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	dbAcc := accountdao.GetAccountById(userId)
-	if dbAcc == nil {
+	if dbAcc == nil || dbAcc.ID == 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	account := accountdao.GetAccountFromCache(dbAcc.OpenId, dbAcc.Channel, userId)
+	if account == nil {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if account.Cancel {
+		return nil, errercode.CreateCode(errercode.AccountCanceled)
 	}
 
 	ok, err := CancelUser(ctx, &accountdto.CancelReq{

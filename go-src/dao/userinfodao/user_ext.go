@@ -3,36 +3,18 @@ package userinfodao
 import (
 	"context"
 	"strings"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/util/guid"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/cache"
 	"xr-game-server/entity"
 )
 
-var (
-	userExtCacheMgr    *cache.CacheMgr
-	cancelCodeCacheMgr *cache.CacheMgr
-)
-
-const cancelCodeMissCacheTime = 10 * time.Minute
+var userExtCacheMgr *cache.CacheMgr
 
 func initUserExtDao() {
 	userExtCacheMgr = cache.NewCacheMgr()
-	cancelCodeCacheMgr = cache.NewCacheMgr()
-}
-
-func cancelCodeMissCacheKey(cancelCode string) string {
-	return "miss:" + cancelCode
-}
-
-func syncCancelCodeCache(cancelCode string, userId uint64) {
-	cancelCodeCacheMgr.FlushCache(cancelCode, userId)
-	ctx := gctx.New()
-	_, _ = cancelCodeCacheMgr.Cache.Remove(ctx, cancelCodeMissCacheKey(cancelCode))
 }
 
 // GetUserExtByUserId 获取用户扩展信息,不存在则新建内存对象(异步入库,默认允许上排行榜)
@@ -87,27 +69,14 @@ func SaveCancelCode(userId uint64) {
 	}
 	cancelCode := guid.S()
 	ext.SetCancelCode(cancelCode)
-	syncCancelCodeCache(cancelCode, userId)
 }
 
-// FindUserIdByCancelCode 根据注销码只读查询用户ID,不存在时负缓存 10 分钟
+// FindUserIdByCancelCode 根据注销码查询用户ID
 func FindUserIdByCancelCode(cancelCode string) uint64 {
 	cancelCode = strings.TrimSpace(cancelCode)
 	if cancelCode == "" {
 		return 0
 	}
-
-	ctx := gctx.New()
-	if ok, _ := cancelCodeCacheMgr.Cache.Contains(ctx, cancelCodeMissCacheKey(cancelCode)); ok {
-		return 0
-	}
-
-	if cached := cancelCodeCacheMgr.GetFromCache(cancelCode); cached != nil {
-		if userId, ok := cached.(uint64); ok && userId > 0 {
-			return userId
-		}
-	}
-
 	var row struct {
 		ID uint64
 	}
@@ -116,11 +85,8 @@ func FindUserIdByCancelCode(cancelCode string) uint64 {
 		Limit(1).
 		Scan(&row)
 	if err != nil || row.ID == 0 {
-		_ = cancelCodeCacheMgr.Cache.Set(ctx, cancelCodeMissCacheKey(cancelCode), 1, cancelCodeMissCacheTime)
 		return 0
 	}
-
-	cancelCodeCacheMgr.FlushCache(cancelCode, row.ID)
 	return row.ID
 }
 

@@ -13,6 +13,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: 'App Token'},
         },
         {
+            path: 'account-cfg',
+            name: 'AccountCfgManagement',
+            component: () => import('@/views/config/account-cfg.vue'),
+            meta: {title: '账号配置'},
+        },
+        {
             path: 'text-moderation',
             name: 'TextModerationCfgManagement',
             component: () => import('@/views/config/text-moderation.vue'),

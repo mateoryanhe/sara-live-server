@@ -326,6 +326,27 @@ export interface SaveAppTokenReq {
     expireAt?: string | null
 }
 
+export interface AccountCfg {
+    id?: string
+    cancelAccountByCodeEnabled: boolean
+    createdAt?: string
+    updatedAt?: string
+}
+
+export interface GetAccountCfgRes {
+    cfg?: AccountCfg | null
+}
+
+export interface SaveAccountCfgReq {
+    id?: string | number
+    cancelAccountByCodeEnabled: boolean
+}
+
+export interface SaveAccountCfgRes {
+    success: boolean
+    id?: string
+}
+
 // 角色相关类型
 export interface Role {
     id: string

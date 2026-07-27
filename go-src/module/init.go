@@ -1,6 +1,7 @@
 package module
 
 import (
+	"xr-game-server/module/accountcfg"
 	"xr-game-server/module/agora"
 	"xr-game-server/module/aliyunmoderation"
 	"xr-game-server/module/anchorrank"
@@ -52,6 +53,7 @@ func Init() {
 	verification_code.Init()
 	aliyunmoderation.Init()
 	privacypolicy.Init()
+	accountcfg.Init()
 
 	liveroom.Init()
 	userinfo.Init()
