@@ -46,24 +46,24 @@ func initRoomList() {
 func flushRoomList(ctx context.Context) {
 	_ = ctx
 	allData := liveroomdao.GetAllLiveRoom()
-	filtered := make([]*entity.LiveRoom, 0, len(allData))
+	rooms := make([]*entity.LiveRoom, 0, len(allData))
 	for _, room := range allData {
-		if room == nil || IsRoomBanned(room) || isDisabledBotAnchorRoom(room) {
+		if room == nil {
 			continue
 		}
-		filtered = append(filtered, room)
+		rooms = append(rooms, room)
 	}
 
-	onlineCounts := make(map[uint64]int, len(filtered))
-	for _, room := range filtered {
+	onlineCounts := make(map[uint64]int, len(rooms))
+	for _, room := range rooms {
 		onlineCounts[room.ID] = countAudienceInRoom(room.ID)
 	}
 
-	sort.Slice(filtered, func(i, j int) bool {
-		return compareLiveRoomsForList(filtered[i], filtered[j], onlineCounts)
+	sort.Slice(rooms, func(i, j int) bool {
+		return compareLiveRoomsForList(rooms[i], rooms[j], onlineCounts)
 	})
 
-	roomListCache.Store(filtered)
+	roomListCache.Store(rooms)
 }
 
 // RefreshRoomListCache 主动刷新直播间列表缓存
@@ -77,6 +77,21 @@ func isDisabledBotAnchorRoom(room *entity.LiveRoom) bool {
 	}
 	user := userinfodao.GetUserInfoByUserId(room.ID)
 	return user != nil && user.IsBotAnchor() && user.BotAnchorStatus != entity.BotAnchorStatusEnabled
+}
+
+// filterRoomsForApp App 端列表查询时过滤不可见直播间
+func filterRoomsForApp(rooms []*entity.LiveRoom) []*entity.LiveRoom {
+	if len(rooms) == 0 {
+		return rooms
+	}
+	filtered := make([]*entity.LiveRoom, 0, len(rooms))
+	for _, room := range rooms {
+		if room == nil || IsRoomBanned(room) || isDisabledBotAnchorRoom(room) {
+			continue
+		}
+		filtered = append(filtered, room)
+	}
+	return filtered
 }
 
 func resolveBotAnchorRoomInfo(anchorId uint64, cloudPlayerVideo string) (isBotAnchor bool, cloudPlayerVideoUrl string) {
@@ -290,7 +305,7 @@ func GetRoomList(ctx context.Context, req *liveroomdto.GetLiveRoomListReq) (*liv
 	userId := httpserver.GetAuthId(ctx)
 	page, pageSize := normalizeRoomListPage(req.Page, req.PageSize)
 
-	cached := getRoomListCache()
+	cached := filterRoomsForApp(getRoomListCache())
 	if cached == nil {
 		return &liveroomdto.GetLiveRoomListRes{
 			Total:    0,
@@ -327,7 +342,7 @@ func GetFollowedRoomList(ctx context.Context, req *liveroomdto.GetFollowedLiveRo
 			continue
 		}
 		room := liveroomdao.GetRoomById(f.AnchorId)
-		if room == nil || IsRoomBanned(room) {
+		if room == nil || IsRoomBanned(room) || isDisabledBotAnchorRoom(room) {
 			continue
 		}
 		rooms = append(rooms, room)
@@ -428,7 +443,7 @@ func GetHotLiveRoomList(ctx context.Context, req *liveroomdto.GetHotLiveRoomList
 	userId := httpserver.GetAuthId(ctx)
 	pageIndex, pageSize := normalizeRoomListPage(req.PageIndex, req.PageSize)
 
-	cached := getRoomListCache()
+	cached := filterRoomsForApp(getRoomListCache())
 	if cached == nil {
 		return &liveroomdto.GetHotLiveRoomListRes{
 			Total:     0,
@@ -460,7 +475,7 @@ func GetNearbyLiveRoomList(ctx context.Context, req *liveroomdto.GetNearbyLiveRo
 	userId := httpserver.GetAuthId(ctx)
 	count := normalizeNearbyLiveRoomCount(req.Count)
 
-	cached := getRoomListCache()
+	cached := filterRoomsForApp(getRoomListCache())
 	if cached == nil {
 		return &liveroomdto.GetNearbyLiveRoomListRes{
 			List: make([]*liveroomdto.LiveRoomListItem, 0),

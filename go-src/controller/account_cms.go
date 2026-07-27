@@ -49,11 +49,11 @@ func (a *AccountController) QueryUserInfo(ctx context.Context, req *accountdto.Q
 }
 
 func (a *AccountController) QueryAnchorList(ctx context.Context, req *accountdto.QueryAnchorListReq) (res *httpserver.CMSQueryResp, err error) {
-	return userinfo.QueryAnchorList(ctx, req)
+	return liveroom.QueryAnchorList(ctx, req)
 }
 
 func (a *AccountController) SetAnchor(ctx context.Context, req *accountdto.SetAnchorReq) (*accountdto.SetAnchorRes, error) {
-	return userinfo.SetAnchor(ctx, req)
+	return liveroom.SetAnchor(ctx, req)
 }
 
 func (a *AccountController) SetUserType(ctx context.Context, req *accountdto.SetUserTypeReq) (*accountdto.SetUserTypeRes, error) {

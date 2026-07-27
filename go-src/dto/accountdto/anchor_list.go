@@ -10,7 +10,7 @@ import (
 type QueryAnchorListReq struct {
 	g.Meta `path:"/getAnchorList" method:"post" summary:"获取主播列表" tags:"账号"`
 	httpserver.CMSQueryReq
-	Key string `json:"key" dc:"查询关键字(用户ID/昵称/手机号/分享码)"`
+	Key string `json:"key" dc:"查询关键字(用户ID模糊/昵称/手机号/分享码)"`
 }
 
 // AnchorListItem 主播列表项(基于 user_infos)
