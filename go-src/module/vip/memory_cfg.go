@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 	"sync/atomic"
-	"xr-game-server/dao/vipcfgdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/vipcfgdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
@@ -23,7 +23,7 @@ var (
 
 // reloadVipCfgMemory 从DB重新加载并整体替换内存快照
 func reloadVipCfgMemory() {
-	rows := vipcfgdao.GetAll()
+	rows := cfgdao.GetAllVipCfg()
 	byLevel := make(map[uint32]*vipcfgdto.AppVipCfgItem, len(rows))
 	list := make([]*vipcfgdto.AppVipCfgItem, 0, len(rows))
 	for _, row := range rows {

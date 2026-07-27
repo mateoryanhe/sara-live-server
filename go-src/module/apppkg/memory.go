@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"xr-game-server/dao/apppkgdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/apppkgdto"
 	"xr-game-server/entity"
 )
@@ -30,7 +30,7 @@ func Init() {
 }
 
 func reloadAppPkgMemory() {
-	rows := apppkgdao.GetAll()
+	rows := cfgdao.GetAllAppPkg()
 	byID := make(map[uint64]*entity.AppPkg, len(rows))
 	byPackageName := make(map[string]*entity.AppPkg, len(rows))
 	list := make([]*entity.AppPkg, 0, len(rows))

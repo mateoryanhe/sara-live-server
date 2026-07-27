@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"xr-game-server/core/httpserver"
-	"xr-game-server/dao/apppkgdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/apppkgdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
@@ -36,7 +36,7 @@ func Create(_ context.Context, req *apppkgdto.CreateAppPkgReq) (*apppkgdto.Creat
 		TermsOfServiceUrl: strings.TrimSpace(req.TermsOfServiceUrl),
 		Remark:            strings.TrimSpace(req.Remark),
 	}
-	if err := apppkgdao.Create(row); err != nil {
+	if err := cfgdao.CreateAppPkg(row); err != nil {
 		return nil, err
 	}
 	reloadAppPkgMemory()
@@ -62,7 +62,7 @@ func Update(_ context.Context, req *apppkgdto.UpdateAppPkgReq) (*apppkgdto.Updat
 	updated.PrivacyPolicyUrl = strings.TrimSpace(req.PrivacyPolicyUrl)
 	updated.TermsOfServiceUrl = strings.TrimSpace(req.TermsOfServiceUrl)
 	updated.Remark = strings.TrimSpace(req.Remark)
-	if err := apppkgdao.Update(&updated); err != nil {
+	if err := cfgdao.UpdateAppPkg(&updated); err != nil {
 		return nil, err
 	}
 	reloadAppPkgMemory()
@@ -73,7 +73,7 @@ func Delete(_ context.Context, req *apppkgdto.DeleteAppPkgReq) (*apppkgdto.Delet
 	if getAppPkgByIDFromMemory(req.ID) == nil {
 		return nil, errercode.CreateCode(errercode.AppPkgNonExist)
 	}
-	if err := apppkgdao.Delete(req.ID); err != nil {
+	if err := cfgdao.DeleteAppPkg(req.ID); err != nil {
 		return nil, err
 	}
 	reloadAppPkgMemory()

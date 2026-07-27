@@ -3,7 +3,7 @@ package game
 import (
 	"context"
 	"strconv"
-	"xr-game-server/dao/gamecfgdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/gamecfgdto"
 	"xr-game-server/entity"
 	"xr-game-server/module/upload"
@@ -37,7 +37,7 @@ func GetAppGameCfgList(_ context.Context, req *gamecfgdto.AppGameCfgListReq) (*g
 }
 
 func listOnShelfGameCfgFromCache() []*entity.GameCfg {
-	all := gamecfgdao.GetAllCached()
+	all := cfgdao.GetAllGameCfgCached()
 	list := make([]*entity.GameCfg, 0, len(all))
 	for _, row := range all {
 		if row == nil || row.Status != entity.GameCfgStatusOnShelf {

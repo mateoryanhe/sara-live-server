@@ -1,4 +1,4 @@
-package randomnickdao
+package cfgdao
 
 import (
 	"time"
@@ -8,28 +8,28 @@ import (
 	"xr-game-server/entity"
 )
 
-func CountAll() (int, error) {
+func CountAllRandomNicknames() (int, error) {
 	n, err := g.DB().Model(string(entity.TbRandomNickname)).Count()
 	return int(n), err
 }
 
-func CountByLang(lang uint8) (int, error) {
+func CountRandomNicknamesByLang(lang uint8) (int, error) {
 	n, err := g.DB().Model(string(entity.TbRandomNickname)).Where("lang", lang).Count()
 	return int(n), err
 }
 
-func LoadAll() ([]*entity.RandomNickname, error) {
+func LoadAllRandomNicknames() ([]*entity.RandomNickname, error) {
 	var rows []*entity.RandomNickname
 	err := g.DB().Model(string(entity.TbRandomNickname)).Order("lang asc, id asc").Scan(&rows)
 	return rows, err
 }
 
-func DeleteByLang(lang uint8) error {
+func DeleteRandomNicknamesByLang(lang uint8) error {
 	_, err := g.DB().Model(string(entity.TbRandomNickname)).Where("lang", lang).Delete()
 	return err
 }
 
-func ListNicknamesByLang(lang uint8) ([]string, error) {
+func ListRandomNicknamesByLang(lang uint8) ([]string, error) {
 	var rows []struct {
 		Nickname string
 	}
@@ -49,7 +49,7 @@ func ListNicknamesByLang(lang uint8) ([]string, error) {
 	return out, nil
 }
 
-func BatchInsert(lang uint8, names []string) error {
+func BatchInsertRandomNicknames(lang uint8, names []string) error {
 	if len(names) == 0 {
 		return nil
 	}
@@ -69,9 +69,9 @@ func BatchInsert(lang uint8, names []string) error {
 	return err
 }
 
-func ReplaceByLang(lang uint8, names []string) error {
-	if err := DeleteByLang(lang); err != nil {
+func ReplaceRandomNicknamesByLang(lang uint8, names []string) error {
+	if err := DeleteRandomNicknamesByLang(lang); err != nil {
 		return err
 	}
-	return BatchInsert(lang, names)
+	return BatchInsertRandomNicknames(lang, names)
 }

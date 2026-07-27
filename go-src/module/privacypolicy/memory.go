@@ -3,7 +3,7 @@ package privacypolicy
 import (
 	"sync/atomic"
 
-	"xr-game-server/dao/privacypolicycfgdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/entity"
 )
 
@@ -18,7 +18,7 @@ var (
 )
 
 func reloadCfgMemory() {
-	cfgCache.Store(toCfgSnapshot(privacypolicycfgdao.Load()))
+	cfgCache.Store(toCfgSnapshot(cfgdao.LoadPrivacyPolicyCfg()))
 }
 
 func getCfgCache() *cfgSnapshot {

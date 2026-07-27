@@ -1,4 +1,4 @@
-package gamecfgdao
+package cfgdao
 
 import (
 	"context"
@@ -22,7 +22,7 @@ func InitGameCfgDao() {
 	gameCfgCacheMgr = cache.NewCacheMgr()
 }
 
-func GetById(id uint64) *entity.GameCfg {
+func GetGameCfgById(id uint64) *entity.GameCfg {
 	var row entity.GameCfg
 	if err := g.DB().Model(string(entity.TbGameCfg)).Where("id = ?", id).Scan(&row); err != nil {
 		return nil
@@ -33,7 +33,7 @@ func GetById(id uint64) *entity.GameCfg {
 	return &row
 }
 
-func GetByCode(code string) *entity.GameCfg {
+func GetGameCfgByCode(code string) *entity.GameCfg {
 	if code == "" {
 		return nil
 	}
@@ -47,45 +47,43 @@ func GetByCode(code string) *entity.GameCfg {
 	return &row
 }
 
-func Create(row *entity.GameCfg) error {
+func CreateGameCfg(row *entity.GameCfg) error {
 	_, err := g.DB().Model(string(entity.TbGameCfg)).Save(row)
 	return err
 }
 
-func Update(row *entity.GameCfg) error {
-	return Create(row)
+func UpdateGameCfg(row *entity.GameCfg) error {
+	return CreateGameCfg(row)
 }
 
-func Delete(id uint64) error {
+func DeleteGameCfg(id uint64) error {
 	_, err := g.DB().Model(string(entity.TbGameCfg)).WherePri(id).Delete()
 	return err
 }
 
-func loadAllFromDB() []*entity.GameCfg {
+func loadAllGameCfgFromDB() []*entity.GameCfg {
 	rows := make([]*entity.GameCfg, 0)
 	_ = g.DB().Model(string(entity.TbGameCfg)).Order("sort desc, id desc").Scan(&rows)
 	return rows
 }
 
-// ReloadCache 配置变更后清除缓存并从数据库重新加载
-func ReloadCache() {
+// ReloadGameCfgCache 配置变更后清除缓存并从数据库重新加载
+func ReloadGameCfgCache() {
 	if gameCfgCacheMgr == nil {
 		return
 	}
-	gameCfgCacheMgr.FlushCache(gameCfgCacheKey, loadAllFromDB())
-	//设置永不过期
+	gameCfgCacheMgr.FlushCache(gameCfgCacheKey, loadAllGameCfgFromDB())
 	gameCfgCacheMgr.Cache.UpdateExpire(gctx.New(), gameCfgCacheKey, time.Hour*24*365*100)
 }
 
-// GetAllCached 获取全部游戏配置(优先读缓存,未命中再查库)
-func GetAllCached() []*entity.GameCfg {
+// GetAllGameCfgCached 获取全部游戏配置(优先读缓存,未命中再查库)
+func GetAllGameCfgCached() []*entity.GameCfg {
 	if gameCfgCacheMgr == nil {
-		return loadAllFromDB()
+		return loadAllGameCfgFromDB()
 	}
 	v := gameCfgCacheMgr.GetData(gameCfgCacheKey, func(ctx context.Context) (value interface{}, err error) {
-		return loadAllFromDB(), nil
+		return loadAllGameCfgFromDB(), nil
 	})
-	//设置永不过期
 	gameCfgCacheMgr.Cache.UpdateExpire(gctx.New(), gameCfgCacheKey, time.Hour*24*365*100)
 	if v == nil {
 		return make([]*entity.GameCfg, 0)
@@ -97,7 +95,7 @@ func GetAllCached() []*entity.GameCfg {
 	return list
 }
 
-func GetList(req *gamecfgdto.GameCfgListReq) (int, []*gamecfgdto.GameCfgListRes) {
+func GetGameCfgList(req *gamecfgdto.GameCfgListReq) (int, []*gamecfgdto.GameCfgListRes) {
 	sql := `select id, name, code, live_cover, link, sort, status, created_at, updated_at
             from game_cfgs
             where 1=1 `

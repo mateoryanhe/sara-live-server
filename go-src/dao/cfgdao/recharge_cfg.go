@@ -1,4 +1,4 @@
-package rechargecfgdao
+package cfgdao
 
 import (
 	"fmt"
@@ -10,8 +10,7 @@ import (
 	"xr-game-server/entity"
 )
 
-// GetById 按ID获取充值配置(直接查 DB,不走缓存)
-func GetById(id uint64) *entity.RechargeCfg {
+func GetRechargeCfgById(id uint64) *entity.RechargeCfg {
 	var cfg entity.RechargeCfg
 	err := g.DB().Model(string(entity.TbRechargeCfg)).Where("id = ?", id).Scan(&cfg)
 	if err != nil {
@@ -20,8 +19,7 @@ func GetById(id uint64) *entity.RechargeCfg {
 	return &cfg
 }
 
-// GetByNameAndType 按名称+类型获取(用于唯一性校验)
-func GetByNameAndType(name string, cfgType uint8) *entity.RechargeCfg {
+func GetRechargeCfgByNameAndType(name string, cfgType uint8) *entity.RechargeCfg {
 	var cfg entity.RechargeCfg
 	err := g.DB().Model(string(entity.TbRechargeCfg)).
 		Where("name = ? AND cfg_type = ?", name, cfgType).
@@ -35,25 +33,21 @@ func GetByNameAndType(name string, cfgType uint8) *entity.RechargeCfg {
 	return &cfg
 }
 
-// Create 新建充值配置
-func Create(cfg *entity.RechargeCfg) error {
+func CreateRechargeCfg(cfg *entity.RechargeCfg) error {
 	_, err := g.DB().Model(string(entity.TbRechargeCfg)).Save(cfg)
 	return err
 }
 
-// Update 更新充值配置(整行 Save)
-func Update(cfg *entity.RechargeCfg) error {
-	return Create(cfg)
+func UpdateRechargeCfg(cfg *entity.RechargeCfg) error {
+	return CreateRechargeCfg(cfg)
 }
 
-// Delete 删除充值配置
-func Delete(id uint64) error {
+func DeleteRechargeCfg(id uint64) error {
 	_, err := g.DB().Model(string(entity.TbRechargeCfg)).WherePri(id).Delete()
 	return err
 }
 
-// UpdateStatus 仅更新上下架状态
-func UpdateStatus(id uint64, status uint8) error {
+func UpdateRechargeCfgStatus(id uint64, status uint8) error {
 	_, err := g.DB().Model(string(entity.TbRechargeCfg)).
 		WherePri(id).
 		Data(g.Map{"status": status}).
@@ -61,9 +55,7 @@ func UpdateStatus(id uint64, status uint8) error {
 	return err
 }
 
-// GetOnShelf 获取全部已上架配置(按 sort desc, price asc, created_at desc 排序)
-// App 端拉取上架列表使用,直接走 DB(数据量小,变更不频繁,可承受每次查询)
-func GetOnShelf() []*entity.RechargeCfg {
+func GetOnShelfRechargeCfg() []*entity.RechargeCfg {
 	ret := make([]*entity.RechargeCfg, 0)
 	err := g.DB().Model(string(entity.TbRechargeCfg)).
 		Where("status = ?", entity.RechargeCfgStatusOnShelf).
@@ -75,8 +67,7 @@ func GetOnShelf() []*entity.RechargeCfg {
 	return ret
 }
 
-// GetList CMS 分页查询(支持名称模糊、上下架过滤)
-func GetList(req *rechargecfgdto.RechargeCfgListReq) (int, []*rechargecfgdto.RechargeCfgListRes) {
+func GetRechargeCfgList(req *rechargecfgdto.RechargeCfgListReq) (int, []*rechargecfgdto.RechargeCfgListRes) {
 	sql := `select id, name, cfg_type, icon, gold, extra_gold, price, currency, product_id,
                    sort, status, description, created_at, updated_at
             from recharge_cfgs
@@ -95,10 +86,10 @@ func GetList(req *rechargecfgdto.RechargeCfgListReq) (int, []*rechargecfgdto.Rec
 		param = append(param, req.TypeFilter)
 	}
 	switch req.StatusFilter {
-	case 1: // 只看下架
+	case 1:
 		sql += ` and status = ?`
 		param = append(param, entity.RechargeCfgStatusOffShelf)
-	case 2: // 只看上架
+	case 2:
 		sql += ` and status = ?`
 		param = append(param, entity.RechargeCfgStatusOnShelf)
 	}

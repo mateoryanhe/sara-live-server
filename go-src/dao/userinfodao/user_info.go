@@ -59,6 +59,22 @@ func GetUserInfoByUserId(userId uint64) *entity.UserInfo {
 	return cacheData.(*entity.UserInfo)
 }
 
+// GetUserInfoFromMemory 仅从内存缓存读取用户基础信息,未命中返回 nil
+func GetUserInfoFromMemory(userId uint64) *entity.UserInfo {
+	if userId == 0 || userInfoCacheMgr == nil {
+		return nil
+	}
+	v := userInfoCacheMgr.GetFromCache(userId)
+	if v == nil {
+		return nil
+	}
+	info, ok := v.(*entity.UserInfo)
+	if !ok || info == nil {
+		return nil
+	}
+	return info
+}
+
 // GetNicknameMapByUserIds 批量查询用户昵称(CMS列表等场景使用)
 func GetNicknameMapByUserIds(userIds []uint64) map[uint64]string {
 	ret := make(map[uint64]string)

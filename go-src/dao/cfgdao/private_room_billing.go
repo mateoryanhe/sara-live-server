@@ -1,4 +1,4 @@
-package privateroombillingdao
+package cfgdao
 
 import (
 	"strconv"
@@ -10,7 +10,7 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 )
 
-func GetById(id uint64) *entity.LivePrivateRoomBilling {
+func GetPrivateRoomBillingById(id uint64) *entity.LivePrivateRoomBilling {
 	var row entity.LivePrivateRoomBilling
 	if err := g.DB().Model(string(entity.TbLivePrivateRoomBilling)).Where("id = ?", id).Scan(&row); err != nil {
 		return nil
@@ -21,7 +21,7 @@ func GetById(id uint64) *entity.LivePrivateRoomBilling {
 	return &row
 }
 
-func GetAll() []*entity.LivePrivateRoomBilling {
+func GetAllPrivateRoomBilling() []*entity.LivePrivateRoomBilling {
 	ret := make([]*entity.LivePrivateRoomBilling, 0)
 	_ = g.DB().Model(string(entity.TbLivePrivateRoomBilling)).
 		Order("sort desc, created_at desc").
@@ -29,21 +29,21 @@ func GetAll() []*entity.LivePrivateRoomBilling {
 	return ret
 }
 
-func Create(row *entity.LivePrivateRoomBilling) error {
+func CreatePrivateRoomBilling(row *entity.LivePrivateRoomBilling) error {
 	_, err := g.DB().Model(string(entity.TbLivePrivateRoomBilling)).Save(row)
 	return err
 }
 
-func Update(row *entity.LivePrivateRoomBilling) error {
-	return Create(row)
+func UpdatePrivateRoomBilling(row *entity.LivePrivateRoomBilling) error {
+	return CreatePrivateRoomBilling(row)
 }
 
-func Delete(id uint64) error {
+func DeletePrivateRoomBilling(id uint64) error {
 	_, err := g.DB().Model(string(entity.TbLivePrivateRoomBilling)).WherePri(id).Delete()
 	return err
 }
 
-func UpdateStatus(id uint64, status uint8) error {
+func UpdatePrivateRoomBillingStatus(id uint64, status uint8) error {
 	_, err := g.DB().Model(string(entity.TbLivePrivateRoomBilling)).
 		WherePri(id).
 		Data(g.Map{"status": status}).

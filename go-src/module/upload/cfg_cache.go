@@ -4,7 +4,7 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"xr-game-server/dao/uploadresourcecfgdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/entity"
 )
 
@@ -33,7 +33,7 @@ var (
 )
 
 func reloadResourceCfgMemory() {
-	resourceCfgCache.Store(toResourceCfgSnapshot(uploadresourcecfgdao.Load()))
+	resourceCfgCache.Store(toResourceCfgSnapshot(cfgdao.LoadUploadResourceCfg()))
 }
 
 func getResourceCfgCache() *resourceCfgSnapshot {

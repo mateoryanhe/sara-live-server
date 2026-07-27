@@ -1,12 +1,11 @@
 package accountdao
 
 import (
-	"context"
-	"fmt"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gctx"
 	"strconv"
 	"time"
+
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/cache"
 	"xr-game-server/core/str"
@@ -16,78 +15,36 @@ import (
 
 var accountCacheMgr *cache.CacheMgr
 
-const accountMissCacheTime = 10 * time.Minute
-
-// GetAccountBy 根据 openId + 区号 + 渠道拉取数据，不存在时创建内存账号并异步落库（仅用于注册等写场景）
-func GetAccountBy(openId string, channel uint, phoneAreaCode string) *entity.Account {
-	key := accountCacheKey(openId, channel, phoneAreaCode)
-	cacheData := accountCacheMgr.GetData(key, func(ctx context.Context) (value interface{}, err error) {
-		var account *entity.Account
-		err = g.Model(string(entity.TbAccount)).Unscoped().Where(g.Map{
-			string(entity.AccountOpenId):        openId,
-			string(entity.AccountChannel):       channel,
-			string(entity.AccountPhoneAreaCode): phoneAreaCode,
-		}).Scan(&account)
-		if account != nil {
-			return account, nil
-		}
-		acc := entity.NewAccount(openId, channel)
-		acc.SetPhoneAreaCode(phoneAreaCode)
-		return acc, nil
-	})
-	return cacheData.(*entity.Account)
-}
-
-// FindAccountBy 只读查询账号，不存在时返回 nil，不会创建新记录
-func FindAccountBy(openId string, channel uint, phoneAreaCode string) *entity.Account {
-	key := accountCacheKey(openId, channel, phoneAreaCode)
-	ctx := gctx.New()
-
-	if ok, _ := accountCacheMgr.Cache.Contains(ctx, accountMissCacheKey(key)); ok {
-		return nil
-	}
-
-	if cached := accountCacheMgr.GetFromCache(key); cached != nil {
-		return cached.(*entity.Account)
-	}
-
-	var account *entity.Account
-	_ = g.Model(string(entity.TbAccount)).Unscoped().Where(g.Map{
-		string(entity.AccountOpenId):        openId,
-		string(entity.AccountChannel):       channel,
-		string(entity.AccountPhoneAreaCode): phoneAreaCode,
-	}).Scan(&account)
-	if account == nil {
-		_ = accountCacheMgr.Cache.Set(ctx, accountMissCacheKey(key), 1, accountMissCacheTime)
-		return nil
-	}
-
-	accountCacheMgr.FlushCache(key, account)
-	return account
-}
-
-func accountCacheKey(openId string, channel uint, phoneAreaCode string) string {
-	return fmt.Sprintf("%v:%v:%v", openId, channel, phoneAreaCode)
-}
-
-func accountMissCacheKey(key string) string {
-	return "miss:" + key
-}
-
 func GetAccountById(accountId uint64) *entity.Account {
-	//从数据库拉取数据
 	var account *entity.Account
 	g.Model(string(entity.TbAccount)).Unscoped().Where(db.IdName, accountId).Scan(&account)
 	if account != nil {
 		return account
-	} else {
-		return nil
 	}
+	return nil
 }
 
 func InitAccountDao() {
 	accountCacheMgr = cache.NewCacheMgr()
-	initDeviceAccountDao()
+	migrateLegacyCanceledOpenId()
+}
+
+// migrateLegacyCanceledOpenId 将历史 __canceled__ 后缀 open_id 还原
+func migrateLegacyCanceledOpenId() {
+	var legacy []*entity.Account
+	_ = g.Model(string(entity.TbAccount)).Unscoped().
+		Where("open_id LIKE ?", "%__canceled__%").
+		Scan(&legacy)
+	for _, acc := range legacy {
+		if acc == nil || acc.ID == 0 {
+			continue
+		}
+		logical := entity.NormalizeOpenId(acc.OpenId)
+		_, _ = g.Model(string(entity.TbAccount)).Unscoped().WherePri(acc.ID).Data(g.Map{
+			"open_id": logical,
+			"cancel":  true,
+		}).Update()
+	}
 }
 
 func GetUserInfo(req *accountdto.QueryUserInfoReq) (int, []*accountdto.UserInfoDto) {
@@ -115,7 +72,6 @@ func GetUserInfo(req *accountdto.QueryUserInfoReq) (int, []*accountdto.UserInfoD
 		param = append(param, startTime, endTime)
 	}
 	sql += ` order by a.id desc`
-	//获取总数
 	countSql := str.GetCountSQL(sql)
 	total, _ := g.DB().GetCount(ctx, countSql, param)
 	sql += ` limit ` + strconv.Itoa(req.PageSize) + ` offset ` + strconv.Itoa(req.PageIndex-1)

@@ -3,7 +3,7 @@ package livecfg
 import (
 	"sync/atomic"
 	"time"
-	"xr-game-server/dao/livecfgdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/entity"
 )
 
@@ -22,7 +22,7 @@ var (
 )
 
 func reloadLiveCfgMemory() {
-	liveCfgCache.Store(toLiveCfgSnapshot(livecfgdao.Load()))
+	liveCfgCache.Store(toLiveCfgSnapshot(cfgdao.LoadLiveCfg()))
 }
 
 func getLiveCfgCache() *liveCfgSnapshot {

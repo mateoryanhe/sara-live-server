@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 	"xr-game-server/core/httpserver"
-	"xr-game-server/dao/bannerdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/bannerdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
@@ -12,7 +12,7 @@ import (
 )
 
 func GetBannerList(_ context.Context, req *bannerdto.BannerListReq) (*httpserver.CMSQueryResp, error) {
-	total, list := bannerdao.GetBannerList(req)
+	total, list := cfgdao.GetBannerList(req)
 	for _, row := range list {
 		row.ImageName = row.Image
 		row.Image = upload.GetUrlByName(row.ImageName)
@@ -43,7 +43,7 @@ func normalizeBannerDirection(scene, direction uint8) uint8 {
 }
 
 func CreateBanner(_ context.Context, req *bannerdto.CreateBannerReq) (*bannerdto.CreateBannerRes, error) {
-	if existing := bannerdao.GetByTitle(req.Title); existing != nil {
+	if existing := cfgdao.GetBannerByTitle(req.Title); existing != nil {
 		return nil, errercode.CreateCode(errercode.BannerExist)
 	}
 	scene := normalizeBannerScene(req.Scene)
@@ -56,7 +56,7 @@ func CreateBanner(_ context.Context, req *bannerdto.CreateBannerReq) (*bannerdto
 		Sort:      req.Sort,
 		Status:    entity.HomeBannerStatusOffShelf,
 	}
-	if err := bannerdao.Create(row); err != nil {
+	if err := cfgdao.CreateBanner(row); err != nil {
 		return nil, err
 	}
 	reloadBannerMemory()
@@ -64,11 +64,11 @@ func CreateBanner(_ context.Context, req *bannerdto.CreateBannerReq) (*bannerdto
 }
 
 func UpdateBanner(_ context.Context, req *bannerdto.UpdateBannerReq) (*bannerdto.UpdateBannerRes, error) {
-	row := bannerdao.GetById(req.ID)
+	row := cfgdao.GetBannerById(req.ID)
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.BannerNonExist)
 	}
-	if existing := bannerdao.GetByTitle(req.Title); existing != nil && existing.ID != req.ID {
+	if existing := cfgdao.GetBannerByTitle(req.Title); existing != nil && existing.ID != req.ID {
 		return nil, errercode.CreateCode(errercode.BannerExist)
 	}
 	row.Title = req.Title
@@ -77,7 +77,7 @@ func UpdateBanner(_ context.Context, req *bannerdto.UpdateBannerReq) (*bannerdto
 	row.Scene = normalizeBannerScene(req.Scene)
 	row.Direction = normalizeBannerDirection(row.Scene, req.Direction)
 	row.Sort = req.Sort
-	if err := bannerdao.Update(row); err != nil {
+	if err := cfgdao.UpdateBanner(row); err != nil {
 		return nil, err
 	}
 	reloadBannerMemory()
@@ -85,10 +85,10 @@ func UpdateBanner(_ context.Context, req *bannerdto.UpdateBannerReq) (*bannerdto
 }
 
 func DeleteBanner(_ context.Context, req *bannerdto.DeleteBannerReq) (*bannerdto.DeleteBannerRes, error) {
-	if row := bannerdao.GetById(req.ID); row == nil {
+	if row := cfgdao.GetBannerById(req.ID); row == nil {
 		return nil, errercode.CreateCode(errercode.BannerNonExist)
 	}
-	if err := bannerdao.Delete(req.ID); err != nil {
+	if err := cfgdao.DeleteBanner(req.ID); err != nil {
 		return nil, err
 	}
 	reloadBannerMemory()
@@ -96,12 +96,12 @@ func DeleteBanner(_ context.Context, req *bannerdto.DeleteBannerReq) (*bannerdto
 }
 
 func OnShelfBanner(_ context.Context, req *bannerdto.OnShelfBannerReq) (*bannerdto.OnShelfBannerRes, error) {
-	row := bannerdao.GetById(req.ID)
+	row := cfgdao.GetBannerById(req.ID)
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.BannerNonExist)
 	}
 	if row.Status != entity.HomeBannerStatusOnShelf {
-		if err := bannerdao.UpdateStatus(req.ID, entity.HomeBannerStatusOnShelf); err != nil {
+		if err := cfgdao.UpdateBannerStatus(req.ID, entity.HomeBannerStatusOnShelf); err != nil {
 			return nil, err
 		}
 		reloadBannerMemory()
@@ -110,12 +110,12 @@ func OnShelfBanner(_ context.Context, req *bannerdto.OnShelfBannerReq) (*bannerd
 }
 
 func OffShelfBanner(_ context.Context, req *bannerdto.OffShelfBannerReq) (*bannerdto.OffShelfBannerRes, error) {
-	row := bannerdao.GetById(req.ID)
+	row := cfgdao.GetBannerById(req.ID)
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.BannerNonExist)
 	}
 	if row.Status != entity.HomeBannerStatusOffShelf {
-		if err := bannerdao.UpdateStatus(req.ID, entity.HomeBannerStatusOffShelf); err != nil {
+		if err := cfgdao.UpdateBannerStatus(req.ID, entity.HomeBannerStatusOffShelf); err != nil {
 			return nil, err
 		}
 		reloadBannerMemory()

@@ -8,6 +8,8 @@ import (
 type BanReq struct {
 	g.Meta       `path:"/ban" method:"post" summary:"封号" tags:"账号"`
 	AccountId    uint64     `json:"accountId" dc:"账号id"`
+	OpenId       string     `json:"openId" v:"required#openId不能为空" dc:"登陆openId"`
+	Channel      uint       `json:"channel" v:"required#channel不能为空" dc:"登陆渠道"`
 	BanApplyTime *time.Time `json:"banApplyTime" dc:"封禁时间"`
 }
 
@@ -15,6 +17,8 @@ type BanReq struct {
 type BanAnchorReq struct {
 	g.Meta       `path:"/banAnchor" method:"post" summary:"封禁主播" tags:"账号"`
 	AccountId    uint64     `json:"accountId" v:"required#账号ID不能为空" dc:"主播账号id"`
+	OpenId       string     `json:"openId" dc:"登陆openId"`
+	Channel      uint       `json:"channel" dc:"登陆渠道"`
 	BanApplyTime *time.Time `json:"banApplyTime" v:"required#封禁截止时间不能为空" dc:"封禁截止时间"`
 	BanReason    string     `json:"banReason" v:"required|length:1,512#封禁原因不能为空|封禁原因长度需在1到512之间" dc:"封禁原因"`
 }
@@ -23,11 +27,15 @@ type BanAnchorReq struct {
 type UnBanAnchorReq struct {
 	g.Meta    `path:"/unBanAnchor" method:"post" summary:"解封主播" tags:"账号"`
 	AccountId uint64 `json:"accountId" v:"required#账号ID不能为空" dc:"主播账号id"`
+	OpenId    string `json:"openId" dc:"登陆openId"`
+	Channel   uint   `json:"channel" dc:"登陆渠道"`
 }
 
 type UnBanReq struct {
 	g.Meta    `path:"/unBan" method:"post" summary:"解封" tags:"账号"`
 	AccountId uint64 `json:"accountId" dc:"账号id"`
+	OpenId    string `json:"openId" v:"required#openId不能为空" dc:"登陆openId"`
+	Channel   uint   `json:"channel" v:"required#channel不能为空" dc:"登陆渠道"`
 }
 
 type BanRes struct {

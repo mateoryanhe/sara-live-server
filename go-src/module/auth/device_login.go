@@ -32,7 +32,12 @@ func DeviceLogin(ctx context.Context, req *authdto.DeviceLoginReq) (*authdto.Dev
 	gmlock.Lock(lockKey)
 	defer gmlock.Unlock(lockKey)
 
-	account, isNewUser := accountdao.GetDeviceAccount(deviceId, DeviceChannel)
+	account := accountdao.FindActiveAccount(deviceId, DeviceChannel)
+	isNewUser := false
+	if account == nil {
+		account = accountdao.RegisterDeviceAccount(deviceId, DeviceChannel)
+		isNewUser = true
+	}
 	if account == nil || account.ID == 0 {
 		return nil, errercode.CreateCode(errercode.LoginFail)
 	}

@@ -21,18 +21,14 @@ func QueryAnchorList(_ context.Context, req *accountdto.QueryAnchorListReq) (*ht
 		}
 		val.Avatar = upload.ResolveAvatarUrlForUser(val.ID, val.Avatar)
 		guildId := val.GuildId
-		if InCache(val.ID) {
-			userInfoCache := userinfodao.GetUserInfoByUserId(val.ID)
-			if userInfoCache != nil {
-				val.Nickname = userInfoCache.Nickname
-				val.Phone = userInfoCache.Phone
-				val.GuildId = userInfoCache.GuildId
-				guildId = userInfoCache.GuildId
-			}
-			accountCache := accountdao.GetAccountById(val.ID)
-			if accountCache != nil {
-				val.IP = accountCache.IP
-			}
+		if accountCache, _, _ := accountdao.FindAccountInCacheByID(val.ID); accountCache != nil {
+			val.IP = accountCache.IP
+		}
+		if userInfoCache := userinfodao.GetUserInfoByUserId(val.ID); userInfoCache != nil {
+			val.Nickname = userInfoCache.Nickname
+			val.Phone = userInfoCache.Phone
+			val.GuildId = userInfoCache.GuildId
+			guildId = userInfoCache.GuildId
 		}
 		room := liveroomdao.GetRoomByAnchor(val.ID)
 		if room == nil {

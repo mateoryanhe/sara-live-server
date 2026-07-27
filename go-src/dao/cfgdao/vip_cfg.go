@@ -1,4 +1,4 @@
-package vipcfgdao
+package cfgdao
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"xr-game-server/entity"
 )
 
-func GetById(id uint64) *entity.VipCfg {
+func GetVipCfgById(id uint64) *entity.VipCfg {
 	var row entity.VipCfg
 	if err := g.DB().Model(string(entity.TbVipCfg)).Where("id = ?", id).Scan(&row); err != nil {
 		return nil
@@ -21,7 +21,7 @@ func GetById(id uint64) *entity.VipCfg {
 	return &row
 }
 
-func GetByLevel(level uint32) *entity.VipCfg {
+func GetVipCfgByLevel(level uint32) *entity.VipCfg {
 	var row entity.VipCfg
 	if err := g.DB().Model(string(entity.TbVipCfg)).Where("level = ?", level).Scan(&row); err != nil {
 		return nil
@@ -32,28 +32,27 @@ func GetByLevel(level uint32) *entity.VipCfg {
 	return &row
 }
 
-func Create(row *entity.VipCfg) error {
+func CreateVipCfg(row *entity.VipCfg) error {
 	_, err := g.DB().Model(string(entity.TbVipCfg)).Save(row)
 	return err
 }
 
-func Update(row *entity.VipCfg) error {
-	return Create(row)
+func UpdateVipCfg(row *entity.VipCfg) error {
+	return CreateVipCfg(row)
 }
 
-func Delete(id uint64) error {
+func DeleteVipCfg(id uint64) error {
 	_, err := g.DB().Model(string(entity.TbVipCfg)).WherePri(id).Delete()
 	return err
 }
 
-// GetAll 查询全部VIP配置(按等级升序,供内存缓存加载)
-func GetAll() []*entity.VipCfg {
+func GetAllVipCfg() []*entity.VipCfg {
 	var rows []*entity.VipCfg
 	_ = g.DB().Model(string(entity.TbVipCfg)).Order("level asc").Scan(&rows)
 	return rows
 }
 
-func GetList(req *vipcfgdto.VipCfgListReq) (int, []*vipcfgdto.VipCfgListRes) {
+func GetVipCfgList(req *vipcfgdto.VipCfgListReq) (int, []*vipcfgdto.VipCfgListRes) {
 	sql := `select id, level, level_name, status, upgrade_recharge_limit, min_withdraw_amount,
                    max_withdraw_amount, fee, animation, created_at, updated_at
             from vip_cfgs

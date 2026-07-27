@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 	"xr-game-server/core/httpserver"
-	"xr-game-server/dao/giftdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/giftdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
@@ -14,7 +14,7 @@ import (
 
 // GetGiftList 分页获取礼物列表(CMS)
 func GetGiftList(_ context.Context, req *giftdto.GiftListReq) (*httpserver.CMSQueryResp, error) {
-	total, list := giftdao.GetGiftList(req)
+	total, list := cfgdao.GetGiftList(req)
 	for _, res := range list {
 		res.IconName = res.Icon
 		res.AnimationName = res.Animation
@@ -35,7 +35,7 @@ func GetAppGiftList(_ context.Context, _ *giftdto.AppGiftListReq) (*giftdto.AppG
 
 // CreateGift 创建礼物
 func CreateGift(_ context.Context, req *giftdto.CreateGiftReq) (*giftdto.CreateGiftRes, error) {
-	if existing := giftdao.GetGiftByName(req.Name); existing != nil {
+	if existing := cfgdao.GetGiftByName(req.Name); existing != nil {
 		return nil, errercode.CreateCode(errercode.GiftExist)
 	}
 
@@ -53,7 +53,7 @@ func CreateGift(_ context.Context, req *giftdto.CreateGiftReq) (*giftdto.CreateG
 		Status:      entity.LiveGiftStatusOffShelf, // 新建默认下架,需手动上架
 		Description: req.Description,
 	}
-	if err := giftdao.CreateGift(g); err != nil {
+	if err := cfgdao.CreateGift(g); err != nil {
 		return nil, err
 	}
 	invalidateGiftCache()
@@ -62,11 +62,11 @@ func CreateGift(_ context.Context, req *giftdto.CreateGiftReq) (*giftdto.CreateG
 
 // UpdateGift 修改礼物(不修改上下架状态)
 func UpdateGift(_ context.Context, req *giftdto.UpdateGiftReq) (*giftdto.UpdateGiftRes, error) {
-	g := giftdao.GetGiftById(req.ID)
+	g := cfgdao.GetGiftById(req.ID)
 	if g == nil {
 		return nil, errercode.CreateCode(errercode.GiftNonExist)
 	}
-	if existing := giftdao.GetGiftByName(req.Name); existing != nil && existing.ID != req.ID {
+	if existing := cfgdao.GetGiftByName(req.Name); existing != nil && existing.ID != req.ID {
 		return nil, errercode.CreateCode(errercode.GiftExist)
 	}
 
@@ -82,7 +82,7 @@ func UpdateGift(_ context.Context, req *giftdto.UpdateGiftReq) (*giftdto.UpdateG
 	g.Sort = req.Sort
 	g.Description = req.Description
 
-	if err := giftdao.UpdateGift(g); err != nil {
+	if err := cfgdao.UpdateGift(g); err != nil {
 		return nil, err
 	}
 	invalidateGiftCache()
@@ -91,10 +91,10 @@ func UpdateGift(_ context.Context, req *giftdto.UpdateGiftReq) (*giftdto.UpdateG
 
 // DeleteGift 删除礼物
 func DeleteGift(_ context.Context, req *giftdto.DeleteGiftReq) (*giftdto.DeleteGiftRes, error) {
-	if g := giftdao.GetGiftById(req.ID); g == nil {
+	if g := cfgdao.GetGiftById(req.ID); g == nil {
 		return nil, errercode.CreateCode(errercode.GiftNonExist)
 	}
-	if err := giftdao.DeleteGift(req.ID); err != nil {
+	if err := cfgdao.DeleteGift(req.ID); err != nil {
 		return nil, err
 	}
 	invalidateGiftCache()
@@ -103,7 +103,7 @@ func DeleteGift(_ context.Context, req *giftdto.DeleteGiftReq) (*giftdto.DeleteG
 
 // OnShelfGift 上架礼物
 func OnShelfGift(_ context.Context, req *giftdto.OnShelfGiftReq) (*giftdto.OnShelfGiftRes, error) {
-	g := giftdao.GetGiftById(req.ID)
+	g := cfgdao.GetGiftById(req.ID)
 	if g == nil {
 		return nil, errercode.CreateCode(errercode.GiftNonExist)
 	}
@@ -111,7 +111,7 @@ func OnShelfGift(_ context.Context, req *giftdto.OnShelfGiftReq) (*giftdto.OnShe
 		now := time.Now()
 		g.PublishedAt = &now
 		g.Status = entity.LiveGiftStatusOnShelf
-		if err := giftdao.UpdateGift(g); err != nil {
+		if err := cfgdao.UpdateGift(g); err != nil {
 			return nil, err
 		}
 		invalidateGiftCache()
@@ -121,12 +121,12 @@ func OnShelfGift(_ context.Context, req *giftdto.OnShelfGiftReq) (*giftdto.OnShe
 
 // OffShelfGift 下架礼物
 func OffShelfGift(_ context.Context, req *giftdto.OffShelfGiftReq) (*giftdto.OffShelfGiftRes, error) {
-	g := giftdao.GetGiftById(req.ID)
+	g := cfgdao.GetGiftById(req.ID)
 	if g == nil {
 		return nil, errercode.CreateCode(errercode.GiftNonExist)
 	}
 	if g.Status != entity.LiveGiftStatusOffShelf {
-		if err := giftdao.UpdateGiftStatus(req.ID, entity.LiveGiftStatusOffShelf); err != nil {
+		if err := cfgdao.UpdateGiftStatus(req.ID, entity.LiveGiftStatusOffShelf); err != nil {
 			return nil, err
 		}
 		invalidateGiftCache()

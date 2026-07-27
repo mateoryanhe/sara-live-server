@@ -1,9 +1,9 @@
 package game
 
-import "xr-game-server/dao/gamecfgdao"
+import "xr-game-server/dao/cfgdao"
 
 // Init 服务启动时初始化游戏配置缓存
 func Init() {
-	gamecfgdao.InitGameCfgDao()
-	gamecfgdao.ReloadCache()
+	cfgdao.InitGameCfgDao()
+	cfgdao.ReloadGameCfgCache()
 }

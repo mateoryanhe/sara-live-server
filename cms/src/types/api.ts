@@ -95,29 +95,41 @@ export interface LoginRes {
 // 账号相关类型
 export interface BanReq {
     accountId: string
+    openId: string
+    channel: number
     banApplyTime?: string
 }
 
 export interface BanAnchorReq {
     accountId: string
+    openId?: string
+    channel?: number
     banApplyTime: string
     banReason: string
 }
 
 export interface UnBanAnchorReq {
     accountId: string
+    openId?: string
+    channel?: number
 }
 
 export interface UnBanReq {
     accountId: string
+    openId: string
+    channel: number
 }
 
 export interface CancelReq {
     accountId: string
+    openId: string
+    channel: number
 }
 
 export interface UnCancelReq {
     accountId: string
+    openId: string
+    channel: number
 }
 
 export interface QueryUserInfoReq extends PageQuery {

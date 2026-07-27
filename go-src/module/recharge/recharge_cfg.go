@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 	"xr-game-server/core/httpserver"
-	"xr-game-server/dao/rechargecfgdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/rechargecfgdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
@@ -15,7 +15,7 @@ import (
 
 // GetList CMS分页查询(全部状态)
 func GetList(_ context.Context, req *rechargecfgdto.RechargeCfgListReq) (*httpserver.CMSQueryResp, error) {
-	total, list := rechargecfgdao.GetList(req)
+	total, list := cfgdao.GetRechargeCfgList(req)
 	for _, row := range list {
 		row.IconName = row.Icon
 		row.Icon = upload.GetUrlByName(row.IconName)
@@ -25,7 +25,7 @@ func GetList(_ context.Context, req *rechargecfgdto.RechargeCfgListReq) (*httpse
 
 // Create 创建充值配置(默认下架,需手动上架)
 func Create(_ context.Context, req *rechargecfgdto.CreateRechargeCfgReq) (*rechargecfgdto.CreateRechargeCfgRes, error) {
-	if existing := rechargecfgdao.GetByNameAndType(req.Name, req.CfgType); existing != nil {
+	if existing := cfgdao.GetRechargeCfgByNameAndType(req.Name, req.CfgType); existing != nil {
 		return nil, errercode.CreateCode(errercode.RechargeCfgExist)
 	}
 	cfg := &entity.RechargeCfg{
@@ -41,7 +41,7 @@ func Create(_ context.Context, req *rechargecfgdto.CreateRechargeCfgReq) (*recha
 		Status:      entity.RechargeCfgStatusOffShelf,
 		Description: req.Description,
 	}
-	if err := rechargecfgdao.Create(cfg); err != nil {
+	if err := cfgdao.CreateRechargeCfg(cfg); err != nil {
 		return nil, err
 	}
 	reloadRechargeCfgCache()
@@ -50,11 +50,11 @@ func Create(_ context.Context, req *rechargecfgdto.CreateRechargeCfgReq) (*recha
 
 // Update 修改充值配置(不修改上下架状态)
 func Update(_ context.Context, req *rechargecfgdto.UpdateRechargeCfgReq) (*rechargecfgdto.UpdateRechargeCfgRes, error) {
-	cfg := rechargecfgdao.GetById(req.ID)
+	cfg := cfgdao.GetRechargeCfgById(req.ID)
 	if cfg == nil {
 		return nil, errercode.CreateCode(errercode.RechargeCfgNonExist)
 	}
-	if existing := rechargecfgdao.GetByNameAndType(req.Name, req.CfgType); existing != nil && existing.ID != req.ID {
+	if existing := cfgdao.GetRechargeCfgByNameAndType(req.Name, req.CfgType); existing != nil && existing.ID != req.ID {
 		return nil, errercode.CreateCode(errercode.RechargeCfgExist)
 	}
 
@@ -69,7 +69,7 @@ func Update(_ context.Context, req *rechargecfgdto.UpdateRechargeCfgReq) (*recha
 	cfg.Sort = req.Sort
 	cfg.Description = req.Description
 
-	if err := rechargecfgdao.Update(cfg); err != nil {
+	if err := cfgdao.UpdateRechargeCfg(cfg); err != nil {
 		return nil, err
 	}
 	reloadRechargeCfgCache()
@@ -78,10 +78,10 @@ func Update(_ context.Context, req *rechargecfgdto.UpdateRechargeCfgReq) (*recha
 
 // Delete 删除充值配置
 func Delete(_ context.Context, req *rechargecfgdto.DeleteRechargeCfgReq) (*rechargecfgdto.DeleteRechargeCfgRes, error) {
-	if cfg := rechargecfgdao.GetById(req.ID); cfg == nil {
+	if cfg := cfgdao.GetRechargeCfgById(req.ID); cfg == nil {
 		return nil, errercode.CreateCode(errercode.RechargeCfgNonExist)
 	}
-	if err := rechargecfgdao.Delete(req.ID); err != nil {
+	if err := cfgdao.DeleteRechargeCfg(req.ID); err != nil {
 		return nil, err
 	}
 	reloadRechargeCfgCache()
@@ -90,12 +90,12 @@ func Delete(_ context.Context, req *rechargecfgdto.DeleteRechargeCfgReq) (*recha
 
 // OnShelf 上架
 func OnShelf(_ context.Context, req *rechargecfgdto.OnShelfRechargeCfgReq) (*rechargecfgdto.OnShelfRechargeCfgRes, error) {
-	cfg := rechargecfgdao.GetById(req.ID)
+	cfg := cfgdao.GetRechargeCfgById(req.ID)
 	if cfg == nil {
 		return nil, errercode.CreateCode(errercode.RechargeCfgNonExist)
 	}
 	if cfg.Status != entity.RechargeCfgStatusOnShelf {
-		if err := rechargecfgdao.UpdateStatus(req.ID, entity.RechargeCfgStatusOnShelf); err != nil {
+		if err := cfgdao.UpdateRechargeCfgStatus(req.ID, entity.RechargeCfgStatusOnShelf); err != nil {
 			return nil, err
 		}
 		reloadRechargeCfgCache()
@@ -105,12 +105,12 @@ func OnShelf(_ context.Context, req *rechargecfgdto.OnShelfRechargeCfgReq) (*rec
 
 // OffShelf 下架
 func OffShelf(_ context.Context, req *rechargecfgdto.OffShelfRechargeCfgReq) (*rechargecfgdto.OffShelfRechargeCfgRes, error) {
-	cfg := rechargecfgdao.GetById(req.ID)
+	cfg := cfgdao.GetRechargeCfgById(req.ID)
 	if cfg == nil {
 		return nil, errercode.CreateCode(errercode.RechargeCfgNonExist)
 	}
 	if cfg.Status != entity.RechargeCfgStatusOffShelf {
-		if err := rechargecfgdao.UpdateStatus(req.ID, entity.RechargeCfgStatusOffShelf); err != nil {
+		if err := cfgdao.UpdateRechargeCfgStatus(req.ID, entity.RechargeCfgStatusOffShelf); err != nil {
 			return nil, err
 		}
 		reloadRechargeCfgCache()

@@ -1,12 +1,11 @@
-package agoracfgdao
+package cfgdao
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/entity"
 )
 
-// Load 从数据库加载声网配置(通常仅一条)
-func Load() *entity.AgoraCfg {
+func LoadAgoraCfg() *entity.AgoraCfg {
 	var row entity.AgoraCfg
 	if err := g.DB().Model(string(entity.TbAgoraCfg)).Order("id asc").Limit(1).Scan(&row); err != nil {
 		return nil
@@ -17,8 +16,7 @@ func Load() *entity.AgoraCfg {
 	return &row
 }
 
-// Save 保存声网配置
-func Save(row *entity.AgoraCfg) error {
+func SaveAgoraCfg(row *entity.AgoraCfg) error {
 	if row == nil {
 		return nil
 	}

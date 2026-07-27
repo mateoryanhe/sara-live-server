@@ -130,6 +130,8 @@ const submitForm = async () => {
         } else {
           const banData: BanReq = {
             accountId: form.userId,
+            openId: form.openId,
+            channel: form.channel,
             banApplyTime: form.banApplyTime,
           }
           const response = await accountApi.ban(banData)

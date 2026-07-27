@@ -331,12 +331,16 @@ const userTypeFormRules: FormRules = {
 interface BanForm {
   userId: string
   nickname: string
+  openId: string
+  channel: number
   banApplyTime: string
 }
 
 const banForm = reactive<BanForm>({
   userId: '',
   nickname: '',
+  openId: '',
+  channel: 0,
   banApplyTime: ''
 })
 
@@ -468,6 +472,21 @@ const handlePageChange = (page: number) => {
   pagination.pageIndex = page
   fetchUserList()
 }
+
+const resolveAccountOpenId = (row: UserInfo): string => {
+  let openId = row.openId || ''
+  const canceledIdx = openId.indexOf('__canceled__')
+  if (canceledIdx > 0) {
+    openId = openId.slice(0, canceledIdx)
+  }
+  return openId
+}
+
+const accountActionPayload = (row: UserInfo) => ({
+  accountId: row.id,
+  openId: resolveAccountOpenId(row),
+  channel: row.channel ?? 0,
+})
 
 const handleSizeChange = (size: number) => {
   pagination.pageSize = size
@@ -631,6 +650,8 @@ const resetBanForm = () => {
 const openBanDialog = (row: UserInfo) => {
   banForm.userId = String(row.id)
   banForm.nickname = row.nickname || '-'
+  banForm.openId = resolveAccountOpenId(row)
+  banForm.channel = row.channel ?? 0
   banForm.banApplyTime = defaultBanApplyTime()
   banDialogVisible.value = true
 }
@@ -643,6 +664,8 @@ const submitBan = async () => {
     try {
       const banData: BanReq = {
         accountId: banForm.userId,
+        openId: banForm.openId,
+        channel: banForm.channel,
         banApplyTime: banForm.banApplyTime
       }
       const response = await accountApi.ban(banData)
@@ -703,7 +726,7 @@ const handleBanAction = async (row: UserInfo) => {
           }
       )
 
-      const response = await accountApi.unBan({accountId: row.id})
+      const response = await accountApi.unBan(accountActionPayload(row))
 
       if (response) {
         ElMessage.success('解封成功')
@@ -744,7 +767,7 @@ const toggleCancelStatus = async (row: UserInfo) => {
           }
       )
 
-      const unCancelData: UnCancelReq = {accountId: row.id}
+      const unCancelData: UnCancelReq = accountActionPayload(row)
       const response = await accountApi.unCancel(unCancelData)
 
       if (response) {
@@ -772,7 +795,7 @@ const toggleCancelStatus = async (row: UserInfo) => {
           }
       )
 
-      const cancelData: CancelReq = {accountId: row.id}
+      const cancelData: CancelReq = accountActionPayload(row)
       const response = await accountApi.cancel(cancelData)
 
       if (response) {

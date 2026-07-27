@@ -14,7 +14,6 @@ import (
 	"xr-game-server/errercode"
 	"xr-game-server/module/auth"
 	"xr-game-server/module/liveroom"
-	"xr-game-server/module/userinfo"
 )
 
 // QueryBotAnchorList CMS分页查询机器人主播列表(基于内存ID列表)
@@ -65,7 +64,6 @@ func CreateBotAnchor(_ context.Context, req *botanchordto.CreateBotAnchorReq) (*
 	addBotAnchorId(account.ID)
 	addEnabledBotAnchorId(account.ID)
 	liveroomdao.FlushRoomCache(room)
-	userinfo.AddIdToCache(account.ID)
 
 	return &botanchordto.CreateBotAnchorRes{ID: account.ID}, nil
 }
@@ -102,7 +100,6 @@ func UpdateBotAnchor(_ context.Context, req *botanchordto.UpdateBotAnchorReq) (*
 	}
 	room.SetPushStream(req.PushStream)
 
-	userinfo.AddIdToCache(req.ID)
 	return &botanchordto.UpdateBotAnchorRes{Success: true}, nil
 }
 
@@ -116,7 +113,6 @@ func SetBotAnchorStatus(ctx context.Context, req *botanchordto.SetBotAnchorStatu
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	user.SetBotAnchorStatus(req.Status)
-	userinfo.AddIdToCache(req.ID)
 	switch req.Status {
 	case entity.BotAnchorStatusEnabled:
 		enableBotAnchorRoomCache(req.ID, user.GuildId)

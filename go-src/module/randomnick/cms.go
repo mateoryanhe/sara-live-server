@@ -3,7 +3,7 @@ package randomnick
 import (
 	"context"
 
-	"xr-game-server/dao/randomnickdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/errercode"
 )
 
@@ -36,9 +36,9 @@ func ImportNicknames(_ context.Context, req *ImportNicknamesReq) (*ImportNicknam
 	imported := names
 	var err error
 	if req.Replace {
-		err = randomnickdao.ReplaceByLang(lang, names)
+		err = cfgdao.ReplaceRandomNicknamesByLang(lang, names)
 	} else {
-		existing, loadErr := randomnickdao.ListNicknamesByLang(lang)
+		existing, loadErr := cfgdao.ListRandomNicknamesByLang(lang)
 		if loadErr != nil {
 			return nil, loadErr
 		}
@@ -56,7 +56,7 @@ func ImportNicknames(_ context.Context, req *ImportNicknamesReq) (*ImportNicknam
 		}
 		imported = appendNames
 		if len(appendNames) > 0 {
-			err = randomnickdao.BatchInsert(lang, appendNames)
+			err = cfgdao.BatchInsertRandomNicknames(lang, appendNames)
 		}
 	}
 	if err != nil {
@@ -74,7 +74,7 @@ func ImportNicknames(_ context.Context, req *ImportNicknamesReq) (*ImportNicknam
 // ClearNicknames 清空指定语言昵称库
 func ClearNicknames(_ context.Context, req *ClearNicknamesReq) (*ClearNicknamesRes, error) {
 	lang := NormalizeLang(req.Lang)
-	if err := randomnickdao.DeleteByLang(lang); err != nil {
+	if err := cfgdao.DeleteRandomNicknamesByLang(lang); err != nil {
 		return nil, err
 	}
 	if err := reloadMemory(); err != nil {

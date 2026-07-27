@@ -6,14 +6,14 @@ import (
 	"strings"
 	"time"
 
-	"xr-game-server/dao/aliyuntextmoderationcfgdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/aliyuntextmoderationdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
 )
 
 func GetCfg(_ context.Context, _ *aliyuntextmoderationdto.GetCfgReq) (*aliyuntextmoderationdto.GetCfgRes, error) {
-	cfg := aliyuntextmoderationcfgdao.Load()
+	cfg := cfgdao.LoadAliyunTextModerationCfg()
 	if cfg == nil {
 		return &aliyuntextmoderationdto.GetCfgRes{Cfg: nil}, nil
 	}
@@ -21,7 +21,7 @@ func GetCfg(_ context.Context, _ *aliyuntextmoderationdto.GetCfgReq) (*aliyuntex
 }
 
 func SaveCfg(_ context.Context, req *aliyuntextmoderationdto.SaveCfgReq) (*aliyuntextmoderationdto.SaveCfgRes, error) {
-	existing := aliyuntextmoderationcfgdao.Load()
+	existing := cfgdao.LoadAliyunTextModerationCfg()
 	row := &entity.AliyunTextModerationCfg{
 		Enabled:         req.Enabled,
 		AccessKeyId:     strings.TrimSpace(req.AccessKeyId),
@@ -57,7 +57,7 @@ func SaveCfg(_ context.Context, req *aliyuntextmoderationdto.SaveCfgReq) (*aliyu
 	if row.CreatedAt.IsZero() {
 		row.CreatedAt = row.UpdatedAt
 	}
-	if err := aliyuntextmoderationcfgdao.Save(row); err != nil {
+	if err := cfgdao.SaveAliyunTextModerationCfg(row); err != nil {
 		return nil, err
 	}
 	invalidateGreenClient()

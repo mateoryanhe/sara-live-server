@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strconv"
 	"sync"
-	"xr-game-server/dao/bannerdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/bannerdto"
 	"xr-game-server/entity"
 	"xr-game-server/module/upload"
@@ -22,7 +22,7 @@ func Init() {
 }
 
 func loadBannerMemory() {
-	rows := bannerdao.GetAll()
+	rows := cfgdao.GetAllBanners()
 	m := make(map[uint64]*entity.HomeBanner, len(rows))
 	onShelf := make([]*bannerdto.AppBannerItem, 0, len(rows))
 	for _, r := range rows {

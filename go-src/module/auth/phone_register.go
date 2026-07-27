@@ -35,12 +35,10 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 		return nil, errercode.CreateCode(errercode.VerifyCodeInvalid)
 	}
 
-	// 检查手机号是否已注册
-	account := accountdao.GetAccountBy(phone, PhoneChannel, phoneAreaCode)
-	if account.ID != 0 && account.Password != "" {
+	if active := accountdao.FindActivePhoneAccount(phoneAreaCode, phone); active != nil && active.Password != "" {
 		return nil, errercode.CreateCode(errercode.AccountAlreadyExists)
 	}
-	account.SetPhoneAreaCode(phoneAreaCode)
+	account := accountdao.RegisterPhoneAccount(phoneAreaCode, phone)
 
 	// 设置密码
 	account.SetPassword(gmd5.MustEncryptString(req.Password))

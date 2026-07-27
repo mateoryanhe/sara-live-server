@@ -2,7 +2,7 @@ package recharge
 
 import (
 	"sync/atomic"
-	"xr-game-server/dao/rechargecfgdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/rechargecfgdto"
 	"xr-game-server/entity"
 )
@@ -39,7 +39,7 @@ func toAppItem(r *entity.RechargeCfg) *rechargecfgdto.AppRechargeCfgItem {
 
 // loadRechargeCfgCache 从 DB 重新加载已上架配置并整体替换快照
 func loadRechargeCfgCache() []*rechargecfgdto.AppRechargeCfgItem {
-	rows := rechargecfgdao.GetOnShelf()
+	rows := cfgdao.GetOnShelfRechargeCfg()
 	byId := make(map[uint64]*rechargecfgdto.AppRechargeCfgItem, len(rows))
 	list := make([]*rechargecfgdto.AppRechargeCfgItem, 0, len(rows))
 	for _, r := range rows {

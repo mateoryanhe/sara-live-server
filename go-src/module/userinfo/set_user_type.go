@@ -21,6 +21,5 @@ func SetUserType(_ context.Context, req *accountdto.SetUserTypeReq) (*accountdto
 		return &accountdto.SetUserTypeRes{Success: true}, nil
 	}
 	user.SetUserType(req.UserType)
-	AddIdToCache(req.AccountId)
 	return &accountdto.SetUserTypeRes{Success: true}, nil
 }

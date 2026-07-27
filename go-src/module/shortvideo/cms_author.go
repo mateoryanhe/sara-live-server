@@ -10,7 +10,6 @@ import (
 	"xr-game-server/entity"
 	"xr-game-server/module/auth"
 	"xr-game-server/module/randomnick"
-	"xr-game-server/module/userinfo"
 )
 
 const maxCMSAuthorNicknameRunes = 32
@@ -30,7 +29,6 @@ func createCMSAuthorUser(nickname, avatar string) (uint64, error) {
 	}
 	user.SetUserType(entity.UserTypeCMSAuthor)
 	userinfodao.GetUserCumulativeStatByUserId(account.ID)
-	userinfo.AddIdToCache(account.ID)
 	return account.ID, nil
 }
 

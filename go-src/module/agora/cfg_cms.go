@@ -4,14 +4,14 @@ import (
 	"context"
 	"strconv"
 	"time"
-	"xr-game-server/dao/agoracfgdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/agoradto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
 )
 
 func GetAgoraCfg(_ context.Context, _ *agoradto.GetAgoraCfgReq) (*agoradto.GetAgoraCfgRes, error) {
-	cfg := agoracfgdao.Load()
+	cfg := cfgdao.LoadAgoraCfg()
 	if cfg == nil {
 		return &agoradto.GetAgoraCfgRes{Cfg: nil}, nil
 	}
@@ -22,7 +22,7 @@ func SaveAgoraCfg(_ context.Context, req *agoradto.SaveAgoraCfgReq) (*agoradto.S
 	if !isValidAgoraTokenCfg(req.TokenExpireSeconds, req.TokenRefreshSeconds) {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	existing := agoracfgdao.Load()
+	existing := cfgdao.LoadAgoraCfg()
 	row := &entity.AgoraCfg{
 		AppId:               req.AppId,
 		AppCertificate:      req.AppCertificate,
@@ -46,7 +46,7 @@ func SaveAgoraCfg(_ context.Context, req *agoradto.SaveAgoraCfgReq) (*agoradto.S
 	if row.CreatedAt.IsZero() {
 		row.CreatedAt = row.UpdatedAt
 	}
-	if err := agoracfgdao.Save(row); err != nil {
+	if err := cfgdao.SaveAgoraCfg(row); err != nil {
 		return nil, err
 	}
 	if isAgoraTokenCfgChanged(existing, row) {

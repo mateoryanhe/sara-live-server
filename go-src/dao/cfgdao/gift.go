@@ -1,4 +1,4 @@
-package giftdao
+package cfgdao
 
 import (
 	"fmt"
@@ -12,7 +12,6 @@ import (
 	"xr-game-server/entity"
 )
 
-// GetGiftById 根据ID获取礼物
 func GetGiftById(id uint64) *entity.LiveGift {
 	var gift entity.LiveGift
 	err := g.DB().Model(string(entity.TbLiveGift)).Where("id = ?", id).Scan(&gift)
@@ -22,7 +21,6 @@ func GetGiftById(id uint64) *entity.LiveGift {
 	return &gift
 }
 
-// GetGiftByName 根据名称获取礼物
 func GetGiftByName(name string) *entity.LiveGift {
 	var gift entity.LiveGift
 	err := g.DB().Model(string(entity.TbLiveGift)).Where("name = ?", name).Scan(&gift)
@@ -32,30 +30,20 @@ func GetGiftByName(name string) *entity.LiveGift {
 	return &gift
 }
 
-// CreateGift 创建礼物
 func CreateGift(gift *entity.LiveGift) error {
 	_, err := g.DB().Model(string(entity.TbLiveGift)).Save(gift)
-	if err == nil {
-		return nil
-	}
 	return err
 }
 
-// UpdateGift 更新礼物(整行 Save)
 func UpdateGift(gift *entity.LiveGift) error {
 	return CreateGift(gift)
 }
 
-// DeleteGift 删除礼物
 func DeleteGift(id uint64) error {
 	_, err := g.DB().Model(string(entity.TbLiveGift)).WherePri(id).Delete()
-	if err == nil {
-		return nil
-	}
 	return err
 }
 
-// UpdateGiftStatus 仅更新上下架状态
 func UpdateGiftStatus(id uint64, status uint8) error {
 	_, err := g.DB().Model(string(entity.TbLiveGift)).
 		WherePri(id).
@@ -64,7 +52,6 @@ func UpdateGiftStatus(id uint64, status uint8) error {
 	return err
 }
 
-// GetOnShelfGifts 获取所有已上架且已到发布时间的礼物
 func GetOnShelfGifts() []*entity.LiveGift {
 	ret := make([]*entity.LiveGift, 0)
 	now := time.Now()
@@ -78,7 +65,6 @@ func GetOnShelfGifts() []*entity.LiveGift {
 	return ret
 }
 
-// GetGiftList 分页获取礼物列表
 func GetGiftList(req *giftdto.GiftListReq) (int, []*giftdto.GiftListRes) {
 	sql := `select id, name, name_en, name_es, name_pt, name_hi, icon, animation, price, category, sort, status, published_at, description, created_at, updated_at
             from live_gifts
@@ -96,10 +82,10 @@ func GetGiftList(req *giftdto.GiftListReq) (int, []*giftdto.GiftListRes) {
 		param = append(param, req.Category)
 	}
 	switch req.StatusFilter {
-	case 1: // 只看下架
+	case 1:
 		sql += ` and status = ?`
 		param = append(param, entity.LiveGiftStatusOffShelf)
-	case 2: // 只看上架
+	case 2:
 		sql += ` and status = ?`
 		param = append(param, entity.LiveGiftStatusOnShelf)
 	}

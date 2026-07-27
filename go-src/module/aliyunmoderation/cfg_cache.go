@@ -4,7 +4,7 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"xr-game-server/dao/aliyuntextmoderationcfgdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/entity"
 )
 
@@ -31,7 +31,7 @@ var (
 )
 
 func reloadCfgMemory() {
-	cfgCache.Store(toCfgSnapshot(aliyuntextmoderationcfgdao.Load()))
+	cfgCache.Store(toCfgSnapshot(cfgdao.LoadAliyunTextModerationCfg()))
 }
 
 func getCfgCache() *cfgSnapshot {

@@ -2,7 +2,7 @@ package agora
 
 import (
 	"sync/atomic"
-	"xr-game-server/dao/agoracfgdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/entity"
 )
 
@@ -34,7 +34,7 @@ var (
 )
 
 func reloadAgoraCfgMemory() {
-	agoraCfgCache.Store(toAgoraCfgSnapshot(agoracfgdao.Load()))
+	agoraCfgCache.Store(toAgoraCfgSnapshot(cfgdao.LoadAgoraCfg()))
 }
 
 func getAgoraCfgCache() *agoraCfgSnapshot {

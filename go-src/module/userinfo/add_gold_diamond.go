@@ -14,7 +14,6 @@ func DiamondCMSAdd(_ context.Context, req *diamonddto.CMSAddDiamondReq) (*diamon
 	if err != nil {
 		return nil, err
 	}
-	AddIdToCache(req.UserId)
 	return &diamonddto.CMSAddDiamondRes{Diamond: after}, nil
 }
 
@@ -24,7 +23,6 @@ func DiamondCMSSub(_ context.Context, req *diamonddto.CMSSubDiamondReq) (*diamon
 	if err != nil {
 		return nil, err
 	}
-	AddIdToCache(req.UserId)
 	return &diamonddto.CMSSubDiamondRes{Diamond: after}, nil
 }
 
@@ -34,7 +32,6 @@ func GoldCMSAdd(_ context.Context, req *golddto.CMSAddGoldReq) (*golddto.CMSAddG
 	if err != nil {
 		return nil, err
 	}
-	AddIdToCache(req.UserId)
 	return &golddto.CMSAddGoldRes{Gold: after}, nil
 }
 
@@ -44,6 +41,5 @@ func GoldCMSSub(_ context.Context, req *golddto.CMSSubGoldReq) (*golddto.CMSSubG
 	if err != nil {
 		return nil, err
 	}
-	AddIdToCache(req.UserId)
 	return &golddto.CMSSubGoldRes{Gold: after}, nil
 }

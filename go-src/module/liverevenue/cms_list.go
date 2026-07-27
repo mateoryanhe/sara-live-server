@@ -5,7 +5,7 @@ import (
 	"strconv"
 	liverevenueconst "xr-game-server/constants/liverevenue"
 	"xr-game-server/core/httpserver"
-	"xr-game-server/dao/giftdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liverevenuedto"
@@ -73,7 +73,7 @@ func toCMSItem(v *entity.LiveRevenueLog, nicknameMap map[uint64]string) *liverev
 		item.ReceiverNickname = nicknameMap[v.ReceiverId]
 	}
 	if v.RevenueType == uint8(liverevenueconst.Gift) {
-		if g := giftdao.GetGiftById(v.BizId); g != nil {
+		if g := cfgdao.GetGiftById(v.BizId); g != nil {
 			item.BizName = g.Name
 		}
 	}

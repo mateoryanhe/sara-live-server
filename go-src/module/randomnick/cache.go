@@ -7,7 +7,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"xr-game-server/dao/randomnickdao"
+	"xr-game-server/dao/cfgdao"
 )
 
 type nicknamePoolSnapshot struct {
@@ -30,7 +30,7 @@ func ReloadMemory() error {
 }
 
 func reloadMemory() error {
-	count, err := randomnickdao.CountAll()
+	count, err := cfgdao.CountAllRandomNicknames()
 	if err != nil {
 		return err
 	}
@@ -44,7 +44,7 @@ func reloadMemory() error {
 		poolCache.Store(snap)
 		return nil
 	}
-	rows, err := randomnickdao.LoadAll()
+	rows, err := cfgdao.LoadAllRandomNicknames()
 	if err != nil {
 		return err
 	}

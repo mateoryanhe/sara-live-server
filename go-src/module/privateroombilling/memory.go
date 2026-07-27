@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strconv"
 	"sync/atomic"
-	"xr-game-server/dao/privateroombillingdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/privateroombillingdto"
 	"xr-game-server/entity"
 )
@@ -25,7 +25,7 @@ func Init() {
 
 // reloadBillingMemory 从DB重新加载并整体替换内存快照
 func reloadBillingMemory() {
-	rows := privateroombillingdao.GetAll()
+	rows := cfgdao.GetAllPrivateRoomBilling()
 	byID := make(map[uint64]*entity.LivePrivateRoomBilling, len(rows))
 	onShelf := make([]*privateroombillingdto.AppBillingItem, 0, len(rows))
 	for _, r := range rows {

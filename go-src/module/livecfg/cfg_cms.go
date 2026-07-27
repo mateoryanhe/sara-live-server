@@ -4,14 +4,14 @@ import (
 	"context"
 	"strconv"
 	"time"
-	"xr-game-server/dao/livecfgdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/livecfgdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
 )
 
 func GetLiveCfg(_ context.Context, _ *livecfgdto.GetLiveCfgReq) (*livecfgdto.GetLiveCfgRes, error) {
-	cfg := livecfgdao.Load()
+	cfg := cfgdao.LoadLiveCfg()
 	if cfg == nil {
 		return &livecfgdto.GetLiveCfgRes{Cfg: nil}, nil
 	}
@@ -19,7 +19,7 @@ func GetLiveCfg(_ context.Context, _ *livecfgdto.GetLiveCfgReq) (*livecfgdto.Get
 }
 
 func SaveLiveCfg(_ context.Context, req *livecfgdto.SaveLiveCfgReq) (*livecfgdto.SaveLiveCfgRes, error) {
-	existing := livecfgdao.Load()
+	existing := cfgdao.LoadLiveCfg()
 	row := &entity.LiveCfg{
 		PaidDanmakuPrice:            req.PaidDanmakuPrice,
 		PrivateRoomFreeWatchSeconds: req.PrivateRoomFreeWatchSeconds,
@@ -38,7 +38,7 @@ func SaveLiveCfg(_ context.Context, req *livecfgdto.SaveLiveCfgReq) (*livecfgdto
 	if row.CreatedAt.IsZero() {
 		row.CreatedAt = row.UpdatedAt
 	}
-	if err := livecfgdao.Save(row); err != nil {
+	if err := cfgdao.SaveLiveCfg(row); err != nil {
 		return nil, err
 	}
 	reloadLiveCfgMemory()

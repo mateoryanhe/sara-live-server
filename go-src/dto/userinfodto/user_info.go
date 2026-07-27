@@ -123,18 +123,6 @@ type CancelAccountRes struct {
 	Success bool `json:"success"`
 }
 
-// CancelAccountByPhoneReq 手机号+验证码注销
-type CancelAccountByPhoneReq struct {
-	g.Meta        `path:"/cancelAccountByPhone" method:"post" summary:"手机号注销" tags:"用户基础信息"`
-	PhoneAreaCode string `json:"phoneAreaCode" dc:"手机区号"`
-	Phone         string `json:"phone" v:"required#手机号不能为空" dc:"手机号"`
-	Code          string `json:"code" v:"required#验证码不能为空" dc:"短信验证码"`
-}
-
-type CancelAccountByPhoneRes struct {
-	Success bool `json:"success"`
-}
-
 // CancelAccountByCodeReq 通过注销码注销账号(官网)
 type CancelAccountByCodeReq struct {
 	g.Meta     `path:"/cancelAccountByCode" method:"post" summary:"通过注销码注销账号" tags:"用户基础信息"`

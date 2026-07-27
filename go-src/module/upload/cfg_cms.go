@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"xr-game-server/dao/uploadresourcecfgdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/uploaddto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
@@ -15,7 +15,7 @@ import (
 const uploadCfgMB = 1024 * 1024
 
 func GetUploadResourceCfg(_ context.Context, _ *uploaddto.GetUploadResourceCfgReq) (*uploaddto.GetUploadResourceCfgRes, error) {
-	cfg := uploadresourcecfgdao.Load()
+	cfg := cfgdao.LoadUploadResourceCfg()
 	if cfg == nil {
 		return &uploaddto.GetUploadResourceCfgRes{Cfg: nil}, nil
 	}
@@ -26,7 +26,7 @@ func SaveUploadResourceCfg(_ context.Context, req *uploaddto.SaveUploadResourceC
 	if req.AppImageMaxSizeMB < 1 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	existing := uploadresourcecfgdao.Load()
+	existing := cfgdao.LoadUploadResourceCfg()
 	row := &entity.UploadResourceCfg{
 		ResourceDomain:                 strings.TrimSpace(req.ResourceDomain),
 		AppImageMaxSize:                uint64(req.AppImageMaxSizeMB) * uploadCfgMB,
@@ -62,7 +62,7 @@ func SaveUploadResourceCfg(_ context.Context, req *uploaddto.SaveUploadResourceC
 	if row.CreatedAt.IsZero() {
 		row.CreatedAt = row.UpdatedAt
 	}
-	if err := uploadresourcecfgdao.Save(row); err != nil {
+	if err := cfgdao.SaveUploadResourceCfg(row); err != nil {
 		return nil, err
 	}
 	invalidateImageGreenClient()

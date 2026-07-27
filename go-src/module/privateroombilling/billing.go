@@ -4,14 +4,14 @@ import (
 	"context"
 	"strconv"
 	"xr-game-server/core/httpserver"
-	"xr-game-server/dao/privateroombillingdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/privateroombillingdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
 )
 
 func GetBillingList(_ context.Context, req *privateroombillingdto.BillingListReq) (*httpserver.CMSQueryResp, error) {
-	total, list := privateroombillingdao.GetBillingList(req)
+	total, list := cfgdao.GetBillingList(req)
 	return &httpserver.CMSQueryResp{Total: total, Data: list}, nil
 }
 
@@ -25,7 +25,7 @@ func CreateBilling(_ context.Context, req *privateroombillingdto.CreateBillingRe
 		Sort:           req.Sort,
 		Status:         entity.LivePrivateRoomBillingStatusOnShelf,
 	}
-	if err := privateroombillingdao.Create(row); err != nil {
+	if err := cfgdao.CreatePrivateRoomBilling(row); err != nil {
 		return nil, err
 	}
 	reloadBillingMemory()
@@ -33,13 +33,13 @@ func CreateBilling(_ context.Context, req *privateroombillingdto.CreateBillingRe
 }
 
 func UpdateBilling(_ context.Context, req *privateroombillingdto.UpdateBillingReq) (*privateroombillingdto.UpdateBillingRes, error) {
-	row := privateroombillingdao.GetById(req.ID)
+	row := cfgdao.GetPrivateRoomBillingById(req.ID)
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.PrivateRoomBillingNonExist)
 	}
 	row.PricePerMinute = req.PricePerMinute
 	row.Sort = req.Sort
-	if err := privateroombillingdao.Update(row); err != nil {
+	if err := cfgdao.UpdatePrivateRoomBilling(row); err != nil {
 		return nil, err
 	}
 	reloadBillingMemory()
@@ -47,10 +47,10 @@ func UpdateBilling(_ context.Context, req *privateroombillingdto.UpdateBillingRe
 }
 
 func DeleteBilling(_ context.Context, req *privateroombillingdto.DeleteBillingReq) (*privateroombillingdto.DeleteBillingRes, error) {
-	if row := privateroombillingdao.GetById(req.ID); row == nil {
+	if row := cfgdao.GetPrivateRoomBillingById(req.ID); row == nil {
 		return nil, errercode.CreateCode(errercode.PrivateRoomBillingNonExist)
 	}
-	if err := privateroombillingdao.Delete(req.ID); err != nil {
+	if err := cfgdao.DeletePrivateRoomBilling(req.ID); err != nil {
 		return nil, err
 	}
 	reloadBillingMemory()
@@ -58,12 +58,12 @@ func DeleteBilling(_ context.Context, req *privateroombillingdto.DeleteBillingRe
 }
 
 func OnShelfBilling(_ context.Context, req *privateroombillingdto.OnShelfBillingReq) (*privateroombillingdto.OnShelfBillingRes, error) {
-	row := privateroombillingdao.GetById(req.ID)
+	row := cfgdao.GetPrivateRoomBillingById(req.ID)
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.PrivateRoomBillingNonExist)
 	}
 	if row.Status != entity.LivePrivateRoomBillingStatusOnShelf {
-		if err := privateroombillingdao.UpdateStatus(req.ID, entity.LivePrivateRoomBillingStatusOnShelf); err != nil {
+		if err := cfgdao.UpdatePrivateRoomBillingStatus(req.ID, entity.LivePrivateRoomBillingStatusOnShelf); err != nil {
 			return nil, err
 		}
 		reloadBillingMemory()
@@ -72,12 +72,12 @@ func OnShelfBilling(_ context.Context, req *privateroombillingdto.OnShelfBilling
 }
 
 func OffShelfBilling(_ context.Context, req *privateroombillingdto.OffShelfBillingReq) (*privateroombillingdto.OffShelfBillingRes, error) {
-	row := privateroombillingdao.GetById(req.ID)
+	row := cfgdao.GetPrivateRoomBillingById(req.ID)
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.PrivateRoomBillingNonExist)
 	}
 	if row.Status != entity.LivePrivateRoomBillingStatusOffShelf {
-		if err := privateroombillingdao.UpdateStatus(req.ID, entity.LivePrivateRoomBillingStatusOffShelf); err != nil {
+		if err := cfgdao.UpdatePrivateRoomBillingStatus(req.ID, entity.LivePrivateRoomBillingStatusOffShelf); err != nil {
 			return nil, err
 		}
 		reloadBillingMemory()

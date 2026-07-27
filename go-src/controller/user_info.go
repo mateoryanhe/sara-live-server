@@ -4,6 +4,7 @@ import (
 	"context"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/userinfodto"
+	"xr-game-server/module/auth"
 	"xr-game-server/module/currencylog"
 	"xr-game-server/module/userinfo"
 )
@@ -48,7 +49,7 @@ func (c *UserInfoController) UploadAvatar(ctx context.Context, req *userinfodto.
 }
 
 func (c *UserInfoController) CancelAccount(ctx context.Context, req *userinfodto.CancelAccountReq) (res *userinfodto.CancelAccountRes, err error) {
-	return userinfo.CancelAccount(ctx, req)
+	return auth.CancelAccount(ctx, req)
 }
 
 func (c *UserInfoController) Feedback(ctx context.Context, req *userinfodto.AppFeedbackReq) (res *userinfodto.AppFeedbackRes, err error) {

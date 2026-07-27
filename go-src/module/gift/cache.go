@@ -2,7 +2,7 @@ package gift
 
 import (
 	"sync"
-	"xr-game-server/dao/giftdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/giftdto"
 	"xr-game-server/entity"
 	"xr-game-server/module/upload"
@@ -28,7 +28,7 @@ func invalidateGiftCache() {
 
 // loadGiftCache 从 DB 重新加载已上架礼物到缓存
 func loadGiftCache() []*giftdto.AppGiftItem {
-	rows := giftdao.GetOnShelfGifts()
+	rows := cfgdao.GetOnShelfGifts()
 	m := make(map[uint64]*giftdto.AppGiftItem, len(rows))
 	list := make([]*giftdto.AppGiftItem, 0, len(rows))
 	for _, r := range rows {

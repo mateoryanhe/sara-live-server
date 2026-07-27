@@ -1,10 +1,9 @@
-package userinfo
+package auth
 
 import (
 	"context"
 	"strings"
 
-	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/accountdto"
@@ -14,30 +13,26 @@ import (
 
 // CancelAccountByCode 通过注销码注销账号(官网公开接口)
 func CancelAccountByCode(ctx context.Context, req *userinfodto.CancelAccountByCodeReq) (*userinfodto.CancelAccountByCodeRes, error) {
-	ip := g.RequestFromCtx(ctx).GetClientIp()
-	if err := checkCancelByCodeIPLimit(ip); err != nil {
-		return nil, err
-	}
-
 	cancelCode := strings.TrimSpace(req.CancelCode)
 	if cancelCode == "" {
-		return nil, markCancelByCodeFailure(ip, errercode.InvalidParam)
+		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	userId := userinfodao.FindUserIdByCancelCode(cancelCode)
 	if userId == 0 {
-		return nil, markCancelByCodeFailure(ip, errercode.InvalidParam)
+		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	account := accountdao.GetAccountById(userId)
-	if account == nil {
-		return nil, markCancelByCodeFailure(ip, errercode.InvalidParam)
+	dbAcc := accountdao.GetAccountById(userId)
+	if dbAcc == nil {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	if account.Cancel {
-		return nil, markCancelByCodeFailure(ip, errercode.AccountCanceled)
-	}
-	ok, err := CancelUser(ctx, &accountdto.CancelReq{AccountId: userId})
+
+	ok, err := CancelUser(ctx, &accountdto.CancelReq{
+		AccountId: userId,
+		OpenId:    dbAcc.OpenId,
+		Channel:   dbAcc.Channel,
+	})
 	if err != nil || !ok {
 		return nil, err
 	}
-	clearCancelByCodeFailure(ip)
 	return &userinfodto.CancelAccountByCodeRes{Success: true}, nil
 }

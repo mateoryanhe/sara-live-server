@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 	"xr-game-server/core/httpserver"
-	"xr-game-server/dao/vipcfgdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/vipcfgdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
@@ -12,7 +12,7 @@ import (
 )
 
 func GetList(_ context.Context, req *vipcfgdto.VipCfgListReq) (*httpserver.CMSQueryResp, error) {
-	total, list := vipcfgdao.GetList(req)
+	total, list := cfgdao.GetVipCfgList(req)
 	for _, res := range list {
 		res.AnimationName = res.Animation
 		res.Animation = upload.GetUrlByName(res.AnimationName)
@@ -25,7 +25,7 @@ func Create(_ context.Context, req *vipcfgdto.CreateVipCfgReq) (*vipcfgdto.Creat
 	if err := validateWithdrawRange(req.MinWithdrawAmount, req.MaxWithdrawAmount); err != nil {
 		return nil, err
 	}
-	if existing := vipcfgdao.GetByLevel(req.Level); existing != nil {
+	if existing := cfgdao.GetVipCfgByLevel(req.Level); existing != nil {
 		return nil, errercode.CreateCode(errercode.VipCfgExist)
 	}
 	row := &entity.VipCfg{
@@ -38,7 +38,7 @@ func Create(_ context.Context, req *vipcfgdto.CreateVipCfgReq) (*vipcfgdto.Creat
 		Fee:                  req.Fee,
 		Animation:            req.Animation,
 	}
-	if err := vipcfgdao.Create(row); err != nil {
+	if err := cfgdao.CreateVipCfg(row); err != nil {
 		return nil, err
 	}
 	reloadVipCfgMemory()
@@ -50,11 +50,11 @@ func Update(_ context.Context, req *vipcfgdto.UpdateVipCfgReq) (*vipcfgdto.Updat
 	if err := validateWithdrawRange(req.MinWithdrawAmount, req.MaxWithdrawAmount); err != nil {
 		return nil, err
 	}
-	row := vipcfgdao.GetById(req.ID)
+	row := cfgdao.GetVipCfgById(req.ID)
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.VipCfgNonExist)
 	}
-	if existing := vipcfgdao.GetByLevel(req.Level); existing != nil && existing.ID != req.ID {
+	if existing := cfgdao.GetVipCfgByLevel(req.Level); existing != nil && existing.ID != req.ID {
 		return nil, errercode.CreateCode(errercode.VipCfgExist)
 	}
 	row.Level = req.Level
@@ -65,7 +65,7 @@ func Update(_ context.Context, req *vipcfgdto.UpdateVipCfgReq) (*vipcfgdto.Updat
 	row.MaxWithdrawAmount = req.MaxWithdrawAmount
 	row.Fee = req.Fee
 	row.Animation = req.Animation
-	if err := vipcfgdao.Update(row); err != nil {
+	if err := cfgdao.UpdateVipCfg(row); err != nil {
 		return nil, err
 	}
 	reloadVipCfgMemory()
@@ -73,10 +73,10 @@ func Update(_ context.Context, req *vipcfgdto.UpdateVipCfgReq) (*vipcfgdto.Updat
 }
 
 func Delete(_ context.Context, req *vipcfgdto.DeleteVipCfgReq) (*vipcfgdto.DeleteVipCfgRes, error) {
-	if row := vipcfgdao.GetById(req.ID); row == nil {
+	if row := cfgdao.GetVipCfgById(req.ID); row == nil {
 		return nil, errercode.CreateCode(errercode.VipCfgNonExist)
 	}
-	if err := vipcfgdao.Delete(req.ID); err != nil {
+	if err := cfgdao.DeleteVipCfg(req.ID); err != nil {
 		return nil, err
 	}
 	reloadVipCfgMemory()

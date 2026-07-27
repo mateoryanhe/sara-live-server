@@ -6,14 +6,14 @@ import (
 	"strings"
 	"time"
 
-	"xr-game-server/dao/privacypolicycfgdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/privacypolicydto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
 )
 
 func GetPrivacyPolicyCfg(_ context.Context, _ *privacypolicydto.GetPrivacyPolicyCfgReq) (*privacypolicydto.GetPrivacyPolicyCfgRes, error) {
-	cfg := privacypolicycfgdao.Load()
+	cfg := cfgdao.LoadPrivacyPolicyCfg()
 	if cfg == nil {
 		return &privacypolicydto.GetPrivacyPolicyCfgRes{Cfg: nil}, nil
 	}
@@ -30,7 +30,7 @@ func SavePrivacyPolicyCfg(_ context.Context, req *privacypolicydto.SavePrivacyPo
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 
-	existing := privacypolicycfgdao.Load()
+	existing := cfgdao.LoadPrivacyPolicyCfg()
 	row := &entity.PrivacyPolicyCfg{
 		PrivacyPolicyUrl:  url,
 		TermsOfServiceUrl: termsUrl,
@@ -49,7 +49,7 @@ func SavePrivacyPolicyCfg(_ context.Context, req *privacypolicydto.SavePrivacyPo
 	if row.CreatedAt.IsZero() {
 		row.CreatedAt = row.UpdatedAt
 	}
-	if err := privacypolicycfgdao.Save(row); err != nil {
+	if err := cfgdao.SavePrivacyPolicyCfg(row); err != nil {
 		return nil, err
 	}
 	reloadCfgMemory()

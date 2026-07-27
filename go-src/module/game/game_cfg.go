@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 	"xr-game-server/core/httpserver"
-	"xr-game-server/dao/gamecfgdao"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/gamecfgdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
@@ -13,7 +13,7 @@ import (
 )
 
 func GetList(_ context.Context, req *gamecfgdto.GameCfgListReq) (*httpserver.CMSQueryResp, error) {
-	total, list := gamecfgdao.GetList(req)
+	total, list := cfgdao.GetGameCfgList(req)
 	for _, item := range list {
 		if item == nil {
 			continue
@@ -25,7 +25,7 @@ func GetList(_ context.Context, req *gamecfgdto.GameCfgListReq) (*httpserver.CMS
 
 func Create(_ context.Context, req *gamecfgdto.CreateGameCfgReq) (*gamecfgdto.CreateGameCfgRes, error) {
 	code := strings.TrimSpace(req.Code)
-	if existing := gamecfgdao.GetByCode(code); existing != nil {
+	if existing := cfgdao.GetGameCfgByCode(code); existing != nil {
 		return nil, errercode.CreateCode(errercode.GameCfgExist)
 	}
 	row := &entity.GameCfg{
@@ -36,20 +36,20 @@ func Create(_ context.Context, req *gamecfgdto.CreateGameCfgReq) (*gamecfgdto.Cr
 		Sort:      req.Sort,
 		Status:    req.Status,
 	}
-	if err := gamecfgdao.Create(row); err != nil {
+	if err := cfgdao.CreateGameCfg(row); err != nil {
 		return nil, err
 	}
-	gamecfgdao.ReloadCache()
+	cfgdao.ReloadGameCfgCache()
 	return &gamecfgdto.CreateGameCfgRes{ID: strconv.FormatUint(row.ID, 10)}, nil
 }
 
 func Update(_ context.Context, req *gamecfgdto.UpdateGameCfgReq) (*gamecfgdto.UpdateGameCfgRes, error) {
-	row := gamecfgdao.GetById(req.ID)
+	row := cfgdao.GetGameCfgById(req.ID)
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.GameCfgNonExist)
 	}
 	code := strings.TrimSpace(req.Code)
-	if existing := gamecfgdao.GetByCode(code); existing != nil && existing.ID != req.ID {
+	if existing := cfgdao.GetGameCfgByCode(code); existing != nil && existing.ID != req.ID {
 		return nil, errercode.CreateCode(errercode.GameCfgExist)
 	}
 	row.Name = strings.TrimSpace(req.Name)
@@ -58,20 +58,20 @@ func Update(_ context.Context, req *gamecfgdto.UpdateGameCfgReq) (*gamecfgdto.Up
 	row.Link = strings.TrimSpace(req.Link)
 	row.Sort = req.Sort
 	row.Status = req.Status
-	if err := gamecfgdao.Update(row); err != nil {
+	if err := cfgdao.UpdateGameCfg(row); err != nil {
 		return nil, err
 	}
-	gamecfgdao.ReloadCache()
+	cfgdao.ReloadGameCfgCache()
 	return &gamecfgdto.UpdateGameCfgRes{Success: true}, nil
 }
 
 func Delete(_ context.Context, req *gamecfgdto.DeleteGameCfgReq) (*gamecfgdto.DeleteGameCfgRes, error) {
-	if row := gamecfgdao.GetById(req.ID); row == nil {
+	if row := cfgdao.GetGameCfgById(req.ID); row == nil {
 		return nil, errercode.CreateCode(errercode.GameCfgNonExist)
 	}
-	if err := gamecfgdao.Delete(req.ID); err != nil {
+	if err := cfgdao.DeleteGameCfg(req.ID); err != nil {
 		return nil, err
 	}
-	gamecfgdao.ReloadCache()
+	cfgdao.ReloadGameCfgCache()
 	return &gamecfgdto.DeleteGameCfgRes{Success: true}, nil
 }

@@ -1,4 +1,4 @@
-package bannerdao
+package cfgdao
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"xr-game-server/entity"
 )
 
-func GetById(id uint64) *entity.HomeBanner {
+func GetBannerById(id uint64) *entity.HomeBanner {
 	var row entity.HomeBanner
 	if err := g.DB().Model(string(entity.TbHomeBanner)).Where("id = ?", id).Scan(&row); err != nil {
 		return nil
@@ -21,7 +21,7 @@ func GetById(id uint64) *entity.HomeBanner {
 	return &row
 }
 
-func GetByTitle(title string) *entity.HomeBanner {
+func GetBannerByTitle(title string) *entity.HomeBanner {
 	var row entity.HomeBanner
 	if err := g.DB().Model(string(entity.TbHomeBanner)).Where("title = ?", title).Scan(&row); err != nil {
 		return nil
@@ -32,7 +32,7 @@ func GetByTitle(title string) *entity.HomeBanner {
 	return &row
 }
 
-func GetAll() []*entity.HomeBanner {
+func GetAllBanners() []*entity.HomeBanner {
 	ret := make([]*entity.HomeBanner, 0)
 	_ = g.DB().Model(string(entity.TbHomeBanner)).
 		Order("sort desc, created_at desc").
@@ -40,21 +40,21 @@ func GetAll() []*entity.HomeBanner {
 	return ret
 }
 
-func Create(row *entity.HomeBanner) error {
+func CreateBanner(row *entity.HomeBanner) error {
 	_, err := g.DB().Model(string(entity.TbHomeBanner)).Save(row)
 	return err
 }
 
-func Update(row *entity.HomeBanner) error {
-	return Create(row)
+func UpdateBanner(row *entity.HomeBanner) error {
+	return CreateBanner(row)
 }
 
-func Delete(id uint64) error {
+func DeleteBanner(id uint64) error {
 	_, err := g.DB().Model(string(entity.TbHomeBanner)).WherePri(id).Delete()
 	return err
 }
 
-func UpdateStatus(id uint64, status uint8) error {
+func UpdateBannerStatus(id uint64, status uint8) error {
 	_, err := g.DB().Model(string(entity.TbHomeBanner)).
 		WherePri(id).
 		Data(g.Map{"status": status}).

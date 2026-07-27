@@ -3,6 +3,7 @@ package syndb
 import (
 	"context"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gogf/gf/v2/container/gqueue"
@@ -211,12 +212,51 @@ func (colCache *ColSynCache) batchSave() (int, bool) {
 	}
 	rows := len(dataMap)
 	_, err := g.DB().Model(colCache.TbName).Data(dataMap).Batch(rows).Save()
-	if err != nil {
-		g.Log().Errorf(gctx.New(), "syndb batchSave失败,table=%v,col=%v,rows=%v,err=%v", colCache.TbName, colCache.ColName, rows, err)
-		return 0, false
+	if err == nil {
+		colCache.Pending = make(map[any]*ColData)
+		return rows, true
 	}
+
+	saved := colCache.saveRowsDiscardOnError(dataMap)
 	colCache.Pending = make(map[any]*ColData)
-	return rows, true
+	if saved == 0 {
+		g.Log().Warningf(gctx.New(), "syndb batchSave失败已全部丢弃,table=%v,col=%v,rows=%v,err=%v",
+			colCache.TbName, colCache.ColName, rows, err)
+		return 0, true
+	}
+	if saved < rows {
+		g.Log().Warningf(gctx.New(), "syndb batchSave部分落库,table=%v,col=%v,saved=%v,discarded=%v,err=%v",
+			colCache.TbName, colCache.ColName, saved, rows-saved, err)
+	}
+	return saved, true
+}
+
+func (colCache *ColSynCache) saveRowsDiscardOnError(dataMap []map[string]interface{}) int {
+	saved := 0
+	for _, row := range dataMap {
+		_, err := g.DB().Model(colCache.TbName).Data(row).Save()
+		if err != nil {
+			idVal := row[colCache.IdName]
+			if isDuplicateKeyErr(err) {
+				g.Log().Warningf(gctx.New(), "syndb落库冲突已丢弃,table=%v,col=%v,id=%v,err=%v",
+					colCache.TbName, colCache.ColName, idVal, err)
+			} else {
+				g.Log().Warningf(gctx.New(), "syndb落库失败已丢弃,table=%v,col=%v,id=%v,err=%v",
+					colCache.TbName, colCache.ColName, idVal, err)
+			}
+			continue
+		}
+		saved++
+	}
+	return saved
+}
+
+func isDuplicateKeyErr(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := err.Error()
+	return strings.Contains(msg, "1062") || strings.Contains(msg, "Duplicate entry")
 }
 
 // ChangeSynTime 变更同步时间

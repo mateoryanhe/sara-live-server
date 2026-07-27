@@ -12,25 +12,36 @@ import (
 
 func QueryUserInfo(ctx context.Context, req *accountdto.QueryUserInfoReq) (res *httpserver.CMSQueryResp, err error) {
 	total, data := accountdao.GetUserInfo(req)
-	//检查缓存数据问题
-	//保证cms系统查询数据正确
 	for _, val := range data {
 		val.IsAnchor = entity.UserTypeIsAnchor(val.UserType)
-		if InCache(val.ID) {
-			//TODO:记录日志
-			userInfoCache := userinfodao.GetUserInfoByUserId(val.ID)
-			val.Diamond = userInfoCache.Diamond
-			val.Gold = userInfoCache.Gold
-			val.IsAnchor = userInfoCache.IsAnchor()
-			val.UserType = userInfoCache.UserType
-			val.Avatar = userInfoCache.Avatar
-			accountCache := accountdao.GetAccountBy(val.OpenId, val.Channel, val.PhoneAreaCode)
+		if accountCache := accountdao.GetAccountFromCache(val.OpenId, val.Channel, val.ID); accountCache != nil {
+			val.OpenId = accountCache.OpenId
+			val.IP = accountCache.IP
+			val.Channel = accountCache.Channel
+			val.PhoneAreaCode = accountCache.PhoneAreaCode
 			val.Cancel = accountCache.Cancel
 			val.Ban = accountCache.Ban
 			val.BanApplyTime = accountCache.BanApplyTime
 			val.BanTime = accountCache.BanTime
+		}
+		if userInfoCache := userinfodao.GetUserInfoFromMemory(val.ID); userInfoCache != nil {
+			val.Nickname = userInfoCache.Nickname
+			val.Phone = userInfoCache.Phone
+			val.Avatar = userInfoCache.Avatar
+			val.Remark = userInfoCache.Remark
+			val.Gold = userInfoCache.Gold
+			val.Diamond = userInfoCache.Diamond
+			val.ShareCode = userInfoCache.ShareCode
+			val.GuildId = userInfoCache.GuildId
+			val.UserType = userInfoCache.UserType
+			val.IsAnchor = userInfoCache.IsAnchor()
 			val.VipLevel = userInfoCache.VipLevel
-			val.CanRank = userinfodao.GetUserExtByUserId(val.ID).CanRank
+		}
+		if userExtCache := userinfodao.GetUserExtFromMemory(val.ID); userExtCache != nil {
+			val.CanRank = userExtCache.CanRank
+			val.CancelCode = userExtCache.CancelCode
+			val.PackageName = userExtCache.PackageName
+			val.AppVersion = userExtCache.AppVersion
 		}
 		val.Avatar = upload.ResolveAvatarUrlForUser(val.ID, val.Avatar)
 	}

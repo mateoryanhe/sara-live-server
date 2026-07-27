@@ -50,6 +50,22 @@ func GetUserExtByUserId(userId uint64) *entity.UserExt {
 	return cacheData.(*entity.UserExt)
 }
 
+// GetUserExtFromMemory 仅从内存缓存读取用户扩展信息,未命中返回 nil
+func GetUserExtFromMemory(userId uint64) *entity.UserExt {
+	if userId == 0 || userExtCacheMgr == nil {
+		return nil
+	}
+	v := userExtCacheMgr.GetFromCache(userId)
+	if v == nil {
+		return nil
+	}
+	ext, ok := v.(*entity.UserExt)
+	if !ok || ext == nil {
+		return nil
+	}
+	return ext
+}
+
 // SaveRegisterInfo 保存注册时的包名与版本号(可为空)
 func SaveRegisterInfo(userId uint64, info *entity.DeviceInfo) {
 	if userId == 0 || info == nil {

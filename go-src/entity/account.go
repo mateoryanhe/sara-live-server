@@ -1,7 +1,7 @@
 package entity
 
 import (
-	"strconv"
+	"strings"
 	"time"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/migrate"
@@ -27,14 +27,14 @@ const (
 
 type Account struct {
 	migrate.OneModel
-	OpenId        string     `gorm:"default:'';comment:开放id;uniqueIndex:uk_account_phone;uniqueIndex:uk_device_account"`
-	PhoneAreaCode string     `gorm:"default:'';comment:手机区号;uniqueIndex:uk_account_phone"`
+	OpenId        string     `gorm:"default:'';comment:开放id"`
+	PhoneAreaCode string     `gorm:"default:'';comment:手机区号"`
 	IP            string     `gorm:"default:'';comment:ip地址"`
-	Channel       uint       `gorm:"default:0;comment:渠道id;uniqueIndex:uk_account_phone;uniqueIndex:uk_device_account"`
+	Channel       uint       `gorm:"default:0;comment:渠道id"`
 	Ban           bool       `gorm:"default:0;comment:封号"`
 	BanTime       *time.Time `gorm:"comment:封号时间"`
 	BanApplyTime  *time.Time `gorm:"comment:封号生效时间"`
-	Cancel        bool       `gorm:"default:0;comment:注销;uniqueIndex:uk_device_account"`
+	Cancel        bool       `gorm:"default:0;comment:注销"`
 	Password      string     `gorm:"default:'';comment:密码"`
 }
 
@@ -47,6 +47,15 @@ func NewAccount(openId string, channel uint) *Account {
 	ret.SetCreatedAt(time.Now())
 	ret.SetUpdatedAt(time.Now())
 	return ret
+}
+
+// NormalizeOpenId 规范化 open_id(兼容历史 __canceled__ 后缀数据)
+func NormalizeOpenId(openId string) string {
+	openId = strings.TrimSpace(openId)
+	if idx := strings.Index(openId, "__canceled__"); idx > 0 {
+		return openId[:idx]
+	}
+	return openId
 }
 
 func (this *Account) SetOpenId(openId string) {
@@ -128,14 +137,6 @@ func (receiver *Account) SetBanApplyTime(banApplyTime *time.Time) {
 }
 
 func (this *Account) SetCancel(cancel bool) {
-	if cancel && !this.Cancel && this.OpenId != "" {
-		// 注销时改写 open_id,释放 uk_account_phone / uk_device_account,允许多次注销后重新注册
-		this.OpenId = this.OpenId + "__canceled__" + strconv.FormatUint(this.ID, 10)
-		syndb.AddDataToQuickChan(TbAccount, AccountOpenId, &syndb.ColData{
-			IdVal:  this.ID,
-			ColVal: this.OpenId,
-		})
-	}
 	this.Cancel = cancel
 	this.SetUpdatedAt(time.Now())
 	syndb.AddDataToQuickChan(TbAccount, AccountCancel, &syndb.ColData{

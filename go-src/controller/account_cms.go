@@ -4,6 +4,7 @@ import (
 	"context"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/accountdto"
+	"xr-game-server/module/auth"
 	"xr-game-server/module/liveroom"
 	"xr-game-server/module/userinfo"
 )
@@ -20,7 +21,7 @@ func initAccountController() {
 }
 
 func (a *AccountController) Ban(ctx context.Context, req *accountdto.BanReq) (resp *accountdto.BanRes, e error) {
-	return userinfo.Ban(ctx, req)
+	return auth.Ban(ctx, req)
 }
 
 func (a *AccountController) BanAnchor(ctx context.Context, req *accountdto.BanAnchorReq) (resp *accountdto.BanRes, e error) {
@@ -32,15 +33,15 @@ func (a *AccountController) UnBanAnchor(ctx context.Context, req *accountdto.UnB
 }
 
 func (a *AccountController) UnBan(ctx context.Context, req *accountdto.UnBanReq) (bool, error) {
-	return userinfo.UnBan(ctx, req)
+	return auth.UnBan(ctx, req)
 }
 
 func (a *AccountController) CancelUser(ctx context.Context, req *accountdto.CancelReq) (bool, error) {
-	return userinfo.CancelUser(ctx, req)
+	return auth.CancelUser(ctx, req)
 }
 
 func (a *AccountController) UnCancelUser(ctx context.Context, req *accountdto.UnCancelReq) (bool, error) {
-	return userinfo.UnCancelUser(ctx, req)
+	return auth.UnCancelUser(ctx, req)
 }
 
 func (a *AccountController) QueryUserInfo(ctx context.Context, req *accountdto.QueryUserInfoReq) (res *httpserver.CMSQueryResp, err error) {

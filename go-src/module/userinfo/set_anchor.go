@@ -17,6 +17,5 @@ func SetAnchor(_ context.Context, req *accountdto.SetAnchorReq) (*accountdto.Set
 	}
 	user.SetUserType(entity.UserTypeAnchor)
 	liveroom.EnsureAnchorRoom(req.AccountId, user.GuildId)
-	AddIdToCache(req.AccountId)
 	return &accountdto.SetAnchorRes{Success: true}, nil
 }

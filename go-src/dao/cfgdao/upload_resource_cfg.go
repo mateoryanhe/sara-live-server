@@ -1,4 +1,4 @@
-package uploadresourcecfgdao
+package cfgdao
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
@@ -6,7 +6,7 @@ import (
 	"xr-game-server/entity"
 )
 
-func Load() *entity.UploadResourceCfg {
+func LoadUploadResourceCfg() *entity.UploadResourceCfg {
 	var row entity.UploadResourceCfg
 	if err := g.DB().Model(string(entity.TbUploadResourceCfg)).Order("id asc").Limit(1).Scan(&row); err != nil {
 		return nil
@@ -17,7 +17,7 @@ func Load() *entity.UploadResourceCfg {
 	return &row
 }
 
-func Save(row *entity.UploadResourceCfg) error {
+func SaveUploadResourceCfg(row *entity.UploadResourceCfg) error {
 	if row == nil {
 		return nil
 	}
