@@ -26,6 +26,24 @@
           <span class="form-tip">App 请求 GET /sysInfo/cfg 时在 header 携带 packageName；包级未配置时使用此处全局值</span>
         </el-form-item>
 
+        <el-form-item label="创作者上传条款 URL" prop="creatorTermsUrl">
+          <el-input
+              v-model="formData.creatorTermsUrl"
+              clearable
+              placeholder="如 https://example.com/creator-terms.html"
+          />
+          <span class="form-tip">App 请求 GET /sysInfo/cfg 时返回 creatorTermsUrl</span>
+        </el-form-item>
+
+        <el-form-item label="房主责任条款 URL" prop="roomOwnerTermsUrl">
+          <el-input
+              v-model="formData.roomOwnerTermsUrl"
+              clearable
+              placeholder="如 https://example.com/room-owner-terms.html"
+          />
+          <span class="form-tip">App 请求 GET /sysInfo/cfg 时返回 roomOwnerTermsUrl</span>
+        </el-form-item>
+
         <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
@@ -52,6 +70,8 @@ const formData = reactive({
   id: '0',
   privacyPolicyUrl: '',
   termsOfServiceUrl: '',
+  creatorTermsUrl: '',
+  roomOwnerTermsUrl: '',
 })
 
 const metaInfo = reactive({
@@ -96,6 +116,42 @@ const formRules = reactive({
       trigger: 'blur',
     },
   ],
+  creatorTermsUrl: [
+    {max: 512, message: 'URL 长度不能超过 512', trigger: 'blur'},
+    {
+      validator: (_: unknown, value: string, callback: (e?: Error) => void) => {
+        const url = value?.trim()
+        if (!url) {
+          callback()
+          return
+        }
+        if (!/^https?:\/\//i.test(url)) {
+          callback(new Error('URL 需以 http:// 或 https:// 开头'))
+          return
+        }
+        callback()
+      },
+      trigger: 'blur',
+    },
+  ],
+  roomOwnerTermsUrl: [
+    {max: 512, message: 'URL 长度不能超过 512', trigger: 'blur'},
+    {
+      validator: (_: unknown, value: string, callback: (e?: Error) => void) => {
+        const url = value?.trim()
+        if (!url) {
+          callback()
+          return
+        }
+        if (!/^https?:\/\//i.test(url)) {
+          callback(new Error('URL 需以 http:// 或 https:// 开头'))
+          return
+        }
+        callback()
+      },
+      trigger: 'blur',
+    },
+  ],
 })
 
 const applyCfg = (cfg: PrivacyPolicyCfg | null | undefined) => {
@@ -103,6 +159,8 @@ const applyCfg = (cfg: PrivacyPolicyCfg | null | undefined) => {
     formData.id = '0'
     formData.privacyPolicyUrl = ''
     formData.termsOfServiceUrl = ''
+    formData.creatorTermsUrl = ''
+    formData.roomOwnerTermsUrl = ''
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
     return
@@ -110,6 +168,8 @@ const applyCfg = (cfg: PrivacyPolicyCfg | null | undefined) => {
   formData.id = cfg.id || '0'
   formData.privacyPolicyUrl = cfg.privacyPolicyUrl || ''
   formData.termsOfServiceUrl = cfg.termsOfServiceUrl || ''
+  formData.creatorTermsUrl = cfg.creatorTermsUrl || ''
+  formData.roomOwnerTermsUrl = cfg.roomOwnerTermsUrl || ''
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
 }
@@ -135,6 +195,8 @@ const handleSave = async () => {
       id: formData.id === '0' ? 0 : Number(formData.id),
       privacyPolicyUrl: formData.privacyPolicyUrl.trim(),
       termsOfServiceUrl: formData.termsOfServiceUrl.trim(),
+      creatorTermsUrl: formData.creatorTermsUrl.trim(),
+      roomOwnerTermsUrl: formData.roomOwnerTermsUrl.trim(),
     })
     if (response?.success) {
       ElMessage.success('保存成功')

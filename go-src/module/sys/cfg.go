@@ -22,6 +22,8 @@ func GetSysCfg(ctx context.Context, req *sysdto.SysCfgReq) (*sysdto.SysCfgResp, 
 		PrivateRoomFreeWatchSeconds: livecfg.GetPrivateRoomFreeWatchSeconds(),
 		PrivacyPolicyUrl:            apppkg.ResolvePrivacyPolicyUrl(packageName, globalPrivacy),
 		TermsOfServiceUrl:           apppkg.ResolveTermsOfServiceUrl(packageName, globalTerms),
+		CreatorTermsUrl:             privacypolicy.GetCreatorTermsUrl(),
+		RoomOwnerTermsUrl:           privacypolicy.GetRoomOwnerTermsUrl(),
 		AppImageMaxSize:             upload.GetAppImageMaxSize(),
 	}, nil
 }

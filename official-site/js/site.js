@@ -11,6 +11,8 @@ const SITE_I18N = {
     navFeatures: 'Features',
     navPrivacy: 'Privacy',
     navTerms: 'Terms',
+    navCreatorTerms: 'Creator Terms',
+    navRoomOwnerTerms: 'Room Owner',
     navCancel: 'Delete Account',
     heroTitle: 'Watch and Go Live Anytime',
     heroDesc: 'Sara Live is a mobile live streaming platform for hosts and audiences. Enjoy real-time video, interactive chat, virtual gifts, and short video content in one app.',
@@ -33,7 +35,11 @@ const SITE_I18N = {
     legalContactLabel: 'Contact',
     termsPageTitle: 'Terms of Service',
     termsPageDesc: 'Rules and conditions for using Sara Live live streaming and related features.',
-    lastUpdated: 'Last updated: July 23, 2026',
+    creatorTermsPageTitle: 'Short Video Creator Upload Compliance Terms',
+    creatorTermsPageDesc: 'Special terms for Sara Live short video creators and MCN-affiliated creators regarding content upload compliance, commercial disclosure, regional rules, and intellectual property.',
+    roomOwnerTermsPageTitle: 'Room Owner Responsibility Terms',
+    roomOwnerTermsPageDesc: 'Responsibilities and compliance requirements for Sara Live voice chat room and live room owners.',
+    lastUpdated: 'Last updated: July 27, 2026',
     cancelPageTitle: 'Delete Account',
     cancelPageDesc: 'Enter your deactivation code to permanently delete your Sara Live account. This action cannot be undone.',
     cancelCodeLabel: 'Deactivation code',
@@ -52,6 +58,8 @@ const SITE_I18N = {
     navFeatures: 'Funciones',
     navPrivacy: 'Privacidad',
     navTerms: 'Términos',
+    navCreatorTerms: 'Creadores',
+    navRoomOwnerTerms: 'Propietario',
     navCancel: 'Eliminar cuenta',
     heroTitle: 'Mira y transmite en vivo en cualquier momento',
     heroDesc: 'Sara Live es una plataforma móvil de transmisión en vivo para anfitriones y audiencias. Disfruta video en tiempo real, chat interactivo, regalos virtuales y videos cortos.',
@@ -74,7 +82,11 @@ const SITE_I18N = {
     legalContactLabel: 'Contacto',
     termsPageTitle: 'Términos de Servicio',
     termsPageDesc: 'Reglas y condiciones para usar Sara Live y sus funciones relacionadas.',
-    lastUpdated: 'Última actualización: 23 de julio de 2026',
+    creatorTermsPageTitle: 'Términos de cumplimiento para subida de videos cortos',
+    creatorTermsPageDesc: 'Términos especiales para creadores de videos cortos de Sara Live y creadores afiliados a MCN sobre cumplimiento de contenido, divulgación comercial, normas regionales y propiedad intelectual.',
+    roomOwnerTermsPageTitle: 'Términos de responsabilidad del propietario de sala',
+    roomOwnerTermsPageDesc: 'Responsabilidades y requisitos de cumplimiento para propietarios de salas de chat de voz y salas en vivo de Sara Live.',
+    lastUpdated: 'Última actualización: 27 de julio de 2026',
     cancelPageTitle: 'Eliminar cuenta',
     cancelPageDesc: 'Introduce tu código de desactivación para eliminar permanentemente tu cuenta de Sara Live. Esta acción no se puede deshacer.',
     cancelCodeLabel: 'Código de desactivación',
@@ -93,6 +105,8 @@ const SITE_I18N = {
     navFeatures: 'Recursos',
     navPrivacy: 'Privacidade',
     navTerms: 'Termos',
+    navCreatorTerms: 'Criadores',
+    navRoomOwnerTerms: 'Proprietário',
     navCancel: 'Excluir conta',
     heroTitle: 'Assista e transmita ao vivo a qualquer hora',
     heroDesc: 'A Sara Live é uma plataforma móvel de transmissão ao vivo para hosts e público. Aproveite vídeo em tempo real, chat interativo, presentes virtuais e vídeos curtos.',
@@ -115,7 +129,11 @@ const SITE_I18N = {
     legalContactLabel: 'Contato',
     termsPageTitle: 'Termos de Serviço',
     termsPageDesc: 'Regras e condições para usar a Sara Live e recursos relacionados.',
-    lastUpdated: 'Última atualização: 23 de julho de 2026',
+    creatorTermsPageTitle: 'Termos de conformidade para upload de vídeos curtos',
+    creatorTermsPageDesc: 'Termos especiais para criadores de vídeos curtos da Sara Live e criadores afiliados a MCN sobre conformidade de conteúdo, divulgação comercial, regras regionais e propriedade intelectual.',
+    roomOwnerTermsPageTitle: 'Termos de responsabilidade do proprietário de sala',
+    roomOwnerTermsPageDesc: 'Responsabilidades e requisitos de conformidade para proprietários de salas de chat de voz e salas ao vivo da Sara Live.',
+    lastUpdated: 'Última atualização: 27 de julho de 2026',
     cancelPageTitle: 'Excluir conta',
     cancelPageDesc: 'Digite seu código de desativação para excluir permanentemente sua conta Sara Live. Esta ação não pode ser desfeita.',
     cancelCodeLabel: 'Código de desativação',
@@ -134,6 +152,8 @@ const SITE_I18N = {
     navFeatures: 'फीचर्स',
     navPrivacy: 'गोपनीयता',
     navTerms: 'नियम',
+    navCreatorTerms: 'क्रिएटर',
+    navRoomOwnerTerms: 'रूम मालिक',
     navCancel: 'खाता हटाएँ',
     heroTitle: 'कभी भी देखें और लाइव जाएँ',
     heroDesc: 'Sara Live होस्ट और दर्शकों के लिए एक मोबाइल लाइव स्ट्रीमिंग प्लेटफ़ॉर्म है। रीयल-टाइम वीडियो, इंटरैक्टिव चैट, वर्चुअल गिफ्ट और शॉर्ट वीडियो का आनंद लें।',
@@ -156,7 +176,11 @@ const SITE_I18N = {
     legalContactLabel: 'संपर्क',
     termsPageTitle: 'सेवा की शर्तें',
     termsPageDesc: 'Sara Live और संबंधित सुविधाओं के उपयोग के नियम और शर्तें।',
-    lastUpdated: 'अंतिम अपडेट: 23 जुलाई 2026',
+    creatorTermsPageTitle: 'शॉर्ट वीडियो क्रिएटर अपलोड अनुपालन शर्तें',
+    creatorTermsPageDesc: 'Sara Live शॉर्ट वीडियो क्रिएटर्स और MCN-संबद्ध क्रिएटर्स के लिए सामग्री अनुपालन, वाणिज्यिक प्रकटीकरण, क्षेत्रीय नियम और बौद्धिक संपदा से संबंधित विशेष शर्तें।',
+    roomOwnerTermsPageTitle: 'रूम मालिक जिम्मेदारी शर्तें',
+    roomOwnerTermsPageDesc: 'Sara Live वॉयस चैट रूम और लाइव रूम मालिकों के लिए जिम्मेदारियाँ और अनुपालन आवश्यकताएँ।',
+    lastUpdated: 'अंतिम अपडेट: 27 जुलाई 2026',
     cancelPageTitle: 'खाता हटाएँ',
     cancelPageDesc: 'अपना Sara Live खाता स्थायी रूप से हटाने के लिए निष्क्रियकरण कोड दर्ज करें। यह क्रिया वापस नहीं की जा सकती।',
     cancelCodeLabel: 'निष्क्रियकरण कोड',
@@ -232,6 +256,10 @@ function setLang(lang) {
         html = renderPrivacyContent(lang);
       } else if (legalSection === 'tos' && typeof renderTermsContent === 'function') {
         html = renderTermsContent(lang);
+      } else if (legalSection === 'creator-terms' && typeof renderCreatorTermsContent === 'function') {
+        html = renderCreatorTermsContent(lang);
+      } else if (legalSection === 'room-owner-terms' && typeof renderRoomOwnerTermsContent === 'function') {
+        html = renderRoomOwnerTermsContent(lang);
       } else if (typeof renderLegalDocument === 'function') {
         html = renderLegalDocument(lang, legalSection || undefined, { showTitle: false });
       }

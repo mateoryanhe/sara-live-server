@@ -62,8 +62,8 @@ func GetUserInfo(req *accountdto.QueryUserInfoReq) (int, []*accountdto.UserInfoD
 	ctx := gctx.New()
 	ret := make([]*accountdto.UserInfoDto, 0)
 	if req.Key != "" {
-		sql += ` and (a.id =? or a.open_id=? )`
-		param = append(param, req.Key, req.Key)
+		sql += ` and (CAST(a.id AS CHAR) LIKE ? or a.open_id = ?)`
+		param = append(param, "%"+req.Key+"%", req.Key)
 	}
 	if req.StartTime != "" {
 		sql += ` and (a.created_at between ? and ?)`

@@ -763,6 +763,8 @@ export interface PrivacyPolicyCfg {
     id: string
     privacyPolicyUrl: string
     termsOfServiceUrl: string
+    creatorTermsUrl: string
+    roomOwnerTermsUrl: string
     createdAt: string
     updatedAt: string
 }
@@ -775,6 +777,8 @@ export interface SavePrivacyPolicyCfgReq {
     id?: number
     privacyPolicyUrl: string
     termsOfServiceUrl: string
+    creatorTermsUrl: string
+    roomOwnerTermsUrl: string
 }
 
 export interface SavePrivacyPolicyCfgRes {

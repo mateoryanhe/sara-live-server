@@ -12,5 +12,7 @@ type SysCfgResp struct {
 	PrivateRoomFreeWatchSeconds uint32  `json:"privateRoomFreeWatchSeconds" dc:"私密直播间免费观看时长(秒)"`
 	PrivacyPolicyUrl            string  `json:"privacyPolicyUrl" dc:"隐私政策页面URL"`
 	TermsOfServiceUrl           string  `json:"termsOfServiceUrl" dc:"用户服务协议页面URL"`
+	CreatorTermsUrl             string  `json:"creatorTermsUrl" dc:"短视频创作者上传合规条款URL"`
+	RoomOwnerTermsUrl           string  `json:"roomOwnerTermsUrl" dc:"房间房主责任条款URL"`
 	AppImageMaxSize             uint64  `json:"appImageMaxSize" dc:"App端图片上传大小上限(字节)"`
 }

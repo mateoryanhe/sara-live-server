@@ -23,10 +23,18 @@ func GetPrivacyPolicyCfg(_ context.Context, _ *privacypolicydto.GetPrivacyPolicy
 func SavePrivacyPolicyCfg(_ context.Context, req *privacypolicydto.SavePrivacyPolicyCfgReq) (*privacypolicydto.SavePrivacyPolicyCfgRes, error) {
 	url := strings.TrimSpace(req.PrivacyPolicyUrl)
 	termsUrl := strings.TrimSpace(req.TermsOfServiceUrl)
+	creatorTermsUrl := strings.TrimSpace(req.CreatorTermsUrl)
+	roomOwnerTermsUrl := strings.TrimSpace(req.RoomOwnerTermsUrl)
 	if url != "" && !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	if termsUrl != "" && !strings.HasPrefix(termsUrl, "http://") && !strings.HasPrefix(termsUrl, "https://") {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if creatorTermsUrl != "" && !strings.HasPrefix(creatorTermsUrl, "http://") && !strings.HasPrefix(creatorTermsUrl, "https://") {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if roomOwnerTermsUrl != "" && !strings.HasPrefix(roomOwnerTermsUrl, "http://") && !strings.HasPrefix(roomOwnerTermsUrl, "https://") {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 
@@ -34,6 +42,8 @@ func SavePrivacyPolicyCfg(_ context.Context, req *privacypolicydto.SavePrivacyPo
 	row := &entity.PrivacyPolicyCfg{
 		PrivacyPolicyUrl:  url,
 		TermsOfServiceUrl: termsUrl,
+		CreatorTermsUrl:   creatorTermsUrl,
+		RoomOwnerTermsUrl: roomOwnerTermsUrl,
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -67,6 +77,8 @@ func toCfgItem(cfg *entity.PrivacyPolicyCfg) *privacypolicydto.PrivacyPolicyCfgI
 		ID:                strconv.FormatUint(cfg.ID, 10),
 		PrivacyPolicyUrl:  cfg.PrivacyPolicyUrl,
 		TermsOfServiceUrl: cfg.TermsOfServiceUrl,
+		CreatorTermsUrl:   cfg.CreatorTermsUrl,
+		RoomOwnerTermsUrl: cfg.RoomOwnerTermsUrl,
 		CreatedAt:         formatTime(cfg.CreatedAt),
 		UpdatedAt:         formatTime(cfg.UpdatedAt),
 	}

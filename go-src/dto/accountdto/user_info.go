@@ -9,7 +9,7 @@ import (
 type QueryUserInfoReq struct {
 	g.Meta `path:"/getUserInfo" method:"post" summary:"获取用户信息" tags:"账号"`
 	httpserver.CMSQueryReq
-	Key       string `json:"key" dc:"查询关键字"`
+	Key       string `json:"key" dc:"查询关键字(用户ID模糊/openId精确)"`
 	StartTime string `json:"startTime" dc:"开始时间"`
 	EndTime   string `json:"endTime" dc:"结束时间"`
 }
