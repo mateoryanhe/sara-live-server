@@ -443,20 +443,42 @@ export interface VipCfg {
     id: string
     level: number
     levelName: string
-    status: number
+    withdrawSwitch?: number
+    animationSwitch?: number
+    commentEffectSwitch?: number
     upgradeRechargeLimit: number
     minWithdrawAmount: number
     maxWithdrawAmount: number
     fee: number
     animation?: string
     animationName?: string
+    animationIcon?: string
+    animationIconName?: string
+    animationDescEn?: string
+    animationDescEs?: string
+    animationDescPt?: string
+    animationDescHi?: string
+    commentEffect?: string
+    commentEffectName?: string
+    commentEffectIcon?: string
+    commentEffectIconName?: string
+    commentEffectDescEn?: string
+    commentEffectDescEs?: string
+    commentEffectDescPt?: string
+    commentEffectDescHi?: string
+    withdrawIcon?: string
+    withdrawIconName?: string
+    withdrawNoticeEn?: string
+    withdrawNoticeEs?: string
+    withdrawNoticePt?: string
+    withdrawNoticeHi?: string
     createdAt: string
     updatedAt: string
 }
 
 export interface VipCfgQuery extends PageQuery {
     levelName?: string
-    statusFilter?: number
+    withdrawSwitchFilter?: number
 }
 
 // App包管理

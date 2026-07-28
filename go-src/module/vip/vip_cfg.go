@@ -8,16 +8,14 @@ import (
 	"xr-game-server/dto/vipcfgdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
-	"xr-game-server/module/upload"
 )
 
 func GetList(_ context.Context, req *vipcfgdto.VipCfgListReq) (*httpserver.CMSQueryResp, error) {
-	total, list := cfgdao.GetVipCfgList(req)
-	for _, res := range list {
-		res.AnimationName = res.Animation
-		res.Animation = upload.GetUrlByName(res.AnimationName)
+	if req == nil {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	return &httpserver.CMSQueryResp{Total: total, Data: list}, nil
+	total, list := queryVipCfgListFromMemory(req)
+	return httpserver.NewCMSQueryResp(total, list), nil
 }
 
 func Create(_ context.Context, req *vipcfgdto.CreateVipCfgReq) (*vipcfgdto.CreateVipCfgRes, error) {
@@ -25,18 +23,36 @@ func Create(_ context.Context, req *vipcfgdto.CreateVipCfgReq) (*vipcfgdto.Creat
 	if err := validateWithdrawRange(req.MinWithdrawAmount, req.MaxWithdrawAmount); err != nil {
 		return nil, err
 	}
-	if existing := cfgdao.GetVipCfgByLevel(req.Level); existing != nil {
+	if findVipCfgByLevelFromMemory(req.Level, 0) != nil {
 		return nil, errercode.CreateCode(errercode.VipCfgExist)
 	}
 	row := &entity.VipCfg{
 		Level:                req.Level,
 		LevelName:            req.LevelName,
-		Status:               req.Status,
+		WithdrawSwitch:       req.WithdrawSwitch,
+		AnimationSwitch:      req.AnimationSwitch,
+		CommentEffectSwitch:  req.CommentEffectSwitch,
 		UpgradeRechargeLimit: req.UpgradeRechargeLimit,
 		MinWithdrawAmount:    req.MinWithdrawAmount,
 		MaxWithdrawAmount:    req.MaxWithdrawAmount,
 		Fee:                  req.Fee,
 		Animation:            req.Animation,
+		AnimationIcon:        req.AnimationIcon,
+		AnimationDescEn:      req.AnimationDescEn,
+		AnimationDescEs:      req.AnimationDescEs,
+		AnimationDescPt:      req.AnimationDescPt,
+		AnimationDescHi:      req.AnimationDescHi,
+		CommentEffect:        req.CommentEffect,
+		CommentEffectIcon:    req.CommentEffectIcon,
+		CommentEffectDescEn:  req.CommentEffectDescEn,
+		CommentEffectDescEs:  req.CommentEffectDescEs,
+		CommentEffectDescPt:  req.CommentEffectDescPt,
+		CommentEffectDescHi:  req.CommentEffectDescHi,
+		WithdrawIcon:         req.WithdrawIcon,
+		WithdrawNoticeEn:     req.WithdrawNoticeEn,
+		WithdrawNoticeEs:     req.WithdrawNoticeEs,
+		WithdrawNoticePt:     req.WithdrawNoticePt,
+		WithdrawNoticeHi:     req.WithdrawNoticeHi,
 	}
 	if err := cfgdao.CreateVipCfg(row); err != nil {
 		return nil, err
@@ -50,22 +66,41 @@ func Update(_ context.Context, req *vipcfgdto.UpdateVipCfgReq) (*vipcfgdto.Updat
 	if err := validateWithdrawRange(req.MinWithdrawAmount, req.MaxWithdrawAmount); err != nil {
 		return nil, err
 	}
-	row := cfgdao.GetVipCfgById(req.ID)
+	row := getVipCfgByIDFromMemory(req.ID)
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.VipCfgNonExist)
 	}
-	if existing := cfgdao.GetVipCfgByLevel(req.Level); existing != nil && existing.ID != req.ID {
+	if findVipCfgByLevelFromMemory(req.Level, req.ID) != nil {
 		return nil, errercode.CreateCode(errercode.VipCfgExist)
 	}
-	row.Level = req.Level
-	row.LevelName = req.LevelName
-	row.Status = req.Status
-	row.UpgradeRechargeLimit = req.UpgradeRechargeLimit
-	row.MinWithdrawAmount = req.MinWithdrawAmount
-	row.MaxWithdrawAmount = req.MaxWithdrawAmount
-	row.Fee = req.Fee
-	row.Animation = req.Animation
-	if err := cfgdao.UpdateVipCfg(row); err != nil {
+	updated := *row
+	updated.Level = req.Level
+	updated.LevelName = req.LevelName
+	updated.WithdrawSwitch = req.WithdrawSwitch
+	updated.AnimationSwitch = req.AnimationSwitch
+	updated.CommentEffectSwitch = req.CommentEffectSwitch
+	updated.UpgradeRechargeLimit = req.UpgradeRechargeLimit
+	updated.MinWithdrawAmount = req.MinWithdrawAmount
+	updated.MaxWithdrawAmount = req.MaxWithdrawAmount
+	updated.Fee = req.Fee
+	updated.Animation = req.Animation
+	updated.AnimationIcon = req.AnimationIcon
+	updated.AnimationDescEn = req.AnimationDescEn
+	updated.AnimationDescEs = req.AnimationDescEs
+	updated.AnimationDescPt = req.AnimationDescPt
+	updated.AnimationDescHi = req.AnimationDescHi
+	updated.CommentEffect = req.CommentEffect
+	updated.CommentEffectIcon = req.CommentEffectIcon
+	updated.CommentEffectDescEn = req.CommentEffectDescEn
+	updated.CommentEffectDescEs = req.CommentEffectDescEs
+	updated.CommentEffectDescPt = req.CommentEffectDescPt
+	updated.CommentEffectDescHi = req.CommentEffectDescHi
+	updated.WithdrawIcon = req.WithdrawIcon
+	updated.WithdrawNoticeEn = req.WithdrawNoticeEn
+	updated.WithdrawNoticeEs = req.WithdrawNoticeEs
+	updated.WithdrawNoticePt = req.WithdrawNoticePt
+	updated.WithdrawNoticeHi = req.WithdrawNoticeHi
+	if err := cfgdao.UpdateVipCfg(&updated); err != nil {
 		return nil, err
 	}
 	reloadVipCfgMemory()
@@ -73,7 +108,7 @@ func Update(_ context.Context, req *vipcfgdto.UpdateVipCfgReq) (*vipcfgdto.Updat
 }
 
 func Delete(_ context.Context, req *vipcfgdto.DeleteVipCfgReq) (*vipcfgdto.DeleteVipCfgRes, error) {
-	if row := cfgdao.GetVipCfgById(req.ID); row == nil {
+	if getVipCfgByIDFromMemory(req.ID) == nil {
 		return nil, errercode.CreateCode(errercode.VipCfgNonExist)
 	}
 	if err := cfgdao.DeleteVipCfg(req.ID); err != nil {

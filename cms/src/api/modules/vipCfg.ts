@@ -1,35 +1,45 @@
 import {request} from '../request'
 import type {PageResponse, VipCfg, VipCfgQuery} from '@/types/api'
 
+type VipCfgSavePayload = {
+    level: number
+    levelName: string
+    withdrawSwitch: number
+    animationSwitch: number
+    commentEffectSwitch: number
+    upgradeRechargeLimit: number
+    minWithdrawAmount: number
+    maxWithdrawAmount: number
+    fee: number
+    animation?: string
+    animationIcon?: string
+    animationDescEn?: string
+    animationDescEs?: string
+    animationDescPt?: string
+    animationDescHi?: string
+    commentEffect?: string
+    commentEffectIcon?: string
+    commentEffectDescEn?: string
+    commentEffectDescEs?: string
+    commentEffectDescPt?: string
+    commentEffectDescHi?: string
+    withdrawIcon?: string
+    withdrawNoticeEn?: string
+    withdrawNoticeEs?: string
+    withdrawNoticePt?: string
+    withdrawNoticeHi?: string
+}
+
 export const vipCfgApi = {
     getVipCfgList: (params: VipCfgQuery) => {
         return request.post<PageResponse<VipCfg>>('/vipCfg/vipCfgList', params)
     },
 
-    createVipCfg: (data: {
-        level: number
-        levelName: string
-        status: number
-        upgradeRechargeLimit: number
-        minWithdrawAmount: number
-        maxWithdrawAmount: number
-        fee: number
-        animation?: string
-    }) => {
+    createVipCfg: (data: VipCfgSavePayload) => {
         return request.post<{ id: string }>('/vipCfg/createVipCfg', data)
     },
 
-    updateVipCfg: (data: {
-        id: string | number
-        level: number
-        levelName: string
-        status: number
-        upgradeRechargeLimit: number
-        minWithdrawAmount: number
-        maxWithdrawAmount: number
-        fee: number
-        animation?: string
-    }) => {
+    updateVipCfg: (data: VipCfgSavePayload & { id: string | number }) => {
         return request.post<boolean>('/vipCfg/updateVipCfg', data)
     },
 

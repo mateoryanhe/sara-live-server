@@ -2,8 +2,12 @@ package vip
 
 import (
 	"context"
+	"sort"
 	"strconv"
+	"strings"
 	"sync/atomic"
+	"time"
+
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/vipcfgdto"
 	"xr-game-server/entity"
@@ -11,9 +15,14 @@ import (
 	"xr-game-server/module/upload"
 )
 
+const vipCfgTimeLayout = "2006-01-02 15:04:05"
+
 type vipCfgSnapshot struct {
-	byLevel map[uint32]*vipcfgdto.AppVipCfgItem
-	list    []*vipcfgdto.AppVipCfgItem
+	byID       map[uint64]*entity.VipCfg
+	byLevel    map[uint32]*entity.VipCfg
+	allList    []*entity.VipCfg
+	appByLevel map[uint32]*vipcfgdto.AppVipCfgItem
+	appList    []*vipcfgdto.AppVipCfgItem
 }
 
 var (
@@ -24,16 +33,37 @@ var (
 // reloadVipCfgMemory 从DB重新加载并整体替换内存快照
 func reloadVipCfgMemory() {
 	rows := cfgdao.GetAllVipCfg()
-	byLevel := make(map[uint32]*vipcfgdto.AppVipCfgItem, len(rows))
-	list := make([]*vipcfgdto.AppVipCfgItem, 0, len(rows))
+	byID := make(map[uint64]*entity.VipCfg, len(rows))
+	byLevel := make(map[uint32]*entity.VipCfg, len(rows))
+	allList := make([]*entity.VipCfg, 0, len(rows))
+	appByLevel := make(map[uint32]*vipcfgdto.AppVipCfgItem, len(rows))
+	appList := make([]*vipcfgdto.AppVipCfgItem, 0, len(rows))
+
 	for _, row := range rows {
+		if row == nil || row.ID == 0 {
+			continue
+		}
+		byID[row.ID] = row
+		byLevel[row.Level] = row
+		allList = append(allList, row)
 		item := toAppVipCfgItem(row)
-		byLevel[row.Level] = item
-		list = append(list, item)
+		appByLevel[row.Level] = item
+		appList = append(appList, item)
 	}
+
+	sort.Slice(allList, func(i, j int) bool {
+		if allList[i].Level != allList[j].Level {
+			return allList[i].Level < allList[j].Level
+		}
+		return allList[i].CreatedAt.After(allList[j].CreatedAt)
+	})
+
 	vipCfgCache.Store(&vipCfgSnapshot{
-		byLevel: byLevel,
-		list:    list,
+		byID:       byID,
+		byLevel:    byLevel,
+		allList:    allList,
+		appByLevel: appByLevel,
+		appList:    appList,
 	})
 }
 
@@ -41,35 +71,201 @@ func getVipCfgSnapshot() *vipCfgSnapshot {
 	v := vipCfgCache.Load()
 	if v == nil {
 		return &vipCfgSnapshot{
-			byLevel: make(map[uint32]*vipcfgdto.AppVipCfgItem),
-			list:    emptyVipCfgList,
+			byID:       make(map[uint64]*entity.VipCfg),
+			byLevel:    make(map[uint32]*entity.VipCfg),
+			allList:    make([]*entity.VipCfg, 0),
+			appByLevel: make(map[uint32]*vipcfgdto.AppVipCfgItem),
+			appList:    emptyVipCfgList,
 		}
 	}
 	return v.(*vipCfgSnapshot)
 }
 
+func getVipCfgByIDFromMemory(id uint64) *entity.VipCfg {
+	return getVipCfgSnapshot().byID[id]
+}
+
+func findVipCfgByLevelFromMemory(level uint32, excludeID uint64) *entity.VipCfg {
+	row := getVipCfgSnapshot().byLevel[level]
+	if row == nil || row.ID == excludeID {
+		return nil
+	}
+	return row
+}
+
+func listVipCfgFromMemory(levelName string, withdrawSwitchFilter int) []*entity.VipCfg {
+	keyword := strings.ToLower(strings.TrimSpace(levelName))
+	rows := getVipCfgSnapshot().allList
+	filtered := make([]*entity.VipCfg, 0, len(rows))
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		if keyword != "" && !strings.Contains(strings.ToLower(row.LevelName), keyword) {
+			continue
+		}
+		switch withdrawSwitchFilter {
+		case 1:
+			if row.WithdrawSwitch != entity.VipCfgSwitchOff {
+				continue
+			}
+		case 2:
+			if row.WithdrawSwitch != entity.VipCfgSwitchOn {
+				continue
+			}
+		}
+		filtered = append(filtered, row)
+	}
+	return filtered
+}
+
+func paginateVipCfgList(rows []*entity.VipCfg, pageIndex, pageSize int) ([]*entity.VipCfg, int) {
+	total := len(rows)
+	if pageIndex <= 0 {
+		pageIndex = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 10
+	}
+	start := (pageIndex - 1) * pageSize
+	if start >= total {
+		return []*entity.VipCfg{}, total
+	}
+	end := start + pageSize
+	if end > total {
+		end = total
+	}
+	return rows[start:end], total
+}
+
+func formatVipCfgTime(value time.Time) string {
+	if value.IsZero() {
+		return ""
+	}
+	return value.Format(vipCfgTimeLayout)
+}
+
+func toVipCfgListRes(row *entity.VipCfg) *vipcfgdto.VipCfgListRes {
+	if row == nil {
+		return nil
+	}
+	return &vipcfgdto.VipCfgListRes{
+		ID:                    strconv.FormatUint(row.ID, 10),
+		Level:                 row.Level,
+		LevelName:             row.LevelName,
+		WithdrawSwitch:        row.WithdrawSwitch,
+		AnimationSwitch:       row.AnimationSwitch,
+		CommentEffectSwitch:   row.CommentEffectSwitch,
+		UpgradeRechargeLimit:  row.UpgradeRechargeLimit,
+		MinWithdrawAmount:     row.MinWithdrawAmount,
+		MaxWithdrawAmount:     row.MaxWithdrawAmount,
+		Fee:                   row.Fee,
+		AnimationName:         row.Animation,
+		Animation:             upload.GetUrlByName(row.Animation),
+		AnimationIconName:     row.AnimationIcon,
+		AnimationIcon:         upload.GetUrlByName(row.AnimationIcon),
+		AnimationDescEn:       row.AnimationDescEn,
+		AnimationDescEs:       row.AnimationDescEs,
+		AnimationDescPt:       row.AnimationDescPt,
+		AnimationDescHi:       row.AnimationDescHi,
+		CommentEffectName:     row.CommentEffect,
+		CommentEffect:         upload.GetUrlByName(row.CommentEffect),
+		CommentEffectIconName: row.CommentEffectIcon,
+		CommentEffectIcon:     upload.GetUrlByName(row.CommentEffectIcon),
+		CommentEffectDescEn:   row.CommentEffectDescEn,
+		CommentEffectDescEs:   row.CommentEffectDescEs,
+		CommentEffectDescPt:   row.CommentEffectDescPt,
+		CommentEffectDescHi:   row.CommentEffectDescHi,
+		WithdrawIconName:      row.WithdrawIcon,
+		WithdrawIcon:          upload.GetUrlByName(row.WithdrawIcon),
+		WithdrawNoticeEn:      row.WithdrawNoticeEn,
+		WithdrawNoticeEs:      row.WithdrawNoticeEs,
+		WithdrawNoticePt:      row.WithdrawNoticePt,
+		WithdrawNoticeHi:      row.WithdrawNoticeHi,
+		CreatedAt:             formatVipCfgTime(row.CreatedAt),
+		UpdatedAt:             formatVipCfgTime(row.UpdatedAt),
+	}
+}
+
+func queryVipCfgListFromMemory(req *vipcfgdto.VipCfgListReq) (int, []*vipcfgdto.VipCfgListRes) {
+	if req == nil {
+		return 0, []*vipcfgdto.VipCfgListRes{}
+	}
+	rows, total := paginateVipCfgList(
+		listVipCfgFromMemory(req.LevelName, req.WithdrawSwitchFilter),
+		req.PageIndex,
+		req.PageSize,
+	)
+	list := make([]*vipcfgdto.VipCfgListRes, 0, len(rows))
+	for _, row := range rows {
+		list = append(list, toVipCfgListRes(row))
+	}
+	return total, list
+}
+
 func toAppVipCfgItem(row *entity.VipCfg) *vipcfgdto.AppVipCfgItem {
+	if row == nil {
+		return nil
+	}
 	return &vipcfgdto.AppVipCfgItem{
-		ID:                   strconv.FormatUint(row.ID, 10),
 		Level:                row.Level,
 		LevelName:            row.LevelName,
-		Status:               row.Status,
 		UpgradeRechargeLimit: row.UpgradeRechargeLimit,
-		MinWithdrawAmount:    row.MinWithdrawAmount,
-		MaxWithdrawAmount:    row.MaxWithdrawAmount,
-		Fee:                  row.Fee,
-		Animation:            upload.GetUrlByName(row.Animation),
+		PrivilegeList:        buildAppVipPrivilegeList(row),
 	}
+}
+
+func buildAppVipPrivilegeList(row *entity.VipCfg) []*vipcfgdto.AppVipPrivilegeItem {
+	if row == nil {
+		return []*vipcfgdto.AppVipPrivilegeItem{}
+	}
+	list := make([]*vipcfgdto.AppVipPrivilegeItem, 0, 3)
+	if row.WithdrawSwitch == entity.VipCfgSwitchOn {
+		list = append(list, &vipcfgdto.AppVipPrivilegeItem{
+			PrivilegeType:     vipcfgdto.AppVipPrivilegeTypeWithdraw,
+			Icon:              upload.GetUrlByName(row.WithdrawIcon),
+			MinWithdrawAmount: row.MinWithdrawAmount,
+			MaxWithdrawAmount: row.MaxWithdrawAmount,
+			Fee:               row.Fee,
+			NoticeEn:          row.WithdrawNoticeEn,
+			NoticeEs:          row.WithdrawNoticeEs,
+			NoticePt:          row.WithdrawNoticePt,
+			NoticeHi:          row.WithdrawNoticeHi,
+		})
+	}
+	if row.AnimationSwitch == entity.VipCfgSwitchOn {
+		list = append(list, &vipcfgdto.AppVipPrivilegeItem{
+			PrivilegeType: vipcfgdto.AppVipPrivilegeTypeEntryEffect,
+			Icon:          upload.GetUrlByName(row.AnimationIcon),
+			Animation:     upload.GetUrlByName(row.Animation),
+			DescEn:        row.AnimationDescEn,
+			DescEs:        row.AnimationDescEs,
+			DescPt:        row.AnimationDescPt,
+			DescHi:        row.AnimationDescHi,
+		})
+	}
+	if row.CommentEffectSwitch == entity.VipCfgSwitchOn {
+		list = append(list, &vipcfgdto.AppVipPrivilegeItem{
+			PrivilegeType: vipcfgdto.AppVipPrivilegeTypeCommentEffect,
+			Icon:          upload.GetUrlByName(row.CommentEffectIcon),
+			Animation:     upload.GetUrlByName(row.CommentEffect),
+			DescEn:        row.CommentEffectDescEn,
+			DescEs:        row.CommentEffectDescEs,
+			DescPt:        row.CommentEffectDescPt,
+			DescHi:        row.CommentEffectDescHi,
+		})
+	}
+	return list
 }
 
 // GetVipCfgFromMemoryByLevel 按等级从内存获取VIP配置(供其它模块使用)
 func GetVipCfgFromMemoryByLevel(level uint32) *vipcfgdto.AppVipCfgItem {
-	return getVipCfgSnapshot().byLevel[level]
+	return getVipCfgSnapshot().appByLevel[level]
 }
 
 // GetAllVipCfgFromMemory 获取全部VIP配置(供其它模块使用)
 func GetAllVipCfgFromMemory() []*vipcfgdto.AppVipCfgItem {
-	return getVipCfgSnapshot().list
+	return getVipCfgSnapshot().appList
 }
 
 // GetAppVipCfgByLevel App端按等级查询VIP配置

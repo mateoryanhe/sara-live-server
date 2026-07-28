@@ -15,8 +15,8 @@
           <el-form-item label="等级名称">
             <el-input v-model="searchForm.levelName" clearable placeholder="等级名称(模糊匹配)"/>
           </el-form-item>
-          <el-form-item label="状态">
-            <el-select v-model="searchForm.statusFilter" placeholder="全部" style="width: 140px">
+          <el-form-item label="提现开关">
+            <el-select v-model="searchForm.withdrawSwitchFilter" placeholder="全部" style="width: 140px">
               <el-option :value="0" label="全部"/>
               <el-option :value="2" label="只看开启"/>
               <el-option :value="1" label="只看关闭"/>
@@ -44,10 +44,75 @@
               <span v-else class="media-url-text">{{ row.animationName || '-' }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="状态" width="90">
+          <el-table-column label="进场特效图标" width="110">
             <template #default="{ row }">
-              <el-tag :type="row.status === 1 ? 'success' : 'info'">
-                {{ row.status === 1 ? '开启' : '关闭' }}
+              <el-image
+                  v-if="row.animationIcon"
+                  :preview-src-list="[row.animationIcon]"
+                  :src="row.animationIcon"
+                  class="table-icon-preview"
+                  fit="cover"
+                  preview-teleported
+              />
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="提现图标" width="100">
+            <template #default="{ row }">
+              <el-image
+                  v-if="row.withdrawIcon"
+                  :preview-src-list="[row.withdrawIcon]"
+                  :src="row.withdrawIcon"
+                  class="table-icon-preview"
+                  fit="cover"
+                  preview-teleported
+              />
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="提现开关" width="100">
+            <template #default="{ row }">
+              <el-tag :type="row.withdrawSwitch === 1 ? 'success' : 'info'">
+                {{ row.withdrawSwitch === 1 ? '开' : '关' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="进场特效开关" width="120">
+            <template #default="{ row }">
+              <el-tag :type="row.animationSwitch === 1 ? 'success' : 'info'">
+                {{ row.animationSwitch === 1 ? '开' : '关' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="公屏评论特效" min-width="200">
+            <template #default="{ row }">
+              <video
+                  v-if="isVideoUrl(row.commentEffect)"
+                  :src="row.commentEffect"
+                  class="table-media-preview"
+                  controls
+                  preload="metadata"
+              />
+              <span v-else class="media-url-text">{{ row.commentEffectName || '-' }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="公屏评论特效图标" width="130">
+            <template #default="{ row }">
+              <el-image
+                  v-if="row.commentEffectIcon"
+                  :preview-src-list="[row.commentEffectIcon]"
+                  :src="row.commentEffectIcon"
+                  class="table-icon-preview"
+                  fit="cover"
+                  preview-teleported
+              />
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="公屏评论特效开关" width="140">
+            <template #default="{ row }">
+              <el-tag :type="row.commentEffectSwitch === 1 ? 'success' : 'info'">
+                {{ row.commentEffectSwitch === 1 ? '开' : '关' }}
               </el-tag>
             </template>
           </el-table-column>
@@ -95,95 +160,380 @@
       </div>
     </el-card>
 
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="640px">
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="720px">
       <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="130px">
-        <el-form-item label="等级" prop="level">
-          <el-input-number v-model="currentRow.level" :min="1" controls-position="right"/>
-        </el-form-item>
-        <el-form-item label="等级名称" prop="levelName">
-          <el-input v-model="currentRow.levelName" placeholder="请输入等级名称"/>
-        </el-form-item>
-        <el-form-item label="进场特效动画" prop="animation">
-          <div class="asset-upload-wrap">
-            <el-upload
-                :before-upload="beforeAnimationUpload"
-                :disabled="animationUploading"
-                :http-request="doUpload"
-                :show-file-list="false"
-                accept=".mp4"
-                action="#"
-                class="animation-uploader"
-            >
-              <video
-                  v-if="animationPreviewUrl"
-                  :src="animationPreviewUrl"
-                  class="animation-preview"
-                  controls
-                  preload="metadata"
+        <el-tabs v-model="activeTab">
+          <el-tab-pane label="基础信息" name="basic">
+            <el-form-item label="等级" prop="level">
+              <el-input-number v-model="currentRow.level" :min="1" controls-position="right"/>
+            </el-form-item>
+            <el-form-item label="等级名称" prop="levelName">
+              <el-input v-model="currentRow.levelName" placeholder="请输入等级名称"/>
+            </el-form-item>
+            <el-form-item label="升级充值上限" prop="upgradeRechargeLimit">
+              <el-input-number
+                  v-model="currentRow.upgradeRechargeLimit"
+                  :min="0"
+                  :precision="4"
+                  :step="0.0001"
+                  controls-position="right"
               />
-              <div v-else class="asset-uploader-placeholder animation-placeholder">
-                <el-icon class="asset-uploader-icon">
-                  <Plus/>
-                </el-icon>
-                <span>点击上传 MP4 动画</span>
+              <div class="form-tip">保留4位小数，例如 100.0000</div>
+            </el-form-item>
+            <el-form-item label="最低提现金额" prop="minWithdrawAmount">
+              <el-input-number
+                  v-model="currentRow.minWithdrawAmount"
+                  :min="0"
+                  :precision="4"
+                  :step="0.0001"
+                  controls-position="right"
+              />
+              <div class="form-tip">保留4位小数</div>
+            </el-form-item>
+            <el-form-item label="最高提现金额" prop="maxWithdrawAmount">
+              <el-input-number
+                  v-model="currentRow.maxWithdrawAmount"
+                  :min="0"
+                  :precision="4"
+                  :step="0.0001"
+                  controls-position="right"
+              />
+              <div class="form-tip">保留4位小数，0 表示不限制</div>
+            </el-form-item>
+            <el-form-item label="手续费" prop="fee">
+              <el-input-number
+                  v-model="currentRow.fee"
+                  :min="0"
+                  :precision="4"
+                  :step="0.0001"
+                  controls-position="right"
+              />
+              <div class="form-tip">保留4位小数</div>
+            </el-form-item>
+          </el-tab-pane>
+
+          <el-tab-pane label="房间进场特效" name="entryEffect">
+            <el-form-item label="进场特效开关" prop="animationSwitch">
+              <el-radio-group v-model="currentRow.animationSwitch">
+                <el-radio :label="1">开</el-radio>
+                <el-radio :label="0">关</el-radio>
+              </el-radio-group>
+              <div class="form-tip">仅控制 App 端是否展示该等级进场特效，后端不参与业务判断</div>
+            </el-form-item>
+            <el-form-item label="特效动画" prop="animation">
+              <div class="asset-upload-wrap">
+                <el-upload
+                    :before-upload="beforeAnimationUpload"
+                    :disabled="animationUploading"
+                    :http-request="(opt) => doAssetUpload(opt, 'animation')"
+                    :show-file-list="false"
+                    accept=".mp4"
+                    action="#"
+                    class="animation-uploader"
+                >
+                  <video
+                      v-if="animationPreviewUrl"
+                      :src="animationPreviewUrl"
+                      class="animation-preview"
+                      controls
+                      preload="metadata"
+                  />
+                  <div v-else class="asset-uploader-placeholder animation-placeholder">
+                    <el-icon class="asset-uploader-icon">
+                      <Plus/>
+                    </el-icon>
+                    <span>点击上传 MP4 动画</span>
+                  </div>
+                </el-upload>
+                <el-button
+                    v-if="animationPreviewUrl || currentRow.animation"
+                    link
+                    type="danger"
+                    @click="clearAnimation"
+                >
+                  移除动画
+                </el-button>
               </div>
-            </el-upload>
-            <el-button
-                v-if="animationPreviewUrl || currentRow.animation"
-                link
-                type="danger"
-                @click="clearAnimation"
-            >
-              移除动画
-            </el-button>
-          </div>
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-radio-group v-model="currentRow.status">
-            <el-radio :label="1">开启</el-radio>
-            <el-radio :label="0">关闭</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="升级充值上限" prop="upgradeRechargeLimit">
-          <el-input-number
-              v-model="currentRow.upgradeRechargeLimit"
-              :min="0"
-              :precision="4"
-              :step="0.0001"
-              controls-position="right"
-          />
-          <div class="form-tip">保留4位小数，例如 100.0000</div>
-        </el-form-item>
-        <el-form-item label="最低提现金额" prop="minWithdrawAmount">
-          <el-input-number
-              v-model="currentRow.minWithdrawAmount"
-              :min="0"
-              :precision="4"
-              :step="0.0001"
-              controls-position="right"
-          />
-          <div class="form-tip">保留4位小数</div>
-        </el-form-item>
-        <el-form-item label="最高提现金额" prop="maxWithdrawAmount">
-          <el-input-number
-              v-model="currentRow.maxWithdrawAmount"
-              :min="0"
-              :precision="4"
-              :step="0.0001"
-              controls-position="right"
-          />
-          <div class="form-tip">保留4位小数，0 表示不限制</div>
-        </el-form-item>
-        <el-form-item label="手续费" prop="fee">
-          <el-input-number
-              v-model="currentRow.fee"
-              :min="0"
-              :precision="4"
-              :step="0.0001"
-              controls-position="right"
-          />
-          <div class="form-tip">保留4位小数</div>
-        </el-form-item>
+            </el-form-item>
+            <el-form-item label="特效图标" prop="animationIcon">
+              <div class="asset-upload-wrap">
+                <el-upload
+                    :before-upload="beforeIconUpload"
+                    :disabled="animationIconUploading"
+                    :http-request="(opt) => doAssetUpload(opt, 'animationIcon')"
+                    :show-file-list="false"
+                    accept="image/*"
+                    action="#"
+                    class="icon-uploader"
+                >
+                  <img
+                      v-if="animationIconPreviewUrl"
+                      :src="animationIconPreviewUrl"
+                      alt="animation icon"
+                      class="icon-preview"
+                  />
+                  <div v-else class="asset-uploader-placeholder icon-placeholder">
+                    <el-icon class="asset-uploader-icon">
+                      <Plus/>
+                    </el-icon>
+                    <span>点击上传图标</span>
+                  </div>
+                </el-upload>
+                <el-button
+                    v-if="animationIconPreviewUrl || currentRow.animationIcon"
+                    link
+                    type="danger"
+                    @click="clearAnimationIcon"
+                >
+                  移除图标
+                </el-button>
+              </div>
+            </el-form-item>
+            <el-form-item label="特效说明(英文)" prop="animationDescEn">
+              <el-input
+                  v-model="currentRow.animationDescEn"
+                  :autosize="{ minRows: 3, maxRows: 6 }"
+                  maxlength="2000"
+                  placeholder="Entry effect description in English"
+                  show-word-limit
+                  type="textarea"
+              />
+            </el-form-item>
+            <el-form-item label="特效说明(西班牙语)" prop="animationDescEs">
+              <el-input
+                  v-model="currentRow.animationDescEs"
+                  :autosize="{ minRows: 3, maxRows: 6 }"
+                  maxlength="2000"
+                  placeholder="Descripción del efecto de entrada en español"
+                  show-word-limit
+                  type="textarea"
+              />
+            </el-form-item>
+            <el-form-item label="特效说明(葡萄牙语)" prop="animationDescPt">
+              <el-input
+                  v-model="currentRow.animationDescPt"
+                  :autosize="{ minRows: 3, maxRows: 6 }"
+                  maxlength="2000"
+                  placeholder="Descrição do efeito de entrada em português"
+                  show-word-limit
+                  type="textarea"
+              />
+            </el-form-item>
+            <el-form-item label="特效说明(印地语)" prop="animationDescHi">
+              <el-input
+                  v-model="currentRow.animationDescHi"
+                  :autosize="{ minRows: 3, maxRows: 6 }"
+                  maxlength="2000"
+                  placeholder="प्रवेश प्रभाव विवरण हिंदी में"
+                  show-word-limit
+                  type="textarea"
+              />
+            </el-form-item>
+          </el-tab-pane>
+
+          <el-tab-pane label="直播间公屏评论特效" name="commentEffect">
+            <el-form-item label="公屏评论特效开关" prop="commentEffectSwitch">
+              <el-radio-group v-model="currentRow.commentEffectSwitch">
+                <el-radio :label="1">开</el-radio>
+                <el-radio :label="0">关</el-radio>
+              </el-radio-group>
+              <div class="form-tip">仅控制 App 端是否展示该等级公屏评论特效，后端不参与业务判断</div>
+            </el-form-item>
+            <el-form-item label="特效动画" prop="commentEffect">
+              <div class="asset-upload-wrap">
+                <el-upload
+                    :before-upload="beforeAnimationUpload"
+                    :disabled="commentEffectUploading"
+                    :http-request="(opt) => doAssetUpload(opt, 'commentEffect')"
+                    :show-file-list="false"
+                    accept=".mp4"
+                    action="#"
+                    class="animation-uploader"
+                >
+                  <video
+                      v-if="commentEffectPreviewUrl"
+                      :src="commentEffectPreviewUrl"
+                      class="animation-preview"
+                      controls
+                      preload="metadata"
+                  />
+                  <div v-else class="asset-uploader-placeholder animation-placeholder">
+                    <el-icon class="asset-uploader-icon">
+                      <Plus/>
+                    </el-icon>
+                    <span>点击上传 MP4 动画</span>
+                  </div>
+                </el-upload>
+                <el-button
+                    v-if="commentEffectPreviewUrl || currentRow.commentEffect"
+                    link
+                    type="danger"
+                    @click="clearCommentEffect"
+                >
+                  移除动画
+                </el-button>
+              </div>
+            </el-form-item>
+            <el-form-item label="特效图标" prop="commentEffectIcon">
+              <div class="asset-upload-wrap">
+                <el-upload
+                    :before-upload="beforeIconUpload"
+                    :disabled="commentEffectIconUploading"
+                    :http-request="(opt) => doAssetUpload(opt, 'commentEffectIcon')"
+                    :show-file-list="false"
+                    accept="image/*"
+                    action="#"
+                    class="icon-uploader"
+                >
+                  <img
+                      v-if="commentEffectIconPreviewUrl"
+                      :src="commentEffectIconPreviewUrl"
+                      alt="comment effect icon"
+                      class="icon-preview"
+                  />
+                  <div v-else class="asset-uploader-placeholder icon-placeholder">
+                    <el-icon class="asset-uploader-icon">
+                      <Plus/>
+                    </el-icon>
+                    <span>点击上传图标</span>
+                  </div>
+                </el-upload>
+                <el-button
+                    v-if="commentEffectIconPreviewUrl || currentRow.commentEffectIcon"
+                    link
+                    type="danger"
+                    @click="clearCommentEffectIcon"
+                >
+                  移除图标
+                </el-button>
+              </div>
+            </el-form-item>
+            <el-form-item label="特效说明(英文)" prop="commentEffectDescEn">
+              <el-input
+                  v-model="currentRow.commentEffectDescEn"
+                  :autosize="{ minRows: 3, maxRows: 6 }"
+                  maxlength="2000"
+                  placeholder="Public screen comment effect description in English"
+                  show-word-limit
+                  type="textarea"
+              />
+            </el-form-item>
+            <el-form-item label="特效说明(西班牙语)" prop="commentEffectDescEs">
+              <el-input
+                  v-model="currentRow.commentEffectDescEs"
+                  :autosize="{ minRows: 3, maxRows: 6 }"
+                  maxlength="2000"
+                  placeholder="Descripción del efecto de comentario en pantalla pública en español"
+                  show-word-limit
+                  type="textarea"
+              />
+            </el-form-item>
+            <el-form-item label="特效说明(葡萄牙语)" prop="commentEffectDescPt">
+              <el-input
+                  v-model="currentRow.commentEffectDescPt"
+                  :autosize="{ minRows: 3, maxRows: 6 }"
+                  maxlength="2000"
+                  placeholder="Descrição do efeito de comentário na tela pública em português"
+                  show-word-limit
+                  type="textarea"
+              />
+            </el-form-item>
+            <el-form-item label="特效说明(印地语)" prop="commentEffectDescHi">
+              <el-input
+                  v-model="currentRow.commentEffectDescHi"
+                  :autosize="{ minRows: 3, maxRows: 6 }"
+                  maxlength="2000"
+                  placeholder="सार्वजनिक स्क्रीन टिप्पणी प्रभाव विवरण हिंदी में"
+                  show-word-limit
+                  type="textarea"
+              />
+            </el-form-item>
+          </el-tab-pane>
+
+          <el-tab-pane label="提现文本" name="withdrawText">
+            <el-form-item label="提现开关" prop="withdrawSwitch">
+              <el-radio-group v-model="currentRow.withdrawSwitch">
+                <el-radio :label="1">开</el-radio>
+                <el-radio :label="0">关</el-radio>
+              </el-radio-group>
+              <div class="form-tip">仅控制 App 端是否展示该等级提现特权，后端不参与业务判断</div>
+            </el-form-item>
+            <el-form-item label="提现图标" prop="withdrawIcon">
+              <div class="asset-upload-wrap">
+                <el-upload
+                    :before-upload="beforeIconUpload"
+                    :disabled="withdrawIconUploading"
+                    :http-request="(opt) => doAssetUpload(opt, 'withdrawIcon')"
+                    :show-file-list="false"
+                    accept="image/*"
+                    action="#"
+                    class="icon-uploader"
+                >
+                  <img
+                      v-if="withdrawIconPreviewUrl"
+                      :src="withdrawIconPreviewUrl"
+                      alt="withdraw icon"
+                      class="icon-preview"
+                  />
+                  <div v-else class="asset-uploader-placeholder icon-placeholder">
+                    <el-icon class="asset-uploader-icon">
+                      <Plus/>
+                    </el-icon>
+                    <span>点击上传图标</span>
+                  </div>
+                </el-upload>
+                <el-button
+                    v-if="withdrawIconPreviewUrl || currentRow.withdrawIcon"
+                    link
+                    type="danger"
+                    @click="clearWithdrawIcon"
+                >
+                  移除图标
+                </el-button>
+              </div>
+            </el-form-item>
+            <el-form-item label="提现须知(英文)" prop="withdrawNoticeEn">
+              <el-input
+                  v-model="currentRow.withdrawNoticeEn"
+                  :autosize="{ minRows: 4, maxRows: 8 }"
+                  maxlength="2000"
+                  placeholder="Withdraw notice in English"
+                  show-word-limit
+                  type="textarea"
+              />
+            </el-form-item>
+            <el-form-item label="提现须知(西班牙语)" prop="withdrawNoticeEs">
+              <el-input
+                  v-model="currentRow.withdrawNoticeEs"
+                  :autosize="{ minRows: 4, maxRows: 8 }"
+                  maxlength="2000"
+                  placeholder="Aviso de retiro en español"
+                  show-word-limit
+                  type="textarea"
+              />
+            </el-form-item>
+            <el-form-item label="提现须知(葡萄牙语)" prop="withdrawNoticePt">
+              <el-input
+                  v-model="currentRow.withdrawNoticePt"
+                  :autosize="{ minRows: 4, maxRows: 8 }"
+                  maxlength="2000"
+                  placeholder="Aviso de saque em português"
+                  show-word-limit
+                  type="textarea"
+              />
+            </el-form-item>
+            <el-form-item label="提现须知(印地语)" prop="withdrawNoticeHi">
+              <el-input
+                  v-model="currentRow.withdrawNoticeHi"
+                  :autosize="{ minRows: 4, maxRows: 8 }"
+                  maxlength="2000"
+                  placeholder="हिंदी में निकासी सूचना"
+                  show-word-limit
+                  type="textarea"
+              />
+            </el-form-item>
+          </el-tab-pane>
+        </el-tabs>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -203,22 +553,41 @@ import {getExt, isVideoUrl, resolveMediaPreviewType} from '@/utils/media-preview
 
 interface SearchForm {
   levelName: string
-  statusFilter: number
+  withdrawSwitchFilter: number
 }
 
 interface VipCfgForm {
   id: string
   level: number
   levelName: string
-  status: number
+  withdrawSwitch: number
+  animationSwitch: number
+  commentEffectSwitch: number
   upgradeRechargeLimit: number
   minWithdrawAmount: number
   maxWithdrawAmount: number
   fee: number
   animation: string
+  animationIcon: string
+  animationDescEn: string
+  animationDescEs: string
+  animationDescPt: string
+  animationDescHi: string
+  commentEffect: string
+  commentEffectIcon: string
+  commentEffectDescEn: string
+  commentEffectDescEs: string
+  commentEffectDescPt: string
+  commentEffectDescHi: string
+  withdrawIcon: string
+  withdrawNoticeEn: string
+  withdrawNoticeEs: string
+  withdrawNoticePt: string
+  withdrawNoticeHi: string
 }
 
 const loading = ref(false)
+const activeTab = ref('basic')
 const tableData = ref<VipCfg[]>([])
 const total = ref(0)
 const currentPage = ref(1)
@@ -226,7 +595,7 @@ const pageSize = ref(10)
 
 const searchForm = reactive<SearchForm>({
   levelName: '',
-  statusFilter: 0
+  withdrawSwitchFilter: 0
 })
 
 const dialogVisible = ref(false)
@@ -235,37 +604,147 @@ const defaultForm = (): VipCfgForm => ({
   id: '',
   level: 1,
   levelName: '',
-  status: 1,
+  withdrawSwitch: 1,
+  animationSwitch: 1,
+  commentEffectSwitch: 1,
   upgradeRechargeLimit: 0,
   minWithdrawAmount: 0,
   maxWithdrawAmount: 0,
   fee: 0,
-  animation: ''
+  animation: '',
+  animationIcon: '',
+  animationDescEn: '',
+  animationDescEs: '',
+  animationDescPt: '',
+  animationDescHi: '',
+  commentEffect: '',
+  commentEffectIcon: '',
+  commentEffectDescEn: '',
+  commentEffectDescEs: '',
+  commentEffectDescPt: '',
+  commentEffectDescHi: '',
+  withdrawIcon: '',
+  withdrawNoticeEn: '',
+  withdrawNoticeEs: '',
+  withdrawNoticePt: '',
+  withdrawNoticeHi: ''
 })
 const currentRow = ref<VipCfgForm>(defaultForm())
 const formRef = ref<FormInstance>()
 
 const animationUploading = ref(false)
+const animationIconUploading = ref(false)
+const commentEffectUploading = ref(false)
+const commentEffectIconUploading = ref(false)
+const withdrawIconUploading = ref(false)
 const animationPreviewUrl = ref('')
-let objectPreviewUrl = ''
+const animationIconPreviewUrl = ref('')
+const commentEffectPreviewUrl = ref('')
+const commentEffectIconPreviewUrl = ref('')
+const withdrawIconPreviewUrl = ref('')
+let animationObjectPreviewUrl = ''
+let animationIconObjectPreviewUrl = ''
+let commentEffectObjectPreviewUrl = ''
+let commentEffectIconObjectPreviewUrl = ''
+let withdrawIconObjectPreviewUrl = ''
 
-const revokeObjectPreview = () => {
-  if (objectPreviewUrl) {
-    URL.revokeObjectURL(objectPreviewUrl)
-    objectPreviewUrl = ''
+const revokeAnimationObjectPreview = () => {
+  if (animationObjectPreviewUrl) {
+    URL.revokeObjectURL(animationObjectPreviewUrl)
+    animationObjectPreviewUrl = ''
+  }
+}
+
+const revokeAnimationIconObjectPreview = () => {
+  if (animationIconObjectPreviewUrl) {
+    URL.revokeObjectURL(animationIconObjectPreviewUrl)
+    animationIconObjectPreviewUrl = ''
+  }
+}
+
+const revokeWithdrawIconObjectPreview = () => {
+  if (withdrawIconObjectPreviewUrl) {
+    URL.revokeObjectURL(withdrawIconObjectPreviewUrl)
+    withdrawIconObjectPreviewUrl = ''
+  }
+}
+
+const revokeCommentEffectObjectPreview = () => {
+  if (commentEffectObjectPreviewUrl) {
+    URL.revokeObjectURL(commentEffectObjectPreviewUrl)
+    commentEffectObjectPreviewUrl = ''
+  }
+}
+
+const revokeCommentEffectIconObjectPreview = () => {
+  if (commentEffectIconObjectPreviewUrl) {
+    URL.revokeObjectURL(commentEffectIconObjectPreviewUrl)
+    commentEffectIconObjectPreviewUrl = ''
   }
 }
 
 const resetAnimationPreview = () => {
-  revokeObjectPreview()
+  revokeAnimationObjectPreview()
   animationPreviewUrl.value = ''
 }
 
+const resetAnimationIconPreview = () => {
+  revokeAnimationIconObjectPreview()
+  animationIconPreviewUrl.value = ''
+}
+
+const resetWithdrawIconPreview = () => {
+  revokeWithdrawIconObjectPreview()
+  withdrawIconPreviewUrl.value = ''
+}
+
+const resetCommentEffectPreview = () => {
+  revokeCommentEffectObjectPreview()
+  commentEffectPreviewUrl.value = ''
+}
+
+const resetCommentEffectIconPreview = () => {
+  revokeCommentEffectIconObjectPreview()
+  commentEffectIconPreviewUrl.value = ''
+}
+
 const setAnimationPreview = (url: string, fromObject = false) => {
-  revokeObjectPreview()
+  revokeAnimationObjectPreview()
   animationPreviewUrl.value = url
   if (fromObject && url) {
-    objectPreviewUrl = url
+    animationObjectPreviewUrl = url
+  }
+}
+
+const setAnimationIconPreview = (url: string, fromObject = false) => {
+  revokeAnimationIconObjectPreview()
+  animationIconPreviewUrl.value = url
+  if (fromObject && url) {
+    animationIconObjectPreviewUrl = url
+  }
+}
+
+const setWithdrawIconPreview = (url: string, fromObject = false) => {
+  revokeWithdrawIconObjectPreview()
+  withdrawIconPreviewUrl.value = url
+  if (fromObject && url) {
+    withdrawIconObjectPreviewUrl = url
+  }
+}
+
+const setCommentEffectPreview = (url: string, fromObject = false) => {
+  revokeCommentEffectObjectPreview()
+  commentEffectPreviewUrl.value = url
+  if (fromObject && url) {
+    commentEffectObjectPreviewUrl = url
+  }
+}
+
+const setCommentEffectIconPreview = (url: string, fromObject = false) => {
+  revokeCommentEffectIconObjectPreview()
+  commentEffectIconPreviewUrl.value = url
+  if (fromObject && url) {
+    commentEffectIconObjectPreviewUrl = url
   }
 }
 
@@ -274,9 +753,34 @@ const clearAnimation = () => {
   resetAnimationPreview()
 }
 
+const clearAnimationIcon = () => {
+  currentRow.value.animationIcon = ''
+  resetAnimationIconPreview()
+}
+
+const clearWithdrawIcon = () => {
+  currentRow.value.withdrawIcon = ''
+  resetWithdrawIconPreview()
+}
+
+const clearCommentEffect = () => {
+  currentRow.value.commentEffect = ''
+  resetCommentEffectPreview()
+}
+
+const clearCommentEffectIcon = () => {
+  currentRow.value.commentEffectIcon = ''
+  resetCommentEffectIconPreview()
+}
+
 watch(dialogVisible, (visible) => {
   if (!visible) {
     resetAnimationPreview()
+    resetAnimationIconPreview()
+    resetCommentEffectPreview()
+    resetCommentEffectIconPreview()
+    resetWithdrawIconPreview()
+    activeTab.value = 'basic'
   }
 })
 
@@ -289,19 +793,48 @@ const beforeAnimationUpload = (file: File): boolean => {
   return true
 }
 
-const doUpload = async (options: UploadRequestOptions) => {
+const beforeIconUpload = (file: File): boolean => {
+  if (!file.type.startsWith('image/')) {
+    ElMessage.error('图标只能上传图片文件')
+    return false
+  }
+  return true
+}
+
+const doAssetUpload = async (
+    options: UploadRequestOptions,
+    field: 'animation' | 'animationIcon' | 'commentEffect' | 'commentEffectIcon' | 'withdrawIcon'
+) => {
   const file = options.file as File
-  animationUploading.value = true
+  const uploadingMap = {
+    animation: animationUploading,
+    animationIcon: animationIconUploading,
+    commentEffect: commentEffectUploading,
+    commentEffectIcon: commentEffectIconUploading,
+    withdrawIcon: withdrawIconUploading
+  }
+  const uploading = uploadingMap[field]
+  uploading.value = true
   try {
     const res = await uploadApi.uploadFile(file)
-    currentRow.value.animation = res.fileName
-    setAnimationPreview(URL.createObjectURL(file), true)
+    currentRow.value[field] = res.fileName
+    if (field === 'animation') {
+      setAnimationPreview(URL.createObjectURL(file), true)
+    } else if (field === 'animationIcon') {
+      setAnimationIconPreview(URL.createObjectURL(file), true)
+    } else if (field === 'commentEffect') {
+      setCommentEffectPreview(URL.createObjectURL(file), true)
+    } else if (field === 'commentEffectIcon') {
+      setCommentEffectIconPreview(URL.createObjectURL(file), true)
+    } else {
+      setWithdrawIconPreview(URL.createObjectURL(file), true)
+    }
     ElMessage.success('上传成功')
   } catch (error) {
     console.error('上传失败:', error)
     ElMessage.error('上传失败')
   } finally {
-    animationUploading.value = false
+    uploading.value = false
   }
 }
 
@@ -331,7 +864,9 @@ const formRules: FormRules = {
     {required: true, message: '请输入等级名称', trigger: 'blur'},
     {min: 1, max: 64, message: '等级名称长度在1-64个字符', trigger: 'blur'}
   ],
-  status: [{required: true, message: '请选择状态', trigger: 'change'}],
+  withdrawSwitch: [{required: true, message: '请选择提现开关', trigger: 'change'}],
+  animationSwitch: [{required: true, message: '请选择进场特效开关', trigger: 'change'}],
+  commentEffectSwitch: [{required: true, message: '请选择公屏评论特效开关', trigger: 'change'}],
   minWithdrawAmount: [{validator: validateWithdrawRange, trigger: 'change'}],
   maxWithdrawAmount: [{validator: validateWithdrawRange, trigger: 'change'}]
 }
@@ -341,7 +876,7 @@ const fetchList = async () => {
   try {
     const response = await vipCfgApi.getVipCfgList({
       levelName: searchForm.levelName,
-      statusFilter: searchForm.statusFilter,
+      withdrawSwitchFilter: searchForm.withdrawSwitchFilter,
       pageIndex: currentPage.value,
       pageSize: pageSize.value
     })
@@ -373,28 +908,76 @@ const handleCurrentChange = (page: number) => {
 const handleAdd = () => {
   dialogTitle.value = '新增VIP等级'
   currentRow.value = defaultForm()
+  activeTab.value = 'basic'
   resetAnimationPreview()
+  resetAnimationIconPreview()
+  resetCommentEffectPreview()
+  resetCommentEffectIconPreview()
+  resetWithdrawIconPreview()
   dialogVisible.value = true
 }
 
 const handleEdit = (row: VipCfg) => {
   dialogTitle.value = '编辑VIP等级'
+  activeTab.value = 'basic'
   const animationName = row.animationName || ''
+  const animationIconName = row.animationIconName || ''
+  const commentEffectName = row.commentEffectName || ''
+  const commentEffectIconName = row.commentEffectIconName || ''
+  const withdrawIconName = row.withdrawIconName || ''
   currentRow.value = {
     id: row.id,
     level: Number(row.level) || 1,
     levelName: row.levelName,
-    status: Number(row.status) || 0,
+    withdrawSwitch: Number(row.withdrawSwitch) || 0,
+    animationSwitch: Number(row.animationSwitch) || 0,
+    commentEffectSwitch: Number(row.commentEffectSwitch) || 0,
     upgradeRechargeLimit: Number(row.upgradeRechargeLimit) || 0,
     minWithdrawAmount: Number(row.minWithdrawAmount) || 0,
     maxWithdrawAmount: Number(row.maxWithdrawAmount) || 0,
     fee: Number(row.fee) || 0,
-    animation: animationName
+    animation: animationName,
+    animationIcon: animationIconName,
+    animationDescEn: row.animationDescEn || '',
+    animationDescEs: row.animationDescEs || '',
+    animationDescPt: row.animationDescPt || '',
+    animationDescHi: row.animationDescHi || '',
+    commentEffect: commentEffectName,
+    commentEffectIcon: commentEffectIconName,
+    commentEffectDescEn: row.commentEffectDescEn || '',
+    commentEffectDescEs: row.commentEffectDescEs || '',
+    commentEffectDescPt: row.commentEffectDescPt || '',
+    commentEffectDescHi: row.commentEffectDescHi || '',
+    withdrawIcon: withdrawIconName,
+    withdrawNoticeEn: row.withdrawNoticeEn || '',
+    withdrawNoticeEs: row.withdrawNoticeEs || '',
+    withdrawNoticePt: row.withdrawNoticePt || '',
+    withdrawNoticeHi: row.withdrawNoticeHi || ''
   }
   if (animationName && resolveMediaPreviewType(row.animation || '', animationName) === 'video') {
     setAnimationPreview(row.animation || '')
   } else {
     resetAnimationPreview()
+  }
+  if (animationIconName) {
+    setAnimationIconPreview(row.animationIcon || '')
+  } else {
+    resetAnimationIconPreview()
+  }
+  if (commentEffectName && resolveMediaPreviewType(row.commentEffect || '', commentEffectName) === 'video') {
+    setCommentEffectPreview(row.commentEffect || '')
+  } else {
+    resetCommentEffectPreview()
+  }
+  if (commentEffectIconName) {
+    setCommentEffectIconPreview(row.commentEffectIcon || '')
+  } else {
+    resetCommentEffectIconPreview()
+  }
+  if (withdrawIconName) {
+    setWithdrawIconPreview(row.withdrawIcon || '')
+  } else {
+    resetWithdrawIconPreview()
   }
   dialogVisible.value = true
 }
@@ -422,12 +1005,30 @@ const handleSave = async () => {
       const payload = {
         level: currentRow.value.level,
         levelName: currentRow.value.levelName,
-        status: currentRow.value.status,
+        withdrawSwitch: currentRow.value.withdrawSwitch,
+        animationSwitch: currentRow.value.animationSwitch,
+        commentEffectSwitch: currentRow.value.commentEffectSwitch,
         upgradeRechargeLimit: currentRow.value.upgradeRechargeLimit,
         minWithdrawAmount: currentRow.value.minWithdrawAmount,
         maxWithdrawAmount: currentRow.value.maxWithdrawAmount,
         fee: currentRow.value.fee,
-        animation: currentRow.value.animation
+        animation: currentRow.value.animation,
+        animationIcon: currentRow.value.animationIcon,
+        animationDescEn: currentRow.value.animationDescEn,
+        animationDescEs: currentRow.value.animationDescEs,
+        animationDescPt: currentRow.value.animationDescPt,
+        animationDescHi: currentRow.value.animationDescHi,
+        commentEffect: currentRow.value.commentEffect,
+        commentEffectIcon: currentRow.value.commentEffectIcon,
+        commentEffectDescEn: currentRow.value.commentEffectDescEn,
+        commentEffectDescEs: currentRow.value.commentEffectDescEs,
+        commentEffectDescPt: currentRow.value.commentEffectDescPt,
+        commentEffectDescHi: currentRow.value.commentEffectDescHi,
+        withdrawIcon: currentRow.value.withdrawIcon,
+        withdrawNoticeEn: currentRow.value.withdrawNoticeEn,
+        withdrawNoticeEs: currentRow.value.withdrawNoticeEs,
+        withdrawNoticePt: currentRow.value.withdrawNoticePt,
+        withdrawNoticeHi: currentRow.value.withdrawNoticeHi
       }
       if (currentRow.value.id) {
         await vipCfgApi.updateVipCfg({id: currentRow.value.id, ...payload})
@@ -446,7 +1047,7 @@ const handleSave = async () => {
 
 const resetSearch = () => {
   searchForm.levelName = ''
-  searchForm.statusFilter = 0
+  searchForm.withdrawSwitchFilter = 0
   currentPage.value = 1
   fetchList()
 }
@@ -508,6 +1109,18 @@ onMounted(() => {
   border-color: var(--el-color-primary);
 }
 
+.icon-uploader :deep(.el-upload) {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.icon-uploader :deep(.el-upload:hover) {
+  border-color: var(--el-color-primary);
+}
+
 .asset-uploader-placeholder {
   display: flex;
   flex-direction: column;
@@ -523,6 +1136,11 @@ onMounted(() => {
   height: 120px;
 }
 
+.icon-placeholder {
+  width: 120px;
+  height: 120px;
+}
+
 .asset-uploader-icon {
   font-size: 28px;
 }
@@ -534,11 +1152,25 @@ onMounted(() => {
   object-fit: cover;
 }
 
+.icon-preview {
+  width: 120px;
+  height: 120px;
+  display: block;
+  object-fit: contain;
+}
+
 .table-media-preview {
   width: 160px;
   max-height: 90px;
   display: block;
   background: #000;
+  border-radius: 4px;
+}
+
+.table-icon-preview {
+  width: 48px;
+  height: 48px;
+  display: block;
   border-radius: 4px;
 }
 
