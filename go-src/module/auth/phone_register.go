@@ -24,8 +24,9 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 	phoneAreaCode := phoneutil.NormalizeAreaCode(req.PhoneAreaCode)
 	phone := req.Phone
 	phoneKey := phoneutil.UniqueKey(phoneAreaCode, phone)
-	gmlock.Lock(phoneKey)
-	defer gmlock.Unlock(phoneKey)
+	lockKey := fmt.Sprintf("phone_register:%s:%d", phoneKey, PhoneChannel)
+	gmlock.Lock(lockKey)
+	defer gmlock.Unlock(lockKey)
 	// 验证验证码
 	valid, err := verification_code.VerifyCode(phoneAreaCode, phone, req.Code)
 	if err != nil {
@@ -35,10 +36,10 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 		return nil, errercode.CreateCode(errercode.VerifyCodeInvalid)
 	}
 
-	if active := accountdao.FindActivePhoneAccount(phoneAreaCode, phone); active != nil && active.Password != "" {
+	if active := accountdao.FindActivePhoneAccount(phoneAreaCode, phone, PhoneChannel); active != nil && active.Password != "" {
 		return nil, errercode.CreateCode(errercode.AccountAlreadyExists)
 	}
-	account := accountdao.RegisterPhoneAccount(phoneAreaCode, phone)
+	account := accountdao.RegisterPhoneAccount(phoneAreaCode, phone, PhoneChannel)
 
 	// 设置密码
 	account.SetPassword(gmd5.MustEncryptString(req.Password))

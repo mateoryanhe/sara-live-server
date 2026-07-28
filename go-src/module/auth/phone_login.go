@@ -26,7 +26,7 @@ func PhoneLogin(ctx context.Context, req *authdto.PhoneLoginReq) (res *authdto.P
 		return nil, err
 	}
 
-	account := accountdao.FindActivePhoneAccount(phoneAreaCode, phone)
+	account := accountdao.FindActivePhoneAccount(phoneAreaCode, phone, PhoneChannel)
 	if account == nil || account.Password == "" {
 		if blockErr := markPhoneLoginFailure(phoneKey); blockErr != nil {
 			return nil, blockErr

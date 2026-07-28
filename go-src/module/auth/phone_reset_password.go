@@ -20,7 +20,7 @@ func PhoneResetPassword(ctx context.Context, req *authdto.PhoneResetPasswordReq)
 	}
 
 	phoneAreaCode := phoneutil.NormalizeAreaCode(req.PhoneAreaCode)
-	account := accountdao.FindActivePhoneAccount(phoneAreaCode, req.Phone)
+	account := accountdao.FindActivePhoneAccount(phoneAreaCode, req.Phone, PhoneChannel)
 	if account == nil || account.Password == "" {
 		return nil, errercode.CreateCode(errercode.LoginFail)
 	}

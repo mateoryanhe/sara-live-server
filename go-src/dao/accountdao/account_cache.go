@@ -12,11 +12,6 @@ import (
 	"xr-game-server/entity"
 )
 
-const (
-	channelPhone  uint = 2
-	channelDevice uint = 4
-)
-
 // PhoneOpenId 手机号登陆 open_id = 区号_手机号
 func PhoneOpenId(areaCode, phone string) string {
 	return phoneutil.NormalizeAreaCode(areaCode) + "_" + strings.TrimSpace(phone)
@@ -108,8 +103,8 @@ func FindActiveAccount(openId string, channel uint) *entity.Account {
 }
 
 // FindActivePhoneAccount 获取未注销手机号账号
-func FindActivePhoneAccount(areaCode, phone string) *entity.Account {
-	return FindActiveAccount(PhoneOpenId(areaCode, phone), channelPhone)
+func FindActivePhoneAccount(areaCode, phone string, channel uint) *entity.Account {
+	return FindActiveAccount(PhoneOpenId(areaCode, phone), channel)
 }
 
 // GetAccountFromCache 从列表缓存中按 accountId 获取账号(CMS/App 写操作)
@@ -141,9 +136,9 @@ func RegisterAccount(openId string, channel uint) *entity.Account {
 }
 
 // RegisterPhoneAccount 手机号注册(open_id 由区号+手机号组成)
-func RegisterPhoneAccount(areaCode, phone string) *entity.Account {
+func RegisterPhoneAccount(areaCode, phone string, channel uint) *entity.Account {
 	openId := PhoneOpenId(areaCode, phone)
-	acc := RegisterAccount(openId, channelPhone)
+	acc := RegisterAccount(openId, channel)
 	if acc == nil {
 		return nil
 	}

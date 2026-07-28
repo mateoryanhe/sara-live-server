@@ -28,7 +28,7 @@ func DeviceLogin(ctx context.Context, req *authdto.DeviceLoginReq) (*authdto.Dev
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 
-	lockKey := deviceId + ":" + fmt.Sprint(DeviceChannel)
+	lockKey := fmt.Sprintf("device_login:%s:%d", deviceId, DeviceChannel)
 	gmlock.Lock(lockKey)
 	defer gmlock.Unlock(lockKey)
 
