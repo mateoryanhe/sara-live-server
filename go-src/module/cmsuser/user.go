@@ -3,6 +3,7 @@ package cmsuser
 import (
 	"context"
 	"errors"
+	"xr-game-server/constants/common"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/cmsuserdao"
 	"xr-game-server/dto/cmsuserdto"
@@ -52,6 +53,12 @@ func UpdateCMSUser(ctx context.Context, req *cmsuserdto.UpdateCMSUserReq) (res *
 		return nil, errors.New("CMS用户不存在")
 	}
 
+	oldStatus := user.Status
+	operatorId := httpserver.GetAuthId(ctx)
+	if oldStatus == common.True && req.Status == common.False && user.ID == operatorId {
+		return nil, errors.New("不能停用自己的账号")
+	}
+
 	// 检查CMS用户名称是否与其他用户重复
 	existingUser := cmsuserdao.GetCMSUserByName(req.Name)
 	if existingUser != nil && existingUser.ID != req.ID {
@@ -70,6 +77,9 @@ func UpdateCMSUser(ctx context.Context, req *cmsuserdto.UpdateCMSUserReq) (res *
 	if err != nil {
 		return nil, err
 	}
+	if oldStatus == common.True && req.Status == common.False {
+		invalidateCmsToken(user.ID)
+	}
 
 	return &cmsuserdto.UpdateCMSUserRes{
 		Success: true,
@@ -83,6 +93,11 @@ func DeleteCMSUser(ctx context.Context, req *cmsuserdto.DeleteCMSUserReq) (res *
 	if user == nil {
 		return nil, errors.New("CMS用户不存在")
 	}
+	if user.ID == httpserver.GetAuthId(ctx) {
+		return nil, errors.New("不能删除自己的账号")
+	}
+
+	invalidateCmsToken(req.ID)
 
 	// 删除CMS用户
 	err = cmsuserdao.DeleteCMSUser(req.ID)

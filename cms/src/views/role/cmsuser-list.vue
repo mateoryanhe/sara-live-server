@@ -234,7 +234,7 @@ const handleAdd = () => {
 const handleEdit = (row: CMSUser) => {
   dialogTitle.value = '编辑用户'
   currentRow.value = {
-    id: row.id,
+    id: String(row.id),
     name: row.name,
     pwd: '',
     status: row.status,
@@ -277,7 +277,7 @@ const handleSave = async () => {
           // 更新用户
           const {id, name, pwd, status, admin, roleId} = currentRow.value
           response = await cmsUserApi.updateCMSUser({
-            id,
+            id: String(id),
             name,
             pwd: pwd || undefined, // 如果密码为空则不更新
             status,

@@ -12,9 +12,12 @@ import (
 
 // GetCMSUserById 根据ID获取CMS用户
 func GetCMSUserById(id uint64) *entity.CMSUser {
+	if id == 0 {
+		return nil
+	}
 	var user entity.CMSUser
 	err := g.DB().Model(string(entity.TbCMSUser)).Where("id = ?", id).Scan(&user)
-	if err != nil {
+	if err != nil || user.ID == 0 {
 		return nil
 	}
 	return &user
@@ -22,9 +25,12 @@ func GetCMSUserById(id uint64) *entity.CMSUser {
 
 // GetCMSUserByName 根据名称获取CMS用户
 func GetCMSUserByName(name string) *entity.CMSUser {
+	if name == "" {
+		return nil
+	}
 	var user entity.CMSUser
 	err := g.DB().Model(string(entity.TbCMSUser)).Where("name = ?", name).Scan(&user)
-	if err != nil {
+	if err != nil || user.ID == 0 {
 		return nil
 	}
 	return &user
@@ -42,6 +48,22 @@ func CreateCMSUser(user *entity.CMSUser) error {
 // UpdateCMSUser 更新CMS用户
 func UpdateCMSUser(user *entity.CMSUser) error {
 	return CreateCMSUser(user)
+}
+
+// ListCMSUserIdsByRoleId 按角色ID获取CMS用户ID列表
+func ListCMSUserIdsByRoleId(roleId uint64) []uint64 {
+	if roleId == 0 {
+		return nil
+	}
+	users := make([]*entity.CMSUser, 0)
+	_ = g.DB().Model(string(entity.TbCMSUser)).Fields("id").Where("role_id = ?", roleId).Scan(&users)
+	ids := make([]uint64, 0, len(users))
+	for _, user := range users {
+		if user != nil && user.ID > 0 {
+			ids = append(ids, user.ID)
+		}
+	}
+	return ids
 }
 
 // DeleteCMSUser 删除CMS用户

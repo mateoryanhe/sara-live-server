@@ -64,6 +64,9 @@ func UpdateRole(ctx context.Context, req *cmsroledto.UpdateRoleReq) (res *cmsrol
 	if err != nil {
 		return nil, err
 	}
+	if req.Status == 0 {
+		invalidateCmsTokensByRoleId(req.ID)
+	}
 
 	return &cmsroledto.UpdateRoleRes{
 		Success: true,
@@ -72,6 +75,7 @@ func UpdateRole(ctx context.Context, req *cmsroledto.UpdateRoleReq) (res *cmsrol
 
 // DeleteRole 删除角色
 func DeleteRole(ctx context.Context, req *cmsroledto.DeleteRoleReq) (res *cmsroledto.DeleteRoleRes, err error) {
+	invalidateCmsTokensByRoleId(req.ID)
 
 	// 删除角色关联的权限
 	err = cmsuserdao.DeleteRolePermissions(req.ID)

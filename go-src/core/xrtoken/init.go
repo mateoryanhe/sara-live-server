@@ -28,6 +28,21 @@ func DelToken(authId uint64) {
 	appCache.Remove(gctx.New(), authId)
 }
 
+func DelCmsToken(authId uint64) {
+	if authId == 0 {
+		return
+	}
+	cmsCache.Remove(gctx.New(), authId)
+}
+
+// InvalidateCmsTokenCache 用随机 token 覆盖缓存,使旧 token 立即失效
+func InvalidateCmsTokenCache(authId uint64) {
+	if authId == 0 {
+		return
+	}
+	cmsCache.Set(gctx.New(), authId, guid.S(), Time)
+}
+
 func InitAppToken(authId uint64, token string, val time.Time) {
 	if token == "" {
 		return
