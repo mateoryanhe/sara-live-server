@@ -79,9 +79,13 @@ func toAppGiftItem(g *entity.LiveGift) *giftdto.AppGiftItem {
 	if g.PublishedAt != nil {
 		publishedAt = g.PublishedAt.Unix()
 	}
+	name := g.NameEn
+	if name == "" {
+		name = g.Name
+	}
 	return &giftdto.AppGiftItem{
 		ID:          g.ID,
-		Name:        g.Name,
+		Name:        name,
 		NameEn:      g.NameEn,
 		NameEs:      g.NameEs,
 		NamePt:      g.NamePt,
