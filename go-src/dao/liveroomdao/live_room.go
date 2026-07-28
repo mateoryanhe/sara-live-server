@@ -1,6 +1,8 @@
 package liveroomdao
 
 import (
+	"strings"
+
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/entity"
@@ -53,6 +55,21 @@ func ListLivingRoomIds() []uint64 {
 		ids = append(ids, row.ID)
 	}
 	return ids
+}
+
+// ListActiveCloudPlayerRooms 查询正在直播且已创建云播放器的直播间
+func ListActiveCloudPlayerRooms() []*entity.LiveRoom {
+	rooms := make([]*entity.LiveRoom, 0)
+	for _, room := range roomCacheMgr.Values() {
+		if room == nil || room.ID == 0 || room.LiveRecordId == 0 {
+			continue
+		}
+		if strings.TrimSpace(room.CloudPlayerId) == "" {
+			continue
+		}
+		rooms = append(rooms, room)
+	}
+	return rooms
 }
 
 func GetAllLiveRoom() []*entity.LiveRoom {

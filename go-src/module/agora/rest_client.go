@@ -44,3 +44,16 @@ func agoraRestPost(ctx context.Context, cfg *agoraCfgSnapshot, path string, body
 	}
 	return resp, nil
 }
+
+func agoraRestPatch(ctx context.Context, cfg *agoraCfgSnapshot, path string, query string, body any) (*gclient.Response, error) {
+	client := newAgoraRestClient(cfg)
+	url := agoraRestBaseURL + path
+	if query != "" {
+		url += "?" + query
+	}
+	resp, err := client.Patch(ctx, url, body)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}

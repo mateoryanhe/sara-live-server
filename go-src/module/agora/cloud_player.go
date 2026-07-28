@@ -26,6 +26,15 @@ type cloudPlayerCreateBody struct {
 	Token       string `json:"token,omitempty"`
 	Name        string `json:"name,omitempty"`
 	RepeatTime  int    `json:"repeatTime,omitempty"`
+	IdleTimeout int    `json:"idleTimeout,omitempty"`
+}
+
+type cloudPlayerUpdateReq struct {
+	Player cloudPlayerUpdateBody `json:"player"`
+}
+
+type cloudPlayerUpdateBody struct {
+	Token string `json:"token,omitempty"`
 }
 
 type cloudPlayerCreateResp struct {
@@ -35,21 +44,21 @@ type cloudPlayerCreateResp struct {
 }
 
 // StartBotAnchorCloudPlayer 机器人主播开播时创建声网云播放器
-func StartBotAnchorCloudPlayer(ctx context.Context, anchorId uint64, cloudPlayerVideo string) (string, error) {
+func StartBotAnchorCloudPlayer(ctx context.Context, anchorId uint64, cloudPlayerVideo string) (string, int64, error) {
 	streamUrl := strings.TrimSpace(upload.ResolveCloudPlayerVideoUrl(cloudPlayerVideo))
 	if streamUrl == "" {
-		return "", errercode.CreateCode(errercode.InvalidParam)
+		return "", 0, errercode.CreateCode(errercode.InvalidParam)
 	}
 
 	cfg := getAgoraCfgCache()
 	if err := validateAgoraRestCfg(cfg); err != nil {
-		return "", err
+		return "", 0, err
 	}
 
 	channelName := strconv.FormatUint(anchorId, 10)
-	token, _, err := BuildChannelToken(anchorId, channelName, agoradto.RTCRolePublisher)
+	token, expireAt, err := BuildChannelToken(anchorId, channelName, agoradto.RTCRolePublisher)
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
 
 	path := fmt.Sprintf("/%s/v1/projects/%s/cloud-player/players", cfg.CloudPlayerRegion, cfg.AppId)
@@ -61,13 +70,14 @@ func StartBotAnchorCloudPlayer(ctx context.Context, anchorId uint64, cloudPlayer
 			Token:       token,
 			Name:        fmt.Sprintf("bot_%d", anchorId),
 			RepeatTime:  -1,
+			IdleTimeout: 600,
 		},
 	}
 
 	resp, err := agoraRestPost(ctx, cfg, path, reqBody)
 	if err != nil {
 		g.Log().Errorf(ctx, "create cloud player failed anchorId=%d err=%v", anchorId, err)
-		return "", errercode.CreateCode(errercode.AgoraCloudPlayerFailed)
+		return "", 0, errercode.CreateCode(errercode.AgoraCloudPlayerFailed)
 	}
 	defer resp.Close()
 
@@ -81,16 +91,18 @@ func StartBotAnchorCloudPlayer(ctx context.Context, anchorId uint64, cloudPlayer
 			}
 		}
 		if playerId != "" {
-			return playerId, nil
+			registerCloudPlayerSequence(playerId)
+			return playerId, expireAt, nil
 		}
 	}
 
 	if resp.StatusCode == http.StatusConflict && playerId != "" {
-		return playerId, nil
+		registerCloudPlayerSequence(playerId)
+		return playerId, expireAt, nil
 	}
 
 	g.Log().Errorf(ctx, "create cloud player failed anchorId=%d status=%d playerId=%s body=%s", anchorId, resp.StatusCode, playerId, string(respBody))
-	return "", errercode.CreateCode(errercode.AgoraCloudPlayerFailed)
+	return "", 0, errercode.CreateCode(errercode.AgoraCloudPlayerFailed)
 }
 
 // StopBotAnchorCloudPlayer 机器人主播下播时销毁声网云播放器
@@ -118,9 +130,16 @@ func StopBotAnchorCloudPlayer(ctx context.Context, playerId string) error {
 	defer resp.Close()
 
 	if resp.StatusCode >= http.StatusOK && resp.StatusCode < http.StatusMultipleChoices {
+		unregisterCloudPlayerSequence(playerId)
+		return nil
+	}
+	if resp.StatusCode == http.StatusNotFound {
+		g.Log().Warningf(ctx, "delete cloud player skipped, player not found playerId=%s requestId=%s", playerId, requestID)
+		unregisterCloudPlayerSequence(playerId)
 		return nil
 	}
 
-	g.Log().Errorf(ctx, "delete cloud player failed playerId=%s requestId=%s status=%d", playerId, requestID, resp.StatusCode)
+	respBody := resp.ReadAll()
+	g.Log().Errorf(ctx, "delete cloud player failed playerId=%s requestId=%s status=%d body=%s", playerId, requestID, resp.StatusCode, string(respBody))
 	return errercode.CreateCode(errercode.AgoraCloudPlayerFailed)
 }
