@@ -56,6 +56,10 @@ func (a *AccountController) SetAnchor(ctx context.Context, req *accountdto.SetAn
 	return liveroom.SetAnchor(ctx, req)
 }
 
+func (a *AccountController) SetTestAnchor(ctx context.Context, req *accountdto.SetTestAnchorReq) (*accountdto.SetTestAnchorRes, error) {
+	return liveroom.SetTestAnchor(ctx, req)
+}
+
 func (a *AccountController) SetUserType(ctx context.Context, req *accountdto.SetUserTypeReq) (*accountdto.SetUserTypeRes, error) {
 	return userinfo.SetUserType(ctx, req)
 }

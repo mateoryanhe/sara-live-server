@@ -53,6 +53,15 @@ type SetAnchorRes struct {
 	Success bool `json:"success"`
 }
 
+type SetTestAnchorReq struct {
+	g.Meta    `path:"/setTestAnchor" method:"post" summary:"设为测试型主播(不可回退)" tags:"账号"`
+	AccountId uint64 `json:"accountId" v:"required#用户ID不能为空" dc:"用户ID"`
+}
+
+type SetTestAnchorRes struct {
+	Success bool `json:"success"`
+}
+
 type SetUserTypeReq struct {
 	g.Meta    `path:"/setUserType" method:"post" summary:"修改用户类型" tags:"账号"`
 	AccountId uint64 `json:"accountId" v:"required#用户ID不能为空" dc:"用户ID"`

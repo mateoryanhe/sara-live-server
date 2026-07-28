@@ -163,6 +163,7 @@ func toLiveRoomListItem(room *entity.LiveRoom, userId uint64) *liveroomdto.LiveR
 	if u := userinfodao.GetUserInfoByUserId(room.ID); u != nil {
 		item.AnchorNickname = u.Nickname
 		item.AnchorAvatar = upload.ResolveAvatarUrlForUser(room.ID, u.Avatar)
+		item.UserType = u.UserType
 	}
 	item.IsBotAnchor, item.CloudPlayerVideo = resolveBotAnchorRoomInfo(room.ID, room.CloudPlayerVideo)
 	item.OnlineCount = countAudienceInRoom(room.ID)

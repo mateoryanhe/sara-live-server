@@ -172,6 +172,10 @@ export interface SetAnchorReq {
     accountId: string
 }
 
+export interface SetTestAnchorReq {
+    accountId: string
+}
+
 export interface SetUserTypeReq {
     accountId: string
     userType: number

@@ -140,6 +140,7 @@
                 <template #dropdown>
                   <el-dropdown-menu>
                     <el-dropdown-item v-if="!scope.row.isAnchor" command="setAnchor">设为主播</el-dropdown-item>
+                    <el-dropdown-item v-if="!scope.row.isAnchor" command="setTestAnchor">设为测试型主播</el-dropdown-item>
                     <el-dropdown-item :divided="!scope.row.isAnchor" command="gold-add">
                       加金币
                     </el-dropdown-item>
@@ -544,6 +545,9 @@ const handleRowCommand = (row: UserInfo, command: string) => {
     case 'setAnchor':
       handleSetAnchor(row)
       break
+    case 'setTestAnchor':
+      handleSetTestAnchor(row)
+      break
   }
 }
 
@@ -600,6 +604,27 @@ const handleSetAnchor = async (row: UserInfo) => {
   } catch (error) {
     if (error !== 'cancel') {
       console.error('设为主播失败:', error)
+    }
+  }
+}
+
+const handleSetTestAnchor = async (row: UserInfo) => {
+  try {
+    await ElMessageBox.confirm(
+        `确定将用户 ${row.id} 设为测试型主播吗？设为测试型主播后不可撤销，且不参与系统统计。`,
+        '设为测试型主播',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+    )
+    await accountApi.setTestAnchor({accountId: String(row.id)})
+    ElMessage.success('已设为测试型主播')
+    await fetchUserList()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('设为测试型主播失败:', error)
     }
   }
 }
