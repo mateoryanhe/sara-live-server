@@ -19,6 +19,7 @@ type VipCfg struct {
 	migrate.OneModel
 	Level                uint32  `gorm:"uniqueIndex;default:0;comment:VIP等级" json:"level"`
 	LevelName            string  `gorm:"size:64;default:'';comment:等级名称" json:"levelName"`
+	LevelIcon            string  `gorm:"size:255;default:'';comment:VIP等级图标资源文件名" json:"levelIcon"`
 	UpgradeRechargeLimit float64 `gorm:"type:decimal(18,4);default:0;comment:升级充值上限(USD)" json:"upgradeRechargeLimit"`
 	WithdrawSwitch       uint8   `gorm:"default:0;comment:提现开关(0关,1开,仅App端使用)" json:"withdrawSwitch"`
 	MinWithdrawAmount    float64 `gorm:"type:decimal(18,4);default:0;comment:最低提现金额(USD)" json:"minWithdrawAmount"`

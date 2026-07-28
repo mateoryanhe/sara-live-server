@@ -443,6 +443,8 @@ export interface VipCfg {
     id: string
     level: number
     levelName: string
+    levelIcon?: string
+    levelIconName?: string
     withdrawSwitch?: number
     animationSwitch?: number
     commentEffectSwitch?: number
@@ -787,6 +789,7 @@ export interface PrivacyPolicyCfg {
     termsOfServiceUrl: string
     creatorTermsUrl: string
     roomOwnerTermsUrl: string
+    vipDescUrl: string
     createdAt: string
     updatedAt: string
 }
@@ -801,6 +804,7 @@ export interface SavePrivacyPolicyCfgReq {
     termsOfServiceUrl: string
     creatorTermsUrl: string
     roomOwnerTermsUrl: string
+    vipDescUrl: string
 }
 
 export interface SavePrivacyPolicyCfgRes {

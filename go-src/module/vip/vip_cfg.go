@@ -29,6 +29,7 @@ func Create(_ context.Context, req *vipcfgdto.CreateVipCfgReq) (*vipcfgdto.Creat
 	row := &entity.VipCfg{
 		Level:                req.Level,
 		LevelName:            req.LevelName,
+		LevelIcon:            req.LevelIcon,
 		WithdrawSwitch:       req.WithdrawSwitch,
 		AnimationSwitch:      req.AnimationSwitch,
 		CommentEffectSwitch:  req.CommentEffectSwitch,
@@ -76,6 +77,7 @@ func Update(_ context.Context, req *vipcfgdto.UpdateVipCfgReq) (*vipcfgdto.Updat
 	updated := *row
 	updated.Level = req.Level
 	updated.LevelName = req.LevelName
+	updated.LevelIcon = req.LevelIcon
 	updated.WithdrawSwitch = req.WithdrawSwitch
 	updated.AnimationSwitch = req.AnimationSwitch
 	updated.CommentEffectSwitch = req.CommentEffectSwitch

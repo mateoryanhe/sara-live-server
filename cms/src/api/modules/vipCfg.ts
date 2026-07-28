@@ -4,6 +4,7 @@ import type {PageResponse, VipCfg, VipCfgQuery} from '@/types/api'
 type VipCfgSavePayload = {
     level: number
     levelName: string
+    levelIcon?: string
     withdrawSwitch: number
     animationSwitch: number
     commentEffectSwitch: number

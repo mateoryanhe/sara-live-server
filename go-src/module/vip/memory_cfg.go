@@ -153,6 +153,8 @@ func toVipCfgListRes(row *entity.VipCfg) *vipcfgdto.VipCfgListRes {
 		ID:                    strconv.FormatUint(row.ID, 10),
 		Level:                 row.Level,
 		LevelName:             row.LevelName,
+		LevelIconName:         row.LevelIcon,
+		LevelIcon:             upload.GetUrlByName(row.LevelIcon),
 		WithdrawSwitch:        row.WithdrawSwitch,
 		AnimationSwitch:       row.AnimationSwitch,
 		CommentEffectSwitch:   row.CommentEffectSwitch,
@@ -210,6 +212,7 @@ func toAppVipCfgItem(row *entity.VipCfg) *vipcfgdto.AppVipCfgItem {
 	return &vipcfgdto.AppVipCfgItem{
 		Level:                row.Level,
 		LevelName:            row.LevelName,
+		LevelIcon:            upload.GetUrlByName(row.LevelIcon),
 		UpgradeRechargeLimit: row.UpgradeRechargeLimit,
 		PrivilegeList:        buildAppVipPrivilegeList(row),
 	}
@@ -224,38 +227,38 @@ func buildAppVipPrivilegeList(row *entity.VipCfg) []*vipcfgdto.AppVipPrivilegeIt
 		list = append(list, &vipcfgdto.AppVipPrivilegeItem{
 			PrivilegeType:     vipcfgdto.AppVipPrivilegeTypeWithdraw,
 			Icon:              upload.GetUrlByName(row.WithdrawIcon),
+			Desc:              appVipPrivilegeDesc(row.WithdrawNoticeEn, row.WithdrawNoticeEs, row.WithdrawNoticePt, row.WithdrawNoticeHi),
 			MinWithdrawAmount: row.MinWithdrawAmount,
 			MaxWithdrawAmount: row.MaxWithdrawAmount,
 			Fee:               row.Fee,
-			NoticeEn:          row.WithdrawNoticeEn,
-			NoticeEs:          row.WithdrawNoticeEs,
-			NoticePt:          row.WithdrawNoticePt,
-			NoticeHi:          row.WithdrawNoticeHi,
 		})
 	}
 	if row.AnimationSwitch == entity.VipCfgSwitchOn {
 		list = append(list, &vipcfgdto.AppVipPrivilegeItem{
 			PrivilegeType: vipcfgdto.AppVipPrivilegeTypeEntryEffect,
 			Icon:          upload.GetUrlByName(row.AnimationIcon),
+			Desc:          appVipPrivilegeDesc(row.AnimationDescEn, row.AnimationDescEs, row.AnimationDescPt, row.AnimationDescHi),
 			Animation:     upload.GetUrlByName(row.Animation),
-			DescEn:        row.AnimationDescEn,
-			DescEs:        row.AnimationDescEs,
-			DescPt:        row.AnimationDescPt,
-			DescHi:        row.AnimationDescHi,
 		})
 	}
 	if row.CommentEffectSwitch == entity.VipCfgSwitchOn {
 		list = append(list, &vipcfgdto.AppVipPrivilegeItem{
 			PrivilegeType: vipcfgdto.AppVipPrivilegeTypeCommentEffect,
 			Icon:          upload.GetUrlByName(row.CommentEffectIcon),
+			Desc:          appVipPrivilegeDesc(row.CommentEffectDescEn, row.CommentEffectDescEs, row.CommentEffectDescPt, row.CommentEffectDescHi),
 			Animation:     upload.GetUrlByName(row.CommentEffect),
-			DescEn:        row.CommentEffectDescEn,
-			DescEs:        row.CommentEffectDescEs,
-			DescPt:        row.CommentEffectDescPt,
-			DescHi:        row.CommentEffectDescHi,
 		})
 	}
 	return list
+}
+
+func appVipPrivilegeDesc(en, es, pt, hi string) vipcfgdto.AppVipPrivilegeI18nText {
+	return vipcfgdto.AppVipPrivilegeI18nText{
+		En: en,
+		Es: es,
+		Pt: pt,
+		Hi: hi,
+	}
 }
 
 // GetVipCfgFromMemoryByLevel 按等级从内存获取VIP配置(供其它模块使用)

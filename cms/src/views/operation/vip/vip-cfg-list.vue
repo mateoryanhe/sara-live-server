@@ -32,6 +32,19 @@
           <el-table-column label="ID" prop="id" width="100"/>
           <el-table-column label="等级" prop="level" width="80"/>
           <el-table-column label="等级名称" prop="levelName" min-width="120"/>
+          <el-table-column label="等级图标" width="100">
+            <template #default="{ row }">
+              <el-image
+                  v-if="row.levelIcon"
+                  :preview-src-list="[row.levelIcon]"
+                  :src="row.levelIcon"
+                  class="table-icon-preview"
+                  fit="cover"
+                  preview-teleported
+              />
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
           <el-table-column label="进场特效" min-width="200">
             <template #default="{ row }">
               <video
@@ -169,6 +182,40 @@
             </el-form-item>
             <el-form-item label="等级名称" prop="levelName">
               <el-input v-model="currentRow.levelName" placeholder="请输入等级名称"/>
+            </el-form-item>
+            <el-form-item label="等级图标" prop="levelIcon">
+              <div class="asset-upload-wrap">
+                <el-upload
+                    :before-upload="beforeIconUpload"
+                    :disabled="levelIconUploading"
+                    :http-request="(opt) => doAssetUpload(opt, 'levelIcon')"
+                    :show-file-list="false"
+                    accept="image/*"
+                    action="#"
+                    class="icon-uploader"
+                >
+                  <img
+                      v-if="levelIconPreviewUrl"
+                      :src="levelIconPreviewUrl"
+                      alt="level icon"
+                      class="icon-preview"
+                  />
+                  <div v-else class="asset-uploader-placeholder icon-placeholder">
+                    <el-icon class="asset-uploader-icon">
+                      <Plus/>
+                    </el-icon>
+                    <span>点击上传图标</span>
+                  </div>
+                </el-upload>
+                <el-button
+                    v-if="levelIconPreviewUrl || currentRow.levelIcon"
+                    link
+                    type="danger"
+                    @click="clearLevelIcon"
+                >
+                  移除图标
+                </el-button>
+              </div>
             </el-form-item>
             <el-form-item label="升级充值上限" prop="upgradeRechargeLimit">
               <el-input-number
@@ -560,6 +607,7 @@ interface VipCfgForm {
   id: string
   level: number
   levelName: string
+  levelIcon: string
   withdrawSwitch: number
   animationSwitch: number
   commentEffectSwitch: number
@@ -604,6 +652,7 @@ const defaultForm = (): VipCfgForm => ({
   id: '',
   level: 1,
   levelName: '',
+  levelIcon: '',
   withdrawSwitch: 1,
   animationSwitch: 1,
   commentEffectSwitch: 1,
@@ -634,16 +683,19 @@ const formRef = ref<FormInstance>()
 
 const animationUploading = ref(false)
 const animationIconUploading = ref(false)
+const levelIconUploading = ref(false)
 const commentEffectUploading = ref(false)
 const commentEffectIconUploading = ref(false)
 const withdrawIconUploading = ref(false)
 const animationPreviewUrl = ref('')
 const animationIconPreviewUrl = ref('')
+const levelIconPreviewUrl = ref('')
 const commentEffectPreviewUrl = ref('')
 const commentEffectIconPreviewUrl = ref('')
 const withdrawIconPreviewUrl = ref('')
 let animationObjectPreviewUrl = ''
 let animationIconObjectPreviewUrl = ''
+let levelIconObjectPreviewUrl = ''
 let commentEffectObjectPreviewUrl = ''
 let commentEffectIconObjectPreviewUrl = ''
 let withdrawIconObjectPreviewUrl = ''
@@ -683,6 +735,13 @@ const revokeCommentEffectIconObjectPreview = () => {
   }
 }
 
+const revokeLevelIconObjectPreview = () => {
+  if (levelIconObjectPreviewUrl) {
+    URL.revokeObjectURL(levelIconObjectPreviewUrl)
+    levelIconObjectPreviewUrl = ''
+  }
+}
+
 const resetAnimationPreview = () => {
   revokeAnimationObjectPreview()
   animationPreviewUrl.value = ''
@@ -706,6 +765,11 @@ const resetCommentEffectPreview = () => {
 const resetCommentEffectIconPreview = () => {
   revokeCommentEffectIconObjectPreview()
   commentEffectIconPreviewUrl.value = ''
+}
+
+const resetLevelIconPreview = () => {
+  revokeLevelIconObjectPreview()
+  levelIconPreviewUrl.value = ''
 }
 
 const setAnimationPreview = (url: string, fromObject = false) => {
@@ -748,6 +812,14 @@ const setCommentEffectIconPreview = (url: string, fromObject = false) => {
   }
 }
 
+const setLevelIconPreview = (url: string, fromObject = false) => {
+  revokeLevelIconObjectPreview()
+  levelIconPreviewUrl.value = url
+  if (fromObject && url) {
+    levelIconObjectPreviewUrl = url
+  }
+}
+
 const clearAnimation = () => {
   currentRow.value.animation = ''
   resetAnimationPreview()
@@ -773,10 +845,16 @@ const clearCommentEffectIcon = () => {
   resetCommentEffectIconPreview()
 }
 
+const clearLevelIcon = () => {
+  currentRow.value.levelIcon = ''
+  resetLevelIconPreview()
+}
+
 watch(dialogVisible, (visible) => {
   if (!visible) {
     resetAnimationPreview()
     resetAnimationIconPreview()
+    resetLevelIconPreview()
     resetCommentEffectPreview()
     resetCommentEffectIconPreview()
     resetWithdrawIconPreview()
@@ -803,12 +881,13 @@ const beforeIconUpload = (file: File): boolean => {
 
 const doAssetUpload = async (
     options: UploadRequestOptions,
-    field: 'animation' | 'animationIcon' | 'commentEffect' | 'commentEffectIcon' | 'withdrawIcon'
+    field: 'animation' | 'animationIcon' | 'levelIcon' | 'commentEffect' | 'commentEffectIcon' | 'withdrawIcon'
 ) => {
   const file = options.file as File
   const uploadingMap = {
     animation: animationUploading,
     animationIcon: animationIconUploading,
+    levelIcon: levelIconUploading,
     commentEffect: commentEffectUploading,
     commentEffectIcon: commentEffectIconUploading,
     withdrawIcon: withdrawIconUploading
@@ -822,6 +901,8 @@ const doAssetUpload = async (
       setAnimationPreview(URL.createObjectURL(file), true)
     } else if (field === 'animationIcon') {
       setAnimationIconPreview(URL.createObjectURL(file), true)
+    } else if (field === 'levelIcon') {
+      setLevelIconPreview(URL.createObjectURL(file), true)
     } else if (field === 'commentEffect') {
       setCommentEffectPreview(URL.createObjectURL(file), true)
     } else if (field === 'commentEffectIcon') {
@@ -911,6 +992,7 @@ const handleAdd = () => {
   activeTab.value = 'basic'
   resetAnimationPreview()
   resetAnimationIconPreview()
+  resetLevelIconPreview()
   resetCommentEffectPreview()
   resetCommentEffectIconPreview()
   resetWithdrawIconPreview()
@@ -922,6 +1004,7 @@ const handleEdit = (row: VipCfg) => {
   activeTab.value = 'basic'
   const animationName = row.animationName || ''
   const animationIconName = row.animationIconName || ''
+  const levelIconName = row.levelIconName || ''
   const commentEffectName = row.commentEffectName || ''
   const commentEffectIconName = row.commentEffectIconName || ''
   const withdrawIconName = row.withdrawIconName || ''
@@ -929,6 +1012,7 @@ const handleEdit = (row: VipCfg) => {
     id: row.id,
     level: Number(row.level) || 1,
     levelName: row.levelName,
+    levelIcon: levelIconName,
     withdrawSwitch: Number(row.withdrawSwitch) || 0,
     animationSwitch: Number(row.animationSwitch) || 0,
     commentEffectSwitch: Number(row.commentEffectSwitch) || 0,
@@ -963,6 +1047,11 @@ const handleEdit = (row: VipCfg) => {
     setAnimationIconPreview(row.animationIcon || '')
   } else {
     resetAnimationIconPreview()
+  }
+  if (levelIconName) {
+    setLevelIconPreview(row.levelIcon || '')
+  } else {
+    resetLevelIconPreview()
   }
   if (commentEffectName && resolveMediaPreviewType(row.commentEffect || '', commentEffectName) === 'video') {
     setCommentEffectPreview(row.commentEffect || '')
@@ -1005,6 +1094,7 @@ const handleSave = async () => {
       const payload = {
         level: currentRow.value.level,
         levelName: currentRow.value.levelName,
+        levelIcon: currentRow.value.levelIcon,
         withdrawSwitch: currentRow.value.withdrawSwitch,
         animationSwitch: currentRow.value.animationSwitch,
         commentEffectSwitch: currentRow.value.commentEffectSwitch,

@@ -44,6 +44,15 @@
           <span class="form-tip">App 请求 GET /sysInfo/cfg 时返回 roomOwnerTermsUrl</span>
         </el-form-item>
 
+        <el-form-item label="VIP描述文档 URL" prop="vipDescUrl">
+          <el-input
+              v-model="formData.vipDescUrl"
+              clearable
+              placeholder="如 https://example.com/vip-desc.html"
+          />
+          <span class="form-tip">App 请求 GET /sysInfo/cfg 时返回 vipDescUrl</span>
+        </el-form-item>
+
         <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
@@ -72,6 +81,7 @@ const formData = reactive({
   termsOfServiceUrl: '',
   creatorTermsUrl: '',
   roomOwnerTermsUrl: '',
+  vipDescUrl: '',
 })
 
 const metaInfo = reactive({
@@ -152,6 +162,24 @@ const formRules = reactive({
       trigger: 'blur',
     },
   ],
+  vipDescUrl: [
+    {max: 512, message: 'URL 长度不能超过 512', trigger: 'blur'},
+    {
+      validator: (_: unknown, value: string, callback: (e?: Error) => void) => {
+        const url = value?.trim()
+        if (!url) {
+          callback()
+          return
+        }
+        if (!/^https?:\/\//i.test(url)) {
+          callback(new Error('URL 需以 http:// 或 https:// 开头'))
+          return
+        }
+        callback()
+      },
+      trigger: 'blur',
+    },
+  ],
 })
 
 const applyCfg = (cfg: PrivacyPolicyCfg | null | undefined) => {
@@ -161,6 +189,7 @@ const applyCfg = (cfg: PrivacyPolicyCfg | null | undefined) => {
     formData.termsOfServiceUrl = ''
     formData.creatorTermsUrl = ''
     formData.roomOwnerTermsUrl = ''
+    formData.vipDescUrl = ''
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
     return
@@ -170,6 +199,7 @@ const applyCfg = (cfg: PrivacyPolicyCfg | null | undefined) => {
   formData.termsOfServiceUrl = cfg.termsOfServiceUrl || ''
   formData.creatorTermsUrl = cfg.creatorTermsUrl || ''
   formData.roomOwnerTermsUrl = cfg.roomOwnerTermsUrl || ''
+  formData.vipDescUrl = cfg.vipDescUrl || ''
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
 }
@@ -197,6 +227,7 @@ const handleSave = async () => {
       termsOfServiceUrl: formData.termsOfServiceUrl.trim(),
       creatorTermsUrl: formData.creatorTermsUrl.trim(),
       roomOwnerTermsUrl: formData.roomOwnerTermsUrl.trim(),
+      vipDescUrl: formData.vipDescUrl.trim(),
     })
     if (response?.success) {
       ElMessage.success('保存成功')

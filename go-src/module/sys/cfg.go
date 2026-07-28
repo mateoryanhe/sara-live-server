@@ -24,6 +24,7 @@ func GetSysCfg(ctx context.Context, req *sysdto.SysCfgReq) (*sysdto.SysCfgResp, 
 		TermsOfServiceUrl:           apppkg.ResolveTermsOfServiceUrl(packageName, globalTerms),
 		CreatorTermsUrl:             privacypolicy.GetCreatorTermsUrl(),
 		RoomOwnerTermsUrl:           privacypolicy.GetRoomOwnerTermsUrl(),
+		VipDescUrl:                  privacypolicy.GetVipDescUrl(),
 		AppImageMaxSize:             upload.GetAppImageMaxSize(),
 	}, nil
 }

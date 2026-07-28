@@ -14,5 +14,6 @@ type SysCfgResp struct {
 	TermsOfServiceUrl           string  `json:"termsOfServiceUrl" dc:"用户服务协议页面URL"`
 	CreatorTermsUrl             string  `json:"creatorTermsUrl" dc:"短视频创作者上传合规条款URL"`
 	RoomOwnerTermsUrl           string  `json:"roomOwnerTermsUrl" dc:"房间房主责任条款URL"`
+	VipDescUrl                  string  `json:"vipDescUrl" dc:"VIP描述文档URL"`
 	AppImageMaxSize             uint64  `json:"appImageMaxSize" dc:"App端图片上传大小上限(字节)"`
 }
