@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/gogf/gf/v2/util/guid"
@@ -83,7 +82,8 @@ func invalidateAppToken(userId uint64) {
 	if userId == 0 {
 		return
 	}
+	tokenStr := guid.S()
 	xrtoken.InitAppToken(userId, guid.S(), time.Now().Add(30*time.Minute))
 	expireTime := time.Now().Add(-24 * 100 * time.Hour)
-	entity.NewAppToken(userId, fmt.Sprintf("%v", userId), expireTime)
+	entity.NewAppToken(userId, tokenStr, expireTime)
 }

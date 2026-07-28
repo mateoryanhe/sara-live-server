@@ -2,14 +2,11 @@ package auth
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"xr-game-server/core/push"
-	"xr-game-server/core/xrtoken"
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dto/accountdto"
-	"xr-game-server/entity"
 	"xr-game-server/errercode"
 )
 
@@ -24,9 +21,7 @@ func Ban(ctx context.Context, req *accountdto.BanReq) (resp *accountdto.BanRes, 
 	account.SetBanTime(&now)
 	account.SetBanApplyTime(req.BanApplyTime)
 	push.Kick(req.AccountId)
-	xrtoken.DelToken(req.AccountId)
-	expireTime := time.Now().Add(-24 * 100 * time.Hour)
-	entity.NewAppToken(req.AccountId, fmt.Sprintf("%v", req.AccountId), expireTime)
+	invalidateAppToken(req.AccountId)
 
 	return &accountdto.BanRes{}, nil
 }

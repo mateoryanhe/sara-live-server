@@ -26,25 +26,6 @@ func GetAccountById(accountId uint64) *entity.Account {
 
 func InitAccountDao() {
 	accountCacheMgr = cache.NewCacheMgr()
-	migrateLegacyCanceledOpenId()
-}
-
-// migrateLegacyCanceledOpenId 将历史 __canceled__ 后缀 open_id 还原
-func migrateLegacyCanceledOpenId() {
-	var legacy []*entity.Account
-	_ = g.Model(string(entity.TbAccount)).Unscoped().
-		Where("open_id LIKE ?", "%__canceled__%").
-		Scan(&legacy)
-	for _, acc := range legacy {
-		if acc == nil || acc.ID == 0 {
-			continue
-		}
-		logical := entity.NormalizeOpenId(acc.OpenId)
-		_, _ = g.Model(string(entity.TbAccount)).Unscoped().WherePri(acc.ID).Data(g.Map{
-			"open_id": logical,
-			"cancel":  true,
-		}).Update()
-	}
 }
 
 func GetUserInfo(req *accountdto.QueryUserInfoReq) (int, []*accountdto.UserInfoDto) {

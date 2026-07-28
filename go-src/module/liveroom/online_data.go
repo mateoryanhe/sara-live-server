@@ -5,19 +5,23 @@ import (
 	"time"
 )
 
-var onlineMap = gmap.NewKVMap[uint64, *gmap.KVMap[uint64, time.Time]](false)
+var onlineMap = gmap.NewKVMap[uint64, *gmap.KVMap[uint64, time.Time]](true)
+
+func getRoomOnlineMap(roomId uint64, create bool) *gmap.KVMap[uint64, time.Time] {
+	if create {
+		return onlineMap.GetOrSetFuncLock(roomId, func() *gmap.KVMap[uint64, time.Time] {
+			return gmap.NewKVMap[uint64, time.Time](true)
+		})
+	}
+	return onlineMap.Get(roomId)
+}
 
 func addToOnline(userId uint64, roomId uint64) {
-	roomMap := onlineMap.Get(roomId)
-	if roomMap == nil {
-		initRoomOnline(roomId)
-		roomMap = onlineMap.Get(roomId)
-	}
-	roomMap.Set(userId, time.Now())
+	getRoomOnlineMap(roomId, true).Set(userId, time.Now())
 }
 
 func getLenForRoom(roomId uint64) int {
-	roomMap := onlineMap.Get(roomId)
+	roomMap := getRoomOnlineMap(roomId, false)
 	if roomMap == nil {
 		return 0
 	}
@@ -25,14 +29,11 @@ func getLenForRoom(roomId uint64) int {
 }
 
 func initRoomOnline(roomId uint64) {
-	if onlineMap.Contains(roomId) {
-		return
-	}
-	onlineMap.Set(roomId, gmap.NewKVMap[uint64, time.Time](true))
+	getRoomOnlineMap(roomId, true)
 }
 
 func removeOnline(userId uint64, roomId uint64) {
-	roomMap := onlineMap.Get(roomId)
+	roomMap := getRoomOnlineMap(roomId, false)
 	if roomMap == nil {
 		return
 	}
@@ -40,16 +41,15 @@ func removeOnline(userId uint64, roomId uint64) {
 }
 
 func getOnline(roomId uint64) []uint64 {
-	roomMap := onlineMap.Get(roomId)
+	roomMap := getRoomOnlineMap(roomId, false)
 	if roomMap == nil {
-		initRoomOnline(roomId)
 		return make([]uint64, 0)
 	}
 	return roomMap.Keys()
 }
 
 func isUserInOnlineMap(userId, roomId uint64) bool {
-	roomMap := onlineMap.Get(roomId)
+	roomMap := getRoomOnlineMap(roomId, false)
 	return roomMap != nil && roomMap.Contains(userId)
 }
 

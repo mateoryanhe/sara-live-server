@@ -49,13 +49,9 @@ func NewAccount(openId string, channel uint) *Account {
 	return ret
 }
 
-// NormalizeOpenId 规范化 open_id(兼容历史 __canceled__ 后缀数据)
+// NormalizeOpenId 规范化 open_id
 func NormalizeOpenId(openId string) string {
-	openId = strings.TrimSpace(openId)
-	if idx := strings.Index(openId, "__canceled__"); idx > 0 {
-		return openId[:idx]
-	}
-	return openId
+	return strings.TrimSpace(openId)
 }
 
 func (this *Account) SetOpenId(openId string) {
