@@ -7,6 +7,7 @@ func InitCfg() {
 	initStaticPathCfg()
 	initDbBufferCfg()
 	initDbCfg()
+	initDbQueryOnlyLogger()
 	initGoPoolCfg()
 	initWebSocketBufferCfg()
 	initSensitiveWordCfg()

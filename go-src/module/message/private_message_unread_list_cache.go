@@ -1,10 +1,10 @@
 package message
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/cache"
 	"xr-game-server/dao/messagedao"
 	"xr-game-server/dao/userinfodao"
@@ -14,182 +14,116 @@ import (
 )
 
 const (
-	privateMessageUnreadListPageSize       = 30
-	privateMessageUnreadListCachePageCount = 2
-	privateMessageUnreadListCacheMaxSize   = privateMessageUnreadListPageSize * privateMessageUnreadListCachePageCount
+	privateMessageUnreadListPageSize = 50
+	privateMessageUnreadListCacheMax = privateMessageUnreadListPageSize * 2
 )
 
-var privateMessageUnreadListCacheMgr *cache.CacheMgr
+var privateMessageUnreadListCacheMgr = cache.NewCacheMgr()
 
-func initPrivateMessageUnreadListCache() {
-	privateMessageUnreadListCacheMgr = cache.NewCacheMgr()
-}
-
-func privateMessageUnreadListCacheKey(userId uint64) string {
+func unreadListKey(userId uint64) string {
 	return fmt.Sprintf("private_msg_unread_list:%d", userId)
 }
 
-func getPrivateMessageUnreadListCache(userId uint64) ([]*messagedto.AppPrivateMessageUnreadDetailItem, bool) {
-	if userId == 0 || privateMessageUnreadListCacheMgr == nil {
-		return nil, false
+func getPrivateMessageUnreadList(userId uint64) []*messagedto.AppPrivateMessageUnreadDetailItem {
+	if userId == 0 {
+		return nil
 	}
-	val, err := privateMessageUnreadListCacheMgr.Cache.Get(gctx.New(), privateMessageUnreadListCacheKey(userId))
-	if err != nil || val == nil || val.IsNil() {
-		return nil, false
-	}
-	list, ok := val.Val().([]*messagedto.AppPrivateMessageUnreadDetailItem)
-	return list, ok
-}
-
-func setPrivateMessageUnreadListCache(userId uint64, list []*messagedto.AppPrivateMessageUnreadDetailItem) {
-	if userId == 0 || privateMessageUnreadListCacheMgr == nil {
-		return
-	}
-	privateMessageUnreadListCacheMgr.FlushCache(privateMessageUnreadListCacheKey(userId), list)
-}
-
-func pagePrivateMessageUnreadList(list []*messagedto.AppPrivateMessageUnreadDetailItem, pageIndex int) []*messagedto.AppPrivateMessageUnreadDetailItem {
-	if pageIndex <= 0 {
-		pageIndex = 1
-	}
-	start := (pageIndex - 1) * privateMessageUnreadListPageSize
-	if start >= len(list) {
-		return make([]*messagedto.AppPrivateMessageUnreadDetailItem, 0)
-	}
-	end := start + privateMessageUnreadListPageSize
-	if end > len(list) {
-		end = len(list)
-	}
-	ret := make([]*messagedto.AppPrivateMessageUnreadDetailItem, 0, end-start)
-	for _, item := range list[start:end] {
-		if item == nil {
-			continue
+	v := privateMessageUnreadListCacheMgr.GetData(unreadListKey(userId), func(ctx context.Context) (interface{}, error) {
+		rows := messagedao.ListPrivateMessageUnreadWithLastMessageFromDBLimit(userId, privateMessageUnreadListCacheMax, 0)
+		list := make([]*messagedto.AppPrivateMessageUnreadDetailItem, 0, len(rows))
+		for _, row := range rows {
+			if row == nil {
+				continue
+			}
+			item := toPrivateMessageUnreadDetailItemFromRow(row)
+			fillPrivateMessageUnreadSenderInfo(item)
+			list = append(list, item)
 		}
-		ret = append(ret, clonePrivateMessageUnreadDetailItem(item))
-	}
-	return ret
-}
-
-func loadPrivateMessageUnreadListCache(userId uint64) []*messagedto.AppPrivateMessageUnreadDetailItem {
-	rows := messagedao.ListPrivateMessageUnreadWithLastMessageFromDBLimit(
-		userId, privateMessageUnreadListCacheMaxSize, 0,
-	)
-	list := make([]*messagedto.AppPrivateMessageUnreadDetailItem, 0, len(rows))
-	for _, row := range rows {
-		if row == nil {
-			continue
-		}
-		item := toPrivateMessageUnreadDetailItemFromRow(row)
-		fillPrivateMessageUnreadSenderInfo(item)
-		list = append(list, item)
-	}
-	setPrivateMessageUnreadListCache(userId, list)
+		return list, nil
+	})
+	list, _ := v.([]*messagedto.AppPrivateMessageUnreadDetailItem)
 	return list
 }
 
-func prependPrivateMessageUnreadListCache(
-	receiverId, senderId uint64,
-	msg *entity.UserMessage,
-	sessionId uint64,
-	unreadCount uint64,
-) {
-	if receiverId == 0 || senderId == 0 || msg == nil {
+func putPrivateMessageUnreadList(userId uint64, list []*messagedto.AppPrivateMessageUnreadDetailItem) {
+	if userId == 0 {
 		return
 	}
-	list, _ := getPrivateMessageUnreadListCache(receiverId)
+	if list == nil {
+		list = make([]*messagedto.AppPrivateMessageUnreadDetailItem, 0)
+	}
+	privateMessageUnreadListCacheMgr.FlushCache(unreadListKey(userId), list)
+}
+
+func firstPagePrivateMessageUnreadList(userId uint64) []*messagedto.AppPrivateMessageUnreadDetailItem {
+	list := getPrivateMessageUnreadList(userId)
+	if len(list) > privateMessageUnreadListPageSize {
+		return list[:privateMessageUnreadListPageSize]
+	}
+	return list
+}
+
+func prependPrivateMessageUnreadListCache(userId, senderId uint64, msg *entity.UserMessage, sessionId, unreadCount uint64) {
+	if userId == 0 || senderId == 0 || msg == nil {
+		return
+	}
+	list := getPrivateMessageUnreadList(userId)
 	now := time.Now()
 	if msg.CreatedAt.IsZero() {
 		msg.CreatedAt = now
 	}
 	item := &messagedto.AppPrivateMessageUnreadDetailItem{
-		SenderId:    senderId,
-		UnreadCount: unreadCount,
-		UpdatedAt:   formatMessageTime(now),
-		LastMessage: toPrivateMessageItem(sessionId, msg),
+		SenderId: senderId, UnreadCount: unreadCount,
+		UpdatedAt: formatMessageTime(now), LastMessage: toPrivateMessageItem(sessionId, msg),
 	}
 	fillPrivateMessageUnreadSenderInfo(item)
 
-	filtered := make([]*messagedto.AppPrivateMessageUnreadDetailItem, 0, len(list)+1)
-	filtered = append(filtered, item)
+	newList := make([]*messagedto.AppPrivateMessageUnreadDetailItem, 0, len(list)+1)
+	newList = append(newList, item)
 	for _, row := range list {
-		if row == nil || row.SenderId == senderId {
-			continue
+		if row != nil && row.SenderId != senderId {
+			newList = append(newList, row)
 		}
-		filtered = append(filtered, row)
 	}
-	if len(filtered) > privateMessageUnreadListCacheMaxSize {
-		filtered = filtered[:privateMessageUnreadListCacheMaxSize]
+	if len(newList) > privateMessageUnreadListCacheMax {
+		newList = newList[:privateMessageUnreadListCacheMax]
 	}
-	setPrivateMessageUnreadListCache(receiverId, filtered)
+	putPrivateMessageUnreadList(userId, newList)
 }
 
-func updatePrivateMessageUnreadListCacheUnread(userId, senderId uint64, unreadCount uint64) {
-	if userId == 0 || senderId == 0 {
-		return
-	}
-	list, ok := getPrivateMessageUnreadListCache(userId)
-	if !ok || len(list) == 0 {
-		return
-	}
+func updatePrivateMessageUnreadListCacheUnread(userId, senderId, unreadCount uint64) {
+	list := getPrivateMessageUnreadList(userId)
 	for _, item := range list {
 		if item != nil && item.SenderId == senderId {
 			item.UnreadCount = unreadCount
 			item.UpdatedAt = formatMessageTime(time.Now())
-			setPrivateMessageUnreadListCache(userId, list)
+			putPrivateMessageUnreadList(userId, list)
 			return
 		}
 	}
 }
 
 func clearAllPrivateMessageUnreadListCacheUnread(userId uint64) {
-	if userId == 0 {
-		return
-	}
-	list, ok := getPrivateMessageUnreadListCache(userId)
-	if !ok {
-		list = loadPrivateMessageUnreadListCache(userId)
-	}
-	if len(list) == 0 {
-		return
-	}
+	list := getPrivateMessageUnreadList(userId)
 	now := formatMessageTime(time.Now())
 	for _, item := range list {
-		if item == nil {
-			continue
+		if item != nil {
+			item.UnreadCount = 0
+			item.UpdatedAt = now
 		}
-		item.UnreadCount = 0
-		item.UpdatedAt = now
 	}
-	setPrivateMessageUnreadListCache(userId, list)
+	putPrivateMessageUnreadList(userId, list)
 }
 
 func removePrivateMessageUnreadListCacheSender(userId, senderId uint64) {
-	if userId == 0 || senderId == 0 {
-		return
-	}
-	list, ok := getPrivateMessageUnreadListCache(userId)
-	if !ok || len(list) == 0 {
-		return
-	}
-	filtered := make([]*messagedto.AppPrivateMessageUnreadDetailItem, 0, len(list))
+	list := getPrivateMessageUnreadList(userId)
+	newList := make([]*messagedto.AppPrivateMessageUnreadDetailItem, 0, len(list))
 	for _, item := range list {
-		if item == nil || item.SenderId == senderId {
-			continue
+		if item != nil && item.SenderId != senderId {
+			newList = append(newList, item)
 		}
-		filtered = append(filtered, item)
 	}
-	if len(filtered) == 0 {
-		removePrivateMessageUnreadListCache(userId)
-		return
-	}
-	setPrivateMessageUnreadListCache(userId, filtered)
-}
-
-func removePrivateMessageUnreadListCache(userId uint64) {
-	if userId == 0 || privateMessageUnreadListCacheMgr == nil {
-		return
-	}
-	_, _ = privateMessageUnreadListCacheMgr.Cache.Remove(gctx.New(), privateMessageUnreadListCacheKey(userId))
+	putPrivateMessageUnreadList(userId, newList)
 }
 
 func fillPrivateMessageUnreadSenderInfo(item *messagedto.AppPrivateMessageUnreadDetailItem) {
@@ -206,17 +140,4 @@ func fillPrivateMessageUnreadSenderInfo(item *messagedto.AppPrivateMessageUnread
 			item.LastMessage.SenderAvatar = upload.ResolveAvatarUrlForUser(item.LastMessage.SenderId, sender.Avatar)
 		}
 	}
-}
-
-func clonePrivateMessageUnreadDetailItem(item *messagedto.AppPrivateMessageUnreadDetailItem) *messagedto.AppPrivateMessageUnreadDetailItem {
-	if item == nil {
-		return nil
-	}
-	ret := *item
-	if item.LastMessage != nil {
-		lastMessage := *item.LastMessage
-		ret.LastMessage = &lastMessage
-	}
-	fillPrivateMessageUnreadSenderInfo(&ret)
-	return &ret
 }

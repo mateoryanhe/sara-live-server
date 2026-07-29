@@ -31,6 +31,7 @@ type AppAnchorRankItem struct {
 // AppAnchorRankListRes App端主播红人榜响应
 type AppAnchorRankListRes struct {
 	Period    int                  `json:"period"    dc:"统计维度"`
+	MyRank    int                  `json:"myRank"    dc:"请求者在榜单中的排名,未上榜为-1"`
 	Total     int                  `json:"total"     dc:"榜单总数(最多500)"`
 	Page      int                  `json:"page"      dc:"当前页码"`
 	PageSize  int                  `json:"pageSize"  dc:"每页数量"`

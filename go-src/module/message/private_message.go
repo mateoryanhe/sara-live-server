@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/constants/cmd"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/push"
@@ -48,18 +49,24 @@ func SendPrivateMessage(ctx context.Context, req *messagedto.AppSendPrivateMessa
 	push.Data(senderId, cmd.PrivateMessagePush, pushItem)
 
 	//往接收者写入消息
-	entity.NewUserMessageSession(msg.ID, entity.BuildUserMessageSessionId(req.ReceiverId, senderId))
+	receiverSession := entity.NewUserMessageSession(msg.ID, entity.BuildUserMessageSessionId(req.ReceiverId, senderId))
 
 	push.Data(req.ReceiverId, cmd.PrivateMessagePush, pushItem)
 	//刷新未读消息缓存
 	unReadData := messagedao.GetUnReadByUserId(req.ReceiverId)
 	unReadData.AddPrivateUnread(1)
 
-	unReadDetail := messagedao.GetUnreadDetailByReceiverSender(senderId, req.ReceiverId)
-	unReadDetail.AddUnread(1)
+	receiverUnreadDetail := messagedao.GetUnreadDetailByReceiverSender(senderId, req.ReceiverId)
+	receiverUnreadDetail.AddUnread(1)
 	messagedao.MarkMutualPrivateChat(senderId, req.ReceiverId)
-	messagedao.FlushUnreadDetailCache(unReadDetail)
-	prependPrivateMessageUnreadListCache(req.ReceiverId, senderId, msg, senderSession.ID, unReadDetail.UnreadCount)
+	messagedao.FlushUnreadDetailCache(receiverUnreadDetail)
+	prependPrivateMessageUnreadListCache(req.ReceiverId, senderId, msg, receiverSession.ID, receiverUnreadDetail.UnreadCount)
+
+	senderUnreadDetail := messagedao.GetUnreadDetailByReceiverSender(req.ReceiverId, senderId)
+	prependPrivateMessageUnreadListCache(senderId, req.ReceiverId, msg, senderSession.ID, senderUnreadDetail.UnreadCount)
+
+	prependPrivateMessageBySenderCache(senderId, req.ReceiverId, senderSession.ID, msg)
+	prependPrivateMessageBySenderCache(req.ReceiverId, senderId, receiverSession.ID, msg)
 
 	return &messagedto.AppSendPrivateMessageRes{
 		MessageId: msg.ID,
@@ -80,12 +87,8 @@ func ListPrivateMessageUnread(ctx context.Context, req *messagedto.AppPrivateMes
 	}
 
 	if pageIndex == 1 {
-		list, ok := getPrivateMessageUnreadListCache(userId)
-		if !ok {
-			list = loadPrivateMessageUnreadListCache(userId)
-		}
 		return &messagedto.AppPrivateMessageUnreadListRes{
-			List: pagePrivateMessageUnreadList(list, pageIndex),
+			List: firstPagePrivateMessageUnreadList(userId),
 		}, nil
 	}
 
@@ -115,10 +118,18 @@ func ListPrivateMessageBySender(ctx context.Context, req *messagedto.AppPrivateM
 
 	pageSize := req.PageSize
 	if pageSize <= 0 {
-		pageSize = 40
+		pageSize = privateMessageBySenderPageSize
 	}
 
 	sessionId := entity.BuildUserMessageSessionId(userId, req.TargetId)
+	if req.LastCreatedAt == 0 {
+		list, hasMore := firstPagePrivateMessageBySender(userId, req.TargetId, pageSize)
+		return &messagedto.AppPrivateMessageBySenderRes{
+			List:    list,
+			HasMore: hasMore,
+		}, nil
+	}
+
 	rows, hasMore := messagedao.ListByReceiverAndSender(sessionId, req.LastCreatedAt, pageSize)
 	list := make([]*messagedto.AppPrivateMessageItem, 0, len(rows))
 	for _, row := range rows {
@@ -193,11 +204,13 @@ func BatchDeletePrivateMessage(ctx context.Context, req *messagedto.AppBatchDele
 		messagedao.FlushUnreadDetailCache(unReadDetail)
 	}
 	removePrivateMessageUnreadListCacheSender(userId, req.TargetId)
+	clearPrivateMessageBySenderCache(userId, req.TargetId)
 
 	targetId := req.TargetId
 	xrpool.AddWithRecover(ctx, func(poolCtx context.Context) {
-		if err := messagedao.DeletePrivateConversationByTarget(poolCtx, userId, targetId); err != nil {
-			g.Log().Errorf(poolCtx, "BatchDeletePrivateMessage userId=%d targetId=%d err=%v", userId, targetId, err)
+		dbCtx := gctx.New()
+		if err := messagedao.DeletePrivateConversationByTarget(dbCtx, userId, targetId); err != nil {
+			g.Log().Errorf(dbCtx, "BatchDeletePrivateMessage userId=%d targetId=%d err=%v", userId, targetId, err)
 		}
 	})
 
@@ -229,8 +242,9 @@ func ClearAllPrivateMessageUnread(ctx context.Context, req *messagedto.AppClearA
 		unReadData.SubPrivateUnread(clearedCount)
 	}
 	xrpool.AddWithRecover(ctx, func(poolCtx context.Context) {
-		if err := messagedao.ClearAllPrivateUnreadInDB(poolCtx, userId); err != nil {
-			g.Log().Errorf(poolCtx, "ClearAllPrivateUnreadInDB userId=%d err=%v", userId, err)
+		dbCtx := gctx.New()
+		if err := messagedao.ClearAllPrivateUnreadInDB(dbCtx, userId); err != nil {
+			g.Log().Errorf(dbCtx, "ClearAllPrivateUnreadInDB userId=%d err=%v", userId, err)
 		}
 	})
 	messagedao.ClearAllPrivateUnreadCache(userId)

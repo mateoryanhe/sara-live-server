@@ -6,6 +6,7 @@ import (
 	"sync/atomic"
 	"time"
 	"xr-game-server/core/event"
+	"xr-game-server/core/httpserver"
 	"xr-game-server/core/xrtimer"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
@@ -175,11 +176,12 @@ func getRankListByPeriod(snapshot *rankSnapshot, period int) []*rankItem {
 }
 
 // GetAppAnchorRankList App端分页查询主播红人榜
-func GetAppAnchorRankList(_ context.Context, req *anchorrankdto.AppAnchorRankListReq) (*anchorrankdto.AppAnchorRankListRes, error) {
+func GetAppAnchorRankList(ctx context.Context, req *anchorrankdto.AppAnchorRankListReq) (*anchorrankdto.AppAnchorRankListRes, error) {
 	page, pageSize := normalizePage(req.Page, req.PageSize)
 	snapshot := getSnapshot()
 	all := getRankListByPeriod(snapshot, req.Period)
 	total := len(all)
+	myRank := findMyAnchorRank(all, httpserver.GetAuthId(ctx))
 	start, end := pageRange(total, page, pageSize)
 	pageData := make([]*anchorrankdto.AppAnchorRankItem, 0, end-start)
 	for _, row := range all[start:end] {
@@ -199,12 +201,25 @@ func GetAppAnchorRankList(_ context.Context, req *anchorrankdto.AppAnchorRankLis
 	}
 	return &anchorrankdto.AppAnchorRankListRes{
 		Period:    req.Period,
+		MyRank:    myRank,
 		Total:     total,
 		Page:      page,
 		PageSize:  pageSize,
 		UpdatedAt: snapshot.UpdatedAt,
 		List:      pageData,
 	}, nil
+}
+
+func findMyAnchorRank(rows []*rankItem, userId uint64) int {
+	if userId == 0 {
+		return -1
+	}
+	for _, row := range rows {
+		if row != nil && row.UserId == userId {
+			return row.Rank
+		}
+	}
+	return -1
 }
 
 func normalizePage(page, pageSize int) (int, int) {
