@@ -17,6 +17,12 @@ const (
 	UserMessageUnreadDetailSenderId    db.TbCol = "sender_id"
 	UserMessageUnreadDetailUserId      db.TbCol = "user_id"
 	UserMessageUnreadDetailUnreadCount db.TbCol = "unread_count"
+	UserMessageUnreadDetailMutualChat  db.TbCol = "mutual_chat"
+)
+
+const (
+	UserMessageUnreadMutualChatNo  uint8 = 0 // 未互发私信
+	UserMessageUnreadMutualChatYes uint8 = 1 // 双方已互发私信
 )
 
 // UserMessageUnreadDetail 用户未读消息明细(按接收者+发送者维度)
@@ -26,6 +32,7 @@ type UserMessageUnreadDetail struct {
 	UnreadCount uint64    `gorm:"default:0;comment:未读数量" json:"unreadCount"`
 	UserId      uint64    `gorm:"default:0;comment:用户id" json:"userId"`
 	SenderId    uint64    `gorm:"default:0;comment:用户id" json:"senderId"`
+	MutualChat  uint8     `gorm:"default:0;comment:双方是否互发私信(0否,1是)" json:"mutualChat"`
 	CreatedAt   time.Time `json:"createdAt"`
 	UpdatedAt   time.Time `json:"updatedAt"`
 }
@@ -74,6 +81,17 @@ func (m *UserMessageUnreadDetail) ClearUnread(v uint64) {
 	})
 }
 
+func (m *UserMessageUnreadDetail) SetMutualChat(v uint8) {
+	if v != UserMessageUnreadMutualChatYes {
+		v = UserMessageUnreadMutualChatNo
+	}
+	m.MutualChat = v
+	m.SetUpdatedAt(time.Now())
+	syndb.AddDataToQuickChan(TbUserMessageUnreadDetail, UserMessageUnreadDetailMutualChat, &syndb.ColData{
+		IdVal: m.ID, ColVal: v,
+	})
+}
+
 func (m *UserMessageUnreadDetail) SetCreatedAt(v time.Time) {
 	m.CreatedAt = v
 	syndb.AddDataToQuickChan(TbUserMessageUnreadDetail, db.CreatedAtName, &syndb.ColData{
@@ -94,5 +112,6 @@ func initUserMessageUnreadDetail() {
 	syndb.RegQuick(TbUserMessageUnreadDetail, UserMessageUnreadDetailSenderId)
 	syndb.RegQuick(TbUserMessageUnreadDetail, UserMessageUnreadDetailUserId)
 	syndb.RegQuick(TbUserMessageUnreadDetail, UserMessageUnreadDetailUnreadCount)
+	syndb.RegQuick(TbUserMessageUnreadDetail, UserMessageUnreadDetailMutualChat)
 	migrate.AutoMigrate(&UserMessageUnreadDetail{})
 }

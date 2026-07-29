@@ -8,4 +8,5 @@ import (
 func Init() {
 	event.Sub(gameevent.SystemMessageEvent, onSystemMessage)
 	initMessageCleanup()
+	initPrivateMessageUnreadListCache()
 }

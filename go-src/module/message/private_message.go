@@ -57,7 +57,9 @@ func SendPrivateMessage(ctx context.Context, req *messagedto.AppSendPrivateMessa
 
 	unReadDetail := messagedao.GetUnreadDetailByReceiverSender(senderId, req.ReceiverId)
 	unReadDetail.AddUnread(1)
+	messagedao.MarkMutualPrivateChat(senderId, req.ReceiverId)
 	messagedao.FlushUnreadDetailCache(unReadDetail)
+	prependPrivateMessageUnreadListCache(req.ReceiverId, senderId, msg, senderSession.ID, unReadDetail.UnreadCount)
 
 	return &messagedto.AppSendPrivateMessageRes{
 		MessageId: msg.ID,
@@ -77,13 +79,26 @@ func ListPrivateMessageUnread(ctx context.Context, req *messagedto.AppPrivateMes
 		pageIndex = 1
 	}
 
-	rows := messagedao.ListPrivateMessageUnreadWithLastMessageFromDB(userId, pageIndex)
+	if pageIndex == 1 {
+		list, ok := getPrivateMessageUnreadListCache(userId)
+		if !ok {
+			list = loadPrivateMessageUnreadListCache(userId)
+		}
+		return &messagedto.AppPrivateMessageUnreadListRes{
+			List: pagePrivateMessageUnreadList(list, pageIndex),
+		}, nil
+	}
+
+	offset := (pageIndex - 1) * privateMessageUnreadListPageSize
+	rows := messagedao.ListPrivateMessageUnreadWithLastMessageFromDBLimit(userId, privateMessageUnreadListPageSize, offset)
 	list := make([]*messagedto.AppPrivateMessageUnreadDetailItem, 0, len(rows))
 	for _, row := range rows {
 		if row == nil {
 			continue
 		}
-		list = append(list, toPrivateMessageUnreadDetailItemFromRow(row))
+		item := toPrivateMessageUnreadDetailItemFromRow(row)
+		fillPrivateMessageUnreadSenderInfo(item)
+		list = append(list, item)
 	}
 	return &messagedto.AppPrivateMessageUnreadListRes{List: list}, nil
 }
@@ -143,6 +158,7 @@ func ClearPrivateMessageUnread(ctx context.Context, req *messagedto.AppClearPriv
 		unReadData.SubPrivateUnread(clearedCount)
 		messagedao.FlushUnreadDetailCache(unReadDetail)
 	}
+	updatePrivateMessageUnreadListCacheUnread(userId, req.TargetId, 0)
 
 	return &messagedto.AppClearPrivateMessageUnreadRes{
 		Success:       true,
@@ -151,7 +167,7 @@ func ClearPrivateMessageUnread(ctx context.Context, req *messagedto.AppClearPriv
 	}, nil
 }
 
-// BatchDeletePrivateMessage App端一键删除与目标用户的全部私信(异步物理删除)
+// BatchDeletePrivateMessage App端一键删除与目标用户的全部私信(异步清除当前用户侧数据)
 func BatchDeletePrivateMessage(ctx context.Context, req *messagedto.AppBatchDeletePrivateMessageReq) (*messagedto.AppBatchDeletePrivateMessageRes, error) {
 	userId := httpserver.GetAuthId(ctx)
 	if userId == 0 {
@@ -163,14 +179,20 @@ func BatchDeletePrivateMessage(ctx context.Context, req *messagedto.AppBatchDele
 
 	unReadData := messagedao.GetUnReadByUserId(userId)
 	unReadDetail := messagedao.GetUnreadDetailByReceiverSender(req.TargetId, userId)
-	if unReadDetail != nil && unReadDetail.UnreadCount > 0 {
-		clearedCount := unReadDetail.UnreadCount
-		if unReadData != nil {
-			unReadData.SubPrivateUnread(clearedCount)
+	if unReadDetail != nil {
+		if unReadDetail.UnreadCount > 0 {
+			clearedCount := unReadDetail.UnreadCount
+			if unReadData != nil {
+				unReadData.SubPrivateUnread(clearedCount)
+			}
+			unReadDetail.ClearUnread(clearedCount)
 		}
-		unReadDetail.ClearUnread(clearedCount)
+		if unReadDetail.MutualChat != entity.UserMessageUnreadMutualChatNo {
+			unReadDetail.SetMutualChat(entity.UserMessageUnreadMutualChatNo)
+		}
 		messagedao.FlushUnreadDetailCache(unReadDetail)
 	}
+	removePrivateMessageUnreadListCacheSender(userId, req.TargetId)
 
 	targetId := req.TargetId
 	xrpool.AddWithRecover(ctx, func(poolCtx context.Context) {
@@ -203,17 +225,16 @@ func ClearAllPrivateMessageUnread(ctx context.Context, req *messagedto.AppClearA
 		clearedCount = unReadData.PrivateUnread
 	}
 
-	xrpool.AddWithRecover(ctx, func(poolCtx context.Context) {
-		if err := messagedao.ClearAllPrivateUnreadInDB(poolCtx, userId); err != nil {
-			g.Log().Errorf(poolCtx, "ClearAllPrivateUnreadInDB userId=%d err=%v", userId, err)
-			return
-		}
-		messagedao.ClearAllPrivateUnreadCache(userId)
-	})
-
 	if unReadData != nil && clearedCount > 0 {
 		unReadData.SubPrivateUnread(clearedCount)
 	}
+	xrpool.AddWithRecover(ctx, func(poolCtx context.Context) {
+		if err := messagedao.ClearAllPrivateUnreadInDB(poolCtx, userId); err != nil {
+			g.Log().Errorf(poolCtx, "ClearAllPrivateUnreadInDB userId=%d err=%v", userId, err)
+		}
+	})
+	messagedao.ClearAllPrivateUnreadCache(userId)
+	clearAllPrivateMessageUnreadListCacheUnread(userId)
 
 	return &messagedto.AppClearAllPrivateMessageUnreadRes{
 		Success:       true,
@@ -242,10 +263,6 @@ func toPrivateMessageUnreadDetailItemFromRow(row *messagedao.PrivateMessageUnrea
 		SenderId:    row.SenderId,
 		UnreadCount: row.UnreadCount,
 		UpdatedAt:   formatMessageTime(row.UpdatedAt),
-	}
-	if sender := userinfodao.GetUserInfoByUserId(row.SenderId); sender != nil {
-		item.SenderName = sender.Nickname
-		item.SenderAvatar = upload.ResolveAvatarUrlForUser(row.SenderId, sender.Avatar)
 	}
 	if row.MessageId > 0 {
 		msg := &entity.UserMessage{

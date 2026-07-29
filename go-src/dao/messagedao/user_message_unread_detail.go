@@ -108,26 +108,53 @@ LEFT JOIN ` + string(entity.TbUserMessageSession) + ` ls ON ls.id = (
   LIMIT 1
 )
 LEFT JOIN ` + string(entity.TbUserMessage) + ` lm ON lm.id = ls.message_id AND lm.is_deleted = 0
-WHERE d.user_id = ?
+WHERE d.user_id = ? AND d.mutual_chat = ?
 ORDER BY d.updated_at DESC
 LIMIT ? OFFSET ?`
 
 // ListPrivateMessageUnreadWithLastMessageFromDB App端私信未读列表(直接查库,表关联查询最后一条消息)
 func ListPrivateMessageUnreadWithLastMessageFromDB(userId uint64, pageIndex int) []*PrivateMessageUnreadListRow {
-	list := make([]*PrivateMessageUnreadListRow, 0)
-	if userId == 0 {
-		return list
-	}
 	if pageIndex <= 0 {
 		pageIndex = 1
 	}
 	offset := (pageIndex - 1) * unreadDetailPageSize
+	return ListPrivateMessageUnreadWithLastMessageFromDBLimit(userId, unreadDetailPageSize, offset)
+}
+
+// ListPrivateMessageUnreadWithLastMessageFromDBLimit App端私信未读列表(直接查库,limit/offset)
+func ListPrivateMessageUnreadWithLastMessageFromDBLimit(userId uint64, limit, offset int) []*PrivateMessageUnreadListRow {
+	list := make([]*PrivateMessageUnreadListRow, 0)
+	if userId == 0 || limit <= 0 {
+		return list
+	}
+	if offset < 0 {
+		offset = 0
+	}
 	_ = g.DB().Ctx(context.Background()).Raw(
 		listPrivateMessageUnreadWithLastMessageSQL,
 		entity.UserMessageTypePrivate,
 		userId,
-		unreadDetailPageSize,
+		entity.UserMessageUnreadMutualChatYes,
+		limit,
 		offset,
 	).Scan(&list)
 	return list
+}
+
+// MarkMutualPrivateChat 标记双方未读明细为已互发私信
+func MarkMutualPrivateChat(userA, userB uint64) {
+	if userA == 0 || userB == 0 || userA == userB {
+		return
+	}
+	markOneMutualPrivateChat(userA, userB)
+	markOneMutualPrivateChat(userB, userA)
+}
+
+func markOneMutualPrivateChat(receiverId, senderId uint64) {
+	detail := GetUnreadDetailByReceiverSender(senderId, receiverId)
+	if detail == nil || detail.MutualChat == entity.UserMessageUnreadMutualChatYes {
+		return
+	}
+	detail.SetMutualChat(entity.UserMessageUnreadMutualChatYes)
+	FlushUnreadDetailCache(detail)
 }
