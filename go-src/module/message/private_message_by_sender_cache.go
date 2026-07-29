@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	privateMessageBySenderPageSize = 40
+	privateMessageBySenderPageSize = 50
 	privateMessageBySenderCacheMax = privateMessageBySenderPageSize * 2
 )
 
