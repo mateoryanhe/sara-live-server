@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"os"
 	"path/filepath"
 	"strings"
@@ -207,6 +208,64 @@ func UploadShortVideoFile(file *ghttp.UploadFile) (string, error) {
 		return "", err
 	}
 	return newName, nil
+}
+
+// StreamUploadShortVideoPart 流式保存短视频 multipart 文件字段
+func StreamUploadShortVideoPart(part *multipart.Part, maxBytes int64) (string, error) {
+	return streamUploadMultipartPart(part, allowedShortVideoExt, maxBytes)
+}
+
+// StreamUploadImagePart 流式保存图片 multipart 文件字段
+func StreamUploadImagePart(part *multipart.Part, maxBytes int64) (string, error) {
+	return streamUploadMultipartPart(part, allowedImageExt, maxBytes)
+}
+
+func streamUploadMultipartPart(part *multipart.Part, allowedExt map[string]struct{}, maxBytes int64) (string, error) {
+	if part == nil || strings.TrimSpace(part.FileName()) == "" {
+		return "", errors.New("upload file is empty")
+	}
+	ext := strings.ToLower(filepath.Ext(part.FileName()))
+	if _, ok := allowedExt[ext]; !ok {
+		return "", fmt.Errorf("file ext not allowed: %s", ext)
+	}
+
+	dir := getImageDir()
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return "", err
+	}
+	newName := newStoredFileName(ext)
+	dstPath := filepath.Join(dir, newName)
+	dst, err := os.Create(dstPath)
+	if err != nil {
+		return "", err
+	}
+
+	reader := io.Reader(part)
+	if maxBytes > 0 {
+		reader = io.LimitReader(part, maxBytes+1)
+	}
+	written, copyErr := io.Copy(dst, reader)
+	closeErr := dst.Close()
+	if copyErr != nil {
+		os.Remove(dstPath)
+		return "", mapUploadReadErr(copyErr)
+	}
+	if closeErr != nil {
+		os.Remove(dstPath)
+		return "", closeErr
+	}
+	if maxBytes > 0 && written > maxBytes {
+		os.Remove(dstPath)
+		return "", errFileTooLarge
+	}
+	return newName, nil
+}
+
+var errFileTooLarge = errors.New("upload file too large")
+
+// IsUploadFileTooLarge 判断是否超过上传大小限制
+func IsUploadFileTooLarge(err error) bool {
+	return err == errFileTooLarge
 }
 
 // DeleteUploadedFile 删除 images 目录下的资源文件;无效文件名或文件不存在时忽略

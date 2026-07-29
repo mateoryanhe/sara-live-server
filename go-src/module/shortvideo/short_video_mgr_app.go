@@ -16,7 +16,18 @@ import (
 	"xr-game-server/module/upload"
 )
 
-func PublishShortVideoApp(ctx context.Context, req *shortvideodto.AppPublishShortVideoReq) (*shortvideodto.AppPublishShortVideoRes, error) {
+func PublishShortVideoAppFromRequest(ctx context.Context, r *ghttp.Request) (*shortvideodto.AppPublishShortVideoRes, error) {
+	input, err := parseAppPublishShortVideoMultipart(ctx, r)
+	if err != nil {
+		return nil, err
+	}
+	return publishShortVideoApp(ctx, input)
+}
+
+func publishShortVideoApp(ctx context.Context, input *appPublishShortVideoInput) (*shortvideodto.AppPublishShortVideoRes, error) {
+	if input == nil {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 	authorId := httpserver.GetAuthId(ctx)
 	if authorId == 0 {
 		return nil, errercode.CreateCode(errercode.EmptyUserId)
@@ -32,52 +43,43 @@ func PublishShortVideoApp(ctx context.Context, req *shortvideodto.AppPublishShor
 	if uint32(shortvideodao.CountAuthorPublishedToday(authorId)) >= dailyLimit {
 		return nil, errercode.CreateCode(errercode.ShortVideoDailyUploadLimit)
 	}
-	if existing := shortvideodao.GetByTitle(req.Title); existing != nil {
+	if existing := shortvideodao.GetByTitle(input.Title); existing != nil {
 		return nil, errercode.CreateCode(errercode.ShortVideoExist)
 	}
-	isPaid, payDiamond, err := normalizeShortVideoPaid(req.IsPaid, req.PayDiamond)
+	isPaid, payDiamond, err := normalizeShortVideoPaid(input.IsPaid, input.PayDiamond)
 	if err != nil {
 		return nil, err
 	}
-	freeWatchSeconds := normalizeShortVideoFreeWatchSeconds(isPaid, req.FreeWatchSeconds)
-	if err := validateShortVideoCategoryId(req.CategoryId); err != nil {
+	freeWatchSeconds := normalizeShortVideoFreeWatchSeconds(isPaid, input.FreeWatchSeconds)
+	if err := validateShortVideoCategoryId(input.CategoryId); err != nil {
 		return nil, err
 	}
-	if err := validateShortVideoDuration(req.Duration); err != nil {
-		return nil, err
-	}
-	videoName, err := uploadShortVideoFile(req.File)
-	if err != nil {
-		return nil, err
-	}
-	coverName, err := uploadShortVideoCoverFile(ctx, req.Cover)
-	if err != nil {
-		upload.DeleteUploadedFile(videoName)
+	if err := validateShortVideoDuration(input.Duration); err != nil {
 		return nil, err
 	}
 	row := entity.NewShortVideo(
 		snowflake.GetId(),
-		req.Title,
-		videoName,
-		coverName,
+		input.Title,
+		input.VideoName,
+		input.CoverName,
 		0,
 		isPaid,
 		payDiamond,
-		req.CategoryId,
-		req.Source,
+		input.CategoryId,
+		input.Source,
 		authorId,
 		entity.ShortVideoAuthorTypeApp,
-		req.Duration,
+		input.Duration,
 		freeWatchSeconds,
 	)
 	shortvideodao.AddShortVideoToCache(row)
 	loadAppShortVideoListCache()
 	res := &shortvideodto.AppPublishShortVideoRes{
 		ID:    strconv.FormatUint(row.ID, 10),
-		Video: upload.GetUrlByName(videoName),
+		Video: upload.GetUrlByName(input.VideoName),
 	}
-	if coverName != "" {
-		res.Cover = upload.GetUrlByName(coverName)
+	if input.CoverName != "" {
+		res.Cover = upload.GetUrlByName(input.CoverName)
 	}
 	return res, nil
 }

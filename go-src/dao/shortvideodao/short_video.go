@@ -156,8 +156,8 @@ func GetShortVideoList(req *shortvideodto.ShortVideoListReq) (int, []*shortvideo
 	}
 
 	sort.Slice(filtered, func(i, j int) bool {
-		if filtered[i].Sort != filtered[j].Sort {
-			return filtered[i].Sort > filtered[j].Sort
+		if filtered[i].CreatedAt.Equal(filtered[j].CreatedAt) {
+			return filtered[i].ID > filtered[j].ID
 		}
 		return filtered[i].CreatedAt.After(filtered[j].CreatedAt)
 	})

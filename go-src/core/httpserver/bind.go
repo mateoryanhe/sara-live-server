@@ -28,6 +28,14 @@ func RegAppCustomizeRes(prefix string, handlerOrObject ...interface{}) {
 	})
 }
 
+// RegAPIHandler 绑定App原始Handler,不触发 GoFrame ParseMultipartForm(适合大文件流式上传)
+func RegAPIHandler(prefix, pattern string, handler ghttp.HandlerFunc) {
+	httpServer.Group(prefix, func(group *ghttp.RouterGroup) {
+		group.Middleware(middlewareLogReq, MiddlewareAppAuth, apiResponseMiddleware)
+		group.POST(pattern, handler)
+	})
+}
+
 // RegCMS 绑定CMS控制器 需要鉴权
 func RegCMS(prefix string, handlerOrObject ...interface{}) {
 	httpServer.Group(prefix, func(group *ghttp.RouterGroup) {

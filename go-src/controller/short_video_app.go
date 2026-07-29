@@ -2,6 +2,8 @@ package controller
 
 import (
 	"context"
+
+	"github.com/gogf/gf/v2/net/ghttp"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/shortvideodto"
 	"xr-game-server/module/shortvideo"
@@ -12,7 +14,17 @@ const ShortVideoAppUrl = "/shortVideo"
 type ShortVideoAppController struct{}
 
 func initShortVideoAppController() {
+	httpserver.RegAPIHandler(ShortVideoAppUrl, "/appPublishShortVideo", handleAppPublishShortVideo)
 	httpserver.RegAPI(ShortVideoAppUrl, &ShortVideoAppController{})
+}
+
+func handleAppPublishShortVideo(r *ghttp.Request) {
+	res, err := shortvideo.PublishShortVideoAppFromRequest(r.Context(), r)
+	if err != nil {
+		r.SetError(err)
+		return
+	}
+	httpserver.SetHandlerResponseData(r, res)
 }
 
 func (c *ShortVideoAppController) AppShortVideoList(ctx context.Context, req *shortvideodto.AppShortVideoListReq) (*shortvideodto.AppShortVideoListRes, error) {
@@ -57,10 +69,6 @@ func (c *ShortVideoAppController) AppShortVideoWatchList(ctx context.Context, re
 
 func (c *ShortVideoAppController) AppShortVideoCategoryList(ctx context.Context, req *shortvideodto.AppShortVideoCategoryListReq) (*shortvideodto.AppShortVideoCategoryListRes, error) {
 	return shortvideo.GetAppShortVideoCategoryList(ctx, req)
-}
-
-func (c *ShortVideoAppController) AppPublishShortVideo(ctx context.Context, req *shortvideodto.AppPublishShortVideoReq) (*shortvideodto.AppPublishShortVideoRes, error) {
-	return shortvideo.PublishShortVideoApp(ctx, req)
 }
 
 func (c *ShortVideoAppController) AppShortVideoUploadRecordList(ctx context.Context, req *shortvideodto.AppShortVideoUploadRecordListReq) (*shortvideodto.AppShortVideoUploadRecordListRes, error) {
