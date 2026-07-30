@@ -40,7 +40,7 @@ func setupAppOpenApiHook() {
 }
 
 func isOpenApiExportAll() bool {
-	return g.Cfg().MustGet(context.Background(), "server.openapiExportAll").Bool()
+	return g.Cfg().MustGet(context.Background(), "server.openapiExportAll", false).Bool()
 }
 
 func hookServeAppOpenApi(r *ghttp.Request) {
