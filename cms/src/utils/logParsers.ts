@@ -11,8 +11,9 @@ import type {
 
 const LOG_QUERY_PATH = '/logQuery/'
 
-const detailLogRe = /^(\S+)\s+\[(\w+)\]\s+\{([a-f0-9]+)\}\s+(.+)$/
-const accessLogRe = /^(\S+)\s+\{([a-f0-9]+)\}\s+(\d+)\s+"(\w+)\s+\S+\s+\S+\s+(\S+)\s+HTTP\/[\d.]+"\s+([\d.]+),\s+([^,]+),/
+const detailLogRe = /^(\S+)\s+\[(\w+)\]\s+(?:\{([a-fA-F0-9]+)\}\s+)?(.+)$/
+const accessLogRe = /^(\S+)\s+\{([a-fA-F0-9]+)\}\s+(\d+)\s+"(\w+)\s+\S+\s+\S+\s+(\S+)\s+HTTP\/[\d.]+"\s+([\d.]+),\s+([^,]+),/
+const accessLogRawRe = /^(\d+)\s+"(\w+)\s+\S+\s+\S+\s+(\S+)\s+HTTP\/[\d.]+"\s+([\d.]+),\s+([^,]+),/
 const errorLogHeaderRe = /^(\S+)\s+\[(\w+)\]\s+\{([a-f0-9]+)\}\s+(\d+)\s+"(\w+)\s+\S+\s+\S+\s+(\S+)\s+HTTP\/[\d.]+"\s+([\d.]+),\s+([^,]+),/
 const errorMetaRe = /,\s*(-?\d+),\s*"([^"]*)"(?:,\s*(.*))?$/
 const errorLogBodyRe = /^ErrorLog\s+/
@@ -269,7 +270,7 @@ export const parseDetailLogLine = (line: string): DetailLogItem | null => {
     const entry: DetailLogItem = {
         time: match[1],
         level: match[2],
-        traceId: match[3],
+        traceId: match[3] || '',
         reqId: '',
         authId: '',
         url: '',
@@ -310,17 +311,31 @@ export const parseAccessLogLine = (line: string): AccessLogItem | null => {
         return null
     }
     const match = trimmed.match(accessLogRe)
-    if (!match) {
+    if (match) {
+        return {
+            time: match[1],
+            traceId: match[2],
+            statusCode: Number(match[3]) || 0,
+            method: match[4],
+            url: match[5],
+            handlerMs: Number(match[6]) * 1000,
+            ip: match[7].trim(),
+            userAgent: extractUserAgent(trimmed),
+            raw: trimmed,
+        }
+    }
+    const rawMatch = trimmed.match(accessLogRawRe)
+    if (!rawMatch) {
         return null
     }
     return {
-        time: match[1],
-        traceId: match[2],
-        statusCode: Number(match[3]) || 0,
-        method: match[4],
-        url: match[5],
-        handlerMs: Number(match[6]) * 1000,
-        ip: match[7].trim(),
+        time: '',
+        traceId: '',
+        statusCode: Number(rawMatch[1]) || 0,
+        method: rawMatch[2],
+        url: rawMatch[3],
+        handlerMs: Number(rawMatch[4]) * 1000,
+        ip: rawMatch[5].trim(),
         userAgent: extractUserAgent(trimmed),
         raw: trimmed,
     }

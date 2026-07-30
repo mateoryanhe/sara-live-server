@@ -16,11 +16,6 @@ server:
   readTimeout: "120m"
   writeTimeout: "120m"
   gzipEnabled: true         # 开启 gzip 响应压缩
-  logPath: "/home/ec2-user/log/"        # 服务器访问/错误日志目录
-  logStdout: false                       # 访问日志同时输出到终端
-  accessLogEnabled: true                # 开启访问日志(执行时间、IP、URL)
-  accessLogPattern: "access-{Y-m-d}.log"
-  errorLogPattern: "error-{Y-m-d}.log"
   # PProf配置
   pprofEnabled: true # 是否开启PProf性能调试特性。默认为false
   pprofPattern: "/66dcd8e25ab3b339546ea1de5eb2d443e6fca76c76d11709f10533be8bd87d7d/pprof"    # 开启PProf时有效，表示PProf特性的页面访问路径，对当前Server绑定的所有域名有效
@@ -46,26 +41,37 @@ bufferSize:
     size: 400 # 协程池大小(未配置时走默认池)
 
 logger:
-  timeFormat: "2006-01-02T15:04:05.000"
-  level: "all"
-  flags: 45
-  path: "/home/ec2-user/log/"
-  file: "detail-{Y-m-d}.log"  # 与 detail 一致，避免产生 2026-07-20.log 等无前缀文件
-  rotateExpire: "3d"              # 保留最近3天的按日日志，过期直接删（不产生时间戳备份）
-  rotateBackupLimit: 0          # 0=不保留备份，过期直接删，不产生 detail-xxx.20260720....log
-  rotateBackupExpire: 0
-  rotateBackupCompress: 0
-  stdoutColorDisabled: false
-  writerColorEnable: true
   detail:                               # API详情日志；启动时同步为默认 g.Log()
     path: "/home/ec2-user/log/"
     file: "detail-{Y-m-d}.log"
     stdout: true
     header: true
-  error:                                # xrlog 错误日志，g.Log("error")
+    flags: 45
+    timeFormat: "2006-01-02T15:04:05.000"
+    rotateExpire: "1d"              # 保留最近3天的按日日志，过期直接删（不产生时间戳备份）
+    rotateBackupLimit: 3          # 0=不保留备份，过期直接删，不产生 detail-xxx.20260720....log
+    stdoutColorDisabled: false
+    writerColorEnable: true
+  access:                               # HTTP Server access 日志(替代 GF 内置 access 日志)
+    path: "/home/ec2-user/log/"
+    file: "access-{Y-m-d}.log"
+    stdout: false
+    header: true                        # 保留时间戳与 TraceId,供日志查询过滤与解析
+    levelPrint: false
+    flags: 40
+    rotateExpire: "1d"
+    rotateBackupLimit: 3
+  error:                                # HTTP 框架错误 + xrlog 错误日志，g.Log("error")
     path: "/home/ec2-user/log/"
     file: "error-{Y-m-d}.log"
     stdout: false
+    flags: 45
+    header: true                        # 保留时间戳与 TraceId,供日志查询过滤与解析
+    timeFormat: "2006-01-02T15:04:05.000"
+    rotateExpire: "1d"              # 保留最近3天的按日日志，过期直接删（不产生时间戳备份）
+    rotateBackupLimit: 3          # 0=不保留备份，过期直接删，不产生 detail-xxx.20260720....log
+    stdoutColorDisabled: false
+    writerColorEnable: true
 
 database:
   logger:

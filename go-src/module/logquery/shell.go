@@ -158,7 +158,7 @@ function in_range(ts) {
   return ts != "" && ts >= start && ts <= end
 }
 function is_log_header(line) {
-  return (line ~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}[T ]/ && line ~ / \[[A-Z]+\] \{/)
+  return (line ~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}[T ]/ && line ~ / \[[A-Z]+\] /)
 }
 BEGIN { keep = 0 }
 {
@@ -177,9 +177,13 @@ function log_ts_sec(line) {
   }
   return ""
 }
+function is_headerless_access(line) {
+  return (line ~ /^[0-9]+ "/)
+}
 {
   ts = log_ts_sec($0)
   if (ts != "" && ts >= start && ts <= end) print $0
+  else if (ts == "" && is_headerless_access($0)) print $0
 }' ` + shellQuote(inPath) + ` > ` + shellQuote(outPath)
 	}
 	return runShellScript(script)
@@ -208,7 +212,7 @@ func buildLogContinuationAwkScript(patterns []string) string {
 	patterns = uniqueNonEmpty(patterns)
 	var builder strings.Builder
 	builder.WriteString(`function is_log_header(line) {
-  return (line ~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}T/ && line ~ / \[[A-Z]+\] \{/)
+  return (line ~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}T/ && line ~ / \[[A-Z]+\] /)
 }
 function matches(line) {
 `)

@@ -53,12 +53,12 @@ type SetAnchorRes struct {
 	Success bool `json:"success"`
 }
 
-type SetTestAnchorReq struct {
-	g.Meta    `path:"/setTestAnchor" method:"post" summary:"设为测试型主播(不可回退)" tags:"账号"`
+type SetSeniorAnchorReq struct {
+	g.Meta    `path:"/setSeniorAnchor" method:"post" summary:"设为高级主播(不可回退)" tags:"账号"`
 	AccountId uint64 `json:"accountId" v:"required#用户ID不能为空" dc:"用户ID"`
 }
 
-type SetTestAnchorRes struct {
+type SetSeniorAnchorRes struct {
 	Success bool `json:"success"`
 }
 

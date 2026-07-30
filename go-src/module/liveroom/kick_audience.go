@@ -14,6 +14,26 @@ import (
 	"xr-game-server/errercode"
 )
 
+// kickAudience 踢出指定观众并推送通知(不要求调用方校验在线状态)
+func kickAudience(anchorId, userId uint64) {
+	now := time.Now()
+	onlineId := entity.BuildLiveRoomOnlineId(userId, anchorId)
+	online := liveroomdao.GetOnlineById(onlineId, userId, anchorId)
+	if online == nil {
+		return
+	}
+	online.SetKickTime(&now)
+	if online.Status == entity.LiveRoomOnlineStatusOnline {
+		exitRoom(userId, anchorId)
+	}
+	push.Data(userId, cmd.LiveRoomAudienceKick, &liveroomdto.AudienceKickPushItem{
+		RoomId:     strconv.FormatUint(anchorId, 10),
+		UserId:     strconv.FormatUint(userId, 10),
+		KickTime:   now.UnixMilli(),
+		BanSeconds: int64(entity.LiveRoomKickBanDuration / time.Second),
+	})
+}
+
 // KickAudience 主播踢出指定观众,默认30分钟内不可再次进入
 func KickAudience(ctx context.Context, req *liveroomdto.KickAudienceReq) (*liveroomdto.KickAudienceRes, error) {
 	anchorId := httpserver.GetAuthId(ctx)
@@ -31,16 +51,7 @@ func KickAudience(ctx context.Context, req *liveroomdto.KickAudienceReq) (*liver
 		return nil, errercode.CreateCode(errercode.LiveRoomAudienceNotOnline)
 	}
 
-	now := time.Now()
-	online.SetKickTime(&now)
-	exitRoom(req.UserId, anchorId)
-
-	push.Data(req.UserId, cmd.LiveRoomAudienceKick, &liveroomdto.AudienceKickPushItem{
-		RoomId:     strconv.FormatUint(anchorId, 10),
-		UserId:     strconv.FormatUint(req.UserId, 10),
-		KickTime:   now.UnixMilli(),
-		BanSeconds: int64(entity.LiveRoomKickBanDuration / time.Second),
-	})
+	kickAudience(anchorId, req.UserId)
 
 	return &liveroomdto.KickAudienceRes{Success: true}, nil
 }

@@ -277,6 +277,41 @@ func filterRoomsByBlocked(rooms []*entity.LiveRoom, userId uint64) []*entity.Liv
 	return filtered
 }
 
+// viewerCanSeeSeniorAnchorRoom 高级主播直播间仅 VIP 等级>0 的用户可见(主播本人始终可见)
+func viewerCanSeeSeniorAnchorRoom(viewerUserId uint64, room *entity.LiveRoom) bool {
+	if room == nil {
+		return false
+	}
+	if viewerUserId == room.ID {
+		return true
+	}
+	anchor := userinfodao.GetUserInfoByUserId(room.ID)
+	if anchor == nil || anchor.UserType != entity.UserTypeSeniorAnchor {
+		return true
+	}
+	if viewerUserId == 0 {
+		return false
+	}
+	viewer := userinfodao.GetUserInfoByUserId(viewerUserId)
+	return viewer != nil && viewer.VipLevel > 0
+}
+
+func filterRoomsBySeniorAnchor(rooms []*entity.LiveRoom, viewerUserId uint64) []*entity.LiveRoom {
+	if len(rooms) == 0 {
+		return rooms
+	}
+	filtered := make([]*entity.LiveRoom, 0, len(rooms))
+	for _, room := range rooms {
+		if room == nil {
+			continue
+		}
+		if viewerCanSeeSeniorAnchorRoom(viewerUserId, room) {
+			filtered = append(filtered, room)
+		}
+	}
+	return filtered
+}
+
 func normalizeRoomListPage(page, pageSize int) (int, int) {
 	if page <= 0 {
 		page = 1
@@ -319,6 +354,7 @@ func GetRoomList(ctx context.Context, req *liveroomdto.GetLiveRoomListReq) (*liv
 
 	filtered := filterRoomsByStatus(cached, req.StatusFilter)
 	filtered = filterRoomsByQuery(filtered, req.TagId, req.Title, req.Notice)
+	filtered = filterRoomsBySeniorAnchor(filtered, userId)
 	filtered = filterRoomsByBlocked(filtered, userId)
 	total := len(filtered)
 	start, end := roomListPageRange(total, page, pageSize)
@@ -351,6 +387,7 @@ func GetFollowedRoomList(ctx context.Context, req *liveroomdto.GetFollowedLiveRo
 	}
 
 	filtered := filterRoomsByStatus(rooms, req.StatusFilter)
+	filtered = filterRoomsBySeniorAnchor(filtered, userId)
 	filtered = filterRoomsByBlocked(filtered, userId)
 	total := len(filtered)
 	start, end := roomListPageRange(total, page, pageSize)
@@ -456,6 +493,7 @@ func GetHotLiveRoomList(ctx context.Context, req *liveroomdto.GetHotLiveRoomList
 	}
 
 	filtered := filterHotLiveRooms(cached)
+	filtered = filterRoomsBySeniorAnchor(filtered, userId)
 	filtered = filterRoomsByBlocked(filtered, userId)
 	total := len(filtered)
 	start, end := roomListPageRange(total, pageIndex, pageSize)
@@ -485,6 +523,7 @@ func GetNearbyLiveRoomList(ctx context.Context, req *liveroomdto.GetNearbyLiveRo
 	}
 
 	liveRooms := filterRoomsByStatus(cached, int(userstatus.LiveRoomStatusLive))
+	liveRooms = filterRoomsBySeniorAnchor(liveRooms, userId)
 	liveRooms = filterRoomsByBlocked(liveRooms, userId)
 	currentIdx := findLiveRoomIndex(liveRooms, req.RoomId)
 	nearbyRooms := collectNearbyLiveRooms(liveRooms, currentIdx, req.Direction, count)

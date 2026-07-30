@@ -14,7 +14,6 @@ func QueryUserInfo(ctx context.Context, req *accountdto.QueryUserInfoReq) (res *
 	total, data := accountdao.GetUserInfo(req)
 	for _, val := range data {
 		val.IsAnchor = entity.UserTypeIsAnchor(val.UserType)
-		val.UserType = entity.UserTypeForCMS(val.UserType)
 		if accountCache := accountdao.GetAccountFromCache(val.OpenId, val.Channel, val.ID); accountCache != nil {
 			val.OpenId = accountCache.OpenId
 			val.IP = accountCache.IP
@@ -34,7 +33,7 @@ func QueryUserInfo(ctx context.Context, req *accountdto.QueryUserInfoReq) (res *
 			val.Diamond = userInfoCache.Diamond
 			val.ShareCode = userInfoCache.ShareCode
 			val.GuildId = userInfoCache.GuildId
-			val.UserType = entity.UserTypeForCMS(userInfoCache.UserType)
+			val.UserType = userInfoCache.UserType
 			val.IsAnchor = userInfoCache.IsAnchor()
 			val.VipLevel = userInfoCache.VipLevel
 		}

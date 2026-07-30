@@ -38,7 +38,10 @@ type logQueryConfig struct {
 
 func loadLogQueryConfig() logQueryConfig {
 	ctx := gctx.New()
-	logDir := strings.TrimSpace(g.Cfg().MustGet(ctx, "logger.detail.path").String())
+	logDir := strings.TrimSpace(g.Cfg().MustGet(ctx, "logger.access.path").String())
+	if logDir == "" {
+		logDir = strings.TrimSpace(g.Cfg().MustGet(ctx, "logger.detail.path").String())
+	}
 	if logDir == "" {
 		logDir = strings.TrimSpace(g.Cfg().MustGet(ctx, "logger.error.path").String())
 	}
@@ -63,9 +66,14 @@ func loadLogQueryConfig() logQueryConfig {
 		exportRoot = filepath.Clean(cfg.GetServerRoot())
 	}
 
+	accessPattern := g.Cfg().MustGet(ctx, "logger.access.file").String()
+	if strings.TrimSpace(accessPattern) == "" {
+		accessPattern = g.Cfg().MustGet(ctx, "server.accessLogPattern").String()
+	}
+
 	return logQueryConfig{
 		LogDir:             filepath.Clean(logDir),
-		AccessPrefix:       logFilePrefixFromPattern(g.Cfg().MustGet(ctx, "server.accessLogPattern").String()),
+		AccessPrefix:       logFilePrefixFromPattern(accessPattern),
 		DetailPrefix:       logFilePrefixFromPattern(g.Cfg().MustGet(ctx, "logger.detail.file").String()),
 		ErrorPrefix:        logFilePrefixFromPattern(g.Cfg().MustGet(ctx, "logger.error.file").String()),
 		ExportStaticPrefix: exportStaticPrefix,

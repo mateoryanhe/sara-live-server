@@ -2,13 +2,11 @@ package httpserver
 
 import (
 	"errors"
-	"fmt"
 	"xr-game-server/core/xrjson"
-	"xr-game-server/core/xrlog"
+	"xr-game-server/errercode"
 
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
-	"xr-game-server/errercode"
 )
 
 type responseBuildResult struct {
@@ -98,25 +96,5 @@ func finalizeHandlerError(r *ghttp.Request, err error) {
 	}
 	if errercode.IsBusiness(err) {
 		r.SetError(nil)
-		return
 	}
-	logUnexpectedHandlerError(r, err)
-}
-
-func logUnexpectedHandlerError(r *ghttp.Request, err error) {
-	if r == nil || err == nil {
-		return
-	}
-	if shouldSkipAPILogChain(r) {
-		return
-	}
-	xrlog.ErrorWithErr(r.Context(), "Handler",
-		fmt.Sprintf("reqId=%v,authId=%v,method=%v,url=%v",
-			r.GetHeader(ReqId, ""),
-			authIdFromRequest(r),
-			r.Method,
-			r.RequestURI,
-		),
-		err,
-	)
 }

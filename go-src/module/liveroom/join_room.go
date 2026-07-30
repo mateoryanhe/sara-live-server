@@ -30,7 +30,12 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 	onlineId := entity.BuildLiveRoomOnlineId(userId, req.RoomId)
 	existing := liveroomdao.GetOnlineById(onlineId, userId, room.ID)
 	if existing.IsKickBanned() {
-		return nil, errercode.CreateCode(errercode.LiveRoomKickBanned)
+		kickAudience(room.ID, userId)
+		return &liveroomdto.JoinRoomRes{
+			OnlineId:    onlineId,
+			OnlineCount: getLenForRoom(room.ID),
+			SysTime:     now.UnixMilli(),
+		}, nil
 	}
 
 	if err := ensureCanJoinPrivateRoom(userId, room); err != nil {
@@ -48,6 +53,16 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 	existing.SetHeartTime(&now)
 	addToOnline(userId, room.ID)
 	refreshRoomAudienceCaches(room.ID)
+
+	if userId != room.ID && !viewerCanSeeSeniorAnchorRoom(userId, room) {
+		kickAudience(room.ID, userId)
+		return &liveroomdto.JoinRoomRes{
+			OnlineId:       onlineId,
+			OnlineCount:    getLenForRoom(room.ID),
+			TicketDeducted: ticketDeducted,
+			SysTime:        now.UnixMilli(),
+		}, nil
+	}
 
 	if userId != room.ID {
 		if user := userinfodao.GetUserInfoByUserId(userId); user != nil {

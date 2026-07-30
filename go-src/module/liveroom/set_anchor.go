@@ -15,13 +15,13 @@ func SetAnchor(_ context.Context, req *accountdto.SetAnchorReq) (*accountdto.Set
 	return setUserAsAnchor(req.AccountId, entity.UserTypeAnchor)
 }
 
-// SetTestAnchor CMS 将用户设为测试型主播(仅允许普通用户,不可回退)
-func SetTestAnchor(_ context.Context, req *accountdto.SetTestAnchorReq) (*accountdto.SetTestAnchorRes, error) {
-	_, err := setUserAsAnchor(req.AccountId, entity.UserTypeTestAnchor)
+// SetSeniorAnchor CMS 将用户设为高级主播(仅允许普通用户,不可回退)
+func SetSeniorAnchor(_ context.Context, req *accountdto.SetSeniorAnchorReq) (*accountdto.SetSeniorAnchorRes, error) {
+	_, err := setUserAsAnchor(req.AccountId, entity.UserTypeSeniorAnchor)
 	if err != nil {
 		return nil, err
 	}
-	return &accountdto.SetTestAnchorRes{Success: true}, nil
+	return &accountdto.SetSeniorAnchorRes{Success: true}, nil
 }
 
 func setUserAsAnchor(accountId uint64, userType uint8) (*accountdto.SetAnchorRes, error) {

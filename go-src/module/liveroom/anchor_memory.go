@@ -44,7 +44,7 @@ func filterAnchorRooms(rooms []*entity.LiveRoom, key string) []*entity.LiveRoom 
 
 func isRegularAnchorRoom(room *entity.LiveRoom) bool {
 	user := userinfodao.GetUserInfoFromMemory(room.ID)
-	return user != nil && (user.UserType == entity.UserTypeAnchor || user.UserType == entity.UserTypeTestAnchor)
+	return user != nil && (user.UserType == entity.UserTypeAnchor || user.UserType == entity.UserTypeSeniorAnchor)
 }
 
 func matchAnchorKey(id uint64, key, likeKey string) bool {

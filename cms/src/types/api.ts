@@ -172,7 +172,7 @@ export interface SetAnchorReq {
     accountId: string
 }
 
-export interface SetTestAnchorReq {
+export interface SetSeniorAnchorReq {
     accountId: string
 }
 

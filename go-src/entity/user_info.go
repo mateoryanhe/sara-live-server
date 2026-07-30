@@ -36,13 +36,13 @@ const (
 )
 
 const (
-	UserTypeNormal      uint8 = 0 // 普通用户
-	UserTypeAnchor      uint8 = 1 // 普通主播
-	UserTypeBotAnchor   uint8 = 2 // 机器人主播
-	UserTypeBotAudience uint8 = 3 // 机器人观众(不参与系统统计)
-	UserTypeTester      uint8 = 4 // 测试人员(不参与系统统计)
-	UserTypeCMSAuthor   uint8 = 5 // CMS短视频作者(不参与系统统计)
-	UserTypeTestAnchor  uint8 = 6 // 测试型主播(可开播,不参与系统统计;userType仅App端使用,CMS展示同普通主播)
+	UserTypeNormal       uint8 = 0 // 普通用户
+	UserTypeAnchor       uint8 = 1 // 普通主播
+	UserTypeBotAnchor    uint8 = 2 // 机器人主播
+	UserTypeBotAudience  uint8 = 3 // 机器人观众(不参与系统统计)
+	UserTypeTester       uint8 = 4 // 测试人员(不参与系统统计)
+	UserTypeCMSAuthor    uint8 = 5 // CMS短视频作者(不参与系统统计)
+	UserTypeSeniorAnchor uint8 = 7 // 高级主播
 )
 
 const (
@@ -61,7 +61,7 @@ type UserInfo struct {
 	Diamond         float64    `gorm:"default:0;comment:钻石"`
 	ShareCode       string     `gorm:"uniqueIndex;default:'';comment:分享码"`
 	GuildId         uint64     `gorm:"index;default:0;comment:所属工会ID(0为未加入)"`
-	UserType        uint8      `gorm:"default:0;comment:用户类型(0普通用户,1普通主播,2机器人主播,3机器人观众,4测试人员,5CMS短视频作者,6测试型主播)" json:"userType"`
+	UserType        uint8      `gorm:"default:0;comment:用户类型(0普通用户,1普通主播,2机器人主播,3机器人观众,4测试人员,5CMS短视频作者,7高级主播)" json:"userType"`
 	HasLiveRoom     bool       `gorm:"default:0;comment:是否已创建直播间(App端完善资料后为true)"`
 	InviterId       uint64     `gorm:"index;default:0;comment:邀请人用户ID(0为无)"`
 	VipLevel        uint32     `gorm:"default:0;comment:VIP等级(0为无)"`
@@ -173,19 +173,11 @@ func (receiver *UserInfo) SetGuildId(guildId uint64) {
 }
 
 func UserTypeIsAnchor(userType uint8) bool {
-	return userType == UserTypeAnchor || userType == UserTypeBotAnchor || userType == UserTypeTestAnchor
+	return userType == UserTypeAnchor || userType == UserTypeBotAnchor || userType == UserTypeSeniorAnchor
 }
 
 func UserTypeExcludedFromStat(userType uint8) bool {
-	return userType == UserTypeBotAudience || userType == UserTypeTester || userType == UserTypeCMSAuthor || userType == UserTypeTestAnchor
-}
-
-// UserTypeForCMS CMS 侧展示用用户类型(测试型主播对 CMS 同普通主播)
-func UserTypeForCMS(userType uint8) uint8 {
-	if userType == UserTypeTestAnchor {
-		return UserTypeAnchor
-	}
-	return userType
+	return userType == UserTypeBotAudience || userType == UserTypeTester || userType == UserTypeCMSAuthor
 }
 
 func (receiver *UserInfo) IsAnchor() bool {
@@ -198,7 +190,7 @@ func (receiver *UserInfo) IsBotAnchor() bool {
 
 func (receiver *UserInfo) SetUserType(userType uint8) {
 	switch userType {
-	case UserTypeNormal, UserTypeAnchor, UserTypeBotAnchor, UserTypeBotAudience, UserTypeTester, UserTypeCMSAuthor, UserTypeTestAnchor:
+	case UserTypeNormal, UserTypeAnchor, UserTypeBotAnchor, UserTypeBotAudience, UserTypeTester, UserTypeCMSAuthor, UserTypeSeniorAnchor:
 	default:
 		userType = UserTypeNormal
 	}

@@ -191,9 +191,9 @@ plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "chmod +x 
 REM No need to create session directory
 REM Skipping session directory creation as per requirement
 
-REM Start program (日志写入 log 目录,便于排查启动失败)
+REM Start program
 echo Starting program...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "sudo bash -c 'nohup %REMOTE_DIR%/%APP_NAME% >> /home/ec2-user/log/xr-game-server-stdout.log 2>&1 &'"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "sudo bash -c 'nohup %REMOTE_DIR%/%APP_NAME% >/dev/null 2>&1 &'"
 
 echo.
 echo ================================
@@ -201,7 +201,6 @@ echo Deployment Complete!
 echo ================================
 echo Server: %REMOTE_HOST%
 echo Program: %APP_NAME%
-echo Startup log: /home/ec2-user/log/xr-game-server-stdout.log
 echo.
 
 REM Clean up local temporary files
@@ -210,16 +209,38 @@ if exist "%DEPLOY_PACKAGE%" del "%DEPLOY_PACKAGE%"
 
 echo Verifying if program is running...
 timeout /t 5 /nobreak >nul
-plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "pgrep -af %APP_NAME% || true; ss -tlnp | grep ':443' || true"
-plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "pgrep -f %APP_NAME% >/dev/null && ss -tlnp | grep -q ':443'" 
-if errorlevel 1 (
-    echo.
-    echo ERROR: Program is NOT listening on port 443 after start!
-    echo Check remote log: /home/ec2-user/log/xr-game-server-stdout.log
-    plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "tail -30 /home/ec2-user/log/xr-game-server-stdout.log 2>/dev/null || true"
+echo.
+
+setlocal enabledelayedexpansion
+set REMOTE_PID=
+for /f "delims=" %%i in ('plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "pgrep -xo %APP_NAME%" 2^>nul') do set REMOTE_PID=%%i
+
+if not defined REMOTE_PID (
+    echo ERROR: %APP_NAME% process not found!
+    endlocal
     pause
     exit /b 1
 )
+
+echo [Process] Started OK
+echo   PID: !REMOTE_PID!
+plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "ps -p !REMOTE_PID! -o pid,etime,cmd --no-headers 2>/dev/null || pgrep -af %APP_NAME%"
+
+echo.
+echo [Port 443]
+plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "ss -tlnp 2>/dev/null | grep ':443' || (echo not listening && exit 1)"
+if errorlevel 1 (
+    echo ERROR: port 443 not listening
+    endlocal
+    pause
+    exit /b 1
+)
+
+echo.
+echo ================================
+echo Verify OK: %APP_NAME% ^(PID: !REMOTE_PID!^) is running
+echo ================================
+endlocal
 
 echo.
 echo Press any key to exit...

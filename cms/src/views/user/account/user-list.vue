@@ -140,7 +140,7 @@
                 <template #dropdown>
                   <el-dropdown-menu>
                     <el-dropdown-item v-if="!scope.row.isAnchor" command="setAnchor">设为主播</el-dropdown-item>
-                    <el-dropdown-item v-if="!scope.row.isAnchor" command="setTestAnchor">设为测试型主播</el-dropdown-item>
+                    <el-dropdown-item v-if="!scope.row.isAnchor" command="setSeniorAnchor">设为高级主播</el-dropdown-item>
                     <el-dropdown-item :divided="!scope.row.isAnchor" command="gold-add">
                       加金币
                     </el-dropdown-item>
@@ -304,6 +304,7 @@ const userTypeLabelMap: Record<number, string> = {
   3: '机器人观众',
   4: '测试人员',
   5: 'CMS短视频作者',
+  7: '高级主播',
 }
 
 const userTypeOptions = [
@@ -545,8 +546,8 @@ const handleRowCommand = (row: UserInfo, command: string) => {
     case 'setAnchor':
       handleSetAnchor(row)
       break
-    case 'setTestAnchor':
-      handleSetTestAnchor(row)
+    case 'setSeniorAnchor':
+      handleSetSeniorAnchor(row)
       break
   }
 }
@@ -608,23 +609,23 @@ const handleSetAnchor = async (row: UserInfo) => {
   }
 }
 
-const handleSetTestAnchor = async (row: UserInfo) => {
+const handleSetSeniorAnchor = async (row: UserInfo) => {
   try {
     await ElMessageBox.confirm(
-        `确定将用户 ${row.id} 设为测试型主播吗？设为测试型主播后不可撤销，且不参与系统统计。`,
-        '设为测试型主播',
+        `确定将用户 ${row.id} 设为高级主播吗？设为高级主播后不可撤销。`,
+        '设为高级主播',
         {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }
     )
-    await accountApi.setTestAnchor({accountId: String(row.id)})
-    ElMessage.success('已设为测试型主播')
+    await accountApi.setSeniorAnchor({accountId: String(row.id)})
+    ElMessage.success('已设为高级主播')
     await fetchUserList()
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('设为测试型主播失败:', error)
+      console.error('设为高级主播失败:', error)
     }
   }
 }
