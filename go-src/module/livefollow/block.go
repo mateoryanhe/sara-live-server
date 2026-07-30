@@ -37,12 +37,16 @@ func Block(ctx context.Context, req *livefollowdto.BlockReq) (*livefollowdto.Blo
 	if existing == nil {
 		row := entity.NewLiveFollowWithStatus(userId, req.TargetId, entity.LiveFollowStatusBlock)
 		livefollowdao.AddFollowToCache(row)
+		livefollowdao.PrependBlockedToListCache(row)
 	} else {
 		wasFollowing := existing.Status == entity.LiveFollowStatusFollow
 		existing.SetStatus(entity.LiveFollowStatusBlock)
 		livefollowdao.AddFollowToCache(existing)
+		livefollowdao.PrependBlockedToListCache(existing)
 		if wasFollowing {
 			userinfodao.DecFollowCount(userId, req.TargetId)
+			livefollowdao.RemoveFollowingFromListCache(userId, req.TargetId)
+			livefollowdao.RemoveFollowerFromListCache(req.TargetId, userId)
 		}
 	}
 
@@ -66,6 +70,7 @@ func Unblock(ctx context.Context, req *livefollowdto.UnblockReq) (*livefollowdto
 	if existing != nil && existing.Status == entity.LiveFollowStatusBlock {
 		existing.SetStatus(entity.LiveFollowStatusUnfollow)
 		livefollowdao.AddFollowToCache(existing)
+		livefollowdao.RemoveBlockedFromListCache(userId, req.TargetId)
 	}
 
 	return &livefollowdto.UnblockRes{
@@ -82,7 +87,7 @@ func BlockList(ctx context.Context, req *livefollowdto.BlockListReq) (*livefollo
 	}
 	page, pageSize := normalizePage(req.Page, req.PageSize)
 
-	total, pageData := livefollowdao.GetBlockedListByUser(userId, page, pageSize)
+	pageData := livefollowdao.GetBlockedListByUser(userId, page, pageSize)
 	list := make([]*livefollowdto.BlockListItem, 0, len(pageData))
 	for _, row := range pageData {
 		item := &livefollowdto.BlockListItem{
@@ -100,7 +105,6 @@ func BlockList(ctx context.Context, req *livefollowdto.BlockListReq) (*livefollo
 	}
 
 	return &livefollowdto.BlockListRes{
-		Total:    total,
 		Page:     page,
 		PageSize: pageSize,
 		List:     list,

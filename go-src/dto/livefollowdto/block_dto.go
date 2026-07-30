@@ -43,7 +43,6 @@ type BlockListItem struct {
 }
 
 type BlockListRes struct {
-	Total    int              `json:"total"    dc:"总数"`
 	Page     int              `json:"page"     dc:"当前页码"`
 	PageSize int              `json:"pageSize" dc:"每页数量"`
 	List     []*BlockListItem `json:"list"     dc:"拉黑列表"`

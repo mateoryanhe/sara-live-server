@@ -55,7 +55,6 @@ type AnchorItem struct {
 }
 
 type FollowingListRes struct {
-	Total    int           `json:"total"    dc:"总数"`
 	Page     int           `json:"page"     dc:"当前页码"`
 	PageSize int           `json:"pageSize" dc:"每页数量"`
 	List     []*AnchorItem `json:"list"     dc:"主播列表"`
@@ -80,7 +79,6 @@ type FollowerItem struct {
 }
 
 type FollowerListRes struct {
-	Total    int             `json:"total"    dc:"总数"`
 	Page     int             `json:"page"     dc:"当前页码"`
 	PageSize int             `json:"pageSize" dc:"每页数量"`
 	List     []*FollowerItem `json:"list"     dc:"粉丝列表"`

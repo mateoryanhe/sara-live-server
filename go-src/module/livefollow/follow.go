@@ -49,11 +49,14 @@ func Follow(ctx context.Context, req *livefollowdto.FollowReq) (*livefollowdto.F
 	if !wasFollowing {
 		userinfodao.IncFollowCount(userId, req.AnchorId)
 		recordNewFollowerDuringLive(req.AnchorId, userId)
+		follow := livefollowdao.GetByUserAnchor(userId, req.AnchorId)
+		livefollowdao.PrependFollowingToListCache(follow)
+		livefollowdao.PrependFollowerToListCache(follow)
 	}
 
 	return &livefollowdto.FollowRes{
 		Following:     true,
-		FollowerCount: livefollowdao.CountFollowersByAnchor(req.AnchorId),
+		FollowerCount: userinfodao.GetFollowerCount(req.AnchorId),
 	}, nil
 }
 
@@ -82,11 +85,13 @@ func Unfollow(ctx context.Context, req *livefollowdto.UnfollowReq) (*livefollowd
 		existing.SetStatus(entity.LiveFollowStatusUnfollow)
 		livefollowdao.AddFollowToCache(existing)
 		userinfodao.DecFollowCount(userId, req.AnchorId)
+		livefollowdao.RemoveFollowingFromListCache(userId, req.AnchorId)
+		livefollowdao.RemoveFollowerFromListCache(req.AnchorId, userId)
 	}
 
 	return &livefollowdto.UnfollowRes{
 		Following:     false,
-		FollowerCount: livefollowdao.CountFollowersByAnchor(req.AnchorId),
+		FollowerCount: userinfodao.GetFollowerCount(req.AnchorId),
 	}, nil
 }
 
@@ -105,7 +110,7 @@ func FollowingList(ctx context.Context, req *livefollowdto.FollowingListReq) (*l
 	userId := httpserver.GetAuthId(ctx)
 	page, pageSize := normalizePage(req.Page, req.PageSize)
 
-	total, pageData := livefollowdao.GetFollowingsByUser(userId, page, pageSize)
+	pageData := livefollowdao.GetFollowingsByUser(userId, page, pageSize)
 
 	list := make([]*livefollowdto.AnchorItem, 0, len(pageData))
 	for _, f := range pageData {
@@ -126,7 +131,6 @@ func FollowingList(ctx context.Context, req *livefollowdto.FollowingListReq) (*l
 	}
 
 	return &livefollowdto.FollowingListRes{
-		Total:    total,
 		Page:     page,
 		PageSize: pageSize,
 		List:     list,
@@ -138,7 +142,7 @@ func FollowerList(ctx context.Context, req *livefollowdto.FollowerListReq) (*liv
 	anchorId := httpserver.GetAuthId(ctx)
 	page, pageSize := normalizePage(req.Page, req.PageSize)
 
-	total, pageData := livefollowdao.GetFollowersByAnchor(anchorId, page, pageSize)
+	pageData := livefollowdao.GetFollowersByAnchor(anchorId, page, pageSize)
 
 	list := make([]*livefollowdto.FollowerItem, 0, len(pageData))
 	for _, f := range pageData {
@@ -157,7 +161,6 @@ func FollowerList(ctx context.Context, req *livefollowdto.FollowerListReq) (*liv
 	}
 
 	return &livefollowdto.FollowerListRes{
-		Total:    total,
 		Page:     page,
 		PageSize: pageSize,
 		List:     list,

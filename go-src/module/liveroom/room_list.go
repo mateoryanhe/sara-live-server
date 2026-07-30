@@ -51,6 +51,7 @@ func flushRoomList(ctx context.Context) {
 		if room == nil {
 			continue
 		}
+		userinfodao.GetUserInfoByUserId(room.ID)
 		rooms = append(rooms, room)
 	}
 
@@ -335,8 +336,8 @@ func GetFollowedRoomList(ctx context.Context, req *liveroomdto.GetFollowedLiveRo
 	userId := httpserver.GetAuthId(ctx)
 	page, pageSize := normalizeRoomListPage(req.Page, req.PageSize)
 
-	followingTotal := livefollowdao.CountFollowingsByUser(userId)
-	_, followings := livefollowdao.GetFollowingsByUser(userId, 1, followingTotal)
+	followingTotal := userinfodao.GetFollowCount(userId)
+	followings := livefollowdao.GetFollowingsByUser(userId, 1, followingTotal)
 	rooms := make([]*entity.LiveRoom, 0, len(followings))
 	for _, f := range followings {
 		if f == nil {
