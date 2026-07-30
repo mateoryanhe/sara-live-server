@@ -25,6 +25,7 @@ import {liveCfgApi} from './modules/liveCfg'
 import {liveRoomTagApi} from './modules/liveRoomTag'
 import {textModerationApi} from './modules/text-moderation'
 import {privacyPolicyApi} from './modules/privacy-policy'
+import {customerServiceApi} from './modules/customer-service'
 import {uploadResourceApi} from './modules/upload-resource'
 import {sysStatApi} from './modules/sysStat'
 import {botAnchorApi} from './modules/bot-anchor'
@@ -58,6 +59,7 @@ export {
     liveRoomTagApi,
     textModerationApi,
     privacyPolicyApi,
+    customerServiceApi,
     uploadResourceApi,
     sysStatApi,
     botAnchorApi,
@@ -92,6 +94,7 @@ export default {
     liveRoomTagApi,
     textModerationApi,
     privacyPolicyApi,
+    customerServiceApi,
     uploadResourceApi,
     sysStatApi,
     botAnchorApi,

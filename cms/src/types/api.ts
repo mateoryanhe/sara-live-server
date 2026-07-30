@@ -816,6 +816,31 @@ export interface SavePrivacyPolicyCfgRes {
     id: string
 }
 
+export interface CustomerServiceCfg {
+    id: string
+    telegramUrl: string
+    facebookUrl: string
+    whatsappUrl: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetCustomerServiceCfgRes {
+    cfg: CustomerServiceCfg | null
+}
+
+export interface SaveCustomerServiceCfgReq {
+    id?: number
+    telegramUrl: string
+    facebookUrl: string
+    whatsappUrl: string
+}
+
+export interface SaveCustomerServiceCfgRes {
+    success: boolean
+    id: string
+}
+
 export interface UploadResourceCfg {
     id: string
     resourceDomain: string

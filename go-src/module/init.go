@@ -11,6 +11,7 @@ import (
 	"xr-game-server/module/botanchor"
 	"xr-game-server/module/call"
 	"xr-game-server/module/currencylog"
+	"xr-game-server/module/custo
 	"xr-game-server/module/game"
 	"xr-game-server/module/livecfg"
 	"xr-game-server/module/liveroom"
@@ -54,6 +55,7 @@ func Init() {
 	aliyunmoderation.Init()
 	privacypolicy.Init()
 	accountcfg.Init()
+	customerservice.Init()
 
 	liveroom.Init()
 	userinfo.Init()

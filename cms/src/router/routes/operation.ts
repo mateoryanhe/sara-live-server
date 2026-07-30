@@ -42,5 +42,11 @@ export const operationRoutes: RouteRecordRaw = {
             component: () => import('@/views/operation/random-nickname/random-nickname-cfg.vue'),
             meta: {title: '随机昵称库'},
         },
+        {
+            path: 'customer-service/customer-service-cfg',
+            name: 'CustomerServiceCfgManagement',
+            component: () => import('@/views/operation/customer-service/customer-service-cfg.vue'),
+            meta: {title: '客服联系配置'},
+        },
     ],
 }

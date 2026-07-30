@@ -32,6 +32,8 @@ func Init() {
 	initLiveCfgCMSController()              // 直播配置(CMS)
 	initAliyunTextModerationCMSController() // 阿里云文本审核(CMS)
 	initPrivacyPolicyCMSController()        // 隐私政策配置(CMS)
+	initCustomerServiceCMSController()      // 客服联系配置(CMS)
+	initCustomerServiceAppController()      // 客服联系配置(App)
 	initAccountCfgCMSController()           // 账号配置(CMS)
 	initGiftController()                    // 礼物配置(CMS)
 	initGiftAppController()                 // 礼物列表(App)

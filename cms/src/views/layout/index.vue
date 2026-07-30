@@ -64,7 +64,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement')"
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement')"
             index="/operation">
           <template #title>
             <el-icon>
@@ -107,6 +107,12 @@
               <EditPen/>
             </el-icon>
             <span>随机昵称库</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('CustomerServiceCfgManagement')" index="/operation/customer-service/customer-service-cfg">
+            <el-icon>
+              <Service/>
+            </el-icon>
+            <span>客服联系配置</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -369,7 +375,7 @@
 <script lang="ts" setup>
 import {computed, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {ArrowDown, Box, Coin, Collection, CollectionTag, Cpu, Document, EditPen, Expand, Fold, Key, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Search, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Box, Coin, Collection, CollectionTag, Cpu, Document, EditPen, Expand, Fold, Key, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Search, Service, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {getIsAdmin, hasPermission} from '@/utils/permission'
 import {clearAuthSession} from '@/utils/auth'
 
