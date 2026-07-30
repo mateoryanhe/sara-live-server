@@ -11,7 +11,6 @@ type AppSystemMessageListReq struct {
 type AppSystemMessageItem struct {
 	Id         uint64 `json:"id,string"`
 	ReceiverId uint64 `json:"receiverId,string"`
-	Title      string `json:"title"`
 	Content    string `json:"content"`
 	CreatedAt  string `json:"createdAt"`
 }
@@ -34,7 +33,6 @@ type AppClearSystemMessageUnreadRes struct {
 type SystemMessagePushItem struct {
 	Id         uint64 `json:"id,string"`
 	ReceiverId uint64 `json:"receiverId,string"`
-	Title      string `json:"title"`
 	Content    string `json:"content"`
 	SentAt     string `json:"sentAt"`
 }

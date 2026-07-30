@@ -40,7 +40,7 @@ func ListByReceiverAndSender(sessionId string, lastCreatedAt int64, pageSize int
 	model := g.Model(string(entity.TbUserMessage)+" m").Ctx(context.Background()).
 		Fields("m.*, s.id AS session_id").
 		InnerJoin(string(entity.TbUserMessageSession)+" s", "s.message_id = m.id").
-		Where("s.session_id = ? AND s.is_deleted = 0 AND m.is_deleted = 0 AND m.type = ?", sessionId, entity.UserMessageTypePrivate)
+		Where("s.session_id = ? AND s.is_deleted = 0 AND m.is_deleted = 0 AND m.sender_id > 0", sessionId)
 	if lastCreatedAt > 0 {
 		model = model.Where("m.created_at < ?", time.UnixMilli(lastCreatedAt))
 	}

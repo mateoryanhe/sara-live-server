@@ -103,7 +103,7 @@ LEFT JOIN ` + string(entity.TbUserMessageSession) + ` ls ON ls.id = (
   SELECT s.id
   FROM ` + string(entity.TbUserMessageSession) + ` s
   INNER JOIN ` + string(entity.TbUserMessage) + ` m ON s.message_id = m.id
-  WHERE s.session_id = d.id AND s.is_deleted = 0 AND m.is_deleted = 0 AND m.type = ?
+  WHERE s.session_id = d.id AND s.is_deleted = 0 AND m.is_deleted = 0 AND m.sender_id > 0
   ORDER BY m.created_at DESC
   LIMIT 1
 )
@@ -132,7 +132,6 @@ func ListPrivateMessageUnreadWithLastMessageFromDBLimit(userId uint64, limit, of
 	}
 	_ = g.DB().Ctx(context.Background()).Raw(
 		listPrivateMessageUnreadWithLastMessageSQL,
-		entity.UserMessageTypePrivate,
 		userId,
 		entity.UserMessageUnreadMutualChatYes,
 		limit,

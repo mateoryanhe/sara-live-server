@@ -41,7 +41,7 @@ func SendPrivateMessage(ctx context.Context, req *messagedto.AppSendPrivateMessa
 		return nil, errercode.CreateCode(errercode.PrivateMessageUserBlocked)
 	}
 
-	msg := entity.NewUserMessage(entity.UserMessageTypePrivate, senderId, req.ReceiverId, "", content)
+	msg := entity.NewUserMessage(senderId, req.ReceiverId, content)
 
 	//往发送者写入消息
 	pushItem := buildPrivateMessagePushItem(msg)

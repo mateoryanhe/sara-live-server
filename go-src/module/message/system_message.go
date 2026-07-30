@@ -2,7 +2,6 @@ package message
 
 import (
 	"context"
-	"strings"
 	"xr-game-server/constants/cmd"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/push"
@@ -23,8 +22,7 @@ func onSystemMessage(val any) {
 		g.Log().Errorf(gctx.New(), "SystemMessageEvent payload type error: %T", val)
 		return
 	}
-	title := strings.TrimSpace(data.Title)
-	content := strings.TrimSpace(data.Content)
+	content := data.Content
 	if content == "" {
 		return
 	}
@@ -32,7 +30,7 @@ func onSystemMessage(val any) {
 		return
 	}
 
-	msg := entity.NewUserMessage(entity.UserMessageTypeSystem, 0, data.ReceiverId, title, content)
+	msg := entity.NewUserMessage(0, data.ReceiverId, content)
 	messagedao.AddSystemToCache(msg)
 
 	pushItem := buildSystemMessagePushItem(msg)
@@ -84,7 +82,6 @@ func buildSystemMessagePushItem(msg *entity.UserMessage) *messagedto.SystemMessa
 	return &messagedto.SystemMessagePushItem{
 		Id:         msg.ID,
 		ReceiverId: msg.ReceiverId,
-		Title:      msg.Title,
 		Content:    msg.Content,
 		SentAt:     formatMessageTime(msg.CreatedAt),
 	}
@@ -94,7 +91,6 @@ func toSystemMessageItem(msg *entity.UserMessage) *messagedto.AppSystemMessageIt
 	return &messagedto.AppSystemMessageItem{
 		Id:         msg.ID,
 		ReceiverId: msg.ReceiverId,
-		Title:      msg.Title,
 		Content:    msg.Content,
 		CreatedAt:  formatMessageTime(msg.CreatedAt),
 	}

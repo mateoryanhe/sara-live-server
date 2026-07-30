@@ -12,34 +12,35 @@ const (
 	TbUserMessage db.TbName = "user_messages"
 )
 
-// 消息类型
 const (
-	UserMessageTypeSystem  uint8 = 1 // 系统消息
-	UserMessageTypePrivate uint8 = 2 // 私信消息
-)
-
-const (
-	UserMessageType       db.TbCol = "type"
 	UserMessageSenderId   db.TbCol = "sender_id"
 	UserMessageReceiverId db.TbCol = "receiver_id"
-	UserMessageTitle      db.TbCol = "title"
 	UserMessageContent    db.TbCol = "content"
 )
 
 // UserMessage 用户消息(系统消息/私信)
+// 系统消息: sender_id=0; 私信: sender_id>0
 // 走 syndb 快速同步缓冲(quick chan),变更通过 Setter 推送到队列由 worker 周期性 Save 到 DB
 type UserMessage struct {
 	migrate.MoreModel
-	Type       uint8  `gorm:"index:idx_receiver_type,priority:2;default:0;comment:消息类型(1-系统消息,2-私信)" json:"type"`
-	SenderId   uint64 `gorm:"index;default:0;comment:发送者ID(系统消息可为0)" json:"senderId"`
-	ReceiverId uint64 `gorm:"index:idx_receiver_type,priority:1;default:0;comment:接收者ID" json:"receiverId"`
-	Title      string `gorm:"size:128;default:'';comment:标题(系统消息使用)" json:"title"`
+	SenderId   uint64 `gorm:"index;default:0;comment:发送者ID(系统消息为0)" json:"senderId"`
+	ReceiverId uint64 `gorm:"index;default:0;comment:接收者ID" json:"receiverId"`
 	Content    string `gorm:"size:1024;default:'';comment:消息内容" json:"content"`
+}
+
+// IsSystemMessage 是否为系统消息
+func (m *UserMessage) IsSystemMessage() bool {
+	return m != nil && m.SenderId == 0
+}
+
+// IsPrivateMessage 是否为私信
+func (m *UserMessage) IsPrivateMessage() bool {
+	return m != nil && m.SenderId > 0
 }
 
 // SessionIdForUser 返回指定用户视角的私信会话ID
 func (m *UserMessage) SessionIdForUser(userId uint64) string {
-	if m == nil || m.Type != UserMessageTypePrivate {
+	if m == nil || !m.IsPrivateMessage() {
 		return ""
 	}
 	if m.SenderId == userId {
@@ -52,23 +53,16 @@ func (m *UserMessage) SessionIdForUser(userId uint64) string {
 }
 
 // NewUserMessage 构造一条新消息
-func NewUserMessage(msgType uint8, senderId, receiverId uint64, title, content string) *UserMessage {
+func NewUserMessage(senderId, receiverId uint64, content string) *UserMessage {
 	ret := &UserMessage{}
 	ret.ID = snowflake.GetId()
 	now := time.Now()
 	ret.SetCreatedAt(now)
 	ret.SetUpdatedAt(now)
-	ret.SetType(msgType)
 	ret.SetSenderId(senderId)
 	ret.SetReceiverId(receiverId)
-	ret.SetTitle(title)
 	ret.SetContent(content)
 	return ret
-}
-
-func (m *UserMessage) SetType(v uint8) {
-	m.Type = v
-	syndb.AddDataToQuickChan(TbUserMessage, UserMessageType, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *UserMessage) SetSenderId(v uint64) {
@@ -79,11 +73,6 @@ func (m *UserMessage) SetSenderId(v uint64) {
 func (m *UserMessage) SetReceiverId(v uint64) {
 	m.ReceiverId = v
 	syndb.AddDataToQuickChan(TbUserMessage, UserMessageReceiverId, &syndb.ColData{IdVal: m.ID, ColVal: v})
-}
-
-func (m *UserMessage) SetTitle(v string) {
-	m.Title = v
-	syndb.AddDataToQuickChan(TbUserMessage, UserMessageTitle, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *UserMessage) SetContent(v string) {
@@ -134,10 +123,8 @@ func initUserMessage() {
 	syndb.RegQuick(TbUserMessage, db.UpdatedAtName)
 	syndb.RegQuick(TbUserMessage, db.IsDeletedName)
 	syndb.RegQuick(TbUserMessage, db.DeletedAtName)
-	syndb.RegQuick(TbUserMessage, UserMessageType)
 	syndb.RegQuick(TbUserMessage, UserMessageSenderId)
 	syndb.RegQuick(TbUserMessage, UserMessageReceiverId)
-	syndb.RegQuick(TbUserMessage, UserMessageTitle)
 	syndb.RegQuick(TbUserMessage, UserMessageContent)
 	migrate.AutoMigrate(&UserMessage{})
 }
