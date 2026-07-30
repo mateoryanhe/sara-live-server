@@ -151,6 +151,7 @@ func FollowerList(ctx context.Context, req *livefollowdto.FollowerListReq) (*liv
 		item := &livefollowdto.FollowerItem{
 			UserId:     strconv.FormatUint(f.UserId, 10),
 			FollowedAt: f.UpdatedAt.Unix(),
+			Following:  livefollowdao.IsFollowing(anchorId, f.UserId),
 		}
 		if u := userinfodao.GetUserInfoByUserId(f.UserId); u != nil {
 			item.Nickname = u.Nickname

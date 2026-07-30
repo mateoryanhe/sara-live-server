@@ -73,6 +73,7 @@ type FollowerItem struct {
 	Nickname   string `json:"nickname"   dc:"粉丝昵称"`
 	Avatar     string `json:"avatar"     dc:"粉丝头像URL(已拼资源域名)"`
 	FollowedAt int64  `json:"followedAt" dc:"关注时间(秒)"`
+	Following  bool   `json:"following"  dc:"当前登录用户是否已关注该粉丝"`
 	VipLevel   uint32 `json:"vipLevel"   dc:"VIP等级"`
 	Gender     uint8  `json:"gender"     dc:"性别(0未知,1男,2女)"`
 	Age        int    `json:"age"        dc:"年龄(未设置出生日期时为0)"`
