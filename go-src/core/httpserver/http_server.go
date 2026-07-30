@@ -33,6 +33,7 @@ func InitHttpServer() {
 		httpServer.Use(ghttp.MiddlewareGzip)
 	}
 	httpServer.BindHookHandler("/*", ghttp.HookAfterOutput, hookAPIRequestAfterOutput)
+	setupAppOpenApiHook()
 	httpServer.Run()
 }
 
