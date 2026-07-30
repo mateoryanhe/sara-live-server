@@ -7,6 +7,7 @@ import (
 	"xr-game-server/dto/calldto"
 	"xr-game-server/dto/diamonddto"
 	"xr-game-server/dto/golddto"
+	"xr-game-server/dto/livefollowdto"
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/dto/messagedto"
 	"xr-game-server/dto/vipdto"
@@ -22,6 +23,7 @@ const (
 	PushTagLiveRoom       = "推送-直播间"
 	PushTagCall           = "推送-通话"
 	PushTagPrivateRoom    = "推送-私密房"
+	PushTagFollow         = "推送-关注"
 )
 
 // --- 推送-通话 ---
@@ -262,6 +264,18 @@ type PrivateMessagePushReq struct {
 type PrivateMessagePushResp struct {
 	Cmd  int                                `json:"cmd" dc:"命令字 13"`
 	Data *messagedto.PrivateMessagePushItem `json:"data"`
+}
+
+// --- 推送-关注 ---
+
+// LiveFollowCountPushReq cmd=35 关注数/粉丝数
+type LiveFollowCountPushReq struct {
+	g.Meta `path:"/liveFollowCount" method:"post" summary:"推送 cmd=35 关注数/粉丝数变更(推送给指定用户)" description:"关注或取关后推送最新关注数与粉丝数" tags:"推送-关注"`
+}
+
+type LiveFollowCountPushResp struct {
+	Cmd  int                                `json:"cmd" dc:"命令字 35"`
+	Data *livefollowdto.FollowCountPushItem `json:"data"`
 }
 
 // --- 推送-钱包 ---

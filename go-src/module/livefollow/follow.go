@@ -52,6 +52,7 @@ func Follow(ctx context.Context, req *livefollowdto.FollowReq) (*livefollowdto.F
 		follow := livefollowdao.GetByUserAnchor(userId, req.AnchorId)
 		livefollowdao.PrependFollowingToListCache(follow)
 		livefollowdao.PrependFollowerToListCache(follow)
+		pushFollowCountChange(userId, req.AnchorId)
 	}
 
 	return &livefollowdto.FollowRes{
@@ -87,6 +88,7 @@ func Unfollow(ctx context.Context, req *livefollowdto.UnfollowReq) (*livefollowd
 		userinfodao.DecFollowCount(userId, req.AnchorId)
 		livefollowdao.RemoveFollowingFromListCache(userId, req.AnchorId)
 		livefollowdao.RemoveFollowerFromListCache(req.AnchorId, userId)
+		pushFollowCountChange(userId, req.AnchorId)
 	}
 
 	return &livefollowdto.UnfollowRes{

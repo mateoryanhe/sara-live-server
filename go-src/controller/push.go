@@ -63,6 +63,13 @@ func (c *PushController) LiveRoomPrivateChat(_ context.Context, _ *pushdto.LiveR
 	return nil, nil
 }
 
+// --- 推送-关注 ---
+
+// LiveFollowCount cmd=35 关注数/粉丝数
+func (c *PushController) LiveFollowCount(_ context.Context, _ *pushdto.LiveFollowCountPushReq) (*pushdto.LiveFollowCountPushResp, error) {
+	return nil, nil
+}
+
 // --- 推送-直播间 ---
 
 // LiveRoomStartLive cmd=34 主播开播(全服广播)

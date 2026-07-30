@@ -83,3 +83,9 @@ type FollowerListRes struct {
 	PageSize int             `json:"pageSize" dc:"每页数量"`
 	List     []*FollowerItem `json:"list"     dc:"粉丝列表"`
 }
+
+// FollowCountPushItem 关注数/粉丝数变更推送载荷
+type FollowCountPushItem struct {
+	FollowCount   int `json:"followCount"   dc:"当前关注数"`
+	FollowerCount int `json:"followerCount" dc:"当前粉丝数"`
+}

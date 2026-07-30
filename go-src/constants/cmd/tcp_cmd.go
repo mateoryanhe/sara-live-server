@@ -63,4 +63,6 @@ const (
 	LiveRoomCallAnchorAcceptedAudience = 33
 	//主播开播推送(全服广播)
 	LiveRoomStartLive = 34
+	//关注数/粉丝数变更推送(推送给指定用户)
+	LiveFollowCountPush = 35
 )
