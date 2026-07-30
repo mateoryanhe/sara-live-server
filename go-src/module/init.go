@@ -11,7 +11,7 @@ import (
 	"xr-game-server/module/botanchor"
 	"xr-game-server/module/call"
 	"xr-game-server/module/currencylog"
-	"xr-game-server/module/custo
+	"xr-game-server/module/customerservice"
 	"xr-game-server/module/game"
 	"xr-game-server/module/livecfg"
 	"xr-game-server/module/liveroom"
