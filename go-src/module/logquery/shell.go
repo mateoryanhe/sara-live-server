@@ -373,8 +373,11 @@ func buildDetailPatterns(traceId, reqId, authId, url, keyword string) []string {
 	return buildCommonPatterns(traceId, reqId, authId, url, keyword)
 }
 
-func buildAccessPatterns(traceId, url, ip string, statusCode int) []string {
+func buildAccessPatterns(traceId, authId, url, ip string, statusCode int) []string {
 	patterns := buildCommonPatterns(traceId, "", "", url, "")
+	if authId = strings.TrimSpace(authId); authId != "" {
+		patterns = append(patterns, "authId="+authId)
+	}
 	if ip != "" {
 		patterns = append(patterns, ip)
 	}

@@ -310,11 +310,13 @@ export const parseAccessLogLine = (line: string): AccessLogItem | null => {
     if (trimmed.includes(LOG_QUERY_PATH)) {
         return null
     }
+    const authId = trimmed.match(authIdRe)?.[1] || ''
     const match = trimmed.match(accessLogRe)
     if (match) {
         return {
             time: match[1],
             traceId: match[2],
+            authId,
             statusCode: Number(match[3]) || 0,
             method: match[4],
             url: match[5],
@@ -331,6 +333,7 @@ export const parseAccessLogLine = (line: string): AccessLogItem | null => {
     return {
         time: '',
         traceId: '',
+        authId,
         statusCode: Number(rawMatch[1]) || 0,
         method: rawMatch[2],
         url: rawMatch[3],

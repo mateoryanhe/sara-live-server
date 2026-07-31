@@ -1045,6 +1045,7 @@ export interface AccessLogQuery {
     startDate: string
     endDate: string
     traceId?: string
+    authId?: string
     url?: string
     ip?: string
     statusCode?: number
@@ -1055,6 +1056,7 @@ export interface AccessLogQuery {
 export interface AccessLogItem {
     time: string
     traceId: string
+    authId?: string
     statusCode: number
     method: string
     url: string
@@ -1129,6 +1131,7 @@ export interface AccessTrendQuery {
     startDate: string
     endDate: string
     traceId?: string
+    authId?: string
     url?: string
     ip?: string
     statusCode?: number

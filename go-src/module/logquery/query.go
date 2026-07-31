@@ -56,7 +56,7 @@ func QueryAccessLogs(_ context.Context, req *logquerydto.CMSQueryAccessLogsReq) 
 	if err := validateLogQueryDateRange(req.StartDate, req.EndDate); err != nil {
 		return nil, err
 	}
-	patterns := buildAccessPatterns(req.TraceId, req.Url, req.Ip, req.StatusCode)
+	patterns := buildAccessPatterns(req.TraceId, req.AuthId, req.Url, req.Ip, req.StatusCode)
 	minMs, maxMs := accessHandlerMsRange(req)
 	result, err := createShellExport(logTypeAccess, patterns, req.StartDate, req.EndDate, req.PageIndex, req.PageSize, minMs, maxMs)
 	return toExportRes(result), err

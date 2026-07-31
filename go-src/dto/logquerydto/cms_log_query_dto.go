@@ -60,6 +60,7 @@ type CMSQueryAccessLogsReq struct {
 	StartDate    string   `json:"startDate" v:"required#开始时间不能为空" dc:"开始时间(Y-m-d或Y-m-d H:i:s)"`
 	EndDate      string   `json:"endDate" v:"required#结束时间不能为空" dc:"结束时间(Y-m-d或Y-m-d H:i:s)"`
 	TraceId      string   `json:"traceId"`
+	AuthId       string   `json:"authId"`
 	Url          string   `json:"url"`
 	Ip           string   `json:"ip"`
 	StatusCode   int      `json:"statusCode"`
@@ -98,6 +99,7 @@ type CMSGetAccessTrendReq struct {
 	StartDate       string   `json:"startDate" v:"required#开始时间不能为空" dc:"开始时间(Y-m-d或Y-m-d H:i:s)"`
 	EndDate         string   `json:"endDate" v:"required#结束时间不能为空" dc:"结束时间(Y-m-d或Y-m-d H:i:s)"`
 	TraceId         string   `json:"traceId"`
+	AuthId          string   `json:"authId"`
 	Url             string   `json:"url"`
 	Ip              string   `json:"ip"`
 	StatusCode      int      `json:"statusCode"`

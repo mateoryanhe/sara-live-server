@@ -36,7 +36,7 @@ func hookAccessLogAfterOutput(r *ghttp.Request) {
 	writeAccessLog(r)
 }
 
-// writeAccessLog 写入 access 日志,格式与 GF Server 内置 access 日志保持一致。
+// writeAccessLog 写入 access 日志,格式在 GF 内置 access 日志基础上追加 authId=。
 func writeAccessLog(r *ghttp.Request) {
 	if r == nil {
 		return
@@ -49,7 +49,7 @@ func writeAccessLog(r *ghttp.Request) {
 		enterTime = gtime.Now()
 	}
 	content := fmt.Sprintf(
-		`%d "%s %s %s %s %s" %.3f, %s, "%s", "%s"`,
+		`%d "%s %s %s %s %s" %.3f, %s, "%s", "%s", authId=%s`,
 		r.Response.Status,
 		r.Method,
 		r.GetSchema(),
@@ -60,6 +60,7 @@ func writeAccessLog(r *ghttp.Request) {
 		r.GetClientIp(),
 		r.Referer(),
 		r.UserAgent(),
+		authIdFromRequest(r),
 	)
 	g.Log("access").Print(r.Context(), content)
 }

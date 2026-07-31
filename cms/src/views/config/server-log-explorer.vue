@@ -99,6 +99,9 @@
             <el-form-item label="TraceId">
               <el-input v-model="accessForm.traceId" clearable placeholder="支持模糊匹配" style="width: 280px"/>
             </el-form-item>
+            <el-form-item label="AuthId">
+              <el-input v-model="accessForm.authId" clearable placeholder="支持模糊匹配" style="width: 180px"/>
+            </el-form-item>
             <el-form-item label="URL">
               <el-input v-model="accessForm.url" clearable placeholder="支持模糊匹配" style="width: 220px"/>
             </el-form-item>
@@ -152,6 +155,7 @@
             </el-table-column>
             <el-table-column label="方法" prop="method" width="90"/>
             <el-table-column label="URL" min-width="220" prop="url" show-overflow-tooltip/>
+            <el-table-column label="AuthId" prop="authId" width="180"/>
             <el-table-column label="耗时(ms)" width="100">
               <template #default="{ row }">
                 <span :class="{ 'log-alert': isSlowHandlerMs(row.handlerMs) }">{{ formatHandlerMs(row.handlerMs) }}</span>
@@ -374,6 +378,7 @@
           </el-table-column>
           <el-table-column label="状态码" prop="statusCode" width="80"/>
           <el-table-column label="URL" min-width="180" prop="url" show-overflow-tooltip/>
+          <el-table-column label="AuthId" prop="authId" width="140"/>
           <el-table-column label="IP" prop="ip" width="140"/>
         </el-table>
 
@@ -631,6 +636,7 @@ const detailPageSize = ref(50)
 const accessForm = reactive({
   ...createDefaultDateRangeForm(),
   traceId: '',
+  authId: '',
   url: '',
   ip: '',
   statusCode: undefined as number | undefined,
@@ -745,6 +751,7 @@ const buildAccessQueryParams = (range: string[]) => ({
   startDate: range[0],
   endDate: range[1],
   traceId: accessForm.traceId.trim(),
+  authId: accessForm.authId.trim(),
   url: accessForm.url.trim(),
   ip: accessForm.ip.trim(),
   statusCode: accessForm.statusCode || undefined,
@@ -938,6 +945,7 @@ const resetDetailForm = () => {
 const resetAccessForm = () => {
   resetFormDateRange(accessForm)
   accessForm.traceId = ''
+  accessForm.authId = ''
   accessForm.url = ''
   accessForm.ip = ''
   accessForm.statusCode = undefined
@@ -1032,6 +1040,11 @@ const copyJsonDialogContent = async () => {
 
 const resolveTraceAuthId = () => {
   for (const item of traceDetail.detailLogs) {
+    if (item.authId) {
+      return item.authId
+    }
+  }
+  for (const item of traceDetail.accessLogs) {
     if (item.authId) {
       return item.authId
     }

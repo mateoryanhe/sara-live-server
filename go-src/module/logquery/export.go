@@ -252,7 +252,7 @@ func createAccessTrendExport(req *logquerydto.CMSGetAccessTrendReq) (*shellExpor
 	initExportCleanup()
 	cfg := loadLogQueryConfig().normalized()
 	intervalMinutes := resolveTrendIntervalMinutes(req.StartDate, req.EndDate, req.IntervalMinutes)
-	patterns := buildAccessPatterns(req.TraceId, req.Url, req.Ip, req.StatusCode)
+	patterns := buildAccessPatterns(req.TraceId, req.AuthId, req.Url, req.Ip, req.StatusCode)
 
 	files := listLogFilesByPrefix(cfg.LogDir, cfg.AccessPrefix, req.StartDate, req.EndDate)
 	exportID := guid.S()
