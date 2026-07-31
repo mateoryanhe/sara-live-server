@@ -1,0 +1,163 @@
+package message
+
+import (
+	"context"
+	"strconv"
+	"time"
+
+	"xr-game-server/core/httpserver"
+	"xr-game-server/dao/cfgdao"
+	"xr-game-server/dto/activitymessagedto"
+	"xr-game-server/entity"
+	"xr-game-server/errercode"
+	"xr-game-server/module/upload"
+)
+
+func GetActivityMessageList(_ context.Context, req *activitymessagedto.ActivityMessageListReq) (*httpserver.CMSQueryResp, error) {
+	total, list := cfgdao.GetActivityMessageList(req)
+	fillActivityMessageListAssets(list)
+	return &httpserver.CMSQueryResp{Total: total, Data: list}, nil
+}
+
+func fillActivityMessageListAssets(list []*activitymessagedto.ActivityMessageListRes) {
+	for _, row := range list {
+		if row == nil {
+			continue
+		}
+		row.IconEnName = row.IconEn
+		row.IconEsName = row.IconEs
+		row.IconPtName = row.IconPt
+		row.IconHiName = row.IconHi
+		row.IconEn = upload.GetUrlByName(row.IconEnName)
+		row.IconEs = upload.GetUrlByName(row.IconEsName)
+		row.IconPt = upload.GetUrlByName(row.IconPtName)
+		row.IconHi = upload.GetUrlByName(row.IconHiName)
+
+		row.BgEnName = row.BgEn
+		row.BgEsName = row.BgEs
+		row.BgPtName = row.BgPt
+		row.BgHiName = row.BgHi
+		row.BgEn = upload.GetUrlByName(row.BgEnName)
+		row.BgEs = upload.GetUrlByName(row.BgEsName)
+		row.BgPt = upload.GetUrlByName(row.BgPtName)
+		row.BgHi = upload.GetUrlByName(row.BgHiName)
+	}
+}
+
+func CreateActivityMessage(_ context.Context, req *activitymessagedto.CreateActivityMessageReq) (*activitymessagedto.CreateActivityMessageRes, error) {
+	row := &entity.ActivityMessage{
+		IconEn:    req.IconEn,
+		IconEs:    req.IconEs,
+		IconPt:    req.IconPt,
+		IconHi:    req.IconHi,
+		BgEn:      req.BgEn,
+		BgEs:      req.BgEs,
+		BgPt:      req.BgPt,
+		BgHi:      req.BgHi,
+		TitleEn:   req.TitleEn,
+		TitleEs:   req.TitleEs,
+		TitlePt:   req.TitlePt,
+		TitleHi:   req.TitleHi,
+		ContentEn: req.ContentEn,
+		ContentEs: req.ContentEs,
+		ContentPt: req.ContentPt,
+		ContentHi: req.ContentHi,
+		UrlEn:     req.UrlEn,
+		UrlEs:     req.UrlEs,
+		UrlPt:     req.UrlPt,
+		UrlHi:     req.UrlHi,
+		Status:    entity.ActivityMessageStatusUnpublished,
+	}
+	if err := cfgdao.CreateActivityMessage(row); err != nil {
+		return nil, err
+	}
+	return &activitymessagedto.CreateActivityMessageRes{ID: strconv.FormatUint(row.ID, 10)}, nil
+}
+
+func UpdateActivityMessage(_ context.Context, req *activitymessagedto.UpdateActivityMessageReq) (*activitymessagedto.UpdateActivityMessageRes, error) {
+	row := cfgdao.GetActivityMessageById(req.ID)
+	if row == nil {
+		return nil, errercode.CreateCode(errercode.ActivityMessageNonExist)
+	}
+	row.IconEn = req.IconEn
+	row.IconEs = req.IconEs
+	row.IconPt = req.IconPt
+	row.IconHi = req.IconHi
+	row.BgEn = req.BgEn
+	row.BgEs = req.BgEs
+	row.BgPt = req.BgPt
+	row.BgHi = req.BgHi
+	row.TitleEn = req.TitleEn
+	row.TitleEs = req.TitleEs
+	row.TitlePt = req.TitlePt
+	row.TitleHi = req.TitleHi
+	row.ContentEn = req.ContentEn
+	row.ContentEs = req.ContentEs
+	row.ContentPt = req.ContentPt
+	row.ContentHi = req.ContentHi
+	row.UrlEn = req.UrlEn
+	row.UrlEs = req.UrlEs
+	row.UrlPt = req.UrlPt
+	row.UrlHi = req.UrlHi
+	if err := cfgdao.UpdateActivityMessage(row); err != nil {
+		return nil, err
+	}
+	return &activitymessagedto.UpdateActivityMessageRes{Success: true}, nil
+}
+
+func DeleteActivityMessage(_ context.Context, req *activitymessagedto.DeleteActivityMessageReq) (*activitymessagedto.DeleteActivityMessageRes, error) {
+	if row := cfgdao.GetActivityMessageById(req.ID); row == nil {
+		return nil, errercode.CreateCode(errercode.ActivityMessageNonExist)
+	}
+	if err := cfgdao.DeleteActivityMessage(req.ID); err != nil {
+		return nil, err
+	}
+	return &activitymessagedto.DeleteActivityMessageRes{Success: true}, nil
+}
+
+func PublishActivityMessage(_ context.Context, req *activitymessagedto.PublishActivityMessageReq) (*activitymessagedto.PublishActivityMessageRes, error) {
+	row := cfgdao.GetActivityMessageById(req.ID)
+	if row == nil {
+		return nil, errercode.CreateCode(errercode.ActivityMessageNonExist)
+	}
+	if row.Status != entity.ActivityMessageStatusPublished {
+		now := time.Now()
+		row.Status = entity.ActivityMessageStatusPublished
+		row.PublishedAt = &now
+		if err := cfgdao.UpdateActivityMessage(row); err != nil {
+			return nil, err
+		}
+	}
+	return &activitymessagedto.PublishActivityMessageRes{Success: true, Status: entity.ActivityMessageStatusPublished}, nil
+}
+
+func UnpublishActivityMessage(_ context.Context, req *activitymessagedto.UnpublishActivityMessageReq) (*activitymessagedto.UnpublishActivityMessageRes, error) {
+	row := cfgdao.GetActivityMessageById(req.ID)
+	if row == nil {
+		return nil, errercode.CreateCode(errercode.ActivityMessageNonExist)
+	}
+	if row.Status != entity.ActivityMessageStatusUnpublished {
+		row.Status = entity.ActivityMessageStatusUnpublished
+		row.PublishedAt = nil
+		if err := cfgdao.UpdateActivityMessage(row); err != nil {
+			return nil, err
+		}
+	}
+	return &activitymessagedto.UnpublishActivityMessageRes{Success: true, Status: entity.ActivityMessageStatusUnpublished}, nil
+}
+
+// GetPublishedActivityMessages 获取已发布活动消息(读 gcache 全量后过滤)
+func GetPublishedActivityMessages() []*entity.ActivityMessage {
+	rows := cfgdao.GetAllActivityMessagesCached()
+	if len(rows) == 0 {
+		return nil
+	}
+	ret := make([]*entity.ActivityMessage, 0, len(rows))
+	for _, row := range rows {
+		if row == nil || row.Status != entity.ActivityMessageStatusPublished {
+			continue
+		}
+		ret = append(ret, row)
+	}
+	return ret
+}

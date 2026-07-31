@@ -98,6 +98,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ShortVideoOnShelfCannotDelete:  "Approved short videos cannot be deleted",
 		ShortVideoOnShelfCannotUpdate:  "Approved short videos cannot be updated",
 		PrivateMessageUserBlocked:      "Cannot send private message due to block relationship",
+		ActivityMessageNonExist:        "Activity message does not exist",
 	},
 	lang.LangZHCN: {
 		Success:                        "成功",
@@ -192,6 +193,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ShortVideoOnShelfCannotDelete:  "已审核通过的短视频不可删除",
 		ShortVideoOnShelfCannotUpdate:  "已审核通过的短视频不可修改",
 		PrivateMessageUserBlocked:      "存在拉黑关系，无法发送私信",
+		ActivityMessageNonExist:        "活动消息不存在",
 	},
 	lang.LangZHTW: {
 		Success:                        "成功",
@@ -286,6 +288,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ShortVideoOnShelfCannotDelete:  "已審核通過的短視頻不可刪除",
 		ShortVideoOnShelfCannotUpdate:  "已審核通過的短視頻不可修改",
 		PrivateMessageUserBlocked:      "存在拉黑關係，無法發送私信",
+		ActivityMessageNonExist:        "活動消息不存在",
 	},
 }
 

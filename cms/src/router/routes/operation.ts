@@ -13,6 +13,12 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {title: '首页Banner'},
         },
         {
+            path: 'activity-message/activity-message-list',
+            name: 'ActivityMessageManagement',
+            component: () => import('@/views/operation/activity-message/activity-message-list.vue'),
+            meta: {title: '活动消息'},
+        },
+        {
             path: 'guild/guild-list',
             name: 'GuildManagement',
             component: () => import('@/views/operation/guild/guild-list.vue'),

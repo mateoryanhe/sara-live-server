@@ -43,6 +43,7 @@ func Init() {
 	initGiftController()                    // 礼物配置(CMS)
 	initGiftAppController()                 // 礼物列表(App)
 	initBannerController()                  // 首页Banner(CMS)
+	initActivityMessageController()         // 活动消息(CMS)
 	initBannerAppController()               // 首页Banner(App)
 	initTicketController()                  // 门票(CMS)
 	initTicketAppController()               // 门票(App)

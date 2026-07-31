@@ -5,6 +5,7 @@ import {cmsUserApi} from './modules/cmsuser'
 import {guildApi} from './modules/guild'
 import {giftApi} from './modules/gift'
 import {bannerApi} from './modules/banner'
+import {activityMessageApi} from './modules/activityMessage'
 import {ticketApi} from './modules/ticket'
 import {privateRoomBillingApi} from './modules/privateRoomBilling'
 import {shortVideoApi} from './modules/shortVideo'
@@ -39,6 +40,7 @@ export {
     guildApi,
     giftApi,
     bannerApi,
+    activityMessageApi,
     ticketApi,
     privateRoomBillingApi,
     shortVideoApi,
@@ -74,6 +76,7 @@ export default {
     guildApi,
     giftApi,
     bannerApi,
+    activityMessageApi,
     ticketApi,
     privateRoomBillingApi,
     shortVideoApi,

@@ -544,6 +544,47 @@ export interface BannerQuery extends PageQuery {
     statusFilter?: number
 }
 
+export interface ActivityMessage {
+    id: string
+    iconEn: string
+    iconEnName: string
+    iconEs: string
+    iconEsName: string
+    iconPt: string
+    iconPtName: string
+    iconHi: string
+    iconHiName: string
+    bgEn: string
+    bgEnName: string
+    bgEs: string
+    bgEsName: string
+    bgPt: string
+    bgPtName: string
+    bgHi: string
+    bgHiName: string
+    titleEn: string
+    titleEs: string
+    titlePt: string
+    titleHi: string
+    contentEn: string
+    contentEs: string
+    contentPt: string
+    contentHi: string
+    urlEn: string
+    urlEs: string
+    urlPt: string
+    urlHi: string
+    status: number
+    publishedAt: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface ActivityMessageQuery extends PageQuery {
+    title?: string
+    statusFilter?: number
+}
+
 export interface Ticket {
     id: string
     price: number

@@ -64,7 +64,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement')"
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement')"
             index="/operation">
           <template #title>
             <el-icon>
@@ -77,6 +77,12 @@
               <Picture/>
             </el-icon>
             <span>首页Banner</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('ActivityMessageManagement')" index="/operation/activity-message/activity-message-list">
+            <el-icon>
+              <Bell/>
+            </el-icon>
+            <span>活动消息</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('GuildManagement')" index="/operation/guild/guild-list">
             <el-icon>
@@ -375,7 +381,7 @@
 <script lang="ts" setup>
 import {computed, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {ArrowDown, Box, Coin, Collection, CollectionTag, Cpu, Document, EditPen, Expand, Fold, Key, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Search, Service, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Bell, Box, Coin, Collection, CollectionTag, Cpu, Document, EditPen, Expand, Fold, Key, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Search, Service, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {getIsAdmin, hasPermission} from '@/utils/permission'
 import {clearAuthSession} from '@/utils/auth'
 

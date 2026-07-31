@@ -175,6 +175,8 @@ const (
 	ShortVideoOnShelfCannotUpdate XRCode = 145
 	// PrivateMessageUserBlocked 存在拉黑关系,无法发送私信
 	PrivateMessageUserBlocked XRCode = 146
+	// ActivityMessageNonExist 活动消息不存在
+	ActivityMessageNonExist XRCode = 147
 )
 
 type XError struct {
