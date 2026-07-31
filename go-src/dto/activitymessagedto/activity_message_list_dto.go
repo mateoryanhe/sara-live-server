@@ -13,7 +13,7 @@ type ActivityMessageListReq struct {
 }
 
 type ActivityMessageListRes struct {
-	ID          string `json:"id"`
+	ID          string `json:"id" dc:"活动消息ID"`
 	IconEn      string `json:"iconEn" dc:"图标URL(英文)"`
 	IconEnName  string `json:"iconEnName" dc:"图标资源名(英文,编辑保存用)"`
 	IconEs      string `json:"iconEs" dc:"图标URL(西班牙语)"`
@@ -30,20 +30,20 @@ type ActivityMessageListRes struct {
 	BgPtName    string `json:"bgPtName" dc:"背景图资源名(葡萄牙语,编辑保存用)"`
 	BgHi        string `json:"bgHi" dc:"背景图URL(印地语)"`
 	BgHiName    string `json:"bgHiName" dc:"背景图资源名(印地语,编辑保存用)"`
-	TitleEn     string `json:"titleEn"`
-	TitleEs     string `json:"titleEs"`
-	TitlePt     string `json:"titlePt"`
-	TitleHi     string `json:"titleHi"`
-	ContentEn   string `json:"contentEn"`
-	ContentEs   string `json:"contentEs"`
-	ContentPt   string `json:"contentPt"`
-	ContentHi   string `json:"contentHi"`
-	UrlEn       string `json:"urlEn"`
-	UrlEs       string `json:"urlEs"`
-	UrlPt       string `json:"urlPt"`
-	UrlHi       string `json:"urlHi"`
-	Status      uint8  `json:"status"`
-	PublishedAt string `json:"publishedAt"`
-	CreatedAt   string `json:"createdAt"`
-	UpdatedAt   string `json:"updatedAt"`
+	TitleEn     string `json:"titleEn" dc:"标题(英文)"`
+	TitleEs     string `json:"titleEs" dc:"标题(西班牙语)"`
+	TitlePt     string `json:"titlePt" dc:"标题(葡萄牙语)"`
+	TitleHi     string `json:"titleHi" dc:"标题(印地语)"`
+	ContentEn   string `json:"contentEn" dc:"内容(英文)"`
+	ContentEs   string `json:"contentEs" dc:"内容(西班牙语)"`
+	ContentPt   string `json:"contentPt" dc:"内容(葡萄牙语)"`
+	ContentHi   string `json:"contentHi" dc:"内容(印地语)"`
+	UrlEn       string `json:"urlEn" dc:"跳转链接(英文)"`
+	UrlEs       string `json:"urlEs" dc:"跳转链接(西班牙语)"`
+	UrlPt       string `json:"urlPt" dc:"跳转链接(葡萄牙语)"`
+	UrlHi       string `json:"urlHi" dc:"跳转链接(印地语)"`
+	Status      uint8  `json:"status" dc:"发布状态(0未发布,1已发布)"`
+	PublishedAt string `json:"publishedAt" dc:"发布时间"`
+	CreatedAt   string `json:"createdAt" dc:"创建时间"`
+	UpdatedAt   string `json:"updatedAt" dc:"更新时间"`
 }

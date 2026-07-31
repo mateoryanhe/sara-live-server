@@ -50,6 +50,24 @@ func markSystemMessageRead(userId uint64, msgType uint8, readCount uint64) uint6
 	return cleared
 }
 
+func clearAllSystemMessageUnread(userId uint64) {
+	if userId == 0 {
+		return
+	}
+	unReadData := messagedao.GetUnReadByUserId(userId)
+	list := messagedao.GetSystemMessageUnreadListCache(userId)
+	for _, row := range list {
+		if row == nil || row.UnreadCount == 0 {
+			continue
+		}
+		row.SubUnread(row.UnreadCount)
+	}
+	messagedao.FlushSystemMessageUnreadListCache(userId, make([]*entity.UserSystemMessageUnread, 0))
+	if unReadData != nil && unReadData.SystemUnread > 0 {
+		unReadData.SubSystemUnread(unReadData.SystemUnread)
+	}
+}
+
 // ListSystemMessageUnread App端查询系统消息未读列表
 func ListSystemMessageUnread(ctx context.Context, _ *messagedto.AppSystemMessageUnreadListReq) (*messagedto.AppSystemMessageUnreadListRes, error) {
 	userId := httpserver.GetAuthId(ctx)

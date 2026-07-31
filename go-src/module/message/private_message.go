@@ -249,6 +249,7 @@ func ClearAllPrivateMessageUnread(ctx context.Context, req *messagedto.AppClearA
 	})
 	messagedao.ClearAllPrivateUnreadCache(userId)
 	clearAllPrivateMessageUnreadListCacheUnread(userId)
+	clearAllSystemMessageUnread(userId)
 
 	return &messagedto.AppClearAllPrivateMessageUnreadRes{
 		Success:       true,

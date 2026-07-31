@@ -8,7 +8,7 @@ import (
 	"xr-game-server/entity"
 )
 
-const SystemMessageUnreadListCacheMax = 10
+const SystemMessageUnreadListCacheMax = 100
 
 var systemMessageUnreadListCacheMgr *cache.CacheMgr
 
