@@ -822,7 +822,8 @@ const fetchErrorLogs = async () => {
     errorTotal.value = response.total || 0
   } catch (error) {
     console.error('查询Error日志失败:', error)
-    ElMessage.error('查询Error日志失败')
+    const message = error instanceof Error ? error.message : '查询Error日志失败'
+    ElMessage.error(message.includes('日志') ? message : `查询Error日志失败: ${message}`)
   } finally {
     errorLoading.value = false
   }
