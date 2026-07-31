@@ -18,7 +18,7 @@ func GetAppShortVideoStatList(ctx context.Context, req *shortvideodto.AppShortVi
 		return nil, errercode.CreateCode(errercode.EmptyUserId)
 	}
 	page, pageSize := normalizeAppListPage(req.Page, req.PageSize)
-	_, rows, err := shortvideodao.ListStatPageByAuthorId(authorId, page, pageSize)
+	rows, err := shortvideodao.ListStatPageByAuthorId(authorId, page, pageSize)
 	if err != nil {
 		return nil, err
 	}

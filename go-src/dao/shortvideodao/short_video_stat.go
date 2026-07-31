@@ -45,11 +45,11 @@ func GetStatByVideoId(videoId uint64) *entity.ShortVideoStat {
 	return stat
 }
 
-// ListStatPageByAuthorId 分页查询指定作者短视频统计数据(直接查库,按发布时间降序)
-func ListStatPageByAuthorId(authorId uint64, pageIndex, pageSize int) (int, []*entity.ShortVideoStat, error) {
+// ListStatPageByAuthorId 分页查询指定作者短视频统计数据(直接查库,按发布时间降序,不查总数)
+func ListStatPageByAuthorId(authorId uint64, pageIndex, pageSize int) ([]*entity.ShortVideoStat, error) {
 	list := make([]*entity.ShortVideoStat, 0)
 	if authorId == 0 {
-		return 0, list, nil
+		return list, nil
 	}
 	if pageIndex <= 0 {
 		pageIndex = 1
@@ -61,19 +61,9 @@ func ListStatPageByAuthorId(authorId uint64, pageIndex, pageSize int) (int, []*e
 	ctx := gctx.New()
 	videoTable := string(entity.TbShortVideo)
 	statTable := string(entity.TbShortVideoStat)
-	m := g.Model(statTable+" s").Ctx(ctx).
+	err := g.Model(statTable+" s").Ctx(ctx).
 		InnerJoin(videoTable+" v", "v."+string(db.IdName)+" = s."+string(db.IdName)).
-		Where("v."+string(entity.ShortVideoAuthorId)+" = ?", authorId)
-
-	total, err := m.Clone().Count()
-	if err != nil {
-		return 0, list, err
-	}
-	if total == 0 {
-		return 0, list, nil
-	}
-
-	err = m.Clone().
+		Where("v."+string(entity.ShortVideoAuthorId)+" = ?", authorId).
 		Fields("s.*").
 		OrderDesc("v." + string(db.CreatedAtName)).
 		OrderDesc("s." + string(db.IdName)).
@@ -81,9 +71,9 @@ func ListStatPageByAuthorId(authorId uint64, pageIndex, pageSize int) (int, []*e
 		Offset((pageIndex - 1) * pageSize).
 		Scan(&list)
 	if err != nil {
-		return 0, list, err
+		return list, err
 	}
-	return total, list, nil
+	return list, nil
 }
 
 func DeleteByVideoId(videoId uint64) error {
