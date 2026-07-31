@@ -5,6 +5,14 @@ server:
   openapiExportAll: false # OpenAPI导出范围:false=仅App端(含推送),true=全部(App+CMS)
   swaggerPath: "/f9acdb1da4ed11ecc115d613e291af14-swagger"  # 内置SwaggerUI展示地址  # 内置SwaggerUI展示地址
   serverRoot: 'D:/company-code/app-code/live-server'
+  imageStaticPrefix: "/images"  # 图片 URL 前缀,须在 staticPaths 中配置对应 path
+  staticPaths:
+    - prefix: "/cms"
+      path: "D:/company-code/app-code/live-server/cms"
+    - prefix: "/images"
+      path: "D:/log"
+    - prefix: "/official-site"
+      path: "D:/company-code/app-code/live-server/official-site"
   clientMaxBodySize: "5g"   # HTTP 请求体/上传上限(唯一大小限制,Go业务层不再校验)
   readTimeout: "120m"
   writeTimeout: "120m"
@@ -12,11 +20,6 @@ server:
   # PProf配置
   pprofEnabled: true
   pprofPattern: "/66dcd8e25ab3b339546ea1de5eb2d443e6fca76c76d11709f10533be8bd87d7d/pprof"
-  logPath: "D:/log"
-  logStdout: false                       # 访问日志同时输出到终端
-  accessLogEnabled: true                # 开启访问日志(执行时间、IP、URL)
-  accessLogPattern: "access-{Y-m-d}.log"
-  errorLogPattern: "error-{Y-m-d}.log"
   ####自定义配置
   debugEnv: true #是否开启debug环境,不会检查权限
   exitTime: 30 #退出系统等待多少秒，开始发送kill -9
@@ -41,26 +44,15 @@ bufferSize:
 
 
 logger:
-  timeFormat: "2006-01-02T15:04:05"
-  level: "all"
-  flags: 4
-  path: "D:/log"
-  file: "detail-{Y-m-d}.log"
-  rotateExpire: "3d"
-  rotateBackupLimit: 0
-  rotateBackupExpire: 0
-  rotateBackupCompress: 0
-  stdoutColorDisabled: false
-  writerColorEnable: true
   detail:
     path: "D:/log"
-    file: "detail-{Y-m-d}.log"
+    file: "detail.log"
     stdout: true
     header: true
   error:
     path: "D:/log"
-    file: "error-{Y-m-d}.log"
-    stdout: false
+    file: "error.log"
+    stdout: true
 
 database:
   logger:

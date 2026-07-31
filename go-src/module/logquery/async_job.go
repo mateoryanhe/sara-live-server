@@ -7,9 +7,8 @@ import (
 	"time"
 
 	"xr-game-server/core/xrlog"
-
 	"xr-game-server/core/xrpool"
-	"xr-game-server/core/xrlog"
+	"xr-game-server/core/xrtimer"
 	"xr-game-server/dto/logquerydto"
 	"xr-game-server/errercode"
 
@@ -57,12 +56,12 @@ type logQueryJobState struct {
 	updatedAt     time.Time
 }
 
+var (
 	logQueryJobStates    sync.Map
 	logQueryJobInitOnce  sync.Once
 	logQueryJobSerialMu  sync.Mutex
 	logQueryPendingMu    sync.Mutex
 	logQueryPendingCount int
-	logQueryPendingCount   int
 )
 
 func initLogQueryJobWorker() {

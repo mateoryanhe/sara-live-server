@@ -5,7 +5,7 @@ import (
 	"xr-game-server/core"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/shutdown"
-	"xr-game-server/core
+	"xr-game-server/core/xrpool"
 	"xr-game-server/dao"
 	"xr-game-server/entity"
 	"xr-game-server/module"
