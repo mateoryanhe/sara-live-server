@@ -59,11 +59,9 @@ func GetShortVideoWatch(userId uint64, pageIndex, pageSize int) []*entity.ShortV
 	if pageIndex <= 0 {
 		pageIndex = 1
 	}
-	if pageSize <= 0 {
-		pageSize = WatchListCachePageSize
-	}
+	pageSize = WatchListCachePageSize
 
-	if pageIndex <= watchListCachedPages && pageSize == WatchListCachePageSize {
+	if pageIndex <= watchListCachedPages {
 		cached := getWatchListCache(userId)
 		start := (pageIndex - 1) * pageSize
 		if start >= len(cached) {
