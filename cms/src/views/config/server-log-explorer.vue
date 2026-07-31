@@ -7,6 +7,7 @@
           <span class="server-time-tip">
             服务器时间: {{ serverTimeDisplay }}
             <template v-if="exportPathTip"> · 导出: {{ exportPathTip }}</template>
+            · 查询最多等待 30 分钟
           </span>
         </div>
       </template>
@@ -262,7 +263,7 @@
         </el-tab-pane>
 
         <el-tab-pane label="详情日志" lazy name="detail">
-          <div class="detail-query-tip">查询已改为后台排队执行（单线程串行），通常 1 分钟内返回；建议填写 TraceId / URL 等条件</div>
+          <div class="detail-query-tip">后台排队执行（单线程串行），建议填写 TraceId / URL 等条件缩小范围</div>
           <el-form :model="detailForm" class="search-form" inline label-width="90px">
             <el-form-item label="开始时间">
               <el-date-picker

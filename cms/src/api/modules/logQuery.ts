@@ -28,7 +28,7 @@ import type {
 } from '@/types/api'
 
 const LOG_QUERY_POLL_INTERVAL_MS = 2000
-const LOG_QUERY_POLL_TIMEOUT_MS = 90000
+const LOG_QUERY_POLL_TIMEOUT_MS = 30 * 60 * 1000
 
 const sleep = (ms: number) => new Promise<void>((resolve) => {
     setTimeout(resolve, ms)
@@ -40,13 +40,14 @@ export async function runAsyncLogQuery<T>(
     queryType: string,
     payload: object,
     onStatus?: LogQueryStatusHandler,
+    pollTimeoutMs: number = LOG_QUERY_POLL_TIMEOUT_MS,
 ): Promise<T> {
     const submit = await request.post<LogQueryJobSubmitResult>('/logQuery/submitJob', {
         queryType,
         payload,
     })
 
-    const deadline = Date.now() + LOG_QUERY_POLL_TIMEOUT_MS
+    const deadline = Date.now() + pollTimeoutMs
     while (Date.now() < deadline) {
         await sleep(LOG_QUERY_POLL_INTERVAL_MS)
         const job = await request.post<LogQueryJobResult<T>>('/logQuery/getJob', {jobId: submit.jobId})
@@ -86,8 +87,9 @@ async function runExportQuery<T>(
     payload: object,
     parse: (text: string, exportRes: LogQueryExportResult) => T,
     onStatus?: LogQueryStatusHandler,
+    pollTimeoutMs: number = LOG_QUERY_POLL_TIMEOUT_MS,
 ): Promise<T> {
-    const exportRes = await runAsyncLogQuery<LogQueryExportResult>(queryType, payload, onStatus)
+    const exportRes = await runAsyncLogQuery<LogQueryExportResult>(queryType, payload, onStatus, pollTimeoutMs)
     try {
         const text = await downloadExportFile(exportRes)
         return parse(text, exportRes)

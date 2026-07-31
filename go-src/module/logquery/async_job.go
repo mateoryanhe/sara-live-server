@@ -18,8 +18,8 @@ import (
 )
 
 const (
-	logQueryJobTimeout   = 55 * time.Second
-	logQueryJobTTL       = 10 * time.Minute
+	logQueryJobTimeout   = 30 * time.Minute
+	logQueryJobTTL       = 40 * time.Minute // 需大于任务超时,避免运行中 job 被清理
 	logQueryJobQueueSize = 32
 
 	logQueryJobStatusPending = "pending"
