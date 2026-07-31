@@ -191,9 +191,9 @@ plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "chmod +x 
 REM No need to create session directory
 REM Skipping session directory creation as per requirement
 
-REM Start program
+REM Start program (cd to app dir so GoFrame can find config.yaml)
 echo Starting program...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "sudo bash -c 'nohup %REMOTE_DIR%/%APP_NAME% >/dev/null 2>&1 &'"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "sudo bash -c 'cd %REMOTE_DIR% && nohup ./%APP_NAME% >/dev/null 2>&1 &'"
 
 echo.
 echo ================================

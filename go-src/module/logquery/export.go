@@ -31,12 +31,19 @@ var (
 
 func initExportCleanup() {
 	exportInitOnce.Do(func() {
+		refreshLogQueryConfig()
 		xrtimer.AddSingleton(gctx.New(), time.Minute, cleanupLogQueryExports)
 	})
 }
 
 func cleanupLogQueryExports(_ context.Context) {
-	cfg := loadLogQueryConfig()
+	logQueryConfigMu.RLock()
+	ready := logQueryConfigReady
+	cfg := logQueryConfigCache
+	logQueryConfigMu.RUnlock()
+	if !ready {
+		return
+	}
 	expireBefore := time.Now().Add(-time.Duration(cfg.ExportTTLMinutes) * time.Minute)
 	exportRecords.Range(func(key, value any) bool {
 		record, ok := value.(*exportRecord)

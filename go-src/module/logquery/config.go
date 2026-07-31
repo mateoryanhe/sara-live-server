@@ -1,6 +1,7 @@
 package logquery
 
 import (
+	"context"
 	"path/filepath"
 	"strings"
 	"time"
@@ -36,46 +37,50 @@ type logQueryConfig struct {
 	MaxPageSize        int
 }
 
-func loadLogQueryConfig() logQueryConfig {
+func buildLogQueryConfig() logQueryConfig {
 	ctx := gctx.New()
-	logDir := strings.TrimSpace(g.Cfg().MustGet(ctx, "logger.access.path").String())
+	logDir := cfgGetString(ctx, "logger.access.path")
 	if logDir == "" {
-		logDir = strings.TrimSpace(g.Cfg().MustGet(ctx, "logger.detail.path").String())
+		logDir = cfgGetString(ctx, "logger.detail.path")
 	}
 	if logDir == "" {
-		logDir = strings.TrimSpace(g.Cfg().MustGet(ctx, "logger.error.path").String())
+		logDir = cfgGetString(ctx, "logger.error.path")
 	}
 	if logDir == "" {
-		logDir = strings.TrimSpace(g.Cfg().MustGet(ctx, "server.logPath").String())
+		logDir = cfgGetString(ctx, "server.logPath")
 	}
 
-	exportStaticPrefix := normalizeLogQueryURLPrefix(g.Cfg().MustGet(ctx, "logQuery.exportStaticPrefix").String())
+	exportStaticPrefix := normalizeLogQueryURLPrefix(cfgGetString(ctx, "logQuery.exportStaticPrefix"))
 	if exportStaticPrefix == "" {
 		exportStaticPrefix = defaultExportStaticPrefix
 	}
-	exportSubDir := strings.TrimSpace(g.Cfg().MustGet(ctx, "logQuery.exportSubDir").String())
+	exportSubDir := cfgGetString(ctx, "logQuery.exportSubDir")
 	if exportSubDir == "" {
 		exportSubDir = defaultExportSubDir
 	}
 
 	exportRoot := strings.TrimSpace(cfg.GetStaticPathRoot(exportStaticPrefix))
 	if exportRoot == "" {
-		exportRoot = strings.TrimSpace(cfg.ResolvePhysicalDir(exportStaticPrefix))
+		if serverCfg := cfg.GetServerCfg(); serverCfg != nil {
+			if root := strings.TrimSpace(serverCfg.StaticResPath); root != "" {
+				exportRoot = filepath.Join(root, strings.Trim(exportStaticPrefix, "/"))
+			}
+		}
 	}
 	if exportRoot == "" {
-		exportRoot = filepath.Clean(cfg.GetServerRoot())
+		exportRoot = "."
 	}
 
-	accessPattern := g.Cfg().MustGet(ctx, "logger.access.file").String()
-	if strings.TrimSpace(accessPattern) == "" {
-		accessPattern = g.Cfg().MustGet(ctx, "server.accessLogPattern").String()
+	accessPattern := cfgGetString(ctx, "logger.access.file")
+	if accessPattern == "" {
+		accessPattern = cfgGetString(ctx, "server.accessLogPattern")
 	}
 
 	return logQueryConfig{
 		LogDir:             filepath.Clean(logDir),
 		AccessPrefix:       logFilePrefixFromPattern(accessPattern),
-		DetailPrefix:       logFilePrefixFromPattern(g.Cfg().MustGet(ctx, "logger.detail.file").String()),
-		ErrorPrefix:        logFilePrefixFromPattern(g.Cfg().MustGet(ctx, "logger.error.file").String()),
+		DetailPrefix:       logFilePrefixFromPattern(cfgGetString(ctx, "logger.detail.file")),
+		ErrorPrefix:        logFilePrefixFromPattern(cfgGetString(ctx, "logger.error.file")),
 		ExportStaticPrefix: exportStaticPrefix,
 		ExportSubDir:       exportSubDir,
 		ExportRoot:         filepath.Clean(exportRoot),
@@ -83,6 +88,14 @@ func loadLogQueryConfig() logQueryConfig {
 		MaxMatchLines:      defaultMaxMatchLines,
 		MaxPageSize:        defaultMaxPageSize,
 	}
+}
+
+func cfgGetString(ctx context.Context, key string) string {
+	value, err := g.Cfg().Get(ctx, key)
+	if err != nil || value.IsNil() {
+		return ""
+	}
+	return strings.TrimSpace(value.String())
 }
 
 func normalizeLogQueryURLPrefix(prefix string) string {
