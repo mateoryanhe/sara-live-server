@@ -74,6 +74,7 @@ func Init() {
 	initUserMessageUnread()
 	initUserMessageUnreadDetail()
 	initUserSystemMessageUnread()
+	initUserPersonalSystemMessage()
 	initCallOrder()
 	initCallUser()
 	initSystemTotalStat()

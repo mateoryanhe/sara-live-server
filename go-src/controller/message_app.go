@@ -45,6 +45,11 @@ func (c *MessageAppController) BatchDeletePrivateMessage(ctx context.Context, re
 	return message.BatchDeletePrivateMessage(ctx, req)
 }
 
+// PersonalSystemMessageList App端查询个人系统消息列表
+func (c *MessageAppController) PersonalSystemMessageList(ctx context.Context, req *messagedto.AppPersonalSystemMessageListReq) (*messagedto.AppPersonalSystemMessageListRes, error) {
+	return message.ListPersonalSystemMessage(ctx, req)
+}
+
 // ActivityMessageList App端查询活动消息列表
 func (c *MessageAppController) ActivityMessageList(ctx context.Context, req *messagedto.AppActivityMessageListReq) (*messagedto.AppActivityMessageListRes, error) {
 	return message.ListUserActivityMessage(ctx, req)
