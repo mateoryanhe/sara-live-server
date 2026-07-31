@@ -6,10 +6,16 @@ import (
 	"sync"
 	"time"
 
+	"xr-game-server/core/xrlog"
+
+	"xr-game-server/core/xrpool"
+	"xr-game-server/core/xrlog"
 	"xr-game-server/dto/logquerydto"
 	"xr-game-server/errercode"
 
+	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/util/guid"
+	"github.com/gogf/gf/v2/util/gutil"
 )
 
 const (
@@ -51,18 +57,33 @@ type logQueryJobState struct {
 	updatedAt     time.Time
 }
 
-var (
-	logQueryJobQueue    chan *logQueryJob
-	logQueryJobStates   sync.Map
-	logQueryJobInitOnce sync.Once
+	logQueryJobStates    sync.Map
+	logQueryJobInitOnce  sync.Once
+	logQueryJobSerialMu  sync.Mutex
+	logQueryPendingMu    sync.Mutex
+	logQueryPendingCount int
+	logQueryPendingCount   int
 )
 
 func initLogQueryJobWorker() {
 	logQueryJobInitOnce.Do(func() {
-		logQueryJobQueue = make(chan *logQueryJob, logQueryJobQueueSize)
-		go logQueryJobWorker()
-		go logQueryJobCleanupLoop()
+		xrtimer.AddSingleton(gctx.New(), time.Minute, cleanupLogQueryJobStates)
 	})
+}
+
+func incLogQueryPending() int {
+	logQueryPendingMu.Lock()
+	defer logQueryPendingMu.Unlock()
+	logQueryPendingCount++
+	return logQueryPendingCount
+}
+
+func decLogQueryPending() {
+	logQueryPendingMu.Lock()
+	defer logQueryPendingMu.Unlock()
+	if logQueryPendingCount > 0 {
+		logQueryPendingCount--
+	}
 }
 
 func SubmitLogQueryJob(_ context.Context, req *logquerydto.CMSSubmitLogQueryJobReq) (*logquerydto.CMSSubmitLogQueryJobRes, error) {
@@ -74,9 +95,14 @@ func SubmitLogQueryJob(_ context.Context, req *logquerydto.CMSSubmitLogQueryJobR
 	}
 	initLogQueryJobWorker()
 
+	queuePosition := incLogQueryPending()
+	if queuePosition > logQueryJobQueueSize {
+		decLogQueryPending()
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+
 	jobID := guid.S()
 	now := time.Now()
-	queuePosition := len(logQueryJobQueue) + 1
 	state := &logQueryJobState{
 		id:            jobID,
 		queryType:     req.QueryType,
@@ -94,12 +120,12 @@ func SubmitLogQueryJob(_ context.Context, req *logquerydto.CMSSubmitLogQueryJobR
 		createdAt: now,
 	}
 
-	select {
-	case logQueryJobQueue <- job:
-	default:
-		logQueryJobStates.Delete(jobID)
-		return nil, errercode.CreateCode(errercode.InvalidParam)
-	}
+	xrpool.AddWithRecover(gctx.New(), func(ctx context.Context) {
+		defer decLogQueryPending()
+		logQueryJobSerialMu.Lock()
+		defer logQueryJobSerialMu.Unlock()
+		runLogQueryJob(job)
+	})
 
 	return &logquerydto.CMSSubmitLogQueryJobRes{
 		JobId:         jobID,
@@ -137,12 +163,6 @@ func isSupportedLogQueryJobType(queryType string) bool {
 	}
 }
 
-func logQueryJobWorker() {
-	for job := range logQueryJobQueue {
-		runLogQueryJob(job)
-	}
-}
-
 func runLogQueryJob(job *logQueryJob) {
 	if job == nil {
 		return
@@ -156,12 +176,22 @@ func runLogQueryJob(job *logQueryJob) {
 	ctx, cancel := context.WithTimeout(context.Background(), logQueryJobTimeout)
 	defer cancel()
 
-	result, err := executeLogQueryJob(ctx, job.queryType, job.payload)
-	if err != nil {
-		updateLogQueryJobState(state, logQueryJobStatusFailed, err.Error(), nil)
-		return
-	}
-	updateLogQueryJobState(state, logQueryJobStatusDone, "", result)
+	// TryCatch: panic 时更新任务状态; xrpool.AddWithRecover 写 error 日志并防止进程退出
+	gutil.TryCatch(ctx, func(try context.Context) {
+		result, err := executeLogQueryJob(try, job.queryType, job.payload)
+		if err != nil {
+			updateLogQueryJobState(state, logQueryJobStatusFailed, err.Error(), nil)
+			return
+		}
+		updateLogQueryJobState(state, logQueryJobStatusDone, "", result)
+	}, func(catch context.Context, exception error) {
+		xrlog.ErrorWithErr(catch, "LogQueryJob", job.queryType, exception)
+		msg := "日志查询异常"
+		if exception != nil {
+			msg = exception.Error()
+		}
+		updateLogQueryJobState(state, logQueryJobStatusFailed, msg, nil)
+	})
 }
 
 func executeLogQueryJob(ctx context.Context, queryType string, payload json.RawMessage) (any, error) {
@@ -228,24 +258,20 @@ func updateLogQueryJobState(state *logQueryJobState, status, errMsg string, resu
 	state.updatedAt = time.Now()
 }
 
-func logQueryJobCleanupLoop() {
-	ticker := time.NewTicker(time.Minute)
-	defer ticker.Stop()
-	for range ticker.C {
-		expireBefore := time.Now().Add(-logQueryJobTTL)
-		logQueryJobStates.Range(func(key, value any) bool {
-			state, ok := value.(*logQueryJobState)
-			if !ok || state == nil {
-				logQueryJobStates.Delete(key)
-				return true
-			}
-			state.mu.RLock()
-			expired := state.updatedAt.Before(expireBefore)
-			state.mu.RUnlock()
-			if expired {
-				logQueryJobStates.Delete(key)
-			}
+func cleanupLogQueryJobStates(_ context.Context) {
+	expireBefore := time.Now().Add(-logQueryJobTTL)
+	logQueryJobStates.Range(func(key, value any) bool {
+		state, ok := value.(*logQueryJobState)
+		if !ok || state == nil {
+			logQueryJobStates.Delete(key)
 			return true
-		})
-	}
+		}
+		state.mu.RLock()
+		expired := state.updatedAt.Before(expireBefore)
+		state.mu.RUnlock()
+		if expired {
+			logQueryJobStates.Delete(key)
+		}
+		return true
+	})
 }

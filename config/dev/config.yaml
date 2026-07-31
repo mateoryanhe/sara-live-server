@@ -43,35 +43,29 @@ bufferSize:
 logger:
   detail:                               # API详情日志；启动时同步为默认 g.Log()
     path: "/home/ec2-user/log/"
-    file: "detail-{Y-m-d}.log"
-    stdout: true
+    file: "detail.log"
     header: true
-    flags: 45
+    flags: 1                            # 仅异步,时间靠 timeFormat,不含源码路径,便于 CMS 解析
     timeFormat: "2006-01-02T15:04:05.000"
-    rotateExpire: "1d"              # 保留最近3天的按日日志，过期直接删（不产生时间戳备份）
-    rotateBackupLimit: 3          # 0=不保留备份，过期直接删，不产生 detail-xxx.20260720....log
-    stdoutColorDisabled: false
-    writerColorEnable: true
+    rotateSize: "10M"              # 保留最近3天的按日日志，过期直接删（不产生时间戳备份）
+    rotateBackupLimit: 0          # 0=不保留备份，过期直接删，不产生 detail-xxx.20260720....log
   access:                               # HTTP Server access 日志(替代 GF 内置 access 日志)
     path: "/home/ec2-user/log/"
-    file: "access-{Y-m-d}.log"
-    stdout: false
+    file: "access.log"
     header: true                        # 保留时间戳与 TraceId,供日志查询过滤与解析
     levelPrint: false
-    flags: 40
-    rotateExpire: "1d"
-    rotateBackupLimit: 3
+    flags: 1                            # 仅时间戳,不含源码路径/级别,便于 CMS 解析
+    timeFormat: "2006-01-02T15:04:05.000"
+    rotateSize: "10M"              # 保留最近3天的按日日志，过期直接删（不产生时间戳备份）
+    rotateBackupLimit: 0          # 0=不保留备份，过期直接删，不产生 detail-xxx.20260720....log
   error:                                # HTTP 框架错误 + xrlog 错误日志，g.Log("error")
     path: "/home/ec2-user/log/"
-    file: "error-{Y-m-d}.log"
-    stdout: false
-    flags: 45
+    file: "error.log"
+    flags: 1                            # 仅异步,时间靠 timeFormat,不含源码路径,便于 CMS 解析
     header: true                        # 保留时间戳与 TraceId,供日志查询过滤与解析
     timeFormat: "2006-01-02T15:04:05.000"
-    rotateExpire: "1d"              # 保留最近3天的按日日志，过期直接删（不产生时间戳备份）
-    rotateBackupLimit: 3          # 0=不保留备份，过期直接删，不产生 detail-xxx.20260720....log
-    stdoutColorDisabled: false
-    writerColorEnable: true
+    rotateSize: "10M"              # 保留最近3天的按日日志，过期直接删（不产生时间戳备份）
+    rotateBackupLimit: 0          # 0=不保留备份，过期直接删，不产生 detail-xxx.20260720....log
 
 database:
   logger:

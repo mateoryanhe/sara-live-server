@@ -5,12 +5,18 @@ import (
 	"xr-game-server/core"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/shutdown"
+	"xr-game-server/core
 	"xr-game-server/dao"
 	"xr-game-server/entity"
 	"xr-game-server/module"
+
+	"github.com/gogf/gf/v2/os/gctx"
 )
 
 func main() {
+	ctx := gctx.New()
+	defer xrpool.RecoverMain(ctx, "main")
+
 	//底层框架初始化
 	core.Init()
 	//数据库表结构初始化
@@ -24,5 +30,4 @@ func main() {
 	httpserver.Ready()
 	//开始监听程序退出
 	shutdown.ListenShutdown()
-
 }

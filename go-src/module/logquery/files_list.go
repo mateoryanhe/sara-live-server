@@ -48,7 +48,8 @@ func sortLogFilesByDate(files []string) {
 }
 
 func extractDateFromFileName(name string) (string, bool) {
-	if len(name) >= 10 {
+	// access-2026-07-30.log → suffix "2026-07-30" (need len >= 14)
+	if len(name) >= 14 {
 		candidate := name[len(name)-14 : len(name)-4]
 		if len(candidate) == 10 && candidate[4] == '-' && candidate[7] == '-' {
 			return candidate, true

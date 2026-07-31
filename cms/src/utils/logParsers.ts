@@ -12,7 +12,7 @@ import type {
 const LOG_QUERY_PATH = '/logQuery/'
 
 const detailLogRe = /^(\S+)\s+\[(\w+)\]\s+(?:\{([a-fA-F0-9]+)\}\s+)?(.+)$/
-const accessLogRe = /^(\S+)\s+\{([a-fA-F0-9]+)\}\s+(\d+)\s+"(\w+)\s+\S+\s+\S+\s+(\S+)\s+HTTP\/[\d.]+"\s+([\d.]+),\s+([^,]+),/
+const accessLogRe = /^(\S+)\s+(?:\[(\w+)\]\s+)?(?:\{([a-fA-F0-9]+)\}\s+)?(?:\S+\.go:\d+\s+)?(\d+)\s+"(\w+)\s+\S+\s+\S+\s+(\S+)\s+HTTP\/[\d.]+"\s+([\d.]+),\s+([^,]+),/
 const accessLogRawRe = /^(\d+)\s+"(\w+)\s+\S+\s+\S+\s+(\S+)\s+HTTP\/[\d.]+"\s+([\d.]+),\s+([^,]+),/
 const errorLogHeaderRe = /^(\S+)\s+\[(\w+)\]\s+\{([a-f0-9]+)\}\s+(\d+)\s+"(\w+)\s+\S+\s+\S+\s+(\S+)\s+HTTP\/[\d.]+"\s+([\d.]+),\s+([^,]+),/
 const errorMetaRe = /,\s*(-?\d+),\s*"([^"]*)"(?:,\s*(.*))?$/
@@ -315,13 +315,13 @@ export const parseAccessLogLine = (line: string): AccessLogItem | null => {
     if (match) {
         return {
             time: match[1],
-            traceId: match[2],
+            traceId: match[3] || '',
             authId,
-            statusCode: Number(match[3]) || 0,
-            method: match[4],
-            url: match[5],
-            handlerMs: Number(match[6]) * 1000,
-            ip: match[7].trim(),
+            statusCode: Number(match[4]) || 0,
+            method: match[5],
+            url: match[6],
+            handlerMs: Number(match[7]) * 1000,
+            ip: match[8].trim(),
             userAgent: extractUserAgent(trimmed),
             raw: trimmed,
         }

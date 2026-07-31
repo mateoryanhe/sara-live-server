@@ -1,7 +1,12 @@
 package controller
 
 import (
+	"context"
+
 	"xr-game-server/core/httpserver"
+	"xr-game-server/core/xrpool"
+
+	"github.com/gogf/gf/v2/os/gctx"
 )
 
 func Init() {
@@ -69,5 +74,7 @@ func Init() {
 	initResourceMetricController()          // 系统资源监控(CMS)
 	initLogQueryController()                // 日志查询(CMS)
 	httpserver.InitWebsocket()
-	go httpserver.InitHttpServer()
+	xrpool.AddWithRecover(gctx.New(), func(ctx context.Context) {
+		httpserver.InitHttpServer()
+	})
 }

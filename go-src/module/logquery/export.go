@@ -1,6 +1,7 @@
 package logquery
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -8,8 +9,10 @@ import (
 	"sync"
 	"time"
 
+	"xr-game-server/core/xrtimer"
 	"xr-game-server/dto/logquerydto"
 
+	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/util/guid"
 )
 
@@ -28,8 +31,23 @@ var (
 
 func initExportCleanup() {
 	exportInitOnce.Do(func() {
-		go exportCleanupLoop()
+		xrtimer.AddSingleton(gctx.New(), time.Minute, cleanupLogQueryExports)
 	})
+}
+
+func cleanupLogQueryExports(_ context.Context) {
+	cfg := loadLogQueryConfig()
+	expireBefore := time.Now().Add(-time.Duration(cfg.ExportTTLMinutes) * time.Minute)
+	exportRecords.Range(func(key, value any) bool {
+		record, ok := value.(*exportRecord)
+		if !ok || record.createdAt.After(expireBefore) {
+			return true
+		}
+		removeFile(record.absPath)
+		exportRecords.Delete(key)
+		return true
+	})
+	cleanExportDir(cfg.exportAbsDir(), expireBefore)
 }
 
 type shellExportResult struct {
@@ -411,25 +429,6 @@ func deleteExport(exportID string) error {
 	removeFile(filepath.Join(cfg.exportAbsDir(), exportID+".stats.tsv"))
 	removeFile(filepath.Join(cfg.exportAbsDir(), exportID+".trend.tsv"))
 	return nil
-}
-
-func exportCleanupLoop() {
-	cfg := loadLogQueryConfig()
-	ticker := time.NewTicker(time.Minute)
-	defer ticker.Stop()
-	for range ticker.C {
-		expireBefore := time.Now().Add(-time.Duration(cfg.ExportTTLMinutes) * time.Minute)
-		exportRecords.Range(func(key, value any) bool {
-			record, ok := value.(*exportRecord)
-			if !ok || record.createdAt.After(expireBefore) {
-				return true
-			}
-			removeFile(record.absPath)
-			exportRecords.Delete(key)
-			return true
-		})
-		cleanExportDir(cfg.exportAbsDir(), expireBefore)
-	}
 }
 
 func cleanExportDir(dir string, expireBefore time.Time) {
