@@ -1,4 +1,4 @@
-package cfgdao
+package messagedao
 
 import (
 	"context"
@@ -17,7 +17,7 @@ const activityMessageCacheKey = "all"
 
 var activityMessageCacheMgr *cache.CacheMgr
 
-func InitActivityMessageDao() {
+func initActivityMessageDao() {
 	activityMessageCacheMgr = cache.NewCacheMgr()
 }
 

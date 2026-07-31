@@ -1,0 +1,138 @@
+package message
+
+import (
+	"context"
+	"sort"
+	"time"
+
+	"xr-game-server/core/httpserver"
+	"xr-game-server/dao/messagedao"
+	"xr-game-server/dto/messagedto"
+	"xr-game-server/entity"
+	"xr-game-server/errercode"
+	"xr-game-server/module/upload"
+)
+
+// ListUserActivityMessage App端查询活动消息列表
+func ListUserActivityMessage(ctx context.Context, _ *messagedto.AppActivityMessageListReq) (*messagedto.AppActivityMessageListRes, error) {
+	userId := httpserver.GetAuthId(ctx)
+	if userId == 0 {
+		return nil, errercode.CreateCode(errercode.EmptyUserId)
+	}
+
+	syncNewActivityMessages(userId)
+
+	detailMap := make(map[uint64]*entity.ActivityMessage)
+	for _, msg := range messagedao.GetAllActivityMessagesCached() {
+		if msg != nil && msg.ID != 0 && msg.Status == entity.ActivityMessageStatusPublished {
+			detailMap[msg.ID] = msg
+		}
+	}
+
+	userRows := messagedao.GetUserActivityMessageListCacheA(userId)
+	list := make([]*messagedto.AppActivityMessageItem, 0, len(userRows))
+	for _, row := range userRows {
+		if row == nil {
+			continue
+		}
+		detail := detailMap[row.ActivityMessageId]
+		if detail == nil {
+			continue
+		}
+		list = append(list, toAppActivityMessageItem(detail))
+	}
+	return &messagedto.AppActivityMessageListRes{List: list}, nil
+}
+
+func toAppActivityMessageItem(msg *entity.ActivityMessage) *messagedto.AppActivityMessageItem {
+	if msg == nil {
+		return nil
+	}
+	publishedAt := ""
+	if msg.PublishedAt != nil {
+		publishedAt = formatMessageTime(*msg.PublishedAt)
+	}
+	return &messagedto.AppActivityMessageItem{
+		Id:          msg.ID,
+		IconEn:      upload.GetUrlByName(msg.IconEn),
+		IconEs:      upload.GetUrlByName(msg.IconEs),
+		IconPt:      upload.GetUrlByName(msg.IconPt),
+		IconHi:      upload.GetUrlByName(msg.IconHi),
+		BgEn:        upload.GetUrlByName(msg.BgEn),
+		BgEs:        upload.GetUrlByName(msg.BgEs),
+		BgPt:        upload.GetUrlByName(msg.BgPt),
+		BgHi:        upload.GetUrlByName(msg.BgHi),
+		TitleEn:     msg.TitleEn,
+		TitleEs:     msg.TitleEs,
+		TitlePt:     msg.TitlePt,
+		TitleHi:     msg.TitleHi,
+		ContentEn:   msg.ContentEn,
+		ContentEs:   msg.ContentEs,
+		ContentPt:   msg.ContentPt,
+		ContentHi:   msg.ContentHi,
+		UrlEn:       msg.UrlEn,
+		UrlEs:       msg.UrlEs,
+		UrlPt:       msg.UrlPt,
+		UrlHi:       msg.UrlHi,
+		PublishedAt: publishedAt,
+	}
+}
+
+func syncNewActivityMessages(userId uint64) {
+	published := GetPublishedActivityMessages()
+	if len(published) == 0 {
+		return
+	}
+
+	userList := messagedao.GetUserActivityMessageListCacheA(userId)
+	owned := make(map[uint64]struct{}, len(userList))
+	for _, row := range userList {
+		if row != nil {
+			owned[row.ActivityMessageId] = struct{}{}
+		}
+	}
+
+	newRows := make([]*entity.UserActivityMessage, 0)
+	for _, msg := range published {
+		if msg == nil || msg.ID == 0 {
+			continue
+		}
+		if _, ok := owned[msg.ID]; ok {
+			continue
+		}
+		newRows = append(newRows, entity.NewUserActivityMessage(userId, msg.ID, msg.PublishedAt))
+	}
+	if len(newRows) == 0 {
+		return
+	}
+
+	messagedao.FlushUserActivityMessageListCacheA(userId, mergeUserActivityMessageList(newRows, userList))
+
+	delta := uint64(len(newRows))
+	AddSystemMessageUnread(userId, entity.UserSystemMessageUnreadTypeActivity, delta)
+	messagedao.GetUnReadByUserId(userId).AddSystemUnread(delta)
+}
+
+func mergeUserActivityMessageList(newRows, existing []*entity.UserActivityMessage) []*entity.UserActivityMessage {
+	merged := make([]*entity.UserActivityMessage, 0, len(newRows)+len(existing))
+	merged = append(merged, newRows...)
+	for _, row := range existing {
+		if row != nil {
+			merged = append(merged, row)
+		}
+	}
+	sort.Slice(merged, func(i, j int) bool {
+		return userActivityMessagePublishedAt(merged[i]).After(userActivityMessagePublishedAt(merged[j]))
+	})
+	if len(merged) > messagedao.UserActivityMessageListCacheASize {
+		merged = merged[:messagedao.UserActivityMessageListCacheASize]
+	}
+	return merged
+}
+
+func userActivityMessagePublishedAt(row *entity.UserActivityMessage) time.Time {
+	if row == nil || row.PublishedAt == nil {
+		return time.Time{}
+	}
+	return *row.PublishedAt
+}

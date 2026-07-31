@@ -16,6 +16,7 @@ func GetMessageUnreadCount(ctx context.Context, _ *messagedto.AppMessageUnreadCo
 		return nil, errercode.CreateCode(errercode.EmptyUserId)
 	}
 
+	syncNewActivityMessages(userId)
 	unReadData := messagedao.GetUnReadByUserId(userId)
 	return &messagedto.AppMessageUnreadCountRes{
 		SystemUnread:  unReadData.SystemUnread,

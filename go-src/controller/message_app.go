@@ -45,12 +45,17 @@ func (c *MessageAppController) BatchDeletePrivateMessage(ctx context.Context, re
 	return message.BatchDeletePrivateMessage(ctx, req)
 }
 
-// SystemMessageList App端查询系统消息列表
-func (c *MessageAppController) SystemMessageList(ctx context.Context, req *messagedto.AppSystemMessageListReq) (*messagedto.AppSystemMessageListRes, error) {
-	return message.ListSystemMessage(ctx, req)
+// ActivityMessageList App端查询活动消息列表
+func (c *MessageAppController) ActivityMessageList(ctx context.Context, req *messagedto.AppActivityMessageListReq) (*messagedto.AppActivityMessageListRes, error) {
+	return message.ListUserActivityMessage(ctx, req)
 }
 
-// ClearSystemMessageUnread App端清除系统消息未读(每次1条)
+// SystemMessageUnreadList App端查询系统消息未读列表
+func (c *MessageAppController) SystemMessageUnreadList(ctx context.Context, req *messagedto.AppSystemMessageUnreadListReq) (*messagedto.AppSystemMessageUnreadListRes, error) {
+	return message.ListSystemMessageUnread(ctx, req)
+}
+
+// ClearSystemMessageUnread App端上报系统消息已读
 func (c *MessageAppController) ClearSystemMessageUnread(ctx context.Context, req *messagedto.AppClearSystemMessageUnreadReq) (*messagedto.AppClearSystemMessageUnreadRes, error) {
 	return message.ClearSystemMessageUnread(ctx, req)
 }

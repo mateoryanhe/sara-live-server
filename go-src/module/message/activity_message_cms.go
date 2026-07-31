@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"xr-game-server/core/httpserver"
-	"xr-game-server/dao/cfgdao"
+	"xr-game-server/dao/messagedao"
 	"xr-game-server/dto/activitymessagedto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
@@ -14,7 +14,7 @@ import (
 )
 
 func GetActivityMessageList(_ context.Context, req *activitymessagedto.ActivityMessageListReq) (*httpserver.CMSQueryResp, error) {
-	total, list := cfgdao.GetActivityMessageList(req)
+	total, list := messagedao.GetActivityMessageList(req)
 	fillActivityMessageListAssets(list)
 	return &httpserver.CMSQueryResp{Total: total, Data: list}, nil
 }
@@ -68,14 +68,14 @@ func CreateActivityMessage(_ context.Context, req *activitymessagedto.CreateActi
 		UrlHi:     req.UrlHi,
 		Status:    entity.ActivityMessageStatusUnpublished,
 	}
-	if err := cfgdao.CreateActivityMessage(row); err != nil {
+	if err := messagedao.CreateActivityMessage(row); err != nil {
 		return nil, err
 	}
 	return &activitymessagedto.CreateActivityMessageRes{ID: strconv.FormatUint(row.ID, 10)}, nil
 }
 
 func UpdateActivityMessage(_ context.Context, req *activitymessagedto.UpdateActivityMessageReq) (*activitymessagedto.UpdateActivityMessageRes, error) {
-	row := cfgdao.GetActivityMessageById(req.ID)
+	row := messagedao.GetActivityMessageById(req.ID)
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.ActivityMessageNonExist)
 	}
@@ -99,24 +99,27 @@ func UpdateActivityMessage(_ context.Context, req *activitymessagedto.UpdateActi
 	row.UrlEs = req.UrlEs
 	row.UrlPt = req.UrlPt
 	row.UrlHi = req.UrlHi
-	if err := cfgdao.UpdateActivityMessage(row); err != nil {
+	if err := messagedao.UpdateActivityMessage(row); err != nil {
 		return nil, err
 	}
 	return &activitymessagedto.UpdateActivityMessageRes{Success: true}, nil
 }
 
 func DeleteActivityMessage(_ context.Context, req *activitymessagedto.DeleteActivityMessageReq) (*activitymessagedto.DeleteActivityMessageRes, error) {
-	if row := cfgdao.GetActivityMessageById(req.ID); row == nil {
+	if row := messagedao.GetActivityMessageById(req.ID); row == nil {
 		return nil, errercode.CreateCode(errercode.ActivityMessageNonExist)
 	}
-	if err := cfgdao.DeleteActivityMessage(req.ID); err != nil {
+	if err := messagedao.DeleteActivityMessage(req.ID); err != nil {
+		return nil, err
+	}
+	if err := messagedao.RemoveUserActivityMessageByActivityMessageId(req.ID); err != nil {
 		return nil, err
 	}
 	return &activitymessagedto.DeleteActivityMessageRes{Success: true}, nil
 }
 
 func PublishActivityMessage(_ context.Context, req *activitymessagedto.PublishActivityMessageReq) (*activitymessagedto.PublishActivityMessageRes, error) {
-	row := cfgdao.GetActivityMessageById(req.ID)
+	row := messagedao.GetActivityMessageById(req.ID)
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.ActivityMessageNonExist)
 	}
@@ -124,7 +127,7 @@ func PublishActivityMessage(_ context.Context, req *activitymessagedto.PublishAc
 		now := time.Now()
 		row.Status = entity.ActivityMessageStatusPublished
 		row.PublishedAt = &now
-		if err := cfgdao.UpdateActivityMessage(row); err != nil {
+		if err := messagedao.UpdateActivityMessage(row); err != nil {
 			return nil, err
 		}
 	}
@@ -132,14 +135,17 @@ func PublishActivityMessage(_ context.Context, req *activitymessagedto.PublishAc
 }
 
 func UnpublishActivityMessage(_ context.Context, req *activitymessagedto.UnpublishActivityMessageReq) (*activitymessagedto.UnpublishActivityMessageRes, error) {
-	row := cfgdao.GetActivityMessageById(req.ID)
+	row := messagedao.GetActivityMessageById(req.ID)
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.ActivityMessageNonExist)
 	}
 	if row.Status != entity.ActivityMessageStatusUnpublished {
 		row.Status = entity.ActivityMessageStatusUnpublished
 		row.PublishedAt = nil
-		if err := cfgdao.UpdateActivityMessage(row); err != nil {
+		if err := messagedao.UpdateActivityMessage(row); err != nil {
+			return nil, err
+		}
+		if err := messagedao.RemoveUserActivityMessageByActivityMessageId(req.ID); err != nil {
 			return nil, err
 		}
 	}
@@ -148,7 +154,7 @@ func UnpublishActivityMessage(_ context.Context, req *activitymessagedto.Unpubli
 
 // GetPublishedActivityMessages 获取已发布活动消息(读 gcache 全量后过滤)
 func GetPublishedActivityMessages() []*entity.ActivityMessage {
-	rows := cfgdao.GetAllActivityMessagesCached()
+	rows := messagedao.GetAllActivityMessagesCached()
 	if len(rows) == 0 {
 		return nil
 	}
