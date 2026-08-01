@@ -65,4 +65,6 @@ const (
 	LiveRoomStartLive = 34
 	//关注数/粉丝数变更推送(推送给指定用户)
 	LiveFollowCountPush = 35
+	//活动消息推送(全服广播,无消息体,客户端自行拉取)
+	ActivityMessagePush = 36
 )

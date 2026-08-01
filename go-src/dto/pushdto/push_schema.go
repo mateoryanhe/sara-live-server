@@ -244,6 +244,15 @@ type LiveRoomGiftPushResp struct {
 
 // --- 推送-消息 ---
 
+// ActivityMessagePushReq cmd=36 活动消息发布广播
+type ActivityMessagePushReq struct {
+	g.Meta `path:"/activityMessage" method:"post" summary:"推送 cmd=36 活动消息发布(全服广播,无消息体,客户端自行拉取)" description:"CMS发布活动消息后全服广播(仅 cmd，无 data)，客户端收到后自行调用 activityMessageList 拉取" tags:"推送-消息"`
+}
+
+type ActivityMessagePushResp struct {
+	Cmd int `json:"cmd" dc:"命令字 36(无 data)"`
+}
+
 // SystemMessagePushReq cmd=14 系统消息
 type SystemMessagePushReq struct {
 	g.Meta `path:"/systemMessage" method:"post" summary:"推送 cmd=14 系统消息(推送给接收者)" description:"系统消息(推送给接收者)" tags:"推送-消息"`

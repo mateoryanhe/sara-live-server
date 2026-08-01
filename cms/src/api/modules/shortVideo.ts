@@ -14,9 +14,13 @@ import type {
     ShortVideoWatchRecord,
 } from '@/types/api'
 
+const SHORT_VIDEO_LIST_TIMEOUT_MS = 30 * 60 * 1000
+
 export const shortVideoApi = {
     getShortVideoList: (params: ShortVideoQuery) => {
-        return request.post<PageResponse<ShortVideo>>('/shortVideo/shortVideoList', params)
+        return request.post<PageResponse<ShortVideo>>('/shortVideo/shortVideoList', params, {
+            timeout: SHORT_VIDEO_LIST_TIMEOUT_MS,
+        })
     },
 
     createShortVideo: (data: CreateShortVideoReq) => {

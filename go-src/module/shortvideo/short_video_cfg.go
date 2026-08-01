@@ -23,7 +23,7 @@ const (
 
 func defaultAppShortVideoCfg() *shortvideodto.AppShortVideoCfgRes {
 	return &shortvideodto.AppShortVideoCfgRes{
-		MaxFileSize:      defaultMaxFileSize,
+		MaxFileSize:      shortVideoMaxFileSizeMB(defaultMaxFileSize),
 		MaxCoverFileSize: defaultMaxCoverFileSize,
 		MaxDuration:      defaultMaxDuration,
 		FreeWatchSeconds: defaultFreeWatchSeconds,
@@ -82,7 +82,7 @@ func GetAppShortVideoCfg(_ context.Context, _ *shortvideodto.AppShortVideoCfgReq
 		return defaultAppShortVideoCfg(), nil
 	}
 	return &shortvideodto.AppShortVideoCfgRes{
-		MaxFileSize:      cfg.MaxFileSize,
+		MaxFileSize:      shortVideoMaxFileSizeMB(getShortVideoMaxFileSize()),
 		MaxCoverFileSize: getShortVideoMaxCoverFileSize(),
 		MaxDuration:      cfg.MaxDuration,
 		FreeWatchSeconds: cfg.FreeWatchSeconds,
@@ -125,6 +125,14 @@ func getShortVideoMaxFileSize() uint64 {
 		return defaultMaxFileSize
 	}
 	return cfg.MaxFileSize
+}
+
+func shortVideoMaxFileSizeMB(bytes uint64) uint64 {
+	const mb = 1024 * 1024
+	if bytes == 0 {
+		return 0
+	}
+	return bytes / mb
 }
 
 func getShortVideoMaxCoverFileSize() uint32 {

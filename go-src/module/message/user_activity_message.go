@@ -114,12 +114,23 @@ func syncNewActivityMessages(userId uint64) {
 }
 
 func mergeUserActivityMessageList(newRows, existing []*entity.UserActivityMessage) []*entity.UserActivityMessage {
+	seen := make(map[uint64]struct{}, len(newRows)+len(existing))
 	merged := make([]*entity.UserActivityMessage, 0, len(newRows)+len(existing))
-	merged = append(merged, newRows...)
-	for _, row := range existing {
-		if row != nil {
-			merged = append(merged, row)
+	appendUnique := func(row *entity.UserActivityMessage) {
+		if row == nil || row.ActivityMessageId == 0 {
+			return
 		}
+		if _, ok := seen[row.ActivityMessageId]; ok {
+			return
+		}
+		seen[row.ActivityMessageId] = struct{}{}
+		merged = append(merged, row)
+	}
+	for _, row := range newRows {
+		appendUnique(row)
+	}
+	for _, row := range existing {
+		appendUnique(row)
 	}
 	sort.Slice(merged, func(i, j int) bool {
 		return userActivityMessagePublishedAt(merged[i]).After(userActivityMessagePublishedAt(merged[j]))
@@ -128,6 +139,29 @@ func mergeUserActivityMessageList(newRows, existing []*entity.UserActivityMessag
 		merged = merged[:messagedao.UserActivityMessageListCacheASize]
 	}
 	return merged
+}
+
+func prependPublishedActivityMessageToCachedUsers(msg *entity.ActivityMessage) {
+	if msg == nil || msg.ID == 0 || msg.PublishedAt == nil {
+		return
+	}
+	for _, userId := range messagedao.GetCachedUserActivityMessageUserIds() {
+		newRow := entity.NewUserActivityMessage(userId, msg.ID, msg.PublishedAt)
+		if !messagedao.PrependUserActivityMessageToListCacheA(userId, newRow) {
+			continue
+		}
+		AddSystemMessageUnread(userId, entity.UserSystemMessageUnreadTypeActivity, 1)
+		messagedao.GetUnReadByUserId(userId).AddSystemUnread(1)
+	}
+}
+
+func removeUnpublishedActivityMessageFromCachedUsers(activityMessageId uint64) {
+	if activityMessageId == 0 {
+		return
+	}
+	for _, userId := range messagedao.GetCachedUserActivityMessageUserIds() {
+		messagedao.RemoveUserActivityMessageFromListCacheA(userId, activityMessageId)
+	}
 }
 
 func userActivityMessagePublishedAt(row *entity.UserActivityMessage) time.Time {

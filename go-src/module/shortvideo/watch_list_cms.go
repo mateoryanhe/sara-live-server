@@ -27,7 +27,6 @@ func GetShortVideoWatchList(_ context.Context, req *shortvideodto.ShortVideoWatc
 			ID:        row.ID,
 			UserId:    strconv.FormatUint(row.UserId, 10),
 			VideoId:   strconv.FormatUint(row.VideoId, 10),
-			FreeTime:  row.FreeTime,
 			CreatedAt: formatShortVideoCfgTime(row.CreatedAt),
 			UpdatedAt: formatShortVideoCfgTime(row.UpdatedAt),
 		}

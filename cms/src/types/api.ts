@@ -650,7 +650,6 @@ export interface ShortVideoWatchRecord {
     videoId: string
     videoTitle: string
     paidTime: string
-    freeTime: number
     createdAt: string
     updatedAt: string
 }

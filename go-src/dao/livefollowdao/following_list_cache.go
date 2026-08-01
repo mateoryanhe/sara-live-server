@@ -11,8 +11,8 @@ import (
 
 const (
 	FollowingListCachePageSize   = 50
-	followingListCachedReadPages = 4
-	followingListCacheMaxPages   = 5
+	followingListCachedReadPages = 7
+	followingListCacheMaxPages   = 8
 	followingListCacheMaxSize    = FollowingListCachePageSize * followingListCacheMaxPages
 )
 

@@ -11,21 +11,21 @@ const config: Record<string, EnvConfig> = {
     development: {
         BASE_API: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8898',
         ENV: 'development',
-        TIMEOUT: 10000,
+        TIMEOUT: 30000,
         SUCCESS_CODE: 200,
         BASE_PATH: ''  // 开发环境不需要额外的基础路径
     },
     production: {
         BASE_API: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:1000',
         ENV: 'production',
-        TIMEOUT: 10000,
+        TIMEOUT: 30000,
         SUCCESS_CODE: 200,
         BASE_PATH: '/res'  // 生产环境的基础路径
     },
     test: {
         BASE_API: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8898',
         ENV: 'test',
-        TIMEOUT: 10000,
+        TIMEOUT: 30000,
         SUCCESS_CODE: 200,
         BASE_PATH: ''  // 测试环境不需要额外的基础路径
     }

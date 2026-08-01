@@ -653,6 +653,15 @@
         "liveRecordId": "90001",
         "startedAt": 1717603200
       }
+    },
+    {
+      "cmd": 36,
+      "name": "ActivityMessagePush",
+      "description": "活动消息发布(全服广播,仅 cmd，无 data，客户端自行拉取 activityMessageList)",
+      "target": "全服在线用户",
+      "dataType": null,
+      "data": null,
+      "example": null
     }
   ],
   "sourceFiles": {

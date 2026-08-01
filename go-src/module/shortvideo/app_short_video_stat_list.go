@@ -25,7 +25,11 @@ func GetAppShortVideoStatList(ctx context.Context, req *shortvideodto.AppShortVi
 
 	list := make([]*shortvideodto.AppShortVideoStatItem, 0, len(rows))
 	for _, row := range rows {
-		if item := toAppShortVideoStatItem(row); item != nil {
+		stat := row
+		if cached := shortvideodao.GetStatFromCacheByVideoId(row.ID); cached != nil {
+			stat = cached
+		}
+		if item := toAppShortVideoStatItem(stat); item != nil {
 			list = append(list, item)
 		}
 	}

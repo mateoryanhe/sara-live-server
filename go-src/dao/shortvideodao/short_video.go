@@ -20,6 +20,7 @@ func initShortVideoDao() {
 	g.Model(string(entity.TbShortVideo)).Scan(&all)
 	for _, v := range all {
 		shortVideoCacheMgr.Set(v.ID, v)
+		GetStatByVideoId(v.ID)
 	}
 }
 

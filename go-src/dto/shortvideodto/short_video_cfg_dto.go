@@ -45,9 +45,9 @@ type AppShortVideoCfgReq struct {
 }
 
 type AppShortVideoCfgRes struct {
-	MaxFileSize      uint64 `json:"maxFileSize"`
-	MaxCoverFileSize uint32 `json:"maxCoverFileSize"`
-	MaxDuration      uint32 `json:"maxDuration"`
-	FreeWatchSeconds uint32 `json:"freeWatchSeconds"`
-	EntryEnabled     uint8  `json:"entryEnabled"`
+	MaxFileSize      uint64 `json:"maxFileSize" dc:"最大文件大小(M)"`
+	MaxCoverFileSize uint32 `json:"maxCoverFileSize" dc:"封面图片最大大小(M)"`
+	MaxDuration      uint32 `json:"maxDuration" dc:"最大时长(秒)"`
+	FreeWatchSeconds uint32 `json:"freeWatchSeconds" dc:"免费观看时长(秒)"`
+	EntryEnabled     uint8  `json:"entryEnabled" dc:"入口开关(0关闭,1开启)"`
 }

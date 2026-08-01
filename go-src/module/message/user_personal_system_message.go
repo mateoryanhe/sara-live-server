@@ -8,22 +8,14 @@ import (
 	"xr-game-server/dto/messagedto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
+	"xr-game-server/module/upload"
 )
 
-func addPersonalSystemMessage(
-	userId uint64,
-	icon, params string,
-	titleEn, titleEs, titlePt, titleHi string,
-	contentEn, contentEs, contentPt, contentHi string,
-) {
-	if userId == 0 {
+func addPersonalSystemMessage(userId uint64, messageTypeId uint32, params string) {
+	if userId == 0 || messageTypeId == 0 {
 		return
 	}
-	row := entity.NewUserPersonalSystemMessage(
-		userId, icon, params,
-		titleEn, titleEs, titlePt, titleHi,
-		contentEn, contentEs, contentPt, contentHi,
-	)
+	row := entity.NewUserPersonalSystemMessage(userId, messageTypeId, params)
 	list := messagedao.GetUserPersonalSystemMessageListCache(userId)
 	newList := make([]*entity.UserPersonalSystemMessage, 0, len(list)+1)
 	newList = append(newList, row)
@@ -63,18 +55,35 @@ func toAppPersonalSystemMessageItem(row *entity.UserPersonalSystemMessage) *mess
 	if row == nil {
 		return nil
 	}
-	return &messagedto.AppPersonalSystemMessageItem{
-		Id:        row.ID,
-		Icon:      row.Icon,
-		TitleEn:   row.TitleEn,
-		TitleEs:   row.TitleEs,
-		TitlePt:   row.TitlePt,
-		TitleHi:   row.TitleHi,
-		ContentEn: row.ContentEn,
-		ContentEs: row.ContentEs,
-		ContentPt: row.ContentPt,
-		ContentHi: row.ContentHi,
-		Params:    row.Params,
-		CreatedAt: formatMessageTime(row.CreatedAt),
+	item := &messagedto.AppPersonalSystemMessageItem{
+		Id:            row.ID,
+		MessageTypeId: row.MessageTypeId,
+		Params:        row.Params,
+		CreatedAt:     formatMessageTime(row.CreatedAt),
+	}
+	if display := resolvePersonalSystemMessageDisplay(row.MessageTypeId); display != nil {
+		item.IconEn = upload.GetUrlByName(display.IconEn)
+		item.IconEs = upload.GetUrlByName(display.IconEs)
+		item.IconPt = upload.GetUrlByName(display.IconPt)
+		item.IconHi = upload.GetUrlByName(display.IconHi)
+		item.TitleEn = display.TitleEn
+		item.TitleEs = display.TitleEs
+		item.TitlePt = display.TitlePt
+		item.TitleHi = display.TitleHi
+		item.ContentEn = display.ContentEn
+		item.ContentEs = display.ContentEs
+		item.ContentPt = display.ContentPt
+		item.ContentHi = display.ContentHi
+	}
+	return item
+}
+
+func resolvePersonalSystemMessageDisplay(messageTypeId uint32) *personalSystemMessageDisplay {
+	switch messageTypeId {
+	case entity.PersonalSystemMessageTypeWelcome:
+		display := welcomePersonalMessageDisplay()
+		return &display
+	default:
+		return nil
 	}
 }

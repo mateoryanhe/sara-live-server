@@ -5,7 +5,9 @@ import (
 	"strconv"
 	"time"
 
+	"xr-game-server/constants/cmd"
 	"xr-game-server/core/httpserver"
+	"xr-game-server/core/push"
 	"xr-game-server/dao/messagedao"
 	"xr-game-server/dto/activitymessagedto"
 	"xr-game-server/entity"
@@ -112,6 +114,7 @@ func DeleteActivityMessage(_ context.Context, req *activitymessagedto.DeleteActi
 	if err := messagedao.DeleteActivityMessage(req.ID); err != nil {
 		return nil, err
 	}
+	removeUnpublishedActivityMessageFromCachedUsers(req.ID)
 	if err := messagedao.RemoveUserActivityMessageByActivityMessageId(req.ID); err != nil {
 		return nil, err
 	}
@@ -130,6 +133,8 @@ func PublishActivityMessage(_ context.Context, req *activitymessagedto.PublishAc
 		if err := messagedao.UpdateActivityMessage(row); err != nil {
 			return nil, err
 		}
+		prependPublishedActivityMessageToCachedUsers(row)
+		push.BroadcastNonData(cmd.ActivityMessagePush)
 	}
 	return &activitymessagedto.PublishActivityMessageRes{Success: true, Status: entity.ActivityMessageStatusPublished}, nil
 }
@@ -145,6 +150,7 @@ func UnpublishActivityMessage(_ context.Context, req *activitymessagedto.Unpubli
 		if err := messagedao.UpdateActivityMessage(row); err != nil {
 			return nil, err
 		}
+		removeUnpublishedActivityMessageFromCachedUsers(req.ID)
 		if err := messagedao.RemoveUserActivityMessageByActivityMessageId(req.ID); err != nil {
 			return nil, err
 		}

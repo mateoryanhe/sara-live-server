@@ -43,7 +43,6 @@
         <el-table-column label="付费时间" prop="paidTime" width="170">
           <template #default="{ row }">{{ row.paidTime || '-' }}</template>
         </el-table-column>
-        <el-table-column label="剩余免费(秒)" prop="freeTime" width="120"/>
         <el-table-column label="创建时间" prop="createdAt" width="170"/>
         <el-table-column label="更新时间" prop="updatedAt" width="170"/>
       </el-table>

@@ -20,7 +20,6 @@ type ShortVideoWatchListItem struct {
 	VideoId    string `json:"videoId"`
 	VideoTitle string `json:"videoTitle"`
 	PaidTime   string `json:"paidTime" dc:"付费时间(空表示未付费)"`
-	FreeTime   uint64 `json:"freeTime,string" dc:"剩余免费时长(秒)"`
 	CreatedAt  string `json:"createdAt"`
 	UpdatedAt  string `json:"updatedAt"`
 }

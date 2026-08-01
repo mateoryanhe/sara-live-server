@@ -13,6 +13,7 @@ const (
 )
 
 const (
+	ShortVideoStatAuthorId           db.TbCol = "author_id"
 	ShortVideoStatTitle              db.TbCol = "title"
 	ShortVideoStatLikeCount          db.TbCol = "like_count"
 	ShortVideoStatViewCount          db.TbCol = "view_count"
@@ -23,6 +24,7 @@ const (
 // ShortVideoStat 短视频统计数据(与短视频一一对应,主键ID即视频ID)
 type ShortVideoStat struct {
 	migrate.OneModel
+	AuthorId           uint64  `gorm:"index;default:0;comment:作者用户ID" json:"authorId"`
 	Title              string  `gorm:"size:64;default:'';comment:视频标题" json:"title"`
 	LikeCount          uint64  `gorm:"default:0;comment:点赞累计数量" json:"likeCount"`
 	ViewCount          uint64  `gorm:"default:0;comment:观看人数(去重)" json:"viewCount"`
@@ -30,7 +32,7 @@ type ShortVideoStat struct {
 	TotalDiamondIncome float64 `gorm:"type:decimal(16,4);default:0;comment:累计钻石收益" json:"totalDiamondIncome"`
 }
 
-func NewShortVideoStat(videoId uint64, title string, publishedAt time.Time) *ShortVideoStat {
+func NewShortVideoStat(videoId, authorId uint64, title string, publishedAt time.Time) *ShortVideoStat {
 	ret := &ShortVideoStat{}
 	ret.ID = videoId
 	if publishedAt.IsZero() {
@@ -38,8 +40,17 @@ func NewShortVideoStat(videoId uint64, title string, publishedAt time.Time) *Sho
 	}
 	ret.SetCreatedAt(publishedAt)
 	ret.SetUpdatedAt(time.Now())
+	ret.SetAuthorId(authorId)
 	ret.SetTitle(title)
 	return ret
+}
+
+func (s *ShortVideoStat) SetAuthorId(val uint64) {
+	s.AuthorId = val
+	syndb.AddDataToLazyChan(TbShortVideoStat, ShortVideoStatAuthorId, &syndb.ColData{
+		IdVal:  s.ID,
+		ColVal: s.AuthorId,
+	})
 }
 
 func (s *ShortVideoStat) SetTitle(val string) {
@@ -108,6 +119,7 @@ func (s *ShortVideoStat) SetUpdatedAt(val time.Time) {
 func initShortVideoStat() {
 	syndb.RegLazy(TbShortVideoStat, db.CreatedAtName)
 	syndb.RegLazy(TbShortVideoStat, db.UpdatedAtName)
+	syndb.RegLazy(TbShortVideoStat, ShortVideoStatAuthorId)
 	syndb.RegLazy(TbShortVideoStat, ShortVideoStatTitle)
 	syndb.RegLazy(TbShortVideoStat, ShortVideoStatLikeCount)
 	syndb.RegLazy(TbShortVideoStat, ShortVideoStatViewCount)

@@ -134,6 +134,11 @@ func (c *PushController) LiveRoomGift(_ context.Context, _ *pushdto.LiveRoomGift
 
 // --- 推送-消息 ---
 
+// ActivityMessage cmd=36 活动消息发布(全服广播)
+func (c *PushController) ActivityMessage(_ context.Context, _ *pushdto.ActivityMessagePushReq) (*pushdto.ActivityMessagePushResp, error) {
+	return nil, nil
+}
+
 // SystemMessage cmd=14 系统消息
 func (c *PushController) SystemMessage(_ context.Context, _ *pushdto.SystemMessagePushReq) (*pushdto.SystemMessagePushResp, error) {
 	return nil, nil

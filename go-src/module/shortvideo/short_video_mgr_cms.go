@@ -152,12 +152,13 @@ func removeShortVideoRow(row *entity.ShortVideo) error {
 	if err := shortvideodao.Delete(row.ID); err != nil {
 		return err
 	}
-	if err := shortvideodao.DeleteByVideoId(row.ID); err != nil {
-		return err
-	}
 	if err := shortvideodao.DeleteWatchByVideoId(row.ID); err != nil {
 		return err
 	}
+	//先刷新列表
+	shortvideodao.RefreshAuthorStatListCacheOnVideoDelete(row.AuthorId, row.ID)
+	//再移除单条缓存
+	shortvideodao.RemoveStatCacheByVideoId(row.ID)
 	upload.DeleteUploadedFile(videoName)
 	upload.DeleteUploadedFile(coverName)
 	loadAppShortVideoListCache()
@@ -174,6 +175,7 @@ func OnShelfShortVideo(_ context.Context, req *shortvideodto.OnShelfShortVideoRe
 	}
 	if row.Status != entity.ShortVideoStatusOnShelf {
 		shortvideodao.UpdateStatus(req.ID, entity.ShortVideoStatusOnShelf)
+		shortvideodao.PrependStatToAuthorListCache(row.AuthorId, shortvideodao.GetStatByVideoId(req.ID))
 		loadAppShortVideoListCache()
 	}
 	return &shortvideodto.OnShelfShortVideoRes{Success: true, Status: entity.ShortVideoStatusOnShelf}, nil
