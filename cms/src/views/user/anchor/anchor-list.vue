@@ -193,6 +193,7 @@ import {onMounted, reactive, ref} from 'vue'
 import {ElForm, ElMessage, ElMessageBox} from 'element-plus'
 import {accountApi} from '@/api'
 import type {AnchorListItem, BanAnchorReq, UnBanAnchorReq} from '@/types/api'
+import {formatAmount} from '@/utils/number-format'
 
 const loading = ref(false)
 const tableData = ref<AnchorListItem[]>([])
@@ -346,13 +347,6 @@ const formatDate = (dateString: string | null | undefined) => {
   } catch {
     return '-'
   }
-}
-
-const formatAmount = (value: number | null | undefined) => {
-  if (value === null || value === undefined) {
-    return '-'
-  }
-  return Number(value).toFixed(2)
 }
 
 const resetBanForm = () => {

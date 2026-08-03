@@ -72,7 +72,9 @@
               <span v-else class="media-url-text">{{ row.animationName || row.animation || '-' }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="价格" prop="price" width="110"/>
+          <el-table-column label="价格" prop="price" width="110">
+            <template #default="{ row }">{{ formatPrice(row.price) }}</template>
+          </el-table-column>
           <el-table-column label="分类" prop="category" width="120"/>
           <el-table-column label="排序" prop="sort" width="80"/>
           <el-table-column label="状态" width="90">
@@ -223,7 +225,7 @@
           </div>
         </el-form-item>
         <el-form-item label="价格(钻石)" prop="price">
-          <el-input-number v-model="currentRow.price" :min="0" controls-position="right"/>
+          <el-input-number v-model="currentRow.price" :min="0" :precision="NUMBER_INPUT_DECIMALS" controls-position="right"/>
         </el-form-item>
         <el-form-item label="分类" prop="category">
           <el-input v-model="currentRow.category" placeholder="请输入分类"/>
@@ -257,6 +259,7 @@ import {
   resolveMediaPreviewType,
   type MediaPreviewType
 } from '@/utils/media-preview'
+import {formatPrice, NUMBER_INPUT_DECIMALS, truncateNumber} from '@/utils/number-format'
 
 interface SearchForm {
   name: string
@@ -510,7 +513,7 @@ const handleEdit = (row: Gift) => {
     nameHi: row.nameHi || '',
     icon: iconName,
     animation: animationName,
-    price: Number(row.price) || 0,
+    price: truncateNumber(row.price),
     category: row.category,
     sort: Number(row.sort) || 0,
     description: row.description

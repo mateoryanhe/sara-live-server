@@ -221,7 +221,7 @@
               <el-input-number
                   v-model="currentRow.upgradeRechargeLimit"
                   :min="0"
-                  :precision="4"
+                  :precision="NUMBER_INPUT_DECIMALS"
                   :step="0.0001"
                   controls-position="right"
               />
@@ -231,7 +231,7 @@
               <el-input-number
                   v-model="currentRow.minWithdrawAmount"
                   :min="0"
-                  :precision="4"
+                  :precision="NUMBER_INPUT_DECIMALS"
                   :step="0.0001"
                   controls-position="right"
               />
@@ -241,7 +241,7 @@
               <el-input-number
                   v-model="currentRow.maxWithdrawAmount"
                   :min="0"
-                  :precision="4"
+                  :precision="NUMBER_INPUT_DECIMALS"
                   :step="0.0001"
                   controls-position="right"
               />
@@ -251,7 +251,7 @@
               <el-input-number
                   v-model="currentRow.fee"
                   :min="0"
-                  :precision="4"
+                  :precision="NUMBER_INPUT_DECIMALS"
                   :step="0.0001"
                   controls-position="right"
               />
@@ -597,6 +597,7 @@ import {Plus} from '@element-plus/icons-vue'
 import {uploadApi, vipCfgApi} from '@/api'
 import type {VipCfg} from '@/types/api.ts'
 import {getExt, isVideoUrl, resolveMediaPreviewType} from '@/utils/media-preview'
+import {formatAmount, NUMBER_INPUT_DECIMALS, truncateNumber} from '@/utils/number-format'
 
 interface SearchForm {
   levelName: string
@@ -919,17 +920,6 @@ const doAssetUpload = async (
   }
 }
 
-const formatAmount = (val: number | null | undefined) => {
-  if (val === null || val === undefined) {
-    return '-'
-  }
-  const n = Number(val)
-  if (Number.isNaN(n)) {
-    return '-'
-  }
-  return n.toLocaleString('zh-CN', {minimumFractionDigits: 0, maximumFractionDigits: 4})
-}
-
 const validateWithdrawRange = (_rule: unknown, _value: unknown, callback: (error?: Error) => void) => {
   const {minWithdrawAmount, maxWithdrawAmount} = currentRow.value
   if (maxWithdrawAmount > 0 && minWithdrawAmount > maxWithdrawAmount) {
@@ -1016,10 +1006,10 @@ const handleEdit = (row: VipCfg) => {
     withdrawSwitch: Number(row.withdrawSwitch) || 0,
     animationSwitch: Number(row.animationSwitch) || 0,
     commentEffectSwitch: Number(row.commentEffectSwitch) || 0,
-    upgradeRechargeLimit: Number(row.upgradeRechargeLimit) || 0,
-    minWithdrawAmount: Number(row.minWithdrawAmount) || 0,
-    maxWithdrawAmount: Number(row.maxWithdrawAmount) || 0,
-    fee: Number(row.fee) || 0,
+    upgradeRechargeLimit: truncateNumber(row.upgradeRechargeLimit),
+    minWithdrawAmount: truncateNumber(row.minWithdrawAmount),
+    maxWithdrawAmount: truncateNumber(row.maxWithdrawAmount),
+    fee: truncateNumber(row.fee),
     animation: animationName,
     animationIcon: animationIconName,
     animationDescEn: row.animationDescEn || '',

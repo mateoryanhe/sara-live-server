@@ -117,7 +117,7 @@
           <el-input-number
               v-model="createOrderForm.amount"
               :min="0.01"
-              :precision="2"
+              :precision="NUMBER_INPUT_DECIMALS"
               :step="1"
               controls-position="right"
               placeholder="请输入订单金额"
@@ -139,6 +139,7 @@ import {ElMessage, ElMessageBox} from 'element-plus'
 import type {FormInstance, FormRules} from 'element-plus'
 import {rechargeOrderApi} from '@/api'
 import type {RechargeOrder} from '@/types/api.ts'
+import {formatAmount, NUMBER_INPUT_DECIMALS} from '@/utils/number-format'
 
 interface SearchForm {
   orderId: string
@@ -296,17 +297,6 @@ const handleCreateOrder = async () => {
   } finally {
     creatingOrder.value = false
   }
-}
-
-const formatAmount = (val: number | null | undefined) => {
-  if (val === null || val === undefined) {
-    return '-'
-  }
-  const n = Number(val)
-  if (Number.isNaN(n)) {
-    return '-'
-  }
-  return n.toLocaleString('zh-CN', {maximumFractionDigits: 4})
 }
 
 const formatUnixTime = (ts: number | null | undefined) => {

@@ -94,6 +94,7 @@ import {onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {liveRecordApi} from '@/api'
 import type {LiveRecordItem} from '@/types/api'
+import {formatAmount} from '@/utils/number-format'
 
 const loading = ref(false)
 const tableData = ref<LiveRecordItem[]>([])
@@ -174,13 +175,6 @@ const formatDate = (dateString: string | null | undefined) => {
   } catch {
     return '-'
   }
-}
-
-const formatAmount = (value: number | null | undefined) => {
-  if (value === null || value === undefined) {
-    return '-'
-  }
-  return Number(value).toFixed(2)
 }
 
 const formatDuration = (seconds: number | null | undefined) => {

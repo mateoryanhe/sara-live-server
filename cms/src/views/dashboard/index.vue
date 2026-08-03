@@ -100,6 +100,7 @@ import {sysStatApi} from '@/api'
 import type {ResourceMetricTrend, SysStat, UserStatTrend} from '@/types/api'
 import BarMetricSection from './components/bar-metric-section.vue'
 import {getUserStatBarMetricTabs, USER_STAT_BAR_SERIES} from './user-stat-bar-series'
+import {formatAmount} from '@/utils/number-format'
 
 const UserStatChart = defineAsyncComponent(() => import('./components/user-stat-chart.vue'))
 const UserStatBarChart = defineAsyncComponent(() => import('./components/user-stat-bar-chart.vue'))
@@ -291,16 +292,6 @@ const handleTabChange = async () => {
 const handleBarMetricChange = async () => {
   await nextTick()
   resizeActiveChart()
-}
-
-const formatAmount = (value: number | null | undefined) => {
-  if (value === null || value === undefined) {
-    return '-'
-  }
-  return Number(value).toLocaleString('zh-CN', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
 }
 
 const formatCount = (value: string | number | null | undefined) => {

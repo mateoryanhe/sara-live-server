@@ -270,7 +270,7 @@
           <el-input-number
               v-model="currentRow.payDiamond"
               :min="0.0001"
-              :precision="4"
+              :precision="NUMBER_INPUT_DECIMALS"
               :step="0.0001"
               controls-position="right"
               style="width: 220px"
@@ -336,6 +336,7 @@ import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadR
 import {Plus} from '@element-plus/icons-vue'
 import {shortVideoApi, uploadApi} from '@/api'
 import type {ShortVideo, ShortVideoCategory} from '@/types/api.ts'
+import {formatPrice, NUMBER_INPUT_DECIMALS, truncateNumber} from '@/utils/number-format'
 
 interface SearchForm {
   title: string
@@ -424,8 +425,6 @@ const isDiskFreeLow = computed(() => {
   const ratio = storageStat.diskFreeRatio
   return ratio > 0 && ratio < 30
 })
-
-const formatPrice = (price: number) => Number(price || 0).toFixed(4)
 
 const formatBytes = (bytes: number) => {
   const value = Number(bytes || 0)
@@ -732,7 +731,7 @@ const handleEdit = (row: ShortVideo) => {
     cover: row.coverName || '',
     sort: Number(row.sort) || 0,
     isPaid: row.isPaid ?? 0,
-    payDiamond: row.isPaid === 1 ? (Number(row.payDiamond) || 1) : 0,
+    payDiamond: row.isPaid === 1 ? (truncateNumber(row.payDiamond) || 1) : 0,
     freeWatchSeconds: row.isPaid === 1 ? (row.freeWatchSeconds != null ? Number(row.freeWatchSeconds) : 15) : 0,
     categoryId: Number(row.categoryId) || 0,
     source: row.source || 1,

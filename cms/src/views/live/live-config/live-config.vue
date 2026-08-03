@@ -12,7 +12,7 @@
           <el-input-number
               v-model="formData.paidDanmakuPrice"
               :min="0"
-              :precision="4"
+              :precision="NUMBER_INPUT_DECIMALS"
               :step="0.0001"
               controls-position="right"
               style="width: 220px"
@@ -49,6 +49,7 @@ import {onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {liveCfgApi} from '@/api/modules/liveCfg'
 import type {LiveCfg} from '@/types/api'
+import {NUMBER_INPUT_DECIMALS, truncateNumber} from '@/utils/number-format'
 
 const loading = ref(false)
 const formRef = ref()
@@ -85,7 +86,7 @@ const applyCfg = (cfg: LiveCfg | null | undefined) => {
     return
   }
   formData.id = cfg.id || '0'
-  formData.paidDanmakuPrice = cfg.paidDanmakuPrice ?? 0
+  formData.paidDanmakuPrice = truncateNumber(cfg.paidDanmakuPrice ?? 0)
   formData.privateRoomFreeWatchSeconds = cfg.privateRoomFreeWatchSeconds ?? 420
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''

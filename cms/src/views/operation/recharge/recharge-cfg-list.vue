@@ -164,7 +164,7 @@
           <div class="form-tip">充值成功后玩家实际到账金币 = 基础金币 + 赠送金币</div>
         </el-form-item>
         <el-form-item label="价格" prop="price">
-          <el-input-number v-model="currentRow.price" :min="0.0001" :precision="4" :step="0.01" controls-position="right"/>
+          <el-input-number v-model="currentRow.price" :min="0.0001" :precision="NUMBER_INPUT_DECIMALS" :step="0.01" controls-position="right"/>
           <div class="form-tip">充值货币固定，支持4位小数</div>
         </el-form-item>
         <el-form-item label="商品SKU" prop="productId">
@@ -191,6 +191,7 @@ import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadR
 import {Plus} from '@element-plus/icons-vue'
 import {rechargeCfgApi, uploadApi} from '@/api'
 import type {RechargeCfg} from '@/types/api.ts'
+import {formatPrice, NUMBER_INPUT_DECIMALS, truncateNumber} from '@/utils/number-format'
 
 interface SearchForm {
   name: string
@@ -252,10 +253,6 @@ const formRef = ref<FormInstance>()
 const iconUploading = ref(false)
 const iconPreviewUrl = ref('')
 let objectPreviewUrl: string | null = null
-
-const formatPrice = (price: number) => {
-  return `${Number(price).toFixed(4)}`
-}
 
 const totalGold = (row: RechargeCfg) => {
   return (Number(row.gold) || 0) + (Number(row.extraGold) || 0)
@@ -376,7 +373,7 @@ const handleEdit = (row: RechargeCfg) => {
     icon: row.iconName || '',
     gold: Number(row.gold) || 1,
     extraGold: Number(row.extraGold) || 0,
-    price: Number(row.price) || 0.99,
+    price: truncateNumber(row.price) || 0.99,
     productId: row.productId || '',
     sort: Number(row.sort) || 0,
     description: row.description || ''

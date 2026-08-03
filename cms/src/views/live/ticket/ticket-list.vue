@@ -86,7 +86,7 @@
           <el-input-number
               v-model="currentRow.price"
               :min="0"
-              :precision="4"
+              :precision="NUMBER_INPUT_DECIMALS"
               :step="0.0001"
               controls-position="right"
           />
@@ -109,6 +109,7 @@ import {onMounted, reactive, ref} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {ticketApi} from '@/api'
 import type {Ticket} from '@/types/api.ts'
+import {formatPrice, NUMBER_INPUT_DECIMALS, truncateNumber} from '@/utils/number-format'
 
 interface SearchForm {
   statusFilter: number
@@ -139,8 +140,6 @@ const defaultForm = (): TicketForm => ({
 })
 const currentRow = ref<TicketForm>(defaultForm())
 const formRef = ref<FormInstance>()
-
-const formatPrice = (price: number) => Number(price).toFixed(4)
 
 const formRules: FormRules = {
   price: [{required: true, message: '请输入钻石价格', trigger: 'blur'}]
@@ -189,7 +188,7 @@ const handleEdit = (row: Ticket) => {
   dialogTitle.value = '编辑门票'
   currentRow.value = {
     id: row.id,
-    price: Number(row.price) || 0,
+    price: truncateNumber(row.price),
     sort: Number(row.sort) || 0
   }
   dialogVisible.value = true

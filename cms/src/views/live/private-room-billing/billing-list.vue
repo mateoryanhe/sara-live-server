@@ -87,7 +87,7 @@
           <el-input-number
               v-model="currentRow.pricePerMinute"
               :min="0"
-              :precision="4"
+              :precision="NUMBER_INPUT_DECIMALS"
               :step="0.0001"
               controls-position="right"
           />
@@ -110,6 +110,7 @@ import {onMounted, reactive, ref} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {privateRoomBillingApi} from '@/api'
 import type {PrivateRoomBilling} from '@/types/api.ts'
+import {formatPrice, NUMBER_INPUT_DECIMALS, truncateNumber} from '@/utils/number-format'
 
 interface SearchForm {
   statusFilter: number
@@ -140,8 +141,6 @@ const defaultForm = (): BillingForm => ({
 })
 const currentRow = ref<BillingForm>(defaultForm())
 const formRef = ref<FormInstance>()
-
-const formatPrice = (price: number) => Number(price).toFixed(4)
 
 const formRules: FormRules = {
   pricePerMinute: [{required: true, message: '请输入每分钟钻石价格', trigger: 'blur'}]
@@ -190,7 +189,7 @@ const handleEdit = (row: PrivateRoomBilling) => {
   dialogTitle.value = '编辑计费'
   currentRow.value = {
     id: row.id,
-    pricePerMinute: Number(row.pricePerMinute) || 0,
+    pricePerMinute: truncateNumber(row.pricePerMinute),
     sort: Number(row.sort) || 0
   }
   dialogVisible.value = true

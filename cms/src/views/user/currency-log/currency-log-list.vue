@@ -68,6 +68,7 @@ import {useRoute} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {currencyLogApi} from '@/api'
 import type {CurrencyLogItem} from '@/types/api'
+import {formatAmount} from '@/utils/number-format'
 
 const route = useRoute()
 
@@ -127,13 +128,6 @@ const handleSizeChange = (size: number) => {
   pagination.pageSize = size
   pagination.pageIndex = 1
   fetchList()
-}
-
-const formatAmount = (value: number | null | undefined) => {
-  if (value === null || value === undefined) {
-    return '-'
-  }
-  return Number(value).toFixed(2)
 }
 
 const formatDate = (dateString: string | null | undefined) => {

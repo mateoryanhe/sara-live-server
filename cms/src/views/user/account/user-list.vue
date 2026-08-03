@@ -196,7 +196,7 @@
           <el-input-number
               v-model="currencyForm.amount"
               :min="0.0001"
-              :precision="4"
+              :precision="NUMBER_INPUT_DECIMALS"
               :step="0.0001"
               controls-position="right"
               style="width: 100%"
@@ -279,6 +279,7 @@ import {ArrowDown} from '@element-plus/icons-vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {useRoute, useRouter} from 'vue-router'
 import type {BanReq, CancelReq, UnBanReq, UnCancelReq, UserInfo} from '@/types/api.ts'
+import {formatAmount, NUMBER_INPUT_DECIMALS} from '@/utils/number-format'
 
 // 用户列表数据
 const userList = ref<UserInfo[]>([])
@@ -845,18 +846,6 @@ const formatPhoneAreaCode = (val?: string) => {
     return '-'
   }
   return code.startsWith('+') ? code : `+${code}`
-}
-
-// 格式化金额(金币/钻石)，保留4位小数
-const formatAmount = (val: number | null | undefined) => {
-  if (val === null || val === undefined) {
-    return '-'
-  }
-  const n = Number(val)
-  if (Number.isNaN(n)) {
-    return '-'
-  }
-  return n.toLocaleString('zh-CN', {maximumFractionDigits: 4})
 }
 
 const formatUserType = (val: number | null | undefined) => {
