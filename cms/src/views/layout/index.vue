@@ -366,8 +366,13 @@
           </el-dropdown>
         </div>
       </el-header>
+      <LayoutTabs/>
       <el-main class="main-content">
-        <router-view/>
+        <router-view v-slot="{ Component, route: currentRoute }">
+          <keep-alive :max="15">
+            <component :is="Component" v-if="Component" :key="currentRoute.path"/>
+          </keep-alive>
+        </router-view>
       </el-main>
       <el-footer class="footer">
         <div class="footer-content">
@@ -379,8 +384,10 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, ref} from 'vue'
+import {computed, ref, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
+import LayoutTabs from '@/components/layout/LayoutTabs.vue'
+import {useLayoutTabs} from '@/composables/useLayoutTabs'
 import {ArrowDown, Bell, Box, Coin, Collection, CollectionTag, Cpu, Document, EditPen, Expand, Fold, Key, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Search, Service, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {getIsAdmin, hasPermission} from '@/utils/permission'
 import {clearAuthSession} from '@/utils/auth'
@@ -388,6 +395,15 @@ import {clearAuthSession} from '@/utils/auth'
 const route = useRoute()
 const router = useRouter()
 const isCollapse = ref(false)
+const {addTab} = useLayoutTabs()
+
+watch(
+    () => route.fullPath,
+    () => {
+      addTab(route)
+    },
+    {immediate: true},
+)
 
 const activeMenu = computed(() => {
   const {path} = route
