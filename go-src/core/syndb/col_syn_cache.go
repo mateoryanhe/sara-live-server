@@ -78,28 +78,51 @@ func addDataToQueue(cacheMap map[string]*ColSynCache, tbName db.TbName, tbCol db
 	start := time.Now()
 	cacheMap[key].DataQueue.Push(colData)
 	if costMs := time.Since(start).Milliseconds(); costMs >= syndbPushSlowLogMs {
-		g.Log().Warningf(gctx.New(), "syndb Push慢,table=%v,col=%v,耗时=%vms,id=%v", tbName, tbCol, costMs, colData.IdVal)
+		g.Log("detail").Warningf(gctx.New(), "syndb Push慢,table=%v,col=%v,耗时=%vms,id=%v", tbName, tbCol, costMs, colData.IdVal)
 	}
 }
 
-// SysExit 调整全部数据库同步组件同步时间到最小
+// SysExit 关机前同步刷盘,必须在关机 handler 内同步执行(不能丢进协程池,否则进程退出前来不及写 detail.log)
 func SysExit(sig os.Signal) {
-	g.Log().Warning(gctx.New(), "准备关机,开始强制同步内存数据到数据库")
+	_ = sig
+	g.Log("detail").Warning(gctx.New(), "准备关机,开始强制同步内存数据到数据库")
+	runShutdownSynLoop()
+}
 
-	for true {
-		for _, val := range lazyMap {
-			gutil.TryCatch(gctx.New(), func(ctx context.Context) {
-				val.ChangeSynTime()
-			}, func(ctx context.Context, exception error) {
-			})
+func runShutdownSynLoop() {
+	ctx := gctx.New()
+	applyShutdownSynPeriod()
+	for {
+		consumeShutdown(ctx)
+		if allSynCachesIdle() {
+			g.Log("detail").Info(ctx, "syndb关机刷盘完成")
+			return
 		}
-		for _, quick := range quickMap {
-			gutil.TryCatch(gctx.New(), func(ctx context.Context) {
-				quick.ChangeSynTime()
-			}, func(ctx context.Context, exception error) {
-			})
+		time.Sleep(CloseTime)
+	}
+}
+
+func applyShutdownSynPeriod() {
+	for _, val := range lazyMap {
+		val.ChangeSynTime()
+	}
+	for _, quick := range quickMap {
+		quick.ChangeSynTime()
+	}
+}
+
+func allSynCachesIdle() bool {
+	for _, colCache := range quickMap {
+		if !colCache.isIdle() {
+			return false
 		}
 	}
+	for _, colCache := range lazyMap {
+		if !colCache.isIdle() {
+			return false
+		}
+	}
+	return true
 }
 
 func consume(ctx context.Context) {
@@ -108,11 +131,34 @@ func consume(ctx context.Context) {
 	start := time.Now()
 	quickRows := flushCaches(quickMap, maxQuickFlushPerTick)
 	lazyRows := flushCaches(lazyMap, maxLazyFlushPerTick)
+	logConsumeResult(ctx, start, quickRows, lazyRows)
+}
+
+func consumeShutdown(ctx context.Context) {
+	pullCaches(quickMap)
+	pullCaches(lazyMap)
+	start := time.Now()
+	quickRows := flushAllPending(quickMap)
+	lazyRows := flushAllPending(lazyMap)
+	logConsumeResult(ctx, start, quickRows, lazyRows)
+}
+
+func logConsumeResult(ctx context.Context, start time.Time, quickRows, lazyRows int) {
 	totalRows := quickRows + lazyRows
 	if totalRows > 0 {
-		g.Log().Infof(ctx, "syndb刷盘成功,quick=%v,lazy=%v,total=%v,costMs=%v",
+		g.Log("detail").Infof(ctx, "syndb刷盘成功,quick=%v,lazy=%v,total=%v,costMs=%v",
 			quickRows, lazyRows, totalRows, time.Since(start).Milliseconds())
 	}
+}
+
+func flushAllPending(cacheMap map[string]*ColSynCache) int {
+	flushedRows := 0
+	for _, colCache := range cacheMap {
+		if rows := safeFlushPending(colCache); rows > 0 {
+			flushedRows += rows
+		}
+	}
+	return flushedRows
 }
 
 func pullCaches(cacheMap map[string]*ColSynCache) {
@@ -163,6 +209,20 @@ func safeSyn(colCache *ColSynCache) int {
 	return flushedRows
 }
 
+func safeFlushPending(colCache *ColSynCache) int {
+	var flushedRows int
+	gutil.TryCatch(gctx.New(), func(ctx context.Context) {
+		var flushed bool
+		flushedRows, flushed = colCache.flushPending()
+		if !flushed {
+			flushedRows = 0
+		}
+	}, func(ctx context.Context, exception error) {
+		xrlog.ErrorWithErr(ctx, "SynDb", "flushPending,table="+colCache.TbName+",col="+colCache.ColName, exception)
+	})
+	return flushedRows
+}
+
 func (colCache *ColSynCache) isIdle() bool {
 	return colCache.DataQueue.Len() == 0 && len(colCache.Pending) == 0
 }
@@ -199,6 +259,13 @@ func (colCache *ColSynCache) Syn() (int, bool) {
 	return colCache.batchSave()
 }
 
+func (colCache *ColSynCache) flushPending() (int, bool) {
+	if len(colCache.Pending) == 0 {
+		return 0, false
+	}
+	return colCache.batchSave()
+}
+
 func (colCache *ColSynCache) batchSave() (int, bool) {
 	if len(colCache.Pending) == common.Zero {
 		return 0, false
@@ -220,12 +287,12 @@ func (colCache *ColSynCache) batchSave() (int, bool) {
 	saved := colCache.saveRowsDiscardOnError(dataMap)
 	colCache.Pending = make(map[any]*ColData)
 	if saved == 0 {
-		g.Log().Warningf(gctx.New(), "syndb batchSave失败已全部丢弃,table=%v,col=%v,rows=%v,err=%v",
+		g.Log("detail").Warningf(gctx.New(), "syndb batchSave失败已全部丢弃,table=%v,col=%v,rows=%v,err=%v",
 			colCache.TbName, colCache.ColName, rows, err)
 		return 0, true
 	}
 	if saved < rows {
-		g.Log().Warningf(gctx.New(), "syndb batchSave部分落库,table=%v,col=%v,saved=%v,discarded=%v,err=%v",
+		g.Log("detail").Warningf(gctx.New(), "syndb batchSave部分落库,table=%v,col=%v,saved=%v,discarded=%v,err=%v",
 			colCache.TbName, colCache.ColName, saved, rows-saved, err)
 	}
 	return saved, true
@@ -238,10 +305,10 @@ func (colCache *ColSynCache) saveRowsDiscardOnError(dataMap []map[string]interfa
 		if err != nil {
 			idVal := row[colCache.IdName]
 			if isDuplicateKeyErr(err) {
-				g.Log().Warningf(gctx.New(), "syndb落库冲突已丢弃,table=%v,col=%v,id=%v,err=%v",
+				g.Log("detail").Warningf(gctx.New(), "syndb落库冲突已丢弃,table=%v,col=%v,id=%v,err=%v",
 					colCache.TbName, colCache.ColName, idVal, err)
 			} else {
-				g.Log().Warningf(gctx.New(), "syndb落库失败已丢弃,table=%v,col=%v,id=%v,err=%v",
+				g.Log("detail").Warningf(gctx.New(), "syndb落库失败已丢弃,table=%v,col=%v,id=%v,err=%v",
 					colCache.TbName, colCache.ColName, idVal, err)
 			}
 			continue

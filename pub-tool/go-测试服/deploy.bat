@@ -191,7 +191,7 @@ plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REM
 
 REM 通过 start.sh 后台启动,避免 plink 因伪终端等待子进程而卡住
 echo Creating remote start script...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "printf '%%s\n' '#!/bin/sh' 'cd %REMOTE_DIR%' 'nohup ./%APP_NAME% >> /home/ec2-user/log/xr-game-server-stdout.log 2>&1 &' > %REMOTE_DIR%/start.sh && chmod +x %REMOTE_DIR%/start.sh"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "printf '%%s\n' '#!/bin/sh' 'cd %REMOTE_DIR%' 'nohup ./%APP_NAME% >/dev/null 2>&1 &' > %REMOTE_DIR%/start.sh && chmod +x %REMOTE_DIR%/start.sh"
 if %errorlevel% neq 0 (
     echo Error: Failed to create remote start script
     pause
@@ -207,7 +207,6 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 echo Program start command completed.
-echo Startup log: /home/ec2-user/log/xr-game-server-stdout.log
 
 echo.
 echo ================================
@@ -230,8 +229,8 @@ for /f "delims=" %%i in ('plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -b
 
 if not defined REMOTE_PID (
     echo ERROR: %APP_NAME% process not found!
-    echo Recent startup log:
-    plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "tail -30 /home/ec2-user/log/xr-game-server-stdout.log 2>/dev/null || echo '(no startup log)'"
+    echo Recent error log:
+    plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "tail -30 /home/ec2-user/log/error*.log 2>/dev/null || echo '(no error log)'"
     pause
     exit /b 1
 )
@@ -245,8 +244,8 @@ echo [Port 443]
 plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "ss -tlnp 2>/dev/null | grep ':443' || (echo not listening && exit 1)"
 if errorlevel 1 (
     echo ERROR: port 443 not listening
-    echo Recent startup log:
-    plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "tail -30 /home/ec2-user/log/xr-game-server-stdout.log 2>/dev/null || echo '(no startup log)'"
+    echo Recent error log:
+    plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "tail -30 /home/ec2-user/log/error*.log 2>/dev/null || echo '(no error log)'"
     pause
     exit /b 1
 )

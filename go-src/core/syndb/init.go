@@ -14,7 +14,7 @@ import (
 func InitSynCache() {
 	//先注册好通道,延迟 10 秒后开始单线程消费缓冲数据(quick 目标约 1 秒内入库)
 	xrtimer.AddOnce(gctx.New(), 10*time.Second, func(ctx context.Context) {
-		g.Log().Infof(ctx, "数据库同步开启成功")
+		g.Log("detail").Infof(ctx, "数据库同步开启成功")
 		xrtimer.AddSingleton(ctx, 500*time.Millisecond, consume)
 	})
 	shutdown.RegCommonShutDownHandler(SysExit)
