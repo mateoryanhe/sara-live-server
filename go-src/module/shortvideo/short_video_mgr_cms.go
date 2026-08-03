@@ -85,9 +85,7 @@ func CreateShortVideo(ctx context.Context, req *shortvideodto.CreateShortVideoRe
 		freeWatchSeconds,
 	)
 	shortvideodao.AddShortVideoToCache(row)
-	loadAppShortVideoListCache()
-	loadAppShortVideoPublishListCache()
-	loadAppShortVideoViewListCache()
+	reloadAllAppShortVideoListCaches()
 	res := &shortvideodto.CreateShortVideoRes{
 		ID:       strconv.FormatUint(row.ID, 10),
 		Video:    upload.GetUrlByName(videoName),
@@ -161,8 +159,7 @@ func removeShortVideoRow(row *entity.ShortVideo) error {
 	shortvideodao.RemoveStatCacheByVideoId(row.ID)
 	upload.DeleteUploadedFile(videoName)
 	upload.DeleteUploadedFile(coverName)
-	loadAppShortVideoListCache()
-	loadAppShortVideoPublishListCache()
+	reloadAllAppShortVideoListCaches()
 	return nil
 }
 
@@ -177,8 +174,7 @@ func OnShelfShortVideo(_ context.Context, req *shortvideodto.OnShelfShortVideoRe
 	if row.Status != entity.ShortVideoStatusOnShelf {
 		shortvideodao.UpdateStatus(req.ID, entity.ShortVideoStatusOnShelf)
 		shortvideodao.PrependStatToAuthorListCache(row.AuthorId, shortvideodao.GetStatByVideoId(req.ID))
-		loadAppShortVideoListCache()
-		loadAppShortVideoPublishListCache()
+		reloadAllAppShortVideoListCaches()
 	}
 	return &shortvideodto.OnShelfShortVideoRes{Success: true, Status: entity.ShortVideoStatusOnShelf}, nil
 }
@@ -190,7 +186,7 @@ func OffShelfShortVideo(_ context.Context, req *shortvideodto.OffShelfShortVideo
 	}
 	if row.Status != entity.ShortVideoStatusOffShelf {
 		shortvideodao.UpdateStatus(req.ID, entity.ShortVideoStatusOffShelf)
-		loadAppShortVideoListCache()
+		reloadAllAppShortVideoListCaches()
 	}
 	return &shortvideodto.OffShelfShortVideoRes{Success: true, Status: entity.ShortVideoStatusOffShelf}, nil
 }

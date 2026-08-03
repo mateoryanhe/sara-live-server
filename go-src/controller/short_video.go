@@ -43,6 +43,10 @@ func (c *ShortVideoController) GetShortVideoCfg(ctx context.Context, req *shortv
 	return shortvideo.GetShortVideoCfg(ctx, req)
 }
 
+func (c *ShortVideoController) ShortVideoStorageStat(ctx context.Context, req *shortvideodto.ShortVideoStorageStatReq) (*shortvideodto.ShortVideoStorageStatRes, error) {
+	return shortvideo.GetShortVideoStorageStat(ctx, req)
+}
+
 func (c *ShortVideoController) SaveShortVideoCfg(ctx context.Context, req *shortvideodto.SaveShortVideoCfgReq) (*shortvideodto.SaveShortVideoCfgRes, error) {
 	return shortvideo.SaveShortVideoCfg(ctx, req)
 }

@@ -156,12 +156,7 @@ func GetShortVideoList(req *shortvideodto.ShortVideoListReq) (int, []*shortvideo
 		filtered = append(filtered, video)
 	}
 
-	sort.Slice(filtered, func(i, j int) bool {
-		if filtered[i].CreatedAt.Equal(filtered[j].CreatedAt) {
-			return filtered[i].ID > filtered[j].ID
-		}
-		return filtered[i].CreatedAt.After(filtered[j].CreatedAt)
-	})
+	sortShortVideoList(filtered, req.SortField)
 
 	total := len(filtered)
 	pageIndex, pageSize := normalizeShortVideoListPage(req.PageIndex, req.PageSize)
@@ -215,6 +210,62 @@ func toShortVideoListRes(video *entity.ShortVideo, nicknameMap map[uint64]string
 		CreatedAt:          formatShortVideoTime(video.CreatedAt),
 		UpdatedAt:          formatShortVideoTime(video.UpdatedAt),
 	}
+}
+
+// CountAll 短视频总记录数(走内存缓存)
+func CountAll() int {
+	if shortVideoCacheMgr == nil {
+		return 0
+	}
+	return shortVideoCacheMgr.Size()
+}
+
+func sortShortVideoList(list []*entity.ShortVideo, sortField string) {
+	switch strings.TrimSpace(sortField) {
+	case "viewCount":
+		sort.Slice(list, func(i, j int) bool {
+			vi, vj := getVideoViewCount(list[i]), getVideoViewCount(list[j])
+			if vi != vj {
+				return vi < vj
+			}
+			return list[i].ID < list[j].ID
+		})
+	case "totalDiamondIncome":
+		sort.Slice(list, func(i, j int) bool {
+			vi, vj := getVideoTotalDiamondIncome(list[i]), getVideoTotalDiamondIncome(list[j])
+			if vi != vj {
+				return vi < vj
+			}
+			return list[i].ID < list[j].ID
+		})
+	default:
+		sort.Slice(list, func(i, j int) bool {
+			if list[i].CreatedAt.Equal(list[j].CreatedAt) {
+				return list[i].ID > list[j].ID
+			}
+			return list[i].CreatedAt.After(list[j].CreatedAt)
+		})
+	}
+}
+
+func getVideoViewCount(video *entity.ShortVideo) uint64 {
+	if video == nil {
+		return 0
+	}
+	if stat := GetStatByVideoId(video.ID); stat != nil {
+		return stat.ViewCount
+	}
+	return 0
+}
+
+func getVideoTotalDiamondIncome(video *entity.ShortVideo) float64 {
+	if video == nil {
+		return 0
+	}
+	if stat := GetStatByVideoId(video.ID); stat != nil {
+		return stat.TotalDiamondIncome
+	}
+	return 0
 }
 
 func normalizeShortVideoListPage(pageIndex, pageSize int) (int, int) {

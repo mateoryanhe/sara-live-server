@@ -63,7 +63,7 @@ func (c *ShortVideoAppController) PayShortVideo(ctx context.Context, req *shortv
 	return shortvideo.PayShortVideo(ctx, req)
 }
 
-func (c *ShortVideoAppController) AppShortVideoWatchList(ctx context.Context, req *shortvideodto.AppShortVideoWatchListReq) (*shortvideodto.AppShortVideoListRes, error) {
+func (c *ShortVideoAppController) AppShortVideoWatchList(ctx context.Context, req *shortvideodto.AppShortVideoWatchListReq) (*shortvideodto.AppShortVideoWatchListRes, error) {
 	return shortvideo.GetAppShortVideoWatchList(ctx, req)
 }
 

@@ -26,11 +26,37 @@
               <el-option :value="1" label="只看下架"/>
             </el-select>
           </el-form-item>
+          <el-form-item label="排序">
+            <el-select
+                v-model="searchForm.sortField"
+                placeholder="默认"
+                style="width: 160px"
+                @change="handleSearch"
+            >
+              <el-option value="" label="创建时间(新→旧)"/>
+              <el-option value="viewCount" label="观看人数(少→多)"/>
+              <el-option value="totalDiamondIncome" label="钻石收益(少→多)"/>
+            </el-select>
+          </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="handleSearch">搜索</el-button>
             <el-button @click="resetSearch">重置</el-button>
           </el-form-item>
         </el-form>
+
+        <div v-loading="storageStatLoading" class="list-summary">
+          <span>共 {{ storageStat.totalCount }} 条短视频</span>
+          <span v-if="storageStat.imageDirPath">
+            ｜目录 {{ storageStat.imageDirPath }} 占用 {{ formatBytes(storageStat.imageDirUsedBytes) }}
+          </span>
+          <span
+              v-if="storageStat.diskFreeRatio > 0"
+              :class="{ 'disk-free-warning': isDiskFreeLow }"
+          >
+            ｜磁盘空闲 {{ formatPercent(storageStat.diskFreeRatio) }}
+          </span>
+          <el-button link type="primary" @click="fetchStorageStat">刷新统计</el-button>
+        </div>
 
         <el-table v-loading="loading" :data="tableData" style="width: 100%">
           <el-table-column label="ID" prop="id" width="100"/>
@@ -315,6 +341,7 @@ interface SearchForm {
   title: string
   authorNickname: string
   statusFilter: number
+  sortField: '' | 'viewCount' | 'totalDiamondIncome'
 }
 
 interface ShortVideoForm {
@@ -338,17 +365,27 @@ const sourceLabelMap: Record<number, string> = {
 }
 
 const loading = ref(false)
+const storageStatLoading = ref(false)
 const saving = ref(false)
 const tableData = ref<ShortVideo[]>([])
 const categoryOptions = ref<ShortVideoCategory[]>([])
 const total = ref(0)
+const storageStat = reactive({
+  totalCount: 0,
+  imageDirPath: '',
+  imageDirUsedBytes: 0,
+  diskTotalBytes: 0,
+  diskFreeBytes: 0,
+  diskFreeRatio: 0,
+})
 const currentPage = ref(1)
 const pageSize = ref(10)
 
 const searchForm = reactive<SearchForm>({
   title: '',
   authorNickname: '',
-  statusFilter: 0
+  statusFilter: 0,
+  sortField: '',
 })
 
 const dialogVisible = ref(false)
@@ -383,7 +420,29 @@ const objectPreviewUrls = reactive<{ cover: string | null }>({
 
 const isCreateMode = computed(() => !currentRow.value.id)
 
+const isDiskFreeLow = computed(() => {
+  const ratio = storageStat.diskFreeRatio
+  return ratio > 0 && ratio < 30
+})
+
 const formatPrice = (price: number) => Number(price || 0).toFixed(4)
+
+const formatBytes = (bytes: number) => {
+  const value = Number(bytes || 0)
+  if (value <= 0) {
+    return '0 B'
+  }
+  const units = ['B', 'KB', 'MB', 'GB', 'TB']
+  let size = value
+  let unitIndex = 0
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024
+    unitIndex += 1
+  }
+  return `${size.toFixed(unitIndex === 0 ? 0 : 2)} ${units[unitIndex]}`
+}
+
+const formatPercent = (ratio: number) => `${Number(ratio || 0).toFixed(1)}%`
 
 const sourceLabel = (source: number) => sourceLabelMap[source] || '-'
 
@@ -573,6 +632,23 @@ const formRules: FormRules = {
   source: [{required: true, message: '请选择视频来源', trigger: 'change'}],
 }
 
+const fetchStorageStat = async () => {
+  storageStatLoading.value = true
+  try {
+    const response = await shortVideoApi.getShortVideoStorageStat()
+    storageStat.totalCount = response.totalCount || 0
+    storageStat.imageDirPath = response.imageDirPath || ''
+    storageStat.imageDirUsedBytes = response.imageDirUsedBytes || 0
+    storageStat.diskTotalBytes = response.diskTotalBytes || 0
+    storageStat.diskFreeBytes = response.diskFreeBytes || 0
+    storageStat.diskFreeRatio = response.diskFreeRatio || 0
+  } catch (error) {
+    console.error('获取短视频存储统计失败:', error)
+  } finally {
+    storageStatLoading.value = false
+  }
+}
+
 const fetchShortVideoCfg = async () => {
   try {
     const response = await shortVideoApi.getShortVideoCfg()
@@ -603,11 +679,12 @@ const fetchShortVideoList = async () => {
       title: searchForm.title,
       authorNickname: searchForm.authorNickname,
       statusFilter: searchForm.statusFilter,
+      sortField: searchForm.sortField,
       pageIndex: currentPage.value,
       pageSize: pageSize.value
     })
-    tableData.value = response.data
-    total.value = response.total
+    tableData.value = response.data || []
+    total.value = response.total || 0
   } catch (error) {
     console.error('获取短视频列表失败:', error)
     ElMessage.error('获取短视频列表失败')
@@ -625,6 +702,7 @@ const resetSearch = () => {
   searchForm.title = ''
   searchForm.authorNickname = ''
   searchForm.statusFilter = 0
+  searchForm.sortField = ''
   currentPage.value = 1
   fetchShortVideoList()
 }
@@ -764,6 +842,7 @@ const handleSave = async () => {
 onMounted(() => {
   fetchShortVideoCfg()
   fetchCategoryOptions()
+  fetchStorageStat()
   fetchShortVideoList()
 })
 </script>
@@ -793,7 +872,23 @@ onMounted(() => {
 }
 
 .search-form {
-  margin-bottom: 15px;
+  margin-bottom: 12px;
+}
+
+.list-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 12px;
+  color: var(--el-text-color-secondary);
+  font-size: 14px;
+  min-height: 32px;
+}
+
+.disk-free-warning {
+  color: var(--el-color-danger);
+  font-weight: 600;
 }
 
 .pagination-container {

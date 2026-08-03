@@ -10,7 +10,7 @@ import (
 )
 
 // GetAppShortVideoWatchList App端分页查询当前用户短视频观看记录
-func GetAppShortVideoWatchList(ctx context.Context, req *shortvideodto.AppShortVideoWatchListReq) (*shortvideodto.AppShortVideoListRes, error) {
+func GetAppShortVideoWatchList(ctx context.Context, req *shortvideodto.AppShortVideoWatchListReq) (*shortvideodto.AppShortVideoWatchListRes, error) {
 	userId := httpserver.GetAuthId(ctx)
 	if userId == 0 {
 		return nil, errercode.CreateCode(errercode.EmptyUserId)
@@ -31,9 +31,8 @@ func GetAppShortVideoWatchList(ctx context.Context, req *shortvideodto.AppShortV
 		}
 		list = append(list, toAppShortVideoItem(video, shortvideodao.GetStatByVideoId(row.VideoId), userId))
 	}
-	list = filterAppShortVideoListByBlocked(list, userId)
 
-	return &shortvideodto.AppShortVideoListRes{
+	return &shortvideodto.AppShortVideoWatchListRes{
 		Page:     page,
 		PageSize: pageSize,
 		List:     list,

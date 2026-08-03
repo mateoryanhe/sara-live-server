@@ -11,6 +11,7 @@ type ShortVideoListReq struct {
 	Title          string `json:"title" dc:"标题(模糊匹配)"`
 	AuthorNickname string `json:"authorNickname" dc:"作者昵称(模糊匹配)"`
 	StatusFilter   int    `json:"statusFilter" dc:"状态过滤(0=全部, 1=只看下架, 2=只看上架)"`
+	SortField      string `json:"sortField" dc:"排序字段(空=创建时间倒序, viewCount=观看人数升序, totalDiamondIncome=钻石收益升序)"`
 }
 
 type ShortVideoListRes struct {

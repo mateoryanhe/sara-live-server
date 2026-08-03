@@ -10,11 +10,13 @@ import type {
     ShortVideoCategory,
     ShortVideoCategoryQuery,
     ShortVideoQuery,
+    ShortVideoStorageStat,
     ShortVideoWatchQuery,
     ShortVideoWatchRecord,
 } from '@/types/api'
 
 const SHORT_VIDEO_LIST_TIMEOUT_MS = 30 * 60 * 1000
+const SHORT_VIDEO_STORAGE_STAT_TIMEOUT_MS = 10 * 60 * 1000
 
 export const shortVideoApi = {
     getShortVideoList: (params: ShortVideoQuery) => {
@@ -33,6 +35,12 @@ export const shortVideoApi = {
 
     getShortVideoCfg: () => {
         return request.post<GetShortVideoCfgRes>('/shortVideo/getShortVideoCfg', {})
+    },
+
+    getShortVideoStorageStat: () => {
+        return request.post<ShortVideoStorageStat>('/shortVideo/shortVideoStorageStat', {}, {
+            timeout: SHORT_VIDEO_STORAGE_STAT_TIMEOUT_MS,
+        })
     },
 
     saveShortVideoCfg: (data: SaveShortVideoCfgReq) => {

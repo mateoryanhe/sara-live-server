@@ -55,6 +55,13 @@ func loadAppShortVideoListCache() {
 	appListCache.Store(list)
 }
 
+// reloadAllAppShortVideoListCaches 立即刷新 App 端三个排序列表缓存
+func reloadAllAppShortVideoListCaches() {
+	loadAppShortVideoListCache()
+	loadAppShortVideoPublishListCache()
+	loadAppShortVideoViewListCache()
+}
+
 func getAppShortVideoListCache() []*shortvideodto.AppShortVideoItem {
 	v := appListCache.Load()
 	if v == nil {

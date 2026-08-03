@@ -641,6 +641,7 @@ export interface ShortVideoQuery extends PageQuery {
     title?: string
     authorNickname?: string
     statusFilter?: number
+    sortField?: '' | 'viewCount' | 'totalDiamondIncome'
 }
 
 export interface ShortVideoWatchRecord {
@@ -712,6 +713,15 @@ export interface SaveShortVideoCfgReq {
 export interface SaveShortVideoCfgRes {
     success: boolean
     id: string
+}
+
+export interface ShortVideoStorageStat {
+    totalCount: number
+    imageDirPath: string
+    imageDirUsedBytes: number
+    diskTotalBytes: number
+    diskFreeBytes: number
+    diskFreeRatio: number
 }
 
 export interface ShortVideoCategory {
