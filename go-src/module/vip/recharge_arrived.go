@@ -42,19 +42,26 @@ func onRechargeArrived(val any) {
 
 	user.SetVipLevel(targetLevel)
 	pushVipLevelToApp(order.UserId, targetLevel)
-	g.Log().Infof(gctx.New(), "vip upgrade userId=%d level=%d totalRecharge=%.4f",
-		order.UserId, targetLevel, totalRecharge)
+
 }
 
-// calcTargetVipLevel 根据累计充值(USD)计算应达到的VIP等级
+// calcTargetVipLevel 根据累计充值(USD)计算应达到的VIP等级。
+// 配置中每级 UpgradeRechargeLimit 为该等级累计充值上限(如 L1=10,L2=20,...,L10=100):
+// 累计充值 < 10 → L1; 累计充值 = 10 → L2; 累计充值 >= 最高级上限 → 最高等级。
 func calcTargetVipLevel(totalRecharge float64) uint32 {
-	var target uint32
-	for _, cfg := range GetAllVipCfgFromMemory() {
-		if totalRecharge >= cfg.UpgradeRechargeLimit && cfg.Level > target {
-			target = cfg.Level
+	if totalRecharge <= 0 {
+		return 0
+	}
+	cfgs := GetAllVipCfgFromMemory()
+	if len(cfgs) == 0 {
+		return 0
+	}
+	for _, cfg := range cfgs {
+		if cfg.UpgradeRechargeLimit > totalRecharge {
+			return cfg.Level
 		}
 	}
-	return target
+	return cfgs[len(cfgs)-1].Level
 }
 
 // getMaxEnabledVipLevel 获取已开启配置中的最高VIP等级
