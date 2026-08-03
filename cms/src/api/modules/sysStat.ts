@@ -1,5 +1,18 @@
 import {request} from '../request'
-import type {ResourceMetricTrend, SysStat, UserStatTrend} from '@/types/api'
+import type {
+    ResourceMetricPoint,
+    ResourceMetricTrendQuery,
+    SysStat,
+    UserStatTrend,
+} from '@/types/api'
+
+export const RESOURCE_METRIC_MAX_POINTS = 1000
+
+const buildResourceMetricQuery = (params: ResourceMetricTrendQuery = {}) => ({
+    startTime: params.startTime || '',
+    endTime: params.endTime || '',
+    limit: params.limit ?? RESOURCE_METRIC_MAX_POINTS,
+})
 
 export const sysStatApi = {
     getSysStat: () => {
@@ -8,8 +21,35 @@ export const sysStatApi = {
     getUserStatTrend: () => {
         return request.post<UserStatTrend>('/sysStat/getUserStatTrend', {})
     },
-    getResourceMetricTrend: () => {
-        return request.post<ResourceMetricTrend>('/resourceMetric/getResourceMetricTrend', {})
+    getResourceMetricMemoryTrend: (params: ResourceMetricTrendQuery = {}) => {
+        return request.post<{ points: ResourceMetricPoint[] }>(
+            '/resourceMetric/getResourceMetricMemoryTrend',
+            buildResourceMetricQuery(params),
+        )
+    },
+    getResourceMetricHeapTrend: (params: ResourceMetricTrendQuery = {}) => {
+        return request.post<{ points: ResourceMetricPoint[] }>(
+            '/resourceMetric/getResourceMetricHeapTrend',
+            buildResourceMetricQuery(params),
+        )
+    },
+    getResourceMetricRatioTrend: (params: ResourceMetricTrendQuery = {}) => {
+        return request.post<{ points: ResourceMetricPoint[] }>(
+            '/resourceMetric/getResourceMetricRatioTrend',
+            buildResourceMetricQuery(params),
+        )
+    },
+    getResourceMetricCpuTrend: (params: ResourceMetricTrendQuery = {}) => {
+        return request.post<{ points: ResourceMetricPoint[] }>(
+            '/resourceMetric/getResourceMetricCpuTrend',
+            buildResourceMetricQuery(params),
+        )
+    },
+    getResourceMetricOnlineTrend: (params: ResourceMetricTrendQuery = {}) => {
+        return request.post<{ points: ResourceMetricPoint[] }>(
+            '/resourceMetric/getResourceMetricOnlineTrend',
+            buildResourceMetricQuery(params),
+        )
     },
 }
 

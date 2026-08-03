@@ -1,135 +1,263 @@
-<template>
-  <div v-loading="loading" class="page-container">
-    <el-card>
-      <template #header>
-        <div class="card-header">
-          <span>系统资源监控</span>
-          <el-button :loading="loading" @click="fetchResourceMetricTrend">刷新</el-button>
-        </div>
-      </template>
-
-      <el-tabs v-model="activeTab" @tab-change="handleTabChange">
-        <el-tab-pane label="内存" name="memory">
-          <ResourceMetricChart
-              ref="memoryChartRef"
-              :data="resourceMetricTrend.points"
-              metric-type="memory"
-              title="进程RSS与系统内存 (最近3天, 每10分钟采样)"
-          />
-        </el-tab-pane>
-        <el-tab-pane label="堆内存" name="heap">
-          <ResourceMetricChart
-              ref="heapChartRef"
-              :data="resourceMetricTrend.points"
-              metric-type="heap"
-              title="进程堆内存 (最近3天, 每10分钟采样)"
-          />
-        </el-tab-pane>
-        <el-tab-pane label="比例" name="ratio">
-          <ResourceMetricChart
-              ref="ratioChartRef"
-              :data="resourceMetricTrend.points"
-              metric-type="ratio"
-              title="堆使用/空闲比例 (最近3天, 每10分钟采样)"
-          />
-        </el-tab-pane>
-        <el-tab-pane label="CPU" name="cpu">
-          <ResourceMetricChart
-              ref="cpuChartRef"
-              :data="resourceMetricTrend.points"
-              metric-type="cpu"
-              title="进程/系统CPU (最近3天, 每10分钟采样)"
-          />
-        </el-tab-pane>
-        <el-tab-pane label="在线人数" name="online">
-          <ResourceMetricChart
-              ref="onlineChartRef"
-              :data="resourceMetricTrend.points"
-              metric-type="online"
-              title="在线人数 (最近3天, 每10分钟采样)"
-          />
-        </el-tab-pane>
-      </el-tabs>
-    </el-card>
-  </div>
-</template>
-
-<script lang="ts" setup>
-import {nextTick, onMounted, reactive, ref} from 'vue'
-import {ElMessage} from 'element-plus'
-import {sysStatApi} from '@/api'
-import type {ResourceMetricTrend} from '@/types/api'
-import ResourceMetricChart from './components/resource-metric-chart.vue'
-
-const loading = ref(false)
-const activeTab = ref('memory')
-const memoryChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
-const heapChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
-const ratioChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
-const cpuChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
-const onlineChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
-
-const resourceMetricTrend = reactive<ResourceMetricTrend>({
-  points: [],
-})
-
-const resizeActiveChart = () => {
-  if (activeTab.value === 'cpu') {
-    cpuChartRef.value?.resize()
-    return
-  }
-  if (activeTab.value === 'online') {
-    onlineChartRef.value?.resize()
-    return
-  }
-  if (activeTab.value === 'heap') {
-    heapChartRef.value?.resize()
-    return
-  }
-  if (activeTab.value === 'ratio') {
-    ratioChartRef.value?.resize()
-    return
-  }
-  memoryChartRef.value?.resize()
-}
-
-const handleTabChange = async () => {
-  await nextTick()
-  setTimeout(() => {
-    resizeActiveChart()
-  }, 0)
-}
-
-const fetchResourceMetricTrend = async () => {
-  loading.value = true
-  try {
-    const data = await sysStatApi.getResourceMetricTrend()
-    resourceMetricTrend.points = data.points || []
-    await nextTick()
-    setTimeout(() => {
-      resizeActiveChart()
-    }, 0)
-  } catch (error) {
-    console.error('获取系统资源趋势失败:', error)
-    ElMessage.error('获取系统资源趋势失败')
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(() => {
-  fetchResourceMetricTrend()
-})
-</script>
-
-<style scoped>
-.page-container {
-  padding: 20px;
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-</style>
+<template>
+  <div v-loading="loading" class="page-container">
+    <el-card>
+      <template #header>
+        <div class="card-header">
+          <span>系统资源监控</span>
+        </div>
+      </template>
+
+      <el-form :model="searchForm" class="search-form" inline label-width="80px">
+        <el-form-item label="开始时间">
+          <el-date-picker
+              v-model="searchForm.startTime"
+              clearable
+              format="YYYY-MM-DD HH:mm:ss"
+              placeholder="开始时间"
+              style="width: 200px"
+              teleported
+              type="datetime"
+              value-format="YYYY-MM-DD HH:mm:ss"
+          />
+        </el-form-item>
+        <el-form-item label="结束时间">
+          <el-date-picker
+              v-model="searchForm.endTime"
+              clearable
+              format="YYYY-MM-DD HH:mm:ss"
+              placeholder="结束时间"
+              style="width: 200px"
+              teleported
+              type="datetime"
+              value-format="YYYY-MM-DD HH:mm:ss"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleQuery">查询</el-button>
+          <el-button @click="resetSearch">重置</el-button>
+        </el-form-item>
+        <span class="search-tip">每10分钟采样，每个模块单次最多展示 {{ RESOURCE_METRIC_MAX_POINTS }} 条</span>
+      </el-form>
+
+      <el-tabs v-model="activeTab" @tab-change="handleTabChange" @tab-click="handleTabClick">
+        <el-tab-pane label="内存" lazy name="memory">
+          <ResourceMetricChart
+              ref="memoryChartRef"
+              :data="tabPoints.memory"
+              metric-type="memory"
+              :title="chartTitle('进程RSS与系统内存')"
+          />
+        </el-tab-pane>
+        <el-tab-pane label="堆内存" lazy name="heap">
+          <ResourceMetricChart
+              ref="heapChartRef"
+              :data="tabPoints.heap"
+              metric-type="heap"
+              :title="chartTitle('进程堆内存')"
+          />
+        </el-tab-pane>
+        <el-tab-pane label="比例" lazy name="ratio">
+          <ResourceMetricChart
+              ref="ratioChartRef"
+              :data="tabPoints.ratio"
+              metric-type="ratio"
+              :title="chartTitle('堆使用/空闲比例')"
+          />
+        </el-tab-pane>
+        <el-tab-pane label="CPU" lazy name="cpu">
+          <ResourceMetricChart
+              ref="cpuChartRef"
+              :data="tabPoints.cpu"
+              metric-type="cpu"
+              :title="chartTitle('进程/系统CPU')"
+          />
+        </el-tab-pane>
+        <el-tab-pane label="在线人数" lazy name="online">
+          <ResourceMetricChart
+              ref="onlineChartRef"
+              :data="tabPoints.online"
+              metric-type="online"
+              :title="chartTitle('在线人数')"
+          />
+        </el-tab-pane>
+      </el-tabs>
+    </el-card>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import {nextTick, reactive, ref} from 'vue'
+import {ElMessage} from 'element-plus'
+import {RESOURCE_METRIC_MAX_POINTS, sysStatApi} from '@/api'
+import type {ResourceMetricPoint} from '@/types/api'
+import ResourceMetricChart from './components/resource-metric-chart.vue'
+
+type MetricTab = 'memory' | 'heap' | 'ratio' | 'cpu' | 'online'
+
+const loading = ref(false)
+const activeTab = ref<MetricTab>('memory')
+const queryKey = ref('')
+
+const memoryChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
+const heapChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
+const ratioChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
+const cpuChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
+const onlineChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
+
+const searchForm = reactive({
+  startTime: '',
+  endTime: '',
+})
+
+const tabPoints = reactive<Record<MetricTab, ResourceMetricPoint[]>>({
+  memory: [],
+  heap: [],
+  ratio: [],
+  cpu: [],
+  online: [],
+})
+
+const loadedTabs = ref(new Set<MetricTab>())
+
+const tabFetchers: Record<MetricTab, (params: {
+  startTime: string
+  endTime: string
+  limit: number
+}) => Promise<{ points: ResourceMetricPoint[] }>> = {
+  memory: sysStatApi.getResourceMetricMemoryTrend,
+  heap: sysStatApi.getResourceMetricHeapTrend,
+  ratio: sysStatApi.getResourceMetricRatioTrend,
+  cpu: sysStatApi.getResourceMetricCpuTrend,
+  online: sysStatApi.getResourceMetricOnlineTrend,
+}
+
+const pad = (value: number) => String(value).padStart(2, '0')
+
+const formatDateTime = (date: Date) => {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+}
+
+const buildDefaultSearchForm = () => {
+  const end = new Date()
+  const start = new Date(end.getTime() - 3 * 24 * 60 * 60 * 1000)
+  searchForm.startTime = formatDateTime(start)
+  searchForm.endTime = formatDateTime(end)
+}
+
+const buildQueryKey = () => `${searchForm.startTime}|${searchForm.endTime}`
+
+const buildQueryParams = () => ({
+  startTime: searchForm.startTime,
+  endTime: searchForm.endTime,
+  limit: RESOURCE_METRIC_MAX_POINTS,
+})
+
+const chartTitle = (label: string) => {
+  if (searchForm.startTime && searchForm.endTime) {
+    return `${label} (${searchForm.startTime} ~ ${searchForm.endTime})`
+  }
+  return label
+}
+
+const clearTabData = () => {
+  tabPoints.memory = []
+  tabPoints.heap = []
+  tabPoints.ratio = []
+  tabPoints.cpu = []
+  tabPoints.online = []
+  loadedTabs.value.clear()
+}
+
+const resizeActiveChart = () => {
+  if (activeTab.value === 'cpu') {
+    cpuChartRef.value?.resize()
+    return
+  }
+  if (activeTab.value === 'online') {
+    onlineChartRef.value?.resize()
+    return
+  }
+  if (activeTab.value === 'heap') {
+    heapChartRef.value?.resize()
+    return
+  }
+  if (activeTab.value === 'ratio') {
+    ratioChartRef.value?.resize()
+    return
+  }
+  memoryChartRef.value?.resize()
+}
+
+const fetchTabData = async (tab: MetricTab, force = false) => {
+  const currentKey = buildQueryKey()
+  if (!force && loadedTabs.value.has(tab) && queryKey.value === currentKey) {
+    return
+  }
+  loading.value = true
+  try {
+    const data = await tabFetchers[tab](buildQueryParams())
+    tabPoints[tab] = data.points || []
+    loadedTabs.value.add(tab)
+    queryKey.value = currentKey
+    await nextTick()
+    if (activeTab.value === tab) {
+      setTimeout(() => {
+        resizeActiveChart()
+      }, 0)
+    }
+  } catch (error) {
+    console.error('获取系统资源趋势失败:', error)
+    ElMessage.error('获取系统资源趋势失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleQuery = async () => {
+  clearTabData()
+  await fetchTabData(activeTab.value, true)
+}
+
+const resetSearch = () => {
+  buildDefaultSearchForm()
+  queryKey.value = ''
+  clearTabData()
+}
+
+const handleTabClick = async (pane: { paneName?: string | number }) => {
+  const tab = String(pane.paneName || activeTab.value) as MetricTab
+  await fetchTabData(tab)
+}
+
+const handleTabChange = async (tabName: string | number) => {
+  activeTab.value = String(tabName) as MetricTab
+  await nextTick()
+  setTimeout(() => {
+    resizeActiveChart()
+  }, 0)
+}
+
+buildDefaultSearchForm()
+</script>
+
+<style scoped>
+.page-container {
+  padding: 20px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.search-form {
+  margin-bottom: 12px;
+}
+
+.search-tip {
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
+}
+</style>
+

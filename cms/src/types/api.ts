@@ -78,6 +78,12 @@ export interface ResourceMetricTrend {
     points: ResourceMetricPoint[]
 }
 
+export interface ResourceMetricTrendQuery {
+    startTime?: string
+    endTime?: string
+    limit?: number
+}
+
 // 登录请求类型
 export interface LoginReq {
     userName: string

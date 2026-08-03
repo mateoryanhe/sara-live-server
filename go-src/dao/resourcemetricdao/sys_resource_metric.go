@@ -32,3 +32,29 @@ func ListSince(since time.Time) []*entity.SysResourceMetric {
 		Scan(&ret)
 	return ret
 }
+
+const maxTrendPoints = 1000
+
+// ListByTimeRange 查询时间范围内的采样记录(按时间升序,最多 limit 条,取范围内最新数据)
+func ListByTimeRange(start, end time.Time, limit int) []*entity.SysResourceMetric {
+	if limit <= 0 {
+		limit = maxTrendPoints
+	}
+	if limit > maxTrendPoints {
+		limit = maxTrendPoints
+	}
+	ctx := gctx.New()
+	m := g.Model(string(entity.TbSysResourceMetric)).Ctx(ctx)
+	if !start.IsZero() {
+		m = m.Where("recorded_at >= ?", start)
+	}
+	if !end.IsZero() {
+		m = m.Where("recorded_at <= ?", end)
+	}
+	ret := make([]*entity.SysResourceMetric, 0)
+	_ = m.OrderDesc("recorded_at").Limit(limit).Scan(&ret)
+	for i, j := 0, len(ret)-1; i < j; i, j = i+1, j-1 {
+		ret[i], ret[j] = ret[j], ret[i]
+	}
+	return ret
+}

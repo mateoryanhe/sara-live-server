@@ -15,7 +15,22 @@ func initResourceMetricController() {
 	httpserver.RegCMS(ResourceMetricUrl, &ResourceMetricController{})
 }
 
-// GetResourceMetricTrend CMS获取系统资源趋势
-func (c *ResourceMetricController) GetResourceMetricTrend(ctx context.Context, req *resourcemetricdto.CMSResourceMetricTrendReq) (res *resourcemetricdto.CMSResourceMetricTrendRes, err error) {
-	return resourcemonitor.GetCMSResourceMetricTrend(ctx, req)
+func (c *ResourceMetricController) GetResourceMetricMemoryTrend(ctx context.Context, req *resourcemetricdto.CMSResourceMetricMemoryTrendReq) (res *resourcemetricdto.CMSResourceMetricMemoryTrendRes, err error) {
+	return resourcemonitor.GetCMSResourceMetricMemoryTrend(ctx, req)
+}
+
+func (c *ResourceMetricController) GetResourceMetricHeapTrend(ctx context.Context, req *resourcemetricdto.CMSResourceMetricHeapTrendReq) (res *resourcemetricdto.CMSResourceMetricHeapTrendRes, err error) {
+	return resourcemonitor.GetCMSResourceMetricHeapTrend(ctx, req)
+}
+
+func (c *ResourceMetricController) GetResourceMetricRatioTrend(ctx context.Context, req *resourcemetricdto.CMSResourceMetricRatioTrendReq) (res *resourcemetricdto.CMSResourceMetricRatioTrendRes, err error) {
+	return resourcemonitor.GetCMSResourceMetricRatioTrend(ctx, req)
+}
+
+func (c *ResourceMetricController) GetResourceMetricCpuTrend(ctx context.Context, req *resourcemetricdto.CMSResourceMetricCpuTrendReq) (res *resourcemetricdto.CMSResourceMetricCpuTrendRes, err error) {
+	return resourcemonitor.GetCMSResourceMetricCpuTrend(ctx, req)
+}
+
+func (c *ResourceMetricController) GetResourceMetricOnlineTrend(ctx context.Context, req *resourcemetricdto.CMSResourceMetricOnlineTrendReq) (res *resourcemetricdto.CMSResourceMetricOnlineTrendRes, err error) {
+	return resourcemonitor.GetCMSResourceMetricOnlineTrend(ctx, req)
 }

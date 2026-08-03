@@ -28,7 +28,7 @@ import {textModerationApi} from './modules/text-moderation'
 import {privacyPolicyApi} from './modules/privacy-policy'
 import {customerServiceApi} from './modules/customer-service'
 import {uploadResourceApi} from './modules/upload-resource'
-import {sysStatApi} from './modules/sysStat'
+import {sysStatApi, RESOURCE_METRIC_MAX_POINTS} from './modules/sysStat'
 import {botAnchorApi} from './modules/bot-anchor'
 import {logQueryApi} from './modules/logQuery'
 
@@ -64,6 +64,7 @@ export {
     customerServiceApi,
     uploadResourceApi,
     sysStatApi,
+    RESOURCE_METRIC_MAX_POINTS,
     botAnchorApi,
     logQueryApi,
 }
@@ -100,6 +101,7 @@ export default {
     customerServiceApi,
     uploadResourceApi,
     sysStatApi,
+    RESOURCE_METRIC_MAX_POINTS,
     botAnchorApi,
     logQueryApi,
 }

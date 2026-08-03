@@ -96,7 +96,7 @@
 <script lang="ts" setup>
 import {computed, defineAsyncComponent, nextTick, onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
-import {sysStatApi} from '@/api'
+import {RESOURCE_METRIC_MAX_POINTS, sysStatApi} from '@/api'
 import type {ResourceMetricTrend, SysStat, UserStatTrend} from '@/types/api'
 import BarMetricSection from './components/bar-metric-section.vue'
 import {getUserStatBarMetricTabs, USER_STAT_BAR_SERIES} from './user-stat-bar-series'
@@ -238,7 +238,7 @@ const fetchSysStat = async () => {
 }
 
 const fetchResourceMetricTrend = async () => {
-  const data = await sysStatApi.getResourceMetricTrend()
+  const data = await sysStatApi.getResourceMetricOnlineTrend({limit: RESOURCE_METRIC_MAX_POINTS})
   resourceMetricTrend.points = data.points || []
   await nextTick()
   setTimeout(() => {
