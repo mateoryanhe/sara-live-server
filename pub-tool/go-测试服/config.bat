@@ -21,3 +21,6 @@ set SUDO_CMD=
 
 REM Graceful shutdown wait time in seconds
 set SHUTDOWN_WAIT_TIME=5
+
+REM SSH port
+set REMOTE_PORT=22

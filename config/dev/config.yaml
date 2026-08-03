@@ -47,6 +47,7 @@ logger:
     header: true
     flags: 1                            # 仅异步,时间靠 timeFormat,不含源码路径,便于 CMS 解析
     timeFormat: "2006-01-02T15:04:05.000"
+    stdout: false
     rotateSize: "10M"              # 保留最近3天的按日日志，过期直接删（不产生时间戳备份）
     rotateBackupLimit: 0          # 0=不保留备份，过期直接删，不产生 detail-xxx.20260720....log
   access:                               # HTTP Server access 日志(替代 GF 内置 access 日志)
@@ -56,6 +57,7 @@ logger:
     levelPrint: false
     flags: 1                            # 仅时间戳,不含源码路径/级别,便于 CMS 解析
     timeFormat: "2006-01-02T15:04:05.000"
+    stdout: false
     rotateSize: "10M"              # 保留最近3天的按日日志，过期直接删（不产生时间戳备份）
     rotateBackupLimit: 0          # 0=不保留备份，过期直接删，不产生 detail-xxx.20260720....log
   error:                                # HTTP 框架错误 + xrlog 错误日志，g.Log("error")
@@ -64,6 +66,7 @@ logger:
     flags: 1                            # 仅异步,时间靠 timeFormat,不含源码路径,便于 CMS 解析
     header: true                        # 保留时间戳与 TraceId,供日志查询过滤与解析
     timeFormat: "2006-01-02T15:04:05.000"
+    stdout: false
     rotateSize: "10M"              # 保留最近3天的按日日志，过期直接删（不产生时间戳备份）
     rotateBackupLimit: 0          # 0=不保留备份，过期直接删，不产生 detail-xxx.20260720....log
 
@@ -71,7 +74,7 @@ database:
   logger:
     path: '/home/ec2-user/log/gf_app'
     level: "all"
-    stdout: true
+    stdout: false
     queryOnly: true   # 仅记录 SELECT/UPDATE/DELETE,不记录 INSERT/SHOW
   default:
     link: "mysql:root:Appledev882116@tcp(127.0.0.1:3306)/live_db"

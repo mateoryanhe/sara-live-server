@@ -1,4 +1,5 @@
 @echo off
+setlocal EnableDelayedExpansion
 REM Set script to execute in current directory
 cd /d "%~dp0"
 
@@ -113,16 +114,16 @@ echo ================================
 
 REM First, accept the host key by running a command with Auto_AcceptHostKeys option
 echo Accepting host key for server...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -batch -hostkey "*" %REMOTE_USER%@%REMOTE_HOST% "echo 'Host key accepted'" >nul 2>&1
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "*" %REMOTE_USER%@%REMOTE_HOST% "echo 'Host key accepted'" >nul 2>&1
 if %errorlevel% neq 0 (
     REM If the command failed but it's due to host key, try to connect without batch mode to accept it
     echo Connecting for the first time to accept host key...
-    echo y | plink.exe -ssh -i "%SSH_KEY_PATH%" %REMOTE_USER%@%REMOTE_HOST% "exit" >nul 2>&1
+    echo y | plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% %REMOTE_USER%@%REMOTE_HOST% "exit" >nul 2>&1
 )
 
 REM Test connection
 echo Testing server connection...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "echo 'Connection successful'"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "echo 'Connection successful'"
 if %errorlevel% neq 0 (
     echo Error: Unable to connect to server %REMOTE_HOST%
     pause
@@ -132,7 +133,7 @@ if %errorlevel% neq 0 (
 echo Uploading deployment package to /tmp...
 
 REM Upload to /tmp first (ec2-user always writable), avoid permission denied on app dir
-pscp.exe -i "%SSH_KEY_PATH%" "%DEPLOY_PACKAGE%" %REMOTE_USER%@%REMOTE_HOST%:/tmp/deploy_package.zip
+pscp.exe -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% "%DEPLOY_PACKAGE%" %REMOTE_USER%@%REMOTE_HOST%:/tmp/deploy_package.zip
 if %errorlevel% neq 0 (
     echo Error: File upload failed
     pause
@@ -141,7 +142,7 @@ if %errorlevel% neq 0 (
 
 REM Ensure remote directory exists, fix ownership (sudo 启动可能导致目录属主为 root)
 echo Preparing remote directory...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "sudo mkdir -p %REMOTE_DIR% && sudo chown -R %REMOTE_USER%:%REMOTE_USER% %REMOTE_DIR% && rm -f %REMOTE_DIR%/%APP_NAME% %REMOTE_DIR%/config.yaml %REMOTE_DIR%/%APP_NAME%.log %REMOTE_DIR%/deploy_package.zip"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "sudo mkdir -p %REMOTE_DIR% && sudo chown -R %REMOTE_USER%:%REMOTE_USER% %REMOTE_DIR% && rm -f %REMOTE_DIR%/%APP_NAME% %REMOTE_DIR%/config.yaml %REMOTE_DIR%/%APP_NAME%.log %REMOTE_DIR%/deploy_package.zip"
 if %errorlevel% neq 0 (
     echo Error: Failed to prepare remote directory %REMOTE_DIR%
     pause
@@ -150,10 +151,10 @@ if %errorlevel% neq 0 (
 
 REM Extract deployment package from /tmp into target directory
 echo Extracting deployment package...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "unzip -o /tmp/deploy_package.zip -d %REMOTE_DIR% && rm -f /tmp/deploy_package.zip"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "unzip -o /tmp/deploy_package.zip -d %REMOTE_DIR% && rm -f /tmp/deploy_package.zip"
 if %errorlevel% neq 0 (
     echo Error: Remote extraction failed
-    plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "rm -f /tmp/deploy_package.zip"
+    plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "rm -f /tmp/deploy_package.zip"
     pause
     exit /b 1
 )
@@ -168,13 +169,13 @@ echo ================================
 
 echo Stopping old program on remote server...
 REM Send SIGTERM signal (kill -15, equivalent to kill -13)
-plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "sudo  pkill -15 %APP_NAME% 2>nul || pkill -TERM %APP_NAME% 2>nul"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "sudo pkill -15 %APP_NAME% 2>/dev/null || pkill -TERM %APP_NAME% 2>/dev/null"
 echo Waiting %SHUTDOWN_WAIT_TIME% seconds for graceful shutdown...
 timeout /t %SHUTDOWN_WAIT_TIME% /nobreak >nul
 
 REM Send SIGKILL signal (kill -9) to force stop any remaining processes
 echo Sending force stop command...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "sudo pkill -9 %APP_NAME% 2>nul || pkill -KILL %APP_NAME% 2>nul"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "sudo pkill -9 %APP_NAME% 2>/dev/null || pkill -KILL %APP_NAME% 2>/dev/null"
 
 
 
@@ -186,14 +187,27 @@ echo ================================
 
 REM Set execution permissions
 echo Setting execution permissions...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "chmod +x %REMOTE_DIR%/%APP_NAME%"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "chmod +x %REMOTE_DIR%/%APP_NAME%"
 
-REM No need to create session directory
-REM Skipping session directory creation as per requirement
+REM 通过 start.sh 后台启动,避免 plink 因伪终端等待子进程而卡住
+echo Creating remote start script...
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "printf '%%s\n' '#!/bin/sh' 'cd %REMOTE_DIR%' 'nohup ./%APP_NAME% >> /home/ec2-user/log/xr-game-server-stdout.log 2>&1 &' > %REMOTE_DIR%/start.sh && chmod +x %REMOTE_DIR%/start.sh"
+if %errorlevel% neq 0 (
+    echo Error: Failed to create remote start script
+    pause
+    exit /b 1
+)
 
 REM Start program (cd to app dir so GoFrame can find config.yaml)
 echo Starting program...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "sudo bash -c 'cd %REMOTE_DIR% && nohup ./%APP_NAME% >/dev/null 2>&1 &'"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "sudo %REMOTE_DIR%/start.sh"
+if %errorlevel% neq 0 (
+    echo Error: Remote start script failed
+    pause
+    exit /b 1
+)
+echo Program start command completed.
+echo Startup log: /home/ec2-user/log/xr-game-server-stdout.log
 
 echo.
 echo ================================
@@ -211,27 +225,28 @@ echo Verifying if program is running...
 timeout /t 5 /nobreak >nul
 echo.
 
-setlocal enabledelayedexpansion
 set REMOTE_PID=
-for /f "delims=" %%i in ('plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "pgrep -xo %APP_NAME%" 2^>nul') do set REMOTE_PID=%%i
+for /f "delims=" %%i in ('plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "pgrep -xo %APP_NAME%" 2^>nul') do set REMOTE_PID=%%i
 
 if not defined REMOTE_PID (
     echo ERROR: %APP_NAME% process not found!
-    endlocal
+    echo Recent startup log:
+    plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "tail -30 /home/ec2-user/log/xr-game-server-stdout.log 2>/dev/null || echo '(no startup log)'"
     pause
     exit /b 1
 )
 
 echo [Process] Started OK
 echo   PID: !REMOTE_PID!
-plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "ps -p !REMOTE_PID! -o pid,etime,cmd --no-headers 2>/dev/null || pgrep -af %APP_NAME%"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "ps -p !REMOTE_PID! -o pid,etime,cmd --no-headers 2>/dev/null || pgrep -af %APP_NAME%"
 
 echo.
 echo [Port 443]
-plink.exe -ssh -i "%SSH_KEY_PATH%" -batch %REMOTE_USER%@%REMOTE_HOST% "ss -tlnp 2>/dev/null | grep ':443' || (echo not listening && exit 1)"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "ss -tlnp 2>/dev/null | grep ':443' || (echo not listening && exit 1)"
 if errorlevel 1 (
     echo ERROR: port 443 not listening
-    endlocal
+    echo Recent startup log:
+    plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "tail -30 /home/ec2-user/log/xr-game-server-stdout.log 2>/dev/null || echo '(no startup log)'"
     pause
     exit /b 1
 )
