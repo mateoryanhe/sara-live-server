@@ -16,4 +16,5 @@ type SysCfgResp struct {
 	RoomOwnerTermsUrl           string  `json:"roomOwnerTermsUrl" dc:"房间房主责任条款URL"`
 	VipDescUrl                  string  `json:"vipDescUrl" dc:"VIP描述文档URL"`
 	AppImageMaxSize             uint64  `json:"appImageMaxSize" dc:"App端图片上传大小上限(字节)"`
+	GoldToDiamondRate           int     `json:"goldToDiamondRate" dc:"金币兑换钻石比例(1金币=N钻石)"`
 }

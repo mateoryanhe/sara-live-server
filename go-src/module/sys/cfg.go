@@ -3,6 +3,7 @@ package sys
 import (
 	"context"
 	"time"
+	"xr-game-server/constants/common"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/sysdto"
 	"xr-game-server/module/apppkg"
@@ -26,5 +27,6 @@ func GetSysCfg(ctx context.Context, req *sysdto.SysCfgReq) (*sysdto.SysCfgResp, 
 		RoomOwnerTermsUrl:           privacypolicy.GetRoomOwnerTermsUrl(),
 		VipDescUrl:                  privacypolicy.GetVipDescUrl(),
 		AppImageMaxSize:             upload.GetAppImageMaxSize(),
+		GoldToDiamondRate:           common.GoldToDiamondRate,
 	}, nil
 }

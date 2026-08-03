@@ -1,10 +1,5 @@
 <template>
-  <div
-      v-loading="pageWaiting"
-      class="page-container"
-      element-loading-background="rgba(255, 255, 255, 0.75)"
-      element-loading-text="pageWaitingText"
-  >
+  <div class="page-container">
     <el-card>
       <template #header>
         <div class="card-header">
@@ -46,6 +41,8 @@
           <el-button @click="handleReset">重置</el-button>
         </el-form-item>
       </el-form>
+
+      <div class="list-summary">共 {{ total }} 条订单</div>
 
       <el-table v-loading="loading" :data="tableData" style="width: 100%">
         <el-table-column label="订单ID" min-width="180" prop="id"/>
@@ -151,8 +148,6 @@ interface SearchForm {
 }
 
 const loading = ref(false)
-const pageWaiting = ref(false)
-const pageWaitingText = ref('处理中，请稍候...')
 const manualRechargingId = ref('')
 const createOrderDialogVisible = ref(false)
 const creatingOrder = ref(false)
@@ -204,8 +199,8 @@ const fetchOrderList = async () => {
   loading.value = true
   try {
     const response = await rechargeOrderApi.getRechargeOrderList(buildQueryParams())
-    tableData.value = response.data
-    total.value = response.total
+    tableData.value = response.data || []
+    total.value = response.total || 0
   } catch (error) {
     console.error('获取充值订单列表失败:', error)
     ElMessage.error('获取充值订单列表失败')
@@ -238,15 +233,9 @@ const handleCurrentChange = (page: number) => {
   fetchOrderList()
 }
 
-const afterManualRechargeSuccess = (after: number) => {
+const afterManualRechargeSuccess = async (after: number) => {
   ElMessage.success(`补单成功，玩家当前金币余额：${formatAmount(after)}`)
-  pageWaitingText.value = '人工补单处理中，请稍候...'
-  pageWaiting.value = true
-  setTimeout(() => {
-    fetchOrderList().finally(() => {
-      pageWaiting.value = false
-    })
-  }, 5000)
+  await fetchOrderList()
 }
 
 const handleManualRecharge = async (row: RechargeOrder) => {
@@ -262,7 +251,7 @@ const handleManualRecharge = async (row: RechargeOrder) => {
     )
     manualRechargingId.value = row.id
     const res = await rechargeOrderApi.manualRecharge(row.id)
-    afterManualRechargeSuccess(res.after)
+    await afterManualRechargeSuccess(res.after)
   } catch (error) {
     if (error !== 'cancel') {
       console.error('人工补单失败:', error)
@@ -301,13 +290,7 @@ const handleCreateOrder = async () => {
     createOrderDialogVisible.value = false
     ElMessage.success(`创建成功，订单ID：${res.orderId}，金额：${formatAmount(res.price)}，金币：${formatAmount(res.gold)}`)
     currentPage.value = 1
-    pageWaitingText.value = '人工创建订单处理中，请稍候...'
-    pageWaiting.value = true
-    setTimeout(() => {
-      fetchOrderList().finally(() => {
-        pageWaiting.value = false
-      })
-    }, 3000)
+    await fetchOrderList()
   } catch (error) {
     console.error('人工创建订单失败:', error)
   } finally {
@@ -383,7 +366,13 @@ onMounted(() => {
 }
 
 .search-form {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
+}
+
+.list-summary {
+  margin-bottom: 12px;
+  color: var(--el-text-color-secondary);
+  font-size: 14px;
 }
 
 .search-form .el-form-item {

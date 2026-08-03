@@ -51,6 +51,30 @@ func FlushOrderCache(o *entity.RechargeOrder) {
 	orderCacheMgr.FlushCache(o.ID, o)
 }
 
+// GetFromCacheById 仅从内存缓存读取订单,未命中返回 nil(不查库)
+func GetFromCacheById(id uint64) *entity.RechargeOrder {
+	if id == 0 || orderCacheMgr == nil {
+		return nil
+	}
+	v := orderCacheMgr.GetFromCache(id)
+	if v == nil {
+		return nil
+	}
+	o, _ := v.(*entity.RechargeOrder)
+	return o
+}
+
+// mergeOrderFromCache 列表项优先使用内存缓存中的最新订单数据
+func mergeOrderFromCache(o *entity.RechargeOrder) *entity.RechargeOrder {
+	if o == nil {
+		return nil
+	}
+	if cached := GetFromCacheById(o.ID); cached != nil {
+		return cached
+	}
+	return o
+}
+
 // RemoveOrderCache 移除指定订单缓存
 func RemoveOrderCache(orderId uint64) {
 	if orderCacheMgr == nil || orderId == 0 {
@@ -135,5 +159,8 @@ func CMSList(f *CMSListFilter) (int, []*entity.RechargeOrder) {
 	_ = m.Clone().Order("id desc").
 		Limit(f.PageSize).Offset((f.PageIndex - 1) * f.PageSize).
 		Scan(&list)
+	for i, row := range list {
+		list[i] = mergeOrderFromCache(row)
+	}
 	return total, list
 }
