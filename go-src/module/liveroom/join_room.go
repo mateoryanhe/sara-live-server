@@ -52,6 +52,7 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 	existing.SetJoinTime(&now)
 	existing.SetHeartTime(&now)
 	addToOnline(userId, room.ID)
+	markContributionRankDataChanged(room.ID)
 	refreshRoomAudienceCaches(room.ID)
 
 	if userId != room.ID && !viewerCanSeeSeniorAnchorRoom(userId, room) {

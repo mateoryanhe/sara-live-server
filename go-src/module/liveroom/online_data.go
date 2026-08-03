@@ -48,6 +48,19 @@ func getOnline(roomId uint64) []uint64 {
 	return roomMap.Keys()
 }
 
+func findOnlineRoomIdsByUser(userId uint64) []uint64 {
+	if userId == 0 {
+		return nil
+	}
+	roomIds := make([]uint64, 0)
+	for _, roomId := range onlineMap.Keys() {
+		if isUserInOnlineMap(userId, roomId) {
+			roomIds = append(roomIds, roomId)
+		}
+	}
+	return roomIds
+}
+
 func isUserInOnlineMap(userId, roomId uint64) bool {
 	roomMap := getRoomOnlineMap(roomId, false)
 	return roomMap != nil && roomMap.Contains(userId)

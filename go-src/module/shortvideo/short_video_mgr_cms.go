@@ -162,6 +162,7 @@ func removeShortVideoRow(row *entity.ShortVideo) error {
 	upload.DeleteUploadedFile(videoName)
 	upload.DeleteUploadedFile(coverName)
 	loadAppShortVideoListCache()
+	loadAppShortVideoPublishListCache()
 	return nil
 }
 
@@ -177,6 +178,7 @@ func OnShelfShortVideo(_ context.Context, req *shortvideodto.OnShelfShortVideoRe
 		shortvideodao.UpdateStatus(req.ID, entity.ShortVideoStatusOnShelf)
 		shortvideodao.PrependStatToAuthorListCache(row.AuthorId, shortvideodao.GetStatByVideoId(req.ID))
 		loadAppShortVideoListCache()
+		loadAppShortVideoPublishListCache()
 	}
 	return &shortvideodto.OnShelfShortVideoRes{Success: true, Status: entity.ShortVideoStatusOnShelf}, nil
 }

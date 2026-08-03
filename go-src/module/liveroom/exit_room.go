@@ -37,5 +37,6 @@ func exitRoom(userId uint64, roomId uint64) {
 		existing.SetStatus(entity.LiveRoomOnlineStatusOffline)
 	}
 	removeOnline(userId, roomId)
+	markContributionRankDataChanged(roomId)
 	refreshRoomAudienceCaches(roomId)
 }

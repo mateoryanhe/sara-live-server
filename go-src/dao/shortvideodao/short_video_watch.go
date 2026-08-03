@@ -70,49 +70,13 @@ func GetOneShortVideoWatch(userId, videoId uint64) *entity.ShortVideoWatch {
 	return watch
 }
 
-// GetShortVideoWatch 分页查询用户可继续观看的记录(已上架且免费/已付费,不含作者本人视频)
-func GetShortVideoWatch(userId uint64, pageIndex, pageSize int) []*entity.ShortVideoWatch {
+// GetUserShortVideoWatchAll 返回用户全部观看记录(按更新时间降序,不做业务过滤)
+func GetUserShortVideoWatchAll(userId uint64) []*entity.ShortVideoWatch {
 	if userId == 0 {
 		return make([]*entity.ShortVideoWatch, 0)
 	}
-	if pageIndex <= 0 {
-		pageIndex = 1
-	}
-	if pageSize <= 0 {
-		pageSize = WatchListCachePageSize
-	}
-
-	filtered := filterWatchList(getWatchMap(userId).Values(), userId)
-	sortWatchList(filtered)
-
-	start := (pageIndex - 1) * pageSize
-	if start >= len(filtered) {
-		return make([]*entity.ShortVideoWatch, 0)
-	}
-	end := start + pageSize
-	if end > len(filtered) {
-		end = len(filtered)
-	}
-	return filtered[start:end]
-}
-
-func filterWatchList(rows []*entity.ShortVideoWatch, userId uint64) []*entity.ShortVideoWatch {
-	list := make([]*entity.ShortVideoWatch, 0, len(rows))
-	for _, watch := range rows {
-		if watch == nil || watch.VideoId == 0 {
-			continue
-		}
-		video := GetShortVideoById(watch.VideoId)
-		if video == nil || video.Status != entity.ShortVideoStatusOnShelf {
-			continue
-		}
-		if video.AuthorId == userId {
-			continue
-		}
-		if video.IsPaid != entity.ShortVideoPaidYes || watch.PaidTime != nil {
-			list = append(list, watch)
-		}
-	}
+	list := getWatchMap(userId).Values()
+	sortWatchList(list)
 	return list
 }
 
@@ -146,7 +110,8 @@ func removeWatchFromCacheByVideoId(videoId uint64) {
 	if watchCacheMgr == nil || videoId == 0 {
 		return
 	}
-	for _, v := range watchCacheMgr.Cache.MustValues(context.Background()) {
+	vals, _ := watchCacheMgr.Cache.Values(context.Background())
+	for _, v := range vals {
 		m, ok := v.(*userWatchMap)
 		if !ok || m == nil {
 			continue

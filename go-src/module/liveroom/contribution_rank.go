@@ -2,19 +2,29 @@ package liveroom
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/container/gmap"
-	"github.com/gogf/gf/v2/os/gctx"
 	"strconv"
 	"time"
+
+	"github.com/gogf/gf/v2/container/gmap"
+	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/constants/cmd"
+	"xr-game-server/constants/currency"
+	"xr-game-server/core/event"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/push"
 	"xr-game-server/core/xrpool"
+	"xr-game-server/core/xrtimer"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/errercode"
+	"xr-game-server/gameevent"
 	"xr-game-server/module/upload"
+)
+
+const (
+	contributionRankTickInterval = 3 * time.Minute
+	contributionRankRefreshDelay = 10 * time.Minute
 )
 
 type contributionRankRow struct {
@@ -29,9 +39,68 @@ type contributionRankSnapshot struct {
 	UpdatedAt int64
 }
 
-var contributionRankCache = gmap.NewKVMap[uint64, *contributionRankSnapshot](true)
+var (
+	contributionRankCache           = gmap.NewKVMap[uint64, *contributionRankSnapshot](true)
+	contributionRankRefreshDeadline = gmap.NewKVMap[uint64, int64](true)
+)
 
-func flushContributionRankCache(roomId uint64) {
+func initContributionRank() {
+	for _, roomId := range liveroomdao.ListLivingRoomIds() {
+		loadContributionRankCache(roomId)
+	}
+	event.Sub(gameevent.CurrencyChangeEvent, onContributionRankDiamondConsumeEvent)
+	event.Sub(gameevent.RankListRefreshEvent, onContributionRankRefreshEvent)
+	xrtimer.AddSingleton(gctx.New(), contributionRankTickInterval, func(ctx context.Context) {
+		tryRefreshContributionRankCaches()
+	})
+}
+
+func onContributionRankDiamondConsumeEvent(data any) {
+	ev, ok := data.(*gameevent.CurrencyChangeEventData)
+	if !ok || ev == nil {
+		return
+	}
+	if ev.Type != gameevent.CurrencyTypeDiamond || ev.Action != gameevent.CurrencyActionSub || ev.Amount <= 0 {
+		return
+	}
+	if ev.Reason != currency.ReasonGiftSend && ev.Reason != currency.ReasonPaidDanmaku {
+		return
+	}
+	for _, roomId := range findOnlineRoomIdsByUser(ev.UserId) {
+		markContributionRankDataChanged(roomId)
+	}
+}
+
+func onContributionRankRefreshEvent(_ any) {
+	for _, roomId := range taskMap.Slice() {
+		markContributionRankDataChanged(roomId)
+	}
+}
+
+func markContributionRankDataChanged(roomId uint64) {
+	if roomId == 0 {
+		return
+	}
+	contributionRankRefreshDeadline.Set(roomId, time.Now().Add(contributionRankRefreshDelay).Unix())
+}
+
+func tryRefreshContributionRankCaches() {
+	nowUnix := time.Now().Unix()
+	for _, roomId := range contributionRankRefreshDeadline.Keys() {
+		deadlineUnix := contributionRankRefreshDeadline.Get(roomId)
+		if deadlineUnix == 0 {
+			contributionRankRefreshDeadline.Remove(roomId)
+			continue
+		}
+		if nowUnix > deadlineUnix {
+			contributionRankRefreshDeadline.Remove(roomId)
+			continue
+		}
+		loadContributionRankCache(roomId)
+	}
+}
+
+func loadContributionRankCache(roomId uint64) {
 	if roomId == 0 {
 		return
 	}
@@ -46,15 +115,14 @@ func flushContributionRankCache(roomId uint64) {
 
 func clearContributionRankCache(roomId uint64) {
 	contributionRankCache.Remove(roomId)
+	contributionRankRefreshDeadline.Remove(roomId)
 }
 
 func refreshRoomAudienceCaches(roomId uint64) {
 	xrpool.AddWithRecover(gctx.New(), func(ctx context.Context) {
-		flushContributionRankCache(roomId)
 		flushOnlineLists(roomId)
 		broadcastAudienceListRefresh(roomId)
 	})
-
 }
 
 func broadcastAudienceListRefresh(roomId uint64) {
@@ -132,6 +200,10 @@ func GetContributionRank(ctx context.Context, req *liveroomdto.GetContributionRa
 	requestUserId := httpserver.GetAuthId(ctx)
 	page, pageSize := normalizeOnlineListPage(req.Page, req.PageSize)
 	snapshot := getContributionRankSnapshot(req.RoomId)
+	if snapshot == nil {
+		loadContributionRankCache(req.RoomId)
+		snapshot = getContributionRankSnapshot(req.RoomId)
+	}
 	rows := getContributionRankRows(snapshot, req.Period)
 	if rows == nil {
 		rows = make([]*contributionRankRow, 0)
