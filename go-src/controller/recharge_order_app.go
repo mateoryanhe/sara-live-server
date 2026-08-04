@@ -26,3 +26,8 @@ func (c *RechargeOrderAppController) CreateRechargeOrder(ctx context.Context, re
 func (c *RechargeOrderAppController) MyRechargeOrderList(ctx context.Context, req *rechargeorderdto.AppMyRechargeOrderListReq) (res *rechargeorderdto.AppMyRechargeOrderListRes, err error) {
 	return recharge.GetMyOrderList(ctx, req)
 }
+
+// CheckRechargeOrderSuccess App端查询订单是否充值成功
+func (c *RechargeOrderAppController) CheckRechargeOrderSuccess(ctx context.Context, req *rechargeorderdto.AppCheckRechargeOrderSuccessReq) (res *rechargeorderdto.AppCheckRechargeOrderSuccessRes, err error) {
+	return recharge.CheckOrderRechargeSuccess(ctx, req)
+}

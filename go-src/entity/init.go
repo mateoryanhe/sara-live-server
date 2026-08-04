@@ -66,6 +66,7 @@ func Init() {
 	initUploadResourceCfg()
 	initPrivacyPolicyCfg()
 	initAccountCfg()
+	initPreloadCfg()
 	initCustomerServiceCfg()
 	initGooglePlayCfg()
 	initActivityMessage()

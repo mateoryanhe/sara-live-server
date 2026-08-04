@@ -1,7 +1,7 @@
 package preload
 
-const RecentLoginPreloadLimit = 100
+import "xr-game-server/dao/cfgdao"
 
 func Init() {
-	preloadRecentLoginUsers()
+	preloadRecentLoginUsers(cfgdao.GetRecentLoginPreloadLimit())
 }

@@ -358,6 +358,27 @@ export interface SaveAccountCfgRes {
     id?: string
 }
 
+export interface PreloadCfg {
+    id?: string
+    recentLoginLimit: number
+    createdAt?: string
+    updatedAt?: string
+}
+
+export interface GetPreloadCfgRes {
+    cfg?: PreloadCfg | null
+}
+
+export interface SavePreloadCfgReq {
+    id?: string | number
+    recentLoginLimit: number
+}
+
+export interface SavePreloadCfgRes {
+    success: boolean
+    id?: string
+}
+
 // 角色相关类型
 export interface Role {
     id: string

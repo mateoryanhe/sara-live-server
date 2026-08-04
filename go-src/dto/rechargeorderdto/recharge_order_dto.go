@@ -121,3 +121,19 @@ type AppMyRechargeOrderListRes struct {
 	Total int                  `json:"total"`
 	List  []*RechargeOrderItem `json:"list"`
 }
+
+// AppCheckRechargeOrderSuccessReq App 端查询订单是否充值成功
+type AppCheckRechargeOrderSuccessReq struct {
+	g.Meta        `path:"/checkRechargeOrderSuccess" method:"post" summary:"App查询订单是否充值成功" tags:"充值订单"`
+	OrderId       string `json:"orderId"       v:"required#订单ID不能为空" dc:"本系统订单号"`
+	AttemptId     string `json:"attemptId"     dc:"预留字段,暂不使用"`
+	ProductId     string `json:"productId"     dc:"预留字段,暂不使用"`
+	PurchaseToken string `json:"purchaseToken" dc:"预留字段,暂不使用"`
+}
+
+type AppCheckRechargeOrderSuccessRes struct {
+	Success     bool    `json:"success"     dc:"true=充值成功,false=其他状态或订单不存在"`
+	GoldBalance float64 `json:"goldBalance" dc:"当前金币余额"`
+	Price       float64 `json:"price"       dc:"订单金额(USD)"`
+	Gold        float64 `json:"gold"        dc:"到账金币数量"`
+}

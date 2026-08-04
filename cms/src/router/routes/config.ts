@@ -19,6 +19,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '账号配置'},
         },
         {
+            path: 'preload-cfg',
+            name: 'PreloadCfgManagement',
+            component: () => import('@/views/config/preload-cfg.vue'),
+            meta: {title: '预热配置'},
+        },
+        {
             path: 'text-moderation',
             name: 'TextModerationCfgManagement',
             component: () => import('@/views/config/text-moderation.vue'),

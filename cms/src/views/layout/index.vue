@@ -262,7 +262,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
+            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
             index="/config">
           <template #title>
             <el-icon>
@@ -281,6 +281,12 @@
               <User/>
             </el-icon>
             <span>账号配置</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('PreloadCfgManagement')" index="/config/preload-cfg">
+            <el-icon>
+              <Cpu/>
+            </el-icon>
+            <span>预热配置</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('TextModerationCfgManagement')" index="/config/text-moderation">
             <el-icon>
