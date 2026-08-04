@@ -125,8 +125,7 @@ func GetOnShelfShortVideos() []*entity.ShortVideo {
 
 func GetShortVideoList(req *shortvideodto.ShortVideoListReq) (int, []*shortvideodto.ShortVideoListRes) {
 	titleKeyword := strings.ToLower(strings.TrimSpace(req.Title))
-	authorKeyword := strings.TrimSpace(req.AuthorNickname)
-	authorIdSet := userinfodao.GetUserIdsByNicknameKeyword(authorKeyword)
+	authorKeyword := strings.ToLower(strings.TrimSpace(req.AuthorNickname))
 	filtered := make([]*entity.ShortVideo, 0)
 	for _, video := range shortVideoCacheMgr.Values() {
 		if video == nil {
@@ -139,7 +138,8 @@ func GetShortVideoList(req *shortvideodto.ShortVideoListReq) (int, []*shortvideo
 			if video.AuthorId == 0 {
 				continue
 			}
-			if _, ok := authorIdSet[video.AuthorId]; !ok {
+			user := userinfodao.GetUserInfoByUserId(video.AuthorId)
+			if user == nil || !strings.Contains(strings.ToLower(user.Nickname), authorKeyword) {
 				continue
 			}
 		}
@@ -163,21 +163,13 @@ func GetShortVideoList(req *shortvideodto.ShortVideoListReq) (int, []*shortvideo
 	start, end := shortVideoListPageRange(total, pageIndex, pageSize)
 
 	ret := make([]*shortvideodto.ShortVideoListRes, 0, end-start)
-	pageVideos := filtered[start:end]
-	authorIds := make([]uint64, 0, len(pageVideos))
-	for _, video := range pageVideos {
-		if video.AuthorId != 0 {
-			authorIds = append(authorIds, video.AuthorId)
-		}
-	}
-	nicknameMap := userinfodao.GetNicknameMapByUserIds(authorIds)
-	for _, video := range pageVideos {
-		ret = append(ret, toShortVideoListRes(video, nicknameMap))
+	for _, video := range filtered[start:end] {
+		ret = append(ret, toShortVideoListRes(video))
 	}
 	return total, ret
 }
 
-func toShortVideoListRes(video *entity.ShortVideo, nicknameMap map[uint64]string) *shortvideodto.ShortVideoListRes {
+func toShortVideoListRes(video *entity.ShortVideo) *shortvideodto.ShortVideoListRes {
 	var likeCount, viewCount, watchCount uint64
 	var totalDiamondIncome float64
 	if stat := GetStatByVideoId(video.ID); stat != nil {
@@ -186,7 +178,10 @@ func toShortVideoListRes(video *entity.ShortVideo, nicknameMap map[uint64]string
 		watchCount = stat.WatchCount
 		totalDiamondIncome = stat.TotalDiamondIncome
 	}
-	authorNickname := nicknameMap[video.AuthorId]
+	authorNickname := ""
+	if user := userinfodao.GetUserInfoByUserId(video.AuthorId); user != nil {
+		authorNickname = user.Nickname
+	}
 	return &shortvideodto.ShortVideoListRes{
 		ID:                 strconv.FormatUint(video.ID, 10),
 		Title:              video.Title,
