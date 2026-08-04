@@ -28,6 +28,9 @@ func parseAppPublishShortVideoMultipart(ctx context.Context, r *ghttp.Request) (
 	if r == nil || r.Request == nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
+	if err := ensureShortVideoUploadDiskSpace(); err != nil {
+		return nil, err
+	}
 	reader, err := r.Request.MultipartReader()
 	if err != nil {
 		return nil, mapAppPublishMultipartErr(err)

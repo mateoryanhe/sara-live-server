@@ -26,22 +26,23 @@ type UserInfoDto struct {
 	Cancel        bool       `json:"cancel"`
 	PhoneAreaCode string     `json:"phoneAreaCode"`
 	// 以下字段来自 user_infos 表(LEFT JOIN,可能为空)
-	Nickname    string  `json:"nickname"`
-	Phone       string  `json:"phone"`
-	Avatar      string  `json:"avatar"`
-	Remark      string  `json:"remark"`
-	Gold        float64 `json:"gold"`
-	Diamond     float64 `json:"diamond"`
-	ShareCode   string  `json:"shareCode"`
-	GuildId     uint64  `json:"guildId"`
-	UserType    uint8   `json:"userType"`
-	IsAnchor    bool    `json:"isAnchor"`
-	VipLevel    uint32  `json:"vipLevel"`
-	DeviceType  string  `json:"deviceType"`
-	PackageName string  `json:"packageName"`
-	AppVersion  string  `json:"appVersion"`
-	CanRank     bool    `json:"canRank"`
-	CancelCode  string  `json:"cancelCode"`
+	Nickname      string     `json:"nickname"`
+	Phone         string     `json:"phone"`
+	Avatar        string     `json:"avatar"`
+	Remark        string     `json:"remark"`
+	Gold          float64    `json:"gold"`
+	Diamond       float64    `json:"diamond"`
+	ShareCode     string     `json:"shareCode"`
+	GuildId       uint64     `json:"guildId"`
+	UserType      uint8      `json:"userType"`
+	IsAnchor      bool       `json:"isAnchor"`
+	VipLevel      uint32     `json:"vipLevel"`
+	LastLoginTime *time.Time `json:"lastLoginTime"`
+	DeviceType    string     `json:"deviceType"`
+	PackageName   string     `json:"packageName"`
+	AppVersion    string     `json:"appVersion"`
+	CanRank       bool       `json:"canRank"`
+	CancelCode    string     `json:"cancelCode"`
 }
 
 type SetAnchorReq struct {

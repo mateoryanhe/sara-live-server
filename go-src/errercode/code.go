@@ -177,6 +177,8 @@ const (
 	PrivateMessageUserBlocked XRCode = 146
 	// ActivityMessageNonExist 活动消息不存在
 	ActivityMessageNonExist XRCode = 147
+	// ShortVideoDiskSpaceInsufficient 磁盘空闲空间不足,无法上传短视频
+	ShortVideoDiskSpaceInsufficient XRCode = 148
 )
 
 type XError struct {

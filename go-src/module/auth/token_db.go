@@ -12,6 +12,23 @@ import (
 func initAppToken() {
 	event.Sub(event.AppToken, onAppToken)
 	xrtoken.SetAppTokenLoader(loadAppTokenFromDB)
+	warmRecentAppTokenCache()
+}
+
+func warmRecentAppTokenCache() {
+	tokens := accountdao.ListAppTokensByRecentLogin(accountdao.RecentLoginAppTokenPreloadLimit)
+	items := make([]xrtoken.AppTokenCacheItem, 0, len(tokens))
+	for _, token := range tokens {
+		if token == nil || token.ID == 0 || token.Token == "" {
+			continue
+		}
+		items = append(items, xrtoken.AppTokenCacheItem{
+			UserId:   token.ID,
+			Token:    token.Token,
+			ExpireAt: token.ExpireAt,
+		})
+	}
+	xrtoken.PreloadAppTokenCache(items)
 }
 
 func loadAppTokenFromDB(authId uint64) (string, time.Time, bool) {

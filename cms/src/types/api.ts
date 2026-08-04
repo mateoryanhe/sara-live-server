@@ -167,6 +167,7 @@ export interface UserInfo {
     userType?: number
     isAnchor?: boolean
     vipLevel?: number
+    lastLoginTime?: string | null
     deviceType?: string
     packageName?: string
     appVersion?: string

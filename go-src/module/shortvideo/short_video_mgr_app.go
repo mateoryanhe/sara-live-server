@@ -227,6 +227,9 @@ func uploadShortVideoFile(file *ghttp.UploadFile) (string, error) {
 	if file == nil {
 		return "", errercode.CreateCode(errercode.InvalidParam)
 	}
+	if err := ensureShortVideoUploadDiskSpace(); err != nil {
+		return "", err
+	}
 	name, err := upload.UploadShortVideoFile(file)
 	if err != nil {
 		return "", errercode.CreateCode(errercode.InvalidParam)

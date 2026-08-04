@@ -36,6 +36,7 @@ func QueryUserInfo(ctx context.Context, req *accountdto.QueryUserInfoReq) (res *
 			val.UserType = userInfoCache.UserType
 			val.IsAnchor = userInfoCache.IsAnchor()
 			val.VipLevel = userInfoCache.VipLevel
+			val.LastLoginTime = userInfoCache.LastLoginTime
 		}
 		if userExtCache := userinfodao.GetUserExtFromMemory(val.ID); userExtCache != nil {
 			val.CanRank = userExtCache.CanRank

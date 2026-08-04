@@ -45,6 +45,11 @@
               {{ formatDate(scope.row.createdAt) }}
             </template>
           </el-table-column>
+          <el-table-column label="最后登录时间" prop="lastLoginTime" width="200">
+            <template #default="scope">
+              {{ formatDate(scope.row.lastLoginTime) }}
+            </template>
+          </el-table-column>
           <el-table-column label="昵称" prop="nickname" width="140">
             <template #default="scope">{{ scope.row.nickname || '-' }}</template>
           </el-table-column>

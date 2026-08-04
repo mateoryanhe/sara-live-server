@@ -18,6 +18,25 @@ func ListValidAppTokens() []*entity.AppToken {
 	return list
 }
 
+const RecentLoginAppTokenPreloadLimit = 100
+
+// ListAppTokensByRecentLogin 按 user_infos.last_login_time 倒序,一次性查询最近登录用户的有效 App Token
+func ListAppTokensByRecentLogin(limit int) []*entity.AppToken {
+	if limit <= 0 {
+		limit = RecentLoginAppTokenPreloadLimit
+	}
+	list := make([]*entity.AppToken, 0, limit)
+	_ = g.Model(string(entity.TbAppToken)+" t").
+		Fields("t.*").
+		InnerJoin(string(entity.TbUserInfo)+" u", "u."+string(db.IdName)+" = t."+string(db.IdName)).
+		Where("u."+string(entity.UserInfoLastLoginTime)+" IS NOT NULL").
+		Where("t.expire_at > ?", time.Now()).
+		Order("u." + string(entity.UserInfoLastLoginTime) + " desc").
+		Limit(limit).
+		Scan(&list)
+	return list
+}
+
 // GetAppTokenByUserId 根据用户ID查询App Token
 func GetAppTokenByUserId(userId uint64) *entity.AppToken {
 	ret := &entity.AppToken{}

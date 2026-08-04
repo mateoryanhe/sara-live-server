@@ -73,7 +73,12 @@ func ReloadAppTokenCache(load func() []AppTokenCacheItem) {
 	if load == nil {
 		return
 	}
-	for _, item := range load() {
+	PreloadAppTokenCache(load())
+}
+
+// PreloadAppTokenCache 预热 App Token 缓存(不清空已有条目)
+func PreloadAppTokenCache(items []AppTokenCacheItem) {
+	for _, item := range items {
 		InitAppToken(item.UserId, item.Token, item.ExpireAt)
 	}
 }

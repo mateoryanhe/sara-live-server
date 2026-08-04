@@ -47,7 +47,7 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		TotalIncome:   float64(anchorrank.GetUserLast30DayRevenue(targetUserId)),
 		Age:           calcAge(data.Birthday),
 	}
-	if req.UserId == authUserId {
+	if req.UserId == 0 {
 		event.Pub(gameevent.LoginEvent, authUserId)
 	}
 	return ret, nil
