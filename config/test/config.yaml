@@ -82,3 +82,4 @@ database:
     maxOpen: 5
     maxLifetime: "30s"
     debug: true
+

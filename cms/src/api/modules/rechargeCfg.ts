@@ -8,10 +8,11 @@ export const rechargeCfgApi = {
 
     createRechargeCfg: (data: {
         name: string
+        packageName: string
         cfgType: number
         icon: string
-        diamond: number
-        extraDiamond: number
+        gold: number
+        extraGold: number
         price: number
         productId: string
         sort: number
@@ -23,10 +24,11 @@ export const rechargeCfgApi = {
     updateRechargeCfg: (data: {
         id: string | number
         name: string
+        packageName: string
         cfgType: number
         icon: string
-        diamond: number
-        extraDiamond: number
+        gold: number
+        extraGold: number
         price: number
         productId: string
         sort: number

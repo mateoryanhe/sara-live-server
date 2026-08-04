@@ -18,12 +18,10 @@ func ListValidAppTokens() []*entity.AppToken {
 	return list
 }
 
-const RecentLoginAppTokenPreloadLimit = 100
-
 // ListAppTokensByRecentLogin 按 user_infos.last_login_time 倒序,一次性查询最近登录用户的有效 App Token
 func ListAppTokensByRecentLogin(limit int) []*entity.AppToken {
 	if limit <= 0 {
-		limit = RecentLoginAppTokenPreloadLimit
+		return nil
 	}
 	list := make([]*entity.AppToken, 0, limit)
 	_ = g.Model(string(entity.TbAppToken)+" t").

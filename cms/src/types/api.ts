@@ -425,6 +425,7 @@ export interface GiftQuery extends PageQuery {
 export interface RechargeCfg {
     id: string
     name: string
+    packageName: string
     cfgType: number
     icon: string
     iconName: string
@@ -445,6 +446,7 @@ export interface RechargeCfg {
 
 export interface RechargeCfgQuery extends PageQuery {
     name?: string
+    packageName?: string
     typeFilter?: number
     statusFilter?: number
 }
@@ -898,6 +900,33 @@ export interface SaveCustomerServiceCfgReq {
 }
 
 export interface SaveCustomerServiceCfgRes {
+    success: boolean
+    id: string
+}
+
+export interface GooglePlayCfg {
+    id: string
+    enabled: boolean
+    packageName: string
+    serviceAccountJson: string
+    rtdnAudience: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetGooglePlayCfgRes {
+    cfg: GooglePlayCfg | null
+}
+
+export interface SaveGooglePlayCfgReq {
+    id?: number
+    enabled: boolean
+    packageName: string
+    serviceAccountJson: string
+    rtdnAudience: string
+}
+
+export interface SaveGooglePlayCfgRes {
     success: boolean
     id: string
 }

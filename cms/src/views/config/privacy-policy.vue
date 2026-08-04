@@ -14,7 +14,7 @@
               clearable
               placeholder="如 https://example.com/privacy.html"
           />
-          <span class="form-tip">App 请求 GET /sysInfo/cfg 时在 header 携带 packageName；包级未配置时使用此处全局值</span>
+          <span class="form-tip">App 请求 GET /sysInfo/cfg 时在 header 携带 X-App-Package；包级未配置时使用此处全局值</span>
         </el-form-item>
 
         <el-form-item label="用户服务协议 URL" prop="termsOfServiceUrl">
@@ -23,7 +23,7 @@
               clearable
               placeholder="如 https://example.com/terms.html"
           />
-          <span class="form-tip">App 请求 GET /sysInfo/cfg 时在 header 携带 packageName；包级未配置时使用此处全局值</span>
+          <span class="form-tip">App 请求 GET /sysInfo/cfg 时在 header 携带 X-App-Package；包级未配置时使用此处全局值</span>
         </el-form-item>
 
         <el-form-item label="创作者上传条款 URL" prop="creatorTermsUrl">

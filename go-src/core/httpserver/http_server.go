@@ -14,7 +14,7 @@ const (
 	Ws                = "/ws"
 	Token             = "token"
 	AuthId            = "authId"
-	PackageNameHeader = "packageName"
+	PackageNameHeader = "X-App-Package"
 	contentTypeJson   = "application/json"
 	ReqId             = "reqId"
 )

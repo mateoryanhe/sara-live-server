@@ -3,6 +3,7 @@ package recharge
 import (
 	"context"
 	"strconv"
+	"strings"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/rechargecfgdto"
@@ -25,11 +26,12 @@ func GetList(_ context.Context, req *rechargecfgdto.RechargeCfgListReq) (*httpse
 
 // Create 创建充值配置(默认下架,需手动上架)
 func Create(_ context.Context, req *rechargecfgdto.CreateRechargeCfgReq) (*rechargecfgdto.CreateRechargeCfgRes, error) {
-	if existing := cfgdao.GetRechargeCfgByNameAndType(req.Name, req.CfgType); existing != nil {
+	if existing := cfgdao.GetRechargeCfgByNameTypeAndPackage(req.Name, req.CfgType, req.PackageName); existing != nil {
 		return nil, errercode.CreateCode(errercode.RechargeCfgExist)
 	}
 	cfg := &entity.RechargeCfg{
 		Name:        req.Name,
+		PackageName: strings.TrimSpace(req.PackageName),
 		CfgType:     req.CfgType,
 		Icon:        req.Icon,
 		Gold:        req.Gold,
@@ -54,11 +56,12 @@ func Update(_ context.Context, req *rechargecfgdto.UpdateRechargeCfgReq) (*recha
 	if cfg == nil {
 		return nil, errercode.CreateCode(errercode.RechargeCfgNonExist)
 	}
-	if existing := cfgdao.GetRechargeCfgByNameAndType(req.Name, req.CfgType); existing != nil && existing.ID != req.ID {
+	if existing := cfgdao.GetRechargeCfgByNameTypeAndPackage(req.Name, req.CfgType, req.PackageName); existing != nil && existing.ID != req.ID {
 		return nil, errercode.CreateCode(errercode.RechargeCfgExist)
 	}
 
 	cfg.Name = req.Name
+	cfg.PackageName = strings.TrimSpace(req.PackageName)
 	cfg.CfgType = req.CfgType
 	cfg.Icon = req.Icon
 	cfg.Gold = req.Gold
@@ -122,11 +125,12 @@ func OffShelf(_ context.Context, req *rechargecfgdto.OffShelfRechargeCfgReq) (*r
 
 // GetAppList App端查询(仅返回已上架,走内存缓存)
 // 缓存在服务启动时加载,CMS 端创建/修改/删除/上下架时重新从 DB 加载。
-func GetAppList(_ context.Context, req *rechargecfgdto.AppRechargeCfgListReq) (*rechargecfgdto.AppRechargeCfgListRes, error) {
+func GetAppList(ctx context.Context, req *rechargecfgdto.AppRechargeCfgListReq) (*rechargecfgdto.AppRechargeCfgListRes, error) {
+	packageName := httpserver.GetPackageNameFromContext(ctx)
 	all := getRechargeCfgCache()
 	list := make([]*rechargecfgdto.AppRechargeCfgItem, 0)
 	for _, item := range all {
-		if item.CfgType == req.CfgType {
+		if item.CfgType == req.CfgType && item.PackageName == packageName {
 			list = append(list, item)
 		}
 	}

@@ -262,7 +262,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
+            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
             index="/config">
           <template #title>
             <el-icon>
@@ -293,6 +293,12 @@
               <Document/>
             </el-icon>
             <span>隐私政策</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('GooglePlayCfgManagement')" index="/config/google-play">
+            <el-icon>
+              <CreditCard/>
+            </el-icon>
+            <span>Google Play</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('UploadResourceCfgManagement')" index="/config/upload-resource">
             <el-icon>
@@ -388,7 +394,7 @@ import {computed, ref, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import LayoutTabs from '@/components/layout/LayoutTabs.vue'
 import {useLayoutTabs} from '@/composables/useLayoutTabs'
-import {ArrowDown, Bell, Box, Coin, Collection, CollectionTag, Cpu, Document, EditPen, Expand, Fold, Key, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Search, Service, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Bell, Box, Coin, Collection, CollectionTag, Cpu, CreditCard, Document, EditPen, Expand, Fold, Key, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Search, Service, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {getIsAdmin, hasPermission} from '@/utils/permission'
 import {clearAuthSession} from '@/utils/auth'
 

@@ -62,3 +62,4 @@ database:
     link: "mysql:root:root123456@tcp(127.0.0.1:3307)/live_db"
     extra: "charset=utf8mb4&parseTime=True&loc=Local"
     debug: true
+

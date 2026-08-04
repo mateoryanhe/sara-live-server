@@ -7,9 +7,14 @@ import (
 	"xr-game-server/entity"
 )
 
+func rechargeCfgProductKey(packageName, productId string) string {
+	return packageName + "\x00" + productId
+}
+
 type rechargeCfgSnapshot struct {
-	byId map[uint64]*rechargecfgdto.AppRechargeCfgItem
-	list []*rechargecfgdto.AppRechargeCfgItem
+	byId        map[uint64]*rechargecfgdto.AppRechargeCfgItem
+	byProductId map[string]*rechargecfgdto.AppRechargeCfgItem
+	list        []*rechargecfgdto.AppRechargeCfgItem
 }
 
 // 充值配置缓存(仅缓存已上架配置,供 App 查询使用)
@@ -24,6 +29,7 @@ func toAppItem(r *entity.RechargeCfg) *rechargecfgdto.AppRechargeCfgItem {
 	return &rechargecfgdto.AppRechargeCfgItem{
 		ID:          r.ID,
 		Name:        r.Name,
+		PackageName: r.PackageName,
 		CfgType:     r.CfgType,
 		Icon:        r.Icon,
 		Gold:        r.Gold,
@@ -41,15 +47,20 @@ func toAppItem(r *entity.RechargeCfg) *rechargecfgdto.AppRechargeCfgItem {
 func loadRechargeCfgCache() []*rechargecfgdto.AppRechargeCfgItem {
 	rows := cfgdao.GetOnShelfRechargeCfg()
 	byId := make(map[uint64]*rechargecfgdto.AppRechargeCfgItem, len(rows))
+	byProductId := make(map[string]*rechargecfgdto.AppRechargeCfgItem, len(rows))
 	list := make([]*rechargecfgdto.AppRechargeCfgItem, 0, len(rows))
 	for _, r := range rows {
 		item := toAppItem(r)
 		byId[r.ID] = item
+		if r.ProductId != "" && r.CfgType == entity.RechargeCfgTypeGoogle {
+			byProductId[rechargeCfgProductKey(r.PackageName, r.ProductId)] = item
+		}
 		list = append(list, item)
 	}
 	rechargeCfgCache.Store(&rechargeCfgSnapshot{
-		byId: byId,
-		list: list,
+		byId:        byId,
+		byProductId: byProductId,
+		list:        list,
 	})
 	return list
 }
@@ -63,8 +74,9 @@ func getRechargeCfgSnapshot() *rechargeCfgSnapshot {
 	v := rechargeCfgCache.Load()
 	if v == nil {
 		return &rechargeCfgSnapshot{
-			byId: make(map[uint64]*rechargecfgdto.AppRechargeCfgItem),
-			list: emptyRechargeCfgList,
+			byId:        make(map[uint64]*rechargecfgdto.AppRechargeCfgItem),
+			byProductId: make(map[string]*rechargecfgdto.AppRechargeCfgItem),
+			list:        emptyRechargeCfgList,
 		}
 	}
 	return v.(*rechargeCfgSnapshot)
@@ -85,4 +97,15 @@ func GetRechargeCfgFromCacheById(id uint64) *rechargecfgdto.AppRechargeCfgItem {
 		loadRechargeCfgCache()
 	}
 	return getRechargeCfgSnapshot().byId[id]
+}
+
+// GetGoogleRechargeCfgByProductId 按包名与 Google 商品 SKU 获取已上架充值档位
+func GetGoogleRechargeCfgByProductId(packageName, productId string) *rechargecfgdto.AppRechargeCfgItem {
+	if productId == "" {
+		return nil
+	}
+	if rechargeCfgCache.Load() == nil {
+		loadRechargeCfgCache()
+	}
+	return getRechargeCfgSnapshot().byProductId[rechargeCfgProductKey(packageName, productId)]
 }

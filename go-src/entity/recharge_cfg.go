@@ -28,6 +28,7 @@ const RechargeCfgCurrencyUSD = "USD"
 type RechargeCfg struct {
 	migrate.OneModel
 	Name        string  `gorm:"size:64;comment:档位名称" json:"name"`
+	PackageName string  `gorm:"size:128;default:'';comment:App包名" json:"packageName"`
 	CfgType     uint8   `gorm:"column:cfg_type;default:1;comment:类型(1iOS,2Google,3渠道)" json:"cfgType"`
 	Icon        string  `gorm:"size:255;default:'';comment:图标URL" json:"icon"`
 	Gold        uint64  `gorm:"default:0;comment:基础到账金币数" json:"gold"`

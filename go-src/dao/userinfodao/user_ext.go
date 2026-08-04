@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/util/guid"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/cache"
@@ -88,6 +89,28 @@ func FindUserIdByCancelCode(cancelCode string) uint64 {
 		return 0
 	}
 	return row.ID
+}
+
+// PreloadUserExtToCache 批量预热 user_exts 缓存
+func PreloadUserExtToCache(userIds []uint64) {
+	if len(userIds) == 0 || userExtCacheMgr == nil {
+		return
+	}
+	ctx := gctx.New()
+	rows := make([]*entity.UserExt, 0, len(userIds))
+	err := g.Model(string(entity.TbUserExt)).Ctx(ctx).Unscoped().
+		WhereIn(string(db.IdName), userIds).
+		Scan(&rows)
+	if err != nil {
+		g.Log().Errorf(ctx, "preload user exts failed: %v", err)
+		return
+	}
+	for _, row := range rows {
+		if row == nil || row.ID == 0 {
+			continue
+		}
+		userExtCacheMgr.FlushCache(row.ID, row)
+	}
 }
 
 // GetFollowCount 获取用户当前关注数(走缓存)

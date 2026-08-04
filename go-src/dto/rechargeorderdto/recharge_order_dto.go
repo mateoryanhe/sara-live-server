@@ -102,10 +102,11 @@ type AppCreateRechargeOrderReq struct {
 }
 
 type AppCreateRechargeOrderRes struct {
-	OrderId  string  `json:"orderId"`  // 订单ID
-	Price    float64 `json:"price"`    // 应付金额(USD)
-	Currency string  `json:"currency"` // 币种
-	Status   uint8   `json:"status"`   // 订单状态(创建后=0 待支付)
+	OrderId             string  `json:"orderId"`             // 订单ID
+	ObfuscatedAccountId string  `json:"obfuscatedAccountId"` // 传给 Google Billing setObfuscatedAccountId,用于 RTDN 关联订单
+	Price               float64 `json:"price"`               // 应付金额(USD)
+	Currency            string  `json:"currency"`            // 币种
+	Status              uint8   `json:"status"`              // 订单状态(创建后=0 待支付)
 }
 
 // AppMyRechargeOrderListReq App 端查询自己的充值记录(分页)

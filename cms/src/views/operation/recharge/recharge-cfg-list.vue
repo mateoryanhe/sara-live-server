@@ -15,6 +15,9 @@
           <el-form-item label="档位名称">
             <el-input v-model="searchForm.name" clearable placeholder="名称(模糊匹配)"/>
           </el-form-item>
+          <el-form-item label="包名">
+            <el-input v-model="searchForm.packageName" clearable placeholder="包名(模糊匹配)"/>
+          </el-form-item>
           <el-form-item label="类型">
             <el-select v-model="searchForm.typeFilter" placeholder="全部" style="width: 140px">
               <el-option :value="0" label="全部"/>
@@ -37,6 +40,7 @@
         <el-table v-loading="loading" :data="tableData" style="width: 100%">
           <el-table-column label="ID" prop="id" width="100"/>
           <el-table-column label="档位名称" prop="name" min-width="120"/>
+          <el-table-column label="包名" prop="packageName" min-width="160" show-overflow-tooltip/>
           <el-table-column label="类型" width="100">
             <template #default="{ row }">
               {{ cfgTypeLabel(row.cfgType) }}
@@ -122,6 +126,9 @@
         <el-form-item label="档位名称" prop="name">
           <el-input v-model="currentRow.name" placeholder="请输入档位名称"/>
         </el-form-item>
+        <el-form-item label="包名" prop="packageName">
+          <el-input v-model="currentRow.packageName" placeholder="请输入 App 包名"/>
+        </el-form-item>
         <el-form-item label="类型" prop="cfgType">
           <el-select v-model="currentRow.cfgType" placeholder="请选择类型" style="width: 100%">
             <el-option v-for="item in cfgTypeOptions" :key="item.value" :label="item.label" :value="item.value"/>
@@ -195,6 +202,7 @@ import {formatPrice, NUMBER_INPUT_DECIMALS, truncateNumber} from '@/utils/number
 
 interface SearchForm {
   name: string
+  packageName: string
   typeFilter: number
   statusFilter: number
 }
@@ -202,6 +210,7 @@ interface SearchForm {
 interface RechargeCfgForm {
   id: string
   name: string
+  packageName: string
   cfgType: number
   icon: string
   gold: number
@@ -230,6 +239,7 @@ const pageSize = ref(10)
 
 const searchForm = reactive<SearchForm>({
   name: '',
+  packageName: '',
   typeFilter: 0,
   statusFilter: 0
 })
@@ -239,6 +249,7 @@ const dialogTitle = ref('')
 const defaultForm = (): RechargeCfgForm => ({
   id: '',
   name: '',
+  packageName: '',
   cfgType: 1,
   icon: '',
   gold: 1,
@@ -315,6 +326,10 @@ const formRules: FormRules = {
     {required: true, message: '请输入档位名称', trigger: 'blur'},
     {min: 1, max: 64, message: '名称长度在1-64个字符', trigger: 'blur'}
   ],
+  packageName: [
+    {required: true, message: '请输入包名', trigger: 'blur'},
+    {min: 1, max: 128, message: '包名长度在1-128个字符', trigger: 'blur'}
+  ],
   cfgType: [{required: true, message: '请选择类型', trigger: 'change'}],
   gold: [{required: true, message: '请输入基础金币数', trigger: 'change'}],
   price: [{required: true, message: '请输入价格', trigger: 'change'}],
@@ -327,6 +342,7 @@ const fetchList = async () => {
   try {
     const response = await rechargeCfgApi.getRechargeCfgList({
       name: searchForm.name,
+      packageName: searchForm.packageName,
       typeFilter: searchForm.typeFilter,
       statusFilter: searchForm.statusFilter,
       pageIndex: currentPage.value,
@@ -369,6 +385,7 @@ const handleEdit = (row: RechargeCfg) => {
   currentRow.value = {
     id: row.id,
     name: row.name,
+    packageName: row.packageName || '',
     cfgType: Number(row.cfgType) || 1,
     icon: row.iconName || '',
     gold: Number(row.gold) || 1,
@@ -430,6 +447,7 @@ const handleSave = async () => {
     try {
       const payload = {
         name: currentRow.value.name,
+        packageName: currentRow.value.packageName,
         cfgType: currentRow.value.cfgType,
         icon: currentRow.value.icon,
         gold: currentRow.value.gold,
@@ -456,6 +474,7 @@ const handleSave = async () => {
 
 const resetSearch = () => {
   searchForm.name = ''
+  searchForm.packageName = ''
   searchForm.typeFilter = 0
   searchForm.statusFilter = 0
   currentPage.value = 1

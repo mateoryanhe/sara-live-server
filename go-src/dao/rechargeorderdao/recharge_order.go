@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"strings"
 	"time"
 	"xr-game-server/core/cache"
 	"xr-game-server/entity"
@@ -81,6 +82,26 @@ func RemoveOrderCache(orderId uint64) {
 		return
 	}
 	_, _ = orderCacheMgr.Cache.Remove(gctx.New(), orderId)
+}
+
+// GetByThirdOrderId 按第三方订单号查询(Google orderId 幂等)
+func GetByThirdOrderId(thirdOrderId string) *entity.RechargeOrder {
+	thirdOrderId = strings.TrimSpace(thirdOrderId)
+	if thirdOrderId == "" {
+		return nil
+	}
+	ctx := gctx.New()
+	var ret entity.RechargeOrder
+	err := g.DB().Model(string(entity.TbRechargeOrder)).Ctx(ctx).
+		Where(string(entity.RechargeOrderThirdOrderId)+" = ?", thirdOrderId).
+		Scan(&ret)
+	if err != nil || ret.ID == 0 {
+		return nil
+	}
+	if cached := GetFromCacheById(ret.ID); cached != nil {
+		return cached
+	}
+	return &ret
 }
 
 // ListByUserId App 端按用户分页查询(按 id 倒序,可按状态过滤)

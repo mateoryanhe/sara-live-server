@@ -18,8 +18,10 @@ import (
 	"xr-game-server/module/logquery"
 	"xr-game-server/module/message"
 	"xr-game-server/module/name"
+	"xr-game-server/module/preload"
+	"xr-
 	"xr-game-server/module/privacypolicy"
-	"xr-game-server/module/privateroombilling"
+	"xr-game-server/module/preload"
 	"xr-game-server/module/randomnick"
 	"xr-game-server/module/recharge"
 	"xr-game-server/module/resourcemonitor"
@@ -37,6 +39,7 @@ func Init() {
 	upload.Init()
 	randomnick.Init()
 	auth.InitAuth()
+	preload.Init()
 	name.Init()
 	currencylog.Init()
 	message.Init()

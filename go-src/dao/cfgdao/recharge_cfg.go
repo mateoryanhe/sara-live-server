@@ -19,10 +19,10 @@ func GetRechargeCfgById(id uint64) *entity.RechargeCfg {
 	return &cfg
 }
 
-func GetRechargeCfgByNameAndType(name string, cfgType uint8) *entity.RechargeCfg {
+func GetRechargeCfgByNameTypeAndPackage(name string, cfgType uint8, packageName string) *entity.RechargeCfg {
 	var cfg entity.RechargeCfg
 	err := g.DB().Model(string(entity.TbRechargeCfg)).
-		Where("name = ? AND cfg_type = ?", name, cfgType).
+		Where("name = ? AND cfg_type = ? AND package_name = ?", name, cfgType, packageName).
 		Scan(&cfg)
 	if err != nil {
 		return nil
@@ -68,7 +68,7 @@ func GetOnShelfRechargeCfg() []*entity.RechargeCfg {
 }
 
 func GetRechargeCfgList(req *rechargecfgdto.RechargeCfgListReq) (int, []*rechargecfgdto.RechargeCfgListRes) {
-	sql := `select id, name, cfg_type, icon, gold, extra_gold, price, currency, product_id,
+	sql := `select id, name, package_name, cfg_type, icon, gold, extra_gold, price, currency, product_id,
                    sort, status, description, created_at, updated_at
             from recharge_cfgs
             where 1=1 `
@@ -79,6 +79,10 @@ func GetRechargeCfgList(req *rechargecfgdto.RechargeCfgListReq) (int, []*recharg
 	if req.Name != "" {
 		sql += ` and name LIKE ?`
 		param = append(param, fmt.Sprintf("%%%s%%", req.Name))
+	}
+	if req.PackageName != "" {
+		sql += ` and package_name LIKE ?`
+		param = append(param, fmt.Sprintf("%%%s%%", req.PackageName))
 	}
 	switch req.TypeFilter {
 	case 1, 2, 3:

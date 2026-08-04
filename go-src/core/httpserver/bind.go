@@ -60,6 +60,14 @@ func RegCMSCustomizeRes(prefix string, handlerOrObject ...interface{}) {
 	})
 }
 
+// RegNonAuthHandler 绑定无需鉴权的原始 Handler(Pub/Sub 等 webhook)
+func RegNonAuthHandler(prefix, pattern string, handler ghttp.HandlerFunc) {
+	httpServer.Group(prefix, func(group *ghttp.RouterGroup) {
+		group.Middleware(middlewareLogReq)
+		group.POST(pattern, handler)
+	})
+}
+
 // RegCMSNonAuthCustomizeRes 自定义结果 不需鉴权
 func RegCMSNonAuthCustomizeRes(prefix string, handlerOrObject ...interface{}) {
 	httpServer.Group(prefix, func(group *ghttp.RouterGroup) {

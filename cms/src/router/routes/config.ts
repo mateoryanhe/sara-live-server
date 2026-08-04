@@ -31,6 +31,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '隐私政策'},
         },
         {
+            path: 'google-play',
+            name: 'GooglePlayCfgManagement',
+            component: () => import('@/views/config/google-play.vue'),
+            meta: {title: 'Google Play'},
+        },
+        {
             path: 'upload-resource',
             name: 'UploadResourceCfgManagement',
             component: () => import('@/views/config/upload-resource.vue'),

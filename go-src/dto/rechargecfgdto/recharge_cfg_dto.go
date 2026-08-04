@@ -12,6 +12,7 @@ type RechargeCfgListReq struct {
 	g.Meta `path:"/rechargeCfgList" method:"post" summary:"获取充值配置列表" tags:"充值配置"`
 	httpserver.CMSQueryReq
 	Name         string `json:"name"         dc:"名称(模糊匹配)"`
+	PackageName  string `json:"packageName"  dc:"包名(模糊匹配)"`
 	TypeFilter   int    `json:"typeFilter"   dc:"类型过滤(0=全部, 1=iOS, 2=Google, 3=渠道)"`
 	StatusFilter int    `json:"statusFilter" dc:"状态过滤(0=全部, 1=只看下架, 2=只看上架)"`
 }
@@ -20,6 +21,7 @@ type RechargeCfgListReq struct {
 type RechargeCfgListRes struct {
 	ID          string  `json:"id"`
 	Name        string  `json:"name"`
+	PackageName string  `json:"packageName"`
 	CfgType     uint8   `json:"cfgType"`
 	Icon        string  `json:"icon" dc:"图标完整URL(列表展示)"`
 	IconName    string  `json:"iconName" dc:"图标资源文件名(编辑保存用)"`
@@ -39,6 +41,7 @@ type RechargeCfgListRes struct {
 type CreateRechargeCfgReq struct {
 	g.Meta      `path:"/createRechargeCfg" method:"post" summary:"创建充值配置" tags:"充值配置"`
 	Name        string  `json:"name"         v:"required|length:1,64#名称不能为空|名称长度需在1到64之间" dc:"档位名称"`
+	PackageName string  `json:"packageName"  v:"required|length:1,128#包名不能为空|包名长度需在1到128之间" dc:"App包名"`
 	CfgType     uint8   `json:"cfgType"      v:"required|in:1,2,3#类型不能为空|类型无效" dc:"类型(1iOS,2Google,3渠道)"`
 	Icon        string  `json:"icon"         v:"max-length:255#图标URL最长255字符" dc:"图标URL"`
 	Gold        uint64  `json:"gold"      v:"required|min:1#基础到账金币数不能为空|基础到账金币数需大于0" dc:"基础到账金币数"`
@@ -58,6 +61,7 @@ type UpdateRechargeCfgReq struct {
 	g.Meta      `path:"/updateRechargeCfg" method:"post" summary:"修改充值配置" tags:"充值配置"`
 	ID          uint64  `json:"id"           v:"required#ID不能为空" dc:"档位ID"`
 	Name        string  `json:"name"         v:"required|length:1,64#名称不能为空|名称长度需在1到64之间" dc:"档位名称"`
+	PackageName string  `json:"packageName"  v:"required|length:1,128#包名不能为空|包名长度需在1到128之间" dc:"App包名"`
 	CfgType     uint8   `json:"cfgType"      v:"required|in:1,2,3#类型不能为空|类型无效" dc:"类型(1iOS,2Google,3渠道)"`
 	Icon        string  `json:"icon"         v:"max-length:255#图标URL最长255字符" dc:"图标URL"`
 	Gold        uint64  `json:"gold"      v:"required|min:1#基础到账金币数不能为空|基础到账金币数需大于0" dc:"基础到账金币数"`
@@ -116,6 +120,7 @@ type AppRechargeCfgListReq struct {
 type AppRechargeCfgItem struct {
 	ID          uint64  `json:"id"`
 	Name        string  `json:"name"`
+	PackageName string  `json:"packageName"`
 	CfgType     uint8   `json:"cfgType"`
 	Icon        string  `json:"icon"`
 	Gold        uint64  `json:"gold" dc:"基础到账金币数"`

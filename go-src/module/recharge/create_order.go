@@ -27,6 +27,10 @@ func CreateOrder(ctx context.Context, req *rechargeorderdto.AppCreateRechargeOrd
 		if cfg.Status != entity.RechargeCfgStatusOnShelf {
 			return nil, errercode.CreateCode(errercode.RechargeCfgOffShelf)
 		}
+		packageName := httpserver.GetPackageNameFromContext(ctx)
+		if packageName == "" || cfg.PackageName != packageName {
+			return nil, errercode.CreateCode(errercode.RechargeCfgNonExist)
+		}
 		if cfg.Price == 0 {
 			return nil, errercode.CreateCode(errercode.RechargeAmountInvalid)
 		}
@@ -55,10 +59,11 @@ func CreateOrder(ctx context.Context, req *rechargeorderdto.AppCreateRechargeOrd
 	event.Pub(gameevent.RechargeOrderCreatedEvent, gameevent.NewRechargeOrderCreatedEventData(order.ID))
 
 	return &rechargeorderdto.AppCreateRechargeOrderRes{
-		OrderId:  strconv.FormatUint(order.ID, 10),
-		Price:    order.Price,
-		Currency: order.Currency,
-		Status:   order.Status,
+		OrderId:             strconv.FormatUint(order.ID, 10),
+		ObfuscatedAccountId: strconv.FormatUint(order.ID, 10),
+		Price:               order.Price,
+		Currency:            order.Currency,
+		Status:              order.Status,
 	}, nil
 }
 
