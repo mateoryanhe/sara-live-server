@@ -8,6 +8,7 @@ const APP_CONFIG = {
 const SITE_I18N = {
   en: {
     navHome: 'Home',
+    navAbout: 'About',
     navFeatures: 'Features',
     navPrivacy: 'Privacy',
     navTerms: 'Terms',
@@ -55,9 +56,18 @@ const SITE_I18N = {
     cancelBlocked: 'Too many failed attempts. Please try again in 2 hours.',
     cancelAlready: 'This account has already been deleted.',
     cancelNetworkError: 'Network error. Please try again later.',
+    aboutPageTitle: 'About Sara Live',
+    aboutP1: 'Sara Live is a live-streaming and social platform intended only for users aged 18 and older. It enables adults around the world to connect, communicate, and share experiences in real time.',
+    aboutP2: 'Sara Live offers live video, voice rooms, calls, public chat, direct messaging, short videos, creator tools, and virtual gifting. Feature availability may vary by country, account status, and app version.',
+    aboutP3: 'We are committed to maintaining a respectful and responsible community. Users can report content or accounts, block other users, and review our Community Guidelines and Child Safety Standards in the Safety Center.',
+    aboutSupportTitle: 'Support and contact',
+    aboutSupportDesc: 'Sara Live is operated by the developer identified in the applicable app-store listing. For product support, safety concerns, or legal inquiries, use Help & Support in Sara Live. If the in-app channel is unavailable, use the developer contact shown in the app-store listing from which you downloaded Sara Live.',
+    aboutThanks: 'Thank you for being part of the Sara Live community.',
+    aboutSupportLink: 'Support',
   },
   es: {
     navHome: 'Inicio',
+    navAbout: 'Acerca de',
     navFeatures: 'Funciones',
     navPrivacy: 'Privacidad',
     navTerms: 'Términos',
@@ -105,9 +115,18 @@ const SITE_I18N = {
     cancelBlocked: 'Demasiados intentos fallidos. Inténtalo de nuevo en 2 horas.',
     cancelAlready: 'Esta cuenta ya fue eliminada.',
     cancelNetworkError: 'Error de red. Inténtalo más tarde.',
+    aboutPageTitle: 'Acerca de Sara Live',
+    aboutP1: 'Sara Live es una plataforma de transmisión en vivo y social destinada únicamente a usuarios mayores de 18 años. Permite a adultos de todo el mundo conectarse, comunicarse y compartir experiencias en tiempo real.',
+    aboutP2: 'Sara Live ofrece video en vivo, salas de voz, llamadas, chat público, mensajes directos, videos cortos, herramientas para creadores y regalos virtuales. La disponibilidad de funciones puede variar según el país, el estado de la cuenta y la versión de la app.',
+    aboutP3: 'Estamos comprometidos con mantener una comunidad respetuosa y responsable. Los usuarios pueden denunciar contenido o cuentas, bloquear a otros usuarios y revisar nuestras Directrices de la Comunidad y Estándares de Seguridad Infantil en el Centro de Seguridad.',
+    aboutSupportTitle: 'Soporte y contacto',
+    aboutSupportDesc: 'Sara Live es operada por el desarrollador identificado en el listado correspondiente de la tienda de aplicaciones. Para soporte del producto, inquietudes de seguridad o consultas legales, usa Ayuda y Soporte en Sara Live. Si el canal dentro de la app no está disponible, utiliza el contacto del desarrollador que aparece en la tienda desde la que descargaste Sara Live.',
+    aboutThanks: 'Gracias por ser parte de la comunidad Sara Live.',
+    aboutSupportLink: 'Soporte',
   },
   pt: {
     navHome: 'Início',
+    navAbout: 'Sobre',
     navFeatures: 'Recursos',
     navPrivacy: 'Privacidade',
     navTerms: 'Termos',
@@ -155,9 +174,18 @@ const SITE_I18N = {
     cancelBlocked: 'Muitas tentativas falhadas. Tente novamente em 2 horas.',
     cancelAlready: 'Esta conta já foi excluída.',
     cancelNetworkError: 'Erro de rede. Tente novamente mais tarde.',
+    aboutPageTitle: 'Sobre a Sara Live',
+    aboutP1: 'A Sara Live é uma plataforma de transmissão ao vivo e social destinada apenas a usuários com 18 anos ou mais. Ela permite que adultos de todo o mundo se conectem, se comuniquem e compartilhem experiências em tempo real.',
+    aboutP2: 'A Sara Live oferece vídeo ao vivo, salas de voz, chamadas, chat público, mensagens diretas, vídeos curtos, ferramentas para criadores e presentes virtuais. A disponibilidade de recursos pode variar conforme o país, o status da conta e a versão do app.',
+    aboutP3: 'Estamos comprometidos em manter uma comunidade respeitosa e responsável. Os usuários podem denunciar conteúdo ou contas, bloquear outros usuários e revisar nossas Diretrizes da Comunidade e Padrões de Segurança Infantil no Centro de Segurança.',
+    aboutSupportTitle: 'Suporte e contato',
+    aboutSupportDesc: 'A Sara Live é operada pelo desenvolvedor identificado no respectivo listing da loja de aplicativos. Para suporte do produto, preocupações de segurança ou consultas legais, use Ajuda e Suporte na Sara Live. Se o canal no app não estiver disponível, use o contato do desenvolvedor exibido na loja de onde você baixou a Sara Live.',
+    aboutThanks: 'Obrigado por fazer parte da comunidade Sara Live.',
+    aboutSupportLink: 'Suporte',
   },
   hi: {
     navHome: 'होम',
+    navAbout: 'परिचय',
     navFeatures: 'फीचर्स',
     navPrivacy: 'गोपनीयता',
     navTerms: 'नियम',
@@ -205,6 +233,14 @@ const SITE_I18N = {
     cancelBlocked: 'बहुत अधिक असफल प्रयास। कृपया 2 घंटे बाद पुनः प्रयास करें।',
     cancelAlready: 'यह खाता पहले ही हटाया जा चुका है।',
     cancelNetworkError: 'नेटवर्क त्रुटि। कृपया बाद में पुनः प्रयास करें।',
+    aboutPageTitle: 'Sara Live के बारे में',
+    aboutP1: 'Sara Live एक लाइव-स्ट्रीमिंग और सोशल प्लेटफ़ॉर्म है जो केवल 18 वर्ष या उससे अधिक उम्र के उपयोगकर्ताओं के लिए है। यह दुनिया भर के वयस्कों को वास्तविक समय में जुड़ने, संवाद करने और अनुभव साझा करने में सक्षम बनाता है।',
+    aboutP2: 'Sara Live लाइव वीडियो, वॉयस रूम, कॉल, सार्वजनिक चैट, डायरेक्ट मैसेज, शॉर्ट वीडियो, क्रिएटर टूल और वर्चुअल गिफ्ट प्रदान करता है। सुविधाओं की उपलब्धता देश, खाता स्थिति और ऐप संस्करण के अनुसार भिन्न हो सकती है।',
+    aboutP3: 'हम एक सम्मानजनक और जिम्मेदार समुदाय बनाए रखने के लिए प्रतिबद्ध हैं। उपयोगकर्ता सामग्री या खातों की रिपोर्ट कर सकते हैं, अन्य उपयोगकर्ताओं को ब्लॉक कर सकते हैं, और सुरक्षा केंद्र में हमारे सामुदायिक दिशानिर्देश और बाल सुरक्षा मानक देख सकते हैं।',
+    aboutSupportTitle: 'सहायता और संपर्क',
+    aboutSupportDesc: 'Sara Live उस डेवलपर द्वारा संचालित है जो संबंधित ऐप-स्टोर लिस्टिंग में पहचाना जाता है। उत्पाद सहायता, सुरक्षा चिंताओं या कानूनी पूछताछ के लिए Sara Live में Help & Support का उपयोग करें। यदि इन-ऐप चैनल उपलब्ध नहीं है, तो उस ऐप-स्टोर लिस्टिंग में दिखाए गए डेवलपर संपर्क का उपयोग करें जहाँ से आपने Sara Live डाउनलोड किया था।',
+    aboutThanks: 'Sara Live समुदाय का हिस्सा बनने के लिए धन्यवाद।',
+    aboutSupportLink: 'सहायता',
   },
 };
 
@@ -445,6 +481,42 @@ function redirectLegacyLegalUrls() {
   }
 }
 
+function initAboutPage() {
+  if (document.body.dataset.aboutPage !== 'true') return;
+  initStandaloneBackButton();
+}
+
+function initSafetyCenterPage() {
+  if (document.body.dataset.safetyCenterPage !== 'true') return;
+  initStandaloneBackButton();
+}
+
+function initStandaloneBackButton() {
+  const appNavigation = window.SoraLegalNavigation;
+  if (appNavigation?.postMessage) {
+    document.documentElement.classList.add('app-embedded');
+  }
+
+  const goBack = () => {
+    if (document.referrer && window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+    if (appNavigation?.postMessage) {
+      appNavigation.postMessage('back');
+      return;
+    }
+    const fallback = document.body.dataset.backFallback;
+    if (fallback) {
+      window.location.assign(fallback);
+    }
+  };
+
+  document.querySelectorAll('[data-back-button]').forEach((button) => {
+    button.addEventListener('click', goBack);
+  });
+}
+
 function initSite() {
   redirectLegacyLegalUrls();
   const lang = getLang();
@@ -457,6 +529,8 @@ function initSite() {
   initMobileNav();
   initLegalToc();
   initCancelAccountForm();
+  initAboutPage();
+  initSafetyCenterPage();
 
   const current = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
   document.querySelectorAll('.nav-links a[data-nav]').forEach((link) => {

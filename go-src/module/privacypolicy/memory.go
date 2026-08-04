@@ -13,6 +13,8 @@ type cfgSnapshot struct {
 	CreatorTermsUrl   string
 	RoomOwnerTermsUrl string
 	VipDescUrl        string
+	AboutSiteUrl      string
+	SafetyCenterUrl   string
 }
 
 var (
@@ -46,6 +48,8 @@ func toCfgSnapshot(row *entity.PrivacyPolicyCfg) *cfgSnapshot {
 		CreatorTermsUrl:   row.CreatorTermsUrl,
 		RoomOwnerTermsUrl: row.RoomOwnerTermsUrl,
 		VipDescUrl:        row.VipDescUrl,
+		AboutSiteUrl:      row.AboutSiteUrl,
+		SafetyCenterUrl:   row.SafetyCenterUrl,
 	}
 }
 
@@ -67,4 +71,12 @@ func GetRoomOwnerTermsUrl() string {
 
 func GetVipDescUrl() string {
 	return getCfgCache().VipDescUrl
+}
+
+func GetAboutSiteUrl() string {
+	return getCfgCache().AboutSiteUrl
+}
+
+func GetSafetyCenterUrl() string {
+	return getCfgCache().SafetyCenterUrl
 }

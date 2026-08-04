@@ -12,6 +12,20 @@ import (
 	"xr-game-server/module/upload"
 )
 
+func resolveAboutSiteUrl() string {
+	if url := privacypolicy.GetAboutSiteUrl(); url != "" {
+		return url
+	}
+	return upload.GetAboutSiteUrl()
+}
+
+func resolveSafetyCenterUrl() string {
+	if url := privacypolicy.GetSafetyCenterUrl(); url != "" {
+		return url
+	}
+	return upload.GetSafetyCenterUrl()
+}
+
 func GetSysCfg(ctx context.Context, req *sysdto.SysCfgReq) (*sysdto.SysCfgResp, error) {
 	_ = req
 	packageName := httpserver.GetPackageNameFromContext(ctx)
@@ -28,5 +42,7 @@ func GetSysCfg(ctx context.Context, req *sysdto.SysCfgReq) (*sysdto.SysCfgResp, 
 		VipDescUrl:                  privacypolicy.GetVipDescUrl(),
 		AppImageMaxSize:             upload.GetAppImageMaxSize(),
 		GoldToDiamondRate:           common.GoldToDiamondRate,
+		AboutSiteUrl:                resolveAboutSiteUrl(),
+		SafetyCenterUrl:             resolveSafetyCenterUrl(),
 	}, nil
 }

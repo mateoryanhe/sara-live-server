@@ -13,6 +13,8 @@ type PrivacyPolicyCfgItem struct {
 	CreatorTermsUrl   string `json:"creatorTermsUrl"`
 	RoomOwnerTermsUrl string `json:"roomOwnerTermsUrl"`
 	VipDescUrl        string `json:"vipDescUrl"`
+	AboutSiteUrl      string `json:"aboutSiteUrl"`
+	SafetyCenterUrl   string `json:"safetyCenterUrl"`
 	CreatedAt         string `json:"createdAt"`
 	UpdatedAt         string `json:"updatedAt"`
 }
@@ -29,6 +31,8 @@ type SavePrivacyPolicyCfgReq struct {
 	CreatorTermsUrl   string `json:"creatorTermsUrl" v:"max-length:512#创作者条款URL长度不能超过512" dc:"短视频创作者上传合规条款URL"`
 	RoomOwnerTermsUrl string `json:"roomOwnerTermsUrl" v:"max-length:512#房主责任条款URL长度不能超过512" dc:"房间房主责任条款URL"`
 	VipDescUrl        string `json:"vipDescUrl" v:"max-length:512#VIP描述文档URL长度不能超过512" dc:"VIP描述文档URL"`
+	AboutSiteUrl      string `json:"aboutSiteUrl" v:"max-length:512#About页面URL长度不能超过512" dc:"About页面URL"`
+	SafetyCenterUrl   string `json:"safetyCenterUrl" v:"max-length:512#安全中心页面URL长度不能超过512" dc:"安全中心页面URL"`
 }
 
 type SavePrivacyPolicyCfgRes struct {

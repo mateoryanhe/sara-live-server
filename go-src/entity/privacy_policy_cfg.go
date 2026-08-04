@@ -17,6 +17,8 @@ type PrivacyPolicyCfg struct {
 	CreatorTermsUrl   string `gorm:"size:512;default:'';comment:短视频创作者上传合规条款URL" json:"creatorTermsUrl"`
 	RoomOwnerTermsUrl string `gorm:"size:512;default:'';comment:房间房主责任条款URL" json:"roomOwnerTermsUrl"`
 	VipDescUrl        string `gorm:"size:512;default:'';comment:VIP描述文档URL" json:"vipDescUrl"`
+	AboutSiteUrl      string `gorm:"size:512;default:'';comment:About页面URL" json:"aboutSiteUrl"`
+	SafetyCenterUrl   string `gorm:"size:512;default:'';comment:安全中心页面URL" json:"safetyCenterUrl"`
 }
 
 func initPrivacyPolicyCfg() {

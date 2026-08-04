@@ -26,6 +26,8 @@ func SavePrivacyPolicyCfg(_ context.Context, req *privacypolicydto.SavePrivacyPo
 	creatorTermsUrl := strings.TrimSpace(req.CreatorTermsUrl)
 	roomOwnerTermsUrl := strings.TrimSpace(req.RoomOwnerTermsUrl)
 	vipDescUrl := strings.TrimSpace(req.VipDescUrl)
+	aboutSiteUrl := strings.TrimSpace(req.AboutSiteUrl)
+	safetyCenterUrl := strings.TrimSpace(req.SafetyCenterUrl)
 	if url != "" && !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
@@ -41,6 +43,12 @@ func SavePrivacyPolicyCfg(_ context.Context, req *privacypolicydto.SavePrivacyPo
 	if vipDescUrl != "" && !strings.HasPrefix(vipDescUrl, "http://") && !strings.HasPrefix(vipDescUrl, "https://") {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
+	if aboutSiteUrl != "" && !strings.HasPrefix(aboutSiteUrl, "http://") && !strings.HasPrefix(aboutSiteUrl, "https://") {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if safetyCenterUrl != "" && !strings.HasPrefix(safetyCenterUrl, "http://") && !strings.HasPrefix(safetyCenterUrl, "https://") {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 
 	existing := cfgdao.LoadPrivacyPolicyCfg()
 	row := &entity.PrivacyPolicyCfg{
@@ -49,6 +57,8 @@ func SavePrivacyPolicyCfg(_ context.Context, req *privacypolicydto.SavePrivacyPo
 		CreatorTermsUrl:   creatorTermsUrl,
 		RoomOwnerTermsUrl: roomOwnerTermsUrl,
 		VipDescUrl:        vipDescUrl,
+		AboutSiteUrl:      aboutSiteUrl,
+		SafetyCenterUrl:   safetyCenterUrl,
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -85,6 +95,8 @@ func toCfgItem(cfg *entity.PrivacyPolicyCfg) *privacypolicydto.PrivacyPolicyCfgI
 		CreatorTermsUrl:   cfg.CreatorTermsUrl,
 		RoomOwnerTermsUrl: cfg.RoomOwnerTermsUrl,
 		VipDescUrl:        cfg.VipDescUrl,
+		AboutSiteUrl:      cfg.AboutSiteUrl,
+		SafetyCenterUrl:   cfg.SafetyCenterUrl,
 		CreatedAt:         formatTime(cfg.CreatedAt),
 		UpdatedAt:         formatTime(cfg.UpdatedAt),
 	}

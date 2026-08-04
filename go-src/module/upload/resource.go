@@ -14,6 +14,16 @@ func GetAppImageMaxSize() uint64 {
 	return getResourceCfgCache().AppImageMaxSize
 }
 
+// GetAboutSiteUrl About 页面 URL
+func GetAboutSiteUrl() string {
+	return buildResourceUrl("/about.html")
+}
+
+// GetSafetyCenterUrl 安全中心页面 URL
+func GetSafetyCenterUrl() string {
+	return buildResourceUrl("/safety-center.html")
+}
+
 // buildResourceUrl 给资源路径拼接域名;name 为空返回空;已是完整 URL 则原样返回
 func buildResourceUrl(name string) string {
 	if name == "" {

@@ -53,6 +53,24 @@
           <span class="form-tip">App 请求 GET /sysInfo/cfg 时返回 vipDescUrl</span>
         </el-form-item>
 
+        <el-form-item label="About 页面 URL" prop="aboutSiteUrl">
+          <el-input
+              v-model="formData.aboutSiteUrl"
+              clearable
+              placeholder="如 https://example.com/about.html"
+          />
+          <span class="form-tip">App 请求 GET /sysInfo/cfg 时返回 aboutSiteUrl；留空则使用资源域名 + /about.html</span>
+        </el-form-item>
+
+        <el-form-item label="安全中心 URL" prop="safetyCenterUrl">
+          <el-input
+              v-model="formData.safetyCenterUrl"
+              clearable
+              placeholder="如 https://example.com/safety-center.html"
+          />
+          <span class="form-tip">App 请求 GET /sysInfo/cfg 时返回 safetyCenterUrl；留空则使用资源域名 + /safety-center.html</span>
+        </el-form-item>
+
         <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
@@ -82,6 +100,8 @@ const formData = reactive({
   creatorTermsUrl: '',
   roomOwnerTermsUrl: '',
   vipDescUrl: '',
+  aboutSiteUrl: '',
+  safetyCenterUrl: '',
 })
 
 const metaInfo = reactive({
@@ -89,97 +109,32 @@ const metaInfo = reactive({
   updatedAt: '',
 })
 
+const validateOptionalUrl = (_: unknown, value: string, callback: (e?: Error) => void) => {
+  const url = value?.trim()
+  if (!url) {
+    callback()
+    return
+  }
+  if (!/^https?:\/\//i.test(url)) {
+    callback(new Error('URL 需以 http:// 或 https:// 开头'))
+    return
+  }
+  callback()
+}
+
+const urlFieldRules = (label: string) => [
+  {max: 512, message: `${label}长度不能超过 512`, trigger: 'blur'},
+  {validator: validateOptionalUrl, trigger: 'blur'},
+]
+
 const formRules = reactive({
-  privacyPolicyUrl: [
-    {max: 512, message: 'URL 长度不能超过 512', trigger: 'blur'},
-    {
-      validator: (_: unknown, value: string, callback: (e?: Error) => void) => {
-        const url = value?.trim()
-        if (!url) {
-          callback()
-          return
-        }
-        if (!/^https?:\/\//i.test(url)) {
-          callback(new Error('URL 需以 http:// 或 https:// 开头'))
-          return
-        }
-        callback()
-      },
-      trigger: 'blur',
-    },
-  ],
-  termsOfServiceUrl: [
-    {max: 512, message: 'URL 长度不能超过 512', trigger: 'blur'},
-    {
-      validator: (_: unknown, value: string, callback: (e?: Error) => void) => {
-        const url = value?.trim()
-        if (!url) {
-          callback()
-          return
-        }
-        if (!/^https?:\/\//i.test(url)) {
-          callback(new Error('URL 需以 http:// 或 https:// 开头'))
-          return
-        }
-        callback()
-      },
-      trigger: 'blur',
-    },
-  ],
-  creatorTermsUrl: [
-    {max: 512, message: 'URL 长度不能超过 512', trigger: 'blur'},
-    {
-      validator: (_: unknown, value: string, callback: (e?: Error) => void) => {
-        const url = value?.trim()
-        if (!url) {
-          callback()
-          return
-        }
-        if (!/^https?:\/\//i.test(url)) {
-          callback(new Error('URL 需以 http:// 或 https:// 开头'))
-          return
-        }
-        callback()
-      },
-      trigger: 'blur',
-    },
-  ],
-  roomOwnerTermsUrl: [
-    {max: 512, message: 'URL 长度不能超过 512', trigger: 'blur'},
-    {
-      validator: (_: unknown, value: string, callback: (e?: Error) => void) => {
-        const url = value?.trim()
-        if (!url) {
-          callback()
-          return
-        }
-        if (!/^https?:\/\//i.test(url)) {
-          callback(new Error('URL 需以 http:// 或 https:// 开头'))
-          return
-        }
-        callback()
-      },
-      trigger: 'blur',
-    },
-  ],
-  vipDescUrl: [
-    {max: 512, message: 'URL 长度不能超过 512', trigger: 'blur'},
-    {
-      validator: (_: unknown, value: string, callback: (e?: Error) => void) => {
-        const url = value?.trim()
-        if (!url) {
-          callback()
-          return
-        }
-        if (!/^https?:\/\//i.test(url)) {
-          callback(new Error('URL 需以 http:// 或 https:// 开头'))
-          return
-        }
-        callback()
-      },
-      trigger: 'blur',
-    },
-  ],
+  privacyPolicyUrl: urlFieldRules('URL'),
+  termsOfServiceUrl: urlFieldRules('URL'),
+  creatorTermsUrl: urlFieldRules('URL'),
+  roomOwnerTermsUrl: urlFieldRules('URL'),
+  vipDescUrl: urlFieldRules('URL'),
+  aboutSiteUrl: urlFieldRules('URL'),
+  safetyCenterUrl: urlFieldRules('URL'),
 })
 
 const applyCfg = (cfg: PrivacyPolicyCfg | null | undefined) => {
@@ -190,6 +145,8 @@ const applyCfg = (cfg: PrivacyPolicyCfg | null | undefined) => {
     formData.creatorTermsUrl = ''
     formData.roomOwnerTermsUrl = ''
     formData.vipDescUrl = ''
+    formData.aboutSiteUrl = ''
+    formData.safetyCenterUrl = ''
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
     return
@@ -200,6 +157,8 @@ const applyCfg = (cfg: PrivacyPolicyCfg | null | undefined) => {
   formData.creatorTermsUrl = cfg.creatorTermsUrl || ''
   formData.roomOwnerTermsUrl = cfg.roomOwnerTermsUrl || ''
   formData.vipDescUrl = cfg.vipDescUrl || ''
+  formData.aboutSiteUrl = cfg.aboutSiteUrl || ''
+  formData.safetyCenterUrl = cfg.safetyCenterUrl || ''
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
 }
@@ -228,6 +187,8 @@ const handleSave = async () => {
       creatorTermsUrl: formData.creatorTermsUrl.trim(),
       roomOwnerTermsUrl: formData.roomOwnerTermsUrl.trim(),
       vipDescUrl: formData.vipDescUrl.trim(),
+      aboutSiteUrl: formData.aboutSiteUrl.trim(),
+      safetyCenterUrl: formData.safetyCenterUrl.trim(),
     })
     if (response?.success) {
       ElMessage.success('保存成功')

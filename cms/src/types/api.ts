@@ -850,6 +850,8 @@ export interface PrivacyPolicyCfg {
     creatorTermsUrl: string
     roomOwnerTermsUrl: string
     vipDescUrl: string
+    aboutSiteUrl: string
+    safetyCenterUrl: string
     createdAt: string
     updatedAt: string
 }
@@ -865,6 +867,8 @@ export interface SavePrivacyPolicyCfgReq {
     creatorTermsUrl: string
     roomOwnerTermsUrl: string
     vipDescUrl: string
+    aboutSiteUrl: string
+    safetyCenterUrl: string
 }
 
 export interface SavePrivacyPolicyCfgRes {
