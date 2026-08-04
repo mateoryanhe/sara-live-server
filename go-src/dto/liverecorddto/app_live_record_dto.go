@@ -32,7 +32,6 @@ type AppLiveRecordItem struct {
 
 // AppLiveRecordListRes App端直播记录分页响应
 type AppLiveRecordListRes struct {
-	Total    int                  `json:"total"    dc:"总条数"`
 	Page     int                  `json:"page"     dc:"当前页码"`
 	PageSize int                  `json:"pageSize" dc:"每页数量"`
 	List     []*AppLiveRecordItem `json:"list"     dc:"直播记录列表"`

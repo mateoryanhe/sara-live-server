@@ -10,10 +10,7 @@ import (
 	"xr-game-server/entity"
 )
 
-const (
-	appDefaultPageSize = 20
-	appMaxPageSize     = 100
-)
+const appLiveRecordListPageSize = liveroomdao.AppLiveRecordListCachePageSize
 
 // ToAppItem 将直播记录实体转为 App 端条目
 func ToAppItem(v *entity.LiveRecord) *liverecorddto.AppLiveRecordItem {
@@ -47,23 +44,21 @@ func ToAppItem(v *entity.LiveRecord) *liverecorddto.AppLiveRecordItem {
 // GetAppList App端分页查询当前主播直播数据
 func GetAppList(ctx context.Context, req *liverecorddto.AppLiveRecordListReq) (*liverecorddto.AppLiveRecordListRes, error) {
 	anchorId := httpserver.GetAuthId(ctx)
-	page, pageSize := normalizeAppPage(req.Page, req.PageSize)
+	page, _ := normalizeAppPage(req.Page, req.PageSize)
 
-	total, rows := liveroomdao.LiveRecordCMSList(&liveroomdao.LiveRecordCMSListFilter{
-		AnchorId:  anchorId,
-		PageIndex: page,
-		PageSize:  pageSize,
-	})
-
+	rows := liveroomdao.GetAppLiveRecordsByAnchor(anchorId, page, appLiveRecordListPageSize)
 	list := make([]*liverecorddto.AppLiveRecordItem, 0, len(rows))
 	for _, row := range rows {
-		list = append(list, ToAppItem(row))
+		record := row
+		if cached := liveroomdao.GetDataFromCache(row.ID); cached != nil {
+			record = cached
+		}
+		list = append(list, ToAppItem(record))
 	}
 
 	return &liverecorddto.AppLiveRecordListRes{
-		Total:    total,
 		Page:     page,
-		PageSize: pageSize,
+		PageSize: appLiveRecordListPageSize,
 		List:     list,
 	}, nil
 }
@@ -73,10 +68,10 @@ func normalizeAppPage(page, pageSize int) (int, int) {
 		page = 1
 	}
 	if pageSize <= 0 {
-		pageSize = appDefaultPageSize
+		pageSize = appLiveRecordListPageSize
 	}
-	if pageSize > appMaxPageSize {
-		pageSize = appMaxPageSize
+	if pageSize > appLiveRecordListPageSize {
+		pageSize = appLiveRecordListPageSize
 	}
 	return page, pageSize
 }

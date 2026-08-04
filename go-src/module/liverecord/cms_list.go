@@ -21,18 +21,7 @@ func parseUint64Filter(val string) uint64 {
 	return id
 }
 
-func collectAnchorIds(rows []*entity.LiveRecord) []uint64 {
-	userIds := make([]uint64, 0, len(rows))
-	for _, row := range rows {
-		if row == nil || row.AnchorId == 0 {
-			continue
-		}
-		userIds = append(userIds, row.AnchorId)
-	}
-	return userIds
-}
-
-func toCMSItem(v *entity.LiveRecord, nicknameMap map[uint64]string) *liverecorddto.CMSLiveRecordItem {
+func toCMSItem(v *entity.LiveRecord) *liverecorddto.CMSLiveRecordItem {
 	if v == nil {
 		return nil
 	}
@@ -57,8 +46,8 @@ func toCMSItem(v *entity.LiveRecord, nicknameMap map[uint64]string) *liverecordd
 		TotalNewFollower:             v.TotalNewFollower,
 		CreatedAt:                    &v.CreatedAt,
 	}
-	if nicknameMap != nil {
-		item.Nickname = nicknameMap[v.AnchorId]
+	if u := userinfodao.GetUserInfoByUserId(v.AnchorId); u != nil {
+		item.Nickname = u.Nickname
 	}
 	return item
 }
@@ -72,10 +61,13 @@ func GetCMSList(_ context.Context, req *liverecorddto.CMSLiveRecordListReq) (*ht
 		PageIndex: req.PageIndex,
 		PageSize:  req.PageSize,
 	})
-	nicknameMap := userinfodao.GetNicknameMapByUserIds(collectAnchorIds(rows))
 	list := make([]*liverecorddto.CMSLiveRecordItem, 0, len(rows))
 	for _, row := range rows {
-		list = append(list, toCMSItem(row, nicknameMap))
+		record := row
+		if cached := liveroomdao.GetDataFromCache(row.ID); cached != nil {
+			record = cached
+		}
+		list = append(list, toCMSItem(record))
 	}
 	return httpserver.NewCMSQueryResp(total, list), nil
 }

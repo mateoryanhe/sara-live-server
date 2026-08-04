@@ -13,6 +13,7 @@ var liveRecordCacheMgr *cache.CacheMgr
 // InitLiveRecordDao 初始化直播记录缓存
 func initLiveRecordDao() {
 	liveRecordCacheMgr = cache.NewCacheMgr()
+	initAppLiveRecordListCache()
 	initLiveRecordUserDao()
 	initRevenueLogDao()
 }
@@ -30,6 +31,19 @@ func GetLiveRecordById(id uint64) *entity.LiveRecord {
 		}
 		return ret, nil
 	})
+	if v == nil {
+		return nil
+	}
+	r, _ := v.(*entity.LiveRecord)
+	return r
+}
+
+// GetDataFromCache 仅从内存缓存读取直播记录,未命中返回 nil(不查库)
+func GetDataFromCache(id uint64) *entity.LiveRecord {
+	if id == 0 || liveRecordCacheMgr == nil {
+		return nil
+	}
+	v := liveRecordCacheMgr.GetFromCache(id)
 	if v == nil {
 		return nil
 	}
