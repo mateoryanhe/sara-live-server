@@ -7,9 +7,25 @@ import (
 )
 
 var (
-	loggerSyncHooks []func()
-	loggerNames     = []string{"detail", "access", "error"}
+	loggerSyncHooks        []func()
+	afterDetailLoggerHooks []func()
+	loggerNames            = []string{"detail", "access", "error"}
 )
+
+// RegisterAfterDetailLoggerHook 注册 detail logger 初始化完成后执行的回调.
+func RegisterAfterDetailLoggerHook(fn func()) {
+	if fn == nil {
+		return
+	}
+	afterDetailLoggerHooks = append(afterDetailLoggerHooks, fn)
+}
+
+// RunAfterDetailLoggerHooks 执行 detail logger 初始化后的回调.
+func RunAfterDetailLoggerHooks() {
+	for _, hook := range afterDetailLoggerHooks {
+		hook()
+	}
+}
 
 // RegisterLoggerSyncHook 注册额外 logger 的同步切换(如 httpServer.Logger)。
 func RegisterLoggerSyncHook(fn func()) {

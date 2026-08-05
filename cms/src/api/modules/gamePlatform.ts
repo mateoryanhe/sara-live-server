@@ -1,0 +1,53 @@
+import request from '../request'
+import type {
+    AddGameShelfReq,
+    AddGameShelfRes,
+    BatchAddGameShelfReq,
+    BatchAddGameShelfRes,
+    BatchDeleteGameShelfReq,
+    BatchDeleteGameShelfRes,
+    DeleteGameShelfReq,
+    DeleteGameShelfRes,
+    GetGamePlatformCfgRes,
+    ReloadVendorGameCacheRes,
+    SaveGamePlatformCfgReq,
+    SaveGamePlatformCfgRes,
+    VendorGame,
+    VendorGameQuery,
+} from '@/types/api'
+
+export const gamePlatformApi = {
+    getGamePlatformCfg: () => {
+        return request.post<GetGamePlatformCfgRes>('/gamePlatform/getGamePlatformCfg', {})
+    },
+
+    saveGamePlatformCfg: (data: SaveGamePlatformCfgReq) => {
+        return request.post<SaveGamePlatformCfgRes>('/gamePlatform/saveGamePlatformCfg', data)
+    },
+
+    getVendorGameList: (params: VendorGameQuery) => {
+        return request.post<{ total: number; data: VendorGame[] }>('/gamePlatform/vendorGameList', params)
+    },
+
+    reloadVendorGameCache: () => {
+        return request.post<ReloadVendorGameCacheRes>('/gamePlatform/reloadVendorGameCache', {})
+    },
+
+    addGameShelf: (data: AddGameShelfReq) => {
+        return request.post<AddGameShelfRes>('/gamePlatform/addGameShelf', data)
+    },
+
+    deleteGameShelf: (data: DeleteGameShelfReq) => {
+        return request.post<DeleteGameShelfRes>('/gamePlatform/deleteGameShelf', data)
+    },
+
+    batchAddGameShelf: (data: BatchAddGameShelfReq) => {
+        return request.post<BatchAddGameShelfRes>('/gamePlatform/batchAddGameShelf', data)
+    },
+
+    batchDeleteGameShelf: (data: BatchDeleteGameShelfReq) => {
+        return request.post<BatchDeleteGameShelfRes>('/gamePlatform/batchDeleteGameShelf', data)
+    },
+}
+
+export default gamePlatformApi

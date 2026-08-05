@@ -16,6 +16,7 @@ import (
 	"xr-game-server/core/cfg"
 	"xr-game-server/core/event"
 	"xr-game-server/core/xrjson"
+	"xr-game-server/core/xrpool"
 	"xr-game-server/core/xrtoken"
 	"xr-game-server/errercode"
 )
@@ -121,22 +122,25 @@ func newClient(id uint64, conn *websocket.Conn) *WebSocketClient {
 func (w *WebSocketClient) init() {
 	ctx, cancel := context.WithCancel(context.Background())
 	w.cancel = cancel
-	go w.readPump()
-	go w.consumeData(ctx)
+	w.startWorker("WebSocket.readPump", w.readPump)
+	w.startWorker("WebSocket.consumeData", func() {
+		w.consumeData(ctx)
+	})
 }
 
-func (w *WebSocketClient) recoverExit() {
-	if recover() != nil {
-		w.exit()
-	}
-}
-
-// readPump 独立读协程,连接断开时 ReadMessage 返回错误并触发 exit
-func (w *WebSocketClient) readPump() {
-	defer func() {
-		w.recoverExit()
-		w.exit()
+// startWorker WebSocket 长连接协程必须独立运行;用 recover 防止 panic 拖垮进程.
+func (w *WebSocketClient) startWorker(source string, fn func()) {
+	go func() {
+		defer func() {
+			xrpool.Recover(gctx.New(), source)
+			w.exit()
+		}()
+		fn()
 	}()
+}
+
+// readPump 独立读协程,连接断开时 ReadMessage 返回错误并退出.
+func (w *WebSocketClient) readPump() {
 	for w.Loop && w.Conn != nil {
 		if _, _, err := w.Conn.ReadMessage(); err != nil {
 			return
@@ -221,7 +225,6 @@ func (w *WebSocketClient) consumeData(ctx context.Context) {
 	flushTimer := time.NewTimer(time.Hour)
 	stopTimer(flushTimer)
 	defer flushTimer.Stop()
-	defer w.recoverExit()
 
 	idleTimer := time.NewTimer(IdleTime)
 	defer idleTimer.Stop()

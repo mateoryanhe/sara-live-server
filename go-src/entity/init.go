@@ -58,6 +58,8 @@ func Init() {
 	initVipCfg()
 	initAppPkg()
 	initGameCfg()
+	initGamePlatformCfg()
+	initGameShelfCfg()
 	initLiveTicket()
 	initLivePrivateRoomBilling()
 	initAgoraCfg()

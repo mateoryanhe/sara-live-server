@@ -17,6 +17,7 @@ func initHTTPServerLogger() {
 	initDetailLogger(ctx)
 	initAccessLogger()
 	initErrorLogger()
+	shutdown.RunAfterDetailLoggerHooks()
 	shutdown.RegisterLoggerSyncHook(func() {
 		shutdown.ApplySyncLogger(httpServer.Logger())
 	})

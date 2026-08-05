@@ -34,7 +34,6 @@ func Create(_ context.Context, req *gamecfgdto.CreateGameCfgReq) (*gamecfgdto.Cr
 		LiveCover: strings.TrimSpace(req.LiveCover),
 		Link:      strings.TrimSpace(req.Link),
 		Sort:      req.Sort,
-		Status:    req.Status,
 	}
 	if err := cfgdao.CreateGameCfg(row); err != nil {
 		return nil, err
@@ -57,7 +56,6 @@ func Update(_ context.Context, req *gamecfgdto.UpdateGameCfgReq) (*gamecfgdto.Up
 	row.LiveCover = strings.TrimSpace(req.LiveCover)
 	row.Link = strings.TrimSpace(req.Link)
 	row.Sort = req.Sort
-	row.Status = req.Status
 	if err := cfgdao.UpdateGameCfg(row); err != nil {
 		return nil, err
 	}

@@ -93,7 +93,7 @@ func pushLiveRoomCallAcceptedToAudience(order *entity.CallOrder) {
 		item.AnchorNickname = u.Nickname
 		item.AnchorAvatar = upload.ResolveAvatarUrlForUser(roomId, u.Avatar)
 	}
-	liveroom.PushToRoomAudience(roomId, cmd.LiveRoomCallAnchorAcceptedAudience, item, roomId, order.CallerId)
+	liveroom.PushToRoomAudience(roomId, cmd.LiveRoomCallAnchorAcceptedAudience, item)
 }
 
 const liveRoomCallEndedMessage = "通话已结束"

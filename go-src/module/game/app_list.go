@@ -2,11 +2,8 @@ package game
 
 import (
 	"context"
-	"strconv"
-	"xr-game-server/dao/cfgdao"
-	"xr-game-server/dto/gamecfgdto"
-	"xr-game-server/entity"
-	"xr-game-server/module/upload"
+
+	"xr-game-server/dto/gameplatformdto"
 )
 
 const (
@@ -14,54 +11,44 @@ const (
 	appGameListMaxPageSize     = 100
 )
 
-// GetAppGameCfgList App端分页查询游戏列表(仅已上架,直接读缓存)
-func GetAppGameCfgList(_ context.Context, req *gamecfgdto.AppGameCfgListReq) (*gamecfgdto.AppGameCfgListRes, error) {
-	page, pageSize := normalizeAppGameListPage(req.Page, req.PageSize)
-	all := listOnShelfGameCfgFromCache()
+// GetAppGameList App 端分页查询已上架游戏列表(读内存).
+func GetAppGameList(_ context.Context, req *gameplatformdto.AppGameListReq) (*gameplatformdto.AppGameListRes, error) {
+	pageIndex, pageSize := normalizeAppGameListPage(0, 0)
+	if req != nil {
+		pageIndex, pageSize = normalizeAppGameListPage(req.PageIndex, req.PageSize)
+	}
+	all := GetAllOnShelfVendorGamesFromMemory()
 	total := len(all)
-	start, end := appGameListPageRange(total, page, pageSize)
+	start, end := appGameListPageRange(total, pageIndex, pageSize)
 
-	list := make([]*gamecfgdto.AppGameCfgItem, 0, end-start)
+	list := make([]*gameplatformdto.AppGameListItem, 0, end-start)
 	for _, row := range all[start:end] {
 		if row == nil {
 			continue
 		}
-		list = append(list, toAppGameCfgItem(row))
+		list = append(list, toAppGameListItem(row))
 	}
-	return &gamecfgdto.AppGameCfgListRes{
-		Total:    total,
-		Page:     page,
-		PageSize: pageSize,
-		List:     list,
+	return &gameplatformdto.AppGameListRes{
+		Total:     total,
+		PageIndex: pageIndex,
+		PageSize:  pageSize,
+		List:      list,
 	}, nil
 }
 
-func listOnShelfGameCfgFromCache() []*entity.GameCfg {
-	all := cfgdao.GetAllGameCfgCached()
-	list := make([]*entity.GameCfg, 0, len(all))
-	for _, row := range all {
-		if row == nil || row.Status != entity.GameCfgStatusOnShelf {
-			continue
-		}
-		list = append(list, row)
-	}
-	return list
-}
-
-func toAppGameCfgItem(row *entity.GameCfg) *gamecfgdto.AppGameCfgItem {
-	return &gamecfgdto.AppGameCfgItem{
-		ID:        strconv.FormatUint(row.ID, 10),
-		Name:      row.Name,
-		Code:      row.Code,
-		LiveCover: upload.GetUrlByName(row.LiveCover),
-		Link:      row.Link,
-		Sort:      row.Sort,
+func toAppGameListItem(row *VendorGame) *gameplatformdto.AppGameListItem {
+	return &gameplatformdto.AppGameListItem{
+		GameCode: row.GameCode,
+		NameEn:   row.NameEn,
+		Cover:    BuildGameCoverUrl(row.Cover),
+		Category: row.Category,
+		Platform: row.Platform,
 	}
 }
 
-func normalizeAppGameListPage(page, pageSize int) (int, int) {
-	if page <= 0 {
-		page = 1
+func normalizeAppGameListPage(pageIndex, pageSize int) (int, int) {
+	if pageIndex <= 0 {
+		pageIndex = 1
 	}
 	if pageSize <= 0 {
 		pageSize = appGameListDefaultPageSize
@@ -69,11 +56,11 @@ func normalizeAppGameListPage(page, pageSize int) (int, int) {
 	if pageSize > appGameListMaxPageSize {
 		pageSize = appGameListMaxPageSize
 	}
-	return page, pageSize
+	return pageIndex, pageSize
 }
 
-func appGameListPageRange(total, page, pageSize int) (int, int) {
-	start := (page - 1) * pageSize
+func appGameListPageRange(total, pageIndex, pageSize int) (int, int) {
+	start := (pageIndex - 1) * pageSize
 	end := start + pageSize
 	if start > total {
 		start = total

@@ -246,7 +246,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('GameCfgManagement')"
+            v-if="hasMenuPermission('GamePlatformCfgManagement') || hasMenuPermission('GameVendorGameListManagement')"
             index="/game">
           <template #title>
             <el-icon>
@@ -254,11 +254,17 @@
             </el-icon>
             <span>游戏管理</span>
           </template>
-          <el-menu-item v-if="hasMenuPermission('GameCfgManagement')" index="/game/game-cfg-list">
+          <el-menu-item v-if="hasMenuPermission('GamePlatformCfgManagement')" index="/game/game-platform-cfg">
             <el-icon>
-              <Cpu/>
+              <Setting/>
             </el-icon>
-            <span>游戏配置</span>
+            <span>平台接入配置</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('GameVendorGameListManagement')" index="/game/game-list">
+            <el-icon>
+              <List/>
+            </el-icon>
+            <span>游戏列表</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -400,7 +406,7 @@ import {computed, ref, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import LayoutTabs from '@/components/layout/LayoutTabs.vue'
 import {useLayoutTabs} from '@/composables/useLayoutTabs'
-import {ArrowDown, Bell, Box, Coin, Collection, CollectionTag, Cpu, CreditCard, Document, EditPen, Expand, Fold, Key, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Search, Service, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Bell, Box, Coin, Collection, CollectionTag, Cpu, CreditCard, Document, EditPen, Expand, Fold, Key, List, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Search, Service, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {getIsAdmin, hasPermission} from '@/utils/permission'
 import {clearAuthSession} from '@/utils/auth'
 

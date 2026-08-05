@@ -533,26 +533,6 @@ export interface AppPkgQuery extends PageQuery {
     packageName?: string
 }
 
-// 游戏配置
-export interface GameCfg {
-    id: string
-    name: string
-    code: string
-    liveCover: string
-    liveCoverUrl?: string
-    link: string
-    sort: number
-    status: number
-    createdAt: string
-    updatedAt: string
-}
-
-export interface GameCfgQuery extends PageQuery {
-    name?: string
-    code?: string
-    statusFilter?: number
-}
-
 // 首页 Banner
 export interface Banner {
     id: string
@@ -947,6 +927,92 @@ export interface SaveGooglePlayCfgReq {
 export interface SaveGooglePlayCfgRes {
     success: boolean
     id: string
+}
+
+export interface GamePlatformCfg {
+    id: string
+    vendorUrl: string
+    token: string
+    secretKey: string
+    iconUrl: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetGamePlatformCfgRes {
+    cfg: GamePlatformCfg | null
+}
+
+export interface SaveGamePlatformCfgReq {
+    id?: number
+    vendorUrl: string
+    token: string
+    secretKey: string
+    iconUrl?: string
+}
+
+export interface SaveGamePlatformCfgRes {
+    success: boolean
+    id: string
+}
+
+export interface VendorGame {
+    gameCode: string
+    name: string
+    nameEn: string
+    category: string
+    cover: string
+    platform: string
+    onShelf?: boolean
+}
+
+export interface VendorGameQuery extends PageQuery {
+    gameCode?: string
+    name?: string
+    platform?: string
+    category?: string
+}
+
+export interface BatchAddGameShelfReq {
+    gameCodes: string[]
+}
+
+export interface BatchAddGameShelfRes {
+    success: boolean
+    successCount: number
+    skipCount: number
+}
+
+export interface BatchDeleteGameShelfReq {
+    gameCodes: string[]
+}
+
+export interface BatchDeleteGameShelfRes {
+    success: boolean
+    successCount: number
+}
+
+export interface DeleteGameShelfReq {
+    id?: number
+    gameCode?: string
+}
+
+export interface DeleteGameShelfRes {
+    success: boolean
+}
+
+export interface AddGameShelfReq {
+    gameCode: string
+}
+
+export interface AddGameShelfRes {
+    success: boolean
+    id: string
+}
+
+export interface ReloadVendorGameCacheRes {
+    success: boolean
+    count: number
 }
 
 export interface UploadResourceCfg {

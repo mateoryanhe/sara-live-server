@@ -96,7 +96,7 @@ func GetAllGameCfgCached() []*entity.GameCfg {
 }
 
 func GetGameCfgList(req *gamecfgdto.GameCfgListReq) (int, []*gamecfgdto.GameCfgListRes) {
-	sql := `select id, name, code, live_cover, link, sort, status, created_at, updated_at
+	sql := `select id, name, code, live_cover, link, sort, created_at, updated_at
             from game_cfgs
             where 1=1 `
 	param := make([]any, 0)
@@ -110,14 +110,6 @@ func GetGameCfgList(req *gamecfgdto.GameCfgListReq) (int, []*gamecfgdto.GameCfgL
 	if req.Code != "" {
 		sql += ` and code LIKE ?`
 		param = append(param, fmt.Sprintf("%%%s%%", req.Code))
-	}
-	switch req.StatusFilter {
-	case 1:
-		sql += ` and status = ?`
-		param = append(param, entity.GameCfgStatusOffShelf)
-	case 2:
-		sql += ` and status = ?`
-		param = append(param, entity.GameCfgStatusOnShelf)
 	}
 
 	sql += ` order by sort desc, id desc`

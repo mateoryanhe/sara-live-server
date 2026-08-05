@@ -20,7 +20,6 @@ import {currencyLogApi} from './modules/currencyLog'
 import {liveRevenueLogApi} from './modules/liveRevenueLog'
 import {liveRecordApi} from './modules/liveRecord'
 import {videoCallLogApi} from './modules/videoCallLog'
-import {gameCfgApi} from './modules/gameCfg'
 import {agoraApi} from './modules/agora'
 import {liveCfgApi} from './modules/liveCfg'
 import {liveRoomTagApi} from './modules/liveRoomTag'
@@ -31,6 +30,7 @@ import {uploadResourceApi} from './modules/upload-resource'
 import {sysStatApi, RESOURCE_METRIC_MAX_POINTS} from './modules/sysStat'
 import {botAnchorApi} from './modules/bot-anchor'
 import {logQueryApi} from './modules/logQuery'
+import {gamePlatformApi} from './modules/gamePlatform'
 
 export {
     authApi,
@@ -55,7 +55,6 @@ export {
     liveRevenueLogApi,
     liveRecordApi,
     videoCallLogApi,
-    gameCfgApi,
     agoraApi,
     liveCfgApi,
     liveRoomTagApi,
@@ -67,6 +66,7 @@ export {
     RESOURCE_METRIC_MAX_POINTS,
     botAnchorApi,
     logQueryApi,
+    gamePlatformApi,
 }
 
 export default {
@@ -92,7 +92,6 @@ export default {
     liveRevenueLogApi,
     liveRecordApi,
     videoCallLogApi,
-    gameCfgApi,
     agoraApi,
     liveCfgApi,
     liveRoomTagApi,
@@ -104,4 +103,5 @@ export default {
     RESOURCE_METRIC_MAX_POINTS,
     botAnchorApi,
     logQueryApi,
+    gamePlatformApi,
 }
