@@ -4,14 +4,11 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/gogf/gf/v2/os/gcache"
 	"github.com/gogf/gf/v2/os/gctx"
-	"google.golang.org/api/idtoken"
 )
 
 const rtdnMessageDedupTTL = 7 * 24 * time.Hour
@@ -48,10 +45,7 @@ type testNotification struct {
 }
 
 // HandleGooglePlayRTDN 处理 Google Play RTDN Pub/Sub Push 回调
-func HandleGooglePlayRTDN(ctx context.Context, body []byte, authHeader string) error {
-	if err := verifyGooglePlayPushAuth(ctx, authHeader); err != nil {
-		return err
-	}
+func HandleGooglePlayRTDN(ctx context.Context, body []byte) error {
 	var push pubSubPushRequest
 	if err := json.Unmarshal(body, &push); err != nil {
 		logGooglePlayError(ctx, "rtdn invalid pubsub body err=%v", err)
@@ -97,46 +91,6 @@ func HandleGooglePlayRTDN(ctx context.Context, body []byte, authHeader string) e
 	}
 	markRTDNMessageProcessed(push.Message.MessageID)
 	return nil
-}
-
-func verifyGooglePlayPushAuth(ctx context.Context, authHeader string) error {
-	cfg := getActiveGooglePlayCfg()
-	if cfg == nil {
-		return nil
-	}
-	audience := strings.TrimSpace(cfg.RtdnAudience)
-	if audience == "" {
-		return nil
-	}
-	token := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
-	if token == "" {
-		return errGooglePlayUnauthorized("missing bearer token")
-	}
-	payload, err := idtoken.Validate(ctx, token, audience)
-	if err != nil {
-		return errGooglePlayUnauthorized("invalid push jwt: %v", err)
-	}
-	if email, _ := payload.Claims["email"].(string); email != "" {
-		logGooglePlayInfo(ctx, "rtdn push jwt email=%s", email)
-	}
-	return nil
-}
-
-type googlePlayUnauthorizedError struct {
-	msg string
-}
-
-func (e *googlePlayUnauthorizedError) Error() string {
-	return e.msg
-}
-
-func errGooglePlayUnauthorized(format string, args ...any) error {
-	return &googlePlayUnauthorizedError{msg: fmt.Sprintf(format, args...)}
-}
-
-func isGooglePlayUnauthorized(err error) bool {
-	_, ok := err.(*googlePlayUnauthorizedError)
-	return ok
 }
 
 func isRTDNMessageProcessed(messageId string) bool {

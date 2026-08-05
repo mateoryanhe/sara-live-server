@@ -50,7 +50,7 @@ func googlePlayCredKeyOf(cfg *entity.GooglePlayCfg) string {
 	if cfg == nil {
 		return ""
 	}
-	return fmt.Sprintf("%d:%s:%d", cfg.ID, cfg.PackageName, len(cfg.ServiceAccountJson))
+	return fmt.Sprintf("%d:%d", cfg.ID, len(cfg.ServiceAccountJson))
 }
 
 func getGoogleProductPurchase(ctx context.Context, packageName, productId, purchaseToken string) (*androidpublisher.ProductPurchase, error) {

@@ -19,6 +19,7 @@ type RechargeOrderItem struct {
 	Source       uint8   `json:"source"`   // 1App 2后台手动
 	PayChannel   uint8   `json:"payChannel"`
 	ThirdOrderId string  `json:"thirdOrderId"`
+	PackageName  string  `json:"packageName"`
 	Remark       string  `json:"remark"`
 	OperatorId   uint64  `json:"operatorId"`
 	CreatedAt    int64   `json:"createdAt"` // 秒
@@ -52,6 +53,7 @@ type CMSRechargeOrderListItem struct {
 	Source       uint8   `json:"source"`
 	PayChannel   uint8   `json:"payChannel"`
 	ThirdOrderId string  `json:"thirdOrderId"`
+	PackageName  string  `json:"packageName"`
 	Remark       string  `json:"remark"`
 	OperatorId   string  `json:"operatorId"`
 	CreatedAt    int64   `json:"createdAt"`
@@ -127,8 +129,8 @@ type AppCheckRechargeOrderSuccessReq struct {
 	g.Meta        `path:"/checkRechargeOrderSuccess" method:"post" summary:"App查询订单是否充值成功" tags:"充值订单"`
 	OrderId       string `json:"orderId"       v:"required#订单ID不能为空" dc:"本系统订单号"`
 	AttemptId     string `json:"attemptId"     dc:"预留字段,暂不使用"`
-	ProductId     string `json:"productId"     dc:"预留字段,暂不使用"`
-	PurchaseToken string `json:"purchaseToken" dc:"预留字段,暂不使用"`
+	ProductId     string `json:"productId"     dc:"Google Play 商品SKU(productId),与 purchaseToken 一并上报时异步验单"`
+	PurchaseToken string `json:"purchaseToken" dc:"Google Play purchaseToken,上报后 xrpool 异步验单到账"`
 }
 
 type AppCheckRechargeOrderSuccessRes struct {

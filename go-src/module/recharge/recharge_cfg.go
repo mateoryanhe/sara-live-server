@@ -29,6 +29,9 @@ func Create(_ context.Context, req *rechargecfgdto.CreateRechargeCfgReq) (*recha
 	if existing := cfgdao.GetRechargeCfgByNameTypeAndPackage(req.Name, req.CfgType, req.PackageName); existing != nil {
 		return nil, errercode.CreateCode(errercode.RechargeCfgExist)
 	}
+	if err := validateRechargeCfgProductId(req.ProductId, req.CfgType, req.PackageName, 0); err != nil {
+		return nil, err
+	}
 	cfg := &entity.RechargeCfg{
 		Name:        req.Name,
 		PackageName: strings.TrimSpace(req.PackageName),
@@ -58,6 +61,9 @@ func Update(_ context.Context, req *rechargecfgdto.UpdateRechargeCfgReq) (*recha
 	}
 	if existing := cfgdao.GetRechargeCfgByNameTypeAndPackage(req.Name, req.CfgType, req.PackageName); existing != nil && existing.ID != req.ID {
 		return nil, errercode.CreateCode(errercode.RechargeCfgExist)
+	}
+	if err := validateRechargeCfgProductId(req.ProductId, req.CfgType, req.PackageName, req.ID); err != nil {
+		return nil, err
 	}
 
 	cfg.Name = req.Name
@@ -126,7 +132,7 @@ func OffShelf(_ context.Context, req *rechargecfgdto.OffShelfRechargeCfgReq) (*r
 // GetAppList App端查询(仅返回已上架,走内存缓存)
 // 缓存在服务启动时加载,CMS 端创建/修改/删除/上下架时重新从 DB 加载。
 func GetAppList(ctx context.Context, req *rechargecfgdto.AppRechargeCfgListReq) (*rechargecfgdto.AppRechargeCfgListRes, error) {
-	packageName := httpserver.GetPackageNameFromContext(ctx)
+	packageName := strings.TrimSpace(httpserver.GetPackageNameFromContext(ctx))
 	all := getRechargeCfgCache()
 	list := make([]*rechargecfgdto.AppRechargeCfgItem, 0)
 	for _, item := range all {
@@ -135,4 +141,22 @@ func GetAppList(ctx context.Context, req *rechargecfgdto.AppRechargeCfgListReq) 
 		}
 	}
 	return &rechargecfgdto.AppRechargeCfgListRes{List: list}, nil
+}
+
+func validateRechargeCfgProductId(productId string, cfgType uint8, packageName string, excludeID uint64) error {
+	productId = strings.TrimSpace(productId)
+	packageName = strings.TrimSpace(packageName)
+	if productId == "" {
+		return nil
+	}
+	switch cfgType {
+	case entity.RechargeCfgTypeGoogle, entity.RechargeCfgTypeIOS:
+	default:
+		return nil
+	}
+	existing := cfgdao.GetRechargeCfgByProductIdTypeAndPackage(productId, cfgType, packageName)
+	if existing != nil && existing.ID != excludeID {
+		return errercode.CreateCode(errercode.RechargeCfgProductIdExist)
+	}
+	return nil
 }

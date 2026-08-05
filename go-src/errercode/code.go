@@ -65,6 +65,8 @@ const (
 	RechargeOrderStateInvalid XRCode = 83
 	// RechargeCfgOffShelf 引用的充值配置已下架
 	RechargeCfgOffShelf XRCode = 84
+	// RechargeCfgProductIdExist 充值配置商品SKU已存在(Google Play/iOS 等同类型内不可重复)
+	RechargeCfgProductIdExist XRCode = 85
 	// InvalidParam 参数无效
 	InvalidParam XRCode = 90
 	// RequestTooFrequent 请求过于频繁

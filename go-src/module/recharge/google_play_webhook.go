@@ -23,12 +23,8 @@ func handleGooglePlayRTDNHTTP(r *ghttp.Request) {
 		r.Response.WriteStatus(http.StatusBadRequest)
 		return
 	}
-	err = HandleGooglePlayRTDN(ctx, body, r.GetHeader("Authorization"))
+	err = HandleGooglePlayRTDN(ctx, body)
 	if err != nil {
-		if isGooglePlayUnauthorized(err) {
-			r.Response.WriteStatus(http.StatusUnauthorized)
-			return
-		}
 		logGooglePlayError(ctx, "rtdn handle failed err=%v", err)
 		r.Response.WriteStatus(http.StatusInternalServerError)
 		return

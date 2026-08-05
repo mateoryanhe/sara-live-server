@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"strconv"
+	"strings"
 	"xr-game-server/core/str"
 	"xr-game-server/dto/rechargecfgdto"
 	"xr-game-server/entity"
@@ -23,6 +24,25 @@ func GetRechargeCfgByNameTypeAndPackage(name string, cfgType uint8, packageName 
 	var cfg entity.RechargeCfg
 	err := g.DB().Model(string(entity.TbRechargeCfg)).
 		Where("name = ? AND cfg_type = ? AND package_name = ?", name, cfgType, packageName).
+		Scan(&cfg)
+	if err != nil {
+		return nil
+	}
+	if cfg.ID == 0 {
+		return nil
+	}
+	return &cfg
+}
+
+func GetRechargeCfgByProductIdTypeAndPackage(productId string, cfgType uint8, packageName string) *entity.RechargeCfg {
+	productId = strings.TrimSpace(productId)
+	packageName = strings.TrimSpace(packageName)
+	if productId == "" || packageName == "" {
+		return nil
+	}
+	var cfg entity.RechargeCfg
+	err := g.DB().Model(string(entity.TbRechargeCfg)).
+		Where("product_id = ? AND cfg_type = ? AND package_name = ?", productId, cfgType, packageName).
 		Scan(&cfg)
 	if err != nil {
 		return nil

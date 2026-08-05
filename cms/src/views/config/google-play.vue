@@ -20,18 +20,6 @@
       </el-alert>
 
       <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="180px">
-        <el-form-item label="启用 RTDN 到账" prop="enabled">
-          <el-switch v-model="formData.enabled"/>
-        </el-form-item>
-
-        <el-form-item label="Android 包名" prop="packageName">
-          <el-input
-              v-model="formData.packageName"
-              clearable
-              placeholder="如 com.example.app"
-          />
-        </el-form-item>
-
         <el-form-item label="服务账号 JSON" prop="serviceAccountJson">
           <el-input
               v-model="formData.serviceAccountJson"
@@ -40,15 +28,6 @@
               type="textarea"
           />
           <span class="form-tip">需具备 Google Play Android Developer API 权限，并在 Play Console 关联该服务账号</span>
-        </el-form-item>
-
-        <el-form-item label="RTDN JWT Audience" prop="rtdnAudience">
-          <el-input
-              v-model="formData.rtdnAudience"
-              clearable
-              placeholder="如 https://your-domain.com/webhook/googlePlay/rtdn"
-          />
-          <span class="form-tip">Pub/Sub Push 订阅 JWT 校验 aud；留空则不校验</span>
         </el-form-item>
 
         <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
@@ -75,10 +54,7 @@ const formRef = ref()
 
 const formData = reactive({
   id: '0',
-  enabled: false,
-  packageName: '',
   serviceAccountJson: '',
-  rtdnAudience: '',
 })
 
 const metaInfo = reactive({
@@ -86,27 +62,10 @@ const metaInfo = reactive({
   updatedAt: '',
 })
 
-const validateOptionalUrl = (_: unknown, value: string, callback: (e?: Error) => void) => {
-  const url = value?.trim()
-  if (!url) {
-    callback()
-    return
-  }
-  if (!/^https?:\/\//i.test(url)) {
-    callback(new Error('URL 需以 http:// 或 https:// 开头'))
-    return
-  }
-  callback()
-}
-
 const validateServiceAccountJson = (_: unknown, value: string, callback: (e?: Error) => void) => {
-  if (!formData.enabled) {
-    callback()
-    return
-  }
   const json = value?.trim()
   if (!json) {
-    callback(new Error('启用时请填写服务账号 JSON'))
+    callback(new Error('请填写服务账号 JSON'))
     return
   }
   try {
@@ -119,46 +78,19 @@ const validateServiceAccountJson = (_: unknown, value: string, callback: (e?: Er
 }
 
 const formRules = reactive({
-  packageName: [
-    {max: 128, message: '包名最长 128 字符', trigger: 'blur'},
-    {
-      validator: (_: unknown, value: string, callback: (e?: Error) => void) => {
-        if (!formData.enabled) {
-          callback()
-          return
-        }
-        if (!value?.trim()) {
-          callback(new Error('启用时请填写包名'))
-          return
-        }
-        callback()
-      },
-      trigger: 'blur',
-    },
-  ],
   serviceAccountJson: [{validator: validateServiceAccountJson, trigger: 'blur'}],
-  rtdnAudience: [
-    {max: 512, message: '长度不能超过 512', trigger: 'blur'},
-    {validator: validateOptionalUrl, trigger: 'blur'},
-  ],
 })
 
 const applyCfg = (cfg: GooglePlayCfg | null | undefined) => {
   if (!cfg) {
     formData.id = '0'
-    formData.enabled = false
-    formData.packageName = ''
     formData.serviceAccountJson = ''
-    formData.rtdnAudience = ''
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
     return
   }
   formData.id = cfg.id || '0'
-  formData.enabled = !!cfg.enabled
-  formData.packageName = cfg.packageName || ''
   formData.serviceAccountJson = cfg.serviceAccountJson || ''
-  formData.rtdnAudience = cfg.rtdnAudience || ''
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
 }
@@ -182,10 +114,8 @@ const handleSave = async () => {
     loading.value = true
     const response = await googlePlayApi.saveGooglePlayCfg({
       id: formData.id === '0' ? 0 : Number(formData.id),
-      enabled: formData.enabled,
-      packageName: formData.packageName.trim(),
+      enabled: true,
       serviceAccountJson: formData.serviceAccountJson.trim(),
-      rtdnAudience: formData.rtdnAudience.trim(),
     })
     if (response?.success) {
       ElMessage.success('保存成功')

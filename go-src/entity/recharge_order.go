@@ -38,6 +38,7 @@ const (
 	RechargeOrderRemark       db.TbCol = "remark"
 	RechargeOrderOperatorId   db.TbCol = "operator_id"
 	RechargeOrderPaidAt       db.TbCol = "paid_at"
+	RechargeOrderPackageName  db.TbCol = "package_name"
 )
 
 // RechargeOrder 充值订单
@@ -55,6 +56,7 @@ type RechargeOrder struct {
 	ThirdOrderId string    `gorm:"size:64;default:'';comment:第三方订单号" json:"thirdOrderId"`
 	Remark       string    `gorm:"size:255;default:'';comment:备注" json:"remark"`
 	OperatorId   uint64    `gorm:"default:0;comment:后台操作员ID(手动充值时记录)" json:"operatorId"`
+	PackageName  string    `gorm:"size:128;default:'';comment:发起充值App包名" json:"packageName"`
 	PaidAt       time.Time `gorm:"comment:完成支付时间" json:"paidAt"`
 }
 
@@ -130,6 +132,11 @@ func (r *RechargeOrder) SetOperatorId(v uint64) {
 	syndb.AddDataToQuickChan(TbRechargeOrder, RechargeOrderOperatorId, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
+func (r *RechargeOrder) SetPackageName(v string) {
+	r.PackageName = v
+	syndb.AddDataToQuickChan(TbRechargeOrder, RechargeOrderPackageName, &syndb.ColData{IdVal: r.ID, ColVal: v})
+}
+
 func (r *RechargeOrder) SetPaidAt(v time.Time) {
 	r.PaidAt = v
 	syndb.AddDataToQuickChan(TbRechargeOrder, RechargeOrderPaidAt, &syndb.ColData{IdVal: r.ID, ColVal: v})
@@ -160,6 +167,7 @@ func initRechargeOrder() {
 	syndb.RegQuick(TbRechargeOrder, RechargeOrderThirdOrderId)
 	syndb.RegQuick(TbRechargeOrder, RechargeOrderRemark)
 	syndb.RegQuick(TbRechargeOrder, RechargeOrderOperatorId)
+	syndb.RegQuick(TbRechargeOrder, RechargeOrderPackageName)
 	syndb.RegQuick(TbRechargeOrder, RechargeOrderPaidAt)
 
 	migrate.AutoMigrate(&RechargeOrder{})

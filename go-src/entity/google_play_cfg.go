@@ -15,7 +15,6 @@ type GooglePlayCfg struct {
 	Enabled            bool   `gorm:"default:0;comment:是否启用" json:"enabled"`
 	PackageName        string `gorm:"size:128;default:'';comment:Android包名" json:"packageName"`
 	ServiceAccountJson string `gorm:"type:text;comment:Google服务账号JSON" json:"serviceAccountJson"`
-	RtdnAudience       string `gorm:"size:512;default:'';comment:Pub/Sub Push JWT aud" json:"rtdnAudience"`
 }
 
 func initGooglePlayCfg() {

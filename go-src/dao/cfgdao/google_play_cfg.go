@@ -73,5 +73,5 @@ func GooglePlayEnabled() bool {
 	if row == nil || !row.Enabled {
 		return false
 	}
-	return strings.TrimSpace(row.PackageName) != "" && strings.TrimSpace(row.ServiceAccountJson) != ""
+	return strings.TrimSpace(row.ServiceAccountJson) != ""
 }

@@ -174,8 +174,15 @@
           <el-input-number v-model="currentRow.price" :min="0.0001" :precision="NUMBER_INPUT_DECIMALS" :step="0.01" controls-position="right"/>
           <div class="form-tip">充值货币固定，支持4位小数</div>
         </el-form-item>
-        <el-form-item label="商品SKU" prop="productId">
-          <el-input v-model="currentRow.productId" placeholder="第三方商品SKU(可选)"/>
+        <el-form-item
+            :required="isStoreSkuRequired(currentRow.cfgType)"
+            label="商品SKU"
+            prop="productId"
+        >
+          <el-input
+              v-model="currentRow.productId"
+              :placeholder="isStoreSkuRequired(currentRow.cfgType) ? '请填写 App Store / Google Play 商品 SKU' : '渠道类型可选填'"
+          />
         </el-form-item>
         <el-form-item label="排序" prop="sort">
           <el-input-number v-model="currentRow.sort" controls-position="right"/>
@@ -230,6 +237,8 @@ const cfgTypeOptions = [
 const cfgTypeLabel = (cfgType: number) => {
   return cfgTypeOptions.find((item) => item.value === cfgType)?.label ?? '未知'
 }
+
+const isStoreSkuRequired = (cfgType: number) => cfgType === 1 || cfgType === 2
 
 const loading = ref(false)
 const tableData = ref<RechargeCfg[]>([])
@@ -297,6 +306,10 @@ watch(dialogVisible, (visible) => {
   }
 })
 
+watch(() => currentRow.value.cfgType, () => {
+  formRef.value?.validateField('productId').catch(() => undefined)
+})
+
 const beforeIconUpload = (file: File): boolean => {
   if (!file.type.startsWith('image/')) {
     ElMessage.error('只能上传图片文件')
@@ -333,7 +346,26 @@ const formRules: FormRules = {
   cfgType: [{required: true, message: '请选择类型', trigger: 'change'}],
   gold: [{required: true, message: '请输入基础金币数', trigger: 'change'}],
   price: [{required: true, message: '请输入价格', trigger: 'change'}],
-  productId: [{max: 64, message: '商品SKU最长64字符', trigger: 'blur'}],
+  productId: [
+    {
+      validator: (_rule, value, callback) => {
+        if (!isStoreSkuRequired(currentRow.value.cfgType)) {
+          callback()
+          return
+        }
+        if (!String(value ?? '').trim()) {
+          callback(new Error('iOS/Google 类型必须填写商品 SKU'))
+          return
+        }
+        if (String(value).length > 64) {
+          callback(new Error('商品SKU最长64字符'))
+          return
+        }
+        callback()
+      },
+      trigger: 'blur'
+    }
+  ],
   description: [{max: 255, message: '描述最长255字符', trigger: 'blur'}]
 }
 

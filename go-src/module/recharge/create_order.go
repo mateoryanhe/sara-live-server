@@ -3,6 +3,7 @@ package recharge
 import (
 	"context"
 	"strconv"
+	"strings"
 	"xr-game-server/core/event"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/rechargeorderdao"
@@ -17,6 +18,10 @@ import (
 // 订单初始状态=待支付;不立即发金币,等支付回调或后台手动完成
 func CreateOrder(ctx context.Context, req *rechargeorderdto.AppCreateRechargeOrderReq) (*rechargeorderdto.AppCreateRechargeOrderRes, error) {
 	userId := httpserver.GetAuthId(ctx)
+	packageName := strings.TrimSpace(httpserver.GetPackageNameFromContext(ctx))
+	if packageName == "" {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 	var order *entity.RechargeOrder
 	//充值金额来自配置
 	if req.CfgId > 0 {
@@ -26,10 +31,6 @@ func CreateOrder(ctx context.Context, req *rechargeorderdto.AppCreateRechargeOrd
 		}
 		if cfg.Status != entity.RechargeCfgStatusOnShelf {
 			return nil, errercode.CreateCode(errercode.RechargeCfgOffShelf)
-		}
-		packageName := httpserver.GetPackageNameFromContext(ctx)
-		if packageName == "" || cfg.PackageName != packageName {
-			return nil, errercode.CreateCode(errercode.RechargeCfgNonExist)
 		}
 		if cfg.Price == 0 {
 			return nil, errercode.CreateCode(errercode.RechargeAmountInvalid)
@@ -54,6 +55,7 @@ func CreateOrder(ctx context.Context, req *rechargeorderdto.AppCreateRechargeOrd
 		order.SetGold(req.Amount * 100)
 	}
 
+	order.SetPackageName(packageName)
 	rechargeorderdao.AddOrderToCache(order)
 
 	event.Pub(gameevent.RechargeOrderCreatedEvent, gameevent.NewRechargeOrderCreatedEventData(order.ID))

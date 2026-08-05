@@ -27,13 +27,8 @@ func GetGooglePlayCfg(_ context.Context, _ *googleplaydto.GetGooglePlayCfgReq) (
 }
 
 func SaveGooglePlayCfg(_ context.Context, req *googleplaydto.SaveGooglePlayCfgReq) (*googleplaydto.SaveGooglePlayCfgRes, error) {
-	packageName := strings.TrimSpace(req.PackageName)
 	serviceAccountJson := strings.TrimSpace(req.ServiceAccountJson)
-	rtdnAudience := strings.TrimSpace(req.RtdnAudience)
 	if req.Enabled {
-		if packageName == "" {
-			return nil, errercode.CreateCode(errercode.InvalidParam)
-		}
 		if serviceAccountJson == "" {
 			return nil, errercode.CreateCode(errercode.InvalidParam)
 		}
@@ -41,16 +36,11 @@ func SaveGooglePlayCfg(_ context.Context, req *googleplaydto.SaveGooglePlayCfgRe
 			return nil, errercode.CreateCode(errercode.InvalidParam)
 		}
 	}
-	if err := validateOptionalURL(rtdnAudience); err != nil {
-		return nil, err
-	}
 
 	existing := cfgdao.GetGooglePlayCfgFromMemory()
 	row := &entity.GooglePlayCfg{
 		Enabled:            req.Enabled,
-		PackageName:        packageName,
 		ServiceAccountJson: serviceAccountJson,
-		RtdnAudience:       rtdnAudience,
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -77,16 +67,6 @@ func SaveGooglePlayCfg(_ context.Context, req *googleplaydto.SaveGooglePlayCfgRe
 	}, nil
 }
 
-func validateOptionalURL(url string) error {
-	if url == "" {
-		return nil
-	}
-	if strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://") {
-		return nil
-	}
-	return errercode.CreateCode(errercode.InvalidParam)
-}
-
 func toGooglePlayCfgItem(cfg *entity.GooglePlayCfg) *googleplaydto.GooglePlayCfgItem {
 	if cfg == nil {
 		return nil
@@ -96,7 +76,6 @@ func toGooglePlayCfgItem(cfg *entity.GooglePlayCfg) *googleplaydto.GooglePlayCfg
 		Enabled:            cfg.Enabled,
 		PackageName:        cfg.PackageName,
 		ServiceAccountJson: cfg.ServiceAccountJson,
-		RtdnAudience:       cfg.RtdnAudience,
 		CreatedAt:          formatGooglePlayCfgTime(cfg.CreatedAt),
 		UpdatedAt:          formatGooglePlayCfgTime(cfg.UpdatedAt),
 	}

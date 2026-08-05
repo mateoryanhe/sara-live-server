@@ -930,7 +930,6 @@ export interface GooglePlayCfg {
     enabled: boolean
     packageName: string
     serviceAccountJson: string
-    rtdnAudience: string
     createdAt: string
     updatedAt: string
 }
@@ -942,9 +941,7 @@ export interface GetGooglePlayCfgRes {
 export interface SaveGooglePlayCfgReq {
     id?: number
     enabled: boolean
-    packageName: string
     serviceAccountJson: string
-    rtdnAudience: string
 }
 
 export interface SaveGooglePlayCfgRes {
