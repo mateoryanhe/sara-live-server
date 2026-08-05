@@ -1,7 +1,10 @@
 package recharge
 
 import (
+	"fmt"
 	"time"
+
+	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/constants/currency"
 	"xr-game-server/core/event"
 	"xr-game-server/dao/rechargeorderdao"
@@ -11,28 +14,47 @@ import (
 	"xr-game-server/module/wallet"
 )
 
+func rechargeOrderLockKey(orderId uint64) string {
+	return fmt.Sprintf("recharge_order_%d", orderId)
+}
+
+func rechargeThirdOrderLockKey(thirdOrderId string) string {
+	return fmt.Sprintf("recharge_third_%s", thirdOrderId)
+}
+
 // completeOrder 内部统一的"订单完成 → 发放金币"逻辑
 // 幂等:已经是已完成状态的订单不会重复发放
 // 返回(发放后玩家金币余额, 错误)
 func completeOrder(o *entity.RechargeOrder, reason currency.Reason) (float64, error) {
-	if o.Status == entity.RechargeOrderStatusCompleted {
+	if o == nil || o.ID == 0 {
+		return 0, errercode.CreateCode(errercode.RechargeOrderNonExist)
+	}
+	lockKey := rechargeOrderLockKey(o.ID)
+	gmlock.Lock(lockKey)
+	defer gmlock.Unlock(lockKey)
+
+	order := rechargeorderdao.GetById(o.ID)
+	if order == nil {
+		return 0, errercode.CreateCode(errercode.RechargeOrderNonExist)
+	}
+	if order.Status == entity.RechargeOrderStatusCompleted {
 		return 0, errercode.CreateCode(errercode.RechargeOrderStateInvalid)
 	}
-	if o.Gold <= 0 {
+	if order.Gold <= 0 {
 		return 0, errercode.CreateCode(errercode.RechargeGoldInvalid)
 	}
-	after, err := wallet.GoldAdd(o.UserId, o.Gold, reason)
+	after, err := wallet.GoldAdd(order.UserId, order.Gold, reason)
 	if err != nil {
 		return 0, err
 	}
 	paidAt := time.Now()
-	o.SetStatus(entity.RechargeOrderStatusCompleted)
-	o.SetPaidAt(paidAt)
-	o.SetUpdatedAt(paidAt)
+	order.SetStatus(entity.RechargeOrderStatusCompleted)
+	order.SetPaidAt(paidAt)
+	order.SetUpdatedAt(paidAt)
 
-	CancelRechargeOrderTimeout(o.ID)
-	event.Pub(gameevent.RechargeArrivedEvent, o)
-	rechargeorderdao.FlushOrderCache(o)
+	CancelRechargeOrderTimeout(order.ID)
+	event.Pub(gameevent.RechargeArrivedEvent, order)
+	rechargeorderdao.FlushOrderCache(order)
 	return after, nil
 }
 

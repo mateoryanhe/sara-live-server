@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"github.com/gogf/gf/v2/os/gmlock"
 	"github.com/gogf/gf/v2/os/gtimer"
 	"xr-game-server/core/xrtimer"
 	"xr-game-server/dao/rechargeorderdao"
@@ -26,7 +26,7 @@ func restorePendingRechargeOrderTimeouts() {
 	if len(orders) == 0 {
 		return
 	}
-	ctx := gctx.New()
+	//ctx := gctx.New()
 	for _, order := range orders {
 		if order == nil || order.ID == 0 {
 			continue
@@ -34,7 +34,7 @@ func restorePendingRechargeOrderTimeouts() {
 		rechargeorderdao.AddOrderToCache(order)
 		ScheduleRechargeOrderTimeout(order.ID, order.CreatedAt)
 	}
-	g.Log().Infof(ctx, "restore recharge order timeout watch count=%d", len(orders))
+	//g.Log().Infof(ctx, "restore recharge order timeout watch count=%d", len(orders))
 }
 
 // ScheduleRechargeOrderTimeout 将待支付订单加入超时检查队列
@@ -70,6 +70,10 @@ func CancelRechargeOrderTimeout(orderId uint64) {
 func cancelRechargeOrderOnTimeout(ctx context.Context, orderId uint64) {
 	rechargeOrderTimeoutEntries.Delete(orderId)
 
+	lockKey := rechargeOrderLockKey(orderId)
+	gmlock.Lock(lockKey)
+	defer gmlock.Unlock(lockKey)
+
 	order := rechargeorderdao.GetById(orderId)
 	if order == nil || order.Status != entity.RechargeOrderStatusPending {
 		return
@@ -78,5 +82,5 @@ func cancelRechargeOrderOnTimeout(ctx context.Context, orderId uint64) {
 	order.SetStatus(entity.RechargeOrderStatusCancelled)
 	order.SetUpdatedAt(now)
 	rechargeorderdao.FlushOrderCache(order)
-	g.Log().Infof(ctx, "recharge order pay timeout cancelled orderId=%d userId=%d", orderId, order.UserId)
+	//g.Log().Infof(ctx, "recharge order pay timeout cancelled orderId=%d userId=%d", orderId, order.UserId)
 }

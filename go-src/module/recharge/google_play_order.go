@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gogf/gf/v2/os/gctx"
+	"github.com/gogf/gf/v2/os/gmlock"
 	"google.golang.org/api/androidpublisher/v3"
 	"xr-game-server/constants/currency"
 	"xr-game-server/core/xrpool"
@@ -26,6 +27,9 @@ func CompleteGooglePlayOrder(orderId uint64, googleOrderId string) error {
 	if orderId == 0 || googleOrderId == "" {
 		return errercode.CreateCode(errercode.InvalidParam)
 	}
+	gmlock.Lock(rechargeThirdOrderLockKey(googleOrderId))
+	defer gmlock.Unlock(rechargeThirdOrderLockKey(googleOrderId))
+
 	if existing := rechargeorderdao.GetByThirdOrderId(googleOrderId); existing != nil {
 		if existing.ID == orderId && existing.Status == entity.RechargeOrderStatusCompleted {
 			return nil
