@@ -4,6 +4,5 @@ package recharge
 func Init() {
 	loadRechargeCfgCache()
 	initGooglePlayCfg()
-	initGooglePay()
 	initRechargeOrderTimeoutWatch()
 }

@@ -38,6 +38,7 @@ func Init() {
 	initAliyunTextModerationCMSController() // 阿里云文本审核(CMS)
 	initPrivacyPolicyCMSController()        // 隐私政策配置(CMS)
 	initGooglePlayCMSController()           // Google Play 配置(CMS)
+	initGooglePlayWebhookController()       // Google Play RTDN Webhook
 	initCustomerServiceCMSController()      // 客服联系配置(CMS)
 	initCustomerServiceAppController()      // 客服联系配置(App)
 	initAccountCfgCMSController()           // 账号配置(CMS)
@@ -69,6 +70,7 @@ func Init() {
 	initGameCfgController()                 // 游戏配置(CMS)
 	initGameAppController()                 // 游戏列表(App)
 	initGamePlatformCMSController()         // 游戏平台接入配置(CMS)
+	initGameVendorCallbackController()      // 游戏第三方回调(verify/balance)
 	initVipCfgAppController()               // VIP配置查询(App)
 	initVipAppController()                  // VIP详情(App)
 	initMessageAppController()              // 私信(App)
