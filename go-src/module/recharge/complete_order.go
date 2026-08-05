@@ -30,6 +30,7 @@ func completeOrder(o *entity.RechargeOrder, reason currency.Reason) (float64, er
 	o.SetPaidAt(paidAt)
 	o.SetUpdatedAt(paidAt)
 
+	CancelRechargeOrderTimeout(o.ID)
 	event.Pub(gameevent.RechargeArrivedEvent, o)
 	rechargeorderdao.FlushOrderCache(o)
 	return after, nil

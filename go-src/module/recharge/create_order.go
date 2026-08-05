@@ -57,6 +57,7 @@ func CreateOrder(ctx context.Context, req *rechargeorderdto.AppCreateRechargeOrd
 
 	order.SetPackageName(packageName)
 	rechargeorderdao.AddOrderToCache(order)
+	ScheduleRechargeOrderTimeout(order.ID, order.CreatedAt)
 
 	event.Pub(gameevent.RechargeOrderCreatedEvent, gameevent.NewRechargeOrderCreatedEventData(order.ID))
 
@@ -90,6 +91,7 @@ func CMSCreateOrder(ctx context.Context, req *rechargeorderdto.CMSCreateRecharge
 	}
 
 	rechargeorderdao.AddOrderToCache(order)
+	ScheduleRechargeOrderTimeout(order.ID, order.CreatedAt)
 	event.Pub(gameevent.RechargeOrderCreatedEvent, gameevent.NewRechargeOrderCreatedEventData(order.ID))
 
 	return &rechargeorderdto.CMSCreateRechargeOrderRes{

@@ -185,3 +185,17 @@ func CMSList(f *CMSListFilter) (int, []*entity.RechargeOrder) {
 	}
 	return total, list
 }
+
+// LoadPendingOrders 启动时加载待支付充值订单
+func LoadPendingOrders() []*entity.RechargeOrder {
+	ctx := gctx.New()
+	orders := make([]*entity.RechargeOrder, 0)
+	err := g.Model(string(entity.TbRechargeOrder)).Ctx(ctx).
+		Where(string(entity.RechargeOrderStatus)+" = ?", entity.RechargeOrderStatusPending).
+		Scan(&orders)
+	if err != nil {
+		g.Log().Errorf(ctx, "load pending recharge orders failed: %v", err)
+		return nil
+	}
+	return orders
+}

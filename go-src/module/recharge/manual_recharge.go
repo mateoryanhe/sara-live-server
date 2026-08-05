@@ -31,6 +31,7 @@ func ManualRecharge(ctx context.Context, req *rechargeorderdto.CMSManualRecharge
 		// 发放失败,标记订单为已取消,避免遗留"待支付"脏数据
 		order.SetStatus(entity.RechargeOrderStatusCancelled)
 		order.SetUpdatedAt(time.Now())
+		CancelRechargeOrderTimeout(order.ID)
 		rechargeorderdao.FlushOrderCache(order)
 		return nil, err
 	}
