@@ -10,8 +10,8 @@ server:
       path: "/home/ec2-user/cdn/images"
     - prefix: "/official-site"
       path: "/home/ec2-user/cdn/official-site"
-  httpsCertPath: "/root/.acme.sh/www.bigtktool.shop_ecc/fullchain.pem"
-  httpsKeyPath: "/root/.acme.sh/www.bigtktool.shop_ecc/privkey.pem"
+  httpsCertPath: "/home/ec2-user/www.bigtktool.shop_ecc/fullchain.pem"
+  httpsKeyPath: "/home/ec2-user/www.bigtktool.shop_ecc/privkey.pem"
   clientMaxBodySize: "5g"   # HTTP 请求体/上传上限(唯一大小限制,Go业务层不再校验)
   readTimeout: "120m"
   writeTimeout: "120m"
@@ -77,7 +77,7 @@ database:
     stdout: false
     queryOnly: true   # 仅记录 SELECT/UPDATE/DELETE,不记录 INSERT/SHOW
   default:
-    link: "mysql:root:Appledev882116@tcp(127.0.0.1:3306)/live_db"
+    link: "mysql:root:Appledev882116@tcp(127.0.0.1:13307)/live_db"
     extra: "charset=utf8mb4&parseTime=True&loc=Local"
     maxIdle: 2
     maxOpen: 8

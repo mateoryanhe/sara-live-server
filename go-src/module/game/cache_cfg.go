@@ -5,7 +5,7 @@ import (
 	"xr-game-server/entity"
 )
 
-// GetAllGameCfgFromCache 获取全部游戏配置(供其它模块使用)
+// GetAllGameCfgFromCache 获取全部上架游戏配置(供其它模块使用).
 func GetAllGameCfgFromCache() []*entity.GameCfg {
-	return cfgdao.GetAllGameCfgCached()
+	return cfgdao.GetAllGameCfgFromMemory()
 }

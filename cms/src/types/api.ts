@@ -971,6 +971,7 @@ export interface VendorGameQuery extends PageQuery {
     name?: string
     platform?: string
     category?: string
+    refreshFromVendor?: boolean
 }
 
 export interface BatchAddGameShelfReq {

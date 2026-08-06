@@ -14,6 +14,7 @@ type CreateLiveRoomReq struct {
 	Notice            string            `json:"notice" dc:"公告"`
 	Category          uint8             `json:"category"  dc:"分类(1=hot,2=game,3=私密,默认1)"`
 	TagId             uint64            `json:"tagId,string"  dc:"直播间标签ID"`
+	GameCodes         []string          `json:"gameCodes" p:"gameCodes" dc:"推荐游戏编码列表(仅游戏直播间category=2时有效)"`
 	Ticket            float64           `json:"ticket" dc:"门票价格(钻石)"`
 	Billing           float64           `json:"billing" dc:"计费价格(每分钟钻石)"`
 	PrivateInviteType uint8             `json:"privateInviteType" v:"in:0,1,2,3#私密邀请类型不合法" dc:"私密邀请类型(1=接受所有人,2=仅VIP,3=拒绝所有人,0或不传时category=1默认3其他默认1)"`

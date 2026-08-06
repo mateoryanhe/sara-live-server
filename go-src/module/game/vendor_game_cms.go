@@ -14,10 +14,12 @@ const (
 	cmsVendorGameMaxPageSize     = 100
 )
 
-// GetVendorGameList CMS 分页查询第三方游戏列表(读 30 分钟浏览缓存，未命中时自动拉取).
+// GetVendorGameList CMS 分页查询第三方游戏(搜索时可全量拉取并覆盖 30 分钟浏览缓存).
 func GetVendorGameList(ctx context.Context, req *gameplatformdto.VendorGameListReq) (*httpserver.CMSQueryResp, error) {
-	if err := EnsureVendorBrowseCache(ctx); err != nil {
-		return nil, err
+	if req != nil && req.RefreshFromVendor {
+		if err := ForceRefreshVendorBrowseCache(ctx); err != nil {
+			return nil, err
+		}
 	}
 	all := filterVendorGames(GetAllVendorBrowseGamesFromMemory(), req)
 	total := len(all)
@@ -25,7 +27,7 @@ func GetVendorGameList(ctx context.Context, req *gameplatformdto.VendorGameListR
 	start, end := cmsVendorGamePageRange(total, pageIndex, pageSize)
 
 	list := make([]*gameplatformdto.VendorGameListItem, 0, end-start)
-	shelfSet := cfgdao.GetGameShelfCodeSetFromMemory()
+	shelfSet := cfgdao.GetGameCfgCodeSetFromMemory()
 	for _, row := range all[start:end] {
 		if row == nil {
 			continue
@@ -35,9 +37,11 @@ func GetVendorGameList(ctx context.Context, req *gameplatformdto.VendorGameListR
 	return httpserver.NewCMSQueryResp(total, list), nil
 }
 
-// ReloadVendorGameCacheCMS 从第三方重新拉取游戏列表到浏览缓存(30 分钟有效).
-func ReloadVendorGameCacheCMS(_ context.Context, _ *gameplatformdto.ReloadVendorGameCacheReq) (*gameplatformdto.ReloadVendorGameCacheRes, error) {
-	syncVendorBrowseCache(false)
+// ReloadVendorGameCacheCMS 从第三方重新拉取游戏列表到浏览缓存.
+func ReloadVendorGameCacheCMS(ctx context.Context, _ *gameplatformdto.ReloadVendorGameCacheReq) (*gameplatformdto.ReloadVendorGameCacheRes, error) {
+	if err := ForceRefreshVendorBrowseCache(ctx); err != nil {
+		return nil, err
+	}
 	return &gameplatformdto.ReloadVendorGameCacheRes{
 		Success: true,
 		Count:   len(GetAllVendorBrowseGamesFromMemory()),

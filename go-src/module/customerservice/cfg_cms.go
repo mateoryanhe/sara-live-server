@@ -24,15 +24,6 @@ func SaveCustomerServiceCfg(_ context.Context, req *customerservicedto.SaveCusto
 	telegramUrl := strings.TrimSpace(req.TelegramUrl)
 	facebookUrl := strings.TrimSpace(req.FacebookUrl)
 	whatsappUrl := strings.TrimSpace(req.WhatsappUrl)
-	if err := validateContactUrl(telegramUrl); err != nil {
-		return nil, err
-	}
-	if err := validateContactUrl(facebookUrl); err != nil {
-		return nil, err
-	}
-	if err := validateContactUrl(whatsappUrl); err != nil {
-		return nil, err
-	}
 
 	existing := cfgdao.GetCustomerServiceCfgCached()
 	row := &entity.CustomerServiceCfg{
@@ -62,16 +53,6 @@ func SaveCustomerServiceCfg(_ context.Context, req *customerservicedto.SaveCusto
 		Success: true,
 		ID:      strconv.FormatUint(row.ID, 10),
 	}, nil
-}
-
-func validateContactUrl(url string) error {
-	if url == "" {
-		return nil
-	}
-	if strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://") {
-		return nil
-	}
-	return errercode.CreateCode(errercode.InvalidParam)
 }
 
 func toCfgItem(cfg *entity.CustomerServiceCfg) *customerservicedto.CustomerServiceCfgItem {

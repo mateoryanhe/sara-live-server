@@ -21,7 +21,6 @@
             >
               批量下架
             </el-button>
-            <el-button :loading="reloadLoading" type="primary" @click="handleReload">从第三方重新拉取</el-button>
           </div>
         </div>
       </template>
@@ -33,8 +32,8 @@
           title="说明"
           type="info"
       >
-        <p>第三方全量列表缓存 30 分钟，过期后自动重新拉取；已上架游戏单独永久缓存，App 端只展示上架游戏。</p>
-        <p>勾选游戏后可批量上架/下架；表格右侧「操作」列可单条上架/下架。已上架的游戏会在 App 端展示。</p>
+        <p>点击「搜索」从第三方全量拉取游戏列表(缓存 30 分钟,每次搜索都会重新拉取覆盖)。已上架游戏写入 game_cfgs 并永久缓存,App 端只展示上架游戏。</p>
+        <p>勾选游戏后可批量上架/下架；表格右侧「操作」列可单条上架/下架。</p>
       </el-alert>
 
       <div v-if="selectedRows.length" class="selection-tip">已选 {{ selectedRows.length }} 项</div>
@@ -127,7 +126,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, reactive, ref} from 'vue'
+import {computed, reactive, ref} from 'vue'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {gamePlatformApi} from '@/api/modules/gamePlatform'
 import type {VendorGame} from '@/types/api'
@@ -140,7 +139,6 @@ interface SearchForm {
 }
 
 const loading = ref(false)
-const reloadLoading = ref(false)
 const shelfOperating = ref(false)
 const tableData = ref<VendorGame[]>([])
 const selectedRows = ref<VendorGame[]>([])
@@ -158,7 +156,7 @@ const searchForm = reactive<SearchForm>({
 const canBatchOnShelf = computed(() => selectedRows.value.some(row => !row.onShelf))
 const canBatchOffShelf = computed(() => selectedRows.value.some(row => row.onShelf))
 
-const fetchList = async () => {
+const fetchList = async (refreshFromVendor = false) => {
   loading.value = true
   try {
     const response = await gamePlatformApi.getVendorGameList({
@@ -168,6 +166,7 @@ const fetchList = async () => {
       category: searchForm.category,
       pageIndex: currentPage.value,
       pageSize: pageSize.value,
+      refreshFromVendor,
     })
     tableData.value = response.data || []
     total.value = response.total || 0
@@ -185,7 +184,7 @@ const handleSelectionChange = (rows: VendorGame[]) => {
 
 const handleSearch = () => {
   currentPage.value = 1
-  fetchList()
+  fetchList(true)
 }
 
 const resetSearch = () => {
@@ -194,7 +193,7 @@ const resetSearch = () => {
   searchForm.platform = ''
   searchForm.category = ''
   currentPage.value = 1
-  fetchList()
+  fetchList(true)
 }
 
 const handleSizeChange = (size: number) => {
@@ -205,25 +204,6 @@ const handleSizeChange = (size: number) => {
 const handleCurrentChange = (page: number) => {
   currentPage.value = page
   fetchList()
-}
-
-const handleReload = async () => {
-  reloadLoading.value = true
-  try {
-    const response = await gamePlatformApi.reloadVendorGameCache()
-    if (response?.success) {
-      ElMessage.success(`拉取成功，共 ${response.count} 条`)
-      currentPage.value = 1
-      await fetchList()
-    } else {
-      ElMessage.error('拉取失败')
-    }
-  } catch (error) {
-    console.error('重新拉取游戏列表失败:', error)
-    ElMessage.error('重新拉取失败')
-  } finally {
-    reloadLoading.value = false
-  }
 }
 
 const handleOnShelf = async (row: VendorGame) => {
@@ -326,10 +306,6 @@ const handleBatchOffShelf = async () => {
     shelfOperating.value = false
   }
 }
-
-onMounted(() => {
-  fetchList()
-})
 </script>
 
 <style scoped>

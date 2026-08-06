@@ -1,0 +1,21 @@
+services:
+  mariadb:
+    image: mariadb:11.4
+    container_name: sara-live-mariadb
+    restart: unless-stopped
+    ports:
+      - "3390:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: Appledev882116
+      MARIADB_DATABASE: live_db
+      TZ: Asia/Shanghai
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d:ro
+      - ./conf.d:/etc/mysql/mariadb.conf.d:ro
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+
+volumes:
+  mariadb_data:

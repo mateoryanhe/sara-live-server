@@ -13,14 +13,9 @@ import (
 	"xr-game-server/errercode"
 )
 
-func initGameShelfCfg() {
-	cfgdao.InitGameShelfCfgDao()
-	cfgdao.ReloadGameShelfCfgCache()
-}
-
 // GetGameShelfList CMS 分页查询上架游戏(读内存).
 func GetGameShelfList(_ context.Context, req *gameplatformdto.GameShelfListReq) (*httpserver.CMSQueryResp, error) {
-	all := filterGameShelfList(cfgdao.GetAllGameShelfCfgFromMemory(), req)
+	all := filterGameShelfList(cfgdao.GetAllGameCfgFromMemory(), req)
 	total := len(all)
 	pageIndex, pageSize := normalizeCMSGameShelfPage(req.PageIndex, req.PageSize)
 	start, end := cmsGameShelfPageRange(total, pageIndex, pageSize)
@@ -35,7 +30,7 @@ func GetGameShelfList(_ context.Context, req *gameplatformdto.GameShelfListReq) 
 	return httpserver.NewCMSQueryResp(total, list), nil
 }
 
-// AddGameShelf CMS 添加上架游戏(写库并刷新内存).
+// AddGameShelf CMS 上架游戏: 写 game_cfgs 并刷新永久缓存.
 func AddGameShelf(ctx context.Context, req *gameplatformdto.AddGameShelfReq) (*gameplatformdto.AddGameShelfRes, error) {
 	gameCode := strings.TrimSpace(req.GameCode)
 	if gameCode == "" {
@@ -45,66 +40,60 @@ func AddGameShelf(ctx context.Context, req *gameplatformdto.AddGameShelfReq) (*g
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 
-	game, err := EnsureVendorGameForShelf(ctx, gameCode)
+	vendorGame, err := EnsureVendorGameForShelf(ctx, gameCode)
 	if err != nil {
 		return nil, err
 	}
 
 	now := time.Now()
-	row := &entity.GameShelfCfg{
+	row := &entity.GameCfg{
 		GameCode: gameCode,
+		Cover:    strings.TrimSpace(vendorGame.Cover),
+		NameEn:   strings.TrimSpace(vendorGame.NameEn),
 	}
 	row.CreatedAt = now
 	row.UpdatedAt = now
-	if err := cfgdao.CreateGameShelfCfg(row); err != nil {
+	if err := cfgdao.CreateGameCfg(row); err != nil {
 		return nil, err
 	}
-	cfgdao.ReloadGameShelfCfgCache()
-	AddOnShelfVendorGame(game)
+	cfgdao.ReloadGameCfgCache()
 	return &gameplatformdto.AddGameShelfRes{
 		Success: true,
 		ID:      strconv.FormatUint(row.ID, 10),
 	}, nil
 }
 
-// DeleteGameShelf CMS 删除上架游戏(写库并刷新内存).
+// DeleteGameShelf CMS 下架游戏: 删 game_cfgs 并刷新永久缓存.
 func DeleteGameShelf(_ context.Context, req *gameplatformdto.DeleteGameShelfReq) (*gameplatformdto.DeleteGameShelfRes, error) {
 	if req == nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	gameCode := strings.TrimSpace(req.GameCode)
 	if gameCode != "" {
-		if err := cfgdao.DeleteGameShelfCfgByGameCode(gameCode); err != nil {
+		if err := cfgdao.DeleteGameCfgByGameCode(gameCode); err != nil {
 			return nil, err
 		}
-		cfgdao.ReloadGameShelfCfgCache()
-		RemoveOnShelfVendorGame(gameCode)
+		cfgdao.ReloadGameCfgCache()
 		return &gameplatformdto.DeleteGameShelfRes{Success: true}, nil
 	}
 	if req.ID == 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	shelfRow := findGameShelfCfgByID(req.ID)
+	shelfRow := findGameCfgByID(req.ID)
 	if shelfRow != nil && shelfRow.GameCode != "" {
 		gameCode = shelfRow.GameCode
 	}
-	if err := cfgdao.DeleteGameShelfCfg(req.ID); err != nil {
+	if err := cfgdao.DeleteGameCfg(req.ID); err != nil {
 		return nil, err
 	}
-	cfgdao.ReloadGameShelfCfgCache()
-	if gameCode != "" {
-		RemoveOnShelfVendorGame(gameCode)
-	}
+	cfgdao.ReloadGameCfgCache()
 	return &gameplatformdto.DeleteGameShelfRes{Success: true}, nil
 }
 
-// BatchAddGameShelf CMS 批量添加上架游戏(写库并刷新内存).
-func BatchAddGameShelf(ctx context.Context, req *gameplatformdto.BatchAddGameShelfReq) (*gameplatformdto.BatchAddGameShelfRes, error) {
+// BatchAddGameShelf CMS 批量上架(写 game_cfgs 并刷新永久缓存).
+func BatchAddGameShelf(_ context.Context, req *gameplatformdto.BatchAddGameShelfReq) (*gameplatformdto.BatchAddGameShelfRes, error) {
 	if req == nil || len(req.GameCodes) == 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
-	}
-	if err := EnsureVendorBrowseCache(ctx); err != nil {
-		return nil, err
 	}
 
 	successCount := 0
@@ -124,22 +113,25 @@ func BatchAddGameShelf(ctx context.Context, req *gameplatformdto.BatchAddGameShe
 			skipCount++
 			continue
 		}
-		game, ok := GetVendorGameFromBrowseCache(gameCode)
+		vendorGame, ok := GetVendorGameFromBrowseCache(gameCode)
 		if !ok {
 			skipCount++
 			continue
 		}
-		row := &entity.GameShelfCfg{GameCode: gameCode}
+		row := &entity.GameCfg{
+			GameCode: gameCode,
+			Cover:    strings.TrimSpace(vendorGame.Cover),
+			NameEn:   strings.TrimSpace(vendorGame.NameEn),
+		}
 		row.CreatedAt = now
 		row.UpdatedAt = now
-		if err := cfgdao.CreateGameShelfCfg(row); err != nil {
+		if err := cfgdao.CreateGameCfg(row); err != nil {
 			return nil, err
 		}
 		added[gameCode] = struct{}{}
-		AddOnShelfVendorGame(game)
 		successCount++
 	}
-	cfgdao.ReloadGameShelfCfgCache()
+	cfgdao.ReloadGameCfgCache()
 	return &gameplatformdto.BatchAddGameShelfRes{
 		Success:      true,
 		SuccessCount: successCount,
@@ -147,7 +139,7 @@ func BatchAddGameShelf(ctx context.Context, req *gameplatformdto.BatchAddGameShe
 	}, nil
 }
 
-// BatchDeleteGameShelf CMS 批量删除上架游戏(写库并刷新内存).
+// BatchDeleteGameShelf CMS 批量下架(删 game_cfgs 并刷新永久缓存).
 func BatchDeleteGameShelf(_ context.Context, req *gameplatformdto.BatchDeleteGameShelfReq) (*gameplatformdto.BatchDeleteGameShelfRes, error) {
 	if req == nil || len(req.GameCodes) == 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
@@ -159,25 +151,19 @@ func BatchDeleteGameShelf(_ context.Context, req *gameplatformdto.BatchDeleteGam
 			codes = append(codes, code)
 		}
 	}
-	count, err := cfgdao.DeleteGameShelfCfgByGameCodes(codes)
+	count, err := cfgdao.DeleteGameCfgByGameCodes(codes)
 	if err != nil {
 		return nil, err
 	}
-	cfgdao.ReloadGameShelfCfgCache()
-	RemoveOnShelfVendorGames(codes)
+	cfgdao.ReloadGameCfgCache()
 	return &gameplatformdto.BatchDeleteGameShelfRes{
 		Success:      true,
 		SuccessCount: count,
 	}, nil
 }
 
-// GetAllOnShelfVendorGamesFromMemory 获取已上架的第三方游戏(内存).
-func GetAllOnShelfVendorGamesFromMemory() []*VendorGame {
-	return GetAllVendorGamesFromMemory()
-}
-
-func findGameShelfCfgByID(id uint64) *entity.GameShelfCfg {
-	for _, row := range cfgdao.GetAllGameShelfCfgFromMemory() {
+func findGameCfgByID(id uint64) *entity.GameCfg {
+	for _, row := range cfgdao.GetAllGameCfgFromMemory() {
 		if row != nil && row.ID == id {
 			return row
 		}
@@ -185,7 +171,7 @@ func findGameShelfCfgByID(id uint64) *entity.GameShelfCfg {
 	return nil
 }
 
-func filterGameShelfList(all []*entity.GameShelfCfg, req *gameplatformdto.GameShelfListReq) []*entity.GameShelfCfg {
+func filterGameShelfList(all []*entity.GameCfg, req *gameplatformdto.GameShelfListReq) []*entity.GameCfg {
 	if req == nil {
 		return all
 	}
@@ -193,7 +179,7 @@ func filterGameShelfList(all []*entity.GameShelfCfg, req *gameplatformdto.GameSh
 	if gameCode == "" {
 		return all
 	}
-	list := make([]*entity.GameShelfCfg, 0, len(all))
+	list := make([]*entity.GameCfg, 0, len(all))
 	for _, row := range all {
 		if row == nil {
 			continue
@@ -206,7 +192,7 @@ func filterGameShelfList(all []*entity.GameShelfCfg, req *gameplatformdto.GameSh
 	return list
 }
 
-func toGameShelfListItem(row *entity.GameShelfCfg) *gameplatformdto.GameShelfListItem {
+func toGameShelfListItem(row *entity.GameCfg) *gameplatformdto.GameShelfListItem {
 	return &gameplatformdto.GameShelfListItem{
 		ID:       strconv.FormatUint(row.ID, 10),
 		GameCode: row.GameCode,

@@ -146,3 +146,8 @@ func (c *LiveRoomAppController) CancelKickBan(ctx context.Context, req *liveroom
 func (c *LiveRoomAppController) ReportLiveStartStatus(ctx context.Context, req *liveroomdto.ReportLiveStartStatusReq) (res *liveroomdto.ReportLiveStartStatusRes, err error) {
 	return liveroom.ReportLiveStartStatus(ctx, req)
 }
+
+// GameRecommendList 查询直播间推荐游戏列表
+func (c *LiveRoomAppController) GameRecommendList(ctx context.Context, req *liveroomdto.GetLiveRoomGameRecommendListReq) (*liveroomdto.GetLiveRoomGameRecommendListRes, error) {
+	return liveroom.GetLiveRoomGameRecommendList(ctx, req)
+}

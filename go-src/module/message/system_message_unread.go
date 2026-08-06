@@ -85,6 +85,7 @@ func ListSystemMessageUnread(ctx context.Context, _ *messagedto.AppSystemMessage
 			MsgType:     row.Type,
 			UnreadCount: row.UnreadCount,
 			UpdatedAt:   formatMessageTime(row.UpdatedAt),
+			UpdatedAtMs: row.UpdatedAt.UnixMilli(),
 		})
 	}
 	return &messagedto.AppSystemMessageUnreadListRes{List: list}, nil

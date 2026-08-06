@@ -2,6 +2,7 @@ package cfg
 
 func InitCfg() {
 	initDefaultLoggerFromDetail()
+	disableHTTPServerBuiltinLogs()
 	initServerCfg()
 	initDomainSiteCfg()
 	initStaticPathCfg()

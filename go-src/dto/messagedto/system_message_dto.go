@@ -11,6 +11,7 @@ type AppSystemMessageUnreadListItem struct {
 	MsgType     uint8  `json:"msgType" dc:"系统消息类型(1活动消息,2个人系统消息)"`
 	UnreadCount uint64 `json:"unreadCount" dc:"未读数"`
 	UpdatedAt   string `json:"updatedAt" dc:"更新时间"`
+	UpdatedAtMs int64  `json:"updatedAtMs" dc:"更新时间"`
 }
 
 type AppSystemMessageUnreadListRes struct {

@@ -1,6 +1,6 @@
 @echo off
 REM Remote server configuration
-set REMOTE_HOST=50.18.253.123
+set REMOTE_HOST=54.241.124.37
 set REMOTE_USER=ec2-user
 set REMOTE_DIR=/home/ec2-user/xgameserver
 

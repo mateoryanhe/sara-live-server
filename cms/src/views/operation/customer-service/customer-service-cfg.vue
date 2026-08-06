@@ -15,11 +15,11 @@
           type="info"
       >
         <p>配置 App 端展示的客服联系方式。App 通过 POST /customerService/cfg 获取（无需登录）。</p>
-        <p>联系方式可为完整链接，需以 http:// 或 https:// 开头；留空表示不展示对应入口。</p>
+        <p>联系方式可为完整链接或任意文本；留空表示不展示对应入口。</p>
       </el-alert>
 
-      <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="160px">
-        <el-form-item label="Telegram" prop="telegramUrl">
+      <el-form :model="formData" class="cfg-form" label-width="160px">
+        <el-form-item label="Telegram">
           <el-input
               v-model="formData.telegramUrl"
               clearable
@@ -27,7 +27,7 @@
           />
         </el-form-item>
 
-        <el-form-item label="Facebook" prop="facebookUrl">
+        <el-form-item label="Facebook">
           <el-input
               v-model="formData.facebookUrl"
               clearable
@@ -35,7 +35,7 @@
           />
         </el-form-item>
 
-        <el-form-item label="WhatsApp" prop="whatsappUrl">
+        <el-form-item label="WhatsApp">
           <el-input
               v-model="formData.whatsappUrl"
               clearable
@@ -63,7 +63,6 @@ import {customerServiceApi} from '@/api/modules/customer-service'
 import type {CustomerServiceCfg} from '@/types/api'
 
 const loading = ref(false)
-const formRef = ref()
 
 const formData = reactive({
   id: '0',
@@ -75,30 +74,6 @@ const formData = reactive({
 const metaInfo = reactive({
   createdAt: '',
   updatedAt: '',
-})
-
-const validateOptionalUrl = (_: unknown, value: string, callback: (e?: Error) => void) => {
-  const url = value?.trim()
-  if (!url) {
-    callback()
-    return
-  }
-  if (!/^https?:\/\//i.test(url)) {
-    callback(new Error('URL 需以 http:// 或 https:// 开头'))
-    return
-  }
-  callback()
-}
-
-const urlFieldRule = [
-  {max: 512, message: '长度不能超过 512', trigger: 'blur'},
-  {validator: validateOptionalUrl, trigger: 'blur'},
-]
-
-const formRules = reactive({
-  telegramUrl: urlFieldRule,
-  facebookUrl: urlFieldRule,
-  whatsappUrl: urlFieldRule,
 })
 
 const applyCfg = (cfg: CustomerServiceCfg | null | undefined) => {
@@ -133,9 +108,8 @@ const fetchCfg = async () => {
 }
 
 const handleSave = async () => {
+  loading.value = true
   try {
-    await formRef.value.validate()
-    loading.value = true
     const response = await customerServiceApi.saveCustomerServiceCfg({
       id: formData.id === '0' ? 0 : Number(formData.id),
       telegramUrl: formData.telegramUrl.trim(),

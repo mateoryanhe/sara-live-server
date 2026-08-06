@@ -58,7 +58,6 @@ func SaveGamePlatformCfg(_ context.Context, req *gameplatformdto.SaveGamePlatfor
 		return nil, err
 	}
 	cfgdao.ReloadGamePlatformCfgCache()
-	ReloadVendorGameCacheAsync(context.Background())
 	return &gameplatformdto.SaveGamePlatformCfgRes{
 		Success: true,
 		ID:      strconv.FormatUint(row.ID, 10),

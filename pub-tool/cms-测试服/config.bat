@@ -2,7 +2,7 @@
 REM CMS 部署配置（使用 PuTTY .ppk 密钥，勿在此文件填写密码）
 
 REM 远程服务器
-set REMOTE_HOST=50.18.253.123
+set REMOTE_HOST=54.241.124.37
 set REMOTE_USER=ec2-user
 set REMOTE_PORT=22
 

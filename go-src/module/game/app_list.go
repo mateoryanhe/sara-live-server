@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"xr-game-server/dto/gameplatformdto"
+	"xr-game-server/entity"
 )
 
 const (
@@ -11,13 +12,13 @@ const (
 	appGameListMaxPageSize     = 100
 )
 
-// GetAppGameList App 端分页查询已上架游戏列表(读内存).
+// GetAppGameList App 端分页查询已上架游戏(读 game_cfgs 永久缓存).
 func GetAppGameList(_ context.Context, req *gameplatformdto.AppGameListReq) (*gameplatformdto.AppGameListRes, error) {
 	pageIndex, pageSize := normalizeAppGameListPage(0, 0)
 	if req != nil {
 		pageIndex, pageSize = normalizeAppGameListPage(req.PageIndex, req.PageSize)
 	}
-	all := GetAllOnShelfVendorGamesFromMemory()
+	all := GetAllOnShelfGamesFromMemory()
 	total := len(all)
 	start, end := appGameListPageRange(total, pageIndex, pageSize)
 
@@ -36,13 +37,11 @@ func GetAppGameList(_ context.Context, req *gameplatformdto.AppGameListReq) (*ga
 	}, nil
 }
 
-func toAppGameListItem(row *VendorGame) *gameplatformdto.AppGameListItem {
+func toAppGameListItem(row *entity.GameCfg) *gameplatformdto.AppGameListItem {
 	return &gameplatformdto.AppGameListItem{
 		GameCode: row.GameCode,
 		NameEn:   row.NameEn,
 		Cover:    BuildGameCoverUrl(row.Cover),
-		Category: row.Category,
-		Platform: row.Platform,
 	}
 }
 

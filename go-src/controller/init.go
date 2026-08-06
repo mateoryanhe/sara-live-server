@@ -67,7 +67,6 @@ func Init() {
 	initRechargeOrderAppController()        // 充值订单(App:发起/查询)
 	initVipCfgController()                  // VIP配置(CMS)
 	initAppPkgController()                  // App包管理(CMS)
-	initGameCfgController()                 // 游戏配置(CMS)
 	initGameAppController()                 // 游戏列表(App)
 	initGamePlatformCMSController()         // 游戏平台接入配置(CMS)
 	initGameVendorCallbackController()      // 游戏第三方回调(verify/balance)

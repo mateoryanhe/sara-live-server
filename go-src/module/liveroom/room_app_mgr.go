@@ -42,6 +42,13 @@ func applyPrivateInviteType(room *entity.LiveRoom, privateInviteType uint8) {
 	}
 }
 
+func applyLiveRoomGameRecommends(roomID uint64, category uint8, gameCodes []string) error {
+	if category != entity.LiveRoomCategoryGame {
+		return nil
+	}
+	return SyncLiveRoomGameRecommendList(roomID, gameCodes)
+}
+
 // CreateRoom 创建直播间
 // 业务规则:
 //  1. 调用者必须已是主播(UserInfo.UserType 为普通主播或机器人主播)
@@ -90,6 +97,9 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 		}
 		applyRoomPricing(existing, req.Ticket, req.Billing)
 		applyPrivateInviteType(existing, req.PrivateInviteType)
+		if err := applyLiveRoomGameRecommends(existing.ID, category, req.GameCodes); err != nil {
+			return nil, err
+		}
 		markLiveRoomCreated(user)
 		return &liveroomdto.CreateLiveRoomRes{
 			RoomId:  strconv.FormatUint(existing.ID, 10),
@@ -112,6 +122,9 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 	applyPrivateInviteType(room, req.PrivateInviteType)
 
 	liveroomdao.AddRoomToCache(room)
+	if err := applyLiveRoomGameRecommends(room.ID, category, req.GameCodes); err != nil {
+		return nil, err
+	}
 	markLiveRoomCreated(user)
 
 	return &liveroomdto.CreateLiveRoomRes{
@@ -132,8 +145,8 @@ func logCreateRoomAppUpload(ctx context.Context, anchorId uint64, req *liveroomd
 		coverSize = req.Cover.Size
 	}
 	g.Log().Infof(ctx,
-		"CreateRoom app upload anchorId=%d title=%q notice=%q category=%d tagId=%d ticket=%.4f billing=%.4f privateInviteType=%d hasCover=%v coverFilename=%q coverSize=%d",
-		anchorId, req.Title, req.Notice, req.Category, req.TagId, req.Ticket, req.Billing, req.PrivateInviteType,
+		"CreateRoom app upload anchorId=%d title=%q notice=%q category=%d tagId=%d gameCodes=%v ticket=%.4f billing=%.4f privateInviteType=%d hasCover=%v coverFilename=%q coverSize=%d",
+		anchorId, req.Title, req.Notice, req.Category, req.TagId, req.GameCodes, req.Ticket, req.Billing, req.PrivateInviteType,
 		hasCover, coverFilename, coverSize,
 	)
 }

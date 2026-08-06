@@ -48,6 +48,8 @@ func mysqlDSN() string {
 }
 
 func openMigrateDB() *gorm.DB {
+	cfg.EnsureErrorLogger()
+
 	migrateMu.Lock()
 	defer migrateMu.Unlock()
 	if migrateDB != nil {

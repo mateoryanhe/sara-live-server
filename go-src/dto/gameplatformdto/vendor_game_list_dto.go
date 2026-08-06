@@ -9,10 +9,11 @@ import (
 type VendorGameListReq struct {
 	g.Meta `path:"/vendorGameList" method:"post" summary:"查询第三方游戏列表" tags:"游戏平台配置"`
 	httpserver.CMSQueryReq
-	GameCode string `json:"gameCode" dc:"游戏编码(模糊匹配)"`
-	Name     string `json:"name" dc:"游戏名称(模糊匹配)"`
-	Platform string `json:"platform" dc:"平台(模糊匹配)"`
-	Category string `json:"category" dc:"分类(模糊匹配)"`
+	GameCode          string `json:"gameCode" dc:"游戏编码(模糊匹配)"`
+	Name              string `json:"name" dc:"游戏名称(模糊匹配)"`
+	Platform          string `json:"platform" dc:"平台(模糊匹配)"`
+	Category          string `json:"category" dc:"分类(模糊匹配)"`
+	RefreshFromVendor bool   `json:"refreshFromVendor" dc:"true=从第三方全量拉取并覆盖浏览缓存"`
 }
 
 // VendorGameListItem CMS 游戏列表项
