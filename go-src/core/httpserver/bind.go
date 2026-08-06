@@ -68,6 +68,14 @@ func RegNonAuthHandler(prefix, pattern string, handler ghttp.HandlerFunc) {
 	})
 }
 
+// RegRootNonAuthCustomizeRes 根路径绑定,无需鉴权,自定义响应(第三方 webhook 等).
+func RegRootNonAuthCustomizeRes(handlerOrObject ...interface{}) {
+	httpServer.Group("/", func(group *ghttp.RouterGroup) {
+		group.Middleware(middlewareLogReq, customResponseMiddleware)
+		group.Bind(handlerOrObject...)
+	})
+}
+
 // RegCMSNonAuthCustomizeRes 自定义结果 不需鉴权
 func RegCMSNonAuthCustomizeRes(prefix string, handlerOrObject ...interface{}) {
 	httpServer.Group(prefix, func(group *ghttp.RouterGroup) {

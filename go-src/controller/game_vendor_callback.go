@@ -8,12 +8,11 @@ import (
 	"xr-game-server/module/game"
 )
 
-const GameVendorCallbackUrl = "/game"
-
 type GameVendorCallbackController struct{}
 
 func initGameVendorCallbackController() {
-	httpserver.RegCMSNonAuthCustomizeRes(GameVendorCallbackUrl, &GameVendorCallbackController{})
+	// 第三方固定访问: POST https://{domain}/verify, POST https://{domain}/balance
+	httpserver.RegRootNonAuthCustomizeRes(&GameVendorCallbackController{})
 }
 
 func (c *GameVendorCallbackController) Verify(ctx context.Context, req *gameplatformdto.VendorVerifyReq) (*gameplatformdto.VendorVerifyRes, error) {
