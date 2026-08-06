@@ -59,6 +59,8 @@ func Init() {
 	initVipCfg()
 	initAppPkg()
 	initGameCfg()
+	initGameBetLog()
+	initGameWinLog()
 	initGamePlatformCfg()
 	initLiveTicket()
 	initLivePrivateRoomBilling()

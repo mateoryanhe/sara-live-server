@@ -69,6 +69,8 @@ func Init() {
 	initAppPkgController()                  // App包管理(CMS)
 	initGameAppController()                 // 游戏列表(App)
 	initGamePlatformCMSController()         // 游戏平台接入配置(CMS)
+	initGameWinLogCMSController()           // 游戏派彩记录(CMS)
+	initGameBetLogCMSController()           // 游戏下注记录(CMS)
 	initGameVendorCallbackController()      // 游戏第三方回调(verify/balance)
 	initVipCfgAppController()               // VIP配置查询(App)
 	initVipAppController()                  // VIP详情(App)

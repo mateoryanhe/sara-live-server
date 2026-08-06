@@ -316,6 +316,50 @@ export interface CurrencyLogItem {
     createdAt?: string | null
 }
 
+export interface GameWinLogQuery extends PageQuery {
+    userId?: string
+    gameCode?: string
+    orderId?: string
+    platformType?: string
+}
+
+export interface GameWinLogItem {
+    id: string
+    userId: string
+    nickname?: string
+    gameCode: string
+    nameEn?: string
+    cover?: string
+    amount: number
+    platformType: string
+    orderId: string
+    createdAt?: string | null
+}
+
+export interface GameBetLogQuery extends PageQuery {
+    userId?: string
+    gameCode?: string
+    orderId?: string
+    platformType?: string
+}
+
+export interface GameBetLogItem {
+    id: string
+    userId: string
+    nickname?: string
+    gameCode: string
+    nameEn?: string
+    cover?: string
+    amount: number
+    platformType: string
+    orderId: string
+    liveRoomId?: string
+    liveRecordId?: string
+    liveRoomTitle?: string
+    anchorNickname?: string
+    createdAt?: string | null
+}
+
 
 // App Token相关类型
 export interface AppToken {

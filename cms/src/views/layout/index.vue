@@ -246,7 +246,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('GamePlatformCfgManagement') || hasMenuPermission('GameVendorGameListManagement')"
+            v-if="hasMenuPermission('GamePlatformCfgManagement') || hasMenuPermission('GameVendorGameListManagement') || hasMenuPermission('GameBetLogListManagement') || hasMenuPermission('GameWinLogListManagement')"
             index="/game">
           <template #title>
             <el-icon>
@@ -265,6 +265,18 @@
               <List/>
             </el-icon>
             <span>游戏列表</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('GameBetLogListManagement')" index="/game/game-bet-log-list">
+            <el-icon>
+              <Money/>
+            </el-icon>
+            <span>下注记录</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('GameWinLogListManagement')" index="/game/game-win-log-list">
+            <el-icon>
+              <Coin/>
+            </el-icon>
+            <span>派彩记录</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu

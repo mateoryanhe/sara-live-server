@@ -4,8 +4,10 @@ import (
 	"context"
 
 	"xr-game-server/core/httpserver"
+	"xr-game-server/dto/gamebetdto"
 	"xr-game-server/dto/gameplatformdto"
 	"xr-game-server/module/game"
+	"xr-game-server/module/gamebet"
 )
 
 const GameAppUrl = "/game"
@@ -24,4 +26,9 @@ func (c *GameAppController) AppGameList(ctx context.Context, req *gameplatformdt
 // AppGameStart App 获取游戏启动链接
 func (c *GameAppController) AppGameStart(ctx context.Context, req *gameplatformdto.AppGameStartReq) (*gameplatformdto.AppGameStartRes, error) {
 	return game.GetAppGameStartLink(ctx, req)
+}
+
+// AppGameBetList App 分页查询游戏下注记录
+func (c *GameAppController) AppGameBetList(ctx context.Context, req *gamebetdto.AppGameBetListReq) (*gamebetdto.AppGameBetListRes, error) {
+	return gamebet.GetAppList(ctx, req)
 }

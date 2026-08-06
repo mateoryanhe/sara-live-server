@@ -18,5 +18,17 @@ export const gameRoutes: RouteRecordRaw = {
             component: () => import('@/views/game/game-list.vue'),
             meta: {title: '游戏列表'},
         },
+        {
+            path: 'game-win-log-list',
+            name: 'GameWinLogListManagement',
+            component: () => import('@/views/game/game-win-log-list.vue'),
+            meta: {title: '派彩记录'},
+        },
+        {
+            path: 'game-bet-log-list',
+            name: 'GameBetLogListManagement',
+            component: () => import('@/views/game/game-bet-log-list.vue'),
+            meta: {title: '下注记录'},
+        },
     ],
 }

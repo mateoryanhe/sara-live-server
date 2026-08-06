@@ -12,11 +12,12 @@ import (
 const vendorCallbackCurrency = "gold"
 
 const (
-	vendorCallbackCodeOK               = 0
-	vendorCallbackCodeInvalidParam     = 1
-	vendorCallbackCodeInvalidSign      = 2
-	vendorCallbackCodePlayerNotFound   = 3
-	vendorCallbackCodePlatformNotReady = 4
+	vendorCallbackCodeOK                  = 0
+	vendorCallbackCodeInvalidParam        = 1
+	vendorCallbackCodeInvalidSign         = 2
+	vendorCallbackCodePlayerNotFound      = 3
+	vendorCallbackCodePlatformNotReady    = 4
+	vendorCallbackCodeInsufficientBalance = 5
 )
 
 // VendorCallbackCodeOK 第三方回调成功码.
@@ -38,6 +39,22 @@ func validateVendorCallback(operatorToken, signValue string, signParams map[stri
 	}
 	if !VerifySign(signParams, signValue, strings.TrimSpace(cfg.SecretKey)) {
 		return &vendorCallbackFail{Code: vendorCallbackCodeInvalidSign, Message: "invalid sign"}
+	}
+	return nil
+}
+
+func validateVendorTransferAuth(operatorToken, secretKey string) *vendorCallbackFail {
+	cfg := cfgdao.GetGamePlatformCfgFromMemory()
+	if cfg == nil || !cfgdao.GamePlatformCfgReady() {
+		return &vendorCallbackFail{Code: vendorCallbackCodePlatformNotReady, Message: "platform cfg not ready"}
+	}
+	operatorToken = strings.TrimSpace(operatorToken)
+	if operatorToken == "" || operatorToken != strings.TrimSpace(cfg.Token) {
+		return &vendorCallbackFail{Code: vendorCallbackCodeInvalidSign, Message: "invalid operator_token"}
+	}
+	secretKey = strings.TrimSpace(secretKey)
+	if secretKey == "" || secretKey != strings.TrimSpace(cfg.SecretKey) {
+		return &vendorCallbackFail{Code: vendorCallbackCodeInvalidSign, Message: "invalid secret_key"}
 	}
 	return nil
 }

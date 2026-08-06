@@ -23,6 +23,8 @@ var reasonTextMap = map[Lang]map[Reason]string{
 		ReasonPaidDanmaku:              "直播间付费弹幕",
 		ReasonLiveRoomVideoCallTicket:  "直播间视频通话门票",
 		ReasonLiveRoomVideoCallBilling: "直播间视频通话计费",
+		ReasonGameBet:                  "游戏下注",
+		ReasonGameBetWin:               "游戏派彩",
 	},
 	LangZHTW: {
 		ReasonUnknown:                  "未知",
@@ -44,6 +46,8 @@ var reasonTextMap = map[Lang]map[Reason]string{
 		ReasonPaidDanmaku:              "直播間付費彈幕",
 		ReasonLiveRoomVideoCallTicket:  "直播間視頻通話門票",
 		ReasonLiveRoomVideoCallBilling: "直播間視頻通話計費",
+		ReasonGameBet:                  "遊戲下注",
+		ReasonGameBetWin:               "遊戲派彩",
 	},
 	LangEN: {
 		ReasonUnknown:                  "Unknown",
@@ -65,6 +69,8 @@ var reasonTextMap = map[Lang]map[Reason]string{
 		ReasonPaidDanmaku:              "Live Room Paid Danmaku",
 		ReasonLiveRoomVideoCallTicket:  "Live Room Video Call Ticket",
 		ReasonLiveRoomVideoCallBilling: "Live Room Video Call Billing",
+		ReasonGameBet:                  "Game Bet",
+		ReasonGameBetWin:               "Game Bet Win",
 	},
 }
 

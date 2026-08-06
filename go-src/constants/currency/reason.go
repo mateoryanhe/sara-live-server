@@ -42,6 +42,10 @@ const (
 	ReasonLiveRoomVideoCallTicket Reason = 17
 	// ReasonLiveRoomVideoCallBilling 直播间视频通话计费
 	ReasonLiveRoomVideoCallBilling Reason = 18
+	// ReasonGameBet 游戏下注扣款
+	ReasonGameBet Reason = 19
+	// ReasonGameBetWin 游戏派彩
+	ReasonGameBetWin Reason = 20
 )
 
 // String 返回枚举的英文标识(用于日志/调试,不参与多语言展示;
@@ -84,6 +88,10 @@ func (r Reason) String() string {
 		return "LiveRoomVideoCallTicket"
 	case ReasonLiveRoomVideoCallBilling:
 		return "LiveRoomVideoCallBilling"
+	case ReasonGameBet:
+		return "GameBet"
+	case ReasonGameBetWin:
+		return "GameBetWin"
 	default:
 		return "Unknown"
 	}

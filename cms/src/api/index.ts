@@ -31,6 +31,8 @@ import {sysStatApi, RESOURCE_METRIC_MAX_POINTS} from './modules/sysStat'
 import {botAnchorApi} from './modules/bot-anchor'
 import {logQueryApi} from './modules/logQuery'
 import {gamePlatformApi} from './modules/gamePlatform'
+import {gameWinLogApi} from './modules/gameWinLog'
+import {gameBetLogApi} from './modules/gameBetLog'
 
 export {
     authApi,
@@ -67,6 +69,8 @@ export {
     botAnchorApi,
     logQueryApi,
     gamePlatformApi,
+    gameWinLogApi,
+    gameBetLogApi,
 }
 
 export default {
@@ -104,4 +108,6 @@ export default {
     botAnchorApi,
     logQueryApi,
     gamePlatformApi,
+    gameWinLogApi,
+    gameBetLogApi,
 }
