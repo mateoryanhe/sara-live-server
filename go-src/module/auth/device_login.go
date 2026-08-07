@@ -8,7 +8,6 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gmlock"
-	"xr-game-server/constants/common"
 	"xr-game-server/core/event"
 	"xr-game-server/core/xrtoken"
 	"xr-game-server/dao/accountdao"
@@ -46,8 +45,11 @@ func DeviceLogin(ctx context.Context, req *authdto.DeviceLoginReq) (*authdto.Dev
 	}
 
 	httpReq := g.RequestFromCtx(ctx)
-	if isNewUser && len(account.IP) == common.Zero {
-		account.SetIp(httpReq.GetClientIp())
+	clientIP := httpReq.GetClientIp()
+	if isNewUser {
+		applyRegisterIpInfo(account, clientIP)
+	} else {
+		applyLoginIpInfo(account, clientIP)
 	}
 
 	tokenStr := xrtoken.AddAppToken(account.ID)

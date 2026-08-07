@@ -97,6 +97,15 @@
          
          
           <el-table-column label="IP" prop="ip" width="150"/>
+          <el-table-column label="登录国家" prop="loginCountry" width="120">
+            <template #default="scope">{{ scope.row.loginCountry || '-' }}</template>
+          </el-table-column>
+          <el-table-column label="注册IP" prop="registerIp" width="150">
+            <template #default="scope">{{ scope.row.registerIp || '-' }}</template>
+          </el-table-column>
+          <el-table-column label="注册国家" prop="registerCountry" width="120">
+            <template #default="scope">{{ scope.row.registerCountry || '-' }}</template>
+          </el-table-column>
           <el-table-column label="设备类型" prop="deviceType" width="100">
             <template #default="scope">{{ scope.row.deviceType || '-' }}</template>
           </el-table-column>

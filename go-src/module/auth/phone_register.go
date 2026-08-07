@@ -7,7 +7,6 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gmlock"
 	"time"
-	"xr-game-server/constants/common"
 	"xr-game-server/core/event"
 	"xr-game-server/core/phoneutil"
 	"xr-game-server/core/xrtoken"
@@ -44,11 +43,9 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 	// 设置密码
 	account.SetPassword(gmd5.MustEncryptString(req.Password))
 
-	// 设置IP
+	// 设置IP与国家
 	httpReq := g.RequestFromCtx(ctx)
-	if len(account.IP) == common.Zero {
-		account.SetIp(httpReq.GetClientIp())
-	}
+	applyRegisterIpInfo(account, httpReq.GetClientIp())
 
 	// 生成token
 	tokenStr := xrtoken.AddAppToken(account.ID)

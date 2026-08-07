@@ -23,19 +23,23 @@ func TestLogin(ctx context.Context, req *authdto.TestLoginReq) (res *authdto.Tes
 	//	return nil, errercode.CreateCode(errercode.TestEnvClose)
 	//}
 	account := accountdao.FindActiveAccount(req.OpenId, Test)
+	isNewUser := false
 	if account == nil {
 		account = accountdao.RegisterAccount(req.OpenId, Test)
+		isNewUser = true
 	}
 	data := account
 	if data.Ban && data.BanApplyTime.After(time.Now()) {
 		return nil, errercode.CreateCode(errercode.Ban)
 	}
 	httpReq := g.RequestFromCtx(ctx)
-	tokenStr := xrtoken.AddAppToken(data.ID)
-	if len(data.IP) == common.Zero {
-		data.SetIp(httpReq.GetClientIp())
-		data.SetUpdatedAt(time.Now())
+	clientIP := httpReq.GetClientIp()
+	if isNewUser {
+		applyRegisterIpInfo(data, clientIP)
+	} else {
+		applyLoginIpInfo(data, clientIP)
 	}
+	tokenStr := xrtoken.AddAppToken(data.ID)
 	userinfodao.GetUserInfoByUserId(data.ID)
 	res = &authdto.TestLoginRes{
 		Token:  tokenStr,

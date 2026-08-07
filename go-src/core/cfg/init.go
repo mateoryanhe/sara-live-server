@@ -12,5 +12,6 @@ func InitCfg() {
 	initGoPoolCfg()
 	initWebSocketBufferCfg()
 	initSensitiveWordCfg()
+	initIpGeoCfg()
 	logConfigContent()
 }

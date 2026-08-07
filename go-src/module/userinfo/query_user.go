@@ -17,6 +17,9 @@ func QueryUserInfo(ctx context.Context, req *accountdto.QueryUserInfoReq) (res *
 		if accountCache := accountdao.GetAccountFromCache(val.OpenId, val.Channel, val.ID); accountCache != nil {
 			val.OpenId = accountCache.OpenId
 			val.IP = accountCache.IP
+			val.RegisterIp = accountCache.RegisterIp
+			val.RegisterCountry = accountCache.RegisterCountry
+			val.LoginCountry = accountCache.LoginCountry
 			val.Channel = accountCache.Channel
 			val.PhoneAreaCode = accountCache.PhoneAreaCode
 			val.Cancel = accountCache.Cancel

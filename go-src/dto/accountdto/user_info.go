@@ -15,16 +15,19 @@ type QueryUserInfoReq struct {
 }
 
 type UserInfoDto struct {
-	ID            uint64     `json:"id,string"`
-	CreatedAt     *time.Time `json:"createdAt"`
-	OpenId        string     `json:"openId"`
-	IP            string     `json:"ip"`
-	Channel       uint       `json:"channel"`
-	Ban           bool       `json:"ban"`
-	BanTime       *time.Time `json:"banTime"`
-	BanApplyTime  *time.Time `json:"banApplyTime"`
-	Cancel        bool       `json:"cancel"`
-	PhoneAreaCode string     `json:"phoneAreaCode"`
+	ID              uint64     `json:"id,string"`
+	CreatedAt       *time.Time `json:"createdAt"`
+	OpenId          string     `json:"openId"`
+	IP              string     `json:"ip"`
+	RegisterIp      string     `json:"registerIp"`
+	RegisterCountry string     `json:"registerCountry"`
+	LoginCountry    string     `json:"loginCountry"`
+	Channel         uint       `json:"channel"`
+	Ban             bool       `json:"ban"`
+	BanTime         *time.Time `json:"banTime"`
+	BanApplyTime    *time.Time `json:"banApplyTime"`
+	Cancel          bool       `json:"cancel"`
+	PhoneAreaCode   string     `json:"phoneAreaCode"`
 	// 以下字段来自 user_infos 表(LEFT JOIN,可能为空)
 	Nickname      string     `json:"nickname"`
 	Phone         string     `json:"phone"`

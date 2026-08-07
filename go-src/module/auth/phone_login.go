@@ -7,7 +7,6 @@ import (
 
 	"github.com/gogf/gf/v2/crypto/gmd5"
 	"github.com/gogf/gf/v2/frame/g"
-	"xr-game-server/constants/common"
 	"xr-game-server/core/phoneutil"
 	"xr-game-server/core/xrtoken"
 	"xr-game-server/dao/accountdao"
@@ -47,9 +46,7 @@ func PhoneLogin(ctx context.Context, req *authdto.PhoneLoginReq) (res *authdto.P
 		return nil, errercode.CreateCode(errercode.Ban)
 	}
 
-	if len(account.IP) == common.Zero {
-		account.SetIp(httpReq.GetClientIp())
-	}
+	applyLoginIpInfo(account, httpReq.GetClientIp())
 	tokenStr := xrtoken.AddAppToken(account.ID)
 	userinfodao.GetUserInfoByUserId(account.ID)
 	userlogindevicedao.RefreshLoginDevice(account.ID, req.DeviceInfo)

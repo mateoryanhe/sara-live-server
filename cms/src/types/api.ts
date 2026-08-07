@@ -149,6 +149,9 @@ export interface UserInfo {
     createdAt?: string | null
     openId: string
     ip: string
+    registerIp?: string
+    registerCountry?: string
+    loginCountry?: string
     channel: number
     ban: boolean
     banTime?: string | null

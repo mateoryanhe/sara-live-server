@@ -19,6 +19,11 @@ server:
   ####自定义配置
   debugEnv: true #是否开启debug环境,不会检查权限
   exitTime: 5 #退出系统等待多少秒，开始发送kill -9
+
+ipGeo:
+  dbPath: "D:/company-code/sara-live-server/GeoLite2-Country.mmdb"
+  # 免注册下载(解压后配置绝对路径):
+  # curl -LO https://cdn.jsdelivr.net/npm/geolite2-country/GeoLite2-Country.mmdb.gz && gunzip -f GeoLite2-Country.mmdb.gz
   # 多域名静态目录与HTTPS证书(SNI)
   # domainSites:
   #   - domain: "cdn.example.com"

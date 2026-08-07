@@ -25,6 +25,11 @@ server:
   memoryLimitM: 300
   # domainSites 多域名示例见 config/local/config.yaml
 
+ipGeo:
+  dbPath: "/home/ec2-user/xgameserver/GeoLite2-Country.mmdb"
+  # 免注册下载(解压后配置绝对路径):
+  # curl -LO https://cdn.jsdelivr.net/npm/geolite2-country/GeoLite2-Country.mmdb.gz && gunzip -f GeoLite2-Country.mmdb.gz
+
 logQuery:
   exportStaticPrefix: "/cms"           # 日志导出静态 URL 前缀,对应 staticPaths 中的 /cms
   exportSubDir: "log-query-export"     # 导出目录: /home/ec2-user/cdn/cms/log-query-export

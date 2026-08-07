@@ -13,6 +13,7 @@ import (
 	"xr-game-server/module/currencylog"
 	"xr-game-server/module/customerservice"
 	"xr-game-server/module/game"
+	"xr-game-server/module/ipgeo"
 	"xr-game-server/module/livecfg"
 	"xr-game-server/module/liveroom"
 	"xr-game-server/module/logquery"
@@ -51,6 +52,7 @@ func Init() {
 	vip.Init()
 	apppkg.Init()
 	game.Init()
+	ipgeo.Init()
 	agora.Init()
 	call.Init()
 	livecfg.Init()

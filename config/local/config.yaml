@@ -31,6 +31,11 @@ server:
   #     certFile: "D:/certs/cdn.example.com/fullchain.pem"
   #     keyFile: "D:/certs/cdn.example.com/privkey.pem"
 
+ipGeo:
+  dbPath: "D:/company-code/sara-live-server/GeoLite2-Country.mmdb"
+  # 免注册下载(解压后配置绝对路径):
+  # curl -LO https://cdn.jsdelivr.net/npm/geolite2-country/GeoLite2-Country.mmdb.gz && gunzip -f GeoLite2-Country.mmdb.gz
+
 bufferSize:
   db:
     tickIntervalMs: 1000   # 调度周期(毫秒)
