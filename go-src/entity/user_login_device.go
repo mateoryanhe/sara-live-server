@@ -53,7 +53,7 @@ func (receiver *UserLoginDevice) Refresh(info *DeviceInfo) {
 func (receiver *UserLoginDevice) SetDeviceType(deviceType string) {
 	receiver.DeviceType = deviceType
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserLoginDevice, UserLoginDeviceType, &syndb.ColData{
+	syndb.AddData(TbUserLoginDevice, UserLoginDeviceType, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: deviceType,
 	})
@@ -62,7 +62,7 @@ func (receiver *UserLoginDevice) SetDeviceType(deviceType string) {
 func (receiver *UserLoginDevice) SetDeviceModel(deviceModel string) {
 	receiver.DeviceModel = deviceModel
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserLoginDevice, UserLoginDeviceModel, &syndb.ColData{
+	syndb.AddData(TbUserLoginDevice, UserLoginDeviceModel, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: deviceModel,
 	})
@@ -71,7 +71,7 @@ func (receiver *UserLoginDevice) SetDeviceModel(deviceModel string) {
 func (receiver *UserLoginDevice) SetOsVersion(osVersion string) {
 	receiver.OsVersion = osVersion
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserLoginDevice, UserLoginDeviceOsVer, &syndb.ColData{
+	syndb.AddData(TbUserLoginDevice, UserLoginDeviceOsVer, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: osVersion,
 	})
@@ -80,7 +80,7 @@ func (receiver *UserLoginDevice) SetOsVersion(osVersion string) {
 func (receiver *UserLoginDevice) SetAppVersion(appVersion string) {
 	receiver.AppVersion = appVersion
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserLoginDevice, UserLoginDeviceAppVer, &syndb.ColData{
+	syndb.AddData(TbUserLoginDevice, UserLoginDeviceAppVer, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: appVersion,
 	})
@@ -89,7 +89,7 @@ func (receiver *UserLoginDevice) SetAppVersion(appVersion string) {
 func (receiver *UserLoginDevice) SetDeviceId(deviceId string) {
 	receiver.DeviceId = deviceId
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserLoginDevice, UserLoginDeviceId, &syndb.ColData{
+	syndb.AddData(TbUserLoginDevice, UserLoginDeviceId, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: deviceId,
 	})
@@ -97,7 +97,7 @@ func (receiver *UserLoginDevice) SetDeviceId(deviceId string) {
 
 func (receiver *UserLoginDevice) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
-	syndb.AddDataToQuickChan(TbUserLoginDevice, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbUserLoginDevice, db.CreatedAtName, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -105,7 +105,7 @@ func (receiver *UserLoginDevice) SetCreatedAt(val time.Time) {
 
 func (receiver *UserLoginDevice) SetUpdatedAt(val time.Time) {
 	receiver.UpdatedAt = val
-	syndb.AddDataToQuickChan(TbUserLoginDevice, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbUserLoginDevice, db.UpdatedAtName, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})

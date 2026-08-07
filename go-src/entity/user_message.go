@@ -67,37 +67,37 @@ func NewUserMessage(senderId, receiverId uint64, content string) *UserMessage {
 
 func (m *UserMessage) SetSenderId(v uint64) {
 	m.SenderId = v
-	syndb.AddDataToQuickChan(TbUserMessage, UserMessageSenderId, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbUserMessage, UserMessageSenderId, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *UserMessage) SetReceiverId(v uint64) {
 	m.ReceiverId = v
-	syndb.AddDataToQuickChan(TbUserMessage, UserMessageReceiverId, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbUserMessage, UserMessageReceiverId, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *UserMessage) SetContent(v string) {
 	m.Content = v
-	syndb.AddDataToQuickChan(TbUserMessage, UserMessageContent, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbUserMessage, UserMessageContent, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *UserMessage) SetCreatedAt(v time.Time) {
 	m.CreatedAt = v
-	syndb.AddDataToQuickChan(TbUserMessage, db.CreatedAtName, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbUserMessage, db.CreatedAtName, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *UserMessage) SetUpdatedAt(v time.Time) {
 	m.UpdatedAt = v
-	syndb.AddDataToQuickChan(TbUserMessage, db.UpdatedAtName, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbUserMessage, db.UpdatedAtName, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *UserMessage) SetIsDeleted(v bool) {
 	m.IsDeleted = v
-	syndb.AddDataToQuickChan(TbUserMessage, db.IsDeletedName, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbUserMessage, db.IsDeletedName, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *UserMessage) SetDeletedAt(v time.Time) {
 	m.DeletedAt = v
-	syndb.AddDataToQuickChan(TbUserMessage, db.DeletedAtName, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbUserMessage, db.DeletedAtName, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 // MarkDeleted 标记消息为已删除

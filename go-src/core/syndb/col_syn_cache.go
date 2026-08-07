@@ -75,20 +75,6 @@ func newColSynCache(tbName string, tbCol string) *ColSynCache {
 
 // AddData 加入变更数据到缓冲队列.
 func AddData(tbName db.TbName, tbCol db.TbCol, colData *ColData) {
-	addDataToQueue(tbName, tbCol, colData)
-}
-
-// AddDataToQuickChan 兼容旧接口,等价于 AddData.
-func AddDataToQuickChan(tbName db.TbName, tbCol db.TbCol, colData *ColData) {
-	AddData(tbName, tbCol, colData)
-}
-
-// AddDataToLazyChan 兼容旧接口,等价于 AddData.
-func AddDataToLazyChan(tbName db.TbName, tbCol db.TbCol, colData *ColData) {
-	AddData(tbName, tbCol, colData)
-}
-
-func addDataToQueue(tbName db.TbName, tbCol db.TbCol, colData *ColData) {
 	key := cacheKey(tbName, tbCol)
 	cache, ok := synCacheMap[key]
 	if !ok || cache == nil {

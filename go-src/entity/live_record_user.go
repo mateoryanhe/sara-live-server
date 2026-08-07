@@ -44,35 +44,35 @@ func NewLiveRecordUser(liveRecordId, userId uint64) *LiveRecordUser {
 
 func (r *LiveRecordUser) SetLiveRecordId(v uint64) {
 	r.LiveRecordId = v
-	syndb.AddDataToLazyChan(TbLiveRecordUser, LiveRecordUserLiveRecordId, &syndb.ColData{
+	syndb.AddData(TbLiveRecordUser, LiveRecordUserLiveRecordId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRecordUser) SetUserId(v uint64) {
 	r.UserId = v
-	syndb.AddDataToLazyChan(TbLiveRecordUser, LiveRecordUserUserId, &syndb.ColData{
+	syndb.AddData(TbLiveRecordUser, LiveRecordUserUserId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRecordUser) SetAudienceAt(v time.Time) {
 	r.AudienceAt = v
-	syndb.AddDataToLazyChan(TbLiveRecordUser, LiveRecordUserAudienceAt, &syndb.ColData{
+	syndb.AddData(TbLiveRecordUser, LiveRecordUserAudienceAt, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRecordUser) SetGiftSenderAt(v time.Time) {
 	r.GiftSenderAt = v
-	syndb.AddDataToLazyChan(TbLiveRecordUser, LiveRecordUserGiftSenderAt, &syndb.ColData{
+	syndb.AddData(TbLiveRecordUser, LiveRecordUserGiftSenderAt, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRecordUser) SetFollowerAt(v time.Time) {
 	r.FollowerAt = v
-	syndb.AddDataToLazyChan(TbLiveRecordUser, LiveRecordUserFollowerAt, &syndb.ColData{
+	syndb.AddData(TbLiveRecordUser, LiveRecordUserFollowerAt, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }

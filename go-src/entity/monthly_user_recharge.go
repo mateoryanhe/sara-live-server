@@ -39,21 +39,21 @@ func NewMonthlyUserRecharge(month string, userId uint64) *MonthlyUserRecharge {
 
 func (r *MonthlyUserRecharge) SetUserId(v uint64) {
 	r.UserId = v
-	syndb.AddDataToLazyChan(TbMonthlyUserRecharge, MonthlyUserRechargeUserId, &syndb.ColData{
+	syndb.AddData(TbMonthlyUserRecharge, MonthlyUserRechargeUserId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *MonthlyUserRecharge) SetRechargeMonth(v string) {
 	r.RechargeMonth = v
-	syndb.AddDataToLazyChan(TbMonthlyUserRecharge, MonthlyUserRechargeRechargeMonth, &syndb.ColData{
+	syndb.AddData(TbMonthlyUserRecharge, MonthlyUserRechargeRechargeMonth, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *MonthlyUserRecharge) SetCreatedAt(v *time.Time) {
 	r.CreatedAt = v
-	syndb.AddDataToLazyChan(TbMonthlyUserRecharge, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbMonthlyUserRecharge, db.CreatedAtName, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }

@@ -45,42 +45,42 @@ func NewUserMessageSession(messageId uint64, sessionId string) *UserMessageSessi
 
 func (m *UserMessageSession) SetMessageId(v uint64) {
 	m.MessageId = v
-	syndb.AddDataToQuickChan(TbUserMessageSession, UserMessageSessionMessageId, &syndb.ColData{
+	syndb.AddData(TbUserMessageSession, UserMessageSessionMessageId, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }
 
 func (m *UserMessageSession) SetSessionId(v string) {
 	m.SessionId = v
-	syndb.AddDataToQuickChan(TbUserMessageSession, UserMessageSessionSessionId, &syndb.ColData{
+	syndb.AddData(TbUserMessageSession, UserMessageSessionSessionId, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }
 
 func (m *UserMessageSession) SetCreatedAt(v time.Time) {
 	m.CreatedAt = v
-	syndb.AddDataToQuickChan(TbUserMessageSession, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbUserMessageSession, db.CreatedAtName, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }
 
 func (m *UserMessageSession) SetUpdatedAt(v time.Time) {
 	m.UpdatedAt = v
-	syndb.AddDataToQuickChan(TbUserMessageSession, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbUserMessageSession, db.UpdatedAtName, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }
 
 func (m *UserMessageSession) SetIsDeleted(v bool) {
 	m.IsDeleted = v
-	syndb.AddDataToQuickChan(TbUserMessageSession, db.IsDeletedName, &syndb.ColData{
+	syndb.AddData(TbUserMessageSession, db.IsDeletedName, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }
 
 func (m *UserMessageSession) SetDeletedAt(v time.Time) {
 	m.DeletedAt = v
-	syndb.AddDataToQuickChan(TbUserMessageSession, db.DeletedAtName, &syndb.ColData{
+	syndb.AddData(TbUserMessageSession, db.DeletedAtName, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }

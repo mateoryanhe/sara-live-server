@@ -60,7 +60,7 @@ func NewDailyLoginStat(date string) *DailyLoginStat {
 
 func (receiver *DailyLoginStat) AddLoginCount(n uint64) {
 	receiver.Count = math.Add(receiver.Count, n)
-	syndb.AddDataToLazyChan(TbDailyLoginStat, DailyLoginStatCount, &syndb.ColData{
+	syndb.AddData(TbDailyLoginStat, DailyLoginStatCount, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.Count,
 	})
@@ -68,7 +68,7 @@ func (receiver *DailyLoginStat) AddLoginCount(n uint64) {
 
 func (receiver *DailyLoginStat) AddRegisterCount(n uint64) {
 	receiver.RegisterCount = math.Add(receiver.RegisterCount, n)
-	syndb.AddDataToLazyChan(TbDailyLoginStat, DailyLoginStatRegisterCount, &syndb.ColData{
+	syndb.AddData(TbDailyLoginStat, DailyLoginStatRegisterCount, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.RegisterCount,
 	})
@@ -76,7 +76,7 @@ func (receiver *DailyLoginStat) AddRegisterCount(n uint64) {
 
 func (receiver *DailyLoginStat) AddRechargeAmount(val float64) {
 	receiver.RechargeAmount = math.AddFloat64(receiver.RechargeAmount, val)
-	syndb.AddDataToLazyChan(TbDailyLoginStat, DailyLoginStatRechargeAmount, &syndb.ColData{
+	syndb.AddData(TbDailyLoginStat, DailyLoginStatRechargeAmount, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.RechargeAmount,
 	})
@@ -84,7 +84,7 @@ func (receiver *DailyLoginStat) AddRechargeAmount(val float64) {
 
 func (receiver *DailyLoginStat) AddGoldConsumeAmount(val float64) {
 	receiver.GoldConsumeAmount = math.AddFloat64(receiver.GoldConsumeAmount, val)
-	syndb.AddDataToLazyChan(TbDailyLoginStat, DailyLoginStatGoldConsumeAmount, &syndb.ColData{
+	syndb.AddData(TbDailyLoginStat, DailyLoginStatGoldConsumeAmount, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.GoldConsumeAmount,
 	})
@@ -92,7 +92,7 @@ func (receiver *DailyLoginStat) AddGoldConsumeAmount(val float64) {
 
 func (receiver *DailyLoginStat) AddDiamondConsumeAmount(val float64) {
 	receiver.DiamondConsumeAmount = math.AddFloat64(receiver.DiamondConsumeAmount, val)
-	syndb.AddDataToLazyChan(TbDailyLoginStat, DailyLoginStatDiamondConsumeAmount, &syndb.ColData{
+	syndb.AddData(TbDailyLoginStat, DailyLoginStatDiamondConsumeAmount, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.DiamondConsumeAmount,
 	})
@@ -100,7 +100,7 @@ func (receiver *DailyLoginStat) AddDiamondConsumeAmount(val float64) {
 
 func (receiver *DailyLoginStat) AddRechargeUserCount(n uint64) {
 	receiver.RechargeUserCount = math.Add(receiver.RechargeUserCount, n)
-	syndb.AddDataToLazyChan(TbDailyLoginStat, DailyLoginStatRechargeUserCount, &syndb.ColData{
+	syndb.AddData(TbDailyLoginStat, DailyLoginStatRechargeUserCount, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.RechargeUserCount,
 	})
@@ -108,7 +108,7 @@ func (receiver *DailyLoginStat) AddRechargeUserCount(n uint64) {
 
 func (receiver *DailyLoginStat) AddGoldConsumeUserCount(n uint64) {
 	receiver.GoldConsumeUserCount = math.Add(receiver.GoldConsumeUserCount, n)
-	syndb.AddDataToLazyChan(TbDailyLoginStat, DailyLoginStatGoldConsumeUserCount, &syndb.ColData{
+	syndb.AddData(TbDailyLoginStat, DailyLoginStatGoldConsumeUserCount, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.GoldConsumeUserCount,
 	})
@@ -116,7 +116,7 @@ func (receiver *DailyLoginStat) AddGoldConsumeUserCount(n uint64) {
 
 func (receiver *DailyLoginStat) AddDiamondConsumeUserCount(n uint64) {
 	receiver.DiamondConsumeUserCount = math.Add(receiver.DiamondConsumeUserCount, n)
-	syndb.AddDataToLazyChan(TbDailyLoginStat, DailyLoginStatDiamondConsumeUserCount, &syndb.ColData{
+	syndb.AddData(TbDailyLoginStat, DailyLoginStatDiamondConsumeUserCount, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.DiamondConsumeUserCount,
 	})
@@ -124,7 +124,7 @@ func (receiver *DailyLoginStat) AddDiamondConsumeUserCount(n uint64) {
 
 func (receiver *DailyLoginStat) AddAudienceUserCount(n uint64) {
 	receiver.AudienceUserCount = math.Add(receiver.AudienceUserCount, n)
-	syndb.AddDataToLazyChan(TbDailyLoginStat, DailyLoginStatAudienceUserCount, &syndb.ColData{
+	syndb.AddData(TbDailyLoginStat, DailyLoginStatAudienceUserCount, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.AudienceUserCount,
 	})

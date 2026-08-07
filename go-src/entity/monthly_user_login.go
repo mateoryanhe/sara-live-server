@@ -39,21 +39,21 @@ func NewMonthlyUserLogin(month string, userId uint64) *MonthlyUserLogin {
 
 func (r *MonthlyUserLogin) SetUserId(v uint64) {
 	r.UserId = v
-	syndb.AddDataToLazyChan(TbMonthlyUserLogin, MonthlyUserLoginUserId, &syndb.ColData{
+	syndb.AddData(TbMonthlyUserLogin, MonthlyUserLoginUserId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *MonthlyUserLogin) SetLoginMonth(v string) {
 	r.LoginMonth = v
-	syndb.AddDataToLazyChan(TbMonthlyUserLogin, MonthlyUserLoginLoginMonth, &syndb.ColData{
+	syndb.AddData(TbMonthlyUserLogin, MonthlyUserLoginLoginMonth, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *MonthlyUserLogin) SetCreatedAt(v *time.Time) {
 	r.CreatedAt = v
-	syndb.AddDataToLazyChan(TbMonthlyUserLogin, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbMonthlyUserLogin, db.CreatedAtName, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }

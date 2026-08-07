@@ -85,7 +85,7 @@ func NewUserInfo(userId uint64) *UserInfo {
 func (receiver *UserInfo) SetNickname(nickname string) {
 	receiver.Nickname = nickname
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserInfo, UserInfoNickname, &syndb.ColData{
+	syndb.AddData(TbUserInfo, UserInfoNickname, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: nickname,
 	})
@@ -94,7 +94,7 @@ func (receiver *UserInfo) SetNickname(nickname string) {
 func (receiver *UserInfo) SetPhone(phone string) {
 	receiver.Phone = phone
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserInfo, UserInfoPhone, &syndb.ColData{
+	syndb.AddData(TbUserInfo, UserInfoPhone, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: phone,
 	})
@@ -103,7 +103,7 @@ func (receiver *UserInfo) SetPhone(phone string) {
 func (receiver *UserInfo) SetAvatar(avatar string) {
 	receiver.Avatar = avatar
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserInfo, UserInfoAvatar, &syndb.ColData{
+	syndb.AddData(TbUserInfo, UserInfoAvatar, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: avatar,
 	})
@@ -112,7 +112,7 @@ func (receiver *UserInfo) SetAvatar(avatar string) {
 func (receiver *UserInfo) SetRemark(remark string) {
 	receiver.Remark = remark
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserInfo, UserInfoRemark, &syndb.ColData{
+	syndb.AddData(TbUserInfo, UserInfoRemark, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: remark,
 	})
@@ -121,7 +121,7 @@ func (receiver *UserInfo) SetRemark(remark string) {
 func (receiver *UserInfo) AddGold(gold float64) {
 	receiver.Gold = math.AddFloat64(gold, receiver.Gold)
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToLazyChan(TbUserInfo, UserInfoGold, &syndb.ColData{
+	syndb.AddData(TbUserInfo, UserInfoGold, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.Gold,
 	})
@@ -130,7 +130,7 @@ func (receiver *UserInfo) AddGold(gold float64) {
 func (receiver *UserInfo) SubGold(gold float64) {
 	receiver.Gold = math.SubFloat64(receiver.Gold, gold)
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToLazyChan(TbUserInfo, UserInfoGold, &syndb.ColData{
+	syndb.AddData(TbUserInfo, UserInfoGold, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.Gold,
 	})
@@ -139,7 +139,7 @@ func (receiver *UserInfo) SubGold(gold float64) {
 func (receiver *UserInfo) AddDiamond(diamond float64) {
 	receiver.Diamond = math.AddFloat64(diamond, receiver.Diamond)
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToLazyChan(TbUserInfo, UserInfoDiamond, &syndb.ColData{
+	syndb.AddData(TbUserInfo, UserInfoDiamond, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.Diamond,
 	})
@@ -148,7 +148,7 @@ func (receiver *UserInfo) AddDiamond(diamond float64) {
 func (receiver *UserInfo) SubDiamond(diamond float64) {
 	receiver.Diamond = math.SubFloat64(receiver.Diamond, diamond)
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToLazyChan(TbUserInfo, UserInfoDiamond, &syndb.ColData{
+	syndb.AddData(TbUserInfo, UserInfoDiamond, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.Diamond,
 	})
@@ -157,7 +157,7 @@ func (receiver *UserInfo) SubDiamond(diamond float64) {
 func (receiver *UserInfo) SetShareCode(shareCode string) {
 	receiver.ShareCode = shareCode
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserInfo, UserInfoShareCode, &syndb.ColData{
+	syndb.AddData(TbUserInfo, UserInfoShareCode, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: shareCode,
 	})
@@ -166,7 +166,7 @@ func (receiver *UserInfo) SetShareCode(shareCode string) {
 func (receiver *UserInfo) SetGuildId(guildId uint64) {
 	receiver.GuildId = guildId
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserInfo, UserInfoGuildId, &syndb.ColData{
+	syndb.AddData(TbUserInfo, UserInfoGuildId, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: guildId,
 	})
@@ -196,7 +196,7 @@ func (receiver *UserInfo) SetUserType(userType uint8) {
 	}
 	receiver.UserType = userType
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserInfo, UserInfoUserType, &syndb.ColData{
+	syndb.AddData(TbUserInfo, UserInfoUserType, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: userType,
 	})
@@ -205,7 +205,7 @@ func (receiver *UserInfo) SetUserType(userType uint8) {
 func (receiver *UserInfo) SetHasLiveRoom(hasLiveRoom bool) {
 	receiver.HasLiveRoom = hasLiveRoom
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserInfo, UserInfoHasLiveRoom, &syndb.ColData{
+	syndb.AddData(TbUserInfo, UserInfoHasLiveRoom, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: hasLiveRoom,
 	})
@@ -214,7 +214,7 @@ func (receiver *UserInfo) SetHasLiveRoom(hasLiveRoom bool) {
 func (receiver *UserInfo) SetInviterId(inviterId uint64) {
 	receiver.InviterId = inviterId
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserInfo, UserInfoInviterId, &syndb.ColData{
+	syndb.AddData(TbUserInfo, UserInfoInviterId, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: inviterId,
 	})
@@ -223,7 +223,7 @@ func (receiver *UserInfo) SetInviterId(inviterId uint64) {
 func (receiver *UserInfo) SetVipLevel(vipLevel uint32) {
 	receiver.VipLevel = vipLevel
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserInfo, UserInfoVipLevel, &syndb.ColData{
+	syndb.AddData(TbUserInfo, UserInfoVipLevel, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: vipLevel,
 	})
@@ -231,7 +231,7 @@ func (receiver *UserInfo) SetVipLevel(vipLevel uint32) {
 
 func (receiver *UserInfo) SetLastLoginTime(val *time.Time) {
 	receiver.LastLoginTime = val
-	syndb.AddDataToLazyChan(TbUserInfo, UserInfoLastLoginTime, &syndb.ColData{
+	syndb.AddData(TbUserInfo, UserInfoLastLoginTime, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -240,7 +240,7 @@ func (receiver *UserInfo) SetLastLoginTime(val *time.Time) {
 func (receiver *UserInfo) SetLiveRoomId(liveRoomId uint64) {
 	receiver.LiveRoomId = liveRoomId
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserInfo, UserInfoLiveRoomId, &syndb.ColData{
+	syndb.AddData(TbUserInfo, UserInfoLiveRoomId, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: liveRoomId,
 	})
@@ -249,7 +249,7 @@ func (receiver *UserInfo) SetLiveRoomId(liveRoomId uint64) {
 func (receiver *UserInfo) SetLiveRoomVer(liveRoomVer uint64) {
 	receiver.LiveRoomVer = liveRoomVer
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserInfo, UserInfoLiveRoomVer, &syndb.ColData{
+	syndb.AddData(TbUserInfo, UserInfoLiveRoomVer, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: liveRoomVer,
 	})
@@ -258,7 +258,7 @@ func (receiver *UserInfo) SetLiveRoomVer(liveRoomVer uint64) {
 func (receiver *UserInfo) SetGender(gender uint8) {
 	receiver.Gender = gender
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserInfo, UserInfoGender, &syndb.ColData{
+	syndb.AddData(TbUserInfo, UserInfoGender, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: gender,
 	})
@@ -267,7 +267,7 @@ func (receiver *UserInfo) SetGender(gender uint8) {
 func (receiver *UserInfo) SetBirthday(val *time.Time) {
 	receiver.Birthday = val
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserInfo, UserInfoBirthday, &syndb.ColData{
+	syndb.AddData(TbUserInfo, UserInfoBirthday, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -276,7 +276,7 @@ func (receiver *UserInfo) SetBirthday(val *time.Time) {
 func (receiver *UserInfo) SetBotAnchorStatus(status uint8) {
 	receiver.BotAnchorStatus = status
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserInfo, UserInfoBotAnchorStatus, &syndb.ColData{
+	syndb.AddData(TbUserInfo, UserInfoBotAnchorStatus, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: status,
 	})
@@ -284,7 +284,7 @@ func (receiver *UserInfo) SetBotAnchorStatus(status uint8) {
 
 func (receiver *UserInfo) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
-	syndb.AddDataToQuickChan(TbUserInfo, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbUserInfo, db.CreatedAtName, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -292,7 +292,7 @@ func (receiver *UserInfo) SetCreatedAt(val time.Time) {
 
 func (receiver *UserInfo) SetUpdatedAt(val time.Time) {
 	receiver.UpdatedAt = val
-	syndb.AddDataToLazyChan(TbUserInfo, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbUserInfo, db.UpdatedAtName, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})

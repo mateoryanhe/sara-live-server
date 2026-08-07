@@ -68,21 +68,21 @@ func NewLiveRoomOnline(userId, roomId uint64) *LiveRoomOnline {
 
 func (o *LiveRoomOnline) SetRoomId(v uint64) {
 	o.RoomId = v
-	syndb.AddDataToQuickChan(TbLiveRoomOnline, LiveRoomOnlineRoomId, &syndb.ColData{
+	syndb.AddData(TbLiveRoomOnline, LiveRoomOnlineRoomId, &syndb.ColData{
 		IdVal: o.ID, ColVal: v,
 	})
 }
 
 func (o *LiveRoomOnline) SetUserId(v uint64) {
 	o.UserId = v
-	syndb.AddDataToQuickChan(TbLiveRoomOnline, LiveRoomOnlineUserId, &syndb.ColData{
+	syndb.AddData(TbLiveRoomOnline, LiveRoomOnlineUserId, &syndb.ColData{
 		IdVal: o.ID, ColVal: v,
 	})
 }
 
 func (o *LiveRoomOnline) SetStatus(v uint8) {
 	o.Status = v
-	syndb.AddDataToQuickChan(TbLiveRoomOnline, LiveRoomOnlineStatus, &syndb.ColData{
+	syndb.AddData(TbLiveRoomOnline, LiveRoomOnlineStatus, &syndb.ColData{
 		IdVal: o.ID, ColVal: v,
 	})
 
@@ -91,7 +91,7 @@ func (o *LiveRoomOnline) SetStatus(v uint8) {
 func (o *LiveRoomOnline) SetMuted(v bool) {
 	o.Muted = v
 
-	syndb.AddDataToQuickChan(TbLiveRoomOnline, LiveRoomOnlineMuted, &syndb.ColData{
+	syndb.AddData(TbLiveRoomOnline, LiveRoomOnlineMuted, &syndb.ColData{
 		IdVal: o.ID, ColVal: v,
 	})
 
@@ -99,28 +99,28 @@ func (o *LiveRoomOnline) SetMuted(v bool) {
 
 func (o *LiveRoomOnline) SetCreatedAt(v time.Time) {
 	o.CreatedAt = v
-	syndb.AddDataToQuickChan(TbLiveRoomOnline, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbLiveRoomOnline, db.CreatedAtName, &syndb.ColData{
 		IdVal: o.ID, ColVal: v,
 	})
 }
 
 func (o *LiveRoomOnline) SetJoinTime(v *time.Time) {
 	o.JoinTime = v
-	syndb.AddDataToQuickChan(TbLiveRoomOnline, TbLiveRoomOnlineJoinTime, &syndb.ColData{
+	syndb.AddData(TbLiveRoomOnline, TbLiveRoomOnlineJoinTime, &syndb.ColData{
 		IdVal: o.ID, ColVal: v,
 	})
 }
 
 func (o *LiveRoomOnline) SetHeartTime(v *time.Time) {
 	o.HeartTime = v
-	syndb.AddDataToLazyChan(TbLiveRoomOnline, TbLiveRoomOnlineHeartTime, &syndb.ColData{
+	syndb.AddData(TbLiveRoomOnline, TbLiveRoomOnlineHeartTime, &syndb.ColData{
 		IdVal: o.ID, ColVal: v,
 	})
 }
 
 func (o *LiveRoomOnline) SetKickTime(v *time.Time) {
 	o.KickTime = v
-	syndb.AddDataToQuickChan(TbLiveRoomOnline, TbLiveRoomOnlineKickTime, &syndb.ColData{
+	syndb.AddData(TbLiveRoomOnline, TbLiveRoomOnlineKickTime, &syndb.ColData{
 		IdVal: o.ID, ColVal: v,
 	})
 }
@@ -130,7 +130,7 @@ func (o *LiveRoomOnline) AddTotalReward(amount float64) {
 		return
 	}
 	o.TotalReward = math.AddFloat64(o.TotalReward, amount)
-	syndb.AddDataToLazyChan(TbLiveRoomOnline, LiveRoomOnlineTotalReward, &syndb.ColData{
+	syndb.AddData(TbLiveRoomOnline, LiveRoomOnlineTotalReward, &syndb.ColData{
 		IdVal: o.ID, ColVal: o.TotalReward,
 	})
 }

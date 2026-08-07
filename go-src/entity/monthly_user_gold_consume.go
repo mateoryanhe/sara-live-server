@@ -36,17 +36,17 @@ func NewMonthlyUserGoldConsume(month string, userId uint64) *MonthlyUserGoldCons
 
 func (r *MonthlyUserGoldConsume) SetUserId(v uint64) {
 	r.UserId = v
-	syndb.AddDataToLazyChan(TbMonthlyUserGoldConsume, MonthlyUserGoldConsumeUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbMonthlyUserGoldConsume, MonthlyUserGoldConsumeUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *MonthlyUserGoldConsume) SetConsumeMonth(v string) {
 	r.ConsumeMonth = v
-	syndb.AddDataToLazyChan(TbMonthlyUserGoldConsume, MonthlyUserGoldConsumeConsumeMonth, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbMonthlyUserGoldConsume, MonthlyUserGoldConsumeConsumeMonth, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *MonthlyUserGoldConsume) SetCreatedAt(v *time.Time) {
 	r.CreatedAt = v
-	syndb.AddDataToLazyChan(TbMonthlyUserGoldConsume, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbMonthlyUserGoldConsume, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func initMonthlyUserGoldConsume() {

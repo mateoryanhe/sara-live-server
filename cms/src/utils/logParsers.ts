@@ -5,6 +5,8 @@ import type {
     DetailLogItem,
     ErrorLogItem,
     PageResponse,
+    SyndbFlushDetailItem,
+    SyndbFlushLog,
     TopStatItem,
     TraceLogDetail,
 } from '@/types/api'
@@ -93,6 +95,83 @@ const extractIdsFromLogHeaders = (message: string) => {
     } catch {
         return {reqId: '', authId: ''}
     }
+}
+
+const syndbFlushLogRe =
+    /^syndb刷盘,reason=([^,]+)(?:,sysCpu=([\d.]+)%,cpuIdle=([\d.]+)%,idleThreshold=([\d.]+)%)?,batchLimit=(\d+),queues=(\d+),rows=(\d+),idleQueues=(\d+),forceQueues=(\d+),costMs=(\d+),detail=\[(.*)\]$/
+const syndbFlushDetailItemRe = /([^:;]+):([^:;]+):(\d+):([^:;]+):(\d+)ms/g
+
+const parseSyndbFlushDetails = (raw: string): SyndbFlushDetailItem[] => {
+    const items: SyndbFlushDetailItem[] = []
+    if (!raw.trim()) {
+        return items
+    }
+    for (const match of raw.matchAll(syndbFlushDetailItemRe)) {
+        items.push({
+            table: match[1],
+            col: match[2],
+            rows: Number(match[3]) || 0,
+            reason: match[4],
+            waitMs: Number(match[5]) || 0,
+        })
+    }
+    return items
+}
+
+export const parseSyndbFlushLog = (message: string): SyndbFlushLog | null => {
+    const match = message.trim().match(syndbFlushLogRe)
+    if (!match) {
+        return null
+    }
+    return {
+        reason: match[1],
+        sysCpu: match[2] ? Number(match[2]) : undefined,
+        cpuIdle: match[3] ? Number(match[3]) : undefined,
+        idleThreshold: match[4] ? Number(match[4]) : undefined,
+        batchLimit: Number(match[5]) || 0,
+        queues: Number(match[6]) || 0,
+        rows: Number(match[7]) || 0,
+        idleQueues: Number(match[8]) || 0,
+        forceQueues: Number(match[9]) || 0,
+        costMs: Number(match[10]) || 0,
+        details: parseSyndbFlushDetails(match[11] || ''),
+    }
+}
+
+export const isSyndbFlushLog = (message?: string) => !!message?.trim().startsWith('syndb刷盘')
+
+const syndbReasonLabelMap: Record<string, string> = {
+    cpu_idle: 'CPU空闲',
+    force_wait: '超时强制',
+    shutdown: '关停刷盘',
+}
+
+export const formatSyndbFlushReason = (reason: string) => syndbReasonLabelMap[reason] || reason
+
+export const syndbFlushReasonTagType = (reason: string): 'success' | 'warning' | 'info' | '' => {
+    if (reason === 'cpu_idle') {
+        return 'success'
+    }
+    if (reason === 'force_wait') {
+        return 'warning'
+    }
+    if (reason === 'shutdown') {
+        return 'info'
+    }
+    return ''
+}
+
+export const formatSyndbFlushSummary = (flush: SyndbFlushLog) => {
+    const parts = [
+        formatSyndbFlushReason(flush.reason),
+        `${flush.rows}行`,
+        `${flush.queues}队列`,
+        `${flush.costMs}ms`,
+    ]
+    if (flush.cpuIdle !== undefined) {
+        parts.push(`CPU空闲${flush.cpuIdle.toFixed(1)}%`)
+    }
+    return parts.join(' · ')
 }
 
 const extractElapsedMsFromMessage = (message: string) => {
@@ -319,6 +398,9 @@ export const parseDetailLogLine = (line: string): DetailLogItem | null => {
     const elapsedMs = extractElapsedMsFromMessage(message)
     if (elapsedMs !== undefined) {
         entry.elapsedMs = elapsedMs
+    }
+    if (isSyndbFlushLog(message)) {
+        entry.syndbFlush = parseSyndbFlushLog(message) ?? undefined
     }
     return entry
 }

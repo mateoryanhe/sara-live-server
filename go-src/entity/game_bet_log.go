@@ -58,57 +58,57 @@ func NewGameBetLog(userId uint64, gameCode, nameEn, cover string, platformType g
 
 func (r *GameBetLog) SetUserId(v uint64) {
 	r.UserId = v
-	syndb.AddDataToQuickChan(TbGameBetLog, GameBetLogUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGameBetLog, GameBetLogUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *GameBetLog) SetGameCode(v string) {
 	r.GameCode = v
-	syndb.AddDataToQuickChan(TbGameBetLog, GameBetLogGameCode, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGameBetLog, GameBetLogGameCode, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *GameBetLog) SetNameEn(v string) {
 	r.NameEn = v
-	syndb.AddDataToQuickChan(TbGameBetLog, GameBetLogNameEn, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGameBetLog, GameBetLogNameEn, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *GameBetLog) SetCover(v string) {
 	r.Cover = v
-	syndb.AddDataToQuickChan(TbGameBetLog, GameBetLogCover, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGameBetLog, GameBetLogCover, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *GameBetLog) SetAmount(v float64) {
 	r.Amount = v
-	syndb.AddDataToQuickChan(TbGameBetLog, GameBetLogAmount, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGameBetLog, GameBetLogAmount, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *GameBetLog) SetPlatformType(v string) {
 	r.PlatformType = v
-	syndb.AddDataToQuickChan(TbGameBetLog, GameBetLogPlatformType, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGameBetLog, GameBetLogPlatformType, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *GameBetLog) SetOrderId(v string) {
 	r.OrderId = v
-	syndb.AddDataToQuickChan(TbGameBetLog, GameBetLogOrderId, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGameBetLog, GameBetLogOrderId, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *GameBetLog) SetLiveRoomId(v uint64) {
 	r.LiveRoomId = v
-	syndb.AddDataToQuickChan(TbGameBetLog, GameBetLogLiveRoomId, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGameBetLog, GameBetLogLiveRoomId, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *GameBetLog) SetLiveRecordId(v uint64) {
 	r.LiveRecordId = v
-	syndb.AddDataToQuickChan(TbGameBetLog, GameBetLogLiveRecordId, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGameBetLog, GameBetLogLiveRecordId, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *GameBetLog) SetCreatedAt(v time.Time) {
 	r.CreatedAt = v
-	syndb.AddDataToQuickChan(TbGameBetLog, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGameBetLog, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *GameBetLog) SetUpdatedAt(v time.Time) {
 	r.UpdatedAt = v
-	syndb.AddDataToQuickChan(TbGameBetLog, db.UpdatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGameBetLog, db.UpdatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func initGameBetLog() {

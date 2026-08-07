@@ -37,17 +37,17 @@ func NewWeeklyUserAudience(week string, userId uint64) *WeeklyUserAudience {
 
 func (r *WeeklyUserAudience) SetUserId(v uint64) {
 	r.UserId = v
-	syndb.AddDataToLazyChan(TbWeeklyUserAudience, WeeklyUserAudienceUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbWeeklyUserAudience, WeeklyUserAudienceUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *WeeklyUserAudience) SetAudienceWeek(v string) {
 	r.AudienceWeek = v
-	syndb.AddDataToLazyChan(TbWeeklyUserAudience, WeeklyUserAudienceAudienceWeek, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbWeeklyUserAudience, WeeklyUserAudienceAudienceWeek, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *WeeklyUserAudience) SetCreatedAt(v *time.Time) {
 	r.CreatedAt = v
-	syndb.AddDataToLazyChan(TbWeeklyUserAudience, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbWeeklyUserAudience, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func initWeeklyUserAudience() {

@@ -46,35 +46,35 @@ func NewUserPersonalSystemMessage(userId uint64, messageTypeId uint32, params st
 
 func (m *UserPersonalSystemMessage) SetUserId(v uint64) {
 	m.UserId = v
-	syndb.AddDataToQuickChan(TbUserPersonalSystemMessage, UserPersonalSystemMessageUserId, &syndb.ColData{
+	syndb.AddData(TbUserPersonalSystemMessage, UserPersonalSystemMessageUserId, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }
 
 func (m *UserPersonalSystemMessage) SetMessageTypeId(v uint32) {
 	m.MessageTypeId = v
-	syndb.AddDataToQuickChan(TbUserPersonalSystemMessage, UserPersonalSystemMessageMessageTypeId, &syndb.ColData{
+	syndb.AddData(TbUserPersonalSystemMessage, UserPersonalSystemMessageMessageTypeId, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }
 
 func (m *UserPersonalSystemMessage) SetParams(v string) {
 	m.Params = v
-	syndb.AddDataToQuickChan(TbUserPersonalSystemMessage, UserPersonalSystemMessageParams, &syndb.ColData{
+	syndb.AddData(TbUserPersonalSystemMessage, UserPersonalSystemMessageParams, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }
 
 func (m *UserPersonalSystemMessage) SetCreatedAt(v time.Time) {
 	m.CreatedAt = v
-	syndb.AddDataToQuickChan(TbUserPersonalSystemMessage, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbUserPersonalSystemMessage, db.CreatedAtName, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }
 
 func (m *UserPersonalSystemMessage) SetUpdatedAt(v time.Time) {
 	m.UpdatedAt = v
-	syndb.AddDataToQuickChan(TbUserPersonalSystemMessage, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbUserPersonalSystemMessage, db.UpdatedAtName, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }

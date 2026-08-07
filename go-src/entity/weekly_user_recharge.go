@@ -39,21 +39,21 @@ func NewWeeklyUserRecharge(week string, userId uint64) *WeeklyUserRecharge {
 
 func (r *WeeklyUserRecharge) SetUserId(v uint64) {
 	r.UserId = v
-	syndb.AddDataToLazyChan(TbWeeklyUserRecharge, WeeklyUserRechargeUserId, &syndb.ColData{
+	syndb.AddData(TbWeeklyUserRecharge, WeeklyUserRechargeUserId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *WeeklyUserRecharge) SetRechargeWeek(v string) {
 	r.RechargeWeek = v
-	syndb.AddDataToLazyChan(TbWeeklyUserRecharge, WeeklyUserRechargeRechargeWeek, &syndb.ColData{
+	syndb.AddData(TbWeeklyUserRecharge, WeeklyUserRechargeRechargeWeek, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *WeeklyUserRecharge) SetCreatedAt(v *time.Time) {
 	r.CreatedAt = v
-	syndb.AddDataToLazyChan(TbWeeklyUserRecharge, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbWeeklyUserRecharge, db.CreatedAtName, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }

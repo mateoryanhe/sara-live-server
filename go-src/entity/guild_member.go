@@ -48,7 +48,7 @@ func NewLiveGuildMember(memberId, guildId, userId uint64) *LiveGuildMember {
 
 func (m *LiveGuildMember) SetGuildId(v uint64) {
 	m.GuildId = v
-	syndb.AddDataToQuickChan(TbLiveGuildMember, GuildMemberGuildId, &syndb.ColData{
+	syndb.AddData(TbLiveGuildMember, GuildMemberGuildId, &syndb.ColData{
 		IdVal:  m.ID,
 		ColVal: v,
 	})
@@ -56,7 +56,7 @@ func (m *LiveGuildMember) SetGuildId(v uint64) {
 
 func (m *LiveGuildMember) SetUserId(v uint64) {
 	m.UserId = v
-	syndb.AddDataToQuickChan(TbLiveGuildMember, GuildMemberUserId, &syndb.ColData{
+	syndb.AddData(TbLiveGuildMember, GuildMemberUserId, &syndb.ColData{
 		IdVal:  m.ID,
 		ColVal: v,
 	})
@@ -65,7 +65,7 @@ func (m *LiveGuildMember) SetUserId(v uint64) {
 func (m *LiveGuildMember) SetStatus(v uint8) {
 	m.Status = v
 	m.SetUpdatedAtOnly(time.Now())
-	syndb.AddDataToQuickChan(TbLiveGuildMember, GuildMemberStatus, &syndb.ColData{
+	syndb.AddData(TbLiveGuildMember, GuildMemberStatus, &syndb.ColData{
 		IdVal:  m.ID,
 		ColVal: v,
 	})
@@ -73,7 +73,7 @@ func (m *LiveGuildMember) SetStatus(v uint8) {
 
 func (m *LiveGuildMember) SetCreatedAt(v time.Time) {
 	m.CreatedAt = v
-	syndb.AddDataToQuickChan(TbLiveGuildMember, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbLiveGuildMember, db.CreatedAtName, &syndb.ColData{
 		IdVal:  m.ID,
 		ColVal: v,
 	})
@@ -81,7 +81,7 @@ func (m *LiveGuildMember) SetCreatedAt(v time.Time) {
 
 func (m *LiveGuildMember) SetUpdatedAt(v time.Time) {
 	m.UpdatedAt = v
-	syndb.AddDataToQuickChan(TbLiveGuildMember, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbLiveGuildMember, db.UpdatedAtName, &syndb.ColData{
 		IdVal:  m.ID,
 		ColVal: v,
 	})
@@ -90,7 +90,7 @@ func (m *LiveGuildMember) SetUpdatedAt(v time.Time) {
 // SetUpdatedAtOnly 仅刷新内存中的UpdatedAt并入队同步,避免在SetStatus中重复调用产生多余日志
 func (m *LiveGuildMember) SetUpdatedAtOnly(v time.Time) {
 	m.UpdatedAt = v
-	syndb.AddDataToQuickChan(TbLiveGuildMember, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbLiveGuildMember, db.UpdatedAtName, &syndb.ColData{
 		IdVal:  m.ID,
 		ColVal: v,
 	})

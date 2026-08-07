@@ -39,21 +39,21 @@ func NewDailyUserRecharge(date string, userId uint64) *DailyUserRecharge {
 
 func (r *DailyUserRecharge) SetUserId(v uint64) {
 	r.UserId = v
-	syndb.AddDataToLazyChan(TbDailyUserRecharge, DailyUserRechargeUserId, &syndb.ColData{
+	syndb.AddData(TbDailyUserRecharge, DailyUserRechargeUserId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *DailyUserRecharge) SetRechargeDate(v string) {
 	r.RechargeDate = v
-	syndb.AddDataToLazyChan(TbDailyUserRecharge, DailyUserRechargeRechargeDate, &syndb.ColData{
+	syndb.AddData(TbDailyUserRecharge, DailyUserRechargeRechargeDate, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *DailyUserRecharge) SetCreatedAt(v *time.Time) {
 	r.CreatedAt = v
-	syndb.AddDataToLazyChan(TbDailyUserRecharge, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbDailyUserRecharge, db.CreatedAtName, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }

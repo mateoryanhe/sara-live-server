@@ -62,7 +62,7 @@ func NewWeeklyLoginStat(week string) *WeeklyLoginStat {
 
 func (r *WeeklyLoginStat) AddLoginCount(n uint64) {
 	r.Count = math.Add(r.Count, n)
-	syndb.AddDataToLazyChan(TbWeeklyLoginStat, WeeklyLoginStatCount, &syndb.ColData{
+	syndb.AddData(TbWeeklyLoginStat, WeeklyLoginStatCount, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.Count,
 	})
@@ -70,7 +70,7 @@ func (r *WeeklyLoginStat) AddLoginCount(n uint64) {
 
 func (r *WeeklyLoginStat) AddRegisterCount(n uint64) {
 	r.RegisterCount = math.Add(r.RegisterCount, n)
-	syndb.AddDataToLazyChan(TbWeeklyLoginStat, WeeklyLoginStatRegisterCount, &syndb.ColData{
+	syndb.AddData(TbWeeklyLoginStat, WeeklyLoginStatRegisterCount, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.RegisterCount,
 	})
@@ -78,7 +78,7 @@ func (r *WeeklyLoginStat) AddRegisterCount(n uint64) {
 
 func (r *WeeklyLoginStat) AddRechargeAmount(val float64) {
 	r.RechargeAmount = math.AddFloat64(r.RechargeAmount, val)
-	syndb.AddDataToLazyChan(TbWeeklyLoginStat, WeeklyLoginStatRechargeAmount, &syndb.ColData{
+	syndb.AddData(TbWeeklyLoginStat, WeeklyLoginStatRechargeAmount, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.RechargeAmount,
 	})
@@ -86,7 +86,7 @@ func (r *WeeklyLoginStat) AddRechargeAmount(val float64) {
 
 func (r *WeeklyLoginStat) AddGoldConsumeAmount(val float64) {
 	r.GoldConsumeAmount = math.AddFloat64(r.GoldConsumeAmount, val)
-	syndb.AddDataToLazyChan(TbWeeklyLoginStat, WeeklyLoginStatGoldConsumeAmount, &syndb.ColData{
+	syndb.AddData(TbWeeklyLoginStat, WeeklyLoginStatGoldConsumeAmount, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.GoldConsumeAmount,
 	})
@@ -94,7 +94,7 @@ func (r *WeeklyLoginStat) AddGoldConsumeAmount(val float64) {
 
 func (r *WeeklyLoginStat) AddDiamondConsumeAmount(val float64) {
 	r.DiamondConsumeAmount = math.AddFloat64(r.DiamondConsumeAmount, val)
-	syndb.AddDataToLazyChan(TbWeeklyLoginStat, WeeklyLoginStatDiamondConsumeAmount, &syndb.ColData{
+	syndb.AddData(TbWeeklyLoginStat, WeeklyLoginStatDiamondConsumeAmount, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.DiamondConsumeAmount,
 	})
@@ -102,7 +102,7 @@ func (r *WeeklyLoginStat) AddDiamondConsumeAmount(val float64) {
 
 func (r *WeeklyLoginStat) AddRechargeUserCount(n uint64) {
 	r.RechargeUserCount = math.Add(r.RechargeUserCount, n)
-	syndb.AddDataToLazyChan(TbWeeklyLoginStat, WeeklyLoginStatRechargeUserCount, &syndb.ColData{
+	syndb.AddData(TbWeeklyLoginStat, WeeklyLoginStatRechargeUserCount, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.RechargeUserCount,
 	})
@@ -110,7 +110,7 @@ func (r *WeeklyLoginStat) AddRechargeUserCount(n uint64) {
 
 func (r *WeeklyLoginStat) AddGoldConsumeUserCount(n uint64) {
 	r.GoldConsumeUserCount = math.Add(r.GoldConsumeUserCount, n)
-	syndb.AddDataToLazyChan(TbWeeklyLoginStat, WeeklyLoginStatGoldConsumeUserCount, &syndb.ColData{
+	syndb.AddData(TbWeeklyLoginStat, WeeklyLoginStatGoldConsumeUserCount, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.GoldConsumeUserCount,
 	})
@@ -118,7 +118,7 @@ func (r *WeeklyLoginStat) AddGoldConsumeUserCount(n uint64) {
 
 func (r *WeeklyLoginStat) AddDiamondConsumeUserCount(n uint64) {
 	r.DiamondConsumeUserCount = math.Add(r.DiamondConsumeUserCount, n)
-	syndb.AddDataToLazyChan(TbWeeklyLoginStat, WeeklyLoginStatDiamondConsumeUserCount, &syndb.ColData{
+	syndb.AddData(TbWeeklyLoginStat, WeeklyLoginStatDiamondConsumeUserCount, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.DiamondConsumeUserCount,
 	})
@@ -126,7 +126,7 @@ func (r *WeeklyLoginStat) AddDiamondConsumeUserCount(n uint64) {
 
 func (r *WeeklyLoginStat) AddAudienceUserCount(n uint64) {
 	r.AudienceUserCount = math.Add(r.AudienceUserCount, n)
-	syndb.AddDataToLazyChan(TbWeeklyLoginStat, WeeklyLoginStatAudienceUserCount, &syndb.ColData{
+	syndb.AddData(TbWeeklyLoginStat, WeeklyLoginStatAudienceUserCount, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.AudienceUserCount,
 	})

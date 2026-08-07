@@ -62,7 +62,7 @@ func NormalizeOpenId(openId string) string {
 
 func (this *Account) SetOpenId(openId string) {
 	this.OpenId = openId
-	syndb.AddDataToQuickChan(TbAccount, AccountOpenId, &syndb.ColData{
+	syndb.AddData(TbAccount, AccountOpenId, &syndb.ColData{
 		IdVal:  this.ID,
 		ColVal: openId,
 	})
@@ -71,7 +71,7 @@ func (this *Account) SetOpenId(openId string) {
 func (receiver *Account) SetIp(ip string) {
 	receiver.IP = ip
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbAccount, AccountIP, &syndb.ColData{
+	syndb.AddData(TbAccount, AccountIP, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: ip,
 	})
@@ -80,7 +80,7 @@ func (receiver *Account) SetIp(ip string) {
 func (receiver *Account) SetRegisterIp(ip string) {
 	receiver.RegisterIp = ip
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbAccount, AccountRegisterIp, &syndb.ColData{
+	syndb.AddData(TbAccount, AccountRegisterIp, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: ip,
 	})
@@ -89,7 +89,7 @@ func (receiver *Account) SetRegisterIp(ip string) {
 func (receiver *Account) SetRegisterCountry(country string) {
 	receiver.RegisterCountry = country
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbAccount, AccountRegisterCountry, &syndb.ColData{
+	syndb.AddData(TbAccount, AccountRegisterCountry, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: country,
 	})
@@ -98,7 +98,7 @@ func (receiver *Account) SetRegisterCountry(country string) {
 func (receiver *Account) SetLoginCountry(country string) {
 	receiver.LoginCountry = country
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbAccount, AccountLoginCountry, &syndb.ColData{
+	syndb.AddData(TbAccount, AccountLoginCountry, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: country,
 	})
@@ -107,7 +107,7 @@ func (receiver *Account) SetLoginCountry(country string) {
 func (receiver *Account) SetChannel(channel uint) {
 	receiver.Channel = channel
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbAccount, AccountChannel, &syndb.ColData{
+	syndb.AddData(TbAccount, AccountChannel, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: channel,
 	})
@@ -116,7 +116,7 @@ func (receiver *Account) SetChannel(channel uint) {
 func (receiver *Account) SetPhoneAreaCode(phoneAreaCode string) {
 	receiver.PhoneAreaCode = phoneAreaCode
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbAccount, AccountPhoneAreaCode, &syndb.ColData{
+	syndb.AddData(TbAccount, AccountPhoneAreaCode, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: phoneAreaCode,
 	})
@@ -124,7 +124,7 @@ func (receiver *Account) SetPhoneAreaCode(phoneAreaCode string) {
 
 func (receiver *Account) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
-	syndb.AddDataToQuickChan(TbAccount, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbAccount, db.CreatedAtName, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -132,7 +132,7 @@ func (receiver *Account) SetCreatedAt(val time.Time) {
 
 func (receiver *Account) SetUpdatedAt(val time.Time) {
 	receiver.UpdatedAt = val
-	syndb.AddDataToQuickChan(TbAccount, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbAccount, db.UpdatedAtName, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -141,7 +141,7 @@ func (receiver *Account) SetUpdatedAt(val time.Time) {
 func (this *Account) SetBan(ban bool) {
 	this.Ban = ban
 	this.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbAccount, AccountBan, &syndb.ColData{
+	syndb.AddData(TbAccount, AccountBan, &syndb.ColData{
 		IdVal:  this.ID,
 		ColVal: ban,
 	})
@@ -150,7 +150,7 @@ func (this *Account) SetBan(ban bool) {
 func (receiver *Account) SetBanTime(banTime *time.Time) {
 	receiver.BanTime = banTime
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbAccount, AccountBanTime, &syndb.ColData{
+	syndb.AddData(TbAccount, AccountBanTime, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: banTime,
 	})
@@ -159,7 +159,7 @@ func (receiver *Account) SetBanTime(banTime *time.Time) {
 func (receiver *Account) SetBanApplyTime(banApplyTime *time.Time) {
 	receiver.BanApplyTime = banApplyTime
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbAccount, AccountBanApplyTime, &syndb.ColData{
+	syndb.AddData(TbAccount, AccountBanApplyTime, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: banApplyTime,
 	})
@@ -168,7 +168,7 @@ func (receiver *Account) SetBanApplyTime(banApplyTime *time.Time) {
 func (this *Account) SetCancel(cancel bool) {
 	this.Cancel = cancel
 	this.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbAccount, AccountCancel, &syndb.ColData{
+	syndb.AddData(TbAccount, AccountCancel, &syndb.ColData{
 		IdVal:  this.ID,
 		ColVal: cancel,
 	})
@@ -177,7 +177,7 @@ func (this *Account) SetCancel(cancel bool) {
 func (receiver *Account) SetPassword(password string) {
 	receiver.Password = password
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbAccount, AccountPassword, &syndb.ColData{
+	syndb.AddData(TbAccount, AccountPassword, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: password,
 	})

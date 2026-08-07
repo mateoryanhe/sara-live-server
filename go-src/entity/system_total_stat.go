@@ -52,7 +52,7 @@ func NewSystemTotalStat(id uint64) *SystemTotalStat {
 func (s *SystemTotalStat) AddTotalGold(val float64) {
 	s.TotalGold = math.AddFloat64(s.TotalGold, val)
 
-	syndb.AddDataToLazyChan(TbSystemTotalStat, SystemTotalStatTotalGold, &syndb.ColData{
+	syndb.AddData(TbSystemTotalStat, SystemTotalStatTotalGold, &syndb.ColData{
 		IdVal:  s.ID,
 		ColVal: s.TotalGold,
 	})
@@ -61,7 +61,7 @@ func (s *SystemTotalStat) AddTotalGold(val float64) {
 func (s *SystemTotalStat) AddTotalGoldConsume(val float64) {
 	s.TotalGoldConsume = math.AddFloat64(s.TotalGoldConsume, val)
 
-	syndb.AddDataToLazyChan(TbSystemTotalStat, SystemTotalStatTotalGoldConsume, &syndb.ColData{
+	syndb.AddData(TbSystemTotalStat, SystemTotalStatTotalGoldConsume, &syndb.ColData{
 		IdVal:  s.ID,
 		ColVal: s.TotalGoldConsume,
 	})
@@ -70,7 +70,7 @@ func (s *SystemTotalStat) AddTotalGoldConsume(val float64) {
 func (s *SystemTotalStat) AddTotalDiamondConsume(val float64) {
 	s.TotalDiamondConsume = math.AddFloat64(s.TotalDiamondConsume, val)
 
-	syndb.AddDataToLazyChan(TbSystemTotalStat, SystemTotalStatTotalDiamondConsume, &syndb.ColData{
+	syndb.AddData(TbSystemTotalStat, SystemTotalStatTotalDiamondConsume, &syndb.ColData{
 		IdVal:  s.ID,
 		ColVal: s.TotalDiamondConsume,
 	})
@@ -79,7 +79,7 @@ func (s *SystemTotalStat) AddTotalDiamondConsume(val float64) {
 func (s *SystemTotalStat) AddTotalRecharge(val float64) {
 	s.TotalRecharge = math.AddFloat64(s.TotalRecharge, val)
 
-	syndb.AddDataToLazyChan(TbSystemTotalStat, SystemTotalStatTotalRecharge, &syndb.ColData{
+	syndb.AddData(TbSystemTotalStat, SystemTotalStatTotalRecharge, &syndb.ColData{
 		IdVal:  s.ID,
 		ColVal: s.TotalRecharge,
 	})
@@ -88,7 +88,7 @@ func (s *SystemTotalStat) AddTotalRecharge(val float64) {
 func (s *SystemTotalStat) AddTotalWithdraw(val float64) {
 	s.TotalWithdraw = math.AddFloat64(s.TotalWithdraw, val)
 
-	syndb.AddDataToLazyChan(TbSystemTotalStat, SystemTotalStatTotalWithdraw, &syndb.ColData{
+	syndb.AddData(TbSystemTotalStat, SystemTotalStatTotalWithdraw, &syndb.ColData{
 		IdVal:  s.ID,
 		ColVal: s.TotalWithdraw,
 	})
@@ -97,7 +97,7 @@ func (s *SystemTotalStat) AddTotalWithdraw(val float64) {
 func (s *SystemTotalStat) AddTotalRegisterUser(val uint64) {
 	s.TotalRegisterUser = math.Add(s.TotalRegisterUser, val)
 
-	syndb.AddDataToLazyChan(TbSystemTotalStat, SystemTotalStatTotalRegisterUser, &syndb.ColData{
+	syndb.AddData(TbSystemTotalStat, SystemTotalStatTotalRegisterUser, &syndb.ColData{
 		IdVal:  s.ID,
 		ColVal: s.TotalRegisterUser,
 	})
@@ -105,7 +105,7 @@ func (s *SystemTotalStat) AddTotalRegisterUser(val uint64) {
 
 func (s *SystemTotalStat) SetCreatedAt(v time.Time) {
 	s.CreatedAt = v
-	syndb.AddDataToLazyChan(TbSystemTotalStat, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbSystemTotalStat, db.CreatedAtName, &syndb.ColData{
 		IdVal:  s.ID,
 		ColVal: v,
 	})
@@ -113,7 +113,7 @@ func (s *SystemTotalStat) SetCreatedAt(v time.Time) {
 
 func (s *SystemTotalStat) SetUpdatedAt(v time.Time) {
 	s.UpdatedAt = v
-	syndb.AddDataToLazyChan(TbSystemTotalStat, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbSystemTotalStat, db.UpdatedAtName, &syndb.ColData{
 		IdVal:  s.ID,
 		ColVal: v,
 	})
@@ -121,7 +121,7 @@ func (s *SystemTotalStat) SetUpdatedAt(v time.Time) {
 
 func (s *SystemTotalStat) touchUpdatedAt() {
 	s.UpdatedAt = time.Now()
-	syndb.AddDataToLazyChan(TbSystemTotalStat, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbSystemTotalStat, db.UpdatedAtName, &syndb.ColData{
 		IdVal:  s.ID,
 		ColVal: s.UpdatedAt,
 	})

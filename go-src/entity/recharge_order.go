@@ -79,77 +79,77 @@ func NewRechargeOrder(userId, cfgId uint64, price float64, currency string, gold
 
 func (r *RechargeOrder) SetUserId(v uint64) {
 	r.UserId = v
-	syndb.AddDataToQuickChan(TbRechargeOrder, RechargeOrderUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbRechargeOrder, RechargeOrderUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *RechargeOrder) SetCfgId(v uint64) {
 	r.CfgId = v
-	syndb.AddDataToQuickChan(TbRechargeOrder, RechargeOrderCfgId, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbRechargeOrder, RechargeOrderCfgId, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *RechargeOrder) SetPrice(v float64) {
 	r.Price = v
-	syndb.AddDataToQuickChan(TbRechargeOrder, RechargeOrderPrice, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbRechargeOrder, RechargeOrderPrice, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *RechargeOrder) SetCurrency(v string) {
 	r.Currency = v
-	syndb.AddDataToQuickChan(TbRechargeOrder, RechargeOrderCurrency, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbRechargeOrder, RechargeOrderCurrency, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *RechargeOrder) SetGold(v float64) {
 	r.Gold = v
-	syndb.AddDataToQuickChan(TbRechargeOrder, RechargeOrderGold, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbRechargeOrder, RechargeOrderGold, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *RechargeOrder) SetStatus(v uint8) {
 	r.Status = v
-	syndb.AddDataToQuickChan(TbRechargeOrder, RechargeOrderStatus, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbRechargeOrder, RechargeOrderStatus, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *RechargeOrder) SetSource(v uint8) {
 	r.Source = v
-	syndb.AddDataToQuickChan(TbRechargeOrder, RechargeOrderSource, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbRechargeOrder, RechargeOrderSource, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *RechargeOrder) SetPayChannel(v uint8) {
 	r.PayChannel = v
-	syndb.AddDataToQuickChan(TbRechargeOrder, RechargeOrderPayChannel, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbRechargeOrder, RechargeOrderPayChannel, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *RechargeOrder) SetThirdOrderId(v string) {
 	r.ThirdOrderId = v
-	syndb.AddDataToQuickChan(TbRechargeOrder, RechargeOrderThirdOrderId, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbRechargeOrder, RechargeOrderThirdOrderId, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *RechargeOrder) SetRemark(v string) {
 	r.Remark = v
-	syndb.AddDataToQuickChan(TbRechargeOrder, RechargeOrderRemark, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbRechargeOrder, RechargeOrderRemark, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *RechargeOrder) SetOperatorId(v uint64) {
 	r.OperatorId = v
-	syndb.AddDataToQuickChan(TbRechargeOrder, RechargeOrderOperatorId, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbRechargeOrder, RechargeOrderOperatorId, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *RechargeOrder) SetPackageName(v string) {
 	r.PackageName = v
-	syndb.AddDataToQuickChan(TbRechargeOrder, RechargeOrderPackageName, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbRechargeOrder, RechargeOrderPackageName, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *RechargeOrder) SetPaidAt(v time.Time) {
 	r.PaidAt = v
-	syndb.AddDataToQuickChan(TbRechargeOrder, RechargeOrderPaidAt, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbRechargeOrder, RechargeOrderPaidAt, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *RechargeOrder) SetCreatedAt(v time.Time) {
 	r.CreatedAt = v
-	syndb.AddDataToQuickChan(TbRechargeOrder, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbRechargeOrder, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *RechargeOrder) SetUpdatedAt(v time.Time) {
 	r.UpdatedAt = v
-	syndb.AddDataToQuickChan(TbRechargeOrder, db.UpdatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbRechargeOrder, db.UpdatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func initRechargeOrder() {

@@ -52,14 +52,14 @@ func NewUserSystemMessageUnread(userId uint64, msgType uint8) *UserSystemMessage
 
 func (m *UserSystemMessageUnread) SetUserId(v uint64) {
 	m.UserId = v
-	syndb.AddDataToQuickChan(TbUserSystemMessageUnread, UserSystemMessageUnreadUserId, &syndb.ColData{
+	syndb.AddData(TbUserSystemMessageUnread, UserSystemMessageUnreadUserId, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }
 
 func (m *UserSystemMessageUnread) SetType(v uint8) {
 	m.Type = v
-	syndb.AddDataToQuickChan(TbUserSystemMessageUnread, UserSystemMessageUnreadType, &syndb.ColData{
+	syndb.AddData(TbUserSystemMessageUnread, UserSystemMessageUnreadType, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }
@@ -67,7 +67,7 @@ func (m *UserSystemMessageUnread) SetType(v uint8) {
 func (m *UserSystemMessageUnread) AddUnread(v uint64) {
 	m.UnreadCount = math.Add(m.UnreadCount, v)
 	m.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserSystemMessageUnread, UserSystemMessageUnreadUnreadCount, &syndb.ColData{
+	syndb.AddData(TbUserSystemMessageUnread, UserSystemMessageUnreadUnreadCount, &syndb.ColData{
 		IdVal: m.ID, ColVal: m.UnreadCount,
 	})
 }
@@ -79,21 +79,21 @@ func (m *UserSystemMessageUnread) SubUnread(v uint64) {
 		m.UnreadCount -= v
 	}
 	m.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserSystemMessageUnread, UserSystemMessageUnreadUnreadCount, &syndb.ColData{
+	syndb.AddData(TbUserSystemMessageUnread, UserSystemMessageUnreadUnreadCount, &syndb.ColData{
 		IdVal: m.ID, ColVal: m.UnreadCount,
 	})
 }
 
 func (m *UserSystemMessageUnread) SetCreatedAt(v time.Time) {
 	m.CreatedAt = v
-	syndb.AddDataToQuickChan(TbUserSystemMessageUnread, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbUserSystemMessageUnread, db.CreatedAtName, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }
 
 func (m *UserSystemMessageUnread) SetUpdatedAt(v time.Time) {
 	m.UpdatedAt = v
-	syndb.AddDataToQuickChan(TbUserSystemMessageUnread, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbUserSystemMessageUnread, db.UpdatedAtName, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }

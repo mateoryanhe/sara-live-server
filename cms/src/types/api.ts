@@ -1249,6 +1249,30 @@ export interface DetailLogQuery {
     keyword?: string
 }
 
+/** syndb 刷盘日志明细项 */
+export interface SyndbFlushDetailItem {
+    table: string
+    col: string
+    rows: number
+    reason: string
+    waitMs: number
+}
+
+/** syndb 刷盘日志结构化数据 */
+export interface SyndbFlushLog {
+    reason: string
+    sysCpu?: number
+    cpuIdle?: number
+    idleThreshold?: number
+    batchLimit: number
+    queues: number
+    rows: number
+    idleQueues: number
+    forceQueues: number
+    costMs: number
+    details: SyndbFlushDetailItem[]
+}
+
 export interface DetailLogItem {
     time: string
     level: string
@@ -1259,6 +1283,7 @@ export interface DetailLogItem {
     elapsedMs?: number
     message: string
     raw: string
+    syndbFlush?: SyndbFlushLog
 }
 
 export interface AccessLogQuery {

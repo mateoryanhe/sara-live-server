@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/gogf/gf/v2/os/gctx"
-	"xr-game-server/constants/db"
 	"xr-game-server/core/shutdown"
 	"xr-game-server/core/xrlog"
 	"xr-game-server/core/xrtimer"
@@ -26,9 +25,4 @@ func InitSynCache() {
 		xrtimer.AddSingleton(ctx, synCfg.tickInterval, consume)
 	})
 	shutdown.RegCommonShutDownHandler(SysExit)
-}
-
-// RegWithSelf 兼容旧接口,等价于 Reg(自定义 period 已废弃).
-func RegWithSelf(tbName db.TbName, tbCol db.TbCol, _ time.Duration, _ int) {
-	Reg(tbName, tbCol)
 }

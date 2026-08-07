@@ -80,84 +80,84 @@ func (r *LiveRevenueLog) IsRefunded() bool {
 
 func (r *LiveRevenueLog) SetRevenueType(v uint8) {
 	r.RevenueType = v
-	syndb.AddDataToQuickChan(TbLiveRevenueLog, LiveRevenueLogRevenueType, &syndb.ColData{
+	syndb.AddData(TbLiveRevenueLog, LiveRevenueLogRevenueType, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRevenueLog) SetRoomId(v uint64) {
 	r.RoomId = v
-	syndb.AddDataToQuickChan(TbLiveRevenueLog, LiveRevenueLogRoomId, &syndb.ColData{
+	syndb.AddData(TbLiveRevenueLog, LiveRevenueLogRoomId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRevenueLog) SetLiveRecordId(v uint64) {
 	r.LiveRecordId = v
-	syndb.AddDataToQuickChan(TbLiveRevenueLog, LiveRevenueLogLiveRecordId, &syndb.ColData{
+	syndb.AddData(TbLiveRevenueLog, LiveRevenueLogLiveRecordId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRevenueLog) SetSenderId(v uint64) {
 	r.SenderId = v
-	syndb.AddDataToQuickChan(TbLiveRevenueLog, LiveRevenueLogSenderId, &syndb.ColData{
+	syndb.AddData(TbLiveRevenueLog, LiveRevenueLogSenderId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRevenueLog) SetReceiverId(v uint64) {
 	r.ReceiverId = v
-	syndb.AddDataToQuickChan(TbLiveRevenueLog, LiveRevenueLogReceiverId, &syndb.ColData{
+	syndb.AddData(TbLiveRevenueLog, LiveRevenueLogReceiverId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRevenueLog) SetBizId(v uint64) {
 	r.BizId = v
-	syndb.AddDataToQuickChan(TbLiveRevenueLog, LiveRevenueLogBizId, &syndb.ColData{
+	syndb.AddData(TbLiveRevenueLog, LiveRevenueLogBizId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRevenueLog) SetCount(v int) {
 	r.Count = v
-	syndb.AddDataToQuickChan(TbLiveRevenueLog, LiveRevenueLogCount, &syndb.ColData{
+	syndb.AddData(TbLiveRevenueLog, LiveRevenueLogCount, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRevenueLog) SetUnitPrice(v float64) {
 	r.UnitPrice = v
-	syndb.AddDataToQuickChan(TbLiveRevenueLog, LiveRevenueLogUnitPrice, &syndb.ColData{
+	syndb.AddData(TbLiveRevenueLog, LiveRevenueLogUnitPrice, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRevenueLog) SetTotalAmount(v float64) {
 	r.TotalAmount = v
-	syndb.AddDataToQuickChan(TbLiveRevenueLog, LiveRevenueLogTotalAmount, &syndb.ColData{
+	syndb.AddData(TbLiveRevenueLog, LiveRevenueLogTotalAmount, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRevenueLog) SetStatus(v uint8) {
 	r.Status = v
-	syndb.AddDataToQuickChan(TbLiveRevenueLog, LiveRevenueLogStatus, &syndb.ColData{
+	syndb.AddData(TbLiveRevenueLog, LiveRevenueLogStatus, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRevenueLog) SetCreatedAt(v time.Time) {
 	r.CreatedAt = v
-	syndb.AddDataToQuickChan(TbLiveRevenueLog, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbLiveRevenueLog, db.CreatedAtName, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRevenueLog) SetUpdatedAt(v time.Time) {
 	r.UpdatedAt = v
-	syndb.AddDataToQuickChan(TbLiveRevenueLog, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbLiveRevenueLog, db.UpdatedAtName, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }

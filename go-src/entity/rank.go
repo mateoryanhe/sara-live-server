@@ -64,7 +64,7 @@ func (receiver *PlayerRank) ReduceVal(val uint64) {
 func (receiver *PlayerRank) SetLock(lock bool) {
 	receiver.Lock = lock
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToLazyChan(TbPlayerRank, PlayerRankLock, &syndb.ColData{
+	syndb.AddData(TbPlayerRank, PlayerRankLock, &syndb.ColData{
 		ColVal: lock,
 		IdVal:  receiver.ID,
 	})
@@ -72,7 +72,7 @@ func (receiver *PlayerRank) SetLock(lock bool) {
 func (receiver *PlayerRank) SetLockTime(lockTime *time.Time) {
 	receiver.LockTime = lockTime
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToLazyChan(TbPlayerRank, PlayerRankLockTime, &syndb.ColData{
+	syndb.AddData(TbPlayerRank, PlayerRankLockTime, &syndb.ColData{
 		ColVal: lockTime,
 		IdVal:  receiver.ID,
 	})
@@ -80,7 +80,7 @@ func (receiver *PlayerRank) SetLockTime(lockTime *time.Time) {
 func (receiver *PlayerRank) SetVal(val uint64) {
 	receiver.Val = val
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToLazyChan(TbPlayerRank, PlayerRankVal, &syndb.ColData{
+	syndb.AddData(TbPlayerRank, PlayerRankVal, &syndb.ColData{
 		ColVal: val,
 		IdVal:  receiver.ID,
 	})
@@ -88,7 +88,7 @@ func (receiver *PlayerRank) SetVal(val uint64) {
 
 func (receiver *PlayerRank) SetTypeId(typeId uint32) {
 	receiver.TypeId = typeId
-	syndb.AddDataToLazyChan(TbPlayerRank, PlayerRankTypeId, &syndb.ColData{
+	syndb.AddData(TbPlayerRank, PlayerRankTypeId, &syndb.ColData{
 		ColVal: typeId,
 		IdVal:  receiver.ID,
 	})
@@ -96,21 +96,21 @@ func (receiver *PlayerRank) SetTypeId(typeId uint32) {
 
 func (receiver *PlayerRank) SetRoleId(roleId uint64) {
 	receiver.RoleId = roleId
-	syndb.AddDataToLazyChan(TbPlayerRank, PlayerRankRoleId, &syndb.ColData{
+	syndb.AddData(TbPlayerRank, PlayerRankRoleId, &syndb.ColData{
 		ColVal: roleId,
 		IdVal:  receiver.ID,
 	})
 }
 func (receiver *PlayerRank) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
-	syndb.AddDataToLazyChan(TbPlayerRank, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbPlayerRank, db.CreatedAtName, &syndb.ColData{
 		ColVal: val,
 		IdVal:  receiver.ID,
 	})
 }
 func (receiver *PlayerRank) SetUpdatedAt(val time.Time) {
 	receiver.UpdatedAt = val
-	syndb.AddDataToLazyChan(TbPlayerRank, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbPlayerRank, db.UpdatedAtName, &syndb.ColData{
 		ColVal: val,
 		IdVal:  receiver.ID,
 	})

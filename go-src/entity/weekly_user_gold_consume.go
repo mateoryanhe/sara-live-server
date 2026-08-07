@@ -36,17 +36,17 @@ func NewWeeklyUserGoldConsume(week string, userId uint64) *WeeklyUserGoldConsume
 
 func (r *WeeklyUserGoldConsume) SetUserId(v uint64) {
 	r.UserId = v
-	syndb.AddDataToLazyChan(TbWeeklyUserGoldConsume, WeeklyUserGoldConsumeUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbWeeklyUserGoldConsume, WeeklyUserGoldConsumeUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *WeeklyUserGoldConsume) SetConsumeWeek(v string) {
 	r.ConsumeWeek = v
-	syndb.AddDataToLazyChan(TbWeeklyUserGoldConsume, WeeklyUserGoldConsumeConsumeWeek, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbWeeklyUserGoldConsume, WeeklyUserGoldConsumeConsumeWeek, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *WeeklyUserGoldConsume) SetCreatedAt(v *time.Time) {
 	r.CreatedAt = v
-	syndb.AddDataToLazyChan(TbWeeklyUserGoldConsume, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbWeeklyUserGoldConsume, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func initWeeklyUserGoldConsume() {

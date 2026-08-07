@@ -272,107 +272,107 @@ func (m *CallOrder) SetUserHeartTime(userId uint64, heartTime time.Time) {
 
 func (m *CallOrder) SetCallerId(v uint64) {
 	m.CallerId = v
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderCallerId, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, CallOrderCallerId, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetReceiverId(v uint64) {
 	m.ReceiverId = v
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderReceiverId, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, CallOrderReceiverId, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetStatus(v uint8) {
 	m.Status = v
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderStatusCol, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, CallOrderStatusCol, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetCallStartTime(v time.Time) {
 	m.CallStartTime = v
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderCallStartTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, CallOrderCallStartTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetAnswerTime(v *time.Time) {
 	m.AnswerTime = v
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderAnswerTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, CallOrderAnswerTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetCallerConfirmTime(v *time.Time) {
 	m.CallerConfirmTime = v
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderCallerConfirmTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, CallOrderCallerConfirmTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetReceiverConfirmTime(v *time.Time) {
 	m.ReceiverConfirmTime = v
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderReceiverConfirmTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, CallOrderReceiverConfirmTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetCallerHeartTime(v *time.Time) {
 	m.CallerHeartTime = v
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderCallerHeartTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, CallOrderCallerHeartTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetReceiverHeartTime(v *time.Time) {
 	m.ReceiverHeartTime = v
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderReceiverHeartTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, CallOrderReceiverHeartTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetCallerHangUpTime(v *time.Time) {
 	m.CallerHangUpTime = v
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderCallerHangUpTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, CallOrderCallerHangUpTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetReceiverHangUpTime(v *time.Time) {
 	m.ReceiverHangUpTime = v
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderReceiverHangUpTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, CallOrderReceiverHangUpTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetOrderEndTime(v *time.Time) {
 	m.OrderEndTime = v
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderOrderEndTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, CallOrderOrderEndTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetCallDuration(v uint32) {
 	m.CallDuration = v
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderCallDuration, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, CallOrderCallDuration, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetCallType(v uint8) {
 	m.CallType = v
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderCallType, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, CallOrderCallType, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetSource(v uint8) {
 	m.Source = v
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderSource, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, CallOrderSource, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetParams(v string) {
 	m.Params = v
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderParams, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, CallOrderParams, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetTicketPrice(v float64) {
 	m.TicketPrice = v
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderTicketPrice, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, CallOrderTicketPrice, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetPricePerMinute(v float64) {
 	m.PricePerMinute = v
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderPricePerMinute, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, CallOrderPricePerMinute, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetTotalCost(v float64) {
 	m.TotalCost = v
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderTotalCost, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, CallOrderTotalCost, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetChargeTime(v *time.Time) {
 	m.ChargeTime = v
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderChargeTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, CallOrderChargeTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) AddBillingDuration(v uint32) {
 	m.BillingDuration += v
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderBillingDuration, &syndb.ColData{IdVal: m.ID, ColVal: m.BillingDuration})
+	syndb.AddData(TbCallOrder, CallOrderBillingDuration, &syndb.ColData{IdVal: m.ID, ColVal: m.BillingDuration})
 }
 
 func (m *CallOrder) SubBillingDuration(v uint32) {
@@ -381,17 +381,17 @@ func (m *CallOrder) SubBillingDuration(v uint32) {
 	} else {
 		m.BillingDuration -= v
 	}
-	syndb.AddDataToQuickChan(TbCallOrder, CallOrderBillingDuration, &syndb.ColData{IdVal: m.ID, ColVal: m.BillingDuration})
+	syndb.AddData(TbCallOrder, CallOrderBillingDuration, &syndb.ColData{IdVal: m.ID, ColVal: m.BillingDuration})
 }
 
 func (m *CallOrder) SetCreatedAt(v time.Time) {
 	m.CreatedAt = v
-	syndb.AddDataToQuickChan(TbCallOrder, db.CreatedAtName, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, db.CreatedAtName, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallOrder) SetUpdatedAt(v time.Time) {
 	m.UpdatedAt = v
-	syndb.AddDataToQuickChan(TbCallOrder, db.UpdatedAtName, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallOrder, db.UpdatedAtName, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func initCallOrder() {

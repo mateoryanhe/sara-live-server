@@ -34,7 +34,7 @@ func NewCmsToken(userId uint64, token string, expireAt time.Time) *CmsToken {
 
 func (t *CmsToken) SetToken(v string) {
 	t.Token = v
-	syndb.AddDataToLazyChan(TbCmsToken, CmsTokenToken, &syndb.ColData{
+	syndb.AddData(TbCmsToken, CmsTokenToken, &syndb.ColData{
 		IdVal:  t.ID,
 		ColVal: v,
 	})
@@ -42,7 +42,7 @@ func (t *CmsToken) SetToken(v string) {
 
 func (t *CmsToken) SetExpireAt(v time.Time) {
 	t.ExpireAt = v
-	syndb.AddDataToLazyChan(TbCmsToken, CmsTokenExpireAt, &syndb.ColData{
+	syndb.AddData(TbCmsToken, CmsTokenExpireAt, &syndb.ColData{
 		IdVal:  t.ID,
 		ColVal: v,
 	})

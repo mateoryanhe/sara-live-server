@@ -49,28 +49,28 @@ func initName() {
 
 func (receiver *Name) SetVal(val string) {
 	receiver.Val = val
-	syndb.AddDataToLazyChan(TbName, NameVal, &syndb.ColData{
+	syndb.AddData(TbName, NameVal, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
 }
 func (receiver *Name) SetTypeId(typeId uint8) {
 	receiver.TypeId = typeId
-	syndb.AddDataToLazyChan(TbName, NameTypeId, &syndb.ColData{
+	syndb.AddData(TbName, NameTypeId, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: typeId,
 	})
 }
 func (receiver *Name) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
-	syndb.AddDataToLazyChan(TbName, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbName, db.CreatedAtName, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
 }
 func (receiver *Name) SetUpdatedAt(val time.Time) {
 	receiver.UpdatedAt = val
-	syndb.AddDataToLazyChan(TbName, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbName, db.UpdatedAtName, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})

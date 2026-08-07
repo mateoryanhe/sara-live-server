@@ -32,7 +32,7 @@ type LiveRoomGameRecommend struct {
 func (r *LiveRoomGameRecommend) SetLiveRoomId(v uint64) {
 	r.LiveRoomId = v
 	r.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbLiveRoomGameRecommend, LiveRoomGameRecommendLiveRoomId, &syndb.ColData{
+	syndb.AddData(TbLiveRoomGameRecommend, LiveRoomGameRecommendLiveRoomId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -40,7 +40,7 @@ func (r *LiveRoomGameRecommend) SetLiveRoomId(v uint64) {
 func (r *LiveRoomGameRecommend) SetGameCode(v string) {
 	r.GameCode = v
 	r.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbLiveRoomGameRecommend, LiveRoomGameRecommendGameCode, &syndb.ColData{
+	syndb.AddData(TbLiveRoomGameRecommend, LiveRoomGameRecommendGameCode, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -48,28 +48,28 @@ func (r *LiveRoomGameRecommend) SetGameCode(v string) {
 func (r *LiveRoomGameRecommend) SetStatus(v uint8) {
 	r.Status = v
 	r.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbLiveRoomGameRecommend, LiveRoomGameRecommendStatus, &syndb.ColData{
+	syndb.AddData(TbLiveRoomGameRecommend, LiveRoomGameRecommendStatus, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRoomGameRecommend) SetCreatedAt(v time.Time) {
 	r.CreatedAt = v
-	syndb.AddDataToQuickChan(TbLiveRoomGameRecommend, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbLiveRoomGameRecommend, db.CreatedAtName, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRoomGameRecommend) SetUpdatedAt(v time.Time) {
 	r.UpdatedAt = v
-	syndb.AddDataToQuickChan(TbLiveRoomGameRecommend, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbLiveRoomGameRecommend, db.UpdatedAtName, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRoomGameRecommend) touchUpdatedAt() {
 	r.UpdatedAt = time.Now()
-	syndb.AddDataToQuickChan(TbLiveRoomGameRecommend, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbLiveRoomGameRecommend, db.UpdatedAtName, &syndb.ColData{
 		IdVal: r.ID, ColVal: r.UpdatedAt,
 	})
 }

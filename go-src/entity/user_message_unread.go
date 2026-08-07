@@ -37,7 +37,7 @@ func NewUserMessageUnread(userId uint64) *UserMessageUnread {
 func (m *UserMessageUnread) AddSystemUnread(v uint64) {
 	m.SystemUnread = math.Add(m.SystemUnread, v)
 	m.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserMessageUnread, UserMessageUnreadSystemUnread, &syndb.ColData{
+	syndb.AddData(TbUserMessageUnread, UserMessageUnreadSystemUnread, &syndb.ColData{
 		IdVal: m.ID, ColVal: m.SystemUnread,
 	})
 }
@@ -49,7 +49,7 @@ func (m *UserMessageUnread) SubSystemUnread(v uint64) {
 		m.SystemUnread -= v
 	}
 	m.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserMessageUnread, UserMessageUnreadSystemUnread, &syndb.ColData{
+	syndb.AddData(TbUserMessageUnread, UserMessageUnreadSystemUnread, &syndb.ColData{
 		IdVal: m.ID, ColVal: m.SystemUnread,
 	})
 }
@@ -57,7 +57,7 @@ func (m *UserMessageUnread) SubSystemUnread(v uint64) {
 func (m *UserMessageUnread) AddPrivateUnread(v uint64) {
 	m.PrivateUnread = math.Add(m.PrivateUnread, v)
 	m.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserMessageUnread, UserMessageUnreadPrivateUnread, &syndb.ColData{
+	syndb.AddData(TbUserMessageUnread, UserMessageUnreadPrivateUnread, &syndb.ColData{
 		IdVal: m.ID, ColVal: m.PrivateUnread,
 	})
 }
@@ -69,21 +69,21 @@ func (m *UserMessageUnread) SubPrivateUnread(v uint64) {
 		m.PrivateUnread -= v
 	}
 	m.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserMessageUnread, UserMessageUnreadPrivateUnread, &syndb.ColData{
+	syndb.AddData(TbUserMessageUnread, UserMessageUnreadPrivateUnread, &syndb.ColData{
 		IdVal: m.ID, ColVal: m.PrivateUnread,
 	})
 }
 
 func (m *UserMessageUnread) SetCreatedAt(v time.Time) {
 	m.CreatedAt = v
-	syndb.AddDataToQuickChan(TbUserMessageUnread, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbUserMessageUnread, db.CreatedAtName, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }
 
 func (m *UserMessageUnread) SetUpdatedAt(v time.Time) {
 	m.UpdatedAt = v
-	syndb.AddDataToQuickChan(TbUserMessageUnread, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbUserMessageUnread, db.UpdatedAtName, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }

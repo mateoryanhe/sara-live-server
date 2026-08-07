@@ -48,7 +48,7 @@ func NewUserCumulativeStat(userId uint64) *UserCumulativeStat {
 func (receiver *UserCumulativeStat) AddTotalRecharge(val float64) bool {
 	receiver.TotalRecharge = math.AddFloat64(receiver.TotalRecharge, val)
 
-	syndb.AddDataToLazyChan(TbUserCumulativeStat, UserCumulativeStatTotalRecharge, &syndb.ColData{
+	syndb.AddData(TbUserCumulativeStat, UserCumulativeStatTotalRecharge, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.TotalRecharge,
 	})
@@ -58,7 +58,7 @@ func (receiver *UserCumulativeStat) AddTotalRecharge(val float64) bool {
 func (receiver *UserCumulativeStat) AddTotalWithdraw(val float64) bool {
 	receiver.TotalWithdraw = math.AddFloat64(receiver.TotalWithdraw, val)
 
-	syndb.AddDataToLazyChan(TbUserCumulativeStat, UserCumulativeStatTotalWithdraw, &syndb.ColData{
+	syndb.AddData(TbUserCumulativeStat, UserCumulativeStatTotalWithdraw, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.TotalWithdraw,
 	})
@@ -68,7 +68,7 @@ func (receiver *UserCumulativeStat) AddTotalWithdraw(val float64) bool {
 func (receiver *UserCumulativeStat) AddTotalFans(val uint64) bool {
 	receiver.TotalFans = math.Add(receiver.TotalFans, val)
 
-	syndb.AddDataToLazyChan(TbUserCumulativeStat, UserCumulativeStatTotalFans, &syndb.ColData{
+	syndb.AddData(TbUserCumulativeStat, UserCumulativeStatTotalFans, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.TotalFans,
 	})
@@ -78,7 +78,7 @@ func (receiver *UserCumulativeStat) AddTotalFans(val uint64) bool {
 func (receiver *UserCumulativeStat) AddTotalFollow(val uint64) bool {
 	receiver.TotalFollow = math.Add(receiver.TotalFollow, val)
 
-	syndb.AddDataToLazyChan(TbUserCumulativeStat, UserCumulativeStatTotalFollow, &syndb.ColData{
+	syndb.AddData(TbUserCumulativeStat, UserCumulativeStatTotalFollow, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.TotalFollow,
 	})
@@ -88,7 +88,7 @@ func (receiver *UserCumulativeStat) AddTotalFollow(val uint64) bool {
 func (receiver *UserCumulativeStat) AddTotalPayCount(val uint64) bool {
 	receiver.TotalPayCount = math.Add(receiver.TotalPayCount, val)
 
-	syndb.AddDataToLazyChan(TbUserCumulativeStat, UserCumulativeStatTotalPayCount, &syndb.ColData{
+	syndb.AddData(TbUserCumulativeStat, UserCumulativeStatTotalPayCount, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.TotalPayCount,
 	})
@@ -99,7 +99,7 @@ func (receiver *UserCumulativeStat) AddTotalDiamondConsume(val float64) bool {
 
 	receiver.TotalDiamondConsume = math.AddFloat64(val, receiver.TotalDiamondConsume)
 
-	syndb.AddDataToLazyChan(TbUserCumulativeStat, UserCumulativeStatTotalDiamondConsume, &syndb.ColData{
+	syndb.AddData(TbUserCumulativeStat, UserCumulativeStatTotalDiamondConsume, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.TotalDiamondConsume,
 	})
@@ -109,7 +109,7 @@ func (receiver *UserCumulativeStat) AddTotalDiamondConsume(val float64) bool {
 func (receiver *UserCumulativeStat) AddTotalGoldConsume(val float64) bool {
 	receiver.TotalGoldConsume = math.AddFloat64(val, receiver.TotalGoldConsume)
 
-	syndb.AddDataToLazyChan(TbUserCumulativeStat, UserCumulativeStatTotalGoldConsume, &syndb.ColData{
+	syndb.AddData(TbUserCumulativeStat, UserCumulativeStatTotalGoldConsume, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.TotalGoldConsume,
 	})
@@ -118,7 +118,7 @@ func (receiver *UserCumulativeStat) AddTotalGoldConsume(val float64) bool {
 
 func (receiver *UserCumulativeStat) AddTotalLiveDuration(val float64) bool {
 	receiver.TotalLiveDuration = math.AddFloat64(receiver.TotalLiveDuration, val)
-	syndb.AddDataToLazyChan(TbUserCumulativeStat, UserCumulativeStatTotalLiveDuration, &syndb.ColData{
+	syndb.AddData(TbUserCumulativeStat, UserCumulativeStatTotalLiveDuration, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.TotalLiveDuration,
 	})
@@ -127,7 +127,7 @@ func (receiver *UserCumulativeStat) AddTotalLiveDuration(val float64) bool {
 
 func (receiver *UserCumulativeStat) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
-	syndb.AddDataToLazyChan(TbUserCumulativeStat, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbUserCumulativeStat, db.CreatedAtName, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -135,7 +135,7 @@ func (receiver *UserCumulativeStat) SetCreatedAt(val time.Time) {
 
 func (receiver *UserCumulativeStat) SetUpdatedAt(val time.Time) {
 	receiver.UpdatedAt = val
-	syndb.AddDataToLazyChan(TbUserCumulativeStat, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbUserCumulativeStat, db.UpdatedAtName, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})

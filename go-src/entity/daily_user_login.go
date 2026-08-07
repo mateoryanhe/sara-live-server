@@ -40,21 +40,21 @@ func NewDailyUserLogin(date string, userId uint64) *DailyUserLogin {
 
 func (r *DailyUserLogin) SetUserId(v uint64) {
 	r.UserId = v
-	syndb.AddDataToLazyChan(TbDailyUserLogin, DailyUserLoginUserId, &syndb.ColData{
+	syndb.AddData(TbDailyUserLogin, DailyUserLoginUserId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *DailyUserLogin) SetLoginDate(v string) {
 	r.LoginDate = v
-	syndb.AddDataToLazyChan(TbDailyUserLogin, DailyUserLoginLoginDate, &syndb.ColData{
+	syndb.AddData(TbDailyUserLogin, DailyUserLoginLoginDate, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *DailyUserLogin) SetCreatedAt(v *time.Time) {
 	r.CreatedAt = v
-	syndb.AddDataToLazyChan(TbDailyUserLogin, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbDailyUserLogin, db.CreatedAtName, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }

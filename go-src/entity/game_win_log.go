@@ -52,47 +52,47 @@ func NewGameWinLog(userId uint64, gameCode, nameEn, cover string, platformType g
 
 func (r *GameWinLog) SetUserId(v uint64) {
 	r.UserId = v
-	syndb.AddDataToQuickChan(TbGameWinLog, GameWinLogUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGameWinLog, GameWinLogUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *GameWinLog) SetGameCode(v string) {
 	r.GameCode = v
-	syndb.AddDataToQuickChan(TbGameWinLog, GameWinLogGameCode, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGameWinLog, GameWinLogGameCode, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *GameWinLog) SetNameEn(v string) {
 	r.NameEn = v
-	syndb.AddDataToQuickChan(TbGameWinLog, GameWinLogNameEn, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGameWinLog, GameWinLogNameEn, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *GameWinLog) SetCover(v string) {
 	r.Cover = v
-	syndb.AddDataToQuickChan(TbGameWinLog, GameWinLogCover, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGameWinLog, GameWinLogCover, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *GameWinLog) SetAmount(v float64) {
 	r.Amount = v
-	syndb.AddDataToQuickChan(TbGameWinLog, GameWinLogAmount, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGameWinLog, GameWinLogAmount, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *GameWinLog) SetPlatformType(v string) {
 	r.PlatformType = v
-	syndb.AddDataToQuickChan(TbGameWinLog, GameWinLogPlatformType, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGameWinLog, GameWinLogPlatformType, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *GameWinLog) SetOrderId(v string) {
 	r.OrderId = v
-	syndb.AddDataToQuickChan(TbGameWinLog, GameWinLogOrderId, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGameWinLog, GameWinLogOrderId, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *GameWinLog) SetCreatedAt(v time.Time) {
 	r.CreatedAt = v
-	syndb.AddDataToQuickChan(TbGameWinLog, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGameWinLog, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *GameWinLog) SetUpdatedAt(v time.Time) {
 	r.UpdatedAt = v
-	syndb.AddDataToQuickChan(TbGameWinLog, db.UpdatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGameWinLog, db.UpdatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func initGameWinLog() {

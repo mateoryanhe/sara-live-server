@@ -48,14 +48,14 @@ func NewLiveRoomBillingPay(userId, roomId uint64) *LiveRoomBillingPay {
 
 func (r *LiveRoomBillingPay) SetUserId(v uint64) {
 	r.UserId = v
-	syndb.AddDataToQuickChan(TbLiveRoomBillingPay, LiveRoomBillingPayUserId, &syndb.ColData{
+	syndb.AddData(TbLiveRoomBillingPay, LiveRoomBillingPayUserId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRoomBillingPay) SetRoomId(v uint64) {
 	r.RoomId = v
-	syndb.AddDataToQuickChan(TbLiveRoomBillingPay, LiveRoomBillingPayRoomId, &syndb.ColData{
+	syndb.AddData(TbLiveRoomBillingPay, LiveRoomBillingPayRoomId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -87,28 +87,28 @@ func (r *LiveRoomBillingPay) GetTicketTime() int64 {
 
 func (r *LiveRoomBillingPay) SetFreeTime(v uint64) {
 	r.FreeTime = v
-	syndb.AddDataToQuickChan(TbLiveRoomBillingPay, LiveRoomBillingPayFreeTime, &syndb.ColData{
+	syndb.AddData(TbLiveRoomBillingPay, LiveRoomBillingPayFreeTime, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRoomBillingPay) SetFreeUsed(v bool) {
 	r.FreeUsed = v
-	syndb.AddDataToQuickChan(TbLiveRoomBillingPay, LiveRoomBillingPayFreeUsed, &syndb.ColData{
+	syndb.AddData(TbLiveRoomBillingPay, LiveRoomBillingPayFreeUsed, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRoomBillingPay) SetLastTicketAt(v time.Time) {
 	r.LastTicketAt = &v
-	syndb.AddDataToQuickChan(TbLiveRoomBillingPay, LiveRoomBillingPayLastTicketAt, &syndb.ColData{
+	syndb.AddData(TbLiveRoomBillingPay, LiveRoomBillingPayLastTicketAt, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRoomBillingPay) SetLastPaidAt(v time.Time) {
 	r.LastPaidAt = &v
-	syndb.AddDataToQuickChan(TbLiveRoomBillingPay, LiveRoomBillingPayLastPaidAt, &syndb.ColData{
+	syndb.AddData(TbLiveRoomBillingPay, LiveRoomBillingPayLastPaidAt, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }

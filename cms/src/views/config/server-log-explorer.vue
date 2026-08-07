@@ -324,7 +324,15 @@
             <el-table-column label="耗时(ms)" width="100">
               <template #default="{ row }">{{ formatHandlerMs(row.elapsedMs) }}</template>
             </el-table-column>
-            <el-table-column label="内容" min-width="320" prop="message" show-overflow-tooltip/>
+            <el-table-column label="内容" min-width="320">
+              <template #default="{ row }">
+                <div v-if="row.syndbFlush" class="syndb-flush-cell">
+                  <SyndbFlushLogView :flush="row.syndbFlush" compact/>
+                  <el-button link size="small" type="primary" @click="openSyndbFlushDialog(row.syndbFlush)">明细</el-button>
+                </div>
+                <span v-else class="log-message-text">{{ row.message }}</span>
+              </template>
+            </el-table-column>
           </el-table>
 
           <div class="pagination-wrap">
@@ -413,12 +421,22 @@
               </el-button>
             </div>
           </div>
-          <pre class="trace-log-content">{{ item.raw }}</pre>
+          <pre v-if="!item.syndbFlush" class="trace-log-content">{{ item.raw }}</pre>
+          <div v-else class="trace-log-content syndb-flush-trace-body">
+            <SyndbFlushLogView :flush="item.syndbFlush"/>
+          </div>
         </div>
         <el-empty v-if="!traceLoading && traceDetail.detailLogs.length === 0 && traceDetail.accessLogs.length === 0 && traceDetail.errorLogs.length === 0" description="未找到日志"/>
         </div>
       </div>
     </el-drawer>
+
+    <el-dialog v-model="syndbFlushDialogVisible" destroy-on-close title="Syndb 刷盘明细" width="78%">
+      <SyndbFlushLogView v-if="syndbFlushDialogData" :flush="syndbFlushDialogData"/>
+      <template #footer>
+        <el-button type="primary" @click="syndbFlushDialogVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
 
     <el-dialog v-model="jsonDialogVisible" :title="jsonDialogTitle" destroy-on-close width="72%">
       <div v-if="jsonDialogParseFailed" class="json-dialog-tip">JSON 解析失败，以下为原始内容</div>
@@ -436,9 +454,10 @@ import {nextTick, onMounted, onUnmounted, reactive, ref, watch} from 'vue'
 import {ElMessage} from 'element-plus'
 import {logQueryApi} from '@/api'
 import AccessTrendChart from './components/access-trend-chart.vue'
+import SyndbFlushLogView from './components/syndb-flush-log.vue'
 import {formatErrorStack, formatErrorSummary, extractAndFormatLogJsonField, listLogJsonFields} from '@/utils/logParsers'
 import type {LogJsonFieldKey} from '@/utils/logParsers'
-import type {AccessLogItem, AccessTrendData, DetailLogItem, ErrorLogItem, LogQueryJobResult, TopStatItem, TraceLogDetail} from '@/types/api'
+import type {AccessLogItem, AccessTrendData, DetailLogItem, ErrorLogItem, LogQueryJobResult, SyndbFlushLog, TopStatItem, TraceLogDetail} from '@/types/api'
 
 const activeTab = ref('stats')
 const queryStatusTip = ref('查询中...')
@@ -693,6 +712,8 @@ const jsonDialogVisible = ref(false)
 const jsonDialogTitle = ref('')
 const jsonDialogContent = ref('')
 const jsonDialogParseFailed = ref(false)
+const syndbFlushDialogVisible = ref(false)
+const syndbFlushDialogData = ref<SyndbFlushLog | null>(null)
 
 const ensureFormDateRange = (form: DateRangeForm): string[] | null => {
   if (!form.startDate || !form.endDate) {
@@ -1014,6 +1035,11 @@ const copyTraceLog = async (content?: string) => {
   }
 }
 
+const openSyndbFlushDialog = (flush: SyndbFlushLog) => {
+  syndbFlushDialogData.value = flush
+  syndbFlushDialogVisible.value = true
+}
+
 const openLogJsonDialog = (content: string, field: LogJsonFieldKey, label: string) => {
   const result = extractAndFormatLogJsonField(content, field)
   if (!result) {
@@ -1231,5 +1257,24 @@ watch(activeTab, async (tab) => {
   word-break: break-all;
   font-size: 12px;
   line-height: 1.6;
+}
+
+.syndb-flush-trace-body {
+  white-space: normal;
+}
+
+.syndb-flush-cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.log-message-text {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

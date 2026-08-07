@@ -55,21 +55,21 @@ func NewShortVideoWatch(userId, videoId uint64) *ShortVideoWatch {
 
 func (watch *ShortVideoWatch) SetUserId(v uint64) {
 	watch.UserId = v
-	syndb.AddDataToQuickChan(TbShortVideoWatch, ShortVideoWatchUserId, &syndb.ColData{
+	syndb.AddData(TbShortVideoWatch, ShortVideoWatchUserId, &syndb.ColData{
 		IdVal: watch.ID, ColVal: v,
 	})
 }
 
 func (watch *ShortVideoWatch) SetVideoId(v uint64) {
 	watch.VideoId = v
-	syndb.AddDataToQuickChan(TbShortVideoWatch, ShortVideoWatchVideoId, &syndb.ColData{
+	syndb.AddData(TbShortVideoWatch, ShortVideoWatchVideoId, &syndb.ColData{
 		IdVal: watch.ID, ColVal: v,
 	})
 }
 
 func (watch *ShortVideoWatch) SetPaidTime(v *time.Time) {
 	watch.PaidTime = v
-	syndb.AddDataToLazyChan(TbShortVideoWatch, ShortVideoWatchPaidTime, &syndb.ColData{
+	syndb.AddData(TbShortVideoWatch, ShortVideoWatchPaidTime, &syndb.ColData{
 		IdVal: watch.ID, ColVal: watch.PaidTime,
 	})
 }
@@ -77,7 +77,7 @@ func (watch *ShortVideoWatch) SetPaidTime(v *time.Time) {
 func (watch *ShortVideoWatch) SetViewCounted(v uint8) {
 	watch.ViewCounted = v
 
-	syndb.AddDataToLazyChan(TbShortVideoWatch, ShortVideoWatchViewCounted, &syndb.ColData{
+	syndb.AddData(TbShortVideoWatch, ShortVideoWatchViewCounted, &syndb.ColData{
 		IdVal: watch.ID, ColVal: v,
 	})
 
@@ -86,21 +86,21 @@ func (watch *ShortVideoWatch) SetViewCounted(v uint8) {
 func (like *ShortVideoWatch) SetStatus(v uint8) {
 	like.Status = v
 
-	syndb.AddDataToQuickChan(TbShortVideoWatch, ShortVideoLikeStatus, &syndb.ColData{
+	syndb.AddData(TbShortVideoWatch, ShortVideoLikeStatus, &syndb.ColData{
 		IdVal: like.ID, ColVal: v,
 	})
 }
 
 func (watch *ShortVideoWatch) SetCreatedAt(v time.Time) {
 	watch.CreatedAt = v
-	syndb.AddDataToQuickChan(TbShortVideoWatch, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbShortVideoWatch, db.CreatedAtName, &syndb.ColData{
 		IdVal: watch.ID, ColVal: v,
 	})
 }
 
 func (watch *ShortVideoWatch) SetUpdatedAt(v time.Time) {
 	watch.UpdatedAt = v
-	syndb.AddDataToLazyChan(TbShortVideoWatch, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbShortVideoWatch, db.UpdatedAtName, &syndb.ColData{
 		IdVal: watch.ID, ColVal: v,
 	})
 }

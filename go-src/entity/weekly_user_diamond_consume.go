@@ -36,17 +36,17 @@ func NewWeeklyUserDiamondConsume(week string, userId uint64) *WeeklyUserDiamondC
 
 func (r *WeeklyUserDiamondConsume) SetUserId(v uint64) {
 	r.UserId = v
-	syndb.AddDataToLazyChan(TbWeeklyUserDiamondConsume, WeeklyUserDiamondConsumeUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbWeeklyUserDiamondConsume, WeeklyUserDiamondConsumeUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *WeeklyUserDiamondConsume) SetConsumeWeek(v string) {
 	r.ConsumeWeek = v
-	syndb.AddDataToLazyChan(TbWeeklyUserDiamondConsume, WeeklyUserDiamondConsumeConsumeWeek, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbWeeklyUserDiamondConsume, WeeklyUserDiamondConsumeConsumeWeek, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *WeeklyUserDiamondConsume) SetCreatedAt(v *time.Time) {
 	r.CreatedAt = v
-	syndb.AddDataToLazyChan(TbWeeklyUserDiamondConsume, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbWeeklyUserDiamondConsume, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func initWeeklyUserDiamondConsume() {

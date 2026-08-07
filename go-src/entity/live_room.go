@@ -111,7 +111,7 @@ func NewLiveRoom(anchorId, guildId uint64, title, cover, notice string) *LiveRoo
 
 func (r *LiveRoom) SetGuildId(v uint64) {
 	r.GuildId = v
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomGuildId, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomGuildId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -119,14 +119,14 @@ func (r *LiveRoom) SetGuildId(v uint64) {
 func (r *LiveRoom) SetTitle(v string) {
 	r.Title = v
 	r.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomTitle, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomTitle, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRoom) SetHeartTime(v *time.Time) {
 	r.HeartTime = v
-	syndb.AddDataToLazyChan(TbLiveRoom, LiveRoomHeartTime, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomHeartTime, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -134,7 +134,7 @@ func (r *LiveRoom) SetHeartTime(v *time.Time) {
 func (r *LiveRoom) SetCover(v string) {
 	r.Cover = v
 	r.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomCover, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomCover, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -142,7 +142,7 @@ func (r *LiveRoom) SetCover(v string) {
 func (r *LiveRoom) SetLiveRecordId(v uint64) {
 	r.LiveRecordId = v
 	r.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomLiveId, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomLiveId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -150,7 +150,7 @@ func (r *LiveRoom) SetLiveRecordId(v uint64) {
 func (r *LiveRoom) SetNotice(v string) {
 	r.Notice = v
 	r.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomNotice, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomNotice, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -158,7 +158,7 @@ func (r *LiveRoom) SetNotice(v string) {
 func (r *LiveRoom) SetBan(v bool) {
 	r.Ban = v
 	r.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomBan, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomBan, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -166,7 +166,7 @@ func (r *LiveRoom) SetBan(v bool) {
 func (r *LiveRoom) SetBanApplyTime(v *time.Time) {
 	r.BanApplyTime = v
 	r.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomBanApplyTime, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomBanApplyTime, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -177,7 +177,7 @@ func (r *LiveRoom) SetPrivateInviteType(v uint8) {
 	}
 	r.PrivateInviteType = v
 	r.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomPrivateInviteType, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomPrivateInviteType, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -185,14 +185,14 @@ func (r *LiveRoom) SetPrivateInviteType(v uint8) {
 func (r *LiveRoom) SetBanReason(v string) {
 	r.BanReason = v
 	r.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomBanReason, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomBanReason, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRoom) AddTotalIncome(v float64) {
 	r.TotalIncome = math.AddFloat64(r.TotalIncome, v)
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomTotalIncome, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomTotalIncome, &syndb.ColData{
 		IdVal: r.ID, ColVal: r.TotalIncome,
 	})
 }
@@ -202,7 +202,7 @@ func (r *LiveRoom) AddTotalGiftIncome(v float64) {
 		return
 	}
 	r.TotalGiftIncome = math.AddFloat64(r.TotalGiftIncome, v)
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomTotalGiftIncome, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomTotalGiftIncome, &syndb.ColData{
 		IdVal: r.ID, ColVal: r.TotalGiftIncome,
 	})
 }
@@ -212,7 +212,7 @@ func (r *LiveRoom) AddTotalPaidDanmakuIncome(v float64) {
 		return
 	}
 	r.TotalPaidDanmakuIncome = math.AddFloat64(r.TotalPaidDanmakuIncome, v)
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomTotalPaidDanmakuIncome, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomTotalPaidDanmakuIncome, &syndb.ColData{
 		IdVal: r.ID, ColVal: r.TotalPaidDanmakuIncome,
 	})
 }
@@ -222,7 +222,7 @@ func (r *LiveRoom) AddTotalPrivateRoomTicketIncome(v float64) {
 		return
 	}
 	r.TotalPrivateRoomTicketIncome = math.AddFloat64(r.TotalPrivateRoomTicketIncome, v)
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomTotalPrivateRoomTicketIncome, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomTotalPrivateRoomTicketIncome, &syndb.ColData{
 		IdVal: r.ID, ColVal: r.TotalPrivateRoomTicketIncome,
 	})
 }
@@ -232,7 +232,7 @@ func (r *LiveRoom) AddTotalPrivateRoomWatchIncome(v float64) {
 		return
 	}
 	r.TotalPrivateRoomWatchIncome = math.AddFloat64(r.TotalPrivateRoomWatchIncome, v)
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomTotalPrivateRoomWatchIncome, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomTotalPrivateRoomWatchIncome, &syndb.ColData{
 		IdVal: r.ID, ColVal: r.TotalPrivateRoomWatchIncome,
 	})
 }
@@ -242,7 +242,7 @@ func (r *LiveRoom) AddTotalVideoCallIncome(v float64) {
 		return
 	}
 	r.TotalVideoCallIncome = math.AddFloat64(r.TotalVideoCallIncome, v)
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomTotalVideoCallIncome, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomTotalVideoCallIncome, &syndb.ColData{
 		IdVal: r.ID, ColVal: r.TotalVideoCallIncome,
 	})
 }
@@ -252,7 +252,7 @@ func (r *LiveRoom) AddTotalVideoCallTicketIncome(v float64) {
 		return
 	}
 	r.TotalVideoCallTicketIncome = math.AddFloat64(r.TotalVideoCallTicketIncome, v)
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomTotalVideoCallTicketIncome, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomTotalVideoCallTicketIncome, &syndb.ColData{
 		IdVal: r.ID, ColVal: r.TotalVideoCallTicketIncome,
 	})
 }
@@ -262,7 +262,7 @@ func (r *LiveRoom) AddTotalVideoCallBillingIncome(v float64) {
 		return
 	}
 	r.TotalVideoCallBillingIncome = math.AddFloat64(r.TotalVideoCallBillingIncome, v)
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomTotalVideoCallBillingIncome, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomTotalVideoCallBillingIncome, &syndb.ColData{
 		IdVal: r.ID, ColVal: r.TotalVideoCallBillingIncome,
 	})
 }
@@ -273,7 +273,7 @@ func (r *LiveRoom) SetCategory(v uint8) {
 	}
 	r.Category = v
 	r.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomCategory, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomCategory, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -281,7 +281,7 @@ func (r *LiveRoom) SetCategory(v uint8) {
 func (r *LiveRoom) SetTagId(v uint64) {
 	r.TagId = v
 	r.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomTagId, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomTagId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -289,7 +289,7 @@ func (r *LiveRoom) SetTagId(v uint64) {
 func (r *LiveRoom) SetTicket(v float64) {
 	r.Ticket = v
 	r.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomTicket, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomTicket, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -297,7 +297,7 @@ func (r *LiveRoom) SetTicket(v float64) {
 func (r *LiveRoom) SetBilling(v float64) {
 	r.Billing = v
 	r.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomBilling, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomBilling, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -305,7 +305,7 @@ func (r *LiveRoom) SetBilling(v float64) {
 func (r *LiveRoom) SetCloudPlayerVideo(v string) {
 	r.CloudPlayerVideo = v
 	r.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomCloudPlayerVideo, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomCloudPlayerVideo, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -313,7 +313,7 @@ func (r *LiveRoom) SetCloudPlayerVideo(v string) {
 func (r *LiveRoom) SetPushStream(v bool) {
 	r.PushStream = v
 	r.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomPushStream, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomPushStream, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -321,7 +321,7 @@ func (r *LiveRoom) SetPushStream(v bool) {
 func (r *LiveRoom) SetCloudPlayerId(v string) {
 	r.CloudPlayerId = v
 	r.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomCloudPlayerId, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomCloudPlayerId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -329,28 +329,28 @@ func (r *LiveRoom) SetCloudPlayerId(v string) {
 func (r *LiveRoom) SetCloudPlayerTokenExpireAt(v *time.Time) {
 	r.CloudPlayerTokenExpireAt = v
 	r.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbLiveRoom, LiveRoomCloudPlayerTokenExpireAt, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, LiveRoomCloudPlayerTokenExpireAt, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRoom) SetCreatedAt(v time.Time) {
 	r.CreatedAt = v
-	syndb.AddDataToQuickChan(TbLiveRoom, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, db.CreatedAtName, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRoom) SetUpdatedAt(v time.Time) {
 	r.UpdatedAt = v
-	syndb.AddDataToQuickChan(TbLiveRoom, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, db.UpdatedAtName, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *LiveRoom) touchUpdatedAt() {
 	r.UpdatedAt = time.Now()
-	syndb.AddDataToQuickChan(TbLiveRoom, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbLiveRoom, db.UpdatedAtName, &syndb.ColData{
 		IdVal: r.ID, ColVal: r.UpdatedAt,
 	})
 }

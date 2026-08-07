@@ -42,35 +42,35 @@ func NewUserActivityMessage(userId, activityMessageId uint64, publishedAt *time.
 
 func (m *UserActivityMessage) SetActivityMessageId(v uint64) {
 	m.ActivityMessageId = v
-	syndb.AddDataToQuickChan(TbUserActivityMessage, UserActivityMessageActivityMessageId, &syndb.ColData{
+	syndb.AddData(TbUserActivityMessage, UserActivityMessageActivityMessageId, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }
 
 func (m *UserActivityMessage) SetUserId(v uint64) {
 	m.UserId = v
-	syndb.AddDataToQuickChan(TbUserActivityMessage, UserActivityMessageUserId, &syndb.ColData{
+	syndb.AddData(TbUserActivityMessage, UserActivityMessageUserId, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }
 
 func (m *UserActivityMessage) SetPublishedAt(v *time.Time) {
 	m.PublishedAt = v
-	syndb.AddDataToQuickChan(TbUserActivityMessage, UserActivityMessagePublishedAt, &syndb.ColData{
+	syndb.AddData(TbUserActivityMessage, UserActivityMessagePublishedAt, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }
 
 func (m *UserActivityMessage) SetCreatedAt(v time.Time) {
 	m.CreatedAt = v
-	syndb.AddDataToQuickChan(TbUserActivityMessage, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbUserActivityMessage, db.CreatedAtName, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }
 
 func (m *UserActivityMessage) SetUpdatedAt(v time.Time) {
 	m.UpdatedAt = v
-	syndb.AddDataToQuickChan(TbUserActivityMessage, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbUserActivityMessage, db.UpdatedAtName, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }

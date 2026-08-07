@@ -35,7 +35,7 @@ func NewAppToken(userId uint64, token string, expireAt time.Time) *AppToken {
 func (t *AppToken) SetToken(v string) {
 	t.Token = v
 
-	syndb.AddDataToLazyChan(TbAppToken, AppTokenToken, &syndb.ColData{
+	syndb.AddData(TbAppToken, AppTokenToken, &syndb.ColData{
 		IdVal:  t.ID,
 		ColVal: v,
 	})
@@ -44,7 +44,7 @@ func (t *AppToken) SetToken(v string) {
 func (t *AppToken) SetExpireAt(v time.Time) {
 	t.ExpireAt = v
 
-	syndb.AddDataToLazyChan(TbAppToken, AppTokenExpireAt, &syndb.ColData{
+	syndb.AddData(TbAppToken, AppTokenExpireAt, &syndb.ColData{
 		IdVal:  t.ID,
 		ColVal: v,
 	})

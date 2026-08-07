@@ -67,7 +67,7 @@ func NewLiveRecord(id uint64) *LiveRecord {
 
 func (r *LiveRecord) SetAnchorId(v uint64) {
 	r.AnchorId = v
-	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordAnchorId, &syndb.ColData{
+	syndb.AddData(TbLiveRecord, LiveRecordAnchorId, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: v,
 	})
@@ -76,7 +76,7 @@ func (r *LiveRecord) SetAnchorId(v uint64) {
 func (r *LiveRecord) SetStartTime(v time.Time) {
 	r.StartTime = v
 	r.touchUpdatedAt()
-	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordStartTime, &syndb.ColData{
+	syndb.AddData(TbLiveRecord, LiveRecordStartTime, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: v,
 	})
@@ -84,7 +84,7 @@ func (r *LiveRecord) SetStartTime(v time.Time) {
 
 func (r *LiveRecord) SetEndTime(v *time.Time) {
 	r.EndTime = v
-	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordEndTime, &syndb.ColData{
+	syndb.AddData(TbLiveRecord, LiveRecordEndTime, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.EndTime,
 	})
@@ -93,7 +93,7 @@ func (r *LiveRecord) SetEndTime(v *time.Time) {
 func (r *LiveRecord) AddTotalAudience(val uint64) {
 	r.TotalAudience = math.Add(r.TotalAudience, val)
 
-	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalAudience, &syndb.ColData{
+	syndb.AddData(TbLiveRecord, LiveRecordTotalAudience, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.TotalAudience,
 	})
@@ -101,7 +101,7 @@ func (r *LiveRecord) AddTotalAudience(val uint64) {
 
 func (r *LiveRecord) AddTotalLiveDuration(v float64) {
 	r.TotalLiveDuration = math.AddFloat64(r.TotalLiveDuration, v)
-	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalLiveDuration, &syndb.ColData{
+	syndb.AddData(TbLiveRecord, LiveRecordTotalLiveDuration, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.TotalLiveDuration,
 	})
@@ -110,7 +110,7 @@ func (r *LiveRecord) AddTotalLiveDuration(v float64) {
 func (r *LiveRecord) AddTotalIncome(v float64) {
 	r.TotalIncome = math.AddFloat64(r.TotalIncome, v)
 
-	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalIncome, &syndb.ColData{
+	syndb.AddData(TbLiveRecord, LiveRecordTotalIncome, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.TotalIncome,
 	})
@@ -119,7 +119,7 @@ func (r *LiveRecord) AddTotalIncome(v float64) {
 func (r *LiveRecord) AddTotalGiftIncome(v float64) {
 	r.TotalGiftIncome = math.AddFloat64(r.TotalGiftIncome, v)
 
-	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalGiftIncome, &syndb.ColData{
+	syndb.AddData(TbLiveRecord, LiveRecordTotalGiftIncome, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.TotalGiftIncome,
 	})
@@ -128,7 +128,7 @@ func (r *LiveRecord) AddTotalGiftIncome(v float64) {
 func (r *LiveRecord) AddTotalPaidDanmakuIncome(v float64) {
 	r.TotalPaidDanmakuIncome = math.AddFloat64(r.TotalPaidDanmakuIncome, v)
 
-	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalPaidDanmakuIncome, &syndb.ColData{
+	syndb.AddData(TbLiveRecord, LiveRecordTotalPaidDanmakuIncome, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.TotalPaidDanmakuIncome,
 	})
@@ -137,7 +137,7 @@ func (r *LiveRecord) AddTotalPaidDanmakuIncome(v float64) {
 func (r *LiveRecord) AddTotalPrivateRoomIncome(v float64) {
 	r.TotalPrivateRoomIncome = math.AddFloat64(r.TotalPrivateRoomIncome, v)
 
-	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalPrivateRoomIncome, &syndb.ColData{
+	syndb.AddData(TbLiveRecord, LiveRecordTotalPrivateRoomIncome, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.TotalPrivateRoomIncome,
 	})
@@ -146,7 +146,7 @@ func (r *LiveRecord) AddTotalPrivateRoomIncome(v float64) {
 func (r *LiveRecord) AddTotalPrivateRoomTicketIncome(v float64) {
 	r.TotalPrivateRoomTicketIncome = math.AddFloat64(r.TotalPrivateRoomTicketIncome, v)
 
-	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalPrivateRoomTicketIncome, &syndb.ColData{
+	syndb.AddData(TbLiveRecord, LiveRecordTotalPrivateRoomTicketIncome, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.TotalPrivateRoomTicketIncome,
 	})
@@ -155,7 +155,7 @@ func (r *LiveRecord) AddTotalPrivateRoomTicketIncome(v float64) {
 func (r *LiveRecord) AddTotalPrivateRoomWatchIncome(v float64) {
 	r.TotalPrivateRoomWatchIncome = math.AddFloat64(r.TotalPrivateRoomWatchIncome, v)
 
-	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalPrivateRoomWatchIncome, &syndb.ColData{
+	syndb.AddData(TbLiveRecord, LiveRecordTotalPrivateRoomWatchIncome, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.TotalPrivateRoomWatchIncome,
 	})
@@ -164,7 +164,7 @@ func (r *LiveRecord) AddTotalPrivateRoomWatchIncome(v float64) {
 func (r *LiveRecord) AddTotalVideoCallIncome(v float64) {
 	r.TotalVideoCallIncome = math.AddFloat64(r.TotalVideoCallIncome, v)
 
-	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalVideoCallIncome, &syndb.ColData{
+	syndb.AddData(TbLiveRecord, LiveRecordTotalVideoCallIncome, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.TotalVideoCallIncome,
 	})
@@ -173,7 +173,7 @@ func (r *LiveRecord) AddTotalVideoCallIncome(v float64) {
 func (r *LiveRecord) AddTotalVideoCallTicketIncome(v float64) {
 	r.TotalVideoCallTicketIncome = math.AddFloat64(r.TotalVideoCallTicketIncome, v)
 
-	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalVideoCallTicketIncome, &syndb.ColData{
+	syndb.AddData(TbLiveRecord, LiveRecordTotalVideoCallTicketIncome, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.TotalVideoCallTicketIncome,
 	})
@@ -182,7 +182,7 @@ func (r *LiveRecord) AddTotalVideoCallTicketIncome(v float64) {
 func (r *LiveRecord) AddTotalVideoCallBillingIncome(v float64) {
 	r.TotalVideoCallBillingIncome = math.AddFloat64(r.TotalVideoCallBillingIncome, v)
 
-	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalVideoCallBillingIncome, &syndb.ColData{
+	syndb.AddData(TbLiveRecord, LiveRecordTotalVideoCallBillingIncome, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.TotalVideoCallBillingIncome,
 	})
@@ -191,7 +191,7 @@ func (r *LiveRecord) AddTotalVideoCallBillingIncome(v float64) {
 func (r *LiveRecord) AddTotalGameBet(v float64) {
 	r.TotalGameBet = math.AddFloat64(r.TotalGameBet, v)
 
-	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalGameBet, &syndb.ColData{
+	syndb.AddData(TbLiveRecord, LiveRecordTotalGameBet, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.TotalGameBet,
 	})
@@ -200,7 +200,7 @@ func (r *LiveRecord) AddTotalGameBet(v float64) {
 func (r *LiveRecord) AddTotalGiftSender(val uint64) {
 	r.TotalGiftSender = math.Add(r.TotalGiftSender, val)
 
-	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalGiftSender, &syndb.ColData{
+	syndb.AddData(TbLiveRecord, LiveRecordTotalGiftSender, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.TotalGiftSender,
 	})
@@ -209,7 +209,7 @@ func (r *LiveRecord) AddTotalGiftSender(val uint64) {
 func (r *LiveRecord) AddTotalNewFollower(val uint64) {
 	r.TotalNewFollower = math.Add(r.TotalNewFollower, val)
 
-	syndb.AddDataToLazyChan(TbLiveRecord, LiveRecordTotalNewFollower, &syndb.ColData{
+	syndb.AddData(TbLiveRecord, LiveRecordTotalNewFollower, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.TotalNewFollower,
 	})
@@ -217,7 +217,7 @@ func (r *LiveRecord) AddTotalNewFollower(val uint64) {
 
 func (r *LiveRecord) SetCreatedAt(v time.Time) {
 	r.CreatedAt = v
-	syndb.AddDataToLazyChan(TbLiveRecord, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbLiveRecord, db.CreatedAtName, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: v,
 	})
@@ -225,7 +225,7 @@ func (r *LiveRecord) SetCreatedAt(v time.Time) {
 
 func (r *LiveRecord) SetUpdatedAt(v time.Time) {
 	r.UpdatedAt = v
-	syndb.AddDataToLazyChan(TbLiveRecord, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbLiveRecord, db.UpdatedAtName, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: v,
 	})
@@ -233,7 +233,7 @@ func (r *LiveRecord) SetUpdatedAt(v time.Time) {
 
 func (r *LiveRecord) touchUpdatedAt() {
 	r.UpdatedAt = time.Now()
-	syndb.AddDataToLazyChan(TbLiveRecord, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbLiveRecord, db.UpdatedAtName, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.UpdatedAt,
 	})

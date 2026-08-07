@@ -45,7 +45,7 @@ func NewUserExt(userId uint64) *UserExt {
 func (receiver *UserExt) SetCanRank(canRank bool) {
 	receiver.CanRank = canRank
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserExt, UserExtCanRank, &syndb.ColData{
+	syndb.AddData(TbUserExt, UserExtCanRank, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: canRank,
 	})
@@ -54,7 +54,7 @@ func (receiver *UserExt) SetCanRank(canRank bool) {
 func (receiver *UserExt) SetPackageName(packageName string) {
 	receiver.PackageName = packageName
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserExt, UserExtPackageName, &syndb.ColData{
+	syndb.AddData(TbUserExt, UserExtPackageName, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: packageName,
 	})
@@ -63,7 +63,7 @@ func (receiver *UserExt) SetPackageName(packageName string) {
 func (receiver *UserExt) SetAppVersion(appVersion string) {
 	receiver.AppVersion = appVersion
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserExt, UserExtAppVersion, &syndb.ColData{
+	syndb.AddData(TbUserExt, UserExtAppVersion, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: appVersion,
 	})
@@ -72,7 +72,7 @@ func (receiver *UserExt) SetAppVersion(appVersion string) {
 func (receiver *UserExt) SetCancelCode(cancelCode string) {
 	receiver.CancelCode = cancelCode
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserExt, UserExtCancelCode, &syndb.ColData{
+	syndb.AddData(TbUserExt, UserExtCancelCode, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: cancelCode,
 	})
@@ -84,7 +84,7 @@ func (receiver *UserExt) AddFollowCount(val uint64) {
 	}
 	receiver.FollowCount = math.Add(receiver.FollowCount, val)
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserExt, UserExtFollowCount, &syndb.ColData{
+	syndb.AddData(TbUserExt, UserExtFollowCount, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.FollowCount,
 	})
@@ -96,7 +96,7 @@ func (receiver *UserExt) SubFollowCount(val uint64) {
 	}
 	receiver.FollowCount = math.Sub(receiver.FollowCount, val)
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserExt, UserExtFollowCount, &syndb.ColData{
+	syndb.AddData(TbUserExt, UserExtFollowCount, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.FollowCount,
 	})
@@ -108,7 +108,7 @@ func (receiver *UserExt) AddFollowerCount(val uint64) {
 	}
 	receiver.FollowerCount = math.Add(receiver.FollowerCount, val)
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserExt, UserExtFollowerCount, &syndb.ColData{
+	syndb.AddData(TbUserExt, UserExtFollowerCount, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.FollowerCount,
 	})
@@ -120,7 +120,7 @@ func (receiver *UserExt) SubFollowerCount(val uint64) {
 	}
 	receiver.FollowerCount = math.Sub(receiver.FollowerCount, val)
 	receiver.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserExt, UserExtFollowerCount, &syndb.ColData{
+	syndb.AddData(TbUserExt, UserExtFollowerCount, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.FollowerCount,
 	})
@@ -128,7 +128,7 @@ func (receiver *UserExt) SubFollowerCount(val uint64) {
 
 func (receiver *UserExt) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
-	syndb.AddDataToQuickChan(TbUserExt, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbUserExt, db.CreatedAtName, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -136,7 +136,7 @@ func (receiver *UserExt) SetCreatedAt(val time.Time) {
 
 func (receiver *UserExt) SetUpdatedAt(val time.Time) {
 	receiver.UpdatedAt = val
-	syndb.AddDataToQuickChan(TbUserExt, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbUserExt, db.UpdatedAtName, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})

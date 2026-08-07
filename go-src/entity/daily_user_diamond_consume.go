@@ -36,17 +36,17 @@ func NewDailyUserDiamondConsume(date string, userId uint64) *DailyUserDiamondCon
 
 func (r *DailyUserDiamondConsume) SetUserId(v uint64) {
 	r.UserId = v
-	syndb.AddDataToLazyChan(TbDailyUserDiamondConsume, DailyUserDiamondConsumeUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbDailyUserDiamondConsume, DailyUserDiamondConsumeUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *DailyUserDiamondConsume) SetConsumeDate(v string) {
 	r.ConsumeDate = v
-	syndb.AddDataToLazyChan(TbDailyUserDiamondConsume, DailyUserDiamondConsumeConsumeDate, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbDailyUserDiamondConsume, DailyUserDiamondConsumeConsumeDate, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *DailyUserDiamondConsume) SetCreatedAt(v *time.Time) {
 	r.CreatedAt = v
-	syndb.AddDataToLazyChan(TbDailyUserDiamondConsume, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbDailyUserDiamondConsume, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func initDailyUserDiamondConsume() {

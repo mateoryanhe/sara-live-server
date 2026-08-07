@@ -151,22 +151,22 @@ func refundLiveRoomCallRevenue(order *entity.CallOrder, liveRecordId uint64, ref
 
 func applyLiveRecordCallRevenueDelta(liveRecord *entity.LiveRecord, amount float64, revenueType liverevenue.Type) {
 	liveRecord.TotalIncome = math.AddFloat64(liveRecord.TotalIncome, amount)
-	syndb.AddDataToLazyChan(entity.TbLiveRecord, entity.LiveRecordTotalIncome, &syndb.ColData{
+	syndb.AddData(entity.TbLiveRecord, entity.LiveRecordTotalIncome, &syndb.ColData{
 		IdVal: liveRecord.ID, ColVal: liveRecord.TotalIncome,
 	})
 	liveRecord.TotalVideoCallIncome = math.AddFloat64(liveRecord.TotalVideoCallIncome, amount)
-	syndb.AddDataToLazyChan(entity.TbLiveRecord, entity.LiveRecordTotalVideoCallIncome, &syndb.ColData{
+	syndb.AddData(entity.TbLiveRecord, entity.LiveRecordTotalVideoCallIncome, &syndb.ColData{
 		IdVal: liveRecord.ID, ColVal: liveRecord.TotalVideoCallIncome,
 	})
 	switch revenueType {
 	case liverevenue.LiveRoomVideoCallTicket:
 		liveRecord.TotalVideoCallTicketIncome = math.AddFloat64(liveRecord.TotalVideoCallTicketIncome, amount)
-		syndb.AddDataToLazyChan(entity.TbLiveRecord, entity.LiveRecordTotalVideoCallTicketIncome, &syndb.ColData{
+		syndb.AddData(entity.TbLiveRecord, entity.LiveRecordTotalVideoCallTicketIncome, &syndb.ColData{
 			IdVal: liveRecord.ID, ColVal: liveRecord.TotalVideoCallTicketIncome,
 		})
 	case liverevenue.LiveRoomVideoCallBilling:
 		liveRecord.TotalVideoCallBillingIncome = math.AddFloat64(liveRecord.TotalVideoCallBillingIncome, amount)
-		syndb.AddDataToLazyChan(entity.TbLiveRecord, entity.LiveRecordTotalVideoCallBillingIncome, &syndb.ColData{
+		syndb.AddData(entity.TbLiveRecord, entity.LiveRecordTotalVideoCallBillingIncome, &syndb.ColData{
 			IdVal: liveRecord.ID, ColVal: liveRecord.TotalVideoCallBillingIncome,
 		})
 	}
@@ -174,22 +174,22 @@ func applyLiveRecordCallRevenueDelta(liveRecord *entity.LiveRecord, amount float
 
 func applyRoomCallRevenueDelta(room *entity.LiveRoom, amount float64, revenueType liverevenue.Type) {
 	room.TotalIncome = math.AddFloat64(room.TotalIncome, amount)
-	syndb.AddDataToQuickChan(entity.TbLiveRoom, entity.LiveRoomTotalIncome, &syndb.ColData{
+	syndb.AddData(entity.TbLiveRoom, entity.LiveRoomTotalIncome, &syndb.ColData{
 		IdVal: room.ID, ColVal: room.TotalIncome,
 	})
 	room.TotalVideoCallIncome = math.AddFloat64(room.TotalVideoCallIncome, amount)
-	syndb.AddDataToQuickChan(entity.TbLiveRoom, entity.LiveRoomTotalVideoCallIncome, &syndb.ColData{
+	syndb.AddData(entity.TbLiveRoom, entity.LiveRoomTotalVideoCallIncome, &syndb.ColData{
 		IdVal: room.ID, ColVal: room.TotalVideoCallIncome,
 	})
 	switch revenueType {
 	case liverevenue.LiveRoomVideoCallTicket:
 		room.TotalVideoCallTicketIncome = math.AddFloat64(room.TotalVideoCallTicketIncome, amount)
-		syndb.AddDataToQuickChan(entity.TbLiveRoom, entity.LiveRoomTotalVideoCallTicketIncome, &syndb.ColData{
+		syndb.AddData(entity.TbLiveRoom, entity.LiveRoomTotalVideoCallTicketIncome, &syndb.ColData{
 			IdVal: room.ID, ColVal: room.TotalVideoCallTicketIncome,
 		})
 	case liverevenue.LiveRoomVideoCallBilling:
 		room.TotalVideoCallBillingIncome = math.AddFloat64(room.TotalVideoCallBillingIncome, amount)
-		syndb.AddDataToQuickChan(entity.TbLiveRoom, entity.LiveRoomTotalVideoCallBillingIncome, &syndb.ColData{
+		syndb.AddData(entity.TbLiveRoom, entity.LiveRoomTotalVideoCallBillingIncome, &syndb.ColData{
 			IdVal: room.ID, ColVal: room.TotalVideoCallBillingIncome,
 		})
 	}

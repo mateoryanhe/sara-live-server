@@ -39,21 +39,21 @@ func NewWeeklyUserLogin(week string, userId uint64) *WeeklyUserLogin {
 
 func (r *WeeklyUserLogin) SetUserId(v uint64) {
 	r.UserId = v
-	syndb.AddDataToLazyChan(TbWeeklyUserLogin, WeeklyUserLoginUserId, &syndb.ColData{
+	syndb.AddData(TbWeeklyUserLogin, WeeklyUserLoginUserId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *WeeklyUserLogin) SetLoginWeek(v string) {
 	r.LoginWeek = v
-	syndb.AddDataToLazyChan(TbWeeklyUserLogin, WeeklyUserLoginLoginWeek, &syndb.ColData{
+	syndb.AddData(TbWeeklyUserLogin, WeeklyUserLoginLoginWeek, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
 
 func (r *WeeklyUserLogin) SetCreatedAt(v *time.Time) {
 	r.CreatedAt = v
-	syndb.AddDataToLazyChan(TbWeeklyUserLogin, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbWeeklyUserLogin, db.CreatedAtName, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }

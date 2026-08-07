@@ -37,17 +37,17 @@ func NewDailyUserAudience(date string, userId uint64) *DailyUserAudience {
 
 func (r *DailyUserAudience) SetUserId(v uint64) {
 	r.UserId = v
-	syndb.AddDataToLazyChan(TbDailyUserAudience, DailyUserAudienceUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbDailyUserAudience, DailyUserAudienceUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *DailyUserAudience) SetAudienceDate(v string) {
 	r.AudienceDate = v
-	syndb.AddDataToLazyChan(TbDailyUserAudience, DailyUserAudienceAudienceDate, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbDailyUserAudience, DailyUserAudienceAudienceDate, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *DailyUserAudience) SetCreatedAt(v *time.Time) {
 	r.CreatedAt = v
-	syndb.AddDataToLazyChan(TbDailyUserAudience, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbDailyUserAudience, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func initDailyUserAudience() {

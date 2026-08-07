@@ -54,14 +54,14 @@ func NewUserMessageUnreadDetail(userId, senderId uint64) *UserMessageUnreadDetai
 
 func (m *UserMessageUnreadDetail) SetUserId(v uint64) {
 	m.UserId = v
-	syndb.AddDataToQuickChan(TbUserMessageUnreadDetail, UserMessageUnreadDetailUserId, &syndb.ColData{
+	syndb.AddData(TbUserMessageUnreadDetail, UserMessageUnreadDetailUserId, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }
 
 func (m *UserMessageUnreadDetail) SetSenderId(v uint64) {
 	m.SenderId = v
-	syndb.AddDataToQuickChan(TbUserMessageUnreadDetail, UserMessageUnreadDetailSenderId, &syndb.ColData{
+	syndb.AddData(TbUserMessageUnreadDetail, UserMessageUnreadDetailSenderId, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }
@@ -69,14 +69,14 @@ func (m *UserMessageUnreadDetail) SetSenderId(v uint64) {
 func (m *UserMessageUnreadDetail) AddUnread(v uint64) {
 	m.UnreadCount = math.Add(m.UnreadCount, v)
 	m.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserMessageUnreadDetail, UserMessageUnreadDetailUnreadCount, &syndb.ColData{
+	syndb.AddData(TbUserMessageUnreadDetail, UserMessageUnreadDetailUnreadCount, &syndb.ColData{
 		IdVal: m.ID, ColVal: m.UnreadCount,
 	})
 }
 
 func (m *UserMessageUnreadDetail) ClearUnread(v uint64) {
 	m.UnreadCount = math.Sub(m.UnreadCount, v)
-	syndb.AddDataToQuickChan(TbUserMessageUnreadDetail, UserMessageUnreadDetailUnreadCount, &syndb.ColData{
+	syndb.AddData(TbUserMessageUnreadDetail, UserMessageUnreadDetailUnreadCount, &syndb.ColData{
 		IdVal: m.ID, ColVal: m.UnreadCount,
 	})
 }
@@ -87,21 +87,21 @@ func (m *UserMessageUnreadDetail) SetMutualChat(v uint8) {
 	}
 	m.MutualChat = v
 	m.SetUpdatedAt(time.Now())
-	syndb.AddDataToQuickChan(TbUserMessageUnreadDetail, UserMessageUnreadDetailMutualChat, &syndb.ColData{
+	syndb.AddData(TbUserMessageUnreadDetail, UserMessageUnreadDetailMutualChat, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }
 
 func (m *UserMessageUnreadDetail) SetCreatedAt(v time.Time) {
 	m.CreatedAt = v
-	syndb.AddDataToQuickChan(TbUserMessageUnreadDetail, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbUserMessageUnreadDetail, db.CreatedAtName, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }
 
 func (m *UserMessageUnreadDetail) SetUpdatedAt(v time.Time) {
 	m.UpdatedAt = v
-	syndb.AddDataToQuickChan(TbUserMessageUnreadDetail, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbUserMessageUnreadDetail, db.UpdatedAtName, &syndb.ColData{
 		IdVal: m.ID, ColVal: v,
 	})
 }

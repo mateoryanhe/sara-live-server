@@ -61,14 +61,14 @@ func NewLiveFollowWithStatus(userId, anchorId uint64, status uint8) *LiveFollow 
 
 func (f *LiveFollow) SetUserId(v uint64) {
 	f.UserId = v
-	syndb.AddDataToQuickChan(TbLiveFollow, LiveFollowUserId, &syndb.ColData{
+	syndb.AddData(TbLiveFollow, LiveFollowUserId, &syndb.ColData{
 		IdVal: f.ID, ColVal: v,
 	})
 }
 
 func (f *LiveFollow) SetAnchorId(v uint64) {
 	f.AnchorId = v
-	syndb.AddDataToQuickChan(TbLiveFollow, LiveFollowAnchorId, &syndb.ColData{
+	syndb.AddData(TbLiveFollow, LiveFollowAnchorId, &syndb.ColData{
 		IdVal: f.ID, ColVal: v,
 	})
 }
@@ -76,24 +76,24 @@ func (f *LiveFollow) SetAnchorId(v uint64) {
 func (f *LiveFollow) SetStatus(v uint8) {
 	f.Status = v
 	f.UpdatedAt = time.Now()
-	syndb.AddDataToQuickChan(TbLiveFollow, LiveFollowStatus, &syndb.ColData{
+	syndb.AddData(TbLiveFollow, LiveFollowStatus, &syndb.ColData{
 		IdVal: f.ID, ColVal: v,
 	})
-	syndb.AddDataToQuickChan(TbLiveFollow, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbLiveFollow, db.UpdatedAtName, &syndb.ColData{
 		IdVal: f.ID, ColVal: f.UpdatedAt,
 	})
 }
 
 func (f *LiveFollow) SetCreatedAt(v time.Time) {
 	f.CreatedAt = v
-	syndb.AddDataToQuickChan(TbLiveFollow, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbLiveFollow, db.CreatedAtName, &syndb.ColData{
 		IdVal: f.ID, ColVal: v,
 	})
 }
 
 func (f *LiveFollow) SetUpdatedAt(v time.Time) {
 	f.UpdatedAt = v
-	syndb.AddDataToQuickChan(TbLiveFollow, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbLiveFollow, db.UpdatedAtName, &syndb.ColData{
 		IdVal: f.ID, ColVal: v,
 	})
 }

@@ -34,12 +34,12 @@ func NewCallUser(userId, callOrderId uint64) *CallUser {
 
 func (m *CallUser) SetCallOrderId(v uint64) {
 	m.CallOrderId = v
-	syndb.AddDataToQuickChan(TbCallUser, CallUserCallOrderId, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallUser, CallUserCallOrderId, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func (m *CallUser) SetHeartTime(v *time.Time) {
 	m.HeartTime = v
-	syndb.AddDataToQuickChan(TbCallUser, CallUserHeartTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
+	syndb.AddData(TbCallUser, CallUserHeartTime, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
 func initCallUser() {

@@ -37,17 +37,17 @@ func NewDailyUserGoldConsume(date string, userId uint64) *DailyUserGoldConsume {
 
 func (r *DailyUserGoldConsume) SetUserId(v uint64) {
 	r.UserId = v
-	syndb.AddDataToLazyChan(TbDailyUserGoldConsume, DailyUserGoldConsumeUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbDailyUserGoldConsume, DailyUserGoldConsumeUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *DailyUserGoldConsume) SetConsumeDate(v string) {
 	r.ConsumeDate = v
-	syndb.AddDataToLazyChan(TbDailyUserGoldConsume, DailyUserGoldConsumeConsumeDate, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbDailyUserGoldConsume, DailyUserGoldConsumeConsumeDate, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *DailyUserGoldConsume) SetCreatedAt(v *time.Time) {
 	r.CreatedAt = v
-	syndb.AddDataToLazyChan(TbDailyUserGoldConsume, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbDailyUserGoldConsume, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func initDailyUserGoldConsume() {

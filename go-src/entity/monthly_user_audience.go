@@ -37,17 +37,17 @@ func NewMonthlyUserAudience(month string, userId uint64) *MonthlyUserAudience {
 
 func (r *MonthlyUserAudience) SetUserId(v uint64) {
 	r.UserId = v
-	syndb.AddDataToLazyChan(TbMonthlyUserAudience, MonthlyUserAudienceUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbMonthlyUserAudience, MonthlyUserAudienceUserId, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *MonthlyUserAudience) SetAudienceMonth(v string) {
 	r.AudienceMonth = v
-	syndb.AddDataToLazyChan(TbMonthlyUserAudience, MonthlyUserAudienceAudienceMonth, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbMonthlyUserAudience, MonthlyUserAudienceAudienceMonth, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *MonthlyUserAudience) SetCreatedAt(v *time.Time) {
 	r.CreatedAt = v
-	syndb.AddDataToLazyChan(TbMonthlyUserAudience, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbMonthlyUserAudience, db.CreatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func initMonthlyUserAudience() {

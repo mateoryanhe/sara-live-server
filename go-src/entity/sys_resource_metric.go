@@ -75,7 +75,7 @@ func NewSysResourceMetric(
 
 func (receiver *SysResourceMetric) SetRecordedAt(val time.Time) {
 	receiver.RecordedAt = val
-	syndb.AddDataToLazyChan(TbSysResourceMetric, SysResourceMetricRecordedAt, &syndb.ColData{
+	syndb.AddData(TbSysResourceMetric, SysResourceMetricRecordedAt, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -83,7 +83,7 @@ func (receiver *SysResourceMetric) SetRecordedAt(val time.Time) {
 
 func (receiver *SysResourceMetric) SetProcMemMb(val float64) {
 	receiver.ProcMemMb = val
-	syndb.AddDataToLazyChan(TbSysResourceMetric, SysResourceMetricProcMemMb, &syndb.ColData{
+	syndb.AddData(TbSysResourceMetric, SysResourceMetricProcMemMb, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -91,7 +91,7 @@ func (receiver *SysResourceMetric) SetProcMemMb(val float64) {
 
 func (receiver *SysResourceMetric) SetProcHeapAllocMb(val float64) {
 	receiver.ProcHeapAllocMb = val
-	syndb.AddDataToLazyChan(TbSysResourceMetric, SysResourceMetricProcHeapAllocMb, &syndb.ColData{
+	syndb.AddData(TbSysResourceMetric, SysResourceMetricProcHeapAllocMb, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -99,7 +99,7 @@ func (receiver *SysResourceMetric) SetProcHeapAllocMb(val float64) {
 
 func (receiver *SysResourceMetric) SetProcHeapInuseMb(val float64) {
 	receiver.ProcHeapInuseMb = val
-	syndb.AddDataToLazyChan(TbSysResourceMetric, SysResourceMetricProcHeapInuseMb, &syndb.ColData{
+	syndb.AddData(TbSysResourceMetric, SysResourceMetricProcHeapInuseMb, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -107,7 +107,7 @@ func (receiver *SysResourceMetric) SetProcHeapInuseMb(val float64) {
 
 func (receiver *SysResourceMetric) SetProcHeapSysMb(val float64) {
 	receiver.ProcHeapSysMb = val
-	syndb.AddDataToLazyChan(TbSysResourceMetric, SysResourceMetricProcHeapSysMb, &syndb.ColData{
+	syndb.AddData(TbSysResourceMetric, SysResourceMetricProcHeapSysMb, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -115,7 +115,7 @@ func (receiver *SysResourceMetric) SetProcHeapSysMb(val float64) {
 
 func (receiver *SysResourceMetric) SetProcHeapUsedPercent(val float64) {
 	receiver.ProcHeapUsedPercent = val
-	syndb.AddDataToLazyChan(TbSysResourceMetric, SysResourceMetricProcHeapUsedPercent, &syndb.ColData{
+	syndb.AddData(TbSysResourceMetric, SysResourceMetricProcHeapUsedPercent, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -123,7 +123,7 @@ func (receiver *SysResourceMetric) SetProcHeapUsedPercent(val float64) {
 
 func (receiver *SysResourceMetric) SetProcHeapIdlePercent(val float64) {
 	receiver.ProcHeapIdlePercent = val
-	syndb.AddDataToLazyChan(TbSysResourceMetric, SysResourceMetricProcHeapIdlePercent, &syndb.ColData{
+	syndb.AddData(TbSysResourceMetric, SysResourceMetricProcHeapIdlePercent, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -131,7 +131,7 @@ func (receiver *SysResourceMetric) SetProcHeapIdlePercent(val float64) {
 
 func (receiver *SysResourceMetric) SetProcCpuPercent(val float64) {
 	receiver.ProcCpuPercent = val
-	syndb.AddDataToLazyChan(TbSysResourceMetric, SysResourceMetricProcCpuPercent, &syndb.ColData{
+	syndb.AddData(TbSysResourceMetric, SysResourceMetricProcCpuPercent, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -139,7 +139,7 @@ func (receiver *SysResourceMetric) SetProcCpuPercent(val float64) {
 
 func (receiver *SysResourceMetric) SetSysMemUsedMb(val float64) {
 	receiver.SysMemUsedMb = val
-	syndb.AddDataToLazyChan(TbSysResourceMetric, SysResourceMetricSysMemUsedMb, &syndb.ColData{
+	syndb.AddData(TbSysResourceMetric, SysResourceMetricSysMemUsedMb, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -147,7 +147,7 @@ func (receiver *SysResourceMetric) SetSysMemUsedMb(val float64) {
 
 func (receiver *SysResourceMetric) SetSysMemTotalMb(val float64) {
 	receiver.SysMemTotalMb = val
-	syndb.AddDataToLazyChan(TbSysResourceMetric, SysResourceMetricSysMemTotalMb, &syndb.ColData{
+	syndb.AddData(TbSysResourceMetric, SysResourceMetricSysMemTotalMb, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -155,7 +155,7 @@ func (receiver *SysResourceMetric) SetSysMemTotalMb(val float64) {
 
 func (receiver *SysResourceMetric) SetSysMemUsedPercent(val float64) {
 	receiver.SysMemUsedPercent = val
-	syndb.AddDataToLazyChan(TbSysResourceMetric, SysResourceMetricSysMemUsedPercent, &syndb.ColData{
+	syndb.AddData(TbSysResourceMetric, SysResourceMetricSysMemUsedPercent, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -163,7 +163,7 @@ func (receiver *SysResourceMetric) SetSysMemUsedPercent(val float64) {
 
 func (receiver *SysResourceMetric) SetSysCpuPercent(val float64) {
 	receiver.SysCpuPercent = val
-	syndb.AddDataToLazyChan(TbSysResourceMetric, SysResourceMetricSysCpuPercent, &syndb.ColData{
+	syndb.AddData(TbSysResourceMetric, SysResourceMetricSysCpuPercent, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -171,7 +171,7 @@ func (receiver *SysResourceMetric) SetSysCpuPercent(val float64) {
 
 func (receiver *SysResourceMetric) SetOnlineCount(val uint64) {
 	receiver.OnlineCount = val
-	syndb.AddDataToLazyChan(TbSysResourceMetric, SysResourceMetricOnlineCount, &syndb.ColData{
+	syndb.AddData(TbSysResourceMetric, SysResourceMetricOnlineCount, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -179,7 +179,7 @@ func (receiver *SysResourceMetric) SetOnlineCount(val uint64) {
 
 func (receiver *SysResourceMetric) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
-	syndb.AddDataToLazyChan(TbSysResourceMetric, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbSysResourceMetric, db.CreatedAtName, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -187,7 +187,7 @@ func (receiver *SysResourceMetric) SetCreatedAt(val time.Time) {
 
 func (receiver *SysResourceMetric) SetUpdatedAt(val time.Time) {
 	receiver.UpdatedAt = val
-	syndb.AddDataToLazyChan(TbSysResourceMetric, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbSysResourceMetric, db.UpdatedAtName, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})

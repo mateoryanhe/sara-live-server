@@ -52,7 +52,7 @@ func NewCurrencyLog(userId uint64, currencyType, action uint8, amount, before, a
 
 func (receiver *CurrencyLog) SetUserId(userId uint64) {
 	receiver.UserId = userId
-	syndb.AddDataToQuickChan(TbCurrencyLog, CurrencyLogUserId, &syndb.ColData{
+	syndb.AddData(TbCurrencyLog, CurrencyLogUserId, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: userId,
 	})
@@ -60,7 +60,7 @@ func (receiver *CurrencyLog) SetUserId(userId uint64) {
 
 func (receiver *CurrencyLog) SetType(currencyType uint8) {
 	receiver.Type = currencyType
-	syndb.AddDataToQuickChan(TbCurrencyLog, CurrencyLogType, &syndb.ColData{
+	syndb.AddData(TbCurrencyLog, CurrencyLogType, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: currencyType,
 	})
@@ -68,7 +68,7 @@ func (receiver *CurrencyLog) SetType(currencyType uint8) {
 
 func (receiver *CurrencyLog) SetAction(action uint8) {
 	receiver.Action = action
-	syndb.AddDataToQuickChan(TbCurrencyLog, CurrencyLogAction, &syndb.ColData{
+	syndb.AddData(TbCurrencyLog, CurrencyLogAction, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: action,
 	})
@@ -76,7 +76,7 @@ func (receiver *CurrencyLog) SetAction(action uint8) {
 
 func (receiver *CurrencyLog) SetAmount(amount float64) {
 	receiver.Amount = amount
-	syndb.AddDataToQuickChan(TbCurrencyLog, CurrencyLogAmount, &syndb.ColData{
+	syndb.AddData(TbCurrencyLog, CurrencyLogAmount, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: amount,
 	})
@@ -84,7 +84,7 @@ func (receiver *CurrencyLog) SetAmount(amount float64) {
 
 func (receiver *CurrencyLog) SetBefore(before float64) {
 	receiver.Before = before
-	syndb.AddDataToQuickChan(TbCurrencyLog, CurrencyLogBefore, &syndb.ColData{
+	syndb.AddData(TbCurrencyLog, CurrencyLogBefore, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: before,
 	})
@@ -92,7 +92,7 @@ func (receiver *CurrencyLog) SetBefore(before float64) {
 
 func (receiver *CurrencyLog) SetAfter(after float64) {
 	receiver.After = after
-	syndb.AddDataToQuickChan(TbCurrencyLog, CurrencyLogAfter, &syndb.ColData{
+	syndb.AddData(TbCurrencyLog, CurrencyLogAfter, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: after,
 	})
@@ -100,7 +100,7 @@ func (receiver *CurrencyLog) SetAfter(after float64) {
 
 func (receiver *CurrencyLog) SetReason(reason currency.Reason) {
 	receiver.Reason = uint8(reason)
-	syndb.AddDataToQuickChan(TbCurrencyLog, CurrencyLogReason, &syndb.ColData{
+	syndb.AddData(TbCurrencyLog, CurrencyLogReason, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: uint8(reason),
 	})
@@ -108,7 +108,7 @@ func (receiver *CurrencyLog) SetReason(reason currency.Reason) {
 
 func (receiver *CurrencyLog) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
-	syndb.AddDataToQuickChan(TbCurrencyLog, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbCurrencyLog, db.CreatedAtName, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})
@@ -116,7 +116,7 @@ func (receiver *CurrencyLog) SetCreatedAt(val time.Time) {
 
 func (receiver *CurrencyLog) SetUpdatedAt(val time.Time) {
 	receiver.UpdatedAt = val
-	syndb.AddDataToQuickChan(TbCurrencyLog, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbCurrencyLog, db.UpdatedAtName, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: val,
 	})

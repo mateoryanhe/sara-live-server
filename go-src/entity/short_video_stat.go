@@ -47,7 +47,7 @@ func NewShortVideoStat(videoId, authorId uint64, title string, publishedAt time.
 
 func (s *ShortVideoStat) SetAuthorId(val uint64) {
 	s.AuthorId = val
-	syndb.AddDataToLazyChan(TbShortVideoStat, ShortVideoStatAuthorId, &syndb.ColData{
+	syndb.AddData(TbShortVideoStat, ShortVideoStatAuthorId, &syndb.ColData{
 		IdVal:  s.ID,
 		ColVal: s.AuthorId,
 	})
@@ -55,7 +55,7 @@ func (s *ShortVideoStat) SetAuthorId(val uint64) {
 
 func (s *ShortVideoStat) SetTitle(val string) {
 	s.Title = val
-	syndb.AddDataToLazyChan(TbShortVideoStat, ShortVideoStatTitle, &syndb.ColData{
+	syndb.AddData(TbShortVideoStat, ShortVideoStatTitle, &syndb.ColData{
 		IdVal:  s.ID,
 		ColVal: s.Title,
 	})
@@ -64,7 +64,7 @@ func (s *ShortVideoStat) SetTitle(val string) {
 func (s *ShortVideoStat) AddLikeCount(val uint64) {
 	s.LikeCount = xrmath.Add(s.LikeCount, val)
 
-	syndb.AddDataToLazyChan(TbShortVideoStat, ShortVideoStatLikeCount, &syndb.ColData{
+	syndb.AddData(TbShortVideoStat, ShortVideoStatLikeCount, &syndb.ColData{
 		IdVal:  s.ID,
 		ColVal: s.LikeCount,
 	})
@@ -73,7 +73,7 @@ func (s *ShortVideoStat) AddLikeCount(val uint64) {
 func (s *ShortVideoStat) AddViewCount(val uint64) {
 	s.ViewCount = xrmath.Add(s.ViewCount, val)
 
-	syndb.AddDataToLazyChan(TbShortVideoStat, ShortVideoStatViewCount, &syndb.ColData{
+	syndb.AddData(TbShortVideoStat, ShortVideoStatViewCount, &syndb.ColData{
 		IdVal:  s.ID,
 		ColVal: s.ViewCount,
 	})
@@ -82,7 +82,7 @@ func (s *ShortVideoStat) AddViewCount(val uint64) {
 func (s *ShortVideoStat) AddWatchCount(val uint64) {
 	s.WatchCount = xrmath.Add(s.WatchCount, val)
 
-	syndb.AddDataToLazyChan(TbShortVideoStat, ShortVideoStatWatchCount, &syndb.ColData{
+	syndb.AddData(TbShortVideoStat, ShortVideoStatWatchCount, &syndb.ColData{
 		IdVal:  s.ID,
 		ColVal: s.WatchCount,
 	})
@@ -94,7 +94,7 @@ func (s *ShortVideoStat) AddTotalDiamondIncome(val float64) {
 	}
 	s.TotalDiamondIncome = xrmath.AddFloat64(s.TotalDiamondIncome, val)
 
-	syndb.AddDataToLazyChan(TbShortVideoStat, ShortVideoStatTotalDiamondIncome, &syndb.ColData{
+	syndb.AddData(TbShortVideoStat, ShortVideoStatTotalDiamondIncome, &syndb.ColData{
 		IdVal:  s.ID,
 		ColVal: s.TotalDiamondIncome,
 	})
@@ -102,7 +102,7 @@ func (s *ShortVideoStat) AddTotalDiamondIncome(val float64) {
 
 func (s *ShortVideoStat) SetCreatedAt(val time.Time) {
 	s.CreatedAt = val
-	syndb.AddDataToLazyChan(TbShortVideoStat, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbShortVideoStat, db.CreatedAtName, &syndb.ColData{
 		ColVal: val,
 		IdVal:  s.ID,
 	})
@@ -110,7 +110,7 @@ func (s *ShortVideoStat) SetCreatedAt(val time.Time) {
 
 func (s *ShortVideoStat) SetUpdatedAt(val time.Time) {
 	s.UpdatedAt = val
-	syndb.AddDataToLazyChan(TbShortVideoStat, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbShortVideoStat, db.UpdatedAtName, &syndb.ColData{
 		ColVal: val,
 		IdVal:  s.ID,
 	})

@@ -96,7 +96,7 @@ func NewShortVideo(id uint64, title, video, cover string, sort int, isPaid uint8
 func (v *ShortVideo) SetTitle(val string) {
 	v.Title = val
 	v.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbShortVideo, ShortVideoTitle, &syndb.ColData{
+	syndb.AddData(TbShortVideo, ShortVideoTitle, &syndb.ColData{
 		IdVal: v.ID, ColVal: val,
 	})
 }
@@ -104,7 +104,7 @@ func (v *ShortVideo) SetTitle(val string) {
 func (v *ShortVideo) SetVideo(val string) {
 	v.Video = val
 	v.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbShortVideo, ShortVideoVideo, &syndb.ColData{
+	syndb.AddData(TbShortVideo, ShortVideoVideo, &syndb.ColData{
 		IdVal: v.ID, ColVal: val,
 	})
 }
@@ -112,7 +112,7 @@ func (v *ShortVideo) SetVideo(val string) {
 func (v *ShortVideo) SetCover(val string) {
 	v.Cover = val
 	v.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbShortVideo, ShortVideoCover, &syndb.ColData{
+	syndb.AddData(TbShortVideo, ShortVideoCover, &syndb.ColData{
 		IdVal: v.ID, ColVal: val,
 	})
 }
@@ -120,7 +120,7 @@ func (v *ShortVideo) SetCover(val string) {
 func (v *ShortVideo) SetSort(val int) {
 	v.Sort = val
 	v.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbShortVideo, ShortVideoSort, &syndb.ColData{
+	syndb.AddData(TbShortVideo, ShortVideoSort, &syndb.ColData{
 		IdVal: v.ID, ColVal: val,
 	})
 }
@@ -128,7 +128,7 @@ func (v *ShortVideo) SetSort(val int) {
 func (v *ShortVideo) SetStatus(val uint8) {
 	v.Status = val
 	v.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbShortVideo, ShortVideoStatusCol, &syndb.ColData{
+	syndb.AddData(TbShortVideo, ShortVideoStatusCol, &syndb.ColData{
 		IdVal: v.ID, ColVal: val,
 	})
 }
@@ -136,7 +136,7 @@ func (v *ShortVideo) SetStatus(val uint8) {
 func (v *ShortVideo) SetIsPaid(val uint8) {
 	v.IsPaid = val
 	v.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbShortVideo, ShortVideoIsPaid, &syndb.ColData{
+	syndb.AddData(TbShortVideo, ShortVideoIsPaid, &syndb.ColData{
 		IdVal: v.ID, ColVal: val,
 	})
 }
@@ -144,7 +144,7 @@ func (v *ShortVideo) SetIsPaid(val uint8) {
 func (v *ShortVideo) SetPayDiamond(val float64) {
 	v.PayDiamond = val
 	v.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbShortVideo, ShortVideoPayDiamond, &syndb.ColData{
+	syndb.AddData(TbShortVideo, ShortVideoPayDiamond, &syndb.ColData{
 		IdVal: v.ID, ColVal: val,
 	})
 }
@@ -152,7 +152,7 @@ func (v *ShortVideo) SetPayDiamond(val float64) {
 func (v *ShortVideo) SetCategoryId(val int) {
 	v.CategoryId = val
 	v.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbShortVideo, ShortVideoCategoryId, &syndb.ColData{
+	syndb.AddData(TbShortVideo, ShortVideoCategoryId, &syndb.ColData{
 		IdVal: v.ID, ColVal: val,
 	})
 }
@@ -160,7 +160,7 @@ func (v *ShortVideo) SetCategoryId(val int) {
 func (v *ShortVideo) SetSource(val uint8) {
 	v.Source = val
 	v.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbShortVideo, ShortVideoSource, &syndb.ColData{
+	syndb.AddData(TbShortVideo, ShortVideoSource, &syndb.ColData{
 		IdVal: v.ID, ColVal: val,
 	})
 }
@@ -168,7 +168,7 @@ func (v *ShortVideo) SetSource(val uint8) {
 func (v *ShortVideo) SetAuthorId(val uint64) {
 	v.AuthorId = val
 	v.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbShortVideo, ShortVideoAuthorId, &syndb.ColData{
+	syndb.AddData(TbShortVideo, ShortVideoAuthorId, &syndb.ColData{
 		IdVal: v.ID, ColVal: val,
 	})
 }
@@ -176,7 +176,7 @@ func (v *ShortVideo) SetAuthorId(val uint64) {
 // initAuthorType 仅在创建时写入,创建后不可修改
 func (v *ShortVideo) initAuthorType(val uint8) {
 	v.AuthorType = val
-	syndb.AddDataToQuickChan(TbShortVideo, ShortVideoAuthorType, &syndb.ColData{
+	syndb.AddData(TbShortVideo, ShortVideoAuthorType, &syndb.ColData{
 		IdVal: v.ID, ColVal: val,
 	})
 }
@@ -184,7 +184,7 @@ func (v *ShortVideo) initAuthorType(val uint8) {
 func (v *ShortVideo) SetDuration(val uint32) {
 	v.Duration = val
 	v.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbShortVideo, ShortVideoDuration, &syndb.ColData{
+	syndb.AddData(TbShortVideo, ShortVideoDuration, &syndb.ColData{
 		IdVal: v.ID, ColVal: val,
 	})
 }
@@ -192,28 +192,28 @@ func (v *ShortVideo) SetDuration(val uint32) {
 func (v *ShortVideo) SetFreeWatchSeconds(val uint32) {
 	v.FreeWatchSeconds = val
 	v.touchUpdatedAt()
-	syndb.AddDataToQuickChan(TbShortVideo, ShortVideoFreeWatchSeconds, &syndb.ColData{
+	syndb.AddData(TbShortVideo, ShortVideoFreeWatchSeconds, &syndb.ColData{
 		IdVal: v.ID, ColVal: val,
 	})
 }
 
 func (v *ShortVideo) SetCreatedAt(val time.Time) {
 	v.CreatedAt = val
-	syndb.AddDataToQuickChan(TbShortVideo, db.CreatedAtName, &syndb.ColData{
+	syndb.AddData(TbShortVideo, db.CreatedAtName, &syndb.ColData{
 		IdVal: v.ID, ColVal: val,
 	})
 }
 
 func (v *ShortVideo) SetUpdatedAt(val time.Time) {
 	v.UpdatedAt = val
-	syndb.AddDataToQuickChan(TbShortVideo, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbShortVideo, db.UpdatedAtName, &syndb.ColData{
 		IdVal: v.ID, ColVal: val,
 	})
 }
 
 func (v *ShortVideo) touchUpdatedAt() {
 	v.UpdatedAt = time.Now()
-	syndb.AddDataToQuickChan(TbShortVideo, db.UpdatedAtName, &syndb.ColData{
+	syndb.AddData(TbShortVideo, db.UpdatedAtName, &syndb.ColData{
 		IdVal: v.ID, ColVal: v.UpdatedAt,
 	})
 }
