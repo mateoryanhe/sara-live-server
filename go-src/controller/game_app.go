@@ -32,3 +32,8 @@ func (c *GameAppController) AppGameStart(ctx context.Context, req *gameplatformd
 func (c *GameAppController) AppGameBetList(ctx context.Context, req *gamebetdto.AppGameBetListReq) (*gamebetdto.AppGameBetListRes, error) {
 	return gamebet.GetAppList(ctx, req)
 }
+
+// AppGameConsumeRank App 分页查询单场直播游戏消费榜
+func (c *GameAppController) AppGameConsumeRank(ctx context.Context, req *gamebetdto.AppGameConsumeRankReq) (*gamebetdto.AppGameConsumeRankRes, error) {
+	return game.GetAppGameConsumeRank(ctx, req)
+}

@@ -48,6 +48,7 @@ func SumAudienceContributionByRoom(roomId uint64, startTime, endTime time.Time, 
 SELECT rl.sender_id, SUM(rl.total_amount) AS total_amount
 FROM ` + string(entity.TbLiveRevenueLog) + ` rl
 INNER JOIN ` + string(entity.TbAccount) + ` a ON a.id = rl.sender_id
+LEFT JOIN ` + string(entity.TbUserExt) + ` ue ON ue.id = rl.sender_id
 WHERE rl.room_id = ?
   AND IFNULL(rl.` + string(entity.LiveRevenueLogStatus) + `, 0) = 0
   AND rl.sender_id IN (` + inPlaceholders + `)
@@ -59,6 +60,7 @@ WHERE rl.room_id = ?
     IFNULL(a.` + string(entity.AccountBan) + `, 0) = 0
     OR (a.` + string(entity.AccountBanApplyTime) + ` IS NOT NULL AND a.` + string(entity.AccountBanApplyTime) + ` <= ?)
   )
+  AND (ue.id IS NULL OR IFNULL(ue.` + string(entity.UserExtCanRank) + `, 1) = 1)
 GROUP BY rl.sender_id
 HAVING SUM(rl.total_amount) > 0
 ORDER BY total_amount DESC

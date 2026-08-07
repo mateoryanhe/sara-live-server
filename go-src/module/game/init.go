@@ -10,4 +10,5 @@ func Init() {
 	cfgdao.ReloadGameCfgCache()
 	initVendorGameCache()
 	initGamePlatformCfg()
+	initGameConsumeRank()
 }

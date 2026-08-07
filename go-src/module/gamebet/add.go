@@ -4,8 +4,10 @@ import (
 	"strings"
 
 	"xr-game-server/constants/gameplatform"
+	"xr-game-server/core/event"
 	"xr-game-server/dao/gamebetdao"
 	"xr-game-server/entity"
+	"xr-game-server/gameevent"
 )
 
 // AddGameBetLog 新增游戏下注记录(quick 缓冲写库,并插入列表缓存头部).
@@ -27,6 +29,9 @@ func AddGameBetLog(userId uint64, gameCode, nameEn, cover string, platformType g
 	)
 	if amount > 0 {
 		gamebetdao.PrependGameBetToAppListCache(userId, row)
+		if liveRecordId > 0 {
+			event.Pub(gameevent.GameBetCreatedEvent, gameevent.NewGameBetCreatedEventData(userId, liveRecordId, amount))
+		}
 	}
 	return row
 }

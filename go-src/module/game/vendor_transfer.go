@@ -9,6 +9,7 @@ import (
 
 	"xr-game-server/constants/currency"
 	"xr-game-server/constants/gameplatform"
+	"xr-game-server/core/event"
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dao/gamebetdao"
@@ -17,6 +18,7 @@ import (
 	"xr-game-server/dto/gameplatformdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
+	"xr-game-server/gameevent"
 	"xr-game-server/module/wallet"
 )
 
@@ -207,6 +209,9 @@ func recordVendorTransferBetLog(userID uint64, gameCode, nameEn, cover string, p
 		liveRecordID,
 	)
 	gamebetdao.PrependGameBetToAppListCache(userID, row)
+	if liveRecordID > 0 {
+		event.Pub(gameevent.GameBetCreatedEvent, gameevent.NewGameBetCreatedEventData(userID, liveRecordID, amount))
+	}
 }
 
 func recordVendorTransferWinLog(userID uint64, gameCode, nameEn, cover string, platformType gameplatform.Platform, orderID string, amount float64) {
