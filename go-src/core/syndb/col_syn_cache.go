@@ -182,7 +182,7 @@ func consumeFlush(ctx context.Context, defaultReason string, sysCpu, cpuIdle flo
 	}
 
 	logLine := formatFlushLog(primaryReason, sysCpu, cpuIdle, start, totalRows, idleCount, forceCount, len(candidates), details)
-	xrlog.DetailLog.Info(ctx, logLine)
+	xrlog.DetailLog.Info(gctx.New(), logLine)
 	return totalRows, logLine
 }
 

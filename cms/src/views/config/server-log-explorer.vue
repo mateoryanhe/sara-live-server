@@ -356,6 +356,7 @@
         <p v-if="traceStartDate && traceEndDate" class="trace-meta">
           查询范围：{{ traceStartDate }} ~ {{ traceEndDate }}
         </p>
+        <p v-if="traceAnchorTime" class="trace-meta">锚点日志：{{ traceAnchorTime }}</p>
         <p v-if="resolveTraceAuthId()" class="trace-meta">AuthId: {{ resolveTraceAuthId() }}</p>
 
         <div v-loading="traceLoading" :element-loading-text="queryStatusTip">
@@ -455,7 +456,7 @@ import {ElMessage} from 'element-plus'
 import {logQueryApi} from '@/api'
 import AccessTrendChart from './components/access-trend-chart.vue'
 import SyndbFlushLogView from './components/syndb-flush-log.vue'
-import {formatErrorStack, formatErrorSummary, extractAndFormatLogJsonField, listLogJsonFields} from '@/utils/logParsers'
+import {formatErrorStack, formatErrorSummary, extractAndFormatLogJsonField, filterTraceLogsToRound, listLogJsonFields, parseLogTimeMs} from '@/utils/logParsers'
 import type {LogJsonFieldKey} from '@/utils/logParsers'
 import type {AccessLogItem, AccessTrendData, DetailLogItem, ErrorLogItem, LogQueryJobResult, SyndbFlushLog, TopStatItem, TraceLogDetail} from '@/types/api'
 
@@ -558,31 +559,6 @@ const normalizeDateRange = (startDate: string, endDate: string): string[] | null
     return [endDate, startDate]
   }
   return [startDate, endDate]
-}
-
-const extractLogDate = (time?: string) => {
-  if (!time || time.length < 10) {
-    return ''
-  }
-  return time.slice(0, 10)
-}
-
-const expandRangeToIncludeDate = (range: string[], logDate: string) => {
-  const normalized = normalizeDateRange(range[0], range[1])
-  if (!normalized) {
-    return null
-  }
-  if (!logDate) {
-    return normalized
-  }
-  let [start, end] = normalized
-  if (logDate < start) {
-    start = logDate
-  }
-  if (logDate > end) {
-    end = logDate
-  }
-  return normalizeDateRange(start, end)
 }
 
 const getActiveTabDateRange = (): string[] => {
@@ -696,6 +672,7 @@ const ipTopData = ref<TopStatItem[]>([])
 
 const traceDrawerVisible = ref(false)
 const traceLoading = ref(false)
+const traceAnchorTime = ref('')
 const defaultTraceDates = createDefaultDateRangeForm()
 const traceStartDate = ref(defaultTraceDates.startDate)
 const traceEndDate = ref(defaultTraceDates.endDate)
@@ -872,16 +849,15 @@ const fetchAccessStats = async () => {
   }
 }
 
-const resolveInitialTraceDateRange = (logTime?: string, tabRange?: string[]) => {
-  const logDate = extractLogDate(logTime)
-  if (logDate) {
-    if (tabRange?.length === 2) {
-      const expanded = expandRangeToIncludeDate(tabRange, logDate)
-      if (expanded) {
-        return expanded
-      }
-    }
-    return [logDate, logDate]
+const TRACE_QUERY_WINDOW_MS = 120_000
+
+const resolveTraceQueryRange = (logTime?: string, tabRange?: string[]): string[] => {
+  const anchorMs = parseLogTimeMs(logTime)
+  if (anchorMs) {
+    return [
+      formatLocalDateTime(new Date(anchorMs - TRACE_QUERY_WINDOW_MS)),
+      formatLocalDateTime(new Date(anchorMs + TRACE_QUERY_WINDOW_MS)),
+    ]
   }
   if (tabRange?.length === 2) {
     const normalized = normalizeDateRange(tabRange[0], tabRange[1])
@@ -913,12 +889,20 @@ const fetchTraceDetail = async () => {
   traceDetail.errorLogs = []
   try {
     const data = await logQueryApi.getTraceLogs(traceDetail.traceId, range[0], range[1], handleLogQueryStatus)
-    traceDetail.traceId = data.traceId || traceDetail.traceId
-    traceDetail.startDate = data.startDate || range[0]
-    traceDetail.endDate = data.endDate || range[1]
-    traceDetail.detailLogs = data.detailLogs || []
-    traceDetail.accessLogs = data.accessLogs || []
-    traceDetail.errorLogs = data.errorLogs || []
+    const filtered = filterTraceLogsToRound({
+      traceId: data.traceId || traceDetail.traceId,
+      startDate: data.startDate || range[0],
+      endDate: data.endDate || range[1],
+      detailLogs: data.detailLogs || [],
+      accessLogs: data.accessLogs || [],
+      errorLogs: data.errorLogs || [],
+    }, traceAnchorTime.value)
+    traceDetail.traceId = filtered.traceId
+    traceDetail.startDate = filtered.startDate
+    traceDetail.endDate = filtered.endDate
+    traceDetail.detailLogs = filtered.detailLogs
+    traceDetail.accessLogs = filtered.accessLogs
+    traceDetail.errorLogs = filtered.errorLogs
   } catch (error) {
     console.error('查询Trace日志失败:', error)
     ElMessage.error('查询Trace日志失败')
@@ -932,7 +916,8 @@ const openTraceDetail = async (traceId: string, logTime?: string) => {
     return
   }
   traceDetail.traceId = traceId
-  const [startDate, endDate] = resolveInitialTraceDateRange(logTime, getActiveTabDateRange())
+  traceAnchorTime.value = logTime || ''
+  const [startDate, endDate] = resolveTraceQueryRange(logTime, getActiveTabDateRange())
   traceStartDate.value = startDate
   traceEndDate.value = endDate
   traceDrawerVisible.value = true

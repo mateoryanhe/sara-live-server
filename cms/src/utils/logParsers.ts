@@ -660,6 +660,91 @@ export const parseLogExportPage = <T>(
     return items
 }
 
+const TRACE_ROUND_BUFFER_MS = 3000
+const TRACE_SYNDb_ANCHOR_MS = 1500
+
+export const parseLogTimeMs = (time?: string): number | null => {
+    if (!time) {
+        return null
+    }
+    const normalized = time.trim().replace(' ', 'T')
+    const ms = Date.parse(normalized)
+    return Number.isNaN(ms) ? null : ms
+}
+
+const sortByLogTime = <T extends { time: string }>(items: T[]) =>
+    [...items].sort((a, b) => (parseLogTimeMs(a.time) || 0) - (parseLogTimeMs(b.time) || 0))
+
+const isWithinLogWindow = (time: string | undefined, startMs: number, endMs: number) => {
+    const logMs = parseLogTimeMs(time)
+    return logMs !== null && logMs >= startMs && logMs <= endMs
+}
+
+/** 将 Trace 查询结果收敛到点击日志所在的一轮请求/一次刷盘 */
+export const filterTraceLogsToRound = (data: TraceLogDetail, anchorTime?: string): TraceLogDetail => {
+    const anchorMs = parseLogTimeMs(anchorTime)
+    if (!anchorMs) {
+        return data
+    }
+
+    const detailLogs = sortByLogTime(data.detailLogs)
+    const accessLogs = sortByLogTime(data.accessLogs)
+    const anchorDetail =
+        detailLogs.find((item) => item.time === anchorTime) ||
+        detailLogs.find((item) => {
+            const logMs = parseLogTimeMs(item.time)
+            return logMs !== null && Math.abs(logMs - anchorMs) <= TRACE_SYNDb_ANCHOR_MS
+        })
+
+    if (anchorDetail?.syndbFlush) {
+        return {
+            ...data,
+            accessLogs: [],
+            errorLogs: data.errorLogs.filter((item) => isWithinLogWindow(item.time, anchorMs - TRACE_SYNDb_ANCHOR_MS, anchorMs + TRACE_SYNDb_ANCHOR_MS)),
+            detailLogs: [anchorDetail],
+        }
+    }
+
+    let roundAccess = accessLogs[0]
+    let bestDiff = Number.POSITIVE_INFINITY
+    for (const access of accessLogs) {
+        const accessMs = parseLogTimeMs(access.time)
+        if (accessMs === null) {
+            continue
+        }
+        const diff = Math.abs(accessMs - anchorMs)
+        if (diff < bestDiff) {
+            bestDiff = diff
+            roundAccess = access
+        }
+    }
+
+    const roundStartMs = parseLogTimeMs(roundAccess?.time) ?? anchorMs - TRACE_ROUND_BUFFER_MS
+    const roundAccessIdx = roundAccess ? accessLogs.indexOf(roundAccess) : -1
+    const nextAccessMs =
+        roundAccessIdx >= 0 && roundAccessIdx + 1 < accessLogs.length
+            ? parseLogTimeMs(accessLogs[roundAccessIdx + 1].time)
+            : null
+    const defaultEndMs = roundStartMs + Math.max((roundAccess?.handlerMs || 0) + TRACE_ROUND_BUFFER_MS, 10000)
+    const roundEndMs = nextAccessMs && nextAccessMs > roundStartMs ? nextAccessMs : defaultEndMs
+
+    return {
+        ...data,
+        accessLogs: roundAccess ? [roundAccess] : [],
+        errorLogs: data.errorLogs.filter((item) => isWithinLogWindow(item.time, roundStartMs - TRACE_ROUND_BUFFER_MS, roundEndMs)),
+        detailLogs: detailLogs.filter((item) => {
+            const logMs = parseLogTimeMs(item.time)
+            if (logMs === null) {
+                return false
+            }
+            if (item.syndbFlush && Math.abs(logMs - anchorMs) > TRACE_SYNDb_ANCHOR_MS) {
+                return false
+            }
+            return logMs >= roundStartMs - TRACE_ROUND_BUFFER_MS && logMs <= roundEndMs
+        }),
+    }
+}
+
 export const parseTraceExport = (text: string, traceId: string, startDate: string, endDate: string): TraceLogDetail => {
     const sections: Record<string, string[]> = {detail: [], access: [], error: []}
     let current = ''
