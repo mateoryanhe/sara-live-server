@@ -1,10 +1,10 @@
 package game
 
 import (
-	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/glog"
+	"xr-game-server/core/xrlog"
 )
 
 func vendorDetailLog() *glog.Logger {
-	return g.Log("detail")
+	return xrlog.DetailLog.Logger()
 }

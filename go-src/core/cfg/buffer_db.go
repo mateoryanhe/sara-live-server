@@ -5,36 +5,29 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 )
 
-const (
-	LazyDbStr = "bufferSize.db.lazy"
-	FastDbStr = "bufferSize.db.fast"
-)
+const SyndbBufferStr = "bufferSize.db"
 
-type DbBufferCfg struct {
-	//单行数据配置
-	Period int
+// SyndbBufferCfg syndb 统一缓冲落库配置
+type SyndbBufferCfg struct {
+	// TickIntervalMs 调度周期(毫秒),默认 1000
+	TickIntervalMs int
+	// CpuIdlePercent 系统 CPU 空闲比例阈值(0~100),达到则允许批量落库,默认 70
+	CpuIdlePercent int
+	// MaxPendingWaitMs Pending 最长等待(毫秒),超时强制落库,默认 5000
+	MaxPendingWaitMs int
+	// BatchSize 每轮全局批量落库上限(所有 queue 共用),默认 100
+	BatchSize int
 }
 
-var LazyDbBufferCfg = &DbBufferCfg{}
-var FastDbBufferCfg = &DbBufferCfg{}
+var SyndbBufferCfgVar = &SyndbBufferCfg{}
 
 func initDbBufferCfg() {
-	initLazy()
-	initFast()
+	initSyndbBuffer()
 }
 
-func initLazy() {
-	data, _ := g.Cfg().GetWithCmd(gctx.New(), LazyDbStr)
-	err := data.Scan(&LazyDbBufferCfg)
-	if err != nil {
-		g.Log().Error(gctx.New(), "无法加载到延迟缓冲池大小配置数据")
-	}
-}
-
-func initFast() {
-	data, _ := g.Cfg().GetWithCmd(gctx.New(), FastDbStr)
-	err := data.Scan(&FastDbBufferCfg)
-	if err != nil {
-		g.Log().Error(gctx.New(), "无法加载到快速缓冲池大小配置数据")
+func initSyndbBuffer() {
+	data, _ := g.Cfg().GetWithCmd(gctx.New(), SyndbBufferStr)
+	if err := data.Scan(SyndbBufferCfgVar); err != nil {
+		g.Log().Error(gctx.New(), "无法加载 syndb 缓冲配置")
 	}
 }

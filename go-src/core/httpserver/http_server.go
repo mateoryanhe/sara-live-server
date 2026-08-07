@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/util/gconv"
 	"xr-game-server/core/shutdown"
+	"xr-game-server/core/xrlog"
 )
 
 const (
@@ -64,7 +65,7 @@ func authIdFromRequest(r *ghttp.Request) string {
 }
 
 func beforeServeHook(r *ghttp.Request) {
-	g.Log("detail").Infof(r.Context(), "beforeServeHook [is file:%v] URI:%s ip:%s", r.IsFileRequest(), r.RequestURI, r.GetClientIp())
+	xrlog.DetailLog.Infof(r.Context(), "beforeServeHook [is file:%v] URI:%s ip:%s", r.IsFileRequest(), r.RequestURI, r.GetClientIp())
 	r.Response.CORSDefault()
 }
 

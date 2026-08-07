@@ -432,3 +432,13 @@ type AnchorStartLivePushItem struct {
 	LiveRecordId string `json:"liveRecordId" dc:"本场直播记录ID"`
 	StartedAt    int64  `json:"startedAt"    dc:"开播时间(秒)"`
 }
+
+// ReportAnchorCodeReq App 上报主播码成为普通主播
+type ReportAnchorCodeReq struct {
+	g.Meta     `path:"/reportAnchorCode" method:"post" summary:"上报主播码成为普通主播" tags:"直播间"`
+	AnchorCode string `json:"anchorCode" v:"required#主播码不能为空" dc:"主播码"`
+}
+
+type ReportAnchorCodeRes struct {
+	Success bool `json:"success"`
+}

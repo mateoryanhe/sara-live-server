@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/glog"
 	"xr-game-server/core/shutdown"
+	"xr-game-server/core/xrlog"
 )
 
 // initHTTPServerLogger 关闭 GF Server 内置 access/error 文件日志,改由 logger.access / logger.error 独立配置处理;
@@ -27,7 +28,7 @@ func initDetailLogger(ctx context.Context) {
 	if g.Cfg().MustGet(ctx, "logger.detail").IsEmpty() {
 		return
 	}
-	detailLogger := g.Log("detail")
+	detailLogger := xrlog.DetailLog.Logger()
 	detailCfg := detailLogger.GetConfig()
 	_ = httpServer.Logger().SetConfig(detailCfg)
 	defaultLogger := glog.New()

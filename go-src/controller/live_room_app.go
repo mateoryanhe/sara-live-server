@@ -151,3 +151,8 @@ func (c *LiveRoomAppController) ReportLiveStartStatus(ctx context.Context, req *
 func (c *LiveRoomAppController) GameRecommendList(ctx context.Context, req *liveroomdto.GetLiveRoomGameRecommendListReq) (*liveroomdto.GetLiveRoomGameRecommendListRes, error) {
 	return liveroom.GetLiveRoomGameRecommendList(ctx, req)
 }
+
+// ReportAnchorCode 上报主播码成为普通主播
+func (c *LiveRoomAppController) ReportAnchorCode(ctx context.Context, req *liveroomdto.ReportAnchorCodeReq) (*liveroomdto.ReportAnchorCodeRes, error) {
+	return liveroom.ReportAnchorCode(ctx, req)
+}

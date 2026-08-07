@@ -31,10 +31,10 @@ logQuery:
 
 bufferSize:
   db:
-    lazy:
-      period: 15000 # 懒缓冲落库周期(毫秒),15秒
-    fast:
-      period: 500 # 快速缓冲落库周期(毫秒),配合500ms调度,约1秒内入库
+    tickIntervalMs: 1000   # 调度周期(毫秒)
+    cpuIdlePercent: 70     # 系统 CPU 空闲比例达到该值才批量落库
+    maxPendingWaitMs: 5000 # Pending 最长等待(毫秒),超时强制落库
+    batchSize: 100         # 每轮全局批量落库上限(所有 queue 共用)
   websocket:
     size: 30 # 推送批量大小(未配置时默认10)
   goPool:
@@ -75,7 +75,7 @@ database:
     path: '/home/ec2-user/log/gf_app'
     level: "all"
     stdout: false
-    queryOnly: true   # 仅记录 SELECT/UPDATE/DELETE,不记录 INSERT/SHOW
+    queryOnly: false   # 仅记录 SELECT/UPDATE/DELETE,不记录 INSERT/SHOW
   default:
     link: "mysql:root:Appledev882116@tcp(127.0.0.1:13307)/live_db"
     extra: "charset=utf8mb4&parseTime=True&loc=Local"

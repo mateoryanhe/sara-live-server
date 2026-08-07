@@ -4,6 +4,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/glog"
+	"xr-game-server/core/xrlog"
 )
 
 // initDefaultLoggerFromDetail 将 logger.detail 配置应用到默认 g.Log()。
@@ -13,7 +14,7 @@ func initDefaultLoggerFromDetail() {
 	if g.Cfg().MustGet(ctx, "logger.detail").IsEmpty() {
 		return
 	}
-	detailLogger := g.Log("detail")
+	detailLogger := xrlog.DetailLog.Logger()
 	defaultLogger := glog.New()
 	if err := defaultLogger.SetConfig(detailLogger.GetConfig()); err != nil {
 		return

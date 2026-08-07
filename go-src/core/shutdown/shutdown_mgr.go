@@ -1,13 +1,13 @@
 package shutdown
 
 import (
-	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gproc"
 	"os"
 	"time"
 	"xr-game-server/constants/common"
 	"xr-game-server/core/cfg"
+	
 )
 
 const (
@@ -36,7 +36,7 @@ func doWhenAppExit(sig os.Signal) {
 	//数据库同步任务,防止程序退出,有数据没有同步到
 	select {
 	case <-time.After(time.Duration(exitTime.ExitTime) * time.Second):
-		g.Log("detail").Warningf(gctx.New(), "程序正常退出,佛祖保佑")
+		xrlog.DetailLog.Warningf(gctx.New(), "程序正常退出,佛祖保佑")
 	}
 }
 
