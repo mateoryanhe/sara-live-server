@@ -7,7 +7,7 @@
         </div>
       </template>
       <div class="search-form">
-        <el-form :model="searchForm" inline label-width="80px">
+        <el-form :model="searchForm" inline label-width="100px">
           <el-form-item label="关键字">
             <el-input v-model="searchForm.key" clearable placeholder="请输入关键字"/>
           </el-form-item>
@@ -30,6 +30,18 @@
                 type="date"
                 value-format="YYYY-MM-DD"
             />
+          </el-form-item>
+          <el-form-item label="充值白名单">
+            <el-select v-model="searchForm.rechargeWhitelist" clearable placeholder="全部" style="width: 120px">
+              <el-option :value="1" label="是"/>
+              <el-option :value="0" label="否"/>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="是否主播">
+            <el-select v-model="searchForm.isAnchor" clearable placeholder="全部" style="width: 120px">
+              <el-option :value="1" label="是"/>
+              <el-option :value="0" label="否"/>
+            </el-select>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="handleSearch">查询</el-button>
@@ -128,6 +140,12 @@
               <el-tag v-else type="success">正常</el-tag>
             </template>
           </el-table-column>
+          <el-table-column label="充值白名单" prop="rechargeWhitelist" width="110">
+            <template #default="scope">
+              <el-tag v-if="scope.row.rechargeWhitelist" type="success">是</el-tag>
+              <el-tag v-else type="info">否</el-tag>
+            </template>
+          </el-table-column>
           <el-table-column label="注销码" prop="cancelCode" width="200" show-overflow-tooltip>
             <template #default="scope">{{ scope.row.cancelCode || '-' }}</template>
           </el-table-column>
@@ -166,6 +184,8 @@
                     </el-dropdown-item>
                     <el-dropdown-item v-if="scope.row.canRank !== false" command="rank-off">下榜</el-dropdown-item>
                     <el-dropdown-item v-if="scope.row.canRank === false" command="rank-on">上榜</el-dropdown-item>
+                    <el-dropdown-item v-if="!scope.row.rechargeWhitelist" command="recharge-whitelist-on">加入充值白名单</el-dropdown-item>
+                    <el-dropdown-item v-if="scope.row.rechargeWhitelist" command="recharge-whitelist-off">移出充值白名单</el-dropdown-item>
                     <el-dropdown-item divided command="cancel">
                       {{ scope.row.cancel ? '取消注销' : '注销' }}
                     </el-dropdown-item>
@@ -414,7 +434,9 @@ const currencyFormRules: FormRules = {
 const searchForm = reactive({
   key: '',
   startTime: '',
-  endTime: ''
+  endTime: '',
+  rechargeWhitelist: undefined as number | undefined,
+  isAnchor: undefined as number | undefined,
 })
 
 // 路由
@@ -442,15 +464,21 @@ const fetchUserList = async (silent = false) => {
   }
   try {
     // 构建查询参数
-    const params = {
+    const params: Record<string, unknown> = {
       pageIndex: pagination.pageIndex,
       pageSize: pagination.pageSize,
       key: searchForm.key,
       startTime: searchForm.startTime,
-      endTime: searchForm.endTime
+      endTime: searchForm.endTime,
+    }
+    if (searchForm.rechargeWhitelist !== undefined && searchForm.rechargeWhitelist !== null) {
+      params.rechargeWhitelist = searchForm.rechargeWhitelist
+    }
+    if (searchForm.isAnchor !== undefined && searchForm.isAnchor !== null) {
+      params.isAnchor = searchForm.isAnchor
     }
 
-    const response = await accountApi.getUserInfo(params)
+    const response = await accountApi.getUserInfo(params as Parameters<typeof accountApi.getUserInfo>[0])
 
     const result = response.data
     userList.value = result || []
@@ -478,6 +506,8 @@ const handleReset = () => {
   searchForm.key = ''
   searchForm.startTime = ''
   searchForm.endTime = ''
+  searchForm.rechargeWhitelist = undefined
+  searchForm.isAnchor = undefined
 
   // 重置到第一页并查询
   pagination.pageIndex = 1
@@ -554,6 +584,12 @@ const handleRowCommand = (row: UserInfo, command: string) => {
       break
     case 'rank-off':
       handleCanRankAction(row, false)
+      break
+    case 'recharge-whitelist-on':
+      handleRechargeWhitelistAction(row, true)
+      break
+    case 'recharge-whitelist-off':
+      handleRechargeWhitelistAction(row, false)
       break
     case 'cancel':
       toggleCancelStatus(row)
@@ -754,6 +790,35 @@ const handleCanRankAction = async (row: UserInfo, canRank: boolean) => {
   }
 }
 
+const handleRechargeWhitelistAction = async (row: UserInfo, rechargeWhitelist: boolean) => {
+  const actionText = rechargeWhitelist ? '加入充值白名单' : '移出充值白名单'
+  try {
+    await ElMessageBox.confirm(
+        `确定要将用户 ${row.id} ${actionText}吗？${rechargeWhitelist ? '加入后 App 创建充值订单将直接到账。' : ''}`,
+        `确认${actionText}`,
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+    )
+    const response = await accountApi.setRechargeWhitelist({
+      accountId: row.id,
+      rechargeWhitelist
+    })
+    if (response) {
+      ElMessage.success(`${actionText}成功`)
+      await fetchUserList()
+    } else {
+      ElMessage.error(`${actionText}失败`)
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error(`${actionText}失败:`, error)
+    }
+  }
+}
+
 const handleBanAction = async (row: UserInfo) => {
   if (row.ban) {
     try {
@@ -907,6 +972,10 @@ onMounted(() => {
 
 .search-form {
   margin-bottom: 20px;
+}
+
+.search-form :deep(.el-form-item__label) {
+  white-space: nowrap;
 }
 
 .pagination {

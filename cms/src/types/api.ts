@@ -142,6 +142,8 @@ export interface QueryUserInfoReq extends PageQuery {
     key?: string
     startTime?: string
     endTime?: string
+    rechargeWhitelist?: number
+    isAnchor?: number
 }
 
 export interface UserInfo {
@@ -176,6 +178,7 @@ export interface UserInfo {
     appVersion?: string
     canRank?: boolean
     cancelCode?: string
+    rechargeWhitelist?: boolean
 }
 
 export interface SetAnchorReq {
@@ -194,6 +197,11 @@ export interface SetUserTypeReq {
 export interface SetCanRankReq {
     accountId: string
     canRank: boolean
+}
+
+export interface SetRechargeWhitelistReq {
+    accountId: string
+    rechargeWhitelist: boolean
 }
 
 export interface QueryAnchorListReq extends PageQuery {

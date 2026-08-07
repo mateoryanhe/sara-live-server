@@ -9,9 +9,11 @@ import (
 type QueryUserInfoReq struct {
 	g.Meta `path:"/getUserInfo" method:"post" summary:"获取用户信息" tags:"账号"`
 	httpserver.CMSQueryReq
-	Key       string `json:"key" dc:"查询关键字(用户ID模糊/openId精确)"`
-	StartTime string `json:"startTime" dc:"开始时间"`
-	EndTime   string `json:"endTime" dc:"结束时间"`
+	Key               string `json:"key" dc:"查询关键字(用户ID模糊/openId精确)"`
+	StartTime         string `json:"startTime" dc:"开始时间"`
+	EndTime           string `json:"endTime" dc:"结束时间"`
+	RechargeWhitelist *int   `json:"rechargeWhitelist" dc:"充值白名单:1是,0否,不传不过滤"`
+	IsAnchor          *int   `json:"isAnchor" dc:"是否主播:1是,0否,不传不过滤"`
 }
 
 type UserInfoDto struct {
@@ -29,23 +31,24 @@ type UserInfoDto struct {
 	Cancel          bool       `json:"cancel"`
 	PhoneAreaCode   string     `json:"phoneAreaCode"`
 	// 以下字段来自 user_infos 表(LEFT JOIN,可能为空)
-	Nickname      string     `json:"nickname"`
-	Phone         string     `json:"phone"`
-	Avatar        string     `json:"avatar"`
-	Remark        string     `json:"remark"`
-	Gold          float64    `json:"gold"`
-	Diamond       float64    `json:"diamond"`
-	ShareCode     string     `json:"shareCode"`
-	GuildId       uint64     `json:"guildId"`
-	UserType      uint8      `json:"userType"`
-	IsAnchor      bool       `json:"isAnchor"`
-	VipLevel      uint32     `json:"vipLevel"`
-	LastLoginTime *time.Time `json:"lastLoginTime"`
-	DeviceType    string     `json:"deviceType"`
-	PackageName   string     `json:"packageName"`
-	AppVersion    string     `json:"appVersion"`
-	CanRank       bool       `json:"canRank"`
-	CancelCode    string     `json:"cancelCode"`
+	Nickname          string     `json:"nickname"`
+	Phone             string     `json:"phone"`
+	Avatar            string     `json:"avatar"`
+	Remark            string     `json:"remark"`
+	Gold              float64    `json:"gold"`
+	Diamond           float64    `json:"diamond"`
+	ShareCode         string     `json:"shareCode"`
+	GuildId           uint64     `json:"guildId"`
+	UserType          uint8      `json:"userType"`
+	IsAnchor          bool       `json:"isAnchor"`
+	VipLevel          uint32     `json:"vipLevel"`
+	LastLoginTime     *time.Time `json:"lastLoginTime"`
+	DeviceType        string     `json:"deviceType"`
+	PackageName       string     `json:"packageName"`
+	AppVersion        string     `json:"appVersion"`
+	CanRank           bool       `json:"canRank"`
+	CancelCode        string     `json:"cancelCode"`
+	RechargeWhitelist bool       `json:"rechargeWhitelist"`
 }
 
 type SetAnchorReq struct {
@@ -83,5 +86,15 @@ type SetCanRankReq struct {
 }
 
 type SetCanRankRes struct {
+	Success bool `json:"success"`
+}
+
+type SetRechargeWhitelistReq struct {
+	g.Meta            `path:"/setRechargeWhitelist" method:"post" summary:"设置充值白名单" tags:"账号"`
+	AccountId         uint64 `json:"accountId" v:"required#用户ID不能为空" dc:"用户ID"`
+	RechargeWhitelist bool   `json:"rechargeWhitelist" dc:"是否在充值白名单"`
+}
+
+type SetRechargeWhitelistRes struct {
 	Success bool `json:"success"`
 }

@@ -49,6 +49,14 @@ func GetUserExtFromMemory(userId uint64) *entity.UserExt {
 	return ext
 }
 
+// IsRechargeWhitelist 用户是否在充值白名单(创建 App 订单后直接到账)
+func IsRechargeWhitelist(userId uint64) bool {
+	if userId == 0 {
+		return false
+	}
+	return GetUserExtByUserId(userId).RechargeWhitelist
+}
+
 // SaveRegisterInfo 保存注册时的包名与版本号(可为空)
 func SaveRegisterInfo(userId uint64, info *entity.DeviceInfo) {
 	if userId == 0 || info == nil {

@@ -61,6 +61,14 @@ func CreateOrder(ctx context.Context, req *rechargeorderdto.AppCreateRechargeOrd
 
 	event.Pub(gameevent.RechargeOrderCreatedEvent, gameevent.NewRechargeOrderCreatedEventData(order.ID))
 
+	if userinfodao.IsRechargeWhitelist(userId) {
+		if _, completeErr := CompleteOrder(order.ID); completeErr == nil {
+			if completed := rechargeorderdao.GetById(order.ID); completed != nil {
+				order = completed
+			}
+		}
+	}
+
 	return &rechargeorderdto.AppCreateRechargeOrderRes{
 		OrderId:             strconv.FormatUint(order.ID, 10),
 		ObfuscatedAccountId: strconv.FormatUint(order.ID, 10),

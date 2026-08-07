@@ -46,6 +46,7 @@ func QueryUserInfo(ctx context.Context, req *accountdto.QueryUserInfoReq) (res *
 			val.CancelCode = userExtCache.CancelCode
 			val.PackageName = userExtCache.PackageName
 			val.AppVersion = userExtCache.AppVersion
+			val.RechargeWhitelist = userExtCache.RechargeWhitelist
 		}
 		val.Avatar = upload.ResolveAvatarUrlForUser(val.ID, val.Avatar)
 	}

@@ -67,3 +67,7 @@ func (a *AccountController) SetUserType(ctx context.Context, req *accountdto.Set
 func (a *AccountController) SetCanRank(ctx context.Context, req *accountdto.SetCanRankReq) (*accountdto.SetCanRankRes, error) {
 	return userinfo.SetCanRank(ctx, req)
 }
+
+func (a *AccountController) SetRechargeWhitelist(ctx context.Context, req *accountdto.SetRechargeWhitelistReq) (*accountdto.SetRechargeWhitelistRes, error) {
+	return userinfo.SetRechargeWhitelist(ctx, req)
+}

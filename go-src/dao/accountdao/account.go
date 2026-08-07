@@ -33,7 +33,8 @@ func GetUserInfo(req *accountdto.QueryUserInfoReq) (int, []*accountdto.UserInfoD
                     u.nickname, u.phone, u.avatar, u.remark,
                     u.gold, u.diamond, u.share_code, u.guild_id, u.user_type, u.vip_level, u.last_login_time,
                     d.device_type, e.package_name, e.app_version, e.cancel_code,
-                    IFNULL(e.can_rank, 1) as can_rank
+                    IFNULL(e.can_rank, 1) as can_rank,
+                    IFNULL(e.recharge_whitelist, 0) as recharge_whitelist
                     from accounts a
                     left join user_infos u on u.id = a.id
                     left join user_login_devices d on d.id = a.id
@@ -51,6 +52,22 @@ func GetUserInfo(req *accountdto.QueryUserInfoReq) (int, []*accountdto.UserInfoD
 		startTime, _ := time.Parse("2006-01-02", req.StartTime)
 		endTime, _ := time.Parse("2006-01-02", req.EndTime)
 		param = append(param, startTime, endTime)
+	}
+	if req.RechargeWhitelist != nil {
+		if *req.RechargeWhitelist == 1 {
+			sql += ` and IFNULL(e.recharge_whitelist, 0) = 1`
+		} else {
+			sql += ` and IFNULL(e.recharge_whitelist, 0) = 0`
+		}
+	}
+	if req.IsAnchor != nil {
+		if *req.IsAnchor == 1 {
+			sql += ` and u.user_type in (?, ?, ?)`
+			param = append(param, entity.UserTypeAnchor, entity.UserTypeBotAnchor, entity.UserTypeSeniorAnchor)
+		} else {
+			sql += ` and IFNULL(u.user_type, 0) not in (?, ?, ?)`
+			param = append(param, entity.UserTypeAnchor, entity.UserTypeBotAnchor, entity.UserTypeSeniorAnchor)
+		}
 	}
 	sql += ` order by a.id desc`
 	countSql := str.GetCountSQL(sql)
