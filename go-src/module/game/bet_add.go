@@ -1,4 +1,4 @@
-package gamebet
+package game
 
 import (
 	"strings"

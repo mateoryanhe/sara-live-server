@@ -1,4 +1,4 @@
-package gamewin
+package game
 
 import (
 	"context"
@@ -9,10 +9,9 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/gamewindto"
 	"xr-game-server/entity"
-	"xr-game-server/module/game"
 )
 
-func parseUserIdFilter(val string) uint64 {
+func parseWinCMSUserIdFilter(val string) uint64 {
 	if val == "" {
 		return 0
 	}
@@ -23,7 +22,7 @@ func parseUserIdFilter(val string) uint64 {
 	return id
 }
 
-func toCMSItem(v *entity.GameWinLog) *gamewindto.CMSGameWinLogItem {
+func toCMSWinLogItem(v *entity.GameWinLog) *gamewindto.CMSGameWinLogItem {
 	if v == nil {
 		return nil
 	}
@@ -32,7 +31,7 @@ func toCMSItem(v *entity.GameWinLog) *gamewindto.CMSGameWinLogItem {
 		UserId:       v.UserId,
 		GameCode:     v.GameCode,
 		NameEn:       v.NameEn,
-		Cover:        game.BuildGameCoverUrl(v.Cover),
+		Cover:        BuildGameCoverUrl(v.Cover),
 		Amount:       v.Amount,
 		PlatformType: v.PlatformType,
 		OrderId:      v.OrderId,
@@ -44,13 +43,13 @@ func toCMSItem(v *entity.GameWinLog) *gamewindto.CMSGameWinLogItem {
 	return item
 }
 
-// GetCMSList CMS 分页查询游戏派彩记录
-func GetCMSList(_ context.Context, req *gamewindto.CMSGameWinLogListReq) (*httpserver.CMSQueryResp, error) {
+// GetWinCMSList CMS 分页查询游戏派彩记录
+func GetWinCMSList(_ context.Context, req *gamewindto.CMSGameWinLogListReq) (*httpserver.CMSQueryResp, error) {
 	if req == nil {
 		return httpserver.NewCMSQueryResp(0, []*gamewindto.CMSGameWinLogItem{}), nil
 	}
 	total, rows := gamewindao.CMSList(&gamewindao.CMSListFilter{
-		UserId:       parseUserIdFilter(req.UserId),
+		UserId:       parseWinCMSUserIdFilter(req.UserId),
 		GameCode:     req.GameCode,
 		OrderId:      req.OrderId,
 		PlatformType: req.PlatformType,
@@ -59,7 +58,7 @@ func GetCMSList(_ context.Context, req *gamewindto.CMSGameWinLogListReq) (*https
 	})
 	list := make([]*gamewindto.CMSGameWinLogItem, 0, len(rows))
 	for _, row := range rows {
-		list = append(list, toCMSItem(row))
+		list = append(list, toCMSWinLogItem(row))
 	}
 	return httpserver.NewCMSQueryResp(total, list), nil
 }

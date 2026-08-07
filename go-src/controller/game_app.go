@@ -7,7 +7,6 @@ import (
 	"xr-game-server/dto/gamebetdto"
 	"xr-game-server/dto/gameplatformdto"
 	"xr-game-server/module/game"
-	"xr-game-server/module/gamebet"
 )
 
 const GameAppUrl = "/game"
@@ -30,7 +29,7 @@ func (c *GameAppController) AppGameStart(ctx context.Context, req *gameplatformd
 
 // AppGameBetList App 分页查询游戏下注记录
 func (c *GameAppController) AppGameBetList(ctx context.Context, req *gamebetdto.AppGameBetListReq) (*gamebetdto.AppGameBetListRes, error) {
-	return gamebet.GetAppList(ctx, req)
+	return game.GetAppBetList(ctx, req)
 }
 
 // AppGameConsumeRank App 分页查询单场直播游戏消费榜

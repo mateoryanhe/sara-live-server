@@ -1,4 +1,4 @@
-package gamebet
+package game
 
 import (
 	"context"
@@ -10,10 +10,9 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/gamebetdto"
 	"xr-game-server/entity"
-	"xr-game-server/module/game"
 )
 
-func parseCMSUserIdFilter(val string) uint64 {
+func parseBetCMSUserIdFilter(val string) uint64 {
 	if val == "" {
 		return 0
 	}
@@ -33,7 +32,7 @@ func toCMSBetLogItem(v *entity.GameBetLog) *gamebetdto.CMSGameBetLogItem {
 		UserId:       v.UserId,
 		GameCode:     v.GameCode,
 		NameEn:       v.NameEn,
-		Cover:        game.BuildGameCoverUrl(v.Cover),
+		Cover:        BuildGameCoverUrl(v.Cover),
 		Amount:       v.Amount,
 		PlatformType: v.PlatformType,
 		OrderId:      v.OrderId,
@@ -60,13 +59,13 @@ func fillCMSBetLogLiveRoomFields(item *gamebetdto.CMSGameBetLogItem, liveRoomId 
 	}
 }
 
-// GetCMSList CMS 分页查询游戏下注记录
-func GetCMSList(_ context.Context, req *gamebetdto.CMSGameBetLogListReq) (*httpserver.CMSQueryResp, error) {
+// GetBetCMSList CMS 分页查询游戏下注记录
+func GetBetCMSList(_ context.Context, req *gamebetdto.CMSGameBetLogListReq) (*httpserver.CMSQueryResp, error) {
 	if req == nil {
 		return httpserver.NewCMSQueryResp(0, []*gamebetdto.CMSGameBetLogItem{}), nil
 	}
 	total, rows := gamebetdao.CMSList(&gamebetdao.CMSListFilter{
-		UserId:       parseCMSUserIdFilter(req.UserId),
+		UserId:       parseBetCMSUserIdFilter(req.UserId),
 		GameCode:     req.GameCode,
 		OrderId:      req.OrderId,
 		PlatformType: req.PlatformType,

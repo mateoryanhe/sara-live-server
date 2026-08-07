@@ -1,4 +1,4 @@
-package gamebet
+package game
 
 import (
 	"context"
@@ -8,13 +8,12 @@ import (
 	"xr-game-server/dao/gamebetdao"
 	"xr-game-server/dto/gamebetdto"
 	"xr-game-server/entity"
-	"xr-game-server/module/game"
 )
 
 const appGameBetListPageSize = gamebetdao.AppGameBetListCachePageSize
 
-// GetAppList App 端分页查询当前用户游戏下注记录
-func GetAppList(ctx context.Context, req *gamebetdto.AppGameBetListReq) (*gamebetdto.AppGameBetListRes, error) {
+// GetAppBetList App 端分页查询当前用户游戏下注记录
+func GetAppBetList(ctx context.Context, req *gamebetdto.AppGameBetListReq) (*gamebetdto.AppGameBetListRes, error) {
 	userId := httpserver.GetAuthId(ctx)
 	page := 1
 	if req != nil && req.Page > 0 {
@@ -41,7 +40,7 @@ func toAppGameBetListItem(row *entity.GameBetLog) *gamebetdto.AppGameBetListItem
 		Id:           strconv.FormatUint(row.ID, 10),
 		GameCode:     row.GameCode,
 		NameEn:       row.NameEn,
-		Cover:        game.BuildGameCoverUrl(row.Cover),
+		Cover:        BuildGameCoverUrl(row.Cover),
 		Amount:       row.Amount,
 		PlatformType: row.PlatformType,
 		OrderId:      row.OrderId,

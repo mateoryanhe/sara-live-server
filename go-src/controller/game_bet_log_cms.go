@@ -5,7 +5,7 @@ import (
 
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/gamebetdto"
-	"xr-game-server/module/gamebet"
+	"xr-game-server/module/game"
 )
 
 const GameBetLogCMSUrl = "/gameBetLog"
@@ -18,5 +18,5 @@ func initGameBetLogCMSController() {
 
 // CMSGameBetLogList CMS 分页查询游戏下注记录
 func (c *GameBetLogCMSController) CMSGameBetLogList(ctx context.Context, req *gamebetdto.CMSGameBetLogListReq) (*httpserver.CMSQueryResp, error) {
-	return gamebet.GetCMSList(ctx, req)
+	return game.GetBetCMSList(ctx, req)
 }
