@@ -537,6 +537,7 @@ export interface VipCfg {
     withdrawSwitch?: number
     animationSwitch?: number
     commentEffectSwitch?: number
+    customerServiceSwitch?: number
     upgradeRechargeLimit: number
     minWithdrawAmount: number
     maxWithdrawAmount: number
@@ -563,6 +564,12 @@ export interface VipCfg {
     withdrawNoticeEs?: string
     withdrawNoticePt?: string
     withdrawNoticeHi?: string
+    customerServiceIcon?: string
+    customerServiceIconName?: string
+    customerServiceDescEn?: string
+    customerServiceDescEs?: string
+    customerServiceDescPt?: string
+    customerServiceDescHi?: string
     createdAt: string
     updatedAt: string
 }

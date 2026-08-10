@@ -129,6 +129,26 @@
               </el-tag>
             </template>
           </el-table-column>
+          <el-table-column label="客服优先图标" width="120">
+            <template #default="{ row }">
+              <el-image
+                  v-if="row.customerServiceIcon"
+                  :preview-src-list="[row.customerServiceIcon]"
+                  :src="row.customerServiceIcon"
+                  class="table-icon-preview"
+                  fit="cover"
+                  preview-teleported
+              />
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="客服优先开关" width="120">
+            <template #default="{ row }">
+              <el-tag :type="row.customerServiceSwitch === 1 ? 'success' : 'info'">
+                {{ row.customerServiceSwitch === 1 ? '开' : '关' }}
+              </el-tag>
+            </template>
+          </el-table-column>
           <el-table-column label="升级充值上限" width="130">
             <template #default="{ row }">
               {{ formatAmount(row.upgradeRechargeLimit) }}
@@ -580,6 +600,90 @@
               />
             </el-form-item>
           </el-tab-pane>
+
+          <el-tab-pane label="客服优先" name="customerService">
+            <el-form-item label="客服优先开关" prop="customerServiceSwitch">
+              <el-radio-group v-model="currentRow.customerServiceSwitch">
+                <el-radio :label="1">开</el-radio>
+                <el-radio :label="0">关</el-radio>
+              </el-radio-group>
+              <div class="form-tip">仅控制 App 端是否展示该等级客服优先特权，后端不参与业务判断</div>
+            </el-form-item>
+            <el-form-item label="特权图标" prop="customerServiceIcon">
+              <div class="asset-upload-wrap">
+                <el-upload
+                    :before-upload="beforeIconUpload"
+                    :disabled="customerServiceIconUploading"
+                    :http-request="(opt) => doAssetUpload(opt, 'customerServiceIcon')"
+                    :show-file-list="false"
+                    accept="image/*"
+                    action="#"
+                    class="icon-uploader"
+                >
+                  <img
+                      v-if="customerServiceIconPreviewUrl"
+                      :src="customerServiceIconPreviewUrl"
+                      alt="customer service icon"
+                      class="icon-preview"
+                  />
+                  <div v-else class="asset-uploader-placeholder icon-placeholder">
+                    <el-icon class="asset-uploader-icon">
+                      <Plus/>
+                    </el-icon>
+                    <span>点击上传图标</span>
+                  </div>
+                </el-upload>
+                <el-button
+                    v-if="customerServiceIconPreviewUrl || currentRow.customerServiceIcon"
+                    link
+                    type="danger"
+                    @click="clearCustomerServiceIcon"
+                >
+                  移除图标
+                </el-button>
+              </div>
+            </el-form-item>
+            <el-form-item label="特权说明(英文)" prop="customerServiceDescEn">
+              <el-input
+                  v-model="currentRow.customerServiceDescEn"
+                  :autosize="{ minRows: 3, maxRows: 6 }"
+                  maxlength="2000"
+                  placeholder="Customer service priority description in English"
+                  show-word-limit
+                  type="textarea"
+              />
+            </el-form-item>
+            <el-form-item label="特权说明(西班牙语)" prop="customerServiceDescEs">
+              <el-input
+                  v-model="currentRow.customerServiceDescEs"
+                  :autosize="{ minRows: 3, maxRows: 6 }"
+                  maxlength="2000"
+                  placeholder="Descripción de prioridad de atención al cliente en español"
+                  show-word-limit
+                  type="textarea"
+              />
+            </el-form-item>
+            <el-form-item label="特权说明(葡萄牙语)" prop="customerServiceDescPt">
+              <el-input
+                  v-model="currentRow.customerServiceDescPt"
+                  :autosize="{ minRows: 3, maxRows: 6 }"
+                  maxlength="2000"
+                  placeholder="Descrição de prioridade de atendimento ao cliente em português"
+                  show-word-limit
+                  type="textarea"
+              />
+            </el-form-item>
+            <el-form-item label="特权说明(印地语)" prop="customerServiceDescHi">
+              <el-input
+                  v-model="currentRow.customerServiceDescHi"
+                  :autosize="{ minRows: 3, maxRows: 6 }"
+                  maxlength="2000"
+                  placeholder="ग्राहक सेवा प्राथमिकता विवरण हिंदी में"
+                  show-word-limit
+                  type="textarea"
+              />
+            </el-form-item>
+          </el-tab-pane>
         </el-tabs>
       </el-form>
       <template #footer>
@@ -612,6 +716,7 @@ interface VipCfgForm {
   withdrawSwitch: number
   animationSwitch: number
   commentEffectSwitch: number
+  customerServiceSwitch: number
   upgradeRechargeLimit: number
   minWithdrawAmount: number
   maxWithdrawAmount: number
@@ -633,6 +738,11 @@ interface VipCfgForm {
   withdrawNoticeEs: string
   withdrawNoticePt: string
   withdrawNoticeHi: string
+  customerServiceIcon: string
+  customerServiceDescEn: string
+  customerServiceDescEs: string
+  customerServiceDescPt: string
+  customerServiceDescHi: string
 }
 
 const loading = ref(false)
@@ -657,6 +767,7 @@ const defaultForm = (): VipCfgForm => ({
   withdrawSwitch: 1,
   animationSwitch: 1,
   commentEffectSwitch: 1,
+  customerServiceSwitch: 1,
   upgradeRechargeLimit: 0,
   minWithdrawAmount: 0,
   maxWithdrawAmount: 0,
@@ -677,7 +788,12 @@ const defaultForm = (): VipCfgForm => ({
   withdrawNoticeEn: '',
   withdrawNoticeEs: '',
   withdrawNoticePt: '',
-  withdrawNoticeHi: ''
+  withdrawNoticeHi: '',
+  customerServiceIcon: '',
+  customerServiceDescEn: '',
+  customerServiceDescEs: '',
+  customerServiceDescPt: '',
+  customerServiceDescHi: ''
 })
 const currentRow = ref<VipCfgForm>(defaultForm())
 const formRef = ref<FormInstance>()
@@ -688,18 +804,21 @@ const levelIconUploading = ref(false)
 const commentEffectUploading = ref(false)
 const commentEffectIconUploading = ref(false)
 const withdrawIconUploading = ref(false)
+const customerServiceIconUploading = ref(false)
 const animationPreviewUrl = ref('')
 const animationIconPreviewUrl = ref('')
 const levelIconPreviewUrl = ref('')
 const commentEffectPreviewUrl = ref('')
 const commentEffectIconPreviewUrl = ref('')
 const withdrawIconPreviewUrl = ref('')
+const customerServiceIconPreviewUrl = ref('')
 let animationObjectPreviewUrl = ''
 let animationIconObjectPreviewUrl = ''
 let levelIconObjectPreviewUrl = ''
 let commentEffectObjectPreviewUrl = ''
 let commentEffectIconObjectPreviewUrl = ''
 let withdrawIconObjectPreviewUrl = ''
+let customerServiceIconObjectPreviewUrl = ''
 
 const revokeAnimationObjectPreview = () => {
   if (animationObjectPreviewUrl) {
@@ -719,6 +838,13 @@ const revokeWithdrawIconObjectPreview = () => {
   if (withdrawIconObjectPreviewUrl) {
     URL.revokeObjectURL(withdrawIconObjectPreviewUrl)
     withdrawIconObjectPreviewUrl = ''
+  }
+}
+
+const revokeCustomerServiceIconObjectPreview = () => {
+  if (customerServiceIconObjectPreviewUrl) {
+    URL.revokeObjectURL(customerServiceIconObjectPreviewUrl)
+    customerServiceIconObjectPreviewUrl = ''
   }
 }
 
@@ -758,6 +884,11 @@ const resetWithdrawIconPreview = () => {
   withdrawIconPreviewUrl.value = ''
 }
 
+const resetCustomerServiceIconPreview = () => {
+  revokeCustomerServiceIconObjectPreview()
+  customerServiceIconPreviewUrl.value = ''
+}
+
 const resetCommentEffectPreview = () => {
   revokeCommentEffectObjectPreview()
   commentEffectPreviewUrl.value = ''
@@ -794,6 +925,14 @@ const setWithdrawIconPreview = (url: string, fromObject = false) => {
   withdrawIconPreviewUrl.value = url
   if (fromObject && url) {
     withdrawIconObjectPreviewUrl = url
+  }
+}
+
+const setCustomerServiceIconPreview = (url: string, fromObject = false) => {
+  revokeCustomerServiceIconObjectPreview()
+  customerServiceIconPreviewUrl.value = url
+  if (fromObject && url) {
+    customerServiceIconObjectPreviewUrl = url
   }
 }
 
@@ -836,6 +975,11 @@ const clearWithdrawIcon = () => {
   resetWithdrawIconPreview()
 }
 
+const clearCustomerServiceIcon = () => {
+  currentRow.value.customerServiceIcon = ''
+  resetCustomerServiceIconPreview()
+}
+
 const clearCommentEffect = () => {
   currentRow.value.commentEffect = ''
   resetCommentEffectPreview()
@@ -859,6 +1003,7 @@ watch(dialogVisible, (visible) => {
     resetCommentEffectPreview()
     resetCommentEffectIconPreview()
     resetWithdrawIconPreview()
+    resetCustomerServiceIconPreview()
     activeTab.value = 'basic'
   }
 })
@@ -882,7 +1027,7 @@ const beforeIconUpload = (file: File): boolean => {
 
 const doAssetUpload = async (
     options: UploadRequestOptions,
-    field: 'animation' | 'animationIcon' | 'levelIcon' | 'commentEffect' | 'commentEffectIcon' | 'withdrawIcon'
+    field: 'animation' | 'animationIcon' | 'levelIcon' | 'commentEffect' | 'commentEffectIcon' | 'withdrawIcon' | 'customerServiceIcon'
 ) => {
   const file = options.file as File
   const uploadingMap = {
@@ -891,7 +1036,8 @@ const doAssetUpload = async (
     levelIcon: levelIconUploading,
     commentEffect: commentEffectUploading,
     commentEffectIcon: commentEffectIconUploading,
-    withdrawIcon: withdrawIconUploading
+    withdrawIcon: withdrawIconUploading,
+    customerServiceIcon: customerServiceIconUploading
   }
   const uploading = uploadingMap[field]
   uploading.value = true
@@ -908,6 +1054,8 @@ const doAssetUpload = async (
       setCommentEffectPreview(URL.createObjectURL(file), true)
     } else if (field === 'commentEffectIcon') {
       setCommentEffectIconPreview(URL.createObjectURL(file), true)
+    } else if (field === 'customerServiceIcon') {
+      setCustomerServiceIconPreview(URL.createObjectURL(file), true)
     } else {
       setWithdrawIconPreview(URL.createObjectURL(file), true)
     }
@@ -938,6 +1086,7 @@ const formRules: FormRules = {
   withdrawSwitch: [{required: true, message: '请选择提现开关', trigger: 'change'}],
   animationSwitch: [{required: true, message: '请选择进场特效开关', trigger: 'change'}],
   commentEffectSwitch: [{required: true, message: '请选择公屏评论特效开关', trigger: 'change'}],
+  customerServiceSwitch: [{required: true, message: '请选择客服优先开关', trigger: 'change'}],
   minWithdrawAmount: [{validator: validateWithdrawRange, trigger: 'change'}],
   maxWithdrawAmount: [{validator: validateWithdrawRange, trigger: 'change'}]
 }
@@ -986,6 +1135,7 @@ const handleAdd = () => {
   resetCommentEffectPreview()
   resetCommentEffectIconPreview()
   resetWithdrawIconPreview()
+  resetCustomerServiceIconPreview()
   dialogVisible.value = true
 }
 
@@ -998,6 +1148,7 @@ const handleEdit = (row: VipCfg) => {
   const commentEffectName = row.commentEffectName || ''
   const commentEffectIconName = row.commentEffectIconName || ''
   const withdrawIconName = row.withdrawIconName || ''
+  const customerServiceIconName = row.customerServiceIconName || ''
   currentRow.value = {
     id: row.id,
     level: Number(row.level) || 1,
@@ -1006,6 +1157,7 @@ const handleEdit = (row: VipCfg) => {
     withdrawSwitch: Number(row.withdrawSwitch) || 0,
     animationSwitch: Number(row.animationSwitch) || 0,
     commentEffectSwitch: Number(row.commentEffectSwitch) || 0,
+    customerServiceSwitch: Number(row.customerServiceSwitch) || 0,
     upgradeRechargeLimit: truncateNumber(row.upgradeRechargeLimit),
     minWithdrawAmount: truncateNumber(row.minWithdrawAmount),
     maxWithdrawAmount: truncateNumber(row.maxWithdrawAmount),
@@ -1026,7 +1178,12 @@ const handleEdit = (row: VipCfg) => {
     withdrawNoticeEn: row.withdrawNoticeEn || '',
     withdrawNoticeEs: row.withdrawNoticeEs || '',
     withdrawNoticePt: row.withdrawNoticePt || '',
-    withdrawNoticeHi: row.withdrawNoticeHi || ''
+    withdrawNoticeHi: row.withdrawNoticeHi || '',
+    customerServiceIcon: customerServiceIconName,
+    customerServiceDescEn: row.customerServiceDescEn || '',
+    customerServiceDescEs: row.customerServiceDescEs || '',
+    customerServiceDescPt: row.customerServiceDescPt || '',
+    customerServiceDescHi: row.customerServiceDescHi || ''
   }
   if (animationName && resolveMediaPreviewType(row.animation || '', animationName) === 'video') {
     setAnimationPreview(row.animation || '')
@@ -1058,6 +1215,11 @@ const handleEdit = (row: VipCfg) => {
   } else {
     resetWithdrawIconPreview()
   }
+  if (customerServiceIconName) {
+    setCustomerServiceIconPreview(row.customerServiceIcon || '')
+  } else {
+    resetCustomerServiceIconPreview()
+  }
   dialogVisible.value = true
 }
 
@@ -1088,6 +1250,7 @@ const handleSave = async () => {
         withdrawSwitch: currentRow.value.withdrawSwitch,
         animationSwitch: currentRow.value.animationSwitch,
         commentEffectSwitch: currentRow.value.commentEffectSwitch,
+        customerServiceSwitch: currentRow.value.customerServiceSwitch,
         upgradeRechargeLimit: currentRow.value.upgradeRechargeLimit,
         minWithdrawAmount: currentRow.value.minWithdrawAmount,
         maxWithdrawAmount: currentRow.value.maxWithdrawAmount,
@@ -1108,7 +1271,12 @@ const handleSave = async () => {
         withdrawNoticeEn: currentRow.value.withdrawNoticeEn,
         withdrawNoticeEs: currentRow.value.withdrawNoticeEs,
         withdrawNoticePt: currentRow.value.withdrawNoticePt,
-        withdrawNoticeHi: currentRow.value.withdrawNoticeHi
+        withdrawNoticeHi: currentRow.value.withdrawNoticeHi,
+        customerServiceIcon: currentRow.value.customerServiceIcon,
+        customerServiceDescEn: currentRow.value.customerServiceDescEn,
+        customerServiceDescEs: currentRow.value.customerServiceDescEs,
+        customerServiceDescPt: currentRow.value.customerServiceDescPt,
+        customerServiceDescHi: currentRow.value.customerServiceDescHi
       }
       if (currentRow.value.id) {
         await vipCfgApi.updateVipCfg({id: currentRow.value.id, ...payload})

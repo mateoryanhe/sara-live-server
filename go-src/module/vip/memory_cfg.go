@@ -150,42 +150,49 @@ func toVipCfgListRes(row *entity.VipCfg) *vipcfgdto.VipCfgListRes {
 		return nil
 	}
 	return &vipcfgdto.VipCfgListRes{
-		ID:                    strconv.FormatUint(row.ID, 10),
-		Level:                 row.Level,
-		LevelName:             row.LevelName,
-		LevelIconName:         row.LevelIcon,
-		LevelIcon:             upload.GetUrlByName(row.LevelIcon),
-		WithdrawSwitch:        row.WithdrawSwitch,
-		AnimationSwitch:       row.AnimationSwitch,
-		CommentEffectSwitch:   row.CommentEffectSwitch,
-		UpgradeRechargeLimit:  row.UpgradeRechargeLimit,
-		MinWithdrawAmount:     row.MinWithdrawAmount,
-		MaxWithdrawAmount:     row.MaxWithdrawAmount,
-		Fee:                   row.Fee,
-		AnimationName:         row.Animation,
-		Animation:             upload.GetUrlByName(row.Animation),
-		AnimationIconName:     row.AnimationIcon,
-		AnimationIcon:         upload.GetUrlByName(row.AnimationIcon),
-		AnimationDescEn:       row.AnimationDescEn,
-		AnimationDescEs:       row.AnimationDescEs,
-		AnimationDescPt:       row.AnimationDescPt,
-		AnimationDescHi:       row.AnimationDescHi,
-		CommentEffectName:     row.CommentEffect,
-		CommentEffect:         upload.GetUrlByName(row.CommentEffect),
-		CommentEffectIconName: row.CommentEffectIcon,
-		CommentEffectIcon:     upload.GetUrlByName(row.CommentEffectIcon),
-		CommentEffectDescEn:   row.CommentEffectDescEn,
-		CommentEffectDescEs:   row.CommentEffectDescEs,
-		CommentEffectDescPt:   row.CommentEffectDescPt,
-		CommentEffectDescHi:   row.CommentEffectDescHi,
-		WithdrawIconName:      row.WithdrawIcon,
-		WithdrawIcon:          upload.GetUrlByName(row.WithdrawIcon),
-		WithdrawNoticeEn:      row.WithdrawNoticeEn,
-		WithdrawNoticeEs:      row.WithdrawNoticeEs,
-		WithdrawNoticePt:      row.WithdrawNoticePt,
-		WithdrawNoticeHi:      row.WithdrawNoticeHi,
-		CreatedAt:             formatVipCfgTime(row.CreatedAt),
-		UpdatedAt:             formatVipCfgTime(row.UpdatedAt),
+		ID:                      strconv.FormatUint(row.ID, 10),
+		Level:                   row.Level,
+		LevelName:               row.LevelName,
+		LevelIconName:           row.LevelIcon,
+		LevelIcon:               upload.GetUrlByName(row.LevelIcon),
+		WithdrawSwitch:          row.WithdrawSwitch,
+		AnimationSwitch:         row.AnimationSwitch,
+		CommentEffectSwitch:     row.CommentEffectSwitch,
+		CustomerServiceSwitch:   row.CustomerServiceSwitch,
+		UpgradeRechargeLimit:    row.UpgradeRechargeLimit,
+		MinWithdrawAmount:       row.MinWithdrawAmount,
+		MaxWithdrawAmount:       row.MaxWithdrawAmount,
+		Fee:                     row.Fee,
+		AnimationName:           row.Animation,
+		Animation:               upload.GetUrlByName(row.Animation),
+		AnimationIconName:       row.AnimationIcon,
+		AnimationIcon:           upload.GetUrlByName(row.AnimationIcon),
+		AnimationDescEn:         row.AnimationDescEn,
+		AnimationDescEs:         row.AnimationDescEs,
+		AnimationDescPt:         row.AnimationDescPt,
+		AnimationDescHi:         row.AnimationDescHi,
+		CommentEffectName:       row.CommentEffect,
+		CommentEffect:           upload.GetUrlByName(row.CommentEffect),
+		CommentEffectIconName:   row.CommentEffectIcon,
+		CommentEffectIcon:       upload.GetUrlByName(row.CommentEffectIcon),
+		CommentEffectDescEn:     row.CommentEffectDescEn,
+		CommentEffectDescEs:     row.CommentEffectDescEs,
+		CommentEffectDescPt:     row.CommentEffectDescPt,
+		CommentEffectDescHi:     row.CommentEffectDescHi,
+		WithdrawIconName:        row.WithdrawIcon,
+		WithdrawIcon:            upload.GetUrlByName(row.WithdrawIcon),
+		WithdrawNoticeEn:        row.WithdrawNoticeEn,
+		WithdrawNoticeEs:        row.WithdrawNoticeEs,
+		WithdrawNoticePt:        row.WithdrawNoticePt,
+		WithdrawNoticeHi:        row.WithdrawNoticeHi,
+		CustomerServiceIconName: row.CustomerServiceIcon,
+		CustomerServiceIcon:     upload.GetUrlByName(row.CustomerServiceIcon),
+		CustomerServiceDescEn:   row.CustomerServiceDescEn,
+		CustomerServiceDescEs:   row.CustomerServiceDescEs,
+		CustomerServiceDescPt:   row.CustomerServiceDescPt,
+		CustomerServiceDescHi:   row.CustomerServiceDescHi,
+		CreatedAt:               formatVipCfgTime(row.CreatedAt),
+		UpdatedAt:               formatVipCfgTime(row.UpdatedAt),
 	}
 }
 
@@ -222,7 +229,7 @@ func buildAppVipPrivilegeList(row *entity.VipCfg) []*vipcfgdto.AppVipPrivilegeIt
 	if row == nil {
 		return []*vipcfgdto.AppVipPrivilegeItem{}
 	}
-	list := make([]*vipcfgdto.AppVipPrivilegeItem, 0, 3)
+	list := make([]*vipcfgdto.AppVipPrivilegeItem, 0, 4)
 	if row.WithdrawSwitch == entity.VipCfgSwitchOn {
 		list = append(list, &vipcfgdto.AppVipPrivilegeItem{
 			PrivilegeType:     vipcfgdto.AppVipPrivilegeTypeWithdraw,
@@ -247,6 +254,13 @@ func buildAppVipPrivilegeList(row *entity.VipCfg) []*vipcfgdto.AppVipPrivilegeIt
 			Icon:          upload.GetUrlByName(row.CommentEffectIcon),
 			Desc:          appVipPrivilegeDesc(row.CommentEffectDescEn, row.CommentEffectDescEs, row.CommentEffectDescPt, row.CommentEffectDescHi),
 			Animation:     upload.GetUrlByName(row.CommentEffect),
+		})
+	}
+	if row.CustomerServiceSwitch == entity.VipCfgSwitchOn {
+		list = append(list, &vipcfgdto.AppVipPrivilegeItem{
+			PrivilegeType: vipcfgdto.AppVipPrivilegeTypeCustomerService,
+			Icon:          upload.GetUrlByName(row.CustomerServiceIcon),
+			Desc:          appVipPrivilegeDesc(row.CustomerServiceDescEn, row.CustomerServiceDescEs, row.CustomerServiceDescPt, row.CustomerServiceDescHi),
 		})
 	}
 	return list

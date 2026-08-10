@@ -27,33 +27,39 @@ func Create(_ context.Context, req *vipcfgdto.CreateVipCfgReq) (*vipcfgdto.Creat
 		return nil, errercode.CreateCode(errercode.VipCfgExist)
 	}
 	row := &entity.VipCfg{
-		Level:                req.Level,
-		LevelName:            req.LevelName,
-		LevelIcon:            req.LevelIcon,
-		WithdrawSwitch:       req.WithdrawSwitch,
-		AnimationSwitch:      req.AnimationSwitch,
-		CommentEffectSwitch:  req.CommentEffectSwitch,
-		UpgradeRechargeLimit: req.UpgradeRechargeLimit,
-		MinWithdrawAmount:    req.MinWithdrawAmount,
-		MaxWithdrawAmount:    req.MaxWithdrawAmount,
-		Fee:                  req.Fee,
-		Animation:            req.Animation,
-		AnimationIcon:        req.AnimationIcon,
-		AnimationDescEn:      req.AnimationDescEn,
-		AnimationDescEs:      req.AnimationDescEs,
-		AnimationDescPt:      req.AnimationDescPt,
-		AnimationDescHi:      req.AnimationDescHi,
-		CommentEffect:        req.CommentEffect,
-		CommentEffectIcon:    req.CommentEffectIcon,
-		CommentEffectDescEn:  req.CommentEffectDescEn,
-		CommentEffectDescEs:  req.CommentEffectDescEs,
-		CommentEffectDescPt:  req.CommentEffectDescPt,
-		CommentEffectDescHi:  req.CommentEffectDescHi,
-		WithdrawIcon:         req.WithdrawIcon,
-		WithdrawNoticeEn:     req.WithdrawNoticeEn,
-		WithdrawNoticeEs:     req.WithdrawNoticeEs,
-		WithdrawNoticePt:     req.WithdrawNoticePt,
-		WithdrawNoticeHi:     req.WithdrawNoticeHi,
+		Level:                 req.Level,
+		LevelName:             req.LevelName,
+		LevelIcon:             req.LevelIcon,
+		WithdrawSwitch:        req.WithdrawSwitch,
+		AnimationSwitch:       req.AnimationSwitch,
+		CommentEffectSwitch:   req.CommentEffectSwitch,
+		CustomerServiceSwitch: req.CustomerServiceSwitch,
+		UpgradeRechargeLimit:  req.UpgradeRechargeLimit,
+		MinWithdrawAmount:     req.MinWithdrawAmount,
+		MaxWithdrawAmount:     req.MaxWithdrawAmount,
+		Fee:                   req.Fee,
+		Animation:             req.Animation,
+		AnimationIcon:         req.AnimationIcon,
+		AnimationDescEn:       req.AnimationDescEn,
+		AnimationDescEs:       req.AnimationDescEs,
+		AnimationDescPt:       req.AnimationDescPt,
+		AnimationDescHi:       req.AnimationDescHi,
+		CommentEffect:         req.CommentEffect,
+		CommentEffectIcon:     req.CommentEffectIcon,
+		CommentEffectDescEn:   req.CommentEffectDescEn,
+		CommentEffectDescEs:   req.CommentEffectDescEs,
+		CommentEffectDescPt:   req.CommentEffectDescPt,
+		CommentEffectDescHi:   req.CommentEffectDescHi,
+		WithdrawIcon:          req.WithdrawIcon,
+		WithdrawNoticeEn:      req.WithdrawNoticeEn,
+		WithdrawNoticeEs:      req.WithdrawNoticeEs,
+		WithdrawNoticePt:      req.WithdrawNoticePt,
+		WithdrawNoticeHi:      req.WithdrawNoticeHi,
+		CustomerServiceIcon:   req.CustomerServiceIcon,
+		CustomerServiceDescEn: req.CustomerServiceDescEn,
+		CustomerServiceDescEs: req.CustomerServiceDescEs,
+		CustomerServiceDescPt: req.CustomerServiceDescPt,
+		CustomerServiceDescHi: req.CustomerServiceDescHi,
 	}
 	if err := cfgdao.CreateVipCfg(row); err != nil {
 		return nil, err
@@ -81,6 +87,7 @@ func Update(_ context.Context, req *vipcfgdto.UpdateVipCfgReq) (*vipcfgdto.Updat
 	updated.WithdrawSwitch = req.WithdrawSwitch
 	updated.AnimationSwitch = req.AnimationSwitch
 	updated.CommentEffectSwitch = req.CommentEffectSwitch
+	updated.CustomerServiceSwitch = req.CustomerServiceSwitch
 	updated.UpgradeRechargeLimit = req.UpgradeRechargeLimit
 	updated.MinWithdrawAmount = req.MinWithdrawAmount
 	updated.MaxWithdrawAmount = req.MaxWithdrawAmount
@@ -102,6 +109,11 @@ func Update(_ context.Context, req *vipcfgdto.UpdateVipCfgReq) (*vipcfgdto.Updat
 	updated.WithdrawNoticeEs = req.WithdrawNoticeEs
 	updated.WithdrawNoticePt = req.WithdrawNoticePt
 	updated.WithdrawNoticeHi = req.WithdrawNoticeHi
+	updated.CustomerServiceIcon = req.CustomerServiceIcon
+	updated.CustomerServiceDescEn = req.CustomerServiceDescEn
+	updated.CustomerServiceDescEs = req.CustomerServiceDescEs
+	updated.CustomerServiceDescPt = req.CustomerServiceDescPt
+	updated.CustomerServiceDescHi = req.CustomerServiceDescHi
 	if err := cfgdao.UpdateVipCfg(&updated); err != nil {
 		return nil, err
 	}

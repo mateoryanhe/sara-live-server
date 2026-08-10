@@ -8,6 +8,7 @@ type VipCfgSavePayload = {
     withdrawSwitch: number
     animationSwitch: number
     commentEffectSwitch: number
+    customerServiceSwitch: number
     upgradeRechargeLimit: number
     minWithdrawAmount: number
     maxWithdrawAmount: number
@@ -29,6 +30,11 @@ type VipCfgSavePayload = {
     withdrawNoticeEs?: string
     withdrawNoticePt?: string
     withdrawNoticeHi?: string
+    customerServiceIcon?: string
+    customerServiceDescEn?: string
+    customerServiceDescEs?: string
+    customerServiceDescPt?: string
+    customerServiceDescHi?: string
 }
 
 export const vipCfgApi = {
