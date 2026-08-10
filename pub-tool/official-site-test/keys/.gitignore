@@ -1,0 +1,5 @@
+# 私钥勿提交 Git
+official-site-sftp
+official-site-sftp.pem
+*.pem
+sftp-test.cmd
