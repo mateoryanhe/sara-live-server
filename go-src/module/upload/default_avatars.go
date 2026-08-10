@@ -2,16 +2,14 @@ package upload
 
 // 默认头像列表(文件位于 images 目录,由 pub-tool/avatars 上传)
 var defaultAvatarNames = []string{
-	"demo_avatar_1.jpg",
-	"demo_avatar_2.jpg",
-	"demo_avatar_3.jpg",
-	"demo_avatar_4.jpg",
-	"demo_avatar_5.jpg",
-	"demo_avatar_6.jpg",
-	"demo_avatar_7.jpg",
-	"demo_avatar_8.jpg",
-	"demo_avatar_9.jpg",
-	"demo_avatar_10.jpg",
+	"demo_avatar_1.png",
+	"demo_avatar_2.png",
+	"demo_avatar_3.png",
+	"demo_avatar_4.png",
+	"demo_avatar_5.png",
+	"demo_avatar_6.png",
+	"demo_avatar_7.png",
+	"demo_avatar_8.png",
 }
 
 // PickDefaultAvatarName 按用户 ID 从默认头像列表中取一个(同一用户固定,未上传头像时使用)
@@ -20,10 +18,11 @@ func PickDefaultAvatarName(userId uint64) string {
 	if n == 0 {
 		return ""
 	}
-	if userId == 0 {
+	idx := int(userId % uint64(n))
+	if idx < 0 || idx >= n {
 		return defaultAvatarNames[0]
 	}
-	return defaultAvatarNames[userId%uint64(n)]
+	return defaultAvatarNames[idx]
 }
 
 // defaultAvatarUrl 默认头像完整 URL
