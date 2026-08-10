@@ -1,54 +1,102 @@
 import type {Permission} from '@/types/api'
+import {
+    getPageFromPermissionKey,
+    isButtonPermissionKey,
+    buttonPermissionKey,
+} from '@/config/page-buttons'
 
 // 存储用户权限信息
 let userPermissions: Permission[] = []
 let isAdmin = false
 
+/** 已授权的 module 字符串集合，便于快速查找 */
+let permissionModuleSet = new Set<string>()
+
+function rebuildPermissionSet() {
+    permissionModuleSet = new Set(
+        userPermissions.map(p => p.module).filter(Boolean),
+    )
+}
+
 /**
  * 设置用户权限信息
- * @param modules 用户拥有的模块权限列表
- * @param admin 是否为管理员
  */
 export const setUserPermissions = (modules: Permission[], admin: boolean) => {
     userPermissions = modules || []
     isAdmin = admin
+    rebuildPermissionSet()
 }
 
-/**
- * 检查用户是否有访问指定模块的权限
- * @param moduleName 模块名称
- * @returns 是否有权限
- */
-export const hasPermission = (moduleName: string): boolean => {
-    // 管理员拥有所有权限
+/** 是否拥有整页权限（module 恰好等于 pageName） */
+export const hasFullPagePermission = (pageName: string): boolean => {
     if (isAdmin) {
         return true
     }
-
-    // 检查是否在权限列表中
-    return userPermissions.some(module => module.module === moduleName)
+    return permissionModuleSet.has(pageName)
 }
 
 /**
- * 获取用户权限列表
- * @returns 用户权限列表
+ * 检查用户是否有访问指定页面的权限
+ * 拥有整页权限，或拥有该页任意按钮权限，均可进入页面
  */
-export const getUserPermissions = (): Permission[] => {
-    return userPermissions
+export const hasPermission = (pageName: string): boolean => {
+    if (isAdmin) {
+        return true
+    }
+    if (permissionModuleSet.has(pageName)) {
+        return true
+    }
+    for (const module of permissionModuleSet) {
+        if (isButtonPermissionKey(module) && getPageFromPermissionKey(module) === pageName) {
+            return true
+        }
+    }
+    return false
 }
 
 /**
- * 检查是否为管理员
- * @returns 是否为管理员
+ * 检查页面内按钮权限
+ * @param pageName 页面路由 name
+ * @param action 按钮 key（page-buttons 中定义）
  */
-export const getIsAdmin = (): boolean => {
-    return isAdmin
+export const hasButtonPermission = (pageName: string, action: string): boolean => {
+    if (isAdmin) {
+        return true
+    }
+    if (permissionModuleSet.has(pageName)) {
+        return true
+    }
+    return permissionModuleSet.has(buttonPermissionKey(pageName, action))
 }
 
 /**
- * 清除权限信息
+ * 解析 v-btn-permission 绑定值
+ * 支持 'PageName:action' 或 'action'（需配合 binding.arg 传 pageName）
  */
+export const resolveButtonPermission = (
+    value: string,
+    argPage?: string,
+): {page: string; action: string} | null => {
+    if (!value) {
+        return null
+    }
+    if (value.includes(':')) {
+        const page = getPageFromPermissionKey(value)
+        const action = value.slice(page.length + 1)
+        return {page, action}
+    }
+    if (argPage) {
+        return {page: argPage, action: value}
+    }
+    return null
+}
+
+export const getUserPermissions = (): Permission[] => userPermissions
+
+export const getIsAdmin = (): boolean => isAdmin
+
 export const clearPermissions = () => {
     userPermissions = []
     isAdmin = false
+    permissionModuleSet.clear()
 }

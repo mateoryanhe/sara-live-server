@@ -61,6 +61,6 @@ func CMSLogin(ctx context.Context, req *authdto.CMSLoginReq) (res *authdto.CMSLo
 		return nil, errercode.CreateCode(errercode.CMSLoginFail)
 	}
 	tokenStr := xrtoken.AddCmsToken(data.ID)
-	perm := cmsuserdao.GetGetPermissionList(data.ID)
+	perm := cmsuserdao.GetGetPermissionList(data.RoleId)
 	return authdto.NewCMSLoginRes(data.ID, tokenStr, data.Admin, perm), nil
 }

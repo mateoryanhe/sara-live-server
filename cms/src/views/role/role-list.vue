@@ -8,7 +8,7 @@
       </template>
       <div class="content">
         <div class="table-header">
-          <el-button type="primary" @click="handleAdd">新增角色</el-button>
+          <el-button v-if="can('create')" type="primary" @click="handleAdd">新增角色</el-button>
         </div>
 
         <!-- 搜索表单 -->
@@ -17,8 +17,8 @@
             <el-input v-model="searchForm.name" clearable placeholder="角色名称"/>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="fetchRoleList">搜索</el-button>
-            <el-button @click="resetSearch">重置</el-button>
+            <el-button v-if="can('search')" type="primary" @click="fetchRoleList">搜索</el-button>
+            <el-button v-if="can('search')" @click="resetSearch">重置</el-button>
           </el-form-item>
         </el-form>
 
@@ -37,9 +37,9 @@
           <el-table-column label="更新时间" prop="updatedAt" width="160"/>
           <el-table-column label="操作" width="280">
             <template #default="{ row }">
-              <el-button size="small" @click="handleEdit(row)">编辑</el-button>
-              <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
-              <el-button size="small" type="primary" @click="handlePermissions(row)">权限</el-button>
+              <el-button v-if="can('edit')" size="small" @click="handleEdit(row)">编辑</el-button>
+              <el-button v-if="can('delete')" size="small" type="danger" @click="handleDelete(row)">删除</el-button>
+              <el-button v-if="can('permission')" size="small" type="primary" @click="handlePermissions(row)">权限</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -90,6 +90,9 @@ import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'elemen
 import {roleApi} from '@/api'
 import type {Role} from '@/types/api'
 import {useRouter} from 'vue-router'
+import {usePagePermission} from '@/composables/usePagePermission'
+
+const {can} = usePagePermission('RoleManagement')
 
 interface SearchForm {
   name: string

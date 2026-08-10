@@ -3,13 +3,14 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>模块管理</span>
+          <span>权限配置</span>
           <el-button style="margin-left: auto;" type="default" @click="handleBack">返回</el-button>
         </div>
       </template>
       <div class="content">
         <div class="table-header">
-          <el-button type="primary" @click="handleSave">保存模块配置</el-button>
+          <el-button type="primary" @click="handleSave">保存权限配置</el-button>
+          <span class="hint">勾选页面可授予整页权限；展开后可单独勾选各按钮</span>
         </div>
 
         <el-tree
@@ -32,8 +33,12 @@ import {ElMessage} from 'element-plus'
 import router from '@/router'
 import {layoutRouteGroups} from '@/router/routes'
 import {useRoute} from 'vue-router'
-// 从role API模块导入Permission接口
 import {roleApi} from '@/api/modules/role'
+import {
+  buttonPermissionKey,
+  getPageButtons,
+  type PageButtonDef,
+} from '@/config/page-buttons'
 
 interface ModuleNode {
   id: string
@@ -43,36 +48,43 @@ interface ModuleNode {
 
 const route = useRoute()
 const treeRef = ref()
-// 从路由配置中动态生成模块数据
 const moduleTreeData = ref<ModuleNode[]>([])
-
 const checkedModules = ref<string[]>([])
 
-// 当前角色ID，从路由参数获取或默认为0
 const roleId = ref(Number(route.query.roleId) || 0)
 
 const treeProps = {
   children: 'children',
-  label: 'name'
+  label: 'name',
 }
 
-// 从路由配置中提取模块数据
+const buildButtonNodes = (pageName: string, metaButtons?: PageButtonDef[]): ModuleNode[] => {
+  return getPageButtons(pageName, metaButtons).map(btn => ({
+    id: buttonPermissionKey(pageName, btn.key),
+    name: btn.label,
+  }))
+}
+
 const generateModuleTreeFromRoutes = () => {
   const routeModules: ModuleNode[] = []
 
-  layoutRouteGroups.forEach(route => {
-    if (route.children && route.meta) {
+  layoutRouteGroups.forEach(group => {
+    if (group.children && group.meta) {
       const module: ModuleNode = {
-        id: `module_${route.path.replace('/', '')}`,
-        name: route.meta.title as string || route.path,
-        children: []
+        id: `module_${group.path.replace('/', '')}`,
+        name: (group.meta.title as string) || group.path,
+        children: [],
       }
 
-      route.children.forEach(child => {
+      group.children.forEach(child => {
         if (child.name && child.meta && !child.meta.hidden) {
+          const pageName = child.name as string
+          const metaButtons = child.meta.buttons as PageButtonDef[] | undefined
+          const buttonNodes = buildButtonNodes(pageName, metaButtons)
           module.children?.push({
-            id: child.name as string,
-            name: child.meta.title as string || child.name as string
+            id: pageName,
+            name: (child.meta.title as string) || pageName,
+            children: buttonNodes.length > 0 ? buttonNodes : undefined,
           })
         }
       })
@@ -86,70 +98,54 @@ const generateModuleTreeFromRoutes = () => {
   return routeModules
 }
 
+const collectSelectedPermissions = (): string[] => {
+  const checkedLeaves = treeRef.value.getCheckedKeys(true) as string[]
+  const checkedAll = treeRef.value.getCheckedKeys(false) as string[]
+
+  const pageKeys = checkedAll.filter(
+      key => !String(key).startsWith('module_') && !String(key).includes(':'),
+  )
+  const buttonKeys = checkedLeaves.filter(key => String(key).includes(':'))
+
+  return [...new Set([...pageKeys, ...buttonKeys])]
+}
+
 const handleSave = async () => {
   try {
-    const checkedKeys = treeRef.value.getCheckedKeys(false)
-    const halfCheckedKeys = treeRef.value.getHalfCheckedKeys()
-    const allCheckedKeys = [...checkedKeys, ...halfCheckedKeys]
+    const selectedModules = collectSelectedPermissions()
 
-    // 过滤掉模块节点，只保留具体功能节点
-    const selectedModules = allCheckedKeys.filter(key => !key.startsWith('module_'))
-
-    // 准备保存数据到后端
     const permissionData = selectedModules.map(moduleId => ({
-      id: 0, // 新增权限时ID为0
+      id: 0,
       module: moduleId,
-      roleId: roleId.value
+      roleId: roleId.value,
     }))
-    
-    console.log('选中的模块:', selectedModules)
 
-    // 调用API创建或更新角色权限
     const response = await roleApi.createPermission(permissionData)
 
-    console.log('权限已更新:', selectedModules)
-
     if (response) {
-      ElMessage.success(`已保存 ${selectedModules.length} 个模块权限`)
+      ElMessage.success(`已保存 ${selectedModules.length} 项权限`)
     } else {
-      ElMessage.error('保存模块配置失败')
+      ElMessage.error('保存权限配置失败')
     }
   } catch (error) {
-    console.error('保存模块配置失败:', error)
-    ElMessage.error('保存模块配置失败')
+    console.error('保存权限配置失败:', error)
+    ElMessage.error('保存权限配置失败')
   }
 }
 
 const handleBack = () => {
-  // 返回到角色管理页面或其他上级页面
-  router.go(-1) // 或者使用 router.push('/role') 返回角色管理页面
+  router.go(-1)
 }
 
 onMounted(async () => {
-  // 从路由配置中动态生成模块树
   moduleTreeData.value = generateModuleTreeFromRoutes()
 
-  // 从接口获取当前角色的权限列表
-  const response = await roleApi.getRolePermissionList(roleId.value)
-  const permissions = response
-
-  // 根据接口返回的权限列表设置默认勾选项
-  // ModuleNode.id 必须在响应结果里面才显示勾选，使用响应结果的 module 字段比较
-  checkedModules.value = []
-
-  // 提取接口返回的模块ID列表
+  const permissions = await roleApi.getRolePermissionList(roleId.value)
   const permissionModules = permissions.map(p => p.module)
 
-  // 遍历模块树数据，只有当模块ID在权限列表中时才设置为选中
-  moduleTreeData.value.forEach(module => {
-    if (module.children) {
-      module.children.forEach(child => {
-        if (permissionModules.includes(child.id)) {
-          checkedModules.value.push(child.id)
-        }
-      })
-    }
-  })
+  checkedModules.value = permissionModules.filter(
+      mod => !mod.startsWith('module_'),
+  )
 })
 </script>
 
@@ -159,12 +155,22 @@ onMounted(async () => {
 }
 
 .card-header {
+  display: flex;
+  align-items: center;
   font-size: 16px;
   font-weight: bold;
 }
 
 .table-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
   margin-bottom: 20px;
+}
+
+.hint {
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
 }
 
 .content {

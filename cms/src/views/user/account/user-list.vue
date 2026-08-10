@@ -44,8 +44,8 @@
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="handleSearch">查询</el-button>
-            <el-button @click="handleReset">重置</el-button>
+            <el-button v-if="can('search')" type="primary" @click="handleSearch">查询</el-button>
+            <el-button v-if="can('search')" @click="handleReset">重置</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -162,7 +162,7 @@
           </el-table-column>
           <el-table-column fixed="right" label="操作" width="100">
             <template #default="scope">
-              <el-dropdown trigger="click" @command="(cmd: string) => handleRowCommand(scope.row, cmd)">
+              <el-dropdown v-if="hasRowActions" trigger="click" @command="(cmd: string) => handleRowCommand(scope.row, cmd)">
                 <el-button size="small" type="primary">
                   操作
                   <el-icon class="el-icon--right">
@@ -171,25 +171,25 @@
                 </el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item v-if="!scope.row.isAnchor" command="setAnchor">设为主播</el-dropdown-item>
-                    <el-dropdown-item v-if="!scope.row.isAnchor" command="setSeniorAnchor">设为高级主播</el-dropdown-item>
-                    <el-dropdown-item :divided="!scope.row.isAnchor" command="gold-add">
+                    <el-dropdown-item v-if="can('setAnchor') && !scope.row.isAnchor" command="setAnchor">设为主播</el-dropdown-item>
+                    <el-dropdown-item v-if="can('setSeniorAnchor') && !scope.row.isAnchor" command="setSeniorAnchor">设为高级主播</el-dropdown-item>
+                    <el-dropdown-item v-if="can('goldAdd')" :divided="!scope.row.isAnchor" command="gold-add">
                       加金币
                     </el-dropdown-item>
-                    <el-dropdown-item command="gold-sub">减金币</el-dropdown-item>
-                    <el-dropdown-item divided command="diamond-add">加钻石</el-dropdown-item>
-                    <el-dropdown-item command="diamond-sub">减钻石</el-dropdown-item>
-                    <el-dropdown-item divided command="ban">
+                    <el-dropdown-item v-if="can('goldSub')" command="gold-sub">减金币</el-dropdown-item>
+                    <el-dropdown-item v-if="can('diamondAdd')" divided command="diamond-add">加钻石</el-dropdown-item>
+                    <el-dropdown-item v-if="can('diamondSub')" command="diamond-sub">减钻石</el-dropdown-item>
+                    <el-dropdown-item v-if="can('ban')" divided command="ban">
                       {{ scope.row.ban ? '解封' : '封号' }}
                     </el-dropdown-item>
-                    <el-dropdown-item v-if="scope.row.canRank !== false" command="rank-off">下榜</el-dropdown-item>
-                    <el-dropdown-item v-if="scope.row.canRank === false" command="rank-on">上榜</el-dropdown-item>
-                    <el-dropdown-item v-if="!scope.row.rechargeWhitelist" command="recharge-whitelist-on">加入充值白名单</el-dropdown-item>
-                    <el-dropdown-item v-if="scope.row.rechargeWhitelist" command="recharge-whitelist-off">移出充值白名单</el-dropdown-item>
-                    <el-dropdown-item divided command="cancel">
+                    <el-dropdown-item v-if="can('rankOff') && scope.row.canRank !== false" command="rank-off">下榜</el-dropdown-item>
+                    <el-dropdown-item v-if="can('rankOn') && scope.row.canRank === false" command="rank-on">上榜</el-dropdown-item>
+                    <el-dropdown-item v-if="can('rechargeWhitelistOn') && !scope.row.rechargeWhitelist" command="recharge-whitelist-on">加入充值白名单</el-dropdown-item>
+                    <el-dropdown-item v-if="can('rechargeWhitelistOff') && scope.row.rechargeWhitelist" command="recharge-whitelist-off">移出充值白名单</el-dropdown-item>
+                    <el-dropdown-item v-if="can('cancel')" divided command="cancel">
                       {{ scope.row.cancel ? '取消注销' : '注销' }}
                     </el-dropdown-item>
-                    <el-dropdown-item v-if="!scope.row.isAnchor" command="setUserType">修改用户类型</el-dropdown-item>
+                    <el-dropdown-item v-if="can('setUserType') && !scope.row.isAnchor" command="setUserType">修改用户类型</el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
@@ -314,6 +314,27 @@ import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'elemen
 import {useRoute, useRouter} from 'vue-router'
 import type {BanReq, CancelReq, UnBanReq, UnCancelReq, UserInfo} from '@/types/api.ts'
 import {formatAmount, NUMBER_INPUT_DECIMALS} from '@/utils/number-format'
+import {usePagePermission} from '@/composables/usePagePermission'
+
+const {can} = usePagePermission('UserList')
+
+const ROW_ACTION_KEYS = [
+  'setAnchor',
+  'setSeniorAnchor',
+  'goldAdd',
+  'goldSub',
+  'diamondAdd',
+  'diamondSub',
+  'ban',
+  'rankOff',
+  'rankOn',
+  'rechargeWhitelistOn',
+  'rechargeWhitelistOff',
+  'cancel',
+  'setUserType',
+] as const
+
+const hasRowActions = computed(() => ROW_ACTION_KEYS.some(key => can(key)))
 
 // 用户列表数据
 const userList = ref<UserInfo[]>([])
