@@ -21,6 +21,11 @@ func GetPrivacyPolicyCfg(_ context.Context, _ *privacypolicydto.GetPrivacyPolicy
 }
 
 func SavePrivacyPolicyCfg(_ context.Context, req *privacypolicydto.SavePrivacyPolicyCfgReq) (*privacypolicydto.SavePrivacyPolicyCfgRes, error) {
+	apiBase, err := normalizeApiBase(req.ApiBase)
+	if err != nil {
+		return nil, err
+	}
+
 	url := strings.TrimSpace(req.PrivacyPolicyUrl)
 	termsUrl := strings.TrimSpace(req.TermsOfServiceUrl)
 	creatorTermsUrl := strings.TrimSpace(req.CreatorTermsUrl)
@@ -28,30 +33,35 @@ func SavePrivacyPolicyCfg(_ context.Context, req *privacypolicydto.SavePrivacyPo
 	vipDescUrl := strings.TrimSpace(req.VipDescUrl)
 	aboutSiteUrl := strings.TrimSpace(req.AboutSiteUrl)
 	safetyCenterUrl := strings.TrimSpace(req.SafetyCenterUrl)
-	if url != "" && !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
-		return nil, errercode.CreateCode(errercode.InvalidParam)
+
+	resolve := func(raw string) (string, error) {
+		return resolvePolicyUrl(apiBase, raw)
 	}
-	if termsUrl != "" && !strings.HasPrefix(termsUrl, "http://") && !strings.HasPrefix(termsUrl, "https://") {
-		return nil, errercode.CreateCode(errercode.InvalidParam)
+	if url, err = resolve(url); err != nil {
+		return nil, err
 	}
-	if creatorTermsUrl != "" && !strings.HasPrefix(creatorTermsUrl, "http://") && !strings.HasPrefix(creatorTermsUrl, "https://") {
-		return nil, errercode.CreateCode(errercode.InvalidParam)
+	if termsUrl, err = resolve(termsUrl); err != nil {
+		return nil, err
 	}
-	if roomOwnerTermsUrl != "" && !strings.HasPrefix(roomOwnerTermsUrl, "http://") && !strings.HasPrefix(roomOwnerTermsUrl, "https://") {
-		return nil, errercode.CreateCode(errercode.InvalidParam)
+	if creatorTermsUrl, err = resolve(creatorTermsUrl); err != nil {
+		return nil, err
 	}
-	if vipDescUrl != "" && !strings.HasPrefix(vipDescUrl, "http://") && !strings.HasPrefix(vipDescUrl, "https://") {
-		return nil, errercode.CreateCode(errercode.InvalidParam)
+	if roomOwnerTermsUrl, err = resolve(roomOwnerTermsUrl); err != nil {
+		return nil, err
 	}
-	if aboutSiteUrl != "" && !strings.HasPrefix(aboutSiteUrl, "http://") && !strings.HasPrefix(aboutSiteUrl, "https://") {
-		return nil, errercode.CreateCode(errercode.InvalidParam)
+	if vipDescUrl, err = resolve(vipDescUrl); err != nil {
+		return nil, err
 	}
-	if safetyCenterUrl != "" && !strings.HasPrefix(safetyCenterUrl, "http://") && !strings.HasPrefix(safetyCenterUrl, "https://") {
-		return nil, errercode.CreateCode(errercode.InvalidParam)
+	if aboutSiteUrl, err = resolve(aboutSiteUrl); err != nil {
+		return nil, err
+	}
+	if safetyCenterUrl, err = resolve(safetyCenterUrl); err != nil {
+		return nil, err
 	}
 
 	existing := cfgdao.LoadPrivacyPolicyCfg()
 	row := &entity.PrivacyPolicyCfg{
+		ApiBase:           apiBase,
 		PrivacyPolicyUrl:  url,
 		TermsOfServiceUrl: termsUrl,
 		CreatorTermsUrl:   creatorTermsUrl,
@@ -88,15 +98,17 @@ func toCfgItem(cfg *entity.PrivacyPolicyCfg) *privacypolicydto.PrivacyPolicyCfgI
 	if cfg == nil {
 		return nil
 	}
+	apiBase := strings.TrimRight(strings.TrimSpace(cfg.ApiBase), "/")
 	return &privacypolicydto.PrivacyPolicyCfgItem{
 		ID:                strconv.FormatUint(cfg.ID, 10),
-		PrivacyPolicyUrl:  cfg.PrivacyPolicyUrl,
-		TermsOfServiceUrl: cfg.TermsOfServiceUrl,
-		CreatorTermsUrl:   cfg.CreatorTermsUrl,
-		RoomOwnerTermsUrl: cfg.RoomOwnerTermsUrl,
-		VipDescUrl:        cfg.VipDescUrl,
-		AboutSiteUrl:      cfg.AboutSiteUrl,
-		SafetyCenterUrl:   cfg.SafetyCenterUrl,
+		ApiBase:           apiBase,
+		PrivacyPolicyUrl:  stripApiBase(apiBase, cfg.PrivacyPolicyUrl),
+		TermsOfServiceUrl: stripApiBase(apiBase, cfg.TermsOfServiceUrl),
+		CreatorTermsUrl:   stripApiBase(apiBase, cfg.CreatorTermsUrl),
+		RoomOwnerTermsUrl: stripApiBase(apiBase, cfg.RoomOwnerTermsUrl),
+		VipDescUrl:        stripApiBase(apiBase, cfg.VipDescUrl),
+		AboutSiteUrl:      stripApiBase(apiBase, cfg.AboutSiteUrl),
+		SafetyCenterUrl:   stripApiBase(apiBase, cfg.SafetyCenterUrl),
 		CreatedAt:         formatTime(cfg.CreatedAt),
 		UpdatedAt:         formatTime(cfg.UpdatedAt),
 	}

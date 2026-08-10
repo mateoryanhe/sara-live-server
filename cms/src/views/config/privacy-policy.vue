@@ -8,11 +8,20 @@
       </template>
 
       <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="160px">
+        <el-form-item label="页面 URL 前缀" prop="apiBase">
+          <el-input
+              v-model="formData.apiBase"
+              clearable
+              placeholder="如 https://www.saralive.net/official-site"
+          />
+          <span class="form-tip">填写后，下方各 URL 可只填相对路径（如 /privacy.html）；完整 https 地址也可直接填写</span>
+        </el-form-item>
+
         <el-form-item label="隐私政策 URL" prop="privacyPolicyUrl">
           <el-input
               v-model="formData.privacyPolicyUrl"
               clearable
-              placeholder="如 https://example.com/privacy.html"
+              placeholder="如 /privacy.html 或完整 URL"
           />
           <span class="form-tip">App 请求 GET /sysInfo/cfg 时在 header 携带 X-App-Package；包级未配置时使用此处全局值</span>
         </el-form-item>
@@ -21,7 +30,7 @@
           <el-input
               v-model="formData.termsOfServiceUrl"
               clearable
-              placeholder="如 https://example.com/terms.html"
+              placeholder="如 /terms.html 或完整 URL"
           />
           <span class="form-tip">App 请求 GET /sysInfo/cfg 时在 header 携带 X-App-Package；包级未配置时使用此处全局值</span>
         </el-form-item>
@@ -30,7 +39,7 @@
           <el-input
               v-model="formData.creatorTermsUrl"
               clearable
-              placeholder="如 https://example.com/creator-terms.html"
+              placeholder="如 /creator-terms.html 或完整 URL"
           />
           <span class="form-tip">App 请求 GET /sysInfo/cfg 时返回 creatorTermsUrl</span>
         </el-form-item>
@@ -39,7 +48,7 @@
           <el-input
               v-model="formData.roomOwnerTermsUrl"
               clearable
-              placeholder="如 https://example.com/room-owner-terms.html"
+              placeholder="如 /room-owner-terms.html 或完整 URL"
           />
           <span class="form-tip">App 请求 GET /sysInfo/cfg 时返回 roomOwnerTermsUrl</span>
         </el-form-item>
@@ -48,7 +57,7 @@
           <el-input
               v-model="formData.vipDescUrl"
               clearable
-              placeholder="如 https://example.com/vip-desc.html"
+              placeholder="如 /vip-desc.html 或完整 URL"
           />
           <span class="form-tip">App 请求 GET /sysInfo/cfg 时返回 vipDescUrl</span>
         </el-form-item>
@@ -57,7 +66,7 @@
           <el-input
               v-model="formData.aboutSiteUrl"
               clearable
-              placeholder="如 https://example.com/about.html"
+              placeholder="如 /about.html 或完整 URL"
           />
           <span class="form-tip">App 请求 GET /sysInfo/cfg 时返回 aboutSiteUrl；留空则使用资源域名 + /about.html</span>
         </el-form-item>
@@ -66,7 +75,7 @@
           <el-input
               v-model="formData.safetyCenterUrl"
               clearable
-              placeholder="如 https://example.com/safety-center.html"
+              placeholder="如 /safety-center.html 或完整 URL"
           />
           <span class="form-tip">App 请求 GET /sysInfo/cfg 时返回 safetyCenterUrl；留空则使用资源域名 + /safety-center.html</span>
         </el-form-item>
@@ -95,6 +104,7 @@ const formRef = ref()
 
 const formData = reactive({
   id: '0',
+  apiBase: '',
   privacyPolicyUrl: '',
   termsOfServiceUrl: '',
   creatorTermsUrl: '',
@@ -109,17 +119,34 @@ const metaInfo = reactive({
   updatedAt: '',
 })
 
+const validateApiBase = (_: unknown, value: string, callback: (e?: Error) => void) => {
+  const base = value?.trim()
+  if (!base) {
+    callback()
+    return
+  }
+  if (!/^https?:\/\//i.test(base)) {
+    callback(new Error('URL 前缀需以 http:// 或 https:// 开头'))
+    return
+  }
+  callback()
+}
+
 const validateOptionalUrl = (_: unknown, value: string, callback: (e?: Error) => void) => {
   const url = value?.trim()
   if (!url) {
     callback()
     return
   }
-  if (!/^https?:\/\//i.test(url)) {
-    callback(new Error('URL 需以 http:// 或 https:// 开头'))
+  if (/^https?:\/\//i.test(url)) {
+    callback()
     return
   }
-  callback()
+  if (formData.apiBase?.trim()) {
+    callback()
+    return
+  }
+  callback(new Error('请填写页面 URL 前缀，或使用完整 http(s) 地址'))
 }
 
 const urlFieldRules = (label: string) => [
@@ -128,6 +155,10 @@ const urlFieldRules = (label: string) => [
 ]
 
 const formRules = reactive({
+  apiBase: [
+    {max: 512, message: 'URL 前缀长度不能超过 512', trigger: 'blur'},
+    {validator: validateApiBase, trigger: 'blur'},
+  ],
   privacyPolicyUrl: urlFieldRules('URL'),
   termsOfServiceUrl: urlFieldRules('URL'),
   creatorTermsUrl: urlFieldRules('URL'),
@@ -140,6 +171,7 @@ const formRules = reactive({
 const applyCfg = (cfg: PrivacyPolicyCfg | null | undefined) => {
   if (!cfg) {
     formData.id = '0'
+    formData.apiBase = ''
     formData.privacyPolicyUrl = ''
     formData.termsOfServiceUrl = ''
     formData.creatorTermsUrl = ''
@@ -152,6 +184,7 @@ const applyCfg = (cfg: PrivacyPolicyCfg | null | undefined) => {
     return
   }
   formData.id = cfg.id || '0'
+  formData.apiBase = cfg.apiBase || ''
   formData.privacyPolicyUrl = cfg.privacyPolicyUrl || ''
   formData.termsOfServiceUrl = cfg.termsOfServiceUrl || ''
   formData.creatorTermsUrl = cfg.creatorTermsUrl || ''
@@ -182,6 +215,7 @@ const handleSave = async () => {
     loading.value = true
     const response = await privacyPolicyApi.savePrivacyPolicyCfg({
       id: formData.id === '0' ? 0 : Number(formData.id),
+      apiBase: formData.apiBase.trim(),
       privacyPolicyUrl: formData.privacyPolicyUrl.trim(),
       termsOfServiceUrl: formData.termsOfServiceUrl.trim(),
       creatorTermsUrl: formData.creatorTermsUrl.trim(),

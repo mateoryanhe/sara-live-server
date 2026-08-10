@@ -8,6 +8,7 @@ type GetPrivacyPolicyCfgReq struct {
 
 type PrivacyPolicyCfgItem struct {
 	ID                string `json:"id"`
+	ApiBase           string `json:"apiBase"`
 	PrivacyPolicyUrl  string `json:"privacyPolicyUrl"`
 	TermsOfServiceUrl string `json:"termsOfServiceUrl"`
 	CreatorTermsUrl   string `json:"creatorTermsUrl"`
@@ -26,6 +27,7 @@ type GetPrivacyPolicyCfgRes struct {
 type SavePrivacyPolicyCfgReq struct {
 	g.Meta            `path:"/savePrivacyPolicyCfg" method:"post" summary:"保存隐私政策配置" tags:"隐私政策配置"`
 	ID                uint64 `json:"id" dc:"配置ID,首次保存可为0"`
+	ApiBase           string `json:"apiBase" v:"max-length:512#API根地址长度不能超过512" dc:"页面URL前缀,相对路径与此拼接"`
 	PrivacyPolicyUrl  string `json:"privacyPolicyUrl" v:"max-length:512#隐私政策URL长度不能超过512" dc:"隐私政策页面URL"`
 	TermsOfServiceUrl string `json:"termsOfServiceUrl" v:"max-length:512#用户服务协议URL长度不能超过512" dc:"用户服务协议页面URL"`
 	CreatorTermsUrl   string `json:"creatorTermsUrl" v:"max-length:512#创作者条款URL长度不能超过512" dc:"短视频创作者上传合规条款URL"`
