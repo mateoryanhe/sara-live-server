@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#6c3bff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="description" content="Cancel your Sara Live account using your deactivation code">
+  <title>Sara Live</title>
+  <link rel="stylesheet" href="css/site.css">
+</head>
+<body data-page-title-key="cancelPageTitle" data-cancel-page="true">
+  <header class="site-header cancel-standalone-header">
+    <div class="container cancel-standalone-bar">
+      <div class="brand brand-static">
+        <img src="assets/app-icon.png" alt="Sara Live">
+        <span>Sara Live</span>
+      </div>
+      <div class="lang-switch">
+        <button class="lang-btn active" data-lang="en" type="button">EN</button>
+        <button class="lang-btn" data-lang="es" type="button">ES</button>
+        <button class="lang-btn" data-lang="pt" type="button">PT</button>
+        <button class="lang-btn" data-lang="hi" type="button">HI</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="content-page">
+    <div class="container cancel-page">
+      <div class="page-header">
+        <h1 data-i18n="cancelPageTitle">Delete Account</h1>
+        <p data-i18n="cancelPageDesc">Enter your deactivation code to permanently delete your Sara Live account. This action cannot be undone.</p>
+      </div>
+
+      <article class="card cancel-card">
+        <form id="cancel-account-form" class="cancel-form" novalidate>
+          <label class="form-label" for="cancel-code" data-i18n="cancelCodeLabel">Deactivation code</label>
+          <input
+            id="cancel-code"
+            class="form-input"
+            type="text"
+            name="cancelCode"
+            autocomplete="off"
+            data-i18n-placeholder="cancelCodePlaceholder"
+            placeholder="Enter your deactivation code"
+            required
+          >
+          <p class="form-tip" data-i18n="cancelCodeHint">Find your deactivation code in the Sara Live app under account settings.</p>
+
+          <div class="form-actions">
+            <button class="btn btn-danger btn-block-mobile" type="submit" data-i18n="cancelSubmit">Delete my account</button>
+          </div>
+        </form>
+
+        <p id="cancel-message" class="cancel-message" role="status" aria-live="polite" hidden></p>
+      </article>
+
+      <p class="legal-contact">
+        <span data-i18n="legalContactLabel">Contact:</span>
+        <a data-support-email href="mailto:support@saralive.app">support@saralive.app</a>
+      </p>
+    </div>
+  </main>
+
+  <footer class="site-footer cancel-standalone-footer">
+    <div class="container footer-grid">
+      <div data-i18n="footerRights">© 2026 Sara Live. All rights reserved.</div>
+      <div class="footer-links">
+        <a href="mailto:support@saralive.app" data-support-email>support@saralive.app</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/site.js"></script>
+</body>
+</html>

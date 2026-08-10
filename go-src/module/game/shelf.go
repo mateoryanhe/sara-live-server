@@ -46,13 +46,7 @@ func AddGameShelf(ctx context.Context, req *gameplatformdto.AddGameShelfReq) (*g
 	}
 
 	now := time.Now()
-	row := &entity.GameCfg{
-		GameCode: gameCode,
-		Cover:    strings.TrimSpace(vendorGame.Cover),
-		NameEn:   strings.TrimSpace(vendorGame.NameEn),
-	}
-	row.CreatedAt = now
-	row.UpdatedAt = now
+	row := newShelfGameCfg(vendorGame, gameCode, now)
 	if err := cfgdao.CreateGameCfg(row); err != nil {
 		return nil, err
 	}
@@ -118,13 +112,7 @@ func BatchAddGameShelf(_ context.Context, req *gameplatformdto.BatchAddGameShelf
 			skipCount++
 			continue
 		}
-		row := &entity.GameCfg{
-			GameCode: gameCode,
-			Cover:    strings.TrimSpace(vendorGame.Cover),
-			NameEn:   strings.TrimSpace(vendorGame.NameEn),
-		}
-		row.CreatedAt = now
-		row.UpdatedAt = now
+		row := newShelfGameCfg(vendorGame, gameCode, now)
 		if err := cfgdao.CreateGameCfg(row); err != nil {
 			return nil, err
 		}
@@ -196,7 +184,20 @@ func toGameShelfListItem(row *entity.GameCfg) *gameplatformdto.GameShelfListItem
 	return &gameplatformdto.GameShelfListItem{
 		ID:       strconv.FormatUint(row.ID, 10),
 		GameCode: row.GameCode,
+		Platform: row.Platform,
 	}
+}
+
+func newShelfGameCfg(vendorGame *VendorGame, gameCode string, now time.Time) *entity.GameCfg {
+	row := &entity.GameCfg{
+		GameCode: gameCode,
+		Cover:    strings.TrimSpace(vendorGame.Cover),
+		NameEn:   strings.TrimSpace(vendorGame.NameEn),
+		Platform: strings.TrimSpace(vendorGame.Platform),
+	}
+	row.CreatedAt = now
+	row.UpdatedAt = now
+	return row
 }
 
 const (

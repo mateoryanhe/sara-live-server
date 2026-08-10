@@ -83,7 +83,16 @@
           <el-input v-model="currentRow.name" placeholder="请输入用户名"/>
         </el-form-item>
         <el-form-item v-if="!currentRow.id" label="密码" prop="pwd">
-          <el-input v-model="currentRow.pwd" placeholder="请输入密码" type="password"/>
+          <div class="pwd-field">
+            <el-input
+                v-model="currentRow.pwd"
+                placeholder="请输入密码或点击随机生成"
+                show-password
+                type="password"
+            />
+            <el-button @click="generateRandomPassword">随机生成</el-button>
+            <el-button :disabled="!currentRow.pwd" @click="copyPassword">复制</el-button>
+          </div>
         </el-form-item>
         <el-form-item v-else label="密码" prop="pwd">
           <el-input v-model="currentRow.pwd" placeholder="留空则不修改密码" type="password"/>
@@ -178,6 +187,33 @@ const formRules = ref<FormRules>({
   pwd: []
 })
 
+const PASSWORD_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
+
+const createRandomPassword = (length = 20) => {
+  const values = crypto.getRandomValues(new Uint32Array(length))
+  return Array.from(values, (value) => PASSWORD_CHARS[value % PASSWORD_CHARS.length]).join('')
+}
+
+const generateRandomPassword = () => {
+  currentRow.value.pwd = createRandomPassword()
+  formRef.value?.validateField('pwd')
+}
+
+const copyPassword = async () => {
+  const value = currentRow.value.pwd?.trim()
+  if (!value) {
+    ElMessage.warning('无可复制内容')
+    return
+  }
+  try {
+    await navigator.clipboard.writeText(value)
+    ElMessage.success('密码已复制')
+  } catch (error) {
+    console.error('复制密码失败:', error)
+    ElMessage.error('复制失败')
+  }
+}
+
 
 // 获取CMS用户列表
 const fetchCMSUserList = async () => {
@@ -218,7 +254,7 @@ const handleAdd = () => {
   currentRow.value = {
     id: '',
     name: '',
-    pwd: '',
+    pwd: createRandomPassword(),
     status: 1,
     admin: false,
     roleId: ''
@@ -358,5 +394,15 @@ onMounted(() => {
 .pagination-container {
   margin-top: 20px;
   text-align: right;
+}
+
+.pwd-field {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.pwd-field .el-input {
+  flex: 1;
 }
 </style>

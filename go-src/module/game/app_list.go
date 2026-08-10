@@ -42,6 +42,7 @@ func toAppGameListItem(row *entity.GameCfg) *gameplatformdto.AppGameListItem {
 		GameCode: row.GameCode,
 		NameEn:   row.NameEn,
 		Cover:    BuildGameCoverUrl(row.Cover),
+		Platform: row.Platform,
 	}
 }
 

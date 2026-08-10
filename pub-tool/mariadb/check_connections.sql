@@ -1,0 +1,10 @@
+SHOW GLOBAL STATUS LIKE 'Max_used_connections';
+SHOW GLOBAL STATUS LIKE 'Threads_connected';
+SHOW GLOBAL STATUS LIKE 'Threads_running';
+SHOW GLOBAL STATUS LIKE 'Connections';
+SHOW GLOBAL STATUS LIKE 'Aborted_connects';
+SHOW GLOBAL STATUS LIKE 'Aborted_clients';
+SELECT @@max_connections AS max_connections;
+SELECT @@innodb_buffer_pool_size AS innodb_buffer_pool_size;
+SELECT @@tmp_table_size AS tmp_table_size;
+SHOW GLOBAL STATUS LIKE 'Uptime';

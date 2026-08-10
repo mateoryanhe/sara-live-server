@@ -12,39 +12,40 @@ import (
 	"xr-game-server/entity"
 )
 
-// HandleVendorVerify 第三方身份验证回调(ops=user_id).
+// HandleVendorVerify 第三方身份验证回调(operator_player_session 或 ops 为用户 ID).
 func HandleVendorVerify(ctx context.Context, req *gameplatformdto.VendorVerifyReq) (*gameplatformdto.VendorVerifyRes, error) {
 	if req == nil {
 		return vendorVerifyFail(vendorCallbackCodeInvalidParam, "invalid request"), nil
 	}
-	signParams, signValue := collectVendorCallbackSignParams(ctx)
-	fillVendorVerifyReq(req, signParams, signValue)
+	bodyParams := collectVendorCallbackBodyParams(ctx)
+	fillVendorVerifyReq(req, bodyParams)
 
-	vendorDetailLog().Infof(ctx, "vendor verify request ops=%s operator_token=%s timestamp=%d",
-		req.Ops, req.OperatorToken, req.Timestamp)
+	userIDStr := resolveVendorVerifyUserID(req)
+	vendorDetailLog().Infof(ctx, "vendor verify request user_id=%s operator_token=%s game_id=%s bet_type=%d",
+		userIDStr, req.OperatorToken, req.GameID, req.BetType)
 
-	if fail := validateVendorCallback(req.OperatorToken, signValue, signParams); fail != nil {
+	if fail := validateVendorTransferAuth(req.OperatorToken, req.SecretKey); fail != nil {
 		resp := vendorVerifyFail(fail.Code, fail.Message)
-		vendorDetailLog().Warningf(ctx, "vendor verify failed ops=%s code=%d msg=%s", req.Ops, resp.Code, resp.Message)
+		vendorDetailLog().Warningf(ctx, "vendor verify failed user_id=%s code=%d msg=%s", userIDStr, resp.Code, resp.Message)
 		return resp, nil
 	}
 
-	userID, err := strconv.ParseUint(strings.TrimSpace(req.Ops), 10, 64)
+	userID, err := strconv.ParseUint(userIDStr, 10, 64)
 	if err != nil || userID == 0 {
-		resp := vendorVerifyFail(vendorCallbackCodeInvalidParam, "invalid ops")
-		vendorDetailLog().Warningf(ctx, "vendor verify failed ops=%s code=%d msg=%s", req.Ops, resp.Code, resp.Message)
+		resp := vendorVerifyFail(vendorCallbackCodeInvalidParam, "invalid operator_player_session")
+		vendorDetailLog().Warningf(ctx, "vendor verify failed user_id=%s code=%d msg=%s", userIDStr, resp.Code, resp.Message)
 		return resp, nil
 	}
 	if accountdao.GetAccountById(userID) == nil {
 		resp := vendorVerifyFail(vendorCallbackCodePlayerNotFound, "player not found")
-		vendorDetailLog().Warningf(ctx, "vendor verify failed ops=%s code=%d msg=%s", req.Ops, resp.Code, resp.Message)
+		vendorDetailLog().Warningf(ctx, "vendor verify failed user_id=%s code=%d msg=%s", userIDStr, resp.Code, resp.Message)
 		return resp, nil
 	}
 
 	userInfo := loadUserInfoForVendorVerify(userID)
 	if userInfo == nil {
 		resp := vendorVerifyFail(vendorCallbackCodePlayerNotFound, "player not found")
-		vendorDetailLog().Warningf(ctx, "vendor verify failed ops=%s code=%d msg=%s", req.Ops, resp.Code, resp.Message)
+		vendorDetailLog().Warningf(ctx, "vendor verify failed user_id=%s code=%d msg=%s", userIDStr, resp.Code, resp.Message)
 		return resp, nil
 	}
 
@@ -56,8 +57,8 @@ func HandleVendorVerify(ctx context.Context, req *gameplatformdto.VendorVerifyRe
 			Balance:    userInfo.Gold,
 		},
 	}
-	vendorDetailLog().Infof(ctx, "vendor verify success ops=%s player_name=%s balance=%v currency=%s",
-		req.Ops, resp.Data.PlayerName, resp.Data.Balance, resp.Data.Currency)
+	vendorDetailLog().Infof(ctx, "vendor verify success user_id=%s player_name=%s balance=%v currency=%s",
+		userIDStr, resp.Data.PlayerName, resp.Data.Balance, resp.Data.Currency)
 	return resp, nil
 }
 
@@ -77,19 +78,41 @@ func loadUserInfoForVendorVerify(userID uint64) *entity.UserInfo {
 	return &row
 }
 
-func fillVendorVerifyReq(req *gameplatformdto.VendorVerifyReq, params map[string]string, signValue string) {
+func fillVendorVerifyReq(req *gameplatformdto.VendorVerifyReq, params map[string]string) {
+	if req == nil || len(params) == 0 {
+		return
+	}
 	if req.OperatorToken == "" {
 		req.OperatorToken = params["operator_token"]
+	}
+	if req.OperatorPlayerSession == "" {
+		req.OperatorPlayerSession = params["operator_player_session"]
+	}
+	if req.SecretKey == "" {
+		req.SecretKey = params["secret_key"]
+	}
+	if req.IP == "" {
+		req.IP = params["ip"]
+	}
+	if req.GameID == "" {
+		req.GameID = params["game_id"]
 	}
 	if req.Ops == "" {
 		req.Ops = params["ops"]
 	}
-	if req.Sign == "" {
-		req.Sign = signValue
+	if req.BetType == 0 {
+		req.BetType = int(parseVendorCallbackTimestamp(params["bet_type"]))
 	}
-	if req.Timestamp == 0 {
-		req.Timestamp = parseVendorCallbackTimestamp(params["timestamp"])
+}
+
+func resolveVendorVerifyUserID(req *gameplatformdto.VendorVerifyReq) string {
+	if req == nil {
+		return ""
 	}
+	if userID := strings.TrimSpace(req.OperatorPlayerSession); userID != "" {
+		return userID
+	}
+	return strings.TrimSpace(req.Ops)
 }
 
 func vendorVerifyFail(code int, message string) *gameplatformdto.VendorVerifyRes {
@@ -97,20 +120,4 @@ func vendorVerifyFail(code int, message string) *gameplatformdto.VendorVerifyRes
 		Code:    code,
 		Message: message,
 	}
-}
-
-func collectVendorCallbackSignParams(ctx context.Context) (map[string]string, string) {
-	r := g.RequestFromCtx(ctx)
-	if r == nil {
-		return map[string]string{}, ""
-	}
-	return CollectSignParamsFromRequest(r)
-}
-
-func parseVendorCallbackTimestamp(raw string) int64 {
-	parsed, err := strconv.ParseInt(strings.TrimSpace(raw), 10, 64)
-	if err != nil {
-		return 0
-	}
-	return parsed
 }

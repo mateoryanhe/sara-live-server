@@ -1,0 +1,5 @@
+DROP USER IF EXISTS ''@'ip-172-31-11-36.us-west-1.compute.internal';
+DROP USER IF EXISTS ''@'localhost';
+DROP USER IF EXISTS ''@'127.0.0.1';
+DROP USER IF EXISTS ''@'%';
+FLUSH PRIVILEGES;

@@ -16,6 +16,7 @@ type GameShelfListReq struct {
 type GameShelfListItem struct {
 	ID       string `json:"id"`
 	GameCode string `json:"gameCode"`
+	Platform string `json:"platform"`
 }
 
 // AddGameShelfReq CMS 添加上架游戏

@@ -1,0 +1,26 @@
+@echo off
+REM Remote server configuration
+set REMOTE_HOST=52.9.70.64
+set REMOTE_USER=ec2-user
+set REMOTE_DIR=/home/ec2-user/xgameserver
+
+REM Local path configuration
+set LOCAL_PROJECT_PATH=D:\company-code\sara-live-server
+set LOCAL_GO_SRC=%LOCAL_PROJECT_PATH%\go-src
+set LOCAL_CONFIG_PATH=%LOCAL_PROJECT_PATH%\config\prod\config.yaml
+set LOCAL_BUILD_PATH=%LOCAL_PROJECT_PATH%\go-build
+
+REM SSH key configuration
+set SSH_KEY_PATH=D:\tools\ppk\live-test.ppk
+
+REM Application name
+set APP_NAME=xr-game-server
+
+REM Remote sudo command (not used)
+set SUDO_CMD=
+
+REM Graceful shutdown wait time in seconds
+set SHUTDOWN_WAIT_TIME=15
+
+REM SSH port
+set REMOTE_PORT=22

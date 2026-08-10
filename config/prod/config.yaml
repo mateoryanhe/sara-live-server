@@ -1,0 +1,85 @@
+server:
+  ###系统配置
+  address: 443  #http服务端口
+  serverRoot: "/home/ec2-user/cdn/official-site"  # 默认静态目录(官网)
+  imageStaticPrefix: "/images"  # 图片 URL 前缀,须在 staticPaths 中配置对应 path
+  staticPaths:
+    - prefix: "/cms"
+      path: "/home/ec2-user/cdn/cms"
+    - prefix: "/images"
+      path: "/home/ec2-user/cdn/images"
+    - prefix: "/official-site"
+      path: "/home/ec2-user/cdn/official-site"
+  httpsCertPath: "/home/ec2-user/www.saralive.net_ecc/fullchain.pem"
+  httpsKeyPath: "/home/ec2-user/www.saralive.net_ecc/privkey.pem"
+  clientMaxBodySize: "5g"   # HTTP 请求体/上传上限(唯一大小限制,Go业务层不再校验)
+  readTimeout: "120m"
+  writeTimeout: "120m"
+  gzipEnabled: true         # 开启 gzip 响应压缩
+  # PProf配置
+  pprofEnabled: true # 是否开启PProf性能调试特性。默认为false
+  pprofPattern: "/66dcd8e25ab3b339546ea1de5eb2d443e6fca76c76d11709f10533be8bd87d7d/pprof"    # 开启PProf时有效，表示PProf特性的页面访问路径，对当前Server绑定的所有域名有效
+  ####自定义配置
+  exitTime: 15 #退出系统等待多少秒，开始发送kill -9
+  dumpRouterMap: false
+  memoryLimitM: 5000
+  # domainSites 多域名示例见 config/local/config.yaml
+
+ipGeo:
+  dbPath: "/home/ec2-user/xgameserver/GeoLite2-Country.mmdb"
+  # 免注册下载(解压后配置绝对路径):
+  # curl -LO https://cdn.jsdelivr.net/npm/geolite2-country/GeoLite2-Country.mmdb.gz && gunzip -f GeoLite2-Country.mmdb.gz
+
+logQuery:
+  exportStaticPrefix: "/cms"           # 日志导出静态 URL 前缀,对应 staticPaths 中的 /cms
+  exportSubDir: "log-query-export"     # 导出目录: /home/ec2-user/cdn/cms/log-query-export
+
+bufferSize:
+  db:
+    tickIntervalMs: 1000   # 调度周期(毫秒)
+    cpuIdlePercent: 70     # 系统 CPU 空闲比例达到该值才批量落库
+    maxPendingWaitMs: 15000 # Pending 最长等待(毫秒),超时强制落库
+    batchSize: 300         # 每轮全局批量落库上限(所有 queue 共用)
+  websocket:
+    size: 50 # 推送批量大小(未配置时默认10)
+  goPool:
+    size: 400 # 协程池大小(未配置时走默认池)
+
+logger:
+  detail:                               # API详情日志；启动时同步为默认 g.Log()
+    path: "/home/ec2-user/log/"
+    file: "detail.log"
+    header: true
+    flags: 1                            # 仅异步,时间靠 timeFormat,不含源码路径,便于 CMS 解析
+    timeFormat: "2006-01-02T15:04:05.000"
+    stdout: false
+    rotateSize: "7g"              # 保留最近3天的按日日志，过期直接删（不产生时间戳备份）
+    rotateBackupLimit: 0          # 0=不保留备份，过期直接删，不产生 detail-xxx.20260720....log
+  access:                               # HTTP Server access 日志(替代 GF 内置 access 日志)
+    path: "/home/ec2-user/log/"
+    file: "access.log"
+    header: true                        # 保留时间戳与 TraceId,供日志查询过滤与解析
+    levelPrint: false
+    flags: 1                            # 仅时间戳,不含源码路径/级别,便于 CMS 解析
+    timeFormat: "2006-01-02T15:04:05.000"
+    stdout: false
+    rotateSize: "3g"              # 保留最近3天的按日日志，过期直接删（不产生时间戳备份）
+    rotateBackupLimit: 0          # 0=不保留备份，过期直接删，不产生 detail-xxx.20260720....log
+  error:                                # HTTP 框架错误 + xrlog 错误日志，g.Log("error")
+    path: "/home/ec2-user/log/"
+    file: "error.log"
+    flags: 1                            # 仅异步,时间靠 timeFormat,不含源码路径,便于 CMS 解析
+    header: true                        # 保留时间戳与 TraceId,供日志查询过滤与解析
+    timeFormat: "2006-01-02T15:04:05.000"
+    stdout: false
+    rotateSize: "2g"              # 保留最近3天的按日日志，过期直接删（不产生时间戳备份）
+    rotateBackupLimit: 0          # 0=不保留备份，过期直接删，不产生 detail-xxx.20260720....log
+
+database:
+  default:
+    link: "mysql:root:c63eac559a03dece518e3eb7a601b30e@tcp(127.0.0.1:14501)/live_db"
+    extra: "charset=utf8mb4&parseTime=True&loc=Local"
+    maxIdle: 20
+    maxOpen: 40
+    maxLifetime: "30s"
+    debug: true

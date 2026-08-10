@@ -23,19 +23,34 @@ func GetAppGameStartLink(ctx context.Context, req *gameplatformdto.AppGameStartR
 	}
 
 	gameCode := strings.TrimSpace(req.GameCode)
-	platform := strings.TrimSpace(req.Platform)
-	if gameCode == "" || platform == "" {
+	if gameCode == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	if !cfgdao.IsGameOnShelfFromMemory(gameCode) {
 		return nil, errercode.CreateCode(errercode.GameCfgNonExist)
 	}
 
-	lang := strings.TrimSpace(req.Lang)
-	link, err := fetchVendorGameStartURL(ctx, gameCode, platform, strconv.FormatUint(userId, 10), lang)
+	platform, err := resolveGameStartPlatform(gameCode)
+	if err != nil {
+		return nil, err
+	}
+
+	link, err := fetchVendorGameStartURL(ctx, gameCode, platform, strconv.FormatUint(userId, 10), "en")
 	if err != nil {
 		xrlog.ErrorWithErr(ctx, "Game", "fetch vendor game start url failed", err)
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	return &gameplatformdto.AppGameStartRes{Link: link}, nil
+}
+
+func resolveGameStartPlatform(gameCode string) (string, error) {
+	gameCfg := cfgdao.GetGameCfgByGameCode(gameCode)
+	if gameCfg == nil {
+		return "", errercode.CreateCode(errercode.GameCfgNonExist)
+	}
+	platform := strings.TrimSpace(gameCfg.Platform)
+	if platform == "" {
+		return "", errercode.CreateCode(errercode.InvalidParam)
+	}
+	return platform, nil
 }

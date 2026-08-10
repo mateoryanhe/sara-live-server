@@ -4,16 +4,19 @@ import "github.com/gogf/gf/v2/frame/g"
 
 // VendorVerifyReq 第三方身份验证回调请求.
 type VendorVerifyReq struct {
-	g.Meta        `path:"/verify" method:"post" summary:"第三方身份验证回调" tags:"游戏第三方回调"`
-	OperatorToken string `json:"operator_token"`
-	Ops           string `json:"ops"`
-	Sign          string `json:"sign"`
-	Timestamp     int64  `json:"timestamp"`
+	g.Meta                `path:"/verify" method:"post" summary:"第三方身份验证回调" tags:"游戏第三方回调"`
+	OperatorToken         string `json:"operator_token"`
+	OperatorPlayerSession string `json:"operator_player_session"`
+	SecretKey             string `json:"secret_key"`
+	IP                    string `json:"ip"`
+	GameID                string `json:"game_id"`
+	BetType               int    `json:"bet_type"`
+	Ops                   string `json:"ops"`
 }
 
 type VendorVerifyData struct {
 	PlayerName string  `json:"player_name"`
-	Currency   string  `json:"currency"`
+	Currency   string  `json:"currency_code"`
 	Balance    float64 `json:"balance"`
 }
 

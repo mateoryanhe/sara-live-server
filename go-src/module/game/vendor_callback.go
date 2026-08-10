@@ -1,6 +1,7 @@
 package game
 
 import (
+	"context"
 	"strconv"
 	"strings"
 
@@ -9,7 +10,7 @@ import (
 	"xr-game-server/entity"
 )
 
-const vendorCallbackCurrency = "gold"
+const vendorCallbackCurrency = "USD"
 
 const (
 	vendorCallbackCodeOK                  = 0
@@ -88,4 +89,25 @@ func loadUserInfoByPlayerName(playerName string) (*entity.UserInfo, uint64) {
 		return nil, 0
 	}
 	return loadUserInfoForVendorVerify(row.ID), row.ID
+}
+
+func collectVendorCallbackSignParams(ctx context.Context) (map[string]string, string) {
+	r := g.RequestFromCtx(ctx)
+	if r == nil {
+		return map[string]string{}, ""
+	}
+	return CollectSignParamsFromRequest(r)
+}
+
+func collectVendorCallbackBodyParams(ctx context.Context) map[string]string {
+	params, _ := collectVendorCallbackSignParams(ctx)
+	return params
+}
+
+func parseVendorCallbackTimestamp(raw string) int64 {
+	parsed, err := strconv.ParseInt(strings.TrimSpace(raw), 10, 64)
+	if err != nil {
+		return 0
+	}
+	return parsed
 }
