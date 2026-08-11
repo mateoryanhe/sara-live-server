@@ -10,8 +10,8 @@ server:
       path: "/home/ec2-user/cdn/images"
     - prefix: "/official-site"
       path: "/home/ec2-user/cdn/official-site"
-  httpsCertPath: "/home/ec2-user/www.saralive.net_ecc/fullchain.pem"
-  httpsKeyPath: "/home/ec2-user/www.saralive.net_ecc/privkey.pem"
+  httpsCertPath: "/home/ec2-user/ssl/cf-origin/cf-origin.pem"
+  httpsKeyPath: "/home/ec2-user/ssl/cf-origin/cf-origin.key"
   clientMaxBodySize: "5g"   # HTTP 请求体/上传上限(唯一大小限制,Go业务层不再校验)
   readTimeout: "120m"
   writeTimeout: "120m"
@@ -38,7 +38,7 @@ bufferSize:
   db:
     tickIntervalMs: 1000   # 调度周期(毫秒)
     cpuIdlePercent: 70     # 系统 CPU 空闲比例达到该值才批量落库
-    maxPendingWaitMs: 15000 # Pending 最长等待(毫秒),超时强制落库
+    maxPendingWaitMs: 10000 # Pending 最长等待(毫秒),超时强制落库
     batchSize: 300         # 每轮全局批量落库上限(所有 queue 共用)
   websocket:
     size: 50 # 推送批量大小(未配置时默认10)

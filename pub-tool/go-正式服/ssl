@@ -1,1 +1,14 @@
-certbot certonly --standalone -d cai.hzaicoin.fun -d bca.hzaicoin.fun
+Cloudflare Origin CA (正式服 saralive.net)
+==========================================
+
+证书文件位置: config/prod/ssl/
+  cf-origin.pem  源站证书
+  cf-origin.key  源站私钥
+
+服务器路径: /home/ec2-user/ssl/cf-origin/
+
+Cloudflare: SSL/TLS -> Full (strict)
+
+部署时 deploy.bat 会自动上传证书; 也可仅上传证书:
+  pscp -i key.ppk config/prod/ssl/cf-origin.pem ec2-user@52.9.70.64:/home/ec2-user/ssl/cf-origin/
+  pscp -i key.ppk config/prod/ssl/cf-origin.key ec2-user@52.9.70.64:/home/ec2-user/ssl/cf-origin/
