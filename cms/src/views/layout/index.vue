@@ -64,7 +64,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement')"
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement')"
             index="/operation">
           <template #title>
             <el-icon>
@@ -89,6 +89,12 @@
               <User/>
             </el-icon>
             <span>工会管理</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('GuildProfileManagement')" index="/operation/guild/guild-profile">
+            <el-icon>
+              <EditPen/>
+            </el-icon>
+            <span>工会基础信息</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('RechargeCfgManagement')" index="/operation/recharge/recharge-cfg-list">
             <el-icon>

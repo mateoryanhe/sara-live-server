@@ -17,6 +17,7 @@ export interface CMSUser {
 
 export interface CMSUserQuery extends PageQuery {
     name?: string
+    key?: string
     status?: number
     admin?: boolean
 }

@@ -1,5 +1,5 @@
 import {request} from '../request'
-import type {Guild, GuildQuery, PageResponse} from '@/types/api'
+import type {Guild, GuildQuery, MyGuildProfile, PageResponse, UpdateMyGuildProfileReq} from '@/types/api'
 
 // 直播工会管理API
 export const guildApi = {
@@ -34,5 +34,13 @@ export const guildApi = {
     // 删除工会
     deleteGuild: (id: string) => {
         return request.post<boolean>('/guild/deleteGuild', {id})
+    },
+
+    getMyGuildProfile: () => {
+        return request.post<MyGuildProfile>('/guild/getMyGuildProfile', {})
+    },
+
+    updateMyGuildProfile: (data: UpdateMyGuildProfileReq) => {
+        return request.post<{ success: boolean }>('/guild/updateMyGuildProfile', data)
     },
 }

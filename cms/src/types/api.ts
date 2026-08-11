@@ -474,6 +474,7 @@ export interface Guild {
     id: string
     name: string
     leaderId: string
+    leaderName?: string
     contact: string
     description: string
     status: number
@@ -483,6 +484,22 @@ export interface Guild {
 
 export interface GuildQuery extends PageQuery {
     name?: string
+}
+
+export interface MyGuildProfile {
+    id: string
+    name: string
+    bankCard: string
+    contact: string
+    description: string
+    updatedAt?: string
+}
+
+export interface UpdateMyGuildProfileReq {
+    name: string
+    bankCard?: string
+    contact?: string
+    description?: string
 }
 
 // 礼物相关类型

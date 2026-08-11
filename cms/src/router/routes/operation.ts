@@ -25,6 +25,12 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {title: '工会管理'},
         },
         {
+            path: 'guild/guild-profile',
+            name: 'GuildProfileManagement',
+            component: () => import('@/views/operation/guild/guild-profile.vue'),
+            meta: {title: '工会基础信息'},
+        },
+        {
             path: 'recharge/recharge-cfg-list',
             name: 'RechargeCfgManagement',
             component: () => import('@/views/operation/recharge/recharge-cfg-list.vue'),

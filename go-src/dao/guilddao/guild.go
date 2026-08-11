@@ -30,6 +30,19 @@ func GetGuildByName(name string) *entity.LiveGuild {
 	return &guild
 }
 
+// GetGuildByLeaderId 根据会长 CMS 用户 ID 获取工会
+func GetGuildByLeaderId(leaderId uint64) *entity.LiveGuild {
+	if leaderId == 0 {
+		return nil
+	}
+	var guild entity.LiveGuild
+	err := g.DB().Model(string(entity.TbLiveGuild)).Where("leader_id = ?", leaderId).Limit(1).Scan(&guild)
+	if err != nil || guild.ID == 0 {
+		return nil
+	}
+	return &guild
+}
+
 // CreateGuild 创建工会
 func CreateGuild(guild *entity.LiveGuild) error {
 	_, err := g.DB().Model(string(entity.TbLiveGuild)).Save(guild)
@@ -55,8 +68,9 @@ func DeleteGuild(id uint64) error {
 
 // GetGuildList 获取工会列表
 func GetGuildList(req *guilddto.GuildListReq) (int, []*guilddto.GuildListRes) {
-	sql := `select g.id, g.name, g.leader_id, g.contact, g.description, g.status, g.created_at, g.updated_at
+	sql := `select g.id, g.name, g.leader_id, IFNULL(u.name, '') as leader_name, g.contact, g.description, g.status, g.created_at, g.updated_at
             from live_guilds g
+            left join cms_users u on u.id = g.leader_id
             where 1=1 `
 	param := make([]any, 0)
 	ctx := gctx.New()

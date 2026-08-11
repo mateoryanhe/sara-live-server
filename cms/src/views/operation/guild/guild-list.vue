@@ -25,7 +25,11 @@
         <el-table v-loading="loading" :data="tableData" style="width: 100%">
           <el-table-column label="ID" prop="id" width="100"/>
           <el-table-column label="工会名称" prop="name"/>
-          <el-table-column label="会长ID" prop="leaderId" width="140"/>
+          <el-table-column label="会长" min-width="180" show-overflow-tooltip>
+            <template #default="{ row }">
+              {{ formatLeader(row) }}
+            </template>
+          </el-table-column>
           <el-table-column label="联系方式" prop="contact" width="160"/>
           <el-table-column label="简介" prop="description" show-overflow-tooltip/>
           <el-table-column label="状态" width="100">
@@ -65,8 +69,26 @@
         <el-form-item label="工会名称" prop="name">
           <el-input v-model="currentRow.name" placeholder="请输入工会名称"/>
         </el-form-item>
-        <el-form-item label="会长ID" prop="leaderId">
-          <el-input-number v-model="currentRow.leaderId" :min="0" controls-position="right" placeholder="请输入会长/负责人ID"/>
+        <el-form-item label="会长" prop="leaderId">
+          <el-select
+              v-model="currentRow.leaderId"
+              :loading="cmsUserLoading"
+              :remote-method="searchCmsUsers"
+              clearable
+              filterable
+              placeholder="搜索CMS用户名或ID"
+              remote
+              reserve-keyword
+              style="width: 100%"
+              @focus="loadInitialCmsUsers"
+          >
+            <el-option
+                v-for="item in cmsUserOptions"
+                :key="item.id"
+                :label="formatCmsUserOption(item)"
+                :value="item.id"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="联系方式" prop="contact">
           <el-input v-model="currentRow.contact" placeholder="请输入联系方式"/>
@@ -92,7 +114,8 @@
 <script lang="ts" setup>
 import {onMounted, reactive, ref} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
-import {guildApi} from '@/api'
+import {cmsUserApi, guildApi} from '@/api'
+import type {CMSUser} from '@/api/modules/cmsuser'
 import type {Guild} from '@/types/api.ts'
 
 interface SearchForm {
@@ -102,13 +125,15 @@ interface SearchForm {
 interface GuildForm {
   id: string
   name: string
-  leaderId: number
+  leaderId: string
   contact: string
   description: string
   status: number
 }
 
 const loading = ref(false)
+const cmsUserLoading = ref(false)
+const cmsUserOptions = ref<CMSUser[]>([])
 const tableData = ref<Guild[]>([])
 const total = ref(0)
 const currentPage = ref(1)
@@ -123,13 +148,76 @@ const dialogTitle = ref('')
 const currentRow = ref<GuildForm>({
   id: '',
   name: '',
-  leaderId: 0,
+  leaderId: '',
   contact: '',
   description: '',
   status: 1
 })
 
 const formRef = ref<FormInstance>()
+let cmsUserSearchTimer: ReturnType<typeof setTimeout> | undefined
+
+const formatCmsUserOption = (item: CMSUser) => `${item.name} (${item.id})`
+
+const formatLeader = (row: Guild) => {
+  if (row.leaderName) {
+    return `${row.leaderName} (${row.leaderId})`
+  }
+  return row.leaderId || '-'
+}
+
+const mergeCmsUserOptions = (users: CMSUser[]) => {
+  const map = new Map<string, CMSUser>()
+  for (const item of cmsUserOptions.value) {
+    map.set(item.id, item)
+  }
+  for (const item of users) {
+    map.set(item.id, item)
+  }
+  cmsUserOptions.value = [...map.values()]
+}
+
+const fetchCmsUserOptions = async (key = '') => {
+  cmsUserLoading.value = true
+  try {
+    const response = await cmsUserApi.getCMSUserList({
+      key: key.trim(),
+      pageIndex: 1,
+      pageSize: 20
+    })
+    mergeCmsUserOptions(response.data)
+  } catch (error) {
+    console.error('获取CMS用户列表失败:', error)
+  } finally {
+    cmsUserLoading.value = false
+  }
+}
+
+const searchCmsUsers = (query: string) => {
+  if (cmsUserSearchTimer) {
+    clearTimeout(cmsUserSearchTimer)
+  }
+  cmsUserSearchTimer = setTimeout(() => {
+    fetchCmsUserOptions(query)
+  }, 300)
+}
+
+const loadInitialCmsUsers = () => {
+  if (cmsUserOptions.value.length === 0) {
+    fetchCmsUserOptions('')
+  }
+}
+
+const ensureLeaderOption = async (leaderId: string) => {
+  const id = leaderId.trim()
+  if (!id || id === '0') {
+    return
+  }
+  if (cmsUserOptions.value.some(item => item.id === id)) {
+    return
+  }
+  await fetchCmsUserOptions(id)
+}
 
 const formRules: FormRules = {
   name: [
@@ -172,28 +260,40 @@ const handleCurrentChange = (page: number) => {
 }
 
 // 操作处理
-const handleAdd = () => {
+const handleAdd = async () => {
   dialogTitle.value = '新增工会'
   currentRow.value = {
     id: '',
     name: '',
-    leaderId: 0,
+    leaderId: '',
     contact: '',
     description: '',
     status: 1
   }
+  cmsUserOptions.value = []
   dialogVisible.value = true
+  await fetchCmsUserOptions('')
 }
 
-const handleEdit = (row: Guild) => {
+const handleEdit = async (row: Guild) => {
   dialogTitle.value = '编辑工会'
+  const leaderId = row.leaderId && row.leaderId !== '0' ? row.leaderId : ''
   currentRow.value = {
     id: row.id,
     name: row.name,
-    leaderId: Number(row.leaderId) || 0,
+    leaderId,
     contact: row.contact,
     description: row.description,
     status: row.status
+  }
+  cmsUserOptions.value = []
+  if (leaderId) {
+    if (row.leaderName) {
+      cmsUserOptions.value = [{id: leaderId, name: row.leaderName} as CMSUser]
+    }
+    await ensureLeaderOption(leaderId)
+  } else {
+    await fetchCmsUserOptions('')
   }
   dialogVisible.value = true
 }
@@ -221,10 +321,11 @@ const handleSave = async () => {
   await formRef.value.validate(async (valid) => {
     if (valid) {
       try {
+        const leaderId = Number(currentRow.value.leaderId) || 0
         if (currentRow.value.id) {
-          await guildApi.updateGuild(currentRow.value)
+          await guildApi.updateGuild({...currentRow.value, leaderId})
         } else {
-          const {name, leaderId, contact, description, status} = currentRow.value
+          const {name, contact, description, status} = currentRow.value
           await guildApi.createGuild({name, leaderId, contact, description, status})
         }
 

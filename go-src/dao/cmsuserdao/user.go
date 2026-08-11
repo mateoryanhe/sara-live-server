@@ -90,6 +90,12 @@ func GetCMSUserList(req *cmsuserdto.CMSUserListReq) (int, []*cmsuserdto.CMSUserL
 		param = append(param, fmt.Sprintf("%%%s%%", req.Name))
 	}
 
+	if req.Key != "" {
+		likeKey := fmt.Sprintf("%%%s%%", req.Key)
+		sql += ` and (u.name LIKE ? OR CAST(u.id AS CHAR) LIKE ?)`
+		param = append(param, likeKey, likeKey)
+	}
+
 	if req.Status > 0 {
 		sql += ` and u.status = ?`
 		param = append(param, req.Status)

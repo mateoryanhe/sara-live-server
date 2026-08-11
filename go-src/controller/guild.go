@@ -37,3 +37,13 @@ func (c *GuildController) UpdateGuild(ctx context.Context, req *guilddto.UpdateG
 func (c *GuildController) DeleteGuild(ctx context.Context, req *guilddto.DeleteGuildReq) (res *guilddto.DeleteGuildRes, err error) {
 	return guild.DeleteGuild(ctx, req)
 }
+
+// GetMyGuildProfile 获取当前 CMS 用户关联工会基础信息
+func (c *GuildController) GetMyGuildProfile(ctx context.Context, req *guilddto.GetMyGuildProfileReq) (res *guilddto.GetMyGuildProfileRes, err error) {
+	return guild.GetMyGuildProfile(ctx, req)
+}
+
+// UpdateMyGuildProfile 更新当前 CMS 用户关联工会基础信息
+func (c *GuildController) UpdateMyGuildProfile(ctx context.Context, req *guilddto.UpdateMyGuildProfileReq) (res *guilddto.UpdateMyGuildProfileRes, err error) {
+	return guild.UpdateMyGuildProfile(ctx, req)
+}

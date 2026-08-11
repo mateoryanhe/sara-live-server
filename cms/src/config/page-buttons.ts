@@ -82,6 +82,7 @@ const CONFIG_PAGES = new Set([
     'LiveCfgManagement',
     'RandomNicknameManagement',
     'CustomerServiceCfgManagement',
+    'GuildProfileManagement',
     'ShortVideoCfgManagement',
     'GamePlatformCfgManagement',
 ])
@@ -133,6 +134,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'member', label: '成员管理'},
         {key: 'approve', label: '审核'},
     ],
+    GuildProfileManagement: DEFAULT_CONFIG_BUTTONS,
     BannerManagement: [
         ...DEFAULT_CRUD_BUTTONS,
         {key: 'sort', label: '排序'},
