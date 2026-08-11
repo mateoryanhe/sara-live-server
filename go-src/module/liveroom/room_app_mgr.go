@@ -269,6 +269,7 @@ func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto
 		OnlineCount:       countAudienceInRoom(room.ID),
 	}
 	res.IsBotAnchor, res.CloudPlayerVideo = resolveBotAnchorRoomInfo(room.ID, room.CloudPlayerVideo)
+	res.IsTest = room.IsTest
 	if u := userinfodao.GetUserInfoByUserId(room.ID); u != nil {
 		res.UserType = u.UserType
 	}

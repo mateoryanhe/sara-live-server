@@ -198,6 +198,7 @@ func buildBotAnchorListItem(userId uint64) *botanchordto.BotAnchorListItem {
 		item.TagId = room.TagId
 		item.CloudPlayerVideoFile = room.CloudPlayerVideo
 		item.PushStream = room.PushStream
+		item.IsTest = room.IsTest
 		if room.LiveRecordId > 0 {
 			item.LiveStatus = 1
 		}

@@ -37,6 +37,7 @@ const (
 	LiveRoomBilling                      db.TbCol = "billing"
 	LiveRoomCloudPlayerVideo             db.TbCol = "cloud_player_video"
 	LiveRoomPushStream                   db.TbCol = "push_stream"
+	LiveRoomIsTest                       db.TbCol = "is_test"
 	LiveRoomCloudPlayerId                db.TbCol = "cloud_player_id"
 	LiveRoomCloudPlayerTokenExpireAt     db.TbCol = "cloud_player_token_expire_at"
 )
@@ -88,6 +89,7 @@ type LiveRoom struct {
 	Billing                      float64    `gorm:"type:decimal(10,4);default:0;comment:计费价格(每分钟钻石)" json:"billing"`
 	CloudPlayerVideo             string     `gorm:"size:512;default:'';comment:云播放器MP4视频URL/路径" json:"cloudPlayerVideo"`
 	PushStream                   bool       `gorm:"default:0;comment:是否推流" json:"pushStream"`
+	IsTest                       bool       `gorm:"default:0;comment:是否测试机器人主播(仅下发App)" json:"isTest"`
 	CloudPlayerId                string     `gorm:"size:64;default:'';comment:声网云播放器ID" json:"cloudPlayerId"`
 	CloudPlayerTokenExpireAt     *time.Time `gorm:"comment:云播放器RTC token过期时间" json:"cloudPlayerTokenExpireAt"`
 }
@@ -318,6 +320,14 @@ func (r *LiveRoom) SetPushStream(v bool) {
 	})
 }
 
+func (r *LiveRoom) SetIsTest(v bool) {
+	r.IsTest = v
+	r.touchUpdatedAt()
+	syndb.AddData(TbLiveRoom, LiveRoomIsTest, &syndb.ColData{
+		IdVal: r.ID, ColVal: v,
+	})
+}
+
 func (r *LiveRoom) SetCloudPlayerId(v string) {
 	r.CloudPlayerId = v
 	r.touchUpdatedAt()
@@ -381,6 +391,7 @@ func initLiveRoom() {
 	syndb.RegQuick(TbLiveRoom, LiveRoomBilling)
 	syndb.RegQuick(TbLiveRoom, LiveRoomCloudPlayerVideo)
 	syndb.RegQuick(TbLiveRoom, LiveRoomPushStream)
+	syndb.RegQuick(TbLiveRoom, LiveRoomIsTest)
 	syndb.RegQuick(TbLiveRoom, LiveRoomCloudPlayerId)
 	syndb.RegQuick(TbLiveRoom, LiveRoomCloudPlayerTokenExpireAt)
 

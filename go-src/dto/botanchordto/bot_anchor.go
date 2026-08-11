@@ -28,6 +28,7 @@ type BotAnchorListItem struct {
 	CloudPlayerVideo     string     `json:"cloudPlayerVideo" dc:"云播放器MP4视频访问URL"`
 	CloudPlayerVideoFile string     `json:"cloudPlayerVideoFile" dc:"云播放器MP4视频存储文件名/路径"`
 	PushStream           bool       `json:"pushStream" dc:"是否推流"`
+	IsTest               bool       `json:"isTest" dc:"是否测试机器人主播"`
 	BotAnchorStatus      uint8      `json:"botAnchorStatus" dc:"状态(0停用,1启用)"`
 	LiveStatus           uint8      `json:"liveStatus" dc:"直播状态(0未开播,1直播中)"`
 	CreatedAt            *time.Time `json:"createdAt"`
@@ -45,6 +46,7 @@ type CreateBotAnchorReq struct {
 	TagId            uint64 `json:"tagId,string" dc:"直播间标签ID(0表示无)"`
 	CloudPlayerVideo string `json:"cloudPlayerVideo" dc:"云播放器MP4视频文件名或URL"`
 	PushStream       bool   `json:"pushStream" dc:"是否推流"`
+	IsTest           bool   `json:"isTest" dc:"是否测试机器人主播"`
 }
 
 // CreateBotAnchorRes CMS创建机器人主播响应
@@ -63,6 +65,7 @@ type UpdateBotAnchorReq struct {
 	TagId            uint64  `json:"tagId,string" dc:"直播间标签ID(0表示无)"`
 	CloudPlayerVideo *string `json:"cloudPlayerVideo" dc:"云播放器MP4视频文件名或URL,不传表示不修改"`
 	PushStream       bool    `json:"pushStream" dc:"是否推流"`
+	IsTest           bool    `json:"isTest" dc:"是否测试机器人主播"`
 }
 
 // UpdateBotAnchorRes CMS更新机器人主播响应

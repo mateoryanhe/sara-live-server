@@ -103,6 +103,13 @@
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column label="测试号" width="90">
+          <template #default="{ row }">
+            <el-tag :type="row.isTest ? 'warning' : 'info'">
+              {{ row.isTest ? '是' : '否' }}
+            </el-tag>
+          </template>
+        </el-table-column>
         <el-table-column label="状态" width="100">
           <template #default="{ row }">
             <el-tag :type="row.botAnchorStatus === 1 ? 'success' : 'info'">
@@ -246,6 +253,10 @@
         <el-form-item label="是否推流">
           <el-switch v-model="formData.pushStream"/>
         </el-form-item>
+        <el-form-item label="测试号">
+          <el-switch v-model="formData.isTest"/>
+          <span class="form-tip">开启后 App 端直播间信息 isTest 为 true，不参与服务端逻辑</span>
+        </el-form-item>
         <el-form-item label="头像" prop="avatar">
           <div class="avatar-upload-wrap">
             <el-upload
@@ -321,6 +332,7 @@ interface BotAnchorForm {
   tagId: number
   cloudPlayerVideo: string
   pushStream: boolean
+  isTest: boolean
 }
 
 const loading = ref(false)
@@ -354,7 +366,8 @@ const formData = ref<BotAnchorForm>({
   category: LIVE_ROOM_CATEGORY_HOT,
   tagId: 0,
   cloudPlayerVideo: '',
-  pushStream: false
+  pushStream: false,
+  isTest: false
 })
 const avatarChanged = ref(false)
 const videoChanged = ref(false)
@@ -511,7 +524,8 @@ const handleAdd = () => {
     category: LIVE_ROOM_CATEGORY_HOT,
     tagId: 0,
     cloudPlayerVideo: '',
-    pushStream: false
+    pushStream: false,
+    isTest: false
   }
   avatarChanged.value = false
   videoChanged.value = false
@@ -531,7 +545,8 @@ const handleEdit = (row: BotAnchorListItem) => {
     category: row.category || LIVE_ROOM_CATEGORY_HOT,
     tagId: Number(row.tagId) || 0,
     cloudPlayerVideo: row.cloudPlayerVideoFile || '',
-    pushStream: !!row.pushStream
+    pushStream: !!row.pushStream,
+    isTest: !!row.isTest
   }
   avatarChanged.value = false
   videoChanged.value = false
@@ -624,6 +639,7 @@ const handleSave = async () => {
           category: number
           tagId: number
           pushStream: boolean
+          isTest: boolean
           avatar?: string
           cloudPlayerVideo?: string
         } = {
@@ -632,7 +648,8 @@ const handleSave = async () => {
           roomTitle: formData.value.roomTitle,
           category: formData.value.category,
           tagId: formData.value.tagId || 0,
-          pushStream: formData.value.pushStream
+          pushStream: formData.value.pushStream,
+          isTest: formData.value.isTest
         }
         if (avatarChanged.value) {
           payload.avatar = formData.value.avatar
@@ -650,7 +667,8 @@ const handleSave = async () => {
           category: formData.value.category,
           tagId: formData.value.tagId || 0,
           cloudPlayerVideo: formData.value.cloudPlayerVideo || undefined,
-          pushStream: formData.value.pushStream
+          pushStream: formData.value.pushStream,
+          isTest: formData.value.isTest
         })
       }
       ElMessage.success(formData.value.id ? '更新成功' : '创建成功')
@@ -910,5 +928,11 @@ onMounted(() => {
 .video-file-name {
   color: var(--el-text-color-secondary);
   font-size: 13px;
+}
+
+.form-tip {
+  margin-left: 12px;
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
 }
 </style>

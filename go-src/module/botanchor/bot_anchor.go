@@ -60,6 +60,7 @@ func CreateBotAnchor(_ context.Context, req *botanchordto.CreateBotAnchorReq) (*
 		room.SetCloudPlayerVideo(strings.TrimSpace(req.CloudPlayerVideo))
 	}
 	room.SetPushStream(req.PushStream)
+	room.SetIsTest(req.IsTest)
 	userinfodao.GetUserCumulativeStatByUserId(account.ID)
 	addBotAnchorId(account.ID)
 	addEnabledBotAnchorId(account.ID)
@@ -99,6 +100,7 @@ func UpdateBotAnchor(_ context.Context, req *botanchordto.UpdateBotAnchorReq) (*
 		room.SetCloudPlayerVideo(strings.TrimSpace(*req.CloudPlayerVideo))
 	}
 	room.SetPushStream(req.PushStream)
+	room.SetIsTest(req.IsTest)
 
 	return &botanchordto.UpdateBotAnchorRes{Success: true}, nil
 }

@@ -167,6 +167,7 @@ func toLiveRoomListItem(room *entity.LiveRoom, userId uint64) *liveroomdto.LiveR
 		item.UserType = u.UserType
 	}
 	item.IsBotAnchor, item.CloudPlayerVideo = resolveBotAnchorRoomInfo(room.ID, room.CloudPlayerVideo)
+	item.IsTest = room.IsTest
 	item.OnlineCount = countAudienceInRoom(room.ID)
 
 	if userId > 0 {

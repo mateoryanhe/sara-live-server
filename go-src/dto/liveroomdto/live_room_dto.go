@@ -404,6 +404,7 @@ type GetLiveRoomRes struct {
 	TotalVideoCallTicketIncome  float64 `json:"totalVideoCallTicketIncome" dc:"累计视频通话门票收益(仅主播本人查询时返回)"`
 	TotalVideoCallBillingIncome float64 `json:"totalVideoCallBillingIncome" dc:"累计视频通话计费收益(仅主播本人查询时返回)"`
 	IsBotAnchor                 bool    `json:"isBotAnchor" dc:"是否机器人主播"`
+	IsTest                      bool    `json:"isTest" dc:"是否测试机器人主播"`
 	CloudPlayerVideo            string  `json:"cloudPlayerVideo" dc:"云播视频地址"`
 	UserType                    uint8   `json:"userType" dc:"主播用户类型(7=高级主播)"`
 }

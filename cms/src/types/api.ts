@@ -254,6 +254,7 @@ export interface BotAnchorListItem {
     cloudPlayerVideo?: string
     cloudPlayerVideoFile?: string
     pushStream?: boolean
+    isTest?: boolean
     botAnchorStatus?: number
     liveStatus?: number
     createdAt?: string | null
@@ -269,6 +270,7 @@ export interface CreateBotAnchorReq {
     tagId?: string | number
     cloudPlayerVideo?: string
     pushStream?: boolean
+    isTest?: boolean
 }
 
 export interface UpdateBotAnchorReq {
@@ -280,6 +282,7 @@ export interface UpdateBotAnchorReq {
     tagId?: string | number
     cloudPlayerVideo?: string
     pushStream?: boolean
+    isTest?: boolean
 }
 
 export interface SetBotAnchorStatusReq {
