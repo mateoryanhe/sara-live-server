@@ -83,3 +83,11 @@ func RegCMSNonAuthCustomizeRes(prefix string, handlerOrObject ...interface{}) {
 		group.Bind(handlerOrObject...)
 	})
 }
+
+// RegDataSyncReceive 数据同步接收端点(校验同步 Token,不走 CMS 登录)
+func RegDataSyncReceive(prefix string, authMiddleware ghttp.HandlerFunc, handlerOrObject ...interface{}) {
+	httpServer.Group(prefix, func(group *ghttp.RouterGroup) {
+		group.Middleware(middlewareLogReq, authMiddleware, apiResponseMiddleware)
+		group.Bind(handlerOrObject...)
+	})
+}

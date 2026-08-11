@@ -268,6 +268,42 @@ func IsUploadFileTooLarge(err error) bool {
 	return err == errFileTooLarge
 }
 
+func sanitizeStoredFileName(name string) string {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return ""
+	}
+	if strings.HasPrefix(name, "http://") || strings.HasPrefix(name, "https://") {
+		return ""
+	}
+	if strings.Contains(name, "/") || strings.Contains(name, "\\") {
+		return ""
+	}
+	return filepath.Base(name)
+}
+
+// ReadUploadedFileBytes 读取已上传资源文件内容
+func ReadUploadedFileBytes(name string) ([]byte, error) {
+	safeName := sanitizeStoredFileName(name)
+	if safeName == "" {
+		return nil, errors.New("invalid file name")
+	}
+	return os.ReadFile(filepath.Join(getImageDir(), safeName))
+}
+
+// SaveUploadedFileBytes 按原文件名写入资源文件(用于跨环境同步)
+func SaveUploadedFileBytes(name string, data []byte) error {
+	safeName := sanitizeStoredFileName(name)
+	if safeName == "" {
+		return errors.New("invalid file name")
+	}
+	dir := getImageDir()
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return err
+	}
+	return os.WriteFile(filepath.Join(dir, safeName), data, 0644)
+}
+
 // DeleteUploadedFile 删除 images 目录下的资源文件;无效文件名或文件不存在时忽略
 func DeleteUploadedFile(name string) {
 	if name == "" {

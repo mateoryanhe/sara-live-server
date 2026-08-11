@@ -33,6 +33,7 @@ import {logQueryApi} from './modules/logQuery'
 import {gamePlatformApi} from './modules/gamePlatform'
 import {gameWinLogApi} from './modules/gameWinLog'
 import {gameBetLogApi} from './modules/gameBetLog'
+import {dataSyncApi} from './modules/data-sync'
 
 export {
     authApi,
@@ -71,6 +72,7 @@ export {
     gamePlatformApi,
     gameWinLogApi,
     gameBetLogApi,
+    dataSyncApi,
 }
 
 export default {
@@ -110,4 +112,5 @@ export default {
     gamePlatformApi,
     gameWinLogApi,
     gameBetLogApi,
+    dataSyncApi,
 }

@@ -49,6 +49,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '资源域名'},
         },
         {
+            path: 'data-sync',
+            name: 'DataSyncCfgManagement',
+            component: () => import('@/views/config/data-sync.vue'),
+            meta: {title: '数据同步'},
+        },
+        {
             path: 'resource-monitor',
             name: 'ResourceMonitor',
             component: () => import('@/views/config/resource-monitor.vue'),

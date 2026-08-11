@@ -30,6 +30,11 @@ var (
 	emptyVipCfgList = make([]*vipcfgdto.AppVipCfgItem, 0)
 )
 
+// ReloadVipCfgMemory 从DB重新加载并整体替换内存快照(供同步等模块调用)
+func ReloadVipCfgMemory() {
+	reloadVipCfgMemory()
+}
+
 // reloadVipCfgMemory 从DB重新加载并整体替换内存快照
 func reloadVipCfgMemory() {
 	rows := cfgdao.GetAllVipCfg()

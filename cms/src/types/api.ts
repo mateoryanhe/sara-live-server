@@ -993,6 +993,40 @@ export interface SaveGooglePlayCfgRes {
     id: string
 }
 
+export interface DataSyncCfg {
+    id: string
+    targetApiBase: string
+    token: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetDataSyncCfgRes {
+    cfg: DataSyncCfg | null
+}
+
+export interface SaveDataSyncCfgReq {
+    id?: number
+    targetApiBase: string
+    token: string
+}
+
+export interface SaveDataSyncCfgRes {
+    success: boolean
+    id: string
+}
+
+export interface SyncVipCfgReq {
+    ids: number[]
+}
+
+export interface SyncVipCfgRes {
+    success: boolean
+    rowCount: number
+    fileCount: number
+    message: string
+}
+
 export interface GamePlatformCfg {
     id: string
     vendorUrl: string

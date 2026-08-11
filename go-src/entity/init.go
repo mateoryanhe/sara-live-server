@@ -73,6 +73,7 @@ func Init() {
 	initPreloadCfg()
 	initCustomerServiceCfg()
 	initGooglePlayCfg()
+	initDataSyncCfg()
 	initActivityMessage()
 	initUserActivityMessage()
 	initUserMessage()

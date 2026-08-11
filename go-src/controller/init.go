@@ -38,6 +38,8 @@ func Init() {
 	initAliyunTextModerationCMSController() // 阿里云文本审核(CMS)
 	initPrivacyPolicyCMSController()        // 隐私政策配置(CMS)
 	initGooglePlayCMSController()           // Google Play 配置(CMS)
+	initDataSyncCMSController()             // 数据同步配置(CMS)
+	initDataSyncReceiveController()         // 数据同步接收(跨环境)
 	initGooglePlayWebhookController()       // Google Play RTDN Webhook
 	initCustomerServiceCMSController()      // 客服联系配置(CMS)
 	initCustomerServiceAppController()      // 客服联系配置(App)

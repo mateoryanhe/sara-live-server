@@ -24,3 +24,12 @@ func GetAllVipCfg() []*entity.VipCfg {
 	_ = g.DB().Model(string(entity.TbVipCfg)).Order("level asc").Scan(&rows)
 	return rows
 }
+
+func GetVipCfgsByIDs(ids []uint64) []*entity.VipCfg {
+	if len(ids) == 0 {
+		return nil
+	}
+	var rows []*entity.VipCfg
+	_ = g.DB().Model(string(entity.TbVipCfg)).WhereIn("id", ids).Scan(&rows)
+	return rows
+}

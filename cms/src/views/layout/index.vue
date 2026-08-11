@@ -280,7 +280,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
+            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
             index="/config">
           <template #title>
             <el-icon>
@@ -329,6 +329,12 @@
               <Picture/>
             </el-icon>
             <span>资源域名</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('DataSyncCfgManagement')" index="/config/data-sync">
+            <el-icon>
+              <Refresh/>
+            </el-icon>
+            <span>数据同步</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('ResourceMonitor')" index="/config/resource-monitor">
             <el-icon>
@@ -418,7 +424,7 @@ import {computed, ref, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import LayoutTabs from '@/components/layout/LayoutTabs.vue'
 import {useLayoutTabs} from '@/composables/useLayoutTabs'
-import {ArrowDown, Bell, Box, Coin, Collection, CollectionTag, Cpu, CreditCard, Document, EditPen, Expand, Fold, Key, List, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Search, Service, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Bell, Box, Coin, Collection, CollectionTag, Cpu, CreditCard, Document, EditPen, Expand, Fold, Key, List, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Refresh, Search, Service, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {getIsAdmin, hasPermission} from '@/utils/permission'
 import {clearAuthSession} from '@/utils/auth'
 
