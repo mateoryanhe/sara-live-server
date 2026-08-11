@@ -3,6 +3,9 @@ import type {
     AnchorListItem,
     BanAnchorReq,
     BanReq,
+    BatchSetAnchorReq,
+    BatchSetAnchorRes,
+    BatchSetSeniorAnchorReq,
     CancelReq,
     PageResponse,
     QueryAnchorListReq,
@@ -64,6 +67,14 @@ const accountApi = {
 
     setSeniorAnchor: (data: SetSeniorAnchorReq) => {
         return request.post<boolean>('/account/setSeniorAnchor', data)
+    },
+
+    batchSetAnchor: (data: BatchSetAnchorReq) => {
+        return request.post<BatchSetAnchorRes>('/account/batchSetAnchor', data)
+    },
+
+    batchSetSeniorAnchor: (data: BatchSetSeniorAnchorReq) => {
+        return request.post<BatchSetAnchorRes>('/account/batchSetSeniorAnchor', data)
     },
 
     setUserType: (data: SetUserTypeReq) => {

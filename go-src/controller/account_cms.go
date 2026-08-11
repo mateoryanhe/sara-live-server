@@ -60,6 +60,14 @@ func (a *AccountController) SetSeniorAnchor(ctx context.Context, req *accountdto
 	return liveroom.SetSeniorAnchor(ctx, req)
 }
 
+func (a *AccountController) BatchSetAnchor(ctx context.Context, req *accountdto.BatchSetAnchorReq) (*accountdto.BatchSetAnchorRes, error) {
+	return liveroom.BatchSetAnchor(ctx, req)
+}
+
+func (a *AccountController) BatchSetSeniorAnchor(ctx context.Context, req *accountdto.BatchSetSeniorAnchorReq) (*accountdto.BatchSetAnchorRes, error) {
+	return liveroom.BatchSetSeniorAnchor(ctx, req)
+}
+
 func (a *AccountController) SetUserType(ctx context.Context, req *accountdto.SetUserTypeReq) (*accountdto.SetUserTypeRes, error) {
 	return userinfo.SetUserType(ctx, req)
 }

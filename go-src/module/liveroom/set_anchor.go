@@ -3,7 +3,6 @@ package liveroom
 import (
 	"context"
 
-	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/accountdto"
 	"xr-game-server/entity"
@@ -11,26 +10,75 @@ import (
 )
 
 // SetAnchor CMS 将用户设为主播(仅允许从未主播变为主播,不可回退)
-func SetAnchor(_ context.Context, req *accountdto.SetAnchorReq) (*accountdto.SetAnchorRes, error) {
-	return setUserAsAnchor(req.AccountId, entity.UserTypeAnchor)
+func SetAnchor(ctx context.Context, req *accountdto.SetAnchorReq) (*accountdto.SetAnchorRes, error) {
+	res, err := setUserAsAnchor(req.AccountId, entity.UserTypeAnchor)
+	if err != nil {
+		return nil, err
+	}
+	RefreshRoomListCache(ctx)
+	return res, nil
 }
 
 // SetSeniorAnchor CMS 将用户设为高级主播(仅允许普通用户,不可回退)
-func SetSeniorAnchor(_ context.Context, req *accountdto.SetSeniorAnchorReq) (*accountdto.SetSeniorAnchorRes, error) {
+func SetSeniorAnchor(ctx context.Context, req *accountdto.SetSeniorAnchorReq) (*accountdto.SetSeniorAnchorRes, error) {
 	_, err := setUserAsAnchor(req.AccountId, entity.UserTypeSeniorAnchor)
 	if err != nil {
 		return nil, err
 	}
+	RefreshRoomListCache(ctx)
 	return &accountdto.SetSeniorAnchorRes{Success: true}, nil
 }
 
+// BatchSetAnchor CMS 批量设普通主播
+func BatchSetAnchor(ctx context.Context, req *accountdto.BatchSetAnchorReq) (*accountdto.BatchSetAnchorRes, error) {
+	return batchSetAnchor(ctx, req.IDs, entity.UserTypeAnchor)
+}
+
+// BatchSetSeniorAnchor CMS 批量设高级主播
+func BatchSetSeniorAnchor(ctx context.Context, req *accountdto.BatchSetSeniorAnchorReq) (*accountdto.BatchSetAnchorRes, error) {
+	return batchSetAnchor(ctx, req.IDs, entity.UserTypeSeniorAnchor)
+}
+
+func batchSetAnchor(ctx context.Context, ids []uint64, userType uint8) (*accountdto.BatchSetAnchorRes, error) {
+	res := &accountdto.BatchSetAnchorRes{}
+	seen := make(map[uint64]struct{}, len(ids))
+	for _, id := range ids {
+		if id == 0 {
+			continue
+		}
+		if _, ok := seen[id]; ok {
+			continue
+		}
+		seen[id] = struct{}{}
+		if err := setUserAsAnchorBatch(id, userType); err != nil {
+			res.FailCount++
+			res.FailIds = append(res.FailIds, id)
+			continue
+		}
+		res.SuccessCount++
+	}
+	if res.SuccessCount > 0 {
+		RefreshRoomListCache(ctx)
+	}
+	return res, nil
+}
+
 func setUserAsAnchor(accountId uint64, userType uint8) (*accountdto.SetAnchorRes, error) {
+	if err := setUserAsAnchorBatch(accountId, userType); err != nil {
+		return nil, err
+	}
+	return &accountdto.SetAnchorRes{Success: true}, nil
+}
+
+func setUserAsAnchorBatch(accountId uint64, userType uint8) error {
 	user := userinfodao.GetUserInfoByUserId(accountId)
+	if entity.UserTypeIsAnchor(user.UserType) {
+		return nil
+	}
 	if user.UserType != entity.UserTypeNormal {
-		return nil, errercode.CreateCode(errercode.UserAlreadyAnchor)
+		return errercode.CreateCode(errercode.InvalidParam)
 	}
 	user.SetUserType(userType)
 	EnsureAnchorRoom(accountId, user.GuildId)
-	RefreshRoomListCache(gctx.New())
-	return &accountdto.SetAnchorRes{Success: true}, nil
+	return nil
 }

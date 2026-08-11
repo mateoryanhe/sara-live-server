@@ -46,6 +46,8 @@
           <el-form-item>
             <el-button v-if="can('search')" type="primary" @click="handleSearch">查询</el-button>
             <el-button v-if="can('search')" @click="handleReset">重置</el-button>
+            <el-button v-if="can('batchSetAnchor')" @click="openBatchAnchorDialog('anchor')">批量设普通主播</el-button>
+            <el-button v-if="can('batchSetSeniorAnchor')" @click="openBatchAnchorDialog('senior')">批量设高级主播</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -300,6 +302,28 @@
         <el-button :loading="userTypeSubmitting" type="primary" @click="submitUserType">确定</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog
+        v-model="batchAnchorDialogVisible"
+        :title="batchAnchorDialogTitle"
+        width="520px"
+        @closed="resetBatchAnchorForm"
+    >
+      <el-form ref="batchAnchorFormRef" :model="batchAnchorForm" :rules="batchAnchorFormRules" label-width="100px">
+        <el-form-item label="用户ID" prop="userIdsText">
+          <el-input
+              v-model="batchAnchorForm.userIdsText"
+              :rows="8"
+              placeholder="每行一个用户ID，也支持逗号、空格分隔"
+              type="textarea"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="batchAnchorDialogVisible = false">取消</el-button>
+        <el-button :loading="batchAnchorSubmitting" type="primary" @click="submitBatchAnchor">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -349,6 +373,50 @@ const banFormRef = ref<FormInstance>()
 const userTypeDialogVisible = ref(false)
 const userTypeSubmitting = ref(false)
 const userTypeFormRef = ref<FormInstance>()
+const batchAnchorDialogVisible = ref(false)
+const batchAnchorSubmitting = ref(false)
+const batchAnchorFormRef = ref<FormInstance>()
+const batchAnchorMode = ref<'anchor' | 'senior'>('anchor')
+
+const batchAnchorDialogTitle = computed(() =>
+    batchAnchorMode.value === 'senior' ? '批量设高级主播' : '批量设普通主播'
+)
+
+interface BatchAnchorForm {
+  userIdsText: string
+}
+
+const batchAnchorForm = reactive<BatchAnchorForm>({
+  userIdsText: ''
+})
+
+const parseUserIds = (text: string): string[] => {
+  const ids = new Set<string>()
+  for (const line of text.split('\n')) {
+    for (const part of line.split(/[\s,，;；]+/)) {
+      const id = part.trim()
+      if (id && /^\d+$/.test(id)) {
+        ids.add(id)
+      }
+    }
+  }
+  return [...ids]
+}
+
+const batchAnchorFormRules: FormRules = {
+  userIdsText: [
+    {
+      validator: (_rule, value, callback) => {
+        if (parseUserIds(String(value || '')).length === 0) {
+          callback(new Error('请填写至少一个有效的用户ID'))
+          return
+        }
+        callback()
+      },
+      trigger: 'blur'
+    }
+  ]
+}
 
 const userTypeLabelMap: Record<number, string> = {
   0: '普通用户',
@@ -697,6 +765,53 @@ const handleSetSeniorAnchor = async (row: UserInfo) => {
       console.error('设为高级主播失败:', error)
     }
   }
+}
+
+const resetBatchAnchorForm = () => {
+  batchAnchorForm.userIdsText = ''
+  batchAnchorFormRef.value?.clearValidate()
+}
+
+const openBatchAnchorDialog = (mode: 'anchor' | 'senior') => {
+  batchAnchorMode.value = mode
+  batchAnchorDialogVisible.value = true
+}
+
+const submitBatchAnchor = async () => {
+  if (!batchAnchorFormRef.value) return
+  await batchAnchorFormRef.value.validate(async (valid) => {
+    if (!valid) return
+    const ids = parseUserIds(batchAnchorForm.userIdsText)
+    const actionLabel = batchAnchorMode.value === 'senior' ? '高级主播' : '普通主播'
+    try {
+      await ElMessageBox.confirm(
+          `确定将 ${ids.length} 个用户设为${actionLabel}吗？设置后不可撤销。`,
+          `批量设${actionLabel}`,
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+      )
+      batchAnchorSubmitting.value = true
+      const response = batchAnchorMode.value === 'senior'
+          ? await accountApi.batchSetSeniorAnchor({ids})
+          : await accountApi.batchSetAnchor({ids})
+      batchAnchorDialogVisible.value = false
+      if (response.failCount > 0) {
+        ElMessage.warning(`批量设置完成：成功 ${response.successCount} 个，失败 ${response.failCount} 个`)
+      } else {
+        ElMessage.success(`批量设置成功，共 ${response.successCount} 个`)
+      }
+      await fetchUserList()
+    } catch (error) {
+      if (error !== 'cancel') {
+        console.error('批量设主播失败:', error)
+      }
+    } finally {
+      batchAnchorSubmitting.value = false
+    }
+  })
 }
 
 const afterCurrencyChangeSuccess = () => {

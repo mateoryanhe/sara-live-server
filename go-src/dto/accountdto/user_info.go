@@ -68,6 +68,22 @@ type SetSeniorAnchorRes struct {
 	Success bool `json:"success"`
 }
 
+type BatchSetAnchorReq struct {
+	g.Meta `path:"/batchSetAnchor" method:"post" summary:"批量设普通主播(不可回退)" tags:"账号"`
+	IDs    []uint64 `json:"ids,string" v:"required|min-length:1#请至少填写一个用户ID"`
+}
+
+type BatchSetSeniorAnchorReq struct {
+	g.Meta `path:"/batchSetSeniorAnchor" method:"post" summary:"批量设高级主播(不可回退)" tags:"账号"`
+	IDs    []uint64 `json:"ids,string" v:"required|min-length:1#请至少填写一个用户ID"`
+}
+
+type BatchSetAnchorRes struct {
+	SuccessCount int      `json:"successCount"`
+	FailCount    int      `json:"failCount"`
+	FailIds      []uint64 `json:"failIds,string"`
+}
+
 type SetUserTypeReq struct {
 	g.Meta    `path:"/setUserType" method:"post" summary:"修改用户类型" tags:"账号"`
 	AccountId uint64 `json:"accountId" v:"required#用户ID不能为空" dc:"用户ID"`

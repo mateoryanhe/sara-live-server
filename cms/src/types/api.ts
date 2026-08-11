@@ -188,6 +188,20 @@ export interface SetSeniorAnchorReq {
     accountId: string
 }
 
+export interface BatchSetAnchorReq {
+    ids: string[]
+}
+
+export interface BatchSetSeniorAnchorReq {
+    ids: string[]
+}
+
+export interface BatchSetAnchorRes {
+    successCount: number
+    failCount: number
+    failIds?: string[]
+}
+
 export interface SetUserTypeReq {
     accountId: string
     userType: number

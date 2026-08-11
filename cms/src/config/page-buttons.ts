@@ -94,6 +94,8 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.search,
         {key: 'setAnchor', label: '设为主播'},
         {key: 'setSeniorAnchor', label: '设为高级主播'},
+        {key: 'batchSetAnchor', label: '批量设普通主播'},
+        {key: 'batchSetSeniorAnchor', label: '批量设高级主播'},
         {key: 'goldAdd', label: '加金币'},
         {key: 'goldSub', label: '减金币'},
         {key: 'diamondAdd', label: '加钻石'},
