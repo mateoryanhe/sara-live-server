@@ -11,6 +11,7 @@ type CreateCMSUserReq struct {
 	Status uint8  `json:"status" dc:"状态(0-禁用,1-启用)"`
 	Admin  bool   `json:"admin" dc:"是否是管理员"`
 	RoleId uint64 `json:"roleId" dc:"角色ID"`
+	Remark string `json:"remark" dc:"备注"`
 }
 
 type CreateCMSUserRes struct {

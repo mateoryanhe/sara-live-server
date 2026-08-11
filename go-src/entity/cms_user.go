@@ -21,6 +21,7 @@ type CMSUser struct {
 	Status uint8  `gorm:"default:0;comment:状态" json:"status"`
 	Admin  bool   `gorm:"default:0;comment:是否是管理员" json:"admin"`
 	RoleId uint64 `gorm:"default:0;comment:角色ID" json:"roleId"`
+	Remark string `gorm:"size:512;default:'';comment:备注" json:"remark"`
 }
 
 func InitCMSUser() {

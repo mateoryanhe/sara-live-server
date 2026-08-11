@@ -34,6 +34,7 @@ func CreateCMSUser(ctx context.Context, req *cmsuserdto.CreateCMSUserReq) (res *
 		Status: req.Status,
 		Admin:  req.Admin,
 		RoleId: req.RoleId,
+		Remark: req.Remark,
 	}
 
 	err = cmsuserdao.CreateCMSUser(&user)
@@ -72,6 +73,7 @@ func UpdateCMSUser(ctx context.Context, req *cmsuserdto.UpdateCMSUserReq) (res *
 	user.Status = req.Status
 	user.Admin = req.Admin
 	user.RoleId = req.RoleId
+	user.Remark = req.Remark
 
 	err = cmsuserdao.UpdateCMSUser(user)
 	if err != nil {

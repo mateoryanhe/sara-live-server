@@ -9,6 +9,8 @@ export interface CMSUser {
     status: number
     admin: boolean
     roleId: string
+    roleName?: string
+    remark?: string
     createdAt: string
     updatedAt: string
 }
@@ -33,6 +35,7 @@ export const cmsUserApi = {
         status: number
         admin: boolean
         roleId: string
+        remark?: string
     }) => {
         return request.post<boolean>('/cmsuser/createCMSUser', data)
     },
@@ -45,6 +48,7 @@ export const cmsUserApi = {
         status: number
         admin: boolean
         roleId: string
+        remark?: string
     }) => {
         return request.post<boolean>('/cmsuser/updateCMSUser', data)
     },

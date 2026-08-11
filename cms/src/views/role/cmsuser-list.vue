@@ -52,6 +52,7 @@
             </template>
           </el-table-column>
           <el-table-column label="角色" prop="roleName" width="100"/>
+          <el-table-column label="备注" min-width="160" prop="remark" show-overflow-tooltip/>
           <el-table-column label="创建时间" prop="createdAt" width="160"/>
           <el-table-column label="更新时间" prop="updatedAt" width="160"/>
           <el-table-column label="操作" width="200">
@@ -130,6 +131,16 @@
           <div v-if="currentRow.admin" class="field-hint">管理员拥有全部权限，无需分配角色</div>
           <div v-else-if="roleOptions.length === 0" class="field-hint warn">暂无可用角色，请先在「角色权限管理」中创建</div>
         </el-form-item>
+        <el-form-item label="备注" prop="remark">
+          <el-input
+              v-model="currentRow.remark"
+              :rows="3"
+              maxlength="512"
+              placeholder="请输入备注"
+              show-word-limit
+              type="textarea"
+          />
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -160,6 +171,7 @@ interface CMSUserForm {
   status: number
   admin: boolean
   roleId: string
+  remark: string
 }
 
 const loading = ref(false)
@@ -183,7 +195,8 @@ const currentRow = ref<CMSUserForm>({
   pwd: '',
   status: 1,
   admin: false,
-  roleId: ''
+  roleId: '',
+  remark: ''
 })
 
 const formRef = ref<FormInstance>()
@@ -294,7 +307,8 @@ const handleAdd = () => {
     pwd: createRandomPassword(),
     status: 1,
     admin: false,
-    roleId: ''
+    roleId: '',
+    remark: ''
   }
   // 新增模式下密码为必填项
   formRules.value.pwd = [
@@ -312,7 +326,8 @@ const handleEdit = (row: CMSUser) => {
     pwd: '',
     status: row.status,
     admin: row.admin,
-    roleId: row.roleId ? String(row.roleId) : ''
+    roleId: row.roleId ? String(row.roleId) : '',
+    remark: row.remark || ''
   }
   // 编辑模式下密码非必填
   formRules.value.pwd = [
@@ -348,24 +363,26 @@ const handleSave = async () => {
         let response
         if (currentRow.value.id) {
           // 更新用户
-          const {id, name, pwd, status, admin, roleId} = currentRow.value
+          const {id, name, pwd, status, admin, roleId, remark} = currentRow.value
           response = await cmsUserApi.updateCMSUser({
             id: String(id),
             name,
             pwd: pwd || undefined, // 如果密码为空则不更新
             status,
             admin,
-            roleId
+            roleId,
+            remark,
           })
         } else {
           // 创建用户
-          const {name, pwd, status, admin, roleId} = currentRow.value
+          const {name, pwd, status, admin, roleId, remark} = currentRow.value
           response = await cmsUserApi.createCMSUser({
             name,
             pwd,
             status,
             admin,
-            roleId
+            roleId,
+            remark,
           })
         }
 

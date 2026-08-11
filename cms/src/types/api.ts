@@ -1429,6 +1429,7 @@ export interface CMSUser {
     admin: boolean
     roleId: string
     roleName: string
+    remark: string
     createdAt: string
     updatedAt: string
 }

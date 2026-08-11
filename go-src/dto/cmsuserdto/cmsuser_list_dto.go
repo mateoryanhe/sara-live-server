@@ -21,6 +21,7 @@ type CMSUserListRes struct {
 	Admin     bool   `json:"admin"`
 	RoleId    uint64 `json:"roleId"`
 	RoleName  string `json:"roleName"`
+	Remark    string `json:"remark"`
 	CreatedAt string `json:"createdAt"`
 	UpdatedAt string `json:"updatedAt"`
 }

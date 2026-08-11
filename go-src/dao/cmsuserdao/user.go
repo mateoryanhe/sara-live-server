@@ -77,7 +77,7 @@ func DeleteCMSUser(id uint64) error {
 
 // GetCMSUserList 获取CMS用户列表
 func GetCMSUserList(req *cmsuserdto.CMSUserListReq) (int, []*cmsuserdto.CMSUserListRes) {
-	sql := `select u.id, u.name, u.pwd, u.status, u.admin, u.role_id, r.name as role_name, u.created_at, u.updated_at
+	sql := `select u.id, u.name, u.pwd, u.status, u.admin, u.role_id, u.remark, r.name as role_name, u.created_at, u.updated_at
             from cms_users u
             left join cms_roles r on u.role_id = r.id
             where 1=1 `
