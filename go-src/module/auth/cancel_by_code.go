@@ -25,6 +25,10 @@ func CancelAccountByCode(ctx context.Context, req *userinfodto.CancelAccountByCo
 	if userId == 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
+	ext := userinfodao.GetUserExtByUserId(userId)
+	if strings.TrimSpace(ext.CancelCode) != cancelCode || !userinfodao.IsCancelCodeValid(ext) {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 	dbAcc := accountdao.GetAccountById(userId)
 	if dbAcc == nil || dbAcc.ID == 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)

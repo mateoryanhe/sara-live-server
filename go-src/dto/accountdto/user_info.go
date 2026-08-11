@@ -47,7 +47,6 @@ type UserInfoDto struct {
 	PackageName       string     `json:"packageName"`
 	AppVersion        string     `json:"appVersion"`
 	CanRank           bool       `json:"canRank"`
-	CancelCode        string     `json:"cancelCode"`
 	RechargeWhitelist bool       `json:"rechargeWhitelist"`
 }
 

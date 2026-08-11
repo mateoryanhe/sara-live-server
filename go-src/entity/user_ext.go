@@ -13,25 +13,27 @@ const (
 )
 
 const (
-	UserExtCanRank           db.TbCol = "can_rank"
-	UserExtPackageName       db.TbCol = "package_name"
-	UserExtAppVersion        db.TbCol = "app_version"
-	UserExtFollowCount       db.TbCol = "follow_count"
-	UserExtFollowerCount     db.TbCol = "follower_count"
-	UserExtCancelCode        db.TbCol = "cancel_code"
-	UserExtRechargeWhitelist db.TbCol = "recharge_whitelist"
+	UserExtCanRank            db.TbCol = "can_rank"
+	UserExtPackageName        db.TbCol = "package_name"
+	UserExtAppVersion         db.TbCol = "app_version"
+	UserExtFollowCount        db.TbCol = "follow_count"
+	UserExtFollowerCount      db.TbCol = "follower_count"
+	UserExtCancelCode         db.TbCol = "cancel_code"
+	UserExtCancelCodeExpireAt db.TbCol = "cancel_code_expire_at"
+	UserExtRechargeWhitelist  db.TbCol = "recharge_whitelist"
 )
 
 // UserExt 用户扩展信息(与用户一一对应,主键ID即用户ID)
 type UserExt struct {
 	migrate.OneModel
-	CanRank           bool   `gorm:"default:1;comment:是否可上排行榜" json:"canRank"`
-	PackageName       string `gorm:"default:'';comment:注册包名" json:"packageName"`
-	AppVersion        string `gorm:"default:'';comment:注册版本号" json:"appVersion"`
-	FollowCount       uint64 `gorm:"default:0;comment:当前关注数" json:"followCount"`
-	FollowerCount     uint64 `gorm:"default:0;comment:当前粉丝数" json:"followerCount"`
-	CancelCode        string `gorm:"size:128;default:'';comment:注销码" json:"cancelCode"`
-	RechargeWhitelist bool   `gorm:"default:0;comment:充值白名单(创建订单后直接到账)" json:"rechargeWhitelist"`
+	CanRank            bool       `gorm:"default:1;comment:是否可上排行榜" json:"canRank"`
+	PackageName        string     `gorm:"default:'';comment:注册包名" json:"packageName"`
+	AppVersion         string     `gorm:"default:'';comment:注册版本号" json:"appVersion"`
+	FollowCount        uint64     `gorm:"default:0;comment:当前关注数" json:"followCount"`
+	FollowerCount      uint64     `gorm:"default:0;comment:当前粉丝数" json:"followerCount"`
+	CancelCode         string     `gorm:"size:128;default:'';comment:注销码" json:"cancelCode"`
+	CancelCodeExpireAt *time.Time `gorm:"index;comment:注销码过期时间" json:"cancelCodeExpireAt"`
+	RechargeWhitelist  bool       `gorm:"default:0;comment:充值白名单(创建订单后直接到账)" json:"rechargeWhitelist"`
 }
 
 func NewUserExt(userId uint64) *UserExt {
@@ -77,6 +79,15 @@ func (receiver *UserExt) SetCancelCode(cancelCode string) {
 	syndb.AddData(TbUserExt, UserExtCancelCode, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: cancelCode,
+	})
+}
+
+func (receiver *UserExt) SetCancelCodeExpireAt(val *time.Time) {
+	receiver.CancelCodeExpireAt = val
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddData(TbUserExt, UserExtCancelCodeExpireAt, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: val,
 	})
 }
 
@@ -162,6 +173,7 @@ func initUserExt() {
 	syndb.RegQuick(TbUserExt, UserExtFollowCount)
 	syndb.RegQuick(TbUserExt, UserExtFollowerCount)
 	syndb.RegQuick(TbUserExt, UserExtCancelCode)
+	syndb.RegQuick(TbUserExt, UserExtCancelCodeExpireAt)
 	syndb.RegQuick(TbUserExt, UserExtRechargeWhitelist)
 
 	migrate.AutoMigrate(&UserExt{})

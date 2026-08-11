@@ -43,7 +43,6 @@ func QueryUserInfo(ctx context.Context, req *accountdto.QueryUserInfoReq) (res *
 		}
 		if userExtCache := userinfodao.GetUserExtFromMemory(val.ID); userExtCache != nil {
 			val.CanRank = userExtCache.CanRank
-			val.CancelCode = userExtCache.CancelCode
 			val.PackageName = userExtCache.PackageName
 			val.AppVersion = userExtCache.AppVersion
 			val.RechargeWhitelist = userExtCache.RechargeWhitelist

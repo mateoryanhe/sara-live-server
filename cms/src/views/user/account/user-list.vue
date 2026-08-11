@@ -146,9 +146,6 @@
               <el-tag v-else type="info">否</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="注销码" prop="cancelCode" width="200" show-overflow-tooltip>
-            <template #default="scope">{{ scope.row.cancelCode || '-' }}</template>
-          </el-table-column>
           
           <el-table-column label="封禁时间" prop="banApplyTime" width="200">
             <template #default="scope">

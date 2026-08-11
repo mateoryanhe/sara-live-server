@@ -16,13 +16,17 @@ func GetUserExt(ctx context.Context, req *userinfodto.GetUserExtReq) (*userinfod
 		targetUserId = req.UserId
 	}
 	ext := userinfodao.GetUserExtByUserId(targetUserId)
+	if targetUserId == authUserId {
+		ext = userinfodao.EnsureCancelCode(targetUserId)
+	}
 	return &userinfodto.GetUserExtRes{
-		UserId:        targetUserId,
-		CanRank:       ext.CanRank,
-		PackageName:   ext.PackageName,
-		AppVersion:    ext.AppVersion,
-		FollowCount:   ext.FollowCount,
-		FollowerCount: ext.FollowerCount,
-		CancelCode:    ext.CancelCode,
+		UserId:             targetUserId,
+		CanRank:            ext.CanRank,
+		PackageName:        ext.PackageName,
+		AppVersion:         ext.AppVersion,
+		FollowCount:        ext.FollowCount,
+		FollowerCount:      ext.FollowerCount,
+		CancelCode:         ext.CancelCode,
+		CancelCodeExpireAt: ext.CancelCodeExpireAt,
 	}, nil
 }

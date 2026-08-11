@@ -177,7 +177,6 @@ export interface UserInfo {
     packageName?: string
     appVersion?: string
     canRank?: boolean
-    cancelCode?: string
     rechargeWhitelist?: boolean
 }
 

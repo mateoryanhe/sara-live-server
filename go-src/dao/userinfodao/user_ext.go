@@ -3,6 +3,7 @@ package userinfodao
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -11,6 +12,8 @@ import (
 	"xr-game-server/core/cache"
 	"xr-game-server/entity"
 )
+
+const cancelCodeValidDuration = 3 * 24 * time.Hour
 
 var userExtCacheMgr *cache.CacheMgr
 
@@ -67,17 +70,38 @@ func SaveRegisterInfo(userId uint64, info *entity.DeviceInfo) {
 	ext.SetAppVersion(strings.TrimSpace(info.AppVersion))
 }
 
-// SaveCancelCode 生成并保存注销码,仅首次写入
+// IsCancelCodeValid 注销码是否存在且在有效期内
+func IsCancelCodeValid(ext *entity.UserExt) bool {
+	if ext == nil || strings.TrimSpace(ext.CancelCode) == "" {
+		return false
+	}
+	if ext.CancelCodeExpireAt == nil || ext.CancelCodeExpireAt.IsZero() {
+		return false
+	}
+	return !time.Now().After(*ext.CancelCodeExpireAt)
+}
+
+func refreshCancelCode(ext *entity.UserExt) {
+	expireAt := time.Now().Add(cancelCodeValidDuration)
+	ext.SetCancelCode(guid.S())
+	ext.SetCancelCodeExpireAt(&expireAt)
+}
+
+// EnsureCancelCode 注销码为空、过期时间缺失或已过期时重新生成(默认有效期 3 天)
+func EnsureCancelCode(userId uint64) *entity.UserExt {
+	ext := GetUserExtByUserId(userId)
+	if !IsCancelCodeValid(ext) {
+		refreshCancelCode(ext)
+	}
+	return ext
+}
+
+// SaveCancelCode 登录时确保注销码有效
 func SaveCancelCode(userId uint64) {
 	if userId == 0 {
 		return
 	}
-	ext := GetUserExtByUserId(userId)
-	if ext.CancelCode != "" {
-		return
-	}
-	cancelCode := guid.S()
-	ext.SetCancelCode(cancelCode)
+	EnsureCancelCode(userId)
 }
 
 // FindUserIdByCancelCode 根据注销码查询用户ID

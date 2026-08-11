@@ -1,6 +1,8 @@
 package userinfodto
 
 import (
+	"time"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 )
@@ -40,13 +42,14 @@ type GetUserExtReq struct {
 }
 
 type GetUserExtRes struct {
-	UserId        uint64 `json:"userId,string"`
-	CanRank       bool   `json:"canRank" dc:"是否可上排行榜"`
-	PackageName   string `json:"packageName" dc:"注册包名"`
-	AppVersion    string `json:"appVersion" dc:"注册版本号"`
-	FollowCount   uint64 `json:"followCount" dc:"当前关注数"`
-	FollowerCount uint64 `json:"followerCount" dc:"当前粉丝数"`
-	CancelCode    string `json:"cancelCode" dc:"注销码"`
+	UserId             uint64     `json:"userId,string"`
+	CanRank            bool       `json:"canRank" dc:"是否可上排行榜"`
+	PackageName        string     `json:"packageName" dc:"注册包名"`
+	AppVersion         string     `json:"appVersion" dc:"注册版本号"`
+	FollowCount        uint64     `json:"followCount" dc:"当前关注数"`
+	FollowerCount      uint64     `json:"followerCount" dc:"当前粉丝数"`
+	CancelCode         string     `json:"cancelCode" dc:"注销码"`
+	CancelCodeExpireAt *time.Time `json:"cancelCodeExpireAt" dc:"注销码过期时间"`
 }
 
 // UpdateGenderReq 修改性别
