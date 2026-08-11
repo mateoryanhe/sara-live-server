@@ -112,14 +112,23 @@
           />
         </el-form-item>
         <el-form-item label="角色" prop="roleId">
-          <el-select v-model="currentRow.roleId" placeholder="请选择角色">
+          <el-select
+              v-model="currentRow.roleId"
+              :disabled="currentRow.admin"
+              clearable
+              filterable
+              placeholder="请选择角色"
+              style="width: 100%"
+          >
             <el-option
                 v-for="role in roleOptions"
-                :key="role.id"
+                :key="String(role.id)"
                 :label="role.name"
-                :value="role.id"
+                :value="String(role.id)"
             />
           </el-select>
+          <div v-if="currentRow.admin" class="field-hint">管理员拥有全部权限，无需分配角色</div>
+          <div v-else-if="roleOptions.length === 0" class="field-hint warn">暂无可用角色，请先在「角色权限管理」中创建</div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -133,7 +142,7 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {cmsUserApi, roleApi} from '@/api'
 import type {CMSUser, Role} from '@/types/api'
@@ -179,13 +188,36 @@ const currentRow = ref<CMSUserForm>({
 
 const formRef = ref<FormInstance>()
 
+const validateRoleId = (_rule: unknown, value: string, callback: (error?: Error) => void) => {
+  if (currentRow.value.admin) {
+    callback()
+    return
+  }
+  if (!value) {
+    callback(new Error('请选择角色'))
+    return
+  }
+  callback()
+}
+
 const formRules = ref<FormRules>({
   name: [
     {required: true, message: '请输入用户名', trigger: 'blur'},
     {min: 2, max: 20, message: '用户名长度在2-20个字符', trigger: 'blur'}
   ],
-  pwd: []
+  pwd: [],
+  roleId: [{validator: validateRoleId, trigger: 'change'}],
 })
+
+watch(
+    () => currentRow.value.admin,
+    (isAdmin) => {
+      if (isAdmin) {
+        currentRow.value.roleId = ''
+        formRef.value?.clearValidate('roleId')
+      }
+    },
+)
 
 const PASSWORD_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
 
@@ -249,6 +281,11 @@ const handleCurrentChange = (page: number) => {
 }
 
 // 操作处理
+const openDialog = async () => {
+  await fetchRoleList()
+  dialogVisible.value = true
+}
+
 const handleAdd = () => {
   dialogTitle.value = '新增用户'
   currentRow.value = {
@@ -264,7 +301,7 @@ const handleAdd = () => {
     {required: true, message: '请输入密码', trigger: 'blur'},
     {min: 6, max: 20, message: '密码长度在6-20个字符', trigger: 'blur'}
   ]
-  dialogVisible.value = true
+  openDialog()
 }
 
 const handleEdit = (row: CMSUser) => {
@@ -275,13 +312,13 @@ const handleEdit = (row: CMSUser) => {
     pwd: '',
     status: row.status,
     admin: row.admin,
-    roleId: row.roleId
+    roleId: row.roleId ? String(row.roleId) : ''
   }
   // 编辑模式下密码非必填
   formRules.value.pwd = [
     {min: 6, max: 20, message: '密码长度在6-20个字符', trigger: 'blur'}
   ]
-  dialogVisible.value = true
+  openDialog()
 }
 
 const handleDelete = async (row: CMSUser) => {
@@ -344,13 +381,15 @@ const handleSave = async () => {
 }
 
 
-// 获取角色列表
+// 获取角色列表（仅启用状态，供下拉选择）
 const fetchRoleList = async () => {
   try {
     const response = await roleApi.getAllRoles()
-    roleOptions.value = response.data
+    const list = response?.data ?? []
+    roleOptions.value = list.filter(role => role.status === 1)
   } catch (error) {
     console.error('获取角色列表失败:', error)
+    roleOptions.value = []
     ElMessage.error('获取角色列表失败')
   }
 }
@@ -404,5 +443,15 @@ onMounted(() => {
 
 .pwd-field .el-input {
   flex: 1;
+}
+
+.field-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+}
+
+.field-hint.warn {
+  color: var(--el-color-warning);
 }
 </style>

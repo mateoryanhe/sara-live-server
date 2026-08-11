@@ -1,6 +1,7 @@
 import {createRouter, createWebHistory, type RouteRecordRaw} from 'vue-router'
 import {hasPermission} from '@/utils/permission'
 import {clearAuthSession, isAuthenticated, restoreAuthSession} from '@/utils/auth'
+import {getDefaultHomePath, hasAnyAccessibleRoute, resolveAccessiblePath} from '@/utils/accessible-route'
 import {ElMessage} from 'element-plus'
 import {layoutRouteGroups} from './routes'
 
@@ -34,7 +35,7 @@ router.beforeEach((to, from, next) => {
     if (to.name === 'Login') {
         if (isAuthenticated()) {
             const redirect = typeof to.query.redirect === 'string' ? to.query.redirect : '/dashboard'
-            next(redirect)
+            next(resolveAccessiblePath(redirect))
             return
         }
         next()
@@ -49,6 +50,15 @@ router.beforeEach((to, from, next) => {
         return
     }
 
+    // 根路径重定向到用户有权限的首页
+    if (to.path === '/' || (to.path === '/dashboard' && to.name === 'Dashboard' && !hasPermission('Dashboard'))) {
+        const home = getDefaultHomePath()
+        if (to.path !== home) {
+            next(home)
+            return
+        }
+    }
+
     const moduleName = String(to.name)
     if (hasPermission(moduleName)) {
         next()
@@ -56,9 +66,31 @@ router.beforeEach((to, from, next) => {
     }
 
     console.warn(`用户没有访问 ${moduleName} 模块的权限`)
+
+    // 登录后跳转到无权限页面：改去第一个有权限的页面，避免误报错误
+    if (from.name === 'Login' || from.name === undefined) {
+        const fallback = getDefaultHomePath()
+        if (fallback !== '/login' && to.path !== fallback) {
+            next(fallback)
+            return
+        }
+    }
+
+    if (!hasAnyAccessibleRoute()) {
+        ElMessage.error('您没有任何模块权限，请联系管理员')
+        clearAuthSession()
+        next({path: '/login'})
+        return
+    }
+
     ElMessage.error('您没有权限访问该模块')
     if (from.name && from.name !== 'Login') {
         next(false)
+        return
+    }
+    const fallback = getDefaultHomePath()
+    if (fallback !== '/login' && to.path !== fallback) {
+        next(fallback)
         return
     }
     clearAuthSession()

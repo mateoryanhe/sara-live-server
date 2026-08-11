@@ -58,6 +58,7 @@ import {authApi} from '@/api'
 import {ElMessage} from 'element-plus'
 import type {LoginRes} from '@/types/api'
 import {clearPermissions} from '@/utils/permission'
+import {resolveAccessiblePath} from '@/utils/accessible-route'
 import {
     getSavedCredentials,
     isAuthenticated,
@@ -93,9 +94,9 @@ const loginRules = {
 const resolveRedirectPath = () => {
   const redirect = route.query.redirect
   if (typeof redirect === 'string' && redirect.startsWith('/')) {
-    return redirect
+    return resolveAccessiblePath(redirect)
   }
-  return '/dashboard'
+  return resolveAccessiblePath('/dashboard')
 }
 
 onMounted(() => {

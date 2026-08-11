@@ -36,7 +36,7 @@ export const roleApi = {
 
     // 获取所有角色列表（用于下拉选择）
     getAllRoles: () => {
-        return request.post<Role[]>('/role/roleList', {pageIndex: 1, pageSize: 9999})
+        return request.post<PageResponse<Role>>('/role/roleList', {pageIndex: 1, pageSize: 9999})
     },
 
     // 创建角色
