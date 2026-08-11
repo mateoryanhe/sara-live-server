@@ -38,6 +38,7 @@ func Init() {
 	initCurrencyLog()
 	InitLiveGuild()
 	initGuildMember()
+	initGuildAnchor()
 	initLiveRoom()
 	initLiveRoomTag()
 	initLiveRoomGameRecommend()
