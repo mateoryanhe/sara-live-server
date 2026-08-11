@@ -83,6 +83,21 @@ func DeleteActivityMessage(id uint64) error {
 	return err
 }
 
+func GetActivityMessagesByIDs(ids []uint64) []*entity.ActivityMessage {
+	if len(ids) == 0 {
+		return nil
+	}
+	var rows []*entity.ActivityMessage
+	_ = g.DB().Model(string(entity.TbActivityMessage)).WhereIn("id", ids).Scan(&rows)
+	return rows
+}
+
+// ReloadActivityMessageCaches 活动消息数据变更后刷新相关内存缓存
+func ReloadActivityMessageCaches() {
+	RemoveActivityMessageCache()
+	ClearAllUserActivityMessageListCacheA()
+}
+
 func GetActivityMessageList(req *activitymessagedto.ActivityMessageListReq) (int, []*activitymessagedto.ActivityMessageListRes) {
 	sql := `select id,
                    icon_en, icon_es, icon_pt, icon_hi,

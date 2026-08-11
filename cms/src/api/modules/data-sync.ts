@@ -1,5 +1,15 @@
 import request from '../request'
-import type {GetDataSyncCfgRes, SaveDataSyncCfgReq, SaveDataSyncCfgRes, SyncVipCfgReq, SyncVipCfgRes} from '@/types/api'
+import type {
+    GetDataSyncCfgRes,
+    SaveDataSyncCfgReq,
+    SaveDataSyncCfgRes,
+    SyncActivityMessageReq,
+    SyncActivityMessageRes,
+    SyncBatchRes,
+    SyncIdsReq,
+    SyncVipCfgReq,
+    SyncVipCfgRes,
+} from '@/types/api'
 
 export const dataSyncApi = {
     getDataSyncCfg: () => {
@@ -12,6 +22,22 @@ export const dataSyncApi = {
 
     syncVipCfg: (data: SyncVipCfgReq) => {
         return request.post<SyncVipCfgRes>('/dataSync/syncVipCfg', data)
+    },
+
+    syncActivityMessage: (data: SyncActivityMessageReq) => {
+        return request.post<SyncActivityMessageRes>('/dataSync/syncActivityMessage', data)
+    },
+
+    syncBanner: (data: SyncIdsReq) => {
+        return request.post<SyncBatchRes>('/dataSync/syncBanner', data)
+    },
+
+    syncGift: (data: SyncIdsReq) => {
+        return request.post<SyncBatchRes>('/dataSync/syncGift', data)
+    },
+
+    syncRechargeCfg: (data: SyncIdsReq) => {
+        return request.post<SyncBatchRes>('/dataSync/syncRechargeCfg', data)
     },
 }
 

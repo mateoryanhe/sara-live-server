@@ -124,6 +124,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.edit,
         BTN.delete,
         {key: 'sort', label: '排序'},
+        {key: 'sync', label: '同步数据'},
     ],
     GuildManagement: [
         ...DEFAULT_CRUD_BUTTONS,
@@ -134,10 +135,12 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         ...DEFAULT_CRUD_BUTTONS,
         {key: 'sort', label: '排序'},
         {key: 'toggle', label: '上下架'},
+        {key: 'sync', label: '同步数据'},
     ],
     ActivityMessageManagement: [
         ...DEFAULT_CRUD_BUTTONS,
         {key: 'publish', label: '发布'},
+        {key: 'sync', label: '同步数据'},
     ],
     GameVendorGameListManagement: [
         BTN.view,
@@ -147,6 +150,10 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'sync', label: '同步厂商'},
     ],
     VipCfgManagement: [
+        ...DEFAULT_CRUD_BUTTONS,
+        {key: 'sync', label: '同步数据'},
+    ],
+    RechargeCfgManagement: [
         ...DEFAULT_CRUD_BUTTONS,
         {key: 'sync', label: '同步数据'},
     ],

@@ -49,6 +49,11 @@ func reloadBannerMemory() {
 	loadBannerMemory()
 }
 
+// ReloadBannerMemory 从DB重新加载Banner内存快照(供同步等模块调用)
+func ReloadBannerMemory() {
+	reloadBannerMemory()
+}
+
 func getAppBannerList(scene uint8) []*bannerdto.AppBannerItem {
 	bannerMu.RLock()
 	if bannerLoaded {

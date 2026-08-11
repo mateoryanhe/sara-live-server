@@ -9,7 +9,18 @@
       <div class="content">
         <div class="table-header">
           <el-button type="primary" @click="handleAdd">新增充值档位</el-button>
+          <el-button
+              v-if="hasButtonPermission('RechargeCfgManagement', 'sync')"
+              :disabled="selectedRows.length === 0"
+              :loading="syncing"
+              type="warning"
+              @click="handleSyncData"
+          >
+            同步数据
+          </el-button>
         </div>
+
+        <div v-if="selectedRows.length" class="selection-tip">已选 {{ selectedRows.length }} 项</div>
 
         <el-form :model="searchForm" class="search-form" inline>
           <el-form-item label="档位名称">
@@ -37,7 +48,14 @@
           </el-form-item>
         </el-form>
 
-        <el-table v-loading="loading" :data="tableData" style="width: 100%">
+        <el-table
+            v-loading="loading"
+            :data="tableData"
+            row-key="id"
+            style="width: 100%"
+            @selection-change="handleSelectionChange"
+        >
+          <el-table-column type="selection" width="48"/>
           <el-table-column label="ID" prop="id" width="100"/>
           <el-table-column label="档位名称" prop="name" min-width="120"/>
           <el-table-column label="包名" prop="packageName" min-width="160" show-overflow-tooltip/>
@@ -203,8 +221,9 @@
 import {onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
 import {Plus} from '@element-plus/icons-vue'
-import {rechargeCfgApi, uploadApi} from '@/api'
+import {dataSyncApi, rechargeCfgApi, uploadApi} from '@/api'
 import type {RechargeCfg} from '@/types/api.ts'
+import {hasButtonPermission} from '@/utils/permission'
 import {formatPrice, NUMBER_INPUT_DECIMALS, truncateNumber} from '@/utils/number-format'
 
 interface SearchForm {
@@ -241,6 +260,8 @@ const cfgTypeLabel = (cfgType: number) => {
 const isStoreSkuRequired = (cfgType: number) => cfgType === 1 || cfgType === 2
 
 const loading = ref(false)
+const syncing = ref(false)
+const selectedRows = ref<RechargeCfg[]>([])
 const tableData = ref<RechargeCfg[]>([])
 const total = ref(0)
 const currentPage = ref(1)
@@ -513,6 +534,43 @@ const resetSearch = () => {
   fetchList()
 }
 
+const handleSelectionChange = (rows: RechargeCfg[]) => {
+  selectedRows.value = rows
+}
+
+const handleSyncData = async () => {
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning('请先勾选要同步的充值配置')
+    return
+  }
+  const ids = selectedRows.value.map((row) => Number(row.id)).filter((id) => id > 0)
+  if (ids.length === 0) {
+    ElMessage.warning('所选充值配置无效')
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+        `将把已选 ${ids.length} 条充值配置及关联图标同步到目标环境（按 ID 覆盖或新增）。是否继续？`,
+        '同步数据',
+        {confirmButtonText: '确定同步', cancelButtonText: '取消', type: 'warning'}
+    )
+    syncing.value = true
+    const response = await dataSyncApi.syncRechargeCfg({ids})
+    if (response?.success) {
+      ElMessage.success(response.message || `同步成功：${response.rowCount} 条，${response.fileCount} 个文件`)
+    } else {
+      ElMessage.error('同步失败')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('同步失败:', error)
+      ElMessage.error('同步失败，请检查数据同步配置与目标服务')
+    }
+  } finally {
+    syncing.value = false
+  }
+}
+
 onMounted(() => {
   fetchList()
 })
@@ -530,6 +588,12 @@ onMounted(() => {
 
 .table-header {
   margin-bottom: 20px;
+}
+
+.selection-tip {
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--el-color-primary);
 }
 
 .search-form {

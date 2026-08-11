@@ -9,7 +9,18 @@
       <div class="content">
         <div class="table-header">
           <el-button type="primary" @click="handleAdd">新增活动消息</el-button>
+          <el-button
+              v-if="hasButtonPermission('ActivityMessageManagement', 'sync')"
+              :disabled="selectedRows.length === 0"
+              :loading="syncing"
+              type="warning"
+              @click="handleSyncData"
+          >
+            同步数据
+          </el-button>
         </div>
+
+        <div v-if="selectedRows.length" class="selection-tip">已选 {{ selectedRows.length }} 项</div>
 
         <el-form :model="searchForm" class="search-form" inline>
           <el-form-item label="标题">
@@ -28,7 +39,14 @@
           </el-form-item>
         </el-form>
 
-        <el-table v-loading="loading" :data="tableData" style="width: 100%">
+        <el-table
+            v-loading="loading"
+            :data="tableData"
+            row-key="id"
+            style="width: 100%"
+            @selection-change="handleSelectionChange"
+        >
+          <el-table-column type="selection" width="48"/>
           <el-table-column label="ID" prop="id" width="90"/>
           <el-table-column label="图标(英文)" width="100">
             <template #default="{ row }">
@@ -348,8 +366,9 @@ import {onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
 import {Plus} from '@element-plus/icons-vue'
 import {activityMessageApi, type ActivityMessageForm} from '@/api/modules/activityMessage'
-import {uploadApi} from '@/api'
+import {dataSyncApi, uploadApi} from '@/api'
 import type {ActivityMessage} from '@/types/api'
+import {hasButtonPermission} from '@/utils/permission'
 
 type LangKey = 'en' | 'es' | 'pt' | 'hi'
 type AssetKind = 'icon' | 'bg'
@@ -368,6 +387,8 @@ interface SearchForm {
 }
 
 const loading = ref(false)
+const syncing = ref(false)
+const selectedRows = ref<ActivityMessage[]>([])
 const tableData = ref<ActivityMessage[]>([])
 const total = ref(0)
 const currentPage = ref(1)
@@ -643,6 +664,47 @@ const handleUnpublish = async (row: ActivityMessage) => {
   }
 }
 
+const handleSelectionChange = (rows: ActivityMessage[]) => {
+  selectedRows.value = rows
+}
+
+const handleSyncData = async () => {
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning('请先勾选要同步的活动消息')
+    return
+  }
+  const ids = selectedRows.value.map((row) => Number(row.id)).filter((id) => id > 0)
+  if (ids.length === 0) {
+    ElMessage.warning('所选活动消息无效')
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+        `将把已选 ${ids.length} 条活动消息及关联图片资源同步到目标环境（按 ID 覆盖或新增）。是否继续？`,
+        '同步数据',
+        {
+          confirmButtonText: '确定同步',
+          cancelButtonText: '取消',
+          type: 'warning',
+        }
+    )
+    syncing.value = true
+    const response = await dataSyncApi.syncActivityMessage({ids})
+    if (response?.success) {
+      ElMessage.success(response.message || `同步成功：${response.rowCount} 条，${response.fileCount} 个文件`)
+    } else {
+      ElMessage.error('同步失败')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('同步失败:', error)
+      ElMessage.error('同步失败，请检查数据同步配置与目标服务')
+    }
+  } finally {
+    syncing.value = false
+  }
+}
+
 onMounted(() => {
   fetchList()
 })
@@ -661,6 +723,12 @@ onMounted(() => {
 
 .table-header {
   margin-bottom: 16px;
+}
+
+.selection-tip {
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--el-color-primary);
 }
 
 .search-form {

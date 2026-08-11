@@ -6,24 +6,25 @@ import (
 	"fmt"
 	"strings"
 
-	"xr-game-server/dao/cfgdao"
+	"github.com/gogf/gf/v2/frame/g"
+	"xr-game-server/dao/messagedao"
 	"xr-game-server/dto/datasyncdto"
 	"xr-game-server/entity"
 	"xr-game-server/module/upload"
-	"xr-game-server/module/vip"
 )
 
-// SyncVipCfg 从当前环境读取指定 VIP 配置及资源文件,推送到目标环境
-func SyncVipCfg(_ context.Context, req *datasyncdto.SyncVipCfgReq) (*datasyncdto.SyncVipCfgRes, error) {
+// SyncActivityMessage 从当前环境读取指定活动消息及资源文件,推送到目标环境
+func SyncActivityMessage(_ context.Context, req *datasyncdto.SyncActivityMessageReq) (*datasyncdto.SyncActivityMessageRes, error) {
 	if req == nil || len(req.IDs) == 0 {
 		return nil, errInvalidParam()
 	}
 
-	rows := cfgdao.GetVipCfgsByIDs(req.IDs)
+	rows := messagedao.GetActivityMessagesByIDs(req.IDs)
 	if len(rows) == 0 {
 		return nil, errInvalidParam()
 	}
-	fileNames := collectVipCfgFileNames(rows)
+
+	fileNames := collectActivityMessageFileNames(rows)
 	files := make([]*datasyncdto.SyncFileItem, 0, len(fileNames))
 	for _, name := range fileNames {
 		content, err := upload.ReadUploadedFileBytes(name)
@@ -36,25 +37,25 @@ func SyncVipCfg(_ context.Context, req *datasyncdto.SyncVipCfgReq) (*datasyncdto
 		})
 	}
 
-	payload := &datasyncdto.ReceiveVipCfgReq{
+	payload := &datasyncdto.ReceiveActivityMessageReq{
 		Rows:  rows,
 		Files: files,
 	}
-	var receiveRes datasyncdto.ReceiveVipCfgRes
-	if err := postSyncReceive("/dataSync/receiveVipCfg", payload, &receiveRes); err != nil {
+	var receiveRes datasyncdto.ReceiveActivityMessageRes
+	if err := postSyncReceive("/dataSync/receiveActivityMessage", payload, &receiveRes); err != nil {
 		return nil, err
 	}
 
-	return &datasyncdto.SyncVipCfgRes{
+	return &datasyncdto.SyncActivityMessageRes{
 		Success:   receiveRes.Success,
 		RowCount:  receiveRes.RowCount,
 		FileCount: receiveRes.FileCount,
-		Message:   fmt.Sprintf("已同步 %d 条配置、%d 个资源文件", receiveRes.RowCount, receiveRes.FileCount),
+		Message:   fmt.Sprintf("已同步 %d 条活动消息、%d 个资源文件", receiveRes.RowCount, receiveRes.FileCount),
 	}, nil
 }
 
-// ReceiveVipCfg 接收 VIP 配置同步,按主键 upsert 并写入资源文件
-func ReceiveVipCfg(_ context.Context, req *datasyncdto.ReceiveVipCfgReq) (*datasyncdto.ReceiveVipCfgRes, error) {
+// ReceiveActivityMessage 接收活动消息同步,按主键 upsert 并刷新缓存
+func ReceiveActivityMessage(_ context.Context, req *datasyncdto.ReceiveActivityMessageReq) (*datasyncdto.ReceiveActivityMessageRes, error) {
 	if req == nil {
 		return nil, errInvalidParam()
 	}
@@ -79,22 +80,22 @@ func ReceiveVipCfg(_ context.Context, req *datasyncdto.ReceiveVipCfgReq) (*datas
 		if row == nil || row.ID == 0 {
 			continue
 		}
-		if err := cfgdao.CreateVipCfg(row); err != nil {
-			return nil, fmt.Errorf("save vip cfg id=%d: %w", row.ID, err)
+		if _, err := g.DB().Model(string(entity.TbActivityMessage)).Save(row); err != nil {
+			return nil, fmt.Errorf("save activity message id=%d: %w", row.ID, err)
 		}
 		rowCount++
 	}
 
-	vip.ReloadVipCfgMemory()
+	messagedao.ReloadActivityMessageCaches()
 
-	return &datasyncdto.ReceiveVipCfgRes{
+	return &datasyncdto.ReceiveActivityMessageRes{
 		Success:   true,
 		RowCount:  rowCount,
 		FileCount: fileCount,
 	}, nil
 }
 
-func collectVipCfgFileNames(rows []*entity.VipCfg) []string {
+func collectActivityMessageFileNames(rows []*entity.ActivityMessage) []string {
 	seen := make(map[string]struct{})
 	names := make([]string, 0)
 	for _, row := range rows {
@@ -102,13 +103,8 @@ func collectVipCfgFileNames(rows []*entity.VipCfg) []string {
 			continue
 		}
 		for _, name := range []string{
-			row.LevelIcon,
-			row.WithdrawIcon,
-			row.Animation,
-			row.AnimationIcon,
-			row.CommentEffect,
-			row.CommentEffectIcon,
-			row.CustomerServiceIcon,
+			row.IconEn, row.IconEs, row.IconPt, row.IconHi,
+			row.BgEn, row.BgEs, row.BgPt, row.BgHi,
 		} {
 			name = strings.TrimSpace(name)
 			if name == "" || strings.HasPrefix(name, "http://") || strings.HasPrefix(name, "https://") {

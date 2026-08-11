@@ -45,6 +45,12 @@ func loadGiftCache() []*giftdto.AppGiftItem {
 	return list
 }
 
+// ReloadGiftCache 从 DB 重新加载礼物缓存(供同步等模块调用)
+func ReloadGiftCache() {
+	invalidateGiftCache()
+	loadGiftCache()
+}
+
 // getGiftCache 获取缓存列表,未加载则触发加载
 func getGiftCache() []*giftdto.AppGiftItem {
 	giftCacheMu.RLock()

@@ -58,6 +58,15 @@ func CreateRechargeCfg(cfg *entity.RechargeCfg) error {
 	return err
 }
 
+func GetRechargeCfgsByIDs(ids []uint64) []*entity.RechargeCfg {
+	if len(ids) == 0 {
+		return nil
+	}
+	var rows []*entity.RechargeCfg
+	_ = g.DB().Model(string(entity.TbRechargeCfg)).WhereIn("id", ids).Scan(&rows)
+	return rows
+}
+
 func UpdateRechargeCfg(cfg *entity.RechargeCfg) error {
 	return CreateRechargeCfg(cfg)
 }

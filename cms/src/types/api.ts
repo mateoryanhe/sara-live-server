@@ -1030,6 +1030,28 @@ export interface SyncVipCfgRes {
     message: string
 }
 
+export interface SyncActivityMessageReq {
+    ids: number[]
+}
+
+export interface SyncActivityMessageRes {
+    success: boolean
+    rowCount: number
+    fileCount: number
+    message: string
+}
+
+export interface SyncIdsReq {
+    ids: number[]
+}
+
+export interface SyncBatchRes {
+    success: boolean
+    rowCount: number
+    fileCount: number
+    message: string
+}
+
 export interface GamePlatformCfg {
     id: string
     vendorUrl: string

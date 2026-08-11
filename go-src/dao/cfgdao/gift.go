@@ -35,6 +35,15 @@ func CreateGift(gift *entity.LiveGift) error {
 	return err
 }
 
+func GetGiftsByIDs(ids []uint64) []*entity.LiveGift {
+	if len(ids) == 0 {
+		return nil
+	}
+	var rows []*entity.LiveGift
+	_ = g.DB().Model(string(entity.TbLiveGift)).WhereIn("id", ids).Scan(&rows)
+	return rows
+}
+
 func UpdateGift(gift *entity.LiveGift) error {
 	return CreateGift(gift)
 }

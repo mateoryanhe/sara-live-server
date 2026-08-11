@@ -70,6 +70,11 @@ func reloadRechargeCfgCache() {
 	loadRechargeCfgCache()
 }
 
+// ReloadRechargeCfgCache 从 DB 重新加载充值配置缓存(供同步等模块调用)
+func ReloadRechargeCfgCache() {
+	reloadRechargeCfgCache()
+}
+
 func getRechargeCfgSnapshot() *rechargeCfgSnapshot {
 	v := rechargeCfgCache.Load()
 	if v == nil {

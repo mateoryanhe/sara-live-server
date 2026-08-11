@@ -45,6 +45,15 @@ func CreateBanner(row *entity.HomeBanner) error {
 	return err
 }
 
+func GetBannersByIDs(ids []uint64) []*entity.HomeBanner {
+	if len(ids) == 0 {
+		return nil
+	}
+	var rows []*entity.HomeBanner
+	_ = g.DB().Model(string(entity.TbHomeBanner)).WhereIn("id", ids).Scan(&rows)
+	return rows
+}
+
 func UpdateBanner(row *entity.HomeBanner) error {
 	return CreateBanner(row)
 }
