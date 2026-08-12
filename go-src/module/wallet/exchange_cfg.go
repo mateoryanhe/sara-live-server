@@ -40,10 +40,16 @@ func GetGoldToDiamondRate() int {
 	return GetExchangeCfgSnapshot().GoldToDiamondRate
 }
 
-// calcAppExchangeGoldDeduct 仅 App 手动兑换使用;手续费比例>0 时额外扣金币
-func calcAppExchangeGoldDeduct(goldAmount float64, snap ExchangeCfgSnapshot) float64 {
-	if goldAmount <= 0 || snap.ExchangeFeePercent <= 0 {
-		return goldAmount
+// calcExchangeDiamond 计算兑换钻石: 毛钻石=金币*比例; App手动兑换时手续费从钻石扣(如100钻扣3%得97钻)
+func calcExchangeDiamond(goldAmount float64, snap ExchangeCfgSnapshot, applyAppFee bool) (gross, fee, net float64) {
+	gross = goldAmount * float64(snap.GoldToDiamondRate)
+	if !applyAppFee || snap.ExchangeFeePercent <= 0 {
+		return gross, 0, gross
 	}
-	return goldAmount * (1 + snap.ExchangeFeePercent/100)
+	fee = gross * (snap.ExchangeFeePercent / 100)
+	net = gross - fee
+	if net < 0 {
+		net = 0
+	}
+	return gross, fee, net
 }

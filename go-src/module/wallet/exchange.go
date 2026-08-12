@@ -14,7 +14,8 @@ type appExchangeResult struct {
 	diamondAfter       float64
 	goldAmount         float64
 	goldDeduct         float64
-	feeGold            float64
+	feeDiamond         float64
+	diamondGross       float64
 	diamondAmount      float64
 	goldToDiamondRate  int
 	exchangeFeePercent float64
@@ -27,15 +28,7 @@ func exchangeGoldToDiamond(userId uint64, goldAmount float64, applyAppFee bool) 
 
 	snap := GetExchangeCfgSnapshot()
 	goldDeduct := goldAmount
-	feeGold := 0.0
-	if applyAppFee {
-		goldDeduct = calcAppExchangeGoldDeduct(goldAmount, snap)
-		feeGold = goldDeduct - goldAmount
-		if feeGold < 0 {
-			feeGold = 0
-		}
-	}
-	diamondAmount := goldAmount * float64(snap.GoldToDiamondRate)
+	diamondGross, feeDiamond, diamondAmount := calcExchangeDiamond(goldAmount, snap, applyAppFee)
 
 	goldAfter, err := GoldSub(userId, goldDeduct, currency.ReasonGoldExchange)
 	if err != nil {
@@ -53,14 +46,15 @@ func exchangeGoldToDiamond(userId uint64, goldAmount float64, applyAppFee bool) 
 		diamondAfter:       diamondAfter,
 		goldAmount:         goldAmount,
 		goldDeduct:         goldDeduct,
-		feeGold:            feeGold,
+		feeDiamond:         feeDiamond,
+		diamondGross:       diamondGross,
 		diamondAmount:      diamondAmount,
 		goldToDiamondRate:  snap.GoldToDiamondRate,
 		exchangeFeePercent: snap.ExchangeFeePercent,
 	}, nil
 }
 
-// AppExchangeGoldToDiamond App端金币兑换钻石;手续费比例>0 时收取手续费
+// AppExchangeGoldToDiamond App端金币兑换钻石;手续费比例>0 时从兑换钻石中扣除
 func AppExchangeGoldToDiamond(ctx context.Context, req *golddto.AppExchangeGoldToDiamondReq) (*golddto.AppExchangeGoldToDiamondRes, error) {
 	userId := httpserver.GetAuthId(ctx)
 	result, err := exchangeGoldToDiamond(userId, req.GoldAmount, true)
@@ -73,7 +67,8 @@ func AppExchangeGoldToDiamond(ctx context.Context, req *golddto.AppExchangeGoldT
 		ExchangedGold:      result.goldAmount,
 		ExchangedDiamond:   result.diamondAmount,
 		GoldDeduct:         result.goldDeduct,
-		FeeGold:            result.feeGold,
+		FeeDiamond:         result.feeDiamond,
+		DiamondGross:       result.diamondGross,
 		GoldToDiamondRate:  result.goldToDiamondRate,
 		ExchangeFeePercent: result.exchangeFeePercent,
 	}, nil

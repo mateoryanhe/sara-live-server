@@ -17,7 +17,7 @@ type SysCfgResp struct {
 	VipDescUrl                  string  `json:"vipDescUrl" dc:"VIP描述文档URL"`
 	AppImageMaxSize             uint64  `json:"appImageMaxSize" dc:"App端图片上传大小上限(字节)"`
 	GoldToDiamondRate           int     `json:"goldToDiamondRate" dc:"金币兑换钻石比例(1金币=N钻石)"`
-	ExchangeFeePercent          float64 `json:"exchangeFeePercent" dc:"App手动兑换手续费(%)，大于0时收取"`
+	ExchangeFeePercent          float64 `json:"exchangeFeePercent" dc:"App手动兑换手续费(%)，从兑换钻石中扣除"`
 	AboutSiteUrl                string  `json:"aboutSiteUrl" dc:"About页面URL"`
 	SafetyCenterUrl             string  `json:"safetyCenterUrl" dc:"安全中心页面URL"`
 }

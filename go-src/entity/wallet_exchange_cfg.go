@@ -18,7 +18,7 @@ const (
 type WalletExchangeCfg struct {
 	migrate.OneModel
 	GoldToDiamondRate  int     `gorm:"default:100;comment:1金币兑换钻石数" json:"goldToDiamondRate"`
-	ExchangeFeePercent float64 `gorm:"type:decimal(6,2);default:3;comment:App手动兑换手续费(%)，大于0时收取" json:"exchangeFeePercent"`
+	ExchangeFeePercent float64 `gorm:"type:decimal(6,2);default:3;comment:App手动兑换手续费(%)，从兑换钻石中扣除" json:"exchangeFeePercent"`
 }
 
 func initWalletExchangeCfg() {

@@ -2,7 +2,7 @@ import {definePageMessages} from './_define'
 
 const zh = {
   tipTitle: '说明',
-  tipLine1: '配置 1 金币兑换钻石数；App 端手动兑换时，若手续费比例大于 0 则额外扣金币。',
+  tipLine1: '配置 1 金币兑换钻石数；App 端手动兑换时，若手续费比例大于 0 则从兑换钻石中扣除（如 1 金币换 100 钻、手续费 3% 则到账 97 钻）。',
   tipLine2: '送礼、付费弹幕等业务内自动兑换始终免手续费，仅按兑换比例扣金币。',
   goldToDiamondRate: '1金币兑换钻石数',
   exchangeFeePercent: 'App兑换手续费(%)',
@@ -18,7 +18,7 @@ export const walletExchangeCfgMessages = definePageMessages(
   zh,
   {
     tipTitle: 'Note',
-    tipLine1: 'Configure how many diamonds 1 gold coin exchanges for. Manual exchange in the app deducts extra gold if fee percent > 0.',
+    tipLine1: 'Configure how many diamonds 1 gold coin exchanges for. Manual app exchange deducts the fee from diamonds (e.g. 1 gold → 100 diamonds, 3% fee → 97 received).',
     tipLine2: 'In-app auto exchange (gifts, paid danmaku, etc.) is always fee-free; only the exchange rate applies.',
     goldToDiamondRate: 'Diamonds per 1 Gold',
     exchangeFeePercent: 'App Exchange Fee (%)',
@@ -31,7 +31,7 @@ export const walletExchangeCfgMessages = definePageMessages(
   },
   {
     tipTitle: 'Nota',
-    tipLine1: 'Configura cuántos diamantes equivalen a 1 moneda de oro. El intercambio manual en la app deduce oro extra si la comisión > 0.',
+    tipLine1: 'Configura cuántos diamantes equivalen a 1 moneda de oro. El intercambio manual deduce la comisión de los diamantes (ej. 1 oro → 100 diamantes, 3% → 97 recibidos).',
     tipLine2: 'El intercambio automático en la app (regalos, danmaku de pago, etc.) siempre es sin comisión.',
     goldToDiamondRate: 'Diamantes por 1 oro',
     exchangeFeePercent: 'Comisión de intercambio en app (%)',
@@ -44,7 +44,7 @@ export const walletExchangeCfgMessages = definePageMessages(
   },
   {
     tipTitle: 'Nota',
-    tipLine1: 'Configure quantos diamantes 1 moeda de ouro troca. Troca manual no app deduz ouro extra se taxa > 0.',
+    tipLine1: 'Configure quantos diamantes 1 moeda de ouro troca. Troca manual deduz a taxa dos diamantes (ex.: 1 ouro → 100 diamantes, 3% → 97 recebidos).',
     tipLine2: 'Troca automática no app (presentes, danmaku pago, etc.) sempre sem taxa.',
     goldToDiamondRate: 'Diamantes por 1 ouro',
     exchangeFeePercent: 'Taxa de troca no app (%)',
@@ -57,7 +57,7 @@ export const walletExchangeCfgMessages = definePageMessages(
   },
   {
     tipTitle: 'नोट',
-    tipLine1: '1 सोने के सिक्के के लिए हीरे की संख्या कॉन्फ़िग करें। ऐप में मैन्युअल विनिमय पर शुल्क > 0 हो तो अतिरिक्त सोना कटता है।',
+    tipLine1: '1 सोने के सिक्के के लिए हीरे की संख्या कॉन्फ़िग करें। मैन्युअल विनिमय पर शुल्क हीरों से कटता है (जैसे 1 सोना → 100 हीरे, 3% → 97 प्राप्त)।',
     tipLine2: 'ऐप में स्वचालित विनिमय (उपहार, सशुल्क डैनमाकू आदि) हमेशा शुल्क-मुक्त।',
     goldToDiamondRate: '1 सोने के लिए हीरे',
     exchangeFeePercent: 'ऐप विनिमय शुल्क (%)',
@@ -70,7 +70,7 @@ export const walletExchangeCfgMessages = definePageMessages(
   },
   {
     tipTitle: 'Catatan',
-    tipLine1: 'Konfigurasi berapa berlian untuk 1 koin emas. Tukar manual di app memotong emas extra jika biaya > 0.',
+    tipLine1: 'Konfigurasi berapa berlian untuk 1 koin emas. Tukar manual memotong biaya dari berlian (mis. 1 emas → 100 berlian, 3% → 97 diterima).',
     tipLine2: 'Tukar otomatis di app (hadiah, danmaku berbayar, dll.) selalu bebas biaya.',
     goldToDiamondRate: 'Berlian per 1 emas',
     exchangeFeePercent: 'Biaya tukar app (%)',

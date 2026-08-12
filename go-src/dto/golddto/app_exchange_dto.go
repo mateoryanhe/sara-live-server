@@ -12,9 +12,10 @@ type AppExchangeGoldToDiamondRes struct {
 	Gold               float64 `json:"gold" dc:"兑换后金币余额"`
 	Diamond            float64 `json:"diamond" dc:"兑换后钻石余额"`
 	ExchangedGold      float64 `json:"exchangedGold" dc:"本次兑换金币数量"`
-	ExchangedDiamond   float64 `json:"exchangedDiamond" dc:"本次获得钻石数量"`
-	GoldDeduct         float64 `json:"goldDeduct" dc:"实际扣减金币(含手续费)"`
-	FeeGold            float64 `json:"feeGold" dc:"手续费金币"`
+	ExchangedDiamond   float64 `json:"exchangedDiamond" dc:"本次实际到账钻石"`
+	GoldDeduct         float64 `json:"goldDeduct" dc:"实际扣减金币"`
+	FeeDiamond         float64 `json:"feeDiamond" dc:"手续费钻石"`
+	DiamondGross       float64 `json:"diamondGross" dc:"兑换钻石(扣费前)"`
 	GoldToDiamondRate  int     `json:"goldToDiamondRate" dc:"兑换比例(1金币=N钻石)"`
 	ExchangeFeePercent float64 `json:"exchangeFeePercent" dc:"手续费比例(%)"`
 }
