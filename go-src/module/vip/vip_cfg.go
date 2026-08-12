@@ -44,22 +44,26 @@ func Create(_ context.Context, req *vipcfgdto.CreateVipCfgReq) (*vipcfgdto.Creat
 		AnimationDescEs:       req.AnimationDescEs,
 		AnimationDescPt:       req.AnimationDescPt,
 		AnimationDescHi:       req.AnimationDescHi,
+		AnimationDescId:       req.AnimationDescId,
 		CommentEffect:         req.CommentEffect,
 		CommentEffectIcon:     req.CommentEffectIcon,
 		CommentEffectDescEn:   req.CommentEffectDescEn,
 		CommentEffectDescEs:   req.CommentEffectDescEs,
 		CommentEffectDescPt:   req.CommentEffectDescPt,
 		CommentEffectDescHi:   req.CommentEffectDescHi,
+		CommentEffectDescId:   req.CommentEffectDescId,
 		WithdrawIcon:          req.WithdrawIcon,
 		WithdrawNoticeEn:      req.WithdrawNoticeEn,
 		WithdrawNoticeEs:      req.WithdrawNoticeEs,
 		WithdrawNoticePt:      req.WithdrawNoticePt,
 		WithdrawNoticeHi:      req.WithdrawNoticeHi,
+		WithdrawNoticeId:      req.WithdrawNoticeId,
 		CustomerServiceIcon:   req.CustomerServiceIcon,
 		CustomerServiceDescEn: req.CustomerServiceDescEn,
 		CustomerServiceDescEs: req.CustomerServiceDescEs,
 		CustomerServiceDescPt: req.CustomerServiceDescPt,
 		CustomerServiceDescHi: req.CustomerServiceDescHi,
+		CustomerServiceDescId: req.CustomerServiceDescId,
 	}
 	if err := cfgdao.CreateVipCfg(row); err != nil {
 		return nil, err
@@ -98,22 +102,26 @@ func Update(_ context.Context, req *vipcfgdto.UpdateVipCfgReq) (*vipcfgdto.Updat
 	updated.AnimationDescEs = req.AnimationDescEs
 	updated.AnimationDescPt = req.AnimationDescPt
 	updated.AnimationDescHi = req.AnimationDescHi
+	updated.AnimationDescId = req.AnimationDescId
 	updated.CommentEffect = req.CommentEffect
 	updated.CommentEffectIcon = req.CommentEffectIcon
 	updated.CommentEffectDescEn = req.CommentEffectDescEn
 	updated.CommentEffectDescEs = req.CommentEffectDescEs
 	updated.CommentEffectDescPt = req.CommentEffectDescPt
 	updated.CommentEffectDescHi = req.CommentEffectDescHi
+	updated.CommentEffectDescId = req.CommentEffectDescId
 	updated.WithdrawIcon = req.WithdrawIcon
 	updated.WithdrawNoticeEn = req.WithdrawNoticeEn
 	updated.WithdrawNoticeEs = req.WithdrawNoticeEs
 	updated.WithdrawNoticePt = req.WithdrawNoticePt
 	updated.WithdrawNoticeHi = req.WithdrawNoticeHi
+	updated.WithdrawNoticeId = req.WithdrawNoticeId
 	updated.CustomerServiceIcon = req.CustomerServiceIcon
 	updated.CustomerServiceDescEn = req.CustomerServiceDescEn
 	updated.CustomerServiceDescEs = req.CustomerServiceDescEs
 	updated.CustomerServiceDescPt = req.CustomerServiceDescPt
 	updated.CustomerServiceDescHi = req.CustomerServiceDescHi
+	updated.CustomerServiceDescId = req.CustomerServiceDescId
 	if err := cfgdao.UpdateVipCfg(&updated); err != nil {
 		return nil, err
 	}

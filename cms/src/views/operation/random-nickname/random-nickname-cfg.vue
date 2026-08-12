@@ -17,7 +17,7 @@
           title="说明"
           type="info"
       >
-        <p>支持英文、西班牙语、印地语、葡萄牙语。一行一个昵称，导入后写入数据库并加载到内存；新用户注册时按 Accept-Language 选择对应语言池。</p>
+        <p>支持英文、西班牙语、印地语、葡萄牙语、印尼语。一行一个昵称，导入后写入数据库并加载到内存；新用户注册时按 Accept-Language 选择对应语言池。</p>
         <p>数据库为空时，服务器启动后使用 Go 内置 1000 条英文昵称；有数据后仅使用数据库内容，不再读内置库。</p>
       </el-alert>
 
@@ -103,6 +103,7 @@ const langOptions = [
   {value: 2, label: 'Español（西班牙语）'},
   {value: 3, label: 'हिन्दी（印地语）'},
   {value: 4, label: 'Português（葡萄牙语）'},
+  {value: 5, label: 'Bahasa Indonesia（印尼语）'},
 ]
 
 const cfg = reactive<GetRandomNicknameCfgRes>({
@@ -146,7 +147,7 @@ async function fetchCfg() {
     if (!cfg.langs.length) {
       cfg.langs = langOptions.map(item => ({
         lang: item.value,
-        langCode: ['en', 'es', 'hi', 'pt'][item.value - 1] || 'en',
+        langCode: ['en', 'es', 'hi', 'pt', 'id'][item.value - 1] || 'en',
         langLabel: item.label.split('（')[0],
         count: 0,
         samples: [],

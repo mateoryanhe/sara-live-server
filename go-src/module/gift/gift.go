@@ -45,6 +45,7 @@ func CreateGift(_ context.Context, req *giftdto.CreateGiftReq) (*giftdto.CreateG
 		NameEs:      req.NameEs,
 		NamePt:      req.NamePt,
 		NameHi:      req.NameHi,
+		NameId:      req.NameId,
 		Icon:        req.Icon,
 		Animation:   req.Animation,
 		Price:       req.Price,
@@ -75,6 +76,7 @@ func UpdateGift(_ context.Context, req *giftdto.UpdateGiftReq) (*giftdto.UpdateG
 	g.NameEs = req.NameEs
 	g.NamePt = req.NamePt
 	g.NameHi = req.NameHi
+	g.NameId = req.NameId
 	g.Icon = req.Icon
 	g.Animation = req.Animation
 	g.Price = req.Price

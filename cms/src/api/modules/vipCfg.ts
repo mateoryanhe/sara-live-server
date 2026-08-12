@@ -19,22 +19,26 @@ type VipCfgSavePayload = {
     animationDescEs?: string
     animationDescPt?: string
     animationDescHi?: string
+    animationDescId?: string
     commentEffect?: string
     commentEffectIcon?: string
     commentEffectDescEn?: string
     commentEffectDescEs?: string
     commentEffectDescPt?: string
     commentEffectDescHi?: string
+    commentEffectDescId?: string
     withdrawIcon?: string
     withdrawNoticeEn?: string
     withdrawNoticeEs?: string
     withdrawNoticePt?: string
     withdrawNoticeHi?: string
+    withdrawNoticeId?: string
     customerServiceIcon?: string
     customerServiceDescEn?: string
     customerServiceDescEs?: string
     customerServiceDescPt?: string
     customerServiceDescHi?: string
+    customerServiceDescId?: string
 }
 
 export const vipCfgApi = {

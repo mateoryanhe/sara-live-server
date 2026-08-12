@@ -15,6 +15,7 @@ type AppGiftItem struct {
 	NameEs      string  `json:"nameEs"`
 	NamePt      string  `json:"namePt"`
 	NameHi      string  `json:"nameHi"`
+	NameId      string  `json:"nameId"`
 	Icon        string  `json:"icon"`
 	Animation   string  `json:"animation"`
 	Price       float64 `json:"price"`

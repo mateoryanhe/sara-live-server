@@ -66,14 +66,17 @@ func toAppPersonalSystemMessageItem(row *entity.UserPersonalSystemMessage) *mess
 		item.IconEs = upload.GetUrlByName(display.IconEs)
 		item.IconPt = upload.GetUrlByName(display.IconPt)
 		item.IconHi = upload.GetUrlByName(display.IconHi)
+		item.IconId = upload.GetUrlByName(display.IconId)
 		item.TitleEn = display.TitleEn
 		item.TitleEs = display.TitleEs
 		item.TitlePt = display.TitlePt
 		item.TitleHi = display.TitleHi
+		item.TitleId = display.TitleId
 		item.ContentEn = display.ContentEn
 		item.ContentEs = display.ContentEs
 		item.ContentPt = display.ContentPt
 		item.ContentHi = display.ContentHi
+		item.ContentId = display.ContentId
 	}
 	return item
 }

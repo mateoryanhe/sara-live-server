@@ -21,6 +21,7 @@ type GiftListRes struct {
 	NameEs        string `json:"nameEs"`
 	NamePt        string `json:"namePt"`
 	NameHi        string `json:"nameHi"`
+	NameId        string `json:"nameId"`
 	Icon          string `json:"icon" dc:"图标完整URL(列表展示)"`
 	IconName      string `json:"iconName" dc:"图标资源文件名(编辑保存用)"`
 	Animation     string `json:"animation" dc:"动画完整URL(列表展示)"`

@@ -9,6 +9,7 @@ const (
 	LangZHCN Lang = "zh-CN" // 简体中文
 	LangZHTW Lang = "zh-TW" // 繁体中文
 	LangEN   Lang = "en"    // 英文(默认)
+	LangID   Lang = "id"    // 印尼语
 )
 
 // DefaultLang 默认语言
@@ -31,6 +32,8 @@ func Parse(s string) Lang {
 		return LangZHTW
 	case strings.HasPrefix(low, "zh"):
 		return LangZHCN
+	case strings.HasPrefix(low, "id"):
+		return LangID
 	case strings.HasPrefix(low, "en"):
 		return LangEN
 	default:

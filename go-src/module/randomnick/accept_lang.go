@@ -21,6 +21,8 @@ func ParseAcceptLanguage(header string) uint8 {
 		return LangHI
 	case strings.HasPrefix(low, "pt"):
 		return LangPT
+	case strings.HasPrefix(low, "id"):
+		return LangID
 	case strings.HasPrefix(low, "en"):
 		return LangEN
 	default:

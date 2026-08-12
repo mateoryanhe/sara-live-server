@@ -176,6 +176,7 @@ func toVipCfgListRes(row *entity.VipCfg) *vipcfgdto.VipCfgListRes {
 		AnimationDescEs:         row.AnimationDescEs,
 		AnimationDescPt:         row.AnimationDescPt,
 		AnimationDescHi:         row.AnimationDescHi,
+		AnimationDescId:         row.AnimationDescId,
 		CommentEffectName:       row.CommentEffect,
 		CommentEffect:           upload.GetUrlByName(row.CommentEffect),
 		CommentEffectIconName:   row.CommentEffectIcon,
@@ -184,18 +185,21 @@ func toVipCfgListRes(row *entity.VipCfg) *vipcfgdto.VipCfgListRes {
 		CommentEffectDescEs:     row.CommentEffectDescEs,
 		CommentEffectDescPt:     row.CommentEffectDescPt,
 		CommentEffectDescHi:     row.CommentEffectDescHi,
+		CommentEffectDescId:     row.CommentEffectDescId,
 		WithdrawIconName:        row.WithdrawIcon,
 		WithdrawIcon:            upload.GetUrlByName(row.WithdrawIcon),
 		WithdrawNoticeEn:        row.WithdrawNoticeEn,
 		WithdrawNoticeEs:        row.WithdrawNoticeEs,
 		WithdrawNoticePt:        row.WithdrawNoticePt,
 		WithdrawNoticeHi:        row.WithdrawNoticeHi,
+		WithdrawNoticeId:        row.WithdrawNoticeId,
 		CustomerServiceIconName: row.CustomerServiceIcon,
 		CustomerServiceIcon:     upload.GetUrlByName(row.CustomerServiceIcon),
 		CustomerServiceDescEn:   row.CustomerServiceDescEn,
 		CustomerServiceDescEs:   row.CustomerServiceDescEs,
 		CustomerServiceDescPt:   row.CustomerServiceDescPt,
 		CustomerServiceDescHi:   row.CustomerServiceDescHi,
+		CustomerServiceDescId:   row.CustomerServiceDescId,
 		CreatedAt:               formatVipCfgTime(row.CreatedAt),
 		UpdatedAt:               formatVipCfgTime(row.UpdatedAt),
 	}
@@ -239,7 +243,7 @@ func buildAppVipPrivilegeList(row *entity.VipCfg) []*vipcfgdto.AppVipPrivilegeIt
 		list = append(list, &vipcfgdto.AppVipPrivilegeItem{
 			PrivilegeType:     vipcfgdto.AppVipPrivilegeTypeWithdraw,
 			Icon:              upload.GetUrlByName(row.WithdrawIcon),
-			Desc:              appVipPrivilegeDesc(row.WithdrawNoticeEn, row.WithdrawNoticeEs, row.WithdrawNoticePt, row.WithdrawNoticeHi),
+			Desc:              appVipPrivilegeDesc(row.WithdrawNoticeEn, row.WithdrawNoticeEs, row.WithdrawNoticePt, row.WithdrawNoticeHi, row.WithdrawNoticeId),
 			MinWithdrawAmount: row.MinWithdrawAmount,
 			MaxWithdrawAmount: row.MaxWithdrawAmount,
 			Fee:               row.Fee,
@@ -249,7 +253,7 @@ func buildAppVipPrivilegeList(row *entity.VipCfg) []*vipcfgdto.AppVipPrivilegeIt
 		list = append(list, &vipcfgdto.AppVipPrivilegeItem{
 			PrivilegeType: vipcfgdto.AppVipPrivilegeTypeEntryEffect,
 			Icon:          upload.GetUrlByName(row.AnimationIcon),
-			Desc:          appVipPrivilegeDesc(row.AnimationDescEn, row.AnimationDescEs, row.AnimationDescPt, row.AnimationDescHi),
+			Desc:          appVipPrivilegeDesc(row.AnimationDescEn, row.AnimationDescEs, row.AnimationDescPt, row.AnimationDescHi, row.AnimationDescId),
 			Animation:     upload.GetUrlByName(row.Animation),
 		})
 	}
@@ -257,7 +261,7 @@ func buildAppVipPrivilegeList(row *entity.VipCfg) []*vipcfgdto.AppVipPrivilegeIt
 		list = append(list, &vipcfgdto.AppVipPrivilegeItem{
 			PrivilegeType: vipcfgdto.AppVipPrivilegeTypeCommentEffect,
 			Icon:          upload.GetUrlByName(row.CommentEffectIcon),
-			Desc:          appVipPrivilegeDesc(row.CommentEffectDescEn, row.CommentEffectDescEs, row.CommentEffectDescPt, row.CommentEffectDescHi),
+			Desc:          appVipPrivilegeDesc(row.CommentEffectDescEn, row.CommentEffectDescEs, row.CommentEffectDescPt, row.CommentEffectDescHi, row.CommentEffectDescId),
 			Animation:     upload.GetUrlByName(row.CommentEffect),
 		})
 	}
@@ -265,18 +269,19 @@ func buildAppVipPrivilegeList(row *entity.VipCfg) []*vipcfgdto.AppVipPrivilegeIt
 		list = append(list, &vipcfgdto.AppVipPrivilegeItem{
 			PrivilegeType: vipcfgdto.AppVipPrivilegeTypeCustomerService,
 			Icon:          upload.GetUrlByName(row.CustomerServiceIcon),
-			Desc:          appVipPrivilegeDesc(row.CustomerServiceDescEn, row.CustomerServiceDescEs, row.CustomerServiceDescPt, row.CustomerServiceDescHi),
+			Desc:          appVipPrivilegeDesc(row.CustomerServiceDescEn, row.CustomerServiceDescEs, row.CustomerServiceDescPt, row.CustomerServiceDescHi, row.CustomerServiceDescId),
 		})
 	}
 	return list
 }
 
-func appVipPrivilegeDesc(en, es, pt, hi string) vipcfgdto.AppVipPrivilegeI18nText {
+func appVipPrivilegeDesc(en, es, pt, hi, id string) vipcfgdto.AppVipPrivilegeI18nText {
 	return vipcfgdto.AppVipPrivilegeI18nText{
 		En: en,
 		Es: es,
 		Pt: pt,
 		Hi: hi,
+		Id: id,
 	}
 }
 

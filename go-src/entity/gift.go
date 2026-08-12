@@ -24,6 +24,7 @@ type LiveGift struct {
 	NameEs      string     `gorm:"size:64;default:'';comment:礼物名称(西班牙语)" json:"nameEs"`
 	NamePt      string     `gorm:"size:64;default:'';comment:礼物名称(葡萄牙语)" json:"namePt"`
 	NameHi      string     `gorm:"size:64;default:'';comment:礼物名称(印地语)" json:"nameHi"`
+	NameId      string     `gorm:"size:64;default:'';comment:礼物名称(印尼语)" json:"nameId"`
 	Icon        string     `gorm:"size:255;default:'';comment:图标URL" json:"icon"`
 	Animation   string     `gorm:"size:255;default:'';comment:动画资源URL" json:"animation"`
 	Price       float64    `gorm:"default:0;comment:钻石单价" json:"price"`

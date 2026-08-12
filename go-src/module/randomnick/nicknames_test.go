@@ -46,6 +46,9 @@ func TestParseAcceptLanguage(t *testing.T) {
 	if ParseAcceptLanguage("pt-BR") != LangPT {
 		t.Fatal("expected portuguese")
 	}
+	if ParseAcceptLanguage("id-ID") != LangID {
+		t.Fatal("expected indonesian")
+	}
 	if ParseAcceptLanguage("") != DefaultLang {
 		t.Fatal("expected default english")
 	}

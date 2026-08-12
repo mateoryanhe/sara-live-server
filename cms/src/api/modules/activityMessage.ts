@@ -7,22 +7,27 @@ export type ActivityMessageForm = {
     iconEs: string
     iconPt: string
     iconHi: string
+    iconId: string
     bgEn: string
     bgEs: string
     bgPt: string
     bgHi: string
+    bgId: string
     titleEn: string
     titleEs: string
     titlePt: string
     titleHi: string
+    titleId: string
     contentEn: string
     contentEs: string
     contentPt: string
     contentHi: string
+    contentId: string
     urlEn: string
     urlEs: string
     urlPt: string
     urlHi: string
+    urlId: string
 }
 
 export const activityMessageApi = {

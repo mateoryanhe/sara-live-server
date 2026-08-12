@@ -351,6 +351,61 @@
               <el-input v-model="currentRow.urlHi" maxlength="512" placeholder="印地语跳转链接" show-word-limit/>
             </el-form-item>
           </el-tab-pane>
+          <el-tab-pane label="Bahasa Indonesia" name="id">
+            <el-form-item label="图标">
+              <div class="icon-upload-wrap">
+                <el-upload
+                    :before-upload="beforeImageUpload"
+                    :disabled="assetUploading.icon.id"
+                    :http-request="(opt) => doAssetUpload('icon', 'id', opt)"
+                    :show-file-list="false"
+                    accept="image/*"
+                    action="#"
+                    class="icon-uploader"
+                >
+                  <img v-if="assetPreviewUrls.icon.id" :src="assetPreviewUrls.icon.id" alt="icon" class="icon-preview"/>
+                  <div v-else class="icon-uploader-placeholder">
+                    <el-icon class="icon-uploader-icon"><Plus/></el-icon>
+                    <span>点击上传图标</span>
+                  </div>
+                </el-upload>
+                <el-button v-if="assetPreviewUrls.icon.id || currentRow.iconId" link type="danger" @click="clearAsset('icon', 'id')">
+                  移除图标
+                </el-button>
+              </div>
+            </el-form-item>
+            <el-form-item label="背景图">
+              <div class="icon-upload-wrap">
+                <el-upload
+                    :before-upload="beforeImageUpload"
+                    :disabled="assetUploading.bg.id"
+                    :http-request="(opt) => doAssetUpload('bg', 'id', opt)"
+                    :show-file-list="false"
+                    accept="image/*"
+                    action="#"
+                    class="bg-uploader"
+                >
+                  <img v-if="assetPreviewUrls.bg.id" :src="assetPreviewUrls.bg.id" alt="bg" class="bg-preview"/>
+                  <div v-else class="bg-uploader-placeholder">
+                    <el-icon class="icon-uploader-icon"><Plus/></el-icon>
+                    <span>点击上传背景图</span>
+                  </div>
+                </el-upload>
+                <el-button v-if="assetPreviewUrls.bg.id || currentRow.bgId" link type="danger" @click="clearAsset('bg', 'id')">
+                  移除背景图
+                </el-button>
+              </div>
+            </el-form-item>
+            <el-form-item label="标题">
+              <el-input v-model="currentRow.titleId" maxlength="128" placeholder="印尼语标题" show-word-limit/>
+            </el-form-item>
+            <el-form-item label="内容">
+              <el-input v-model="currentRow.contentId" :rows="5" placeholder="印尼语内容" type="textarea"/>
+            </el-form-item>
+            <el-form-item label="跳转链接">
+              <el-input v-model="currentRow.urlId" maxlength="512" placeholder="印尼语跳转链接" show-word-limit/>
+            </el-form-item>
+          </el-tab-pane>
         </el-tabs>
       </el-form>
       <template #footer>
@@ -370,16 +425,16 @@ import {dataSyncApi, uploadApi} from '@/api'
 import type {ActivityMessage} from '@/types/api'
 import {hasButtonPermission} from '@/utils/permission'
 
-type LangKey = 'en' | 'es' | 'pt' | 'hi'
+type LangKey = 'en' | 'es' | 'pt' | 'hi' | 'id'
 type AssetKind = 'icon' | 'bg'
 
 const assetFieldMap: Record<AssetKind, Record<LangKey, keyof ActivityMessageForm>> = {
-  icon: {en: 'iconEn', es: 'iconEs', pt: 'iconPt', hi: 'iconHi'},
-  bg: {en: 'bgEn', es: 'bgEs', pt: 'bgPt', hi: 'bgHi'},
+  icon: {en: 'iconEn', es: 'iconEs', pt: 'iconPt', hi: 'iconHi', id: 'iconId'},
+  bg: {en: 'bgEn', es: 'bgEs', pt: 'bgPt', hi: 'bgHi', id: 'bgId'},
 }
 
-const emptyLangRecord = () => ({en: '', es: '', pt: '', hi: ''})
-const emptyLangBoolRecord = () => ({en: false, es: false, pt: false, hi: false})
+const emptyLangRecord = () => ({en: '', es: '', pt: '', hi: '', id: ''})
+const emptyLangBoolRecord = () => ({en: false, es: false, pt: false, hi: false, id: false})
 
 interface SearchForm {
   title: string
@@ -408,22 +463,27 @@ const defaultForm = (): ActivityMessageForm => ({
   iconEs: '',
   iconPt: '',
   iconHi: '',
+  iconId: '',
   bgEn: '',
   bgEs: '',
   bgPt: '',
   bgHi: '',
+  bgId: '',
   titleEn: '',
   titleEs: '',
   titlePt: '',
   titleHi: '',
+  titleId: '',
   contentEn: '',
   contentEs: '',
   contentPt: '',
   contentHi: '',
+  contentId: '',
   urlEn: '',
   urlEs: '',
   urlPt: '',
   urlHi: '',
+  urlId: '',
 })
 const currentRow = ref<ActivityMessageForm>(defaultForm())
 const formRef = ref<FormInstance>()
@@ -515,10 +575,12 @@ const syncAssetPreviewsFromRow = (row: ActivityMessage) => {
   setAssetPreview('icon', 'es', row.iconEs || '')
   setAssetPreview('icon', 'pt', row.iconPt || '')
   setAssetPreview('icon', 'hi', row.iconHi || '')
+  setAssetPreview('icon', 'id', row.iconId || '')
   setAssetPreview('bg', 'en', row.bgEn || '')
   setAssetPreview('bg', 'es', row.bgEs || '')
   setAssetPreview('bg', 'pt', row.bgPt || '')
   setAssetPreview('bg', 'hi', row.bgHi || '')
+  setAssetPreview('bg', 'id', row.bgId || '')
 }
 
 const fetchList = async () => {
@@ -577,22 +639,27 @@ const handleEdit = (row: ActivityMessage) => {
     iconEs: row.iconEsName || '',
     iconPt: row.iconPtName || '',
     iconHi: row.iconHiName || '',
+    iconId: row.iconIdName || '',
     bgEn: row.bgEnName || '',
     bgEs: row.bgEsName || '',
     bgPt: row.bgPtName || '',
     bgHi: row.bgHiName || '',
+    bgId: row.bgIdName || '',
     titleEn: row.titleEn || '',
     titleEs: row.titleEs || '',
     titlePt: row.titlePt || '',
     titleHi: row.titleHi || '',
+    titleId: row.titleId || '',
     contentEn: row.contentEn || '',
     contentEs: row.contentEs || '',
     contentPt: row.contentPt || '',
     contentHi: row.contentHi || '',
+    contentId: row.contentId || '',
     urlEn: row.urlEn || '',
     urlEs: row.urlEs || '',
     urlPt: row.urlPt || '',
     urlHi: row.urlHi || '',
+    urlId: row.urlId || '',
   }
   syncAssetPreviewsFromRow(row)
   activeLangTab.value = 'en'

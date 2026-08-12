@@ -414,6 +414,16 @@
                   type="textarea"
               />
             </el-form-item>
+            <el-form-item label="特效说明(印尼语)" prop="animationDescId">
+              <el-input
+                  v-model="currentRow.animationDescId"
+                  :autosize="{ minRows: 3, maxRows: 6 }"
+                  maxlength="2000"
+                  placeholder="Deskripsi efek masuk dalam Bahasa Indonesia"
+                  show-word-limit
+                  type="textarea"
+              />
+            </el-form-item>
           </el-tab-pane>
 
           <el-tab-pane label="直播间公屏评论特效" name="commentEffect">
@@ -533,6 +543,16 @@
                   type="textarea"
               />
             </el-form-item>
+            <el-form-item label="特效说明(印尼语)" prop="commentEffectDescId">
+              <el-input
+                  v-model="currentRow.commentEffectDescId"
+                  :autosize="{ minRows: 3, maxRows: 6 }"
+                  maxlength="2000"
+                  placeholder="Deskripsi efek komentar layar publik dalam Bahasa Indonesia"
+                  show-word-limit
+                  type="textarea"
+              />
+            </el-form-item>
           </el-tab-pane>
 
           <el-tab-pane label="提现文本" name="withdrawText">
@@ -613,6 +633,16 @@
                   :autosize="{ minRows: 4, maxRows: 8 }"
                   maxlength="2000"
                   placeholder="हिंदी में निकासी सूचना"
+                  show-word-limit
+                  type="textarea"
+              />
+            </el-form-item>
+            <el-form-item label="提现须知(印尼语)" prop="withdrawNoticeId">
+              <el-input
+                  v-model="currentRow.withdrawNoticeId"
+                  :autosize="{ minRows: 4, maxRows: 8 }"
+                  maxlength="2000"
+                  placeholder="Pemberitahuan penarikan dalam Bahasa Indonesia"
                   show-word-limit
                   type="textarea"
               />
@@ -701,6 +731,16 @@
                   type="textarea"
               />
             </el-form-item>
+            <el-form-item label="特权说明(印尼语)" prop="customerServiceDescId">
+              <el-input
+                  v-model="currentRow.customerServiceDescId"
+                  :autosize="{ minRows: 3, maxRows: 6 }"
+                  maxlength="2000"
+                  placeholder="Deskripsi prioritas layanan pelanggan dalam Bahasa Indonesia"
+                  show-word-limit
+                  type="textarea"
+              />
+            </el-form-item>
           </el-tab-pane>
         </el-tabs>
       </el-form>
@@ -746,22 +786,26 @@ interface VipCfgForm {
   animationDescEs: string
   animationDescPt: string
   animationDescHi: string
+  animationDescId: string
   commentEffect: string
   commentEffectIcon: string
   commentEffectDescEn: string
   commentEffectDescEs: string
   commentEffectDescPt: string
   commentEffectDescHi: string
+  commentEffectDescId: string
   withdrawIcon: string
   withdrawNoticeEn: string
   withdrawNoticeEs: string
   withdrawNoticePt: string
   withdrawNoticeHi: string
+  withdrawNoticeId: string
   customerServiceIcon: string
   customerServiceDescEn: string
   customerServiceDescEs: string
   customerServiceDescPt: string
   customerServiceDescHi: string
+  customerServiceDescId: string
 }
 
 const loading = ref(false)
@@ -799,22 +843,26 @@ const defaultForm = (): VipCfgForm => ({
   animationDescEs: '',
   animationDescPt: '',
   animationDescHi: '',
+  animationDescId: '',
   commentEffect: '',
   commentEffectIcon: '',
   commentEffectDescEn: '',
   commentEffectDescEs: '',
   commentEffectDescPt: '',
   commentEffectDescHi: '',
+  commentEffectDescId: '',
   withdrawIcon: '',
   withdrawNoticeEn: '',
   withdrawNoticeEs: '',
   withdrawNoticePt: '',
   withdrawNoticeHi: '',
+  withdrawNoticeId: '',
   customerServiceIcon: '',
   customerServiceDescEn: '',
   customerServiceDescEs: '',
   customerServiceDescPt: '',
-  customerServiceDescHi: ''
+  customerServiceDescHi: '',
+  customerServiceDescId: ''
 })
 const currentRow = ref<VipCfgForm>(defaultForm())
 const formRef = ref<FormInstance>()
@@ -1230,22 +1278,26 @@ const handleEdit = (row: VipCfg) => {
     animationDescEs: row.animationDescEs || '',
     animationDescPt: row.animationDescPt || '',
     animationDescHi: row.animationDescHi || '',
+    animationDescId: row.animationDescId || '',
     commentEffect: commentEffectName,
     commentEffectIcon: commentEffectIconName,
     commentEffectDescEn: row.commentEffectDescEn || '',
     commentEffectDescEs: row.commentEffectDescEs || '',
     commentEffectDescPt: row.commentEffectDescPt || '',
     commentEffectDescHi: row.commentEffectDescHi || '',
+    commentEffectDescId: row.commentEffectDescId || '',
     withdrawIcon: withdrawIconName,
     withdrawNoticeEn: row.withdrawNoticeEn || '',
     withdrawNoticeEs: row.withdrawNoticeEs || '',
     withdrawNoticePt: row.withdrawNoticePt || '',
     withdrawNoticeHi: row.withdrawNoticeHi || '',
+    withdrawNoticeId: row.withdrawNoticeId || '',
     customerServiceIcon: customerServiceIconName,
     customerServiceDescEn: row.customerServiceDescEn || '',
     customerServiceDescEs: row.customerServiceDescEs || '',
     customerServiceDescPt: row.customerServiceDescPt || '',
-    customerServiceDescHi: row.customerServiceDescHi || ''
+    customerServiceDescHi: row.customerServiceDescHi || '',
+    customerServiceDescId: row.customerServiceDescId || ''
   }
   if (animationName && resolveMediaPreviewType(row.animation || '', animationName) === 'video') {
     setAnimationPreview(row.animation || '')
@@ -1323,22 +1375,26 @@ const handleSave = async () => {
         animationDescEs: currentRow.value.animationDescEs,
         animationDescPt: currentRow.value.animationDescPt,
         animationDescHi: currentRow.value.animationDescHi,
+        animationDescId: currentRow.value.animationDescId,
         commentEffect: currentRow.value.commentEffect,
         commentEffectIcon: currentRow.value.commentEffectIcon,
         commentEffectDescEn: currentRow.value.commentEffectDescEn,
         commentEffectDescEs: currentRow.value.commentEffectDescEs,
         commentEffectDescPt: currentRow.value.commentEffectDescPt,
         commentEffectDescHi: currentRow.value.commentEffectDescHi,
+        commentEffectDescId: currentRow.value.commentEffectDescId,
         withdrawIcon: currentRow.value.withdrawIcon,
         withdrawNoticeEn: currentRow.value.withdrawNoticeEn,
         withdrawNoticeEs: currentRow.value.withdrawNoticeEs,
         withdrawNoticePt: currentRow.value.withdrawNoticePt,
         withdrawNoticeHi: currentRow.value.withdrawNoticeHi,
+        withdrawNoticeId: currentRow.value.withdrawNoticeId,
         customerServiceIcon: currentRow.value.customerServiceIcon,
         customerServiceDescEn: currentRow.value.customerServiceDescEn,
         customerServiceDescEs: currentRow.value.customerServiceDescEs,
         customerServiceDescPt: currentRow.value.customerServiceDescPt,
-        customerServiceDescHi: currentRow.value.customerServiceDescHi
+        customerServiceDescHi: currentRow.value.customerServiceDescHi,
+        customerServiceDescId: currentRow.value.customerServiceDescId
       }
       if (currentRow.value.id) {
         await vipCfgApi.updateVipCfg({id: currentRow.value.id, ...payload})

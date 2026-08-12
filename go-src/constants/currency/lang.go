@@ -9,6 +9,7 @@ const (
 	LangZHCN = lang.LangZHCN
 	LangZHTW = lang.LangZHTW
 	LangEN   = lang.LangEN
+	LangID   = lang.LangID
 )
 
 // DefaultLang 默认语言

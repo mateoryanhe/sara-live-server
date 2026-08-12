@@ -36,6 +36,7 @@ type VipCfgListRes struct {
 	AnimationDescEs         string  `json:"animationDescEs" dc:"进场特效说明(西班牙语)"`
 	AnimationDescPt         string  `json:"animationDescPt" dc:"进场特效说明(葡萄牙语)"`
 	AnimationDescHi         string  `json:"animationDescHi" dc:"进场特效说明(印地语)"`
+	AnimationDescId         string  `json:"animationDescId" dc:"进场特效说明(印尼语)"`
 	CommentEffect           string  `json:"commentEffect" dc:"公屏评论特效动画完整URL(列表展示)"`
 	CommentEffectName       string  `json:"commentEffectName" dc:"公屏评论特效动画资源文件名(编辑保存用)"`
 	CommentEffectIcon       string  `json:"commentEffectIcon" dc:"公屏评论特效图标完整URL(列表展示)"`
@@ -44,18 +45,21 @@ type VipCfgListRes struct {
 	CommentEffectDescEs     string  `json:"commentEffectDescEs" dc:"公屏评论特效说明(西班牙语)"`
 	CommentEffectDescPt     string  `json:"commentEffectDescPt" dc:"公屏评论特效说明(葡萄牙语)"`
 	CommentEffectDescHi     string  `json:"commentEffectDescHi" dc:"公屏评论特效说明(印地语)"`
+	CommentEffectDescId     string  `json:"commentEffectDescId" dc:"公屏评论特效说明(印尼语)"`
 	WithdrawIcon            string  `json:"withdrawIcon" dc:"提现图标完整URL(列表展示)"`
 	WithdrawIconName        string  `json:"withdrawIconName" dc:"提现图标资源文件名(编辑保存用)"`
 	WithdrawNoticeEn        string  `json:"withdrawNoticeEn" dc:"提现须知(英文)"`
 	WithdrawNoticeEs        string  `json:"withdrawNoticeEs" dc:"提现须知(西班牙语)"`
 	WithdrawNoticePt        string  `json:"withdrawNoticePt" dc:"提现须知(葡萄牙语)"`
 	WithdrawNoticeHi        string  `json:"withdrawNoticeHi" dc:"提现须知(印地语)"`
+	WithdrawNoticeId        string  `json:"withdrawNoticeId" dc:"提现须知(印尼语)"`
 	CustomerServiceIcon     string  `json:"customerServiceIcon" dc:"客服优先图标完整URL(列表展示)"`
 	CustomerServiceIconName string  `json:"customerServiceIconName" dc:"客服优先图标资源文件名(编辑保存用)"`
 	CustomerServiceDescEn   string  `json:"customerServiceDescEn" dc:"客服优先说明(英文)"`
 	CustomerServiceDescEs   string  `json:"customerServiceDescEs" dc:"客服优先说明(西班牙语)"`
 	CustomerServiceDescPt   string  `json:"customerServiceDescPt" dc:"客服优先说明(葡萄牙语)"`
 	CustomerServiceDescHi   string  `json:"customerServiceDescHi" dc:"客服优先说明(印地语)"`
+	CustomerServiceDescId   string  `json:"customerServiceDescId" dc:"客服优先说明(印尼语)"`
 	CreatedAt               string  `json:"createdAt"`
 	UpdatedAt               string  `json:"updatedAt"`
 }
@@ -80,22 +84,26 @@ type CreateVipCfgReq struct {
 	AnimationDescEs       string  `json:"animationDescEs" dc:"进场特效说明(西班牙语)"`
 	AnimationDescPt       string  `json:"animationDescPt" dc:"进场特效说明(葡萄牙语)"`
 	AnimationDescHi       string  `json:"animationDescHi" dc:"进场特效说明(印地语)"`
+	AnimationDescId       string  `json:"animationDescId" dc:"进场特效说明(印尼语)"`
 	CommentEffect         string  `json:"commentEffect" dc:"公屏评论特效动画资源文件名(mp4)"`
 	CommentEffectIcon     string  `json:"commentEffectIcon" dc:"公屏评论特效图标资源文件名"`
 	CommentEffectDescEn   string  `json:"commentEffectDescEn" dc:"公屏评论特效说明(英文)"`
 	CommentEffectDescEs   string  `json:"commentEffectDescEs" dc:"公屏评论特效说明(西班牙语)"`
 	CommentEffectDescPt   string  `json:"commentEffectDescPt" dc:"公屏评论特效说明(葡萄牙语)"`
 	CommentEffectDescHi   string  `json:"commentEffectDescHi" dc:"公屏评论特效说明(印地语)"`
+	CommentEffectDescId   string  `json:"commentEffectDescId" dc:"公屏评论特效说明(印尼语)"`
 	WithdrawIcon          string  `json:"withdrawIcon" dc:"提现图标资源文件名"`
 	WithdrawNoticeEn      string  `json:"withdrawNoticeEn" dc:"提现须知(英文)"`
 	WithdrawNoticeEs      string  `json:"withdrawNoticeEs" dc:"提现须知(西班牙语)"`
 	WithdrawNoticePt      string  `json:"withdrawNoticePt" dc:"提现须知(葡萄牙语)"`
 	WithdrawNoticeHi      string  `json:"withdrawNoticeHi" dc:"提现须知(印地语)"`
+	WithdrawNoticeId      string  `json:"withdrawNoticeId" dc:"提现须知(印尼语)"`
 	CustomerServiceIcon   string  `json:"customerServiceIcon" dc:"客服优先图标资源文件名"`
 	CustomerServiceDescEn string  `json:"customerServiceDescEn" dc:"客服优先说明(英文)"`
 	CustomerServiceDescEs string  `json:"customerServiceDescEs" dc:"客服优先说明(西班牙语)"`
 	CustomerServiceDescPt string  `json:"customerServiceDescPt" dc:"客服优先说明(葡萄牙语)"`
 	CustomerServiceDescHi string  `json:"customerServiceDescHi" dc:"客服优先说明(印地语)"`
+	CustomerServiceDescId string  `json:"customerServiceDescId" dc:"客服优先说明(印尼语)"`
 }
 
 type CreateVipCfgRes struct {
@@ -123,22 +131,26 @@ type UpdateVipCfgReq struct {
 	AnimationDescEs       string  `json:"animationDescEs" dc:"进场特效说明(西班牙语)"`
 	AnimationDescPt       string  `json:"animationDescPt" dc:"进场特效说明(葡萄牙语)"`
 	AnimationDescHi       string  `json:"animationDescHi" dc:"进场特效说明(印地语)"`
+	AnimationDescId       string  `json:"animationDescId" dc:"进场特效说明(印尼语)"`
 	CommentEffect         string  `json:"commentEffect" dc:"公屏评论特效动画资源文件名(mp4)"`
 	CommentEffectIcon     string  `json:"commentEffectIcon" dc:"公屏评论特效图标资源文件名"`
 	CommentEffectDescEn   string  `json:"commentEffectDescEn" dc:"公屏评论特效说明(英文)"`
 	CommentEffectDescEs   string  `json:"commentEffectDescEs" dc:"公屏评论特效说明(西班牙语)"`
 	CommentEffectDescPt   string  `json:"commentEffectDescPt" dc:"公屏评论特效说明(葡萄牙语)"`
 	CommentEffectDescHi   string  `json:"commentEffectDescHi" dc:"公屏评论特效说明(印地语)"`
+	CommentEffectDescId   string  `json:"commentEffectDescId" dc:"公屏评论特效说明(印尼语)"`
 	WithdrawIcon          string  `json:"withdrawIcon" dc:"提现图标资源文件名"`
 	WithdrawNoticeEn      string  `json:"withdrawNoticeEn" dc:"提现须知(英文)"`
 	WithdrawNoticeEs      string  `json:"withdrawNoticeEs" dc:"提现须知(西班牙语)"`
 	WithdrawNoticePt      string  `json:"withdrawNoticePt" dc:"提现须知(葡萄牙语)"`
 	WithdrawNoticeHi      string  `json:"withdrawNoticeHi" dc:"提现须知(印地语)"`
+	WithdrawNoticeId      string  `json:"withdrawNoticeId" dc:"提现须知(印尼语)"`
 	CustomerServiceIcon   string  `json:"customerServiceIcon" dc:"客服优先图标资源文件名"`
 	CustomerServiceDescEn string  `json:"customerServiceDescEn" dc:"客服优先说明(英文)"`
 	CustomerServiceDescEs string  `json:"customerServiceDescEs" dc:"客服优先说明(西班牙语)"`
 	CustomerServiceDescPt string  `json:"customerServiceDescPt" dc:"客服优先说明(葡萄牙语)"`
 	CustomerServiceDescHi string  `json:"customerServiceDescHi" dc:"客服优先说明(印地语)"`
+	CustomerServiceDescId string  `json:"customerServiceDescId" dc:"客服优先说明(印尼语)"`
 }
 
 type UpdateVipCfgRes struct {
@@ -171,6 +183,7 @@ type AppVipPrivilegeI18nText struct {
 	Es string `json:"es" dc:"西班牙语"`
 	Pt string `json:"pt" dc:"葡萄牙语"`
 	Hi string `json:"hi" dc:"印地语"`
+	Id string `json:"id" dc:"印尼语"`
 }
 
 // AppVipPrivilegeItem App端VIP特权项(按开关动态组装)

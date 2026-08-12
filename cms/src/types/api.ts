@@ -510,6 +510,7 @@ export interface Gift {
     nameEs: string
     namePt: string
     nameHi: string
+    nameId: string
     icon: string
     iconName: string
     animation: string
@@ -583,6 +584,7 @@ export interface VipCfg {
     animationDescEs?: string
     animationDescPt?: string
     animationDescHi?: string
+    animationDescId?: string
     commentEffect?: string
     commentEffectName?: string
     commentEffectIcon?: string
@@ -591,18 +593,21 @@ export interface VipCfg {
     commentEffectDescEs?: string
     commentEffectDescPt?: string
     commentEffectDescHi?: string
+    commentEffectDescId?: string
     withdrawIcon?: string
     withdrawIconName?: string
     withdrawNoticeEn?: string
     withdrawNoticeEs?: string
     withdrawNoticePt?: string
     withdrawNoticeHi?: string
+    withdrawNoticeId?: string
     customerServiceIcon?: string
     customerServiceIconName?: string
     customerServiceDescEn?: string
     customerServiceDescEs?: string
     customerServiceDescPt?: string
     customerServiceDescHi?: string
+    customerServiceDescId?: string
     createdAt: string
     updatedAt: string
 }
@@ -659,6 +664,8 @@ export interface ActivityMessage {
     iconPtName: string
     iconHi: string
     iconHiName: string
+    iconId: string
+    iconIdName: string
     bgEn: string
     bgEnName: string
     bgEs: string
@@ -667,18 +674,23 @@ export interface ActivityMessage {
     bgPtName: string
     bgHi: string
     bgHiName: string
+    bgId: string
+    bgIdName: string
     titleEn: string
     titleEs: string
     titlePt: string
     titleHi: string
+    titleId: string
     contentEn: string
     contentEs: string
     contentPt: string
     contentHi: string
+    contentId: string
     urlEn: string
     urlEs: string
     urlPt: string
     urlHi: string
+    urlId: string
     status: number
     publishedAt: string
     createdAt: string

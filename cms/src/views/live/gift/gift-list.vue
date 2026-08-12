@@ -57,6 +57,7 @@
           <el-table-column label="名称(西班牙语)" prop="nameEs" min-width="120" show-overflow-tooltip/>
           <el-table-column label="名称(葡萄牙语)" prop="namePt" min-width="120" show-overflow-tooltip/>
           <el-table-column label="名称(印地语)" prop="nameHi" min-width="120" show-overflow-tooltip/>
+          <el-table-column label="名称(印尼语)" prop="nameId" min-width="120" show-overflow-tooltip/>
           <el-table-column label="图标" width="90">
             <template #default="{ row }">
               <el-image
@@ -165,6 +166,9 @@
         </el-form-item>
         <el-form-item label="名称(印地语)" prop="nameHi">
           <el-input v-model="currentRow.nameHi" placeholder="请输入印地语名称"/>
+        </el-form-item>
+        <el-form-item label="名称(印尼语)" prop="nameId">
+          <el-input v-model="currentRow.nameId" placeholder="请输入印尼语名称"/>
         </el-form-item>
         <el-form-item label="图标" prop="icon">
           <div class="asset-upload-wrap">
@@ -293,6 +297,7 @@ interface GiftForm {
   nameEs: string
   namePt: string
   nameHi: string
+  nameId: string
   icon: string
   animation: string
   price: number
@@ -324,6 +329,7 @@ const defaultForm = (): GiftForm => ({
   nameEs: '',
   namePt: '',
   nameHi: '',
+  nameId: '',
   icon: '',
   animation: '',
   price: 0,
@@ -466,6 +472,7 @@ const formRules: FormRules = {
   nameEs: [{max: 64, message: '西班牙语名称最长64字符', trigger: 'blur'}],
   namePt: [{max: 64, message: '葡萄牙语名称最长64字符', trigger: 'blur'}],
   nameHi: [{max: 64, message: '印地语名称最长64字符', trigger: 'blur'}],
+  nameId: [{max: 64, message: '印尼语名称最长64字符', trigger: 'blur'}],
   icon: [],
   animation: [],
   category: [
@@ -532,6 +539,7 @@ const handleEdit = (row: Gift) => {
     nameEs: row.nameEs || '',
     namePt: row.namePt || '',
     nameHi: row.nameHi || '',
+    nameId: row.nameId || '',
     icon: iconName,
     animation: animationName,
     price: truncateNumber(row.price),
@@ -605,8 +613,8 @@ const handleSave = async () => {
         if (currentRow.value.id) {
           await giftApi.updateGift(currentRow.value)
         } else {
-          const {name, nameEn, nameEs, namePt, nameHi, icon, animation, price, category, sort, description} = currentRow.value
-          await giftApi.createGift({name, nameEn, nameEs, namePt, nameHi, icon, animation, price, category, sort, description})
+          const {name, nameEn, nameEs, namePt, nameHi, nameId, icon, animation, price, category, sort, description} = currentRow.value
+          await giftApi.createGift({name, nameEn, nameEs, namePt, nameHi, nameId, icon, animation, price, category, sort, description})
         }
 
         ElMessage.success(currentRow.value.id ? '更新成功' : '创建成功')

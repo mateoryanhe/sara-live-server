@@ -96,6 +96,7 @@ func toAppGiftItem(g *entity.LiveGift) *giftdto.AppGiftItem {
 		NameEs:      g.NameEs,
 		NamePt:      g.NamePt,
 		NameHi:      g.NameHi,
+		NameId:      g.NameId,
 		Icon:        upload.GetUrlByName(g.Icon),
 		Animation:   upload.GetUrlByName(g.Animation),
 		Price:       g.Price,
