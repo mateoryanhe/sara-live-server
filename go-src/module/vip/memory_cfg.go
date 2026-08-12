@@ -98,7 +98,7 @@ func findVipCfgByLevelFromMemory(level uint32, excludeID uint64) *entity.VipCfg 
 	return row
 }
 
-func listVipCfgFromMemory(levelName string, withdrawSwitchFilter int) []*entity.VipCfg {
+func listVipCfgFromMemory(levelName string) []*entity.VipCfg {
 	keyword := strings.ToLower(strings.TrimSpace(levelName))
 	rows := getVipCfgSnapshot().allList
 	filtered := make([]*entity.VipCfg, 0, len(rows))
@@ -108,16 +108,6 @@ func listVipCfgFromMemory(levelName string, withdrawSwitchFilter int) []*entity.
 		}
 		if keyword != "" && !strings.Contains(strings.ToLower(row.LevelName), keyword) {
 			continue
-		}
-		switch withdrawSwitchFilter {
-		case 1:
-			if row.WithdrawSwitch != entity.VipCfgSwitchOff {
-				continue
-			}
-		case 2:
-			if row.WithdrawSwitch != entity.VipCfgSwitchOn {
-				continue
-			}
 		}
 		filtered = append(filtered, row)
 	}
@@ -160,18 +150,19 @@ func toVipCfgListRes(row *entity.VipCfg) *vipcfgdto.VipCfgListRes {
 		LevelName:               row.LevelName,
 		LevelIconName:           row.LevelIcon,
 		LevelIcon:               upload.GetUrlByName(row.LevelIcon),
-		WithdrawSwitch:          row.WithdrawSwitch,
 		AnimationSwitch:         row.AnimationSwitch,
 		CommentEffectSwitch:     row.CommentEffectSwitch,
 		CustomerServiceSwitch:   row.CustomerServiceSwitch,
 		UpgradeRechargeLimit:    row.UpgradeRechargeLimit,
-		MinWithdrawAmount:       row.MinWithdrawAmount,
-		MaxWithdrawAmount:       row.MaxWithdrawAmount,
-		Fee:                     row.Fee,
 		AnimationName:           row.Animation,
 		Animation:               upload.GetUrlByName(row.Animation),
 		AnimationIconName:       row.AnimationIcon,
 		AnimationIcon:           upload.GetUrlByName(row.AnimationIcon),
+		AnimationTitleEn:        row.AnimationTitleEn,
+		AnimationTitleEs:        row.AnimationTitleEs,
+		AnimationTitlePt:        row.AnimationTitlePt,
+		AnimationTitleHi:        row.AnimationTitleHi,
+		AnimationTitleId:        row.AnimationTitleId,
 		AnimationDescEn:         row.AnimationDescEn,
 		AnimationDescEs:         row.AnimationDescEs,
 		AnimationDescPt:         row.AnimationDescPt,
@@ -181,20 +172,23 @@ func toVipCfgListRes(row *entity.VipCfg) *vipcfgdto.VipCfgListRes {
 		CommentEffect:           upload.GetUrlByName(row.CommentEffect),
 		CommentEffectIconName:   row.CommentEffectIcon,
 		CommentEffectIcon:       upload.GetUrlByName(row.CommentEffectIcon),
+		CommentEffectTitleEn:    row.CommentEffectTitleEn,
+		CommentEffectTitleEs:    row.CommentEffectTitleEs,
+		CommentEffectTitlePt:    row.CommentEffectTitlePt,
+		CommentEffectTitleHi:    row.CommentEffectTitleHi,
+		CommentEffectTitleId:    row.CommentEffectTitleId,
 		CommentEffectDescEn:     row.CommentEffectDescEn,
 		CommentEffectDescEs:     row.CommentEffectDescEs,
 		CommentEffectDescPt:     row.CommentEffectDescPt,
 		CommentEffectDescHi:     row.CommentEffectDescHi,
 		CommentEffectDescId:     row.CommentEffectDescId,
-		WithdrawIconName:        row.WithdrawIcon,
-		WithdrawIcon:            upload.GetUrlByName(row.WithdrawIcon),
-		WithdrawNoticeEn:        row.WithdrawNoticeEn,
-		WithdrawNoticeEs:        row.WithdrawNoticeEs,
-		WithdrawNoticePt:        row.WithdrawNoticePt,
-		WithdrawNoticeHi:        row.WithdrawNoticeHi,
-		WithdrawNoticeId:        row.WithdrawNoticeId,
 		CustomerServiceIconName: row.CustomerServiceIcon,
 		CustomerServiceIcon:     upload.GetUrlByName(row.CustomerServiceIcon),
+		CustomerServiceTitleEn:  row.CustomerServiceTitleEn,
+		CustomerServiceTitleEs:  row.CustomerServiceTitleEs,
+		CustomerServiceTitlePt:  row.CustomerServiceTitlePt,
+		CustomerServiceTitleHi:  row.CustomerServiceTitleHi,
+		CustomerServiceTitleId:  row.CustomerServiceTitleId,
 		CustomerServiceDescEn:   row.CustomerServiceDescEn,
 		CustomerServiceDescEs:   row.CustomerServiceDescEs,
 		CustomerServiceDescPt:   row.CustomerServiceDescPt,
@@ -210,7 +204,7 @@ func queryVipCfgListFromMemory(req *vipcfgdto.VipCfgListReq) (int, []*vipcfgdto.
 		return 0, []*vipcfgdto.VipCfgListRes{}
 	}
 	rows, total := paginateVipCfgList(
-		listVipCfgFromMemory(req.LevelName, req.WithdrawSwitchFilter),
+		listVipCfgFromMemory(req.LevelName),
 		req.PageIndex,
 		req.PageSize,
 	)
@@ -238,22 +232,13 @@ func buildAppVipPrivilegeList(row *entity.VipCfg) []*vipcfgdto.AppVipPrivilegeIt
 	if row == nil {
 		return []*vipcfgdto.AppVipPrivilegeItem{}
 	}
-	list := make([]*vipcfgdto.AppVipPrivilegeItem, 0, 4)
-	if row.WithdrawSwitch == entity.VipCfgSwitchOn {
-		list = append(list, &vipcfgdto.AppVipPrivilegeItem{
-			PrivilegeType:     vipcfgdto.AppVipPrivilegeTypeWithdraw,
-			Icon:              upload.GetUrlByName(row.WithdrawIcon),
-			Desc:              appVipPrivilegeDesc(row.WithdrawNoticeEn, row.WithdrawNoticeEs, row.WithdrawNoticePt, row.WithdrawNoticeHi, row.WithdrawNoticeId),
-			MinWithdrawAmount: row.MinWithdrawAmount,
-			MaxWithdrawAmount: row.MaxWithdrawAmount,
-			Fee:               row.Fee,
-		})
-	}
+	list := make([]*vipcfgdto.AppVipPrivilegeItem, 0, 3)
 	if row.AnimationSwitch == entity.VipCfgSwitchOn {
 		list = append(list, &vipcfgdto.AppVipPrivilegeItem{
 			PrivilegeType: vipcfgdto.AppVipPrivilegeTypeEntryEffect,
 			Icon:          upload.GetUrlByName(row.AnimationIcon),
-			Desc:          appVipPrivilegeDesc(row.AnimationDescEn, row.AnimationDescEs, row.AnimationDescPt, row.AnimationDescHi, row.AnimationDescId),
+			Title:         appVipPrivilegeI18nText(row.AnimationTitleEn, row.AnimationTitleEs, row.AnimationTitlePt, row.AnimationTitleHi, row.AnimationTitleId),
+			Desc:          appVipPrivilegeI18nText(row.AnimationDescEn, row.AnimationDescEs, row.AnimationDescPt, row.AnimationDescHi, row.AnimationDescId),
 			Animation:     upload.GetUrlByName(row.Animation),
 		})
 	}
@@ -261,7 +246,8 @@ func buildAppVipPrivilegeList(row *entity.VipCfg) []*vipcfgdto.AppVipPrivilegeIt
 		list = append(list, &vipcfgdto.AppVipPrivilegeItem{
 			PrivilegeType: vipcfgdto.AppVipPrivilegeTypeCommentEffect,
 			Icon:          upload.GetUrlByName(row.CommentEffectIcon),
-			Desc:          appVipPrivilegeDesc(row.CommentEffectDescEn, row.CommentEffectDescEs, row.CommentEffectDescPt, row.CommentEffectDescHi, row.CommentEffectDescId),
+			Title:         appVipPrivilegeI18nText(row.CommentEffectTitleEn, row.CommentEffectTitleEs, row.CommentEffectTitlePt, row.CommentEffectTitleHi, row.CommentEffectTitleId),
+			Desc:          appVipPrivilegeI18nText(row.CommentEffectDescEn, row.CommentEffectDescEs, row.CommentEffectDescPt, row.CommentEffectDescHi, row.CommentEffectDescId),
 			Animation:     upload.GetUrlByName(row.CommentEffect),
 		})
 	}
@@ -269,13 +255,14 @@ func buildAppVipPrivilegeList(row *entity.VipCfg) []*vipcfgdto.AppVipPrivilegeIt
 		list = append(list, &vipcfgdto.AppVipPrivilegeItem{
 			PrivilegeType: vipcfgdto.AppVipPrivilegeTypeCustomerService,
 			Icon:          upload.GetUrlByName(row.CustomerServiceIcon),
-			Desc:          appVipPrivilegeDesc(row.CustomerServiceDescEn, row.CustomerServiceDescEs, row.CustomerServiceDescPt, row.CustomerServiceDescHi, row.CustomerServiceDescId),
+			Title:         appVipPrivilegeI18nText(row.CustomerServiceTitleEn, row.CustomerServiceTitleEs, row.CustomerServiceTitlePt, row.CustomerServiceTitleHi, row.CustomerServiceTitleId),
+			Desc:          appVipPrivilegeI18nText(row.CustomerServiceDescEn, row.CustomerServiceDescEs, row.CustomerServiceDescPt, row.CustomerServiceDescHi, row.CustomerServiceDescId),
 		})
 	}
 	return list
 }
 
-func appVipPrivilegeDesc(en, es, pt, hi, id string) vipcfgdto.AppVipPrivilegeI18nText {
+func appVipPrivilegeI18nText(en, es, pt, hi, id string) vipcfgdto.AppVipPrivilegeI18nText {
 	return vipcfgdto.AppVipPrivilegeI18nText{
 		En: en,
 		Es: es,

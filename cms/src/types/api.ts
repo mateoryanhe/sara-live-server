@@ -568,18 +568,19 @@ export interface VipCfg {
     levelName: string
     levelIcon?: string
     levelIconName?: string
-    withdrawSwitch?: number
     animationSwitch?: number
     commentEffectSwitch?: number
     customerServiceSwitch?: number
     upgradeRechargeLimit: number
-    minWithdrawAmount: number
-    maxWithdrawAmount: number
-    fee: number
     animation?: string
     animationName?: string
     animationIcon?: string
     animationIconName?: string
+    animationTitleEn?: string
+    animationTitleEs?: string
+    animationTitlePt?: string
+    animationTitleHi?: string
+    animationTitleId?: string
     animationDescEn?: string
     animationDescEs?: string
     animationDescPt?: string
@@ -589,20 +590,23 @@ export interface VipCfg {
     commentEffectName?: string
     commentEffectIcon?: string
     commentEffectIconName?: string
+    commentEffectTitleEn?: string
+    commentEffectTitleEs?: string
+    commentEffectTitlePt?: string
+    commentEffectTitleHi?: string
+    commentEffectTitleId?: string
     commentEffectDescEn?: string
     commentEffectDescEs?: string
     commentEffectDescPt?: string
     commentEffectDescHi?: string
     commentEffectDescId?: string
-    withdrawIcon?: string
-    withdrawIconName?: string
-    withdrawNoticeEn?: string
-    withdrawNoticeEs?: string
-    withdrawNoticePt?: string
-    withdrawNoticeHi?: string
-    withdrawNoticeId?: string
     customerServiceIcon?: string
     customerServiceIconName?: string
+    customerServiceTitleEn?: string
+    customerServiceTitleEs?: string
+    customerServiceTitlePt?: string
+    customerServiceTitleHi?: string
+    customerServiceTitleId?: string
     customerServiceDescEn?: string
     customerServiceDescEs?: string
     customerServiceDescPt?: string
@@ -614,7 +618,6 @@ export interface VipCfg {
 
 export interface VipCfgQuery extends PageQuery {
     levelName?: string
-    withdrawSwitchFilter?: number
 }
 
 // App包管理

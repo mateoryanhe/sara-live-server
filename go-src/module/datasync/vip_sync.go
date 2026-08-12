@@ -103,7 +103,6 @@ func collectVipCfgFileNames(rows []*entity.VipCfg) []string {
 		}
 		for _, name := range []string{
 			row.LevelIcon,
-			row.WithdrawIcon,
 			row.Animation,
 			row.AnimationIcon,
 			row.CommentEffect,

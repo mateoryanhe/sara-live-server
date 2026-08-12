@@ -5,16 +5,17 @@ type VipCfgSavePayload = {
     level: number
     levelName: string
     levelIcon?: string
-    withdrawSwitch: number
     animationSwitch: number
     commentEffectSwitch: number
     customerServiceSwitch: number
     upgradeRechargeLimit: number
-    minWithdrawAmount: number
-    maxWithdrawAmount: number
-    fee: number
     animation?: string
     animationIcon?: string
+    animationTitleEn?: string
+    animationTitleEs?: string
+    animationTitlePt?: string
+    animationTitleHi?: string
+    animationTitleId?: string
     animationDescEn?: string
     animationDescEs?: string
     animationDescPt?: string
@@ -22,18 +23,22 @@ type VipCfgSavePayload = {
     animationDescId?: string
     commentEffect?: string
     commentEffectIcon?: string
+    commentEffectTitleEn?: string
+    commentEffectTitleEs?: string
+    commentEffectTitlePt?: string
+    commentEffectTitleHi?: string
+    commentEffectTitleId?: string
     commentEffectDescEn?: string
     commentEffectDescEs?: string
     commentEffectDescPt?: string
     commentEffectDescHi?: string
     commentEffectDescId?: string
-    withdrawIcon?: string
-    withdrawNoticeEn?: string
-    withdrawNoticeEs?: string
-    withdrawNoticePt?: string
-    withdrawNoticeHi?: string
-    withdrawNoticeId?: string
     customerServiceIcon?: string
+    customerServiceTitleEn?: string
+    customerServiceTitleEs?: string
+    customerServiceTitlePt?: string
+    customerServiceTitleHi?: string
+    customerServiceTitleId?: string
     customerServiceDescEn?: string
     customerServiceDescEs?: string
     customerServiceDescPt?: string

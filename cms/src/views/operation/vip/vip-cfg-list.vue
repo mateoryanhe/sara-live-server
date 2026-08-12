@@ -26,13 +26,6 @@
           <el-form-item :label="t('pages.vipCfgList.levelName')">
             <el-input v-model="searchForm.levelName" clearable :placeholder="t('pages.vipCfgList.levelNameFuzzy')"/>
           </el-form-item>
-          <el-form-item :label="t('pages.vipCfgList.withdrawSwitchFilter')">
-            <el-select v-model="searchForm.withdrawSwitchFilter" :placeholder="t('common.all')" style="width: 140px">
-              <el-option :value="0" :label="t('common.all')"/>
-              <el-option :value="2" :label="t('pages.vipCfgList.onlyOn')"/>
-              <el-option :value="1" :label="t('pages.vipCfgList.onlyOff')"/>
-            </el-select>
-          </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="handleSearch">{{ t('common.search') }}</el-button>
             <el-button @click="resetSearch">{{ t('common.reset') }}</el-button>
@@ -86,26 +79,6 @@
                   preview-teleported
               />
               <span v-else>-</span>
-            </template>
-          </el-table-column>
-          <el-table-column :label="t('pages.vipCfgList.withdrawIcon')" width="100">
-            <template #default="{ row }">
-              <el-image
-                  v-if="row.withdrawIcon"
-                  :preview-src-list="[row.withdrawIcon]"
-                  :src="row.withdrawIcon"
-                  class="table-icon-preview"
-                  fit="cover"
-                  preview-teleported
-              />
-              <span v-else>-</span>
-            </template>
-          </el-table-column>
-          <el-table-column :label="t('pages.vipCfgList.withdrawSwitch')" width="100">
-            <template #default="{ row }">
-              <el-tag :type="row.withdrawSwitch === 1 ? 'success' : 'info'">
-                {{ row.withdrawSwitch === 1 ? t('common.on') : t('common.off') }}
-              </el-tag>
             </template>
           </el-table-column>
           <el-table-column :label="t('pages.vipCfgList.entryEffectSwitch')" width="120">
@@ -172,21 +145,6 @@
               {{ formatAmount(row.upgradeRechargeLimit) }}
             </template>
           </el-table-column>
-          <el-table-column :label="t('pages.vipCfgList.minWithdrawAmount')" width="130">
-            <template #default="{ row }">
-              {{ formatAmount(row.minWithdrawAmount) }}
-            </template>
-          </el-table-column>
-          <el-table-column :label="t('pages.vipCfgList.maxWithdrawAmount')" width="130">
-            <template #default="{ row }">
-              {{ formatAmount(row.maxWithdrawAmount) }}
-            </template>
-          </el-table-column>
-          <el-table-column :label="t('pages.vipCfgList.fee')" width="100">
-            <template #default="{ row }">
-              {{ formatAmount(row.fee) }}
-            </template>
-          </el-table-column>
           <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
           <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
           <el-table-column fixed="right" :label="t('common.actions')" width="180">
@@ -211,7 +169,7 @@
       </div>
     </el-card>
 
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="720px">
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" destroy-on-close width="720px">
       <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="130px">
         <el-tabs v-model="activeTab">
           <el-tab-pane :label="t('pages.vipCfgList.tabBasic')" name="basic">
@@ -265,36 +223,9 @@
               />
               <div class="form-tip">{{ t('pages.vipCfgList.decimalExample') }}</div>
             </el-form-item>
-            <el-form-item :label="t('pages.vipCfgList.minWithdrawAmount')" prop="minWithdrawAmount">
-              <el-input-number
-                  v-model="currentRow.minWithdrawAmount"
-                  :min="0"
-                  :precision="NUMBER_INPUT_DECIMALS"
-                  :step="0.0001"
-                  controls-position="right"
-              />
-              <div class="form-tip">{{ t('pages.vipCfgList.decimalTip') }}</div>
-            </el-form-item>
-            <el-form-item :label="t('pages.vipCfgList.maxWithdrawAmount')" prop="maxWithdrawAmount">
-              <el-input-number
-                  v-model="currentRow.maxWithdrawAmount"
-                  :min="0"
-                  :precision="NUMBER_INPUT_DECIMALS"
-                  :step="0.0001"
-                  controls-position="right"
-              />
-              <div class="form-tip">{{ t('pages.vipCfgList.maxWithdrawZeroTip') }}</div>
-            </el-form-item>
-            <el-form-item :label="t('pages.vipCfgList.fee')" prop="fee">
-              <el-input-number
-                  v-model="currentRow.fee"
-                  :min="0"
-                  :precision="NUMBER_INPUT_DECIMALS"
-                  :step="0.0001"
-                  controls-position="right"
-              />
-              <div class="form-tip">{{ t('pages.vipCfgList.decimalTip') }}</div>
-            </el-form-item>
+            <el-alert :closable="false" show-icon type="info" class="form-tip-block">
+              {{ t('pages.vipCfgList.titleEditTip') }}
+            </el-alert>
           </el-tab-pane>
 
           <el-tab-pane :label="t('pages.vipCfgList.tabEntryEffect')" name="entryEffect">
@@ -373,6 +304,21 @@
                   {{ t('pages.vipCfgList.removeIcon') }}
                 </el-button>
               </div>
+            </el-form-item>
+            <el-form-item :label="t('pages.vipCfgList.effectTitleEn')" prop="animationTitleEn">
+              <el-input v-model="currentRow.animationTitleEn" maxlength="128" placeholder="Entry effect title in English" show-word-limit/>
+            </el-form-item>
+            <el-form-item :label="t('pages.vipCfgList.effectTitleEs')" prop="animationTitleEs">
+              <el-input v-model="currentRow.animationTitleEs" maxlength="128" placeholder="Título del efecto de entrada en español" show-word-limit/>
+            </el-form-item>
+            <el-form-item :label="t('pages.vipCfgList.effectTitlePt')" prop="animationTitlePt">
+              <el-input v-model="currentRow.animationTitlePt" maxlength="128" placeholder="Título do efeito de entrada em português" show-word-limit/>
+            </el-form-item>
+            <el-form-item :label="t('pages.vipCfgList.effectTitleHi')" prop="animationTitleHi">
+              <el-input v-model="currentRow.animationTitleHi" maxlength="128" placeholder="प्रवेश प्रभाव शीर्षक हिंदी में" show-word-limit/>
+            </el-form-item>
+            <el-form-item :label="t('pages.vipCfgList.effectTitleId')" prop="animationTitleId">
+              <el-input v-model="currentRow.animationTitleId" maxlength="128" placeholder="Judul efek masuk dalam Bahasa Indonesia" show-word-limit/>
             </el-form-item>
             <el-form-item :label="t('pages.vipCfgList.effectDescEn')" prop="animationDescEn">
               <el-input
@@ -503,6 +449,21 @@
                 </el-button>
               </div>
             </el-form-item>
+            <el-form-item :label="t('pages.vipCfgList.effectTitleEn')" prop="commentEffectTitleEn">
+              <el-input v-model="currentRow.commentEffectTitleEn" maxlength="128" placeholder="Comment effect title in English" show-word-limit/>
+            </el-form-item>
+            <el-form-item :label="t('pages.vipCfgList.effectTitleEs')" prop="commentEffectTitleEs">
+              <el-input v-model="currentRow.commentEffectTitleEs" maxlength="128" placeholder="Título del efecto de comentario en español" show-word-limit/>
+            </el-form-item>
+            <el-form-item :label="t('pages.vipCfgList.effectTitlePt')" prop="commentEffectTitlePt">
+              <el-input v-model="currentRow.commentEffectTitlePt" maxlength="128" placeholder="Título do efeito de comentário em português" show-word-limit/>
+            </el-form-item>
+            <el-form-item :label="t('pages.vipCfgList.effectTitleHi')" prop="commentEffectTitleHi">
+              <el-input v-model="currentRow.commentEffectTitleHi" maxlength="128" placeholder="टिप्पणी प्रभाव शीर्षक हिंदी में" show-word-limit/>
+            </el-form-item>
+            <el-form-item :label="t('pages.vipCfgList.effectTitleId')" prop="commentEffectTitleId">
+              <el-input v-model="currentRow.commentEffectTitleId" maxlength="128" placeholder="Judul efek komentar dalam Bahasa Indonesia" show-word-limit/>
+            </el-form-item>
             <el-form-item :label="t('pages.vipCfgList.effectDescEn')" prop="commentEffectDescEn">
               <el-input
                   v-model="currentRow.commentEffectDescEn"
@@ -555,100 +516,6 @@
             </el-form-item>
           </el-tab-pane>
 
-          <el-tab-pane :label="t('pages.vipCfgList.tabWithdrawText')" name="withdrawText">
-            <el-form-item :label="t('pages.vipCfgList.withdrawSwitch')" prop="withdrawSwitch">
-              <el-radio-group v-model="currentRow.withdrawSwitch">
-                <el-radio :label="1">{{ t('common.on') }}</el-radio>
-                <el-radio :label="0">{{ t('common.off') }}</el-radio>
-              </el-radio-group>
-              <div class="form-tip">{{ t('pages.vipCfgList.appDisplayWithdrawTip') }}</div>
-            </el-form-item>
-            <el-form-item :label="t('pages.vipCfgList.withdrawIcon')" prop="withdrawIcon">
-              <div class="asset-upload-wrap">
-                <el-upload
-                    :before-upload="beforeIconUpload"
-                    :disabled="withdrawIconUploading"
-                    :http-request="(opt) => doAssetUpload(opt, 'withdrawIcon')"
-                    :show-file-list="false"
-                    accept="image/*"
-                    action="#"
-                    class="icon-uploader"
-                >
-                  <img
-                      v-if="withdrawIconPreviewUrl"
-                      :src="withdrawIconPreviewUrl"
-                      alt="withdraw icon"
-                      class="icon-preview"
-                  />
-                  <div v-else class="asset-uploader-placeholder icon-placeholder">
-                    <el-icon class="asset-uploader-icon">
-                      <Plus/>
-                    </el-icon>
-                    <span>{{ t('pages.vipCfgList.clickUploadIcon') }}</span>
-                  </div>
-                </el-upload>
-                <el-button
-                    v-if="withdrawIconPreviewUrl || currentRow.withdrawIcon"
-                    link
-                    type="danger"
-                    @click="clearWithdrawIcon"
-                >
-                  {{ t('pages.vipCfgList.removeIcon') }}
-                </el-button>
-              </div>
-            </el-form-item>
-            <el-form-item :label="t('pages.vipCfgList.withdrawNoticeEn')" prop="withdrawNoticeEn">
-              <el-input
-                  v-model="currentRow.withdrawNoticeEn"
-                  :autosize="{ minRows: 4, maxRows: 8 }"
-                  maxlength="2000"
-                  placeholder="Withdraw notice in English"
-                  show-word-limit
-                  type="textarea"
-              />
-            </el-form-item>
-            <el-form-item :label="t('pages.vipCfgList.withdrawNoticeEs')" prop="withdrawNoticeEs">
-              <el-input
-                  v-model="currentRow.withdrawNoticeEs"
-                  :autosize="{ minRows: 4, maxRows: 8 }"
-                  maxlength="2000"
-                  placeholder="Aviso de retiro en español"
-                  show-word-limit
-                  type="textarea"
-              />
-            </el-form-item>
-            <el-form-item :label="t('pages.vipCfgList.withdrawNoticePt')" prop="withdrawNoticePt">
-              <el-input
-                  v-model="currentRow.withdrawNoticePt"
-                  :autosize="{ minRows: 4, maxRows: 8 }"
-                  maxlength="2000"
-                  placeholder="Aviso de saque em português"
-                  show-word-limit
-                  type="textarea"
-              />
-            </el-form-item>
-            <el-form-item :label="t('pages.vipCfgList.withdrawNoticeHi')" prop="withdrawNoticeHi">
-              <el-input
-                  v-model="currentRow.withdrawNoticeHi"
-                  :autosize="{ minRows: 4, maxRows: 8 }"
-                  maxlength="2000"
-                  placeholder="हिंदी में निकासी सूचना"
-                  show-word-limit
-                  type="textarea"
-              />
-            </el-form-item>
-            <el-form-item :label="t('pages.vipCfgList.withdrawNoticeId')" prop="withdrawNoticeId">
-              <el-input
-                  v-model="currentRow.withdrawNoticeId"
-                  :autosize="{ minRows: 4, maxRows: 8 }"
-                  maxlength="2000"
-                  placeholder="Pemberitahuan penarikan dalam Bahasa Indonesia"
-                  show-word-limit
-                  type="textarea"
-              />
-            </el-form-item>
-          </el-tab-pane>
-
           <el-tab-pane :label="t('pages.vipCfgList.tabCustomerService')" name="customerService">
             <el-form-item :label="t('pages.vipCfgList.customerServiceSwitch')" prop="customerServiceSwitch">
               <el-radio-group v-model="currentRow.customerServiceSwitch">
@@ -690,6 +557,21 @@
                   {{ t('pages.vipCfgList.removeIcon') }}
                 </el-button>
               </div>
+            </el-form-item>
+            <el-form-item :label="t('pages.vipCfgList.privilegeTitleEn')" prop="customerServiceTitleEn">
+              <el-input v-model="currentRow.customerServiceTitleEn" maxlength="128" placeholder="Customer service privilege title in English" show-word-limit/>
+            </el-form-item>
+            <el-form-item :label="t('pages.vipCfgList.privilegeTitleEs')" prop="customerServiceTitleEs">
+              <el-input v-model="currentRow.customerServiceTitleEs" maxlength="128" placeholder="Título de atención al cliente en español" show-word-limit/>
+            </el-form-item>
+            <el-form-item :label="t('pages.vipCfgList.privilegeTitlePt')" prop="customerServiceTitlePt">
+              <el-input v-model="currentRow.customerServiceTitlePt" maxlength="128" placeholder="Título de atendimento ao cliente em português" show-word-limit/>
+            </el-form-item>
+            <el-form-item :label="t('pages.vipCfgList.privilegeTitleHi')" prop="customerServiceTitleHi">
+              <el-input v-model="currentRow.customerServiceTitleHi" maxlength="128" placeholder="ग्राहक सेवा विशेषाधिकार शीर्षक हिंदी में" show-word-limit/>
+            </el-form-item>
+            <el-form-item :label="t('pages.vipCfgList.privilegeTitleId')" prop="customerServiceTitleId">
+              <el-input v-model="currentRow.customerServiceTitleId" maxlength="128" placeholder="Judul hak layanan pelanggan dalam Bahasa Indonesia" show-word-limit/>
             </el-form-item>
             <el-form-item :label="t('pages.vipCfgList.privilegeDescEn')" prop="customerServiceDescEn">
               <el-input
@@ -765,7 +647,6 @@ import {formatAmount, NUMBER_INPUT_DECIMALS, truncateNumber} from '@/utils/numbe
 
 interface SearchForm {
   levelName: string
-  withdrawSwitchFilter: number
 }
 
 interface VipCfgForm {
@@ -773,16 +654,17 @@ interface VipCfgForm {
   level: number
   levelName: string
   levelIcon: string
-  withdrawSwitch: number
   animationSwitch: number
   commentEffectSwitch: number
   customerServiceSwitch: number
   upgradeRechargeLimit: number
-  minWithdrawAmount: number
-  maxWithdrawAmount: number
-  fee: number
   animation: string
   animationIcon: string
+  animationTitleEn: string
+  animationTitleEs: string
+  animationTitlePt: string
+  animationTitleHi: string
+  animationTitleId: string
   animationDescEn: string
   animationDescEs: string
   animationDescPt: string
@@ -790,18 +672,22 @@ interface VipCfgForm {
   animationDescId: string
   commentEffect: string
   commentEffectIcon: string
+  commentEffectTitleEn: string
+  commentEffectTitleEs: string
+  commentEffectTitlePt: string
+  commentEffectTitleHi: string
+  commentEffectTitleId: string
   commentEffectDescEn: string
   commentEffectDescEs: string
   commentEffectDescPt: string
   commentEffectDescHi: string
   commentEffectDescId: string
-  withdrawIcon: string
-  withdrawNoticeEn: string
-  withdrawNoticeEs: string
-  withdrawNoticePt: string
-  withdrawNoticeHi: string
-  withdrawNoticeId: string
   customerServiceIcon: string
+  customerServiceTitleEn: string
+  customerServiceTitleEs: string
+  customerServiceTitlePt: string
+  customerServiceTitleHi: string
+  customerServiceTitleId: string
   customerServiceDescEn: string
   customerServiceDescEs: string
   customerServiceDescPt: string
@@ -821,8 +707,7 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 
 const searchForm = reactive<SearchForm>({
-  levelName: '',
-  withdrawSwitchFilter: 0
+  levelName: ''
 })
 
 const dialogVisible = ref(false)
@@ -832,16 +717,17 @@ const defaultForm = (): VipCfgForm => ({
   level: 1,
   levelName: '',
   levelIcon: '',
-  withdrawSwitch: 1,
   animationSwitch: 1,
   commentEffectSwitch: 1,
   customerServiceSwitch: 1,
   upgradeRechargeLimit: 0,
-  minWithdrawAmount: 0,
-  maxWithdrawAmount: 0,
-  fee: 0,
   animation: '',
   animationIcon: '',
+  animationTitleEn: '',
+  animationTitleEs: '',
+  animationTitlePt: '',
+  animationTitleHi: '',
+  animationTitleId: '',
   animationDescEn: '',
   animationDescEs: '',
   animationDescPt: '',
@@ -849,25 +735,29 @@ const defaultForm = (): VipCfgForm => ({
   animationDescId: '',
   commentEffect: '',
   commentEffectIcon: '',
+  commentEffectTitleEn: '',
+  commentEffectTitleEs: '',
+  commentEffectTitlePt: '',
+  commentEffectTitleHi: '',
+  commentEffectTitleId: '',
   commentEffectDescEn: '',
   commentEffectDescEs: '',
   commentEffectDescPt: '',
   commentEffectDescHi: '',
   commentEffectDescId: '',
-  withdrawIcon: '',
-  withdrawNoticeEn: '',
-  withdrawNoticeEs: '',
-  withdrawNoticePt: '',
-  withdrawNoticeHi: '',
-  withdrawNoticeId: '',
   customerServiceIcon: '',
+  customerServiceTitleEn: '',
+  customerServiceTitleEs: '',
+  customerServiceTitlePt: '',
+  customerServiceTitleHi: '',
+  customerServiceTitleId: '',
   customerServiceDescEn: '',
   customerServiceDescEs: '',
   customerServiceDescPt: '',
   customerServiceDescHi: '',
   customerServiceDescId: ''
 })
-const currentRow = ref<VipCfgForm>(defaultForm())
+const currentRow = reactive(defaultForm())
 const formRef = ref<FormInstance>()
 
 const animationUploading = ref(false)
@@ -875,21 +765,18 @@ const animationIconUploading = ref(false)
 const levelIconUploading = ref(false)
 const commentEffectUploading = ref(false)
 const commentEffectIconUploading = ref(false)
-const withdrawIconUploading = ref(false)
 const customerServiceIconUploading = ref(false)
 const animationPreviewUrl = ref('')
 const animationIconPreviewUrl = ref('')
 const levelIconPreviewUrl = ref('')
 const commentEffectPreviewUrl = ref('')
 const commentEffectIconPreviewUrl = ref('')
-const withdrawIconPreviewUrl = ref('')
 const customerServiceIconPreviewUrl = ref('')
 let animationObjectPreviewUrl = ''
 let animationIconObjectPreviewUrl = ''
 let levelIconObjectPreviewUrl = ''
 let commentEffectObjectPreviewUrl = ''
 let commentEffectIconObjectPreviewUrl = ''
-let withdrawIconObjectPreviewUrl = ''
 let customerServiceIconObjectPreviewUrl = ''
 
 const revokeAnimationObjectPreview = () => {
@@ -903,13 +790,6 @@ const revokeAnimationIconObjectPreview = () => {
   if (animationIconObjectPreviewUrl) {
     URL.revokeObjectURL(animationIconObjectPreviewUrl)
     animationIconObjectPreviewUrl = ''
-  }
-}
-
-const revokeWithdrawIconObjectPreview = () => {
-  if (withdrawIconObjectPreviewUrl) {
-    URL.revokeObjectURL(withdrawIconObjectPreviewUrl)
-    withdrawIconObjectPreviewUrl = ''
   }
 }
 
@@ -951,11 +831,6 @@ const resetAnimationIconPreview = () => {
   animationIconPreviewUrl.value = ''
 }
 
-const resetWithdrawIconPreview = () => {
-  revokeWithdrawIconObjectPreview()
-  withdrawIconPreviewUrl.value = ''
-}
-
 const resetCustomerServiceIconPreview = () => {
   revokeCustomerServiceIconObjectPreview()
   customerServiceIconPreviewUrl.value = ''
@@ -992,14 +867,6 @@ const setAnimationIconPreview = (url: string, fromObject = false) => {
   }
 }
 
-const setWithdrawIconPreview = (url: string, fromObject = false) => {
-  revokeWithdrawIconObjectPreview()
-  withdrawIconPreviewUrl.value = url
-  if (fromObject && url) {
-    withdrawIconObjectPreviewUrl = url
-  }
-}
-
 const setCustomerServiceIconPreview = (url: string, fromObject = false) => {
   revokeCustomerServiceIconObjectPreview()
   customerServiceIconPreviewUrl.value = url
@@ -1033,37 +900,32 @@ const setLevelIconPreview = (url: string, fromObject = false) => {
 }
 
 const clearAnimation = () => {
-  currentRow.value.animation = ''
+  currentRow.animation = ''
   resetAnimationPreview()
 }
 
 const clearAnimationIcon = () => {
-  currentRow.value.animationIcon = ''
+  currentRow.animationIcon = ''
   resetAnimationIconPreview()
 }
 
-const clearWithdrawIcon = () => {
-  currentRow.value.withdrawIcon = ''
-  resetWithdrawIconPreview()
-}
-
 const clearCustomerServiceIcon = () => {
-  currentRow.value.customerServiceIcon = ''
+  currentRow.customerServiceIcon = ''
   resetCustomerServiceIconPreview()
 }
 
 const clearCommentEffect = () => {
-  currentRow.value.commentEffect = ''
+  currentRow.commentEffect = ''
   resetCommentEffectPreview()
 }
 
 const clearCommentEffectIcon = () => {
-  currentRow.value.commentEffectIcon = ''
+  currentRow.commentEffectIcon = ''
   resetCommentEffectIconPreview()
 }
 
 const clearLevelIcon = () => {
-  currentRow.value.levelIcon = ''
+  currentRow.levelIcon = ''
   resetLevelIconPreview()
 }
 
@@ -1074,7 +936,6 @@ watch(dialogVisible, (visible) => {
     resetLevelIconPreview()
     resetCommentEffectPreview()
     resetCommentEffectIconPreview()
-    resetWithdrawIconPreview()
     resetCustomerServiceIconPreview()
     activeTab.value = 'basic'
   }
@@ -1099,7 +960,7 @@ const beforeIconUpload = (file: File): boolean => {
 
 const doAssetUpload = async (
     options: UploadRequestOptions,
-    field: 'animation' | 'animationIcon' | 'levelIcon' | 'commentEffect' | 'commentEffectIcon' | 'withdrawIcon' | 'customerServiceIcon'
+    field: 'animation' | 'animationIcon' | 'levelIcon' | 'commentEffect' | 'commentEffectIcon' | 'customerServiceIcon'
 ) => {
   const file = options.file as File
   const uploadingMap = {
@@ -1108,14 +969,13 @@ const doAssetUpload = async (
     levelIcon: levelIconUploading,
     commentEffect: commentEffectUploading,
     commentEffectIcon: commentEffectIconUploading,
-    withdrawIcon: withdrawIconUploading,
     customerServiceIcon: customerServiceIconUploading
   }
   const uploading = uploadingMap[field]
   uploading.value = true
   try {
     const res = await uploadApi.uploadFile(file)
-    currentRow.value[field] = res.fileName
+    currentRow[field] = res.fileName
     if (field === 'animation') {
       setAnimationPreview(URL.createObjectURL(file), true)
     } else if (field === 'animationIcon') {
@@ -1128,8 +988,6 @@ const doAssetUpload = async (
       setCommentEffectIconPreview(URL.createObjectURL(file), true)
     } else if (field === 'customerServiceIcon') {
       setCustomerServiceIconPreview(URL.createObjectURL(file), true)
-    } else {
-      setWithdrawIconPreview(URL.createObjectURL(file), true)
     }
     ElMessage.success(t('pages.vipCfgList.uploadSuccess'))
   } catch (error) {
@@ -1140,27 +998,15 @@ const doAssetUpload = async (
   }
 }
 
-const validateWithdrawRange = (_rule: unknown, _value: unknown, callback: (error?: Error) => void) => {
-  const {minWithdrawAmount, maxWithdrawAmount} = currentRow.value
-  if (maxWithdrawAmount > 0 && minWithdrawAmount > maxWithdrawAmount) {
-    callback(new Error(t('pages.vipCfgList.withdrawRangeInvalid')))
-    return
-  }
-  callback()
-}
-
 const formRules = computed<FormRules>(() => ({
   level: [{required: true, message: t('pages.vipCfgList.levelRequired'), trigger: 'change'}],
   levelName: [
     {required: true, message: t('pages.vipCfgList.levelNameRequired'), trigger: 'blur'},
     {min: 1, max: 64, message: t('pages.vipCfgList.levelNameLength'), trigger: 'blur'}
   ],
-  withdrawSwitch: [{required: true, message: t('pages.vipCfgList.withdrawSwitchRequired'), trigger: 'change'}],
   animationSwitch: [{required: true, message: t('pages.vipCfgList.animationSwitchRequired'), trigger: 'change'}],
   commentEffectSwitch: [{required: true, message: t('pages.vipCfgList.commentEffectSwitchRequired'), trigger: 'change'}],
-  customerServiceSwitch: [{required: true, message: t('pages.vipCfgList.customerServiceSwitchRequired'), trigger: 'change'}],
-  minWithdrawAmount: [{validator: validateWithdrawRange, trigger: 'change'}],
-  maxWithdrawAmount: [{validator: validateWithdrawRange, trigger: 'change'}]
+  customerServiceSwitch: [{required: true, message: t('pages.vipCfgList.customerServiceSwitchRequired'), trigger: 'change'}]
 }))
 
 const fetchList = async () => {
@@ -1168,7 +1014,6 @@ const fetchList = async () => {
   try {
     const response = await vipCfgApi.getVipCfgList({
       levelName: searchForm.levelName,
-      withdrawSwitchFilter: searchForm.withdrawSwitchFilter,
       pageIndex: currentPage.value,
       pageSize: pageSize.value
     })
@@ -1199,14 +1044,13 @@ const handleCurrentChange = (page: number) => {
 
 const handleAdd = () => {
   dialogTitle.value = t('pages.vipCfgList.addVipLevel')
-  currentRow.value = defaultForm()
+  Object.assign(currentRow, defaultForm())
   activeTab.value = 'basic'
   resetAnimationPreview()
   resetAnimationIconPreview()
   resetLevelIconPreview()
   resetCommentEffectPreview()
   resetCommentEffectIconPreview()
-  resetWithdrawIconPreview()
   resetCustomerServiceIconPreview()
   dialogVisible.value = true
 }
@@ -1263,23 +1107,23 @@ const handleEdit = (row: VipCfg) => {
   const levelIconName = row.levelIconName || ''
   const commentEffectName = row.commentEffectName || ''
   const commentEffectIconName = row.commentEffectIconName || ''
-  const withdrawIconName = row.withdrawIconName || ''
   const customerServiceIconName = row.customerServiceIconName || ''
-  currentRow.value = {
+  Object.assign(currentRow, {
     id: row.id,
     level: Number(row.level) || 1,
     levelName: row.levelName,
     levelIcon: levelIconName,
-    withdrawSwitch: Number(row.withdrawSwitch) || 0,
     animationSwitch: Number(row.animationSwitch) || 0,
     commentEffectSwitch: Number(row.commentEffectSwitch) || 0,
     customerServiceSwitch: Number(row.customerServiceSwitch) || 0,
     upgradeRechargeLimit: truncateNumber(row.upgradeRechargeLimit),
-    minWithdrawAmount: truncateNumber(row.minWithdrawAmount),
-    maxWithdrawAmount: truncateNumber(row.maxWithdrawAmount),
-    fee: truncateNumber(row.fee),
     animation: animationName,
     animationIcon: animationIconName,
+    animationTitleEn: row.animationTitleEn || '',
+    animationTitleEs: row.animationTitleEs || '',
+    animationTitlePt: row.animationTitlePt || '',
+    animationTitleHi: row.animationTitleHi || '',
+    animationTitleId: row.animationTitleId || '',
     animationDescEn: row.animationDescEn || '',
     animationDescEs: row.animationDescEs || '',
     animationDescPt: row.animationDescPt || '',
@@ -1287,24 +1131,28 @@ const handleEdit = (row: VipCfg) => {
     animationDescId: row.animationDescId || '',
     commentEffect: commentEffectName,
     commentEffectIcon: commentEffectIconName,
+    commentEffectTitleEn: row.commentEffectTitleEn || '',
+    commentEffectTitleEs: row.commentEffectTitleEs || '',
+    commentEffectTitlePt: row.commentEffectTitlePt || '',
+    commentEffectTitleHi: row.commentEffectTitleHi || '',
+    commentEffectTitleId: row.commentEffectTitleId || '',
     commentEffectDescEn: row.commentEffectDescEn || '',
     commentEffectDescEs: row.commentEffectDescEs || '',
     commentEffectDescPt: row.commentEffectDescPt || '',
     commentEffectDescHi: row.commentEffectDescHi || '',
     commentEffectDescId: row.commentEffectDescId || '',
-    withdrawIcon: withdrawIconName,
-    withdrawNoticeEn: row.withdrawNoticeEn || '',
-    withdrawNoticeEs: row.withdrawNoticeEs || '',
-    withdrawNoticePt: row.withdrawNoticePt || '',
-    withdrawNoticeHi: row.withdrawNoticeHi || '',
-    withdrawNoticeId: row.withdrawNoticeId || '',
     customerServiceIcon: customerServiceIconName,
+    customerServiceTitleEn: row.customerServiceTitleEn || '',
+    customerServiceTitleEs: row.customerServiceTitleEs || '',
+    customerServiceTitlePt: row.customerServiceTitlePt || '',
+    customerServiceTitleHi: row.customerServiceTitleHi || '',
+    customerServiceTitleId: row.customerServiceTitleId || '',
     customerServiceDescEn: row.customerServiceDescEn || '',
     customerServiceDescEs: row.customerServiceDescEs || '',
     customerServiceDescPt: row.customerServiceDescPt || '',
     customerServiceDescHi: row.customerServiceDescHi || '',
     customerServiceDescId: row.customerServiceDescId || ''
-  }
+  })
   if (animationName && resolveMediaPreviewType(row.animation || '', animationName) === 'video') {
     setAnimationPreview(row.animation || '')
   } else {
@@ -1329,11 +1177,6 @@ const handleEdit = (row: VipCfg) => {
     setCommentEffectIconPreview(row.commentEffectIcon || '')
   } else {
     resetCommentEffectIconPreview()
-  }
-  if (withdrawIconName) {
-    setWithdrawIconPreview(row.withdrawIcon || '')
-  } else {
-    resetWithdrawIconPreview()
   }
   if (customerServiceIconName) {
     setCustomerServiceIconPreview(row.customerServiceIcon || '')
@@ -1364,50 +1207,55 @@ const handleSave = async () => {
     if (!valid) return
     try {
       const payload = {
-        level: currentRow.value.level,
-        levelName: currentRow.value.levelName,
-        levelIcon: currentRow.value.levelIcon,
-        withdrawSwitch: currentRow.value.withdrawSwitch,
-        animationSwitch: currentRow.value.animationSwitch,
-        commentEffectSwitch: currentRow.value.commentEffectSwitch,
-        customerServiceSwitch: currentRow.value.customerServiceSwitch,
-        upgradeRechargeLimit: currentRow.value.upgradeRechargeLimit,
-        minWithdrawAmount: currentRow.value.minWithdrawAmount,
-        maxWithdrawAmount: currentRow.value.maxWithdrawAmount,
-        fee: currentRow.value.fee,
-        animation: currentRow.value.animation,
-        animationIcon: currentRow.value.animationIcon,
-        animationDescEn: currentRow.value.animationDescEn,
-        animationDescEs: currentRow.value.animationDescEs,
-        animationDescPt: currentRow.value.animationDescPt,
-        animationDescHi: currentRow.value.animationDescHi,
-        animationDescId: currentRow.value.animationDescId,
-        commentEffect: currentRow.value.commentEffect,
-        commentEffectIcon: currentRow.value.commentEffectIcon,
-        commentEffectDescEn: currentRow.value.commentEffectDescEn,
-        commentEffectDescEs: currentRow.value.commentEffectDescEs,
-        commentEffectDescPt: currentRow.value.commentEffectDescPt,
-        commentEffectDescHi: currentRow.value.commentEffectDescHi,
-        commentEffectDescId: currentRow.value.commentEffectDescId,
-        withdrawIcon: currentRow.value.withdrawIcon,
-        withdrawNoticeEn: currentRow.value.withdrawNoticeEn,
-        withdrawNoticeEs: currentRow.value.withdrawNoticeEs,
-        withdrawNoticePt: currentRow.value.withdrawNoticePt,
-        withdrawNoticeHi: currentRow.value.withdrawNoticeHi,
-        withdrawNoticeId: currentRow.value.withdrawNoticeId,
-        customerServiceIcon: currentRow.value.customerServiceIcon,
-        customerServiceDescEn: currentRow.value.customerServiceDescEn,
-        customerServiceDescEs: currentRow.value.customerServiceDescEs,
-        customerServiceDescPt: currentRow.value.customerServiceDescPt,
-        customerServiceDescHi: currentRow.value.customerServiceDescHi,
-        customerServiceDescId: currentRow.value.customerServiceDescId
+        level: currentRow.level,
+        levelName: currentRow.levelName,
+        levelIcon: currentRow.levelIcon,
+        animationSwitch: currentRow.animationSwitch,
+        commentEffectSwitch: currentRow.commentEffectSwitch,
+        customerServiceSwitch: currentRow.customerServiceSwitch,
+        upgradeRechargeLimit: currentRow.upgradeRechargeLimit,
+        animation: currentRow.animation,
+        animationIcon: currentRow.animationIcon,
+        animationTitleEn: currentRow.animationTitleEn,
+        animationTitleEs: currentRow.animationTitleEs,
+        animationTitlePt: currentRow.animationTitlePt,
+        animationTitleHi: currentRow.animationTitleHi,
+        animationTitleId: currentRow.animationTitleId,
+        animationDescEn: currentRow.animationDescEn,
+        animationDescEs: currentRow.animationDescEs,
+        animationDescPt: currentRow.animationDescPt,
+        animationDescHi: currentRow.animationDescHi,
+        animationDescId: currentRow.animationDescId,
+        commentEffect: currentRow.commentEffect,
+        commentEffectIcon: currentRow.commentEffectIcon,
+        commentEffectTitleEn: currentRow.commentEffectTitleEn,
+        commentEffectTitleEs: currentRow.commentEffectTitleEs,
+        commentEffectTitlePt: currentRow.commentEffectTitlePt,
+        commentEffectTitleHi: currentRow.commentEffectTitleHi,
+        commentEffectTitleId: currentRow.commentEffectTitleId,
+        commentEffectDescEn: currentRow.commentEffectDescEn,
+        commentEffectDescEs: currentRow.commentEffectDescEs,
+        commentEffectDescPt: currentRow.commentEffectDescPt,
+        commentEffectDescHi: currentRow.commentEffectDescHi,
+        commentEffectDescId: currentRow.commentEffectDescId,
+        customerServiceIcon: currentRow.customerServiceIcon,
+        customerServiceTitleEn: currentRow.customerServiceTitleEn,
+        customerServiceTitleEs: currentRow.customerServiceTitleEs,
+        customerServiceTitlePt: currentRow.customerServiceTitlePt,
+        customerServiceTitleHi: currentRow.customerServiceTitleHi,
+        customerServiceTitleId: currentRow.customerServiceTitleId,
+        customerServiceDescEn: currentRow.customerServiceDescEn,
+        customerServiceDescEs: currentRow.customerServiceDescEs,
+        customerServiceDescPt: currentRow.customerServiceDescPt,
+        customerServiceDescHi: currentRow.customerServiceDescHi,
+        customerServiceDescId: currentRow.customerServiceDescId
       }
-      if (currentRow.value.id) {
-        await vipCfgApi.updateVipCfg({id: currentRow.value.id, ...payload})
+      if (currentRow.id) {
+        await vipCfgApi.updateVipCfg({id: currentRow.id, ...payload})
       } else {
         await vipCfgApi.createVipCfg(payload)
       }
-      ElMessage.success(currentRow.value.id ? t('common.updateSuccess') : t('common.createSuccess'))
+      ElMessage.success(currentRow.id ? t('common.updateSuccess') : t('common.createSuccess'))
       dialogVisible.value = false
       fetchList()
     } catch (error) {
@@ -1419,7 +1267,6 @@ const handleSave = async () => {
 
 const resetSearch = () => {
   searchForm.levelName = ''
-  searchForm.withdrawSwitchFilter = 0
   currentPage.value = 1
   fetchList()
 }
@@ -1460,6 +1307,10 @@ onMounted(() => {
 .pagination-container {
   margin-top: 20px;
   text-align: right;
+}
+
+.form-tip-block {
+  margin-bottom: 12px;
 }
 
 .form-tip {
