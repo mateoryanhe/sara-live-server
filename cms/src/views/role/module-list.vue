@@ -3,14 +3,14 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>权限配置</span>
-          <el-button style="margin-left: auto;" type="default" @click="handleBack">返回</el-button>
+          <span>{{ t('menu.RoleManagement') }}</span>
+          <el-button style="margin-left: auto;" type="default" @click="handleBack">{{ t('pages.moduleList.back') }}</el-button>
         </div>
       </template>
       <div class="content">
         <div class="table-header">
-          <el-button type="primary" @click="handleSave">保存权限配置</el-button>
-          <span class="hint">勾选页面可授予整页权限；展开后可单独勾选各按钮</span>
+          <el-button type="primary" @click="handleSave">{{ t('pages.moduleList.savePermissions') }}</el-button>
+          <span class="hint">{{ t('pages.moduleList.permissionHint') }}</span>
         </div>
 
         <el-tree
@@ -28,6 +28,7 @@
 </template>
 
 <script lang="ts" setup>
+import {useI18n} from 'vue-i18n'
 import {onMounted, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import router from '@/router'
@@ -46,6 +47,7 @@ interface ModuleNode {
   children?: ModuleNode[]
 }
 
+const {t} = useI18n()
 const route = useRoute()
 const treeRef = ref()
 const moduleTreeData = ref<ModuleNode[]>([])
@@ -123,13 +125,13 @@ const handleSave = async () => {
     const response = await roleApi.createPermission(permissionData)
 
     if (response) {
-      ElMessage.success(`已保存 ${selectedModules.length} 项权限`)
+      ElMessage.success(t('pages.moduleList.saveSuccess', {count: selectedModules.length}))
     } else {
-      ElMessage.error('保存权限配置失败')
+      ElMessage.error(t('pages.moduleList.saveFailed'))
     }
   } catch (error) {
-    console.error('保存权限配置失败:', error)
-    ElMessage.error('保存权限配置失败')
+    console.error('Failed to save permissions:', error)
+    ElMessage.error(t('pages.moduleList.saveFailed'))
   }
 }
 

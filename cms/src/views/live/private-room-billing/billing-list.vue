@@ -3,56 +3,56 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>私密直播间计费</span>
-          <span class="card-tip">按分钟计费</span>
+          <span>{{ t('menu.PrivateRoomBillingManagement') }}</span>
+          <span class="card-tip">{{ t('pages.billingList.billingByMinute') }}</span>
         </div>
       </template>
       <div class="content">
         <div class="table-header">
-          <el-button type="primary" @click="handleAdd">新增计费</el-button>
+          <el-button type="primary" @click="handleAdd">{{ t('pages.billingList.addBilling') }}</el-button>
         </div>
 
         <el-form :model="searchForm" class="search-form" inline>
-          <el-form-item label="状态">
-            <el-select v-model="searchForm.statusFilter" placeholder="全部" style="width: 140px">
-              <el-option :value="0" label="全部"/>
-              <el-option :value="2" label="只看上架"/>
-              <el-option :value="1" label="只看下架"/>
+          <el-form-item :label="t('common.status')">
+            <el-select v-model="searchForm.statusFilter" :placeholder="t('common.all')" style="width: 140px">
+              <el-option :value="0" :label="t('common.all')"/>
+              <el-option :value="2" :label="t('common.onlyOnShelf')"/>
+              <el-option :value="1" :label="t('common.onlyOffShelf')"/>
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="handleSearch">搜索</el-button>
-            <el-button @click="resetSearch">重置</el-button>
+            <el-button type="primary" @click="handleSearch">{{ t('common.search') }}</el-button>
+            <el-button @click="resetSearch">{{ t('common.reset') }}</el-button>
           </el-form-item>
         </el-form>
 
         <el-table v-loading="loading" :data="tableData" style="width: 100%">
           <el-table-column label="ID" prop="id" width="100"/>
-          <el-table-column label="每分钟钻石价格" width="160">
+          <el-table-column :label="t('pages.billingList.pricePerMinute')" width="160">
             <template #default="{ row }">
               {{ formatPrice(row.pricePerMinute) }}
             </template>
           </el-table-column>
-          <el-table-column label="排序" prop="sort" width="80"/>
-          <el-table-column label="状态" width="90">
+          <el-table-column :label="t('common.sort')" prop="sort" width="80"/>
+          <el-table-column :label="t('common.status')" width="90">
             <template #default="{ row }">
               <el-tag :type="row.status === 1 ? 'success' : 'info'">
-                {{ row.status === 1 ? '上架' : '下架' }}
+                {{ row.status === 1 ? t('common.onShelf') : t('common.offShelf') }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" prop="createdAt" width="160"/>
-          <el-table-column label="更新时间" prop="updatedAt" width="160"/>
-          <el-table-column fixed="right" label="操作" width="260">
+          <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
+          <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
+          <el-table-column fixed="right" :label="t('common.actions')" width="260">
             <template #default="{ row }">
-              <el-button size="small" @click="handleEdit(row)">编辑</el-button>
+              <el-button size="small" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
               <el-button
                   v-if="row.status !== 1"
                   size="small"
                   type="success"
                   @click="handleOnShelf(row)"
               >
-                上架
+                {{ t('common.onShelf') }}
               </el-button>
               <el-button
                   v-else
@@ -60,9 +60,9 @@
                   type="warning"
                   @click="handleOffShelf(row)"
               >
-                下架
+                {{ t('common.offShelf') }}
               </el-button>
-              <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
+              <el-button size="small" type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -83,7 +83,7 @@
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="480px">
       <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="140px">
-        <el-form-item label="每分钟钻石价格" prop="pricePerMinute">
+        <el-form-item :label="t('pages.billingList.pricePerMinute')" prop="pricePerMinute">
           <el-input-number
               v-model="currentRow.pricePerMinute"
               :min="0"
@@ -92,21 +92,22 @@
               controls-position="right"
           />
         </el-form-item>
-        <el-form-item label="排序" prop="sort">
+        <el-form-item :label="t('common.sort')" prop="sort">
           <el-input-number v-model="currentRow.sort" controls-position="right"/>
-          <div class="form-tip">数值越大越靠前</div>
+          <div class="form-tip">{{ t('pages.billingList.sortHigherFirst') }}</div>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSave">保存</el-button>
+        <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="handleSave">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {computed, onMounted, reactive, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {privateRoomBillingApi} from '@/api'
 import type {PrivateRoomBilling} from '@/types/api.ts'
@@ -122,6 +123,7 @@ interface BillingForm {
   sort: number
 }
 
+const {t} = useI18n()
 const loading = ref(false)
 const tableData = ref<PrivateRoomBilling[]>([])
 const total = ref(0)
@@ -142,9 +144,9 @@ const defaultForm = (): BillingForm => ({
 const currentRow = ref<BillingForm>(defaultForm())
 const formRef = ref<FormInstance>()
 
-const formRules: FormRules = {
-  pricePerMinute: [{required: true, message: '请输入每分钟钻石价格', trigger: 'blur'}]
-}
+const formRules = computed<FormRules>(() => ({
+  pricePerMinute: [{required: true, message: t('pages.billingList.priceRequired'), trigger: 'blur'}]
+}))
 
 const fetchList = async () => {
   loading.value = true
@@ -157,8 +159,8 @@ const fetchList = async () => {
     tableData.value = response.data
     total.value = response.total
   } catch (error) {
-    console.error('获取计费列表失败:', error)
-    ElMessage.error('获取计费列表失败')
+    console.error('fetch billing list failed:', error)
+    ElMessage.error(t('pages.billingList.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -180,13 +182,13 @@ const handleCurrentChange = (page: number) => {
 }
 
 const handleAdd = () => {
-  dialogTitle.value = '新增计费'
+  dialogTitle.value = t('pages.billingList.addBilling')
   currentRow.value = defaultForm()
   dialogVisible.value = true
 }
 
 const handleEdit = (row: PrivateRoomBilling) => {
-  dialogTitle.value = '编辑计费'
+  dialogTitle.value = t('pages.billingList.editBilling')
   currentRow.value = {
     id: row.id,
     pricePerMinute: truncateNumber(row.pricePerMinute),
@@ -197,38 +199,38 @@ const handleEdit = (row: PrivateRoomBilling) => {
 
 const handleDelete = async (row: PrivateRoomBilling) => {
   try {
-    await ElMessageBox.confirm(`确定要删除计费配置 ID ${row.id} 吗？`, '确认删除', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+    await ElMessageBox.confirm(t('pages.billingList.deleteConfirm', {id: row.id}), t('common.confirmDelete'), {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
       type: 'warning'
     })
     await privateRoomBillingApi.deleteBilling(row.id)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('common.deleteSuccess'))
     fetchList()
   } catch (error) {
-    console.error('删除失败:', error)
+    console.error('delete failed:', error)
   }
 }
 
 const handleOnShelf = async (row: PrivateRoomBilling) => {
   try {
     await privateRoomBillingApi.onShelfBilling(row.id)
-    ElMessage.success('上架成功')
+    ElMessage.success(t('pages.billingList.onShelfSuccess'))
     fetchList()
   } catch (error) {
-    console.error('上架失败:', error)
-    ElMessage.error('上架失败')
+    console.error('on shelf failed:', error)
+    ElMessage.error(t('pages.billingList.onShelfFailed'))
   }
 }
 
 const handleOffShelf = async (row: PrivateRoomBilling) => {
   try {
     await privateRoomBillingApi.offShelfBilling(row.id)
-    ElMessage.success('下架成功')
+    ElMessage.success(t('pages.billingList.offShelfSuccess'))
     fetchList()
   } catch (error) {
-    console.error('下架失败:', error)
-    ElMessage.error('下架失败')
+    console.error('off shelf failed:', error)
+    ElMessage.error(t('pages.billingList.offShelfFailed'))
   }
 }
 
@@ -246,12 +248,12 @@ const handleSave = async () => {
       } else {
         await privateRoomBillingApi.createBilling(payload)
       }
-      ElMessage.success(currentRow.value.id ? '更新成功' : '创建成功')
+      ElMessage.success(currentRow.value.id ? t('common.updateSuccess') : t('common.createSuccess'))
       dialogVisible.value = false
       fetchList()
     } catch (error) {
-      console.error('保存失败:', error)
-      ElMessage.error('保存失败')
+      console.error('save failed:', error)
+      ElMessage.error(t('pages.billingList.saveFailed'))
     }
   })
 }

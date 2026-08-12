@@ -3,9 +3,9 @@
     <el-card v-loading="loading">
       <template #header>
         <div class="card-header">
-          <span>随机昵称库</span>
+          <span>{{ t('menu.RandomNicknameManagement') }}</span>
           <el-tag :type="cfg.useDB ? 'success' : 'info'" size="small">
-            {{ cfg.useDB ? '使用数据库昵称库' : '使用内置英文昵称库' }}
+            {{ cfg.useDB ? t('pages.randomNicknameCfg.useDbPool') : t('pages.randomNicknameCfg.useBuiltinPool') }}
           </el-tag>
         </div>
       </template>
@@ -14,44 +14,44 @@
           :closable="false"
           class="tip-alert"
           show-icon
-          title="说明"
+          :title="t('pages.randomNicknameCfg.tipTitle')"
           type="info"
       >
-        <p>支持英文、西班牙语、印地语、葡萄牙语、印尼语。一行一个昵称，导入后写入数据库并加载到内存；新用户注册时按 Accept-Language 选择对应语言池。</p>
-        <p>数据库为空时，服务器启动后使用 Go 内置 1000 条英文昵称；有数据后仅使用数据库内容，不再读内置库。</p>
+        <p>{{ t('pages.randomNicknameCfg.tipLine1') }}</p>
+        <p>{{ t('pages.randomNicknameCfg.tipLine2') }}</p>
       </el-alert>
 
-      <el-table :data="cfg.langs" border class="stat-table" empty-text="暂无数据">
-        <el-table-column label="语言" min-width="140" prop="langLabel"/>
-        <el-table-column label="代码" prop="langCode" width="80"/>
-        <el-table-column label="数量" prop="count" width="100"/>
-        <el-table-column label="示例" min-width="260">
+      <el-table :data="cfg.langs" border class="stat-table" :empty-text="t('pages.randomNicknameCfg.noData')">
+        <el-table-column :label="t('pages.randomNicknameCfg.language')" min-width="140" prop="langLabel"/>
+        <el-table-column :label="t('pages.randomNicknameCfg.code')" prop="langCode" width="80"/>
+        <el-table-column :label="t('pages.randomNicknameCfg.count')" prop="count" width="100"/>
+        <el-table-column :label="t('pages.randomNicknameCfg.samples')" min-width="260">
           <template #default="{ row }">
             <span v-if="row.samples?.length">{{ row.samples.join('、') }}</span>
             <span v-else class="text-muted">-</span>
           </template>
         </el-table-column>
-        <el-table-column fixed="right" label="操作" width="100">
+        <el-table-column fixed="right" :label="t('common.actions')" width="100">
           <template #default="{ row }">
             <el-popconfirm
-                :title="`确定清空 ${row.langLabel} 昵称库？`"
-                confirm-button-text="清空"
+                :title="t('pages.randomNicknameCfg.clearConfirm', {lang: row.langLabel})"
+                :confirm-button-text="t('pages.randomNicknameCfg.clear')"
                 confirm-button-type="danger"
                 @confirm="handleClear(row.lang)"
             >
               <template #reference>
-                <el-button :disabled="row.count <= 0" link type="danger">清空</el-button>
+                <el-button :disabled="row.count <= 0" link type="danger">{{ t('pages.randomNicknameCfg.clear') }}</el-button>
               </template>
             </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
 
-      <el-divider content-position="left">批量导入</el-divider>
+      <el-divider content-position="left">{{ t('pages.randomNicknameCfg.batchImport') }}</el-divider>
 
       <el-form ref="formRef" :model="formData" :rules="formRules" class="import-form" label-width="120px">
-        <el-form-item label="语言" prop="lang">
-          <el-select v-model="formData.lang" placeholder="请选择语言" style="width: 240px">
+        <el-form-item :label="t('pages.randomNicknameCfg.language')" prop="lang">
+          <el-select v-model="formData.lang" :placeholder="t('pages.randomNicknameCfg.selectLanguage')" style="width: 240px">
             <el-option
                 v-for="item in langOptions"
                 :key="item.value"
@@ -61,27 +61,27 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="导入模式">
+        <el-form-item :label="t('pages.randomNicknameCfg.importMode')">
           <el-radio-group v-model="formData.replace">
-            <el-radio :value="false">追加（去重）</el-radio>
-            <el-radio :value="true">覆盖（先清空该语言再导入）</el-radio>
+            <el-radio :value="false">{{ t('pages.randomNicknameCfg.appendMode') }}</el-radio>
+            <el-radio :value="true">{{ t('pages.randomNicknameCfg.replaceMode') }}</el-radio>
           </el-radio-group>
         </el-form-item>
 
-        <el-form-item label="昵称内容" prop="content">
+        <el-form-item :label="t('pages.randomNicknameCfg.nicknameContent')" prop="content">
           <el-input
               v-model="formData.content"
               :rows="14"
-              placeholder="一行一个昵称，空行会自动忽略"
+              :placeholder="t('pages.randomNicknameCfg.nicknamePlaceholder')"
               type="textarea"
           />
-          <span class="form-tip">已解析 {{ parsedCount }} 条有效昵称（去重后）</span>
+          <span class="form-tip">{{ t('pages.randomNicknameCfg.parsedCount', {count: parsedCount}) }}</span>
         </el-form-item>
 
         <el-form-item>
-          <el-button :loading="submitting" type="primary" @click="handleImport">导入</el-button>
-          <el-button @click="fetchCfg">刷新统计</el-button>
-          <el-button @click="resetForm">重置</el-button>
+          <el-button :loading="submitting" type="primary" @click="handleImport">{{ t('pages.randomNicknameCfg.import') }}</el-button>
+          <el-button @click="fetchCfg">{{ t('pages.randomNicknameCfg.refreshStats') }}</el-button>
+          <el-button @click="resetForm">{{ t('common.reset') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -90,21 +90,23 @@
 
 <script lang="ts" setup>
 import {computed, onMounted, reactive, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
 import {ElMessage} from 'element-plus'
 import {randomNicknameApi} from '@/api/modules/randomNickname'
 import type {GetRandomNicknameCfgRes, RandomNicknameLangItem} from '@/types/api'
 
+const {t} = useI18n()
 const loading = ref(false)
 const submitting = ref(false)
 const formRef = ref()
 
-const langOptions = [
-  {value: 1, label: 'English（英文，默认）'},
-  {value: 2, label: 'Español（西班牙语）'},
-  {value: 3, label: 'हिन्दी（印地语）'},
-  {value: 4, label: 'Português（葡萄牙语）'},
-  {value: 5, label: 'Bahasa Indonesia（印尼语）'},
-]
+const langOptions = computed(() => [
+  {value: 1, label: t('pages.randomNicknameCfg.langEn')},
+  {value: 2, label: t('pages.randomNicknameCfg.langEs')},
+  {value: 3, label: t('pages.randomNicknameCfg.langHi')},
+  {value: 4, label: t('pages.randomNicknameCfg.langPt')},
+  {value: 5, label: t('pages.randomNicknameCfg.langId')},
+])
 
 const cfg = reactive<GetRandomNicknameCfgRes>({
   useDB: false,
@@ -117,10 +119,10 @@ const formData = reactive({
   replace: false,
 })
 
-const formRules = reactive({
-  lang: [{required: true, message: '请选择语言', trigger: 'change'}],
-  content: [{required: true, message: '请输入昵称内容', trigger: 'blur'}],
-})
+const formRules = computed(() => ({
+  lang: [{required: true, message: t('pages.randomNicknameCfg.langRequired'), trigger: 'change'}],
+  content: [{required: true, message: t('pages.randomNicknameCfg.contentRequired'), trigger: 'blur'}],
+}))
 
 const parsedCount = computed(() => parseNicknames(formData.content).length)
 
@@ -145,10 +147,10 @@ async function fetchCfg() {
     cfg.useDB = res.useDB
     cfg.langs = res.langs || []
     if (!cfg.langs.length) {
-      cfg.langs = langOptions.map(item => ({
+      cfg.langs = langOptions.value.map(item => ({
         lang: item.value,
         langCode: ['en', 'es', 'hi', 'pt', 'id'][item.value - 1] || 'en',
-        langLabel: item.label.split('（')[0],
+        langLabel: item.label.split('（')[0].split('(')[0].trim(),
         count: 0,
         samples: [],
       })) as RandomNicknameLangItem[]
@@ -161,7 +163,7 @@ async function fetchCfg() {
 async function handleImport() {
   await formRef.value?.validate()
   if (parsedCount.value <= 0) {
-    ElMessage.warning('没有可导入的有效昵称')
+    ElMessage.warning(t('pages.randomNicknameCfg.noValidNicknames'))
     return
   }
   submitting.value = true
@@ -171,7 +173,7 @@ async function handleImport() {
       content: formData.content,
       replace: formData.replace,
     })
-    ElMessage.success(`导入成功：本次 ${res.imported} 条，该语言共 ${res.total} 条`)
+    ElMessage.success(t('pages.randomNicknameCfg.importSuccess', {imported: res.imported, total: res.total}))
     formData.content = ''
     await fetchCfg()
   } finally {
@@ -184,7 +186,7 @@ async function handleClear(lang: number) {
   try {
     const res = await randomNicknameApi.clearRandomNicknames({lang})
     if (res.success) {
-      ElMessage.success('已清空')
+      ElMessage.success(t('pages.randomNicknameCfg.cleared'))
       await fetchCfg()
     }
   } finally {

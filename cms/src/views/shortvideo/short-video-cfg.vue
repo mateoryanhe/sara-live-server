@@ -3,12 +3,12 @@
     <el-card v-loading="loading">
       <template #header>
         <div class="card-header">
-          <span>短视频配置</span>
+          <span>{{ t('menu.ShortVideoCfgManagement') }}</span>
         </div>
       </template>
 
       <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="140px">
-        <el-form-item label="最大文件大小" prop="maxFileSizeMB">
+        <el-form-item :label="t('pages.shortVideoCfg.maxFileSize')" prop="maxFileSizeMB">
           <el-input-number
               v-model="formData.maxFileSizeMB"
               :min="1"
@@ -16,10 +16,10 @@
               controls-position="right"
               style="width: 220px"
           />
-          <span class="form-tip">MB，保存后按字节写入数据库</span>
+          <span class="form-tip">{{ t('pages.shortVideoCfg.maxFileSizeTip') }}</span>
         </el-form-item>
 
-        <el-form-item label="封面图片大小" prop="maxCoverFileSize">
+        <el-form-item :label="t('pages.shortVideoCfg.maxCoverFileSize')" prop="maxCoverFileSize">
           <el-input-number
               v-model="formData.maxCoverFileSize"
               :min="1"
@@ -27,10 +27,10 @@
               controls-position="right"
               style="width: 220px"
           />
-          <span class="form-tip">MB，封面上传大小上限</span>
+          <span class="form-tip">{{ t('pages.shortVideoCfg.maxCoverFileSizeTip') }}</span>
         </el-form-item>
 
-        <el-form-item label="最大时长" prop="maxDuration">
+        <el-form-item :label="t('pages.shortVideoCfg.maxDuration')" prop="maxDuration">
           <el-input-number
               v-model="formData.maxDuration"
               :min="1"
@@ -38,10 +38,10 @@
               controls-position="right"
               style="width: 220px"
           />
-          <span class="form-tip">秒</span>
+          <span class="form-tip">{{ t('pages.shortVideoCfg.seconds') }}</span>
         </el-form-item>
 
-        <el-form-item label="免费观看时长" prop="freeWatchSeconds">
+        <el-form-item :label="t('pages.shortVideoCfg.freeWatchSeconds')" prop="freeWatchSeconds">
           <el-input-number
               v-model="formData.freeWatchSeconds"
               :min="0"
@@ -49,10 +49,10 @@
               controls-position="right"
               style="width: 220px"
           />
-          <span class="form-tip">秒，观看前该时长免费（0 表示无免费时长）</span>
+          <span class="form-tip">{{ t('pages.shortVideoCfg.freeWatchSecondsTip') }}</span>
         </el-form-item>
 
-        <el-form-item label="主播每日上传上限" prop="anchorDailyUploadLimit">
+        <el-form-item :label="t('pages.shortVideoCfg.anchorDailyUploadLimit')" prop="anchorDailyUploadLimit">
           <el-input-number
               v-model="formData.anchorDailyUploadLimit"
               :min="1"
@@ -60,10 +60,10 @@
               controls-position="right"
               style="width: 220px"
           />
-          <span class="form-tip">条，用户类型为普通主播/机器人主播时生效</span>
+          <span class="form-tip">{{ t('pages.shortVideoCfg.anchorDailyUploadLimitTip') }}</span>
         </el-form-item>
 
-        <el-form-item label="普通用户每日上传上限" prop="normalUserDailyUploadLimit">
+        <el-form-item :label="t('pages.shortVideoCfg.normalUserDailyUploadLimit')" prop="normalUserDailyUploadLimit">
           <el-input-number
               v-model="formData.normalUserDailyUploadLimit"
               :min="1"
@@ -71,26 +71,26 @@
               controls-position="right"
               style="width: 220px"
           />
-          <span class="form-tip">条，用户类型为 0（普通用户）时生效</span>
+          <span class="form-tip">{{ t('pages.shortVideoCfg.normalUserDailyUploadLimitTip') }}</span>
         </el-form-item>
 
-        <el-form-item label="短视频入口" prop="entryEnabled">
+        <el-form-item :label="t('pages.shortVideoCfg.entryEnabled')" prop="entryEnabled">
           <el-switch
               v-model="formData.entryEnabled"
               :active-value="1"
               :inactive-value="0"
-              active-text="开启"
-              inactive-text="关闭"
+              :active-text="t('pages.shortVideoCfg.switchOn')"
+              :inactive-text="t('pages.shortVideoCfg.switchOff')"
           />
         </el-form-item>
 
-        <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
+        <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.shortVideoCfg.lastUpdated')">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="handleSave">保存配置</el-button>
-          <el-button @click="fetchCfg">刷新</el-button>
+          <el-button type="primary" @click="handleSave">{{ t('common.saveConfig') }}</el-button>
+          <el-button @click="fetchCfg">{{ t('common.refresh') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -98,11 +98,13 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {computed, onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {shortVideoApi} from '@/api/modules/shortVideo'
 import type {ShortVideoCfg} from '@/types/api'
 
+const {t} = useI18n()
 const MB = 1024 * 1024
 
 const loading = ref(false)
@@ -124,34 +126,34 @@ const metaInfo = reactive({
   updatedAt: '',
 })
 
-const formRules = reactive({
+const formRules = computed(() => ({
   maxFileSizeMB: [
-    {required: true, message: '请输入最大文件大小', trigger: 'blur'},
-    {type: 'number', min: 1, message: '最大文件大小必须大于0', trigger: 'blur'},
+    {required: true, message: t('pages.shortVideoCfg.maxFileSizeRequired'), trigger: 'blur'},
+    {type: 'number', min: 1, message: t('pages.shortVideoCfg.maxFileSizeMin'), trigger: 'blur'},
   ],
   maxCoverFileSize: [
-    {required: true, message: '请输入封面图片大小', trigger: 'blur'},
-    {type: 'number', min: 1, message: '封面图片大小必须大于0', trigger: 'blur'},
+    {required: true, message: t('pages.shortVideoCfg.maxCoverFileSizeRequired'), trigger: 'blur'},
+    {type: 'number', min: 1, message: t('pages.shortVideoCfg.maxCoverFileSizeMin'), trigger: 'blur'},
   ],
   maxDuration: [
-    {required: true, message: '请输入最大时长', trigger: 'blur'},
-    {type: 'number', min: 1, message: '最大时长必须大于0', trigger: 'blur'},
+    {required: true, message: t('pages.shortVideoCfg.maxDurationRequired'), trigger: 'blur'},
+    {type: 'number', min: 1, message: t('pages.shortVideoCfg.maxDurationMin'), trigger: 'blur'},
   ],
   freeWatchSeconds: [
-    {type: 'number', min: 0, message: '免费观看时长不能小于0', trigger: 'blur'},
+    {type: 'number', min: 0, message: t('pages.shortVideoCfg.freeWatchSecondsMin'), trigger: 'blur'},
   ],
   anchorDailyUploadLimit: [
-    {required: true, message: '请输入主播每日上传上限', trigger: 'blur'},
-    {type: 'number', min: 1, message: '主播每日上传上限必须大于0', trigger: 'blur'},
+    {required: true, message: t('pages.shortVideoCfg.anchorDailyUploadLimitRequired'), trigger: 'blur'},
+    {type: 'number', min: 1, message: t('pages.shortVideoCfg.anchorDailyUploadLimitMin'), trigger: 'blur'},
   ],
   normalUserDailyUploadLimit: [
-    {required: true, message: '请输入普通用户每日上传上限', trigger: 'blur'},
-    {type: 'number', min: 1, message: '普通用户每日上传上限必须大于0', trigger: 'blur'},
+    {required: true, message: t('pages.shortVideoCfg.normalUserDailyUploadLimitRequired'), trigger: 'blur'},
+    {type: 'number', min: 1, message: t('pages.shortVideoCfg.normalUserDailyUploadLimitMin'), trigger: 'blur'},
   ],
   entryEnabled: [
-    {required: true, message: '请选择入口开关', trigger: 'change'},
+    {required: true, message: t('pages.shortVideoCfg.entryEnabledRequired'), trigger: 'change'},
   ],
-})
+}))
 
 const applyCfg = (cfg: ShortVideoCfg | null | undefined) => {
   if (!cfg) {
@@ -185,8 +187,8 @@ const fetchCfg = async () => {
     const response = await shortVideoApi.getShortVideoCfg()
     applyCfg(response.cfg)
   } catch (error) {
-    console.error('获取短视频配置失败:', error)
-    ElMessage.error('获取配置失败')
+    console.error('fetch short video cfg failed:', error)
+    ElMessage.error(t('pages.shortVideoCfg.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -207,16 +209,16 @@ const handleSave = async () => {
       entryEnabled: formData.entryEnabled,
     })
     if (response?.success) {
-      ElMessage.success('保存成功')
+      ElMessage.success(t('pages.shortVideoCfg.saveSuccess'))
       if (response.id) {
         formData.id = response.id
       }
       await fetchCfg()
     } else {
-      ElMessage.error('保存失败')
+      ElMessage.error(t('pages.shortVideoCfg.saveFailed'))
     }
   } catch (error) {
-    console.error('保存短视频配置失败:', error)
+    console.error('save short video cfg failed:', error)
   } finally {
     loading.value = false
   }

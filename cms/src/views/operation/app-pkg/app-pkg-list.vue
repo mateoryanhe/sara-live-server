@@ -3,48 +3,48 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>App包管理</span>
+          <span>{{ t('menu.AppPkgManagement') }}</span>
         </div>
       </template>
       <div class="content">
         <div class="table-header">
-          <el-button type="primary" @click="handleAdd">新增App包</el-button>
+          <el-button type="primary" @click="handleAdd">{{ t('pages.appPkgList.addAppPkg') }}</el-button>
         </div>
 
         <el-form :model="searchForm" class="search-form" inline>
-          <el-form-item label="包名">
-            <el-input v-model="searchForm.packageName" clearable placeholder="包名(模糊匹配)"/>
+          <el-form-item :label="t('pages.appPkgList.packageName')">
+            <el-input v-model="searchForm.packageName" clearable :placeholder="t('pages.appPkgList.packageNameFuzzy')"/>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="handleSearch">搜索</el-button>
-            <el-button @click="resetSearch">重置</el-button>
+            <el-button type="primary" @click="handleSearch">{{ t('common.search') }}</el-button>
+            <el-button @click="resetSearch">{{ t('common.reset') }}</el-button>
           </el-form-item>
         </el-form>
 
         <el-table v-loading="loading" :data="tableData" style="width: 100%">
           <el-table-column label="ID" prop="id" width="100"/>
-          <el-table-column label="包名" min-width="220" prop="packageName" show-overflow-tooltip/>
-          <el-table-column label="密钥" min-width="300">
+          <el-table-column :label="t('pages.appPkgList.packageName')" min-width="220" prop="packageName" show-overflow-tooltip/>
+          <el-table-column :label="t('pages.appPkgList.secretKey')" min-width="300">
             <template #default="{ row }">
               <div class="secret-key-cell">
                 <span
-                    :title="isSecretKeyVisible(row.id) ? '点击隐藏' : '点击显示'"
+                    :title="isSecretKeyVisible(row.id) ? t('pages.appPkgList.clickToHide') : t('pages.appPkgList.clickToShow')"
                     class="secret-key-text"
                     @click="toggleSecretKeyVisible(row.id)"
                 >
                   {{ formatSecretKeyDisplay(row) }}
                 </span>
-                <el-button link type="primary" @click="copySecretKey(row.secretKey)">复制</el-button>
+                <el-button link type="primary" @click="copySecretKey(row.secretKey)">{{ t('common.copy') }}</el-button>
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="备注" min-width="180" prop="remark" show-overflow-tooltip/>
-          <el-table-column label="创建时间" prop="createdAt" width="160"/>
-          <el-table-column label="更新时间" prop="updatedAt" width="160"/>
-          <el-table-column fixed="right" label="操作" width="160">
+          <el-table-column :label="t('common.remark')" min-width="180" prop="remark" show-overflow-tooltip/>
+          <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
+          <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
+          <el-table-column fixed="right" :label="t('common.actions')" width="160">
             <template #default="{ row }">
-              <el-button size="small" @click="handleEdit(row)">编辑</el-button>
-              <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
+              <el-button size="small" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
+              <el-button size="small" type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -65,35 +65,36 @@
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="640px">
       <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="120px">
-        <el-form-item label="包名" prop="packageName">
-          <el-input v-model="currentRow.packageName" placeholder="例如 com.example.app"/>
+        <el-form-item :label="t('pages.appPkgList.packageName')" prop="packageName">
+          <el-input v-model="currentRow.packageName" :placeholder="t('pages.appPkgList.packageNamePlaceholder')"/>
         </el-form-item>
-        <el-form-item label="密钥" prop="secretKey">
+        <el-form-item :label="t('pages.appPkgList.secretKey')" prop="secretKey">
           <div class="secret-key-input">
-            <el-input v-model="currentRow.secretKey" placeholder="请输入密钥或自动生成" show-password type="password"/>
-            <el-button @click="generateSecretKeyForForm">自动生成</el-button>
+            <el-input v-model="currentRow.secretKey" :placeholder="t('pages.appPkgList.secretKeyPlaceholder')" show-password type="password"/>
+            <el-button @click="generateSecretKeyForForm">{{ t('pages.appPkgList.autoGenerate') }}</el-button>
           </div>
         </el-form-item>
-        <el-form-item label="隐私政策 URL" prop="privacyPolicyUrl">
-          <el-input v-model="currentRow.privacyPolicyUrl" clearable placeholder="留空则使用全局法律合规配置"/>
+        <el-form-item :label="t('pages.appPkgList.privacyPolicyUrl')" prop="privacyPolicyUrl">
+          <el-input v-model="currentRow.privacyPolicyUrl" clearable :placeholder="t('pages.appPkgList.privacyPolicyPlaceholder')"/>
         </el-form-item>
-        <el-form-item label="用户协议 URL" prop="termsOfServiceUrl">
-          <el-input v-model="currentRow.termsOfServiceUrl" clearable placeholder="留空则使用全局法律合规配置"/>
+        <el-form-item :label="t('pages.appPkgList.termsOfServiceUrl')" prop="termsOfServiceUrl">
+          <el-input v-model="currentRow.termsOfServiceUrl" clearable :placeholder="t('pages.appPkgList.termsPlaceholder')"/>
         </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="currentRow.remark" :rows="3" placeholder="可选" type="textarea"/>
+        <el-form-item :label="t('common.remark')" prop="remark">
+          <el-input v-model="currentRow.remark" :rows="3" :placeholder="t('pages.appPkgList.remarkOptional')" type="textarea"/>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSave">保存</el-button>
+        <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="handleSave">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {computed, onMounted, reactive, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {appPkgApi} from '@/api'
 import type {AppPkg} from '@/types/api.ts'
@@ -111,6 +112,7 @@ interface AppPkgForm {
   remark: string
 }
 
+const {t} = useI18n()
 const loading = ref(false)
 const tableData = ref<AppPkg[]>([])
 const total = ref(0)
@@ -169,15 +171,15 @@ const formatSecretKeyDisplay = (row: AppPkg) => {
 
 const copySecretKey = async (value?: string) => {
   if (!value) {
-    ElMessage.warning('无可复制内容')
+    ElMessage.warning(t('pages.appPkgList.nothingToCopy'))
     return
   }
   try {
     await navigator.clipboard.writeText(value)
-    ElMessage.success('已复制')
+    ElMessage.success(t('pages.appPkgList.copied'))
   } catch (error) {
-    console.error('复制密钥失败:', error)
-    ElMessage.error('复制失败')
+    console.error('copy secret key failed:', error)
+    ElMessage.error(t('pages.appPkgList.copyFailed'))
   }
 }
 
@@ -192,28 +194,28 @@ const validateOptionalUrl = (_: unknown, value: string, callback: (e?: Error) =>
     return
   }
   if (url.length > 512) {
-    callback(new Error('URL 长度不能超过 512'))
+    callback(new Error(t('pages.appPkgList.urlMaxLength')))
     return
   }
   if (!/^https?:\/\//i.test(url)) {
-    callback(new Error('URL 需以 http:// 或 https:// 开头'))
+    callback(new Error(t('pages.appPkgList.urlMustHttp')))
     return
   }
   callback()
 }
 
-const formRules: FormRules = {
+const formRules = computed<FormRules>(() => ({
   packageName: [
-    {required: true, message: '请输入包名', trigger: 'blur'},
-    {min: 1, max: 128, message: '包名长度在1-128个字符', trigger: 'blur'}
+    {required: true, message: t('pages.appPkgList.packageNameRequired'), trigger: 'blur'},
+    {min: 1, max: 128, message: t('pages.appPkgList.packageNameLength'), trigger: 'blur'}
   ],
   secretKey: [
-    {required: true, message: '请输入密钥', trigger: 'blur'},
-    {min: 1, max: 256, message: '密钥长度在1-256个字符', trigger: 'blur'}
+    {required: true, message: t('pages.appPkgList.secretKeyRequired'), trigger: 'blur'},
+    {min: 1, max: 256, message: t('pages.appPkgList.secretKeyLength'), trigger: 'blur'}
   ],
   privacyPolicyUrl: [{validator: validateOptionalUrl, trigger: 'blur'}],
   termsOfServiceUrl: [{validator: validateOptionalUrl, trigger: 'blur'}]
-}
+}))
 
 const fetchList = async () => {
   loading.value = true
@@ -227,8 +229,8 @@ const fetchList = async () => {
     total.value = response.total
     clearVisibleSecretKeys()
   } catch (error) {
-    console.error('获取App包列表失败:', error)
-    ElMessage.error('获取App包列表失败')
+    console.error('fetch app pkg list failed:', error)
+    ElMessage.error(t('pages.appPkgList.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -255,13 +257,13 @@ const resetSearch = () => {
 }
 
 const handleAdd = () => {
-  dialogTitle.value = '新增App包'
+  dialogTitle.value = t('pages.appPkgList.addAppPkg')
   currentRow.value = defaultForm()
   dialogVisible.value = true
 }
 
 const handleEdit = (row: AppPkg) => {
-  dialogTitle.value = '编辑App包'
+  dialogTitle.value = t('pages.appPkgList.editAppPkg')
   currentRow.value = {
     id: row.id,
     packageName: row.packageName,
@@ -294,30 +296,33 @@ const handleSave = async () => {
           id: currentRow.value.id,
           ...payload
         })
-        ElMessage.success('更新成功')
+        ElMessage.success(t('common.updateSuccess'))
       } else {
         await appPkgApi.createAppPkg(payload)
-        ElMessage.success('创建成功')
+        ElMessage.success(t('common.createSuccess'))
       }
       dialogVisible.value = false
       fetchList()
     } catch (error) {
-      console.error('保存App包失败:', error)
+      console.error('save app pkg failed:', error)
+      ElMessage.error(t('pages.appPkgList.saveFailed'))
     }
   })
 }
 
 const handleDelete = async (row: AppPkg) => {
   try {
-    await ElMessageBox.confirm(`确定删除App包「${row.packageName}」吗？`, '提示', {
+    await ElMessageBox.confirm(t('pages.appPkgList.deleteConfirm', {name: row.packageName}), t('pages.appPkgList.promptTitle'), {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
       type: 'warning'
     })
     await appPkgApi.deleteAppPkg(row.id)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('common.deleteSuccess'))
     fetchList()
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('删除App包失败:', error)
+      console.error('delete app pkg failed:', error)
     }
   }
 }

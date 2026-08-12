@@ -3,90 +3,90 @@
     <el-card v-loading="loading">
       <template #header>
         <div class="card-header">
-          <span>法律合规配置</span>
+          <span>{{ t('menu.PrivacyPolicyCfgManagement') }}</span>
         </div>
       </template>
 
       <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="160px">
-        <el-form-item label="页面 URL 前缀" prop="apiBase">
+        <el-form-item :label="t('pages.privacyPolicy.apiBase')" prop="apiBase">
           <el-input
               v-model="formData.apiBase"
               clearable
-              placeholder="如 https://www.saralive.net/official-site"
+              :placeholder="t('pages.privacyPolicy.apiBasePlaceholder')"
           />
-          <span class="form-tip">填写后，下方各 URL 可只填相对路径（如 /privacy.html）；完整 https 地址也可直接填写</span>
+          <span class="form-tip">{{ t('pages.privacyPolicy.apiBaseTip') }}</span>
         </el-form-item>
 
-        <el-form-item label="隐私政策 URL" prop="privacyPolicyUrl">
+        <el-form-item :label="t('pages.privacyPolicy.privacyPolicyUrl')" prop="privacyPolicyUrl">
           <el-input
               v-model="formData.privacyPolicyUrl"
               clearable
-              placeholder="如 /privacy.html 或完整 URL"
+              :placeholder="t('pages.privacyPolicy.privacyPolicyPlaceholder')"
           />
-          <span class="form-tip">App 请求 GET /sysInfo/cfg 时在 header 携带 X-App-Package；包级未配置时使用此处全局值</span>
+          <span class="form-tip">{{ t('pages.privacyPolicy.privacyPolicyTip') }}</span>
         </el-form-item>
 
-        <el-form-item label="用户服务协议 URL" prop="termsOfServiceUrl">
+        <el-form-item :label="t('pages.privacyPolicy.termsOfServiceUrl')" prop="termsOfServiceUrl">
           <el-input
               v-model="formData.termsOfServiceUrl"
               clearable
-              placeholder="如 /terms.html 或完整 URL"
+              :placeholder="t('pages.privacyPolicy.termsPlaceholder')"
           />
-          <span class="form-tip">App 请求 GET /sysInfo/cfg 时在 header 携带 X-App-Package；包级未配置时使用此处全局值</span>
+          <span class="form-tip">{{ t('pages.privacyPolicy.termsTip') }}</span>
         </el-form-item>
 
-        <el-form-item label="创作者上传条款 URL" prop="creatorTermsUrl">
+        <el-form-item :label="t('pages.privacyPolicy.creatorTermsUrl')" prop="creatorTermsUrl">
           <el-input
               v-model="formData.creatorTermsUrl"
               clearable
-              placeholder="如 /creator-terms.html 或完整 URL"
+              :placeholder="t('pages.privacyPolicy.creatorTermsPlaceholder')"
           />
-          <span class="form-tip">App 请求 GET /sysInfo/cfg 时返回 creatorTermsUrl</span>
+          <span class="form-tip">{{ t('pages.privacyPolicy.creatorTermsTip') }}</span>
         </el-form-item>
 
-        <el-form-item label="房主责任条款 URL" prop="roomOwnerTermsUrl">
+        <el-form-item :label="t('pages.privacyPolicy.roomOwnerTermsUrl')" prop="roomOwnerTermsUrl">
           <el-input
               v-model="formData.roomOwnerTermsUrl"
               clearable
-              placeholder="如 /room-owner-terms.html 或完整 URL"
+              :placeholder="t('pages.privacyPolicy.roomOwnerTermsPlaceholder')"
           />
-          <span class="form-tip">App 请求 GET /sysInfo/cfg 时返回 roomOwnerTermsUrl</span>
+          <span class="form-tip">{{ t('pages.privacyPolicy.roomOwnerTermsTip') }}</span>
         </el-form-item>
 
-        <el-form-item label="VIP描述文档 URL" prop="vipDescUrl">
+        <el-form-item :label="t('pages.privacyPolicy.vipDescUrl')" prop="vipDescUrl">
           <el-input
               v-model="formData.vipDescUrl"
               clearable
-              placeholder="如 /vip-desc.html 或完整 URL"
+              :placeholder="t('pages.privacyPolicy.vipDescPlaceholder')"
           />
-          <span class="form-tip">App 请求 GET /sysInfo/cfg 时返回 vipDescUrl</span>
+          <span class="form-tip">{{ t('pages.privacyPolicy.vipDescTip') }}</span>
         </el-form-item>
 
-        <el-form-item label="About 页面 URL" prop="aboutSiteUrl">
+        <el-form-item :label="t('pages.privacyPolicy.aboutSiteUrl')" prop="aboutSiteUrl">
           <el-input
               v-model="formData.aboutSiteUrl"
               clearable
-              placeholder="如 /about.html 或完整 URL"
+              :placeholder="t('pages.privacyPolicy.aboutSitePlaceholder')"
           />
-          <span class="form-tip">App 请求 GET /sysInfo/cfg 时返回 aboutSiteUrl；留空则使用资源域名 + /about.html</span>
+          <span class="form-tip">{{ t('pages.privacyPolicy.aboutSiteTip') }}</span>
         </el-form-item>
 
-        <el-form-item label="安全中心 URL" prop="safetyCenterUrl">
+        <el-form-item :label="t('pages.privacyPolicy.safetyCenterUrl')" prop="safetyCenterUrl">
           <el-input
               v-model="formData.safetyCenterUrl"
               clearable
-              placeholder="如 /safety-center.html 或完整 URL"
+              :placeholder="t('pages.privacyPolicy.safetyCenterPlaceholder')"
           />
-          <span class="form-tip">App 请求 GET /sysInfo/cfg 时返回 safetyCenterUrl；留空则使用资源域名 + /safety-center.html</span>
+          <span class="form-tip">{{ t('pages.privacyPolicy.safetyCenterTip') }}</span>
         </el-form-item>
 
-        <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
+        <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.privacyPolicy.lastUpdated')">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="handleSave">保存配置</el-button>
-          <el-button @click="fetchCfg">刷新</el-button>
+          <el-button type="primary" @click="handleSave">{{ t('common.saveConfig') }}</el-button>
+          <el-button @click="fetchCfg">{{ t('common.refresh') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -94,11 +94,13 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {computed, onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {privacyPolicyApi} from '@/api/modules/privacy-policy'
 import type {PrivacyPolicyCfg} from '@/types/api'
 
+const {t} = useI18n()
 const loading = ref(false)
 const formRef = ref()
 
@@ -126,7 +128,7 @@ const validateApiBase = (_: unknown, value: string, callback: (e?: Error) => voi
     return
   }
   if (!/^https?:\/\//i.test(base)) {
-    callback(new Error('URL 前缀需以 http:// 或 https:// 开头'))
+    callback(new Error(t('pages.privacyPolicy.apiBasePrefixInvalid')))
     return
   }
   callback()
@@ -146,27 +148,27 @@ const validateOptionalUrl = (_: unknown, value: string, callback: (e?: Error) =>
     callback()
     return
   }
-  callback(new Error('请填写页面 URL 前缀，或使用完整 http(s) 地址'))
+  callback(new Error(t('pages.privacyPolicy.urlPrefixOrFullRequired')))
 }
 
-const urlFieldRules = (label: string) => [
-  {max: 512, message: `${label}长度不能超过 512`, trigger: 'blur'},
+const urlFieldRules = () => [
+  {max: 512, message: t('pages.privacyPolicy.urlMaxLength'), trigger: 'blur'},
   {validator: validateOptionalUrl, trigger: 'blur'},
 ]
 
-const formRules = reactive({
+const formRules = computed(() => ({
   apiBase: [
-    {max: 512, message: 'URL 前缀长度不能超过 512', trigger: 'blur'},
+    {max: 512, message: t('pages.privacyPolicy.apiBaseMaxLength'), trigger: 'blur'},
     {validator: validateApiBase, trigger: 'blur'},
   ],
-  privacyPolicyUrl: urlFieldRules('URL'),
-  termsOfServiceUrl: urlFieldRules('URL'),
-  creatorTermsUrl: urlFieldRules('URL'),
-  roomOwnerTermsUrl: urlFieldRules('URL'),
-  vipDescUrl: urlFieldRules('URL'),
-  aboutSiteUrl: urlFieldRules('URL'),
-  safetyCenterUrl: urlFieldRules('URL'),
-})
+  privacyPolicyUrl: urlFieldRules(),
+  termsOfServiceUrl: urlFieldRules(),
+  creatorTermsUrl: urlFieldRules(),
+  roomOwnerTermsUrl: urlFieldRules(),
+  vipDescUrl: urlFieldRules(),
+  aboutSiteUrl: urlFieldRules(),
+  safetyCenterUrl: urlFieldRules(),
+}))
 
 const applyCfg = (cfg: PrivacyPolicyCfg | null | undefined) => {
   if (!cfg) {
@@ -202,8 +204,8 @@ const fetchCfg = async () => {
     const response = await privacyPolicyApi.getPrivacyPolicyCfg()
     applyCfg(response.cfg)
   } catch (error) {
-    console.error('获取隐私政策配置失败:', error)
-    ElMessage.error('获取配置失败')
+    console.error('fetch privacy policy cfg failed:', error)
+    ElMessage.error(t('pages.privacyPolicy.fetchCfgFailed'))
   } finally {
     loading.value = false
   }
@@ -225,16 +227,16 @@ const handleSave = async () => {
       safetyCenterUrl: formData.safetyCenterUrl.trim(),
     })
     if (response?.success) {
-      ElMessage.success('保存成功')
+      ElMessage.success(t('pages.privacyPolicy.saveSuccess'))
       if (response.id) {
         formData.id = response.id
       }
       await fetchCfg()
     } else {
-      ElMessage.error('保存失败')
+      ElMessage.error(t('pages.privacyPolicy.saveFailed'))
     }
   } catch (error) {
-    console.error('保存隐私政策配置失败:', error)
+    console.error('save privacy policy cfg failed:', error)
   } finally {
     loading.value = false
   }

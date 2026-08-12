@@ -3,65 +3,65 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>短视频管理</span>
+          <span>{{ t('menu.ShortVideoManagement') }}</span>
         </div>
       </template>
       <div class="content">
         <div class="table-header">
-          <el-button type="primary" @click="handleAdd">新增短视频</el-button>
-          <span class="table-tip">支持 App 端与 CMS 端上传；CMS 上传作者类型为 CMS</span>
+          <el-button type="primary" @click="handleAdd">{{ t('pages.shortVideoList.addShortVideo') }}</el-button>
+          <span class="table-tip">{{ t('pages.shortVideoList.uploadTip') }}</span>
         </div>
 
         <el-form :model="searchForm" class="search-form" inline>
-          <el-form-item label="标题">
-            <el-input v-model="searchForm.title" clearable placeholder="标题(模糊匹配)"/>
+          <el-form-item :label="t('common.title')">
+            <el-input v-model="searchForm.title" clearable :placeholder="t('pages.shortVideoList.titlePlaceholder')"/>
           </el-form-item>
-          <el-form-item label="作者昵称">
-            <el-input v-model="searchForm.authorNickname" clearable placeholder="作者昵称(模糊匹配)"/>
+          <el-form-item :label="t('pages.shortVideoList.authorNickname')">
+            <el-input v-model="searchForm.authorNickname" clearable :placeholder="t('pages.shortVideoList.authorNicknamePlaceholder')"/>
           </el-form-item>
-          <el-form-item label="状态">
-            <el-select v-model="searchForm.statusFilter" placeholder="全部" style="width: 140px">
-              <el-option :value="0" label="全部"/>
-              <el-option :value="2" label="只看上架"/>
-              <el-option :value="1" label="只看下架"/>
+          <el-form-item :label="t('common.status')">
+            <el-select v-model="searchForm.statusFilter" :placeholder="t('common.all')" style="width: 140px">
+              <el-option :value="0" :label="t('common.all')"/>
+              <el-option :value="2" :label="t('common.onlyOnShelf')"/>
+              <el-option :value="1" :label="t('common.onlyOffShelf')"/>
             </el-select>
           </el-form-item>
-          <el-form-item label="排序">
+          <el-form-item :label="t('common.sort')">
             <el-select
                 v-model="searchForm.sortField"
-                placeholder="默认"
+                :placeholder="t('common.all')"
                 style="width: 160px"
                 @change="handleSearch"
             >
-              <el-option value="" label="创建时间(新→旧)"/>
-              <el-option value="viewCount" label="观看人数(少→多)"/>
-              <el-option value="totalDiamondIncome" label="钻石收益(少→多)"/>
+              <el-option value="" :label="t('pages.shortVideoList.sortDefault')"/>
+              <el-option value="viewCount" :label="t('pages.shortVideoList.sortViewCount')"/>
+              <el-option value="totalDiamondIncome" :label="t('pages.shortVideoList.sortDiamondIncome')"/>
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="handleSearch">搜索</el-button>
-            <el-button @click="resetSearch">重置</el-button>
+            <el-button type="primary" @click="handleSearch">{{ t('common.search') }}</el-button>
+            <el-button @click="resetSearch">{{ t('common.reset') }}</el-button>
           </el-form-item>
         </el-form>
 
         <div v-loading="storageStatLoading" class="list-summary">
-          <span>共 {{ storageStat.totalCount }} 条短视频</span>
+          <span>{{ t('pages.shortVideoList.totalCount', {count: storageStat.totalCount}) }}</span>
           <span v-if="storageStat.imageDirPath">
-            ｜目录 {{ storageStat.imageDirPath }} 占用 {{ formatBytes(storageStat.imageDirUsedBytes) }}
+            {{ t('pages.shortVideoList.dirUsage', {path: storageStat.imageDirPath, size: formatBytes(storageStat.imageDirUsedBytes)}) }}
           </span>
           <span
               v-if="storageStat.diskFreeRatio > 0"
               :class="{ 'disk-free-warning': isDiskFreeLow }"
           >
-            ｜磁盘空闲 {{ formatPercent(storageStat.diskFreeRatio) }}
+            {{ t('pages.shortVideoList.diskFree', {ratio: formatPercent(storageStat.diskFreeRatio)}) }}
           </span>
-          <el-button link type="primary" @click="fetchStorageStat">刷新统计</el-button>
+          <el-button link type="primary" @click="fetchStorageStat">{{ t('pages.shortVideoList.refreshStat') }}</el-button>
         </div>
 
         <el-table v-loading="loading" :data="tableData" style="width: 100%">
           <el-table-column label="ID" prop="id" width="100"/>
-          <el-table-column label="标题" prop="title" min-width="140"/>
-          <el-table-column label="封面" width="100">
+          <el-table-column :label="t('common.title')" prop="title" min-width="140"/>
+          <el-table-column :label="t('pages.shortVideoList.cover')" width="100">
             <template #default="{ row }">
               <el-image
                   v-if="row.cover"
@@ -74,7 +74,7 @@
               <span v-else>-</span>
             </template>
           </el-table-column>
-          <el-table-column label="视频" min-width="200">
+          <el-table-column :label="t('pages.shortVideoList.video')" min-width="200">
             <template #default="{ row }">
               <div v-if="row.video" class="table-video-cell">
                 <video
@@ -84,78 +84,78 @@
                     controls
                     preload="metadata"
                 />
-                <el-button link type="primary" @click="openVideoPreview(row.video)">放大预览</el-button>
+                <el-button link type="primary" @click="openVideoPreview(row.video)">{{ t('pages.shortVideoList.enlargePreview') }}</el-button>
               </div>
               <span v-else>-</span>
             </template>
           </el-table-column>
-          <el-table-column label="作者昵称" min-width="120">
+          <el-table-column :label="t('pages.shortVideoList.authorNickname')" min-width="120">
             <template #default="{ row }">
               {{ row.authorNickname || '-' }}
             </template>
           </el-table-column>
-          <el-table-column label="作者类型" width="90">
+          <el-table-column :label="t('pages.shortVideoList.authorType')" width="90">
             <template #default="{ row }">
               <el-tag :type="row.authorType === 1 ? 'warning' : 'success'">
                 {{ row.authorType === 1 ? 'CMS' : 'App' }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="作者ID" prop="authorId" width="100"/>
-          <el-table-column label="排序" prop="sort" width="80"/>
-          <el-table-column label="是否付费" width="90">
+          <el-table-column :label="t('pages.shortVideoList.authorId')" prop="authorId" width="100"/>
+          <el-table-column :label="t('common.sort')" prop="sort" width="80"/>
+          <el-table-column :label="t('pages.shortVideoList.isPaid')" width="90">
             <template #default="{ row }">
               <el-tag :type="row.isPaid === 1 ? 'warning' : 'success'">
-                {{ row.isPaid === 1 ? '付费' : '免费' }}
+                {{ row.isPaid === 1 ? t('pages.shortVideoList.paid') : t('pages.shortVideoList.free') }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="付费钻石" width="110">
+          <el-table-column :label="t('pages.shortVideoList.payDiamond')" width="110">
             <template #default="{ row }">
               {{ row.isPaid === 1 ? formatPrice(row.payDiamond) : '-' }}
             </template>
           </el-table-column>
-          <el-table-column label="免费时长(秒)" width="110">
+          <el-table-column :label="t('pages.shortVideoList.freeWatchSeconds')" width="110">
             <template #default="{ row }">
               {{ row.isPaid === 1 ? (row.freeWatchSeconds != null ? row.freeWatchSeconds : 15) : '-' }}
             </template>
           </el-table-column>
-          <el-table-column label="分类" width="100">
+          <el-table-column :label="t('pages.shortVideoList.videoCategory')" width="100">
             <template #default="{ row }">
               {{ categoryName(row.categoryId) }}
             </template>
           </el-table-column>
-          <el-table-column label="来源" width="90">
+          <el-table-column :label="t('pages.shortVideoList.source')" width="90">
             <template #default="{ row }">
               {{ sourceLabel(row.source) }}
             </template>
           </el-table-column>
-          <el-table-column label="点赞数" prop="likeCount" width="90"/>
-          <el-table-column label="观看人数" prop="viewCount" width="90"/>
-          <el-table-column label="观看次数" prop="watchCount" width="90"/>
-          <el-table-column label="累计钻石收益" width="120">
+          <el-table-column :label="t('pages.shortVideoList.likeCount')" prop="likeCount" width="90"/>
+          <el-table-column :label="t('pages.shortVideoList.viewCount')" prop="viewCount" width="90"/>
+          <el-table-column :label="t('pages.shortVideoList.watchCount')" prop="watchCount" width="90"/>
+          <el-table-column :label="t('pages.shortVideoList.totalDiamondIncome')" width="120">
             <template #default="{ row }">
               {{ formatPrice(row.totalDiamondIncome) }}
             </template>
           </el-table-column>
-          <el-table-column label="状态" width="90">
+          <el-table-column :label="t('common.status')" width="90">
             <template #default="{ row }">
               <el-tag :type="row.status === 1 ? 'success' : 'info'">
-                {{ row.status === 1 ? '上架' : '下架' }}
+                {{ row.status === 1 ? t('common.onShelf') : t('common.offShelf') }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" prop="createdAt" width="160"/>
-          <el-table-column fixed="right" label="操作" width="260">
+          <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
+          <el-table-column fixed="right" :label="t('common.actions')" width="260">
             <template #default="{ row }">
-              <el-button size="small" @click="handleEdit(row)">编辑</el-button>
+              <el-button size="small" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
               <el-button
                   v-if="row.status !== 1"
                   size="small"
                   type="success"
                   @click="handleOnShelf(row)"
               >
-                上架
+                {{ t('common.onShelf') }}
               </el-button>
               <el-button
                   v-else
@@ -163,9 +163,9 @@
                   type="warning"
                   @click="handleOffShelf(row)"
               >
-                下架
+                {{ t('common.offShelf') }}
               </el-button>
-              <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
+              <el-button size="small" type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -186,10 +186,10 @@
 
     <el-dialog v-model="dialogVisible" :close-on-click-modal="false" :title="dialogTitle" destroy-on-close width="640px">
       <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="100px">
-        <el-form-item label="标题" prop="title">
-          <el-input v-model="currentRow.title" placeholder="请输入标题"/>
+        <el-form-item :label="t('common.title')" prop="title">
+          <el-input v-model="currentRow.title" :placeholder="t('pages.shortVideoList.titlePlaceholderForm')"/>
         </el-form-item>
-        <el-form-item v-if="isCreateMode" label="视频">
+        <el-form-item v-if="isCreateMode" :label="t('pages.shortVideoList.video')">
           <div class="video-upload-wrap">
             <el-upload
                 :before-upload="beforeVideoSelect"
@@ -208,14 +208,14 @@
                   preload="metadata"
               />
               <div v-else class="video-uploader-placeholder">
-                <el-button type="primary">选择视频</el-button>
+                <el-button type="primary">{{ t('pages.shortVideoList.selectVideo') }}</el-button>
               </div>
             </el-upload>
-            <span v-if="videoDuration > 0" class="form-tip">视频时长：{{ videoDuration }} 秒</span>
-            <el-button v-if="videoPreviewUrl" link type="danger" @click="clearCreateVideo">清除视频</el-button>
+            <span v-if="videoDuration > 0" class="form-tip">{{ t('pages.shortVideoList.videoDuration', {seconds: videoDuration}) }}</span>
+            <el-button v-if="videoPreviewUrl" link type="danger" @click="clearCreateVideo">{{ t('pages.shortVideoList.clearVideo') }}</el-button>
           </div>
         </el-form-item>
-        <el-form-item v-else-if="videoPreviewUrl" label="视频">
+        <el-form-item v-else-if="videoPreviewUrl" :label="t('pages.shortVideoList.video')">
           <div class="preview-box">
             <video
                 :key="videoPreviewUrl"
@@ -225,17 +225,17 @@
                 preload="metadata"
             />
           </div>
-          <div class="form-tip">视频文件不可修改，仅可编辑元数据</div>
+          <div class="form-tip">{{ t('pages.shortVideoList.videoReadonlyTip') }}</div>
         </el-form-item>
-        <el-form-item v-if="isCreateMode" label="作者昵称">
-          <el-input v-model="currentRow.authorNickname" clearable maxlength="32" placeholder="可选，留空则从随机昵称库抽取"/>
-          <div class="form-tip">留空时从随机昵称库（默认英文）自动分配；系统将自动创建 CMS 短视频作者账号</div>
+        <el-form-item v-if="isCreateMode" :label="t('pages.shortVideoList.authorNickname')">
+          <el-input v-model="currentRow.authorNickname" clearable maxlength="32" :placeholder="t('pages.shortVideoList.authorNicknamePlaceholderForm')"/>
+          <div class="form-tip">{{ t('pages.shortVideoList.authorNicknameTip') }}</div>
         </el-form-item>
-        <el-form-item v-else label="作者昵称">
+        <el-form-item v-else :label="t('pages.shortVideoList.authorNickname')">
           <span>{{ currentRow.authorNickname || '-' }}</span>
-          <div v-if="currentRow.authorId" class="form-tip">作者ID：{{ currentRow.authorId }}</div>
+          <div v-if="currentRow.authorId" class="form-tip">{{ t('pages.shortVideoList.authorIdTip', {id: currentRow.authorId}) }}</div>
         </el-form-item>
-        <el-form-item label="封面" prop="cover">
+        <el-form-item :label="t('pages.shortVideoList.cover')" prop="cover">
           <div class="upload-wrap">
             <el-upload
                 :before-upload="beforeCoverUpload"
@@ -249,24 +249,24 @@
               <img v-if="coverPreviewUrl" :src="coverPreviewUrl" alt="cover" class="cover-preview"/>
               <div v-else class="cover-placeholder">
                 <el-icon><Plus/></el-icon>
-                <span>上传封面</span>
+                <span>{{ t('pages.shortVideoList.uploadCover') }}</span>
               </div>
             </el-upload>
             <el-button v-if="coverPreviewUrl || currentRow.cover" link type="danger" @click="clearAsset">
-              移除封面
+              {{ t('pages.shortVideoList.removeCover') }}
             </el-button>
           </div>
         </el-form-item>
-        <el-form-item label="排序" prop="sort">
+        <el-form-item :label="t('common.sort')" prop="sort">
           <el-input-number v-model="currentRow.sort" controls-position="right"/>
         </el-form-item>
-        <el-form-item label="是否付费" prop="isPaid">
+        <el-form-item :label="t('pages.shortVideoList.isPaidLabel')" prop="isPaid">
           <el-radio-group v-model="currentRow.isPaid">
-            <el-radio :label="0">免费</el-radio>
-            <el-radio :label="1">付费</el-radio>
+            <el-radio :label="0">{{ t('pages.shortVideoList.free') }}</el-radio>
+            <el-radio :label="1">{{ t('pages.shortVideoList.paid') }}</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item v-if="currentRow.isPaid === 1" label="付费钻石" prop="payDiamond">
+        <el-form-item v-if="currentRow.isPaid === 1" :label="t('pages.shortVideoList.payDiamond')" prop="payDiamond">
           <el-input-number
               v-model="currentRow.payDiamond"
               :min="0.0001"
@@ -275,9 +275,9 @@
               controls-position="right"
               style="width: 220px"
           />
-          <span class="form-tip">付费视频一次性解锁价格</span>
+          <span class="form-tip">{{ t('pages.shortVideoList.payDiamondTip') }}</span>
         </el-form-item>
-        <el-form-item v-if="currentRow.isPaid === 1" label="免费观看时长" prop="freeWatchSeconds">
+        <el-form-item v-if="currentRow.isPaid === 1" :label="t('pages.shortVideoList.freeWatchDuration')" prop="freeWatchSeconds">
           <el-input-number
               v-model="currentRow.freeWatchSeconds"
               :min="0"
@@ -285,10 +285,10 @@
               controls-position="right"
               style="width: 220px"
           />
-          <span class="form-tip">单位：秒，0 表示无免费时长，默认 15 秒</span>
+          <span class="form-tip">{{ t('pages.shortVideoList.freeWatchDurationTip') }}</span>
         </el-form-item>
-        <el-form-item label="视频分类" prop="categoryId">
-          <el-select v-model="currentRow.categoryId" clearable placeholder="请选择分类" style="width: 220px">
+        <el-form-item :label="t('pages.shortVideoList.videoCategoryLabel')" prop="categoryId">
+          <el-select v-model="currentRow.categoryId" clearable :placeholder="t('pages.shortVideoList.selectCategory')" style="width: 220px">
             <el-option
                 v-for="item in categoryOptions"
                 :key="item.id"
@@ -297,24 +297,24 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="视频来源" prop="source">
+        <el-form-item :label="t('pages.shortVideoList.videoSource')" prop="source">
           <el-radio-group v-model="currentRow.source">
-            <el-radio :label="1">原创</el-radio>
-            <el-radio :label="2">转发</el-radio>
-            <el-radio :label="3">AI生成</el-radio>
+            <el-radio :label="1">{{ t('pages.shortVideoList.sourceOriginal') }}</el-radio>
+            <el-radio :label="2">{{ t('pages.shortVideoList.sourceRepost') }}</el-radio>
+            <el-radio :label="3">{{ t('pages.shortVideoList.sourceAi') }}</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button :loading="saving" type="primary" @click="handleSave">保存</el-button>
+        <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button :loading="saving" type="primary" @click="handleSave">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
 
     <el-dialog
         v-model="videoDialogVisible"
         destroy-on-close
-        title="视频预览"
+        :title="t('pages.shortVideoList.videoPreview')"
         width="720px"
     >
       <video
@@ -331,6 +331,7 @@
 </template>
 
 <script lang="ts" setup>
+import {useI18n} from 'vue-i18n'
 import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
 import {Plus} from '@element-plus/icons-vue'
@@ -359,11 +360,7 @@ interface ShortVideoForm {
   authorId: string
 }
 
-const sourceLabelMap: Record<number, string> = {
-  1: '原创',
-  2: '转发',
-  3: 'AI生成',
-}
+const {t} = useI18n()
 
 const loading = ref(false)
 const storageStatLoading = ref(false)
@@ -426,6 +423,15 @@ const isDiskFreeLow = computed(() => {
   return ratio > 0 && ratio < 30
 })
 
+const sourceLabel = (source: number) => {
+  const map: Record<number, string> = {
+    1: t('pages.shortVideoList.sourceOriginal'),
+    2: t('pages.shortVideoList.sourceRepost'),
+    3: t('pages.shortVideoList.sourceAi'),
+  }
+  return map[source] || '-'
+}
+
 const formatBytes = (bytes: number) => {
   const value = Number(bytes || 0)
   if (value <= 0) {
@@ -442,8 +448,6 @@ const formatBytes = (bytes: number) => {
 }
 
 const formatPercent = (ratio: number) => `${Number(ratio || 0).toFixed(1)}%`
-
-const sourceLabel = (source: number) => sourceLabelMap[source] || '-'
 
 const categoryName = (categoryId: number) => {
   if (!categoryId) {
@@ -494,7 +498,7 @@ const detectVideoDuration = (file: File): Promise<number> => {
     }
     video.onerror = () => {
       URL.revokeObjectURL(url)
-      reject(new Error('无法读取视频时长'))
+      reject(new Error('read video duration failed'))
     }
     video.src = url
   })
@@ -507,24 +511,24 @@ const getFileExt = (name: string) => {
   return idx >= 0 ? name.slice(idx).toLowerCase() : ''
 }
 
-const beforeVideoSelect = async (file: File): boolean | Promise<boolean> => {
+const beforeVideoSelect = async (file: File): Promise<boolean> => {
   const ext = getFileExt(file.name)
   if (!allowedVideoExt.includes(ext)) {
-    ElMessage.error('仅支持 MP4 / WebM / MOV 格式')
+    ElMessage.error(t('pages.shortVideoList.videoFormatError'))
     return false
   }
   try {
     const duration = await detectVideoDuration(file)
     if (maxVideoDuration.value > 0 && duration > maxVideoDuration.value) {
-      ElMessage.error(`视频时长不能超过 ${maxVideoDuration.value} 秒`)
+      ElMessage.error(t('pages.shortVideoList.videoDurationExceeded', {max: maxVideoDuration.value}))
       return false
     }
     videoFile.value = file
     videoDuration.value = duration
     setCreateVideoPreview(file)
   } catch (error) {
-    console.error('读取视频失败:', error)
-    ElMessage.error('无法读取视频信息')
+    console.error('read video failed:', error)
+    ElMessage.error(t('pages.shortVideoList.readVideoFailed'))
     return false
   }
   return false
@@ -544,7 +548,7 @@ const openVideoPreview = (url: string) => {
 
 const beforeCoverUpload = (file: File): boolean => {
   if (!file.type.startsWith('image/')) {
-    ElMessage.error('封面只能上传图片文件')
+    ElMessage.error(t('pages.shortVideoList.coverImageOnly'))
     return false
   }
   return true
@@ -563,10 +567,10 @@ const doUpload = async (options: UploadRequestOptions) => {
       objectPreviewUrls.cover = previewUrl
     }
     formRef.value?.validateField('cover').catch(() => undefined)
-    ElMessage.success('上传成功')
+    ElMessage.success(t('pages.shortVideoList.uploadSuccess'))
   } catch (error) {
-    console.error('上传失败:', error)
-    ElMessage.error('上传失败')
+    console.error('upload failed:', error)
+    ElMessage.error(t('pages.shortVideoList.uploadFailed'))
   } finally {
     coverUploading.value = false
   }
@@ -599,16 +603,16 @@ watch(() => currentRow.value.isPaid, (paid) => {
   currentRow.value.freeWatchSeconds = 0
 })
 
-const formRules: FormRules = {
+const formRules = computed<FormRules>(() => ({
   title: [
-    {required: true, message: '请输入标题', trigger: 'blur'},
-    {min: 1, max: 64, message: '标题长度在1-64个字符', trigger: 'blur'}
+    {required: true, message: t('pages.shortVideoList.titleRequired'), trigger: 'blur'},
+    {min: 1, max: 64, message: t('pages.shortVideoList.titleLength'), trigger: 'blur'}
   ],
   payDiamond: [
     {
       validator: (_rule, value, callback) => {
         if (currentRow.value.isPaid === 1 && (!value || value <= 0)) {
-          callback(new Error('付费视频请填写付费钻石'))
+          callback(new Error(t('pages.shortVideoList.payDiamondRequired')))
           return
         }
         callback()
@@ -620,7 +624,7 @@ const formRules: FormRules = {
     {
       validator: (_rule, value, callback) => {
         if (currentRow.value.isPaid === 1 && (value == null || value < 0)) {
-          callback(new Error('免费观看时长不能小于0'))
+          callback(new Error(t('pages.shortVideoList.freeWatchSecondsMin')))
           return
         }
         callback()
@@ -628,8 +632,8 @@ const formRules: FormRules = {
       trigger: 'change',
     },
   ],
-  source: [{required: true, message: '请选择视频来源', trigger: 'change'}],
-}
+  source: [{required: true, message: t('pages.shortVideoList.sourceRequired'), trigger: 'change'}],
+}))
 
 const fetchStorageStat = async () => {
   storageStatLoading.value = true
@@ -642,7 +646,7 @@ const fetchStorageStat = async () => {
     storageStat.diskFreeBytes = response.diskFreeBytes || 0
     storageStat.diskFreeRatio = response.diskFreeRatio || 0
   } catch (error) {
-    console.error('获取短视频存储统计失败:', error)
+    console.error('fetch storage stat failed:', error)
   } finally {
     storageStatLoading.value = false
   }
@@ -655,7 +659,7 @@ const fetchShortVideoCfg = async () => {
       maxVideoDuration.value = Math.max(1, response.cfg.maxDuration)
     }
   } catch (error) {
-    console.error('获取短视频配置失败:', error)
+    console.error('fetch short video cfg failed:', error)
   }
 }
 
@@ -667,7 +671,7 @@ const fetchCategoryOptions = async () => {
     })
     categoryOptions.value = response.data || []
   } catch (error) {
-    console.error('获取短视频分类失败:', error)
+    console.error('fetch categories failed:', error)
   }
 }
 
@@ -685,8 +689,8 @@ const fetchShortVideoList = async () => {
     tableData.value = response.data || []
     total.value = response.total || 0
   } catch (error) {
-    console.error('获取短视频列表失败:', error)
-    ElMessage.error('获取短视频列表失败')
+    console.error('fetch short video list failed:', error)
+    ElMessage.error(t('pages.shortVideoList.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -717,14 +721,14 @@ const handleCurrentChange = (page: number) => {
 }
 
 const handleAdd = () => {
-  dialogTitle.value = '新增短视频'
+  dialogTitle.value = t('pages.shortVideoList.addShortVideo')
   currentRow.value = defaultForm()
   resetAssetPreview()
   dialogVisible.value = true
 }
 
 const handleEdit = (row: ShortVideo) => {
-  dialogTitle.value = '编辑短视频'
+  dialogTitle.value = t('pages.shortVideoList.editShortVideo')
   currentRow.value = {
     id: row.id,
     title: row.title,
@@ -747,42 +751,42 @@ const handleEdit = (row: ShortVideo) => {
 
 const handleDelete = async (row: ShortVideo) => {
   try {
-    await ElMessageBox.confirm(`确定要删除短视频 "${row.title}" 吗？`, '确认删除', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+    await ElMessageBox.confirm(t('pages.shortVideoList.deleteConfirm', {title: row.title}), t('common.confirmDelete'), {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
       type: 'warning'
     })
     await shortVideoApi.deleteShortVideo(row.id)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('common.deleteSuccess'))
     fetchShortVideoList()
   } catch (error) {
-    console.error('删除失败:', error)
+    console.error('delete failed:', error)
   }
 }
 
 const handleOnShelf = async (row: ShortVideo) => {
   try {
     await shortVideoApi.onShelfShortVideo(row.id)
-    ElMessage.success('上架成功')
+    ElMessage.success(t('pages.shortVideoList.onShelfSuccess'))
     fetchShortVideoList()
   } catch (error) {
-    console.error('上架失败:', error)
-    ElMessage.error('上架失败')
+    console.error('on shelf failed:', error)
+    ElMessage.error(t('pages.shortVideoList.onShelfFailed'))
   }
 }
 
 const handleOffShelf = async (row: ShortVideo) => {
   try {
-    await ElMessageBox.confirm(`确定要下架短视频 "${row.title}" 吗？`, '确认下架', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+    await ElMessageBox.confirm(t('pages.shortVideoList.offShelfConfirm', {title: row.title}), t('common.confirmOffShelf'), {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
       type: 'warning'
     })
     await shortVideoApi.offShelfShortVideo(row.id)
-    ElMessage.success('下架成功')
+    ElMessage.success(t('pages.shortVideoList.offShelfSuccess'))
     fetchShortVideoList()
   } catch (error) {
-    console.error('下架失败:', error)
+    console.error('off shelf failed:', error)
   }
 }
 
@@ -804,10 +808,10 @@ const handleSave = async () => {
       }
       if (isCreateMode.value) {
         if (!videoFile.value) {
-          ElMessage.error('请选择视频文件')
+          ElMessage.error(t('pages.shortVideoList.selectVideoRequired'))
           return
         }
-        ElMessage.info('正在上传视频，请稍候...')
+        ElMessage.info(t('pages.shortVideoList.uploadingVideo'))
         const videoRes = await uploadApi.uploadFile(videoFile.value)
         await shortVideoApi.createShortVideo({
           video: videoRes.fileName,
@@ -822,16 +826,16 @@ const handleSave = async () => {
           duration: videoDuration.value,
           authorNickname: currentRow.value.authorNickname || undefined,
         })
-        ElMessage.success('创建成功')
+        ElMessage.success(t('common.createSuccess'))
       } else {
         await shortVideoApi.updateShortVideo({id: currentRow.value.id, ...payload})
-        ElMessage.success('更新成功')
+        ElMessage.success(t('common.updateSuccess'))
       }
       dialogVisible.value = false
       fetchShortVideoList()
     } catch (error) {
-      console.error('保存失败:', error)
-      ElMessage.error('保存失败')
+      console.error('save failed:', error)
+      ElMessage.error(t('pages.shortVideoList.saveFailed'))
     } finally {
       saving.value = false
     }

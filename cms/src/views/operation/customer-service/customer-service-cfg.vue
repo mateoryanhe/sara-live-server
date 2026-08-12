@@ -3,7 +3,7 @@
     <el-card v-loading="loading">
       <template #header>
         <div class="card-header">
-          <span>客服联系配置</span>
+          <span>{{ t('menu.CustomerServiceCfgManagement') }}</span>
         </div>
       </template>
 
@@ -11,11 +11,11 @@
           :closable="false"
           class="tip-alert"
           show-icon
-          title="说明"
+          :title="t('pages.customerServiceCfg.tipTitle')"
           type="info"
       >
-        <p>配置 App 端展示的客服联系方式。App 通过 POST /customerService/cfg 获取（无需登录）。</p>
-        <p>联系方式可为完整链接或任意文本；留空表示不展示对应入口。</p>
+        <p>{{ t('pages.customerServiceCfg.tipLine1') }}</p>
+        <p>{{ t('pages.customerServiceCfg.tipLine2') }}</p>
       </el-alert>
 
       <el-form :model="formData" class="cfg-form" label-width="160px">
@@ -23,7 +23,7 @@
           <el-input
               v-model="formData.telegramUrl"
               clearable
-              placeholder="如 https://t.me/your_support"
+              :placeholder="t('pages.customerServiceCfg.telegramPlaceholder')"
           />
         </el-form-item>
 
@@ -31,7 +31,7 @@
           <el-input
               v-model="formData.facebookUrl"
               clearable
-              placeholder="如 https://facebook.com/your_page"
+              :placeholder="t('pages.customerServiceCfg.facebookPlaceholder')"
           />
         </el-form-item>
 
@@ -39,17 +39,17 @@
           <el-input
               v-model="formData.whatsappUrl"
               clearable
-              placeholder="如 https://wa.me/1234567890"
+              :placeholder="t('pages.customerServiceCfg.whatsappPlaceholder')"
           />
         </el-form-item>
 
-        <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
+        <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.customerServiceCfg.lastUpdated')">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="handleSave">保存配置</el-button>
-          <el-button @click="fetchCfg">刷新</el-button>
+          <el-button type="primary" @click="handleSave">{{ t('common.saveConfig') }}</el-button>
+          <el-button @click="fetchCfg">{{ t('common.refresh') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -57,11 +57,13 @@
 </template>
 
 <script lang="ts" setup>
+import {useI18n} from 'vue-i18n'
 import {onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {customerServiceApi} from '@/api/modules/customer-service'
 import type {CustomerServiceCfg} from '@/types/api'
 
+const {t} = useI18n()
 const loading = ref(false)
 
 const formData = reactive({
@@ -100,8 +102,8 @@ const fetchCfg = async () => {
     const response = await customerServiceApi.getCustomerServiceCfg()
     applyCfg(response.cfg)
   } catch (error) {
-    console.error('获取客服联系配置失败:', error)
-    ElMessage.error('获取配置失败')
+    console.error('fetch customer service config failed:', error)
+    ElMessage.error(t('pages.customerServiceCfg.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -117,16 +119,16 @@ const handleSave = async () => {
       whatsappUrl: formData.whatsappUrl.trim(),
     })
     if (response?.success) {
-      ElMessage.success('保存成功')
+      ElMessage.success(t('common.saveConfig'))
       if (response.id) {
         formData.id = response.id
       }
       await fetchCfg()
     } else {
-      ElMessage.error('保存失败')
+      ElMessage.error(t('pages.customerServiceCfg.saveFailed'))
     }
   } catch (error) {
-    console.error('保存客服联系配置失败:', error)
+    console.error('save customer service config failed:', error)
   } finally {
     loading.value = false
   }

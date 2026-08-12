@@ -3,46 +3,46 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>App Token</span>
+          <span>{{ t('menu.AppTokenConfig') }}</span>
         </div>
       </template>
 
       <el-form :model="searchForm" class="search-form" inline>
-        <el-form-item label="用户ID">
+        <el-form-item :label="t('common.userId')">
           <el-input
               v-model="searchForm.userId"
               clearable
-              placeholder="请输入用户ID"
+              :placeholder="t('pages.appToken.userIdPlaceholder')"
               style="width: 220px"
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-          <el-button @click="handleReset">重置</el-button>
+          <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
+          <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
         </el-form-item>
       </el-form>
 
       <div class="table-header">
-        <el-button type="primary" @click="handleAdd">新增 Token</el-button>
+        <el-button type="primary" @click="handleAdd">{{ t('pages.appToken.addToken') }}</el-button>
       </div>
 
       <el-table v-loading="loading" :data="tableData" style="width: 100%">
-        <el-table-column label="用户ID" prop="id" width="220"/>
-        <el-table-column label="Token" min-width="320" prop="token" show-overflow-tooltip/>
-        <el-table-column label="过期时间" prop="expireAt" width="200">
+        <el-table-column :label="t('common.userId')" prop="id" width="220"/>
+        <el-table-column :label="t('pages.appToken.token')" min-width="320" prop="token" show-overflow-tooltip/>
+        <el-table-column :label="t('pages.appToken.expireAt')" prop="expireAt" width="200">
           <template #default="scope">
             {{ formatDate(scope.row.expireAt) }}
           </template>
         </el-table-column>
-        <el-table-column label="状态" prop="expired" width="100">
+        <el-table-column :label="t('common.status')" prop="expired" width="100">
           <template #default="scope">
-            <el-tag v-if="scope.row.expired" type="danger">已过期</el-tag>
-            <el-tag v-else type="success">有效</el-tag>
+            <el-tag v-if="scope.row.expired" type="danger">{{ t('pages.appToken.expired') }}</el-tag>
+            <el-tag v-else type="success">{{ t('pages.appToken.valid') }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120">
+        <el-table-column :label="t('common.actions')" width="120">
           <template #default="scope">
-            <el-button size="small" @click="handleEdit(scope.row)">编辑</el-button>
+            <el-button size="small" @click="handleEdit(scope.row)">{{ t('common.edit') }}</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -62,47 +62,49 @@
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" destroy-on-close width="560px">
       <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="100px">
-        <el-form-item label="用户ID" prop="id">
+        <el-form-item :label="t('common.userId')" prop="id">
           <el-input
               v-model="currentRow.id"
               :disabled="isEdit"
-              placeholder="请输入用户ID"
+              :placeholder="t('pages.appToken.userIdPlaceholder')"
           />
         </el-form-item>
-        <el-form-item label="Token" prop="token">
+        <el-form-item :label="t('pages.appToken.token')" prop="token">
           <el-input
               v-model="currentRow.token"
-              placeholder="新增留空自动生成,编辑留空则保持不变"
+              :placeholder="t('pages.appToken.tokenPlaceholder')"
               type="textarea"
           />
         </el-form-item>
-        <el-form-item label="过期时间" prop="expireAt">
+        <el-form-item :label="t('pages.appToken.expireAt')" prop="expireAt">
           <el-date-picker
               v-model="currentRow.expireAt"
               clearable
               format="YYYY-MM-DD HH:mm:ss"
-              placeholder="请选择过期时间"
+              :placeholder="t('pages.appToken.selectExpireAt')"
               style="width: 100%"
               type="datetime"
               value-format="YYYY-MM-DD HH:mm:ss"
           />
-          <div v-if="!isEdit" class="form-tip">默认有效期 30 天，过期时间：{{ currentRow.expireAt || '-' }}</div>
+          <div v-if="!isEdit" class="form-tip">{{ t('pages.appToken.defaultExpireTip', {time: currentRow.expireAt || '-'}) }}</div>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSave">确定</el-button>
+        <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="handleSave">{{ t('common.confirm') }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {nextTick, onMounted, reactive, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {computed, nextTick, onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import appTokenApi from '@/api/modules/appToken'
 import type {AppToken, SaveAppTokenReq} from '@/types/api'
 
+const {t} = useI18n()
 const tableData = ref<AppToken[]>([])
 const loading = ref(false)
 const total = ref(0)
@@ -114,7 +116,7 @@ const searchForm = reactive({
 })
 
 const dialogVisible = ref(false)
-const dialogTitle = ref('新增 Token')
+const dialogTitle = ref('')
 const isEdit = ref(false)
 const currentRow = ref<SaveAppTokenReq>({
   id: '',
@@ -123,9 +125,9 @@ const currentRow = ref<SaveAppTokenReq>({
 })
 const formRef = ref()
 
-const formRules = reactive({
-  id: [{required: true, message: '请输入用户ID', trigger: 'blur'}],
-})
+const formRules = computed(() => ({
+  id: [{required: true, message: t('pages.appToken.userIdRequired'), trigger: 'blur'}],
+}))
 
 const formatDate = (value?: string | null) => {
   if (!value) {
@@ -152,8 +154,8 @@ const fetchList = async () => {
     tableData.value = response.data || []
     total.value = response.total || 0
   } catch (error) {
-    console.error('获取App Token列表失败:', error)
-    ElMessage.error('获取数据失败')
+    console.error('fetch app token list failed:', error)
+    ElMessage.error(t('pages.appToken.fetchListFailed'))
   } finally {
     loading.value = false
   }
@@ -181,7 +183,7 @@ const handleCurrentChange = (page: number) => {
 }
 
 const handleAdd = async () => {
-  dialogTitle.value = '新增 Token'
+  dialogTitle.value = t('pages.appToken.addTokenTitle')
   isEdit.value = false
   currentRow.value = {
     id: searchForm.userId || '',
@@ -194,7 +196,7 @@ const handleAdd = async () => {
 }
 
 const handleEdit = (row: AppToken) => {
-  dialogTitle.value = '编辑 Token'
+  dialogTitle.value = t('pages.appToken.editTokenTitle')
   isEdit.value = true
   currentRow.value = {
     id: row.id,
@@ -214,14 +216,14 @@ const handleSave = async () => {
     }
     const response = await appTokenApi.saveAppToken(payload)
     if (response) {
-      ElMessage.success('保存成功')
+      ElMessage.success(t('pages.appToken.saveSuccess'))
       dialogVisible.value = false
       await fetchList()
     } else {
-      ElMessage.error('保存失败')
+      ElMessage.error(t('pages.appToken.saveFailed'))
     }
   } catch (error) {
-    console.error('保存App Token失败:', error)
+    console.error('save app token failed:', error)
   }
 }
 

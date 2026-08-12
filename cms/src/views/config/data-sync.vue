@@ -3,7 +3,7 @@
     <el-card v-loading="loading">
       <template #header>
         <div class="card-header">
-          <span>数据同步配置</span>
+          <span>{{ t('menu.DataSyncCfgManagement') }}</span>
         </div>
       </template>
 
@@ -11,42 +11,42 @@
           :closable="false"
           class="tip-alert"
           show-icon
-          title="说明"
+          :title="t('pages.dataSync.noticeTitle')"
           type="info"
       >
-        <p>配置跨环境数据同步的目标 API 与 Token。测试服与正式服填写相同的 Token，同步请求通过 Header 携带校验。</p>
+        <p>{{ t('pages.dataSync.noticeBody') }}</p>
       </el-alert>
 
       <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="140px">
-        <el-form-item label="目标 API 根地址" prop="targetApiBase">
+        <el-form-item :label="t('pages.dataSync.targetApiBase')" prop="targetApiBase">
           <el-input
               v-model="formData.targetApiBase"
               clearable
-              placeholder="例如 https://api.example.com"
+              :placeholder="t('pages.dataSync.targetApiBasePlaceholder')"
           />
         </el-form-item>
 
-        <el-form-item label="同步 Token" prop="token">
+        <el-form-item :label="t('pages.dataSync.syncToken')" prop="token">
           <div class="token-input">
             <el-input
                 v-model="formData.token"
                 clearable
-                placeholder="测试服与正式服保持一致"
+                :placeholder="t('pages.dataSync.syncTokenPlaceholder')"
                 show-password
                 type="password"
             />
-            <el-button @click="generateSyncToken">随机生成</el-button>
-            <el-button :disabled="!formData.token" @click="copySyncToken">复制</el-button>
+            <el-button @click="generateSyncToken">{{ t('pages.dataSync.generateToken') }}</el-button>
+            <el-button :disabled="!formData.token" @click="copySyncToken">{{ t('common.copy') }}</el-button>
           </div>
         </el-form-item>
 
-        <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
+        <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.dataSync.lastUpdated')">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="handleSave">保存配置</el-button>
-          <el-button @click="fetchCfg">刷新</el-button>
+          <el-button type="primary" @click="handleSave">{{ t('common.saveConfig') }}</el-button>
+          <el-button @click="fetchCfg">{{ t('common.refresh') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -54,11 +54,13 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {computed, onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {dataSyncApi} from '@/api/modules/data-sync'
 import type {DataSyncCfg} from '@/types/api'
 
+const {t} = useI18n()
 const loading = ref(false)
 const formRef = ref()
 
@@ -73,10 +75,10 @@ const metaInfo = reactive({
   updatedAt: '',
 })
 
-const formRules = reactive({
-  targetApiBase: [{required: true, message: '请填写目标 API 根地址', trigger: 'blur'}],
-  token: [{required: true, message: '请填写同步 Token', trigger: 'blur'}],
-})
+const formRules = computed(() => ({
+  targetApiBase: [{required: true, message: t('pages.dataSync.targetApiBaseRequired'), trigger: 'blur'}],
+  token: [{required: true, message: t('pages.dataSync.syncTokenRequired'), trigger: 'blur'}],
+}))
 
 const generateSyncToken = () => {
   formData.token = crypto.randomUUID().replace(/-/g, '')
@@ -85,15 +87,15 @@ const generateSyncToken = () => {
 const copySyncToken = async () => {
   const value = formData.token.trim()
   if (!value) {
-    ElMessage.warning('Token 为空，无法复制')
+    ElMessage.warning(t('pages.dataSync.tokenEmptyCopy'))
     return
   }
   try {
     await navigator.clipboard.writeText(value)
-    ElMessage.success('已复制到剪贴板')
+    ElMessage.success(t('pages.dataSync.copiedToClipboard'))
   } catch (error) {
-    console.error('复制 Token 失败:', error)
-    ElMessage.error('复制失败')
+    console.error('copy token failed:', error)
+    ElMessage.error(t('pages.dataSync.copyFailed'))
   }
 }
 
@@ -119,8 +121,8 @@ const fetchCfg = async () => {
     const response = await dataSyncApi.getDataSyncCfg()
     applyCfg(response.cfg)
   } catch (error) {
-    console.error('获取数据同步配置失败:', error)
-    ElMessage.error('获取配置失败')
+    console.error('fetch data sync cfg failed:', error)
+    ElMessage.error(t('pages.dataSync.fetchCfgFailed'))
   } finally {
     loading.value = false
   }
@@ -136,16 +138,16 @@ const handleSave = async () => {
       token: formData.token.trim(),
     })
     if (response?.success) {
-      ElMessage.success('保存成功')
+      ElMessage.success(t('pages.dataSync.saveSuccess'))
       if (response.id) {
         formData.id = response.id
       }
       await fetchCfg()
     } else {
-      ElMessage.error('保存失败')
+      ElMessage.error(t('pages.dataSync.saveFailed'))
     }
   } catch (error) {
-    console.error('保存数据同步配置失败:', error)
+    console.error('save data sync cfg failed:', error)
   } finally {
     loading.value = false
   }

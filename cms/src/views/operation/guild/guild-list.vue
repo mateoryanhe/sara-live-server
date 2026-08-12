@@ -3,48 +3,47 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>直播工会管理</span>
+          <span>{{ t('menu.GuildManagement') }}</span>
         </div>
       </template>
       <div class="content">
         <div class="table-header">
-          <el-button type="primary" @click="handleAdd">新增工会</el-button>
+          <el-button type="primary" @click="handleAdd">{{ t('pages.guildList.addGuild') }}</el-button>
         </div>
 
-        <!-- 搜索表单 -->
         <el-form :model="searchForm" class="search-form" inline>
-          <el-form-item label="工会名称">
-            <el-input v-model="searchForm.name" clearable placeholder="工会名称"/>
+          <el-form-item :label="t('pages.guildList.guildName')">
+            <el-input v-model="searchForm.name" clearable :placeholder="t('pages.guildList.guildNameSearchPlaceholder')"/>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="fetchGuildList">搜索</el-button>
-            <el-button @click="resetSearch">重置</el-button>
+            <el-button type="primary" @click="fetchGuildList">{{ t('common.search') }}</el-button>
+            <el-button @click="resetSearch">{{ t('common.reset') }}</el-button>
           </el-form-item>
         </el-form>
 
         <el-table v-loading="loading" :data="tableData" style="width: 100%">
           <el-table-column label="ID" prop="id" width="100"/>
-          <el-table-column label="工会名称" prop="name"/>
-          <el-table-column label="会长" min-width="180" show-overflow-tooltip>
+          <el-table-column :label="t('pages.guildList.guildName')" prop="name"/>
+          <el-table-column :label="t('pages.guildList.leader')" min-width="180" show-overflow-tooltip>
             <template #default="{ row }">
               {{ formatLeader(row) }}
             </template>
           </el-table-column>
-          <el-table-column label="联系方式" prop="contact" width="160"/>
-          <el-table-column label="简介" prop="description" show-overflow-tooltip/>
-          <el-table-column label="状态" width="100">
+          <el-table-column :label="t('pages.guildList.contact')" prop="contact" width="160"/>
+          <el-table-column :label="t('pages.guildList.description')" prop="description" show-overflow-tooltip/>
+          <el-table-column :label="t('common.status')" width="100">
             <template #default="{ row }">
               <el-tag :type="row.status === 1 ? 'success' : 'danger'">
-                {{ row.status === 1 ? '启用' : '禁用' }}
+                {{ row.status === 1 ? t('common.enabled') : t('common.disabled') }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" prop="createdAt" width="160"/>
-          <el-table-column label="更新时间" prop="updatedAt" width="160"/>
-          <el-table-column label="操作" width="200">
+          <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
+          <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
+          <el-table-column :label="t('common.actions')" width="200">
             <template #default="{ row }">
-              <el-button size="small" @click="handleEdit(row)">编辑</el-button>
-              <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
+              <el-button size="small" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
+              <el-button size="small" type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -63,20 +62,19 @@
       </div>
     </el-card>
 
-    <!-- 工会编辑对话框 -->
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px">
       <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="100px">
-        <el-form-item label="工会名称" prop="name">
-          <el-input v-model="currentRow.name" placeholder="请输入工会名称"/>
+        <el-form-item :label="t('pages.guildList.guildName')" prop="name">
+          <el-input v-model="currentRow.name" :placeholder="t('pages.guildList.guildNamePlaceholder')"/>
         </el-form-item>
-        <el-form-item label="会长" prop="leaderId">
+        <el-form-item :label="t('pages.guildList.leader')" prop="leaderId">
           <el-select
               v-model="currentRow.leaderId"
               :loading="cmsUserLoading"
               :remote-method="searchCmsUsers"
               clearable
               filterable
-              placeholder="搜索CMS用户名或ID"
+              :placeholder="t('pages.guildList.leaderSearchPlaceholder')"
               remote
               reserve-keyword
               style="width: 100%"
@@ -90,29 +88,30 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="联系方式" prop="contact">
-          <el-input v-model="currentRow.contact" placeholder="请输入联系方式"/>
+        <el-form-item :label="t('pages.guildList.contact')" prop="contact">
+          <el-input v-model="currentRow.contact" :placeholder="t('pages.guildList.contactPlaceholder')"/>
         </el-form-item>
-        <el-form-item label="简介" prop="description">
-          <el-input v-model="currentRow.description" placeholder="请输入工会简介" type="textarea"/>
+        <el-form-item :label="t('pages.guildList.description')" prop="description">
+          <el-input v-model="currentRow.description" :placeholder="t('pages.guildList.descriptionPlaceholder')" type="textarea"/>
         </el-form-item>
-        <el-form-item label="状态" prop="status">
+        <el-form-item :label="t('common.status')" prop="status">
           <el-radio-group v-model="currentRow.status">
-            <el-radio :label="1">启用</el-radio>
-            <el-radio :label="0">禁用</el-radio>
+            <el-radio :label="1">{{ t('common.enabled') }}</el-radio>
+            <el-radio :label="0">{{ t('common.disabled') }}</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSave">保存</el-button>
+        <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="handleSave">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {computed, onMounted, reactive, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {cmsUserApi, guildApi} from '@/api'
 import type {CMSUser} from '@/api/modules/cmsuser'
@@ -131,6 +130,7 @@ interface GuildForm {
   status: number
 }
 
+const {t} = useI18n()
 const loading = ref(false)
 const cmsUserLoading = ref(false)
 const cmsUserOptions = ref<CMSUser[]>([])
@@ -187,7 +187,7 @@ const fetchCmsUserOptions = async (key = '') => {
     })
     mergeCmsUserOptions(response.data)
   } catch (error) {
-    console.error('获取CMS用户列表失败:', error)
+    console.error('fetch cms user list failed:', error)
   } finally {
     cmsUserLoading.value = false
   }
@@ -219,17 +219,16 @@ const ensureLeaderOption = async (leaderId: string) => {
   await fetchCmsUserOptions(id)
 }
 
-const formRules: FormRules = {
+const formRules = computed<FormRules>(() => ({
   name: [
-    {required: true, message: '请输入工会名称', trigger: 'blur'},
-    {min: 2, max: 32, message: '工会名称长度在2-32个字符', trigger: 'blur'}
+    {required: true, message: t('pages.guildList.nameRequired'), trigger: 'blur'},
+    {min: 2, max: 32, message: t('pages.guildList.nameLength'), trigger: 'blur'}
   ],
   description: [
-    {max: 200, message: '简介长度不能超过200个字符', trigger: 'blur'}
+    {max: 200, message: t('pages.guildList.descriptionMaxLength'), trigger: 'blur'}
   ]
-}
+}))
 
-// 获取工会列表
 const fetchGuildList = async () => {
   loading.value = true
   try {
@@ -241,14 +240,13 @@ const fetchGuildList = async () => {
     tableData.value = response.data
     total.value = response.total
   } catch (error) {
-    console.error('获取工会列表失败:', error)
-    ElMessage.error('获取工会列表失败')
+    console.error('fetch guild list failed:', error)
+    ElMessage.error(t('pages.guildList.fetchFailed'))
   } finally {
     loading.value = false
   }
 }
 
-// 分页处理
 const handleSizeChange = (size: number) => {
   pageSize.value = size
   fetchGuildList()
@@ -259,9 +257,8 @@ const handleCurrentChange = (page: number) => {
   fetchGuildList()
 }
 
-// 操作处理
 const handleAdd = async () => {
-  dialogTitle.value = '新增工会'
+  dialogTitle.value = t('pages.guildList.addGuild')
   currentRow.value = {
     id: '',
     name: '',
@@ -276,7 +273,7 @@ const handleAdd = async () => {
 }
 
 const handleEdit = async (row: Guild) => {
-  dialogTitle.value = '编辑工会'
+  dialogTitle.value = t('pages.guildList.editGuild')
   const leaderId = row.leaderId && row.leaderId !== '0' ? row.leaderId : ''
   currentRow.value = {
     id: row.id,
@@ -300,21 +297,20 @@ const handleEdit = async (row: Guild) => {
 
 const handleDelete = async (row: Guild) => {
   try {
-    await ElMessageBox.confirm(`确定要删除工会 "${row.name}" 吗？`, '确认删除', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+    await ElMessageBox.confirm(t('pages.guildList.deleteConfirm', {name: row.name}), t('common.confirmDelete'), {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
       type: 'warning'
     })
 
     await guildApi.deleteGuild(row.id)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('common.deleteSuccess'))
     fetchGuildList()
   } catch (error) {
-    console.error('删除失败:', error)
+    console.error('delete failed:', error)
   }
 }
 
-// 保存操作
 const handleSave = async () => {
   if (!formRef.value) return
 
@@ -329,18 +325,17 @@ const handleSave = async () => {
           await guildApi.createGuild({name, leaderId, contact, description, status})
         }
 
-        ElMessage.success(currentRow.value.id ? '更新成功' : '创建成功')
+        ElMessage.success(currentRow.value.id ? t('common.updateSuccess') : t('common.createSuccess'))
         dialogVisible.value = false
         fetchGuildList()
       } catch (error) {
-        console.error(currentRow.value.id ? '更新失败:' : '创建失败:', error)
-        ElMessage.error(currentRow.value.id ? '更新失败' : '创建失败')
+        console.error('save guild failed:', error)
+        ElMessage.error(currentRow.value.id ? t('pages.guildList.updateFailed') : t('pages.guildList.createFailed'))
       }
     }
   })
 }
 
-// 重置搜索
 const resetSearch = () => {
   searchForm.name = ''
   fetchGuildList()

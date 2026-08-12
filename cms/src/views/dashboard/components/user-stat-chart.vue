@@ -3,6 +3,7 @@
 </template>
 
 <script lang="ts" setup>
+import {useI18n} from 'vue-i18n'
 import {nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue'
 import type {EChartsType} from 'echarts/core'
 import echarts, {type EChartsOption} from '@/utils/echarts'
@@ -13,6 +14,7 @@ const props = defineProps<{
   title?: string
 }>()
 
+const {t, locale} = useI18n()
 const chartRef = ref<HTMLDivElement>()
 let chartInstance: EChartsType | null = null
 
@@ -36,7 +38,7 @@ const buildOption = (points: UserStatTrendPoint[]): EChartsOption => {
       trigger: 'axis',
     },
     legend: {
-      data: ['活跃用户数', '新注册用户数'],
+      data: [t('pages.dashboard.activeUsers'), t('pages.dashboard.registerUsers')],
       top: props.title ? 28 : 0,
     },
     grid: {
@@ -59,14 +61,14 @@ const buildOption = (points: UserStatTrendPoint[]): EChartsOption => {
     },
     series: [
       {
-        name: '活跃用户数',
+        name: t('pages.dashboard.activeUsers'),
         type: 'line',
         smooth: true,
         data: activeSeries,
         itemStyle: {color: '#409EFF'},
       },
       {
-        name: '新注册用户数',
+        name: t('pages.dashboard.registerUsers'),
         type: 'line',
         smooth: true,
         data: registerSeries,
@@ -93,7 +95,7 @@ const handleResize = () => {
 }
 
 watch(
-    () => props.data,
+    () => [props.data, props.title, locale.value],
     () => {
       renderChart()
     },

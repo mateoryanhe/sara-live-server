@@ -3,40 +3,40 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>下注记录</span>
+          <span>{{ t('menu.GameBetLogListManagement') }}</span>
         </div>
       </template>
 
       <el-form :model="searchForm" class="search-form" inline label-width="80px">
-        <el-form-item label="用户ID">
-          <el-input v-model="searchForm.userId" clearable placeholder="请输入用户ID"/>
+        <el-form-item :label="t('common.userId')">
+          <el-input v-model="searchForm.userId" clearable :placeholder="t('common.pleaseEnter') + ' ' + t('common.userId')"/>
         </el-form-item>
-        <el-form-item label="游戏编码">
-          <el-input v-model="searchForm.gameCode" clearable placeholder="游戏编码"/>
+        <el-form-item :label="t('pages.gameBetLogList.gameCode')">
+          <el-input v-model="searchForm.gameCode" clearable :placeholder="t('pages.gameBetLogList.gameCodePlaceholder')"/>
         </el-form-item>
-        <el-form-item label="订单ID">
-          <el-input v-model="searchForm.orderId" clearable placeholder="交易/订单ID"/>
+        <el-form-item :label="t('pages.gameBetLogList.orderId')">
+          <el-input v-model="searchForm.orderId" clearable :placeholder="t('pages.gameBetLogList.orderIdPlaceholder')"/>
         </el-form-item>
-        <el-form-item label="平台">
-          <el-input v-model="searchForm.platformType" clearable placeholder="如 ZY"/>
+        <el-form-item :label="t('pages.gameBetLogList.platform')">
+          <el-input v-model="searchForm.platformType" clearable :placeholder="t('pages.gameBetLogList.platformPlaceholder')"/>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-          <el-button @click="handleReset">重置</el-button>
+          <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
+          <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
         </el-form-item>
       </el-form>
 
       <el-table v-loading="loading" :data="tableData" style="width: 100%">
-        <el-table-column label="记录ID" min-width="180" prop="id"/>
-        <el-table-column label="用户ID" min-width="180" prop="userId"/>
-        <el-table-column label="用户昵称" min-width="140" prop="nickname">
+        <el-table-column :label="t('pages.gameBetLogList.recordId')" min-width="180" prop="id"/>
+        <el-table-column :label="t('common.userId')" min-width="180" prop="userId"/>
+        <el-table-column :label="t('pages.gameBetLogList.userNickname')" min-width="140" prop="nickname">
           <template #default="{ row }">{{ row.nickname || '-' }}</template>
         </el-table-column>
-        <el-table-column label="游戏编码" min-width="120" prop="gameCode"/>
-        <el-table-column label="英文名称" min-width="140" prop="nameEn" show-overflow-tooltip>
+        <el-table-column :label="t('pages.gameBetLogList.gameCode')" min-width="120" prop="gameCode"/>
+        <el-table-column :label="t('pages.gameBetLogList.nameEn')" min-width="140" prop="nameEn" show-overflow-tooltip>
           <template #default="{ row }">{{ row.nameEn || '-' }}</template>
         </el-table-column>
-        <el-table-column label="封面" min-width="100">
+        <el-table-column :label="t('pages.gameBetLogList.cover')" min-width="100">
           <template #default="{ row }">
             <el-image
                 v-if="row.cover"
@@ -49,24 +49,24 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column label="下注金额" prop="amount" width="120">
+        <el-table-column :label="t('pages.gameBetLogList.betAmount')" prop="amount" width="120">
           <template #default="{ row }">{{ formatAmount(row.amount) }}</template>
         </el-table-column>
-        <el-table-column label="平台" prop="platformType" width="100"/>
-        <el-table-column label="直播间ID" min-width="180" prop="liveRoomId">
+        <el-table-column :label="t('pages.gameBetLogList.platform')" prop="platformType" width="100"/>
+        <el-table-column :label="t('pages.gameBetLogList.liveRoomId')" min-width="180" prop="liveRoomId">
           <template #default="{ row }">{{ row.liveRoomId || '-' }}</template>
         </el-table-column>
-        <el-table-column label="直播间标题" min-width="160" prop="liveRoomTitle" show-overflow-tooltip>
+        <el-table-column :label="t('pages.gameBetLogList.liveRoomTitle')" min-width="160" prop="liveRoomTitle" show-overflow-tooltip>
           <template #default="{ row }">{{ row.liveRoomTitle || '-' }}</template>
         </el-table-column>
-        <el-table-column label="主播昵称" min-width="140" prop="anchorNickname">
+        <el-table-column :label="t('pages.gameBetLogList.anchorNickname')" min-width="140" prop="anchorNickname">
           <template #default="{ row }">{{ row.anchorNickname || '-' }}</template>
         </el-table-column>
-        <el-table-column label="直播记录ID" min-width="180" prop="liveRecordId">
+        <el-table-column :label="t('pages.gameBetLogList.liveRecordId')" min-width="180" prop="liveRecordId">
           <template #default="{ row }">{{ row.liveRecordId || '-' }}</template>
         </el-table-column>
-        <el-table-column label="订单ID" min-width="200" prop="orderId" show-overflow-tooltip/>
-        <el-table-column label="时间" width="170">
+        <el-table-column :label="t('pages.gameBetLogList.orderId')" min-width="200" prop="orderId" show-overflow-tooltip/>
+        <el-table-column :label="t('pages.gameBetLogList.time')" width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>
       </el-table>
@@ -87,12 +87,14 @@
 </template>
 
 <script lang="ts" setup>
+import {useI18n} from 'vue-i18n'
 import {onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {gameBetLogApi} from '@/api'
 import type {GameBetLogItem} from '@/types/api'
 import {formatAmount} from '@/utils/number-format'
 
+const {t, locale} = useI18n()
 const loading = ref(false)
 const tableData = ref<GameBetLogItem[]>([])
 
@@ -123,8 +125,8 @@ const fetchList = async () => {
     tableData.value = response.data || []
     pagination.total = response.total || 0
   } catch (error) {
-    console.error('获取下注记录失败:', error)
-    ElMessage.error('获取下注记录失败')
+    console.error('fetch bet log failed:', error)
+    ElMessage.error(t('pages.gameBetLogList.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -160,7 +162,7 @@ const formatDate = (dateString: string | null | undefined) => {
     return '-'
   }
   try {
-    return new Date(dateString).toLocaleString('zh-CN')
+    return new Date(dateString).toLocaleString(locale.value)
   } catch {
     return '-'
   }

@@ -3,25 +3,25 @@
     <el-card v-loading="loading">
       <template #header>
         <div class="card-header">
-          <span>预热配置</span>
+          <span>{{ t('menu.PreloadCfgManagement') }}</span>
         </div>
       </template>
 
       <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="200px">
-        <el-form-item label="最近登录用户预热数量" prop="recentLoginLimit">
+        <el-form-item :label="t('pages.preloadCfg.recentLoginLimit')" prop="recentLoginLimit">
           <el-input-number v-model="formData.recentLoginLimit" :min="1" :max="10000" controls-position="right"/>
           <div class="form-tip">
-            服务启动时按 user_infos.last_login_time 倒序预热最近 N 个用户的缓存，默认 100；修改后需重启服务生效
+            {{ t('pages.preloadCfg.recentLoginLimitTip') }}
           </div>
         </el-form-item>
 
-        <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
+        <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.preloadCfg.lastUpdated')">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="handleSave">保存配置</el-button>
-          <el-button @click="fetchCfg">刷新</el-button>
+          <el-button type="primary" @click="handleSave">{{ t('common.saveConfig') }}</el-button>
+          <el-button @click="fetchCfg">{{ t('common.refresh') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -29,11 +29,13 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {computed, onMounted, reactive, ref} from 'vue'
 import {ElMessage, type FormInstance, type FormRules} from 'element-plus'
 import preloadCfgApi from '@/api/modules/preload-cfg'
 import type {PreloadCfg} from '@/types/api'
 
+const {t} = useI18n()
 const loading = ref(false)
 const formRef = ref<FormInstance>()
 
@@ -47,12 +49,12 @@ const metaInfo = reactive({
   updatedAt: '',
 })
 
-const formRules: FormRules = {
+const formRules = computed<FormRules>(() => ({
   recentLoginLimit: [
-    {required: true, message: '请输入预热数量', trigger: 'change'},
-    {type: 'number', min: 1, max: 10000, message: '预热数量需在 1-10000 之间', trigger: 'change'},
+    {required: true, message: t('pages.preloadCfg.preloadCountRequired'), trigger: 'change'},
+    {type: 'number', min: 1, max: 10000, message: t('pages.preloadCfg.preloadCountRange'), trigger: 'change'},
   ],
-}
+}))
 
 const applyCfg = (cfg: PreloadCfg | null | undefined) => {
   formData.id = cfg?.id || '0'
@@ -67,8 +69,8 @@ const fetchCfg = async () => {
     const response = await preloadCfgApi.getPreloadCfg()
     applyCfg(response.cfg)
   } catch (error) {
-    console.error('获取预热配置失败:', error)
-    ElMessage.error('获取配置失败')
+    console.error('fetch preload cfg failed:', error)
+    ElMessage.error(t('pages.preloadCfg.fetchCfgFailed'))
   } finally {
     loading.value = false
   }
@@ -84,16 +86,16 @@ const handleSave = async () => {
         recentLoginLimit: formData.recentLoginLimit,
       })
       if (response?.success) {
-        ElMessage.success('保存成功，重启服务后生效')
+        ElMessage.success(t('pages.preloadCfg.saveSuccessRestart'))
         if (response.id) {
           formData.id = response.id
         }
         await fetchCfg()
       } else {
-        ElMessage.error('保存失败')
+        ElMessage.error(t('pages.preloadCfg.saveFailed'))
       }
     } catch (error) {
-      console.error('保存预热配置失败:', error)
+      console.error('save preload cfg failed:', error)
     }
   })
 }

@@ -3,6 +3,7 @@
 </template>
 
 <script lang="ts" setup>
+import {useI18n} from 'vue-i18n'
 import {nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue'
 import type {EChartsType} from 'echarts/core'
 import echarts, {type EChartsOption} from '@/utils/echarts'
@@ -16,6 +17,7 @@ const props = defineProps<{
   title?: string
 }>()
 
+const {t, locale} = useI18n()
 const chartRef = ref<HTMLDivElement>()
 let chartInstance: EChartsType | null = null
 
@@ -24,6 +26,13 @@ const formatNumber = (value: number | null | undefined, digits = 2) => {
     return '-'
   }
   return Number(value).toFixed(digits)
+}
+
+const formatCount = (value: number | string | null | undefined) => {
+  if (value === null || value === undefined || value === '') {
+    return '-'
+  }
+  return Number(value).toLocaleString()
 }
 
 const buildMemoryOption = (points: ResourceMetricPoint[]): EChartsOption => {
@@ -50,13 +59,17 @@ const buildMemoryOption = (points: ResourceMetricPoint[]): EChartsOption => {
         const point = points[index]
         return [
           items[0].name,
-          `进程RSS: ${formatNumber(point?.procMemMb)} MB`,
-          `系统已用内存: ${formatNumber(point?.sysMemUsedMb)} MB / ${formatNumber(point?.sysMemTotalMb)} MB (${formatNumber(point?.sysMemUsedPercent)}%)`,
+          t('pages.resourceMonitor.procRssTooltip', {value: formatNumber(point?.procMemMb)}),
+          t('pages.resourceMonitor.sysMemTooltip', {
+            used: formatNumber(point?.sysMemUsedMb),
+            total: formatNumber(point?.sysMemTotalMb),
+            percent: formatNumber(point?.sysMemUsedPercent),
+          }),
         ].join('<br/>')
       },
     },
     legend: {
-      data: ['进程RSS', '系统已用内存'],
+      data: [t('pages.resourceMonitor.procRss'), t('pages.resourceMonitor.sysMemUsed')],
       top: props.title ? 28 : 0,
     },
     grid: {
@@ -73,19 +86,19 @@ const buildMemoryOption = (points: ResourceMetricPoint[]): EChartsOption => {
     },
     yAxis: {
       type: 'value',
-      name: '内存(MB)',
+      name: t('pages.resourceMonitor.memoryMb'),
       min: 0,
     },
     series: [
       {
-        name: '进程RSS',
+        name: t('pages.resourceMonitor.procRss'),
         type: 'line',
         smooth: true,
         data: procMemSeries,
         itemStyle: {color: '#409EFF'},
       },
       {
-        name: '系统已用内存',
+        name: t('pages.resourceMonitor.sysMemUsed'),
         type: 'line',
         smooth: true,
         data: sysMemSeries,
@@ -120,14 +133,18 @@ const buildHeapOption = (points: ResourceMetricPoint[]): EChartsOption => {
         const point = points[index]
         return [
           items[0].name,
-          `堆已分配: ${formatNumber(point?.procHeapAllocMb)} MB`,
-          `堆使用中: ${formatNumber(point?.procHeapInuseMb)} MB`,
-          `堆系统占用: ${formatNumber(point?.procHeapSysMb)} MB`,
+          t('pages.resourceMonitor.heapAllocTooltip', {value: formatNumber(point?.procHeapAllocMb)}),
+          t('pages.resourceMonitor.heapInuseTooltip', {value: formatNumber(point?.procHeapInuseMb)}),
+          t('pages.resourceMonitor.heapSysTooltip', {value: formatNumber(point?.procHeapSysMb)}),
         ].join('<br/>')
       },
     },
     legend: {
-      data: ['堆已分配', '堆使用中', '堆系统占用'],
+      data: [
+        t('pages.resourceMonitor.heapAlloc'),
+        t('pages.resourceMonitor.heapInuse'),
+        t('pages.resourceMonitor.heapSys'),
+      ],
       top: props.title ? 28 : 0,
     },
     grid: {
@@ -144,26 +161,26 @@ const buildHeapOption = (points: ResourceMetricPoint[]): EChartsOption => {
     },
     yAxis: {
       type: 'value',
-      name: '堆内存(MB)',
+      name: t('pages.resourceMonitor.heapMemoryMb'),
       min: 0,
     },
     series: [
       {
-        name: '堆已分配',
+        name: t('pages.resourceMonitor.heapAlloc'),
         type: 'line',
         smooth: true,
         data: heapAllocSeries,
         itemStyle: {color: '#409EFF'},
       },
       {
-        name: '堆使用中',
+        name: t('pages.resourceMonitor.heapInuse'),
         type: 'line',
         smooth: true,
         data: heapInuseSeries,
         itemStyle: {color: '#E6A23C'},
       },
       {
-        name: '堆系统占用',
+        name: t('pages.resourceMonitor.heapSys'),
         type: 'line',
         smooth: true,
         data: heapSysSeries,
@@ -197,13 +214,13 @@ const buildHeapRatioOption = (points: ResourceMetricPoint[]): EChartsOption => {
         const point = points[index]
         return [
           items[0].name,
-          `堆使用比例: ${formatNumber(point?.procHeapUsedPercent)}%`,
-          `堆空闲比例: ${formatNumber(point?.procHeapIdlePercent)}%`,
+          t('pages.resourceMonitor.heapUsedPercentTooltip', {value: formatNumber(point?.procHeapUsedPercent)}),
+          t('pages.resourceMonitor.heapIdlePercentTooltip', {value: formatNumber(point?.procHeapIdlePercent)}),
         ].join('<br/>')
       },
     },
     legend: {
-      data: ['堆使用比例', '堆空闲比例'],
+      data: [t('pages.resourceMonitor.heapUsedPercent'), t('pages.resourceMonitor.heapIdlePercent')],
       top: props.title ? 28 : 0,
     },
     grid: {
@@ -220,20 +237,20 @@ const buildHeapRatioOption = (points: ResourceMetricPoint[]): EChartsOption => {
     },
     yAxis: {
       type: 'value',
-      name: '比例(%)',
+      name: t('pages.resourceMonitor.ratioPercent'),
       min: 0,
       max: 100,
     },
     series: [
       {
-        name: '堆使用比例',
+        name: t('pages.resourceMonitor.heapUsedPercent'),
         type: 'line',
         smooth: true,
         data: heapUsedPercentSeries,
         itemStyle: {color: '#67C23A'},
       },
       {
-        name: '堆空闲比例',
+        name: t('pages.resourceMonitor.heapIdlePercent'),
         type: 'line',
         smooth: true,
         data: heapIdlePercentSeries,
@@ -241,13 +258,6 @@ const buildHeapRatioOption = (points: ResourceMetricPoint[]): EChartsOption => {
       },
     ],
   }
-}
-
-const formatCount = (value: number | string | null | undefined) => {
-  if (value === null || value === undefined || value === '') {
-    return '-'
-  }
-  return Number(value).toLocaleString('zh-CN')
 }
 
 const buildOnlineOption = (points: ResourceMetricPoint[]): EChartsOption => {
@@ -273,12 +283,12 @@ const buildOnlineOption = (points: ResourceMetricPoint[]): EChartsOption => {
         const point = points[index]
         return [
           items[0].name,
-          `在线人数: ${formatCount(point?.onlineCount)}`,
+          t('pages.resourceMonitor.onlineCountTooltip', {value: formatCount(point?.onlineCount)}),
         ].join('<br/>')
       },
     },
     legend: {
-      data: ['在线人数'],
+      data: [t('pages.resourceMonitor.onlineCount')],
       top: props.title ? 28 : 0,
     },
     grid: {
@@ -295,13 +305,13 @@ const buildOnlineOption = (points: ResourceMetricPoint[]): EChartsOption => {
     },
     yAxis: {
       type: 'value',
-      name: '人数',
+      name: t('pages.resourceMonitor.peopleCount'),
       min: 0,
       minInterval: 1,
     },
     series: [
       {
-        name: '在线人数',
+        name: t('pages.resourceMonitor.onlineCount'),
         type: 'line',
         smooth: true,
         data: onlineSeries,
@@ -335,13 +345,13 @@ const buildCpuOption = (points: ResourceMetricPoint[]): EChartsOption => {
         const point = points[index]
         return [
           items[0].name,
-          `进程CPU: ${formatNumber(point?.procCpuPercent)}%`,
-          `系统CPU: ${formatNumber(point?.sysCpuPercent)}%`,
+          t('pages.resourceMonitor.procCpuTooltip', {value: formatNumber(point?.procCpuPercent)}),
+          t('pages.resourceMonitor.sysCpuTooltip', {value: formatNumber(point?.sysCpuPercent)}),
         ].join('<br/>')
       },
     },
     legend: {
-      data: ['进程CPU', '系统CPU'],
+      data: [t('pages.resourceMonitor.procCpu'), t('pages.resourceMonitor.sysCpu')],
       top: props.title ? 28 : 0,
     },
     grid: {
@@ -358,20 +368,20 @@ const buildCpuOption = (points: ResourceMetricPoint[]): EChartsOption => {
     },
     yAxis: {
       type: 'value',
-      name: 'CPU(%)',
+      name: t('pages.resourceMonitor.cpuPercent'),
       min: 0,
       max: 100,
     },
     series: [
       {
-        name: '进程CPU',
+        name: t('pages.resourceMonitor.procCpu'),
         type: 'line',
         smooth: true,
         data: procCpuSeries,
         itemStyle: {color: '#E6A23C'},
       },
       {
-        name: '系统CPU',
+        name: t('pages.resourceMonitor.sysCpu'),
         type: 'line',
         smooth: true,
         data: sysCpuSeries,
@@ -414,7 +424,7 @@ const handleResize = () => {
 }
 
 watch(
-    () => [props.data, props.metricType],
+    () => [props.data, props.metricType, props.title, locale.value],
     () => {
       renderChart()
     },

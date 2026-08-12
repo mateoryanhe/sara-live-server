@@ -3,7 +3,7 @@
     <el-card v-loading="loading">
       <template #header>
         <div class="card-header">
-          <span>工会基础信息</span>
+          <span>{{ t('menu.GuildProfileManagement') }}</span>
         </div>
       </template>
 
@@ -11,14 +11,14 @@
           :closable="false"
           class="tip-alert"
           show-icon
-          title="说明"
+          :title="t('pages.guildProfile.tipTitle')"
           type="info"
       >
-        <p>仅可编辑当前登录 CMS 账号作为会长（leader_id）关联的工会信息。</p>
-        <p>若未匹配到工会，请联系管理员在「工会管理」中设置会长。</p>
+        <p>{{ t('pages.guildProfile.tipLine1') }}</p>
+        <p>{{ t('pages.guildProfile.tipLine2') }}</p>
       </el-alert>
 
-      <el-empty v-if="!loading && !hasGuild" description="未找到与当前账号关联的工会"/>
+      <el-empty v-if="!loading && !hasGuild" :description="t('pages.guildProfile.noGuild')"/>
 
       <el-form
           v-else
@@ -28,34 +28,34 @@
           class="profile-form"
           label-width="100px"
       >
-        <el-form-item label="工会ID">
+        <el-form-item :label="t('pages.guildProfile.guildId')">
           <el-input v-model="formData.id" disabled/>
         </el-form-item>
-        <el-form-item label="工会名称" prop="name">
-          <el-input v-model="formData.name" maxlength="32" placeholder="请输入工会名称" show-word-limit/>
+        <el-form-item :label="t('pages.guildProfile.guildName')" prop="name">
+          <el-input v-model="formData.name" maxlength="32" :placeholder="t('pages.guildProfile.guildNamePlaceholder')" show-word-limit/>
         </el-form-item>
-        <el-form-item label="银行卡" prop="bankCard">
-          <el-input v-model="formData.bankCard" maxlength="64" placeholder="请输入银行卡信息" show-word-limit/>
+        <el-form-item :label="t('pages.guildProfile.bankCard')" prop="bankCard">
+          <el-input v-model="formData.bankCard" maxlength="64" :placeholder="t('pages.guildProfile.bankCardPlaceholder')" show-word-limit/>
         </el-form-item>
-        <el-form-item label="联系方式" prop="contact">
-          <el-input v-model="formData.contact" maxlength="64" placeholder="请输入联系方式" show-word-limit/>
+        <el-form-item :label="t('pages.guildProfile.contact')" prop="contact">
+          <el-input v-model="formData.contact" maxlength="64" :placeholder="t('pages.guildProfile.contactPlaceholder')" show-word-limit/>
         </el-form-item>
-        <el-form-item label="简介" prop="description">
+        <el-form-item :label="t('pages.guildProfile.description')" prop="description">
           <el-input
               v-model="formData.description"
               :rows="4"
               maxlength="255"
-              placeholder="请输入工会简介"
+              :placeholder="t('pages.guildProfile.descriptionPlaceholder')"
               show-word-limit
               type="textarea"
           />
         </el-form-item>
-        <el-form-item v-if="formData.updatedAt" label="最近更新">
+        <el-form-item v-if="formData.updatedAt" :label="t('pages.guildProfile.lastUpdated')">
           <span>{{ formData.updatedAt }}</span>
         </el-form-item>
         <el-form-item>
-          <el-button v-if="can('save')" :loading="saving" type="primary" @click="handleSave">保存</el-button>
-          <el-button @click="fetchProfile">刷新</el-button>
+          <el-button v-if="can('save')" :loading="saving" type="primary" @click="handleSave">{{ t('common.save') }}</el-button>
+          <el-button @click="fetchProfile">{{ t('common.refresh') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -63,7 +63,8 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {computed, onMounted, reactive, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
 import {ElMessage, type FormInstance, type FormRules} from 'element-plus'
 import {guildApi} from '@/api'
 import type {MyGuildProfile} from '@/types/api'
@@ -71,6 +72,7 @@ import {usePagePermission} from '@/composables/usePagePermission'
 
 const {can} = usePagePermission('GuildProfileManagement')
 
+const {t} = useI18n()
 const loading = ref(false)
 const saving = ref(false)
 const hasGuild = ref(false)
@@ -85,21 +87,21 @@ const formData = reactive({
   updatedAt: '',
 })
 
-const formRules: FormRules = {
+const formRules = computed<FormRules>(() => ({
   name: [
-    {required: true, message: '请输入工会名称', trigger: 'blur'},
-    {min: 2, max: 32, message: '工会名称长度在2-32个字符', trigger: 'blur'},
+    {required: true, message: t('pages.guildProfile.nameRequired'), trigger: 'blur'},
+    {min: 2, max: 32, message: t('pages.guildProfile.nameLength'), trigger: 'blur'},
   ],
   bankCard: [
-    {max: 64, message: '银行卡信息不能超过64个字符', trigger: 'blur'},
+    {max: 64, message: t('pages.guildProfile.bankCardMaxLength'), trigger: 'blur'},
   ],
   contact: [
-    {max: 64, message: '联系方式不能超过64个字符', trigger: 'blur'},
+    {max: 64, message: t('pages.guildProfile.contactMaxLength'), trigger: 'blur'},
   ],
   description: [
-    {max: 255, message: '简介长度不能超过255个字符', trigger: 'blur'},
+    {max: 255, message: t('pages.guildProfile.descriptionMaxLength'), trigger: 'blur'},
   ],
-}
+}))
 
 const applyProfile = (profile: MyGuildProfile | null | undefined) => {
   if (!profile?.id) {
@@ -127,7 +129,7 @@ const fetchProfile = async () => {
     const response = await guildApi.getMyGuildProfile()
     applyProfile(response)
   } catch (error) {
-    console.error('获取工会基础信息失败:', error)
+    console.error('fetch guild profile failed:', error)
     applyProfile(null)
   } finally {
     loading.value = false
@@ -147,13 +149,13 @@ const handleSave = async () => {
         description: formData.description.trim(),
       })
       if (response?.success) {
-        ElMessage.success('保存成功')
+        ElMessage.success(t('common.saveConfig'))
         await fetchProfile()
       } else {
-        ElMessage.error('保存失败')
+        ElMessage.error(t('pages.guildProfile.saveFailed'))
       }
     } catch (error) {
-      console.error('保存工会基础信息失败:', error)
+      console.error('save guild profile failed:', error)
     } finally {
       saving.value = false
     }

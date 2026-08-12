@@ -18,17 +18,14 @@
 </template>
 
 <script lang="ts" setup>
-import {getUserStatBarMetricTabs} from '../user-stat-bar-series'
-
 defineProps<{
   metricKey: string
+  metricTabs: Array<{key: string; label: string}>
 }>()
 
 const emit = defineEmits<{
   'update:metricKey': [value: string]
 }>()
-
-const metricTabs = getUserStatBarMetricTabs()
 
 const onTabChange = (name: string | number) => {
   emit('update:metricKey', String(name))

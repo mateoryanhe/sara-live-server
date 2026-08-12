@@ -3,12 +3,12 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>VIP配置管理</span>
+          <span>{{ t('menu.VipCfgManagement') }}</span>
         </div>
       </template>
       <div class="content">
         <div class="table-header">
-          <el-button type="primary" @click="handleAdd">新增VIP等级</el-button>
+          <el-button type="primary" @click="handleAdd">{{ t('pages.vipCfgList.addVipLevel') }}</el-button>
           <el-button
               v-if="hasButtonPermission('VipCfgManagement', 'sync')"
               :disabled="selectedRows.length === 0"
@@ -16,26 +16,26 @@
               type="warning"
               @click="handleSyncData"
           >
-            同步数据
+            {{ t('common.syncData') }}
           </el-button>
         </div>
 
-        <div v-if="selectedRows.length" class="selection-tip">已选 {{ selectedRows.length }} 项</div>
+        <div v-if="selectedRows.length" class="selection-tip">{{ t('common.selectedCount', {count: selectedRows.length}) }}</div>
 
         <el-form :model="searchForm" class="search-form" inline>
-          <el-form-item label="等级名称">
-            <el-input v-model="searchForm.levelName" clearable placeholder="等级名称(模糊匹配)"/>
+          <el-form-item :label="t('pages.vipCfgList.levelName')">
+            <el-input v-model="searchForm.levelName" clearable :placeholder="t('pages.vipCfgList.levelNameFuzzy')"/>
           </el-form-item>
-          <el-form-item label="提现开关">
-            <el-select v-model="searchForm.withdrawSwitchFilter" placeholder="全部" style="width: 140px">
-              <el-option :value="0" label="全部"/>
-              <el-option :value="2" label="只看开启"/>
-              <el-option :value="1" label="只看关闭"/>
+          <el-form-item :label="t('pages.vipCfgList.withdrawSwitchFilter')">
+            <el-select v-model="searchForm.withdrawSwitchFilter" :placeholder="t('common.all')" style="width: 140px">
+              <el-option :value="0" :label="t('common.all')"/>
+              <el-option :value="2" :label="t('pages.vipCfgList.onlyOn')"/>
+              <el-option :value="1" :label="t('pages.vipCfgList.onlyOff')"/>
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="handleSearch">搜索</el-button>
-            <el-button @click="resetSearch">重置</el-button>
+            <el-button type="primary" @click="handleSearch">{{ t('common.search') }}</el-button>
+            <el-button @click="resetSearch">{{ t('common.reset') }}</el-button>
           </el-form-item>
         </el-form>
 
@@ -48,9 +48,9 @@
         >
           <el-table-column type="selection" width="48"/>
           <el-table-column label="ID" prop="id" width="100"/>
-          <el-table-column label="等级" prop="level" width="80"/>
-          <el-table-column label="等级名称" prop="levelName" min-width="120"/>
-          <el-table-column label="等级图标" width="100">
+          <el-table-column :label="t('common.level')" prop="level" width="80"/>
+          <el-table-column :label="t('pages.vipCfgList.levelName')" prop="levelName" min-width="120"/>
+          <el-table-column :label="t('pages.vipCfgList.levelIcon')" width="100">
             <template #default="{ row }">
               <el-image
                   v-if="row.levelIcon"
@@ -63,7 +63,7 @@
               <span v-else>-</span>
             </template>
           </el-table-column>
-          <el-table-column label="进场特效" min-width="200">
+          <el-table-column :label="t('pages.vipCfgList.entryEffect')" min-width="200">
             <template #default="{ row }">
               <video
                   v-if="isVideoUrl(row.animation)"
@@ -75,7 +75,7 @@
               <span v-else class="media-url-text">{{ row.animationName || '-' }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="进场特效图标" width="110">
+          <el-table-column :label="t('pages.vipCfgList.entryEffectIcon')" width="110">
             <template #default="{ row }">
               <el-image
                   v-if="row.animationIcon"
@@ -88,7 +88,7 @@
               <span v-else>-</span>
             </template>
           </el-table-column>
-          <el-table-column label="提现图标" width="100">
+          <el-table-column :label="t('pages.vipCfgList.withdrawIcon')" width="100">
             <template #default="{ row }">
               <el-image
                   v-if="row.withdrawIcon"
@@ -101,21 +101,21 @@
               <span v-else>-</span>
             </template>
           </el-table-column>
-          <el-table-column label="提现开关" width="100">
+          <el-table-column :label="t('pages.vipCfgList.withdrawSwitch')" width="100">
             <template #default="{ row }">
               <el-tag :type="row.withdrawSwitch === 1 ? 'success' : 'info'">
-                {{ row.withdrawSwitch === 1 ? '开' : '关' }}
+                {{ row.withdrawSwitch === 1 ? t('common.on') : t('common.off') }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="进场特效开关" width="120">
+          <el-table-column :label="t('pages.vipCfgList.entryEffectSwitch')" width="120">
             <template #default="{ row }">
               <el-tag :type="row.animationSwitch === 1 ? 'success' : 'info'">
-                {{ row.animationSwitch === 1 ? '开' : '关' }}
+                {{ row.animationSwitch === 1 ? t('common.on') : t('common.off') }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="公屏评论特效" min-width="200">
+          <el-table-column :label="t('pages.vipCfgList.commentEffect')" min-width="200">
             <template #default="{ row }">
               <video
                   v-if="isVideoUrl(row.commentEffect)"
@@ -127,7 +127,7 @@
               <span v-else class="media-url-text">{{ row.commentEffectName || '-' }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="公屏评论特效图标" width="130">
+          <el-table-column :label="t('pages.vipCfgList.commentEffectIcon')" width="130">
             <template #default="{ row }">
               <el-image
                   v-if="row.commentEffectIcon"
@@ -140,14 +140,14 @@
               <span v-else>-</span>
             </template>
           </el-table-column>
-          <el-table-column label="公屏评论特效开关" width="140">
+          <el-table-column :label="t('pages.vipCfgList.commentEffectSwitch')" width="140">
             <template #default="{ row }">
               <el-tag :type="row.commentEffectSwitch === 1 ? 'success' : 'info'">
-                {{ row.commentEffectSwitch === 1 ? '开' : '关' }}
+                {{ row.commentEffectSwitch === 1 ? t('common.on') : t('common.off') }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="客服优先图标" width="120">
+          <el-table-column :label="t('pages.vipCfgList.customerServiceIcon')" width="120">
             <template #default="{ row }">
               <el-image
                   v-if="row.customerServiceIcon"
@@ -160,39 +160,39 @@
               <span v-else>-</span>
             </template>
           </el-table-column>
-          <el-table-column label="客服优先开关" width="120">
+          <el-table-column :label="t('pages.vipCfgList.customerServiceSwitch')" width="120">
             <template #default="{ row }">
               <el-tag :type="row.customerServiceSwitch === 1 ? 'success' : 'info'">
-                {{ row.customerServiceSwitch === 1 ? '开' : '关' }}
+                {{ row.customerServiceSwitch === 1 ? t('common.on') : t('common.off') }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="升级充值上限" width="130">
+          <el-table-column :label="t('pages.vipCfgList.upgradeRechargeLimit')" width="130">
             <template #default="{ row }">
               {{ formatAmount(row.upgradeRechargeLimit) }}
             </template>
           </el-table-column>
-          <el-table-column label="最低提现金额" width="130">
+          <el-table-column :label="t('pages.vipCfgList.minWithdrawAmount')" width="130">
             <template #default="{ row }">
               {{ formatAmount(row.minWithdrawAmount) }}
             </template>
           </el-table-column>
-          <el-table-column label="最高提现金额" width="130">
+          <el-table-column :label="t('pages.vipCfgList.maxWithdrawAmount')" width="130">
             <template #default="{ row }">
               {{ formatAmount(row.maxWithdrawAmount) }}
             </template>
           </el-table-column>
-          <el-table-column label="手续费" width="100">
+          <el-table-column :label="t('pages.vipCfgList.fee')" width="100">
             <template #default="{ row }">
               {{ formatAmount(row.fee) }}
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" prop="createdAt" width="160"/>
-          <el-table-column label="更新时间" prop="updatedAt" width="160"/>
-          <el-table-column fixed="right" label="操作" width="180">
+          <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
+          <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
+          <el-table-column fixed="right" :label="t('common.actions')" width="180">
             <template #default="{ row }">
-              <el-button size="small" @click="handleEdit(row)">编辑</el-button>
-              <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
+              <el-button size="small" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
+              <el-button size="small" type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -214,14 +214,14 @@
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="720px">
       <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="130px">
         <el-tabs v-model="activeTab">
-          <el-tab-pane label="基础信息" name="basic">
-            <el-form-item label="等级" prop="level">
+          <el-tab-pane :label="t('pages.vipCfgList.tabBasic')" name="basic">
+            <el-form-item :label="t('common.level')" prop="level">
               <el-input-number v-model="currentRow.level" :min="1" controls-position="right"/>
             </el-form-item>
-            <el-form-item label="等级名称" prop="levelName">
-              <el-input v-model="currentRow.levelName" placeholder="请输入等级名称"/>
+            <el-form-item :label="t('pages.vipCfgList.levelName')" prop="levelName">
+              <el-input v-model="currentRow.levelName" :placeholder="t('pages.vipCfgList.levelNamePlaceholder')"/>
             </el-form-item>
-            <el-form-item label="等级图标" prop="levelIcon">
+            <el-form-item :label="t('pages.vipCfgList.levelIcon')" prop="levelIcon">
               <div class="asset-upload-wrap">
                 <el-upload
                     :before-upload="beforeIconUpload"
@@ -242,7 +242,7 @@
                     <el-icon class="asset-uploader-icon">
                       <Plus/>
                     </el-icon>
-                    <span>点击上传图标</span>
+                    <span>{{ t('pages.vipCfgList.clickUploadIcon') }}</span>
                   </div>
                 </el-upload>
                 <el-button
@@ -251,11 +251,11 @@
                     type="danger"
                     @click="clearLevelIcon"
                 >
-                  移除图标
+                  {{ t('pages.vipCfgList.removeIcon') }}
                 </el-button>
               </div>
             </el-form-item>
-            <el-form-item label="升级充值上限" prop="upgradeRechargeLimit">
+            <el-form-item :label="t('pages.vipCfgList.upgradeRechargeLimit')" prop="upgradeRechargeLimit">
               <el-input-number
                   v-model="currentRow.upgradeRechargeLimit"
                   :min="0"
@@ -263,9 +263,9 @@
                   :step="0.0001"
                   controls-position="right"
               />
-              <div class="form-tip">保留4位小数，例如 100.0000</div>
+              <div class="form-tip">{{ t('pages.vipCfgList.decimalExample') }}</div>
             </el-form-item>
-            <el-form-item label="最低提现金额" prop="minWithdrawAmount">
+            <el-form-item :label="t('pages.vipCfgList.minWithdrawAmount')" prop="minWithdrawAmount">
               <el-input-number
                   v-model="currentRow.minWithdrawAmount"
                   :min="0"
@@ -273,9 +273,9 @@
                   :step="0.0001"
                   controls-position="right"
               />
-              <div class="form-tip">保留4位小数</div>
+              <div class="form-tip">{{ t('pages.vipCfgList.decimalTip') }}</div>
             </el-form-item>
-            <el-form-item label="最高提现金额" prop="maxWithdrawAmount">
+            <el-form-item :label="t('pages.vipCfgList.maxWithdrawAmount')" prop="maxWithdrawAmount">
               <el-input-number
                   v-model="currentRow.maxWithdrawAmount"
                   :min="0"
@@ -283,9 +283,9 @@
                   :step="0.0001"
                   controls-position="right"
               />
-              <div class="form-tip">保留4位小数，0 表示不限制</div>
+              <div class="form-tip">{{ t('pages.vipCfgList.maxWithdrawZeroTip') }}</div>
             </el-form-item>
-            <el-form-item label="手续费" prop="fee">
+            <el-form-item :label="t('pages.vipCfgList.fee')" prop="fee">
               <el-input-number
                   v-model="currentRow.fee"
                   :min="0"
@@ -293,19 +293,19 @@
                   :step="0.0001"
                   controls-position="right"
               />
-              <div class="form-tip">保留4位小数</div>
+              <div class="form-tip">{{ t('pages.vipCfgList.decimalTip') }}</div>
             </el-form-item>
           </el-tab-pane>
 
-          <el-tab-pane label="房间进场特效" name="entryEffect">
-            <el-form-item label="进场特效开关" prop="animationSwitch">
+          <el-tab-pane :label="t('pages.vipCfgList.tabEntryEffect')" name="entryEffect">
+            <el-form-item :label="t('pages.vipCfgList.entryEffectSwitch')" prop="animationSwitch">
               <el-radio-group v-model="currentRow.animationSwitch">
-                <el-radio :label="1">开</el-radio>
-                <el-radio :label="0">关</el-radio>
+                <el-radio :label="1">{{ t('common.on') }}</el-radio>
+                <el-radio :label="0">{{ t('common.off') }}</el-radio>
               </el-radio-group>
-              <div class="form-tip">仅控制 App 端是否展示该等级进场特效，后端不参与业务判断</div>
+              <div class="form-tip">{{ t('pages.vipCfgList.appDisplayTip') }}</div>
             </el-form-item>
-            <el-form-item label="特效动画" prop="animation">
+            <el-form-item :label="t('pages.vipCfgList.effectAnimation')" prop="animation">
               <div class="asset-upload-wrap">
                 <el-upload
                     :before-upload="beforeAnimationUpload"
@@ -327,7 +327,7 @@
                     <el-icon class="asset-uploader-icon">
                       <Plus/>
                     </el-icon>
-                    <span>点击上传 MP4 动画</span>
+                    <span>{{ t('pages.vipCfgList.clickUploadMp4') }}</span>
                   </div>
                 </el-upload>
                 <el-button
@@ -336,11 +336,11 @@
                     type="danger"
                     @click="clearAnimation"
                 >
-                  移除动画
+                  {{ t('pages.vipCfgList.removeAnimation') }}
                 </el-button>
               </div>
             </el-form-item>
-            <el-form-item label="特效图标" prop="animationIcon">
+            <el-form-item :label="t('pages.vipCfgList.effectIcon')" prop="animationIcon">
               <div class="asset-upload-wrap">
                 <el-upload
                     :before-upload="beforeIconUpload"
@@ -361,7 +361,7 @@
                     <el-icon class="asset-uploader-icon">
                       <Plus/>
                     </el-icon>
-                    <span>点击上传图标</span>
+                    <span>{{ t('pages.vipCfgList.clickUploadIcon') }}</span>
                   </div>
                 </el-upload>
                 <el-button
@@ -370,11 +370,11 @@
                     type="danger"
                     @click="clearAnimationIcon"
                 >
-                  移除图标
+                  {{ t('pages.vipCfgList.removeIcon') }}
                 </el-button>
               </div>
             </el-form-item>
-            <el-form-item label="特效说明(英文)" prop="animationDescEn">
+            <el-form-item :label="t('pages.vipCfgList.effectDescEn')" prop="animationDescEn">
               <el-input
                   v-model="currentRow.animationDescEn"
                   :autosize="{ minRows: 3, maxRows: 6 }"
@@ -384,7 +384,7 @@
                   type="textarea"
               />
             </el-form-item>
-            <el-form-item label="特效说明(西班牙语)" prop="animationDescEs">
+            <el-form-item :label="t('pages.vipCfgList.effectDescEs')" prop="animationDescEs">
               <el-input
                   v-model="currentRow.animationDescEs"
                   :autosize="{ minRows: 3, maxRows: 6 }"
@@ -394,7 +394,7 @@
                   type="textarea"
               />
             </el-form-item>
-            <el-form-item label="特效说明(葡萄牙语)" prop="animationDescPt">
+            <el-form-item :label="t('pages.vipCfgList.effectDescPt')" prop="animationDescPt">
               <el-input
                   v-model="currentRow.animationDescPt"
                   :autosize="{ minRows: 3, maxRows: 6 }"
@@ -404,7 +404,7 @@
                   type="textarea"
               />
             </el-form-item>
-            <el-form-item label="特效说明(印地语)" prop="animationDescHi">
+            <el-form-item :label="t('pages.vipCfgList.effectDescHi')" prop="animationDescHi">
               <el-input
                   v-model="currentRow.animationDescHi"
                   :autosize="{ minRows: 3, maxRows: 6 }"
@@ -414,7 +414,7 @@
                   type="textarea"
               />
             </el-form-item>
-            <el-form-item label="特效说明(印尼语)" prop="animationDescId">
+            <el-form-item :label="t('pages.vipCfgList.effectDescId')" prop="animationDescId">
               <el-input
                   v-model="currentRow.animationDescId"
                   :autosize="{ minRows: 3, maxRows: 6 }"
@@ -426,15 +426,15 @@
             </el-form-item>
           </el-tab-pane>
 
-          <el-tab-pane label="直播间公屏评论特效" name="commentEffect">
-            <el-form-item label="公屏评论特效开关" prop="commentEffectSwitch">
+          <el-tab-pane :label="t('pages.vipCfgList.tabCommentEffect')" name="commentEffect">
+            <el-form-item :label="t('pages.vipCfgList.commentEffectSwitch')" prop="commentEffectSwitch">
               <el-radio-group v-model="currentRow.commentEffectSwitch">
-                <el-radio :label="1">开</el-radio>
-                <el-radio :label="0">关</el-radio>
+                <el-radio :label="1">{{ t('common.on') }}</el-radio>
+                <el-radio :label="0">{{ t('common.off') }}</el-radio>
               </el-radio-group>
-              <div class="form-tip">仅控制 App 端是否展示该等级公屏评论特效，后端不参与业务判断</div>
+              <div class="form-tip">{{ t('pages.vipCfgList.appDisplayCommentTip') }}</div>
             </el-form-item>
-            <el-form-item label="特效动画" prop="commentEffect">
+            <el-form-item :label="t('pages.vipCfgList.effectAnimation')" prop="commentEffect">
               <div class="asset-upload-wrap">
                 <el-upload
                     :before-upload="beforeAnimationUpload"
@@ -456,7 +456,7 @@
                     <el-icon class="asset-uploader-icon">
                       <Plus/>
                     </el-icon>
-                    <span>点击上传 MP4 动画</span>
+                    <span>{{ t('pages.vipCfgList.clickUploadMp4') }}</span>
                   </div>
                 </el-upload>
                 <el-button
@@ -465,11 +465,11 @@
                     type="danger"
                     @click="clearCommentEffect"
                 >
-                  移除动画
+                  {{ t('pages.vipCfgList.removeAnimation') }}
                 </el-button>
               </div>
             </el-form-item>
-            <el-form-item label="特效图标" prop="commentEffectIcon">
+            <el-form-item :label="t('pages.vipCfgList.effectIcon')" prop="commentEffectIcon">
               <div class="asset-upload-wrap">
                 <el-upload
                     :before-upload="beforeIconUpload"
@@ -490,7 +490,7 @@
                     <el-icon class="asset-uploader-icon">
                       <Plus/>
                     </el-icon>
-                    <span>点击上传图标</span>
+                    <span>{{ t('pages.vipCfgList.clickUploadIcon') }}</span>
                   </div>
                 </el-upload>
                 <el-button
@@ -499,11 +499,11 @@
                     type="danger"
                     @click="clearCommentEffectIcon"
                 >
-                  移除图标
+                  {{ t('pages.vipCfgList.removeIcon') }}
                 </el-button>
               </div>
             </el-form-item>
-            <el-form-item label="特效说明(英文)" prop="commentEffectDescEn">
+            <el-form-item :label="t('pages.vipCfgList.effectDescEn')" prop="commentEffectDescEn">
               <el-input
                   v-model="currentRow.commentEffectDescEn"
                   :autosize="{ minRows: 3, maxRows: 6 }"
@@ -513,7 +513,7 @@
                   type="textarea"
               />
             </el-form-item>
-            <el-form-item label="特效说明(西班牙语)" prop="commentEffectDescEs">
+            <el-form-item :label="t('pages.vipCfgList.effectDescEs')" prop="commentEffectDescEs">
               <el-input
                   v-model="currentRow.commentEffectDescEs"
                   :autosize="{ minRows: 3, maxRows: 6 }"
@@ -523,7 +523,7 @@
                   type="textarea"
               />
             </el-form-item>
-            <el-form-item label="特效说明(葡萄牙语)" prop="commentEffectDescPt">
+            <el-form-item :label="t('pages.vipCfgList.effectDescPt')" prop="commentEffectDescPt">
               <el-input
                   v-model="currentRow.commentEffectDescPt"
                   :autosize="{ minRows: 3, maxRows: 6 }"
@@ -533,7 +533,7 @@
                   type="textarea"
               />
             </el-form-item>
-            <el-form-item label="特效说明(印地语)" prop="commentEffectDescHi">
+            <el-form-item :label="t('pages.vipCfgList.effectDescHi')" prop="commentEffectDescHi">
               <el-input
                   v-model="currentRow.commentEffectDescHi"
                   :autosize="{ minRows: 3, maxRows: 6 }"
@@ -543,7 +543,7 @@
                   type="textarea"
               />
             </el-form-item>
-            <el-form-item label="特效说明(印尼语)" prop="commentEffectDescId">
+            <el-form-item :label="t('pages.vipCfgList.effectDescId')" prop="commentEffectDescId">
               <el-input
                   v-model="currentRow.commentEffectDescId"
                   :autosize="{ minRows: 3, maxRows: 6 }"
@@ -555,15 +555,15 @@
             </el-form-item>
           </el-tab-pane>
 
-          <el-tab-pane label="提现文本" name="withdrawText">
-            <el-form-item label="提现开关" prop="withdrawSwitch">
+          <el-tab-pane :label="t('pages.vipCfgList.tabWithdrawText')" name="withdrawText">
+            <el-form-item :label="t('pages.vipCfgList.withdrawSwitch')" prop="withdrawSwitch">
               <el-radio-group v-model="currentRow.withdrawSwitch">
-                <el-radio :label="1">开</el-radio>
-                <el-radio :label="0">关</el-radio>
+                <el-radio :label="1">{{ t('common.on') }}</el-radio>
+                <el-radio :label="0">{{ t('common.off') }}</el-radio>
               </el-radio-group>
-              <div class="form-tip">仅控制 App 端是否展示该等级提现特权，后端不参与业务判断</div>
+              <div class="form-tip">{{ t('pages.vipCfgList.appDisplayWithdrawTip') }}</div>
             </el-form-item>
-            <el-form-item label="提现图标" prop="withdrawIcon">
+            <el-form-item :label="t('pages.vipCfgList.withdrawIcon')" prop="withdrawIcon">
               <div class="asset-upload-wrap">
                 <el-upload
                     :before-upload="beforeIconUpload"
@@ -584,7 +584,7 @@
                     <el-icon class="asset-uploader-icon">
                       <Plus/>
                     </el-icon>
-                    <span>点击上传图标</span>
+                    <span>{{ t('pages.vipCfgList.clickUploadIcon') }}</span>
                   </div>
                 </el-upload>
                 <el-button
@@ -593,11 +593,11 @@
                     type="danger"
                     @click="clearWithdrawIcon"
                 >
-                  移除图标
+                  {{ t('pages.vipCfgList.removeIcon') }}
                 </el-button>
               </div>
             </el-form-item>
-            <el-form-item label="提现须知(英文)" prop="withdrawNoticeEn">
+            <el-form-item :label="t('pages.vipCfgList.withdrawNoticeEn')" prop="withdrawNoticeEn">
               <el-input
                   v-model="currentRow.withdrawNoticeEn"
                   :autosize="{ minRows: 4, maxRows: 8 }"
@@ -607,7 +607,7 @@
                   type="textarea"
               />
             </el-form-item>
-            <el-form-item label="提现须知(西班牙语)" prop="withdrawNoticeEs">
+            <el-form-item :label="t('pages.vipCfgList.withdrawNoticeEs')" prop="withdrawNoticeEs">
               <el-input
                   v-model="currentRow.withdrawNoticeEs"
                   :autosize="{ minRows: 4, maxRows: 8 }"
@@ -617,7 +617,7 @@
                   type="textarea"
               />
             </el-form-item>
-            <el-form-item label="提现须知(葡萄牙语)" prop="withdrawNoticePt">
+            <el-form-item :label="t('pages.vipCfgList.withdrawNoticePt')" prop="withdrawNoticePt">
               <el-input
                   v-model="currentRow.withdrawNoticePt"
                   :autosize="{ minRows: 4, maxRows: 8 }"
@@ -627,7 +627,7 @@
                   type="textarea"
               />
             </el-form-item>
-            <el-form-item label="提现须知(印地语)" prop="withdrawNoticeHi">
+            <el-form-item :label="t('pages.vipCfgList.withdrawNoticeHi')" prop="withdrawNoticeHi">
               <el-input
                   v-model="currentRow.withdrawNoticeHi"
                   :autosize="{ minRows: 4, maxRows: 8 }"
@@ -637,7 +637,7 @@
                   type="textarea"
               />
             </el-form-item>
-            <el-form-item label="提现须知(印尼语)" prop="withdrawNoticeId">
+            <el-form-item :label="t('pages.vipCfgList.withdrawNoticeId')" prop="withdrawNoticeId">
               <el-input
                   v-model="currentRow.withdrawNoticeId"
                   :autosize="{ minRows: 4, maxRows: 8 }"
@@ -649,15 +649,15 @@
             </el-form-item>
           </el-tab-pane>
 
-          <el-tab-pane label="客服优先" name="customerService">
-            <el-form-item label="客服优先开关" prop="customerServiceSwitch">
+          <el-tab-pane :label="t('pages.vipCfgList.tabCustomerService')" name="customerService">
+            <el-form-item :label="t('pages.vipCfgList.customerServiceSwitch')" prop="customerServiceSwitch">
               <el-radio-group v-model="currentRow.customerServiceSwitch">
-                <el-radio :label="1">开</el-radio>
-                <el-radio :label="0">关</el-radio>
+                <el-radio :label="1">{{ t('common.on') }}</el-radio>
+                <el-radio :label="0">{{ t('common.off') }}</el-radio>
               </el-radio-group>
-              <div class="form-tip">仅控制 App 端是否展示该等级客服优先特权，后端不参与业务判断</div>
+              <div class="form-tip">{{ t('pages.vipCfgList.appDisplayCsTip') }}</div>
             </el-form-item>
-            <el-form-item label="特权图标" prop="customerServiceIcon">
+            <el-form-item :label="t('pages.vipCfgList.privilegeIcon')" prop="customerServiceIcon">
               <div class="asset-upload-wrap">
                 <el-upload
                     :before-upload="beforeIconUpload"
@@ -678,7 +678,7 @@
                     <el-icon class="asset-uploader-icon">
                       <Plus/>
                     </el-icon>
-                    <span>点击上传图标</span>
+                    <span>{{ t('pages.vipCfgList.clickUploadIcon') }}</span>
                   </div>
                 </el-upload>
                 <el-button
@@ -687,11 +687,11 @@
                     type="danger"
                     @click="clearCustomerServiceIcon"
                 >
-                  移除图标
+                  {{ t('pages.vipCfgList.removeIcon') }}
                 </el-button>
               </div>
             </el-form-item>
-            <el-form-item label="特权说明(英文)" prop="customerServiceDescEn">
+            <el-form-item :label="t('pages.vipCfgList.privilegeDescEn')" prop="customerServiceDescEn">
               <el-input
                   v-model="currentRow.customerServiceDescEn"
                   :autosize="{ minRows: 3, maxRows: 6 }"
@@ -701,7 +701,7 @@
                   type="textarea"
               />
             </el-form-item>
-            <el-form-item label="特权说明(西班牙语)" prop="customerServiceDescEs">
+            <el-form-item :label="t('pages.vipCfgList.privilegeDescEs')" prop="customerServiceDescEs">
               <el-input
                   v-model="currentRow.customerServiceDescEs"
                   :autosize="{ minRows: 3, maxRows: 6 }"
@@ -711,7 +711,7 @@
                   type="textarea"
               />
             </el-form-item>
-            <el-form-item label="特权说明(葡萄牙语)" prop="customerServiceDescPt">
+            <el-form-item :label="t('pages.vipCfgList.privilegeDescPt')" prop="customerServiceDescPt">
               <el-input
                   v-model="currentRow.customerServiceDescPt"
                   :autosize="{ minRows: 3, maxRows: 6 }"
@@ -721,7 +721,7 @@
                   type="textarea"
               />
             </el-form-item>
-            <el-form-item label="特权说明(印地语)" prop="customerServiceDescHi">
+            <el-form-item :label="t('pages.vipCfgList.privilegeDescHi')" prop="customerServiceDescHi">
               <el-input
                   v-model="currentRow.customerServiceDescHi"
                   :autosize="{ minRows: 3, maxRows: 6 }"
@@ -731,7 +731,7 @@
                   type="textarea"
               />
             </el-form-item>
-            <el-form-item label="特权说明(印尼语)" prop="customerServiceDescId">
+            <el-form-item :label="t('pages.vipCfgList.privilegeDescId')" prop="customerServiceDescId">
               <el-input
                   v-model="currentRow.customerServiceDescId"
                   :autosize="{ minRows: 3, maxRows: 6 }"
@@ -745,15 +745,16 @@
         </el-tabs>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSave">保存</el-button>
+        <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="handleSave">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref, watch} from 'vue'
+import {computed, onMounted, reactive, ref, watch} from 'vue'
+import {useI18n} from 'vue-i18n'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
 import {Plus} from '@element-plus/icons-vue'
 import {dataSyncApi, uploadApi, vipCfgApi} from '@/api'
@@ -807,6 +808,8 @@ interface VipCfgForm {
   customerServiceDescHi: string
   customerServiceDescId: string
 }
+
+const {t} = useI18n()
 
 const loading = ref(false)
 const syncing = ref(false)
@@ -1080,7 +1083,7 @@ watch(dialogVisible, (visible) => {
 const beforeAnimationUpload = (file: File): boolean => {
   const ext = getExt(file.name)
   if (ext !== '.mp4') {
-    ElMessage.error('仅支持 MP4 格式')
+    ElMessage.error(t('pages.vipCfgList.mp4Only'))
     return false
   }
   return true
@@ -1088,7 +1091,7 @@ const beforeAnimationUpload = (file: File): boolean => {
 
 const beforeIconUpload = (file: File): boolean => {
   if (!file.type.startsWith('image/')) {
-    ElMessage.error('图标只能上传图片文件')
+    ElMessage.error(t('pages.vipCfgList.iconImageOnly'))
     return false
   }
   return true
@@ -1128,10 +1131,10 @@ const doAssetUpload = async (
     } else {
       setWithdrawIconPreview(URL.createObjectURL(file), true)
     }
-    ElMessage.success('上传成功')
+    ElMessage.success(t('pages.vipCfgList.uploadSuccess'))
   } catch (error) {
-    console.error('上传失败:', error)
-    ElMessage.error('上传失败')
+    console.error('upload failed:', error)
+    ElMessage.error(t('pages.vipCfgList.uploadFailed'))
   } finally {
     uploading.value = false
   }
@@ -1140,25 +1143,25 @@ const doAssetUpload = async (
 const validateWithdrawRange = (_rule: unknown, _value: unknown, callback: (error?: Error) => void) => {
   const {minWithdrawAmount, maxWithdrawAmount} = currentRow.value
   if (maxWithdrawAmount > 0 && minWithdrawAmount > maxWithdrawAmount) {
-    callback(new Error('最低提现金额不能大于最高提现金额'))
+    callback(new Error(t('pages.vipCfgList.withdrawRangeInvalid')))
     return
   }
   callback()
 }
 
-const formRules: FormRules = {
-  level: [{required: true, message: '请输入等级', trigger: 'change'}],
+const formRules = computed<FormRules>(() => ({
+  level: [{required: true, message: t('pages.vipCfgList.levelRequired'), trigger: 'change'}],
   levelName: [
-    {required: true, message: '请输入等级名称', trigger: 'blur'},
-    {min: 1, max: 64, message: '等级名称长度在1-64个字符', trigger: 'blur'}
+    {required: true, message: t('pages.vipCfgList.levelNameRequired'), trigger: 'blur'},
+    {min: 1, max: 64, message: t('pages.vipCfgList.levelNameLength'), trigger: 'blur'}
   ],
-  withdrawSwitch: [{required: true, message: '请选择提现开关', trigger: 'change'}],
-  animationSwitch: [{required: true, message: '请选择进场特效开关', trigger: 'change'}],
-  commentEffectSwitch: [{required: true, message: '请选择公屏评论特效开关', trigger: 'change'}],
-  customerServiceSwitch: [{required: true, message: '请选择客服优先开关', trigger: 'change'}],
+  withdrawSwitch: [{required: true, message: t('pages.vipCfgList.withdrawSwitchRequired'), trigger: 'change'}],
+  animationSwitch: [{required: true, message: t('pages.vipCfgList.animationSwitchRequired'), trigger: 'change'}],
+  commentEffectSwitch: [{required: true, message: t('pages.vipCfgList.commentEffectSwitchRequired'), trigger: 'change'}],
+  customerServiceSwitch: [{required: true, message: t('pages.vipCfgList.customerServiceSwitchRequired'), trigger: 'change'}],
   minWithdrawAmount: [{validator: validateWithdrawRange, trigger: 'change'}],
   maxWithdrawAmount: [{validator: validateWithdrawRange, trigger: 'change'}]
-}
+}))
 
 const fetchList = async () => {
   loading.value = true
@@ -1172,8 +1175,8 @@ const fetchList = async () => {
     tableData.value = response.data
     total.value = response.total
   } catch (error) {
-    console.error('获取VIP配置列表失败:', error)
-    ElMessage.error('获取VIP配置列表失败')
+    console.error('fetch vip cfg list failed:', error)
+    ElMessage.error(t('pages.vipCfgList.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -1195,7 +1198,7 @@ const handleCurrentChange = (page: number) => {
 }
 
 const handleAdd = () => {
-  dialogTitle.value = '新增VIP等级'
+  dialogTitle.value = t('pages.vipCfgList.addVipLevel')
   currentRow.value = defaultForm()
   activeTab.value = 'basic'
   resetAnimationPreview()
@@ -1214,35 +1217,38 @@ const handleSelectionChange = (rows: VipCfg[]) => {
 
 const handleSyncData = async () => {
   if (selectedRows.value.length === 0) {
-    ElMessage.warning('请先勾选要同步的配置')
+    ElMessage.warning(t('pages.vipCfgList.selectSyncFirst'))
     return
   }
   const ids = selectedRows.value.map((row) => Number(row.id)).filter((id) => id > 0)
   if (ids.length === 0) {
-    ElMessage.warning('所选配置无效')
+    ElMessage.warning(t('pages.vipCfgList.invalidSelection'))
     return
   }
   try {
     await ElMessageBox.confirm(
-        `将把已选 ${ids.length} 条 VIP 配置及关联图片/动画资源同步到目标环境（按 ID 覆盖或新增）。是否继续？`,
-        '同步数据',
+        t('pages.vipCfgList.syncConfirm', {count: ids.length}),
+        t('common.syncData'),
         {
-          confirmButtonText: '确定同步',
-          cancelButtonText: '取消',
+          confirmButtonText: t('common.confirmSync'),
+          cancelButtonText: t('common.cancel'),
           type: 'warning',
         }
     )
     syncing.value = true
     const response = await dataSyncApi.syncVipCfg({ids})
     if (response?.success) {
-      ElMessage.success(response.message || `同步成功：${response.rowCount} 条配置，${response.fileCount} 个文件`)
+      ElMessage.success(response.message || t('pages.vipCfgList.syncSuccessDetail', {
+        rows: response.rowCount,
+        files: response.fileCount,
+      }))
     } else {
-      ElMessage.error('同步失败')
+      ElMessage.error(t('pages.vipCfgList.syncFailed'))
     }
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('同步失败:', error)
-      ElMessage.error('同步失败，请检查数据同步配置与目标服务')
+      console.error('sync failed:', error)
+      ElMessage.error(t('pages.vipCfgList.syncFailedCheckConfig'))
     }
   } finally {
     syncing.value = false
@@ -1250,7 +1256,7 @@ const handleSyncData = async () => {
 }
 
 const handleEdit = (row: VipCfg) => {
-  dialogTitle.value = '编辑VIP等级'
+  dialogTitle.value = t('pages.vipCfgList.editVipLevel')
   activeTab.value = 'basic'
   const animationName = row.animationName || ''
   const animationIconName = row.animationIconName || ''
@@ -1339,16 +1345,16 @@ const handleEdit = (row: VipCfg) => {
 
 const handleDelete = async (row: VipCfg) => {
   try {
-    await ElMessageBox.confirm(`确定要删除 VIP等级 "${row.levelName}" 吗？`, '确认删除', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+    await ElMessageBox.confirm(t('pages.vipCfgList.deleteConfirm', {name: row.levelName}), t('common.confirmDelete'), {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
       type: 'warning'
     })
     await vipCfgApi.deleteVipCfg(row.id)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('common.deleteSuccess'))
     fetchList()
   } catch (error) {
-    console.error('删除失败:', error)
+    console.error('delete failed:', error)
   }
 }
 
@@ -1401,12 +1407,12 @@ const handleSave = async () => {
       } else {
         await vipCfgApi.createVipCfg(payload)
       }
-      ElMessage.success(currentRow.value.id ? '更新成功' : '创建成功')
+      ElMessage.success(currentRow.value.id ? t('common.updateSuccess') : t('common.createSuccess'))
       dialogVisible.value = false
       fetchList()
     } catch (error) {
-      console.error('保存失败:', error)
-      ElMessage.error('保存失败')
+      console.error('save failed:', error)
+      ElMessage.error(t('pages.vipCfgList.saveFailed'))
     }
   })
 }

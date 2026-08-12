@@ -3,24 +3,24 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>直播间标签</span>
+          <span>{{ t('menu.LiveRoomTagManagement') }}</span>
         </div>
       </template>
       <div class="content">
         <div class="table-header">
-          <el-button type="primary" @click="handleAdd">新增标签</el-button>
+          <el-button type="primary" @click="handleAdd">{{ t('pages.liveRoomTagList.addTag') }}</el-button>
         </div>
 
         <el-table v-loading="loading" :data="tableData" style="width: 100%">
           <el-table-column label="ID" prop="id" width="100"/>
-          <el-table-column label="标签名称" prop="name" min-width="160"/>
-          <el-table-column label="排序" prop="sort" width="80"/>
-          <el-table-column label="创建时间" prop="createdAt" width="160"/>
-          <el-table-column label="更新时间" prop="updatedAt" width="160"/>
-          <el-table-column fixed="right" label="操作" width="160">
+          <el-table-column :label="t('pages.liveRoomTagList.tagName')" prop="name" min-width="160"/>
+          <el-table-column :label="t('common.sort')" prop="sort" width="80"/>
+          <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
+          <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
+          <el-table-column fixed="right" :label="t('common.actions')" width="160">
             <template #default="{ row }">
-              <el-button size="small" @click="handleEdit(row)">编辑</el-button>
-              <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
+              <el-button size="small" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
+              <el-button size="small" type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -41,24 +41,25 @@
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="480px">
       <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="100px">
-        <el-form-item label="标签名称" prop="name">
-          <el-input v-model="currentRow.name" maxlength="64" placeholder="请输入标签名称" show-word-limit/>
+        <el-form-item :label="t('pages.liveRoomTagList.tagName')" prop="name">
+          <el-input v-model="currentRow.name" maxlength="64" :placeholder="t('pages.liveRoomTagList.tagNamePlaceholder')" show-word-limit/>
         </el-form-item>
-        <el-form-item label="排序" prop="sort">
+        <el-form-item :label="t('common.sort')" prop="sort">
           <el-input-number v-model="currentRow.sort" controls-position="right"/>
-          <div class="form-tip">数值越大越靠前</div>
+          <div class="form-tip">{{ t('pages.liveRoomTagList.sortHigherFirst') }}</div>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSave">保存</el-button>
+        <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="handleSave">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {onMounted, ref} from 'vue'
+import {computed, onMounted, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {liveRoomTagApi} from '@/api/modules/liveRoomTag'
 import type {LiveRoomTag} from '@/types/api'
@@ -68,6 +69,8 @@ interface TagForm {
   name: string
   sort: number
 }
+
+const {t} = useI18n()
 
 const loading = ref(false)
 const tableData = ref<LiveRoomTag[]>([])
@@ -85,12 +88,12 @@ const defaultForm = (): TagForm => ({
 const currentRow = ref<TagForm>(defaultForm())
 const formRef = ref<FormInstance>()
 
-const formRules: FormRules = {
+const formRules = computed<FormRules>(() => ({
   name: [
-    {required: true, message: '请输入标签名称', trigger: 'blur'},
-    {max: 64, message: '标签名称最长64字符', trigger: 'blur'},
+    {required: true, message: t('pages.liveRoomTagList.nameRequired'), trigger: 'blur'},
+    {max: 64, message: t('pages.liveRoomTagList.nameMaxLength'), trigger: 'blur'},
   ]
-}
+}))
 
 const fetchList = async () => {
   loading.value = true
@@ -102,8 +105,8 @@ const fetchList = async () => {
     tableData.value = response.data
     total.value = response.total
   } catch (error) {
-    console.error('获取直播间标签列表失败:', error)
-    ElMessage.error('获取标签列表失败')
+    console.error('fetch live room tag list failed:', error)
+    ElMessage.error(t('pages.liveRoomTagList.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -120,13 +123,13 @@ const handleCurrentChange = (page: number) => {
 }
 
 const handleAdd = () => {
-  dialogTitle.value = '新增标签'
+  dialogTitle.value = t('pages.liveRoomTagList.addTag')
   currentRow.value = defaultForm()
   dialogVisible.value = true
 }
 
 const handleEdit = (row: LiveRoomTag) => {
-  dialogTitle.value = '编辑标签'
+  dialogTitle.value = t('pages.liveRoomTagList.editTag')
   currentRow.value = {
     id: row.id,
     name: row.name,
@@ -144,32 +147,34 @@ const handleSave = async () => {
         name: currentRow.value.name,
         sort: currentRow.value.sort
       })
-      ElMessage.success('更新成功')
+      ElMessage.success(t('common.updateSuccess'))
     } else {
       await liveRoomTagApi.createLiveRoomTag({
         name: currentRow.value.name,
         sort: currentRow.value.sort
       })
-      ElMessage.success('创建成功')
+      ElMessage.success(t('common.createSuccess'))
     }
     dialogVisible.value = false
     fetchList()
   } catch (error) {
-    console.error('保存直播间标签失败:', error)
+    console.error('save live room tag failed:', error)
   }
 }
 
 const handleDelete = async (row: LiveRoomTag) => {
   try {
-    await ElMessageBox.confirm(`确定要删除标签「${row.name}」吗？`, '确认删除', {
+    await ElMessageBox.confirm(t('pages.liveRoomTagList.deleteConfirm', {name: row.name}), t('common.confirmDelete'), {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
       type: 'warning'
     })
     await liveRoomTagApi.deleteLiveRoomTag(row.id)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('common.deleteSuccess'))
     fetchList()
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('删除直播间标签失败:', error)
+      console.error('delete live room tag failed:', error)
     }
   }
 }

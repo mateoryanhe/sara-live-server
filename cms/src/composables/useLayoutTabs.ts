@@ -12,17 +12,21 @@ const DASHBOARD_PATH = '/dashboard'
 const tabs = ref<LayoutTab[]>([
     {
         path: DASHBOARD_PATH,
-        title: '仪表盘',
+        title: 'Dashboard',
         name: 'Dashboard',
     },
 ])
 
 function resolveTabTitle(route: RouteLocationNormalizedLoaded): string {
+    const name = route.name?.toString()
+    if (name) {
+        return name
+    }
     const title = route.meta?.title
     if (typeof title === 'string' && title) {
         return title
     }
-    return route.name?.toString() || route.path
+    return route.path
 }
 
 function shouldTrackRoute(route: RouteLocationNormalizedLoaded): boolean {

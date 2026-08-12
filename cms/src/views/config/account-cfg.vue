@@ -3,29 +3,29 @@
     <el-card v-loading="loading">
       <template #header>
         <div class="card-header">
-          <span>账号配置</span>
+          <span>{{ t('menu.AccountCfgManagement') }}</span>
         </div>
       </template>
 
       <el-form ref="formRef" :model="formData" class="cfg-form" label-width="200px">
-        <el-form-item label="注销码销户(官网)">
+        <el-form-item :label="t('pages.accountCfg.cancelAccountByCodeEnabled')">
           <el-switch
               v-model="formData.cancelAccountByCodeEnabled"
-              active-text="开启"
-              inactive-text="关闭"
+              :active-text="t('common.open')"
+              :inactive-text="t('common.close')"
           />
           <div class="form-tip">
-            控制官网公开接口 POST /userInfo/cancelAccountByCode 是否可用，默认关闭
+            {{ t('pages.accountCfg.cancelAccountByCodeTip') }}
           </div>
         </el-form-item>
 
-        <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
+        <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.accountCfg.lastUpdated')">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="handleSave">保存配置</el-button>
-          <el-button @click="fetchCfg">刷新</el-button>
+          <el-button type="primary" @click="handleSave">{{ t('common.saveConfig') }}</el-button>
+          <el-button @click="fetchCfg">{{ t('common.refresh') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -33,11 +33,13 @@
 </template>
 
 <script lang="ts" setup>
+import {useI18n} from 'vue-i18n'
 import {onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import accountCfgApi from '@/api/modules/account-cfg'
 import type {AccountCfg} from '@/types/api'
 
+const {t} = useI18n()
 const loading = ref(false)
 const formRef = ref()
 
@@ -64,8 +66,8 @@ const fetchCfg = async () => {
     const response = await accountCfgApi.getAccountCfg()
     applyCfg(response.cfg)
   } catch (error) {
-    console.error('获取账号配置失败:', error)
-    ElMessage.error('获取配置失败')
+    console.error('fetch account cfg failed:', error)
+    ElMessage.error(t('pages.accountCfg.fetchCfgFailed'))
   } finally {
     loading.value = false
   }
@@ -78,16 +80,16 @@ const handleSave = async () => {
       cancelAccountByCodeEnabled: formData.cancelAccountByCodeEnabled,
     })
     if (response?.success) {
-      ElMessage.success('保存成功')
+      ElMessage.success(t('pages.accountCfg.saveSuccess'))
       if (response.id) {
         formData.id = response.id
       }
       await fetchCfg()
     } else {
-      ElMessage.error('保存失败')
+      ElMessage.error(t('pages.accountCfg.saveFailed'))
     }
   } catch (error) {
-    console.error('保存账号配置失败:', error)
+    console.error('save account cfg failed:', error)
   }
 }
 

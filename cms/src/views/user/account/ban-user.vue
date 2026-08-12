@@ -3,33 +3,33 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>{{ isAnchorBan ? '封禁主播' : '封号用户' }}</span>
+          <span>{{ isAnchorBan ? t('pages.banUser.banAnchorTitle') : t('pages.banUser.banUserTitle') }}</span>
         </div>
       </template>
 
       <el-form ref="formRef" :model="form" :rules="rules" label-width="120px">
-        <el-form-item label="用户ID" prop="userId">
-          <el-input v-model="form.userId" disabled placeholder="请输入用户ID"/>
+        <el-form-item :label="t('common.userId')" prop="userId">
+          <el-input v-model="form.userId" disabled :placeholder="t('common.pleaseEnter')"/>
         </el-form-item>
 
-        <el-form-item label="OpenId" prop="openId">
-          <el-input v-model="form.openId" disabled placeholder="OpenId"/>
+        <el-form-item :label="t('pages.banUser.openId')" prop="openId">
+          <el-input v-model="form.openId" disabled :placeholder="t('pages.banUser.openId')"/>
         </el-form-item>
 
-        <el-form-item label="IP地址" prop="ip">
-          <el-input v-model="form.ip" disabled placeholder="IP地址"/>
+        <el-form-item :label="t('pages.banUser.ipAddress')" prop="ip">
+          <el-input v-model="form.ip" disabled :placeholder="t('pages.banUser.ipAddress')"/>
         </el-form-item>
 
-        <el-form-item label="渠道" prop="channel">
-          <el-input v-model="form.channel" disabled placeholder="渠道"/>
+        <el-form-item :label="t('pages.banUser.channel')" prop="channel">
+          <el-input v-model="form.channel" disabled :placeholder="t('pages.banUser.channel')"/>
         </el-form-item>
 
-        <el-form-item label="封号截止时间" prop="banApplyTime">
+        <el-form-item :label="t('pages.banUser.banUntil')" prop="banApplyTime">
           <el-date-picker
               v-model="form.banApplyTime"
               :disabled-date="disabledDate"
               format="YYYY-MM-DD HH:mm:ss"
-              placeholder="选择封号截止时间"
+              :placeholder="t('pages.banUser.selectBanUntil')"
               type="datetime"
               value-format="YYYY-MM-DD HH:mm:ss"
           />
@@ -37,9 +37,9 @@
 
         <el-form-item>
           <el-button type="primary" @click="submitForm">
-            {{ isAnchorBan ? '确认封禁' : '确认封号' }}
+            {{ isAnchorBan ? t('pages.banUser.confirmBanAnchor') : t('pages.banUser.confirmBanUser') }}
           </el-button>
-          <el-button @click="goBack">返回</el-button>
+          <el-button @click="goBack">{{ t('pages.banUser.back') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -48,11 +48,13 @@
 
 <script lang="ts" setup>
 import {computed, onMounted, reactive, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
 import {useRoute, useRouter} from 'vue-router'
-import {ElForm, ElMessage} from 'element-plus'
+import {ElForm, ElMessage, type FormRules} from 'element-plus'
 import {accountApi} from '@/api'
 import type {BanAnchorReq, BanReq} from '@/types/api.ts'
 
+const {t} = useI18n()
 const router = useRouter()
 const route = useRoute()
 
@@ -65,10 +67,8 @@ const returnPath = computed(() => {
   return '/user/account/user-list'
 })
 
-// 表单引用
 const formRef = ref<InstanceType<typeof ElForm>>()
 
-// 表单数据
 const form = reactive({
   userId: '',
   openId: '',
@@ -77,38 +77,32 @@ const form = reactive({
   banApplyTime: ''
 })
 
-// 表单验证规则
-const rules = {
+const rules = computed<FormRules>(() => ({
   userId: [
-    {required: true, message: '请输入用户ID', trigger: 'blur'}
+    {required: true, message: t('pages.banUser.userIdRequired'), trigger: 'blur'}
   ],
   banApplyTime: [
-    {required: true, message: '请选择封号截止时间', trigger: 'change'}
+    {required: true, message: t('pages.banUser.banUntilRequired'), trigger: 'change'}
   ]
-}
+}))
 
-// 禁用过去的日期
 const disabledDate = (time: Date) => {
   return time.getTime() < Date.now()
 }
 
-// 初始化数据
 onMounted(() => {
-  // 从路由参数获取用户数据
   const userData = route.query
   if (userData && userData.id) {
     form.userId = userData.id as string
     form.openId = userData.openId as string || ''
     form.ip = userData.ip as string || ''
     form.channel = Number(userData.channel) || 0
-    // 默认设置为7天后
     form.banApplyTime = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
   } else {
     router.push(returnPath.value)
   }
 })
 
-// 提交封号表单
 const submitForm = async () => {
   if (!formRef.value) return
 
@@ -122,10 +116,10 @@ const submitForm = async () => {
           }
           const response = await accountApi.banAnchor(banData)
           if (response) {
-            ElMessage.success('封禁成功，已通知App端')
+            ElMessage.success(t('pages.banUser.banAnchorSuccess'))
             router.push(returnPath.value + '?refresh=' + Date.now())
           } else {
-            ElMessage.error('封禁失败')
+            ElMessage.error(t('pages.banUser.banAnchorFailed'))
           }
         } else {
           const banData: BanReq = {
@@ -136,23 +130,22 @@ const submitForm = async () => {
           }
           const response = await accountApi.ban(banData)
           if (response) {
-            ElMessage.success('封号成功')
+            ElMessage.success(t('pages.banUser.banUserSuccess'))
             router.push(returnPath.value + '?refresh=' + Date.now())
           } else {
-            ElMessage.error('封号失败')
+            ElMessage.error(t('pages.banUser.banUserFailed'))
           }
         }
       } catch (error) {
-        console.error('封号请求失败:', error)
-        ElMessage.error('封号请求失败')
+        console.error('Ban request failed:', error)
+        ElMessage.error(t('pages.banUser.banRequestFailed'))
       }
     } else {
-      ElMessage.error('请填写正确的表单信息')
+      ElMessage.error(t('pages.banUser.invalidForm'))
     }
   })
 }
 
-// 返回列表
 const goBack = () => {
   router.push(returnPath.value)
 }

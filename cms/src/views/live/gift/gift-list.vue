@@ -3,12 +3,12 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>礼物管理</span>
+          <span>{{ t('menu.GiftManagement') }}</span>
         </div>
       </template>
       <div class="content">
         <div class="table-header">
-          <el-button type="primary" @click="handleAdd">新增礼物</el-button>
+          <el-button type="primary" @click="handleAdd">{{ t('pages.giftList.addGift') }}</el-button>
           <el-button
               v-if="hasButtonPermission('GiftManagement', 'sync')"
               :disabled="selectedRows.length === 0"
@@ -16,30 +16,31 @@
               type="warning"
               @click="handleSyncData"
           >
-            同步数据
+            {{ t('common.syncData') }}
           </el-button>
         </div>
 
-        <div v-if="selectedRows.length" class="selection-tip">已选 {{ selectedRows.length }} 项</div>
+        <div v-if="selectedRows.length" class="selection-tip">
+          {{ t('common.selectedCount', {count: selectedRows.length}) }}
+        </div>
 
-        <!-- 搜索表单 -->
         <el-form :model="searchForm" class="search-form" inline>
-          <el-form-item label="礼物名称">
-            <el-input v-model="searchForm.name" clearable placeholder="礼物名称(模糊匹配)"/>
+          <el-form-item :label="t('pages.giftList.giftName')">
+            <el-input v-model="searchForm.name" clearable :placeholder="t('pages.giftList.giftNameFuzzy')"/>
           </el-form-item>
-          <el-form-item label="分类">
-            <el-input v-model="searchForm.category" clearable placeholder="分类"/>
+          <el-form-item :label="t('common.category')">
+            <el-input v-model="searchForm.category" clearable :placeholder="t('common.category')"/>
           </el-form-item>
-          <el-form-item label="状态">
-            <el-select v-model="searchForm.statusFilter" placeholder="全部" style="width: 140px">
-              <el-option :value="0" label="全部"/>
-              <el-option :value="2" label="只看上架"/>
-              <el-option :value="1" label="只看下架"/>
+          <el-form-item :label="t('common.status')">
+            <el-select v-model="searchForm.statusFilter" :placeholder="t('common.all')" style="width: 140px">
+              <el-option :value="0" :label="t('common.all')"/>
+              <el-option :value="2" :label="t('common.onlyOnShelf')"/>
+              <el-option :value="1" :label="t('common.onlyOffShelf')"/>
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="handleSearch">搜索</el-button>
-            <el-button @click="resetSearch">重置</el-button>
+            <el-button type="primary" @click="handleSearch">{{ t('common.search') }}</el-button>
+            <el-button @click="resetSearch">{{ t('common.reset') }}</el-button>
           </el-form-item>
         </el-form>
 
@@ -52,13 +53,13 @@
         >
           <el-table-column type="selection" width="48"/>
           <el-table-column label="ID" prop="id" width="100"/>
-          <el-table-column label="礼物名称" prop="name" min-width="120"/>
-          <el-table-column label="名称(英文)" prop="nameEn" min-width="120" show-overflow-tooltip/>
-          <el-table-column label="名称(西班牙语)" prop="nameEs" min-width="120" show-overflow-tooltip/>
-          <el-table-column label="名称(葡萄牙语)" prop="namePt" min-width="120" show-overflow-tooltip/>
-          <el-table-column label="名称(印地语)" prop="nameHi" min-width="120" show-overflow-tooltip/>
-          <el-table-column label="名称(印尼语)" prop="nameId" min-width="120" show-overflow-tooltip/>
-          <el-table-column label="图标" width="90">
+          <el-table-column :label="t('pages.giftList.giftName')" prop="name" min-width="120"/>
+          <el-table-column :label="t('common.nameEn')" prop="nameEn" min-width="120" show-overflow-tooltip/>
+          <el-table-column :label="t('common.nameEs')" prop="nameEs" min-width="120" show-overflow-tooltip/>
+          <el-table-column :label="t('common.namePt')" prop="namePt" min-width="120" show-overflow-tooltip/>
+          <el-table-column :label="t('common.nameHi')" prop="nameHi" min-width="120" show-overflow-tooltip/>
+          <el-table-column :label="t('common.nameId')" prop="nameId" min-width="120" show-overflow-tooltip/>
+          <el-table-column :label="t('common.icon')" width="90">
             <template #default="{ row }">
               <el-image
                   v-if="row.icon"
@@ -71,7 +72,7 @@
               <span v-else>-</span>
             </template>
           </el-table-column>
-          <el-table-column label="动画资源" min-width="220">
+          <el-table-column :label="t('common.animationResource')" min-width="220">
             <template #default="{ row }">
               <video
                   v-if="isVideoUrl(row.animation)"
@@ -91,36 +92,36 @@
               <span v-else class="media-url-text">{{ row.animationName || row.animation || '-' }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="价格" prop="price" width="110">
+          <el-table-column :label="t('common.price')" prop="price" width="110">
             <template #default="{ row }">{{ formatPrice(row.price) }}</template>
           </el-table-column>
-          <el-table-column label="分类" prop="category" width="120"/>
-          <el-table-column label="排序" prop="sort" width="80"/>
-          <el-table-column label="状态" width="90">
+          <el-table-column :label="t('common.category')" prop="category" width="120"/>
+          <el-table-column :label="t('common.sort')" prop="sort" width="80"/>
+          <el-table-column :label="t('common.status')" width="90">
             <template #default="{ row }">
               <el-tag :type="row.status === 1 ? 'success' : 'info'">
-                {{ row.status === 1 ? '上架' : '下架' }}
+                {{ row.status === 1 ? t('common.onShelf') : t('common.offShelf') }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="描述" prop="description" min-width="160" show-overflow-tooltip/>
-          <el-table-column label="发布时间" prop="publishedAt" width="160">
+          <el-table-column :label="t('common.description')" prop="description" min-width="160" show-overflow-tooltip/>
+          <el-table-column :label="t('common.publishedAt')" prop="publishedAt" width="160">
             <template #default="{ row }">
               {{ row.publishedAt || '-' }}
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" prop="createdAt" width="160"/>
-          <el-table-column label="更新时间" prop="updatedAt" width="160"/>
-          <el-table-column fixed="right" label="操作" width="260">
+          <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
+          <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
+          <el-table-column fixed="right" :label="t('common.actions')" width="260">
             <template #default="{ row }">
-              <el-button size="small" @click="handleEdit(row)">编辑</el-button>
+              <el-button size="small" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
               <el-button
                   v-if="row.status !== 1"
                   size="small"
                   type="success"
                   @click="handleOnShelf(row)"
               >
-                上架
+                {{ t('common.onShelf') }}
               </el-button>
               <el-button
                   v-else
@@ -128,9 +129,9 @@
                   type="warning"
                   @click="handleOffShelf(row)"
               >
-                下架
+                {{ t('common.offShelf') }}
               </el-button>
-              <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
+              <el-button size="small" type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -149,28 +150,27 @@
       </div>
     </el-card>
 
-    <!-- 礼物编辑对话框 -->
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="640px">
       <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="100px">
-        <el-form-item label="礼物名称" prop="name">
-          <el-input v-model="currentRow.name" placeholder="请输入礼物名称"/>
+        <el-form-item :label="t('pages.giftList.giftName')" prop="name">
+          <el-input v-model="currentRow.name" :placeholder="t('pages.giftList.giftNamePlaceholder')"/>
         </el-form-item>
-        <el-form-item label="名称(英文)" prop="nameEn">
-          <el-input v-model="currentRow.nameEn" placeholder="请输入英文名称"/>
+        <el-form-item :label="t('common.nameEn')" prop="nameEn">
+          <el-input v-model="currentRow.nameEn" :placeholder="t('pages.giftList.nameEnPlaceholder')"/>
         </el-form-item>
-        <el-form-item label="名称(西班牙语)" prop="nameEs">
-          <el-input v-model="currentRow.nameEs" placeholder="请输入西班牙语名称"/>
+        <el-form-item :label="t('common.nameEs')" prop="nameEs">
+          <el-input v-model="currentRow.nameEs" :placeholder="t('pages.giftList.nameEsPlaceholder')"/>
         </el-form-item>
-        <el-form-item label="名称(葡萄牙语)" prop="namePt">
-          <el-input v-model="currentRow.namePt" placeholder="请输入葡萄牙语名称"/>
+        <el-form-item :label="t('common.namePt')" prop="namePt">
+          <el-input v-model="currentRow.namePt" :placeholder="t('pages.giftList.namePtPlaceholder')"/>
         </el-form-item>
-        <el-form-item label="名称(印地语)" prop="nameHi">
-          <el-input v-model="currentRow.nameHi" placeholder="请输入印地语名称"/>
+        <el-form-item :label="t('common.nameHi')" prop="nameHi">
+          <el-input v-model="currentRow.nameHi" :placeholder="t('pages.giftList.nameHiPlaceholder')"/>
         </el-form-item>
-        <el-form-item label="名称(印尼语)" prop="nameId">
-          <el-input v-model="currentRow.nameId" placeholder="请输入印尼语名称"/>
+        <el-form-item :label="t('common.nameId')" prop="nameId">
+          <el-input v-model="currentRow.nameId" :placeholder="t('pages.giftList.nameIdPlaceholder')"/>
         </el-form-item>
-        <el-form-item label="图标" prop="icon">
+        <el-form-item :label="t('common.icon')" prop="icon">
           <div class="asset-upload-wrap">
             <el-upload
                 :before-upload="beforeIconUpload"
@@ -186,7 +186,7 @@
                 <el-icon class="asset-uploader-icon">
                   <Plus/>
                 </el-icon>
-                <span>点击上传图标</span>
+                <span>{{ t('pages.giftList.clickUploadIcon') }}</span>
               </div>
             </el-upload>
             <el-button
@@ -195,11 +195,11 @@
                 type="danger"
                 @click="clearAsset('icon')"
             >
-              移除图标
+              {{ t('pages.giftList.removeIcon') }}
             </el-button>
           </div>
         </el-form-item>
-        <el-form-item label="动画资源" prop="animation">
+        <el-form-item :label="t('common.animationResource')" prop="animation">
           <div class="asset-upload-wrap">
             <el-upload
                 :before-upload="beforeAnimationUpload"
@@ -233,7 +233,7 @@
                 <el-icon class="asset-uploader-icon">
                   <Plus/>
                 </el-icon>
-                <span>点击上传动画资源</span>
+                <span>{{ t('pages.giftList.clickUploadAnimation') }}</span>
               </div>
             </el-upload>
             <el-button
@@ -242,33 +242,34 @@
                 type="danger"
                 @click="clearAsset('animation')"
             >
-              移除动画
+              {{ t('pages.giftList.removeAnimation') }}
             </el-button>
           </div>
         </el-form-item>
-        <el-form-item label="价格(钻石)" prop="price">
+        <el-form-item :label="t('pages.giftList.priceDiamond')" prop="price">
           <el-input-number v-model="currentRow.price" :min="0" :precision="NUMBER_INPUT_DECIMALS" controls-position="right"/>
         </el-form-item>
-        <el-form-item label="分类" prop="category">
-          <el-input v-model="currentRow.category" placeholder="请输入分类"/>
+        <el-form-item :label="t('common.category')" prop="category">
+          <el-input v-model="currentRow.category" :placeholder="t('pages.giftList.categoryPlaceholder')"/>
         </el-form-item>
-        <el-form-item label="排序" prop="sort">
+        <el-form-item :label="t('common.sort')" prop="sort">
           <el-input-number v-model="currentRow.sort" controls-position="right"/>
         </el-form-item>
-        <el-form-item label="描述" prop="description">
-          <el-input v-model="currentRow.description" placeholder="请输入描述" type="textarea"/>
+        <el-form-item :label="t('common.description')" prop="description">
+          <el-input v-model="currentRow.description" :placeholder="t('pages.giftList.descriptionPlaceholder')" type="textarea"/>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSave">保存</el-button>
+        <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="handleSave">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref, watch} from 'vue'
+import {computed, onMounted, reactive, ref, watch} from 'vue'
+import {useI18n} from 'vue-i18n'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
 import {Document, Plus} from '@element-plus/icons-vue'
 import {dataSyncApi, giftApi, uploadApi} from '@/api'
@@ -305,6 +306,8 @@ interface GiftForm {
   sort: number
   description: string
 }
+
+const {t} = useI18n()
 
 const loading = ref(false)
 const syncing = ref(false)
@@ -410,7 +413,6 @@ watch(dialogVisible, (visible) => {
   }
 })
 
-// CMS后台允许上传的扩展名(与后端 allowedCMSExt 保持一致)
 const allowedAnimationExt = [
   '.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.apng',
   '.svga', '.pag', '.json', '.lottie', '.mp4', '.webm', '.zip'
@@ -418,7 +420,7 @@ const allowedAnimationExt = [
 
 const beforeIconUpload = (file: File): boolean => {
   if (!file.type.startsWith('image/')) {
-    ElMessage.error('图标只能上传图片文件')
+    ElMessage.error(t('pages.giftList.iconImageOnly'))
     return false
   }
   return true
@@ -427,7 +429,7 @@ const beforeIconUpload = (file: File): boolean => {
 const beforeAnimationUpload = (file: File): boolean => {
   const ext = getExt(file.name)
   if (!allowedAnimationExt.includes(ext)) {
-    ElMessage.error(`不支持的文件类型: ${ext || '未知'}`)
+    ElMessage.error(t('pages.giftList.unsupportedFileType', {ext: ext || '-'}))
     return false
   }
   return true
@@ -454,36 +456,35 @@ const doUpload = async (
       }
     }
     formRef.value?.validateField(field).catch(() => undefined)
-    ElMessage.success('上传成功')
+    ElMessage.success(t('pages.giftList.uploadSuccess'))
   } catch (error) {
-    console.error('上传失败:', error)
-    ElMessage.error('上传失败')
+    console.error('upload failed:', error)
+    ElMessage.error(t('pages.giftList.uploadFailed'))
   } finally {
     flag.value = false
   }
 }
 
-const formRules: FormRules = {
+const formRules = computed<FormRules>(() => ({
   name: [
-    {required: true, message: '请输入礼物名称', trigger: 'blur'},
-    {min: 1, max: 64, message: '礼物名称长度在1-64个字符', trigger: 'blur'}
+    {required: true, message: t('pages.giftList.nameRequired'), trigger: 'blur'},
+    {min: 1, max: 64, message: t('pages.giftList.nameLength'), trigger: 'blur'}
   ],
-  nameEn: [{max: 64, message: '英文名称最长64字符', trigger: 'blur'}],
-  nameEs: [{max: 64, message: '西班牙语名称最长64字符', trigger: 'blur'}],
-  namePt: [{max: 64, message: '葡萄牙语名称最长64字符', trigger: 'blur'}],
-  nameHi: [{max: 64, message: '印地语名称最长64字符', trigger: 'blur'}],
-  nameId: [{max: 64, message: '印尼语名称最长64字符', trigger: 'blur'}],
+  nameEn: [{max: 64, message: t('pages.giftList.nameEnMaxLength'), trigger: 'blur'}],
+  nameEs: [{max: 64, message: t('pages.giftList.nameEsMaxLength'), trigger: 'blur'}],
+  namePt: [{max: 64, message: t('pages.giftList.namePtMaxLength'), trigger: 'blur'}],
+  nameHi: [{max: 64, message: t('pages.giftList.nameHiMaxLength'), trigger: 'blur'}],
+  nameId: [{max: 64, message: t('pages.giftList.nameIdMaxLength'), trigger: 'blur'}],
   icon: [],
   animation: [],
   category: [
-    {max: 32, message: '分类最长32字符', trigger: 'blur'}
+    {max: 32, message: t('pages.giftList.categoryMaxLength'), trigger: 'blur'}
   ],
   description: [
-    {max: 255, message: '描述最长255字符', trigger: 'blur'}
+    {max: 255, message: t('pages.giftList.descriptionMaxLength'), trigger: 'blur'}
   ]
-}
+}))
 
-// 获取礼物列表
 const fetchGiftList = async () => {
   loading.value = true
   try {
@@ -497,8 +498,8 @@ const fetchGiftList = async () => {
     tableData.value = response.data
     total.value = response.total
   } catch (error) {
-    console.error('获取礼物列表失败:', error)
-    ElMessage.error('获取礼物列表失败')
+    console.error('fetch gift list failed:', error)
+    ElMessage.error(t('pages.giftList.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -509,7 +510,6 @@ const handleSearch = () => {
   fetchGiftList()
 }
 
-// 分页处理
 const handleSizeChange = (size: number) => {
   pageSize.value = size
   fetchGiftList()
@@ -520,16 +520,15 @@ const handleCurrentChange = (page: number) => {
   fetchGiftList()
 }
 
-// 操作处理
 const handleAdd = () => {
-  dialogTitle.value = '新增礼物'
+  dialogTitle.value = t('pages.giftList.addGift')
   currentRow.value = defaultForm()
   resetAssetPreview()
   dialogVisible.value = true
 }
 
 const handleEdit = (row: Gift) => {
-  dialogTitle.value = '编辑礼物'
+  dialogTitle.value = t('pages.giftList.editGift')
   const iconName = row.iconName || ''
   const animationName = row.animationName || ''
   currentRow.value = {
@@ -563,47 +562,58 @@ const handleEdit = (row: Gift) => {
 
 const handleDelete = async (row: Gift) => {
   try {
-    await ElMessageBox.confirm(`确定要删除礼物 "${row.name}" 吗？`, '确认删除', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
+    await ElMessageBox.confirm(
+        t('pages.giftList.deleteConfirm', {name: row.name}),
+        t('common.confirmDelete'),
+        {
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning'
+        }
+    )
 
     await giftApi.deleteGift(row.id)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('common.deleteSuccess'))
     fetchGiftList()
   } catch (error) {
-    console.error('删除失败:', error)
+    if (error !== 'cancel') {
+      console.error('delete gift failed:', error)
+    }
   }
 }
 
 const handleOnShelf = async (row: Gift) => {
   try {
     await giftApi.onShelfGift(row.id)
-    ElMessage.success('上架成功')
+    ElMessage.success(t('pages.giftList.onShelfSuccess'))
     fetchGiftList()
   } catch (error) {
-    console.error('上架失败:', error)
-    ElMessage.error('上架失败')
+    console.error('on shelf failed:', error)
+    ElMessage.error(t('pages.giftList.onShelfFailed'))
   }
 }
 
 const handleOffShelf = async (row: Gift) => {
   try {
-    await ElMessageBox.confirm(`确定要下架礼物 "${row.name}" 吗？`, '确认下架', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
+    await ElMessageBox.confirm(
+        t('pages.giftList.offShelfConfirm', {name: row.name}),
+        t('common.confirmOffShelf'),
+        {
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning'
+        }
+    )
     await giftApi.offShelfGift(row.id)
-    ElMessage.success('下架成功')
+    ElMessage.success(t('pages.giftList.offShelfSuccess'))
     fetchGiftList()
   } catch (error) {
-    console.error('下架失败:', error)
+    if (error !== 'cancel') {
+      console.error('off shelf failed:', error)
+    }
   }
 }
 
-// 保存操作
 const handleSave = async () => {
   if (!formRef.value) return
 
@@ -617,18 +627,17 @@ const handleSave = async () => {
           await giftApi.createGift({name, nameEn, nameEs, namePt, nameHi, nameId, icon, animation, price, category, sort, description})
         }
 
-        ElMessage.success(currentRow.value.id ? '更新成功' : '创建成功')
+        ElMessage.success(currentRow.value.id ? t('common.updateSuccess') : t('common.createSuccess'))
         dialogVisible.value = false
         fetchGiftList()
       } catch (error) {
-        console.error(currentRow.value.id ? '更新失败:' : '创建失败:', error)
-        ElMessage.error(currentRow.value.id ? '更新失败' : '创建失败')
+        console.error(currentRow.value.id ? 'update failed:' : 'create failed:', error)
+        ElMessage.error(currentRow.value.id ? t('pages.giftList.updateFailed') : t('pages.giftList.createFailed'))
       }
     }
   })
 }
 
-// 重置搜索
 const resetSearch = () => {
   searchForm.name = ''
   searchForm.category = ''
@@ -643,31 +652,34 @@ const handleSelectionChange = (rows: Gift[]) => {
 
 const handleSyncData = async () => {
   if (selectedRows.value.length === 0) {
-    ElMessage.warning('请先勾选要同步的礼物')
+    ElMessage.warning(t('pages.giftList.selectSyncFirst'))
     return
   }
   const ids = selectedRows.value.map((row) => Number(row.id)).filter((id) => id > 0)
   if (ids.length === 0) {
-    ElMessage.warning('所选礼物无效')
+    ElMessage.warning(t('pages.giftList.invalidSelection'))
     return
   }
   try {
     await ElMessageBox.confirm(
-        `将把已选 ${ids.length} 条礼物及关联图标/动画同步到目标环境（按 ID 覆盖或新增）。是否继续？`,
-        '同步数据',
-        {confirmButtonText: '确定同步', cancelButtonText: '取消', type: 'warning'}
+        t('pages.giftList.syncConfirm', {count: ids.length}),
+        t('common.syncData'),
+        {confirmButtonText: t('common.confirmSync'), cancelButtonText: t('common.cancel'), type: 'warning'}
     )
     syncing.value = true
     const response = await dataSyncApi.syncGift({ids})
     if (response?.success) {
-      ElMessage.success(response.message || `同步成功：${response.rowCount} 条，${response.fileCount} 个文件`)
+      ElMessage.success(response.message || t('pages.giftList.syncSuccessDetail', {
+        rows: response.rowCount,
+        files: response.fileCount
+      }))
     } else {
-      ElMessage.error('同步失败')
+      ElMessage.error(t('pages.giftList.syncFailed'))
     }
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('同步失败:', error)
-      ElMessage.error('同步失败，请检查数据同步配置与目标服务')
+      console.error('sync failed:', error)
+      ElMessage.error(t('pages.giftList.syncFailedCheckConfig'))
     }
   } finally {
     syncing.value = false

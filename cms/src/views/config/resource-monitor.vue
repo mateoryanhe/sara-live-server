@@ -3,29 +3,29 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>系统资源监控</span>
+          <span>{{ t('menu.ResourceMonitor') }}</span>
         </div>
       </template>
 
       <el-form :model="searchForm" class="search-form" inline label-width="80px">
-        <el-form-item label="开始时间">
+        <el-form-item :label="t('common.startTime')">
           <el-date-picker
               v-model="searchForm.startTime"
               clearable
               format="YYYY-MM-DD HH:mm:ss"
-              placeholder="开始时间"
+              :placeholder="t('common.startTime')"
               style="width: 200px"
               teleported
               type="datetime"
               value-format="YYYY-MM-DD HH:mm:ss"
           />
         </el-form-item>
-        <el-form-item label="结束时间">
+        <el-form-item :label="t('common.endTime')">
           <el-date-picker
               v-model="searchForm.endTime"
               clearable
               format="YYYY-MM-DD HH:mm:ss"
-              placeholder="结束时间"
+              :placeholder="t('common.endTime')"
               style="width: 200px"
               teleported
               type="datetime"
@@ -33,51 +33,51 @@
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleQuery">查询</el-button>
-          <el-button @click="resetSearch">重置</el-button>
+          <el-button type="primary" @click="handleQuery">{{ t('common.query') }}</el-button>
+          <el-button @click="resetSearch">{{ t('common.reset') }}</el-button>
         </el-form-item>
-        <span class="search-tip">每10分钟采样，每个模块单次最多展示 {{ RESOURCE_METRIC_MAX_POINTS }} 条</span>
+        <span class="search-tip">{{ t('pages.resourceMonitor.searchTip', {max: RESOURCE_METRIC_MAX_POINTS}) }}</span>
       </el-form>
 
       <el-tabs v-model="activeTab" @tab-change="handleTabChange" @tab-click="handleTabClick">
-        <el-tab-pane label="内存" lazy name="memory">
+        <el-tab-pane :label="t('pages.resourceMonitor.tabMemory')" lazy name="memory">
           <ResourceMetricChart
               ref="memoryChartRef"
               :data="tabPoints.memory"
               metric-type="memory"
-              :title="chartTitle('进程RSS与系统内存')"
+              :title="chartTitle(t('pages.resourceMonitor.chartProcRssSysMem'))"
           />
         </el-tab-pane>
-        <el-tab-pane label="堆内存" lazy name="heap">
+        <el-tab-pane :label="t('pages.resourceMonitor.tabHeap')" lazy name="heap">
           <ResourceMetricChart
               ref="heapChartRef"
               :data="tabPoints.heap"
               metric-type="heap"
-              :title="chartTitle('进程堆内存')"
+              :title="chartTitle(t('pages.resourceMonitor.chartProcHeap'))"
           />
         </el-tab-pane>
-        <el-tab-pane label="比例" lazy name="ratio">
+        <el-tab-pane :label="t('pages.resourceMonitor.tabRatio')" lazy name="ratio">
           <ResourceMetricChart
               ref="ratioChartRef"
               :data="tabPoints.ratio"
               metric-type="ratio"
-              :title="chartTitle('堆使用/空闲比例')"
+              :title="chartTitle(t('pages.resourceMonitor.chartHeapRatio'))"
           />
         </el-tab-pane>
-        <el-tab-pane label="CPU" lazy name="cpu">
+        <el-tab-pane :label="t('pages.resourceMonitor.tabCpu')" lazy name="cpu">
           <ResourceMetricChart
               ref="cpuChartRef"
               :data="tabPoints.cpu"
               metric-type="cpu"
-              :title="chartTitle('进程/系统CPU')"
+              :title="chartTitle(t('pages.resourceMonitor.chartProcSysCpu'))"
           />
         </el-tab-pane>
-        <el-tab-pane label="在线人数" lazy name="online">
+        <el-tab-pane :label="t('pages.resourceMonitor.tabOnline')" lazy name="online">
           <ResourceMetricChart
               ref="onlineChartRef"
               :data="tabPoints.online"
               metric-type="online"
-              :title="chartTitle('在线人数')"
+              :title="chartTitle(t('pages.resourceMonitor.chartOnlineCount'))"
           />
         </el-tab-pane>
       </el-tabs>
@@ -86,6 +86,7 @@
 </template>
 
 <script lang="ts" setup>
+import {useI18n} from 'vue-i18n'
 import {nextTick, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {RESOURCE_METRIC_MAX_POINTS, sysStatApi} from '@/api'
@@ -94,6 +95,7 @@ import ResourceMetricChart from './components/resource-metric-chart.vue'
 
 type MetricTab = 'memory' | 'heap' | 'ratio' | 'cpu' | 'online'
 
+const {t} = useI18n()
 const loading = ref(false)
 const activeTab = ref<MetricTab>('memory')
 const queryKey = ref('')
@@ -154,7 +156,11 @@ const buildQueryParams = () => ({
 
 const chartTitle = (label: string) => {
   if (searchForm.startTime && searchForm.endTime) {
-    return `${label} (${searchForm.startTime} ~ ${searchForm.endTime})`
+    return t('pages.resourceMonitor.chartTitleRange', {
+      label,
+      start: searchForm.startTime,
+      end: searchForm.endTime,
+    })
   }
   return label
 }
@@ -206,8 +212,8 @@ const fetchTabData = async (tab: MetricTab, force = false) => {
       }, 0)
     }
   } catch (error) {
-    console.error('获取系统资源趋势失败:', error)
-    ElMessage.error('获取系统资源趋势失败')
+    console.error('fetch resource trend failed:', error)
+    ElMessage.error(t('pages.resourceMonitor.fetchTrendFailed'))
   } finally {
     loading.value = false
   }

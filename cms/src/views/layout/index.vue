@@ -2,7 +2,7 @@
   <el-container class="layout-container">
     <!-- 侧边栏 -->
     <el-aside class="aside" width="220px">
-      <div class="logo">XR Game Server</div>
+      <div class="logo">{{ t('common.logo') }}</div>
       <el-menu
           :collapse="isCollapse"
           :default-active="activeMenu"
@@ -15,7 +15,7 @@
           <el-icon>
             <Odometer/>
           </el-icon>
-          <span>仪表盘</span>
+          <span>{{ t('menu.Dashboard') }}</span>
         </el-menu-item>
         <el-sub-menu
             v-if="hasMenuPermission('UserList') || hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('RechargeOrderList') || hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList')"
@@ -24,43 +24,43 @@
             <el-icon>
               <User/>
             </el-icon>
-            <span>用户管理</span>
+            <span>{{ t('menu.UserManagement') }}</span>
           </template>
           <el-menu-item v-if="hasMenuPermission('UserList')" index="/user/account/user-list">
             <el-icon>
               <User/>
             </el-icon>
-            <span>用户列表</span>
+            <span>{{ t('menu.UserList') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('AnchorListManagement')" index="/user/anchor/anchor-list">
             <el-icon>
               <VideoPlay/>
             </el-icon>
-            <span>主播列表</span>
+            <span>{{ t('menu.AnchorListManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('BotAnchorManagement')" index="/user/bot-anchor/bot-anchor-list">
             <el-icon>
               <Cpu/>
             </el-icon>
-            <span>机器人主播</span>
+            <span>{{ t('menu.BotAnchorManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('RechargeOrderList')" index="/user/recharge-order/recharge-order-list">
             <el-icon>
               <Wallet/>
             </el-icon>
-            <span>充值订单</span>
+            <span>{{ t('menu.RechargeOrderList') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('GoldCurrencyLogList')" index="/user/currency-log/gold-log-list">
             <el-icon>
               <Coin/>
             </el-icon>
-            <span>金币流水</span>
+            <span>{{ t('menu.GoldCurrencyLogList') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('DiamondCurrencyLogList')" index="/user/currency-log/diamond-log-list">
             <el-icon>
               <Money/>
             </el-icon>
-            <span>钻石流水</span>
+            <span>{{ t('menu.DiamondCurrencyLogList') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -70,67 +70,67 @@
             <el-icon>
               <Stamp/>
             </el-icon>
-            <span>运营管理</span>
+            <span>{{ t('menu.OperationManagement') }}</span>
           </template>
           <el-menu-item v-if="hasMenuPermission('BannerManagement')" index="/operation/banner/banner-list">
             <el-icon>
               <Picture/>
             </el-icon>
-            <span>首页Banner</span>
+            <span>{{ t('menu.BannerManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('ActivityMessageManagement')" index="/operation/activity-message/activity-message-list">
             <el-icon>
               <Bell/>
             </el-icon>
-            <span>活动消息</span>
+            <span>{{ t('menu.ActivityMessageManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('GuildManagement')" index="/operation/guild/guild-list">
             <el-icon>
               <User/>
             </el-icon>
-            <span>工会管理</span>
+            <span>{{ t('menu.GuildManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('GuildProfileManagement')" index="/operation/guild/guild-profile">
             <el-icon>
               <EditPen/>
             </el-icon>
-            <span>工会基础信息</span>
+            <span>{{ t('menu.GuildProfileManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('RechargeCfgManagement')" index="/operation/recharge/recharge-cfg-list">
             <el-icon>
               <Wallet/>
             </el-icon>
-            <span>充值配置</span>
+            <span>{{ t('menu.RechargeCfgManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('VipCfgManagement')" index="/operation/vip/vip-cfg-list">
             <el-icon>
               <Medal/>
             </el-icon>
-            <span>VIP配置</span>
+            <span>{{ t('menu.VipCfgManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('AppPkgManagement')" index="/operation/app-pkg/app-pkg-list">
             <el-icon>
               <Box/>
             </el-icon>
-            <span>App包管理</span>
+            <span>{{ t('menu.AppPkgManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('RandomNicknameManagement')" index="/operation/random-nickname/random-nickname-cfg">
             <el-icon>
               <EditPen/>
             </el-icon>
-            <span>随机昵称库</span>
+            <span>{{ t('menu.RandomNicknameManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('CustomerServiceCfgManagement')" index="/operation/customer-service/customer-service-cfg">
             <el-icon>
               <Service/>
             </el-icon>
-            <span>客服联系配置</span>
+            <span>{{ t('menu.CustomerServiceCfgManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('WalletExchangeCfgManagement')" index="/operation/wallet/wallet-exchange-cfg">
             <el-icon>
               <Coin/>
             </el-icon>
-            <span>金币兑换配置</span>
+            <span>{{ t('menu.WalletExchangeCfgManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -140,43 +140,43 @@
             <el-icon>
               <VideoPlay/>
             </el-icon>
-            <span>直播管理</span>
+            <span>{{ t('menu.LiveManagement') }}</span>
           </template>
           <el-menu-item v-if="hasMenuPermission('GiftManagement')" index="/live/gift/gift-list">
             <el-icon>
               <Present/>
             </el-icon>
-            <span>礼物管理</span>
+            <span>{{ t('menu.GiftManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('AgoraCfgManagement')" index="/live/agora-cfg">
             <el-icon>
               <Setting/>
             </el-icon>
-            <span>声网配置</span>
+            <span>{{ t('menu.AgoraCfgManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('TicketManagement')" index="/live/ticket/ticket-list">
             <el-icon>
               <Tickets/>
             </el-icon>
-            <span>门票管理</span>
+            <span>{{ t('menu.TicketManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('PrivateRoomBillingManagement')" index="/live/private-room-billing/billing-list">
             <el-icon>
               <Lock/>
             </el-icon>
-            <span>私密直播间计费</span>
+            <span>{{ t('menu.PrivateRoomBillingManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('LiveCfgManagement')" index="/live/live-config/live-config">
             <el-icon>
               <VideoCamera/>
             </el-icon>
-            <span>直播配置</span>
+            <span>{{ t('menu.LiveCfgManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('LiveRoomTagManagement')" index="/live/live-room-tag/live-room-tag-list">
             <el-icon>
               <CollectionTag/>
             </el-icon>
-            <span>直播间标签</span>
+            <span>{{ t('menu.LiveRoomTagManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -186,26 +186,26 @@
             <el-icon>
               <Document/>
             </el-icon>
-            <span>日志</span>
+            <span>{{ t('menu.LogManagement') }}</span>
           </template>
           <el-sub-menu index="/log/live">
             <template #title>
               <el-icon>
                 <VideoPlay/>
               </el-icon>
-              <span>直播日志</span>
+              <span>{{ t('menu.LiveLogGroup') }}</span>
             </template>
             <el-menu-item v-if="hasMenuPermission('LiveRevenueLogList')" index="/log/live/revenue-log-list">
               <el-icon>
                 <Present/>
               </el-icon>
-              <span>直播收益流水</span>
+              <span>{{ t('menu.LiveRevenueLogList') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('LiveRecordList')" index="/log/live/live-record-list">
               <el-icon>
                 <Monitor/>
               </el-icon>
-              <span>直播记录</span>
+              <span>{{ t('menu.LiveRecordList') }}</span>
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu index="/log/call">
@@ -213,13 +213,13 @@
               <el-icon>
                 <VideoCamera/>
               </el-icon>
-              <span>通话日志</span>
+              <span>{{ t('menu.CallLogGroup') }}</span>
             </template>
             <el-menu-item v-if="hasMenuPermission('VideoCallLogList')" index="/log/call/video-call-log-list">
               <el-icon>
                 <VideoCamera/>
               </el-icon>
-              <span>视频通话日志</span>
+              <span>{{ t('menu.VideoCallLogList') }}</span>
             </el-menu-item>
           </el-sub-menu>
         </el-sub-menu>
@@ -230,31 +230,31 @@
             <el-icon>
               <VideoCamera/>
             </el-icon>
-            <span>短视频</span>
+            <span>{{ t('menu.ShortVideoGroup') }}</span>
           </template>
           <el-menu-item v-if="hasMenuPermission('ShortVideoManagement')" index="/shortvideo/short-video-list">
             <el-icon>
               <VideoCamera/>
             </el-icon>
-            <span>短视频管理</span>
+            <span>{{ t('menu.ShortVideoManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('ShortVideoCategoryManagement')" index="/shortvideo/short-video-category-list">
             <el-icon>
               <Collection/>
             </el-icon>
-            <span>短视频分类</span>
+            <span>{{ t('menu.ShortVideoCategoryManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('ShortVideoCfgManagement')" index="/shortvideo/short-video-cfg">
             <el-icon>
               <Setting/>
             </el-icon>
-            <span>短视频配置</span>
+            <span>{{ t('menu.ShortVideoCfgManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('ShortVideoWatchManagement')" index="/shortvideo/short-video-watch-list">
             <el-icon>
               <View/>
             </el-icon>
-            <span>观看记录</span>
+            <span>{{ t('menu.ShortVideoWatchManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -264,31 +264,31 @@
             <el-icon>
               <Cpu/>
             </el-icon>
-            <span>游戏管理</span>
+            <span>{{ t('menu.GameManagement') }}</span>
           </template>
           <el-menu-item v-if="hasMenuPermission('GamePlatformCfgManagement')" index="/game/game-platform-cfg">
             <el-icon>
               <Setting/>
             </el-icon>
-            <span>平台接入配置</span>
+            <span>{{ t('menu.GamePlatformCfgManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('GameVendorGameListManagement')" index="/game/game-list">
             <el-icon>
               <List/>
             </el-icon>
-            <span>游戏列表</span>
+            <span>{{ t('menu.GameVendorGameListManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('GameBetLogListManagement')" index="/game/game-bet-log-list">
             <el-icon>
               <Money/>
             </el-icon>
-            <span>下注记录</span>
+            <span>{{ t('menu.GameBetLogListManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('GameWinLogListManagement')" index="/game/game-win-log-list">
             <el-icon>
               <Coin/>
             </el-icon>
-            <span>派彩记录</span>
+            <span>{{ t('menu.GameWinLogListManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -298,67 +298,67 @@
             <el-icon>
               <Setting/>
             </el-icon>
-            <span>系统配置</span>
+            <span>{{ t('menu.ConfigManagement') }}</span>
           </template>
           <el-menu-item v-if="hasMenuPermission('AppTokenConfig')" index="/config/app-token">
             <el-icon>
               <Key/>
             </el-icon>
-            <span>App Token</span>
+            <span>{{ t('menu.AppTokenConfig') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('AccountCfgManagement')" index="/config/account-cfg">
             <el-icon>
               <User/>
             </el-icon>
-            <span>账号配置</span>
+            <span>{{ t('menu.AccountCfgManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('PreloadCfgManagement')" index="/config/preload-cfg">
             <el-icon>
               <Cpu/>
             </el-icon>
-            <span>预热配置</span>
+            <span>{{ t('menu.PreloadCfgManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('TextModerationCfgManagement')" index="/config/text-moderation">
             <el-icon>
               <Document/>
             </el-icon>
-            <span>敏感词过滤</span>
+            <span>{{ t('menu.TextModerationCfgManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('PrivacyPolicyCfgManagement')" index="/config/privacy-policy">
             <el-icon>
               <Document/>
             </el-icon>
-            <span>隐私政策</span>
+            <span>{{ t('menu.PrivacyPolicyCfgManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('GooglePlayCfgManagement')" index="/config/google-play">
             <el-icon>
               <CreditCard/>
             </el-icon>
-            <span>Google Play</span>
+            <span>{{ t('menu.GooglePlayCfgManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('UploadResourceCfgManagement')" index="/config/upload-resource">
             <el-icon>
               <Picture/>
             </el-icon>
-            <span>资源域名</span>
+            <span>{{ t('menu.UploadResourceCfgManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('DataSyncCfgManagement')" index="/config/data-sync">
             <el-icon>
               <Refresh/>
             </el-icon>
-            <span>数据同步</span>
+            <span>{{ t('menu.DataSyncCfgManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('ResourceMonitor')" index="/config/resource-monitor">
             <el-icon>
               <Monitor/>
             </el-icon>
-            <span>资源监控</span>
+            <span>{{ t('menu.ResourceMonitor') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('ServerLogExplorer')" index="/config/server-log">
             <el-icon>
               <Search/>
             </el-icon>
-            <span>服务器日志</span>
+            <span>{{ t('menu.ServerLogExplorer') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <!-- 角色权限管理菜单 -->
@@ -369,19 +369,19 @@
             <el-icon>
               <Lock/>
             </el-icon>
-            <span>角色权限</span>
+            <span>{{ t('menu.RoleManagementGroup') }}</span>
           </template>
           <el-menu-item v-if="hasMenuPermission('RoleManagement')" index="/role/role-list">
             <el-icon>
               <User/>
             </el-icon>
-            <span>角色权限管理</span>
+            <span>{{ t('menu.RoleManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('CMSUserManagement')" index="/role/cmsuser-list">
             <el-icon>
               <User/>
             </el-icon>
-            <span>CMS用户管理</span>
+            <span>{{ t('menu.CMSUserManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
       </el-menu>
@@ -399,6 +399,7 @@
           </el-button>
         </div>
         <div class="header-right">
+          <LanguageSwitcher class="header-lang" compact show-label/>
           <el-dropdown>
             <span class="el-dropdown-link">
               {{ username }}
@@ -408,7 +409,7 @@
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item @click="logout">退出登录</el-dropdown-item>
+                <el-dropdown-item @click="logout">{{ t('common.logout') }}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -424,7 +425,7 @@
       </el-main>
       <el-footer class="footer">
         <div class="footer-content">
-          XR Game Server 管理系统 &copy; {{ new Date().getFullYear() }}
+          {{ t('common.footer') }} &copy; {{ new Date().getFullYear() }}
         </div>
       </el-footer>
     </el-container>
@@ -434,7 +435,9 @@
 <script lang="ts" setup>
 import {computed, ref, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
+import {useI18n} from 'vue-i18n'
 import LayoutTabs from '@/components/layout/LayoutTabs.vue'
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import {useLayoutTabs} from '@/composables/useLayoutTabs'
 import {ArrowDown, Bell, Box, Coin, Collection, CollectionTag, Cpu, CreditCard, Document, EditPen, Expand, Fold, Key, List, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Refresh, Search, Service, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {getIsAdmin, hasPermission} from '@/utils/permission'
@@ -442,6 +445,7 @@ import {clearAuthSession} from '@/utils/auth'
 
 const route = useRoute()
 const router = useRouter()
+const {t} = useI18n()
 const isCollapse = ref(false)
 const {addTab} = useLayoutTabs()
 
@@ -460,7 +464,7 @@ const activeMenu = computed(() => {
 
 const username = computed(() => {
   // 从localStorage获取用户名，如果不存在则显示默认值
-  return localStorage.getItem('username') || '管理员'
+  return localStorage.getItem('username') || t('common.admin')
 })
 
 const toggleCollapse = () => {
@@ -532,6 +536,16 @@ const hasMenuPermission = (moduleName: string) => {
 .header-left {
   display: flex;
   align-items: center;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-lang {
+  margin-right: 4px;
 }
 
 .collapse-btn {

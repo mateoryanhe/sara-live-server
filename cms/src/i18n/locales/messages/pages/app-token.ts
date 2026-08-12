@@ -1,0 +1,111 @@
+import {definePageMessages} from './_define'
+
+const zh = {
+  userIdPlaceholder: '请输入用户ID',
+  addToken: '新增 Token',
+  token: 'Token',
+  expireAt: '过期时间',
+  expired: '已过期',
+  valid: '有效',
+  tokenPlaceholder: '新增留空自动生成,编辑留空则保持不变',
+  selectExpireAt: '请选择过期时间',
+  defaultExpireTip: '默认有效期 30 天，过期时间：{time}',
+  addTokenTitle: '新增 Token',
+  editTokenTitle: '编辑 Token',
+  userIdRequired: '请输入用户ID',
+  fetchListFailed: '获取数据失败',
+  saveSuccess: '保存成功',
+  saveFailed: '保存失败',
+}
+
+const en = {
+  userIdPlaceholder: 'Enter user ID',
+  addToken: 'Add Token',
+  token: 'Token',
+  expireAt: 'Expires at',
+  expired: 'Expired',
+  valid: 'Valid',
+  tokenPlaceholder: 'Leave empty to auto-generate on create, or keep unchanged on edit',
+  selectExpireAt: 'Select expiration time',
+  defaultExpireTip: 'Default validity 30 days, expires at: {time}',
+  addTokenTitle: 'Add Token',
+  editTokenTitle: 'Edit Token',
+  userIdRequired: 'Please enter user ID',
+  fetchListFailed: 'Failed to load data',
+  saveSuccess: 'Saved successfully',
+  saveFailed: 'Save failed',
+}
+
+const es = {
+  userIdPlaceholder: 'Introduce ID de usuario',
+  addToken: 'Añadir Token',
+  token: 'Token',
+  expireAt: 'Expira',
+  expired: 'Expirado',
+  valid: 'Válido',
+  tokenPlaceholder: 'Dejar vacío para auto-generar al crear, o mantener al editar',
+  selectExpireAt: 'Seleccionar fecha de expiración',
+  defaultExpireTip: 'Validez predeterminada 30 días, expira: {time}',
+  addTokenTitle: 'Añadir Token',
+  editTokenTitle: 'Editar Token',
+  userIdRequired: 'Introduce ID de usuario',
+  fetchListFailed: 'Error al cargar datos',
+  saveSuccess: 'Guardado correctamente',
+  saveFailed: 'Error al guardar',
+}
+
+const pt = {
+  userIdPlaceholder: 'Digite o ID do usuário',
+  addToken: 'Adicionar Token',
+  token: 'Token',
+  expireAt: 'Expira em',
+  expired: 'Expirado',
+  valid: 'Válido',
+  tokenPlaceholder: 'Deixe vazio para gerar automaticamente ou manter inalterado ao editar',
+  selectExpireAt: 'Selecionar data de expiração',
+  defaultExpireTip: 'Validade padrão 30 dias, expira em: {time}',
+  addTokenTitle: 'Adicionar Token',
+  editTokenTitle: 'Editar Token',
+  userIdRequired: 'Digite o ID do usuário',
+  fetchListFailed: 'Falha ao carregar dados',
+  saveSuccess: 'Salvo com sucesso',
+  saveFailed: 'Falha ao salvar',
+}
+
+const hi = {
+  userIdPlaceholder: 'उपयोगकर्ता ID दर्ज करें',
+  addToken: 'Token जोड़ें',
+  token: 'Token',
+  expireAt: 'समाप्ति समय',
+  expired: 'समाप्त',
+  valid: 'मान्य',
+  tokenPlaceholder: 'बनाते समय खाली छोड़ें तो स्वतः बनेगा, संपादन में खाली छोड़ें तो अपरिवर्तित',
+  selectExpireAt: 'समाप्ति समय चुनें',
+  defaultExpireTip: 'डिफ़ॉल्ट वैधता 30 दिन, समाप्ति: {time}',
+  addTokenTitle: 'Token जोड़ें',
+  editTokenTitle: 'Token संपादित',
+  userIdRequired: 'उपयोगकर्ता ID दर्ज करें',
+  fetchListFailed: 'डेटा लोड विफल',
+  saveSuccess: 'सफलतापूर्वक सहेजा',
+  saveFailed: 'सहेजना विफल',
+}
+
+const id = {
+  userIdPlaceholder: 'Masukkan ID pengguna',
+  addToken: 'Tambah Token',
+  token: 'Token',
+  expireAt: 'Kedaluwarsa',
+  expired: 'Kedaluwarsa',
+  valid: 'Valid',
+  tokenPlaceholder: 'Kosongkan untuk buat otomatis, atau biarkan tidak berubah saat edit',
+  selectExpireAt: 'Pilih waktu kedaluwarsa',
+  defaultExpireTip: 'Masa berlaku default 30 hari, kedaluwarsa: {time}',
+  addTokenTitle: 'Tambah Token',
+  editTokenTitle: 'Edit Token',
+  userIdRequired: 'Masukkan ID pengguna',
+  fetchListFailed: 'Gagal memuat data',
+  saveSuccess: 'Berhasil disimpan',
+  saveFailed: 'Gagal menyimpan',
+}
+
+export const appTokenMessages = definePageMessages(zh, en, es, pt, hi, id)

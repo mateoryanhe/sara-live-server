@@ -3,36 +3,36 @@
     <el-card v-loading="serverTimeLoading">
       <template #header>
         <div class="card-header">
-          <span>服务器日志</span>
+          <span>{{ t('menu.ServerLogExplorer') }}</span>
           <span class="server-time-tip">
-            服务器时间: {{ serverTimeDisplay }}
-            <template v-if="exportPathTip"> · 导出: {{ exportPathTip }}</template>
-            · 查询最多等待 30 分钟
+            {{ t('pages.serverLogExplorer.serverTime') }}: {{ serverTimeDisplay }}
+            <template v-if="exportPathTip"> · {{ t('pages.serverLogExplorer.exportPath') }}: {{ exportPathTip }}</template>
+            · {{ t('pages.serverLogExplorer.queryMaxWait') }}
           </span>
         </div>
       </template>
 
       <el-tabs v-model="activeTab">
-        <el-tab-pane label="访问统计" name="stats">
+        <el-tab-pane :label="t('pages.serverLogExplorer.tabAccessStats')" name="stats">
           <el-form :model="statsForm" class="search-form" inline label-width="90px">
-            <el-form-item label="开始时间">
+            <el-form-item :label="t('common.startTime')">
               <el-date-picker
                   v-model="statsForm.startDate"
                   clearable
                   format="YYYY-MM-DD HH:mm:ss"
-                  placeholder="开始时间"
+                  :placeholder="t('common.startTime')"
                   style="width: 190px"
                   teleported
                   type="datetime"
                   value-format="YYYY-MM-DD HH:mm:ss"
               />
             </el-form-item>
-            <el-form-item label="结束时间">
+            <el-form-item :label="t('common.endTime')">
               <el-date-picker
                   v-model="statsForm.endDate"
                   clearable
                   format="YYYY-MM-DD HH:mm:ss"
-                  placeholder="结束时间"
+                  :placeholder="t('common.endTime')"
                   style="width: 190px"
                   teleported
                   type="datetime"
@@ -43,127 +43,130 @@
               <el-input-number v-model="statsForm.topN" :max="100" :min="1" controls-position="right" style="width: 120px"/>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="fetchAccessStats">查询</el-button>
+              <el-button type="primary" @click="fetchAccessStats">{{ t('common.query') }}</el-button>
             </el-form-item>
           </el-form>
 
           <el-row v-loading="statsLoading" :element-loading-text="queryStatusTip" :gutter="20">
             <el-col :span="12">
               <el-card shadow="never">
-                <template #header>接口访问 TopN</template>
+                <template #header>{{ t('pages.serverLogExplorer.urlTopN') }}</template>
                 <el-table :data="urlTopData" size="small">
                   <el-table-column label="#" type="index" width="50"/>
                   <el-table-column label="URL" min-width="220" prop="key" show-overflow-tooltip/>
-                  <el-table-column label="访问数" prop="count" width="100"/>
+                  <el-table-column :label="t('pages.serverLogExplorer.visitCount')" prop="count" width="100"/>
                 </el-table>
               </el-card>
             </el-col>
             <el-col :span="12">
               <el-card shadow="never">
-                <template #header>IP访问 TopN</template>
+                <template #header>{{ t('pages.serverLogExplorer.ipTopN') }}</template>
                 <el-table :data="ipTopData" size="small">
                   <el-table-column label="#" type="index" width="50"/>
                   <el-table-column label="IP" min-width="180" prop="key" show-overflow-tooltip/>
-                  <el-table-column label="访问数" prop="count" width="100"/>
+                  <el-table-column :label="t('pages.serverLogExplorer.visitCount')" prop="count" width="100"/>
                 </el-table>
               </el-card>
             </el-col>
           </el-row>
         </el-tab-pane>
 
-        <el-tab-pane label="Access日志" name="access">
+        <el-tab-pane :label="t('pages.serverLogExplorer.tabAccessLog')" name="access">
           <el-form :model="accessForm" class="search-form" inline label-width="100px">
-            <el-form-item label="开始时间">
+            <el-form-item :label="t('common.startTime')">
               <el-date-picker
                   v-model="accessForm.startDate"
                   clearable
                   format="YYYY-MM-DD HH:mm:ss"
-                  placeholder="开始时间"
+                  :placeholder="t('common.startTime')"
                   style="width: 190px"
                   teleported
                   type="datetime"
                   value-format="YYYY-MM-DD HH:mm:ss"
               />
             </el-form-item>
-            <el-form-item label="结束时间">
+            <el-form-item :label="t('common.endTime')">
               <el-date-picker
                   v-model="accessForm.endDate"
                   clearable
                   format="YYYY-MM-DD HH:mm:ss"
-                  placeholder="结束时间"
+                  :placeholder="t('common.endTime')"
                   style="width: 190px"
                   teleported
                   type="datetime"
                   value-format="YYYY-MM-DD HH:mm:ss"
               />
             </el-form-item>
-            <el-form-item label="TraceId">
-              <el-input v-model="accessForm.traceId" clearable placeholder="支持模糊匹配" style="width: 280px"/>
+            <el-form-item :label="t('pages.serverLogExplorer.traceId')">
+              <el-input v-model="accessForm.traceId" clearable :placeholder="t('pages.serverLogExplorer.fuzzyMatchPlaceholder')" style="width: 280px"/>
             </el-form-item>
-            <el-form-item label="AuthId">
-              <el-input v-model="accessForm.authId" clearable placeholder="支持模糊匹配" style="width: 180px"/>
+            <el-form-item :label="t('pages.serverLogExplorer.authId')">
+              <el-input v-model="accessForm.authId" clearable :placeholder="t('pages.serverLogExplorer.fuzzyMatchPlaceholder')" style="width: 180px"/>
             </el-form-item>
             <el-form-item label="URL">
-              <el-input v-model="accessForm.url" clearable placeholder="支持模糊匹配" style="width: 220px"/>
+              <el-input v-model="accessForm.url" clearable :placeholder="t('pages.serverLogExplorer.fuzzyMatchPlaceholder')" style="width: 220px"/>
             </el-form-item>
             <el-form-item label="IP">
-              <el-input v-model="accessForm.ip" clearable placeholder="支持模糊匹配" style="width: 180px"/>
+              <el-input v-model="accessForm.ip" clearable :placeholder="t('pages.serverLogExplorer.fuzzyMatchPlaceholder')" style="width: 180px"/>
             </el-form-item>
-            <el-form-item label="状态码">
-              <el-input-number v-model="accessForm.statusCode" :controls="false" :min="0" placeholder="全部" style="width: 120px"/>
+            <el-form-item :label="t('pages.serverLogExplorer.statusCode')">
+              <el-input-number v-model="accessForm.statusCode" :controls="false" :min="0" :placeholder="t('common.all')" style="width: 120px"/>
             </el-form-item>
             <el-form-item>
               <template #label>
-                <span class="clickable-label" title="点击设为400" @click="setAccessMinHandlerMsDefault">耗时大于(ms)</span>
+                <span class="clickable-label" :title="t('pages.serverLogExplorer.minHandlerMsTip')" @click="setAccessMinHandlerMsDefault">{{ t('pages.serverLogExplorer.minHandlerMs') }}</span>
               </template>
-              <el-input-number v-model="accessForm.minHandlerMs" :controls="false" :min="0" placeholder="全部" style="width: 120px"/>
+              <el-input-number v-model="accessForm.minHandlerMs" :controls="false" :min="0" :placeholder="t('common.all')" style="width: 120px"/>
             </el-form-item>
-            <el-form-item label="聚合粒度">
-              <el-select v-model="accessForm.intervalMinutes" placeholder="自动" style="width: 120px">
-                <el-option :value="0" label="自动"/>
-                <el-option :value="1" label="1分钟"/>
-                <el-option :value="5" label="5分钟"/>
-                <el-option :value="15" label="15分钟"/>
-                <el-option :value="60" label="1小时"/>
+            <el-form-item :label="t('pages.serverLogExplorer.intervalGranularity')">
+              <el-select v-model="accessForm.intervalMinutes" :placeholder="t('pages.serverLogExplorer.intervalAuto')" style="width: 120px">
+                <el-option :value="0" :label="t('pages.serverLogExplorer.intervalAuto')"/>
+                <el-option :value="1" :label="t('pages.serverLogExplorer.interval1Min')"/>
+                <el-option :value="5" :label="t('pages.serverLogExplorer.interval5Min')"/>
+                <el-option :value="15" :label="t('pages.serverLogExplorer.interval15Min')"/>
+                <el-option :value="60" :label="t('pages.serverLogExplorer.interval1Hour')"/>
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="handleAccessSearch">查询</el-button>
-              <el-button @click="resetAccessForm">重置</el-button>
+              <el-button type="primary" @click="handleAccessSearch">{{ t('common.query') }}</el-button>
+              <el-button @click="resetAccessForm">{{ t('common.reset') }}</el-button>
             </el-form-item>
           </el-form>
 
           <div v-loading="accessTrendLoading" :element-loading-text="queryStatusTip" class="access-trend-panel">
             <AccessTrendChart ref="accessTrendChartRef" :data="accessTrendData"/>
             <div v-if="accessTrendData?.peakTime" class="trend-summary">
-              总访问量 {{ accessTrendData.totalCount }}，
-              峰值 {{ accessTrendData.peakCount }} 次/每{{ accessTrendData.intervalMinutes }}分钟
-              ({{ accessTrendData.peakTime }})
+              {{ t('pages.serverLogExplorer.trendSummary', {
+                total: accessTrendData.totalCount,
+                peak: accessTrendData.peakCount,
+                interval: accessTrendData.intervalMinutes,
+                peakTime: accessTrendData.peakTime,
+              }) }}
             </div>
           </div>
 
           <el-table v-loading="accessLoading" :data="accessTableData" :element-loading-text="queryStatusTip" style="width: 100%">
-            <el-table-column label="时间" prop="time" width="210"/>
-            <el-table-column label="TraceId" min-width="280">
+            <el-table-column :label="t('pages.serverLogExplorer.time')" prop="time" width="210"/>
+            <el-table-column :label="t('pages.serverLogExplorer.traceId')" min-width="280">
               <template #default="{ row }">
                 <el-link type="primary" @click="openTraceDetail(row.traceId, row.time)">{{ row.traceId }}</el-link>
               </template>
             </el-table-column>
-            <el-table-column label="状态码" width="90">
+            <el-table-column :label="t('pages.serverLogExplorer.statusCode')" width="90">
               <template #default="{ row }">
                 <span :class="{ 'log-alert': isAbnormalStatusCode(row.statusCode) }">{{ row.statusCode }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="方法" prop="method" width="90"/>
+            <el-table-column :label="t('pages.serverLogExplorer.method')" prop="method" width="90"/>
             <el-table-column label="URL" min-width="220" prop="url" show-overflow-tooltip/>
-            <el-table-column label="AuthId" prop="authId" width="180"/>
-            <el-table-column label="耗时(ms)" width="100">
+            <el-table-column :label="t('pages.serverLogExplorer.authId')" prop="authId" width="180"/>
+            <el-table-column :label="t('pages.serverLogExplorer.handlerMs')" width="100">
               <template #default="{ row }">
                 <span :class="{ 'log-alert': isSlowHandlerMs(row.handlerMs) }">{{ formatHandlerMs(row.handlerMs) }}</span>
               </template>
             </el-table-column>
             <el-table-column label="IP" min-width="160" prop="ip" show-overflow-tooltip/>
-            <el-table-column label="UserAgent" min-width="180" prop="userAgent" show-overflow-tooltip/>
+            <el-table-column :label="t('pages.serverLogExplorer.userAgent')" min-width="180" prop="userAgent" show-overflow-tooltip/>
           </el-table>
 
           <div class="pagination-wrap">
@@ -180,70 +183,70 @@
           </div>
         </el-tab-pane>
 
-        <el-tab-pane label="Error日志" name="error">
+        <el-tab-pane :label="t('pages.serverLogExplorer.tabErrorLog')" name="error">
           <el-form :model="errorForm" class="search-form" inline label-width="100px">
-            <el-form-item label="开始时间">
+            <el-form-item :label="t('common.startTime')">
               <el-date-picker
                   v-model="errorForm.startDate"
                   clearable
                   format="YYYY-MM-DD HH:mm:ss"
-                  placeholder="开始时间"
+                  :placeholder="t('common.startTime')"
                   style="width: 190px"
                   teleported
                   type="datetime"
                   value-format="YYYY-MM-DD HH:mm:ss"
               />
             </el-form-item>
-            <el-form-item label="结束时间">
+            <el-form-item :label="t('common.endTime')">
               <el-date-picker
                   v-model="errorForm.endDate"
                   clearable
                   format="YYYY-MM-DD HH:mm:ss"
-                  placeholder="结束时间"
+                  :placeholder="t('common.endTime')"
                   style="width: 190px"
                   teleported
                   type="datetime"
                   value-format="YYYY-MM-DD HH:mm:ss"
               />
             </el-form-item>
-            <el-form-item label="TraceId">
-              <el-input v-model="errorForm.traceId" clearable placeholder="支持模糊匹配" style="width: 280px"/>
+            <el-form-item :label="t('pages.serverLogExplorer.traceId')">
+              <el-input v-model="errorForm.traceId" clearable :placeholder="t('pages.serverLogExplorer.fuzzyMatchPlaceholder')" style="width: 280px"/>
             </el-form-item>
             <el-form-item label="URL">
-              <el-input v-model="errorForm.url" clearable placeholder="支持模糊匹配" style="width: 220px"/>
+              <el-input v-model="errorForm.url" clearable :placeholder="t('pages.serverLogExplorer.fuzzyMatchPlaceholder')" style="width: 220px"/>
             </el-form-item>
             <el-form-item label="IP">
-              <el-input v-model="errorForm.ip" clearable placeholder="支持模糊匹配" style="width: 180px"/>
+              <el-input v-model="errorForm.ip" clearable :placeholder="t('pages.serverLogExplorer.fuzzyMatchPlaceholder')" style="width: 180px"/>
             </el-form-item>
-            <el-form-item label="状态码">
-              <el-input-number v-model="errorForm.statusCode" :controls="false" :min="0" placeholder="全部" style="width: 120px"/>
+            <el-form-item :label="t('pages.serverLogExplorer.statusCode')">
+              <el-input-number v-model="errorForm.statusCode" :controls="false" :min="0" :placeholder="t('common.all')" style="width: 120px"/>
             </el-form-item>
-            <el-form-item label="关键词">
-              <el-input v-model="errorForm.keyword" clearable placeholder="ErrorLog/堆栈/错误信息" style="width: 200px"/>
+            <el-form-item :label="t('common.keyword')">
+              <el-input v-model="errorForm.keyword" clearable :placeholder="t('pages.serverLogExplorer.errorKeywordPlaceholder')" style="width: 200px"/>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="handleErrorSearch">查询</el-button>
-              <el-button @click="resetErrorForm">重置</el-button>
+              <el-button type="primary" @click="handleErrorSearch">{{ t('common.query') }}</el-button>
+              <el-button @click="resetErrorForm">{{ t('common.reset') }}</el-button>
             </el-form-item>
           </el-form>
 
           <el-table v-loading="errorLoading" :data="errorTableData" :element-loading-text="queryStatusTip" style="width: 100%">
-            <el-table-column label="时间" prop="time" width="210"/>
-            <el-table-column label="TraceId" min-width="280">
+            <el-table-column :label="t('pages.serverLogExplorer.time')" prop="time" width="210"/>
+            <el-table-column :label="t('pages.serverLogExplorer.traceId')" min-width="280">
               <template #default="{ row }">
                 <el-link type="primary" @click="openTraceDetail(row.traceId, row.time)">{{ row.traceId }}</el-link>
               </template>
             </el-table-column>
-            <el-table-column label="状态码" prop="statusCode" width="90"/>
-            <el-table-column label="方法" prop="method" width="90"/>
+            <el-table-column :label="t('pages.serverLogExplorer.statusCode')" prop="statusCode" width="90"/>
+            <el-table-column :label="t('pages.serverLogExplorer.method')" prop="method" width="90"/>
             <el-table-column label="URL" min-width="200" prop="url" show-overflow-tooltip/>
             <el-table-column label="IP" min-width="140" prop="ip" show-overflow-tooltip/>
-            <el-table-column label="错误码" prop="errorCode" width="90"/>
-            <el-table-column label="错误信息" min-width="160" show-overflow-tooltip>
+            <el-table-column :label="t('pages.serverLogExplorer.errorCode')" prop="errorCode" width="90"/>
+            <el-table-column :label="t('pages.serverLogExplorer.errorMessage')" min-width="160" show-overflow-tooltip>
               <template #default="{ row }">{{ formatErrorSummary(row) }}</template>
             </el-table-column>
-            <el-table-column label="详情" min-width="180" prop="detail" show-overflow-tooltip/>
-            <el-table-column label="堆栈" min-width="220" show-overflow-tooltip>
+            <el-table-column :label="t('pages.serverLogExplorer.detail')" min-width="180" prop="detail" show-overflow-tooltip/>
+            <el-table-column :label="t('pages.serverLogExplorer.stack')" min-width="220" show-overflow-tooltip>
               <template #default="{ row }">{{ formatErrorStack(row) }}</template>
             </el-table-column>
           </el-table>
@@ -262,73 +265,73 @@
           </div>
         </el-tab-pane>
 
-        <el-tab-pane label="详情日志" lazy name="detail">
-          <div class="detail-query-tip">后台排队执行（单线程串行），建议填写 TraceId / URL 等条件缩小范围</div>
+        <el-tab-pane :label="t('pages.serverLogExplorer.tabDetailLog')" lazy name="detail">
+          <div class="detail-query-tip">{{ t('pages.serverLogExplorer.detailQueryTip') }}</div>
           <el-form :model="detailForm" class="search-form" inline label-width="90px">
-            <el-form-item label="开始时间">
+            <el-form-item :label="t('common.startTime')">
               <el-date-picker
                   v-model="detailForm.startDate"
                   clearable
                   format="YYYY-MM-DD HH:mm:ss"
-                  placeholder="开始时间"
+                  :placeholder="t('common.startTime')"
                   style="width: 190px"
                   teleported
                   type="datetime"
                   value-format="YYYY-MM-DD HH:mm:ss"
               />
             </el-form-item>
-            <el-form-item label="结束时间">
+            <el-form-item :label="t('common.endTime')">
               <el-date-picker
                   v-model="detailForm.endDate"
                   clearable
                   format="YYYY-MM-DD HH:mm:ss"
-                  placeholder="结束时间"
+                  :placeholder="t('common.endTime')"
                   style="width: 190px"
                   teleported
                   type="datetime"
                   value-format="YYYY-MM-DD HH:mm:ss"
               />
             </el-form-item>
-            <el-form-item label="TraceId">
-              <el-input v-model="detailForm.traceId" clearable placeholder="支持模糊匹配" style="width: 280px"/>
+            <el-form-item :label="t('pages.serverLogExplorer.traceId')">
+              <el-input v-model="detailForm.traceId" clearable :placeholder="t('pages.serverLogExplorer.fuzzyMatchPlaceholder')" style="width: 280px"/>
             </el-form-item>
-            <el-form-item label="ReqId">
-              <el-input v-model="detailForm.reqId" clearable placeholder="支持模糊匹配" style="width: 180px"/>
+            <el-form-item :label="t('pages.serverLogExplorer.reqId')">
+              <el-input v-model="detailForm.reqId" clearable :placeholder="t('pages.serverLogExplorer.fuzzyMatchPlaceholder')" style="width: 180px"/>
             </el-form-item>
-            <el-form-item label="AuthId">
-              <el-input v-model="detailForm.authId" clearable placeholder="支持模糊匹配(含推送)" style="width: 180px"/>
+            <el-form-item :label="t('pages.serverLogExplorer.authId')">
+              <el-input v-model="detailForm.authId" clearable :placeholder="t('pages.serverLogExplorer.fuzzyMatchPushPlaceholder')" style="width: 180px"/>
             </el-form-item>
             <el-form-item label="URL">
-              <el-input v-model="detailForm.url" clearable placeholder="支持模糊匹配" style="width: 220px"/>
+              <el-input v-model="detailForm.url" clearable :placeholder="t('pages.serverLogExplorer.fuzzyMatchPlaceholder')" style="width: 220px"/>
             </el-form-item>
-            <el-form-item label="关键词">
-              <el-input v-model="detailForm.keyword" clearable placeholder="ErrorLog/内容模糊匹配" style="width: 180px"/>
+            <el-form-item :label="t('common.keyword')">
+              <el-input v-model="detailForm.keyword" clearable :placeholder="t('pages.serverLogExplorer.detailKeywordPlaceholder')" style="width: 180px"/>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="handleDetailSearch">查询</el-button>
-              <el-button @click="resetDetailForm">重置</el-button>
+              <el-button type="primary" @click="handleDetailSearch">{{ t('common.query') }}</el-button>
+              <el-button @click="resetDetailForm">{{ t('common.reset') }}</el-button>
             </el-form-item>
           </el-form>
 
           <el-table v-loading="detailLoading" :data="detailTableData" :element-loading-text="queryStatusTip" style="width: 100%">
-            <el-table-column label="时间" prop="time" width="210"/>
-            <el-table-column label="级别" prop="level" width="80"/>
-            <el-table-column label="TraceId" min-width="280">
+            <el-table-column :label="t('pages.serverLogExplorer.time')" prop="time" width="210"/>
+            <el-table-column :label="t('pages.serverLogExplorer.level')" prop="level" width="80"/>
+            <el-table-column :label="t('pages.serverLogExplorer.traceId')" min-width="280">
               <template #default="{ row }">
                 <el-link type="primary" @click="openTraceDetail(row.traceId, row.time)">{{ row.traceId }}</el-link>
               </template>
             </el-table-column>
-            <el-table-column label="ReqId" prop="reqId" width="160"/>
-            <el-table-column label="AuthId" prop="authId" width="180"/>
+            <el-table-column :label="t('pages.serverLogExplorer.reqId')" prop="reqId" width="160"/>
+            <el-table-column :label="t('pages.serverLogExplorer.authId')" prop="authId" width="180"/>
             <el-table-column label="URL" min-width="180" prop="url" show-overflow-tooltip/>
-            <el-table-column label="耗时(ms)" width="100">
+            <el-table-column :label="t('pages.serverLogExplorer.handlerMs')" width="100">
               <template #default="{ row }">{{ formatHandlerMs(row.elapsedMs) }}</template>
             </el-table-column>
-            <el-table-column label="内容" min-width="320">
+            <el-table-column :label="t('pages.serverLogExplorer.content')" min-width="320">
               <template #default="{ row }">
                 <div v-if="row.syndbFlush" class="syndb-flush-cell">
                   <SyndbFlushLogView :flush="row.syndbFlush" compact/>
-                  <el-button link size="small" type="primary" @click="openSyndbFlushDialog(row.syndbFlush)">明细</el-button>
+                  <el-button link size="small" type="primary" @click="openSyndbFlushDialog(row.syndbFlush)">{{ t('pages.serverLogExplorer.detailBtn') }}</el-button>
                 </div>
                 <span v-else class="log-message-text">{{ row.message }}</span>
               </template>
@@ -354,13 +357,13 @@
     <el-drawer v-model="traceDrawerVisible" :title="`TraceId: ${traceDetail.traceId}`" size="60%">
       <div class="trace-drawer">
         <p v-if="traceStartDate && traceEndDate" class="trace-meta">
-          查询范围：{{ traceStartDate }} ~ {{ traceEndDate }}
+          {{ t('pages.serverLogExplorer.traceQueryRange', {start: traceStartDate, end: traceEndDate}) }}
         </p>
-        <p v-if="traceAnchorTime" class="trace-meta">锚点日志：{{ traceAnchorTime }}</p>
-        <p v-if="resolveTraceAuthId()" class="trace-meta">AuthId: {{ resolveTraceAuthId() }}</p>
+        <p v-if="traceAnchorTime" class="trace-meta">{{ t('pages.serverLogExplorer.traceAnchorLog', {time: traceAnchorTime}) }}</p>
+        <p v-if="resolveTraceAuthId()" class="trace-meta">{{ t('pages.serverLogExplorer.traceAuthId', {authId: resolveTraceAuthId()}) }}</p>
 
         <div v-loading="traceLoading" :element-loading-text="queryStatusTip">
-        <h4>Error日志</h4>
+        <h4>{{ t('pages.serverLogExplorer.errorLogSection') }}</h4>
         <div v-for="(item, index) in traceDetail.errorLogs" :key="'error-' + index" class="trace-log-line">
           <div class="trace-log-meta">
             <div class="trace-log-meta-main">
@@ -368,17 +371,17 @@
               <span v-if="hasElapsedMs(item.handlerMs)" :class="elapsedMsClass(item.handlerMs)" class="trace-elapsed">
                 {{ formatElapsedMs(item.handlerMs) }}
               </span>
-              <span v-if="item.authId" class="trace-auth-id">AuthId: {{ item.authId }}</span>
+              <span v-if="item.authId" class="trace-auth-id">{{ t('pages.serverLogExplorer.traceAuthId', {authId: item.authId}) }}</span>
               <span>[{{ item.level }}] {{ formatErrorSummary(item) }}</span>
             </div>
           </div>
           <pre v-if="formatErrorStack(item)" class="trace-log-content">{{ formatErrorStack(item) }}</pre>
         </div>
 
-        <h4>Access日志</h4>
+        <h4>{{ t('pages.serverLogExplorer.accessLogSection') }}</h4>
         <el-table :data="traceDetail.accessLogs" size="small" style="margin-bottom: 20px">
-          <el-table-column label="时间" prop="time" width="210"/>
-          <el-table-column label="耗时(ms)" width="100">
+          <el-table-column :label="t('pages.serverLogExplorer.time')" prop="time" width="210"/>
+          <el-table-column :label="t('pages.serverLogExplorer.handlerMs')" width="100">
             <template #default="{ row }">
               <span v-if="hasElapsedMs(row.handlerMs)" :class="elapsedMsClass(row.handlerMs)" class="trace-elapsed">
                 {{ formatElapsedMs(row.handlerMs) }}
@@ -386,13 +389,13 @@
               <span v-else>-</span>
             </template>
           </el-table-column>
-          <el-table-column label="状态码" prop="statusCode" width="80"/>
+          <el-table-column :label="t('pages.serverLogExplorer.statusCode')" prop="statusCode" width="80"/>
           <el-table-column label="URL" min-width="180" prop="url" show-overflow-tooltip/>
-          <el-table-column label="AuthId" prop="authId" width="140"/>
+          <el-table-column :label="t('pages.serverLogExplorer.authId')" prop="authId" width="140"/>
           <el-table-column label="IP" prop="ip" width="140"/>
         </el-table>
 
-        <h4>详情日志</h4>
+        <h4>{{ t('pages.serverLogExplorer.detailLogSection') }}</h4>
         <div v-for="(item, index) in traceDetail.detailLogs" :key="index" class="trace-log-line">
             <div class="trace-log-meta">
             <div class="trace-log-meta-main">
@@ -400,7 +403,7 @@
               <span v-if="hasElapsedMs(item.elapsedMs)" :class="elapsedMsClass(item.elapsedMs)" class="trace-elapsed">
                 {{ formatElapsedMs(item.elapsedMs) }}
               </span>
-              <span v-if="item.authId" class="trace-auth-id">AuthId: {{ item.authId }}</span>
+              <span v-if="item.authId" class="trace-auth-id">{{ t('pages.serverLogExplorer.traceAuthId', {authId: item.authId}) }}</span>
               <span>[{{ item.level }}]</span>
             </div>
             <div class="trace-log-actions">
@@ -410,15 +413,15 @@
                   link
                   size="small"
                   type="primary"
-                  @click="openLogJsonDialog(item.raw || item.message, field.key, field.label)"
+                  @click="openLogJsonDialog(item.raw || item.message, field.key, translateLogFieldLabel(field.key, field.label))"
               >
-                {{ field.label }}
+                {{ translateLogFieldLabel(field.key, field.label) }}
               </el-button>
               <el-button link size="small" type="primary" @click="copyTraceLog(item.raw || item.message)">
                 <el-icon>
                   <CopyDocument/>
                 </el-icon>
-                复制
+                {{ t('common.copy') }}
               </el-button>
             </div>
           </div>
@@ -427,30 +430,31 @@
             <SyndbFlushLogView :flush="item.syndbFlush"/>
           </div>
         </div>
-        <el-empty v-if="!traceLoading && traceDetail.detailLogs.length === 0 && traceDetail.accessLogs.length === 0 && traceDetail.errorLogs.length === 0" description="未找到日志"/>
+        <el-empty v-if="!traceLoading && traceDetail.detailLogs.length === 0 && traceDetail.accessLogs.length === 0 && traceDetail.errorLogs.length === 0" :description="t('pages.serverLogExplorer.noLogsFound')"/>
         </div>
       </div>
     </el-drawer>
 
-    <el-dialog v-model="syndbFlushDialogVisible" destroy-on-close title="Syndb 刷盘明细" width="78%">
+    <el-dialog v-model="syndbFlushDialogVisible" destroy-on-close :title="t('pages.serverLogExplorer.syndbFlushDialogTitle')" width="78%">
       <SyndbFlushLogView v-if="syndbFlushDialogData" :flush="syndbFlushDialogData"/>
       <template #footer>
-        <el-button type="primary" @click="syndbFlushDialogVisible = false">关闭</el-button>
+        <el-button type="primary" @click="syndbFlushDialogVisible = false">{{ t('common.close') }}</el-button>
       </template>
     </el-dialog>
 
     <el-dialog v-model="jsonDialogVisible" :title="jsonDialogTitle" destroy-on-close width="72%">
-      <div v-if="jsonDialogParseFailed" class="json-dialog-tip">JSON 解析失败，以下为原始内容</div>
+      <div v-if="jsonDialogParseFailed" class="json-dialog-tip">{{ t('pages.serverLogExplorer.jsonParseFailed') }}</div>
       <pre class="json-dialog-content">{{ jsonDialogContent }}</pre>
       <template #footer>
-        <el-button @click="copyJsonDialogContent">复制</el-button>
-        <el-button type="primary" @click="jsonDialogVisible = false">关闭</el-button>
+        <el-button @click="copyJsonDialogContent">{{ t('common.copy') }}</el-button>
+        <el-button type="primary" @click="jsonDialogVisible = false">{{ t('common.close') }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
+import {useI18n} from 'vue-i18n'
 import {nextTick, onMounted, onUnmounted, reactive, ref, watch} from 'vue'
 import {ElMessage} from 'element-plus'
 import {logQueryApi} from '@/api'
@@ -460,8 +464,9 @@ import {formatErrorStack, formatErrorSummary, extractAndFormatLogJsonField, filt
 import type {LogJsonFieldKey} from '@/utils/logParsers'
 import type {AccessLogItem, AccessTrendData, DetailLogItem, ErrorLogItem, LogQueryJobResult, SyndbFlushLog, TopStatItem, TraceLogDetail} from '@/types/api'
 
+const {t} = useI18n()
 const activeTab = ref('stats')
-const queryStatusTip = ref('查询中...')
+const queryStatusTip = ref('')
 const serverTimeLoading = ref(false)
 const serverTimeDisplay = ref('-')
 const exportPathTip = ref('')
@@ -529,7 +534,7 @@ const syncServerTime = async () => {
     exportPathTip.value = data.exportUrlPrefix || ''
   } catch (error) {
     console.error('获取服务器时间失败:', error)
-    ElMessage.error('获取服务器时间失败')
+    ElMessage.error(t('pages.serverLogExplorer.fetchServerTimeFailed'))
   } finally {
     serverTimeLoading.value = false
   }
@@ -692,9 +697,16 @@ const jsonDialogParseFailed = ref(false)
 const syndbFlushDialogVisible = ref(false)
 const syndbFlushDialogData = ref<SyndbFlushLog | null>(null)
 
+const translateLogFieldLabel = (field: LogJsonFieldKey, label: string) => {
+  if (field === 'respContent') {
+    return t('pages.serverLogExplorer.logFieldResponse')
+  }
+  return label
+}
+
 const ensureFormDateRange = (form: DateRangeForm): string[] | null => {
   if (!form.startDate || !form.endDate) {
-    ElMessage.warning('请选择开始和结束时间')
+    ElMessage.warning(t('pages.serverLogExplorer.selectDateRange'))
     return null
   }
   const normalized = normalizeDateRange(form.startDate, form.endDate)
@@ -709,12 +721,12 @@ const ensureFormDateRange = (form: DateRangeForm): string[] | null => {
 const handleLogQueryStatus = (job: LogQueryJobResult) => {
   if (job.status === 'pending') {
     queryStatusTip.value = job.queuePosition > 1
-        ? `排队中，前面还有 ${job.queuePosition - 1} 个查询...`
-        : '排队中，即将开始查询...'
+        ? t('pages.serverLogExplorer.queuePending', {count: job.queuePosition - 1})
+        : t('pages.serverLogExplorer.queueStarting')
     return
   }
   if (job.status === 'running') {
-    queryStatusTip.value = '正在查询日志，请稍候...'
+    queryStatusTip.value = t('pages.serverLogExplorer.queryRunning')
   }
 }
 
@@ -740,7 +752,7 @@ const fetchDetailLogs = async () => {
     detailTotal.value = response.total || 0
   } catch (error) {
     console.error('查询详情日志失败:', error)
-    ElMessage.error('查询详情日志失败')
+    ElMessage.error(t('pages.serverLogExplorer.queryDetailFailed'))
   } finally {
     detailLoading.value = false
   }
@@ -770,7 +782,7 @@ const fetchAccessTrend = async () => {
     accessTrendChartRef.value?.resize()
   } catch (error) {
     console.error('查询Access趋势失败:', error)
-    ElMessage.error('查询Access趋势失败')
+    ElMessage.error(t('pages.serverLogExplorer.queryAccessTrendFailed'))
   } finally {
     accessTrendLoading.value = false
   }
@@ -792,7 +804,7 @@ const fetchAccessLogs = async () => {
     accessTotal.value = response.total || 0
   } catch (error) {
     console.error('查询Access日志失败:', error)
-    ElMessage.error('查询Access日志失败')
+    ElMessage.error(t('pages.serverLogExplorer.queryAccessFailed'))
   } finally {
     accessLoading.value = false
   }
@@ -820,8 +832,8 @@ const fetchErrorLogs = async () => {
     errorTotal.value = response.total || 0
   } catch (error) {
     console.error('查询Error日志失败:', error)
-    const message = error instanceof Error ? error.message : '查询Error日志失败'
-    ElMessage.error(message.includes('日志') ? message : `查询Error日志失败: ${message}`)
+    const message = error instanceof Error ? error.message : t('pages.serverLogExplorer.queryErrorFailed')
+    ElMessage.error(message.includes('log') || message.includes('Log') || message.includes('日志') ? message : `${t('pages.serverLogExplorer.queryErrorFailed')}: ${message}`)
   } finally {
     errorLoading.value = false
   }
@@ -843,7 +855,7 @@ const fetchAccessStats = async () => {
     ipTopData.value = response.ipTop || []
   } catch (error) {
     console.error('查询访问统计失败:', error)
-    ElMessage.error('查询访问统计失败')
+    ElMessage.error(t('pages.serverLogExplorer.queryStatsFailed'))
   } finally {
     statsLoading.value = false
   }
@@ -905,7 +917,7 @@ const fetchTraceDetail = async () => {
     traceDetail.errorLogs = filtered.errorLogs
   } catch (error) {
     console.error('查询Trace日志失败:', error)
-    ElMessage.error('查询Trace日志失败')
+    ElMessage.error(t('pages.serverLogExplorer.queryTraceFailed'))
   } finally {
     traceLoading.value = false
   }
@@ -1008,15 +1020,15 @@ const elapsedMsClass = (value?: number | null) => {
 
 const copyTraceLog = async (content?: string) => {
   if (!content) {
-    ElMessage.warning('无可复制内容')
+    ElMessage.warning(t('pages.serverLogExplorer.nothingToCopy'))
     return
   }
   try {
     await navigator.clipboard.writeText(content)
-    ElMessage.success('已复制')
+    ElMessage.success(t('pages.serverLogExplorer.copied'))
   } catch (error) {
     console.error('复制日志失败:', error)
-    ElMessage.error('复制失败')
+    ElMessage.error(t('pages.serverLogExplorer.copyFailed'))
   }
 }
 
@@ -1028,10 +1040,10 @@ const openSyndbFlushDialog = (flush: SyndbFlushLog) => {
 const openLogJsonDialog = (content: string, field: LogJsonFieldKey, label: string) => {
   const result = extractAndFormatLogJsonField(content, field)
   if (!result) {
-    ElMessage.warning(`未找到 ${label} 内容`)
+    ElMessage.warning(t('pages.serverLogExplorer.contentNotFound', {label}))
     return
   }
-  jsonDialogTitle.value = `${label} JSON`
+  jsonDialogTitle.value = `${label}${t('pages.serverLogExplorer.jsonDialogSuffix')}`
   jsonDialogContent.value = result.formatted
   jsonDialogParseFailed.value = !result.parsed
   jsonDialogVisible.value = true
@@ -1039,15 +1051,15 @@ const openLogJsonDialog = (content: string, field: LogJsonFieldKey, label: strin
 
 const copyJsonDialogContent = async () => {
   if (!jsonDialogContent.value) {
-    ElMessage.warning('无可复制内容')
+    ElMessage.warning(t('pages.serverLogExplorer.nothingToCopy'))
     return
   }
   try {
     await navigator.clipboard.writeText(jsonDialogContent.value)
-    ElMessage.success('已复制')
+    ElMessage.success(t('pages.serverLogExplorer.copied'))
   } catch (error) {
     console.error('复制 JSON 失败:', error)
-    ElMessage.error('复制失败')
+    ElMessage.error(t('pages.serverLogExplorer.copyFailed'))
   }
 }
 
@@ -1071,6 +1083,7 @@ const resolveTraceAuthId = () => {
 }
 
 onMounted(async () => {
+  queryStatusTip.value = t('pages.serverLogExplorer.querying')
   await syncServerTime()
   applyDefaultDateRanges()
   startServerTimeClock()

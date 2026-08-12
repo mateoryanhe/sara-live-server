@@ -3,6 +3,7 @@
 </template>
 
 <script lang="ts" setup>
+import {useI18n} from 'vue-i18n'
 import {computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue'
 import type {EChartsType} from 'echarts/core'
 import echarts, {type EChartsOption} from '@/utils/echarts'
@@ -12,10 +13,10 @@ import {USER_STAT_BAR_SERIES, getEnabledUserStatBarSeries} from '../user-stat-ba
 const props = defineProps<{
   data: UserStatTrendPoint[]
   title?: string
-  /** 当前展示的指标 key(与 barMetrics 字段一致) */
   metricKey: string
 }>()
 
+const {t, locale} = useI18n()
 const chartRef = ref<HTMLDivElement>()
 let chartInstance: EChartsType | null = null
 
@@ -27,6 +28,11 @@ const activeMetric = computed(() => {
   return getEnabledUserStatBarSeries()[0]
 })
 
+const activeMetricLabel = computed(() => {
+  const cfg = activeMetric.value
+  return cfg ? t(`pages.dashboard.${cfg.labelKey}`) : ''
+})
+
 const buildOption = (points: UserStatTrendPoint[]): EChartsOption => {
   const cfg = activeMetric.value
   if (!cfg) {
@@ -35,6 +41,7 @@ const buildOption = (points: UserStatTrendPoint[]): EChartsOption => {
 
   const times = points.map((item) => item.time)
   const hasTitle = Boolean(props.title)
+  const seriesName = activeMetricLabel.value
 
   return {
     title: hasTitle
@@ -67,7 +74,7 @@ const buildOption = (points: UserStatTrendPoint[]): EChartsOption => {
     },
     series: [
       {
-        name: cfg.label,
+        name: seriesName,
         type: 'bar',
         barMaxWidth: 40,
         data: points.map((item) => Number(item.barMetrics?.[cfg.key] ?? 0)),
@@ -94,7 +101,7 @@ const handleResize = () => {
 }
 
 watch(
-    () => [props.data, props.metricKey, activeMetric.value],
+    () => [props.data, props.metricKey, props.title, activeMetric.value, locale.value],
     () => {
       renderChart()
     },

@@ -3,19 +3,19 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>机器人主播</span>
+          <span>{{ t('menu.BotAnchorManagement') }}</span>
         </div>
       </template>
 
       <div class="table-header">
-        <el-button type="primary" @click="handleAdd">新增机器人主播</el-button>
+        <el-button type="primary" @click="handleAdd">{{ t('pages.botAnchorList.addBotAnchor') }}</el-button>
         <el-button
             :disabled="!canBatchStartLive"
             :loading="batchOperating"
             type="success"
             @click="handleBatchStartLive"
         >
-          批量开播
+          {{ t('pages.botAnchorList.batchStartLive') }}
         </el-button>
         <el-button
             :disabled="!canBatchStopLive"
@@ -23,18 +23,24 @@
             type="danger"
             @click="handleBatchStopLive"
         >
-          批量下播
+          {{ t('pages.botAnchorList.batchStopLive') }}
         </el-button>
-        <span v-if="selectedRows.length" class="selection-tip">已选 {{ selectedRows.length }} 项</span>
+        <span v-if="selectedRows.length" class="selection-tip">
+          {{ t('common.selectedCount', {count: selectedRows.length}) }}
+        </span>
       </div>
 
       <el-form :model="searchForm" class="search-form" inline label-width="80px">
-        <el-form-item label="关键字">
-          <el-input v-model="searchForm.key" clearable placeholder="用户ID/昵称"/>
+        <el-form-item :label="t('common.keyword')">
+          <el-input
+              v-model="searchForm.key"
+              clearable
+              :placeholder="t('pages.botAnchorList.keywordPlaceholder')"
+          />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-          <el-button @click="handleReset">重置</el-button>
+          <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
+          <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
         </el-form-item>
       </el-form>
 
@@ -47,11 +53,11 @@
           @selection-change="handleSelectionChange"
       >
         <el-table-column :selectable="isRowSelectable" type="selection" width="48"/>
-        <el-table-column label="用户ID" prop="id" width="180"/>
-        <el-table-column label="昵称" min-width="120" prop="nickname">
+        <el-table-column :label="t('common.userId')" prop="id" width="180"/>
+        <el-table-column :label="t('common.nickname')" min-width="120" prop="nickname">
           <template #default="{ row }">{{ row.nickname || '-' }}</template>
         </el-table-column>
-        <el-table-column label="头像" width="80">
+        <el-table-column :label="t('common.avatar')" width="80">
           <template #default="{ row }">
             <el-image
                 v-if="row.avatar"
@@ -65,24 +71,29 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column label="工会ID" prop="guildId" width="120">
+        <el-table-column :label="t('pages.botAnchorList.guildId')" prop="guildId" width="120">
           <template #default="{ row }">{{ row.guildId || '-' }}</template>
         </el-table-column>
-        <el-table-column label="直播间ID" prop="roomId" width="180">
+        <el-table-column :label="t('pages.botAnchorList.liveRoomId')" prop="roomId" width="180">
           <template #default="{ row }">{{ row.roomId || row.id || '-' }}</template>
         </el-table-column>
-        <el-table-column label="直播间标题" min-width="140" prop="roomTitle" show-overflow-tooltip>
+        <el-table-column
+            :label="t('pages.botAnchorList.roomTitle')"
+            min-width="140"
+            prop="roomTitle"
+            show-overflow-tooltip
+        >
           <template #default="{ row }">{{ row.roomTitle || '-' }}</template>
         </el-table-column>
-        <el-table-column label="房间类型" width="100">
+        <el-table-column :label="t('pages.botAnchorList.roomType')" width="100">
           <template #default="{ row }">
             <el-tag :type="categoryTagType(row.category)">{{ categoryLabel(row.category) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="直播间标签" min-width="120">
+        <el-table-column :label="t('pages.botAnchorList.liveRoomTag')" min-width="120">
           <template #default="{ row }">{{ row.tagName || (row.tagId ? row.tagId : '-') }}</template>
         </el-table-column>
-        <el-table-column label="云播视频" min-width="200">
+        <el-table-column :label="t('pages.botAnchorList.cloudPlayerVideo')" min-width="200">
           <template #default="{ row }">
             <div v-if="row.cloudPlayerVideo" class="table-video-cell">
               <video
@@ -91,55 +102,57 @@
                   controls
                   preload="metadata"
               />
-              <el-button link type="primary" @click="openVideoPreview(row.cloudPlayerVideo)">放大预览</el-button>
+              <el-button link type="primary" @click="openVideoPreview(row.cloudPlayerVideo)">
+                {{ t('pages.botAnchorList.enlargePreview') }}
+              </el-button>
             </div>
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column label="是否推流" width="100">
+        <el-table-column :label="t('pages.botAnchorList.pushStream')" width="100">
           <template #default="{ row }">
             <el-tag :type="row.pushStream ? 'success' : 'info'">
-              {{ row.pushStream ? '是' : '否' }}
+              {{ row.pushStream ? t('common.yes') : t('common.no') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="测试号" width="90">
+        <el-table-column :label="t('pages.botAnchorList.testAccount')" width="90">
           <template #default="{ row }">
             <el-tag :type="row.isTest ? 'warning' : 'info'">
-              {{ row.isTest ? '是' : '否' }}
+              {{ row.isTest ? t('common.yes') : t('common.no') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="状态" width="100">
+        <el-table-column :label="t('common.status')" width="100">
           <template #default="{ row }">
             <el-tag :type="row.botAnchorStatus === 1 ? 'success' : 'info'">
-              {{ row.botAnchorStatus === 1 ? '启用' : '停用' }}
+              {{ row.botAnchorStatus === 1 ? t('common.enabled') : t('common.disabled') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="直播状态" width="100">
+        <el-table-column :label="t('pages.botAnchorList.liveStatus')" width="100">
           <template #default="{ row }">
             <el-tag :type="row.liveStatus === 1 ? 'success' : 'info'">
-              {{ row.liveStatus === 1 ? '直播中' : '未开播' }}
+              {{ row.liveStatus === 1 ? t('common.live') : t('common.offline') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="创建时间" prop="createdAt" width="170">
+        <el-table-column :label="t('common.createdAt')" prop="createdAt" width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>
-        <el-table-column label="更新时间" prop="updatedAt" width="170">
+        <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="170">
           <template #default="{ row }">{{ formatDate(row.updatedAt) }}</template>
         </el-table-column>
-        <el-table-column fixed="right" label="操作" width="280">
+        <el-table-column fixed="right" :label="t('common.actions')" width="280">
           <template #default="{ row }">
-            <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
+            <el-button link type="primary" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
             <el-button
                 v-if="row.botAnchorStatus === 1 && row.liveStatus !== 1"
                 link
                 type="success"
                 @click="handleStartLive(row)"
             >
-              开播
+              {{ t('pages.botAnchorList.startLive') }}
             </el-button>
             <el-button
                 v-if="row.botAnchorStatus === 1 && row.liveStatus === 1"
@@ -147,14 +160,18 @@
                 type="danger"
                 @click="handleStopLive(row)"
             >
-              下播
+              {{ t('pages.botAnchorList.stopLive') }}
             </el-button>
             <el-button
                 :type="row.botAnchorStatus === 1 ? 'warning' : 'success'"
                 link
                 @click="toggleStatus(row)"
             >
-              {{ row.botAnchorStatus === 1 ? '停用' : '启用' }}
+              {{
+                row.botAnchorStatus === 1
+                    ? t('pages.botAnchorList.disable')
+                    : t('pages.botAnchorList.enable')
+              }}
             </el-button>
           </template>
         </el-table-column>
@@ -181,27 +198,49 @@
         width="640px"
     >
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px">
-        <el-form-item v-if="formData.id" label="用户ID">
+        <el-form-item v-if="formData.id" :label="t('common.userId')">
           <el-input v-model="formData.id" disabled/>
         </el-form-item>
-        <el-form-item label="昵称" prop="nickname">
-          <el-input v-model="formData.nickname" maxlength="32" placeholder="请输入昵称" show-word-limit/>
+        <el-form-item :label="t('common.nickname')" prop="nickname">
+          <el-input
+              v-model="formData.nickname"
+              maxlength="32"
+              :placeholder="t('pages.botAnchorList.enterNickname')"
+              show-word-limit
+          />
         </el-form-item>
-        <el-form-item label="直播间标题" prop="roomTitle">
-          <el-input v-model="formData.roomTitle" maxlength="128" placeholder="请输入直播间标题" show-word-limit/>
+        <el-form-item :label="t('pages.botAnchorList.roomTitle')" prop="roomTitle">
+          <el-input
+              v-model="formData.roomTitle"
+              maxlength="128"
+              :placeholder="t('pages.botAnchorList.enterRoomTitle')"
+              show-word-limit
+          />
         </el-form-item>
-        <el-form-item v-if="!formData.id" label="工会ID">
-          <el-input v-model="formData.guildId" placeholder="可选,留空表示不绑定工会"/>
+        <el-form-item v-if="!formData.id" :label="t('pages.botAnchorList.guildId')">
+          <el-input
+              v-model="formData.guildId"
+              :placeholder="t('pages.botAnchorList.guildIdOptional')"
+          />
         </el-form-item>
-        <el-form-item label="房间类型" prop="category">
-          <el-select v-model="formData.category" placeholder="请选择房间类型" style="width: 220px">
-            <el-option :value="LIVE_ROOM_CATEGORY_HOT" label="秀场"/>
-            <el-option :value="LIVE_ROOM_CATEGORY_GAME" label="游戏"/>
+        <el-form-item :label="t('pages.botAnchorList.roomType')" prop="category">
+          <el-select
+              v-model="formData.category"
+              :placeholder="t('pages.botAnchorList.selectRoomType')"
+              style="width: 220px"
+          >
+            <el-option :value="LIVE_ROOM_CATEGORY_HOT" :label="t('pages.botAnchorList.categoryShow')"/>
+            <el-option :value="LIVE_ROOM_CATEGORY_GAME" :label="t('pages.botAnchorList.categoryGame')"/>
           </el-select>
         </el-form-item>
-        <el-form-item label="直播间标签" prop="tagId">
-          <el-select v-model="formData.tagId" clearable placeholder="请选择标签" style="width: 220px">
-            <el-option :value="0" label="无"/>
+        <el-form-item :label="t('pages.botAnchorList.liveRoomTag')" prop="tagId">
+          <el-select
+              v-model="formData.tagId"
+              clearable
+              :placeholder="t('pages.botAnchorList.selectTag')"
+              style="width: 220px"
+          >
+            <el-option :value="0" :label="t('pages.botAnchorList.none')"/>
             <el-option
                 v-for="item in tagOptions"
                 :key="item.id"
@@ -210,7 +249,7 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="云播MP4" prop="cloudPlayerVideo">
+        <el-form-item :label="t('pages.botAnchorList.cloudMp4')" prop="cloudPlayerVideo">
           <div class="video-upload-wrap">
             <el-upload
                 action="#"
@@ -230,7 +269,9 @@
                   preload="metadata"
               />
               <div v-else class="video-uploader-placeholder">
-                <el-button :loading="videoUploading" type="primary">上传MP4</el-button>
+                <el-button :loading="videoUploading" type="primary">
+                  {{ t('pages.botAnchorList.uploadMp4') }}
+                </el-button>
               </div>
             </el-upload>
             <span v-if="formData.cloudPlayerVideo" class="video-file-name">{{ formData.cloudPlayerVideo }}</span>
@@ -246,18 +287,18 @@
                 type="danger"
                 @click="clearVideo"
             >
-              清除视频
+              {{ t('pages.botAnchorList.clearVideo') }}
             </el-button>
           </div>
         </el-form-item>
-        <el-form-item label="是否推流">
+        <el-form-item :label="t('pages.botAnchorList.pushStream')">
           <el-switch v-model="formData.pushStream"/>
         </el-form-item>
-        <el-form-item label="测试号">
+        <el-form-item :label="t('pages.botAnchorList.testAccount')">
           <el-switch v-model="formData.isTest"/>
-          <span class="form-tip">开启后 App 端直播间信息 isTest 为 true，不参与服务端逻辑</span>
+          <span class="form-tip">{{ t('pages.botAnchorList.isTestTip') }}</span>
         </el-form-item>
-        <el-form-item label="头像" prop="avatar">
+        <el-form-item :label="t('common.avatar')" prop="avatar">
           <div class="avatar-upload-wrap">
             <el-upload
                 :before-upload="beforeAvatarUpload"
@@ -279,20 +320,22 @@
                 </el-icon>
               </div>
             </el-upload>
-            <el-button v-if="formData.avatar" link type="danger" @click="clearAvatar">清除头像</el-button>
+            <el-button v-if="formData.avatar" link type="danger" @click="clearAvatar">
+              {{ t('pages.botAnchorList.clearAvatar') }}
+            </el-button>
           </div>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button :loading="saving" type="primary" @click="handleSave">保存</el-button>
+        <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button :loading="saving" type="primary" @click="handleSave">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
 
     <el-dialog
         v-model="videoDialogVisible"
         destroy-on-close
-        title="云播视频预览"
+        :title="t('pages.botAnchorList.cloudVideoPreview')"
         width="720px"
     >
       <video
@@ -308,12 +351,14 @@
 </template>
 
 <script lang="ts" setup>
+import {useI18n} from 'vue-i18n'
 import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type TableInstance, type UploadRequestOptions} from 'element-plus'
 import {Plus} from '@element-plus/icons-vue'
 import {botAnchorApi, liveRoomTagApi, uploadApi} from '@/api'
 import type {BotAnchorListItem, LiveRoomTag} from '@/types/api'
 
+const {t} = useI18n()
 const LIVE_ROOM_CATEGORY_HOT = 1
 const LIVE_ROOM_CATEGORY_GAME = 2
 const LIVE_ROOM_CATEGORY_PRIVATE = 3
@@ -376,14 +421,14 @@ let objectVideoPreviewUrl = ''
 const avatarPreviewUrl = ref('')
 const videoPreviewUrl = ref('')
 
-const formRules: FormRules = {
+const formRules = computed<FormRules>(() => ({
   nickname: [
-    {required: true, message: '请输入昵称', trigger: 'blur'},
-    {min: 1, max: 32, message: '昵称长度在1-32个字符', trigger: 'blur'}
+    {required: true, message: t('pages.botAnchorList.nicknameRequired'), trigger: 'blur'},
+    {min: 1, max: 32, message: t('pages.botAnchorList.nicknameLength'), trigger: 'blur'}
   ],
-  roomTitle: [{max: 128, message: '直播间标题最长128个字符', trigger: 'blur'}],
-  category: [{required: true, message: '请选择房间类型', trigger: 'change'}]
-}
+  roomTitle: [{max: 128, message: t('pages.botAnchorList.roomTitleMaxLength'), trigger: 'blur'}],
+  category: [{required: true, message: t('pages.botAnchorList.categoryRequired'), trigger: 'change'}]
+}))
 
 const isStartableRow = (row: BotAnchorListItem) => row.botAnchorStatus === 1 && row.liveStatus !== 1
 const isStoppableRow = (row: BotAnchorListItem) => row.botAnchorStatus === 1 && row.liveStatus === 1
@@ -404,9 +449,9 @@ const clearSelection = () => {
 }
 
 const categoryLabel = (category?: number) => {
-  if (category === LIVE_ROOM_CATEGORY_HOT) return '热门'
-  if (category === LIVE_ROOM_CATEGORY_GAME) return '游戏'
-  if (category === LIVE_ROOM_CATEGORY_PRIVATE) return '私密'
+  if (category === LIVE_ROOM_CATEGORY_HOT) return t('pages.botAnchorList.categoryHot')
+  if (category === LIVE_ROOM_CATEGORY_GAME) return t('pages.botAnchorList.categoryGame')
+  if (category === LIVE_ROOM_CATEGORY_PRIVATE) return t('pages.botAnchorList.categoryPrivate')
   return '-'
 }
 
@@ -425,7 +470,8 @@ const fetchTagOptions = async () => {
     })
     tagOptions.value = response.data || []
   } catch (error) {
-    console.error('获取直播间标签失败:', error)
+    console.error('fetchTagOptions failed:', error)
+    ElMessage.error(t('pages.botAnchorList.fetchTagsFailed'))
   }
 }
 
@@ -468,7 +514,7 @@ const formatDate = (dateString: string | null | undefined) => {
   if (!dateString) return '-'
   const date = new Date(dateString)
   if (Number.isNaN(date.getTime())) return dateString
-  return date.toLocaleString('zh-CN', {hour12: false})
+  return date.toLocaleString(undefined, {hour12: false})
 }
 
 const fetchList = async () => {
@@ -482,8 +528,8 @@ const fetchList = async () => {
     tableData.value = response.data
     pagination.total = response.total
   } catch (error) {
-    console.error('获取机器人主播列表失败:', error)
-    ElMessage.error('获取机器人主播列表失败')
+    console.error('fetchList failed:', error)
+    ElMessage.error(t('pages.botAnchorList.fetchListFailed'))
   } finally {
     loading.value = false
   }
@@ -514,7 +560,7 @@ const handleSizeChange = (size: number) => {
 }
 
 const handleAdd = () => {
-  dialogTitle.value = '新增机器人主播'
+  dialogTitle.value = t('pages.botAnchorList.addDialogTitle')
   formData.value = {
     id: '',
     nickname: '',
@@ -535,7 +581,7 @@ const handleAdd = () => {
 }
 
 const handleEdit = (row: BotAnchorListItem) => {
-  dialogTitle.value = '编辑机器人主播'
+  dialogTitle.value = t('pages.botAnchorList.editDialogTitle')
   formData.value = {
     id: row.id,
     nickname: row.nickname || '',
@@ -557,7 +603,7 @@ const handleEdit = (row: BotAnchorListItem) => {
 
 const beforeAvatarUpload = (file: File): boolean => {
   if (!file.type.startsWith('image/')) {
-    ElMessage.error('只能上传图片文件')
+    ElMessage.error(t('pages.botAnchorList.imageOnly'))
     return false
   }
   return true
@@ -571,10 +617,10 @@ const doUpload = async (options: UploadRequestOptions) => {
     formData.value.avatar = res.fileName
     avatarChanged.value = true
     setAvatarPreview(URL.createObjectURL(file), true)
-    ElMessage.success('上传成功')
+    ElMessage.success(t('pages.botAnchorList.uploadSuccess'))
   } catch (error) {
-    console.error('上传失败:', error)
-    ElMessage.error('上传失败')
+    console.error('upload failed:', error)
+    ElMessage.error(t('pages.botAnchorList.uploadFailed'))
   } finally {
     avatarUploading.value = false
   }
@@ -589,10 +635,10 @@ const clearAvatar = () => {
 const beforeVideoUpload = (file: File): boolean => {
   const isMp4 = file.type === 'video/mp4' || file.name.toLowerCase().endsWith('.mp4')
   if (!isMp4) {
-    ElMessage.error('只能上传MP4视频')
+    ElMessage.error(t('pages.botAnchorList.mp4Only'))
     return false
   }
-  
+
   return true
 }
 
@@ -606,13 +652,12 @@ const doVideoUpload = async (options: UploadRequestOptions) => {
     })
     formData.value.cloudPlayerVideo = res.fileName
     videoChanged.value = true
-    // 优先用服务端 URL 预览(大文件 blob URL 常无法播放)
     const previewUrl = res.fileUrl || URL.createObjectURL(file)
     setVideoPreview(previewUrl, !res.fileUrl)
-    ElMessage.success('视频上传成功')
+    ElMessage.success(t('pages.botAnchorList.videoUploadSuccess'))
   } catch (error) {
-    console.error('视频上传失败:', error)
-    ElMessage.error('视频上传失败')
+    console.error('video upload failed:', error)
+    ElMessage.error(t('pages.botAnchorList.videoUploadFailed'))
   } finally {
     videoUploading.value = false
     videoUploadProgress.value = 0
@@ -671,12 +716,12 @@ const handleSave = async () => {
           isTest: formData.value.isTest
         })
       }
-      ElMessage.success(formData.value.id ? '更新成功' : '创建成功')
+      ElMessage.success(formData.value.id ? t('common.updateSuccess') : t('common.createSuccess'))
       dialogVisible.value = false
       fetchList()
     } catch (error) {
-      console.error('保存失败:', error)
-      ElMessage.error('保存失败')
+      console.error('save failed:', error)
+      ElMessage.error(t('pages.botAnchorList.saveFailed'))
     } finally {
       saving.value = false
     }
@@ -685,18 +730,22 @@ const handleSave = async () => {
 
 const handleStopLive = async (row: BotAnchorListItem) => {
   try {
-    await ElMessageBox.confirm(`确定要让机器人主播「${row.nickname || row.id}」下播吗？`, '确认下播', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
+    await ElMessageBox.confirm(
+        t('pages.botAnchorList.stopLiveConfirm', {name: row.nickname || row.id}),
+        t('pages.botAnchorList.stopLiveTitle'),
+        {
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning'
+        }
+    )
     await botAnchorApi.stopBotAnchorLive({id: row.id})
-    ElMessage.success('下播成功')
+    ElMessage.success(t('pages.botAnchorList.stopLiveSuccess'))
     fetchList()
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('下播失败:', error)
-      ElMessage.error('下播失败')
+      console.error('stopLive failed:', error)
+      ElMessage.error(t('pages.botAnchorList.stopLiveFailed'))
     }
   }
 }
@@ -704,28 +753,37 @@ const handleStopLive = async (row: BotAnchorListItem) => {
 const handleBatchStartLive = async () => {
   const rows = startableSelectedRows.value
   if (!rows.length) {
-    ElMessage.warning('请选择可开播的机器人主播')
+    ElMessage.warning(t('pages.botAnchorList.selectStartable'))
     return
   }
   try {
-    await ElMessageBox.confirm(`确定要批量开播 ${rows.length} 个机器人主播吗？`, '确认批量开播', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
+    await ElMessageBox.confirm(
+        t('pages.botAnchorList.batchStartConfirm', {count: rows.length}),
+        t('pages.botAnchorList.batchStartTitle'),
+        {
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning'
+        }
+    )
     batchOperating.value = true
     const response = await botAnchorApi.batchStartBotAnchorLive({ids: rows.map((row) => row.id)})
     if (response.failCount > 0) {
-      ElMessage.warning(`批量开播完成：成功 ${response.successCount} 个，失败 ${response.failCount} 个`)
+      ElMessage.warning(
+          t('pages.botAnchorList.batchStartPartial', {
+            success: response.successCount,
+            fail: response.failCount
+          })
+      )
     } else {
-      ElMessage.success(`批量开播成功，共 ${response.successCount} 个`)
+      ElMessage.success(t('pages.botAnchorList.batchStartSuccess', {count: response.successCount}))
     }
     clearSelection()
     fetchList()
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('批量开播失败:', error)
-      ElMessage.error('批量开播失败')
+      console.error('batchStartLive failed:', error)
+      ElMessage.error(t('pages.botAnchorList.batchStartFailed'))
     }
   } finally {
     batchOperating.value = false
@@ -735,28 +793,37 @@ const handleBatchStartLive = async () => {
 const handleBatchStopLive = async () => {
   const rows = stoppableSelectedRows.value
   if (!rows.length) {
-    ElMessage.warning('请选择可下播的机器人主播')
+    ElMessage.warning(t('pages.botAnchorList.selectStoppable'))
     return
   }
   try {
-    await ElMessageBox.confirm(`确定要批量下播 ${rows.length} 个机器人主播吗？`, '确认批量下播', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
+    await ElMessageBox.confirm(
+        t('pages.botAnchorList.batchStopConfirm', {count: rows.length}),
+        t('pages.botAnchorList.batchStopTitle'),
+        {
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning'
+        }
+    )
     batchOperating.value = true
     const response = await botAnchorApi.batchStopBotAnchorLive({ids: rows.map((row) => row.id)})
     if (response.failCount > 0) {
-      ElMessage.warning(`批量下播完成：成功 ${response.successCount} 个，失败 ${response.failCount} 个`)
+      ElMessage.warning(
+          t('pages.botAnchorList.batchStopPartial', {
+            success: response.successCount,
+            fail: response.failCount
+          })
+      )
     } else {
-      ElMessage.success(`批量下播成功，共 ${response.successCount} 个`)
+      ElMessage.success(t('pages.botAnchorList.batchStopSuccess', {count: response.successCount}))
     }
     clearSelection()
     fetchList()
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('批量下播失败:', error)
-      ElMessage.error('批量下播失败')
+      console.error('batchStopLive failed:', error)
+      ElMessage.error(t('pages.botAnchorList.batchStopFailed'))
     }
   } finally {
     batchOperating.value = false
@@ -765,38 +832,48 @@ const handleBatchStopLive = async () => {
 
 const handleStartLive = async (row: BotAnchorListItem) => {
   try {
-    await ElMessageBox.confirm(`确定要让机器人主播「${row.nickname || row.id}」开播吗？`, '确认开播', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
+    await ElMessageBox.confirm(
+        t('pages.botAnchorList.startLiveConfirm', {name: row.nickname || row.id}),
+        t('pages.botAnchorList.startLiveTitle'),
+        {
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning'
+        }
+    )
     await botAnchorApi.startBotAnchorLive({id: row.id})
-    ElMessage.success('开播成功')
+    ElMessage.success(t('pages.botAnchorList.startLiveSuccess'))
     fetchList()
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('开播失败:', error)
-      ElMessage.error('开播失败')
+      console.error('startLive failed:', error)
+      ElMessage.error(t('pages.botAnchorList.startLiveFailed'))
     }
   }
 }
 
 const toggleStatus = async (row: BotAnchorListItem) => {
   const nextStatus = row.botAnchorStatus === 1 ? 0 : 1
-  const actionText = nextStatus === 1 ? '启用' : '停用'
+  const actionText = nextStatus === 1
+      ? t('pages.botAnchorList.toggleEnable')
+      : t('pages.botAnchorList.toggleDisable')
   try {
-    await ElMessageBox.confirm(`确定要${actionText}机器人主播「${row.nickname || row.id}」吗？`, '确认操作', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
+    await ElMessageBox.confirm(
+        t('pages.botAnchorList.toggleConfirm', {action: actionText, name: row.nickname || row.id}),
+        t('pages.botAnchorList.toggleTitle'),
+        {
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning'
+        }
+    )
     await botAnchorApi.setBotAnchorStatus({id: row.id, status: nextStatus})
-    ElMessage.success(`${actionText}成功`)
+    ElMessage.success(t('pages.botAnchorList.toggleSuccess', {action: actionText}))
     fetchList()
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('操作失败:', error)
-      ElMessage.error('操作失败')
+      console.error('toggleStatus failed:', error)
+      ElMessage.error(t('pages.botAnchorList.operationFailed'))
     }
   }
 }

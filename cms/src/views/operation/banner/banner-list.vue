@@ -3,12 +3,12 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>Banner 管理</span>
+          <span>{{ t('menu.BannerManagement') }}</span>
         </div>
       </template>
       <div class="content">
         <div class="table-header">
-          <el-button type="primary" @click="handleAdd">新增 Banner</el-button>
+          <el-button type="primary" @click="handleAdd">{{ t('pages.bannerList.addBanner') }}</el-button>
           <el-button
               v-if="hasButtonPermission('BannerManagement', 'sync')"
               :disabled="selectedRows.length === 0"
@@ -16,33 +16,39 @@
               type="warning"
               @click="handleSyncData"
           >
-            同步数据
+            {{ t('common.syncData') }}
           </el-button>
         </div>
 
-        <div v-if="selectedRows.length" class="selection-tip">已选 {{ selectedRows.length }} 项</div>
+        <div v-if="selectedRows.length" class="selection-tip">
+          {{ t('common.selectedCount', {count: selectedRows.length}) }}
+        </div>
 
         <el-form :model="searchForm" class="search-form" inline>
-          <el-form-item label="标题">
-            <el-input v-model="searchForm.title" clearable placeholder="标题(模糊匹配)"/>
+          <el-form-item :label="t('common.title')">
+            <el-input v-model="searchForm.title" clearable :placeholder="t('pages.bannerList.titleFuzzy')"/>
           </el-form-item>
-          <el-form-item label="展示场景">
-            <el-select v-model="searchForm.sceneFilter" placeholder="全部" style="width: 140px">
-              <el-option :value="0" label="全部"/>
-              <el-option :value="1" label="首页"/>
-              <el-option :value="2" label="直播间"/>
+          <el-form-item :label="t('pages.bannerList.displayScene')">
+            <el-select v-model="searchForm.sceneFilter" :placeholder="t('common.all')" style="width: 140px">
+              <el-option :value="0" :label="t('common.all')"/>
+              <el-option
+                  v-for="item in sceneOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+              />
             </el-select>
           </el-form-item>
-          <el-form-item label="状态">
-            <el-select v-model="searchForm.statusFilter" placeholder="全部" style="width: 140px">
-              <el-option :value="0" label="全部"/>
-              <el-option :value="2" label="只看上架"/>
-              <el-option :value="1" label="只看下架"/>
+          <el-form-item :label="t('common.status')">
+            <el-select v-model="searchForm.statusFilter" :placeholder="t('common.all')" style="width: 140px">
+              <el-option :value="0" :label="t('common.all')"/>
+              <el-option :value="2" :label="t('common.onlyOnShelf')"/>
+              <el-option :value="1" :label="t('common.onlyOffShelf')"/>
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="handleSearch">搜索</el-button>
-            <el-button @click="resetSearch">重置</el-button>
+            <el-button type="primary" @click="handleSearch">{{ t('common.search') }}</el-button>
+            <el-button @click="resetSearch">{{ t('common.reset') }}</el-button>
           </el-form-item>
         </el-form>
 
@@ -55,8 +61,8 @@
         >
           <el-table-column type="selection" width="48"/>
           <el-table-column label="ID" prop="id" width="100"/>
-          <el-table-column label="标题" prop="title" min-width="140"/>
-          <el-table-column label="图片" width="100">
+          <el-table-column :label="t('common.title')" prop="title" min-width="140"/>
+          <el-table-column :label="t('pages.bannerList.image')" width="100">
             <template #default="{ row }">
               <el-image
                   v-if="row.image"
@@ -69,37 +75,37 @@
               <span v-else>-</span>
             </template>
           </el-table-column>
-          <el-table-column label="跳转链接" prop="link" min-width="200" show-overflow-tooltip/>
-          <el-table-column label="展示场景" width="100">
+          <el-table-column :label="t('pages.bannerList.link')" prop="link" min-width="200" show-overflow-tooltip/>
+          <el-table-column :label="t('pages.bannerList.displayScene')" width="100">
             <template #default="{ row }">
               {{ sceneLabel(row.scene) }}
             </template>
           </el-table-column>
-          <el-table-column label="展示位置" width="110">
+          <el-table-column :label="t('pages.bannerList.displayPosition')" width="110">
             <template #default="{ row }">
               {{ directionLabel(row.direction, row.scene) }}
             </template>
           </el-table-column>
-          <el-table-column label="排序" prop="sort" width="80"/>
-          <el-table-column label="状态" width="90">
+          <el-table-column :label="t('common.sort')" prop="sort" width="80"/>
+          <el-table-column :label="t('common.status')" width="90">
             <template #default="{ row }">
               <el-tag :type="row.status === 1 ? 'success' : 'info'">
-                {{ row.status === 1 ? '上架' : '下架' }}
+                {{ row.status === 1 ? t('common.onShelf') : t('common.offShelf') }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" prop="createdAt" width="160"/>
-          <el-table-column label="更新时间" prop="updatedAt" width="160"/>
-          <el-table-column fixed="right" label="操作" width="260">
+          <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
+          <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
+          <el-table-column fixed="right" :label="t('common.actions')" width="260">
             <template #default="{ row }">
-              <el-button size="small" @click="handleEdit(row)">编辑</el-button>
+              <el-button size="small" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
               <el-button
                   v-if="row.status !== 1"
                   size="small"
                   type="success"
                   @click="handleOnShelf(row)"
               >
-                上架
+                {{ t('common.onShelf') }}
               </el-button>
               <el-button
                   v-else
@@ -107,9 +113,9 @@
                   type="warning"
                   @click="handleOffShelf(row)"
               >
-                下架
+                {{ t('common.offShelf') }}
               </el-button>
-              <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
+              <el-button size="small" type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -130,10 +136,10 @@
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="560px">
       <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="100px">
-        <el-form-item label="标题" prop="title">
-          <el-input v-model="currentRow.title" placeholder="请输入标题"/>
+        <el-form-item :label="t('common.title')" prop="title">
+          <el-input v-model="currentRow.title" :placeholder="t('pages.bannerList.titleRequired')"/>
         </el-form-item>
-        <el-form-item label="图片" prop="image">
+        <el-form-item :label="t('pages.bannerList.image')" prop="image">
           <div class="image-upload-wrap">
             <el-upload
                 :before-upload="beforeImageUpload"
@@ -149,7 +155,7 @@
                 <el-icon class="banner-uploader-icon">
                   <Plus/>
                 </el-icon>
-                <span>点击上传图片</span>
+                <span>{{ t('pages.bannerList.clickUploadImage') }}</span>
               </div>
             </el-upload>
             <el-button
@@ -159,21 +165,26 @@
                 type="danger"
                 @click="clearImage"
             >
-              移除图片
+              {{ t('pages.bannerList.removeImage') }}
             </el-button>
           </div>
         </el-form-item>
-        <el-form-item label="跳转链接" prop="link">
-          <el-input v-model="currentRow.link" placeholder="请输入跳转链接"/>
+        <el-form-item :label="t('pages.bannerList.link')" prop="link">
+          <el-input v-model="currentRow.link" :placeholder="t('pages.bannerList.linkPlaceholder')"/>
         </el-form-item>
-        <el-form-item label="展示场景" prop="scene">
+        <el-form-item :label="t('pages.bannerList.displayScene')" prop="scene">
           <el-radio-group v-model="currentRow.scene">
-            <el-radio :label="1">首页</el-radio>
-            <el-radio :label="2">直播间</el-radio>
+            <el-radio v-for="item in sceneOptions" :key="item.value" :label="item.value">
+              {{ item.label }}
+            </el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="展示位置" prop="direction">
-          <el-select v-model="currentRow.direction" placeholder="请选择展示位置" style="width: 100%">
+        <el-form-item :label="t('pages.bannerList.displayPosition')" prop="direction">
+          <el-select
+              v-model="currentRow.direction"
+              :placeholder="t('pages.bannerList.selectDisplayPosition')"
+              style="width: 100%"
+          >
             <el-option
                 v-for="item in currentDirectionOptions"
                 :key="item.value"
@@ -182,13 +193,13 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="排序" prop="sort">
+        <el-form-item :label="t('common.sort')" prop="sort">
           <el-input-number v-model="currentRow.sort" controls-position="right"/>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSave">保存</el-button>
+        <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="handleSave">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -196,11 +207,14 @@
 
 <script lang="ts" setup>
 import {computed, onMounted, reactive, ref, watch} from 'vue'
+import {useI18n} from 'vue-i18n'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
 import {Plus} from '@element-plus/icons-vue'
 import {bannerApi, dataSyncApi, uploadApi} from '@/api'
 import type {Banner} from '@/types/api.ts'
 import {hasButtonPermission} from '@/utils/permission'
+
+const {t} = useI18n()
 
 interface SearchForm {
   title: string
@@ -218,32 +232,32 @@ interface BannerForm {
   sort: number
 }
 
-const homeDirectionOptions = [
-  {value: 1, label: '首页顶部'},
-  {value: 2, label: '首页中部'},
-  {value: 3, label: '首页底部'},
-]
+const homeDirectionOptions = computed(() => [
+  {value: 1, label: t('pages.bannerList.positionHomeTop')},
+  {value: 2, label: t('pages.bannerList.positionHomeMiddle')},
+  {value: 3, label: t('pages.bannerList.positionHomeBottom')},
+])
 
-const liveRoomDirectionOptions = [
-  {value: 4, label: '直播大厅'},
-]
+const liveRoomDirectionOptions = computed(() => [
+  {value: 4, label: t('pages.bannerList.positionLiveHall')},
+])
 
-const sceneOptions = [
-  {value: 1, label: '首页'},
-  {value: 2, label: '直播间'},
-]
+const sceneOptions = computed(() => [
+  {value: 1, label: t('pages.bannerList.sceneHome')},
+  {value: 2, label: t('pages.bannerList.sceneLiveRoom')},
+])
 
 const sceneLabel = (scene: number) => {
-  return sceneOptions.find((item) => item.value === Number(scene))?.label ?? '首页'
+  return sceneOptions.value.find((item) => item.value === Number(scene))?.label ?? t('pages.bannerList.sceneHome')
 }
 
 const directionLabel = (direction: number, scene = 1) => {
-  const options = Number(scene) === 2 ? liveRoomDirectionOptions : homeDirectionOptions
-  return options.find((item) => item.value === direction)?.label ?? '未知'
+  const options = Number(scene) === 2 ? liveRoomDirectionOptions.value : homeDirectionOptions.value
+  return options.find((item) => item.value === direction)?.label ?? t('pages.bannerList.unknown')
 }
 
 const currentDirectionOptions = computed(() => {
-  return currentRow.value.scene === 2 ? liveRoomDirectionOptions : homeDirectionOptions
+  return currentRow.value.scene === 2 ? liveRoomDirectionOptions.value : homeDirectionOptions.value
 })
 
 const loading = ref(false)
@@ -317,7 +331,7 @@ watch(dialogVisible, (visible) => {
 
 const beforeImageUpload = (file: File): boolean => {
   if (!file.type.startsWith('image/')) {
-    ElMessage.error('只能上传图片文件')
+    ElMessage.error(t('pages.bannerList.imageOnly'))
     return false
   }
   return true
@@ -331,25 +345,25 @@ const doUpload = async (options: UploadRequestOptions) => {
     currentRow.value.image = res.fileName
     setImagePreview(URL.createObjectURL(file), true)
     formRef.value?.validateField('image').catch(() => undefined)
-    ElMessage.success('上传成功')
+    ElMessage.success(t('pages.bannerList.uploadSuccess'))
   } catch (error) {
-    console.error('上传失败:', error)
-    ElMessage.error('上传失败')
+    console.error('upload banner image failed:', error)
+    ElMessage.error(t('pages.bannerList.uploadFailed'))
   } finally {
     imageUploading.value = false
   }
 }
 
-const formRules: FormRules = {
+const formRules = computed<FormRules>(() => ({
   title: [
-    {required: true, message: '请输入标题', trigger: 'blur'},
-    {min: 1, max: 64, message: '标题长度在1-64个字符', trigger: 'blur'}
+    {required: true, message: t('pages.bannerList.titleRequired'), trigger: 'blur'},
+    {min: 1, max: 64, message: t('pages.bannerList.titleLength'), trigger: 'blur'}
   ],
-  image: [{required: true, message: '请上传图片', trigger: 'change'}],
-  link: [{max: 512, message: '跳转链接最长512字符', trigger: 'blur'}],
-  scene: [{required: true, message: '请选择展示场景', trigger: 'change'}],
-  direction: [{required: true, message: '请选择展示位置', trigger: 'change'}]
-}
+  image: [{required: true, message: t('pages.bannerList.imageRequired'), trigger: 'change'}],
+  link: [{max: 512, message: t('pages.bannerList.linkMaxLength'), trigger: 'blur'}],
+  scene: [{required: true, message: t('pages.bannerList.sceneRequired'), trigger: 'change'}],
+  direction: [{required: true, message: t('pages.bannerList.positionRequired'), trigger: 'change'}]
+}))
 
 const fetchBannerList = async () => {
   loading.value = true
@@ -364,8 +378,8 @@ const fetchBannerList = async () => {
     tableData.value = response.data
     total.value = response.total
   } catch (error) {
-    console.error('获取Banner列表失败:', error)
-    ElMessage.error('获取Banner列表失败')
+    console.error('fetch banner list failed:', error)
+    ElMessage.error(t('pages.bannerList.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -387,14 +401,14 @@ const handleCurrentChange = (page: number) => {
 }
 
 const handleAdd = () => {
-  dialogTitle.value = '新增 Banner'
+  dialogTitle.value = t('pages.bannerList.addBanner')
   currentRow.value = defaultForm()
   setImagePreview('')
   dialogVisible.value = true
 }
 
 const handleEdit = (row: Banner) => {
-  dialogTitle.value = '编辑 Banner'
+  dialogTitle.value = t('pages.bannerList.editBanner')
   currentRow.value = {
     id: row.id,
     title: row.title,
@@ -410,42 +424,54 @@ const handleEdit = (row: Banner) => {
 
 const handleDelete = async (row: Banner) => {
   try {
-    await ElMessageBox.confirm(`确定要删除 Banner "${row.title}" 吗？`, '确认删除', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
+    await ElMessageBox.confirm(
+        t('pages.bannerList.deleteConfirm', {title: row.title}),
+        t('common.confirmDelete'),
+        {
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning'
+        }
+    )
     await bannerApi.deleteBanner(row.id)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('common.deleteSuccess'))
     fetchBannerList()
   } catch (error) {
-    console.error('删除失败:', error)
+    if (error !== 'cancel') {
+      console.error('delete banner failed:', error)
+    }
   }
 }
 
 const handleOnShelf = async (row: Banner) => {
   try {
     await bannerApi.onShelfBanner(row.id)
-    ElMessage.success('上架成功')
+    ElMessage.success(t('pages.bannerList.onShelfSuccess'))
     fetchBannerList()
   } catch (error) {
-    console.error('上架失败:', error)
-    ElMessage.error('上架失败')
+    console.error('publish banner failed:', error)
+    ElMessage.error(t('pages.bannerList.onShelfFailed'))
   }
 }
 
 const handleOffShelf = async (row: Banner) => {
   try {
-    await ElMessageBox.confirm(`确定要下架 Banner "${row.title}" 吗？`, '确认下架', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
+    await ElMessageBox.confirm(
+        t('pages.bannerList.offShelfConfirm', {title: row.title}),
+        t('common.confirmOffShelf'),
+        {
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning'
+        }
+    )
     await bannerApi.offShelfBanner(row.id)
-    ElMessage.success('下架成功')
+    ElMessage.success(t('pages.bannerList.offShelfSuccess'))
     fetchBannerList()
   } catch (error) {
-    console.error('下架失败:', error)
+    if (error !== 'cancel') {
+      console.error('unpublish banner failed:', error)
+    }
   }
 }
 
@@ -460,12 +486,12 @@ const handleSave = async () => {
         const {title, image, link, scene, direction, sort} = currentRow.value
         await bannerApi.createBanner({title, image, link, scene, direction, sort})
       }
-      ElMessage.success(currentRow.value.id ? '更新成功' : '创建成功')
+      ElMessage.success(currentRow.value.id ? t('common.updateSuccess') : t('common.createSuccess'))
       dialogVisible.value = false
       fetchBannerList()
     } catch (error) {
-      console.error('保存失败:', error)
-      ElMessage.error('保存失败')
+      console.error('save banner failed:', error)
+      ElMessage.error(t('pages.bannerList.saveFailed'))
     }
   })
 }
@@ -484,31 +510,36 @@ const handleSelectionChange = (rows: Banner[]) => {
 
 const handleSyncData = async () => {
   if (selectedRows.value.length === 0) {
-    ElMessage.warning('请先勾选要同步的 Banner')
+    ElMessage.warning(t('pages.bannerList.selectSyncFirst'))
     return
   }
   const ids = selectedRows.value.map((row) => Number(row.id)).filter((id) => id > 0)
   if (ids.length === 0) {
-    ElMessage.warning('所选 Banner 无效')
+    ElMessage.warning(t('pages.bannerList.invalidSelection'))
     return
   }
   try {
     await ElMessageBox.confirm(
-        `将把已选 ${ids.length} 条 Banner 及关联图片同步到目标环境（按 ID 覆盖或新增）。是否继续？`,
-        '同步数据',
-        {confirmButtonText: '确定同步', cancelButtonText: '取消', type: 'warning'}
+        t('pages.bannerList.syncConfirm', {count: ids.length}),
+        t('common.syncData'),
+        {confirmButtonText: t('common.confirmSync'), cancelButtonText: t('common.cancel'), type: 'warning'}
     )
     syncing.value = true
     const response = await dataSyncApi.syncBanner({ids})
     if (response?.success) {
-      ElMessage.success(response.message || `同步成功：${response.rowCount} 条，${response.fileCount} 个文件`)
+      ElMessage.success(
+          response.message || t('pages.bannerList.syncSuccessDetail', {
+            rows: response.rowCount,
+            files: response.fileCount
+          })
+      )
     } else {
-      ElMessage.error('同步失败')
+      ElMessage.error(t('pages.bannerList.syncFailed'))
     }
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('同步失败:', error)
-      ElMessage.error('同步失败，请检查数据同步配置与目标服务')
+      console.error('sync banner failed:', error)
+      ElMessage.error(t('pages.bannerList.syncFailedCheckConfig'))
     }
   } finally {
     syncing.value = false

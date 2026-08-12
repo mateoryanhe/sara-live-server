@@ -3,7 +3,7 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>游戏列表</span>
+          <span>{{ t('menu.GameVendorGameListManagement') }}</span>
           <div class="header-actions">
             <el-button
                 :disabled="!canBatchOnShelf"
@@ -11,7 +11,7 @@
                 type="success"
                 @click="handleBatchOnShelf"
             >
-              批量上架
+              {{ t('common.batchOnShelf') }}
             </el-button>
             <el-button
                 :disabled="!canBatchOffShelf"
@@ -19,7 +19,7 @@
                 type="warning"
                 @click="handleBatchOffShelf"
             >
-              批量下架
+              {{ t('common.batchOffShelf') }}
             </el-button>
           </div>
         </div>
@@ -27,33 +27,33 @@
 
       <el-alert
           :closable="false"
+          :title="t('pages.gameList.noteTitle')"
           class="tip-alert"
           show-icon
-          title="说明"
           type="info"
       >
-        <p>点击「搜索」从第三方全量拉取游戏列表(缓存 30 分钟,每次搜索都会重新拉取覆盖)。已上架游戏写入 game_cfgs 并永久缓存,App 端只展示上架游戏。</p>
-        <p>勾选游戏后可批量上架/下架；表格右侧「操作」列可单条上架/下架。</p>
+        <p>{{ t('pages.gameList.tipLine1') }}</p>
+        <p>{{ t('pages.gameList.tipLine2') }}</p>
       </el-alert>
 
-      <div v-if="selectedRows.length" class="selection-tip">已选 {{ selectedRows.length }} 项</div>
+      <div v-if="selectedRows.length" class="selection-tip">{{ t('common.selectedCount', {count: selectedRows.length}) }}</div>
 
       <el-form :model="searchForm" class="search-form" inline>
-        <el-form-item label="游戏编码">
-          <el-input v-model="searchForm.gameCode" clearable placeholder="游戏编码(模糊匹配)"/>
+        <el-form-item :label="t('pages.gameList.gameCode')">
+          <el-input v-model="searchForm.gameCode" clearable :placeholder="t('pages.gameList.gameCodePlaceholder')"/>
         </el-form-item>
-        <el-form-item label="游戏名称">
-          <el-input v-model="searchForm.name" clearable placeholder="中/英文名称(模糊匹配)"/>
+        <el-form-item :label="t('pages.gameList.gameName')">
+          <el-input v-model="searchForm.name" clearable :placeholder="t('pages.gameList.gameNamePlaceholder')"/>
         </el-form-item>
-        <el-form-item label="平台">
-          <el-input v-model="searchForm.platform" clearable placeholder="如 pg / pp"/>
+        <el-form-item :label="t('pages.gameList.platform')">
+          <el-input v-model="searchForm.platform" clearable :placeholder="t('pages.gameList.platformPlaceholder')"/>
         </el-form-item>
-        <el-form-item label="分类">
-          <el-input v-model="searchForm.category" clearable placeholder="如 slot"/>
+        <el-form-item :label="t('common.category')">
+          <el-input v-model="searchForm.category" clearable :placeholder="t('pages.gameList.categoryPlaceholder')"/>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">搜索</el-button>
-          <el-button @click="resetSearch">重置</el-button>
+          <el-button type="primary" @click="handleSearch">{{ t('common.search') }}</el-button>
+          <el-button @click="resetSearch">{{ t('common.reset') }}</el-button>
         </el-form-item>
       </el-form>
 
@@ -65,17 +65,17 @@
           @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="48"/>
-        <el-table-column label="游戏编码" min-width="140" prop="gameCode"/>
-        <el-table-column label="名称" min-width="140" prop="name"/>
-        <el-table-column label="英文名称" min-width="140" prop="nameEn"/>
-        <el-table-column label="分类" prop="category" width="100"/>
-        <el-table-column label="平台" prop="platform" width="100"/>
-        <el-table-column label="上架状态" width="100">
+        <el-table-column :label="t('pages.gameList.gameCode')" min-width="140" prop="gameCode"/>
+        <el-table-column :label="t('common.name')" min-width="140" prop="name"/>
+        <el-table-column :label="t('pages.gameList.nameEn')" min-width="140" prop="nameEn"/>
+        <el-table-column :label="t('common.category')" prop="category" width="100"/>
+        <el-table-column :label="t('pages.gameList.platform')" prop="platform" width="100"/>
+        <el-table-column :label="t('pages.gameList.shelfStatus')" width="100">
           <template #default="{ row }">
-            <el-tag :type="row.onShelf ? 'success' : 'info'">{{ row.onShelf ? '已上架' : '未上架' }}</el-tag>
+            <el-tag :type="row.onShelf ? 'success' : 'info'">{{ row.onShelf ? t('pages.gameList.onShelfStatus') : t('pages.gameList.offShelfStatus') }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="封面" min-width="120">
+        <el-table-column :label="t('pages.gameList.cover')" min-width="120">
           <template #default="{ row }">
             <el-image
                 v-if="row.cover"
@@ -88,7 +88,7 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column fixed="right" label="操作" width="160">
+        <el-table-column fixed="right" :label="t('common.actions')" width="160">
           <template #default="{ row }">
             <el-button
                 v-if="!row.onShelf"
@@ -96,7 +96,7 @@
                 type="success"
                 @click="handleOnShelf(row)"
             >
-              上架
+              {{ t('common.onShelf') }}
             </el-button>
             <el-button
                 v-else
@@ -104,7 +104,7 @@
                 type="warning"
                 @click="handleOffShelf(row)"
             >
-              下架
+              {{ t('common.offShelf') }}
             </el-button>
           </template>
         </el-table-column>
@@ -127,9 +127,12 @@
 
 <script lang="ts" setup>
 import {computed, reactive, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {gamePlatformApi} from '@/api/modules/gamePlatform'
 import type {VendorGame} from '@/types/api'
+
+const {t} = useI18n()
 
 interface SearchForm {
   gameCode: string
@@ -171,8 +174,8 @@ const fetchList = async (refreshFromVendor = false) => {
     tableData.value = response.data || []
     total.value = response.total || 0
   } catch (error) {
-    console.error('获取游戏列表失败:', error)
-    ElMessage.error('获取游戏列表失败')
+    console.error('fetch game list failed:', error)
+    ElMessage.error(t('pages.gameList.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -211,14 +214,14 @@ const handleOnShelf = async (row: VendorGame) => {
   try {
     const response = await gamePlatformApi.addGameShelf({gameCode: row.gameCode})
     if (response?.success) {
-      ElMessage.success('上架成功')
+      ElMessage.success(t('pages.gameList.onShelfSuccess'))
       await fetchList()
     } else {
-      ElMessage.error('上架失败')
+      ElMessage.error(t('pages.gameList.onShelfFailed'))
     }
   } catch (error) {
-    console.error('上架失败:', error)
-    ElMessage.error('上架失败')
+    console.error('on shelf failed:', error)
+    ElMessage.error(t('pages.gameList.onShelfFailed'))
   } finally {
     shelfOperating.value = false
   }
@@ -226,7 +229,11 @@ const handleOnShelf = async (row: VendorGame) => {
 
 const handleOffShelf = async (row: VendorGame) => {
   try {
-    await ElMessageBox.confirm(`确定下架游戏「${row.name || row.gameCode}」吗？`, '确认下架', {type: 'warning'})
+    await ElMessageBox.confirm(
+        t('pages.gameList.offShelfConfirm', {name: row.name || row.gameCode}),
+        t('common.confirmOffShelf'),
+        {type: 'warning'},
+    )
   } catch {
     return
   }
@@ -234,14 +241,14 @@ const handleOffShelf = async (row: VendorGame) => {
   try {
     const response = await gamePlatformApi.deleteGameShelf({gameCode: row.gameCode})
     if (response?.success) {
-      ElMessage.success('下架成功')
+      ElMessage.success(t('pages.gameList.offShelfSuccess'))
       await fetchList()
     } else {
-      ElMessage.error('下架失败')
+      ElMessage.error(t('pages.gameList.offShelfFailed'))
     }
   } catch (error) {
-    console.error('下架失败:', error)
-    ElMessage.error('下架失败')
+    console.error('off shelf failed:', error)
+    ElMessage.error(t('pages.gameList.offShelfFailed'))
   } finally {
     shelfOperating.value = false
   }
@@ -250,11 +257,15 @@ const handleOffShelf = async (row: VendorGame) => {
 const handleBatchOnShelf = async () => {
   const gameCodes = selectedRows.value.filter(row => !row.onShelf).map(row => row.gameCode)
   if (!gameCodes.length) {
-    ElMessage.warning('请选择未上架的游戏')
+    ElMessage.warning(t('pages.gameList.selectUnpublished'))
     return
   }
   try {
-    await ElMessageBox.confirm(`确定批量上架 ${gameCodes.length} 个游戏吗？`, '确认批量上架', {type: 'warning'})
+    await ElMessageBox.confirm(
+        t('pages.gameList.batchOnShelfConfirm', {count: gameCodes.length}),
+        t('pages.gameList.batchOnShelfTitle'),
+        {type: 'warning'},
+    )
   } catch {
     return
   }
@@ -263,17 +274,20 @@ const handleBatchOnShelf = async () => {
     const response = await gamePlatformApi.batchAddGameShelf({gameCodes})
     if (response?.success) {
       if (response.skipCount > 0) {
-        ElMessage.success(`批量上架完成：成功 ${response.successCount} 个，跳过 ${response.skipCount} 个`)
+        ElMessage.success(t('pages.gameList.batchOnShelfDoneWithSkip', {
+          success: response.successCount,
+          skip: response.skipCount,
+        }))
       } else {
-        ElMessage.success(`批量上架成功，共 ${response.successCount} 个`)
+        ElMessage.success(t('pages.gameList.batchOnShelfSuccess', {count: response.successCount}))
       }
       await fetchList()
     } else {
-      ElMessage.error('批量上架失败')
+      ElMessage.error(t('pages.gameList.batchOnShelfFailed'))
     }
   } catch (error) {
-    console.error('批量上架失败:', error)
-    ElMessage.error('批量上架失败')
+    console.error('batch on shelf failed:', error)
+    ElMessage.error(t('pages.gameList.batchOnShelfFailed'))
   } finally {
     shelfOperating.value = false
   }
@@ -282,11 +296,15 @@ const handleBatchOnShelf = async () => {
 const handleBatchOffShelf = async () => {
   const gameCodes = selectedRows.value.filter(row => row.onShelf).map(row => row.gameCode)
   if (!gameCodes.length) {
-    ElMessage.warning('请选择已上架的游戏')
+    ElMessage.warning(t('pages.gameList.selectPublished'))
     return
   }
   try {
-    await ElMessageBox.confirm(`确定批量下架 ${gameCodes.length} 个游戏吗？`, '确认批量下架', {type: 'warning'})
+    await ElMessageBox.confirm(
+        t('pages.gameList.batchOffShelfConfirm', {count: gameCodes.length}),
+        t('pages.gameList.batchOffShelfTitle'),
+        {type: 'warning'},
+    )
   } catch {
     return
   }
@@ -294,14 +312,14 @@ const handleBatchOffShelf = async () => {
   try {
     const response = await gamePlatformApi.batchDeleteGameShelf({gameCodes})
     if (response?.success) {
-      ElMessage.success(`批量下架成功，共 ${response.successCount} 个`)
+      ElMessage.success(t('pages.gameList.batchOffShelfSuccess', {count: response.successCount}))
       await fetchList()
     } else {
-      ElMessage.error('批量下架失败')
+      ElMessage.error(t('pages.gameList.batchOffShelfFailed'))
     }
   } catch (error) {
-    console.error('批量下架失败:', error)
-    ElMessage.error('批量下架失败')
+    console.error('batch off shelf failed:', error)
+    ElMessage.error(t('pages.gameList.batchOffShelfFailed'))
   } finally {
     shelfOperating.value = false
   }

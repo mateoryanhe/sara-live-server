@@ -3,24 +3,24 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>短视频分类</span>
+          <span>{{ t('menu.ShortVideoCategoryManagement') }}</span>
         </div>
       </template>
       <div class="content">
         <div class="table-header">
-          <el-button type="primary" @click="handleAdd">新增分类</el-button>
+          <el-button type="primary" @click="handleAdd">{{ t('pages.shortVideoCategoryList.addCategory') }}</el-button>
         </div>
 
         <el-table v-loading="loading" :data="tableData" style="width: 100%">
           <el-table-column label="ID" prop="id" width="100"/>
-          <el-table-column label="分类名称" prop="name" min-width="160"/>
-          <el-table-column label="排序" prop="sort" width="80"/>
-          <el-table-column label="创建时间" prop="createdAt" width="160"/>
-          <el-table-column label="更新时间" prop="updatedAt" width="160"/>
-          <el-table-column fixed="right" label="操作" width="160">
+          <el-table-column :label="t('pages.shortVideoCategoryList.categoryName')" prop="name" min-width="160"/>
+          <el-table-column :label="t('common.sort')" prop="sort" width="80"/>
+          <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
+          <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
+          <el-table-column fixed="right" :label="t('common.actions')" width="160">
             <template #default="{ row }">
-              <el-button size="small" @click="handleEdit(row)">编辑</el-button>
-              <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
+              <el-button size="small" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
+              <el-button size="small" type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -41,24 +41,25 @@
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="480px">
       <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="100px">
-        <el-form-item label="分类名称" prop="name">
-          <el-input v-model="currentRow.name" maxlength="64" placeholder="请输入分类名称" show-word-limit/>
+        <el-form-item :label="t('pages.shortVideoCategoryList.categoryName')" prop="name">
+          <el-input v-model="currentRow.name" maxlength="64" :placeholder="t('pages.shortVideoCategoryList.categoryNamePlaceholder')" show-word-limit/>
         </el-form-item>
-        <el-form-item label="排序" prop="sort">
+        <el-form-item :label="t('common.sort')" prop="sort">
           <el-input-number v-model="currentRow.sort" controls-position="right"/>
-          <div class="form-tip">数值越大越靠前</div>
+          <div class="form-tip">{{ t('pages.shortVideoCategoryList.sortTip') }}</div>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSave">保存</el-button>
+        <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="handleSave">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {onMounted, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {computed, onMounted, ref} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {shortVideoApi} from '@/api/modules/shortVideo'
 import type {ShortVideoCategory} from '@/types/api'
@@ -69,6 +70,7 @@ interface CategoryForm {
   sort: number
 }
 
+const {t} = useI18n()
 const loading = ref(false)
 const tableData = ref<ShortVideoCategory[]>([])
 const total = ref(0)
@@ -85,12 +87,12 @@ const defaultForm = (): CategoryForm => ({
 const currentRow = ref<CategoryForm>(defaultForm())
 const formRef = ref<FormInstance>()
 
-const formRules: FormRules = {
+const formRules = computed<FormRules>(() => ({
   name: [
-    {required: true, message: '请输入分类名称', trigger: 'blur'},
-    {max: 64, message: '分类名称最长64字符', trigger: 'blur'},
+    {required: true, message: t('pages.shortVideoCategoryList.nameRequired'), trigger: 'blur'},
+    {max: 64, message: t('pages.shortVideoCategoryList.nameMax'), trigger: 'blur'},
   ]
-}
+}))
 
 const fetchList = async () => {
   loading.value = true
@@ -102,8 +104,8 @@ const fetchList = async () => {
     tableData.value = response.data
     total.value = response.total
   } catch (error) {
-    console.error('获取短视频分类列表失败:', error)
-    ElMessage.error('获取分类列表失败')
+    console.error('fetch category list failed:', error)
+    ElMessage.error(t('pages.shortVideoCategoryList.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -120,13 +122,13 @@ const handleCurrentChange = (page: number) => {
 }
 
 const handleAdd = () => {
-  dialogTitle.value = '新增分类'
+  dialogTitle.value = t('pages.shortVideoCategoryList.addTitle')
   currentRow.value = defaultForm()
   dialogVisible.value = true
 }
 
 const handleEdit = (row: ShortVideoCategory) => {
-  dialogTitle.value = '编辑分类'
+  dialogTitle.value = t('pages.shortVideoCategoryList.editTitle')
   currentRow.value = {
     id: row.id,
     name: row.name,
@@ -144,32 +146,34 @@ const handleSave = async () => {
         name: currentRow.value.name,
         sort: currentRow.value.sort
       })
-      ElMessage.success('更新成功')
+      ElMessage.success(t('common.updateSuccess'))
     } else {
       await shortVideoApi.createShortVideoCategory({
         name: currentRow.value.name,
         sort: currentRow.value.sort
       })
-      ElMessage.success('创建成功')
+      ElMessage.success(t('common.createSuccess'))
     }
     dialogVisible.value = false
     fetchList()
   } catch (error) {
-    console.error('保存短视频分类失败:', error)
+    console.error('save category failed:', error)
   }
 }
 
 const handleDelete = async (row: ShortVideoCategory) => {
   try {
-    await ElMessageBox.confirm(`确定要删除分类「${row.name}」吗？`, '确认删除', {
-      type: 'warning'
-    })
+    await ElMessageBox.confirm(
+        t('pages.shortVideoCategoryList.deleteConfirm', {name: row.name}),
+        t('common.confirmDelete'),
+        {type: 'warning'},
+    )
     await shortVideoApi.deleteShortVideoCategory(row.id)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('common.deleteSuccess'))
     fetchList()
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('删除短视频分类失败:', error)
+      console.error('delete category failed:', error)
     }
   }
 }

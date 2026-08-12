@@ -3,78 +3,82 @@
     <el-card v-loading="loading">
       <template #header>
         <div class="card-header">
-          <span>资源与上传配置</span>
+          <span>{{ t('menu.UploadResourceCfgManagement') }}</span>
         </div>
       </template>
 
       <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="160px">
-        <el-divider content-position="left">静态资源</el-divider>
+        <el-divider content-position="left">{{ t('pages.uploadResource.staticResources') }}</el-divider>
 
-        <el-form-item label="资源域名" prop="resourceDomain">
+        <el-form-item :label="t('pages.uploadResource.resourceDomain')" prop="resourceDomain">
           <el-input
               v-model="formData.resourceDomain"
               clearable
-              placeholder="如 http://127.0.0.1 或 https://cdn.example.com"
+              :placeholder="t('pages.uploadResource.resourceDomainPlaceholder')"
           />
-          <span class="form-tip">留空默认 http://127.0.0.1；开启图片审核时须填写阿里云可公网访问的域名（不能是 127.0.0.1/内网 IP）</span>
+          <span class="form-tip">{{ t('pages.uploadResource.resourceDomainTip') }}</span>
         </el-form-item>
 
-        <el-form-item label="App 图片大小上限" prop="appImageMaxSizeMB">
+        <el-form-item :label="t('pages.uploadResource.appImageMaxSizeMB')" prop="appImageMaxSizeMB">
           <el-input-number v-model="formData.appImageMaxSizeMB" :max="1024" :min="1" :step="1"/>
-          <span class="form-tip">MB，App 端上传图片（如头像）的大小上限，通过 GET /sys/cfg 下发给客户端</span>
+          <span class="form-tip">{{ t('pages.uploadResource.appImageMaxSizeTip') }}</span>
         </el-form-item>
 
-        <el-divider content-position="left">App 图片审核（阿里云）</el-divider>
+        <el-divider content-position="left">{{ t('pages.uploadResource.imageModerationSection') }}</el-divider>
 
-        <el-form-item label="开启图片审核">
-          <el-switch v-model="formData.imageModerationEnabled" active-text="开启" inactive-text="关闭"/>
-          <span class="form-tip">仅对 App 端上传的图片生效（如头像），CMS 后台上传不审核；图片先存本地，再通过资源域名拼 imageUrl 调用阿里云 ImageModeration 检测</span>
+        <el-form-item :label="t('pages.uploadResource.enableImageModeration')">
+          <el-switch
+              v-model="formData.imageModerationEnabled"
+              :active-text="t('common.open')"
+              :inactive-text="t('common.close')"
+          />
+          <span class="form-tip">{{ t('pages.uploadResource.enableImageModerationTip') }}</span>
         </el-form-item>
 
         <template v-if="formData.imageModerationEnabled">
           <el-form-item label="AccessKey ID" prop="imageModerationAccessKeyId">
-            <el-input v-model="formData.imageModerationAccessKeyId" clearable placeholder="RAM 用户 AccessKey ID"/>
+            <el-input v-model="formData.imageModerationAccessKeyId" clearable :placeholder="t('pages.uploadResource.accessKeyIdPlaceholder')"/>
           </el-form-item>
 
           <el-form-item label="AccessKey Secret" prop="imageModerationAccessKeySecret">
             <el-input
                 v-model="formData.imageModerationAccessKeySecret"
                 clearable
-                placeholder="留空表示不修改已保存的 Secret"
+                :placeholder="t('pages.uploadResource.accessKeySecretPlaceholder')"
                 show-password
                 type="password"
             />
           </el-form-item>
 
-          <el-form-item label="地域 RegionId" prop="imageModerationRegionId">
-            <el-input v-model="formData.imageModerationRegionId" clearable placeholder="cn-shanghai"/>
+          <el-form-item :label="t('pages.uploadResource.regionId')" prop="imageModerationRegionId">
+            <el-input v-model="formData.imageModerationRegionId" clearable :placeholder="t('pages.uploadResource.imageModerationRegionPlaceholder')"/>
           </el-form-item>
 
-          <el-form-item label="接入点 Endpoint" prop="imageModerationEndpoint">
+          <el-form-item :label="t('pages.uploadResource.endpoint')" prop="imageModerationEndpoint">
             <el-input
                 v-model="formData.imageModerationEndpoint"
                 clearable
-                placeholder="green-cip.cn-shanghai.aliyuncs.com"
+                :placeholder="t('pages.uploadResource.imageModerationEndpointPlaceholder')"
             />
           </el-form-item>
 
-          <el-form-item label="审核 Service" prop="imageModerationService">
+          <el-form-item :label="t('pages.uploadResource.imageModerationService')" prop="imageModerationService">
             <el-input
                 v-model="formData.imageModerationService"
                 clearable
-                placeholder="profilePhotoCheck（头像）"
+                :placeholder="t('pages.uploadResource.imageModerationServicePlaceholder')"
             />
-            <span class="form-tip">头像推荐 profilePhotoCheck；通用可用 baselineCheck</span>
+            <span class="form-tip">{{ t('pages.uploadResource.imageModerationServiceTip') }}</span>
           </el-form-item>
         </template>
 
-        <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
+        <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.uploadResource.lastUpdated')">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="handleSave">保存配置</el-button>
-          <el-button @click="fetchCfg">刷新</el-button>
+          <el-button type="primary" @click="handleSave">{{ t('common.saveConfig') }}</el-button>
+          <el-button @click="fetchCfg">{{ t('common.refresh') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -82,11 +86,13 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref, watch} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage} from 'element-plus'
 import {uploadResourceApi} from '@/api/modules/upload-resource'
 import type {UploadResourceCfg} from '@/types/api'
 
+const {t} = useI18n()
 const loading = ref(false)
 const formRef = ref()
 const imageSecretTouched = ref(false)
@@ -108,11 +114,11 @@ const metaInfo = reactive({
   updatedAt: '',
 })
 
-const formRules = reactive({
-  resourceDomain: [{max: 256, message: '域名长度不能超过 256', trigger: 'blur'}],
+const formRules = computed(() => ({
+  resourceDomain: [{max: 256, message: t('pages.uploadResource.domainMaxLength'), trigger: 'blur'}],
   appImageMaxSizeMB: [
-    {required: true, message: '请输入 App 图片大小上限', trigger: 'blur'},
-    {type: 'number', min: 1, message: '大小必须大于 0MB', trigger: 'blur'},
+    {required: true, message: t('pages.uploadResource.appImageMaxSizeRequired'), trigger: 'blur'},
+    {type: 'number', min: 1, message: t('pages.uploadResource.appImageMaxSizeMin'), trigger: 'blur'},
   ],
   imageModerationAccessKeyId: [
     {
@@ -122,7 +128,7 @@ const formRules = reactive({
           return
         }
         if (!value?.trim()) {
-          callback(new Error('开启图片审核时请填写 AccessKey ID'))
+          callback(new Error(t('pages.uploadResource.imageModerationAccessKeyRequired')))
           return
         }
         callback()
@@ -130,7 +136,7 @@ const formRules = reactive({
       trigger: 'blur',
     },
   ],
-})
+}))
 
 watch(
     () => formData.imageModerationAccessKeySecret,
@@ -174,8 +180,8 @@ const fetchCfg = async () => {
     const response = await uploadResourceApi.getUploadResourceCfg()
     applyCfg(response.cfg)
   } catch (error) {
-    console.error('获取资源配置失败:', error)
-    ElMessage.error('获取配置失败')
+    console.error('fetch upload resource cfg failed:', error)
+    ElMessage.error(t('pages.uploadResource.fetchCfgFailed'))
   } finally {
     loading.value = false
   }
@@ -199,16 +205,16 @@ const handleSave = async () => {
       imageModerationService: formData.imageModerationService.trim(),
     })
     if (response?.success) {
-      ElMessage.success('保存成功')
+      ElMessage.success(t('pages.uploadResource.saveSuccess'))
       if (response.id) {
         formData.id = response.id
       }
       await fetchCfg()
     } else {
-      ElMessage.error('保存失败')
+      ElMessage.error(t('pages.uploadResource.saveFailed'))
     }
   } catch (error) {
-    console.error('保存资源配置失败:', error)
+    console.error('save upload resource cfg failed:', error)
   } finally {
     loading.value = false
   }

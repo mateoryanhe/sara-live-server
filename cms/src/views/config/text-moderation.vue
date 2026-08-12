@@ -3,59 +3,63 @@
     <el-card v-loading="loading">
       <template #header>
         <div class="card-header">
-          <span>敏感词过滤（阿里云）</span>
+          <span>{{ t('menu.TextModerationCfgManagement') }}</span>
         </div>
       </template>
 
       <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="160px">
-        <el-form-item label="开启过滤">
-          <el-switch v-model="formData.enabled" active-text="开启" inactive-text="关闭"/>
-          <span class="form-tip">关闭后 App 文本不再调用阿里云审核（直接放行）</span>
+        <el-form-item :label="t('pages.textModeration.enableFilter')">
+          <el-switch
+              v-model="formData.enabled"
+              :active-text="t('common.open')"
+              :inactive-text="t('common.close')"
+          />
+          <span class="form-tip">{{ t('pages.textModeration.enableFilterTip') }}</span>
         </el-form-item>
 
         <template v-if="formData.enabled">
           <el-form-item label="AccessKey ID" prop="accessKeyId">
-            <el-input v-model="formData.accessKeyId" clearable placeholder="RAM 用户 AccessKey ID"/>
+            <el-input v-model="formData.accessKeyId" clearable :placeholder="t('pages.textModeration.accessKeyIdPlaceholder')"/>
           </el-form-item>
 
           <el-form-item label="AccessKey Secret" prop="accessKeySecret">
             <el-input
                 v-model="formData.accessKeySecret"
                 clearable
-                placeholder="留空表示不修改已保存的 Secret"
+                :placeholder="t('pages.textModeration.accessKeySecretPlaceholder')"
                 show-password
                 type="password"
             />
           </el-form-item>
 
-          <el-form-item label="地域 RegionId" prop="regionId">
-            <el-input v-model="formData.regionId" clearable placeholder="如 cn-shanghai"/>
+          <el-form-item :label="t('pages.textModeration.regionId')" prop="regionId">
+            <el-input v-model="formData.regionId" clearable :placeholder="t('pages.textModeration.regionIdPlaceholder')"/>
           </el-form-item>
 
-          <el-form-item label="接入点 Endpoint" prop="endpoint">
-            <el-input v-model="formData.endpoint" clearable placeholder="如 green-cip.cn-shanghai.aliyuncs.com"/>
+          <el-form-item :label="t('pages.textModeration.endpoint')" prop="endpoint">
+            <el-input v-model="formData.endpoint" clearable :placeholder="t('pages.textModeration.endpointPlaceholder')"/>
           </el-form-item>
 
-          <el-form-item label="公聊/私信 Service" prop="chatService">
-            <el-input v-model="formData.chatService" clearable placeholder="默认 chat_detection"/>
+          <el-form-item :label="t('pages.textModeration.chatService')" prop="chatService">
+            <el-input v-model="formData.chatService" clearable :placeholder="t('pages.textModeration.chatServicePlaceholder')"/>
           </el-form-item>
 
-          <el-form-item label="昵称 Service" prop="nicknameService">
-            <el-input v-model="formData.nicknameService" clearable placeholder="默认 nickname_detection"/>
+          <el-form-item :label="t('pages.textModeration.nicknameService')" prop="nicknameService">
+            <el-input v-model="formData.nicknameService" clearable :placeholder="t('pages.textModeration.nicknameServicePlaceholder')"/>
           </el-form-item>
 
-          <el-form-item label="评论/公告 Service" prop="commentService">
-            <el-input v-model="formData.commentService" clearable placeholder="默认 comment_detection"/>
+          <el-form-item :label="t('pages.textModeration.commentService')" prop="commentService">
+            <el-input v-model="formData.commentService" clearable :placeholder="t('pages.textModeration.commentServicePlaceholder')"/>
           </el-form-item>
         </template>
 
-        <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
+        <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.textModeration.lastUpdated')">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="handleSave">保存配置</el-button>
-          <el-button @click="fetchCfg">刷新</el-button>
+          <el-button type="primary" @click="handleSave">{{ t('common.saveConfig') }}</el-button>
+          <el-button @click="fetchCfg">{{ t('common.refresh') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -63,11 +67,13 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref, watch} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage} from 'element-plus'
 import {textModerationApi} from '@/api/modules/text-moderation'
 import type {TextModerationCfg} from '@/types/api'
 
+const {t} = useI18n()
 const loading = ref(false)
 const formRef = ref()
 const secretTouched = ref(false)
@@ -89,7 +95,7 @@ const metaInfo = reactive({
   updatedAt: '',
 })
 
-const formRules = reactive({
+const formRules = computed(() => ({
   accessKeyId: [
     {
       validator: (_: unknown, value: string, callback: (e?: Error) => void) => {
@@ -98,7 +104,7 @@ const formRules = reactive({
           return
         }
         if (!value?.trim()) {
-          callback(new Error('开启过滤时请填写 AccessKey ID'))
+          callback(new Error(t('pages.textModeration.accessKeyIdRequired')))
           return
         }
         callback()
@@ -106,9 +112,9 @@ const formRules = reactive({
       trigger: 'blur',
     },
   ],
-  regionId: [{required: true, message: '请填写 RegionId', trigger: 'blur'}],
-  endpoint: [{required: true, message: '请填写 Endpoint', trigger: 'blur'}],
-})
+  regionId: [{required: true, message: t('pages.textModeration.regionIdRequired'), trigger: 'blur'}],
+  endpoint: [{required: true, message: t('pages.textModeration.endpointRequired'), trigger: 'blur'}],
+}))
 
 watch(
     () => formData.accessKeySecret,
@@ -152,8 +158,8 @@ const fetchCfg = async () => {
     const response = await textModerationApi.getTextModerationCfg()
     applyCfg(response.cfg)
   } catch (error) {
-    console.error('获取文本审核配置失败:', error)
-    ElMessage.error('获取配置失败')
+    console.error('fetch text moderation cfg failed:', error)
+    ElMessage.error(t('pages.textModeration.fetchCfgFailed'))
   } finally {
     loading.value = false
   }
@@ -175,16 +181,16 @@ const handleSave = async () => {
       commentService: formData.commentService.trim(),
     })
     if (response?.success) {
-      ElMessage.success('保存成功')
+      ElMessage.success(t('pages.textModeration.saveSuccess'))
       if (response.id) {
         formData.id = response.id
       }
       await fetchCfg()
     } else {
-      ElMessage.error('保存失败')
+      ElMessage.error(t('pages.textModeration.saveFailed'))
     }
   } catch (error) {
-    console.error('保存文本审核配置失败:', error)
+    console.error('save text moderation cfg failed:', error)
   } finally {
     loading.value = false
   }

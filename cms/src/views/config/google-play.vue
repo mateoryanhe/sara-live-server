@@ -3,7 +3,7 @@
     <el-card v-loading="loading">
       <template #header>
         <div class="card-header">
-          <span>Google Play 充值配置</span>
+          <span>{{ t('menu.GooglePlayCfgManagement') }}</span>
         </div>
       </template>
 
@@ -11,32 +11,32 @@
           :closable="false"
           class="tip-alert"
           show-icon
-          title="说明"
+          :title="t('pages.googlePlay.noticeTitle')"
           type="info"
       >
-        <p>配置 Google Play RTDN 回调与验单参数。Pub/Sub Push 地址：<code>POST /webhook/googlePlay/rtdn</code></p>
-        <p>App 创建订单后，发起 Google 支付时需将返回的 <code>obfuscatedAccountId</code> 传入 BillingFlowParams.setObfuscatedAccountId。</p>
-        <p>充值档位请在「运营 → 充值配置」中维护 Google 类型商品 SKU（productId）。发货成功后会自动 consume 消耗型商品。</p>
+        <p>{{ t('pages.googlePlay.noticeLine1') }}</p>
+        <p>{{ t('pages.googlePlay.noticeLine2') }}</p>
+        <p>{{ t('pages.googlePlay.noticeLine3') }}</p>
       </el-alert>
 
       <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="180px">
-        <el-form-item label="服务账号 JSON" prop="serviceAccountJson">
+        <el-form-item :label="t('pages.googlePlay.serviceAccountJson')" prop="serviceAccountJson">
           <el-input
               v-model="formData.serviceAccountJson"
               :rows="8"
-              placeholder="粘贴 Google Cloud 服务账号 JSON 全文"
+              :placeholder="t('pages.googlePlay.serviceAccountJsonPlaceholder')"
               type="textarea"
           />
-          <span class="form-tip">需具备 Google Play Android Developer API 权限，并在 Play Console 关联该服务账号</span>
+          <span class="form-tip">{{ t('pages.googlePlay.serviceAccountJsonTip') }}</span>
         </el-form-item>
 
-        <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
+        <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.googlePlay.lastUpdated')">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="handleSave">保存配置</el-button>
-          <el-button @click="fetchCfg">刷新</el-button>
+          <el-button type="primary" @click="handleSave">{{ t('common.saveConfig') }}</el-button>
+          <el-button @click="fetchCfg">{{ t('common.refresh') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -44,11 +44,13 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {computed, onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {googlePlayApi} from '@/api/modules/google-play'
 import type {GooglePlayCfg} from '@/types/api'
 
+const {t} = useI18n()
 const loading = ref(false)
 const formRef = ref()
 
@@ -65,21 +67,21 @@ const metaInfo = reactive({
 const validateServiceAccountJson = (_: unknown, value: string, callback: (e?: Error) => void) => {
   const json = value?.trim()
   if (!json) {
-    callback(new Error('请填写服务账号 JSON'))
+    callback(new Error(t('pages.googlePlay.serviceAccountJsonRequired')))
     return
   }
   try {
     JSON.parse(json)
   } catch {
-    callback(new Error('服务账号 JSON 格式无效'))
+    callback(new Error(t('pages.googlePlay.serviceAccountJsonInvalid')))
     return
   }
   callback()
 }
 
-const formRules = reactive({
+const formRules = computed(() => ({
   serviceAccountJson: [{validator: validateServiceAccountJson, trigger: 'blur'}],
-})
+}))
 
 const applyCfg = (cfg: GooglePlayCfg | null | undefined) => {
   if (!cfg) {
@@ -101,8 +103,8 @@ const fetchCfg = async () => {
     const response = await googlePlayApi.getGooglePlayCfg()
     applyCfg(response.cfg)
   } catch (error) {
-    console.error('获取 Google Play 配置失败:', error)
-    ElMessage.error('获取配置失败')
+    console.error('fetch google play cfg failed:', error)
+    ElMessage.error(t('pages.googlePlay.fetchCfgFailed'))
   } finally {
     loading.value = false
   }
@@ -118,16 +120,16 @@ const handleSave = async () => {
       serviceAccountJson: formData.serviceAccountJson.trim(),
     })
     if (response?.success) {
-      ElMessage.success('保存成功')
+      ElMessage.success(t('pages.googlePlay.saveSuccess'))
       if (response.id) {
         formData.id = response.id
       }
       await fetchCfg()
     } else {
-      ElMessage.error('保存失败')
+      ElMessage.error(t('pages.googlePlay.saveFailed'))
     }
   } catch (error) {
-    console.error('保存 Google Play 配置失败:', error)
+    console.error('save google play cfg failed:', error)
   } finally {
     loading.value = false
   }

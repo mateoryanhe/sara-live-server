@@ -12,22 +12,22 @@
           v-for="tab in tabs"
           :key="tab.path"
           :closable="tab.path !== '/dashboard'"
-          :label="tab.title"
+          :label="tabLabel(tab)"
           :name="tab.path"
       />
     </el-tabs>
     <div class="layout-tabs__actions">
       <el-dropdown trigger="click" @command="handleCommand">
         <el-button class="layout-tabs__menu-btn" size="small" text>
-          标签操作
+          {{ t('tabs.actions') }}
           <el-icon class="el-icon--right">
             <ArrowDown/>
           </el-icon>
         </el-button>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item command="closeOthers">关闭其他</el-dropdown-item>
-            <el-dropdown-item command="closeAll">关闭全部</el-dropdown-item>
+            <el-dropdown-item command="closeOthers">{{ t('tabs.closeOthers') }}</el-dropdown-item>
+            <el-dropdown-item command="closeAll">{{ t('tabs.closeAll') }}</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -43,15 +43,15 @@
           :class="{ disabled: !canCloseContextTab }"
           @click="handleContextAction('close')"
       >
-        关闭
+        {{ t('tabs.close') }}
       </li>
       <li
           :class="{ disabled: !canCloseOthers }"
           @click="handleContextAction('closeOthers')"
       >
-        关闭其他
+        {{ t('tabs.closeOthers') }}
       </li>
-      <li @click="handleContextAction('closeAll')">关闭全部</li>
+      <li @click="handleContextAction('closeAll')">{{ t('tabs.closeAll') }}</li>
     </ul>
   </div>
 </template>
@@ -59,15 +59,24 @@
 <script lang="ts" setup>
 import {computed, onMounted, onUnmounted, reactive, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
+import {useI18n} from 'vue-i18n'
 import {ArrowDown} from '@element-plus/icons-vue'
 import type {TabsPaneContext} from 'element-plus'
-import {useLayoutTabs} from '@/composables/useLayoutTabs'
+import {useLayoutTabs, type LayoutTab} from '@/composables/useLayoutTabs'
 
 const DASHBOARD_PATH = '/dashboard'
 
 const route = useRoute()
 const router = useRouter()
+const {t, te} = useI18n()
 const {tabs, removeTab, closeOtherTabs, closeAllTabs} = useLayoutTabs()
+
+const tabLabel = (tab: LayoutTab) => {
+  if (tab.name && te(`menu.${tab.name}`)) {
+    return t(`menu.${tab.name}`)
+  }
+  return tab.title
+}
 
 const contextTabPath = ref('')
 const contextMenu = reactive({

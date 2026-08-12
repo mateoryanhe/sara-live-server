@@ -3,59 +3,59 @@
     <el-card v-loading="loading">
       <template #header>
         <div class="card-header">
-          <span>游戏平台接入配置</span>
+          <span>{{ t('menu.GamePlatformCfgManagement') }}</span>
         </div>
       </template>
 
       <el-alert
           :closable="false"
+          :title="t('pages.gamePlatformCfg.noteTitle')"
           class="tip-alert"
           show-icon
-          title="说明"
           type="info"
       >
-        <p>配置第三方游戏平台 API 凭证，用于后续拉取游戏列表、启动游戏等接口。</p>
-        <p>厂家 URL 为平台 API 根地址；Token 对应请求头 <code>x-token</code>；SecretKey 用于平台回调验签（verify / balance / transfer）。</p>
-        <p>IconUrl 为游戏封面 CDN 根地址，第三方游戏列表返回的 cover 为相对路径，展示时会自动拼接。</p>
-        <p>文档参考：<code>https://admin.win12.best/#/layout/integrator/docs</code></p>
+        <p>{{ t('pages.gamePlatformCfg.tipLine1') }}</p>
+        <p>{{ t('pages.gamePlatformCfg.tipLine2') }}</p>
+        <p>{{ t('pages.gamePlatformCfg.tipLine3') }}</p>
+        <p>{{ t('pages.gamePlatformCfg.tipLine4') }}</p>
       </el-alert>
 
       <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="140px">
-        <el-form-item label="厂家 URL" prop="vendorUrl">
-          <el-input v-model="formData.vendorUrl" clearable placeholder="如 https://gapi.win12.best"/>
+        <el-form-item :label="t('pages.gamePlatformCfg.vendorUrl')" prop="vendorUrl">
+          <el-input v-model="formData.vendorUrl" clearable :placeholder="t('pages.gamePlatformCfg.vendorUrlPlaceholder')"/>
         </el-form-item>
 
-        <el-form-item label="IconUrl" prop="iconUrl">
-          <el-input v-model="formData.iconUrl" clearable placeholder="游戏封面 CDN 根地址，如 https://cdn.example.com/images"/>
+        <el-form-item :label="t('pages.gamePlatformCfg.iconUrl')" prop="iconUrl">
+          <el-input v-model="formData.iconUrl" clearable :placeholder="t('pages.gamePlatformCfg.iconUrlPlaceholder')"/>
         </el-form-item>
 
-        <el-form-item label="Token" prop="token">
+        <el-form-item :label="t('pages.gamePlatformCfg.token')" prop="token">
           <el-input
               v-model="formData.token"
               clearable
-              placeholder="平台接入 Token (x-token)"
+              :placeholder="t('pages.gamePlatformCfg.tokenPlaceholder')"
               show-password
               type="password"
           />
         </el-form-item>
 
-        <el-form-item label="SecretKey" prop="secretKey">
+        <el-form-item :label="t('pages.gamePlatformCfg.secretKey')" prop="secretKey">
           <el-input
               v-model="formData.secretKey"
               clearable
-              placeholder="平台 SecretKey"
+              :placeholder="t('pages.gamePlatformCfg.secretKeyPlaceholder')"
               show-password
               type="password"
           />
         </el-form-item>
 
-        <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
+        <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.gamePlatformCfg.lastUpdated')">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="handleSave">保存配置</el-button>
-          <el-button @click="fetchCfg">刷新</el-button>
+          <el-button type="primary" @click="handleSave">{{ t('common.saveConfig') }}</el-button>
+          <el-button @click="fetchCfg">{{ t('common.refresh') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -63,11 +63,13 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {computed, onMounted, reactive, ref} from 'vue'
 import {ElMessage, type FormInstance, type FormRules} from 'element-plus'
 import {gamePlatformApi} from '@/api'
 import type {GamePlatformCfg} from '@/types/api'
 
+const {t} = useI18n()
 const loading = ref(false)
 const formRef = ref<FormInstance>()
 
@@ -84,21 +86,21 @@ const metaInfo = reactive({
   updatedAt: '',
 })
 
-const formRules: FormRules = {
+const formRules = computed<FormRules>(() => ({
   vendorUrl: [
-    {required: true, message: '请填写厂家 URL', trigger: 'blur'},
-    {max: 255, message: '厂家 URL 最长 255 字符', trigger: 'blur'},
+    {required: true, message: t('pages.gamePlatformCfg.vendorUrlRequired'), trigger: 'blur'},
+    {max: 255, message: t('pages.gamePlatformCfg.vendorUrlMax'), trigger: 'blur'},
   ],
-  iconUrl: [{max: 512, message: 'IconUrl 最长 512 字符', trigger: 'blur'}],
+  iconUrl: [{max: 512, message: t('pages.gamePlatformCfg.iconUrlMax'), trigger: 'blur'}],
   token: [
-    {required: true, message: '请填写 Token', trigger: 'blur'},
-    {max: 512, message: 'Token 最长 512 字符', trigger: 'blur'},
+    {required: true, message: t('pages.gamePlatformCfg.tokenRequired'), trigger: 'blur'},
+    {max: 512, message: t('pages.gamePlatformCfg.tokenMax'), trigger: 'blur'},
   ],
   secretKey: [
-    {required: true, message: '请填写 SecretKey', trigger: 'blur'},
-    {max: 255, message: 'SecretKey 最长 255 字符', trigger: 'blur'},
+    {required: true, message: t('pages.gamePlatformCfg.secretKeyRequired'), trigger: 'blur'},
+    {max: 255, message: t('pages.gamePlatformCfg.secretKeyMax'), trigger: 'blur'},
   ],
-}
+}))
 
 const applyCfg = (cfg: GamePlatformCfg | null | undefined) => {
   if (!cfg) {
@@ -126,8 +128,8 @@ const fetchCfg = async () => {
     const response = await gamePlatformApi.getGamePlatformCfg()
     applyCfg(response.cfg)
   } catch (error) {
-    console.error('获取游戏平台配置失败:', error)
-    ElMessage.error('获取配置失败')
+    console.error('fetch game platform cfg failed:', error)
+    ElMessage.error(t('pages.gamePlatformCfg.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -148,16 +150,16 @@ const handleSave = async () => {
       secretKey: formData.secretKey.trim(),
     })
     if (response?.success) {
-      ElMessage.success('保存成功')
+      ElMessage.success(t('pages.gamePlatformCfg.saveSuccess'))
       if (response.id) {
         formData.id = response.id
       }
       await fetchCfg()
     } else {
-      ElMessage.error('保存失败')
+      ElMessage.error(t('pages.gamePlatformCfg.saveFailed'))
     }
   } catch (error) {
-    console.error('保存游戏平台配置失败:', error)
+    console.error('save game platform cfg failed:', error)
   } finally {
     loading.value = false
   }

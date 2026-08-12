@@ -3,8 +3,8 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>基础数据</span>
-          <el-button :loading="loading" @click="fetchSysStat">刷新</el-button>
+          <span>{{ t('pages.dashboard.basicData') }}</span>
+          <el-button :loading="loading" @click="fetchSysStat">{{ t('common.refresh') }}</el-button>
         </div>
       </template>
 
@@ -32,16 +32,17 @@
     <el-card class="user-stat-card">
       <template #header>
         <div class="card-header">
-          <span>用户数据</span>
-          <el-button :loading="trendLoading" @click="fetchUserStatTrend">刷新</el-button>
+          <span>{{ t('pages.dashboard.userData') }}</span>
+          <el-button :loading="trendLoading" @click="fetchUserStatTrend">{{ t('common.refresh') }}</el-button>
         </div>
       </template>
 
       <el-tabs v-model="activePeriod" lazy @tab-change="handleTabChange">
-        <el-tab-pane label="日" name="daily">
-          <UserStatChart ref="dailyLineChartRef" :data="userStatTrend.daily" title="活跃用户 / 新注册 (最近30天)"/>
+        <el-tab-pane :label="t('pages.dashboard.periodDaily')" name="daily">
+          <UserStatChart ref="dailyLineChartRef" :data="userStatTrend.daily" :title="t('pages.dashboard.activeRegisterDaily')"/>
           <BarMetricSection
               :metric-key="activeBarMetric"
+              :metric-tabs="barMetricTabs"
               @update:metric-key="(v) => { activeBarMetric = v; handleBarMetricChange() }"
           >
             <UserStatBarChart
@@ -52,10 +53,11 @@
             />
           </BarMetricSection>
         </el-tab-pane>
-        <el-tab-pane label="周" name="weekly">
-          <UserStatChart ref="weeklyLineChartRef" :data="userStatTrend.weekly" title="活跃用户 / 新注册 (最近12周)"/>
+        <el-tab-pane :label="t('pages.dashboard.periodWeekly')" name="weekly">
+          <UserStatChart ref="weeklyLineChartRef" :data="userStatTrend.weekly" :title="t('pages.dashboard.activeRegisterWeekly')"/>
           <BarMetricSection
               :metric-key="activeBarMetric"
+              :metric-tabs="barMetricTabs"
               @update:metric-key="(v) => { activeBarMetric = v; handleBarMetricChange() }"
           >
             <UserStatBarChart
@@ -66,10 +68,11 @@
             />
           </BarMetricSection>
         </el-tab-pane>
-        <el-tab-pane label="月" name="monthly">
-          <UserStatChart ref="monthlyLineChartRef" :data="userStatTrend.monthly" title="活跃用户 / 新注册 (最近12月)"/>
+        <el-tab-pane :label="t('pages.dashboard.periodMonthly')" name="monthly">
+          <UserStatChart ref="monthlyLineChartRef" :data="userStatTrend.monthly" :title="t('pages.dashboard.activeRegisterMonthly')"/>
           <BarMetricSection
               :metric-key="activeBarMetric"
+              :metric-tabs="barMetricTabs"
               @update:metric-key="(v) => { activeBarMetric = v; handleBarMetricChange() }"
           >
             <UserStatBarChart
@@ -86,7 +89,7 @@
           ref="onlineChartRef"
           :data="resourceMetricTrend.points"
           metric-type="online"
-          title="在线人数 (最近3天, 每10分钟采样)"
+          :title="t('pages.dashboard.onlineChartTitle')"
           class="online-chart"
       />
     </el-card>
@@ -94,6 +97,7 @@
 </template>
 
 <script lang="ts" setup>
+import {useI18n} from 'vue-i18n'
 import {computed, defineAsyncComponent, nextTick, onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {RESOURCE_METRIC_MAX_POINTS, sysStatApi} from '@/api'
@@ -106,25 +110,37 @@ const UserStatChart = defineAsyncComponent(() => import('./components/user-stat-
 const UserStatBarChart = defineAsyncComponent(() => import('./components/user-stat-bar-chart.vue'))
 const ResourceMetricChart = defineAsyncComponent(() => import('@/views/config/components/resource-metric-chart.vue'))
 
+const {t, locale} = useI18n()
 const loading = ref(false)
 const trendLoading = ref(false)
 const activePeriod = ref('daily')
-const barMetricTabs = getUserStatBarMetricTabs()
-const activeBarMetric = ref(barMetricTabs[0]?.key ?? 'rechargeUser')
+const enabledBarSeries = getUserStatBarMetricTabs()
+const activeBarMetric = ref(enabledBarSeries[0]?.key ?? 'rechargeUser')
+
+const barMetricTabs = computed(() =>
+    enabledBarSeries.map((item) => ({
+      key: item.key,
+      label: t(`pages.dashboard.${item.labelKey}`),
+    })),
+)
 
 const barChartPeriodSuffix = computed(() => {
   if (activePeriod.value === 'weekly') {
-    return '最近12周'
+    return t('pages.dashboard.last12Weeks')
   }
   if (activePeriod.value === 'monthly') {
-    return '最近12月'
+    return t('pages.dashboard.last12Months')
   }
-  return '最近30天'
+  return t('pages.dashboard.last30Days')
 })
 
 const barChartTitle = computed(() => {
   const metric = USER_STAT_BAR_SERIES.find((item) => item.key === activeBarMetric.value)
-  return `${metric?.label ?? ''} (${barChartPeriodSuffix.value})`
+  const label = metric ? t(`pages.dashboard.${metric.labelKey}`) : ''
+  return t('pages.dashboard.chartTitleWithPeriod', {
+    label,
+    period: barChartPeriodSuffix.value,
+  })
 })
 
 const dailyLineChartRef = ref<InstanceType<typeof UserStatChart>>()
@@ -174,40 +190,37 @@ type BasicStatCardKey = keyof Pick<
 
 type BasicStatCardConfig = {
   key: BasicStatCardKey
-  label: string
+  labelKey: string
   theme: string
   format: 'amount' | 'count'
 }
 
 type BasicStatCard = BasicStatCardConfig & {
+  label: string
   value: number | string
 }
 
-/** 基础数据展示顺序(自上而下、从左到右); 每 5 项一行 */
 const BASIC_STAT_CARD_CONFIG: BasicStatCardConfig[] = [
-  {key: 'totalGold', label: '金币钱包现存总金额', theme: 'stat-card-gold', format: 'amount'},
-  {key: 'todayRecharge', label: '今日充值金额', theme: 'stat-card-today-recharge', format: 'amount'},
-  {key: 'todayGoldConsume', label: '今日消费金额-金币', theme: 'stat-card-today-gold-consume', format: 'amount'},
-  {key: 'todayDiamondConsume', label: '今日消费金额-钻石', theme: 'stat-card-today-diamond-consume', format: 'amount'},
-  {key: 'todayRegisterUser', label: '今日注册用户数', theme: 'stat-card-today-register', format: 'count'},
-  {key: 'totalRecharge', label: '总充值金额', theme: 'stat-card-recharge', format: 'amount'},
-  {key: 'totalWithdraw', label: '总提现金额', theme: 'stat-card-withdraw', format: 'amount'},
-  {key: 'totalGoldConsume', label: '总消费金额-金币', theme: 'stat-card-total-gold-consume', format: 'amount'},
-  {key: 'totalDiamondConsume', label: '总消费金额-钻石', theme: 'stat-card-total-diamond-consume', format: 'amount'},
-  {key: 'totalRegisterUser', label: '总注册用户数', theme: 'stat-card-register', format: 'count'},
+  {key: 'totalGold', labelKey: 'statTotalGold', theme: 'stat-card-gold', format: 'amount'},
+  {key: 'todayRecharge', labelKey: 'statTodayRecharge', theme: 'stat-card-today-recharge', format: 'amount'},
+  {key: 'todayGoldConsume', labelKey: 'statTodayGoldConsume', theme: 'stat-card-today-gold-consume', format: 'amount'},
+  {key: 'todayDiamondConsume', labelKey: 'statTodayDiamondConsume', theme: 'stat-card-today-diamond-consume', format: 'amount'},
+  {key: 'todayRegisterUser', labelKey: 'statTodayRegisterUser', theme: 'stat-card-today-register', format: 'count'},
+  {key: 'totalRecharge', labelKey: 'statTotalRecharge', theme: 'stat-card-recharge', format: 'amount'},
+  {key: 'totalWithdraw', labelKey: 'statTotalWithdraw', theme: 'stat-card-withdraw', format: 'amount'},
+  {key: 'totalGoldConsume', labelKey: 'statTotalGoldConsume', theme: 'stat-card-total-gold-consume', format: 'amount'},
+  {key: 'totalDiamondConsume', labelKey: 'statTotalDiamondConsume', theme: 'stat-card-total-diamond-consume', format: 'amount'},
+  {key: 'totalRegisterUser', labelKey: 'statTotalRegisterUser', theme: 'stat-card-register', format: 'count'},
 ]
 
 const BASIC_STAT_ROW_SIZE = 5
 
-const buildBasicStatCards = (): BasicStatCard[] =>
-    BASIC_STAT_CARD_CONFIG.map((cfg) => ({
-      ...cfg,
-      value: sysStat[cfg.key] ?? 0,
-    }))
-
-/** 按配置顺序拆成 2 行 × 5 列 */
 const basicStatCardRows = computed<BasicStatCard[][]>(() => {
-  const cards = buildBasicStatCards()
+  const cards: BasicStatCard[] = BASIC_STAT_CARD_CONFIG.map((cfg) => ({
+    ...cfg,
+    label: t(`pages.dashboard.${cfg.labelKey}`),
+    value: sysStat[cfg.key] ?? 0,
+  }))
   const rows: BasicStatCard[][] = []
   for (let i = 0; i < cards.length; i += BASIC_STAT_ROW_SIZE) {
     rows.push(cards.slice(i, i + BASIC_STAT_ROW_SIZE))
@@ -230,8 +243,8 @@ const fetchSysStat = async () => {
     sysStat.todayDiamondConsume = data.todayDiamondConsume ?? 0
     sysStat.todayRegisterUser = data.todayRegisterUser ?? 0
   } catch (error) {
-    console.error('获取系统总数据失败:', error)
-    ElMessage.error('获取系统总数据失败')
+    console.error('fetch sys stat failed:', error)
+    ElMessage.error(t('pages.dashboard.fetchSysStatFailed'))
   } finally {
     loading.value = false
   }
@@ -261,8 +274,8 @@ const fetchUserStatTrend = async () => {
       resizeActiveChart()
     }, 0)
   } catch (error) {
-    console.error('获取用户数据趋势失败:', error)
-    ElMessage.error('获取用户数据趋势失败')
+    console.error('fetch user stat trend failed:', error)
+    ElMessage.error(t('pages.dashboard.fetchUserTrendFailed'))
   } finally {
     trendLoading.value = false
   }
@@ -298,7 +311,7 @@ const formatCount = (value: string | number | null | undefined) => {
   if (value === null || value === undefined || value === '') {
     return '-'
   }
-  return Number(value).toLocaleString('zh-CN')
+  return Number(value).toLocaleString(locale.value)
 }
 
 onMounted(() => {

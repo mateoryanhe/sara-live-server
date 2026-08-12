@@ -3,6 +3,7 @@
 </template>
 
 <script lang="ts" setup>
+import {useI18n} from 'vue-i18n'
 import {nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue'
 import type {EChartsType} from 'echarts/core'
 import echarts, {type EChartsOption} from '@/utils/echarts'
@@ -13,6 +14,7 @@ const props = defineProps<{
   loading?: boolean
 }>()
 
+const {t, locale} = useI18n()
 const chartRef = ref<HTMLDivElement>()
 let chartInstance: EChartsType | null = null
 
@@ -25,7 +27,7 @@ const buildOption = (trend: AccessTrendData | null): EChartsOption => {
 
   return {
     title: {
-      text: `访问量趋势 (每${intervalMinutes}分钟)`,
+      text: t('pages.resourceMonitor.accessTrendTitle', {minutes: intervalMinutes}),
       left: 'center',
       textStyle: {fontSize: 14, fontWeight: 500},
     },
@@ -40,7 +42,7 @@ const buildOption = (trend: AccessTrendData | null): EChartsOption => {
         const point = points[index]
         return [
           point?.time || items[0].name,
-          `访问量: ${point?.count ?? 0}`,
+          t('pages.resourceMonitor.accessCountTooltip', {value: point?.count ?? 0}),
         ].join('<br/>')
       },
     },
@@ -58,13 +60,13 @@ const buildOption = (trend: AccessTrendData | null): EChartsOption => {
     },
     yAxis: {
       type: 'value',
-      name: '访问量',
+      name: t('pages.resourceMonitor.accessCount'),
       min: 0,
       minInterval: 1,
     },
     series: [
       {
-        name: '访问量',
+        name: t('pages.resourceMonitor.accessCount'),
         type: 'line',
         smooth: true,
         showSymbol: times.length <= 48,
@@ -74,7 +76,7 @@ const buildOption = (trend: AccessTrendData | null): EChartsOption => {
           symbol: 'pin',
           symbolSize: 48,
           data: [{
-            name: '峰值',
+            name: t('pages.resourceMonitor.peak'),
             coord: [peakIndex, counts[peakIndex]],
             value: counts[peakIndex],
           }],
@@ -99,7 +101,7 @@ const resize = () => {
 }
 
 watch(
-    () => [props.data, props.loading],
+    () => [props.data, props.loading, locale.value],
     async () => {
       await nextTick()
       renderChart()

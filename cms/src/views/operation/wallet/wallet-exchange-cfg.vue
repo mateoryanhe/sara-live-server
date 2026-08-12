@@ -3,7 +3,7 @@
     <el-card v-loading="loading">
       <template #header>
         <div class="card-header">
-          <span>金币兑换钻石配置</span>
+          <span>{{ t('menu.WalletExchangeCfgManagement') }}</span>
         </div>
       </template>
 
@@ -11,15 +11,15 @@
           :closable="false"
           class="tip-alert"
           show-icon
-          title="说明"
+          :title="t('pages.walletExchangeCfg.tipTitle')"
           type="info"
       >
-        <p>配置 1 金币兑换钻石数；App 端手动兑换时，若手续费比例大于 0 则额外扣金币。</p>
-        <p>送礼、付费弹幕等业务内自动兑换始终免手续费，仅按兑换比例扣金币。</p>
+        <p>{{ t('pages.walletExchangeCfg.tipLine1') }}</p>
+        <p>{{ t('pages.walletExchangeCfg.tipLine2') }}</p>
       </el-alert>
 
       <el-form :model="formData" class="cfg-form" label-width="180px">
-        <el-form-item label="1金币兑换钻石数">
+        <el-form-item :label="t('pages.walletExchangeCfg.goldToDiamondRate')">
           <el-input-number
               v-model="formData.goldToDiamondRate"
               :min="1"
@@ -28,7 +28,7 @@
           />
         </el-form-item>
 
-        <el-form-item label="App兑换手续费(%)">
+        <el-form-item :label="t('pages.walletExchangeCfg.exchangeFeePercent')">
           <el-input-number
               v-model="formData.exchangeFeePercent"
               :min="0"
@@ -36,16 +36,16 @@
               :step="0.1"
               controls-position="right"
           />
-          <span class="field-tip">设为 0 表示 App 手动兑换不收手续费</span>
+          <span class="field-tip">{{ t('pages.walletExchangeCfg.exchangeFeeTip') }}</span>
         </el-form-item>
 
-        <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
+        <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.walletExchangeCfg.lastUpdated')">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="handleSave">保存配置</el-button>
-          <el-button @click="fetchCfg">刷新</el-button>
+          <el-button type="primary" @click="handleSave">{{ t('common.saveConfig') }}</el-button>
+          <el-button @click="fetchCfg">{{ t('common.refresh') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -54,9 +54,12 @@
 
 <script lang="ts" setup>
 import {onMounted, reactive, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
 import {ElMessage} from 'element-plus'
 import {walletApi} from '@/api/modules/wallet'
 import type {WalletExchangeCfg} from '@/types/api'
+
+const {t} = useI18n()
 
 const loading = ref(false)
 
@@ -93,8 +96,8 @@ const fetchCfg = async () => {
     const response = await walletApi.getWalletExchangeCfg()
     applyCfg(response.cfg)
   } catch (error) {
-    console.error('获取金币兑换配置失败:', error)
-    ElMessage.error('获取配置失败')
+    console.error('fetch wallet exchange config failed:', error)
+    ElMessage.error(t('pages.walletExchangeCfg.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -102,11 +105,11 @@ const fetchCfg = async () => {
 
 const handleSave = async () => {
   if (formData.goldToDiamondRate <= 0) {
-    ElMessage.warning('兑换比例必须大于 0')
+    ElMessage.warning(t('pages.walletExchangeCfg.rateMustPositive'))
     return
   }
   if (formData.exchangeFeePercent < 0) {
-    ElMessage.warning('手续费不能为负数')
+    ElMessage.warning(t('pages.walletExchangeCfg.feeCannotNegative'))
     return
   }
 
@@ -118,16 +121,16 @@ const handleSave = async () => {
       exchangeFeePercent: formData.exchangeFeePercent,
     })
     if (response?.success) {
-      ElMessage.success('保存成功')
+      ElMessage.success(t('common.saveConfig'))
       if (response.id) {
         formData.id = response.id
       }
       await fetchCfg()
     } else {
-      ElMessage.error('保存失败')
+      ElMessage.error(t('pages.walletExchangeCfg.saveFailed'))
     }
   } catch (error) {
-    console.error('保存金币兑换配置失败:', error)
+    console.error('save wallet exchange config failed:', error)
   } finally {
     loading.value = false
   }

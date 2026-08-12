@@ -3,100 +3,100 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>视频通话日志</span>
+          <span>{{ t('menu.VideoCallLogList') }}</span>
         </div>
       </template>
 
       <el-form :model="searchForm" class="search-form" inline label-width="100px">
-        <el-form-item label="呼叫者ID">
-          <el-input v-model="searchForm.callerId" clearable placeholder="请输入呼叫者ID"/>
+        <el-form-item :label="t('pages.videoCallLogList.callerId')">
+          <el-input v-model="searchForm.callerId" clearable :placeholder="t('pages.videoCallLogList.enterCallerId')"/>
         </el-form-item>
-        <el-form-item label="接收者ID">
-          <el-input v-model="searchForm.receiverId" clearable placeholder="请输入接收者ID"/>
+        <el-form-item :label="t('pages.videoCallLogList.receiverId')">
+          <el-input v-model="searchForm.receiverId" clearable :placeholder="t('pages.videoCallLogList.enterReceiverId')"/>
         </el-form-item>
-        <el-form-item label="来源">
-          <el-select v-model="searchForm.source" clearable placeholder="全部" style="width: 140px">
-            <el-option :value="0" label="全部"/>
-            <el-option :value="1" label="直播间"/>
-            <el-option :value="2" label="私信"/>
+        <el-form-item :label="t('pages.videoCallLogList.source')">
+          <el-select v-model="searchForm.source" clearable :placeholder="t('common.all')" style="width: 140px">
+            <el-option :value="0" :label="t('common.all')"/>
+            <el-option :value="1" :label="t('pages.videoCallLogList.sourceLiveRoom')"/>
+            <el-option :value="2" :label="t('pages.videoCallLogList.sourcePrivateMessage')"/>
           </el-select>
         </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="searchForm.status" clearable placeholder="全部" style="width: 160px">
-            <el-option :value="0" label="全部"/>
-            <el-option :value="1" label="呼叫中"/>
-            <el-option :value="2" label="已接听"/>
-            <el-option :value="3" label="通话中"/>
-            <el-option :value="4" label="已结束"/>
-            <el-option :value="5" label="拒接"/>
-            <el-option :value="6" label="呼叫超时"/>
-            <el-option :value="7" label="心跳超时"/>
-            <el-option :value="8" label="钻石不足"/>
+        <el-form-item :label="t('common.status')">
+          <el-select v-model="searchForm.status" clearable :placeholder="t('common.all')" style="width: 160px">
+            <el-option :value="0" :label="t('common.all')"/>
+            <el-option :value="1" :label="t('pages.videoCallLogList.statusCalling')"/>
+            <el-option :value="2" :label="t('pages.videoCallLogList.statusAnswered')"/>
+            <el-option :value="3" :label="t('pages.videoCallLogList.statusInCall')"/>
+            <el-option :value="4" :label="t('pages.videoCallLogList.statusEnded')"/>
+            <el-option :value="5" :label="t('pages.videoCallLogList.statusRejected')"/>
+            <el-option :value="6" :label="t('pages.videoCallLogList.statusCallTimeout')"/>
+            <el-option :value="7" :label="t('pages.videoCallLogList.statusHeartTimeout')"/>
+            <el-option :value="8" :label="t('pages.videoCallLogList.statusInsufficientDiamond')"/>
           </el-select>
         </el-form-item>
-        <el-form-item label="呼叫时间">
+        <el-form-item :label="t('pages.videoCallLogList.callTime')">
           <el-date-picker
               v-model="searchForm.dateRange"
               clearable
-              end-placeholder="结束日期"
+              :end-placeholder="t('pages.videoCallLogList.endDate')"
               format="YYYY-MM-DD"
-              range-separator="至"
-              start-placeholder="开始日期"
+              :range-separator="t('pages.videoCallLogList.dateRangeSeparator')"
+              :start-placeholder="t('pages.videoCallLogList.startDate')"
               style="width: 260px"
               type="daterange"
               value-format="YYYY-MM-DD"
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-          <el-button @click="handleReset">重置</el-button>
+          <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
+          <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
         </el-form-item>
       </el-form>
 
       <el-table v-loading="loading" :data="tableData" style="width: 100%">
-        <el-table-column label="订单ID" min-width="180" prop="id"/>
-        <el-table-column label="状态" prop="statusText" width="140"/>
-        <el-table-column label="来源" prop="sourceText" width="90"/>
-        <el-table-column label="呼叫者ID" min-width="180" prop="callerId"/>
-        <el-table-column label="呼叫者昵称" min-width="120">
+        <el-table-column :label="t('pages.rechargeOrderList.orderId')" min-width="180" prop="id"/>
+        <el-table-column :label="t('common.status')" prop="statusText" width="140"/>
+        <el-table-column :label="t('pages.videoCallLogList.source')" prop="sourceText" width="90"/>
+        <el-table-column :label="t('pages.videoCallLogList.callerId')" min-width="180" prop="callerId"/>
+        <el-table-column :label="t('pages.videoCallLogList.callerNickname')" min-width="120">
           <template #default="{ row }">{{ row.callerNickname || '-' }}</template>
         </el-table-column>
-        <el-table-column label="接收者ID" min-width="180" prop="receiverId"/>
-        <el-table-column label="接收者昵称" min-width="120">
+        <el-table-column :label="t('pages.videoCallLogList.receiverId')" min-width="180" prop="receiverId"/>
+        <el-table-column :label="t('pages.videoCallLogList.receiverNickname')" min-width="120">
           <template #default="{ row }">{{ row.receiverNickname || '-' }}</template>
         </el-table-column>
-        <el-table-column label="呼叫时间" width="170">
+        <el-table-column :label="t('pages.videoCallLogList.callTime')" width="170">
           <template #default="{ row }">{{ formatDate(row.callStartTime) }}</template>
         </el-table-column>
-        <el-table-column label="接听时间" width="170">
+        <el-table-column :label="t('pages.videoCallLogList.answerTime')" width="170">
           <template #default="{ row }">{{ formatDate(row.answerTime) }}</template>
         </el-table-column>
-        <el-table-column label="呼叫者最后心跳" width="170">
+        <el-table-column :label="t('pages.videoCallLogList.callerLastHeart')" width="170">
           <template #default="{ row }">{{ formatDate(row.callerHeartTime) }}</template>
         </el-table-column>
-        <el-table-column label="接听者最后心跳" width="170">
+        <el-table-column :label="t('pages.videoCallLogList.receiverLastHeart')" width="170">
           <template #default="{ row }">{{ formatDate(row.receiverHeartTime) }}</template>
         </el-table-column>
-        <el-table-column label="结束时间" width="170">
+        <el-table-column :label="t('pages.videoCallLogList.endTime')" width="170">
           <template #default="{ row }">{{ formatDate(row.orderEndTime) }}</template>
         </el-table-column>
-        <el-table-column label="通话时长" width="120">
+        <el-table-column :label="t('pages.videoCallLogList.callDuration')" width="120">
           <template #default="{ row }">{{ formatDuration(row.callDuration) }}</template>
         </el-table-column>
-        <el-table-column label="门票(钻石)" width="110">
+        <el-table-column :label="t('pages.videoCallLogList.ticketDiamond')" width="110">
           <template #default="{ row }">{{ formatAmount(row.ticketPrice) }}</template>
         </el-table-column>
-        <el-table-column label="分钟单价(钻石)" width="130">
+        <el-table-column :label="t('pages.videoCallLogList.pricePerMinuteDiamond')" width="130">
           <template #default="{ row }">{{ formatAmount(row.pricePerMinute) }}</template>
         </el-table-column>
-        <el-table-column label="计费时长(分钟)" prop="billingDuration" width="120"/>
-        <el-table-column label="总费用(钻石)" width="120">
+        <el-table-column :label="t('pages.videoCallLogList.billingDurationMinutes')" prop="billingDuration" width="120"/>
+        <el-table-column :label="t('pages.videoCallLogList.totalCostDiamond')" width="120">
           <template #default="{ row }">{{ formatAmount(row.totalCost) }}</template>
         </el-table-column>
-        <el-table-column label="最近扣费时间" width="170">
+        <el-table-column :label="t('pages.videoCallLogList.lastChargeTime')" width="170">
           <template #default="{ row }">{{ formatDate(row.chargeTime) }}</template>
         </el-table-column>
-        <el-table-column label="创建时间" width="170">
+        <el-table-column :label="t('common.createdAt')" width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>
       </el-table>
@@ -117,12 +117,14 @@
 </template>
 
 <script lang="ts" setup>
+import {useI18n} from 'vue-i18n'
 import {onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {videoCallLogApi} from '@/api'
 import type {VideoCallLogItem} from '@/types/api'
 import {formatAmount} from '@/utils/number-format'
 
+const {t} = useI18n()
 const loading = ref(false)
 const tableData = ref<VideoCallLogItem[]>([])
 
@@ -169,8 +171,8 @@ const fetchList = async () => {
     tableData.value = response.data || []
     pagination.total = response.total || 0
   } catch (error) {
-    console.error('获取视频通话日志失败:', error)
-    ElMessage.error('获取视频通话日志失败')
+    console.error('Failed to load video call logs:', error)
+    ElMessage.error(t('pages.videoCallLogList.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -203,31 +205,27 @@ const handleSizeChange = (size: number) => {
 }
 
 const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) {
-    return '-'
-  }
+  if (!dateString) return '-'
   try {
-    return new Date(dateString).toLocaleString('zh-CN')
+    return new Date(dateString).toLocaleString()
   } catch {
     return '-'
   }
 }
 
 const formatDuration = (seconds: number | null | undefined) => {
-  if (seconds === null || seconds === undefined || seconds <= 0) {
-    return '-'
-  }
+  if (seconds === null || seconds === undefined || seconds <= 0) return '-'
   const total = Math.floor(seconds)
   const h = Math.floor(total / 3600)
   const m = Math.floor((total % 3600) / 60)
   const s = total % 60
   if (h > 0) {
-    return `${h}时${m}分${s}秒`
+    return t('pages.videoCallLogList.durationHours', {h, m, s})
   }
   if (m > 0) {
-    return `${m}分${s}秒`
+    return t('pages.videoCallLogList.durationMinutes', {m, s})
   }
-  return `${s}秒`
+  return t('pages.videoCallLogList.durationSeconds', {s})
 }
 
 onMounted(() => {

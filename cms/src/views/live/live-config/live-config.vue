@@ -3,12 +3,12 @@
     <el-card v-loading="loading">
       <template #header>
         <div class="card-header">
-          <span>直播配置</span>
+          <span>{{ t('menu.LiveCfgManagement') }}</span>
         </div>
       </template>
 
       <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="140px">
-        <el-form-item label="付费弹幕价格" prop="paidDanmakuPrice">
+        <el-form-item :label="t('pages.liveConfig.paidDanmakuPrice')" prop="paidDanmakuPrice">
           <el-input-number
               v-model="formData.paidDanmakuPrice"
               :min="0"
@@ -17,10 +17,10 @@
               controls-position="right"
               style="width: 220px"
           />
-          <span class="form-tip">钻石，保留 4 位小数</span>
+          <span class="form-tip">{{ t('pages.liveConfig.paidDanmakuTip') }}</span>
         </el-form-item>
 
-        <el-form-item label="私密房免费时长" prop="privateRoomFreeWatchSeconds">
+        <el-form-item :label="t('pages.liveConfig.privateRoomFreeWatchSeconds')" prop="privateRoomFreeWatchSeconds">
           <el-input-number
               v-model="formData.privateRoomFreeWatchSeconds"
               :min="0"
@@ -28,16 +28,16 @@
               controls-position="right"
               style="width: 220px"
           />
-          <span class="form-tip">秒，进房后该时长内不按分钟扣费</span>
+          <span class="form-tip">{{ t('pages.liveConfig.privateRoomFreeWatchTip') }}</span>
         </el-form-item>
 
-        <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
+        <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.liveConfig.lastUpdated')">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="handleSave">保存配置</el-button>
-          <el-button @click="fetchCfg">刷新</el-button>
+          <el-button type="primary" @click="handleSave">{{ t('common.saveConfig') }}</el-button>
+          <el-button @click="fetchCfg">{{ t('common.refresh') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -45,12 +45,14 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {computed, onMounted, reactive, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
 import {ElMessage} from 'element-plus'
 import {liveCfgApi} from '@/api/modules/liveCfg'
 import type {LiveCfg} from '@/types/api'
 import {NUMBER_INPUT_DECIMALS, truncateNumber} from '@/utils/number-format'
 
+const {t} = useI18n()
 const loading = ref(false)
 const formRef = ref()
 
@@ -65,16 +67,16 @@ const metaInfo = reactive({
   updatedAt: '',
 })
 
-const formRules = reactive({
+const formRules = computed(() => ({
   paidDanmakuPrice: [
-    {required: true, message: '请输入付费弹幕价格', trigger: 'blur'},
-    {type: 'number', min: 0, message: '价格不能小于 0', trigger: 'blur'},
+    {required: true, message: t('pages.liveConfig.paidDanmakuRequired'), trigger: 'blur'},
+    {type: 'number', min: 0, message: t('pages.liveConfig.priceMinZero'), trigger: 'blur'},
   ],
   privateRoomFreeWatchSeconds: [
-    {required: true, message: '请输入私密直播间免费观看时长', trigger: 'blur'},
-    {type: 'number', min: 0, message: '免费观看时长不能小于 0', trigger: 'blur'},
+    {required: true, message: t('pages.liveConfig.freeWatchRequired'), trigger: 'blur'},
+    {type: 'number', min: 0, message: t('pages.liveConfig.freeWatchMinZero'), trigger: 'blur'},
   ],
-})
+}))
 
 const applyCfg = (cfg: LiveCfg | null | undefined) => {
   if (!cfg) {
@@ -98,8 +100,8 @@ const fetchCfg = async () => {
     const response = await liveCfgApi.getLiveCfg()
     applyCfg(response.cfg)
   } catch (error) {
-    console.error('获取直播配置失败:', error)
-    ElMessage.error('获取配置失败')
+    console.error('fetch live config failed:', error)
+    ElMessage.error(t('pages.liveConfig.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -115,16 +117,16 @@ const handleSave = async () => {
       privateRoomFreeWatchSeconds: formData.privateRoomFreeWatchSeconds,
     })
     if (response?.success) {
-      ElMessage.success('保存成功')
+      ElMessage.success(t('common.saveConfig'))
       if (response.id) {
         formData.id = response.id
       }
       await fetchCfg()
     } else {
-      ElMessage.error('保存失败')
+      ElMessage.error(t('pages.liveConfig.saveFailed'))
     }
   } catch (error) {
-    console.error('保存直播配置失败:', error)
+    console.error('save live config failed:', error)
   } finally {
     loading.value = false
   }

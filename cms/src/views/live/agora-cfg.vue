@@ -3,51 +3,51 @@
     <el-card v-loading="loading">
       <template #header>
         <div class="card-header">
-          <span>声网配置</span>
+          <span>{{ t('menu.AgoraCfgManagement') }}</span>
         </div>
       </template>
 
       <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="140px">
         <el-form-item label="AppId" prop="appId">
-          <el-input v-model="formData.appId" clearable placeholder="请输入声网 AppId"/>
+          <el-input v-model="formData.appId" clearable :placeholder="t('pages.agoraCfg.appIdPlaceholder')"/>
         </el-form-item>
 
         <el-form-item label="AppCertificate" prop="appCertificate">
           <el-input
               v-model="formData.appCertificate"
               clearable
-              placeholder="请输入声网 AppCertificate"
+              :placeholder="t('pages.agoraCfg.appCertificatePlaceholder')"
               show-password
               type="password"
           />
         </el-form-item>
 
         <el-form-item label="REST CustomerId" prop="restCustomerId">
-          <el-input v-model="formData.restCustomerId" clearable placeholder="请输入声网 REST CustomerId"/>
-          <span class="form-tip">云播放器接口需要配置</span>
+          <el-input v-model="formData.restCustomerId" clearable :placeholder="t('pages.agoraCfg.restCustomerIdPlaceholder')"/>
+          <span class="form-tip">{{ t('pages.agoraCfg.restCustomerTip') }}</span>
         </el-form-item>
 
         <el-form-item label="REST CustomerSecret" prop="restCustomerSecret">
           <el-input
               v-model="formData.restCustomerSecret"
               clearable
-              placeholder="请输入声网 REST CustomerSecret"
+              :placeholder="t('pages.agoraCfg.restCustomerSecretPlaceholder')"
               show-password
               type="password"
           />
-          <span class="form-tip">云播放器接口需要配置</span>
+          <span class="form-tip">{{ t('pages.agoraCfg.restCustomerTip') }}</span>
         </el-form-item>
 
-        <el-form-item label="云播放器区域" prop="cloudPlayerRegion">
-          <el-select v-model="formData.cloudPlayerRegion" placeholder="请选择区域" style="width: 220px">
-            <el-option label="中国大陆 (cn)" value="cn"/>
-            <el-option label="亚太 (ap)" value="ap"/>
-            <el-option label="欧洲 (eu)" value="eu"/>
-            <el-option label="北美 (na)" value="na"/>
+        <el-form-item :label="t('pages.agoraCfg.cloudPlayerRegion')" prop="cloudPlayerRegion">
+          <el-select v-model="formData.cloudPlayerRegion" :placeholder="t('pages.agoraCfg.selectRegion')" style="width: 220px">
+            <el-option :label="t('pages.agoraCfg.regionCn')" value="cn"/>
+            <el-option :label="t('pages.agoraCfg.regionAp')" value="ap"/>
+            <el-option :label="t('pages.agoraCfg.regionEu')" value="eu"/>
+            <el-option :label="t('pages.agoraCfg.regionNa')" value="na"/>
           </el-select>
         </el-form-item>
 
-        <el-form-item label="Token有效期" prop="tokenExpireHours">
+        <el-form-item :label="t('pages.agoraCfg.tokenExpireHours')" prop="tokenExpireHours">
           <el-input-number
               v-model="formData.tokenExpireHours"
               :max="TOKEN_EXPIRE_MAX_HOURS"
@@ -56,16 +56,16 @@
               controls-position="right"
               style="width: 220px"
           />
-          <span class="form-tip">小时，范围 {{ TOKEN_EXPIRE_MIN_HOURS }}-{{ TOKEN_EXPIRE_MAX_HOURS }} 小时，默认 {{ TOKEN_EXPIRE_DEFAULT_HOURS }} 小时</span>
+          <span class="form-tip">{{ tokenExpireTip }}</span>
         </el-form-item>
 
-        <el-form-item v-if="metaInfo.updatedAt" label="最近更新">
+        <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.agoraCfg.lastUpdated')">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="handleSave">保存配置</el-button>
-          <el-button @click="fetchCfg">刷新</el-button>
+          <el-button type="primary" @click="handleSave">{{ t('common.saveConfig') }}</el-button>
+          <el-button @click="fetchCfg">{{ t('common.refresh') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -73,11 +73,13 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {computed, onMounted, reactive, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
 import {ElMessage} from 'element-plus'
 import {agoraApi} from '@/api/modules/agora'
 import type {AgoraCfg} from '@/types/api'
 
+const {t} = useI18n()
 const TOKEN_EXPIRE_MIN_HOURS = 4
 const TOKEN_EXPIRE_MAX_HOURS = 24
 const TOKEN_EXPIRE_DEFAULT_HOURS = 24
@@ -103,6 +105,41 @@ const metaInfo = reactive({
   updatedAt: '',
 })
 
+const tokenExpireTip = computed(() =>
+    t('pages.agoraCfg.tokenExpireTip', {
+      min: TOKEN_EXPIRE_MIN_HOURS,
+      max: TOKEN_EXPIRE_MAX_HOURS,
+      default: TOKEN_EXPIRE_DEFAULT_HOURS,
+    })
+)
+
+const formRules = computed(() => ({
+  appId: [
+    {required: true, message: t('pages.agoraCfg.appIdRequired'), trigger: 'blur'},
+    {min: 1, max: 64, message: t('pages.agoraCfg.appIdLength'), trigger: 'blur'},
+  ],
+  appCertificate: [
+    {required: true, message: t('pages.agoraCfg.appCertificateRequired'), trigger: 'blur'},
+    {min: 1, max: 128, message: t('pages.agoraCfg.appCertificateLength'), trigger: 'blur'},
+  ],
+  restCustomerId: [
+    {max: 64, message: t('pages.agoraCfg.restCustomerIdMax'), trigger: 'blur'},
+  ],
+  restCustomerSecret: [
+    {max: 128, message: t('pages.agoraCfg.restCustomerSecretMax'), trigger: 'blur'},
+  ],
+  tokenExpireHours: [
+    {required: true, message: t('pages.agoraCfg.tokenExpireRequired'), trigger: 'blur'},
+    {
+      type: 'number',
+      min: TOKEN_EXPIRE_MIN_HOURS,
+      max: TOKEN_EXPIRE_MAX_HOURS,
+      message: t('pages.agoraCfg.tokenExpireRange', {min: TOKEN_EXPIRE_MIN_HOURS, max: TOKEN_EXPIRE_MAX_HOURS}),
+      trigger: 'blur',
+    },
+  ],
+}))
+
 const clampTokenExpireHours = (hours: number) => {
   if (!Number.isFinite(hours) || hours <= 0) {
     return TOKEN_EXPIRE_DEFAULT_HOURS
@@ -123,33 +160,6 @@ const buildLegacyTokenRefreshSeconds = (expireHours: number) => {
   const refreshHours = Math.max(TOKEN_REFRESH_MIN_HOURS, expireHours - TOKEN_REFRESH_AHEAD_GAP_HOURS)
   return hoursToSeconds(refreshHours)
 }
-
-const formRules = reactive({
-  appId: [
-    {required: true, message: '请输入 AppId', trigger: 'blur'},
-    {min: 1, max: 64, message: 'AppId 长度在 1-64 个字符', trigger: 'blur'},
-  ],
-  appCertificate: [
-    {required: true, message: '请输入 AppCertificate', trigger: 'blur'},
-    {min: 1, max: 128, message: 'AppCertificate 长度在 1-128 个字符', trigger: 'blur'},
-  ],
-  restCustomerId: [
-    {max: 64, message: 'REST CustomerId 长度不能超过 64 个字符', trigger: 'blur'},
-  ],
-  restCustomerSecret: [
-    {max: 128, message: 'REST CustomerSecret 长度不能超过 128 个字符', trigger: 'blur'},
-  ],
-  tokenExpireHours: [
-    {required: true, message: '请输入 Token 有效期', trigger: 'blur'},
-    {
-      type: 'number',
-      min: TOKEN_EXPIRE_MIN_HOURS,
-      max: TOKEN_EXPIRE_MAX_HOURS,
-      message: `Token 有效期需在 ${TOKEN_EXPIRE_MIN_HOURS}-${TOKEN_EXPIRE_MAX_HOURS} 小时之间`,
-      trigger: 'blur',
-    },
-  ],
-})
 
 const applyCfg = (cfg: AgoraCfg | null | undefined) => {
   if (!cfg) {
@@ -181,8 +191,8 @@ const fetchCfg = async () => {
     const response = await agoraApi.getAgoraCfg()
     applyCfg(response.cfg)
   } catch (error) {
-    console.error('获取声网配置失败:', error)
-    ElMessage.error('获取配置失败')
+    console.error('fetch agora config failed:', error)
+    ElMessage.error(t('pages.agoraCfg.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -203,16 +213,16 @@ const handleSave = async () => {
       tokenRefreshSeconds: buildLegacyTokenRefreshSeconds(formData.tokenExpireHours),
     })
     if (response?.success) {
-      ElMessage.success('保存成功')
+      ElMessage.success(t('common.saveConfig'))
       if (response.id) {
         formData.id = response.id
       }
       await fetchCfg()
     } else {
-      ElMessage.error('保存失败')
+      ElMessage.error(t('pages.agoraCfg.saveFailed'))
     }
   } catch (error) {
-    console.error('保存声网配置失败:', error)
+    console.error('save agora config failed:', error)
   } finally {
     loading.value = false
   }

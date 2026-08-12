@@ -3,73 +3,73 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>直播记录</span>
+          <span>{{ t('menu.LiveRecordList') }}</span>
         </div>
       </template>
 
       <el-form :model="searchForm" class="search-form" inline label-width="100px">
-        <el-form-item label="主播ID">
-          <el-input v-model="searchForm.anchorId" clearable placeholder="请输入主播ID"/>
+        <el-form-item :label="t('pages.liveRecordList.anchorId')">
+          <el-input v-model="searchForm.anchorId" clearable :placeholder="t('pages.liveRecordList.enterAnchorId')"/>
         </el-form-item>
-        <el-form-item label="开始时间">
+        <el-form-item :label="t('common.startTime')">
           <el-date-picker
               v-model="searchForm.dateRange"
               clearable
-              end-placeholder="结束日期"
+              :end-placeholder="t('pages.liveRecordList.endDate')"
               format="YYYY-MM-DD"
-              range-separator="至"
-              start-placeholder="开始日期"
+              :range-separator="t('pages.liveRecordList.dateRangeSeparator')"
+              :start-placeholder="t('pages.liveRecordList.startDate')"
               style="width: 260px"
               type="daterange"
               value-format="YYYY-MM-DD"
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-          <el-button @click="handleReset">重置</el-button>
+          <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
+          <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
         </el-form-item>
       </el-form>
 
       <el-table v-loading="loading" :data="tableData" style="width: 100%">
-        <el-table-column label="记录ID" min-width="180" prop="id"/>
-        <el-table-column label="主播ID" min-width="180" prop="anchorId"/>
-        <el-table-column label="主播昵称" min-width="120" prop="nickname">
+        <el-table-column :label="t('pages.liveRecordList.recordId')" min-width="180" prop="id"/>
+        <el-table-column :label="t('pages.liveRecordList.anchorId')" min-width="180" prop="anchorId"/>
+        <el-table-column :label="t('pages.liveRecordList.anchorNickname')" min-width="120" prop="nickname">
           <template #default="{ row }">{{ row.nickname || '-' }}</template>
         </el-table-column>
-        <el-table-column label="开始时间" width="170">
+        <el-table-column :label="t('common.startTime')" width="170">
           <template #default="{ row }">{{ formatDate(row.startTime) }}</template>
         </el-table-column>
-        <el-table-column label="结束时间" width="170">
+        <el-table-column :label="t('common.endTime')" width="170">
           <template #default="{ row }">{{ formatDate(row.endTime) }}</template>
         </el-table-column>
-        <el-table-column label="累计观众" prop="totalAudience" width="100"/>
-        <el-table-column label="直播时长" width="120">
+        <el-table-column :label="t('pages.liveRecordList.totalAudience')" prop="totalAudience" width="100"/>
+        <el-table-column :label="t('pages.liveRecordList.liveDuration')" width="120">
           <template #default="{ row }">{{ formatDuration(row.totalLiveDuration) }}</template>
         </el-table-column>
-        <el-table-column label="总收益" width="120">
+        <el-table-column :label="t('pages.liveRecordList.totalIncome')" width="120">
           <template #default="{ row }">{{ formatAmount(row.totalIncome) }}</template>
         </el-table-column>
-        <el-table-column label="礼物收入" width="120">
+        <el-table-column :label="t('pages.liveRecordList.giftIncome')" width="120">
           <template #default="{ row }">{{ formatAmount(row.totalGiftIncome) }}</template>
         </el-table-column>
-        <el-table-column label="付费弹幕收入" width="120">
+        <el-table-column :label="t('pages.liveRecordList.paidDanmakuIncome')" width="120">
           <template #default="{ row }">{{ formatAmount(row.totalPaidDanmakuIncome) }}</template>
         </el-table-column>
-        <el-table-column label="视频门票收入" width="120">
+        <el-table-column :label="t('pages.liveRecordList.videoTicketIncome')" width="120">
           <template #default="{ row }">{{ formatAmount(row.totalVideoCallTicketIncome) }}</template>
         </el-table-column>
-        <el-table-column label="视频通话计费收入" width="140">
+        <el-table-column :label="t('pages.liveRecordList.videoBillingIncome')" width="140">
           <template #default="{ row }">{{ formatAmount(row.totalVideoCallBillingIncome) }}</template>
         </el-table-column>
-        <el-table-column label="视频通话收入" width="120">
+        <el-table-column :label="t('pages.liveRecordList.videoCallIncome')" width="120">
           <template #default="{ row }">{{ formatAmount(row.totalVideoCallIncome) }}</template>
         </el-table-column>
-        <el-table-column label="送礼人数" prop="totalGiftSender" width="100"/>
-        <el-table-column label="新加粉丝" prop="totalNewFollower" width="100"/>
-        <el-table-column label="游戏下注总额" width="130">
+        <el-table-column :label="t('pages.liveRecordList.giftSenderCount')" prop="totalGiftSender" width="100"/>
+        <el-table-column :label="t('pages.liveRecordList.newFollowers')" prop="totalNewFollower" width="100"/>
+        <el-table-column :label="t('pages.liveRecordList.totalGameBet')" width="130">
           <template #default="{ row }">{{ formatAmount(row.totalGameBet) }}</template>
         </el-table-column>
-        <el-table-column label="创建时间" width="170">
+        <el-table-column :label="t('common.createdAt')" width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>
       </el-table>
@@ -90,12 +90,14 @@
 </template>
 
 <script lang="ts" setup>
+import {useI18n} from 'vue-i18n'
 import {onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {liveRecordApi} from '@/api'
 import type {LiveRecordItem} from '@/types/api'
 import {formatAmount} from '@/utils/number-format'
 
+const {t} = useI18n()
 const loading = ref(false)
 const tableData = ref<LiveRecordItem[]>([])
 
@@ -136,8 +138,8 @@ const fetchList = async () => {
     tableData.value = response.data || []
     pagination.total = response.total || 0
   } catch (error) {
-    console.error('获取直播记录失败:', error)
-    ElMessage.error('获取直播记录失败')
+    console.error('Failed to load live records:', error)
+    ElMessage.error(t('pages.liveRecordList.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -167,31 +169,27 @@ const handleSizeChange = (size: number) => {
 }
 
 const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) {
-    return '-'
-  }
+  if (!dateString) return '-'
   try {
-    return new Date(dateString).toLocaleString('zh-CN')
+    return new Date(dateString).toLocaleString()
   } catch {
     return '-'
   }
 }
 
 const formatDuration = (seconds: number | null | undefined) => {
-  if (seconds === null || seconds === undefined || seconds <= 0) {
-    return '-'
-  }
+  if (seconds === null || seconds === undefined || seconds <= 0) return '-'
   const total = Math.floor(seconds)
   const h = Math.floor(total / 3600)
   const m = Math.floor((total % 3600) / 60)
   const s = total % 60
   if (h > 0) {
-    return `${h}时${m}分${s}秒`
+    return t('pages.liveRecordList.durationHours', {h, m, s})
   }
   if (m > 0) {
-    return `${m}分${s}秒`
+    return t('pages.liveRecordList.durationMinutes', {m, s})
   }
-  return `${s}秒`
+  return t('pages.liveRecordList.durationSeconds', {s})
 }
 
 onMounted(() => {

@@ -3,71 +3,71 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>用户列表</span>
+          <span>{{ t('menu.UserList') }}</span>
         </div>
       </template>
       <div class="search-form">
         <el-form :model="searchForm" inline label-width="100px">
-          <el-form-item label="关键字">
-            <el-input v-model="searchForm.key" clearable placeholder="请输入关键字"/>
+          <el-form-item :label="t('common.keyword')">
+            <el-input v-model="searchForm.key" clearable :placeholder="t('pages.userList.keywordPlaceholder')"/>
           </el-form-item>
-          <el-form-item label="开始时间">
+          <el-form-item :label="t('common.startTime')">
             <el-date-picker
                 v-model="searchForm.startTime"
                 clearable
                 format="YYYY-MM-DD"
-                placeholder="选择开始时间"
+                :placeholder="t('common.selectStartTime')"
                 type="date"
                 value-format="YYYY-MM-DD"
             />
           </el-form-item>
-          <el-form-item label="结束时间">
+          <el-form-item :label="t('common.endTime')">
             <el-date-picker
                 v-model="searchForm.endTime"
                 clearable
                 format="YYYY-MM-DD"
-                placeholder="选择结束时间"
+                :placeholder="t('common.selectEndTime')"
                 type="date"
                 value-format="YYYY-MM-DD"
             />
           </el-form-item>
-          <el-form-item label="充值白名单">
-            <el-select v-model="searchForm.rechargeWhitelist" clearable placeholder="全部" style="width: 120px">
-              <el-option :value="1" label="是"/>
-              <el-option :value="0" label="否"/>
+          <el-form-item :label="t('pages.userList.rechargeWhitelist')">
+            <el-select v-model="searchForm.rechargeWhitelist" clearable :placeholder="t('common.all')" style="width: 120px">
+              <el-option :value="1" :label="t('common.yes')"/>
+              <el-option :value="0" :label="t('common.no')"/>
             </el-select>
           </el-form-item>
-          <el-form-item label="是否主播">
-            <el-select v-model="searchForm.isAnchor" clearable placeholder="全部" style="width: 120px">
-              <el-option :value="1" label="是"/>
-              <el-option :value="0" label="否"/>
+          <el-form-item :label="t('pages.userList.isAnchor')">
+            <el-select v-model="searchForm.isAnchor" clearable :placeholder="t('common.all')" style="width: 120px">
+              <el-option :value="1" :label="t('common.yes')"/>
+              <el-option :value="0" :label="t('common.no')"/>
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button v-if="can('search')" type="primary" @click="handleSearch">查询</el-button>
-            <el-button v-if="can('search')" @click="handleReset">重置</el-button>
-            <el-button v-if="can('batchSetAnchor')" @click="openBatchAnchorDialog('anchor')">批量设普通主播</el-button>
-            <el-button v-if="can('batchSetSeniorAnchor')" @click="openBatchAnchorDialog('senior')">批量设高级主播</el-button>
+            <el-button v-if="can('search')" type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
+            <el-button v-if="can('search')" @click="handleReset">{{ t('common.reset') }}</el-button>
+            <el-button v-if="can('batchSetAnchor')" @click="openBatchAnchorDialog('anchor')">{{ t('pages.userList.batchSetAnchor') }}</el-button>
+            <el-button v-if="can('batchSetSeniorAnchor')" @click="openBatchAnchorDialog('senior')">{{ t('pages.userList.batchSetSeniorAnchor') }}</el-button>
           </el-form-item>
         </el-form>
       </div>
       <div class="content">
         <el-table v-loading="loading" :data="userList" style="width: 100%">
           <el-table-column label="ID" prop="id" width="200"/>
-          <el-table-column label="创建时间" prop="createdAt" width="200">
+          <el-table-column :label="t('common.createdAt')" prop="createdAt" width="200">
             <template #default="scope">
               {{ formatDate(scope.row.createdAt) }}
             </template>
           </el-table-column>
-          <el-table-column label="最后登录时间" prop="lastLoginTime" width="200">
+          <el-table-column :label="t('pages.userList.lastLoginTime')" prop="lastLoginTime" width="200">
             <template #default="scope">
               {{ formatDate(scope.row.lastLoginTime) }}
             </template>
           </el-table-column>
-          <el-table-column label="昵称" prop="nickname" width="140">
+          <el-table-column :label="t('common.nickname')" prop="nickname" width="140">
             <template #default="scope">{{ scope.row.nickname || '-' }}</template>
           </el-table-column>
-          <el-table-column label="头像" prop="avatar" width="80">
+          <el-table-column :label="t('pages.userList.avatar')" prop="avatar" width="80">
             <template #default="scope">
               <el-image
                   v-if="scope.row.avatar"
@@ -81,114 +81,114 @@
               <span v-else class="avatar-empty">-</span>
             </template>
           </el-table-column>
-          <el-table-column label="区号" prop="phoneAreaCode" width="90">
+          <el-table-column :label="t('pages.userList.phoneAreaCode')" prop="phoneAreaCode" width="90">
             <template #default="scope">{{ formatPhoneAreaCode(scope.row.phoneAreaCode) }}</template>
           </el-table-column>
-           <el-table-column label="手机号" prop="phone" width="140">
+           <el-table-column :label="t('pages.userList.phone')" prop="phone" width="140">
             <template #default="scope">{{ scope.row.phone || '-' }}</template>
           </el-table-column>
-          <el-table-column label="金币余额" prop="gold" width="120">
+          <el-table-column :label="t('pages.userList.goldBalance')" prop="gold" width="120">
             <template #default="scope">{{ formatAmount(scope.row.gold) }}</template>
           </el-table-column>
-          <el-table-column label="钻石余额" prop="diamond" width="120">
+          <el-table-column :label="t('pages.userList.diamondBalance')" prop="diamond" width="120">
             <template #default="scope">{{ formatAmount(scope.row.diamond) }}</template>
           </el-table-column>
-          <el-table-column label="VIP等级" prop="vipLevel" width="100">
+          <el-table-column :label="t('pages.userList.vipLevel')" prop="vipLevel" width="100">
             <template #default="scope">{{ formatVipLevel(scope.row.vipLevel) }}</template>
           </el-table-column>
-          <el-table-column label="用户类型" prop="userType" width="120">
+          <el-table-column :label="t('pages.userList.userType')" prop="userType" width="120">
             <template #default="scope">{{ formatUserType(scope.row.userType) }}</template>
           </el-table-column>
-          <el-table-column label="主播" prop="isAnchor" width="90">
+          <el-table-column :label="t('pages.userList.anchor')" prop="isAnchor" width="90">
             <template #default="scope">
-              <el-tag v-if="scope.row.isAnchor" type="success">是</el-tag>
-              <el-tag v-else type="info">否</el-tag>
+              <el-tag v-if="scope.row.isAnchor" type="success">{{ t('common.yes') }}</el-tag>
+              <el-tag v-else type="info">{{ t('common.no') }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="分享码" prop="shareCode" width="140">
+          <el-table-column :label="t('pages.userList.shareCode')" prop="shareCode" width="140">
             <template #default="scope">{{ scope.row.shareCode || '-' }}</template>
           </el-table-column>
          
          
           <el-table-column label="IP" prop="ip" width="150"/>
-          <el-table-column label="登录国家" prop="loginCountry" width="120">
+          <el-table-column :label="t('pages.userList.loginCountry')" prop="loginCountry" width="120">
             <template #default="scope">{{ scope.row.loginCountry || '-' }}</template>
           </el-table-column>
-          <el-table-column label="注册IP" prop="registerIp" width="150">
+          <el-table-column :label="t('pages.userList.registerIp')" prop="registerIp" width="150">
             <template #default="scope">{{ scope.row.registerIp || '-' }}</template>
           </el-table-column>
-          <el-table-column label="注册国家" prop="registerCountry" width="120">
+          <el-table-column :label="t('pages.userList.registerCountry')" prop="registerCountry" width="120">
             <template #default="scope">{{ scope.row.registerCountry || '-' }}</template>
           </el-table-column>
-          <el-table-column label="设备类型" prop="deviceType" width="100">
+          <el-table-column :label="t('pages.userList.deviceType')" prop="deviceType" width="100">
             <template #default="scope">{{ scope.row.deviceType || '-' }}</template>
           </el-table-column>
-           <el-table-column label="包名" prop="packageName" width="180" show-overflow-tooltip>
+           <el-table-column :label="t('pages.userList.packageName')" prop="packageName" width="180" show-overflow-tooltip>
             <template #default="scope">{{ scope.row.packageName || '-' }}</template>
           </el-table-column>
-          <el-table-column label="版本号" prop="appVersion" width="120" show-overflow-tooltip>
+          <el-table-column :label="t('pages.userList.appVersion')" prop="appVersion" width="120" show-overflow-tooltip>
             <template #default="scope">{{ scope.row.appVersion || '-' }}</template>
           </el-table-column>
           
-          <el-table-column label="封号状态" prop="ban" width="120">
+          <el-table-column :label="t('pages.userList.banStatus')" prop="ban" width="120">
             <template #default="scope">
-              <el-tag v-if="scope.row.ban" type="danger">已封号</el-tag>
-              <el-tag v-else type="success">正常</el-tag>
+              <el-tag v-if="scope.row.ban" type="danger">{{ t('pages.userList.banned') }}</el-tag>
+              <el-tag v-else type="success">{{ t('common.normal') }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="注销状态" prop="cancel" width="120">
+          <el-table-column :label="t('pages.userList.cancelStatus')" prop="cancel" width="120">
             <template #default="scope">
-              <el-tag v-if="scope.row.cancel" type="warning">已注销</el-tag>
-              <el-tag v-else type="success">正常</el-tag>
+              <el-tag v-if="scope.row.cancel" type="warning">{{ t('pages.userList.canceled') }}</el-tag>
+              <el-tag v-else type="success">{{ t('common.normal') }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="充值白名单" prop="rechargeWhitelist" width="110">
+          <el-table-column :label="t('pages.userList.rechargeWhitelist')" prop="rechargeWhitelist" width="110">
             <template #default="scope">
-              <el-tag v-if="scope.row.rechargeWhitelist" type="success">是</el-tag>
-              <el-tag v-else type="info">否</el-tag>
+              <el-tag v-if="scope.row.rechargeWhitelist" type="success">{{ t('common.yes') }}</el-tag>
+              <el-tag v-else type="info">{{ t('common.no') }}</el-tag>
             </template>
           </el-table-column>
           
-          <el-table-column label="封禁时间" prop="banApplyTime" width="200">
+          <el-table-column :label="t('pages.userList.banTime')" prop="banApplyTime" width="200">
             <template #default="scope">
               {{ formatDate(scope.row.banApplyTime) }}
             </template>
           </el-table-column>
-           <el-table-column label="OpenId" prop="openId" width="200"/>
-          <el-table-column label="渠道" prop="channel" width="100"/>
-          <el-table-column label="备注" prop="remark" min-width="160" show-overflow-tooltip>
+           <el-table-column :label="t('pages.userList.openId')" prop="openId" width="200"/>
+          <el-table-column :label="t('pages.userList.channel')" prop="channel" width="100"/>
+          <el-table-column :label="t('common.remark')" prop="remark" min-width="160" show-overflow-tooltip>
             <template #default="scope">{{ scope.row.remark || '-' }}</template>
           </el-table-column>
-          <el-table-column fixed="right" label="操作" width="100">
+          <el-table-column fixed="right" :label="t('common.actions')" width="100">
             <template #default="scope">
               <el-dropdown v-if="hasRowActions" trigger="click" @command="(cmd: string) => handleRowCommand(scope.row, cmd)">
                 <el-button size="small" type="primary">
-                  操作
+                  {{ t('common.actions') }}
                   <el-icon class="el-icon--right">
                     <ArrowDown/>
                   </el-icon>
                 </el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item v-if="can('setAnchor') && !scope.row.isAnchor" command="setAnchor">设为主播</el-dropdown-item>
-                    <el-dropdown-item v-if="can('setSeniorAnchor') && !scope.row.isAnchor" command="setSeniorAnchor">设为高级主播</el-dropdown-item>
+                    <el-dropdown-item v-if="can('setAnchor') && !scope.row.isAnchor" command="setAnchor">{{ t('pages.userList.setAnchor') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="can('setSeniorAnchor') && !scope.row.isAnchor" command="setSeniorAnchor">{{ t('pages.userList.setSeniorAnchor') }}</el-dropdown-item>
                     <el-dropdown-item v-if="can('goldAdd')" :divided="!scope.row.isAnchor" command="gold-add">
-                      加金币
+                      {{ t('pages.userList.addGold') }}
                     </el-dropdown-item>
-                    <el-dropdown-item v-if="can('goldSub')" command="gold-sub">减金币</el-dropdown-item>
-                    <el-dropdown-item v-if="can('diamondAdd')" divided command="diamond-add">加钻石</el-dropdown-item>
-                    <el-dropdown-item v-if="can('diamondSub')" command="diamond-sub">减钻石</el-dropdown-item>
+                    <el-dropdown-item v-if="can('goldSub')" command="gold-sub">{{ t('pages.userList.subGold') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="can('diamondAdd')" divided command="diamond-add">{{ t('pages.userList.addDiamond') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="can('diamondSub')" command="diamond-sub">{{ t('pages.userList.subDiamond') }}</el-dropdown-item>
                     <el-dropdown-item v-if="can('ban')" divided command="ban">
-                      {{ scope.row.ban ? '解封' : '封号' }}
+                      {{ scope.row.ban ? t('pages.userList.unban') : t('pages.userList.ban') }}
                     </el-dropdown-item>
-                    <el-dropdown-item v-if="can('rankOff') && scope.row.canRank !== false" command="rank-off">下榜</el-dropdown-item>
-                    <el-dropdown-item v-if="can('rankOn') && scope.row.canRank === false" command="rank-on">上榜</el-dropdown-item>
-                    <el-dropdown-item v-if="can('rechargeWhitelistOn') && !scope.row.rechargeWhitelist" command="recharge-whitelist-on">加入充值白名单</el-dropdown-item>
-                    <el-dropdown-item v-if="can('rechargeWhitelistOff') && scope.row.rechargeWhitelist" command="recharge-whitelist-off">移出充值白名单</el-dropdown-item>
+                    <el-dropdown-item v-if="can('rankOff') && scope.row.canRank !== false" command="rank-off">{{ t('pages.userList.rankOff') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="can('rankOn') && scope.row.canRank === false" command="rank-on">{{ t('pages.userList.rankOn') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="can('rechargeWhitelistOn') && !scope.row.rechargeWhitelist" command="recharge-whitelist-on">{{ t('pages.userList.rechargeWhitelistOn') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="can('rechargeWhitelistOff') && scope.row.rechargeWhitelist" command="recharge-whitelist-off">{{ t('pages.userList.rechargeWhitelistOff') }}</el-dropdown-item>
                     <el-dropdown-item v-if="can('cancel')" divided command="cancel">
-                      {{ scope.row.cancel ? '取消注销' : '注销' }}
+                      {{ scope.row.cancel ? t('pages.userList.uncancel') : t('pages.userList.cancelAccount') }}
                     </el-dropdown-item>
-                    <el-dropdown-item v-if="can('setUserType') && !scope.row.isAnchor" command="setUserType">修改用户类型</el-dropdown-item>
+                    <el-dropdown-item v-if="can('setUserType') && !scope.row.isAnchor" command="setUserType">{{ t('pages.userList.setUserType') }}</el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
@@ -216,10 +216,10 @@
         @closed="resetCurrencyForm"
     >
       <el-form ref="currencyFormRef" :model="currencyForm" :rules="currencyFormRules" label-width="100px">
-        <el-form-item label="用户ID">
+        <el-form-item :label="t('common.userId')">
           <el-input v-model="currencyForm.userId" disabled/>
         </el-form-item>
-        <el-form-item label="昵称">
+        <el-form-item :label="t('common.nickname')">
           <el-input v-model="currencyForm.nickname" disabled/>
         </el-form-item>
         <el-form-item :label="currencyBalanceLabel">
@@ -237,30 +237,30 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="currencyDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitCurrencyChange">确定</el-button>
+        <el-button @click="currencyDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="submitCurrencyChange">{{ t('common.confirm') }}</el-button>
       </template>
     </el-dialog>
 
     <el-dialog
         v-model="banDialogVisible"
-        title="封号"
+        :title="t('pages.userList.banDialogTitle')"
         width="480px"
         @closed="resetBanForm"
     >
       <el-form ref="banFormRef" :model="banForm" :rules="banFormRules" label-width="110px">
-        <el-form-item label="用户ID">
+        <el-form-item :label="t('common.userId')">
           <el-input v-model="banForm.userId" disabled/>
         </el-form-item>
-        <el-form-item label="昵称">
+        <el-form-item :label="t('common.nickname')">
           <el-input v-model="banForm.nickname" disabled/>
         </el-form-item>
-        <el-form-item label="封号截止时间" prop="banApplyTime">
+        <el-form-item :label="t('pages.userList.banUntil')" prop="banApplyTime">
           <el-date-picker
               v-model="banForm.banApplyTime"
               :disabled-date="disabledBanDate"
               format="YYYY-MM-DD HH:mm:ss"
-              placeholder="选择封号截止时间"
+              :placeholder="t('pages.userList.selectBanUntil')"
               style="width: 100%"
               type="datetime"
               value-format="YYYY-MM-DD HH:mm:ss"
@@ -268,26 +268,26 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="banDialogVisible = false">取消</el-button>
-        <el-button :loading="banSubmitting" type="primary" @click="submitBan">确定</el-button>
+        <el-button @click="banDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button :loading="banSubmitting" type="primary" @click="submitBan">{{ t('common.confirm') }}</el-button>
       </template>
     </el-dialog>
 
     <el-dialog
         v-model="userTypeDialogVisible"
-        title="修改用户类型"
+        :title="t('pages.userList.editUserTypeTitle')"
         width="440px"
         @closed="resetUserTypeForm"
     >
       <el-form ref="userTypeFormRef" :model="userTypeForm" :rules="userTypeFormRules" label-width="100px">
-        <el-form-item label="用户ID">
+        <el-form-item :label="t('common.userId')">
           <el-input v-model="userTypeForm.userId" disabled/>
         </el-form-item>
-        <el-form-item label="昵称">
+        <el-form-item :label="t('common.nickname')">
           <el-input v-model="userTypeForm.nickname" disabled/>
         </el-form-item>
-        <el-form-item label="用户类型" prop="userType">
-          <el-select v-model="userTypeForm.userType" placeholder="请选择用户类型" style="width: 100%">
+        <el-form-item :label="t('pages.userList.userType')" prop="userType">
+          <el-select v-model="userTypeForm.userType" :placeholder="t('pages.userList.selectUserType')" style="width: 100%">
             <el-option
                 v-for="item in userTypeOptions"
                 :key="item.value"
@@ -298,8 +298,8 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="userTypeDialogVisible = false">取消</el-button>
-        <el-button :loading="userTypeSubmitting" type="primary" @click="submitUserType">确定</el-button>
+        <el-button @click="userTypeDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button :loading="userTypeSubmitting" type="primary" @click="submitUserType">{{ t('common.confirm') }}</el-button>
       </template>
     </el-dialog>
 
@@ -310,18 +310,18 @@
         @closed="resetBatchAnchorForm"
     >
       <el-form ref="batchAnchorFormRef" :model="batchAnchorForm" :rules="batchAnchorFormRules" label-width="100px">
-        <el-form-item label="用户ID" prop="userIdsText">
+        <el-form-item :label="t('common.userId')" prop="userIdsText">
           <el-input
               v-model="batchAnchorForm.userIdsText"
               :rows="8"
-              placeholder="每行一个用户ID，也支持逗号、空格分隔"
+              :placeholder="t('pages.userList.batchUserIdsPlaceholder')"
               type="textarea"
           />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="batchAnchorDialogVisible = false">取消</el-button>
-        <el-button :loading="batchAnchorSubmitting" type="primary" @click="submitBatchAnchor">确定</el-button>
+        <el-button @click="batchAnchorDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button :loading="batchAnchorSubmitting" type="primary" @click="submitBatchAnchor">{{ t('common.confirm') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -329,6 +329,7 @@
 
 <script lang="ts" setup>
 import {computed, onMounted, reactive, ref, watch} from 'vue'
+import {useI18n} from 'vue-i18n'
 import {accountApi, diamondApi, goldApi} from '@/api'
 import {ArrowDown} from '@element-plus/icons-vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
@@ -337,6 +338,7 @@ import type {BanReq, CancelReq, UnBanReq, UnCancelReq, UserInfo} from '@/types/a
 import {formatAmount, NUMBER_INPUT_DECIMALS} from '@/utils/number-format'
 import {usePagePermission} from '@/composables/usePagePermission'
 
+const {t, locale} = useI18n()
 const {can} = usePagePermission('UserList')
 
 const ROW_ACTION_KEYS = [
@@ -357,7 +359,6 @@ const ROW_ACTION_KEYS = [
 
 const hasRowActions = computed(() => ROW_ACTION_KEYS.some(key => can(key)))
 
-// 用户列表数据
 const userList = ref<UserInfo[]>([])
 const loading = ref(false)
 type CurrencyType = 'gold' | 'diamond'
@@ -379,7 +380,9 @@ const batchAnchorFormRef = ref<FormInstance>()
 const batchAnchorMode = ref<'anchor' | 'senior'>('anchor')
 
 const batchAnchorDialogTitle = computed(() =>
-    batchAnchorMode.value === 'senior' ? '批量设高级主播' : '批量设普通主播'
+    batchAnchorMode.value === 'senior'
+        ? t('pages.userList.batchSetSeniorAnchorTitle')
+        : t('pages.userList.batchSetAnchorTitle')
 )
 
 interface BatchAnchorForm {
@@ -403,12 +406,12 @@ const parseUserIds = (text: string): string[] => {
   return [...ids]
 }
 
-const batchAnchorFormRules: FormRules = {
+const batchAnchorFormRules = computed<FormRules>(() => ({
   userIdsText: [
     {
       validator: (_rule, value, callback) => {
         if (parseUserIds(String(value || '')).length === 0) {
-          callback(new Error('请填写至少一个有效的用户ID'))
+          callback(new Error(t('pages.userList.userIdsRequired')))
           return
         }
         callback()
@@ -416,22 +419,22 @@ const batchAnchorFormRules: FormRules = {
       trigger: 'blur'
     }
   ]
-}
+}))
 
-const userTypeLabelMap: Record<number, string> = {
-  0: '普通用户',
-  1: '普通主播',
-  2: '机器人主播',
-  3: '机器人观众',
-  4: '测试人员',
-  5: 'CMS短视频作者',
-  7: '高级主播',
-}
+const userTypeLabelMap = computed<Record<number, string>>(() => ({
+  0: t('pages.userList.userTypeNormal'),
+  1: t('pages.userList.userTypeAnchor'),
+  2: t('pages.userList.userTypeBotAnchor'),
+  3: t('pages.userList.userTypeBotViewer'),
+  4: t('pages.userList.userTypeTester'),
+  5: t('pages.userList.userTypeCmsAuthor'),
+  7: t('pages.userList.userTypeSeniorAnchor'),
+}))
 
-const userTypeOptions = [
-  {label: '普通用户', value: 0},
-  {label: '测试人员', value: 4}
-]
+const userTypeOptions = computed(() => [
+  {label: t('pages.userList.userTypeNormal'), value: 0},
+  {label: t('pages.userList.userTypeTester'), value: 4}
+])
 
 interface UserTypeForm {
   userId: string
@@ -445,11 +448,11 @@ const userTypeForm = reactive<UserTypeForm>({
   userType: 0
 })
 
-const userTypeFormRules: FormRules = {
+const userTypeFormRules = computed<FormRules>(() => ({
   userType: [
-    {required: true, message: '请选择用户类型', trigger: 'change'}
+    {required: true, message: t('pages.userList.selectUserTypeRequired'), trigger: 'change'}
   ]
-}
+}))
 
 interface BanForm {
   userId: string
@@ -467,11 +470,11 @@ const banForm = reactive<BanForm>({
   banApplyTime: ''
 })
 
-const banFormRules: FormRules = {
+const banFormRules = computed<FormRules>(() => ({
   banApplyTime: [
-    {required: true, message: '请选择封号截止时间', trigger: 'change'}
+    {required: true, message: t('pages.userList.selectBanUntilRequired'), trigger: 'change'}
   ]
-}
+}))
 
 interface CurrencyForm {
   userId: string
@@ -487,26 +490,32 @@ const currencyForm = reactive<CurrencyForm>({
   amount: 1
 })
 
-const currencyName = computed(() => (currencyType.value === 'gold' ? '金币' : '钻石'))
+const currencyName = computed(() =>
+    currencyType.value === 'gold' ? t('pages.userList.gold') : t('pages.userList.diamond')
+)
 
 const currencyDialogTitle = computed(() =>
-    `${currencyMode.value === 'add' ? '增加' : '扣减'}${currencyName.value}`
+    currencyMode.value === 'add'
+        ? t('pages.userList.addCurrency', {currency: currencyName.value})
+        : t('pages.userList.subCurrency', {currency: currencyName.value})
 )
 
-const currencyBalanceLabel = computed(() => `当前${currencyName.value}`)
+const currencyBalanceLabel = computed(() =>
+    t('pages.userList.currentBalance', {balance: currencyName.value})
+)
 
 const currencyAmountLabel = computed(() =>
-    currencyMode.value === 'add' ? '增加数量' : '扣减数量'
+    currencyMode.value === 'add' ? t('pages.userList.addAmount') : t('pages.userList.subAmount')
 )
 
-const currencyFormRules: FormRules = {
+const currencyFormRules = computed<FormRules>(() => ({
   amount: [
-    {required: true, message: '请输入数量', trigger: 'blur'},
+    {required: true, message: t('pages.userList.amountRequired'), trigger: 'blur'},
     {
       validator: (_rule, value, callback) => {
         const n = Number(value)
         if (!n || n <= 0) {
-          callback(new Error('数量必须大于0'))
+          callback(new Error(t('pages.userList.amountPositive')))
           return
         }
         callback()
@@ -514,9 +523,8 @@ const currencyFormRules: FormRules = {
       trigger: 'blur'
     }
   ]
-}
+}))
 
-// 搜索表单
 const searchForm = reactive({
   key: '',
   startTime: '',
@@ -525,31 +533,26 @@ const searchForm = reactive({
   isAnchor: undefined as number | undefined,
 })
 
-// 路由
 const router = useRouter()
 const route = useRoute()
 
-// 分页信息
 const pagination = reactive({
   pageIndex: 1,
   pageSize: 10,
   total: 0
 })
 
-// 监听路由参数变化，当有refresh参数时重新获取数据
 watch(() => route.query.refresh, (newRefresh) => {
   if (newRefresh) {
     fetchUserList()
   }
 }, {immediate: false})
 
-// 获取用户列表
 const fetchUserList = async (silent = false) => {
   if (!silent) {
     loading.value = true
   }
   try {
-    // 构建查询参数
     const params: Record<string, unknown> = {
       pageIndex: pagination.pageIndex,
       pageSize: pagination.pageSize,
@@ -570,8 +573,8 @@ const fetchUserList = async (silent = false) => {
     userList.value = result || []
     pagination.total = response?.total || 0
   } catch (error) {
-    console.error('获取用户列表失败:', error)
-    ElMessage.error('获取用户列表失败')
+    console.error('fetchUserList failed:', error)
+    ElMessage.error(t('pages.userList.fetchFailed'))
   } finally {
     if (!silent) {
       loading.value = false
@@ -579,28 +582,22 @@ const fetchUserList = async (silent = false) => {
   }
 }
 
-// 处理查询
 const handleSearch = () => {
-  // 重置到第一页并查询
   pagination.pageIndex = 1
   fetchUserList()
 }
 
-// 处理重置
 const handleReset = () => {
-  // 重置搜索表单
   searchForm.key = ''
   searchForm.startTime = ''
   searchForm.endTime = ''
   searchForm.rechargeWhitelist = undefined
   searchForm.isAnchor = undefined
 
-  // 重置到第一页并查询
   pagination.pageIndex = 1
   fetchUserList()
 }
 
-// 处理分页变化
 const handlePageChange = (page: number) => {
   pagination.pageIndex = page
   fetchUserList()
@@ -715,10 +712,10 @@ const submitUserType = async () => {
         userType: userTypeForm.userType
       })
       userTypeDialogVisible.value = false
-      ElMessage.success('用户类型已更新')
+      ElMessage.success(t('pages.userList.userTypeUpdated'))
       await fetchUserList()
     } catch (error) {
-      console.error('修改用户类型失败:', error)
+      console.error('setUserType failed:', error)
     } finally {
       userTypeSubmitting.value = false
     }
@@ -728,20 +725,20 @@ const submitUserType = async () => {
 const handleSetAnchor = async (row: UserInfo) => {
   try {
     await ElMessageBox.confirm(
-        `确定将用户 ${row.id} 设为主播吗？设为主播后不可撤销。`,
-        '设为主播',
+        t('pages.userList.setAnchorConfirm', {id: row.id}),
+        t('pages.userList.setAnchorTitle'),
         {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
           type: 'warning'
         }
     )
     await accountApi.setAnchor({accountId: String(row.id)})
-    ElMessage.success('已设为主播')
+    ElMessage.success(t('pages.userList.setAnchorSuccess'))
     await fetchUserList()
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('设为主播失败:', error)
+      console.error('setAnchor failed:', error)
     }
   }
 }
@@ -749,20 +746,20 @@ const handleSetAnchor = async (row: UserInfo) => {
 const handleSetSeniorAnchor = async (row: UserInfo) => {
   try {
     await ElMessageBox.confirm(
-        `确定将用户 ${row.id} 设为高级主播吗？设为高级主播后不可撤销。`,
-        '设为高级主播',
+        t('pages.userList.setSeniorAnchorConfirm', {id: row.id}),
+        t('pages.userList.setSeniorAnchorTitle'),
         {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
           type: 'warning'
         }
     )
     await accountApi.setSeniorAnchor({accountId: String(row.id)})
-    ElMessage.success('已设为高级主播')
+    ElMessage.success(t('pages.userList.setSeniorAnchorSuccess'))
     await fetchUserList()
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('设为高级主播失败:', error)
+      console.error('setSeniorAnchor failed:', error)
     }
   }
 }
@@ -782,14 +779,19 @@ const submitBatchAnchor = async () => {
   await batchAnchorFormRef.value.validate(async (valid) => {
     if (!valid) return
     const ids = parseUserIds(batchAnchorForm.userIdsText)
-    const actionLabel = batchAnchorMode.value === 'senior' ? '高级主播' : '普通主播'
+    const role = batchAnchorMode.value === 'senior'
+        ? t('pages.userList.batchSetSeniorRole')
+        : t('pages.userList.batchSetAnchorRole')
+    const title = batchAnchorMode.value === 'senior'
+        ? t('pages.userList.batchSetSeniorAnchorTitle')
+        : t('pages.userList.batchSetAnchorTitle')
     try {
       await ElMessageBox.confirm(
-          `确定将 ${ids.length} 个用户设为${actionLabel}吗？设置后不可撤销。`,
-          `批量设${actionLabel}`,
+          t('pages.userList.batchSetConfirm', {count: ids.length, role}),
+          title,
           {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
+            confirmButtonText: t('common.confirm'),
+            cancelButtonText: t('common.cancel'),
             type: 'warning'
           }
       )
@@ -799,14 +801,17 @@ const submitBatchAnchor = async () => {
           : await accountApi.batchSetAnchor({ids})
       batchAnchorDialogVisible.value = false
       if (response.failCount > 0) {
-        ElMessage.warning(`批量设置完成：成功 ${response.successCount} 个，失败 ${response.failCount} 个`)
+        ElMessage.warning(t('pages.userList.batchSetPartial', {
+          success: response.successCount,
+          fail: response.failCount
+        }))
       } else {
-        ElMessage.success(`批量设置成功，共 ${response.successCount} 个`)
+        ElMessage.success(t('pages.userList.batchSetSuccess', {count: response.successCount}))
       }
       await fetchUserList()
     } catch (error) {
       if (error !== 'cancel') {
-        console.error('批量设主播失败:', error)
+        console.error('batchSetAnchor failed:', error)
       }
     } finally {
       batchAnchorSubmitting.value = false
@@ -816,7 +821,7 @@ const submitBatchAnchor = async () => {
 
 const afterCurrencyChangeSuccess = () => {
   currencyDialogVisible.value = false
-  ElMessage.success('操作成功')
+  ElMessage.success(t('common.operationSuccess'))
   fetchUserList(true)
 }
 
@@ -837,7 +842,7 @@ const submitCurrencyChange = async () => {
       }
       afterCurrencyChangeSuccess()
     } catch (error) {
-      console.error(`${currencyName.value}变更失败:`, error)
+      console.error('currencyChange failed:', error)
     }
   })
 }
@@ -881,13 +886,13 @@ const submitBan = async () => {
       const response = await accountApi.ban(banData)
       if (response) {
         banDialogVisible.value = false
-        ElMessage.success('封号成功')
+        ElMessage.success(t('pages.userList.banSuccess'))
         await fetchUserList()
       } else {
-        ElMessage.error('封号失败')
+        ElMessage.error(t('pages.userList.banFailed'))
       }
     } catch (error) {
-      console.error('封号失败:', error)
+      console.error('ban failed:', error)
     } finally {
       banSubmitting.value = false
     }
@@ -895,14 +900,14 @@ const submitBan = async () => {
 }
 
 const handleCanRankAction = async (row: UserInfo, canRank: boolean) => {
-  const actionText = canRank ? '上榜' : '下榜'
+  const actionText = canRank ? t('pages.userList.rankOnAction') : t('pages.userList.rankOffAction')
   try {
     await ElMessageBox.confirm(
-        `确定要将用户 ${row.id} ${actionText}吗？`,
-        `确认${actionText}`,
+        t('pages.userList.rankConfirm', {id: row.id, action: actionText}),
+        t('pages.userList.rankTitle', {action: actionText}),
         {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
           type: 'warning'
         }
     )
@@ -911,27 +916,30 @@ const handleCanRankAction = async (row: UserInfo, canRank: boolean) => {
       canRank
     })
     if (response) {
-      ElMessage.success(`${actionText}成功`)
+      ElMessage.success(t('pages.userList.rankSuccess', {action: actionText}))
       await fetchUserList()
     } else {
-      ElMessage.error(`${actionText}失败`)
+      ElMessage.error(t('pages.userList.rankFailed', {action: actionText}))
     }
   } catch (error) {
     if (error !== 'cancel') {
-      console.error(`${actionText}失败:`, error)
+      console.error('canRank action failed:', error)
     }
   }
 }
 
 const handleRechargeWhitelistAction = async (row: UserInfo, rechargeWhitelist: boolean) => {
-  const actionText = rechargeWhitelist ? '加入充值白名单' : '移出充值白名单'
+  const actionText = rechargeWhitelist
+      ? t('pages.userList.rechargeWhitelistJoin')
+      : t('pages.userList.rechargeWhitelistRemove')
+  const extra = rechargeWhitelist ? t('pages.userList.rechargeWhitelistExtra') : ''
   try {
     await ElMessageBox.confirm(
-        `确定要将用户 ${row.id} ${actionText}吗？${rechargeWhitelist ? '加入后 App 创建充值订单将直接到账。' : ''}`,
-        `确认${actionText}`,
+        t('pages.userList.rechargeWhitelistConfirm', {id: row.id, action: actionText, extra}),
+        t('pages.userList.rankTitle', {action: actionText}),
         {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
           type: 'warning'
         }
     )
@@ -940,14 +948,14 @@ const handleRechargeWhitelistAction = async (row: UserInfo, rechargeWhitelist: b
       rechargeWhitelist
     })
     if (response) {
-      ElMessage.success(`${actionText}成功`)
+      ElMessage.success(t('pages.userList.rankSuccess', {action: actionText}))
       await fetchUserList()
     } else {
-      ElMessage.error(`${actionText}失败`)
+      ElMessage.error(t('pages.userList.rankFailed', {action: actionText}))
     }
   } catch (error) {
     if (error !== 'cancel') {
-      console.error(`${actionText}失败:`, error)
+      console.error('rechargeWhitelist action failed:', error)
     }
   }
 }
@@ -956,11 +964,11 @@ const handleBanAction = async (row: UserInfo) => {
   if (row.ban) {
     try {
       await ElMessageBox.confirm(
-          `确定要解封用户 ${row.id} 吗？`,
-          '确认解封',
+          t('pages.userList.unbanConfirm', {id: row.id}),
+          t('pages.userList.unbanTitle'),
           {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
+            confirmButtonText: t('common.confirm'),
+            cancelButtonText: t('common.cancel'),
             type: 'warning'
           }
       )
@@ -968,14 +976,14 @@ const handleBanAction = async (row: UserInfo) => {
       const response = await accountApi.unBan(accountActionPayload(row))
 
       if (response) {
-        ElMessage.success('解封成功')
+        ElMessage.success(t('pages.userList.unbanSuccess'))
         await fetchUserList()
       } else {
-        ElMessage.error('解封失败')
+        ElMessage.error(t('pages.userList.unbanFailed'))
       }
     } catch (error) {
       if (error !== 'cancel') {
-        console.error('解封失败:', error)
+        console.error('unban failed:', error)
       }
     }
     return
@@ -991,17 +999,15 @@ const patchUserRow = (userId: number | string, patch: Partial<UserInfo>) => {
   }
 }
 
-// 切换注销状态
 const toggleCancelStatus = async (row: UserInfo) => {
   if (row.cancel) {
-    // 取消注销操作
     try {
       await ElMessageBox.confirm(
-          `确定要取消注销用户 ${row.id} 吗？`,
-          '确认取消注销',
+          t('pages.userList.uncancelConfirm', {id: row.id}),
+          t('pages.userList.uncancelTitle'),
           {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
+            confirmButtonText: t('common.confirm'),
+            cancelButtonText: t('common.cancel'),
             type: 'warning'
           }
       )
@@ -1011,25 +1017,24 @@ const toggleCancelStatus = async (row: UserInfo) => {
 
       if (response) {
         patchUserRow(row.id, {cancel: false})
-        ElMessage.success('取消注销成功')
+        ElMessage.success(t('pages.userList.uncancelSuccess'))
         await fetchUserList(true)
       } else {
-        ElMessage.error('取消注销失败')
+        ElMessage.error(t('pages.userList.uncancelFailed'))
       }
     } catch (error) {
       if (error !== 'cancel') {
-        console.error('取消注销失败:', error)
+        console.error('uncancel failed:', error)
       }
     }
   } else {
-    // 注销操作
     try {
       await ElMessageBox.confirm(
-          `确定要注销用户 ${row.id} 吗？注销后用户将无法登录系统`,
-          '确认注销',
+          t('pages.userList.cancelConfirm', {id: row.id}),
+          t('pages.userList.cancelTitle'),
           {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
+            confirmButtonText: t('common.confirm'),
+            cancelButtonText: t('common.cancel'),
             type: 'warning'
           }
       )
@@ -1039,14 +1044,14 @@ const toggleCancelStatus = async (row: UserInfo) => {
 
       if (response) {
         patchUserRow(row.id, {cancel: true})
-        ElMessage.success('注销成功')
+        ElMessage.success(t('pages.userList.cancelSuccess'))
         await fetchUserList(true)
       } else {
-        ElMessage.error('注销失败')
+        ElMessage.error(t('pages.userList.cancelFailed'))
       }
     } catch (error) {
       if (error !== 'cancel') {
-        console.error('注销失败:', error)
+        console.error('cancel failed:', error)
       }
     }
   }
@@ -1062,9 +1067,9 @@ const formatPhoneAreaCode = (val?: string) => {
 
 const formatUserType = (val: number | null | undefined) => {
   if (val === null || val === undefined) {
-    return '普通用户'
+    return t('pages.userList.userTypeNormal')
   }
-  return userTypeLabelMap[val] || '普通用户'
+  return userTypeLabelMap.value[val] || t('pages.userList.userTypeNormal')
 }
 
 const formatVipLevel = (val: number | null | undefined) => {
@@ -1074,19 +1079,17 @@ const formatVipLevel = (val: number | null | undefined) => {
   return String(val)
 }
 
-// 格式化日期函数
 const formatDate = (dateString: string | null | undefined) => {
   if (!dateString) {
     return '-'
   }
   try {
-    return new Date(dateString).toLocaleString('zh-CN')
+    return new Date(dateString).toLocaleString(locale.value)
   } catch {
     return '-'
   }
 }
 
-// 页面初始化时获取数据
 onMounted(() => {
   fetchUserList()
 })

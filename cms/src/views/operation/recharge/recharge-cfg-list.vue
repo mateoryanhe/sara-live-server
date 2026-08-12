@@ -3,12 +3,12 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>充值配置管理</span>
+          <span>{{ t('menu.RechargeCfgManagement') }}</span>
         </div>
       </template>
       <div class="content">
         <div class="table-header">
-          <el-button type="primary" @click="handleAdd">新增充值档位</el-button>
+          <el-button type="primary" @click="handleAdd">{{ t('pages.rechargeCfgList.addCfg') }}</el-button>
           <el-button
               v-if="hasButtonPermission('RechargeCfgManagement', 'sync')"
               :disabled="selectedRows.length === 0"
@@ -16,35 +16,37 @@
               type="warning"
               @click="handleSyncData"
           >
-            同步数据
+            {{ t('common.syncData') }}
           </el-button>
         </div>
 
-        <div v-if="selectedRows.length" class="selection-tip">已选 {{ selectedRows.length }} 项</div>
+        <div v-if="selectedRows.length" class="selection-tip">
+          {{ t('common.selectedCount', {count: selectedRows.length}) }}
+        </div>
 
         <el-form :model="searchForm" class="search-form" inline>
-          <el-form-item label="档位名称">
-            <el-input v-model="searchForm.name" clearable placeholder="名称(模糊匹配)"/>
+          <el-form-item :label="t('pages.rechargeCfgList.tierName')">
+            <el-input v-model="searchForm.name" clearable :placeholder="t('pages.rechargeCfgList.nameFuzzy')"/>
           </el-form-item>
-          <el-form-item label="包名">
-            <el-input v-model="searchForm.packageName" clearable placeholder="包名(模糊匹配)"/>
+          <el-form-item :label="t('pages.rechargeCfgList.packageName')">
+            <el-input v-model="searchForm.packageName" clearable :placeholder="t('pages.rechargeCfgList.packageNameFuzzy')"/>
           </el-form-item>
-          <el-form-item label="类型">
-            <el-select v-model="searchForm.typeFilter" placeholder="全部" style="width: 140px">
-              <el-option :value="0" label="全部"/>
+          <el-form-item :label="t('pages.rechargeCfgList.cfgType')">
+            <el-select v-model="searchForm.typeFilter" :placeholder="t('common.all')" style="width: 140px">
+              <el-option :value="0" :label="t('common.all')"/>
               <el-option v-for="item in cfgTypeOptions" :key="item.value" :label="item.label" :value="item.value"/>
             </el-select>
           </el-form-item>
-          <el-form-item label="状态">
-            <el-select v-model="searchForm.statusFilter" placeholder="全部" style="width: 140px">
-              <el-option :value="0" label="全部"/>
-              <el-option :value="2" label="只看上架"/>
-              <el-option :value="1" label="只看下架"/>
+          <el-form-item :label="t('common.status')">
+            <el-select v-model="searchForm.statusFilter" :placeholder="t('common.all')" style="width: 140px">
+              <el-option :value="0" :label="t('common.all')"/>
+              <el-option :value="2" :label="t('common.onlyOnShelf')"/>
+              <el-option :value="1" :label="t('common.onlyOffShelf')"/>
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="handleSearch">搜索</el-button>
-            <el-button @click="resetSearch">重置</el-button>
+            <el-button type="primary" @click="handleSearch">{{ t('common.search') }}</el-button>
+            <el-button @click="resetSearch">{{ t('common.reset') }}</el-button>
           </el-form-item>
         </el-form>
 
@@ -57,14 +59,14 @@
         >
           <el-table-column type="selection" width="48"/>
           <el-table-column label="ID" prop="id" width="100"/>
-          <el-table-column label="档位名称" prop="name" min-width="120"/>
-          <el-table-column label="包名" prop="packageName" min-width="160" show-overflow-tooltip/>
-          <el-table-column label="类型" width="100">
+          <el-table-column :label="t('pages.rechargeCfgList.tierName')" prop="name" min-width="120"/>
+          <el-table-column :label="t('pages.rechargeCfgList.packageName')" prop="packageName" min-width="160" show-overflow-tooltip/>
+          <el-table-column :label="t('pages.rechargeCfgList.cfgType')" width="100">
             <template #default="{ row }">
               {{ cfgTypeLabel(row.cfgType) }}
             </template>
           </el-table-column>
-          <el-table-column label="图标" width="90">
+          <el-table-column :label="t('common.icon')" width="90">
             <template #default="{ row }">
               <el-image
                   v-if="row.icon"
@@ -77,40 +79,40 @@
               <span v-else>-</span>
             </template>
           </el-table-column>
-          <el-table-column label="基础金币" prop="gold" width="100"/>
-          <el-table-column label="赠送金币" prop="extraGold" width="100"/>
-          <el-table-column label="合计金币" width="100">
+          <el-table-column :label="t('pages.rechargeCfgList.baseGold')" prop="gold" width="100"/>
+          <el-table-column :label="t('pages.rechargeCfgList.extraGold')" prop="extraGold" width="100"/>
+          <el-table-column :label="t('pages.rechargeCfgList.totalGold')" width="100">
             <template #default="{ row }">
               {{ totalGold(row) }}
             </template>
           </el-table-column>
-          <el-table-column label="价格" width="120">
+          <el-table-column :label="t('common.price')" width="120">
             <template #default="{ row }">
               {{ formatPrice(row.price) }}
             </template>
           </el-table-column>
-          <el-table-column label="商品SKU" prop="productId" min-width="140" show-overflow-tooltip/>
-          <el-table-column label="排序" prop="sort" width="80"/>
-          <el-table-column label="状态" width="90">
+          <el-table-column :label="t('pages.rechargeCfgList.productSku')" prop="productId" min-width="140" show-overflow-tooltip/>
+          <el-table-column :label="t('common.sort')" prop="sort" width="80"/>
+          <el-table-column :label="t('common.status')" width="90">
             <template #default="{ row }">
               <el-tag :type="row.status === 1 ? 'success' : 'info'">
-                {{ row.status === 1 ? '上架' : '下架' }}
+                {{ row.status === 1 ? t('common.onShelf') : t('common.offShelf') }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="描述" prop="description" min-width="160" show-overflow-tooltip/>
-          <el-table-column label="创建时间" prop="createdAt" width="160"/>
-          <el-table-column label="更新时间" prop="updatedAt" width="160"/>
-          <el-table-column fixed="right" label="操作" width="260">
+          <el-table-column :label="t('common.description')" prop="description" min-width="160" show-overflow-tooltip/>
+          <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
+          <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
+          <el-table-column fixed="right" :label="t('common.actions')" width="260">
             <template #default="{ row }">
-              <el-button size="small" @click="handleEdit(row)">编辑</el-button>
+              <el-button size="small" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
               <el-button
                   v-if="row.status !== 1"
                   size="small"
                   type="success"
                   @click="handleOnShelf(row)"
               >
-                上架
+                {{ t('common.onShelf') }}
               </el-button>
               <el-button
                   v-else
@@ -118,9 +120,9 @@
                   type="warning"
                   @click="handleOffShelf(row)"
               >
-                下架
+                {{ t('common.offShelf') }}
               </el-button>
-              <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
+              <el-button size="small" type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -141,18 +143,18 @@
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="640px">
       <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="110px">
-        <el-form-item label="档位名称" prop="name">
-          <el-input v-model="currentRow.name" placeholder="请输入档位名称"/>
+        <el-form-item :label="t('pages.rechargeCfgList.tierName')" prop="name">
+          <el-input v-model="currentRow.name" :placeholder="t('pages.rechargeCfgList.tierNamePlaceholder')"/>
         </el-form-item>
-        <el-form-item label="包名" prop="packageName">
-          <el-input v-model="currentRow.packageName" placeholder="请输入 App 包名"/>
+        <el-form-item :label="t('pages.rechargeCfgList.packageName')" prop="packageName">
+          <el-input v-model="currentRow.packageName" :placeholder="t('pages.rechargeCfgList.packageNamePlaceholder')"/>
         </el-form-item>
-        <el-form-item label="类型" prop="cfgType">
-          <el-select v-model="currentRow.cfgType" placeholder="请选择类型" style="width: 100%">
+        <el-form-item :label="t('pages.rechargeCfgList.cfgType')" prop="cfgType">
+          <el-select v-model="currentRow.cfgType" :placeholder="t('pages.rechargeCfgList.selectType')" style="width: 100%">
             <el-option v-for="item in cfgTypeOptions" :key="item.value" :label="item.label" :value="item.value"/>
           </el-select>
         </el-form-item>
-        <el-form-item label="图标" prop="icon">
+        <el-form-item :label="t('common.icon')" prop="icon">
           <div class="icon-upload-wrap">
             <el-upload
                 :before-upload="beforeIconUpload"
@@ -168,7 +170,7 @@
                 <el-icon class="icon-uploader-icon">
                   <Plus/>
                 </el-icon>
-                <span>点击上传图标</span>
+                <span>{{ t('pages.rechargeCfgList.clickUploadIcon') }}</span>
               </div>
             </el-upload>
             <el-button
@@ -177,48 +179,49 @@
                 type="danger"
                 @click="clearIcon"
             >
-              移除图标
+              {{ t('pages.rechargeCfgList.removeIcon') }}
             </el-button>
           </div>
         </el-form-item>
-        <el-form-item label="基础金币" prop="gold">
+        <el-form-item :label="t('pages.rechargeCfgList.baseGold')" prop="gold">
           <el-input-number v-model="currentRow.gold" :min="1" controls-position="right"/>
         </el-form-item>
-        <el-form-item label="赠送金币" prop="extraGold">
+        <el-form-item :label="t('pages.rechargeCfgList.extraGold')" prop="extraGold">
           <el-input-number v-model="currentRow.extraGold" :min="0" controls-position="right"/>
-          <div class="form-tip">充值成功后玩家实际到账金币 = 基础金币 + 赠送金币</div>
+          <div class="form-tip">{{ t('pages.rechargeCfgList.goldCreditTip') }}</div>
         </el-form-item>
-        <el-form-item label="价格" prop="price">
+        <el-form-item :label="t('common.price')" prop="price">
           <el-input-number v-model="currentRow.price" :min="0.0001" :precision="NUMBER_INPUT_DECIMALS" :step="0.01" controls-position="right"/>
-          <div class="form-tip">充值货币固定，支持4位小数</div>
+          <div class="form-tip">{{ t('pages.rechargeCfgList.priceTip') }}</div>
         </el-form-item>
         <el-form-item
             :required="isStoreSkuRequired(currentRow.cfgType)"
-            label="商品SKU"
+            :label="t('pages.rechargeCfgList.productSku')"
             prop="productId"
         >
           <el-input
               v-model="currentRow.productId"
-              :placeholder="isStoreSkuRequired(currentRow.cfgType) ? '请填写 App Store / Google Play 商品 SKU' : '渠道类型可选填'"
+              :placeholder="productSkuPlaceholder"
           />
         </el-form-item>
-        <el-form-item label="排序" prop="sort">
+        <el-form-item :label="t('common.sort')" prop="sort">
           <el-input-number v-model="currentRow.sort" controls-position="right"/>
         </el-form-item>
-        <el-form-item label="描述" prop="description">
-          <el-input v-model="currentRow.description" placeholder="请输入描述" type="textarea"/>
+        <el-form-item :label="t('common.description')" prop="description">
+          <el-input v-model="currentRow.description" :placeholder="descriptionPlaceholder" type="textarea"/>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSave">保存</el-button>
+        <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="handleSave">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref, watch} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
 import {Plus} from '@element-plus/icons-vue'
 import {dataSyncApi, rechargeCfgApi, uploadApi} from '@/api'
@@ -247,17 +250,27 @@ interface RechargeCfgForm {
   description: string
 }
 
-const cfgTypeOptions = [
-  {value: 1, label: 'iOS'},
-  {value: 2, label: 'Google'},
-  {value: 3, label: '渠道'}
-]
+const {t} = useI18n()
+
+const cfgTypeOptions = computed(() => [
+  {value: 1, label: t('pages.rechargeCfgList.typeIos')},
+  {value: 2, label: t('pages.rechargeCfgList.typeGoogle')},
+  {value: 3, label: t('pages.rechargeCfgList.typeChannel')}
+])
 
 const cfgTypeLabel = (cfgType: number) => {
-  return cfgTypeOptions.find((item) => item.value === cfgType)?.label ?? '未知'
+  return cfgTypeOptions.value.find((item) => item.value === cfgType)?.label ?? t('pages.rechargeCfgList.unknown')
 }
 
 const isStoreSkuRequired = (cfgType: number) => cfgType === 1 || cfgType === 2
+
+const productSkuPlaceholder = computed(() =>
+    isStoreSkuRequired(currentRow.value.cfgType)
+        ? t('pages.rechargeCfgList.productSkuRequired')
+        : t('pages.rechargeCfgList.productSkuOptional')
+)
+
+const descriptionPlaceholder = computed(() => `${t('common.pleaseEnter')}${t('common.description')}`)
 
 const loading = ref(false)
 const syncing = ref(false)
@@ -333,7 +346,7 @@ watch(() => currentRow.value.cfgType, () => {
 
 const beforeIconUpload = (file: File): boolean => {
   if (!file.type.startsWith('image/')) {
-    ElMessage.error('只能上传图片文件')
+    ElMessage.error(t('pages.rechargeCfgList.imageOnly'))
     return false
   }
   return true
@@ -346,27 +359,27 @@ const doUpload = async (options: UploadRequestOptions) => {
     const res = await uploadApi.uploadFile(file)
     currentRow.value.icon = res.fileName
     setIconPreview(URL.createObjectURL(file), true)
-    ElMessage.success('上传成功')
+    ElMessage.success(t('pages.rechargeCfgList.uploadSuccess'))
   } catch (error) {
-    console.error('上传失败:', error)
-    ElMessage.error('上传失败')
+    console.error('upload failed:', error)
+    ElMessage.error(t('pages.rechargeCfgList.uploadFailed'))
   } finally {
     iconUploading.value = false
   }
 }
 
-const formRules: FormRules = {
+const formRules = computed<FormRules>(() => ({
   name: [
-    {required: true, message: '请输入档位名称', trigger: 'blur'},
-    {min: 1, max: 64, message: '名称长度在1-64个字符', trigger: 'blur'}
+    {required: true, message: t('pages.rechargeCfgList.nameRequired'), trigger: 'blur'},
+    {min: 1, max: 64, message: t('pages.rechargeCfgList.nameLength'), trigger: 'blur'}
   ],
   packageName: [
-    {required: true, message: '请输入包名', trigger: 'blur'},
-    {min: 1, max: 128, message: '包名长度在1-128个字符', trigger: 'blur'}
+    {required: true, message: t('pages.rechargeCfgList.packageNameRequired'), trigger: 'blur'},
+    {min: 1, max: 128, message: t('pages.rechargeCfgList.packageNameLength'), trigger: 'blur'}
   ],
-  cfgType: [{required: true, message: '请选择类型', trigger: 'change'}],
-  gold: [{required: true, message: '请输入基础金币数', trigger: 'change'}],
-  price: [{required: true, message: '请输入价格', trigger: 'change'}],
+  cfgType: [{required: true, message: t('pages.rechargeCfgList.typeRequired'), trigger: 'change'}],
+  gold: [{required: true, message: t('pages.rechargeCfgList.goldRequired'), trigger: 'change'}],
+  price: [{required: true, message: t('pages.rechargeCfgList.priceRequired'), trigger: 'change'}],
   productId: [
     {
       validator: (_rule, value, callback) => {
@@ -375,11 +388,11 @@ const formRules: FormRules = {
           return
         }
         if (!String(value ?? '').trim()) {
-          callback(new Error('iOS/Google 类型必须填写商品 SKU'))
+          callback(new Error(t('pages.rechargeCfgList.skuRequired')))
           return
         }
         if (String(value).length > 64) {
-          callback(new Error('商品SKU最长64字符'))
+          callback(new Error(t('pages.rechargeCfgList.skuMaxLength')))
           return
         }
         callback()
@@ -387,8 +400,8 @@ const formRules: FormRules = {
       trigger: 'blur'
     }
   ],
-  description: [{max: 255, message: '描述最长255字符', trigger: 'blur'}]
-}
+  description: [{max: 255, message: t('pages.rechargeCfgList.descriptionMaxLength'), trigger: 'blur'}]
+}))
 
 const fetchList = async () => {
   loading.value = true
@@ -404,8 +417,8 @@ const fetchList = async () => {
     tableData.value = response.data
     total.value = response.total
   } catch (error) {
-    console.error('获取充值配置列表失败:', error)
-    ElMessage.error('获取充值配置列表失败')
+    console.error('fetch recharge cfg list failed:', error)
+    ElMessage.error(t('pages.rechargeCfgList.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -427,14 +440,14 @@ const handleCurrentChange = (page: number) => {
 }
 
 const handleAdd = () => {
-  dialogTitle.value = '新增充值档位'
+  dialogTitle.value = t('pages.rechargeCfgList.addCfg')
   currentRow.value = defaultForm()
   setIconPreview('')
   dialogVisible.value = true
 }
 
 const handleEdit = (row: RechargeCfg) => {
-  dialogTitle.value = '编辑充值档位'
+  dialogTitle.value = t('pages.rechargeCfgList.editCfg')
   currentRow.value = {
     id: row.id,
     name: row.name,
@@ -454,42 +467,54 @@ const handleEdit = (row: RechargeCfg) => {
 
 const handleDelete = async (row: RechargeCfg) => {
   try {
-    await ElMessageBox.confirm(`确定要删除充值档位 "${row.name}" 吗？`, '确认删除', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
+    await ElMessageBox.confirm(
+        t('pages.rechargeCfgList.deleteConfirm', {name: row.name}),
+        t('common.confirmDelete'),
+        {
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning'
+        }
+    )
     await rechargeCfgApi.deleteRechargeCfg(row.id)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('common.deleteSuccess'))
     fetchList()
   } catch (error) {
-    console.error('删除失败:', error)
+    if (error !== 'cancel') {
+      console.error('delete recharge cfg failed:', error)
+    }
   }
 }
 
 const handleOnShelf = async (row: RechargeCfg) => {
   try {
     await rechargeCfgApi.onShelfRechargeCfg(row.id)
-    ElMessage.success('上架成功')
+    ElMessage.success(t('pages.rechargeCfgList.onShelfSuccess'))
     fetchList()
   } catch (error) {
-    console.error('上架失败:', error)
-    ElMessage.error('上架失败')
+    console.error('on shelf failed:', error)
+    ElMessage.error(t('pages.rechargeCfgList.onShelfFailed'))
   }
 }
 
 const handleOffShelf = async (row: RechargeCfg) => {
   try {
-    await ElMessageBox.confirm(`确定要下架充值档位 "${row.name}" 吗？`, '确认下架', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
+    await ElMessageBox.confirm(
+        t('pages.rechargeCfgList.offShelfConfirm', {name: row.name}),
+        t('common.confirmOffShelf'),
+        {
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning'
+        }
+    )
     await rechargeCfgApi.offShelfRechargeCfg(row.id)
-    ElMessage.success('下架成功')
+    ElMessage.success(t('pages.rechargeCfgList.offShelfSuccess'))
     fetchList()
   } catch (error) {
-    console.error('下架失败:', error)
+    if (error !== 'cancel') {
+      console.error('off shelf failed:', error)
+    }
   }
 }
 
@@ -515,12 +540,12 @@ const handleSave = async () => {
       } else {
         await rechargeCfgApi.createRechargeCfg(payload)
       }
-      ElMessage.success(currentRow.value.id ? '更新成功' : '创建成功')
+      ElMessage.success(currentRow.value.id ? t('common.updateSuccess') : t('common.createSuccess'))
       dialogVisible.value = false
       fetchList()
     } catch (error) {
-      console.error('保存失败:', error)
-      ElMessage.error('保存失败')
+      console.error('save failed:', error)
+      ElMessage.error(t('pages.rechargeCfgList.saveFailed'))
     }
   })
 }
@@ -540,31 +565,36 @@ const handleSelectionChange = (rows: RechargeCfg[]) => {
 
 const handleSyncData = async () => {
   if (selectedRows.value.length === 0) {
-    ElMessage.warning('请先勾选要同步的充值配置')
+    ElMessage.warning(t('pages.rechargeCfgList.selectSyncFirst'))
     return
   }
   const ids = selectedRows.value.map((row) => Number(row.id)).filter((id) => id > 0)
   if (ids.length === 0) {
-    ElMessage.warning('所选充值配置无效')
+    ElMessage.warning(t('pages.rechargeCfgList.invalidSelection'))
     return
   }
   try {
     await ElMessageBox.confirm(
-        `将把已选 ${ids.length} 条充值配置及关联图标同步到目标环境（按 ID 覆盖或新增）。是否继续？`,
-        '同步数据',
-        {confirmButtonText: '确定同步', cancelButtonText: '取消', type: 'warning'}
+        t('pages.rechargeCfgList.syncConfirm', {count: ids.length}),
+        t('common.syncData'),
+        {confirmButtonText: t('common.confirmSync'), cancelButtonText: t('common.cancel'), type: 'warning'}
     )
     syncing.value = true
     const response = await dataSyncApi.syncRechargeCfg({ids})
     if (response?.success) {
-      ElMessage.success(response.message || `同步成功：${response.rowCount} 条，${response.fileCount} 个文件`)
+      ElMessage.success(
+          response.message || t('pages.rechargeCfgList.syncSuccessDetail', {
+            rows: response.rowCount,
+            files: response.fileCount
+          })
+      )
     } else {
-      ElMessage.error('同步失败')
+      ElMessage.error(t('pages.rechargeCfgList.syncFailed'))
     }
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('同步失败:', error)
-      ElMessage.error('同步失败，请检查数据同步配置与目标服务')
+      console.error('sync failed:', error)
+      ElMessage.error(t('pages.rechargeCfgList.syncFailedCheckConfig'))
     }
   } finally {
     syncing.value = false
