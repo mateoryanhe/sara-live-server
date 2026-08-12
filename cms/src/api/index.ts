@@ -26,6 +26,7 @@ import {liveRoomTagApi} from './modules/liveRoomTag'
 import {textModerationApi} from './modules/text-moderation'
 import {privacyPolicyApi} from './modules/privacy-policy'
 import {customerServiceApi} from './modules/customer-service'
+import {walletApi} from './modules/wallet'
 import {uploadResourceApi} from './modules/upload-resource'
 import {sysStatApi, RESOURCE_METRIC_MAX_POINTS} from './modules/sysStat'
 import {botAnchorApi} from './modules/bot-anchor'
@@ -64,6 +65,7 @@ export {
     textModerationApi,
     privacyPolicyApi,
     customerServiceApi,
+    walletApi,
     uploadResourceApi,
     sysStatApi,
     RESOURCE_METRIC_MAX_POINTS,
@@ -104,6 +106,7 @@ export default {
     textModerationApi,
     privacyPolicyApi,
     customerServiceApi,
+    walletApi,
     uploadResourceApi,
     sysStatApi,
     RESOURCE_METRIC_MAX_POINTS,

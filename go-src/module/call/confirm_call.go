@@ -16,7 +16,7 @@ import (
 
 const callAnswerConfirmChargeThreshold uint32 = 2
 
-// ConfirmCall 通话应答确认;双方各确认一次,均确认后发起首次扣费
+// ConfirmCall 通话应答确认;双方各确认一次,均确认后发起首次扣费(钻石不足时按缺口自动金币兑换)
 func ConfirmCall(ctx context.Context, req *calldto.ConfirmCallReq) (*calldto.ConfirmCallRes, error) {
 	userId := httpserver.GetAuthId(ctx)
 	if userId == 0 {

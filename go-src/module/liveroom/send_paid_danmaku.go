@@ -27,7 +27,7 @@ import (
 )
 
 // SendPaidDanmaku 直播间付费弹幕
-//  1. 按直播配置单价扣减钻石
+//  1. 按直播配置单价扣减钻石;不足时按缺口自动金币兑换钻石后扣款
 //  2. 向房间内全体在线用户推送 cmd.LiveRoomPaidDanmaku
 func SendPaidDanmaku(ctx context.Context, req *liveroomdto.SendPaidDanmakuReq) (*liveroomdto.SendPaidDanmakuRes, error) {
 	content := strings.TrimSpace(req.Content)
@@ -61,7 +61,7 @@ func SendPaidDanmaku(ctx context.Context, req *liveroomdto.SendPaidDanmakuReq) (
 		}
 	}
 
-	remaining, err := wallet.DiamondSub(senderId, price, currency.ReasonPaidDanmaku)
+	remaining, err := wallet.DiamondSubWithGoldExchange(senderId, price, currency.ReasonPaidDanmaku)
 	if err != nil {
 		return nil, err
 	}

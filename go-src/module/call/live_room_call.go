@@ -51,7 +51,7 @@ func LiveRoomCall(ctx context.Context, req *calldto.LiveRoomCallReq) (*calldto.L
 		requiredDiamond += room.Billing
 	}
 	if requiredDiamond > 0 {
-		if err := wallet.DiamondNotEnough(callerId, requiredDiamond); err != nil {
+		if err := wallet.CanPayWithGoldExchange(callerId, requiredDiamond); err != nil {
 			return nil, err
 		}
 	}

@@ -26,7 +26,7 @@ import (
 
 // SendGift 直播间送礼
 //  1. 校验房间存在、礼物存在(命中礼物缓存,即默认已上架)、数量合法
-//  2. 计算总消耗 = 礼物单价 * 数量,使用钻石支付(diamond.Sub)
+//  2. 计算总消耗 = 礼物单价 * 数量,优先扣钻石;不足时按缺口自动金币兑换钻石后扣款
 //  3. 扣款成功后,向房间内全体在线用户(含送礼人自身)推送 cmd.LiveRoomGift
 func SendGift(ctx context.Context, req *liveroomdto.SendGiftReq) (*liveroomdto.SendGiftRes, error) {
 	result, err := prepareSendGift(ctx, req.RoomId, req.GiftId, req.Count)
@@ -102,9 +102,14 @@ func prepareSendGift(ctx context.Context, roomId, giftId uint64, count int) (*se
 	if err != nil {
 		return nil, err
 	}
-	remaining, err := wallet.DiamondSub(senderId, totalCost, currency.ReasonGiftSend)
-	if err != nil {
-		return nil, err
+	var remaining float64
+	if totalCost > 0 {
+		remaining, err = wallet.DiamondSubWithGoldExchange(senderId, totalCost, currency.ReasonGiftSend)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		remaining = userinfodao.GetUserInfoByUserId(senderId).Diamond
 	}
 
 	eventData := entity.NewLiveRevenueLogRecord(room.ID, room.LiveRecordId, senderId, room.ID, giftId, count, giftItem.Price, totalCost, uint8(liverevenue.Gift))

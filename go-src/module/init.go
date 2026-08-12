@@ -33,6 +33,7 @@ import (
 	"xr-game-server/module/userinfo"
 	"xr-game-server/module/verification_code"
 	"xr-game-server/module/vip"
+	"xr-game-server/module/wallet"
 )
 
 func Init() {
@@ -61,6 +62,7 @@ func Init() {
 	privacypolicy.Init()
 	accountcfg.Init()
 	customerservice.Init()
+	wallet.Init()
 	logquery.Init()
 
 	liveroom.Init()

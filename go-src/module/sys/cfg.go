@@ -3,13 +3,13 @@ package sys
 import (
 	"context"
 	"time"
-	"xr-game-server/constants/common"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/sysdto"
 	"xr-game-server/module/apppkg"
 	"xr-game-server/module/livecfg"
 	"xr-game-server/module/privacypolicy"
 	"xr-game-server/module/upload"
+	"xr-game-server/module/wallet"
 )
 
 func resolveAboutSiteUrl() string {
@@ -31,6 +31,7 @@ func GetSysCfg(ctx context.Context, req *sysdto.SysCfgReq) (*sysdto.SysCfgResp, 
 	packageName := httpserver.GetPackageNameFromContext(ctx)
 	globalPrivacy := privacypolicy.GetPrivacyPolicyUrl()
 	globalTerms := privacypolicy.GetTermsOfServiceUrl()
+	exchangeCfg := wallet.GetExchangeCfgSnapshot()
 	return &sysdto.SysCfgResp{
 		SysTime:                     time.Now().UnixMilli(),
 		PaidDanmakuPrice:            livecfg.GetPaidDanmakuPrice(),
@@ -41,7 +42,8 @@ func GetSysCfg(ctx context.Context, req *sysdto.SysCfgReq) (*sysdto.SysCfgResp, 
 		RoomOwnerTermsUrl:           privacypolicy.GetRoomOwnerTermsUrl(),
 		VipDescUrl:                  privacypolicy.GetVipDescUrl(),
 		AppImageMaxSize:             upload.GetAppImageMaxSize(),
-		GoldToDiamondRate:           common.GoldToDiamondRate,
+		GoldToDiamondRate:           exchangeCfg.GoldToDiamondRate,
+		ExchangeFeePercent:          exchangeCfg.ExchangeFeePercent,
 		AboutSiteUrl:                resolveAboutSiteUrl(),
 		SafetyCenterUrl:             resolveSafetyCenterUrl(),
 	}, nil

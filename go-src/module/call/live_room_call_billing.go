@@ -17,7 +17,7 @@ import (
 	"xr-game-server/module/wallet"
 )
 
-// checkLiveRoomCallDiamondOnAccept 接听时仅校验呼叫者钻石是否足够(门票+首分钟)
+// checkLiveRoomCallDiamondOnAccept 接听时校验呼叫者是否可支付(钻石+按需兑换金币,门票+首分钟)
 func checkLiveRoomCallDiamondOnAccept(order *entity.CallOrder) error {
 	if order == nil || order.Source != entity.CallOrderSourceLiveRoom {
 		return nil
@@ -30,7 +30,7 @@ func checkLiveRoomCallDiamondOnAccept(order *entity.CallOrder) error {
 	if requiredDiamond <= 0 {
 		return nil
 	}
-	return wallet.DiamondNotEnough(order.CallerId, requiredDiamond)
+	return wallet.CanPayWithGoldExchange(order.CallerId, requiredDiamond)
 }
 
 // chargeLiveRoomCallOnAccept 直播间来源通话接听后开始扣费(门票+首分钟)
@@ -46,7 +46,7 @@ func chargeLiveRoomCallOnAccept(order *entity.CallOrder, now time.Time) error {
 	var totalCost float64
 
 	if order.TicketPrice > 0 {
-		if _, err := wallet.DiamondSub(callerId, order.TicketPrice, currency.ReasonLiveRoomVideoCallTicket); err != nil {
+		if _, err := wallet.DiamondSubWithGoldExchange(callerId, order.TicketPrice, currency.ReasonLiveRoomVideoCallTicket); err != nil {
 			return err
 		}
 		totalCost += order.TicketPrice
@@ -54,7 +54,7 @@ func chargeLiveRoomCallOnAccept(order *entity.CallOrder, now time.Time) error {
 	}
 
 	if order.PricePerMinute > 0 {
-		if _, err := wallet.DiamondSub(callerId, order.PricePerMinute, currency.ReasonLiveRoomVideoCallBilling); err != nil {
+		if _, err := wallet.DiamondSubWithGoldExchange(callerId, order.PricePerMinute, currency.ReasonLiveRoomVideoCallBilling); err != nil {
 			return err
 		}
 		totalCost += order.PricePerMinute
@@ -81,7 +81,7 @@ func chargeLiveRoomCallBillingIfDue(order *entity.CallOrder, now time.Time) erro
 	}
 
 	liveRecordId, _ := strconv.ParseUint(order.Params, 10, 64)
-	if _, err := wallet.DiamondSub(order.CallerId, order.PricePerMinute, currency.ReasonLiveRoomVideoCallBilling); err != nil {
+	if _, err := wallet.DiamondSubWithGoldExchange(order.CallerId, order.PricePerMinute, currency.ReasonLiveRoomVideoCallBilling); err != nil {
 		return err
 	}
 	recordLiveRoomCallRevenue(order.ReceiverId, liveRecordId, order.CallerId, order.ID, order.PricePerMinute, liverevenue.LiveRoomVideoCallBilling)

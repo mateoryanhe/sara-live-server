@@ -60,5 +60,11 @@ export const operationRoutes: RouteRecordRaw = {
             component: () => import('@/views/operation/customer-service/customer-service-cfg.vue'),
             meta: {title: '客服联系配置'},
         },
+        {
+            path: 'wallet/wallet-exchange-cfg',
+            name: 'WalletExchangeCfgManagement',
+            component: () => import('@/views/operation/wallet/wallet-exchange-cfg.vue'),
+            meta: {title: '金币兑换配置'},
+        },
     ],
 }

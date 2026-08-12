@@ -64,7 +64,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement')"
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement')"
             index="/operation">
           <template #title>
             <el-icon>
@@ -125,6 +125,12 @@
               <Service/>
             </el-icon>
             <span>客服联系配置</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('WalletExchangeCfgManagement')" index="/operation/wallet/wallet-exchange-cfg">
+            <el-icon>
+              <Coin/>
+            </el-icon>
+            <span>金币兑换配置</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu

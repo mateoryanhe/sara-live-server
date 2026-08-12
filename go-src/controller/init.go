@@ -43,6 +43,7 @@ func Init() {
 	initGooglePlayWebhookController()       // Google Play RTDN Webhook
 	initCustomerServiceCMSController()      // 客服联系配置(CMS)
 	initCustomerServiceAppController()      // 客服联系配置(App)
+	initWalletCMSController()               // 钱包配置(CMS)
 	initAccountCfgCMSController()           // 账号配置(CMS)
 	initPreloadCfgCMSController()           // 预热配置(CMS)
 	initGiftController()                    // 礼物配置(CMS)

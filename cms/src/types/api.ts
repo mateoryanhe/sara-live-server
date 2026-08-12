@@ -1002,6 +1002,29 @@ export interface SaveCustomerServiceCfgRes {
     id: string
 }
 
+export interface WalletExchangeCfg {
+    id: string
+    goldToDiamondRate: number
+    exchangeFeePercent: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetWalletExchangeCfgRes {
+    cfg: WalletExchangeCfg | null
+}
+
+export interface SaveWalletExchangeCfgReq {
+    id?: number
+    goldToDiamondRate: number
+    exchangeFeePercent: number
+}
+
+export interface SaveWalletExchangeCfgRes {
+    success: boolean
+    id: string
+}
+
 export interface GooglePlayCfg {
     id: string
     enabled: boolean

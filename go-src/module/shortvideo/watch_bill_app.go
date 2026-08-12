@@ -54,7 +54,7 @@ func WatchShortVideoEnd(_ context.Context, _ *shortvideodto.WatchShortVideoEndRe
 	return &shortvideodto.WatchShortVideoEndRes{}, nil
 }
 
-// PayShortVideo App端短视频付费观看,按视频付费价格一次性扣除钻石
+// PayShortVideo App端短视频付费观看,按视频付费价格一次性扣除钻石;不足时按缺口自动金币兑换钻石后扣款
 func PayShortVideo(ctx context.Context, req *shortvideodto.PayShortVideoReq) (*shortvideodto.PayShortVideoRes, error) {
 	userId := httpserver.GetAuthId(ctx)
 	if userId == 0 {
@@ -83,7 +83,7 @@ func PayShortVideo(ctx context.Context, req *shortvideodto.PayShortVideoReq) (*s
 		}, nil
 	}
 
-	diamond, err := wallet.DiamondSub(userId, price, currency.ReasonShortVideoWatch)
+	diamond, err := wallet.DiamondSubWithGoldExchange(userId, price, currency.ReasonShortVideoWatch)
 	if err != nil {
 		return nil, err
 	}
