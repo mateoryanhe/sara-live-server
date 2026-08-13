@@ -59,8 +59,8 @@ func getAppRoomTagList() []*liveroomdto.AppLiveRoomTagItem {
 	return getRoomTagSnapshot().list
 }
 
-// getAppRoomTagListForApp App 端标签列表(过滤 isSpecial=true).
-func getAppRoomTagListForApp() []*liveroomdto.AppLiveRoomTagItem {
+// getAppRoomTagNormalList App 端普通标签列表(仅 isSpecial=false).
+func getAppRoomTagNormalList() []*liveroomdto.AppLiveRoomTagItem {
 	all := getAppRoomTagList()
 	if len(all) == 0 {
 		return emptyRoomTagList

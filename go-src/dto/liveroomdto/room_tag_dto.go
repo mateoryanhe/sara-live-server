@@ -52,7 +52,11 @@ type DeleteLiveRoomTagRes struct {
 }
 
 type AppLiveRoomTagListReq struct {
-	g.Meta `path:"/appLiveRoomTagList" method:"post" summary:"App查询直播间标签(不含特殊标签)" tags:"直播间标签"`
+	g.Meta `path:"/appLiveRoomTagList" method:"post" summary:"App查询直播间标签(全部)" tags:"直播间标签"`
+}
+
+type AppLiveRoomNormalTagListReq struct {
+	g.Meta `path:"/appLiveRoomNormalTagList" method:"post" summary:"App查询直播间普通标签(isSpecial=false)" tags:"直播间标签"`
 }
 
 type AppLiveRoomTagItem struct {

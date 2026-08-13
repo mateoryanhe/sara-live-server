@@ -18,3 +18,7 @@ func initLiveRoomTagAppController() {
 func (c *LiveRoomTagAppController) AppLiveRoomTagList(ctx context.Context, req *liveroomdto.AppLiveRoomTagListReq) (*liveroomdto.AppLiveRoomTagListRes, error) {
 	return liveroom.GetAppLiveRoomTagList(ctx, req)
 }
+
+func (c *LiveRoomTagAppController) AppLiveRoomNormalTagList(ctx context.Context, req *liveroomdto.AppLiveRoomNormalTagListReq) (*liveroomdto.AppLiveRoomTagListRes, error) {
+	return liveroom.GetAppLiveRoomNormalTagList(ctx, req)
+}

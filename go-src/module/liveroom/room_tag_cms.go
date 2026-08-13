@@ -16,7 +16,11 @@ func GetLiveRoomTagList(_ context.Context, req *liveroomdto.LiveRoomTagListReq) 
 }
 
 func GetAppLiveRoomTagList(_ context.Context, _ *liveroomdto.AppLiveRoomTagListReq) (*liveroomdto.AppLiveRoomTagListRes, error) {
-	return &liveroomdto.AppLiveRoomTagListRes{List: getAppRoomTagListForApp()}, nil
+	return &liveroomdto.AppLiveRoomTagListRes{List: getAppRoomTagList()}, nil
+}
+
+func GetAppLiveRoomNormalTagList(_ context.Context, _ *liveroomdto.AppLiveRoomNormalTagListReq) (*liveroomdto.AppLiveRoomTagListRes, error) {
+	return &liveroomdto.AppLiveRoomTagListRes{List: getAppRoomTagNormalList()}, nil
 }
 
 func CreateLiveRoomTag(_ context.Context, req *liveroomdto.CreateLiveRoomTagReq) (*liveroomdto.CreateLiveRoomTagRes, error) {
