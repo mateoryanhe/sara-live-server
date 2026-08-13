@@ -465,6 +465,7 @@ export interface Permission {
     id: string
     module: string
     roleId: number
+    apiPath?: string
     createdAt?: string
     updatedAt?: string
 }

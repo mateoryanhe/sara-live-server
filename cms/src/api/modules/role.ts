@@ -20,6 +20,7 @@ export interface Permission {
     id: number
     module: string
     roleId: number
+    apiPath?: string
 }
 
 export interface RoleQuery extends PageQuery {

@@ -40,6 +40,7 @@ import {
   getPageButtons,
   type PageButtonDef,
 } from '@/config/page-buttons'
+import {getPermissionApiPath} from '@/config/permission-api-paths'
 
 interface ModuleNode {
   id: string
@@ -120,6 +121,7 @@ const handleSave = async () => {
       id: 0,
       module: moduleId,
       roleId: roleId.value,
+      apiPath: getPermissionApiPath(moduleId),
     }))
 
     const response = await roleApi.createPermission(permissionData)

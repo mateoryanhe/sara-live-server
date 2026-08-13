@@ -11,8 +11,9 @@ const (
 
 type Permission struct {
 	migrate.OneModel
-	Module string `gorm:"comment:模块" json:"module"`
-	RoleId uint64 `gorm:"comment:角色ID" json:"roleId"`
+	Module  string `gorm:"comment:模块" json:"module"`
+	RoleId  uint64 `gorm:"comment:角色ID" json:"roleId"`
+	ApiPath string `gorm:"size:255;default:'';comment:请求接口路径" json:"apiPath"`
 }
 
 func InitPermission() {
