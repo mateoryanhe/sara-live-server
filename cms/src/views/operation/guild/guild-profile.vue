@@ -1,6 +1,6 @@
 <template>
   <div class="page-container">
-    <el-card v-loading="loading">
+    <el-card>
       <template #header>
         <div class="card-header">
           <span>{{ t('menu.GuildProfileManagement') }}</span>
@@ -18,16 +18,27 @@
         <p>{{ t('pages.guildProfile.tipLine2') }}</p>
       </el-alert>
 
-      <el-empty v-if="!loading && !hasGuild" :description="t('pages.guildProfile.noGuild')"/>
+      <div class="content">
+        <el-table v-loading="loading" :data="tableData" style="width: 100%">
+          <el-table-column label="ID" prop="id" width="100"/>
+          <el-table-column :label="t('pages.guildProfile.guildName')" min-width="140" prop="name"/>
+          <el-table-column :label="t('pages.guildProfile.bankCard')" min-width="160" prop="bankCard" show-overflow-tooltip/>
+          <el-table-column :label="t('pages.guildProfile.contact')" min-width="140" prop="contact" show-overflow-tooltip/>
+          <el-table-column :label="t('pages.guildProfile.description')" min-width="180" prop="description" show-overflow-tooltip/>
+          <el-table-column :label="t('pages.guildProfile.lastUpdated')" prop="updatedAt" width="170"/>
+          <el-table-column :label="t('common.actions')" width="100" fixed="right">
+            <template #default="{ row }">
+              <el-button v-if="can('save')" size="small" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
 
-      <el-form
-          v-else
-          ref="formRef"
-          :model="formData"
-          :rules="formRules"
-          class="profile-form"
-          label-width="100px"
-      >
+        <el-empty v-if="!loading && tableData.length === 0" :description="t('pages.guildProfile.noGuild')"/>
+      </div>
+    </el-card>
+
+    <el-dialog v-model="dialogVisible" :title="t('pages.guildProfile.editGuild')" destroy-on-close width="640px">
+      <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px">
         <el-form-item :label="t('pages.guildProfile.guildId')">
           <el-input v-model="formData.id" disabled/>
         </el-form-item>
@@ -50,15 +61,12 @@
               type="textarea"
           />
         </el-form-item>
-        <el-form-item v-if="formData.updatedAt" :label="t('pages.guildProfile.lastUpdated')">
-          <span>{{ formData.updatedAt }}</span>
-        </el-form-item>
-        <el-form-item>
-          <el-button v-if="can('save')" :loading="saving" type="primary" @click="handleSave">{{ t('common.save') }}</el-button>
-          <el-button @click="fetchProfile">{{ t('common.refresh') }}</el-button>
-        </el-form-item>
       </el-form>
-    </el-card>
+      <template #footer>
+        <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button :loading="saving" type="primary" @click="handleSave">{{ t('common.save') }}</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -75,7 +83,8 @@ const {can} = usePagePermission('GuildProfileManagement')
 const {t} = useI18n()
 const loading = ref(false)
 const saving = ref(false)
-const hasGuild = ref(false)
+const dialogVisible = ref(false)
+const tableData = ref<MyGuildProfile[]>([])
 const formRef = ref<FormInstance>()
 
 const formData = reactive({
@@ -84,7 +93,6 @@ const formData = reactive({
   bankCard: '',
   contact: '',
   description: '',
-  updatedAt: '',
 })
 
 const formRules = computed<FormRules>(() => ({
@@ -103,46 +111,36 @@ const formRules = computed<FormRules>(() => ({
   ],
 }))
 
-const applyProfile = (profile: MyGuildProfile | null | undefined) => {
-  if (!profile?.id) {
-    hasGuild.value = false
-    formData.id = ''
-    formData.name = ''
-    formData.bankCard = ''
-    formData.contact = ''
-    formData.description = ''
-    formData.updatedAt = ''
-    return
-  }
-  hasGuild.value = true
-  formData.id = profile.id
-  formData.name = profile.name || ''
-  formData.bankCard = profile.bankCard || ''
-  formData.contact = profile.contact || ''
-  formData.description = profile.description || ''
-  formData.updatedAt = profile.updatedAt || ''
-}
-
-const fetchProfile = async () => {
+const fetchList = async () => {
   loading.value = true
   try {
     const response = await guildApi.getMyGuildProfile()
-    applyProfile(response)
+    tableData.value = response?.list ?? []
   } catch (error) {
-    console.error('fetch guild profile failed:', error)
-    applyProfile(null)
+    console.error('fetch guild profile list failed:', error)
+    tableData.value = []
   } finally {
     loading.value = false
   }
 }
 
+const handleEdit = (row: MyGuildProfile) => {
+  formData.id = row.id
+  formData.name = row.name || ''
+  formData.bankCard = row.bankCard || ''
+  formData.contact = row.contact || ''
+  formData.description = row.description || ''
+  dialogVisible.value = true
+}
+
 const handleSave = async () => {
-  if (!formRef.value || !hasGuild.value) return
+  if (!formRef.value || !formData.id) return
   await formRef.value.validate(async (valid) => {
     if (!valid) return
     saving.value = true
     try {
       const response = await guildApi.updateMyGuildProfile({
+        id: formData.id,
         name: formData.name.trim(),
         bankCard: formData.bankCard.trim(),
         contact: formData.contact.trim(),
@@ -150,7 +148,8 @@ const handleSave = async () => {
       })
       if (response?.success) {
         ElMessage.success(t('common.saveConfig'))
-        await fetchProfile()
+        dialogVisible.value = false
+        await fetchList()
       } else {
         ElMessage.error(t('pages.guildProfile.saveFailed'))
       }
@@ -163,7 +162,7 @@ const handleSave = async () => {
 }
 
 onMounted(() => {
-  fetchProfile()
+  fetchList()
 })
 </script>
 
@@ -181,7 +180,7 @@ onMounted(() => {
   margin-bottom: 20px;
 }
 
-.profile-form {
-  max-width: 640px;
+.content {
+  margin-top: 4px;
 }
 </style>

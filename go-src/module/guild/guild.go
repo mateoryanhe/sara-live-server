@@ -3,12 +3,19 @@ package guild
 import (
 	"context"
 	"strconv"
+
 	"xr-game-server/core/httpserver"
+	"xr-game-server/core/snowflake"
+	"xr-game-server/dao/cmsuserdao"
 	"xr-game-server/dao/guilddao"
 	"xr-game-server/dto/guilddto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
 )
+
+func genGuildId() uint64 {
+	return snowflake.GetId()
+}
 
 // GetGuildList 获取直播工会列表
 func GetGuildList(ctx context.Context, req *guilddto.GuildListReq) (res *httpserver.CMSQueryResp, err error) {
@@ -25,15 +32,16 @@ func CreateGuild(ctx context.Context, req *guilddto.CreateGuildReq) (res *guildd
 		return nil, errercode.CreateCode(errercode.GuildExist)
 	}
 
-	guild := entity.LiveGuild{
-		Name:        req.Name,
-		LeaderId:    req.LeaderId,
-		Contact:     req.Contact,
-		Description: req.Description,
-		Status:      req.Status,
-	}
-
-	if err = guilddao.CreateGuild(&guild); err != nil {
+	guild := entity.NewLiveGuild(
+		genGuildId(),
+		req.Name,
+		req.LeaderId,
+		resolveLeaderName(req.LeaderId),
+		req.Contact,
+		req.Description,
+		req.Status,
+	)
+	if err = guilddao.CreateGuild(guild); err != nil {
 		return nil, err
 	}
 
@@ -51,16 +59,15 @@ func UpdateGuild(ctx context.Context, req *guilddto.UpdateGuildReq) (res *guildd
 		return nil, errercode.CreateCode(errercode.GuildExist)
 	}
 
-	guild.Name = req.Name
-	guild.LeaderId = req.LeaderId
-	guild.Contact = req.Contact
-	guild.Description = req.Description
-	guild.Status = req.Status
-
-	if err = guilddao.UpdateGuild(guild); err != nil {
-		return nil, err
-	}
-	guilddao.RemoveGuildCache(req.ID)
+	oldName := guild.Name
+	oldLeaderId := guild.LeaderId
+	guild.SetName(req.Name)
+	guild.SetLeaderId(req.LeaderId)
+	guild.SetLeaderName(resolveLeaderName(req.LeaderId))
+	guild.SetContact(req.Contact)
+	guild.SetDescription(req.Description)
+	guild.SetStatus(req.Status)
+	guilddao.UpdateGuild(guild, oldName, oldLeaderId)
 
 	return &guilddto.UpdateGuildRes{Success: true}, nil
 }
@@ -70,7 +77,6 @@ func DeleteGuild(ctx context.Context, req *guilddto.DeleteGuildReq) (res *guildd
 	if err = guilddao.DeleteGuild(req.ID); err != nil {
 		return nil, err
 	}
-	guilddao.RemoveGuildCache(req.ID)
 	guilddao.RemoveGuildMembersCache(req.ID)
 	return &guilddto.DeleteGuildRes{Success: true}, nil
 }
@@ -85,8 +91,20 @@ func GetGuild(ctx context.Context, req *guilddto.GetGuildReq) (res *guilddto.Get
 		ID:          strconv.FormatUint(guild.ID, 10),
 		Name:        guild.Name,
 		LeaderId:    strconv.FormatUint(guild.LeaderId, 10),
+		LeaderName:  guild.LeaderName,
 		Contact:     guild.Contact,
 		Description: guild.Description,
 		Status:      guild.Status,
 	}, nil
+}
+
+func resolveLeaderName(leaderId uint64) string {
+	if leaderId == 0 {
+		return ""
+	}
+	user := cmsuserdao.GetCMSUserById(leaderId)
+	if user == nil {
+		return ""
+	}
+	return user.Name
 }

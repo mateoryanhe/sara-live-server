@@ -37,7 +37,7 @@ export const guildApi = {
     },
 
     getMyGuildProfile: () => {
-        return request.post<MyGuildProfile>('/guild/getMyGuildProfile', {})
+        return request.post<MyGuildProfileListRes>('/guild/getMyGuildProfile', {})
     },
 
     updateMyGuildProfile: (data: UpdateMyGuildProfileReq) => {

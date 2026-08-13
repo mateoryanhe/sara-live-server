@@ -496,10 +496,15 @@ export interface MyGuildProfile {
 }
 
 export interface UpdateMyGuildProfileReq {
+    id: string | number
     name: string
     bankCard?: string
     contact?: string
     description?: string
+}
+
+export interface MyGuildProfileListRes {
+    list: MyGuildProfile[]
 }
 
 // 礼物相关类型

@@ -1,90 +1,57 @@
 package guilddao
 
 import (
-	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gctx"
-	"strconv"
-	"xr-game-server/core/str"
 	"xr-game-server/dto/guilddto"
 	"xr-game-server/entity"
 )
 
-// GetGuildById 根据ID获取工会
+// GetGuildById 根据 ID 从内存快照获取工会
 func GetGuildById(id uint64) *entity.LiveGuild {
-	var guild entity.LiveGuild
-	err := g.DB().Model(string(entity.TbLiveGuild)).Where("id = ?", id).Scan(&guild)
-	if err != nil {
-		return nil
-	}
-	return &guild
+	return getGuildByIdFromMemory(id)
 }
 
-// GetGuildByName 根据名称获取工会
+// GetGuildByName 根据名称从内存快照获取工会
 func GetGuildByName(name string) *entity.LiveGuild {
-	var guild entity.LiveGuild
-	err := g.DB().Model(string(entity.TbLiveGuild)).Where("name = ?", name).Scan(&guild)
-	if err != nil {
-		return nil
-	}
-	return &guild
+	return getGuildByNameFromMemory(name)
 }
 
-// GetGuildByLeaderId 根据会长 CMS 用户 ID 获取工会
+// ListGuildsByLeaderId 根据会长 CMS 用户 ID 从内存快照获取其管理的全部工会
+func ListGuildsByLeaderId(leaderId uint64) []*entity.LiveGuild {
+	return listGuildsByLeaderIdFromMemory(leaderId)
+}
+
+// GetGuildByLeaderId 根据会长 CMS 用户 ID 获取工会(兼容旧逻辑,取第一条)
 func GetGuildByLeaderId(leaderId uint64) *entity.LiveGuild {
-	if leaderId == 0 {
+	rows := ListGuildsByLeaderId(leaderId)
+	if len(rows) == 0 {
 		return nil
 	}
-	var guild entity.LiveGuild
-	err := g.DB().Model(string(entity.TbLiveGuild)).Where("leader_id = ?", leaderId).Limit(1).Scan(&guild)
-	if err != nil || guild.ID == 0 {
-		return nil
-	}
-	return &guild
+	return rows[0]
 }
 
-// CreateGuild 创建工会
+// CreateGuild 将工会加入内存快照(字段异步入库由 syndb 负责)
 func CreateGuild(guild *entity.LiveGuild) error {
-	_, err := g.DB().Model(string(entity.TbLiveGuild)).Save(guild)
-	if err == nil {
-		return nil
-	}
-	return err
+	AddGuildToMemory(guild)
+	return nil
 }
 
-// UpdateGuild 更新工会
-func UpdateGuild(guild *entity.LiveGuild) error {
-	return CreateGuild(guild)
+// UpdateGuild 刷新工会内存索引(字段异步入库由 syndb 负责)
+func UpdateGuild(guild *entity.LiveGuild, oldName string, oldLeaderId uint64) {
+	ReindexGuildInMemory(guild, oldName, oldLeaderId)
 }
 
-// DeleteGuild 删除工会
+// DeleteGuild 删除工会并刷新内存快照
 func DeleteGuild(id uint64) error {
 	_, err := g.DB().Model(string(entity.TbLiveGuild)).WherePri(id).Delete()
-	if err == nil {
-		return nil
+	if err != nil {
+		return err
 	}
-	return err
+	RemoveGuildFromMemory(id)
+	return nil
 }
 
-// GetGuildList 获取工会列表
+// GetGuildList 从内存快照获取工会列表
 func GetGuildList(req *guilddto.GuildListReq) (int, []*guilddto.GuildListRes) {
-	sql := `select g.id, g.name, g.leader_id, IFNULL(u.name, '') as leader_name, g.contact, g.description, g.status, g.created_at, g.updated_at
-            from live_guilds g
-            left join cms_users u on u.id = g.leader_id
-            where 1=1 `
-	param := make([]any, 0)
-	ctx := gctx.New()
-	ret := make([]*guilddto.GuildListRes, 0)
-
-	if req.Name != "" {
-		sql += ` and g.name LIKE ?`
-		param = append(param, fmt.Sprintf("%%%s%%", req.Name))
-	}
-
-	sql += ` order by g.created_at desc`
-	countSql := str.GetCountSQL(sql)
-	total, _ := g.DB().GetCount(ctx, countSql, param)
-	sql += ` limit ` + strconv.Itoa(req.PageSize) + ` offset ` + strconv.Itoa(req.PageIndex-1)
-	g.DB().GetScan(ctx, &ret, sql, param)
-	return total, ret
+	return queryGuildListFromMemory(req)
 }
