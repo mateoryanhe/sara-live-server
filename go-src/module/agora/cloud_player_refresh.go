@@ -13,6 +13,7 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gtimer"
 	"github.com/gogf/gf/v2/util/guid"
+	"xr-game-server/core/xrlog"
 	"xr-game-server/core/xrtimer"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/agoradto"
@@ -141,7 +142,9 @@ func refreshCloudPlayerTokenForAnchor(ctx context.Context, anchorId uint64) {
 	unregisterCloudPlayerSequence(playerId)
 	newPlayerId, newExpireAt, createErr := StartBotAnchorCloudPlayer(ctx, anchorId, room.CloudPlayerVideo)
 	if createErr != nil {
-		g.Log().Errorf(ctx, "recreate cloud player failed anchorId=%d err=%v", anchorId, createErr)
+		xrlog.ErrorWithErr(ctx, logSourceAgoraCloudPlayer,
+			fmt.Sprintf("recreate failed anchorId=%d oldPlayerId=%s", anchorId, playerId),
+			createErr)
 		return
 	}
 	room.SetCloudPlayerId(newPlayerId)
@@ -193,8 +196,10 @@ func updateBotAnchorCloudPlayerToken(ctx context.Context, anchorId uint64, playe
 	}
 
 	respBody := resp.ReadAll()
-	g.Log().Errorf(ctx, "refresh cloud player token failed anchorId=%d playerId=%s requestId=%s status=%d body=%s",
-		anchorId, playerId, requestID, resp.StatusCode, string(respBody))
+	xrlog.Error(ctx, logSourceAgoraCloudPlayer, fmt.Sprintf(
+		"refresh token failed anchorId=%d playerId=%s requestId=%s status=%d path=%s body=%s",
+		anchorId, playerId, requestID, resp.StatusCode, path, string(respBody),
+	))
 	return 0, fmt.Errorf("refresh cloud player token status=%d", resp.StatusCode)
 }
 

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"xr-game-server/core/xrlog"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/guid"
@@ -14,6 +15,8 @@ import (
 	"xr-game-server/errercode"
 	"xr-game-server/module/upload"
 )
+
+const logSourceAgoraCloudPlayer = "AgoraCloudPlayer"
 
 type cloudPlayerCreateReq struct {
 	Player cloudPlayerCreateBody `json:"player"`
@@ -76,7 +79,9 @@ func StartBotAnchorCloudPlayer(ctx context.Context, anchorId uint64, cloudPlayer
 
 	resp, err := agoraRestPost(ctx, cfg, path, reqBody)
 	if err != nil {
-		g.Log().Errorf(ctx, "create cloud player failed anchorId=%d err=%v", anchorId, err)
+		xrlog.ErrorWithErr(ctx, logSourceAgoraCloudPlayer,
+			fmt.Sprintf("create request failed anchorId=%d channel=%s streamUrl=%s path=%s", anchorId, channelName, streamUrl, path),
+			err)
 		return "", 0, errercode.CreateCode(errercode.AgoraCloudPlayerFailed)
 	}
 	defer resp.Close()
@@ -101,7 +106,11 @@ func StartBotAnchorCloudPlayer(ctx context.Context, anchorId uint64, cloudPlayer
 		return playerId, expireAt, nil
 	}
 
-	g.Log().Errorf(ctx, "create cloud player failed anchorId=%d status=%d playerId=%s body=%s", anchorId, resp.StatusCode, playerId, string(respBody))
+	xrlog.Error(ctx, logSourceAgoraCloudPlayer, fmt.Sprintf(
+		"create failed anchorId=%d status=%d playerId=%s channel=%s streamUrl=%s region=%s appId=%s path=%s requestId=%s body=%s",
+		anchorId, resp.StatusCode, playerId, channelName, streamUrl, cfg.CloudPlayerRegion, cfg.AppId, path,
+		strings.TrimSpace(resp.Header.Get("X-Request-ID")), string(respBody),
+	))
 	return "", 0, errercode.CreateCode(errercode.AgoraCloudPlayerFailed)
 }
 
@@ -124,7 +133,9 @@ func StopBotAnchorCloudPlayer(ctx context.Context, playerId string) error {
 
 	resp, err := client.Delete(ctx, agoraRestBaseURL+path)
 	if err != nil {
-		g.Log().Errorf(ctx, "delete cloud player failed playerId=%s requestId=%s err=%v", playerId, requestID, err)
+		xrlog.ErrorWithErr(ctx, logSourceAgoraCloudPlayer,
+			fmt.Sprintf("delete request failed playerId=%s requestId=%s path=%s", playerId, requestID, path),
+			err)
 		return errercode.CreateCode(errercode.AgoraCloudPlayerFailed)
 	}
 	defer resp.Close()
@@ -140,6 +151,9 @@ func StopBotAnchorCloudPlayer(ctx context.Context, playerId string) error {
 	}
 
 	respBody := resp.ReadAll()
-	g.Log().Errorf(ctx, "delete cloud player failed playerId=%s requestId=%s status=%d body=%s", playerId, requestID, resp.StatusCode, string(respBody))
+	xrlog.Error(ctx, logSourceAgoraCloudPlayer, fmt.Sprintf(
+		"delete failed playerId=%s requestId=%s status=%d path=%s body=%s",
+		playerId, requestID, resp.StatusCode, path, string(respBody),
+	))
 	return errercode.CreateCode(errercode.AgoraCloudPlayerFailed)
 }

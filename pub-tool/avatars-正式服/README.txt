@@ -10,7 +10,7 @@
 
 远程目录
   测试/生产默认: /home/ec2-user/cdn/images
-  对应静态访问路径: /images/文件名.jpg
+  对应静态访问路径: /images/文件名.png（扩展名与上传文件一致）
   说明: 该目录可能由 sudo 启动的服务创建(属主 root),脚本会使用 sudo unzip 写入
 
 前置条件

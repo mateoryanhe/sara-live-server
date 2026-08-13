@@ -144,6 +144,6 @@ if errorlevel 1 (
 del "%ZIP_FILE%"
 echo.
 echo Avatar upload completed! [%DEPLOY_ENV%] -^> %REMOTE_DIR%
-echo Access example: /images/demo_avatar_1.jpg
+echo Access example: /images/demo_avatar_1.png
 pause
 endlocal
