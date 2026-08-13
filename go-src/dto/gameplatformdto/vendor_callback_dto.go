@@ -28,22 +28,29 @@ type VendorVerifyRes struct {
 
 // VendorBalanceReq 第三方获取余额回调请求.
 type VendorBalanceReq struct {
-	g.Meta        `path:"/balance" method:"post" summary:"第三方获取余额回调" tags:"游戏第三方回调"`
-	OperatorToken string `json:"operator_token"`
-	PlayerName    string `json:"player_name"`
-	Sign          string `json:"sign"`
-	Timestamp     int64  `json:"timestamp"`
+	g.Meta                `path:"/balance" method:"post" summary:"第三方获取余额回调" tags:"游戏第三方回调"`
+	OperatorToken         string `json:"operator_token"`
+	OperatorPlayerSession string `json:"operator_player_session"`
+	SecretKey             string `json:"secret_key"`
+	IP                    string `json:"ip"`
+	GameID                string `json:"game_id"`
+	PlayerName            string `json:"player_name"`
 }
 
 type VendorBalanceData struct {
 	Balance      float64 `json:"balance"`
-	CurrencyCode string  `json:"currency_code,omitempty"`
+	CurrencyCode string  `json:"currency_code"`
+	RTP          float64 `json:"rtp"`
+}
+
+type VendorBalanceError struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }
 
 type VendorBalanceRes struct {
-	Code    int                `json:"code"`
-	Message string             `json:"message,omitempty"`
-	Data    *VendorBalanceData `json:"data,omitempty"`
+	Data  *VendorBalanceData  `json:"data"`
+	Error *VendorBalanceError `json:"error"`
 }
 
 // VendorTransferReq 第三方下注转账回调请求.

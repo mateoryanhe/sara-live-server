@@ -2,73 +2,128 @@ package game
 
 import (
 	"context"
+	"strconv"
 	"strings"
 
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dto/gameplatformdto"
 )
 
-// HandleVendorBalance 第三方获取余额回调(player_name 对应 verify 返回的玩家名).
+const vendorCallbackDefaultRTP = 0.9
+
+// HandleVendorBalance 第三方获取余额回调(operator_player_session 为用户 ID).
 func HandleVendorBalance(ctx context.Context, req *gameplatformdto.VendorBalanceReq) (*gameplatformdto.VendorBalanceRes, error) {
 	if req == nil {
 		return vendorBalanceFail(vendorCallbackCodeInvalidParam, "invalid request"), nil
 	}
-	signParams, signValue := collectVendorCallbackSignParams(ctx)
-	fillVendorBalanceReq(req, signParams, signValue)
+	bodyParams := collectVendorCallbackBodyParams(ctx)
+	fillVendorBalanceReq(req, bodyParams)
 
-	vendorDetailLog().Infof(ctx, "vendor balance request player_name=%s operator_token=%s timestamp=%d",
-		req.PlayerName, req.OperatorToken, req.Timestamp)
+	userIDStr := strings.TrimSpace(req.OperatorPlayerSession)
+	vendorDetailLog().Infof(ctx, "vendor balance request user_id=%s player_name=%s operator_token=%s game_id=%s ip=%s",
+		userIDStr, req.PlayerName, req.OperatorToken, req.GameID, req.IP)
 
-	if fail := validateVendorCallback(req.OperatorToken, signValue, signParams); fail != nil {
+	if fail := validateVendorTransferAuth(req.OperatorToken, req.SecretKey); fail != nil {
 		resp := vendorBalanceFail(fail.Code, fail.Message)
-		vendorDetailLog().Warningf(ctx, "vendor balance failed player_name=%s code=%d msg=%s", req.PlayerName, resp.Code, resp.Message)
+		vendorDetailLog().Warningf(ctx, "vendor balance failed user_id=%s code=%d msg=%s", userIDStr, resp.Error.Code, resp.Error.Message)
+		return resp, nil
+	}
+	if fail := validateVendorBalanceReq(req); fail != nil {
+		resp := vendorBalanceFail(fail.Code, fail.Message)
+		vendorDetailLog().Warningf(ctx, "vendor balance failed user_id=%s code=%d msg=%s", userIDStr, resp.Error.Code, resp.Error.Message)
 		return resp, nil
 	}
 
-	playerName := strings.TrimSpace(req.PlayerName)
-	if playerName == "" {
-		resp := vendorBalanceFail(vendorCallbackCodeInvalidParam, "invalid player_name")
-		vendorDetailLog().Warningf(ctx, "vendor balance failed player_name=%s code=%d msg=%s", req.PlayerName, resp.Code, resp.Message)
+	userID, err := strconv.ParseUint(userIDStr, 10, 64)
+	if err != nil || userID == 0 {
+		resp := vendorBalanceFail(vendorCallbackCodeInvalidParam, "invalid operator_player_session")
+		vendorDetailLog().Warningf(ctx, "vendor balance failed user_id=%s code=%d msg=%s", userIDStr, resp.Error.Code, resp.Error.Message)
 		return resp, nil
 	}
-
-	userInfo, userID := loadUserInfoByPlayerName(playerName)
-	if userID == 0 || userInfo == nil || accountdao.GetAccountById(userID) == nil {
+	if accountdao.GetAccountById(userID) == nil {
 		resp := vendorBalanceFail(vendorCallbackCodePlayerNotFound, "player not found")
-		vendorDetailLog().Warningf(ctx, "vendor balance failed player_name=%s code=%d msg=%s", req.PlayerName, resp.Code, resp.Message)
+		vendorDetailLog().Warningf(ctx, "vendor balance failed user_id=%s code=%d msg=%s", userIDStr, resp.Error.Code, resp.Error.Message)
 		return resp, nil
 	}
 
-	resp := &gameplatformdto.VendorBalanceRes{
-		Code: vendorCallbackCodeOK,
-		Data: &gameplatformdto.VendorBalanceData{
-			Balance:      userInfo.Gold,
-			CurrencyCode: vendorCallbackCurrency,
-		},
+	userInfo := loadUserInfoForVendorVerify(userID)
+	if userInfo == nil {
+		resp := vendorBalanceFail(vendorCallbackCodePlayerNotFound, "player not found")
+		vendorDetailLog().Warningf(ctx, "vendor balance failed user_id=%s code=%d msg=%s", userIDStr, resp.Error.Code, resp.Error.Message)
+		return resp, nil
 	}
-	vendorDetailLog().Infof(ctx, "vendor balance success player_name=%s balance=%v currency_code=%s",
-		req.PlayerName, resp.Data.Balance, resp.Data.CurrencyCode)
+	if !vendorTransferPlayerNameMatch(userInfo, userID, req.PlayerName) {
+		resp := vendorBalanceFail(vendorCallbackCodeInvalidParam, "player_name mismatch")
+		vendorDetailLog().Warningf(ctx, "vendor balance failed user_id=%s code=%d msg=%s", userIDStr, resp.Error.Code, resp.Error.Message)
+		return resp, nil
+	}
+
+	resp := vendorBalanceSuccess(userInfo.Gold)
+	vendorDetailLog().Infof(ctx, "vendor balance success user_id=%s player_name=%s balance=%v currency_code=%s rtp=%v",
+		userIDStr, req.PlayerName, resp.Data.Balance, resp.Data.CurrencyCode, resp.Data.RTP)
 	return resp, nil
 }
 
-func fillVendorBalanceReq(req *gameplatformdto.VendorBalanceReq, params map[string]string, signValue string) {
+func validateVendorBalanceReq(req *gameplatformdto.VendorBalanceReq) *vendorCallbackFail {
+	if req == nil {
+		return &vendorCallbackFail{Code: vendorCallbackCodeInvalidParam, Message: "invalid request"}
+	}
+	if strings.TrimSpace(req.OperatorPlayerSession) == "" {
+		return &vendorCallbackFail{Code: vendorCallbackCodeInvalidParam, Message: "invalid operator_player_session"}
+	}
+	if strings.TrimSpace(req.IP) == "" {
+		return &vendorCallbackFail{Code: vendorCallbackCodeInvalidParam, Message: "invalid ip"}
+	}
+	if strings.TrimSpace(req.GameID) == "" {
+		return &vendorCallbackFail{Code: vendorCallbackCodeInvalidParam, Message: "invalid game_id"}
+	}
+	if strings.TrimSpace(req.PlayerName) == "" {
+		return &vendorCallbackFail{Code: vendorCallbackCodeInvalidParam, Message: "invalid player_name"}
+	}
+	return nil
+}
+
+func fillVendorBalanceReq(req *gameplatformdto.VendorBalanceReq, params map[string]string) {
+	if req == nil || len(params) == 0 {
+		return
+	}
 	if req.OperatorToken == "" {
 		req.OperatorToken = params["operator_token"]
+	}
+	if req.OperatorPlayerSession == "" {
+		req.OperatorPlayerSession = params["operator_player_session"]
+	}
+	if req.SecretKey == "" {
+		req.SecretKey = params["secret_key"]
+	}
+	if req.IP == "" {
+		req.IP = params["ip"]
+	}
+	if req.GameID == "" {
+		req.GameID = params["game_id"]
 	}
 	if req.PlayerName == "" {
 		req.PlayerName = params["player_name"]
 	}
-	if req.Sign == "" {
-		req.Sign = signValue
-	}
-	if req.Timestamp == 0 {
-		req.Timestamp = parseVendorCallbackTimestamp(params["timestamp"])
+}
+
+func vendorBalanceSuccess(balance float64) *gameplatformdto.VendorBalanceRes {
+	return &gameplatformdto.VendorBalanceRes{
+		Data: &gameplatformdto.VendorBalanceData{
+			Balance:      balance,
+			CurrencyCode: vendorCallbackCurrency,
+			RTP:          vendorCallbackDefaultRTP,
+		},
+		Error: nil,
 	}
 }
 
 func vendorBalanceFail(code int, message string) *gameplatformdto.VendorBalanceRes {
 	return &gameplatformdto.VendorBalanceRes{
-		Code:    code,
-		Message: message,
+		Data: nil,
+		Error: &gameplatformdto.VendorBalanceError{
+			Code:    code,
+			Message: message,
+		},
 	}
 }
