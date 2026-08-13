@@ -47,7 +47,17 @@ func CreateCMSUser(user *entity.CMSUser) error {
 
 // UpdateCMSUser 更新CMS用户
 func UpdateCMSUser(user *entity.CMSUser) error {
-	return CreateCMSUser(user)
+	old := GetCMSUserById(user.ID)
+	_, err := g.DB().Model(string(entity.TbCMSUser)).Save(user)
+	if err != nil {
+		return err
+	}
+	oldName := ""
+	if old != nil {
+		oldName = old.Name
+	}
+	refreshCMSLoginUserCacheIfExists(user, oldName)
+	return nil
 }
 
 // ListCMSUserIdsByRoleId 按角色ID获取CMS用户ID列表
@@ -68,11 +78,15 @@ func ListCMSUserIdsByRoleId(roleId uint64) []uint64 {
 
 // DeleteCMSUser 删除CMS用户
 func DeleteCMSUser(id uint64) error {
+	user := GetCMSUserById(id)
 	_, err := g.DB().Model(string(entity.TbCMSUser)).WherePri(id).Delete()
-	if err == nil {
-		return nil
+	if err != nil {
+		return err
 	}
-	return err
+	if user != nil {
+		removeCMSLoginUserCacheIfExists(user.Name)
+	}
+	return nil
 }
 
 // GetCMSUserList 获取CMS用户列表
@@ -107,7 +121,6 @@ func GetCMSUserList(req *cmsuserdto.CMSUserListReq) (int, []*cmsuserdto.CMSUserL
 	}
 
 	sql += ` order by u.created_at desc`
-	//获取总数
 	countSql := str.GetCountSQL(sql)
 	total, _ := g.DB().GetCount(ctx, countSql, param)
 	sql += ` limit ` + strconv.Itoa(req.PageSize) + ` offset ` + strconv.Itoa(req.PageIndex-1)
