@@ -15,6 +15,11 @@
           <el-table-column label="ID" prop="id" width="100"/>
           <el-table-column :label="t('pages.liveRoomTagList.tagName')" prop="name" min-width="160"/>
           <el-table-column :label="t('common.sort')" prop="sort" width="80"/>
+          <el-table-column :label="t('pages.liveRoomTagList.isSpecial')" prop="isSpecial" width="100">
+            <template #default="{ row }">
+              {{ row.isSpecial ? t('common.yes') : t('common.no') }}
+            </template>
+          </el-table-column>
           <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
           <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
           <el-table-column fixed="right" :label="t('common.actions')" width="160">
@@ -48,6 +53,9 @@
           <el-input-number v-model="currentRow.sort" controls-position="right"/>
           <div class="form-tip">{{ t('pages.liveRoomTagList.sortHigherFirst') }}</div>
         </el-form-item>
+        <el-form-item :label="t('pages.liveRoomTagList.isSpecial')" prop="isSpecial">
+          <el-switch v-model="currentRow.isSpecial"/>
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
@@ -68,6 +76,7 @@ interface TagForm {
   id: string
   name: string
   sort: number
+  isSpecial: boolean
 }
 
 const {t} = useI18n()
@@ -83,7 +92,8 @@ const dialogTitle = ref('')
 const defaultForm = (): TagForm => ({
   id: '',
   name: '',
-  sort: 0
+  sort: 0,
+  isSpecial: false
 })
 const currentRow = ref<TagForm>(defaultForm())
 const formRef = ref<FormInstance>()
@@ -133,7 +143,8 @@ const handleEdit = (row: LiveRoomTag) => {
   currentRow.value = {
     id: row.id,
     name: row.name,
-    sort: Number(row.sort) || 0
+    sort: Number(row.sort) || 0,
+    isSpecial: !!row.isSpecial
   }
   dialogVisible.value = true
 }
@@ -145,13 +156,15 @@ const handleSave = async () => {
       await liveRoomTagApi.updateLiveRoomTag({
         id: currentRow.value.id,
         name: currentRow.value.name,
-        sort: currentRow.value.sort
+        sort: currentRow.value.sort,
+        isSpecial: currentRow.value.isSpecial
       })
       ElMessage.success(t('common.updateSuccess'))
     } else {
       await liveRoomTagApi.createLiveRoomTag({
         name: currentRow.value.name,
-        sort: currentRow.value.sort
+        sort: currentRow.value.sort,
+        isSpecial: currentRow.value.isSpecial
       })
       ElMessage.success(t('common.createSuccess'))
     }

@@ -261,6 +261,41 @@ func filterRoomsByQuery(rooms []*entity.LiveRoom, tagId uint64, title, notice st
 	return filtered
 }
 
+func buildFollowingAnchorSet(userId uint64) map[uint64]struct{} {
+	set := make(map[uint64]struct{})
+	if userId == 0 {
+		return set
+	}
+	followingTotal := userinfodao.GetFollowCount(userId)
+	followings := livefollowdao.GetFollowingsByUser(userId, 1, followingTotal)
+	for _, f := range followings {
+		if f != nil && f.AnchorId > 0 {
+			set[f.AnchorId] = struct{}{}
+		}
+	}
+	return set
+}
+
+func filterRoomsByFollowing(rooms []*entity.LiveRoom, userId uint64) []*entity.LiveRoom {
+	if userId == 0 {
+		return make([]*entity.LiveRoom, 0)
+	}
+	following := buildFollowingAnchorSet(userId)
+	if len(following) == 0 {
+		return make([]*entity.LiveRoom, 0)
+	}
+	filtered := make([]*entity.LiveRoom, 0, len(following))
+	for _, room := range rooms {
+		if room == nil {
+			continue
+		}
+		if _, ok := following[room.ID]; ok {
+			filtered = append(filtered, room)
+		}
+	}
+	return filtered
+}
+
 func filterRoomsByBlocked(rooms []*entity.LiveRoom, userId uint64) []*entity.LiveRoom {
 	if userId == 0 || len(rooms) == 0 {
 		return rooms
@@ -354,7 +389,15 @@ func GetRoomList(ctx context.Context, req *liveroomdto.GetLiveRoomListReq) (*liv
 	}
 
 	filtered := filterRoomsByStatus(cached, req.StatusFilter)
-	filtered = filterRoomsByQuery(filtered, req.TagId, req.Title, req.Notice)
+	tagId := req.TagId
+	switch resolveSpecialRoomTagFilterMode(tagId) {
+	case specialRoomTagNameAll:
+		tagId = 0
+	case specialRoomTagNameMy:
+		filtered = filterRoomsByFollowing(filtered, userId)
+		tagId = 0
+	}
+	filtered = filterRoomsByQuery(filtered, tagId, req.Title, req.Notice)
 	filtered = filterRoomsBySeniorAnchor(filtered, userId)
 	filtered = filterRoomsByBlocked(filtered, userId)
 	total := len(filtered)
@@ -443,25 +486,6 @@ func collectNearbyLiveRooms(rooms []*entity.LiveRoom, currentIdx, direction, cou
 	return result
 }
 
-func filterHotLiveRooms(rooms []*entity.LiveRoom) []*entity.LiveRoom {
-	hotTagId := getRoomTagIdByName("Hot")
-	filtered := make([]*entity.LiveRoom, 0, len(rooms))
-	for _, room := range rooms {
-		if room == nil || room.LiveRecordId == 0 {
-			continue
-		}
-		if hotTagId > 0 {
-			if room.TagId != hotTagId {
-				continue
-			}
-		} else if room.Category != entity.LiveRoomCategoryHot {
-			continue
-		}
-		filtered = append(filtered, room)
-	}
-	return filtered
-}
-
 func buildHotLiveRoomListItems(rooms []*entity.LiveRoom, userId uint64, startRank int) []*liveroomdto.HotLiveRoomListItem {
 	list := make([]*liveroomdto.HotLiveRoomListItem, 0, len(rooms))
 	rank := startRank
@@ -478,7 +502,7 @@ func buildHotLiveRoomListItems(rooms []*entity.LiveRoom, userId uint64, startRan
 	return list
 }
 
-// GetHotLiveRoomList App 分页查询 Hot 分类直播中房间列表(走内存缓存排序,含排名)
+// GetHotLiveRoomList App 分页查询 Hot 列表(暂拉取全部直播间,走内存缓存排序,含排名)
 func GetHotLiveRoomList(ctx context.Context, req *liveroomdto.GetHotLiveRoomListReq) (*liveroomdto.GetHotLiveRoomListRes, error) {
 	userId := httpserver.GetAuthId(ctx)
 	pageIndex, pageSize := normalizeRoomListPage(req.PageIndex, req.PageSize)
@@ -493,8 +517,7 @@ func GetHotLiveRoomList(ctx context.Context, req *liveroomdto.GetHotLiveRoomList
 		}, nil
 	}
 
-	filtered := filterHotLiveRooms(cached)
-	filtered = filterRoomsBySeniorAnchor(filtered, userId)
+	filtered := filterRoomsBySeniorAnchor(cached, userId)
 	filtered = filterRoomsByBlocked(filtered, userId)
 	total := len(filtered)
 	start, end := roomListPageRange(total, pageIndex, pageSize)

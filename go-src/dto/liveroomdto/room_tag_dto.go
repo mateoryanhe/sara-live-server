@@ -14,14 +14,16 @@ type LiveRoomTagListRes struct {
 	ID        string `json:"id"`
 	Name      string `json:"name"`
 	Sort      int    `json:"sort"`
+	IsSpecial bool   `json:"isSpecial"`
 	CreatedAt string `json:"createdAt"`
 	UpdatedAt string `json:"updatedAt"`
 }
 
 type CreateLiveRoomTagReq struct {
-	g.Meta `path:"/createLiveRoomTag" method:"post" summary:"创建直播间标签" tags:"直播间标签"`
-	Name   string `json:"name" v:"required|length:1,64#标签名称不能为空|标签名称长度需在1-64字符" dc:"标签名称"`
-	Sort   int    `json:"sort" dc:"排序值(越大越靠前)"`
+	g.Meta    `path:"/createLiveRoomTag" method:"post" summary:"创建直播间标签" tags:"直播间标签"`
+	Name      string `json:"name" v:"required|length:1,64#标签名称不能为空|标签名称长度需在1-64字符" dc:"标签名称"`
+	Sort      int    `json:"sort" dc:"排序值(越大越靠前)"`
+	IsSpecial bool   `json:"isSpecial" dc:"是否特殊"`
 }
 
 type CreateLiveRoomTagRes struct {
@@ -29,10 +31,11 @@ type CreateLiveRoomTagRes struct {
 }
 
 type UpdateLiveRoomTagReq struct {
-	g.Meta `path:"/updateLiveRoomTag" method:"post" summary:"修改直播间标签" tags:"直播间标签"`
-	ID     uint64 `json:"id" v:"required#标签ID不能为空" dc:"标签ID"`
-	Name   string `json:"name" v:"required|length:1,64#标签名称不能为空|标签名称长度需在1-64字符" dc:"标签名称"`
-	Sort   int    `json:"sort" dc:"排序值(越大越靠前)"`
+	g.Meta    `path:"/updateLiveRoomTag" method:"post" summary:"修改直播间标签" tags:"直播间标签"`
+	ID        uint64 `json:"id" v:"required#标签ID不能为空" dc:"标签ID"`
+	Name      string `json:"name" v:"required|length:1,64#标签名称不能为空|标签名称长度需在1-64字符" dc:"标签名称"`
+	Sort      int    `json:"sort" dc:"排序值(越大越靠前)"`
+	IsSpecial bool   `json:"isSpecial" dc:"是否特殊"`
 }
 
 type UpdateLiveRoomTagRes struct {
@@ -49,13 +52,14 @@ type DeleteLiveRoomTagRes struct {
 }
 
 type AppLiveRoomTagListReq struct {
-	g.Meta `path:"/appLiveRoomTagList" method:"post" summary:"App查询直播间标签列表" tags:"直播间标签"`
+	g.Meta `path:"/appLiveRoomTagList" method:"post" summary:"App查询直播间标签(不含特殊标签)" tags:"直播间标签"`
 }
 
 type AppLiveRoomTagItem struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	Sort int    `json:"sort"`
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	Sort      int    `json:"sort"`
+	IsSpecial bool   `json:"isSpecial,omitempty"`
 }
 
 type AppLiveRoomTagListRes struct {

@@ -865,6 +865,7 @@ export interface LiveRoomTag {
     id: string
     name: string
     sort: number
+    isSpecial: boolean
     createdAt: string
     updatedAt: string
 }

@@ -11,6 +11,7 @@ const zh = {
   nameRequired: '请输入标签名称',
   nameMaxLength: '标签名称最长64字符',
   saveFailed: '保存标签失败',
+  isSpecial: '是否特殊',
 } as const
 
 export const liveRoomTagListMessages = definePageMessages(
@@ -26,6 +27,7 @@ export const liveRoomTagListMessages = definePageMessages(
     nameRequired: 'Please enter tag name',
     nameMaxLength: 'Tag name max 64 characters',
     saveFailed: 'Failed to save tag',
+    isSpecial: 'Special',
   },
   {
     addTag: 'Añadir etiqueta',
@@ -38,6 +40,7 @@ export const liveRoomTagListMessages = definePageMessages(
     nameRequired: 'Introduce el nombre de etiqueta',
     nameMaxLength: 'Nombre máx. 64 caracteres',
     saveFailed: 'Error al guardar etiqueta',
+    isSpecial: 'Especial',
   },
   {
     addTag: 'Adicionar tag',
@@ -50,6 +53,7 @@ export const liveRoomTagListMessages = definePageMessages(
     nameRequired: 'Digite o nome da tag',
     nameMaxLength: 'Nome máx. 64 caracteres',
     saveFailed: 'Falha ao salvar tag',
+    isSpecial: 'Especial',
   },
   {
     addTag: 'टैग जोड़ें',
@@ -62,6 +66,7 @@ export const liveRoomTagListMessages = definePageMessages(
     nameRequired: 'टैग नाम दर्ज करें',
     nameMaxLength: 'टैग नाम अधिकतम 64 अक्षर',
     saveFailed: 'टैग सहेजना विफल',
+    isSpecial: 'विशेष',
   },
   {
     addTag: 'Tambah tag',
@@ -74,5 +79,6 @@ export const liveRoomTagListMessages = definePageMessages(
     nameRequired: 'Masukkan nama tag',
     nameMaxLength: 'Nama tag maks. 64 karakter',
     saveFailed: 'Gagal menyimpan tag',
+    isSpecial: 'Khusus',
   },
 )

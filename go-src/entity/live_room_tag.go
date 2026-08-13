@@ -12,8 +12,9 @@ const (
 // LiveRoomTag 直播间标签(CMS 管理)
 type LiveRoomTag struct {
 	migrate.OneModel
-	Name string `gorm:"size:64;comment:标签名称" json:"name"`
-	Sort int    `gorm:"default:0;comment:排序值(越大越靠前)" json:"sort"`
+	Name      string `gorm:"size:64;comment:标签名称" json:"name"`
+	Sort      int    `gorm:"default:0;comment:排序值(越大越靠前)" json:"sort"`
+	IsSpecial bool   `gorm:"default:0;comment:是否特殊" json:"isSpecial"`
 }
 
 func initLiveRoomTag() {

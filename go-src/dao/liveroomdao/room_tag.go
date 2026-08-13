@@ -58,7 +58,7 @@ func DeleteRoomTag(id uint64) error {
 }
 
 func GetRoomTagList(req *liveroomdto.LiveRoomTagListReq) (int, []*liveroomdto.LiveRoomTagListRes) {
-	sql := `select id, name, sort, created_at, updated_at
+	sql := `select id, name, sort, is_special, created_at, updated_at
             from live_room_tags
             where 1=1 `
 	param := make([]any, 0)

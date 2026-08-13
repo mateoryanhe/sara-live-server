@@ -59,6 +59,45 @@ func getAppRoomTagList() []*liveroomdto.AppLiveRoomTagItem {
 	return getRoomTagSnapshot().list
 }
 
+// getAppRoomTagListForApp App 端标签列表(过滤 isSpecial=true).
+func getAppRoomTagListForApp() []*liveroomdto.AppLiveRoomTagItem {
+	all := getAppRoomTagList()
+	if len(all) == 0 {
+		return emptyRoomTagList
+	}
+	list := make([]*liveroomdto.AppLiveRoomTagItem, 0, len(all))
+	for _, item := range all {
+		if item == nil || item.IsSpecial {
+			continue
+		}
+		list = append(list, item)
+	}
+	return list
+}
+
+const (
+	specialRoomTagNameAll = "all"
+	specialRoomTagNameMy  = "my"
+)
+
+func resolveSpecialRoomTagFilterMode(tagId uint64) string {
+	if tagId == 0 {
+		return ""
+	}
+	tag := GetRoomTagFromMemoryById(tagId)
+	if tag == nil || !tag.IsSpecial {
+		return ""
+	}
+	switch strings.ToLower(strings.TrimSpace(tag.Name)) {
+	case specialRoomTagNameAll:
+		return specialRoomTagNameAll
+	case specialRoomTagNameMy:
+		return specialRoomTagNameMy
+	default:
+		return ""
+	}
+}
+
 func GetRoomTagFromMemoryById(id uint64) *entity.LiveRoomTag {
 	return getRoomTagSnapshot().byID[id]
 }
@@ -88,8 +127,9 @@ func getRoomTagIdByName(name string) uint64 {
 
 func toAppLiveRoomTagItem(tag *entity.LiveRoomTag) *liveroomdto.AppLiveRoomTagItem {
 	return &liveroomdto.AppLiveRoomTagItem{
-		ID:   strconv.FormatUint(tag.ID, 10),
-		Name: tag.Name,
-		Sort: tag.Sort,
+		ID:        strconv.FormatUint(tag.ID, 10),
+		Name:      tag.Name,
+		Sort:      tag.Sort,
+		IsSpecial: tag.IsSpecial,
 	}
 }

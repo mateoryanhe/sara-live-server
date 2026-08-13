@@ -16,7 +16,7 @@ func GetLiveRoomTagList(_ context.Context, req *liveroomdto.LiveRoomTagListReq) 
 }
 
 func GetAppLiveRoomTagList(_ context.Context, _ *liveroomdto.AppLiveRoomTagListReq) (*liveroomdto.AppLiveRoomTagListRes, error) {
-	return &liveroomdto.AppLiveRoomTagListRes{List: getAppRoomTagList()}, nil
+	return &liveroomdto.AppLiveRoomTagListRes{List: getAppRoomTagListForApp()}, nil
 }
 
 func CreateLiveRoomTag(_ context.Context, req *liveroomdto.CreateLiveRoomTagReq) (*liveroomdto.CreateLiveRoomTagRes, error) {
@@ -24,8 +24,9 @@ func CreateLiveRoomTag(_ context.Context, req *liveroomdto.CreateLiveRoomTagReq)
 		return nil, errercode.CreateCode(errercode.LiveRoomTagExist)
 	}
 	row := &entity.LiveRoomTag{
-		Name: req.Name,
-		Sort: req.Sort,
+		Name:      req.Name,
+		Sort:      req.Sort,
+		IsSpecial: req.IsSpecial,
 	}
 	if err := liveroomdao.CreateRoomTag(row); err != nil {
 		return nil, err
@@ -44,6 +45,7 @@ func UpdateLiveRoomTag(_ context.Context, req *liveroomdto.UpdateLiveRoomTagReq)
 	}
 	row.Name = req.Name
 	row.Sort = req.Sort
+	row.IsSpecial = req.IsSpecial
 	if err := liveroomdao.UpdateRoomTag(row); err != nil {
 		return nil, err
 	}

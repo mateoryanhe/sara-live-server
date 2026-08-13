@@ -6,11 +6,11 @@ export const liveRoomTagApi = {
         return request.post<PageResponse<LiveRoomTag>>('/liveRoomTag/liveRoomTagList', params)
     },
 
-    createLiveRoomTag: (data: { name: string; sort: number }) => {
+    createLiveRoomTag: (data: { name: string; sort: number; isSpecial?: boolean }) => {
         return request.post<{ id: string }>('/liveRoomTag/createLiveRoomTag', data)
     },
 
-    updateLiveRoomTag: (data: { id: string | number; name: string; sort: number }) => {
+    updateLiveRoomTag: (data: { id: string | number; name: string; sort: number; isSpecial?: boolean }) => {
         return request.post<boolean>('/liveRoomTag/updateLiveRoomTag', data)
     },
 
