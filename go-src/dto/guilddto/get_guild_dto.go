@@ -15,7 +15,6 @@ type GetGuildRes struct {
 	Name        string `json:"name"`
 	LeaderId    string `json:"leaderId"`
 	LeaderName  string `json:"leaderName"`
-	Contact     string `json:"contact"`
 	Description string `json:"description"`
 	Status      uint8  `json:"status"`
 }

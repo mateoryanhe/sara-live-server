@@ -1,5 +1,5 @@
 import {request} from '../request'
-import type {Guild, GuildQuery, MyGuildProfile, PageResponse, UpdateMyGuildProfileReq} from '@/types/api'
+import type {Guild, GuildQuery, MyGuildProfileListRes, PageResponse, UpdateMyGuildProfileReq} from '@/types/api'
 
 // 直播工会管理API
 export const guildApi = {
@@ -12,9 +12,7 @@ export const guildApi = {
     createGuild: (data: {
         name: string
         leaderId: number
-        contact: string
         description: string
-        status: number
     }) => {
         return request.post<{ id: string }>('/guild/createGuild', data)
     },
@@ -24,9 +22,7 @@ export const guildApi = {
         id: string
         name: string
         leaderId: number
-        contact: string
         description: string
-        status: number
     }) => {
         return request.post<boolean>('/guild/updateGuild', data)
     },

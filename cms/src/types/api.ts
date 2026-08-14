@@ -476,7 +476,6 @@ export interface Guild {
     name: string
     leaderId: string
     leaderName?: string
-    contact: string
     description: string
     status: number
     createdAt: string
@@ -490,8 +489,6 @@ export interface GuildQuery extends PageQuery {
 export interface MyGuildProfile {
     id: string
     name: string
-    bankCard: string
-    contact: string
     description: string
     updatedAt?: string
 }
@@ -499,8 +496,6 @@ export interface MyGuildProfile {
 export interface UpdateMyGuildProfileReq {
     id: string | number
     name: string
-    bankCard?: string
-    contact?: string
     description?: string
 }
 

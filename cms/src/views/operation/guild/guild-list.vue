@@ -29,15 +29,7 @@
               {{ formatLeader(row) }}
             </template>
           </el-table-column>
-          <el-table-column :label="t('pages.guildList.contact')" prop="contact" width="160"/>
           <el-table-column :label="t('pages.guildList.description')" prop="description" show-overflow-tooltip/>
-          <el-table-column :label="t('common.status')" width="100">
-            <template #default="{ row }">
-              <el-tag :type="row.status === 1 ? 'success' : 'danger'">
-                {{ row.status === 1 ? t('common.enabled') : t('common.disabled') }}
-              </el-tag>
-            </template>
-          </el-table-column>
           <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
           <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
           <el-table-column :label="t('common.actions')" width="200">
@@ -88,17 +80,8 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item :label="t('pages.guildList.contact')" prop="contact">
-          <el-input v-model="currentRow.contact" :placeholder="t('pages.guildList.contactPlaceholder')"/>
-        </el-form-item>
         <el-form-item :label="t('pages.guildList.description')" prop="description">
           <el-input v-model="currentRow.description" :placeholder="t('pages.guildList.descriptionPlaceholder')" type="textarea"/>
-        </el-form-item>
-        <el-form-item :label="t('common.status')" prop="status">
-          <el-radio-group v-model="currentRow.status">
-            <el-radio :label="1">{{ t('common.enabled') }}</el-radio>
-            <el-radio :label="0">{{ t('common.disabled') }}</el-radio>
-          </el-radio-group>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -125,9 +108,7 @@ interface GuildForm {
   id: string
   name: string
   leaderId: string
-  contact: string
   description: string
-  status: number
 }
 
 const {t} = useI18n()
@@ -149,9 +130,7 @@ const currentRow = ref<GuildForm>({
   id: '',
   name: '',
   leaderId: '',
-  contact: '',
   description: '',
-  status: 1
 })
 
 const formRef = ref<FormInstance>()
@@ -263,9 +242,7 @@ const handleAdd = async () => {
     id: '',
     name: '',
     leaderId: '',
-    contact: '',
     description: '',
-    status: 1
   }
   cmsUserOptions.value = []
   dialogVisible.value = true
@@ -279,9 +256,7 @@ const handleEdit = async (row: Guild) => {
     id: row.id,
     name: row.name,
     leaderId,
-    contact: row.contact,
     description: row.description,
-    status: row.status
   }
   cmsUserOptions.value = []
   if (leaderId) {
@@ -321,8 +296,8 @@ const handleSave = async () => {
         if (currentRow.value.id) {
           await guildApi.updateGuild({...currentRow.value, leaderId})
         } else {
-          const {name, contact, description, status} = currentRow.value
-          await guildApi.createGuild({name, leaderId, contact, description, status})
+          const {name, description} = currentRow.value
+          await guildApi.createGuild({name, leaderId, description})
         }
 
         ElMessage.success(currentRow.value.id ? t('common.updateSuccess') : t('common.createSuccess'))

@@ -62,7 +62,10 @@ func ReloadGuildMemory() {
 
 func loadAllGuildsFromDB() []*entity.LiveGuild {
 	rows := make([]*entity.LiveGuild, 0)
-	_ = g.DB().Model(string(entity.TbLiveGuild)).Order("created_at desc").Scan(&rows)
+	_ = g.DB().Model(string(entity.TbLiveGuild)).
+		Where(string(entity.LiveGuildStatus), entity.LiveGuildStatusNormal).
+		Order("created_at desc").
+		Scan(&rows)
 	return rows
 }
 
@@ -122,7 +125,6 @@ func toGuildListRes(row *entity.LiveGuild) *guilddto.GuildListRes {
 		Name:        row.Name,
 		LeaderId:    strconv.FormatUint(row.LeaderId, 10),
 		LeaderName:  row.LeaderName,
-		Contact:     row.Contact,
 		Description: row.Description,
 		Status:      row.Status,
 		CreatedAt:   formatGuildTime(row.CreatedAt),
@@ -179,7 +181,7 @@ func queryGuildListFromMemory(req *guilddto.GuildListReq) (int, []*guilddto.Guil
 	return total, list
 }
 
-// AddGuildToMemory 将新工会写入内存快照(异步入库由 syndb 负责)
+// AddGuildToMemory 将新工会写入内存快照
 func AddGuildToMemory(g *entity.LiveGuild) {
 	if g == nil || g.ID == 0 {
 		return

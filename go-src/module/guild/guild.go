@@ -37,9 +37,7 @@ func CreateGuild(ctx context.Context, req *guilddto.CreateGuildReq) (res *guildd
 		req.Name,
 		req.LeaderId,
 		resolveLeaderName(req.LeaderId),
-		req.Contact,
 		req.Description,
-		req.Status,
 	)
 	if err = guilddao.CreateGuild(guild); err != nil {
 		return nil, err
@@ -61,19 +59,22 @@ func UpdateGuild(ctx context.Context, req *guilddto.UpdateGuildReq) (res *guildd
 
 	oldName := guild.Name
 	oldLeaderId := guild.LeaderId
-	guild.SetName(req.Name)
-	guild.SetLeaderId(req.LeaderId)
-	guild.SetLeaderName(resolveLeaderName(req.LeaderId))
-	guild.SetContact(req.Contact)
-	guild.SetDescription(req.Description)
-	guild.SetStatus(req.Status)
-	guilddao.UpdateGuild(guild, oldName, oldLeaderId)
+	guild.Name = req.Name
+	guild.LeaderId = req.LeaderId
+	guild.LeaderName = resolveLeaderName(req.LeaderId)
+	guild.Description = req.Description
+	if err = guilddao.UpdateGuild(guild, oldName, oldLeaderId); err != nil {
+		return nil, err
+	}
 
 	return &guilddto.UpdateGuildRes{Success: true}, nil
 }
 
-// DeleteGuild 删除直播工会
+// DeleteGuild 软删除直播工会
 func DeleteGuild(ctx context.Context, req *guilddto.DeleteGuildReq) (res *guilddto.DeleteGuildRes, err error) {
+	if guilddao.GetGuildById(req.ID) == nil {
+		return nil, errercode.CreateCode(errercode.GuildNonExist)
+	}
 	if err = guilddao.DeleteGuild(req.ID); err != nil {
 		return nil, err
 	}
@@ -92,7 +93,6 @@ func GetGuild(ctx context.Context, req *guilddto.GetGuildReq) (res *guilddto.Get
 		Name:        guild.Name,
 		LeaderId:    strconv.FormatUint(guild.LeaderId, 10),
 		LeaderName:  guild.LeaderName,
-		Contact:     guild.Contact,
 		Description: guild.Description,
 		Status:      guild.Status,
 	}, nil

@@ -22,8 +22,6 @@
         <el-table v-loading="loading" :data="tableData" style="width: 100%">
           <el-table-column label="ID" prop="id" width="100"/>
           <el-table-column :label="t('pages.guildProfile.guildName')" min-width="140" prop="name"/>
-          <el-table-column :label="t('pages.guildProfile.bankCard')" min-width="160" prop="bankCard" show-overflow-tooltip/>
-          <el-table-column :label="t('pages.guildProfile.contact')" min-width="140" prop="contact" show-overflow-tooltip/>
           <el-table-column :label="t('pages.guildProfile.description')" min-width="180" prop="description" show-overflow-tooltip/>
           <el-table-column :label="t('pages.guildProfile.lastUpdated')" prop="updatedAt" width="170"/>
           <el-table-column :label="t('common.actions')" width="100" fixed="right">
@@ -44,12 +42,6 @@
         </el-form-item>
         <el-form-item :label="t('pages.guildProfile.guildName')" prop="name">
           <el-input v-model="formData.name" maxlength="32" :placeholder="t('pages.guildProfile.guildNamePlaceholder')" show-word-limit/>
-        </el-form-item>
-        <el-form-item :label="t('pages.guildProfile.bankCard')" prop="bankCard">
-          <el-input v-model="formData.bankCard" maxlength="64" :placeholder="t('pages.guildProfile.bankCardPlaceholder')" show-word-limit/>
-        </el-form-item>
-        <el-form-item :label="t('pages.guildProfile.contact')" prop="contact">
-          <el-input v-model="formData.contact" maxlength="64" :placeholder="t('pages.guildProfile.contactPlaceholder')" show-word-limit/>
         </el-form-item>
         <el-form-item :label="t('pages.guildProfile.description')" prop="description">
           <el-input
@@ -90,8 +82,6 @@ const formRef = ref<FormInstance>()
 const formData = reactive({
   id: '',
   name: '',
-  bankCard: '',
-  contact: '',
   description: '',
 })
 
@@ -99,12 +89,6 @@ const formRules = computed<FormRules>(() => ({
   name: [
     {required: true, message: t('pages.guildProfile.nameRequired'), trigger: 'blur'},
     {min: 2, max: 32, message: t('pages.guildProfile.nameLength'), trigger: 'blur'},
-  ],
-  bankCard: [
-    {max: 64, message: t('pages.guildProfile.bankCardMaxLength'), trigger: 'blur'},
-  ],
-  contact: [
-    {max: 64, message: t('pages.guildProfile.contactMaxLength'), trigger: 'blur'},
   ],
   description: [
     {max: 255, message: t('pages.guildProfile.descriptionMaxLength'), trigger: 'blur'},
@@ -127,8 +111,6 @@ const fetchList = async () => {
 const handleEdit = (row: MyGuildProfile) => {
   formData.id = row.id
   formData.name = row.name || ''
-  formData.bankCard = row.bankCard || ''
-  formData.contact = row.contact || ''
   formData.description = row.description || ''
   dialogVisible.value = true
 }
@@ -142,8 +124,6 @@ const handleSave = async () => {
       const response = await guildApi.updateMyGuildProfile({
         id: formData.id,
         name: formData.name.trim(),
-        bankCard: formData.bankCard.trim(),
-        contact: formData.contact.trim(),
         description: formData.description.trim(),
       })
       if (response?.success) {

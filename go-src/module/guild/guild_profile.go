@@ -41,11 +41,11 @@ func UpdateMyGuildProfile(ctx context.Context, req *guilddto.UpdateMyGuildProfil
 	}
 
 	oldName := guild.Name
-	guild.SetName(name)
-	guild.SetBankCard(strings.TrimSpace(req.BankCard))
-	guild.SetContact(strings.TrimSpace(req.Contact))
-	guild.SetDescription(strings.TrimSpace(req.Description))
-	guilddao.UpdateGuild(guild, oldName, guild.LeaderId)
+	guild.Name = name
+	guild.Description = strings.TrimSpace(req.Description)
+	if err = guilddao.UpdateGuild(guild, oldName, guild.LeaderId); err != nil {
+		return nil, err
+	}
 
 	return &guilddto.UpdateMyGuildProfileRes{Success: true}, nil
 }
@@ -87,8 +87,6 @@ func toMyGuildProfileItem(guild *entity.LiveGuild) *guilddto.MyGuildProfileItem 
 	return &guilddto.MyGuildProfileItem{
 		ID:          strconv.FormatUint(guild.ID, 10),
 		Name:        guild.Name,
-		BankCard:    guild.BankCard,
-		Contact:     guild.Contact,
 		Description: guild.Description,
 		UpdatedAt:   updatedAt,
 	}
