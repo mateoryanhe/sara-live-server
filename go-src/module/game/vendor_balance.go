@@ -2,6 +2,7 @@ package game
 
 import (
 	"context"
+	"math"
 	"strconv"
 	"strings"
 
@@ -107,10 +108,10 @@ func fillVendorBalanceReq(req *gameplatformdto.VendorBalanceReq, params map[stri
 	}
 }
 
-func vendorBalanceSuccess(balance float64) *gameplatformdto.VendorBalanceRes {
+func vendorBalanceSuccess(gold float64) *gameplatformdto.VendorBalanceRes {
 	return &gameplatformdto.VendorBalanceRes{
 		Data: &gameplatformdto.VendorBalanceData{
-			Balance:      balance,
+			Balance:      int64(math.Floor(gold)),
 			CurrencyCode: vendorCallbackCurrency,
 			RTP:          vendorCallbackDefaultRTP,
 		},

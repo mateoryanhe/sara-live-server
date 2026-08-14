@@ -38,7 +38,7 @@ type VendorBalanceReq struct {
 }
 
 type VendorBalanceData struct {
-	Balance      float64 `json:"balance"`
+	Balance      int64   `json:"balance"`
 	CurrencyCode string  `json:"currency_code"`
 	RTP          float64 `json:"rtp"`
 }
