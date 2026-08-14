@@ -40,6 +40,7 @@ const (
 	LiveRoomIsTest                       db.TbCol = "is_test"
 	LiveRoomCloudPlayerId                db.TbCol = "cloud_player_id"
 	LiveRoomCloudPlayerTokenExpireAt     db.TbCol = "cloud_player_token_expire_at"
+	LiveRoomTimezone                     db.TbCol = "timezone"
 )
 
 const (
@@ -92,6 +93,7 @@ type LiveRoom struct {
 	IsTest                       bool       `gorm:"default:0;comment:是否测试机器人主播(仅下发App)" json:"isTest"`
 	CloudPlayerId                string     `gorm:"size:64;default:'';comment:声网云播放器ID" json:"cloudPlayerId"`
 	CloudPlayerTokenExpireAt     *time.Time `gorm:"comment:云播放器RTC token过期时间" json:"cloudPlayerTokenExpireAt"`
+	Timezone                     int        `gorm:"default:0;comment:时区偏移量" json:"timezone"`
 }
 
 // NewLiveRoom 构造内存对象,字段写入通过 syndb 异步入库
@@ -108,6 +110,22 @@ func NewLiveRoom(anchorId, guildId uint64, title, cover, notice string) *LiveRoo
 	r.SetNotice(notice)
 	r.SetCategory(LiveRoomCategoryHot)
 	r.SetPrivateInviteType(DefaultPrivateInviteType(LiveRoomCategoryHot))
+	return r
+}
+
+// NewLiveRoomWithTimezone 构造带时区的直播间对象
+func NewLiveRoomWithTimezone(anchorId, guildId uint64, timezone int, title, cover, notice string) *LiveRoom {
+	r := &LiveRoom{}
+	r.ID = anchorId
+	now := time.Now()
+	r.SetCreatedAt(now)
+	r.SetGuildId(guildId)
+	r.SetTitle(title)
+	r.SetCover(cover)
+	r.SetNotice(notice)
+	r.SetCategory(LiveRoomCategoryHot)
+	r.SetPrivateInviteType(DefaultPrivateInviteType(LiveRoomCategoryHot))
+	r.SetTimezone(timezone)
 	return r
 }
 
@@ -340,6 +358,14 @@ func (r *LiveRoom) SetCloudPlayerTokenExpireAt(v *time.Time) {
 	r.CloudPlayerTokenExpireAt = v
 	r.touchUpdatedAt()
 	syndb.AddData(TbLiveRoom, LiveRoomCloudPlayerTokenExpireAt, &syndb.ColData{
+		IdVal: r.ID, ColVal: v,
+	})
+}
+
+func (r *LiveRoom) SetTimezone(v int) {
+	r.Timezone = v
+	r.touchUpdatedAt()
+	syndb.AddData(TbLiveRoom, LiveRoomTimezone, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }

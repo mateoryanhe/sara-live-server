@@ -9,19 +9,12 @@
       <div class="content">
         <div class="table-header">
           <el-button type="primary" @click="handleAdd">{{ t('pages.guildList.addGuild') }}</el-button>
+          <el-button @click="downloadTxtTemplate">{{ t('pages.guildList.downloadTemplate') }}</el-button>
           <el-button
-              v-if="can('batchSetAnchor')"
-              :loading="importing"
-              @click="triggerCsvImport(1)"
+              v-if="can('batchSetTimezone')"
+              @click="handleBatchSetTimezone"
           >
-            {{ t('pages.guildList.importNormalAnchor') }}
-          </el-button>
-          <el-button
-              v-if="can('batchSetSeniorAnchor')"
-              :loading="importing"
-              @click="triggerCsvImport(7)"
-          >
-            {{ t('pages.guildList.importSeniorAnchor') }}
+            {{ t('pages.guildList.batchSetTimezone') }}
           </el-button>
         </div>
         <el-alert
@@ -47,11 +40,13 @@
             :data="tableData"
             highlight-current-row
             style="width: 100%"
+            @selection-change="handleSelectionChange"
             @current-change="handleCurrentRowChange"
         >
-          <el-table-column label="ID" prop="id" width="100"/>
+          <el-table-column type="selection" width="55" />
+          <el-table-column label="ID" prop="id" width="190"/>
           <el-table-column :label="t('pages.guildList.guildName')" prop="name"/>
-          <el-table-column :label="t('pages.guildList.leader')" min-width="180" show-overflow-tooltip>
+          <el-table-column :label="t('pages.guildList.leader')" width="140" show-overflow-tooltip>
             <template #default="{ row }">
               {{ formatLeader(row) }}
             </template>
@@ -59,9 +54,32 @@
           <el-table-column :label="t('pages.guildList.description')" prop="description" show-overflow-tooltip/>
           <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
           <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
-          <el-table-column :label="t('common.actions')" width="200">
+          <el-table-column fixed="right" :label="t('common.actions')" width="500">
             <template #default="{ row }">
               <el-button size="small" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
+              <el-button
+                  v-if="can('viewMembers')"
+                  size="small"
+                  @click="handleViewMembers(row)"
+              >
+                {{ t('pages.guildList.viewMembers') }}
+              </el-button>
+              <el-button
+                  v-if="can('batchSetAnchor')"
+                  :loading="importing"
+                  size="small"
+                  @click="triggerCsvImport(row, 1)"
+              >
+                {{ t('pages.guildList.importNormalAnchor') }}
+              </el-button>
+              <el-button
+                  v-if="can('batchSetSeniorAnchor')"
+                  :loading="importing"
+                  size="small"
+                  @click="triggerCsvImport(row, 7)"
+              >
+                {{ t('pages.guildList.importSeniorAnchor') }}
+              </el-button>
               <el-button size="small" type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
             </template>
           </el-table-column>
@@ -110,6 +128,15 @@
         <el-form-item :label="t('pages.guildList.description')" prop="description">
           <el-input v-model="currentRow.description" :placeholder="t('pages.guildList.descriptionPlaceholder')" type="textarea"/>
         </el-form-item>
+        <el-form-item :label="t('pages.guildList.timezone')" prop="timezone">
+          <el-input-number
+              v-model="currentRow.timezone"
+              :placeholder="t('pages.guildList.timezonePlaceholder')"
+              :min="-12"
+              :max="14"
+              style="width: 100%"
+          />
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
@@ -117,9 +144,30 @@
       </template>
     </el-dialog>
 
+    <el-dialog v-model="batchTimezoneVisible" :title="t('pages.guildList.batchSetTimezone')" width="500px">
+      <el-form label-width="100px">
+        <el-form-item :label="t('pages.guildList.selectedGuilds')">
+          <span>{{ selectedGuilds.length }} {{ t('pages.guildList.guilds') }}</span>
+        </el-form-item>
+        <el-form-item :label="t('pages.guildList.timezone')" required>
+          <el-input-number
+              v-model="batchTimezone"
+              :placeholder="t('pages.guildList.timezonePlaceholder')"
+              :min="-12"
+              :max="14"
+              style="width: 100%"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="batchTimezoneVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" :loading="batchUpdating" @click="handleBatchUpdateTimezone">{{ t('common.save') }}</el-button>
+      </template>
+    </el-dialog>
+
     <input
         ref="csvInputRef"
-        accept=".csv,text/csv"
+        accept=".txt,.csv,text/plain,text/csv"
         class="hidden-file-input"
         type="file"
         @change="onCsvFileSelected"
@@ -148,6 +196,7 @@ interface GuildForm {
   name: string
   leaderId: string
   description: string
+  timezone: number
 }
 
 const {t} = useI18n()
@@ -159,11 +208,15 @@ const cmsUserLoading = ref(false)
 const cmsUserOptions = ref<CMSUser[]>([])
 const tableData = ref<Guild[]>([])
 const selectedGuild = ref<Guild | null>(null)
+const selectedGuilds = ref<Guild[]>([])
 const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
 const pendingAnchorType = ref<1 | 7>(1)
 const csvInputRef = ref<HTMLInputElement | null>(null)
+const batchTimezoneVisible = ref(false)
+const batchTimezone = ref<number>(8)
+const batchUpdating = ref(false)
 
 const searchForm = reactive<SearchForm>({
   name: ''
@@ -176,6 +229,7 @@ const currentRow = ref<GuildForm>({
   name: '',
   leaderId: '',
   description: '',
+  timezone: 8,
 })
 
 const formRef = ref<FormInstance>()
@@ -295,6 +349,7 @@ const handleAdd = async () => {
     name: '',
     leaderId: '',
     description: '',
+    timezone: 8,
   }
   cmsUserOptions.value = []
   dialogVisible.value = true
@@ -309,6 +364,7 @@ const handleEdit = async (row: Guild) => {
     name: row.name,
     leaderId,
     description: row.description,
+    timezone: row.timezone ?? 8,
   }
   cmsUserOptions.value = []
   if (leaderId) {
@@ -348,8 +404,8 @@ const handleSave = async () => {
         if (currentRow.value.id) {
           await guildApi.updateGuild({...currentRow.value, leaderId})
         } else {
-          const {name, description} = currentRow.value
-          await guildApi.createGuild({name, leaderId, description})
+          const {name, description, timezone} = currentRow.value
+          await guildApi.createGuild({name, leaderId, description, timezone})
         }
 
         ElMessage.success(currentRow.value.id ? t('common.updateSuccess') : t('common.createSuccess'))
@@ -430,11 +486,20 @@ const parseGuildAnchorCsv = (text: string): ImportGuildAnchorRow[] => {
   return rows
 }
 
-const triggerCsvImport = (anchorType: 1 | 7) => {
-  if (!selectedGuild.value) {
-    ElMessage.warning(t('pages.guildList.selectGuildFirst'))
-    return
-  }
+const downloadTxtTemplate = () => {
+  // 用 txt，避免 Excel 把大整数改成科学计数法
+  const content = 'user_id,cancel_code\n10001,ABC123\n'
+  const blob = new Blob(['\uFEFF' + content], {type: 'text/plain;charset=utf-8;'})
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'guild_anchor_import_template.txt'
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
+const triggerCsvImport = (row: Guild, anchorType: 1 | 7) => {
+  selectedGuild.value = row
   pendingAnchorType.value = anchorType
   if (csvInputRef.value) {
     csvInputRef.value.value = ''
@@ -485,6 +550,55 @@ const onCsvFileSelected = async (event: Event) => {
 onMounted(() => {
   fetchGuildList()
 })
+
+const handleSelectionChange = (selection: Guild[]) => {
+  selectedGuilds.value = selection
+}
+
+const handleBatchSetTimezone = () => {
+  if (selectedGuilds.value.length === 0) {
+    ElMessage.warning(t('pages.guildList.selectGuildsFirst'))
+    return
+  }
+  batchTimezone.value = 8
+  batchTimezoneVisible.value = true
+}
+
+const handleViewMembers = (row: Guild) => {
+  router.push({
+    name: 'GuildMembers',
+    query: {
+      guildId: row.id,
+      guildName: row.name,
+    },
+  })
+}
+
+const handleBatchUpdateTimezone = async () => {
+  if (selectedGuilds.value.length === 0) {
+    ElMessage.warning(t('pages.guildList.selectGuildsFirst'))
+    return
+  }
+  if (batchTimezone.value === undefined) {
+    ElMessage.warning(t('pages.guildList.selectTimezoneFirst'))
+    return
+  }
+  batchUpdating.value = true
+  try {
+    await guildApi.batchUpdateGuildTimezone({
+      guildIds: selectedGuilds.value.map(g => g.id),
+      timezone: batchTimezone.value
+    })
+    ElMessage.success(t('common.updateSuccess'))
+    batchTimezoneVisible.value = false
+    fetchGuildList()
+  } catch (error) {
+    console.error('batch update timezone failed:', error)
+    ElMessage.error(t('pages.guildList.updateFailed'))
+  } finally {
+    batchUpdating.value = false
+  }
+}
 </script>
 
 <style scoped>

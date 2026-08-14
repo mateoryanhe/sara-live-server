@@ -11,6 +11,7 @@ import (
 	"xr-game-server/dto/guilddto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
+	"xr-game-server/module/timezonecfg"
 )
 
 func genGuildId() uint64 {
@@ -38,10 +39,12 @@ func CreateGuild(ctx context.Context, req *guilddto.CreateGuildReq) (res *guildd
 		req.LeaderId,
 		resolveLeaderName(req.LeaderId),
 		req.Description,
+		req.Timezone,
 	)
 	if err = guilddao.CreateGuild(guild); err != nil {
 		return nil, err
 	}
+	timezonecfg.EnsureCron(req.Timezone)
 
 	return &guilddto.CreateGuildRes{ID: strconv.FormatUint(guild.ID, 10)}, nil
 }
@@ -57,15 +60,15 @@ func UpdateGuild(ctx context.Context, req *guilddto.UpdateGuildReq) (res *guildd
 		return nil, errercode.CreateCode(errercode.GuildExist)
 	}
 
-	oldName := guild.Name
-	oldLeaderId := guild.LeaderId
 	guild.Name = req.Name
 	guild.LeaderId = req.LeaderId
 	guild.LeaderName = resolveLeaderName(req.LeaderId)
 	guild.Description = req.Description
-	if err = guilddao.UpdateGuild(guild, oldName, oldLeaderId); err != nil {
+	guild.Timezone = req.Timezone
+	if err = guilddao.UpdateGuild(guild); err != nil {
 		return nil, err
 	}
+	timezonecfg.EnsureCron(req.Timezone)
 
 	return &guilddto.UpdateGuildRes{Success: true}, nil
 }
@@ -78,24 +81,7 @@ func DeleteGuild(ctx context.Context, req *guilddto.DeleteGuildReq) (res *guildd
 	if err = guilddao.DeleteGuild(req.ID); err != nil {
 		return nil, err
 	}
-	guilddao.RemoveGuildMembersCache(req.ID)
 	return &guilddto.DeleteGuildRes{Success: true}, nil
-}
-
-// GetGuild App端获取工会信息(走缓存)
-func GetGuild(ctx context.Context, req *guilddto.GetGuildReq) (res *guilddto.GetGuildRes, err error) {
-	guild := guilddao.GetGuildByIdCached(req.ID)
-	if guild == nil {
-		return nil, errercode.CreateCode(errercode.GuildNonExist)
-	}
-	return &guilddto.GetGuildRes{
-		ID:          strconv.FormatUint(guild.ID, 10),
-		Name:        guild.Name,
-		LeaderId:    strconv.FormatUint(guild.LeaderId, 10),
-		LeaderName:  guild.LeaderName,
-		Description: guild.Description,
-		Status:      guild.Status,
-	}, nil
 }
 
 func resolveLeaderName(leaderId uint64) string {
@@ -107,4 +93,13 @@ func resolveLeaderName(leaderId uint64) string {
 		return ""
 	}
 	return user.Name
+}
+
+// BatchUpdateGuildTimezone 批量更新工会时区
+func BatchUpdateGuildTimezone(_ context.Context, req *guilddto.BatchUpdateGuildTimezoneReq) (res *guilddto.BatchUpdateGuildTimezoneRes, err error) {
+	if err := guilddao.BatchUpdateGuildTimezone(req.GuildIds, req.Timezone); err != nil {
+		return nil, err
+	}
+	timezonecfg.EnsureCron(req.Timezone)
+	return &guilddto.BatchUpdateGuildTimezoneRes{Success: true}, nil
 }

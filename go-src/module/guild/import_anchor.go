@@ -22,7 +22,8 @@ func ImportGuildAnchors(ctx context.Context, req *guilddto.ImportGuildAnchorsReq
 	if req.AnchorType != entity.UserTypeAnchor && req.AnchorType != entity.UserTypeSeniorAnchor {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	if guilddao.GetGuildById(req.GuildId) == nil {
+	guild := guilddao.GetGuildById(req.GuildId)
+	if guild == nil {
 		return nil, errercode.CreateCode(errercode.GuildNonExist)
 	}
 
@@ -50,7 +51,7 @@ func ImportGuildAnchors(ctx context.Context, req *guilddto.ImportGuildAnchorsReq
 		}
 		seen[userID] = struct{}{}
 
-		failReason, nickname := importOneGuildAnchor(req.GuildId, userID, cancelCode, req.AnchorType)
+		failReason, nickname := importOneGuildAnchor(guild, userID, cancelCode, req.AnchorType)
 		if failReason > 0 {
 			res.Fails = append(res.Fails, &guilddto.ImportGuildAnchorFailItem{
 				UserId:   strconv.FormatUint(userID, 10),
@@ -70,7 +71,7 @@ func ImportGuildAnchors(ctx context.Context, req *guilddto.ImportGuildAnchorsReq
 	return res, nil
 }
 
-func importOneGuildAnchor(guildId, userID uint64, cancelCode string, anchorType uint8) (failReason int, nickname string) {
+func importOneGuildAnchor(guild *entity.LiveGuild, userID uint64, cancelCode string, anchorType uint8) (failReason int, nickname string) {
 	if accountdao.GetAccountById(userID) == nil {
 		return guilddto.ImportAnchorFailUserNotFound, ""
 	}
@@ -99,23 +100,7 @@ func importOneGuildAnchor(guildId, userID uint64, cancelCode string, anchorType 
 		return guilddto.ImportAnchorFailCannotSetAnchor, nickname
 	}
 
-	user.SetGuildId(guildId)
-	ensureImportedGuildMember(guildId, userID)
-	_ = liveroom.SetUserAsAnchorIfNeeded(userID, anchorType)
+	user.SetGuildId(guild.ID)
+	_ = liveroom.SetUserAsAnchorWithTimezone(userID, guild.ID, anchorType)
 	return 0, nickname
-}
-
-func ensureImportedGuildMember(guildId, userID uint64) {
-	exist := guilddao.FindMemberInGuild(guildId, userID, entity.GuildMemberStatusApproved)
-	if exist != nil {
-		return
-	}
-	if pending := guilddao.FindMemberInGuild(guildId, userID, entity.GuildMemberStatusPending); pending != nil {
-		pending.SetStatus(entity.GuildMemberStatusApproved)
-		guilddao.FlushMemberCache(pending)
-		return
-	}
-	m := entity.NewLiveGuildMember(genMemberId(), guildId, userID)
-	m.SetStatus(entity.GuildMemberStatusApproved)
-	guilddao.AddMemberToCache(m)
 }

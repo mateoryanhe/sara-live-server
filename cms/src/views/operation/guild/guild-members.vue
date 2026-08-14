@@ -1,53 +1,14 @@
 <template>
-
   <div class="page-container">
-
     <el-card>
-
       <template #header>
-
         <div class="card-header">
-
-          <span>{{ t('menu.AnchorListManagement') }}</span>
-
+          <span>{{ pageTitle }}</span>
+          <el-button @click="goBack">{{ t('pages.guildMembers.back') }}</el-button>
         </div>
-
       </template>
 
-
-
-      <el-form :model="searchForm" class="search-form" inline label-width="80px">
-
-        <el-form-item :label="t('common.keyword')">
-
-          <el-input v-model="searchForm.key" clearable :placeholder="t('pages.anchorList.keywordPlaceholder')"/>
-
-        </el-form-item>
-
-        <el-form-item>
-
-          <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
-
-          <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
-
-        </el-form-item>
-
-      </el-form>
-
-      <div class="table-header">
-        <el-button
-            :disabled="selectedAnchors.length === 0"
-            type="primary"
-            @click="handleBatchSetTimezone"
-        >
-          {{ t('pages.anchorList.batchSetTimezone') }}
-        </el-button>
-      </div>
-
-
-
-      <el-table v-loading="loading" :data="tableData" style="width: 100%" @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" :selectable="checkSelectable"/>
+      <el-table v-loading="loading" :data="tableData" style="width: 100%">
         <el-table-column :label="t('common.userId')" prop="id" width="180"/>
         <el-table-column :label="t('common.nickname')" min-width="120" prop="nickname">
           <template #default="{ row }">{{ row.nickname || '-' }}</template>
@@ -69,7 +30,7 @@
         <el-table-column :label="t('common.phone')" min-width="130" prop="phone">
           <template #default="{ row }">{{ row.phone || '-' }}</template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.guildId')" prop="guildId" width="120">
+        <el-table-column :label="t('pages.anchorList.guildId')" prop="guildId" width="190">
           <template #default="{ row }">{{ row.guildId || '-' }}</template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.anchorType')" width="110">
@@ -152,277 +113,168 @@
         <el-table-column :label="t('pages.anchorList.profileUpdatedAt')" prop="createdAt" width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>
-        <el-table-column fixed="right" :label="t('common.actions')" width="220">
+        <el-table-column fixed="right" :label="t('common.actions')" :width="readonly ? 90 : 220">
           <template #default="{ row }">
             <el-button link type="primary" @click="openDetail(row)">
               {{ t('common.detail') }}
             </el-button>
-            <el-button
-                :type="row.ban ? 'warning' : 'danger'"
-                link
-                @click="toggleBanStatus(row)"
-            >
-              {{ row.ban ? t('pages.anchorList.unban') : t('pages.anchorList.ban') }}
-            </el-button>
-            <el-button
-                v-if="Number(row.guildId) !== 0"
-                link
-                type="danger"
-                @click="handleExitGuild(row)"
-            >
-              {{ t('pages.anchorList.exitGuild') }}
-            </el-button>
+            <template v-if="!readonly">
+              <el-button
+                  v-if="row.ban ? can('unban') : can('ban')"
+                  :type="row.ban ? 'warning' : 'danger'"
+                  link
+                  @click="toggleBanStatus(row)"
+              >
+                {{ row.ban ? t('pages.anchorList.unban') : t('pages.anchorList.ban') }}
+              </el-button>
+              <el-button
+                  v-if="can('exitGuild')"
+                  link
+                  type="danger"
+                  @click="handleExitGuild(row)"
+              >
+                {{ t('pages.anchorList.exitGuild') }}
+              </el-button>
+            </template>
           </template>
         </el-table-column>
       </el-table>
 
-
-
-      <div class="pagination">
-
+      <div class="pagination-container">
         <el-pagination
-
             v-model:current-page="pagination.pageIndex"
-
             v-model:page-size="pagination.pageSize"
-
             :page-sizes="[10, 20, 50, 100]"
-
             :total="pagination.total"
-
             layout="total, sizes, prev, pager, next, jumper"
-
-            @current-change="handlePageChange"
-
             @size-change="handleSizeChange"
-
+            @current-change="handleCurrentChange"
         />
-
       </div>
 
+      <el-empty v-if="!loading && tableData.length === 0" :description="t('pages.guildMembers.noMembers')"/>
     </el-card>
 
-
-
     <el-dialog
-
+        v-if="!readonly"
         v-model="banDialogVisible"
-
         :close-on-click-modal="false"
-
         destroy-on-close
-
         :title="t('pages.anchorList.banDialogTitle')"
-
         width="520px"
-
         @closed="resetBanForm"
-
     >
-
       <el-form ref="banFormRef" :model="banForm" :rules="banRules" label-width="100px">
-
         <el-form-item :label="t('pages.anchorList.anchorId')">
-
           <el-input v-model="banForm.accountId" disabled/>
-
         </el-form-item>
-
         <el-form-item :label="t('common.nickname')">
-
           <el-input v-model="banForm.nickname" disabled/>
-
         </el-form-item>
-
         <el-form-item :label="t('pages.anchorList.banUntil')" prop="banApplyTime">
-
           <el-date-picker
-
               v-model="banForm.banApplyTime"
-
               :disabled-date="disabledDate"
-
               format="YYYY-MM-DD HH:mm:ss"
-
               :placeholder="t('pages.anchorList.selectBanUntil')"
-
               style="width: 100%"
-
               type="datetime"
-
               value-format="YYYY-MM-DD HH:mm:ss"
-
           />
-
         </el-form-item>
-
         <el-form-item :label="t('pages.anchorList.banReason')" prop="banReason">
-
           <el-input
-
               v-model="banForm.banReason"
-
               :maxlength="512"
-
               :rows="4"
-
               :placeholder="t('pages.anchorList.enterBanReason')"
-
               show-word-limit
-
               type="textarea"
-
           />
-
         </el-form-item>
-
       </el-form>
-
       <template #footer>
-
         <el-button @click="banDialogVisible = false">{{ t('common.cancel') }}</el-button>
-
         <el-button :loading="banSubmitting" type="primary" @click="submitBan">{{ t('pages.anchorList.confirmBan') }}</el-button>
-
-      </template>
-
-    </el-dialog>
-
-    <el-dialog v-model="batchTimezoneVisible" :title="t('pages.anchorList.batchSetTimezone')" width="500px">
-      <el-form label-width="100px">
-        <el-form-item :label="t('pages.anchorList.selectedAnchors')">
-          <span>{{ selectedAnchors.length }} {{ t('pages.anchorList.anchors') }}</span>
-        </el-form-item>
-        <el-form-item :label="t('pages.anchorList.timezone')" required>
-          <el-input-number
-              v-model="batchTimezone"
-              :placeholder="t('pages.anchorList.selectTimezone')"
-              :min="-12"
-              :max="14"
-              style="width: 100%"
-          />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="batchTimezoneVisible = false">{{ t('common.cancel') }}</el-button>
-        <el-button type="primary" :loading="batchUpdating" @click="handleBatchUpdateTimezone">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
-
   </div>
-
 </template>
 
-
-
 <script lang="ts" setup>
-
-import {computed, onMounted, reactive, ref} from 'vue'
-
+import {computed, onActivated, reactive, ref, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
-
-import {useRouter} from 'vue-router'
-
+import {useRoute, useRouter} from 'vue-router'
 import {ElForm, ElMessage, ElMessageBox, type FormRules} from 'element-plus'
-
 import {accountApi} from '@/api'
-
-import type {AnchorListItem, BanAnchorReq, BatchSetAnchorTimezoneRes, UnBanAnchorReq} from '@/types/api'
-
+import type {AnchorListItem, BanAnchorReq, UnBanAnchorReq} from '@/types/api'
 import {formatAmount} from '@/utils/number-format'
-
-
+import {usePagePermission} from '@/composables/usePagePermission'
 
 const {t} = useI18n()
-
+const route = useRoute()
 const router = useRouter()
-
-
+const readonly = computed(() => route.name === 'GuildProfileMembers')
+const {can} = usePagePermission(
+  route.name === 'GuildProfileMembers' ? 'GuildProfileManagement' : 'GuildManagement',
+)
 
 const loading = ref(false)
-
 const tableData = ref<AnchorListItem[]>([])
+const pagination = reactive({
+  pageIndex: 1,
+  pageSize: 10,
+  total: 0,
+})
 
 const banDialogVisible = ref(false)
-
 const banSubmitting = ref(false)
-
 const banFormRef = ref<InstanceType<typeof ElForm>>()
-
-const selectedAnchors = ref<AnchorListItem[]>([])
-const batchTimezoneVisible = ref(false)
-const batchTimezone = ref<number>(8)
-const batchUpdating = ref(false)
-
-
-
-const searchForm = reactive({
-
-  key: '',
-
-})
-
-
-
-const pagination = reactive({
-
-  pageIndex: 1,
-
-  pageSize: 10,
-
-  total: 0,
-
-})
-
-
-
 const banForm = reactive({
-
   accountId: '',
-
   nickname: '',
-
   banApplyTime: '',
-
   banReason: '',
-
 })
-
-
 
 const banRules = computed<FormRules>(() => ({
-
   banApplyTime: [
-
     {required: true, message: t('pages.anchorList.banApplyTimeRequired'), trigger: 'change'},
-
   ],
-
   banReason: [
-
     {required: true, message: t('pages.anchorList.banReasonRequired'), trigger: 'blur'},
-
     {min: 1, max: 512, message: t('pages.anchorList.banReasonLength'), trigger: 'blur'},
-
   ],
-
 }))
 
+const guildId = computed(() => {
+  const value = route.query.guildId
+  if (Array.isArray(value)) {
+    return String(value[0] ?? '')
+  }
+  if (value == null || value === '') {
+    return ''
+  }
+  return String(value)
+})
 
+const guildName = computed(() => {
+  const value = route.query.guildName
+  if (Array.isArray(value)) {
+    return String(value[0] ?? '')
+  }
+  if (value == null || value === '') {
+    return ''
+  }
+  return String(value)
+})
 
-const defaultBanApplyTime = () => {
-
-  const date = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-
-  const pad = (n: number) => String(n).padStart(2, '0')
-
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
-
-}
-
-
-
-const disabledDate = (time: Date) => time.getTime() < Date.now()
+const pageTitle = computed(() => {
+  if (guildName.value) {
+    return t('pages.guildMembers.titleWithName', {name: guildName.value})
+  }
+  return t('pages.guildMembers.title')
+})
 
 const LIVE_ROOM_CATEGORY_HOT = 1
 const LIVE_ROOM_CATEGORY_GAME = 2
@@ -484,300 +336,130 @@ const formatDate = (dateString: string | null | undefined) => {
   }
 }
 
+const defaultBanApplyTime = () => {
+  const date = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+}
+
+const disabledDate = (time: Date) => time.getTime() < Date.now()
+
 const fetchList = async () => {
-
-  loading.value = true
-
-  try {
-
-    const response = await accountApi.getAnchorList({
-
-      pageIndex: pagination.pageIndex,
-
-      pageSize: pagination.pageSize,
-
-      key: searchForm.key,
-
-    })
-
-    tableData.value = response.data || []
-
-    pagination.total = response.total || 0
-
-  } catch (error) {
-
-    console.error('Failed to load anchor list:', error)
-
-    ElMessage.error(t('pages.anchorList.fetchFailed'))
-
-  } finally {
-
-    loading.value = false
-
+  if (!guildId.value) {
+    tableData.value = []
+    pagination.total = 0
+    return
   }
-
+  loading.value = true
+  try {
+    const response = await accountApi.getAnchorList({
+      pageIndex: pagination.pageIndex,
+      pageSize: pagination.pageSize,
+      guildId: guildId.value,
+    })
+    tableData.value = response.data || []
+    pagination.total = response.total || 0
+  } catch (error) {
+    console.error('Failed to load guild members:', error)
+    ElMessage.error(t('pages.guildMembers.fetchFailed'))
+  } finally {
+    loading.value = false
+  }
 }
-
-
-
-const handleSearch = () => {
-
-  pagination.pageIndex = 1
-
-  fetchList()
-
-}
-
-
-
-const handleReset = () => {
-
-  searchForm.key = ''
-
-  pagination.pageIndex = 1
-
-  fetchList()
-
-}
-
-
-
-const handlePageChange = (page: number) => {
-
-  pagination.pageIndex = page
-
-  fetchList()
-
-}
-
-
 
 const handleSizeChange = (size: number) => {
-
   pagination.pageSize = size
-
   pagination.pageIndex = 1
-
   fetchList()
+}
 
+const handleCurrentChange = (page: number) => {
+  pagination.pageIndex = page
+  fetchList()
 }
 
 const resetBanForm = () => {
-
   banForm.accountId = ''
-
   banForm.nickname = ''
-
   banForm.banApplyTime = ''
-
   banForm.banReason = ''
-
   banFormRef.value?.clearValidate()
-
-}
-
-const openDetail = (row: AnchorListItem) => {
-  router.push({
-    path: '/user/anchor/anchor-detail',
-    query: {id: String(row.id)},
-  })
 }
 
 const openBanDialog = (row: AnchorListItem) => {
-
   banForm.accountId = row.id
-
   banForm.nickname = row.nickname || '-'
-
   banForm.banApplyTime = defaultBanApplyTime()
-
   banForm.banReason = ''
-
   banDialogVisible.value = true
-
 }
-
-
 
 const submitBan = async () => {
-
   if (!banFormRef.value) return
-
   await banFormRef.value.validate(async (valid: boolean) => {
-
     if (!valid) return
-
     banSubmitting.value = true
-
     try {
-
       const banData: BanAnchorReq = {
-
         accountId: banForm.accountId,
-
         banApplyTime: banForm.banApplyTime,
-
         banReason: banForm.banReason.trim(),
-
       }
-
       const response = await accountApi.banAnchor(banData)
-
       if (response) {
-
         ElMessage.success(t('pages.anchorList.banSuccessNotify'))
-
         banDialogVisible.value = false
-
         fetchList()
-
       } else {
-
         ElMessage.error(t('pages.anchorList.banFailed'))
-
       }
-
     } catch (error) {
-
       console.error('Ban anchor failed:', error)
-
       ElMessage.error(t('pages.anchorList.banRequestFailed'))
-
     } finally {
-
       banSubmitting.value = false
-
     }
-
   })
-
 }
-
-
 
 const toggleBanStatus = async (row: AnchorListItem) => {
-
   if (row.ban) {
-
     try {
-
       await ElMessageBox.confirm(
-
           t('pages.anchorList.unbanConfirm', {id: row.id}),
-
           t('pages.anchorList.unbanTitle'),
-
           {
-
             confirmButtonText: t('common.confirm'),
-
             cancelButtonText: t('common.cancel'),
-
             type: 'warning',
-
-          }
-
+          },
       )
-
       const unBanData: UnBanAnchorReq = {accountId: row.id}
-
       const response = await accountApi.unBanAnchor(unBanData)
-
       if (response) {
-
         ElMessage.success(t('pages.anchorList.unbanSuccess'))
-
         fetchList()
-
       } else {
-
         ElMessage.error(t('pages.anchorList.unbanFailed'))
-
       }
-
     } catch {
-
       // cancelled
-
     }
-
     return
-
   }
-
   openBanDialog(row)
-
-}
-
-
-
-onMounted(() => {
-
-  fetchList()
-
-})
-
-const handleSelectionChange = (selection: AnchorListItem[]) => {
-  selectedAnchors.value = selection
-}
-
-const checkSelectable = (row: AnchorListItem) => {
-  const guildId = Number(row.guildId) || 0
-  return guildId === 0
-}
-
-const handleBatchSetTimezone = () => {
-  if (selectedAnchors.value.length === 0) {
-    ElMessage.warning(t('pages.anchorList.selectAnchorsFirst'))
-    return
-  }
-  batchTimezone.value = 8
-  batchTimezoneVisible.value = true
-}
-
-const handleBatchUpdateTimezone = async () => {
-  if (selectedAnchors.value.length === 0) {
-    ElMessage.warning(t('pages.anchorList.selectAnchorsFirst'))
-    return
-  }
-  if (batchTimezone.value === undefined) {
-    ElMessage.warning(t('pages.anchorList.selectTimezoneFirst'))
-    return
-  }
-  const guildZeroAnchors = selectedAnchors.value.filter(a => (Number(a.guildId) || 0) === 0)
-  if (guildZeroAnchors.length === 0) {
-    ElMessage.warning(t('pages.anchorList.noGuildZeroAnchor'))
-    return
-  }
-  batchUpdating.value = true
-  try {
-    const response = await accountApi.batchSetAnchorTimezone({
-      anchorIds: guildZeroAnchors.map(a => a.id),
-      timezone: batchTimezone.value
-    })
-    const res = response as BatchSetAnchorTimezoneRes
-    ElMessage.success(t('pages.anchorList.batchSetTimezoneSuccess', {success: res.successCount, fail: res.failCount}))
-    batchTimezoneVisible.value = false
-    selectedAnchors.value = []
-    fetchList()
-  } catch (error) {
-    console.error('batch set timezone failed:', error)
-    ElMessage.error(t('pages.anchorList.batchSetTimezoneFailed'))
-  } finally {
-    batchUpdating.value = false
-  }
 }
 
 const handleExitGuild = async (row: AnchorListItem) => {
   try {
     await ElMessageBox.confirm(
-      t('pages.anchorList.exitGuildConfirm', {id: row.id}),
-      t('pages.anchorList.exitGuildTitle'),
-      {
-        confirmButtonText: t('common.confirm'),
-        cancelButtonText: t('common.cancel'),
-        type: 'warning'
-      }
+        t('pages.anchorList.exitGuildConfirm', {id: row.id}),
+        t('pages.anchorList.exitGuildTitle'),
+        {
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning',
+        },
     )
     await accountApi.exitGuild({anchorId: row.id})
     ElMessage.success(t('pages.anchorList.exitGuildSuccess'))
@@ -787,61 +469,46 @@ const handleExitGuild = async (row: AnchorListItem) => {
   }
 }
 
+const goBack = () => {
+  router.push({name: readonly.value ? 'GuildProfileManagement' : 'GuildManagement'})
+}
+
+const openDetail = (row: AnchorListItem) => {
+  router.push({
+    path: '/user/anchor/anchor-detail',
+    query: {id: String(row.id)},
+  })
+}
+
+// keep-alive 按 path 缓存，query 变化不会重新挂载；激活或 guildId 变化时都要拉列表
+watch(guildId, (_id, prev) => {
+  if (prev !== undefined) {
+    pagination.pageIndex = 1
+  }
+  fetchList()
+})
+
+onActivated(() => {
+  fetchList()
+})
 </script>
 
-
-
 <style scoped>
-
 .page-container {
-
   padding: 20px;
-
 }
-
-
 
 .card-header {
-
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
-
+  font-size: 16px;
+  font-weight: bold;
 }
 
-
-
-.search-form {
-
-  margin-bottom: 20px;
-
-}
-
-
-
-.pagination {
-
-  margin-top: 20px;
-
+.pagination-container {
+  margin-top: 16px;
   display: flex;
-
   justify-content: flex-end;
-
 }
-
-.table-header {
-
-  margin-bottom: 12px;
-
-  display: flex;
-
-  gap: 12px;
-
-  flex-wrap: wrap;
-
-}
-
 </style>
-

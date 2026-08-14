@@ -19,6 +19,16 @@ export const userRoutes: RouteRecordRaw = {
             meta: {title: '主播列表'},
         },
         {
+            path: 'anchor/anchor-detail',
+            name: 'AnchorDetail',
+            component: () => import('@/views/user/anchor/anchor-detail.vue'),
+            meta: {
+                title: '主播详情',
+                hidden: true,
+                parentPermission: ['AnchorListManagement', 'GuildManagement', 'GuildProfileManagement'],
+            },
+        },
+        {
             path: 'bot-anchor/bot-anchor-list',
             name: 'BotAnchorManagement',
             component: () => import('@/views/user/bot-anchor/bot-anchor-list.vue'),

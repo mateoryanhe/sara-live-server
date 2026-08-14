@@ -13,7 +13,7 @@ import (
 )
 
 func queryAnchorListFromMemory(req *accountdto.QueryAnchorListReq) (int, []*accountdto.AnchorListItem) {
-	rooms := filterAnchorRooms(getRoomListCache(), req.Key)
+	rooms := filterAnchorRooms(getRoomListCache(), req.Key, req.GuildId)
 	total := len(rooms)
 	pageRooms := paginateAnchorRooms(rooms, req.PageIndex, req.PageSize)
 	ret := make([]*accountdto.AnchorListItem, 0, len(pageRooms))
@@ -25,13 +25,19 @@ func queryAnchorListFromMemory(req *accountdto.QueryAnchorListReq) (int, []*acco
 	return total, ret
 }
 
-func filterAnchorRooms(rooms []*entity.LiveRoom, key string) []*entity.LiveRoom {
+func filterAnchorRooms(rooms []*entity.LiveRoom, key string, guildId uint64) []*entity.LiveRoom {
 	key = strings.TrimSpace(key)
 	likeKey := strings.ToLower(key)
 	filtered := make([]*entity.LiveRoom, 0, len(rooms))
 	for _, room := range rooms {
 		if room == nil || !isRegularAnchorRoom(room) {
 			continue
+		}
+		if guildId > 0 {
+			user := userinfodao.GetUserInfoFromMemory(room.ID)
+			if user == nil || user.GuildId != guildId {
+				continue
+			}
 		}
 		if key != "" && !matchAnchorKey(room.ID, key, likeKey) {
 			continue
@@ -94,6 +100,7 @@ func buildAnchorListItem(room *entity.LiveRoom) *accountdto.AnchorListItem {
 		item.Nickname = user.Nickname
 		item.Phone = user.Phone
 		item.Avatar = user.Avatar
+		item.UserType = user.UserType
 		item.GuildId = user.GuildId
 		if !user.CreatedAt.IsZero() {
 			createdAt := user.CreatedAt

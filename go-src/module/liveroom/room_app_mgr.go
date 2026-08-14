@@ -14,6 +14,7 @@ import (
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
 	"xr-game-server/module/aliyunmoderation"
+	"xr-game-server/module/timezonecfg"
 	"xr-game-server/module/upload"
 )
 
@@ -299,6 +300,19 @@ func EnsureAnchorRoom(anchorId, guildId uint64) *entity.LiveRoom {
 		return room
 	}
 	room := entity.NewLiveRoom(anchorId, guildId, "", "", "")
+	liveroomdao.AddRoomToCache(room)
+	return room
+}
+
+// EnsureAnchorRoomWithTimezone 确保主播拥有直播间记录,并设置时区
+func EnsureAnchorRoomWithTimezone(anchorId, guildId uint64, timezone int) *entity.LiveRoom {
+	timezonecfg.EnsureCron(timezone)
+	if room := liveroomdao.GetRoomByAnchor(anchorId); room != nil {
+		// 已存在则更新时区
+		room.SetTimezone(timezone)
+		return room
+	}
+	room := entity.NewLiveRoomWithTimezone(anchorId, guildId, timezone, "", "", "")
 	liveroomdao.AddRoomToCache(room)
 	return room
 }

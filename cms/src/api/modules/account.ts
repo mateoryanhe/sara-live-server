@@ -2,11 +2,14 @@ import {request} from '../request'
 import type {
     AnchorListItem,
     BanAnchorReq,
-    BanReq,
     BatchSetAnchorReq,
     BatchSetAnchorRes,
+    BatchSetAnchorTimezoneReq,
+    BatchSetAnchorTimezoneRes,
     BatchSetSeniorAnchorReq,
     CancelReq,
+    ExitGuildReq,
+    ExitGuildRes,
     PageResponse,
     QueryAnchorListReq,
     QueryUserInfoReq,
@@ -87,6 +90,16 @@ const accountApi = {
 
     setRechargeWhitelist: (data: SetRechargeWhitelistReq) => {
         return request.post<boolean>('/account/setRechargeWhitelist', data)
+    },
+
+    // 批量设置主播时区(仅限工会ID=0的主播)
+    batchSetAnchorTimezone: (data: BatchSetAnchorTimezoneReq) => {
+        return request.post<BatchSetAnchorTimezoneRes>('/account/batchSetAnchorTimezone', data)
+    },
+
+    // 退出工会(将工会ID置为0)
+    exitGuild: (data: ExitGuildReq) => {
+        return request.post<ExitGuildRes>('/account/exitGuild', data)
     }
 }
 

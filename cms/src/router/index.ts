@@ -64,6 +64,15 @@ router.beforeEach((to, from, next) => {
         next()
         return
     }
+    const parentPermission = to.meta.parentPermission
+    if (typeof parentPermission === 'string' && parentPermission && hasPermission(parentPermission)) {
+        next()
+        return
+    }
+    if (Array.isArray(parentPermission) && parentPermission.some(p => typeof p === 'string' && p && hasPermission(p))) {
+        next()
+        return
+    }
 
     console.warn(`用户没有访问 ${moduleName} 模块的权限`)
 

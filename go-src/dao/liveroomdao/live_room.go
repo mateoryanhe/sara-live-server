@@ -100,3 +100,17 @@ func RemoveRoomFromCache(roomId uint64) {
 	}
 	roomCacheMgr.Remove(roomId)
 }
+
+// ListRoomsByGuild 获取指定工会下的所有直播间
+func ListRoomsByGuild(guildId uint64) []*entity.LiveRoom {
+	rooms := make([]*entity.LiveRoom, 0)
+	for _, room := range roomCacheMgr.Values() {
+		if room == nil || room.ID == 0 {
+			continue
+		}
+		if room.GuildId == guildId {
+			rooms = append(rooms, room)
+		}
+	}
+	return rooms
+}

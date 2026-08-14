@@ -37,8 +37,6 @@ func Init() {
 	initMonthlyUserAudience()
 	initCurrencyLog()
 	InitLiveGuild()
-	initGuildMember()
-	initGuildAnchor()
 	initLiveRoom()
 	initLiveRoomTag()
 	initLiveRoomGameRecommend()

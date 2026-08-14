@@ -26,7 +26,6 @@ func Init() {
 	initUserInfoController()                // 用户基础信息(App)
 	initUserInfoPublicController()          // 用户公开接口(官网销户等)
 	initGuildController()                   // 直播工会管理(CMS)
-	initGuildAppController()                // 直播工会查询(App)
 	initLiveRoomAppController()             // 直播间(App)
 	initLiveRoomTagController()             // 直播间标签(CMS)
 	initLiveRoomTagAppController()          // 直播间标签(App)

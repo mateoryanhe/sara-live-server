@@ -14,7 +14,7 @@ const menu = {
   BannerManagement: '首页Banner',
   ActivityMessageManagement: '活动消息',
   GuildManagement: '工会管理',
-  GuildProfileManagement: '工会基础信息',
+  GuildProfileManagement: '工会数据查询',
   RechargeCfgManagement: '充值配置',
   VipCfgManagement: 'VIP配置',
   AppPkgManagement: 'App包管理',

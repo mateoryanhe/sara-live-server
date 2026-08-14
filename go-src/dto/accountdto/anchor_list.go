@@ -10,7 +10,8 @@ import (
 type QueryAnchorListReq struct {
 	g.Meta `path:"/getAnchorList" method:"post" summary:"获取主播列表" tags:"账号"`
 	httpserver.CMSQueryReq
-	Key string `json:"key" dc:"查询关键字(用户ID模糊/昵称/手机号/分享码)"`
+	Key     string `json:"key" dc:"查询关键字(用户ID模糊/昵称/手机号/分享码)"`
+	GuildId uint64 `json:"guildId" dc:"工会ID(可选,大于0时按工会过滤)"`
 }
 
 // AnchorListItem 主播列表项(基于 user_infos)
@@ -19,6 +20,7 @@ type AnchorListItem struct {
 	Nickname                     string     `json:"nickname"`
 	Phone                        string     `json:"phone"`
 	Avatar                       string     `json:"avatar"`
+	UserType                     uint8      `json:"userType" dc:"用户类型(1=普通主播,7=高级主播)"`
 	GuildId                      uint64     `json:"guildId,string"`
 	IP                           string     `json:"ip" dc:"登录IP"`
 	RoomTitle                    string     `json:"roomTitle"`

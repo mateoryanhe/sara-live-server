@@ -3,10 +3,13 @@ package liveroom
 import (
 	"context"
 
+	"xr-game-server/dao/guilddao"
+	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/accountdto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
+	"xr-game-server/module/timezonecfg"
 )
 
 // SetAnchor CMS 将用户设为主播(仅允许从未主播变为主播,不可回退)
@@ -86,4 +89,79 @@ func setUserAsAnchorBatch(accountId uint64, userType uint8) error {
 // SetUserAsAnchorIfNeeded 将普通用户设为主播类型;已是主播则跳过
 func SetUserAsAnchorIfNeeded(accountId uint64, userType uint8) error {
 	return setUserAsAnchorBatch(accountId, userType)
+}
+
+// SetUserAsAnchorWithTimezone 将普通用户设为主播类型;已是主播则只更新时区;时区从工会获取
+func SetUserAsAnchorWithTimezone(accountId, guildId uint64, userType uint8) error {
+	user := userinfodao.GetUserInfoByUserId(accountId)
+	if user == nil {
+		return nil
+	}
+	if !entity.UserTypeIsAnchor(user.UserType) && user.UserType != entity.UserTypeNormal {
+		return nil
+	}
+	// 从工会获取时区
+	guild := guilddao.GetGuildById(guildId)
+	timezone := 0
+	if guild != nil {
+		timezone = guild.Timezone
+	}
+	EnsureAnchorRoomWithTimezone(accountId, guildId, timezone)
+	if entity.UserTypeIsAnchor(user.UserType) {
+		return nil
+	}
+	user.SetUserType(userType)
+	return nil
+}
+
+// BatchSetAnchorTimezone CMS批量设置主播时区(仅限工会ID=0的主播)
+func BatchSetAnchorTimezone(ctx context.Context, req *accountdto.BatchSetAnchorTimezoneReq) (*accountdto.BatchSetAnchorTimezoneRes, error) {
+	res := &accountdto.BatchSetAnchorTimezoneRes{}
+	for _, anchorId := range req.AnchorIds {
+		if err := setAnchorTimezone(anchorId, req.Timezone); err != nil {
+			res.FailCount++
+			res.FailIds = append(res.FailIds, anchorId)
+			continue
+		}
+		res.SuccessCount++
+	}
+	if res.SuccessCount > 0 {
+		timezonecfg.EnsureCron(req.Timezone)
+		RefreshRoomListCache(ctx)
+	}
+	return res, nil
+}
+
+// setAnchorTimezone 设置单个主播时区(仅工会ID=0才可设置)
+func setAnchorTimezone(anchorId uint64, timezone int) error {
+	user := userinfodao.GetUserInfoByUserId(anchorId)
+	if user == nil {
+		return errercode.CreateCode(errercode.InvalidParam)
+	}
+	if !entity.UserTypeIsAnchor(user.UserType) {
+		return errercode.CreateCode(errercode.InvalidParam)
+	}
+	if user.GuildId != 0 {
+		return errercode.CreateCode(errercode.InvalidParam)
+	}
+	room := liveroomdao.GetRoomByAnchor(anchorId)
+	if room == nil {
+		return nil
+	}
+	room.SetTimezone(timezone)
+	return nil
+}
+
+// ExitGuild CMS主播退出工会(将工会ID置为0)
+func ExitGuild(ctx context.Context, req *accountdto.ExitGuildReq) (*accountdto.ExitGuildRes, error) {
+	user := userinfodao.GetUserInfoByUserId(req.AnchorId)
+	if user == nil {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if !entity.UserTypeIsAnchor(user.UserType) {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	user.SetGuildId(0)
+	RefreshRoomListCache(ctx)
+	return &accountdto.ExitGuildRes{Success: true}, nil
 }

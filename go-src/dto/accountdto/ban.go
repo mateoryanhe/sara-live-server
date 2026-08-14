@@ -40,3 +40,26 @@ type UnBanReq struct {
 
 type BanRes struct {
 }
+
+// BatchSetAnchorTimezoneReq CMS批量设置主播时区(仅限工会ID=0的主播)
+type BatchSetAnchorTimezoneReq struct {
+	g.Meta    `path:"/batchSetAnchorTimezone" method:"post" summary:"批量设置主播时区" tags:"账号"`
+	AnchorIds []uint64 `json:"anchorIds" v:"required#主播ID列表不能为空" dc:"主播账号ID列表"`
+	Timezone  int      `json:"timezone" v:"required#时区不能为空" dc:"时区值"`
+}
+
+type BatchSetAnchorTimezoneRes struct {
+	SuccessCount int      `json:"successCount" dc:"成功数量"`
+	FailCount    int      `json:"failCount" dc:"失败数量"`
+	FailIds      []uint64 `json:"failIds" dc:"失败的主播ID"`
+}
+
+// ExitGuildReq CMS主播退出工会(将工会ID置为0)
+type ExitGuildReq struct {
+	g.Meta   `path:"/exitGuild" method:"post" summary:"退出工会" tags:"账号"`
+	AnchorId uint64 `json:"anchorId" v:"required#主播ID不能为空" dc:"主播账号ID"`
+}
+
+type ExitGuildRes struct {
+	Success bool `json:"success" dc:"是否成功"`
+}

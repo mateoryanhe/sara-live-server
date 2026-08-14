@@ -17,6 +17,7 @@ const (
 	LiveGuildLeaderName  db.TbCol = "leader_name"
 	LiveGuildDescription db.TbCol = "description"
 	LiveGuildStatus      db.TbCol = "status"
+	LiveGuildTimezone    db.TbCol = "timezone"
 )
 
 // 工会状态(软删除)
@@ -25,7 +26,7 @@ const (
 	LiveGuildStatusNormal  uint8 = 1 // 正常
 )
 
-// LiveGuild 直播工会(启动预加载至内存;字段直接写库,status=0 表示软删除)
+// LiveGuild 直播工会(读写直连数据库,status=0 表示软删除)
 type LiveGuild struct {
 	migrate.OneModel
 	Name        string `gorm:"size:64;comment:工会名称" json:"name"`
@@ -33,10 +34,11 @@ type LiveGuild struct {
 	LeaderName  string `gorm:"size:64;default:'';comment:会长名称" json:"leaderName"`
 	Description string `gorm:"size:255;comment:工会简介" json:"description"`
 	Status      uint8  `gorm:"default:1;comment:状态(0-已删除,1-正常)" json:"status"`
+	Timezone    int    `gorm:"default:0;comment:时区偏移量" json:"timezone"`
 }
 
-// NewLiveGuild 构造内存对象(不写库)
-func NewLiveGuild(id uint64, name string, leaderId uint64, leaderName, description string) *LiveGuild {
+// NewLiveGuild 构造工会对象(不写库)
+func NewLiveGuild(id uint64, name string, leaderId uint64, leaderName, description string, timezone int) *LiveGuild {
 	now := time.Now()
 	return &LiveGuild{
 		OneModel: migrate.OneModel{
@@ -48,6 +50,7 @@ func NewLiveGuild(id uint64, name string, leaderId uint64, leaderName, descripti
 		LeaderId:    leaderId,
 		LeaderName:  leaderName,
 		Description: description,
+		Timezone:    timezone,
 		Status:      LiveGuildStatusNormal,
 	}
 }

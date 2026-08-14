@@ -1,38 +1,75 @@
 package guilddto
 
-import "github.com/gogf/gf/v2/frame/g"
-
-// 工会主播 CSV 导入失败原因
-const (
-	ImportAnchorFailUserNotFound       = 1 // 用户不存在
-	ImportAnchorFailCancelCodeMismatch = 2 // 注销码错误
-	ImportAnchorFailCancelCodeExpired  = 3 // 注销码已过期
-	ImportAnchorFailAlreadyInGuild     = 4 // 已加入工会
-	ImportAnchorFailCannotSetAnchor    = 5 // 无法设为主播(非普通用户)
+import (
+	"github.com/gogf/gf/v2/frame/g"
 )
 
-// ImportGuildAnchorRow CSV 行
+type ImportGuildAnchorsReq struct {
+	g.Meta     `path:"/importGuildAnchors" method:"post" summary:"CSV导入工会主播" tags:"直播工会"`
+	GuildId    uint64                  `json:"guildId" v:"required#工会ID不能为空" dc:"工会ID"`
+	AnchorType uint8                   `json:"anchorType" v:"required#主播类型不能为空" dc:"主播类型(1=普通主播,7=高级主播)"`
+	Rows       []*ImportGuildAnchorRow `json:"rows" v:"required#导入数据不能为空" dc:"导入数据行"`
+}
+
 type ImportGuildAnchorRow struct {
-	UserId     uint64 `json:"userId,string" dc:"用户ID"`
+	UserId     uint64 `json:"userId" dc:"用户ID"`
 	CancelCode string `json:"cancelCode" dc:"注销码"`
 }
 
-// ImportGuildAnchorsReq CMS 按工会 CSV 导入主播
-type ImportGuildAnchorsReq struct {
-	g.Meta     `path:"/importGuildAnchors" method:"post" summary:"CSV导入工会主播" tags:"直播工会"`
-	GuildId    uint64                  `json:"guildId" v:"required#工会ID不能为空" dc:"目标工会ID"`
-	AnchorType uint8                   `json:"anchorType" v:"required|in:1,7#主播类型不能为空|仅支持普通主播或高级主播" dc:"主播类型(1普通主播,7高级主播)"`
-	Rows       []*ImportGuildAnchorRow `json:"rows" v:"required|min-length:1#请至少导入一行数据" dc:"CSV解析后的行"`
+type ImportGuildAnchorsRes struct {
+	SuccessCount int                          `json:"successCount" dc:"成功数量"`
+	FailCount    int                          `json:"failCount" dc:"失败数量"`
+	Fails        []*ImportGuildAnchorFailItem `json:"fails" dc:"失败列表"`
 }
 
 type ImportGuildAnchorFailItem struct {
 	UserId   string `json:"userId" dc:"用户ID"`
-	Nickname string `json:"nickname" dc:"昵称"`
-	Reason   int    `json:"reason" dc:"失败原因(1用户不存在,2注销码错误,3注销码过期,4已加入工会,5无法设为主播)"`
+	Nickname string `json:"nickname" dc:"用户昵称"`
+	Reason   int    `json:"reason" dc:"失败原因代码"`
 }
 
-type ImportGuildAnchorsRes struct {
-	SuccessCount int                          `json:"successCount"`
-	FailCount    int                          `json:"failCount"`
-	Fails        []*ImportGuildAnchorFailItem `json:"fails"`
+const (
+	ImportAnchorFailUserNotFound       = 1 // 用户不存在
+	ImportAnchorFailCancelCodeMismatch = 2 // 注销码不匹配
+	ImportAnchorFailCancelCodeExpired  = 3 // 注销码已过期
+	ImportAnchorFailAlreadyInGuild     = 4 // 已在其他工会
+	ImportAnchorFailCannotSetAnchor    = 5 // 无法设置为主播
+)
+
+func GetImportAnchorFailReasonText(reason int) string {
+	switch reason {
+	case ImportAnchorFailUserNotFound:
+		return "User not found"
+	case ImportAnchorFailCancelCodeMismatch:
+		return "Cancel code mismatch"
+	case ImportAnchorFailCancelCodeExpired:
+		return "Cancel code expired"
+	case ImportAnchorFailAlreadyInGuild:
+		return "Already in another guild"
+	case ImportAnchorFailCannotSetAnchor:
+		return "Cannot set as anchor"
+	default:
+		return "Unknown error"
+	}
+}
+
+type SetAnchorGuildReq struct {
+	GuildId    uint64 `json:"guildId" dc:"工会ID"`
+	AnchorId   uint64 `json:"anchorId" v:"required#主播ID不能为空" dc:"主播ID"`
+	AnchorType uint8  `json:"anchorType" v:"required#主播类型不能为空" dc:"主播类型"`
+}
+
+type SetAnchorGuildRes struct {
+	Success bool `json:"success" dc:"是否成功"`
+}
+
+type BatchExitGuildReq struct {
+	GuildId   uint64   `json:"guildId" v:"required#工会ID不能为空" dc:"工会ID"`
+	AnchorIds []uint64 `json:"anchorIds" v:"required#主播ID列表不能为空" dc:"主播ID列表"`
+}
+
+type BatchExitGuildRes struct {
+	SuccessCount int      `json:"successCount" dc:"成功数量"`
+	FailCount    int      `json:"failCount" dc:"失败数量"`
+	FailIds      []uint64 `json:"failIds" dc:"失败的主播ID"`
 }

@@ -28,13 +28,25 @@ export const operationRoutes: RouteRecordRaw = {
             path: 'guild/guild-anchor-import-result',
             name: 'GuildAnchorImportResult',
             component: () => import('@/views/operation/guild/guild-anchor-import-result.vue'),
-            meta: {title: '工会主播导入结果', hidden: true},
+            meta: {title: '工会主播导入结果', hidden: true, parentPermission: 'GuildManagement'},
+        },
+        {
+            path: 'guild/guild-members',
+            name: 'GuildMembers',
+            component: () => import('@/views/operation/guild/guild-members.vue'),
+            meta: {title: '工会成员', hidden: true, parentPermission: 'GuildManagement'},
+        },
+        {
+            path: 'guild/guild-profile-members',
+            name: 'GuildProfileMembers',
+            component: () => import('@/views/operation/guild/guild-members.vue'),
+            meta: {title: '名下主播', hidden: true, parentPermission: 'GuildProfileManagement'},
         },
         {
             path: 'guild/guild-profile',
             name: 'GuildProfileManagement',
             component: () => import('@/views/operation/guild/guild-profile.vue'),
-            meta: {title: '工会基础信息'},
+            meta: {title: '工会数据查询'},
         },
         {
             path: 'recharge/recharge-cfg-list',

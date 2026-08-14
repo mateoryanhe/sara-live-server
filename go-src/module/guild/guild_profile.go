@@ -40,10 +40,9 @@ func UpdateMyGuildProfile(ctx context.Context, req *guilddto.UpdateMyGuildProfil
 		return nil, errercode.CreateCode(errercode.GuildExist)
 	}
 
-	oldName := guild.Name
 	guild.Name = name
 	guild.Description = strings.TrimSpace(req.Description)
-	if err = guilddao.UpdateGuild(guild, oldName, guild.LeaderId); err != nil {
+	if err = guilddao.UpdateGuild(guild); err != nil {
 		return nil, err
 	}
 

@@ -83,7 +83,6 @@ const CONFIG_PAGES = new Set([
     'RandomNicknameManagement',
     'CustomerServiceCfgManagement',
     'WalletExchangeCfgManagement',
-    'GuildProfileManagement',
     'ShortVideoCfgManagement',
     'GamePlatformCfgManagement',
 ])
@@ -130,12 +129,18 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     ],
     GuildManagement: [
         ...DEFAULT_CRUD_BUTTONS,
-        {key: 'batchSetAnchor', label: 'CSV导入普通主播'},
-        {key: 'batchSetSeniorAnchor', label: 'CSV导入高级主播'},
-        {key: 'member', label: '成员管理'},
-        {key: 'approve', label: '审核'},
+        {key: 'viewMembers', label: '查看成员'},
+        {key: 'ban', label: '封禁主播'},
+        {key: 'unban', label: '解封主播'},
+        {key: 'exitGuild', label: '退出工会'},
+        {key: 'batchSetAnchor', label: '导入普通主播'},
+        {key: 'batchSetSeniorAnchor', label: '导入高级主播'},
+        {key: 'batchSetTimezone', label: '批量设置时区'},
     ],
-    GuildProfileManagement: DEFAULT_CONFIG_BUTTONS,
+    GuildProfileManagement: [
+        ...DEFAULT_VIEW_BUTTONS,
+        {key: 'viewAnchors', label: '查询名下主播'},
+    ],
     BannerManagement: [
         ...DEFAULT_CRUD_BUTTONS,
         {key: 'sort', label: '排序'},

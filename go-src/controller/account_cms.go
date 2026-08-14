@@ -79,3 +79,13 @@ func (a *AccountController) SetCanRank(ctx context.Context, req *accountdto.SetC
 func (a *AccountController) SetRechargeWhitelist(ctx context.Context, req *accountdto.SetRechargeWhitelistReq) (*accountdto.SetRechargeWhitelistRes, error) {
 	return userinfo.SetRechargeWhitelist(ctx, req)
 }
+
+// BatchSetAnchorTimezone CMS批量设置主播时区(仅限工会ID=0的主播)
+func (a *AccountController) BatchSetAnchorTimezone(ctx context.Context, req *accountdto.BatchSetAnchorTimezoneReq) (*accountdto.BatchSetAnchorTimezoneRes, error) {
+	return liveroom.BatchSetAnchorTimezone(ctx, req)
+}
+
+// ExitGuild CMS主播退出工会(将工会ID置为0)
+func (a *AccountController) ExitGuild(ctx context.Context, req *accountdto.ExitGuildReq) (*accountdto.ExitGuildRes, error) {
+	return liveroom.ExitGuild(ctx, req)
+}

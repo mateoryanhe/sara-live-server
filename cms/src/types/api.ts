@@ -202,6 +202,25 @@ export interface BatchSetAnchorRes {
     failIds?: string[]
 }
 
+export interface BatchSetAnchorTimezoneReq {
+    anchorIds: string[]
+    timezone: number
+}
+
+export interface BatchSetAnchorTimezoneRes {
+    successCount: number
+    failCount: number
+    failIds: string[]
+}
+
+export interface ExitGuildReq {
+    anchorId: string
+}
+
+export interface ExitGuildRes {
+    success: boolean
+}
+
 export interface SetUserTypeReq {
     accountId: string
     userType: number
@@ -219,6 +238,7 @@ export interface SetRechargeWhitelistReq {
 
 export interface QueryAnchorListReq extends PageQuery {
     key?: string
+    guildId?: string | number
 }
 
 export interface AnchorListItem {
@@ -226,6 +246,8 @@ export interface AnchorListItem {
     nickname?: string
     phone?: string
     avatar?: string
+    /** 1=普通主播, 7=高级主播 */
+    userType?: number
     guildId?: string | number
     ip?: string
     roomTitle?: string
@@ -478,6 +500,7 @@ export interface Guild {
     leaderName?: string
     description: string
     status: number
+    timezone: number
     createdAt: string
     updatedAt: string
 }

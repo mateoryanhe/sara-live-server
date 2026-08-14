@@ -21,6 +21,7 @@ export const guildApi = {
         name: string
         leaderId: number
         description: string
+        timezone: number
     }) => {
         return request.post<{ id: string }>('/guild/createGuild', data)
     },
@@ -31,6 +32,7 @@ export const guildApi = {
         name: string
         leaderId: number
         description: string
+        timezone: number
     }) => {
         return request.post<boolean>('/guild/updateGuild', data)
     },
@@ -50,5 +52,10 @@ export const guildApi = {
 
     importGuildAnchors: (data: ImportGuildAnchorsReq) => {
         return request.post<ImportGuildAnchorsRes>('/guild/importGuildAnchors', data)
+    },
+
+    // 批量更新工会时区
+    batchUpdateGuildTimezone: (data: { guildIds: string[], timezone: number }) => {
+        return request.post<{ success: boolean }>('/guild/batchUpdateGuildTimezone', data)
     },
 }
