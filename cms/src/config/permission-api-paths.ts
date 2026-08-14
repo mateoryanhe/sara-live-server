@@ -10,8 +10,6 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'UserList:search': '/account/getUserInfo',
     'UserList:setAnchor': '/account/setAnchor',
     'UserList:setSeniorAnchor': '/account/setSeniorAnchor',
-    'UserList:batchSetAnchor': '/account/batchSetAnchor',
-    'UserList:batchSetSeniorAnchor': '/account/batchSetSeniorAnchor',
     'UserList:goldAdd': '/gold/add',
     'UserList:goldSub': '/gold/sub',
     'UserList:diamondAdd': '/diamond/add',
@@ -80,6 +78,8 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GuildManagement:create': '/guild/createGuild',
     'GuildManagement:edit': '/guild/updateGuild',
     'GuildManagement:delete': '/guild/deleteGuild',
+    'GuildManagement:batchSetAnchor': '/guild/importGuildAnchors',
+    'GuildManagement:batchSetSeniorAnchor': '/guild/importGuildAnchors',
     'GuildManagement:member': '/guild/guildList',
     'GuildManagement:approve': '/guild/guildList',
 

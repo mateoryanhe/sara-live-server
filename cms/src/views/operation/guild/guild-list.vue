@@ -9,7 +9,28 @@
       <div class="content">
         <div class="table-header">
           <el-button type="primary" @click="handleAdd">{{ t('pages.guildList.addGuild') }}</el-button>
+          <el-button
+              v-if="can('batchSetAnchor')"
+              :loading="importing"
+              @click="triggerCsvImport(1)"
+          >
+            {{ t('pages.guildList.importNormalAnchor') }}
+          </el-button>
+          <el-button
+              v-if="can('batchSetSeniorAnchor')"
+              :loading="importing"
+              @click="triggerCsvImport(7)"
+          >
+            {{ t('pages.guildList.importSeniorAnchor') }}
+          </el-button>
         </div>
+        <el-alert
+            :closable="false"
+            class="import-tip"
+            show-icon
+            :title="t('pages.guildList.importTip')"
+            type="info"
+        />
 
         <el-form :model="searchForm" class="search-form" inline>
           <el-form-item :label="t('pages.guildList.guildName')">
@@ -21,7 +42,13 @@
           </el-form-item>
         </el-form>
 
-        <el-table v-loading="loading" :data="tableData" style="width: 100%">
+        <el-table
+            v-loading="loading"
+            :data="tableData"
+            highlight-current-row
+            style="width: 100%"
+            @current-change="handleCurrentRowChange"
+        >
           <el-table-column label="ID" prop="id" width="100"/>
           <el-table-column :label="t('pages.guildList.guildName')" prop="name"/>
           <el-table-column :label="t('pages.guildList.leader')" min-width="180" show-overflow-tooltip>
@@ -89,16 +116,28 @@
         <el-button type="primary" @click="handleSave">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
+
+    <input
+        ref="csvInputRef"
+        accept=".csv,text/csv"
+        class="hidden-file-input"
+        type="file"
+        @change="onCsvFileSelected"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
 import {computed, onMounted, reactive, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
+import {useRouter} from 'vue-router'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {cmsUserApi, guildApi} from '@/api'
 import type {CMSUser} from '@/api/modules/cmsuser'
-import type {Guild} from '@/types/api.ts'
+import type {Guild, GuildAnchorImportResultState, ImportGuildAnchorRow} from '@/types/api.ts'
+import {usePagePermission} from '@/composables/usePagePermission'
+
+const GUILD_ANCHOR_IMPORT_RESULT_KEY = 'guildAnchorImportResult'
 
 interface SearchForm {
   name: string
@@ -112,13 +151,19 @@ interface GuildForm {
 }
 
 const {t} = useI18n()
+const router = useRouter()
+const {can} = usePagePermission('GuildManagement')
 const loading = ref(false)
+const importing = ref(false)
 const cmsUserLoading = ref(false)
 const cmsUserOptions = ref<CMSUser[]>([])
 const tableData = ref<Guild[]>([])
+const selectedGuild = ref<Guild | null>(null)
 const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
+const pendingAnchorType = ref<1 | 7>(1)
+const csvInputRef = ref<HTMLInputElement | null>(null)
 
 const searchForm = reactive<SearchForm>({
   name: ''
@@ -218,6 +263,9 @@ const fetchGuildList = async () => {
     })
     tableData.value = response.data
     total.value = response.total
+    if (selectedGuild.value && !tableData.value.some(item => item.id === selectedGuild.value?.id)) {
+      selectedGuild.value = null
+    }
   } catch (error) {
     console.error('fetch guild list failed:', error)
     ElMessage.error(t('pages.guildList.fetchFailed'))
@@ -234,6 +282,10 @@ const handleSizeChange = (size: number) => {
 const handleCurrentChange = (page: number) => {
   currentPage.value = page
   fetchGuildList()
+}
+
+const handleCurrentRowChange = (row: Guild | null) => {
+  selectedGuild.value = row
 }
 
 const handleAdd = async () => {
@@ -316,6 +368,120 @@ const resetSearch = () => {
   fetchGuildList()
 }
 
+const parseCsvLine = (line: string): string[] => {
+  const result: string[] = []
+  let current = ''
+  let inQuotes = false
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i]
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"'
+        i++
+      } else {
+        inQuotes = !inQuotes
+      }
+      continue
+    }
+    if ((ch === ',' || ch === '\t') && !inQuotes) {
+      result.push(current.trim())
+      current = ''
+      continue
+    }
+    current += ch
+  }
+  result.push(current.trim())
+  return result
+}
+
+const normalizeHeader = (value: string) => value.trim().toLowerCase().replace(/^\ufeff/, '')
+
+const isHeaderRow = (cols: string[]) => {
+  if (cols.length < 2) return false
+  const a = normalizeHeader(cols[0])
+  const b = normalizeHeader(cols[1])
+  const userHeaders = new Set(['user_id', 'userid', '用户id'])
+  const codeHeaders = new Set(['cancel_code', 'cancelcode', '注销码'])
+  return userHeaders.has(a) && codeHeaders.has(b)
+}
+
+const parseGuildAnchorCsv = (text: string): ImportGuildAnchorRow[] => {
+  const lines = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean)
+  if (lines.length === 0) {
+    return []
+  }
+  let start = 0
+  const firstCols = parseCsvLine(lines[0])
+  if (isHeaderRow(firstCols)) {
+    start = 1
+  }
+  const rows: ImportGuildAnchorRow[] = []
+  const seen = new Set<string>()
+  for (let i = start; i < lines.length; i++) {
+    const cols = parseCsvLine(lines[i])
+    if (cols.length < 2) continue
+    const userId = cols[0].replace(/^\ufeff/, '').trim()
+    const cancelCode = cols[1].trim()
+    if (!userId || !/^\d+$/.test(userId) || !cancelCode) continue
+    if (seen.has(userId)) continue
+    seen.add(userId)
+    rows.push({userId, cancelCode})
+  }
+  return rows
+}
+
+const triggerCsvImport = (anchorType: 1 | 7) => {
+  if (!selectedGuild.value) {
+    ElMessage.warning(t('pages.guildList.selectGuildFirst'))
+    return
+  }
+  pendingAnchorType.value = anchorType
+  if (csvInputRef.value) {
+    csvInputRef.value.value = ''
+    csvInputRef.value.click()
+  }
+}
+
+const onCsvFileSelected = async (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file || !selectedGuild.value) {
+    return
+  }
+  importing.value = true
+  try {
+    const text = await file.text()
+    const rows = parseGuildAnchorCsv(text)
+    if (rows.length === 0) {
+      ElMessage.warning(t('pages.guildList.csvEmpty'))
+      return
+    }
+    const response = await guildApi.importGuildAnchors({
+      guildId: selectedGuild.value.id,
+      anchorType: pendingAnchorType.value,
+      rows,
+    })
+    const state: GuildAnchorImportResultState = {
+      guildId: selectedGuild.value.id,
+      guildName: selectedGuild.value.name,
+      anchorType: pendingAnchorType.value,
+      successCount: response?.successCount ?? 0,
+      failCount: response?.failCount ?? 0,
+      fails: response?.fails ?? [],
+    }
+    sessionStorage.setItem(GUILD_ANCHOR_IMPORT_RESULT_KEY, JSON.stringify(state))
+    await router.push({name: 'GuildAnchorImportResult'})
+  } catch (error) {
+    console.error('import guild anchors failed:', error)
+    ElMessage.error(t('pages.guildList.importFailed'))
+  } finally {
+    importing.value = false
+    if (csvInputRef.value) {
+      csvInputRef.value.value = ''
+    }
+  }
+}
+
 onMounted(() => {
   fetchGuildList()
 })
@@ -332,7 +498,14 @@ onMounted(() => {
 }
 
 .table-header {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.import-tip {
+  margin-bottom: 16px;
 }
 
 .search-form {
@@ -346,5 +519,9 @@ onMounted(() => {
 .pagination-container {
   margin-top: 20px;
   text-align: right;
+}
+
+.hidden-file-input {
+  display: none;
 }
 </style>

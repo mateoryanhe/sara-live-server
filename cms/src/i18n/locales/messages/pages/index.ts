@@ -11,6 +11,7 @@ import {banUserMessages} from './ban-user'
 import {bannerListMessages} from './banner-list'
 import {activityMessageListMessages} from './activity-message-list'
 import {guildListMessages} from './guild-list'
+import {guildAnchorImportResultMessages} from './guild-anchor-import-result'
 import {guildProfileMessages} from './guild-profile'
 import {rechargeCfgListMessages} from './recharge-cfg-list'
 import {appPkgListMessages} from './app-pkg-list'
@@ -60,6 +61,7 @@ const pageMessageBuilders = [
   ['bannerList', bannerListMessages],
   ['activityMessageList', activityMessageListMessages],
   ['guildList', guildListMessages],
+  ['guildAnchorImportResult', guildAnchorImportResultMessages],
   ['guildProfile', guildProfileMessages],
   ['rechargeCfgList', rechargeCfgListMessages],
   ['appPkgList', appPkgListMessages],

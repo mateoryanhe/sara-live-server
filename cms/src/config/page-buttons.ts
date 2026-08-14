@@ -96,8 +96,6 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.search,
         {key: 'setAnchor', label: '设为主播'},
         {key: 'setSeniorAnchor', label: '设为高级主播'},
-        {key: 'batchSetAnchor', label: '批量设普通主播'},
-        {key: 'batchSetSeniorAnchor', label: '批量设高级主播'},
         {key: 'goldAdd', label: '加金币'},
         {key: 'goldSub', label: '减金币'},
         {key: 'diamondAdd', label: '加钻石'},
@@ -132,6 +130,8 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     ],
     GuildManagement: [
         ...DEFAULT_CRUD_BUTTONS,
+        {key: 'batchSetAnchor', label: 'CSV导入普通主播'},
+        {key: 'batchSetSeniorAnchor', label: 'CSV导入高级主播'},
         {key: 'member', label: '成员管理'},
         {key: 'approve', label: '审核'},
     ],

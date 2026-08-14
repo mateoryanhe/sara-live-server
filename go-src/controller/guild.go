@@ -47,3 +47,8 @@ func (c *GuildController) GetMyGuildProfile(ctx context.Context, req *guilddto.G
 func (c *GuildController) UpdateMyGuildProfile(ctx context.Context, req *guilddto.UpdateMyGuildProfileReq) (res *guilddto.UpdateMyGuildProfileRes, err error) {
 	return guild.UpdateMyGuildProfile(ctx, req)
 }
+
+// ImportGuildAnchors CSV 导入工会主播
+func (c *GuildController) ImportGuildAnchors(ctx context.Context, req *guilddto.ImportGuildAnchorsReq) (res *guilddto.ImportGuildAnchorsRes, err error) {
+	return guild.ImportGuildAnchors(ctx, req)
+}

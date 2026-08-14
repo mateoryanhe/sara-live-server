@@ -46,8 +46,6 @@
           <el-form-item>
             <el-button v-if="can('search')" type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
             <el-button v-if="can('search')" @click="handleReset">{{ t('common.reset') }}</el-button>
-            <el-button v-if="can('batchSetAnchor')" @click="openBatchAnchorDialog('anchor')">{{ t('pages.userList.batchSetAnchor') }}</el-button>
-            <el-button v-if="can('batchSetSeniorAnchor')" @click="openBatchAnchorDialog('senior')">{{ t('pages.userList.batchSetSeniorAnchor') }}</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -302,28 +300,6 @@
         <el-button :loading="userTypeSubmitting" type="primary" @click="submitUserType">{{ t('common.confirm') }}</el-button>
       </template>
     </el-dialog>
-
-    <el-dialog
-        v-model="batchAnchorDialogVisible"
-        :title="batchAnchorDialogTitle"
-        width="520px"
-        @closed="resetBatchAnchorForm"
-    >
-      <el-form ref="batchAnchorFormRef" :model="batchAnchorForm" :rules="batchAnchorFormRules" label-width="100px">
-        <el-form-item :label="t('common.userId')" prop="userIdsText">
-          <el-input
-              v-model="batchAnchorForm.userIdsText"
-              :rows="8"
-              :placeholder="t('pages.userList.batchUserIdsPlaceholder')"
-              type="textarea"
-          />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="batchAnchorDialogVisible = false">{{ t('common.cancel') }}</el-button>
-        <el-button :loading="batchAnchorSubmitting" type="primary" @click="submitBatchAnchor">{{ t('common.confirm') }}</el-button>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
@@ -374,52 +350,6 @@ const banFormRef = ref<FormInstance>()
 const userTypeDialogVisible = ref(false)
 const userTypeSubmitting = ref(false)
 const userTypeFormRef = ref<FormInstance>()
-const batchAnchorDialogVisible = ref(false)
-const batchAnchorSubmitting = ref(false)
-const batchAnchorFormRef = ref<FormInstance>()
-const batchAnchorMode = ref<'anchor' | 'senior'>('anchor')
-
-const batchAnchorDialogTitle = computed(() =>
-    batchAnchorMode.value === 'senior'
-        ? t('pages.userList.batchSetSeniorAnchorTitle')
-        : t('pages.userList.batchSetAnchorTitle')
-)
-
-interface BatchAnchorForm {
-  userIdsText: string
-}
-
-const batchAnchorForm = reactive<BatchAnchorForm>({
-  userIdsText: ''
-})
-
-const parseUserIds = (text: string): string[] => {
-  const ids = new Set<string>()
-  for (const line of text.split('\n')) {
-    for (const part of line.split(/[\s,，;；]+/)) {
-      const id = part.trim()
-      if (id && /^\d+$/.test(id)) {
-        ids.add(id)
-      }
-    }
-  }
-  return [...ids]
-}
-
-const batchAnchorFormRules = computed<FormRules>(() => ({
-  userIdsText: [
-    {
-      validator: (_rule, value, callback) => {
-        if (parseUserIds(String(value || '')).length === 0) {
-          callback(new Error(t('pages.userList.userIdsRequired')))
-          return
-        }
-        callback()
-      },
-      trigger: 'blur'
-    }
-  ]
-}))
 
 const userTypeLabelMap = computed<Record<number, string>>(() => ({
   0: t('pages.userList.userTypeNormal'),
@@ -762,61 +692,6 @@ const handleSetSeniorAnchor = async (row: UserInfo) => {
       console.error('setSeniorAnchor failed:', error)
     }
   }
-}
-
-const resetBatchAnchorForm = () => {
-  batchAnchorForm.userIdsText = ''
-  batchAnchorFormRef.value?.clearValidate()
-}
-
-const openBatchAnchorDialog = (mode: 'anchor' | 'senior') => {
-  batchAnchorMode.value = mode
-  batchAnchorDialogVisible.value = true
-}
-
-const submitBatchAnchor = async () => {
-  if (!batchAnchorFormRef.value) return
-  await batchAnchorFormRef.value.validate(async (valid) => {
-    if (!valid) return
-    const ids = parseUserIds(batchAnchorForm.userIdsText)
-    const role = batchAnchorMode.value === 'senior'
-        ? t('pages.userList.batchSetSeniorRole')
-        : t('pages.userList.batchSetAnchorRole')
-    const title = batchAnchorMode.value === 'senior'
-        ? t('pages.userList.batchSetSeniorAnchorTitle')
-        : t('pages.userList.batchSetAnchorTitle')
-    try {
-      await ElMessageBox.confirm(
-          t('pages.userList.batchSetConfirm', {count: ids.length, role}),
-          title,
-          {
-            confirmButtonText: t('common.confirm'),
-            cancelButtonText: t('common.cancel'),
-            type: 'warning'
-          }
-      )
-      batchAnchorSubmitting.value = true
-      const response = batchAnchorMode.value === 'senior'
-          ? await accountApi.batchSetSeniorAnchor({ids})
-          : await accountApi.batchSetAnchor({ids})
-      batchAnchorDialogVisible.value = false
-      if (response.failCount > 0) {
-        ElMessage.warning(t('pages.userList.batchSetPartial', {
-          success: response.successCount,
-          fail: response.failCount
-        }))
-      } else {
-        ElMessage.success(t('pages.userList.batchSetSuccess', {count: response.successCount}))
-      }
-      await fetchUserList()
-    } catch (error) {
-      if (error !== 'cancel') {
-        console.error('batchSetAnchor failed:', error)
-      }
-    } finally {
-      batchAnchorSubmitting.value = false
-    }
-  })
 }
 
 const afterCurrencyChangeSuccess = () => {

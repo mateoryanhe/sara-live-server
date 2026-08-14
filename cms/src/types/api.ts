@@ -499,6 +499,40 @@ export interface UpdateMyGuildProfileReq {
     description?: string
 }
 
+export interface ImportGuildAnchorRow {
+    userId: string
+    cancelCode: string
+}
+
+export interface ImportGuildAnchorsReq {
+    guildId: string | number
+    /** 1 普通主播, 7 高级主播 */
+    anchorType: 1 | 7
+    rows: ImportGuildAnchorRow[]
+}
+
+export interface ImportGuildAnchorFailItem {
+    userId: string
+    nickname: string
+    /** 1用户不存在 2注销码错误 3注销码过期 4已加入工会 5无法设为主播 */
+    reason: number
+}
+
+export interface ImportGuildAnchorsRes {
+    successCount: number
+    failCount: number
+    fails: ImportGuildAnchorFailItem[]
+}
+
+export interface GuildAnchorImportResultState {
+    guildId: string
+    guildName: string
+    anchorType: 1 | 7
+    successCount: number
+    failCount: number
+    fails: ImportGuildAnchorFailItem[]
+}
+
 export interface MyGuildProfileListRes {
     list: MyGuildProfile[]
 }

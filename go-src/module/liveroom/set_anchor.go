@@ -82,3 +82,8 @@ func setUserAsAnchorBatch(accountId uint64, userType uint8) error {
 	EnsureAnchorRoom(accountId, user.GuildId)
 	return nil
 }
+
+// SetUserAsAnchorIfNeeded 将普通用户设为主播类型;已是主播则跳过
+func SetUserAsAnchorIfNeeded(accountId uint64, userType uint8) error {
+	return setUserAsAnchorBatch(accountId, userType)
+}

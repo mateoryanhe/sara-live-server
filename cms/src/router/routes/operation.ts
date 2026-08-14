@@ -25,6 +25,12 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {title: '工会管理'},
         },
         {
+            path: 'guild/guild-anchor-import-result',
+            name: 'GuildAnchorImportResult',
+            component: () => import('@/views/operation/guild/guild-anchor-import-result.vue'),
+            meta: {title: '工会主播导入结果', hidden: true},
+        },
+        {
             path: 'guild/guild-profile',
             name: 'GuildProfileManagement',
             component: () => import('@/views/operation/guild/guild-profile.vue'),
