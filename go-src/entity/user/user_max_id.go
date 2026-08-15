@@ -12,6 +12,7 @@ const (
 )
 
 const (
+	// UserMaxIdDefaultID 用户ID起点(当前最大ID初始值;下次分配为 DefaultID+1)
 	UserMaxIdDefaultID uint64 = 1000000
 )
 
@@ -25,10 +26,10 @@ type UserMaxId struct {
 	MaxId uint64 `gorm:"default:0;comment:当前最大ID" json:"maxId"`
 }
 
-// NewUserMaxId 构造最大ID记录
+// NewUserMaxId 构造最大ID记录(id 为表主键,通常为1)
 func NewUserMaxId(id uint64) *UserMaxId {
 	if id == 0 {
-		id = UserMaxIdDefaultID
+		id = 1
 	}
 	return &UserMaxId{ID: id}
 }
