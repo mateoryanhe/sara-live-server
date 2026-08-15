@@ -9,7 +9,7 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/accountdto"
 	liveentity "xr-game-server/entity/live"
-	userentity "xr-game-server/ent
+	userentity "xr-game-server/entity/user"
 	"xr-game-server/module/upload"
 )
 

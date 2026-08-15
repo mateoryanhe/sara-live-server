@@ -11,7 +11,7 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/botanchordto"
 	liveentity "xr-game-server/entity/live"
-	userentity "xr-game-server
+	userentity "xr-game-server/entity/user"
 	"xr-game-server/errercode"
 	"xr-game-server/module/auth"
 	"xr-game-server/module/liveroom"
