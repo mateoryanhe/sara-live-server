@@ -34,20 +34,7 @@
 
       </el-form>
 
-      <div class="table-header">
-        <el-button
-            :disabled="selectedAnchors.length === 0"
-            type="primary"
-            @click="handleBatchSetTimezone"
-        >
-          {{ t('pages.anchorList.batchSetTimezone') }}
-        </el-button>
-      </div>
-
-
-
-      <el-table v-loading="loading" :data="tableData" style="width: 100%" @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" :selectable="checkSelectable"/>
+      <el-table v-loading="loading" :data="tableData" style="width: 100%">
         <el-table-column :label="t('common.userId')" prop="id" width="180"/>
         <el-table-column :label="t('common.nickname')" min-width="120" prop="nickname">
           <template #default="{ row }">{{ row.nickname || '-' }}</template>
@@ -288,27 +275,6 @@
 
     </el-dialog>
 
-    <el-dialog v-model="batchTimezoneVisible" :title="t('pages.anchorList.batchSetTimezone')" width="500px">
-      <el-form label-width="100px">
-        <el-form-item :label="t('pages.anchorList.selectedAnchors')">
-          <span>{{ selectedAnchors.length }} {{ t('pages.anchorList.anchors') }}</span>
-        </el-form-item>
-        <el-form-item :label="t('pages.anchorList.timezone')" required>
-          <el-input-number
-              v-model="batchTimezone"
-              :placeholder="t('pages.anchorList.selectTimezone')"
-              :min="-12"
-              :max="14"
-              style="width: 100%"
-          />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="batchTimezoneVisible = false">{{ t('common.cancel') }}</el-button>
-        <el-button type="primary" :loading="batchUpdating" @click="handleBatchUpdateTimezone">{{ t('common.save') }}</el-button>
-      </template>
-    </el-dialog>
-
   </div>
 
 </template>
@@ -327,7 +293,7 @@ import {ElForm, ElMessage, ElMessageBox, type FormRules} from 'element-plus'
 
 import {accountApi} from '@/api'
 
-import type {AnchorListItem, BanAnchorReq, BatchSetAnchorTimezoneRes, UnBanAnchorReq} from '@/types/api'
+import type {AnchorListItem, BanAnchorReq, UnBanAnchorReq} from '@/types/api'
 
 import {formatAmount} from '@/utils/number-format'
 
@@ -348,11 +314,6 @@ const banDialogVisible = ref(false)
 const banSubmitting = ref(false)
 
 const banFormRef = ref<InstanceType<typeof ElForm>>()
-
-const selectedAnchors = ref<AnchorListItem[]>([])
-const batchTimezoneVisible = ref(false)
-const batchTimezone = ref<number>(8)
-const batchUpdating = ref(false)
 
 
 
@@ -716,57 +677,6 @@ onMounted(() => {
   fetchList()
 
 })
-
-const handleSelectionChange = (selection: AnchorListItem[]) => {
-  selectedAnchors.value = selection
-}
-
-const checkSelectable = (row: AnchorListItem) => {
-  const guildId = Number(row.guildId) || 0
-  return guildId === 0
-}
-
-const handleBatchSetTimezone = () => {
-  if (selectedAnchors.value.length === 0) {
-    ElMessage.warning(t('pages.anchorList.selectAnchorsFirst'))
-    return
-  }
-  batchTimezone.value = 8
-  batchTimezoneVisible.value = true
-}
-
-const handleBatchUpdateTimezone = async () => {
-  if (selectedAnchors.value.length === 0) {
-    ElMessage.warning(t('pages.anchorList.selectAnchorsFirst'))
-    return
-  }
-  if (batchTimezone.value === undefined) {
-    ElMessage.warning(t('pages.anchorList.selectTimezoneFirst'))
-    return
-  }
-  const guildZeroAnchors = selectedAnchors.value.filter(a => (Number(a.guildId) || 0) === 0)
-  if (guildZeroAnchors.length === 0) {
-    ElMessage.warning(t('pages.anchorList.noGuildZeroAnchor'))
-    return
-  }
-  batchUpdating.value = true
-  try {
-    const response = await accountApi.batchSetAnchorTimezone({
-      anchorIds: guildZeroAnchors.map(a => a.id),
-      timezone: batchTimezone.value
-    })
-    const res = response as BatchSetAnchorTimezoneRes
-    ElMessage.success(t('pages.anchorList.batchSetTimezoneSuccess', {success: res.successCount, fail: res.failCount}))
-    batchTimezoneVisible.value = false
-    selectedAnchors.value = []
-    fetchList()
-  } catch (error) {
-    console.error('batch set timezone failed:', error)
-    ElMessage.error(t('pages.anchorList.batchSetTimezoneFailed'))
-  } finally {
-    batchUpdating.value = false
-  }
-}
 
 const handleExitGuild = async (row: AnchorListItem) => {
   try {

@@ -84,7 +84,6 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GuildManagement:exitGuild': '/account/exitGuild',
     'GuildManagement:batchSetAnchor': '/guild/importGuildAnchors',
     'GuildManagement:batchSetSeniorAnchor': '/guild/importGuildAnchors',
-    'GuildManagement:batchSetTimezone': '/guild/batchUpdateGuildTimezone',
 
     GuildProfileManagement: '/guild/getMyGuildProfile',
     'GuildProfileManagement:view': '/guild/getMyGuildProfile',

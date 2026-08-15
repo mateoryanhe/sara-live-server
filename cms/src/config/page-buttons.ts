@@ -135,7 +135,6 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'exitGuild', label: '退出工会'},
         {key: 'batchSetAnchor', label: '导入普通主播'},
         {key: 'batchSetSeniorAnchor', label: '导入高级主播'},
-        {key: 'batchSetTimezone', label: '批量设置时区'},
     ],
     GuildProfileManagement: [
         ...DEFAULT_VIEW_BUTTONS,

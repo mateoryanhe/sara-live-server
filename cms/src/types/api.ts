@@ -202,17 +202,6 @@ export interface BatchSetAnchorRes {
     failIds?: string[]
 }
 
-export interface BatchSetAnchorTimezoneReq {
-    anchorIds: string[]
-    timezone: number
-}
-
-export interface BatchSetAnchorTimezoneRes {
-    successCount: number
-    failCount: number
-    failIds: string[]
-}
-
 export interface ExitGuildReq {
     anchorId: string
 }
@@ -500,7 +489,6 @@ export interface Guild {
     leaderName?: string
     description: string
     status: number
-    timezone: number
     createdAt: string
     updatedAt: string
 }

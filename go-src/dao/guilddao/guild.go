@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
-	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/guilddto"
 	"xr-game-server/entity"
 )
@@ -152,31 +151,6 @@ func GetGuildList(req *guilddto.GuildListReq) (int, []*guilddto.GuildListRes) {
 	return total, list
 }
 
-// BatchUpdateGuildTimezone 批量更新工会时区,并同步更新主播时区
-func BatchUpdateGuildTimezone(guildIds []uint64, timezone int) error {
-	if len(guildIds) == 0 {
-		return nil
-	}
-	now := time.Now()
-	_, err := g.DB().Model(string(entity.TbLiveGuild)).
-		Data(g.Map{
-			string(entity.LiveGuildTimezone): timezone,
-			"updated_at":                     now,
-		}).
-		WhereIn("id", guildIds).
-		Where(string(entity.LiveGuildStatus), entity.LiveGuildStatusNormal).
-		Update()
-	if err != nil {
-		return err
-	}
-	for _, guildId := range guildIds {
-		for _, room := range liveroomdao.ListRoomsByGuild(guildId) {
-			room.SetTimezone(timezone)
-		}
-	}
-	return nil
-}
-
 func toGuildListRes(row *entity.LiveGuild) *guilddto.GuildListRes {
 	if row == nil {
 		return nil
@@ -188,7 +162,6 @@ func toGuildListRes(row *entity.LiveGuild) *guilddto.GuildListRes {
 		LeaderName:  row.LeaderName,
 		Description: row.Description,
 		Status:      row.Status,
-		Timezone:    row.Timezone,
 		CreatedAt:   formatGuildTime(row.CreatedAt),
 		UpdatedAt:   formatGuildTime(row.UpdatedAt),
 	}

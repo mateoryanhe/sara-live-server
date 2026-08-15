@@ -52,8 +52,3 @@ func (c *GuildController) UpdateMyGuildProfile(ctx context.Context, req *guilddt
 func (c *GuildController) ImportGuildAnchors(ctx context.Context, req *guilddto.ImportGuildAnchorsReq) (res *guilddto.ImportGuildAnchorsRes, err error) {
 	return guild.ImportGuildAnchors(ctx, req)
 }
-
-// BatchUpdateGuildTimezone 批量更新工会时区
-func (c *GuildController) BatchUpdateGuildTimezone(ctx context.Context, req *guilddto.BatchUpdateGuildTimezoneReq) (res *guilddto.BatchUpdateGuildTimezoneRes, err error) {
-	return guild.BatchUpdateGuildTimezone(ctx, req)
-}

@@ -55,19 +55,10 @@ const zh = {
   unbanTitle: '确认解封',
   unbanSuccess: '解封成功',
   unbanFailed: '解封失败',
-  batchSetTimezone: '批量设置时区',
-  selectAnchorsFirst: '请先勾选要设置时区的主播',
-  selectTimezoneFirst: '请输入时区',
-  noGuildZeroAnchor: '所选主播中无工会ID=0的主播',
-  batchSetTimezoneSuccess: '设置成功 {success} 个，失败 {fail} 个',
-  batchSetTimezoneFailed: '批量设置时区失败',
   exitGuild: '退出工会',
   exitGuildConfirm: '确定要退出工会吗？',
   exitGuildTitle: '确认退出工会',
   exitGuildSuccess: '退出工会成功',
-  selectedAnchors: '已选主播',
-  anchors: '个主播',
-  selectTimezone: '输入时区偏移量，如 8 表示 UTC+8',
 } as const
 
 const en: Record<keyof typeof zh, string> = {
@@ -125,19 +116,10 @@ const en: Record<keyof typeof zh, string> = {
   unbanTitle: 'Confirm Unban',
   unbanSuccess: 'Unbanned successfully',
   unbanFailed: 'Unban failed',
-  batchSetTimezone: 'Batch Set Timezone',
-  selectAnchorsFirst: 'Select anchors first',
-  selectTimezoneFirst: 'Please enter timezone',
-  noGuildZeroAnchor: 'No anchors with guildId=0 selected',
-  batchSetTimezoneSuccess: 'Success {success}, Failed {fail}',
-  batchSetTimezoneFailed: 'Batch set timezone failed',
   exitGuild: 'Exit Guild',
   exitGuildConfirm: 'Exit guild?',
   exitGuildTitle: 'Confirm Exit Guild',
   exitGuildSuccess: 'Exited guild successfully',
-  selectedAnchors: 'Selected Anchors',
-  anchors: 'anchors',
-  selectTimezone: 'Enter timezone offset, e.g. 8 for UTC+8',
 }
 
 const es: Record<keyof typeof zh, string> = {
@@ -195,19 +177,10 @@ const es: Record<keyof typeof zh, string> = {
   unbanTitle: 'Confirmar desbaneo',
   unbanSuccess: 'Desbaneado correctamente',
   unbanFailed: 'Error al desbanear',
-  batchSetTimezone: 'Batch Set Timezone',
-  selectAnchorsFirst: 'Select anchors first',
-  selectTimezoneFirst: 'Please enter timezone',
-  noGuildZeroAnchor: 'No anchors with guildId=0 selected',
-  batchSetTimezoneSuccess: 'Success {success}, Failed {fail}',
-  batchSetTimezoneFailed: 'Batch set timezone failed',
   exitGuild: 'Exit Guild',
   exitGuildConfirm: 'Exit guild?',
   exitGuildTitle: 'Confirm Exit Guild',
   exitGuildSuccess: 'Exited guild successfully',
-  selectedAnchors: 'Selected Anchors',
-  anchors: 'anchors',
-  selectTimezone: 'Enter timezone offset, e.g. 8 for UTC+8',
 }
 
 const pt: Record<keyof typeof zh, string> = {
@@ -265,19 +238,10 @@ const pt: Record<keyof typeof zh, string> = {
   unbanTitle: 'Confirmar desbanimento',
   unbanSuccess: 'Desbanido com sucesso',
   unbanFailed: 'Falha ao desbanir',
-  batchSetTimezone: 'Batch Set Timezone',
-  selectAnchorsFirst: 'Select anchors first',
-  selectTimezoneFirst: 'Please enter timezone',
-  noGuildZeroAnchor: 'No anchors with guildId=0 selected',
-  batchSetTimezoneSuccess: 'Success {success}, Failed {fail}',
-  batchSetTimezoneFailed: 'Batch set timezone failed',
   exitGuild: 'Exit Guild',
   exitGuildConfirm: 'Exit guild?',
   exitGuildTitle: 'Confirm Exit Guild',
   exitGuildSuccess: 'Exited guild successfully',
-  selectedAnchors: 'Selected Anchors',
-  anchors: 'anchors',
-  selectTimezone: 'Enter timezone offset, e.g. 8 for UTC+8',
 }
 
 const hi: Record<keyof typeof zh, string> = {
@@ -335,19 +299,10 @@ const hi: Record<keyof typeof zh, string> = {
   unbanTitle: 'अनबैन पुष्टि',
   unbanSuccess: 'अनबैन सफल',
   unbanFailed: 'अनबैन विफल',
-  batchSetTimezone: 'Batch Set Timezone',
-  selectAnchorsFirst: 'Select anchors first',
-  selectTimezoneFirst: 'Please enter timezone',
-  noGuildZeroAnchor: 'No anchors with guildId=0 selected',
-  batchSetTimezoneSuccess: 'Success {success}, Failed {fail}',
-  batchSetTimezoneFailed: 'Batch set timezone failed',
   exitGuild: 'Exit Guild',
   exitGuildConfirm: 'Exit guild?',
   exitGuildTitle: 'Confirm Exit Guild',
   exitGuildSuccess: 'Exited guild successfully',
-  selectedAnchors: 'Selected Anchors',
-  anchors: 'anchors',
-  selectTimezone: 'Enter timezone offset, e.g. 8 for UTC+8',
 }
 
 const id: Record<keyof typeof zh, string> = {
@@ -405,19 +360,10 @@ const id: Record<keyof typeof zh, string> = {
   unbanTitle: 'Konfirmasi batalkan ban',
   unbanSuccess: 'Batalkan ban berhasil',
   unbanFailed: 'Batalkan ban gagal',
-  batchSetTimezone: 'Batch Set Timezone',
-  selectAnchorsFirst: 'Select anchors first',
-  selectTimezoneFirst: 'Please enter timezone',
-  noGuildZeroAnchor: 'No anchors with guildId=0 selected',
-  batchSetTimezoneSuccess: 'Success {success}, Failed {fail}',
-  batchSetTimezoneFailed: 'Batch set timezone failed',
   exitGuild: 'Exit Guild',
   exitGuildConfirm: 'Exit guild?',
   exitGuildTitle: 'Confirm Exit Guild',
   exitGuildSuccess: 'Exited guild successfully',
-  selectedAnchors: 'Selected Anchors',
-  anchors: 'anchors',
-  selectTimezone: 'Enter timezone offset, e.g. 8 for UTC+8',
 }
 
 export const anchorListMessages = definePageMessages(zh, en, es, pt, hi, id)

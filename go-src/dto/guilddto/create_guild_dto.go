@@ -9,7 +9,6 @@ type CreateGuildReq struct {
 	Name        string `json:"name" v:"required#工会名称不能为空" dc:"工会名称"`
 	LeaderId    uint64 `json:"leaderId" dc:"会长/负责人ID"`
 	Description string `json:"description" dc:"工会简介"`
-	Timezone    int    `json:"timezone" dc:"时区偏移量"`
 }
 
 type CreateGuildRes struct {

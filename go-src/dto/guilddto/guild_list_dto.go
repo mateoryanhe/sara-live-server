@@ -18,7 +18,6 @@ type GuildListRes struct {
 	LeaderName  string `json:"leaderName"`
 	Description string `json:"description"`
 	Status      uint8  `json:"status"`
-	Timezone    int    `json:"timezone"`
 	CreatedAt   string `json:"createdAt"`
 	UpdatedAt   string `json:"updatedAt"`
 }

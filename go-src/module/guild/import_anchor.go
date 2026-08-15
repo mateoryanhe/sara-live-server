@@ -101,6 +101,6 @@ func importOneGuildAnchor(guild *entity.LiveGuild, userID uint64, cancelCode str
 	}
 
 	user.SetGuildId(guild.ID)
-	_ = liveroom.SetUserAsAnchorWithTimezone(userID, guild.ID, anchorType)
+	_ = liveroom.SetUserAsAnchorIfNeeded(userID, anchorType)
 	return 0, nickname
 }

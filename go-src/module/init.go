@@ -29,7 +29,6 @@ import (
 	"xr-game-server/module/shortvideo"
 	"xr-game-server/module/stat"
 	"xr-game-server/module/ticket"
-	"xr-game-server/module/timezon
 	"xr-game-server/module/upload"
 	"xr-game-server/module/userinfo"
 	"xr-game-server/module/verification_code"
@@ -65,7 +64,6 @@ func Init() {
 	customerservice.Init()
 	wallet.Init()
 	logquery.Init()
-	timezonecfg.Init()
 
 	liveroom.Init()
 	userinfo.Init()
