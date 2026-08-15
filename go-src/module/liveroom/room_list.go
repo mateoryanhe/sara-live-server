@@ -87,7 +87,7 @@ func filterRoomsForApp(rooms []*entity.LiveRoom) []*entity.LiveRoom {
 	}
 	filtered := make([]*entity.LiveRoom, 0, len(rooms))
 	for _, room := range rooms {
-		if room == nil || IsRoomBanned(room) || isDisabledBotAnchorRoom(room) {
+		if room == nil || IsRoomBanned(room) || IsRoomOffShelf(room) || isDisabledBotAnchorRoom(room) {
 			continue
 		}
 		filtered = append(filtered, room)
@@ -424,7 +424,7 @@ func GetFollowedRoomList(ctx context.Context, req *liveroomdto.GetFollowedLiveRo
 			continue
 		}
 		room := liveroomdao.GetRoomById(f.AnchorId)
-		if room == nil || IsRoomBanned(room) || isDisabledBotAnchorRoom(room) {
+		if room == nil || IsRoomBanned(room) || IsRoomOffShelf(room) || isDisabledBotAnchorRoom(room) {
 			continue
 		}
 		rooms = append(rooms, room)

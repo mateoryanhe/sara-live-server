@@ -40,12 +40,19 @@ const (
 	LiveRoomIsTest                       db.TbCol = "is_test"
 	LiveRoomCloudPlayerId                db.TbCol = "cloud_player_id"
 	LiveRoomCloudPlayerTokenExpireAt     db.TbCol = "cloud_player_token_expire_at"
+	LiveRoomStatus                       db.TbCol = "status"
 )
 
 const (
 	LiveRoomCategoryHot     uint8 = 1 // hot
 	LiveRoomCategoryGame    uint8 = 2 // game
 	LiveRoomCategoryPrivate uint8 = 3 // 私密
+)
+
+// 直播间上下架状态
+const (
+	LiveRoomStatusOffShelf uint8 = 0 // 下架
+	LiveRoomStatusOnShelf  uint8 = 1 // 上架
 )
 
 const (
@@ -92,6 +99,7 @@ type LiveRoom struct {
 	IsTest                       bool       `gorm:"default:0;comment:是否测试机器人主播(仅下发App)" json:"isTest"`
 	CloudPlayerId                string     `gorm:"size:64;default:'';comment:声网云播放器ID" json:"cloudPlayerId"`
 	CloudPlayerTokenExpireAt     *time.Time `gorm:"comment:云播放器RTC token过期时间" json:"cloudPlayerTokenExpireAt"`
+	Status                       uint8      `gorm:"default:1;comment:状态(0-下架,1-上架)" json:"status"`
 }
 
 // NewLiveRoom 构造内存对象,字段写入通过 syndb 异步入库
@@ -108,6 +116,7 @@ func NewLiveRoom(anchorId, guildId uint64, title, cover, notice string) *LiveRoo
 	r.SetNotice(notice)
 	r.SetCategory(LiveRoomCategoryHot)
 	r.SetPrivateInviteType(DefaultPrivateInviteType(LiveRoomCategoryHot))
+	r.SetStatus(LiveRoomStatusOnShelf)
 	return r
 }
 
@@ -340,6 +349,17 @@ func (r *LiveRoom) SetCloudPlayerTokenExpireAt(v *time.Time) {
 	r.CloudPlayerTokenExpireAt = v
 	r.touchUpdatedAt()
 	syndb.AddData(TbLiveRoom, LiveRoomCloudPlayerTokenExpireAt, &syndb.ColData{
+		IdVal: r.ID, ColVal: v,
+	})
+}
+
+func (r *LiveRoom) SetStatus(v uint8) {
+	if v != LiveRoomStatusOffShelf && v != LiveRoomStatusOnShelf {
+		v = LiveRoomStatusOnShelf
+	}
+	r.Status = v
+	r.touchUpdatedAt()
+	syndb.AddData(TbLiveRoom, LiveRoomStatus, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }

@@ -87,6 +87,11 @@ func markContributionRankDataChanged(roomId uint64) {
 func tryRefreshContributionRankCaches() {
 	nowUnix := time.Now().Unix()
 	for _, roomId := range contributionRankRefreshDeadline.Keys() {
+		// 已下播房间不再刷新,并清掉残留缓存
+		if !taskMap.Contains(roomId) {
+			clearContributionRankCache(roomId)
+			continue
+		}
 		deadlineUnix := contributionRankRefreshDeadline.Get(roomId)
 		if deadlineUnix == 0 {
 			contributionRankRefreshDeadline.Remove(roomId)
@@ -127,12 +132,6 @@ func refreshRoomAudienceCaches(roomId uint64) {
 
 func broadcastAudienceListRefresh(roomId uint64) {
 	online := getOnline(roomId)
-
-	userIds := commonOnlineMap.Get(roomId)
-	if userIds == nil {
-		userIds = make([]uint64, 0)
-	}
-
 	payload := &liveroomdto.AudienceListRefreshPushItem{
 		RoomId: roomId,
 	}
@@ -144,17 +143,18 @@ func broadcastAudienceListRefresh(roomId uint64) {
 }
 
 func clearRoomAudienceCaches(roomId uint64) {
+	clearRoomOnlineMap(roomId)
 	clearOnlineLists(roomId)
 	clearContributionRankCache(roomId)
 }
 
 func loadContributionRankRows(roomId uint64, startTime, endTime time.Time) []*contributionRankRow {
+	list := make([]*contributionRankRow, 0)
 	onlineUserIds := getOnline(roomId)
 	if len(onlineUserIds) == 0 {
-		return nil
+		return list
 	}
 	rows := liveroomdao.SumAudienceContributionByRoom(roomId, startTime, endTime, onlineUserIds)
-	list := make([]*contributionRankRow, 0, len(rows))
 	for _, row := range rows {
 		if row == nil || row.SenderId == 0 {
 			continue
@@ -176,19 +176,25 @@ func getContributionRankSnapshot(roomId uint64) *contributionRankSnapshot {
 }
 
 func getContributionRankRows(snapshot *contributionRankSnapshot, period int) []*contributionRankRow {
+	empty := make([]*contributionRankRow, 0)
 	if snapshot == nil {
-		return nil
+		return empty
 	}
+	var rows []*contributionRankRow
 	switch period {
 	case liveroomdto.ContributionRankPeriodToday:
-		return snapshot.Today
+		rows = snapshot.Today
 	case liveroomdto.ContributionRankPeriodLast7:
-		return snapshot.Last7
+		rows = snapshot.Last7
 	case liveroomdto.ContributionRankPeriodLast30:
-		return snapshot.Last30
+		rows = snapshot.Last30
 	default:
-		return nil
+		return empty
 	}
+	if rows == nil {
+		return empty
+	}
+	return rows
 }
 
 // GetContributionRank App端分页查询直播间观众贡献榜(礼物+付费弹幕)

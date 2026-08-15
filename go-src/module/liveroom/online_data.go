@@ -40,19 +40,24 @@ func removeOnline(userId uint64, roomId uint64) {
 	roomMap.Remove(userId)
 }
 
+// getOnline 获取房间在线用户ID列表;key 不存在时返回空切片,避免 nil
 func getOnline(roomId uint64) []uint64 {
 	roomMap := getRoomOnlineMap(roomId, false)
 	if roomMap == nil {
 		return make([]uint64, 0)
 	}
-	return roomMap.Keys()
+	keys := roomMap.Keys()
+	if keys == nil {
+		return make([]uint64, 0)
+	}
+	return keys
 }
 
 func findOnlineRoomIdsByUser(userId uint64) []uint64 {
-	if userId == 0 {
-		return nil
-	}
 	roomIds := make([]uint64, 0)
+	if userId == 0 {
+		return roomIds
+	}
 	for _, roomId := range onlineMap.Keys() {
 		if isUserInOnlineMap(userId, roomId) {
 			roomIds = append(roomIds, roomId)
@@ -67,6 +72,13 @@ func isUserInOnlineMap(userId, roomId uint64) bool {
 }
 
 func countAudienceInRoom(roomId uint64) int {
-	count := len(getOnline(roomId))
-	return count
+	return len(getOnline(roomId))
+}
+
+// clearRoomOnlineMap 下播时清空该房在线名单内存
+func clearRoomOnlineMap(roomId uint64) {
+	if roomId == 0 {
+		return
+	}
+	onlineMap.Remove(roomId)
 }

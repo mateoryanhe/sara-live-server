@@ -32,6 +32,11 @@ func (a *AccountController) UnBanAnchor(ctx context.Context, req *accountdto.UnB
 	return liveroom.UnBanAnchor(ctx, req)
 }
 
+// SetLiveRoomStatus CMS上架/下架主播直播间
+func (a *AccountController) SetLiveRoomStatus(ctx context.Context, req *accountdto.SetLiveRoomStatusReq) (*accountdto.SetLiveRoomStatusRes, error) {
+	return liveroom.SetLiveRoomStatus(ctx, req)
+}
+
 func (a *AccountController) UnBan(ctx context.Context, req *accountdto.UnBanReq) (bool, error) {
 	return auth.UnBan(ctx, req)
 }
@@ -50,6 +55,11 @@ func (a *AccountController) QueryUserInfo(ctx context.Context, req *accountdto.Q
 
 func (a *AccountController) QueryAnchorList(ctx context.Context, req *accountdto.QueryAnchorListReq) (res *httpserver.CMSQueryResp, err error) {
 	return liveroom.QueryAnchorList(ctx, req)
+}
+
+// QueryOffShelfLiveRoomList CMS回收站:查询已下架直播间
+func (a *AccountController) QueryOffShelfLiveRoomList(ctx context.Context, req *accountdto.QueryOffShelfLiveRoomListReq) (res *httpserver.CMSQueryResp, err error) {
+	return liveroom.QueryOffShelfLiveRoomList(ctx, req)
 }
 
 func (a *AccountController) SetAnchor(ctx context.Context, req *accountdto.SetAnchorReq) (*accountdto.SetAnchorRes, error) {

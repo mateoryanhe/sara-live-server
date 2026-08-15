@@ -63,8 +63,11 @@ func startAnchorLive(ctx context.Context, room *entity.LiveRoom, heartTime time.
 	if IsRoomBanned(room) {
 		return 0, errercode.CreateCode(errercode.LiveRoomBanned)
 	}
+	if IsRoomOffShelf(room) {
+		return 0, errercode.CreateCode(errercode.LiveRoomOffShelf)
+	}
 	addTask(room.ID)
-	initRoomOnline(room.ID)
+	initRoomAudienceCaches(room.ID)
 
 	liveRecordId := snowflake.GetId()
 	room.SetLiveRecordId(liveRecordId)
@@ -76,7 +79,6 @@ func startAnchorLive(ctx context.Context, room *entity.LiveRoom, heartTime time.
 	liveroomdao.PrependLiveRecordToAppListCache(room.ID, liveRecord)
 	liveroomdao.FlushRoomCache(room)
 	flushRoomList(ctx)
-	flushOnlineLists(room.ID)
 	broadcastAnchorStartLive(room.ID, liveRecordId, liveRecord.StartTime.Unix())
 	return liveRecordId, nil
 }

@@ -145,4 +145,5 @@ func fillAnchorRoomFields(item *accountdto.AnchorListItem, room *entity.LiveRoom
 	item.BanApplyTime = room.BanApplyTime
 	item.BanReason = room.BanReason
 	item.Ban = IsRoomBanned(room)
+	item.Status = room.Status
 }

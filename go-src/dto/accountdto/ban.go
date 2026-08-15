@@ -1,8 +1,10 @@
 package accountdto
 
 import (
-	"github.com/gogf/gf/v2/frame/g"
 	"time"
+
+	"github.com/gogf/gf/v2/frame/g"
+	"xr-game-server/core/httpserver"
 )
 
 type BanReq struct {
@@ -39,6 +41,44 @@ type UnBanReq struct {
 }
 
 type BanRes struct {
+}
+
+// SetLiveRoomStatusReq CMS上架/下架主播直播间
+type SetLiveRoomStatusReq struct {
+	g.Meta   `path:"/setLiveRoomStatus" method:"post" summary:"上架/下架主播直播间" tags:"账号"`
+	AnchorId uint64 `json:"anchorId" v:"required#主播ID不能为空" dc:"主播账号ID"`
+	Status   uint8  `json:"status" v:"required|in:0,1#状态不能为空|状态只能为0下架或1上架" dc:"状态(0-下架,1-上架)"`
+}
+
+type SetLiveRoomStatusRes struct {
+	Success bool  `json:"success" dc:"是否成功"`
+	Status  uint8 `json:"status" dc:"当前状态(0-下架,1-上架)"`
+}
+
+// QueryOffShelfLiveRoomListReq CMS回收站:查询已下架直播间(直查DB)
+type QueryOffShelfLiveRoomListReq struct {
+	g.Meta `path:"/getOffShelfLiveRoomList" method:"post" summary:"获取下架直播间列表(回收站)" tags:"账号"`
+	httpserver.CMSQueryReq
+	Key string `json:"key" dc:"查询关键字(用户ID模糊/昵称/手机号/分享码)"`
+}
+
+// OffShelfLiveRoomItem 回收站列表项
+type OffShelfLiveRoomItem struct {
+	ID           uint64     `json:"id,string"`
+	Nickname     string     `json:"nickname"`
+	Phone        string     `json:"phone"`
+	Avatar       string     `json:"avatar"`
+	UserType     uint8      `json:"userType"`
+	GuildId      uint64     `json:"guildId,string"`
+	RoomTitle    string     `json:"roomTitle"`
+	RoomId       uint64     `json:"roomId,string"`
+	Category     uint8      `json:"category"`
+	Ban          bool       `json:"ban"`
+	BanApplyTime *time.Time `json:"banApplyTime"`
+	BanReason    string     `json:"banReason"`
+	Status       uint8      `json:"status"`
+	UpdatedAt    *time.Time `json:"updatedAt"`
+	CreatedAt    *time.Time `json:"createdAt"`
 }
 
 // ExitGuildReq CMS主播退出工会(将工会ID置为0)

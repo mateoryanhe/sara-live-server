@@ -12,7 +12,22 @@ import (
 
 const guildTimeLayout = "2006-01-02 15:04:05"
 
-// GetGuildById 根据 ID 从数据库获取工会(不含已软删除)
+// GetGuildByIdFromDB 根据 ID 直查数据库(含下架)
+func GetGuildByIdFromDB(id uint64) *entity.LiveGuild {
+	if id == 0 {
+		return nil
+	}
+	var row entity.LiveGuild
+	err := g.DB().Model(string(entity.TbLiveGuild)).
+		WherePri(id).
+		Scan(&row)
+	if err != nil || row.ID == 0 {
+		return nil
+	}
+	return &row
+}
+
+// GetGuildById 根据 ID 从数据库获取工会(不含已下架)
 func GetGuildById(id uint64) *entity.LiveGuild {
 	if id == 0 {
 		return nil
@@ -20,7 +35,7 @@ func GetGuildById(id uint64) *entity.LiveGuild {
 	var row entity.LiveGuild
 	err := g.DB().Model(string(entity.TbLiveGuild)).
 		WherePri(id).
-		Where(string(entity.LiveGuildStatus), entity.LiveGuildStatusNormal).
+		Where(string(entity.LiveGuildStatus), entity.LiveGuildStatusOnShelf).
 		Scan(&row)
 	if err != nil || row.ID == 0 {
 		return nil
@@ -37,7 +52,7 @@ func GetGuildByName(name string) *entity.LiveGuild {
 	var row entity.LiveGuild
 	err := g.DB().Model(string(entity.TbLiveGuild)).
 		Where(string(entity.LiveGuildName), name).
-		Where(string(entity.LiveGuildStatus), entity.LiveGuildStatusNormal).
+		Where(string(entity.LiveGuildStatus), entity.LiveGuildStatusOnShelf).
 		Scan(&row)
 	if err != nil || row.ID == 0 {
 		return nil
@@ -53,7 +68,7 @@ func ListGuildsByLeaderId(leaderId uint64) []*entity.LiveGuild {
 	rows := make([]*entity.LiveGuild, 0)
 	_ = g.DB().Model(string(entity.TbLiveGuild)).
 		Where(string(entity.LiveGuildLeaderId), leaderId).
-		Where(string(entity.LiveGuildStatus), entity.LiveGuildStatusNormal).
+		Where(string(entity.LiveGuildStatus), entity.LiveGuildStatusOnShelf).
 		Order("id asc").
 		Scan(&rows)
 	return rows
@@ -74,7 +89,7 @@ func CreateGuild(guild *entity.LiveGuild) error {
 		return nil
 	}
 	if guild.Status == 0 {
-		guild.Status = entity.LiveGuildStatusNormal
+		guild.Status = entity.LiveGuildStatusOnShelf
 	}
 	now := time.Now()
 	if guild.CreatedAt.IsZero() {
@@ -95,7 +110,7 @@ func UpdateGuild(guild *entity.LiveGuild) error {
 	return err
 }
 
-// DeleteGuild 软删除工会(status=0)
+// DeleteGuild 下架工会(status=0)
 func DeleteGuild(id uint64) error {
 	if id == 0 {
 		return nil
@@ -103,16 +118,72 @@ func DeleteGuild(id uint64) error {
 	now := time.Now()
 	_, err := g.DB().Model(string(entity.TbLiveGuild)).
 		Data(g.Map{
-			string(entity.LiveGuildStatus): entity.LiveGuildStatusDeleted,
+			string(entity.LiveGuildStatus): entity.LiveGuildStatusOffShelf,
 			"updated_at":                   now,
 		}).
 		WherePri(id).
-		Where(string(entity.LiveGuildStatus), entity.LiveGuildStatusNormal).
+		Where(string(entity.LiveGuildStatus), entity.LiveGuildStatusOnShelf).
 		Update()
 	return err
 }
 
-// GetGuildList 从数据库分页查询工会列表(不含已软删除)
+// OnShelfGuild 上架工会(status=1)
+func OnShelfGuild(id uint64) error {
+	if id == 0 {
+		return nil
+	}
+	now := time.Now()
+	_, err := g.DB().Model(string(entity.TbLiveGuild)).
+		Data(g.Map{
+			string(entity.LiveGuildStatus): entity.LiveGuildStatusOnShelf,
+			"updated_at":                   now,
+		}).
+		WherePri(id).
+		Where(string(entity.LiveGuildStatus), entity.LiveGuildStatusOffShelf).
+		Update()
+	return err
+}
+
+// GetOffShelfGuildList 分页查询已下架工会(直连数据库)
+func GetOffShelfGuildList(req *guilddto.OffShelfGuildListReq) (int, []*guilddto.GuildListRes) {
+	if req == nil {
+		return 0, []*guilddto.GuildListRes{}
+	}
+	pageIndex := req.PageIndex
+	pageSize := req.PageSize
+	if pageIndex <= 0 {
+		pageIndex = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 10
+	}
+
+	m := g.DB().Model(string(entity.TbLiveGuild)).
+		Where(string(entity.LiveGuildStatus), entity.LiveGuildStatusOffShelf)
+	if keyword := strings.TrimSpace(req.Name); keyword != "" {
+		m = m.WhereLike(string(entity.LiveGuildName), "%"+keyword+"%")
+	}
+
+	total, err := m.Count()
+	if err != nil {
+		return 0, []*guilddto.GuildListRes{}
+	}
+
+	rows := make([]*entity.LiveGuild, 0)
+	_ = m.Order("updated_at desc").
+		Page(pageIndex, pageSize).
+		Scan(&rows)
+
+	list := make([]*guilddto.GuildListRes, 0, len(rows))
+	for _, row := range rows {
+		if item := toGuildListRes(row); item != nil {
+			list = append(list, item)
+		}
+	}
+	return total, list
+}
+
+// GetGuildList 从数据库分页查询工会列表(不含已下架)
 func GetGuildList(req *guilddto.GuildListReq) (int, []*guilddto.GuildListRes) {
 	if req == nil {
 		return 0, []*guilddto.GuildListRes{}
@@ -127,7 +198,7 @@ func GetGuildList(req *guilddto.GuildListReq) (int, []*guilddto.GuildListRes) {
 	}
 
 	m := g.DB().Model(string(entity.TbLiveGuild)).
-		Where(string(entity.LiveGuildStatus), entity.LiveGuildStatusNormal)
+		Where(string(entity.LiveGuildStatus), entity.LiveGuildStatusOnShelf)
 	if keyword := strings.TrimSpace(req.Name); keyword != "" {
 		m = m.WhereLike(string(entity.LiveGuildName), "%"+keyword+"%")
 	}

@@ -59,6 +59,12 @@ const zh = {
   exitGuildConfirm: '确定要退出工会吗？',
   exitGuildTitle: '确认退出工会',
   exitGuildSuccess: '退出工会成功',
+  shelfStatus: '上架状态',
+  offShelfConfirm: '确定要下架主播间 {id} 吗？下架后将从App列表隐藏并强制下播。',
+  onShelfSuccess: '上架成功',
+  offShelfSuccess: '下架成功',
+  onShelfFailed: '上架失败',
+  offShelfFailed: '下架失败',
 } as const
 
 const en: Record<keyof typeof zh, string> = {
@@ -120,6 +126,12 @@ const en: Record<keyof typeof zh, string> = {
   exitGuildConfirm: 'Exit guild?',
   exitGuildTitle: 'Confirm Exit Guild',
   exitGuildSuccess: 'Exited guild successfully',
+  shelfStatus: 'Shelf Status',
+  offShelfConfirm: 'Unpublish live room {id}? It will be hidden from App list and the live will stop.',
+  onShelfSuccess: 'Published successfully',
+  offShelfSuccess: 'Unpublished successfully',
+  onShelfFailed: 'Failed to publish',
+  offShelfFailed: 'Failed to unpublish',
 }
 
 const es: Record<keyof typeof zh, string> = {
@@ -181,6 +193,12 @@ const es: Record<keyof typeof zh, string> = {
   exitGuildConfirm: 'Exit guild?',
   exitGuildTitle: 'Confirm Exit Guild',
   exitGuildSuccess: 'Exited guild successfully',
+  shelfStatus: 'Shelf Status',
+  offShelfConfirm: 'Unpublish live room {id}? It will be hidden from App list and the live will stop.',
+  onShelfSuccess: 'Published successfully',
+  offShelfSuccess: 'Unpublished successfully',
+  onShelfFailed: 'Failed to publish',
+  offShelfFailed: 'Failed to unpublish',
 }
 
 const pt: Record<keyof typeof zh, string> = {
@@ -242,6 +260,12 @@ const pt: Record<keyof typeof zh, string> = {
   exitGuildConfirm: 'Exit guild?',
   exitGuildTitle: 'Confirm Exit Guild',
   exitGuildSuccess: 'Exited guild successfully',
+  shelfStatus: 'Shelf Status',
+  offShelfConfirm: 'Unpublish live room {id}? It will be hidden from App list and the live will stop.',
+  onShelfSuccess: 'Published successfully',
+  offShelfSuccess: 'Unpublished successfully',
+  onShelfFailed: 'Failed to publish',
+  offShelfFailed: 'Failed to unpublish',
 }
 
 const hi: Record<keyof typeof zh, string> = {
@@ -303,6 +327,12 @@ const hi: Record<keyof typeof zh, string> = {
   exitGuildConfirm: 'Exit guild?',
   exitGuildTitle: 'Confirm Exit Guild',
   exitGuildSuccess: 'Exited guild successfully',
+  shelfStatus: 'Shelf Status',
+  offShelfConfirm: 'Unpublish live room {id}? It will be hidden from App list and the live will stop.',
+  onShelfSuccess: 'Published successfully',
+  offShelfSuccess: 'Unpublished successfully',
+  onShelfFailed: 'Failed to publish',
+  offShelfFailed: 'Failed to unpublish',
 }
 
 const id: Record<keyof typeof zh, string> = {
@@ -364,6 +394,12 @@ const id: Record<keyof typeof zh, string> = {
   exitGuildConfirm: 'Exit guild?',
   exitGuildTitle: 'Confirm Exit Guild',
   exitGuildSuccess: 'Exited guild successfully',
+  shelfStatus: 'Shelf Status',
+  offShelfConfirm: 'Unpublish live room {id}? It will be hidden from App list and the live will stop.',
+  onShelfSuccess: 'Published successfully',
+  offShelfSuccess: 'Unpublished successfully',
+  onShelfFailed: 'Failed to publish',
+  offShelfFailed: 'Failed to unpublish',
 }
 
 export const anchorListMessages = definePageMessages(zh, en, es, pt, hi, id)

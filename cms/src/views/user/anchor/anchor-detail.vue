@@ -64,6 +64,10 @@
             <el-tag v-if="detail.ban" type="danger">{{ t('common.banned') }}</el-tag>
             <el-tag v-else type="success">{{ t('common.normal') }}</el-tag>
           </el-descriptions-item>
+          <el-descriptions-item :label="t('pages.anchorList.shelfStatus')">
+            <el-tag v-if="detail.status === 1" type="success">{{ t('common.onShelf') }}</el-tag>
+            <el-tag v-else type="info">{{ t('common.offShelf') }}</el-tag>
+          </el-descriptions-item>
           <el-descriptions-item :label="t('pages.anchorList.banUntil')">{{ formatDate(detail.banApplyTime) }}</el-descriptions-item>
           <el-descriptions-item :label="t('pages.anchorList.banReason')">{{ detail.banReason || '-' }}</el-descriptions-item>
           <el-descriptions-item :label="t('pages.anchorList.registeredAt')">{{ formatDate(detail.registeredAt) }}</el-descriptions-item>

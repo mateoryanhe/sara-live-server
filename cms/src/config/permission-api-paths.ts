@@ -26,6 +26,12 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'AnchorListManagement:view': '/account/getAnchorList',
     'AnchorListManagement:search': '/account/getAnchorList',
     'AnchorListManagement:edit': '/account/setAnchor',
+    'AnchorListManagement:offShelf': '/account/setLiveRoomStatus',
+
+    LiveRoomRecycleBinManagement: '/account/getOffShelfLiveRoomList',
+    'LiveRoomRecycleBinManagement:view': '/account/getOffShelfLiveRoomList',
+    'LiveRoomRecycleBinManagement:search': '/account/getOffShelfLiveRoomList',
+    'LiveRoomRecycleBinManagement:onShelf': '/account/setLiveRoomStatus',
 
     BotAnchorManagement: '/botAnchor/getBotAnchorList',
     'BotAnchorManagement:view': '/botAnchor/getBotAnchorList',
@@ -77,13 +83,18 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GuildManagement:search': '/guild/guildList',
     'GuildManagement:create': '/guild/createGuild',
     'GuildManagement:edit': '/guild/updateGuild',
-    'GuildManagement:delete': '/guild/deleteGuild',
+    'GuildManagement:offShelf': '/guild/deleteGuild',
     'GuildManagement:viewMembers': '/account/getAnchorList',
     'GuildManagement:ban': '/account/banAnchor',
     'GuildManagement:unban': '/account/unBanAnchor',
     'GuildManagement:exitGuild': '/account/exitGuild',
     'GuildManagement:batchSetAnchor': '/guild/importGuildAnchors',
     'GuildManagement:batchSetSeniorAnchor': '/guild/importGuildAnchors',
+
+    GuildRecycleBinManagement: '/guild/offShelfGuildList',
+    'GuildRecycleBinManagement:view': '/guild/offShelfGuildList',
+    'GuildRecycleBinManagement:search': '/guild/offShelfGuildList',
+    'GuildRecycleBinManagement:onShelf': '/guild/onShelfGuild',
 
     GuildProfileManagement: '/guild/getMyGuildProfile',
     'GuildProfileManagement:view': '/guild/getMyGuildProfile',

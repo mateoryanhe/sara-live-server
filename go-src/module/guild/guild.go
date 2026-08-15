@@ -11,6 +11,7 @@ import (
 	"xr-game-server/dto/guilddto"
 	"xr-game-server/entity"
 	"xr-game-server/errercode"
+	"xr-game-server/module/liveroom"
 )
 
 func genGuildId() uint64 {
@@ -20,6 +21,15 @@ func genGuildId() uint64 {
 // GetGuildList 获取直播工会列表
 func GetGuildList(ctx context.Context, req *guilddto.GuildListReq) (res *httpserver.CMSQueryResp, err error) {
 	total, guilds := guilddao.GetGuildList(req)
+	return &httpserver.CMSQueryResp{
+		Total: total,
+		Data:  guilds,
+	}, nil
+}
+
+// GetOffShelfGuildList 获取已下架工会列表(垃圾库,直查DB)
+func GetOffShelfGuildList(ctx context.Context, req *guilddto.OffShelfGuildListReq) (res *httpserver.CMSQueryResp, err error) {
+	total, guilds := guilddao.GetOffShelfGuildList(req)
 	return &httpserver.CMSQueryResp{
 		Total: total,
 		Data:  guilds,
@@ -68,15 +78,36 @@ func UpdateGuild(ctx context.Context, req *guilddto.UpdateGuildReq) (res *guildd
 	return &guilddto.UpdateGuildRes{Success: true}, nil
 }
 
-// DeleteGuild 软删除直播工会
+// DeleteGuild 下架直播工会(同步下架工会下全部主播间)
 func DeleteGuild(ctx context.Context, req *guilddto.DeleteGuildReq) (res *guilddto.DeleteGuildRes, err error) {
 	if guilddao.GetGuildById(req.ID) == nil {
 		return nil, errercode.CreateCode(errercode.GuildNonExist)
 	}
+	liveroom.OffShelfGuildLiveRooms(ctx, req.ID)
 	if err = guilddao.DeleteGuild(req.ID); err != nil {
 		return nil, err
 	}
 	return &guilddto.DeleteGuildRes{Success: true}, nil
+}
+
+// OnShelfGuild 上架直播工会(同步上架工会下全部主播间)
+func OnShelfGuild(ctx context.Context, req *guilddto.OnShelfGuildReq) (res *guilddto.OnShelfGuildRes, err error) {
+	guild := guilddao.GetGuildByIdFromDB(req.ID)
+	if guild == nil {
+		return nil, errercode.CreateCode(errercode.GuildNonExist)
+	}
+	if guild.Status == entity.LiveGuildStatusOnShelf {
+		return &guilddto.OnShelfGuildRes{Success: true}, nil
+	}
+	// 上架前校验名称是否与已上架工会冲突
+	if existing := guilddao.GetGuildByName(guild.Name); existing != nil && existing.ID != guild.ID {
+		return nil, errercode.CreateCode(errercode.GuildExist)
+	}
+	if err = guilddao.OnShelfGuild(req.ID); err != nil {
+		return nil, err
+	}
+	liveroom.OnShelfGuildLiveRooms(ctx, req.ID)
+	return &guilddto.OnShelfGuildRes{Success: true}, nil
 }
 
 func resolveLeaderName(leaderId uint64) string {

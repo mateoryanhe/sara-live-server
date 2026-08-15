@@ -14,15 +14,30 @@ var roomCacheMgr = gmap.NewKVMap[uint64, *entity.LiveRoom](false)
 // InitLiveRoomDao 初始化直播间相关缓存
 func initLiveRoomDao() {
 	initLiveRoomBillingPayDao()
-	//启动的时候,加载全部主播
+	// 启动时只加载上架(status=1)的直播间
 	all := make([]*entity.LiveRoom, 0)
-	g.Model(string(entity.TbLiveRoom)).Scan(&all)
+	_ = g.Model(string(entity.TbLiveRoom)).
+		Where(string(entity.LiveRoomStatus), entity.LiveRoomStatusOnShelf).
+		Scan(&all)
 	for _, v := range all {
 		roomCacheMgr.Set(v.ID, v)
 	}
 }
 
-// GetRoomById 按 roomId 获取直播间(走缓存)
+// GetRoomFromDB 按 roomId 直查数据库(含下架直播间,不走缓存)
+func GetRoomFromDB(roomId uint64) *entity.LiveRoom {
+	if roomId == 0 {
+		return nil
+	}
+	var row entity.LiveRoom
+	err := g.Model(string(entity.TbLiveRoom)).WherePri(roomId).Scan(&row)
+	if err != nil || row.ID == 0 {
+		return nil
+	}
+	return &row
+}
+
+// GetRoomById 按 roomId 获取直播间(走缓存,仅上架)
 func GetRoomById(roomId uint64) *entity.LiveRoom {
 	if !roomCacheMgr.Contains(roomId) {
 		return nil
@@ -77,17 +92,21 @@ func GetAllLiveRoom() []*entity.LiveRoom {
 	return data
 }
 
-// AddRoomToCache 新建直播间后写入缓存
-func AddRoomToCache(r *entity.LiveRoom) {
+// FlushRoomCache 直播间字段变更后刷新缓存(仅上架房间保留在缓存)
+func FlushRoomCache(r *entity.LiveRoom) {
 	if r == nil {
+		return
+	}
+	if r.Status != entity.LiveRoomStatusOnShelf {
+		roomCacheMgr.Remove(r.ID)
 		return
 	}
 	roomCacheMgr.Set(r.ID, r)
 }
 
-// FlushRoomCache 直播间字段变更后刷新缓存
-func FlushRoomCache(r *entity.LiveRoom) {
-	if r == nil {
+// AddRoomToCache 新建/上架直播间后写入缓存(仅上架)
+func AddRoomToCache(r *entity.LiveRoom) {
+	if r == nil || r.Status != entity.LiveRoomStatusOnShelf {
 		return
 	}
 	roomCacheMgr.Set(r.ID, r)
@@ -101,9 +120,12 @@ func RemoveRoomFromCache(roomId uint64) {
 	roomCacheMgr.Remove(roomId)
 }
 
-// ListRoomsByGuild 获取指定工会下的所有直播间
+// ListRoomsByGuild 获取指定工会下的所有直播间(缓存,仅上架)
 func ListRoomsByGuild(guildId uint64) []*entity.LiveRoom {
 	rooms := make([]*entity.LiveRoom, 0)
+	if guildId == 0 {
+		return rooms
+	}
 	for _, room := range roomCacheMgr.Values() {
 		if room == nil || room.ID == 0 {
 			continue
@@ -112,5 +134,17 @@ func ListRoomsByGuild(guildId uint64) []*entity.LiveRoom {
 			rooms = append(rooms, room)
 		}
 	}
+	return rooms
+}
+
+// ListRoomsByGuildFromDB 直查指定工会下全部直播间(含下架)
+func ListRoomsByGuildFromDB(guildId uint64) []*entity.LiveRoom {
+	rooms := make([]*entity.LiveRoom, 0)
+	if guildId == 0 {
+		return rooms
+	}
+	_ = g.Model(string(entity.TbLiveRoom)).
+		Where(string(entity.LiveRoomGuildId), guildId).
+		Scan(&rooms)
 	return rooms
 }

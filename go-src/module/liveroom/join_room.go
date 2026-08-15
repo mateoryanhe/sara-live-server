@@ -21,6 +21,9 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 	if room == nil {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
+	if userId != room.ID && IsRoomOffShelf(room) {
+		return nil, errercode.CreateCode(errercode.LiveRoomOffShelf)
+	}
 
 	if userId != room.ID && room.LiveRecordId == 0 {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotLive)

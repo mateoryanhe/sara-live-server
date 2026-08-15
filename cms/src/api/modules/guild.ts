@@ -35,9 +35,19 @@ export const guildApi = {
         return request.post<boolean>('/guild/updateGuild', data)
     },
 
-    // 删除工会
+    // 下架工会
     deleteGuild: (id: string) => {
         return request.post<boolean>('/guild/deleteGuild', {id})
+    },
+
+    // 工会垃圾库：已下架列表
+    getOffShelfGuildList: (params: GuildQuery) => {
+        return request.post<PageResponse<Guild>>('/guild/offShelfGuildList', params)
+    },
+
+    // 上架工会
+    onShelfGuild: (id: string) => {
+        return request.post<{ success: boolean }>('/guild/onShelfGuild', {id})
     },
 
     getMyGuildProfile: () => {

@@ -92,6 +92,9 @@ func BanAnchor(_ context.Context, req *accountdto.BanAnchorReq) (*accountdto.Ban
 func UnBanAnchor(_ context.Context, req *accountdto.UnBanAnchorReq) (bool, error) {
 	room := liveroomdao.GetRoomByAnchor(req.AccountId)
 	if room == nil {
+		room = liveroomdao.GetRoomFromDB(req.AccountId)
+	}
+	if room == nil {
 		return false, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
 	room.SetBan(false)

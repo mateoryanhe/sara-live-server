@@ -4,6 +4,7 @@ import {userListMessages} from '../user-list'
 import {giftListMessages} from './gift-list'
 import {vipCfgListMessages} from './vip-cfg-list'
 import {anchorListMessages} from './anchor-list'
+import {liveRoomRecycleBinMessages} from './live-room-recycle-bin'
 import {botAnchorListMessages} from './bot-anchor-list'
 import {rechargeOrderListMessages} from './recharge-order-list'
 import {currencyLogListMessages} from './currency-log-list'
@@ -11,6 +12,7 @@ import {banUserMessages} from './ban-user'
 import {bannerListMessages} from './banner-list'
 import {activityMessageListMessages} from './activity-message-list'
 import {guildListMessages} from './guild-list'
+import {guildRecycleBinMessages} from './guild-recycle-bin'
 import {guildAnchorImportResultMessages} from './guild-anchor-import-result'
 import {guildMembersMessages} from './guild-members'
 import {guildProfileMessages} from './guild-profile'
@@ -55,6 +57,7 @@ const pageMessageBuilders = [
   ['giftList', giftListMessages],
   ['vipCfgList', vipCfgListMessages],
   ['anchorList', anchorListMessages],
+  ['liveRoomRecycleBin', liveRoomRecycleBinMessages],
   ['botAnchorList', botAnchorListMessages],
   ['rechargeOrderList', rechargeOrderListMessages],
   ['currencyLogList', currencyLogListMessages],
@@ -62,6 +65,7 @@ const pageMessageBuilders = [
   ['bannerList', bannerListMessages],
   ['activityMessageList', activityMessageListMessages],
   ['guildList', guildListMessages],
+  ['guildRecycleBin', guildRecycleBinMessages],
   ['guildAnchorImportResult', guildAnchorImportResultMessages],
   ['guildMembers', guildMembersMessages],
   ['guildProfile', guildProfileMessages],

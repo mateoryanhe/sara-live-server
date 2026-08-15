@@ -107,7 +107,8 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'cancel', label: '注销/取消注销'},
         {key: 'setUserType', label: '修改用户类型'},
     ],
-    AnchorListManagement: [BTN.view, BTN.search, BTN.edit],
+    AnchorListManagement: [BTN.view, BTN.search, BTN.edit, {key: 'offShelf', label: '下架'}],
+    LiveRoomRecycleBinManagement: [BTN.view, BTN.search, {key: 'onShelf', label: '上架'}],
     RoleManagement: [
         BTN.view,
         BTN.search,
@@ -128,7 +129,11 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'sync', label: '同步数据'},
     ],
     GuildManagement: [
-        ...DEFAULT_CRUD_BUTTONS,
+        BTN.view,
+        BTN.search,
+        BTN.create,
+        BTN.edit,
+        {key: 'offShelf', label: '下架'},
         {key: 'viewMembers', label: '查看成员'},
         {key: 'ban', label: '封禁主播'},
         {key: 'unban', label: '解封主播'},
@@ -136,6 +141,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'batchSetAnchor', label: '导入普通主播'},
         {key: 'batchSetSeniorAnchor', label: '导入高级主播'},
     ],
+    GuildRecycleBinManagement: [BTN.view, BTN.search, {key: 'onShelf', label: '上架'}],
     GuildProfileManagement: [
         ...DEFAULT_VIEW_BUTTONS,
         {key: 'viewAnchors', label: '查询名下主播'},

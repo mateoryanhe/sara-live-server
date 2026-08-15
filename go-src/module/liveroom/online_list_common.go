@@ -45,7 +45,7 @@ func buildOnlineSortKeys(roomId uint64, userIds []uint64) []onlineSortKey {
 
 func sortOnlineUserIds(keys []onlineSortKey) []uint64 {
 	if len(keys) == 0 {
-		return nil
+		return make([]uint64, 0)
 	}
 
 	rewarded := make([]onlineSortKey, 0, len(keys))
@@ -81,14 +81,39 @@ func sortOnlineUserIds(keys []onlineSortKey) []uint64 {
 	return sorted
 }
 
+// getCommonOnlineList 普通在线列表;key 不存在返回空切片
+func getCommonOnlineList(roomId uint64) []uint64 {
+	all := commonOnlineMap.Get(roomId)
+	if all == nil {
+		return make([]uint64, 0)
+	}
+	return all
+}
+
+// getVipOnlineList VIP在线列表;key 不存在返回空切片
+func getVipOnlineList(roomId uint64) []uint64 {
+	all := vipOnlineMap.Get(roomId)
+	if all == nil {
+		return make([]uint64, 0)
+	}
+	return all
+}
+
 func flushCommonOnlineMap(roomId uint64) {
-	all := getOnline(roomId)
-	commonOnlineMap.Set(roomId, sortOnlineUserIds(buildOnlineSortKeys(roomId, all)))
+	// 未开播:确保不残留 key
+	if !taskMap.Contains(roomId) {
+		commonOnlineMap.Remove(roomId)
+		return
+	}
+	commonOnlineMap.Set(roomId, sortOnlineUserIds(buildOnlineSortKeys(roomId, getOnline(roomId))))
 }
 
 func flushVipOnlineMap(roomId uint64) {
-	all := getOnline(roomId)
-	keys := buildOnlineSortKeys(roomId, all)
+	if !taskMap.Contains(roomId) {
+		vipOnlineMap.Remove(roomId)
+		return
+	}
+	keys := buildOnlineSortKeys(roomId, getOnline(roomId))
 	vipKeys := make([]onlineSortKey, 0, len(keys))
 	for _, key := range keys {
 		if key.vipLevel > 0 {
@@ -103,9 +128,28 @@ func flushOnlineLists(roomId uint64) {
 	flushVipOnlineMap(roomId)
 }
 
+// initRoomOnlineLists 开播时预建普通/VIP在线列表缓存(空列表)
+func initRoomOnlineLists(roomId uint64) {
+	if roomId == 0 {
+		return
+	}
+	empty := make([]uint64, 0)
+	commonOnlineMap.Set(roomId, empty)
+	vipOnlineMap.Set(roomId, empty)
+}
+
 func clearOnlineLists(roomId uint64) {
 	commonOnlineMap.Remove(roomId)
 	vipOnlineMap.Remove(roomId)
+}
+
+// initRoomAudienceCaches 开播时建好该房在线相关内存缓存
+func initRoomAudienceCaches(roomId uint64) {
+	if roomId == 0 {
+		return
+	}
+	initRoomOnline(roomId)
+	initRoomOnlineLists(roomId)
 }
 
 func normalizeOnlineListPage(page, pageSize int) (int, int) {
@@ -122,6 +166,9 @@ func normalizeOnlineListPage(page, pageSize int) (int, int) {
 }
 
 func buildOnlineUserItems(roomId uint64, userIds []uint64) []*liveroomdto.OnlineUserItem {
+	if userIds == nil {
+		userIds = make([]uint64, 0)
+	}
 	list := make([]*liveroomdto.OnlineUserItem, 0, len(userIds))
 	for _, userId := range userIds {
 		onlineId := entity.BuildLiveRoomOnlineId(userId, roomId)

@@ -23,6 +23,11 @@ func (c *GuildController) GuildList(ctx context.Context, req *guilddto.GuildList
 	return guild.GetGuildList(ctx, req)
 }
 
+// OffShelfGuildList 获取已下架工会列表(垃圾库)
+func (c *GuildController) OffShelfGuildList(ctx context.Context, req *guilddto.OffShelfGuildListReq) (res *httpserver.CMSQueryResp, err error) {
+	return guild.GetOffShelfGuildList(ctx, req)
+}
+
 // CreateGuild 创建直播工会
 func (c *GuildController) CreateGuild(ctx context.Context, req *guilddto.CreateGuildReq) (res *guilddto.CreateGuildRes, err error) {
 	return guild.CreateGuild(ctx, req)
@@ -33,9 +38,14 @@ func (c *GuildController) UpdateGuild(ctx context.Context, req *guilddto.UpdateG
 	return guild.UpdateGuild(ctx, req)
 }
 
-// DeleteGuild 删除直播工会
+// DeleteGuild 下架直播工会
 func (c *GuildController) DeleteGuild(ctx context.Context, req *guilddto.DeleteGuildReq) (res *guilddto.DeleteGuildRes, err error) {
 	return guild.DeleteGuild(ctx, req)
+}
+
+// OnShelfGuild 上架直播工会
+func (c *GuildController) OnShelfGuild(ctx context.Context, req *guilddto.OnShelfGuildReq) (res *guilddto.OnShelfGuildRes, err error) {
+	return guild.OnShelfGuild(ctx, req)
 }
 
 // GetMyGuildProfile 获取当前 CMS 用户关联工会基础信息

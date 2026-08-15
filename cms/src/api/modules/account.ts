@@ -10,9 +10,13 @@ import type {
     ExitGuildRes,
     PageResponse,
     QueryAnchorListReq,
+    QueryOffShelfLiveRoomListReq,
+    OffShelfLiveRoomItem,
     QueryUserInfoReq,
     SetAnchorReq,
     SetCanRankReq,
+    SetLiveRoomStatusReq,
+    SetLiveRoomStatusRes,
     SetRechargeWhitelistReq,
     SetSeniorAnchorReq,
     SetUserTypeReq,
@@ -62,6 +66,10 @@ const accountApi = {
         return request.post<PageResponse<AnchorListItem>>('/account/getAnchorList', data)
     },
 
+    getOffShelfLiveRoomList: (data: QueryOffShelfLiveRoomListReq) => {
+        return request.post<PageResponse<OffShelfLiveRoomItem>>('/account/getOffShelfLiveRoomList', data)
+    },
+
     setAnchor: (data: SetAnchorReq) => {
         return request.post<boolean>('/account/setAnchor', data)
     },
@@ -88,6 +96,11 @@ const accountApi = {
 
     setRechargeWhitelist: (data: SetRechargeWhitelistReq) => {
         return request.post<boolean>('/account/setRechargeWhitelist', data)
+    },
+
+    // 上架/下架主播直播间
+    setLiveRoomStatus: (data: SetLiveRoomStatusReq) => {
+        return request.post<SetLiveRoomStatusRes>('/account/setLiveRoomStatus', data)
     },
 
     // 退出工会(将工会ID置为0)

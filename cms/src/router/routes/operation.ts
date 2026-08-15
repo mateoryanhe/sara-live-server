@@ -25,6 +25,12 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {title: '工会管理'},
         },
         {
+            path: 'guild/guild-recycle-bin',
+            name: 'GuildRecycleBinManagement',
+            component: () => import('@/views/operation/guild/guild-recycle-bin.vue'),
+            meta: {title: '工会垃圾库'},
+        },
+        {
             path: 'guild/guild-anchor-import-result',
             name: 'GuildAnchorImportResult',
             component: () => import('@/views/operation/guild/guild-anchor-import-result.vue'),

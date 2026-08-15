@@ -298,6 +298,10 @@ func EnsureAnchorRoom(anchorId, guildId uint64) *entity.LiveRoom {
 	if room := liveroomdao.GetRoomByAnchor(anchorId); room != nil {
 		return room
 	}
+	// 已下架的直播间不在缓存中,直查 DB,避免重复创建
+	if room := liveroomdao.GetRoomFromDB(anchorId); room != nil {
+		return room
+	}
 	room := entity.NewLiveRoom(anchorId, guildId, "", "", "")
 	liveroomdao.AddRoomToCache(room)
 	return room

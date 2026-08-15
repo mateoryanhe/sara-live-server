@@ -19,6 +19,12 @@ export const userRoutes: RouteRecordRaw = {
             meta: {title: '主播列表'},
         },
         {
+            path: 'anchor/live-room-recycle-bin',
+            name: 'LiveRoomRecycleBinManagement',
+            component: () => import('@/views/user/anchor/live-room-recycle-bin.vue'),
+            meta: {title: '主播间回收站'},
+        },
+        {
             path: 'anchor/anchor-detail',
             name: 'AnchorDetail',
             component: () => import('@/views/user/anchor/anchor-detail.vue'),

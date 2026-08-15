@@ -41,6 +41,7 @@ type AnchorListItem struct {
 	Ban                          bool       `json:"ban" dc:"是否封禁"`
 	BanApplyTime                 *time.Time `json:"banApplyTime" dc:"封禁截止时间"`
 	BanReason                    string     `json:"banReason" dc:"封禁原因"`
+	Status                       uint8      `json:"status" dc:"直播间状态(0-下架,1-上架)"`
 	CreatedAt                    *time.Time `json:"createdAt"`
 	RegisteredAt                 *time.Time `json:"registeredAt" dc:"账号注册时间"`
 }

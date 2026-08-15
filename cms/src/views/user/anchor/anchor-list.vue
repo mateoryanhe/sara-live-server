@@ -127,6 +127,12 @@
             <el-tag v-else type="success">{{ t('common.normal') }}</el-tag>
           </template>
         </el-table-column>
+        <el-table-column :label="t('pages.anchorList.shelfStatus')" prop="status" width="100">
+          <template #default="{ row }">
+            <el-tag v-if="row.status === 1" type="success">{{ t('common.onShelf') }}</el-tag>
+            <el-tag v-else type="info">{{ t('common.offShelf') }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column :label="t('pages.anchorList.banUntil')" prop="banApplyTime" width="170">
           <template #default="{ row }">{{ formatDate(row.banApplyTime) }}</template>
         </el-table-column>
@@ -139,10 +145,18 @@
         <el-table-column :label="t('pages.anchorList.profileUpdatedAt')" prop="createdAt" width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>
-        <el-table-column fixed="right" :label="t('common.actions')" width="220">
+        <el-table-column fixed="right" :label="t('common.actions')" width="280">
           <template #default="{ row }">
             <el-button link type="primary" @click="openDetail(row)">
               {{ t('common.detail') }}
+            </el-button>
+            <el-button
+                v-if="can('offShelf')"
+                type="warning"
+                link
+                @click="handleOffShelf(row)"
+            >
+              {{ t('common.offShelf') }}
             </el-button>
             <el-button
                 :type="row.ban ? 'warning' : 'danger'"
@@ -296,14 +310,12 @@ import {accountApi} from '@/api'
 import type {AnchorListItem, BanAnchorReq, UnBanAnchorReq} from '@/types/api'
 
 import {formatAmount} from '@/utils/number-format'
-
-
+import {usePagePermission} from '@/composables/usePagePermission'
 
 const {t} = useI18n()
 
 const router = useRouter()
-
-
+const {can} = usePagePermission('AnchorListManagement')
 
 const loading = ref(false)
 
@@ -677,6 +689,32 @@ onMounted(() => {
   fetchList()
 
 })
+
+const handleOffShelf = async (row: AnchorListItem) => {
+  try {
+    await ElMessageBox.confirm(
+      t('pages.anchorList.offShelfConfirm', {id: row.id}),
+      t('common.confirmOffShelf'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        type: 'warning',
+      },
+    )
+    await accountApi.setLiveRoomStatus({
+      anchorId: row.id,
+      status: 0,
+    })
+    ElMessage.success(t('pages.anchorList.offShelfSuccess'))
+    fetchList()
+  } catch (error) {
+    if (error === 'cancel' || error === 'close') {
+      return
+    }
+    console.error('off shelf live room failed:', error)
+    ElMessage.error(t('pages.anchorList.offShelfFailed'))
+  }
+}
 
 const handleExitGuild = async (row: AnchorListItem) => {
   try {

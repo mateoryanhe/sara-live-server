@@ -72,7 +72,14 @@
               >
                 {{ t('pages.guildList.importSeniorAnchor') }}
               </el-button>
-              <el-button size="small" type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
+              <el-button
+                  v-if="can('offShelf')"
+                  size="small"
+                  type="warning"
+                  @click="handleOffShelf(row)"
+              >
+                {{ t('common.offShelf') }}
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -332,19 +339,27 @@ const handleEdit = async (row: Guild) => {
   dialogVisible.value = true
 }
 
-const handleDelete = async (row: Guild) => {
+const handleOffShelf = async (row: Guild) => {
   try {
-    await ElMessageBox.confirm(t('pages.guildList.deleteConfirm', {name: row.name}), t('common.confirmDelete'), {
-      confirmButtonText: t('common.confirm'),
-      cancelButtonText: t('common.cancel'),
-      type: 'warning'
-    })
+    await ElMessageBox.confirm(
+      t('pages.guildList.offShelfConfirm', {name: row.name}),
+      t('common.confirmOffShelf'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        type: 'warning',
+      },
+    )
 
     await guildApi.deleteGuild(row.id)
-    ElMessage.success(t('common.deleteSuccess'))
+    ElMessage.success(t('pages.guildList.offShelfSuccess'))
     fetchGuildList()
   } catch (error) {
-    console.error('delete failed:', error)
+    if (error === 'cancel' || error === 'close') {
+      return
+    }
+    console.error('off shelf guild failed:', error)
+    ElMessage.error(t('pages.guildList.offShelfFailed'))
   }
 }
 

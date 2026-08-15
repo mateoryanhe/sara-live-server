@@ -210,6 +210,17 @@ export interface ExitGuildRes {
     success: boolean
 }
 
+export interface SetLiveRoomStatusReq {
+    anchorId: string
+    /** 0=下架, 1=上架 */
+    status: number
+}
+
+export interface SetLiveRoomStatusRes {
+    success: boolean
+    status: number
+}
+
 export interface SetUserTypeReq {
     accountId: string
     userType: number
@@ -228,6 +239,28 @@ export interface SetRechargeWhitelistReq {
 export interface QueryAnchorListReq extends PageQuery {
     key?: string
     guildId?: string | number
+}
+
+export interface QueryOffShelfLiveRoomListReq extends PageQuery {
+    key?: string
+}
+
+export interface OffShelfLiveRoomItem {
+    id: string
+    nickname?: string
+    phone?: string
+    avatar?: string
+    userType?: number
+    guildId?: string | number
+    roomTitle?: string
+    roomId?: string
+    category?: number
+    ban?: boolean
+    banApplyTime?: string | null
+    banReason?: string
+    status?: number
+    updatedAt?: string | null
+    createdAt?: string | null
 }
 
 export interface AnchorListItem {
@@ -257,6 +290,8 @@ export interface AnchorListItem {
     ban?: boolean
     banApplyTime?: string | null
     banReason?: string
+    /** 0=下架, 1=上架 */
+    status?: number
     createdAt?: string | null
     registeredAt?: string | null
 }

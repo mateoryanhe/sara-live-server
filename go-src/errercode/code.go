@@ -43,6 +43,8 @@ const (
 	LiveRoomNotExist XRCode = 52
 	// LiveRoomBanned 直播间已被封禁
 	LiveRoomBanned XRCode = 53
+	// LiveRoomOffShelf 直播间已下架
+	LiveRoomOffShelf XRCode = 54
 	// GiftExist 礼物名称已存在
 	GiftExist XRCode = 60
 	// GiftNonExist 礼物不存在

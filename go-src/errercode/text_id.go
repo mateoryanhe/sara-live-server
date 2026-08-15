@@ -30,6 +30,7 @@ func init() {
 		LiveRoomNotAnchor:               "Anda belum menjadi anchor",
 		LiveRoomNotExist:                "Ruang live tidak ditemukan",
 		LiveRoomBanned:                  "Ruang live diblokir",
+		LiveRoomOffShelf:                "Ruang live tidak tersedia",
 		GiftExist:                       "Nama hadiah sudah ada",
 		GiftNonExist:                    "Hadiah tidak ditemukan",
 		GiftCountInvalid:                "Jumlah hadiah tidak valid",
