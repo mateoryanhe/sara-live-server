@@ -9,7 +9,6 @@ import (
 	"xr-game-server/dao/livefollowdao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/messagedao"
-	"xr-game-server/dao/namedao"
 	"xr-game-server/dao/rechargeorderdao"
 	"xr-game-server/dao/shortvideodao"
 	"xr-game-server/dao/statdao"
@@ -19,7 +18,6 @@ import (
 
 func Init() {
 	accountdao.InitAccountDao()
-	namedao.InitName()
 	cmsuserdao.InitCMSUser()
 	userinfodao.InitUserInfoDao()
 	userlogindevicedao.InitUserLoginDeviceDao()

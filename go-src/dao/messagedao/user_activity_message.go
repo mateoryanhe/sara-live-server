@@ -8,7 +8,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/cache"
-	"xr-game-server/entity"
+	"xr-game-server/entity/message"
 )
 
 const UserActivityMessageListCacheASize = 50

@@ -9,7 +9,7 @@ import (
 	"xr-game-server/core/snowflake"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/liveroomdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 	"xr-game-server/errercode"
 	"xr-game-server/module/agora"
 )

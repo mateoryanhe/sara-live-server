@@ -7,7 +7,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/dao/cfgdao"
-	"xr-game-server/entity"
+	userentity "xr-game-server/entity/user"
 )
 
 const vendorCallbackCurrency = "USD"
@@ -60,7 +60,7 @@ func validateVendorTransferAuth(operatorToken, secretKey string) *vendorCallback
 	return nil
 }
 
-func resolvePlayerName(userInfo *entity.UserInfo, userID uint64) string {
+func resolvePlayerName(userInfo *userentity.UserInfo, userID uint64) string {
 	if userInfo == nil {
 		return strconv.FormatUint(userID, 10)
 	}
@@ -71,7 +71,7 @@ func resolvePlayerName(userInfo *entity.UserInfo, userID uint64) string {
 	return playerName
 }
 
-func loadUserInfoByPlayerName(playerName string) (*entity.UserInfo, uint64) {
+func loadUserInfoByPlayerName(playerName string) (*userentity.UserInfo, uint64) {
 	playerName = strings.TrimSpace(playerName)
 	if playerName == "" {
 		return nil, 0
@@ -81,9 +81,9 @@ func loadUserInfoByPlayerName(playerName string) (*entity.UserInfo, uint64) {
 			return userInfo, userID
 		}
 	}
-	var row entity.UserInfo
-	if err := g.DB().Model(string(entity.TbUserInfo)).Unscoped().
-		Where(string(entity.UserInfoNickname)+" = ?", playerName).
+	var row userentity.UserInfo
+	if err := g.DB().Model(string(userentity.TbUserInfo)).Unscoped().
+		Where(string(userentity.UserInfoNickname)+" = ?", playerName).
 		Limit(1).
 		Scan(&row); err != nil || row.ID == 0 {
 		return nil, 0

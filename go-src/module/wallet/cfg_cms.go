@@ -7,7 +7,7 @@ import (
 
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/walletdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/user"
 	"xr-game-server/errercode"
 )
 

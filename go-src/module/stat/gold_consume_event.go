@@ -8,7 +8,7 @@ import (
 	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/core/event"
 	"xr-game-server/dao/statdao"
-	"xr-game-server/entity"
+	"xr-game-server/entity/stat"
 	"xr-game-server/gameevent"
 )
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"xr-game-server/dao/cmsuserdao"
 	"xr-game-server/dto/permdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/cms"
 )
 
 // GetPermissionList 获取权限列表

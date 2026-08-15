@@ -8,7 +8,7 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/rechargeorderdao"
 	"xr-game-server/dto/rechargeorderdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/recharge"
 	"xr-game-server/errercode"
 )
 

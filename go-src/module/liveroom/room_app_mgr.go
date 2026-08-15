@@ -11,20 +11,21 @@ import (
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
-	"xr-game-server/entity"
+	liveentity "xr-game-server/entity/live"
+	userentity "xr-game-server/entity/user"
 	"xr-game-server/errercode"
 	"xr-game-server/module/aliyunmoderation"
 	"xr-game-server/module/upload"
 )
 
 func normalizeLiveRoomCategory(category uint8) uint8 {
-	if category == entity.LiveRoomCategoryGame || category == entity.LiveRoomCategoryPrivate {
+	if category == liveentity.LiveRoomCategoryGame || category == liveentity.LiveRoomCategoryPrivate {
 		return category
 	}
-	return entity.LiveRoomCategoryHot
+	return liveentity.LiveRoomCategoryHot
 }
 
-func applyRoomPricing(room *entity.LiveRoom, ticket, billing float64) {
+func applyRoomPricing(room *liveentity.LiveRoom, ticket, billing float64) {
 	if room.Ticket != ticket {
 		room.SetTicket(ticket)
 	}
@@ -33,9 +34,9 @@ func applyRoomPricing(room *entity.LiveRoom, ticket, billing float64) {
 	}
 }
 
-func applyPrivateInviteType(room *entity.LiveRoom, privateInviteType uint8) {
+func applyPrivateInviteType(room *liveentity.LiveRoom, privateInviteType uint8) {
 	if privateInviteType == 0 {
-		privateInviteType = entity.DefaultPrivateInviteType(room.Category)
+		privateInviteType = liveentity.DefaultPrivateInviteType(room.Category)
 	}
 	if room.PrivateInviteType != privateInviteType {
 		room.SetPrivateInviteType(privateInviteType)
@@ -43,7 +44,7 @@ func applyPrivateInviteType(room *entity.LiveRoom, privateInviteType uint8) {
 }
 
 func applyLiveRoomGameRecommends(roomID uint64, category uint8, gameCodes []string) error {
-	if category != entity.LiveRoomCategoryGame {
+	if category != liveentity.LiveRoomCategoryGame {
 		return nil
 	}
 	return SyncLiveRoomGameRecommendList(roomID, gameCodes)
@@ -108,7 +109,7 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 	}
 
 	// 通过 syndb 异步入库,不直接 INSERT;LiveRoom.ID 复用主播用户ID
-	room := entity.NewLiveRoom(
+	room := liveentity.NewLiveRoom(
 		anchorId,
 		user.GuildId,
 		coverName,
@@ -152,7 +153,7 @@ func logCreateRoomAppUpload(ctx context.Context, anchorId uint64, req *liveroomd
 }
 
 // loadOwnRoom 获取调用者(主播)自己的直播间;不存在则返回 LiveRoomNotExist
-func loadOwnRoom(ctx context.Context) (*entity.LiveRoom, error) {
+func loadOwnRoom(ctx context.Context) (*liveentity.LiveRoom, error) {
 	anchorId := httpserver.GetAuthId(ctx)
 	room := liveroomdao.GetRoomById(anchorId)
 	if room == nil {
@@ -190,7 +191,7 @@ func UpdateNotice(ctx context.Context, req *liveroomdto.UpdateNoticeReq) (*liver
 }
 
 // markLiveRoomCreated App端创建/完善直播间后,标记 user_infos.has_live_room = true
-func markLiveRoomCreated(user *entity.UserInfo) {
+func markLiveRoomCreated(user *userentity.UserInfo) {
 	if user == nil || user.HasLiveRoom {
 		return
 	}
@@ -213,8 +214,8 @@ func calcAge(birthday *time.Time) int {
 	return age
 }
 
-func allowShowCallIcon(room *entity.LiveRoom, userId uint64) bool {
-	if room == nil || room.Category != entity.LiveRoomCategoryHot {
+func allowShowCallIcon(room *liveentity.LiveRoom, userId uint64) bool {
+	if room == nil || room.Category != liveentity.LiveRoomCategoryHot {
 		return false
 	}
 	if userId == 0 || userId == room.ID {
@@ -223,15 +224,15 @@ func allowShowCallIcon(room *entity.LiveRoom, userId uint64) bool {
 
 	inviteType := room.PrivateInviteType
 	if inviteType == 0 {
-		inviteType = entity.DefaultPrivateInviteType(room.Category)
+		inviteType = liveentity.DefaultPrivateInviteType(room.Category)
 	}
 	switch inviteType {
-	case entity.LiveRoomPrivateInviteAll:
+	case liveentity.LiveRoomPrivateInviteAll:
 		return true
-	case entity.LiveRoomPrivateInviteVip:
+	case liveentity.LiveRoomPrivateInviteVip:
 		user := userinfodao.GetUserInfoByUserId(userId)
 		return user != nil && user.VipLevel > 0
-	case entity.LiveRoomPrivateInviteReject:
+	case liveentity.LiveRoomPrivateInviteReject:
 		return false
 	default:
 		return true
@@ -274,7 +275,7 @@ func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto
 		res.UserType = u.UserType
 	}
 	//判断一下房间类型
-	if room.Category == entity.LiveRoomCategoryPrivate {
+	if room.Category == liveentity.LiveRoomCategoryPrivate {
 		clearFreeTime(userId, room.ID)
 		//私密房免费时长
 		pay := liveroomdao.GetLiveRoomBillingPay(userId, req.RoomId)
@@ -294,7 +295,7 @@ func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto
 }
 
 // EnsureAnchorRoom 确保主播拥有直播间记录(CMS设为主播时预创建,App端后续可完善资料)
-func EnsureAnchorRoom(anchorId, guildId uint64) *entity.LiveRoom {
+func EnsureAnchorRoom(anchorId, guildId uint64) *liveentity.LiveRoom {
 	if room := liveroomdao.GetRoomByAnchor(anchorId); room != nil {
 		return room
 	}
@@ -302,7 +303,7 @@ func EnsureAnchorRoom(anchorId, guildId uint64) *entity.LiveRoom {
 	if room := liveroomdao.GetRoomFromDB(anchorId); room != nil {
 		return room
 	}
-	room := entity.NewLiveRoom(anchorId, guildId, "", "", "")
+	room := liveentity.NewLiveRoom(anchorId, guildId, "", "", "")
 	liveroomdao.AddRoomToCache(room)
 	return room
 }

@@ -8,7 +8,8 @@ import (
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/liveroomdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/game"
+	liveentity "xr-game-server/entity/live"
 	"xr-game-server/errercode"
 	"xr-game-server/module/game"
 )
@@ -37,7 +38,7 @@ func GetLiveRoomGameRecommendList(_ context.Context, req *liveroomdto.GetLiveRoo
 }
 
 // AddLiveRoomGameRecommend 新增直播间推荐游戏(写库并更新缓存列表).
-func AddLiveRoomGameRecommend(liveRoomID uint64, gameCode string) (*entity.LiveRoomGameRecommend, error) {
+func AddLiveRoomGameRecommend(liveRoomID uint64, gameCode string) (*liveentity.LiveRoomGameRecommend, error) {
 	if liveRoomID == 0 || gameCode == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
@@ -45,10 +46,10 @@ func AddLiveRoomGameRecommend(liveRoomID uint64, gameCode string) (*entity.LiveR
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	now := time.Now()
-	row := &entity.LiveRoomGameRecommend{
+	row := &liveentity.LiveRoomGameRecommend{
 		LiveRoomId: liveRoomID,
 		GameCode:   gameCode,
-		Status:     entity.LiveRoomGameRecommendStatusActive,
+		Status:     liveentity.LiveRoomGameRecommendStatusActive,
 	}
 	row.CreatedAt = now
 	row.UpdatedAt = now
@@ -78,7 +79,7 @@ func buildOnShelfGameMap() map[string]*entity.GameCfg {
 	return m
 }
 
-func toLiveRoomGameRecommendItem(row *entity.LiveRoomGameRecommend, gameCfg *entity.GameCfg) *liveroomdto.LiveRoomGameRecommendItem {
+func toLiveRoomGameRecommendItem(row *liveentity.LiveRoomGameRecommend, gameCfg *entity.GameCfg) *liveroomdto.LiveRoomGameRecommendItem {
 	item := &liveroomdto.LiveRoomGameRecommendItem{
 		GameCode: row.GameCode,
 	}
@@ -109,7 +110,7 @@ func SyncLiveRoomGameRecommendList(liveRoomID uint64, gameCodes []string) error 
 	}
 
 	current := liveroomdao.GetActiveLiveRoomGameRecommendsByRoomID(liveRoomID)
-	currentMap := make(map[string]*entity.LiveRoomGameRecommend, len(current))
+	currentMap := make(map[string]*liveentity.LiveRoomGameRecommend, len(current))
 	for _, row := range current {
 		if row == nil || row.GameCode == "" {
 			continue

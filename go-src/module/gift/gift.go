@@ -7,7 +7,7 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/giftdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 	"xr-game-server/errercode"
 	"xr-game-server/module/upload"
 )

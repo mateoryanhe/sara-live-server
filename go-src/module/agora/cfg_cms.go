@@ -6,7 +6,7 @@ import (
 	"time"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/agoradto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 	"xr-game-server/errercode"
 )
 

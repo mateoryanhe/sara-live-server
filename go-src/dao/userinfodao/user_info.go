@@ -8,7 +8,7 @@ import (
 	"strings"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/cache"
-	"xr-game-server/entity"
+	userentity "xr-game-server/entity/user"
 )
 
 var userInfoCacheMgr *cache.CacheMgr
@@ -28,8 +28,8 @@ func GetUserIdByShareCode(shareCode string) uint64 {
 	}
 	cacheData := shareCodeUserIdCacheMgr.GetData(shareCode, func(ctx context.Context) (value interface{}, err error) {
 		var userId uint64
-		err = g.Model(string(entity.TbUserInfo)).Unscoped().Where(g.Map{
-			string(entity.UserInfoShareCode): shareCode,
+		err = g.Model(string(userentity.TbUserInfo)).Unscoped().Where(g.Map{
+			string(userentity.UserInfoShareCode): shareCode,
 		}).Fields(string(db.IdName)).Scan(&userId)
 		return userId, err
 	})
@@ -43,24 +43,24 @@ func GetUserIdByShareCode(shareCode string) uint64 {
 }
 
 // GetUserInfoByUserId 根据用户ID获取用户基础信息,命中不了缓存从数据库拉取,数据库不存在则新建
-func GetUserInfoByUserId(userId uint64) *entity.UserInfo {
+func GetUserInfoByUserId(userId uint64) *userentity.UserInfo {
 	cacheData := userInfoCacheMgr.GetData(userId, func(ctx context.Context) (value interface{}, err error) {
-		var data *entity.UserInfo
-		err = g.Model(string(entity.TbUserInfo)).Unscoped().Where(g.Map{
+		var data *userentity.UserInfo
+		err = g.Model(string(userentity.TbUserInfo)).Unscoped().Where(g.Map{
 			string(db.IdName): userId,
 		}).Scan(&data)
 		if data != nil {
 			return data, nil
 		}
 		//数据库没有,新建一条
-		newData := entity.NewUserInfo(userId)
+		newData := userentity.NewUserInfo(userId)
 		return newData, nil
 	})
-	return cacheData.(*entity.UserInfo)
+	return cacheData.(*userentity.UserInfo)
 }
 
 // GetUserInfoFromMemory 仅从内存缓存读取用户基础信息,未命中返回 nil
-func GetUserInfoFromMemory(userId uint64) *entity.UserInfo {
+func GetUserInfoFromMemory(userId uint64) *userentity.UserInfo {
 	if userId == 0 || userInfoCacheMgr == nil {
 		return nil
 	}
@@ -68,7 +68,7 @@ func GetUserInfoFromMemory(userId uint64) *entity.UserInfo {
 	if v == nil {
 		return nil
 	}
-	info, ok := v.(*entity.UserInfo)
+	info, ok := v.(*userentity.UserInfo)
 	if !ok || info == nil {
 		return nil
 	}
@@ -96,10 +96,10 @@ func GetNicknameMapByUserIds(userIds []uint64) map[uint64]string {
 	if len(uniqueIds) == 0 {
 		return ret
 	}
-	rows := make([]*entity.UserInfo, 0, len(uniqueIds))
+	rows := make([]*userentity.UserInfo, 0, len(uniqueIds))
 	ctx := gctx.New()
-	_ = g.Model(string(entity.TbUserInfo)).Ctx(ctx).Unscoped().
-		Fields(string(db.IdName), string(entity.UserInfoNickname)).
+	_ = g.Model(string(userentity.TbUserInfo)).Ctx(ctx).Unscoped().
+		Fields(string(db.IdName), string(userentity.UserInfoNickname)).
 		WhereIn(string(db.IdName), uniqueIds).
 		Scan(&rows)
 	for _, row := range rows {
@@ -112,8 +112,8 @@ func GetNicknameMapByUserIds(userIds []uint64) map[uint64]string {
 }
 
 // GetUserProfileMapByUserIds 批量查询用户昵称与头像
-func GetUserProfileMapByUserIds(userIds []uint64) map[uint64]*entity.UserInfo {
-	ret := make(map[uint64]*entity.UserInfo)
+func GetUserProfileMapByUserIds(userIds []uint64) map[uint64]*userentity.UserInfo {
+	ret := make(map[uint64]*userentity.UserInfo)
 	if len(userIds) == 0 {
 		return ret
 	}
@@ -132,10 +132,10 @@ func GetUserProfileMapByUserIds(userIds []uint64) map[uint64]*entity.UserInfo {
 	if len(uniqueIds) == 0 {
 		return ret
 	}
-	rows := make([]*entity.UserInfo, 0, len(uniqueIds))
+	rows := make([]*userentity.UserInfo, 0, len(uniqueIds))
 	ctx := gctx.New()
-	_ = g.Model(string(entity.TbUserInfo)).Ctx(ctx).Unscoped().
-		Fields(string(db.IdName), string(entity.UserInfoNickname), string(entity.UserInfoAvatar)).
+	_ = g.Model(string(userentity.TbUserInfo)).Ctx(ctx).Unscoped().
+		Fields(string(db.IdName), string(userentity.UserInfoNickname), string(userentity.UserInfoAvatar)).
 		WhereIn(string(db.IdName), uniqueIds).
 		Scan(&rows)
 	for _, row := range rows {
@@ -154,11 +154,11 @@ func GetUserIdsByNicknameKeyword(keyword string) map[uint64]struct{} {
 	if keyword == "" {
 		return ret
 	}
-	rows := make([]*entity.UserInfo, 0)
+	rows := make([]*userentity.UserInfo, 0)
 	ctx := gctx.New()
-	_ = g.Model(string(entity.TbUserInfo)).Ctx(ctx).Unscoped().
+	_ = g.Model(string(userentity.TbUserInfo)).Ctx(ctx).Unscoped().
 		Fields(string(db.IdName)).
-		WhereLike(string(entity.UserInfoNickname), "%"+keyword+"%").
+		WhereLike(string(userentity.UserInfoNickname), "%"+keyword+"%").
 		Scan(&rows)
 	for _, row := range rows {
 		if row == nil || row.ID == 0 {

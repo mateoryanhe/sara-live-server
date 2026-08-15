@@ -8,7 +8,7 @@ import (
 	"xr-game-server/dao/currencylogdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/currencylogdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/user"
 )
 
 func parseUserIdFilter(val string) uint64 {

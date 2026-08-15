@@ -7,7 +7,7 @@ import (
 
 	"github.com/gogf/gf/v2/util/guid"
 	"xr-game-server/dao/userinfodao"
-	"xr-game-server/entity"
+	"xr-game-server/entity/user"
 	"xr-game-server/module/auth"
 	"xr-game-server/module/randomnick"
 )

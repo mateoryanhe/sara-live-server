@@ -8,7 +8,7 @@ import (
 
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/aliyuntextmoderationdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 	"xr-game-server/errercode"
 )
 

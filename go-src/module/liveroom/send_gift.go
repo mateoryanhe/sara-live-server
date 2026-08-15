@@ -16,7 +16,7 @@ import (
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 	"xr-game-server/errercode"
 	"xr-game-server/gameevent"
 	"xr-game-server/module/gift"

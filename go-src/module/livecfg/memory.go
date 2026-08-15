@@ -4,7 +4,7 @@ import (
 	"sync/atomic"
 	"time"
 	"xr-game-server/dao/cfgdao"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 )
 
 const defaultPrivateRoomFreeWatchSeconds uint32 = 420

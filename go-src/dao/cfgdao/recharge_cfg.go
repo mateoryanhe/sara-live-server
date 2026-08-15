@@ -8,7 +8,7 @@ import (
 	"strings"
 	"xr-game-server/core/str"
 	"xr-game-server/dto/rechargecfgdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/recharge"
 )
 
 func GetRechargeCfgById(id uint64) *entity.RechargeCfg {

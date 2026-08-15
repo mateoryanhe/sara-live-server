@@ -14,7 +14,7 @@ import (
 	"xr-game-server/core/push"
 	"xr-game-server/core/xrtimer"
 	"xr-game-server/dao/resourcemetricdao"
-	"xr-game-server/entity"
+	"xr-game-server/entity/sys"
 	"xr-game-server/gameevent"
 )
 

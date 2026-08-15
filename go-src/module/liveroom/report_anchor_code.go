@@ -6,7 +6,7 @@ import (
 
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/liveroomdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/user"
 	"xr-game-server/errercode"
 )
 

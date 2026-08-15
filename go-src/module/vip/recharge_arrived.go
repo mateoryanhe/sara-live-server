@@ -4,7 +4,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/dao/userinfodao"
-	"xr-game-server/entity"
+	"xr-game-server/entity/recharge"
 )
 
 func onRechargeArrived(val any) {

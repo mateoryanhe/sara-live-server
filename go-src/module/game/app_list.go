@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"xr-game-server/dto/gameplatformdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/game"
 )
 
 const (

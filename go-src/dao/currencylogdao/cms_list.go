@@ -3,7 +3,7 @@ package currencylogdao
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"xr-game-server/entity"
+	"xr-game-server/entity/user"
 )
 
 // CMSListFilter CMS货币流水查询条件

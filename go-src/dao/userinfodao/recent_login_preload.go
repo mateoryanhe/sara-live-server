@@ -4,7 +4,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/constants/db"
-	"xr-game-server/entity"
+	userentity "xr-game-server/entity/user"
 )
 
 // ListRecentLoginUserIds 按 last_login_time 倒序查询最近登录用户 ID
@@ -12,11 +12,11 @@ func ListRecentLoginUserIds(limit int) []uint64 {
 	if limit <= 0 {
 		return nil
 	}
-	rows := make([]*entity.UserInfo, 0, limit)
-	_ = g.Model(string(entity.TbUserInfo)).Unscoped().
+	rows := make([]*userentity.UserInfo, 0, limit)
+	_ = g.Model(string(userentity.TbUserInfo)).Unscoped().
 		Fields(string(db.IdName)).
-		Where(string(entity.UserInfoLastLoginTime) + " IS NOT NULL").
-		Order(string(entity.UserInfoLastLoginTime) + " desc").
+		Where(string(userentity.UserInfoLastLoginTime) + " IS NOT NULL").
+		Order(string(userentity.UserInfoLastLoginTime) + " desc").
 		Limit(limit).
 		Scan(&rows)
 	userIds := make([]uint64, 0, len(rows))
@@ -39,13 +39,13 @@ func PreloadRecentLoginUserInfos(limit int) []uint64 {
 	return userIds
 }
 
-func loadUserInfosByUserIds(userIds []uint64) []*entity.UserInfo {
+func loadUserInfosByUserIds(userIds []uint64) []*userentity.UserInfo {
 	if len(userIds) == 0 {
 		return nil
 	}
-	rows := make([]*entity.UserInfo, 0, len(userIds))
+	rows := make([]*userentity.UserInfo, 0, len(userIds))
 	ctx := gctx.New()
-	err := g.Model(string(entity.TbUserInfo)).Ctx(ctx).Unscoped().
+	err := g.Model(string(userentity.TbUserInfo)).Ctx(ctx).Unscoped().
 		WhereIn(string(db.IdName), userIds).
 		Scan(&rows)
 	if err != nil {
@@ -56,7 +56,7 @@ func loadUserInfosByUserIds(userIds []uint64) []*entity.UserInfo {
 }
 
 // PreloadUserInfoToCache 批量写入 user_infos 缓存
-func PreloadUserInfoToCache(users []*entity.UserInfo) {
+func PreloadUserInfoToCache(users []*userentity.UserInfo) {
 	if len(users) == 0 || userInfoCacheMgr == nil {
 		return
 	}

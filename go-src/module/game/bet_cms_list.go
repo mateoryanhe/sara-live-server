@@ -9,7 +9,7 @@ import (
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/gamebetdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/game"
 )
 
 func parseBetCMSUserIdFilter(val string) uint64 {

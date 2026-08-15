@@ -5,7 +5,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"xr-game-server/entity"
+	"xr-game-server/entity/sys"
 )
 
 // DeleteBefore 删除采样时间早于指定时刻的记录(保留最近数据)

@@ -18,7 +18,6 @@ import (
 	"xr-game-server/module/liveroom"
 	"xr-game-server/module/logquery"
 	"xr-game-server/module/message"
-	"xr-game-server/module/name"
 	"xr-game-server/module/preload"
 	"xr-game-server/module/privacypolicy"
 	"xr-game-server/module/privateroombilling"
@@ -41,7 +40,6 @@ func Init() {
 	randomnick.Init()
 	auth.InitAuth()
 	preload.Init()
-	name.Init()
 	currencylog.Init()
 	message.Init()
 	recharge.Init()

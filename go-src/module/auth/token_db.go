@@ -6,7 +6,8 @@ import (
 	"xr-game-server/core/xrtoken"
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/cmsuserdao"
-	"xr-game-server/entity"
+	cmsentity "xr-game-server/entity/cms"
+	"xr-game-server/entity/user"
 )
 
 func initAppToken() {
@@ -39,7 +40,7 @@ func onAppToken(val any) {
 func onCmsToken(val any) {
 	data := val.(*event.CmsTokenData)
 	expireAt := time.Now().Add(xrtoken.Time)
-	entity.NewCmsToken(data.Id, data.Token, expireAt)
+	cmsentity.NewCmsToken(data.Id, data.Token, expireAt)
 }
 
 // ReloadAppTokenCache 从数据库重新加载App Token缓存

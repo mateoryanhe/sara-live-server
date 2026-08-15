@@ -5,7 +5,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"xr-game-server/entity"
+	"xr-game-server/entity/game"
 )
 
 // ExistsGameWinLogByOrderId 是否已存在相同订单/交易 ID 的派彩记录(幂等).

@@ -6,7 +6,7 @@ import (
 	"xr-game-server/core/push"
 	"xr-game-server/dao/statdao"
 	"xr-game-server/dto/statdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/stat"
 )
 
 // GetCMSSysStat CMS获取系统总数据

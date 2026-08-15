@@ -9,7 +9,7 @@ import (
 	"xr-game-server/dao/cmsuserdao"
 	"xr-game-server/dao/guilddao"
 	"xr-game-server/dto/guilddto"
-	"xr-game-server/entity"
+	liveentity "xr-game-server/entity/live"
 	"xr-game-server/errercode"
 	"xr-game-server/module/liveroom"
 )
@@ -42,7 +42,7 @@ func CreateGuild(ctx context.Context, req *guilddto.CreateGuildReq) (res *guildd
 		return nil, errercode.CreateCode(errercode.GuildExist)
 	}
 
-	guild := entity.NewLiveGuild(
+	guild := liveentity.NewLiveGuild(
 		genGuildId(),
 		req.Name,
 		req.LeaderId,
@@ -96,7 +96,7 @@ func OnShelfGuild(ctx context.Context, req *guilddto.OnShelfGuildReq) (res *guil
 	if guild == nil {
 		return nil, errercode.CreateCode(errercode.GuildNonExist)
 	}
-	if guild.Status == entity.LiveGuildStatusOnShelf {
+	if guild.Status == liveentity.LiveGuildStatusOnShelf {
 		return &guilddto.OnShelfGuildRes{Success: true}, nil
 	}
 	// 上架前校验名称是否与已上架工会冲突

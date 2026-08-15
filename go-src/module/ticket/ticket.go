@@ -6,7 +6,7 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/ticketdao"
 	"xr-game-server/dto/ticketdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 	"xr-game-server/errercode"
 )
 

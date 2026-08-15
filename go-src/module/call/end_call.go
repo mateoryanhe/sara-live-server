@@ -9,7 +9,7 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/calldao"
 	"xr-game-server/dto/calldto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/call"
 	"xr-game-server/errercode"
 )
 

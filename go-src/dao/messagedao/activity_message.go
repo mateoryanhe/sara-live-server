@@ -10,7 +10,7 @@ import (
 	"xr-game-server/core/cache"
 	"xr-game-server/core/str"
 	"xr-game-server/dto/activitymessagedto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/message"
 )
 
 const activityMessageCacheKey = "all"

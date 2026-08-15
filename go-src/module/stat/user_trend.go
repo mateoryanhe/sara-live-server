@@ -4,7 +4,7 @@ import (
 	"context"
 	"xr-game-server/dao/statdao"
 	"xr-game-server/dto/statdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/stat"
 )
 
 const (

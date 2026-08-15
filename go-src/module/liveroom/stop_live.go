@@ -10,7 +10,7 @@ import (
 	"xr-game-server/core/push"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/liveroomdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 	"xr-game-server/errercode"
 	"xr-game-server/module/agora"
 	"xr-game-server/module/liverecord"

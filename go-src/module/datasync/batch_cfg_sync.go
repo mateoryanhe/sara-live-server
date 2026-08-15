@@ -7,7 +7,8 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/datasyncdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
+	rechargeentity "xr-game-server/entity/recharge"
 	"xr-game-server/module/banner"
 	"xr-game-server/module/gift"
 	"xr-game-server/module/recharge"
@@ -149,13 +150,13 @@ func saveLiveGifts(rows []*entity.LiveGift) (int, error) {
 	return rowCount, nil
 }
 
-func saveRechargeCfgs(rows []*entity.RechargeCfg) (int, error) {
+func saveRechargeCfgs(rows []*rechargeentity.RechargeCfg) (int, error) {
 	rowCount := 0
 	for _, row := range rows {
 		if row == nil || row.ID == 0 {
 			continue
 		}
-		if _, err := g.DB().Model(string(entity.TbRechargeCfg)).Save(row); err != nil {
+		if _, err := g.DB().Model(string(rechargeentity.TbRechargeCfg)).Save(row); err != nil {
 			return rowCount, fmt.Errorf("save recharge cfg id=%d: %w", row.ID, err)
 		}
 		rowCount++
@@ -188,7 +189,7 @@ func collectGiftFileNames(rows []*entity.LiveGift) []string {
 	return names
 }
 
-func collectRechargeCfgFileNames(rows []*entity.RechargeCfg) []string {
+func collectRechargeCfgFileNames(rows []*rechargeentity.RechargeCfg) []string {
 	seen := make(map[string]struct{})
 	names := make([]string, 0)
 	for _, row := range rows {

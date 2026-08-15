@@ -15,7 +15,8 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/agoradto"
 	"xr-game-server/dto/liveroomdto"
-	"xr-game-server/entity"
+	liveentity "xr-game-server/entity/live"
+	userentity "xr-game-server/entity/user"
 	"xr-game-server/module/agora"
 	"xr-game-server/module/upload"
 
@@ -32,8 +33,8 @@ const (
 )
 
 var (
-	roomListCache      atomic.Value // []*entity.LiveRoom
-	emptyRoomListCache = make([]*entity.LiveRoom, 0)
+	roomListCache      atomic.Value // []*liveentity.LiveRoom
+	emptyRoomListCache = make([]*liveentity.LiveRoom, 0)
 )
 
 func initRoomList() {
@@ -46,7 +47,7 @@ func initRoomList() {
 func flushRoomList(ctx context.Context) {
 	_ = ctx
 	allData := liveroomdao.GetAllLiveRoom()
-	rooms := make([]*entity.LiveRoom, 0, len(allData))
+	rooms := make([]*liveentity.LiveRoom, 0, len(allData))
 	for _, room := range allData {
 		if room == nil {
 			continue
@@ -72,20 +73,20 @@ func RefreshRoomListCache(ctx context.Context) {
 	flushRoomList(ctx)
 }
 
-func isDisabledBotAnchorRoom(room *entity.LiveRoom) bool {
+func isDisabledBotAnchorRoom(room *liveentity.LiveRoom) bool {
 	if room == nil {
 		return false
 	}
 	user := userinfodao.GetUserInfoByUserId(room.ID)
-	return user != nil && user.IsBotAnchor() && user.BotAnchorStatus != entity.BotAnchorStatusEnabled
+	return user != nil && user.IsBotAnchor() && user.BotAnchorStatus != userentity.BotAnchorStatusEnabled
 }
 
 // filterRoomsForApp App 端列表查询时过滤不可见直播间
-func filterRoomsForApp(rooms []*entity.LiveRoom) []*entity.LiveRoom {
+func filterRoomsForApp(rooms []*liveentity.LiveRoom) []*liveentity.LiveRoom {
 	if len(rooms) == 0 {
 		return rooms
 	}
-	filtered := make([]*entity.LiveRoom, 0, len(rooms))
+	filtered := make([]*liveentity.LiveRoom, 0, len(rooms))
 	for _, room := range rooms {
 		if room == nil || IsRoomBanned(room) || IsRoomOffShelf(room) || isDisabledBotAnchorRoom(room) {
 			continue
@@ -105,7 +106,7 @@ func resolveBotAnchorRoomInfo(anchorId uint64, cloudPlayerVideo string) (isBotAn
 	return
 }
 
-func compareLiveRoomsForList(a, b *entity.LiveRoom, onlineCounts map[uint64]int) bool {
+func compareLiveRoomsForList(a, b *liveentity.LiveRoom, onlineCounts map[uint64]int) bool {
 	if a == nil {
 		return false
 	}
@@ -128,14 +129,14 @@ func compareLiveRoomsForList(a, b *entity.LiveRoom, onlineCounts map[uint64]int)
 	return a.ID > b.ID
 }
 
-func liveRoomHeartTimeUnix(room *entity.LiveRoom) int64 {
+func liveRoomHeartTimeUnix(room *liveentity.LiveRoom) int64 {
 	if room == nil || room.HeartTime == nil {
 		return 0
 	}
 	return room.HeartTime.Unix()
 }
 
-func toLiveRoomListItem(room *entity.LiveRoom, userId uint64) *liveroomdto.LiveRoomListItem {
+func toLiveRoomListItem(room *liveentity.LiveRoom, userId uint64) *liveroomdto.LiveRoomListItem {
 	status := userstatus.LiveRoomStatusClosed
 	if room.LiveRecordId > 0 {
 		status = userstatus.LiveRoomStatusLive
@@ -184,7 +185,7 @@ func toLiveRoomListItem(room *entity.LiveRoom, userId uint64) *liveroomdto.LiveR
 	return item
 }
 
-func buildLiveRoomListItems(rooms []*entity.LiveRoom, userId uint64) []*liveroomdto.LiveRoomListItem {
+func buildLiveRoomListItems(rooms []*liveentity.LiveRoom, userId uint64) []*liveroomdto.LiveRoomListItem {
 	list := make([]*liveroomdto.LiveRoomListItem, 0, len(rooms))
 	for _, room := range rooms {
 		if room == nil {
@@ -195,23 +196,23 @@ func buildLiveRoomListItems(rooms []*entity.LiveRoom, userId uint64) []*liveroom
 	return list
 }
 
-func getRoomListCache() []*entity.LiveRoom {
+func getRoomListCache() []*liveentity.LiveRoom {
 	v := roomListCache.Load()
 	if v == nil {
 		return nil
 	}
-	list, ok := v.([]*entity.LiveRoom)
+	list, ok := v.([]*liveentity.LiveRoom)
 	if !ok || len(list) == 0 {
 		return nil
 	}
 	return list
 }
 
-func filterRoomsByStatus(rooms []*entity.LiveRoom, statusFilter int) []*entity.LiveRoom {
+func filterRoomsByStatus(rooms []*liveentity.LiveRoom, statusFilter int) []*liveentity.LiveRoom {
 	if statusFilter == 0 {
 		return rooms
 	}
-	filtered := make([]*entity.LiveRoom, 0, len(rooms))
+	filtered := make([]*liveentity.LiveRoom, 0, len(rooms))
 	for _, room := range rooms {
 		if room == nil {
 			continue
@@ -236,13 +237,13 @@ func filterRoomsByStatus(rooms []*entity.LiveRoom, statusFilter int) []*entity.L
 	return filtered
 }
 
-func filterRoomsByQuery(rooms []*entity.LiveRoom, tagId uint64, title, notice string) []*entity.LiveRoom {
+func filterRoomsByQuery(rooms []*liveentity.LiveRoom, tagId uint64, title, notice string) []*liveentity.LiveRoom {
 	titleKey := strings.ToLower(strings.TrimSpace(title))
 	noticeKey := strings.ToLower(strings.TrimSpace(notice))
 	if tagId == 0 && titleKey == "" && noticeKey == "" {
 		return rooms
 	}
-	filtered := make([]*entity.LiveRoom, 0, len(rooms))
+	filtered := make([]*liveentity.LiveRoom, 0, len(rooms))
 	for _, room := range rooms {
 		if room == nil {
 			continue
@@ -276,15 +277,15 @@ func buildFollowingAnchorSet(userId uint64) map[uint64]struct{} {
 	return set
 }
 
-func filterRoomsByFollowing(rooms []*entity.LiveRoom, userId uint64) []*entity.LiveRoom {
+func filterRoomsByFollowing(rooms []*liveentity.LiveRoom, userId uint64) []*liveentity.LiveRoom {
 	if userId == 0 {
-		return make([]*entity.LiveRoom, 0)
+		return make([]*liveentity.LiveRoom, 0)
 	}
 	following := buildFollowingAnchorSet(userId)
 	if len(following) == 0 {
-		return make([]*entity.LiveRoom, 0)
+		return make([]*liveentity.LiveRoom, 0)
 	}
-	filtered := make([]*entity.LiveRoom, 0, len(following))
+	filtered := make([]*liveentity.LiveRoom, 0, len(following))
 	for _, room := range rooms {
 		if room == nil {
 			continue
@@ -296,11 +297,11 @@ func filterRoomsByFollowing(rooms []*entity.LiveRoom, userId uint64) []*entity.L
 	return filtered
 }
 
-func filterRoomsByBlocked(rooms []*entity.LiveRoom, userId uint64) []*entity.LiveRoom {
+func filterRoomsByBlocked(rooms []*liveentity.LiveRoom, userId uint64) []*liveentity.LiveRoom {
 	if userId == 0 || len(rooms) == 0 {
 		return rooms
 	}
-	filtered := make([]*entity.LiveRoom, 0, len(rooms))
+	filtered := make([]*liveentity.LiveRoom, 0, len(rooms))
 	for _, room := range rooms {
 		if room == nil {
 			continue
@@ -314,7 +315,7 @@ func filterRoomsByBlocked(rooms []*entity.LiveRoom, userId uint64) []*entity.Liv
 }
 
 // viewerCanSeeSeniorAnchorRoom 高级主播直播间仅 VIP 等级>0 的用户可见(主播本人始终可见)
-func viewerCanSeeSeniorAnchorRoom(viewerUserId uint64, room *entity.LiveRoom) bool {
+func viewerCanSeeSeniorAnchorRoom(viewerUserId uint64, room *liveentity.LiveRoom) bool {
 	if room == nil {
 		return false
 	}
@@ -322,7 +323,7 @@ func viewerCanSeeSeniorAnchorRoom(viewerUserId uint64, room *entity.LiveRoom) bo
 		return true
 	}
 	anchor := userinfodao.GetUserInfoByUserId(room.ID)
-	if anchor == nil || anchor.UserType != entity.UserTypeSeniorAnchor {
+	if anchor == nil || anchor.UserType != userentity.UserTypeSeniorAnchor {
 		return true
 	}
 	if viewerUserId == 0 {
@@ -332,11 +333,11 @@ func viewerCanSeeSeniorAnchorRoom(viewerUserId uint64, room *entity.LiveRoom) bo
 	return viewer != nil && viewer.VipLevel > 0
 }
 
-func filterRoomsBySeniorAnchor(rooms []*entity.LiveRoom, viewerUserId uint64) []*entity.LiveRoom {
+func filterRoomsBySeniorAnchor(rooms []*liveentity.LiveRoom, viewerUserId uint64) []*liveentity.LiveRoom {
 	if len(rooms) == 0 {
 		return rooms
 	}
-	filtered := make([]*entity.LiveRoom, 0, len(rooms))
+	filtered := make([]*liveentity.LiveRoom, 0, len(rooms))
 	for _, room := range rooms {
 		if room == nil {
 			continue
@@ -418,7 +419,7 @@ func GetFollowedRoomList(ctx context.Context, req *liveroomdto.GetFollowedLiveRo
 
 	followingTotal := userinfodao.GetFollowCount(userId)
 	followings := livefollowdao.GetFollowingsByUser(userId, 1, followingTotal)
-	rooms := make([]*entity.LiveRoom, 0, len(followings))
+	rooms := make([]*liveentity.LiveRoom, 0, len(followings))
 	for _, f := range followings {
 		if f == nil {
 			continue
@@ -459,7 +460,7 @@ func normalizeNearbyLiveRoomCount(count int) int {
 	return count
 }
 
-func findLiveRoomIndex(rooms []*entity.LiveRoom, roomId uint64) int {
+func findLiveRoomIndex(rooms []*liveentity.LiveRoom, roomId uint64) int {
 	for i, room := range rooms {
 		if room != nil && room.ID == roomId {
 			return i
@@ -468,11 +469,11 @@ func findLiveRoomIndex(rooms []*entity.LiveRoom, roomId uint64) int {
 	return -1
 }
 
-func collectNearbyLiveRooms(rooms []*entity.LiveRoom, currentIdx, direction, count int) []*entity.LiveRoom {
+func collectNearbyLiveRooms(rooms []*liveentity.LiveRoom, currentIdx, direction, count int) []*liveentity.LiveRoom {
 	if currentIdx < 0 || len(rooms) == 0 || count <= 0 {
-		return make([]*entity.LiveRoom, 0)
+		return make([]*liveentity.LiveRoom, 0)
 	}
-	result := make([]*entity.LiveRoom, 0, count)
+	result := make([]*liveentity.LiveRoom, 0, count)
 	switch direction {
 	case liveroomdto.NearbyLiveRoomDirectionDown:
 		for i := currentIdx + 1; i < len(rooms) && len(result) < count; i++ {
@@ -486,7 +487,7 @@ func collectNearbyLiveRooms(rooms []*entity.LiveRoom, currentIdx, direction, cou
 	return result
 }
 
-func buildHotLiveRoomListItems(rooms []*entity.LiveRoom, userId uint64, startRank int) []*liveroomdto.HotLiveRoomListItem {
+func buildHotLiveRoomListItems(rooms []*liveentity.LiveRoom, userId uint64, startRank int) []*liveroomdto.HotLiveRoomListItem {
 	list := make([]*liveroomdto.HotLiveRoomListItem, 0, len(rooms))
 	rank := startRank
 	for _, room := range rooms {

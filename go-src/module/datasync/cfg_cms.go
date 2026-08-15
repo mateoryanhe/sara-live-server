@@ -8,7 +8,7 @@ import (
 
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/datasyncdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/sys"
 )
 
 func GetDataSyncCfg(_ context.Context, _ *datasyncdto.GetDataSyncCfgReq) (*datasyncdto.GetDataSyncCfgRes, error) {

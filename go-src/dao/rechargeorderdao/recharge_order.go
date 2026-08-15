@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 	"xr-game-server/core/cache"
-	"xr-game-server/entity"
+	"xr-game-server/entity/recharge"
 )
 
 var orderCacheMgr *cache.CacheMgr

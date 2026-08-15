@@ -10,7 +10,7 @@ import (
 	"github.com/gogf/gf/v2/util/guid"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/cache"
-	"xr-game-server/entity"
+	"xr-game-server/entity/user"
 )
 
 const cancelCodeValidDuration = 3 * 24 * time.Hour

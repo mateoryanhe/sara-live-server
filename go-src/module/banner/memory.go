@@ -6,7 +6,7 @@ import (
 	"sync"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/bannerdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 	"xr-game-server/module/upload"
 )
 

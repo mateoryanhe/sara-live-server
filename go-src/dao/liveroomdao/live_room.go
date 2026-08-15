@@ -5,7 +5,7 @@ import (
 
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/frame/g"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 )
 
 // roomCacheMgr 按 roomId(== 主播用户ID) 缓存

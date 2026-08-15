@@ -8,7 +8,7 @@ import (
 
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/uploaddto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/sys"
 	"xr-game-server/errercode"
 )
 

@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"xr-game-server/core/str"
 	"xr-game-server/dto/privateroombillingdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"

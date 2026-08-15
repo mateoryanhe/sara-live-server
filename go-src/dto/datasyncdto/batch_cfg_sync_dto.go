@@ -2,7 +2,8 @@ package datasyncdto
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
+	rechargeentity "xr-game-server/entity/recharge"
 )
 
 type SyncBatchRes struct {
@@ -47,6 +48,6 @@ type SyncRechargeCfgReq struct {
 
 type ReceiveRechargeCfgReq struct {
 	g.Meta `path:"/receiveRechargeCfg" method:"post" summary:"接收充值配置同步" tags:"数据同步"`
-	Rows   []*entity.RechargeCfg `json:"rows"`
-	Files  []*SyncFileItem       `json:"files"`
+	Rows   []*rechargeentity.RechargeCfg `json:"rows"`
+	Files  []*SyncFileItem               `json:"files"`
 }

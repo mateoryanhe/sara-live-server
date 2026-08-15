@@ -6,7 +6,7 @@ import (
 	"xr-game-server/constants/gameplatform"
 	"xr-game-server/core/event"
 	"xr-game-server/dao/gamebetdao"
-	"xr-game-server/entity"
+	"xr-game-server/entity/game"
 	"xr-game-server/gameevent"
 )
 

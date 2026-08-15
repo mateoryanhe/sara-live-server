@@ -8,7 +8,7 @@ import (
 	"xr-game-server/constants/liverevenue"
 	"xr-game-server/core/event"
 	"xr-game-server/dao/liveroomdao"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 	"xr-game-server/errercode"
 	"xr-game-server/gameevent"
 	"xr-game-server/module/livecfg"

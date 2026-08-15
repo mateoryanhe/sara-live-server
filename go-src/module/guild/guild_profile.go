@@ -8,7 +8,7 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/guilddao"
 	"xr-game-server/dto/guilddto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 	"xr-game-server/errercode"
 )
 

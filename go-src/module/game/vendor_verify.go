@@ -9,7 +9,7 @@ import (
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/gameplatformdto"
-	"xr-game-server/entity"
+	userentity "xr-game-server/entity/user"
 )
 
 // HandleVendorVerify 第三方身份验证回调(operator_player_session 或 ops 为用户 ID).
@@ -62,12 +62,12 @@ func HandleVendorVerify(ctx context.Context, req *gameplatformdto.VendorVerifyRe
 	return resp, nil
 }
 
-func loadUserInfoForVendorVerify(userID uint64) *entity.UserInfo {
+func loadUserInfoForVendorVerify(userID uint64) *userentity.UserInfo {
 	if userInfo := userinfodao.GetUserInfoFromMemory(userID); userInfo != nil {
 		return userInfo
 	}
-	var row entity.UserInfo
-	if err := g.DB().Model(string(entity.TbUserInfo)).Unscoped().
+	var row userentity.UserInfo
+	if err := g.DB().Model(string(userentity.TbUserInfo)).Unscoped().
 		Where("id = ?", userID).
 		Scan(&row); err != nil {
 		return nil

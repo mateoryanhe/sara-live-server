@@ -5,7 +5,7 @@ import (
 
 	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/dao/statdao"
-	"xr-game-server/entity"
+	"xr-game-server/entity/stat"
 )
 
 // RecordValidAudience 记录有效观众(跨直播间去重,日/周/月各计一次)

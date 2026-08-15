@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
-	"xr-game-server/entity"
+	"xr-game-server/entity/cms"
 )
 
 // ListValidCmsTokens 查询未过期的CMS Token(expire_at > 当前服务器时间)

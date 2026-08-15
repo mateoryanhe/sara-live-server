@@ -7,7 +7,7 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/liverecorddto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 )
 
 const appLiveRecordListPageSize = liveroomdao.AppLiveRecordListCachePageSize

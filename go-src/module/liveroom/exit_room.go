@@ -6,7 +6,7 @@ import (
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 )
 
 // LeaveRoom 玩家离开直播间,记录状态置为 Offline(保留行)

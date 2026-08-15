@@ -5,7 +5,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 )
 
 // LiveRecordCMSListFilter CMS直播记录查询条件

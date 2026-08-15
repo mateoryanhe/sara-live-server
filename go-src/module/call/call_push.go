@@ -8,7 +8,7 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/agoradto"
 	"xr-game-server/dto/calldto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/call"
 	"xr-game-server/module/agora"
 	"xr-game-server/module/liveroom"
 	"xr-game-server/module/upload"

@@ -8,7 +8,8 @@ import (
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/accountdto"
-	"xr-game-server/entity"
+	liveentity "xr-game-server/entity/live"
+	userentity "xr-game-server/ent
 	"xr-game-server/module/upload"
 )
 
@@ -25,10 +26,10 @@ func queryAnchorListFromMemory(req *accountdto.QueryAnchorListReq) (int, []*acco
 	return total, ret
 }
 
-func filterAnchorRooms(rooms []*entity.LiveRoom, key string, guildId uint64) []*entity.LiveRoom {
+func filterAnchorRooms(rooms []*liveentity.LiveRoom, key string, guildId uint64) []*liveentity.LiveRoom {
 	key = strings.TrimSpace(key)
 	likeKey := strings.ToLower(key)
-	filtered := make([]*entity.LiveRoom, 0, len(rooms))
+	filtered := make([]*liveentity.LiveRoom, 0, len(rooms))
 	for _, room := range rooms {
 		if room == nil || !isRegularAnchorRoom(room) {
 			continue
@@ -48,9 +49,9 @@ func filterAnchorRooms(rooms []*entity.LiveRoom, key string, guildId uint64) []*
 	return filtered
 }
 
-func isRegularAnchorRoom(room *entity.LiveRoom) bool {
+func isRegularAnchorRoom(room *liveentity.LiveRoom) bool {
 	user := userinfodao.GetUserInfoFromMemory(room.ID)
-	return user != nil && (user.UserType == entity.UserTypeAnchor || user.UserType == entity.UserTypeSeniorAnchor)
+	return user != nil && (user.UserType == userentity.UserTypeAnchor || user.UserType == userentity.UserTypeSeniorAnchor)
 }
 
 func matchAnchorKey(id uint64, key, likeKey string) bool {
@@ -70,7 +71,7 @@ func matchAnchorKey(id uint64, key, likeKey string) bool {
 	return strings.Contains(strings.ToLower(user.ShareCode), likeKey)
 }
 
-func paginateAnchorRooms(rooms []*entity.LiveRoom, pageIndex, pageSize int) []*entity.LiveRoom {
+func paginateAnchorRooms(rooms []*liveentity.LiveRoom, pageIndex, pageSize int) []*liveentity.LiveRoom {
 	if pageIndex <= 0 {
 		pageIndex = 1
 	}
@@ -88,7 +89,7 @@ func paginateAnchorRooms(rooms []*entity.LiveRoom, pageIndex, pageSize int) []*e
 	return rooms[offset:end]
 }
 
-func buildAnchorListItem(room *entity.LiveRoom) *accountdto.AnchorListItem {
+func buildAnchorListItem(room *liveentity.LiveRoom) *accountdto.AnchorListItem {
 	if room == nil {
 		return nil
 	}
@@ -119,7 +120,7 @@ func buildAnchorListItem(room *entity.LiveRoom) *accountdto.AnchorListItem {
 	return item
 }
 
-func fillAnchorRoomFields(item *accountdto.AnchorListItem, room *entity.LiveRoom) {
+func fillAnchorRoomFields(item *accountdto.AnchorListItem, room *liveentity.LiveRoom) {
 	if item == nil || room == nil {
 		return
 	}

@@ -7,7 +7,7 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/cmsuserdao"
 	"xr-game-server/dto/cmsuserdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/cms"
 )
 
 // GetCMSUserList 获取CMS用户列表

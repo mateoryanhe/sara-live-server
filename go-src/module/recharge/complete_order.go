@@ -8,7 +8,7 @@ import (
 	"xr-game-server/constants/currency"
 	"xr-game-server/core/event"
 	"xr-game-server/dao/rechargeorderdao"
-	"xr-game-server/entity"
+	"xr-game-server/entity/recharge"
 	"xr-game-server/errercode"
 	"xr-game-server/gameevent"
 	"xr-game-server/module/wallet"

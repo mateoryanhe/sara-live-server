@@ -9,7 +9,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/dao/messagedao"
 	"xr-game-server/dto/datasyncdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/message"
 	"xr-game-server/module/upload"
 )
 

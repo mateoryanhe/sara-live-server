@@ -9,7 +9,8 @@ import (
 	"xr-game-server/dao/guilddao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/guilddto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
+	userentity "xr-game-server/entity/user"
 	"xr-game-server/errercode"
 	"xr-game-server/module/liveroom"
 )
@@ -19,7 +20,7 @@ func ImportGuildAnchors(ctx context.Context, req *guilddto.ImportGuildAnchorsReq
 	if req == nil || req.GuildId == 0 || len(req.Rows) == 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	if req.AnchorType != entity.UserTypeAnchor && req.AnchorType != entity.UserTypeSeniorAnchor {
+	if req.AnchorType != userentity.UserTypeAnchor && req.AnchorType != userentity.UserTypeSeniorAnchor {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	guild := guilddao.GetGuildById(req.GuildId)
@@ -96,7 +97,7 @@ func importOneGuildAnchor(guild *entity.LiveGuild, userID uint64, cancelCode str
 	if user.GuildId != 0 {
 		return guilddto.ImportAnchorFailAlreadyInGuild, nickname
 	}
-	if !entity.UserTypeIsAnchor(user.UserType) && user.UserType != entity.UserTypeNormal {
+	if !userentity.UserTypeIsAnchor(user.UserType) && user.UserType != userentity.UserTypeNormal {
 		return guilddto.ImportAnchorFailCannotSetAnchor, nickname
 	}
 

@@ -9,7 +9,7 @@ import (
 	"xr-game-server/dao/rechargeorderdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/rechargeorderdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/recharge"
 )
 
 // CheckOrderRechargeSuccess App 端查询订单是否充值成功

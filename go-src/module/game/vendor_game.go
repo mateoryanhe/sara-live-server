@@ -3,7 +3,7 @@ package game
 import (
 	"xr-game-server/core/cache"
 	"xr-game-server/dao/cfgdao"
-	"xr-game-server/entity"
+	"xr-game-server/entity/game"
 )
 
 const vendorBrowseCacheKey = "all"

@@ -9,7 +9,7 @@ import (
 	"xr-game-server/dao/rechargeorderdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/rechargeorderdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/recharge"
 	"xr-game-server/errercode"
 	"xr-game-server/gameevent"
 )

@@ -7,8 +7,8 @@ import (
 	"xr-game-server/core/snowflake"
 	"xr-game-server/dao/shortvideodao"
 	"xr-game-server/dto/shortvideodto"
-	"xr-game-server/entity"
 	sventity "xr-game-server/entity/shortvideo"
+	userentity "xr-game-server/entity/user"
 )
 
 // 配置短视频大小,计费等
@@ -177,7 +177,7 @@ func getNormalUserDailyUploadLimit() uint32 {
 }
 
 func getAuthorDailyUploadLimit(userType uint8) uint32 {
-	if entity.UserTypeIsAnchor(userType) {
+	if userentity.UserTypeIsAnchor(userType) {
 		return getAnchorDailyUploadLimit()
 	}
 	return getNormalUserDailyUploadLimit()

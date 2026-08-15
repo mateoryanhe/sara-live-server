@@ -8,7 +8,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/str"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 )
 
 // OffShelfRoomRow 回收站列表行(直连 DB)

@@ -7,7 +7,7 @@ import (
 	"xr-game-server/core/event"
 	"xr-game-server/dao/currencylogdao"
 	"xr-game-server/dto/userinfodto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/user"
 	"xr-game-server/gameevent"
 )
 

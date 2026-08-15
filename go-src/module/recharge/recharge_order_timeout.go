@@ -10,7 +10,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtimer"
 	"xr-game-server/core/xrtimer"
 	"xr-game-server/dao/rechargeorderdao"
-	"xr-game-server/entity"
+	"xr-game-server/entity/recharge"
 )
 
 const rechargeOrderPayTimeout = 30 * time.Minute

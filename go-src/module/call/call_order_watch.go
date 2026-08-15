@@ -9,7 +9,7 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/xrtimer"
 	"xr-game-server/dao/calldao"
-	"xr-game-server/entity"
+	"xr-game-server/entity/call"
 )
 
 const callRingTimeout = 60 * time.Second

@@ -6,7 +6,7 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/cmsuserdao"
 	"xr-game-server/dto/cmsroledto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/cms"
 )
 
 // GetRoleList 获取角色列表

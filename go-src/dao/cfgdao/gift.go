@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"xr-game-server/core/str"
 	"xr-game-server/dto/giftdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 )
 
 func GetGiftById(id uint64) *entity.LiveGift {

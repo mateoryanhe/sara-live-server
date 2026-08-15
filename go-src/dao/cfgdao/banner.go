@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"xr-game-server/core/str"
 	"xr-game-server/dto/bannerdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 )
 
 func GetBannerById(id uint64) *entity.HomeBanner {

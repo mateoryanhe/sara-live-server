@@ -8,7 +8,7 @@ import (
 	"xr-game-server/dao/gamewindao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/gamewindto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/game"
 )
 
 func parseWinCMSUserIdFilter(val string) uint64 {

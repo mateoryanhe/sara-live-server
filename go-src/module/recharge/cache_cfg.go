@@ -4,7 +4,7 @@ import (
 	"sync/atomic"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/rechargecfgdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/recharge"
 )
 
 func rechargeCfgProductKey(packageName, productId string) string {

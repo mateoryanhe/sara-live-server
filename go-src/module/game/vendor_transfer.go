@@ -16,7 +16,8 @@ import (
 	"xr-game-server/dao/gamewindao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/gameplatformdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/game"
+	userentity "xr-game-server/entity/user"
 	"xr-game-server/errercode"
 	"xr-game-server/gameevent"
 	"xr-game-server/module/wallet"
@@ -240,7 +241,7 @@ func resolveVendorTransferUpdatedTime(req *gameplatformdto.VendorTransferReq) in
 	return 0
 }
 
-func vendorTransferPlayerNameMatch(userInfo *entity.UserInfo, userID uint64, playerName string) bool {
+func vendorTransferPlayerNameMatch(userInfo *userentity.UserInfo, userID uint64, playerName string) bool {
 	expected := resolvePlayerName(userInfo, userID)
 	return strings.EqualFold(strings.TrimSpace(expected), strings.TrimSpace(playerName))
 }

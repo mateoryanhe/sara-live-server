@@ -11,7 +11,7 @@ import (
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/agoradto"
 	"xr-game-server/dto/calldto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/call"
 	"xr-game-server/errercode"
 	"xr-game-server/module/agora"
 	"xr-game-server/module/wallet"

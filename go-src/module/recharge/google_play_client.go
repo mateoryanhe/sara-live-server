@@ -10,7 +10,7 @@ import (
 	"google.golang.org/api/androidpublisher/v3"
 	"google.golang.org/api/option"
 	"xr-game-server/dao/cfgdao"
-	"xr-game-server/entity"
+	"xr-game-server/entity/recharge"
 )
 
 var (

@@ -7,7 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	liverevenueconst "xr-game-server/constants/liverevenue"
 	"xr-game-server/core/cache"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 )
 
 var revenueLogCacheMgr *cache.CacheMgr

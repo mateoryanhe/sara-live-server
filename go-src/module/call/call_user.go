@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"xr-game-server/dao/calldao"
-	"xr-game-server/entity"
+	"xr-game-server/entity/call"
 	"xr-game-server/errercode"
 )
 

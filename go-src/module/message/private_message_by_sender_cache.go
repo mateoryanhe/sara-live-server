@@ -7,7 +7,7 @@ import (
 	"xr-game-server/core/cache"
 	"xr-game-server/dao/messagedao"
 	"xr-game-server/dto/messagedto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/message"
 )
 
 const (

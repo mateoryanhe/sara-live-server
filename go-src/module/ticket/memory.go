@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"xr-game-server/dao/ticketdao"
 	"xr-game-server/dto/ticketdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 )
 
 type ticketSnapshot struct {

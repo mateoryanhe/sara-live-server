@@ -6,7 +6,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/constants/db"
-	"xr-game-server/entity"
+	"xr-game-server/entity/message"
 )
 
 // ClearAllPrivateUnreadInDB 将指定用户全部私信未读数清零(直接更新数据库)

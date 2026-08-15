@@ -10,7 +10,8 @@ import (
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/botanchordto"
-	"xr-game-server/entity"
+	liveentity "xr-game-server/entity/live"
+	userentity "xr-game-server
 	"xr-game-server/errercode"
 	"xr-game-server/module/auth"
 	"xr-game-server/module/liveroom"
@@ -30,22 +31,22 @@ func CreateBotAnchor(_ context.Context, req *botanchordto.CreateBotAnchorReq) (*
 	}
 	category := req.Category
 	if category == 0 {
-		category = entity.LiveRoomCategoryHot
+		category = liveentity.LiveRoomCategoryHot
 	}
 	if err := validateRoomTagId(req.TagId); err != nil {
 		return nil, err
 	}
 
 	openId := fmt.Sprintf("bot_%s", guid.S())
-	account := entity.NewAccount(openId, auth.BotAnchorChannel)
+	account := userentity.NewAccount(openId, auth.BotAnchorChannel)
 
 	user := userinfodao.GetUserInfoByUserId(account.ID)
 	user.SetNickname(nickname)
 	if req.Avatar != "" {
 		user.SetAvatar(strings.TrimSpace(req.Avatar))
 	}
-	user.SetUserType(entity.UserTypeBotAnchor)
-	user.SetBotAnchorStatus(entity.BotAnchorStatusEnabled)
+	user.SetUserType(userentity.UserTypeBotAnchor)
+	user.SetBotAnchorStatus(userentity.BotAnchorStatusEnabled)
 	user.SetHasLiveRoom(true)
 	if req.GuildId > 0 {
 		user.SetGuildId(req.GuildId)
@@ -54,7 +55,7 @@ func CreateBotAnchor(_ context.Context, req *botanchordto.CreateBotAnchorReq) (*
 	room := liveroom.EnsureAnchorRoom(account.ID, user.GuildId)
 	room.SetTitle(strings.TrimSpace(req.RoomTitle))
 	room.SetCategory(category)
-	room.SetPrivateInviteType(entity.DefaultPrivateInviteType(category))
+	room.SetPrivateInviteType(liveentity.DefaultPrivateInviteType(category))
 	room.SetTagId(req.TagId)
 	if req.CloudPlayerVideo != "" {
 		room.SetCloudPlayerVideo(strings.TrimSpace(req.CloudPlayerVideo))
@@ -89,12 +90,12 @@ func UpdateBotAnchor(_ context.Context, req *botanchordto.UpdateBotAnchorReq) (*
 
 	category := req.Category
 	if category == 0 {
-		category = entity.LiveRoomCategoryHot
+		category = liveentity.LiveRoomCategoryHot
 	}
 	room := liveroom.EnsureAnchorRoom(req.ID, user.GuildId)
 	room.SetTitle(strings.TrimSpace(req.RoomTitle))
 	room.SetCategory(category)
-	room.SetPrivateInviteType(entity.DefaultPrivateInviteType(category))
+	room.SetPrivateInviteType(liveentity.DefaultPrivateInviteType(category))
 	room.SetTagId(req.TagId)
 	if req.CloudPlayerVideo != nil {
 		room.SetCloudPlayerVideo(strings.TrimSpace(*req.CloudPlayerVideo))
@@ -111,14 +112,14 @@ func SetBotAnchorStatus(ctx context.Context, req *botanchordto.SetBotAnchorStatu
 	if err != nil {
 		return nil, err
 	}
-	if req.Status != entity.BotAnchorStatusDisabled && req.Status != entity.BotAnchorStatusEnabled {
+	if req.Status != userentity.BotAnchorStatusDisabled && req.Status != userentity.BotAnchorStatusEnabled {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	user.SetBotAnchorStatus(req.Status)
 	switch req.Status {
-	case entity.BotAnchorStatusEnabled:
+	case userentity.BotAnchorStatusEnabled:
 		enableBotAnchorRoomCache(req.ID, user.GuildId)
-	case entity.BotAnchorStatusDisabled:
+	case userentity.BotAnchorStatusDisabled:
 		disableBotAnchorRoomCache(req.ID)
 	}
 	liveroom.RefreshRoomListCache(ctx)
@@ -131,7 +132,7 @@ func StartBotAnchorLive(ctx context.Context, req *botanchordto.StartBotAnchorLiv
 	if err != nil {
 		return nil, err
 	}
-	if user.BotAnchorStatus != entity.BotAnchorStatusEnabled {
+	if user.BotAnchorStatus != userentity.BotAnchorStatusEnabled {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	if err := liveroom.StartLiveForBotAnchor(ctx, req.ID, user.GuildId); err != nil {
@@ -191,7 +192,7 @@ func batchBotAnchorLive(ctx context.Context, ids []uint64, action func(uint64) e
 	return res, nil
 }
 
-func getBotAnchorUser(userId uint64) (*entity.UserInfo, error) {
+func getBotAnchorUser(userId uint64) (*userentity.UserInfo, error) {
 	if userId == 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}

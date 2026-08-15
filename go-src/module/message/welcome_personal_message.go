@@ -7,7 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/event"
 	"xr-game-server/core/xrpool"
-	"xr-game-server/entity"
+	"xr-game-server/entity/message"
 	"xr-game-server/gameevent"
 )
 

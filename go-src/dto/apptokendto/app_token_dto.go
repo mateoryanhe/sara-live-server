@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/gogf/gf/v2/util/gconv"
-	"xr-game-server/entity"
+	"xr-game-server/entity/user"
 )
 
 type AppTokenDto struct {

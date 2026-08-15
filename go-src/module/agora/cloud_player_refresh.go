@@ -17,7 +17,7 @@ import (
 	"xr-game-server/core/xrtimer"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/agoradto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 )
 
 const cloudPlayerTokenRefreshStartupDelay = time.Minute

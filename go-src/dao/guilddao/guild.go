@@ -7,18 +7,18 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/dto/guilddto"
-	"xr-game-server/entity"
+	liveentity "xr-game-server/entity/live"
 )
 
 const guildTimeLayout = "2006-01-02 15:04:05"
 
 // GetGuildByIdFromDB 根据 ID 直查数据库(含下架)
-func GetGuildByIdFromDB(id uint64) *entity.LiveGuild {
+func GetGuildByIdFromDB(id uint64) *liveentity.LiveGuild {
 	if id == 0 {
 		return nil
 	}
-	var row entity.LiveGuild
-	err := g.DB().Model(string(entity.TbLiveGuild)).
+	var row liveentity.LiveGuild
+	err := g.DB().Model(string(liveentity.TbLiveGuild)).
 		WherePri(id).
 		Scan(&row)
 	if err != nil || row.ID == 0 {
@@ -28,14 +28,14 @@ func GetGuildByIdFromDB(id uint64) *entity.LiveGuild {
 }
 
 // GetGuildById 根据 ID 从数据库获取工会(不含已下架)
-func GetGuildById(id uint64) *entity.LiveGuild {
+func GetGuildById(id uint64) *liveentity.LiveGuild {
 	if id == 0 {
 		return nil
 	}
-	var row entity.LiveGuild
-	err := g.DB().Model(string(entity.TbLiveGuild)).
+	var row liveentity.LiveGuild
+	err := g.DB().Model(string(liveentity.TbLiveGuild)).
 		WherePri(id).
-		Where(string(entity.LiveGuildStatus), entity.LiveGuildStatusOnShelf).
+		Where(string(liveentity.LiveGuildStatus), liveentity.LiveGuildStatusOnShelf).
 		Scan(&row)
 	if err != nil || row.ID == 0 {
 		return nil
@@ -44,15 +44,15 @@ func GetGuildById(id uint64) *entity.LiveGuild {
 }
 
 // GetGuildByName 根据名称从数据库获取工会(不含已软删除)
-func GetGuildByName(name string) *entity.LiveGuild {
+func GetGuildByName(name string) *liveentity.LiveGuild {
 	name = strings.TrimSpace(name)
 	if name == "" {
 		return nil
 	}
-	var row entity.LiveGuild
-	err := g.DB().Model(string(entity.TbLiveGuild)).
-		Where(string(entity.LiveGuildName), name).
-		Where(string(entity.LiveGuildStatus), entity.LiveGuildStatusOnShelf).
+	var row liveentity.LiveGuild
+	err := g.DB().Model(string(liveentity.TbLiveGuild)).
+		Where(string(liveentity.LiveGuildName), name).
+		Where(string(liveentity.LiveGuildStatus), liveentity.LiveGuildStatusOnShelf).
 		Scan(&row)
 	if err != nil || row.ID == 0 {
 		return nil
@@ -61,21 +61,21 @@ func GetGuildByName(name string) *entity.LiveGuild {
 }
 
 // ListGuildsByLeaderId 根据会长 CMS 用户 ID 从数据库获取其管理的全部工会(不含已软删除)
-func ListGuildsByLeaderId(leaderId uint64) []*entity.LiveGuild {
+func ListGuildsByLeaderId(leaderId uint64) []*liveentity.LiveGuild {
 	if leaderId == 0 {
 		return nil
 	}
-	rows := make([]*entity.LiveGuild, 0)
-	_ = g.DB().Model(string(entity.TbLiveGuild)).
-		Where(string(entity.LiveGuildLeaderId), leaderId).
-		Where(string(entity.LiveGuildStatus), entity.LiveGuildStatusOnShelf).
+	rows := make([]*liveentity.LiveGuild, 0)
+	_ = g.DB().Model(string(liveentity.TbLiveGuild)).
+		Where(string(liveentity.LiveGuildLeaderId), leaderId).
+		Where(string(liveentity.LiveGuildStatus), liveentity.LiveGuildStatusOnShelf).
 		Order("id asc").
 		Scan(&rows)
 	return rows
 }
 
 // GetGuildByLeaderId 根据会长 CMS 用户 ID 获取工会(兼容旧逻辑,取第一条)
-func GetGuildByLeaderId(leaderId uint64) *entity.LiveGuild {
+func GetGuildByLeaderId(leaderId uint64) *liveentity.LiveGuild {
 	rows := ListGuildsByLeaderId(leaderId)
 	if len(rows) == 0 {
 		return nil
@@ -84,29 +84,29 @@ func GetGuildByLeaderId(leaderId uint64) *entity.LiveGuild {
 }
 
 // CreateGuild 直接写库
-func CreateGuild(guild *entity.LiveGuild) error {
+func CreateGuild(guild *liveentity.LiveGuild) error {
 	if guild == nil || guild.ID == 0 {
 		return nil
 	}
 	if guild.Status == 0 {
-		guild.Status = entity.LiveGuildStatusOnShelf
+		guild.Status = liveentity.LiveGuildStatusOnShelf
 	}
 	now := time.Now()
 	if guild.CreatedAt.IsZero() {
 		guild.CreatedAt = now
 	}
 	guild.UpdatedAt = now
-	_, err := g.DB().Model(string(entity.TbLiveGuild)).Save(guild)
+	_, err := g.DB().Model(string(liveentity.TbLiveGuild)).Save(guild)
 	return err
 }
 
 // UpdateGuild 直接写库
-func UpdateGuild(guild *entity.LiveGuild) error {
+func UpdateGuild(guild *liveentity.LiveGuild) error {
 	if guild == nil || guild.ID == 0 {
 		return nil
 	}
 	guild.UpdatedAt = time.Now()
-	_, err := g.DB().Model(string(entity.TbLiveGuild)).Save(guild)
+	_, err := g.DB().Model(string(liveentity.TbLiveGuild)).Save(guild)
 	return err
 }
 
@@ -116,13 +116,13 @@ func DeleteGuild(id uint64) error {
 		return nil
 	}
 	now := time.Now()
-	_, err := g.DB().Model(string(entity.TbLiveGuild)).
+	_, err := g.DB().Model(string(liveentity.TbLiveGuild)).
 		Data(g.Map{
-			string(entity.LiveGuildStatus): entity.LiveGuildStatusOffShelf,
-			"updated_at":                   now,
+			string(liveentity.LiveGuildStatus): liveentity.LiveGuildStatusOffShelf,
+			"updated_at":                       now,
 		}).
 		WherePri(id).
-		Where(string(entity.LiveGuildStatus), entity.LiveGuildStatusOnShelf).
+		Where(string(liveentity.LiveGuildStatus), liveentity.LiveGuildStatusOnShelf).
 		Update()
 	return err
 }
@@ -133,13 +133,13 @@ func OnShelfGuild(id uint64) error {
 		return nil
 	}
 	now := time.Now()
-	_, err := g.DB().Model(string(entity.TbLiveGuild)).
+	_, err := g.DB().Model(string(liveentity.TbLiveGuild)).
 		Data(g.Map{
-			string(entity.LiveGuildStatus): entity.LiveGuildStatusOnShelf,
-			"updated_at":                   now,
+			string(liveentity.LiveGuildStatus): liveentity.LiveGuildStatusOnShelf,
+			"updated_at":                       now,
 		}).
 		WherePri(id).
-		Where(string(entity.LiveGuildStatus), entity.LiveGuildStatusOffShelf).
+		Where(string(liveentity.LiveGuildStatus), liveentity.LiveGuildStatusOffShelf).
 		Update()
 	return err
 }
@@ -158,10 +158,10 @@ func GetOffShelfGuildList(req *guilddto.OffShelfGuildListReq) (int, []*guilddto.
 		pageSize = 10
 	}
 
-	m := g.DB().Model(string(entity.TbLiveGuild)).
-		Where(string(entity.LiveGuildStatus), entity.LiveGuildStatusOffShelf)
+	m := g.DB().Model(string(liveentity.TbLiveGuild)).
+		Where(string(liveentity.LiveGuildStatus), liveentity.LiveGuildStatusOffShelf)
 	if keyword := strings.TrimSpace(req.Name); keyword != "" {
-		m = m.WhereLike(string(entity.LiveGuildName), "%"+keyword+"%")
+		m = m.WhereLike(string(liveentity.LiveGuildName), "%"+keyword+"%")
 	}
 
 	total, err := m.Count()
@@ -169,7 +169,7 @@ func GetOffShelfGuildList(req *guilddto.OffShelfGuildListReq) (int, []*guilddto.
 		return 0, []*guilddto.GuildListRes{}
 	}
 
-	rows := make([]*entity.LiveGuild, 0)
+	rows := make([]*liveentity.LiveGuild, 0)
 	_ = m.Order("updated_at desc").
 		Page(pageIndex, pageSize).
 		Scan(&rows)
@@ -197,10 +197,10 @@ func GetGuildList(req *guilddto.GuildListReq) (int, []*guilddto.GuildListRes) {
 		pageSize = 10
 	}
 
-	m := g.DB().Model(string(entity.TbLiveGuild)).
-		Where(string(entity.LiveGuildStatus), entity.LiveGuildStatusOnShelf)
+	m := g.DB().Model(string(liveentity.TbLiveGuild)).
+		Where(string(liveentity.LiveGuildStatus), liveentity.LiveGuildStatusOnShelf)
 	if keyword := strings.TrimSpace(req.Name); keyword != "" {
-		m = m.WhereLike(string(entity.LiveGuildName), "%"+keyword+"%")
+		m = m.WhereLike(string(liveentity.LiveGuildName), "%"+keyword+"%")
 	}
 
 	total, err := m.Count()
@@ -208,7 +208,7 @@ func GetGuildList(req *guilddto.GuildListReq) (int, []*guilddto.GuildListRes) {
 		return 0, []*guilddto.GuildListRes{}
 	}
 
-	rows := make([]*entity.LiveGuild, 0)
+	rows := make([]*liveentity.LiveGuild, 0)
 	_ = m.Order("created_at desc").
 		Page(pageIndex, pageSize).
 		Scan(&rows)
@@ -222,7 +222,7 @@ func GetGuildList(req *guilddto.GuildListReq) (int, []*guilddto.GuildListRes) {
 	return total, list
 }
 
-func toGuildListRes(row *entity.LiveGuild) *guilddto.GuildListRes {
+func toGuildListRes(row *liveentity.LiveGuild) *guilddto.GuildListRes {
 	if row == nil {
 		return nil
 	}

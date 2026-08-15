@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/liveroomdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 )
 
 type roomTagSnapshot struct {

@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/privateroombillingdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 )
 
 type billingSnapshot struct {

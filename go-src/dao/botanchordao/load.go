@@ -4,7 +4,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/constants/db"
-	"xr-game-server/entity"
+	"xr-game-server/entity/user"
 )
 
 // LoadAllBotAnchorIds 从数据库加载全部机器人主播用户ID(启动初始化用)

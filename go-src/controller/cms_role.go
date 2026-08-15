@@ -5,7 +5,7 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/cmsroledto"
 	"xr-game-server/dto/permdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/cms"
 	"xr-game-server/module/cmsuser"
 )
 

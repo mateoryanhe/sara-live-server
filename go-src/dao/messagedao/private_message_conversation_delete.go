@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/gogf/gf/v2/frame/g"
-	"xr-game-server/entity"
+	"xr-game-server/entity/message"
 )
 
 const deletePrivateMessageSessionsByUserSQL = `

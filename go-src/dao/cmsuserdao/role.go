@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"xr-game-server/core/str"
 	"xr-game-server/dto/cmsroledto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/cms"
 )
 
 // GetRoleById 根据ID获取角色

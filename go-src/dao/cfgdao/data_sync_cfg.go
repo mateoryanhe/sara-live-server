@@ -3,7 +3,7 @@ package cfgdao
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/constants/db"
-	"xr-game-server/entity"
+	"xr-game-server/entity/sys"
 )
 
 // GetDataSyncCfg 从数据库读取数据同步配置(不缓存)

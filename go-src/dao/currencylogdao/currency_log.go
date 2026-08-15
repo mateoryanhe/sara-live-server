@@ -3,7 +3,7 @@ package currencylogdao
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"xr-game-server/entity"
+	"xr-game-server/entity/user"
 )
 
 // GetByUserId 按用户ID分页查询货币流水(按ID倒序)

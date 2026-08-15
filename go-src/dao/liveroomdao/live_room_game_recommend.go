@@ -7,7 +7,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/cache"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 )
 
 var liveRoomGameRecommendCacheMgr *cache.CacheMgr

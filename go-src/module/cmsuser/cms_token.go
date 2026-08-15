@@ -5,7 +5,7 @@ import (
 
 	"xr-game-server/core/xrtoken"
 	"xr-game-server/dao/cmsuserdao"
-	"xr-game-server/entity"
+	"xr-game-server/entity/cms"
 )
 
 func invalidateCmsToken(userId uint64) {

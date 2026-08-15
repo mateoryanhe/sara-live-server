@@ -9,7 +9,7 @@ import (
 
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/googleplaydto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/recharge"
 	"xr-game-server/errercode"
 )
 

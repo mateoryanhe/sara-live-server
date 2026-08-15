@@ -8,7 +8,7 @@ import (
 	"xr-game-server/dao/livefollowdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/livefollowdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 	"xr-game-server/errercode"
 	"xr-game-server/module/upload"
 )

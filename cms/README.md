@@ -22,8 +22,7 @@ src/
 │   │   ├── auth.ts         # 权限相关API
 │   │   ├── account.ts      # 账号相关API
 │   │   ├── agent.ts        # 智能体相关API
-│   │   ├── coinCfg.ts      # 币种配置相关API
-│   │   └── globalCfg.ts    # 全局配置相关API
+│   │   └── coinCfg.ts      # 币种配置相关API
 │   └── request.ts          # axios请求封装
 ├── assets/                 # 静态资源
 ├── components/             # 公共组件
@@ -94,7 +93,6 @@ npm run preview
 
 - 权限相关: `/auth/*`
 - 账号管理: `/account/*`
-- 全局配置: `/globalCfg/*`
 - 智能体管理: `/agent/*`
 - 币种配置: `/coinCfg/*`
 

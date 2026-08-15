@@ -7,7 +7,8 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	liverevenueconst "xr-game-server/constants/liverevenue"
-	"xr-game-server/entity"
+	liveentity "xr-game-server/entity/live"
+	userentity "xr-game-server/entity/user"
 )
 
 // AudienceContributionStatRow 观众贡献聚合结果
@@ -46,21 +47,21 @@ func SumAudienceContributionByRoom(roomId uint64, startTime, endTime time.Time, 
 
 	sql := `
 SELECT rl.sender_id, SUM(rl.total_amount) AS total_amount
-FROM ` + string(entity.TbLiveRevenueLog) + ` rl
-INNER JOIN ` + string(entity.TbAccount) + ` a ON a.id = rl.sender_id
-LEFT JOIN ` + string(entity.TbUserExt) + ` ue ON ue.id = rl.sender_id
+FROM ` + string(liveentity.TbLiveRevenueLog) + ` rl
+INNER JOIN ` + string(userentity.TbAccount) + ` a ON a.id = rl.sender_id
+LEFT JOIN ` + string(userentity.TbUserExt) + ` ue ON ue.id = rl.sender_id
 WHERE rl.room_id = ?
-  AND IFNULL(rl.` + string(entity.LiveRevenueLogStatus) + `, 0) = 0
+  AND IFNULL(rl.` + string(liveentity.LiveRevenueLogStatus) + `, 0) = 0
   AND rl.sender_id IN (` + inPlaceholders + `)
   AND rl.revenue_type IN (?, ?)
   AND rl.created_at >= ?
   AND rl.created_at <= ?
-  AND IFNULL(a.` + string(entity.AccountCancel) + `, 0) = 0
+  AND IFNULL(a.` + string(userentity.AccountCancel) + `, 0) = 0
   AND (
-    IFNULL(a.` + string(entity.AccountBan) + `, 0) = 0
-    OR (a.` + string(entity.AccountBanApplyTime) + ` IS NOT NULL AND a.` + string(entity.AccountBanApplyTime) + ` <= ?)
+    IFNULL(a.` + string(userentity.AccountBan) + `, 0) = 0
+    OR (a.` + string(userentity.AccountBanApplyTime) + ` IS NOT NULL AND a.` + string(userentity.AccountBanApplyTime) + ` <= ?)
   )
-  AND (ue.id IS NULL OR IFNULL(ue.` + string(entity.UserExtCanRank) + `, 1) = 1)
+  AND (ue.id IS NULL OR IFNULL(ue.` + string(userentity.UserExtCanRank) + `, 1) = 1)
 GROUP BY rl.sender_id
 HAVING SUM(rl.total_amount) > 0
 ORDER BY total_amount DESC

@@ -10,7 +10,7 @@ import (
 
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/vipcfgdto"
-	"xr-game-server/entity"
+	liveentity "xr-game-server/entity/live"
 	"xr-game-server/errercode"
 	"xr-game-server/module/upload"
 )
@@ -18,9 +18,9 @@ import (
 const vipCfgTimeLayout = "2006-01-02 15:04:05"
 
 type vipCfgSnapshot struct {
-	byID       map[uint64]*entity.VipCfg
-	byLevel    map[uint32]*entity.VipCfg
-	allList    []*entity.VipCfg
+	byID       map[uint64]*liveentity.VipCfg
+	byLevel    map[uint32]*liveentity.VipCfg
+	allList    []*liveentity.VipCfg
 	appByLevel map[uint32]*vipcfgdto.AppVipCfgItem
 	appList    []*vipcfgdto.AppVipCfgItem
 }
@@ -38,9 +38,9 @@ func ReloadVipCfgMemory() {
 // reloadVipCfgMemory 从DB重新加载并整体替换内存快照
 func reloadVipCfgMemory() {
 	rows := cfgdao.GetAllVipCfg()
-	byID := make(map[uint64]*entity.VipCfg, len(rows))
-	byLevel := make(map[uint32]*entity.VipCfg, len(rows))
-	allList := make([]*entity.VipCfg, 0, len(rows))
+	byID := make(map[uint64]*liveentity.VipCfg, len(rows))
+	byLevel := make(map[uint32]*liveentity.VipCfg, len(rows))
+	allList := make([]*liveentity.VipCfg, 0, len(rows))
 	appByLevel := make(map[uint32]*vipcfgdto.AppVipCfgItem, len(rows))
 	appList := make([]*vipcfgdto.AppVipCfgItem, 0, len(rows))
 
@@ -76,9 +76,9 @@ func getVipCfgSnapshot() *vipCfgSnapshot {
 	v := vipCfgCache.Load()
 	if v == nil {
 		return &vipCfgSnapshot{
-			byID:       make(map[uint64]*entity.VipCfg),
-			byLevel:    make(map[uint32]*entity.VipCfg),
-			allList:    make([]*entity.VipCfg, 0),
+			byID:       make(map[uint64]*liveentity.VipCfg),
+			byLevel:    make(map[uint32]*liveentity.VipCfg),
+			allList:    make([]*liveentity.VipCfg, 0),
 			appByLevel: make(map[uint32]*vipcfgdto.AppVipCfgItem),
 			appList:    emptyVipCfgList,
 		}
@@ -86,11 +86,11 @@ func getVipCfgSnapshot() *vipCfgSnapshot {
 	return v.(*vipCfgSnapshot)
 }
 
-func getVipCfgByIDFromMemory(id uint64) *entity.VipCfg {
+func getVipCfgByIDFromMemory(id uint64) *liveentity.VipCfg {
 	return getVipCfgSnapshot().byID[id]
 }
 
-func findVipCfgByLevelFromMemory(level uint32, excludeID uint64) *entity.VipCfg {
+func findVipCfgByLevelFromMemory(level uint32, excludeID uint64) *liveentity.VipCfg {
 	row := getVipCfgSnapshot().byLevel[level]
 	if row == nil || row.ID == excludeID {
 		return nil
@@ -98,10 +98,10 @@ func findVipCfgByLevelFromMemory(level uint32, excludeID uint64) *entity.VipCfg 
 	return row
 }
 
-func listVipCfgFromMemory(levelName string) []*entity.VipCfg {
+func listVipCfgFromMemory(levelName string) []*liveentity.VipCfg {
 	keyword := strings.ToLower(strings.TrimSpace(levelName))
 	rows := getVipCfgSnapshot().allList
-	filtered := make([]*entity.VipCfg, 0, len(rows))
+	filtered := make([]*liveentity.VipCfg, 0, len(rows))
 	for _, row := range rows {
 		if row == nil {
 			continue
@@ -114,7 +114,7 @@ func listVipCfgFromMemory(levelName string) []*entity.VipCfg {
 	return filtered
 }
 
-func paginateVipCfgList(rows []*entity.VipCfg, pageIndex, pageSize int) ([]*entity.VipCfg, int) {
+func paginateVipCfgList(rows []*liveentity.VipCfg, pageIndex, pageSize int) ([]*liveentity.VipCfg, int) {
 	total := len(rows)
 	if pageIndex <= 0 {
 		pageIndex = 1
@@ -124,7 +124,7 @@ func paginateVipCfgList(rows []*entity.VipCfg, pageIndex, pageSize int) ([]*enti
 	}
 	start := (pageIndex - 1) * pageSize
 	if start >= total {
-		return []*entity.VipCfg{}, total
+		return []*liveentity.VipCfg{}, total
 	}
 	end := start + pageSize
 	if end > total {
@@ -140,7 +140,7 @@ func formatVipCfgTime(value time.Time) string {
 	return value.Format(vipCfgTimeLayout)
 }
 
-func toVipCfgListRes(row *entity.VipCfg) *vipcfgdto.VipCfgListRes {
+func toVipCfgListRes(row *liveentity.VipCfg) *vipcfgdto.VipCfgListRes {
 	if row == nil {
 		return nil
 	}
@@ -215,7 +215,7 @@ func queryVipCfgListFromMemory(req *vipcfgdto.VipCfgListReq) (int, []*vipcfgdto.
 	return total, list
 }
 
-func toAppVipCfgItem(row *entity.VipCfg) *vipcfgdto.AppVipCfgItem {
+func toAppVipCfgItem(row *liveentity.VipCfg) *vipcfgdto.AppVipCfgItem {
 	if row == nil {
 		return nil
 	}
@@ -228,12 +228,12 @@ func toAppVipCfgItem(row *entity.VipCfg) *vipcfgdto.AppVipCfgItem {
 	}
 }
 
-func buildAppVipPrivilegeList(row *entity.VipCfg) []*vipcfgdto.AppVipPrivilegeItem {
+func buildAppVipPrivilegeList(row *liveentity.VipCfg) []*vipcfgdto.AppVipPrivilegeItem {
 	if row == nil {
 		return []*vipcfgdto.AppVipPrivilegeItem{}
 	}
 	list := make([]*vipcfgdto.AppVipPrivilegeItem, 0, 3)
-	if row.AnimationSwitch == entity.VipCfgSwitchOn {
+	if row.AnimationSwitch == liveentity.VipCfgSwitchOn {
 		list = append(list, &vipcfgdto.AppVipPrivilegeItem{
 			PrivilegeType: vipcfgdto.AppVipPrivilegeTypeEntryEffect,
 			Icon:          upload.GetUrlByName(row.AnimationIcon),
@@ -242,7 +242,7 @@ func buildAppVipPrivilegeList(row *entity.VipCfg) []*vipcfgdto.AppVipPrivilegeIt
 			Animation:     upload.GetUrlByName(row.Animation),
 		})
 	}
-	if row.CommentEffectSwitch == entity.VipCfgSwitchOn {
+	if row.CommentEffectSwitch == liveentity.VipCfgSwitchOn {
 		list = append(list, &vipcfgdto.AppVipPrivilegeItem{
 			PrivilegeType: vipcfgdto.AppVipPrivilegeTypeCommentEffect,
 			Icon:          upload.GetUrlByName(row.CommentEffectIcon),
@@ -251,7 +251,7 @@ func buildAppVipPrivilegeList(row *entity.VipCfg) []*vipcfgdto.AppVipPrivilegeIt
 			Animation:     upload.GetUrlByName(row.CommentEffect),
 		})
 	}
-	if row.CustomerServiceSwitch == entity.VipCfgSwitchOn {
+	if row.CustomerServiceSwitch == liveentity.VipCfgSwitchOn {
 		list = append(list, &vipcfgdto.AppVipPrivilegeItem{
 			PrivilegeType: vipcfgdto.AppVipPrivilegeTypeCustomerService,
 			Icon:          upload.GetUrlByName(row.CustomerServiceIcon),

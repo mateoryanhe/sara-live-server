@@ -10,7 +10,7 @@ import (
 	"xr-game-server/core/push"
 	"xr-game-server/dao/messagedao"
 	"xr-game-server/dto/activitymessagedto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/message"
 	"xr-game-server/errercode"
 	"xr-game-server/module/upload"
 )

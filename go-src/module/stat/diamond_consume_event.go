@@ -9,7 +9,7 @@ import (
 	"xr-game-server/constants/currency"
 	"xr-game-server/core/event"
 	"xr-game-server/dao/statdao"
-	"xr-game-server/entity"
+	"xr-game-server/entity/stat"
 	"xr-game-server/gameevent"
 )
 

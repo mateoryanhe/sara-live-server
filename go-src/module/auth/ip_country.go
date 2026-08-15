@@ -3,7 +3,7 @@ package auth
 import (
 	"strings"
 
-	"xr-game-server/entity"
+	"xr-game-server/entity/user"
 	"xr-game-server/module/ipgeo"
 )
 

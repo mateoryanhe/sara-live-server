@@ -7,7 +7,7 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/gamebetdao"
 	"xr-game-server/dto/gamebetdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/game"
 )
 
 const appGameBetListPageSize = gamebetdao.AppGameBetListCachePageSize

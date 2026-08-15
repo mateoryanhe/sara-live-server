@@ -3,7 +3,7 @@ package statdao
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/core/snowflake"
-	"xr-game-server/entity"
+	"xr-game-server/entity/stat"
 )
 
 var sysSata *entity.SystemTotalStat

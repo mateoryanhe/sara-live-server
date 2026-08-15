@@ -7,7 +7,7 @@ import (
 
 	"xr-game-server/dao/resourcemetricdao"
 	"xr-game-server/dto/resourcemetricdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/sys"
 )
 
 const trendTimeLayout = "2006-01-02 15:04:05"

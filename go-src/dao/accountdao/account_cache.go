@@ -9,7 +9,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/phoneutil"
-	"xr-game-server/entity"
+	"xr-game-server/entity/user"
 )
 
 // PhoneOpenId 手机号登陆 open_id = 区号_手机号

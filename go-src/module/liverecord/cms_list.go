@@ -7,7 +7,7 @@ import (
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liverecorddto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 )
 
 func parseUint64Filter(val string) uint64 {

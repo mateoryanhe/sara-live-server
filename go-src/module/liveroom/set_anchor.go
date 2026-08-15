@@ -5,7 +5,7 @@ import (
 
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/accountdto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/user"
 	"xr-game-server/errercode"
 )
 

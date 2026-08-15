@@ -3,7 +3,7 @@ package agora
 import (
 	"sync/atomic"
 	"xr-game-server/dao/cfgdao"
-	"xr-game-server/entity"
+	"xr-game-server/entity/live"
 )
 
 const (
