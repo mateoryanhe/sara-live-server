@@ -54,14 +54,17 @@ func CreateBotAnchor(_ context.Context, req *botanchordto.CreateBotAnchorReq) (*
 
 	room := liveroom.EnsureAnchorRoom(account.ID, user.GuildId)
 	room.SetTitle(strings.TrimSpace(req.RoomTitle))
-	room.SetCategory(category)
-	room.SetPrivateInviteType(liveentity.DefaultPrivateInviteType(category))
-	room.SetTagId(req.TagId)
-	if req.CloudPlayerVideo != "" {
-		room.SetCloudPlayerVideo(strings.TrimSpace(req.CloudPlayerVideo))
+	cfg := liveroomdao.GetLiveRoomCfg(room.ID)
+	if cfg != nil {
+		cfg.SetCategory(category)
+		cfg.SetPrivateInviteType(liveentity.DefaultPrivateInviteType(category))
+		cfg.SetTagId(req.TagId)
+		if req.CloudPlayerVideo != "" {
+			cfg.SetCloudPlayerVideo(strings.TrimSpace(req.CloudPlayerVideo))
+		}
+		cfg.SetPushStream(req.PushStream)
+		cfg.SetIsTest(req.IsTest)
 	}
-	room.SetPushStream(req.PushStream)
-	room.SetIsTest(req.IsTest)
 	userinfodao.GetUserCumulativeStatByUserId(account.ID)
 	addBotAnchorId(account.ID)
 	addEnabledBotAnchorId(account.ID)
@@ -94,14 +97,17 @@ func UpdateBotAnchor(_ context.Context, req *botanchordto.UpdateBotAnchorReq) (*
 	}
 	room := liveroom.EnsureAnchorRoom(req.ID, user.GuildId)
 	room.SetTitle(strings.TrimSpace(req.RoomTitle))
-	room.SetCategory(category)
-	room.SetPrivateInviteType(liveentity.DefaultPrivateInviteType(category))
-	room.SetTagId(req.TagId)
-	if req.CloudPlayerVideo != nil {
-		room.SetCloudPlayerVideo(strings.TrimSpace(*req.CloudPlayerVideo))
+	cfg := liveroomdao.GetLiveRoomCfg(room.ID)
+	if cfg != nil {
+		cfg.SetCategory(category)
+		cfg.SetPrivateInviteType(liveentity.DefaultPrivateInviteType(category))
+		cfg.SetTagId(req.TagId)
+		if req.CloudPlayerVideo != nil {
+			cfg.SetCloudPlayerVideo(strings.TrimSpace(*req.CloudPlayerVideo))
+		}
+		cfg.SetPushStream(req.PushStream)
+		cfg.SetIsTest(req.IsTest)
 	}
-	room.SetPushStream(req.PushStream)
-	room.SetIsTest(req.IsTest)
 
 	return &botanchordto.UpdateBotAnchorRes{Success: true}, nil
 }

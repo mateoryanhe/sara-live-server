@@ -29,6 +29,7 @@ func initLiveRoomDao() {
 		}
 	}
 	PreloadLiveRoomIncomes(ids)
+	PreloadLiveRoomCfgs(ids)
 }
 
 // GetRoomFromDB 按 roomId 直查数据库(含下架直播间,不走缓存)
@@ -86,7 +87,8 @@ func ListActiveCloudPlayerRooms() []*entity.LiveRoom {
 		if room == nil || room.ID == 0 || room.LiveRecordId == 0 {
 			continue
 		}
-		if strings.TrimSpace(room.CloudPlayerId) == "" {
+		cfg := GetLiveRoomCfgFromCache(room.ID)
+		if cfg == nil || strings.TrimSpace(cfg.CloudPlayerId) == "" {
 			continue
 		}
 		rooms = append(rooms, room)
@@ -107,6 +109,7 @@ func FlushRoomCache(r *entity.LiveRoom) {
 	if r.Status != entity.LiveRoomStatusOnShelf {
 		roomCacheMgr.Remove(r.ID)
 		RemoveLiveRoomIncomeFromCache(r.ID)
+		RemoveLiveRoomCfgFromCache(r.ID)
 		return
 	}
 	roomCacheMgr.Set(r.ID, r)
@@ -119,6 +122,7 @@ func AddRoomToCache(r *entity.LiveRoom) {
 	}
 	roomCacheMgr.Set(r.ID, r)
 	AddLiveRoomIncomeToCache(r.ID)
+	AddLiveRoomCfgToCache(r.ID)
 }
 
 // RemoveRoomFromCache 从直播间缓存移除(停用机器人主播等场景)
@@ -128,6 +132,7 @@ func RemoveRoomFromCache(roomId uint64) {
 	}
 	roomCacheMgr.Remove(roomId)
 	RemoveLiveRoomIncomeFromCache(roomId)
+	RemoveLiveRoomCfgFromCache(roomId)
 }
 
 // ListRoomsByGuild 获取指定工会下的所有直播间(缓存,仅上架)

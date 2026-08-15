@@ -41,13 +41,14 @@ func ListOffShelfRooms(page, pageSize int, key string) (int, []*OffShelfRoomRow)
 		pageSize = 100
 	}
 
-	sql := `SELECT r.id, r.guild_id, r.title, r.cover, r.category,
+	sql := `SELECT r.id, r.guild_id, r.title, r.cover, IFNULL(c.category, 1) AS category,
                    r.ban, r.ban_apply_time, r.ban_reason, r.updated_at, r.created_at,
                    IFNULL(u.nickname, '') AS nickname,
                    IFNULL(u.avatar, '') AS avatar,
                    IFNULL(u.phone, '') AS phone,
                    IFNULL(u.user_type, 0) AS user_type
             FROM live_rooms r
+            LEFT JOIN live_room_cfgs c ON c.id = r.id
             LEFT JOIN user_infos u ON u.id = r.id
             WHERE r.status = ?`
 	param := []any{entity.LiveRoomStatusOffShelf}

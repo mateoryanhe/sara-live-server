@@ -36,19 +36,23 @@ func initCloudPlayerTokenRefresh() {
 
 func restoreCloudPlayerTokenRefreshTimers(ctx context.Context) {
 	for _, room := range liveroomdao.ListActiveCloudPlayerRooms() {
-		if room == nil || room.ID == 0 || strings.TrimSpace(room.CloudPlayerId) == "" {
+		if room == nil || room.ID == 0 {
 			continue
 		}
-		expireAt := resolveCloudPlayerTokenExpireAt(room)
-		ScheduleCloudPlayerTokenRefresh(room.ID, room.CloudPlayerId, expireAt)
+		cfg := liveroomdao.GetLiveRoomCfgFromCache(room.ID)
+		if cfg == nil || strings.TrimSpace(cfg.CloudPlayerId) == "" {
+			continue
+		}
+		expireAt := resolveCloudPlayerTokenExpireAt(room, cfg)
+		ScheduleCloudPlayerTokenRefresh(room.ID, cfg.CloudPlayerId, expireAt)
 		g.Log().Infof(ctx, "restore cloud player token timer anchorId=%d playerId=%s expireAt=%s",
-			room.ID, room.CloudPlayerId, expireAt.Format(time.RFC3339))
+			room.ID, cfg.CloudPlayerId, expireAt.Format(time.RFC3339))
 	}
 }
 
-func resolveCloudPlayerTokenExpireAt(room *entity.LiveRoom) time.Time {
-	if room != nil && room.CloudPlayerTokenExpireAt != nil && !room.CloudPlayerTokenExpireAt.IsZero() {
-		return *room.CloudPlayerTokenExpireAt
+func resolveCloudPlayerTokenExpireAt(room *entity.LiveRoom, cfg *entity.LiveRoomCfg) time.Time {
+	if cfg != nil && cfg.CloudPlayerTokenExpireAt != nil && !cfg.CloudPlayerTokenExpireAt.IsZero() {
+		return *cfg.CloudPlayerTokenExpireAt
 	}
 	return estimateCloudPlayerTokenExpireAt(room)
 }
@@ -117,8 +121,13 @@ func refreshCloudPlayerTokenForAnchor(ctx context.Context, anchorId uint64) {
 		CancelCloudPlayerTokenRefresh(anchorId)
 		return
 	}
+	cfg := liveroomdao.GetLiveRoomCfg(room.ID)
+	if cfg == nil {
+		CancelCloudPlayerTokenRefresh(anchorId)
+		return
+	}
 
-	playerId := strings.TrimSpace(room.CloudPlayerId)
+	playerId := strings.TrimSpace(cfg.CloudPlayerId)
 	if playerId == "" {
 		CancelCloudPlayerTokenRefresh(anchorId)
 		return
@@ -128,7 +137,7 @@ func refreshCloudPlayerTokenForAnchor(ctx context.Context, anchorId uint64) {
 	expireAt, err := updateBotAnchorCloudPlayerToken(ctx, anchorId, playerId)
 	if err == nil {
 		expireTime := time.Unix(expireAt, 0)
-		room.SetCloudPlayerTokenExpireAt(&expireTime)
+		cfg.SetCloudPlayerTokenExpireAt(&expireTime)
 		liveroomdao.FlushRoomCache(room)
 		ScheduleCloudPlayerTokenRefresh(anchorId, playerId, expireTime)
 		return
@@ -140,16 +149,16 @@ func refreshCloudPlayerTokenForAnchor(ctx context.Context, anchorId uint64) {
 
 	g.Log().Warningf(ctx, "cloud player missing, recreating anchorId=%d playerId=%s", anchorId, playerId)
 	unregisterCloudPlayerSequence(playerId)
-	newPlayerId, newExpireAt, createErr := StartBotAnchorCloudPlayer(ctx, anchorId, room.CloudPlayerVideo)
+	newPlayerId, newExpireAt, createErr := StartBotAnchorCloudPlayer(ctx, anchorId, cfg.CloudPlayerVideo)
 	if createErr != nil {
 		xrlog.ErrorWithErr(ctx, logSourceAgoraCloudPlayer,
 			fmt.Sprintf("recreate failed anchorId=%d oldPlayerId=%s", anchorId, playerId),
 			createErr)
 		return
 	}
-	room.SetCloudPlayerId(newPlayerId)
+	cfg.SetCloudPlayerId(newPlayerId)
 	newExpireTime := time.Unix(newExpireAt, 0)
-	room.SetCloudPlayerTokenExpireAt(&newExpireTime)
+	cfg.SetCloudPlayerTokenExpireAt(&newExpireTime)
 	liveroomdao.FlushRoomCache(room)
 	ScheduleCloudPlayerTokenRefresh(anchorId, newPlayerId, newExpireTime)
 	g.Log().Infof(ctx, "cloud player recreated anchorId=%d playerId=%s", anchorId, newPlayerId)

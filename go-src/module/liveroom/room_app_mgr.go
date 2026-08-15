@@ -25,21 +25,27 @@ func normalizeLiveRoomCategory(category uint8) uint8 {
 	return liveentity.LiveRoomCategoryHot
 }
 
-func applyRoomPricing(room *liveentity.LiveRoom, ticket, billing float64) {
-	if room.Ticket != ticket {
-		room.SetTicket(ticket)
+func applyRoomPricing(cfg *liveentity.LiveRoomCfg, ticket, billing float64) {
+	if cfg == nil {
+		return
 	}
-	if room.Billing != billing {
-		room.SetBilling(billing)
+	if cfg.Ticket != ticket {
+		cfg.SetTicket(ticket)
+	}
+	if cfg.Billing != billing {
+		cfg.SetBilling(billing)
 	}
 }
 
-func applyPrivateInviteType(room *liveentity.LiveRoom, privateInviteType uint8) {
-	if privateInviteType == 0 {
-		privateInviteType = liveentity.DefaultPrivateInviteType(room.Category)
+func applyPrivateInviteType(cfg *liveentity.LiveRoomCfg, privateInviteType uint8) {
+	if cfg == nil {
+		return
 	}
-	if room.PrivateInviteType != privateInviteType {
-		room.SetPrivateInviteType(privateInviteType)
+	if privateInviteType == 0 {
+		privateInviteType = liveentity.DefaultPrivateInviteType(cfg.Category)
+	}
+	if cfg.PrivateInviteType != privateInviteType {
+		cfg.SetPrivateInviteType(privateInviteType)
 	}
 }
 
@@ -81,6 +87,7 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 
 	// 同一主播仅允许一个直播间(roomId == anchorId);CMS预创建的空直播间允许App完善资料
 	if existing := liveroomdao.GetRoomById(anchorId); existing != nil {
+		cfg := liveroomdao.GetLiveRoomCfg(existing.ID)
 		if req.Title != "" && existing.Title != req.Title {
 			existing.SetTitle(req.Title)
 		}
@@ -90,14 +97,16 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 		if req.Notice != "" && existing.Notice != req.Notice {
 			existing.SetNotice(req.Notice)
 		}
-		if req.Category > 0 && existing.Category != category {
-			existing.SetCategory(category)
+		if cfg != nil {
+			if req.Category > 0 && cfg.Category != category {
+				cfg.SetCategory(category)
+			}
+			if cfg.TagId != req.TagId {
+				cfg.SetTagId(req.TagId)
+			}
+			applyRoomPricing(cfg, req.Ticket, req.Billing)
+			applyPrivateInviteType(cfg, req.PrivateInviteType)
 		}
-		if existing.TagId != req.TagId {
-			existing.SetTagId(req.TagId)
-		}
-		applyRoomPricing(existing, req.Ticket, req.Billing)
-		applyPrivateInviteType(existing, req.PrivateInviteType)
 		if err := applyLiveRoomGameRecommends(existing.ID, category, req.GameCodes); err != nil {
 			return nil, err
 		}
@@ -116,13 +125,15 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 		req.Title,
 		req.Notice,
 	)
-	room.SetCategory(category)
-	room.SetTagId(req.TagId)
-	room.SetTicket(req.Ticket)
-	room.SetBilling(req.Billing)
-	applyPrivateInviteType(room, req.PrivateInviteType)
-
 	liveroomdao.AddRoomToCache(room)
+	cfg := liveroomdao.GetLiveRoomCfg(room.ID)
+	if cfg != nil {
+		cfg.SetCategory(category)
+		cfg.SetTagId(req.TagId)
+		cfg.SetTicket(req.Ticket)
+		cfg.SetBilling(req.Billing)
+		applyPrivateInviteType(cfg, req.PrivateInviteType)
+	}
 	if err := applyLiveRoomGameRecommends(room.ID, category, req.GameCodes); err != nil {
 		return nil, err
 	}
@@ -214,17 +225,17 @@ func calcAge(birthday *time.Time) int {
 	return age
 }
 
-func allowShowCallIcon(room *liveentity.LiveRoom, userId uint64) bool {
-	if room == nil || room.Category != liveentity.LiveRoomCategoryHot {
+func allowShowCallIcon(room *liveentity.LiveRoom, cfg *liveentity.LiveRoomCfg, userId uint64) bool {
+	if room == nil || cfg == nil || cfg.Category != liveentity.LiveRoomCategoryHot {
 		return false
 	}
 	if userId == 0 || userId == room.ID {
 		return false
 	}
 
-	inviteType := room.PrivateInviteType
+	inviteType := cfg.PrivateInviteType
 	if inviteType == 0 {
-		inviteType = liveentity.DefaultPrivateInviteType(room.Category)
+		inviteType = liveentity.DefaultPrivateInviteType(cfg.Category)
 	}
 	switch inviteType {
 	case liveentity.LiveRoomPrivateInviteAll:
@@ -246,6 +257,10 @@ func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto
 	if room == nil {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
+	cfg := liveroomdao.GetLiveRoomCfg(room.ID)
+	if cfg == nil {
+		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
+	}
 
 	status := userstatus.LiveRoomStatusClosed
 	if room.LiveRecordId > 0 {
@@ -259,23 +274,23 @@ func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto
 		Cover:             upload.GetUrlByName(room.Cover),
 		Notice:            room.Notice,
 		Status:            status,
-		Category:          room.Category,
-		TagId:             strconv.FormatUint(room.TagId, 10),
-		TagName:           getRoomTagName(room.TagId),
-		Ticket:            room.Ticket,
-		Billing:           room.Billing,
-		PrivateInviteType: room.PrivateInviteType,
-		AllowCallIcon:     allowShowCallIcon(room, userId),
+		Category:          cfg.Category,
+		TagId:             strconv.FormatUint(cfg.TagId, 10),
+		TagName:           getRoomTagName(cfg.TagId),
+		Ticket:            cfg.Ticket,
+		Billing:           cfg.Billing,
+		PrivateInviteType: cfg.PrivateInviteType,
+		AllowCallIcon:     allowShowCallIcon(room, cfg, userId),
 		CreateAt:          room.CreatedAt.Unix(),
 		OnlineCount:       countAudienceInRoom(room.ID),
 	}
-	res.IsBotAnchor, res.CloudPlayerVideo = resolveBotAnchorRoomInfo(room.ID, room.CloudPlayerVideo)
-	res.IsTest = room.IsTest
+	res.IsBotAnchor, res.CloudPlayerVideo = resolveBotAnchorRoomInfo(room.ID, cfg.CloudPlayerVideo)
+	res.IsTest = cfg.IsTest
 	if u := userinfodao.GetUserInfoByUserId(room.ID); u != nil {
 		res.UserType = u.UserType
 	}
 	//判断一下房间类型
-	if room.Category == liveentity.LiveRoomCategoryPrivate {
+	if cfg.Category == liveentity.LiveRoomCategoryPrivate {
 		clearFreeTime(userId, room.ID)
 		//私密房免费时长
 		pay := liveroomdao.GetLiveRoomBillingPay(userId, req.RoomId)

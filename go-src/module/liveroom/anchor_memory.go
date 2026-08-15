@@ -127,10 +127,12 @@ func fillAnchorRoomFields(item *accountdto.AnchorListItem, room *liveentity.Live
 	}
 	item.RoomTitle = room.Title
 	item.RoomId = room.ID
-	item.Category = room.Category
-	item.PrivateInviteType = room.PrivateInviteType
-	item.Ticket = room.Ticket
-	item.Billing = room.Billing
+	if cfg := liveroomdao.GetLiveRoomCfgFromCache(room.ID); cfg != nil {
+		item.Category = cfg.Category
+		item.PrivateInviteType = cfg.PrivateInviteType
+		item.Ticket = cfg.Ticket
+		item.Billing = cfg.Billing
+	}
 	// 主播列表收益只读永久缓存(生涯累计),不查库
 	if income := liveroomdao.GetLiveRoomIncomeTotalFromCache(room.ID); income != nil {
 		item.TotalIncome = income.TotalIncome

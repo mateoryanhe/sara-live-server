@@ -20,7 +20,11 @@ const (
 
 // ensureCanJoinPrivateRoom 私密直播间仅允许1名观众(不含主播);已在房间内可重复进入
 func ensureCanJoinPrivateRoom(userId uint64, room *entity.LiveRoom) error {
-	if room == nil || room.Category != entity.LiveRoomCategoryPrivate {
+	if room == nil {
+		return nil
+	}
+	cfg := liveroomdao.GetLiveRoomCfg(room.ID)
+	if cfg == nil || cfg.Category != entity.LiveRoomCategoryPrivate {
 		return nil
 	}
 	if userId == room.ID {
@@ -37,13 +41,17 @@ func ensureCanJoinPrivateRoom(userId uint64, room *entity.LiveRoom) error {
 
 // chargePrivateRoomTicketIfNeeded 私密直播间进房扣门票,24小时内同一用户同一房间只扣一次
 func chargePrivateRoomTicketIfNeeded(userId uint64, room *entity.LiveRoom, now time.Time) (float64, error) {
-	if room == nil || room.Category != entity.LiveRoomCategoryPrivate {
+	if room == nil {
+		return 0, nil
+	}
+	cfg := liveroomdao.GetLiveRoomCfg(room.ID)
+	if cfg == nil || cfg.Category != entity.LiveRoomCategoryPrivate {
 		return 0, nil
 	}
 	if userId == room.ID {
 		return 0, nil
 	}
-	ticketPrice := room.Ticket
+	ticketPrice := cfg.Ticket
 	if ticketPrice <= 0 {
 		return 0, nil
 	}
@@ -76,13 +84,17 @@ func chargePrivateRoomTicketIfNeeded(userId uint64, room *entity.LiveRoom, now t
 
 // chargePrivateRoomBillingIfNeeded 私密直播间按分钟扣观众钻石(每场直播独立计费)
 func chargePrivateRoomBillingIfNeeded(userId uint64, room *entity.LiveRoom) (float64, error) {
-	if room == nil || room.Category != entity.LiveRoomCategoryPrivate {
+	if room == nil {
+		return 0, nil
+	}
+	cfg := liveroomdao.GetLiveRoomCfg(room.ID)
+	if cfg == nil || cfg.Category != entity.LiveRoomCategoryPrivate {
 		return 0, nil
 	}
 	if userId == room.ID || room.LiveRecordId == 0 {
 		return 0, nil
 	}
-	billingPrice := room.Billing / 60
+	billingPrice := cfg.Billing / 60
 	if billingPrice <= 0 {
 		return 0, nil
 	}
@@ -99,10 +111,10 @@ func chargePrivateRoomBillingIfNeeded(userId uint64, room *entity.LiveRoom) (flo
 		if pay.LastPaidAt != nil && now.Before(*pay.LastPaidAt) {
 			return 0, nil
 		}
-		if _, err := wallet.DiamondSub(userId, room.Billing, currency.ReasonPrivateRoomBilling); err != nil {
+		if _, err := wallet.DiamondSub(userId, cfg.Billing, currency.ReasonPrivateRoomBilling); err != nil {
 			return 0, err
 		}
-		recordPrivateRoomBillingRevenue(room, userId, room.Billing)
+		recordPrivateRoomBillingRevenue(room, userId, cfg.Billing)
 		pay.SetLastPaidAt(now.Add(time.Minute))
 		return 0, nil
 
@@ -116,7 +128,11 @@ func chargePrivateRoomBillingIfNeeded(userId uint64, room *entity.LiveRoom) (flo
 func clearFreeTime(userId uint64, roomId uint64) {
 	room := liveroomdao.GetRoomById(roomId)
 	//开始全部计费清0
-	if room == nil || room.Category != entity.LiveRoomCategoryPrivate {
+	if room == nil {
+		return
+	}
+	cfg := liveroomdao.GetLiveRoomCfg(room.ID)
+	if cfg == nil || cfg.Category != entity.LiveRoomCategoryPrivate {
 		return
 	}
 	if userId == room.ID {
@@ -144,7 +160,11 @@ func clearFreeTime(userId uint64, roomId uint64) {
 func joinChargePrivateRoom(userId uint64, roomId uint64) error {
 	room := liveroomdao.GetRoomById(roomId)
 	//开始全部计费清0
-	if room == nil || room.Category != entity.LiveRoomCategoryPrivate {
+	if room == nil {
+		return nil
+	}
+	cfg := liveroomdao.GetLiveRoomCfg(room.ID)
+	if cfg == nil || cfg.Category != entity.LiveRoomCategoryPrivate {
 		return nil
 	}
 	if userId == room.ID {
@@ -159,10 +179,10 @@ func joinChargePrivateRoom(userId uint64, roomId uint64) error {
 	if pay.FreeTime > 0 {
 		return nil
 	}
-	if _, err := wallet.DiamondSub(userId, room.Billing, currency.ReasonPrivateRoomBilling); err != nil {
+	if _, err := wallet.DiamondSub(userId, cfg.Billing, currency.ReasonPrivateRoomBilling); err != nil {
 		return err
 	}
-	recordPrivateRoomBillingRevenue(room, userId, room.Billing)
+	recordPrivateRoomBillingRevenue(room, userId, cfg.Billing)
 	pay.SetLastPaidAt(now.Add(time.Minute))
 	return nil
 }

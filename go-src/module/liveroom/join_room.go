@@ -92,7 +92,8 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 		SysTime:        now.UnixMilli(),
 	}
 	//判断一下房间类型
-	if room.Category == entity.LiveRoomCategoryPrivate {
+	cfg := liveroomdao.GetLiveRoomCfg(room.ID)
+	if cfg != nil && cfg.Category == entity.LiveRoomCategoryPrivate {
 		//结算上次免费时长
 		clearFreeTime(userId, room.ID)
 		//私密房免费时长

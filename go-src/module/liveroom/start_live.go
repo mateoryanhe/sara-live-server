@@ -38,17 +38,18 @@ func StartLiveForBotAnchor(ctx context.Context, anchorId, guildId uint64) error 
 	if err != nil {
 		return err
 	}
-	if !room.PushStream {
+	cfg := liveroomdao.GetLiveRoomCfg(room.ID)
+	if cfg == nil || !cfg.PushStream {
 		return nil
 	}
-	playerId, tokenExpireAt, err := agora.StartBotAnchorCloudPlayer(ctx, anchorId, room.CloudPlayerVideo)
+	playerId, tokenExpireAt, err := agora.StartBotAnchorCloudPlayer(ctx, anchorId, cfg.CloudPlayerVideo)
 	if err != nil {
 		stopLive(anchorId)
 		return err
 	}
-	room.SetCloudPlayerId(playerId)
+	cfg.SetCloudPlayerId(playerId)
 	tokenExpireTime := time.Unix(tokenExpireAt, 0)
-	room.SetCloudPlayerTokenExpireAt(&tokenExpireTime)
+	cfg.SetCloudPlayerTokenExpireAt(&tokenExpireTime)
 	liveroomdao.FlushRoomCache(room)
 	agora.ScheduleCloudPlayerTokenRefresh(anchorId, playerId, tokenExpireTime)
 	return nil

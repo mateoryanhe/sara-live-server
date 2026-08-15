@@ -141,22 +141,27 @@ func toLiveRoomListItem(room *liveentity.LiveRoom, userId uint64) *liveroomdto.L
 	if room.LiveRecordId > 0 {
 		status = userstatus.LiveRoomStatusLive
 	}
+	cfg := liveroomdao.GetLiveRoomCfg(room.ID)
 	item := &liveroomdto.LiveRoomListItem{
-		RoomId:        strconv.FormatUint(room.ID, 10),
-		GuildId:       strconv.FormatUint(room.GuildId, 10),
-		Title:         room.Title,
-		Cover:         room.Cover,
-		Notice:        room.Notice,
-		Status:        status,
-		Category:      room.Category,
-		Ticket:        room.Ticket,
-		Billing:       room.Billing,
-		AllowCallIcon: allowShowCallIcon(room, userId),
-		CreateAt:      room.CreatedAt.Unix(),
+		RoomId:   strconv.FormatUint(room.ID, 10),
+		GuildId:  strconv.FormatUint(room.GuildId, 10),
+		Title:    room.Title,
+		Cover:    room.Cover,
+		Notice:   room.Notice,
+		Status:   status,
+		CreateAt: room.CreatedAt.Unix(),
 	}
-	if room.TagId > 0 {
-		item.TagId = strconv.FormatUint(room.TagId, 10)
-		item.TagName = getRoomTagName(room.TagId)
+	if cfg != nil {
+		item.Category = cfg.Category
+		item.Ticket = cfg.Ticket
+		item.Billing = cfg.Billing
+		item.AllowCallIcon = allowShowCallIcon(room, cfg, userId)
+		if cfg.TagId > 0 {
+			item.TagId = strconv.FormatUint(cfg.TagId, 10)
+			item.TagName = getRoomTagName(cfg.TagId)
+		}
+		item.IsBotAnchor, item.CloudPlayerVideo = resolveBotAnchorRoomInfo(room.ID, cfg.CloudPlayerVideo)
+		item.IsTest = cfg.IsTest
 	}
 	if item.Cover != "" {
 		item.Cover = upload.GetUrlByName(room.Cover)
@@ -167,8 +172,6 @@ func toLiveRoomListItem(room *liveentity.LiveRoom, userId uint64) *liveroomdto.L
 		item.AnchorAvatar = upload.ResolveAvatarUrlForUser(room.ID, u.Avatar)
 		item.UserType = u.UserType
 	}
-	item.IsBotAnchor, item.CloudPlayerVideo = resolveBotAnchorRoomInfo(room.ID, room.CloudPlayerVideo)
-	item.IsTest = room.IsTest
 	item.OnlineCount = countAudienceInRoom(room.ID)
 
 	if userId > 0 {
@@ -248,8 +251,11 @@ func filterRoomsByQuery(rooms []*liveentity.LiveRoom, tagId uint64, title, notic
 		if room == nil {
 			continue
 		}
-		if tagId > 0 && room.TagId != tagId {
-			continue
+		if tagId > 0 {
+			cfg := liveroomdao.GetLiveRoomCfgFromCache(room.ID)
+			if cfg == nil || cfg.TagId != tagId {
+				continue
+			}
 		}
 		if titleKey != "" && !strings.Contains(strings.ToLower(room.Title), titleKey) {
 			continue

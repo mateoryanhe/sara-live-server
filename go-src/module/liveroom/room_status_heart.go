@@ -82,7 +82,7 @@ func flushAnchorId(room *entity.LiveRoom) {
 	now := time.Now()
 	room.SetHeartTime(&now)
 	period := CommonPeriod
-	if room.Category == entity.LiveRoomCategoryPrivate {
+	if cfg := liveroomdao.GetLiveRoomCfg(room.ID); cfg != nil && cfg.Category == entity.LiveRoomCategoryPrivate {
 		period = PrivatePeriod
 	}
 	//记录本次直播

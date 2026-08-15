@@ -45,10 +45,14 @@ func LiveRoomCall(ctx context.Context, req *calldto.LiveRoomCallReq) (*calldto.L
 	if room.LiveRecordId == 0 {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotLive)
 	}
+	cfg := liveroomdao.GetLiveRoomCfg(room.ID)
+	if cfg == nil {
+		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
+	}
 
-	requiredDiamond := room.Ticket
-	if room.Billing > 0 {
-		requiredDiamond += room.Billing
+	requiredDiamond := cfg.Ticket
+	if cfg.Billing > 0 {
+		requiredDiamond += cfg.Billing
 	}
 	if requiredDiamond > 0 {
 		if err := wallet.CanPayWithGoldExchange(callerId, requiredDiamond); err != nil {
@@ -62,8 +66,8 @@ func LiveRoomCall(ctx context.Context, req *calldto.LiveRoomCallReq) (*calldto.L
 		entity.CallOrderTypeVideo,
 		entity.CallOrderSourceLiveRoom,
 		strconv.FormatUint(room.LiveRecordId, 10),
-		room.Ticket,
-		room.Billing,
+		cfg.Ticket,
+		cfg.Billing,
 	)
 	calldao.AddOrderToCache(order)
 	trackActiveCallOrder(order.ID)

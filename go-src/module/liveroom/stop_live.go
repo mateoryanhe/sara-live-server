@@ -32,13 +32,14 @@ func StopLiveForBotAnchor(ctx context.Context, anchorId uint64) error {
 	if room == nil || room.LiveRecordId == 0 {
 		return errercode.CreateCode(errercode.LiveRoomNotLive)
 	}
-	if room.CloudPlayerId != "" {
+	cfg := liveroomdao.GetLiveRoomCfg(room.ID)
+	if cfg != nil && cfg.CloudPlayerId != "" {
 		agora.CancelCloudPlayerTokenRefresh(anchorId)
-		if err := agora.StopBotAnchorCloudPlayer(ctx, room.CloudPlayerId); err != nil {
+		if err := agora.StopBotAnchorCloudPlayer(ctx, cfg.CloudPlayerId); err != nil {
 			return err
 		}
-		room.SetCloudPlayerId("")
-		room.SetCloudPlayerTokenExpireAt(nil)
+		cfg.SetCloudPlayerId("")
+		cfg.SetCloudPlayerTokenExpireAt(nil)
 	}
 	stopLive(anchorId)
 	liveroomdao.FlushRoomCache(room)

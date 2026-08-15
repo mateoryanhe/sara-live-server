@@ -76,11 +76,15 @@ func SendPrivateRoomChat(ctx context.Context, req *liveroomdto.SendPrivateRoomCh
 }
 
 func resolvePrivateRoomAnchorId(userId, targetId uint64) uint64 {
-	if room := liveroomdao.GetRoomById(userId); room != nil && room.Category == entity.LiveRoomCategoryPrivate {
-		return userId
+	if room := liveroomdao.GetRoomById(userId); room != nil {
+		if cfg := liveroomdao.GetLiveRoomCfg(room.ID); cfg != nil && cfg.Category == entity.LiveRoomCategoryPrivate {
+			return userId
+		}
 	}
-	if room := liveroomdao.GetRoomById(targetId); room != nil && room.Category == entity.LiveRoomCategoryPrivate {
-		return targetId
+	if room := liveroomdao.GetRoomById(targetId); room != nil {
+		if cfg := liveroomdao.GetLiveRoomCfg(room.ID); cfg != nil && cfg.Category == entity.LiveRoomCategoryPrivate {
+			return targetId
+		}
 	}
 	return 0
 }

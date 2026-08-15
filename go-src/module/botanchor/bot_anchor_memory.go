@@ -58,6 +58,7 @@ func reloadBotAnchorMemory() {
 func preloadBotAnchorCache(userId uint64) {
 	userinfodao.GetUserInfoByUserId(userId)
 	liveroomdao.GetRoomByAnchor(userId)
+	liveroomdao.AddLiveRoomCfgToCache(userId)
 }
 
 func addBotAnchorId(userId uint64) {
@@ -194,15 +195,17 @@ func buildBotAnchorListItem(userId uint64) *botanchordto.BotAnchorListItem {
 	}
 	if room != nil {
 		item.RoomTitle = room.Title
-		item.Category = room.Category
-		item.TagId = room.TagId
-		item.CloudPlayerVideoFile = room.CloudPlayerVideo
-		item.PushStream = room.PushStream
-		item.IsTest = room.IsTest
 		if room.LiveRecordId > 0 {
 			item.LiveStatus = 1
 		}
-		if tag := liveroom.GetRoomTagFromMemoryById(room.TagId); tag != nil {
+	}
+	if cfg := liveroomdao.GetLiveRoomCfgFromCache(userId); cfg != nil {
+		item.Category = cfg.Category
+		item.TagId = cfg.TagId
+		item.CloudPlayerVideoFile = cfg.CloudPlayerVideo
+		item.PushStream = cfg.PushStream
+		item.IsTest = cfg.IsTest
+		if tag := liveroom.GetRoomTagFromMemoryById(cfg.TagId); tag != nil {
 			item.TagName = tag.Name
 		}
 	}
