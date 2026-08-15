@@ -10,7 +10,7 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/cache"
-	"xr-game-server/entity"
+	"xr-game-server/entity/shortvideo"
 )
 
 const (

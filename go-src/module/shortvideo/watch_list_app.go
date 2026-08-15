@@ -5,7 +5,7 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/shortvideodao"
 	"xr-game-server/dto/shortvideodto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/shortvideo"
 	"xr-game-server/errercode"
 )
 

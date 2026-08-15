@@ -11,7 +11,7 @@ import (
 	"xr-game-server/dao/shortvideodao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/shortvideodto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/shortvideo"
 	"xr-game-server/errercode"
 	"xr-game-server/module/upload"
 )

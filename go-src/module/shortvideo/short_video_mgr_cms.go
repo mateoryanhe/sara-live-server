@@ -9,7 +9,7 @@ import (
 	"xr-game-server/core/snowflake"
 	"xr-game-server/dao/shortvideodao"
 	"xr-game-server/dto/shortvideodto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/shortvideo"
 	"xr-game-server/errercode"
 	"xr-game-server/module/upload"
 )

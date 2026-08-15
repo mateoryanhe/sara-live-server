@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"xr-game-server/dao/shortvideodao"
 	"xr-game-server/dto/shortvideodto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/shortvideo"
 )
 
 type categorySnapshot struct {

@@ -8,6 +8,7 @@ import (
 	"xr-game-server/dao/shortvideodao"
 	"xr-game-server/dto/shortvideodto"
 	"xr-game-server/entity"
+	sventity "xr-game-server/entity/shortvideo"
 )
 
 // 配置短视频大小,计费等
@@ -16,7 +17,7 @@ const (
 	defaultMaxCoverFileSize           uint32 = 5
 	defaultMaxDuration                uint32 = 60
 	defaultFreeWatchSeconds           uint32 = 8
-	defaultEntryEnabled               uint8  = entity.ShortVideoCfgEntryEnabled
+	defaultEntryEnabled               uint8  = sventity.ShortVideoCfgEntryEnabled
 	defaultAnchorDailyUploadLimit     uint32 = 100
 	defaultNormalUserDailyUploadLimit uint32 = 1
 )
@@ -49,7 +50,7 @@ func GetShortVideoCfg(_ context.Context, _ *shortvideodto.GetShortVideoCfgReq) (
 
 func SaveShortVideoCfg(_ context.Context, req *shortvideodto.SaveShortVideoCfgReq) (*shortvideodto.SaveShortVideoCfgRes, error) {
 	existing := shortvideodao.Get()
-	row := &entity.ShortVideoCfg{
+	row := &sventity.ShortVideoCfg{
 		MaxFileSize:                req.MaxFileSize,
 		MaxCoverFileSize:           req.MaxCoverFileSize,
 		MaxDuration:                req.MaxDuration,
@@ -90,7 +91,7 @@ func GetAppShortVideoCfg(_ context.Context, _ *shortvideodto.AppShortVideoCfgReq
 	}, nil
 }
 
-func toShortVideoCfgItem(cfg *entity.ShortVideoCfg) *shortvideodto.ShortVideoCfgItem {
+func toShortVideoCfgItem(cfg *sventity.ShortVideoCfg) *shortvideodto.ShortVideoCfgItem {
 	if cfg == nil {
 		return nil
 	}

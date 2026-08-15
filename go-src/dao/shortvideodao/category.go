@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"xr-game-server/core/str"
 	"xr-game-server/dto/shortvideodto"
-	"xr-game-server/entity"
+	"xr-game-server/entity/shortvideo"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"

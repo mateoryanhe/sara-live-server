@@ -1,6 +1,9 @@
 package entity
 
-import "xr-game-server/core/migrate"
+import (
+	"xr-game-server/core/migrate"
+	sventity "xr-game-server/entity/shortvideo"
+)
 
 func Init() {
 	initAccount()
@@ -47,11 +50,7 @@ func Init() {
 	initLiveRevenueLog()
 	InitLiveGift()
 	initHomeBanner()
-	initShortVideo()
-	initShortVideoStat()
-	initShortVideoCfg()
-	initShortVideoCategory()
-	initShortVideoWatch()
+	sventity.Init()
 	initLiveFollow()
 	initRechargeCfg()
 	initRechargeOrder()
