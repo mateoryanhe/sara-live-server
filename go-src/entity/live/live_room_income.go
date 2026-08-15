@@ -48,6 +48,69 @@ func (a *LiveRoomIncomeAmounts) clearAmounts() {
 	a.TotalVideoCallBillingIncome = 0
 }
 
+// IsZero 是否全部为0
+func (a *LiveRoomIncomeAmounts) IsZero() bool {
+	if a == nil {
+		return true
+	}
+	return a.TotalIncome == 0 &&
+		a.TotalGiftIncome == 0 &&
+		a.TotalPaidDanmakuIncome == 0 &&
+		a.TotalPrivateRoomTicketIncome == 0 &&
+		a.TotalPrivateRoomWatchIncome == 0 &&
+		a.TotalVideoCallIncome == 0 &&
+		a.TotalVideoCallTicketIncome == 0 &&
+		a.TotalVideoCallBillingIncome == 0
+}
+
+// addIncomeAmountsLocked 在已持锁前提下累加各收益字段
+func addIncomeAmountsLocked(tb db.TbName, id uint64, dst *LiveRoomIncomeAmounts, src *LiveRoomIncomeAmounts) {
+	if dst == nil || src == nil || src.IsZero() {
+		return
+	}
+	if src.TotalIncome != 0 {
+		addIncomeAmountLocked(tb, LiveRoomIncomeTotalIncome, id, &dst.TotalIncome, src.TotalIncome)
+	}
+	if src.TotalGiftIncome > 0 {
+		addIncomeAmountLocked(tb, LiveRoomIncomeTotalGiftIncome, id, &dst.TotalGiftIncome, src.TotalGiftIncome)
+	}
+	if src.TotalPaidDanmakuIncome > 0 {
+		addIncomeAmountLocked(tb, LiveRoomIncomeTotalPaidDanmakuIncome, id, &dst.TotalPaidDanmakuIncome, src.TotalPaidDanmakuIncome)
+	}
+	if src.TotalPrivateRoomTicketIncome > 0 {
+		addIncomeAmountLocked(tb, LiveRoomIncomeTotalPrivateRoomTicketIncome, id, &dst.TotalPrivateRoomTicketIncome, src.TotalPrivateRoomTicketIncome)
+	}
+	if src.TotalPrivateRoomWatchIncome > 0 {
+		addIncomeAmountLocked(tb, LiveRoomIncomeTotalPrivateRoomWatchIncome, id, &dst.TotalPrivateRoomWatchIncome, src.TotalPrivateRoomWatchIncome)
+	}
+	if src.TotalVideoCallIncome != 0 {
+		addIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallIncome, id, &dst.TotalVideoCallIncome, src.TotalVideoCallIncome)
+	}
+	if src.TotalVideoCallTicketIncome != 0 {
+		addIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallTicketIncome, id, &dst.TotalVideoCallTicketIncome, src.TotalVideoCallTicketIncome)
+	}
+	if src.TotalVideoCallBillingIncome != 0 {
+		addIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallBillingIncome, id, &dst.TotalVideoCallBillingIncome, src.TotalVideoCallBillingIncome)
+	}
+}
+
+// clearIncomeAmountsLocked 在已持锁前提下清零并写库
+func clearIncomeAmountsLocked(tb db.TbName, id uint64, a *LiveRoomIncomeAmounts, updatedAt *time.Time) {
+	if a == nil {
+		return
+	}
+	a.clearAmounts()
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalIncome, id, 0)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalGiftIncome, id, 0)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalPaidDanmakuIncome, id, 0)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalPrivateRoomTicketIncome, id, 0)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalPrivateRoomWatchIncome, id, 0)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallIncome, id, 0)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallTicketIncome, id, 0)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallBillingIncome, id, 0)
+	touchIncomeUpdatedAt(tb, id, updatedAt)
+}
+
 func addIncomeAmount(tb db.TbName, col db.TbCol, id uint64, cur *float64, v float64, skipNonPositive bool, updatedAt *time.Time) {
 	if skipNonPositive && v <= 0 {
 		return
@@ -125,6 +188,7 @@ func regLiveRoomIncomeCols(tb db.TbName) {
 
 func initLiveRoomIncome() {
 	initLiveRoomIncomeUnsettled()
+	initLiveRoomIncomeUnsettledArchive()
 	initLiveRoomIncomeSettled()
 	initLiveRoomIncomeTotal()
 }

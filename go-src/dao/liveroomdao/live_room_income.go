@@ -173,3 +173,32 @@ func ListLiveRoomIncomeTotalFromDB(roomIds []uint64) map[uint64]*entity.LiveRoom
 	}
 	return ret
 }
+
+// getLiveRoomIncomeUnsettledForArchive 下架归档用:优先缓存,否则直查DB(不新建)
+func getLiveRoomIncomeUnsettledForArchive(roomId uint64) *entity.LiveRoomIncomeUnsettled {
+	if roomId == 0 {
+		return nil
+	}
+	if incomeUnsettledCache.Contains(roomId) {
+		return incomeUnsettledCache.Get(roomId)
+	}
+	var row entity.LiveRoomIncomeUnsettled
+	err := g.Model(string(entity.TbLiveRoomIncomeUnsettled)).Unscoped().WherePri(roomId).Scan(&row)
+	if err != nil || row.ID == 0 {
+		return nil
+	}
+	return &row
+}
+
+// ArchiveAndClearUnsettledIncome 下架时:新建一条归档记录并清零未结算表
+func ArchiveAndClearUnsettledIncome(roomId, guildId uint64) {
+	unsettled := getLiveRoomIncomeUnsettledForArchive(roomId)
+	if unsettled == nil || unsettled.IsZero() {
+		return
+	}
+	snap := unsettled.SnapshotAndClear()
+	if snap.IsZero() {
+		return
+	}
+	_ = entity.NewLiveRoomIncomeUnsettledArchive(roomId, guildId, &snap)
+}

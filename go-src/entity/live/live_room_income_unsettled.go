@@ -75,21 +75,34 @@ func (r *LiveRoomIncomeUnsettled) AddPrivateRoomWatchEarn(v float64) {
 	addIncomeEarn(TbLiveRoomIncomeUnsettled, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalPrivateRoomWatchIncome, &r.TotalPrivateRoomWatchIncome)
 }
 
+// AddAmounts 累加一笔金额到未结算表(一次加锁)
+func (r *LiveRoomIncomeUnsettled) AddAmounts(a *LiveRoomIncomeAmounts) {
+	if a == nil || a.IsZero() {
+		return
+	}
+	key := liveRoomIncomeLockKey(TbLiveRoomIncomeUnsettled, r.ID)
+	gmlock.Lock(key)
+	defer gmlock.Unlock(key)
+	addIncomeAmountsLocked(TbLiveRoomIncomeUnsettled, r.ID, &r.LiveRoomIncomeAmounts, a)
+	touchIncomeUpdatedAt(TbLiveRoomIncomeUnsettled, r.ID, &r.UpdatedAt)
+}
+
+// SnapshotAndClear 取出当前未结算金额并清零(一次加锁,用于下架归档)
+func (r *LiveRoomIncomeUnsettled) SnapshotAndClear() LiveRoomIncomeAmounts {
+	key := liveRoomIncomeLockKey(TbLiveRoomIncomeUnsettled, r.ID)
+	gmlock.Lock(key)
+	defer gmlock.Unlock(key)
+	snap := r.LiveRoomIncomeAmounts
+	clearIncomeAmountsLocked(TbLiveRoomIncomeUnsettled, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt)
+	return snap
+}
+
 // Clear 结算后清零未结算收益
 func (r *LiveRoomIncomeUnsettled) Clear() {
 	key := liveRoomIncomeLockKey(TbLiveRoomIncomeUnsettled, r.ID)
 	gmlock.Lock(key)
 	defer gmlock.Unlock(key)
-	r.clearAmounts()
-	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettled, LiveRoomIncomeTotalIncome, r.ID, 0)
-	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettled, LiveRoomIncomeTotalGiftIncome, r.ID, 0)
-	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettled, LiveRoomIncomeTotalPaidDanmakuIncome, r.ID, 0)
-	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettled, LiveRoomIncomeTotalPrivateRoomTicketIncome, r.ID, 0)
-	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettled, LiveRoomIncomeTotalPrivateRoomWatchIncome, r.ID, 0)
-	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettled, LiveRoomIncomeTotalVideoCallIncome, r.ID, 0)
-	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettled, LiveRoomIncomeTotalVideoCallTicketIncome, r.ID, 0)
-	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettled, LiveRoomIncomeTotalVideoCallBillingIncome, r.ID, 0)
-	touchIncomeUpdatedAt(TbLiveRoomIncomeUnsettled, r.ID, &r.UpdatedAt)
+	clearIncomeAmountsLocked(TbLiveRoomIncomeUnsettled, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt)
 }
 
 func initLiveRoomIncomeUnsettled() {

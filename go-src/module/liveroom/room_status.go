@@ -96,6 +96,8 @@ func doOffShelfLiveRoom(ctx context.Context, anchorId uint64) (*accountdto.SetLi
 	} else {
 		clearRoomAudienceCaches(anchorId)
 	}
+	// 未结算收益新建归档记录后清零,避免下架丢数据
+	liveroomdao.ArchiveAndClearUnsettledIncome(anchorId, room.GuildId)
 	room.SetStatus(entity.LiveRoomStatusOffShelf)
 	liveroomdao.RemoveRoomFromCache(anchorId)
 	return &accountdto.SetLiveRoomStatusRes{Success: true, Status: entity.LiveRoomStatusOffShelf}, nil

@@ -57,36 +57,13 @@ func (r *LiveRoomIncomeSettled) AddTotalVideoCallBillingIncome(v float64) {
 
 // AddAmounts 结算时将一笔金额累加到已结算表(一次加锁)
 func (r *LiveRoomIncomeSettled) AddAmounts(a *LiveRoomIncomeAmounts) {
-	if a == nil {
+	if a == nil || a.IsZero() {
 		return
 	}
 	key := liveRoomIncomeLockKey(TbLiveRoomIncomeSettled, r.ID)
 	gmlock.Lock(key)
 	defer gmlock.Unlock(key)
-	if a.TotalIncome > 0 {
-		addIncomeAmountLocked(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalIncome, r.ID, &r.TotalIncome, a.TotalIncome)
-	}
-	if a.TotalGiftIncome > 0 {
-		addIncomeAmountLocked(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalGiftIncome, r.ID, &r.TotalGiftIncome, a.TotalGiftIncome)
-	}
-	if a.TotalPaidDanmakuIncome > 0 {
-		addIncomeAmountLocked(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalPaidDanmakuIncome, r.ID, &r.TotalPaidDanmakuIncome, a.TotalPaidDanmakuIncome)
-	}
-	if a.TotalPrivateRoomTicketIncome > 0 {
-		addIncomeAmountLocked(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalPrivateRoomTicketIncome, r.ID, &r.TotalPrivateRoomTicketIncome, a.TotalPrivateRoomTicketIncome)
-	}
-	if a.TotalPrivateRoomWatchIncome > 0 {
-		addIncomeAmountLocked(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalPrivateRoomWatchIncome, r.ID, &r.TotalPrivateRoomWatchIncome, a.TotalPrivateRoomWatchIncome)
-	}
-	if a.TotalVideoCallIncome > 0 {
-		addIncomeAmountLocked(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalVideoCallIncome, r.ID, &r.TotalVideoCallIncome, a.TotalVideoCallIncome)
-	}
-	if a.TotalVideoCallTicketIncome > 0 {
-		addIncomeAmountLocked(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalVideoCallTicketIncome, r.ID, &r.TotalVideoCallTicketIncome, a.TotalVideoCallTicketIncome)
-	}
-	if a.TotalVideoCallBillingIncome > 0 {
-		addIncomeAmountLocked(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalVideoCallBillingIncome, r.ID, &r.TotalVideoCallBillingIncome, a.TotalVideoCallBillingIncome)
-	}
+	addIncomeAmountsLocked(TbLiveRoomIncomeSettled, r.ID, &r.LiveRoomIncomeAmounts, a)
 	touchIncomeUpdatedAt(TbLiveRoomIncomeSettled, r.ID, &r.UpdatedAt)
 }
 
