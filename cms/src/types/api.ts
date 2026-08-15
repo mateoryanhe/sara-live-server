@@ -547,7 +547,6 @@ export interface UpdateMyGuildProfileReq {
 
 export interface ImportGuildAnchorRow {
     userId: string
-    cancelCode: string
 }
 
 export interface ImportGuildAnchorsReq {
@@ -560,7 +559,7 @@ export interface ImportGuildAnchorsReq {
 export interface ImportGuildAnchorFailItem {
     userId: string
     nickname: string
-    /** 1用户不存在 2注销码错误 3注销码过期 4已加入工会 5无法设为主播 */
+    /** 1用户不存在 2注销码错误(废弃) 3注销码过期(废弃) 4已加入工会 5无法设为主播 6主播间缓存已存在 */
     reason: number
 }
 

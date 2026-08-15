@@ -126,11 +126,21 @@ func appendAccountToListCache(openId string, channel uint, account *entity.Accou
 
 // RegisterAccount 注册新账号并写入列表缓存
 func RegisterAccount(openId string, channel uint) *entity.Account {
+	return RegisterAccountWithID(0, openId, channel)
+}
+
+// RegisterAccountWithID 使用指定ID注册新账号(id=0 时由 NewAccount 自行生成)
+func RegisterAccountWithID(id uint64, openId string, channel uint) *entity.Account {
 	openId = LogicalOpenId(strings.TrimSpace(openId))
 	if openId == "" || channel == 0 {
 		return nil
 	}
-	acc := entity.NewAccount(openId, channel)
+	var acc *entity.Account
+	if id == 0 {
+		acc = entity.NewAccount(openId, channel)
+	} else {
+		acc = entity.NewAccountWithID(id, openId, channel)
+	}
 	appendAccountToListCache(openId, channel, acc)
 	return acc
 }

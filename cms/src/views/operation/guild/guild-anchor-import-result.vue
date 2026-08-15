@@ -63,6 +63,8 @@ const formatReason = (reason: number) => {
       return t('pages.guildAnchorImportResult.reasonAlreadyInGuild')
     case 5:
       return t('pages.guildAnchorImportResult.reasonCannotSetAnchor')
+    case 6:
+      return t('pages.guildAnchorImportResult.reasonAlreadyHasLiveRoom')
     default:
       return t('pages.guildAnchorImportResult.reasonUnknown')
   }

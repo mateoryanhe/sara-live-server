@@ -34,7 +34,7 @@ func DeviceLogin(ctx context.Context, req *authdto.DeviceLoginReq) (*authdto.Dev
 	account := accountdao.FindActiveAccount(deviceId, DeviceChannel)
 	isNewUser := false
 	if account == nil {
-		account = accountdao.RegisterDeviceAccount(deviceId, DeviceChannel)
+		account = accountdao.RegisterAccountWithID(NextUserId(), deviceId, DeviceChannel)
 		isNewUser = true
 	}
 	if account == nil || account.ID == 0 {

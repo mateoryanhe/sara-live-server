@@ -422,12 +422,10 @@ const parseCsvLine = (line: string): string[] => {
 const normalizeHeader = (value: string) => value.trim().toLowerCase().replace(/^\ufeff/, '')
 
 const isHeaderRow = (cols: string[]) => {
-  if (cols.length < 2) return false
+  if (cols.length < 1) return false
   const a = normalizeHeader(cols[0])
-  const b = normalizeHeader(cols[1])
-  const userHeaders = new Set(['user_id', 'userid', '用户id'])
-  const codeHeaders = new Set(['cancel_code', 'cancelcode', '注销码'])
-  return userHeaders.has(a) && codeHeaders.has(b)
+  const userHeaders = new Set(['user_id', 'userid', '用户id', 'id'])
+  return userHeaders.has(a)
 }
 
 const parseGuildAnchorCsv = (text: string): ImportGuildAnchorRow[] => {
@@ -444,20 +442,19 @@ const parseGuildAnchorCsv = (text: string): ImportGuildAnchorRow[] => {
   const seen = new Set<string>()
   for (let i = start; i < lines.length; i++) {
     const cols = parseCsvLine(lines[i])
-    if (cols.length < 2) continue
+    if (cols.length < 1) continue
     const userId = cols[0].replace(/^\ufeff/, '').trim()
-    const cancelCode = cols[1].trim()
-    if (!userId || !/^\d+$/.test(userId) || !cancelCode) continue
+    if (!userId || !/^\d+$/.test(userId)) continue
     if (seen.has(userId)) continue
     seen.add(userId)
-    rows.push({userId, cancelCode})
+    rows.push({userId})
   }
   return rows
 }
 
 const downloadTxtTemplate = () => {
   // 用 txt，避免 Excel 把大整数改成科学计数法
-  const content = 'user_id,cancel_code\n10001,ABC123\n'
+  const content = 'user_id\n10001\n'
   const blob = new Blob(['\uFEFF' + content], {type: 'text/plain;charset=utf-8;'})
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')

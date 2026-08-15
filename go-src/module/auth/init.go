@@ -5,4 +5,5 @@ func InitAuth() {
 	initAppCancelGuard()
 	initAppToken()
 	initCmsToken()
+	initUserMaxId()
 }

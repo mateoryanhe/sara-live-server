@@ -45,8 +45,13 @@ type Account struct {
 }
 
 func NewAccount(openId string, channel uint) *Account {
+	return NewAccountWithID(snowflake.GetId(), openId, channel)
+}
+
+// NewAccountWithID 使用指定ID构造账号
+func NewAccountWithID(id uint64, openId string, channel uint) *Account {
 	ret := &Account{}
-	ret.ID = snowflake.GetId()
+	ret.ID = id
 	ret.SetChannel(channel)
 	ret.SetOpenId(openId)
 	ret.SetCancel(false)

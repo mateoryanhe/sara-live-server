@@ -3,10 +3,10 @@ package guild
 import (
 	"context"
 	"strconv"
-	"strings"
 
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/guilddao"
+	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/guilddto"
 	"xr-game-server/entity/live"
@@ -15,7 +15,7 @@ import (
 	"xr-game-server/module/liveroom"
 )
 
-// ImportGuildAnchors CMS 按工会 CSV 导入普通/高级主播
+// ImportGuildAnchors CMS 按工会 CSV 导入普通/高级主播(仅需用户ID)
 func ImportGuildAnchors(ctx context.Context, req *guilddto.ImportGuildAnchorsReq) (*guilddto.ImportGuildAnchorsRes, error) {
 	if req == nil || req.GuildId == 0 || len(req.Rows) == 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
@@ -39,7 +39,6 @@ func ImportGuildAnchors(ctx context.Context, req *guilddto.ImportGuildAnchorsReq
 			continue
 		}
 		userID := row.UserId
-		cancelCode := strings.TrimSpace(row.CancelCode)
 		if userID == 0 {
 			res.Fails = append(res.Fails, &guilddto.ImportGuildAnchorFailItem{
 				UserId: "0",
@@ -52,7 +51,7 @@ func ImportGuildAnchors(ctx context.Context, req *guilddto.ImportGuildAnchorsReq
 		}
 		seen[userID] = struct{}{}
 
-		failReason, nickname := importOneGuildAnchor(guild, userID, cancelCode, req.AnchorType)
+		failReason, nickname := importOneGuildAnchor(guild, userID, req.AnchorType)
 		if failReason > 0 {
 			res.Fails = append(res.Fails, &guilddto.ImportGuildAnchorFailItem{
 				UserId:   strconv.FormatUint(userID, 10),
@@ -72,26 +71,20 @@ func ImportGuildAnchors(ctx context.Context, req *guilddto.ImportGuildAnchorsReq
 	return res, nil
 }
 
-func importOneGuildAnchor(guild *entity.LiveGuild, userID uint64, cancelCode string, anchorType uint8) (failReason int, nickname string) {
+func importOneGuildAnchor(guild *entity.LiveGuild, userID uint64, anchorType uint8) (failReason int, nickname string) {
 	if accountdao.GetAccountById(userID) == nil {
 		return guilddto.ImportAnchorFailUserNotFound, ""
 	}
 
 	user := userinfodao.GetUserInfoByUserId(userID)
-	if user != nil {
-		nickname = user.Nickname
+	if user == nil {
+		return guilddto.ImportAnchorFailUserNotFound, ""
 	}
+	nickname = user.Nickname
 
-	ext := userinfodao.GetUserExtByUserId(userID)
-	storedCode := ""
-	if ext != nil {
-		storedCode = strings.TrimSpace(ext.CancelCode)
-	}
-	if storedCode == "" || storedCode != cancelCode {
-		return guilddto.ImportAnchorFailCancelCodeMismatch, nickname
-	}
-	if !userinfodao.IsCancelCodeValid(ext) {
-		return guilddto.ImportAnchorFailCancelCodeExpired, nickname
+	// 主播间缓存已有该ID,不可再导入当前工会
+	if liveroomdao.GetRoomById(userID) != nil {
+		return guilddto.ImportAnchorFailAlreadyHasLiveRoom, nickname
 	}
 
 	if user.GuildId != 0 {

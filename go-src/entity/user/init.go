@@ -13,4 +13,5 @@ func Init() {
 	initCustomerServiceCfg()
 	initPrivacyPolicyCfg()
 	initAppToken()
+	initUserMaxId()
 }

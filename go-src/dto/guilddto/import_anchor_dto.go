@@ -12,8 +12,7 @@ type ImportGuildAnchorsReq struct {
 }
 
 type ImportGuildAnchorRow struct {
-	UserId     uint64 `json:"userId" dc:"用户ID"`
-	CancelCode string `json:"cancelCode" dc:"注销码"`
+	UserId uint64 `json:"userId" dc:"用户ID"`
 }
 
 type ImportGuildAnchorsRes struct {
@@ -30,10 +29,11 @@ type ImportGuildAnchorFailItem struct {
 
 const (
 	ImportAnchorFailUserNotFound       = 1 // 用户不存在
-	ImportAnchorFailCancelCodeMismatch = 2 // 注销码不匹配
-	ImportAnchorFailCancelCodeExpired  = 3 // 注销码已过期
+	ImportAnchorFailCancelCodeMismatch = 2 // 注销码不匹配(已废弃)
+	ImportAnchorFailCancelCodeExpired  = 3 // 注销码已过期(已废弃)
 	ImportAnchorFailAlreadyInGuild     = 4 // 已在其他工会
 	ImportAnchorFailCannotSetAnchor    = 5 // 无法设置为主播
+	ImportAnchorFailAlreadyHasLiveRoom = 6 // 主播间缓存已存在
 )
 
 func GetImportAnchorFailReasonText(reason int) string {
@@ -48,6 +48,8 @@ func GetImportAnchorFailReasonText(reason int) string {
 		return "Already in another guild"
 	case ImportAnchorFailCannotSetAnchor:
 		return "Cannot set as anchor"
+	case ImportAnchorFailAlreadyHasLiveRoom:
+		return "Live room already exists"
 	default:
 		return "Unknown error"
 	}
