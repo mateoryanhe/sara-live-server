@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"xr-game-server/dao/accountdao"
+	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/accountdto"
 	liveentity "xr-game-server/entity/live"
@@ -130,14 +131,17 @@ func fillAnchorRoomFields(item *accountdto.AnchorListItem, room *liveentity.Live
 	item.PrivateInviteType = room.PrivateInviteType
 	item.Ticket = room.Ticket
 	item.Billing = room.Billing
-	item.TotalIncome = room.TotalIncome
-	item.TotalGiftIncome = room.TotalGiftIncome
-	item.TotalPaidDanmakuIncome = room.TotalPaidDanmakuIncome
-	item.TotalPrivateRoomTicketIncome = room.TotalPrivateRoomTicketIncome
-	item.TotalPrivateRoomWatchIncome = room.TotalPrivateRoomWatchIncome
-	item.TotalVideoCallIncome = room.TotalVideoCallIncome
-	item.TotalVideoCallTicketIncome = room.TotalVideoCallTicketIncome
-	item.TotalVideoCallBillingIncome = room.TotalVideoCallBillingIncome
+	// 主播列表收益只读永久缓存(生涯累计),不查库
+	if income := liveroomdao.GetLiveRoomIncomeTotalFromCache(room.ID); income != nil {
+		item.TotalIncome = income.TotalIncome
+		item.TotalGiftIncome = income.TotalGiftIncome
+		item.TotalPaidDanmakuIncome = income.TotalPaidDanmakuIncome
+		item.TotalPrivateRoomTicketIncome = income.TotalPrivateRoomTicketIncome
+		item.TotalPrivateRoomWatchIncome = income.TotalPrivateRoomWatchIncome
+		item.TotalVideoCallIncome = income.TotalVideoCallIncome
+		item.TotalVideoCallTicketIncome = income.TotalVideoCallTicketIncome
+		item.TotalVideoCallBillingIncome = income.TotalVideoCallBillingIncome
+	}
 	if room.LiveRecordId > 0 {
 		item.LiveStatus = 1
 	} else {

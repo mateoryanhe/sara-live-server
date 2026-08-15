@@ -128,6 +128,13 @@ func doOnShelfLiveRoom(ctx context.Context, anchorId uint64) (*accountdto.SetLiv
 // QueryOffShelfLiveRoomList CMS 回收站:直查 DB 已下架直播间
 func QueryOffShelfLiveRoomList(_ context.Context, req *accountdto.QueryOffShelfLiveRoomListReq) (*httpserver.CMSQueryResp, error) {
 	total, rows := liveroomdao.ListOffShelfRooms(req.PageIndex, req.PageSize, req.Key)
+	roomIds := make([]uint64, 0, len(rows))
+	for _, row := range rows {
+		if row != nil && row.ID != 0 {
+			roomIds = append(roomIds, row.ID)
+		}
+	}
+	incomeMap := liveroomdao.ListLiveRoomIncomeTotalFromDB(roomIds)
 	list := make([]*accountdto.OffShelfLiveRoomItem, 0, len(rows))
 	for _, row := range rows {
 		if row == nil {
@@ -149,6 +156,16 @@ func QueryOffShelfLiveRoomList(_ context.Context, req *accountdto.QueryOffShelfL
 			Status:       entity.LiveRoomStatusOffShelf,
 			UpdatedAt:    row.UpdatedAt,
 			CreatedAt:    row.CreatedAt,
+		}
+		if income := incomeMap[row.ID]; income != nil {
+			item.TotalIncome = income.TotalIncome
+			item.TotalGiftIncome = income.TotalGiftIncome
+			item.TotalPaidDanmakuIncome = income.TotalPaidDanmakuIncome
+			item.TotalPrivateRoomTicketIncome = income.TotalPrivateRoomTicketIncome
+			item.TotalPrivateRoomWatchIncome = income.TotalPrivateRoomWatchIncome
+			item.TotalVideoCallIncome = income.TotalVideoCallIncome
+			item.TotalVideoCallTicketIncome = income.TotalVideoCallTicketIncome
+			item.TotalVideoCallBillingIncome = income.TotalVideoCallBillingIncome
 		}
 		list = append(list, item)
 	}

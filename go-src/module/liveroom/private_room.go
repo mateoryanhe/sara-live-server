@@ -1,8 +1,6 @@
 package liveroom
 
 import (
-	"fmt"
-	"github.com/gogf/gf/v2/os/gmlock"
 	"time"
 	"xr-game-server/constants/currency"
 	"xr-game-server/constants/liverevenue"
@@ -64,22 +62,14 @@ func chargePrivateRoomTicketIfNeeded(userId uint64, room *entity.LiveRoom, now t
 	pay.SetLastTicketAt(now)
 	pay.SetFreeTime(uint64(livecfg.GetPrivateRoomFreeWatchDuration().Seconds()))
 
-	lockKey := fmt.Sprintf("room_%v", room.ID)
-	gmlock.Lock(lockKey)
-	defer gmlock.Unlock(lockKey)
-	//防止并发,主播可以收到多个人的礼物
-	liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId)
-	//添加本次直播收到的礼物总额
-	liveRecord.AddTotalIncome(ticketPrice)
-	liveRecord.AddTotalPrivateRoomIncome(ticketPrice)
-	liveRecord.AddTotalPrivateRoomTicketIncome(ticketPrice)
-	//记录主播总收益
-	room.AddTotalIncome(ticketPrice)
-	room.AddTotalPrivateRoomTicketIncome(ticketPrice)
+	// 单场直播记录 + 主播收益(实体内加锁)
+	if liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId); liveRecord != nil {
+		liveRecord.AddPrivateRoomTicketEarn(ticketPrice)
+	}
+	liveroomdao.GetLiveRoomIncomeUnsettled(room.ID).AddPrivateRoomTicketEarn(ticketPrice)
+	liveroomdao.GetLiveRoomIncomeTotal(room.ID).AddPrivateRoomTicketEarn(ticketPrice)
 
-	//记录直播收益流水(礼物)
 	eventData := entity.NewLiveRevenueLogRecord(room.ID, room.LiveRecordId, 0, room.ID, 0, 0, 0, ticketPrice, uint8(liverevenue.Ticket))
-
 	event.Pub(gameevent.RevenueEventEvent, eventData)
 	return ticketPrice, nil
 }
@@ -181,16 +171,11 @@ func recordPrivateRoomBillingRevenue(room *entity.LiveRoom, userId uint64, amoun
 	if amount <= 0 || room == nil || room.LiveRecordId == 0 {
 		return
 	}
-	lockKey := fmt.Sprintf("%d", room.ID)
-	gmlock.Lock(lockKey)
-	defer gmlock.Unlock(lockKey)
 	if liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId); liveRecord != nil {
-		liveRecord.AddTotalIncome(amount)
-		liveRecord.AddTotalPrivateRoomIncome(amount)
-		liveRecord.AddTotalPrivateRoomWatchIncome(amount)
+		liveRecord.AddPrivateRoomWatchEarn(amount)
 	}
-	room.AddTotalIncome(amount)
-	room.AddTotalPrivateRoomWatchIncome(amount)
+	liveroomdao.GetLiveRoomIncomeUnsettled(room.ID).AddPrivateRoomWatchEarn(amount)
+	liveroomdao.GetLiveRoomIncomeTotal(room.ID).AddPrivateRoomWatchEarn(amount)
 	eventData := entity.NewLiveRevenueLogRecord(
 		room.ID, room.LiveRecordId, userId, room.ID, 0, 1, amount, amount, uint8(liverevenue.PrivateRoom),
 	)

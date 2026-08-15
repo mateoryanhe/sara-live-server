@@ -1,0 +1,130 @@
+package entity
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/gogf/gf/v2/os/gmlock"
+	"xr-game-server/constants/db"
+	"xr-game-server/core/math"
+	"xr-game-server/core/syndb"
+)
+
+const (
+	LiveRoomIncomeTotalIncome                  db.TbCol = "total_income"
+	LiveRoomIncomeTotalGiftIncome              db.TbCol = "total_gift_income"
+	LiveRoomIncomeTotalPaidDanmakuIncome       db.TbCol = "total_paid_danmaku_income"
+	LiveRoomIncomeTotalPrivateRoomTicketIncome db.TbCol = "total_private_room_ticket_income"
+	LiveRoomIncomeTotalPrivateRoomWatchIncome  db.TbCol = "total_private_room_watch_income"
+	LiveRoomIncomeTotalVideoCallIncome         db.TbCol = "total_video_call_income"
+	LiveRoomIncomeTotalVideoCallTicketIncome   db.TbCol = "total_video_call_ticket_income"
+	LiveRoomIncomeTotalVideoCallBillingIncome  db.TbCol = "total_video_call_billing_income"
+)
+
+// LiveRoomIncomeAmounts 直播间收益字段(三张收益表共用结构)
+type LiveRoomIncomeAmounts struct {
+	TotalIncome                  float64 `gorm:"default:0;comment:直播收益" json:"totalIncome"`
+	TotalGiftIncome              float64 `gorm:"default:0;comment:累计礼物收益" json:"totalGiftIncome"`
+	TotalPaidDanmakuIncome       float64 `gorm:"default:0;comment:累计付费弹幕收益" json:"totalPaidDanmakuIncome"`
+	TotalPrivateRoomTicketIncome float64 `gorm:"default:0;comment:累计私密直播间门票收益" json:"totalPrivateRoomTicketIncome"`
+	TotalPrivateRoomWatchIncome  float64 `gorm:"default:0;comment:累计私密房观看收益" json:"totalPrivateRoomWatchIncome"`
+	TotalVideoCallIncome         float64 `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话收益" json:"totalVideoCallIncome"`
+	TotalVideoCallTicketIncome   float64 `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话门票收益" json:"totalVideoCallTicketIncome"`
+	TotalVideoCallBillingIncome  float64 `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话计费收益" json:"totalVideoCallBillingIncome"`
+}
+
+func liveRoomIncomeLockKey(tb db.TbName, id uint64) string {
+	return fmt.Sprintf("live_room_income:%s:%d", tb, id)
+}
+
+func (a *LiveRoomIncomeAmounts) clearAmounts() {
+	a.TotalIncome = 0
+	a.TotalGiftIncome = 0
+	a.TotalPaidDanmakuIncome = 0
+	a.TotalPrivateRoomTicketIncome = 0
+	a.TotalPrivateRoomWatchIncome = 0
+	a.TotalVideoCallIncome = 0
+	a.TotalVideoCallTicketIncome = 0
+	a.TotalVideoCallBillingIncome = 0
+}
+
+func addIncomeAmount(tb db.TbName, col db.TbCol, id uint64, cur *float64, v float64, skipNonPositive bool, updatedAt *time.Time) {
+	if skipNonPositive && v <= 0 {
+		return
+	}
+	key := liveRoomIncomeLockKey(tb, id)
+	gmlock.Lock(key)
+	defer gmlock.Unlock(key)
+	addIncomeAmountLocked(tb, col, id, cur, v)
+	touchIncomeUpdatedAt(tb, id, updatedAt)
+}
+
+func addIncomeAmountLocked(tb db.TbName, col db.TbCol, id uint64, cur *float64, v float64) {
+	*cur = math.AddFloat64(*cur, v)
+	syndb.AddData(tb, col, &syndb.ColData{IdVal: id, ColVal: *cur})
+}
+
+func writeIncomeAmountLocked(tb db.TbName, col db.TbCol, id uint64, v float64) {
+	syndb.AddData(tb, col, &syndb.ColData{IdVal: id, ColVal: v})
+}
+
+func touchIncomeUpdatedAt(tb db.TbName, id uint64, updatedAt *time.Time) {
+	if updatedAt == nil {
+		return
+	}
+	*updatedAt = time.Now()
+	syndb.AddData(tb, db.UpdatedAtName, &syndb.ColData{IdVal: id, ColVal: *updatedAt})
+}
+
+// addIncomeEarn 一次加锁:总收益 + 单一细分项(细分项仅 amount>0 时累加)
+func addIncomeEarn(tb db.TbName, id uint64, a *LiveRoomIncomeAmounts, updatedAt *time.Time, amount float64, extraCol db.TbCol, extra *float64) {
+	if a == nil || id == 0 || extra == nil {
+		return
+	}
+	key := liveRoomIncomeLockKey(tb, id)
+	gmlock.Lock(key)
+	defer gmlock.Unlock(key)
+	addIncomeAmountLocked(tb, LiveRoomIncomeTotalIncome, id, &a.TotalIncome, amount)
+	if amount > 0 {
+		addIncomeAmountLocked(tb, extraCol, id, extra, amount)
+	}
+	touchIncomeUpdatedAt(tb, id, updatedAt)
+}
+
+// ApplyVideoCallIncomeDelta 通话收益增减(支持负数退款),内部按表+房间加锁
+func ApplyVideoCallIncomeDelta(tb db.TbName, id uint64, a *LiveRoomIncomeAmounts, updatedAt *time.Time, amount float64, ticket, billing bool) {
+	if a == nil || id == 0 {
+		return
+	}
+	key := liveRoomIncomeLockKey(tb, id)
+	gmlock.Lock(key)
+	defer gmlock.Unlock(key)
+	addIncomeAmountLocked(tb, LiveRoomIncomeTotalIncome, id, &a.TotalIncome, amount)
+	addIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallIncome, id, &a.TotalVideoCallIncome, amount)
+	if ticket {
+		addIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallTicketIncome, id, &a.TotalVideoCallTicketIncome, amount)
+	}
+	if billing {
+		addIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallBillingIncome, id, &a.TotalVideoCallBillingIncome, amount)
+	}
+	touchIncomeUpdatedAt(tb, id, updatedAt)
+}
+
+func regLiveRoomIncomeCols(tb db.TbName) {
+	syndb.RegQuick(tb, db.CreatedAtName)
+	syndb.RegQuick(tb, db.UpdatedAtName)
+	syndb.RegQuick(tb, LiveRoomIncomeTotalIncome)
+	syndb.RegQuick(tb, LiveRoomIncomeTotalGiftIncome)
+	syndb.RegQuick(tb, LiveRoomIncomeTotalPaidDanmakuIncome)
+	syndb.RegQuick(tb, LiveRoomIncomeTotalPrivateRoomTicketIncome)
+	syndb.RegQuick(tb, LiveRoomIncomeTotalPrivateRoomWatchIncome)
+	syndb.RegQuick(tb, LiveRoomIncomeTotalVideoCallIncome)
+	syndb.RegQuick(tb, LiveRoomIncomeTotalVideoCallTicketIncome)
+	syndb.RegQuick(tb, LiveRoomIncomeTotalVideoCallBillingIncome)
+}
+
+func initLiveRoomIncome() {
+	initLiveRoomIncomeUnsettled()
+	initLiveRoomIncomeSettled()
+	initLiveRoomIncomeTotal()
+}

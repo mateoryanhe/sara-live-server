@@ -286,9 +286,11 @@ func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto
 	}
 
 	if userId == room.ID {
-		res.TotalVideoCallIncome = room.TotalVideoCallIncome
-		res.TotalVideoCallTicketIncome = room.TotalVideoCallTicketIncome
-		res.TotalVideoCallBillingIncome = room.TotalVideoCallBillingIncome
+		if income := liveroomdao.GetLiveRoomIncomeTotalFromCache(room.ID); income != nil {
+			res.TotalVideoCallIncome = income.TotalVideoCallIncome
+			res.TotalVideoCallTicketIncome = income.TotalVideoCallTicketIncome
+			res.TotalVideoCallBillingIncome = income.TotalVideoCallBillingIncome
+		}
 	}
 
 	return res, nil

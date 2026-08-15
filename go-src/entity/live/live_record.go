@@ -1,7 +1,10 @@
 package entity
 
 import (
+	"fmt"
 	"time"
+
+	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/math"
 	"xr-game-server/core/migrate"
@@ -54,6 +57,10 @@ type LiveRecord struct {
 	TotalNewFollower             uint64     `gorm:"default:0;comment:新加粉丝数(去重)" json:"totalNewFollower"`
 }
 
+func liveRecordLockKey(id uint64) string {
+	return fmt.Sprintf("live_record:%d", id)
+}
+
 // NewLiveRecord 构造一条直播记录,字段写入通过 syndb 异步入库
 func NewLiveRecord(id uint64) *LiveRecord {
 	ret := &LiveRecord{}
@@ -90,128 +97,160 @@ func (r *LiveRecord) SetEndTime(v *time.Time) {
 	})
 }
 
-func (r *LiveRecord) AddTotalAudience(val uint64) {
-	r.TotalAudience = math.Add(r.TotalAudience, val)
+func (r *LiveRecord) addFloatLocked(col db.TbCol, cur *float64, v float64) {
+	*cur = math.AddFloat64(*cur, v)
+	syndb.AddData(TbLiveRecord, col, &syndb.ColData{IdVal: r.ID, ColVal: *cur})
+}
 
-	syndb.AddData(TbLiveRecord, LiveRecordTotalAudience, &syndb.ColData{
-		IdVal:  r.ID,
-		ColVal: r.TotalAudience,
+func (r *LiveRecord) addUintLocked(col db.TbCol, cur *uint64, v uint64) {
+	*cur = math.Add(*cur, v)
+	syndb.AddData(TbLiveRecord, col, &syndb.ColData{IdVal: r.ID, ColVal: *cur})
+}
+
+func (r *LiveRecord) withLock(fn func()) {
+	key := liveRecordLockKey(r.ID)
+	gmlock.Lock(key)
+	defer gmlock.Unlock(key)
+	fn()
+}
+
+func (r *LiveRecord) AddTotalAudience(val uint64) {
+	r.withLock(func() {
+		r.addUintLocked(LiveRecordTotalAudience, &r.TotalAudience, val)
 	})
 }
 
 func (r *LiveRecord) AddTotalLiveDuration(v float64) {
-	r.TotalLiveDuration = math.AddFloat64(r.TotalLiveDuration, v)
-	syndb.AddData(TbLiveRecord, LiveRecordTotalLiveDuration, &syndb.ColData{
-		IdVal:  r.ID,
-		ColVal: r.TotalLiveDuration,
+	r.withLock(func() {
+		r.addFloatLocked(LiveRecordTotalLiveDuration, &r.TotalLiveDuration, v)
 	})
 }
 
 func (r *LiveRecord) AddTotalIncome(v float64) {
-	r.TotalIncome = math.AddFloat64(r.TotalIncome, v)
-
-	syndb.AddData(TbLiveRecord, LiveRecordTotalIncome, &syndb.ColData{
-		IdVal:  r.ID,
-		ColVal: r.TotalIncome,
+	r.withLock(func() {
+		r.addFloatLocked(LiveRecordTotalIncome, &r.TotalIncome, v)
 	})
 }
 
 func (r *LiveRecord) AddTotalGiftIncome(v float64) {
-	r.TotalGiftIncome = math.AddFloat64(r.TotalGiftIncome, v)
-
-	syndb.AddData(TbLiveRecord, LiveRecordTotalGiftIncome, &syndb.ColData{
-		IdVal:  r.ID,
-		ColVal: r.TotalGiftIncome,
+	r.withLock(func() {
+		r.addFloatLocked(LiveRecordTotalGiftIncome, &r.TotalGiftIncome, v)
 	})
 }
 
 func (r *LiveRecord) AddTotalPaidDanmakuIncome(v float64) {
-	r.TotalPaidDanmakuIncome = math.AddFloat64(r.TotalPaidDanmakuIncome, v)
-
-	syndb.AddData(TbLiveRecord, LiveRecordTotalPaidDanmakuIncome, &syndb.ColData{
-		IdVal:  r.ID,
-		ColVal: r.TotalPaidDanmakuIncome,
+	r.withLock(func() {
+		r.addFloatLocked(LiveRecordTotalPaidDanmakuIncome, &r.TotalPaidDanmakuIncome, v)
 	})
 }
 
 func (r *LiveRecord) AddTotalPrivateRoomIncome(v float64) {
-	r.TotalPrivateRoomIncome = math.AddFloat64(r.TotalPrivateRoomIncome, v)
-
-	syndb.AddData(TbLiveRecord, LiveRecordTotalPrivateRoomIncome, &syndb.ColData{
-		IdVal:  r.ID,
-		ColVal: r.TotalPrivateRoomIncome,
+	r.withLock(func() {
+		r.addFloatLocked(LiveRecordTotalPrivateRoomIncome, &r.TotalPrivateRoomIncome, v)
 	})
 }
 
 func (r *LiveRecord) AddTotalPrivateRoomTicketIncome(v float64) {
-	r.TotalPrivateRoomTicketIncome = math.AddFloat64(r.TotalPrivateRoomTicketIncome, v)
-
-	syndb.AddData(TbLiveRecord, LiveRecordTotalPrivateRoomTicketIncome, &syndb.ColData{
-		IdVal:  r.ID,
-		ColVal: r.TotalPrivateRoomTicketIncome,
+	r.withLock(func() {
+		r.addFloatLocked(LiveRecordTotalPrivateRoomTicketIncome, &r.TotalPrivateRoomTicketIncome, v)
 	})
 }
 
 func (r *LiveRecord) AddTotalPrivateRoomWatchIncome(v float64) {
-	r.TotalPrivateRoomWatchIncome = math.AddFloat64(r.TotalPrivateRoomWatchIncome, v)
-
-	syndb.AddData(TbLiveRecord, LiveRecordTotalPrivateRoomWatchIncome, &syndb.ColData{
-		IdVal:  r.ID,
-		ColVal: r.TotalPrivateRoomWatchIncome,
+	r.withLock(func() {
+		r.addFloatLocked(LiveRecordTotalPrivateRoomWatchIncome, &r.TotalPrivateRoomWatchIncome, v)
 	})
 }
 
 func (r *LiveRecord) AddTotalVideoCallIncome(v float64) {
-	r.TotalVideoCallIncome = math.AddFloat64(r.TotalVideoCallIncome, v)
-
-	syndb.AddData(TbLiveRecord, LiveRecordTotalVideoCallIncome, &syndb.ColData{
-		IdVal:  r.ID,
-		ColVal: r.TotalVideoCallIncome,
+	r.withLock(func() {
+		r.addFloatLocked(LiveRecordTotalVideoCallIncome, &r.TotalVideoCallIncome, v)
 	})
 }
 
 func (r *LiveRecord) AddTotalVideoCallTicketIncome(v float64) {
-	r.TotalVideoCallTicketIncome = math.AddFloat64(r.TotalVideoCallTicketIncome, v)
-
-	syndb.AddData(TbLiveRecord, LiveRecordTotalVideoCallTicketIncome, &syndb.ColData{
-		IdVal:  r.ID,
-		ColVal: r.TotalVideoCallTicketIncome,
+	r.withLock(func() {
+		r.addFloatLocked(LiveRecordTotalVideoCallTicketIncome, &r.TotalVideoCallTicketIncome, v)
 	})
 }
 
 func (r *LiveRecord) AddTotalVideoCallBillingIncome(v float64) {
-	r.TotalVideoCallBillingIncome = math.AddFloat64(r.TotalVideoCallBillingIncome, v)
-
-	syndb.AddData(TbLiveRecord, LiveRecordTotalVideoCallBillingIncome, &syndb.ColData{
-		IdVal:  r.ID,
-		ColVal: r.TotalVideoCallBillingIncome,
+	r.withLock(func() {
+		r.addFloatLocked(LiveRecordTotalVideoCallBillingIncome, &r.TotalVideoCallBillingIncome, v)
 	})
 }
 
 func (r *LiveRecord) AddTotalGameBet(v float64) {
-	r.TotalGameBet = math.AddFloat64(r.TotalGameBet, v)
-
-	syndb.AddData(TbLiveRecord, LiveRecordTotalGameBet, &syndb.ColData{
-		IdVal:  r.ID,
-		ColVal: r.TotalGameBet,
+	r.withLock(func() {
+		r.addFloatLocked(LiveRecordTotalGameBet, &r.TotalGameBet, v)
 	})
 }
 
 func (r *LiveRecord) AddTotalGiftSender(val uint64) {
-	r.TotalGiftSender = math.Add(r.TotalGiftSender, val)
-
-	syndb.AddData(TbLiveRecord, LiveRecordTotalGiftSender, &syndb.ColData{
-		IdVal:  r.ID,
-		ColVal: r.TotalGiftSender,
+	r.withLock(func() {
+		r.addUintLocked(LiveRecordTotalGiftSender, &r.TotalGiftSender, val)
 	})
 }
 
 func (r *LiveRecord) AddTotalNewFollower(val uint64) {
-	r.TotalNewFollower = math.Add(r.TotalNewFollower, val)
+	r.withLock(func() {
+		r.addUintLocked(LiveRecordTotalNewFollower, &r.TotalNewFollower, val)
+	})
+}
 
-	syndb.AddData(TbLiveRecord, LiveRecordTotalNewFollower, &syndb.ColData{
-		IdVal:  r.ID,
-		ColVal: r.TotalNewFollower,
+// AddGiftEarn 礼物收益(总收益+礼物,内部加锁)
+func (r *LiveRecord) AddGiftEarn(v float64) {
+	r.withLock(func() {
+		r.addFloatLocked(LiveRecordTotalIncome, &r.TotalIncome, v)
+		if v > 0 {
+			r.addFloatLocked(LiveRecordTotalGiftIncome, &r.TotalGiftIncome, v)
+		}
+	})
+}
+
+// AddPaidDanmakuEarn 付费弹幕收益(总收益+弹幕,内部加锁)
+func (r *LiveRecord) AddPaidDanmakuEarn(v float64) {
+	r.withLock(func() {
+		r.addFloatLocked(LiveRecordTotalIncome, &r.TotalIncome, v)
+		if v > 0 {
+			r.addFloatLocked(LiveRecordTotalPaidDanmakuIncome, &r.TotalPaidDanmakuIncome, v)
+		}
+	})
+}
+
+// AddPrivateRoomTicketEarn 私密房门票收益(总/私密房/门票,内部加锁)
+func (r *LiveRecord) AddPrivateRoomTicketEarn(v float64) {
+	r.withLock(func() {
+		r.addFloatLocked(LiveRecordTotalIncome, &r.TotalIncome, v)
+		if v > 0 {
+			r.addFloatLocked(LiveRecordTotalPrivateRoomIncome, &r.TotalPrivateRoomIncome, v)
+			r.addFloatLocked(LiveRecordTotalPrivateRoomTicketIncome, &r.TotalPrivateRoomTicketIncome, v)
+		}
+	})
+}
+
+// AddPrivateRoomWatchEarn 私密房观看收益(总/私密房/观看,内部加锁)
+func (r *LiveRecord) AddPrivateRoomWatchEarn(v float64) {
+	r.withLock(func() {
+		r.addFloatLocked(LiveRecordTotalIncome, &r.TotalIncome, v)
+		if v > 0 {
+			r.addFloatLocked(LiveRecordTotalPrivateRoomIncome, &r.TotalPrivateRoomIncome, v)
+			r.addFloatLocked(LiveRecordTotalPrivateRoomWatchIncome, &r.TotalPrivateRoomWatchIncome, v)
+		}
+	})
+}
+
+// ApplyVideoCallIncomeDelta 通话收益增减(支持负数退款),内部加锁
+func (r *LiveRecord) ApplyVideoCallIncomeDelta(amount float64, ticket, billing bool) {
+	r.withLock(func() {
+		r.addFloatLocked(LiveRecordTotalIncome, &r.TotalIncome, amount)
+		r.addFloatLocked(LiveRecordTotalVideoCallIncome, &r.TotalVideoCallIncome, amount)
+		if ticket {
+			r.addFloatLocked(LiveRecordTotalVideoCallTicketIncome, &r.TotalVideoCallTicketIncome, amount)
+		}
+		if billing {
+			r.addFloatLocked(LiveRecordTotalVideoCallBillingIncome, &r.TotalVideoCallBillingIncome, amount)
+		}
 	})
 }
 

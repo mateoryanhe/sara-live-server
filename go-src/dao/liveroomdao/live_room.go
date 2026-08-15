@@ -22,6 +22,13 @@ func initLiveRoomDao() {
 	for _, v := range all {
 		roomCacheMgr.Set(v.ID, v)
 	}
+	ids := make([]uint64, 0, len(all))
+	for _, v := range all {
+		if v != nil && v.ID != 0 {
+			ids = append(ids, v.ID)
+		}
+	}
+	PreloadLiveRoomIncomes(ids)
 }
 
 // GetRoomFromDB 按 roomId 直查数据库(含下架直播间,不走缓存)
@@ -99,6 +106,7 @@ func FlushRoomCache(r *entity.LiveRoom) {
 	}
 	if r.Status != entity.LiveRoomStatusOnShelf {
 		roomCacheMgr.Remove(r.ID)
+		RemoveLiveRoomIncomeFromCache(r.ID)
 		return
 	}
 	roomCacheMgr.Set(r.ID, r)
@@ -110,6 +118,7 @@ func AddRoomToCache(r *entity.LiveRoom) {
 		return
 	}
 	roomCacheMgr.Set(r.ID, r)
+	AddLiveRoomIncomeToCache(r.ID)
 }
 
 // RemoveRoomFromCache 从直播间缓存移除(停用机器人主播等场景)
@@ -118,6 +127,7 @@ func RemoveRoomFromCache(roomId uint64) {
 		return
 	}
 	roomCacheMgr.Remove(roomId)
+	RemoveLiveRoomIncomeFromCache(roomId)
 }
 
 // ListRoomsByGuild 获取指定工会下的所有直播间(缓存,仅上架)

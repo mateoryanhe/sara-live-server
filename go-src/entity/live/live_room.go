@@ -3,7 +3,6 @@ package entity
 import (
 	"time"
 	"xr-game-server/constants/db"
-	"xr-game-server/core/math"
 	"xr-game-server/core/migrate"
 	"xr-game-server/core/syndb"
 )
@@ -13,34 +12,26 @@ const (
 )
 
 const (
-	LiveRoomGuildId                      db.TbCol = "guild_id"
-	LiveRoomTitle                        db.TbCol = "title"
-	LiveRoomCover                        db.TbCol = "cover"
-	LiveRoomNotice                       db.TbCol = "notice"
-	LiveRoomLiveId                       db.TbCol = "live_record_id"
-	LiveRoomHeartTime                    db.TbCol = "heart_time"
-	LiveRoomBan                          db.TbCol = "ban"
-	LiveRoomBanApplyTime                 db.TbCol = "ban_apply_time"
-	LiveRoomPrivateInviteType            db.TbCol = "private_invite_type"
-	LiveRoomBanReason                    db.TbCol = "ban_reason"
-	LiveRoomTotalIncome                  db.TbCol = "total_income"
-	LiveRoomTotalGiftIncome              db.TbCol = "total_gift_income"
-	LiveRoomTotalPaidDanmakuIncome       db.TbCol = "total_paid_danmaku_income"
-	LiveRoomTotalPrivateRoomTicketIncome db.TbCol = "total_private_room_ticket_income"
-	LiveRoomTotalPrivateRoomWatchIncome  db.TbCol = "total_private_room_watch_income"
-	LiveRoomTotalVideoCallIncome         db.TbCol = "total_video_call_income"
-	LiveRoomTotalVideoCallTicketIncome   db.TbCol = "total_video_call_ticket_income"
-	LiveRoomTotalVideoCallBillingIncome  db.TbCol = "total_video_call_billing_income"
-	LiveRoomCategory                     db.TbCol = "category"
-	LiveRoomTagId                        db.TbCol = "tag_id"
-	LiveRoomTicket                       db.TbCol = "ticket"
-	LiveRoomBilling                      db.TbCol = "billing"
-	LiveRoomCloudPlayerVideo             db.TbCol = "cloud_player_video"
-	LiveRoomPushStream                   db.TbCol = "push_stream"
-	LiveRoomIsTest                       db.TbCol = "is_test"
-	LiveRoomCloudPlayerId                db.TbCol = "cloud_player_id"
-	LiveRoomCloudPlayerTokenExpireAt     db.TbCol = "cloud_player_token_expire_at"
-	LiveRoomStatus                       db.TbCol = "status"
+	LiveRoomGuildId                  db.TbCol = "guild_id"
+	LiveRoomTitle                    db.TbCol = "title"
+	LiveRoomCover                    db.TbCol = "cover"
+	LiveRoomNotice                   db.TbCol = "notice"
+	LiveRoomLiveId                   db.TbCol = "live_record_id"
+	LiveRoomHeartTime                db.TbCol = "heart_time"
+	LiveRoomBan                      db.TbCol = "ban"
+	LiveRoomBanApplyTime             db.TbCol = "ban_apply_time"
+	LiveRoomPrivateInviteType        db.TbCol = "private_invite_type"
+	LiveRoomBanReason                db.TbCol = "ban_reason"
+	LiveRoomCategory                 db.TbCol = "category"
+	LiveRoomTagId                    db.TbCol = "tag_id"
+	LiveRoomTicket                   db.TbCol = "ticket"
+	LiveRoomBilling                  db.TbCol = "billing"
+	LiveRoomCloudPlayerVideo         db.TbCol = "cloud_player_video"
+	LiveRoomPushStream               db.TbCol = "push_stream"
+	LiveRoomIsTest                   db.TbCol = "is_test"
+	LiveRoomCloudPlayerId            db.TbCol = "cloud_player_id"
+	LiveRoomCloudPlayerTokenExpireAt db.TbCol = "cloud_player_token_expire_at"
+	LiveRoomStatus                   db.TbCol = "status"
 )
 
 const (
@@ -72,34 +63,26 @@ func DefaultPrivateInviteType(category uint8) uint8 {
 // LiveRoom 直播间(LiveRoom.ID 与 UserInfo.ID 均为主播用户ID,每个主播仅一个直播间)
 type LiveRoom struct {
 	migrate.OneModel
-	GuildId                      uint64     `gorm:"index;default:0;comment:所属工会ID" json:"guildId"`
-	Title                        string     `gorm:"size:128;default:'';comment:直播间标题" json:"title"`
-	Cover                        string     `gorm:"size:255;default:'';comment:封面图URL" json:"cover"`
-	Notice                       string     `gorm:"size:512;default:'';comment:公告" json:"notice"`
-	LiveRecordId                 uint64     `gorm:"default:0;comment:直播记录id" json:"liveRecordId"`
-	HeartTime                    *time.Time `gorm:"comment:房间心跳状态,大于5分钟，判断下播" json:"heart_time"`
-	Ban                          bool       `gorm:"default:0;comment:封禁状态" json:"ban"`
-	BanApplyTime                 *time.Time `gorm:"comment:封禁截止时间" json:"banApplyTime"`
-	PrivateInviteType            uint8      `gorm:"default:1;comment:私密邀请类型(1=接受所有人,2=仅VIP,3=拒绝所有人)" json:"privateInviteType"`
-	BanReason                    string     `gorm:"size:512;default:'';comment:封禁原因" json:"banReason"`
-	TotalIncome                  float64    `gorm:"default:0;comment:直播收益" json:"totalIncome"`
-	TotalGiftIncome              float64    `gorm:"default:0;comment:累计礼物收益" json:"totalGiftIncome"`
-	TotalPaidDanmakuIncome       float64    `gorm:"default:0;comment:累计付费弹幕收益" json:"totalPaidDanmakuIncome"`
-	TotalPrivateRoomTicketIncome float64    `gorm:"default:0;comment:累计私密直播间门票收益" json:"totalPrivateRoomTicketIncome"`
-	TotalPrivateRoomWatchIncome  float64    `gorm:"default:0;comment:累计私密房观看收益" json:"totalPrivateRoomWatchIncome"`
-	TotalVideoCallIncome         float64    `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话收益" json:"totalVideoCallIncome"`
-	TotalVideoCallTicketIncome   float64    `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话门票收益" json:"totalVideoCallTicketIncome"`
-	TotalVideoCallBillingIncome  float64    `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话计费收益" json:"totalVideoCallBillingIncome"`
-	Category                     uint8      `gorm:"default:1;comment:分类(1=hot,2=game,3=私密)" json:"category"`
-	TagId                        uint64     `gorm:"default:0;comment:直播间标签ID" json:"tagId"`
-	Ticket                       float64    `gorm:"type:decimal(10,4);default:0;comment:门票价格(钻石)" json:"ticket"`
-	Billing                      float64    `gorm:"type:decimal(10,4);default:0;comment:计费价格(每分钟钻石)" json:"billing"`
-	CloudPlayerVideo             string     `gorm:"size:512;default:'';comment:云播放器MP4视频URL/路径" json:"cloudPlayerVideo"`
-	PushStream                   bool       `gorm:"default:0;comment:是否推流" json:"pushStream"`
-	IsTest                       bool       `gorm:"default:0;comment:是否测试机器人主播(仅下发App)" json:"isTest"`
-	CloudPlayerId                string     `gorm:"size:64;default:'';comment:声网云播放器ID" json:"cloudPlayerId"`
-	CloudPlayerTokenExpireAt     *time.Time `gorm:"comment:云播放器RTC token过期时间" json:"cloudPlayerTokenExpireAt"`
-	Status                       uint8      `gorm:"default:1;comment:状态(0-下架,1-上架)" json:"status"`
+	GuildId                  uint64     `gorm:"index;default:0;comment:所属工会ID" json:"guildId"`
+	Title                    string     `gorm:"size:128;default:'';comment:直播间标题" json:"title"`
+	Cover                    string     `gorm:"size:255;default:'';comment:封面图URL" json:"cover"`
+	Notice                   string     `gorm:"size:512;default:'';comment:公告" json:"notice"`
+	LiveRecordId             uint64     `gorm:"default:0;comment:直播记录id" json:"liveRecordId"`
+	HeartTime                *time.Time `gorm:"comment:房间心跳状态,大于5分钟，判断下播" json:"heart_time"`
+	Ban                      bool       `gorm:"default:0;comment:封禁状态" json:"ban"`
+	BanApplyTime             *time.Time `gorm:"comment:封禁截止时间" json:"banApplyTime"`
+	PrivateInviteType        uint8      `gorm:"default:1;comment:私密邀请类型(1=接受所有人,2=仅VIP,3=拒绝所有人)" json:"privateInviteType"`
+	BanReason                string     `gorm:"size:512;default:'';comment:封禁原因" json:"banReason"`
+	Category                 uint8      `gorm:"default:1;comment:分类(1=hot,2=game,3=私密)" json:"category"`
+	TagId                    uint64     `gorm:"default:0;comment:直播间标签ID" json:"tagId"`
+	Ticket                   float64    `gorm:"type:decimal(10,4);default:0;comment:门票价格(钻石)" json:"ticket"`
+	Billing                  float64    `gorm:"type:decimal(10,4);default:0;comment:计费价格(每分钟钻石)" json:"billing"`
+	CloudPlayerVideo         string     `gorm:"size:512;default:'';comment:云播放器MP4视频URL/路径" json:"cloudPlayerVideo"`
+	PushStream               bool       `gorm:"default:0;comment:是否推流" json:"pushStream"`
+	IsTest                   bool       `gorm:"default:0;comment:是否测试机器人主播(仅下发App)" json:"isTest"`
+	CloudPlayerId            string     `gorm:"size:64;default:'';comment:声网云播放器ID" json:"cloudPlayerId"`
+	CloudPlayerTokenExpireAt *time.Time `gorm:"comment:云播放器RTC token过期时间" json:"cloudPlayerTokenExpireAt"`
+	Status                   uint8      `gorm:"default:1;comment:状态(0-下架,1-上架)" json:"status"`
 }
 
 // NewLiveRoom 构造内存对象,字段写入通过 syndb 异步入库
@@ -198,83 +181,6 @@ func (r *LiveRoom) SetBanReason(v string) {
 	r.touchUpdatedAt()
 	syndb.AddData(TbLiveRoom, LiveRoomBanReason, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
-	})
-}
-
-func (r *LiveRoom) AddTotalIncome(v float64) {
-	r.TotalIncome = math.AddFloat64(r.TotalIncome, v)
-	syndb.AddData(TbLiveRoom, LiveRoomTotalIncome, &syndb.ColData{
-		IdVal: r.ID, ColVal: r.TotalIncome,
-	})
-}
-
-func (r *LiveRoom) AddTotalGiftIncome(v float64) {
-	if v <= 0 {
-		return
-	}
-	r.TotalGiftIncome = math.AddFloat64(r.TotalGiftIncome, v)
-	syndb.AddData(TbLiveRoom, LiveRoomTotalGiftIncome, &syndb.ColData{
-		IdVal: r.ID, ColVal: r.TotalGiftIncome,
-	})
-}
-
-func (r *LiveRoom) AddTotalPaidDanmakuIncome(v float64) {
-	if v <= 0 {
-		return
-	}
-	r.TotalPaidDanmakuIncome = math.AddFloat64(r.TotalPaidDanmakuIncome, v)
-	syndb.AddData(TbLiveRoom, LiveRoomTotalPaidDanmakuIncome, &syndb.ColData{
-		IdVal: r.ID, ColVal: r.TotalPaidDanmakuIncome,
-	})
-}
-
-func (r *LiveRoom) AddTotalPrivateRoomTicketIncome(v float64) {
-	if v <= 0 {
-		return
-	}
-	r.TotalPrivateRoomTicketIncome = math.AddFloat64(r.TotalPrivateRoomTicketIncome, v)
-	syndb.AddData(TbLiveRoom, LiveRoomTotalPrivateRoomTicketIncome, &syndb.ColData{
-		IdVal: r.ID, ColVal: r.TotalPrivateRoomTicketIncome,
-	})
-}
-
-func (r *LiveRoom) AddTotalPrivateRoomWatchIncome(v float64) {
-	if v <= 0 {
-		return
-	}
-	r.TotalPrivateRoomWatchIncome = math.AddFloat64(r.TotalPrivateRoomWatchIncome, v)
-	syndb.AddData(TbLiveRoom, LiveRoomTotalPrivateRoomWatchIncome, &syndb.ColData{
-		IdVal: r.ID, ColVal: r.TotalPrivateRoomWatchIncome,
-	})
-}
-
-func (r *LiveRoom) AddTotalVideoCallIncome(v float64) {
-	if v <= 0 {
-		return
-	}
-	r.TotalVideoCallIncome = math.AddFloat64(r.TotalVideoCallIncome, v)
-	syndb.AddData(TbLiveRoom, LiveRoomTotalVideoCallIncome, &syndb.ColData{
-		IdVal: r.ID, ColVal: r.TotalVideoCallIncome,
-	})
-}
-
-func (r *LiveRoom) AddTotalVideoCallTicketIncome(v float64) {
-	if v <= 0 {
-		return
-	}
-	r.TotalVideoCallTicketIncome = math.AddFloat64(r.TotalVideoCallTicketIncome, v)
-	syndb.AddData(TbLiveRoom, LiveRoomTotalVideoCallTicketIncome, &syndb.ColData{
-		IdVal: r.ID, ColVal: r.TotalVideoCallTicketIncome,
-	})
-}
-
-func (r *LiveRoom) AddTotalVideoCallBillingIncome(v float64) {
-	if v <= 0 {
-		return
-	}
-	r.TotalVideoCallBillingIncome = math.AddFloat64(r.TotalVideoCallBillingIncome, v)
-	syndb.AddData(TbLiveRoom, LiveRoomTotalVideoCallBillingIncome, &syndb.ColData{
-		IdVal: r.ID, ColVal: r.TotalVideoCallBillingIncome,
 	})
 }
 
@@ -397,14 +303,6 @@ func initLiveRoom() {
 	syndb.RegQuick(TbLiveRoom, LiveRoomBanApplyTime)
 	syndb.RegQuick(TbLiveRoom, LiveRoomPrivateInviteType)
 	syndb.RegQuick(TbLiveRoom, LiveRoomBanReason)
-	syndb.RegQuick(TbLiveRoom, LiveRoomTotalIncome)
-	syndb.RegQuick(TbLiveRoom, LiveRoomTotalGiftIncome)
-	syndb.RegQuick(TbLiveRoom, LiveRoomTotalPaidDanmakuIncome)
-	syndb.RegQuick(TbLiveRoom, LiveRoomTotalPrivateRoomTicketIncome)
-	syndb.RegQuick(TbLiveRoom, LiveRoomTotalPrivateRoomWatchIncome)
-	syndb.RegQuick(TbLiveRoom, LiveRoomTotalVideoCallIncome)
-	syndb.RegQuick(TbLiveRoom, LiveRoomTotalVideoCallTicketIncome)
-	syndb.RegQuick(TbLiveRoom, LiveRoomTotalVideoCallBillingIncome)
 	syndb.RegQuick(TbLiveRoom, LiveRoomCategory)
 	syndb.RegQuick(TbLiveRoom, LiveRoomTagId)
 	syndb.RegQuick(TbLiveRoom, LiveRoomTicket)

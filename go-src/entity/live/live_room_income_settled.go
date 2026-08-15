@@ -1,0 +1,96 @@
+package entity
+
+import (
+	"time"
+	"xr-game-server/constants/db"
+	"xr-game-server/core/migrate"
+	"xr-game-server/core/syndb"
+
+	"github.com/gogf/gf/v2/os/gmlock"
+)
+
+const (
+	TbLiveRoomIncomeSettled db.TbName = "live_room_income_settleds"
+)
+
+// LiveRoomIncomeSettled 直播间已结算收益(每次结算累加)
+type LiveRoomIncomeSettled struct {
+	migrate.OneModel
+	LiveRoomIncomeAmounts
+}
+
+func NewLiveRoomIncomeSettled(roomId uint64) *LiveRoomIncomeSettled {
+	ret := &LiveRoomIncomeSettled{}
+	ret.ID = roomId
+	now := time.Now()
+	ret.CreatedAt = now
+	ret.UpdatedAt = now
+	syndb.AddData(TbLiveRoomIncomeSettled, db.CreatedAtName, &syndb.ColData{IdVal: roomId, ColVal: now})
+	syndb.AddData(TbLiveRoomIncomeSettled, db.UpdatedAtName, &syndb.ColData{IdVal: roomId, ColVal: now})
+	return ret
+}
+
+func (r *LiveRoomIncomeSettled) AddTotalIncome(v float64) {
+	addIncomeAmount(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalIncome, r.ID, &r.TotalIncome, v, true, &r.UpdatedAt)
+}
+func (r *LiveRoomIncomeSettled) AddTotalGiftIncome(v float64) {
+	addIncomeAmount(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalGiftIncome, r.ID, &r.TotalGiftIncome, v, true, &r.UpdatedAt)
+}
+func (r *LiveRoomIncomeSettled) AddTotalPaidDanmakuIncome(v float64) {
+	addIncomeAmount(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalPaidDanmakuIncome, r.ID, &r.TotalPaidDanmakuIncome, v, true, &r.UpdatedAt)
+}
+func (r *LiveRoomIncomeSettled) AddTotalPrivateRoomTicketIncome(v float64) {
+	addIncomeAmount(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalPrivateRoomTicketIncome, r.ID, &r.TotalPrivateRoomTicketIncome, v, true, &r.UpdatedAt)
+}
+func (r *LiveRoomIncomeSettled) AddTotalPrivateRoomWatchIncome(v float64) {
+	addIncomeAmount(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalPrivateRoomWatchIncome, r.ID, &r.TotalPrivateRoomWatchIncome, v, true, &r.UpdatedAt)
+}
+func (r *LiveRoomIncomeSettled) AddTotalVideoCallIncome(v float64) {
+	addIncomeAmount(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalVideoCallIncome, r.ID, &r.TotalVideoCallIncome, v, true, &r.UpdatedAt)
+}
+func (r *LiveRoomIncomeSettled) AddTotalVideoCallTicketIncome(v float64) {
+	addIncomeAmount(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalVideoCallTicketIncome, r.ID, &r.TotalVideoCallTicketIncome, v, true, &r.UpdatedAt)
+}
+func (r *LiveRoomIncomeSettled) AddTotalVideoCallBillingIncome(v float64) {
+	addIncomeAmount(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalVideoCallBillingIncome, r.ID, &r.TotalVideoCallBillingIncome, v, true, &r.UpdatedAt)
+}
+
+// AddAmounts 结算时将一笔金额累加到已结算表(一次加锁)
+func (r *LiveRoomIncomeSettled) AddAmounts(a *LiveRoomIncomeAmounts) {
+	if a == nil {
+		return
+	}
+	key := liveRoomIncomeLockKey(TbLiveRoomIncomeSettled, r.ID)
+	gmlock.Lock(key)
+	defer gmlock.Unlock(key)
+	if a.TotalIncome > 0 {
+		addIncomeAmountLocked(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalIncome, r.ID, &r.TotalIncome, a.TotalIncome)
+	}
+	if a.TotalGiftIncome > 0 {
+		addIncomeAmountLocked(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalGiftIncome, r.ID, &r.TotalGiftIncome, a.TotalGiftIncome)
+	}
+	if a.TotalPaidDanmakuIncome > 0 {
+		addIncomeAmountLocked(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalPaidDanmakuIncome, r.ID, &r.TotalPaidDanmakuIncome, a.TotalPaidDanmakuIncome)
+	}
+	if a.TotalPrivateRoomTicketIncome > 0 {
+		addIncomeAmountLocked(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalPrivateRoomTicketIncome, r.ID, &r.TotalPrivateRoomTicketIncome, a.TotalPrivateRoomTicketIncome)
+	}
+	if a.TotalPrivateRoomWatchIncome > 0 {
+		addIncomeAmountLocked(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalPrivateRoomWatchIncome, r.ID, &r.TotalPrivateRoomWatchIncome, a.TotalPrivateRoomWatchIncome)
+	}
+	if a.TotalVideoCallIncome > 0 {
+		addIncomeAmountLocked(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalVideoCallIncome, r.ID, &r.TotalVideoCallIncome, a.TotalVideoCallIncome)
+	}
+	if a.TotalVideoCallTicketIncome > 0 {
+		addIncomeAmountLocked(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalVideoCallTicketIncome, r.ID, &r.TotalVideoCallTicketIncome, a.TotalVideoCallTicketIncome)
+	}
+	if a.TotalVideoCallBillingIncome > 0 {
+		addIncomeAmountLocked(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalVideoCallBillingIncome, r.ID, &r.TotalVideoCallBillingIncome, a.TotalVideoCallBillingIncome)
+	}
+	touchIncomeUpdatedAt(TbLiveRoomIncomeSettled, r.ID, &r.UpdatedAt)
+}
+
+func initLiveRoomIncomeSettled() {
+	regLiveRoomIncomeCols(TbLiveRoomIncomeSettled)
+	migrate.AutoMigrate(&LiveRoomIncomeSettled{})
+}

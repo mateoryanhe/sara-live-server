@@ -30,7 +30,7 @@ type AnchorListItem struct {
 	Ticket                       float64    `json:"ticket" dc:"门票价格(钻石,私密直播间)"`
 	Billing                      float64    `json:"billing" dc:"计费价格(每分钟钻石,私密直播间)"`
 	LiveStatus                   uint8      `json:"liveStatus" dc:"直播状态(0未开播,1直播中)"`
-	TotalIncome                  float64    `json:"totalIncome" dc:"直播收益"`
+	TotalIncome                  float64    `json:"totalIncome" dc:"生涯累计直播收益(缓存)"`
 	TotalGiftIncome              float64    `json:"totalGiftIncome" dc:"累计礼物收益"`
 	TotalPaidDanmakuIncome       float64    `json:"totalPaidDanmakuIncome" dc:"累计付费弹幕收益"`
 	TotalPrivateRoomTicketIncome float64    `json:"totalPrivateRoomTicketIncome" dc:"累计私密直播间门票收益"`

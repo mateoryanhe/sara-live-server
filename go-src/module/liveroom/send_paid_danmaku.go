@@ -2,12 +2,10 @@ package liveroom
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/constants/cmd"
 	"xr-game-server/constants/currency"
 	"xr-game-server/constants/liverevenue"
@@ -89,16 +87,11 @@ func SendPaidDanmaku(ctx context.Context, req *liveroomdto.SendPaidDanmakuReq) (
 		push.Data(o, cmd.LiveRoomPaidDanmaku, payload)
 	}
 
-	lockName := fmt.Sprintf("room_%v", req.RoomId)
-	gmlock.Lock(lockName)
-	defer gmlock.Unlock(lockName)
-
 	if liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId); liveRecord != nil {
-		liveRecord.AddTotalIncome(price)
-		liveRecord.AddTotalPaidDanmakuIncome(price)
+		liveRecord.AddPaidDanmakuEarn(price)
 	}
-	room.AddTotalIncome(price)
-	room.AddTotalPaidDanmakuIncome(price)
+	liveroomdao.GetLiveRoomIncomeUnsettled(room.ID).AddPaidDanmakuEarn(price)
+	liveroomdao.GetLiveRoomIncomeTotal(room.ID).AddPaidDanmakuEarn(price)
 
 	event.Pub(gameevent.RevenueEventEvent, eventData)
 

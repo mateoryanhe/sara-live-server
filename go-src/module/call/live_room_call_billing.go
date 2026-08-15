@@ -1,16 +1,13 @@
 package call
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
-	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/constants/currency"
 	"xr-game-server/constants/liverevenue"
 	"xr-game-server/core/event"
 	"xr-game-server/core/math"
-	"xr-game-server/core/syndb"
 	"xr-game-server/dao/liveroomdao"
 	callentity "xr-game-server/entity/call"
 	liveentity "xr-game-server/entity/live"
@@ -102,18 +99,16 @@ func applyLiveRoomCallRevenue(roomId, liveRecordId, callerId, orderId uint64, am
 		return
 	}
 
-	lockKey := fmt.Sprintf("room_%d", roomId)
-	gmlock.Lock(lockKey)
-	defer gmlock.Unlock(lockKey)
-
 	room := liveroomdao.GetRoomById(roomId)
 	if room == nil {
 		return
 	}
+	ticket := revenueType == liverevenue.LiveRoomVideoCallTicket
+	billing := revenueType == liverevenue.LiveRoomVideoCallBilling
 	if liveRecord := liveroomdao.GetLiveRecordById(liveRecordId); liveRecord != nil {
-		applyLiveRecordCallRevenueDelta(liveRecord, amount, revenueType)
+		liveRecord.ApplyVideoCallIncomeDelta(amount, ticket, billing)
 	}
-	applyRoomCallRevenueDelta(room, amount, revenueType)
+	applyRoomCallRevenueDelta(room, amount, ticket, billing)
 
 	var eventData *liveentity.LiveRevenueLog
 	switch revenueType {
@@ -132,10 +127,6 @@ func refundLiveRoomCallRevenue(order *callentity.CallOrder, liveRecordId uint64,
 		return
 	}
 
-	lockKey := fmt.Sprintf("room_%d", order.ReceiverId)
-	gmlock.Lock(lockKey)
-	defer gmlock.Unlock(lockKey)
-
 	if log := liveroomdao.FindLatestUnrefundedVideoCallBillingLog(order.ID, order.CallerId); log != nil {
 		log.SetStatus(liveentity.LiveRevenueLogStatusRefunded)
 	}
@@ -145,55 +136,19 @@ func refundLiveRoomCallRevenue(order *callentity.CallOrder, liveRecordId uint64,
 		return
 	}
 	if liveRecord := liveroomdao.GetLiveRecordById(liveRecordId); liveRecord != nil {
-		applyLiveRecordCallRevenueDelta(liveRecord, -refundAmount, liverevenue.LiveRoomVideoCallBilling)
+		liveRecord.ApplyVideoCallIncomeDelta(-refundAmount, false, true)
 	}
-	applyRoomCallRevenueDelta(room, -refundAmount, liverevenue.LiveRoomVideoCallBilling)
+	applyRoomCallRevenueDelta(room, -refundAmount, false, true)
 }
 
-func applyLiveRecordCallRevenueDelta(liveRecord *liveentity.LiveRecord, amount float64, revenueType liverevenue.Type) {
-	liveRecord.TotalIncome = math.AddFloat64(liveRecord.TotalIncome, amount)
-	syndb.AddData(liveentity.TbLiveRecord, liveentity.LiveRecordTotalIncome, &syndb.ColData{
-		IdVal: liveRecord.ID, ColVal: liveRecord.TotalIncome,
-	})
-	liveRecord.TotalVideoCallIncome = math.AddFloat64(liveRecord.TotalVideoCallIncome, amount)
-	syndb.AddData(liveentity.TbLiveRecord, liveentity.LiveRecordTotalVideoCallIncome, &syndb.ColData{
-		IdVal: liveRecord.ID, ColVal: liveRecord.TotalVideoCallIncome,
-	})
-	switch revenueType {
-	case liverevenue.LiveRoomVideoCallTicket:
-		liveRecord.TotalVideoCallTicketIncome = math.AddFloat64(liveRecord.TotalVideoCallTicketIncome, amount)
-		syndb.AddData(liveentity.TbLiveRecord, liveentity.LiveRecordTotalVideoCallTicketIncome, &syndb.ColData{
-			IdVal: liveRecord.ID, ColVal: liveRecord.TotalVideoCallTicketIncome,
-		})
-	case liverevenue.LiveRoomVideoCallBilling:
-		liveRecord.TotalVideoCallBillingIncome = math.AddFloat64(liveRecord.TotalVideoCallBillingIncome, amount)
-		syndb.AddData(liveentity.TbLiveRecord, liveentity.LiveRecordTotalVideoCallBillingIncome, &syndb.ColData{
-			IdVal: liveRecord.ID, ColVal: liveRecord.TotalVideoCallBillingIncome,
-		})
+func applyRoomCallRevenueDelta(room *liveentity.LiveRoom, amount float64, ticket, billing bool) {
+	unsettled := liveroomdao.GetLiveRoomIncomeUnsettled(room.ID)
+	total := liveroomdao.GetLiveRoomIncomeTotal(room.ID)
+	if unsettled == nil || total == nil {
+		return
 	}
-}
-
-func applyRoomCallRevenueDelta(room *liveentity.LiveRoom, amount float64, revenueType liverevenue.Type) {
-	room.TotalIncome = math.AddFloat64(room.TotalIncome, amount)
-	syndb.AddData(liveentity.TbLiveRoom, liveentity.LiveRoomTotalIncome, &syndb.ColData{
-		IdVal: room.ID, ColVal: room.TotalIncome,
-	})
-	room.TotalVideoCallIncome = math.AddFloat64(room.TotalVideoCallIncome, amount)
-	syndb.AddData(liveentity.TbLiveRoom, liveentity.LiveRoomTotalVideoCallIncome, &syndb.ColData{
-		IdVal: room.ID, ColVal: room.TotalVideoCallIncome,
-	})
-	switch revenueType {
-	case liverevenue.LiveRoomVideoCallTicket:
-		room.TotalVideoCallTicketIncome = math.AddFloat64(room.TotalVideoCallTicketIncome, amount)
-		syndb.AddData(liveentity.TbLiveRoom, liveentity.LiveRoomTotalVideoCallTicketIncome, &syndb.ColData{
-			IdVal: room.ID, ColVal: room.TotalVideoCallTicketIncome,
-		})
-	case liverevenue.LiveRoomVideoCallBilling:
-		room.TotalVideoCallBillingIncome = math.AddFloat64(room.TotalVideoCallBillingIncome, amount)
-		syndb.AddData(liveentity.TbLiveRoom, liveentity.LiveRoomTotalVideoCallBillingIncome, &syndb.ColData{
-			IdVal: room.ID, ColVal: room.TotalVideoCallBillingIncome,
-		})
-	}
+	liveentity.ApplyVideoCallIncomeDelta(liveentity.TbLiveRoomIncomeUnsettled, unsettled.ID, &unsettled.LiveRoomIncomeAmounts, &unsettled.UpdatedAt, amount, ticket, billing)
+	liveentity.ApplyVideoCallIncomeDelta(liveentity.TbLiveRoomIncomeTotal, total.ID, &total.LiveRoomIncomeAmounts, &total.UpdatedAt, amount, ticket, billing)
 }
 
 const callBillingRefundGrace = 30 * time.Second

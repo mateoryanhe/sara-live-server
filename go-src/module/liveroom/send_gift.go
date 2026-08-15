@@ -2,11 +2,9 @@ package liveroom
 
 import (
 	"context"
-	"fmt"
 	"math"
 	"time"
 
-	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/constants/cmd"
 	"xr-game-server/constants/currency"
 	"xr-game-server/constants/liverevenue"
@@ -149,20 +147,14 @@ func recordSendGiftStats(result *sendGiftResult) {
 		return
 	}
 
-	lockName := fmt.Sprintf("room_%v", result.room.ID)
-	gmlock.Lock(lockName)
-	defer gmlock.Unlock(lockName)
-
-	liveRecord := liveroomdao.GetLiveRecordById(result.room.LiveRecordId)
-	if liveRecord != nil {
-		liveRecord.AddTotalIncome(result.totalCost)
-		liveRecord.AddTotalGiftIncome(result.totalCost)
+	if liveRecord := liveroomdao.GetLiveRecordById(result.room.LiveRecordId); liveRecord != nil {
+		liveRecord.AddGiftEarn(result.totalCost)
 		if result.room.LiveRecordId > 0 && liveroomdao.TryRecordLiveRecordGiftSender(result.room.LiveRecordId, result.senderId) {
 			liveRecord.AddTotalGiftSender(1)
 		}
 	}
-	result.room.AddTotalIncome(result.totalCost)
-	result.room.AddTotalGiftIncome(result.totalCost)
+	liveroomdao.GetLiveRoomIncomeUnsettled(result.room.ID).AddGiftEarn(result.totalCost)
+	liveroomdao.GetLiveRoomIncomeTotal(result.room.ID).AddGiftEarn(result.totalCost)
 
 	event.Pub(gameevent.RevenueEventEvent, result.eventData)
 

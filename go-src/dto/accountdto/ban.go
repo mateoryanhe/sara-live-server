@@ -64,21 +64,29 @@ type QueryOffShelfLiveRoomListReq struct {
 
 // OffShelfLiveRoomItem 回收站列表项
 type OffShelfLiveRoomItem struct {
-	ID           uint64     `json:"id,string"`
-	Nickname     string     `json:"nickname"`
-	Phone        string     `json:"phone"`
-	Avatar       string     `json:"avatar"`
-	UserType     uint8      `json:"userType"`
-	GuildId      uint64     `json:"guildId,string"`
-	RoomTitle    string     `json:"roomTitle"`
-	RoomId       uint64     `json:"roomId,string"`
-	Category     uint8      `json:"category"`
-	Ban          bool       `json:"ban"`
-	BanApplyTime *time.Time `json:"banApplyTime"`
-	BanReason    string     `json:"banReason"`
-	Status       uint8      `json:"status"`
-	UpdatedAt    *time.Time `json:"updatedAt"`
-	CreatedAt    *time.Time `json:"createdAt"`
+	ID                           uint64     `json:"id,string"`
+	Nickname                     string     `json:"nickname"`
+	Phone                        string     `json:"phone"`
+	Avatar                       string     `json:"avatar"`
+	UserType                     uint8      `json:"userType"`
+	GuildId                      uint64     `json:"guildId,string"`
+	RoomTitle                    string     `json:"roomTitle"`
+	RoomId                       uint64     `json:"roomId,string"`
+	Category                     uint8      `json:"category"`
+	Ban                          bool       `json:"ban"`
+	BanApplyTime                 *time.Time `json:"banApplyTime"`
+	BanReason                    string     `json:"banReason"`
+	Status                       uint8      `json:"status"`
+	TotalIncome                  float64    `json:"totalIncome" dc:"生涯累计直播收益(直查DB)"`
+	TotalGiftIncome              float64    `json:"totalGiftIncome"`
+	TotalPaidDanmakuIncome       float64    `json:"totalPaidDanmakuIncome"`
+	TotalPrivateRoomTicketIncome float64    `json:"totalPrivateRoomTicketIncome"`
+	TotalPrivateRoomWatchIncome  float64    `json:"totalPrivateRoomWatchIncome"`
+	TotalVideoCallIncome         float64    `json:"totalVideoCallIncome"`
+	TotalVideoCallTicketIncome   float64    `json:"totalVideoCallTicketIncome"`
+	TotalVideoCallBillingIncome  float64    `json:"totalVideoCallBillingIncome"`
+	UpdatedAt                    *time.Time `json:"updatedAt"`
+	CreatedAt                    *time.Time `json:"createdAt"`
 }
 
 // ExitGuildReq CMS主播退出工会(将工会ID置为0)

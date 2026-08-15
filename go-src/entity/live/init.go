@@ -3,6 +3,7 @@ package entity
 // Init 直播相关表迁移与 syndb 注册
 func Init() {
 	initLiveRoom()
+	initLiveRoomIncome()
 	initLiveRoomTag()
 	initLiveRoomGameRecommend()
 	initLiveRoomOnline()
