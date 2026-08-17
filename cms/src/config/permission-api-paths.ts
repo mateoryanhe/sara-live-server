@@ -8,6 +8,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     UserList: '/account/getUserInfo',
     'UserList:view': '/account/getUserInfo',
     'UserList:search': '/account/getUserInfo',
+    'UserList:viewDetail': '/account/getUserDetail',
     'UserList:setAnchor': '/account/setAnchor',
     'UserList:setSeniorAnchor': '/account/setSeniorAnchor',
     'UserList:goldAdd': '/gold/add',

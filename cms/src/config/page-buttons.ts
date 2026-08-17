@@ -96,6 +96,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     UserList: [
         BTN.view,
         BTN.search,
+        {key: 'viewDetail', label: '查看详情'},
         {key: 'setAnchor', label: '设为主播'},
         {key: 'setSeniorAnchor', label: '设为高级主播'},
         {key: 'goldAdd', label: '加金币'},

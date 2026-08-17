@@ -64,7 +64,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('GuildSalaryCfgManagement') || hasMenuPermission('AnchorIncomeSettlementLogList') || hasMenuPermission('GuildIncomeSettlementLogList')"
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('GuildSalaryCfgManagement') || hasMenuPermission('AnchorIncomeSettlementLogList') || hasMenuPermission('GuildIncomeSettlementLogList')"
             index="/operation">
           <template #title>
             <el-icon>
@@ -72,90 +72,146 @@
             </el-icon>
             <span>{{ t('menu.OperationManagement') }}</span>
           </template>
-          <el-menu-item v-if="hasMenuPermission('BannerManagement')" index="/operation/banner/banner-list">
-            <el-icon>
-              <Picture/>
-            </el-icon>
-            <span>{{ t('menu.BannerManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('ActivityMessageManagement')" index="/operation/activity-message/activity-message-list">
-            <el-icon>
-              <Bell/>
-            </el-icon>
-            <span>{{ t('menu.ActivityMessageManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('GuildManagement')" index="/operation/guild/guild-list">
-            <el-icon>
-              <User/>
-            </el-icon>
-            <span>{{ t('menu.GuildManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('GuildProfileManagement')" index="/operation/guild/guild-profile">
-            <el-icon>
-              <EditPen/>
-            </el-icon>
-            <span>{{ t('menu.GuildProfileManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('RechargeCfgManagement')" index="/operation/recharge/recharge-cfg-list">
-            <el-icon>
-              <Wallet/>
-            </el-icon>
-            <span>{{ t('menu.RechargeCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('VipCfgManagement')" index="/operation/vip/vip-cfg-list">
-            <el-icon>
-              <Medal/>
-            </el-icon>
-            <span>{{ t('menu.VipCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('AppPkgManagement')" index="/operation/app-pkg/app-pkg-list">
-            <el-icon>
-              <Box/>
-            </el-icon>
-            <span>{{ t('menu.AppPkgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('RandomNicknameManagement')" index="/operation/random-nickname/random-nickname-cfg">
-            <el-icon>
-              <EditPen/>
-            </el-icon>
-            <span>{{ t('menu.RandomNicknameManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('CustomerServiceCfgManagement')" index="/operation/customer-service/customer-service-cfg">
-            <el-icon>
-              <Service/>
-            </el-icon>
-            <span>{{ t('menu.CustomerServiceCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('WalletExchangeCfgManagement')" index="/operation/wallet/wallet-exchange-cfg">
-            <el-icon>
-              <Coin/>
-            </el-icon>
-            <span>{{ t('menu.WalletExchangeCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('AnchorSalaryCfgManagement')" index="/operation/salary/anchor-salary-cfg-list">
-            <el-icon>
-              <CreditCard/>
-            </el-icon>
-            <span>{{ t('menu.AnchorSalaryCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('GuildSalaryCfgManagement')" index="/operation/salary/guild-salary-cfg-list">
-            <el-icon>
-              <CreditCard/>
-            </el-icon>
-            <span>{{ t('menu.GuildSalaryCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('AnchorIncomeSettlementLogList')" index="/operation/salary/anchor-income-settlement-log-list">
-            <el-icon>
-              <Document/>
-            </el-icon>
-            <span>{{ t('menu.AnchorIncomeSettlementLogList') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('GuildIncomeSettlementLogList')" index="/operation/salary/guild-income-settlement-log-list">
-            <el-icon>
-              <Document/>
-            </el-icon>
-            <span>{{ t('menu.GuildIncomeSettlementLogList') }}</span>
-          </el-menu-item>
+          <el-sub-menu
+              v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement')"
+              index="/operation/group/content">
+            <template #title>
+              <el-icon>
+                <Picture/>
+              </el-icon>
+              <span>{{ t('menu.OperationContentGroup') }}</span>
+            </template>
+            <el-menu-item v-if="hasMenuPermission('BannerManagement')" index="/operation/banner/banner-list">
+              <el-icon>
+                <Picture/>
+              </el-icon>
+              <span>{{ t('menu.BannerManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('ActivityMessageManagement')" index="/operation/activity-message/activity-message-list">
+              <el-icon>
+                <Bell/>
+              </el-icon>
+              <span>{{ t('menu.ActivityMessageManagement') }}</span>
+            </el-menu-item>
+          </el-sub-menu>
+          <el-sub-menu
+              v-if="hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement')"
+              index="/operation/group/recharge">
+            <template #title>
+              <el-icon>
+                <Wallet/>
+              </el-icon>
+              <span>{{ t('menu.OperationRechargeGroup') }}</span>
+            </template>
+            <el-menu-item v-if="hasMenuPermission('RechargeCfgManagement')" index="/operation/recharge/recharge-cfg-list">
+              <el-icon>
+                <Wallet/>
+              </el-icon>
+              <span>{{ t('menu.RechargeCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('VipCfgManagement')" index="/operation/vip/vip-cfg-list">
+              <el-icon>
+                <Medal/>
+              </el-icon>
+              <span>{{ t('menu.VipCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('WalletExchangeCfgManagement')" index="/operation/wallet/wallet-exchange-cfg">
+              <el-icon>
+                <Coin/>
+              </el-icon>
+              <span>{{ t('menu.WalletExchangeCfgManagement') }}</span>
+            </el-menu-item>
+          </el-sub-menu>
+          <el-sub-menu
+              v-if="hasMenuPermission('GuildManagement') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement')"
+              index="/operation/group/guild">
+            <template #title>
+              <el-icon>
+                <User/>
+              </el-icon>
+              <span>{{ t('menu.OperationGuildGroup') }}</span>
+            </template>
+            <el-menu-item v-if="hasMenuPermission('GuildManagement')" index="/operation/guild/guild-list">
+              <el-icon>
+                <User/>
+              </el-icon>
+              <span>{{ t('menu.GuildManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('GuildRecycleBinManagement')" index="/operation/guild/guild-recycle-bin">
+              <el-icon>
+                <Delete/>
+              </el-icon>
+              <span>{{ t('menu.GuildRecycleBinManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('GuildProfileManagement')" index="/operation/guild/guild-profile">
+              <el-icon>
+                <EditPen/>
+              </el-icon>
+              <span>{{ t('menu.GuildProfileManagement') }}</span>
+            </el-menu-item>
+          </el-sub-menu>
+          <el-sub-menu
+              v-if="hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('GuildSalaryCfgManagement') || hasMenuPermission('AnchorIncomeSettlementLogList') || hasMenuPermission('GuildIncomeSettlementLogList')"
+              index="/operation/group/settlement">
+            <template #title>
+              <el-icon>
+                <CreditCard/>
+              </el-icon>
+              <span>{{ t('menu.OperationSettlementGroup') }}</span>
+            </template>
+            <el-menu-item v-if="hasMenuPermission('AnchorSalaryCfgManagement')" index="/operation/salary/anchor-salary-cfg-list">
+              <el-icon>
+                <CreditCard/>
+              </el-icon>
+              <span>{{ t('menu.AnchorSalaryCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('GuildSalaryCfgManagement')" index="/operation/salary/guild-salary-cfg-list">
+              <el-icon>
+                <CreditCard/>
+              </el-icon>
+              <span>{{ t('menu.GuildSalaryCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('AnchorIncomeSettlementLogList')" index="/operation/salary/anchor-income-settlement-log-list">
+              <el-icon>
+                <Document/>
+              </el-icon>
+              <span>{{ t('menu.AnchorIncomeSettlementLogList') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('GuildIncomeSettlementLogList')" index="/operation/salary/guild-income-settlement-log-list">
+              <el-icon>
+                <Document/>
+              </el-icon>
+              <span>{{ t('menu.GuildIncomeSettlementLogList') }}</span>
+            </el-menu-item>
+          </el-sub-menu>
+          <el-sub-menu
+              v-if="hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement')"
+              index="/operation/group/app">
+            <template #title>
+              <el-icon>
+                <Box/>
+              </el-icon>
+              <span>{{ t('menu.OperationAppGroup') }}</span>
+            </template>
+            <el-menu-item v-if="hasMenuPermission('AppPkgManagement')" index="/operation/app-pkg/app-pkg-list">
+              <el-icon>
+                <Box/>
+              </el-icon>
+              <span>{{ t('menu.AppPkgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('RandomNicknameManagement')" index="/operation/random-nickname/random-nickname-cfg">
+              <el-icon>
+                <EditPen/>
+              </el-icon>
+              <span>{{ t('menu.RandomNicknameManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('CustomerServiceCfgManagement')" index="/operation/customer-service/customer-service-cfg">
+              <el-icon>
+                <Service/>
+              </el-icon>
+              <span>{{ t('menu.CustomerServiceCfgManagement') }}</span>
+            </el-menu-item>
+          </el-sub-menu>
         </el-sub-menu>
         <el-sub-menu
             v-if="hasMenuPermission('GiftManagement') || hasMenuPermission('AgoraCfgManagement') || hasMenuPermission('TicketManagement') || hasMenuPermission('PrivateRoomBillingManagement') || hasMenuPermission('LiveCfgManagement') || hasMenuPermission('LiveRoomTagManagement')"
@@ -509,7 +565,7 @@ import {useI18n} from 'vue-i18n'
 import LayoutTabs from '@/components/layout/LayoutTabs.vue'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import {useLayoutTabs} from '@/composables/useLayoutTabs'
-import {ArrowDown, Bell, Box, Coin, Collection, CollectionTag, Cpu, CreditCard, Document, EditPen, Expand, Fold, Key, List, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Refresh, Search, Service, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Bell, Box, Coin, Collection, CollectionTag, Cpu, CreditCard, Delete, Document, EditPen, Expand, Fold, Key, List, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Refresh, Search, Service, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {getIsAdmin, hasPermission} from '@/utils/permission'
 import {clearAuthSession} from '@/utils/auth'
 

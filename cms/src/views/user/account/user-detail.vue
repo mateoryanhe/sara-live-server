@@ -12,63 +12,82 @@
         <el-empty v-if="!loading && !detail?.account" :description="t('pages.userList.detailNotFound')"/>
         <el-tabs v-else-if="detail" v-model="activeTab">
           <el-tab-pane :label="t('pages.userList.tabBasic')" name="basic">
-            <el-descriptions :column="1" border>
-              <el-descriptions-item :label="t('common.userId')">{{ detail.account?.id || '-' }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.openId')">{{ detail.account?.openId || '-' }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.phoneAreaCode')">{{ detail.account?.phoneAreaCode || '-' }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.phone')">{{ detail.profile?.phone || '-' }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.avatar')">
-                <el-image
-                    v-if="detail.profile?.avatar"
-                    :preview-src-list="[detail.profile.avatar]"
-                    :src="detail.profile.avatar"
-                    fit="cover"
-                    hide-on-click-modal
-                    preview-teleported
-                    style="width:48px;height:48px;border-radius:50%"
-                />
-                <span v-else>-</span>
-              </el-descriptions-item>
-              <el-descriptions-item :label="t('common.nickname')">{{ detail.profile?.nickname || '-' }}</el-descriptions-item>
-              <el-descriptions-item :label="t('common.remark')">{{ detail.profile?.remark || '-' }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.shareCode')">{{ detail.profile?.shareCode || '-' }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.userType')">
-                <el-tag>{{ userTypeLabel(detail.profile?.userType) }}</el-tag>
-              </el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.isAnchor')">
-                <el-tag :type="detail.profile?.isAnchor ? 'success' : 'info'">
-                  {{ detail.profile?.isAnchor ? t('common.yes') : t('common.no') }}
-                </el-tag>
-              </el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.inviterId')">{{ detail.profile?.inviterId || '-' }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.vipLevel')">{{ detail.profile?.vipLevel ?? '-' }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.guildId')">{{ detail.profile?.guildId || '-' }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.gender')">{{ genderLabel(detail.profile?.gender) }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.birthday')">{{ formatDate(detail.profile?.birthday) }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.botAnchorStatus')">
-                {{ botAnchorStatusLabel(detail.profile?.botAnchorStatus) }}
-              </el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.liveRoomId')">{{ detail.profile?.liveRoomId || '-' }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.liveRoomVer')">{{ detail.profile?.liveRoomVer || '-' }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.lastLoginTime')">{{ formatDate(detail.profile?.lastLoginTime) }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.ip')">{{ detail.account?.ip || '-' }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.loginCountry')">{{ detail.account?.loginCountry || '-' }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.registerIp')">{{ detail.account?.registerIp || '-' }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.registerCountry')">{{ detail.account?.registerCountry || '-' }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.channel')">{{ detail.account?.channel ?? '-' }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.banStatus')">
-                <el-tag v-if="detail.account?.ban" type="danger">{{ t('pages.userList.banned') }}</el-tag>
-                <el-tag v-else type="success">{{ t('common.normal') }}</el-tag>
-              </el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.banTime')">{{ formatDate(detail.account?.banApplyTime) }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.banAppliedAt')">{{ formatDate(detail.account?.banTime) }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.cancelStatus')">
-                <el-tag v-if="detail.account?.cancel" type="warning">{{ t('pages.userList.canceled') }}</el-tag>
-                <el-tag v-else type="success">{{ t('common.normal') }}</el-tag>
-              </el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.registeredAt')">{{ formatDate(detail.account?.createdAt) }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.profileUpdatedAt')">{{ formatDate(detail.profile?.updatedAt) }}</el-descriptions-item>
-            </el-descriptions>
+            <el-tabs v-model="basicSubTab" class="basic-sub-tabs">
+              <el-tab-pane :label="t('pages.userList.basicSubTabProfile')" name="profile">
+                <el-descriptions :column="1" border>
+                  <el-descriptions-item :label="t('common.userId')">{{ detail.account?.id || '-' }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.openId')">{{ detail.account?.openId || '-' }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.phoneAreaCode')">{{ detail.account?.phoneAreaCode || '-' }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.phone')">{{ detail.profile?.phone || '-' }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.avatar')">
+                    <el-image
+                        v-if="detail.profile?.avatar"
+                        :preview-src-list="[detail.profile.avatar]"
+                        :src="detail.profile.avatar"
+                        fit="cover"
+                        hide-on-click-modal
+                        preview-teleported
+                        style="width:48px;height:48px;border-radius:50%"
+                    />
+                    <span v-else>-</span>
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="t('common.nickname')">{{ detail.profile?.nickname || '-' }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('common.remark')">{{ detail.profile?.remark || '-' }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.shareCode')">{{ detail.profile?.shareCode || '-' }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.gender')">{{ genderLabel(detail.profile?.gender) }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.birthday')">{{ formatDate(detail.profile?.birthday) }}</el-descriptions-item>
+                </el-descriptions>
+              </el-tab-pane>
+
+              <el-tab-pane :label="t('pages.userList.basicSubTabIdentity')" name="identity">
+                <el-descriptions :column="1" border>
+                  <el-descriptions-item :label="t('pages.userList.userType')">
+                    <el-tag>{{ userTypeLabel(detail.profile?.userType) }}</el-tag>
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.isAnchor')">
+                    <el-tag :type="detail.profile?.isAnchor ? 'success' : 'info'">
+                      {{ detail.profile?.isAnchor ? t('common.yes') : t('common.no') }}
+                    </el-tag>
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.inviterId')">{{ detail.profile?.inviterId || '-' }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.vipLevel')">{{ detail.profile?.vipLevel ?? '-' }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.guildId')">{{ detail.profile?.guildId || '-' }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.botAnchorStatus')">
+                    {{ botAnchorStatusLabel(detail.profile?.botAnchorStatus) }}
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.liveRoomId')">{{ detail.profile?.liveRoomId || '-' }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.liveRoomVer')">{{ detail.profile?.liveRoomVer || '-' }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.channel')">{{ detail.account?.channel ?? '-' }}</el-descriptions-item>
+                </el-descriptions>
+              </el-tab-pane>
+
+              <el-tab-pane :label="t('pages.userList.basicSubTabLogin')" name="login">
+                <el-descriptions :column="1" border>
+                  <el-descriptions-item :label="t('pages.userList.lastLoginTime')">{{ formatDate(detail.profile?.lastLoginTime) }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.ip')">{{ detail.account?.ip || '-' }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.loginCountry')">{{ detail.account?.loginCountry || '-' }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.registerIp')">{{ detail.account?.registerIp || '-' }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.registerCountry')">{{ detail.account?.registerCountry || '-' }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.registeredAt')">{{ formatDate(detail.account?.createdAt) }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.profileUpdatedAt')">{{ formatDate(detail.profile?.updatedAt) }}</el-descriptions-item>
+                </el-descriptions>
+              </el-tab-pane>
+
+              <el-tab-pane :label="t('pages.userList.basicSubTabStatus')" name="status">
+                <el-descriptions :column="1" border>
+                  <el-descriptions-item :label="t('pages.userList.banStatus')">
+                    <el-tag v-if="detail.account?.ban" type="danger">{{ t('pages.userList.banned') }}</el-tag>
+                    <el-tag v-else type="success">{{ t('common.normal') }}</el-tag>
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.banTime')">{{ formatDate(detail.account?.banApplyTime) }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.banAppliedAt')">{{ formatDate(detail.account?.banTime) }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.cancelStatus')">
+                    <el-tag v-if="detail.account?.cancel" type="warning">{{ t('pages.userList.canceled') }}</el-tag>
+                    <el-tag v-else type="success">{{ t('common.normal') }}</el-tag>
+                  </el-descriptions-item>
+                </el-descriptions>
+              </el-tab-pane>
+            </el-tabs>
           </el-tab-pane>
 
           <el-tab-pane :label="t('pages.userList.tabWallet')" name="wallet">
@@ -149,6 +168,7 @@ const router = useRouter()
 const loading = ref(false)
 const detail = ref<UserDetail | null>(null)
 const activeTab = ref('basic')
+const basicSubTab = ref('profile')
 
 const userId = computed(() => String(route.query.id || '').trim())
 
@@ -239,6 +259,7 @@ const goBack = () => {
 watch(userId, (_id, prev) => {
   if (prev !== undefined) {
     activeTab.value = 'basic'
+    basicSubTab.value = 'profile'
     fetchDetail()
   }
 })
@@ -253,5 +274,9 @@ onActivated(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.basic-sub-tabs :deep(.el-tabs__header) {
+  margin-bottom: 16px;
 }
 </style>

@@ -51,7 +51,14 @@
       </div>
       <div class="content">
         <el-table v-loading="loading" :data="userList" style="width: 100%">
-          <el-table-column label="ID" prop="id" width="200"/>
+          <el-table-column label="ID" prop="id" width="200">
+            <template #default="scope">
+              <el-button v-if="canViewDetail" link type="primary" @click="openDetail(scope.row)">
+                {{ scope.row.id }}
+              </el-button>
+              <span v-else>{{ scope.row.id }}</span>
+            </template>
+          </el-table-column>
           <el-table-column :label="t('common.createdAt')" prop="createdAt" width="200">
             <template #default="scope">
               {{ formatDate(scope.row.createdAt) }}
@@ -168,8 +175,8 @@
                 </el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item v-if="can('view')" command="viewDetail">{{ t('pages.userList.viewDetail') }}</el-dropdown-item>
-                    <el-dropdown-item v-if="can('setAnchor') && !scope.row.isAnchor" :divided="can('view')" command="setAnchor">{{ t('pages.userList.setAnchor') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="canViewDetail" command="viewDetail">{{ t('pages.userList.viewDetail') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="can('setAnchor') && !scope.row.isAnchor" :divided="canViewDetail" command="setAnchor">{{ t('pages.userList.setAnchor') }}</el-dropdown-item>
                     <el-dropdown-item v-if="can('setSeniorAnchor') && !scope.row.isAnchor" command="setSeniorAnchor">{{ t('pages.userList.setSeniorAnchor') }}</el-dropdown-item>
                     <el-dropdown-item v-if="can('goldAdd')" :divided="!scope.row.isAnchor" command="gold-add">
                       {{ t('pages.userList.addGold') }}
@@ -317,6 +324,7 @@ import {usePagePermission} from '@/composables/usePagePermission'
 
 const {t, locale} = useI18n()
 const {can} = usePagePermission('UserList')
+const canViewDetail = computed(() => can('viewDetail'))
 
 const ROW_ACTION_KEYS = [
   'setAnchor',
@@ -334,7 +342,7 @@ const ROW_ACTION_KEYS = [
   'setUserType',
 ] as const
 
-const hasRowActions = computed(() => can('view') || ROW_ACTION_KEYS.some(key => can(key)))
+const hasRowActions = computed(() => canViewDetail.value || ROW_ACTION_KEYS.some(key => can(key)))
 
 const userList = ref<UserInfo[]>([])
 const loading = ref(false)
