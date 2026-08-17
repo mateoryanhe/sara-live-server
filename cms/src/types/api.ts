@@ -962,6 +962,19 @@ export interface AnchorSalaryCfg {
 export interface AnchorSalaryCfgQuery extends PageQuery {
 }
 
+export interface GuildSalaryCfg {
+    id: string
+    dailyEffectiveLiveCount: number
+    weeklyEffectiveLiveCount: number
+    salaryAmount: number
+    sort: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GuildSalaryCfgQuery extends PageQuery {
+}
+
 export interface AgoraCfg {
     id: string
     appId: string

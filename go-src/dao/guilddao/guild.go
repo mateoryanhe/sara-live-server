@@ -43,6 +43,15 @@ func GetGuildById(id uint64) *liveentity.LiveGuild {
 	return &row
 }
 
+// ListOnShelfGuilds 查询全部上架工会
+func ListOnShelfGuilds() []*liveentity.LiveGuild {
+	rows := make([]*liveentity.LiveGuild, 0)
+	_ = g.DB().Model(string(liveentity.TbLiveGuild)).
+		Where(string(liveentity.LiveGuildStatus), liveentity.LiveGuildStatusOnShelf).
+		Scan(&rows)
+	return rows
+}
+
 // GetGuildByName 根据名称从数据库获取工会(不含已软删除)
 func GetGuildByName(name string) *liveentity.LiveGuild {
 	name = strings.TrimSpace(name)

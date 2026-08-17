@@ -21,9 +21,10 @@ const (
 	LiveRoomIncomeTotalVideoCallBillingIncome  db.TbCol = "total_video_call_billing_income"
 	LiveRoomIncomeTotalLiveDuration            db.TbCol = "total_live_duration"
 	LiveRoomIncomeEffectiveLiveCount           db.TbCol = "effective_live_count"
+	LiveRoomIncomeSettlementSalary             db.TbCol = "settlement_salary"
 )
 
-// LiveRoomIncomeAmounts 直播间收益字段(三张收益表共用结构)
+// LiveRoomIncomeAmounts 直播间/工会收益字段(房间与工会收益表共用结构)
 type LiveRoomIncomeAmounts struct {
 	TotalIncome                  float64 `gorm:"default:0;comment:直播收益" json:"totalIncome"`
 	TotalGiftIncome              float64 `gorm:"default:0;comment:累计礼物收益" json:"totalGiftIncome"`
@@ -229,4 +230,8 @@ func initLiveRoomIncome() {
 	initLiveRoomIncomeUnsettledArchive()
 	initLiveRoomIncomeSettled()
 	initLiveRoomIncomeTotal()
+	initGuildIncomeUnsettled()
+	initGuildIncomeUnsettledArchive()
+	initGuildIncomeSettled()
+	initGuildIncomeTotal()
 }

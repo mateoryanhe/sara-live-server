@@ -51,6 +51,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   AppTokenConfig: 'ऐप टोकन',
   AccountCfgManagement: 'अकाउंट कॉन्फ़िग',
   AnchorSalaryCfgManagement: 'एंकर वेतन टियर',
+  GuildSalaryCfgManagement: 'गिल्ड वेतन टियर',
   PreloadCfgManagement: 'प्रीलोड कॉन्फ़िग',
   TextModerationCfgManagement: 'टेक्स्ट मॉडरेशन',
   PrivacyPolicyCfgManagement: 'गोपनीयता नीति',

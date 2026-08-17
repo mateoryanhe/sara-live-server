@@ -3,6 +3,7 @@ package liveroom
 import (
 	"context"
 
+	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/accountdto"
 	"xr-game-server/entity/user"
@@ -88,7 +89,7 @@ func SetUserAsAnchorIfNeeded(accountId uint64, userType uint8) error {
 	return setUserAsAnchorBatch(accountId, userType)
 }
 
-// ExitGuild CMS主播退出工会(将 live_room.guild_id 置为0)
+// ExitGuild CMS主播退出工会(将 live_room.guild_id 置为0;主播日有效次数清零,房间未结算归档清零)
 func ExitGuild(ctx context.Context, req *accountdto.ExitGuildReq) (*accountdto.ExitGuildRes, error) {
 	user := userinfodao.GetUserInfoByUserId(req.AnchorId)
 	if user == nil {
@@ -98,7 +99,12 @@ func ExitGuild(ctx context.Context, req *accountdto.ExitGuildReq) (*accountdto.E
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	room := EnsureAnchorRoom(req.AnchorId, 0)
-	room.SetGuildId(0)
+	guildId := room.GuildId
+	if guildId > 0 {
+		liveroomdao.ArchiveAndClearUnsettledIncome(req.AnchorId, guildId)
+		liveroomdao.ClearRecentUnsettledDailyEffectiveLiveCount(req.AnchorId)
+		room.SetGuildId(0)
+	}
 	RefreshRoomListCache(ctx)
 	return &accountdto.ExitGuildRes{Success: true}, nil
 }

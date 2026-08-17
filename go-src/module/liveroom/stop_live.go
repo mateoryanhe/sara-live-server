@@ -80,6 +80,7 @@ func stopLive(anchorId uint64) *entity.LiveRecord {
 		if total := liveroomdao.GetLiveRoomIncomeTotal(anchorId); total != nil {
 			total.AddEffectiveLiveCount(1)
 		}
+		liveroomdao.MirrorGuildEffectiveLiveCount(anchorId, 1)
 		liveroomdao.AddDailyEffectiveLiveCount(anchorId, now)
 	}
 	return liveRecord

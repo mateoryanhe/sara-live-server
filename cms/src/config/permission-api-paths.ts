@@ -246,6 +246,13 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'AnchorSalaryCfgManagement:edit': '/anchorSalaryCfg/updateAnchorSalaryCfg',
     'AnchorSalaryCfgManagement:delete': '/anchorSalaryCfg/deleteAnchorSalaryCfg',
 
+    GuildSalaryCfgManagement: '/guildSalaryCfg/guildSalaryCfgList',
+    'GuildSalaryCfgManagement:view': '/guildSalaryCfg/guildSalaryCfgList',
+    'GuildSalaryCfgManagement:search': '/guildSalaryCfg/guildSalaryCfgList',
+    'GuildSalaryCfgManagement:create': '/guildSalaryCfg/createGuildSalaryCfg',
+    'GuildSalaryCfgManagement:edit': '/guildSalaryCfg/updateGuildSalaryCfg',
+    'GuildSalaryCfgManagement:delete': '/guildSalaryCfg/deleteGuildSalaryCfg',
+
     PreloadCfgManagement: '/preloadCfg/getPreloadCfg',
     'PreloadCfgManagement:view': '/preloadCfg/getPreloadCfg',
     'PreloadCfgManagement:save': '/preloadCfg/savePreloadCfg',

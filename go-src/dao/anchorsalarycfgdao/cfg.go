@@ -53,3 +53,12 @@ func GetList(req *anchorsalarycfgdto.AnchorSalaryCfgListReq) (int, []*anchorsala
 	g.DB().GetScan(ctx, &ret, sql, param)
 	return total, ret
 }
+
+// ListAllOrderBySalaryDesc 全部薪资分档(薪资降序,用于结算匹配最高档)
+func ListAllOrderBySalaryDesc() []*entity.AnchorSalaryCfg {
+	rows := make([]*entity.AnchorSalaryCfg, 0)
+	_ = g.DB().Model(string(entity.TbAnchorSalaryCfg)).
+		Order("salary_amount desc, id desc").
+		Scan(&rows)
+	return rows
+}

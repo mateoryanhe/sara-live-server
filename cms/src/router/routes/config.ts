@@ -25,6 +25,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '主播结算薪资'},
         },
         {
+            path: 'guild-salary-cfg',
+            name: 'GuildSalaryCfgManagement',
+            component: () => import('@/views/config/guild-salary-cfg-list.vue'),
+            meta: {title: '工会结算薪资'},
+        },
+        {
             path: 'preload-cfg',
             name: 'PreloadCfgManagement',
             component: () => import('@/views/config/preload-cfg.vue'),

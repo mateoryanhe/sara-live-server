@@ -5,4 +5,6 @@ func Init() {
 	initHeart()
 	initRoomList()
 	initRoomTagMemory()
+	initAnchorSettlement()
+	initGuildSettlement()
 }

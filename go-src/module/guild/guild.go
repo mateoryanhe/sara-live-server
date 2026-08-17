@@ -8,6 +8,7 @@ import (
 	"xr-game-server/core/snowflake"
 	"xr-game-server/dao/cmsuserdao"
 	"xr-game-server/dao/guilddao"
+	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/guilddto"
 	liveentity "xr-game-server/entity/live"
 	"xr-game-server/errercode"
@@ -78,12 +79,14 @@ func UpdateGuild(ctx context.Context, req *guilddto.UpdateGuildReq) (res *guildd
 	return &guilddto.UpdateGuildRes{Success: true}, nil
 }
 
-// DeleteGuild 下架直播工会(同步下架工会下全部主播间)
+// DeleteGuild 下架直播工会(同步下架工会下全部主播间,并归档清零工会未结算收益/日有效次数)
 func DeleteGuild(ctx context.Context, req *guilddto.DeleteGuildReq) (res *guilddto.DeleteGuildRes, err error) {
 	if guilddao.GetGuildById(req.ID) == nil {
 		return nil, errercode.CreateCode(errercode.GuildNonExist)
 	}
 	liveroom.OffShelfGuildLiveRooms(ctx, req.ID)
+	liveroomdao.ArchiveAndClearGuildUnsettledIncome(req.ID)
+	liveroomdao.ClearRecentUnsettledDailyGuildEffectiveLiveCount(req.ID)
 	if err = guilddao.DeleteGuild(req.ID); err != nil {
 		return nil, err
 	}

@@ -51,6 +51,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   AppTokenConfig: 'App Token',
   AccountCfgManagement: 'Konfigurasi Akun',
   AnchorSalaryCfgManagement: 'Gaji Anchor',
+  GuildSalaryCfgManagement: 'Gaji Guild',
   PreloadCfgManagement: 'Konfigurasi Preload',
   TextModerationCfgManagement: 'Moderasi Teks',
   PrivacyPolicyCfgManagement: 'Kebijakan Privasi',

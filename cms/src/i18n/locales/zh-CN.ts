@@ -50,6 +50,7 @@ const menu = {
   AppTokenConfig: 'App Token',
   AccountCfgManagement: '账号配置',
   AnchorSalaryCfgManagement: '主播结算薪资',
+  GuildSalaryCfgManagement: '工会结算薪资',
   PreloadCfgManagement: '预热配置',
   TextModerationCfgManagement: '敏感词过滤',
   PrivacyPolicyCfgManagement: '隐私政策',

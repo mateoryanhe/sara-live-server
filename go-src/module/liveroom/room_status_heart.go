@@ -99,6 +99,7 @@ func flushAnchorId(room *entity.LiveRoom) {
 	if total := liveroomdao.GetLiveRoomIncomeTotal(room.ID); total != nil {
 		total.AddTotalLiveDuration(sec)
 	}
+	liveroomdao.MirrorGuildLiveDuration(room.ID, sec)
 }
 
 func flushAudience(userId uint64, room *entity.LiveRoom) {

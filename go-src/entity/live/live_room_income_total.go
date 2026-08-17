@@ -15,6 +15,7 @@ const (
 type LiveRoomIncomeTotal struct {
 	migrate.OneModel
 	LiveRoomIncomeAmounts
+	SettlementSalary float64 `gorm:"type:decimal(16,4);default:0;comment:结算薪资" json:"settlementSalary"`
 }
 
 func NewLiveRoomIncomeTotal(roomId uint64) *LiveRoomIncomeTotal {
@@ -79,7 +80,16 @@ func (r *LiveRoomIncomeTotal) AddPrivateRoomWatchEarn(v float64) {
 	addIncomeEarn(TbLiveRoomIncomeTotal, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalPrivateRoomWatchIncome, &r.TotalPrivateRoomWatchIncome)
 }
 
+// AddSettlementSalary 累加结算薪资
+func (r *LiveRoomIncomeTotal) AddSettlementSalary(v float64) {
+	if r == nil || v == 0 {
+		return
+	}
+	addIncomeAmount(TbLiveRoomIncomeTotal, LiveRoomIncomeSettlementSalary, r.ID, &r.SettlementSalary, v, false, &r.UpdatedAt)
+}
+
 func initLiveRoomIncomeTotal() {
 	regLiveRoomIncomeCols(TbLiveRoomIncomeTotal)
+	syndb.RegQuick(TbLiveRoomIncomeTotal, LiveRoomIncomeSettlementSalary)
 	migrate.AutoMigrate(&LiveRoomIncomeTotal{})
 }

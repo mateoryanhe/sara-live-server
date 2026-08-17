@@ -155,6 +155,7 @@ func recordSendGiftStats(result *sendGiftResult) {
 	}
 	liveroomdao.GetLiveRoomIncomeUnsettled(result.room.ID).AddGiftEarn(result.totalCost)
 	liveroomdao.GetLiveRoomIncomeTotal(result.room.ID).AddGiftEarn(result.totalCost)
+	liveroomdao.MirrorGuildGiftEarn(result.room.ID, result.totalCost)
 
 	event.Pub(gameevent.RevenueEventEvent, result.eventData)
 

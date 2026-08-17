@@ -23,6 +23,7 @@ type LiveRoomIncomeUnsettledArchive struct {
 	RoomId  uint64 `gorm:"index;default:0;comment:直播间ID" json:"roomId"`
 	GuildId uint64 `gorm:"index;default:0;comment:工会ID" json:"guildId"`
 	LiveRoomIncomeAmounts
+	SettlementSalary float64 `gorm:"type:decimal(16,4);default:0;comment:结算薪资" json:"settlementSalary"`
 }
 
 // NewLiveRoomIncomeUnsettledArchive 新建一条下架未结算归档并入库
@@ -62,5 +63,6 @@ func initLiveRoomIncomeUnsettledArchive() {
 	syndb.RegQuick(TbLiveRoomIncomeUnsettledArchive, LiveRoomIncomeUnsettledArchiveRoomId)
 	syndb.RegQuick(TbLiveRoomIncomeUnsettledArchive, LiveRoomIncomeUnsettledArchiveGuildId)
 	regLiveRoomIncomeCols(TbLiveRoomIncomeUnsettledArchive)
+	syndb.RegQuick(TbLiveRoomIncomeUnsettledArchive, LiveRoomIncomeSettlementSalary)
 	migrate.AutoMigrate(&LiveRoomIncomeUnsettledArchive{})
 }

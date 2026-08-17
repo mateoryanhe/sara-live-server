@@ -42,6 +42,7 @@ import {shortVideoCategoryListMessages} from './short-video-category-list'
 import {shortVideoWatchListMessages} from './short-video-watch-list'
 import {accountCfgMessages} from './account-cfg'
 import {anchorSalaryCfgListMessages} from './anchor-salary-cfg-list'
+import {guildSalaryCfgListMessages} from './guild-salary-cfg-list'
 import {appTokenMessages} from './app-token'
 import {preloadCfgMessages} from './preload-cfg'
 import {textModerationMessages} from './text-moderation'
@@ -96,6 +97,7 @@ const pageMessageBuilders = [
   ['shortVideoWatchList', shortVideoWatchListMessages],
   ['accountCfg', accountCfgMessages],
   ['anchorSalaryCfgList', anchorSalaryCfgListMessages],
+  ['guildSalaryCfgList', guildSalaryCfgListMessages],
   ['appToken', appTokenMessages],
   ['preloadCfg', preloadCfgMessages],
   ['textModeration', textModerationMessages],
