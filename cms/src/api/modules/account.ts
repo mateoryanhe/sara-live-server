@@ -24,6 +24,7 @@ import type {
     UnBanAnchorReq,
     UnBanReq,
     UnCancelReq,
+    UserDetail,
     UserInfo
 } from '@/types/api'
 
@@ -69,6 +70,10 @@ const accountApi = {
 
     getAnchorDetail: (anchorId: string | number) => {
         return request.post<AnchorDetail>('/account/getAnchorDetail', {anchorId})
+    },
+
+    getUserDetail: (userId: string | number) => {
+        return request.post<UserDetail>('/account/getUserDetail', {userId})
     },
 
     getOffShelfLiveRoomList: (data: QueryOffShelfLiveRoomListReq) => {

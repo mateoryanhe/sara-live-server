@@ -21,6 +21,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'UserList:rechargeWhitelistOff': '/account/setRechargeWhitelist',
     'UserList:cancel': '/account/cancel',
     'UserList:setUserType': '/account/setUserType',
+    UserDetail: '/account/getUserDetail',
 
     AnchorListManagement: '/account/getAnchorList',
     'AnchorListManagement:view': '/account/getAnchorList',

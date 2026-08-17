@@ -53,6 +53,10 @@ func (a *AccountController) QueryUserInfo(ctx context.Context, req *accountdto.Q
 	return userinfo.QueryUserInfo(ctx, req)
 }
 
+func (a *AccountController) GetUserDetail(ctx context.Context, req *accountdto.GetUserDetailReq) (*accountdto.GetUserDetailRes, error) {
+	return userinfo.QueryUserDetail(ctx, req)
+}
+
 func (a *AccountController) QueryAnchorList(ctx context.Context, req *accountdto.QueryAnchorListReq) (res *httpserver.CMSQueryResp, err error) {
 	return liveroom.QueryAnchorList(ctx, req)
 }

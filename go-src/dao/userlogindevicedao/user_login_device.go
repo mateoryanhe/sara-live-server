@@ -59,3 +59,18 @@ func FindUserIdByDeviceId(deviceId string) uint64 {
 	}
 	return row.ID
 }
+
+// GetUserLoginDeviceFromDB 直查 user_login_devices(不存在返回 nil,不新建)
+func GetUserLoginDeviceFromDB(userId uint64) *entity.UserLoginDevice {
+	if userId == 0 {
+		return nil
+	}
+	var row entity.UserLoginDevice
+	err := g.Model(string(entity.TbUserLoginDevice)).Unscoped().Where(g.Map{
+		string(db.IdName): userId,
+	}).Scan(&row)
+	if err != nil || row.ID == 0 {
+		return nil
+	}
+	return &row
+}

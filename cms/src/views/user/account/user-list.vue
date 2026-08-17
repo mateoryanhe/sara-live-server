@@ -168,7 +168,8 @@
                 </el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item v-if="can('setAnchor') && !scope.row.isAnchor" command="setAnchor">{{ t('pages.userList.setAnchor') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="can('view')" command="viewDetail">{{ t('pages.userList.viewDetail') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="can('setAnchor') && !scope.row.isAnchor" :divided="can('view')" command="setAnchor">{{ t('pages.userList.setAnchor') }}</el-dropdown-item>
                     <el-dropdown-item v-if="can('setSeniorAnchor') && !scope.row.isAnchor" command="setSeniorAnchor">{{ t('pages.userList.setSeniorAnchor') }}</el-dropdown-item>
                     <el-dropdown-item v-if="can('goldAdd')" :divided="!scope.row.isAnchor" command="gold-add">
                       {{ t('pages.userList.addGold') }}
@@ -333,7 +334,7 @@ const ROW_ACTION_KEYS = [
   'setUserType',
 ] as const
 
-const hasRowActions = computed(() => ROW_ACTION_KEYS.some(key => can(key)))
+const hasRowActions = computed(() => can('view') || ROW_ACTION_KEYS.some(key => can(key)))
 
 const userList = ref<UserInfo[]>([])
 const loading = ref(false)
@@ -572,8 +573,18 @@ const openCurrencyDialog = (row: UserInfo, type: CurrencyType, mode: CurrencyMod
   currencyDialogVisible.value = true
 }
 
+const openDetail = (row: UserInfo) => {
+  router.push({
+    path: '/user/account/user-detail',
+    query: {id: String(row.id)},
+  })
+}
+
 const handleRowCommand = (row: UserInfo, command: string) => {
   switch (command) {
+    case 'viewDetail':
+      openDetail(row)
+      break
     case 'setUserType':
       openUserTypeDialog(row)
       break

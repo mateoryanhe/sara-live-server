@@ -360,6 +360,89 @@ export interface AnchorDetail {
     incomeArchives?: LiveRoomIncomeArchiveItem[]
 }
 
+export interface UserAccountDetailItem {
+    id: string
+    openId?: string
+    ip?: string
+    registerIp?: string
+    registerCountry?: string
+    loginCountry?: string
+    channel?: number
+    phoneAreaCode?: string
+    ban?: boolean
+    banTime?: string | null
+    banApplyTime?: string | null
+    cancel?: boolean
+    createdAt?: string | null
+}
+
+export interface UserProfileDetailItem {
+    nickname?: string
+    phone?: string
+    avatar?: string
+    remark?: string
+    shareCode?: string
+    userType?: number
+    isAnchor?: boolean
+    inviterId?: string
+    vipLevel?: number
+    lastLoginTime?: string | null
+    liveRoomId?: string
+    liveRoomVer?: string
+    gender?: number
+    birthday?: string | null
+    botAnchorStatus?: number
+    guildId?: string
+    updatedAt?: string | null
+}
+
+export interface UserWalletDetailItem {
+    gold?: number
+    diamond?: number
+}
+
+export interface UserExtDetailItem {
+    canRank?: boolean
+    prettyId?: string
+    packageName?: string
+    appVersion?: string
+    followCount?: number
+    followerCount?: number
+    cancelCode?: string
+    cancelCodeExpireAt?: string | null
+    rechargeWhitelist?: boolean
+    updatedAt?: string | null
+}
+
+export interface UserCumulativeStatDetailItem {
+    totalRecharge?: number
+    totalWithdraw?: number
+    totalPayCount?: number
+    totalDiamondConsume?: number
+    totalGoldConsume?: number
+    totalLiveDuration?: number
+    updatedAt?: string | null
+}
+
+export interface UserLoginDeviceDetailItem {
+    deviceType?: string
+    deviceModel?: string
+    cpuModel?: string
+    osVersion?: string
+    appVersion?: string
+    deviceId?: string
+    updatedAt?: string | null
+}
+
+export interface UserDetail {
+    account?: UserAccountDetailItem | null
+    profile?: UserProfileDetailItem | null
+    wallet?: UserWalletDetailItem | null
+    userExt?: UserExtDetailItem | null
+    cumulativeStat?: UserCumulativeStatDetailItem | null
+    loginDevice?: UserLoginDeviceDetailItem | null
+}
+
 export interface QueryBotAnchorListReq extends PageQuery {
     key?: string
 }

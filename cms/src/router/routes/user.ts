@@ -13,6 +13,16 @@ export const userRoutes: RouteRecordRaw = {
             meta: {title: '用户列表'},
         },
         {
+            path: 'account/user-detail',
+            name: 'UserDetail',
+            component: () => import('@/views/user/account/user-detail.vue'),
+            meta: {
+                title: '用户详情',
+                hidden: true,
+                parentPermission: ['UserList'],
+            },
+        },
+        {
             path: 'anchor/anchor-list',
             name: 'AnchorListManagement',
             component: () => import('@/views/user/anchor/anchor-list.vue'),
