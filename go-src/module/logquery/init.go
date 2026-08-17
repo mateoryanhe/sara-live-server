@@ -2,6 +2,8 @@ package logquery
 
 import (
 	"sync"
+
+	appcfg "xr-game-server/core/cfg"
 )
 
 var (
@@ -43,5 +45,5 @@ func refreshLogQueryConfig() logQueryConfig {
 }
 
 func (c logQueryConfig) hasEssentialPaths() bool {
-	return c.LogDir != "" || c.ExportRoot != ""
+	return c.LogDir != "" || c.exportAbsDir() != "" || appcfg.GetCMSFileExportRoot() != ""
 }

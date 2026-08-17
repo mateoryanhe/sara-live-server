@@ -44,6 +44,8 @@ import {accountCfgMessages} from './account-cfg'
 import {simulatorCpuKeywordListMessages} from './simulator-cpu-keyword-list'
 import {anchorSalaryCfgListMessages} from './anchor-salary-cfg-list'
 import {guildSalaryCfgListMessages} from './guild-salary-cfg-list'
+import {anchorIncomeSettlementLogListMessages} from './anchor-income-settlement-log-list'
+import {guildIncomeSettlementLogListMessages} from './guild-income-settlement-log-list'
 import {appTokenMessages} from './app-token'
 import {preloadCfgMessages} from './preload-cfg'
 import {textModerationMessages} from './text-moderation'
@@ -100,6 +102,8 @@ const pageMessageBuilders = [
   ['simulatorCpuKeywordList', simulatorCpuKeywordListMessages],
   ['anchorSalaryCfgList', anchorSalaryCfgListMessages],
   ['guildSalaryCfgList', guildSalaryCfgListMessages],
+  ['anchorIncomeSettlementLogList', anchorIncomeSettlementLogListMessages],
+  ['guildIncomeSettlementLogList', guildIncomeSettlementLogListMessages],
   ['appToken', appTokenMessages],
   ['preloadCfg', preloadCfgMessages],
   ['textModeration', textModerationMessages],

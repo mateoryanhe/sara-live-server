@@ -260,6 +260,16 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GuildSalaryCfgManagement:edit': '/guildSalaryCfg/updateGuildSalaryCfg',
     'GuildSalaryCfgManagement:delete': '/guildSalaryCfg/deleteGuildSalaryCfg',
 
+    AnchorIncomeSettlementLogList: '/anchorIncomeSettlementLog/cmsAnchorIncomeSettlementLogList',
+    'AnchorIncomeSettlementLogList:view': '/anchorIncomeSettlementLog/cmsAnchorIncomeSettlementLogList',
+    'AnchorIncomeSettlementLogList:search': '/anchorIncomeSettlementLog/cmsAnchorIncomeSettlementLogList',
+    'AnchorIncomeSettlementLogList:export': '/anchorIncomeSettlementLog/cmsAnchorIncomeSettlementLogList',
+
+    GuildIncomeSettlementLogList: '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
+    'GuildIncomeSettlementLogList:view': '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
+    'GuildIncomeSettlementLogList:search': '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
+    'GuildIncomeSettlementLogList:export': '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
+
     PreloadCfgManagement: '/preloadCfg/getPreloadCfg',
     'PreloadCfgManagement:view': '/preloadCfg/getPreloadCfg',
     'PreloadCfgManagement:save': '/preloadCfg/savePreloadCfg',

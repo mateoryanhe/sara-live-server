@@ -13,8 +13,8 @@
 
         <el-table v-loading="loading" :data="tableData" style="width: 100%">
           <el-table-column label="ID" prop="id" width="100"/>
-          <el-table-column :label="t('pages.guildSalaryCfgList.dailyEffectiveLiveCount')" prop="dailyEffectiveLiveCount" min-width="160"/>
-          <el-table-column :label="t('pages.guildSalaryCfgList.weeklyEffectiveLiveCount')" prop="weeklyEffectiveLiveCount" min-width="160"/>
+          <el-table-column :label="t('pages.guildSalaryCfgList.weeklyWorkDays')" prop="weeklyWorkDays" min-width="140"/>
+          <el-table-column :label="t('pages.guildSalaryCfgList.dailyLiveDurationMinutes')" prop="dailyLiveDurationMinutes" min-width="160"/>
           <el-table-column :label="t('pages.guildSalaryCfgList.salaryAmount')" prop="salaryAmount" min-width="120"/>
           <el-table-column :label="t('common.sort')" prop="sort" width="80"/>
           <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
@@ -42,12 +42,12 @@
     </el-card>
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="520px">
-      <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="160px">
-        <el-form-item :label="t('pages.guildSalaryCfgList.dailyEffectiveLiveCount')" prop="dailyEffectiveLiveCount">
-          <el-input-number v-model="currentRow.dailyEffectiveLiveCount" :min="0" controls-position="right"/>
+      <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="180px">
+        <el-form-item :label="t('pages.guildSalaryCfgList.weeklyWorkDays')" prop="weeklyWorkDays">
+          <el-input-number v-model="currentRow.weeklyWorkDays" :max="7" :min="0" controls-position="right"/>
         </el-form-item>
-        <el-form-item :label="t('pages.guildSalaryCfgList.weeklyEffectiveLiveCount')" prop="weeklyEffectiveLiveCount">
-          <el-input-number v-model="currentRow.weeklyEffectiveLiveCount" :min="0" controls-position="right"/>
+        <el-form-item :label="t('pages.guildSalaryCfgList.dailyLiveDurationMinutes')" prop="dailyLiveDurationMinutes">
+          <el-input-number v-model="currentRow.dailyLiveDurationMinutes" :min="0" controls-position="right"/>
         </el-form-item>
         <el-form-item :label="t('pages.guildSalaryCfgList.salaryAmount')" prop="salaryAmount">
           <el-input-number v-model="currentRow.salaryAmount" :min="0" :precision="4" :step="1" controls-position="right"/>
@@ -74,8 +74,8 @@ import type {GuildSalaryCfg} from '@/types/api'
 
 interface TierForm {
   id: string
-  dailyEffectiveLiveCount: number
-  weeklyEffectiveLiveCount: number
+  weeklyWorkDays: number
+  dailyLiveDurationMinutes: number
   salaryAmount: number
   sort: number
 }
@@ -92,8 +92,8 @@ const dialogVisible = ref(false)
 const dialogTitle = ref('')
 const defaultForm = (): TierForm => ({
   id: '',
-  dailyEffectiveLiveCount: 0,
-  weeklyEffectiveLiveCount: 0,
+  weeklyWorkDays: 0,
+  dailyLiveDurationMinutes: 0,
   salaryAmount: 0,
   sort: 0,
 })
@@ -101,11 +101,11 @@ const currentRow = ref<TierForm>(defaultForm())
 const formRef = ref<FormInstance>()
 
 const formRules = computed<FormRules>(() => ({
-  dailyEffectiveLiveCount: [
-    {required: true, message: t('pages.guildSalaryCfgList.dailyRequired'), trigger: 'change'},
+  weeklyWorkDays: [
+    {required: true, message: t('pages.guildSalaryCfgList.weeklyWorkDaysRequired'), trigger: 'change'},
   ],
-  weeklyEffectiveLiveCount: [
-    {required: true, message: t('pages.guildSalaryCfgList.weeklyRequired'), trigger: 'change'},
+  dailyLiveDurationMinutes: [
+    {required: true, message: t('pages.guildSalaryCfgList.dailyLiveDurationRequired'), trigger: 'change'},
   ],
   salaryAmount: [
     {required: true, message: t('pages.guildSalaryCfgList.salaryRequired'), trigger: 'change'},
@@ -149,8 +149,8 @@ const handleEdit = (row: GuildSalaryCfg) => {
   dialogTitle.value = t('pages.guildSalaryCfgList.editTier')
   currentRow.value = {
     id: row.id,
-    dailyEffectiveLiveCount: Number(row.dailyEffectiveLiveCount) || 0,
-    weeklyEffectiveLiveCount: Number(row.weeklyEffectiveLiveCount) || 0,
+    weeklyWorkDays: Number(row.weeklyWorkDays) || 0,
+    dailyLiveDurationMinutes: Number(row.dailyLiveDurationMinutes) || 0,
     salaryAmount: Number(row.salaryAmount) || 0,
     sort: Number(row.sort) || 0,
   }
@@ -161,8 +161,8 @@ const handleSave = async () => {
   try {
     await formRef.value?.validate()
     const payload = {
-      dailyEffectiveLiveCount: currentRow.value.dailyEffectiveLiveCount,
-      weeklyEffectiveLiveCount: currentRow.value.weeklyEffectiveLiveCount,
+      weeklyWorkDays: currentRow.value.weeklyWorkDays,
+      dailyLiveDurationMinutes: currentRow.value.dailyLiveDurationMinutes,
       salaryAmount: currentRow.value.salaryAmount,
       sort: currentRow.value.sort,
     }

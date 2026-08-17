@@ -34,9 +34,6 @@ func NewGuildIncomeSettled(guildId uint64) *GuildIncomeSettled {
 func (r *GuildIncomeSettled) AddTotalLiveDuration(v float64) {
 	addIncomeAmount(TbGuildIncomeSettled, LiveRoomIncomeTotalLiveDuration, r.ID, &r.TotalLiveDuration, v, true, &r.UpdatedAt)
 }
-func (r *GuildIncomeSettled) AddEffectiveLiveCount(v uint64) {
-	addIncomeCount(TbGuildIncomeSettled, LiveRoomIncomeEffectiveLiveCount, r.ID, &r.EffectiveLiveCount, v, &r.UpdatedAt)
-}
 
 func (r *GuildIncomeSettled) AddAmounts(a *LiveRoomIncomeAmounts) {
 	if a == nil || a.IsZero() {

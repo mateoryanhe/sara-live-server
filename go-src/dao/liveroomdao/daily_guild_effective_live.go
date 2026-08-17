@@ -38,7 +38,7 @@ func GetDailyGuildEffectiveLive(date string, guildId uint64) *entity.DailyGuildE
 	return row
 }
 
-// ListRecentUnsettledDailyGuildEffectiveLives 直查DB:某工会最近N条未结算日有效直播记录
+// ListRecentUnsettledDailyGuildEffectiveLives 直查DB:某工会最近N条未结算日直播时长记录
 func ListRecentUnsettledDailyGuildEffectiveLives(guildId uint64) []*entity.DailyGuildEffectiveLive {
 	if guildId == 0 {
 		return nil
@@ -52,19 +52,19 @@ func ListRecentUnsettledDailyGuildEffectiveLives(guildId uint64) []*entity.Daily
 	return rows
 }
 
-// ClearRecentUnsettledDailyGuildEffectiveLiveCount 工会下架:直查DB取最近8条未结算日表,EffectiveLiveCount置0
-func ClearRecentUnsettledDailyGuildEffectiveLiveCount(guildId uint64) {
+// ClearRecentUnsettledDailyGuildLiveDuration 工会下架:直查DB取最近8条未结算日表,直播时长置0
+func ClearRecentUnsettledDailyGuildLiveDuration(guildId uint64) {
 	rows := ListRecentUnsettledDailyGuildEffectiveLives(guildId)
 	for _, row := range rows {
 		if row == nil || row.ID == "" {
 			continue
 		}
 		target := resolveDailyGuildEffectiveLiveTarget(row)
-		target.SetEffectiveLiveCount(0)
+		target.SetLiveDuration(0)
 	}
 }
 
-// MarkDailyGuildEffectiveLivesSettled 将工会日有效直播记录标记为已结算(不清零次数)
+// MarkDailyGuildEffectiveLivesSettled 将工会日直播时长记录标记为已结算
 func MarkDailyGuildEffectiveLivesSettled(rows []*entity.DailyGuildEffectiveLive) {
 	for _, row := range rows {
 		if row == nil || row.ID == "" {
@@ -92,9 +92,9 @@ func resolveDailyGuildEffectiveLiveTarget(row *entity.DailyGuildEffectiveLive) *
 	return row
 }
 
-// AddDailyGuildEffectiveLiveCount 工会当日有效直播次数+1
-func AddDailyGuildEffectiveLiveCount(guildId uint64, at time.Time) {
-	if guildId == 0 {
+// AddDailyGuildLiveDuration 累加工会当日直播时长(主播下播且单场>30分钟时同步调用)
+func AddDailyGuildLiveDuration(guildId uint64, at time.Time, durationSec float64) {
+	if guildId == 0 || durationSec <= 0 {
 		return
 	}
 	date := entity.FormatDailyAnchorEffectiveLiveDate(at)
@@ -102,5 +102,5 @@ func AddDailyGuildEffectiveLiveCount(guildId uint64, at time.Time) {
 	if row == nil {
 		return
 	}
-	row.AddEffectiveLiveCount(1)
+	row.AddLiveDuration(durationSec)
 }

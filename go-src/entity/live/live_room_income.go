@@ -20,7 +20,6 @@ const (
 	LiveRoomIncomeTotalVideoCallTicketIncome   db.TbCol = "total_video_call_ticket_income"
 	LiveRoomIncomeTotalVideoCallBillingIncome  db.TbCol = "total_video_call_billing_income"
 	LiveRoomIncomeTotalLiveDuration            db.TbCol = "total_live_duration"
-	LiveRoomIncomeEffectiveLiveCount           db.TbCol = "effective_live_count"
 	LiveRoomIncomeSettlementSalary             db.TbCol = "settlement_salary"
 )
 
@@ -35,7 +34,6 @@ type LiveRoomIncomeAmounts struct {
 	TotalVideoCallTicketIncome   float64 `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话门票收益" json:"totalVideoCallTicketIncome"`
 	TotalVideoCallBillingIncome  float64 `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话计费收益" json:"totalVideoCallBillingIncome"`
 	TotalLiveDuration            float64 `gorm:"default:0;comment:累计直播时长(秒)" json:"totalLiveDuration"`
-	EffectiveLiveCount           uint64  `gorm:"default:0;comment:有效直播次数(单场时长大于30分钟+1)" json:"effectiveLiveCount"`
 }
 
 func liveRoomIncomeLockKey(tb db.TbName, id uint64) string {
@@ -52,7 +50,6 @@ func (a *LiveRoomIncomeAmounts) clearAmounts() {
 	a.TotalVideoCallTicketIncome = 0
 	a.TotalVideoCallBillingIncome = 0
 	a.TotalLiveDuration = 0
-	a.EffectiveLiveCount = 0
 }
 
 // IsZero 是否全部为0
@@ -68,8 +65,7 @@ func (a *LiveRoomIncomeAmounts) IsZero() bool {
 		a.TotalVideoCallIncome == 0 &&
 		a.TotalVideoCallTicketIncome == 0 &&
 		a.TotalVideoCallBillingIncome == 0 &&
-		a.TotalLiveDuration == 0 &&
-		a.EffectiveLiveCount == 0
+		a.TotalLiveDuration == 0
 }
 
 // addIncomeAmountsLocked 在已持锁前提下累加各收益字段
@@ -104,9 +100,6 @@ func addIncomeAmountsLocked(tb db.TbName, id uint64, dst *LiveRoomIncomeAmounts,
 	if src.TotalLiveDuration > 0 {
 		addIncomeAmountLocked(tb, LiveRoomIncomeTotalLiveDuration, id, &dst.TotalLiveDuration, src.TotalLiveDuration)
 	}
-	if src.EffectiveLiveCount > 0 {
-		addIncomeCountLocked(tb, LiveRoomIncomeEffectiveLiveCount, id, &dst.EffectiveLiveCount, src.EffectiveLiveCount)
-	}
 }
 
 // clearIncomeAmountsLocked 在已持锁前提下清零并写库
@@ -124,7 +117,6 @@ func clearIncomeAmountsLocked(tb db.TbName, id uint64, a *LiveRoomIncomeAmounts,
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallTicketIncome, id, 0)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallBillingIncome, id, 0)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalLiveDuration, id, 0)
-	writeIncomeCountLocked(tb, LiveRoomIncomeEffectiveLiveCount, id, 0)
 	touchIncomeUpdatedAt(tb, id, updatedAt)
 }
 
@@ -144,27 +136,7 @@ func addIncomeAmountLocked(tb db.TbName, col db.TbCol, id uint64, cur *float64, 
 	syndb.AddData(tb, col, &syndb.ColData{IdVal: id, ColVal: *cur})
 }
 
-func addIncomeCount(tb db.TbName, col db.TbCol, id uint64, cur *uint64, v uint64, updatedAt *time.Time) {
-	if v == 0 {
-		return
-	}
-	key := liveRoomIncomeLockKey(tb, id)
-	gmlock.Lock(key)
-	defer gmlock.Unlock(key)
-	addIncomeCountLocked(tb, col, id, cur, v)
-	touchIncomeUpdatedAt(tb, id, updatedAt)
-}
-
-func addIncomeCountLocked(tb db.TbName, col db.TbCol, id uint64, cur *uint64, v uint64) {
-	*cur = math.Add(*cur, v)
-	syndb.AddData(tb, col, &syndb.ColData{IdVal: id, ColVal: *cur})
-}
-
 func writeIncomeAmountLocked(tb db.TbName, col db.TbCol, id uint64, v float64) {
-	syndb.AddData(tb, col, &syndb.ColData{IdVal: id, ColVal: v})
-}
-
-func writeIncomeCountLocked(tb db.TbName, col db.TbCol, id uint64, v uint64) {
 	syndb.AddData(tb, col, &syndb.ColData{IdVal: id, ColVal: v})
 }
 
@@ -222,7 +194,6 @@ func regLiveRoomIncomeCols(tb db.TbName) {
 	syndb.RegQuick(tb, LiveRoomIncomeTotalVideoCallTicketIncome)
 	syndb.RegQuick(tb, LiveRoomIncomeTotalVideoCallBillingIncome)
 	syndb.RegQuick(tb, LiveRoomIncomeTotalLiveDuration)
-	syndb.RegQuick(tb, LiveRoomIncomeEffectiveLiveCount)
 }
 
 func initLiveRoomIncome() {

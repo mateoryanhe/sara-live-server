@@ -6,6 +6,7 @@ func InitCfg() {
 	initServerCfg()
 	initDomainSiteCfg()
 	initStaticPathCfg()
+	initCMSFileExportCfg()
 	initDbBufferCfg()
 	initDbCfg()
 	initDbQueryOnlyLogger()

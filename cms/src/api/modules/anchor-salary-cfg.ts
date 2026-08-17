@@ -7,8 +7,8 @@ export const anchorSalaryCfgApi = {
   },
 
   create: (data: {
-    dailyEffectiveLiveCount: number
-    weeklyEffectiveLiveCount: number
+    weeklyWorkDays: number
+    dailyLiveDurationMinutes: number
     salaryAmount: number
     sort: number
   }) => {
@@ -17,8 +17,8 @@ export const anchorSalaryCfgApi = {
 
   update: (data: {
     id: string | number
-    dailyEffectiveLiveCount: number
-    weeklyEffectiveLiveCount: number
+    weeklyWorkDays: number
+    dailyLiveDurationMinutes: number
     salaryAmount: number
     sort: number
   }) => {

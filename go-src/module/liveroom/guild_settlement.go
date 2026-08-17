@@ -40,7 +40,7 @@ func settleOneGuild(guildId uint64, cfgs []*entity.GuildSalaryCfg) {
 	if unsettled == nil {
 		return
 	}
-	salary := matchGuildSalaryAmount(unsettled.EffectiveLiveCount, dailyRows, cfgs)
+	salary := matchGuildSalaryAmount(countGuildWeeklyWorkDays(dailyRows), dailyRows, cfgs)
 	hasDaily := len(dailyRows) > 0
 	hasUnsettled := !unsettled.IsZero()
 	if !hasDaily && !hasUnsettled && salary == 0 {
@@ -64,16 +64,16 @@ func settleOneGuild(guildId uint64, cfgs []*entity.GuildSalaryCfg) {
 	_ = entity.NewGuildIncomeSettlementLog(guildId, &snap, salary)
 }
 
-// matchGuildSalaryAmount 按薪资降序取最高满足档;日表任一天未达日门槛则该档不达标;周次数用未结算 EffectiveLiveCount
-func matchGuildSalaryAmount(weeklyEffectiveLiveCount uint64, dailyRows []*entity.DailyGuildEffectiveLive, cfgs []*entity.GuildSalaryCfg) float64 {
+// matchGuildSalaryAmount 按薪资降序取最高满足档(结算规则后续完善)
+func matchGuildSalaryAmount(weeklyWorkDays uint64, dailyRows []*entity.DailyGuildEffectiveLive, cfgs []*entity.GuildSalaryCfg) float64 {
 	for _, cfg := range cfgs {
 		if cfg == nil {
 			continue
 		}
-		if weeklyEffectiveLiveCount < cfg.WeeklyEffectiveLiveCount {
+		if weeklyWorkDays < cfg.WeeklyWorkDays {
 			continue
 		}
-		if !dailyGuildEffectiveLivesMeet(dailyRows, cfg.DailyEffectiveLiveCount) {
+		if !dailyGuildEffectiveLivesMeet(dailyRows, cfg.DailyLiveDurationMinutes) {
 			continue
 		}
 		return cfg.SalaryAmount
@@ -81,17 +81,28 @@ func matchGuildSalaryAmount(weeklyEffectiveLiveCount uint64, dailyRows []*entity
 	return 0
 }
 
-func dailyGuildEffectiveLivesMeet(dailyRows []*entity.DailyGuildEffectiveLive, dailyNeed uint64) bool {
-	if dailyNeed == 0 {
+func dailyGuildEffectiveLivesMeet(dailyRows []*entity.DailyGuildEffectiveLive, dailyNeedMinutes uint64) bool {
+	if dailyNeedMinutes == 0 {
 		return true
 	}
 	if len(dailyRows) == 0 {
 		return false
 	}
+	needSec := float64(dailyNeedMinutes) * 60
 	for _, row := range dailyRows {
-		if row == nil || row.EffectiveLiveCount < dailyNeed {
+		if row == nil || row.LiveDuration < needSec {
 			return false
 		}
 	}
 	return true
+}
+
+func countGuildWeeklyWorkDays(dailyRows []*entity.DailyGuildEffectiveLive) uint64 {
+	var n uint64
+	for _, row := range dailyRows {
+		if row != nil && row.LiveDuration > 0 {
+			n++
+		}
+	}
+	return n
 }

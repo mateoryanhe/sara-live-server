@@ -1,0 +1,98 @@
+package cfg
+
+import (
+	"path/filepath"
+	"strings"
+
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
+)
+
+const (
+	CMSFileExportStaticPrefix      = "/cms-export"
+	defaultCMSFileExportTTLMinutes = 30
+)
+
+var (
+	cmsFileExportStaticPrefix string
+	cmsFileExportRoot         string
+	cmsFileExportTTLMinutes   int
+)
+
+func initCMSFileExportCfg() {
+	cmsFileExportStaticPrefix = CMSFileExportStaticPrefix
+	cmsFileExportRoot = ""
+	cmsFileExportTTLMinutes = defaultCMSFileExportTTLMinutes
+
+	for _, item := range staticPathCfgs {
+		if item == nil || item.Prefix != CMSFileExportStaticPrefix {
+			continue
+		}
+		cmsFileExportRoot = strings.TrimSpace(item.Path)
+		if item.TTLMinutes > 0 {
+			cmsFileExportTTLMinutes = item.TTLMinutes
+		}
+		break
+	}
+
+	ctx := gctx.New()
+	if cmsFileExportRoot == "" {
+		g.Log().Warningf(ctx, "server.staticPaths 未配置 %s,CMS 文件导出将不可用", CMSFileExportStaticPrefix)
+		return
+	}
+	g.Log().Warningf(ctx, "CMS文件导出已加载 staticPrefix=%s root=%s ttlMinutes=%d",
+		cmsFileExportStaticPrefix, cmsFileExportRoot, cmsFileExportTTLMinutes)
+}
+
+// GetCMSFileExportStaticPrefix CMS 文件导出下载 URL 前缀
+func GetCMSFileExportStaticPrefix() string {
+	if cmsFileExportStaticPrefix == "" {
+		return CMSFileExportStaticPrefix
+	}
+	return cmsFileExportStaticPrefix
+}
+
+// GetCMSFileExportRoot CMS 文件导出物理目录
+func GetCMSFileExportRoot() string {
+	return cmsFileExportRoot
+}
+
+// GetCMSFileExportTTLMinutes 导出文件过期清理时间(分钟)
+func GetCMSFileExportTTLMinutes() int {
+	if cmsFileExportTTLMinutes <= 0 {
+		return defaultCMSFileExportTTLMinutes
+	}
+	return cmsFileExportTTLMinutes
+}
+
+// ResolveCMSFileExportDir CMS 文件导出目录(所有导出共用同一目录)
+func ResolveCMSFileExportDir() string {
+	if cmsFileExportRoot == "" {
+		return "."
+	}
+	return cmsFileExportRoot
+}
+
+// BuildCMSFileExportURLPrefix CMS 文件导出 URL 前缀
+func BuildCMSFileExportURLPrefix() string {
+	return GetCMSFileExportStaticPrefix()
+}
+
+// BuildCMSFileExportURL 构建文件下载 URL,如 /cms-export/{fileName}
+func BuildCMSFileExportURL(fileName string) string {
+	prefix := BuildCMSFileExportURLPrefix()
+	fileName = strings.Trim(strings.ReplaceAll(fileName, "\\", "/"), "/")
+	if fileName == "" {
+		return prefix
+	}
+	return prefix + "/" + fileName
+}
+
+// JoinCMSFileExportPath 拼接导出目录下的相对路径(禁止 ..)
+func JoinCMSFileExportPath(name string) string {
+	name = strings.Trim(strings.ReplaceAll(name, "\\", "/"), "/")
+	if name == "" || strings.Contains(name, "..") {
+		return ResolveCMSFileExportDir()
+	}
+	return filepath.Join(ResolveCMSFileExportDir(), name)
+}

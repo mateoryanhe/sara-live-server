@@ -4,23 +4,24 @@ import (
 	"context"
 	"time"
 
+	"xr-game-server/core/cfg"
 	"xr-game-server/dto/logquerydto"
 	"xr-game-server/errercode"
 )
 
 func GetLogPaths(_ context.Context, _ *logquerydto.CMSGetLogPathsReq) (*logquerydto.CMSGetLogPathsRes, error) {
-	cfg := loadLogQueryConfig().normalized()
+	logCfg := loadLogQueryConfig().normalized()
 	return &logquerydto.CMSGetLogPathsRes{
-		ServerTime:         time.Now().Format("2006-01-02 15:04:05.000"),
-		LogDir:             cfg.LogDir,
-		AccessPrefix:       cfg.AccessPrefix,
-		DetailPrefix:       cfg.DetailPrefix,
-		ErrorPrefix:        cfg.ErrorPrefix,
-		ExportSubDir:       cfg.ExportSubDir,
-		ExportStaticPrefix: cfg.ExportStaticPrefix,
-		ExportAbsDir:       cfg.exportAbsDir(),
-		ExportURLPrefix:    cfg.exportURLPrefix(),
-		LinuxOnly:          true,
+		ServerTime:             time.Now().Format("2006-01-02 15:04:05.000"),
+		LogDir:                 logCfg.LogDir,
+		AccessPrefix:           logCfg.AccessPrefix,
+		DetailPrefix:           logCfg.DetailPrefix,
+		ErrorPrefix:            logCfg.ErrorPrefix,
+		FileExportStaticPrefix: cfg.GetCMSFileExportStaticPrefix(),
+		FileExportAbsDir:       logCfg.exportAbsDir(),
+		FileExportURLPrefix:    logCfg.exportURLPrefix(),
+		FileExportTTLMinutes:   cfg.GetCMSFileExportTTLMinutes(),
+		LinuxOnly:              true,
 	}, nil
 }
 

@@ -64,7 +64,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('GuildSalaryCfgManagement')"
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('GuildSalaryCfgManagement') || hasMenuPermission('AnchorIncomeSettlementLogList') || hasMenuPermission('GuildIncomeSettlementLogList')"
             index="/operation">
           <template #title>
             <el-icon>
@@ -143,6 +143,18 @@
               <CreditCard/>
             </el-icon>
             <span>{{ t('menu.GuildSalaryCfgManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('AnchorIncomeSettlementLogList')" index="/operation/salary/anchor-income-settlement-log-list">
+            <el-icon>
+              <Document/>
+            </el-icon>
+            <span>{{ t('menu.AnchorIncomeSettlementLogList') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('GuildIncomeSettlementLogList')" index="/operation/salary/guild-income-settlement-log-list">
+            <el-icon>
+              <Document/>
+            </el-icon>
+            <span>{{ t('menu.GuildIncomeSettlementLogList') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -312,72 +324,112 @@
             </el-icon>
             <span>{{ t('menu.ConfigManagement') }}</span>
           </template>
-          <el-menu-item v-if="hasMenuPermission('AppTokenConfig')" index="/config/app-token">
-            <el-icon>
-              <Key/>
-            </el-icon>
-            <span>{{ t('menu.AppTokenConfig') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('AccountCfgManagement')" index="/config/account-cfg">
-            <el-icon>
-              <User/>
-            </el-icon>
-            <span>{{ t('menu.AccountCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('SimulatorCpuKeywordManagement')" index="/config/simulator-cpu-keyword">
-            <el-icon>
-              <Cpu/>
-            </el-icon>
-            <span>{{ t('menu.SimulatorCpuKeywordManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('PreloadCfgManagement')" index="/config/preload-cfg">
-            <el-icon>
-              <Cpu/>
-            </el-icon>
-            <span>{{ t('menu.PreloadCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('TextModerationCfgManagement')" index="/config/text-moderation">
-            <el-icon>
-              <Document/>
-            </el-icon>
-            <span>{{ t('menu.TextModerationCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('PrivacyPolicyCfgManagement')" index="/config/privacy-policy">
-            <el-icon>
-              <Document/>
-            </el-icon>
-            <span>{{ t('menu.PrivacyPolicyCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('GooglePlayCfgManagement')" index="/config/google-play">
-            <el-icon>
-              <CreditCard/>
-            </el-icon>
-            <span>{{ t('menu.GooglePlayCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('UploadResourceCfgManagement')" index="/config/upload-resource">
-            <el-icon>
-              <Picture/>
-            </el-icon>
-            <span>{{ t('menu.UploadResourceCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('DataSyncCfgManagement')" index="/config/data-sync">
-            <el-icon>
-              <Refresh/>
-            </el-icon>
-            <span>{{ t('menu.DataSyncCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('ResourceMonitor')" index="/config/resource-monitor">
-            <el-icon>
-              <Monitor/>
-            </el-icon>
-            <span>{{ t('menu.ResourceMonitor') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('ServerLogExplorer')" index="/config/server-log">
-            <el-icon>
-              <Search/>
-            </el-icon>
-            <span>{{ t('menu.ServerLogExplorer') }}</span>
-          </el-menu-item>
+          <el-sub-menu
+              v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('PreloadCfgManagement')"
+              index="/config/group/basic">
+            <template #title>
+              <el-icon>
+                <Key/>
+              </el-icon>
+              <span>{{ t('menu.ConfigBasicGroup') }}</span>
+            </template>
+            <el-menu-item v-if="hasMenuPermission('AppTokenConfig')" index="/config/app-token">
+              <el-icon>
+                <Key/>
+              </el-icon>
+              <span>{{ t('menu.AppTokenConfig') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('AccountCfgManagement')" index="/config/account-cfg">
+              <el-icon>
+                <User/>
+              </el-icon>
+              <span>{{ t('menu.AccountCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('PreloadCfgManagement')" index="/config/preload-cfg">
+              <el-icon>
+                <Cpu/>
+              </el-icon>
+              <span>{{ t('menu.PreloadCfgManagement') }}</span>
+            </el-menu-item>
+          </el-sub-menu>
+          <el-sub-menu
+              v-if="hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement')"
+              index="/config/group/security">
+            <template #title>
+              <el-icon>
+                <Lock/>
+              </el-icon>
+              <span>{{ t('menu.ConfigSecurityGroup') }}</span>
+            </template>
+            <el-menu-item v-if="hasMenuPermission('SimulatorCpuKeywordManagement')" index="/config/simulator-cpu-keyword">
+              <el-icon>
+                <Cpu/>
+              </el-icon>
+              <span>{{ t('menu.SimulatorCpuKeywordManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('TextModerationCfgManagement')" index="/config/text-moderation">
+              <el-icon>
+                <Document/>
+              </el-icon>
+              <span>{{ t('menu.TextModerationCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('PrivacyPolicyCfgManagement')" index="/config/privacy-policy">
+              <el-icon>
+                <Document/>
+              </el-icon>
+              <span>{{ t('menu.PrivacyPolicyCfgManagement') }}</span>
+            </el-menu-item>
+          </el-sub-menu>
+          <el-sub-menu
+              v-if="hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('DataSyncCfgManagement')"
+              index="/config/group/platform">
+            <template #title>
+              <el-icon>
+                <CreditCard/>
+              </el-icon>
+              <span>{{ t('menu.ConfigPlatformGroup') }}</span>
+            </template>
+            <el-menu-item v-if="hasMenuPermission('GooglePlayCfgManagement')" index="/config/google-play">
+              <el-icon>
+                <CreditCard/>
+              </el-icon>
+              <span>{{ t('menu.GooglePlayCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('UploadResourceCfgManagement')" index="/config/upload-resource">
+              <el-icon>
+                <Picture/>
+              </el-icon>
+              <span>{{ t('menu.UploadResourceCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('DataSyncCfgManagement')" index="/config/data-sync">
+              <el-icon>
+                <Refresh/>
+              </el-icon>
+              <span>{{ t('menu.DataSyncCfgManagement') }}</span>
+            </el-menu-item>
+          </el-sub-menu>
+          <el-sub-menu
+              v-if="hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
+              index="/config/group/ops">
+            <template #title>
+              <el-icon>
+                <Monitor/>
+              </el-icon>
+              <span>{{ t('menu.ConfigOpsGroup') }}</span>
+            </template>
+            <el-menu-item v-if="hasMenuPermission('ResourceMonitor')" index="/config/resource-monitor">
+              <el-icon>
+                <Monitor/>
+              </el-icon>
+              <span>{{ t('menu.ResourceMonitor') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('ServerLogExplorer')" index="/config/server-log">
+              <el-icon>
+                <Search/>
+              </el-icon>
+              <span>{{ t('menu.ServerLogExplorer') }}</span>
+            </el-menu-item>
+          </el-sub-menu>
         </el-sub-menu>
         <!-- 角色权限管理菜单 -->
         <el-sub-menu

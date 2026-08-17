@@ -15,23 +15,26 @@ const (
 	TbDailyAnchorEffectiveLive db.TbName = "daily_anchor_effective_lives"
 )
 
+// MinAccumulateLiveSessionSec 单场直播时长大于此值(秒)才计入日表累计时长
+const MinAccumulateLiveSessionSec = 30 * 60
+
 const (
-	DailyAnchorEffectiveLiveRoomId             db.TbCol = "room_id"
-	DailyAnchorEffectiveLiveLiveDate           db.TbCol = "live_date"
-	DailyAnchorEffectiveLiveEffectiveLiveCount db.TbCol = "effective_live_count"
-	DailyAnchorEffectiveLiveSettled            db.TbCol = "settled"
+	DailyAnchorEffectiveLiveRoomId       db.TbCol = "room_id"
+	DailyAnchorEffectiveLiveLiveDate     db.TbCol = "live_date"
+	DailyAnchorEffectiveLiveLiveDuration db.TbCol = "live_duration"
+	DailyAnchorEffectiveLiveSettled      db.TbCol = "settled"
 )
 
-// DailyAnchorEffectiveLive 主播每日有效直播次数
+// DailyAnchorEffectiveLive 主播每日直播时长统计
 // 主键 ID = "{date}_{roomId}"(roomId==主播用户ID),字段经 syndb 缓冲落库
 type DailyAnchorEffectiveLive struct {
-	ID                 string    `gorm:"primaryKey;size:64;comment:复合ID(date_roomId)" json:"id"`
-	RoomId             uint64    `gorm:"index;default:0;comment:直播间ID(==主播用户ID)" json:"roomId"`
-	LiveDate           string    `gorm:"size:10;index;default:'';comment:日期(YYYY-MM-DD)" json:"liveDate"`
-	EffectiveLiveCount uint64    `gorm:"default:0;comment:当日有效直播次数" json:"effectiveLiveCount"`
-	Settled            bool      `gorm:"default:0;comment:结算标记(0未结算,1已结算)" json:"settled"`
-	CreatedAt          time.Time `json:"createdAt"`
-	UpdatedAt          time.Time `json:"updatedAt"`
+	ID           string    `gorm:"primaryKey;size:64;comment:复合ID(date_roomId)" json:"id"`
+	RoomId       uint64    `gorm:"index;default:0;comment:直播间ID(==主播用户ID)" json:"roomId"`
+	LiveDate     string    `gorm:"size:10;index;default:'';comment:日期(YYYY-MM-DD)" json:"liveDate"`
+	LiveDuration float64   `gorm:"default:0;comment:当日累计直播时长(秒,仅统计单场>30分钟)" json:"liveDuration"`
+	Settled      bool      `gorm:"default:0;comment:结算标记(0未结算,1已结算)" json:"settled"`
+	CreatedAt    time.Time `json:"createdAt"`
+	UpdatedAt    time.Time `json:"updatedAt"`
 }
 
 // FormatDailyAnchorEffectiveLiveDate 格式化统计日期
@@ -91,36 +94,36 @@ func (r *DailyAnchorEffectiveLive) SetSettled(v bool) {
 	})
 }
 
-// SetEffectiveLiveCount 设置当日有效直播次数(可置0,syndb 缓冲)
-func (r *DailyAnchorEffectiveLive) SetEffectiveLiveCount(v uint64) {
+// SetLiveDuration 设置当日累计直播时长(可置0,syndb 缓冲)
+func (r *DailyAnchorEffectiveLive) SetLiveDuration(v float64) {
 	if r == nil {
 		return
 	}
 	key := fmt.Sprintf("daily_anchor_effective_live:%s", r.ID)
 	gmlock.Lock(key)
 	defer gmlock.Unlock(key)
-	r.EffectiveLiveCount = v
+	r.LiveDuration = v
 	r.UpdatedAt = time.Now()
-	syndb.AddData(TbDailyAnchorEffectiveLive, DailyAnchorEffectiveLiveEffectiveLiveCount, &syndb.ColData{
-		IdVal: r.ID, ColVal: r.EffectiveLiveCount,
+	syndb.AddData(TbDailyAnchorEffectiveLive, DailyAnchorEffectiveLiveLiveDuration, &syndb.ColData{
+		IdVal: r.ID, ColVal: r.LiveDuration,
 	})
 	syndb.AddData(TbDailyAnchorEffectiveLive, db.UpdatedAtName, &syndb.ColData{
 		IdVal: r.ID, ColVal: r.UpdatedAt,
 	})
 }
 
-// AddEffectiveLiveCount 累加当日有效直播次数(syndb 缓冲)
-func (r *DailyAnchorEffectiveLive) AddEffectiveLiveCount(v uint64) {
-	if r == nil || v == 0 {
+// AddLiveDuration 累加当日直播时长(syndb 缓冲)
+func (r *DailyAnchorEffectiveLive) AddLiveDuration(v float64) {
+	if r == nil || v <= 0 {
 		return
 	}
 	key := fmt.Sprintf("daily_anchor_effective_live:%s", r.ID)
 	gmlock.Lock(key)
 	defer gmlock.Unlock(key)
-	r.EffectiveLiveCount = math.Add(r.EffectiveLiveCount, v)
+	r.LiveDuration = math.AddFloat64(r.LiveDuration, v)
 	r.UpdatedAt = time.Now()
-	syndb.AddData(TbDailyAnchorEffectiveLive, DailyAnchorEffectiveLiveEffectiveLiveCount, &syndb.ColData{
-		IdVal: r.ID, ColVal: r.EffectiveLiveCount,
+	syndb.AddData(TbDailyAnchorEffectiveLive, DailyAnchorEffectiveLiveLiveDuration, &syndb.ColData{
+		IdVal: r.ID, ColVal: r.LiveDuration,
 	})
 	syndb.AddData(TbDailyAnchorEffectiveLive, db.UpdatedAtName, &syndb.ColData{
 		IdVal: r.ID, ColVal: r.UpdatedAt,
@@ -132,7 +135,7 @@ func initDailyAnchorEffectiveLive() {
 	syndb.RegLazy(TbDailyAnchorEffectiveLive, db.UpdatedAtName)
 	syndb.RegQuick(TbDailyAnchorEffectiveLive, DailyAnchorEffectiveLiveRoomId)
 	syndb.RegQuick(TbDailyAnchorEffectiveLive, DailyAnchorEffectiveLiveLiveDate)
-	syndb.RegLazy(TbDailyAnchorEffectiveLive, DailyAnchorEffectiveLiveEffectiveLiveCount)
+	syndb.RegLazy(TbDailyAnchorEffectiveLive, DailyAnchorEffectiveLiveLiveDuration)
 	syndb.RegQuick(TbDailyAnchorEffectiveLive, DailyAnchorEffectiveLiveSettled)
 	migrate.AutoMigrate(&DailyAnchorEffectiveLive{})
 }

@@ -12,8 +12,8 @@ type AnchorSalaryCfgListReq struct {
 
 type AnchorSalaryCfgItem struct {
 	ID                       string  `json:"id"`
-	DailyEffectiveLiveCount  uint64  `json:"dailyEffectiveLiveCount"`
-	WeeklyEffectiveLiveCount uint64  `json:"weeklyEffectiveLiveCount"`
+	WeeklyWorkDays           uint64  `json:"weeklyWorkDays"`
+	DailyLiveDurationMinutes uint64  `json:"dailyLiveDurationMinutes"`
 	SalaryAmount             float64 `json:"salaryAmount"`
 	Sort                     int     `json:"sort"`
 	CreatedAt                string  `json:"createdAt"`
@@ -22,8 +22,8 @@ type AnchorSalaryCfgItem struct {
 
 type CreateAnchorSalaryCfgReq struct {
 	g.Meta                   `path:"/createAnchorSalaryCfg" method:"post" summary:"创建主播结算薪资分档" tags:"主播结算薪资配置"`
-	DailyEffectiveLiveCount  uint64  `json:"dailyEffectiveLiveCount" dc:"每天有效直播次数门槛"`
-	WeeklyEffectiveLiveCount uint64  `json:"weeklyEffectiveLiveCount" dc:"每周有效直播次数门槛"`
+	WeeklyWorkDays           uint64  `json:"weeklyWorkDays" dc:"每周工作天数门槛"`
+	DailyLiveDurationMinutes uint64  `json:"dailyLiveDurationMinutes" dc:"每天直播时长门槛(分钟)"`
 	SalaryAmount             float64 `json:"salaryAmount" dc:"薪资金额"`
 	Sort                     int     `json:"sort" dc:"排序值(越大越靠前)"`
 }
@@ -35,8 +35,8 @@ type CreateAnchorSalaryCfgRes struct {
 type UpdateAnchorSalaryCfgReq struct {
 	g.Meta                   `path:"/updateAnchorSalaryCfg" method:"post" summary:"修改主播结算薪资分档" tags:"主播结算薪资配置"`
 	ID                       uint64  `json:"id" v:"required#配置ID不能为空" dc:"配置ID"`
-	DailyEffectiveLiveCount  uint64  `json:"dailyEffectiveLiveCount" dc:"每天有效直播次数门槛"`
-	WeeklyEffectiveLiveCount uint64  `json:"weeklyEffectiveLiveCount" dc:"每周有效直播次数门槛"`
+	WeeklyWorkDays           uint64  `json:"weeklyWorkDays" dc:"每周工作天数门槛"`
+	DailyLiveDurationMinutes uint64  `json:"dailyLiveDurationMinutes" dc:"每天直播时长门槛(分钟)"`
 	SalaryAmount             float64 `json:"salaryAmount" dc:"薪资金额"`
 	Sort                     int     `json:"sort" dc:"排序值(越大越靠前)"`
 }

@@ -86,7 +86,7 @@ func DeleteGuild(ctx context.Context, req *guilddto.DeleteGuildReq) (res *guildd
 	}
 	liveroom.OffShelfGuildLiveRooms(ctx, req.ID)
 	liveroomdao.ArchiveAndClearGuildUnsettledIncome(req.ID)
-	liveroomdao.ClearRecentUnsettledDailyGuildEffectiveLiveCount(req.ID)
+	liveroomdao.ClearRecentUnsettledDailyGuildLiveDuration(req.ID)
 	if err = guilddao.DeleteGuild(req.ID); err != nil {
 		return nil, err
 	}

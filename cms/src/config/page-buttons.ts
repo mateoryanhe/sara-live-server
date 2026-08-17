@@ -60,6 +60,8 @@ const READONLY_PAGES = new Set([
     'GoldCurrencyLogList',
     'DiamondCurrencyLogList',
     'LiveRevenueLogList',
+    'AnchorIncomeSettlementLogList',
+    'GuildIncomeSettlementLogList',
     'LiveRecordList',
     'VideoCallLogList',
     'GameWinLogListManagement',

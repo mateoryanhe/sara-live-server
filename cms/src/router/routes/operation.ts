@@ -102,5 +102,17 @@ export const operationRoutes: RouteRecordRaw = {
             component: () => import('@/views/operation/salary/guild-salary-cfg-list.vue'),
             meta: {title: '工会结算薪资'},
         },
+        {
+            path: 'salary/anchor-income-settlement-log-list',
+            name: 'AnchorIncomeSettlementLogList',
+            component: () => import('@/views/operation/salary/anchor-income-settlement-log-list.vue'),
+            meta: {title: '主播结算流水'},
+        },
+        {
+            path: 'salary/guild-income-settlement-log-list',
+            name: 'GuildIncomeSettlementLogList',
+            component: () => import('@/views/operation/salary/guild-income-settlement-log-list.vue'),
+            meta: {title: '工会结算流水'},
+        },
     ],
 }

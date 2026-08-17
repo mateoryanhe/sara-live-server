@@ -43,6 +43,26 @@ func GetGuildById(id uint64) *liveentity.LiveGuild {
 	return &row
 }
 
+// GetNameMapByIds 批量查询工会名称(CMS列表等场景使用)
+func GetNameMapByIds(ids []uint64) map[uint64]string {
+	if len(ids) == 0 {
+		return nil
+	}
+	type row struct {
+		ID   uint64 `json:"id"`
+		Name string `json:"name"`
+	}
+	rows := make([]row, 0)
+	_ = g.DB().Model(string(liveentity.TbLiveGuild)).
+		Where("id IN (?)", ids).
+		Scan(&rows)
+	ret := make(map[uint64]string, len(rows))
+	for _, r := range rows {
+		ret[r.ID] = r.Name
+	}
+	return ret
+}
+
 // ListOnShelfGuilds 查询全部上架工会
 func ListOnShelfGuilds() []*liveentity.LiveGuild {
 	rows := make([]*liveentity.LiveGuild, 0)

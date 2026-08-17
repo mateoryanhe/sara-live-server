@@ -39,7 +39,7 @@ func settleOneAnchor(roomId uint64, cfgs []*entity.AnchorSalaryCfg) {
 	if unsettled == nil {
 		return
 	}
-	salary := matchAnchorSalaryAmount(unsettled.EffectiveLiveCount, dailyRows, cfgs)
+	salary := matchAnchorSalaryAmount(countAnchorWeeklyWorkDays(dailyRows), dailyRows, cfgs)
 	hasDaily := len(dailyRows) > 0
 	hasUnsettled := !unsettled.IsZero()
 	if !hasDaily && !hasUnsettled && salary == 0 {
@@ -63,16 +63,16 @@ func settleOneAnchor(roomId uint64, cfgs []*entity.AnchorSalaryCfg) {
 	_ = entity.NewAnchorIncomeSettlementLog(roomId, &snap, salary)
 }
 
-// matchAnchorSalaryAmount 按薪资降序取最高满足档;日表任一天未达日门槛则该档不达标;周次数用未结算 EffectiveLiveCount
-func matchAnchorSalaryAmount(weeklyEffectiveLiveCount uint64, dailyRows []*entity.DailyAnchorEffectiveLive, cfgs []*entity.AnchorSalaryCfg) float64 {
+// matchAnchorSalaryAmount 按薪资降序取最高满足档(结算规则后续按日表时长/workDays完善)
+func matchAnchorSalaryAmount(weeklyWorkDays uint64, dailyRows []*entity.DailyAnchorEffectiveLive, cfgs []*entity.AnchorSalaryCfg) float64 {
 	for _, cfg := range cfgs {
 		if cfg == nil {
 			continue
 		}
-		if weeklyEffectiveLiveCount < cfg.WeeklyEffectiveLiveCount {
+		if weeklyWorkDays < cfg.WeeklyWorkDays {
 			continue
 		}
-		if !dailyEffectiveLivesMeet(dailyRows, cfg.DailyEffectiveLiveCount) {
+		if !dailyEffectiveLivesMeet(dailyRows, cfg.DailyLiveDurationMinutes) {
 			continue
 		}
 		return cfg.SalaryAmount
@@ -80,17 +80,28 @@ func matchAnchorSalaryAmount(weeklyEffectiveLiveCount uint64, dailyRows []*entit
 	return 0
 }
 
-func dailyEffectiveLivesMeet(dailyRows []*entity.DailyAnchorEffectiveLive, dailyNeed uint64) bool {
-	if dailyNeed == 0 {
+func dailyEffectiveLivesMeet(dailyRows []*entity.DailyAnchorEffectiveLive, dailyNeedMinutes uint64) bool {
+	if dailyNeedMinutes == 0 {
 		return true
 	}
 	if len(dailyRows) == 0 {
 		return false
 	}
+	needSec := float64(dailyNeedMinutes) * 60
 	for _, row := range dailyRows {
-		if row == nil || row.EffectiveLiveCount < dailyNeed {
+		if row == nil || row.LiveDuration < needSec {
 			return false
 		}
 	}
 	return true
+}
+
+func countAnchorWeeklyWorkDays(dailyRows []*entity.DailyAnchorEffectiveLive) uint64 {
+	var n uint64
+	for _, row := range dailyRows {
+		if row != nil && row.LiveDuration > 0 {
+			n++
+		}
+	}
+	return n
 }

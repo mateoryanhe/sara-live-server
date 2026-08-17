@@ -963,8 +963,8 @@ export interface LiveRoomTagQuery extends PageQuery {
 
 export interface AnchorSalaryCfg {
     id: string
-    dailyEffectiveLiveCount: number
-    weeklyEffectiveLiveCount: number
+    weeklyWorkDays: number
+    dailyLiveDurationMinutes: number
     salaryAmount: number
     sort: number
     createdAt: string
@@ -976,8 +976,8 @@ export interface AnchorSalaryCfgQuery extends PageQuery {
 
 export interface GuildSalaryCfg {
     id: string
-    dailyEffectiveLiveCount: number
-    weeklyEffectiveLiveCount: number
+    weeklyWorkDays: number
+    dailyLiveDurationMinutes: number
     salaryAmount: number
     sort: number
     createdAt: string
@@ -985,6 +985,45 @@ export interface GuildSalaryCfg {
 }
 
 export interface GuildSalaryCfgQuery extends PageQuery {
+}
+
+export interface IncomeSettlementLogAmounts {
+    totalIncome: number
+    totalGiftIncome: number
+    totalPaidDanmakuIncome: number
+    totalPrivateRoomTicketIncome: number
+    totalPrivateRoomWatchIncome: number
+    totalVideoCallIncome: number
+    totalVideoCallTicketIncome: number
+    totalVideoCallBillingIncome: number
+    totalLiveDuration: number
+    settlementSalary: number
+}
+
+export interface AnchorIncomeSettlementLogQuery extends PageQuery {
+    roomId?: string
+    startTime?: number
+    endTime?: number
+}
+
+export interface AnchorIncomeSettlementLogItem extends IncomeSettlementLogAmounts {
+    id: string
+    roomId: string
+    roomNickname?: string
+    createdAt?: string | null
+}
+
+export interface GuildIncomeSettlementLogQuery extends PageQuery {
+    guildId?: string
+    startTime?: number
+    endTime?: number
+}
+
+export interface GuildIncomeSettlementLogItem extends IncomeSettlementLogAmounts {
+    id: string
+    guildId: string
+    guildName?: string
+    createdAt?: string | null
 }
 
 export interface AgoraCfg {
@@ -1486,10 +1525,10 @@ export interface LogPathsConfig {
     accessPrefix: string
     detailPrefix: string
     errorPrefix: string
-    exportSubDir: string
-    exportStaticPrefix?: string
-    exportAbsDir?: string
-    exportUrlPrefix: string
+    fileExportStaticPrefix?: string
+    fileExportAbsDir?: string
+    fileExportUrlPrefix: string
+    fileExportTtlMinutes?: number
     linuxOnly?: boolean
 }
 

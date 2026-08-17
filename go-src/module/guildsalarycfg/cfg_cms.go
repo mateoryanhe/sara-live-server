@@ -18,8 +18,8 @@ func GetList(_ context.Context, req *guildsalarycfgdto.GuildSalaryCfgListReq) (*
 
 func Create(_ context.Context, req *guildsalarycfgdto.CreateGuildSalaryCfgReq) (*guildsalarycfgdto.CreateGuildSalaryCfgRes, error) {
 	row := &entity.GuildSalaryCfg{
-		DailyEffectiveLiveCount:  req.DailyEffectiveLiveCount,
-		WeeklyEffectiveLiveCount: req.WeeklyEffectiveLiveCount,
+		WeeklyWorkDays:           req.WeeklyWorkDays,
+		DailyLiveDurationMinutes: req.DailyLiveDurationMinutes,
 		SalaryAmount:             req.SalaryAmount,
 		Sort:                     req.Sort,
 	}
@@ -34,8 +34,8 @@ func Update(_ context.Context, req *guildsalarycfgdto.UpdateGuildSalaryCfgReq) (
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	row.DailyEffectiveLiveCount = req.DailyEffectiveLiveCount
-	row.WeeklyEffectiveLiveCount = req.WeeklyEffectiveLiveCount
+	row.WeeklyWorkDays = req.WeeklyWorkDays
+	row.DailyLiveDurationMinutes = req.DailyLiveDurationMinutes
 	row.SalaryAmount = req.SalaryAmount
 	row.Sort = req.Sort
 	if err := guildsalarycfgdao.Update(row); err != nil {

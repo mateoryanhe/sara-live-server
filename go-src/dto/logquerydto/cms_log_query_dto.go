@@ -12,16 +12,16 @@ type CMSGetLogPathsReq struct {
 }
 
 type CMSGetLogPathsRes struct {
-	ServerTime         string `json:"serverTime"`
-	LogDir             string `json:"logDir"`
-	AccessPrefix       string `json:"accessPrefix"`
-	DetailPrefix       string `json:"detailPrefix"`
-	ErrorPrefix        string `json:"errorPrefix"`
-	ExportSubDir       string `json:"exportSubDir"`
-	ExportStaticPrefix string `json:"exportStaticPrefix"`
-	ExportAbsDir       string `json:"exportAbsDir"`
-	ExportURLPrefix    string `json:"exportUrlPrefix"`
-	LinuxOnly          bool   `json:"linuxOnly"`
+	ServerTime             string `json:"serverTime"`
+	LogDir                 string `json:"logDir"`
+	AccessPrefix           string `json:"accessPrefix"`
+	DetailPrefix           string `json:"detailPrefix"`
+	ErrorPrefix            string `json:"errorPrefix"`
+	FileExportStaticPrefix string `json:"fileExportStaticPrefix"`
+	FileExportAbsDir       string `json:"fileExportAbsDir"`
+	FileExportURLPrefix    string `json:"fileExportUrlPrefix"`
+	FileExportTTLMinutes   int    `json:"fileExportTtlMinutes"`
+	LinuxOnly              bool   `json:"linuxOnly"`
 }
 
 type CMSLogQueryExportRes struct {

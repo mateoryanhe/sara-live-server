@@ -44,7 +44,7 @@ func cleanupLogQueryExports(_ context.Context) {
 	if !ready {
 		return
 	}
-	expireBefore := time.Now().Add(-time.Duration(cfg.ExportTTLMinutes) * time.Minute)
+	expireBefore := time.Now().Add(-time.Duration(cfg.exportTTLMinutes()) * time.Minute)
 	exportRecords.Range(func(key, value any) bool {
 		record, ok := value.(*exportRecord)
 		if !ok || record.createdAt.After(expireBefore) {

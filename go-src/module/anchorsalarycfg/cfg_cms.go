@@ -18,8 +18,8 @@ func GetList(_ context.Context, req *anchorsalarycfgdto.AnchorSalaryCfgListReq) 
 
 func Create(_ context.Context, req *anchorsalarycfgdto.CreateAnchorSalaryCfgReq) (*anchorsalarycfgdto.CreateAnchorSalaryCfgRes, error) {
 	row := &entity.AnchorSalaryCfg{
-		DailyEffectiveLiveCount:  req.DailyEffectiveLiveCount,
-		WeeklyEffectiveLiveCount: req.WeeklyEffectiveLiveCount,
+		WeeklyWorkDays:           req.WeeklyWorkDays,
+		DailyLiveDurationMinutes: req.DailyLiveDurationMinutes,
 		SalaryAmount:             req.SalaryAmount,
 		Sort:                     req.Sort,
 	}
@@ -34,8 +34,8 @@ func Update(_ context.Context, req *anchorsalarycfgdto.UpdateAnchorSalaryCfgReq)
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	row.DailyEffectiveLiveCount = req.DailyEffectiveLiveCount
-	row.WeeklyEffectiveLiveCount = req.WeeklyEffectiveLiveCount
+	row.WeeklyWorkDays = req.WeeklyWorkDays
+	row.DailyLiveDurationMinutes = req.DailyLiveDurationMinutes
 	row.SalaryAmount = req.SalaryAmount
 	row.Sort = req.Sort
 	if err := anchorsalarycfgdao.Update(row); err != nil {

@@ -12,9 +12,10 @@ import (
 
 // StaticPathCfg URL 前缀与物理目录映射
 type StaticPathCfg struct {
-	Prefix string `json:"prefix" dc:"URL前缀,如 /cms"`
-	Path   string `json:"path"   dc:"物理目录绝对路径(GoFrame 原生字段)"`
-	Root   string `json:"root"   dc:"物理目录,兼容旧配置"`
+	Prefix     string `json:"prefix"     dc:"URL前缀,如 /cms"`
+	Path       string `json:"path"       dc:"物理目录绝对路径(GoFrame 原生字段)"`
+	Root       string `json:"root"       dc:"物理目录,兼容旧配置"`
+	TTLMinutes int    `json:"ttlMinutes" dc:"CMS文件导出过期清理(分钟),仅 /cms-export 使用"`
 }
 
 func staticPathPhysicalDir(item *StaticPathCfg) string {

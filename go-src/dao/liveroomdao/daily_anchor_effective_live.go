@@ -18,7 +18,7 @@ func initDailyAnchorEffectiveLiveDao() {
 	dailyAnchorEffectiveLiveCacheMgr = cache.NewCacheMgr()
 }
 
-// GetDailyAnchorEffectiveLive 按日期+直播间获取每日有效直播次数(缓存;无则新建缓冲对象)
+// GetDailyAnchorEffectiveLive 按日期+直播间获取每日直播时长(缓存;无则新建缓冲对象)
 func GetDailyAnchorEffectiveLive(date string, roomId uint64) *entity.DailyAnchorEffectiveLive {
 	if date == "" || roomId == 0 || dailyAnchorEffectiveLiveCacheMgr == nil {
 		return nil
@@ -39,19 +39,19 @@ func GetDailyAnchorEffectiveLive(date string, roomId uint64) *entity.DailyAnchor
 	return row
 }
 
-// ClearRecentUnsettledDailyEffectiveLiveCount 主播下架:直查DB取最近8条未结算日表,EffectiveLiveCount置0
-func ClearRecentUnsettledDailyEffectiveLiveCount(roomId uint64) {
+// ClearRecentUnsettledDailyLiveDuration 主播下架:直查DB取最近8条未结算日表,直播时长置0
+func ClearRecentUnsettledDailyLiveDuration(roomId uint64) {
 	rows := ListRecentUnsettledDailyEffectiveLives(roomId)
 	for _, row := range rows {
 		if row == nil || row.ID == "" {
 			continue
 		}
 		target := resolveDailyAnchorEffectiveLiveTarget(row)
-		target.SetEffectiveLiveCount(0)
+		target.SetLiveDuration(0)
 	}
 }
 
-// ListRecentUnsettledDailyEffectiveLives 直查DB:某主播最近N条未结算日有效直播记录
+// ListRecentUnsettledDailyEffectiveLives 直查DB:某主播最近N条未结算日直播时长记录
 func ListRecentUnsettledDailyEffectiveLives(roomId uint64) []*entity.DailyAnchorEffectiveLive {
 	if roomId == 0 {
 		return nil
@@ -65,7 +65,7 @@ func ListRecentUnsettledDailyEffectiveLives(roomId uint64) []*entity.DailyAnchor
 	return rows
 }
 
-// MarkDailyEffectiveLivesSettled 将日有效直播记录标记为已结算(不清零次数;优先写缓存对象)
+// MarkDailyEffectiveLivesSettled 将日直播时长记录标记为已结算(优先写缓存对象)
 func MarkDailyEffectiveLivesSettled(rows []*entity.DailyAnchorEffectiveLive) {
 	for _, row := range rows {
 		if row == nil || row.ID == "" {
@@ -93,9 +93,9 @@ func resolveDailyAnchorEffectiveLiveTarget(row *entity.DailyAnchorEffectiveLive)
 	return row
 }
 
-// AddDailyEffectiveLiveCount 当日有效直播次数+1(下播且本场时长达标时调用;有工会则同步工会日表)
-func AddDailyEffectiveLiveCount(roomId uint64, at time.Time) {
-	if roomId == 0 {
+// AddDailyLiveDuration 累加当日直播时长(下播且单场>30分钟时调用)
+func AddDailyLiveDuration(roomId uint64, at time.Time, durationSec float64) {
+	if roomId == 0 || durationSec <= 0 {
 		return
 	}
 	date := entity.FormatDailyAnchorEffectiveLiveDate(at)
@@ -103,8 +103,8 @@ func AddDailyEffectiveLiveCount(roomId uint64, at time.Time) {
 	if row == nil {
 		return
 	}
-	row.AddEffectiveLiveCount(1)
+	row.AddLiveDuration(durationSec)
 	ForRoomGuild(roomId, func(guildId uint64) {
-		AddDailyGuildEffectiveLiveCount(guildId, at)
+		AddDailyGuildLiveDuration(guildId, at, durationSec)
 	})
 }

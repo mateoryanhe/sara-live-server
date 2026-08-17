@@ -531,7 +531,7 @@ const syncServerTime = async () => {
     serverTimeBaseMs = parsed.getTime()
     serverTimeSyncClientMs = Date.now()
     updateServerTimeDisplay()
-    exportPathTip.value = data.exportUrlPrefix || ''
+    exportPathTip.value = data.fileExportUrlPrefix || ''
   } catch (error) {
     console.error('获取服务器时间失败:', error)
     ElMessage.error(t('pages.serverLogExplorer.fetchServerTimeFailed'))

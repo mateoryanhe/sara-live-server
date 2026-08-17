@@ -32,9 +32,6 @@ func NewGuildIncomeTotal(guildId uint64) *GuildIncomeTotal {
 func (r *GuildIncomeTotal) AddTotalLiveDuration(v float64) {
 	addIncomeAmount(TbGuildIncomeTotal, LiveRoomIncomeTotalLiveDuration, r.ID, &r.TotalLiveDuration, v, true, &r.UpdatedAt)
 }
-func (r *GuildIncomeTotal) AddEffectiveLiveCount(v uint64) {
-	addIncomeCount(TbGuildIncomeTotal, LiveRoomIncomeEffectiveLiveCount, r.ID, &r.EffectiveLiveCount, v, &r.UpdatedAt)
-}
 func (r *GuildIncomeTotal) AddGiftEarn(v float64) {
 	addIncomeEarn(TbGuildIncomeTotal, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalGiftIncome, &r.TotalGiftIncome)
 }

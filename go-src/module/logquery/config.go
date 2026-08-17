@@ -17,24 +17,17 @@ const (
 	logTypeDetail = "detail"
 	logTypeError  = "error"
 
-	defaultExportStaticPrefix = "/cms"
-	defaultExportSubDir       = "log-query-export"
-	defaultExportTTLMinutes   = 30
-	defaultMaxMatchLines      = 100000
-	defaultMaxPageSize        = 200
+	defaultMaxMatchLines = 100000
+	defaultMaxPageSize   = 200
 )
 
 type logQueryConfig struct {
-	LogDir             string
-	AccessPrefix       string
-	DetailPrefix       string
-	ErrorPrefix        string
-	ExportStaticPrefix string
-	ExportSubDir       string
-	ExportRoot         string
-	ExportTTLMinutes   int
-	MaxMatchLines      int
-	MaxPageSize        int
+	LogDir        string
+	AccessPrefix  string
+	DetailPrefix  string
+	ErrorPrefix   string
+	MaxMatchLines int
+	MaxPageSize   int
 }
 
 func buildLogQueryConfig() logQueryConfig {
@@ -50,43 +43,18 @@ func buildLogQueryConfig() logQueryConfig {
 		logDir = cfgGetString(ctx, "server.logPath")
 	}
 
-	exportStaticPrefix := normalizeLogQueryURLPrefix(cfgGetString(ctx, "logQuery.exportStaticPrefix"))
-	if exportStaticPrefix == "" {
-		exportStaticPrefix = defaultExportStaticPrefix
-	}
-	exportSubDir := cfgGetString(ctx, "logQuery.exportSubDir")
-	if exportSubDir == "" {
-		exportSubDir = defaultExportSubDir
-	}
-
-	exportRoot := strings.TrimSpace(cfg.GetStaticPathRoot(exportStaticPrefix))
-	if exportRoot == "" {
-		if serverCfg := cfg.GetServerCfg(); serverCfg != nil {
-			if root := strings.TrimSpace(serverCfg.StaticResPath); root != "" {
-				exportRoot = filepath.Join(root, strings.Trim(exportStaticPrefix, "/"))
-			}
-		}
-	}
-	if exportRoot == "" {
-		exportRoot = "."
-	}
-
 	accessPattern := cfgGetString(ctx, "logger.access.file")
 	if accessPattern == "" {
 		accessPattern = cfgGetString(ctx, "server.accessLogPattern")
 	}
 
 	return logQueryConfig{
-		LogDir:             filepath.Clean(logDir),
-		AccessPrefix:       logFilePrefixFromPattern(accessPattern),
-		DetailPrefix:       logFilePrefixFromPattern(cfgGetString(ctx, "logger.detail.file")),
-		ErrorPrefix:        logFilePrefixFromPattern(cfgGetString(ctx, "logger.error.file")),
-		ExportStaticPrefix: exportStaticPrefix,
-		ExportSubDir:       exportSubDir,
-		ExportRoot:         filepath.Clean(exportRoot),
-		ExportTTLMinutes:   defaultExportTTLMinutes,
-		MaxMatchLines:      defaultMaxMatchLines,
-		MaxPageSize:        defaultMaxPageSize,
+		LogDir:        filepath.Clean(logDir),
+		AccessPrefix:  logFilePrefixFromPattern(accessPattern),
+		DetailPrefix:  logFilePrefixFromPattern(cfgGetString(ctx, "logger.detail.file")),
+		ErrorPrefix:   logFilePrefixFromPattern(cfgGetString(ctx, "logger.error.file")),
+		MaxMatchLines: defaultMaxMatchLines,
+		MaxPageSize:   defaultMaxPageSize,
 	}
 }
 
@@ -96,17 +64,6 @@ func cfgGetString(ctx context.Context, key string) string {
 		return ""
 	}
 	return strings.TrimSpace(value.String())
-}
-
-func normalizeLogQueryURLPrefix(prefix string) string {
-	prefix = strings.TrimSpace(prefix)
-	if prefix == "" {
-		return ""
-	}
-	if !strings.HasPrefix(prefix, "/") {
-		prefix = "/" + prefix
-	}
-	return strings.TrimRight(prefix, "/")
 }
 
 func logFilePrefixFromPattern(pattern string) string {
@@ -150,19 +107,15 @@ func (c logQueryConfig) prefixForType(logType string) string {
 }
 
 func (c logQueryConfig) exportAbsDir() string {
-	return filepath.Join(c.ExportRoot, c.ExportSubDir)
+	return cfg.ResolveCMSFileExportDir()
 }
 
 func (c logQueryConfig) exportURLPrefix() string {
-	prefix := normalizeLogQueryURLPrefix(c.ExportStaticPrefix)
-	if prefix == "" {
-		prefix = defaultExportStaticPrefix
-	}
-	sub := strings.Trim(strings.ReplaceAll(c.ExportSubDir, "\\", "/"), "/")
-	if sub == "" {
-		sub = defaultExportSubDir
-	}
-	return prefix + "/" + sub
+	return cfg.BuildCMSFileExportURLPrefix()
+}
+
+func (c logQueryConfig) exportTTLMinutes() int {
+	return cfg.GetCMSFileExportTTLMinutes()
 }
 
 func formatLogFileName(pattern string, dateStr string) string {

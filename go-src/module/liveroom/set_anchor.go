@@ -102,7 +102,7 @@ func ExitGuild(ctx context.Context, req *accountdto.ExitGuildReq) (*accountdto.E
 	guildId := room.GuildId
 	if guildId > 0 {
 		liveroomdao.ArchiveAndClearUnsettledIncome(req.AnchorId, guildId)
-		liveroomdao.ClearRecentUnsettledDailyEffectiveLiveCount(req.AnchorId)
+		liveroomdao.ClearRecentUnsettledDailyLiveDuration(req.AnchorId)
 		room.SetGuildId(0)
 	}
 	RefreshRoomListCache(ctx)

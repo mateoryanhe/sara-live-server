@@ -39,7 +39,7 @@ func Delete(id uint64) error {
 }
 
 func GetList(req *anchorsalarycfgdto.AnchorSalaryCfgListReq) (int, []*anchorsalarycfgdto.AnchorSalaryCfgItem) {
-	sql := `select id, daily_effective_live_count, weekly_effective_live_count, salary_amount, sort, created_at, updated_at
+	sql := `select id, weekly_work_days, daily_live_duration_minutes, salary_amount, sort, created_at, updated_at
             from anchor_salary_cfgs
             where 1=1 `
 	param := make([]any, 0)

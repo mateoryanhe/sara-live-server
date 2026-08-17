@@ -53,7 +53,6 @@ func NewLiveRoomIncomeUnsettledArchive(roomId, guildId uint64, a *LiveRoomIncome
 	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettledArchive, LiveRoomIncomeTotalVideoCallTicketIncome, ret.ID, a.TotalVideoCallTicketIncome)
 	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettledArchive, LiveRoomIncomeTotalVideoCallBillingIncome, ret.ID, a.TotalVideoCallBillingIncome)
 	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettledArchive, LiveRoomIncomeTotalLiveDuration, ret.ID, a.TotalLiveDuration)
-	writeIncomeCountLocked(TbLiveRoomIncomeUnsettledArchive, LiveRoomIncomeEffectiveLiveCount, ret.ID, a.EffectiveLiveCount)
 	return ret
 }
 

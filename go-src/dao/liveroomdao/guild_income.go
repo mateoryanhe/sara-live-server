@@ -123,18 +123,6 @@ func MirrorGuildLiveDuration(roomId uint64, sec float64) {
 	})
 }
 
-// MirrorGuildEffectiveLiveCount 同步有效直播次数到工会未结算+生涯
-func MirrorGuildEffectiveLiveCount(roomId uint64, n uint64) {
-	ForRoomGuild(roomId, func(guildId uint64) {
-		if u := GetGuildIncomeUnsettled(guildId); u != nil {
-			u.AddEffectiveLiveCount(n)
-		}
-		if t := GetGuildIncomeTotal(guildId); t != nil {
-			t.AddEffectiveLiveCount(n)
-		}
-	})
-}
-
 // MirrorGuildVideoCallIncomeDelta 同步通话收益增减到工会
 func MirrorGuildVideoCallIncomeDelta(roomId uint64, amount float64, ticket, billing bool) {
 	ForRoomGuild(roomId, func(guildId uint64) {

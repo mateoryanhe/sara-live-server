@@ -9,6 +9,9 @@ server:
   staticPaths:
     - prefix: "/cms"
       path: "D:/company-code/app-code/live-server/cms"
+    - prefix: "/cms-export"
+      path: "D:/company-code/app-code/live-server/cms-export"
+      ttlMinutes: 30
     - prefix: "/images"
       path: "D:/log"
     - prefix: "/official-site"
