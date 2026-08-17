@@ -5,5 +5,6 @@ func Init() {
 	initLiveRoomIncomeDao()
 	initLiveRecordDao()
 	initLiveRoomOnlineDao()
+	initDailyAnchorEffectiveLiveDao()
 	InitLiveRoomGameRecommendDao()
 }

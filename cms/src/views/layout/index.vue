@@ -292,7 +292,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
+            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
             index="/config">
           <template #title>
             <el-icon>
@@ -311,6 +311,12 @@
               <User/>
             </el-icon>
             <span>{{ t('menu.AccountCfgManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('AnchorSalaryCfgManagement')" index="/config/anchor-salary-cfg">
+            <el-icon>
+              <CreditCard/>
+            </el-icon>
+            <span>{{ t('menu.AnchorSalaryCfgManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('PreloadCfgManagement')" index="/config/preload-cfg">
             <el-icon>

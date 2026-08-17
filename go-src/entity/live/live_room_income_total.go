@@ -55,6 +55,9 @@ func (r *LiveRoomIncomeTotal) AddTotalVideoCallBillingIncome(v float64) {
 func (r *LiveRoomIncomeTotal) AddTotalLiveDuration(v float64) {
 	addIncomeAmount(TbLiveRoomIncomeTotal, LiveRoomIncomeTotalLiveDuration, r.ID, &r.TotalLiveDuration, v, true, &r.UpdatedAt)
 }
+func (r *LiveRoomIncomeTotal) AddEffectiveLiveCount(v uint64) {
+	addIncomeCount(TbLiveRoomIncomeTotal, LiveRoomIncomeEffectiveLiveCount, r.ID, &r.EffectiveLiveCount, v, &r.UpdatedAt)
+}
 
 // AddGiftEarn 礼物收益(总收益+礼物细分,内部加锁)
 func (r *LiveRoomIncomeTotal) AddGiftEarn(v float64) {

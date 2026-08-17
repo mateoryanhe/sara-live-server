@@ -949,6 +949,19 @@ export interface LiveRoomTag {
 export interface LiveRoomTagQuery extends PageQuery {
 }
 
+export interface AnchorSalaryCfg {
+    id: string
+    dailyEffectiveLiveCount: number
+    weeklyEffectiveLiveCount: number
+    salaryAmount: number
+    sort: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface AnchorSalaryCfgQuery extends PageQuery {
+}
+
 export interface AgoraCfg {
     id: string
     appId: string

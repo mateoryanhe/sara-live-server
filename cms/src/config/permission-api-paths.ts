@@ -239,6 +239,13 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'AccountCfgManagement:view': '/accountCfg/getAccountCfg',
     'AccountCfgManagement:save': '/accountCfg/saveAccountCfg',
 
+    AnchorSalaryCfgManagement: '/anchorSalaryCfg/anchorSalaryCfgList',
+    'AnchorSalaryCfgManagement:view': '/anchorSalaryCfg/anchorSalaryCfgList',
+    'AnchorSalaryCfgManagement:search': '/anchorSalaryCfg/anchorSalaryCfgList',
+    'AnchorSalaryCfgManagement:create': '/anchorSalaryCfg/createAnchorSalaryCfg',
+    'AnchorSalaryCfgManagement:edit': '/anchorSalaryCfg/updateAnchorSalaryCfg',
+    'AnchorSalaryCfgManagement:delete': '/anchorSalaryCfg/deleteAnchorSalaryCfg',
+
     PreloadCfgManagement: '/preloadCfg/getPreloadCfg',
     'PreloadCfgManagement:view': '/preloadCfg/getPreloadCfg',
     'PreloadCfgManagement:save': '/preloadCfg/savePreloadCfg',

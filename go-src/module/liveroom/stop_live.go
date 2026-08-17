@@ -72,6 +72,16 @@ func stopLive(anchorId uint64) *entity.LiveRecord {
 	}
 	now := time.Now()
 	liveRecord.SetEndTime(&now)
+	// 单场直播时长大于30分钟计为一次有效直播
+	if liveRecord.TotalLiveDuration > 30*60 {
+		if unsettled := liveroomdao.GetLiveRoomIncomeUnsettled(anchorId); unsettled != nil {
+			unsettled.AddEffectiveLiveCount(1)
+		}
+		if total := liveroomdao.GetLiveRoomIncomeTotal(anchorId); total != nil {
+			total.AddEffectiveLiveCount(1)
+		}
+		liveroomdao.AddDailyEffectiveLiveCount(anchorId, now)
+	}
 	return liveRecord
 }
 

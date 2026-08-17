@@ -19,6 +19,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '账号配置'},
         },
         {
+            path: 'anchor-salary-cfg',
+            name: 'AnchorSalaryCfgManagement',
+            component: () => import('@/views/config/anchor-salary-cfg-list.vue'),
+            meta: {title: '主播结算薪资'},
+        },
+        {
             path: 'preload-cfg',
             name: 'PreloadCfgManagement',
             component: () => import('@/views/config/preload-cfg.vue'),

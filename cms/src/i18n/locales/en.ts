@@ -50,6 +50,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   ConfigManagement: 'System Config',
   AppTokenConfig: 'App Token',
   AccountCfgManagement: 'Account Config',
+  AnchorSalaryCfgManagement: 'Anchor Salary Tiers',
   PreloadCfgManagement: 'Preload Config',
   TextModerationCfgManagement: 'Text Moderation',
   PrivacyPolicyCfgManagement: 'Privacy Policy',

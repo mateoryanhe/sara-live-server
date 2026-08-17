@@ -49,6 +49,7 @@ const menu = {
   ConfigManagement: '系统配置',
   AppTokenConfig: 'App Token',
   AccountCfgManagement: '账号配置',
+  AnchorSalaryCfgManagement: '主播结算薪资',
   PreloadCfgManagement: '预热配置',
   TextModerationCfgManagement: '敏感词过滤',
   PrivacyPolicyCfgManagement: '隐私政策',
