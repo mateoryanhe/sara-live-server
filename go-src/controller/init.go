@@ -44,6 +44,7 @@ func Init() {
 	initCustomerServiceAppController()      // 客服联系配置(App)
 	initWalletCMSController()               // 钱包配置(CMS)
 	initAccountCfgCMSController()           // 账号配置(CMS)
+	initSimulatorCpuKeywordCMSController()  // 模拟器CPU关键词(CMS)
 	initAnchorSalaryCfgCMSController()      // 主播结算薪资分档配置(CMS)
 	initGuildSalaryCfgCMSController()       // 工会结算薪资分档配置(CMS)
 	initPreloadCfgCMSController()           // 预热配置(CMS)

@@ -19,16 +19,10 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '账号配置'},
         },
         {
-            path: 'anchor-salary-cfg',
-            name: 'AnchorSalaryCfgManagement',
-            component: () => import('@/views/config/anchor-salary-cfg-list.vue'),
-            meta: {title: '主播结算薪资'},
-        },
-        {
-            path: 'guild-salary-cfg',
-            name: 'GuildSalaryCfgManagement',
-            component: () => import('@/views/config/guild-salary-cfg-list.vue'),
-            meta: {title: '工会结算薪资'},
+            path: 'simulator-cpu-keyword',
+            name: 'SimulatorCpuKeywordManagement',
+            component: () => import('@/views/config/simulator-cpu-keyword-list.vue'),
+            meta: {title: '模拟器CPU关键词'},
         },
         {
             path: 'preload-cfg',

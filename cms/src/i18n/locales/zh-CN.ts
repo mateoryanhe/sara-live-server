@@ -49,6 +49,7 @@ const menu = {
   ConfigManagement: '系统配置',
   AppTokenConfig: 'App Token',
   AccountCfgManagement: '账号配置',
+  SimulatorCpuKeywordManagement: '模拟器CPU关键词',
   AnchorSalaryCfgManagement: '主播结算薪资',
   GuildSalaryCfgManagement: '工会结算薪资',
   PreloadCfgManagement: '预热配置',

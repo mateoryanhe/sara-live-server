@@ -50,6 +50,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   ConfigManagement: 'Config. do sistema',
   AppTokenConfig: 'Token do app',
   AccountCfgManagement: 'Config. de conta',
+  SimulatorCpuKeywordManagement: 'Palavras CPU simulador',
   AnchorSalaryCfgManagement: 'Salário de âncora',
   GuildSalaryCfgManagement: 'Salário de guilda',
   PreloadCfgManagement: 'Config. de pré-carregamento',

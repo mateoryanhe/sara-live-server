@@ -50,6 +50,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   ConfigManagement: 'Konfigurasi Sistem',
   AppTokenConfig: 'App Token',
   AccountCfgManagement: 'Konfigurasi Akun',
+  SimulatorCpuKeywordManagement: 'Kata kunci CPU simulator',
   AnchorSalaryCfgManagement: 'Gaji Anchor',
   GuildSalaryCfgManagement: 'Gaji Guild',
   PreloadCfgManagement: 'Konfigurasi Preload',

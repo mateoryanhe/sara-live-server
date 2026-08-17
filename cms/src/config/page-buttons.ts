@@ -72,6 +72,7 @@ const READONLY_PAGES = new Set([
 const CONFIG_PAGES = new Set([
     'AppTokenConfig',
     'AccountCfgManagement',
+    'SimulatorCpuKeywordManagement',
     'PreloadCfgManagement',
     'TextModerationCfgManagement',
     'PrivacyPolicyCfgManagement',

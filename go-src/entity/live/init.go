@@ -16,6 +16,8 @@ func Init() {
 	initLiveRecord()
 	initLiveRecordUser()
 	initLiveRevenueLog()
+	initAnchorIncomeSettlementLog()
+	initGuildIncomeSettlementLog()
 	initLiveFollow()
 	initLiveTicket()
 	initLivePrivateRoomBilling()

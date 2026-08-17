@@ -90,5 +90,17 @@ export const operationRoutes: RouteRecordRaw = {
             component: () => import('@/views/operation/wallet/wallet-exchange-cfg.vue'),
             meta: {title: '金币兑换配置'},
         },
+        {
+            path: 'salary/anchor-salary-cfg-list',
+            name: 'AnchorSalaryCfgManagement',
+            component: () => import('@/views/operation/salary/anchor-salary-cfg-list.vue'),
+            meta: {title: '主播结算薪资'},
+        },
+        {
+            path: 'salary/guild-salary-cfg-list',
+            name: 'GuildSalaryCfgManagement',
+            component: () => import('@/views/operation/salary/guild-salary-cfg-list.vue'),
+            meta: {title: '工会结算薪资'},
+        },
     ],
 }

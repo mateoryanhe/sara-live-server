@@ -60,6 +60,7 @@ func settleOneAnchor(roomId uint64, cfgs []*entity.AnchorSalaryCfg) {
 	if hasDaily {
 		liveroomdao.MarkDailyEffectiveLivesSettled(dailyRows)
 	}
+	_ = entity.NewAnchorIncomeSettlementLog(roomId, &snap, salary)
 }
 
 // matchAnchorSalaryAmount 按薪资降序取最高满足档;日表任一天未达日门槛则该档不达标;周次数用未结算 EffectiveLiveCount

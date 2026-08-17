@@ -64,7 +64,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement')"
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('GuildSalaryCfgManagement')"
             index="/operation">
           <template #title>
             <el-icon>
@@ -131,6 +131,18 @@
               <Coin/>
             </el-icon>
             <span>{{ t('menu.WalletExchangeCfgManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('AnchorSalaryCfgManagement')" index="/operation/salary/anchor-salary-cfg-list">
+            <el-icon>
+              <CreditCard/>
+            </el-icon>
+            <span>{{ t('menu.AnchorSalaryCfgManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('GuildSalaryCfgManagement')" index="/operation/salary/guild-salary-cfg-list">
+            <el-icon>
+              <CreditCard/>
+            </el-icon>
+            <span>{{ t('menu.GuildSalaryCfgManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -292,7 +304,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('GuildSalaryCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
+            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
             index="/config">
           <template #title>
             <el-icon>
@@ -312,17 +324,11 @@
             </el-icon>
             <span>{{ t('menu.AccountCfgManagement') }}</span>
           </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('AnchorSalaryCfgManagement')" index="/config/anchor-salary-cfg">
+          <el-menu-item v-if="hasMenuPermission('SimulatorCpuKeywordManagement')" index="/config/simulator-cpu-keyword">
             <el-icon>
-              <CreditCard/>
+              <Cpu/>
             </el-icon>
-            <span>{{ t('menu.AnchorSalaryCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('GuildSalaryCfgManagement')" index="/config/guild-salary-cfg">
-            <el-icon>
-              <CreditCard/>
-            </el-icon>
-            <span>{{ t('menu.GuildSalaryCfgManagement') }}</span>
+            <span>{{ t('menu.SimulatorCpuKeywordManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('PreloadCfgManagement')" index="/config/preload-cfg">
             <el-icon>

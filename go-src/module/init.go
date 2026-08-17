@@ -26,6 +26,7 @@ import (
 	"xr-game-server/module/resourcemonitor"
 	"xr-game-server/module/richrank"
 	"xr-game-server/module/shortvideo"
+	"xr-game-server/module/simulatorcpukeyword"
 	"xr-game-server/module/stat"
 	"xr-game-server/module/ticket"
 	"xr-game-server/module/upload"
@@ -61,6 +62,7 @@ func Init() {
 	aliyunmoderation.Init()
 	privacypolicy.Init()
 	accountcfg.Init()
+	simulatorcpukeyword.Init()
 	customerservice.Init()
 	wallet.Init()
 	logquery.Init()

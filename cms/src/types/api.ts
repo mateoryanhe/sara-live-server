@@ -462,6 +462,18 @@ export interface AccountCfg {
     updatedAt?: string
 }
 
+export interface SimulatorCpuKeyword {
+    id: string
+    keyword: string
+    remark: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface SimulatorCpuKeywordQuery extends PageQuery {
+    key?: string
+}
+
 export interface GetAccountCfgRes {
     cfg?: AccountCfg | null
 }

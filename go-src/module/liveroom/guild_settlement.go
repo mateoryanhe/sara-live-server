@@ -61,6 +61,7 @@ func settleOneGuild(guildId uint64, cfgs []*entity.GuildSalaryCfg) {
 	if hasDaily {
 		liveroomdao.MarkDailyGuildEffectiveLivesSettled(dailyRows)
 	}
+	_ = entity.NewGuildIncomeSettlementLog(guildId, &snap, salary)
 }
 
 // matchGuildSalaryAmount 按薪资降序取最高满足档;日表任一天未达日门槛则该档不达标;周次数用未结算 EffectiveLiveCount

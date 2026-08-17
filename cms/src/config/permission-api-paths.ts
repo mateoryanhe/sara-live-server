@@ -239,6 +239,13 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'AccountCfgManagement:view': '/accountCfg/getAccountCfg',
     'AccountCfgManagement:save': '/accountCfg/saveAccountCfg',
 
+    SimulatorCpuKeywordManagement: '/simulatorCpuKeyword/simulatorCpuKeywordList',
+    'SimulatorCpuKeywordManagement:view': '/simulatorCpuKeyword/simulatorCpuKeywordList',
+    'SimulatorCpuKeywordManagement:search': '/simulatorCpuKeyword/simulatorCpuKeywordList',
+    'SimulatorCpuKeywordManagement:create': '/simulatorCpuKeyword/createSimulatorCpuKeyword',
+    'SimulatorCpuKeywordManagement:edit': '/simulatorCpuKeyword/updateSimulatorCpuKeyword',
+    'SimulatorCpuKeywordManagement:delete': '/simulatorCpuKeyword/deleteSimulatorCpuKeyword',
+
     AnchorSalaryCfgManagement: '/anchorSalaryCfg/anchorSalaryCfgList',
     'AnchorSalaryCfgManagement:view': '/anchorSalaryCfg/anchorSalaryCfgList',
     'AnchorSalaryCfgManagement:search': '/anchorSalaryCfg/anchorSalaryCfgList',
