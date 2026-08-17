@@ -19,6 +19,7 @@ const (
 	LiveRoomIncomeTotalVideoCallIncome         db.TbCol = "total_video_call_income"
 	LiveRoomIncomeTotalVideoCallTicketIncome   db.TbCol = "total_video_call_ticket_income"
 	LiveRoomIncomeTotalVideoCallBillingIncome  db.TbCol = "total_video_call_billing_income"
+	LiveRoomIncomeTotalLiveDuration            db.TbCol = "total_live_duration"
 )
 
 // LiveRoomIncomeAmounts 直播间收益字段(三张收益表共用结构)
@@ -31,6 +32,7 @@ type LiveRoomIncomeAmounts struct {
 	TotalVideoCallIncome         float64 `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话收益" json:"totalVideoCallIncome"`
 	TotalVideoCallTicketIncome   float64 `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话门票收益" json:"totalVideoCallTicketIncome"`
 	TotalVideoCallBillingIncome  float64 `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话计费收益" json:"totalVideoCallBillingIncome"`
+	TotalLiveDuration            float64 `gorm:"default:0;comment:累计直播时长(秒)" json:"totalLiveDuration"`
 }
 
 func liveRoomIncomeLockKey(tb db.TbName, id uint64) string {
@@ -46,6 +48,7 @@ func (a *LiveRoomIncomeAmounts) clearAmounts() {
 	a.TotalVideoCallIncome = 0
 	a.TotalVideoCallTicketIncome = 0
 	a.TotalVideoCallBillingIncome = 0
+	a.TotalLiveDuration = 0
 }
 
 // IsZero 是否全部为0
@@ -60,7 +63,8 @@ func (a *LiveRoomIncomeAmounts) IsZero() bool {
 		a.TotalPrivateRoomWatchIncome == 0 &&
 		a.TotalVideoCallIncome == 0 &&
 		a.TotalVideoCallTicketIncome == 0 &&
-		a.TotalVideoCallBillingIncome == 0
+		a.TotalVideoCallBillingIncome == 0 &&
+		a.TotalLiveDuration == 0
 }
 
 // addIncomeAmountsLocked 在已持锁前提下累加各收益字段
@@ -92,6 +96,9 @@ func addIncomeAmountsLocked(tb db.TbName, id uint64, dst *LiveRoomIncomeAmounts,
 	if src.TotalVideoCallBillingIncome != 0 {
 		addIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallBillingIncome, id, &dst.TotalVideoCallBillingIncome, src.TotalVideoCallBillingIncome)
 	}
+	if src.TotalLiveDuration > 0 {
+		addIncomeAmountLocked(tb, LiveRoomIncomeTotalLiveDuration, id, &dst.TotalLiveDuration, src.TotalLiveDuration)
+	}
 }
 
 // clearIncomeAmountsLocked 在已持锁前提下清零并写库
@@ -108,6 +115,7 @@ func clearIncomeAmountsLocked(tb db.TbName, id uint64, a *LiveRoomIncomeAmounts,
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallIncome, id, 0)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallTicketIncome, id, 0)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallBillingIncome, id, 0)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalLiveDuration, id, 0)
 	touchIncomeUpdatedAt(tb, id, updatedAt)
 }
 
@@ -184,6 +192,7 @@ func regLiveRoomIncomeCols(tb db.TbName) {
 	syndb.RegQuick(tb, LiveRoomIncomeTotalVideoCallIncome)
 	syndb.RegQuick(tb, LiveRoomIncomeTotalVideoCallTicketIncome)
 	syndb.RegQuick(tb, LiveRoomIncomeTotalVideoCallBillingIncome)
+	syndb.RegQuick(tb, LiveRoomIncomeTotalLiveDuration)
 }
 
 func initLiveRoomIncome() {

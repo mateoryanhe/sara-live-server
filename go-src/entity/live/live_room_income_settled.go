@@ -54,6 +54,9 @@ func (r *LiveRoomIncomeSettled) AddTotalVideoCallTicketIncome(v float64) {
 func (r *LiveRoomIncomeSettled) AddTotalVideoCallBillingIncome(v float64) {
 	addIncomeAmount(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalVideoCallBillingIncome, r.ID, &r.TotalVideoCallBillingIncome, v, true, &r.UpdatedAt)
 }
+func (r *LiveRoomIncomeSettled) AddTotalLiveDuration(v float64) {
+	addIncomeAmount(TbLiveRoomIncomeSettled, LiveRoomIncomeTotalLiveDuration, r.ID, &r.TotalLiveDuration, v, true, &r.UpdatedAt)
+}
 
 // AddAmounts 结算时将一笔金额累加到已结算表(一次加锁)
 func (r *LiveRoomIncomeSettled) AddAmounts(a *LiveRoomIncomeAmounts) {

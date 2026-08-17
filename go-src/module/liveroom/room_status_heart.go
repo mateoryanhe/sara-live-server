@@ -85,12 +85,20 @@ func flushAnchorId(room *entity.LiveRoom) {
 	if cfg := liveroomdao.GetLiveRoomCfg(room.ID); cfg != nil && cfg.Category == entity.LiveRoomCategoryPrivate {
 		period = PrivatePeriod
 	}
+	sec := float64(period)
 	//记录本次直播
 	liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId)
-	liveRecord.AddTotalLiveDuration(float64(period))
-	//累计全部直播
+	liveRecord.AddTotalLiveDuration(sec)
+	//累计全部直播(用户统计)
 	stat := userinfodao.GetUserCumulativeStatByUserId(room.ID)
-	stat.AddTotalLiveDuration(float64(period))
+	stat.AddTotalLiveDuration(sec)
+	//直播间未结算+生涯累计时长
+	if unsettled := liveroomdao.GetLiveRoomIncomeUnsettled(room.ID); unsettled != nil {
+		unsettled.AddTotalLiveDuration(sec)
+	}
+	if total := liveroomdao.GetLiveRoomIncomeTotal(room.ID); total != nil {
+		total.AddTotalLiveDuration(sec)
+	}
 }
 
 func flushAudience(userId uint64, room *entity.LiveRoom) {
