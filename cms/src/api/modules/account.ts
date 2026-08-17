@@ -1,6 +1,8 @@
 import {request} from '../request'
 import type {
     AnchorDetail,
+    AnchorDailyEffectiveLiveItem,
+    AnchorDailyEffectiveLiveQuery,
     AnchorListItem,
     BanAnchorReq,
     BatchSetAnchorReq,
@@ -70,6 +72,10 @@ const accountApi = {
 
     getAnchorDetail: (anchorId: string | number) => {
         return request.post<AnchorDetail>('/account/getAnchorDetail', {anchorId})
+    },
+
+    getAnchorDailyEffectiveLiveList: (data: AnchorDailyEffectiveLiveQuery) => {
+        return request.post<PageResponse<AnchorDailyEffectiveLiveItem>>('/account/getAnchorDailyEffectiveLiveList', data)
     },
 
     getUserDetail: (userId: string | number) => {

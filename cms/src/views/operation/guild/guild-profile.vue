@@ -24,7 +24,7 @@
           <el-table-column :label="t('pages.guildProfile.guildName')" min-width="140" prop="name"/>
           <el-table-column :label="t('pages.guildProfile.description')" min-width="180" prop="description" show-overflow-tooltip/>
           <el-table-column :label="t('pages.guildProfile.lastUpdated')" prop="updatedAt" width="170"/>
-          <el-table-column fixed="right" :label="t('common.actions')" width="140">
+          <el-table-column fixed="right" :label="t('common.actions')" width="260">
             <template #default="{ row }">
               <el-button
                   v-if="can('viewAnchors')"
@@ -33,6 +33,14 @@
                   @click="handleViewAnchors(row)"
               >
                 {{ t('pages.guildProfile.viewAnchors') }}
+              </el-button>
+              <el-button
+                  v-if="can('viewAnchorSettlementLogs')"
+                  link
+                  type="primary"
+                  @click="handleViewSettlementLogs(row)"
+              >
+                {{ t('pages.guildProfile.viewAnchorSettlementLogs') }}
               </el-button>
             </template>
           </el-table-column>
@@ -82,6 +90,14 @@ const handleViewAnchors = (row: MyGuildProfile) => {
       guildId: id,
       guildName: row.name || '',
     },
+  })
+}
+
+const handleViewSettlementLogs = (row: MyGuildProfile) => {
+  const id = row?.id != null ? String(row.id) : ''
+  router.push({
+    path: '/operation/guild/guild-anchor-income-settlement-log-list',
+    query: id ? {guildId: id} : {},
   })
 }
 

@@ -9,7 +9,14 @@
       </template>
 
       <el-table v-loading="loading" :data="tableData" style="width: 100%">
-        <el-table-column :label="t('common.userId')" prop="id" width="180"/>
+        <el-table-column :label="t('common.userId')" prop="id" width="180">
+          <template #default="{ row }">
+            <el-button v-if="canViewDetail" link type="primary" @click="openDetail(row)">
+              {{ row.id }}
+            </el-button>
+            <span v-else>{{ row.id }}</span>
+          </template>
+        </el-table-column>
         <el-table-column :label="t('common.nickname')" min-width="120" prop="nickname">
           <template #default="{ row }">{{ row.nickname || '-' }}</template>
         </el-table-column>
@@ -115,7 +122,7 @@
         </el-table-column>
         <el-table-column fixed="right" :label="t('common.actions')" :width="readonly ? 90 : 220">
           <template #default="{ row }">
-            <el-button link type="primary" @click="openDetail(row)">
+            <el-button v-if="canViewDetail" link type="primary" @click="openDetail(row)">
               {{ t('common.detail') }}
             </el-button>
             <template v-if="!readonly">
@@ -218,6 +225,7 @@ const readonly = computed(() => route.name === 'GuildProfileMembers')
 const {can} = usePagePermission(
   route.name === 'GuildProfileMembers' ? 'GuildProfileManagement' : 'GuildManagement',
 )
+const canViewDetail = computed(() => can('viewDetail'))
 
 const loading = ref(false)
 const tableData = ref<AnchorListItem[]>([])

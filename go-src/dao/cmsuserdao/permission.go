@@ -56,12 +56,33 @@ func RoleHasApiPath(roleId uint64, apiPath string) bool {
 	if roleId == 0 || apiPath == "" {
 		return false
 	}
+	if roleHasApiPathExact(roleId, apiPath) {
+		return true
+	}
+	for _, alias := range cmsApiPermissionAliasPaths(apiPath) {
+		if roleHasApiPathExact(roleId, alias) {
+			return true
+		}
+	}
+	return false
+}
+
+func roleHasApiPathExact(roleId uint64, apiPath string) bool {
 	for _, p := range GetGetPermissionList(roleId) {
 		if p != nil && p.ApiPath == apiPath {
 			return true
 		}
 	}
 	return false
+}
+
+func cmsApiPermissionAliasPaths(apiPath string) []string {
+	switch apiPath {
+	case "/account/getAnchorDailyEffectiveLiveList":
+		return []string{"/account/getAnchorDetail"}
+	default:
+		return nil
+	}
 }
 
 func SavePermissions(data []*entity.Permission) {

@@ -23,6 +23,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   GuildManagement: 'Gremios',
   GuildRecycleBinManagement: 'Papelera de gremios',
   GuildProfileManagement: 'Perfil del gremio',
+  GuildProfileAnchorSettlementLogList: 'Liquidaciones de anclas del gremio',
   RechargeCfgManagement: 'Config. de recarga',
   VipCfgManagement: 'Config. VIP',
   AppPkgManagement: 'Paquetes de app',

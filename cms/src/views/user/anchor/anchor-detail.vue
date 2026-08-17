@@ -155,6 +155,10 @@
             </el-table>
             <el-empty v-else :description="t('pages.anchorList.noArchiveData')"/>
           </el-tab-pane>
+
+          <el-tab-pane :label="t('pages.anchorList.tabDailyEffectiveLive')" name="dailyEffectiveLive">
+            <DailyLivePanel :active="activeTab === 'dailyEffectiveLive'" :anchor-id="anchorId"/>
+          </el-tab-pane>
         </el-tabs>
       </div>
     </el-card>
@@ -168,6 +172,7 @@ import {useRoute, useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {accountApi} from '@/api'
 import IncomePanel from './anchor-detail-income-panel.vue'
+import DailyLivePanel from './anchor-detail-daily-live-panel.vue'
 import type {AnchorDetail} from '@/types/api'
 import {formatAmount} from '@/utils/number-format'
 

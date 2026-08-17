@@ -65,6 +65,10 @@ func (a *AccountController) GetAnchorDetail(ctx context.Context, req *accountdto
 	return liveroom.QueryAnchorDetail(ctx, req)
 }
 
+func (a *AccountController) GetAnchorDailyEffectiveLiveList(ctx context.Context, req *accountdto.GetAnchorDailyEffectiveLiveListReq) (*httpserver.CMSQueryResp, error) {
+	return liveroom.QueryAnchorDailyEffectiveLiveList(ctx, req)
+}
+
 // QueryOffShelfLiveRoomList CMS回收站:查询已下架直播间
 func (a *AccountController) QueryOffShelfLiveRoomList(ctx context.Context, req *accountdto.QueryOffShelfLiveRoomListReq) (res *httpserver.CMSQueryResp, err error) {
 	return liveroom.QueryOffShelfLiveRoomList(ctx, req)

@@ -1,9 +1,11 @@
 import {request} from '../request'
 import type {
+    AnchorIncomeSettlementLogItem,
     Guild,
     GuildQuery,
     ImportGuildAnchorsReq,
     ImportGuildAnchorsRes,
+    MyGuildAnchorIncomeSettlementLogQuery,
     MyGuildProfileListRes,
     PageResponse,
     UpdateMyGuildProfileReq,
@@ -52,6 +54,10 @@ export const guildApi = {
 
     getMyGuildProfile: () => {
         return request.post<MyGuildProfileListRes>('/guild/getMyGuildProfile', {})
+    },
+
+    getMyGuildAnchorIncomeSettlementLogList: (params: MyGuildAnchorIncomeSettlementLogQuery) => {
+        return request.post<PageResponse<AnchorIncomeSettlementLogItem>>('/guild/cmsMyGuildAnchorIncomeSettlementLogList', params)
     },
 
     updateMyGuildProfile: (data: UpdateMyGuildProfileReq) => {

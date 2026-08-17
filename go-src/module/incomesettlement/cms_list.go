@@ -8,6 +8,7 @@ import (
 	"xr-game-server/dao/guilddao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
+	"xr-game-server/dto/guilddto"
 	"xr-game-server/dto/incomesettlementdto"
 	"xr-game-server/entity/live"
 )
@@ -127,4 +128,61 @@ func GetGuildCMSList(_ context.Context, req *incomesettlementdto.CMSGuildIncomeS
 		list = append(list, item)
 	}
 	return httpserver.NewCMSQueryResp(total, list), nil
+}
+
+// GetAnchorCMSListByGuildIds CMS分页查询指定工会下主播结算流水
+func GetAnchorCMSListByGuildIds(_ context.Context, guildIds []uint64, req *guilddto.CMSMyGuildAnchorIncomeSettlementLogListReq) (*httpserver.CMSQueryResp, error) {
+	list := make([]*incomesettlementdto.CMSIncomeSettlementLogItem, 0)
+	if len(guildIds) == 0 {
+		return httpserver.NewCMSQueryResp(0, list), nil
+	}
+	total, rows := liveroomdao.AnchorIncomeSettlementLogCMSListByGuildIds(&liveroomdao.AnchorIncomeSettlementLogCMSListByGuildIdsFilter{
+		GuildIds:  guildIds,
+		RoomId:    parseUint64Filter(req.RoomId),
+		StartTime: req.StartTime,
+		EndTime:   req.EndTime,
+		PageIndex: req.PageIndex,
+		PageSize:  req.PageSize,
+	})
+	roomIds := collectAnchorRoomIds(rows)
+	nicknameMap := userinfodao.GetNicknameMapByUserIds(roomIds)
+	guildIdMap := liveroomdao.GetGuildIdMapByRoomIds(roomIds)
+	guildNameMap := guilddao.GetNameMapByIds(collectGuildIdsFromMap(guildIdMap))
+	list = make([]*incomesettlementdto.CMSIncomeSettlementLogItem, 0, len(rows))
+	for _, row := range rows {
+		item := fillCMSItemFromAnchor(row)
+		if item == nil {
+			continue
+		}
+		if nicknameMap != nil {
+			item.RoomNickname = nicknameMap[row.RoomId]
+		}
+		if guildIdMap != nil {
+			item.GuildId = guildIdMap[row.RoomId]
+			if guildNameMap != nil {
+				item.GuildName = guildNameMap[item.GuildId]
+			}
+		}
+		list = append(list, item)
+	}
+	return httpserver.NewCMSQueryResp(total, list), nil
+}
+
+func collectGuildIdsFromMap(guildIdMap map[uint64]uint64) []uint64 {
+	if len(guildIdMap) == 0 {
+		return nil
+	}
+	ids := make([]uint64, 0, len(guildIdMap))
+	seen := make(map[uint64]struct{}, len(guildIdMap))
+	for _, guildId := range guildIdMap {
+		if guildId == 0 {
+			continue
+		}
+		if _, ok := seen[guildId]; ok {
+			continue
+		}
+		seen[guildId] = struct{}{}
+		ids = append(ids, guildId)
+	}
+	return ids
 }

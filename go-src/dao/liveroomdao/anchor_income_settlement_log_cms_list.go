@@ -49,3 +49,52 @@ func AnchorIncomeSettlementLogCMSList(f *AnchorIncomeSettlementLogCMSListFilter)
 		Scan(&list)
 	return total, list
 }
+
+// AnchorIncomeSettlementLogCMSListByGuildIdsFilter CMS按工会ID列表查询主播结算流水
+type AnchorIncomeSettlementLogCMSListByGuildIdsFilter struct {
+	GuildIds  []uint64
+	RoomId    uint64
+	StartTime int64
+	EndTime   int64
+	PageIndex int
+	PageSize  int
+}
+
+// AnchorIncomeSettlementLogCMSListByGuildIds CMS分页查询指定工会下主播结算流水(关联 live_rooms.guild_id)
+func AnchorIncomeSettlementLogCMSListByGuildIds(f *AnchorIncomeSettlementLogCMSListByGuildIdsFilter) (int, []*entity.AnchorIncomeSettlementLog) {
+	list := make([]*entity.AnchorIncomeSettlementLog, 0)
+	if f == nil || len(f.GuildIds) == 0 {
+		return 0, list
+	}
+	if f.PageIndex <= 0 {
+		f.PageIndex = 1
+	}
+	if f.PageSize <= 0 {
+		f.PageSize = 20
+	}
+	ctx := gctx.New()
+	logTable := string(entity.TbAnchorIncomeSettlementLog)
+	roomTable := string(entity.TbLiveRoom)
+	roomIdCol := string(entity.AnchorIncomeSettlementLogRoomId)
+	guildIdCol := string(entity.LiveRoomGuildId)
+	m := g.Model(logTable+" a").Ctx(ctx).
+		InnerJoin(roomTable+" r", "r.id = a."+roomIdCol).
+		Where("r."+guildIdCol+" IN (?)", f.GuildIds)
+	if f.RoomId > 0 {
+		m = m.Where("a."+roomIdCol+" = ?", f.RoomId)
+	}
+	if f.StartTime > 0 {
+		m = m.Where("a.created_at >= ?", time.Unix(f.StartTime, 0))
+	}
+	if f.EndTime > 0 {
+		m = m.Where("a.created_at <= ?", time.Unix(f.EndTime, 0))
+	}
+	total, err := m.Clone().Count()
+	if err != nil {
+		return 0, list
+	}
+	_ = m.Clone().Fields("a.*").Order("a.id desc").
+		Limit(f.PageSize).Offset((f.PageIndex - 1) * f.PageSize).
+		Scan(&list)
+	return total, list
+}

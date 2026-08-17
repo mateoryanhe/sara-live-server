@@ -9,6 +9,7 @@ const zh = {
   description: '简介',
   lastUpdated: '最近更新',
   viewAnchors: '查询名下主播',
+  viewAnchorSettlementLogs: '查看结算流水',
 } as const
 
 export const guildProfileMessages = definePageMessages(
@@ -22,6 +23,7 @@ export const guildProfileMessages = definePageMessages(
     description: 'Description',
     lastUpdated: 'Last Updated',
     viewAnchors: 'View Anchors',
+    viewAnchorSettlementLogs: 'View Settlement Logs',
   },
   {
     tipTitle: 'Nota',
@@ -32,6 +34,7 @@ export const guildProfileMessages = definePageMessages(
     description: 'Descripción',
     lastUpdated: 'Última actualización',
     viewAnchors: 'Ver anclas',
+    viewAnchorSettlementLogs: 'Ver liquidaciones',
   },
   {
     tipTitle: 'Nota',
@@ -42,6 +45,7 @@ export const guildProfileMessages = definePageMessages(
     description: 'Descrição',
     lastUpdated: 'Última atualização',
     viewAnchors: 'Ver âncoras',
+    viewAnchorSettlementLogs: 'Ver liquidações',
   },
   {
     tipTitle: 'नोट',
@@ -52,6 +56,7 @@ export const guildProfileMessages = definePageMessages(
     description: 'विवरण',
     lastUpdated: 'अंतिम अपडेट',
     viewAnchors: 'एंकर देखें',
+    viewAnchorSettlementLogs: 'निपटान लॉग देखें',
   },
   {
     tipTitle: 'Catatan',
@@ -62,5 +67,6 @@ export const guildProfileMessages = definePageMessages(
     description: 'Deskripsi',
     lastUpdated: 'Terakhir diperbarui',
     viewAnchors: 'Lihat anchor',
+    viewAnchorSettlementLogs: 'Lihat log penyelesaian',
   },
 )

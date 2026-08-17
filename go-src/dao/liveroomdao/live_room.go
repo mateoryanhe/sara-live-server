@@ -187,3 +187,23 @@ func ListRoomsByGuildFromDB(guildId uint64) []*entity.LiveRoom {
 		Scan(&rooms)
 	return rooms
 }
+
+// GetGuildIdMapByRoomIds 批量查询直播间所属工会ID
+func GetGuildIdMapByRoomIds(roomIds []uint64) map[uint64]uint64 {
+	if len(roomIds) == 0 {
+		return nil
+	}
+	type row struct {
+		ID      uint64
+		GuildId uint64
+	}
+	rows := make([]row, 0)
+	_ = g.Model(string(entity.TbLiveRoom)).
+		Where("id IN (?)", roomIds).
+		Scan(&rows)
+	ret := make(map[uint64]uint64, len(rows))
+	for _, r := range rows {
+		ret[r.ID] = r.GuildId
+	}
+	return ret
+}

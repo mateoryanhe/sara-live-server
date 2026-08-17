@@ -58,6 +58,11 @@ func (c *GuildController) UpdateMyGuildProfile(ctx context.Context, req *guilddt
 	return guild.UpdateMyGuildProfile(ctx, req)
 }
 
+// CMSMyGuildAnchorIncomeSettlementLogList 查询当前 CMS 用户名下工会的主播结算流水
+func (c *GuildController) CMSMyGuildAnchorIncomeSettlementLogList(ctx context.Context, req *guilddto.CMSMyGuildAnchorIncomeSettlementLogListReq) (*httpserver.CMSQueryResp, error) {
+	return guild.GetMyGuildAnchorIncomeSettlementLogList(ctx, req)
+}
+
 // ImportGuildAnchors CSV 导入工会主播
 func (c *GuildController) ImportGuildAnchors(ctx context.Context, req *guilddto.ImportGuildAnchorsReq) (res *guilddto.ImportGuildAnchorsRes, err error) {
 	return guild.ImportGuildAnchors(ctx, req)

@@ -27,6 +27,10 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 	}
 	data := userinfodao.GetUserInfoByUserId(targetUserId)
 	userExt := userinfodao.GetUserExtByUserId(targetUserId)
+	prettyId := userExt.PrettyId
+	if prettyId == 0 {
+		prettyId = data.ID
+	}
 	ret := &userinfodto.GetUserInfoRes{
 		UserId:        data.ID,
 		Nickname:      data.Nickname,
@@ -40,7 +44,7 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		IsAnchor:      data.IsAnchor(),
 		UserType:      data.UserType,
 		HasLiveRoom:   liveroomdao.HasLiveRoom(data.ID),
-		PrettyId:      userExt.PrettyId,
+		PrettyId:      prettyId,
 		Gender:        data.Gender,
 		Birthday:      formatBirthday(data.Birthday),
 		FollowCount:   int(userExt.FollowCount),

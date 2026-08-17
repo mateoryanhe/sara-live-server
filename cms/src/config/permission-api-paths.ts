@@ -28,8 +28,10 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'AnchorListManagement:view': '/account/getAnchorList',
     'AnchorListManagement:search': '/account/getAnchorList',
     'AnchorListManagement:edit': '/account/setAnchor',
+    'AnchorListManagement:viewDetail': '/account/getAnchorDetail',
     'AnchorListManagement:offShelf': '/account/setLiveRoomStatus',
     AnchorDetail: '/account/getAnchorDetail',
+    'AnchorDetail:dailyEffectiveLive': '/account/getAnchorDailyEffectiveLiveList',
 
     LiveRoomRecycleBinManagement: '/account/getOffShelfLiveRoomList',
     'LiveRoomRecycleBinManagement:view': '/account/getOffShelfLiveRoomList',
@@ -88,6 +90,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GuildManagement:edit': '/guild/updateGuild',
     'GuildManagement:offShelf': '/guild/deleteGuild',
     'GuildManagement:viewMembers': '/account/getAnchorList',
+    'GuildManagement:viewDetail': '/account/getAnchorDetail',
     'GuildManagement:ban': '/account/banAnchor',
     'GuildManagement:unban': '/account/unBanAnchor',
     'GuildManagement:exitGuild': '/account/exitGuild',
@@ -102,6 +105,13 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     GuildProfileManagement: '/guild/getMyGuildProfile',
     'GuildProfileManagement:view': '/guild/getMyGuildProfile',
     'GuildProfileManagement:viewAnchors': '/account/getAnchorList',
+    'GuildProfileManagement:viewDetail': '/account/getAnchorDetail',
+    'GuildProfileManagement:viewAnchorSettlementLogs': '/guild/cmsMyGuildAnchorIncomeSettlementLogList',
+
+    GuildProfileAnchorSettlementLogList: '/guild/cmsMyGuildAnchorIncomeSettlementLogList',
+    'GuildProfileAnchorSettlementLogList:view': '/guild/cmsMyGuildAnchorIncomeSettlementLogList',
+    'GuildProfileAnchorSettlementLogList:search': '/guild/cmsMyGuildAnchorIncomeSettlementLogList',
+    'GuildProfileAnchorSettlementLogList:export': '/guild/cmsMyGuildAnchorIncomeSettlementLogList',
 
     RechargeCfgManagement: '/rechargeCfg/rechargeCfgList',
     'RechargeCfgManagement:view': '/rechargeCfg/rechargeCfgList',

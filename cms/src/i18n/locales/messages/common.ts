@@ -16,7 +16,7 @@ export const commonMessages = {
     nameEn: '名称(英文)', nameEs: '名称(西班牙语)', namePt: '名称(葡萄牙语)', nameHi: '名称(印地语)', nameId: '名称(印尼语)',
     descEn: '说明(英文)', descEs: '说明(西班牙语)', descPt: '说明(葡萄牙语)', descHi: '说明(印地语)', descId: '说明(印尼语)',
     fuzzyMatch: '模糊匹配', pleaseEnter: '请输入', pleaseSelect: '请选择', loading: '加载中...',
-    success: '成功', failed: '失败', copy: '复制', refresh: '刷新', export: '导出', import: '导入',
+    success: '成功', failed: '失败', copy: '复制', refresh: '刷新', export: '导出', exportSuccess: '导出成功', exportFailed: '导出失败', exportEmpty: '没有可导出的数据', import: '导入',
     open: '开启', close: '关闭', live: '直播中', offline: '未开播', banned: '已封禁',
   },
   en: {
@@ -36,7 +36,7 @@ export const commonMessages = {
     nameEn: 'Name (EN)', nameEs: 'Name (ES)', namePt: 'Name (PT)', nameHi: 'Name (HI)', nameId: 'Name (ID)',
     descEn: 'Description (EN)', descEs: 'Description (ES)', descPt: 'Description (PT)', descHi: 'Description (HI)', descId: 'Description (ID)',
     fuzzyMatch: 'Fuzzy match', pleaseEnter: 'Please enter', pleaseSelect: 'Please select', loading: 'Loading...',
-    success: 'Success', failed: 'Failed', copy: 'Copy', refresh: 'Refresh', export: 'Export', import: 'Import',
+    success: 'Success', failed: 'Failed', copy: 'Copy', refresh: 'Refresh', export: 'Export', exportSuccess: 'Export successful', exportFailed: 'Export failed', exportEmpty: 'No data to export', import: 'Import',
     open: 'Open', close: 'Close', live: 'Live', offline: 'Offline', banned: 'Banned',
   },
   es: {
@@ -56,7 +56,7 @@ export const commonMessages = {
     nameEn: 'Nombre (EN)', nameEs: 'Nombre (ES)', namePt: 'Nombre (PT)', nameHi: 'Nombre (HI)', nameId: 'Nombre (ID)',
     descEn: 'Descripción (EN)', descEs: 'Descripción (ES)', descPt: 'Descripción (PT)', descHi: 'Descripción (HI)', descId: 'Descripción (ID)',
     fuzzyMatch: 'Coincidencia difusa', pleaseEnter: 'Introduce', pleaseSelect: 'Selecciona', loading: 'Cargando...',
-    success: 'Éxito', failed: 'Fallido', copy: 'Copiar', refresh: 'Actualizar', export: 'Exportar', import: 'Importar',
+    success: 'Éxito', failed: 'Fallido', copy: 'Copiar', refresh: 'Actualizar', export: 'Exportar', exportSuccess: 'Exportación exitosa', exportFailed: 'Error al exportar', exportEmpty: 'No hay datos para exportar', import: 'Importar',
     open: 'Abrir', close: 'Cerrar', live: 'En vivo', offline: 'Offline', banned: 'Baneado',
   },
   pt: {
@@ -76,7 +76,7 @@ export const commonMessages = {
     nameEn: 'Nome (EN)', nameEs: 'Nome (ES)', namePt: 'Nome (PT)', nameHi: 'Nome (HI)', nameId: 'Nome (ID)',
     descEn: 'Descrição (EN)', descEs: 'Descrição (ES)', descPt: 'Descrição (PT)', descHi: 'Descrição (HI)', descId: 'Descrição (ID)',
     fuzzyMatch: 'Correspondência aproximada', pleaseEnter: 'Digite', pleaseSelect: 'Selecione', loading: 'Carregando...',
-    success: 'Sucesso', failed: 'Falhou', copy: 'Copiar', refresh: 'Atualizar', export: 'Exportar', import: 'Importar',
+    success: 'Sucesso', failed: 'Falhou', copy: 'Copiar', refresh: 'Atualizar', export: 'Exportar', exportSuccess: 'Exportação concluída', exportFailed: 'Falha ao exportar', exportEmpty: 'Nenhum dado para exportar', import: 'Importar',
     open: 'Abrir', close: 'Fechar', live: 'Ao vivo', offline: 'Offline', banned: 'Banido',
   },
   hi: {
@@ -96,7 +96,7 @@ export const commonMessages = {
     nameEn: 'नाम (EN)', nameEs: 'नाम (ES)', namePt: 'नाम (PT)', nameHi: 'नाम (HI)', nameId: 'नाम (ID)',
     descEn: 'विवरण (EN)', descEs: 'विवरण (ES)', descPt: 'विवरण (PT)', descHi: 'विवरण (HI)', descId: 'विवरण (ID)',
     fuzzyMatch: 'फ़ज़ी मिलान', pleaseEnter: 'दर्ज करें', pleaseSelect: 'चुनें', loading: 'लोड हो रहा है...',
-    success: 'सफल', failed: 'विफल', copy: 'कॉपी', refresh: 'रीफ़्रेश', export: 'निर्यात', import: 'आयात',
+    success: 'सफल', failed: 'विफल', copy: 'कॉपी', refresh: 'रीफ़्रेश', export: 'निर्यात', exportSuccess: 'निर्यात सफल', exportFailed: 'निर्यात विफल', exportEmpty: 'निर्यात करने के लिए कोई डेटा नहीं', import: 'आयात',
     open: 'खोलें', close: 'बंद', live: 'लाइव', offline: 'ऑफ़लाइन', banned: 'प्रतिबंधित',
   },
   id: {
@@ -116,7 +116,7 @@ export const commonMessages = {
     nameEn: 'Nama (EN)', nameEs: 'Nama (ES)', namePt: 'Nama (PT)', nameHi: 'Nama (HI)', nameId: 'Nama (ID)',
     descEn: 'Deskripsi (EN)', descEs: 'Deskripsi (ES)', descPt: 'Deskripsi (PT)', descHi: 'Deskripsi (HI)', descId: 'Deskripsi (ID)',
     fuzzyMatch: 'Pencocokan fuzzy', pleaseEnter: 'Masukkan', pleaseSelect: 'Pilih', loading: 'Memuat...',
-    success: 'Berhasil', failed: 'Gagal', copy: 'Salin', refresh: 'Segarkan', export: 'Ekspor', import: 'Impor',
+    success: 'Berhasil', failed: 'Gagal', copy: 'Salin', refresh: 'Segarkan', export: 'Ekspor', exportSuccess: 'Ekspor berhasil', exportFailed: 'Ekspor gagal', exportEmpty: 'Tidak ada data untuk diekspor', import: 'Impor',
     open: 'Buka', close: 'Tutup', live: 'Live', offline: 'Offline', banned: 'Diblokir',
   },
 } as const

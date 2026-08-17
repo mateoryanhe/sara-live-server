@@ -62,6 +62,7 @@ const READONLY_PAGES = new Set([
     'LiveRevenueLogList',
     'AnchorIncomeSettlementLogList',
     'GuildIncomeSettlementLogList',
+    'GuildProfileAnchorSettlementLogList',
     'LiveRecordList',
     'VideoCallLogList',
     'GameWinLogListManagement',
@@ -111,7 +112,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'cancel', label: '注销/取消注销'},
         {key: 'setUserType', label: '修改用户类型'},
     ],
-    AnchorListManagement: [BTN.view, BTN.search, BTN.edit, {key: 'offShelf', label: '下架'}],
+    AnchorListManagement: [BTN.view, BTN.search, BTN.edit, {key: 'viewDetail', label: '查看详情'}, {key: 'offShelf', label: '下架'}],
     LiveRoomRecycleBinManagement: [BTN.view, BTN.search, {key: 'onShelf', label: '上架'}],
     RoleManagement: [
         BTN.view,
@@ -139,6 +140,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.edit,
         {key: 'offShelf', label: '下架'},
         {key: 'viewMembers', label: '查看成员'},
+        {key: 'viewDetail', label: '查看详情'},
         {key: 'ban', label: '封禁主播'},
         {key: 'unban', label: '解封主播'},
         {key: 'exitGuild', label: '退出工会'},
@@ -149,6 +151,8 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     GuildProfileManagement: [
         ...DEFAULT_VIEW_BUTTONS,
         {key: 'viewAnchors', label: '查询名下主播'},
+        {key: 'viewDetail', label: '查看详情'},
+        {key: 'viewAnchorSettlementLogs', label: '查看名下主播结算流水'},
     ],
     BannerManagement: [
         ...DEFAULT_CRUD_BUTTONS,

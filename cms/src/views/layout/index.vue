@@ -64,7 +64,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('GuildSalaryCfgManagement') || hasMenuPermission('AnchorIncomeSettlementLogList') || hasMenuPermission('GuildIncomeSettlementLogList')"
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('GuildProfileAnchorSettlementLogList') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('GuildSalaryCfgManagement') || hasMenuPermission('AnchorIncomeSettlementLogList') || hasMenuPermission('GuildIncomeSettlementLogList')"
             index="/operation">
           <template #title>
             <el-icon>
@@ -123,7 +123,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('GuildManagement') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement')"
+              v-if="hasMenuPermission('GuildManagement') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('GuildProfileAnchorSettlementLogList')"
               index="/operation/group/guild">
             <template #title>
               <el-icon>
@@ -148,6 +148,12 @@
                 <EditPen/>
               </el-icon>
               <span>{{ t('menu.GuildProfileManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('GuildProfileAnchorSettlementLogList')" index="/operation/guild/guild-anchor-income-settlement-log-list">
+              <el-icon>
+                <Document/>
+              </el-icon>
+              <span>{{ t('menu.GuildProfileAnchorSettlementLogList') }}</span>
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu

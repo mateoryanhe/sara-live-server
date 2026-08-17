@@ -16,6 +16,7 @@ import {guildRecycleBinMessages} from './guild-recycle-bin'
 import {guildAnchorImportResultMessages} from './guild-anchor-import-result'
 import {guildMembersMessages} from './guild-members'
 import {guildProfileMessages} from './guild-profile'
+import {guildAnchorIncomeSettlementLogListMessages} from './guild-anchor-income-settlement-log-list'
 import {rechargeCfgListMessages} from './recharge-cfg-list'
 import {appPkgListMessages} from './app-pkg-list'
 import {randomNicknameCfgMessages} from './random-nickname-cfg'
@@ -74,6 +75,7 @@ const pageMessageBuilders = [
   ['guildAnchorImportResult', guildAnchorImportResultMessages],
   ['guildMembers', guildMembersMessages],
   ['guildProfile', guildProfileMessages],
+  ['guildAnchorIncomeSettlementLogList', guildAnchorIncomeSettlementLogListMessages],
   ['rechargeCfgList', rechargeCfgListMessages],
   ['appPkgList', appPkgListMessages],
   ['randomNicknameCfg', randomNicknameCfgMessages],

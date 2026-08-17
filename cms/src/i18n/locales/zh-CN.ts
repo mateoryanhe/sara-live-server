@@ -22,6 +22,7 @@ const menu = {
   GuildManagement: '工会管理',
   GuildRecycleBinManagement: '工会垃圾库',
   GuildProfileManagement: '工会数据查询',
+  GuildProfileAnchorSettlementLogList: '名下主播结算流水',
   RechargeCfgManagement: '充值配置',
   VipCfgManagement: 'VIP配置',
   AppPkgManagement: 'App包管理',

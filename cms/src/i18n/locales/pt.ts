@@ -23,6 +23,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   GuildManagement: 'Guildas',
   GuildRecycleBinManagement: 'Lixeira de guildas',
   GuildProfileManagement: 'Perfil da guilda',
+  GuildProfileAnchorSettlementLogList: 'Liquidações de âncoras da guilda',
   RechargeCfgManagement: 'Config. de recarga',
   VipCfgManagement: 'Config. VIP',
   AppPkgManagement: 'Pacotes do app',

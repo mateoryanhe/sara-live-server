@@ -55,6 +55,12 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {title: '工会数据查询'},
         },
         {
+            path: 'guild/guild-anchor-income-settlement-log-list',
+            name: 'GuildProfileAnchorSettlementLogList',
+            component: () => import('@/views/operation/guild/guild-anchor-income-settlement-log-list.vue'),
+            meta: {title: '名下主播结算流水'},
+        },
+        {
             path: 'recharge/recharge-cfg-list',
             name: 'RechargeCfgManagement',
             component: () => import('@/views/operation/recharge/recharge-cfg-list.vue'),

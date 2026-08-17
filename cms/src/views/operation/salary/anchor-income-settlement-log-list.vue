@@ -27,6 +27,7 @@
         <el-form-item>
           <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
           <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
+          <el-button v-if="can('export')" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
         </el-form-item>
       </el-form>
 
@@ -72,9 +73,14 @@ import {onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {anchorIncomeSettlementLogApi} from '@/api/modules/anchor-income-settlement-log'
 import type {AnchorIncomeSettlementLogItem} from '@/types/api'
+import {usePagePermission} from '@/composables/usePagePermission'
+import {downloadCsv, fetchAllPagedRows} from '@/utils/csv-export'
+import {buildAnchorSettlementLogCsvColumns} from '@/utils/income-settlement-log-csv'
 
 const {t} = useI18n()
+const {can} = usePagePermission('AnchorIncomeSettlementLogList')
 const loading = ref(false)
+const exporting = ref(false)
 const tableData = ref<AnchorIncomeSettlementLogItem[]>([])
 
 const searchForm = reactive({
@@ -96,16 +102,20 @@ const toDayEndUnix = (dateStr: string): number => {
   return Math.floor(new Date(`${dateStr}T23:59:59`).getTime() / 1000)
 }
 
-const buildQueryParams = () => {
+const buildFilterParams = () => {
   const [startDate, endDate] = searchForm.dateRange || []
   return {
-    pageIndex: pagination.pageIndex,
-    pageSize: pagination.pageSize,
     roomId: searchForm.roomId.trim(),
     startTime: startDate ? toDayStartUnix(startDate) : 0,
     endTime: endDate ? toDayEndUnix(endDate) : 0,
   }
 }
+
+const buildQueryParams = () => ({
+  ...buildFilterParams(),
+  pageIndex: pagination.pageIndex,
+  pageSize: pagination.pageSize,
+})
 
 const fetchList = async () => {
   loading.value = true
@@ -142,6 +152,34 @@ const handleSizeChange = (size: number) => {
   pagination.pageSize = size
   pagination.pageIndex = 1
   fetchList()
+}
+
+const handleExport = async () => {
+  exporting.value = true
+  try {
+    const rows = await fetchAllPagedRows((pageIndex, pageSize) =>
+      anchorIncomeSettlementLogApi.getList({
+        ...buildFilterParams(),
+        pageIndex,
+        pageSize,
+      }),
+    )
+    if (rows.length === 0) {
+      ElMessage.warning(t('common.exportEmpty'))
+      return
+    }
+    downloadCsv(
+      `anchor-income-settlement-log-${Date.now()}.csv`,
+      buildAnchorSettlementLogCsvColumns(t),
+      rows,
+    )
+    ElMessage.success(t('common.exportSuccess'))
+  } catch (error) {
+    console.error('export anchor income settlement log failed:', error)
+    ElMessage.error(t('common.exportFailed'))
+  } finally {
+    exporting.value = false
+  }
 }
 
 const formatDate = (dateString: string | null | undefined) => {

@@ -360,6 +360,23 @@ export interface AnchorDetail {
     incomeArchives?: LiveRoomIncomeArchiveItem[]
 }
 
+export interface AnchorDailyEffectiveLiveQuery extends PageQuery {
+    anchorId: string | number
+    liveDateStart?: string
+    liveDateEnd?: string
+    settled?: number
+}
+
+export interface AnchorDailyEffectiveLiveItem {
+    id: string
+    roomId?: string
+    liveDate?: string
+    liveDuration?: number
+    settled?: boolean
+    createdAt?: string | null
+    updatedAt?: string | null
+}
+
 export interface UserAccountDetailItem {
     id: string
     openId?: string
@@ -1157,7 +1174,16 @@ export interface AnchorIncomeSettlementLogItem extends IncomeSettlementLogAmount
     id: string
     roomId: string
     roomNickname?: string
+    guildId?: string
+    guildName?: string
     createdAt?: string | null
+}
+
+export interface MyGuildAnchorIncomeSettlementLogQuery extends PageQuery {
+    guildId?: string
+    roomId?: string
+    startTime?: number
+    endTime?: number
 }
 
 export interface GuildIncomeSettlementLogQuery extends PageQuery {
