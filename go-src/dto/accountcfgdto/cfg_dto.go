@@ -9,6 +9,7 @@ type GetAccountCfgReq struct {
 type AccountCfgItem struct {
 	ID                         string `json:"id"`
 	CancelAccountByCodeEnabled bool   `json:"cancelAccountByCodeEnabled"`
+	SimulatorLoginEnabled      bool   `json:"simulatorLoginEnabled"`
 	CreatedAt                  string `json:"createdAt"`
 	UpdatedAt                  string `json:"updatedAt"`
 }
@@ -21,6 +22,7 @@ type SaveAccountCfgReq struct {
 	g.Meta                     `path:"/saveAccountCfg" method:"post" summary:"保存账号配置" tags:"账号配置"`
 	ID                         uint64 `json:"id" dc:"配置ID,首次保存可为0"`
 	CancelAccountByCodeEnabled bool   `json:"cancelAccountByCodeEnabled" dc:"注销码销户开关(官网公开接口)"`
+	SimulatorLoginEnabled      bool   `json:"simulatorLoginEnabled" dc:"模拟器是否允许登录"`
 }
 
 type SaveAccountCfgRes struct {

@@ -15,6 +15,7 @@ const (
 const (
 	UserLoginDeviceType   db.TbCol = "device_type"
 	UserLoginDeviceModel  db.TbCol = "device_model"
+	UserLoginDeviceCpu    db.TbCol = "cpu_model"
 	UserLoginDeviceOsVer  db.TbCol = "os_version"
 	UserLoginDeviceAppVer db.TbCol = "app_version"
 	UserLoginDeviceId     db.TbCol = "device_id"
@@ -25,6 +26,7 @@ type UserLoginDevice struct {
 	migrate.OneModel
 	DeviceType  string `gorm:"size:16;default:'';comment:设备类型(ios/android)" json:"deviceType"`
 	DeviceModel string `gorm:"size:128;default:'';comment:设备型号" json:"deviceModel"`
+	CpuModel    string `gorm:"size:128;default:'';comment:CPU型号/硬件标识" json:"cpuModel"`
 	OsVersion   string `gorm:"size:64;default:'';comment:系统版本号" json:"osVersion"`
 	AppVersion  string `gorm:"size:64;default:'';comment:App/APK版本号" json:"appVersion"`
 	DeviceId    string `gorm:"size:128;default:'';comment:设备唯一标识" json:"deviceId"`
@@ -45,6 +47,7 @@ func (receiver *UserLoginDevice) Refresh(info *DeviceInfo) {
 	}
 	receiver.SetDeviceType(strings.ToLower(strings.TrimSpace(info.DeviceType)))
 	receiver.SetDeviceModel(info.DeviceModel)
+	receiver.SetCpuModel(info.CpuModel)
 	receiver.SetOsVersion(info.OsVersion)
 	receiver.SetAppVersion(info.AppVersion)
 	receiver.SetDeviceId(info.DeviceId)
@@ -65,6 +68,15 @@ func (receiver *UserLoginDevice) SetDeviceModel(deviceModel string) {
 	syndb.AddData(TbUserLoginDevice, UserLoginDeviceModel, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: deviceModel,
+	})
+}
+
+func (receiver *UserLoginDevice) SetCpuModel(cpuModel string) {
+	receiver.CpuModel = cpuModel
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddData(TbUserLoginDevice, UserLoginDeviceCpu, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: cpuModel,
 	})
 }
 
@@ -116,6 +128,7 @@ func initUserLoginDevice() {
 	syndb.RegQuick(TbUserLoginDevice, db.UpdatedAtName)
 	syndb.RegQuick(TbUserLoginDevice, UserLoginDeviceType)
 	syndb.RegQuick(TbUserLoginDevice, UserLoginDeviceModel)
+	syndb.RegQuick(TbUserLoginDevice, UserLoginDeviceCpu)
 	syndb.RegQuick(TbUserLoginDevice, UserLoginDeviceOsVer)
 	syndb.RegQuick(TbUserLoginDevice, UserLoginDeviceAppVer)
 	syndb.RegQuick(TbUserLoginDevice, UserLoginDeviceId)

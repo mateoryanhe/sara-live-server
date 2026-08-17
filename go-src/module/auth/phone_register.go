@@ -20,6 +20,9 @@ import (
 )
 
 func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *authdto.PhoneRegisterRes, err error) {
+	if err = ensureSimulatorLoginAllowed(req.DeviceInfo); err != nil {
+		return nil, err
+	}
 	phoneAreaCode := phoneutil.NormalizeAreaCode(req.PhoneAreaCode)
 	phone := req.Phone
 	phoneKey := phoneutil.UniqueKey(phoneAreaCode, phone)

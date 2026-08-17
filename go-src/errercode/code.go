@@ -183,6 +183,8 @@ const (
 	ActivityMessageNonExist XRCode = 147
 	// ShortVideoDiskSpaceInsufficient 磁盘空闲空间不足,无法上传短视频
 	ShortVideoDiskSpaceInsufficient XRCode = 148
+	// SimulatorLoginDenied 模拟器登录被禁止
+	SimulatorLoginDenied XRCode = 149
 )
 
 type XError struct {

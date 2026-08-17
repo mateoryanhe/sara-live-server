@@ -10,6 +10,7 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/phoneutil"
 	"xr-game-server/entity/user"
+	"xr-game-server/module/usermaxid"
 )
 
 // PhoneOpenId 手机号登陆 open_id = 区号_手机号
@@ -124,23 +125,21 @@ func appendAccountToListCache(openId string, channel uint, account *entity.Accou
 	accountCacheMgr.FlushCache(key, newList)
 }
 
-// RegisterAccount 注册新账号并写入列表缓存
+// RegisterAccount 注册新账号并写入列表缓存(ID 由 usermaxid 分配)
 func RegisterAccount(openId string, channel uint) *entity.Account {
-	return RegisterAccountWithID(0, openId, channel)
+	return RegisterAccountWithID(usermaxid.NextUserId(), openId, channel)
 }
 
-// RegisterAccountWithID 使用指定ID注册新账号(id=0 时由 NewAccount 自行生成)
+// RegisterAccountWithID 使用指定ID注册新账号(id=0 时回退为 usermaxid 分配)
 func RegisterAccountWithID(id uint64, openId string, channel uint) *entity.Account {
 	openId = LogicalOpenId(strings.TrimSpace(openId))
 	if openId == "" || channel == 0 {
 		return nil
 	}
-	var acc *entity.Account
 	if id == 0 {
-		acc = entity.NewAccount(openId, channel)
-	} else {
-		acc = entity.NewAccountWithID(id, openId, channel)
+		id = usermaxid.NextUserId()
 	}
+	acc := entity.NewAccountWithID(id, openId, channel)
 	appendAccountToListCache(openId, channel, acc)
 	return acc
 }

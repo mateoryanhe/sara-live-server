@@ -1,4 +1,4 @@
-package auth
+package usermaxid
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
@@ -10,7 +10,8 @@ var userMaxId *entity.UserMaxId
 
 const userMaxIdRecordID uint64 = 1
 
-func initUserMaxId() {
+// Init 加载/初始化用户最大ID(启动时调用)
+func Init() {
 	row := &entity.UserMaxId{}
 	err := g.Model(string(entity.TbUserMaxId)).Order("id asc").Limit(1).Scan(row)
 	if err != nil || row.ID == 0 {
@@ -31,7 +32,7 @@ func initUserMaxId() {
 // NextUserId 原子分配下一个用户ID
 func NextUserId() uint64 {
 	if userMaxId == nil {
-		initUserMaxId()
+		Init()
 	}
 	return userMaxId.Add(1)
 }

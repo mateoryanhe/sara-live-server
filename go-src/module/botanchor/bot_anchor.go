@@ -7,6 +7,7 @@ import (
 
 	"github.com/gogf/gf/v2/util/guid"
 	"xr-game-server/core/httpserver"
+	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/botanchordto"
@@ -38,7 +39,10 @@ func CreateBotAnchor(_ context.Context, req *botanchordto.CreateBotAnchorReq) (*
 	}
 
 	openId := fmt.Sprintf("bot_%s", guid.S())
-	account := userentity.NewAccount(openId, auth.BotAnchorChannel)
+	account := accountdao.RegisterAccount(openId, auth.BotAnchorChannel)
+	if account == nil || account.ID == 0 {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 
 	user := userinfodao.GetUserInfoByUserId(account.ID)
 	user.SetNickname(nickname)

@@ -6,6 +6,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/gogf/gf/v2/util/guid"
+	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/entity/user"
 	"xr-game-server/module/auth"
@@ -21,7 +22,10 @@ func createCMSAuthorUser(nickname, avatar string) (uint64, error) {
 		return 0, fmt.Errorf("empty cms author nickname")
 	}
 	openId := fmt.Sprintf("sv_%s", guid.S())
-	account := entity.NewAccount(openId, auth.ShortVideoAuthorChannel)
+	account := accountdao.RegisterAccount(openId, auth.ShortVideoAuthorChannel)
+	if account == nil || account.ID == 0 {
+		return 0, fmt.Errorf("register cms author account failed")
+	}
 	user := userinfodao.GetUserInfoByUserId(account.ID)
 	user.SetNickname(nickname)
 	if avatar = strings.TrimSpace(avatar); avatar != "" {

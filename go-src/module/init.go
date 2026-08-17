@@ -30,6 +30,7 @@ import (
 	"xr-game-server/module/ticket"
 	"xr-game-server/module/upload"
 	"xr-game-server/module/userinfo"
+	"xr-game-server/module/usermaxid"
 	"xr-game-server/module/verification_code"
 	"xr-game-server/module/vip"
 	"xr-game-server/module/wallet"
@@ -38,6 +39,7 @@ import (
 func Init() {
 	upload.Init()
 	randomnick.Init()
+	usermaxid.Init()
 	auth.InitAuth()
 	preload.Init()
 	currencylog.Init()

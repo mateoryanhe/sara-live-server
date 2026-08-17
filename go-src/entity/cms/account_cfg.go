@@ -13,6 +13,7 @@ const (
 type AccountCfg struct {
 	migrate.OneModel
 	CancelAccountByCodeEnabled bool `gorm:"default:0;comment:注销码销户开关(官网公开接口)" json:"cancelAccountByCodeEnabled"`
+	SimulatorLoginEnabled      bool `gorm:"default:1;comment:模拟器是否允许登录" json:"simulatorLoginEnabled"`
 }
 
 func initAccountCfg() {

@@ -16,6 +16,7 @@ func GetAccountCfg(_ context.Context, _ *accountcfgdto.GetAccountCfgReq) (*accou
 	if cfg == nil {
 		return &accountcfgdto.GetAccountCfgRes{Cfg: &accountcfgdto.AccountCfgItem{
 			CancelAccountByCodeEnabled: false,
+			SimulatorLoginEnabled:      true,
 		}}, nil
 	}
 	return &accountcfgdto.GetAccountCfgRes{Cfg: toCfgItem(cfg)}, nil
@@ -25,6 +26,7 @@ func SaveAccountCfg(_ context.Context, req *accountcfgdto.SaveAccountCfgReq) (*a
 	existing := cfgdao.LoadAccountCfg()
 	row := &entity.AccountCfg{
 		CancelAccountByCodeEnabled: req.CancelAccountByCodeEnabled,
+		SimulatorLoginEnabled:      req.SimulatorLoginEnabled,
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -57,6 +59,7 @@ func toCfgItem(cfg *entity.AccountCfg) *accountcfgdto.AccountCfgItem {
 	return &accountcfgdto.AccountCfgItem{
 		ID:                         strconv.FormatUint(cfg.ID, 10),
 		CancelAccountByCodeEnabled: cfg.CancelAccountByCodeEnabled,
+		SimulatorLoginEnabled:      cfg.SimulatorLoginEnabled,
 		CreatedAt:                  formatTime(cfg.CreatedAt),
 		UpdatedAt:                  formatTime(cfg.UpdatedAt),
 	}

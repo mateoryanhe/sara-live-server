@@ -5,7 +5,6 @@ import (
 	"time"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/migrate"
-	"xr-game-server/core/snowflake"
 	"xr-game-server/core/syndb"
 )
 
@@ -44,11 +43,6 @@ type Account struct {
 	Password        string     `gorm:"default:'';comment:密码"`
 }
 
-func NewAccount(openId string, channel uint) *Account {
-	return NewAccountWithID(snowflake.GetId(), openId, channel)
-}
-
-// NewAccountWithID 使用指定ID构造账号
 func NewAccountWithID(id uint64, openId string, channel uint) *Account {
 	ret := &Account{}
 	ret.ID = id

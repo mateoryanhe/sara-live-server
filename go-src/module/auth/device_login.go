@@ -22,6 +22,9 @@ func DeviceLogin(ctx context.Context, req *authdto.DeviceLoginReq) (*authdto.Dev
 	if req.DeviceInfo == nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
+	if err := ensureSimulatorLoginAllowed(req.DeviceInfo); err != nil {
+		return nil, err
+	}
 	deviceId := strings.TrimSpace(req.DeviceInfo.DeviceId)
 	if deviceId == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
@@ -34,7 +37,7 @@ func DeviceLogin(ctx context.Context, req *authdto.DeviceLoginReq) (*authdto.Dev
 	account := accountdao.FindActiveAccount(deviceId, DeviceChannel)
 	isNewUser := false
 	if account == nil {
-		account = accountdao.RegisterAccountWithID(NextUserId(), deviceId, DeviceChannel)
+		account = accountdao.RegisterAccount(deviceId, DeviceChannel)
 		isNewUser = true
 	}
 	if account == nil || account.ID == 0 {

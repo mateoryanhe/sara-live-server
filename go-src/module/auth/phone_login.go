@@ -17,6 +17,9 @@ import (
 )
 
 func PhoneLogin(ctx context.Context, req *authdto.PhoneLoginReq) (res *authdto.PhoneLoginRes, err error) {
+	if err = ensureSimulatorLoginAllowed(req.DeviceInfo); err != nil {
+		return nil, err
+	}
 	httpReq := g.RequestFromCtx(ctx)
 	phoneAreaCode := phoneutil.NormalizeAreaCode(req.PhoneAreaCode)
 	phone := req.Phone
