@@ -29,6 +29,9 @@ func GetUserExtByUserId(userId uint64) *entity.UserExt {
 			string(db.IdName): userId,
 		}).Scan(&data)
 		if data != nil {
+			if data.PrettyId == 0 {
+				data.SetPrettyId(userId)
+			}
 			return data, nil
 		}
 		return entity.NewUserExt(userId), nil

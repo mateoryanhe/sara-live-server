@@ -9,7 +9,7 @@ import (
 
 type cfgSnapshot struct {
 	CancelAccountByCodeEnabled bool
-	SimulatorLoginEnabled      bool
+	BlockSimulatorLogin        bool
 }
 
 var cfgCache atomic.Value
@@ -21,22 +21,22 @@ func reloadCfgMemory() {
 func getCfgCache() *cfgSnapshot {
 	v := cfgCache.Load()
 	if v == nil {
-		return &cfgSnapshot{SimulatorLoginEnabled: true}
+		return &cfgSnapshot{}
 	}
 	snap, ok := v.(*cfgSnapshot)
 	if !ok || snap == nil {
-		return &cfgSnapshot{SimulatorLoginEnabled: true}
+		return &cfgSnapshot{}
 	}
 	return snap
 }
 
 func toCfgSnapshot(row *entity.AccountCfg) *cfgSnapshot {
 	if row == nil {
-		return &cfgSnapshot{SimulatorLoginEnabled: true}
+		return &cfgSnapshot{}
 	}
 	return &cfgSnapshot{
 		CancelAccountByCodeEnabled: row.CancelAccountByCodeEnabled,
-		SimulatorLoginEnabled:      row.SimulatorLoginEnabled,
+		BlockSimulatorLogin:        row.BlockSimulatorLogin,
 	}
 }
 
@@ -45,7 +45,7 @@ func IsCancelAccountByCodeEnabled() bool {
 	return getCfgCache().CancelAccountByCodeEnabled
 }
 
-// IsSimulatorLoginEnabled 模拟器是否允许登录
-func IsSimulatorLoginEnabled() bool {
-	return getCfgCache().SimulatorLoginEnabled
+// IsSimulatorLoginBlocked 是否拦截模拟器登录(默认 false=不拦截)
+func IsSimulatorLoginBlocked() bool {
+	return getCfgCache().BlockSimulatorLogin
 }

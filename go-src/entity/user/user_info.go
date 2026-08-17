@@ -22,9 +22,7 @@ const (
 	UserInfoGold            db.TbCol = "gold"
 	UserInfoDiamond         db.TbCol = "diamond"
 	UserInfoShareCode       db.TbCol = "share_code"
-	UserInfoGuildId         db.TbCol = "guild_id"
 	UserInfoUserType        db.TbCol = "user_type"
-	UserInfoHasLiveRoom     db.TbCol = "has_live_room"
 	UserInfoInviterId       db.TbCol = "inviter_id"
 	UserInfoVipLevel        db.TbCol = "vip_level"
 	UserInfoLastLoginTime   db.TbCol = "last_login_time"
@@ -60,9 +58,7 @@ type UserInfo struct {
 	Gold            float64    `gorm:"default:0;comment:金币"`
 	Diamond         float64    `gorm:"default:0;comment:钻石"`
 	ShareCode       string     `gorm:"uniqueIndex;default:'';comment:分享码"`
-	GuildId         uint64     `gorm:"index;default:0;comment:所属工会ID(0为未加入)"`
 	UserType        uint8      `gorm:"default:0;comment:用户类型(0普通用户,1普通主播,2机器人主播,3机器人观众,4测试人员,5CMS短视频作者,7高级主播)" json:"userType"`
-	HasLiveRoom     bool       `gorm:"default:0;comment:是否已创建直播间(App端完善资料后为true)"`
 	InviterId       uint64     `gorm:"index;default:0;comment:邀请人用户ID(0为无)"`
 	VipLevel        uint32     `gorm:"default:0;comment:VIP等级(0为无)"`
 	LastLoginTime   *time.Time `gorm:"comment:最后登录时间" json:"lastLoginTime"`
@@ -163,15 +159,6 @@ func (receiver *UserInfo) SetShareCode(shareCode string) {
 	})
 }
 
-func (receiver *UserInfo) SetGuildId(guildId uint64) {
-	receiver.GuildId = guildId
-	receiver.SetUpdatedAt(time.Now())
-	syndb.AddData(TbUserInfo, UserInfoGuildId, &syndb.ColData{
-		IdVal:  receiver.ID,
-		ColVal: guildId,
-	})
-}
-
 func UserTypeIsAnchor(userType uint8) bool {
 	return userType == UserTypeAnchor || userType == UserTypeBotAnchor || userType == UserTypeSeniorAnchor
 }
@@ -199,15 +186,6 @@ func (receiver *UserInfo) SetUserType(userType uint8) {
 	syndb.AddData(TbUserInfo, UserInfoUserType, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: userType,
-	})
-}
-
-func (receiver *UserInfo) SetHasLiveRoom(hasLiveRoom bool) {
-	receiver.HasLiveRoom = hasLiveRoom
-	receiver.SetUpdatedAt(time.Now())
-	syndb.AddData(TbUserInfo, UserInfoHasLiveRoom, &syndb.ColData{
-		IdVal:  receiver.ID,
-		ColVal: hasLiveRoom,
 	})
 }
 
@@ -309,9 +287,7 @@ func initUserInfo() {
 	syndb.RegLazy(TbUserInfo, UserInfoGold)
 	syndb.RegLazy(TbUserInfo, UserInfoDiamond)
 	syndb.RegQuick(TbUserInfo, UserInfoShareCode)
-	syndb.RegQuick(TbUserInfo, UserInfoGuildId)
 	syndb.RegQuick(TbUserInfo, UserInfoUserType)
-	syndb.RegQuick(TbUserInfo, UserInfoHasLiveRoom)
 	syndb.RegQuick(TbUserInfo, UserInfoInviterId)
 	syndb.RegQuick(TbUserInfo, UserInfoVipLevel)
 	syndb.RegLazy(TbUserInfo, UserInfoLastLoginTime)

@@ -36,8 +36,7 @@ func filterAnchorRooms(rooms []*liveentity.LiveRoom, key string, guildId uint64)
 			continue
 		}
 		if guildId > 0 {
-			user := userinfodao.GetUserInfoFromMemory(room.ID)
-			if user == nil || user.GuildId != guildId {
+			if room.GuildId != guildId {
 				continue
 			}
 		}
@@ -97,13 +96,12 @@ func buildAnchorListItem(room *liveentity.LiveRoom) *accountdto.AnchorListItem {
 	userId := room.ID
 	user := userinfodao.GetUserInfoFromMemory(userId)
 
-	item := &accountdto.AnchorListItem{ID: userId}
+	item := &accountdto.AnchorListItem{ID: userId, GuildId: room.GuildId}
 	if user != nil {
 		item.Nickname = user.Nickname
 		item.Phone = user.Phone
 		item.Avatar = user.Avatar
 		item.UserType = user.UserType
-		item.GuildId = user.GuildId
 		if !user.CreatedAt.IsZero() {
 			createdAt := user.CreatedAt
 			item.CreatedAt = &createdAt

@@ -51,12 +51,8 @@ func CreateBotAnchor(_ context.Context, req *botanchordto.CreateBotAnchorReq) (*
 	}
 	user.SetUserType(userentity.UserTypeBotAnchor)
 	user.SetBotAnchorStatus(userentity.BotAnchorStatusEnabled)
-	user.SetHasLiveRoom(true)
-	if req.GuildId > 0 {
-		user.SetGuildId(req.GuildId)
-	}
 
-	room := liveroom.EnsureAnchorRoom(account.ID, user.GuildId)
+	room := liveroom.EnsureAnchorRoom(account.ID, req.GuildId)
 	room.SetTitle(strings.TrimSpace(req.RoomTitle))
 	cfg := liveroomdao.GetLiveRoomCfg(room.ID)
 	if cfg != nil {
@@ -99,7 +95,7 @@ func UpdateBotAnchor(_ context.Context, req *botanchordto.UpdateBotAnchorReq) (*
 	if category == 0 {
 		category = liveentity.LiveRoomCategoryHot
 	}
-	room := liveroom.EnsureAnchorRoom(req.ID, user.GuildId)
+	room := liveroom.EnsureAnchorRoom(req.ID, 0)
 	room.SetTitle(strings.TrimSpace(req.RoomTitle))
 	cfg := liveroomdao.GetLiveRoomCfg(room.ID)
 	if cfg != nil {
@@ -128,7 +124,7 @@ func SetBotAnchorStatus(ctx context.Context, req *botanchordto.SetBotAnchorStatu
 	user.SetBotAnchorStatus(req.Status)
 	switch req.Status {
 	case userentity.BotAnchorStatusEnabled:
-		enableBotAnchorRoomCache(req.ID, user.GuildId)
+		enableBotAnchorRoomCache(req.ID, liveroomdao.GetAnchorGuildId(req.ID))
 	case userentity.BotAnchorStatusDisabled:
 		disableBotAnchorRoomCache(req.ID)
 	}
@@ -145,7 +141,7 @@ func StartBotAnchorLive(ctx context.Context, req *botanchordto.StartBotAnchorLiv
 	if user.BotAnchorStatus != userentity.BotAnchorStatusEnabled {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	if err := liveroom.StartLiveForBotAnchor(ctx, req.ID, user.GuildId); err != nil {
+	if err := liveroom.StartLiveForBotAnchor(ctx, req.ID, liveroomdao.GetAnchorGuildId(req.ID)); err != nil {
 		return nil, err
 	}
 	return &botanchordto.StartBotAnchorLiveRes{Success: true}, nil

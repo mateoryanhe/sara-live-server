@@ -25,12 +25,12 @@ var simulatorCPUKeywords = []string{
 	"android_x86",
 }
 
-// ensureSimulatorLoginAllowed 配置关闭模拟器登录时,按上报 cpuModel 拦截
+// ensureSimulatorLoginAllowed 配置开启拦截时,按上报 cpuModel 拒绝模拟器登录(默认不拦截)
 func ensureSimulatorLoginAllowed(info *entity.DeviceInfo) error {
 	if info == nil || !isSimulatorByCPU(info) {
 		return nil
 	}
-	if accountcfg.IsSimulatorLoginEnabled() {
+	if !accountcfg.IsSimulatorLoginBlocked() {
 		return nil
 	}
 	return errercode.CreateCode(errercode.SimulatorLoginDenied)

@@ -79,7 +79,7 @@ func setUserAsAnchorBatch(accountId uint64, userType uint8) error {
 		return errercode.CreateCode(errercode.InvalidParam)
 	}
 	user.SetUserType(userType)
-	EnsureAnchorRoom(accountId, user.GuildId)
+	EnsureAnchorRoom(accountId, 0)
 	return nil
 }
 
@@ -88,7 +88,7 @@ func SetUserAsAnchorIfNeeded(accountId uint64, userType uint8) error {
 	return setUserAsAnchorBatch(accountId, userType)
 }
 
-// ExitGuild CMS主播退出工会(将工会ID置为0)
+// ExitGuild CMS主播退出工会(将 live_room.guild_id 置为0)
 func ExitGuild(ctx context.Context, req *accountdto.ExitGuildReq) (*accountdto.ExitGuildRes, error) {
 	user := userinfodao.GetUserInfoByUserId(req.AnchorId)
 	if user == nil {
@@ -97,7 +97,8 @@ func ExitGuild(ctx context.Context, req *accountdto.ExitGuildReq) (*accountdto.E
 	if !entity.UserTypeIsAnchor(user.UserType) {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	user.SetGuildId(0)
+	room := EnsureAnchorRoom(req.AnchorId, 0)
+	room.SetGuildId(0)
 	RefreshRoomListCache(ctx)
 	return &accountdto.ExitGuildRes{Success: true}, nil
 }

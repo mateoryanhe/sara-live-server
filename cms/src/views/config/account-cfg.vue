@@ -19,14 +19,14 @@
           </div>
         </el-form-item>
 
-        <el-form-item :label="t('pages.accountCfg.simulatorLoginEnabled')">
+        <el-form-item :label="t('pages.accountCfg.blockSimulatorLogin')">
           <el-switch
-              v-model="formData.simulatorLoginEnabled"
+              v-model="formData.blockSimulatorLogin"
               :active-text="t('common.open')"
               :inactive-text="t('common.close')"
           />
           <div class="form-tip">
-            {{ t('pages.accountCfg.simulatorLoginTip') }}
+            {{ t('pages.accountCfg.blockSimulatorLoginTip') }}
           </div>
         </el-form-item>
 
@@ -57,7 +57,7 @@ const formRef = ref()
 const formData = reactive({
   id: '0',
   cancelAccountByCodeEnabled: false,
-  simulatorLoginEnabled: true,
+  blockSimulatorLogin: false,
 })
 
 const metaInfo = reactive({
@@ -68,7 +68,7 @@ const metaInfo = reactive({
 const applyCfg = (cfg: AccountCfg | null | undefined) => {
   formData.id = cfg?.id || '0'
   formData.cancelAccountByCodeEnabled = !!cfg?.cancelAccountByCodeEnabled
-  formData.simulatorLoginEnabled = cfg?.simulatorLoginEnabled !== false
+  formData.blockSimulatorLogin = !!cfg?.blockSimulatorLogin
   metaInfo.createdAt = cfg?.createdAt || ''
   metaInfo.updatedAt = cfg?.updatedAt || ''
 }
@@ -91,7 +91,7 @@ const handleSave = async () => {
     const response = await accountCfgApi.saveAccountCfg({
       id: formData.id === '0' ? 0 : Number(formData.id),
       cancelAccountByCodeEnabled: formData.cancelAccountByCodeEnabled,
-      simulatorLoginEnabled: formData.simulatorLoginEnabled,
+      blockSimulatorLogin: formData.blockSimulatorLogin,
     })
     if (response?.success) {
       ElMessage.success(t('pages.accountCfg.saveSuccess'))

@@ -124,11 +124,11 @@ func FollowingList(ctx context.Context, req *livefollowdto.FollowingListReq) (*l
 		if u := userinfodao.GetUserInfoByUserId(f.AnchorId); u != nil {
 			item.Nickname = u.Nickname
 			item.Avatar = upload.ResolveAvatarUrlForUser(f.AnchorId, u.Avatar)
-			item.GuildId = strconv.FormatUint(u.GuildId, 10)
 			item.VipLevel = u.VipLevel
 			item.Gender = u.Gender
 			item.Age = calcAge(u.Birthday)
 		}
+		item.GuildId = strconv.FormatUint(liveroomdao.GetAnchorGuildId(f.AnchorId), 10)
 		list = append(list, item)
 	}
 

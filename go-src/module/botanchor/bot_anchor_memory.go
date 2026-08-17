@@ -182,7 +182,6 @@ func buildBotAnchorListItem(userId uint64) *botanchordto.BotAnchorListItem {
 	if user != nil {
 		item.Nickname = user.Nickname
 		item.Avatar = user.Avatar
-		item.GuildId = user.GuildId
 		item.BotAnchorStatus = user.BotAnchorStatus
 		if !user.CreatedAt.IsZero() {
 			createdAt := user.CreatedAt
@@ -194,6 +193,7 @@ func buildBotAnchorListItem(userId uint64) *botanchordto.BotAnchorListItem {
 		}
 	}
 	if room != nil {
+		item.GuildId = room.GuildId
 		item.RoomTitle = room.Title
 		if room.LiveRecordId > 0 {
 			item.LiveStatus = 1

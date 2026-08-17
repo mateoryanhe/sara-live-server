@@ -21,6 +21,7 @@ func GetUserExt(ctx context.Context, req *userinfodto.GetUserExtReq) (*userinfod
 	}
 	return &userinfodto.GetUserExtRes{
 		UserId:             targetUserId,
+		PrettyId:           ext.PrettyId,
 		CanRank:            ext.CanRank,
 		PackageName:        ext.PackageName,
 		AppVersion:         ext.AppVersion,

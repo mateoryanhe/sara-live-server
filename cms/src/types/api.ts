@@ -457,7 +457,7 @@ export interface SaveAppTokenReq {
 export interface AccountCfg {
     id?: string
     cancelAccountByCodeEnabled: boolean
-    simulatorLoginEnabled: boolean
+    blockSimulatorLogin: boolean
     createdAt?: string
     updatedAt?: string
 }
@@ -469,7 +469,7 @@ export interface GetAccountCfgRes {
 export interface SaveAccountCfgReq {
     id?: string | number
     cancelAccountByCodeEnabled: boolean
-    simulatorLoginEnabled: boolean
+    blockSimulatorLogin: boolean
 }
 
 export interface SaveAccountCfgRes {

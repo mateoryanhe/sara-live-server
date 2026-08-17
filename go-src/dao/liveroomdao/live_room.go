@@ -60,6 +60,30 @@ func GetRoomByAnchor(anchorId uint64) *entity.LiveRoom {
 	return GetRoomById(anchorId)
 }
 
+// GetAnchorGuildId 主播所属工会ID(live_room.guild_id; roomId==用户ID; 无直播间返回0)
+func GetAnchorGuildId(anchorId uint64) uint64 {
+	if room := GetRoomById(anchorId); room != nil {
+		return room.GuildId
+	}
+	if room := GetRoomFromDB(anchorId); room != nil {
+		return room.GuildId
+	}
+	return 0
+}
+
+// ResolveRoom 优先读上架缓存,否则直查DB(含下架)
+func ResolveRoom(anchorId uint64) *entity.LiveRoom {
+	if room := GetRoomById(anchorId); room != nil {
+		return room
+	}
+	return GetRoomFromDB(anchorId)
+}
+
+// HasLiveRoom 是否已有直播间记录(roomId==用户ID)
+func HasLiveRoom(anchorId uint64) bool {
+	return ResolveRoom(anchorId) != nil
+}
+
 // ListLivingRoomIds 查询正在直播的直播间ID(live_record_id > 0),仅返回 id 列
 func ListLivingRoomIds() []uint64 {
 	type idRow struct {

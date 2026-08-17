@@ -87,14 +87,14 @@ func importOneGuildAnchor(guild *entity.LiveGuild, userID uint64, anchorType uin
 		return guilddto.ImportAnchorFailAlreadyHasLiveRoom, nickname
 	}
 
-	if user.GuildId != 0 {
+	if liveroomdao.GetAnchorGuildId(userID) != 0 {
 		return guilddto.ImportAnchorFailAlreadyInGuild, nickname
 	}
 	if !userentity.UserTypeIsAnchor(user.UserType) && user.UserType != userentity.UserTypeNormal {
 		return guilddto.ImportAnchorFailCannotSetAnchor, nickname
 	}
 
-	user.SetGuildId(guild.ID)
 	_ = liveroom.SetUserAsAnchorIfNeeded(userID, anchorType)
+	liveroom.EnsureAnchorRoom(userID, guild.ID)
 	return 0, nickname
 }

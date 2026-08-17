@@ -14,6 +14,7 @@ const (
 
 const (
 	UserExtCanRank            db.TbCol = "can_rank"
+	UserExtPrettyId           db.TbCol = "pretty_id"
 	UserExtPackageName        db.TbCol = "package_name"
 	UserExtAppVersion         db.TbCol = "app_version"
 	UserExtFollowCount        db.TbCol = "follow_count"
@@ -27,6 +28,7 @@ const (
 type UserExt struct {
 	migrate.OneModel
 	CanRank            bool       `gorm:"default:1;comment:是否可上排行榜" json:"canRank"`
+	PrettyId           uint64     `gorm:"index;default:0;comment:靓号(默认等于用户ID)" json:"prettyId"`
 	PackageName        string     `gorm:"default:'';comment:注册包名" json:"packageName"`
 	AppVersion         string     `gorm:"default:'';comment:注册版本号" json:"appVersion"`
 	FollowCount        uint64     `gorm:"default:0;comment:当前关注数" json:"followCount"`
@@ -43,6 +45,7 @@ func NewUserExt(userId uint64) *UserExt {
 	ret.SetCreatedAt(now)
 	ret.SetUpdatedAt(now)
 	ret.SetCanRank(true)
+	ret.SetPrettyId(userId)
 	return ret
 }
 
@@ -52,6 +55,15 @@ func (receiver *UserExt) SetCanRank(canRank bool) {
 	syndb.AddData(TbUserExt, UserExtCanRank, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: canRank,
+	})
+}
+
+func (receiver *UserExt) SetPrettyId(prettyId uint64) {
+	receiver.PrettyId = prettyId
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddData(TbUserExt, UserExtPrettyId, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: prettyId,
 	})
 }
 
@@ -168,6 +180,7 @@ func initUserExt() {
 	syndb.RegQuick(TbUserExt, db.CreatedAtName)
 	syndb.RegQuick(TbUserExt, db.UpdatedAtName)
 	syndb.RegQuick(TbUserExt, UserExtCanRank)
+	syndb.RegQuick(TbUserExt, UserExtPrettyId)
 	syndb.RegQuick(TbUserExt, UserExtPackageName)
 	syndb.RegQuick(TbUserExt, UserExtAppVersion)
 	syndb.RegQuick(TbUserExt, UserExtFollowCount)

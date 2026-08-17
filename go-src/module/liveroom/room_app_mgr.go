@@ -12,7 +12,6 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
 	liveentity "xr-game-server/entity/live"
-	userentity "xr-game-server/entity/user"
 	"xr-game-server/errercode"
 	"xr-game-server/module/aliyunmoderation"
 	"xr-game-server/module/upload"
@@ -110,7 +109,6 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 		if err := applyLiveRoomGameRecommends(existing.ID, category, req.GameCodes); err != nil {
 			return nil, err
 		}
-		markLiveRoomCreated(user)
 		return &liveroomdto.CreateLiveRoomRes{
 			RoomId:  strconv.FormatUint(existing.ID, 10),
 			GuildId: strconv.FormatUint(existing.GuildId, 10),
@@ -120,7 +118,7 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 	// 通过 syndb 异步入库,不直接 INSERT;LiveRoom.ID 复用主播用户ID
 	room := liveentity.NewLiveRoom(
 		anchorId,
-		user.GuildId,
+		liveroomdao.GetAnchorGuildId(anchorId),
 		coverName,
 		req.Title,
 		req.Notice,
@@ -137,7 +135,6 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 	if err := applyLiveRoomGameRecommends(room.ID, category, req.GameCodes); err != nil {
 		return nil, err
 	}
-	markLiveRoomCreated(user)
 
 	return &liveroomdto.CreateLiveRoomRes{
 		RoomId:  strconv.FormatUint(room.ID, 10),
@@ -199,14 +196,6 @@ func UpdateNotice(ctx context.Context, req *liveroomdto.UpdateNoticeReq) (*liver
 		//liveroomdao.FlushRoomCache(room)
 	}
 	return &liveroomdto.UpdateNoticeRes{Success: true}, nil
-}
-
-// markLiveRoomCreated App端创建/完善直播间后,标记 user_infos.has_live_room = true
-func markLiveRoomCreated(user *userentity.UserInfo) {
-	if user == nil || user.HasLiveRoom {
-		return
-	}
-	user.SetHasLiveRoom(true)
 }
 
 func calcAge(birthday *time.Time) int {
@@ -312,12 +301,19 @@ func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto
 }
 
 // EnsureAnchorRoom 确保主播拥有直播间记录(CMS设为主播时预创建,App端后续可完善资料)
+// guildId>0 时同步写入 live_room.guild_id(工会归属唯一来源)
 func EnsureAnchorRoom(anchorId, guildId uint64) *liveentity.LiveRoom {
 	if room := liveroomdao.GetRoomByAnchor(anchorId); room != nil {
+		if guildId > 0 && room.GuildId != guildId {
+			room.SetGuildId(guildId)
+		}
 		return room
 	}
 	// 已下架的直播间不在缓存中,直查 DB,避免重复创建
 	if room := liveroomdao.GetRoomFromDB(anchorId); room != nil {
+		if guildId > 0 && room.GuildId != guildId {
+			room.SetGuildId(guildId)
+		}
 		return room
 	}
 	room := liveentity.NewLiveRoom(anchorId, guildId, "", "", "")

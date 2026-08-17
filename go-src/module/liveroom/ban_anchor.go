@@ -79,7 +79,7 @@ func BanAnchor(_ context.Context, req *accountdto.BanAnchorReq) (*accountdto.Ban
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 
-	room := EnsureAnchorRoom(req.AccountId, user.GuildId)
+	room := EnsureAnchorRoom(req.AccountId, 0)
 
 	room.SetBan(true)
 	room.SetBanApplyTime(req.BanApplyTime)

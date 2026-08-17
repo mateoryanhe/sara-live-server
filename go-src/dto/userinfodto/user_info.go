@@ -26,6 +26,7 @@ type GetUserInfoRes struct {
 	IsAnchor      bool    `json:"isAnchor" dc:"是否主播"`
 	UserType      uint8   `json:"userType" dc:"用户类型(7=高级主播)"`
 	HasLiveRoom   bool    `json:"hasLiveRoom" dc:"是否已创建直播间"`
+	PrettyId      uint64  `json:"prettyId,string" dc:"靓号"`
 	Gender        uint8   `json:"gender" dc:"性别(0未知,1男,2女)"`
 	Birthday      string  `json:"birthday" dc:"出生日期(YYYY-MM-DD,空表示未设置)"`
 	FollowCount   int     `json:"followCount" dc:"用户关注数"`
@@ -43,6 +44,7 @@ type GetUserExtReq struct {
 
 type GetUserExtRes struct {
 	UserId             uint64     `json:"userId,string"`
+	PrettyId           uint64     `json:"prettyId,string" dc:"靓号"`
 	CanRank            bool       `json:"canRank" dc:"是否可上排行榜"`
 	PackageName        string     `json:"packageName" dc:"注册包名"`
 	AppVersion         string     `json:"appVersion" dc:"注册版本号"`

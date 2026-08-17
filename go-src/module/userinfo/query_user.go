@@ -4,6 +4,7 @@ import (
 	"context"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/accountdao"
+	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/accountdto"
 	"xr-game-server/entity/user"
@@ -35,12 +36,12 @@ func QueryUserInfo(ctx context.Context, req *accountdto.QueryUserInfoReq) (res *
 			val.Gold = userInfoCache.Gold
 			val.Diamond = userInfoCache.Diamond
 			val.ShareCode = userInfoCache.ShareCode
-			val.GuildId = userInfoCache.GuildId
 			val.UserType = userInfoCache.UserType
 			val.IsAnchor = userInfoCache.IsAnchor()
 			val.VipLevel = userInfoCache.VipLevel
 			val.LastLoginTime = userInfoCache.LastLoginTime
 		}
+		val.GuildId = liveroomdao.GetAnchorGuildId(val.ID)
 		if userExtCache := userinfodao.GetUserExtFromMemory(val.ID); userExtCache != nil {
 			val.CanRank = userExtCache.CanRank
 			val.PackageName = userExtCache.PackageName
