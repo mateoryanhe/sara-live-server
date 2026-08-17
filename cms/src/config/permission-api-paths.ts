@@ -27,6 +27,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'AnchorListManagement:search': '/account/getAnchorList',
     'AnchorListManagement:edit': '/account/setAnchor',
     'AnchorListManagement:offShelf': '/account/setLiveRoomStatus',
+    AnchorDetail: '/account/getAnchorDetail',
 
     LiveRoomRecycleBinManagement: '/account/getOffShelfLiveRoomList',
     'LiveRoomRecycleBinManagement:view': '/account/getOffShelfLiveRoomList',

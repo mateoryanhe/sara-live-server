@@ -296,6 +296,70 @@ export interface AnchorListItem {
     registeredAt?: string | null
 }
 
+export interface LiveRoomIncomeAmounts {
+    totalIncome?: number
+    totalGiftIncome?: number
+    totalPaidDanmakuIncome?: number
+    totalPrivateRoomTicketIncome?: number
+    totalPrivateRoomWatchIncome?: number
+    totalVideoCallIncome?: number
+    totalVideoCallTicketIncome?: number
+    totalVideoCallBillingIncome?: number
+    totalLiveDuration?: number
+}
+
+export interface AnchorLiveRoomDetail {
+    id: string
+    guildId?: string
+    title?: string
+    cover?: string
+    notice?: string
+    liveRecordId?: string
+    heartTime?: string | null
+    ban?: boolean
+    banApplyTime?: string | null
+    banReason?: string
+    status?: number
+    liveStatus?: number
+    category?: number
+    privateInviteType?: number
+    ticket?: number
+    billing?: number
+    createdAt?: string | null
+    updatedAt?: string | null
+}
+
+export interface LiveRoomIncomeUnsettledDetail extends LiveRoomIncomeAmounts {
+    updatedAt?: string | null
+}
+
+export interface LiveRoomIncomeSettledDetail extends LiveRoomIncomeAmounts {
+    settlementSalary?: number
+    updatedAt?: string | null
+}
+
+export interface LiveRoomIncomeTotalDetail extends LiveRoomIncomeAmounts {
+    settlementSalary?: number
+    updatedAt?: string | null
+}
+
+export interface LiveRoomIncomeArchiveItem extends LiveRoomIncomeAmounts {
+    id: string
+    roomId?: string
+    guildId?: string
+    settlementSalary?: number
+    createdAt?: string | null
+}
+
+export interface AnchorDetail {
+    anchor?: AnchorListItem
+    liveRoom?: AnchorLiveRoomDetail
+    incomeUnsettled?: LiveRoomIncomeUnsettledDetail | null
+    incomeSettled?: LiveRoomIncomeSettledDetail | null
+    incomeTotal?: LiveRoomIncomeTotalDetail | null
+    incomeArchives?: LiveRoomIncomeArchiveItem[]
+}
+
 export interface QueryBotAnchorListReq extends PageQuery {
     key?: string
 }

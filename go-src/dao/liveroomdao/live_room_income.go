@@ -174,6 +174,66 @@ func ListLiveRoomIncomeTotalFromDB(roomIds []uint64) map[uint64]*entity.LiveRoom
 	return ret
 }
 
+// GetLiveRoomIncomeUnsettledForCMS 未结算收益(缓存优先,否则直查DB,不新建)
+func GetLiveRoomIncomeUnsettledForCMS(roomId uint64) *entity.LiveRoomIncomeUnsettled {
+	if roomId == 0 {
+		return nil
+	}
+	if incomeUnsettledCache.Contains(roomId) {
+		return incomeUnsettledCache.Get(roomId)
+	}
+	var row entity.LiveRoomIncomeUnsettled
+	err := g.Model(string(entity.TbLiveRoomIncomeUnsettled)).Unscoped().WherePri(roomId).Scan(&row)
+	if err != nil || row.ID == 0 {
+		return nil
+	}
+	return &row
+}
+
+// GetLiveRoomIncomeSettledForCMS 已结算收益(缓存优先,否则直查DB,不新建)
+func GetLiveRoomIncomeSettledForCMS(roomId uint64) *entity.LiveRoomIncomeSettled {
+	if roomId == 0 {
+		return nil
+	}
+	if incomeSettledCache.Contains(roomId) {
+		return incomeSettledCache.Get(roomId)
+	}
+	var row entity.LiveRoomIncomeSettled
+	err := g.Model(string(entity.TbLiveRoomIncomeSettled)).Unscoped().WherePri(roomId).Scan(&row)
+	if err != nil || row.ID == 0 {
+		return nil
+	}
+	return &row
+}
+
+// GetLiveRoomIncomeTotalForCMS 生涯累计收益(缓存优先,否则直查DB,不新建)
+func GetLiveRoomIncomeTotalForCMS(roomId uint64) *entity.LiveRoomIncomeTotal {
+	if roomId == 0 {
+		return nil
+	}
+	if incomeTotalCache.Contains(roomId) {
+		return incomeTotalCache.Get(roomId)
+	}
+	return GetLiveRoomIncomeTotalFromDB(roomId)
+}
+
+// ListLiveRoomIncomeUnsettledArchives 查询直播间下架未结算归档记录
+func ListLiveRoomIncomeUnsettledArchives(roomId uint64, limit int) []*entity.LiveRoomIncomeUnsettledArchive {
+	if roomId == 0 {
+		return nil
+	}
+	if limit <= 0 {
+		limit = 50
+	}
+	rows := make([]*entity.LiveRoomIncomeUnsettledArchive, 0)
+	_ = g.Model(string(entity.TbLiveRoomIncomeUnsettledArchive)).
+		Where(string(entity.LiveRoomIncomeUnsettledArchiveRoomId)+" = ?", roomId).
+		Order(string(db.CreatedAtName) + " desc").
+		Limit(limit).
+		Scan(&rows)
+	return rows
+}
+
 // getLiveRoomIncomeUnsettledForArchive 下架归档用:优先缓存,否则直查DB(不新建)
 func getLiveRoomIncomeUnsettledForArchive(roomId uint64) *entity.LiveRoomIncomeUnsettled {
 	if roomId == 0 {

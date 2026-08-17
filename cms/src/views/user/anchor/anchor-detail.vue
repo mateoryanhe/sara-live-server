@@ -9,71 +9,153 @@
       </template>
 
       <div v-loading="loading">
-        <el-descriptions v-if="detail" :column="1" border>
-          <el-descriptions-item :label="t('common.userId')">{{ detail.id }}</el-descriptions-item>
-          <el-descriptions-item :label="t('common.nickname')">{{ detail.nickname || '-' }}</el-descriptions-item>
-          <el-descriptions-item :label="t('common.avatar')">
-            <el-image
-                v-if="detail.avatar"
-                :preview-src-list="[detail.avatar]"
-                :src="detail.avatar"
-                fit="cover"
-                hide-on-click-modal
-                preview-teleported
-                style="width:48px;height:48px;border-radius:50%"
+        <el-empty v-if="!loading && !detail" :description="t('pages.anchorList.detailNotFound')"/>
+        <el-tabs v-else-if="detail" v-model="activeTab">
+          <el-tab-pane :label="t('pages.anchorList.tabBasic')" name="basic">
+            <el-descriptions v-if="detail.anchor" :column="1" border>
+              <el-descriptions-item :label="t('common.userId')">{{ detail.anchor.id }}</el-descriptions-item>
+              <el-descriptions-item :label="t('common.nickname')">{{ detail.anchor.nickname || '-' }}</el-descriptions-item>
+              <el-descriptions-item :label="t('common.avatar')">
+                <el-image
+                    v-if="detail.anchor.avatar"
+                    :preview-src-list="[detail.anchor.avatar]"
+                    :src="detail.anchor.avatar"
+                    fit="cover"
+                    hide-on-click-modal
+                    preview-teleported
+                    style="width:48px;height:48px;border-radius:50%"
+                />
+                <span v-else>-</span>
+              </el-descriptions-item>
+              <el-descriptions-item :label="t('common.phone')">{{ detail.anchor.phone || '-' }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.guildId')">{{ detail.anchor.guildId || '-' }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.anchorType')">
+                <el-tag :type="anchorTypeTagType(detail.anchor.userType)">{{ anchorTypeLabel(detail.anchor.userType) }}</el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.loginIp')">{{ detail.anchor.ip || '-' }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.banStatus')">
+                <el-tag v-if="detail.anchor.ban" type="danger">{{ t('common.banned') }}</el-tag>
+                <el-tag v-else type="success">{{ t('common.normal') }}</el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.banUntil')">{{ formatDate(detail.anchor.banApplyTime) }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.banReason')">{{ detail.anchor.banReason || '-' }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.registeredAt')">{{ formatDate(detail.anchor.registeredAt) }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.profileUpdatedAt')">{{ formatDate(detail.anchor.createdAt) }}</el-descriptions-item>
+            </el-descriptions>
+          </el-tab-pane>
+
+          <el-tab-pane :label="t('pages.anchorList.tabLiveRoom')" name="liveRoom">
+            <el-descriptions v-if="detail.liveRoom" :column="1" border>
+              <el-descriptions-item :label="t('pages.anchorList.liveRoom')">{{ detail.liveRoom.id || '-' }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.guildId')">{{ detail.liveRoom.guildId || '-' }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.roomTitle')">{{ detail.liveRoom.title || '-' }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.roomCover')">
+                <el-image
+                    v-if="detail.liveRoom.cover"
+                    :preview-src-list="[detail.liveRoom.cover]"
+                    :src="detail.liveRoom.cover"
+                    fit="cover"
+                    hide-on-click-modal
+                    preview-teleported
+                    style="width:80px;height:80px;border-radius:4px"
+                />
+                <span v-else>-</span>
+              </el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.roomNotice')">{{ detail.liveRoom.notice || '-' }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.liveRecordId')">{{ detail.liveRoom.liveRecordId || '-' }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.heartTime')">{{ formatDate(detail.liveRoom.heartTime) }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.roomType')">
+                <el-tag :type="categoryTagType(detail.liveRoom.category)">{{ categoryLabel(detail.liveRoom.category) }}</el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.privateInviteType')">
+                <template v-if="detail.liveRoom.category === LIVE_ROOM_CATEGORY_HOT">
+                  <el-tag :type="privateInviteTagType(detail.liveRoom.privateInviteType)">
+                    {{ privateInviteLabel(detail.liveRoom.privateInviteType) }}
+                  </el-tag>
+                </template>
+                <span v-else>-</span>
+              </el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.ticketPrice')">
+                {{ isPrivateRoom(detail.liveRoom.category) ? formatAmount(detail.liveRoom.ticket) : '-' }}
+              </el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.billingPricePerMinute')">
+                {{ isPrivateRoom(detail.liveRoom.category) ? formatAmount(detail.liveRoom.billing) : '-' }}
+              </el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.liveStatus')">
+                <el-tag :type="detail.liveRoom.liveStatus === 1 ? 'success' : 'info'">
+                  {{ detail.liveRoom.liveStatus === 1 ? t('common.live') : t('common.offline') }}
+                </el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.shelfStatus')">
+                <el-tag v-if="detail.liveRoom.status === 1" type="success">{{ t('common.onShelf') }}</el-tag>
+                <el-tag v-else type="info">{{ t('common.offShelf') }}</el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.banStatus')">
+                <el-tag v-if="detail.liveRoom.ban" type="danger">{{ t('common.banned') }}</el-tag>
+                <el-tag v-else type="success">{{ t('common.normal') }}</el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.banUntil')">{{ formatDate(detail.liveRoom.banApplyTime) }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.banReason')">{{ detail.liveRoom.banReason || '-' }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.roomCreatedAt')">{{ formatDate(detail.liveRoom.createdAt) }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.roomUpdatedAt')">{{ formatDate(detail.liveRoom.updatedAt) }}</el-descriptions-item>
+            </el-descriptions>
+          </el-tab-pane>
+
+          <el-tab-pane :label="t('pages.anchorList.tabIncomeUnsettled')" name="incomeUnsettled">
+            <IncomePanel :data="detail.incomeUnsettled" :updated-at="detail.incomeUnsettled?.updatedAt"/>
+          </el-tab-pane>
+
+          <el-tab-pane :label="t('pages.anchorList.tabIncomeSettled')" name="incomeSettled">
+            <IncomePanel
+                :data="detail.incomeSettled"
+                :settlement-salary="detail.incomeSettled?.settlementSalary"
+                :updated-at="detail.incomeSettled?.updatedAt"
             />
-            <span v-else>-</span>
-          </el-descriptions-item>
-          <el-descriptions-item :label="t('common.phone')">{{ detail.phone || '-' }}</el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.guildId')">{{ detail.guildId || '-' }}</el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.anchorType')">
-            <el-tag :type="anchorTypeTagType(detail.userType)">{{ anchorTypeLabel(detail.userType) }}</el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.loginIp')">{{ detail.ip || '-' }}</el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.liveRoom')">{{ detail.roomId || detail.id || '-' }}</el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.roomType')">
-            <el-tag :type="categoryTagType(detail.category)">{{ categoryLabel(detail.category) }}</el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.privateInviteType')">
-            <template v-if="detail.category === LIVE_ROOM_CATEGORY_HOT">
-              <el-tag :type="privateInviteTagType(detail.privateInviteType)">
-                {{ privateInviteLabel(detail.privateInviteType) }}
-              </el-tag>
-            </template>
-            <span v-else>-</span>
-          </el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.ticketPrice')">
-            {{ isPrivateRoom(detail.category) ? formatAmount(detail.ticket) : '-' }}
-          </el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.billingPricePerMinute')">
-            {{ isPrivateRoom(detail.category) ? formatAmount(detail.billing) : '-' }}
-          </el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.roomTitle')">{{ detail.roomTitle || '-' }}</el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.liveStatus')">
-            <el-tag :type="detail.liveStatus === 1 ? 'success' : 'info'">
-              {{ detail.liveStatus === 1 ? t('common.live') : t('common.offline') }}
-            </el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.liveIncome')">{{ formatAmount(detail.totalIncome) }}</el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.giftIncome')">{{ formatAmount(detail.totalGiftIncome) }}</el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.paidDanmakuIncome')">{{ formatAmount(detail.totalPaidDanmakuIncome) }}</el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.videoTicketIncome')">{{ formatAmount(detail.totalVideoCallTicketIncome) }}</el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.videoBillingIncome')">{{ formatAmount(detail.totalVideoCallBillingIncome) }}</el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.videoCallIncome')">{{ formatAmount(detail.totalVideoCallIncome) }}</el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.banStatus')">
-            <el-tag v-if="detail.ban" type="danger">{{ t('common.banned') }}</el-tag>
-            <el-tag v-else type="success">{{ t('common.normal') }}</el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.shelfStatus')">
-            <el-tag v-if="detail.status === 1" type="success">{{ t('common.onShelf') }}</el-tag>
-            <el-tag v-else type="info">{{ t('common.offShelf') }}</el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.banUntil')">{{ formatDate(detail.banApplyTime) }}</el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.banReason')">{{ detail.banReason || '-' }}</el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.registeredAt')">{{ formatDate(detail.registeredAt) }}</el-descriptions-item>
-          <el-descriptions-item :label="t('pages.anchorList.profileUpdatedAt')">{{ formatDate(detail.createdAt) }}</el-descriptions-item>
-        </el-descriptions>
-        <el-empty v-else-if="!loading" :description="t('pages.anchorList.detailNotFound')"/>
+          </el-tab-pane>
+
+          <el-tab-pane :label="t('pages.anchorList.tabIncomeTotal')" name="incomeTotal">
+            <IncomePanel
+                :data="detail.incomeTotal"
+                :settlement-salary="detail.incomeTotal?.settlementSalary"
+                :updated-at="detail.incomeTotal?.updatedAt"
+            />
+          </el-tab-pane>
+
+          <el-tab-pane :label="t('pages.anchorList.tabIncomeArchive')" name="incomeArchive">
+            <el-table v-if="detail.incomeArchives?.length" :data="detail.incomeArchives" style="width:100%">
+              <el-table-column :label="t('pages.anchorList.archiveId')" min-width="180" prop="id"/>
+              <el-table-column :label="t('pages.anchorList.guildId')" min-width="120" prop="guildId"/>
+              <el-table-column :label="t('pages.anchorList.liveIncome')" min-width="110">
+                <template #default="{ row }">{{ formatAmount(row.totalIncome) }}</template>
+              </el-table-column>
+              <el-table-column :label="t('pages.anchorList.giftIncome')" min-width="110">
+                <template #default="{ row }">{{ formatAmount(row.totalGiftIncome) }}</template>
+              </el-table-column>
+              <el-table-column :label="t('pages.anchorList.paidDanmakuIncome')" min-width="120">
+                <template #default="{ row }">{{ formatAmount(row.totalPaidDanmakuIncome) }}</template>
+              </el-table-column>
+              <el-table-column :label="t('pages.anchorList.privateRoomTicketIncome')" min-width="130">
+                <template #default="{ row }">{{ formatAmount(row.totalPrivateRoomTicketIncome) }}</template>
+              </el-table-column>
+              <el-table-column :label="t('pages.anchorList.privateRoomWatchIncome')" min-width="130">
+                <template #default="{ row }">{{ formatAmount(row.totalPrivateRoomWatchIncome) }}</template>
+              </el-table-column>
+              <el-table-column :label="t('pages.anchorList.videoCallIncome')" min-width="120">
+                <template #default="{ row }">{{ formatAmount(row.totalVideoCallIncome) }}</template>
+              </el-table-column>
+              <el-table-column :label="t('pages.anchorList.totalLiveDuration')" min-width="120">
+                <template #default="{ row }">{{ row.totalLiveDuration ?? '-' }}</template>
+              </el-table-column>
+              <el-table-column :label="t('pages.anchorList.settlementSalary')" min-width="110">
+                <template #default="{ row }">{{ formatAmount(row.settlementSalary) }}</template>
+              </el-table-column>
+              <el-table-column :label="t('common.createdAt')" min-width="170">
+                <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
+              </el-table-column>
+            </el-table>
+            <el-empty v-else :description="t('pages.anchorList.noArchiveData')"/>
+          </el-tab-pane>
+        </el-tabs>
       </div>
     </el-card>
   </div>
@@ -85,7 +167,8 @@ import {useI18n} from 'vue-i18n'
 import {useRoute, useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {accountApi} from '@/api'
-import type {AnchorListItem} from '@/types/api'
+import IncomePanel from './anchor-detail-income-panel.vue'
+import type {AnchorDetail} from '@/types/api'
 import {formatAmount} from '@/utils/number-format'
 
 const {t} = useI18n()
@@ -93,7 +176,8 @@ const route = useRoute()
 const router = useRouter()
 
 const loading = ref(false)
-const detail = ref<AnchorListItem | null>(null)
+const detail = ref<AnchorDetail | null>(null)
+const activeTab = ref('basic')
 
 const LIVE_ROOM_CATEGORY_HOT = 1
 const LIVE_ROOM_CATEGORY_GAME = 2
@@ -116,8 +200,8 @@ const anchorId = computed(() => {
 })
 
 const pageTitle = computed(() => {
-  if (detail.value?.nickname) {
-    return t('pages.anchorList.detailTitleWithName', {name: detail.value.nickname})
+  if (detail.value?.anchor?.nickname) {
+    return t('pages.anchorList.detailTitleWithName', {name: detail.value.anchor.nickname})
   }
   if (anchorId.value) {
     return t('pages.anchorList.detailTitleWithId', {id: anchorId.value})
@@ -183,14 +267,8 @@ const fetchDetail = async () => {
   }
   loading.value = true
   try {
-    const response = await accountApi.getAnchorList({
-      pageIndex: 1,
-      pageSize: 50,
-      key: anchorId.value,
-    })
-    const list = response.data || []
-    detail.value = list.find(item => String(item.id) === anchorId.value) || null
-    if (!detail.value) {
+    detail.value = await accountApi.getAnchorDetail(anchorId.value)
+    if (!detail.value?.anchor) {
       ElMessage.warning(t('pages.anchorList.detailNotFound'))
     }
   } catch (error) {
@@ -212,6 +290,7 @@ const goBack = () => {
 
 watch(anchorId, (_id, prev) => {
   if (prev !== undefined) {
+    activeTab.value = 'basic'
     fetchDetail()
   }
 })

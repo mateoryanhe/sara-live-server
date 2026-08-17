@@ -15,8 +15,6 @@ const (
 const (
 	UserCumulativeStatTotalRecharge       db.TbCol = "total_recharge"
 	UserCumulativeStatTotalWithdraw       db.TbCol = "total_withdraw"
-	UserCumulativeStatTotalFans           db.TbCol = "total_fans"
-	UserCumulativeStatTotalFollow         db.TbCol = "total_follow"
 	UserCumulativeStatTotalPayCount       db.TbCol = "total_pay_count"
 	UserCumulativeStatTotalDiamondConsume db.TbCol = "total_diamond_consume"
 	UserCumulativeStatTotalGoldConsume    db.TbCol = "total_gold_consume"
@@ -28,8 +26,6 @@ type UserCumulativeStat struct {
 	migrate.OneModel
 	TotalRecharge       float64 `gorm:"default:0;comment:累计充值" json:"totalRecharge"`
 	TotalWithdraw       float64 `gorm:"default:0;comment:累计提现" json:"totalWithdraw"`
-	TotalFans           uint64  `gorm:"default:0;comment:累计粉丝数量" json:"totalFans"`
-	TotalFollow         uint64  `gorm:"default:0;comment:累计关注数量" json:"totalFollow"`
 	TotalPayCount       uint64  `gorm:"default:0;comment:累计付费次数" json:"totalPayCount"`
 	TotalDiamondConsume float64 `gorm:"default:0;comment:累计钻石消费" json:"totalDiamondConsume"`
 	TotalGoldConsume    float64 `gorm:"default:0;comment:累计金币消费" json:"totalGoldConsume"`
@@ -61,26 +57,6 @@ func (receiver *UserCumulativeStat) AddTotalWithdraw(val float64) bool {
 	syndb.AddData(TbUserCumulativeStat, UserCumulativeStatTotalWithdraw, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: receiver.TotalWithdraw,
-	})
-	return true
-}
-
-func (receiver *UserCumulativeStat) AddTotalFans(val uint64) bool {
-	receiver.TotalFans = math.Add(receiver.TotalFans, val)
-
-	syndb.AddData(TbUserCumulativeStat, UserCumulativeStatTotalFans, &syndb.ColData{
-		IdVal:  receiver.ID,
-		ColVal: receiver.TotalFans,
-	})
-	return true
-}
-
-func (receiver *UserCumulativeStat) AddTotalFollow(val uint64) bool {
-	receiver.TotalFollow = math.Add(receiver.TotalFollow, val)
-
-	syndb.AddData(TbUserCumulativeStat, UserCumulativeStatTotalFollow, &syndb.ColData{
-		IdVal:  receiver.ID,
-		ColVal: receiver.TotalFollow,
 	})
 	return true
 }
@@ -146,8 +122,6 @@ func initUserCumulativeStat() {
 	syndb.RegLazy(TbUserCumulativeStat, db.UpdatedAtName)
 	syndb.RegLazy(TbUserCumulativeStat, UserCumulativeStatTotalRecharge)
 	syndb.RegLazy(TbUserCumulativeStat, UserCumulativeStatTotalWithdraw)
-	syndb.RegLazy(TbUserCumulativeStat, UserCumulativeStatTotalFans)
-	syndb.RegLazy(TbUserCumulativeStat, UserCumulativeStatTotalFollow)
 	syndb.RegLazy(TbUserCumulativeStat, UserCumulativeStatTotalPayCount)
 	syndb.RegLazy(TbUserCumulativeStat, UserCumulativeStatTotalDiamondConsume)
 	syndb.RegLazy(TbUserCumulativeStat, UserCumulativeStatTotalGoldConsume)

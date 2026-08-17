@@ -50,7 +50,7 @@
           <el-input-number v-model="currentRow.dailyLiveDurationMinutes" :min="0" controls-position="right"/>
         </el-form-item>
         <el-form-item :label="t('pages.anchorSalaryCfgList.salaryAmount')" prop="salaryAmount">
-          <el-input-number v-model="currentRow.salaryAmount" :min="0" :precision="4" :step="1" controls-position="right"/>
+          <el-input-number v-model="currentRow.salaryAmount" :min="0" :precision="0" :step="1" controls-position="right"/>
         </el-form-item>
         <el-form-item :label="t('common.sort')" prop="sort">
           <el-input-number v-model="currentRow.sort" controls-position="right"/>

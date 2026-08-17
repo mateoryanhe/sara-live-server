@@ -1,5 +1,6 @@
 import {request} from '../request'
 import type {
+    AnchorDetail,
     AnchorListItem,
     BanAnchorReq,
     BatchSetAnchorReq,
@@ -64,6 +65,10 @@ const accountApi = {
 
     getAnchorList: (data: QueryAnchorListReq) => {
         return request.post<PageResponse<AnchorListItem>>('/account/getAnchorList', data)
+    },
+
+    getAnchorDetail: (anchorId: string | number) => {
+        return request.post<AnchorDetail>('/account/getAnchorDetail', {anchorId})
     },
 
     getOffShelfLiveRoomList: (data: QueryOffShelfLiveRoomListReq) => {
