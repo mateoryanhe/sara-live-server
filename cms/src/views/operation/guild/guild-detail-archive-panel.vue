@@ -2,26 +2,26 @@
   <div>
     <el-table v-loading="loading" :data="tableData" style="width:100%">
       <el-table-column :label="t('pages.anchorList.archiveId')" min-width="180" prop="id"/>
-      <el-table-column :label="t('pages.anchorList.liveIncome')" min-width="110">
-        <template #default="{ row }">{{ formatNum(row.totalIncome) }}</template>
+      <el-table-column :label="t('pages.anchorList.liveIncome')" align="right" min-width="120">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
       </el-table-column>
-      <el-table-column :label="t('pages.anchorList.giftIncome')" min-width="110">
-        <template #default="{ row }">{{ formatNum(row.totalGiftIncome) }}</template>
+      <el-table-column :label="t('pages.anchorList.giftIncome')" align="right" min-width="120">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGiftIncome) }}</span></template>
       </el-table-column>
-      <el-table-column :label="t('pages.anchorList.paidDanmakuIncome')" min-width="120">
-        <template #default="{ row }">{{ formatNum(row.totalPaidDanmakuIncome) }}</template>
+      <el-table-column :label="t('pages.anchorList.paidDanmakuIncome')" align="right" min-width="130">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
       </el-table-column>
-      <el-table-column :label="t('pages.anchorList.privateRoomTicketIncome')" min-width="130">
-        <template #default="{ row }">{{ formatNum(row.totalPrivateRoomTicketIncome) }}</template>
+      <el-table-column :label="t('pages.anchorList.privateRoomTicketIncome')" align="right" min-width="140">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomTicketIncome) }}</span></template>
       </el-table-column>
-      <el-table-column :label="t('pages.anchorList.privateRoomWatchIncome')" min-width="130">
-        <template #default="{ row }">{{ formatNum(row.totalPrivateRoomWatchIncome) }}</template>
+      <el-table-column :label="t('pages.anchorList.privateRoomWatchIncome')" align="right" min-width="140">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomWatchIncome) }}</span></template>
       </el-table-column>
-      <el-table-column :label="t('pages.anchorList.videoCallIncome')" min-width="120">
-        <template #default="{ row }">{{ formatNum(row.totalVideoCallIncome) }}</template>
+      <el-table-column :label="t('pages.anchorList.videoCallIncome')" align="right" min-width="130">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
       </el-table-column>
       <el-table-column :label="t('pages.anchorList.totalLiveDuration')" min-width="120">
-        <template #default="{ row }">{{ formatNum(row.totalLiveDuration) }}</template>
+        <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
       </el-table-column>
       <el-table-column :label="t('common.createdAt')" min-width="170">
         <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
@@ -38,7 +38,8 @@ import {useI18n} from 'vue-i18n'
 import {ElMessage} from 'element-plus'
 import {guildApi} from '@/api'
 import type {GuildIncomeArchiveItem} from '@/types/api'
-import {formatAmount} from '@/utils/number-format'
+import {formatWalletBalance} from '@/utils/number-format'
+import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 
 const props = defineProps<{
   guildId: string
@@ -67,8 +68,6 @@ const fetchList = async () => {
     loading.value = false
   }
 }
-
-const formatNum = (value?: number | null) => formatAmount(value, '0')
 
 const formatDate = (dateString: string | null | undefined) => {
   if (!dateString) return '-'

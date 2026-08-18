@@ -86,17 +86,15 @@
               <span v-else class="avatar-empty">-</span>
             </template>
           </el-table-column>
-          <el-table-column :label="t('pages.userList.phoneAreaCode')" prop="phoneAreaCode" width="90">
-            <template #default="scope">{{ formatPhoneAreaCode(scope.row.phoneAreaCode) }}</template>
+          <el-table-column :label="t('pages.userList.goldBalance')" align="right" min-width="130" prop="gold">
+            <template #default="scope">
+              <span class="currency-gold">{{ formatWalletBalance(scope.row.gold) }}</span>
+            </template>
           </el-table-column>
-           <el-table-column :label="t('pages.userList.phone')" prop="phone" width="140">
-            <template #default="scope">{{ scope.row.phone || '-' }}</template>
-          </el-table-column>
-          <el-table-column :label="t('pages.userList.goldBalance')" prop="gold" width="120">
-            <template #default="scope">{{ formatAmount(scope.row.gold) }}</template>
-          </el-table-column>
-          <el-table-column :label="t('pages.userList.diamondBalance')" prop="diamond" width="120">
-            <template #default="scope">{{ formatAmount(scope.row.diamond) }}</template>
+          <el-table-column :label="t('pages.userList.diamondBalance')" align="right" min-width="130" prop="diamond">
+            <template #default="scope">
+              <span class="currency-diamond">{{ formatWalletBalance(scope.row.diamond) }}</span>
+            </template>
           </el-table-column>
           <el-table-column :label="t('pages.userList.vipLevel')" prop="vipLevel" width="100">
             <template #default="scope">{{ formatVipLevel(scope.row.vipLevel) }}</template>
@@ -110,11 +108,7 @@
               <el-tag v-else type="info">{{ t('common.no') }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column :label="t('pages.userList.shareCode')" prop="shareCode" width="140">
-            <template #default="scope">{{ scope.row.shareCode || '-' }}</template>
-          </el-table-column>
-         
-         
+
           <el-table-column label="IP" prop="ip" width="150"/>
           <el-table-column :label="t('pages.userList.loginCountry')" prop="loginCountry" width="120">
             <template #default="scope">{{ scope.row.loginCountry || '-' }}</template>
@@ -319,7 +313,7 @@ import {ArrowDown} from '@element-plus/icons-vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {useRoute, useRouter} from 'vue-router'
 import type {BanReq, CancelReq, UnBanReq, UnCancelReq, UserInfo} from '@/types/api.ts'
-import {formatAmount, NUMBER_INPUT_DECIMALS} from '@/utils/number-format'
+import {formatWalletBalance, NUMBER_INPUT_DECIMALS} from '@/utils/number-format'
 import {usePagePermission} from '@/composables/usePagePermission'
 
 const {t, locale} = useI18n()
@@ -576,7 +570,7 @@ const openCurrencyDialog = (row: UserInfo, type: CurrencyType, mode: CurrencyMod
   currencyMode.value = mode
   currencyForm.userId = String(row.id)
   currencyForm.nickname = row.nickname || '-'
-  currencyForm.currentBalanceText = formatAmount(type === 'gold' ? row.gold : row.diamond)
+  currencyForm.currentBalanceText = formatWalletBalance(type === 'gold' ? row.gold : row.diamond)
   currencyForm.amount = 1
   currencyDialogVisible.value = true
 }
@@ -951,14 +945,6 @@ const toggleCancelStatus = async (row: UserInfo) => {
   }
 }
 
-const formatPhoneAreaCode = (val?: string) => {
-  const code = (val || '').trim()
-  if (!code) {
-    return '-'
-  }
-  return code.startsWith('+') ? code : `+${code}`
-}
-
 const formatUserType = (val: number | null | undefined) => {
   if (val === null || val === undefined) {
     return t('pages.userList.userTypeNormal')
@@ -1012,5 +998,19 @@ onMounted(() => {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+
+.currency-gold,
+.currency-diamond {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.currency-gold {
+  color: #d48806;
+}
+
+.currency-diamond {
+  color: #1677ff;
 }
 </style>

@@ -15,7 +15,9 @@
           <el-table-column label="ID" prop="id" width="100"/>
           <el-table-column :label="t('pages.anchorSalaryCfgList.weeklyWorkDays')" prop="weeklyWorkDays" min-width="140"/>
           <el-table-column :label="t('pages.anchorSalaryCfgList.dailyLiveDurationMinutes')" prop="dailyLiveDurationMinutes" min-width="160"/>
-          <el-table-column :label="t('pages.anchorSalaryCfgList.salaryAmount')" prop="salaryAmount" min-width="120"/>
+          <el-table-column :label="t('pages.anchorSalaryCfgList.salaryAmount')" align="right" min-width="120" prop="salaryAmount">
+            <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.salaryAmount) }}</span></template>
+          </el-table-column>
           <el-table-column :label="t('common.sort')" prop="sort" width="80"/>
           <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
           <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
@@ -71,6 +73,7 @@ import {useI18n} from 'vue-i18n'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {anchorSalaryCfgApi} from '@/api/modules/anchor-salary-cfg'
 import type {AnchorSalaryCfg} from '@/types/api'
+import {formatWalletBalance} from '@/utils/number-format'
 
 interface TierForm {
   id: string

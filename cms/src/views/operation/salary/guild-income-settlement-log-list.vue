@@ -37,19 +37,39 @@
         <el-table-column :label="t('pages.guildIncomeSettlementLogList.guildName')" min-width="120" prop="guildName">
           <template #default="{ row }">{{ row.guildName || '-' }}</template>
         </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalIncome')" min-width="110" prop="totalIncome"/>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalGiftIncome')" min-width="110" prop="totalGiftIncome"/>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalPaidDanmakuIncome')" min-width="120" prop="totalPaidDanmakuIncome"/>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalPrivateRoomTicketIncome')" min-width="130" prop="totalPrivateRoomTicketIncome"/>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalPrivateRoomWatchIncome')" min-width="130" prop="totalPrivateRoomWatchIncome"/>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalVideoCallIncome')" min-width="120" prop="totalVideoCallIncome"/>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalVideoCallTicketIncome')" min-width="140" prop="totalVideoCallTicketIncome"/>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalVideoCallBillingIncome')" min-width="140" prop="totalVideoCallBillingIncome"/>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalLiveDuration')" min-width="120" prop="totalLiveDuration"/>
+        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalIncome')" align="right" min-width="120">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
+        </el-table-column>
+        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalGiftIncome')" align="right" min-width="120">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGiftIncome) }}</span></template>
+        </el-table-column>
+        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalPaidDanmakuIncome')" align="right" min-width="130">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
+        </el-table-column>
+        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalPrivateRoomTicketIncome')" align="right" min-width="140">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomTicketIncome) }}</span></template>
+        </el-table-column>
+        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalPrivateRoomWatchIncome')" align="right" min-width="140">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomWatchIncome) }}</span></template>
+        </el-table-column>
+        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalVideoCallIncome')" align="right" min-width="130">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
+        </el-table-column>
+        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalVideoCallTicketIncome')" align="right" min-width="150">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallTicketIncome) }}</span></template>
+        </el-table-column>
+        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalVideoCallBillingIncome')" align="right" min-width="150">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallBillingIncome) }}</span></template>
+        </el-table-column>
+        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalLiveDuration')" min-width="120">
+          <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
+        </el-table-column>
         <el-table-column :label="t('pages.guildIncomeSettlementLogList.guildSharePercent')" min-width="110" prop="guildSharePercent">
           <template #default="{ row }">{{ formatSharePercent(row.guildSharePercent) }}</template>
         </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.settlementShareAmount')" min-width="120" prop="settlementShareAmount"/>
+        <el-table-column :label="t('pages.guildIncomeSettlementLogList.settlementShareAmount')" align="right" min-width="130">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementShareAmount) }}</span></template>
+        </el-table-column>
         <el-table-column :label="t('common.createdAt')" fixed="right" width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>
@@ -79,6 +99,8 @@ import type {GuildIncomeSettlementLogItem} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
 import {downloadCsv, fetchAllPagedRows} from '@/utils/csv-export'
 import {buildGuildSettlementLogCsvColumns} from '@/utils/income-settlement-log-csv'
+import {formatWalletBalance} from '@/utils/number-format'
+import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 
 const {t} = useI18n()
 const {can} = usePagePermission('GuildIncomeSettlementLogList')

@@ -77,7 +77,6 @@ type UserCumulativeStatDetailItem struct {
 	TotalPayCount       uint64     `json:"totalPayCount"`
 	TotalDiamondConsume float64    `json:"totalDiamondConsume"`
 	TotalGoldConsume    float64    `json:"totalGoldConsume"`
-	TotalLiveDuration   float64    `json:"totalLiveDuration"`
 	UpdatedAt           *time.Time `json:"updatedAt"`
 }
 

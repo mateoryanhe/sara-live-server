@@ -8,7 +8,6 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/xrtimer"
 	"xr-game-server/dao/liveroomdao"
-	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/entity/live"
 	"xr-game-server/errercode"
@@ -89,9 +88,6 @@ func flushAnchorId(room *entity.LiveRoom) {
 	//记录本次直播
 	liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId)
 	liveRecord.AddTotalLiveDuration(sec)
-	//累计全部直播(用户统计)
-	stat := userinfodao.GetUserCumulativeStatByUserId(room.ID)
-	stat.AddTotalLiveDuration(sec)
 	//直播间未结算+生涯累计时长
 	if unsettled := liveroomdao.GetLiveRoomIncomeUnsettled(room.ID); unsettled != nil {
 		unsettled.AddTotalLiveDuration(sec)

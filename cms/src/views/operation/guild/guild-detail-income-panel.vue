@@ -1,16 +1,16 @@
 <template>
   <el-descriptions :column="1" border>
-    <el-descriptions-item :label="t('pages.anchorList.liveIncome')">{{ formatNum(displayData.totalIncome) }}</el-descriptions-item>
-    <el-descriptions-item :label="t('pages.anchorList.giftIncome')">{{ formatNum(displayData.totalGiftIncome) }}</el-descriptions-item>
-    <el-descriptions-item :label="t('pages.anchorList.paidDanmakuIncome')">{{ formatNum(displayData.totalPaidDanmakuIncome) }}</el-descriptions-item>
-    <el-descriptions-item :label="t('pages.anchorList.privateRoomTicketIncome')">{{ formatNum(displayData.totalPrivateRoomTicketIncome) }}</el-descriptions-item>
-    <el-descriptions-item :label="t('pages.anchorList.privateRoomWatchIncome')">{{ formatNum(displayData.totalPrivateRoomWatchIncome) }}</el-descriptions-item>
-    <el-descriptions-item :label="t('pages.anchorList.videoCallIncome')">{{ formatNum(displayData.totalVideoCallIncome) }}</el-descriptions-item>
-    <el-descriptions-item :label="t('pages.anchorList.videoTicketIncome')">{{ formatNum(displayData.totalVideoCallTicketIncome) }}</el-descriptions-item>
-    <el-descriptions-item :label="t('pages.anchorList.videoBillingIncome')">{{ formatNum(displayData.totalVideoCallBillingIncome) }}</el-descriptions-item>
-    <el-descriptions-item :label="t('pages.anchorList.totalLiveDuration')">{{ formatNum(displayData.totalLiveDuration) }}</el-descriptions-item>
+    <el-descriptions-item :label="t('pages.anchorList.liveIncome')"><span class="money-amount">{{ formatWalletBalance(displayData.totalIncome) }}</span></el-descriptions-item>
+    <el-descriptions-item :label="t('pages.anchorList.giftIncome')"><span class="money-amount">{{ formatWalletBalance(displayData.totalGiftIncome) }}</span></el-descriptions-item>
+    <el-descriptions-item :label="t('pages.anchorList.paidDanmakuIncome')"><span class="money-amount">{{ formatWalletBalance(displayData.totalPaidDanmakuIncome) }}</span></el-descriptions-item>
+    <el-descriptions-item :label="t('pages.anchorList.privateRoomTicketIncome')"><span class="money-amount">{{ formatWalletBalance(displayData.totalPrivateRoomTicketIncome) }}</span></el-descriptions-item>
+    <el-descriptions-item :label="t('pages.anchorList.privateRoomWatchIncome')"><span class="money-amount">{{ formatWalletBalance(displayData.totalPrivateRoomWatchIncome) }}</span></el-descriptions-item>
+    <el-descriptions-item :label="t('pages.anchorList.videoCallIncome')"><span class="money-amount">{{ formatWalletBalance(displayData.totalVideoCallIncome) }}</span></el-descriptions-item>
+    <el-descriptions-item :label="t('pages.anchorList.videoTicketIncome')"><span class="money-amount">{{ formatWalletBalance(displayData.totalVideoCallTicketIncome) }}</span></el-descriptions-item>
+    <el-descriptions-item :label="t('pages.anchorList.videoBillingIncome')"><span class="money-amount">{{ formatWalletBalance(displayData.totalVideoCallBillingIncome) }}</span></el-descriptions-item>
+    <el-descriptions-item :label="t('pages.anchorList.totalLiveDuration')">{{ formatLiveDurationMinutes(displayData.totalLiveDuration, t) }}</el-descriptions-item>
     <el-descriptions-item v-if="showSettlementShare" :label="t('pages.anchorList.settlementShareAmount')">
-      {{ formatNum(settlementShareAmount) }}
+      <span class="money-amount">{{ formatWalletBalance(settlementShareAmount) }}</span>
     </el-descriptions-item>
     <el-descriptions-item v-if="updatedAt" :label="t('pages.anchorList.roomUpdatedAt')">{{ formatDate(updatedAt) }}</el-descriptions-item>
   </el-descriptions>
@@ -20,7 +20,8 @@
 import {computed} from 'vue'
 import {useI18n} from 'vue-i18n'
 import type {LiveRoomIncomeAmounts} from '@/types/api'
-import {formatAmount} from '@/utils/number-format'
+import {formatWalletBalance} from '@/utils/number-format'
+import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 
 const props = defineProps<{
   data?: LiveRoomIncomeAmounts | null
@@ -42,8 +43,6 @@ const displayData = computed<Required<LiveRoomIncomeAmounts>>(() => ({
   totalVideoCallBillingIncome: props.data?.totalVideoCallBillingIncome ?? 0,
   totalLiveDuration: props.data?.totalLiveDuration ?? 0,
 }))
-
-const formatNum = (value?: number | null) => formatAmount(value, '0')
 
 const formatDate = (dateString?: string | null) => {
   if (!dateString) return '-'

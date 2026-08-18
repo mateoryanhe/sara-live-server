@@ -51,3 +51,29 @@ export function truncateNumber(
 
 export const formatAmount = formatNumberDisplay
 export const formatPrice = formatNumberDisplay
+
+/** 钱包余额展示：固定小数位 + 千分位，空值按 0 显示 */
+export function formatWalletBalance(
+  value: number | string | null | undefined,
+  decimals: number = NUMBER_DISPLAY_DECIMALS,
+): string {
+  const text = formatNumberDisplay(value, '0', decimals)
+  const negative = text.startsWith('-')
+  const unsigned = negative ? text.slice(1) : text
+  const [intPart, fracPart = ''] = unsigned.split('.')
+  const intWithSep = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  const formatted = decimals > 0 ? `${intWithSep}.${fracPart}` : intWithSep
+  return negative ? `-${formatted}` : formatted
+}
+
+/** 累计次数等整数展示：千分位，空值按 0 显示 */
+export function formatStatCount(value: number | string | null | undefined): string {
+  if (value === null || value === undefined || value === '') {
+    return '0'
+  }
+  const num = Number(value)
+  if (!Number.isFinite(num)) {
+    return '0'
+  }
+  return String(Math.trunc(num)).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}

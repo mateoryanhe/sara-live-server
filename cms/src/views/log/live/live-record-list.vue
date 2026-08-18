@@ -46,28 +46,28 @@
         <el-table-column :label="t('pages.liveRecordList.liveDuration')" width="120">
           <template #default="{ row }">{{ formatDuration(row.totalLiveDuration) }}</template>
         </el-table-column>
-        <el-table-column :label="t('pages.liveRecordList.totalIncome')" width="120">
-          <template #default="{ row }">{{ formatAmount(row.totalIncome) }}</template>
+        <el-table-column :label="t('pages.liveRecordList.totalIncome')" align="right" min-width="120">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.liveRecordList.giftIncome')" width="120">
-          <template #default="{ row }">{{ formatAmount(row.totalGiftIncome) }}</template>
+        <el-table-column :label="t('pages.liveRecordList.giftIncome')" align="right" min-width="120">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGiftIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.liveRecordList.paidDanmakuIncome')" width="120">
-          <template #default="{ row }">{{ formatAmount(row.totalPaidDanmakuIncome) }}</template>
+        <el-table-column :label="t('pages.liveRecordList.paidDanmakuIncome')" align="right" min-width="130">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.liveRecordList.videoTicketIncome')" width="120">
-          <template #default="{ row }">{{ formatAmount(row.totalVideoCallTicketIncome) }}</template>
+        <el-table-column :label="t('pages.liveRecordList.videoTicketIncome')" align="right" min-width="130">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallTicketIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.liveRecordList.videoBillingIncome')" width="140">
-          <template #default="{ row }">{{ formatAmount(row.totalVideoCallBillingIncome) }}</template>
+        <el-table-column :label="t('pages.liveRecordList.videoBillingIncome')" align="right" min-width="150">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallBillingIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.liveRecordList.videoCallIncome')" width="120">
-          <template #default="{ row }">{{ formatAmount(row.totalVideoCallIncome) }}</template>
+        <el-table-column :label="t('pages.liveRecordList.videoCallIncome')" align="right" min-width="130">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
         </el-table-column>
         <el-table-column :label="t('pages.liveRecordList.giftSenderCount')" prop="totalGiftSender" width="100"/>
         <el-table-column :label="t('pages.liveRecordList.newFollowers')" prop="totalNewFollower" width="100"/>
-        <el-table-column :label="t('pages.liveRecordList.totalGameBet')" width="130">
-          <template #default="{ row }">{{ formatAmount(row.totalGameBet) }}</template>
+        <el-table-column :label="t('pages.liveRecordList.totalGameBet')" align="right" min-width="130">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameBet) }}</span></template>
         </el-table-column>
         <el-table-column :label="t('common.createdAt')" width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
@@ -95,7 +95,7 @@ import {onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {liveRecordApi} from '@/api'
 import type {LiveRecordItem} from '@/types/api'
-import {formatAmount} from '@/utils/number-format'
+import {formatWalletBalance} from '@/utils/number-format'
 
 const {t} = useI18n()
 const loading = ref(false)

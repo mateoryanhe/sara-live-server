@@ -128,7 +128,6 @@ func toUserCumulativeStatDetailItem(stat *userentity.UserCumulativeStat) *accoun
 		TotalPayCount:       stat.TotalPayCount,
 		TotalDiamondConsume: stat.TotalDiamondConsume,
 		TotalGoldConsume:    stat.TotalGoldConsume,
-		TotalLiveDuration:   stat.TotalLiveDuration,
 	}
 	if !stat.UpdatedAt.IsZero() {
 		updatedAt := stat.UpdatedAt

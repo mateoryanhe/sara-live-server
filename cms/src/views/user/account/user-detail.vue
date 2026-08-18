@@ -91,10 +91,16 @@
           </el-tab-pane>
 
           <el-tab-pane :label="t('pages.userList.tabWallet')" name="wallet">
-            <el-descriptions :column="1" border>
-              <el-descriptions-item :label="t('pages.userList.goldBalance')">{{ formatAmount(detail.wallet?.gold) }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.diamondBalance')">{{ formatAmount(detail.wallet?.diamond) }}</el-descriptions-item>
-            </el-descriptions>
+            <div class="wallet-panel">
+              <div class="wallet-balance-card wallet-balance-gold">
+                <div class="wallet-balance-label">{{ t('pages.userList.goldBalance') }}</div>
+                <div class="wallet-balance-value">{{ formatWalletBalance(detail.wallet?.gold) }}</div>
+              </div>
+              <div class="wallet-balance-card wallet-balance-diamond">
+                <div class="wallet-balance-label">{{ t('pages.userList.diamondBalance') }}</div>
+                <div class="wallet-balance-value">{{ formatWalletBalance(detail.wallet?.diamond) }}</div>
+              </div>
+            </div>
           </el-tab-pane>
 
           <el-tab-pane :label="t('pages.userList.tabUserExt')" name="userExt">
@@ -123,15 +129,33 @@
 
           <el-tab-pane :label="t('pages.userList.tabCumulativeStat')" name="cumulativeStat">
             <el-empty v-if="!detail.cumulativeStat" :description="t('pages.userList.noData')"/>
-            <el-descriptions v-else :column="1" border>
-              <el-descriptions-item :label="t('pages.userList.totalRecharge')">{{ formatAmount(detail.cumulativeStat.totalRecharge) }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.totalWithdraw')">{{ formatAmount(detail.cumulativeStat.totalWithdraw) }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.totalPayCount')">{{ detail.cumulativeStat.totalPayCount ?? '-' }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.totalDiamondConsume')">{{ formatAmount(detail.cumulativeStat.totalDiamondConsume) }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.totalGoldConsume')">{{ formatAmount(detail.cumulativeStat.totalGoldConsume) }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.totalLiveDuration')">{{ formatDuration(detail.cumulativeStat.totalLiveDuration) }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.userList.statUpdatedAt')">{{ formatDate(detail.cumulativeStat.updatedAt) }}</el-descriptions-item>
-            </el-descriptions>
+            <div v-else>
+              <div class="wallet-panel">
+                <div class="wallet-balance-card stat-recharge">
+                  <div class="wallet-balance-label">{{ t('pages.userList.totalRecharge') }}</div>
+                  <div class="wallet-balance-value">{{ formatWalletBalance(detail.cumulativeStat.totalRecharge) }}</div>
+                </div>
+                <div class="wallet-balance-card stat-withdraw">
+                  <div class="wallet-balance-label">{{ t('pages.userList.totalWithdraw') }}</div>
+                  <div class="wallet-balance-value">{{ formatWalletBalance(detail.cumulativeStat.totalWithdraw) }}</div>
+                </div>
+                <div class="wallet-balance-card stat-pay-count">
+                  <div class="wallet-balance-label">{{ t('pages.userList.totalPayCount') }}</div>
+                  <div class="wallet-balance-value">{{ formatStatCount(detail.cumulativeStat.totalPayCount) }}</div>
+                </div>
+                <div class="wallet-balance-card stat-diamond-consume">
+                  <div class="wallet-balance-label">{{ t('pages.userList.totalDiamondConsume') }}</div>
+                  <div class="wallet-balance-value">{{ formatWalletBalance(detail.cumulativeStat.totalDiamondConsume) }}</div>
+                </div>
+                <div class="wallet-balance-card stat-gold-consume">
+                  <div class="wallet-balance-label">{{ t('pages.userList.totalGoldConsume') }}</div>
+                  <div class="wallet-balance-value">{{ formatWalletBalance(detail.cumulativeStat.totalGoldConsume) }}</div>
+                </div>
+              </div>
+              <div class="stat-updated-at">
+                {{ t('pages.userList.statUpdatedAt') }}：{{ formatDate(detail.cumulativeStat.updatedAt) }}
+              </div>
+            </div>
           </el-tab-pane>
 
           <el-tab-pane :label="t('pages.userList.tabLoginDevice')" name="loginDevice">
@@ -159,7 +183,7 @@ import {useRoute, useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {accountApi} from '@/api'
 import type {UserDetail} from '@/types/api.ts'
-import {formatAmount} from '@/utils/number-format'
+import {formatStatCount, formatWalletBalance} from '@/utils/number-format'
 
 const {t} = useI18n()
 const route = useRoute()
@@ -223,15 +247,6 @@ const formatDate = (dateString: string | null | undefined) => {
   }
 }
 
-const formatDuration = (seconds?: number) => {
-  if (seconds === undefined || seconds === null) return '-'
-  const total = Math.max(0, Math.floor(seconds))
-  const hours = Math.floor(total / 3600)
-  const minutes = Math.floor((total % 3600) / 60)
-  const secs = total % 60
-  return t('pages.userList.durationFormat', {hours, minutes, seconds: secs})
-}
-
 const isUserDetailRoute = () => route.name === 'UserDetail'
 
 const fetchDetail = async () => {
@@ -293,5 +308,68 @@ onActivated(() => {
 
 .basic-sub-tabs :deep(.el-tabs__header) {
   margin-bottom: 16px;
+}
+
+.wallet-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.wallet-balance-card {
+  flex: 1 1 240px;
+  max-width: 360px;
+  padding: 20px 24px;
+  border-radius: 8px;
+  border: 1px solid var(--el-border-color-light);
+  background: var(--el-fill-color-blank);
+}
+
+.wallet-balance-label {
+  font-size: 14px;
+  color: var(--el-text-color-secondary);
+  margin-bottom: 12px;
+}
+
+.wallet-balance-value {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  word-break: break-all;
+}
+
+.wallet-balance-gold .wallet-balance-value {
+  color: #d48806;
+}
+
+.wallet-balance-diamond .wallet-balance-value {
+  color: #1677ff;
+}
+
+.stat-recharge .wallet-balance-value {
+  color: #389e0d;
+}
+
+.stat-withdraw .wallet-balance-value {
+  color: #cf1322;
+}
+
+.stat-pay-count .wallet-balance-value {
+  color: #531dab;
+}
+
+.stat-diamond-consume .wallet-balance-value {
+  color: #1677ff;
+}
+
+.stat-gold-consume .wallet-balance-value {
+  color: #d48806;
+}
+
+.stat-updated-at {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--el-text-color-secondary);
 }
 </style>

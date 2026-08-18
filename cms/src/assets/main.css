@@ -35,3 +35,7 @@ body {
     align-items: center;
     justify-content: center;
 }
+
+.money-amount {
+    font-variant-numeric: tabular-nums;
+}

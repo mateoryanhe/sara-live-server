@@ -83,8 +83,8 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.liveIncome')" min-width="110">
-          <template #default="{ row }">{{ formatAmount(row.totalIncome) }}</template>
+        <el-table-column :label="t('pages.anchorList.liveIncome')" align="right" min-width="120">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.banStatus')" prop="ban" width="100">
           <template #default="{ row }">
@@ -183,7 +183,7 @@ import {useRouter} from 'vue-router'
 import {ElForm, ElMessage, ElMessageBox, type FormRules} from 'element-plus'
 import {accountApi} from '@/api'
 import type {AnchorListItem, BanAnchorReq, UnBanAnchorReq} from '@/types/api'
-import {formatAmount} from '@/utils/number-format'
+import {formatWalletBalance} from '@/utils/number-format'
 import {usePagePermission} from '@/composables/usePagePermission'
 
 const {t} = useI18n()

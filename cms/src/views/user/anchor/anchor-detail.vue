@@ -76,10 +76,12 @@
                 <span v-else>-</span>
               </el-descriptions-item>
               <el-descriptions-item :label="t('pages.anchorList.ticketPrice')">
-                {{ isPrivateRoom(detail.liveRoom.category) ? formatAmount(detail.liveRoom.ticket) : '-' }}
+                <span v-if="isPrivateRoom(detail.liveRoom.category)" class="money-amount">{{ formatWalletBalance(detail.liveRoom.ticket) }}</span>
+                <span v-else>-</span>
               </el-descriptions-item>
               <el-descriptions-item :label="t('pages.anchorList.billingPricePerMinute')">
-                {{ isPrivateRoom(detail.liveRoom.category) ? formatAmount(detail.liveRoom.billing) : '-' }}
+                <span v-if="isPrivateRoom(detail.liveRoom.category)" class="money-amount">{{ formatWalletBalance(detail.liveRoom.billing) }}</span>
+                <span v-else>-</span>
               </el-descriptions-item>
               <el-descriptions-item :label="t('pages.anchorList.liveStatus')">
                 <el-tag :type="detail.liveRoom.liveStatus === 1 ? 'success' : 'info'">
@@ -139,29 +141,29 @@
             <el-table v-if="detail.incomeArchives?.length" :data="detail.incomeArchives" style="width:100%">
               <el-table-column :label="t('pages.anchorList.archiveId')" min-width="180" prop="id"/>
               <el-table-column :label="t('pages.anchorList.guildId')" min-width="120" prop="guildId"/>
-              <el-table-column :label="t('pages.anchorList.liveIncome')" min-width="110">
-                <template #default="{ row }">{{ formatAmount(row.totalIncome) }}</template>
+              <el-table-column :label="t('pages.anchorList.liveIncome')" align="right" min-width="120">
+                <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
               </el-table-column>
-              <el-table-column :label="t('pages.anchorList.giftIncome')" min-width="110">
-                <template #default="{ row }">{{ formatAmount(row.totalGiftIncome) }}</template>
+              <el-table-column :label="t('pages.anchorList.giftIncome')" align="right" min-width="120">
+                <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGiftIncome) }}</span></template>
               </el-table-column>
-              <el-table-column :label="t('pages.anchorList.paidDanmakuIncome')" min-width="120">
-                <template #default="{ row }">{{ formatAmount(row.totalPaidDanmakuIncome) }}</template>
+              <el-table-column :label="t('pages.anchorList.paidDanmakuIncome')" align="right" min-width="130">
+                <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
               </el-table-column>
-              <el-table-column :label="t('pages.anchorList.privateRoomTicketIncome')" min-width="130">
-                <template #default="{ row }">{{ formatAmount(row.totalPrivateRoomTicketIncome) }}</template>
+              <el-table-column :label="t('pages.anchorList.privateRoomTicketIncome')" align="right" min-width="140">
+                <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomTicketIncome) }}</span></template>
               </el-table-column>
-              <el-table-column :label="t('pages.anchorList.privateRoomWatchIncome')" min-width="130">
-                <template #default="{ row }">{{ formatAmount(row.totalPrivateRoomWatchIncome) }}</template>
+              <el-table-column :label="t('pages.anchorList.privateRoomWatchIncome')" align="right" min-width="140">
+                <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomWatchIncome) }}</span></template>
               </el-table-column>
-              <el-table-column :label="t('pages.anchorList.videoCallIncome')" min-width="120">
-                <template #default="{ row }">{{ formatAmount(row.totalVideoCallIncome) }}</template>
+              <el-table-column :label="t('pages.anchorList.videoCallIncome')" align="right" min-width="130">
+                <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
               </el-table-column>
               <el-table-column :label="t('pages.anchorList.totalLiveDuration')" min-width="120">
                 <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
               </el-table-column>
-              <el-table-column :label="t('pages.anchorList.settlementSalary')" min-width="110">
-                <template #default="{ row }">{{ formatAmount(row.settlementSalary) }}</template>
+              <el-table-column :label="t('pages.anchorList.settlementSalary')" align="right" min-width="120">
+                <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementSalary) }}</span></template>
               </el-table-column>
               <el-table-column :label="t('common.createdAt')" min-width="170">
                 <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
@@ -186,7 +188,7 @@ import DailyLivePanel from './anchor-detail-daily-live-panel.vue'
 import LiveRecordPanel from './anchor-detail-live-record-panel.vue'
 import SettlementLogPanel from './anchor-detail-settlement-log-panel.vue'
 import type {AnchorDetail} from '@/types/api'
-import {formatAmount} from '@/utils/number-format'
+import {formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 
 const {t} = useI18n()

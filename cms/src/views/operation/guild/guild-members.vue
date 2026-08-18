@@ -64,14 +64,16 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.ticketPrice')" min-width="100">
+        <el-table-column :label="t('pages.anchorList.ticketPrice')" align="right" min-width="110">
           <template #default="{ row }">
-            {{ isPrivateRoom(row.category) ? formatAmount(row.ticket) : '-' }}
+            <span v-if="isPrivateRoom(row.category)" class="money-amount">{{ formatWalletBalance(row.ticket) }}</span>
+            <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.billingPricePerMinute')" min-width="110">
+        <el-table-column :label="t('pages.anchorList.billingPricePerMinute')" align="right" min-width="120">
           <template #default="{ row }">
-            {{ isPrivateRoom(row.category) ? formatAmount(row.billing) : '-' }}
+            <span v-if="isPrivateRoom(row.category)" class="money-amount">{{ formatWalletBalance(row.billing) }}</span>
+            <span v-else>-</span>
           </template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.roomTitle')" min-width="140" prop="roomTitle" show-overflow-tooltip>
@@ -84,23 +86,23 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.liveIncome')" min-width="110">
-          <template #default="{ row }">{{ formatAmount(row.totalIncome) }}</template>
+        <el-table-column :label="t('pages.anchorList.liveIncome')" align="right" min-width="120">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.giftIncome')" min-width="110">
-          <template #default="{ row }">{{ formatAmount(row.totalGiftIncome) }}</template>
+        <el-table-column :label="t('pages.anchorList.giftIncome')" align="right" min-width="120">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGiftIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.paidDanmakuIncome')" min-width="120">
-          <template #default="{ row }">{{ formatAmount(row.totalPaidDanmakuIncome) }}</template>
+        <el-table-column :label="t('pages.anchorList.paidDanmakuIncome')" align="right" min-width="130">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.videoTicketIncome')" min-width="120">
-          <template #default="{ row }">{{ formatAmount(row.totalVideoCallTicketIncome) }}</template>
+        <el-table-column :label="t('pages.anchorList.videoTicketIncome')" align="right" min-width="130">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallTicketIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.videoBillingIncome')" min-width="140">
-          <template #default="{ row }">{{ formatAmount(row.totalVideoCallBillingIncome) }}</template>
+        <el-table-column :label="t('pages.anchorList.videoBillingIncome')" align="right" min-width="150">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallBillingIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.videoCallIncome')" min-width="120">
-          <template #default="{ row }">{{ formatAmount(row.totalVideoCallIncome) }}</template>
+        <el-table-column :label="t('pages.anchorList.videoCallIncome')" align="right" min-width="130">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.banStatus')" prop="ban" width="100">
           <template #default="{ row }">
@@ -252,7 +254,7 @@ import {useRoute, useRouter} from 'vue-router'
 import {ElForm, ElMessage, ElMessageBox, type FormRules} from 'element-plus'
 import {accountApi, guildApi} from '@/api'
 import type {AnchorListItem, BanAnchorReq, UnBanAnchorReq} from '@/types/api'
-import {formatAmount} from '@/utils/number-format'
+import {formatWalletBalance} from '@/utils/number-format'
 import {usePagePermission} from '@/composables/usePagePermission'
 
 const USER_TYPE_ANCHOR = 1

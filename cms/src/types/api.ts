@@ -457,7 +457,6 @@ export interface UserCumulativeStatDetailItem {
     totalPayCount?: number
     totalDiamondConsume?: number
     totalGoldConsume?: number
-    totalLiveDuration?: number
     updatedAt?: string | null
 }
 
