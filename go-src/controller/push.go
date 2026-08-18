@@ -77,6 +77,11 @@ func (c *PushController) LiveRoomStartLive(_ context.Context, _ *pushdto.LiveRoo
 	return nil, nil
 }
 
+// LiveRoomTotalIncome cmd=37 本场直播总收益
+func (c *PushController) LiveRoomTotalIncome(_ context.Context, _ *pushdto.LiveRoomTotalIncomePushReq) (*pushdto.LiveRoomTotalIncomePushResp, error) {
+	return nil, nil
+}
+
 // LiveRoomAudienceListRefresh cmd=24 观众列表刷新
 func (c *PushController) LiveRoomAudienceListRefresh(_ context.Context, _ *pushdto.LiveRoomAudienceListRefreshPushReq) (*pushdto.LiveRoomAudienceListRefreshPushResp, error) {
 	return nil, nil

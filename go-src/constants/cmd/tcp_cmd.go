@@ -67,4 +67,6 @@ const (
 	LiveFollowCountPush = 35
 	//活动消息推送(全服广播,无消息体,客户端自行拉取)
 	ActivityMessagePush = 36
+	//本场直播总收益推送(房间内全体在线用户,含主播)
+	LiveRoomTotalIncome = 37
 )

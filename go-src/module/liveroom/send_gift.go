@@ -159,6 +159,8 @@ func recordSendGiftStats(result *sendGiftResult) {
 
 	event.Pub(gameevent.RevenueEventEvent, result.eventData)
 
+	NotifyLiveRecordTotalIncome(result.room)
+
 	onlineId := entity.BuildLiveRoomOnlineId(result.senderId, result.room.ID)
 	if online := liveroomdao.GetOnlineById(onlineId, result.senderId, result.room.ID); online != nil {
 		online.AddTotalReward(result.totalCost)

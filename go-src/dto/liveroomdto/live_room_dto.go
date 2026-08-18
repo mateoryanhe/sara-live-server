@@ -434,6 +434,13 @@ type AnchorStartLivePushItem struct {
 	StartedAt    int64  `json:"startedAt"    dc:"开播时间(秒)"`
 }
 
+// LiveRecordTotalIncomePushItem 本场直播总收益推送载荷(房间内全体在线用户,含主播)
+type LiveRecordTotalIncomePushItem struct {
+	RoomId       string  `json:"roomId"       dc:"直播间ID"`
+	LiveRecordId string  `json:"liveRecordId" dc:"本场直播记录ID"`
+	TotalIncome  float64 `json:"totalIncome"  dc:"本场直播总收益(钻石)"`
+}
+
 // ReportAnchorCodeReq App 上报主播码成为普通主播
 type ReportAnchorCodeReq struct {
 	g.Meta     `path:"/reportAnchorCode" method:"post" summary:"上报主播码成为普通主播" tags:"直播间"`

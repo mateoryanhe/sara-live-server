@@ -132,6 +132,16 @@ type LiveRoomStartLivePushResp struct {
 	Data *liveroomdto.AnchorStartLivePushItem `json:"data"`
 }
 
+// LiveRoomTotalIncomePushReq cmd=37 本场直播总收益
+type LiveRoomTotalIncomePushReq struct {
+	g.Meta `path:"/liveRoomTotalIncome" method:"post" summary:"推送 cmd=37 本场直播总收益(房间内全体在线用户,含主播)" description:"送礼、付费弹幕、私密房扣费等导致本场 live_record.total_income 变化后广播" tags:"推送-直播间"`
+}
+
+type LiveRoomTotalIncomePushResp struct {
+	Cmd  int                                        `json:"cmd" dc:"命令字 37"`
+	Data *liveroomdto.LiveRecordTotalIncomePushItem `json:"data"`
+}
+
 // LiveRoomAudienceListRefreshPushReq cmd=24 观众列表刷新
 type LiveRoomAudienceListRefreshPushReq struct {
 	g.Meta `path:"/liveRoomAudienceListRefresh" method:"post" summary:"推送 cmd=24 观众列表刷新(房间内全体在线用户,含主播)" description:"观众列表刷新(房间内全体在线用户,含主播)" tags:"推送-直播间"`

@@ -106,12 +106,8 @@ func importOneGuildAnchor(guild *entity.LiveGuild, userID uint64, anchorType uin
 	}
 	nickname = user.Nickname
 
-	// 主播间缓存已有该ID,不可再导入当前工会
-	if liveroomdao.GetRoomById(userID) != nil {
-		return guilddto.ImportAnchorFailAlreadyHasLiveRoom, nickname
-	}
-
-	if liveroomdao.GetAnchorGuildId(userID) != 0 {
+	existingGuildId := liveroomdao.GetAnchorGuildId(userID)
+	if existingGuildId != 0 && existingGuildId != guild.ID {
 		return guilddto.ImportAnchorFailAlreadyInGuild, nickname
 	}
 	if !userentity.UserTypeIsAnchor(user.UserType) && user.UserType != userentity.UserTypeNormal {

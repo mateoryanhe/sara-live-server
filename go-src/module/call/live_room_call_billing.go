@@ -12,6 +12,7 @@ import (
 	callentity "xr-game-server/entity/call"
 	liveentity "xr-game-server/entity/live"
 	"xr-game-server/gameevent"
+	"xr-game-server/module/liveroom"
 	"xr-game-server/module/wallet"
 )
 
@@ -120,6 +121,7 @@ func applyLiveRoomCallRevenue(roomId, liveRecordId, callerId, orderId uint64, am
 		return
 	}
 	event.Pub(gameevent.RevenueEventEvent, eventData)
+	liveroom.NotifyLiveRecordTotalIncome(room)
 }
 
 func refundLiveRoomCallRevenue(order *callentity.CallOrder, liveRecordId uint64, refundAmount float64) {
@@ -139,6 +141,7 @@ func refundLiveRoomCallRevenue(order *callentity.CallOrder, liveRecordId uint64,
 		liveRecord.ApplyVideoCallIncomeDelta(-refundAmount, false, true)
 	}
 	applyRoomCallRevenueDelta(room, -refundAmount, false, true)
+	liveroom.NotifyLiveRecordTotalIncome(room)
 }
 
 func applyRoomCallRevenueDelta(room *liveentity.LiveRoom, amount float64, ticket, billing bool) {

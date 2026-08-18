@@ -662,6 +662,23 @@
       "dataType": null,
       "data": null,
       "example": null
+    },
+    {
+      "cmd": 37,
+      "name": "LiveRoomTotalIncome",
+      "description": "本场直播总收益更新(送礼、付费弹幕、私密房扣费、视频通话等入账后)",
+      "target": "房间内全体在线用户(含主播)",
+      "dataType": "LiveRecordTotalIncomePushItem",
+      "data": {
+        "roomId": { "type": "string", "json": "roomId", "description": "直播间ID" },
+        "liveRecordId": { "type": "string", "json": "liveRecordId", "description": "本场直播记录ID" },
+        "totalIncome": { "type": "float64", "json": "totalIncome", "description": "本场直播总收益(钻石)" }
+      },
+      "example": {
+        "roomId": "10001",
+        "liveRecordId": "90001",
+        "totalIncome": 128.5
+      }
     }
   ],
   "sourceFiles": {

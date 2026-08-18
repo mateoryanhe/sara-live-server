@@ -314,6 +314,9 @@ func EnsureAnchorRoom(anchorId, guildId uint64) *liveentity.LiveRoom {
 		if guildId > 0 && room.GuildId != guildId {
 			room.SetGuildId(guildId)
 		}
+		if room.Status == liveentity.LiveRoomStatusOnShelf {
+			liveroomdao.AddRoomToCache(room)
+		}
 		return room
 	}
 	room := liveentity.NewLiveRoom(anchorId, guildId, "", "", "")
