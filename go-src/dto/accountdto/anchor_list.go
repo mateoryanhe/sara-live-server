@@ -13,6 +13,7 @@ type QueryAnchorListReq struct {
 	Key          string `json:"key" dc:"查询关键字(用户ID模糊/昵称/手机号/分享码)"`
 	GuildId      uint64 `json:"guildId" dc:"工会ID(可选,大于0时按工会过滤)"`
 	PlatformOnly bool   `json:"platformOnly" dc:"仅平台主播(guild_id=0)"`
+	LiveStatus   *uint8 `json:"liveStatus" dc:"直播状态过滤(0未开播,1直播中,不传则不过滤)"`
 }
 
 // AnchorListItem 主播列表项(基于 user_infos)

@@ -158,7 +158,7 @@
                 <template #default="{ row }">{{ formatAmount(row.totalVideoCallIncome) }}</template>
               </el-table-column>
               <el-table-column :label="t('pages.anchorList.totalLiveDuration')" min-width="120">
-                <template #default="{ row }">{{ row.totalLiveDuration ?? '-' }}</template>
+                <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
               </el-table-column>
               <el-table-column :label="t('pages.anchorList.settlementSalary')" min-width="110">
                 <template #default="{ row }">{{ formatAmount(row.settlementSalary) }}</template>
@@ -187,6 +187,7 @@ import LiveRecordPanel from './anchor-detail-live-record-panel.vue'
 import SettlementLogPanel from './anchor-detail-settlement-log-panel.vue'
 import type {AnchorDetail} from '@/types/api'
 import {formatAmount} from '@/utils/number-format'
+import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 
 const {t} = useI18n()
 const route = useRoute()

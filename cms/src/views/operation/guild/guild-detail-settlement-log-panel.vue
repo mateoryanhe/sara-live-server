@@ -8,6 +8,10 @@
         type="info"
     />
 
+    <div class="toolbar">
+      <el-button v-if="canExport" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
+    </div>
+
     <el-table v-loading="loading" :data="tableData" style="width:100%">
       <el-table-column :label="t('pages.guildIncomeSettlementLogList.logId')" min-width="180" prop="id"/>
       <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalIncome')" min-width="110">
@@ -35,7 +39,7 @@
         <template #default="{ row }">{{ formatNum(row.totalVideoCallBillingIncome) }}</template>
       </el-table-column>
       <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalLiveDuration')" min-width="120">
-        <template #default="{ row }">{{ formatNum(row.totalLiveDuration) }}</template>
+        <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
       </el-table-column>
       <el-table-column :label="t('pages.guildIncomeSettlementLogList.guildSharePercent')" min-width="110">
         <template #default="{ row }">{{ formatSharePercent(row.guildSharePercent) }}</template>
@@ -53,12 +57,16 @@
 </template>
 
 <script lang="ts" setup>
-import {ref, watch} from 'vue'
+import {computed, ref, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage} from 'element-plus'
 import {guildIncomeSettlementLogApi} from '@/api/modules/guild-income-settlement-log'
 import type {GuildIncomeSettlementLogItem} from '@/types/api'
+import {usePagePermission} from '@/composables/usePagePermission'
+import {downloadCsv, fetchAllPagedRows} from '@/utils/csv-export'
+import {buildGuildSettlementLogCsvColumns} from '@/utils/income-settlement-log-csv'
 import {formatAmount} from '@/utils/number-format'
+import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 
 const props = defineProps<{
   guildId: string
@@ -66,9 +74,16 @@ const props = defineProps<{
 }>()
 
 const {t} = useI18n()
+const {can} = usePagePermission('GuildDetail')
+const canExport = computed(() => can('exportSettlementLog'))
 const loading = ref(false)
+const exporting = ref(false)
 const tableData = ref<GuildIncomeSettlementLogItem[]>([])
 const loaded = ref(false)
+
+const buildFilterParams = () => ({
+  guildId: props.guildId,
+})
 
 const fetchList = async () => {
   if (!props.guildId) {
@@ -78,7 +93,7 @@ const fetchList = async () => {
   loading.value = true
   try {
     const response = await guildIncomeSettlementLogApi.getList({
-      guildId: props.guildId,
+      ...buildFilterParams(),
       pageIndex: 1,
       pageSize: 50,
     })
@@ -89,6 +104,38 @@ const fetchList = async () => {
     ElMessage.error(t('pages.guildList.settlementLogFetchFailed'))
   } finally {
     loading.value = false
+  }
+}
+
+const handleExport = async () => {
+  if (!props.guildId) {
+    ElMessage.warning(t('common.exportEmpty'))
+    return
+  }
+  exporting.value = true
+  try {
+    const rows = await fetchAllPagedRows((pageIndex, pageSize) =>
+      guildIncomeSettlementLogApi.getList({
+        ...buildFilterParams(),
+        pageIndex,
+        pageSize,
+      }),
+    )
+    if (rows.length === 0) {
+      ElMessage.warning(t('common.exportEmpty'))
+      return
+    }
+    downloadCsv(
+      `guild-settlement-log-${props.guildId}-${Date.now()}.csv`,
+      buildGuildSettlementLogCsvColumns(t),
+      rows,
+    )
+    ElMessage.success(t('common.exportSuccess'))
+  } catch (error) {
+    console.error('Failed to export guild settlement logs:', error)
+    ElMessage.error(t('common.exportFailed'))
+  } finally {
+    exporting.value = false
   }
 }
 
@@ -137,5 +184,11 @@ watch(
 <style scoped>
 .hint-alert {
   margin-bottom: 16px;
+}
+
+.toolbar {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

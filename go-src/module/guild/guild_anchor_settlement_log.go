@@ -12,6 +12,26 @@ import (
 	"xr-game-server/module/incomesettlement"
 )
 
+// GetGuildAnchorIncomeSettlementLogList CMS分页查询指定工会名下主播结算流水
+func GetGuildAnchorIncomeSettlementLogList(ctx context.Context, req *guilddto.CMSGuildAnchorIncomeSettlementLogListReq) (*httpserver.CMSQueryResp, error) {
+	guildId := parseGuildIdFilter(req.GuildId)
+	if guildId == 0 {
+		return incomesettlement.GetAnchorCMSListByGuildIds(ctx, nil, &guilddto.CMSMyGuildAnchorIncomeSettlementLogListReq{
+			CMSQueryReq: req.CMSQueryReq,
+			RoomId:      req.RoomId,
+			StartTime:   req.StartTime,
+			EndTime:     req.EndTime,
+		})
+	}
+	return incomesettlement.GetAnchorCMSListByGuildIds(ctx, []uint64{guildId}, &guilddto.CMSMyGuildAnchorIncomeSettlementLogListReq{
+		CMSQueryReq: req.CMSQueryReq,
+		GuildId:     req.GuildId,
+		RoomId:      req.RoomId,
+		StartTime:   req.StartTime,
+		EndTime:     req.EndTime,
+	})
+}
+
 // GetMyGuildAnchorIncomeSettlementLogList CMS分页查询当前用户名下工会的主播结算流水
 func GetMyGuildAnchorIncomeSettlementLogList(ctx context.Context, req *guilddto.CMSMyGuildAnchorIncomeSettlementLogListReq) (*httpserver.CMSQueryResp, error) {
 	cmsUserId, err := getCMSUserId(ctx)

@@ -15,7 +15,7 @@ import (
 )
 
 func queryAnchorListFromMemory(req *accountdto.QueryAnchorListReq) (int, []*accountdto.AnchorListItem) {
-	rooms := filterAnchorRooms(getRoomListCache(), req.Key, req.GuildId, req.PlatformOnly)
+	rooms := filterAnchorRooms(getRoomListCache(), req.Key, req.GuildId, req.PlatformOnly, req.LiveStatus)
 	total := len(rooms)
 	pageRooms := paginateAnchorRooms(rooms, req.PageIndex, req.PageSize)
 	ret := make([]*accountdto.AnchorListItem, 0, len(pageRooms))
@@ -27,7 +27,7 @@ func queryAnchorListFromMemory(req *accountdto.QueryAnchorListReq) (int, []*acco
 	return total, ret
 }
 
-func filterAnchorRooms(rooms []*liveentity.LiveRoom, key string, guildId uint64, platformOnly bool) []*liveentity.LiveRoom {
+func filterAnchorRooms(rooms []*liveentity.LiveRoom, key string, guildId uint64, platformOnly bool, liveStatus *uint8) []*liveentity.LiveRoom {
 	key = strings.TrimSpace(key)
 	likeKey := strings.ToLower(key)
 	filtered := make([]*liveentity.LiveRoom, 0, len(rooms))
@@ -44,6 +44,9 @@ func filterAnchorRooms(rooms []*liveentity.LiveRoom, key string, guildId uint64,
 				continue
 			}
 		}
+		if liveStatus != nil && roomLiveStatus(room) != *liveStatus {
+			continue
+		}
 		if key != "" && !matchAnchorKey(room.ID, key, likeKey) {
 			continue
 		}
@@ -51,6 +54,13 @@ func filterAnchorRooms(rooms []*liveentity.LiveRoom, key string, guildId uint64,
 	}
 	sort.Slice(filtered, func(i, j int) bool { return filtered[i].ID > filtered[j].ID })
 	return filtered
+}
+
+func roomLiveStatus(room *liveentity.LiveRoom) uint8 {
+	if room != nil && room.LiveRecordId > 0 {
+		return 1
+	}
+	return 0
 }
 
 func isRegularAnchorRoom(room *liveentity.LiveRoom) bool {
@@ -146,11 +156,7 @@ func fillAnchorRoomFields(item *accountdto.AnchorListItem, room *liveentity.Live
 		item.TotalVideoCallTicketIncome = income.TotalVideoCallTicketIncome
 		item.TotalVideoCallBillingIncome = income.TotalVideoCallBillingIncome
 	}
-	if room.LiveRecordId > 0 {
-		item.LiveStatus = 1
-	} else {
-		item.LiveStatus = 0
-	}
+	item.LiveStatus = roomLiveStatus(room)
 	item.BanApplyTime = room.BanApplyTime
 	item.BanReason = room.BanReason
 	item.Ban = IsRoomBanned(room)

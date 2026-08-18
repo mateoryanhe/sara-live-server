@@ -1,14 +1,30 @@
 <template>
   <div>
+    <el-alert
+        :closable="false"
+        class="hint-alert"
+        show-icon
+        :title="t('pages.guildList.anchorSettlementLogHint')"
+        type="info"
+    />
+
     <el-form :model="searchForm" class="search-form" inline label-width="100px">
-      <el-form-item :label="t('common.startTime')">
+      <el-form-item :label="t('pages.guildAnchorIncomeSettlementLogList.roomId')">
+        <el-input
+            v-model="searchForm.roomId"
+            clearable
+            :placeholder="t('pages.guildAnchorIncomeSettlementLogList.enterRoomId')"
+            style="width: 200px"
+        />
+      </el-form-item>
+      <el-form-item :label="t('common.createdAt')">
         <el-date-picker
             v-model="searchForm.dateRange"
             clearable
-            :end-placeholder="t('pages.liveRecordList.endDate')"
+            :end-placeholder="t('pages.guildAnchorIncomeSettlementLogList.endDate')"
             format="YYYY-MM-DD"
-            :range-separator="t('pages.liveRecordList.dateRangeSeparator')"
-            :start-placeholder="t('pages.liveRecordList.startDate')"
+            :range-separator="t('pages.guildAnchorIncomeSettlementLogList.dateRangeSeparator')"
+            :start-placeholder="t('pages.guildAnchorIncomeSettlementLogList.startDate')"
             style="width: 260px"
             type="daterange"
             value-format="YYYY-MM-DD"
@@ -17,55 +33,40 @@
       <el-form-item>
         <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
         <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
-        <el-button v-if="canExport" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
+        <el-button :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
       </el-form-item>
     </el-form>
 
-    <el-table v-loading="loading" :data="tableData" style="width: 100%">
-      <el-table-column :label="t('pages.liveRecordList.recordId')" min-width="180" prop="id"/>
-      <el-table-column :label="t('pages.liveRecordList.anchorId')" min-width="180" prop="anchorId"/>
-      <el-table-column :label="t('pages.liveRecordList.anchorNickname')" min-width="120" prop="nickname">
-        <template #default="{ row }">{{ row.nickname || '-' }}</template>
+    <el-table v-loading="loading" :data="tableData" style="width:100%">
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.logId')" fixed="left" min-width="180" prop="id"/>
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.roomId')" min-width="180" prop="roomId"/>
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.roomNickname')" min-width="120">
+        <template #default="{ row }">{{ row.roomNickname || '-' }}</template>
       </el-table-column>
-      <el-table-column :label="t('common.startTime')" width="170">
-        <template #default="{ row }">{{ formatDate(row.startTime) }}</template>
-      </el-table-column>
-      <el-table-column :label="t('common.endTime')" width="170">
-        <template #default="{ row }">{{ formatDate(row.endTime) }}</template>
-      </el-table-column>
-      <el-table-column :label="t('pages.liveRecordList.totalAudience')" prop="totalAudience" width="100"/>
-      <el-table-column :label="t('pages.liveRecordList.liveDuration')" width="120">
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalIncome')" min-width="110" prop="totalIncome"/>
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalGiftIncome')" min-width="110" prop="totalGiftIncome"/>
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalPaidDanmakuIncome')" min-width="120" prop="totalPaidDanmakuIncome"/>
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalPrivateRoomTicketIncome')" min-width="130" prop="totalPrivateRoomTicketIncome"/>
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalPrivateRoomWatchIncome')" min-width="130" prop="totalPrivateRoomWatchIncome"/>
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalVideoCallIncome')" min-width="120" prop="totalVideoCallIncome"/>
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalVideoCallTicketIncome')" min-width="140" prop="totalVideoCallTicketIncome"/>
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalVideoCallBillingIncome')" min-width="140" prop="totalVideoCallBillingIncome"/>
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalLiveDuration')" min-width="120">
         <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
       </el-table-column>
-      <el-table-column :label="t('pages.liveRecordList.totalIncome')" width="120">
-        <template #default="{ row }">{{ formatAmount(row.totalIncome) }}</template>
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.settlementSalary')" min-width="110" prop="settlementSalary"/>
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.anchorSharePercent')" min-width="110">
+        <template #default="{ row }">{{ formatSharePercent(row.anchorSharePercent) }}</template>
       </el-table-column>
-      <el-table-column :label="t('pages.liveRecordList.giftIncome')" width="120">
-        <template #default="{ row }">{{ formatAmount(row.totalGiftIncome) }}</template>
-      </el-table-column>
-      <el-table-column :label="t('pages.liveRecordList.paidDanmakuIncome')" width="120">
-        <template #default="{ row }">{{ formatAmount(row.totalPaidDanmakuIncome) }}</template>
-      </el-table-column>
-      <el-table-column :label="t('pages.liveRecordList.videoTicketIncome')" width="120">
-        <template #default="{ row }">{{ formatAmount(row.totalVideoCallTicketIncome) }}</template>
-      </el-table-column>
-      <el-table-column :label="t('pages.liveRecordList.videoBillingIncome')" width="140">
-        <template #default="{ row }">{{ formatAmount(row.totalVideoCallBillingIncome) }}</template>
-      </el-table-column>
-      <el-table-column :label="t('pages.liveRecordList.videoCallIncome')" width="120">
-        <template #default="{ row }">{{ formatAmount(row.totalVideoCallIncome) }}</template>
-      </el-table-column>
-      <el-table-column :label="t('pages.liveRecordList.giftSenderCount')" prop="totalGiftSender" width="100"/>
-      <el-table-column :label="t('pages.liveRecordList.newFollowers')" prop="totalNewFollower" width="100"/>
-      <el-table-column :label="t('pages.liveRecordList.totalGameBet')" width="130">
-        <template #default="{ row }">{{ formatAmount(row.totalGameBet) }}</template>
-      </el-table-column>
-      <el-table-column :label="t('common.createdAt')" width="170">
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.settlementShareAmount')" min-width="120" prop="settlementShareAmount"/>
+      <el-table-column :label="t('common.createdAt')" fixed="right" width="170">
         <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
       </el-table-column>
     </el-table>
 
-    <div class="pagination">
+    <el-empty v-if="!loading && tableData.length === 0" :description="t('pages.guildList.noAnchorSettlementLogData')"/>
+
+    <div v-if="pagination.total > 0" class="pagination">
       <el-pagination
           v-model:current-page="pagination.pageIndex"
           v-model:page-size="pagination.pageSize"
@@ -80,28 +81,24 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, reactive, ref, watch} from 'vue'
+import {reactive, ref, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage} from 'element-plus'
-import {liveRecordApi} from '@/api'
-import type {LiveRecordItem} from '@/types/api'
-import {formatAmount} from '@/utils/number-format'
-import {usePagePermission} from '@/composables/usePagePermission'
+import {guildApi} from '@/api'
+import type {AnchorIncomeSettlementLogItem} from '@/types/api'
 import {downloadCsv, fetchAllPagedRows} from '@/utils/csv-export'
-import {buildLiveRecordCsvColumns} from '@/utils/live-record-csv'
+import {buildGuildAnchorSettlementLogCsvColumns} from '@/utils/income-settlement-log-csv'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 
 const props = defineProps<{
-  anchorId: string
+  guildId: string
   active: boolean
 }>()
 
 const {t} = useI18n()
-const {can} = usePagePermission('AnchorDetail')
-const canExport = computed(() => can('exportLiveRecord'))
 const loading = ref(false)
 const exporting = ref(false)
-const tableData = ref<LiveRecordItem[]>([])
+const tableData = ref<AnchorIncomeSettlementLogItem[]>([])
 const loaded = ref(false)
 
 const pagination = reactive({
@@ -123,6 +120,7 @@ const createDefaultDateRange = () => {
 }
 
 const searchForm = reactive({
+  roomId: '',
   dateRange: createDefaultDateRange(),
 })
 
@@ -137,7 +135,8 @@ const toDayEndUnix = (dateStr: string): number => {
 const buildFilterParams = () => {
   const [startDate, endDate] = searchForm.dateRange || []
   return {
-    anchorId: props.anchorId,
+    guildId: props.guildId,
+    roomId: searchForm.roomId.trim(),
     startTime: startDate ? toDayStartUnix(startDate) : 0,
     endTime: endDate ? toDayEndUnix(endDate) : 0,
   }
@@ -150,20 +149,20 @@ const buildQueryParams = () => ({
 })
 
 const fetchList = async () => {
-  if (!props.anchorId) {
+  if (!props.guildId) {
     tableData.value = []
     pagination.total = 0
     return
   }
   loading.value = true
   try {
-    const response = await liveRecordApi.getLiveRecordList(buildQueryParams())
+    const response = await guildApi.getGuildAnchorIncomeSettlementLogList(buildQueryParams())
     tableData.value = response.data || []
     pagination.total = response.total || 0
     loaded.value = true
   } catch (error) {
-    console.error('Failed to load anchor live records:', error)
-    ElMessage.error(t('pages.liveRecordList.fetchFailed'))
+    console.error('Failed to load guild anchor settlement logs:', error)
+    ElMessage.error(t('pages.guildList.anchorSettlementLogFetchFailed'))
   } finally {
     loading.value = false
   }
@@ -175,6 +174,7 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
+  searchForm.roomId = ''
   searchForm.dateRange = createDefaultDateRange()
   pagination.pageIndex = 1
   fetchList()
@@ -192,14 +192,14 @@ const handleSizeChange = (size: number) => {
 }
 
 const handleExport = async () => {
-  if (!props.anchorId) {
+  if (!props.guildId) {
     ElMessage.warning(t('common.exportEmpty'))
     return
   }
   exporting.value = true
   try {
     const rows = await fetchAllPagedRows((pageIndex, pageSize) =>
-      liveRecordApi.getLiveRecordList({
+      guildApi.getGuildAnchorIncomeSettlementLogList({
         ...buildFilterParams(),
         pageIndex,
         pageSize,
@@ -210,17 +210,22 @@ const handleExport = async () => {
       return
     }
     downloadCsv(
-      `anchor-live-record-${props.anchorId}-${Date.now()}.csv`,
-      buildLiveRecordCsvColumns(t),
+      `guild-anchor-settlement-log-${props.guildId}-${Date.now()}.csv`,
+      buildGuildAnchorSettlementLogCsvColumns(t),
       rows,
     )
     ElMessage.success(t('common.exportSuccess'))
   } catch (error) {
-    console.error('Failed to export anchor live records:', error)
+    console.error('Failed to export guild anchor settlement logs:', error)
     ElMessage.error(t('common.exportFailed'))
   } finally {
     exporting.value = false
   }
+}
+
+const formatSharePercent = (value: number | null | undefined) => {
+  if (value == null || Number.isNaN(value)) return '-'
+  return `${value}%`
 }
 
 const formatDate = (dateString: string | null | undefined) => {
@@ -237,11 +242,12 @@ const resetState = () => {
   tableData.value = []
   pagination.pageIndex = 1
   pagination.total = 0
+  searchForm.roomId = ''
   searchForm.dateRange = createDefaultDateRange()
 }
 
 watch(
-  () => props.anchorId,
+  () => props.guildId,
   () => {
     resetState()
     if (props.active) {
@@ -253,7 +259,7 @@ watch(
 watch(
   () => props.active,
   (active) => {
-    if (active && !loaded.value && props.anchorId) {
+    if (active && !loaded.value && props.guildId) {
       fetchList()
     }
   },
@@ -262,8 +268,16 @@ watch(
 </script>
 
 <style scoped>
+.hint-alert {
+  margin-bottom: 16px;
+}
+
 .search-form {
   margin-bottom: 16px;
+}
+
+.search-form :deep(.el-form-item__label) {
+  white-space: nowrap;
 }
 
 .pagination {

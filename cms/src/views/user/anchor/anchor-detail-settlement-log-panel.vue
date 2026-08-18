@@ -22,7 +22,9 @@
       <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalVideoCallIncome')" min-width="120" prop="totalVideoCallIncome"/>
       <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalVideoCallTicketIncome')" min-width="140" prop="totalVideoCallTicketIncome"/>
       <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalVideoCallBillingIncome')" min-width="140" prop="totalVideoCallBillingIncome"/>
-      <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalLiveDuration')" min-width="120" prop="totalLiveDuration"/>
+      <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalLiveDuration')" min-width="120">
+        <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
+      </el-table-column>
       <el-table-column :label="t('pages.anchorIncomeSettlementLogList.settlementSalary')" min-width="110" prop="settlementSalary"/>
       <el-table-column :label="t('pages.anchorIncomeSettlementLogList.anchorSharePercent')" min-width="110" prop="anchorSharePercent">
         <template #default="{ row }">{{ formatSharePercent(row.anchorSharePercent) }}</template>
@@ -46,6 +48,7 @@ import type {AnchorIncomeSettlementLogItem} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
 import {downloadCsv, fetchAllPagedRows} from '@/utils/csv-export'
 import {buildAnchorSettlementLogCsvColumns} from '@/utils/income-settlement-log-csv'
+import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 
 const props = defineProps<{
   anchorId: string

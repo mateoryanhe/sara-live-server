@@ -12,7 +12,7 @@
       <el-table-column :label="t('pages.anchorList.dailyRecordId')" min-width="180" prop="id"/>
       <el-table-column :label="t('pages.anchorList.dailyLiveDate')" min-width="120" prop="liveDate"/>
       <el-table-column :label="t('pages.anchorList.dailyLiveDuration')" min-width="150">
-        <template #default="{ row }">{{ formatDuration(row.liveDuration) }}</template>
+        <template #default="{ row }">{{ formatLiveDurationMinutes(row.liveDuration, t) }}</template>
       </el-table-column>
       <el-table-column :label="t('pages.anchorList.dailySettled')" min-width="100">
         <template #default="{ row }">
@@ -39,6 +39,7 @@ import {useI18n} from 'vue-i18n'
 import {ElMessage} from 'element-plus'
 import {accountApi} from '@/api'
 import type {AnchorDailyEffectiveLiveItem} from '@/types/api'
+import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 
 const props = defineProps<{
   anchorId: string
@@ -80,15 +81,6 @@ const formatDate = (dateString: string | null | undefined) => {
   } catch {
     return '-'
   }
-}
-
-const formatDuration = (seconds?: number) => {
-  if (seconds === undefined || seconds === null) return '-'
-  const total = Math.max(0, Math.floor(seconds))
-  const hours = Math.floor(total / 3600)
-  const minutes = Math.floor((total % 3600) / 60)
-  const secs = total % 60
-  return t('pages.anchorList.durationFormat', {hours, minutes, seconds: secs})
 }
 
 const resetState = () => {

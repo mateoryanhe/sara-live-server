@@ -240,6 +240,7 @@ export interface QueryAnchorListReq extends PageQuery {
     key?: string
     guildId?: string | number
     platformOnly?: boolean
+    liveStatus?: number
 }
 
 export interface QueryOffShelfLiveRoomListReq extends PageQuery {

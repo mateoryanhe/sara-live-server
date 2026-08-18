@@ -1,5 +1,6 @@
 import type {IncomeSettlementLogAmounts} from '@/types/api'
 import type {CsvColumn} from './csv-export'
+import {liveDurationSecondsToMinutes} from './live-duration-format'
 
 export type SettlementLogCsvRow = IncomeSettlementLogAmounts & {
   id: string
@@ -33,7 +34,7 @@ function incomeAmountColumns(t: TranslateFn, ns: string): CsvColumn<SettlementLo
     {header: t(`${ns}.totalVideoCallIncome`), value: row => row.totalVideoCallIncome},
     {header: t(`${ns}.totalVideoCallTicketIncome`), value: row => row.totalVideoCallTicketIncome},
     {header: t(`${ns}.totalVideoCallBillingIncome`), value: row => row.totalVideoCallBillingIncome},
-    {header: t(`${ns}.totalLiveDuration`), value: row => row.totalLiveDuration},
+    {header: t(`${ns}.totalLiveDuration`), value: row => liveDurationSecondsToMinutes(row.totalLiveDuration) ?? ''},
   ]
 }
 

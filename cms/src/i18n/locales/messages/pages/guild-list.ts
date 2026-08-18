@@ -64,6 +64,10 @@ const zh = {
   settlementLogHint: '展示最近50条结算流水',
   settlementLogFetchFailed: '获取结算流水失败',
   noSettlementLogData: '暂无结算流水记录',
+  tabAnchorSettlementLog: '名下主播结算流水',
+  anchorSettlementLogHint: '默认查询最近一周的结算流水',
+  anchorSettlementLogFetchFailed: '获取名下主播结算流水失败',
+  noAnchorSettlementLogData: '暂无名下主播结算流水记录',
 } as const
 
 export const guildListMessages = definePageMessages(
@@ -132,6 +136,10 @@ export const guildListMessages = definePageMessages(
     settlementLogHint: 'Shows the latest 50 settlement logs',
     settlementLogFetchFailed: 'Failed to load settlement logs',
     noSettlementLogData: 'No settlement log records',
+    tabAnchorSettlementLog: 'Anchor Settlement Logs',
+    anchorSettlementLogHint: 'Defaults to settlement logs from the last 7 days',
+    anchorSettlementLogFetchFailed: 'Failed to load anchor settlement logs',
+    noAnchorSettlementLogData: 'No anchor settlement log records',
   },
   {
     addGuild: 'Añadir gremio',
@@ -197,6 +205,10 @@ export const guildListMessages = definePageMessages(
     settlementLogHint: 'Muestra los últimos 50 registros de liquidación',
     settlementLogFetchFailed: 'Error al cargar registros de liquidación',
     noSettlementLogData: 'Sin registros de liquidación',
+    tabAnchorSettlementLog: 'Liquidación de anfitriones',
+    anchorSettlementLogHint: 'Por defecto muestra la liquidación de la última semana',
+    anchorSettlementLogFetchFailed: 'Error al cargar liquidación de anfitriones',
+    noAnchorSettlementLogData: 'Sin registros de liquidación de anfitriones',
   },
   {
     addGuild: 'Adicionar guilda',
@@ -262,6 +274,10 @@ export const guildListMessages = definePageMessages(
     settlementLogHint: 'Exibe os últimos 50 registros de liquidação',
     settlementLogFetchFailed: 'Falha ao carregar registros de liquidação',
     noSettlementLogData: 'Sem registros de liquidação',
+    tabAnchorSettlementLog: 'Liquidação de âncoras',
+    anchorSettlementLogHint: 'Por padrão exibe a liquidação da última semana',
+    anchorSettlementLogFetchFailed: 'Falha ao carregar liquidação de âncoras',
+    noAnchorSettlementLogData: 'Sem registros de liquidação de âncoras',
   },
   {
     addGuild: 'गिल्ड जोड़ें',
@@ -327,6 +343,10 @@ export const guildListMessages = definePageMessages(
     settlementLogHint: 'हाल के 50 निपटान लॉग दिखाता है',
     settlementLogFetchFailed: 'निपटान लॉग लोड करने में विफल',
     noSettlementLogData: 'कोई निपटान लॉग रिकॉर्ड नहीं',
+    tabAnchorSettlementLog: 'एंकर निपटान लॉग',
+    anchorSettlementLogHint: 'डिफ़ॉल्ट रूप से पिछले सप्ताह के निपटान लॉग दिखाता है',
+    anchorSettlementLogFetchFailed: 'एंकर निपटान लॉग लोड करने में विफल',
+    noAnchorSettlementLogData: 'कोई एंकर निपटान लॉग रिकॉर्ड नहीं',
   },
   {
     addGuild: 'Tambah guild',
@@ -392,5 +412,9 @@ export const guildListMessages = definePageMessages(
     settlementLogHint: 'Menampilkan 50 log penyelesaian terbaru',
     settlementLogFetchFailed: 'Gagal memuat log penyelesaian',
     noSettlementLogData: 'Tidak ada log penyelesaian',
+    tabAnchorSettlementLog: 'Log Penyelesaian Anchor',
+    anchorSettlementLogHint: 'Secara default menampilkan log penyelesaian seminggu terakhir',
+    anchorSettlementLogFetchFailed: 'Gagal memuat log penyelesaian anchor',
+    noAnchorSettlementLogData: 'Tidak ada log penyelesaian anchor',
   },
 )

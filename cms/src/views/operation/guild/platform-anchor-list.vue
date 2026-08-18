@@ -7,15 +7,29 @@
         </div>
       </template>
 
-      <el-form :model="searchForm" class="search-form" inline label-width="80px">
-        <el-form-item :label="t('common.keyword')">
-          <el-input v-model="searchForm.key" clearable :placeholder="t('pages.anchorList.keywordPlaceholder')"/>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
-          <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
-        </el-form-item>
-      </el-form>
+      <div class="search-form">
+        <el-form :model="searchForm" inline label-width="100px">
+          <el-form-item :label="t('common.keyword')">
+            <el-input
+                v-model="searchForm.key"
+                clearable
+                :placeholder="t('pages.anchorList.keywordPlaceholder')"
+                style="width: 200px"
+            />
+          </el-form-item>
+          <el-form-item :label="t('pages.anchorList.liveStatus')">
+            <el-select v-model="searchForm.liveStatus" style="width: 120px">
+              <el-option :value="ALL_LIVE_STATUS" :label="t('common.all')"/>
+              <el-option :value="1" :label="t('common.live')"/>
+              <el-option :value="0" :label="t('common.offline')"/>
+            </el-select>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
+            <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
 
       <el-table v-loading="loading" :data="tableData" style="width: 100%">
         <el-table-column :label="t('common.userId')" prop="id" width="180">
@@ -183,7 +197,8 @@ const banDialogVisible = ref(false)
 const banSubmitting = ref(false)
 const banFormRef = ref<InstanceType<typeof ElForm>>()
 
-const searchForm = reactive({key: ''})
+const ALL_LIVE_STATUS = -1
+const searchForm = reactive({key: '', liveStatus: 1})
 const pagination = reactive({pageIndex: 1, pageSize: 10, total: 0})
 const banForm = reactive({accountId: '', nickname: '', banApplyTime: '', banReason: ''})
 
@@ -240,6 +255,7 @@ const fetchList = async () => {
       pageSize: pagination.pageSize,
       key: searchForm.key,
       platformOnly: true,
+      ...(searchForm.liveStatus >= 0 ? {liveStatus: searchForm.liveStatus} : {}),
     })
     tableData.value = response.data || []
     pagination.total = response.total || 0
@@ -258,6 +274,7 @@ const handleSearch = () => {
 
 const handleReset = () => {
   searchForm.key = ''
+  searchForm.liveStatus = 1
   pagination.pageIndex = 1
   fetchList()
 }
@@ -389,6 +406,15 @@ onMounted(() => {
 
 .search-form {
   margin-bottom: 20px;
+}
+
+.search-form :deep(.el-form-item__label) {
+  white-space: nowrap;
+}
+
+.search-form :deep(.el-form--inline .el-form-item) {
+  margin-right: 16px;
+  margin-bottom: 0;
 }
 
 .pagination {

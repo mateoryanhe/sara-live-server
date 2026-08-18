@@ -58,6 +58,11 @@ func (c *GuildController) UpdateMyGuildProfile(ctx context.Context, req *guilddt
 	return guild.UpdateMyGuildProfile(ctx, req)
 }
 
+// CMSGuildAnchorIncomeSettlementLogList CMS查询指定工会名下主播结算流水
+func (c *GuildController) CMSGuildAnchorIncomeSettlementLogList(ctx context.Context, req *guilddto.CMSGuildAnchorIncomeSettlementLogListReq) (*httpserver.CMSQueryResp, error) {
+	return guild.GetGuildAnchorIncomeSettlementLogList(ctx, req)
+}
+
 // CMSMyGuildAnchorIncomeSettlementLogList 查询当前 CMS 用户名下工会的主播结算流水
 func (c *GuildController) CMSMyGuildAnchorIncomeSettlementLogList(ctx context.Context, req *guilddto.CMSMyGuildAnchorIncomeSettlementLogListReq) (*httpserver.CMSQueryResp, error) {
 	return guild.GetMyGuildAnchorIncomeSettlementLogList(ctx, req)

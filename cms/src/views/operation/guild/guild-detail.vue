@@ -55,6 +55,10 @@
           <el-tab-pane :label="t('pages.guildList.tabSettlementLog')" name="settlementLog">
             <SettlementLogPanel :active="activeTab === 'settlementLog'" :guild-id="guildId"/>
           </el-tab-pane>
+
+          <el-tab-pane :label="t('pages.guildList.tabAnchorSettlementLog')" name="anchorSettlementLog">
+            <AnchorSettlementLogPanel :active="activeTab === 'anchorSettlementLog'" :guild-id="guildId"/>
+          </el-tab-pane>
         </el-tabs>
       </div>
     </el-card>
@@ -70,6 +74,7 @@ import {guildApi} from '@/api'
 import IncomePanel from './guild-detail-income-panel.vue'
 import ArchivePanel from './guild-detail-archive-panel.vue'
 import SettlementLogPanel from './guild-detail-settlement-log-panel.vue'
+import AnchorSettlementLogPanel from './guild-detail-anchor-settlement-log-panel.vue'
 import type {Guild, GuildDetailIncome} from '@/types/api'
 
 const {t} = useI18n()

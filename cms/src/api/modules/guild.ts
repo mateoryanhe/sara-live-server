@@ -66,6 +66,10 @@ export const guildApi = {
         return request.post<PageResponse<AnchorIncomeSettlementLogItem>>('/guild/cmsMyGuildAnchorIncomeSettlementLogList', params)
     },
 
+    getGuildAnchorIncomeSettlementLogList: (params: MyGuildAnchorIncomeSettlementLogQuery) => {
+        return request.post<PageResponse<AnchorIncomeSettlementLogItem>>('/guild/cmsGuildAnchorIncomeSettlementLogList', params)
+    },
+
     updateMyGuildProfile: (data: UpdateMyGuildProfileReq) => {
         return request.post<{ success: boolean }>('/guild/updateMyGuildProfile', data)
     },

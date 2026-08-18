@@ -104,6 +104,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GuildManagement:offShelf': '/guild/deleteGuild',
     'GuildManagement:viewMembers': '/account/getAnchorList',
     'GuildManagement:viewDetail': '/guild/getGuildDetail',
+    'GuildManagement:viewAnchorSettlementLogs': '/guild/cmsGuildAnchorIncomeSettlementLogList',
     'GuildManagement:ban': '/account/banAnchor',
     'GuildManagement:unban': '/account/unBanAnchor',
     'GuildManagement:exitGuild': '/account/exitGuild',
@@ -115,6 +116,9 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     GuildDetail: '/guild/getGuildDetail',
     'GuildDetail:incomeArchive': '/guild/getGuildIncomeArchives',
     'GuildDetail:settlementLog': '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
+    'GuildDetail:exportSettlementLog': '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
+    'GuildDetail:anchorSettlementLog': '/guild/cmsGuildAnchorIncomeSettlementLogList',
+    'GuildDetail:exportAnchorSettlementLog': '/guild/cmsGuildAnchorIncomeSettlementLogList',
 
     GuildRecycleBinManagement: '/guild/offShelfGuildList',
     'GuildRecycleBinManagement:view': '/guild/offShelfGuildList',

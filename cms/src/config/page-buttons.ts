@@ -150,6 +150,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'offShelf', label: '下架'},
         {key: 'viewMembers', label: '查看成员'},
         {key: 'viewDetail', label: '查看详情'},
+        {key: 'viewAnchorSettlementLogs', label: '查看名下主播结算流水'},
         {key: 'ban', label: '封禁主播'},
         {key: 'unban', label: '解封主播'},
         {key: 'exitGuild', label: '退出工会'},
@@ -157,6 +158,14 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'joinGuildAnchor', label: '加入工会'},
         {key: 'batchSetAnchor', label: '导入普通主播'},
         {key: 'batchSetSeniorAnchor', label: '导入高级主播'},
+    ],
+    GuildDetail: [
+        BTN.view,
+        {key: 'incomeArchive', label: '查看下架归档'},
+        {key: 'settlementLog', label: '查看结算流水'},
+        {key: 'exportSettlementLog', label: '导出结算流水'},
+        {key: 'anchorSettlementLog', label: '查看名下主播结算流水'},
+        {key: 'exportAnchorSettlementLog', label: '导出名下主播结算流水'},
     ],
     GuildRecycleBinManagement: [BTN.view, BTN.search, {key: 'onShelf', label: '上架'}],
     GuildProfileManagement: [

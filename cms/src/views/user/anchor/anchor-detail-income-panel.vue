@@ -9,7 +9,7 @@
     <el-descriptions-item :label="t('pages.anchorList.videoCallIncome')">{{ formatAmount(data.totalVideoCallIncome) }}</el-descriptions-item>
     <el-descriptions-item :label="t('pages.anchorList.videoTicketIncome')">{{ formatAmount(data.totalVideoCallTicketIncome) }}</el-descriptions-item>
     <el-descriptions-item :label="t('pages.anchorList.videoBillingIncome')">{{ formatAmount(data.totalVideoCallBillingIncome) }}</el-descriptions-item>
-    <el-descriptions-item :label="t('pages.anchorList.totalLiveDuration')">{{ data.totalLiveDuration ?? '-' }}</el-descriptions-item>
+    <el-descriptions-item :label="t('pages.anchorList.totalLiveDuration')">{{ formatLiveDurationMinutes(data.totalLiveDuration, t) }}</el-descriptions-item>
     <el-descriptions-item v-if="settlementSalary != null" :label="t('pages.anchorList.settlementSalary')">
       {{ formatAmount(settlementSalary) }}
     </el-descriptions-item>
@@ -24,6 +24,7 @@
 import {useI18n} from 'vue-i18n'
 import type {LiveRoomIncomeAmounts} from '@/types/api'
 import {formatAmount} from '@/utils/number-format'
+import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 
 defineProps<{
   data?: LiveRoomIncomeAmounts | null

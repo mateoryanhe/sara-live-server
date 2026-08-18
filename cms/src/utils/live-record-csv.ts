@@ -1,5 +1,6 @@
 import type {LiveRecordItem} from '@/types/api'
 import type {CsvColumn} from './csv-export'
+import {liveDurationSecondsToMinutes} from './live-duration-format'
 
 type TranslateFn = (key: string) => string
 
@@ -25,7 +26,7 @@ export function buildLiveRecordCsvColumns(
     {header: t('common.startTime'), value: row => formatLiveRecordCsvDate(row.startTime)},
     {header: t('common.endTime'), value: row => formatLiveRecordCsvDate(row.endTime)},
     {header: t(`${ns}.totalAudience`), value: row => row.totalAudience},
-    {header: t(`${ns}.liveDuration`), value: row => row.totalLiveDuration},
+    {header: t(`${ns}.liveDuration`), value: row => liveDurationSecondsToMinutes(row.totalLiveDuration) ?? ''},
     {header: t(`${ns}.totalIncome`), value: row => row.totalIncome},
     {header: t(`${ns}.giftIncome`), value: row => row.totalGiftIncome},
     {header: t(`${ns}.paidDanmakuIncome`), value: row => row.totalPaidDanmakuIncome},
