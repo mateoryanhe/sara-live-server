@@ -32,13 +32,16 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 	now := time.Now()
 	onlineId := entity.BuildLiveRoomOnlineId(userId, req.RoomId)
 	existing := liveroomdao.GetOnlineById(onlineId, userId, room.ID)
-	if existing.IsKickBanned() {
-		kickAudience(room.ID, userId)
+	if existing != nil && existing.IsKickBanned() {
+		notifyKickBannedAudience(room.ID, userId)
 		return &liveroomdto.JoinRoomRes{
 			OnlineId:    onlineId,
 			OnlineCount: getLenForRoom(room.ID),
 			SysTime:     now.UnixMilli(),
 		}, nil
+	}
+	if existing != nil && existing.KickTime != nil {
+		existing.SetKickTime(nil)
 	}
 
 	if err := ensureCanJoinPrivateRoom(userId, room); err != nil {
