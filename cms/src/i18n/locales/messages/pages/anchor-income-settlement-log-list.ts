@@ -21,6 +21,8 @@ const zh = {
   totalVideoCallBillingIncome: '视频通话计费收益',
   totalLiveDuration: '直播时长(秒)',
   settlementSalary: '结算薪资',
+  anchorSharePercent: '主播分佣比例(%)',
+  settlementShareAmount: '结算分佣金额',
   fetchFailed: '获取主播结算流水失败',
 } as const
 
@@ -47,6 +49,8 @@ export const anchorIncomeSettlementLogListMessages = definePageMessages(
     totalVideoCallBillingIncome: 'Video Call Billing Income',
     totalLiveDuration: 'Live Duration (sec)',
     settlementSalary: 'Settlement Salary',
+    anchorSharePercent: 'Anchor Share (%)',
+    settlementShareAmount: 'Settlement Share Amount',
     fetchFailed: 'Failed to load anchor settlement logs',
   },
   {
@@ -70,6 +74,8 @@ export const anchorIncomeSettlementLogListMessages = definePageMessages(
     totalVideoCallBillingIncome: 'Ingresos por facturación de videollamada',
     totalLiveDuration: 'Duración en vivo (seg)',
     settlementSalary: 'Salario de liquidación',
+    anchorSharePercent: 'Reparto ancla (%)',
+    settlementShareAmount: 'Monto de reparto de liquidación',
     fetchFailed: 'Error al cargar registros de liquidación de ancla',
   },
   {
@@ -93,6 +99,8 @@ export const anchorIncomeSettlementLogListMessages = definePageMessages(
     totalVideoCallBillingIncome: 'Receita de cobrança de videochamada',
     totalLiveDuration: 'Duração ao vivo (seg)',
     settlementSalary: 'Salário de liquidação',
+    anchorSharePercent: 'Reparto âncora (%)',
+    settlementShareAmount: 'Valor de repasse de liquidação',
     fetchFailed: 'Falha ao carregar registros de liquidação de âncora',
   },
   {
@@ -116,6 +124,8 @@ export const anchorIncomeSettlementLogListMessages = definePageMessages(
     totalVideoCallBillingIncome: 'वीडियो कॉल बिलिंग आय',
     totalLiveDuration: 'लाइव अवधि (सेक)',
     settlementSalary: 'निपटान वेतन',
+    anchorSharePercent: 'एंकर हिस्सा (%)',
+    settlementShareAmount: 'निपटान हिस्सेदारी राशि',
     fetchFailed: 'एंकर निपटान लॉग लोड करने में विफल',
   },
   {
@@ -139,6 +149,8 @@ export const anchorIncomeSettlementLogListMessages = definePageMessages(
     totalVideoCallBillingIncome: 'Pendapatan tagihan panggilan video',
     totalLiveDuration: 'Durasi live (detik)',
     settlementSalary: 'Gaji penyelesaian',
+    anchorSharePercent: 'Bagi hasil anchor (%)',
+    settlementShareAmount: 'Jumlah bagi hasil penyelesaian',
     fetchFailed: 'Gagal memuat log penyelesaian anchor',
   },
 )

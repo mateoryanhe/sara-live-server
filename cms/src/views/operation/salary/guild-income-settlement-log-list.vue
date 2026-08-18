@@ -46,7 +46,10 @@
         <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalVideoCallTicketIncome')" min-width="140" prop="totalVideoCallTicketIncome"/>
         <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalVideoCallBillingIncome')" min-width="140" prop="totalVideoCallBillingIncome"/>
         <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalLiveDuration')" min-width="120" prop="totalLiveDuration"/>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.settlementSalary')" min-width="110" prop="settlementSalary"/>
+        <el-table-column :label="t('pages.guildIncomeSettlementLogList.guildSharePercent')" min-width="110" prop="guildSharePercent">
+          <template #default="{ row }">{{ formatSharePercent(row.guildSharePercent) }}</template>
+        </el-table-column>
+        <el-table-column :label="t('pages.guildIncomeSettlementLogList.settlementShareAmount')" min-width="120" prop="settlementShareAmount"/>
         <el-table-column :label="t('common.createdAt')" fixed="right" width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>
@@ -180,6 +183,11 @@ const handleExport = async () => {
   } finally {
     exporting.value = false
   }
+}
+
+const formatSharePercent = (value: number | null | undefined) => {
+  if (value == null || Number.isNaN(value)) return '-'
+  return `${value}%`
 }
 
 const formatDate = (dateString: string | null | undefined) => {

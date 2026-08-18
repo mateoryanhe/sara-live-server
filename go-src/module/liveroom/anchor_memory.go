@@ -15,7 +15,7 @@ import (
 )
 
 func queryAnchorListFromMemory(req *accountdto.QueryAnchorListReq) (int, []*accountdto.AnchorListItem) {
-	rooms := filterAnchorRooms(getRoomListCache(), req.Key, req.GuildId)
+	rooms := filterAnchorRooms(getRoomListCache(), req.Key, req.GuildId, req.PlatformOnly)
 	total := len(rooms)
 	pageRooms := paginateAnchorRooms(rooms, req.PageIndex, req.PageSize)
 	ret := make([]*accountdto.AnchorListItem, 0, len(pageRooms))
@@ -27,7 +27,7 @@ func queryAnchorListFromMemory(req *accountdto.QueryAnchorListReq) (int, []*acco
 	return total, ret
 }
 
-func filterAnchorRooms(rooms []*liveentity.LiveRoom, key string, guildId uint64) []*liveentity.LiveRoom {
+func filterAnchorRooms(rooms []*liveentity.LiveRoom, key string, guildId uint64, platformOnly bool) []*liveentity.LiveRoom {
 	key = strings.TrimSpace(key)
 	likeKey := strings.ToLower(key)
 	filtered := make([]*liveentity.LiveRoom, 0, len(rooms))
@@ -35,7 +35,11 @@ func filterAnchorRooms(rooms []*liveentity.LiveRoom, key string, guildId uint64)
 		if room == nil || !isRegularAnchorRoom(room) {
 			continue
 		}
-		if guildId > 0 {
+		if platformOnly {
+			if room.GuildId != 0 {
+				continue
+			}
+		} else if guildId > 0 {
 			if room.GuildId != guildId {
 				continue
 			}

@@ -87,6 +87,7 @@ const CONFIG_PAGES = new Set([
     'RandomNicknameManagement',
     'CustomerServiceCfgManagement',
     'WalletExchangeCfgManagement',
+    'LiveRevenueShareCfgManagement',
     'ShortVideoCfgManagement',
     'GamePlatformCfgManagement',
 ])
@@ -113,6 +114,14 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'setUserType', label: '修改用户类型'},
     ],
     AnchorListManagement: [BTN.view, BTN.search, BTN.edit, {key: 'viewDetail', label: '查看详情'}, {key: 'offShelf', label: '下架'}],
+    PlatformAnchorList: [
+        BTN.view,
+        BTN.search,
+        {key: 'viewDetail', label: '查看详情'},
+        {key: 'offShelf', label: '下架'},
+        {key: 'ban', label: '封禁主播'},
+        {key: 'unban', label: '解封主播'},
+    ],
     LiveRoomRecycleBinManagement: [BTN.view, BTN.search, {key: 'onShelf', label: '上架'}],
     RoleManagement: [
         BTN.view,

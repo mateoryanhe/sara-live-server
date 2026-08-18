@@ -41,7 +41,7 @@ export const userRoutes: RouteRecordRaw = {
             meta: {
                 title: '主播详情',
                 hidden: true,
-                parentPermission: ['AnchorListManagement', 'GuildManagement', 'GuildProfileManagement'],
+                parentPermission: ['AnchorListManagement', 'GuildManagement', 'GuildProfileManagement', 'PlatformAnchorList'],
             },
         },
         {

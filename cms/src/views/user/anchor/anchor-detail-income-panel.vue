@@ -13,6 +13,9 @@
     <el-descriptions-item v-if="settlementSalary != null" :label="t('pages.anchorList.settlementSalary')">
       {{ formatAmount(settlementSalary) }}
     </el-descriptions-item>
+    <el-descriptions-item v-if="settlementShareAmount != null" :label="t('pages.anchorList.settlementShareAmount')">
+      {{ formatAmount(settlementShareAmount) }}
+    </el-descriptions-item>
     <el-descriptions-item v-if="updatedAt" :label="t('pages.anchorList.roomUpdatedAt')">{{ formatDate(updatedAt) }}</el-descriptions-item>
   </el-descriptions>
 </template>
@@ -25,6 +28,7 @@ import {formatAmount} from '@/utils/number-format'
 defineProps<{
   data?: LiveRoomIncomeAmounts | null
   settlementSalary?: number
+  settlementShareAmount?: number
   updatedAt?: string | null
 }>()
 

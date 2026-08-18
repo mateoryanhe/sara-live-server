@@ -239,6 +239,7 @@ export interface SetRechargeWhitelistReq {
 export interface QueryAnchorListReq extends PageQuery {
     key?: string
     guildId?: string | number
+    platformOnly?: boolean
 }
 
 export interface QueryOffShelfLiveRoomListReq extends PageQuery {
@@ -335,11 +336,13 @@ export interface LiveRoomIncomeUnsettledDetail extends LiveRoomIncomeAmounts {
 
 export interface LiveRoomIncomeSettledDetail extends LiveRoomIncomeAmounts {
     settlementSalary?: number
+    settlementShareAmount?: number
     updatedAt?: string | null
 }
 
 export interface LiveRoomIncomeTotalDetail extends LiveRoomIncomeAmounts {
     settlementSalary?: number
+    settlementShareAmount?: number
     updatedAt?: string | null
 }
 
@@ -358,6 +361,22 @@ export interface AnchorDetail {
     incomeSettled?: LiveRoomIncomeSettledDetail | null
     incomeTotal?: LiveRoomIncomeTotalDetail | null
     incomeArchives?: LiveRoomIncomeArchiveItem[]
+}
+
+export interface GuildIncomeArchiveItem extends LiveRoomIncomeAmounts {
+    id: string
+    guildId?: string
+    createdAt?: string | null
+}
+
+export interface GuildDetailIncome {
+    incomeUnsettled?: LiveRoomIncomeUnsettledDetail | null
+    incomeSettled?: LiveRoomIncomeSettledDetail | null
+    incomeTotal?: LiveRoomIncomeTotalDetail | null
+}
+
+export interface GuildIncomeArchivesRes {
+    list: GuildIncomeArchiveItem[]
 }
 
 export interface AnchorDailyEffectiveLiveQuery extends PageQuery {
@@ -1138,19 +1157,6 @@ export interface AnchorSalaryCfg {
 export interface AnchorSalaryCfgQuery extends PageQuery {
 }
 
-export interface GuildSalaryCfg {
-    id: string
-    weeklyWorkDays: number
-    dailyLiveDurationMinutes: number
-    salaryAmount: number
-    sort: number
-    createdAt: string
-    updatedAt: string
-}
-
-export interface GuildSalaryCfgQuery extends PageQuery {
-}
-
 export interface IncomeSettlementLogAmounts {
     totalIncome: number
     totalGiftIncome: number
@@ -1162,6 +1168,9 @@ export interface IncomeSettlementLogAmounts {
     totalVideoCallBillingIncome: number
     totalLiveDuration: number
     settlementSalary: number
+    settlementShareAmount?: number
+    anchorSharePercent?: number
+    guildSharePercent?: number
 }
 
 export interface AnchorIncomeSettlementLogQuery extends PageQuery {
@@ -1369,6 +1378,29 @@ export interface SaveWalletExchangeCfgReq {
 }
 
 export interface SaveWalletExchangeCfgRes {
+    success: boolean
+    id: string
+}
+
+export interface LiveRevenueShareCfg {
+    id: string
+    anchorSharePercent: number
+    guildSharePercent: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetLiveRevenueShareCfgRes {
+    cfg: LiveRevenueShareCfg | null
+}
+
+export interface SaveLiveRevenueShareCfgReq {
+    id?: number
+    anchorSharePercent: number
+    guildSharePercent: number
+}
+
+export interface SaveLiveRevenueShareCfgRes {
     success: boolean
     id: string
 }

@@ -41,6 +41,8 @@ func fillCMSItemFromAnchor(row *entity.AnchorIncomeSettlementLog) *incomesettlem
 		TotalVideoCallBillingIncome:  row.TotalVideoCallBillingIncome,
 		TotalLiveDuration:            row.TotalLiveDuration,
 		SettlementSalary:             row.SettlementSalary,
+		SettlementShareAmount:        row.SettlementShareAmount,
+		AnchorSharePercent:           row.AnchorSharePercent,
 		CreatedAt:                    &row.CreatedAt,
 	}
 	return item
@@ -63,6 +65,8 @@ func fillCMSItemFromGuild(row *entity.GuildIncomeSettlementLog) *incomesettlemen
 		TotalVideoCallBillingIncome:  row.TotalVideoCallBillingIncome,
 		TotalLiveDuration:            row.TotalLiveDuration,
 		SettlementSalary:             row.SettlementSalary,
+		SettlementShareAmount:        row.SettlementShareAmount,
+		GuildSharePercent:            row.GuildSharePercent,
 		CreatedAt:                    &row.CreatedAt,
 	}
 	return item

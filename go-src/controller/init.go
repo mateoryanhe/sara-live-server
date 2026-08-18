@@ -46,7 +46,7 @@ func Init() {
 	initAccountCfgCMSController()                // 账号配置(CMS)
 	initSimulatorCpuKeywordCMSController()       // 模拟器CPU关键词(CMS)
 	initAnchorSalaryCfgCMSController()           // 主播结算薪资分档配置(CMS)
-	initGuildSalaryCfgCMSController()            // 工会结算薪资分档配置(CMS)
+	initLiveRevenueShareCfgCMSController()       // 流水分佣配置(CMS)
 	initPreloadCfgCMSController()                // 预热配置(CMS)
 	initGiftController()                         // 礼物配置(CMS)
 	initGiftAppController()                      // 礼物列表(App)

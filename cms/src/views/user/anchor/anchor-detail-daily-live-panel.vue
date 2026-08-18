@@ -8,33 +8,6 @@
         type="info"
     />
 
-    <el-form :model="searchForm" class="search-form" inline label-width="90px">
-      <el-form-item :label="t('pages.anchorList.dailyLiveDate')">
-        <el-date-picker
-            v-model="searchForm.dateRange"
-            clearable
-            :end-placeholder="t('pages.anchorList.dailyEndDate')"
-            format="YYYY-MM-DD"
-            :range-separator="t('pages.anchorList.dailyDateRangeSeparator')"
-            :start-placeholder="t('pages.anchorList.dailyStartDate')"
-            style="width: 260px"
-            type="daterange"
-            value-format="YYYY-MM-DD"
-        />
-      </el-form-item>
-      <el-form-item :label="t('pages.anchorList.dailySettled')">
-        <el-select v-model="searchForm.settled" :placeholder="t('common.all')" style="width: 140px">
-          <el-option :label="t('common.all')" :value="-1"/>
-          <el-option :label="t('pages.anchorList.dailySettledNo')" :value="0"/>
-          <el-option :label="t('pages.anchorList.dailySettledYes')" :value="1"/>
-        </el-select>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
-        <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
-      </el-form-item>
-    </el-form>
-
     <el-table v-loading="loading" :data="tableData" style="width:100%">
       <el-table-column :label="t('pages.anchorList.dailyRecordId')" min-width="180" prop="id"/>
       <el-table-column :label="t('pages.anchorList.dailyLiveDate')" min-width="120" prop="liveDate"/>
@@ -57,23 +30,11 @@
     </el-table>
 
     <el-empty v-if="!loading && tableData.length === 0" :description="t('pages.anchorList.noDailyEffectiveLiveData')"/>
-
-    <div class="pagination">
-      <el-pagination
-          v-model:current-page="pagination.pageIndex"
-          v-model:page-size="pagination.pageSize"
-          :page-sizes="[10, 20, 50, 100]"
-          :total="pagination.total"
-          layout="total, sizes, prev, pager, next, jumper"
-          @current-change="handlePageChange"
-          @size-change="handleSizeChange"
-      />
-    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {reactive, ref, watch} from 'vue'
+import {ref, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage} from 'element-plus'
 import {accountApi} from '@/api'
@@ -89,40 +50,20 @@ const loading = ref(false)
 const tableData = ref<AnchorDailyEffectiveLiveItem[]>([])
 const loaded = ref(false)
 
-const searchForm = reactive({
-  dateRange: [] as string[],
-  settled: -1 as number,
-})
-
-const pagination = reactive({
-  pageIndex: 1,
-  pageSize: 20,
-  total: 0,
-})
-
-const buildQueryParams = () => {
-  const [liveDateStart, liveDateEnd] = searchForm.dateRange || []
-  return {
-    pageIndex: pagination.pageIndex,
-    pageSize: pagination.pageSize,
-    anchorId: props.anchorId,
-    liveDateStart: liveDateStart || '',
-    liveDateEnd: liveDateEnd || '',
-    settled: searchForm.settled ?? -1,
-  }
-}
-
 const fetchList = async () => {
   if (!props.anchorId) {
     tableData.value = []
-    pagination.total = 0
     return
   }
   loading.value = true
   try {
-    const response = await accountApi.getAnchorDailyEffectiveLiveList(buildQueryParams())
+    const response = await accountApi.getAnchorDailyEffectiveLiveList({
+      anchorId: props.anchorId,
+      pageIndex: 1,
+      pageSize: 8,
+      settled: 0,
+    })
     tableData.value = response.data || []
-    pagination.total = response.total || 0
     loaded.value = true
   } catch (error) {
     console.error('Failed to load daily effective live list:', error)
@@ -130,29 +71,6 @@ const fetchList = async () => {
   } finally {
     loading.value = false
   }
-}
-
-const handleSearch = () => {
-  pagination.pageIndex = 1
-  fetchList()
-}
-
-const handleReset = () => {
-  searchForm.dateRange = []
-  searchForm.settled = -1
-  pagination.pageIndex = 1
-  fetchList()
-}
-
-const handlePageChange = (page: number) => {
-  pagination.pageIndex = page
-  fetchList()
-}
-
-const handleSizeChange = (size: number) => {
-  pagination.pageSize = size
-  pagination.pageIndex = 1
-  fetchList()
 }
 
 const formatDate = (dateString: string | null | undefined) => {
@@ -176,10 +94,6 @@ const formatDuration = (seconds?: number) => {
 const resetState = () => {
   loaded.value = false
   tableData.value = []
-  pagination.pageIndex = 1
-  pagination.total = 0
-  searchForm.dateRange = []
-  searchForm.settled = -1
 }
 
 watch(
@@ -206,15 +120,5 @@ watch(
 <style scoped>
 .hint-alert {
   margin-bottom: 16px;
-}
-
-.search-form {
-  margin-bottom: 16px;
-}
-
-.pagination {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 16px;
 }
 </style>

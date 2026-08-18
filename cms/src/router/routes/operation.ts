@@ -25,6 +25,22 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {title: '工会管理'},
         },
         {
+            path: 'guild/guild-detail',
+            name: 'GuildDetail',
+            component: () => import('@/views/operation/guild/guild-detail.vue'),
+            meta: {
+                title: '工会详情',
+                hidden: true,
+                parentPermission: ['GuildManagement', 'GuildProfileManagement'],
+            },
+        },
+        {
+            path: 'guild/platform-anchor-list',
+            name: 'PlatformAnchorList',
+            component: () => import('@/views/operation/guild/platform-anchor-list.vue'),
+            meta: {title: '平台主播'},
+        },
+        {
             path: 'guild/guild-recycle-bin',
             name: 'GuildRecycleBinManagement',
             component: () => import('@/views/operation/guild/guild-recycle-bin.vue'),
@@ -103,10 +119,10 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {title: '主播结算薪资'},
         },
         {
-            path: 'salary/guild-salary-cfg-list',
-            name: 'GuildSalaryCfgManagement',
-            component: () => import('@/views/operation/salary/guild-salary-cfg-list.vue'),
-            meta: {title: '工会结算薪资'},
+            path: 'salary/live-revenue-share-cfg',
+            name: 'LiveRevenueShareCfgManagement',
+            component: () => import('@/views/operation/salary/live-revenue-share-cfg.vue'),
+            meta: {title: '流水分佣配置'},
         },
         {
             path: 'salary/anchor-income-settlement-log-list',

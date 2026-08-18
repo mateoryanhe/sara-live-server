@@ -50,3 +50,13 @@ func GetDataFromCache(id uint64) *entity.LiveRecord {
 	r, _ := v.(*entity.LiveRecord)
 	return r
 }
+
+func resolveLiveRecordTarget(row *entity.LiveRecord) *entity.LiveRecord {
+	if row == nil {
+		return nil
+	}
+	if cached := GetDataFromCache(row.ID); cached != nil {
+		return cached
+	}
+	return row
+}

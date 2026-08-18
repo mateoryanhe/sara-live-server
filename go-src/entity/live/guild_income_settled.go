@@ -17,7 +17,8 @@ const (
 type GuildIncomeSettled struct {
 	migrate.OneModel
 	LiveRoomIncomeAmounts
-	SettlementSalary float64 `gorm:"type:decimal(16,4);default:0;comment:结算薪资" json:"settlementSalary"`
+	SettlementSalary      float64 `gorm:"type:decimal(16,4);default:0;comment:结算薪资" json:"settlementSalary"`
+	SettlementShareAmount float64 `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额" json:"settlementShareAmount"`
 }
 
 func NewGuildIncomeSettled(guildId uint64) *GuildIncomeSettled {
@@ -54,8 +55,17 @@ func (r *GuildIncomeSettled) AddSettlementSalary(v float64) {
 	addIncomeAmount(TbGuildIncomeSettled, LiveRoomIncomeSettlementSalary, r.ID, &r.SettlementSalary, v, false, &r.UpdatedAt)
 }
 
+// AddSettlementShareAmount 累加结算分佣金额
+func (r *GuildIncomeSettled) AddSettlementShareAmount(v float64) {
+	if r == nil || v == 0 {
+		return
+	}
+	addIncomeAmount(TbGuildIncomeSettled, LiveRoomIncomeSettlementShareAmount, r.ID, &r.SettlementShareAmount, v, false, &r.UpdatedAt)
+}
+
 func initGuildIncomeSettled() {
 	regLiveRoomIncomeCols(TbGuildIncomeSettled)
 	syndb.RegQuick(TbGuildIncomeSettled, LiveRoomIncomeSettlementSalary)
+	syndb.RegQuick(TbGuildIncomeSettled, LiveRoomIncomeSettlementShareAmount)
 	migrate.AutoMigrate(&GuildIncomeSettled{})
 }

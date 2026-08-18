@@ -34,15 +34,17 @@ type LiveRoomIncomeUnsettledItem struct {
 // LiveRoomIncomeSettledItem 已结算收益
 type LiveRoomIncomeSettledItem struct {
 	LiveRoomIncomeAmountsItem
-	SettlementSalary float64    `json:"settlementSalary"`
-	UpdatedAt        *time.Time `json:"updatedAt"`
+	SettlementSalary      float64    `json:"settlementSalary"`
+	SettlementShareAmount float64    `json:"settlementShareAmount"`
+	UpdatedAt             *time.Time `json:"updatedAt"`
 }
 
 // LiveRoomIncomeTotalItem 生涯累计收益
 type LiveRoomIncomeTotalItem struct {
 	LiveRoomIncomeAmountsItem
-	SettlementSalary float64    `json:"settlementSalary"`
-	UpdatedAt        *time.Time `json:"updatedAt"`
+	SettlementSalary      float64    `json:"settlementSalary"`
+	SettlementShareAmount float64    `json:"settlementShareAmount"`
+	UpdatedAt             *time.Time `json:"updatedAt"`
 }
 
 // AnchorLiveRoomDetailItem 直播间详情

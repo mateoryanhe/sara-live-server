@@ -2,6 +2,8 @@ import {request} from '../request'
 import type {
     AnchorIncomeSettlementLogItem,
     Guild,
+    GuildDetailIncome,
+    GuildIncomeArchivesRes,
     GuildQuery,
     ImportGuildAnchorsReq,
     ImportGuildAnchorsRes,
@@ -66,5 +68,13 @@ export const guildApi = {
 
     importGuildAnchors: (data: ImportGuildAnchorsReq) => {
         return request.post<ImportGuildAnchorsRes>('/guild/importGuildAnchors', data)
+    },
+
+    getGuildDetail: (guildId: string) => {
+        return request.post<GuildDetailIncome>('/guild/getGuildDetail', {guildId})
+    },
+
+    getGuildIncomeArchives: (guildId: string) => {
+        return request.post<GuildIncomeArchivesRes>('/guild/getGuildIncomeArchives', {guildId})
     },
 }

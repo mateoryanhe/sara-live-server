@@ -63,11 +63,7 @@ func GetCMSList(_ context.Context, req *liverecorddto.CMSLiveRecordListReq) (*ht
 	})
 	list := make([]*liverecorddto.CMSLiveRecordItem, 0, len(rows))
 	for _, row := range rows {
-		record := row
-		if cached := liveroomdao.GetDataFromCache(row.ID); cached != nil {
-			record = cached
-		}
-		list = append(list, toCMSItem(record))
+		list = append(list, toCMSItem(row))
 	}
 	return httpserver.NewCMSQueryResp(total, list), nil
 }

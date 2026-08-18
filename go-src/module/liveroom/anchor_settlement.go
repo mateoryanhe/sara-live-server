@@ -8,6 +8,7 @@ import (
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/entity/live"
 	"xr-game-server/gameevent"
+	"xr-game-server/module/liverevenuesharecfg"
 )
 
 func initAnchorSettlement() {
@@ -47,20 +48,28 @@ func settleOneAnchor(roomId uint64, cfgs []*entity.AnchorSalaryCfg) {
 	}
 
 	snap := unsettled.SnapshotAndClear()
+	anchorSharePercent := liverevenuesharecfg.ResolveAnchorSharePercent()
+	shareAmount := liverevenuesharecfg.CalcSettlementShareAmount(salary, snap.TotalIncome)
 	settled := liveroomdao.GetLiveRoomIncomeSettled(roomId)
 	if settled != nil {
 		settled.AddAmounts(&snap)
 		settled.AddSettlementSalary(salary)
+		settled.AddSettlementShareAmount(shareAmount)
 	}
 	if salary != 0 {
 		if total := liveroomdao.GetLiveRoomIncomeTotal(roomId); total != nil {
 			total.AddSettlementSalary(salary)
 		}
 	}
+	if shareAmount != 0 {
+		if total := liveroomdao.GetLiveRoomIncomeTotal(roomId); total != nil {
+			total.AddSettlementShareAmount(shareAmount)
+		}
+	}
 	if hasDaily {
 		liveroomdao.MarkDailyEffectiveLivesSettled(dailyRows)
 	}
-	_ = entity.NewAnchorIncomeSettlementLog(roomId, &snap, salary)
+	_ = entity.NewAnchorIncomeSettlementLog(roomId, &snap, salary, shareAmount, anchorSharePercent)
 }
 
 // matchAnchorSalaryAmount 按薪资降序取最高满足档(结算规则后续按日表时长/workDays完善)

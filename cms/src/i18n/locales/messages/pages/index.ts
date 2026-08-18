@@ -44,7 +44,7 @@ import {shortVideoWatchListMessages} from './short-video-watch-list'
 import {accountCfgMessages} from './account-cfg'
 import {simulatorCpuKeywordListMessages} from './simulator-cpu-keyword-list'
 import {anchorSalaryCfgListMessages} from './anchor-salary-cfg-list'
-import {guildSalaryCfgListMessages} from './guild-salary-cfg-list'
+import {liveRevenueShareCfgMessages} from './live-revenue-share-cfg'
 import {anchorIncomeSettlementLogListMessages} from './anchor-income-settlement-log-list'
 import {guildIncomeSettlementLogListMessages} from './guild-income-settlement-log-list'
 import {appTokenMessages} from './app-token'
@@ -103,7 +103,7 @@ const pageMessageBuilders = [
   ['accountCfg', accountCfgMessages],
   ['simulatorCpuKeywordList', simulatorCpuKeywordListMessages],
   ['anchorSalaryCfgList', anchorSalaryCfgListMessages],
-  ['guildSalaryCfgList', guildSalaryCfgListMessages],
+  ['liveRevenueShareCfg', liveRevenueShareCfgMessages],
   ['anchorIncomeSettlementLogList', anchorIncomeSettlementLogListMessages],
   ['guildIncomeSettlementLogList', guildIncomeSettlementLogListMessages],
   ['appToken', appTokenMessages],

@@ -21,6 +21,7 @@ const (
 	LiveRoomIncomeTotalVideoCallBillingIncome  db.TbCol = "total_video_call_billing_income"
 	LiveRoomIncomeTotalLiveDuration            db.TbCol = "total_live_duration"
 	LiveRoomIncomeSettlementSalary             db.TbCol = "settlement_salary"
+	LiveRoomIncomeSettlementShareAmount        db.TbCol = "settlement_share_amount"
 )
 
 // LiveRoomIncomeAmounts 直播间/工会收益字段(房间与工会收益表共用结构)

@@ -30,8 +30,20 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'AnchorListManagement:edit': '/account/setAnchor',
     'AnchorListManagement:viewDetail': '/account/getAnchorDetail',
     'AnchorListManagement:offShelf': '/account/setLiveRoomStatus',
+
+    PlatformAnchorList: '/account/getAnchorList',
+    'PlatformAnchorList:view': '/account/getAnchorList',
+    'PlatformAnchorList:search': '/account/getAnchorList',
+    'PlatformAnchorList:viewDetail': '/account/getAnchorDetail',
+    'PlatformAnchorList:offShelf': '/account/setLiveRoomStatus',
+    'PlatformAnchorList:ban': '/account/banAnchor',
+    'PlatformAnchorList:unban': '/account/unBanAnchor',
+
     AnchorDetail: '/account/getAnchorDetail',
     'AnchorDetail:dailyEffectiveLive': '/account/getAnchorDailyEffectiveLiveList',
+    'AnchorDetail:liveRecord': '/liveRecord/cmsLiveRecordList',
+    'AnchorDetail:exportLiveRecord': '/liveRecord/cmsLiveRecordList',
+    'AnchorDetail:settlementLog': '/anchorIncomeSettlementLog/cmsAnchorIncomeSettlementLogList',
 
     LiveRoomRecycleBinManagement: '/account/getOffShelfLiveRoomList',
     'LiveRoomRecycleBinManagement:view': '/account/getOffShelfLiveRoomList',
@@ -90,12 +102,16 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GuildManagement:edit': '/guild/updateGuild',
     'GuildManagement:offShelf': '/guild/deleteGuild',
     'GuildManagement:viewMembers': '/account/getAnchorList',
-    'GuildManagement:viewDetail': '/account/getAnchorDetail',
+    'GuildManagement:viewDetail': '/guild/getGuildDetail',
     'GuildManagement:ban': '/account/banAnchor',
     'GuildManagement:unban': '/account/unBanAnchor',
     'GuildManagement:exitGuild': '/account/exitGuild',
     'GuildManagement:batchSetAnchor': '/guild/importGuildAnchors',
     'GuildManagement:batchSetSeniorAnchor': '/guild/importGuildAnchors',
+
+    GuildDetail: '/guild/getGuildDetail',
+    'GuildDetail:incomeArchive': '/guild/getGuildIncomeArchives',
+    'GuildDetail:settlementLog': '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
 
     GuildRecycleBinManagement: '/guild/offShelfGuildList',
     'GuildRecycleBinManagement:view': '/guild/offShelfGuildList',
@@ -147,6 +163,10 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     WalletExchangeCfgManagement: '/wallet/getWalletExchangeCfg',
     'WalletExchangeCfgManagement:view': '/wallet/getWalletExchangeCfg',
     'WalletExchangeCfgManagement:save': '/wallet/saveWalletExchangeCfg',
+
+    LiveRevenueShareCfgManagement: '/liveRevenueShareCfg/getLiveRevenueShareCfg',
+    'LiveRevenueShareCfgManagement:view': '/liveRevenueShareCfg/getLiveRevenueShareCfg',
+    'LiveRevenueShareCfgManagement:save': '/liveRevenueShareCfg/saveLiveRevenueShareCfg',
 
     GiftManagement: '/gift/giftList',
     'GiftManagement:view': '/gift/giftList',
@@ -265,13 +285,6 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'AnchorSalaryCfgManagement:create': '/anchorSalaryCfg/createAnchorSalaryCfg',
     'AnchorSalaryCfgManagement:edit': '/anchorSalaryCfg/updateAnchorSalaryCfg',
     'AnchorSalaryCfgManagement:delete': '/anchorSalaryCfg/deleteAnchorSalaryCfg',
-
-    GuildSalaryCfgManagement: '/guildSalaryCfg/guildSalaryCfgList',
-    'GuildSalaryCfgManagement:view': '/guildSalaryCfg/guildSalaryCfgList',
-    'GuildSalaryCfgManagement:search': '/guildSalaryCfg/guildSalaryCfgList',
-    'GuildSalaryCfgManagement:create': '/guildSalaryCfg/createGuildSalaryCfg',
-    'GuildSalaryCfgManagement:edit': '/guildSalaryCfg/updateGuildSalaryCfg',
-    'GuildSalaryCfgManagement:delete': '/guildSalaryCfg/deleteGuildSalaryCfg',
 
     AnchorIncomeSettlementLogList: '/anchorIncomeSettlementLog/cmsAnchorIncomeSettlementLogList',
     'AnchorIncomeSettlementLogList:view': '/anchorIncomeSettlementLog/cmsAnchorIncomeSettlementLogList',

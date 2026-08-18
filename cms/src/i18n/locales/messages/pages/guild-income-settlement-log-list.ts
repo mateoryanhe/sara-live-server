@@ -20,7 +20,8 @@ const zh = {
   totalVideoCallTicketIncome: '视频通话门票收益',
   totalVideoCallBillingIncome: '视频通话计费收益',
   totalLiveDuration: '直播时长(秒)',
-  settlementSalary: '结算薪资',
+  guildSharePercent: '工会分佣比例(%)',
+  settlementShareAmount: '结算分佣金额',
   fetchFailed: '获取工会结算流水失败',
 } as const
 
@@ -46,7 +47,8 @@ export const guildIncomeSettlementLogListMessages = definePageMessages(
     totalVideoCallTicketIncome: 'Video Call Ticket Income',
     totalVideoCallBillingIncome: 'Video Call Billing Income',
     totalLiveDuration: 'Live Duration (sec)',
-    settlementSalary: 'Settlement Salary',
+    guildSharePercent: 'Guild Share (%)',
+    settlementShareAmount: 'Settlement Share Amount',
     fetchFailed: 'Failed to load guild settlement logs',
   },
   {
@@ -69,7 +71,8 @@ export const guildIncomeSettlementLogListMessages = definePageMessages(
     totalVideoCallTicketIncome: 'Ingresos por entrada de videollamada',
     totalVideoCallBillingIncome: 'Ingresos por facturación de videollamada',
     totalLiveDuration: 'Duración en vivo (seg)',
-    settlementSalary: 'Salario de liquidación',
+    guildSharePercent: 'Reparto gremio (%)',
+    settlementShareAmount: 'Monto de reparto de liquidación',
     fetchFailed: 'Error al cargar registros de liquidación de gremio',
   },
   {
@@ -92,7 +95,8 @@ export const guildIncomeSettlementLogListMessages = definePageMessages(
     totalVideoCallTicketIncome: 'Receita de ingresso de videochamada',
     totalVideoCallBillingIncome: 'Receita de cobrança de videochamada',
     totalLiveDuration: 'Duração ao vivo (seg)',
-    settlementSalary: 'Salário de liquidação',
+    guildSharePercent: 'Reparto guilda (%)',
+    settlementShareAmount: 'Valor de repasse de liquidação',
     fetchFailed: 'Falha ao carregar registros de liquidação de guilda',
   },
   {
@@ -115,7 +119,8 @@ export const guildIncomeSettlementLogListMessages = definePageMessages(
     totalVideoCallTicketIncome: 'वीडियो कॉल टिकट आय',
     totalVideoCallBillingIncome: 'वीडियो कॉल बिलिंग आय',
     totalLiveDuration: 'लाइव अवधि (सेक)',
-    settlementSalary: 'निपटान वेतन',
+    guildSharePercent: 'गिल्ड हिस्सा (%)',
+    settlementShareAmount: 'निपटान हिस्सेदारी राशि',
     fetchFailed: 'गिल्ड निपटान लॉग लोड करने में विफल',
   },
   {
@@ -138,7 +143,8 @@ export const guildIncomeSettlementLogListMessages = definePageMessages(
     totalVideoCallTicketIncome: 'Pendapatan tiket panggilan video',
     totalVideoCallBillingIncome: 'Pendapatan tagihan panggilan video',
     totalLiveDuration: 'Durasi live (detik)',
-    settlementSalary: 'Gaji penyelesaian',
+    guildSharePercent: 'Bagi hasil guild (%)',
+    settlementShareAmount: 'Jumlah bagi hasil penyelesaian',
     fetchFailed: 'Gagal memuat log penyelesaian guild',
   },
 )

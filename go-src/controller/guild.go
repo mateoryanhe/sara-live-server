@@ -67,3 +67,13 @@ func (c *GuildController) CMSMyGuildAnchorIncomeSettlementLogList(ctx context.Co
 func (c *GuildController) ImportGuildAnchors(ctx context.Context, req *guilddto.ImportGuildAnchorsReq) (res *guilddto.ImportGuildAnchorsRes, err error) {
 	return guild.ImportGuildAnchors(ctx, req)
 }
+
+// GetGuildDetail CMS获取工会详情收益
+func (c *GuildController) GetGuildDetail(ctx context.Context, req *guilddto.GetGuildDetailReq) (res *guilddto.GetGuildDetailRes, err error) {
+	return guild.QueryGuildDetail(ctx, req)
+}
+
+// GetGuildIncomeArchives CMS获取工会下架归档
+func (c *GuildController) GetGuildIncomeArchives(ctx context.Context, req *guilddto.GetGuildIncomeArchivesReq) (res *guilddto.GetGuildIncomeArchivesRes, err error) {
+	return guild.QueryGuildIncomeArchives(ctx, req)
+}

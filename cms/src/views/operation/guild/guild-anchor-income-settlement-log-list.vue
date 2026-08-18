@@ -67,6 +67,10 @@
         <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalVideoCallBillingIncome')" min-width="140" prop="totalVideoCallBillingIncome"/>
         <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalLiveDuration')" min-width="120" prop="totalLiveDuration"/>
         <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.settlementSalary')" min-width="110" prop="settlementSalary"/>
+        <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.anchorSharePercent')" min-width="110" prop="anchorSharePercent">
+          <template #default="{ row }">{{ formatSharePercent(row.anchorSharePercent) }}</template>
+        </el-table-column>
+        <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.settlementShareAmount')" min-width="120" prop="settlementShareAmount"/>
         <el-table-column :label="t('common.createdAt')" fixed="right" width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>
@@ -217,6 +221,11 @@ const handleExport = async () => {
   } finally {
     exporting.value = false
   }
+}
+
+const formatSharePercent = (value: number | null | undefined) => {
+  if (value == null || Number.isNaN(value)) return '-'
+  return `${value}%`
 }
 
 const formatDate = (dateString: string | null | undefined) => {

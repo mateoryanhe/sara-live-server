@@ -36,7 +36,14 @@
             style="width: 100%"
             @current-change="handleCurrentRowChange"
         >
-          <el-table-column label="ID" prop="id" width="190"/>
+          <el-table-column label="ID" prop="id" width="190">
+            <template #default="{ row }">
+              <el-button v-if="canViewDetail" link type="primary" @click="openDetail(row)">
+                {{ row.id }}
+              </el-button>
+              <span v-else>{{ row.id }}</span>
+            </template>
+          </el-table-column>
           <el-table-column :label="t('pages.guildList.guildName')" prop="name"/>
           <el-table-column :label="t('pages.guildList.leader')" width="140" show-overflow-tooltip>
             <template #default="{ row }">
@@ -46,8 +53,11 @@
           <el-table-column :label="t('pages.guildList.description')" prop="description" show-overflow-tooltip/>
           <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
           <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
-          <el-table-column fixed="right" :label="t('common.actions')" width="500">
+          <el-table-column fixed="right" :label="t('common.actions')" width="580">
             <template #default="{ row }">
+              <el-button v-if="canViewDetail" size="small" @click="openDetail(row)">
+                {{ t('pages.guildList.viewDetail') }}
+              </el-button>
               <el-button size="small" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
               <el-button
                   v-if="can('viewMembers')"
@@ -170,6 +180,7 @@ interface GuildForm {
 const {t} = useI18n()
 const router = useRouter()
 const {can} = usePagePermission('GuildManagement')
+const canViewDetail = computed(() => can('viewDetail'))
 const loading = ref(false)
 const importing = ref(false)
 const cmsUserLoading = ref(false)
@@ -516,6 +527,22 @@ const onCsvFileSelected = async (event: Event) => {
 onMounted(() => {
   fetchGuildList()
 })
+
+const openDetail = (row: Guild) => {
+  router.push({
+    name: 'GuildDetail',
+    query: {
+      id: row.id,
+      name: row.name,
+      leaderId: row.leaderId,
+      leaderName: row.leaderName ?? '',
+      description: row.description ?? '',
+      status: String(row.status ?? 1),
+      createdAt: row.createdAt ?? '',
+      updatedAt: row.updatedAt ?? '',
+    },
+  })
+}
 
 const handleViewMembers = (row: Guild) => {
   router.push({

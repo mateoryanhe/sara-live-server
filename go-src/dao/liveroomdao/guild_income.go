@@ -152,6 +152,79 @@ func getGuildIncomeUnsettledForArchive(guildId uint64) *entity.GuildIncomeUnsett
 	return &row
 }
 
+// GetGuildIncomeUnsettledForCMS 未结算收益(缓存优先,否则直查DB,不新建)
+func GetGuildIncomeUnsettledForCMS(guildId uint64) *entity.GuildIncomeUnsettled {
+	if guildId == 0 {
+		return nil
+	}
+	if guildIncomeUnsettledCache.Contains(guildId) {
+		return guildIncomeUnsettledCache.Get(guildId)
+	}
+	var row entity.GuildIncomeUnsettled
+	err := g.Model(string(entity.TbGuildIncomeUnsettled)).Unscoped().WherePri(guildId).Scan(&row)
+	if err != nil || row.ID == 0 {
+		return nil
+	}
+	return &row
+}
+
+// GetGuildIncomeSettledForCMS 已结算收益(缓存优先,否则直查DB,不新建)
+func GetGuildIncomeSettledForCMS(guildId uint64) *entity.GuildIncomeSettled {
+	if guildId == 0 {
+		return nil
+	}
+	if guildIncomeSettledCache.Contains(guildId) {
+		return guildIncomeSettledCache.Get(guildId)
+	}
+	var row entity.GuildIncomeSettled
+	err := g.Model(string(entity.TbGuildIncomeSettled)).Unscoped().WherePri(guildId).Scan(&row)
+	if err != nil || row.ID == 0 {
+		return nil
+	}
+	return &row
+}
+
+// GetGuildIncomeTotalForCMS 生涯累计收益(缓存优先,否则直查DB,不新建)
+func GetGuildIncomeTotalForCMS(guildId uint64) *entity.GuildIncomeTotal {
+	if guildId == 0 {
+		return nil
+	}
+	if guildIncomeTotalCache.Contains(guildId) {
+		return guildIncomeTotalCache.Get(guildId)
+	}
+	return GetGuildIncomeTotalFromDB(guildId)
+}
+
+// GetGuildIncomeTotalFromDB 直查数据库
+func GetGuildIncomeTotalFromDB(guildId uint64) *entity.GuildIncomeTotal {
+	if guildId == 0 {
+		return nil
+	}
+	var row entity.GuildIncomeTotal
+	err := g.Model(string(entity.TbGuildIncomeTotal)).Unscoped().WherePri(guildId).Scan(&row)
+	if err != nil || row.ID == 0 {
+		return nil
+	}
+	return &row
+}
+
+// ListGuildIncomeUnsettledArchives 查询工会下架未结算归档记录
+func ListGuildIncomeUnsettledArchives(guildId uint64, limit int) []*entity.GuildIncomeUnsettledArchive {
+	if guildId == 0 {
+		return nil
+	}
+	if limit <= 0 {
+		limit = 50
+	}
+	rows := make([]*entity.GuildIncomeUnsettledArchive, 0)
+	_ = g.Model(string(entity.TbGuildIncomeUnsettledArchive)).
+		Where(string(entity.GuildIncomeUnsettledArchiveGuildId)+" = ?", guildId).
+		Order("created_at desc").
+		Limit(limit).
+		Scan(&rows)
+	return rows
+}
+
 // ArchiveAndClearGuildUnsettledIncome 工会下架时:新建一条归档记录并清零工会未结算表
 func ArchiveAndClearGuildUnsettledIncome(guildId uint64) {
 	unsettled := getGuildIncomeUnsettledForArchive(guildId)

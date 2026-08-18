@@ -23,7 +23,7 @@ export function formatSettlementLogCsvDate(dateString: string | null | undefined
   }
 }
 
-function amountColumns(t: TranslateFn, ns: string): CsvColumn<SettlementLogCsvRow>[] {
+function incomeAmountColumns(t: TranslateFn, ns: string): CsvColumn<SettlementLogCsvRow>[] {
   return [
     {header: t(`${ns}.totalIncome`), value: row => row.totalIncome},
     {header: t(`${ns}.totalGiftIncome`), value: row => row.totalGiftIncome},
@@ -34,7 +34,15 @@ function amountColumns(t: TranslateFn, ns: string): CsvColumn<SettlementLogCsvRo
     {header: t(`${ns}.totalVideoCallTicketIncome`), value: row => row.totalVideoCallTicketIncome},
     {header: t(`${ns}.totalVideoCallBillingIncome`), value: row => row.totalVideoCallBillingIncome},
     {header: t(`${ns}.totalLiveDuration`), value: row => row.totalLiveDuration},
+  ]
+}
+
+function amountColumns(t: TranslateFn, ns: string): CsvColumn<SettlementLogCsvRow>[] {
+  return [
+    ...incomeAmountColumns(t, ns),
     {header: t(`${ns}.settlementSalary`), value: row => row.settlementSalary},
+    {header: t(`${ns}.anchorSharePercent`), value: row => row.anchorSharePercent ?? ''},
+    {header: t(`${ns}.settlementShareAmount`), value: row => row.settlementShareAmount ?? ''},
   ]
 }
 
@@ -51,6 +59,14 @@ export function buildAnchorSettlementLogCsvColumns(
   ]
 }
 
+function guildAmountColumns(t: TranslateFn, ns: string): CsvColumn<SettlementLogCsvRow>[] {
+  return [
+    ...incomeAmountColumns(t, ns),
+    {header: t(`${ns}.guildSharePercent`), value: row => row.guildSharePercent ?? ''},
+    {header: t(`${ns}.settlementShareAmount`), value: row => row.settlementShareAmount ?? ''},
+  ]
+}
+
 export function buildGuildSettlementLogCsvColumns(
   t: TranslateFn,
   ns = 'pages.guildIncomeSettlementLogList',
@@ -59,7 +75,7 @@ export function buildGuildSettlementLogCsvColumns(
     {header: t(`${ns}.logId`), value: row => row.id},
     {header: t(`${ns}.guildId`), value: row => row.guildId ?? ''},
     {header: t(`${ns}.guildName`), value: row => row.guildName ?? ''},
-    ...amountColumns(t, ns),
+    ...guildAmountColumns(t, ns),
     {header: t('common.createdAt'), value: row => formatSettlementLogCsvDate(row.createdAt)},
   ]
 }

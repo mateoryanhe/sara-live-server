@@ -7,7 +7,7 @@ func Init() {
 	initLiveRoomIncome()
 	initLiveRoomTag()
 	initAnchorSalaryCfg()
-	initGuildSalaryCfg()
+	initLiveRevenueShareCfg()
 	initLiveRoomGameRecommend()
 	initLiveRoomOnline()
 	initDailyAnchorEffectiveLive()

@@ -15,6 +15,7 @@ import (
 	"xr-game-server/module/game"
 	"xr-game-server/module/ipgeo"
 	"xr-game-server/module/livecfg"
+	"xr-game-server/module/liverevenuesharecfg"
 	"xr-game-server/module/liveroom"
 	"xr-game-server/module/logquery"
 	"xr-game-server/module/message"
@@ -65,6 +66,7 @@ func Init() {
 	simulatorcpukeyword.Init()
 	customerservice.Init()
 	wallet.Init()
+	liverevenuesharecfg.Init()
 	logquery.Init()
 
 	liveroom.Init()

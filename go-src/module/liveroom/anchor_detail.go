@@ -109,6 +109,7 @@ func toIncomeSettledItem(row *entity.LiveRoomIncomeSettled) *accountdto.LiveRoom
 	item := &accountdto.LiveRoomIncomeSettledItem{
 		LiveRoomIncomeAmountsItem: toIncomeAmountsItem(&row.LiveRoomIncomeAmounts),
 		SettlementSalary:          row.SettlementSalary,
+		SettlementShareAmount:     row.SettlementShareAmount,
 	}
 	if !row.UpdatedAt.IsZero() {
 		updatedAt := row.UpdatedAt
@@ -124,6 +125,7 @@ func toIncomeTotalItem(row *entity.LiveRoomIncomeTotal) *accountdto.LiveRoomInco
 	item := &accountdto.LiveRoomIncomeTotalItem{
 		LiveRoomIncomeAmountsItem: toIncomeAmountsItem(&row.LiveRoomIncomeAmounts),
 		SettlementSalary:          row.SettlementSalary,
+		SettlementShareAmount:     row.SettlementShareAmount,
 	}
 	if !row.UpdatedAt.IsZero() {
 		updatedAt := row.UpdatedAt

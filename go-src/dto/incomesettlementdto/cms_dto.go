@@ -42,5 +42,8 @@ type CMSIncomeSettlementLogItem struct {
 	TotalVideoCallBillingIncome  float64    `json:"totalVideoCallBillingIncome"`
 	TotalLiveDuration            float64    `json:"totalLiveDuration"`
 	SettlementSalary             float64    `json:"settlementSalary"`
+	SettlementShareAmount        float64    `json:"settlementShareAmount"`
+	AnchorSharePercent           float64    `json:"anchorSharePercent"`
+	GuildSharePercent            float64    `json:"guildSharePercent"`
 	CreatedAt                    *time.Time `json:"createdAt"`
 }

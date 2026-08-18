@@ -17,7 +17,21 @@ type LiveRecordCMSListFilter struct {
 	PageSize  int
 }
 
-// LiveRecordCMSList CMS分页查询直播记录(按ID倒序)
+func mergeLiveRecordsFromCache(rows []*entity.LiveRecord) []*entity.LiveRecord {
+	if len(rows) == 0 {
+		return rows
+	}
+	list := make([]*entity.LiveRecord, 0, len(rows))
+	for _, row := range rows {
+		if row == nil || row.ID == 0 {
+			continue
+		}
+		list = append(list, resolveLiveRecordTarget(row))
+	}
+	return list
+}
+
+// LiveRecordCMSList CMS分页查询直播记录(按ID倒序;DB结果逐条合并单条缓存)
 func LiveRecordCMSList(f *LiveRecordCMSListFilter) (int, []*entity.LiveRecord) {
 	list := make([]*entity.LiveRecord, 0)
 	if f == nil {
@@ -47,5 +61,5 @@ func LiveRecordCMSList(f *LiveRecordCMSListFilter) (int, []*entity.LiveRecord) {
 	_ = m.Clone().Order("id desc").
 		Limit(f.PageSize).Offset((f.PageIndex - 1) * f.PageSize).
 		Scan(&list)
-	return total, list
+	return total, mergeLiveRecordsFromCache(list)
 }
