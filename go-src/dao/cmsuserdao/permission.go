@@ -78,6 +78,8 @@ func roleHasApiPathExact(roleId uint64, apiPath string) bool {
 
 func cmsApiPermissionAliasPaths(apiPath string) []string {
 	switch apiPath {
+	case "/account/getUserDetail":
+		return []string{"/account/getUserInfo"}
 	case "/account/getAnchorDailyEffectiveLiveList":
 		return []string{"/account/getAnchorDetail"}
 	default:

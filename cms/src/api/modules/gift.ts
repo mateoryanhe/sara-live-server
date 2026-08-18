@@ -11,6 +11,11 @@ export const giftApi = {
     // 创建礼物
     createGift: (data: {
         name: string
+        nameEn?: string
+        nameEs?: string
+        namePt?: string
+        nameHi?: string
+        nameId?: string
         icon: string
         animation: string
         price: number
@@ -25,6 +30,11 @@ export const giftApi = {
     updateGift: (data: {
         id: string | number
         name: string
+        nameEn?: string
+        nameEs?: string
+        namePt?: string
+        nameHi?: string
+        nameId?: string
         icon: string
         animation: string
         price: number

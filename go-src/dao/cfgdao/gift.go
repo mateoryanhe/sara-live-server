@@ -75,7 +75,7 @@ func GetOnShelfGifts() []*entity.LiveGift {
 }
 
 func GetGiftList(req *giftdto.GiftListReq) (int, []*giftdto.GiftListRes) {
-	sql := `select id, name, name_en, name_es, name_pt, name_hi, icon, animation, price, category, sort, status, published_at, description, created_at, updated_at
+	sql := `select id, name, name_en, name_es, name_pt, name_hi, name_id, icon, animation, price, category, sort, status, published_at, description, created_at, updated_at
             from live_gifts
             where 1=1 `
 	param := make([]any, 0)

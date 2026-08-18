@@ -621,7 +621,8 @@ const handleSave = async () => {
     if (valid) {
       try {
         if (currentRow.value.id) {
-          await giftApi.updateGift(currentRow.value)
+          const {id, name, nameEn, nameEs, namePt, nameHi, nameId, icon, animation, price, category, sort, description} = currentRow.value
+          await giftApi.updateGift({id, name, nameEn, nameEs, namePt, nameHi, nameId, icon, animation, price, category, sort, description})
         } else {
           const {name, nameEn, nameEs, namePt, nameHi, nameId, icon, animation, price, category, sort, description} = currentRow.value
           await giftApi.createGift({name, nameEn, nameEs, namePt, nameHi, nameId, icon, animation, price, category, sort, description})

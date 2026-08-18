@@ -277,7 +277,12 @@ const formatDate = (dateString: string | null | undefined) => {
   }
 }
 
+const isAnchorDetailRoute = () => route.name === 'AnchorDetail'
+
 const fetchDetail = async () => {
+  if (!isAnchorDetailRoute()) {
+    return
+  }
   if (!anchorId.value) {
     detail.value = null
     return
@@ -306,6 +311,9 @@ const goBack = () => {
 }
 
 watch(anchorId, (_id, prev) => {
+  if (!isAnchorDetailRoute()) {
+    return
+  }
   if (prev !== undefined) {
     activeTab.value = 'basic'
     fetchDetail()
@@ -313,6 +321,9 @@ watch(anchorId, (_id, prev) => {
 })
 
 onActivated(() => {
+  if (!isAnchorDetailRoute()) {
+    return
+  }
   fetchDetail()
 })
 </script>

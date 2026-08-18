@@ -52,7 +52,7 @@
                   <el-descriptions-item :label="t('pages.userList.inviterId')">{{ detail.profile?.inviterId || '-' }}</el-descriptions-item>
                   <el-descriptions-item :label="t('pages.userList.vipLevel')">{{ detail.profile?.vipLevel ?? '-' }}</el-descriptions-item>
                   <el-descriptions-item :label="t('pages.userList.guildId')">{{ detail.profile?.guildId || '-' }}</el-descriptions-item>
-                  <el-descriptions-item :label="t('pages.userList.botAnchorStatus')">
+                  <el-descriptions-item v-if="showBotAnchorStatus" :label="t('pages.userList.botAnchorStatus')">
                     {{ botAnchorStatusLabel(detail.profile?.botAnchorStatus) }}
                   </el-descriptions-item>
                   <el-descriptions-item :label="t('pages.userList.liveRoomId')">{{ detail.profile?.liveRoomId || '-' }}</el-descriptions-item>
@@ -170,7 +170,11 @@ const detail = ref<UserDetail | null>(null)
 const activeTab = ref('basic')
 const basicSubTab = ref('profile')
 
+const USER_TYPE_BOT_ANCHOR = 2
+
 const userId = computed(() => String(route.query.id || '').trim())
+
+const showBotAnchorStatus = computed(() => detail.value?.profile?.userType === USER_TYPE_BOT_ANCHOR)
 
 const pageTitle = computed(() => {
   if (detail.value?.profile?.nickname) {
@@ -228,7 +232,12 @@ const formatDuration = (seconds?: number) => {
   return t('pages.userList.durationFormat', {hours, minutes, seconds: secs})
 }
 
+const isUserDetailRoute = () => route.name === 'UserDetail'
+
 const fetchDetail = async () => {
+  if (!isUserDetailRoute()) {
+    return
+  }
   if (!userId.value) {
     detail.value = null
     return
@@ -257,6 +266,9 @@ const goBack = () => {
 }
 
 watch(userId, (_id, prev) => {
+  if (!isUserDetailRoute()) {
+    return
+  }
   if (prev !== undefined) {
     activeTab.value = 'basic'
     basicSubTab.value = 'profile'
@@ -265,6 +277,9 @@ watch(userId, (_id, prev) => {
 })
 
 onActivated(() => {
+  if (!isUserDetailRoute()) {
+    return
+  }
   fetchDetail()
 })
 </script>

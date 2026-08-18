@@ -9,7 +9,7 @@ import (
 // GetUserDetailReq CMS获取用户详情
 type GetUserDetailReq struct {
 	g.Meta `path:"/getUserDetail" method:"post" summary:"CMS获取用户详情" tags:"账号"`
-	UserId uint64 `json:"userId" v:"required#用户ID不能为空" dc:"用户ID"`
+	UserId uint64 `json:"userId,string" v:"required#用户ID不能为空" dc:"用户ID"`
 }
 
 // UserAccountDetailItem 账号信息(accounts)

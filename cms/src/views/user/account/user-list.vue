@@ -583,7 +583,7 @@ const openCurrencyDialog = (row: UserInfo, type: CurrencyType, mode: CurrencyMod
 
 const openDetail = (row: UserInfo) => {
   router.push({
-    path: '/user/account/user-detail',
+    name: 'UserDetail',
     query: {id: String(row.id)},
   })
 }
