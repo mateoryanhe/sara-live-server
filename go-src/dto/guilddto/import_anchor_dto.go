@@ -56,12 +56,27 @@ func GetImportAnchorFailReasonText(reason int) string {
 }
 
 type SetAnchorGuildReq struct {
-	GuildId    uint64 `json:"guildId" dc:"工会ID"`
-	AnchorId   uint64 `json:"anchorId" v:"required#主播ID不能为空" dc:"主播ID"`
-	AnchorType uint8  `json:"anchorType" v:"required#主播类型不能为空" dc:"主播类型"`
+	g.Meta     `path:"/joinGuildAnchor" method:"post" summary:"CMS加入工会主播" tags:"直播工会"`
+	GuildId    uint64 `json:"guildId" v:"required#工会ID不能为空" dc:"工会ID"`
+	UserId     uint64 `json:"userId" v:"required#用户ID不能为空" dc:"用户ID"`
+	AnchorType uint8  `json:"anchorType" v:"required#主播类型不能为空" dc:"主播类型(1=普通主播,7=高级主播)"`
 }
 
 type SetAnchorGuildRes struct {
+	Success  bool   `json:"success" dc:"是否成功"`
+	Reason   int    `json:"reason" dc:"失败原因代码(0=成功)"`
+	Nickname string `json:"nickname" dc:"用户昵称"`
+}
+
+// SetGuildAnchorTypeReq CMS设置工会主播类型
+type SetGuildAnchorTypeReq struct {
+	g.Meta     `path:"/setGuildAnchorType" method:"post" summary:"CMS设置工会主播类型" tags:"直播工会"`
+	GuildId    uint64 `json:"guildId" v:"required#工会ID不能为空" dc:"工会ID"`
+	UserId     uint64 `json:"userId" v:"required#用户ID不能为空" dc:"用户ID"`
+	AnchorType uint8  `json:"anchorType" v:"required#主播类型不能为空" dc:"主播类型(1=普通主播,7=高级主播)"`
+}
+
+type SetGuildAnchorTypeRes struct {
 	Success bool `json:"success" dc:"是否成功"`
 }
 

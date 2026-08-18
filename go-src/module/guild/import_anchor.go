@@ -71,6 +71,30 @@ func ImportGuildAnchors(ctx context.Context, req *guilddto.ImportGuildAnchorsReq
 	return res, nil
 }
 
+// JoinGuildAnchor CMS 单个用户加入工会(设为主播并绑定工会)
+func JoinGuildAnchor(ctx context.Context, req *guilddto.SetAnchorGuildReq) (*guilddto.SetAnchorGuildRes, error) {
+	if req == nil || req.GuildId == 0 || req.UserId == 0 {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if req.AnchorType != userentity.UserTypeAnchor && req.AnchorType != userentity.UserTypeSeniorAnchor {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	guild := guilddao.GetGuildById(req.GuildId)
+	if guild == nil {
+		return nil, errercode.CreateCode(errercode.GuildNonExist)
+	}
+	failReason, nickname := importOneGuildAnchor(guild, req.UserId, req.AnchorType)
+	if failReason > 0 {
+		return &guilddto.SetAnchorGuildRes{
+			Success:  false,
+			Reason:   failReason,
+			Nickname: nickname,
+		}, nil
+	}
+	liveroom.RefreshRoomListCache(ctx)
+	return &guilddto.SetAnchorGuildRes{Success: true}, nil
+}
+
 func importOneGuildAnchor(guild *entity.LiveGuild, userID uint64, anchorType uint8) (failReason int, nickname string) {
 	if accountdao.GetAccountById(userID) == nil {
 		return guilddto.ImportAnchorFailUserNotFound, ""

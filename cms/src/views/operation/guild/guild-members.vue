@@ -120,12 +120,20 @@
         <el-table-column :label="t('pages.anchorList.profileUpdatedAt')" prop="createdAt" width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>
-        <el-table-column fixed="right" :label="t('common.actions')" :width="readonly ? 90 : 220">
+        <el-table-column fixed="right" :label="t('common.actions')" :width="readonly ? 90 : 320">
           <template #default="{ row }">
             <el-button v-if="canViewDetail" link type="primary" @click="openDetail(row)">
               {{ t('common.detail') }}
             </el-button>
             <template v-if="!readonly">
+              <el-button
+                  v-if="canSetAnchorType(row)"
+                  link
+                  type="primary"
+                  @click="openAnchorTypeDialog(row)"
+              >
+                {{ t('pages.guildMembers.setAnchorType') }}
+              </el-button>
               <el-button
                   v-if="row.ban ? can('unban') : can('ban')"
                   :type="row.ban ? 'warning' : 'danger'"
@@ -205,6 +213,35 @@
         <el-button :loading="banSubmitting" type="primary" @click="submitBan">{{ t('pages.anchorList.confirmBan') }}</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog
+        v-if="!readonly"
+        v-model="anchorTypeDialogVisible"
+        :title="anchorTypeDialogTitle"
+        width="480px"
+        @closed="resetAnchorTypeForm"
+    >
+      <el-form ref="anchorTypeFormRef" :model="anchorTypeForm" :rules="anchorTypeRules" label-width="100px">
+        <el-form-item :label="t('common.userId')">
+          <el-input v-model="anchorTypeForm.userId" disabled/>
+        </el-form-item>
+        <el-form-item :label="t('common.nickname')">
+          <el-input v-model="anchorTypeForm.nickname" disabled/>
+        </el-form-item>
+        <el-form-item :label="t('pages.anchorList.anchorType')" prop="anchorType">
+          <el-select v-model="anchorTypeForm.anchorType" style="width: 100%">
+            <el-option :label="t('pages.anchorList.anchorTypeNormal')" :value="1"/>
+            <el-option :label="t('pages.anchorList.anchorTypeSenior')" :value="7"/>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="anchorTypeDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button :loading="anchorTypeSubmitting" type="primary" @click="submitAnchorType">
+          {{ t('common.confirm') }}
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -213,10 +250,13 @@ import {computed, onActivated, reactive, ref, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {useRoute, useRouter} from 'vue-router'
 import {ElForm, ElMessage, ElMessageBox, type FormRules} from 'element-plus'
-import {accountApi} from '@/api'
+import {accountApi, guildApi} from '@/api'
 import type {AnchorListItem, BanAnchorReq, UnBanAnchorReq} from '@/types/api'
 import {formatAmount} from '@/utils/number-format'
 import {usePagePermission} from '@/composables/usePagePermission'
+
+const USER_TYPE_ANCHOR = 1
+const USER_TYPE_SENIOR_ANCHOR = 7
 
 const {t} = useI18n()
 const route = useRoute()
@@ -226,6 +266,12 @@ const {can} = usePagePermission(
   route.name === 'GuildProfileMembers' ? 'GuildProfileManagement' : 'GuildManagement',
 )
 const canViewDetail = computed(() => can('viewDetail'))
+const canSetAnchorType = (row: AnchorListItem) => {
+  if (!can('setAnchorType')) {
+    return false
+  }
+  return row.userType === USER_TYPE_ANCHOR || row.userType === USER_TYPE_SENIOR_ANCHOR
+}
 
 const loading = ref(false)
 const tableData = ref<AnchorListItem[]>([])
@@ -252,6 +298,22 @@ const banRules = computed<FormRules>(() => ({
   banReason: [
     {required: true, message: t('pages.anchorList.banReasonRequired'), trigger: 'blur'},
     {min: 1, max: 512, message: t('pages.anchorList.banReasonLength'), trigger: 'blur'},
+  ],
+}))
+
+const anchorTypeDialogVisible = ref(false)
+const anchorTypeDialogTitle = ref('')
+const anchorTypeSubmitting = ref(false)
+const anchorTypeFormRef = ref<InstanceType<typeof ElForm>>()
+const anchorTypeForm = reactive({
+  userId: '',
+  nickname: '',
+  anchorType: 1 as 1 | 7,
+})
+
+const anchorTypeRules = computed<FormRules>(() => ({
+  anchorType: [
+    {required: true, message: t('pages.guildMembers.anchorTypeRequired'), trigger: 'change'},
   ],
 }))
 
@@ -290,8 +352,6 @@ const LIVE_ROOM_CATEGORY_PRIVATE = 3
 const LIVE_ROOM_PRIVATE_INVITE_ALL = 1
 const LIVE_ROOM_PRIVATE_INVITE_VIP = 2
 const LIVE_ROOM_PRIVATE_INVITE_REJECT = 3
-const USER_TYPE_ANCHOR = 1
-const USER_TYPE_SENIOR_ANCHOR = 7
 
 const isPrivateRoom = (category?: number) => category === LIVE_ROOM_CATEGORY_PRIVATE
 
@@ -392,6 +452,52 @@ const resetBanForm = () => {
   banForm.banApplyTime = ''
   banForm.banReason = ''
   banFormRef.value?.clearValidate()
+}
+
+const resetAnchorTypeForm = () => {
+  anchorTypeForm.userId = ''
+  anchorTypeForm.nickname = ''
+  anchorTypeForm.anchorType = 1
+  anchorTypeFormRef.value?.clearValidate()
+}
+
+const openAnchorTypeDialog = (row: AnchorListItem) => {
+  anchorTypeDialogTitle.value = t('pages.guildMembers.setAnchorTypeTitle', {id: row.id})
+  anchorTypeForm.userId = row.id
+  anchorTypeForm.nickname = row.nickname || '-'
+  anchorTypeForm.anchorType = row.userType === USER_TYPE_SENIOR_ANCHOR ? 7 : 1
+  anchorTypeDialogVisible.value = true
+}
+
+const submitAnchorType = async () => {
+  if (!anchorTypeFormRef.value || !guildId.value) {
+    return
+  }
+  await anchorTypeFormRef.value.validate(async (valid: boolean) => {
+    if (!valid) {
+      return
+    }
+    anchorTypeSubmitting.value = true
+    try {
+      const response = await guildApi.setGuildAnchorType({
+        guildId: guildId.value,
+        userId: anchorTypeForm.userId,
+        anchorType: anchorTypeForm.anchorType,
+      })
+      if (response.success) {
+        ElMessage.success(t('pages.guildMembers.setAnchorTypeSuccess'))
+        anchorTypeDialogVisible.value = false
+        fetchList()
+        return
+      }
+      ElMessage.error(t('pages.guildMembers.setAnchorTypeFailed'))
+    } catch (error) {
+      console.error('set guild anchor type failed:', error)
+      ElMessage.error(t('pages.guildMembers.setAnchorTypeRequestFailed'))
+    } finally {
+      anchorTypeSubmitting.value = false
+    }
+  })
 }
 
 const openBanDialog = (row: AnchorListItem) => {

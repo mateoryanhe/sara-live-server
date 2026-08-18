@@ -44,6 +44,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'AnchorDetail:liveRecord': '/liveRecord/cmsLiveRecordList',
     'AnchorDetail:exportLiveRecord': '/liveRecord/cmsLiveRecordList',
     'AnchorDetail:settlementLog': '/anchorIncomeSettlementLog/cmsAnchorIncomeSettlementLogList',
+    'AnchorDetail:exportSettlementLog': '/anchorIncomeSettlementLog/cmsAnchorIncomeSettlementLogList',
 
     LiveRoomRecycleBinManagement: '/account/getOffShelfLiveRoomList',
     'LiveRoomRecycleBinManagement:view': '/account/getOffShelfLiveRoomList',
@@ -106,6 +107,8 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GuildManagement:ban': '/account/banAnchor',
     'GuildManagement:unban': '/account/unBanAnchor',
     'GuildManagement:exitGuild': '/account/exitGuild',
+    'GuildManagement:setAnchorType': '/guild/setGuildAnchorType',
+    'GuildManagement:joinGuildAnchor': '/guild/joinGuildAnchor',
     'GuildManagement:batchSetAnchor': '/guild/importGuildAnchors',
     'GuildManagement:batchSetSeniorAnchor': '/guild/importGuildAnchors',
 

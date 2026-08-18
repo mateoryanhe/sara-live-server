@@ -746,6 +746,30 @@ export interface ImportGuildAnchorRow {
     userId: string
 }
 
+export interface SetGuildAnchorTypeReq {
+    guildId: string | number
+    userId: string | number
+    /** 1 普通主播, 7 高级主播 */
+    anchorType: 1 | 7
+}
+
+export interface SetGuildAnchorTypeRes {
+    success: boolean
+}
+
+export interface JoinGuildAnchorReq {
+    guildId: string | number
+    userId: string | number
+    /** 1 普通主播, 7 高级主播 */
+    anchorType: 1 | 7
+}
+
+export interface JoinGuildAnchorRes {
+    success: boolean
+    reason?: number
+    nickname?: string
+}
+
 export interface ImportGuildAnchorsReq {
     guildId: string | number
     /** 1 普通主播, 7 高级主播 */

@@ -8,6 +8,10 @@
         type="info"
     />
 
+    <div class="toolbar">
+      <el-button v-if="canExport" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
+    </div>
+
     <el-table v-loading="loading" :data="tableData" style="width:100%">
       <el-table-column :label="t('pages.anchorIncomeSettlementLogList.logId')" min-width="180" prop="id"/>
       <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalIncome')" min-width="110" prop="totalIncome"/>
@@ -34,11 +38,14 @@
 </template>
 
 <script lang="ts" setup>
-import {ref, watch} from 'vue'
+import {computed, ref, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage} from 'element-plus'
 import {anchorIncomeSettlementLogApi} from '@/api/modules/anchor-income-settlement-log'
 import type {AnchorIncomeSettlementLogItem} from '@/types/api'
+import {usePagePermission} from '@/composables/usePagePermission'
+import {downloadCsv, fetchAllPagedRows} from '@/utils/csv-export'
+import {buildAnchorSettlementLogCsvColumns} from '@/utils/income-settlement-log-csv'
 
 const props = defineProps<{
   anchorId: string
@@ -46,9 +53,16 @@ const props = defineProps<{
 }>()
 
 const {t} = useI18n()
+const {can} = usePagePermission('AnchorDetail')
+const canExport = computed(() => can('exportSettlementLog'))
 const loading = ref(false)
+const exporting = ref(false)
 const tableData = ref<AnchorIncomeSettlementLogItem[]>([])
 const loaded = ref(false)
+
+const buildFilterParams = () => ({
+  roomId: props.anchorId,
+})
 
 const fetchList = async () => {
   if (!props.anchorId) {
@@ -58,7 +72,7 @@ const fetchList = async () => {
   loading.value = true
   try {
     const response = await anchorIncomeSettlementLogApi.getList({
-      roomId: props.anchorId,
+      ...buildFilterParams(),
       pageIndex: 1,
       pageSize: 50,
     })
@@ -69,6 +83,38 @@ const fetchList = async () => {
     ElMessage.error(t('pages.anchorList.settlementLogFetchFailed'))
   } finally {
     loading.value = false
+  }
+}
+
+const handleExport = async () => {
+  if (!props.anchorId) {
+    ElMessage.warning(t('common.exportEmpty'))
+    return
+  }
+  exporting.value = true
+  try {
+    const rows = await fetchAllPagedRows((pageIndex, pageSize) =>
+      anchorIncomeSettlementLogApi.getList({
+        ...buildFilterParams(),
+        pageIndex,
+        pageSize,
+      }),
+    )
+    if (rows.length === 0) {
+      ElMessage.warning(t('common.exportEmpty'))
+      return
+    }
+    downloadCsv(
+      `anchor-settlement-log-${props.anchorId}-${Date.now()}.csv`,
+      buildAnchorSettlementLogCsvColumns(t),
+      rows,
+    )
+    ElMessage.success(t('common.exportSuccess'))
+  } catch (error) {
+    console.error('Failed to export anchor settlement logs:', error)
+    ElMessage.error(t('common.exportFailed'))
+  } finally {
+    exporting.value = false
   }
 }
 
@@ -115,5 +161,11 @@ watch(
 <style scoped>
 .hint-alert {
   margin-bottom: 16px;
+}
+
+.toolbar {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

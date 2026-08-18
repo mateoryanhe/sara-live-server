@@ -153,6 +153,8 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'ban', label: '封禁主播'},
         {key: 'unban', label: '解封主播'},
         {key: 'exitGuild', label: '退出工会'},
+        {key: 'setAnchorType', label: '设置主播类型'},
+        {key: 'joinGuildAnchor', label: '加入工会'},
         {key: 'batchSetAnchor', label: '导入普通主播'},
         {key: 'batchSetSeniorAnchor', label: '导入高级主播'},
     ],

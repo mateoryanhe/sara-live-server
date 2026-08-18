@@ -68,6 +68,16 @@ func (c *GuildController) ImportGuildAnchors(ctx context.Context, req *guilddto.
 	return guild.ImportGuildAnchors(ctx, req)
 }
 
+// JoinGuildAnchor CMS加入工会主播
+func (c *GuildController) JoinGuildAnchor(ctx context.Context, req *guilddto.SetAnchorGuildReq) (res *guilddto.SetAnchorGuildRes, err error) {
+	return guild.JoinGuildAnchor(ctx, req)
+}
+
+// SetGuildAnchorType CMS设置工会主播类型
+func (c *GuildController) SetGuildAnchorType(ctx context.Context, req *guilddto.SetGuildAnchorTypeReq) (res *guilddto.SetGuildAnchorTypeRes, err error) {
+	return guild.SetGuildAnchorType(ctx, req)
+}
+
 // GetGuildDetail CMS获取工会详情收益
 func (c *GuildController) GetGuildDetail(ctx context.Context, req *guilddto.GetGuildDetailReq) (res *guilddto.GetGuildDetailRes, err error) {
 	return guild.QueryGuildDetail(ctx, req)

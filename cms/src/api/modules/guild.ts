@@ -7,6 +7,10 @@ import type {
     GuildQuery,
     ImportGuildAnchorsReq,
     ImportGuildAnchorsRes,
+    JoinGuildAnchorReq,
+    JoinGuildAnchorRes,
+    SetGuildAnchorTypeReq,
+    SetGuildAnchorTypeRes,
     MyGuildAnchorIncomeSettlementLogQuery,
     MyGuildProfileListRes,
     PageResponse,
@@ -68,6 +72,14 @@ export const guildApi = {
 
     importGuildAnchors: (data: ImportGuildAnchorsReq) => {
         return request.post<ImportGuildAnchorsRes>('/guild/importGuildAnchors', data)
+    },
+
+    joinGuildAnchor: (data: JoinGuildAnchorReq) => {
+        return request.post<JoinGuildAnchorRes>('/guild/joinGuildAnchor', data)
+    },
+
+    setGuildAnchorType: (data: SetGuildAnchorTypeReq) => {
+        return request.post<SetGuildAnchorTypeRes>('/guild/setGuildAnchorType', data)
     },
 
     getGuildDetail: (guildId: string) => {

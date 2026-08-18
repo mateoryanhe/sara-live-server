@@ -53,7 +53,7 @@
           <el-table-column :label="t('pages.guildList.description')" prop="description" show-overflow-tooltip/>
           <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
           <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
-          <el-table-column fixed="right" :label="t('common.actions')" width="580">
+          <el-table-column fixed="right" :label="t('common.actions')" width="660">
             <template #default="{ row }">
               <el-button v-if="canViewDetail" size="small" @click="openDetail(row)">
                 {{ t('pages.guildList.viewDetail') }}
@@ -65,6 +65,13 @@
                   @click="handleViewMembers(row)"
               >
                 {{ t('pages.guildList.viewMembers') }}
+              </el-button>
+              <el-button
+                  v-if="can('joinGuildAnchor')"
+                  size="small"
+                  @click="openJoinDialog(row)"
+              >
+                {{ t('pages.guildList.joinGuildAnchor') }}
               </el-button>
               <el-button
                   v-if="can('batchSetAnchor')"
@@ -144,6 +151,24 @@
       </template>
     </el-dialog>
 
+    <el-dialog v-model="joinDialogVisible" :title="joinDialogTitle" width="480px">
+      <el-form ref="joinFormRef" :model="joinForm" :rules="joinFormRules" label-width="100px">
+        <el-form-item :label="t('pages.guildList.joinUserId')" prop="userId">
+          <el-input v-model="joinForm.userId" clearable :placeholder="t('pages.guildList.joinUserIdPlaceholder')"/>
+        </el-form-item>
+        <el-form-item :label="t('pages.guildList.memberType')" prop="anchorType">
+          <el-select v-model="joinForm.anchorType" style="width: 100%">
+            <el-option :label="t('pages.guildList.normalAnchor')" :value="1"/>
+            <el-option :label="t('pages.guildList.seniorAnchor')" :value="7"/>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="joinDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button :loading="joinSubmitting" type="primary" @click="handleJoinSubmit">{{ t('common.confirm') }}</el-button>
+      </template>
+    </el-dialog>
+
     <input
         ref="csvInputRef"
         accept=".txt,.csv,text/plain,text/csv"
@@ -177,6 +202,13 @@ interface GuildForm {
   description: string
 }
 
+interface JoinGuildForm {
+  guildId: string
+  guildName: string
+  userId: string
+  anchorType: 1 | 7
+}
+
 const {t} = useI18n()
 const router = useRouter()
 const {can} = usePagePermission('GuildManagement')
@@ -195,6 +227,17 @@ const csvInputRef = ref<HTMLInputElement | null>(null)
 
 const searchForm = reactive<SearchForm>({
   name: ''
+})
+
+const joinDialogVisible = ref(false)
+const joinDialogTitle = ref('')
+const joinSubmitting = ref(false)
+const joinFormRef = ref<FormInstance>()
+const joinForm = ref<JoinGuildForm>({
+  guildId: '',
+  guildName: '',
+  userId: '',
+  anchorType: 1,
 })
 
 const dialogVisible = ref(false)
@@ -270,6 +313,16 @@ const ensureLeaderOption = async (leaderId: string) => {
   }
   await fetchCmsUserOptions(id)
 }
+
+const joinFormRules = computed<FormRules>(() => ({
+  userId: [
+    {required: true, message: t('pages.guildList.joinUserIdRequired'), trigger: 'blur'},
+    {pattern: /^\d+$/, message: t('pages.guildList.joinUserIdInvalid'), trigger: 'blur'},
+  ],
+  anchorType: [
+    {required: true, message: t('pages.guildList.joinAnchorTypeRequired'), trigger: 'change'},
+  ],
+}))
 
 const formRules = computed<FormRules>(() => ({
   name: [
@@ -395,6 +448,73 @@ const handleSave = async () => {
         console.error('save guild failed:', error)
         ElMessage.error(currentRow.value.id ? t('pages.guildList.updateFailed') : t('pages.guildList.createFailed'))
       }
+    }
+  })
+}
+
+const formatJoinFailReason = (reason?: number) => {
+  switch (reason) {
+    case 1:
+      return t('pages.guildAnchorImportResult.reasonUserNotFound')
+    case 2:
+      return t('pages.guildAnchorImportResult.reasonCancelCodeMismatch')
+    case 3:
+      return t('pages.guildAnchorImportResult.reasonCancelCodeExpired')
+    case 4:
+      return t('pages.guildAnchorImportResult.reasonAlreadyInGuild')
+    case 5:
+      return t('pages.guildAnchorImportResult.reasonCannotSetAnchor')
+    case 6:
+      return t('pages.guildAnchorImportResult.reasonAlreadyHasLiveRoom')
+    default:
+      return t('pages.guildAnchorImportResult.reasonUnknown')
+  }
+}
+
+const openJoinDialog = (row: Guild) => {
+  joinDialogTitle.value = t('pages.guildList.joinGuildAnchorTitle', {name: row.name})
+  joinForm.value = {
+    guildId: row.id,
+    guildName: row.name,
+    userId: '',
+    anchorType: 1,
+  }
+  joinDialogVisible.value = true
+  joinFormRef.value?.clearValidate()
+}
+
+const handleJoinSubmit = async () => {
+  if (!joinFormRef.value) {
+    return
+  }
+  await joinFormRef.value.validate(async (valid) => {
+    if (!valid) {
+      return
+    }
+    joinSubmitting.value = true
+    try {
+      const response = await guildApi.joinGuildAnchor({
+        guildId: joinForm.value.guildId,
+        userId: joinForm.value.userId.trim(),
+        anchorType: joinForm.value.anchorType,
+      })
+      if (response.success) {
+        ElMessage.success(t('pages.guildList.joinGuildAnchorSuccess'))
+        joinDialogVisible.value = false
+        return
+      }
+      const reasonText = formatJoinFailReason(response.reason)
+      const nickname = response.nickname?.trim()
+      ElMessage.error(
+        nickname
+          ? t('pages.guildList.joinGuildAnchorFailedWithUser', {nickname, reason: reasonText})
+          : t('pages.guildList.joinGuildAnchorFailed', {reason: reasonText}),
+      )
+    } catch (error) {
+      console.error('join guild anchor failed:', error)
+      ElMessage.error(t('pages.guildList.joinGuildAnchorRequestFailed'))
+    } finally {
+      joinSubmitting.value = false
     }
   })
 }
