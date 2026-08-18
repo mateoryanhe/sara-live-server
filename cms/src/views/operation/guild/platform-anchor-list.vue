@@ -98,10 +98,18 @@
             <el-tag v-else type="info">{{ t('common.offShelf') }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column fixed="right" :label="t('common.actions')" width="220">
+        <el-table-column fixed="right" :label="t('common.actions')" width="280">
           <template #default="{ row }">
             <el-button v-if="canViewDetail" link type="primary" @click="openDetail(row)">
               {{ t('common.detail') }}
+            </el-button>
+            <el-button
+                v-if="showSetAnchorType"
+                link
+                type="primary"
+                @click="openAnchorTypeDialog(row)"
+            >
+              {{ t('pages.guildMembers.setAnchorType') }}
             </el-button>
             <el-button v-if="can('offShelf')" type="warning" link @click="handleOffShelf(row)">
               {{ t('common.offShelf') }}
@@ -173,6 +181,34 @@
         <el-button :loading="banSubmitting" type="primary" @click="submitBan">{{ t('pages.anchorList.confirmBan') }}</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog
+        v-model="anchorTypeDialogVisible"
+        :title="anchorTypeDialogTitle"
+        width="480px"
+        @closed="resetAnchorTypeForm"
+    >
+      <el-form ref="anchorTypeFormRef" :model="anchorTypeForm" :rules="anchorTypeRules" label-width="100px">
+        <el-form-item :label="t('common.userId')">
+          <el-input v-model="anchorTypeForm.userId" disabled/>
+        </el-form-item>
+        <el-form-item :label="t('common.nickname')">
+          <el-input v-model="anchorTypeForm.nickname" disabled/>
+        </el-form-item>
+        <el-form-item :label="t('pages.anchorList.anchorType')" prop="anchorType">
+          <el-select v-model="anchorTypeForm.anchorType" style="width: 100%">
+            <el-option :label="t('pages.anchorList.anchorTypeNormal')" :value="1"/>
+            <el-option :label="t('pages.anchorList.anchorTypeSenior')" :value="7"/>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="anchorTypeDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button :loading="anchorTypeSubmitting" type="primary" @click="submitAnchorType">
+          {{ t('common.confirm') }}
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -184,18 +220,35 @@ import {ElForm, ElMessage, ElMessageBox, type FormRules} from 'element-plus'
 import {accountApi} from '@/api'
 import type {AnchorListItem, BanAnchorReq, UnBanAnchorReq} from '@/types/api'
 import {formatWalletBalance} from '@/utils/number-format'
+import {hasButtonPermission} from '@/utils/permission'
 import {usePagePermission} from '@/composables/usePagePermission'
+
+const USER_TYPE_ANCHOR = 1
+const USER_TYPE_SENIOR_ANCHOR = 7
 
 const {t} = useI18n()
 const router = useRouter()
 const {can} = usePagePermission('PlatformAnchorList')
 const canViewDetail = computed(() => can('viewDetail'))
+const showSetAnchorType = computed(() =>
+    hasButtonPermission('PlatformAnchorList', 'setAnchorType')
+    || hasButtonPermission('GuildManagement', 'setAnchorType'),
+)
 
 const loading = ref(false)
 const tableData = ref<AnchorListItem[]>([])
 const banDialogVisible = ref(false)
 const banSubmitting = ref(false)
 const banFormRef = ref<InstanceType<typeof ElForm>>()
+const anchorTypeDialogVisible = ref(false)
+const anchorTypeDialogTitle = ref('')
+const anchorTypeSubmitting = ref(false)
+const anchorTypeFormRef = ref<InstanceType<typeof ElForm>>()
+const anchorTypeForm = reactive({
+  userId: '',
+  nickname: '',
+  anchorType: 1 as 1 | 7,
+})
 
 const ALL_LIVE_STATUS = -1
 const searchForm = reactive({key: '', liveStatus: 1})
@@ -210,8 +263,11 @@ const banRules = computed<FormRules>(() => ({
   ],
 }))
 
-const USER_TYPE_ANCHOR = 1
-const USER_TYPE_SENIOR_ANCHOR = 7
+const anchorTypeRules = computed<FormRules>(() => ({
+  anchorType: [
+    {required: true, message: t('pages.guildMembers.anchorTypeRequired'), trigger: 'change'},
+  ],
+}))
 
 const anchorTypeLabel = (userType?: number) => {
   if (userType === USER_TYPE_SENIOR_ANCHOR) return t('pages.anchorList.anchorTypeSenior')
@@ -296,6 +352,52 @@ const resetBanForm = () => {
   banForm.banApplyTime = ''
   banForm.banReason = ''
   banFormRef.value?.clearValidate()
+}
+
+const resetAnchorTypeForm = () => {
+  anchorTypeForm.userId = ''
+  anchorTypeForm.nickname = ''
+  anchorTypeForm.anchorType = 1
+  anchorTypeFormRef.value?.clearValidate()
+}
+
+const openAnchorTypeDialog = (row: AnchorListItem) => {
+  anchorTypeDialogTitle.value = t('pages.guildMembers.setAnchorTypeTitle', {id: row.id})
+  anchorTypeForm.userId = row.id
+  anchorTypeForm.nickname = row.nickname || '-'
+  const userType = Number(row.userType)
+  anchorTypeForm.anchorType = userType === USER_TYPE_SENIOR_ANCHOR ? 7 : 1
+  anchorTypeDialogVisible.value = true
+}
+
+const submitAnchorType = async () => {
+  if (!anchorTypeFormRef.value) {
+    return
+  }
+  await anchorTypeFormRef.value.validate(async (valid: boolean) => {
+    if (!valid) {
+      return
+    }
+    anchorTypeSubmitting.value = true
+    try {
+      const response = await accountApi.setPlatformAnchorType({
+        userId: anchorTypeForm.userId,
+        anchorType: anchorTypeForm.anchorType,
+      })
+      if (response?.success) {
+        ElMessage.success(t('pages.guildMembers.setAnchorTypeSuccess'))
+        anchorTypeDialogVisible.value = false
+        fetchList()
+      } else {
+        ElMessage.error(t('pages.guildMembers.setAnchorTypeFailed'))
+      }
+    } catch (error) {
+      console.error('Set platform anchor type failed:', error)
+      ElMessage.error(t('pages.guildMembers.setAnchorTypeRequestFailed'))
+    } finally {
+      anchorTypeSubmitting.value = false
+    }
+  })
 }
 
 const openDetail = (row: AnchorListItem) => {

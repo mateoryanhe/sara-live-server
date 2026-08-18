@@ -753,6 +753,16 @@ export interface SetGuildAnchorTypeReq {
     anchorType: 1 | 7
 }
 
+export interface SetPlatformAnchorTypeReq {
+    userId: string | number
+    /** 1 普通主播, 7 高级主播 */
+    anchorType: 1 | 7
+}
+
+export interface SetPlatformAnchorTypeRes {
+    success: boolean
+}
+
 export interface SetGuildAnchorTypeRes {
     success: boolean
 }

@@ -106,3 +106,8 @@ func (a *AccountController) SetRechargeWhitelist(ctx context.Context, req *accou
 func (a *AccountController) ExitGuild(ctx context.Context, req *accountdto.ExitGuildReq) (*accountdto.ExitGuildRes, error) {
 	return liveroom.ExitGuild(ctx, req)
 }
+
+// SetPlatformAnchorType CMS设置平台主播类型
+func (a *AccountController) SetPlatformAnchorType(ctx context.Context, req *accountdto.SetPlatformAnchorTypeReq) (*accountdto.SetPlatformAnchorTypeRes, error) {
+	return liveroom.SetPlatformAnchorType(ctx, req)
+}

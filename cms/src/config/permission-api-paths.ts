@@ -38,6 +38,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'PlatformAnchorList:offShelf': '/account/setLiveRoomStatus',
     'PlatformAnchorList:ban': '/account/banAnchor',
     'PlatformAnchorList:unban': '/account/unBanAnchor',
+    'PlatformAnchorList:setAnchorType': '/account/setPlatformAnchorType',
 
     AnchorDetail: '/account/getAnchorDetail',
     'AnchorDetail:dailyEffectiveLive': '/account/getAnchorDailyEffectiveLiveList',

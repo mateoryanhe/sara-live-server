@@ -121,6 +121,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'offShelf', label: '下架'},
         {key: 'ban', label: '封禁主播'},
         {key: 'unban', label: '解封主播'},
+        {key: 'setAnchorType', label: '设置主播类型'},
     ],
     LiveRoomRecycleBinManagement: [BTN.view, BTN.search, {key: 'onShelf', label: '上架'}],
     RoleManagement: [

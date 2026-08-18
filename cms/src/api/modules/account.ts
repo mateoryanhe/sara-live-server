@@ -22,6 +22,8 @@ import type {
     SetLiveRoomStatusRes,
     SetRechargeWhitelistReq,
     SetSeniorAnchorReq,
+    SetPlatformAnchorTypeReq,
+    SetPlatformAnchorTypeRes,
     SetUserTypeReq,
     UnBanAnchorReq,
     UnBanReq,
@@ -122,7 +124,11 @@ const accountApi = {
     // 退出工会(将工会ID置为0)
     exitGuild: (data: ExitGuildReq) => {
         return request.post<ExitGuildRes>('/account/exitGuild', data)
-    }
+    },
+
+    setPlatformAnchorType: (data: SetPlatformAnchorTypeReq) => {
+        return request.post<SetPlatformAnchorTypeRes>('/account/setPlatformAnchorType', data)
+    },
 }
 
 export default accountApi

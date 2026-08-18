@@ -113,3 +113,13 @@ type SetRechargeWhitelistReq struct {
 type SetRechargeWhitelistRes struct {
 	Success bool `json:"success"`
 }
+
+type SetPlatformAnchorTypeReq struct {
+	g.Meta     `path:"/setPlatformAnchorType" method:"post" summary:"CMS设置平台主播类型" tags:"账号"`
+	UserId     uint64 `json:"userId" v:"required#用户ID不能为空" dc:"用户ID"`
+	AnchorType uint8  `json:"anchorType" v:"required#主播类型不能为空" dc:"主播类型(1=普通主播,7=高级主播)"`
+}
+
+type SetPlatformAnchorTypeRes struct {
+	Success bool `json:"success"`
+}
