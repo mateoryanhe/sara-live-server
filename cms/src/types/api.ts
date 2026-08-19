@@ -387,9 +387,45 @@ export interface AnchorDailyEffectiveLiveQuery extends PageQuery {
     settled?: number
 }
 
-export interface AnchorDailyEffectiveLiveItem {
+export interface AnchorDailyEffectiveLiveItem extends LiveRoomIncomeAmounts {
     id: string
     roomId?: string
+    liveDate?: string
+    liveDuration?: number
+    settled?: boolean
+    createdAt?: string | null
+    updatedAt?: string | null
+}
+
+export interface GuildDailyEffectiveLiveQuery extends PageQuery {
+    guildId: string | number
+    liveDateStart?: string
+    liveDateEnd?: string
+    settled?: number
+}
+
+export interface GuildDailyEffectiveLiveItem extends LiveRoomIncomeAmounts {
+    id: string
+    guildId?: string
+    liveDate?: string
+    liveDuration?: number
+    settled?: boolean
+    createdAt?: string | null
+    updatedAt?: string | null
+}
+
+export interface GuildAnchorDailyEffectiveLiveQuery extends PageQuery {
+    guildId: string | number
+    roomId?: string
+    liveDateStart?: string
+    liveDateEnd?: string
+    settled?: number
+}
+
+export interface GuildAnchorDailyEffectiveLiveItem extends LiveRoomIncomeAmounts {
+    id: string
+    roomId?: string
+    roomNickname?: string
     liveDate?: string
     liveDuration?: number
     settled?: boolean

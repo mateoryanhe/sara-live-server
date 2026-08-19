@@ -24,6 +24,19 @@ func notifyKickBannedAudience(anchorId, userId uint64) {
 	pushKickAudience(anchorId, userId, false)
 }
 
+func kickBanStatus(online *entity.LiveRoomOnline) (kickBanned bool, kickTime, expireAt, remain int64) {
+	if online == nil || !online.IsKickBanned() || online.KickTime == nil {
+		return false, 0, 0, 0
+	}
+	kickTime = online.KickTime.Unix()
+	expireAt = online.KickTime.Add(entity.LiveRoomKickBanDuration).Unix()
+	remain = expireAt - time.Now().Unix()
+	if remain < 0 {
+		remain = 0
+	}
+	return true, kickTime, expireAt, remain
+}
+
 func pushKickAudience(anchorId, userId uint64, refreshKickTime bool) {
 	onlineId := entity.BuildLiveRoomOnlineId(userId, anchorId)
 	online := liveroomdao.GetOnlineById(onlineId, userId, anchorId)

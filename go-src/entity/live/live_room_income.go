@@ -70,7 +70,7 @@ func (a *LiveRoomIncomeAmounts) IsZero() bool {
 }
 
 // addIncomeAmountsLocked 在已持锁前提下累加各收益字段
-func addIncomeAmountsLocked(tb db.TbName, id uint64, dst *LiveRoomIncomeAmounts, src *LiveRoomIncomeAmounts) {
+func addIncomeAmountsLocked(tb db.TbName, id any, dst *LiveRoomIncomeAmounts, src *LiveRoomIncomeAmounts) {
 	if dst == nil || src == nil || src.IsZero() {
 		return
 	}
@@ -104,7 +104,7 @@ func addIncomeAmountsLocked(tb db.TbName, id uint64, dst *LiveRoomIncomeAmounts,
 }
 
 // clearIncomeAmountsLocked 在已持锁前提下清零并写库
-func clearIncomeAmountsLocked(tb db.TbName, id uint64, a *LiveRoomIncomeAmounts, updatedAt *time.Time) {
+func clearIncomeAmountsLocked(tb db.TbName, id any, a *LiveRoomIncomeAmounts, updatedAt *time.Time) {
 	if a == nil {
 		return
 	}
@@ -132,16 +132,16 @@ func addIncomeAmount(tb db.TbName, col db.TbCol, id uint64, cur *float64, v floa
 	touchIncomeUpdatedAt(tb, id, updatedAt)
 }
 
-func addIncomeAmountLocked(tb db.TbName, col db.TbCol, id uint64, cur *float64, v float64) {
+func addIncomeAmountLocked(tb db.TbName, col db.TbCol, id any, cur *float64, v float64) {
 	*cur = math.AddFloat64(*cur, v)
 	syndb.AddData(tb, col, &syndb.ColData{IdVal: id, ColVal: *cur})
 }
 
-func writeIncomeAmountLocked(tb db.TbName, col db.TbCol, id uint64, v float64) {
+func writeIncomeAmountLocked(tb db.TbName, col db.TbCol, id any, v float64) {
 	syndb.AddData(tb, col, &syndb.ColData{IdVal: id, ColVal: v})
 }
 
-func touchIncomeUpdatedAt(tb db.TbName, id uint64, updatedAt *time.Time) {
+func touchIncomeUpdatedAt(tb db.TbName, id any, updatedAt *time.Time) {
 	if updatedAt == nil {
 		return
 	}
@@ -154,9 +154,16 @@ func addIncomeEarn(tb db.TbName, id uint64, a *LiveRoomIncomeAmounts, updatedAt 
 	if a == nil || id == 0 || extra == nil {
 		return
 	}
-	key := liveRoomIncomeLockKey(tb, id)
-	gmlock.Lock(key)
-	defer gmlock.Unlock(key)
+	addIncomeEarnWithLockKey(tb, liveRoomIncomeLockKey(tb, id), id, a, updatedAt, amount, extraCol, extra)
+}
+
+// addIncomeEarnWithLockKey 自定义锁键与主键类型的收益累加(用于日表等复合主键)
+func addIncomeEarnWithLockKey(tb db.TbName, lockKey string, id any, a *LiveRoomIncomeAmounts, updatedAt *time.Time, amount float64, extraCol db.TbCol, extra *float64) {
+	if a == nil || id == nil || extra == nil || lockKey == "" {
+		return
+	}
+	gmlock.Lock(lockKey)
+	defer gmlock.Unlock(lockKey)
 	addIncomeAmountLocked(tb, LiveRoomIncomeTotalIncome, id, &a.TotalIncome, amount)
 	if amount > 0 {
 		addIncomeAmountLocked(tb, extraCol, id, extra, amount)
@@ -169,9 +176,16 @@ func ApplyVideoCallIncomeDelta(tb db.TbName, id uint64, a *LiveRoomIncomeAmounts
 	if a == nil || id == 0 {
 		return
 	}
-	key := liveRoomIncomeLockKey(tb, id)
-	gmlock.Lock(key)
-	defer gmlock.Unlock(key)
+	ApplyVideoCallIncomeDeltaWithLockKey(tb, liveRoomIncomeLockKey(tb, id), id, a, updatedAt, amount, ticket, billing)
+}
+
+// ApplyVideoCallIncomeDeltaWithLockKey 自定义锁键与主键类型的通话收益增减
+func ApplyVideoCallIncomeDeltaWithLockKey(tb db.TbName, lockKey string, id any, a *LiveRoomIncomeAmounts, updatedAt *time.Time, amount float64, ticket, billing bool) {
+	if a == nil || id == nil || lockKey == "" {
+		return
+	}
+	gmlock.Lock(lockKey)
+	defer gmlock.Unlock(lockKey)
 	addIncomeAmountLocked(tb, LiveRoomIncomeTotalIncome, id, &a.TotalIncome, amount)
 	addIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallIncome, id, &a.TotalVideoCallIncome, amount)
 	if ticket {

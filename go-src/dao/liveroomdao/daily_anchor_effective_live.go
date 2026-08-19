@@ -52,7 +52,7 @@ func ClearRecentUnsettledDailyLiveDuration(roomId uint64) {
 	}
 }
 
-// ListRecentUnsettledDailyEffectiveLives 直查DB:某主播最近N条未结算日直播时长记录
+// ListRecentUnsettledDailyEffectiveLives 直查DB:某主播最近N条未结算日表,命中缓存则用缓存数据
 func ListRecentUnsettledDailyEffectiveLives(roomId uint64) []*entity.DailyAnchorEffectiveLive {
 	if roomId == 0 {
 		return nil
@@ -63,7 +63,7 @@ func ListRecentUnsettledDailyEffectiveLives(roomId uint64) []*entity.DailyAnchor
 		Order(string(db.CreatedAtName) + " desc").
 		Limit(recentUnsettledDailyEffectiveLiveLimit).
 		Scan(&rows)
-	return rows
+	return mergeDailyAnchorEffectiveLivesFromCache(rows)
 }
 
 func mergeDailyAnchorEffectiveLivesFromCache(rows []*entity.DailyAnchorEffectiveLive) []*entity.DailyAnchorEffectiveLive {
@@ -80,11 +80,7 @@ func mergeDailyAnchorEffectiveLivesFromCache(rows []*entity.DailyAnchorEffective
 	return list
 }
 
-func isDailyAnchorEffectiveLiveDefaultQuery(f *DailyAnchorEffectiveLiveCMSListFilter) bool {
-	return f.LiveDateStart == "" && f.LiveDateEnd == "" && f.Settled != 1
-}
-
-// DailyAnchorEffectiveLiveCMSListFilter CMS主播每日直播时长查询条件
+// DailyAnchorEffectiveLiveCMSListFilter CMS主播每日流水查询条件
 type DailyAnchorEffectiveLiveCMSListFilter struct {
 	RoomId        uint64
 	LiveDateStart string
@@ -94,15 +90,11 @@ type DailyAnchorEffectiveLiveCMSListFilter struct {
 	PageSize      int
 }
 
-// DailyAnchorEffectiveLiveCMSList CMS分页查询主播每日直播时长(按日期倒序)
+// DailyAnchorEffectiveLiveCMSList CMS分页查询主播每日流水(直查DB,命中缓存则用缓存数据)
 func DailyAnchorEffectiveLiveCMSList(f *DailyAnchorEffectiveLiveCMSListFilter) (int, []*entity.DailyAnchorEffectiveLive) {
 	list := make([]*entity.DailyAnchorEffectiveLive, 0)
 	if f == nil || f.RoomId == 0 {
 		return 0, list
-	}
-	if isDailyAnchorEffectiveLiveDefaultQuery(f) {
-		rows := mergeDailyAnchorEffectiveLivesFromCache(ListRecentUnsettledDailyEffectiveLives(f.RoomId))
-		return len(rows), rows
 	}
 	if f.PageIndex <= 0 {
 		f.PageIndex = 1

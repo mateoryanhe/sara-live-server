@@ -153,6 +153,7 @@ func applyRoomCallRevenueDelta(room *liveentity.LiveRoom, amount float64, ticket
 	liveentity.ApplyVideoCallIncomeDelta(liveentity.TbLiveRoomIncomeUnsettled, unsettled.ID, &unsettled.LiveRoomIncomeAmounts, &unsettled.UpdatedAt, amount, ticket, billing)
 	liveentity.ApplyVideoCallIncomeDelta(liveentity.TbLiveRoomIncomeTotal, total.ID, &total.LiveRoomIncomeAmounts, &total.UpdatedAt, amount, ticket, billing)
 	liveroomdao.MirrorGuildVideoCallIncomeDelta(room.ID, amount, ticket, billing)
+	liveroomdao.MirrorDailyAnchorVideoCallIncomeDelta(room.ID, time.Now(), amount, ticket, billing)
 }
 
 const callBillingRefundGrace = 30 * time.Second

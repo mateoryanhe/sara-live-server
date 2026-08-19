@@ -1,6 +1,8 @@
 package liveroomdao
 
 import (
+	"time"
+
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/entity/live"
@@ -63,8 +65,9 @@ func ForRoomGuild(roomId uint64, fn func(guildId uint64)) {
 	fn(guildId)
 }
 
-// MirrorGuildGiftEarn 同步礼物收益到工会未结算+生涯
+// MirrorGuildGiftEarn 同步礼物收益到工会未结算+生涯+日表
 func MirrorGuildGiftEarn(roomId uint64, amount float64) {
+	at := time.Now()
 	ForRoomGuild(roomId, func(guildId uint64) {
 		if u := GetGuildIncomeUnsettled(guildId); u != nil {
 			u.AddGiftEarn(amount)
@@ -72,11 +75,13 @@ func MirrorGuildGiftEarn(roomId uint64, amount float64) {
 		if t := GetGuildIncomeTotal(guildId); t != nil {
 			t.AddGiftEarn(amount)
 		}
+		MirrorDailyGuildGiftEarn(guildId, at, amount)
 	})
 }
 
 // MirrorGuildPaidDanmakuEarn 同步付费弹幕收益到工会
 func MirrorGuildPaidDanmakuEarn(roomId uint64, amount float64) {
+	at := time.Now()
 	ForRoomGuild(roomId, func(guildId uint64) {
 		if u := GetGuildIncomeUnsettled(guildId); u != nil {
 			u.AddPaidDanmakuEarn(amount)
@@ -84,11 +89,13 @@ func MirrorGuildPaidDanmakuEarn(roomId uint64, amount float64) {
 		if t := GetGuildIncomeTotal(guildId); t != nil {
 			t.AddPaidDanmakuEarn(amount)
 		}
+		MirrorDailyGuildPaidDanmakuEarn(guildId, at, amount)
 	})
 }
 
 // MirrorGuildPrivateRoomTicketEarn 同步私密房门票收益到工会
 func MirrorGuildPrivateRoomTicketEarn(roomId uint64, amount float64) {
+	at := time.Now()
 	ForRoomGuild(roomId, func(guildId uint64) {
 		if u := GetGuildIncomeUnsettled(guildId); u != nil {
 			u.AddPrivateRoomTicketEarn(amount)
@@ -96,11 +103,13 @@ func MirrorGuildPrivateRoomTicketEarn(roomId uint64, amount float64) {
 		if t := GetGuildIncomeTotal(guildId); t != nil {
 			t.AddPrivateRoomTicketEarn(amount)
 		}
+		MirrorDailyGuildPrivateRoomTicketEarn(guildId, at, amount)
 	})
 }
 
 // MirrorGuildPrivateRoomWatchEarn 同步私密房观看收益到工会
 func MirrorGuildPrivateRoomWatchEarn(roomId uint64, amount float64) {
+	at := time.Now()
 	ForRoomGuild(roomId, func(guildId uint64) {
 		if u := GetGuildIncomeUnsettled(guildId); u != nil {
 			u.AddPrivateRoomWatchEarn(amount)
@@ -108,11 +117,13 @@ func MirrorGuildPrivateRoomWatchEarn(roomId uint64, amount float64) {
 		if t := GetGuildIncomeTotal(guildId); t != nil {
 			t.AddPrivateRoomWatchEarn(amount)
 		}
+		MirrorDailyGuildPrivateRoomWatchEarn(guildId, at, amount)
 	})
 }
 
 // MirrorGuildLiveDuration 同步直播时长到工会
 func MirrorGuildLiveDuration(roomId uint64, sec float64) {
+	at := time.Now()
 	ForRoomGuild(roomId, func(guildId uint64) {
 		if u := GetGuildIncomeUnsettled(guildId); u != nil {
 			u.AddTotalLiveDuration(sec)
@@ -120,11 +131,13 @@ func MirrorGuildLiveDuration(roomId uint64, sec float64) {
 		if t := GetGuildIncomeTotal(guildId); t != nil {
 			t.AddTotalLiveDuration(sec)
 		}
+		MirrorDailyGuildLiveDuration(guildId, at, sec)
 	})
 }
 
 // MirrorGuildVideoCallIncomeDelta 同步通话收益增减到工会
 func MirrorGuildVideoCallIncomeDelta(roomId uint64, amount float64, ticket, billing bool) {
+	at := time.Now()
 	ForRoomGuild(roomId, func(guildId uint64) {
 		unsettled := GetGuildIncomeUnsettled(guildId)
 		total := GetGuildIncomeTotal(guildId)
@@ -133,6 +146,7 @@ func MirrorGuildVideoCallIncomeDelta(roomId uint64, amount float64, ticket, bill
 		}
 		entity.ApplyVideoCallIncomeDelta(entity.TbGuildIncomeUnsettled, unsettled.ID, &unsettled.LiveRoomIncomeAmounts, &unsettled.UpdatedAt, amount, ticket, billing)
 		entity.ApplyVideoCallIncomeDelta(entity.TbGuildIncomeTotal, total.ID, &total.LiveRoomIncomeAmounts, &total.UpdatedAt, amount, ticket, billing)
+		MirrorDailyGuildVideoCallIncomeDelta(guildId, at, amount, ticket, billing)
 	})
 }
 

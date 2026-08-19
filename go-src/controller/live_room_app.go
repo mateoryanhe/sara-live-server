@@ -52,6 +52,11 @@ func (c *LiveRoomAppController) LeaveRoom(ctx context.Context, req *liveroomdto.
 	return liveroom.LeaveRoom(ctx, req)
 }
 
+// GetLiveRecord 按直播间ID查询本场直播记录
+func (c *LiveRoomAppController) GetLiveRecord(ctx context.Context, req *liveroomdto.GetLiveRecordReq) (res *liveroomdto.GetLiveRecordRes, err error) {
+	return liveroom.GetLiveRecord(ctx, req)
+}
+
 // GetOnlineUserList 分页查询直播间在线玩家
 func (c *LiveRoomAppController) GetOnlineUserList(ctx context.Context, req *liveroomdto.GetOnlineUserListReq) (res *liveroomdto.GetOnlineUserListRes, err error) {
 	return liveroom.GetOnlineUserList(ctx, req)

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/cache"
 	"xr-game-server/entity/live"
@@ -38,7 +39,7 @@ func GetDailyGuildEffectiveLive(date string, guildId uint64) *entity.DailyGuildE
 	return row
 }
 
-// ListRecentUnsettledDailyGuildEffectiveLives 直查DB:某工会最近N条未结算日直播时长记录
+// ListRecentUnsettledDailyGuildEffectiveLives 直查DB:某工会最近N条未结算日表,命中缓存则用缓存数据
 func ListRecentUnsettledDailyGuildEffectiveLives(guildId uint64) []*entity.DailyGuildEffectiveLive {
 	if guildId == 0 {
 		return nil
@@ -49,7 +50,69 @@ func ListRecentUnsettledDailyGuildEffectiveLives(guildId uint64) []*entity.Daily
 		Order(string(db.CreatedAtName) + " desc").
 		Limit(recentUnsettledDailyGuildEffectiveLiveLimit).
 		Scan(&rows)
-	return rows
+	return mergeDailyGuildEffectiveLivesFromCache(rows)
+}
+
+func mergeDailyGuildEffectiveLivesFromCache(rows []*entity.DailyGuildEffectiveLive) []*entity.DailyGuildEffectiveLive {
+	if len(rows) == 0 {
+		return rows
+	}
+	list := make([]*entity.DailyGuildEffectiveLive, 0, len(rows))
+	for _, row := range rows {
+		if row == nil || row.ID == "" {
+			continue
+		}
+		list = append(list, resolveDailyGuildEffectiveLiveTarget(row))
+	}
+	return list
+}
+
+// DailyGuildEffectiveLiveCMSListFilter CMS工会每日流水查询条件
+type DailyGuildEffectiveLiveCMSListFilter struct {
+	GuildId       uint64
+	LiveDateStart string
+	LiveDateEnd   string
+	Settled       int8 // -1全部,0未结算,1已结算
+	PageIndex     int
+	PageSize      int
+}
+
+// DailyGuildEffectiveLiveCMSList CMS分页查询工会每日流水(直查DB,命中缓存则用缓存数据)
+func DailyGuildEffectiveLiveCMSList(f *DailyGuildEffectiveLiveCMSListFilter) (int, []*entity.DailyGuildEffectiveLive) {
+	list := make([]*entity.DailyGuildEffectiveLive, 0)
+	if f == nil || f.GuildId == 0 {
+		return 0, list
+	}
+	if f.PageIndex <= 0 {
+		f.PageIndex = 1
+	}
+	if f.PageSize <= 0 {
+		f.PageSize = 20
+	}
+	ctx := gctx.New()
+	m := g.Model(string(entity.TbDailyGuildEffectiveLive)).Ctx(ctx).
+		Where(string(entity.DailyGuildEffectiveLiveGuildId)+" = ?", f.GuildId)
+	if f.LiveDateStart != "" {
+		m = m.Where(string(entity.DailyGuildEffectiveLiveLiveDate)+" >= ?", f.LiveDateStart)
+	}
+	if f.LiveDateEnd != "" {
+		m = m.Where(string(entity.DailyGuildEffectiveLiveLiveDate)+" <= ?", f.LiveDateEnd)
+	}
+	if f.Settled == 0 {
+		m = m.Where(string(entity.DailyGuildEffectiveLiveSettled)+" = ?", false)
+	} else if f.Settled == 1 {
+		m = m.Where(string(entity.DailyGuildEffectiveLiveSettled)+" = ?", true)
+	}
+	total, err := m.Clone().Count()
+	if err != nil {
+		return 0, list
+	}
+	_ = m.Clone().
+		Order(string(entity.DailyGuildEffectiveLiveLiveDate) + " desc, id desc").
+		Limit(f.PageSize).
+		Offset((f.PageIndex - 1) * f.PageSize).
+		Scan(&list)
+	return total, mergeDailyGuildEffectiveLivesFromCache(list)
 }
 
 // ClearRecentUnsettledDailyGuildLiveDuration 工会下架:直查DB取最近8条未结算日表,直播时长置0
@@ -64,7 +127,7 @@ func ClearRecentUnsettledDailyGuildLiveDuration(guildId uint64) {
 	}
 }
 
-// MarkDailyGuildEffectiveLivesSettled 将工会日直播时长记录标记为已结算
+// MarkDailyGuildEffectiveLivesSettled 将工会日表记录标记为已结算(优先写缓存对象)
 func MarkDailyGuildEffectiveLivesSettled(rows []*entity.DailyGuildEffectiveLive) {
 	for _, row := range rows {
 		if row == nil || row.ID == "" {

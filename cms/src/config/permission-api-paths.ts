@@ -22,6 +22,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'UserList:rechargeWhitelistOff': '/account/setRechargeWhitelist',
     'UserList:cancel': '/account/cancel',
     'UserList:setUserType': '/account/setUserType',
+    'UserList:setAnchorType': '/account/setPlatformAnchorType',
     UserDetail: '/account/getUserDetail',
 
     AnchorListManagement: '/account/getAnchorList',
@@ -42,6 +43,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
 
     AnchorDetail: '/account/getAnchorDetail',
     'AnchorDetail:dailyEffectiveLive': '/account/getAnchorDailyEffectiveLiveList',
+    'AnchorDetail:exportDailyEffectiveLive': '/account/getAnchorDailyEffectiveLiveList',
     'AnchorDetail:liveRecord': '/liveRecord/cmsLiveRecordList',
     'AnchorDetail:exportLiveRecord': '/liveRecord/cmsLiveRecordList',
     'AnchorDetail:settlementLog': '/anchorIncomeSettlementLog/cmsAnchorIncomeSettlementLogList',
@@ -120,6 +122,10 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GuildDetail:exportSettlementLog': '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
     'GuildDetail:anchorSettlementLog': '/guild/cmsGuildAnchorIncomeSettlementLogList',
     'GuildDetail:exportAnchorSettlementLog': '/guild/cmsGuildAnchorIncomeSettlementLogList',
+    'GuildDetail:anchorDailyEffectiveLive': '/guild/cmsGuildAnchorDailyEffectiveLiveList',
+    'GuildDetail:exportAnchorDailyEffectiveLive': '/guild/cmsGuildAnchorDailyEffectiveLiveList',
+    'GuildDetail:dailyEffectiveLive': '/guild/getGuildDailyEffectiveLiveList',
+    'GuildDetail:exportDailyEffectiveLive': '/guild/getGuildDailyEffectiveLiveList',
 
     GuildRecycleBinManagement: '/guild/offShelfGuildList',
     'GuildRecycleBinManagement:view': '/guild/offShelfGuildList',

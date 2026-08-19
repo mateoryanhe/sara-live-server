@@ -82,6 +82,12 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/account/getUserInfo"}
 	case "/account/getAnchorDailyEffectiveLiveList":
 		return []string{"/account/getAnchorDetail"}
+	case "/guild/getGuildDailyEffectiveLiveList":
+		return []string{"/guild/getGuildDetail"}
+	case "/guild/cmsGuildAnchorDailyEffectiveLiveList":
+		return []string{"/guild/cmsGuildAnchorIncomeSettlementLogList", "/guild/getGuildDetail"}
+	case "/guild/setGuildAnchorType":
+		return []string{"/account/setPlatformAnchorType"}
 	default:
 		return nil
 	}

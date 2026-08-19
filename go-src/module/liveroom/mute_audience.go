@@ -3,7 +3,6 @@ package liveroom
 import (
 	"context"
 	"strconv"
-	"time"
 
 	"xr-game-server/constants/cmd"
 	"xr-game-server/core/httpserver"
@@ -39,17 +38,7 @@ func GetAudienceRestrictStatus(ctx context.Context, req *liveroomdto.GetAudience
 	}
 
 	res.Muted = online.Muted
-	res.KickBanned = online.IsKickBanned()
-	if res.KickBanned && online.KickTime != nil {
-		kickTime := online.KickTime.Unix()
-		expireAt := online.KickTime.Add(entity.LiveRoomKickBanDuration).Unix()
-		res.KickTime = kickTime
-		res.KickBanExpireAt = expireAt
-		remain := expireAt - time.Now().Unix()
-		if remain > 0 {
-			res.KickRemainSeconds = remain
-		}
-	}
+	res.KickBanned, res.KickTime, res.KickBanExpireAt, res.KickRemainSeconds = kickBanStatus(online)
 	return res, nil
 }
 

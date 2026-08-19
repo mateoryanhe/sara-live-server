@@ -93,6 +93,7 @@ func SendPaidDanmaku(ctx context.Context, req *liveroomdto.SendPaidDanmakuReq) (
 	liveroomdao.GetLiveRoomIncomeUnsettled(room.ID).AddPaidDanmakuEarn(price)
 	liveroomdao.GetLiveRoomIncomeTotal(room.ID).AddPaidDanmakuEarn(price)
 	liveroomdao.MirrorGuildPaidDanmakuEarn(room.ID, price)
+	liveroomdao.MirrorDailyAnchorPaidDanmakuEarn(room.ID, time.Now(), price)
 
 	event.Pub(gameevent.RevenueEventEvent, eventData)
 

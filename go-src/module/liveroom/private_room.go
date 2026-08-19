@@ -77,6 +77,7 @@ func chargePrivateRoomTicketIfNeeded(userId uint64, room *entity.LiveRoom, now t
 	liveroomdao.GetLiveRoomIncomeUnsettled(room.ID).AddPrivateRoomTicketEarn(ticketPrice)
 	liveroomdao.GetLiveRoomIncomeTotal(room.ID).AddPrivateRoomTicketEarn(ticketPrice)
 	liveroomdao.MirrorGuildPrivateRoomTicketEarn(room.ID, ticketPrice)
+	liveroomdao.MirrorDailyAnchorPrivateRoomTicketEarn(room.ID, now, ticketPrice)
 
 	eventData := entity.NewLiveRevenueLogRecord(room.ID, room.LiveRecordId, 0, room.ID, 0, 0, 0, ticketPrice, uint8(liverevenue.Ticket))
 	event.Pub(gameevent.RevenueEventEvent, eventData)
@@ -199,6 +200,7 @@ func recordPrivateRoomBillingRevenue(room *entity.LiveRoom, userId uint64, amoun
 	liveroomdao.GetLiveRoomIncomeUnsettled(room.ID).AddPrivateRoomWatchEarn(amount)
 	liveroomdao.GetLiveRoomIncomeTotal(room.ID).AddPrivateRoomWatchEarn(amount)
 	liveroomdao.MirrorGuildPrivateRoomWatchEarn(room.ID, amount)
+	liveroomdao.MirrorDailyAnchorPrivateRoomWatchEarn(room.ID, time.Now(), amount)
 	eventData := entity.NewLiveRevenueLogRecord(
 		room.ID, room.LiveRecordId, userId, room.ID, 0, 1, amount, amount, uint8(liverevenue.PrivateRoom),
 	)

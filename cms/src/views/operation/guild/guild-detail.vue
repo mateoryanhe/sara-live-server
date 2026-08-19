@@ -52,12 +52,20 @@
             <ArchivePanel :active="activeTab === 'incomeArchive'" :guild-id="guildId"/>
           </el-tab-pane>
 
+          <el-tab-pane :label="t('pages.guildList.tabDailyEffectiveLive')" name="dailyEffectiveLive">
+            <DailyLivePanel :active="activeTab === 'dailyEffectiveLive'" :guild-id="guildId"/>
+          </el-tab-pane>
+
           <el-tab-pane :label="t('pages.guildList.tabSettlementLog')" name="settlementLog">
             <SettlementLogPanel :active="activeTab === 'settlementLog'" :guild-id="guildId"/>
           </el-tab-pane>
 
           <el-tab-pane :label="t('pages.guildList.tabAnchorSettlementLog')" name="anchorSettlementLog">
             <AnchorSettlementLogPanel :active="activeTab === 'anchorSettlementLog'" :guild-id="guildId"/>
+          </el-tab-pane>
+
+          <el-tab-pane :label="t('pages.guildList.tabAnchorDailyEffectiveLive')" name="anchorDailyEffectiveLive">
+            <AnchorDailyLivePanel :active="activeTab === 'anchorDailyEffectiveLive'" :guild-id="guildId"/>
           </el-tab-pane>
         </el-tabs>
       </div>
@@ -73,8 +81,10 @@ import {ElMessage} from 'element-plus'
 import {guildApi} from '@/api'
 import IncomePanel from './guild-detail-income-panel.vue'
 import ArchivePanel from './guild-detail-archive-panel.vue'
+import DailyLivePanel from './guild-detail-daily-live-panel.vue'
 import SettlementLogPanel from './guild-detail-settlement-log-panel.vue'
 import AnchorSettlementLogPanel from './guild-detail-anchor-settlement-log-panel.vue'
+import AnchorDailyLivePanel from './guild-detail-anchor-daily-live-panel.vue'
 import type {Guild, GuildDetailIncome} from '@/types/api'
 
 const {t} = useI18n()

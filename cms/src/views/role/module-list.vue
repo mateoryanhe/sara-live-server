@@ -32,14 +32,9 @@ import {useI18n} from 'vue-i18n'
 import {onMounted, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import router from '@/router'
-import {layoutRouteGroups} from '@/router/routes'
 import {useRoute} from 'vue-router'
 import {roleApi} from '@/api/modules/role'
-import {
-  buttonPermissionKey,
-  getPageButtons,
-  type PageButtonDef,
-} from '@/config/page-buttons'
+import {buildPermissionModuleTree} from '@/config/permission-menu-tree'
 import {getPermissionApiPath} from '@/config/permission-api-paths'
 
 interface ModuleNode {
@@ -61,53 +56,19 @@ const treeProps = {
   label: 'name',
 }
 
-const buildButtonNodes = (pageName: string, metaButtons?: PageButtonDef[]): ModuleNode[] => {
-  return getPageButtons(pageName, metaButtons).map(btn => ({
-    id: buttonPermissionKey(pageName, btn.key),
-    name: btn.label,
-  }))
-}
-
-const generateModuleTreeFromRoutes = () => {
-  const routeModules: ModuleNode[] = []
-
-  layoutRouteGroups.forEach(group => {
-    if (group.children && group.meta) {
-      const module: ModuleNode = {
-        id: `module_${group.path.replace('/', '')}`,
-        name: (group.meta.title as string) || group.path,
-        children: [],
-      }
-
-      group.children.forEach(child => {
-        if (child.name && child.meta && !child.meta.hidden) {
-          const pageName = child.name as string
-          const metaButtons = child.meta.buttons as PageButtonDef[] | undefined
-          const buttonNodes = buildButtonNodes(pageName, metaButtons)
-          module.children?.push({
-            id: pageName,
-            name: (child.meta.title as string) || pageName,
-            children: buttonNodes.length > 0 ? buttonNodes : undefined,
-          })
-        }
-      })
-
-      if (module.children && module.children.length > 0) {
-        routeModules.push(module)
-      }
-    }
-  })
-
-  return routeModules
+const isPermissionModuleKey = (key: string) => {
+  const value = String(key)
+  return value.startsWith('module_') || value.startsWith('permission_slice_')
 }
 
 const collectSelectedPermissions = (): string[] => {
   const checkedLeaves = treeRef.value.getCheckedKeys(true) as string[]
   const checkedAll = treeRef.value.getCheckedKeys(false) as string[]
 
-  const pageKeys = checkedAll.filter(
-      key => !String(key).startsWith('module_') && !String(key).includes(':'),
-  )
+  const pageKeys = checkedAll.filter(key => {
+    const value = String(key)
+    return !isPermissionModuleKey(value) && !value.includes(':')
+  })
   const buttonKeys = checkedLeaves.filter(key => String(key).includes(':'))
 
   return [...new Set([...pageKeys, ...buttonKeys])]
@@ -142,7 +103,7 @@ const handleBack = () => {
 }
 
 onMounted(async () => {
-  moduleTreeData.value = generateModuleTreeFromRoutes()
+  moduleTreeData.value = buildPermissionModuleTree(t)
 
   const permissions = await roleApi.getRolePermissionList(roleId.value)
   const permissionModules = permissions.map(p => p.module)

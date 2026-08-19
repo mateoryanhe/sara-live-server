@@ -96,6 +96,7 @@ func flushAnchorId(room *entity.LiveRoom) {
 		total.AddTotalLiveDuration(sec)
 	}
 	liveroomdao.MirrorGuildLiveDuration(room.ID, sec)
+	liveroomdao.MirrorDailyAnchorLiveDuration(room.ID, now, sec)
 }
 
 func flushAudience(userId uint64, room *entity.LiveRoom) {

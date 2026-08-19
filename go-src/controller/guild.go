@@ -92,3 +92,13 @@ func (c *GuildController) GetGuildDetail(ctx context.Context, req *guilddto.GetG
 func (c *GuildController) GetGuildIncomeArchives(ctx context.Context, req *guilddto.GetGuildIncomeArchivesReq) (res *guilddto.GetGuildIncomeArchivesRes, err error) {
 	return guild.QueryGuildIncomeArchives(ctx, req)
 }
+
+// GetGuildDailyEffectiveLiveList CMS查询工会每日流水
+func (c *GuildController) GetGuildDailyEffectiveLiveList(ctx context.Context, req *guilddto.GetGuildDailyEffectiveLiveListReq) (*httpserver.CMSQueryResp, error) {
+	return guild.QueryGuildDailyEffectiveLiveList(ctx, req)
+}
+
+// CMSGuildAnchorDailyEffectiveLiveList CMS查询工会名下主播每日流水
+func (c *GuildController) CMSGuildAnchorDailyEffectiveLiveList(ctx context.Context, req *guilddto.CMSGuildAnchorDailyEffectiveLiveListReq) (*httpserver.CMSQueryResp, error) {
+	return guild.GetGuildAnchorDailyEffectiveLiveList(ctx, req)
+}

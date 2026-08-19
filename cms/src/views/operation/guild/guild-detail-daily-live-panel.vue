@@ -4,7 +4,7 @@
         :closable="false"
         class="hint-alert"
         show-icon
-        :title="t('pages.anchorList.dailyEffectiveLiveHint')"
+        :title="t('pages.guildList.dailyEffectiveLiveHint')"
         type="info"
     />
 
@@ -54,7 +54,7 @@
       </el-table-column>
     </el-table>
 
-    <el-empty v-if="!loading && tableData.length === 0" :description="t('pages.anchorList.noDailyEffectiveLiveData')"/>
+    <el-empty v-if="!loading && tableData.length === 0" :description="t('pages.guildList.noDailyEffectiveLiveData')"/>
   </div>
 </template>
 
@@ -62,42 +62,42 @@
 import {computed, ref, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage} from 'element-plus'
-import {accountApi} from '@/api'
-import type {AnchorDailyEffectiveLiveItem} from '@/types/api'
+import {guildApi} from '@/api'
+import type {GuildDailyEffectiveLiveItem} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
 import {downloadCsv, fetchAllPagedRows} from '@/utils/csv-export'
-import {buildAnchorDailyEffectiveLiveCsvColumns} from '@/utils/daily-effective-live-csv'
+import {buildGuildDailyEffectiveLiveCsvColumns} from '@/utils/daily-effective-live-csv'
 import {formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 
 const props = defineProps<{
-  anchorId: string
+  guildId: string
   active: boolean
 }>()
 
 const {t} = useI18n()
-const {can} = usePagePermission('AnchorDetail')
+const {can} = usePagePermission('GuildDetail')
 const canExport = computed(() => can('exportDailyEffectiveLive'))
 const loading = ref(false)
 const exporting = ref(false)
-const tableData = ref<AnchorDailyEffectiveLiveItem[]>([])
+const tableData = ref<GuildDailyEffectiveLiveItem[]>([])
 const loaded = ref(false)
 
 const DEFAULT_PAGE_SIZE = 8
 
 const buildFilterParams = () => ({
-  anchorId: props.anchorId,
+  guildId: props.guildId,
   settled: 0,
 })
 
 const fetchList = async () => {
-  if (!props.anchorId) {
+  if (!props.guildId) {
     tableData.value = []
     return
   }
   loading.value = true
   try {
-    const response = await accountApi.getAnchorDailyEffectiveLiveList({
+    const response = await guildApi.getGuildDailyEffectiveLiveList({
       ...buildFilterParams(),
       pageIndex: 1,
       pageSize: DEFAULT_PAGE_SIZE,
@@ -105,22 +105,22 @@ const fetchList = async () => {
     tableData.value = response.data || []
     loaded.value = true
   } catch (error) {
-    console.error('Failed to load daily effective live list:', error)
-    ElMessage.error(t('pages.anchorList.dailyEffectiveLiveFetchFailed'))
+    console.error('Failed to load guild daily flow list:', error)
+    ElMessage.error(t('pages.guildList.dailyEffectiveLiveFetchFailed'))
   } finally {
     loading.value = false
   }
 }
 
 const handleExport = async () => {
-  if (!props.anchorId) {
+  if (!props.guildId) {
     ElMessage.warning(t('common.exportEmpty'))
     return
   }
   exporting.value = true
   try {
     const rows = await fetchAllPagedRows((pageIndex, pageSize) =>
-      accountApi.getAnchorDailyEffectiveLiveList({
+      guildApi.getGuildDailyEffectiveLiveList({
         ...buildFilterParams(),
         pageIndex,
         pageSize,
@@ -131,13 +131,13 @@ const handleExport = async () => {
       return
     }
     downloadCsv(
-      `anchor-daily-flow-${props.anchorId}-${Date.now()}.csv`,
-      buildAnchorDailyEffectiveLiveCsvColumns(t),
+      `guild-daily-flow-${props.guildId}-${Date.now()}.csv`,
+      buildGuildDailyEffectiveLiveCsvColumns(t),
       rows,
     )
     ElMessage.success(t('common.exportSuccess'))
   } catch (error) {
-    console.error('Failed to export anchor daily flow:', error)
+    console.error('Failed to export guild daily flow:', error)
     ElMessage.error(t('common.exportFailed'))
   } finally {
     exporting.value = false
@@ -159,7 +159,7 @@ const resetState = () => {
 }
 
 watch(
-  () => props.anchorId,
+  () => props.guildId,
   () => {
     resetState()
     if (props.active) {
@@ -171,7 +171,7 @@ watch(
 watch(
   () => props.active,
   (active) => {
-    if (active && !loaded.value && props.anchorId) {
+    if (active && !loaded.value && props.guildId) {
       fetchList()
     }
   },

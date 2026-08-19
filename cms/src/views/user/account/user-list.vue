@@ -189,6 +189,7 @@
                       {{ scope.row.cancel ? t('pages.userList.uncancel') : t('pages.userList.cancelAccount') }}
                     </el-dropdown-item>
                     <el-dropdown-item v-if="can('setUserType') && !scope.row.isAnchor" command="setUserType">{{ t('pages.userList.setUserType') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="showSetAnchorType && isAnchorUser(scope.row)" command="setAnchorType">{{ t('pages.guildMembers.setAnchorType') }}</el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
@@ -302,15 +303,41 @@
         <el-button :loading="userTypeSubmitting" type="primary" @click="submitUserType">{{ t('common.confirm') }}</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog
+        v-model="anchorTypeDialogVisible"
+        :title="anchorTypeDialogTitle"
+        width="480px"
+        @closed="resetAnchorTypeForm"
+    >
+      <el-form ref="anchorTypeFormRef" :model="anchorTypeForm" :rules="anchorTypeFormRules" label-width="100px">
+        <el-form-item :label="t('common.userId')">
+          <el-input v-model="anchorTypeForm.userId" disabled/>
+        </el-form-item>
+        <el-form-item :label="t('common.nickname')">
+          <el-input v-model="anchorTypeForm.nickname" disabled/>
+        </el-form-item>
+        <el-form-item :label="t('pages.anchorList.anchorType')" prop="anchorType">
+          <el-select v-model="anchorTypeForm.anchorType" style="width: 100%">
+            <el-option :label="t('pages.anchorList.anchorTypeNormal')" :value="1"/>
+            <el-option :label="t('pages.anchorList.anchorTypeSenior')" :value="7"/>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="anchorTypeDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button :loading="anchorTypeSubmitting" type="primary" @click="submitAnchorType">{{ t('common.confirm') }}</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
 import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
-import {accountApi, diamondApi, goldApi} from '@/api'
+import {accountApi, diamondApi, goldApi, guildApi} from '@/api'
 import {ArrowDown} from '@element-plus/icons-vue'
-import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
+import {ElForm, ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {useRoute, useRouter} from 'vue-router'
 import type {BanReq, CancelReq, UnBanReq, UnCancelReq, UserInfo} from '@/types/api.ts'
 import {formatWalletBalance, NUMBER_INPUT_DECIMALS} from '@/utils/number-format'
@@ -319,10 +346,15 @@ import {usePagePermission} from '@/composables/usePagePermission'
 const {t, locale} = useI18n()
 const {can} = usePagePermission('UserList')
 const canViewDetail = computed(() => can('viewDetail'))
+const showSetAnchorType = computed(() => can('setAnchorType'))
+
+const USER_TYPE_ANCHOR = 1
+const USER_TYPE_SENIOR_ANCHOR = 7
 
 const ROW_ACTION_KEYS = [
   'setAnchor',
   'setSeniorAnchor',
+  'setAnchorType',
   'goldAdd',
   'goldSub',
   'diamondAdd',
@@ -353,6 +385,10 @@ const banFormRef = ref<FormInstance>()
 const userTypeDialogVisible = ref(false)
 const userTypeSubmitting = ref(false)
 const userTypeFormRef = ref<FormInstance>()
+const anchorTypeDialogVisible = ref(false)
+const anchorTypeDialogTitle = ref('')
+const anchorTypeSubmitting = ref(false)
+const anchorTypeFormRef = ref<InstanceType<typeof ElForm>>()
 
 const userTypeLabelMap = computed<Record<number, string>>(() => ({
   0: t('pages.userList.userTypeNormal'),
@@ -386,6 +422,29 @@ const userTypeFormRules = computed<FormRules>(() => ({
     {required: true, message: t('pages.userList.selectUserTypeRequired'), trigger: 'change'}
   ]
 }))
+
+interface AnchorTypeForm {
+  userId: string
+  nickname: string
+  guildId: string
+  anchorType: 1 | 7
+}
+
+const anchorTypeForm = reactive<AnchorTypeForm>({
+  userId: '',
+  nickname: '',
+  guildId: '0',
+  anchorType: 1,
+})
+
+const anchorTypeFormRules = computed<FormRules>(() => ({
+  anchorType: [
+    {required: true, message: t('pages.guildMembers.anchorTypeRequired'), trigger: 'change'},
+  ],
+}))
+
+const isAnchorUser = (row: UserInfo) =>
+    !!row.isAnchor || row.userType === USER_TYPE_ANCHOR || row.userType === USER_TYPE_SENIOR_ANCHOR
 
 interface BanForm {
   userId: string
@@ -626,6 +685,9 @@ const handleRowCommand = (row: UserInfo, command: string) => {
     case 'setSeniorAnchor':
       handleSetSeniorAnchor(row)
       break
+    case 'setAnchorType':
+      openAnchorTypeDialog(row)
+      break
   }
 }
 
@@ -705,6 +767,60 @@ const handleSetSeniorAnchor = async (row: UserInfo) => {
       console.error('setSeniorAnchor failed:', error)
     }
   }
+}
+
+const resetAnchorTypeForm = () => {
+  anchorTypeForm.userId = ''
+  anchorTypeForm.nickname = ''
+  anchorTypeForm.guildId = '0'
+  anchorTypeForm.anchorType = 1
+  anchorTypeFormRef.value?.clearValidate()
+}
+
+const openAnchorTypeDialog = (row: UserInfo) => {
+  anchorTypeDialogTitle.value = t('pages.guildMembers.setAnchorTypeTitle', {id: row.id})
+  anchorTypeForm.userId = String(row.id)
+  anchorTypeForm.nickname = row.nickname || '-'
+  anchorTypeForm.guildId = row.guildId != null && String(row.guildId) !== '' ? String(row.guildId) : '0'
+  const userType = row.userType ?? USER_TYPE_ANCHOR
+  anchorTypeForm.anchorType = userType === USER_TYPE_SENIOR_ANCHOR ? 7 : 1
+  anchorTypeDialogVisible.value = true
+}
+
+const submitAnchorType = async () => {
+  if (!anchorTypeFormRef.value) {
+    return
+  }
+  await anchorTypeFormRef.value.validate(async (valid: boolean) => {
+    if (!valid) {
+      return
+    }
+    anchorTypeSubmitting.value = true
+    try {
+      const payload = {
+        userId: anchorTypeForm.userId,
+        anchorType: anchorTypeForm.anchorType,
+      }
+      const response = anchorTypeForm.guildId === '0'
+          ? await accountApi.setPlatformAnchorType(payload)
+          : await guildApi.setGuildAnchorType({
+            guildId: anchorTypeForm.guildId,
+            ...payload,
+          })
+      if (response?.success) {
+        ElMessage.success(t('pages.guildMembers.setAnchorTypeSuccess'))
+        anchorTypeDialogVisible.value = false
+        await fetchUserList()
+      } else {
+        ElMessage.error(t('pages.guildMembers.setAnchorTypeFailed'))
+      }
+    } catch (error) {
+      console.error('setAnchorType failed:', error)
+      ElMessage.error(t('pages.guildMembers.setAnchorTypeRequestFailed'))
+    } finally {
+      anchorTypeSubmitting.value = false
+    }
+  })
 }
 
 const afterCurrencyChangeSuccess = () => {

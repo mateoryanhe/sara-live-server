@@ -4,16 +4,32 @@
         :closable="false"
         class="hint-alert"
         show-icon
-        :title="t('pages.anchorList.dailyEffectiveLiveHint')"
+        :title="t('pages.guildList.anchorDailyEffectiveLiveHint')"
         type="info"
     />
 
-    <div class="toolbar">
-      <el-button v-if="canExport" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
-    </div>
+    <el-form :model="searchForm" class="search-form" inline label-width="100px">
+      <el-form-item :label="t('pages.guildAnchorIncomeSettlementLogList.roomId')">
+        <el-input
+            v-model="searchForm.roomId"
+            clearable
+            :placeholder="t('pages.guildAnchorIncomeSettlementLogList.enterRoomId')"
+            style="width: 200px"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
+        <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
+        <el-button v-if="canExport" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
+      </el-form-item>
+    </el-form>
 
     <el-table v-loading="loading" :data="tableData" style="width:100%">
       <el-table-column :label="t('pages.anchorList.dailyRecordId')" min-width="180" prop="id"/>
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.roomId')" min-width="180" prop="roomId"/>
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.roomNickname')" min-width="120">
+        <template #default="{ row }">{{ row.roomNickname || '-' }}</template>
+      </el-table-column>
       <el-table-column :label="t('pages.anchorList.dailyLiveDate')" min-width="120" prop="liveDate"/>
       <el-table-column :label="t('pages.anchorList.dailyLiveDuration')" min-width="150">
         <template #default="{ row }">{{ formatLiveDurationMinutes(row.liveDuration, t) }}</template>
@@ -54,50 +70,55 @@
       </el-table-column>
     </el-table>
 
-    <el-empty v-if="!loading && tableData.length === 0" :description="t('pages.anchorList.noDailyEffectiveLiveData')"/>
+    <el-empty v-if="!loading && tableData.length === 0" :description="t('pages.guildList.noAnchorDailyEffectiveLiveData')"/>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {computed, ref, watch} from 'vue'
+import {computed, reactive, ref, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage} from 'element-plus'
-import {accountApi} from '@/api'
-import type {AnchorDailyEffectiveLiveItem} from '@/types/api'
+import {guildApi} from '@/api'
+import type {GuildAnchorDailyEffectiveLiveItem} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
 import {downloadCsv, fetchAllPagedRows} from '@/utils/csv-export'
-import {buildAnchorDailyEffectiveLiveCsvColumns} from '@/utils/daily-effective-live-csv'
+import {buildGuildAnchorDailyEffectiveLiveCsvColumns} from '@/utils/daily-effective-live-csv'
 import {formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 
 const props = defineProps<{
-  anchorId: string
+  guildId: string
   active: boolean
 }>()
 
 const {t} = useI18n()
-const {can} = usePagePermission('AnchorDetail')
-const canExport = computed(() => can('exportDailyEffectiveLive'))
+const {can} = usePagePermission('GuildDetail')
+const canExport = computed(() => can('exportAnchorDailyEffectiveLive'))
 const loading = ref(false)
 const exporting = ref(false)
-const tableData = ref<AnchorDailyEffectiveLiveItem[]>([])
+const tableData = ref<GuildAnchorDailyEffectiveLiveItem[]>([])
 const loaded = ref(false)
+
+const searchForm = reactive({
+  roomId: '',
+})
 
 const DEFAULT_PAGE_SIZE = 8
 
 const buildFilterParams = () => ({
-  anchorId: props.anchorId,
+  guildId: props.guildId,
+  roomId: searchForm.roomId.trim() || undefined,
   settled: 0,
 })
 
 const fetchList = async () => {
-  if (!props.anchorId) {
+  if (!props.guildId) {
     tableData.value = []
     return
   }
   loading.value = true
   try {
-    const response = await accountApi.getAnchorDailyEffectiveLiveList({
+    const response = await guildApi.getGuildAnchorDailyEffectiveLiveList({
       ...buildFilterParams(),
       pageIndex: 1,
       pageSize: DEFAULT_PAGE_SIZE,
@@ -105,22 +126,31 @@ const fetchList = async () => {
     tableData.value = response.data || []
     loaded.value = true
   } catch (error) {
-    console.error('Failed to load daily effective live list:', error)
-    ElMessage.error(t('pages.anchorList.dailyEffectiveLiveFetchFailed'))
+    console.error('Failed to load guild anchor daily flow list:', error)
+    ElMessage.error(t('pages.guildList.anchorDailyEffectiveLiveFetchFailed'))
   } finally {
     loading.value = false
   }
 }
 
+const handleSearch = () => {
+  fetchList()
+}
+
+const handleReset = () => {
+  searchForm.roomId = ''
+  fetchList()
+}
+
 const handleExport = async () => {
-  if (!props.anchorId) {
+  if (!props.guildId) {
     ElMessage.warning(t('common.exportEmpty'))
     return
   }
   exporting.value = true
   try {
     const rows = await fetchAllPagedRows((pageIndex, pageSize) =>
-      accountApi.getAnchorDailyEffectiveLiveList({
+      guildApi.getGuildAnchorDailyEffectiveLiveList({
         ...buildFilterParams(),
         pageIndex,
         pageSize,
@@ -131,13 +161,13 @@ const handleExport = async () => {
       return
     }
     downloadCsv(
-      `anchor-daily-flow-${props.anchorId}-${Date.now()}.csv`,
-      buildAnchorDailyEffectiveLiveCsvColumns(t),
+      `guild-anchor-daily-flow-${props.guildId}-${Date.now()}.csv`,
+      buildGuildAnchorDailyEffectiveLiveCsvColumns(t),
       rows,
     )
     ElMessage.success(t('common.exportSuccess'))
   } catch (error) {
-    console.error('Failed to export anchor daily flow:', error)
+    console.error('Failed to export guild anchor daily flow:', error)
     ElMessage.error(t('common.exportFailed'))
   } finally {
     exporting.value = false
@@ -156,10 +186,11 @@ const formatDate = (dateString: string | null | undefined) => {
 const resetState = () => {
   loaded.value = false
   tableData.value = []
+  searchForm.roomId = ''
 }
 
 watch(
-  () => props.anchorId,
+  () => props.guildId,
   () => {
     resetState()
     if (props.active) {
@@ -171,7 +202,7 @@ watch(
 watch(
   () => props.active,
   (active) => {
-    if (active && !loaded.value && props.anchorId) {
+    if (active && !loaded.value && props.guildId) {
       fetchList()
     }
   },
@@ -184,9 +215,11 @@ watch(
   margin-bottom: 16px;
 }
 
-.toolbar {
+.search-form {
   margin-bottom: 16px;
-  display: flex;
-  justify-content: flex-end;
+}
+
+.search-form :deep(.el-form-item__label) {
+  white-space: nowrap;
 }
 </style>

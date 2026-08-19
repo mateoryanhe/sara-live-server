@@ -2,6 +2,10 @@ import {request} from '../request'
 import type {
     AnchorIncomeSettlementLogItem,
     Guild,
+    GuildDailyEffectiveLiveItem,
+    GuildDailyEffectiveLiveQuery,
+    GuildAnchorDailyEffectiveLiveItem,
+    GuildAnchorDailyEffectiveLiveQuery,
     GuildDetailIncome,
     GuildIncomeArchivesRes,
     GuildQuery,
@@ -92,5 +96,13 @@ export const guildApi = {
 
     getGuildIncomeArchives: (guildId: string) => {
         return request.post<GuildIncomeArchivesRes>('/guild/getGuildIncomeArchives', {guildId})
+    },
+
+    getGuildDailyEffectiveLiveList: (data: GuildDailyEffectiveLiveQuery) => {
+        return request.post<PageResponse<GuildDailyEffectiveLiveItem>>('/guild/getGuildDailyEffectiveLiveList', data)
+    },
+
+    getGuildAnchorDailyEffectiveLiveList: (data: GuildAnchorDailyEffectiveLiveQuery) => {
+        return request.post<PageResponse<GuildAnchorDailyEffectiveLiveItem>>('/guild/cmsGuildAnchorDailyEffectiveLiveList', data)
     },
 }

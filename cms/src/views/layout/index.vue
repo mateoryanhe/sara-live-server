@@ -18,7 +18,7 @@
           <span>{{ t('menu.Dashboard') }}</span>
         </el-menu-item>
         <el-sub-menu
-            v-if="hasMenuPermission('UserList') || hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('RechargeOrderList')"
+            v-if="hasMenuPermission('UserList') || hasMenuPermission('AnchorListManagement') || hasMenuPermission('LiveRoomRecycleBinManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('RechargeOrderList')"
             index="/user/account">
           <template #title>
             <el-icon>
@@ -37,6 +37,12 @@
               <VideoPlay/>
             </el-icon>
             <span>{{ t('menu.AnchorListManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('LiveRoomRecycleBinManagement')" index="/user/anchor/live-room-recycle-bin">
+            <el-icon>
+              <Delete/>
+            </el-icon>
+            <span>{{ t('menu.LiveRoomRecycleBinManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('BotAnchorManagement')" index="/user/bot-anchor/bot-anchor-list">
             <el-icon>

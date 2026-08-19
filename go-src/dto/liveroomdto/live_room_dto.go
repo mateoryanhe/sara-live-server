@@ -69,12 +69,16 @@ type JoinRoomReq struct {
 }
 
 type JoinRoomRes struct {
-	OnlineId       string  `json:"onlineId"       dc:"在线记录ID(userId_roomId)"`
-	OnlineCount    int     `json:"onlineCount"    dc:"当前在线人数"`
-	TicketDeducted float64 `json:"ticketDeducted" dc:"本次扣除门票钻石(未扣为0)"`
-	SysTime        int64   `json:"sysTime,string"`
-	FreeTime       uint64  `json:"freeTime"`
-	TicketTime     int64   `json:"ticketTime"`
+	OnlineId          string  `json:"onlineId"          dc:"在线记录ID(userId_roomId)"`
+	OnlineCount       int     `json:"onlineCount"       dc:"当前在线人数"`
+	TicketDeducted    float64 `json:"ticketDeducted"    dc:"本次扣除门票钻石(未扣为0)"`
+	SysTime           int64   `json:"sysTime,string"`
+	FreeTime          uint64  `json:"freeTime"`
+	TicketTime        int64   `json:"ticketTime"`
+	KickBanned        bool    `json:"kickBanned"        dc:"是否处于踢出封禁期(封禁期内未真正进房)"`
+	KickTime          int64   `json:"kickTime"          dc:"最近踢出时间(秒,0表示无)"`
+	KickBanExpireAt   int64   `json:"kickBanExpireAt"   dc:"踢出封禁截止时间(秒,0表示无)"`
+	KickRemainSeconds int64   `json:"kickRemainSeconds" dc:"踢出封禁剩余秒数"`
 }
 
 // LeaveRoomReq 离开直播间
@@ -86,6 +90,18 @@ type LeaveRoomReq struct {
 type LeaveRoomRes struct {
 	OnlineCount int   `json:"onlineCount" dc:"当前在线人数"`
 	SysTime     int64 `json:"sysTime,string"`
+}
+
+// GetLiveRecordReq 按直播间ID查询本场直播记录
+type GetLiveRecordReq struct {
+	g.Meta `path:"/getLiveRecord" method:"post" summary:"查询本场直播记录" tags:"直播间"`
+	RoomId uint64 `json:"roomId" v:"required#直播间ID不能为空" dc:"直播间ID"`
+}
+
+type GetLiveRecordRes struct {
+	RoomId       string                           `json:"roomId"       dc:"直播间ID"`
+	LiveRecordId string                           `json:"liveRecordId" dc:"本场直播记录ID"`
+	LiveRecord   *liverecorddto.AppLiveRecordItem `json:"liveRecord"   dc:"本场直播记录数据"`
 }
 
 // GetOnlineUserListReq 分页查询直播间在线玩家列表

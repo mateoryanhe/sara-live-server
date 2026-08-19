@@ -25,16 +25,17 @@ const (
 	DailyAnchorEffectiveLiveSettled      db.TbCol = "settled"
 )
 
-// DailyAnchorEffectiveLive 主播每日直播时长统计
+// DailyAnchorEffectiveLive 主播每日直播时长与收益流水
 // 主键 ID = "{date}_{roomId}"(roomId==主播用户ID),字段经 syndb 缓冲落库
 type DailyAnchorEffectiveLive struct {
-	ID           string    `gorm:"primaryKey;size:64;comment:复合ID(date_roomId)" json:"id"`
-	RoomId       uint64    `gorm:"index;default:0;comment:直播间ID(==主播用户ID)" json:"roomId"`
-	LiveDate     string    `gorm:"size:10;index;default:'';comment:日期(YYYY-MM-DD)" json:"liveDate"`
-	LiveDuration float64   `gorm:"default:0;comment:当日累计直播时长(秒,仅统计单场>30分钟)" json:"liveDuration"`
-	Settled      bool      `gorm:"default:0;comment:结算标记(0未结算,1已结算)" json:"settled"`
-	CreatedAt    time.Time `json:"createdAt"`
-	UpdatedAt    time.Time `json:"updatedAt"`
+	ID           string  `gorm:"primaryKey;size:64;comment:复合ID(date_roomId)" json:"id"`
+	RoomId       uint64  `gorm:"index;default:0;comment:直播间ID(==主播用户ID)" json:"roomId"`
+	LiveDate     string  `gorm:"size:10;index;default:'';comment:日期(YYYY-MM-DD)" json:"liveDate"`
+	LiveDuration float64 `gorm:"default:0;comment:当日累计直播时长(秒,仅统计单场>30分钟)" json:"liveDuration"`
+	Settled      bool    `gorm:"default:0;comment:结算标记(0未结算,1已结算)" json:"settled"`
+	LiveRoomIncomeAmounts
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 // FormatDailyAnchorEffectiveLiveDate 格式化统计日期
@@ -130,6 +131,61 @@ func (r *DailyAnchorEffectiveLive) AddLiveDuration(v float64) {
 	})
 }
 
+func (r *DailyAnchorEffectiveLive) lockKey() string {
+	return fmt.Sprintf("daily_anchor_effective_live:%s", r.ID)
+}
+
+// AddGiftEarn 礼物收益(总收益+礼物细分,内部加锁)
+func (r *DailyAnchorEffectiveLive) AddGiftEarn(v float64) {
+	if r == nil || r.ID == "" {
+		return
+	}
+	addIncomeEarnWithLockKey(TbDailyAnchorEffectiveLive, r.lockKey(), r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalGiftIncome, &r.TotalGiftIncome)
+}
+
+// AddPaidDanmakuEarn 付费弹幕收益(总收益+弹幕细分,内部加锁)
+func (r *DailyAnchorEffectiveLive) AddPaidDanmakuEarn(v float64) {
+	if r == nil || r.ID == "" {
+		return
+	}
+	addIncomeEarnWithLockKey(TbDailyAnchorEffectiveLive, r.lockKey(), r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalPaidDanmakuIncome, &r.TotalPaidDanmakuIncome)
+}
+
+// AddPrivateRoomTicketEarn 私密房门票收益(总收益+门票细分,内部加锁)
+func (r *DailyAnchorEffectiveLive) AddPrivateRoomTicketEarn(v float64) {
+	if r == nil || r.ID == "" {
+		return
+	}
+	addIncomeEarnWithLockKey(TbDailyAnchorEffectiveLive, r.lockKey(), r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalPrivateRoomTicketIncome, &r.TotalPrivateRoomTicketIncome)
+}
+
+// AddPrivateRoomWatchEarn 私密房观看收益(总收益+观看细分,内部加锁)
+func (r *DailyAnchorEffectiveLive) AddPrivateRoomWatchEarn(v float64) {
+	if r == nil || r.ID == "" {
+		return
+	}
+	addIncomeEarnWithLockKey(TbDailyAnchorEffectiveLive, r.lockKey(), r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalPrivateRoomWatchIncome, &r.TotalPrivateRoomWatchIncome)
+}
+
+// ApplyVideoCallIncomeDelta 通话收益增减(支持负数退款,内部加锁)
+func (r *DailyAnchorEffectiveLive) ApplyVideoCallIncomeDelta(amount float64, ticket, billing bool) {
+	if r == nil || r.ID == "" {
+		return
+	}
+	ApplyVideoCallIncomeDeltaWithLockKey(TbDailyAnchorEffectiveLive, r.lockKey(), r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, amount, ticket, billing)
+}
+
+// AddTotalLiveDuration 累加心跳上报直播时长(秒,syndb 缓冲)
+func (r *DailyAnchorEffectiveLive) AddTotalLiveDuration(v float64) {
+	if r == nil || r.ID == "" || v <= 0 {
+		return
+	}
+	gmlock.Lock(r.lockKey())
+	defer gmlock.Unlock(r.lockKey())
+	addIncomeAmountLocked(TbDailyAnchorEffectiveLive, LiveRoomIncomeTotalLiveDuration, r.ID, &r.TotalLiveDuration, v)
+	touchIncomeUpdatedAt(TbDailyAnchorEffectiveLive, r.ID, &r.UpdatedAt)
+}
+
 func initDailyAnchorEffectiveLive() {
 	syndb.RegQuick(TbDailyAnchorEffectiveLive, db.CreatedAtName)
 	syndb.RegLazy(TbDailyAnchorEffectiveLive, db.UpdatedAtName)
@@ -137,5 +193,6 @@ func initDailyAnchorEffectiveLive() {
 	syndb.RegQuick(TbDailyAnchorEffectiveLive, DailyAnchorEffectiveLiveLiveDate)
 	syndb.RegLazy(TbDailyAnchorEffectiveLive, DailyAnchorEffectiveLiveLiveDuration)
 	syndb.RegQuick(TbDailyAnchorEffectiveLive, DailyAnchorEffectiveLiveSettled)
+	regLiveRoomIncomeCols(TbDailyAnchorEffectiveLive)
 	migrate.AutoMigrate(&DailyAnchorEffectiveLive{})
 }

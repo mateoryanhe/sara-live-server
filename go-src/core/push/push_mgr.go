@@ -1,14 +1,15 @@
 package push
 
 import (
-	"github.com/gogf/gf/v2/container/gmap"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gctx"
 	"time"
+
+	"github.com/gogf/gf/v2/container/gmap"
+	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/constants/cmd"
 	"xr-game-server/core/event"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/xrjson"
+	"xr-game-server/core/xrlog"
 
 	"xr-game-server/errercode"
 )
@@ -31,7 +32,7 @@ func Data(clientId uint64, cmd int, msg any) {
 		return
 	}
 	jStr, _ := xrjson.Marshal(msg)
-	g.Log().Infof(gctx.New(), "authId=%v,发送数据cmd=%v,data=%s", clientId, cmd, jStr)
+	xrlog.DetailLog.Infof(gctx.New(), "authId=%v,发送数据cmd=%v,data=%s", clientId, cmd, jStr)
 	client.Send(&httpserver.PushResp{
 		Data: msg,
 		Cmd:  cmd,
@@ -48,7 +49,7 @@ func OutData(clientId uint64, cmd int) {
 	if client == nil {
 		return
 	}
-	g.Log().Infof(gctx.New(), "authId=%v,发送数据cmd=%v", clientId, cmd)
+	xrlog.DetailLog.Infof(gctx.New(), "authId=%v,发送数据cmd=%v", clientId, cmd)
 	client.Send(&httpserver.PushResp{
 		Cmd: cmd,
 	})
@@ -102,7 +103,7 @@ func rmClient(data any) {
 	if !ok || leaveClient == nil {
 		return
 	}
-	g.Log().Infof(gctx.New(), "authId=%v,ip=%v,离线了", leaveClient.Id, clientRemoteAddr(leaveClient))
+	xrlog.DetailLog.Infof(gctx.New(), "authId=%v,ip=%v,离线了", leaveClient.Id, clientRemoteAddr(leaveClient))
 	event.Pub(event.Offline, event.NewOfflineData(leaveClient.Id))
 	mapData := clientMap.Get(leaveClient.Id)
 	if mapData == nil {
@@ -126,7 +127,7 @@ func addClient(data any) {
 	if !ok || client == nil {
 		return
 	}
-	g.Log().Infof(gctx.New(), "authId=%v,ip=%v,上线了", client.Id, clientRemoteAddr(client))
+	xrlog.DetailLog.Infof(gctx.New(), "authId=%v,ip=%v,上线了", client.Id, clientRemoteAddr(client))
 	//尝试下线当前客户端,由客户端主动登出
 	OutData(client.Id, cmd.RepeatLogin)
 	clientMap.Set(client.Id, client)
