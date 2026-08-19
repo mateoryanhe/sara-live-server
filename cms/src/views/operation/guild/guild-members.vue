@@ -37,8 +37,13 @@
         <el-table-column :label="t('common.phone')" min-width="130" prop="phone">
           <template #default="{ row }">{{ row.phone || '-' }}</template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.guildId')" prop="guildId" width="190">
-          <template #default="{ row }">{{ row.guildId || '-' }}</template>
+        <el-table-column :label="t('menu.UserDetail')" width="110">
+          <template #default="{ row }">
+            <el-button v-if="canViewUserDetail" link type="primary" @click="openUserDetail(row.id)">
+              {{ t('pages.userList.viewDetail') }}
+            </el-button>
+            <span v-else>-</span>
+          </template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.anchorType')" width="110">
           <template #default="{ row }">
@@ -256,6 +261,7 @@ import {accountApi, guildApi} from '@/api'
 import type {AnchorListItem, BanAnchorReq, UnBanAnchorReq} from '@/types/api'
 import {formatWalletBalance} from '@/utils/number-format'
 import {usePagePermission} from '@/composables/usePagePermission'
+import {useUserDetailNav} from '@/composables/useUserDetailNav'
 
 const USER_TYPE_ANCHOR = 1
 const USER_TYPE_SENIOR_ANCHOR = 7
@@ -264,9 +270,9 @@ const {t} = useI18n()
 const route = useRoute()
 const router = useRouter()
 const readonly = computed(() => route.name === 'GuildProfileMembers')
-const {can} = usePagePermission(
-  route.name === 'GuildProfileMembers' ? 'GuildProfileManagement' : 'GuildManagement',
-)
+const permissionPage = route.name === 'GuildProfileMembers' ? 'GuildProfileManagement' : 'GuildManagement'
+const {can} = usePagePermission(permissionPage)
+const {canViewUserDetail, openUserDetail} = useUserDetailNav(permissionPage)
 const canViewDetail = computed(() => can('viewDetail'))
 const canSetAnchorType = (row: AnchorListItem) => {
   if (!can('setAnchorType')) {

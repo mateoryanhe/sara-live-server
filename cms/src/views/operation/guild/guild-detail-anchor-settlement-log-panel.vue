@@ -79,6 +79,14 @@
       <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.settlementShareAmount')" align="right" min-width="130">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementShareAmount) }}</span></template>
       </el-table-column>
+      <el-table-column :label="t('menu.UserDetail')" width="110">
+        <template #default="{ row }">
+          <el-button v-if="canViewUserDetail && row.roomId" link type="primary" @click="openUserDetail(row.roomId)">
+            {{ t('pages.userList.viewDetail') }}
+          </el-button>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
       <el-table-column :label="t('common.createdAt')" fixed="right" width="170">
         <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
       </el-table-column>
@@ -106,6 +114,7 @@ import {useI18n} from 'vue-i18n'
 import {ElMessage} from 'element-plus'
 import {guildApi} from '@/api'
 import type {AnchorIncomeSettlementLogItem} from '@/types/api'
+import {useUserDetailNav} from '@/composables/useUserDetailNav'
 import {downloadCsv, fetchAllPagedRows} from '@/utils/csv-export'
 import {buildGuildAnchorSettlementLogCsvColumns} from '@/utils/income-settlement-log-csv'
 import {formatWalletBalance} from '@/utils/number-format'
@@ -117,6 +126,7 @@ const props = defineProps<{
 }>()
 
 const {t} = useI18n()
+const {canViewUserDetail, openUserDetail} = useUserDetailNav('GuildDetail')
 const loading = ref(false)
 const exporting = ref(false)
 const tableData = ref<AnchorIncomeSettlementLogItem[]>([])

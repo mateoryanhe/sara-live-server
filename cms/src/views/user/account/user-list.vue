@@ -104,7 +104,15 @@
           </el-table-column>
           <el-table-column :label="t('pages.userList.anchor')" prop="isAnchor" width="90">
             <template #default="scope">
-              <el-tag v-if="scope.row.isAnchor" type="success">{{ t('common.yes') }}</el-tag>
+              <el-button
+                  v-if="isAnchorUser(scope.row) && canViewAnchorDetail"
+                  link
+                  type="primary"
+                  @click="openAnchorDetail(scope.row)"
+              >
+                {{ t('common.yes') }}
+              </el-button>
+              <el-tag v-else-if="isAnchorUser(scope.row)" type="success">{{ t('common.yes') }}</el-tag>
               <el-tag v-else type="info">{{ t('common.no') }}</el-tag>
             </template>
           </el-table-column>
@@ -346,6 +354,7 @@ import {usePagePermission} from '@/composables/usePagePermission'
 const {t, locale} = useI18n()
 const {can} = usePagePermission('UserList')
 const canViewDetail = computed(() => can('viewDetail'))
+const canViewAnchorDetail = computed(() => can('viewAnchorDetail'))
 const showSetAnchorType = computed(() => can('setAnchorType'))
 
 const USER_TYPE_ANCHOR = 1
@@ -637,6 +646,13 @@ const openCurrencyDialog = (row: UserInfo, type: CurrencyType, mode: CurrencyMod
 const openDetail = (row: UserInfo) => {
   router.push({
     name: 'UserDetail',
+    query: {id: String(row.id)},
+  })
+}
+
+const openAnchorDetail = (row: UserInfo) => {
+  router.push({
+    path: '/user/anchor/anchor-detail',
     query: {id: String(row.id)},
   })
 }

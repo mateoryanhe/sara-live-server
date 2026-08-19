@@ -31,7 +31,7 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {
                 title: '工会详情',
                 hidden: true,
-                parentPermission: ['GuildManagement', 'GuildProfileManagement'],
+                parentPermission: ['GuildManagement', 'GuildProfileManagement', 'AnchorListManagement'],
             },
         },
         {

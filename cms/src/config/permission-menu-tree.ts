@@ -57,6 +57,7 @@ const GUILD_LIST_BUTTON_KEYS = [
     'offShelf',
     'viewMembers',
     'viewDetail',
+    'viewUserDetail',
     'viewAnchorSettlementLogs',
     'joinGuildAnchor',
     'batchSetAnchor',
@@ -65,6 +66,7 @@ const GUILD_LIST_BUTTON_KEYS = [
 
 const GUILD_MEMBER_BUTTON_KEYS = [
     'viewDetail',
+    'viewUserDetail',
     'ban',
     'unban',
     'exitGuild',

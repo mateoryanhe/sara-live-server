@@ -4,7 +4,7 @@
       <template #header>
         <div class="card-header">
           <span>{{ t('menu.RechargeOrderList') }}</span>
-          <el-button type="primary" @click="openCreateOrderDialog">{{ t('pages.rechargeOrderList.manualCreateOrder') }}</el-button>
+          <el-button v-if="canManualCreateOrder" type="primary" @click="openCreateOrderDialog">{{ t('pages.rechargeOrderList.manualCreateOrder') }}</el-button>
         </div>
       </template>
 
@@ -79,7 +79,7 @@
         <el-table-column :label="t('pages.rechargeOrderList.paidAt')" width="170">
           <template #default="{ row }">{{ formatUnixTime(row.paidAt) }}</template>
         </el-table-column>
-        <el-table-column fixed="right" :label="t('common.actions')" width="120">
+        <el-table-column v-if="canManualRecharge" fixed="right" :label="t('common.actions')" width="120">
           <template #default="{ row }">
             <el-button
                 v-if="row.status === 0"
@@ -139,6 +139,7 @@ import {computed, onMounted, reactive, ref} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {rechargeOrderApi} from '@/api'
 import type {RechargeOrder} from '@/types/api.ts'
+import {usePagePermission} from '@/composables/usePagePermission'
 import {formatAmount, NUMBER_INPUT_DECIMALS} from '@/utils/number-format'
 
 interface SearchForm {
@@ -149,6 +150,9 @@ interface SearchForm {
 }
 
 const {t} = useI18n()
+const {can} = usePagePermission('RechargeOrderList')
+const canManualCreateOrder = computed(() => can('manualCreateOrder'))
+const canManualRecharge = computed(() => can('manualRecharge'))
 const loading = ref(false)
 const manualRechargingId = ref('')
 const createOrderDialogVisible = ref(false)

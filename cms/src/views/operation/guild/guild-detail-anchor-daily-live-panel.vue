@@ -68,6 +68,14 @@
       <el-table-column :label="t('pages.anchorList.roomUpdatedAt')" min-width="170">
         <template #default="{ row }">{{ formatDate(row.updatedAt) }}</template>
       </el-table-column>
+      <el-table-column :label="t('menu.UserDetail')" width="110">
+        <template #default="{ row }">
+          <el-button v-if="canViewUserDetail && row.roomId" link type="primary" @click="openUserDetail(row.roomId)">
+            {{ t('pages.userList.viewDetail') }}
+          </el-button>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
     </el-table>
 
     <el-empty v-if="!loading && tableData.length === 0" :description="t('pages.guildList.noAnchorDailyEffectiveLiveData')"/>
@@ -81,6 +89,7 @@ import {ElMessage} from 'element-plus'
 import {guildApi} from '@/api'
 import type {GuildAnchorDailyEffectiveLiveItem} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
+import {useUserDetailNav} from '@/composables/useUserDetailNav'
 import {downloadCsv, fetchAllPagedRows} from '@/utils/csv-export'
 import {buildGuildAnchorDailyEffectiveLiveCsvColumns} from '@/utils/daily-effective-live-csv'
 import {formatWalletBalance} from '@/utils/number-format'
@@ -93,6 +102,7 @@ const props = defineProps<{
 
 const {t} = useI18n()
 const {can} = usePagePermission('GuildDetail')
+const {canViewUserDetail, openUserDetail} = useUserDetailNav('GuildDetail')
 const canExport = computed(() => can('exportAnchorDailyEffectiveLive'))
 const loading = ref(false)
 const exporting = ref(false)

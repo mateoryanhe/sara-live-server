@@ -64,7 +64,17 @@
           <template #default="{ row }">{{ row.phone || '-' }}</template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.guildId')" prop="guildId" width="120">
-          <template #default="{ row }">{{ row.guildId || '-' }}</template>
+          <template #default="{ row }">
+            <el-button
+                v-if="hasGuild(row) && canViewGuildDetail"
+                link
+                type="primary"
+                @click="openGuildDetail(row.guildId)"
+            >
+              {{ row.guildId }}
+            </el-button>
+            <span v-else>{{ row.guildId || '-' }}</span>
+          </template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.anchorType')" width="110">
           <template #default="{ row }">
@@ -153,6 +163,14 @@
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.profileUpdatedAt')" prop="createdAt" width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
+        </el-table-column>
+        <el-table-column :label="t('menu.UserDetail')" width="110">
+          <template #default="{ row }">
+            <el-button v-if="canViewUserDetail" link type="primary" @click="openUserDetail(row.id)">
+              {{ t('pages.userList.viewDetail') }}
+            </el-button>
+            <span v-else>-</span>
+          </template>
         </el-table-column>
         <el-table-column fixed="right" :label="t('common.actions')" width="280">
           <template #default="{ row }">
@@ -320,12 +338,15 @@ import type {AnchorListItem, BanAnchorReq, UnBanAnchorReq} from '@/types/api'
 
 import {formatWalletBalance} from '@/utils/number-format'
 import {usePagePermission} from '@/composables/usePagePermission'
+import {useUserDetailNav} from '@/composables/useUserDetailNav'
 
 const {t} = useI18n()
 
 const router = useRouter()
 const {can} = usePagePermission('AnchorListManagement')
+const {canViewUserDetail, openUserDetail} = useUserDetailNav('AnchorListManagement')
 const canViewDetail = computed(() => can('viewDetail'))
+const canViewGuildDetail = computed(() => can('viewGuildDetail'))
 
 const loading = ref(false)
 
@@ -563,6 +584,24 @@ const openDetail = (row: AnchorListItem) => {
   router.push({
     path: '/user/anchor/anchor-detail',
     query: {id: String(row.id)},
+  })
+}
+
+const hasGuild = (row: AnchorListItem) => {
+  const guildId = row.guildId
+  if (guildId == null || guildId === '') {
+    return false
+  }
+  return Number(guildId) !== 0
+}
+
+const openGuildDetail = (guildId: string | number | undefined) => {
+  if (!guildId || Number(guildId) === 0) {
+    return
+  }
+  router.push({
+    name: 'GuildDetail',
+    query: {id: String(guildId)},
   })
 }
 

@@ -10,6 +10,7 @@
       <div class="content">
         <div class="table-header">
           <el-button type="primary" @click="handleSave">{{ t('pages.moduleList.savePermissions') }}</el-button>
+          <el-button @click="handleExpandAll">{{ t('pages.moduleList.expandAll') }}</el-button>
           <span class="hint">{{ t('pages.moduleList.permissionHint') }}</span>
         </div>
 
@@ -18,7 +19,6 @@
             :data="moduleTreeData"
             :default-checked-keys="checkedModules"
             :props="treeProps"
-            default-expand-all
             node-key="id"
             show-checkbox
         />
@@ -30,7 +30,7 @@
 <script lang="ts" setup>
 import {useI18n} from 'vue-i18n'
 import {onMounted, ref} from 'vue'
-import {ElMessage} from 'element-plus'
+import {ElMessage, type TreeInstance} from 'element-plus'
 import router from '@/router'
 import {useRoute} from 'vue-router'
 import {roleApi} from '@/api/modules/role'
@@ -45,7 +45,7 @@ interface ModuleNode {
 
 const {t} = useI18n()
 const route = useRoute()
-const treeRef = ref()
+const treeRef = ref<TreeInstance>()
 const moduleTreeData = ref<ModuleNode[]>([])
 const checkedModules = ref<string[]>([])
 
@@ -100,6 +100,18 @@ const handleSave = async () => {
 
 const handleBack = () => {
   router.go(-1)
+}
+
+const handleExpandAll = () => {
+  const tree = treeRef.value
+  if (!tree?.store?.nodesMap) {
+    return
+  }
+  for (const node of Object.values(tree.store.nodesMap)) {
+    if (node.childNodes?.length) {
+      node.expanded = true
+    }
+  }
 }
 
 onMounted(async () => {

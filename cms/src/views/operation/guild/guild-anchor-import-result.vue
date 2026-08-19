@@ -26,6 +26,14 @@
         <el-table :data="result.fails" style="width: 100%">
           <el-table-column :label="t('pages.guildAnchorImportResult.userId')" min-width="160" prop="userId"/>
           <el-table-column :label="t('pages.guildAnchorImportResult.nickname')" min-width="160" prop="nickname" show-overflow-tooltip/>
+          <el-table-column :label="t('menu.UserDetail')" width="110">
+            <template #default="{ row }">
+              <el-button v-if="canViewUserDetail && row.userId" link type="primary" @click="openUserDetail(row.userId)">
+                {{ t('pages.userList.viewDetail') }}
+              </el-button>
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
           <el-table-column :label="t('pages.guildAnchorImportResult.reason')" min-width="200">
             <template #default="{ row }">
               {{ formatReason(row.reason) }}
@@ -44,11 +52,13 @@ import {onMounted, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {useRouter} from 'vue-router'
 import type {GuildAnchorImportResultState} from '@/types/api'
+import {useUserDetailNav} from '@/composables/useUserDetailNav'
 
 const GUILD_ANCHOR_IMPORT_RESULT_KEY = 'guildAnchorImportResult'
 
 const {t} = useI18n()
 const router = useRouter()
+const {canViewUserDetail, openUserDetail} = useUserDetailNav('GuildManagement')
 const result = ref<GuildAnchorImportResultState | null>(null)
 
 const formatReason = (reason: number) => {

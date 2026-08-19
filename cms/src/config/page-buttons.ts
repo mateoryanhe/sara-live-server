@@ -56,7 +56,6 @@ export const DEFAULT_CONFIG_BUTTONS: PageButtonDef[] = [
 export const DEFAULT_VIEW_BUTTONS: PageButtonDef[] = [BTN.view]
 
 const READONLY_PAGES = new Set([
-    'RechargeOrderList',
     'GoldCurrencyLogList',
     'DiamondCurrencyLogList',
     'LiveRevenueLogList',
@@ -99,6 +98,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.view,
         BTN.search,
         {key: 'viewDetail', label: '查看详情'},
+        {key: 'viewAnchorDetail', label: '查看主播详情'},
         {key: 'setAnchor', label: '设为主播'},
         {key: 'setSeniorAnchor', label: '设为高级主播'},
         {key: 'goldAdd', label: '加金币'},
@@ -114,11 +114,12 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'setUserType', label: '修改用户类型'},
         {key: 'setAnchorType', label: '设置主播类型'},
     ],
-    AnchorListManagement: [BTN.view, BTN.search, BTN.edit, {key: 'viewDetail', label: '查看详情'}, {key: 'offShelf', label: '下架'}],
+    AnchorListManagement: [BTN.view, BTN.search, BTN.edit, {key: 'viewDetail', label: '查看详情'}, {key: 'viewUserDetail', label: '查看用户详情'}, {key: 'viewGuildDetail', label: '查看工会详情'}, {key: 'offShelf', label: '下架'}],
     PlatformAnchorList: [
         BTN.view,
         BTN.search,
         {key: 'viewDetail', label: '查看详情'},
+        {key: 'viewUserDetail', label: '查看用户详情'},
         {key: 'offShelf', label: '下架'},
         {key: 'ban', label: '封禁主播'},
         {key: 'unban', label: '解封主播'},
@@ -152,6 +153,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'offShelf', label: '下架'},
         {key: 'viewMembers', label: '查看成员'},
         {key: 'viewDetail', label: '查看详情'},
+        {key: 'viewUserDetail', label: '查看用户详情'},
         {key: 'viewAnchorSettlementLogs', label: '查看名下主播结算流水'},
         {key: 'ban', label: '封禁主播'},
         {key: 'unban', label: '解封主播'},
@@ -172,6 +174,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     ],
     GuildDetail: [
         BTN.view,
+        {key: 'viewUserDetail', label: '查看用户详情'},
         {key: 'dailyEffectiveLive', label: '查看工会每日流水'},
         {key: 'exportDailyEffectiveLive', label: '导出工会每日流水'},
         {key: 'incomeArchive', label: '查看下架归档'},
@@ -185,6 +188,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     GuildRecycleBinManagement: [BTN.view, BTN.search, {key: 'onShelf', label: '上架'}],
     GuildProfileManagement: [
         ...DEFAULT_VIEW_BUTTONS,
+        {key: 'viewUserDetail', label: '查看用户详情'},
         {key: 'viewAnchors', label: '查询名下主播'},
         {key: 'viewDetail', label: '查看详情'},
         {key: 'viewAnchorSettlementLogs', label: '查看名下主播结算流水'},
@@ -214,6 +218,12 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     RechargeCfgManagement: [
         ...DEFAULT_CRUD_BUTTONS,
         {key: 'sync', label: '同步数据'},
+    ],
+    RechargeOrderList: [
+        BTN.view,
+        BTN.search,
+        {key: 'manualCreateOrder', label: '人工创建订单'},
+        {key: 'manualRecharge', label: '人工补单'},
     ],
 }
 
