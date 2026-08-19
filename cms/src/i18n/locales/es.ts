@@ -73,6 +73,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   AnchorIncomeSettlementLogList: 'Liquidación de ancla',
   GuildIncomeSettlementLogList: 'Liquidación de gremio',
   PreloadCfgManagement: 'Config. de precarga',
+  ServerRuntimeCfgManagement: 'Config. de ejecución del servidor',
   TextModerationCfgManagement: 'Moderación de texto',
   PrivacyPolicyCfgManagement: 'Política de privacidad',
   GooglePlayCfgManagement: 'Google Play',

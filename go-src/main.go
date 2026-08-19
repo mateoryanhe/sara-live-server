@@ -28,6 +28,6 @@ func main() {
 	//httpserver服务器模块启动
 	controller.Init()
 	httpserver.Ready()
-	//开始监听程序退出
+	//开始监听程序退出(阻塞 main; 发版与关机均走热重启/GF 信号处理)
 	shutdown.ListenShutdown()
 }

@@ -16,6 +16,7 @@ import (
 	"xr-game-server/core/cfg"
 	"xr-game-server/core/event"
 	"xr-game-server/core/xrjson"
+	"xr-game-server/core/xrlog"
 	"xr-game-server/core/xrpool"
 	"xr-game-server/core/xrtoken"
 	"xr-game-server/errercode"
@@ -77,6 +78,12 @@ func InitWebsocket() {
 	)
 
 	httpServer.BindHandler(Ws, func(r *ghttp.Request) {
+		if restartClosing.Load() {
+			xrlog.DetailLog.Warningf(r.Context(), "热重启:旧进程收到新 WebSocket 请求并关闭连接,URI=%s ip=%s", r.RequestURI, r.GetClientIp())
+			r.Response.Header().Set("Connection", "close")
+			r.Exit()
+			return
+		}
 		ws, err := wsUpGrader.Upgrade(r.Response.Writer, r.Request, nil)
 		if err != nil {
 			return

@@ -19,8 +19,8 @@ set APP_NAME=xr-game-server
 REM Remote sudo command (not used)
 set SUDO_CMD=
 
-REM Graceful shutdown wait time in seconds
-set SHUTDOWN_WAIT_TIME=15
+REM Hot restart auth (must match CMS/server runtime cfg hotRestartAuth)
+set HOT_RESTART_AUTH=nGH66S4TjBjQqCKyWJAM
 
 REM SSH port
 set REMOTE_PORT=22

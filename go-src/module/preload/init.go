@@ -3,11 +3,15 @@ package preload
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"xr-game-server/core/cfg"
+	"xr-game-server/core/hotrestart"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dao/liveroomdao"
 )
 
 func Init() {
+	hotrestart.RegisterHotRestartAuthProvider(cfgdao.GetHotRestartAuth)
+	cfg.ApplyMemoryLimit(cfgdao.GetMemoryLimitM())
 	preloadRecentLoginUsers(cfgdao.GetRecentLoginPreloadLimit())
 	preloadLiveRoomGameRecommends()
 }

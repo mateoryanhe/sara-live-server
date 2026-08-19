@@ -45,6 +45,11 @@ func ApplySyncLogger(logger *glog.Logger) {
 	_ = logger.SetConfig(cfg)
 }
 
+// EnableSyncLoggers 关闭异步写盘,改为同步写入.
+func EnableSyncLoggers() {
+	enableSyncLoggers()
+}
+
 func enableSyncLoggers() {
 	ctx := gctx.New()
 	for _, name := range loggerNames {

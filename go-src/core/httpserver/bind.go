@@ -60,6 +60,12 @@ func RegCMSCustomizeRes(prefix string, handlerOrObject ...interface{}) {
 	})
 }
 
+// RegInternalHandler 绑定内部运维接口,不走 canDo 拦截.
+func RegInternalHandler(pattern string, handler ghttp.HandlerFunc) {
+	httpServer.BindHandler("GET:"+pattern, handler)
+	httpServer.BindHandler("POST:"+pattern, handler)
+}
+
 // RegNonAuthHandler 绑定无需鉴权的原始 Handler(Pub/Sub 等 webhook)
 func RegNonAuthHandler(prefix, pattern string, handler ghttp.HandlerFunc) {
 	httpServer.Group(prefix, func(group *ghttp.RouterGroup) {

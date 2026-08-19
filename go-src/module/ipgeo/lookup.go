@@ -8,8 +8,8 @@ import (
 
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/oschwald/geoip2-golang/v2"
-	"xr-game-server/core/cfg"
 	"xr-game-server/core/xrlog"
+	
 )
 
 var (
@@ -19,7 +19,7 @@ var (
 
 // Init 加载 IP 国家数据库(GeoLite2-Country.mmdb,MMDB 格式).
 func Init() {
-	path := strings.TrimSpace(cfg.IpGeoCfgVar.DbPath)
+	path := strings.TrimSpace(cfgdao.GetIpGeoDbPath())
 	if path == "" {
 		xrlog.DetailLog.Warning(gctx.New(), "ipGeo.dbPath 未配置,IP 国家解析不可用")
 		return

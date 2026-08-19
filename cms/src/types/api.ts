@@ -711,6 +711,9 @@ export interface SaveAccountCfgRes {
 export interface PreloadCfg {
     id?: string
     recentLoginLimit: number
+    hotRestartAuth?: string
+    memoryLimitM?: number
+    ipGeoDbPath?: string
     createdAt?: string
     updatedAt?: string
 }
@@ -722,6 +725,9 @@ export interface GetPreloadCfgRes {
 export interface SavePreloadCfgReq {
     id?: string | number
     recentLoginLimit: number
+    hotRestartAuth: string
+    memoryLimitM: number
+    ipGeoDbPath: string
 }
 
 export interface SavePreloadCfgRes {

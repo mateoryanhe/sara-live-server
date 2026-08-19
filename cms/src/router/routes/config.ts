@@ -19,10 +19,10 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '账号配置', parentTitle: '基础配置'},
         },
         {
-            path: 'preload-cfg',
-            name: 'PreloadCfgManagement',
-            component: () => import('@/views/config/preload-cfg.vue'),
-            meta: {title: '预热配置', parentTitle: '基础配置'},
+            path: 'server-runtime-cfg',
+            name: 'ServerRuntimeCfgManagement',
+            component: () => import('@/views/config/server-runtime-cfg.vue'),
+            meta: {title: '服务器运行配置', parentTitle: '基础配置'},
         },
         {
             path: 'simulator-cpu-keyword',

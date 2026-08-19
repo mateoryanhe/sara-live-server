@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/gogf/gf/v2/os/gctx"
-	"xr-game-server/core/shutdown"
 	"xr-game-server/core/xrlog"
 	"xr-game-server/core/xrtimer"
 )
@@ -24,5 +23,4 @@ func InitSynCache() {
 		)
 		xrtimer.AddSingleton(ctx, synCfg.tickInterval, consume)
 	})
-	shutdown.RegCommonShutDownHandler(SysExit)
 }

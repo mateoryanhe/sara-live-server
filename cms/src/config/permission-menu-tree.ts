@@ -254,7 +254,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 children: [
                     {kind: 'page', pageName: 'AppTokenConfig'},
                     {kind: 'page', pageName: 'AccountCfgManagement'},
-                    {kind: 'page', pageName: 'PreloadCfgManagement'},
+                    {kind: 'page', pageName: 'ServerRuntimeCfgManagement'},
                 ],
             },
             {

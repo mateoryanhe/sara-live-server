@@ -20,12 +20,14 @@ server:
   readTimeout: "120m"
   writeTimeout: "120m"
   gzipEnabled: true
+  graceful: true
+  hotRestartFlushTimeout: 60
+  hotRestartExitTimeout: 120
   # PProf配置
   pprofEnabled: true
   pprofPattern: "/66dcd8e25ab3b339546ea1de5eb2d443e6fca76c76d11709f10533be8bd87d7d/pprof"
   ####自定义配置
   debugEnv: true #是否开启debug环境,不会检查权限
-  exitTime: 30 #退出系统等待多少秒，开始发送kill -9
   dumpRouterMap: false
   # 多域名静态目录与HTTPS证书(SNI)
   # domainSites:
@@ -33,11 +35,6 @@ server:
   #     root: "D:/cdn/site1"
   #     certFile: "D:/certs/cdn.example.com/fullchain.pem"
   #     keyFile: "D:/certs/cdn.example.com/privkey.pem"
-
-ipGeo:
-  dbPath: "D:/company-code/sara-live-server/GeoLite2-Country.mmdb"
-  # 免注册下载(解压后配置绝对路径):
-  # curl -LO https://cdn.jsdelivr.net/npm/geolite2-country/GeoLite2-Country.mmdb.gz && gunzip -f GeoLite2-Country.mmdb.gz
 
 bufferSize:
   db:

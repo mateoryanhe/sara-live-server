@@ -318,6 +318,9 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GuildIncomeSettlementLogList:search': '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
     'GuildIncomeSettlementLogList:export': '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
 
+    ServerRuntimeCfgManagement: '/preloadCfg/getPreloadCfg',
+    'ServerRuntimeCfgManagement:view': '/preloadCfg/getPreloadCfg',
+    'ServerRuntimeCfgManagement:save': '/preloadCfg/savePreloadCfg',
     PreloadCfgManagement: '/preloadCfg/getPreloadCfg',
     'PreloadCfgManagement:view': '/preloadCfg/getPreloadCfg',
     'PreloadCfgManagement:save': '/preloadCfg/savePreloadCfg',

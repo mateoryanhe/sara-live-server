@@ -162,34 +162,12 @@ if %errorlevel% neq 0 (
 
 echo.
 echo ================================
-echo Step 3: Connect to remote server and stop old program
+echo Step 3: Hot restart or cold start
 echo ================================
 
-
-
-echo Stopping old program on remote server...
-REM Send SIGTERM signal (kill -15, equivalent to kill -13)
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "sudo pkill -15 %APP_NAME% 2>/dev/null || pkill -TERM %APP_NAME% 2>/dev/null"
-echo Waiting %SHUTDOWN_WAIT_TIME% seconds for graceful shutdown...
-timeout /t %SHUTDOWN_WAIT_TIME% /nobreak >nul
-
-REM Send SIGKILL signal (kill -9) to force stop any remaining processes
-echo Sending force stop command...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "sudo pkill -9 %APP_NAME% 2>/dev/null || pkill -KILL %APP_NAME% 2>/dev/null"
-
-
-
-
-echo.
-echo ================================
-echo Step 5: Extract and start program
-echo ================================
-
-REM Set execution permissions
 echo Setting execution permissions...
 plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "chmod +x %REMOTE_DIR%/%APP_NAME%"
 
-REM 通过 start.sh 后台启动,避免 plink 因伪终端等待子进程而卡住
 echo Creating remote start script...
 plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "printf '%%s\n' '#!/bin/sh' 'cd %REMOTE_DIR%' 'nohup ./%APP_NAME% >/dev/null 2>&1 &' > %REMOTE_DIR%/start.sh && chmod +x %REMOTE_DIR%/start.sh"
 if %errorlevel% neq 0 (
@@ -198,15 +176,49 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-REM Start program (cd to app dir so GoFrame can find config.yaml)
-echo Starting program...
+echo Checking if %APP_NAME% is running...
+set OLD_PID=
+for /f "delims=" %%i in ('plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "pgrep -xo %APP_NAME% 2>/dev/null || true"') do set OLD_PID=%%i
+
+if defined OLD_PID goto do_hot_restart
+
+echo No running process, cold starting...
 plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "sudo %REMOTE_DIR%/start.sh"
-if %errorlevel% neq 0 (
+if !errorlevel! neq 0 (
     echo Error: Remote start script failed
     pause
     exit /b 1
 )
-echo Program start command completed.
+goto hot_restart_done
+
+:do_hot_restart
+echo Process found ^(PID: !OLD_PID!^), triggering GoFrame hot restart...
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "curl -sf -k 'https://127.0.0.1/internal/hotRestart?auth=%HOT_RESTART_AUTH%' || exit 1"
+if !errorlevel! neq 0 (
+    echo Error: Hot restart API call failed
+    pause
+    exit /b 1
+)
+echo Hot restart triggered, waiting for new process (max 180s)...
+set /a WAIT_LEFT=180
+:wait_hot_restart
+timeout /t 3 /nobreak >nul
+set /a WAIT_LEFT-=3
+set NEW_PID=
+for /f "delims=" %%i in ('plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "pgrep -xo %APP_NAME% 2>/dev/null || true"') do set NEW_PID=%%i
+if not defined NEW_PID (
+    if !WAIT_LEFT! leq 0 goto hot_restart_timeout
+    goto wait_hot_restart
+)
+if not "!NEW_PID!"=="!OLD_PID!" goto hot_restart_done
+if !WAIT_LEFT! leq 0 goto hot_restart_timeout
+goto wait_hot_restart
+
+:hot_restart_timeout
+echo Warning: Hot restart wait timeout, checking process state...
+
+:hot_restart_done
+echo Program start/restart command completed.
 
 echo.
 echo ================================

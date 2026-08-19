@@ -2,6 +2,7 @@ package xrtimer
 
 import (
 	"context"
+	"sync/atomic"
 	"time"
 	"xr-game-server/core/xrlog"
 
@@ -9,8 +10,19 @@ import (
 	"github.com/gogf/gf/v2/util/gutil"
 )
 
+var paused atomic.Bool
+
 func Init() {
 
+}
+
+// Pause 停止执行新的定时任务(已在队列中的任务会在入口处直接返回).
+func Pause() {
+	paused.Store(true)
+}
+
+func IsPaused() bool {
+	return paused.Load()
 }
 
 // AddSingleton 执行定时任务,可以取消,有防panic,避免程序崩溃,执行完任务,才会执行下个任务,长时间间隔的定时任务,使用此方法
@@ -19,6 +31,9 @@ func Init() {
 // interval: 间隔时间 大于秒的定时任务可以使用此方法
 func AddSingleton(ctx context.Context, interval time.Duration, job gtimer.JobFunc) *gtimer.Entry {
 	entry := gtimer.AddSingleton(ctx, interval, func(ctx context.Context) {
+		if paused.Load() {
+			return
+		}
 		gutil.TryCatch(ctx, func(try context.Context) {
 			job(ctx)
 		}, func(catch context.Context, exception error) {
@@ -36,6 +51,9 @@ func AddSingleton(ctx context.Context, interval time.Duration, job gtimer.JobFun
 func AddOnce(ctx context.Context, taskTime time.Duration, job gtimer.JobFunc) *gtimer.Entry {
 
 	entry := gtimer.AddOnce(ctx, taskTime, func(ctx context.Context) {
+		if paused.Load() {
+			return
+		}
 		gutil.TryCatch(ctx, func(try context.Context) {
 			job(ctx)
 		}, func(catch context.Context, exception error) {

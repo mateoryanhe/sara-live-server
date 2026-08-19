@@ -20,6 +20,7 @@ func Init() {
 	initDiamondController()
 	initIndex()
 	initSysController()
+	initHotRestartController()
 	initAppTokenController()
 	initRoleController()                         // 添加角色控制器初始化
 	initCMSUserController()                      // 添加CMS用户控制器初始化

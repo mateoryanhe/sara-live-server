@@ -3,6 +3,7 @@ package preload
 import (
 	"context"
 	"strconv"
+	"strings"
 	"time"
 
 	"xr-game-server/dao/cfgdao"
@@ -14,9 +15,7 @@ import (
 func GetPreloadCfg(_ context.Context, _ *preloadcfgdto.GetPreloadCfgReq) (*preloadcfgdto.GetPreloadCfgRes, error) {
 	cfg := cfgdao.LoadPreloadCfg()
 	if cfg == nil {
-		return &preloadcfgdto.GetPreloadCfgRes{Cfg: &preloadcfgdto.PreloadCfgItem{
-			RecentLoginLimit: cfgdao.DefaultRecentLoginPreloadLimit,
-		}}, nil
+		return &preloadcfgdto.GetPreloadCfgRes{Cfg: defaultPreloadCfgItem()}, nil
 	}
 	return &preloadcfgdto.GetPreloadCfgRes{Cfg: toPreloadCfgItem(cfg)}, nil
 }
@@ -25,6 +24,9 @@ func SavePreloadCfg(_ context.Context, req *preloadcfgdto.SavePreloadCfgReq) (*p
 	existing := cfgdao.LoadPreloadCfg()
 	row := &entity.PreloadCfg{
 		RecentLoginLimit: req.RecentLoginLimit,
+		HotRestartAuth:   strings.TrimSpace(req.HotRestartAuth),
+		MemoryLimitM:     req.MemoryLimitM,
+		IpGeoDbPath:      strings.TrimSpace(req.IpGeoDbPath),
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -49,6 +51,15 @@ func SavePreloadCfg(_ context.Context, req *preloadcfgdto.SavePreloadCfgReq) (*p
 	}, nil
 }
 
+func defaultPreloadCfgItem() *preloadcfgdto.PreloadCfgItem {
+	return &preloadcfgdto.PreloadCfgItem{
+		RecentLoginLimit: cfgdao.DefaultRecentLoginPreloadLimit,
+		HotRestartAuth:   cfgdao.DefaultHotRestartAuth,
+		MemoryLimitM:     cfgdao.DefaultMemoryLimitM,
+		IpGeoDbPath:      cfgdao.DefaultIpGeoDbPath,
+	}
+}
+
 func toPreloadCfgItem(cfg *entity.PreloadCfg) *preloadcfgdto.PreloadCfgItem {
 	if cfg == nil {
 		return nil
@@ -57,9 +68,24 @@ func toPreloadCfgItem(cfg *entity.PreloadCfg) *preloadcfgdto.PreloadCfgItem {
 	if limit <= 0 {
 		limit = cfgdao.DefaultRecentLoginPreloadLimit
 	}
+	memoryM := cfg.MemoryLimitM
+	if memoryM <= 0 {
+		memoryM = cfgdao.DefaultMemoryLimitM
+	}
+	auth := strings.TrimSpace(cfg.HotRestartAuth)
+	if auth == "" {
+		auth = cfgdao.DefaultHotRestartAuth
+	}
+	ipGeoPath := strings.TrimSpace(cfg.IpGeoDbPath)
+	if ipGeoPath == "" {
+		ipGeoPath = cfgdao.DefaultIpGeoDbPath
+	}
 	return &preloadcfgdto.PreloadCfgItem{
 		ID:               strconv.FormatUint(cfg.ID, 10),
 		RecentLoginLimit: limit,
+		HotRestartAuth:   auth,
+		MemoryLimitM:     memoryM,
+		IpGeoDbPath:      ipGeoPath,
 		CreatedAt:        formatPreloadCfgTime(cfg.CreatedAt),
 		UpdatedAt:        formatPreloadCfgTime(cfg.UpdatedAt),
 	}

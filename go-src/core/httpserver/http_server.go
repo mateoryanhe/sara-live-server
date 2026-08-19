@@ -7,7 +7,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/util/gconv"
-	"xr-game-server/core/shutdown"
+	"xr-game-server/core/hotrestart"
 	"xr-game-server/core/xrlog"
 )
 
@@ -24,12 +24,12 @@ var httpServer = g.Server()
 
 // InitHttpServer 初始化http服务器
 func InitHttpServer() {
-	shutdown.RegCommonShutDownHandler(closeServer)
+	hotrestart.RegisterEnterRestartPhase(EnterRestartClosingPhase)
 	setupDomainSites()
 	setupStaticPaths()
 	initHTTPServerLogger()
 	httpServer.SetErrorStack(true)
-	httpServer.Use(middlewareCORS)
+	httpServer.Use(middlewareCORS, middlewareRestartGuard)
 	if g.Cfg().MustGet(context.Background(), "server.gzipEnabled").Bool() {
 		httpServer.Use(ghttp.MiddlewareGzip)
 	}
@@ -37,7 +37,9 @@ func InitHttpServer() {
 	httpServer.BindHookHandler("/*", ghttp.HookAfterOutput, hookHTTPErrorLogAfterOutput)
 	httpServer.BindHookHandler("/*", ghttp.HookAfterOutput, hookAPIRequestAfterOutput)
 	setupAppOpenApiHook()
+	enableHotRestartGraceful()
 	httpServer.Run()
+	hotrestart.NotifyOldProcessExit()
 }
 
 func GetAuthId(ctx context.Context) uint64 {

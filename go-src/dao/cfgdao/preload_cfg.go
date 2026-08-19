@@ -1,11 +1,18 @@
 package cfgdao
 
 import (
+	"strings"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/entity/sys"
 )
 
-const DefaultRecentLoginPreloadLimit = 100
+const (
+	DefaultRecentLoginPreloadLimit = 100
+	DefaultHotRestartAuth          = "nGH66S4TjBjQqCKyWJAM"
+	DefaultMemoryLimitM            = 300
+	DefaultIpGeoDbPath             = "/home/ec2-user/xgameserver/GeoLite2-Country.mmdb"
+)
 
 func LoadPreloadCfg() *entity.PreloadCfg {
 	var row entity.PreloadCfg
@@ -33,4 +40,32 @@ func GetRecentLoginPreloadLimit() int {
 		return DefaultRecentLoginPreloadLimit
 	}
 	return cfg.RecentLoginLimit
+}
+
+func GetHotRestartAuth() string {
+	cfg := LoadPreloadCfg()
+	if cfg != nil {
+		if auth := strings.TrimSpace(cfg.HotRestartAuth); auth != "" {
+			return auth
+		}
+	}
+	return DefaultHotRestartAuth
+}
+
+func GetMemoryLimitM() int {
+	cfg := LoadPreloadCfg()
+	if cfg != nil && cfg.MemoryLimitM > 0 {
+		return cfg.MemoryLimitM
+	}
+	return DefaultMemoryLimitM
+}
+
+func GetIpGeoDbPath() string {
+	cfg := LoadPreloadCfg()
+	if cfg != nil {
+		if path := strings.TrimSpace(cfg.IpGeoDbPath); path != "" {
+			return path
+		}
+	}
+	return DefaultIpGeoDbPath
 }

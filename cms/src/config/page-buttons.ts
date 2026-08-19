@@ -75,6 +75,7 @@ const CONFIG_PAGES = new Set([
     'AppTokenConfig',
     'AccountCfgManagement',
     'SimulatorCpuKeywordManagement',
+    'ServerRuntimeCfgManagement',
     'PreloadCfgManagement',
     'TextModerationCfgManagement',
     'PrivacyPolicyCfgManagement',

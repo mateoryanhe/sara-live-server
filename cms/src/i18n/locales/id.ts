@@ -73,6 +73,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   AnchorIncomeSettlementLogList: 'Log Penyelesaian Anchor',
   GuildIncomeSettlementLogList: 'Log Penyelesaian Guild',
   PreloadCfgManagement: 'Konfigurasi Preload',
+  ServerRuntimeCfgManagement: 'Konfigurasi Runtime Server',
   TextModerationCfgManagement: 'Moderasi Teks',
   PrivacyPolicyCfgManagement: 'Kebijakan Privasi',
   GooglePlayCfgManagement: 'Google Play',

@@ -48,6 +48,7 @@ import {liveRevenueShareCfgMessages} from './live-revenue-share-cfg'
 import {anchorIncomeSettlementLogListMessages} from './anchor-income-settlement-log-list'
 import {guildIncomeSettlementLogListMessages} from './guild-income-settlement-log-list'
 import {appTokenMessages} from './app-token'
+import {serverRuntimeCfgMessages} from './server-runtime-cfg'
 import {preloadCfgMessages} from './preload-cfg'
 import {textModerationMessages} from './text-moderation'
 import {privacyPolicyMessages} from './privacy-policy'
@@ -108,6 +109,7 @@ const pageMessageBuilders = [
   ['guildIncomeSettlementLogList', guildIncomeSettlementLogListMessages],
   ['appToken', appTokenMessages],
   ['preloadCfg', preloadCfgMessages],
+  ['serverRuntimeCfg', serverRuntimeCfgMessages],
   ['textModeration', textModerationMessages],
   ['privacyPolicy', privacyPolicyMessages],
   ['googlePlay', googlePlayMessages],

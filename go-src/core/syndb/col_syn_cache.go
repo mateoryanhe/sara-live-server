@@ -3,7 +3,6 @@ package syndb
 import (
 	"context"
 	"fmt"
-	"os"
 	"sort"
 	"strings"
 	"time"
@@ -87,20 +86,28 @@ func AddData(tbName db.TbName, tbCol db.TbCol, colData *ColData) {
 	}
 }
 
-// SysExit 关机前同步刷盘,必须在关机 handler 内同步执行.
-func SysExit(sig os.Signal) {
-	_ = sig
-	xrlog.DetailLog.Warning(gctx.New(), "准备关机,开始强制同步内存数据到数据库")
-	runShutdownSynLoop()
+// AllCachesIdle 所有入库队列是否已空.
+func AllCachesIdle() bool {
+	return allSynCachesIdle()
 }
 
-func runShutdownSynLoop() {
+// FlushUntilIdle 无条件刷盘直到队列空; timeout<=0 表示一直等到空.
+// 返回 true 表示队列已空,false 表示超时仍有数据.
+func FlushUntilIdle(timeout time.Duration) bool {
 	ctx := gctx.New()
+	deadline := time.Time{}
+	if timeout > 0 {
+		deadline = time.Now().Add(timeout)
+	}
 	for {
 		rows, _ := consumeFlush(ctx, flushReasonShutdown, 0, 0, true)
 		if rows == 0 && allSynCachesIdle() {
 			xrlog.DetailLog.Info(ctx, "syndb关机刷盘完成")
-			return
+			return true
+		}
+		if !deadline.IsZero() && time.Now().After(deadline) {
+			xrlog.DetailLog.Warning(ctx, "syndb刷盘超时,仍有未落库数据")
+			return false
 		}
 		time.Sleep(CloseTime)
 	}

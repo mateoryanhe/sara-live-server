@@ -9,12 +9,13 @@ import (
 )
 
 const (
-	Online      Type = "Online"
-	Offline     Type = "Offline"
-	ClientEnter Type = "ClientEnter"
-	ClientLeave Type = "ClientLeave"
-	AppToken    Type = "AppToken"
-	CmsToken    Type = "CmsToken"
+	Online         Type = "Online"
+	Offline        Type = "Offline"
+	ClientEnter    Type = "ClientEnter"
+	ClientLeave    Type = "ClientLeave"
+	AppToken       Type = "AppToken"
+	CmsToken       Type = "CmsToken"
+	PrepareRestart Type = "PrepareRestart"
 )
 
 type Handler func(val any)

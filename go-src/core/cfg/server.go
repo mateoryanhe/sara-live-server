@@ -24,10 +24,10 @@ type XRServerCfg struct {
 	KeyFile  string
 	//服务器id
 	Id int64
-	//程序最长退出时间
-	ExitTime int
-	// Go堆内存软上限(MB),0或未设置时默认400M
-	MemoryLimitM int
+	// 热重启刷盘最长等待(秒),Restart 前
+	HotRestartFlushTimeout int
+	// 热重启后旧进程自行退出最长等待(秒),超时强制退出
+	HotRestartExitTimeout int
 }
 
 var serverCfg *XRServerCfg
@@ -44,7 +44,6 @@ func initServerCfg() {
 		g.Log().Error(gctx.New(), "无法加载到基础配置文件数据")
 		return
 	}
-	applyMemoryLimit(serverCfg.MemoryLimitM)
 }
 
 // GetClientMaxBodySize 读取 server.clientMaxBodySize,与 GoFrame HTTP 请求体上限一致
