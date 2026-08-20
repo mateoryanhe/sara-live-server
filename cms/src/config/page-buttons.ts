@@ -119,6 +119,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'cancel', label: '注销/取消注销'},
         {key: 'setUserType', label: '修改用户类型'},
         {key: 'setAnchorType', label: '设置主播类型'},
+        {key: 'openGame', label: '打开游戏'},
     ],
     AnchorListManagement: [BTN.view, BTN.search, BTN.edit, {key: 'viewDetail', label: '查看详情'}, {key: 'viewUserDetail', label: '查看用户详情'}, {key: 'viewGuildDetail', label: '查看工会详情'}, {key: 'offShelf', label: '下架'}],
     PlatformAnchorList: [
@@ -220,7 +221,10 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     GameShelfListManagement: [
         BTN.view,
         BTN.search,
+        BTN.edit,
         {key: 'shelf', label: '下架'},
+        {key: 'vendorConfig', label: '第三方配置'},
+        {key: 'startGame', label: '打开游戏'},
     ],
     VipCfgManagement: [
         ...DEFAULT_CRUD_BUTTONS,

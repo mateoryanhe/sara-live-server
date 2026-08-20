@@ -51,3 +51,15 @@ func (c *GamePlatformCMSController) BatchAddGameShelf(ctx context.Context, req *
 func (c *GamePlatformCMSController) BatchDeleteGameShelf(ctx context.Context, req *gameplatformdto.BatchDeleteGameShelfReq) (*gameplatformdto.BatchDeleteGameShelfRes, error) {
 	return game.BatchDeleteGameShelf(ctx, req)
 }
+
+func (c *GamePlatformCMSController) UpdateGameShelf(ctx context.Context, req *gameplatformdto.UpdateGameShelfReq) (*gameplatformdto.UpdateGameShelfRes, error) {
+	return game.UpdateGameShelf(ctx, req)
+}
+
+func (c *GamePlatformCMSController) GetMultiplayerConfigUrl(ctx context.Context, req *gameplatformdto.GetMultiplayerConfigUrlReq) (*gameplatformdto.GetMultiplayerConfigUrlRes, error) {
+	return game.GetMultiplayerConfigUrl(ctx, req)
+}
+
+func (c *GamePlatformCMSController) CMSGameStartLink(ctx context.Context, req *gameplatformdto.CMSGameStartLinkReq) (*gameplatformdto.CMSGameStartLinkRes, error) {
+	return game.GetCMSGameStartLink(ctx, req)
+}

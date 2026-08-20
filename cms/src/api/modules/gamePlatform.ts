@@ -16,6 +16,12 @@ import type {
     VendorGameQuery,
     GameShelfItem,
     GameShelfQuery,
+    UpdateGameShelfReq,
+    UpdateGameShelfRes,
+    GetMultiplayerConfigUrlReq,
+    GetMultiplayerConfigUrlRes,
+    CMSGameStartLinkReq,
+    CMSGameStartLinkRes,
 } from '@/types/api'
 
 export const gamePlatformApi = {
@@ -53,6 +59,18 @@ export const gamePlatformApi = {
 
     batchDeleteGameShelf: (data: BatchDeleteGameShelfReq) => {
         return request.post<BatchDeleteGameShelfRes>('/gamePlatform/batchDeleteGameShelf', data)
+    },
+
+    updateGameShelf: (data: UpdateGameShelfReq) => {
+        return request.post<UpdateGameShelfRes>('/gamePlatform/updateGameShelf', data)
+    },
+
+    getMultiplayerConfigUrl: (data: GetMultiplayerConfigUrlReq) => {
+        return request.post<GetMultiplayerConfigUrlRes>('/gamePlatform/getMultiplayerConfigUrl', data)
+    },
+
+    getCMSGameStartLink: (data: CMSGameStartLinkReq) => {
+        return request.post<CMSGameStartLinkRes>('/gamePlatform/cmsGameStartLink', data)
     },
 }
 

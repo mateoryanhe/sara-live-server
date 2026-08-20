@@ -24,6 +24,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'UserList:cancel': '/account/cancel',
     'UserList:setUserType': '/account/setUserType',
     'UserList:setAnchorType': '/account/setPlatformAnchorType',
+    'UserList:openGame': '/gamePlatform/gameShelfList',
     UserDetail: '/account/getUserDetail',
 
     AnchorListManagement: '/account/getAnchorList',
@@ -281,7 +282,10 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     GameShelfListManagement: '/gamePlatform/gameShelfList',
     'GameShelfListManagement:view': '/gamePlatform/gameShelfList',
     'GameShelfListManagement:search': '/gamePlatform/gameShelfList',
+    'GameShelfListManagement:edit': '/gamePlatform/updateGameShelf',
     'GameShelfListManagement:shelf': '/gamePlatform/deleteGameShelf',
+    'GameShelfListManagement:vendorConfig': '/gamePlatform/getMultiplayerConfigUrl',
+    'GameShelfListManagement:startGame': '/gamePlatform/cmsGameStartLink',
 
     GameWinLogListManagement: '/gameWinLog/cmsGameWinLogList',
     'GameWinLogListManagement:view': '/gameWinLog/cmsGameWinLogList',

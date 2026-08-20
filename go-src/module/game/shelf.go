@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"xr-game-server/core/httpserver"
+	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/gameplatformdto"
 	"xr-game-server/entity/game"
@@ -150,6 +151,95 @@ func BatchDeleteGameShelf(_ context.Context, req *gameplatformdto.BatchDeleteGam
 	}, nil
 }
 
+// UpdateGameShelf CMS 更新上架游戏直播展示字段.
+func UpdateGameShelf(_ context.Context, req *gameplatformdto.UpdateGameShelfReq) (*gameplatformdto.UpdateGameShelfRes, error) {
+	if req == nil {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	gameCode := strings.TrimSpace(req.GameCode)
+	if gameCode == "" {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if cfgdao.GetGameCfgByGameCode(gameCode) == nil {
+		return nil, errercode.CreateCode(errercode.GameCfgNonExist)
+	}
+	liveGameName := strings.TrimSpace(req.LiveGameName)
+	liveGameCover := strings.TrimSpace(req.LiveGameCover)
+	if liveGameCover != "" && !strings.HasPrefix(liveGameCover, "http://") && !strings.HasPrefix(liveGameCover, "https://") {
+		liveGameCover = normalizeVendorGameCover(liveGameCover)
+	}
+	ok, err := cfgdao.UpdateGameCfgLiveDisplay(gameCode, liveGameName, liveGameCover)
+	if err != nil {
+		return nil, err
+	}
+	if !ok {
+		return nil, errercode.CreateCode(errercode.GameCfgNonExist)
+	}
+	cfgdao.ReloadGameCfgCache()
+	return &gameplatformdto.UpdateGameShelfRes{Success: true}, nil
+}
+
+// GetMultiplayerConfigUrl CMS 获取第三方自研游戏 embed 配置页链接.
+func GetMultiplayerConfigUrl(ctx context.Context, req *gameplatformdto.GetMultiplayerConfigUrlReq) (*gameplatformdto.GetMultiplayerConfigUrlRes, error) {
+	if req == nil {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	gameCode := strings.TrimSpace(req.GameCode)
+	if gameCode == "" {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if !cfgdao.IsGameOnShelfFromMemory(gameCode) {
+		return nil, errercode.CreateCode(errercode.GameCfgNonExist)
+	}
+
+	platform := strings.TrimSpace(req.Platform)
+	if platform == "" {
+		if row := cfgdao.GetGameCfgByGameCode(gameCode); row != nil {
+			platform = strings.TrimSpace(row.Platform)
+		}
+	}
+	if platform == "" {
+		platform = vendorMultiplayerDefaultPlatform
+	}
+
+	configURL, expireInMs, err := fetchVendorMultiplayerConfigURL(ctx, gameCode, platform)
+	if err != nil {
+		return nil, err
+	}
+	return &gameplatformdto.GetMultiplayerConfigUrlRes{
+		ConfigUrl:  configURL,
+		ExpireInMs: expireInMs,
+	}, nil
+}
+
+// GetCMSGameStartLink CMS 代指定用户获取游戏启动链接.
+func GetCMSGameStartLink(ctx context.Context, req *gameplatformdto.CMSGameStartLinkReq) (*gameplatformdto.CMSGameStartLinkRes, error) {
+	if req == nil || req.UserId == 0 {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	gameCode := strings.TrimSpace(req.GameCode)
+	if gameCode == "" {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if accountdao.GetAccountById(req.UserId) == nil {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if !cfgdao.IsGameOnShelfFromMemory(gameCode) {
+		return nil, errercode.CreateCode(errercode.GameCfgNonExist)
+	}
+
+	platform, err := resolveGameStartPlatform(gameCode)
+	if err != nil {
+		return nil, err
+	}
+
+	link, err := fetchVendorGameStartURL(ctx, gameCode, platform, strconv.FormatUint(req.UserId, 10), "en")
+	if err != nil {
+		return nil, err
+	}
+	return &gameplatformdto.CMSGameStartLinkRes{Link: link}, nil
+}
+
 func findGameCfgByID(id uint64) *entity.GameCfg {
 	for _, row := range cfgdao.GetAllGameCfgFromMemory() {
 		if row != nil && row.ID == id {
@@ -203,11 +293,14 @@ func filterGameShelfList(all []*entity.GameCfg, req *gameplatformdto.GameShelfLi
 
 func toGameShelfListItem(row *entity.GameCfg) *gameplatformdto.GameShelfListItem {
 	item := &gameplatformdto.GameShelfListItem{
-		ID:       strconv.FormatUint(row.ID, 10),
-		GameCode: row.GameCode,
-		NameEn:   row.NameEn,
-		Cover:    BuildGameCoverUrl(row.Cover),
-		Platform: row.Platform,
+		ID:               strconv.FormatUint(row.ID, 10),
+		GameCode:         row.GameCode,
+		NameEn:           row.NameEn,
+		Cover:            BuildGameCoverUrl(row.Cover),
+		LiveGameName:     row.LiveGameName,
+		LiveGameCover:    row.LiveGameCover,
+		LiveGameCoverUrl: BuildGameCoverUrl(row.LiveGameCover),
+		Platform:         row.Platform,
 	}
 	if vendorGame, ok := GetVendorGameFromBrowseCache(row.GameCode); ok && vendorGame != nil {
 		item.Name = strings.TrimSpace(vendorGame.Name)

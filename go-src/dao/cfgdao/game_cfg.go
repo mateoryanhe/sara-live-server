@@ -137,3 +137,22 @@ func DeleteGameCfgByGameCodes(gameCodes []string) (int, error) {
 	}
 	return int(affected), nil
 }
+
+func UpdateGameCfgLiveDisplay(gameCode, liveGameName, liveGameCover string) (bool, error) {
+	gameCode = strings.TrimSpace(gameCode)
+	if gameCode == "" {
+		return false, nil
+	}
+	result, err := g.DB().Model(string(entity.TbGameCfg)).Where("game_code = ?", gameCode).Data(g.Map{
+		"live_game_name":  liveGameName,
+		"live_game_cover": liveGameCover,
+	}).Update()
+	if err != nil {
+		return false, err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+	return affected > 0, nil
+}

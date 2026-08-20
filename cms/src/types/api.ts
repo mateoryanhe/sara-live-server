@@ -1614,7 +1614,39 @@ export interface GameShelfItem {
     name: string
     nameEn: string
     cover: string
+    liveGameName: string
+    liveGameCover: string
+    liveGameCoverUrl: string
     platform: string
+}
+
+export interface UpdateGameShelfReq {
+    gameCode: string
+    liveGameName?: string
+    liveGameCover?: string
+}
+
+export interface UpdateGameShelfRes {
+    success: boolean
+}
+
+export interface GetMultiplayerConfigUrlReq {
+    gameCode: string
+    platform?: string
+}
+
+export interface GetMultiplayerConfigUrlRes {
+    configUrl: string
+    expireInMs: number
+}
+
+export interface CMSGameStartLinkReq {
+    userId: number
+    gameCode: string
+}
+
+export interface CMSGameStartLinkRes {
+    link: string
 }
 
 export interface GameShelfQuery extends PageQuery {

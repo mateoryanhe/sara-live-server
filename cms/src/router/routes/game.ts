@@ -4,8 +4,14 @@ import type {RouteRecordRaw} from 'vue-router'
 export const gameRoutes: RouteRecordRaw = {
     path: '/game',
     meta: {title: '游戏管理', icon: 'Cpu'},
-    redirect: '/game/game-platform-cfg',
+    redirect: '/game/game-shelf-list',
     children: [
+        {
+            path: 'game-shelf-list',
+            name: 'GameShelfListManagement',
+            component: () => import('@/views/game/game-shelf-list.vue'),
+            meta: {title: '上架游戏列表'},
+        },
         {
             path: 'game-platform-cfg',
             name: 'GamePlatformCfgManagement',
@@ -17,12 +23,6 @@ export const gameRoutes: RouteRecordRaw = {
             name: 'GameVendorGameListManagement',
             component: () => import('@/views/game/game-list.vue'),
             meta: {title: '游戏库'},
-        },
-        {
-            path: 'game-shelf-list',
-            name: 'GameShelfListManagement',
-            component: () => import('@/views/game/game-shelf-list.vue'),
-            meta: {title: '上架游戏列表'},
         },
         {
             path: 'game-win-log-list',

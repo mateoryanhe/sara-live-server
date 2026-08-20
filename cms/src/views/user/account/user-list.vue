@@ -177,8 +177,9 @@
                 </el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item v-if="canViewDetail" command="viewDetail">{{ t('pages.userList.viewDetail') }}</el-dropdown-item>
-                    <el-dropdown-item v-if="can('setAnchor') && !scope.row.isAnchor" :divided="canViewDetail" command="setAnchor">{{ t('pages.userList.setAnchor') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="can('openGame')" command="openGame">{{ t('pages.userList.openGame') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="canViewDetail" :divided="can('openGame')" command="viewDetail">{{ t('pages.userList.viewDetail') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="can('setAnchor') && !scope.row.isAnchor" :divided="canViewDetail || can('openGame')" command="setAnchor">{{ t('pages.userList.setAnchor') }}</el-dropdown-item>
                     <el-dropdown-item v-if="can('setSeniorAnchor') && !scope.row.isAnchor" command="setSeniorAnchor">{{ t('pages.userList.setSeniorAnchor') }}</el-dropdown-item>
                     <el-dropdown-item v-if="can('goldAdd')" :divided="!scope.row.isAnchor" command="gold-add">
                       {{ t('pages.userList.addGold') }}
@@ -375,6 +376,7 @@ const ROW_ACTION_KEYS = [
   'rechargeWhitelistOff',
   'cancel',
   'setUserType',
+  'openGame',
 ] as const
 
 const hasRowActions = computed(() => canViewDetail.value || ROW_ACTION_KEYS.some(key => can(key)))
@@ -657,8 +659,21 @@ const openAnchorDetail = (row: UserInfo) => {
   })
 }
 
+const openGamePicker = (row: UserInfo) => {
+  router.push({
+    path: '/game/game-shelf-list',
+    query: {
+      pickUserId: String(row.id),
+      pickUserNickname: row.nickname || '',
+    },
+  })
+}
+
 const handleRowCommand = (row: UserInfo, command: string) => {
   switch (command) {
+    case 'openGame':
+      openGamePicker(row)
+      break
     case 'viewDetail':
       openDetail(row)
       break

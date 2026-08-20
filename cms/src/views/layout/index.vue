@@ -384,6 +384,12 @@
             </el-icon>
             <span>{{ t('menu.GameManagement') }}</span>
           </template>
+          <el-menu-item v-if="hasMenuPermission('GameShelfListManagement')" index="/game/game-shelf-list">
+            <el-icon>
+              <Collection/>
+            </el-icon>
+            <span>{{ t('menu.GameShelfListManagement') }}</span>
+          </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('GamePlatformCfgManagement')" index="/game/game-platform-cfg">
             <el-icon>
               <Setting/>
@@ -395,12 +401,6 @@
               <List/>
             </el-icon>
             <span>{{ t('menu.GameVendorGameListManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('GameShelfListManagement')" index="/game/game-shelf-list">
-            <el-icon>
-              <Collection/>
-            </el-icon>
-            <span>{{ t('menu.GameShelfListManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('GameBetLogListManagement')" index="/game/game-bet-log-list">
             <el-icon>

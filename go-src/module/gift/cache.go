@@ -1,6 +1,7 @@
 package gift
 
 import (
+	"sort"
 	"sync"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/giftdto"
@@ -13,7 +14,7 @@ import (
 var (
 	giftCacheMu     sync.RWMutex
 	giftCacheMap    map[uint64]*giftdto.AppGiftItem // id -> item
-	giftCacheSorted []*giftdto.AppGiftItem          // 按 sort desc, created_at desc 排序的列表
+	giftCacheSorted []*giftdto.AppGiftItem          // 按 price asc 排序的列表
 	giftCacheLoaded bool
 )
 
@@ -36,6 +37,7 @@ func loadGiftCache() []*giftdto.AppGiftItem {
 		m[r.ID] = item
 		list = append(list, item)
 	}
+	sortAppGiftItemsByPriceAsc(list)
 
 	giftCacheMu.Lock()
 	giftCacheMap = m
@@ -78,6 +80,15 @@ func GetGiftFromCacheById(id uint64) *giftdto.AppGiftItem {
 	item := giftCacheMap[id]
 	giftCacheMu.RUnlock()
 	return item
+}
+
+func sortAppGiftItemsByPriceAsc(list []*giftdto.AppGiftItem) {
+	sort.Slice(list, func(i, j int) bool {
+		if list[i].Price != list[j].Price {
+			return list[i].Price < list[j].Price
+		}
+		return list[i].ID < list[j].ID
+	})
 }
 
 func toAppGiftItem(g *entity.LiveGift) *giftdto.AppGiftItem {
