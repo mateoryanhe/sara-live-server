@@ -11,11 +11,30 @@ import (
 // RevenueLogCMSListFilter CMS直播收益流水查询条件
 type RevenueLogCMSListFilter struct {
 	ReceiverId  uint64
+	ReceiverIds []uint64
 	RevenueType uint8
 	StartTime   int64
 	EndTime     int64
 	PageIndex   int
 	PageSize    int
+}
+
+func (f *RevenueLogCMSListFilter) receiverIds() []uint64 {
+	if f == nil {
+		return nil
+	}
+	if len(f.ReceiverIds) > 0 {
+		return f.ReceiverIds
+	}
+	if f.ReceiverId > 0 {
+		return []uint64{f.ReceiverId}
+	}
+	return nil
+}
+
+// ParseRevenueLogReceiverIds 合并收益流水查询中的收益用户ID参数(兼容单选与多选)
+func ParseRevenueLogReceiverIds(receiverId, platformAnchorId, guildAnchorId string, receiverIds []string) []uint64 {
+	return ParseLiveRecordAnchorIds(receiverId, platformAnchorId, guildAnchorId, receiverIds)
 }
 
 // RevenueLogCMSList CMS分页查询直播收益流水(按ID倒序)
@@ -32,8 +51,8 @@ func RevenueLogCMSList(f *RevenueLogCMSListFilter) (int, []*entity.LiveRevenueLo
 	}
 	ctx := gctx.New()
 	m := g.Model(string(entity.TbLiveRevenueLog)).Ctx(ctx)
-	if f.ReceiverId > 0 {
-		m = m.Where(string(entity.LiveRevenueLogReceiverId)+" = ?", f.ReceiverId)
+	if receiverIds := f.receiverIds(); len(receiverIds) > 0 {
+		m = m.Where(string(entity.LiveRevenueLogReceiverId)+" IN (?)", receiverIds)
 	}
 	if f.RevenueType > 0 {
 		m = m.Where(string(entity.LiveRevenueLogRevenueType)+" = ?", f.RevenueType)

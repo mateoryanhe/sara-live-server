@@ -231,6 +231,18 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'manualCreateOrder', label: '人工创建订单'},
         {key: 'manualRecharge', label: '人工补单'},
     ],
+    LiveRecordList: [
+        BTN.view,
+        BTN.search,
+        BTN.export,
+        {key: 'viewUserDetail', label: '查看用户详情'},
+    ],
+    LiveRevenueLogList: [
+        BTN.view,
+        BTN.search,
+        BTN.export,
+        {key: 'viewUserDetail', label: '查看用户详情'},
+    ],
 }
 
 export function getPageButtons(pageName: string, metaButtons?: PageButtonDef[]): PageButtonDef[] {

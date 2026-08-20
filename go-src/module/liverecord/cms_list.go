@@ -48,6 +48,7 @@ func toCMSItem(v *entity.LiveRecord) *liverecorddto.CMSLiveRecordItem {
 	}
 	if u := userinfodao.GetUserInfoByUserId(v.AnchorId); u != nil {
 		item.Nickname = u.Nickname
+		item.Avatar = u.Avatar
 	}
 	return item
 }

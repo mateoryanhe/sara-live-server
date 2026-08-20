@@ -8,10 +8,18 @@
       </template>
 
       <el-form :model="searchForm" class="search-form" inline label-width="100px">
-        <el-form-item :label="t('pages.liveRecordList.anchorFilter')">
+        <el-form-item :label="t('pages.liveRecordList.platformAnchor')">
           <AnchorRemoteSelect
-              v-model="searchForm.anchorIds"
-              :placeholder="t('pages.liveRecordList.searchAnchor')"
+              v-model="searchForm.platformAnchorIds"
+              mode="platform"
+              :placeholder="t('pages.liveRecordList.searchPlatformAnchor')"
+          />
+        </el-form-item>
+        <el-form-item :label="t('pages.liveRecordList.guildAnchor')">
+          <AnchorRemoteSelect
+              v-model="searchForm.guildAnchorIds"
+              mode="guild"
+              :placeholder="t('pages.liveRecordList.searchGuildAnchor')"
           />
         </el-form-item>
         <el-form-item :label="t('pages.liveRecordList.startDate')">
@@ -45,9 +53,38 @@
 
       <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width: 100%">
         <el-table-column :label="t('pages.liveRecordList.recordId')" min-width="180" prop="id"/>
-        <el-table-column :label="t('pages.liveRecordList.anchorId')" min-width="180" prop="anchorId"/>
+        <el-table-column :label="t('pages.liveRecordList.anchorId')" min-width="180" prop="anchorId">
+          <template #default="{ row }">
+            <el-button v-if="row.anchorId" link type="primary" @click="openAnchorDetail(row.anchorId)">
+              {{ row.anchorId }}
+            </el-button>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('common.avatar')" width="80">
+          <template #default="{ row }">
+            <el-image
+                v-if="row.avatar"
+                :preview-src-list="[row.avatar]"
+                :src="row.avatar"
+                fit="cover"
+                hide-on-click-modal
+                preview-teleported
+                style="width:40px;height:40px;border-radius:50%"
+            />
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
         <el-table-column :label="t('pages.liveRecordList.anchorNickname')" min-width="120" prop="nickname">
           <template #default="{ row }">{{ row.nickname || '-' }}</template>
+        </el-table-column>
+        <el-table-column :label="t('menu.UserDetail')" width="110">
+          <template #default="{ row }">
+            <el-button v-if="row.anchorId" link type="primary" @click="openUserDetail(row.anchorId)">
+              {{ t('pages.userList.viewDetail') }}
+            </el-button>
+            <span v-else>-</span>
+          </template>
         </el-table-column>
         <el-table-column :label="t('common.startTime')" width="170">
           <template #default="{ row }">{{ formatDate(row.startTime) }}</template>
@@ -105,26 +142,35 @@
 <script lang="ts" setup>
 import {useI18n} from 'vue-i18n'
 import {onMounted, reactive, ref} from 'vue'
+import {useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {liveRecordApi} from '@/api'
 import type {LiveRecordItem} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
+import {useUserDetailNav} from '@/composables/useUserDetailNav'
 import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
 import {CMS_EXPORT_TYPE_LIVE_RECORD} from '@/utils/cms-async-export'
 import {buildLiveRecordCsvColumns} from '@/utils/live-record-csv'
 import {formatWalletBalance} from '@/utils/number-format'
 
 const {t} = useI18n()
+const router = useRouter()
 const {can} = usePagePermission('LiveRecordList')
+const {openUserDetail} = useUserDetailNav('LiveRecordList')
 const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
 const tableData = ref<LiveRecordItem[]>([])
 
 const searchForm = reactive({
-  anchorIds: [] as string[],
+  platformAnchorIds: [] as string[],
+  guildAnchorIds: [] as string[],
   startDate: '',
   endDate: '',
 })
+
+const buildSelectedAnchorIds = () => {
+  return [...new Set([...searchForm.platformAnchorIds, ...searchForm.guildAnchorIds])]
+}
 
 const pagination = reactive({
   pageIndex: 1,
@@ -143,13 +189,13 @@ const toDayEndUnix = (dateStr: string): number => {
 const buildQueryParams = () => ({
   pageIndex: pagination.pageIndex,
   pageSize: pagination.pageSize,
-  anchorIds: [...searchForm.anchorIds],
+  anchorIds: buildSelectedAnchorIds(),
   startTime: searchForm.startDate ? toDayStartUnix(searchForm.startDate) : 0,
   endTime: searchForm.endDate ? toDayEndUnix(searchForm.endDate) : 0,
 })
 
 const buildFilterParams = () => ({
-  anchorIds: [...searchForm.anchorIds],
+  anchorIds: buildSelectedAnchorIds(),
   startTime: searchForm.startDate ? toDayStartUnix(searchForm.startDate) : 0,
   endTime: searchForm.endDate ? toDayEndUnix(searchForm.endDate) : 0,
 })
@@ -174,7 +220,8 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
-  searchForm.anchorIds = []
+  searchForm.platformAnchorIds = []
+  searchForm.guildAnchorIds = []
   searchForm.startDate = ''
   searchForm.endDate = ''
   pagination.pageIndex = 1
@@ -190,6 +237,16 @@ const handleSizeChange = (size: number) => {
   pagination.pageSize = size
   pagination.pageIndex = 1
   fetchList()
+}
+
+const openAnchorDetail = (anchorId: string | number) => {
+  if (!anchorId) {
+    return
+  }
+  router.push({
+    path: '/user/anchor/anchor-detail',
+    query: {id: String(anchorId)},
+  })
 }
 
 const handleExport = async () => {

@@ -1715,6 +1715,7 @@ export interface RechargeOrderQuery extends PageQuery {
 
 export interface LiveRevenueLogQuery extends PageQuery {
     receiverId?: string
+    receiverIds?: string[]
     revenueType?: number
     startTime?: number
     endTime?: number
@@ -1730,6 +1731,7 @@ export interface LiveRevenueLogItem {
     senderNickname?: string
     receiverId: string
     receiverNickname?: string
+    receiverAvatar?: string
     bizId: string
     bizName?: string
     count: number
@@ -1751,6 +1753,7 @@ export interface LiveRecordItem {
     id: string
     anchorId: string
     nickname?: string
+    avatar?: string
     startTime?: string | null
     endTime?: string | null
     totalAudience: number

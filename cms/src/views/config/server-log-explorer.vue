@@ -176,7 +176,7 @@
                 :page-sizes="[20, 50, 100, 200]"
                 :total="accessTotal"
                 background
-                layout="total, sizes, prev, pager, next"
+                layout="sizes, prev, pager, next"
                 @current-change="fetchAccessLogs"
                 @size-change="handleAccessSearch"
             />
@@ -258,7 +258,7 @@
                 :page-sizes="[20, 50, 100, 200]"
                 :total="errorTotal"
                 background
-                layout="total, sizes, prev, pager, next"
+                layout="sizes, prev, pager, next"
                 @current-change="fetchErrorLogs"
                 @size-change="handleErrorSearch"
             />
@@ -345,7 +345,7 @@
                 :page-sizes="[20, 50, 100, 200]"
                 :total="detailTotal"
                 background
-                layout="total, sizes, prev, pager, next"
+                layout="sizes, prev, pager, next"
                 @current-change="fetchDetailLogs"
                 @size-change="handleDetailSearch"
             />

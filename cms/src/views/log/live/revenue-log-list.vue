@@ -8,8 +8,19 @@
       </template>
 
       <el-form :model="searchForm" class="search-form" inline label-width="100px">
-        <el-form-item :label="t('pages.revenueLogList.receiverId')">
-          <el-input v-model="searchForm.receiverId" clearable :placeholder="t('pages.revenueLogList.enterReceiverId')"/>
+        <el-form-item :label="t('pages.revenueLogList.platformAnchor')">
+          <AnchorRemoteSelect
+              v-model="searchForm.platformAnchorIds"
+              mode="platform"
+              :placeholder="t('pages.revenueLogList.searchPlatformAnchor')"
+          />
+        </el-form-item>
+        <el-form-item :label="t('pages.revenueLogList.guildAnchor')">
+          <AnchorRemoteSelect
+              v-model="searchForm.guildAnchorIds"
+              mode="guild"
+              :placeholder="t('pages.revenueLogList.searchGuildAnchor')"
+          />
         </el-form-item>
         <el-form-item :label="t('pages.revenueLogList.revenueType')">
           <el-select v-model="searchForm.revenueType" clearable :placeholder="t('common.all')" style="width: 140px">
@@ -19,16 +30,25 @@
             <el-option :value="3" :label="t('pages.revenueLogList.revenueGameBet')"/>
           </el-select>
         </el-form-item>
-        <el-form-item :label="t('common.createdAt')">
+        <el-form-item :label="t('pages.revenueLogList.startDate')">
           <el-date-picker
-              v-model="searchForm.dateRange"
+              v-model="searchForm.startDate"
               clearable
-              :end-placeholder="t('pages.revenueLogList.endDate')"
               format="YYYY-MM-DD"
-              :range-separator="t('pages.revenueLogList.dateRangeSeparator')"
-              :start-placeholder="t('pages.revenueLogList.startDate')"
-              style="width: 260px"
-              type="daterange"
+              :placeholder="t('pages.revenueLogList.startDate')"
+              style="width: 160px"
+              type="date"
+              value-format="YYYY-MM-DD"
+          />
+        </el-form-item>
+        <el-form-item :label="t('pages.revenueLogList.endDate')">
+          <el-date-picker
+              v-model="searchForm.endDate"
+              clearable
+              format="YYYY-MM-DD"
+              :placeholder="t('pages.revenueLogList.endDate')"
+              style="width: 160px"
+              type="date"
               value-format="YYYY-MM-DD"
           />
         </el-form-item>
@@ -50,9 +70,38 @@
         <el-table-column :label="t('pages.revenueLogList.payerNickname')" min-width="120" prop="senderNickname">
           <template #default="{ row }">{{ row.senderNickname || '-' }}</template>
         </el-table-column>
-        <el-table-column :label="t('pages.revenueLogList.receiverUserId')" min-width="180" prop="receiverId"/>
+        <el-table-column :label="t('pages.revenueLogList.receiverUserId')" min-width="180" prop="receiverId">
+          <template #default="{ row }">
+            <el-button v-if="row.receiverId" link type="primary" @click="openAnchorDetail(row.receiverId)">
+              {{ row.receiverId }}
+            </el-button>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('common.avatar')" width="80">
+          <template #default="{ row }">
+            <el-image
+                v-if="row.receiverAvatar"
+                :preview-src-list="[row.receiverAvatar]"
+                :src="row.receiverAvatar"
+                fit="cover"
+                hide-on-click-modal
+                preview-teleported
+                style="width:40px;height:40px;border-radius:50%"
+            />
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
         <el-table-column :label="t('pages.revenueLogList.receiverNickname')" min-width="120" prop="receiverNickname">
           <template #default="{ row }">{{ row.receiverNickname || '-' }}</template>
+        </el-table-column>
+        <el-table-column :label="t('menu.UserDetail')" width="110">
+          <template #default="{ row }">
+            <el-button v-if="row.receiverId" link type="primary" @click="openUserDetail(row.receiverId)">
+              {{ t('pages.userList.viewDetail') }}
+            </el-button>
+            <span v-else>-</span>
+          </template>
         </el-table-column>
         <el-table-column :label="t('pages.revenueLogList.bizId')" min-width="180" prop="bizId"/>
         <el-table-column :label="t('pages.revenueLogList.bizName')" min-width="120" prop="bizName">
@@ -91,25 +140,35 @@
 <script lang="ts" setup>
 import {useI18n} from 'vue-i18n'
 import {onMounted, reactive, ref} from 'vue'
+import {useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {liveRevenueLogApi} from '@/api'
 import type {LiveRevenueLogItem} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
+import {useUserDetailNav} from '@/composables/useUserDetailNav'
 import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
 import {CMS_EXPORT_TYPE_LIVE_REVENUE_LOG} from '@/utils/cms-async-export'
 import {buildLiveRevenueLogCsvColumns} from '@/utils/live-revenue-log-csv'
 
 const {t} = useI18n()
+const router = useRouter()
 const {can} = usePagePermission('LiveRevenueLogList')
+const {openUserDetail} = useUserDetailNav('LiveRevenueLogList')
 const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
 const tableData = ref<LiveRevenueLogItem[]>([])
 
 const searchForm = reactive({
-  receiverId: '',
+  platformAnchorIds: [] as string[],
+  guildAnchorIds: [] as string[],
   revenueType: 0,
-  dateRange: [] as string[],
+  startDate: '',
+  endDate: '',
 })
+
+const buildSelectedReceiverIds = () => {
+  return [...new Set([...searchForm.platformAnchorIds, ...searchForm.guildAnchorIds])]
+}
 
 const formatRevenueType = (type: number) => {
   const map: Record<number, string> = {
@@ -134,27 +193,21 @@ const toDayEndUnix = (dateStr: string): number => {
   return Math.floor(new Date(`${dateStr}T23:59:59`).getTime() / 1000)
 }
 
-const buildQueryParams = () => {
-  const [startDate, endDate] = searchForm.dateRange || []
-  return {
-    pageIndex: pagination.pageIndex,
-    pageSize: pagination.pageSize,
-    receiverId: searchForm.receiverId.trim(),
-    revenueType: searchForm.revenueType || 0,
-    startTime: startDate ? toDayStartUnix(startDate) : 0,
-    endTime: endDate ? toDayEndUnix(endDate) : 0,
-  }
-}
+const buildQueryParams = () => ({
+  pageIndex: pagination.pageIndex,
+  pageSize: pagination.pageSize,
+  receiverIds: buildSelectedReceiverIds(),
+  revenueType: searchForm.revenueType || 0,
+  startTime: searchForm.startDate ? toDayStartUnix(searchForm.startDate) : 0,
+  endTime: searchForm.endDate ? toDayEndUnix(searchForm.endDate) : 0,
+})
 
-const buildFilterParams = () => {
-  const [startDate, endDate] = searchForm.dateRange || []
-  return {
-    receiverId: searchForm.receiverId.trim(),
-    revenueType: searchForm.revenueType || 0,
-    startTime: startDate ? toDayStartUnix(startDate) : 0,
-    endTime: endDate ? toDayEndUnix(endDate) : 0,
-  }
-}
+const buildFilterParams = () => ({
+  receiverIds: buildSelectedReceiverIds(),
+  revenueType: searchForm.revenueType || 0,
+  startTime: searchForm.startDate ? toDayStartUnix(searchForm.startDate) : 0,
+  endTime: searchForm.endDate ? toDayEndUnix(searchForm.endDate) : 0,
+})
 
 const fetchList = async () => {
   loading.value = true
@@ -176,9 +229,11 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
-  searchForm.receiverId = ''
+  searchForm.platformAnchorIds = []
+  searchForm.guildAnchorIds = []
   searchForm.revenueType = 0
-  searchForm.dateRange = []
+  searchForm.startDate = ''
+  searchForm.endDate = ''
   pagination.pageIndex = 1
   fetchList()
 }
@@ -192,6 +247,16 @@ const handleSizeChange = (size: number) => {
   pagination.pageSize = size
   pagination.pageIndex = 1
   fetchList()
+}
+
+const openAnchorDetail = (anchorId: string | number) => {
+  if (!anchorId) {
+    return
+  }
+  router.push({
+    path: '/user/anchor/anchor-detail',
+    query: {id: String(anchorId)},
+  })
 }
 
 const handleExport = async () => {

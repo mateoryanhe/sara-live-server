@@ -851,6 +851,16 @@ export const buildPageResponse = <T>(items: T[], total: number): PageResponse<T>
     data: items,
 })
 
+/** 日志查询无总数分页：满页时预留下一页，末页按当前页推算 */
+export const estimateLogQueryPageTotal = (pageIndex: number, pageSize: number, itemCount: number): number => {
+    const page = pageIndex > 0 ? pageIndex : 1
+    const size = pageSize > 0 ? pageSize : Math.max(itemCount, 1)
+    if (itemCount >= size) {
+        return page * size + 1
+    }
+    return (page - 1) * size + itemCount
+}
+
 export const LOG_JSON_FIELD_OPTIONS = [
     {key: 'headers', label: 'Header'},
     {key: 'respContent', label: '响应'},

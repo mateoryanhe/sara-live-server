@@ -23,6 +23,7 @@ type CMSLiveRecordItem struct {
 	Id                           uint64     `json:"id,string"`
 	AnchorId                     uint64     `json:"anchorId,string"`
 	Nickname                     string     `json:"nickname"`
+	Avatar                       string     `json:"avatar"`
 	StartTime                    *time.Time `json:"startTime"`
 	EndTime                      *time.Time `json:"endTime"`
 	TotalAudience                uint64     `json:"totalAudience"`

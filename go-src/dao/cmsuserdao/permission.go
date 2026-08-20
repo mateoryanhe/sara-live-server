@@ -79,7 +79,7 @@ func roleHasApiPathExact(roleId uint64, apiPath string) bool {
 func cmsApiPermissionAliasPaths(apiPath string) []string {
 	switch apiPath {
 	case "/account/getUserDetail":
-		return []string{"/account/getUserInfo"}
+		return []string{"/account/getUserInfo", "/liveRecord/cmsLiveRecordList", "/liveRevenueLog/cmsLiveRevenueLogList"}
 	case "/account/getAnchorDailyEffectiveLiveList":
 		return []string{"/account/getAnchorDetail"}
 	case "/guild/getGuildDailyEffectiveLiveList":
@@ -93,7 +93,9 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 	case "/cmsExport/deleteExport":
 		return []string{"/cmsExport/submitJob"}
 	case "/account/getAnchorList":
-		return []string{"/liveRecord/cmsLiveRecordList", "/account/getAnchorList"}
+		return []string{"/liveRecord/cmsLiveRecordList", "/liveRevenueLog/cmsLiveRevenueLogList", "/account/getAnchorList"}
+	case "/account/getAnchorDetail":
+		return []string{"/liveRecord/cmsLiveRecordList", "/liveRevenueLog/cmsLiveRevenueLogList"}
 	default:
 		return nil
 	}

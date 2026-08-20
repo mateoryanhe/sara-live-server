@@ -1,6 +1,7 @@
 import {request} from '../request'
 import {
     buildPageResponse,
+    estimateLogQueryPageTotal,
     parseAccessLogLine,
     parseDetailLogLine,
     parseErrorLogLines,
@@ -110,21 +111,21 @@ export const logQueryApi = {
     queryDetailLogs: (params: DetailLogQuery, onStatus?: LogQueryStatusHandler) => {
         return runExportQuery<PageResponse<DetailLogItem>>('detail', params, (text, exportRes) => {
             const items = parseLogExportPage(text, parseDetailLogLine)
-            return buildPageResponse(items, exportRes.total || items.length)
+            return buildPageResponse(items, estimateLogQueryPageTotal(exportRes.pageIndex, exportRes.pageSize, items.length))
         }, onStatus)
     },
 
     queryAccessLogs: (params: AccessLogQuery, onStatus?: LogQueryStatusHandler) => {
         return runExportQuery<PageResponse<AccessLogItem>>('access', params, (text, exportRes) => {
             const items = parseLogExportPage(text, parseAccessLogLine)
-            return buildPageResponse(items, exportRes.total || items.length)
+            return buildPageResponse(items, estimateLogQueryPageTotal(exportRes.pageIndex, exportRes.pageSize, items.length))
         }, onStatus)
     },
 
     queryErrorLogs: (params: ErrorLogQuery, onStatus?: LogQueryStatusHandler) => {
         return runExportQuery<PageResponse<ErrorLogItem>>('error', params, (text, exportRes) => {
             const items = parseErrorLogLines(text)
-            return buildPageResponse(items, exportRes.total || items.length)
+            return buildPageResponse(items, estimateLogQueryPageTotal(exportRes.pageIndex, exportRes.pageSize, items.length))
         }, onStatus)
     },
 

@@ -231,11 +231,13 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'LiveRevenueLogList:view': '/liveRevenueLog/cmsLiveRevenueLogList',
     'LiveRevenueLogList:search': '/liveRevenueLog/cmsLiveRevenueLogList',
     'LiveRevenueLogList:export': '/cmsExport/submitJob',
+    'LiveRevenueLogList:viewUserDetail': '/account/getUserDetail',
 
     LiveRecordList: '/liveRecord/cmsLiveRecordList',
     'LiveRecordList:view': '/liveRecord/cmsLiveRecordList',
     'LiveRecordList:search': '/liveRecord/cmsLiveRecordList',
     'LiveRecordList:export': '/cmsExport/submitJob',
+    'LiveRecordList:viewUserDetail': '/account/getUserDetail',
 
     VideoCallLogList: '/call/cmsVideoCallLogList',
     'VideoCallLogList:view': '/call/cmsVideoCallLogList',

@@ -13,6 +13,8 @@ const (
 	msgPhase1End         = "热更新----第一阶段-----结束"
 	msgPhase2Start       = "热更新---第二阶段----开始"
 	msgPhase2HTTPClose   = "热更新---第二阶段----收到http请求,继续执行,URI=%s ip=%s"
+	msgPhase2WaitEnd     = "热更新---第二阶段----等待结束,开始刷盘"
+	msgPhase2QueueEmpty  = "热更新---第二阶段---入库队列清空完毕"
 	msgPhase2QueueHasRow = "热更新---第二阶段----入库队列有数据,数据量%d行,%s"
 	msgPhase2EndBless    = "热更新---第二阶段----结束,佛祖保佑"
 	msgPhase2EndNoBless  = "热更新---第二阶段----结束,佛祖不保佑了,要去看看日志,%s"
@@ -32,6 +34,14 @@ func logPhase1End(ctx context.Context) {
 
 func logPhase2Start(ctx context.Context) {
 	xrlog.DetailLog.Warning(ctx, msgPhase2Start)
+}
+
+func logPhase2WaitEndFlush(ctx context.Context) {
+	xrlog.DetailLog.Warning(ctx, msgPhase2WaitEnd)
+}
+
+func logPhase2QueueEmpty(ctx context.Context) {
+	xrlog.DetailLog.Warning(ctx, msgPhase2QueueEmpty)
 }
 
 // LogPhase2HTTPRequest 第二阶段旧进程收到 HTTP/WS 请求(继续执行,仅记录日志).

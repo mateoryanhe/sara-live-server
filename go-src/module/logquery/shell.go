@@ -41,18 +41,6 @@ func removeFile(path string) {
 	_ = os.Remove(path)
 }
 
-func countLines(path string) (int, error) {
-	out, err := runCommand("wc", "-l", path)
-	if err != nil {
-		return 0, err
-	}
-	fields := strings.Fields(string(out))
-	if len(fields) == 0 {
-		return 0, nil
-	}
-	return strconv.Atoi(fields[0])
-}
-
 func sanitizeShellPattern(pattern string) (string, bool) {
 	pattern = strings.TrimSpace(pattern)
 	if pattern == "" {

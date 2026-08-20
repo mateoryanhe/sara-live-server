@@ -84,10 +84,13 @@ type CMSExportLiveRecordPayload struct {
 
 type CMSExportLiveRevenueLogPayload struct {
 	CMSExportHeadersPayload
-	ReceiverId  string `json:"receiverId"`
-	RevenueType uint8  `json:"revenueType"`
-	StartTime   int64  `json:"startTime"`
-	EndTime     int64  `json:"endTime"`
+	ReceiverId       string   `json:"receiverId"`
+	PlatformAnchorId string   `json:"platformAnchorId"`
+	GuildAnchorId    string   `json:"guildAnchorId"`
+	ReceiverIds      []string `json:"receiverIds"`
+	RevenueType      uint8    `json:"revenueType"`
+	StartTime        int64    `json:"startTime"`
+	EndTime          int64    `json:"endTime"`
 }
 
 type CMSExportVideoCallLogPayload struct {

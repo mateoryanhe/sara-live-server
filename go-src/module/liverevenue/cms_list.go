@@ -2,7 +2,6 @@ package liverevenue
 
 import (
 	"context"
-	"strconv"
 	liverevenueconst "xr-game-server/constants/liverevenue"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/cfgdao"
@@ -10,18 +9,8 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liverevenuedto"
 	"xr-game-server/entity/live"
+	userentity "xr-game-server/entity/user"
 )
-
-func parseUint64Filter(val string) uint64 {
-	if val == "" {
-		return 0
-	}
-	id, err := strconv.ParseUint(val, 10, 64)
-	if err != nil {
-		return 0
-	}
-	return id
-}
 
 func collectRevenueLogUserIds(rows []*entity.LiveRevenueLog) []uint64 {
 	userIds := make([]uint64, 0, len(rows)*2)
@@ -48,7 +37,7 @@ func revenueLogStatusText(status uint8) string {
 	}
 }
 
-func toCMSItem(v *entity.LiveRevenueLog, nicknameMap map[uint64]string) *liverevenuedto.CMSLiveRevenueLogItem {
+func toCMSItem(v *entity.LiveRevenueLog, profileMap map[uint64]*userentity.UserInfo) *liverevenuedto.CMSLiveRevenueLogItem {
 	if v == nil {
 		return nil
 	}
@@ -68,9 +57,14 @@ func toCMSItem(v *entity.LiveRevenueLog, nicknameMap map[uint64]string) *liverev
 		StatusText:      revenueLogStatusText(v.Status),
 		CreatedAt:       &v.CreatedAt,
 	}
-	if nicknameMap != nil {
-		item.SenderNickname = nicknameMap[v.SenderId]
-		item.ReceiverNickname = nicknameMap[v.ReceiverId]
+	if profileMap != nil {
+		if sender := profileMap[v.SenderId]; sender != nil {
+			item.SenderNickname = sender.Nickname
+		}
+		if receiver := profileMap[v.ReceiverId]; receiver != nil {
+			item.ReceiverNickname = receiver.Nickname
+			item.ReceiverAvatar = receiver.Avatar
+		}
 	}
 	if v.RevenueType == uint8(liverevenueconst.Gift) {
 		if g := cfgdao.GetGiftById(v.BizId); g != nil {
@@ -83,17 +77,17 @@ func toCMSItem(v *entity.LiveRevenueLog, nicknameMap map[uint64]string) *liverev
 // GetCMSList CMS分页查询直播收益流水
 func GetCMSList(_ context.Context, req *liverevenuedto.CMSLiveRevenueLogListReq) (*httpserver.CMSQueryResp, error) {
 	total, rows := liveroomdao.RevenueLogCMSList(&liveroomdao.RevenueLogCMSListFilter{
-		ReceiverId:  parseUint64Filter(req.ReceiverId),
+		ReceiverIds: liveroomdao.ParseRevenueLogReceiverIds(req.ReceiverId, req.PlatformAnchorId, req.GuildAnchorId, req.ReceiverIds),
 		RevenueType: req.RevenueType,
 		StartTime:   req.StartTime,
 		EndTime:     req.EndTime,
 		PageIndex:   req.PageIndex,
 		PageSize:    req.PageSize,
 	})
-	nicknameMap := userinfodao.GetNicknameMapByUserIds(collectRevenueLogUserIds(rows))
+	profileMap := userinfodao.GetUserProfileMapByUserIds(collectRevenueLogUserIds(rows))
 	list := make([]*liverevenuedto.CMSLiveRevenueLogItem, 0, len(rows))
 	for _, row := range rows {
-		list = append(list, toCMSItem(row, nicknameMap))
+		list = append(list, toCMSItem(row, profileMap))
 	}
 	return httpserver.NewCMSQueryResp(total, list), nil
 }

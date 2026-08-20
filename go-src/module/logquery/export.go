@@ -116,11 +116,6 @@ func createShellExport(logType string, patterns []string, startDate, endDate str
 			return nil, filterErr
 		}
 	}
-	total, err := countLines(rawPath)
-	if err != nil {
-		removeFile(rawPath)
-		return nil, err
-	}
 	if err := paginateFile(rawPath, pagePath, pageIndex, pageSize); err != nil {
 		removeFile(rawPath)
 		return nil, err
@@ -147,7 +142,6 @@ func createShellExport(logType string, patterns []string, startDate, endDate str
 		ExportID:  exportID,
 		FileName:  fileName,
 		FileUrl:   fileURL,
-		Total:     total,
 		PageIndex: pageIndex,
 		PageSize:  pageSize,
 	}, nil

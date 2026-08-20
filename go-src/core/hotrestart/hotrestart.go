@@ -102,6 +102,10 @@ func tryExitOldProcess() {
 		time.Sleep(time.Duration(hotRestartExitWaitSec()) * time.Second)
 
 		shutdown.EnableSyncLoggers()
+		logPhase2WaitEndFlush(ctx)
+		if idle := syndb.FlushUntilIdle(time.Duration(hotRestartFlushTimeoutSec()) * time.Second); idle {
+			logPhase2QueueEmpty(ctx)
+		}
 		logPhase2End(ctx)
 		os.Exit(0)
 	})
