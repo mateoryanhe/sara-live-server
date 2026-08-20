@@ -13,6 +13,16 @@ export const gameRoutes: RouteRecordRaw = {
             meta: {title: '上架游戏列表'},
         },
         {
+            path: 'game-vendor-config',
+            name: 'GameVendorConfig',
+            component: () => import('@/views/game/game-vendor-config.vue'),
+            meta: {
+                title: '第三方配置',
+                hidden: true,
+                parentPermission: ['GameShelfListManagement'],
+            },
+        },
+        {
             path: 'game-platform-cfg',
             name: 'GamePlatformCfgManagement',
             component: () => import('@/views/game/game-platform-cfg.vue'),

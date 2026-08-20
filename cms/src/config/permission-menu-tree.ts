@@ -188,11 +188,19 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
         id: 'game',
         titleKey: 'menu.GameManagement',
         children: [
-            page('GameShelfListManagement'),
+            page('GameShelfListManagement', {subPages: [{pageName: 'GameVendorConfig'}]}),
             page('GamePlatformCfgManagement'),
             page('GameVendorGameListManagement'),
             page('GameBetLogListManagement'),
             page('GameWinLogListManagement'),
+        ],
+    },
+    {
+        kind: 'group',
+        id: 'activity',
+        titleKey: 'menu.ActivityManagement',
+        children: [
+            page('FirstRechargeActivityManagement'),
         ],
     },
     {

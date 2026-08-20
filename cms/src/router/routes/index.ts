@@ -8,6 +8,7 @@ import {configRoutes} from './config'
 import {roleRoutes} from './role'
 import {shortVideoRoutes} from './shortvideo'
 import {gameRoutes} from './game'
+import {activityRoutes} from './activity'
 
 /** 按 views 目录分类的业务路由分组 */
 export const layoutRouteGroups: RouteRecordRaw[] = [
@@ -18,6 +19,7 @@ export const layoutRouteGroups: RouteRecordRaw[] = [
     logRoutes,
     shortVideoRoutes,
     gameRoutes,
+    activityRoutes,
     configRoutes,
     roleRoutes,
 ]

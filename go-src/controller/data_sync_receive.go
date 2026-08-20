@@ -33,3 +33,7 @@ func (c *DataSyncReceiveController) ReceiveGift(ctx context.Context, req *datasy
 func (c *DataSyncReceiveController) ReceiveRechargeCfg(ctx context.Context, req *datasyncdto.ReceiveRechargeCfgReq) (*datasyncdto.ReceiveBatchRes, error) {
 	return datasync.ReceiveRechargeCfg(ctx, req)
 }
+
+func (c *DataSyncReceiveController) ReceiveFirstRechargeActivityCfg(ctx context.Context, req *datasyncdto.ReceiveFirstRechargeActivityCfgReq) (*datasyncdto.ReceiveFirstRechargeActivityCfgRes, error) {
+	return datasync.ReceiveFirstRechargeActivityCfg(ctx, req)
+}

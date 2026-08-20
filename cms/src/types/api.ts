@@ -710,6 +710,62 @@ export interface SaveAccountCfgRes {
     id?: string
 }
 
+export interface FirstRechargePrivilegeItem {
+    icon?: string
+    iconName?: string
+    descEn?: string
+    descEs?: string
+    descPt?: string
+    descHi?: string
+    descId?: string
+}
+
+export interface FirstRechargeActivityCfg {
+    id?: string
+    enabled: boolean
+    icon?: string
+    iconName?: string
+    titleEn?: string
+    titleEs?: string
+    titlePt?: string
+    titleHi?: string
+    titleId?: string
+    rechargeBtnTextEn?: string
+    rechargeBtnTextEs?: string
+    rechargeBtnTextPt?: string
+    rechargeBtnTextHi?: string
+    rechargeBtnTextId?: string
+    privileges?: FirstRechargePrivilegeItem[]
+    createdAt?: string
+    updatedAt?: string
+}
+
+export interface GetFirstRechargeActivityCfgRes {
+    cfg?: FirstRechargeActivityCfg | null
+}
+
+export interface SaveFirstRechargeActivityCfgReq {
+    id?: string | number
+    enabled: boolean
+    icon?: string
+    titleEn?: string
+    titleEs?: string
+    titlePt?: string
+    titleHi?: string
+    titleId?: string
+    rechargeBtnTextEn?: string
+    rechargeBtnTextEs?: string
+    rechargeBtnTextPt?: string
+    rechargeBtnTextHi?: string
+    rechargeBtnTextId?: string
+    privileges?: FirstRechargePrivilegeItem[]
+}
+
+export interface SaveFirstRechargeActivityCfgRes {
+    success: boolean
+    id?: string
+}
+
 export interface PreloadCfg {
     id?: string
     recentLoginLimit: number
@@ -1557,6 +1613,13 @@ export interface SyncIdsReq {
 }
 
 export interface SyncBatchRes {
+    success: boolean
+    rowCount: number
+    fileCount: number
+    message: string
+}
+
+export interface SyncFirstRechargeActivityCfgRes {
     success: boolean
     rowCount: number
     fileCount: number

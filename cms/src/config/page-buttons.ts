@@ -95,6 +95,7 @@ const CONFIG_PAGES = new Set([
     'LiveRevenueShareCfgManagement',
     'ShortVideoCfgManagement',
     'GamePlatformCfgManagement',
+    'FirstRechargeActivityManagement',
 ])
 
 /** 各页面自定义按钮（未列出的页面按类型使用默认集） */
@@ -251,6 +252,11 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.search,
         BTN.export,
         {key: 'viewUserDetail', label: '查看用户详情'},
+    ],
+    FirstRechargeActivityManagement: [
+        BTN.view,
+        BTN.save,
+        {key: 'sync', label: '同步数据'},
     ],
 }
 

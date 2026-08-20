@@ -287,6 +287,13 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GameShelfListManagement:vendorConfig': '/gamePlatform/getMultiplayerConfigUrl',
     'GameShelfListManagement:startGame': '/gamePlatform/cmsGameStartLink',
 
+    GameVendorConfig: '/gamePlatform/getMultiplayerConfigUrl',
+
+    FirstRechargeActivityManagement: '/firstRechargeActivity/getFirstRechargeActivityCfg',
+    'FirstRechargeActivityManagement:view': '/firstRechargeActivity/getFirstRechargeActivityCfg',
+    'FirstRechargeActivityManagement:save': '/firstRechargeActivity/saveFirstRechargeActivityCfg',
+    'FirstRechargeActivityManagement:sync': '/dataSync/syncFirstRechargeActivityCfg',
+
     GameWinLogListManagement: '/gameWinLog/cmsGameWinLogList',
     'GameWinLogListManagement:view': '/gameWinLog/cmsGameWinLogList',
     'GameWinLogListManagement:search': '/gameWinLog/cmsGameWinLogList',

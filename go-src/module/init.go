@@ -2,6 +2,7 @@ package module
 
 import (
 	"xr-game-server/module/accountcfg"
+	"xr-game-server/module/activity"
 	"xr-game-server/module/agora"
 	"xr-game-server/module/aliyunmoderation"
 	"xr-game-server/module/anchorrank"
@@ -63,6 +64,7 @@ func Init() {
 	aliyunmoderation.Init()
 	privacypolicy.Init()
 	accountcfg.Init()
+	activity.Init()
 	simulatorcpukeyword.Init()
 	customerservice.Init()
 	wallet.Init()

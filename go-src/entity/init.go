@@ -2,7 +2,8 @@ package entity
 
 import (
 	"xr-game-server/core/migrate"
-	callentity "xr-game-server/entity/call"
+	activityentity "xr-game-server/entity/activity"
+	callentity "xr-game-server/entity/cal
 	cmsentity "xr-game-server/entity/cms"
 	gameentity "xr-game-server/entity/game"
 	liveentity "xr-game-server/entity/live"
@@ -21,6 +22,7 @@ func Init() {
 	liveentity.Init()
 	sventity.Init()
 	rechargeentity.Init()
+	activityentity.Init()
 	initAppPkg()
 	gameentity.Init()
 	sysentity.Init()

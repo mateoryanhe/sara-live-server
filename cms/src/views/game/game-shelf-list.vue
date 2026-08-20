@@ -122,7 +122,6 @@
             <template v-else-if="!isPickMode">
               <el-button
                   v-if="can('vendorConfig')"
-                  :loading="openingConfigCode === row.gameCode"
                   link
                   type="success"
                   @click="handleOpenVendorConfig(row)"
@@ -269,7 +268,6 @@ const loading = ref(false)
 const shelfOperating = ref(false)
 const editSaving = ref(false)
 const editDialogVisible = ref(false)
-const openingConfigCode = ref('')
 const startingGameCode = ref('')
 const editFormRef = ref<FormInstance>()
 const tableData = ref<GameShelfItem[]>([])
@@ -410,25 +408,15 @@ const resetEditForm = () => {
   editFormRef.value?.clearValidate()
 }
 
-const handleOpenVendorConfig = async (row: GameShelfItem) => {
-  openingConfigCode.value = row.gameCode
-  try {
-    const response = await gamePlatformApi.getMultiplayerConfigUrl({
+const handleOpenVendorConfig = (row: GameShelfItem) => {
+  router.push({
+    name: 'GameVendorConfig',
+    query: {
       gameCode: row.gameCode,
       platform: row.platform,
-    })
-    const configUrl = response?.configUrl?.trim()
-    if (!configUrl) {
-      ElMessage.error(t('pages.gameShelfList.vendorConfigEmpty'))
-      return
-    }
-    window.open(configUrl, '_blank', 'noopener,noreferrer')
-  } catch (error) {
-    console.error('get multiplayer config url failed:', error)
-    ElMessage.error(t('pages.gameShelfList.vendorConfigFailed'))
-  } finally {
-    openingConfigCode.value = ''
-  }
+      name: row.name || row.nameEn || row.gameCode,
+    },
+  })
 }
 
 const handleEditSave = async () => {

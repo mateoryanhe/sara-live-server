@@ -416,6 +416,22 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
+            v-if="hasMenuPermission('FirstRechargeActivityManagement')"
+            index="/activity">
+          <template #title>
+            <el-icon>
+              <Present/>
+            </el-icon>
+            <span>{{ t('menu.ActivityManagement') }}</span>
+          </template>
+          <el-menu-item v-if="hasMenuPermission('FirstRechargeActivityManagement')" index="/activity/first-recharge-activity-cfg">
+            <el-icon>
+              <Present/>
+            </el-icon>
+            <span>{{ t('menu.FirstRechargeActivityManagement') }}</span>
+          </el-menu-item>
+        </el-sub-menu>
+        <el-sub-menu
             v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
             index="/config">
           <template #title>

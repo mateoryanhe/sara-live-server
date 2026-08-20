@@ -43,6 +43,7 @@ import {shortVideoCfgMessages} from './short-video-cfg'
 import {shortVideoCategoryListMessages} from './short-video-category-list'
 import {shortVideoWatchListMessages} from './short-video-watch-list'
 import {accountCfgMessages} from './account-cfg'
+import {firstRechargeActivityCfgMessages} from './first-recharge-activity-cfg'
 import {simulatorCpuKeywordListMessages} from './simulator-cpu-keyword-list'
 import {anchorSalaryCfgListMessages} from './anchor-salary-cfg-list'
 import {liveRevenueShareCfgMessages} from './live-revenue-share-cfg'
@@ -104,6 +105,7 @@ const pageMessageBuilders = [
   ['shortVideoCategoryList', shortVideoCategoryListMessages],
   ['shortVideoWatchList', shortVideoWatchListMessages],
   ['accountCfg', accountCfgMessages],
+  ['firstRechargeActivityCfg', firstRechargeActivityCfgMessages],
   ['simulatorCpuKeywordList', simulatorCpuKeywordListMessages],
   ['anchorSalaryCfgList', anchorSalaryCfgListMessages],
   ['liveRevenueShareCfg', liveRevenueShareCfgMessages],

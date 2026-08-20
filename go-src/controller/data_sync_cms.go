@@ -43,3 +43,7 @@ func (c *DataSyncCMSController) SyncGift(ctx context.Context, req *datasyncdto.S
 func (c *DataSyncCMSController) SyncRechargeCfg(ctx context.Context, req *datasyncdto.SyncRechargeCfgReq) (*datasyncdto.SyncBatchRes, error) {
 	return datasync.SyncRechargeCfg(ctx, req)
 }
+
+func (c *DataSyncCMSController) SyncFirstRechargeActivityCfg(ctx context.Context, req *datasyncdto.SyncFirstRechargeActivityCfgReq) (*datasyncdto.SyncFirstRechargeActivityCfgRes, error) {
+	return datasync.SyncFirstRechargeActivityCfg(ctx, req)
+}
