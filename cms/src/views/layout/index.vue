@@ -376,7 +376,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('GamePlatformCfgManagement') || hasMenuPermission('GameVendorGameListManagement') || hasMenuPermission('GameBetLogListManagement') || hasMenuPermission('GameWinLogListManagement')"
+            v-if="hasMenuPermission('GamePlatformCfgManagement') || hasMenuPermission('GameVendorGameListManagement') || hasMenuPermission('GameShelfListManagement') || hasMenuPermission('GameBetLogListManagement') || hasMenuPermission('GameWinLogListManagement')"
             index="/game">
           <template #title>
             <el-icon>
@@ -395,6 +395,12 @@
               <List/>
             </el-icon>
             <span>{{ t('menu.GameVendorGameListManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('GameShelfListManagement')" index="/game/game-shelf-list">
+            <el-icon>
+              <Collection/>
+            </el-icon>
+            <span>{{ t('menu.GameShelfListManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('GameBetLogListManagement')" index="/game/game-bet-log-list">
             <el-icon>

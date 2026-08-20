@@ -86,8 +86,8 @@ func toLiveRoomGameRecommendItem(row *liveentity.LiveRoomGameRecommend, gameCfg 
 	if gameCfg == nil {
 		return item
 	}
-	item.NameEn = gameCfg.NameEn
-	item.Cover = game.BuildGameCoverUrl(gameCfg.Cover)
+	item.NameEn = game.ResolveAppGameName(gameCfg)
+	item.Cover = game.ResolveAppGameCover(gameCfg)
 	return item
 }
 

@@ -16,7 +16,13 @@ export const gameRoutes: RouteRecordRaw = {
             path: 'game-list',
             name: 'GameVendorGameListManagement',
             component: () => import('@/views/game/game-list.vue'),
-            meta: {title: '游戏列表'},
+            meta: {title: '游戏库'},
+        },
+        {
+            path: 'game-shelf-list',
+            name: 'GameShelfListManagement',
+            component: () => import('@/views/game/game-shelf-list.vue'),
+            meta: {title: '上架游戏列表'},
         },
         {
             path: 'game-win-log-list',

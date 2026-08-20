@@ -1608,6 +1608,21 @@ export interface VendorGameQuery extends PageQuery {
     refreshFromVendor?: boolean
 }
 
+export interface GameShelfItem {
+    id: string
+    gameCode: string
+    name: string
+    nameEn: string
+    cover: string
+    platform: string
+}
+
+export interface GameShelfQuery extends PageQuery {
+    gameCode?: string
+    name?: string
+    platform?: string
+}
+
 export interface BatchAddGameShelfReq {
     gameCodes: string[]
 }

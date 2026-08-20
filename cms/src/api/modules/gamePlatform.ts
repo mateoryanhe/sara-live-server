@@ -14,6 +14,8 @@ import type {
     SaveGamePlatformCfgRes,
     VendorGame,
     VendorGameQuery,
+    GameShelfItem,
+    GameShelfQuery,
 } from '@/types/api'
 
 export const gamePlatformApi = {
@@ -27,6 +29,10 @@ export const gamePlatformApi = {
 
     getVendorGameList: (params: VendorGameQuery) => {
         return request.post<{ total: number; data: VendorGame[] }>('/gamePlatform/vendorGameList', params)
+    },
+
+    getGameShelfList: (params: GameShelfQuery) => {
+        return request.post<{ total: number; data: GameShelfItem[] }>('/gamePlatform/gameShelfList', params)
     },
 
     reloadVendorGameCache: () => {

@@ -164,16 +164,37 @@ func filterGameShelfList(all []*entity.GameCfg, req *gameplatformdto.GameShelfLi
 		return all
 	}
 	gameCode := strings.TrimSpace(req.GameCode)
-	if gameCode == "" {
+	name := strings.TrimSpace(req.Name)
+	platform := strings.TrimSpace(req.Platform)
+	if gameCode == "" && name == "" && platform == "" {
 		return all
 	}
+
 	list := make([]*entity.GameCfg, 0, len(all))
 	for _, row := range all {
 		if row == nil {
 			continue
 		}
-		if !strings.Contains(strings.ToLower(row.GameCode), strings.ToLower(gameCode)) {
+		if gameCode != "" && !strings.Contains(strings.ToLower(row.GameCode), strings.ToLower(gameCode)) {
 			continue
+		}
+		if platform != "" && !strings.Contains(strings.ToLower(row.Platform), strings.ToLower(platform)) {
+			continue
+		}
+		if name != "" {
+			nameEn := strings.ToLower(strings.TrimSpace(row.NameEn))
+			vendorName := ""
+			vendorNameEn := ""
+			if vendorGame, ok := GetVendorGameFromBrowseCache(row.GameCode); ok && vendorGame != nil {
+				vendorName = strings.ToLower(strings.TrimSpace(vendorGame.Name))
+				vendorNameEn = strings.ToLower(strings.TrimSpace(vendorGame.NameEn))
+			}
+			keyword := strings.ToLower(name)
+			if !strings.Contains(nameEn, keyword) &&
+				!strings.Contains(vendorName, keyword) &&
+				!strings.Contains(vendorNameEn, keyword) {
+				continue
+			}
 		}
 		list = append(list, row)
 	}
@@ -181,11 +202,20 @@ func filterGameShelfList(all []*entity.GameCfg, req *gameplatformdto.GameShelfLi
 }
 
 func toGameShelfListItem(row *entity.GameCfg) *gameplatformdto.GameShelfListItem {
-	return &gameplatformdto.GameShelfListItem{
+	item := &gameplatformdto.GameShelfListItem{
 		ID:       strconv.FormatUint(row.ID, 10),
 		GameCode: row.GameCode,
+		NameEn:   row.NameEn,
+		Cover:    BuildGameCoverUrl(row.Cover),
 		Platform: row.Platform,
 	}
+	if vendorGame, ok := GetVendorGameFromBrowseCache(row.GameCode); ok && vendorGame != nil {
+		item.Name = strings.TrimSpace(vendorGame.Name)
+		if item.NameEn == "" {
+			item.NameEn = strings.TrimSpace(vendorGame.NameEn)
+		}
+	}
+	return item
 }
 
 func newShelfGameCfg(vendorGame *VendorGame, gameCode string, now time.Time) *entity.GameCfg {

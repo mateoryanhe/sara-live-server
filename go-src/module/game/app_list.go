@@ -40,8 +40,8 @@ func GetAppGameList(_ context.Context, req *gameplatformdto.AppGameListReq) (*ga
 func toAppGameListItem(row *entity.GameCfg) *gameplatformdto.AppGameListItem {
 	return &gameplatformdto.AppGameListItem{
 		GameCode: row.GameCode,
-		NameEn:   row.NameEn,
-		Cover:    BuildGameCoverUrl(row.Cover),
+		NameEn:   ResolveAppGameName(row),
+		Cover:    ResolveAppGameCover(row),
 		Platform: row.Platform,
 	}
 }

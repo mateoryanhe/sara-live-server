@@ -278,6 +278,11 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GameVendorGameListManagement:shelf': '/gamePlatform/addGameShelf',
     'GameVendorGameListManagement:sync': '/gamePlatform/reloadVendorGameCache',
 
+    GameShelfListManagement: '/gamePlatform/gameShelfList',
+    'GameShelfListManagement:view': '/gamePlatform/gameShelfList',
+    'GameShelfListManagement:search': '/gamePlatform/gameShelfList',
+    'GameShelfListManagement:shelf': '/gamePlatform/deleteGameShelf',
+
     GameWinLogListManagement: '/gameWinLog/cmsGameWinLogList',
     'GameWinLogListManagement:view': '/gameWinLog/cmsGameWinLogList',
     'GameWinLogListManagement:search': '/gameWinLog/cmsGameWinLogList',

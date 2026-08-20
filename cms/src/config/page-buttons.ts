@@ -217,6 +217,11 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'shelf', label: '上下架'},
         {key: 'sync', label: '同步厂商'},
     ],
+    GameShelfListManagement: [
+        BTN.view,
+        BTN.search,
+        {key: 'shelf', label: '下架'},
+    ],
     VipCfgManagement: [
         ...DEFAULT_CRUD_BUTTONS,
         {key: 'sync', label: '同步数据'},

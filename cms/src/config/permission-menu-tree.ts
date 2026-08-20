@@ -238,6 +238,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
         children: [
             {kind: 'page', pageName: 'GamePlatformCfgManagement'},
             {kind: 'page', pageName: 'GameVendorGameListManagement'},
+            {kind: 'page', pageName: 'GameShelfListManagement'},
             {kind: 'page', pageName: 'GameBetLogListManagement'},
             {kind: 'page', pageName: 'GameWinLogListManagement'},
         ],

@@ -34,6 +34,7 @@ import {roleListMessages} from './role-list'
 import {cmsUserListMessages} from './cmsuser-list'
 import {moduleListMessages} from './module-list'
 import {gameListMessages} from './game-list'
+import {gameShelfListMessages} from './game-shelf-list'
 import {gamePlatformCfgMessages} from './game-platform-cfg'
 import {gameBetLogListMessages} from './game-bet-log-list'
 import {gameWinLogListMessages} from './game-win-log-list'
@@ -94,6 +95,7 @@ const pageMessageBuilders = [
   ['cmsUserList', cmsUserListMessages],
   ['moduleList', moduleListMessages],
   ['gameList', gameListMessages],
+  ['gameShelfList', gameShelfListMessages],
   ['gamePlatformCfg', gamePlatformCfgMessages],
   ['gameBetLogList', gameBetLogListMessages],
   ['gameWinLogList', gameWinLogListMessages],

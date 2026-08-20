@@ -10,12 +10,17 @@ type GameShelfListReq struct {
 	g.Meta `path:"/gameShelfList" method:"post" summary:"查询上架游戏列表" tags:"游戏平台配置"`
 	httpserver.CMSQueryReq
 	GameCode string `json:"gameCode" dc:"游戏编码(模糊匹配)"`
+	Name     string `json:"name" dc:"游戏名称(模糊匹配,中/英文)"`
+	Platform string `json:"platform" dc:"平台编码(模糊匹配)"`
 }
 
 // GameShelfListItem CMS 上架游戏项
 type GameShelfListItem struct {
 	ID       string `json:"id"`
 	GameCode string `json:"gameCode"`
+	Name     string `json:"name"`
+	NameEn   string `json:"nameEn"`
+	Cover    string `json:"cover"`
 	Platform string `json:"platform"`
 }
 
