@@ -168,6 +168,11 @@ func (c *PushController) Gold(_ context.Context, _ *pushdto.GoldPushReq) (*pushd
 	return nil, nil
 }
 
+// FirstRechargeSuccess cmd=38 首充成功
+func (c *PushController) FirstRechargeSuccess(_ context.Context, _ *pushdto.FirstRechargeSuccessPushReq) (*pushdto.FirstRechargeSuccessPushResp, error) {
+	return nil, nil
+}
+
 // Diamond cmd=10 钻石余额
 func (c *PushController) Diamond(_ context.Context, _ *pushdto.DiamondPushReq) (*pushdto.DiamondPushResp, error) {
 	return nil, nil

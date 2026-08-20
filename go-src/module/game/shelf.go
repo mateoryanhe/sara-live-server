@@ -10,7 +10,7 @@ import (
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/gameplatformdto"
-	"xr-game-server/entity/game"
+	entity "xr-game-server/entity/game"
 	"xr-game-server/errercode"
 )
 
@@ -41,13 +41,18 @@ func AddGameShelf(ctx context.Context, req *gameplatformdto.AddGameShelfReq) (*g
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 
-	vendorGame, err := EnsureVendorGameForShelf(ctx, gameCode)
+	vendorGame, err := EnsureVendorGameForShelf(ctx, gameCode, req.Platform)
+	if err != nil {
+		return nil, err
+	}
+
+	platform, err := resolveShelfPlatform(req.Platform, vendorGame)
 	if err != nil {
 		return nil, err
 	}
 
 	now := time.Now()
-	row := newShelfGameCfg(vendorGame, gameCode, now)
+	row := buildShelfGameCfg(vendorGame, gameCode, platform, now)
 	if err := cfgdao.CreateGameCfg(row); err != nil {
 		return nil, err
 	}
@@ -87,16 +92,19 @@ func DeleteGameShelf(_ context.Context, req *gameplatformdto.DeleteGameShelfReq)
 
 // BatchAddGameShelf CMS 批量上架(写 game_cfgs 并刷新永久缓存).
 func BatchAddGameShelf(_ context.Context, req *gameplatformdto.BatchAddGameShelfReq) (*gameplatformdto.BatchAddGameShelfRes, error) {
-	if req == nil || len(req.GameCodes) == 0 {
+	if req == nil || len(req.Items) == 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 
 	successCount := 0
 	skipCount := 0
 	now := time.Now()
-	added := make(map[string]struct{}, len(req.GameCodes))
-	for _, raw := range req.GameCodes {
-		gameCode := strings.TrimSpace(raw)
+	added := make(map[string]struct{}, len(req.Items))
+	for _, item := range req.Items {
+		if item == nil {
+			continue
+		}
+		gameCode := strings.TrimSpace(item.GameCode)
 		if gameCode == "" {
 			continue
 		}
@@ -108,12 +116,17 @@ func BatchAddGameShelf(_ context.Context, req *gameplatformdto.BatchAddGameShelf
 			skipCount++
 			continue
 		}
-		vendorGame, ok := GetVendorGameFromBrowseCache(gameCode)
-		if !ok {
+		vendorGame, ok := GetVendorGameFromLibrary(gameCode, item.Platform)
+		if !ok || vendorGame == nil {
 			skipCount++
 			continue
 		}
-		row := newShelfGameCfg(vendorGame, gameCode, now)
+		platform, err := resolveShelfPlatform(item.Platform, vendorGame)
+		if err != nil {
+			skipCount++
+			continue
+		}
+		row := buildShelfGameCfg(vendorGame, gameCode, platform, now)
 		if err := cfgdao.CreateGameCfg(row); err != nil {
 			return nil, err
 		}
@@ -224,18 +237,22 @@ func GetCMSGameStartLink(ctx context.Context, req *gameplatformdto.CMSGameStartL
 	if accountdao.GetAccountById(req.UserId) == nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	if !cfgdao.IsGameOnShelfFromMemory(gameCode) {
+	shelfRow := cfgdao.GetGameCfgByGameCode(gameCode)
+	if shelfRow == nil {
 		return nil, errercode.CreateCode(errercode.GameCfgNonExist)
 	}
 
-	platform, err := resolveGameStartPlatform(gameCode)
-	if err != nil {
-		return nil, err
+	platform := strings.TrimSpace(req.Platform)
+	if platform == "" {
+		platform = strings.TrimSpace(shelfRow.Platform)
+	}
+	if platform == "" {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 
 	link, err := fetchVendorGameStartURL(ctx, gameCode, platform, strconv.FormatUint(req.UserId, 10), "en")
 	if err != nil {
-		return nil, err
+		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	return &gameplatformdto.CMSGameStartLinkRes{Link: link}, nil
 }
@@ -275,7 +292,7 @@ func filterGameShelfList(all []*entity.GameCfg, req *gameplatformdto.GameShelfLi
 			nameEn := strings.ToLower(strings.TrimSpace(row.NameEn))
 			vendorName := ""
 			vendorNameEn := ""
-			if vendorGame, ok := GetVendorGameFromBrowseCache(row.GameCode); ok && vendorGame != nil {
+			if vendorGame, ok := GetVendorGameFromLibrary(row.GameCode, row.Platform); ok && vendorGame != nil {
 				vendorName = strings.ToLower(strings.TrimSpace(vendorGame.Name))
 				vendorNameEn = strings.ToLower(strings.TrimSpace(vendorGame.NameEn))
 			}
@@ -302,7 +319,7 @@ func toGameShelfListItem(row *entity.GameCfg) *gameplatformdto.GameShelfListItem
 		LiveGameCoverUrl: BuildGameCoverUrl(row.LiveGameCover),
 		Platform:         row.Platform,
 	}
-	if vendorGame, ok := GetVendorGameFromBrowseCache(row.GameCode); ok && vendorGame != nil {
+	if vendorGame, ok := GetVendorGameFromLibrary(row.GameCode, row.Platform); ok && vendorGame != nil {
 		item.Name = strings.TrimSpace(vendorGame.Name)
 		if item.NameEn == "" {
 			item.NameEn = strings.TrimSpace(vendorGame.NameEn)
@@ -311,12 +328,24 @@ func toGameShelfListItem(row *entity.GameCfg) *gameplatformdto.GameShelfListItem
 	return item
 }
 
-func newShelfGameCfg(vendorGame *VendorGame, gameCode string, now time.Time) *entity.GameCfg {
+// resolveShelfPlatform 上架 platform 只取第三方字段, 不做 cover 推断.
+func resolveShelfPlatform(requestPlatform string, vendorGame *VendorGame) (string, error) {
+	platform := strings.TrimSpace(requestPlatform)
+	if platform == "" && vendorGame != nil {
+		platform = strings.TrimSpace(vendorGame.Platform)
+	}
+	if platform == "" {
+		return "", errercode.CreateCode(errercode.InvalidParam)
+	}
+	return platform, nil
+}
+
+func buildShelfGameCfg(vendorGame *VendorGame, gameCode, platform string, now time.Time) *entity.GameCfg {
 	row := &entity.GameCfg{
 		GameCode: gameCode,
 		Cover:    strings.TrimSpace(vendorGame.Cover),
 		NameEn:   strings.TrimSpace(vendorGame.NameEn),
-		Platform: strings.TrimSpace(vendorGame.Platform),
+		Platform: platform,
 	}
 	row.CreatedAt = now
 	row.UpdatedAt = now

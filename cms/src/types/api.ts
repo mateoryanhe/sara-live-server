@@ -1668,7 +1668,6 @@ export interface VendorGameQuery extends PageQuery {
     name?: string
     platform?: string
     category?: string
-    refreshFromVendor?: boolean
 }
 
 export interface GameShelfItem {
@@ -1704,8 +1703,9 @@ export interface GetMultiplayerConfigUrlRes {
 }
 
 export interface CMSGameStartLinkReq {
-    userId: number
+    userId: string
     gameCode: string
+    platform?: string
 }
 
 export interface CMSGameStartLinkRes {
@@ -1718,8 +1718,13 @@ export interface GameShelfQuery extends PageQuery {
     platform?: string
 }
 
+export interface BatchAddGameShelfItem {
+    gameCode: string
+    platform: string
+}
+
 export interface BatchAddGameShelfReq {
-    gameCodes: string[]
+    items: BatchAddGameShelfItem[]
 }
 
 export interface BatchAddGameShelfRes {
@@ -1748,6 +1753,7 @@ export interface DeleteGameShelfRes {
 
 export interface AddGameShelfReq {
     gameCode: string
+    platform: string
 }
 
 export interface AddGameShelfRes {

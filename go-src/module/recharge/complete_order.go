@@ -52,7 +52,9 @@ func completeOrder(o *entity.RechargeOrder, reason currency.Reason) (float64, er
 	order.SetStatus(entity.RechargeOrderStatusCompleted)
 	order.SetPaidAt(paidAt)
 	order.SetUpdatedAt(paidAt)
-	userinfodao.MarkFirstRechargeDone(order.UserId)
+	if userinfodao.MarkFirstRechargeDone(order.UserId) {
+		event.Pub(gameevent.FirstRechargeCompletedEvent, order)
+	}
 
 	CancelRechargeOrderTimeout(order.ID)
 	event.Pub(gameevent.RechargeArrivedEvent, order)

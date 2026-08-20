@@ -9,3 +9,8 @@ import (
 func GetAllGameCfgFromCache() []*entity.GameCfg {
 	return cfgdao.GetAllGameCfgFromMemory()
 }
+
+// GetAllOnShelfGamesFromMemory 获取全部已上架游戏(读 game_cfgs 永久缓存).
+func GetAllOnShelfGamesFromMemory() []*entity.GameCfg {
+	return cfgdao.GetAllGameCfgFromMemory()
+}

@@ -28,6 +28,7 @@ type vendorGameListResp struct {
 	Code int `json:"code"`
 	Data struct {
 		List     []*vendorGameListItem `json:"list"`
+		Data     []*vendorGameListItem `json:"data"`
 		Total    int                   `json:"total"`
 		Page     int                   `json:"page"`
 		PageSize int                   `json:"pageSize"`
@@ -177,8 +178,12 @@ func fetchVendorGamePageOnce(
 		return nil, 0, fmt.Errorf("vendor game list code=%d msg=%s", result.Code, msg)
 	}
 
-	games := make([]*VendorGame, 0, len(result.Data.List))
-	for _, item := range result.Data.List {
+	items := result.Data.List
+	if len(items) == 0 {
+		items = result.Data.Data
+	}
+	games := make([]*VendorGame, 0, len(items))
+	for _, item := range items {
 		if item == nil || strings.TrimSpace(item.GameCode) == "" {
 			continue
 		}

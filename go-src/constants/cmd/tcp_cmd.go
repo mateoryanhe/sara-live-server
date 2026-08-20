@@ -69,4 +69,6 @@ const (
 	ActivityMessagePush = 36
 	//本场直播总收益推送(房间内全体在线用户,含主播)
 	LiveRoomTotalIncome = 37
+	//首充成功推送(推送给指定用户)
+	FirstRechargeSuccessPush = 38
 )

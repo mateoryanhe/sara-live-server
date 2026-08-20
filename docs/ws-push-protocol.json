@@ -679,6 +679,23 @@
         "liveRecordId": "90001",
         "totalIncome": 128.5
       }
+    },
+    {
+      "cmd": 38,
+      "name": "FirstRechargeSuccessPush",
+      "description": "用户首次充值到账",
+      "target": "指定用户",
+      "dataType": "FirstRechargeSuccessPushItem",
+      "data": {
+        "firstRecharge": { "type": "bool", "json": "firstRecharge", "description": "false=已首充,客户端隐藏首充入口" },
+        "gold": { "type": "uint64", "json": "gold", "description": "本次到账金币数" },
+        "orderId": { "type": "string", "json": "orderId", "description": "充值订单ID" }
+      },
+      "example": {
+        "firstRecharge": false,
+        "gold": 1000,
+        "orderId": "1234567890"
+      }
     }
   ],
   "sourceFiles": {
@@ -689,6 +706,7 @@
     "callPayloads": "go-src/dto/calldto/call_push_dto.go",
     "messagePayloads": "go-src/dto/messagedto/private_message_dto.go, system_message_dto.go",
     "walletPayloads": "go-src/dto/diamonddto/cms_diamond_dto.go, go-src/dto/golddto/cms_gold_dto.go",
+    "activityPayloads": "go-src/dto/activitydto/first_recharge_activity_dto.go",
     "vipPayload": "go-src/dto/vipdto/vip_detail_dto.go"
   }
 }

@@ -6,6 +6,14 @@
           <span>{{ t('menu.GameVendorGameListManagement') }}</span>
           <div class="header-actions">
             <el-button
+                v-if="can('sync')"
+                :loading="syncing"
+                type="primary"
+                @click="handleSyncVendorLibrary"
+            >
+              {{ t('common.syncData') }}
+            </el-button>
+            <el-button
                 :disabled="!canBatchOnShelf"
                 :loading="shelfOperating"
                 type="success"
@@ -60,7 +68,7 @@
       <el-table
           v-loading="loading"
           :data="tableData"
-          row-key="gameCode"
+          :row-key="vendorGameRowKey"
           style="width: 100%"
           @selection-change="handleSelectionChange"
       >
@@ -126,13 +134,15 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, reactive, ref} from 'vue'
+import {computed, onMounted, reactive, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {gamePlatformApi} from '@/api/modules/gamePlatform'
 import type {VendorGame} from '@/types/api'
+import {usePagePermission} from '@/composables/usePagePermission'
 
 const {t} = useI18n()
+const {can} = usePagePermission('GameVendorGameListManagement')
 
 interface SearchForm {
   gameCode: string
@@ -142,6 +152,7 @@ interface SearchForm {
 }
 
 const loading = ref(false)
+const syncing = ref(false)
 const shelfOperating = ref(false)
 const tableData = ref<VendorGame[]>([])
 const selectedRows = ref<VendorGame[]>([])
@@ -159,7 +170,9 @@ const searchForm = reactive<SearchForm>({
 const canBatchOnShelf = computed(() => selectedRows.value.some(row => !row.onShelf))
 const canBatchOffShelf = computed(() => selectedRows.value.some(row => row.onShelf))
 
-const fetchList = async (refreshFromVendor = false) => {
+const vendorGameRowKey = (row: VendorGame) => `${row.gameCode}@${row.platform}`
+
+const fetchList = async () => {
   loading.value = true
   try {
     const response = await gamePlatformApi.getVendorGameList({
@@ -169,7 +182,6 @@ const fetchList = async (refreshFromVendor = false) => {
       category: searchForm.category,
       pageIndex: currentPage.value,
       pageSize: pageSize.value,
-      refreshFromVendor,
     })
     tableData.value = response.data || []
     total.value = response.total || 0
@@ -187,7 +199,7 @@ const handleSelectionChange = (rows: VendorGame[]) => {
 
 const handleSearch = () => {
   currentPage.value = 1
-  fetchList(true)
+  fetchList()
 }
 
 const resetSearch = () => {
@@ -196,8 +208,40 @@ const resetSearch = () => {
   searchForm.platform = ''
   searchForm.category = ''
   currentPage.value = 1
-  fetchList(true)
+  fetchList()
 }
+
+const handleSyncVendorLibrary = async () => {
+  try {
+    await ElMessageBox.confirm(
+        t('pages.gameList.syncConfirm'),
+        t('common.syncData'),
+        {type: 'warning'},
+    )
+  } catch {
+    return
+  }
+  syncing.value = true
+  try {
+    const response = await gamePlatformApi.reloadVendorGameCache()
+    if (response?.success) {
+      ElMessage.success(t('pages.gameList.syncSuccess', {count: response.count || 0}))
+      currentPage.value = 1
+      await fetchList()
+    } else {
+      ElMessage.error(t('pages.gameList.syncFailed'))
+    }
+  } catch (error) {
+    console.error('sync vendor game library failed:', error)
+    ElMessage.error(t('pages.gameList.syncFailed'))
+  } finally {
+    syncing.value = false
+  }
+}
+
+onMounted(() => {
+  fetchList()
+})
 
 const handleSizeChange = (size: number) => {
   pageSize.value = size
@@ -212,7 +256,7 @@ const handleCurrentChange = (page: number) => {
 const handleOnShelf = async (row: VendorGame) => {
   shelfOperating.value = true
   try {
-    const response = await gamePlatformApi.addGameShelf({gameCode: row.gameCode})
+    const response = await gamePlatformApi.addGameShelf({gameCode: row.gameCode, platform: row.platform})
     if (response?.success) {
       ElMessage.success(t('pages.gameList.onShelfSuccess'))
       await fetchList()
@@ -255,14 +299,17 @@ const handleOffShelf = async (row: VendorGame) => {
 }
 
 const handleBatchOnShelf = async () => {
-  const gameCodes = selectedRows.value.filter(row => !row.onShelf).map(row => row.gameCode)
-  if (!gameCodes.length) {
+  const items = selectedRows.value.filter(row => !row.onShelf).map(row => ({
+    gameCode: row.gameCode,
+    platform: row.platform,
+  }))
+  if (!items.length) {
     ElMessage.warning(t('pages.gameList.selectUnpublished'))
     return
   }
   try {
     await ElMessageBox.confirm(
-        t('pages.gameList.batchOnShelfConfirm', {count: gameCodes.length}),
+        t('pages.gameList.batchOnShelfConfirm', {count: items.length}),
         t('pages.gameList.batchOnShelfTitle'),
         {type: 'warning'},
     )
@@ -271,7 +318,7 @@ const handleBatchOnShelf = async () => {
   }
   shelfOperating.value = true
   try {
-    const response = await gamePlatformApi.batchAddGameShelf({gameCodes})
+    const response = await gamePlatformApi.batchAddGameShelf({items})
     if (response?.success) {
       if (response.skipCount > 0) {
         ElMessage.success(t('pages.gameList.batchOnShelfDoneWithSkip', {

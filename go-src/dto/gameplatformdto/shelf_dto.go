@@ -31,6 +31,7 @@ type GameShelfListItem struct {
 type AddGameShelfReq struct {
 	g.Meta   `path:"/addGameShelf" method:"post" summary:"添加上架游戏" tags:"游戏平台配置"`
 	GameCode string `json:"gameCode" v:"required#游戏编码不能为空" dc:"游戏编码"`
+	Platform string `json:"platform" v:"required#平台编码不能为空" dc:"平台编码(第三方 platform 字段)"`
 }
 
 // AddGameShelfRes CMS 添加上架游戏结果
@@ -51,10 +52,16 @@ type DeleteGameShelfRes struct {
 	Success bool `json:"success"`
 }
 
+// BatchAddGameShelfItem CMS 批量上架单项
+type BatchAddGameShelfItem struct {
+	GameCode string `json:"gameCode" v:"required#游戏编码不能为空" dc:"游戏编码"`
+	Platform string `json:"platform" v:"required#平台编码不能为空" dc:"平台编码(第三方 platform 字段)"`
+}
+
 // BatchAddGameShelfReq CMS 批量添加上架游戏
 type BatchAddGameShelfReq struct {
-	g.Meta    `path:"/batchAddGameShelf" method:"post" summary:"批量添加上架游戏" tags:"游戏平台配置"`
-	GameCodes []string `json:"gameCodes" v:"required#游戏编码列表不能为空" dc:"游戏编码列表"`
+	g.Meta `path:"/batchAddGameShelf" method:"post" summary:"批量添加上架游戏" tags:"游戏平台配置"`
+	Items  []*BatchAddGameShelfItem `json:"items" v:"required#上架列表不能为空" dc:"上架游戏列表"`
 }
 
 // BatchAddGameShelfRes CMS 批量添加上架游戏结果
@@ -105,8 +112,9 @@ type GetMultiplayerConfigUrlRes struct {
 // CMSGameStartLinkReq CMS 代用户获取游戏启动链接
 type CMSGameStartLinkReq struct {
 	g.Meta   `path:"/cmsGameStartLink" method:"post" summary:"CMS代用户获取游戏启动链接" tags:"游戏平台配置"`
-	UserId   uint64 `json:"userId" v:"required#用户ID不能为空" dc:"用户ID(作为第三方 ops)"`
+	UserId   uint64 `json:"userId,string" v:"required#用户ID不能为空" dc:"用户ID(作为第三方 ops)"`
 	GameCode string `json:"gameCode" v:"required#游戏编码不能为空" dc:"游戏编码(对应第三方 gameId)"`
+	Platform string `json:"platform" dc:"平台编码(默认取上架记录)"`
 }
 
 // CMSGameStartLinkRes CMS 游戏启动链接

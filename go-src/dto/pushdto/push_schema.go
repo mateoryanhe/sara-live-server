@@ -4,6 +4,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/push"
+	"xr-game-server/dto/activitydto"
 	"xr-game-server/dto/calldto"
 	"xr-game-server/dto/diamonddto"
 	"xr-game-server/dto/golddto"
@@ -317,6 +318,16 @@ type GoldPushReq struct {
 type GoldPushResp struct {
 	Cmd  int                   `json:"cmd" dc:"命令字 11"`
 	Data *golddto.GoldPushItem `json:"data"`
+}
+
+// FirstRechargeSuccessPushReq cmd=38 首充成功
+type FirstRechargeSuccessPushReq struct {
+	g.Meta `path:"/firstRechargeSuccess" method:"post" summary:"推送 cmd=38 首充成功(推送给指定用户)" description:"用户首次充值到账后推送,客户端收到后隐藏首充入口" tags:"推送-钱包"`
+}
+
+type FirstRechargeSuccessPushResp struct {
+	Cmd  int                                       `json:"cmd" dc:"命令字 38"`
+	Data *activitydto.FirstRechargeSuccessPushItem `json:"data"`
 }
 
 // DiamondPushReq cmd=10 钻石余额

@@ -381,8 +381,9 @@ const handleStartGame = async (row: GameShelfItem) => {
   startingGameCode.value = row.gameCode
   try {
     const response = await gamePlatformApi.getCMSGameStartLink({
-      userId: Number(pickUserId.value),
+      userId: pickUserId.value,
       gameCode: row.gameCode,
+      platform: row.platform,
     })
     const link = response?.link?.trim()
     if (!link) {

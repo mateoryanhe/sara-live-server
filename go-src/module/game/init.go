@@ -8,7 +8,6 @@ import (
 func Init() {
 	cfgdao.InitGameCfgDao()
 	cfgdao.ReloadGameCfgCache()
-	initVendorGameCache()
 	initGamePlatformCfg()
 	initGameConsumeRank()
 }

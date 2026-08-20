@@ -111,3 +111,22 @@ func Close() {
 	migrateDB = nil
 	migrateSQL = nil
 }
+
+// DropIndexIfExists 删除指定索引(不存在则忽略).
+func DropIndexIfExists(table, indexName string) {
+	table = strings.TrimSpace(table)
+	indexName = strings.TrimSpace(indexName)
+	if table == "" || indexName == "" {
+		return
+	}
+	db := openMigrateDB()
+	var count int64
+	_ = db.Raw(
+		`SELECT COUNT(1) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = ? AND index_name = ?`,
+		table, indexName,
+	).Scan(&count).Error
+	if count <= 0 {
+		return
+	}
+	_ = db.Exec("ALTER TABLE `" + table + "` DROP INDEX `" + indexName + "`").Error
+}

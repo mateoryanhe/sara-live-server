@@ -1,14 +1,10 @@
 package game
 
 import (
-	"xr-game-server/core/cache"
-	"xr-game-server/dao/cfgdao"
-	"xr-game-server/entity/game"
+	entity "xr-game-server/entity/game"
 )
 
-const vendorBrowseCacheKey = "all"
-
-// VendorGame 第三方平台游戏(仅 CMS 浏览缓存使用)
+// VendorGame CMS/上架使用的第三方游戏视图.
 type VendorGame struct {
 	GameCode string `json:"gameCode"`
 	Name     string `json:"name"`
@@ -18,69 +14,30 @@ type VendorGame struct {
 	Platform string `json:"platform"`
 }
 
-var vendorBrowseCacheMgr *cache.CacheMgr
-
-func initVendorGameCache() {
-	vendorBrowseCacheMgr = cache.NewCacheMgr()
-}
-
-func cloneVendorGame(game *VendorGame) *VendorGame {
-	if game == nil {
+func toVendorGame(row *entity.VendorGameLib) *VendorGame {
+	if row == nil {
 		return nil
 	}
 	return &VendorGame{
-		GameCode: game.GameCode,
-		Name:     game.Name,
-		NameEn:   game.NameEn,
-		Category: game.Category,
-		Cover:    game.Cover,
-		Platform: game.Platform,
+		GameCode: row.GameCode,
+		Name:     row.Name,
+		NameEn:   row.NameEn,
+		Category: row.Category,
+		Cover:    row.Cover,
+		Platform: row.Platform,
 	}
 }
 
-func setVendorBrowseCache(games []*VendorGame) {
-	if vendorBrowseCacheMgr == nil {
-		return
-	}
-	snapshot := make([]*VendorGame, 0, len(games))
-	for _, row := range games {
-		if row == nil {
-			continue
-		}
-		snapshot = append(snapshot, cloneVendorGame(row))
-	}
-	vendorBrowseCacheMgr.FlushCache(vendorBrowseCacheKey, snapshot)
-}
-
-func GetAllVendorBrowseGamesFromMemory() []*VendorGame {
-	if vendorBrowseCacheMgr == nil {
-		return make([]*VendorGame, 0)
-	}
-	v := vendorBrowseCacheMgr.GetFromCache(vendorBrowseCacheKey)
+func toVendorGameLibEntity(v *VendorGame) *entity.VendorGameLib {
 	if v == nil {
-		return make([]*VendorGame, 0)
+		return nil
 	}
-	list, _ := v.([]*VendorGame)
-	if len(list) == 0 {
-		return make([]*VendorGame, 0)
+	return &entity.VendorGameLib{
+		GameCode: v.GameCode,
+		Name:     v.Name,
+		NameEn:   v.NameEn,
+		Category: v.Category,
+		Cover:    v.Cover,
+		Platform: v.Platform,
 	}
-	out := make([]*VendorGame, 0, len(list))
-	for _, row := range list {
-		out = append(out, cloneVendorGame(row))
-	}
-	return out
-}
-
-func GetVendorGameFromBrowseCache(gameCode string) (*VendorGame, bool) {
-	for _, row := range GetAllVendorBrowseGamesFromMemory() {
-		if row != nil && row.GameCode == gameCode {
-			return cloneVendorGame(row), true
-		}
-	}
-	return nil, false
-}
-
-// GetAllOnShelfGamesFromMemory 获取已上架游戏(读 game_cfgs 永久缓存).
-func GetAllOnShelfGamesFromMemory() []*entity.GameCfg {
-	return cfgdao.GetAllGameCfgFromMemory()
 }

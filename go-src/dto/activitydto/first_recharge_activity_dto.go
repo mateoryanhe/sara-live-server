@@ -78,6 +78,13 @@ type AppFirstRechargeActivityCfgReq struct {
 
 // AppFirstRechargeActivityCfgRes App端首充活动配置
 // enabled=false 时建议隐藏活动入口; 文案按客户端语言从 En/Es/Pt/Hi/Id 字段取值
+// FirstRechargeSuccessPushItem 首充成功推送载荷
+type FirstRechargeSuccessPushItem struct {
+	FirstRecharge bool   `json:"firstRecharge" dc:"false=已首充,客户端隐藏首充入口"`
+	Gold          uint64 `json:"gold" dc:"本次到账金币数"`
+	OrderId       string `json:"orderId" dc:"充值订单ID"`
+}
+
 type AppFirstRechargeActivityCfgRes struct {
 	Enabled           bool                             `json:"enabled" dc:"活动开关,true=展示首充活动,false=隐藏"`
 	Icon              string                           `json:"icon" dc:"活动小图标CDN完整URL"`

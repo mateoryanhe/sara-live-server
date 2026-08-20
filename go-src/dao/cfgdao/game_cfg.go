@@ -59,6 +59,23 @@ func GetGameCfgCodeSetFromMemory() map[string]struct{} {
 	return set
 }
 
+// GetGameCfgShelfKeySetFromMemory 已上架游戏键集合(game_code + platform).
+func GetGameCfgShelfKeySetFromMemory() map[string]struct{} {
+	all := GetAllGameCfgFromMemory()
+	set := make(map[string]struct{}, len(all))
+	for _, row := range all {
+		if row == nil || row.GameCode == "" {
+			continue
+		}
+		set[GameCfgShelfKey(row.GameCode, row.Platform)] = struct{}{}
+	}
+	return set
+}
+
+func GameCfgShelfKey(gameCode, platform string) string {
+	return strings.TrimSpace(gameCode) + "\x00" + strings.TrimSpace(platform)
+}
+
 func IsGameOnShelfFromMemory(gameCode string) bool {
 	if gameCode == "" {
 		return false
@@ -95,8 +112,36 @@ func CreateGameCfg(row *entity.GameCfg) error {
 	if row == nil {
 		return nil
 	}
-	_, err := g.DB().Model(string(entity.TbGameCfg)).Save(row)
+	_, err := g.DB().Model(string(entity.TbGameCfg)).Data(g.Map{
+		"game_code":       row.GameCode,
+		"cover":           row.Cover,
+		"name_en":         row.NameEn,
+		"platform":        row.Platform,
+		"live_game_name":  row.LiveGameName,
+		"live_game_cover": row.LiveGameCover,
+		"created_at":      row.CreatedAt,
+		"updated_at":      row.UpdatedAt,
+	}).Insert()
 	return err
+}
+
+func SetGameCfgPlatform(gameCode, platform string) (bool, error) {
+	gameCode = strings.TrimSpace(gameCode)
+	platform = strings.TrimSpace(platform)
+	if gameCode == "" || platform == "" {
+		return false, nil
+	}
+	result, err := g.DB().Model(string(entity.TbGameCfg)).Where("game_code = ?", gameCode).Data(g.Map{
+		"platform": platform,
+	}).Update()
+	if err != nil {
+		return false, err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+	return affected > 0, nil
 }
 
 func DeleteGameCfg(id uint64) error {
