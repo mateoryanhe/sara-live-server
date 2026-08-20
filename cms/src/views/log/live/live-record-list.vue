@@ -11,26 +11,36 @@
         <el-form-item :label="t('pages.liveRecordList.anchorId')">
           <el-input v-model="searchForm.anchorId" clearable :placeholder="t('pages.liveRecordList.enterAnchorId')"/>
         </el-form-item>
-        <el-form-item :label="t('common.startTime')">
+        <el-form-item :label="t('pages.liveRecordList.startDate')">
           <el-date-picker
-              v-model="searchForm.dateRange"
+              v-model="searchForm.startDate"
               clearable
-              :end-placeholder="t('pages.liveRecordList.endDate')"
               format="YYYY-MM-DD"
-              :range-separator="t('pages.liveRecordList.dateRangeSeparator')"
-              :start-placeholder="t('pages.liveRecordList.startDate')"
-              style="width: 260px"
-              type="daterange"
+              :placeholder="t('pages.liveRecordList.startDate')"
+              style="width: 160px"
+              type="date"
+              value-format="YYYY-MM-DD"
+          />
+        </el-form-item>
+        <el-form-item :label="t('pages.liveRecordList.endDate')">
+          <el-date-picker
+              v-model="searchForm.endDate"
+              clearable
+              format="YYYY-MM-DD"
+              :placeholder="t('pages.liveRecordList.endDate')"
+              style="width: 160px"
+              type="date"
               value-format="YYYY-MM-DD"
           />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
           <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
+          <el-button v-if="can('export')" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
         </el-form-item>
       </el-form>
 
-      <el-table v-loading="loading" :data="tableData" style="width: 100%">
+      <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width: 100%">
         <el-table-column :label="t('pages.liveRecordList.recordId')" min-width="180" prop="id"/>
         <el-table-column :label="t('pages.liveRecordList.anchorId')" min-width="180" prop="anchorId"/>
         <el-table-column :label="t('pages.liveRecordList.anchorNickname')" min-width="120" prop="nickname">
@@ -95,15 +105,22 @@ import {onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {liveRecordApi} from '@/api'
 import type {LiveRecordItem} from '@/types/api'
+import {usePagePermission} from '@/composables/usePagePermission'
+import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
+import {CMS_EXPORT_TYPE_LIVE_RECORD} from '@/utils/cms-async-export'
+import {buildLiveRecordCsvColumns} from '@/utils/live-record-csv'
 import {formatWalletBalance} from '@/utils/number-format'
 
 const {t} = useI18n()
+const {can} = usePagePermission('LiveRecordList')
+const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
 const tableData = ref<LiveRecordItem[]>([])
 
 const searchForm = reactive({
   anchorId: '',
-  dateRange: [] as string[],
+  startDate: '',
+  endDate: '',
 })
 
 const pagination = reactive({
@@ -120,16 +137,19 @@ const toDayEndUnix = (dateStr: string): number => {
   return Math.floor(new Date(`${dateStr}T23:59:59`).getTime() / 1000)
 }
 
-const buildQueryParams = () => {
-  const [startDate, endDate] = searchForm.dateRange || []
-  return {
-    pageIndex: pagination.pageIndex,
-    pageSize: pagination.pageSize,
-    anchorId: searchForm.anchorId.trim(),
-    startTime: startDate ? toDayStartUnix(startDate) : 0,
-    endTime: endDate ? toDayEndUnix(endDate) : 0,
-  }
-}
+const buildQueryParams = () => ({
+  pageIndex: pagination.pageIndex,
+  pageSize: pagination.pageSize,
+  anchorId: searchForm.anchorId.trim(),
+  startTime: searchForm.startDate ? toDayStartUnix(searchForm.startDate) : 0,
+  endTime: searchForm.endDate ? toDayEndUnix(searchForm.endDate) : 0,
+})
+
+const buildFilterParams = () => ({
+  anchorId: searchForm.anchorId.trim(),
+  startTime: searchForm.startDate ? toDayStartUnix(searchForm.startDate) : 0,
+  endTime: searchForm.endDate ? toDayEndUnix(searchForm.endDate) : 0,
+})
 
 const fetchList = async () => {
   loading.value = true
@@ -152,7 +172,8 @@ const handleSearch = () => {
 
 const handleReset = () => {
   searchForm.anchorId = ''
-  searchForm.dateRange = []
+  searchForm.startDate = ''
+  searchForm.endDate = ''
   pagination.pageIndex = 1
   fetchList()
 }
@@ -166,6 +187,17 @@ const handleSizeChange = (size: number) => {
   pagination.pageSize = size
   pagination.pageIndex = 1
   fetchList()
+}
+
+const handleExport = async () => {
+  await runExport(
+    CMS_EXPORT_TYPE_LIVE_RECORD,
+    {
+      headers: buildCsvHeaders(buildLiveRecordCsvColumns(t)),
+      ...buildFilterParams(),
+    },
+    `live-record-${Date.now()}.csv`,
+  )
 }
 
 const formatDate = (dateString: string | null | undefined) => {

@@ -14,6 +14,7 @@ import (
 	"xr-game-server/entity/call"
 	"xr-game-server/errercode"
 	"xr-game-server/module/agora"
+	"xr-game-server/module/liveroom"
 	"xr-game-server/module/wallet"
 )
 
@@ -48,6 +49,9 @@ func LiveRoomCall(ctx context.Context, req *calldto.LiveRoomCallReq) (*calldto.L
 	cfg := liveroomdao.GetLiveRoomCfg(room.ID)
 	if cfg == nil {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
+	}
+	if !liveroom.CanInitiateLiveRoomCall(room, cfg, callerId) {
+		return nil, errercode.CreateCode(errercode.NoPermission)
 	}
 
 	requiredDiamond := cfg.Ticket

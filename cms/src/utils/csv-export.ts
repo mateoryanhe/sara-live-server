@@ -35,20 +35,29 @@ export function downloadCsv<T>(filename: string, columns: CsvColumn<T>[], rows: 
 
 export async function fetchAllPagedRows<T>(
   fetchPage: (pageIndex: number, pageSize: number) => Promise<{data?: T[]; total?: number}>,
-  pageSize = 500,
+  pageSize = 100,
 ): Promise<T[]> {
   const all: T[] = []
   let pageIndex = 1
-  let total = 0
+  let knownTotal: number | undefined
 
   while (true) {
     const response = await fetchPage(pageIndex, pageSize)
-    const rows = response.data ?? []
-    total = response.total ?? rows.length
-    all.push(...rows)
-    if (rows.length === 0 || all.length >= total) {
+    const rows = Array.isArray(response.data) ? response.data : []
+    if (rows.length === 0) {
       break
     }
+
+    if (knownTotal === undefined && typeof response.total === 'number') {
+      knownTotal = response.total
+    }
+
+    all.push(...rows)
+
+    if (knownTotal !== undefined && all.length >= knownTotal) {
+      break
+    }
+
     pageIndex += 1
   }
 

@@ -91,6 +91,36 @@ func AllCachesIdle() bool {
 	return allSynCachesIdle()
 }
 
+// PendingQueueRowCount 入库队列待落库行数(含 queue 与 pending).
+func PendingQueueRowCount() int {
+	pullAllCaches()
+	total := 0
+	for _, colCache := range synCacheMap {
+		total += int(colCache.DataQueue.Len()) + len(colCache.Pending)
+	}
+	return total
+}
+
+// PendingQueueSummary 汇总仍有数据的入库队列;全部为空时返回空字符串.
+func PendingQueueSummary() string {
+	pullAllCaches()
+	var parts []string
+	total := 0
+	for _, colCache := range synCacheMap {
+		queueLen := colCache.DataQueue.Len()
+		pendingLen := len(colCache.Pending)
+		if queueLen == 0 && pendingLen == 0 {
+			continue
+		}
+		total += int(queueLen) + pendingLen
+		parts = append(parts, fmt.Sprintf("%s:%s(queue=%d,pending=%d)", colCache.TbName, colCache.ColName, queueLen, pendingLen))
+	}
+	if total == 0 {
+		return ""
+	}
+	return fmt.Sprintf("total=%d,detail=[%s]", total, strings.Join(parts, "; "))
+}
+
 // FlushUntilIdle 无条件刷盘直到队列空; timeout<=0 表示一直等到空.
 // 返回 true 表示队列已空,false 表示超时仍有数据.
 func FlushUntilIdle(timeout time.Duration) bool {

@@ -38,8 +38,10 @@ const (
 
 const (
 	LiveRoomPrivateInviteAll    uint8 = 1 // 接受所有人
-	LiveRoomPrivateInviteVip    uint8 = 2 // 仅VIP
+	LiveRoomPrivateInviteVip    uint8 = 2 // 仅累计充值达标用户
 	LiveRoomPrivateInviteReject uint8 = 3 // 拒绝所有人
+
+	LiveRoomCallMinTotalRechargeUSD = 10 // 直播间1v1通话最低累计充值(USD)
 )
 
 // DefaultPrivateInviteType 按直播间分类返回私密邀请类型默认值

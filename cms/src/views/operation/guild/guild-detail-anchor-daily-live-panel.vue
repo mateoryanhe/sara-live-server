@@ -24,7 +24,7 @@
       </el-form-item>
     </el-form>
 
-    <el-table v-loading="loading" :data="tableData" style="width:100%">
+    <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width:100%">
       <el-table-column :label="t('pages.anchorList.dailyRecordId')" min-width="180" prop="id"/>
       <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.roomId')" min-width="180" prop="roomId"/>
       <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.roomNickname')" min-width="120">
@@ -90,7 +90,8 @@ import {guildApi} from '@/api'
 import type {GuildAnchorDailyEffectiveLiveItem} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
 import {useUserDetailNav} from '@/composables/useUserDetailNav'
-import {downloadCsv, fetchAllPagedRows} from '@/utils/csv-export'
+import {buildCsvHeaders, buildDailyEffectiveLiveExportLabels, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
+import {CMS_EXPORT_TYPE_GUILD_ANCHOR_DAILY_EFFECTIVE_LIVE} from '@/utils/cms-async-export'
 import {buildGuildAnchorDailyEffectiveLiveCsvColumns} from '@/utils/daily-effective-live-csv'
 import {formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
@@ -104,8 +105,8 @@ const {t} = useI18n()
 const {can} = usePagePermission('GuildDetail')
 const {canViewUserDetail, openUserDetail} = useUserDetailNav('GuildDetail')
 const canExport = computed(() => can('exportAnchorDailyEffectiveLive'))
+const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
-const exporting = ref(false)
 const tableData = ref<GuildAnchorDailyEffectiveLiveItem[]>([])
 const loaded = ref(false)
 
@@ -157,31 +158,15 @@ const handleExport = async () => {
     ElMessage.warning(t('common.exportEmpty'))
     return
   }
-  exporting.value = true
-  try {
-    const rows = await fetchAllPagedRows((pageIndex, pageSize) =>
-      guildApi.getGuildAnchorDailyEffectiveLiveList({
-        ...buildFilterParams(),
-        pageIndex,
-        pageSize,
-      }),
-    )
-    if (rows.length === 0) {
-      ElMessage.warning(t('common.exportEmpty'))
-      return
-    }
-    downloadCsv(
-      `guild-anchor-daily-flow-${props.guildId}-${Date.now()}.csv`,
-      buildGuildAnchorDailyEffectiveLiveCsvColumns(t),
-      rows,
-    )
-    ElMessage.success(t('common.exportSuccess'))
-  } catch (error) {
-    console.error('Failed to export guild anchor daily flow:', error)
-    ElMessage.error(t('common.exportFailed'))
-  } finally {
-    exporting.value = false
-  }
+  await runExport(
+    CMS_EXPORT_TYPE_GUILD_ANCHOR_DAILY_EFFECTIVE_LIVE,
+    {
+      headers: buildCsvHeaders(buildGuildAnchorDailyEffectiveLiveCsvColumns(t)),
+      ...buildFilterParams(),
+      ...buildDailyEffectiveLiveExportLabels(t),
+    },
+    `guild-anchor-daily-flow-${props.guildId}-${Date.now()}.csv`,
+  )
 }
 
 const formatDate = (dateString: string | null | undefined) => {

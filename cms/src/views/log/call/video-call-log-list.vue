@@ -50,10 +50,11 @@
         <el-form-item>
           <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
           <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
+          <el-button v-if="can('export')" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
         </el-form-item>
       </el-form>
 
-      <el-table v-loading="loading" :data="tableData" style="width: 100%">
+      <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width: 100%">
         <el-table-column :label="t('pages.rechargeOrderList.orderId')" min-width="180" prop="id"/>
         <el-table-column :label="t('common.status')" prop="statusText" width="140"/>
         <el-table-column :label="t('pages.videoCallLogList.source')" prop="sourceText" width="90"/>
@@ -122,9 +123,15 @@ import {onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {videoCallLogApi} from '@/api'
 import type {VideoCallLogItem} from '@/types/api'
+import {usePagePermission} from '@/composables/usePagePermission'
+import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
+import {CMS_EXPORT_TYPE_VIDEO_CALL_LOG} from '@/utils/cms-async-export'
 import {formatAmount} from '@/utils/number-format'
+import {buildVideoCallLogCsvColumns} from '@/utils/video-call-log-csv'
 
 const {t} = useI18n()
+const {can} = usePagePermission('VideoCallLogList')
+const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
 const tableData = ref<VideoCallLogItem[]>([])
 
@@ -155,6 +162,18 @@ const buildQueryParams = () => {
   return {
     pageIndex: pagination.pageIndex,
     pageSize: pagination.pageSize,
+    callerId: searchForm.callerId.trim(),
+    receiverId: searchForm.receiverId.trim(),
+    source: searchForm.source || 0,
+    status: searchForm.status || 0,
+    startTime: startDate ? toDayStartUnix(startDate) : 0,
+    endTime: endDate ? toDayEndUnix(endDate) : 0,
+  }
+}
+
+const buildFilterParams = () => {
+  const [startDate, endDate] = searchForm.dateRange || []
+  return {
     callerId: searchForm.callerId.trim(),
     receiverId: searchForm.receiverId.trim(),
     source: searchForm.source || 0,
@@ -202,6 +221,17 @@ const handleSizeChange = (size: number) => {
   pagination.pageSize = size
   pagination.pageIndex = 1
   fetchList()
+}
+
+const handleExport = async () => {
+  await runExport(
+    CMS_EXPORT_TYPE_VIDEO_CALL_LOG,
+    {
+      headers: buildCsvHeaders(buildVideoCallLogCsvColumns(t)),
+      ...buildFilterParams(),
+    },
+    `video-call-log-${Date.now()}.csv`,
+  )
 }
 
 const formatDate = (dateString: string | null | undefined) => {

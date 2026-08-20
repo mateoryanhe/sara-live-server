@@ -1988,6 +1988,37 @@ export interface LogQueryJobResult<T = unknown> {
     result?: T
 }
 
+export type CMSExportJobStatus = 'pending' | 'running' | 'done' | 'failed'
+
+export interface CMSExportJobSubmitResult {
+    jobId: string
+    queuePosition: number
+}
+
+export interface CMSExportJobProgress {
+    exportedRows: number
+    totalRows: number
+}
+
+export interface CMSExportResult {
+    exportId: string
+    fileName: string
+    fileUrl: string
+    total: number
+    pageIndex?: number
+    pageSize?: number
+}
+
+export interface CMSExportJobResult {
+    jobId: string
+    exportType: string
+    status: CMSExportJobStatus
+    queuePosition: number
+    errorMessage?: string
+    progress?: CMSExportJobProgress
+    result?: CMSExportResult
+}
+
 // CMS用户相关类型
 export interface CMSUser {
     id: string

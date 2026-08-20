@@ -48,7 +48,7 @@
         </el-form-item>
       </el-form>
 
-      <el-table v-loading="loading" :data="tableData" style="width: 100%">
+      <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width: 100%">
         <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.logId')" fixed="left" min-width="180" prop="id"/>
         <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.guildName')" min-width="120" prop="guildName">
           <template #default="{ row }">{{ row.guildName || '-' }}</template>
@@ -121,7 +121,8 @@ import {ElMessage} from 'element-plus'
 import {guildApi} from '@/api'
 import type {AnchorIncomeSettlementLogItem, MyGuildProfile} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
-import {downloadCsv, fetchAllPagedRows} from '@/utils/csv-export'
+import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
+import {CMS_EXPORT_TYPE_MY_GUILD_ANCHOR_INCOME_SETTLEMENT_LOG} from '@/utils/cms-async-export'
 import {buildGuildAnchorSettlementLogCsvColumns} from '@/utils/income-settlement-log-csv'
 import {formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
@@ -129,8 +130,8 @@ import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 const {t} = useI18n()
 const route = useRoute()
 const {can} = usePagePermission('GuildProfileAnchorSettlementLogList')
+const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
-const exporting = ref(false)
 const tableData = ref<AnchorIncomeSettlementLogItem[]>([])
 const guildOptions = ref<MyGuildProfile[]>([])
 
@@ -220,31 +221,14 @@ const handleSizeChange = (size: number) => {
 }
 
 const handleExport = async () => {
-  exporting.value = true
-  try {
-    const rows = await fetchAllPagedRows((pageIndex, pageSize) =>
-      guildApi.getMyGuildAnchorIncomeSettlementLogList({
-        ...buildFilterParams(),
-        pageIndex,
-        pageSize,
-      }),
-    )
-    if (rows.length === 0) {
-      ElMessage.warning(t('common.exportEmpty'))
-      return
-    }
-    downloadCsv(
-      `guild-anchor-income-settlement-log-${Date.now()}.csv`,
-      buildGuildAnchorSettlementLogCsvColumns(t),
-      rows,
-    )
-    ElMessage.success(t('common.exportSuccess'))
-  } catch (error) {
-    console.error('export guild anchor income settlement log failed:', error)
-    ElMessage.error(t('common.exportFailed'))
-  } finally {
-    exporting.value = false
-  }
+  await runExport(
+    CMS_EXPORT_TYPE_MY_GUILD_ANCHOR_INCOME_SETTLEMENT_LOG,
+    {
+      headers: buildCsvHeaders(buildGuildAnchorSettlementLogCsvColumns(t)),
+      ...buildFilterParams(),
+    },
+    `guild-anchor-income-settlement-log-${Date.now()}.csv`,
+  )
 }
 
 const formatSharePercent = (value: number | null | undefined) => {

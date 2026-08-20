@@ -1,16 +1,25 @@
 <template>
   <div>
     <el-form :model="searchForm" class="search-form" inline label-width="100px">
-      <el-form-item :label="t('common.startTime')">
+      <el-form-item :label="t('pages.liveRecordList.startDate')">
         <el-date-picker
-            v-model="searchForm.dateRange"
+            v-model="searchForm.startDate"
             clearable
-            :end-placeholder="t('pages.liveRecordList.endDate')"
             format="YYYY-MM-DD"
-            :range-separator="t('pages.liveRecordList.dateRangeSeparator')"
-            :start-placeholder="t('pages.liveRecordList.startDate')"
-            style="width: 260px"
-            type="daterange"
+            :placeholder="t('pages.liveRecordList.startDate')"
+            style="width: 160px"
+            type="date"
+            value-format="YYYY-MM-DD"
+        />
+      </el-form-item>
+      <el-form-item :label="t('pages.liveRecordList.endDate')">
+        <el-date-picker
+            v-model="searchForm.endDate"
+            clearable
+            format="YYYY-MM-DD"
+            :placeholder="t('pages.liveRecordList.endDate')"
+            style="width: 160px"
+            type="date"
             value-format="YYYY-MM-DD"
         />
       </el-form-item>
@@ -21,7 +30,7 @@
       </el-form-item>
     </el-form>
 
-    <el-table v-loading="loading" :data="tableData" style="width: 100%">
+    <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width: 100%">
       <el-table-column :label="t('pages.liveRecordList.recordId')" min-width="180" prop="id"/>
       <el-table-column :label="t('pages.liveRecordList.anchorId')" min-width="180" prop="anchorId"/>
       <el-table-column :label="t('pages.liveRecordList.anchorNickname')" min-width="120" prop="nickname">
@@ -87,7 +96,8 @@ import {liveRecordApi} from '@/api'
 import type {LiveRecordItem} from '@/types/api'
 import {formatWalletBalance} from '@/utils/number-format'
 import {usePagePermission} from '@/composables/usePagePermission'
-import {downloadCsv, fetchAllPagedRows} from '@/utils/csv-export'
+import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
+import {CMS_EXPORT_TYPE_LIVE_RECORD} from '@/utils/cms-async-export'
 import {buildLiveRecordCsvColumns} from '@/utils/live-record-csv'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 
@@ -99,8 +109,8 @@ const props = defineProps<{
 const {t} = useI18n()
 const {can} = usePagePermission('AnchorDetail')
 const canExport = computed(() => can('exportLiveRecord'))
+const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
-const exporting = ref(false)
 const tableData = ref<LiveRecordItem[]>([])
 const loaded = ref(false)
 
@@ -119,12 +129,13 @@ const createDefaultDateRange = () => {
   const end = new Date()
   const start = new Date()
   start.setDate(end.getDate() - 6)
-  return [formatDateString(start), formatDateString(end)] as string[]
+  return {
+    startDate: formatDateString(start),
+    endDate: formatDateString(end),
+  }
 }
 
-const searchForm = reactive({
-  dateRange: createDefaultDateRange(),
-})
+const searchForm = reactive(createDefaultDateRange())
 
 const toDayStartUnix = (dateStr: string): number => {
   return Math.floor(new Date(`${dateStr}T00:00:00`).getTime() / 1000)
@@ -134,14 +145,11 @@ const toDayEndUnix = (dateStr: string): number => {
   return Math.floor(new Date(`${dateStr}T23:59:59`).getTime() / 1000)
 }
 
-const buildFilterParams = () => {
-  const [startDate, endDate] = searchForm.dateRange || []
-  return {
-    anchorId: props.anchorId,
-    startTime: startDate ? toDayStartUnix(startDate) : 0,
-    endTime: endDate ? toDayEndUnix(endDate) : 0,
-  }
-}
+const buildFilterParams = () => ({
+  anchorId: props.anchorId,
+  startTime: searchForm.startDate ? toDayStartUnix(searchForm.startDate) : 0,
+  endTime: searchForm.endDate ? toDayEndUnix(searchForm.endDate) : 0,
+})
 
 const buildQueryParams = () => ({
   ...buildFilterParams(),
@@ -175,7 +183,7 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
-  searchForm.dateRange = createDefaultDateRange()
+  Object.assign(searchForm, createDefaultDateRange())
   pagination.pageIndex = 1
   fetchList()
 }
@@ -196,31 +204,14 @@ const handleExport = async () => {
     ElMessage.warning(t('common.exportEmpty'))
     return
   }
-  exporting.value = true
-  try {
-    const rows = await fetchAllPagedRows((pageIndex, pageSize) =>
-      liveRecordApi.getLiveRecordList({
-        ...buildFilterParams(),
-        pageIndex,
-        pageSize,
-      }),
-    )
-    if (rows.length === 0) {
-      ElMessage.warning(t('common.exportEmpty'))
-      return
-    }
-    downloadCsv(
-      `anchor-live-record-${props.anchorId}-${Date.now()}.csv`,
-      buildLiveRecordCsvColumns(t),
-      rows,
-    )
-    ElMessage.success(t('common.exportSuccess'))
-  } catch (error) {
-    console.error('Failed to export anchor live records:', error)
-    ElMessage.error(t('common.exportFailed'))
-  } finally {
-    exporting.value = false
-  }
+  await runExport(
+    CMS_EXPORT_TYPE_LIVE_RECORD,
+    {
+      headers: buildCsvHeaders(buildLiveRecordCsvColumns(t)),
+      ...buildFilterParams(),
+    },
+    `anchor-live-record-${props.anchorId}-${Date.now()}.csv`,
+  )
 }
 
 const formatDate = (dateString: string | null | undefined) => {

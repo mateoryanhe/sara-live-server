@@ -88,6 +88,7 @@ func Init() {
 	initSysStatController()                      // 系统总数据/仪表盘(CMS)
 	initResourceMetricController()               // 系统资源监控(CMS)
 	initLogQueryController()                     // 日志查询(CMS)
+	initCMSExportController()                    // CMS异步导出
 	httpserver.InitWebsocket()
 	xrpool.AddWithRecover(gctx.New(), func(ctx context.Context) {
 		httpserver.InitHttpServer()

@@ -214,6 +214,20 @@ func calcAge(birthday *time.Time) int {
 	return age
 }
 
+// ViewerCanUseLiveRoomCall 累计充值满 10 USD 可使用直播间 1v1 通话
+func ViewerCanUseLiveRoomCall(userId uint64) bool {
+	if userId == 0 {
+		return false
+	}
+	stat := userinfodao.GetUserCumulativeStatByUserId(userId)
+	return stat != nil && stat.TotalRecharge >= liveentity.LiveRoomCallMinTotalRechargeUSD
+}
+
+// CanInitiateLiveRoomCall 当前用户是否可向该直播间发起 1v1 通话(与 AllowCallIcon 规则一致)
+func CanInitiateLiveRoomCall(room *liveentity.LiveRoom, cfg *liveentity.LiveRoomCfg, userId uint64) bool {
+	return allowShowCallIcon(room, cfg, userId)
+}
+
 func allowShowCallIcon(room *liveentity.LiveRoom, cfg *liveentity.LiveRoomCfg, userId uint64) bool {
 	if room == nil || cfg == nil || cfg.Category != liveentity.LiveRoomCategoryHot {
 		return false
@@ -230,8 +244,7 @@ func allowShowCallIcon(room *liveentity.LiveRoom, cfg *liveentity.LiveRoomCfg, u
 	case liveentity.LiveRoomPrivateInviteAll:
 		return true
 	case liveentity.LiveRoomPrivateInviteVip:
-		user := userinfodao.GetUserInfoByUserId(userId)
-		return user != nil && user.VipLevel > 0
+		return ViewerCanUseLiveRoomCall(userId)
 	case liveentity.LiveRoomPrivateInviteReject:
 		return false
 	default:

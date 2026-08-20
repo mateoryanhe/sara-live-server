@@ -31,7 +31,7 @@
         </el-form-item>
       </el-form>
 
-      <el-table v-loading="loading" :data="tableData" style="width: 100%">
+      <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width: 100%">
         <el-table-column :label="t('pages.guildIncomeSettlementLogList.logId')" fixed="left" min-width="180" prop="id"/>
         <el-table-column :label="t('pages.guildIncomeSettlementLogList.guildId')" min-width="180" prop="guildId"/>
         <el-table-column :label="t('pages.guildIncomeSettlementLogList.guildName')" min-width="120" prop="guildName">
@@ -97,15 +97,16 @@ import {ElMessage} from 'element-plus'
 import {guildIncomeSettlementLogApi} from '@/api/modules/guild-income-settlement-log'
 import type {GuildIncomeSettlementLogItem} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
-import {downloadCsv, fetchAllPagedRows} from '@/utils/csv-export'
+import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
+import {CMS_EXPORT_TYPE_GUILD_INCOME_SETTLEMENT_LOG} from '@/utils/cms-async-export'
 import {buildGuildSettlementLogCsvColumns} from '@/utils/income-settlement-log-csv'
 import {formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 
 const {t} = useI18n()
 const {can} = usePagePermission('GuildIncomeSettlementLogList')
+const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
-const exporting = ref(false)
 const tableData = ref<GuildIncomeSettlementLogItem[]>([])
 
 const searchForm = reactive({
@@ -180,31 +181,14 @@ const handleSizeChange = (size: number) => {
 }
 
 const handleExport = async () => {
-  exporting.value = true
-  try {
-    const rows = await fetchAllPagedRows((pageIndex, pageSize) =>
-      guildIncomeSettlementLogApi.getList({
-        ...buildFilterParams(),
-        pageIndex,
-        pageSize,
-      }),
-    )
-    if (rows.length === 0) {
-      ElMessage.warning(t('common.exportEmpty'))
-      return
-    }
-    downloadCsv(
-      `guild-income-settlement-log-${Date.now()}.csv`,
-      buildGuildSettlementLogCsvColumns(t),
-      rows,
-    )
-    ElMessage.success(t('common.exportSuccess'))
-  } catch (error) {
-    console.error('export guild income settlement log failed:', error)
-    ElMessage.error(t('common.exportFailed'))
-  } finally {
-    exporting.value = false
-  }
+  await runExport(
+    CMS_EXPORT_TYPE_GUILD_INCOME_SETTLEMENT_LOG,
+    {
+      headers: buildCsvHeaders(buildGuildSettlementLogCsvColumns(t)),
+      ...buildFilterParams(),
+    },
+    `guild-income-settlement-log-${Date.now()}.csv`,
+  )
 }
 
 const formatSharePercent = (value: number | null | undefined) => {

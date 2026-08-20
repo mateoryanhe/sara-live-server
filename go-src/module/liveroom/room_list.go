@@ -320,7 +320,7 @@ func filterRoomsByBlocked(rooms []*liveentity.LiveRoom, userId uint64) []*liveen
 	return filtered
 }
 
-// viewerCanSeeSeniorAnchorRoom 高级主播直播间仅 VIP 等级>0 的用户可见(主播本人始终可见)
+// viewerCanSeeSeniorAnchorRoom App 列表中高级主播直播间对已登录用户可见(含 VIP=0,主播本人始终可见)
 func viewerCanSeeSeniorAnchorRoom(viewerUserId uint64, room *liveentity.LiveRoom) bool {
 	if room == nil {
 		return false
@@ -335,8 +335,7 @@ func viewerCanSeeSeniorAnchorRoom(viewerUserId uint64, room *liveentity.LiveRoom
 	if viewerUserId == 0 {
 		return false
 	}
-	viewer := userinfodao.GetUserInfoByUserId(viewerUserId)
-	return viewer != nil && viewer.VipLevel > 0
+	return userinfodao.GetUserInfoByUserId(viewerUserId) != nil
 }
 
 func filterRoomsBySeniorAnchor(rooms []*liveentity.LiveRoom, viewerUserId uint64) []*liveentity.LiveRoom {

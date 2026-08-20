@@ -4,8 +4,7 @@ import (
 	"sync/atomic"
 
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/gctx"
-	"xr-game-server/core/xrlog"
+	"xr-game-server/core/hotrestart"
 	"xr-game-server/errercode"
 )
 
@@ -24,12 +23,11 @@ func RejectNewRequests() {
 func EnterRestartClosingPhase() {
 	restartClosing.Store(true)
 	canDo = false
-	xrlog.DetailLog.Warning(gctx.New(), "热重启:旧进程 Restart 完成,拒绝新 HTTP/WS 连接")
 }
 
 func middlewareRestartGuard(r *ghttp.Request) {
 	if restartClosing.Load() {
-		xrlog.DetailLog.Warningf(r.Context(), "热重启:旧进程收到新 HTTP 请求并关闭连接,URI=%s ip=%s", r.RequestURI, r.GetClientIp())
+		hotrestart.LogPhase2HTTPRequestClosed(r.Context(), r.RequestURI, r.GetClientIp())
 		r.Response.Header().Set("Connection", "close")
 		r.Exit()
 		return

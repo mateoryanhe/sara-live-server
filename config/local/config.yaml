@@ -22,7 +22,7 @@ server:
   gzipEnabled: true
   graceful: true
   hotRestartFlushTimeout: 60
-  hotRestartExitTimeout: 120
+  hotRestartExitTimeout: 60
   # PProf配置
   pprofEnabled: true
   pprofPattern: "/66dcd8e25ab3b339546ea1de5eb2d443e6fca76c76d11709f10533be8bd87d7d/pprof"

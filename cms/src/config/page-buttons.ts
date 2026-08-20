@@ -71,6 +71,11 @@ const READONLY_PAGES = new Set([
     'ShortVideoWatchManagement',
 ])
 
+/** 只读列表但不含导出 */
+const READONLY_NO_EXPORT_PAGES = new Set([
+    'ServerLogExplorer',
+])
+
 const CONFIG_PAGES = new Set([
     'AppTokenConfig',
     'AccountCfgManagement',
@@ -236,6 +241,9 @@ export function getPageButtons(pageName: string, metaButtons?: PageButtonDef[]):
         return PAGE_BUTTON_OVERRIDES[pageName]
     }
     if (READONLY_PAGES.has(pageName)) {
+        if (READONLY_NO_EXPORT_PAGES.has(pageName)) {
+            return [BTN.view, BTN.search]
+        }
         return DEFAULT_READONLY_BUTTONS
     }
     if (CONFIG_PAGES.has(pageName)) {

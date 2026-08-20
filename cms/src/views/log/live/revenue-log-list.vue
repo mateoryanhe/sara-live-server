@@ -35,10 +35,11 @@
         <el-form-item>
           <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
           <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
+          <el-button v-if="can('export')" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
         </el-form-item>
       </el-form>
 
-      <el-table v-loading="loading" :data="tableData" style="width: 100%">
+      <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width: 100%">
         <el-table-column :label="t('pages.revenueLogList.logId')" min-width="180" prop="id"/>
         <el-table-column :label="t('pages.revenueLogList.revenueType')" prop="revenueTypeText" width="100">
           <template #default="{ row }">{{ row.revenueTypeText || formatRevenueType(row.revenueType) }}</template>
@@ -93,8 +94,14 @@ import {onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {liveRevenueLogApi} from '@/api'
 import type {LiveRevenueLogItem} from '@/types/api'
+import {usePagePermission} from '@/composables/usePagePermission'
+import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
+import {CMS_EXPORT_TYPE_LIVE_REVENUE_LOG} from '@/utils/cms-async-export'
+import {buildLiveRevenueLogCsvColumns} from '@/utils/live-revenue-log-csv'
 
 const {t} = useI18n()
+const {can} = usePagePermission('LiveRevenueLogList')
+const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
 const tableData = ref<LiveRevenueLogItem[]>([])
 
@@ -139,6 +146,16 @@ const buildQueryParams = () => {
   }
 }
 
+const buildFilterParams = () => {
+  const [startDate, endDate] = searchForm.dateRange || []
+  return {
+    receiverId: searchForm.receiverId.trim(),
+    revenueType: searchForm.revenueType || 0,
+    startTime: startDate ? toDayStartUnix(startDate) : 0,
+    endTime: endDate ? toDayEndUnix(endDate) : 0,
+  }
+}
+
 const fetchList = async () => {
   loading.value = true
   try {
@@ -175,6 +192,17 @@ const handleSizeChange = (size: number) => {
   pagination.pageSize = size
   pagination.pageIndex = 1
   fetchList()
+}
+
+const handleExport = async () => {
+  await runExport(
+    CMS_EXPORT_TYPE_LIVE_REVENUE_LOG,
+    {
+      headers: buildCsvHeaders(buildLiveRevenueLogCsvColumns(t, formatRevenueType)),
+      ...buildFilterParams(),
+    },
+    `live-revenue-log-${Date.now()}.csv`,
+  )
 }
 
 const formatDate = (dateString: string | null | undefined) => {

@@ -12,7 +12,7 @@
       <el-button v-if="canExport" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
     </div>
 
-    <el-table v-loading="loading" :data="tableData" style="width:100%">
+    <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width:100%">
       <el-table-column :label="t('pages.anchorList.dailyRecordId')" min-width="180" prop="id"/>
       <el-table-column :label="t('pages.anchorList.dailyLiveDate')" min-width="120" prop="liveDate"/>
       <el-table-column :label="t('pages.anchorList.dailyLiveDuration')" min-width="150">
@@ -65,7 +65,8 @@ import {ElMessage} from 'element-plus'
 import {guildApi} from '@/api'
 import type {GuildDailyEffectiveLiveItem} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
-import {downloadCsv, fetchAllPagedRows} from '@/utils/csv-export'
+import {buildCsvHeaders, buildDailyEffectiveLiveExportLabels, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
+import {CMS_EXPORT_TYPE_GUILD_DAILY_EFFECTIVE_LIVE} from '@/utils/cms-async-export'
 import {buildGuildDailyEffectiveLiveCsvColumns} from '@/utils/daily-effective-live-csv'
 import {formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
@@ -78,8 +79,8 @@ const props = defineProps<{
 const {t} = useI18n()
 const {can} = usePagePermission('GuildDetail')
 const canExport = computed(() => can('exportDailyEffectiveLive'))
+const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
-const exporting = ref(false)
 const tableData = ref<GuildDailyEffectiveLiveItem[]>([])
 const loaded = ref(false)
 
@@ -117,31 +118,16 @@ const handleExport = async () => {
     ElMessage.warning(t('common.exportEmpty'))
     return
   }
-  exporting.value = true
-  try {
-    const rows = await fetchAllPagedRows((pageIndex, pageSize) =>
-      guildApi.getGuildDailyEffectiveLiveList({
-        ...buildFilterParams(),
-        pageIndex,
-        pageSize,
-      }),
-    )
-    if (rows.length === 0) {
-      ElMessage.warning(t('common.exportEmpty'))
-      return
-    }
-    downloadCsv(
-      `guild-daily-flow-${props.guildId}-${Date.now()}.csv`,
-      buildGuildDailyEffectiveLiveCsvColumns(t),
-      rows,
-    )
-    ElMessage.success(t('common.exportSuccess'))
-  } catch (error) {
-    console.error('Failed to export guild daily flow:', error)
-    ElMessage.error(t('common.exportFailed'))
-  } finally {
-    exporting.value = false
-  }
+  await runExport(
+    CMS_EXPORT_TYPE_GUILD_DAILY_EFFECTIVE_LIVE,
+    {
+      headers: buildCsvHeaders(buildGuildDailyEffectiveLiveCsvColumns(t)),
+      guildId: Number(props.guildId),
+      ...buildFilterParams(),
+      ...buildDailyEffectiveLiveExportLabels(t),
+    },
+    `guild-daily-flow-${props.guildId}-${Date.now()}.csv`,
+  )
 }
 
 const formatDate = (dateString: string | null | undefined) => {

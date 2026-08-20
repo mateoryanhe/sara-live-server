@@ -1,7 +1,6 @@
 package hotrestart
 
 import (
-	"context"
 	"crypto/subtle"
 	"os"
 	"strings"
@@ -22,7 +21,7 @@ import (
 
 const (
 	defaultHotRestartFlushTimeout = 60
-	defaultHotRestartExitTimeout  = 120
+	defaultHotRestartExitWait     = 60
 	defaultHotRestartAuth         = "nGH66S4TjBjQqCKyWJAM"
 )
 
@@ -63,26 +62,21 @@ func TryTriggerHotRestart(auth string) (accepted bool, reason string) {
 func runHotRestart() {
 	hotRestartOnce.Do(func() {
 		ctx := gctx.New()
-		xrlog.DetailLog.Warning(ctx, "热重启:收到请求,停止定时器并开始刷盘(HTTP 继续服务)")
+		logPhase1Start(ctx)
 
 		event.Pub(event.PrepareRestart, nil)
 		xrtimer.Pause()
 
-		flushTimeout := hotRestartFlushTimeoutSec()
-		xrlog.DetailLog.Warningf(ctx, "热重启:开始无条件刷盘,timeout=%vs", flushTimeout)
-
-		idle := syndb.FlushUntilIdle(time.Duration(flushTimeout) * time.Second)
+		idle := syndb.FlushUntilIdle(time.Duration(hotRestartFlushTimeoutSec()) * time.Second)
 		if idle {
-			xrlog.DetailLog.Info(ctx, "热重启:数据库入库队列已空,准备执行 Restart")
-		} else {
-			xrlog.DetailLog.Warning(ctx, "热重启:刷盘超时,强制执行 Restart")
+			logPhase1QueueEmpty(ctx)
 		}
+		logPhase1End(ctx)
 
 		shutdown.EnableSyncLoggers()
 
-		xrlog.DetailLog.Warning(ctx, "热重启:调用 GoFrame RestartAllServer")
 		if err := ghttp.RestartAllServer(ctx, ""); err != nil {
-			xrlog.DetailLog.Errorf(ctx, "热重启:RestartAllServer 失败,err=%v", err)
+			xrlog.DetailLog.Errorf(ctx, "热更新---RestartAllServer失败,err=%v", err)
 			return
 		}
 
@@ -90,38 +84,32 @@ func runHotRestart() {
 		if enterRestartPhaseFunc != nil {
 			enterRestartPhaseFunc()
 		}
-		xrlog.DetailLog.Warning(ctx, "热重启:RestartAllServer 完成,旧进程开始自行退出")
+		logPhase2Start(ctx)
 
-		exitOldProcess(ctx, hotRestartExitTimeoutSec())
+		tryExitOldProcess()
 	})
 }
 
-// exitOldProcess 旧进程自行关闭 HTTP 并退出,不依赖新进程发消息;超时后强制退出.
-func exitOldProcess(ctx context.Context, exitTimeoutSec int) {
-	xrlog.DetailLog.Warningf(ctx, "热重启:旧进程关闭 HTTP,最长等待=%vs", exitTimeoutSec)
+var oldProcessExitOnce sync.Once
 
-	shutdownCtx, cancel := context.WithTimeout(ctx, time.Duration(exitTimeoutSec)*time.Second)
-	defer cancel()
-
-	if err := ghttp.ShutdownAllServer(shutdownCtx); err != nil {
-		xrlog.DetailLog.Warningf(ctx, "热重启:旧进程 ShutdownAllServer,err=%v", err)
-	}
-
-	if shutdownCtx.Err() != nil {
-		xrlog.DetailLog.Warningf(ctx, "热重启:旧进程退出超时(%vs),强制退出", exitTimeoutSec)
-	} else {
-		xrlog.DetailLog.Info(ctx, "热重启:旧进程 HTTP 已关闭")
-	}
-
-	xrlog.DetailLog.Warning(ctx, "热重启:旧进程成功退出,佛祖保佑,成功重启")
-	os.Exit(0)
-}
-
-// NotifyOldProcessExit 非热重启路径下 HTTP Run 返回时调用(热重启旧进程走 exitOldProcess).
-func NotifyOldProcessExit() {
+// tryExitOldProcess 旧进程固定等待后写第二阶段结束日志并退出;Run 返回与热重启协程均可触发,只执行一次.
+func tryExitOldProcess() {
 	if !oldProcessAfterRestart.Load() {
 		return
 	}
+	oldProcessExitOnce.Do(func() {
+		ctx := gctx.New()
+		time.Sleep(time.Duration(hotRestartExitWaitSec()) * time.Second)
+
+		shutdown.EnableSyncLoggers()
+		logPhase2End(ctx)
+		os.Exit(0)
+	})
+}
+
+// NotifyOldProcessExit httpServer.Run 返回时触发(与热重启协程 tryExitOldProcess 互为补充).
+func NotifyOldProcessExit() {
+	tryExitOldProcess()
 }
 
 func hotRestartAuth() string {
@@ -141,10 +129,10 @@ func hotRestartFlushTimeoutSec() int {
 	return serverCfg.HotRestartFlushTimeout
 }
 
-func hotRestartExitTimeoutSec() int {
+func hotRestartExitWaitSec() int {
 	serverCfg := cfg.GetServerCfg()
 	if serverCfg == nil || serverCfg.HotRestartExitTimeout <= common.Zero {
-		return defaultHotRestartExitTimeout
+		return defaultHotRestartExitWait
 	}
 	return serverCfg.HotRestartExitTimeout
 }
