@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/gogf/gf/v2/container/gqueue"
@@ -17,10 +18,13 @@ import (
 )
 
 const (
-	// CloseTime 服务器关闭时同步间隔
-	CloseTime = 50 * time.Millisecond
 	// syndbPushSlowLogMs Push 超过该阈值(毫秒)时记录慢日志
 	syndbPushSlowLogMs = int64(5)
+)
+
+var (
+	shutdownFlushWatchers atomic.Int32
+	pendingNotify         = make(chan struct{}, 1)
 )
 
 const (
@@ -81,6 +85,7 @@ func AddData(tbName db.TbName, tbCol db.TbCol, colData *ColData) {
 	}
 	start := time.Now()
 	cache.DataQueue.Push(colData)
+	signalPendingData()
 	if costMs := time.Since(start).Milliseconds(); costMs >= syndbPushSlowLogMs {
 		xrlog.DetailLog.Warningf(gctx.New(), "syndb Push慢,table=%v,col=%v,耗时=%vms,id=%v", tbName, tbCol, costMs, colData.IdVal)
 	}
@@ -121,9 +126,21 @@ func PendingQueueSummary() string {
 	return fmt.Sprintf("total=%d,detail=[%s]", total, strings.Join(parts, "; "))
 }
 
+// FlushShutdownOnce 执行一轮 shutdown 刷盘(不等待队列空).
+func FlushShutdownOnce() int {
+	ctx := gctx.New()
+	rows, _ := consumeFlush(ctx, flushReasonShutdown, 0, 0, true)
+	return rows
+}
+
 // FlushUntilIdle 无条件刷盘直到队列空; timeout<=0 表示一直等到空.
 // 返回 true 表示队列已空,false 表示超时仍有数据.
+// 关机/热重启刷盘期间监听 pendingNotify,有新入库立即继续刷盘,不再固定 sleep.
 func FlushUntilIdle(timeout time.Duration) bool {
+	beginShutdownFlushWatch()
+	defer endShutdownFlushWatch()
+	drainPendingNotify()
+
 	ctx := gctx.New()
 	deadline := time.Time{}
 	if timeout > 0 {
@@ -139,7 +156,55 @@ func FlushUntilIdle(timeout time.Duration) bool {
 			xrlog.DetailLog.Warning(ctx, "syndb刷盘超时,仍有未落库数据")
 			return false
 		}
-		time.Sleep(CloseTime)
+		if !allSynCachesIdle() {
+			continue
+		}
+		waitPendingNotify(deadline)
+	}
+}
+
+func beginShutdownFlushWatch() {
+	shutdownFlushWatchers.Add(1)
+}
+
+func endShutdownFlushWatch() {
+	shutdownFlushWatchers.Add(-1)
+}
+
+func signalPendingData() {
+	if shutdownFlushWatchers.Load() <= 0 {
+		return
+	}
+	select {
+	case pendingNotify <- struct{}{}:
+	default:
+	}
+}
+
+func drainPendingNotify() {
+	select {
+	case <-pendingNotify:
+	default:
+	}
+}
+
+func waitPendingNotify(deadline time.Time) {
+	if !deadline.IsZero() && time.Now().After(deadline) {
+		return
+	}
+	if deadline.IsZero() {
+		<-pendingNotify
+		return
+	}
+	remaining := time.Until(deadline)
+	if remaining <= 0 {
+		return
+	}
+	timer := time.NewTimer(remaining)
+	defer timer.Stop()
+	select {
+	case <-pendingNotify:
+	case <-timer.C:
 	}
 }
 

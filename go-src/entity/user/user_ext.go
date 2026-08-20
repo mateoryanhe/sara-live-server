@@ -22,6 +22,7 @@ const (
 	UserExtCancelCode         db.TbCol = "cancel_code"
 	UserExtCancelCodeExpireAt db.TbCol = "cancel_code_expire_at"
 	UserExtRechargeWhitelist  db.TbCol = "recharge_whitelist"
+	UserExtFirstRecharge      db.TbCol = "first_recharge"
 )
 
 // UserExt 用户扩展信息(与用户一一对应,主键ID即用户ID)
@@ -36,6 +37,7 @@ type UserExt struct {
 	CancelCode         string     `gorm:"size:128;default:'';comment:注销码" json:"cancelCode"`
 	CancelCodeExpireAt *time.Time `gorm:"index;comment:注销码过期时间" json:"cancelCodeExpireAt"`
 	RechargeWhitelist  bool       `gorm:"default:0;comment:充值白名单(创建订单后直接到账)" json:"rechargeWhitelist"`
+	FirstRecharge      bool       `gorm:"default:1;comment:是否首次充值(1=未首充,0=已首充)" json:"firstRecharge"`
 }
 
 func NewUserExt(userId uint64) *UserExt {
@@ -46,6 +48,7 @@ func NewUserExt(userId uint64) *UserExt {
 	ret.SetUpdatedAt(now)
 	ret.SetCanRank(true)
 	ret.SetPrettyId(userId)
+	ret.SetFirstRecharge(true)
 	return ret
 }
 
@@ -107,6 +110,15 @@ func (receiver *UserExt) SetRechargeWhitelist(v bool) {
 	receiver.RechargeWhitelist = v
 	receiver.SetUpdatedAt(time.Now())
 	syndb.AddData(TbUserExt, UserExtRechargeWhitelist, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: v,
+	})
+}
+
+func (receiver *UserExt) SetFirstRecharge(v bool) {
+	receiver.FirstRecharge = v
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddData(TbUserExt, UserExtFirstRecharge, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: v,
 	})
@@ -188,6 +200,7 @@ func initUserExt() {
 	syndb.RegQuick(TbUserExt, UserExtCancelCode)
 	syndb.RegQuick(TbUserExt, UserExtCancelCodeExpireAt)
 	syndb.RegQuick(TbUserExt, UserExtRechargeWhitelist)
+	syndb.RegQuick(TbUserExt, UserExtFirstRecharge)
 
 	migrate.AutoMigrate(&UserExt{})
 }

@@ -52,6 +52,7 @@ type GetUserExtRes struct {
 	FollowerCount      uint64     `json:"followerCount" dc:"当前粉丝数"`
 	CancelCode         string     `json:"cancelCode" dc:"注销码"`
 	CancelCodeExpireAt *time.Time `json:"cancelCodeExpireAt" dc:"注销码过期时间"`
+	FirstRecharge      bool       `json:"firstRecharge" dc:"是否首次充值(未首充为true)"`
 }
 
 // UpdateGenderReq 修改性别

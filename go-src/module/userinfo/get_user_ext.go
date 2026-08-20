@@ -29,5 +29,6 @@ func GetUserExt(ctx context.Context, req *userinfodto.GetUserExtReq) (*userinfod
 		FollowerCount:      ext.FollowerCount,
 		CancelCode:         ext.CancelCode,
 		CancelCodeExpireAt: ext.CancelCodeExpireAt,
+		FirstRecharge:      ext.FirstRecharge,
 	}, nil
 }

@@ -20,9 +20,9 @@ import (
 )
 
 const (
-	defaultHotRestartFlushTimeout = 60
-	defaultHotRestartExitWait     = 60
-	defaultHotRestartAuth         = "nGH66S4TjBjQqCKyWJAM"
+	defaultHotRestartPhase1Wait = 60
+	defaultHotRestartExitWait   = 60
+	defaultHotRestartAuth       = "nGH66S4TjBjQqCKyWJAM"
 )
 
 var (
@@ -67,8 +67,9 @@ func runHotRestart() {
 		event.Pub(event.PrepareRestart, nil)
 		xrtimer.Pause()
 
-		idle := syndb.FlushUntilIdle(time.Duration(hotRestartFlushTimeoutSec()) * time.Second)
-		if idle {
+		startPhase1FlushBackground(ctx)
+		time.Sleep(time.Duration(hotRestartPhase1WaitSec()) * time.Second)
+		if syndb.AllCachesIdle() {
 			logPhase1QueueEmpty(ctx)
 		}
 		logPhase1End(ctx)
@@ -103,7 +104,8 @@ func tryExitOldProcess() {
 
 		shutdown.EnableSyncLoggers()
 		logPhase2WaitEndFlush(ctx)
-		if idle := syndb.FlushUntilIdle(time.Duration(hotRestartFlushTimeoutSec()) * time.Second); idle {
+		flushPhase2Once(ctx)
+		if syndb.AllCachesIdle() {
 			logPhase2QueueEmpty(ctx)
 		}
 		logPhase2End(ctx)
@@ -125,10 +127,10 @@ func hotRestartAuth() string {
 	return defaultHotRestartAuth
 }
 
-func hotRestartFlushTimeoutSec() int {
+func hotRestartPhase1WaitSec() int {
 	serverCfg := cfg.GetServerCfg()
 	if serverCfg == nil || serverCfg.HotRestartFlushTimeout <= common.Zero {
-		return defaultHotRestartFlushTimeout
+		return defaultHotRestartPhase1Wait
 	}
 	return serverCfg.HotRestartFlushTimeout
 }

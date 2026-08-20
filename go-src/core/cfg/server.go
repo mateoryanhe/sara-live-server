@@ -24,9 +24,9 @@ type XRServerCfg struct {
 	KeyFile  string
 	//服务器id
 	Id int64
-	// 热重启刷盘最长等待(秒),Restart 前
+	// 热重启第一阶段最长等待(秒),到点即 Restart,与后台刷盘并行;队列是否空不影响
 	HotRestartFlushTimeout int
-	// 热重启后旧进程固定等待(秒),RestartAllServer 完成后等待该时长再退出
+	// 热重启后旧进程固定等待(秒),RestartAllServer 完成后等待该时长再强制退出
 	HotRestartExitTimeout int
 }
 

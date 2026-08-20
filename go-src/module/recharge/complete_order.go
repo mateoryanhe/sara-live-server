@@ -8,6 +8,7 @@ import (
 	"xr-game-server/constants/currency"
 	"xr-game-server/core/event"
 	"xr-game-server/dao/rechargeorderdao"
+	"xr-game-server/dao/userinfodao"
 	"xr-game-server/entity/recharge"
 	"xr-game-server/errercode"
 	"xr-game-server/gameevent"
@@ -51,6 +52,7 @@ func completeOrder(o *entity.RechargeOrder, reason currency.Reason) (float64, er
 	order.SetStatus(entity.RechargeOrderStatusCompleted)
 	order.SetPaidAt(paidAt)
 	order.SetUpdatedAt(paidAt)
+	userinfodao.MarkFirstRechargeDone(order.UserId)
 
 	CancelRechargeOrderTimeout(order.ID)
 	event.Pub(gameevent.RechargeArrivedEvent, order)

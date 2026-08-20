@@ -63,6 +63,18 @@ func IsRechargeWhitelist(userId uint64) bool {
 	return GetUserExtByUserId(userId).RechargeWhitelist
 }
 
+// MarkFirstRechargeDone 首充到账后标记为非首次充值.
+func MarkFirstRechargeDone(userId uint64) {
+	if userId == 0 {
+		return
+	}
+	ext := GetUserExtByUserId(userId)
+	if !ext.FirstRecharge {
+		return
+	}
+	ext.SetFirstRecharge(false)
+}
+
 // SaveRegisterInfo 保存注册时的包名与版本号(可为空)
 func SaveRegisterInfo(userId uint64, info *entity.DeviceInfo) {
 	if userId == 0 || info == nil {
