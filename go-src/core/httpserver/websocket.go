@@ -79,10 +79,7 @@ func InitWebsocket() {
 
 	httpServer.BindHandler(Ws, func(r *ghttp.Request) {
 		if restartClosing.Load() {
-			hotrestart.LogPhase2HTTPRequestClosed(r.Context(), r.RequestURI, r.GetClientIp())
-			r.Response.Header().Set("Connection", "close")
-			r.Exit()
-			return
+			hotrestart.LogPhase2HTTPRequest(r.Context(), r.RequestURI, r.GetClientIp())
 		}
 		ws, err := wsUpGrader.Upgrade(r.Response.Writer, r.Request, nil)
 		if err != nil {

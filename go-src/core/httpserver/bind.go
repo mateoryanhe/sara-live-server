@@ -60,7 +60,7 @@ func RegCMSCustomizeRes(prefix string, handlerOrObject ...interface{}) {
 	})
 }
 
-// RegInternalHandler 绑定内部运维接口,不走 canDo 拦截.
+// RegInternalHandler 绑定内部运维接口,不走 middlewareLogReq.
 func RegInternalHandler(pattern string, handler ghttp.HandlerFunc) {
 	httpServer.BindHandler("GET:"+pattern, handler)
 	httpServer.BindHandler("POST:"+pattern, handler)

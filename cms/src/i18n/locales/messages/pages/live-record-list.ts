@@ -3,6 +3,8 @@ import {definePageMessages} from './_define'
 const zh = {
   anchorId: '主播ID',
   enterAnchorId: '请输入主播ID',
+  anchorFilter: '主播',
+  searchAnchor: '搜索主播（ID/昵称/手机号/工会名称）',
   endDate: '结束日期',
   startDate: '开始日期',
   dateRangeSeparator: '至',
@@ -28,6 +30,8 @@ const zh = {
 const en: Record<keyof typeof zh, string> = {
   anchorId: 'Anchor ID',
   enterAnchorId: 'Enter anchor ID',
+  anchorFilter: 'Anchor',
+  searchAnchor: 'Search anchor (ID/nickname/phone/guild name)',
   endDate: 'End date',
   startDate: 'Start date',
   dateRangeSeparator: 'to',
@@ -53,6 +57,8 @@ const en: Record<keyof typeof zh, string> = {
 const es: Record<keyof typeof zh, string> = {
   anchorId: 'ID anfitrión',
   enterAnchorId: 'Introduzca ID anfitrión',
+  anchorFilter: 'Anfitrión',
+  searchAnchor: 'Buscar anfitrión (ID/apodo/teléfono/gremio)',
   endDate: 'Fecha fin',
   startDate: 'Fecha inicio',
   dateRangeSeparator: 'a',
@@ -78,6 +84,8 @@ const es: Record<keyof typeof zh, string> = {
 const pt: Record<keyof typeof zh, string> = {
   anchorId: 'ID apresentador',
   enterAnchorId: 'Digite ID apresentador',
+  anchorFilter: 'Apresentador',
+  searchAnchor: 'Buscar apresentador (ID/apelido/telefone/guilda)',
   endDate: 'Data fim',
   startDate: 'Data início',
   dateRangeSeparator: 'até',
@@ -103,6 +111,8 @@ const pt: Record<keyof typeof zh, string> = {
 const hi: Record<keyof typeof zh, string> = {
   anchorId: 'एंकर ID',
   enterAnchorId: 'एंकर ID दर्ज करें',
+  anchorFilter: 'एंकर',
+  searchAnchor: 'एंकर खोजें (ID/उपनाम/फ़ोन/गिल्ड नाम)',
   endDate: 'समाप्ति तिथि',
   startDate: 'प्रारंभ तिथि',
   dateRangeSeparator: 'से',
@@ -128,6 +138,8 @@ const hi: Record<keyof typeof zh, string> = {
 const id: Record<keyof typeof zh, string> = {
   anchorId: 'ID host',
   enterAnchorId: 'Masukkan ID host',
+  anchorFilter: 'Host',
+  searchAnchor: 'Cari host (ID/nama/telepon/nama guild)',
   endDate: 'Tanggal akhir',
   startDate: 'Tanggal mulai',
   dateRangeSeparator: 's/d',

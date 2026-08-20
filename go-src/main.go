@@ -3,7 +3,6 @@ package main
 import (
 	"xr-game-server/controller"
 	"xr-game-server/core"
-	"xr-game-server/core/httpserver"
 	"xr-game-server/core/shutdown"
 	"xr-game-server/core/xrpool"
 	"xr-game-server/dao"
@@ -27,7 +26,6 @@ func main() {
 	module.Init()
 	//httpserver服务器模块启动
 	controller.Init()
-	httpserver.Ready()
-	//开始监听程序退出(阻塞 main; 发版与关机均走热重启/GF 信号处理)
+	//阻塞 main,等待进程退出(GF 信号处理与热重启).
 	shutdown.ListenShutdown()
 }

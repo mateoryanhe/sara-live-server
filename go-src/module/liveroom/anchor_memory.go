@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"xr-game-server/dao/accountdao"
+	"xr-game-server/dao/guilddao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/accountdto"
@@ -15,7 +16,7 @@ import (
 )
 
 func queryAnchorListFromMemory(req *accountdto.QueryAnchorListReq) (int, []*accountdto.AnchorListItem) {
-	rooms := filterAnchorRooms(getRoomListCache(), req.Key, req.GuildId, req.PlatformOnly, req.LiveStatus)
+	rooms := filterAnchorRooms(getRoomListCache(), req.Key, req.GuildId, req.PlatformOnly, req.GuildOnly, req.LiveStatus)
 	total := len(rooms)
 	pageRooms := paginateAnchorRooms(rooms, req.PageIndex, req.PageSize)
 	ret := make([]*accountdto.AnchorListItem, 0, len(pageRooms))
@@ -24,12 +25,52 @@ func queryAnchorListFromMemory(req *accountdto.QueryAnchorListReq) (int, []*acco
 			ret = append(ret, item)
 		}
 	}
+	fillAnchorListGuildNames(ret)
 	return total, ret
 }
 
-func filterAnchorRooms(rooms []*liveentity.LiveRoom, key string, guildId uint64, platformOnly bool, liveStatus *uint8) []*liveentity.LiveRoom {
+func fillAnchorListGuildNames(items []*accountdto.AnchorListItem) {
+	if len(items) == 0 {
+		return
+	}
+	guildIds := make([]uint64, 0, len(items))
+	for _, item := range items {
+		if item != nil && item.GuildId > 0 {
+			guildIds = append(guildIds, item.GuildId)
+		}
+	}
+	guildNameMap := guilddao.GetNameMapByIds(guildIds)
+	if guildNameMap == nil {
+		return
+	}
+	for _, item := range items {
+		if item != nil && item.GuildId > 0 {
+			item.GuildName = guildNameMap[item.GuildId]
+		}
+	}
+}
+
+func collectRoomGuildIds(rooms []*liveentity.LiveRoom) []uint64 {
+	guildIdSet := make(map[uint64]struct{})
+	for _, room := range rooms {
+		if room != nil && room.GuildId > 0 {
+			guildIdSet[room.GuildId] = struct{}{}
+		}
+	}
+	if len(guildIdSet) == 0 {
+		return nil
+	}
+	guildIds := make([]uint64, 0, len(guildIdSet))
+	for guildId := range guildIdSet {
+		guildIds = append(guildIds, guildId)
+	}
+	return guildIds
+}
+
+func filterAnchorRooms(rooms []*liveentity.LiveRoom, key string, guildId uint64, platformOnly, guildOnly bool, liveStatus *uint8) []*liveentity.LiveRoom {
 	key = strings.TrimSpace(key)
 	likeKey := strings.ToLower(key)
+	guildNameMap := guilddao.GetNameMapByIds(collectRoomGuildIds(rooms))
 	filtered := make([]*liveentity.LiveRoom, 0, len(rooms))
 	for _, room := range rooms {
 		if room == nil || !isRegularAnchorRoom(room) {
@@ -37,6 +78,10 @@ func filterAnchorRooms(rooms []*liveentity.LiveRoom, key string, guildId uint64,
 		}
 		if platformOnly {
 			if room.GuildId != 0 {
+				continue
+			}
+		} else if guildOnly {
+			if room.GuildId == 0 {
 				continue
 			}
 		} else if guildId > 0 {
@@ -47,7 +92,7 @@ func filterAnchorRooms(rooms []*liveentity.LiveRoom, key string, guildId uint64,
 		if liveStatus != nil && roomLiveStatus(room) != *liveStatus {
 			continue
 		}
-		if key != "" && !matchAnchorKey(room.ID, key, likeKey) {
+		if key != "" && !matchAnchorKey(room.ID, room.GuildId, key, likeKey, guildNameMap) {
 			continue
 		}
 		filtered = append(filtered, room)
@@ -68,7 +113,7 @@ func isRegularAnchorRoom(room *liveentity.LiveRoom) bool {
 	return user != nil && (user.UserType == userentity.UserTypeAnchor || user.UserType == userentity.UserTypeSeniorAnchor)
 }
 
-func matchAnchorKey(id uint64, key, likeKey string) bool {
+func matchAnchorKey(id, guildId uint64, key, likeKey string, guildNameMap map[uint64]string) bool {
 	if strings.Contains(strconv.FormatUint(id, 10), key) {
 		return true
 	}
@@ -82,7 +127,13 @@ func matchAnchorKey(id uint64, key, likeKey string) bool {
 	if strings.Contains(user.Phone, key) {
 		return true
 	}
-	return strings.Contains(strings.ToLower(user.ShareCode), likeKey)
+	if strings.Contains(strings.ToLower(user.ShareCode), likeKey) {
+		return true
+	}
+	if guildId > 0 && guildNameMap != nil {
+		return strings.Contains(strings.ToLower(guildNameMap[guildId]), likeKey)
+	}
+	return false
 }
 
 func paginateAnchorRooms(rooms []*liveentity.LiveRoom, pageIndex, pageSize int) []*liveentity.LiveRoom {

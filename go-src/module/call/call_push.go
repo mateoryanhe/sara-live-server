@@ -72,12 +72,12 @@ func pushCallAccepted(callerId, receiverId, orderId uint64, channelName string, 
 
 const liveRoomCallAnchorAcceptedAudienceMessage = "主播开始接听视频通话"
 
-func pushLiveRoomCallAcceptedToAudience(order *entity.CallOrder) {
+func buildLiveRoomCallAnchorAcceptedAudienceItem(order *entity.CallOrder) *calldto.CallAnchorAcceptedAudiencePushItem {
 	if order == nil || order.Source != entity.CallOrderSourceLiveRoom {
-		return
+		return nil
 	}
 	if order.CallType != entity.CallOrderTypeVideo {
-		return
+		return nil
 	}
 
 	roomId := order.ReceiverId
@@ -93,7 +93,26 @@ func pushLiveRoomCallAcceptedToAudience(order *entity.CallOrder) {
 		item.AnchorNickname = u.Nickname
 		item.AnchorAvatar = upload.ResolveAvatarUrlForUser(roomId, u.Avatar)
 	}
-	liveroom.PushToRoomAudience(roomId, cmd.LiveRoomCallAnchorAcceptedAudience, item)
+	return item
+}
+
+func pushLiveRoomCallAcceptedToAudienceUser(userId uint64, order *entity.CallOrder) {
+	if userId == 0 {
+		return
+	}
+	item := buildLiveRoomCallAnchorAcceptedAudienceItem(order)
+	if item == nil {
+		return
+	}
+	push.Data(userId, cmd.LiveRoomCallAnchorAcceptedAudience, item)
+}
+
+func pushLiveRoomCallAcceptedToAudience(order *entity.CallOrder) {
+	item := buildLiveRoomCallAnchorAcceptedAudienceItem(order)
+	if item == nil {
+		return
+	}
+	liveroom.PushToRoomAudience(order.ReceiverId, cmd.LiveRoomCallAnchorAcceptedAudience, item)
 }
 
 const liveRoomCallEndedMessage = "通话已结束"

@@ -1,6 +1,7 @@
 package liveroomdao
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -10,11 +11,52 @@ import (
 
 // LiveRecordCMSListFilter CMS直播记录查询条件
 type LiveRecordCMSListFilter struct {
-	AnchorId  uint64
+	AnchorIds []uint64
 	StartTime int64
 	EndTime   int64
 	PageIndex int
 	PageSize  int
+}
+
+func (f *LiveRecordCMSListFilter) anchorIds() []uint64 {
+	if f == nil {
+		return nil
+	}
+	return f.AnchorIds
+}
+
+func parseUint64AnchorId(val string) uint64 {
+	if val == "" {
+		return 0
+	}
+	id, err := strconv.ParseUint(val, 10, 64)
+	if err != nil {
+		return 0
+	}
+	return id
+}
+
+// ParseLiveRecordAnchorIds 合并直播记录查询中的主播ID参数(兼容单选与多选)
+func ParseLiveRecordAnchorIds(anchorId, platformAnchorId, guildAnchorId string, anchorIds []string) []uint64 {
+	seen := make(map[uint64]struct{})
+	ret := make([]uint64, 0, len(anchorIds)+3)
+	add := func(id uint64) {
+		if id == 0 {
+			return
+		}
+		if _, ok := seen[id]; ok {
+			return
+		}
+		seen[id] = struct{}{}
+		ret = append(ret, id)
+	}
+	add(parseUint64AnchorId(anchorId))
+	add(parseUint64AnchorId(platformAnchorId))
+	add(parseUint64AnchorId(guildAnchorId))
+	for _, val := range anchorIds {
+		add(parseUint64AnchorId(val))
+	}
+	return ret
 }
 
 func mergeLiveRecordsFromCache(rows []*entity.LiveRecord) []*entity.LiveRecord {
@@ -45,8 +87,8 @@ func LiveRecordCMSList(f *LiveRecordCMSListFilter) (int, []*entity.LiveRecord) {
 	}
 	ctx := gctx.New()
 	m := g.Model(string(entity.TbLiveRecord)).Ctx(ctx)
-	if f.AnchorId > 0 {
-		m = m.Where(string(entity.LiveRecordAnchorId)+" = ?", f.AnchorId)
+	if anchorIds := f.anchorIds(); len(anchorIds) > 0 {
+		m = m.Where(string(entity.LiveRecordAnchorId)+" IN (?)", anchorIds)
 	}
 	if f.StartTime > 0 {
 		m = m.Where(string(entity.LiveRecordStartTime)+" >= ?", time.Unix(f.StartTime, 0))

@@ -74,9 +74,12 @@ type CMSExportHeadersPayload struct {
 
 type CMSExportLiveRecordPayload struct {
 	CMSExportHeadersPayload
-	AnchorId  string `json:"anchorId"`
-	StartTime int64  `json:"startTime"`
-	EndTime   int64  `json:"endTime"`
+	AnchorId         string   `json:"anchorId"`
+	PlatformAnchorId string   `json:"platformAnchorId"`
+	GuildAnchorId    string   `json:"guildAnchorId"`
+	AnchorIds        []string `json:"anchorIds"`
+	StartTime        int64    `json:"startTime"`
+	EndTime          int64    `json:"endTime"`
 }
 
 type CMSExportLiveRevenueLogPayload struct {

@@ -12,6 +12,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AnchorRemoteSelect: typeof import('./src/components/AnchorRemoteSelect.vue')['default']
     ElAlert: typeof import('element-plus/es')['ElAlert']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElButton: typeof import('element-plus/es')['ElButton']
@@ -77,6 +78,7 @@ declare module 'vue' {
 
 // For TSX support
 declare global {
+  const AnchorRemoteSelect: typeof import('./src/components/AnchorRemoteSelect.vue')['default']
   const ElAlert: typeof import('element-plus/es')['ElAlert']
   const ElAside: typeof import('element-plus/es')['ElAside']
   const ElButton: typeof import('element-plus/es')['ElButton']

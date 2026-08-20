@@ -8,8 +8,11 @@
       </template>
 
       <el-form :model="searchForm" class="search-form" inline label-width="100px">
-        <el-form-item :label="t('pages.liveRecordList.anchorId')">
-          <el-input v-model="searchForm.anchorId" clearable :placeholder="t('pages.liveRecordList.enterAnchorId')"/>
+        <el-form-item :label="t('pages.liveRecordList.anchorFilter')">
+          <AnchorRemoteSelect
+              v-model="searchForm.anchorIds"
+              :placeholder="t('pages.liveRecordList.searchAnchor')"
+          />
         </el-form-item>
         <el-form-item :label="t('pages.liveRecordList.startDate')">
           <el-date-picker
@@ -118,7 +121,7 @@ const loading = ref(false)
 const tableData = ref<LiveRecordItem[]>([])
 
 const searchForm = reactive({
-  anchorId: '',
+  anchorIds: [] as string[],
   startDate: '',
   endDate: '',
 })
@@ -140,13 +143,13 @@ const toDayEndUnix = (dateStr: string): number => {
 const buildQueryParams = () => ({
   pageIndex: pagination.pageIndex,
   pageSize: pagination.pageSize,
-  anchorId: searchForm.anchorId.trim(),
+  anchorIds: [...searchForm.anchorIds],
   startTime: searchForm.startDate ? toDayStartUnix(searchForm.startDate) : 0,
   endTime: searchForm.endDate ? toDayEndUnix(searchForm.endDate) : 0,
 })
 
 const buildFilterParams = () => ({
-  anchorId: searchForm.anchorId.trim(),
+  anchorIds: [...searchForm.anchorIds],
   startTime: searchForm.startDate ? toDayStartUnix(searchForm.startDate) : 0,
   endTime: searchForm.endDate ? toDayEndUnix(searchForm.endDate) : 0,
 })
@@ -171,7 +174,7 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
-  searchForm.anchorId = ''
+  searchForm.anchorIds = []
   searchForm.startDate = ''
   searchForm.endDate = ''
   pagination.pageIndex = 1

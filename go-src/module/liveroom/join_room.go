@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"xr-game-server/core/event"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
@@ -80,6 +81,12 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 		}
 	}
 	broadcastAudienceJoin(room.ID, userId, getLenForRoom(room.ID))
+	if userId != room.ID {
+		event.Pub(event.LiveRoomAudienceJoined, &liveroomdto.AudienceJoinedEvent{
+			RoomId: room.ID,
+			UserId: userId,
+		})
+	}
 	// 直播中且非主播本人:有效观众(单场去重 + 日/周/月跨直播间去重)
 	if room.LiveRecordId > 0 && userId != req.RoomId {
 		stat.RecordValidAudience(userId, time.Now())

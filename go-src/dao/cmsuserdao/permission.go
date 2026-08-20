@@ -92,6 +92,8 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/cmsExport/submitJob"}
 	case "/cmsExport/deleteExport":
 		return []string{"/cmsExport/submitJob"}
+	case "/account/getAnchorList":
+		return []string{"/liveRecord/cmsLiveRecordList", "/account/getAnchorList"}
 	default:
 		return nil
 	}

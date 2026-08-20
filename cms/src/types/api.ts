@@ -240,6 +240,7 @@ export interface QueryAnchorListReq extends PageQuery {
     key?: string
     guildId?: string | number
     platformOnly?: boolean
+    guildOnly?: boolean
     liveStatus?: number
 }
 
@@ -273,6 +274,7 @@ export interface AnchorListItem {
     /** 1=普通主播, 7=高级主播 */
     userType?: number
     guildId?: string | number
+    guildName?: string
     ip?: string
     roomTitle?: string
     roomId?: string
@@ -1740,6 +1742,7 @@ export interface LiveRevenueLogItem {
 
 export interface LiveRecordQuery extends PageQuery {
     anchorId?: string
+    anchorIds?: string[]
     startTime?: number
     endTime?: number
 }

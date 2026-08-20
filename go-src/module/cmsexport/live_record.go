@@ -15,10 +15,9 @@ func exportLiveRecordCSV(ctx context.Context, payload json.RawMessage, onProgres
 	if err := json.Unmarshal(payload, &req); err != nil {
 		return nil, err
 	}
-	anchorId := parseUint64Filter(req.AnchorId)
 	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 		total, rows := liveroomdao.LiveRecordCMSList(&liveroomdao.LiveRecordCMSListFilter{
-			AnchorId:  anchorId,
+			AnchorIds: liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
 			StartTime: req.StartTime,
 			EndTime:   req.EndTime,
 			PageIndex: pageIndex,
