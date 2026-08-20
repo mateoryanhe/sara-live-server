@@ -3,7 +3,7 @@ package entity
 import (
 	"xr-game-server/core/migrate"
 	activityentity "xr-game-server/entity/activity"
-	callentity "xr-game-server/entity/cal
+	callentity "xr-game-server/entity/call"
 	cmsentity "xr-game-server/entity/cms"
 	gameentity "xr-game-server/entity/game"
 	liveentity "xr-game-server/entity/live"
