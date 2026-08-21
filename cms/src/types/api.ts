@@ -595,6 +595,8 @@ export interface BatchBotAnchorLiveRes {
 export interface CurrencyLogQuery extends PageQuery {
     userId?: string
     currencyType: number
+    startTime?: number
+    endTime?: number
 }
 
 export interface CurrencyLogItem {

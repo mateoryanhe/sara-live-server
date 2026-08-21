@@ -1,6 +1,8 @@
 package currencylogdao
 
 import (
+	"time"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/entity/user"
@@ -10,6 +12,8 @@ import (
 type CMSListFilter struct {
 	UserId       uint64
 	CurrencyType uint8
+	StartTime    int64
+	EndTime      int64
 	PageIndex    int
 	PageSize     int
 }
@@ -33,6 +37,12 @@ func CMSList(f *CMSListFilter) (int, []*entity.CurrencyLog) {
 		Where(string(entity.CurrencyLogType)+" = ?", f.CurrencyType)
 	if f.UserId > 0 {
 		m = m.Where(string(entity.CurrencyLogUserId)+" = ?", f.UserId)
+	}
+	if f.StartTime > 0 {
+		m = m.Where("created_at >= ?", time.Unix(f.StartTime, 0))
+	}
+	if f.EndTime > 0 {
+		m = m.Where("created_at <= ?", time.Unix(f.EndTime, 0))
 	}
 	total, err := m.Clone().Count()
 	if err != nil {

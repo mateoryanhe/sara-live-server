@@ -26,6 +26,10 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'UserList:setAnchorType': '/account/setPlatformAnchorType',
     'UserList:openGame': '/gamePlatform/gameShelfList',
     UserDetail: '/account/getUserDetail',
+    'UserDetail:goldLog': '/currencyLog/cmsCurrencyLogList',
+    'UserDetail:exportGoldLog': '/cmsExport/submitJob',
+    'UserDetail:diamondLog': '/currencyLog/cmsCurrencyLogList',
+    'UserDetail:exportDiamondLog': '/cmsExport/submitJob',
 
     AnchorListManagement: '/account/getAnchorList',
     'AnchorListManagement:view': '/account/getAnchorList',
@@ -73,6 +77,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     RechargeOrderList: '/rechargeOrder/rechargeOrderList',
     'RechargeOrderList:view': '/rechargeOrder/rechargeOrderList',
     'RechargeOrderList:search': '/rechargeOrder/rechargeOrderList',
+    'RechargeOrderList:viewUserDetail': '/account/getUserDetail',
     'RechargeOrderList:manualCreateOrder': '/rechargeOrder/manualCreateOrder',
     'RechargeOrderList:manualRecharge': '/rechargeOrder/manualRecharge',
 

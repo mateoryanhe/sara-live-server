@@ -35,6 +35,15 @@
       </el-form>
 
       <el-table v-loading="loading" :data="tableData" style="width: 100%">
+        <el-table-column fixed label="#" type="index" width="55" :index="formatRowIndex"/>
+        <el-table-column :label="t('menu.UserDetail')" width="110">
+          <template #default="{ row }">
+            <el-button v-if="canViewUserDetail" link type="primary" @click="openUserDetail(row.id)">
+              {{ t('pages.userList.viewDetail') }}
+            </el-button>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
         <el-table-column :label="t('common.userId')" prop="id" width="180">
           <template #default="{ row }">
             <el-button v-if="canViewDetail" link type="primary" @click="openDetail(row)">
@@ -163,14 +172,6 @@
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.profileUpdatedAt')" prop="createdAt" width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
-        </el-table-column>
-        <el-table-column :label="t('menu.UserDetail')" width="110">
-          <template #default="{ row }">
-            <el-button v-if="canViewUserDetail" link type="primary" @click="openUserDetail(row.id)">
-              {{ t('pages.userList.viewDetail') }}
-            </el-button>
-            <span v-else>-</span>
-          </template>
         </el-table-column>
         <el-table-column fixed="right" :label="t('common.actions')" width="280">
           <template #default="{ row }">
@@ -565,6 +566,9 @@ const handleSizeChange = (size: number) => {
   fetchList()
 
 }
+
+const formatRowIndex = (index: number) =>
+    (pagination.pageIndex - 1) * pagination.pageSize + index + 1
 
 const resetBanForm = () => {
 

@@ -30,6 +30,8 @@ func onCurrencyChange(val any) {
 		data.Before,
 		data.After,
 		data.Reason,
+		data.GameName,
+		data.GameCategory,
 	)
 	g.Log().Debugf(context.Background(),
 		"currency log userId=%d type=%d action=%d amount=%v before=%v after=%v reason=%d(%s)",
@@ -43,15 +45,17 @@ func GetByUserId(ctx context.Context, req *userinfodto.GetCurrencyLogReq) (*user
 	items := make([]*userinfodto.CurrencyLogItem, 0, len(list))
 	for _, v := range list {
 		items = append(items, &userinfodto.CurrencyLogItem{
-			Id:       v.ID,
-			UserId:   v.UserId,
-			Type:     v.Type,
-			Action:   v.Action,
-			Amount:   v.Amount,
-			Before:   v.Before,
-			After:    v.After,
-			Reason:   v.Reason,
-			CreateAt: v.CreatedAt.Unix(),
+			Id:           v.ID,
+			UserId:       v.UserId,
+			Type:         v.Type,
+			Action:       v.Action,
+			Amount:       v.Amount,
+			Before:       v.Before,
+			After:        v.After,
+			Reason:       v.Reason,
+			GameName:     v.GameName,
+			GameCategory: v.GameCategory,
+			CreateAt:     v.CreatedAt.Unix(),
 		})
 	}
 	return &userinfodto.GetCurrencyLogRes{

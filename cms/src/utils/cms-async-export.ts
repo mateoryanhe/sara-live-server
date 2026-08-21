@@ -101,3 +101,4 @@ export const CMS_EXPORT_TYPE_MY_GUILD_ANCHOR_INCOME_SETTLEMENT_LOG = 'myGuildAnc
 export const CMS_EXPORT_TYPE_ANCHOR_DAILY_EFFECTIVE_LIVE = 'anchorDailyEffectiveLive'
 export const CMS_EXPORT_TYPE_GUILD_DAILY_EFFECTIVE_LIVE = 'guildDailyEffectiveLive'
 export const CMS_EXPORT_TYPE_GUILD_ANCHOR_DAILY_EFFECTIVE_LIVE = 'guildAnchorDailyEffectiveLive'
+export const CMS_EXPORT_TYPE_CURRENCY_LOG = 'currencyLog'

@@ -120,7 +120,7 @@ func toUserExtDetailItem(ext *userentity.UserExt) *accountdto.UserExtDetailItem 
 
 func toUserCumulativeStatDetailItem(stat *userentity.UserCumulativeStat) *accountdto.UserCumulativeStatDetailItem {
 	if stat == nil || stat.ID == 0 {
-		return nil
+		return &accountdto.UserCumulativeStatDetailItem{}
 	}
 	item := &accountdto.UserCumulativeStatDetailItem{
 		TotalRecharge:       stat.TotalRecharge,

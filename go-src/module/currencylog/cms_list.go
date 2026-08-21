@@ -27,15 +27,17 @@ func toCMSItem(v *entity.CurrencyLog) *currencylogdto.CMSCurrencyLogItem {
 		return nil
 	}
 	item := &currencylogdto.CMSCurrencyLogItem{
-		Id:         v.ID,
-		UserId:     v.UserId,
-		Action:     v.Action,
-		Amount:     v.Amount,
-		Before:     v.Before,
-		After:      v.After,
-		Reason:     v.Reason,
-		ReasonText: currency.Reason(v.Reason).Text(currency.LangZHCN),
-		CreatedAt:  &v.CreatedAt,
+		Id:           v.ID,
+		UserId:       v.UserId,
+		Action:       v.Action,
+		Amount:       v.Amount,
+		Before:       v.Before,
+		After:        v.After,
+		Reason:       v.Reason,
+		ReasonText:   currency.Reason(v.Reason).Text(currency.LangZHCN),
+		GameName:     v.GameName,
+		GameCategory: v.GameCategory,
+		CreatedAt:    &v.CreatedAt,
 	}
 	if u := userinfodao.GetUserInfoByUserId(v.UserId); u != nil {
 		item.Nickname = u.Nickname
@@ -48,6 +50,8 @@ func GetCMSList(_ context.Context, req *currencylogdto.CMSCurrencyLogListReq) (*
 	total, rows := currencylogdao.CMSList(&currencylogdao.CMSListFilter{
 		UserId:       parseUserIdFilter(req.UserId),
 		CurrencyType: req.CurrencyType,
+		StartTime:    req.StartTime,
+		EndTime:      req.EndTime,
 		PageIndex:    req.PageIndex,
 		PageSize:     req.PageSize,
 	})

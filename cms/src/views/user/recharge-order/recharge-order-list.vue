@@ -45,8 +45,16 @@
       <div class="list-summary">{{ t('pages.rechargeOrderList.totalOrders', {count: total}) }}</div>
 
       <el-table v-loading="loading" :data="tableData" style="width: 100%">
+        <el-table-column fixed label="#" type="index" width="55" :index="formatRowIndex"/>
         <el-table-column :label="t('pages.rechargeOrderList.orderId')" min-width="180" prop="id"/>
-        <el-table-column :label="t('common.userId')" min-width="180" prop="userId"/>
+        <el-table-column :label="t('common.userId')" min-width="180" prop="userId">
+          <template #default="{ row }">
+            <el-button v-if="canViewUserDetail && row.userId" link type="primary" @click="openUserDetail(row.userId)">
+              {{ row.userId }}
+            </el-button>
+            <span v-else>{{ row.userId || '-' }}</span>
+          </template>
+        </el-table-column>
         <el-table-column :label="t('pages.rechargeOrderList.userNickname')" min-width="140" prop="nickname">
           <template #default="{ row }">{{ row.nickname || '-' }}</template>
         </el-table-column>
@@ -140,6 +148,7 @@ import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'elemen
 import {rechargeOrderApi} from '@/api'
 import type {RechargeOrder} from '@/types/api.ts'
 import {usePagePermission} from '@/composables/usePagePermission'
+import {useUserDetailNav} from '@/composables/useUserDetailNav'
 import {formatAmount, NUMBER_INPUT_DECIMALS} from '@/utils/number-format'
 
 interface SearchForm {
@@ -151,6 +160,7 @@ interface SearchForm {
 
 const {t} = useI18n()
 const {can} = usePagePermission('RechargeOrderList')
+const {canViewUserDetail, openUserDetail} = useUserDetailNav('RechargeOrderList')
 const canManualCreateOrder = computed(() => can('manualCreateOrder'))
 const canManualRecharge = computed(() => can('manualRecharge'))
 const loading = ref(false)
@@ -238,6 +248,9 @@ const handleCurrentChange = (page: number) => {
   currentPage.value = page
   fetchOrderList()
 }
+
+const formatRowIndex = (index: number) =>
+    (currentPage.value - 1) * pageSize.value + index + 1
 
 const afterManualRechargeSuccess = async (after: number) => {
   ElMessage.success(t('pages.rechargeOrderList.manualRechargeSuccess', {balance: formatAmount(after)}))

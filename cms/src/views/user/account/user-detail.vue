@@ -128,32 +128,31 @@
           </el-tab-pane>
 
           <el-tab-pane :label="t('pages.userList.tabCumulativeStat')" name="cumulativeStat">
-            <el-empty v-if="!detail.cumulativeStat" :description="t('pages.userList.noData')"/>
-            <div v-else>
+            <div>
               <div class="wallet-panel">
                 <div class="wallet-balance-card stat-recharge">
                   <div class="wallet-balance-label">{{ t('pages.userList.totalRecharge') }}</div>
-                  <div class="wallet-balance-value">{{ formatWalletBalance(detail.cumulativeStat.totalRecharge) }}</div>
+                  <div class="wallet-balance-value">{{ formatWalletBalance(cumulativeStat.totalRecharge) }}</div>
                 </div>
                 <div class="wallet-balance-card stat-withdraw">
                   <div class="wallet-balance-label">{{ t('pages.userList.totalWithdraw') }}</div>
-                  <div class="wallet-balance-value">{{ formatWalletBalance(detail.cumulativeStat.totalWithdraw) }}</div>
+                  <div class="wallet-balance-value">{{ formatWalletBalance(cumulativeStat.totalWithdraw) }}</div>
                 </div>
                 <div class="wallet-balance-card stat-pay-count">
                   <div class="wallet-balance-label">{{ t('pages.userList.totalPayCount') }}</div>
-                  <div class="wallet-balance-value">{{ formatStatCount(detail.cumulativeStat.totalPayCount) }}</div>
+                  <div class="wallet-balance-value">{{ formatStatCount(cumulativeStat.totalPayCount) }}</div>
                 </div>
                 <div class="wallet-balance-card stat-diamond-consume">
                   <div class="wallet-balance-label">{{ t('pages.userList.totalDiamondConsume') }}</div>
-                  <div class="wallet-balance-value">{{ formatWalletBalance(detail.cumulativeStat.totalDiamondConsume) }}</div>
+                  <div class="wallet-balance-value">{{ formatWalletBalance(cumulativeStat.totalDiamondConsume) }}</div>
                 </div>
                 <div class="wallet-balance-card stat-gold-consume">
                   <div class="wallet-balance-label">{{ t('pages.userList.totalGoldConsume') }}</div>
-                  <div class="wallet-balance-value">{{ formatWalletBalance(detail.cumulativeStat.totalGoldConsume) }}</div>
+                  <div class="wallet-balance-value">{{ formatWalletBalance(cumulativeStat.totalGoldConsume) }}</div>
                 </div>
               </div>
               <div class="stat-updated-at">
-                {{ t('pages.userList.statUpdatedAt') }}：{{ formatDate(detail.cumulativeStat.updatedAt) }}
+                {{ t('pages.userList.statUpdatedAt') }}：{{ formatDate(cumulativeStat.updatedAt) }}
               </div>
             </div>
           </el-tab-pane>
@@ -170,6 +169,24 @@
               <el-descriptions-item :label="t('pages.userList.deviceUpdatedAt')">{{ formatDate(detail.loginDevice.updatedAt) }}</el-descriptions-item>
             </el-descriptions>
           </el-tab-pane>
+
+          <el-tab-pane v-if="canViewGoldLog" :label="t('pages.userList.tabGoldLog')" name="goldLog">
+            <CurrencyLogPanel
+                :active="activeTab === 'goldLog'"
+                :currency-type="1"
+                export-permission="exportGoldLog"
+                :user-id="userId"
+            />
+          </el-tab-pane>
+
+          <el-tab-pane v-if="canViewDiamondLog" :label="t('pages.userList.tabDiamondLog')" name="diamondLog">
+            <CurrencyLogPanel
+                :active="activeTab === 'diamondLog'"
+                :currency-type="2"
+                export-permission="exportDiamondLog"
+                :user-id="userId"
+            />
+          </el-tab-pane>
         </el-tabs>
       </div>
     </el-card>
@@ -182,10 +199,15 @@ import {useI18n} from 'vue-i18n'
 import {useRoute, useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {accountApi} from '@/api'
-import type {UserDetail} from '@/types/api.ts'
+import CurrencyLogPanel from './user-detail-currency-log-panel.vue'
+import type {UserCumulativeStatDetailItem, UserDetail} from '@/types/api.ts'
 import {formatStatCount, formatWalletBalance} from '@/utils/number-format'
+import {usePagePermission} from '@/composables/usePagePermission'
 
 const {t} = useI18n()
+const {can} = usePagePermission('UserDetail')
+const canViewGoldLog = computed(() => can('goldLog'))
+const canViewDiamondLog = computed(() => can('diamondLog'))
 const route = useRoute()
 const router = useRouter()
 
@@ -199,6 +221,8 @@ const USER_TYPE_BOT_ANCHOR = 2
 const userId = computed(() => String(route.query.id || '').trim())
 
 const showBotAnchorStatus = computed(() => detail.value?.profile?.userType === USER_TYPE_BOT_ANCHOR)
+
+const cumulativeStat = computed<UserCumulativeStatDetailItem>(() => detail.value?.cumulativeStat ?? {})
 
 const pageTitle = computed(() => {
   if (detail.value?.profile?.nickname) {

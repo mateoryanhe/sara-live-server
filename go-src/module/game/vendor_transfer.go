@@ -82,16 +82,18 @@ func HandleVendorTransfer(ctx context.Context, req *gameplatformdto.VendorTransf
 		return resp, nil
 	}
 
-	balance, fail := applyVendorTransferWallet(userID, req.BetAmount, req.WinAmount)
+	platformType, _ := gameplatform.ParsePlatform(req.Platform)
+	gameID := strings.TrimSpace(req.GameID)
+	gameName, gameCategory := resolveVendorTransferGameMeta(gameID, req.Platform)
+	nameEn, cover := resolveVendorTransferGameInfo(gameID)
+
+	balance, fail := applyVendorTransferWallet(userID, req.BetAmount, req.WinAmount, gameName, gameCategory)
 	if fail != nil {
 		resp := vendorTransferFail(fail.Code, fail.Message)
 		vendorDetailLog().Warningf(ctx, "vendor transfer failed transaction_id=%s code=%d msg=%s", transactionID, fail.Code, fail.Message)
 		return resp, nil
 	}
 
-	platformType, _ := gameplatform.ParsePlatform(req.Platform)
-	gameID := strings.TrimSpace(req.GameID)
-	nameEn, cover := resolveVendorTransferGameInfo(gameID)
 	if req.BetAmount > 0 {
 		recordVendorTransferBetLog(userID, gameID, nameEn, cover, platformType, transactionID, req.BetAmount)
 	}
@@ -149,12 +151,16 @@ func validateVendorTransferReq(req *gameplatformdto.VendorTransferReq) *vendorCa
 }
 
 // applyVendorTransferWallet 下注扣金币、派彩加金币.
-func applyVendorTransferWallet(userID uint64, betAmount, winAmount float64) (float64, *vendorCallbackFail) {
+func applyVendorTransferWallet(userID uint64, betAmount, winAmount float64, gameName, gameCategory string) (float64, *vendorCallbackFail) {
 	balance := userinfodao.GetUserInfoByUserId(userID).Gold
+	gameMeta := &gameevent.CurrencyChangeMeta{
+		GameName:     gameName,
+		GameCategory: gameCategory,
+	}
 
 	if betAmount > 0 {
 		var err error
-		balance, err = wallet.GoldSub(userID, betAmount, currency.ReasonGameBet)
+		balance, err = wallet.GoldSub(userID, betAmount, currency.ReasonGameBet, gameMeta)
 		if err != nil {
 			if isGoldNotEnoughErr(err) {
 				return 0, &vendorCallbackFail{Code: vendorCallbackCodeInsufficientBalance, Message: "insufficient balance"}
@@ -165,7 +171,7 @@ func applyVendorTransferWallet(userID uint64, betAmount, winAmount float64) (flo
 
 	if winAmount > 0 {
 		var err error
-		balance, err = wallet.GoldAdd(userID, winAmount, currency.ReasonGameBetWin)
+		balance, err = wallet.GoldAdd(userID, winAmount, currency.ReasonGameBetWin, gameMeta)
 		if err != nil {
 			return 0, &vendorCallbackFail{Code: vendorCallbackCodeInvalidParam, Message: "wallet update failed"}
 		}
@@ -191,6 +197,27 @@ func resolveVendorTransferGameInfo(gameID string) (nameEn, cover string) {
 		return "", ""
 	}
 	return gameCfg.NameEn, gameCfg.Cover
+}
+
+func resolveVendorTransferGameMeta(gameID, platform string) (gameName, gameCategory string) {
+	gameID = strings.TrimSpace(gameID)
+	platform = strings.TrimSpace(platform)
+	if lib := cfgdao.GetVendorGameLib(gameID, platform); lib != nil {
+		gameName = strings.TrimSpace(lib.NameEn)
+		if gameName == "" {
+			gameName = strings.TrimSpace(lib.Name)
+		}
+		gameCategory = strings.TrimSpace(lib.Category)
+	}
+	if gameName == "" {
+		if gameCfg := cfgdao.GetGameCfgByGameCode(gameID); gameCfg != nil {
+			gameName = strings.TrimSpace(gameCfg.NameEn)
+			if gameName == "" {
+				gameName = strings.TrimSpace(gameCfg.LiveGameName)
+			}
+		}
+	}
+	return gameName, gameCategory
 }
 
 func recordVendorTransferBetLog(userID uint64, gameCode, nameEn, cover string, platformType gameplatform.Platform, orderID string, amount float64) {

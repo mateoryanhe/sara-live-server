@@ -124,7 +124,7 @@ func DiamondSub(userId uint64, amount float64, reason currency.Reason) (float64,
 }
 
 // GoldAdd 给指定用户增加金币,amount 必须为正数,reason 流水原因枚举
-func GoldAdd(userId uint64, amount float64, reason currency.Reason) (float64, error) {
+func GoldAdd(userId uint64, amount float64, reason currency.Reason, meta ...*gameevent.CurrencyChangeMeta) (float64, error) {
 	if amount <= 0 {
 		return 0, errercode.CreateCode(errercode.GoldAmountInvalid)
 	}
@@ -135,14 +135,14 @@ func GoldAdd(userId uint64, amount float64, reason currency.Reason) (float64, er
 	after := data.Gold
 	event.Pub(gameevent.CurrencyChangeEvent, gameevent.NewCurrencyChangeEventData(
 		userId, gameevent.CurrencyTypeGold, gameevent.CurrencyActionAdd,
-		amount, before, after, reason,
+		amount, before, after, reason, meta...,
 	))
 	pushGoldToApp(userId, after)
 	return after, nil
 }
 
 // GoldSub 扣减指定用户金币,amount 必须为正数,余额不足返回错误,reason 流水原因枚举
-func GoldSub(userId uint64, amount float64, reason currency.Reason) (float64, error) {
+func GoldSub(userId uint64, amount float64, reason currency.Reason, meta ...*gameevent.CurrencyChangeMeta) (float64, error) {
 	if amount <= 0 {
 		return 0, errercode.CreateCode(errercode.GoldAmountInvalid)
 	}
@@ -159,7 +159,7 @@ func GoldSub(userId uint64, amount float64, reason currency.Reason) (float64, er
 	stat.AddTotalGoldConsume(amount)
 	event.Pub(gameevent.CurrencyChangeEvent, gameevent.NewCurrencyChangeEventData(
 		userId, gameevent.CurrencyTypeGold, gameevent.CurrencyActionSub,
-		amount, before, after, reason,
+		amount, before, after, reason, meta...,
 	))
 	pushGoldToApp(userId, after)
 	return after, nil

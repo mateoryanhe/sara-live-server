@@ -14,28 +14,32 @@ const (
 )
 
 const (
-	CurrencyLogUserId db.TbCol = "user_id"
-	CurrencyLogType   db.TbCol = "type"
-	CurrencyLogAction db.TbCol = "action"
-	CurrencyLogAmount db.TbCol = "amount"
-	CurrencyLogBefore db.TbCol = "before"
-	CurrencyLogAfter  db.TbCol = "after"
-	CurrencyLogReason db.TbCol = "reason"
+	CurrencyLogUserId       db.TbCol = "user_id"
+	CurrencyLogType         db.TbCol = "type"
+	CurrencyLogAction       db.TbCol = "action"
+	CurrencyLogAmount       db.TbCol = "amount"
+	CurrencyLogBefore       db.TbCol = "before"
+	CurrencyLogAfter        db.TbCol = "after"
+	CurrencyLogReason       db.TbCol = "reason"
+	CurrencyLogGameName     db.TbCol = "game_name"
+	CurrencyLogGameCategory db.TbCol = "game_category"
 )
 
 // CurrencyLog 金币/钻石流水记录
 type CurrencyLog struct {
 	migrate.OneModel
-	UserId uint64  `gorm:"index;default:0;comment:用户ID"`
-	Type   uint8   `gorm:"default:0;comment:货币类型 1金币 2钻石"`
-	Action uint8   `gorm:"default:0;comment:动作 1加 2减"`
-	Amount float64 `gorm:"default:0;comment:变动数量"`
-	Before float64 `gorm:"default:0;comment:变动前余额"`
-	After  float64 `gorm:"default:0;comment:变动后余额"`
-	Reason uint8   `gorm:"default:0;comment:变动原因(枚举,参见 constants/currency.Reason)"`
+	UserId       uint64  `gorm:"index;default:0;comment:用户ID"`
+	Type         uint8   `gorm:"default:0;comment:货币类型 1金币 2钻石"`
+	Action       uint8   `gorm:"default:0;comment:动作 1加 2减"`
+	Amount       float64 `gorm:"default:0;comment:变动数量"`
+	Before       float64 `gorm:"default:0;comment:变动前余额"`
+	After        float64 `gorm:"default:0;comment:变动后余额"`
+	Reason       uint8   `gorm:"default:0;comment:变动原因(枚举,参见 constants/currency.Reason)"`
+	GameName     string  `gorm:"size:128;default:'';comment:游戏名称"`
+	GameCategory string  `gorm:"size:64;default:'';comment:游戏分类"`
 }
 
-func NewCurrencyLog(userId uint64, currencyType, action uint8, amount, before, after float64, reason currency.Reason) *CurrencyLog {
+func NewCurrencyLog(userId uint64, currencyType, action uint8, amount, before, after float64, reason currency.Reason, gameName, gameCategory string) *CurrencyLog {
 	ret := &CurrencyLog{}
 	ret.ID = snowflake.GetId()
 	ret.SetCreatedAt(time.Now())
@@ -47,6 +51,8 @@ func NewCurrencyLog(userId uint64, currencyType, action uint8, amount, before, a
 	ret.SetBefore(before)
 	ret.SetAfter(after)
 	ret.SetReason(reason)
+	ret.SetGameName(gameName)
+	ret.SetGameCategory(gameCategory)
 	return ret
 }
 
@@ -106,6 +112,22 @@ func (receiver *CurrencyLog) SetReason(reason currency.Reason) {
 	})
 }
 
+func (receiver *CurrencyLog) SetGameName(gameName string) {
+	receiver.GameName = gameName
+	syndb.AddData(TbCurrencyLog, CurrencyLogGameName, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: gameName,
+	})
+}
+
+func (receiver *CurrencyLog) SetGameCategory(gameCategory string) {
+	receiver.GameCategory = gameCategory
+	syndb.AddData(TbCurrencyLog, CurrencyLogGameCategory, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: gameCategory,
+	})
+}
+
 func (receiver *CurrencyLog) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
 	syndb.AddData(TbCurrencyLog, db.CreatedAtName, &syndb.ColData{
@@ -133,6 +155,8 @@ func initCurrencyLog() {
 	syndb.RegQuick(TbCurrencyLog, CurrencyLogBefore)
 	syndb.RegQuick(TbCurrencyLog, CurrencyLogAfter)
 	syndb.RegQuick(TbCurrencyLog, CurrencyLogReason)
+	syndb.RegQuick(TbCurrencyLog, CurrencyLogGameName)
+	syndb.RegQuick(TbCurrencyLog, CurrencyLogGameCategory)
 
 	migrate.AutoMigrate(&CurrencyLog{})
 }

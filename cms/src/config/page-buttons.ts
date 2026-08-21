@@ -122,6 +122,13 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'setAnchorType', label: '设置主播类型'},
         {key: 'openGame', label: '打开游戏'},
     ],
+    UserDetail: [
+        BTN.view,
+        {key: 'goldLog', label: '查看金币流水'},
+        {key: 'exportGoldLog', label: '导出金币流水'},
+        {key: 'diamondLog', label: '查看钻石流水'},
+        {key: 'exportDiamondLog', label: '导出钻石流水'},
+    ],
     AnchorListManagement: [BTN.view, BTN.search, BTN.edit, {key: 'viewDetail', label: '查看详情'}, {key: 'viewUserDetail', label: '查看用户详情'}, {key: 'viewGuildDetail', label: '查看工会详情'}, {key: 'offShelf', label: '下架'}],
     PlatformAnchorList: [
         BTN.view,
@@ -238,6 +245,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     RechargeOrderList: [
         BTN.view,
         BTN.search,
+        {key: 'viewUserDetail', label: '查看用户详情'},
         {key: 'manualCreateOrder', label: '人工创建订单'},
         {key: 'manualRecharge', label: '人工补单'},
     ],

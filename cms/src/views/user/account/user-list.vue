@@ -51,12 +51,16 @@
       </div>
       <div class="content">
         <el-table v-loading="loading" :data="userList" style="width: 100%">
-          <el-table-column label="ID" prop="id" width="200">
+          <el-table-column fixed label="#" type="index" width="55" :index="formatRowIndex"/>
+          <el-table-column label="ID" prop="id" min-width="240">
             <template #default="scope">
-              <el-button v-if="canViewDetail" link type="primary" @click="openDetail(scope.row)">
-                {{ scope.row.id }}
-              </el-button>
-              <span v-else>{{ scope.row.id }}</span>
+              <div class="id-cell">
+                <el-button v-if="canViewDetail" link type="primary" @click="openDetail(scope.row)">
+                  {{ scope.row.id }}
+                </el-button>
+                <span v-else>{{ scope.row.id }}</span>
+                <el-button link type="primary" @click="copyUserId(scope.row.id)">{{ t('common.copy') }}</el-button>
+              </div>
             </template>
           </el-table-column>
           <el-table-column :label="t('common.createdAt')" prop="createdAt" width="200">
@@ -725,6 +729,9 @@ const handleSizeChange = (size: number) => {
   fetchUserList()
 }
 
+const formatRowIndex = (index: number) =>
+    (pagination.pageIndex - 1) * pagination.pageSize + index + 1
+
 const resetCurrencyForm = () => {
   currencyForm.userId = ''
   currencyForm.nickname = ''
@@ -748,6 +755,20 @@ const openDetail = (row: UserInfo) => {
     name: 'UserDetail',
     query: {id: String(row.id)},
   })
+}
+
+const copyUserId = async (userId: string | number | undefined) => {
+  const value = String(userId ?? '').trim()
+  if (!value) {
+    return
+  }
+  try {
+    await navigator.clipboard.writeText(value)
+    ElMessage.success(t('common.operationSuccess'))
+  } catch (error) {
+    console.error('copy user id failed:', error)
+    ElMessage.error(t('common.failed'))
+  }
 }
 
 const openAnchorDetail = (row: UserInfo) => {
@@ -1336,5 +1357,12 @@ onMounted(() => {
 
 .currency-diamond {
   color: #1677ff;
+}
+
+.id-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
 }
 </style>
