@@ -4,6 +4,7 @@ import (
 	"xr-game-server/controller"
 	"xr-game-server/core"
 	"xr-game-server/core/shutdown"
+	"xr-game-server/core/startup"
 	"xr-game-server/core/xrpool"
 	"xr-game-server/dao"
 	"xr-game-server/entity"
@@ -16,6 +17,7 @@ func main() {
 	ctx := gctx.New()
 	defer xrpool.RecoverMain(ctx, "main")
 
+	startup.MarkBegin()
 	//底层框架初始化
 	core.Init()
 	//数据库表结构初始化

@@ -3,11 +3,14 @@ package httpserver
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/util/gconv"
 	"xr-game-server/core/hotrestart"
+	"xr-game-server/core/startup"
 	"xr-game-server/core/xrlog"
 )
 
@@ -38,8 +41,17 @@ func InitHttpServer() {
 	httpServer.BindHookHandler("/*", ghttp.HookAfterOutput, hookAPIRequestAfterOutput)
 	setupAppOpenApiHook()
 	enableHotRestartGraceful()
+	go waitHTTPServerReadyAndLogStartupEnd()
 	httpServer.Run()
 	hotrestart.NotifyOldProcessExit()
+}
+
+func waitHTTPServerReadyAndLogStartupEnd() {
+	ctx := gctx.New()
+	for httpServer.Status() != ghttp.ServerStatusRunning {
+		time.Sleep(5 * time.Millisecond)
+	}
+	startup.LogEnd(ctx)
 }
 
 func GetAuthId(ctx context.Context) uint64 {

@@ -194,9 +194,9 @@ goto hot_restart_done
 :do_hot_restart
 echo Process found ^(PID: !OLD_PID!^), triggering GoFrame hot restart...
 
-REM Read hot restart timeouts from config.yaml (dev: flush=3s, exit=1s)
-set HOT_RESTART_FLUSH_TIMEOUT=60
-set HOT_RESTART_EXIT_TIMEOUT=60
+REM Read hot restart timeouts from LOCAL_CONFIG_PATH (config.bat -> config/dev/config.yaml)
+set HOT_RESTART_FLUSH_TIMEOUT=1
+set HOT_RESTART_EXIT_TIMEOUT=10
 for /f "usebackq tokens=2 delims=:" %%a in (`findstr /i /c:"hotRestartFlushTimeout" "%LOCAL_CONFIG_PATH%"`) do (
   for /f "tokens=1" %%b in ("%%a") do set HOT_RESTART_FLUSH_TIMEOUT=%%b
 )
@@ -204,6 +204,7 @@ for /f "usebackq tokens=2 delims=:" %%a in (`findstr /i /c:"hotRestartExitTimeou
   for /f "tokens=1" %%b in ("%%a") do set HOT_RESTART_EXIT_TIMEOUT=%%b
 )
 set /a HOT_RESTART_WAIT_MAX=HOT_RESTART_FLUSH_TIMEOUT+HOT_RESTART_EXIT_TIMEOUT+3
+echo Hot restart config from %LOCAL_CONFIG_PATH%: flush=!HOT_RESTART_FLUSH_TIMEOUT!s exit=!HOT_RESTART_EXIT_TIMEOUT!s waitMax=!HOT_RESTART_WAIT_MAX!s
 
 plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "curl -sf -k 'https://127.0.0.1/internal/hotRestart?auth=%HOT_RESTART_AUTH%' || exit 1"
 if !errorlevel! neq 0 (

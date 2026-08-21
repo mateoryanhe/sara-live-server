@@ -8,6 +8,7 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liverecorddto"
 	"xr-game-server/entity/live"
+	"xr-game-server/module/upload"
 )
 
 func parseUint64Filter(val string) uint64 {
@@ -48,7 +49,7 @@ func toCMSItem(v *entity.LiveRecord) *liverecorddto.CMSLiveRecordItem {
 	}
 	if u := userinfodao.GetUserInfoByUserId(v.AnchorId); u != nil {
 		item.Nickname = u.Nickname
-		item.Avatar = u.Avatar
+		item.Avatar = upload.ResolveAvatarUrlForUser(v.AnchorId, u.Avatar)
 	}
 	return item
 }

@@ -193,17 +193,30 @@ goto hot_restart_done
 
 :do_hot_restart
 echo Process found ^(PID: !OLD_PID!^), triggering GoFrame hot restart...
+
+REM Read hot restart timeouts from LOCAL_CONFIG_PATH (config.bat -> config/prod/config.yaml)
+set HOT_RESTART_FLUSH_TIMEOUT=60
+set HOT_RESTART_EXIT_TIMEOUT=60
+for /f "usebackq tokens=2 delims=:" %%a in (`findstr /i /c:"hotRestartFlushTimeout" "%LOCAL_CONFIG_PATH%"`) do (
+  for /f "tokens=1" %%b in ("%%a") do set HOT_RESTART_FLUSH_TIMEOUT=%%b
+)
+for /f "usebackq tokens=2 delims=:" %%a in (`findstr /i /c:"hotRestartExitTimeout" "%LOCAL_CONFIG_PATH%"`) do (
+  for /f "tokens=1" %%b in ("%%a") do set HOT_RESTART_EXIT_TIMEOUT=%%b
+)
+set /a HOT_RESTART_WAIT_MAX=HOT_RESTART_FLUSH_TIMEOUT+HOT_RESTART_EXIT_TIMEOUT+3
+echo Hot restart config from %LOCAL_CONFIG_PATH%: flush=!HOT_RESTART_FLUSH_TIMEOUT!s exit=!HOT_RESTART_EXIT_TIMEOUT!s waitMax=!HOT_RESTART_WAIT_MAX!s
+
 plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "curl -sf -k 'https://127.0.0.1/internal/hotRestart?auth=%HOT_RESTART_AUTH%' || exit 1"
 if !errorlevel! neq 0 (
     echo Error: Hot restart API call failed
     pause
     exit /b 1
 )
-echo Hot restart triggered, waiting for new process (max 180s)...
-set /a WAIT_LEFT=180
+echo Hot restart triggered, waiting for new process ^(max !HOT_RESTART_WAIT_MAX!s, flush=!HOT_RESTART_FLUSH_TIMEOUT!s exit=!HOT_RESTART_EXIT_TIMEOUT!s^)...
+set /a WAIT_LEFT=HOT_RESTART_WAIT_MAX
 :wait_hot_restart
-timeout /t 3 /nobreak >nul
-set /a WAIT_LEFT-=3
+timeout /t 1 /nobreak >nul
+set /a WAIT_LEFT-=1
 set NEW_PID=
 for /f "delims=" %%i in ('plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "pgrep -xo %APP_NAME% 2>/dev/null || true"') do set NEW_PID=%%i
 if not defined NEW_PID (
@@ -233,7 +246,7 @@ if exist "%TEMP_DIR%" rmdir /s /q "%TEMP_DIR%"
 if exist "%DEPLOY_PACKAGE%" del "%DEPLOY_PACKAGE%"
 
 echo Verifying if program is running...
-timeout /t 5 /nobreak >nul
+timeout /t 2 /nobreak >nul
 echo.
 
 set REMOTE_PID=

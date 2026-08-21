@@ -338,6 +338,65 @@
         <el-button :loading="anchorTypeSubmitting" type="primary" @click="submitAnchorType">{{ t('common.confirm') }}</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog
+        v-model="gamePickerDialogVisible"
+        :title="gamePickerDialogTitle"
+        destroy-on-close
+        width="920px"
+        @closed="resetGamePicker"
+        @open="handleGamePickerOpen"
+    >
+      <p class="game-picker-tip">{{ gamePickerTipText }}</p>
+      <el-form :model="gamePickerSearchForm" class="search-form" inline>
+        <el-form-item :label="t('pages.gameList.gameCode')">
+          <el-input v-model="gamePickerSearchForm.gameCode" clearable :placeholder="t('pages.gameList.gameCodePlaceholder')"/>
+        </el-form-item>
+        <el-form-item :label="t('pages.gameList.gameName')">
+          <el-input v-model="gamePickerSearchForm.name" clearable :placeholder="t('pages.gameList.gameNamePlaceholder')"/>
+        </el-form-item>
+        <el-form-item :label="t('pages.gameList.platform')">
+          <el-input v-model="gamePickerSearchForm.platform" clearable :placeholder="t('pages.gameList.platformPlaceholder')"/>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleGamePickerSearch">{{ t('common.search') }}</el-button>
+          <el-button @click="resetGamePickerSearch">{{ t('common.reset') }}</el-button>
+        </el-form-item>
+      </el-form>
+      <el-table v-loading="gamePickerLoading" :data="gamePickerTableData" row-key="gameCode" style="width: 100%">
+        <el-table-column :label="t('pages.gameList.gameCode')" min-width="140" prop="gameCode"/>
+        <el-table-column :label="t('common.name')" min-width="120">
+          <template #default="{ row }">{{ row.name || row.nameEn || '-' }}</template>
+        </el-table-column>
+        <el-table-column :label="t('pages.gameList.nameEn')" min-width="120" prop="nameEn">
+          <template #default="{ row }">{{ row.nameEn || '-' }}</template>
+        </el-table-column>
+        <el-table-column :label="t('pages.gameList.platform')" prop="platform" width="100"/>
+        <el-table-column fixed="right" :label="t('common.actions')" width="120">
+          <template #default="{ row }">
+            <el-button
+                :loading="gamePickerStartingCode === row.gameCode"
+                link
+                type="success"
+                @click="handleGamePickerStart(row)"
+            >
+              {{ t('pages.gameShelfList.startGame') }}
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div class="pagination">
+        <el-pagination
+            v-model:current-page="gamePickerPagination.pageIndex"
+            v-model:page-size="gamePickerPagination.pageSize"
+            :page-sizes="[10, 20, 50]"
+            :total="gamePickerPagination.total"
+            layout="total, sizes, prev, pager, next"
+            @current-change="fetchGamePickerList"
+            @size-change="handleGamePickerSizeChange"
+        />
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -348,7 +407,8 @@ import {accountApi, diamondApi, goldApi, guildApi} from '@/api'
 import {ArrowDown} from '@element-plus/icons-vue'
 import {ElForm, ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {useRoute, useRouter} from 'vue-router'
-import type {BanReq, CancelReq, UnBanReq, UnCancelReq, UserInfo} from '@/types/api.ts'
+import type {BanReq, CancelReq, GameShelfItem, UnBanReq, UnCancelReq, UserInfo} from '@/types/api.ts'
+import {gamePlatformApi} from '@/api/modules/gamePlatform'
 import {formatWalletBalance, NUMBER_INPUT_DECIMALS} from '@/utils/number-format'
 import {usePagePermission} from '@/composables/usePagePermission'
 
@@ -400,6 +460,44 @@ const anchorTypeDialogVisible = ref(false)
 const anchorTypeDialogTitle = ref('')
 const anchorTypeSubmitting = ref(false)
 const anchorTypeFormRef = ref<InstanceType<typeof ElForm>>()
+
+const gamePickerDialogVisible = ref(false)
+const gamePickerLoading = ref(false)
+const gamePickerStartingCode = ref('')
+const gamePickerTableData = ref<GameShelfItem[]>([])
+const gamePickerUser = ref<UserInfo | null>(null)
+const gamePickerSearchForm = reactive({
+  gameCode: '',
+  name: '',
+  platform: '',
+})
+const gamePickerPagination = reactive({
+  pageIndex: 1,
+  pageSize: 20,
+  total: 0,
+})
+
+const gamePickerDialogTitle = computed(() => {
+  const user = gamePickerUser.value
+  if (!user) {
+    return t('pages.userList.openGame')
+  }
+  if (user.nickname) {
+    return t('pages.userList.openGameDialogTitle', {name: user.nickname})
+  }
+  return t('pages.userList.openGameDialogTitleNoName', {id: user.id})
+})
+
+const gamePickerTipText = computed(() => {
+  const user = gamePickerUser.value
+  if (!user) {
+    return ''
+  }
+  if (user.nickname) {
+    return t('pages.gameShelfList.pickUserHint', {name: user.nickname, id: user.id})
+  }
+  return t('pages.gameShelfList.pickUserHintNoName', {id: user.id})
+})
 
 const userTypeLabelMap = computed<Record<number, string>>(() => ({
   0: t('pages.userList.userTypeNormal'),
@@ -659,14 +757,87 @@ const openAnchorDetail = (row: UserInfo) => {
   })
 }
 
+const resetGamePickerSearch = () => {
+  gamePickerSearchForm.gameCode = ''
+  gamePickerSearchForm.name = ''
+  gamePickerSearchForm.platform = ''
+  gamePickerPagination.pageIndex = 1
+}
+
+const resetGamePicker = () => {
+  gamePickerUser.value = null
+  gamePickerTableData.value = []
+  gamePickerStartingCode.value = ''
+  gamePickerPagination.total = 0
+  resetGamePickerSearch()
+}
+
+const fetchGamePickerList = async () => {
+  gamePickerLoading.value = true
+  try {
+    const response = await gamePlatformApi.getGameShelfList({
+      gameCode: gamePickerSearchForm.gameCode,
+      name: gamePickerSearchForm.name,
+      platform: gamePickerSearchForm.platform,
+      pageIndex: gamePickerPagination.pageIndex,
+      pageSize: gamePickerPagination.pageSize,
+    })
+    gamePickerTableData.value = response.data || []
+    gamePickerPagination.total = response.total || 0
+  } catch (error) {
+    console.error('fetch game shelf list failed:', error)
+    ElMessage.error(t('pages.gameShelfList.fetchFailed'))
+  } finally {
+    gamePickerLoading.value = false
+  }
+}
+
+const handleGamePickerOpen = () => {
+  fetchGamePickerList()
+}
+
+const handleGamePickerSearch = () => {
+  gamePickerPagination.pageIndex = 1
+  fetchGamePickerList()
+}
+
+const handleGamePickerSizeChange = (size: number) => {
+  gamePickerPagination.pageSize = size
+  gamePickerPagination.pageIndex = 1
+  fetchGamePickerList()
+}
+
+const handleGamePickerStart = async (row: GameShelfItem) => {
+  const user = gamePickerUser.value
+  if (!user?.id) {
+    return
+  }
+  gamePickerStartingCode.value = row.gameCode
+  try {
+    const response = await gamePlatformApi.getCMSGameStartLink({
+      userId: String(user.id),
+      gameCode: row.gameCode,
+      platform: row.platform,
+    })
+    const link = response?.link?.trim()
+    if (!link) {
+      ElMessage.error(t('pages.gameShelfList.startGameEmpty'))
+      return
+    }
+    window.open(link, '_blank', 'noopener,noreferrer')
+  } catch (error) {
+    console.error('get cms game start link failed:', error)
+    ElMessage.error(t('pages.gameShelfList.startGameFailed'))
+  } finally {
+    gamePickerStartingCode.value = ''
+  }
+}
+
 const openGamePicker = (row: UserInfo) => {
-  router.push({
-    path: '/game/game-shelf-list',
-    query: {
-      pickUserId: String(row.id),
-      pickUserNickname: row.nickname || '',
-    },
-  })
+  gamePickerUser.value = row
+  resetGamePickerSearch()
+  gamePickerPagination.pageSize = 20
+  gamePickerDialogVisible.value = true
 }
 
 const handleRowCommand = (row: UserInfo, command: string) => {
@@ -1145,6 +1316,12 @@ onMounted(() => {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+
+.game-picker-tip {
+  margin: 0 0 16px;
+  color: var(--el-text-color-secondary);
+  line-height: 1.5;
 }
 
 .currency-gold,

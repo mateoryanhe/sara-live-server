@@ -8,6 +8,7 @@ REM Local path configuration
 set LOCAL_PROJECT_PATH=D:\company-code\sara-live-server
 set LOCAL_GO_SRC=%LOCAL_PROJECT_PATH%\go-src
 set LOCAL_CONFIG_PATH=%LOCAL_PROJECT_PATH%\config\dev\config.yaml
+REM deploy.bat 从此 yaml 读取 hotRestartFlushTimeout / hotRestartExitTimeout
 set LOCAL_BUILD_PATH=%LOCAL_PROJECT_PATH%\go-build
 
 REM SSH key configuration
@@ -19,7 +20,7 @@ set APP_NAME=xr-game-server
 REM Remote sudo command (not used)
 set SUDO_CMD=
 
-REM Hot restart auth (must match CMS/server runtime cfg hotRestartAuth)
+REM Hot restart auth (must match CMS/server runtime cfg hotRestartAuth, default nGH66S4TjBjQqCKyWJAM)
 set HOT_RESTART_AUTH=nGH66S4TjBjQqCKyWJAM
 
 REM SSH port

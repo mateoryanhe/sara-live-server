@@ -6,13 +6,6 @@
           <span>{{ t('menu.GameShelfListManagement') }}</span>
           <div class="header-actions">
             <el-button
-                v-if="isPickMode"
-                @click="cancelPickUser"
-            >
-              {{ t('pages.gameShelfList.cancelPickUser') }}
-            </el-button>
-            <el-button
-                v-if="!isPickMode"
                 :disabled="!canBatchOffShelf"
                 :loading="shelfOperating"
                 type="warning"
@@ -25,17 +18,6 @@
       </template>
 
       <el-alert
-          v-if="isPickMode"
-          :closable="false"
-          class="tip-alert"
-          show-icon
-          type="warning"
-      >
-        <p>{{ pickUserHintText }}</p>
-      </el-alert>
-
-      <el-alert
-          v-else
           :closable="false"
           :title="t('pages.gameShelfList.noteTitle')"
           class="tip-alert"
@@ -70,7 +52,7 @@
           style="width: 100%"
           @selection-change="handleSelectionChange"
       >
-        <el-table-column v-if="!isPickMode" type="selection" width="48"/>
+        <el-table-column type="selection" width="48"/>
         <el-table-column :label="t('pages.gameList.gameCode')" min-width="140" prop="gameCode"/>
         <el-table-column :label="t('common.name')" min-width="120" prop="name">
           <template #default="{ row }">{{ row.name || '-' }}</template>
@@ -108,43 +90,32 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column fixed="right" :label="t('common.actions')" :width="isPickMode ? 120 : 220">
+        <el-table-column fixed="right" :label="t('common.actions')" width="220">
           <template #default="{ row }">
             <el-button
-                v-if="isPickMode && can('startGame')"
-                :loading="startingGameCode === row.gameCode"
+                v-if="can('vendorConfig')"
                 link
                 type="success"
-                @click="handleStartGame(row)"
+                @click="handleOpenVendorConfig(row)"
             >
-              {{ t('pages.gameShelfList.startGame') }}
+              {{ t('pages.gameShelfList.vendorConfig') }}
             </el-button>
-            <template v-else-if="!isPickMode">
-              <el-button
-                  v-if="can('vendorConfig')"
-                  link
-                  type="success"
-                  @click="handleOpenVendorConfig(row)"
-              >
-                {{ t('pages.gameShelfList.vendorConfig') }}
-              </el-button>
-              <el-button
-                  v-if="can('edit')"
-                  link
-                  type="primary"
-                  @click="openEditDialog(row)"
-              >
-                {{ t('common.edit') }}
-              </el-button>
-              <el-button
-                  v-if="can('shelf')"
-                  link
-                  type="warning"
-                  @click="handleOffShelf(row)"
-              >
-                {{ t('common.offShelf') }}
-              </el-button>
-            </template>
+            <el-button
+                v-if="can('edit')"
+                link
+                type="primary"
+                @click="openEditDialog(row)"
+            >
+              {{ t('common.edit') }}
+            </el-button>
+            <el-button
+                v-if="can('shelf')"
+                link
+                type="warning"
+                @click="handleOffShelf(row)"
+            >
+              {{ t('common.offShelf') }}
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -220,34 +191,17 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, reactive, ref, watch} from 'vue'
+import {computed, onMounted, reactive, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
-import {useRoute, useRouter} from 'vue-router'
+import {useRouter} from 'vue-router'
 import {ElMessage, ElMessageBox, type FormInstance} from 'element-plus'
 import {gamePlatformApi} from '@/api/modules/gamePlatform'
 import type {GameShelfItem} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
 
 const {t} = useI18n()
-const route = useRoute()
 const router = useRouter()
 const {can} = usePagePermission('GameShelfListManagement')
-
-const pickUserId = ref('')
-const pickUserNickname = ref('')
-const isPickMode = computed(() => !!pickUserId.value)
-const pickUserHintText = computed(() => {
-  if (!pickUserId.value) {
-    return ''
-  }
-  if (pickUserNickname.value) {
-    return t('pages.gameShelfList.pickUserHint', {
-      name: pickUserNickname.value,
-      id: pickUserId.value,
-    })
-  }
-  return t('pages.gameShelfList.pickUserHintNoName', {id: pickUserId.value})
-})
 
 interface SearchForm {
   gameCode: string
@@ -268,7 +222,6 @@ const loading = ref(false)
 const shelfOperating = ref(false)
 const editSaving = ref(false)
 const editDialogVisible = ref(false)
-const startingGameCode = ref('')
 const editFormRef = ref<FormInstance>()
 const tableData = ref<GameShelfItem[]>([])
 const selectedRows = ref<GameShelfItem[]>([])
@@ -361,44 +314,6 @@ const openEditDialog = (row: GameShelfItem) => {
   editDialogVisible.value = true
 }
 
-const syncPickUserFromRoute = () => {
-  pickUserId.value = typeof route.query.pickUserId === 'string' ? route.query.pickUserId.trim() : ''
-  pickUserNickname.value = typeof route.query.pickUserNickname === 'string' ? route.query.pickUserNickname.trim() : ''
-}
-
-watch(() => route.query, () => {
-  syncPickUserFromRoute()
-}, {deep: true})
-
-const cancelPickUser = () => {
-  router.replace({path: '/game/game-shelf-list'})
-}
-
-const handleStartGame = async (row: GameShelfItem) => {
-  if (!pickUserId.value) {
-    return
-  }
-  startingGameCode.value = row.gameCode
-  try {
-    const response = await gamePlatformApi.getCMSGameStartLink({
-      userId: pickUserId.value,
-      gameCode: row.gameCode,
-      platform: row.platform,
-    })
-    const link = response?.link?.trim()
-    if (!link) {
-      ElMessage.error(t('pages.gameShelfList.startGameEmpty'))
-      return
-    }
-    window.open(link, '_blank', 'noopener,noreferrer')
-  } catch (error) {
-    console.error('get cms game start link failed:', error)
-    ElMessage.error(t('pages.gameShelfList.startGameFailed'))
-  } finally {
-    startingGameCode.value = ''
-  }
-}
-
 const resetEditForm = () => {
   editForm.gameCode = ''
   editForm.defaultNameEn = ''
@@ -420,6 +335,58 @@ const handleOpenVendorConfig = (row: GameShelfItem) => {
   })
 }
 
+const handleOffShelf = async (row: GameShelfItem) => {
+  try {
+    await ElMessageBox.confirm(
+        t('pages.gameShelfList.offShelfConfirm', {name: row.name || row.nameEn || row.gameCode}),
+        t('common.confirm'),
+        {type: 'warning'},
+    )
+    const response = await gamePlatformApi.deleteGameShelf({gameCode: row.gameCode})
+    if (response?.success) {
+      ElMessage.success(t('pages.gameShelfList.offShelfSuccess'))
+      await fetchList()
+    } else {
+      ElMessage.error(t('pages.gameShelfList.offShelfFailed'))
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('off shelf failed:', error)
+      ElMessage.error(t('pages.gameShelfList.offShelfFailed'))
+    }
+  }
+}
+
+const handleBatchOffShelf = async () => {
+  const gameCodes = selectedRows.value.map(row => row.gameCode).filter(Boolean)
+  if (!gameCodes.length) {
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+        t('pages.gameShelfList.batchOffShelfConfirm', {count: gameCodes.length}),
+        t('pages.gameShelfList.batchOffShelfTitle'),
+        {type: 'warning'},
+    )
+    shelfOperating.value = true
+    const response = await gamePlatformApi.batchDeleteGameShelf({gameCodes})
+    if (response?.success) {
+      ElMessage.success(t('pages.gameShelfList.batchOffShelfSuccess', {count: response.successCount || gameCodes.length}))
+      selectedRows.value = []
+      await fetchList()
+    } else {
+      ElMessage.error(t('pages.gameShelfList.batchOffShelfFailed'))
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('batch off shelf failed:', error)
+      ElMessage.error(t('pages.gameShelfList.batchOffShelfFailed'))
+    }
+  } finally {
+    shelfOperating.value = false
+  }
+}
+
 const handleEditSave = async () => {
   if (!editForm.gameCode) {
     return
@@ -428,8 +395,8 @@ const handleEditSave = async () => {
   try {
     const response = await gamePlatformApi.updateGameShelf({
       gameCode: editForm.gameCode,
-      liveGameName: editForm.liveGameName.trim(),
-      liveGameCover: editForm.liveGameCover.trim(),
+      liveGameName: editForm.liveGameName,
+      liveGameCover: editForm.liveGameCover,
     })
     if (response?.success) {
       ElMessage.success(t('pages.gameShelfList.editSuccess'))
@@ -446,67 +413,7 @@ const handleEditSave = async () => {
   }
 }
 
-const handleOffShelf = async (row: GameShelfItem) => {
-  try {
-    await ElMessageBox.confirm(
-        t('pages.gameList.offShelfConfirm', {name: row.name || row.nameEn || row.gameCode}),
-        t('common.confirmOffShelf'),
-        {type: 'warning'},
-    )
-  } catch {
-    return
-  }
-  shelfOperating.value = true
-  try {
-    const response = await gamePlatformApi.deleteGameShelf({gameCode: row.gameCode})
-    if (response?.success) {
-      ElMessage.success(t('pages.gameList.offShelfSuccess'))
-      await fetchList()
-    } else {
-      ElMessage.error(t('pages.gameList.offShelfFailed'))
-    }
-  } catch (error) {
-    console.error('off shelf failed:', error)
-    ElMessage.error(t('pages.gameList.offShelfFailed'))
-  } finally {
-    shelfOperating.value = false
-  }
-}
-
-const handleBatchOffShelf = async () => {
-  const gameCodes = selectedRows.value.map(row => row.gameCode)
-  if (!gameCodes.length) {
-    ElMessage.warning(t('pages.gameList.selectPublished'))
-    return
-  }
-  try {
-    await ElMessageBox.confirm(
-        t('pages.gameList.batchOffShelfConfirm', {count: gameCodes.length}),
-        t('pages.gameList.batchOffShelfTitle'),
-        {type: 'warning'},
-    )
-  } catch {
-    return
-  }
-  shelfOperating.value = true
-  try {
-    const response = await gamePlatformApi.batchDeleteGameShelf({gameCodes})
-    if (response?.success) {
-      ElMessage.success(t('pages.gameList.batchOffShelfSuccess', {count: response.successCount}))
-      await fetchList()
-    } else {
-      ElMessage.error(t('pages.gameList.batchOffShelfFailed'))
-    }
-  } catch (error) {
-    console.error('batch off shelf failed:', error)
-    ElMessage.error(t('pages.gameList.batchOffShelfFailed'))
-  } finally {
-    shelfOperating.value = false
-  }
-}
-
 onMounted(() => {
-  syncPickUserFromRoute()
   fetchList()
 })
 </script>
@@ -520,43 +427,24 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  font-size: 16px;
-  font-weight: bold;
-}
-
-.header-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
 }
 
 .tip-alert {
-  margin-bottom: 20px;
-}
-
-.tip-alert p {
-  margin: 4px 0;
+  margin-bottom: 16px;
 }
 
 .selection-tip {
-  color: var(--el-text-color-secondary);
-  font-size: 13px;
   margin-bottom: 12px;
+  color: var(--el-color-primary);
 }
 
 .search-form {
-  margin-bottom: 20px;
-}
-
-.search-form .el-form-item {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .pagination-container {
-  margin-top: 20px;
-  text-align: right;
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
 }
 </style>
