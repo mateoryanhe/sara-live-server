@@ -41,6 +41,11 @@ func LikeShortVideo(ctx context.Context, req *shortvideodto.LikeShortVideoReq) (
 		return &shortvideodto.LikeShortVideoRes{LikeCount: 0}, nil
 	}
 	stat.AddLikeCount(1)
+	if row.AuthorId > 0 {
+		if authorStat := shortvideodao.GetAuthorStatByAuthorId(row.AuthorId); authorStat != nil {
+			authorStat.AddLikeCount(1)
+		}
+	}
 
 	return &shortvideodto.LikeShortVideoRes{LikeCount: stat.LikeCount}, nil
 }

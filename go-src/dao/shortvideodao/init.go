@@ -4,5 +4,6 @@ func Init() {
 	initShortVideoDao()
 	initShortVideoCfgDao()
 	initShortVideoStatDao()
+	initShortVideoAuthorStatDao()
 	initShortVideoWatchDao()
 }

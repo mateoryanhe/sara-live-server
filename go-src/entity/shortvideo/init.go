@@ -4,6 +4,7 @@ package entity
 func Init() {
 	initShortVideo()
 	initShortVideoStat()
+	initShortVideoAuthorStat()
 	initShortVideoCfg()
 	initShortVideoCategory()
 	initShortVideoWatch()

@@ -8,6 +8,26 @@
         type="info"
     />
 
+    <el-form :model="searchForm" class="search-form" inline label-width="100px">
+      <el-form-item :label="t('common.createdAt')">
+        <el-date-picker
+            v-model="searchForm.dateRange"
+            clearable
+            :end-placeholder="t('pages.anchorIncomeSettlementLogList.endDate')"
+            format="YYYY-MM-DD"
+            :range-separator="t('pages.anchorIncomeSettlementLogList.dateRangeSeparator')"
+            :start-placeholder="t('pages.anchorIncomeSettlementLogList.startDate')"
+            style="width: 260px"
+            type="daterange"
+            value-format="YYYY-MM-DD"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
+        <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
+      </el-form-item>
+    </el-form>
+
     <div class="toolbar">
       <el-button v-if="canExport" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
     </div>
@@ -56,11 +76,23 @@
     </el-table>
 
     <el-empty v-if="!loading && tableData.length === 0" :description="t('pages.anchorList.noSettlementLogData')"/>
+
+    <div v-if="pagination.total > 0" class="pagination">
+      <el-pagination
+          v-model:current-page="pagination.pageIndex"
+          v-model:page-size="pagination.pageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          :total="pagination.total"
+          layout="total, sizes, prev, pager, next, jumper"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
+      />
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {computed, ref, watch} from 'vue'
+import {computed, reactive, ref, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage} from 'element-plus'
 import {anchorIncomeSettlementLogApi} from '@/api/modules/anchor-income-settlement-log'
@@ -85,23 +117,50 @@ const loading = ref(false)
 const tableData = ref<AnchorIncomeSettlementLogItem[]>([])
 const loaded = ref(false)
 
-const buildFilterParams = () => ({
-  roomId: props.anchorId,
+const searchForm = reactive({
+  dateRange: [] as string[],
+})
+
+const pagination = reactive({
+  pageIndex: 1,
+  pageSize: 20,
+  total: 0,
+})
+
+const toDayStartUnix = (dateStr: string): number => {
+  return Math.floor(new Date(`${dateStr}T00:00:00`).getTime() / 1000)
+}
+
+const toDayEndUnix = (dateStr: string): number => {
+  return Math.floor(new Date(`${dateStr}T23:59:59`).getTime() / 1000)
+}
+
+const buildFilterParams = () => {
+  const [startDate, endDate] = searchForm.dateRange || []
+  return {
+    roomId: props.anchorId,
+    startTime: startDate ? toDayStartUnix(startDate) : 0,
+    endTime: endDate ? toDayEndUnix(endDate) : 0,
+  }
+}
+
+const buildQueryParams = () => ({
+  ...buildFilterParams(),
+  pageIndex: pagination.pageIndex,
+  pageSize: pagination.pageSize,
 })
 
 const fetchList = async () => {
   if (!props.anchorId) {
     tableData.value = []
+    pagination.total = 0
     return
   }
   loading.value = true
   try {
-    const response = await anchorIncomeSettlementLogApi.getList({
-      ...buildFilterParams(),
-      pageIndex: 1,
-      pageSize: 50,
-    })
+    const response = await anchorIncomeSettlementLogApi.getList(buildQueryParams())
     tableData.value = response.data || []
+    pagination.total = response.total || 0
     loaded.value = true
   } catch (error) {
     console.error('Failed to load anchor settlement logs:', error)
@@ -109,6 +168,28 @@ const fetchList = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const handleSearch = () => {
+  pagination.pageIndex = 1
+  fetchList()
+}
+
+const handleReset = () => {
+  searchForm.dateRange = []
+  pagination.pageIndex = 1
+  fetchList()
+}
+
+const handlePageChange = (page: number) => {
+  pagination.pageIndex = page
+  fetchList()
+}
+
+const handleSizeChange = (size: number) => {
+  pagination.pageSize = size
+  pagination.pageIndex = 1
+  fetchList()
 }
 
 const handleExport = async () => {
@@ -143,6 +224,9 @@ const formatDate = (dateString: string | null | undefined) => {
 const resetState = () => {
   loaded.value = false
   tableData.value = []
+  searchForm.dateRange = []
+  pagination.pageIndex = 1
+  pagination.total = 0
 }
 
 watch(
@@ -171,9 +255,19 @@ watch(
   margin-bottom: 16px;
 }
 
+.search-form {
+  margin-bottom: 16px;
+}
+
 .toolbar {
   margin-bottom: 16px;
   display: flex;
   justify-content: flex-end;
+}
+
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
 }
 </style>

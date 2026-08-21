@@ -19,6 +19,7 @@ func HandleVendorBalance(ctx context.Context, req *gameplatformdto.VendorBalance
 	}
 	bodyParams := collectVendorCallbackBodyParams(ctx)
 	fillVendorBalanceReq(req, bodyParams)
+	req.IP = resolveVendorCallbackIP(ctx, req.IP, bodyParams)
 
 	userIDStr := strings.TrimSpace(req.OperatorPlayerSession)
 	vendorDetailLog().Infof(ctx, "vendor balance request user_id=%s player_name=%s operator_token=%s game_id=%s ip=%s",
@@ -71,9 +72,6 @@ func validateVendorBalanceReq(req *gameplatformdto.VendorBalanceReq) *vendorCall
 	}
 	if strings.TrimSpace(req.OperatorPlayerSession) == "" {
 		return &vendorCallbackFail{Code: vendorCallbackCodeInvalidParam, Message: "invalid operator_player_session"}
-	}
-	if strings.TrimSpace(req.IP) == "" {
-		return &vendorCallbackFail{Code: vendorCallbackCodeInvalidParam, Message: "invalid ip"}
 	}
 	if strings.TrimSpace(req.GameID) == "" {
 		return &vendorCallbackFail{Code: vendorCallbackCodeInvalidParam, Message: "invalid game_id"}

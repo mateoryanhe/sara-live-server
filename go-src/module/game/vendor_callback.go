@@ -104,6 +104,22 @@ func collectVendorCallbackBodyParams(ctx context.Context) map[string]string {
 	return params
 }
 
+// resolveVendorCallbackIP 优先使用回调 body 中的 ip,缺失时回退为请求客户端 IP(第三方服务端地址).
+func resolveVendorCallbackIP(ctx context.Context, bodyIP string, params map[string]string) string {
+	if ip := strings.TrimSpace(bodyIP); ip != "" {
+		return ip
+	}
+	if params != nil {
+		if ip := strings.TrimSpace(params["ip"]); ip != "" {
+			return ip
+		}
+	}
+	if r := g.RequestFromCtx(ctx); r != nil {
+		return strings.TrimSpace(r.GetClientIp())
+	}
+	return ""
+}
+
 func parseVendorCallbackTimestamp(raw string) int64 {
 	parsed, err := strconv.ParseInt(strings.TrimSpace(raw), 10, 64)
 	if err != nil {

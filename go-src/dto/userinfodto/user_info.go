@@ -43,16 +43,19 @@ type GetUserExtReq struct {
 }
 
 type GetUserExtRes struct {
-	UserId             uint64     `json:"userId,string"`
-	PrettyId           uint64     `json:"prettyId,string" dc:"靓号"`
-	CanRank            bool       `json:"canRank" dc:"是否可上排行榜"`
-	PackageName        string     `json:"packageName" dc:"注册包名"`
-	AppVersion         string     `json:"appVersion" dc:"注册版本号"`
-	FollowCount        uint64     `json:"followCount" dc:"当前关注数"`
-	FollowerCount      uint64     `json:"followerCount" dc:"当前粉丝数"`
-	CancelCode         string     `json:"cancelCode" dc:"注销码"`
-	CancelCodeExpireAt *time.Time `json:"cancelCodeExpireAt" dc:"注销码过期时间"`
-	FirstRecharge      bool       `json:"firstRecharge" dc:"是否首次充值(未首充为true)"`
+	UserId                uint64     `json:"userId,string"`
+	PrettyId              uint64     `json:"prettyId,string" dc:"靓号"`
+	CanRank               bool       `json:"canRank" dc:"是否可上排行榜"`
+	PackageName           string     `json:"packageName" dc:"注册包名"`
+	AppVersion            string     `json:"appVersion" dc:"注册版本号"`
+	FollowCount           uint64     `json:"followCount" dc:"当前关注数"`
+	FollowerCount         uint64     `json:"followerCount" dc:"当前粉丝数"`
+	CancelCode            string     `json:"cancelCode" dc:"注销码"`
+	CancelCodeExpireAt    *time.Time `json:"cancelCodeExpireAt" dc:"注销码过期时间"`
+	FirstRecharge         bool       `json:"firstRecharge" dc:"是否首次充值(未首充为true)"`
+	ShortVideoViewCount   uint64     `json:"shortVideoViewCount" dc:"累计短视频观看人数"`
+	ShortVideoTotalIncome float64    `json:"shortVideoTotalIncome" dc:"累计短视频收入总额(钻石)"`
+	ShortVideoLikeCount   uint64     `json:"shortVideoLikeCount" dc:"累计短视频点赞总数"`
 }
 
 // UpdateGenderReq 修改性别

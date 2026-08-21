@@ -32,6 +32,7 @@ func HandleVendorTransfer(ctx context.Context, req *gameplatformdto.VendorTransf
 	}
 	bodyParams := collectVendorTransferBodyParams(ctx)
 	fillVendorTransferReq(req, bodyParams)
+	req.IP = resolveVendorCallbackIP(ctx, req.IP, bodyParams)
 
 	vendorDetailLog().Infof(ctx,
 		"vendor transfer request transaction_id=%s player_name=%s bet_id=%s bet_amount=%v win_amount=%v real_transfer_amount=%v",
@@ -109,7 +110,6 @@ func validateVendorTransferReq(req *gameplatformdto.VendorTransferReq) *vendorCa
 		"operator_token":          req.OperatorToken,
 		"operator_player_session": req.OperatorPlayerSession,
 		"secret_key":              req.SecretKey,
-		"ip":                      req.IP,
 		"game_id":                 req.GameID,
 		"player_name":             req.PlayerName,
 		"parent_bet_id":           req.ParentBetID,

@@ -43,6 +43,11 @@ func WatchShortVideoStart(ctx context.Context, req *shortvideodto.WatchShortVide
 		stat := shortvideodao.GetStatByVideoId(watch.VideoId)
 		if stat != nil {
 			stat.AddViewCount(1)
+			if video.AuthorId > 0 {
+				if authorStat := shortvideodao.GetAuthorStatByAuthorId(video.AuthorId); authorStat != nil {
+					authorStat.AddViewCount(1)
+				}
+			}
 		}
 	}
 
@@ -96,6 +101,11 @@ func PayShortVideo(ctx context.Context, req *shortvideodto.PayShortVideoReq) (*s
 	defer gmlock.Unlock(lockName)
 	if stat := shortvideodao.GetStatByVideoId(req.VideoId); stat != nil {
 		stat.AddTotalDiamondIncome(price)
+		if video.AuthorId > 0 {
+			if authorStat := shortvideodao.GetAuthorStatByAuthorId(video.AuthorId); authorStat != nil {
+				authorStat.AddTotalDiamondIncome(price)
+			}
+		}
 	}
 
 	return &shortvideodto.PayShortVideoRes{
