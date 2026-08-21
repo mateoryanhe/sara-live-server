@@ -2,6 +2,7 @@ package agora
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -134,7 +135,7 @@ func refreshCloudPlayerTokenForAnchor(ctx context.Context, anchorId uint64) {
 	}
 	restoreCloudPlayerSequence(playerId)
 
-	expireAt, err := updateBotAnchorCloudPlayerToken(ctx, anchorId, playerId)
+	expireAt, err := updateBotAnchorCloudPlayerToken(ctx, anchorId, playerId, cfg.CloudPlayerVideo)
 	if err == nil {
 		expireTime := time.Unix(expireAt, 0)
 		cfg.SetCloudPlayerTokenExpireAt(&expireTime)
@@ -142,17 +143,25 @@ func refreshCloudPlayerTokenForAnchor(ctx context.Context, anchorId uint64) {
 		ScheduleCloudPlayerTokenRefresh(anchorId, playerId, expireTime)
 		return
 	}
-	if !isCloudPlayerNotFound(err) {
+	if !shouldRecreateCloudPlayerOnRefresh(err) {
 		g.Log().Warningf(ctx, "refresh cloud player token failed anchorId=%d playerId=%s err=%v", anchorId, playerId, err)
 		return
 	}
 
-	g.Log().Warningf(ctx, "cloud player missing, recreating anchorId=%d playerId=%s", anchorId, playerId)
-	unregisterCloudPlayerSequence(playerId)
+	g.Log().Warningf(ctx, "refresh cloud player token failed, recreating anchorId=%d playerId=%s err=%v", anchorId, playerId, err)
+	recreateBotAnchorCloudPlayer(ctx, anchorId, room, cfg, playerId)
+}
+
+func recreateBotAnchorCloudPlayer(ctx context.Context, anchorId uint64, room *entity.LiveRoom, cfg *entity.LiveRoomCfg, oldPlayerId string) {
+	unregisterCloudPlayerSequence(oldPlayerId)
+	if stopErr := StopBotAnchorCloudPlayer(ctx, oldPlayerId); stopErr != nil {
+		g.Log().Warningf(ctx, "stop old cloud player before recreate failed anchorId=%d playerId=%s err=%v", anchorId, oldPlayerId, stopErr)
+	}
+
 	newPlayerId, newExpireAt, createErr := StartBotAnchorCloudPlayer(ctx, anchorId, cfg.CloudPlayerVideo)
 	if createErr != nil {
 		xrlog.ErrorWithErr(ctx, logSourceAgoraCloudPlayer,
-			fmt.Sprintf("recreate failed anchorId=%d oldPlayerId=%s", anchorId, playerId),
+			fmt.Sprintf("recreate failed anchorId=%d oldPlayerId=%s", anchorId, oldPlayerId),
 			createErr)
 		return
 	}
@@ -164,7 +173,7 @@ func refreshCloudPlayerTokenForAnchor(ctx context.Context, anchorId uint64) {
 	g.Log().Infof(ctx, "cloud player recreated anchorId=%d playerId=%s", anchorId, newPlayerId)
 }
 
-func updateBotAnchorCloudPlayerToken(ctx context.Context, anchorId uint64, playerId string) (int64, error) {
+func updateBotAnchorCloudPlayerToken(ctx context.Context, anchorId uint64, playerId, cloudPlayerVideo string) (int64, error) {
 	playerId = strings.TrimSpace(playerId)
 	if anchorId == 0 || playerId == "" {
 		return 0, nil
@@ -181,15 +190,18 @@ func updateBotAnchorCloudPlayerToken(ctx context.Context, anchorId uint64, playe
 		return 0, err
 	}
 
+	playerBody, err := buildBotAnchorCloudPlayerBody(anchorId, cloudPlayerVideo, token)
+	if err != nil {
+		return 0, err
+	}
+
 	path := fmt.Sprintf("/%s/v1/projects/%s/cloud-player/players/%s", cfg.CloudPlayerRegion, cfg.AppId, playerId)
 	query := fmt.Sprintf("sequence=%d", nextCloudPlayerSequence(playerId))
 	requestID := guid.S()
 
 	client := newAgoraRestClient(cfg)
 	client.SetHeader("X-Request-ID", requestID)
-	resp, err := client.Patch(ctx, agoraRestBaseURL+path+"?"+query, cloudPlayerUpdateReq{
-		Player: cloudPlayerUpdateBody{Token: token},
-	})
+	resp, err := client.Patch(ctx, agoraRestBaseURL+path+"?"+query, cloudPlayerUpdateReq{Player: playerBody})
 	if err != nil {
 		return 0, err
 	}
@@ -209,11 +221,30 @@ func updateBotAnchorCloudPlayerToken(ctx context.Context, anchorId uint64, playe
 		"refresh token failed anchorId=%d playerId=%s requestId=%s status=%d path=%s body=%s",
 		anchorId, playerId, requestID, resp.StatusCode, path, string(respBody),
 	))
-	return 0, fmt.Errorf("refresh cloud player token status=%d", resp.StatusCode)
+	return 0, &cloudPlayerRefreshError{statusCode: resp.StatusCode}
+}
+
+type cloudPlayerRefreshError struct {
+	statusCode int
+}
+
+func (e *cloudPlayerRefreshError) Error() string {
+	return fmt.Sprintf("refresh cloud player token status=%d", e.statusCode)
+}
+
+func shouldRecreateCloudPlayerOnRefresh(err error) bool {
+	if errors.Is(err, errCloudPlayerNotFound) {
+		return true
+	}
+	var refreshErr *cloudPlayerRefreshError
+	if errors.As(err, &refreshErr) {
+		return refreshErr.statusCode == http.StatusBadRequest || refreshErr.statusCode == http.StatusNotFound
+	}
+	return false
 }
 
 var errCloudPlayerNotFound = fmt.Errorf("cloud player not found")
 
 func isCloudPlayerNotFound(err error) bool {
-	return err == errCloudPlayerNotFound
+	return errors.Is(err, errCloudPlayerNotFound)
 }

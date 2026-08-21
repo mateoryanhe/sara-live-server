@@ -2,7 +2,6 @@ package agora
 
 import (
 	"sync"
-	"time"
 )
 
 var cloudPlayerUpdateSeq sync.Map // playerId -> int
@@ -28,14 +27,15 @@ func restoreCloudPlayerSequence(playerId string) {
 	if _, loaded := cloudPlayerUpdateSeq.Load(playerId); loaded {
 		return
 	}
-	cloudPlayerUpdateSeq.Store(playerId, int(time.Now().Unix()))
+	// 服务重启后从 0 开始；若 Agora 侧已有更高 sequence，续期失败会走重建逻辑。
+	cloudPlayerUpdateSeq.Store(playerId, -1)
 }
 
 func nextCloudPlayerSequence(playerId string) int {
 	if playerId == "" {
 		return 0
 	}
-	val, _ := cloudPlayerUpdateSeq.LoadOrStore(playerId, int(time.Now().Unix())-1)
+	val, _ := cloudPlayerUpdateSeq.LoadOrStore(playerId, -1)
 	seq := val.(int) + 1
 	cloudPlayerUpdateSeq.Store(playerId, seq)
 	return seq

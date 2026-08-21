@@ -19,10 +19,10 @@ import (
 const logSourceAgoraCloudPlayer = "AgoraCloudPlayer"
 
 type cloudPlayerCreateReq struct {
-	Player cloudPlayerCreateBody `json:"player"`
+	Player cloudPlayerBody `json:"player"`
 }
 
-type cloudPlayerCreateBody struct {
+type cloudPlayerBody struct {
 	Account     string `json:"account"`
 	ChannelName string `json:"channelName"`
 	StreamUrl   string `json:"streamUrl"`
@@ -33,11 +33,20 @@ type cloudPlayerCreateBody struct {
 }
 
 type cloudPlayerUpdateReq struct {
-	Player cloudPlayerUpdateBody `json:"player"`
+	Player cloudPlayerBody `json:"player"`
 }
 
-type cloudPlayerUpdateBody struct {
-	Token string `json:"token,omitempty"`
+func buildBotAnchorCloudPlayerBody(anchorId uint64, cloudPlayerVideo, token string) (cloudPlayerBody, error) {
+	streamUrl := strings.TrimSpace(upload.ResolveCloudPlayerVideoUrl(cloudPlayerVideo))
+	if streamUrl == "" {
+		return cloudPlayerBody{}, errercode.CreateCode(errercode.InvalidParam)
+	}
+	return cloudPlayerBody{
+		Account:     buildUserAccount(anchorId),
+		ChannelName: strconv.FormatUint(anchorId, 10),
+		StreamUrl:   streamUrl,
+		Token:       token,
+	}, nil
 }
 
 type cloudPlayerCreateResp struct {
@@ -48,11 +57,6 @@ type cloudPlayerCreateResp struct {
 
 // StartBotAnchorCloudPlayer 机器人主播开播时创建声网云播放器
 func StartBotAnchorCloudPlayer(ctx context.Context, anchorId uint64, cloudPlayerVideo string) (string, int64, error) {
-	streamUrl := strings.TrimSpace(upload.ResolveCloudPlayerVideoUrl(cloudPlayerVideo))
-	if streamUrl == "" {
-		return "", 0, errercode.CreateCode(errercode.InvalidParam)
-	}
-
 	cfg := getAgoraCfgCache()
 	if err := validateAgoraRestCfg(cfg); err != nil {
 		return "", 0, err
@@ -64,23 +68,21 @@ func StartBotAnchorCloudPlayer(ctx context.Context, anchorId uint64, cloudPlayer
 		return "", 0, err
 	}
 
-	path := fmt.Sprintf("/%s/v1/projects/%s/cloud-player/players", cfg.CloudPlayerRegion, cfg.AppId)
-	reqBody := cloudPlayerCreateReq{
-		Player: cloudPlayerCreateBody{
-			Account:     buildUserAccount(anchorId),
-			ChannelName: channelName,
-			StreamUrl:   streamUrl,
-			Token:       token,
-			Name:        fmt.Sprintf("bot_%d", anchorId),
-			RepeatTime:  -1,
-			IdleTimeout: 600,
-		},
+	playerBody, err := buildBotAnchorCloudPlayerBody(anchorId, cloudPlayerVideo, token)
+	if err != nil {
+		return "", 0, err
 	}
+	playerBody.Name = fmt.Sprintf("bot_%d", anchorId)
+	playerBody.RepeatTime = -1
+	playerBody.IdleTimeout = 600
+
+	path := fmt.Sprintf("/%s/v1/projects/%s/cloud-player/players", cfg.CloudPlayerRegion, cfg.AppId)
+	reqBody := cloudPlayerCreateReq{Player: playerBody}
 
 	resp, err := agoraRestPost(ctx, cfg, path, reqBody)
 	if err != nil {
 		xrlog.ErrorWithErr(ctx, logSourceAgoraCloudPlayer,
-			fmt.Sprintf("create request failed anchorId=%d channel=%s streamUrl=%s path=%s", anchorId, channelName, streamUrl, path),
+			fmt.Sprintf("create request failed anchorId=%d channel=%s streamUrl=%s path=%s", anchorId, playerBody.ChannelName, playerBody.StreamUrl, path),
 			err)
 		return "", 0, errercode.CreateCode(errercode.AgoraCloudPlayerFailed)
 	}
@@ -108,7 +110,7 @@ func StartBotAnchorCloudPlayer(ctx context.Context, anchorId uint64, cloudPlayer
 
 	xrlog.Error(ctx, logSourceAgoraCloudPlayer, fmt.Sprintf(
 		"create failed anchorId=%d status=%d playerId=%s channel=%s streamUrl=%s region=%s appId=%s path=%s requestId=%s body=%s",
-		anchorId, resp.StatusCode, playerId, channelName, streamUrl, cfg.CloudPlayerRegion, cfg.AppId, path,
+		anchorId, resp.StatusCode, playerId, playerBody.ChannelName, playerBody.StreamUrl, cfg.CloudPlayerRegion, cfg.AppId, path,
 		strings.TrimSpace(resp.Header.Get("X-Request-ID")), string(respBody),
 	))
 	return "", 0, errercode.CreateCode(errercode.AgoraCloudPlayerFailed)
