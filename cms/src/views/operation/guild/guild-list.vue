@@ -36,6 +36,7 @@
             style="width: 100%"
             @current-change="handleCurrentRowChange"
         >
+          <el-table-column fixed label="#" type="index" width="55" :index="formatRowIndex"/>
           <el-table-column label="ID" prop="id" width="190">
             <template #default="{ row }">
               <el-button v-if="canViewDetail" link type="primary" @click="openDetail(row)">
@@ -121,25 +122,16 @@
           <el-input v-model="currentRow.name" :placeholder="t('pages.guildList.guildNamePlaceholder')"/>
         </el-form-item>
         <el-form-item :label="t('pages.guildList.leader')" prop="leaderId">
-          <el-select
-              v-model="currentRow.leaderId"
-              :loading="cmsUserLoading"
-              :remote-method="searchCmsUsers"
-              clearable
-              filterable
-              :placeholder="t('pages.guildList.leaderSearchPlaceholder')"
-              remote
-              reserve-keyword
-              style="width: 100%"
-              @focus="loadInitialCmsUsers"
-          >
-            <el-option
-                v-for="item in cmsUserOptions"
-                :key="item.id"
-                :label="formatCmsUserOption(item)"
-                :value="item.id"
+          <div class="leader-picker-field">
+            <el-input
+                :model-value="leaderDisplayText"
+                class="leader-picker-input"
+                readonly
+                :placeholder="t('pages.guildList.leaderPickPlaceholder')"
             />
-          </el-select>
+            <el-button type="primary" @click="openLeaderPicker">{{ t('pages.guildList.selectLeader') }}</el-button>
+            <el-button v-if="currentRow.leaderId" link type="danger" @click="clearLeader">{{ t('pages.guildList.clearLeader') }}</el-button>
+          </div>
         </el-form-item>
         <el-form-item :label="t('pages.guildList.description')" prop="description">
           <el-input v-model="currentRow.description" :placeholder="t('pages.guildList.descriptionPlaceholder')" type="textarea"/>
@@ -150,6 +142,8 @@
         <el-button type="primary" @click="handleSave">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
+
+    <CmsUserPickerDialog v-model="leaderPickerVisible" @select="handleLeaderSelect"/>
 
     <el-dialog v-model="joinDialogVisible" :title="joinDialogTitle" width="480px">
       <el-form ref="joinFormRef" :model="joinForm" :rules="joinFormRules" label-width="100px">
@@ -184,7 +178,8 @@ import {computed, onMounted, reactive, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {useRouter} from 'vue-router'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
-import {cmsUserApi, guildApi} from '@/api'
+import {guildApi} from '@/api'
+import CmsUserPickerDialog from '@/components/CmsUserPickerDialog.vue'
 import type {CMSUser} from '@/api/modules/cmsuser'
 import type {Guild, GuildAnchorImportResultState, ImportGuildAnchorRow} from '@/types/api.ts'
 import {usePagePermission} from '@/composables/usePagePermission'
@@ -215,8 +210,8 @@ const {can} = usePagePermission('GuildManagement')
 const canViewDetail = computed(() => can('viewDetail'))
 const loading = ref(false)
 const importing = ref(false)
-const cmsUserLoading = ref(false)
-const cmsUserOptions = ref<CMSUser[]>([])
+const leaderPickerVisible = ref(false)
+const selectedLeader = ref<CMSUser | null>(null)
 const tableData = ref<Guild[]>([])
 const selectedGuild = ref<Guild | null>(null)
 const total = ref(0)
@@ -250,9 +245,16 @@ const currentRow = ref<GuildForm>({
 })
 
 const formRef = ref<FormInstance>()
-let cmsUserSearchTimer: ReturnType<typeof setTimeout> | undefined
 
-const formatCmsUserOption = (item: CMSUser) => `${item.name} (${item.id})`
+const leaderDisplayText = computed(() => {
+  if (selectedLeader.value) {
+    return `${selectedLeader.value.name} (${selectedLeader.value.id})`
+  }
+  if (currentRow.value.leaderId) {
+    return currentRow.value.leaderId
+  }
+  return ''
+})
 
 const formatLeader = (row: Guild) => {
   if (row.leaderName) {
@@ -261,57 +263,18 @@ const formatLeader = (row: Guild) => {
   return row.leaderId || '-'
 }
 
-const mergeCmsUserOptions = (users: CMSUser[]) => {
-  const map = new Map<string, CMSUser>()
-  for (const item of cmsUserOptions.value) {
-    map.set(item.id, item)
-  }
-  for (const item of users) {
-    map.set(item.id, item)
-  }
-  cmsUserOptions.value = [...map.values()]
+const openLeaderPicker = () => {
+  leaderPickerVisible.value = true
 }
 
-const fetchCmsUserOptions = async (key = '') => {
-  cmsUserLoading.value = true
-  try {
-    const response = await cmsUserApi.getCMSUserList({
-      key: key.trim(),
-      pageIndex: 1,
-      pageSize: 20
-    })
-    mergeCmsUserOptions(response.data)
-  } catch (error) {
-    console.error('fetch cms user list failed:', error)
-  } finally {
-    cmsUserLoading.value = false
-  }
+const clearLeader = () => {
+  currentRow.value.leaderId = ''
+  selectedLeader.value = null
 }
 
-const searchCmsUsers = (query: string) => {
-  if (cmsUserSearchTimer) {
-    clearTimeout(cmsUserSearchTimer)
-  }
-  cmsUserSearchTimer = setTimeout(() => {
-    fetchCmsUserOptions(query)
-  }, 300)
-}
-
-const loadInitialCmsUsers = () => {
-  if (cmsUserOptions.value.length === 0) {
-    fetchCmsUserOptions('')
-  }
-}
-
-const ensureLeaderOption = async (leaderId: string) => {
-  const id = leaderId.trim()
-  if (!id || id === '0') {
-    return
-  }
-  if (cmsUserOptions.value.some(item => item.id === id)) {
-    return
-  }
-  await fetchCmsUserOptions(id)
+const handleLeaderSelect = (user: CMSUser) => {
+  currentRow.value.leaderId = user.id
+  selectedLeader.value = user
 }
 
 const joinFormRules = computed<FormRules>(() => ({
@@ -365,11 +328,14 @@ const handleCurrentChange = (page: number) => {
   fetchGuildList()
 }
 
+const formatRowIndex = (index: number) =>
+    (currentPage.value - 1) * pageSize.value + index + 1
+
 const handleCurrentRowChange = (row: Guild | null) => {
   selectedGuild.value = row
 }
 
-const handleAdd = async () => {
+const handleAdd = () => {
   dialogTitle.value = t('pages.guildList.addGuild')
   currentRow.value = {
     id: '',
@@ -377,12 +343,11 @@ const handleAdd = async () => {
     leaderId: '',
     description: '',
   }
-  cmsUserOptions.value = []
+  selectedLeader.value = null
   dialogVisible.value = true
-  await fetchCmsUserOptions('')
 }
 
-const handleEdit = async (row: Guild) => {
+const handleEdit = (row: Guild) => {
   dialogTitle.value = t('pages.guildList.editGuild')
   const leaderId = row.leaderId && row.leaderId !== '0' ? row.leaderId : ''
   currentRow.value = {
@@ -391,15 +356,9 @@ const handleEdit = async (row: Guild) => {
     leaderId,
     description: row.description,
   }
-  cmsUserOptions.value = []
-  if (leaderId) {
-    if (row.leaderName) {
-      cmsUserOptions.value = [{id: leaderId, name: row.leaderName} as CMSUser]
-    }
-    await ensureLeaderOption(leaderId)
-  } else {
-    await fetchCmsUserOptions('')
-  }
+  selectedLeader.value = leaderId && row.leaderName
+      ? {id: leaderId, name: row.leaderName} as CMSUser
+      : null
   dialogVisible.value = true
 }
 
@@ -707,6 +666,17 @@ const handleViewMembers = (row: Guild) => {
 .pagination-container {
   margin-top: 20px;
   text-align: right;
+}
+
+.leader-picker-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.leader-picker-input {
+  flex: 1;
 }
 
 .hidden-file-input {

@@ -104,6 +104,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ShortVideoDiskSpaceInsufficient: "Insufficient disk space to upload short video",
 		ShortVideoPriceTierNonExist:     "Short video price tier does not exist",
 		SimulatorLoginDenied:            "Simulator login is not allowed",
+		GuildLeaderDisabled:             "Guild leader CMS user is disabled",
 	},
 	lang.LangZHCN: {
 		Success:                         "成功",
@@ -204,6 +205,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ShortVideoDiskSpaceInsufficient: "磁盘空闲空间不足,无法上传短视频",
 		ShortVideoPriceTierNonExist:     "短视频价格挡位不存在",
 		SimulatorLoginDenied:            "不允许模拟器登录",
+		GuildLeaderDisabled:             "工会长对应的CMS用户已停用",
 	},
 	lang.LangZHTW: {
 		Success:                         "成功",
@@ -304,6 +306,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ShortVideoDiskSpaceInsufficient: "磁盤空閒空間不足,無法上傳短視頻",
 		ShortVideoPriceTierNonExist:     "短視頻價格擋位不存在",
 		SimulatorLoginDenied:            "不允許模擬器登入",
+		GuildLeaderDisabled:             "工會長對應的CMS用戶已停用",
 	},
 }
 

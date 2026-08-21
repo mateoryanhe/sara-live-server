@@ -13,6 +13,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AnchorRemoteSelect: typeof import('./src/components/AnchorRemoteSelect.vue')['default']
+    CmsUserPickerDialog: typeof import('./src/components/CmsUserPickerDialog.vue')['default']
     ElAlert: typeof import('element-plus/es')['ElAlert']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
@@ -82,6 +83,7 @@ declare module 'vue' {
 // For TSX support
 declare global {
   const AnchorRemoteSelect: typeof import('./src/components/AnchorRemoteSelect.vue')['default']
+  const CmsUserPickerDialog: typeof import('./src/components/CmsUserPickerDialog.vue')['default']
   const ElAlert: typeof import('element-plus/es')['ElAlert']
   const ElAside: typeof import('element-plus/es')['ElAside']
   const ElAvatar: typeof import('element-plus/es')['ElAvatar']

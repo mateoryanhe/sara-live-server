@@ -102,5 +102,6 @@ func init() {
 		ShortVideoDiskSpaceInsufficient: "Ruang disk tidak cukup untuk mengunggah video pendek",
 		ShortVideoPriceTierNonExist:     "Tier harga video pendek tidak ditemukan",
 		SimulatorLoginDenied:            "Login simulator tidak diizinkan",
+		GuildLeaderDisabled:             "Pengguna CMS pemimpin guild dinonaktifkan",
 	}
 }

@@ -10,6 +10,7 @@ type CMSUserListReq struct {
 	httpserver.CMSQueryReq
 	Name   string `json:"name" dc:"CMS用户名称"`
 	Key    string `json:"key" dc:"关键字(用户名/ID模糊)"`
+	RoleId string `json:"roleId" dc:"角色ID(可选)"`
 	Status uint8  `json:"status" dc:"状态"`
 	Admin  bool   `json:"admin" dc:"是否是管理员"`
 }

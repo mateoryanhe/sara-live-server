@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -197,6 +198,14 @@ func GetCMSUserList(req *cmsuserdto.CMSUserListReq) (int, []*cmsuserdto.CMSUserL
 		likeKey := fmt.Sprintf("%%%s%%", req.Key)
 		sql += ` and (u.name LIKE ? OR CAST(u.id AS CHAR) LIKE ?)`
 		param = append(param, likeKey, likeKey)
+	}
+
+	if req.RoleId != "" {
+		roleId, err := strconv.ParseUint(strings.TrimSpace(req.RoleId), 10, 64)
+		if err == nil && roleId > 0 {
+			sql += ` and u.role_id = ?`
+			param = append(param, roleId)
+		}
 	}
 
 	if req.Status > 0 {

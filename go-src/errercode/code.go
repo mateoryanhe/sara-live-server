@@ -187,6 +187,8 @@ const (
 	SimulatorLoginDenied XRCode = 149
 	// ShortVideoPriceTierNonExist 短视频价格挡位不存在
 	ShortVideoPriceTierNonExist XRCode = 150
+	// GuildLeaderDisabled 工会长对应的CMS用户已停用
+	GuildLeaderDisabled XRCode = 151
 )
 
 type XError struct {

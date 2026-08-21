@@ -42,6 +42,9 @@ func CreateGuild(ctx context.Context, req *guilddto.CreateGuildReq) (res *guildd
 	if existing := guilddao.GetGuildByName(req.Name); existing != nil {
 		return nil, errercode.CreateCode(errercode.GuildExist)
 	}
+	if err = validateGuildLeader(req.LeaderId); err != nil {
+		return nil, err
+	}
 
 	guild := liveentity.NewLiveGuild(
 		genGuildId(),
@@ -66,6 +69,9 @@ func UpdateGuild(ctx context.Context, req *guilddto.UpdateGuildReq) (res *guildd
 
 	if existing := guilddao.GetGuildByName(req.Name); existing != nil && existing.ID != req.ID {
 		return nil, errercode.CreateCode(errercode.GuildExist)
+	}
+	if err = validateGuildLeader(req.LeaderId); err != nil {
+		return nil, err
 	}
 
 	guild.Name = req.Name
@@ -122,4 +128,18 @@ func resolveLeaderName(leaderId uint64) string {
 		return ""
 	}
 	return user.Name
+}
+
+func validateGuildLeader(leaderId uint64) error {
+	if leaderId == 0 {
+		return nil
+	}
+	user := cmsuserdao.GetCMSUserById(leaderId)
+	if user == nil {
+		return errercode.CreateCode(errercode.InvalidParam)
+	}
+	if user.Status != 1 {
+		return errercode.CreateCode(errercode.GuildLeaderDisabled)
+	}
+	return nil
 }
