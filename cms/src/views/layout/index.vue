@@ -342,7 +342,7 @@
           </el-sub-menu>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('ShortVideoManagement') || hasMenuPermission('ShortVideoCategoryManagement') || hasMenuPermission('ShortVideoCfgManagement') || hasMenuPermission('ShortVideoWatchManagement')"
+            v-if="hasMenuPermission('ShortVideoManagement') || hasMenuPermission('ShortVideoCategoryManagement') || hasMenuPermission('ShortVideoPriceTierManagement') || hasMenuPermission('ShortVideoCfgManagement') || hasMenuPermission('ShortVideoWatchManagement')"
             index="/shortvideo">
           <template #title>
             <el-icon>
@@ -361,6 +361,12 @@
               <Collection/>
             </el-icon>
             <span>{{ t('menu.ShortVideoCategoryManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('ShortVideoPriceTierManagement')" index="/shortvideo/short-video-price-tier-list">
+            <el-icon>
+              <Money/>
+            </el-icon>
+            <span>{{ t('menu.ShortVideoPriceTierManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('ShortVideoCfgManagement')" index="/shortvideo/short-video-cfg">
             <el-icon>

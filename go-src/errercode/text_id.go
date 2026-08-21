@@ -100,6 +100,7 @@ func init() {
 		PrivateMessageUserBlocked:       "Tidak dapat mengirim pesan pribadi karena hubungan blokir",
 		ActivityMessageNonExist:         "Pesan aktivitas tidak ditemukan",
 		ShortVideoDiskSpaceInsufficient: "Ruang disk tidak cukup untuk mengunggah video pendek",
+		ShortVideoPriceTierNonExist:     "Tier harga video pendek tidak ditemukan",
 		SimulatorLoginDenied:            "Login simulator tidak diizinkan",
 	}
 }

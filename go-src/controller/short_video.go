@@ -70,3 +70,27 @@ func (c *ShortVideoController) UpdateShortVideoCategory(ctx context.Context, req
 func (c *ShortVideoController) DeleteShortVideoCategory(ctx context.Context, req *shortvideodto.DeleteShortVideoCategoryReq) (*shortvideodto.DeleteShortVideoCategoryRes, error) {
 	return shortvideo.DeleteShortVideoCategory(ctx, req)
 }
+
+func (c *ShortVideoController) ShortVideoPriceTierList(ctx context.Context, req *shortvideodto.ShortVideoPriceTierListReq) (*httpserver.CMSQueryResp, error) {
+	return shortvideo.GetShortVideoPriceTierList(ctx, req)
+}
+
+func (c *ShortVideoController) CreateShortVideoPriceTier(ctx context.Context, req *shortvideodto.CreateShortVideoPriceTierReq) (*shortvideodto.CreateShortVideoPriceTierRes, error) {
+	return shortvideo.CreateShortVideoPriceTier(ctx, req)
+}
+
+func (c *ShortVideoController) UpdateShortVideoPriceTier(ctx context.Context, req *shortvideodto.UpdateShortVideoPriceTierReq) (*shortvideodto.UpdateShortVideoPriceTierRes, error) {
+	return shortvideo.UpdateShortVideoPriceTier(ctx, req)
+}
+
+func (c *ShortVideoController) DeleteShortVideoPriceTier(ctx context.Context, req *shortvideodto.DeleteShortVideoPriceTierReq) (*shortvideodto.DeleteShortVideoPriceTierRes, error) {
+	return shortvideo.DeleteShortVideoPriceTier(ctx, req)
+}
+
+func (c *ShortVideoController) OnShelfShortVideoPriceTier(ctx context.Context, req *shortvideodto.OnShelfShortVideoPriceTierReq) (*shortvideodto.OnShelfShortVideoPriceTierRes, error) {
+	return shortvideo.OnShelfShortVideoPriceTier(ctx, req)
+}
+
+func (c *ShortVideoController) OffShelfShortVideoPriceTier(ctx context.Context, req *shortvideodto.OffShelfShortVideoPriceTierReq) (*shortvideodto.OffShelfShortVideoPriceTierRes, error) {
+	return shortvideo.OffShelfShortVideoPriceTier(ctx, req)
+}

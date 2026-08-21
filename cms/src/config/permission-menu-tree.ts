@@ -179,6 +179,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
         children: [
             page('ShortVideoManagement'),
             page('ShortVideoCategoryManagement'),
+            page('ShortVideoPriceTierManagement'),
             page('ShortVideoCfgManagement'),
             page('ShortVideoWatchManagement'),
         ],

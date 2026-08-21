@@ -7,4 +7,5 @@ func Init() {
 	initShortVideoCfg()
 	initShortVideoCategory()
 	initShortVideoWatch()
+	initShortVideoPriceTier()
 }

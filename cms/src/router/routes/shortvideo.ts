@@ -25,6 +25,12 @@ export const shortVideoRoutes: RouteRecordRaw = {
             meta: {title: '短视频分类'},
         },
         {
+            path: 'short-video-price-tier-list',
+            name: 'ShortVideoPriceTierManagement',
+            component: () => import('@/views/shortvideo/short-video-price-tier-list.vue'),
+            meta: {title: '短视频价格挡位'},
+        },
+        {
             path: 'short-video-watch-list',
             name: 'ShortVideoWatchManagement',
             component: () => import('@/views/shortvideo/short-video-watch-list.vue'),

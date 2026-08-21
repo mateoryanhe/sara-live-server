@@ -53,6 +53,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   ShortVideoGroup: 'Videos cortos',
   ShortVideoManagement: 'Videos cortos',
   ShortVideoCategoryManagement: 'Categorías',
+  ShortVideoPriceTierManagement: 'Niveles de precio',
   ShortVideoCfgManagement: 'Config. de videos',
   ShortVideoWatchManagement: 'Historial de visualización',
   GameManagement: 'Juegos',

@@ -185,6 +185,8 @@ const (
 	ShortVideoDiskSpaceInsufficient XRCode = 148
 	// SimulatorLoginDenied 模拟器登录被禁止
 	SimulatorLoginDenied XRCode = 149
+	// ShortVideoPriceTierNonExist 短视频价格挡位不存在
+	ShortVideoPriceTierNonExist XRCode = 150
 )
 
 type XError struct {

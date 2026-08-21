@@ -86,3 +86,11 @@ func (c *ShortVideoAppController) AppDeleteShortVideo(ctx context.Context, req *
 func (c *ShortVideoAppController) AppShortVideoStatList(ctx context.Context, req *shortvideodto.AppShortVideoStatListReq) (*shortvideodto.AppShortVideoStatListRes, error) {
 	return shortvideo.GetAppShortVideoStatList(ctx, req)
 }
+
+func (c *ShortVideoAppController) AppShortVideoPriceTierList(ctx context.Context, req *shortvideodto.AppShortVideoPriceTierListReq) (*shortvideodto.AppShortVideoPriceTierListRes, error) {
+	return shortvideo.GetAppShortVideoPriceTierList(ctx, req)
+}
+
+func (c *ShortVideoAppController) AppUserShortVideoList(ctx context.Context, req *shortvideodto.AppUserShortVideoListReq) (*shortvideodto.AppShortVideoListRes, error) {
+	return shortvideo.GetAppUserShortVideoList(ctx, req)
+}

@@ -1266,6 +1266,18 @@ export interface ShortVideoCategory {
 export interface ShortVideoCategoryQuery extends PageQuery {
 }
 
+export interface ShortVideoPriceTier {
+    id: string
+    price: number
+    status: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface ShortVideoPriceTierQuery extends PageQuery {
+    statusFilter?: number
+}
+
 export interface LiveRoomTag {
     id: string
     name: string

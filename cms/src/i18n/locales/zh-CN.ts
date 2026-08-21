@@ -52,6 +52,7 @@ const menu = {
   ShortVideoGroup: '短视频',
   ShortVideoManagement: '短视频管理',
   ShortVideoCategoryManagement: '短视频分类',
+  ShortVideoPriceTierManagement: '短视频价格挡位',
   ShortVideoCfgManagement: '短视频配置',
   ShortVideoWatchManagement: '观看记录',
   GameManagement: '游戏管理',

@@ -41,6 +41,7 @@ import {gameWinLogListMessages} from './game-win-log-list'
 import {shortVideoListMessages} from './short-video-list'
 import {shortVideoCfgMessages} from './short-video-cfg'
 import {shortVideoCategoryListMessages} from './short-video-category-list'
+import {shortVideoPriceTierListMessages} from './short-video-price-tier-list'
 import {shortVideoWatchListMessages} from './short-video-watch-list'
 import {accountCfgMessages} from './account-cfg'
 import {firstRechargeActivityCfgMessages} from './first-recharge-activity-cfg'
@@ -103,6 +104,7 @@ const pageMessageBuilders = [
   ['shortVideoList', shortVideoListMessages],
   ['shortVideoCfg', shortVideoCfgMessages],
   ['shortVideoCategoryList', shortVideoCategoryListMessages],
+  ['shortVideoPriceTierList', shortVideoPriceTierListMessages],
   ['shortVideoWatchList', shortVideoWatchListMessages],
   ['accountCfg', accountCfgMessages],
   ['firstRechargeActivityCfg', firstRechargeActivityCfgMessages],

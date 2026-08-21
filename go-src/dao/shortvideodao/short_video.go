@@ -93,6 +93,24 @@ func GetAuthorShortVideos(authorId uint64) []*entity.ShortVideo {
 	return filtered
 }
 
+// GetAuthorOnShelfShortVideos 查询指定作者已上架短视频(走内存缓存,不排序不分页)
+func GetAuthorOnShelfShortVideos(authorId uint64) []*entity.ShortVideo {
+	if authorId == 0 {
+		return nil
+	}
+	filtered := make([]*entity.ShortVideo, 0)
+	for _, video := range shortVideoCacheMgr.Values() {
+		if video == nil || video.AuthorId != authorId {
+			continue
+		}
+		if video.Status != entity.ShortVideoStatusOnShelf {
+			continue
+		}
+		filtered = append(filtered, video)
+	}
+	return filtered
+}
+
 func AddShortVideoToCache(row *entity.ShortVideo) {
 	FlushShortVideo(row)
 }

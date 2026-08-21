@@ -263,6 +263,13 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'ShortVideoCategoryManagement:edit': '/shortVideo/updateShortVideoCategory',
     'ShortVideoCategoryManagement:delete': '/shortVideo/deleteShortVideoCategory',
 
+    ShortVideoPriceTierManagement: '/shortVideo/shortVideoPriceTierList',
+    'ShortVideoPriceTierManagement:view': '/shortVideo/shortVideoPriceTierList',
+    'ShortVideoPriceTierManagement:search': '/shortVideo/shortVideoPriceTierList',
+    'ShortVideoPriceTierManagement:create': '/shortVideo/createShortVideoPriceTier',
+    'ShortVideoPriceTierManagement:edit': '/shortVideo/updateShortVideoPriceTier',
+    'ShortVideoPriceTierManagement:delete': '/shortVideo/deleteShortVideoPriceTier',
+
     ShortVideoWatchManagement: '/shortVideo/shortVideoWatchList',
     'ShortVideoWatchManagement:view': '/shortVideo/shortVideoWatchList',
     'ShortVideoWatchManagement:search': '/shortVideo/shortVideoWatchList',

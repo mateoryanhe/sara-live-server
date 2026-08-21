@@ -6,4 +6,5 @@ func Init() {
 	initAppListCache()
 	initAppViewListCache()
 	initAppPublishListCache()
+	initPriceTierMemory()
 }

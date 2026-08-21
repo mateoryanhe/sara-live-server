@@ -102,6 +102,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		PrivateMessageUserBlocked:       "Cannot send private message due to block relationship",
 		ActivityMessageNonExist:         "Activity message does not exist",
 		ShortVideoDiskSpaceInsufficient: "Insufficient disk space to upload short video",
+		ShortVideoPriceTierNonExist:     "Short video price tier does not exist",
 		SimulatorLoginDenied:            "Simulator login is not allowed",
 	},
 	lang.LangZHCN: {
@@ -201,6 +202,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		PrivateMessageUserBlocked:       "存在拉黑关系，无法发送私信",
 		ActivityMessageNonExist:         "活动消息不存在",
 		ShortVideoDiskSpaceInsufficient: "磁盘空闲空间不足,无法上传短视频",
+		ShortVideoPriceTierNonExist:     "短视频价格挡位不存在",
 		SimulatorLoginDenied:            "不允许模拟器登录",
 	},
 	lang.LangZHTW: {
@@ -300,6 +302,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		PrivateMessageUserBlocked:       "存在拉黑關係，無法發送私信",
 		ActivityMessageNonExist:         "活動消息不存在",
 		ShortVideoDiskSpaceInsufficient: "磁盤空閒空間不足,無法上傳短視頻",
+		ShortVideoPriceTierNonExist:     "短視頻價格擋位不存在",
 		SimulatorLoginDenied:            "不允許模擬器登入",
 	},
 }

@@ -9,6 +9,8 @@ import type {
     ShortVideo,
     ShortVideoCategory,
     ShortVideoCategoryQuery,
+    ShortVideoPriceTier,
+    ShortVideoPriceTierQuery,
     ShortVideoQuery,
     ShortVideoStorageStat,
     ShortVideoWatchQuery,
@@ -87,5 +89,29 @@ export const shortVideoApi = {
 
     deleteShortVideoCategory: (id: string | number) => {
         return request.post<boolean>('/shortVideo/deleteShortVideoCategory', {id})
+    },
+
+    getShortVideoPriceTierList: (params: ShortVideoPriceTierQuery) => {
+        return request.post<PageResponse<ShortVideoPriceTier>>('/shortVideo/shortVideoPriceTierList', params)
+    },
+
+    createShortVideoPriceTier: (data: { price: number }) => {
+        return request.post<{ id: string }>('/shortVideo/createShortVideoPriceTier', data)
+    },
+
+    updateShortVideoPriceTier: (data: { id: string | number; price: number }) => {
+        return request.post<boolean>('/shortVideo/updateShortVideoPriceTier', data)
+    },
+
+    deleteShortVideoPriceTier: (id: string | number) => {
+        return request.post<boolean>('/shortVideo/deleteShortVideoPriceTier', {id})
+    },
+
+    onShelfShortVideoPriceTier: (id: string | number) => {
+        return request.post<{ success: boolean; status: number }>('/shortVideo/onShelfShortVideoPriceTier', {id})
+    },
+
+    offShelfShortVideoPriceTier: (id: string | number) => {
+        return request.post<{ success: boolean; status: number }>('/shortVideo/offShelfShortVideoPriceTier', {id})
     },
 }
