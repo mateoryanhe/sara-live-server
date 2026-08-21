@@ -156,6 +156,7 @@ func applyVendorTransferWallet(userID uint64, betAmount, winAmount float64, game
 	gameMeta := &gameevent.CurrencyChangeMeta{
 		GameName:     gameName,
 		GameCategory: gameCategory,
+		BusinessType: currency.BusinessTypeGame,
 	}
 
 	if betAmount > 0 {

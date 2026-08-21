@@ -35,9 +35,11 @@ func toCMSItem(v *entity.CurrencyLog) *currencylogdto.CMSCurrencyLogItem {
 		After:        v.After,
 		Reason:       v.Reason,
 		ReasonText:   currency.Reason(v.Reason).Text(currency.LangZHCN),
-		GameName:     v.GameName,
-		GameCategory: v.GameCategory,
-		CreatedAt:    &v.CreatedAt,
+		GameName:         v.GameName,
+		GameCategory:     v.GameCategory,
+		BusinessType:     v.BusinessType,
+		BusinessTypeText: currency.BusinessTypeText(v.BusinessType),
+		CreatedAt:        &v.CreatedAt,
 	}
 	if u := userinfodao.GetUserInfoByUserId(v.UserId); u != nil {
 		item.Nickname = u.Nickname

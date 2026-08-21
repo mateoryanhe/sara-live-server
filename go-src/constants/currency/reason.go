@@ -42,9 +42,9 @@ const (
 	ReasonLiveRoomVideoCallTicket Reason = 17
 	// ReasonLiveRoomVideoCallBilling 直播间视频通话计费
 	ReasonLiveRoomVideoCallBilling Reason = 18
-	// ReasonGameBet 游戏下注扣款
+	// ReasonGameBet 游戏消费扣款
 	ReasonGameBet Reason = 19
-	// ReasonGameBetWin 游戏派彩
+	// ReasonGameBetWin 游戏奖励
 	ReasonGameBetWin Reason = 20
 )
 

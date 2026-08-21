@@ -21,8 +21,9 @@ const (
 	CurrencyLogBefore       db.TbCol = "before"
 	CurrencyLogAfter        db.TbCol = "after"
 	CurrencyLogReason       db.TbCol = "reason"
-	CurrencyLogGameName     db.TbCol = "game_name"
-	CurrencyLogGameCategory db.TbCol = "game_category"
+	CurrencyLogGameName       db.TbCol = "game_name"
+	CurrencyLogGameCategory   db.TbCol = "game_category"
+	CurrencyLogBusinessType   db.TbCol = "business_type"
 )
 
 // CurrencyLog 金币/钻石流水记录
@@ -37,9 +38,13 @@ type CurrencyLog struct {
 	Reason       uint8   `gorm:"default:0;comment:变动原因(枚举,参见 constants/currency.Reason)"`
 	GameName     string  `gorm:"size:128;default:'';comment:游戏名称"`
 	GameCategory string  `gorm:"size:64;default:'';comment:游戏分类"`
+	BusinessType uint8   `gorm:"default:1;comment:商业类型 1社交 2游戏"`
 }
 
-func NewCurrencyLog(userId uint64, currencyType, action uint8, amount, before, after float64, reason currency.Reason, gameName, gameCategory string) *CurrencyLog {
+func NewCurrencyLog(userId uint64, currencyType, action uint8, amount, before, after float64, reason currency.Reason, gameName, gameCategory string, businessType uint8) *CurrencyLog {
+	if businessType == 0 {
+		businessType = currency.BusinessTypeSocial
+	}
 	ret := &CurrencyLog{}
 	ret.ID = snowflake.GetId()
 	ret.SetCreatedAt(time.Now())
@@ -53,6 +58,7 @@ func NewCurrencyLog(userId uint64, currencyType, action uint8, amount, before, a
 	ret.SetReason(reason)
 	ret.SetGameName(gameName)
 	ret.SetGameCategory(gameCategory)
+	ret.SetBusinessType(businessType)
 	return ret
 }
 
@@ -128,6 +134,17 @@ func (receiver *CurrencyLog) SetGameCategory(gameCategory string) {
 	})
 }
 
+func (receiver *CurrencyLog) SetBusinessType(businessType uint8) {
+	if businessType == 0 {
+		businessType = currency.BusinessTypeSocial
+	}
+	receiver.BusinessType = businessType
+	syndb.AddData(TbCurrencyLog, CurrencyLogBusinessType, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: businessType,
+	})
+}
+
 func (receiver *CurrencyLog) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
 	syndb.AddData(TbCurrencyLog, db.CreatedAtName, &syndb.ColData{
@@ -157,6 +174,7 @@ func initCurrencyLog() {
 	syndb.RegQuick(TbCurrencyLog, CurrencyLogReason)
 	syndb.RegQuick(TbCurrencyLog, CurrencyLogGameName)
 	syndb.RegQuick(TbCurrencyLog, CurrencyLogGameCategory)
+	syndb.RegQuick(TbCurrencyLog, CurrencyLogBusinessType)
 
 	migrate.AutoMigrate(&CurrencyLog{})
 }

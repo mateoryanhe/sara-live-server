@@ -29,5 +29,7 @@ type CMSCurrencyLogItem struct {
 	ReasonText   string     `json:"reasonText"`
 	GameName     string     `json:"gameName"`
 	GameCategory string     `json:"gameCategory"`
+	BusinessType uint8      `json:"businessType" dc:"商业类型 1社交 2游戏"`
+	BusinessTypeText string `json:"businessTypeText"`
 	CreatedAt    *time.Time `json:"createdAt"`
 }

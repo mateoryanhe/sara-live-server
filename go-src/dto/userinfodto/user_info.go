@@ -105,9 +105,10 @@ type CurrencyLogItem struct {
 	Before       float64 `json:"before"`
 	After        float64 `json:"after"`
 	Reason       uint8   `json:"reason"` // 货币变动原因枚举,参见 constants/currency.Reason
-	GameName     string  `json:"gameName"`
-	GameCategory string  `json:"gameCategory"`
-	CreateAt     int64   `json:"createAt"`
+	GameName       string  `json:"gameName"`
+	GameCategory   string  `json:"gameCategory"`
+	BusinessType   uint8   `json:"businessType"` // 1社交 2游戏
+	CreateAt       int64   `json:"createAt"`
 }
 
 type GetCurrencyLogRes struct {

@@ -54,6 +54,7 @@ func currencyLogToCSVRow(row *userentity.CurrencyLog) []string {
 		currency.Reason(row.Reason).Text(currency.LangZHCN),
 		row.GameName,
 		row.GameCategory,
+		currency.BusinessTypeText(row.BusinessType),
 		formatCSVTime(row.CreatedAt),
 	}
 }

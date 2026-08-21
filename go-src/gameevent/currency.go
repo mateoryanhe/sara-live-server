@@ -22,10 +22,11 @@ const (
 	CurrencyActionSub uint8 = 2
 )
 
-// CurrencyChangeMeta 货币流水附加信息(如游戏下注).
+// CurrencyChangeMeta 货币流水附加信息(如游戏消费).
 type CurrencyChangeMeta struct {
 	GameName     string
 	GameCategory string
+	BusinessType uint8 // 商业类型:1社交 2游戏,默认社交
 }
 
 // CurrencyChangeEventData 货币流水事件数据
@@ -39,21 +40,26 @@ type CurrencyChangeEventData struct {
 	Reason       currency.Reason // 变动原因(枚举)
 	GameName     string          // 游戏名称(可选)
 	GameCategory string          // 游戏分类(可选)
+	BusinessType uint8           // 商业类型:1社交 2游戏
 }
 
 func NewCurrencyChangeEventData(userId uint64, currencyType, action uint8, amount, before, after float64, reason currency.Reason, meta ...*CurrencyChangeMeta) *CurrencyChangeEventData {
 	data := &CurrencyChangeEventData{
-		UserId: userId,
-		Type:   currencyType,
-		Action: action,
-		Amount: amount,
-		Before: before,
-		After:  after,
-		Reason: reason,
+		UserId:       userId,
+		Type:         currencyType,
+		Action:       action,
+		Amount:       amount,
+		Before:       before,
+		After:        after,
+		Reason:       reason,
+		BusinessType: currency.BusinessTypeSocial,
 	}
 	if len(meta) > 0 && meta[0] != nil {
 		data.GameName = meta[0].GameName
 		data.GameCategory = meta[0].GameCategory
+		if meta[0].BusinessType != 0 {
+			data.BusinessType = meta[0].BusinessType
+		}
 	}
 	return data
 }
