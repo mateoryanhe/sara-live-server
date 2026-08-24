@@ -6,4 +6,5 @@ const (
 	BotAnchorChannel        = 3 // 机器人主播专用渠道
 	DeviceChannel           = 4 // 设备码快捷登录/注册
 	ShortVideoAuthorChannel = 5 // CMS短视频作者专用渠道
+	H5DeviceChannel         = 6 // H5设备码快捷登录/注册
 )

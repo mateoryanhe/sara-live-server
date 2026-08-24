@@ -45,6 +45,10 @@ func (s *AuthController) DeviceLogin(ctx context.Context, req *authdto.DeviceLog
 	return auth.DeviceLogin(ctx, req)
 }
 
+func (s *AuthController) H5DeviceLogin(ctx context.Context, req *authdto.H5DeviceLoginReq) (*authdto.H5DeviceLoginRes, error) {
+	return auth.H5DeviceLogin(ctx, req)
+}
+
 func (s *AuthController) PhoneResetPassword(ctx context.Context, req *authdto.PhoneResetPasswordReq) (*authdto.PhoneResetPasswordRes, error) {
 	return auth.PhoneResetPassword(ctx, req)
 }

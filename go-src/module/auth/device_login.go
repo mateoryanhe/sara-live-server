@@ -14,30 +14,41 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dao/userlogindevicedao"
 	"xr-game-server/dto/authdto"
+	"xr-game-server/entity/user"
 	"xr-game-server/errercode"
 	"xr-game-server/gameevent"
 )
 
 func DeviceLogin(ctx context.Context, req *authdto.DeviceLoginReq) (*authdto.DeviceLoginRes, error) {
-	if req.DeviceInfo == nil {
+	return loginByDevice(ctx, req.DeviceInfo, DeviceChannel, true)
+}
+
+func H5DeviceLogin(ctx context.Context, req *authdto.H5DeviceLoginReq) (*authdto.H5DeviceLoginRes, error) {
+	return loginByDevice(ctx, req.DeviceInfo, H5DeviceChannel, false)
+}
+
+func loginByDevice(ctx context.Context, deviceInfo *entity.DeviceInfo, channel uint, checkSimulator bool) (*authdto.DeviceLoginRes, error) {
+	if deviceInfo == nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	if err := ensureSimulatorLoginAllowed(req.DeviceInfo); err != nil {
-		return nil, err
+	if checkSimulator {
+		if err := ensureSimulatorLoginAllowed(deviceInfo); err != nil {
+			return nil, err
+		}
 	}
-	deviceId := strings.TrimSpace(req.DeviceInfo.DeviceId)
+	deviceId := strings.TrimSpace(deviceInfo.DeviceId)
 	if deviceId == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 
-	lockKey := fmt.Sprintf("device_login:%s:%d", deviceId, DeviceChannel)
+	lockKey := fmt.Sprintf("device_login:%s:%d", deviceId, channel)
 	gmlock.Lock(lockKey)
 	defer gmlock.Unlock(lockKey)
 
-	account := accountdao.FindActiveAccount(deviceId, DeviceChannel)
+	account := accountdao.FindActiveAccount(deviceId, channel)
 	isNewUser := false
 	if account == nil {
-		account = accountdao.RegisterAccount(deviceId, DeviceChannel)
+		account = accountdao.RegisterAccount(deviceId, channel)
 		isNewUser = true
 	}
 	if account == nil || account.ID == 0 {
@@ -57,8 +68,8 @@ func DeviceLogin(ctx context.Context, req *authdto.DeviceLoginReq) (*authdto.Dev
 
 	tokenStr := xrtoken.AddAppToken(account.ID)
 	userinfodao.GetUserInfoByUserId(account.ID)
-	userlogindevicedao.RefreshLoginDevice(account.ID, req.DeviceInfo)
-	userinfodao.SaveRegisterInfo(account.ID, req.DeviceInfo)
+	userlogindevicedao.RefreshLoginDevice(account.ID, deviceInfo)
+	userinfodao.SaveRegisterInfo(account.ID, deviceInfo)
 	userinfodao.SaveCancelCode(account.ID)
 	if isNewUser {
 		event.Pub(gameevent.RegisterEvent, gameevent.NewRegisterEventDataFromCtx(ctx, account.ID, time.Now()))

@@ -87,6 +87,7 @@ type FirstRechargeSuccessPushItem struct {
 
 type AppFirstRechargeActivityCfgRes struct {
 	Enabled           bool                             `json:"enabled" dc:"活动开关,true=展示首充活动,false=隐藏"`
+	FirstRecharge     bool                             `json:"firstRecharge" dc:"是否首次充值(未首充为true,已首充为false),来自 user_exts.first_recharge"`
 	Icon              string                           `json:"icon" dc:"活动小图标CDN完整URL"`
 	TitleEn           string                           `json:"titleEn" dc:"活动标题(英文)"`
 	TitleEs           string                           `json:"titleEs" dc:"活动标题(西班牙语)"`
