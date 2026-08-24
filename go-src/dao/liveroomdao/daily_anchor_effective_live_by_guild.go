@@ -10,6 +10,7 @@ import (
 type DailyAnchorEffectiveLiveCMSListByGuildFilter struct {
 	GuildId       uint64
 	RoomId        uint64
+	RoomIds       []uint64
 	LiveDateStart string
 	LiveDateEnd   string
 	Settled       int8 // -1全部,0未结算,1已结算
@@ -39,6 +40,8 @@ func DailyAnchorEffectiveLiveCMSListByGuild(f *DailyAnchorEffectiveLiveCMSListBy
 		Where("r."+guildIdCol+" = ?", f.GuildId)
 	if f.RoomId > 0 {
 		m = m.Where("d."+roomIdCol+" = ?", f.RoomId)
+	} else if len(f.RoomIds) > 0 {
+		m = m.WhereIn("d."+roomIdCol, f.RoomIds)
 	}
 	if f.LiveDateStart != "" {
 		m = m.Where("d."+string(entity.DailyAnchorEffectiveLiveLiveDate)+" >= ?", f.LiveDateStart)
@@ -67,6 +70,7 @@ func DailyAnchorEffectiveLiveCMSListByGuild(f *DailyAnchorEffectiveLiveCMSListBy
 type DailyAnchorEffectiveLiveCMSListByGuildIdsFilter struct {
 	GuildIds      []uint64
 	RoomId        uint64
+	RoomIds       []uint64
 	LiveDateStart string
 	LiveDateEnd   string
 	Settled       int8
@@ -96,6 +100,8 @@ func DailyAnchorEffectiveLiveCMSListByGuildIds(f *DailyAnchorEffectiveLiveCMSLis
 		WhereIn("r."+guildIdCol, f.GuildIds)
 	if f.RoomId > 0 {
 		m = m.Where("d."+roomIdCol+" = ?", f.RoomId)
+	} else if len(f.RoomIds) > 0 {
+		m = m.WhereIn("d."+roomIdCol, f.RoomIds)
 	}
 	if f.LiveDateStart != "" {
 		m = m.Where("d."+string(entity.DailyAnchorEffectiveLiveLiveDate)+" >= ?", f.LiveDateStart)

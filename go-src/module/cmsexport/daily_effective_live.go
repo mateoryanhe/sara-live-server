@@ -62,6 +62,30 @@ func exportGuildDailyEffectiveLiveCSV(ctx context.Context, payload json.RawMessa
 	}, onProgress)
 }
 
+func exportLiveDailyEffectiveLiveCSV(ctx context.Context, payload json.RawMessage, onProgress func(exportedRows, totalRows int)) (*exportResult, error) {
+	var req cmsexportdto.CMSExportLiveDailyEffectiveLivePayload
+	if err := json.Unmarshal(payload, &req); err != nil {
+		return nil, err
+	}
+	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
+		total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSMultiList(&liveroomdao.DailyAnchorEffectiveLiveCMSMultiListFilter{
+			RoomIds:       liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
+			LiveDateStart: req.LiveDateStart,
+			LiveDateEnd:   req.LiveDateEnd,
+			Settled:       req.Settled,
+			PageIndex:     pageIndex,
+			PageSize:      pageSize,
+		})
+		roomIds := collectDailyAnchorRoomIds(rows)
+		nicknameMap := userinfodao.GetNicknameMapByUserIds(roomIds)
+		csvRows := make([][]string, 0, len(rows))
+		for _, row := range rows {
+			csvRows = append(csvRows, guildAnchorDailyEffectiveLiveToCSVRow(row, nicknameMap, req.SettledYesText, req.SettledNoText))
+		}
+		return total, csvRows
+	}, onProgress)
+}
+
 func exportGuildAnchorDailyEffectiveLiveCSV(ctx context.Context, payload json.RawMessage, onProgress func(exportedRows, totalRows int)) (*exportResult, error) {
 	var req cmsexportdto.CMSExportGuildAnchorDailyEffectiveLivePayload
 	if err := json.Unmarshal(payload, &req); err != nil {
@@ -100,25 +124,29 @@ func exportMyGuildAnchorDailyEffectiveLiveCSV(ctx context.Context, cmsUserId uin
 	if len(guildIds) == 0 {
 		return nil, errercode.CreateCode(errercode.NoPermission)
 	}
-	roomId := parseUint64Filter(req.RoomId)
-	if roomId > 0 {
-		room := liveroomdao.ResolveRoom(roomId)
-		if room == nil || !containsGuildId(guildIds, room.GuildId) {
-			return nil, errercode.CreateCode(errercode.NoPermission)
+	roomIds := guild.ResolveOwnedGuildAnchorRoomIds(req.RoomId, req.RoomIds)
+	if len(roomIds) > 0 {
+		if err := guild.ValidateMyOwnedGuildAnchorsAccessForUser(cmsUserId, roomIds); err != nil {
+			return nil, err
 		}
 	}
 	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
-		total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSListByGuildIds(&liveroomdao.DailyAnchorEffectiveLiveCMSListByGuildIdsFilter{
+		filter := &liveroomdao.DailyAnchorEffectiveLiveCMSListByGuildIdsFilter{
 			GuildIds:      guildIds,
-			RoomId:        roomId,
 			LiveDateStart: req.LiveDateStart,
 			LiveDateEnd:   req.LiveDateEnd,
 			Settled:       req.Settled,
 			PageIndex:     pageIndex,
 			PageSize:      pageSize,
-		})
-		roomIds := collectDailyAnchorRoomIds(rows)
-		nicknameMap := userinfodao.GetNicknameMapByUserIds(roomIds)
+		}
+		if len(roomIds) == 1 {
+			filter.RoomId = roomIds[0]
+		} else if len(roomIds) > 1 {
+			filter.RoomIds = roomIds
+		}
+		total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSListByGuildIds(filter)
+		anchorRoomIds := collectDailyAnchorRoomIds(rows)
+		nicknameMap := userinfodao.GetNicknameMapByUserIds(anchorRoomIds)
 		csvRows := make([][]string, 0, len(rows))
 		for _, row := range rows {
 			csvRows = append(csvRows, guildAnchorDailyEffectiveLiveToCSVRow(row, nicknameMap, req.SettledYesText, req.SettledNoText))

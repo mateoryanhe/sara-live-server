@@ -62,6 +62,7 @@ const READONLY_PAGES = new Set([
     'AnchorIncomeSettlementLogList',
     'GuildIncomeSettlementLogList',
     'LiveRecordList',
+    'LiveDailyEffectiveLiveList',
     'VideoCallLogList',
     'GameWinLogListManagement',
     'GameBetLogListManagement',
@@ -255,6 +256,11 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.search,
         BTN.export,
         {key: 'viewUserDetail', label: '查看用户详情'},
+    ],
+    LiveDailyEffectiveLiveList: [
+        BTN.view,
+        BTN.search,
+        BTN.export,
     ],
     LiveRevenueLogList: [
         BTN.view,

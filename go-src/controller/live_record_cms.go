@@ -21,3 +21,8 @@ func initLiveRecordCMSController() {
 func (c *LiveRecordCMSController) CMSLiveRecordList(ctx context.Context, req *liverecorddto.CMSLiveRecordListReq) (res *httpserver.CMSQueryResp, err error) {
 	return liverecord.GetCMSList(ctx, req)
 }
+
+// CMSDailyEffectiveLiveList CMS分页查询每日流水
+func (c *LiveRecordCMSController) CMSDailyEffectiveLiveList(ctx context.Context, req *liverecorddto.CMSDailyEffectiveLiveListReq) (res *httpserver.CMSQueryResp, err error) {
+	return liverecord.GetCMSDailyEffectiveLiveList(ctx, req)
+}

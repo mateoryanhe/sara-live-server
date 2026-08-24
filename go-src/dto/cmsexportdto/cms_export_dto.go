@@ -18,6 +18,7 @@ const (
 	ExportTypeGuildDailyEffectiveLive          = "guildDailyEffectiveLive"
 	ExportTypeGuildAnchorDailyEffectiveLive    = "guildAnchorDailyEffectiveLive"
 	ExportTypeMyGuildAnchorDailyEffectiveLive  = "myGuildAnchorDailyEffectiveLive"
+	ExportTypeLiveDailyEffectiveLive             = "liveDailyEffectiveLive"
 	ExportTypeCurrencyLog                      = "currencyLog"
 )
 
@@ -171,10 +172,23 @@ type CMSExportGuildAnchorDailyEffectiveLivePayload struct {
 type CMSExportMyGuildAnchorDailyEffectiveLivePayload struct {
 	CMSExportHeadersPayload
 	CMSExportDailyEffectiveLiveLabels
-	RoomId        string `json:"roomId"`
-	LiveDateStart string `json:"liveDateStart"`
-	LiveDateEnd   string `json:"liveDateEnd"`
-	Settled       int8   `json:"settled"`
+	RoomId        string   `json:"roomId"`
+	RoomIds       []string `json:"roomIds"`
+	LiveDateStart string   `json:"liveDateStart"`
+	LiveDateEnd   string   `json:"liveDateEnd"`
+	Settled       int8     `json:"settled"`
+}
+
+type CMSExportLiveDailyEffectiveLivePayload struct {
+	CMSExportHeadersPayload
+	CMSExportDailyEffectiveLiveLabels
+	AnchorId         string   `json:"anchorId"`
+	PlatformAnchorId string   `json:"platformAnchorId"`
+	GuildAnchorId    string   `json:"guildAnchorId"`
+	AnchorIds        []string `json:"anchorIds"`
+	LiveDateStart    string   `json:"liveDateStart"`
+	LiveDateEnd      string   `json:"liveDateEnd"`
+	Settled          int8     `json:"settled"`
 }
 
 type CMSExportCurrencyLogPayload struct {

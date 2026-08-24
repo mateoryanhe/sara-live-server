@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/constants/db"
@@ -105,17 +106,7 @@ func DailyAnchorEffectiveLiveCMSList(f *DailyAnchorEffectiveLiveCMSListFilter) (
 	ctx := gctx.New()
 	m := g.Model(string(entity.TbDailyAnchorEffectiveLive)).Ctx(ctx).
 		Where(string(entity.DailyAnchorEffectiveLiveRoomId)+" = ?", f.RoomId)
-	if f.LiveDateStart != "" {
-		m = m.Where(string(entity.DailyAnchorEffectiveLiveLiveDate)+" >= ?", f.LiveDateStart)
-	}
-	if f.LiveDateEnd != "" {
-		m = m.Where(string(entity.DailyAnchorEffectiveLiveLiveDate)+" <= ?", f.LiveDateEnd)
-	}
-	if f.Settled == 0 {
-		m = m.Where(string(entity.DailyAnchorEffectiveLiveSettled)+" = ?", false)
-	} else if f.Settled == 1 {
-		m = m.Where(string(entity.DailyAnchorEffectiveLiveSettled)+" = ?", true)
-	}
+	m = applyDailyAnchorEffectiveLiveCMSFilters(m, f.LiveDateStart, f.LiveDateEnd, f.Settled)
 	total, err := m.Clone().Count()
 	if err != nil {
 		return 0, list
@@ -126,6 +117,61 @@ func DailyAnchorEffectiveLiveCMSList(f *DailyAnchorEffectiveLiveCMSListFilter) (
 		Offset((f.PageIndex - 1) * f.PageSize).
 		Scan(&list)
 	return total, mergeDailyAnchorEffectiveLivesFromCache(list)
+}
+
+// DailyAnchorEffectiveLiveCMSMultiListFilter CMS多主播每日流水查询条件
+type DailyAnchorEffectiveLiveCMSMultiListFilter struct {
+	RoomIds       []uint64
+	LiveDateStart string
+	LiveDateEnd   string
+	Settled       int8
+	PageIndex     int
+	PageSize      int
+}
+
+// DailyAnchorEffectiveLiveCMSMultiList CMS分页查询多主播每日流水(直查DB,命中缓存则用缓存数据)
+func DailyAnchorEffectiveLiveCMSMultiList(f *DailyAnchorEffectiveLiveCMSMultiListFilter) (int, []*entity.DailyAnchorEffectiveLive) {
+	list := make([]*entity.DailyAnchorEffectiveLive, 0)
+	if f == nil {
+		return 0, list
+	}
+	if f.PageIndex <= 0 {
+		f.PageIndex = 1
+	}
+	if f.PageSize <= 0 {
+		f.PageSize = 20
+	}
+	ctx := gctx.New()
+	m := g.Model(string(entity.TbDailyAnchorEffectiveLive)).Ctx(ctx)
+	if len(f.RoomIds) > 0 {
+		m = m.Where(string(entity.DailyAnchorEffectiveLiveRoomId)+" IN (?)", f.RoomIds)
+	}
+	m = applyDailyAnchorEffectiveLiveCMSFilters(m, f.LiveDateStart, f.LiveDateEnd, f.Settled)
+	total, err := m.Clone().Count()
+	if err != nil {
+		return 0, list
+	}
+	_ = m.Clone().
+		Order(string(entity.DailyAnchorEffectiveLiveLiveDate) + " desc, id desc").
+		Limit(f.PageSize).
+		Offset((f.PageIndex - 1) * f.PageSize).
+		Scan(&list)
+	return total, mergeDailyAnchorEffectiveLivesFromCache(list)
+}
+
+func applyDailyAnchorEffectiveLiveCMSFilters(m *gdb.Model, liveDateStart, liveDateEnd string, settled int8) *gdb.Model {
+	if liveDateStart != "" {
+		m = m.Where(string(entity.DailyAnchorEffectiveLiveLiveDate)+" >= ?", liveDateStart)
+	}
+	if liveDateEnd != "" {
+		m = m.Where(string(entity.DailyAnchorEffectiveLiveLiveDate)+" <= ?", liveDateEnd)
+	}
+	if settled == 0 {
+		m = m.Where(string(entity.DailyAnchorEffectiveLiveSettled)+" = ?", false)
+	} else if settled == 1 {
+		m = m.Where(string(entity.DailyAnchorEffectiveLiveSettled)+" = ?", true)
+	}
+	return m
 }
 
 // MarkDailyEffectiveLivesSettled 将日直播时长记录标记为已结算(优先写缓存对象)

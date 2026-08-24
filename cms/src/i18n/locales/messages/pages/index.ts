@@ -32,6 +32,7 @@ import {liveConfigMessages} from './live-config'
 import {liveRoomTagListMessages} from './live-room-tag-list'
 import {revenueLogListMessages} from './revenue-log-list'
 import {liveRecordListMessages} from './live-record-list'
+import {liveDailyEffectiveLiveListMessages} from './live-daily-effective-live-list'
 import {videoCallLogListMessages} from './video-call-log-list'
 import {roleListMessages} from './role-list'
 import {cmsUserListMessages} from './cmsuser-list'
@@ -98,6 +99,7 @@ const pageMessageBuilders = [
   ['liveRoomTagList', liveRoomTagListMessages],
   ['revenueLogList', revenueLogListMessages],
   ['liveRecordList', liveRecordListMessages],
+  ['liveDailyEffectiveLiveList', liveDailyEffectiveLiveListMessages],
   ['videoCallLogList', videoCallLogListMessages],
   ['roleList', roleListMessages],
   ['cmsUserList', cmsUserListMessages],

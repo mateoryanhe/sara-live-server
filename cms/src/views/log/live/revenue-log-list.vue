@@ -7,20 +7,38 @@
         </div>
       </template>
 
-      <el-form :model="searchForm" class="search-form" inline label-width="100px">
-        <el-form-item :label="t('pages.revenueLogList.platformAnchor')">
-          <AnchorRemoteSelect
-              v-model="searchForm.platformAnchorIds"
-              mode="platform"
-              :placeholder="t('pages.revenueLogList.searchPlatformAnchor')"
-          />
+      <el-form :model="searchForm" class="search-form" inline label-width="88px">
+        <el-form-item :label="t('pages.liveRecordList.platformAnchor')">
+          <div class="anchor-filter anchor-filter--compact">
+            <el-input
+                :model-value="platformAnchorInputValue"
+                class="anchor-input"
+                disabled
+                :placeholder="t('pages.liveRecordList.noPlatformAnchorSelected')"
+            />
+            <el-button size="small" @click="openPlatformAnchorPicker">
+              {{ t('pages.liveRecordList.selectPlatformAnchor') }}
+            </el-button>
+            <el-button v-if="selectedPlatformAnchors.length > 0" link size="small" @click="clearPlatformAnchors">
+              {{ t('pages.liveRecordList.clearPlatformAnchor') }}
+            </el-button>
+          </div>
         </el-form-item>
-        <el-form-item :label="t('pages.revenueLogList.guildAnchor')">
-          <AnchorRemoteSelect
-              v-model="searchForm.guildAnchorIds"
-              mode="guild"
-              :placeholder="t('pages.revenueLogList.searchGuildAnchor')"
-          />
+        <el-form-item :label="t('pages.liveRecordList.guildAnchor')">
+          <div class="anchor-filter anchor-filter--compact">
+            <el-input
+                :model-value="guildAnchorInputValue"
+                class="anchor-input"
+                disabled
+                :placeholder="t('pages.liveRecordList.noGuildAnchorSelected')"
+            />
+            <el-button size="small" @click="openGuildAnchorPicker">
+              {{ t('pages.liveRecordList.selectGuildAnchor') }}
+            </el-button>
+            <el-button v-if="selectedGuildAnchors.length > 0" link size="small" @click="clearGuildAnchors">
+              {{ t('pages.liveRecordList.clearGuildAnchor') }}
+            </el-button>
+          </div>
         </el-form-item>
         <el-form-item :label="t('pages.revenueLogList.revenueType')">
           <el-select v-model="searchForm.revenueType" clearable :placeholder="t('common.all')" style="width: 140px">
@@ -30,23 +48,23 @@
             <el-option :value="3" :label="t('pages.revenueLogList.revenueGameBet')"/>
           </el-select>
         </el-form-item>
-        <el-form-item :label="t('pages.revenueLogList.startDate')">
+        <el-form-item :label="t('pages.liveRecordList.startDate')">
           <el-date-picker
               v-model="searchForm.startDate"
               clearable
               format="YYYY-MM-DD"
-              :placeholder="t('pages.revenueLogList.startDate')"
+              :placeholder="t('pages.liveRecordList.startDate')"
               style="width: 160px"
               type="date"
               value-format="YYYY-MM-DD"
           />
         </el-form-item>
-        <el-form-item :label="t('pages.revenueLogList.endDate')">
+        <el-form-item :label="t('pages.liveRecordList.endDate')">
           <el-date-picker
               v-model="searchForm.endDate"
               clearable
               format="YYYY-MM-DD"
-              :placeholder="t('pages.revenueLogList.endDate')"
+              :placeholder="t('pages.liveRecordList.endDate')"
               style="width: 160px"
               type="date"
               value-format="YYYY-MM-DD"
@@ -134,16 +152,32 @@
         />
       </div>
     </el-card>
+
+    <AnchorPickerDialog
+        v-model:visible="platformAnchorPickerVisible"
+        :initial-anchors="selectedPlatformAnchors"
+        multiple
+        platform-only
+        @confirm-multiple="handlePlatformAnchorsPicked"
+    />
+
+    <GuildAnchorPickerDialog
+        v-model:visible="guildAnchorPickerVisible"
+        :initial-anchors="selectedGuildAnchors"
+        @confirm="handleGuildAnchorsPicked"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
+import {computed, onMounted, reactive, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
-import {onMounted, reactive, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {liveRevenueLogApi} from '@/api'
-import type {LiveRevenueLogItem} from '@/types/api'
+import type {AnchorListItem, LiveRevenueLogItem} from '@/types/api'
+import AnchorPickerDialog from '@/components/AnchorPickerDialog.vue'
+import GuildAnchorPickerDialog from '@/components/GuildAnchorPickerDialog.vue'
 import {usePagePermission} from '@/composables/usePagePermission'
 import {useUserDetailNav} from '@/composables/useUserDetailNav'
 import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
@@ -157,17 +191,78 @@ const {openUserDetail} = useUserDetailNav('LiveRevenueLogList')
 const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
 const tableData = ref<LiveRevenueLogItem[]>([])
+const selectedPlatformAnchors = ref<AnchorListItem[]>([])
+const selectedGuildAnchors = ref<AnchorListItem[]>([])
+const platformAnchorPickerVisible = ref(false)
+const guildAnchorPickerVisible = ref(false)
 
 const searchForm = reactive({
-  platformAnchorIds: [] as string[],
-  guildAnchorIds: [] as string[],
   revenueType: 0,
   startDate: '',
   endDate: '',
 })
 
+const formatPlatformAnchorLabel = (anchor: AnchorListItem) => {
+  const nickname = anchor.nickname || '-'
+  return `${nickname} (${anchor.id})`
+}
+
+const formatGuildAnchorLabel = (anchor: AnchorListItem) => {
+  const nickname = anchor.nickname || '-'
+  if (anchor.guildName) {
+    return `[${anchor.guildName}] ${nickname} (${anchor.id})`
+  }
+  return `${nickname} (${anchor.id})`
+}
+
+const platformAnchorInputValue = computed(() => {
+  if (selectedPlatformAnchors.value.length === 0) {
+    return ''
+  }
+  if (selectedPlatformAnchors.value.length === 1) {
+    return formatPlatformAnchorLabel(selectedPlatformAnchors.value[0])
+  }
+  return t('pages.liveRecordList.selectedPlatformAnchorsCount', {count: selectedPlatformAnchors.value.length})
+})
+
+const guildAnchorInputValue = computed(() => {
+  if (selectedGuildAnchors.value.length === 0) {
+    return ''
+  }
+  if (selectedGuildAnchors.value.length === 1) {
+    return formatGuildAnchorLabel(selectedGuildAnchors.value[0])
+  }
+  return t('pages.liveRecordList.selectedGuildAnchorsCount', {count: selectedGuildAnchors.value.length})
+})
+
+const openPlatformAnchorPicker = () => {
+  platformAnchorPickerVisible.value = true
+}
+
+const clearPlatformAnchors = () => {
+  selectedPlatformAnchors.value = []
+}
+
+const handlePlatformAnchorsPicked = (anchors: AnchorListItem[]) => {
+  selectedPlatformAnchors.value = anchors
+}
+
+const openGuildAnchorPicker = () => {
+  guildAnchorPickerVisible.value = true
+}
+
+const clearGuildAnchors = () => {
+  selectedGuildAnchors.value = []
+}
+
+const handleGuildAnchorsPicked = (anchors: AnchorListItem[]) => {
+  selectedGuildAnchors.value = anchors
+}
+
 const buildSelectedReceiverIds = () => {
-  return [...new Set([...searchForm.platformAnchorIds, ...searchForm.guildAnchorIds])]
+  const platformIds = selectedPlatformAnchors.value.map(anchor => String(anchor.id))
+  const guildIds = selectedGuildAnchors.value.map(anchor => String(anchor.id))
+  return [...new Set([...platformIds, ...guildIds])]
 }
 
 const formatRevenueType = (type: number) => {
@@ -229,8 +324,8 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
-  searchForm.platformAnchorIds = []
-  searchForm.guildAnchorIds = []
+  selectedPlatformAnchors.value = []
+  selectedGuildAnchors.value = []
   searchForm.revenueType = 0
   searchForm.startDate = ''
   searchForm.endDate = ''
@@ -297,6 +392,21 @@ onMounted(() => {
 
 .search-form {
   margin-bottom: 16px;
+}
+
+.search-form :deep(.el-form-item) {
+  margin-bottom: 0;
+  margin-right: 12px;
+}
+
+.anchor-filter--compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.anchor-input {
+  width: 220px;
 }
 
 .pagination {

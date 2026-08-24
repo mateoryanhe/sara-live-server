@@ -101,4 +101,5 @@ export const CMS_EXPORT_TYPE_ANCHOR_DAILY_EFFECTIVE_LIVE = 'anchorDailyEffective
 export const CMS_EXPORT_TYPE_GUILD_DAILY_EFFECTIVE_LIVE = 'guildDailyEffectiveLive'
 export const CMS_EXPORT_TYPE_GUILD_ANCHOR_DAILY_EFFECTIVE_LIVE = 'guildAnchorDailyEffectiveLive'
 export const CMS_EXPORT_TYPE_MY_GUILD_ANCHOR_DAILY_EFFECTIVE_LIVE = 'myGuildAnchorDailyEffectiveLive'
+export const CMS_EXPORT_TYPE_LIVE_DAILY_EFFECTIVE_LIVE = 'liveDailyEffectiveLive'
 export const CMS_EXPORT_TYPE_CURRENCY_LOG = 'currencyLog'

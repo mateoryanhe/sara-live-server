@@ -3,7 +3,7 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>{{ t('menu.LiveRecordList') }}</span>
+          <span>{{ t('menu.LiveDailyEffectiveLiveList') }}</span>
         </div>
       </template>
 
@@ -70,75 +70,48 @@
       </el-form>
 
       <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width: 100%">
-        <el-table-column :label="t('pages.liveRecordList.recordId')" min-width="180" prop="id"/>
-        <el-table-column :label="t('pages.liveRecordList.anchorId')" min-width="180" prop="anchorId">
-          <template #default="{ row }">
-            <el-button v-if="row.anchorId" link type="primary" @click="openAnchorDetail(row.anchorId)">
-              {{ row.anchorId }}
-            </el-button>
-            <span v-else>-</span>
-          </template>
+        <el-table-column :label="t('pages.anchorList.dailyRecordId')" min-width="180" prop="id"/>
+        <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.roomId')" min-width="180" prop="roomId"/>
+        <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.roomNickname')" min-width="120">
+          <template #default="{ row }">{{ row.roomNickname || '-' }}</template>
         </el-table-column>
-        <el-table-column :label="t('common.avatar')" width="80">
-          <template #default="{ row }">
-            <el-image
-                v-if="row.avatar"
-                :preview-src-list="[row.avatar]"
-                :src="row.avatar"
-                fit="cover"
-                hide-on-click-modal
-                preview-teleported
-                style="width:40px;height:40px;border-radius:50%"
-            />
-            <span v-else>-</span>
-          </template>
+        <el-table-column :label="t('pages.anchorList.dailyLiveDate')" min-width="120" prop="liveDate"/>
+        <el-table-column :label="t('pages.anchorList.dailyLiveDuration')" min-width="150">
+          <template #default="{ row }">{{ formatLiveDurationMinutes(row.liveDuration, t) }}</template>
         </el-table-column>
-        <el-table-column :label="t('pages.liveRecordList.anchorNickname')" min-width="120" prop="nickname">
-          <template #default="{ row }">{{ row.nickname || '-' }}</template>
+        <el-table-column :label="t('pages.anchorList.dailyReportedLiveDuration')" min-width="150">
+          <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
         </el-table-column>
-        <el-table-column :label="t('menu.UserDetail')" width="110">
-          <template #default="{ row }">
-            <el-button v-if="row.anchorId" link type="primary" @click="openUserDetail(row.anchorId)">
-              {{ t('pages.userList.viewDetail') }}
-            </el-button>
-            <span v-else>-</span>
-          </template>
-        </el-table-column>
-        <el-table-column :label="t('common.startTime')" width="170">
-          <template #default="{ row }">{{ formatDate(row.startTime) }}</template>
-        </el-table-column>
-        <el-table-column :label="t('common.endTime')" width="170">
-          <template #default="{ row }">{{ formatDate(row.endTime) }}</template>
-        </el-table-column>
-        <el-table-column :label="t('pages.liveRecordList.totalAudience')" prop="totalAudience" width="100"/>
-        <el-table-column :label="t('pages.liveRecordList.liveDuration')" width="120">
-          <template #default="{ row }">{{ formatDuration(row.totalLiveDuration) }}</template>
-        </el-table-column>
-        <el-table-column :label="t('pages.liveRecordList.totalIncome')" align="right" min-width="120">
+        <el-table-column :label="t('pages.anchorList.liveIncome')" align="right" min-width="120">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.liveRecordList.giftIncome')" align="right" min-width="120">
+        <el-table-column :label="t('pages.anchorList.giftIncome')" align="right" min-width="120">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGiftIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.liveRecordList.paidDanmakuIncome')" align="right" min-width="130">
+        <el-table-column :label="t('pages.anchorList.paidDanmakuIncome')" align="right" min-width="130">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.liveRecordList.videoTicketIncome')" align="right" min-width="130">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallTicketIncome) }}</span></template>
+        <el-table-column :label="t('pages.anchorList.privateRoomTicketIncome')" align="right" min-width="140">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomTicketIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.liveRecordList.videoBillingIncome')" align="right" min-width="150">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallBillingIncome) }}</span></template>
+        <el-table-column :label="t('pages.anchorList.privateRoomWatchIncome')" align="right" min-width="140">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomWatchIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.liveRecordList.videoCallIncome')" align="right" min-width="130">
+        <el-table-column :label="t('pages.anchorList.videoCallIncome')" align="right" min-width="130">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.liveRecordList.giftSenderCount')" prop="totalGiftSender" width="100"/>
-        <el-table-column :label="t('pages.liveRecordList.newFollowers')" prop="totalNewFollower" width="100"/>
-        <el-table-column :label="t('pages.liveRecordList.totalGameBet')" align="right" min-width="130">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameBet) }}</span></template>
+        <el-table-column :label="t('pages.anchorList.dailySettled')" min-width="100">
+          <template #default="{ row }">
+            <el-tag :type="row.settled ? 'success' : 'warning'">
+              {{ row.settled ? t('pages.anchorList.dailySettledYes') : t('pages.anchorList.dailySettledNo') }}
+            </el-tag>
+          </template>
         </el-table-column>
-        <el-table-column :label="t('common.createdAt')" width="170">
+        <el-table-column :label="t('common.createdAt')" min-width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorList.roomUpdatedAt')" min-width="170">
+          <template #default="{ row }">{{ formatDate(row.updatedAt) }}</template>
         </el-table-column>
       </el-table>
 
@@ -172,28 +145,26 @@
 </template>
 
 <script lang="ts" setup>
-import {useI18n} from 'vue-i18n'
 import {computed, onMounted, reactive, ref} from 'vue'
-import {useRouter} from 'vue-router'
+import {useI18n} from 'vue-i18n'
 import {ElMessage} from 'element-plus'
 import {liveRecordApi} from '@/api'
-import type {AnchorListItem, LiveRecordItem} from '@/types/api'
+import type {AnchorListItem, GuildAnchorDailyEffectiveLiveItem} from '@/types/api'
 import AnchorPickerDialog from '@/components/AnchorPickerDialog.vue'
 import GuildAnchorPickerDialog from '@/components/GuildAnchorPickerDialog.vue'
 import {usePagePermission} from '@/composables/usePagePermission'
-import {useUserDetailNav} from '@/composables/useUserDetailNav'
-import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
-import {CMS_EXPORT_TYPE_LIVE_RECORD} from '@/utils/cms-async-export'
-import {buildLiveRecordCsvColumns} from '@/utils/live-record-csv'
+import {buildCsvHeaders, buildDailyEffectiveLiveExportLabels, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
+import {CMS_EXPORT_TYPE_LIVE_DAILY_EFFECTIVE_LIVE} from '@/utils/cms-async-export'
+import {buildGuildAnchorDailyEffectiveLiveCsvColumns} from '@/utils/daily-effective-live-csv'
 import {formatWalletBalance} from '@/utils/number-format'
+import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 
 const {t} = useI18n()
-const router = useRouter()
-const {can} = usePagePermission('LiveRecordList')
-const {openUserDetail} = useUserDetailNav('LiveRecordList')
+const {can} = usePagePermission('LiveDailyEffectiveLiveList')
 const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
+
 const loading = ref(false)
-const tableData = ref<LiveRecordItem[]>([])
+const tableData = ref<GuildAnchorDailyEffectiveLiveItem[]>([])
 const selectedPlatformAnchors = ref<AnchorListItem[]>([])
 const selectedGuildAnchors = ref<AnchorListItem[]>([])
 const platformAnchorPickerVisible = ref(false)
@@ -202,6 +173,12 @@ const guildAnchorPickerVisible = ref(false)
 const searchForm = reactive({
   startDate: '',
   endDate: '',
+})
+
+const pagination = reactive({
+  pageIndex: 1,
+  pageSize: 20,
+  total: 0,
 })
 
 const formatPlatformAnchorLabel = (anchor: AnchorListItem) => {
@@ -267,43 +244,28 @@ const buildSelectedAnchorIds = () => {
   return [...new Set([...platformIds, ...guildIds])]
 }
 
-const pagination = reactive({
-  pageIndex: 1,
-  pageSize: 20,
-  total: 0,
-})
-
-const toDayStartUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T00:00:00`).getTime() / 1000)
-}
-
-const toDayEndUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T23:59:59`).getTime() / 1000)
-}
-
-const buildQueryParams = () => ({
-  pageIndex: pagination.pageIndex,
-  pageSize: pagination.pageSize,
-  anchorIds: buildSelectedAnchorIds(),
-  startTime: searchForm.startDate ? toDayStartUnix(searchForm.startDate) : 0,
-  endTime: searchForm.endDate ? toDayEndUnix(searchForm.endDate) : 0,
-})
-
 const buildFilterParams = () => ({
   anchorIds: buildSelectedAnchorIds(),
-  startTime: searchForm.startDate ? toDayStartUnix(searchForm.startDate) : 0,
-  endTime: searchForm.endDate ? toDayEndUnix(searchForm.endDate) : 0,
+  liveDateStart: searchForm.startDate || undefined,
+  liveDateEnd: searchForm.endDate || undefined,
+  settled: -1,
+})
+
+const buildQueryParams = () => ({
+  ...buildFilterParams(),
+  pageIndex: pagination.pageIndex,
+  pageSize: pagination.pageSize,
 })
 
 const fetchList = async () => {
   loading.value = true
   try {
-    const response = await liveRecordApi.getLiveRecordList(buildQueryParams())
+    const response = await liveRecordApi.getDailyEffectiveLiveList(buildQueryParams())
     tableData.value = response.data || []
     pagination.total = response.total || 0
   } catch (error) {
-    console.error('Failed to load live records:', error)
-    ElMessage.error(t('pages.liveRecordList.fetchFailed'))
+    console.error('Failed to load daily effective live list:', error)
+    ElMessage.error(t('pages.liveDailyEffectiveLiveList.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -334,24 +296,15 @@ const handleSizeChange = (size: number) => {
   fetchList()
 }
 
-const openAnchorDetail = (anchorId: string | number) => {
-  if (!anchorId) {
-    return
-  }
-  router.push({
-    path: '/user/anchor/anchor-detail',
-    query: {id: String(anchorId)},
-  })
-}
-
 const handleExport = async () => {
   await runExport(
-    CMS_EXPORT_TYPE_LIVE_RECORD,
+    CMS_EXPORT_TYPE_LIVE_DAILY_EFFECTIVE_LIVE,
     {
-      headers: buildCsvHeaders(buildLiveRecordCsvColumns(t)),
+      headers: buildCsvHeaders(buildGuildAnchorDailyEffectiveLiveCsvColumns(t)),
       ...buildFilterParams(),
+      ...buildDailyEffectiveLiveExportLabels(t),
     },
-    `live-record-${Date.now()}.csv`,
+    `daily-effective-live-${Date.now()}.csv`,
   )
 }
 
@@ -362,21 +315,6 @@ const formatDate = (dateString: string | null | undefined) => {
   } catch {
     return '-'
   }
-}
-
-const formatDuration = (seconds: number | null | undefined) => {
-  if (seconds === null || seconds === undefined || seconds <= 0) return '-'
-  const total = Math.floor(seconds)
-  const h = Math.floor(total / 3600)
-  const m = Math.floor((total % 3600) / 60)
-  const s = total % 60
-  if (h > 0) {
-    return t('pages.liveRecordList.durationHours', {h, m, s})
-  }
-  if (m > 0) {
-    return t('pages.liveRecordList.durationMinutes', {m, s})
-  }
-  return t('pages.liveRecordList.durationSeconds', {s})
 }
 
 onMounted(() => {

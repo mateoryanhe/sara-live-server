@@ -87,7 +87,7 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 	case "/guild/getGuildDailyEffectiveLiveList":
 		return []string{"/guild/getGuildDetail"}
 	case "/guild/guildList":
-		return []string{"/guild/cmsGuildAnchorDailyEffectiveLiveList", "/guild/cmsMyGuildAnchorDailyEffectiveLiveList"}
+		return []string{"/guild/cmsGuildAnchorDailyEffectiveLiveList", "/guild/cmsMyGuildAnchorDailyEffectiveLiveList", "/liveRecord/cmsLiveRecordList", "/liveRecord/cmsDailyEffectiveLiveList", "/liveRevenueLog/cmsLiveRevenueLogList"}
 	case "/guild/cmsGuildAnchorDailyEffectiveLiveList":
 		return []string{"/guild/cmsGuildAnchorIncomeSettlementLogList", "/guild/getGuildDetail", "/guild/guildList", "/account/getAnchorList"}
 	case "/guild/setGuildAnchorType":
@@ -107,7 +107,11 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 	case "/guild/getMyGuildAnchorDailyEffectiveLiveList":
 		return []string{"/guild/getMyGuildProfile", "/account/getAnchorDailyEffectiveLiveList"}
 	case "/account/getAnchorList":
-		return []string{"/liveRecord/cmsLiveRecordList", "/liveRevenueLog/cmsLiveRevenueLogList", "/account/getAnchorList", "/guild/cmsGuildAnchorDailyEffectiveLiveList", "/guild/cmsMyGuildAnchorDailyEffectiveLiveList", "/guild/getMyOwnedGuildAnchorList"}
+		return []string{"/liveRecord/cmsLiveRecordList", "/liveRecord/cmsDailyEffectiveLiveList", "/liveRevenueLog/cmsLiveRevenueLogList", "/account/getAnchorList", "/guild/cmsGuildAnchorDailyEffectiveLiveList", "/guild/cmsMyGuildAnchorDailyEffectiveLiveList", "/guild/getMyOwnedGuildAnchorList"}
+	case "/liveRecord/cmsDailyEffectiveLiveList":
+		return []string{"/liveRecord/cmsLiveRecordList", "/account/getAnchorList", "/guild/guildList"}
+	case "/liveRevenueLog/cmsLiveRevenueLogList":
+		return []string{"/liveRecord/cmsLiveRecordList", "/account/getAnchorList", "/guild/guildList"}
 	case "/account/getAnchorDetail":
 		return []string{"/liveRecord/cmsLiveRecordList", "/liveRevenueLog/cmsLiveRevenueLogList"}
 	default:

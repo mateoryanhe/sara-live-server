@@ -260,7 +260,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('LiveRevenueLogList') || hasMenuPermission('LiveRecordList') || hasMenuPermission('VideoCallLogList') || hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList') || hasMenuPermission('AnchorIncomeSettlementLogList') || hasMenuPermission('GuildIncomeSettlementLogList')"
+            v-if="hasMenuPermission('LiveRevenueLogList') || hasMenuPermission('LiveRecordList') || hasMenuPermission('LiveDailyEffectiveLiveList') || hasMenuPermission('VideoCallLogList') || hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList') || hasMenuPermission('AnchorIncomeSettlementLogList') || hasMenuPermission('GuildIncomeSettlementLogList')"
             index="/log">
           <template #title>
             <el-icon>
@@ -275,17 +275,23 @@
               </el-icon>
               <span>{{ t('menu.LiveLogGroup') }}</span>
             </template>
+            <el-menu-item v-if="hasMenuPermission('LiveRecordList')" index="/log/live/live-record-list">
+              <el-icon>
+                <Monitor/>
+              </el-icon>
+              <span>{{ t('menu.LiveRecordList') }}</span>
+            </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('LiveRevenueLogList')" index="/log/live/revenue-log-list">
               <el-icon>
                 <Present/>
               </el-icon>
               <span>{{ t('menu.LiveRevenueLogList') }}</span>
             </el-menu-item>
-            <el-menu-item v-if="hasMenuPermission('LiveRecordList')" index="/log/live/live-record-list">
+            <el-menu-item v-if="hasMenuPermission('LiveDailyEffectiveLiveList')" index="/log/live/daily-effective-live-list">
               <el-icon>
-                <Monitor/>
+                <Calendar/>
               </el-icon>
-              <span>{{ t('menu.LiveRecordList') }}</span>
+              <span>{{ t('menu.LiveDailyEffectiveLiveList') }}</span>
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu index="/log/call">
@@ -637,7 +643,7 @@ import {useI18n} from 'vue-i18n'
 import LayoutTabs from '@/components/layout/LayoutTabs.vue'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import {useLayoutTabs} from '@/composables/useLayoutTabs'
-import {ArrowDown, Bell, Box, Coin, Collection, CollectionTag, Cpu, CreditCard, Delete, Document, EditPen, Expand, Fold, Key, List, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Refresh, Search, Service, Setting, Stamp, Tickets, User, UserFilled, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Bell, Box, Calendar, Coin, Collection, CollectionTag, Cpu, CreditCard, Delete, Document, EditPen, Expand, Fold, Key, List, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Refresh, Search, Service, Setting, Stamp, Tickets, User, UserFilled, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {getIsAdmin, hasPermission} from '@/utils/permission'
 import {clearAuthSession} from '@/utils/auth'
 

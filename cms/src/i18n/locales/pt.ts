@@ -47,6 +47,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   LiveLogGroup: 'Registros ao vivo',
   LiveRevenueLogList: 'Receita ao vivo',
   LiveRecordList: 'Gravações ao vivo',
+  LiveDailyEffectiveLiveList: 'Fluxo diário ao vivo',
   CallLogGroup: 'Registros de chamadas',
   VideoCallLogList: 'Registros de videochamada',
   UserLogGroup: 'Registros de usuário',

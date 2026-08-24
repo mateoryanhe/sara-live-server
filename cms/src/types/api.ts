@@ -938,6 +938,7 @@ export interface MyGuildAnchorDailyEffectiveLiveQuery extends PageQuery {
 
 export interface MyOwnedGuildAnchorDailyEffectiveLiveQuery extends PageQuery {
     roomId?: string
+    roomIds?: string[]
     liveDateStart?: string
     liveDateEnd?: string
     settled?: number
@@ -1909,6 +1910,14 @@ export interface LiveRecordQuery extends PageQuery {
     anchorIds?: string[]
     startTime?: number
     endTime?: number
+}
+
+export interface DailyEffectiveLiveQuery extends PageQuery {
+    anchorId?: string
+    anchorIds?: string[]
+    liveDateStart?: string
+    liveDateEnd?: string
+    settled?: number
 }
 
 export interface LiveRecordItem {

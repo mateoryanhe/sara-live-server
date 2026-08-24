@@ -72,6 +72,26 @@ func parseGuildIdFilter(val string) uint64 {
 	return id
 }
 
+func parseGuildIdFilters(vals []string) []uint64 {
+	if len(vals) == 0 {
+		return nil
+	}
+	ids := make([]uint64, 0, len(vals))
+	seen := make(map[uint64]struct{}, len(vals))
+	for _, val := range vals {
+		id := parseGuildIdFilter(val)
+		if id == 0 {
+			continue
+		}
+		if _, ok := seen[id]; ok {
+			continue
+		}
+		seen[id] = struct{}{}
+		ids = append(ids, id)
+	}
+	return ids
+}
+
 func containsGuildId(ids []uint64, guildId uint64) bool {
 	for _, id := range ids {
 		if id == guildId {

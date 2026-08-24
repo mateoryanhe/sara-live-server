@@ -33,13 +33,58 @@ func validateMyOwnedGuildAnchorAccess(ctx context.Context, anchorId uint64) erro
 	if anchorId == 0 {
 		return nil
 	}
+	return validateMyOwnedGuildAnchorsAccess(ctx, []uint64{anchorId})
+}
+
+func validateMyOwnedGuildAnchorsAccess(ctx context.Context, anchorIds []uint64) error {
+	if len(anchorIds) == 0 {
+		return nil
+	}
 	guildIds, err := collectOwnedGuildIdsForCMS(ctx)
 	if err != nil {
 		return err
 	}
-	room := liveroomdao.ResolveRoom(anchorId)
-	if room == nil || !containsGuildId(guildIds, room.GuildId) {
-		return errercode.CreateCode(errercode.NoPermission)
+	for _, anchorId := range anchorIds {
+		if anchorId == 0 {
+			continue
+		}
+		room := liveroomdao.ResolveRoom(anchorId)
+		if room == nil || !containsGuildId(guildIds, room.GuildId) {
+			return errercode.CreateCode(errercode.NoPermission)
+		}
+	}
+	return nil
+}
+
+func resolveOwnedGuildAnchorRoomIds(roomId string, roomIds []string) []uint64 {
+	if len(roomIds) > 0 {
+		return parseGuildIdFilters(roomIds)
+	}
+	if id := parseGuildIdFilter(roomId); id > 0 {
+		return []uint64{id}
+	}
+	return nil
+}
+
+// ResolveOwnedGuildAnchorRoomIds 解析主播筛选 ID 列表
+func ResolveOwnedGuildAnchorRoomIds(roomId string, roomIds []string) []uint64 {
+	return resolveOwnedGuildAnchorRoomIds(roomId, roomIds)
+}
+
+// ValidateMyOwnedGuildAnchorsAccessForUser 校验 CMS 用户是否可访问这些主播
+func ValidateMyOwnedGuildAnchorsAccessForUser(cmsUserId uint64, anchorIds []uint64) error {
+	if len(anchorIds) == 0 {
+		return nil
+	}
+	guildIds := CollectOwnedGuildIdsForCMSUser(cmsUserId)
+	for _, anchorId := range anchorIds {
+		if anchorId == 0 {
+			continue
+		}
+		room := liveroomdao.ResolveRoom(anchorId)
+		if room == nil || !containsGuildId(guildIds, room.GuildId) {
+			return errercode.CreateCode(errercode.NoPermission)
+		}
 	}
 	return nil
 }
@@ -82,24 +127,29 @@ func GetMyOwnedGuildAnchorDailyEffectiveLiveList(ctx context.Context, req *guild
 	if len(guildIds) == 0 {
 		return httpserver.NewCMSQueryResp(0, []*guilddto.GuildAnchorDailyEffectiveLiveItem{}), nil
 	}
-	roomId := parseGuildIdFilter(req.RoomId)
-	if err = validateMyOwnedGuildAnchorAccess(ctx, roomId); err != nil {
+	roomIds := resolveOwnedGuildAnchorRoomIds(req.RoomId, req.RoomIds)
+	if err = validateMyOwnedGuildAnchorsAccess(ctx, roomIds); err != nil {
 		return nil, err
 	}
-	total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSListByGuildIds(&liveroomdao.DailyAnchorEffectiveLiveCMSListByGuildIdsFilter{
+	filter := &liveroomdao.DailyAnchorEffectiveLiveCMSListByGuildIdsFilter{
 		GuildIds:      guildIds,
-		RoomId:        roomId,
 		LiveDateStart: req.LiveDateStart,
 		LiveDateEnd:   req.LiveDateEnd,
 		Settled:       req.Settled,
 		PageIndex:     req.PageIndex,
 		PageSize:      req.PageSize,
-	})
-	roomIds := collectDailyAnchorRoomIds(rows)
-	nicknameMap := userinfodao.GetNicknameMapByUserIds(roomIds)
+	}
+	if len(roomIds) == 1 {
+		filter.RoomId = roomIds[0]
+	} else if len(roomIds) > 1 {
+		filter.RoomIds = roomIds
+	}
+	total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSListByGuildIds(filter)
+	anchorRoomIds := CollectDailyAnchorRoomIds(rows)
+	nicknameMap := userinfodao.GetNicknameMapByUserIds(anchorRoomIds)
 	list := make([]*guilddto.GuildAnchorDailyEffectiveLiveItem, 0, len(rows))
 	for _, row := range rows {
-		if item := toGuildAnchorDailyEffectiveLiveItem(row, nicknameMap); item != nil {
+		if item := ToGuildAnchorDailyEffectiveLiveItem(row, nicknameMap); item != nil {
 			list = append(list, item)
 		}
 	}

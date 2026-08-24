@@ -29,18 +29,18 @@ func GetGuildAnchorDailyEffectiveLiveList(_ context.Context, req *guilddto.CMSGu
 		PageIndex:     req.PageIndex,
 		PageSize:      req.PageSize,
 	})
-	roomIds := collectDailyAnchorRoomIds(rows)
+	roomIds := CollectDailyAnchorRoomIds(rows)
 	nicknameMap := userinfodao.GetNicknameMapByUserIds(roomIds)
 	list := make([]*guilddto.GuildAnchorDailyEffectiveLiveItem, 0, len(rows))
 	for _, row := range rows {
-		if item := toGuildAnchorDailyEffectiveLiveItem(row, nicknameMap); item != nil {
+		if item := ToGuildAnchorDailyEffectiveLiveItem(row, nicknameMap); item != nil {
 			list = append(list, item)
 		}
 	}
 	return httpserver.NewCMSQueryResp(total, list), nil
 }
 
-func collectDailyAnchorRoomIds(rows []*liveentity.DailyAnchorEffectiveLive) []uint64 {
+func CollectDailyAnchorRoomIds(rows []*liveentity.DailyAnchorEffectiveLive) []uint64 {
 	if len(rows) == 0 {
 		return nil
 	}
@@ -53,7 +53,7 @@ func collectDailyAnchorRoomIds(rows []*liveentity.DailyAnchorEffectiveLive) []ui
 	return ids
 }
 
-func toGuildAnchorDailyEffectiveLiveItem(row *liveentity.DailyAnchorEffectiveLive, nicknameMap map[uint64]string) *guilddto.GuildAnchorDailyEffectiveLiveItem {
+func ToGuildAnchorDailyEffectiveLiveItem(row *liveentity.DailyAnchorEffectiveLive, nicknameMap map[uint64]string) *guilddto.GuildAnchorDailyEffectiveLiveItem {
 	if row == nil || row.ID == "" {
 		return nil
 	}

@@ -18,16 +18,28 @@
       <el-form :model="searchForm" class="search-form" inline label-width="100px">
         <el-form-item :label="t('pages.guildAnchorDailyLiveList.anchor')">
           <div class="anchor-filter">
-            <el-input
-                :model-value="selectedAnchorLabel"
-                class="anchor-input"
-                disabled
-                :placeholder="t('pages.guildAnchorDailyLiveList.noAnchorSelected')"
-            />
+            <div class="anchor-selection">
+              <el-input
+                  :model-value="selectedAnchorsLabel"
+                  class="anchor-input"
+                  disabled
+                  :placeholder="t('pages.guildAnchorDailyLiveList.noAnchorSelected')"
+              />
+              <div v-if="selectedAnchors.length > 0" class="anchor-tags">
+                <el-tag
+                    v-for="anchor in selectedAnchors"
+                    :key="anchor.id"
+                    closable
+                    @close="removeSelectedAnchor(anchor)"
+                >
+                  {{ formatAnchorLabel(anchor) }}
+                </el-tag>
+              </div>
+            </div>
             <el-button @click="openAnchorPicker">
               {{ t('pages.guildAnchorDailyLiveList.selectAnchor') }}
             </el-button>
-            <el-button v-if="selectedAnchor" @click="clearSelectedAnchor">
+            <el-button v-if="selectedAnchors.length > 0" @click="clearSelectedAnchors">
               {{ t('pages.guildAnchorDailyLiveList.clearAnchor') }}
             </el-button>
           </div>
@@ -115,9 +127,10 @@
 
     <AnchorPickerDialog
         v-model:visible="anchorPickerVisible"
+        :initial-anchors="selectedAnchors"
+        multiple
         owned-guild-only
-        :initial-anchor="selectedAnchor"
-        @confirm="handleAnchorPicked"
+        @confirm-multiple="handleAnchorsPicked"
     />
   </div>
 </template>
@@ -142,7 +155,7 @@ const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 
 const loading = ref(false)
 const tableData = ref<GuildAnchorDailyEffectiveLiveItem[]>([])
-const selectedAnchor = ref<AnchorListItem | null>(null)
+const selectedAnchors = ref<AnchorListItem[]>([])
 const anchorPickerVisible = ref(false)
 
 const searchForm = reactive({
@@ -155,30 +168,42 @@ const pagination = reactive({
   total: 0,
 })
 
-const selectedAnchorLabel = computed(() => {
-  if (!selectedAnchor.value) {
+const formatAnchorLabel = (anchor: AnchorListItem) => {
+  const nickname = anchor.nickname || '-'
+  return `${nickname} (${anchor.id})`
+}
+
+const selectedAnchorsLabel = computed(() => {
+  if (selectedAnchors.value.length === 0) {
     return ''
   }
-  const nickname = selectedAnchor.value.nickname || '-'
-  return `${nickname} (${selectedAnchor.value.id})`
+  if (selectedAnchors.value.length === 1) {
+    return formatAnchorLabel(selectedAnchors.value[0])
+  }
+  return t('pages.guildAnchorDailyLiveList.selectedAnchorsCount', {count: selectedAnchors.value.length})
 })
 
 const openAnchorPicker = () => {
   anchorPickerVisible.value = true
 }
 
-const clearSelectedAnchor = () => {
-  selectedAnchor.value = null
+const clearSelectedAnchors = () => {
+  selectedAnchors.value = []
 }
 
-const handleAnchorPicked = (anchor: AnchorListItem | null) => {
-  selectedAnchor.value = anchor
+const removeSelectedAnchor = (anchor: AnchorListItem) => {
+  selectedAnchors.value = selectedAnchors.value.filter(item => item.id !== anchor.id)
+}
+
+const handleAnchorsPicked = (anchors: AnchorListItem[]) => {
+  selectedAnchors.value = anchors
 }
 
 const buildFilterParams = () => {
   const [liveDateStart, liveDateEnd] = searchForm.dateRange || []
+  const roomIds = selectedAnchors.value.map(anchor => String(anchor.id))
   return {
-    roomId: selectedAnchor.value?.id || undefined,
+    roomIds: roomIds.length > 0 ? roomIds : undefined,
     liveDateStart: liveDateStart || undefined,
     liveDateEnd: liveDateEnd || undefined,
     settled: 0,
@@ -214,7 +239,7 @@ const handleSearch = () => {
 
 const handleReset = () => {
   searchForm.dateRange = []
-  selectedAnchor.value = null
+  selectedAnchors.value = []
   pagination.pageIndex = 1
   pagination.total = 0
   tableData.value = []
@@ -273,8 +298,21 @@ const formatDate = (dateString: string | null | undefined) => {
 
 .anchor-filter {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
+}
+
+.anchor-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.anchor-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 420px;
 }
 
 .anchor-input {

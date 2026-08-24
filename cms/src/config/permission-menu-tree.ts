@@ -200,8 +200,9 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
         titleKey: 'menu.LogManagement',
         children: [
             group('log-live', 'menu.LiveLogGroup', [
-                page('LiveRevenueLogList'),
                 page('LiveRecordList'),
+                page('LiveRevenueLogList'),
+                page('LiveDailyEffectiveLiveList'),
             ]),
             group('log-call', 'menu.CallLogGroup', [
                 page('VideoCallLogList'),
