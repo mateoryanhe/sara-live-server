@@ -30,3 +30,7 @@ func handleH5LiveDeployZip(r *ghttp.Request) {
 func (c *H5LiveDeployCMSController) GetH5LiveDeployInfo(ctx context.Context, req *h5livedeploydto.GetH5LiveDeployInfoReq) (*h5livedeploydto.GetH5LiveDeployInfoRes, error) {
 	return h5livedeploy.GetH5LiveDeployInfo(ctx, req)
 }
+
+func (c *H5LiveDeployCMSController) SaveH5LiveDeployCfg(ctx context.Context, req *h5livedeploydto.SaveH5LiveDeployCfgReq) (*h5livedeploydto.SaveH5LiveDeployCfgRes, error) {
+	return h5livedeploy.SaveH5LiveDeployCfg(ctx, req)
+}

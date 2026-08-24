@@ -2,7 +2,6 @@ package h5livedeploy
 
 import (
 	"archive/zip"
-	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -14,20 +13,6 @@ import (
 	"xr-game-server/core/cfg"
 	"xr-game-server/dto/h5livedeploydto"
 )
-
-func GetH5LiveDeployInfo(_ context.Context, _ *h5livedeploydto.GetH5LiveDeployInfoReq) (*h5livedeploydto.GetH5LiveDeployInfoRes, error) {
-	deployPath, err := getDeployDir()
-	if err != nil {
-		return nil, err
-	}
-	return &h5livedeploydto.GetH5LiveDeployInfoRes{
-		Info: &h5livedeploydto.H5LiveDeployInfoItem{
-			UrlPrefix:  h5livedeploydto.H5LiveStaticPrefix,
-			DeployPath: deployPath,
-			AcceptExt:  ".zip",
-		},
-	}, nil
-}
 
 func DeployZipFromRequest(r *ghttp.Request) (*h5livedeploydto.DeployH5LiveZipRes, error) {
 	if r == nil || r.Request == nil {

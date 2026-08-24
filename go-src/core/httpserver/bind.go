@@ -7,7 +7,7 @@ import (
 // RegAPI 绑定app控制器 检查权限 返回自定义格式数据
 func RegAPI(prefix string, handlerOrObject ...interface{}) {
 	httpServer.Group(prefix, func(group *ghttp.RouterGroup) {
-		group.Middleware(middlewareLogReq, MiddlewareAppAuth, apiResponseMiddleware)
+		group.Middleware(middlewareLogReq, MiddlewareH5Crypto, MiddlewareAppAuth, apiResponseMiddleware)
 		group.Bind(handlerOrObject...)
 	})
 }
@@ -15,7 +15,7 @@ func RegAPI(prefix string, handlerOrObject ...interface{}) {
 // RegNonAuthAPI 绑定无需权限检查控制器 返回自定义格式数据
 func RegNonAuthAPI(prefix string, handlerOrObject ...interface{}) {
 	httpServer.Group(prefix, func(group *ghttp.RouterGroup) {
-		group.Middleware(middlewareLogReq, apiResponseMiddleware)
+		group.Middleware(middlewareLogReq, MiddlewareH5Crypto, apiResponseMiddleware)
 		group.Bind(handlerOrObject...)
 	})
 }
@@ -23,7 +23,7 @@ func RegNonAuthAPI(prefix string, handlerOrObject ...interface{}) {
 // RegAppCustomizeRes 自定义查询结果 需要鉴权 app专用
 func RegAppCustomizeRes(prefix string, handlerOrObject ...interface{}) {
 	httpServer.Group(prefix, func(group *ghttp.RouterGroup) {
-		group.Middleware(middlewareLogReq, MiddlewareAppAuth, customResponseMiddleware)
+		group.Middleware(middlewareLogReq, MiddlewareH5Crypto, MiddlewareAppAuth, customResponseMiddleware)
 		group.Bind(handlerOrObject...)
 	})
 }
@@ -31,7 +31,7 @@ func RegAppCustomizeRes(prefix string, handlerOrObject ...interface{}) {
 // RegAPIHandler 绑定App原始Handler,不触发 GoFrame ParseMultipartForm(适合大文件流式上传)
 func RegAPIHandler(prefix, pattern string, handler ghttp.HandlerFunc) {
 	httpServer.Group(prefix, func(group *ghttp.RouterGroup) {
-		group.Middleware(middlewareLogReq, MiddlewareAppAuth, apiResponseMiddleware)
+		group.Middleware(middlewareLogReq, MiddlewareH5Crypto, MiddlewareAppAuth, apiResponseMiddleware)
 		group.POST(pattern, handler)
 	})
 }

@@ -34,6 +34,10 @@ func WriteFailJson(r *ghttp.Request, code int) {
 	resp := CreateFail(code)
 	resp.Message = errercode.GetMsg(errercode.XRCode(code), GetLang(r))
 	respBody := xrjson.MustMarshal(resp)
+	if isH5CryptoRequest(r) {
+		writeH5ResponseBody(r, respBody, writeStart)
+		return
+	}
 	respContent := string(respBody)
 	r.Response.Header().Set("Content-Type", contentTypeJson)
 	r.Response.Write(respBody)

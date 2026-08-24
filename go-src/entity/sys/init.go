@@ -5,5 +5,6 @@ func Init() {
 	initUploadResourceCfg()
 	initPreloadCfg()
 	initDataSyncCfg()
+	initH5LiveDeployCfg()
 	initSysResourceMetric()
 }

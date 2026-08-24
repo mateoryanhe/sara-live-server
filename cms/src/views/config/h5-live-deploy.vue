@@ -14,6 +14,40 @@
         </el-descriptions-item>
       </el-descriptions>
 
+      <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="120px">
+        <div class="section-title">{{ t('pages.h5LiveDeploy.secretTitle') }}</div>
+        <div class="form-tip">{{ t('pages.h5LiveDeploy.secretTip') }}</div>
+
+        <el-form-item :label="t('pages.h5LiveDeploy.deploySecret')" prop="deploySecret">
+          <div class="secret-input">
+            <el-input
+                v-model="formData.deploySecret"
+                clearable
+                :disabled="!can('save')"
+                :placeholder="t('pages.h5LiveDeploy.deploySecretPlaceholder')"
+                show-password
+                type="password"
+            />
+            <el-button v-if="can('save')" @click="generateDeploySecret">
+              {{ t('pages.h5LiveDeploy.generateSecret') }}
+            </el-button>
+            <el-button :disabled="!formData.deploySecret" @click="copyDeploySecret">
+              {{ t('common.copy') }}
+            </el-button>
+          </div>
+        </el-form-item>
+
+        <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.h5LiveDeploy.lastUpdated')">
+          <span>{{ metaInfo.updatedAt }}</span>
+        </el-form-item>
+
+        <el-form-item v-if="can('save')">
+          <el-button :loading="saving" type="primary" @click="handleSaveSecret">
+            {{ t('common.saveConfig') }}
+          </el-button>
+        </el-form-item>
+      </el-form>
+
       <div class="upload-section">
         <div class="section-title">{{ t('pages.h5LiveDeploy.uploadTitle') }}</div>
         <div class="form-tip">{{ t('pages.h5LiveDeploy.uploadTip') }}</div>
@@ -80,9 +114,9 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onMounted, reactive, ref} from 'vue'
 import {UploadFilled} from '@element-plus/icons-vue'
-import type {UploadFile, UploadFiles} from 'element-plus'
+import type {FormInstance, FormRules, UploadFile, UploadFiles} from 'element-plus'
 import {ElMessage} from 'element-plus'
 import {useI18n} from 'vue-i18n'
 import {h5LiveDeployApi} from '@/api/modules/h5-live-deploy'
@@ -93,24 +127,89 @@ const {t} = useI18n()
 const {can} = usePagePermission('H5LiveDeployManagement')
 
 const loading = ref(false)
+const saving = ref(false)
 const uploading = ref(false)
 const uploadPercent = ref(0)
 const uploadStatus = ref<'success' | 'exception' | ''>('')
 const deployInfo = ref<H5LiveDeployInfo | null>(null)
 const selectedFile = ref<File | null>(null)
 const deployResult = ref<DeployH5LiveZipRes | null>(null)
+const formRef = ref<FormInstance>()
+
+const formData = reactive({
+  id: 0,
+  deploySecret: '',
+})
+
+const metaInfo = reactive({
+  updatedAt: '',
+})
+
+const formRules = computed<FormRules>(() => ({
+  deploySecret: [{required: true, message: t('pages.h5LiveDeploy.deploySecretRequired'), trigger: 'blur'}],
+}))
 
 const deployResultTitle = computed(() => t('pages.h5LiveDeploy.deploySuccess'))
+
+const applyDeployInfo = (info: H5LiveDeployInfo | null | undefined) => {
+  deployInfo.value = info ?? null
+  formData.id = info?.id ? Number(info.id) : 0
+  formData.deploySecret = info?.deploySecret ?? ''
+  metaInfo.updatedAt = info?.updatedAt ?? ''
+}
 
 const fetchDeployInfo = async () => {
   loading.value = true
   try {
     const response = await h5LiveDeployApi.getH5LiveDeployInfo()
-    deployInfo.value = response.info ?? null
+    applyDeployInfo(response.info)
   } catch {
     ElMessage.error(t('pages.h5LiveDeploy.fetchInfoFailed'))
   } finally {
     loading.value = false
+  }
+}
+
+const generateDeploySecret = () => {
+  formData.deploySecret = crypto.randomUUID().replace(/-/g, '')
+}
+
+const copyDeploySecret = async () => {
+  const value = formData.deploySecret.trim()
+  if (!value) {
+    ElMessage.warning(t('pages.h5LiveDeploy.secretEmptyCopy'))
+    return
+  }
+  try {
+    await navigator.clipboard.writeText(value)
+    ElMessage.success(t('pages.h5LiveDeploy.copiedToClipboard'))
+  } catch (error) {
+    console.error('copy deploy secret failed:', error)
+    ElMessage.error(t('pages.h5LiveDeploy.copyFailed'))
+  }
+}
+
+const handleSaveSecret = async () => {
+  if (!formRef.value) {
+    return
+  }
+  try {
+    await formRef.value.validate()
+  } catch {
+    return
+  }
+  saving.value = true
+  try {
+    await h5LiveDeployApi.saveH5LiveDeployCfg({
+      id: formData.id,
+      deploySecret: formData.deploySecret.trim(),
+    })
+    ElMessage.success(t('pages.h5LiveDeploy.saveSuccess'))
+    await fetchDeployInfo()
+  } catch {
+    ElMessage.error(t('pages.h5LiveDeploy.saveFailed'))
+  } finally {
+    saving.value = false
   }
 }
 
@@ -170,6 +269,10 @@ onMounted(() => {
   margin-bottom: 24px;
 }
 
+.cfg-form {
+  margin-bottom: 24px;
+}
+
 .upload-section {
   margin-top: 8px;
 }
@@ -185,6 +288,18 @@ onMounted(() => {
   font-size: 13px;
   line-height: 1.6;
   margin-bottom: 12px;
+}
+
+.secret-input {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+}
+
+.secret-input :deep(.el-input) {
+  flex: 1;
+  min-width: 260px;
 }
 
 .zip-uploader {

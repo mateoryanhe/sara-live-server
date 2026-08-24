@@ -389,6 +389,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
 
     H5LiveDeployManagement: '/h5LiveDeploy/getH5LiveDeployInfo',
     'H5LiveDeployManagement:view': '/h5LiveDeploy/getH5LiveDeployInfo',
+    'H5LiveDeployManagement:save': '/h5LiveDeploy/saveH5LiveDeployCfg',
     'H5LiveDeployManagement:deploy': '/h5LiveDeploy/deployZip',
 
     ResourceMonitor: '/resourceMetric/getResourceMetricMemoryTrend',

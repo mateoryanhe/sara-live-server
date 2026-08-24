@@ -14,6 +14,7 @@ import (
 	"xr-game-server/module/currencylog"
 	"xr-game-server/module/customerservice"
 	"xr-game-server/module/game"
+	"xr-game-server/module/h5livedeploy"
 	"xr-game-server/module/ipgeo"
 	"xr-game-server/module/livecfg"
 	"xr-game-server/module/liverevenuesharecfg"
@@ -56,6 +57,7 @@ func Init() {
 	vip.Init()
 	apppkg.Init()
 	game.Init()
+	h5livedeploy.Init()
 	ipgeo.Init()
 	agora.Init()
 	call.Init()

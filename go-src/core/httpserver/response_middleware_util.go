@@ -82,6 +82,10 @@ func writeResponse(r *ghttp.Request, wrapSuccess func(any) any) {
 	result := buildResponseResult(r, wrapSuccess)
 	finalizeHandlerError(r, handlerErr)
 	respContent := string(result.resp)
+	if isH5CryptoRequest(r) {
+		writeH5ResponseBody(r, result.resp, writeStart)
+		return
+	}
 	r.Response.Header().Set("Content-Type", contentTypeJson)
 	r.Response.Write(result.resp)
 	stashAPIResponseBufferWrittenAt(r)

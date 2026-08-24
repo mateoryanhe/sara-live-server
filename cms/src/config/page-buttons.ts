@@ -276,6 +276,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     ],
     H5LiveDeployManagement: [
         BTN.view,
+        BTN.save,
         {key: 'deploy', label: '上传部署'},
     ],
 }

@@ -25,7 +25,7 @@ func middlewareRestartGuard(r *ghttp.Request) {
 func middlewareCORS(r *ghttp.Request) {
 	options := r.Response.DefaultCORSOptions()
 	// CMS/App 自定义鉴权头
-	for _, header := range []string{"token", "authId", "reqId", PackageNameHeader} {
+	for _, header := range []string{"token", "authId", "reqId", PackageNameHeader, H5ClientHeader} {
 		if options.AllowHeaders == "" {
 			options.AllowHeaders = header
 			continue
