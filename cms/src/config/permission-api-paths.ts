@@ -387,6 +387,10 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'DataSyncCfgManagement:view': '/dataSync/getDataSyncCfg',
     'DataSyncCfgManagement:save': '/dataSync/saveDataSyncCfg',
 
+    H5LiveDeployManagement: '/h5LiveDeploy/getH5LiveDeployInfo',
+    'H5LiveDeployManagement:view': '/h5LiveDeploy/getH5LiveDeployInfo',
+    'H5LiveDeployManagement:deploy': '/h5LiveDeploy/deployZip',
+
     ResourceMonitor: '/resourceMetric/getResourceMetricMemoryTrend',
     'ResourceMonitor:view': '/resourceMetric/getResourceMetricMemoryTrend',
     'ResourceMonitor:search': '/resourceMetric/getResourceMetricMemoryTrend',

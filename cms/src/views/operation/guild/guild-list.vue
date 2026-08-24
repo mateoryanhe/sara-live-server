@@ -9,7 +9,6 @@
       <div class="content">
         <div class="table-header">
           <el-button type="primary" @click="handleAdd">{{ t('pages.guildList.addGuild') }}</el-button>
-          <el-button @click="downloadTxtTemplate">{{ t('pages.guildList.downloadTemplate') }}</el-button>
         </div>
         <el-alert
             :closable="false"
@@ -76,17 +75,15 @@
               </el-button>
               <el-button
                   v-if="can('batchSetAnchor')"
-                  :loading="importing"
                   size="small"
-                  @click="triggerCsvImport(row, 1)"
+                  @click="openImportDialog(row, 1)"
               >
                 {{ t('pages.guildList.importNormalAnchor') }}
               </el-button>
               <el-button
                   v-if="can('batchSetSeniorAnchor')"
-                  :loading="importing"
                   size="small"
-                  @click="triggerCsvImport(row, 7)"
+                  @click="openImportDialog(row, 7)"
               >
                 {{ t('pages.guildList.importSeniorAnchor') }}
               </el-button>
@@ -163,13 +160,22 @@
       </template>
     </el-dialog>
 
-    <input
-        ref="csvInputRef"
-        accept=".txt,.csv,text/plain,text/csv"
-        class="hidden-file-input"
-        type="file"
-        @change="onCsvFileSelected"
-    />
+    <el-dialog v-model="importDialogVisible" :title="importDialogTitle" width="560px">
+      <el-form ref="importFormRef" :model="importForm" :rules="importFormRules" label-width="80px">
+        <el-form-item :label="t('pages.guildList.importUserIds')" prop="userIdsText">
+          <el-input
+              v-model="importForm.userIdsText"
+              :autosize="{ minRows: 8, maxRows: 16 }"
+              :placeholder="t('pages.guildList.importUserIdsPlaceholder')"
+              type="textarea"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="importDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button :loading="importing" type="primary" @click="handleImportSubmit">{{ t('common.confirm') }}</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -204,6 +210,13 @@ interface JoinGuildForm {
   anchorType: 1 | 7
 }
 
+interface ImportGuildForm {
+  guildId: string
+  guildName: string
+  anchorType: 1 | 7
+  userIdsText: string
+}
+
 const {t} = useI18n()
 const router = useRouter()
 const {can} = usePagePermission('GuildManagement')
@@ -217,8 +230,15 @@ const selectedGuild = ref<Guild | null>(null)
 const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
-const pendingAnchorType = ref<1 | 7>(1)
-const csvInputRef = ref<HTMLInputElement | null>(null)
+const importDialogVisible = ref(false)
+const importDialogTitle = ref('')
+const importFormRef = ref<FormInstance>()
+const importForm = ref<ImportGuildForm>({
+  guildId: '',
+  guildName: '',
+  anchorType: 1,
+  userIdsText: '',
+})
 
 const searchForm = reactive<SearchForm>({
   name: ''
@@ -276,6 +296,12 @@ const handleLeaderSelect = (user: CMSUser) => {
   currentRow.value.leaderId = user.id
   selectedLeader.value = user
 }
+
+const importFormRules = computed<FormRules>(() => ({
+  userIdsText: [
+    {required: true, message: t('pages.guildList.importUserIdsRequired'), trigger: 'blur'},
+  ],
+}))
 
 const joinFormRules = computed<FormRules>(() => ({
   userId: [
@@ -483,124 +509,84 @@ const resetSearch = () => {
   fetchGuildList()
 }
 
-const parseCsvLine = (line: string): string[] => {
-  const result: string[] = []
-  let current = ''
-  let inQuotes = false
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i]
-    if (ch === '"') {
-      if (inQuotes && line[i + 1] === '"') {
-        current += '"'
-        i++
-      } else {
-        inQuotes = !inQuotes
-      }
-      continue
-    }
-    if ((ch === ',' || ch === '\t') && !inQuotes) {
-      result.push(current.trim())
-      current = ''
-      continue
-    }
-    current += ch
-  }
-  result.push(current.trim())
-  return result
-}
-
-const normalizeHeader = (value: string) => value.trim().toLowerCase().replace(/^\ufeff/, '')
-
-const isHeaderRow = (cols: string[]) => {
-  if (cols.length < 1) return false
-  const a = normalizeHeader(cols[0])
-  const userHeaders = new Set(['user_id', 'userid', '用户id', 'id'])
-  return userHeaders.has(a)
-}
-
-const parseGuildAnchorCsv = (text: string): ImportGuildAnchorRow[] => {
-  const lines = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean)
-  if (lines.length === 0) {
+const parseImportUserIds = (text: string): ImportGuildAnchorRow[] => {
+  const normalized = text.replace(/^\ufeff/, '').trim()
+  if (!normalized) {
     return []
   }
-  let start = 0
-  const firstCols = parseCsvLine(lines[0])
-  if (isHeaderRow(firstCols)) {
-    start = 1
-  }
+  const headerPattern = /^(user_id|userid|用户id|id)$/i
+  const tokens = normalized.split(/[\s,;\t\r\n]+/).map(item => item.trim()).filter(Boolean)
   const rows: ImportGuildAnchorRow[] = []
   const seen = new Set<string>()
-  for (let i = start; i < lines.length; i++) {
-    const cols = parseCsvLine(lines[i])
-    if (cols.length < 1) continue
-    const userId = cols[0].replace(/^\ufeff/, '').trim()
-    if (!userId || !/^\d+$/.test(userId)) continue
-    if (seen.has(userId)) continue
-    seen.add(userId)
-    rows.push({userId})
+  for (const token of tokens) {
+    if (headerPattern.test(token)) {
+      continue
+    }
+    if (!/^\d+$/.test(token)) {
+      continue
+    }
+    if (seen.has(token)) {
+      continue
+    }
+    seen.add(token)
+    rows.push({userId: token})
   }
   return rows
 }
 
-const downloadTxtTemplate = () => {
-  // 用 txt，避免 Excel 把大整数改成科学计数法
-  const content = 'user_id\n10001\n'
-  const blob = new Blob(['\uFEFF' + content], {type: 'text/plain;charset=utf-8;'})
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = 'guild_anchor_import_template.txt'
-  link.click()
-  URL.revokeObjectURL(url)
-}
-
-const triggerCsvImport = (row: Guild, anchorType: 1 | 7) => {
+const openImportDialog = (row: Guild, anchorType: 1 | 7) => {
   selectedGuild.value = row
-  pendingAnchorType.value = anchorType
-  if (csvInputRef.value) {
-    csvInputRef.value.value = ''
-    csvInputRef.value.click()
+  importDialogTitle.value = anchorType === 7
+      ? t('pages.guildList.importSeniorAnchorTitle', {name: row.name})
+      : t('pages.guildList.importNormalAnchorTitle', {name: row.name})
+  importForm.value = {
+    guildId: row.id,
+    guildName: row.name,
+    anchorType,
+    userIdsText: '',
   }
+  importDialogVisible.value = true
+  importFormRef.value?.clearValidate()
 }
 
-const onCsvFileSelected = async (event: Event) => {
-  const input = event.target as HTMLInputElement
-  const file = input.files?.[0]
-  if (!file || !selectedGuild.value) {
+const handleImportSubmit = async () => {
+  if (!importFormRef.value) {
     return
   }
-  importing.value = true
-  try {
-    const text = await file.text()
-    const rows = parseGuildAnchorCsv(text)
-    if (rows.length === 0) {
-      ElMessage.warning(t('pages.guildList.csvEmpty'))
+  await importFormRef.value.validate(async (valid) => {
+    if (!valid) {
       return
     }
-    const response = await guildApi.importGuildAnchors({
-      guildId: selectedGuild.value.id,
-      anchorType: pendingAnchorType.value,
-      rows,
-    })
-    const state: GuildAnchorImportResultState = {
-      guildId: selectedGuild.value.id,
-      guildName: selectedGuild.value.name,
-      anchorType: pendingAnchorType.value,
-      successCount: response?.successCount ?? 0,
-      failCount: response?.failCount ?? 0,
-      fails: response?.fails ?? [],
+    const rows = parseImportUserIds(importForm.value.userIdsText)
+    if (rows.length === 0) {
+      ElMessage.warning(t('pages.guildList.importEmpty'))
+      return
     }
-    sessionStorage.setItem(GUILD_ANCHOR_IMPORT_RESULT_KEY, JSON.stringify(state))
-    await router.push({name: 'GuildAnchorImportResult'})
-  } catch (error) {
-    console.error('import guild anchors failed:', error)
-    ElMessage.error(t('pages.guildList.importFailed'))
-  } finally {
-    importing.value = false
-    if (csvInputRef.value) {
-      csvInputRef.value.value = ''
+    importing.value = true
+    try {
+      const response = await guildApi.importGuildAnchors({
+        guildId: importForm.value.guildId,
+        anchorType: importForm.value.anchorType,
+        rows,
+      })
+      const state: GuildAnchorImportResultState = {
+        guildId: importForm.value.guildId,
+        guildName: importForm.value.guildName,
+        anchorType: importForm.value.anchorType,
+        successCount: response?.successCount ?? 0,
+        failCount: response?.failCount ?? 0,
+        fails: response?.fails ?? [],
+      }
+      importDialogVisible.value = false
+      sessionStorage.setItem(GUILD_ANCHOR_IMPORT_RESULT_KEY, JSON.stringify(state))
+      await router.push({name: 'GuildAnchorImportResult'})
+    } catch (error) {
+      console.error('import guild anchors failed:', error)
+      ElMessage.error(t('pages.guildList.importFailed'))
+    } finally {
+      importing.value = false
     }
-  }
+  })
 }
 
 onMounted(() => {
@@ -679,7 +665,4 @@ const handleViewMembers = (row: Guild) => {
   flex: 1;
 }
 
-.hidden-file-input {
-  display: none;
-}
 </style>

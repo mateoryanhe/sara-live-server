@@ -274,6 +274,10 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.save,
         {key: 'sync', label: '同步数据'},
     ],
+    H5LiveDeployManagement: [
+        BTN.view,
+        {key: 'deploy', label: '上传部署'},
+    ],
 }
 
 export function getPageButtons(pageName: string, metaButtons?: PageButtonDef[]): PageButtonDef[] {

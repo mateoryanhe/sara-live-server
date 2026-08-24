@@ -61,6 +61,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '数据同步', parentTitle: '平台与资源'},
         },
         {
+            path: 'h5-live-deploy',
+            name: 'H5LiveDeployManagement',
+            component: () => import('@/views/config/h5-live-deploy.vue'),
+            meta: {title: 'H5直播部署', parentTitle: '平台与资源'},
+        },
+        {
             path: 'resource-monitor',
             name: 'ResourceMonitor',
             component: () => import('@/views/config/resource-monitor.vue'),

@@ -268,6 +268,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('GooglePlayCfgManagement'),
                 page('UploadResourceCfgManagement'),
                 page('DataSyncCfgManagement'),
+                page('H5LiveDeployManagement'),
             ]),
             group('config-ops', 'menu.ConfigOpsGroup', [
                 page('ResourceMonitor'),

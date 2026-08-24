@@ -86,6 +86,7 @@ func Init() {
 	initVipAppController()                       // VIP详情(App)
 	initMessageAppController()                   // 私信(App)
 	initUploadController()                       // CMS文件上传
+	initH5LiveDeployCMSController()              // H5直播静态资源部署(CMS)
 	initRandomNicknameController()               // 随机昵称库(CMS)
 	initSysStatController()                      // 系统总数据/仪表盘(CMS)
 	initResourceMetricController()               // 系统资源监控(CMS)

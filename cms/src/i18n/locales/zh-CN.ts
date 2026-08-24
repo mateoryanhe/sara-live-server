@@ -84,6 +84,7 @@ const menu = {
   PrivacyPolicyCfgManagement: '隐私政策',
   GooglePlayCfgManagement: 'Google Play',
   UploadResourceCfgManagement: '资源域名',
+  H5LiveDeployManagement: 'H5直播部署',
   DataSyncCfgManagement: '数据同步',
   ResourceMonitor: '资源监控',
   ServerLogExplorer: '服务器日志',

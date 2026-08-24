@@ -61,6 +61,7 @@ import {textModerationMessages} from './text-moderation'
 import {privacyPolicyMessages} from './privacy-policy'
 import {googlePlayMessages} from './google-play'
 import {uploadResourceMessages} from './upload-resource'
+import {h5LiveDeployMessages} from './h5-live-deploy'
 import {dataSyncMessages} from './data-sync'
 import {resourceMonitorMessages} from './resource-monitor'
 import {serverLogExplorerMessages} from './server-log-explorer'
@@ -128,6 +129,7 @@ const pageMessageBuilders = [
   ['privacyPolicy', privacyPolicyMessages],
   ['googlePlay', googlePlayMessages],
   ['uploadResource', uploadResourceMessages],
+  ['h5LiveDeploy', h5LiveDeployMessages],
   ['dataSync', dataSyncMessages],
   ['resourceMonitor', resourceMonitorMessages],
   ['serverLogExplorer', serverLogExplorerMessages],

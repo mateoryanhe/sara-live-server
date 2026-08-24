@@ -85,6 +85,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   PrivacyPolicyCfgManagement: 'Política de privacidade',
   GooglePlayCfgManagement: 'Google Play',
   UploadResourceCfgManagement: 'CDN de recursos',
+  H5LiveDeployManagement: 'Deploy H5 Live',
   DataSyncCfgManagement: 'Sincronização de dados',
   ResourceMonitor: 'Monitor de recursos',
   ServerLogExplorer: 'Registros do servidor',

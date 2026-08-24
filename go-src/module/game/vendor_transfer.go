@@ -87,7 +87,7 @@ func HandleVendorTransfer(ctx context.Context, req *gameplatformdto.VendorTransf
 	gameName, gameCategory := resolveVendorTransferGameMeta(gameID, req.Platform)
 	nameEn, cover := resolveVendorTransferGameInfo(gameID)
 
-	balance, fail := applyVendorTransferWallet(userID, req.BetAmount, req.WinAmount, gameName, gameCategory)
+	balance, fail := applyVendorTransferWallet(userID, req.BetAmount, req.WinAmount, gameName, gameCategory, transactionID)
 	if fail != nil {
 		resp := vendorTransferFail(fail.Code, fail.Message)
 		vendorDetailLog().Warningf(ctx, "vendor transfer failed transaction_id=%s code=%d msg=%s", transactionID, fail.Code, fail.Message)
@@ -151,12 +151,13 @@ func validateVendorTransferReq(req *gameplatformdto.VendorTransferReq) *vendorCa
 }
 
 // applyVendorTransferWallet 下注扣金币、派彩加金币.
-func applyVendorTransferWallet(userID uint64, betAmount, winAmount float64, gameName, gameCategory string) (float64, *vendorCallbackFail) {
+func applyVendorTransferWallet(userID uint64, betAmount, winAmount float64, gameName, gameCategory, transactionID string) (float64, *vendorCallbackFail) {
 	balance := userinfodao.GetUserInfoByUserId(userID).Gold
 	gameMeta := &gameevent.CurrencyChangeMeta{
-		GameName:     gameName,
-		GameCategory: gameCategory,
-		BusinessType: currency.BusinessTypeGame,
+		GameName:      gameName,
+		GameCategory:  gameCategory,
+		BusinessType:  currency.BusinessTypeGame,
+		TransactionId: strings.TrimSpace(transactionID),
 	}
 
 	if betAmount > 0 {
