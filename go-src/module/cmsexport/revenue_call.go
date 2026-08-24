@@ -23,8 +23,9 @@ func exportLiveRevenueLogCSV(ctx context.Context, payload json.RawMessage, onPro
 	receiverIds := liveroomdao.ParseRevenueLogReceiverIds(req.ReceiverId, req.PlatformAnchorId, req.GuildAnchorId, req.ReceiverIds)
 	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 		total, rows := liveroomdao.RevenueLogCMSList(&liveroomdao.RevenueLogCMSListFilter{
-			ReceiverIds: receiverIds,
-			RevenueType: req.RevenueType,
+			ReceiverIds:  receiverIds,
+			LiveRecordId: parseUint64Filter(req.LiveRecordId),
+			RevenueType:  req.RevenueType,
 			StartTime:   req.StartTime,
 			EndTime:     req.EndTime,
 			PageIndex:   pageIndex,

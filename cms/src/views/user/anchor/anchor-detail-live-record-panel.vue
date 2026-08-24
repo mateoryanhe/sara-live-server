@@ -31,7 +31,14 @@
     </el-form>
 
     <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width: 100%">
-      <el-table-column :label="t('pages.liveRecordList.recordId')" min-width="180" prop="id"/>
+      <el-table-column :label="t('pages.liveRecordList.recordId')" min-width="180" prop="id">
+        <template #default="{ row }">
+          <el-button v-if="row.id" link type="primary" @click="openLiveRecordDetail(row.id)">
+            {{ row.id }}
+          </el-button>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
       <el-table-column :label="t('pages.liveRecordList.anchorId')" min-width="180" prop="anchorId"/>
       <el-table-column :label="t('pages.liveRecordList.anchorNickname')" min-width="120" prop="nickname">
         <template #default="{ row }">{{ row.nickname || '-' }}</template>
@@ -91,6 +98,7 @@
 <script lang="ts" setup>
 import {computed, reactive, ref, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
+import {useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {liveRecordApi} from '@/api'
 import type {LiveRecordItem} from '@/types/api'
@@ -107,6 +115,7 @@ const props = defineProps<{
 }>()
 
 const {t} = useI18n()
+const router = useRouter()
 const {can} = usePagePermission('AnchorDetail')
 const canExport = computed(() => can('exportLiveRecord'))
 const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
@@ -199,6 +208,19 @@ const handleSizeChange = (size: number) => {
   fetchList()
 }
 
+const openLiveRecordDetail = (recordId: string | number) => {
+  if (!recordId || !props.anchorId) {
+    return
+  }
+  router.push({
+    name: 'AnchorLiveRecordDetail',
+    query: {
+      anchorId: props.anchorId,
+      liveRecordId: String(recordId),
+    },
+  })
+}
+
 const handleExport = async () => {
   if (!props.anchorId) {
     ElMessage.warning(t('common.exportEmpty'))
@@ -228,7 +250,7 @@ const resetState = () => {
   tableData.value = []
   pagination.pageIndex = 1
   pagination.total = 0
-  searchForm.dateRange = createDefaultDateRange()
+  Object.assign(searchForm, createDefaultDateRange())
 }
 
 watch(

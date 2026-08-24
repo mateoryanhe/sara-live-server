@@ -11,11 +11,12 @@ import (
 
 // LiveRecordCMSListFilter CMS直播记录查询条件
 type LiveRecordCMSListFilter struct {
-	AnchorIds []uint64
-	StartTime int64
-	EndTime   int64
-	PageIndex int
-	PageSize  int
+	AnchorIds    []uint64
+	LiveRecordId uint64
+	StartTime    int64
+	EndTime      int64
+	PageIndex    int
+	PageSize     int
 }
 
 func (f *LiveRecordCMSListFilter) anchorIds() []uint64 {
@@ -89,6 +90,9 @@ func LiveRecordCMSList(f *LiveRecordCMSListFilter) (int, []*entity.LiveRecord) {
 	m := g.Model(string(entity.TbLiveRecord)).Ctx(ctx)
 	if anchorIds := f.anchorIds(); len(anchorIds) > 0 {
 		m = m.Where(string(entity.LiveRecordAnchorId)+" IN (?)", anchorIds)
+	}
+	if f.LiveRecordId > 0 {
+		m = m.Where("id = ?", f.LiveRecordId)
 	}
 	if f.StartTime > 0 {
 		m = m.Where(string(entity.LiveRecordStartTime)+" >= ?", time.Unix(f.StartTime, 0))

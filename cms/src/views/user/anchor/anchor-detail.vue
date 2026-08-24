@@ -197,7 +197,7 @@ const router = useRouter()
 
 const loading = ref(false)
 const detail = ref<AnchorDetail | null>(null)
-const activeTab = ref('basic')
+const activeTab = ref(typeof route.query.tab === 'string' ? route.query.tab : 'basic')
 
 const LIVE_ROOM_CATEGORY_HOT = 1
 const LIVE_ROOM_CATEGORY_GAME = 2
@@ -318,10 +318,22 @@ watch(anchorId, (_id, prev) => {
     return
   }
   if (prev !== undefined) {
-    activeTab.value = 'basic'
+    activeTab.value = typeof route.query.tab === 'string' ? route.query.tab : 'basic'
     fetchDetail()
   }
 })
+
+watch(
+  () => route.query.tab,
+  (tab) => {
+    if (!isAnchorDetailRoute()) {
+      return
+    }
+    if (typeof tab === 'string' && tab) {
+      activeTab.value = tab
+    }
+  },
+)
 
 onActivated(() => {
   if (!isAnchorDetailRoute()) {

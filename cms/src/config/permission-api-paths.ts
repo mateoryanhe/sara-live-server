@@ -55,6 +55,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'AnchorDetail:exportDailyEffectiveLive': '/cmsExport/submitJob',
     'AnchorDetail:liveRecord': '/liveRecord/cmsLiveRecordList',
     'AnchorDetail:exportLiveRecord': '/cmsExport/submitJob',
+    'AnchorDetail:liveRecordRevenue': '/liveRevenueLog/cmsLiveRevenueLogList',
     'AnchorDetail:settlementLog': '/anchorIncomeSettlementLog/cmsAnchorIncomeSettlementLogList',
     'AnchorDetail:exportSettlementLog': '/cmsExport/submitJob',
 

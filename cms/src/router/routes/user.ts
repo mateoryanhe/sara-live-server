@@ -35,6 +35,16 @@ export const userRoutes: RouteRecordRaw = {
             meta: {title: '主播间回收站'},
         },
         {
+            path: 'anchor/live-record-detail',
+            name: 'AnchorLiveRecordDetail',
+            component: () => import('@/views/user/anchor/anchor-live-record-detail.vue'),
+            meta: {
+                title: '直播记录详情',
+                hidden: true,
+                parentPermission: ['AnchorDetail'],
+            },
+        },
+        {
             path: 'anchor/anchor-detail',
             name: 'AnchorDetail',
             component: () => import('@/views/user/anchor/anchor-detail.vue'),

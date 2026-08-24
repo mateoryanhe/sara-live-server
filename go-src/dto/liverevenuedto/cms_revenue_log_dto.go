@@ -15,6 +15,7 @@ type CMSLiveRevenueLogListReq struct {
 	PlatformAnchorId string   `json:"platformAnchorId" dc:"平台主播ID(可选,兼容旧参数)"`
 	GuildAnchorId    string   `json:"guildAnchorId" dc:"工会主播ID(可选,兼容旧参数)"`
 	ReceiverIds      []string `json:"receiverIds" dc:"收益用户ID列表(可选,多选)"`
+	LiveRecordId     string   `json:"liveRecordId" dc:"直播记录ID(可选)"`
 	RevenueType      uint8    `json:"revenueType" dc:"收益类型(0=全部,1礼物,2付费弹幕,3游戏下注)"`
 	StartTime        int64    `json:"startTime"   dc:"创建时间起(秒, 0=不过滤)"`
 	EndTime          int64    `json:"endTime"     dc:"创建时间止(秒, 0=不过滤)"`

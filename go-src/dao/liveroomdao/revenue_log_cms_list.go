@@ -10,13 +10,14 @@ import (
 
 // RevenueLogCMSListFilter CMS直播收益流水查询条件
 type RevenueLogCMSListFilter struct {
-	ReceiverId  uint64
-	ReceiverIds []uint64
-	RevenueType uint8
-	StartTime   int64
-	EndTime     int64
-	PageIndex   int
-	PageSize    int
+	ReceiverId   uint64
+	ReceiverIds  []uint64
+	LiveRecordId uint64
+	RevenueType  uint8
+	StartTime    int64
+	EndTime      int64
+	PageIndex    int
+	PageSize     int
 }
 
 func (f *RevenueLogCMSListFilter) receiverIds() []uint64 {
@@ -53,6 +54,9 @@ func RevenueLogCMSList(f *RevenueLogCMSListFilter) (int, []*entity.LiveRevenueLo
 	m := g.Model(string(entity.TbLiveRevenueLog)).Ctx(ctx)
 	if receiverIds := f.receiverIds(); len(receiverIds) > 0 {
 		m = m.Where(string(entity.LiveRevenueLogReceiverId)+" IN (?)", receiverIds)
+	}
+	if f.LiveRecordId > 0 {
+		m = m.Where(string(entity.LiveRevenueLogLiveRecordId)+" = ?", f.LiveRecordId)
 	}
 	if f.RevenueType > 0 {
 		m = m.Where(string(entity.LiveRevenueLogRevenueType)+" = ?", f.RevenueType)

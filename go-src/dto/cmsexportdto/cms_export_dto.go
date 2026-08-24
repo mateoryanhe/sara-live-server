@@ -91,6 +91,7 @@ type CMSExportLiveRevenueLogPayload struct {
 	PlatformAnchorId string   `json:"platformAnchorId"`
 	GuildAnchorId    string   `json:"guildAnchorId"`
 	ReceiverIds      []string `json:"receiverIds"`
+	LiveRecordId     string   `json:"liveRecordId"`
 	RevenueType      uint8    `json:"revenueType"`
 	StartTime        int64    `json:"startTime"`
 	EndTime          int64    `json:"endTime"`

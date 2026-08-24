@@ -184,6 +184,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'exportDailyEffectiveLive', label: '导出每日流水'},
         {key: 'liveRecord', label: '查看直播记录'},
         {key: 'exportLiveRecord', label: '导出直播记录'},
+        {key: 'liveRecordRevenue', label: '查看直播记录收益流水'},
         {key: 'settlementLog', label: '查看结算流水'},
         {key: 'exportSettlementLog', label: '导出结算流水'},
     ],

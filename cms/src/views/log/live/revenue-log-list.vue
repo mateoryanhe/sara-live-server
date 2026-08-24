@@ -41,11 +41,14 @@
           </div>
         </el-form-item>
         <el-form-item :label="t('pages.revenueLogList.revenueType')">
-          <el-select v-model="searchForm.revenueType" clearable :placeholder="t('common.all')" style="width: 140px">
+          <el-select v-model="searchForm.revenueType" clearable :placeholder="t('common.all')" style="width: 200px">
             <el-option :value="0" :label="t('common.all')"/>
-            <el-option :value="1" :label="t('pages.revenueLogList.revenueGift')"/>
-            <el-option :value="2" :label="t('pages.revenueLogList.revenuePaidDanmaku')"/>
-            <el-option :value="3" :label="t('pages.revenueLogList.revenueGameBet')"/>
+            <el-option
+                v-for="option in revenueTypeOptions"
+                :key="option.value"
+                :label="t(option.labelKey)"
+                :value="option.value"
+            />
           </el-select>
         </el-form-item>
         <el-form-item :label="t('pages.liveRecordList.startDate')">
@@ -79,7 +82,7 @@
 
       <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width: 100%">
         <el-table-column :label="t('pages.revenueLogList.logId')" min-width="180" prop="id"/>
-        <el-table-column :label="t('pages.revenueLogList.revenueType')" prop="revenueTypeText" width="100">
+        <el-table-column :label="t('pages.revenueLogList.revenueType')" min-width="140" prop="revenueTypeText">
           <template #default="{ row }">{{ row.revenueTypeText || formatRevenueType(row.revenueType) }}</template>
         </el-table-column>
         <el-table-column :label="t('pages.revenueLogList.liveRoomId')" min-width="180" prop="roomId"/>
@@ -183,12 +186,15 @@ import {useUserDetailNav} from '@/composables/useUserDetailNav'
 import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
 import {CMS_EXPORT_TYPE_LIVE_REVENUE_LOG} from '@/utils/cms-async-export'
 import {buildLiveRevenueLogCsvColumns} from '@/utils/live-revenue-log-csv'
+import {createLiveRevenueTypeFormatter, LIVE_REVENUE_TYPE_OPTIONS} from '@/utils/live-revenue-type'
 
 const {t} = useI18n()
 const router = useRouter()
 const {can} = usePagePermission('LiveRevenueLogList')
 const {openUserDetail} = useUserDetailNav('LiveRevenueLogList')
 const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
+const revenueTypeOptions = LIVE_REVENUE_TYPE_OPTIONS
+const formatRevenueType = createLiveRevenueTypeFormatter(t)
 const loading = ref(false)
 const tableData = ref<LiveRevenueLogItem[]>([])
 const selectedPlatformAnchors = ref<AnchorListItem[]>([])
@@ -263,15 +269,6 @@ const buildSelectedReceiverIds = () => {
   const platformIds = selectedPlatformAnchors.value.map(anchor => String(anchor.id))
   const guildIds = selectedGuildAnchors.value.map(anchor => String(anchor.id))
   return [...new Set([...platformIds, ...guildIds])]
-}
-
-const formatRevenueType = (type: number) => {
-  const map: Record<number, string> = {
-    1: t('pages.revenueLogList.revenueGift'),
-    2: t('pages.revenueLogList.revenuePaidDanmaku'),
-    3: t('pages.revenueLogList.revenueGameBet'),
-  }
-  return map[type] || t('pages.revenueLogList.unknown')
 }
 
 const pagination = reactive({

@@ -112,6 +112,8 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/liveRecord/cmsLiveRecordList", "/account/getAnchorList", "/guild/guildList"}
 	case "/liveRevenueLog/cmsLiveRevenueLogList":
 		return []string{"/liveRecord/cmsLiveRecordList", "/account/getAnchorList", "/guild/guildList"}
+	case "/liveRecord/cmsLiveRecordList":
+		return []string{"/liveRevenueLog/cmsLiveRevenueLogList"}
 	case "/account/getAnchorDetail":
 		return []string{"/liveRecord/cmsLiveRecordList", "/liveRevenueLog/cmsLiveRevenueLogList"}
 	default:

@@ -1879,6 +1879,7 @@ export interface RechargeOrderQuery extends PageQuery {
 export interface LiveRevenueLogQuery extends PageQuery {
     receiverId?: string
     receiverIds?: string[]
+    liveRecordId?: string
     revenueType?: number
     startTime?: number
     endTime?: number
@@ -1908,6 +1909,7 @@ export interface LiveRevenueLogItem {
 export interface LiveRecordQuery extends PageQuery {
     anchorId?: string
     anchorIds?: string[]
+    liveRecordId?: string
     startTime?: number
     endTime?: number
 }

@@ -57,11 +57,12 @@ func toCMSItem(v *entity.LiveRecord) *liverecorddto.CMSLiveRecordItem {
 // GetCMSList CMS分页查询直播记录
 func GetCMSList(_ context.Context, req *liverecorddto.CMSLiveRecordListReq) (*httpserver.CMSQueryResp, error) {
 	total, rows := liveroomdao.LiveRecordCMSList(&liveroomdao.LiveRecordCMSListFilter{
-		AnchorIds: liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
-		StartTime: req.StartTime,
-		EndTime:   req.EndTime,
-		PageIndex: req.PageIndex,
-		PageSize:  req.PageSize,
+		AnchorIds:    liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
+		LiveRecordId: parseUint64Filter(req.LiveRecordId),
+		StartTime:    req.StartTime,
+		EndTime:      req.EndTime,
+		PageIndex:    req.PageIndex,
+		PageSize:     req.PageSize,
 	})
 	list := make([]*liverecorddto.CMSLiveRecordItem, 0, len(rows))
 	for _, row := range rows {

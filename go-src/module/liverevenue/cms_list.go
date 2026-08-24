@@ -2,6 +2,7 @@ package liverevenue
 
 import (
 	"context"
+	"strconv"
 	liverevenueconst "xr-game-server/constants/liverevenue"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/cfgdao"
@@ -11,6 +12,17 @@ import (
 	"xr-game-server/entity/live"
 	userentity "xr-game-server/entity/user"
 )
+
+func parseUint64Filter(val string) uint64 {
+	if val == "" {
+		return 0
+	}
+	id, err := strconv.ParseUint(val, 10, 64)
+	if err != nil {
+		return 0
+	}
+	return id
+}
 
 func collectRevenueLogUserIds(rows []*entity.LiveRevenueLog) []uint64 {
 	userIds := make([]uint64, 0, len(rows)*2)
@@ -77,12 +89,13 @@ func toCMSItem(v *entity.LiveRevenueLog, profileMap map[uint64]*userentity.UserI
 // GetCMSList CMS分页查询直播收益流水
 func GetCMSList(_ context.Context, req *liverevenuedto.CMSLiveRevenueLogListReq) (*httpserver.CMSQueryResp, error) {
 	total, rows := liveroomdao.RevenueLogCMSList(&liveroomdao.RevenueLogCMSListFilter{
-		ReceiverIds: liveroomdao.ParseRevenueLogReceiverIds(req.ReceiverId, req.PlatformAnchorId, req.GuildAnchorId, req.ReceiverIds),
-		RevenueType: req.RevenueType,
-		StartTime:   req.StartTime,
-		EndTime:     req.EndTime,
-		PageIndex:   req.PageIndex,
-		PageSize:    req.PageSize,
+		ReceiverIds:  liveroomdao.ParseRevenueLogReceiverIds(req.ReceiverId, req.PlatformAnchorId, req.GuildAnchorId, req.ReceiverIds),
+		LiveRecordId: parseUint64Filter(req.LiveRecordId),
+		RevenueType:  req.RevenueType,
+		StartTime:    req.StartTime,
+		EndTime:      req.EndTime,
+		PageIndex:    req.PageIndex,
+		PageSize:     req.PageSize,
 	})
 	profileMap := userinfodao.GetUserProfileMapByUserIds(collectRevenueLogUserIds(rows))
 	list := make([]*liverevenuedto.CMSLiveRevenueLogItem, 0, len(rows))
