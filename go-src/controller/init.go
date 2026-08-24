@@ -73,6 +73,7 @@ func Init() {
 	initLiveRecordCMSController()                // 直播记录(CMS)
 	initLiveRecordAppController()                // 直播记录(App)
 	initRichRankAppController()                  // 富豪榜(App)
+	initGameConsumeRankAppController()           // 游戏消费榜(App)
 	initAnchorRankAppController()                // 主播红人榜(App)
 	initRechargeOrderAppController()             // 充值订单(App:发起/查询)
 	initVipCfgController()                       // VIP配置(CMS)

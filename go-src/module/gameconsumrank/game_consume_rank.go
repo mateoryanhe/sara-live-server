@@ -1,29 +1,28 @@
-package anchorrank
+package gameconsumrank
 
 import (
 	"context"
 	"strconv"
 	"sync/atomic"
 	"time"
-	"xr-game-server/constants/liverevenue"
+
+	"github.com/gogf/gf/v2/os/gctx"
+	"xr-game-server/constants/currency"
 	"xr-game-server/core/event"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/xrtimer"
-	"xr-game-server/dao/liveroomdao"
+	"xr-game-server/dao/currencylogdao"
 	"xr-game-server/dao/userinfodao"
-	"xr-game-server/dto/anchorrankdto"
-	"xr-game-server/entity/live"
+	"xr-game-server/dto/gameconsumrankdto"
 	"xr-game-server/gameevent"
 	"xr-game-server/module/upload"
-
-	"github.com/gogf/gf/v2/os/gctx"
 )
 
 const (
-	defaultPageSize        = 20
-	maxPageSize            = 100
-	anchorRankTickInterval = 3 * time.Minute
-	anchorRankRefreshDelay = 10 * time.Minute
+	defaultPageSize              = 20
+	maxPageSize                  = 100
+	gameConsumeRankTickInterval  = 3 * time.Minute
+	gameConsumeRankRefreshDelay  = 10 * time.Minute
 )
 
 type rankItem struct {
@@ -31,7 +30,7 @@ type rankItem struct {
 	UserId        uint64
 	Nickname      string
 	Avatar        string
-	RevenueAmount uint64
+	ConsumeAmount float64
 	VipLevel      uint32
 	Gender        uint8
 	Age           int
@@ -44,53 +43,50 @@ type rankSnapshot struct {
 	UpdatedAt int64
 }
 
-var anchorRankCache atomic.Value
+var gameConsumeRankCache atomic.Value
 var dataRefreshDeadline atomic.Int64
 
 func init() {
-	anchorRankCache.Store(&rankSnapshot{
+	gameConsumeRankCache.Store(&rankSnapshot{
 		Today:  make([]*rankItem, 0),
 		Last7:  make([]*rankItem, 0),
 		Last30: make([]*rankItem, 0),
 	})
 }
 
-// Init 初始化主播红人榜缓存,订阅收益事件,每3分钟检查是否需要刷新
+// Init 初始化游戏消费榜缓存,订阅游戏金币消费事件,每3分钟检查是否需要刷新
 func Init() {
-	loadAnchorRankCache()
-	event.Sub(gameevent.RevenueEventEvent, onRevenueEvent)
+	loadGameConsumeRankCache()
+	event.Sub(gameevent.CurrencyChangeEvent, onGameGoldConsumeEvent)
 	event.Sub(gameevent.RankListRefreshEvent, onRankListRefreshEvent)
-	xrtimer.AddSingleton(gctx.New(), anchorRankTickInterval, func(ctx context.Context) {
-		tryRefreshAnchorRankCache()
+	xrtimer.AddSingleton(gctx.New(), gameConsumeRankTickInterval, func(ctx context.Context) {
+		tryRefreshGameConsumeRankCache()
 	})
 }
 
-func onRevenueEvent(data any) {
-	log, ok := data.(*entity.LiveRevenueLog)
-	if !ok || log == nil {
+func onGameGoldConsumeEvent(data any) {
+	ev, ok := data.(*gameevent.CurrencyChangeEventData)
+	if !ok || ev == nil {
 		return
 	}
-	if log.ReceiverId == 0 || log.TotalAmount <= 0 {
+	if ev.Type != gameevent.CurrencyTypeGold || ev.Action != gameevent.CurrencyActionSub || ev.Amount <= 0 {
 		return
 	}
-	if log.Status != entity.LiveRevenueLogStatusNormal {
+	if ev.BusinessType != currency.BusinessTypeGame && ev.Reason != currency.ReasonGameBet {
 		return
 	}
-	if log.RevenueType == uint8(liverevenue.GameBet) {
-		return
-	}
-	markAnchorRankDataChanged()
+	markGameConsumeRankDataChanged()
 }
 
-func markAnchorRankDataChanged() {
-	dataRefreshDeadline.Store(time.Now().Add(anchorRankRefreshDelay).Unix())
+func markGameConsumeRankDataChanged() {
+	dataRefreshDeadline.Store(time.Now().Add(gameConsumeRankRefreshDelay).Unix())
 }
 
 func onRankListRefreshEvent(_ any) {
-	markAnchorRankDataChanged()
+	markGameConsumeRankDataChanged()
 }
 
-func tryRefreshAnchorRankCache() {
+func tryRefreshGameConsumeRankCache() {
 	deadlineUnix := dataRefreshDeadline.Load()
 	if deadlineUnix == 0 {
 		return
@@ -100,43 +96,44 @@ func tryRefreshAnchorRankCache() {
 		dataRefreshDeadline.Store(0)
 		return
 	}
-	loadAnchorRankCache()
+	loadGameConsumeRankCache()
 }
 
-func loadAnchorRankCache() {
+func loadGameConsumeRankCache() {
 	now := time.Now()
 	snapshot := &rankSnapshot{
-		Today:     buildRankItems(liveroomdao.SumRevenueByReceiver(startOfDay(now), now)),
-		Last7:     buildRankItems(liveroomdao.SumRevenueByReceiver(now.AddDate(0, 0, -7), now)),
-		Last30:    buildRankItems(liveroomdao.SumRevenueByReceiver(now.AddDate(0, 0, -30), now)),
+		Today:     buildRankItems(currencylogdao.SumGameGoldConsumeByUser(startOfDay(now), now)),
+		Last7:     buildRankItems(currencylogdao.SumGameGoldConsumeByUser(now.AddDate(0, 0, -7), now)),
+		Last30:    buildRankItems(currencylogdao.SumGameGoldConsumeByUser(now.AddDate(0, 0, -30), now)),
 		UpdatedAt: now.Unix(),
 	}
-	anchorRankCache.Store(snapshot)
+	gameConsumeRankCache.Store(snapshot)
 }
 
 func startOfDay(t time.Time) time.Time {
 	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 }
 
-func buildRankItems(rows []*liveroomdao.AnchorRevenueStatRow) []*rankItem {
+func buildRankItems(rows []*currencylogdao.DiamondConsumeStatRow) []*rankItem {
 	if len(rows) == 0 {
 		return make([]*rankItem, 0)
 	}
+
 	list := make([]*rankItem, 0, len(rows))
 	rankNo := 0
 	for _, row := range rows {
-		if row == nil || row.ReceiverId == 0 {
+		if row == nil || row.UserId == 0 {
 			continue
 		}
 		rankNo++
 		item := &rankItem{
 			Rank:          rankNo,
-			UserId:        row.ReceiverId,
-			RevenueAmount: row.TotalAmount,
+			UserId:        row.UserId,
+			ConsumeAmount: row.Total,
 		}
-		if profile := userinfodao.GetUserInfoByUserId(row.ReceiverId); profile != nil {
+		if profile := userinfodao.GetUserInfoByUserId(row.UserId); profile != nil {
 			item.Nickname = profile.Nickname
-			item.Avatar = upload.ResolveAvatarUrlForUser(row.ReceiverId, profile.Avatar)
+			item.Avatar = upload.ResolveAvatarUrlForUser(row.UserId, profile.Avatar)
 			item.VipLevel = profile.VipLevel
 			item.Gender = profile.Gender
 			item.Age = calcAge(profile.Birthday)
@@ -147,7 +144,7 @@ func buildRankItems(rows []*liveroomdao.AnchorRevenueStatRow) []*rankItem {
 }
 
 func getSnapshot() *rankSnapshot {
-	v := anchorRankCache.Load()
+	v := gameConsumeRankCache.Load()
 	if v == nil {
 		return &rankSnapshot{
 			Today:  make([]*rankItem, 0),
@@ -168,42 +165,42 @@ func getSnapshot() *rankSnapshot {
 
 func getRankListByPeriod(snapshot *rankSnapshot, period int) []*rankItem {
 	switch period {
-	case anchorrankdto.AnchorRankPeriodToday:
+	case gameconsumrankdto.GameConsumeRankPeriodToday:
 		return snapshot.Today
-	case anchorrankdto.AnchorRankPeriodLast7:
+	case gameconsumrankdto.GameConsumeRankPeriodLast7:
 		return snapshot.Last7
-	case anchorrankdto.AnchorRankPeriodLast30:
+	case gameconsumrankdto.GameConsumeRankPeriodLast30:
 		return snapshot.Last30
 	default:
 		return make([]*rankItem, 0)
 	}
 }
 
-// GetAppAnchorRankList App端分页查询主播红人榜
-func GetAppAnchorRankList(ctx context.Context, req *anchorrankdto.AppAnchorRankListReq) (*anchorrankdto.AppAnchorRankListRes, error) {
+// GetAppGameConsumeRankList App端分页查询游戏消费榜
+func GetAppGameConsumeRankList(ctx context.Context, req *gameconsumrankdto.AppGameConsumeRankListReq) (*gameconsumrankdto.AppGameConsumeRankListRes, error) {
 	page, pageSize := normalizePage(req.Page, req.PageSize)
 	snapshot := getSnapshot()
 	all := getRankListByPeriod(snapshot, req.Period)
 	total := len(all)
-	myRank := findMyAnchorRank(all, httpserver.GetAuthId(ctx))
+	myRank := findMyRank(all, httpserver.GetAuthId(ctx))
 	start, end := pageRange(total, page, pageSize)
-	pageData := make([]*anchorrankdto.AppAnchorRankItem, 0, end-start)
+	pageData := make([]*gameconsumrankdto.AppGameConsumeRankItem, 0, end-start)
 	for _, row := range all[start:end] {
 		if row == nil {
 			continue
 		}
-		pageData = append(pageData, &anchorrankdto.AppAnchorRankItem{
+		pageData = append(pageData, &gameconsumrankdto.AppGameConsumeRankItem{
 			Rank:          row.Rank,
 			UserId:        strconv.FormatUint(row.UserId, 10),
 			Nickname:      row.Nickname,
 			Avatar:        row.Avatar,
-			RevenueAmount: row.RevenueAmount,
+			ConsumeAmount: row.ConsumeAmount,
 			VipLevel:      row.VipLevel,
 			Gender:        row.Gender,
 			Age:           row.Age,
 		})
 	}
-	return &anchorrankdto.AppAnchorRankListRes{
+	return &gameconsumrankdto.AppGameConsumeRankListRes{
 		Period:    req.Period,
 		MyRank:    myRank,
 		Total:     total,
@@ -214,7 +211,7 @@ func GetAppAnchorRankList(ctx context.Context, req *anchorrankdto.AppAnchorRankL
 	}, nil
 }
 
-func findMyAnchorRank(rows []*rankItem, userId uint64) int {
+func findMyRank(rows []*rankItem, userId uint64) int {
 	if userId == 0 {
 		return -1
 	}
@@ -265,17 +262,4 @@ func pageRange(total, page, pageSize int) (int, int) {
 		end = total
 	}
 	return start, end
-}
-
-// GetUserLast30DayRevenue 从主播红人榜缓存获取用户最近30天收益,未上榜返回0
-func GetUserLast30DayRevenue(userId uint64) uint64 {
-	if userId == 0 {
-		return 0
-	}
-	for _, item := range getSnapshot().Last30 {
-		if item != nil && item.UserId == userId {
-			return item.RevenueAmount
-		}
-	}
-	return 0
 }

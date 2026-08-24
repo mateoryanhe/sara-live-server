@@ -5,6 +5,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"xr-game-server/constants/liverevenue"
 	liveentity "xr-game-server/entity/live"
 	userentity "xr-game-server/entity/user"
 )
@@ -17,7 +18,7 @@ type AnchorRevenueStatRow struct {
 	TotalAmount uint64 `json:"total_amount"`
 }
 
-// SumRevenueByReceiver 统计指定时间范围内主播收益总额,按主播分组取前500名
+// SumRevenueByReceiver 统计指定时间范围内主播社交类收益总额,按主播分组取前500名(不含游戏收益).
 func SumRevenueByReceiver(startTime, endTime time.Time) []*AnchorRevenueStatRow {
 	list := make([]*AnchorRevenueStatRow, 0)
 	if endTime.Before(startTime) {
@@ -40,10 +41,11 @@ WHERE rl.receiver_id > 0
     OR (a.`+string(userentity.AccountBanApplyTime)+` IS NOT NULL AND a.`+string(userentity.AccountBanApplyTime)+` <= ?)
   )
   AND (ue.id IS NULL OR IFNULL(ue.`+string(userentity.UserExtCanRank)+`, 1) = 1)
+  AND IFNULL(rl.`+string(liveentity.LiveRevenueLogRevenueType)+`, 0) <> ?
 GROUP BY rl.receiver_id
 ORDER BY total_amount DESC
 LIMIT ?
-`, startTime, endTime, now, anchorRankTopLimit).Scan(&list)
+`, startTime, endTime, now, liverevenue.GameBet, anchorRankTopLimit).Scan(&list)
 	if err != nil {
 		g.Log().Errorf(ctx, "SumRevenueByReceiver error: %v", err)
 		return make([]*AnchorRevenueStatRow, 0)

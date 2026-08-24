@@ -14,6 +14,7 @@ import (
 	"xr-game-server/module/currencylog"
 	"xr-game-server/module/customerservice"
 	"xr-game-server/module/game"
+	"xr-game-server/module/gameconsumrank"
 	"xr-game-server/module/h5livedeploy"
 	"xr-game-server/module/ipgeo"
 	"xr-game-server/module/livecfg"
@@ -50,6 +51,7 @@ func Init() {
 	message.Init()
 	recharge.Init()
 	richrank.Init()
+	gameconsumrank.Init()
 	anchorrank.Init()
 	banner.Init()
 	ticket.Init()

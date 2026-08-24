@@ -10,16 +10,10 @@ import (
 	"xr-game-server/gameevent"
 )
 
-const richRankTopLimit = 500
+const gameConsumeRankTopLimit = 500
 
-// DiamondConsumeStatRow 钻石消费聚合结果
-type DiamondConsumeStatRow struct {
-	UserId uint64  `json:"user_id"`
-	Total  float64 `json:"total"`
-}
-
-// SumDiamondConsumeByUser 统计指定时间范围内社交类钻石消费总额,按用户分组取前500名(不含游戏消费).
-func SumDiamondConsumeByUser(startTime, endTime time.Time) []*DiamondConsumeStatRow {
+// SumGameGoldConsumeByUser 统计指定时间范围内游戏类金币消费总额,按用户分组取前500名.
+func SumGameGoldConsumeByUser(startTime, endTime time.Time) []*DiamondConsumeStatRow {
 	list := make([]*DiamondConsumeStatRow, 0)
 	if endTime.Before(startTime) {
 		return list
@@ -41,13 +35,13 @@ WHERE cl.`+string(entity.CurrencyLogType)+` = ?
     OR (a.`+string(entity.AccountBanApplyTime)+` IS NOT NULL AND a.`+string(entity.AccountBanApplyTime)+` <= ?)
   )
   AND (ue.id IS NULL OR IFNULL(ue.`+string(entity.UserExtCanRank)+`, 1) = 1)
-  AND IFNULL(cl.`+string(entity.CurrencyLogBusinessType)+`, ?) <> ?
+  AND IFNULL(cl.`+string(entity.CurrencyLogBusinessType)+`, ?) = ?
 GROUP BY cl.user_id
 ORDER BY total DESC
 LIMIT ?
-`, gameevent.CurrencyTypeDiamond, gameevent.CurrencyActionSub, startTime, endTime, now, currency.BusinessTypeSocial, currency.BusinessTypeGame, richRankTopLimit).Scan(&list)
+`, gameevent.CurrencyTypeGold, gameevent.CurrencyActionSub, startTime, endTime, now, currency.BusinessTypeSocial, currency.BusinessTypeGame, gameConsumeRankTopLimit).Scan(&list)
 	if err != nil {
-		g.Log().Errorf(ctx, "SumDiamondConsumeByUser error: %v", err)
+		g.Log().Errorf(ctx, "SumGameGoldConsumeByUser error: %v", err)
 		return make([]*DiamondConsumeStatRow, 0)
 	}
 	return list
