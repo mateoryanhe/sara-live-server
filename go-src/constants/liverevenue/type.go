@@ -31,7 +31,7 @@ func Text(t Type) string {
 	case PaidDanmaku:
 		return "付费弹幕"
 	case GameBet:
-		return "游戏下注"
+		return "游戏消费"
 	case PrivateRoom:
 		return "私密直播间计费"
 	case Ticket:

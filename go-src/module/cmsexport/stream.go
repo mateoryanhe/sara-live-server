@@ -2,6 +2,7 @@ package cmsexport
 
 import (
 	"context"
+	"fmt"
 )
 
 const defaultExportPageSize = 500
@@ -66,6 +67,15 @@ func streamCSVExport(
 			}
 		}
 		if len(rows) == 0 {
+			if pageIndex == 1 && totalRows == 0 {
+				return abort()
+			}
+			if exportedRows < totalRows {
+				_ = writer.close()
+				removeFile(filePath)
+				exportRecords.Delete(record.exportID)
+				return nil, fmt.Errorf("export incomplete: exported %d of %d rows", exportedRows, totalRows)
+			}
 			break
 		}
 		for _, row := range rows {

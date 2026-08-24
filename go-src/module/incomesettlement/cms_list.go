@@ -94,8 +94,9 @@ func collectGuildIds(rows []*entity.GuildIncomeSettlementLog) []uint64 {
 
 // GetAnchorCMSList CMS分页查询主播结算流水
 func GetAnchorCMSList(_ context.Context, req *incomesettlementdto.CMSAnchorIncomeSettlementLogListReq) (*httpserver.CMSQueryResp, error) {
+	roomIds := liveroomdao.ParseLiveRecordAnchorIds(req.RoomId, "", "", req.AnchorIds)
 	total, rows := liveroomdao.AnchorIncomeSettlementLogCMSList(&liveroomdao.AnchorIncomeSettlementLogCMSListFilter{
-		RoomId:    parseUint64Filter(req.RoomId),
+		RoomIds:   roomIds,
 		StartTime: req.StartTime,
 		EndTime:   req.EndTime,
 		PageIndex: req.PageIndex,

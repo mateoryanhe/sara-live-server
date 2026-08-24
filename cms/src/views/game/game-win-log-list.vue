@@ -113,7 +113,7 @@ const fetchList = async () => {
     tableData.value = response.data || []
     pagination.total = response.total || 0
   } catch (error) {
-    console.error('fetch win log failed:', error)
+    console.error('fetch game reward log failed:', error)
     ElMessage.error(t('pages.gameWinLogList.fetchFailed'))
   } finally {
     loading.value = false

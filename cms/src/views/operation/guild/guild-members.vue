@@ -34,6 +34,16 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
+        <el-table-column :label="t('pages.anchorList.liveStatus')" width="100">
+          <template #default="{ row }">
+            <el-tag :type="row.liveStatus === 1 ? 'success' : 'info'">
+              {{ row.liveStatus === 1 ? t('common.live') : t('common.offline') }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorList.liveIncome')" align="right" min-width="120">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
+        </el-table-column>
         <el-table-column :label="t('common.phone')" min-width="130" prop="phone">
           <template #default="{ row }">{{ row.phone || '-' }}</template>
         </el-table-column>
@@ -83,16 +93,6 @@
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.roomTitle')" min-width="140" prop="roomTitle" show-overflow-tooltip>
           <template #default="{ row }">{{ row.roomTitle || '-' }}</template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorList.liveStatus')" width="100">
-          <template #default="{ row }">
-            <el-tag :type="row.liveStatus === 1 ? 'success' : 'info'">
-              {{ row.liveStatus === 1 ? t('common.live') : t('common.offline') }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorList.liveIncome')" align="right" min-width="120">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.giftIncome')" align="right" min-width="120">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGiftIncome) }}</span></template>

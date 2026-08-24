@@ -109,9 +109,10 @@ type CMSExportVideoCallLogPayload struct {
 
 type CMSExportAnchorIncomeSettlementLogPayload struct {
 	CMSExportHeadersPayload
-	RoomId    string `json:"roomId"`
-	StartTime int64  `json:"startTime"`
-	EndTime   int64  `json:"endTime"`
+	RoomId    string   `json:"roomId"`
+	AnchorIds []string `json:"anchorIds"`
+	StartTime int64    `json:"startTime"`
+	EndTime   int64    `json:"endTime"`
 }
 
 type CMSExportGuildIncomeSettlementLogPayload struct {

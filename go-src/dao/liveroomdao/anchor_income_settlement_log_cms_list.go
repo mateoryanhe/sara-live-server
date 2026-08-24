@@ -11,6 +11,7 @@ import (
 // AnchorIncomeSettlementLogCMSListFilter CMS主播结算流水查询条件
 type AnchorIncomeSettlementLogCMSListFilter struct {
 	RoomId    uint64
+	RoomIds   []uint64
 	StartTime int64
 	EndTime   int64
 	PageIndex int
@@ -31,8 +32,11 @@ func AnchorIncomeSettlementLogCMSList(f *AnchorIncomeSettlementLogCMSListFilter)
 	}
 	ctx := gctx.New()
 	m := g.Model(string(entity.TbAnchorIncomeSettlementLog)).Ctx(ctx)
-	if f.RoomId > 0 {
-		m = m.Where(string(entity.AnchorIncomeSettlementLogRoomId)+" = ?", f.RoomId)
+	roomIdCol := string(entity.AnchorIncomeSettlementLogRoomId)
+	if len(f.RoomIds) > 0 {
+		m = m.Where(roomIdCol+" IN (?)", f.RoomIds)
+	} else if f.RoomId > 0 {
+		m = m.Where(roomIdCol+" = ?", f.RoomId)
 	}
 	if f.StartTime > 0 {
 		m = m.Where("created_at >= ?", time.Unix(f.StartTime, 0))

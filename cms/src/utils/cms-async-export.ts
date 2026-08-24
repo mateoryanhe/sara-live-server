@@ -1,4 +1,5 @@
 import {cmsExportApi} from '@/api/modules/cmsExport'
+import envConfig from '@/config/env'
 import type {CMSExportJobResult, CMSExportResult} from '@/types/api'
 
 const CMS_EXPORT_POLL_INTERVAL_MS = 2000
@@ -42,15 +43,28 @@ const resolveExportUrl = (fileUrl: string) => {
     if (/^https?:\/\//i.test(fileUrl)) {
         return fileUrl
     }
-    const origin = window.location.origin.replace(/\/$/, '')
-    return `${origin}${fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`}`
+    const apiBase = envConfig.BASE_API.replace(/\/$/, '')
+    return `${apiBase}${fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`}`
 }
 
-export function downloadExportFile(fileUrl: string, fileName: string): void {
-    const link = document.createElement('a')
-    link.href = resolveExportUrl(fileUrl)
-    link.download = fileName.endsWith('.csv') ? fileName : `${fileName}.csv`
-    link.click()
+export async function downloadExportFile(fileUrl: string, fileName: string): Promise<void> {
+    const url = resolveExportUrl(fileUrl)
+    const response = await fetch(url)
+    if (!response.ok) {
+        throw new Error(`Download failed: HTTP ${response.status}`)
+    }
+    const blob = await response.blob()
+    const objectUrl = URL.createObjectURL(blob)
+    try {
+        const link = document.createElement('a')
+        link.href = objectUrl
+        link.download = fileName.endsWith('.csv') ? fileName : `${fileName}.csv`
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+    } finally {
+        URL.revokeObjectURL(objectUrl)
+    }
 }
 
 export async function exportAndDownloadFile(
@@ -61,7 +75,7 @@ export async function exportAndDownloadFile(
 ): Promise<CMSExportResult> {
     const result = await runAsyncCmsExport(exportType, payload, onStatus)
     try {
-        downloadExportFile(result.fileUrl, fileName || result.fileName)
+        await downloadExportFile(result.fileUrl, fileName || result.fileName)
     } finally {
         try {
             await cmsExportApi.deleteExport({exportId: result.exportId})

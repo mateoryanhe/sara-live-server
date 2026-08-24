@@ -11,9 +11,10 @@ import (
 type CMSAnchorIncomeSettlementLogListReq struct {
 	g.Meta `path:"/cmsAnchorIncomeSettlementLogList" method:"post" summary:"CMS查询主播结算流水" tags:"主播结算流水"`
 	httpserver.CMSQueryReq
-	RoomId    string `json:"roomId"    dc:"直播间ID(可选,留空查全部)"`
-	StartTime int64  `json:"startTime" dc:"创建时间起(秒, 0=不过滤)"`
-	EndTime   int64  `json:"endTime"   dc:"创建时间止(秒, 0=不过滤)"`
+	RoomId    string   `json:"roomId"    dc:"直播间ID(可选,留空查全部,兼容旧版单选)"`
+	AnchorIds []string `json:"anchorIds" dc:"主播ID列表(可选,多选)"`
+	StartTime int64    `json:"startTime" dc:"创建时间起(秒, 0=不过滤)"`
+	EndTime   int64    `json:"endTime"   dc:"创建时间止(秒, 0=不过滤)"`
 }
 
 // CMSGuildIncomeSettlementLogListReq CMS分页查询工会结算流水

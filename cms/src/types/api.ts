@@ -1356,6 +1356,7 @@ export interface IncomeSettlementLogAmounts {
 
 export interface AnchorIncomeSettlementLogQuery extends PageQuery {
     roomId?: string
+    anchorIds?: string[]
     startTime?: number
     endTime?: number
 }

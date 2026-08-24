@@ -7,20 +7,58 @@
         </div>
       </template>
 
-      <el-form :model="searchForm" class="search-form" inline label-width="100px">
-        <el-form-item :label="t('pages.anchorIncomeSettlementLogList.roomId')">
-          <el-input v-model="searchForm.roomId" clearable :placeholder="t('pages.anchorIncomeSettlementLogList.enterRoomId')"/>
+      <el-form :model="searchForm" class="search-form" inline label-width="88px">
+        <el-form-item :label="t('pages.liveRecordList.platformAnchor')">
+          <div class="anchor-filter anchor-filter--compact">
+            <el-input
+                :model-value="platformAnchorInputValue"
+                class="anchor-input"
+                disabled
+                :placeholder="t('pages.liveRecordList.noPlatformAnchorSelected')"
+            />
+            <el-button size="small" @click="openPlatformAnchorPicker">
+              {{ t('pages.liveRecordList.selectPlatformAnchor') }}
+            </el-button>
+            <el-button v-if="selectedPlatformAnchors.length > 0" link size="small" @click="clearPlatformAnchors">
+              {{ t('pages.liveRecordList.clearPlatformAnchor') }}
+            </el-button>
+          </div>
         </el-form-item>
-        <el-form-item :label="t('common.createdAt')">
+        <el-form-item :label="t('pages.liveRecordList.guildAnchor')">
+          <div class="anchor-filter anchor-filter--compact">
+            <el-input
+                :model-value="guildAnchorInputValue"
+                class="anchor-input"
+                disabled
+                :placeholder="t('pages.liveRecordList.noGuildAnchorSelected')"
+            />
+            <el-button size="small" @click="openGuildAnchorPicker">
+              {{ t('pages.liveRecordList.selectGuildAnchor') }}
+            </el-button>
+            <el-button v-if="selectedGuildAnchors.length > 0" link size="small" @click="clearGuildAnchors">
+              {{ t('pages.liveRecordList.clearGuildAnchor') }}
+            </el-button>
+          </div>
+        </el-form-item>
+        <el-form-item :label="t('pages.liveRecordList.startDate')">
           <el-date-picker
-              v-model="searchForm.dateRange"
+              v-model="searchForm.startDate"
               clearable
-              :end-placeholder="t('pages.anchorIncomeSettlementLogList.endDate')"
               format="YYYY-MM-DD"
-              :range-separator="t('pages.anchorIncomeSettlementLogList.dateRangeSeparator')"
-              :start-placeholder="t('pages.anchorIncomeSettlementLogList.startDate')"
-              style="width: 260px"
-              type="daterange"
+              :placeholder="t('pages.liveRecordList.startDate')"
+              style="width: 160px"
+              type="date"
+              value-format="YYYY-MM-DD"
+          />
+        </el-form-item>
+        <el-form-item :label="t('pages.liveRecordList.endDate')">
+          <el-date-picker
+              v-model="searchForm.endDate"
+              clearable
+              format="YYYY-MM-DD"
+              :placeholder="t('pages.liveRecordList.endDate')"
+              style="width: 160px"
+              type="date"
               value-format="YYYY-MM-DD"
           />
         </el-form-item>
@@ -90,15 +128,31 @@
         />
       </div>
     </el-card>
+
+    <AnchorPickerDialog
+        v-model:visible="platformAnchorPickerVisible"
+        :initial-anchors="selectedPlatformAnchors"
+        multiple
+        platform-only
+        @confirm-multiple="handlePlatformAnchorsPicked"
+    />
+
+    <GuildAnchorPickerDialog
+        v-model:visible="guildAnchorPickerVisible"
+        :initial-anchors="selectedGuildAnchors"
+        @confirm="handleGuildAnchorsPicked"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
 import {useI18n} from 'vue-i18n'
-import {onMounted, reactive, ref} from 'vue'
+import {computed, onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {anchorIncomeSettlementLogApi} from '@/api/modules/anchor-income-settlement-log'
-import type {AnchorIncomeSettlementLogItem} from '@/types/api'
+import type {AnchorIncomeSettlementLogItem, AnchorListItem} from '@/types/api'
+import AnchorPickerDialog from '@/components/AnchorPickerDialog.vue'
+import GuildAnchorPickerDialog from '@/components/GuildAnchorPickerDialog.vue'
 import {usePagePermission} from '@/composables/usePagePermission'
 import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
 import {CMS_EXPORT_TYPE_ANCHOR_INCOME_SETTLEMENT_LOG} from '@/utils/cms-async-export'
@@ -111,11 +165,78 @@ const {can} = usePagePermission('AnchorIncomeSettlementLogList')
 const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
 const tableData = ref<AnchorIncomeSettlementLogItem[]>([])
+const selectedPlatformAnchors = ref<AnchorListItem[]>([])
+const selectedGuildAnchors = ref<AnchorListItem[]>([])
+const platformAnchorPickerVisible = ref(false)
+const guildAnchorPickerVisible = ref(false)
 
 const searchForm = reactive({
-  roomId: '',
-  dateRange: [] as string[],
+  startDate: '',
+  endDate: '',
 })
+
+const formatPlatformAnchorLabel = (anchor: AnchorListItem) => {
+  const nickname = anchor.nickname || '-'
+  return `${nickname} (${anchor.id})`
+}
+
+const formatGuildAnchorLabel = (anchor: AnchorListItem) => {
+  const nickname = anchor.nickname || '-'
+  if (anchor.guildName) {
+    return `[${anchor.guildName}] ${nickname} (${anchor.id})`
+  }
+  return `${nickname} (${anchor.id})`
+}
+
+const platformAnchorInputValue = computed(() => {
+  if (selectedPlatformAnchors.value.length === 0) {
+    return ''
+  }
+  if (selectedPlatformAnchors.value.length === 1) {
+    return formatPlatformAnchorLabel(selectedPlatformAnchors.value[0])
+  }
+  return t('pages.liveRecordList.selectedPlatformAnchorsCount', {count: selectedPlatformAnchors.value.length})
+})
+
+const guildAnchorInputValue = computed(() => {
+  if (selectedGuildAnchors.value.length === 0) {
+    return ''
+  }
+  if (selectedGuildAnchors.value.length === 1) {
+    return formatGuildAnchorLabel(selectedGuildAnchors.value[0])
+  }
+  return t('pages.liveRecordList.selectedGuildAnchorsCount', {count: selectedGuildAnchors.value.length})
+})
+
+const openPlatformAnchorPicker = () => {
+  platformAnchorPickerVisible.value = true
+}
+
+const clearPlatformAnchors = () => {
+  selectedPlatformAnchors.value = []
+}
+
+const handlePlatformAnchorsPicked = (anchors: AnchorListItem[]) => {
+  selectedPlatformAnchors.value = anchors
+}
+
+const openGuildAnchorPicker = () => {
+  guildAnchorPickerVisible.value = true
+}
+
+const clearGuildAnchors = () => {
+  selectedGuildAnchors.value = []
+}
+
+const handleGuildAnchorsPicked = (anchors: AnchorListItem[]) => {
+  selectedGuildAnchors.value = anchors
+}
+
+const buildSelectedAnchorIds = () => {
+  const platformIds = selectedPlatformAnchors.value.map(anchor => String(anchor.id))
+  const guildIds = selectedGuildAnchors.value.map(anchor => String(anchor.id))
+  return [...new Set([...platformIds, ...guildIds])]
+}
 
 const pagination = reactive({
   pageIndex: 1,
@@ -131,14 +252,11 @@ const toDayEndUnix = (dateStr: string): number => {
   return Math.floor(new Date(`${dateStr}T23:59:59`).getTime() / 1000)
 }
 
-const buildFilterParams = () => {
-  const [startDate, endDate] = searchForm.dateRange || []
-  return {
-    roomId: searchForm.roomId.trim(),
-    startTime: startDate ? toDayStartUnix(startDate) : 0,
-    endTime: endDate ? toDayEndUnix(endDate) : 0,
-  }
-}
+const buildFilterParams = () => ({
+  anchorIds: buildSelectedAnchorIds(),
+  startTime: searchForm.startDate ? toDayStartUnix(searchForm.startDate) : 0,
+  endTime: searchForm.endDate ? toDayEndUnix(searchForm.endDate) : 0,
+})
 
 const buildQueryParams = () => ({
   ...buildFilterParams(),
@@ -166,8 +284,10 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
-  searchForm.roomId = ''
-  searchForm.dateRange = []
+  selectedPlatformAnchors.value = []
+  selectedGuildAnchors.value = []
+  searchForm.startDate = ''
+  searchForm.endDate = ''
   pagination.pageIndex = 1
   fetchList()
 }
@@ -226,6 +346,21 @@ onMounted(() => {
 
 .search-form {
   margin-bottom: 16px;
+}
+
+.search-form :deep(.el-form-item) {
+  margin-bottom: 0;
+  margin-right: 12px;
+}
+
+.anchor-filter--compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.anchor-input {
+  width: 220px;
 }
 
 .pagination {

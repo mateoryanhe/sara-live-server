@@ -18,8 +18,9 @@ func exportAnchorIncomeSettlementLogCSV(ctx context.Context, payload json.RawMes
 		return nil, err
 	}
 	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
+		roomIds := liveroomdao.ParseLiveRecordAnchorIds(req.RoomId, "", "", req.AnchorIds)
 		total, rows := liveroomdao.AnchorIncomeSettlementLogCMSList(&liveroomdao.AnchorIncomeSettlementLogCMSListFilter{
-			RoomId:    parseUint64Filter(req.RoomId),
+			RoomIds:   roomIds,
 			StartTime: req.StartTime,
 			EndTime:   req.EndTime,
 			PageIndex: pageIndex,
