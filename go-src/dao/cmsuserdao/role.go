@@ -55,7 +55,7 @@ func DeleteRole(id uint64) error {
 
 // GetRoleList 获取角色列表
 func GetRoleList(req *cmsroledto.RoleListReq) (int, []*cmsroledto.RoleListRes) {
-	sql := `select r.id, r.name, r.description, r.status, r.created_at, r.updated_at
+	sql := `select r.id, r.name, r.description, r.role_type, r.status, r.created_at, r.updated_at
             from cms_roles r
             where 1=1 `
 	param := make([]any, 0)
@@ -65,6 +65,11 @@ func GetRoleList(req *cmsroledto.RoleListReq) (int, []*cmsroledto.RoleListRes) {
 	if req.Name != "" {
 		sql += ` and r.name LIKE ?`
 		param = append(param, fmt.Sprintf("%%%s%%", req.Name))
+	}
+
+	if req.RoleType > 0 {
+		sql += ` and r.role_type = ?`
+		param = append(param, req.RoleType)
 	}
 
 	sql += ` order by r.created_at desc`

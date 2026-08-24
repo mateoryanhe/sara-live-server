@@ -1,5 +1,6 @@
 import {request} from '../request'
 import type {
+    AnchorDailyEffectiveLiveItem,
     AnchorIncomeSettlementLogItem,
     Guild,
     GuildDailyEffectiveLiveItem,
@@ -16,6 +17,11 @@ import type {
     SetGuildAnchorTypeReq,
     SetGuildAnchorTypeRes,
     MyGuildAnchorIncomeSettlementLogQuery,
+    MyGuildAnchorListItem,
+    MyGuildAnchorListQuery,
+    MyGuildAnchorDailyEffectiveLiveQuery,
+    MyOwnedGuildAnchorDailyEffectiveLiveQuery,
+    MyOwnedGuildAnchorListQuery,
     MyGuildProfileListRes,
     PageResponse,
     UpdateMyGuildProfileReq,
@@ -66,8 +72,12 @@ export const guildApi = {
         return request.post<MyGuildProfileListRes>('/guild/getMyGuildProfile', {})
     },
 
-    getMyGuildAnchorIncomeSettlementLogList: (params: MyGuildAnchorIncomeSettlementLogQuery) => {
-        return request.post<PageResponse<AnchorIncomeSettlementLogItem>>('/guild/cmsMyGuildAnchorIncomeSettlementLogList', params)
+    getMyGuildAnchorList: (params: MyGuildAnchorListQuery) => {
+        return request.post<PageResponse<MyGuildAnchorListItem>>('/guild/getMyGuildAnchorList', params)
+    },
+
+    getMyGuildAnchorDailyEffectiveLiveList: (params: MyGuildAnchorDailyEffectiveLiveQuery) => {
+        return request.post<PageResponse<AnchorDailyEffectiveLiveItem>>('/guild/getMyGuildAnchorDailyEffectiveLiveList', params)
     },
 
     getGuildAnchorIncomeSettlementLogList: (params: MyGuildAnchorIncomeSettlementLogQuery) => {
@@ -104,5 +114,13 @@ export const guildApi = {
 
     getGuildAnchorDailyEffectiveLiveList: (data: GuildAnchorDailyEffectiveLiveQuery) => {
         return request.post<PageResponse<GuildAnchorDailyEffectiveLiveItem>>('/guild/cmsGuildAnchorDailyEffectiveLiveList', data)
+    },
+
+    getMyOwnedGuildAnchorDailyEffectiveLiveList: (params: MyOwnedGuildAnchorDailyEffectiveLiveQuery) => {
+        return request.post<PageResponse<GuildAnchorDailyEffectiveLiveItem>>('/guild/cmsMyGuildAnchorDailyEffectiveLiveList', params)
+    },
+
+    getMyOwnedGuildAnchorList: (params: MyOwnedGuildAnchorListQuery) => {
+        return request.post<PageResponse<MyGuildAnchorListItem>>('/guild/getMyOwnedGuildAnchorList', params)
     },
 }

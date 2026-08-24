@@ -58,7 +58,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('PlatformAnchorList') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('GuildProfileAnchorSettlementLogList') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('LiveRevenueShareCfgManagement')"
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('GuildAnchorDailyLiveManagement') || hasMenuPermission('PlatformAnchorList') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('LiveRevenueShareCfgManagement')"
             index="/operation">
           <template #title>
             <el-icon>
@@ -117,7 +117,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('GuildManagement') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('GuildProfileAnchorSettlementLogList') || hasMenuPermission('PlatformAnchorList')"
+              v-if="hasMenuPermission('GuildManagement') || hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('GuildAnchorDailyLiveManagement') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('PlatformAnchorList')"
               index="/operation/group/guild">
             <template #title>
               <el-icon>
@@ -130,6 +130,18 @@
                 <User/>
               </el-icon>
               <span>{{ t('menu.GuildManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('GuildCMSUserManagement')" index="/operation/guild/guild-cms-user-list">
+              <el-icon>
+                <UserFilled/>
+              </el-icon>
+              <span>{{ t('menu.GuildCMSUserManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('GuildAnchorDailyLiveManagement')" index="/operation/guild/guild-anchor-daily-live-list">
+              <el-icon>
+                <Document/>
+              </el-icon>
+              <span>{{ t('menu.GuildAnchorDailyLiveManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('PlatformAnchorList')" index="/operation/guild/platform-anchor-list">
               <el-icon>
@@ -148,12 +160,6 @@
                 <EditPen/>
               </el-icon>
               <span>{{ t('menu.GuildProfileManagement') }}</span>
-            </el-menu-item>
-            <el-menu-item v-if="hasMenuPermission('GuildProfileAnchorSettlementLogList')" index="/operation/guild/guild-anchor-income-settlement-log-list">
-              <el-icon>
-                <Document/>
-              </el-icon>
-              <span>{{ t('menu.GuildProfileAnchorSettlementLogList') }}</span>
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
@@ -631,7 +637,7 @@ import {useI18n} from 'vue-i18n'
 import LayoutTabs from '@/components/layout/LayoutTabs.vue'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import {useLayoutTabs} from '@/composables/useLayoutTabs'
-import {ArrowDown, Bell, Box, Coin, Collection, CollectionTag, Cpu, CreditCard, Delete, Document, EditPen, Expand, Fold, Key, List, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Refresh, Search, Service, Setting, Stamp, Tickets, User, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Bell, Box, Coin, Collection, CollectionTag, Cpu, CreditCard, Delete, Document, EditPen, Expand, Fold, Key, List, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Refresh, Search, Service, Setting, Stamp, Tickets, User, UserFilled, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {getIsAdmin, hasPermission} from '@/utils/permission'
 import {clearAuthSession} from '@/utils/auth'
 

@@ -7,6 +7,7 @@ import (
 
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/guilddao"
+	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/guilddto"
 	"xr-game-server/entity/live"
 	"xr-game-server/errercode"
@@ -84,9 +85,18 @@ func toMyGuildProfileItem(guild *entity.LiveGuild) *guilddto.MyGuildProfileItem 
 		updatedAt = guild.UpdatedAt.Format("2006-01-02 15:04:05")
 	}
 	return &guilddto.MyGuildProfileItem{
-		ID:          strconv.FormatUint(guild.ID, 10),
-		Name:        guild.Name,
-		Description: guild.Description,
-		UpdatedAt:   updatedAt,
+		ID:                   strconv.FormatUint(guild.ID, 10),
+		Name:                 guild.Name,
+		Description:          guild.Description,
+		UnsettledTotalIncome: resolveGuildUnsettledTotalIncome(guild.ID),
+		UpdatedAt:            updatedAt,
 	}
+}
+
+func resolveGuildUnsettledTotalIncome(guildId uint64) float64 {
+	row := liveroomdao.GetGuildIncomeUnsettledForCMS(guildId)
+	if row == nil {
+		return 0
+	}
+	return row.TotalIncome
 }

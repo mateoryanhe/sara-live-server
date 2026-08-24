@@ -101,6 +101,56 @@ func filterAnchorRooms(rooms []*liveentity.LiveRoom, key string, guildId uint64,
 	return filtered
 }
 
+func filterAnchorRoomsByGuildIds(rooms []*liveentity.LiveRoom, guildIds []uint64, key string, liveStatus *uint8) []*liveentity.LiveRoom {
+	if len(guildIds) == 0 {
+		return nil
+	}
+	guildIdSet := make(map[uint64]struct{}, len(guildIds))
+	for _, guildId := range guildIds {
+		if guildId > 0 {
+			guildIdSet[guildId] = struct{}{}
+		}
+	}
+	if len(guildIdSet) == 0 {
+		return nil
+	}
+	key = strings.TrimSpace(key)
+	likeKey := strings.ToLower(key)
+	guildNameMap := guilddao.GetNameMapByIds(collectRoomGuildIds(rooms))
+	filtered := make([]*liveentity.LiveRoom, 0, len(rooms))
+	for _, room := range rooms {
+		if room == nil || !isRegularAnchorRoom(room) {
+			continue
+		}
+		if _, ok := guildIdSet[room.GuildId]; !ok {
+			continue
+		}
+		if liveStatus != nil && roomLiveStatus(room) != *liveStatus {
+			continue
+		}
+		if key != "" && !matchAnchorKey(room.ID, room.GuildId, key, likeKey, guildNameMap) {
+			continue
+		}
+		filtered = append(filtered, room)
+	}
+	sort.Slice(filtered, func(i, j int) bool { return filtered[i].ID > filtered[j].ID })
+	return filtered
+}
+
+func queryAnchorListByGuildIdsFromMemory(guildIds []uint64, req *accountdto.QueryAnchorListReq) (int, []*accountdto.AnchorListItem) {
+	rooms := filterAnchorRoomsByGuildIds(getRoomListCache(), guildIds, req.Key, req.LiveStatus)
+	total := len(rooms)
+	pageRooms := paginateAnchorRooms(rooms, req.PageIndex, req.PageSize)
+	ret := make([]*accountdto.AnchorListItem, 0, len(pageRooms))
+	for _, room := range pageRooms {
+		if item := buildAnchorListItem(room); item != nil {
+			ret = append(ret, item)
+		}
+	}
+	fillAnchorListGuildNames(ret)
+	return total, ret
+}
+
 func roomLiveStatus(room *liveentity.LiveRoom) uint8 {
 	if room != nil && room.LiveRecordId > 0 {
 		return 1

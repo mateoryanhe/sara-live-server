@@ -8,8 +8,8 @@ const zh = {
   guildName: '工会名称',
   description: '简介',
   lastUpdated: '最近更新',
+  unsettledTotalIncome: '未结算总流水',
   viewAnchors: '查询名下主播',
-  viewAnchorSettlementLogs: '查看结算流水',
 } as const
 
 export const guildProfileMessages = definePageMessages(
@@ -22,8 +22,8 @@ export const guildProfileMessages = definePageMessages(
     guildName: 'Guild Name',
     description: 'Description',
     lastUpdated: 'Last Updated',
+    unsettledTotalIncome: 'Unsettled Total Income',
     viewAnchors: 'View Anchors',
-    viewAnchorSettlementLogs: 'View Settlement Logs',
   },
   {
     tipTitle: 'Nota',
@@ -33,8 +33,8 @@ export const guildProfileMessages = definePageMessages(
     guildName: 'Nombre del gremio',
     description: 'Descripción',
     lastUpdated: 'Última actualización',
+    unsettledTotalIncome: 'Ingresos totales no liquidados',
     viewAnchors: 'Ver anclas',
-    viewAnchorSettlementLogs: 'Ver liquidaciones',
   },
   {
     tipTitle: 'Nota',
@@ -44,8 +44,8 @@ export const guildProfileMessages = definePageMessages(
     guildName: 'Nome da guilda',
     description: 'Descrição',
     lastUpdated: 'Última atualização',
+    unsettledTotalIncome: 'Receita total não liquidada',
     viewAnchors: 'Ver âncoras',
-    viewAnchorSettlementLogs: 'Ver liquidações',
   },
   {
     tipTitle: 'नोट',
@@ -55,8 +55,8 @@ export const guildProfileMessages = definePageMessages(
     guildName: 'गिल्ड नाम',
     description: 'विवरण',
     lastUpdated: 'अंतिम अपडेट',
+    unsettledTotalIncome: 'अनिपटारा कुल आय',
     viewAnchors: 'एंकर देखें',
-    viewAnchorSettlementLogs: 'निपटान लॉग देखें',
   },
   {
     tipTitle: 'Catatan',
@@ -66,7 +66,7 @@ export const guildProfileMessages = definePageMessages(
     guildName: 'Nama guild',
     description: 'Deskripsi',
     lastUpdated: 'Terakhir diperbarui',
+    unsettledTotalIncome: 'Total pendapatan belum diselesaikan',
     viewAnchors: 'Lihat anchor',
-    viewAnchorSettlementLogs: 'Lihat log penyelesaian',
   },
 )

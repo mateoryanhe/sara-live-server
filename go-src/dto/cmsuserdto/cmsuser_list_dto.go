@@ -8,11 +8,13 @@ import (
 type CMSUserListReq struct {
 	g.Meta `path:"/cmsUserList" method:"post" summary:"获取CMS用户列表" tags:"CMS用户管理"`
 	httpserver.CMSQueryReq
-	Name   string `json:"name" dc:"CMS用户名称"`
-	Key    string `json:"key" dc:"关键字(用户名/ID模糊)"`
-	RoleId string `json:"roleId" dc:"角色ID(可选)"`
-	Status uint8  `json:"status" dc:"状态"`
-	Admin  bool   `json:"admin" dc:"是否是管理员"`
+	Name     string `json:"name" dc:"CMS用户名称"`
+	Key      string `json:"key" dc:"关键字(用户名/ID模糊)"`
+	RoleId   string `json:"roleId" dc:"角色ID(可选)"`
+	Status   uint8  `json:"status" dc:"状态"`
+	Admin    bool   `json:"admin" dc:"是否是管理员"`
+	RoleType uint8  `json:"roleType" dc:"按关联角色类型筛选 1内部 2外部"`
+	NonAdmin bool   `json:"nonAdmin" dc:"仅非管理员"`
 }
 
 type CMSUserListRes struct {
@@ -23,6 +25,7 @@ type CMSUserListRes struct {
 	Admin     bool   `json:"admin"`
 	RoleId    uint64 `json:"roleId"`
 	RoleName  string `json:"roleName"`
+	RoleType  uint8  `json:"roleType"`
 	Remark    string `json:"remark"`
 	CreatedAt string `json:"createdAt"`
 	UpdatedAt string `json:"updatedAt"`

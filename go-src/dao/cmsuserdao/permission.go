@@ -86,16 +86,28 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/account/getAnchorDetail"}
 	case "/guild/getGuildDailyEffectiveLiveList":
 		return []string{"/guild/getGuildDetail"}
+	case "/guild/guildList":
+		return []string{"/guild/cmsGuildAnchorDailyEffectiveLiveList", "/guild/cmsMyGuildAnchorDailyEffectiveLiveList"}
 	case "/guild/cmsGuildAnchorDailyEffectiveLiveList":
-		return []string{"/guild/cmsGuildAnchorIncomeSettlementLogList", "/guild/getGuildDetail"}
+		return []string{"/guild/cmsGuildAnchorIncomeSettlementLogList", "/guild/getGuildDetail", "/guild/guildList", "/account/getAnchorList"}
 	case "/guild/setGuildAnchorType":
 		return []string{"/account/setPlatformAnchorType"}
 	case "/cmsExport/getJob":
 		return []string{"/cmsExport/submitJob"}
 	case "/cmsExport/deleteExport":
 		return []string{"/cmsExport/submitJob"}
+	case "/cmsuser/createGuildCMSUser":
+		return []string{"/role/roleList"}
+	case "/guild/cmsMyGuildAnchorDailyEffectiveLiveList":
+		return []string{"/guild/getMyGuildProfile", "/guild/getMyOwnedGuildAnchorList"}
+	case "/guild/getMyOwnedGuildAnchorList":
+		return []string{"/guild/getMyGuildProfile"}
+	case "/guild/getMyGuildAnchorList":
+		return []string{"/guild/getMyGuildProfile", "/account/getAnchorList"}
+	case "/guild/getMyGuildAnchorDailyEffectiveLiveList":
+		return []string{"/guild/getMyGuildProfile", "/account/getAnchorDailyEffectiveLiveList"}
 	case "/account/getAnchorList":
-		return []string{"/liveRecord/cmsLiveRecordList", "/liveRevenueLog/cmsLiveRevenueLogList", "/account/getAnchorList"}
+		return []string{"/liveRecord/cmsLiveRecordList", "/liveRevenueLog/cmsLiveRevenueLogList", "/account/getAnchorList", "/guild/cmsGuildAnchorDailyEffectiveLiveList", "/guild/cmsMyGuildAnchorDailyEffectiveLiveList", "/guild/getMyOwnedGuildAnchorList"}
 	case "/account/getAnchorDetail":
 		return []string{"/liveRecord/cmsLiveRecordList", "/liveRevenueLog/cmsLiveRevenueLogList"}
 	default:

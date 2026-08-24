@@ -128,6 +128,17 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GuildManagement:batchSetAnchor': '/guild/importGuildAnchors',
     'GuildManagement:batchSetSeniorAnchor': '/guild/importGuildAnchors',
 
+    GuildCMSUserManagement: '/cmsuser/cmsUserList',
+    'GuildCMSUserManagement:view': '/cmsuser/cmsUserList',
+    'GuildCMSUserManagement:search': '/cmsuser/cmsUserList',
+    'GuildCMSUserManagement:create': '/cmsuser/createGuildCMSUser',
+    'GuildCMSUserManagement:resetPassword': '/cmsuser/updateCMSUser',
+
+    GuildAnchorDailyLiveManagement: '/guild/cmsMyGuildAnchorDailyEffectiveLiveList',
+    'GuildAnchorDailyLiveManagement:view': '/guild/cmsMyGuildAnchorDailyEffectiveLiveList',
+    'GuildAnchorDailyLiveManagement:search': '/guild/cmsMyGuildAnchorDailyEffectiveLiveList',
+    'GuildAnchorDailyLiveManagement:export': '/cmsExport/submitJob',
+
     GuildDetail: '/guild/getGuildDetail',
     'GuildDetail:viewUserDetail': '/account/getUserDetail',
     'GuildDetail:incomeArchive': '/guild/getGuildIncomeArchives',
@@ -148,14 +159,9 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     GuildProfileManagement: '/guild/getMyGuildProfile',
     'GuildProfileManagement:view': '/guild/getMyGuildProfile',
     'GuildProfileManagement:viewUserDetail': '/account/getUserDetail',
-    'GuildProfileManagement:viewAnchors': '/account/getAnchorList',
+    'GuildProfileManagement:viewAnchors': '/guild/getMyGuildAnchorList',
+    'GuildProfileManagement:dailyEffectiveLive': '/guild/getMyGuildAnchorDailyEffectiveLiveList',
     'GuildProfileManagement:viewDetail': '/account/getAnchorDetail',
-    'GuildProfileManagement:viewAnchorSettlementLogs': '/guild/cmsMyGuildAnchorIncomeSettlementLogList',
-
-    GuildProfileAnchorSettlementLogList: '/guild/cmsMyGuildAnchorIncomeSettlementLogList',
-    'GuildProfileAnchorSettlementLogList:view': '/guild/cmsMyGuildAnchorIncomeSettlementLogList',
-    'GuildProfileAnchorSettlementLogList:search': '/guild/cmsMyGuildAnchorIncomeSettlementLogList',
-    'GuildProfileAnchorSettlementLogList:export': '/cmsExport/submitJob',
 
     RechargeCfgManagement: '/rechargeCfg/rechargeCfgList',
     'RechargeCfgManagement:view': '/rechargeCfg/rechargeCfgList',

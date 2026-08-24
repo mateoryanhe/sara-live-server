@@ -32,7 +32,10 @@ const zh = {
   deleteConfirm: '确定要删除用户 "{name}" 吗？',
   deleteTitle: '确认删除',
   createFailed: '创建失败',
-  updateFailed: '更新失败',
+  resetPasswordFailed: '重设密码失败',
+  resetPassword: '重设密码',
+  resetPasswordTitle: '重设密码',
+  resetPasswordSuccess: '密码重设成功',
 } as const
 
 const en: Record<keyof typeof zh, string> = {
@@ -68,6 +71,10 @@ const en: Record<keyof typeof zh, string> = {
   deleteTitle: 'Confirm Delete',
   createFailed: 'Create failed',
   updateFailed: 'Update failed',
+  resetPasswordFailed: 'Failed to reset password',
+  resetPassword: 'Reset Password',
+  resetPasswordTitle: 'Reset Password',
+  resetPasswordSuccess: 'Password reset successfully',
 }
 
 const es: Record<keyof typeof zh, string> = {
@@ -103,6 +110,10 @@ const es: Record<keyof typeof zh, string> = {
   deleteTitle: 'Confirmar eliminación',
   createFailed: 'Error al crear',
   updateFailed: 'Error al actualizar',
+  resetPasswordFailed: 'Error al restablecer contraseña',
+  resetPassword: 'Restablecer contraseña',
+  resetPasswordTitle: 'Restablecer contraseña',
+  resetPasswordSuccess: 'Contraseña restablecida',
 }
 
 const pt: Record<keyof typeof zh, string> = {
@@ -138,6 +149,10 @@ const pt: Record<keyof typeof zh, string> = {
   deleteTitle: 'Confirmar exclusão',
   createFailed: 'Falha ao criar',
   updateFailed: 'Falha ao atualizar',
+  resetPasswordFailed: 'Falha ao redefinir senha',
+  resetPassword: 'Redefinir senha',
+  resetPasswordTitle: 'Redefinir senha',
+  resetPasswordSuccess: 'Senha redefinida com sucesso',
 }
 
 const hi: Record<keyof typeof zh, string> = {
@@ -173,6 +188,10 @@ const hi: Record<keyof typeof zh, string> = {
   deleteTitle: 'हटाने की पुष्टि',
   createFailed: 'बनाना विफल',
   updateFailed: 'अपडेट विफल',
+  resetPasswordFailed: 'पासवर्ड रीसेट विफल',
+  resetPassword: 'पासवर्ड रीसेट',
+  resetPasswordTitle: 'पासवर्ड रीसेट',
+  resetPasswordSuccess: 'पासवर्ड सफलतापूर्वक रीसेट',
 }
 
 const id: Record<keyof typeof zh, string> = {
@@ -208,6 +227,10 @@ const id: Record<keyof typeof zh, string> = {
   deleteTitle: 'Konfirmasi hapus',
   createFailed: 'Gagal membuat',
   updateFailed: 'Gagal memperbarui',
+  resetPasswordFailed: 'Gagal mereset kata sandi',
+  resetPassword: 'Reset kata sandi',
+  resetPasswordTitle: 'Reset kata sandi',
+  resetPasswordSuccess: 'Kata sandi berhasil direset',
 }
 
 export const cmsUserListMessages = definePageMessages(zh, en, es, pt, hi, id)

@@ -58,6 +58,26 @@ func (c *GuildController) UpdateMyGuildProfile(ctx context.Context, req *guilddt
 	return guild.UpdateMyGuildProfile(ctx, req)
 }
 
+// GetMyGuildAnchorList 获取当前 CMS 用户管理的工会名下主播列表
+func (c *GuildController) GetMyGuildAnchorList(ctx context.Context, req *guilddto.GetMyGuildAnchorListReq) (*httpserver.CMSQueryResp, error) {
+	return guild.GetMyGuildAnchorList(ctx, req)
+}
+
+// GetMyGuildAnchorDailyEffectiveLiveList 获取当前 CMS 用户管理的指定工会名下主播每日流水
+func (c *GuildController) GetMyGuildAnchorDailyEffectiveLiveList(ctx context.Context, req *guilddto.GetMyGuildAnchorDailyEffectiveLiveListReq) (*httpserver.CMSQueryResp, error) {
+	return guild.GetMyGuildAnchorDailyEffectiveLiveList(ctx, req)
+}
+
+// GetMyOwnedGuildAnchorDailyEffectiveLiveList 获取当前 CMS 用户管理的工会名下主播每日流水
+func (c *GuildController) GetMyOwnedGuildAnchorDailyEffectiveLiveList(ctx context.Context, req *guilddto.CMSMyGuildAnchorDailyEffectiveLiveListReq) (*httpserver.CMSQueryResp, error) {
+	return guild.GetMyOwnedGuildAnchorDailyEffectiveLiveList(ctx, req)
+}
+
+// GetMyOwnedGuildAnchorList 获取当前 CMS 用户管理的全部工会名下主播
+func (c *GuildController) GetMyOwnedGuildAnchorList(ctx context.Context, req *guilddto.GetMyOwnedGuildAnchorListReq) (*httpserver.CMSQueryResp, error) {
+	return guild.GetMyOwnedGuildAnchorList(ctx, req)
+}
+
 // CMSGuildAnchorIncomeSettlementLogList CMS查询指定工会名下主播结算流水
 func (c *GuildController) CMSGuildAnchorIncomeSettlementLogList(ctx context.Context, req *guilddto.CMSGuildAnchorIncomeSettlementLogListReq) (*httpserver.CMSQueryResp, error) {
 	return guild.GetGuildAnchorIncomeSettlementLogList(ctx, req)

@@ -12,3 +12,9 @@ func QueryAnchorList(_ context.Context, req *accountdto.QueryAnchorListReq) (*ht
 	total, data := queryAnchorListFromMemory(req)
 	return httpserver.NewCMSQueryResp(total, data), nil
 }
+
+// QueryAnchorListByGuildIds CMS分页查询指定多个工会名下主播列表
+func QueryAnchorListByGuildIds(_ context.Context, guildIds []uint64, req *accountdto.QueryAnchorListReq) (*httpserver.CMSQueryResp, error) {
+	total, data := queryAnchorListByGuildIdsFromMemory(guildIds, req)
+	return httpserver.NewCMSQueryResp(total, data), nil
+}

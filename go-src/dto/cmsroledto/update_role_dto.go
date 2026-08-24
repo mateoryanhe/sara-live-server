@@ -9,6 +9,7 @@ type UpdateRoleReq struct {
 	ID          uint64   `json:"id" v:"required#角色ID不能为空" dc:"角色ID"`
 	Name        string   `json:"name" v:"required#角色名称不能为空" dc:"角色名称"`
 	Description string   `json:"description" dc:"角色描述"`
+	RoleType    uint8    `json:"roleType" dc:"角色类型 1内部 2外部"`
 	Status      uint8    `json:"status" dc:"状态(0-禁用,1-启用)"`
 	Permissions []uint64 `json:"permissions" dc:"权限ID列表"`
 }

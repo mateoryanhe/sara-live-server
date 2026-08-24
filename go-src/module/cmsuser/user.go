@@ -47,14 +47,57 @@ func CreateCMSUser(ctx context.Context, req *cmsuserdto.CreateCMSUserReq) (res *
 	}, nil
 }
 
+// CreateGuildCMSUser 工会模块创建外部 CMS 用户(固定非管理员)
+func CreateGuildCMSUser(_ context.Context, req *cmsuserdto.CreateGuildCMSUserReq) (*cmsuserdto.CreateCMSUserRes, error) {
+	existingUser := cmsuserdao.GetCMSUserByName(req.Name)
+	if existingUser != nil {
+		return nil, errors.New("CMS用户名称已存在")
+	}
+
+	role := cmsuserdao.GetRoleById(req.RoleId)
+	if role == nil {
+		return nil, errors.New("角色不存在")
+	}
+	if role.Status != 1 {
+		return nil, errors.New("角色已禁用")
+	}
+	if role.RoleType != entity.CMSRoleTypeExternal {
+		return nil, errors.New("只能选择外部类型角色")
+	}
+
+	status := req.Status
+	if status == 0 {
+		status = 1
+	}
+
+	user := entity.CMSUser{
+		Name:   req.Name,
+		Pwd:    req.Pwd,
+		Status: status,
+		Admin:  false,
+		RoleId: req.RoleId,
+		Remark: req.Remark,
+	}
+
+	if err := cmsuserdao.CreateCMSUser(&user); err != nil {
+		return nil, err
+	}
+
+	return &cmsuserdto.CreateCMSUserRes{
+		ID: user.ID,
+	}, nil
+}
+
 // UpdateCMSUser 更新CMS用户
 func UpdateCMSUser(ctx context.Context, req *cmsuserdto.UpdateCMSUserReq) (res *cmsuserdto.UpdateCMSUserRes, err error) {
-	user := cmsuserdao.GetCMSUserById(req.ID)
+	user := cmsuserdao.LoadCMSUserFromDB(req.ID)
 	if user == nil {
 		return nil, errors.New("CMS用户不存在")
 	}
 
 	oldStatus := user.Status
+	oldName := user.Name
+	oldRoleId := user.RoleId
 	operatorId := httpserver.GetAuthId(ctx)
 	if oldStatus == common.True && req.Status == common.False && user.ID == operatorId {
 		return nil, errors.New("不能停用自己的账号")
@@ -67,7 +110,8 @@ func UpdateCMSUser(ctx context.Context, req *cmsuserdto.UpdateCMSUserReq) (res *
 	}
 
 	user.Name = req.Name
-	if req.Pwd != "" {
+	pwdChanged := req.Pwd != ""
+	if pwdChanged {
 		user.Pwd = req.Pwd
 	}
 	user.Status = req.Status
@@ -79,7 +123,13 @@ func UpdateCMSUser(ctx context.Context, req *cmsuserdto.UpdateCMSUserReq) (res *
 	if err != nil {
 		return nil, err
 	}
+	if oldName != user.Name {
+		cmsuserdao.RemoveCMSLoginUserMissCache(oldName)
+	}
 	if oldStatus == common.True && req.Status == common.False {
+		invalidateCmsToken(user.ID)
+	}
+	if pwdChanged || user.RoleId != oldRoleId {
 		invalidateCmsToken(user.ID)
 	}
 

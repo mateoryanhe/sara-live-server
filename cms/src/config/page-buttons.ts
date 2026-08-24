@@ -61,7 +61,6 @@ const READONLY_PAGES = new Set([
     'LiveRevenueLogList',
     'AnchorIncomeSettlementLogList',
     'GuildIncomeSettlementLogList',
-    'GuildProfileAnchorSettlementLogList',
     'LiveRecordList',
     'VideoCallLogList',
     'GameWinLogListManagement',
@@ -201,12 +200,14 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'exportAnchorDailyEffectiveLive', label: '导出名下主播每日流水'},
     ],
     GuildRecycleBinManagement: [BTN.view, BTN.search, {key: 'onShelf', label: '上架'}],
+    GuildCMSUserManagement: [BTN.view, BTN.search, BTN.create, {key: 'resetPassword', label: '重设密码'}],
+    GuildAnchorDailyLiveManagement: [BTN.view, BTN.search, BTN.export],
     GuildProfileManagement: [
         ...DEFAULT_VIEW_BUTTONS,
         {key: 'viewUserDetail', label: '查看用户详情'},
         {key: 'viewAnchors', label: '查询名下主播'},
+        {key: 'dailyEffectiveLive', label: '查看每日流水'},
         {key: 'viewDetail', label: '查看详情'},
-        {key: 'viewAnchorSettlementLogs', label: '查看名下主播结算流水'},
     ],
     BannerManagement: [
         ...DEFAULT_CRUD_BUTTONS,

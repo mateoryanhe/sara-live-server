@@ -13,9 +13,12 @@ import {bannerListMessages} from './banner-list'
 import {activityMessageListMessages} from './activity-message-list'
 import {guildListMessages} from './guild-list'
 import {guildRecycleBinMessages} from './guild-recycle-bin'
+import {guildAnchorDailyLiveListMessages} from './guild-anchor-daily-live-list'
 import {guildAnchorImportResultMessages} from './guild-anchor-import-result'
 import {guildMembersMessages} from './guild-members'
 import {guildProfileMessages} from './guild-profile'
+import {guildProfileMembersMessages} from './guild-profile-members'
+import {guildCmsUserListMessages} from './guild-cms-user-list'
 import {guildAnchorIncomeSettlementLogListMessages} from './guild-anchor-income-settlement-log-list'
 import {rechargeCfgListMessages} from './recharge-cfg-list'
 import {appPkgListMessages} from './app-pkg-list'
@@ -76,9 +79,12 @@ const pageMessageBuilders = [
   ['activityMessageList', activityMessageListMessages],
   ['guildList', guildListMessages],
   ['guildRecycleBin', guildRecycleBinMessages],
+  ['guildAnchorDailyLiveList', guildAnchorDailyLiveListMessages],
   ['guildAnchorImportResult', guildAnchorImportResultMessages],
   ['guildMembers', guildMembersMessages],
   ['guildProfile', guildProfileMessages],
+  ['guildProfileMembers', guildProfileMembersMessages],
+  ['guildCmsUserList', guildCmsUserListMessages],
   ['guildAnchorIncomeSettlementLogList', guildAnchorIncomeSettlementLogListMessages],
   ['rechargeCfgList', rechargeCfgListMessages],
   ['appPkgList', appPkgListMessages],

@@ -25,6 +25,18 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {title: '工会管理'},
         },
         {
+            path: 'guild/guild-cms-user-list',
+            name: 'GuildCMSUserManagement',
+            component: () => import('@/views/operation/guild/guild-cms-user-list.vue'),
+            meta: {title: '工会CMS用户'},
+        },
+        {
+            path: 'guild/guild-anchor-daily-live-list',
+            name: 'GuildAnchorDailyLiveManagement',
+            component: () => import('@/views/operation/guild/guild-anchor-daily-live-list.vue'),
+            meta: {title: '名下主播每日流水'},
+        },
+        {
             path: 'guild/guild-detail',
             name: 'GuildDetail',
             component: () => import('@/views/operation/guild/guild-detail.vue'),
@@ -61,20 +73,20 @@ export const operationRoutes: RouteRecordRaw = {
         {
             path: 'guild/guild-profile-members',
             name: 'GuildProfileMembers',
-            component: () => import('@/views/operation/guild/guild-members.vue'),
+            component: () => import('@/views/operation/guild/guild-profile-members.vue'),
             meta: {title: '名下主播', hidden: true, parentPermission: 'GuildProfileManagement'},
+        },
+        {
+            path: 'guild/guild-profile-anchor-daily-live',
+            name: 'GuildProfileAnchorDailyLive',
+            component: () => import('@/views/operation/guild/guild-profile-anchor-daily-live.vue'),
+            meta: {title: '每日流水', hidden: true, parentPermission: 'GuildProfileManagement'},
         },
         {
             path: 'guild/guild-profile',
             name: 'GuildProfileManagement',
             component: () => import('@/views/operation/guild/guild-profile.vue'),
             meta: {title: '工会数据查询'},
-        },
-        {
-            path: 'guild/guild-anchor-income-settlement-log-list',
-            name: 'GuildProfileAnchorSettlementLogList',
-            component: () => import('@/views/operation/guild/guild-anchor-income-settlement-log-list.vue'),
-            meta: {title: '名下主播结算流水'},
         },
         {
             path: 'recharge/recharge-cfg-list',

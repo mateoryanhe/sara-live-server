@@ -9,10 +9,11 @@ type GetMyGuildProfileReq struct {
 }
 
 type MyGuildProfileItem struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	UpdatedAt   string `json:"updatedAt"`
+	ID                   string  `json:"id"`
+	Name                 string  `json:"name"`
+	Description          string  `json:"description"`
+	UnsettledTotalIncome float64 `json:"unsettledTotalIncome" dc:"未结算总流水"`
+	UpdatedAt            string  `json:"updatedAt"`
 }
 
 type GetMyGuildProfileRes struct {

@@ -25,6 +25,13 @@
           <el-table-column label="ID" prop="id" width="100"/>
           <el-table-column :label="t('pages.roleList.roleName')" prop="name"/>
           <el-table-column :label="t('pages.roleList.description')" prop="description" show-overflow-tooltip/>
+          <el-table-column :label="t('pages.roleList.roleType')" width="100">
+            <template #default="{ row }">
+              <el-tag :type="row.roleType === ROLE_TYPE_EXTERNAL ? 'warning' : 'info'">
+                {{ formatRoleType(row.roleType) }}
+              </el-tag>
+            </template>
+          </el-table-column>
           <el-table-column :label="t('common.status')" width="100">
             <template #default="{ row }">
               <el-tag :type="row.status === 1 ? 'success' : 'danger'">
@@ -65,6 +72,12 @@
         <el-form-item :label="t('pages.roleList.roleDescription')" prop="description">
           <el-input v-model="currentRow.description" :placeholder="t('pages.roleList.enterRoleDescription')" type="textarea"/>
         </el-form-item>
+        <el-form-item :label="t('pages.roleList.roleType')" prop="roleType">
+          <el-radio-group v-model="currentRow.roleType">
+            <el-radio :label="ROLE_TYPE_INTERNAL">{{ t('pages.roleList.roleTypeInternal') }}</el-radio>
+            <el-radio :label="ROLE_TYPE_EXTERNAL">{{ t('pages.roleList.roleTypeExternal') }}</el-radio>
+          </el-radio-group>
+        </el-form-item>
         <el-form-item :label="t('common.status')" prop="status">
           <el-radio-group v-model="currentRow.status">
             <el-radio :label="1">{{ t('common.enabled') }}</el-radio>
@@ -92,6 +105,9 @@ import {usePagePermission} from '@/composables/usePagePermission'
 const {t} = useI18n()
 const {can} = usePagePermission('RoleManagement')
 
+const ROLE_TYPE_INTERNAL = 1
+const ROLE_TYPE_EXTERNAL = 2
+
 interface SearchForm {
   name: string
 }
@@ -100,6 +116,7 @@ interface RoleForm {
   id: string
   name: string
   description: string
+  roleType: number
   status: number
   permissions?: string[]
 }
@@ -120,6 +137,7 @@ const currentRow = ref<RoleForm>({
   id: '',
   name: '',
   description: '',
+  roleType: ROLE_TYPE_INTERNAL,
   status: 1
 })
 
@@ -133,8 +151,18 @@ const formRules = computed<FormRules>(() => ({
   ],
   description: [
     {max: 200, message: t('pages.roleList.descriptionMaxLength'), trigger: 'blur'}
+  ],
+  roleType: [
+    {required: true, message: t('pages.roleList.roleTypeRequired'), trigger: 'change'}
   ]
 }))
+
+const formatRoleType = (roleType?: number) => {
+  if (roleType === ROLE_TYPE_EXTERNAL) {
+    return t('pages.roleList.roleTypeExternal')
+  }
+  return t('pages.roleList.roleTypeInternal')
+}
 
 const fetchRoleList = async () => {
   loading.value = true
@@ -170,6 +198,7 @@ const handleAdd = () => {
     id: '',
     name: '',
     description: '',
+    roleType: ROLE_TYPE_INTERNAL,
     status: 1
   }
   dialogVisible.value = true
@@ -181,6 +210,7 @@ const handleEdit = (row: Role) => {
     id: row.id,
     name: row.name,
     description: row.description,
+    roleType: row.roleType === ROLE_TYPE_EXTERNAL ? ROLE_TYPE_EXTERNAL : ROLE_TYPE_INTERNAL,
     status: row.status
   }
   dialogVisible.value = true
@@ -220,10 +250,11 @@ const handleSave = async () => {
         if (currentRow.value.id) {
           await roleApi.updateRole(currentRow.value)
         } else {
-          const {name, description, status} = currentRow.value
+          const {name, description, roleType, status} = currentRow.value
           await roleApi.createRole({
             name,
             description,
+            roleType,
             status,
             permissions: []
           })

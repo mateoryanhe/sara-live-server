@@ -83,6 +83,31 @@ const GUILD_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
     },
 ]
 
+const GUILD_PROFILE_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
+    {id: 'access', titleKey: 'pages.moduleList.groupAccess', buttonKeys: ['view']},
+    {
+        id: 'navigate',
+        titleKey: 'pages.moduleList.groupNavigate',
+        buttonKeys: ['viewAnchors', 'dailyEffectiveLive', 'viewDetail', 'viewUserDetail'],
+    },
+]
+
+const GUILD_ANCHOR_DAILY_LIVE_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
+    {id: 'access', titleKey: 'pages.moduleList.groupAccess', buttonKeys: ['view', 'search', 'export']},
+]
+
+const GUILD_CMS_USER_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
+    {id: 'access', titleKey: 'pages.moduleList.groupAccess', buttonKeys: ['view', 'search', 'create', 'resetPassword']},
+]
+
+function group(
+    id: string,
+    titleKey: string,
+    children: PermissionMenuNode[],
+): PermissionMenuGroup {
+    return {kind: 'group', id, titleKey, children}
+}
+
 function page(
     pageName: string,
     options?: {
@@ -101,8 +126,8 @@ function page(
 }
 
 /**
- * CMS 权限树（扁平分组 + 子页挂靠父页 + 按钮分组）
- * 结构比侧边栏少一层，便于角色勾选；module 存库格式不变。
+ * CMS 权限树（分组对齐侧边栏子菜单 + 子页挂靠父页 + 按钮分组）
+ * module 存库格式不变。
  */
 export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
     {
@@ -128,21 +153,32 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
         id: 'operation',
         titleKey: 'menu.OperationManagement',
         children: [
-            page('BannerManagement'),
-            page('ActivityMessageManagement'),
-            page('RechargeCfgManagement'),
-            page('VipCfgManagement'),
-            page('WalletExchangeCfgManagement'),
-            page('GuildManagement', {buttonGroups: GUILD_BUTTON_GROUPS, subPages: [{pageName: 'GuildDetail'}]}),
-            page('PlatformAnchorList'),
-            page('GuildRecycleBinManagement'),
-            page('GuildProfileManagement'),
-            page('GuildProfileAnchorSettlementLogList'),
-            page('AnchorSalaryCfgManagement'),
-            page('LiveRevenueShareCfgManagement'),
-            page('AppPkgManagement'),
-            page('RandomNicknameManagement'),
-            page('CustomerServiceCfgManagement'),
+            group('operation-content', 'menu.OperationContentGroup', [
+                page('BannerManagement'),
+                page('ActivityMessageManagement'),
+            ]),
+            group('operation-recharge', 'menu.OperationRechargeGroup', [
+                page('RechargeCfgManagement'),
+                page('VipCfgManagement'),
+                page('WalletExchangeCfgManagement'),
+            ]),
+            group('operation-guild', 'menu.OperationGuildGroup', [
+                page('GuildManagement', {buttonGroups: GUILD_BUTTON_GROUPS, subPages: [{pageName: 'GuildDetail'}]}),
+                page('GuildCMSUserManagement', {buttonGroups: GUILD_CMS_USER_BUTTON_GROUPS}),
+                page('GuildAnchorDailyLiveManagement', {buttonGroups: GUILD_ANCHOR_DAILY_LIVE_BUTTON_GROUPS}),
+                page('PlatformAnchorList'),
+                page('GuildRecycleBinManagement'),
+                page('GuildProfileManagement', {buttonGroups: GUILD_PROFILE_BUTTON_GROUPS}),
+            ]),
+            group('operation-settlement', 'menu.OperationSettlementGroup', [
+                page('AnchorSalaryCfgManagement'),
+                page('LiveRevenueShareCfgManagement'),
+            ]),
+            group('operation-app', 'menu.OperationAppGroup', [
+                page('AppPkgManagement'),
+                page('RandomNicknameManagement'),
+                page('CustomerServiceCfgManagement'),
+            ]),
         ],
     },
     {
@@ -163,13 +199,21 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
         id: 'log',
         titleKey: 'menu.LogManagement',
         children: [
-            page('LiveRevenueLogList'),
-            page('LiveRecordList'),
-            page('VideoCallLogList'),
-            page('GoldCurrencyLogList'),
-            page('DiamondCurrencyLogList'),
-            page('AnchorIncomeSettlementLogList'),
-            page('GuildIncomeSettlementLogList'),
+            group('log-live', 'menu.LiveLogGroup', [
+                page('LiveRevenueLogList'),
+                page('LiveRecordList'),
+            ]),
+            group('log-call', 'menu.CallLogGroup', [
+                page('VideoCallLogList'),
+            ]),
+            group('log-user', 'menu.UserLogGroup', [
+                page('GoldCurrencyLogList'),
+                page('DiamondCurrencyLogList'),
+            ]),
+            group('log-settlement', 'menu.SettlementLogGroup', [
+                page('AnchorIncomeSettlementLogList'),
+                page('GuildIncomeSettlementLogList'),
+            ]),
         ],
     },
     {
@@ -209,17 +253,25 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
         id: 'config',
         titleKey: 'menu.ConfigManagement',
         children: [
-            page('AppTokenConfig'),
-            page('AccountCfgManagement'),
-            page('ServerRuntimeCfgManagement'),
-            page('SimulatorCpuKeywordManagement'),
-            page('TextModerationCfgManagement'),
-            page('PrivacyPolicyCfgManagement'),
-            page('GooglePlayCfgManagement'),
-            page('UploadResourceCfgManagement'),
-            page('DataSyncCfgManagement'),
-            page('ResourceMonitor'),
-            page('ServerLogExplorer'),
+            group('config-basic', 'menu.ConfigBasicGroup', [
+                page('AppTokenConfig'),
+                page('AccountCfgManagement'),
+                page('ServerRuntimeCfgManagement'),
+            ]),
+            group('config-security', 'menu.ConfigSecurityGroup', [
+                page('SimulatorCpuKeywordManagement'),
+                page('TextModerationCfgManagement'),
+                page('PrivacyPolicyCfgManagement'),
+            ]),
+            group('config-platform', 'menu.ConfigPlatformGroup', [
+                page('GooglePlayCfgManagement'),
+                page('UploadResourceCfgManagement'),
+                page('DataSyncCfgManagement'),
+            ]),
+            group('config-ops', 'menu.ConfigOpsGroup', [
+                page('ResourceMonitor'),
+                page('ServerLogExplorer'),
+            ]),
         ],
     },
     {

@@ -800,6 +800,7 @@ export interface Role {
     id: string
     name: string
     description: string
+    roleType?: number
     status: number
     createdAt: string
     updatedAt: string
@@ -835,6 +836,7 @@ export interface MyGuildProfile {
     id: string
     name: string
     description: string
+    unsettledTotalIncome?: number
     updatedAt?: string
 }
 
@@ -913,6 +915,36 @@ export interface GuildAnchorImportResultState {
 
 export interface MyGuildProfileListRes {
     list: MyGuildProfile[]
+}
+
+export interface MyGuildAnchorListItem {
+    id: string
+    nickname: string
+    avatar: string
+    unsettledTotalIncome?: number
+}
+
+export interface MyGuildAnchorListQuery extends PageQuery {
+    guildId: string | number
+}
+
+export interface MyGuildAnchorDailyEffectiveLiveQuery extends PageQuery {
+    guildId: string | number
+    anchorId: string | number
+    liveDateStart?: string
+    liveDateEnd?: string
+    settled?: number
+}
+
+export interface MyOwnedGuildAnchorDailyEffectiveLiveQuery extends PageQuery {
+    roomId?: string
+    liveDateStart?: string
+    liveDateEnd?: string
+    settled?: number
+}
+
+export interface MyOwnedGuildAnchorListQuery extends PageQuery {
+    key?: string
 }
 
 // 礼物相关类型

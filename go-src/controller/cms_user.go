@@ -28,6 +28,11 @@ func (c *CMSUserController) CreateCMSUser(ctx context.Context, req *cmsuserdto.C
 	return cmsuser.CreateCMSUser(ctx, req)
 }
 
+// CreateGuildCMSUser 工会模块创建外部 CMS 用户
+func (c *CMSUserController) CreateGuildCMSUser(ctx context.Context, req *cmsuserdto.CreateGuildCMSUserReq) (res *cmsuserdto.CreateCMSUserRes, err error) {
+	return cmsuser.CreateGuildCMSUser(ctx, req)
+}
+
 // UpdateCMSUser 更新CMS用户
 func (c *CMSUserController) UpdateCMSUser(ctx context.Context, req *cmsuserdto.UpdateCMSUserReq) (res *cmsuserdto.UpdateCMSUserRes, err error) {
 	return cmsuser.UpdateCMSUser(ctx, req)

@@ -6,9 +6,15 @@ export interface Role {
     id: string
     name: string
     description: string
+    roleType?: number
     status: number
     createdAt: string
     updatedAt: string
+}
+
+export interface RoleQuery extends PageQuery {
+    name?: string
+    roleType?: number
 }
 
 export interface RolePermission {
@@ -21,10 +27,6 @@ export interface Permission {
     module: string
     roleId: number
     apiPath?: string
-}
-
-export interface RoleQuery extends PageQuery {
-    name?: string
 }
 
 
@@ -44,6 +46,7 @@ export const roleApi = {
     createRole: (data: {
         name: string
         description: string
+        roleType: number
         status: number
         permissions: string[]
     }) => {
@@ -55,6 +58,7 @@ export const roleApi = {
         id: string
         name: string
         description: string
+        roleType: number
         status: number
         permissions?: string[]
     }) => {

@@ -173,6 +173,7 @@ func isSupportedExportType(exportType string) bool {
 		cmsexportdto.ExportTypeAnchorDailyEffectiveLive,
 		cmsexportdto.ExportTypeGuildDailyEffectiveLive,
 		cmsexportdto.ExportTypeGuildAnchorDailyEffectiveLive,
+		cmsexportdto.ExportTypeMyGuildAnchorDailyEffectiveLive,
 		cmsexportdto.ExportTypeCurrencyLog:
 		return true
 	default:
@@ -237,6 +238,8 @@ func executeExportJob(ctx context.Context, exportType string, cmsUserId uint64, 
 		return exportGuildDailyEffectiveLiveCSV(ctx, payload, onProgress)
 	case cmsexportdto.ExportTypeGuildAnchorDailyEffectiveLive:
 		return exportGuildAnchorDailyEffectiveLiveCSV(ctx, payload, onProgress)
+	case cmsexportdto.ExportTypeMyGuildAnchorDailyEffectiveLive:
+		return exportMyGuildAnchorDailyEffectiveLiveCSV(ctx, cmsUserId, payload, onProgress)
 	case cmsexportdto.ExportTypeCurrencyLog:
 		return exportCurrencyLogCSV(ctx, payload, onProgress)
 	default:

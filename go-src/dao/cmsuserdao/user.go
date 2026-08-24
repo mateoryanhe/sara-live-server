@@ -95,6 +95,41 @@ func removeCMSLoginUserCacheIfExists(userId uint64) {
 	}
 }
 
+// LoadCMSUserFromDB 根据 ID 从数据库加载 CMS 用户(不走缓存,供写操作使用)
+func LoadCMSUserFromDB(id uint64) *entity.CMSUser {
+	if id == 0 {
+		return nil
+	}
+	var user entity.CMSUser
+	err := g.DB().Model(string(entity.TbCMSUser)).Where("id = ?", id).Scan(&user)
+	if err != nil || user.ID == 0 {
+		return nil
+	}
+	return &user
+}
+
+// RemoveCMSLoginUserMissCache 清除用户名未命中缓存
+func RemoveCMSLoginUserMissCache(name string) {
+	removeCMSLoginUserMissCache(name)
+}
+
+func loadCMSUserFromDB(id uint64) *entity.CMSUser {
+	return LoadCMSUserFromDB(id)
+}
+
+func syncCMSLoginUserCacheFromDB(userId uint64) {
+	if userId == 0 {
+		return
+	}
+	user := loadCMSUserFromDB(userId)
+	if user == nil {
+		removeCMSLoginUserCacheIfExists(userId)
+		return
+	}
+	refreshCMSLoginUserCacheIfExists(user)
+	removeCMSLoginUserMissCache(user.Name)
+}
+
 // GetCMSUserById 根据ID获取CMS用户(走 cmsLoginUserCacheMgr 缓存,key=user.id)
 func GetCMSUserById(id uint64) *entity.CMSUser {
 	if id == 0 || cmsLoginUserCacheMgr == nil {
@@ -146,7 +181,7 @@ func UpdateCMSUser(user *entity.CMSUser) error {
 	if err != nil {
 		return err
 	}
-	refreshCMSLoginUserCacheIfExists(user)
+	syncCMSLoginUserCacheFromDB(user.ID)
 	return nil
 }
 
@@ -181,7 +216,7 @@ func DeleteCMSUser(id uint64) error {
 
 // GetCMSUserList 获取CMS用户列表
 func GetCMSUserList(req *cmsuserdto.CMSUserListReq) (int, []*cmsuserdto.CMSUserListRes) {
-	sql := `select u.id, u.name, u.pwd, u.status, u.admin, u.role_id, u.remark, r.name as role_name, u.created_at, u.updated_at
+	sql := `select u.id, u.name, u.pwd, u.status, u.admin, u.role_id, u.remark, r.name as role_name, IFNULL(r.role_type, 0) as role_type, u.created_at, u.updated_at
             from cms_users u
             left join cms_roles r on u.role_id = r.id
             where 1=1 `
@@ -216,6 +251,15 @@ func GetCMSUserList(req *cmsuserdto.CMSUserListReq) (int, []*cmsuserdto.CMSUserL
 	if req.Admin {
 		sql += ` and u.admin = ?`
 		param = append(param, req.Admin)
+	}
+
+	if req.NonAdmin {
+		sql += ` and u.admin = 0`
+	}
+
+	if req.RoleType > 0 {
+		sql += ` and r.role_type = ?`
+		param = append(param, req.RoleType)
 	}
 
 	sql += ` order by u.created_at desc`

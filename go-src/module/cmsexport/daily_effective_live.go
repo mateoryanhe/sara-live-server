@@ -9,6 +9,7 @@ import (
 	"xr-game-server/dto/cmsexportdto"
 	liveentity "xr-game-server/entity/live"
 	"xr-game-server/errercode"
+	"xr-game-server/module/guild"
 )
 
 func exportAnchorDailyEffectiveLiveCSV(ctx context.Context, payload json.RawMessage, onProgress func(exportedRows, totalRows int)) (*exportResult, error) {
@@ -74,6 +75,42 @@ func exportGuildAnchorDailyEffectiveLiveCSV(ctx context.Context, payload json.Ra
 		total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSListByGuild(&liveroomdao.DailyAnchorEffectiveLiveCMSListByGuildFilter{
 			GuildId:       guildId,
 			RoomId:        parseUint64Filter(req.RoomId),
+			LiveDateStart: req.LiveDateStart,
+			LiveDateEnd:   req.LiveDateEnd,
+			Settled:       req.Settled,
+			PageIndex:     pageIndex,
+			PageSize:      pageSize,
+		})
+		roomIds := collectDailyAnchorRoomIds(rows)
+		nicknameMap := userinfodao.GetNicknameMapByUserIds(roomIds)
+		csvRows := make([][]string, 0, len(rows))
+		for _, row := range rows {
+			csvRows = append(csvRows, guildAnchorDailyEffectiveLiveToCSVRow(row, nicknameMap, req.SettledYesText, req.SettledNoText))
+		}
+		return total, csvRows
+	}, onProgress)
+}
+
+func exportMyGuildAnchorDailyEffectiveLiveCSV(ctx context.Context, cmsUserId uint64, payload json.RawMessage, onProgress func(exportedRows, totalRows int)) (*exportResult, error) {
+	var req cmsexportdto.CMSExportMyGuildAnchorDailyEffectiveLivePayload
+	if err := json.Unmarshal(payload, &req); err != nil {
+		return nil, err
+	}
+	guildIds := guild.CollectOwnedGuildIdsForCMSUser(cmsUserId)
+	if len(guildIds) == 0 {
+		return nil, errercode.CreateCode(errercode.NoPermission)
+	}
+	roomId := parseUint64Filter(req.RoomId)
+	if roomId > 0 {
+		room := liveroomdao.ResolveRoom(roomId)
+		if room == nil || !containsGuildId(guildIds, room.GuildId) {
+			return nil, errercode.CreateCode(errercode.NoPermission)
+		}
+	}
+	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
+		total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSListByGuildIds(&liveroomdao.DailyAnchorEffectiveLiveCMSListByGuildIdsFilter{
+			GuildIds:      guildIds,
+			RoomId:        roomId,
 			LiveDateStart: req.LiveDateStart,
 			LiveDateEnd:   req.LiveDateEnd,
 			Settled:       req.Settled,

@@ -23,8 +23,13 @@
           <el-table-column label="ID" prop="id" width="190"/>
           <el-table-column :label="t('pages.guildProfile.guildName')" min-width="140" prop="name"/>
           <el-table-column :label="t('pages.guildProfile.description')" min-width="180" prop="description" show-overflow-tooltip/>
+          <el-table-column :label="t('pages.guildProfile.unsettledTotalIncome')" align="right" min-width="140">
+            <template #default="{ row }">
+              <span class="money-amount">{{ formatWalletBalance(row.unsettledTotalIncome) }}</span>
+            </template>
+          </el-table-column>
           <el-table-column :label="t('pages.guildProfile.lastUpdated')" prop="updatedAt" width="170"/>
-          <el-table-column fixed="right" :label="t('common.actions')" width="260">
+          <el-table-column fixed="right" :label="t('common.actions')" width="140">
             <template #default="{ row }">
               <el-button
                   v-if="can('viewAnchors')"
@@ -33,14 +38,6 @@
                   @click="handleViewAnchors(row)"
               >
                 {{ t('pages.guildProfile.viewAnchors') }}
-              </el-button>
-              <el-button
-                  v-if="can('viewAnchorSettlementLogs')"
-                  link
-                  type="primary"
-                  @click="handleViewSettlementLogs(row)"
-              >
-                {{ t('pages.guildProfile.viewAnchorSettlementLogs') }}
               </el-button>
             </template>
           </el-table-column>
@@ -59,6 +56,7 @@ import {useRouter} from 'vue-router'
 import {guildApi} from '@/api'
 import type {MyGuildProfile} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
+import {formatWalletBalance} from '@/utils/number-format'
 
 const {t} = useI18n()
 const router = useRouter()
@@ -93,14 +91,6 @@ const handleViewAnchors = (row: MyGuildProfile) => {
   })
 }
 
-const handleViewSettlementLogs = (row: MyGuildProfile) => {
-  const id = row?.id != null ? String(row.id) : ''
-  router.push({
-    path: '/operation/guild/guild-anchor-income-settlement-log-list',
-    query: id ? {guildId: id} : {},
-  })
-}
-
 onMounted(() => {
   fetchList()
 })
@@ -122,5 +112,9 @@ onMounted(() => {
 
 .content {
   margin-top: 4px;
+}
+
+.money-amount {
+  font-variant-numeric: tabular-nums;
 }
 </style>

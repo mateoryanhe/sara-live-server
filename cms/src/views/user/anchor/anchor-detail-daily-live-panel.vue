@@ -33,43 +33,43 @@
     </div>
 
     <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width:100%">
-      <el-table-column :label="t('pages.anchorList.dailyRecordId')" min-width="180" prop="id"/>
+      <el-table-column v-if="!simpleColumns" :label="t('pages.anchorList.dailyRecordId')" min-width="180" prop="id"/>
       <el-table-column :label="t('pages.anchorList.dailyLiveDate')" min-width="120" prop="liveDate"/>
       <el-table-column :label="t('pages.anchorList.dailyLiveDuration')" min-width="150">
         <template #default="{ row }">{{ formatLiveDurationMinutes(row.liveDuration, t) }}</template>
       </el-table-column>
-      <el-table-column :label="t('pages.anchorList.dailyReportedLiveDuration')" min-width="150">
+      <el-table-column v-if="!simpleColumns" :label="t('pages.anchorList.dailyReportedLiveDuration')" min-width="150">
         <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
       </el-table-column>
       <el-table-column :label="t('pages.anchorList.liveIncome')" align="right" min-width="120">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
       </el-table-column>
-      <el-table-column :label="t('pages.anchorList.giftIncome')" align="right" min-width="120">
+      <el-table-column v-if="!simpleColumns" :label="t('pages.anchorList.giftIncome')" align="right" min-width="120">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGiftIncome) }}</span></template>
       </el-table-column>
-      <el-table-column :label="t('pages.anchorList.paidDanmakuIncome')" align="right" min-width="130">
+      <el-table-column v-if="!simpleColumns" :label="t('pages.anchorList.paidDanmakuIncome')" align="right" min-width="130">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
       </el-table-column>
-      <el-table-column :label="t('pages.anchorList.privateRoomTicketIncome')" align="right" min-width="140">
+      <el-table-column v-if="!simpleColumns" :label="t('pages.anchorList.privateRoomTicketIncome')" align="right" min-width="140">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomTicketIncome) }}</span></template>
       </el-table-column>
-      <el-table-column :label="t('pages.anchorList.privateRoomWatchIncome')" align="right" min-width="140">
+      <el-table-column v-if="!simpleColumns" :label="t('pages.anchorList.privateRoomWatchIncome')" align="right" min-width="140">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomWatchIncome) }}</span></template>
       </el-table-column>
-      <el-table-column :label="t('pages.anchorList.videoCallIncome')" align="right" min-width="130">
+      <el-table-column v-if="!simpleColumns" :label="t('pages.anchorList.videoCallIncome')" align="right" min-width="130">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
       </el-table-column>
-      <el-table-column :label="t('pages.anchorList.dailySettled')" min-width="100">
+      <el-table-column v-if="!simpleColumns" :label="t('pages.anchorList.dailySettled')" min-width="100">
         <template #default="{ row }">
           <el-tag :type="row.settled ? 'success' : 'warning'">
             {{ row.settled ? t('pages.anchorList.dailySettledYes') : t('pages.anchorList.dailySettledNo') }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column :label="t('common.createdAt')" min-width="170">
+      <el-table-column v-if="!simpleColumns" :label="t('common.createdAt')" min-width="170">
         <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
       </el-table-column>
-      <el-table-column :label="t('pages.anchorList.roomUpdatedAt')" min-width="170">
+      <el-table-column v-if="!simpleColumns" :label="t('pages.anchorList.roomUpdatedAt')" min-width="170">
         <template #default="{ row }">{{ formatDate(row.updatedAt) }}</template>
       </el-table-column>
     </el-table>
@@ -94,7 +94,7 @@
 import {computed, reactive, ref, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage} from 'element-plus'
-import {accountApi} from '@/api'
+import {accountApi, guildApi} from '@/api'
 import type {AnchorDailyEffectiveLiveItem} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
 import {buildCsvHeaders, buildDailyEffectiveLiveExportLabels, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
@@ -105,11 +105,15 @@ import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 
 const props = defineProps<{
   anchorId: string
-  active: boolean
+  active?: boolean
+  guildId?: string
+  permissionPage?: string
+  simpleColumns?: boolean
 }>()
 
 const {t} = useI18n()
-const {can} = usePagePermission('AnchorDetail')
+const resolvedPermissionPage = props.permissionPage ?? (props.guildId ? 'GuildProfileManagement' : 'AnchorDetail')
+const {can} = usePagePermission(resolvedPermissionPage)
 const canExport = computed(() => can('exportDailyEffectiveLive'))
 const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
@@ -128,11 +132,21 @@ const pagination = reactive({
 
 const buildFilterParams = () => {
   const [liveDateStart, liveDateEnd] = searchForm.dateRange || []
-  return {
-    anchorId: props.anchorId,
+  const base = {
     liveDateStart: liveDateStart || undefined,
     liveDateEnd: liveDateEnd || undefined,
     settled: 0,
+  }
+  if (props.guildId) {
+    return {
+      ...base,
+      guildId: props.guildId,
+      anchorId: props.anchorId,
+    }
+  }
+  return {
+    ...base,
+    anchorId: props.anchorId,
   }
 }
 
@@ -150,7 +164,9 @@ const fetchList = async () => {
   }
   loading.value = true
   try {
-    const response = await accountApi.getAnchorDailyEffectiveLiveList(buildQueryParams())
+    const response = props.guildId
+        ? await guildApi.getMyGuildAnchorDailyEffectiveLiveList(buildQueryParams())
+        : await accountApi.getAnchorDailyEffectiveLiveList(buildQueryParams())
     tableData.value = response.data || []
     pagination.total = response.total || 0
     loaded.value = true
@@ -231,7 +247,7 @@ watch(
 watch(
   () => props.active,
   (active) => {
-    if (active && !loaded.value && props.anchorId) {
+    if (active !== false && !loaded.value && props.anchorId) {
       fetchList()
     }
   },

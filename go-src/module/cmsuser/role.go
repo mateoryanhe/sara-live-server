@@ -27,9 +27,15 @@ func CreateRole(ctx context.Context, req *cmsroledto.CreateRoleReq) (res *cmsrol
 		return nil, errors.New("角色名称已存在")
 	}
 
+	roleType, err := normalizeRoleType(req.RoleType)
+	if err != nil {
+		return nil, err
+	}
+
 	role := entity.CMSRole{
 		Name:        req.Name,
 		Description: req.Description,
+		RoleType:    roleType,
 		Status:      req.Status,
 	}
 
@@ -56,8 +62,14 @@ func UpdateRole(ctx context.Context, req *cmsroledto.UpdateRoleReq) (res *cmsrol
 		return nil, errors.New("角色名称已存在")
 	}
 
+	roleType, err := normalizeRoleType(req.RoleType)
+	if err != nil {
+		return nil, err
+	}
+
 	role.Name = req.Name
 	role.Description = req.Description
+	role.RoleType = roleType
 	role.Status = req.Status
 
 	err = cmsuserdao.UpdateRole(role)
@@ -92,4 +104,14 @@ func DeleteRole(ctx context.Context, req *cmsroledto.DeleteRoleReq) (res *cmsrol
 	return &cmsroledto.DeleteRoleRes{
 		Success: true,
 	}, nil
+}
+
+func normalizeRoleType(roleType uint8) (uint8, error) {
+	if roleType == 0 {
+		return entity.CMSRoleTypeInternal, nil
+	}
+	if roleType != entity.CMSRoleTypeInternal && roleType != entity.CMSRoleTypeExternal {
+		return 0, errors.New("角色类型无效")
+	}
+	return roleType, nil
 }

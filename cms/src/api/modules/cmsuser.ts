@@ -21,6 +21,8 @@ export interface CMSUserQuery extends PageQuery {
     roleId?: string
     status?: number
     admin?: boolean
+    roleType?: number
+    nonAdmin?: boolean
 }
 
 // CMS用户管理API
@@ -40,6 +42,16 @@ export const cmsUserApi = {
         remark?: string
     }) => {
         return request.post<boolean>('/cmsuser/createCMSUser', data)
+    },
+
+    createGuildCMSUser: (data: {
+        name: string
+        pwd: string
+        status: number
+        roleId: string
+        remark?: string
+    }) => {
+        return request.post<{ id: string }>('/cmsuser/createGuildCMSUser', data)
     },
 
     // 更新CMS用户
