@@ -7,13 +7,14 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/constants/currency"
 	"xr-game-server/constants/gameplatform"
 	"xr-game-server/core/event"
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dao/gamebetdao"
-	"xr-game-server/dao/gamewindao"
+	"xr-game-server/dao/gamevendordao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/gameplatformdto"
 	"xr-game-server/entity/game"
@@ -75,7 +76,9 @@ func HandleVendorTransfer(ctx context.Context, req *gameplatformdto.VendorTransf
 	}
 
 	transactionID := strings.TrimSpace(req.TransactionID)
-	if existsVendorTransferTransaction(transactionID) {
+	gmlock.Lock(vendorTransferLockKey(transactionID))
+	defer gmlock.Unlock(vendorTransferLockKey(transactionID))
+	if gamevendordao.IsVendorTransferProcessed(transactionID) {
 		balance := userinfodao.GetUserInfoByUserId(userID).Gold
 		resp := vendorTransferSuccess(balance, resolveVendorTransferUpdatedTime(req))
 		vendorDetailLog().Infof(ctx, "vendor transfer duplicate transaction_id=%s balance=%v", transactionID, balance)
@@ -100,6 +103,8 @@ func HandleVendorTransfer(ctx context.Context, req *gameplatformdto.VendorTransf
 	if req.WinAmount > 0 {
 		recordVendorTransferWinLog(userID, gameID, nameEn, cover, platformType, transactionID, req.WinAmount)
 	}
+
+	gamevendordao.MarkVendorTransferProcessed(transactionID)
 
 	resp := vendorTransferSuccess(balance, resolveVendorTransferUpdatedTime(req))
 	vendorDetailLog().Infof(ctx, "vendor transfer success transaction_id=%s user_id=%d balance=%v bet_amount=%v win_amount=%v",
@@ -259,8 +264,8 @@ func recordVendorTransferWinLog(userID uint64, gameCode, nameEn, cover string, p
 	)
 }
 
-func existsVendorTransferTransaction(transactionID string) bool {
-	return gamebetdao.ExistsGameBetLogByOrderId(transactionID) || gamewindao.ExistsGameWinLogByOrderId(transactionID)
+func vendorTransferLockKey(transactionID string) string {
+	return "vendor_transfer:" + strings.TrimSpace(transactionID)
 }
 
 func resolveVendorTransferUpdatedTime(req *gameplatformdto.VendorTransferReq) int64 {

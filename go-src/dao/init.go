@@ -5,6 +5,7 @@ import (
 	"xr-game-server/dao/calldao"
 	"xr-game-server/dao/cmsuserdao"
 	"xr-game-server/dao/gamebetdao"
+	"xr-game-server/dao/gamevendordao"
 	"xr-game-server/dao/guilddao"
 	"xr-game-server/dao/livefollowdao"
 	"xr-game-server/dao/liveroomdao"
@@ -23,6 +24,7 @@ func Init() {
 	userlogindevicedao.InitUserLoginDeviceDao()
 	guilddao.InitGuildDao()
 	gamebetdao.Init()
+	gamevendordao.Init()
 	liveroomdao.Init()
 	livefollowdao.InitLiveFollowDao()
 	shortvideodao.Init()
