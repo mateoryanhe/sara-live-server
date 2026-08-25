@@ -17,7 +17,7 @@ type CreateLiveRoomReq struct {
 	GameCodes         []string          `json:"gameCodes" p:"gameCodes" dc:"推荐游戏编码列表(仅游戏直播间category=2时有效)"`
 	Ticket            float64           `json:"ticket" dc:"门票价格(钻石)"`
 	Billing           float64           `json:"billing" dc:"计费价格(每分钟钻石)"`
-	PrivateInviteType uint8             `json:"privateInviteType" v:"in:0,1,2,3#私密邀请类型不合法" dc:"私密邀请类型(1=接受所有人,2=仅VIP,3=拒绝所有人,0或不传时category=1默认3其他默认1)"`
+	PrivateInviteType uint8             `json:"privateInviteType" v:"in:0,1,3#私密邀请类型不合法" dc:"私密邀请类型(1=接受所有人,3=拒绝所有人,0或不传时category=1默认3其他默认1)"`
 }
 
 type CreateLiveRoomRes struct {
@@ -409,8 +409,8 @@ type GetLiveRoomRes struct {
 	TagName                     string  `json:"tagName" dc:"直播间标签名称"`
 	Ticket                      float64 `json:"ticket" dc:"门票价格(钻石)"`
 	Billing                     float64 `json:"billing" dc:"计费价格(每分钟钻石)"`
-	PrivateInviteType           uint8   `json:"privateInviteType" dc:"私密邀请类型(1=接受所有人,2=仅VIP,3=拒绝所有人)"`
-	AllowCallIcon               bool    `json:"allowCallIcon" dc:"是否允许显示电话图标按钮(仅category=1时按私密邀请类型判断)"`
+	PrivateInviteType           uint8   `json:"privateInviteType" dc:"私密邀请类型(1=接受所有人,3=拒绝所有人)"`
+	AllowCallIcon               bool    `json:"allowCallIcon" dc:"是否允许显示电话图标按钮(普通主播不显示;接受所有人且累计充值>=10USD时为true)"`
 	CreateAt                    int64   `json:"createAt" dc:"创建时间(秒)"`
 	OnlineCount                 int     `json:"onlineCount" dc:"在线观众人数(不含主播)"`
 	FreeTime                    uint64  `json:"freeTime" dc:"私密房免费时间"`

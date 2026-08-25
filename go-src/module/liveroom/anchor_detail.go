@@ -51,12 +51,12 @@ func buildAnchorLiveRoomDetail(room *entity.LiveRoom) *accountdto.AnchorLiveRoom
 	}
 	if cfg := liveroomdao.GetLiveRoomCfgFromCache(room.ID); cfg != nil {
 		item.Category = cfg.Category
-		item.PrivateInviteType = cfg.PrivateInviteType
+		item.PrivateInviteType = entity.NormalizePrivateInviteType(cfg.PrivateInviteType, cfg.Category)
 		item.Ticket = cfg.Ticket
 		item.Billing = cfg.Billing
 	} else if cfg := liveroomdao.GetLiveRoomCfgFromDB(room.ID); cfg != nil {
 		item.Category = cfg.Category
-		item.PrivateInviteType = cfg.PrivateInviteType
+		item.PrivateInviteType = entity.NormalizePrivateInviteType(cfg.PrivateInviteType, cfg.Category)
 		item.Ticket = cfg.Ticket
 		item.Billing = cfg.Billing
 	}

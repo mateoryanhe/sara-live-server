@@ -78,7 +78,7 @@
         <el-table-column :label="t('common.phone')" min-width="130" prop="phone">
           <template #default="{ row }">{{ row.phone || '-' }}</template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.guildId')" prop="guildId" width="120">
+        <el-table-column :label="t('pages.anchorList.guildName')" min-width="140" prop="guildName" show-overflow-tooltip>
           <template #default="{ row }">
             <el-button
                 v-if="hasGuild(row) && canViewGuildDetail"
@@ -86,9 +86,9 @@
                 type="primary"
                 @click="openGuildDetail(row.guildId)"
             >
-              {{ row.guildId }}
+              {{ row.guildName || '-' }}
             </el-button>
-            <span v-else>{{ row.guildId || '-' }}</span>
+            <span v-else>{{ row.guildName || '-' }}</span>
           </template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.anchorType')" width="110">
@@ -441,7 +441,6 @@ const LIVE_ROOM_CATEGORY_HOT = 1
 const LIVE_ROOM_CATEGORY_GAME = 2
 const LIVE_ROOM_CATEGORY_PRIVATE = 3
 const LIVE_ROOM_PRIVATE_INVITE_ALL = 1
-const LIVE_ROOM_PRIVATE_INVITE_VIP = 2
 const LIVE_ROOM_PRIVATE_INVITE_REJECT = 3
 const USER_TYPE_ANCHOR = 1
 const USER_TYPE_SENIOR_ANCHOR = 7
@@ -461,14 +460,12 @@ const anchorTypeTagType = (userType?: number) => {
 }
 
 const privateInviteLabel = (type?: number) => {
-  if (type === LIVE_ROOM_PRIVATE_INVITE_VIP) return t('pages.anchorList.privateInviteVipOnly')
   if (type === LIVE_ROOM_PRIVATE_INVITE_REJECT) return t('pages.anchorList.privateInviteRejectAll')
   if (type === LIVE_ROOM_PRIVATE_INVITE_ALL) return t('pages.anchorList.privateInviteAcceptAll')
   return '-'
 }
 
 const privateInviteTagType = (type?: number) => {
-  if (type === LIVE_ROOM_PRIVATE_INVITE_VIP) return 'warning'
   if (type === LIVE_ROOM_PRIVATE_INVITE_REJECT) return 'danger'
   if (type === LIVE_ROOM_PRIVATE_INVITE_ALL) return 'success'
   return 'info'

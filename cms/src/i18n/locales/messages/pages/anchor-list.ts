@@ -3,6 +3,7 @@ import {definePageMessages} from './_define'
 const zh = {
   keywordPlaceholder: '用户ID/昵称/手机号/分享码',
   guildId: '工会ID',
+  guildName: '工会名称',
   anchorType: '主播类型',
   anchorTypeNormal: '普通主播',
   anchorTypeSenior: '高级主播',
@@ -119,6 +120,7 @@ const zh = {
 const en: Record<keyof typeof zh, string> = {
   keywordPlaceholder: 'User ID / nickname / phone / share code',
   guildId: 'Guild ID',
+  guildName: 'Guild Name',
   anchorType: 'Anchor Type',
   anchorTypeNormal: 'Normal Anchor',
   anchorTypeSenior: 'Senior Anchor',
@@ -235,6 +237,7 @@ const en: Record<keyof typeof zh, string> = {
 const es: Record<keyof typeof zh, string> = {
   keywordPlaceholder: 'ID / apodo / teléfono / código compartir',
   guildId: 'ID de gremio',
+  guildName: 'Nombre del gremio',
   anchorType: 'Tipo de ancla',
   anchorTypeNormal: 'Ancla normal',
   anchorTypeSenior: 'Ancla senior',
@@ -351,6 +354,7 @@ const es: Record<keyof typeof zh, string> = {
 const pt: Record<keyof typeof zh, string> = {
   keywordPlaceholder: 'ID / apelido / telefone / código',
   guildId: 'ID da guilda',
+  guildName: 'Nome da guilda',
   anchorType: 'Tipo de âncora',
   anchorTypeNormal: 'Âncora normal',
   anchorTypeSenior: 'Âncora sênior',
@@ -467,6 +471,7 @@ const pt: Record<keyof typeof zh, string> = {
 const hi: Record<keyof typeof zh, string> = {
   keywordPlaceholder: 'उपयोगकर्ता ID / उपनाम / फ़ोन / शेयर कोड',
   guildId: 'गिल्ड ID',
+  guildName: 'गिल्ड नाम',
   anchorType: 'एंकर प्रकार',
   anchorTypeNormal: 'सामान्य एंकर',
   anchorTypeSenior: 'सीनियर एंकर',
@@ -583,6 +588,7 @@ const hi: Record<keyof typeof zh, string> = {
 const id: Record<keyof typeof zh, string> = {
   keywordPlaceholder: 'ID / nama / telepon / kode bagikan',
   guildId: 'ID guild',
+  guildName: 'Nama guild',
   anchorType: 'Tipe anchor',
   anchorTypeNormal: 'Anchor biasa',
   anchorTypeSenior: 'Anchor senior',

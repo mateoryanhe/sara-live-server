@@ -242,7 +242,7 @@ func fillAnchorRoomFields(item *accountdto.AnchorListItem, room *liveentity.Live
 	item.RoomId = room.ID
 	if cfg := liveroomdao.GetLiveRoomCfgFromCache(room.ID); cfg != nil {
 		item.Category = cfg.Category
-		item.PrivateInviteType = cfg.PrivateInviteType
+		item.PrivateInviteType = liveentity.NormalizePrivateInviteType(cfg.PrivateInviteType, cfg.Category)
 		item.Ticket = cfg.Ticket
 		item.Billing = cfg.Billing
 	}

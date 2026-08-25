@@ -12,6 +12,7 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
 	liveentity "xr-game-server/entity/live"
+	userentity "xr-game-server/entity/user"
 	"xr-game-server/errercode"
 	"xr-game-server/module/aliyunmoderation"
 	"xr-game-server/module/upload"
@@ -229,27 +230,16 @@ func CanInitiateLiveRoomCall(room *liveentity.LiveRoom, cfg *liveentity.LiveRoom
 }
 
 func allowShowCallIcon(room *liveentity.LiveRoom, cfg *liveentity.LiveRoomCfg, userId uint64) bool {
-	if room == nil || cfg == nil || cfg.Category != liveentity.LiveRoomCategoryHot {
+	if room == nil || cfg == nil || userId == 0 || userId == room.ID {
 		return false
 	}
-	if userId == 0 || userId == room.ID {
+	if anchor := userinfodao.GetUserInfoByUserId(room.ID); anchor == nil || anchor.UserType == userentity.UserTypeAnchor {
 		return false
 	}
-
-	inviteType := cfg.PrivateInviteType
-	if inviteType == 0 {
-		inviteType = liveentity.DefaultPrivateInviteType(cfg.Category)
-	}
-	switch inviteType {
-	case liveentity.LiveRoomPrivateInviteAll:
-		return true
-	case liveentity.LiveRoomPrivateInviteVip:
-		return ViewerCanUseLiveRoomCall(userId)
-	case liveentity.LiveRoomPrivateInviteReject:
+	if liveentity.NormalizePrivateInviteType(cfg.PrivateInviteType, cfg.Category) == liveentity.LiveRoomPrivateInviteReject {
 		return false
-	default:
-		return true
 	}
+	return ViewerCanUseLiveRoomCall(userId)
 }
 
 // GetRoom 查询直播间(公开接口,任意登录用户可调用)
@@ -281,7 +271,7 @@ func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto
 		TagName:           getRoomTagName(cfg.TagId),
 		Ticket:            cfg.Ticket,
 		Billing:           cfg.Billing,
-		PrivateInviteType: cfg.PrivateInviteType,
+		PrivateInviteType: liveentity.NormalizePrivateInviteType(cfg.PrivateInviteType, cfg.Category),
 		AllowCallIcon:     allowShowCallIcon(room, cfg, userId),
 		CreateAt:          room.CreatedAt.Unix(),
 		OnlineCount:       countAudienceInRoom(room.ID),

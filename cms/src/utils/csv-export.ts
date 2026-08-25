@@ -3,11 +3,28 @@ export interface CsvColumn<T> {
   value: (row: T) => string | number | boolean | null | undefined
 }
 
+/** Excel 打开 CSV 时超长数字会丢精度; 超 2^53-1 的 ID 加 \\t 前缀强制按文本显示 */
+export function formatCsvSnowflakeId(value: string | number | null | undefined): string {
+  if (value === null || value === undefined || value === '') {
+    return ''
+  }
+  const text = String(value).trim()
+  if (!/^\d+$/.test(text)) {
+    return text
+  }
+  if (text.length > 15 || BigInt(text) > BigInt(Number.MAX_SAFE_INTEGER)) {
+    return `\t${text}`
+  }
+  return text
+}
+
 function escapeCsvCell(value: unknown): string {
   if (value === null || value === undefined) {
     return ''
   }
-  const text = String(value)
+  const text = typeof value === 'string' || typeof value === 'number'
+    ? formatCsvSnowflakeId(value)
+    : String(value)
   if (/[",\r\n]/.test(text)) {
     return `"${text.replace(/"/g, '""')}"`
   }

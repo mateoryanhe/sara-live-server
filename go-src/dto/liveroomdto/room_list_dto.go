@@ -26,7 +26,7 @@ type LiveRoomListItem struct {
 	TagName            string  `json:"tagName" dc:"直播间标签名称"`
 	Ticket             float64 `json:"ticket" dc:"门票价格(钻石)"`
 	Billing            float64 `json:"billing" dc:"计费价格(每分钟钻石)"`
-	AllowCallIcon      bool    `json:"allowCallIcon" dc:"是否允许显示电话图标按钮(仅category=1时按私密邀请类型判断)"`
+	AllowCallIcon      bool    `json:"allowCallIcon" dc:"是否允许显示电话图标按钮(普通主播不显示;接受所有人且累计充值>=10USD时为true)"`
 	CreateAt           int64   `json:"createAt" dc:"创建时间(秒)"`
 	AnchorNickname     string  `json:"anchorNickname" dc:"主播昵称"`
 	AnchorAvatar       string  `json:"anchorAvatar" dc:"主播头像URL(已拼资源域名)"`

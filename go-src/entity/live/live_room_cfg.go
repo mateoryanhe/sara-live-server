@@ -27,7 +27,7 @@ const (
 // LiveRoomCfg 直播间配置(主键=房间ID=主播ID)
 type LiveRoomCfg struct {
 	migrate.OneModel
-	PrivateInviteType        uint8      `gorm:"default:1;comment:私密邀请类型(1=接受所有人,2=仅VIP,3=拒绝所有人)" json:"privateInviteType"`
+	PrivateInviteType        uint8      `gorm:"default:1;comment:私密邀请类型(1=接受所有人,3=拒绝所有人)" json:"privateInviteType"`
 	Category                 uint8      `gorm:"default:1;comment:分类(1=hot,2=game,3=私密)" json:"category"`
 	TagId                    uint64     `gorm:"default:0;comment:直播间标签ID" json:"tagId"`
 	Ticket                   float64    `gorm:"type:decimal(10,4);default:0;comment:门票价格(钻石)" json:"ticket"`
@@ -59,9 +59,7 @@ func (r *LiveRoomCfg) touchUpdatedAt() {
 }
 
 func (r *LiveRoomCfg) SetPrivateInviteType(v uint8) {
-	if v != LiveRoomPrivateInviteAll && v != LiveRoomPrivateInviteVip && v != LiveRoomPrivateInviteReject {
-		v = LiveRoomPrivateInviteAll
-	}
+	v = NormalizePrivateInviteType(v, r.Category)
 	r.PrivateInviteType = v
 	r.touchUpdatedAt()
 	syndb.AddData(TbLiveRoomCfg, LiveRoomCfgPrivateInviteType, &syndb.ColData{IdVal: r.ID, ColVal: v})

@@ -358,7 +358,6 @@ const LIVE_ROOM_CATEGORY_HOT = 1
 const LIVE_ROOM_CATEGORY_GAME = 2
 const LIVE_ROOM_CATEGORY_PRIVATE = 3
 const LIVE_ROOM_PRIVATE_INVITE_ALL = 1
-const LIVE_ROOM_PRIVATE_INVITE_VIP = 2
 const LIVE_ROOM_PRIVATE_INVITE_REJECT = 3
 
 const isPrivateRoom = (category?: number) => category === LIVE_ROOM_CATEGORY_PRIVATE
@@ -376,14 +375,12 @@ const anchorTypeTagType = (userType?: number) => {
 }
 
 const privateInviteLabel = (type?: number) => {
-  if (type === LIVE_ROOM_PRIVATE_INVITE_VIP) return t('pages.anchorList.privateInviteVipOnly')
   if (type === LIVE_ROOM_PRIVATE_INVITE_REJECT) return t('pages.anchorList.privateInviteRejectAll')
   if (type === LIVE_ROOM_PRIVATE_INVITE_ALL) return t('pages.anchorList.privateInviteAcceptAll')
   return '-'
 }
 
 const privateInviteTagType = (type?: number) => {
-  if (type === LIVE_ROOM_PRIVATE_INVITE_VIP) return 'warning'
   if (type === LIVE_ROOM_PRIVATE_INVITE_REJECT) return 'danger'
   if (type === LIVE_ROOM_PRIVATE_INVITE_ALL) return 'success'
   return 'info'
