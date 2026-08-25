@@ -3,6 +3,8 @@ import {
     getPageFromPermissionKey,
     isButtonPermissionKey,
     buttonPermissionKey,
+    pageHasGranularButtons,
+    getPageButtons,
 } from '@/config/page-buttons'
 
 // 存储用户权限信息
@@ -35,19 +37,32 @@ export const hasFullPagePermission = (pageName: string): boolean => {
     return permissionModuleSet.has(pageName)
 }
 
+/** module 是否为该页面在 page-buttons 中已定义的按钮权限 */
+function isKnownPageButton(pageName: string, module: string): boolean {
+    if (!isButtonPermissionKey(module)) {
+        return false
+    }
+    const page = getPageFromPermissionKey(module)
+    if (page !== pageName) {
+        return false
+    }
+    const action = module.slice(page.length + 1)
+    return getPageButtons(pageName).some(btn => btn.key === action)
+}
+
 /**
  * 检查用户是否有访问指定页面的权限
- * 拥有整页权限，或拥有该页任意按钮权限，均可进入页面
+ * 拥有整页权限，或拥有该页已定义按钮权限之一，均可进入页面
  */
 export const hasPermission = (pageName: string): boolean => {
     if (isAdmin) {
         return true
     }
-    if (permissionModuleSet.has(pageName)) {
+    if (!pageHasGranularButtons(pageName) && permissionModuleSet.has(pageName)) {
         return true
     }
     for (const module of permissionModuleSet) {
-        if (isButtonPermissionKey(module) && getPageFromPermissionKey(module) === pageName) {
+        if (isKnownPageButton(pageName, module)) {
             return true
         }
     }
@@ -63,10 +78,13 @@ export const hasButtonPermission = (pageName: string, action: string): boolean =
     if (isAdmin) {
         return true
     }
-    if (permissionModuleSet.has(pageName)) {
+    if (permissionModuleSet.has(buttonPermissionKey(pageName, action))) {
         return true
     }
-    return permissionModuleSet.has(buttonPermissionKey(pageName, action))
+    if (!pageHasGranularButtons(pageName) && permissionModuleSet.has(pageName)) {
+        return true
+    }
+    return false
 }
 
 /**

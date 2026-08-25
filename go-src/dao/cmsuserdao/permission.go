@@ -98,6 +98,8 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/cmsExport/submitJob"}
 	case "/cmsuser/createGuildCMSUser":
 		return []string{"/role/roleList"}
+	case "/role/roleList":
+		return []string{"/cmsuser/createGuildCMSUser"}
 	case "/guild/cmsMyGuildAnchorDailyEffectiveLiveList":
 		return []string{"/guild/getMyGuildProfile", "/guild/getMyOwnedGuildAnchorList"}
 	case "/guild/getMyOwnedGuildAnchorList":
@@ -116,6 +118,10 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/liveRevenueLog/cmsLiveRevenueLogList"}
 	case "/account/getAnchorDetail":
 		return []string{"/liveRecord/cmsLiveRecordList", "/liveRevenueLog/cmsLiveRevenueLogList"}
+	case "/shortVideo/shortVideoStorageStat":
+		return []string{"/shortVideo/shortVideoList"}
+	case "/shortVideo/onShelfShortVideo", "/shortVideo/offShelfShortVideo":
+		return []string{"/shortVideo/updateShortVideo"}
 	default:
 		return nil
 	}

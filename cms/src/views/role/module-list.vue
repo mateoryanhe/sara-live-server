@@ -96,6 +96,7 @@ import {useRoute} from 'vue-router'
 import {roleApi} from '@/api/modules/role'
 import {buildPermissionModuleTree, type PermissionModuleNode} from '@/config/permission-menu-tree'
 import {getPermissionApiPath} from '@/config/permission-api-paths'
+import {isButtonPermissionKey, pageHasGranularButtons} from '@/config/page-buttons'
 
 interface NavFrame {
   title: string
@@ -200,6 +201,10 @@ const collectPermissionIds = (node: PermissionModuleNode): string[] => {
 
 const countPermissionLeaves = (node: PermissionModuleNode): number => collectPermissionIds(node).length
 
+/** 库中可能存页面级 module（如 LiveRoomRecycleBinManagement），需与按钮子权限一并参与勾选判断 */
+const hasPageLevelPermission = (node: PermissionModuleNode): boolean =>
+    isPermissionId(node.id) && checkedSet.value.has(node.id)
+
 const isNodeChecked = (node: PermissionModuleNode): boolean => {
   if (!hasChildren(node)) {
     return checkedSet.value.has(node.id)
@@ -214,19 +219,29 @@ const isNodeIndeterminate = (node: PermissionModuleNode): boolean => {
   }
   const ids = collectPermissionIds(node)
   const checkedCount = ids.filter(id => checkedSet.value.has(id)).length
-  return checkedCount > 0 && checkedCount < ids.length
+  if (checkedCount > 0 && checkedCount < ids.length) {
+    return true
+  }
+  return hasPageLevelPermission(node) && checkedCount < ids.length
 }
+
+/** 有按钮子权限的页面只持久化按钮级 module，去掉遗留的页面级 module */
+const normalizeModulesForSave = (modules: string[]): string[] =>
+    modules.filter(moduleId => isButtonPermissionKey(moduleId) || !pageHasGranularButtons(moduleId))
 
 const toggleNode = (node: PermissionModuleNode, checked: boolean) => {
   const next = new Set(checkedSet.value)
-  const ids = hasChildren(node) ? collectPermissionIds(node) : [node.id]
-  ids.filter(isPermissionId).forEach(id => {
-    if (checked) {
-      next.add(id)
-    } else {
-      next.delete(id)
+  const leafIds = hasChildren(node)
+      ? collectPermissionIds(node).filter(isPermissionId)
+      : [node.id].filter(isPermissionId)
+  if (checked) {
+    leafIds.forEach(id => next.add(id))
+  } else {
+    if (isPermissionId(node.id)) {
+      next.delete(node.id)
     }
-  })
+    leafIds.forEach(id => next.delete(id))
+  }
   checkedSet.value = next
 }
 
@@ -260,7 +275,7 @@ const handleHeaderBack = () => {
 
 const handleSave = async () => {
   try {
-    const selectedModules = [...checkedSet.value]
+    const selectedModules = normalizeModulesForSave([...checkedSet.value])
 
     const permissionData = selectedModules.map(moduleId => ({
       id: 0,

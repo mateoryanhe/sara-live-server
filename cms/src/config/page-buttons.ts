@@ -288,6 +288,11 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     ],
 }
 
+/** 页面是否配置了多个按钮（需按按钮粒度授权，页面级 module 不再代表全部按钮） */
+export function pageHasGranularButtons(pageName: string, metaButtons?: PageButtonDef[]): boolean {
+    return getPageButtons(pageName, metaButtons).length > 1
+}
+
 export function getPageButtons(pageName: string, metaButtons?: PageButtonDef[]): PageButtonDef[] {
     if (metaButtons?.length) {
         return metaButtons

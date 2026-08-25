@@ -286,6 +286,9 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'ShortVideoManagement:create': '/shortVideo/createShortVideo',
     'ShortVideoManagement:edit': '/shortVideo/updateShortVideo',
     'ShortVideoManagement:delete': '/shortVideo/deleteShortVideo',
+    'ShortVideoManagement:onShelf': '/shortVideo/onShelfShortVideo',
+    'ShortVideoManagement:offShelf': '/shortVideo/offShelfShortVideo',
+    'ShortVideoManagement:viewStorageStat': '/shortVideo/shortVideoStorageStat',
 
     ShortVideoCfgManagement: '/shortVideo/getShortVideoCfg',
     'ShortVideoCfgManagement:view': '/shortVideo/getShortVideoCfg',
