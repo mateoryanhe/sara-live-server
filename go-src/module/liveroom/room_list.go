@@ -58,7 +58,7 @@ func flushRoomList(ctx context.Context) {
 
 	onlineCounts := make(map[uint64]int, len(rooms))
 	for _, room := range rooms {
-		onlineCounts[room.ID] = countAudienceInRoom(room.ID)
+		onlineCounts[room.ID] = appAudienceOnlineCount(room.ID, room.LiveRecordId)
 	}
 
 	sort.Slice(rooms, func(i, j int) bool {
@@ -172,7 +172,7 @@ func toLiveRoomListItem(room *liveentity.LiveRoom, userId uint64) *liveroomdto.L
 		item.AnchorAvatar = upload.ResolveAvatarUrlForUser(room.ID, u.Avatar)
 		item.UserType = u.UserType
 	}
-	item.OnlineCount = countAudienceInRoom(room.ID)
+	item.OnlineCount = appAudienceOnlineCount(room.ID, room.LiveRecordId)
 
 	if userId > 0 {
 		channelName := strconv.FormatUint(room.ID, 10)

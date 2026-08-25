@@ -75,6 +75,14 @@ func countAudienceInRoom(roomId uint64) int {
 	return len(getOnline(roomId))
 }
 
+// appAudienceOnlineCount App 端展示的在线观众数; 主播下播时固定返回 0
+func appAudienceOnlineCount(roomId, liveRecordId uint64) int {
+	if roomId == 0 || liveRecordId == 0 {
+		return 0
+	}
+	return countAudienceInRoom(roomId)
+}
+
 // clearRoomOnlineMap 下播时清空该房在线名单内存
 func clearRoomOnlineMap(roomId uint64) {
 	if roomId == 0 {

@@ -274,7 +274,7 @@ func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto
 		PrivateInviteType: liveentity.NormalizePrivateInviteType(cfg.PrivateInviteType, cfg.Category),
 		AllowCallIcon:     allowShowCallIcon(room, cfg, userId),
 		CreateAt:          room.CreatedAt.Unix(),
-		OnlineCount:       countAudienceInRoom(room.ID),
+		OnlineCount:       appAudienceOnlineCount(room.ID, room.LiveRecordId),
 	}
 	res.IsBotAnchor, res.CloudPlayerVideo = resolveBotAnchorRoomInfo(room.ID, cfg.CloudPlayerVideo)
 	res.IsTest = cfg.IsTest
