@@ -94,3 +94,31 @@ export function buildGuildAnchorDailyEffectiveLiveCsvColumns(
     {header: t(`${ns}.roomUpdatedAt`), value: row => formatDailyEffectiveLiveCsvDate(row.updatedAt)},
   ]
 }
+
+export function buildLiveDailyEffectiveLiveListCsvColumns(
+  t: TranslateFn,
+): CsvColumn<GuildAnchorDailyEffectiveLiveItem>[] {
+  const ns = 'pages.liveDailyEffectiveLiveList'
+  return [
+    {header: t('pages.anchorList.dailyLiveDate'), value: row => row.liveDate ?? ''},
+    {header: t('pages.guildAnchorIncomeSettlementLogList.roomId'), value: row => row.roomId ?? ''},
+    {header: t('pages.guildAnchorIncomeSettlementLogList.roomNickname'), value: row => row.roomNickname ?? ''},
+    {header: t(`${ns}.unsettledTotalIncome`), value: row => row.unsettledTotalIncome},
+    {header: t('pages.anchorList.dailyLiveDuration'), value: row => liveDurationSecondsToMinutes(row.liveDuration) ?? ''},
+    {header: t('pages.anchorList.dailyReportedLiveDuration'), value: row => liveDurationSecondsToMinutes(row.totalLiveDuration) ?? ''},
+    {header: t(`${ns}.dailyLiveIncome`), value: row => row.totalIncome},
+    {header: t(`${ns}.dailyGiftIncome`), value: row => row.totalGiftIncome},
+    {header: t(`${ns}.dailyPaidDanmakuIncome`), value: row => row.totalPaidDanmakuIncome},
+    {header: t(`${ns}.dailyPrivateRoomTicketIncome`), value: row => row.totalPrivateRoomTicketIncome},
+    {header: t(`${ns}.dailyPrivateRoomWatchIncome`), value: row => row.totalPrivateRoomWatchIncome},
+    {header: t(`${ns}.dailyVideoCallIncome`), value: row => row.totalVideoCallIncome},
+    {header: t(`${ns}.dailyVideoTicketIncome`), value: row => row.totalVideoCallTicketIncome},
+    {header: t(`${ns}.dailyVideoBillingIncome`), value: row => row.totalVideoCallBillingIncome},
+    {
+      header: t('pages.anchorList.dailySettled'),
+      value: row => (row.settled ? t('pages.anchorList.dailySettledYes') : t('pages.anchorList.dailySettledNo')),
+    },
+    {header: t('common.createdAt'), value: row => formatDailyEffectiveLiveCsvDate(row.createdAt)},
+    {header: t('pages.anchorList.roomUpdatedAt'), value: row => formatDailyEffectiveLiveCsvDate(row.updatedAt)},
+  ]
+}

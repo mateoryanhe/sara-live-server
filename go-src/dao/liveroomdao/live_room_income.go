@@ -190,6 +190,44 @@ func GetLiveRoomIncomeUnsettledForCMS(roomId uint64) *entity.LiveRoomIncomeUnset
 	return &row
 }
 
+// ListLiveRoomIncomeUnsettledTotalForCMS 批量查询未结算总收益(缓存优先,否则直查DB,不新建)
+func ListLiveRoomIncomeUnsettledTotalForCMS(roomIds []uint64) map[uint64]float64 {
+	ret := make(map[uint64]float64)
+	if len(roomIds) == 0 {
+		return ret
+	}
+	seen := make(map[uint64]struct{}, len(roomIds))
+	missing := make([]uint64, 0, len(roomIds))
+	for _, roomId := range roomIds {
+		if roomId == 0 {
+			continue
+		}
+		if _, ok := seen[roomId]; ok {
+			continue
+		}
+		seen[roomId] = struct{}{}
+		if incomeUnsettledCache.Contains(roomId) {
+			if row := incomeUnsettledCache.Get(roomId); row != nil {
+				ret[roomId] = row.TotalIncome
+			}
+			continue
+		}
+		missing = append(missing, roomId)
+	}
+	if len(missing) == 0 {
+		return ret
+	}
+	rows := make([]*entity.LiveRoomIncomeUnsettled, 0, len(missing))
+	_ = g.Model(string(entity.TbLiveRoomIncomeUnsettled)).Unscoped().
+		WhereIn(string(db.IdName), missing).Scan(&rows)
+	for _, row := range rows {
+		if row != nil && row.ID != 0 {
+			ret[row.ID] = row.TotalIncome
+		}
+	}
+	return ret
+}
+
 // GetLiveRoomIncomeSettledForCMS 已结算收益(缓存优先,否则直查DB,不新建)
 func GetLiveRoomIncomeSettledForCMS(roomId uint64) *entity.LiveRoomIncomeSettled {
 	if roomId == 0 {

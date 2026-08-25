@@ -428,6 +428,8 @@ export interface GuildAnchorDailyEffectiveLiveItem extends LiveRoomIncomeAmounts
     id: string
     roomId?: string
     roomNickname?: string
+    roomAvatar?: string
+    unsettledTotalIncome?: number
     liveDate?: string
     liveDuration?: number
     settled?: boolean
@@ -708,6 +710,38 @@ export interface SaveAccountCfgReq {
 }
 
 export interface SaveAccountCfgRes {
+    success: boolean
+    id?: string
+}
+
+export interface AppVersionUpdateDetailItem {
+    content: string
+    sort?: number
+}
+
+export interface AppVersionCfg {
+    id?: string
+    versionQueryEnabled: boolean
+    version: string
+    downloadUrl?: string
+    updateDetails?: AppVersionUpdateDetailItem[]
+    createdAt?: string
+    updatedAt?: string
+}
+
+export interface GetAppVersionCfgRes {
+    cfg?: AppVersionCfg | null
+}
+
+export interface SaveAppVersionCfgReq {
+    id?: string | number
+    versionQueryEnabled: boolean
+    version: string
+    downloadUrl?: string
+    updateDetails?: AppVersionUpdateDetailItem[]
+}
+
+export interface SaveAppVersionCfgRes {
     success: boolean
     id?: string
 }

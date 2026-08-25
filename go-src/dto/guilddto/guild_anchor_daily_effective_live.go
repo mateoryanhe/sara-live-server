@@ -23,8 +23,10 @@ type CMSGuildAnchorDailyEffectiveLiveListReq struct {
 type GuildAnchorDailyEffectiveLiveItem struct {
 	ID           string  `json:"id"`
 	RoomId       uint64  `json:"roomId,string"`
-	RoomNickname string  `json:"roomNickname"`
-	LiveDate     string  `json:"liveDate"`
+	RoomNickname         string  `json:"roomNickname"`
+	RoomAvatar           string  `json:"roomAvatar"`
+	UnsettledTotalIncome float64 `json:"unsettledTotalIncome"`
+	LiveDate             string  `json:"liveDate"`
 	LiveDuration float64 `json:"liveDuration"`
 	Settled      bool    `json:"settled"`
 	accountdto.LiveRoomIncomeAmountsItem

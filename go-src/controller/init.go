@@ -45,6 +45,8 @@ func Init() {
 	initCustomerServiceAppController()           // 客服联系配置(App)
 	initWalletCMSController()                    // 钱包配置(CMS)
 	initAccountCfgCMSController()                // 账号配置(CMS)
+	initAppVersionCfgCMSController()             // App版本配置(CMS)
+	initAppVersionAppController()                // App版本查询(App)
 	initFirstRechargeActivityCMSController()     // 首充活动配置(CMS)
 	initFirstRechargeActivityAppController()     // 首充活动配置(App)
 	initSimulatorCpuKeywordCMSController()       // 模拟器CPU关键词(CMS)

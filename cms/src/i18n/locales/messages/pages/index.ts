@@ -48,6 +48,7 @@ import {shortVideoCategoryListMessages} from './short-video-category-list'
 import {shortVideoPriceTierListMessages} from './short-video-price-tier-list'
 import {shortVideoWatchListMessages} from './short-video-watch-list'
 import {accountCfgMessages} from './account-cfg'
+import {appVersionCfgMessages} from './app-version-cfg'
 import {firstRechargeActivityCfgMessages} from './first-recharge-activity-cfg'
 import {simulatorCpuKeywordListMessages} from './simulator-cpu-keyword-list'
 import {anchorSalaryCfgListMessages} from './anchor-salary-cfg-list'
@@ -116,6 +117,7 @@ const pageMessageBuilders = [
   ['shortVideoPriceTierList', shortVideoPriceTierListMessages],
   ['shortVideoWatchList', shortVideoWatchListMessages],
   ['accountCfg', accountCfgMessages],
+  ['appVersionCfg', appVersionCfgMessages],
   ['firstRechargeActivityCfg', firstRechargeActivityCfgMessages],
   ['simulatorCpuKeywordList', simulatorCpuKeywordListMessages],
   ['anchorSalaryCfgList', anchorSalaryCfgListMessages],

@@ -9,6 +9,8 @@ import (
 	"xr-game-server/dto/accountdto"
 	"xr-game-server/dto/liverecorddto"
 	liveentity "xr-game-server/entity/live"
+	userentity "xr-game-server/entity/user"
+	"xr-game-server/module/upload"
 )
 
 // GetCMSDailyEffectiveLiveList CMS分页查询每日流水
@@ -22,10 +24,11 @@ func GetCMSDailyEffectiveLiveList(_ context.Context, req *liverecorddto.CMSDaily
 		PageIndex:     req.PageIndex,
 		PageSize:      req.PageSize,
 	})
-	nicknameMap := userinfodao.GetNicknameMapByUserIds(collectDailyAnchorRoomIds(rows))
+	profileMap := userinfodao.GetUserProfileMapByUserIds(collectDailyAnchorRoomIds(rows))
+	unsettledIncomeMap := liveroomdao.ListLiveRoomIncomeUnsettledTotalForCMS(collectDailyAnchorRoomIds(rows))
 	list := make([]*liverecorddto.CMSDailyEffectiveLiveItem, 0, len(rows))
 	for _, row := range rows {
-		if item := toCMSDailyEffectiveLiveItem(row, nicknameMap); item != nil {
+		if item := toCMSDailyEffectiveLiveItem(row, profileMap, unsettledIncomeMap); item != nil {
 			list = append(list, item)
 		}
 	}
@@ -45,7 +48,7 @@ func collectDailyAnchorRoomIds(rows []*liveentity.DailyAnchorEffectiveLive) []ui
 	return ids
 }
 
-func toCMSDailyEffectiveLiveItem(row *liveentity.DailyAnchorEffectiveLive, nicknameMap map[uint64]string) *liverecorddto.CMSDailyEffectiveLiveItem {
+func toCMSDailyEffectiveLiveItem(row *liveentity.DailyAnchorEffectiveLive, profileMap map[uint64]*userentity.UserInfo, unsettledIncomeMap map[uint64]float64) *liverecorddto.CMSDailyEffectiveLiveItem {
 	if row == nil || row.ID == "" {
 		return nil
 	}
@@ -68,8 +71,14 @@ func toCMSDailyEffectiveLiveItem(row *liveentity.DailyAnchorEffectiveLive, nickn
 			TotalLiveDuration:            amounts.TotalLiveDuration,
 		},
 	}
-	if nicknameMap != nil {
-		item.RoomNickname = nicknameMap[row.RoomId]
+	if profileMap != nil {
+		if profile := profileMap[row.RoomId]; profile != nil {
+			item.RoomNickname = profile.Nickname
+			item.RoomAvatar = upload.ResolveAvatarUrlForUser(row.RoomId, profile.Avatar)
+		}
+	}
+	if unsettledIncomeMap != nil {
+		item.UnsettledTotalIncome = unsettledIncomeMap[row.RoomId]
 	}
 	if !row.CreatedAt.IsZero() {
 		createdAt := row.CreatedAt

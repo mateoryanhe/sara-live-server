@@ -73,6 +73,7 @@ const menu = {
   ConfigOpsGroup: '运维监控',
   AppTokenConfig: 'App Token',
   AccountCfgManagement: '账号配置',
+  AppVersionCfgManagement: 'App版本查询',
   SimulatorCpuKeywordManagement: '模拟器CPU关键词',
   AnchorSalaryCfgManagement: '主播结算薪资',
   LiveRevenueShareCfgManagement: '流水分佣配置',

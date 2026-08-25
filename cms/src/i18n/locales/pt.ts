@@ -74,6 +74,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   ConfigOpsGroup: 'Ops e monitor',
   AppTokenConfig: 'Token do app',
   AccountCfgManagement: 'Config. de conta',
+  AppVersionCfgManagement: 'Consulta de versão App',
   SimulatorCpuKeywordManagement: 'Palavras CPU simulador',
   AnchorSalaryCfgManagement: 'Salário de âncora',
   LiveRevenueShareCfgManagement: 'Reparto de receita',

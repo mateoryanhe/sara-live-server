@@ -257,6 +257,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             group('config-basic', 'menu.ConfigBasicGroup', [
                 page('AppTokenConfig'),
                 page('AccountCfgManagement'),
+                page('AppVersionCfgManagement'),
                 page('ServerRuntimeCfgManagement'),
             ]),
             group('config-security', 'menu.ConfigSecurityGroup', [

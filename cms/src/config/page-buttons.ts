@@ -79,6 +79,7 @@ const READONLY_NO_EXPORT_PAGES = new Set([
 const CONFIG_PAGES = new Set([
     'AppTokenConfig',
     'AccountCfgManagement',
+    'AppVersionCfgManagement',
     'SimulatorCpuKeywordManagement',
     'ServerRuntimeCfgManagement',
     'PreloadCfgManagement',

@@ -8,7 +8,9 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/guilddto"
 	liveentity "xr-game-server/entity/live"
+	userentity "xr-game-server/entity/user"
 	"xr-game-server/errercode"
+	"xr-game-server/module/upload"
 )
 
 // GetGuildAnchorDailyEffectiveLiveList CMS分页查询指定工会名下主播每日流水
@@ -30,10 +32,10 @@ func GetGuildAnchorDailyEffectiveLiveList(_ context.Context, req *guilddto.CMSGu
 		PageSize:      req.PageSize,
 	})
 	roomIds := CollectDailyAnchorRoomIds(rows)
-	nicknameMap := userinfodao.GetNicknameMapByUserIds(roomIds)
+	profileMap := userinfodao.GetUserProfileMapByUserIds(roomIds)
 	list := make([]*guilddto.GuildAnchorDailyEffectiveLiveItem, 0, len(rows))
 	for _, row := range rows {
-		if item := ToGuildAnchorDailyEffectiveLiveItem(row, nicknameMap); item != nil {
+		if item := ToGuildAnchorDailyEffectiveLiveItem(row, profileMap); item != nil {
 			list = append(list, item)
 		}
 	}
@@ -53,7 +55,7 @@ func CollectDailyAnchorRoomIds(rows []*liveentity.DailyAnchorEffectiveLive) []ui
 	return ids
 }
 
-func ToGuildAnchorDailyEffectiveLiveItem(row *liveentity.DailyAnchorEffectiveLive, nicknameMap map[uint64]string) *guilddto.GuildAnchorDailyEffectiveLiveItem {
+func ToGuildAnchorDailyEffectiveLiveItem(row *liveentity.DailyAnchorEffectiveLive, profileMap map[uint64]*userentity.UserInfo) *guilddto.GuildAnchorDailyEffectiveLiveItem {
 	if row == nil || row.ID == "" {
 		return nil
 	}
@@ -65,8 +67,11 @@ func ToGuildAnchorDailyEffectiveLiveItem(row *liveentity.DailyAnchorEffectiveLiv
 		Settled:                   row.Settled,
 		LiveRoomIncomeAmountsItem: toIncomeAmountsItem(&row.LiveRoomIncomeAmounts),
 	}
-	if nicknameMap != nil {
-		item.RoomNickname = nicknameMap[row.RoomId]
+	if profileMap != nil {
+		if profile := profileMap[row.RoomId]; profile != nil {
+			item.RoomNickname = profile.Nickname
+			item.RoomAvatar = upload.ResolveAvatarUrlForUser(row.RoomId, profile.Avatar)
+		}
 	}
 	if !row.CreatedAt.IsZero() {
 		createdAt := row.CreatedAt

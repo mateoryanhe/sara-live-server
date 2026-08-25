@@ -7,5 +7,7 @@ func Init() {
 	InitCMSRole()
 	InitPermission()
 	initAccountCfg()
+	initAppVersionCfg()
+	initAppVersionUpdateDetail()
 	initSimulatorCpuKeyword()
 }

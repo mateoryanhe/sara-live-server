@@ -450,7 +450,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
+            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
             index="/config">
           <template #title>
             <el-icon>
@@ -459,7 +459,7 @@
             <span>{{ t('menu.ConfigManagement') }}</span>
           </template>
           <el-sub-menu
-              v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement')"
+              v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement')"
               index="/config/group/basic">
             <template #title>
               <el-icon>
@@ -478,6 +478,12 @@
                 <User/>
               </el-icon>
               <span>{{ t('menu.AccountCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('AppVersionCfgManagement')" index="/config/app-version-cfg">
+              <el-icon>
+                <Iphone/>
+              </el-icon>
+              <span>{{ t('menu.AppVersionCfgManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement')" index="/config/server-runtime-cfg">
               <el-icon>
@@ -649,7 +655,7 @@ import {useI18n} from 'vue-i18n'
 import LayoutTabs from '@/components/layout/LayoutTabs.vue'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import {useLayoutTabs} from '@/composables/useLayoutTabs'
-import {ArrowDown, Bell, Box, Calendar, Coin, Collection, CollectionTag, Cpu, CreditCard, Delete, Document, EditPen, Expand, Fold, Key, List, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Refresh, Search, Service, Setting, Stamp, Tickets, UploadFilled, User, UserFilled, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Bell, Box, Calendar, Coin, Collection, CollectionTag, Cpu, CreditCard, Delete, Document, EditPen, Expand, Fold, Iphone, Key, List, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Refresh, Search, Service, Setting, Stamp, Tickets, UploadFilled, User, UserFilled, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {getIsAdmin, hasPermission} from '@/utils/permission'
 import {clearAuthSession} from '@/utils/auth'
 

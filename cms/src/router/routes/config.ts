@@ -19,6 +19,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '账号配置', parentTitle: '基础配置'},
         },
         {
+            path: 'app-version-cfg',
+            name: 'AppVersionCfgManagement',
+            component: () => import('@/views/config/app-version-cfg.vue'),
+            meta: {title: 'App版本查询', parentTitle: '基础配置'},
+        },
+        {
             path: 'server-runtime-cfg',
             name: 'ServerRuntimeCfgManagement',
             component: () => import('@/views/config/server-runtime-cfg.vue'),

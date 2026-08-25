@@ -336,6 +336,10 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'AccountCfgManagement:view': '/accountCfg/getAccountCfg',
     'AccountCfgManagement:save': '/accountCfg/saveAccountCfg',
 
+    AppVersionCfgManagement: '/appVersionCfg/getAppVersionCfg',
+    'AppVersionCfgManagement:view': '/appVersionCfg/getAppVersionCfg',
+    'AppVersionCfgManagement:save': '/appVersionCfg/saveAppVersionCfg',
+
     SimulatorCpuKeywordManagement: '/simulatorCpuKeyword/simulatorCpuKeywordList',
     'SimulatorCpuKeywordManagement:view': '/simulatorCpuKeyword/simulatorCpuKeywordList',
     'SimulatorCpuKeywordManagement:search': '/simulatorCpuKeyword/simulatorCpuKeywordList',
