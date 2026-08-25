@@ -15,6 +15,7 @@ type AppVersionCfgItem struct {
 	ID                  string                        `json:"id"`
 	VersionQueryEnabled bool                          `json:"versionQueryEnabled"`
 	Version             string                        `json:"version"`
+	BuildVersion        string                        `json:"buildVersion"`
 	DownloadUrl         string                        `json:"downloadUrl"`
 	UpdateDetails       []*AppVersionUpdateDetailItem `json:"updateDetails"`
 	CreatedAt           string                        `json:"createdAt"`
@@ -30,6 +31,7 @@ type SaveAppVersionCfgReq struct {
 	ID                  uint64                        `json:"id" dc:"配置ID,首次保存可为0"`
 	VersionQueryEnabled bool                          `json:"versionQueryEnabled" dc:"App版本查询开关(仅透传App端,服务端不做拦截)"`
 	Version             string                        `json:"version" dc:"版本号"`
+	BuildVersion        string                        `json:"buildVersion" dc:"构建版本号"`
 	DownloadUrl         string                        `json:"downloadUrl" dc:"下载地址"`
 	UpdateDetails       []*AppVersionUpdateDetailItem `json:"updateDetails" dc:"更新明细列表"`
 }
@@ -46,6 +48,7 @@ type AppVersionQueryReq struct {
 type AppVersionQueryRes struct {
 	Enabled       bool                          `json:"enabled" dc:"App版本查询开关(仅透传,由App端自行处理)"`
 	Version       string                        `json:"version"`
+	BuildVersion  string                        `json:"buildVersion"`
 	DownloadUrl   string                        `json:"downloadUrl"`
 	UpdateDetails []*AppVersionUpdateDetailItem `json:"updateDetails"`
 }

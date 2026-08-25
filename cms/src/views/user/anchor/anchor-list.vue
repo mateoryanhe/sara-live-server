@@ -20,7 +20,12 @@
 
         <el-form-item :label="t('common.keyword')">
 
-          <el-input v-model="searchForm.key" clearable :placeholder="t('pages.anchorList.keywordPlaceholder')"/>
+          <el-input
+              v-model="searchForm.key"
+              clearable
+              :placeholder="t('pages.anchorList.keywordPlaceholder')"
+              style="width: 200px"
+          />
 
         </el-form-item>
 
@@ -34,6 +39,7 @@
 
       </el-form>
 
+      <div class="table-scroll">
       <el-table v-loading="loading" :data="tableData" style="width: 100%">
         <el-table-column fixed label="#" type="index" width="55" :index="formatRowIndex"/>
         <el-table-column :label="t('menu.UserDetail')" width="110">
@@ -226,6 +232,8 @@
             @size-change="handleSizeChange"
 
         />
+
+      </div>
 
       </div>
 
@@ -798,6 +806,18 @@ const handleExitGuild = async (row: AnchorListItem) => {
 
   padding: 20px;
 
+  max-width: 100%;
+
+  min-width: 0;
+
+}
+
+.page-container :deep(.el-card__body) {
+
+  max-width: 100%;
+
+  overflow-x: hidden;
+
 }
 
 
@@ -817,6 +837,34 @@ const handleExitGuild = async (row: AnchorListItem) => {
 .search-form {
 
   margin-bottom: 20px;
+
+  width: 100%;
+
+  min-width: 0;
+
+}
+
+.search-form :deep(.el-form-item__label) {
+
+  white-space: nowrap;
+
+}
+
+.search-form :deep(.el-form--inline .el-form-item) {
+
+  margin-right: 12px;
+
+  margin-bottom: 8px;
+
+}
+
+.table-scroll {
+
+  width: 100%;
+
+  max-width: 100%;
+
+  overflow-x: auto;
 
 }
 

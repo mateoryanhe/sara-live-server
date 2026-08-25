@@ -51,6 +51,7 @@
               class="perm-row"
           >
             <el-checkbox
+                class="perm-checkbox"
                 :indeterminate="isNodeIndeterminate(item)"
                 :model-value="isNodeChecked(item)"
                 @change="(val: boolean) => toggleNode(item, val)"
@@ -61,13 +62,14 @@
                 :class="{ clickable: hasChildren(item) }"
                 @click="enterNode(item)"
             >
-              <span class="perm-name">{{ item.name }}</span>
+              <span class="perm-name" :title="item.name">{{ item.name }}</span>
               <span v-if="hasChildren(item)" class="perm-meta">
                 {{ t('pages.moduleList.childCount', {count: countPermissionLeaves(item)}) }}
               </span>
             </div>
             <el-button
                 v-if="hasChildren(item)"
+                class="perm-enter"
                 link
                 type="primary"
                 @click="enterNode(item)"
@@ -85,7 +87,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onActivated, ref, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage} from 'element-plus'
 import {ArrowRight} from '@element-plus/icons-vue'
@@ -107,8 +109,69 @@ const moduleTreeData = ref<PermissionModuleNode[]>([])
 const checkedSet = ref(new Set<string>())
 const filterText = ref('')
 
-const roleId = ref(Number(route.query.roleId) || 0)
-const roleName = ref(typeof route.query.roleName === 'string' ? route.query.roleName : '')
+const roleId = ref(0)
+const roleName = ref('')
+const loadedRoleKey = ref('')
+
+const parseRoleId = (): number => {
+  const raw = route.query.roleId
+  if (raw == null || raw === '') {
+    return 0
+  }
+  const id = Number(Array.isArray(raw) ? raw[0] : raw)
+  return Number.isFinite(id) ? id : 0
+}
+
+const parseRoleName = (): string => {
+  const raw = route.query.roleName
+  return typeof raw === 'string' ? raw : ''
+}
+
+const buildRoleKey = () => `${parseRoleId()}::${parseRoleName()}`
+
+const resetNavStack = () => {
+  navStack.value = [{
+    title: t('pages.moduleList.rootTitle'),
+    nodes: moduleTreeData.value,
+  }]
+  filterText.value = ''
+}
+
+const loadRolePermissions = async () => {
+  const roleKey = buildRoleKey()
+  if (roleKey === loadedRoleKey.value) {
+    return
+  }
+
+  const nextRoleId = parseRoleId()
+  roleId.value = nextRoleId
+  roleName.value = parseRoleName()
+  loadedRoleKey.value = roleKey
+
+  if (!nextRoleId) {
+    checkedSet.value = new Set<string>()
+    resetNavStack()
+    return
+  }
+
+  loading.value = true
+  try {
+    if (moduleTreeData.value.length === 0) {
+      moduleTreeData.value = buildPermissionModuleTree(key => t(key))
+    }
+    resetNavStack()
+
+    const permissions = await roleApi.getRolePermissionList(nextRoleId)
+    const next = new Set<string>()
+    permissions
+        .map(p => p.module)
+        .filter(mod => isPermissionId(mod))
+        .forEach(mod => next.add(mod))
+    checkedSet.value = next
+  } finally {
+    loading.value = false
+  }
+}
 
 const navStack = ref<NavFrame[]>([{title: '', nodes: []}])
 
@@ -210,6 +273,7 @@ const handleSave = async () => {
 
     if (response) {
       ElMessage.success(t('pages.moduleList.saveSuccess', {count: selectedModules.length}))
+      loadedRoleKey.value = ''
     } else {
       ElMessage.error(t('pages.moduleList.saveFailed'))
     }
@@ -219,25 +283,17 @@ const handleSave = async () => {
   }
 }
 
-onMounted(async () => {
-  loading.value = true
-  try {
-    moduleTreeData.value = buildPermissionModuleTree(key => t(key))
-    navStack.value = [{
-      title: t('pages.moduleList.rootTitle'),
-      nodes: moduleTreeData.value,
-    }]
+// keep-alive 按 path 缓存，query 变化不会重新挂载
+watch(
+    () => [route.query.roleId, route.query.roleName] as const,
+    () => {
+      void loadRolePermissions()
+    },
+    {immediate: true},
+)
 
-    const permissions = await roleApi.getRolePermissionList(roleId.value)
-    const next = new Set<string>()
-    permissions
-        .map(p => p.module)
-        .filter(mod => isPermissionId(mod))
-        .forEach(mod => next.add(mod))
-    checkedSet.value = next
-  } finally {
-    loading.value = false
-  }
+onActivated(() => {
+  void loadRolePermissions()
 })
 </script>
 
@@ -312,9 +368,34 @@ onMounted(async () => {
 .perm-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   padding: 12px 16px;
   border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+.perm-checkbox {
+  flex-shrink: 0;
+}
+
+.perm-main {
+  flex: 0 1 auto;
+  max-width: min(360px, 50vw);
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.perm-enter {
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+.perm-name {
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .perm-row:last-child {
@@ -325,20 +406,8 @@ onMounted(async () => {
   background: var(--el-fill-color-light);
 }
 
-.perm-main {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .perm-main.clickable {
   cursor: pointer;
-}
-
-.perm-name {
-  font-size: 14px;
 }
 
 .perm-meta {

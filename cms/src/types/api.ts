@@ -723,6 +723,7 @@ export interface AppVersionCfg {
     id?: string
     versionQueryEnabled: boolean
     version: string
+    buildVersion?: string
     downloadUrl?: string
     updateDetails?: AppVersionUpdateDetailItem[]
     createdAt?: string
@@ -737,6 +738,7 @@ export interface SaveAppVersionCfgReq {
     id?: string | number
     versionQueryEnabled: boolean
     version: string
+    buildVersion?: string
     downloadUrl?: string
     updateDetails?: AppVersionUpdateDetailItem[]
 }

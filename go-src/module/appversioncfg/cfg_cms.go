@@ -18,6 +18,7 @@ func GetAppVersionCfg(_ context.Context, _ *appversioncfgdto.GetAppVersionCfgReq
 		return &appversioncfgdto.GetAppVersionCfgRes{Cfg: &appversioncfgdto.AppVersionCfgItem{
 			VersionQueryEnabled: false,
 			Version:             "",
+			BuildVersion:        "",
 			DownloadUrl:         "",
 			UpdateDetails:       []*appversioncfgdto.AppVersionUpdateDetailItem{},
 		}}, nil
@@ -27,12 +28,14 @@ func GetAppVersionCfg(_ context.Context, _ *appversioncfgdto.GetAppVersionCfgReq
 
 func SaveAppVersionCfg(_ context.Context, req *appversioncfgdto.SaveAppVersionCfgReq) (*appversioncfgdto.SaveAppVersionCfgRes, error) {
 	version := strings.TrimSpace(req.Version)
+	buildVersion := strings.TrimSpace(req.BuildVersion)
 	downloadUrl := strings.TrimSpace(req.DownloadUrl)
 
 	existing := cfgdao.LoadAppVersionCfg()
 	row := &entity.AppVersionCfg{
 		VersionQueryEnabled: req.VersionQueryEnabled,
 		Version:             version,
+		BuildVersion:        buildVersion,
 		DownloadUrl:         downloadUrl,
 	}
 	if req.ID > 0 {
@@ -95,6 +98,7 @@ func toCfgItem(cfg *entity.AppVersionCfg, details []*entity.AppVersionUpdateDeta
 		ID:                  strconv.FormatUint(cfg.ID, 10),
 		VersionQueryEnabled: cfg.VersionQueryEnabled,
 		Version:             cfg.Version,
+		BuildVersion:        cfg.BuildVersion,
 		DownloadUrl:         cfg.DownloadUrl,
 		UpdateDetails:       toUpdateDetailItems(details),
 		CreatedAt:           formatTime(cfg.CreatedAt),

@@ -75,6 +75,24 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'BanUser:view': '/account/ban',
     'BanUser:save': '/account/ban',
 
+    GuildMembers: '/account/getAnchorList',
+    'GuildMembers:view': '/account/getAnchorList',
+
+    GuildAnchorImportResult: '/guild/importGuildAnchors',
+    'GuildAnchorImportResult:view': '/guild/importGuildAnchors',
+
+    GuildProfileMembers: '/guild/getMyGuildAnchorList',
+    'GuildProfileMembers:view': '/guild/getMyGuildAnchorList',
+
+    GuildProfileAnchorDailyLive: '/guild/getMyGuildAnchorDailyEffectiveLiveList',
+    'GuildProfileAnchorDailyLive:view': '/guild/getMyGuildAnchorDailyEffectiveLiveList',
+    'GuildProfileAnchorDailyLive:search': '/guild/getMyGuildAnchorDailyEffectiveLiveList',
+    'GuildProfileAnchorDailyLive:export': '/cmsExport/submitJob',
+
+    AnchorLiveRecordDetail: '/liveRecord/getLiveRecordList',
+    'AnchorLiveRecordDetail:view': '/liveRecord/getLiveRecordList',
+    'AnchorLiveRecordDetail:search': '/liveRecord/getLiveRecordList',
+
     RechargeOrderList: '/rechargeOrder/rechargeOrderList',
     'RechargeOrderList:view': '/rechargeOrder/rechargeOrderList',
     'RechargeOrderList:search': '/rechargeOrder/rechargeOrderList',

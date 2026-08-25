@@ -141,8 +141,13 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
         id: 'user',
         titleKey: 'menu.UserManagement',
         children: [
-            page('UserList', {buttonGroups: USER_LIST_BUTTON_GROUPS, subPages: [{pageName: 'UserDetail'}]}),
-            page('AnchorListManagement', {subPages: [{pageName: 'AnchorDetail'}]}),
+            page('UserList', {
+                buttonGroups: USER_LIST_BUTTON_GROUPS,
+                subPages: [{pageName: 'UserDetail'}, {pageName: 'BanUser'}],
+            }),
+            page('AnchorListManagement', {
+                subPages: [{pageName: 'AnchorDetail'}, {pageName: 'AnchorLiveRecordDetail'}],
+            }),
             page('LiveRoomRecycleBinManagement'),
             page('BotAnchorManagement'),
             page('RechargeOrderList'),
@@ -163,12 +168,25 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('WalletExchangeCfgManagement'),
             ]),
             group('operation-guild', 'menu.OperationGuildGroup', [
-                page('GuildManagement', {buttonGroups: GUILD_BUTTON_GROUPS, subPages: [{pageName: 'GuildDetail'}]}),
+                page('GuildManagement', {
+                    buttonGroups: GUILD_BUTTON_GROUPS,
+                    subPages: [
+                        {pageName: 'GuildDetail'},
+                        {pageName: 'GuildMembers'},
+                        {pageName: 'GuildAnchorImportResult'},
+                    ],
+                }),
                 page('GuildCMSUserManagement', {buttonGroups: GUILD_CMS_USER_BUTTON_GROUPS}),
                 page('GuildAnchorDailyLiveManagement', {buttonGroups: GUILD_ANCHOR_DAILY_LIVE_BUTTON_GROUPS}),
                 page('PlatformAnchorList'),
                 page('GuildRecycleBinManagement'),
-                page('GuildProfileManagement', {buttonGroups: GUILD_PROFILE_BUTTON_GROUPS}),
+                page('GuildProfileManagement', {
+                    buttonGroups: GUILD_PROFILE_BUTTON_GROUPS,
+                    subPages: [
+                        {pageName: 'GuildProfileMembers'},
+                        {pageName: 'GuildProfileAnchorDailyLive'},
+                    ],
+                }),
             ]),
             group('operation-settlement', 'menu.OperationSettlementGroup', [
                 page('AnchorSalaryCfgManagement'),
@@ -258,7 +276,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('AppTokenConfig'),
                 page('AccountCfgManagement'),
                 page('AppVersionCfgManagement'),
-                page('ServerRuntimeCfgManagement'),
+                page('ServerRuntimeCfgManagement', {subPages: [{pageName: 'PreloadCfgManagement', titleKey: 'menu.PreloadCfgManagement'}]}),
             ]),
             group('config-security', 'menu.ConfigSecurityGroup', [
                 page('SimulatorCpuKeywordManagement'),

@@ -33,6 +33,20 @@
           </div>
         </el-form-item>
 
+        <el-form-item :label="t('pages.appVersionCfg.buildVersion')" prop="buildVersion">
+          <el-input
+              v-model="formData.buildVersion"
+              maxlength="32"
+              show-word-limit
+              clearable
+              :placeholder="t('pages.appVersionCfg.buildVersionTip')"
+              style="max-width: 360px"
+          />
+          <div class="form-tip">
+            {{ t('pages.appVersionCfg.buildVersionTip') }}
+          </div>
+        </el-form-item>
+
         <el-form-item :label="t('pages.appVersionCfg.downloadUrl')" prop="downloadUrl">
           <el-input
               v-model="formData.downloadUrl"
@@ -115,6 +129,7 @@ const formData = reactive({
   id: '0',
   versionQueryEnabled: false,
   version: '',
+  buildVersion: '',
   downloadUrl: '',
   updateDetails: [] as AppVersionUpdateDetailItem[],
 })
@@ -130,6 +145,7 @@ const applyCfg = (cfg: AppVersionCfg | null | undefined) => {
   formData.id = cfg?.id || '0'
   formData.versionQueryEnabled = !!cfg?.versionQueryEnabled
   formData.version = cfg?.version || ''
+  formData.buildVersion = cfg?.buildVersion || ''
   formData.downloadUrl = cfg?.downloadUrl || ''
   formData.updateDetails = (cfg?.updateDetails || []).map((item, index) => ({
     content: item.content || '',
@@ -193,6 +209,7 @@ const handleSave = async () => {
       id: formData.id === '0' ? 0 : Number(formData.id),
       versionQueryEnabled: formData.versionQueryEnabled,
       version: formData.version.trim(),
+      buildVersion: formData.buildVersion.trim(),
       downloadUrl: formData.downloadUrl.trim(),
       updateDetails: buildSaveDetails(),
     })

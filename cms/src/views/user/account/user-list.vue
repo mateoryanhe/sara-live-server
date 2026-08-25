@@ -9,7 +9,12 @@
       <div class="search-form">
         <el-form :model="searchForm" inline label-width="100px">
           <el-form-item :label="t('common.keyword')">
-            <el-input v-model="searchForm.key" clearable :placeholder="t('pages.userList.keywordPlaceholder')"/>
+            <el-input
+                v-model="searchForm.key"
+                clearable
+                :placeholder="t('pages.userList.keywordPlaceholder')"
+                style="width: 200px"
+            />
           </el-form-item>
           <el-form-item :label="t('common.startTime')">
             <el-date-picker
@@ -17,6 +22,7 @@
                 clearable
                 format="YYYY-MM-DD"
                 :placeholder="t('common.selectStartTime')"
+                style="width: 160px"
                 type="date"
                 value-format="YYYY-MM-DD"
             />
@@ -27,6 +33,7 @@
                 clearable
                 format="YYYY-MM-DD"
                 :placeholder="t('common.selectEndTime')"
+                style="width: 160px"
                 type="date"
                 value-format="YYYY-MM-DD"
             />
@@ -49,7 +56,7 @@
           </el-form-item>
         </el-form>
       </div>
-      <div class="content">
+      <div class="table-scroll">
         <el-table v-loading="loading" :data="userList" style="width: 100%">
           <el-table-column fixed label="#" type="index" width="55" :index="formatRowIndex"/>
           <el-table-column label="ID" prop="id" min-width="240">
@@ -1317,6 +1324,13 @@ onMounted(() => {
 <style scoped>
 .page-container {
   padding: 20px;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.page-container :deep(.el-card__body) {
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .card-header {
@@ -1327,10 +1341,23 @@ onMounted(() => {
 
 .search-form {
   margin-bottom: 20px;
+  width: 100%;
+  min-width: 0;
 }
 
 .search-form :deep(.el-form-item__label) {
   white-space: nowrap;
+}
+
+.search-form :deep(.el-form--inline .el-form-item) {
+  margin-right: 12px;
+  margin-bottom: 8px;
+}
+
+.table-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .pagination {
@@ -1363,6 +1390,12 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  max-width: 100%;
+}
+
+.id-cell .el-button--link,
+.id-cell .el-button.is-link {
+  flex-shrink: 0;
 }
 </style>

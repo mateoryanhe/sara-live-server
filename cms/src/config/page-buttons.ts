@@ -153,6 +153,12 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     CMSUserManagement: [...DEFAULT_CRUD_BUTTONS],
     ModuleList: [BTN.view, BTN.save],
     BanUser: [BTN.view, BTN.save],
+    GuildMembers: DEFAULT_VIEW_BUTTONS,
+    GuildAnchorImportResult: DEFAULT_VIEW_BUTTONS,
+    GuildProfileMembers: DEFAULT_VIEW_BUTTONS,
+    GuildProfileAnchorDailyLive: [BTN.view, BTN.search, BTN.export],
+    AnchorLiveRecordDetail: [BTN.view, BTN.search],
+    PreloadCfgManagement: DEFAULT_CONFIG_BUTTONS,
     GiftManagement: [
         BTN.view,
         BTN.create,
