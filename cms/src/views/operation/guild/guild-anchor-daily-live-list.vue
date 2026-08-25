@@ -65,48 +65,33 @@
       </el-form>
 
       <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width: 100%">
-        <el-table-column :label="t('pages.anchorList.dailyRecordId')" min-width="180" prop="id"/>
         <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.roomId')" min-width="180" prop="roomId"/>
         <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.roomNickname')" min-width="120">
           <template #default="{ row }">{{ row.roomNickname || '-' }}</template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.dailyLiveDate')" min-width="120" prop="liveDate"/>
-        <el-table-column :label="t('pages.anchorList.dailyLiveDuration')" min-width="150">
-          <template #default="{ row }">{{ formatLiveDurationMinutes(row.liveDuration, t) }}</template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorList.dailyReportedLiveDuration')" min-width="150">
-          <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorList.liveIncome')" align="right" min-width="120">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorList.giftIncome')" align="right" min-width="120">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGiftIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorList.paidDanmakuIncome')" align="right" min-width="130">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorList.privateRoomTicketIncome')" align="right" min-width="140">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomTicketIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorList.privateRoomWatchIncome')" align="right" min-width="140">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomWatchIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorList.videoCallIncome')" align="right" min-width="130">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorList.dailySettled')" min-width="100">
+        <el-table-column :label="t('common.avatar')" width="80">
           <template #default="{ row }">
-            <el-tag :type="row.settled ? 'success' : 'warning'">
-              {{ row.settled ? t('pages.anchorList.dailySettledYes') : t('pages.anchorList.dailySettledNo') }}
-            </el-tag>
+            <el-image
+                v-if="row.roomAvatar"
+                :preview-src-list="[row.roomAvatar]"
+                :src="row.roomAvatar"
+                fit="cover"
+                hide-on-click-modal
+                preview-teleported
+                style="width:40px;height:40px;border-radius:50%"
+            />
+            <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column :label="t('common.createdAt')" min-width="170">
-          <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
+        <el-table-column :label="t('pages.anchorList.dailyLiveDate')" min-width="120" prop="liveDate"/>
+        <el-table-column :label="t('pages.liveDailyEffectiveLiveList.unsettledTotalIncome')" align="right" min-width="140">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.unsettledTotalIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.roomUpdatedAt')" min-width="170">
-          <template #default="{ row }">{{ formatDate(row.updatedAt) }}</template>
+        <el-table-column :label="t('pages.liveDailyEffectiveLiveList.dailyLiveIncome')" align="right" min-width="130">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorList.dailyLiveDuration')" min-width="150">
+          <template #default="{ row }">{{ formatLiveDurationMinutes(row.liveDuration, t) }}</template>
         </el-table-column>
       </el-table>
 
@@ -266,15 +251,6 @@ const handleExport = async () => {
     },
     `my-guild-anchor-daily-flow-${Date.now()}.csv`,
   )
-}
-
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) return '-'
-  try {
-    return new Date(dateString).toLocaleString()
-  } catch {
-    return '-'
-  }
 }
 </script>
 

@@ -33,9 +33,10 @@ func GetGuildAnchorDailyEffectiveLiveList(_ context.Context, req *guilddto.CMSGu
 	})
 	roomIds := CollectDailyAnchorRoomIds(rows)
 	profileMap := userinfodao.GetUserProfileMapByUserIds(roomIds)
+	unsettledIncomeMap := liveroomdao.ListLiveRoomIncomeUnsettledTotalForCMS(roomIds)
 	list := make([]*guilddto.GuildAnchorDailyEffectiveLiveItem, 0, len(rows))
 	for _, row := range rows {
-		if item := ToGuildAnchorDailyEffectiveLiveItem(row, profileMap); item != nil {
+		if item := ToGuildAnchorDailyEffectiveLiveItem(row, profileMap, unsettledIncomeMap); item != nil {
 			list = append(list, item)
 		}
 	}
@@ -55,7 +56,7 @@ func CollectDailyAnchorRoomIds(rows []*liveentity.DailyAnchorEffectiveLive) []ui
 	return ids
 }
 
-func ToGuildAnchorDailyEffectiveLiveItem(row *liveentity.DailyAnchorEffectiveLive, profileMap map[uint64]*userentity.UserInfo) *guilddto.GuildAnchorDailyEffectiveLiveItem {
+func ToGuildAnchorDailyEffectiveLiveItem(row *liveentity.DailyAnchorEffectiveLive, profileMap map[uint64]*userentity.UserInfo, unsettledIncomeMap map[uint64]float64) *guilddto.GuildAnchorDailyEffectiveLiveItem {
 	if row == nil || row.ID == "" {
 		return nil
 	}
@@ -72,6 +73,9 @@ func ToGuildAnchorDailyEffectiveLiveItem(row *liveentity.DailyAnchorEffectiveLiv
 			item.RoomNickname = profile.Nickname
 			item.RoomAvatar = upload.ResolveAvatarUrlForUser(row.RoomId, profile.Avatar)
 		}
+	}
+	if unsettledIncomeMap != nil {
+		item.UnsettledTotalIncome = unsettledIncomeMap[row.RoomId]
 	}
 	if !row.CreatedAt.IsZero() {
 		createdAt := row.CreatedAt

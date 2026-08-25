@@ -108,9 +108,10 @@ func exportGuildAnchorDailyEffectiveLiveCSV(ctx context.Context, payload json.Ra
 		})
 		roomIds := collectDailyAnchorRoomIds(rows)
 		nicknameMap := userinfodao.GetNicknameMapByUserIds(roomIds)
+		unsettledIncomeMap := liveroomdao.ListLiveRoomIncomeUnsettledTotalForCMS(roomIds)
 		csvRows := make([][]string, 0, len(rows))
 		for _, row := range rows {
-			csvRows = append(csvRows, guildAnchorDailyEffectiveLiveToCSVRow(row, nicknameMap, req.SettledYesText, req.SettledNoText))
+			csvRows = append(csvRows, guildAnchorDailyEffectiveLiveToCSVRow(row, nicknameMap, unsettledIncomeMap))
 		}
 		return total, csvRows
 	}, onProgress)
@@ -148,9 +149,10 @@ func exportMyGuildAnchorDailyEffectiveLiveCSV(ctx context.Context, cmsUserId uin
 		total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSListByGuildIds(filter)
 		anchorRoomIds := collectDailyAnchorRoomIds(rows)
 		nicknameMap := userinfodao.GetNicknameMapByUserIds(anchorRoomIds)
+		unsettledIncomeMap := liveroomdao.ListLiveRoomIncomeUnsettledTotalForCMS(anchorRoomIds)
 		csvRows := make([][]string, 0, len(rows))
 		for _, row := range rows {
-			csvRows = append(csvRows, guildAnchorDailyEffectiveLiveToCSVRow(row, nicknameMap, req.SettledYesText, req.SettledNoText))
+			csvRows = append(csvRows, guildAnchorDailyEffectiveLiveToCSVRow(row, nicknameMap, unsettledIncomeMap))
 		}
 		return total, csvRows
 	}, onProgress)
@@ -194,7 +196,7 @@ func guildDailyEffectiveLiveToCSVRow(row *liveentity.DailyGuildEffectiveLive, se
 	return cells
 }
 
-func guildAnchorDailyEffectiveLiveToCSVRow(row *liveentity.DailyAnchorEffectiveLive, nicknameMap map[uint64]string, settledYesText, settledNoText string) []string {
+func guildAnchorDailyEffectiveLiveToCSVRow(row *liveentity.DailyAnchorEffectiveLive, nicknameMap map[uint64]string, unsettledIncomeMap map[uint64]float64) []string {
 	if row == nil {
 		return nil
 	}
@@ -203,18 +205,18 @@ func guildAnchorDailyEffectiveLiveToCSVRow(row *liveentity.DailyAnchorEffectiveL
 		roomNickname = nicknameMap[row.RoomId]
 	}
 	cells := []string{
-		row.ID,
 		formatCSVUint(row.RoomId),
 		roomNickname,
 		row.LiveDate,
-		formatLiveDurationMinutes(row.LiveDuration),
-		formatLiveDurationMinutes(row.TotalLiveDuration),
 	}
-	cells = append(cells, incomeAmountCSVCells(&row.LiveRoomIncomeAmounts)...)
+	if unsettledIncomeMap != nil {
+		cells = append(cells, formatCSVFloat(unsettledIncomeMap[row.RoomId]))
+	} else {
+		cells = append(cells, "")
+	}
 	cells = append(cells,
-		formatSettledText(row.Settled, settledYesText, settledNoText),
-		formatCSVTime(row.CreatedAt),
-		formatCSVTime(row.UpdatedAt),
+		formatCSVFloat(row.TotalIncome),
+		formatLiveDurationMinutes(row.LiveDuration),
 	)
 	return cells
 }

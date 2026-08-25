@@ -147,9 +147,10 @@ func GetMyOwnedGuildAnchorDailyEffectiveLiveList(ctx context.Context, req *guild
 	total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSListByGuildIds(filter)
 	anchorRoomIds := CollectDailyAnchorRoomIds(rows)
 	profileMap := userinfodao.GetUserProfileMapByUserIds(anchorRoomIds)
+	unsettledIncomeMap := liveroomdao.ListLiveRoomIncomeUnsettledTotalForCMS(anchorRoomIds)
 	list := make([]*guilddto.GuildAnchorDailyEffectiveLiveItem, 0, len(rows))
 	for _, row := range rows {
-		if item := ToGuildAnchorDailyEffectiveLiveItem(row, profileMap); item != nil {
+		if item := ToGuildAnchorDailyEffectiveLiveItem(row, profileMap, unsettledIncomeMap); item != nil {
 			list = append(list, item)
 		}
 	}
