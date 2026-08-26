@@ -70,11 +70,7 @@ func getCMSDir() string {
 }
 
 func GetUrlByName(name string) string {
-	segment := cfg.GetImageStaticPathSegment()
-	if segment == "" {
-		return buildResourceUrl("/" + name)
-	}
-	return buildResourceUrl(fmt.Sprintf("/%s/%s", segment, name))
+	return buildImageResourceUrl(name)
 }
 
 func newStoredFileName(ext string) string {

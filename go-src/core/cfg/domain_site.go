@@ -2,9 +2,6 @@ package cfg
 
 import (
 	"strings"
-
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gctx"
 )
 
 // DomainSiteCfg 域名静态站点配置
@@ -20,13 +17,6 @@ var domainSiteCfgs []*DomainSiteCfg
 // GetDomainSiteCfgs 获取域名站点配置
 func GetDomainSiteCfgs() []*DomainSiteCfg {
 	return domainSiteCfgs
-}
-
-func initDomainSiteCfg() {
-	ctx := gctx.New()
-	list := make([]*DomainSiteCfg, 0)
-	_ = g.Cfg().MustGet(ctx, "server.domainSites").Scan(&list)
-	domainSiteCfgs = normalizeDomainSiteCfgs(list)
 }
 
 func normalizeDomainSiteCfgs(list []*DomainSiteCfg) []*DomainSiteCfg {

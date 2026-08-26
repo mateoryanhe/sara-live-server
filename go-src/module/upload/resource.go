@@ -1,7 +1,10 @@
 package upload
 
 import (
+	"net/url"
 	"strings"
+
+	"xr-game-server/core/cfg"
 )
 
 // GetResourceDomain 静态资源访问域名;未配置时默认 http://127.0.0.1
@@ -35,4 +38,50 @@ func buildResourceUrl(name string) string {
 	domain := GetResourceDomain()
 	path := strings.TrimLeft(name, "/")
 	return domain + "/" + path
+}
+
+func buildImageResourcePath(fileName string) string {
+	fileName = strings.Trim(strings.ReplaceAll(fileName, "\\", "/"), "/")
+	if fileName == "" {
+		return ""
+	}
+	if resourceDomainUsesDedicatedImageHost(GetResourceDomain()) {
+		return "/" + fileName
+	}
+	segment := cfg.GetImageStaticPathSegment()
+	if segment == "" {
+		return "/" + fileName
+	}
+	return "/" + segment + "/" + fileName
+}
+
+func buildImageResourceUrl(fileName string) string {
+	return buildResourceUrl(buildImageResourcePath(fileName))
+}
+
+func resourceDomainUsesDedicatedImageHost(domain string) bool {
+	segment := strings.Trim(cfg.GetImageStaticPathSegment(), "/")
+	if segment == "" {
+		return false
+	}
+	host := resourceDomainHost(domain)
+	if host == "" {
+		return false
+	}
+	host = strings.ToLower(host)
+	return host == segment || strings.HasPrefix(host, segment+".")
+}
+
+func resourceDomainHost(domain string) string {
+	domain = strings.TrimSpace(domain)
+	if domain == "" {
+		return ""
+	}
+	if u, err := url.Parse(domain); err == nil && u.Host != "" {
+		return u.Hostname()
+	}
+	if u, err := url.Parse("https://" + strings.TrimPrefix(domain, "//")); err == nil && u.Host != "" {
+		return u.Hostname()
+	}
+	return ""
 }

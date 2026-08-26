@@ -31,8 +31,8 @@ CMS 一键构建上传说明（PuTTY + .ppk 密钥）
 
 注意
   旧脚本会先 rm -rf 整个 REMOTE_DIR，若解压失败会导致 /cms 目录被清空。
-  服务器 staticPaths 映射: /cms -> /home/ec2-user/cdn/cms
-  访问示例: https://www.bigtktool.shop/cms/
+  服务器 domainSites 映射: cms.bigtktool.shop -> /home/ec2-user/cdn/cms
+  访问示例: https://cms.bigtktool.shop/
 
 密钥格式
   若密钥为 OpenSSH (.pem)，请用 PuTTYgen 转为 .ppk 后写入 SSH_KEY_PATH。

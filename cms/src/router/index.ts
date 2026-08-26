@@ -21,7 +21,7 @@ const routes: Array<RouteRecordRaw> = [
 ]
 
 const router = createRouter({
-    history: createWebHistory('/cms/'),
+    history: createWebHistory(import.meta.env.BASE_URL),
     routes,
 })
 

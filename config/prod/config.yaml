@@ -1,18 +1,19 @@
 server:
   ###系统配置
   address: 443  #http服务端口
-  serverRoot: "/home/ec2-user/cdn/official-site"  # 默认静态目录(官网)
-  imageStaticPrefix: "/images"  # 图片 URL 前缀,须在 staticPaths 中配置对应 path
-  staticPaths:
-    - prefix: "/cms"
+  serverRoot: "/home/ec2-user/cdn/official-site"  # GoFrame 默认静态目录; API 走 www, 官网走 web 子域
+  staticSites:  # *.saralive.net 通配证书, certFile/keyFile 可省略; www 不配此项,默认 API
+    - domain: "lzg.saralive.net"
       path: "/home/ec2-user/cdn/cms"
-    - prefix: "/cms-export"
+    - domain: "cms-export.saralive.net"
       path: "/home/ec2-user/cdn/cms-export"
       ttlMinutes: 30                # CMS 文件导出过期清理(分钟)
-    - prefix: "/images"
+    - domain: "images.saralive.net"
       path: "/home/ec2-user/cdn/images"
-    - prefix: "/official-site"
+    - domain: "web.saralive.net"
       path: "/home/ec2-user/cdn/official-site"
+    - domain: "h5-live.saralive.net"
+      path: "/home/ec2-user/cdn/h5-live"
   httpsCertPath: "/home/ec2-user/ssl/cf-origin/cf-origin.pem"
   httpsKeyPath: "/home/ec2-user/ssl/cf-origin/cf-origin.key"
   clientMaxBodySize: "5g"   # HTTP 请求体/上传上限(唯一大小限制,Go业务层不再校验)
@@ -27,7 +28,6 @@ server:
   pprofPattern: "/66dcd8e25ab3b339546ea1de5eb2d443e6fca76c76d11709f10533be8bd87d7d/pprof"    # 开启PProf时有效，表示PProf特性的页面访问路径，对当前Server绑定的所有域名有效
   ####自定义配置
   dumpRouterMap: false
-  # domainSites 多域名示例见 config/local/config.yaml
 
 bufferSize:
   db:

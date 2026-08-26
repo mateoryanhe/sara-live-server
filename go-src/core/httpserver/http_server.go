@@ -80,7 +80,7 @@ func authIdFromRequest(r *ghttp.Request) string {
 
 func beforeServeHook(r *ghttp.Request) {
 	xrlog.DetailLog.Infof(r.Context(), "beforeServeHook [is file:%v] URI:%s ip:%s", r.IsFileRequest(), r.RequestURI, r.GetClientIp())
-	r.Response.CORSDefault()
+	applyRequestCORS(r)
 }
 
 func GetReqId(ctx context.Context) uint64 {

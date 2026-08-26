@@ -37,7 +37,7 @@ func initCMSFileExportCfg() {
 
 	ctx := gctx.New()
 	if cmsFileExportRoot == "" {
-		g.Log().Warningf(ctx, "server.staticPaths 未配置 %s,CMS 文件导出将不可用", CMSFileExportStaticPrefix)
+		g.Log().Warningf(ctx, "server.staticSites 未配置 %s,CMS 文件导出将不可用", CMSFileExportStaticPrefix)
 		return
 	}
 	g.Log().Warningf(ctx, "CMS文件导出已加载 staticPrefix=%s root=%s ttlMinutes=%d",

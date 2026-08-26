@@ -1,6 +1,7 @@
 package cfg
 
 import (
+	"context"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -36,7 +37,7 @@ func GetImageStaticPrefix() string {
 	return imageStaticPrefix
 }
 
-// GetImageStaticRoot 图片物理目录,来自 staticPaths 映射
+// GetImageStaticRoot 图片物理目录,来自 staticSites 映射
 func GetImageStaticRoot() string {
 	if imageStaticPrefix == "" {
 		return ""
@@ -59,31 +60,39 @@ func GetServerRoot() string {
 	return strings.TrimSpace(g.Cfg().MustGet(gctx.New(), "server.serverRoot").String())
 }
 
-func initStaticPathCfg() {
-	ctx := gctx.New()
-	list := make([]*StaticPathCfg, 0)
-	_ = g.Cfg().MustGet(ctx, "server.staticPaths").Scan(&list)
-	staticPathCfgs = normalizeStaticPathCfgs(list)
-	initImageStaticCfg()
-}
-
 func initImageStaticCfg() {
 	ctx := gctx.New()
-	prefix := normalizeURLPrefix(g.Cfg().MustGet(ctx, "server.imageStaticPrefix").String())
-	if prefix == "" || prefix == "/" {
-		g.Log().Error(ctx, "server.imageStaticPrefix 未配置,图片上传与静态访问将不可用")
+	prefix := resolveImageStaticPrefix(ctx)
+	if prefix == "" {
+		g.Log().Error(ctx, "未找到图片静态站点,请在 server.staticSites 中配置 images 域名或 prefix:/images")
 		return
 	}
 	root := strings.TrimSpace(GetStaticPathRoot(prefix))
 	if root == "" {
-		g.Log().Errorf(ctx, "server.imageStaticPrefix=%s 在 server.staticPaths 中未找到对应 root", prefix)
+		g.Log().Errorf(ctx, "图片静态 prefix=%s 在 server.staticSites 中未找到对应 path", prefix)
 		return
 	}
 	if gfile.RealPath(root) == "" {
-		g.Log().Errorf(ctx, "图片静态目录不存在 imageStaticPrefix=%s root=%s", prefix, root)
+		g.Log().Errorf(ctx, "图片静态目录不存在 prefix=%s path=%s", prefix, root)
 	}
 	imageStaticPrefix = prefix
-	g.Log().Warningf(ctx, "图片静态路径已加载 imageStaticPrefix=%s root=%s", prefix, root)
+	g.Log().Warningf(ctx, "图片静态路径已加载 prefix=%s path=%s", prefix, root)
+}
+
+func resolveImageStaticPrefix(ctx context.Context) string {
+	explicit := normalizeURLPrefix(g.Cfg().MustGet(ctx, "server.imageStaticPrefix").String())
+	if explicit != "" && explicit != "/" {
+		return explicit
+	}
+	for _, item := range staticPathCfgs {
+		if item == nil {
+			continue
+		}
+		if strings.EqualFold(strings.Trim(item.Prefix, "/"), "images") {
+			return item.Prefix
+		}
+	}
+	return ""
 }
 
 func normalizeStaticPathCfgs(list []*StaticPathCfg) []*StaticPathCfg {

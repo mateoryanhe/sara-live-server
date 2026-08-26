@@ -4,18 +4,19 @@ server:
   openapiPath: "/f9acdb1da4ed11ecc115d613e291af14-api.json" # OpenAPI接口文档地址
   openapiExportAll: false # OpenAPI导出范围:false=仅App端(含推送),true=全部(App+CMS)
   swaggerPath: "/f9acdb1da4ed11ecc115d613e291af14-swagger"  # 内置SwaggerUI展示地址  # 内置SwaggerUI展示地址
-  serverRoot: 'D:/company-code/app-code/live-server'
-  imageStaticPrefix: "/images"  # 图片 URL 前缀,须在 staticPaths 中配置对应 path
-  staticPaths:
-    - prefix: "/cms"
+  serverRoot: 'D:/company-code/app-code/live-server/official-site'  # GoFrame 默认静态目录; API 走 127.0.0.1, 官网走 web 子域
+  staticSites:  # *.localhost 解析到 127.0.0.1; 127.0.0.1:9443 不配此项,默认 API
+    - domain: "cms.localhost"
       path: "D:/company-code/app-code/live-server/cms"
-    - prefix: "/cms-export"
+    - domain: "cms-export.localhost"
       path: "D:/company-code/app-code/live-server/cms-export"
       ttlMinutes: 30
-    - prefix: "/images"
+    - domain: "images.localhost"
       path: "D:/log"
-    - prefix: "/official-site"
+    - domain: "web.localhost"
       path: "D:/company-code/app-code/live-server/official-site"
+    - domain: "h5-live.localhost"
+      path: "D:/company-code/app-code/live-server/h5-live"
   clientMaxBodySize: "5g"   # HTTP 请求体/上传上限(唯一大小限制,Go业务层不再校验)
   readTimeout: "120m"
   writeTimeout: "120m"
@@ -29,12 +30,7 @@ server:
   ####自定义配置
   debugEnv: true #是否开启debug环境,不会检查权限
   dumpRouterMap: false
-  # 多域名静态目录与HTTPS证书(SNI)
-  # domainSites:
-  #   - domain: "cdn.example.com"
-  #     root: "D:/cdn/site1"
-  #     certFile: "D:/certs/cdn.example.com/fullchain.pem"
-  #     keyFile: "D:/certs/cdn.example.com/privkey.pem"
+  # 远程环境 staticSites 示例见 config/dev/config.yaml
 
 bufferSize:
   db:

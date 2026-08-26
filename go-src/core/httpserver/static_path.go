@@ -30,6 +30,9 @@ func serveConfiguredStaticPath(r *ghttp.Request) {
 	if r == nil {
 		return
 	}
+	if handleStaticCORS(r) {
+		return
+	}
 	if r.Method != http.MethodGet && r.Method != http.MethodHead {
 		return
 	}
@@ -104,6 +107,7 @@ func isCMSAssetRequest(rel string) bool {
 }
 
 func writeStaticFile(r *ghttp.Request, filePath string) {
+	applyRequestCORS(r)
 	if r.Method == http.MethodHead {
 		r.Response.WriteHeader(http.StatusOK)
 		return

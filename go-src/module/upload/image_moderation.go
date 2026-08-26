@@ -19,7 +19,6 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/google/uuid"
-	"xr-game-server/core/cfg"
 	"xr-game-server/core/xrjson"
 
 	"xr-game-server/errercode"
@@ -121,11 +120,7 @@ func invalidateImageGreenClient() {
 }
 
 func buildImageURL(fileName string) string {
-	segment := cfg.GetImageStaticPathSegment()
-	if segment == "" {
-		return buildResourceUrl("/" + fileName)
-	}
-	return buildResourceUrl(fmt.Sprintf("/%s/%s", segment, fileName))
+	return buildImageResourceUrl(fileName)
 }
 
 func isPublicResourceURL(rawURL string) bool {

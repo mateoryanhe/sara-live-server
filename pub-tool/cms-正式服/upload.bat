@@ -197,6 +197,6 @@ if errorlevel 1 (
 del "%ZIP_FILE%"
 echo.
 echo Build and upload completed! [%DEPLOY_ENV%] -^> %REMOTE_DIR%
-echo Access: https://www.bigtktool.shop/cms/
+echo Access: https://cms.saralive.net/
 pause
 endlocal

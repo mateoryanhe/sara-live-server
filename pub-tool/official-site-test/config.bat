@@ -19,5 +19,5 @@ set REMOTE_DIR_TEST=/
 set REMOTE_DIR_PROD=/
 
 REM 注销账号等接口的 API 根地址（写入 js/site.js 的 apiBaseUrl）
-set API_BASE_URL_TEST=
-set API_BASE_URL_PROD=
+set API_BASE_URL_TEST=https://www.bigtktool.shop
+set API_BASE_URL_PROD=https://www.saralive.net

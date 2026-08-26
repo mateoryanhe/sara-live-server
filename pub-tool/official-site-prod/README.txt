@@ -24,5 +24,6 @@
   3. 通过 SFTP 逐文件上传（自动 mkdir 子目录）
 
 说明
-  远程目录 /home/ec2-user/cdn/official-site，与 config/prod/config.yaml 中 staticPaths 一致
-  访问示例: https://www.saralive.net/official-site/index.html
+  远程目录 /home/ec2-user/cdn/official-site，与 config/prod staticSites 中 web.saralive.net 一致
+  API 根域 www.saralive.net 不在 staticSites 中,默认走 Go API 路由
+  访问示例: https://web.saralive.net/

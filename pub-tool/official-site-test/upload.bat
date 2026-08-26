@@ -141,6 +141,6 @@ if exist "%STAGING_DIR%" rmdir /s /q "%STAGING_DIR%"
 echo.
 echo Official site upload completed! [%DEPLOY_ENV%]
 echo Uploaded via %SFTP_USER% to /home/ec2-user/cdn/official-site
-echo Access example: /official-site/index.html
+echo Access example: https://web.bigtktool.shop/
 pause
 endlocal

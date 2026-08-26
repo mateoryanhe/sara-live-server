@@ -36,15 +36,9 @@
   4. 远程解压到临时目录，仅覆盖包内文件（不 rm -rf 整目录，避免无关子目录权限导致失败）
 
 说明
-  REMOTE_DIR 默认 /home/ec2-user/cdn/official-site,与 server.staticPaths 中官网目录一致
-  cms、images 已拆分到独立目录,清空官网目录不会影响其他资源
-
-访问路径
-  默认远程目录 /home/ec2-user/cdn/official-site
-  若 serverRoot 为 /home/ec2-user/cdn，则访问：
-    https://你的域名/official-site/index.html
-
-  若使用 domainSites 将独立域名指到该目录，可改为部署到 site 根目录并调整 REMOTE_DIR_*。
+  远程目录 /home/ec2-user/cdn/official-site,与 config/dev staticSites 中 web.bigtktool.shop 一致
+  API 根域 www.bigtktool.shop 不在 staticSites 中,默认走 Go API 路由
+  访问示例: https://web.bigtktool.shop/
 
 密钥格式
   若密钥为 OpenSSH (.pem)，请用 PuTTYgen 转为 .ppk 后写入 SSH_KEY_PATH。

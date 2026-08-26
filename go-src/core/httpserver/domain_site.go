@@ -80,23 +80,122 @@ func serveDomainStatic(r *ghttp.Request, root string) {
 	if r == nil || root == "" {
 		return
 	}
+	if handleStaticCORS(r) {
+		return
+	}
 	if r.Method != http.MethodGet && r.Method != http.MethodHead {
 		return
 	}
-	reqPath := r.URL.Path
-	if reqPath == "/cms" || strings.HasPrefix(reqPath, "/cms/") {
-		return
-	}
-	filePath, ok := buildDomainStaticFilePath(root, reqPath)
-	if !ok || !gfile.Exists(filePath) {
+	reqPath := mapStaticSiteRequestPath(root, r.URL.Path)
+	cmsSite := isCMSDomainRoot(root)
+	if cmsSite && reqPath == "" {
 		r.Response.WriteStatus(http.StatusNotFound)
 		r.ExitAll()
 		return
 	}
+	if !cmsSite && (reqPath == "/cms" || strings.HasPrefix(reqPath, "/cms/")) {
+		return
+	}
+	filePath, ok := buildDomainStaticFilePath(root, reqPath)
+	if ok && gfile.Exists(filePath) && !gfile.IsDir(filePath) {
+		applyRequestCORS(r)
+		if r.Method == http.MethodHead {
+			r.Response.WriteHeader(http.StatusOK)
+		} else {
+			r.Response.ServeFile(filePath)
+		}
+		r.ExitAll()
+		return
+	}
+	if cmsSite {
+		serveCMSDomainSPA(r, root, reqPath)
+		return
+	}
+	applyRequestCORS(r)
+	r.Response.WriteStatus(http.StatusNotFound)
+	r.ExitAll()
+}
+
+func mapStaticSiteRequestPath(root, path string) string {
+	if isCMSDomainRoot(root) {
+		return mapCMSDomainRequestPath(path)
+	}
+	if isImagesDomainRoot(root) {
+		return mapLegacyPrefixRequestPath(path, cfg.GetImageStaticPrefix())
+	}
+	return path
+}
+
+func isImagesDomainRoot(root string) bool {
+	return strings.EqualFold(filepath.Base(filepath.Clean(root)), "images")
+}
+
+func mapLegacyPrefixRequestPath(path, prefix string) string {
+	prefix = strings.TrimSpace(prefix)
+	if prefix == "" || prefix == "/" {
+		return path
+	}
+	prefix = normalizeStaticURLPrefix(prefix)
+	if path == prefix || strings.HasPrefix(path, prefix+"/") {
+		path = strings.TrimPrefix(path, prefix)
+	}
+	if path == "" {
+		return "/"
+	}
+	if !strings.HasPrefix(path, "/") {
+		return "/" + path
+	}
+	return path
+}
+
+func normalizeStaticURLPrefix(prefix string) string {
+	prefix = strings.TrimSpace(prefix)
+	if prefix == "" {
+		return "/"
+	}
+	if !strings.HasPrefix(prefix, "/") {
+		prefix = "/" + prefix
+	}
+	return strings.TrimRight(prefix, "/")
+}
+
+func isCMSDomainRoot(root string) bool {
+	return strings.EqualFold(filepath.Base(filepath.Clean(root)), "cms")
+}
+
+func mapCMSDomainRequestPath(path string) string {
+	if path == "/cms" || strings.HasPrefix(path, "/cms/") {
+		path = strings.TrimPrefix(path, "/cms")
+	}
+	if path == "" {
+		return "/"
+	}
+	if !strings.HasPrefix(path, "/") {
+		return "/" + path
+	}
+	return path
+}
+
+func serveCMSDomainSPA(r *ghttp.Request, root, reqPath string) {
+	rel := strings.TrimPrefix(reqPath, "/")
+	if rel != "" && isCMSAssetRequest(rel) {
+		applyRequestCORS(r)
+		r.Response.WriteStatus(http.StatusNotFound)
+		r.ExitAll()
+		return
+	}
+	indexPath := filepath.Join(root, "index.html")
+	if !gfile.Exists(indexPath) {
+		applyRequestCORS(r)
+		r.Response.WriteStatus(http.StatusNotFound)
+		r.ExitAll()
+		return
+	}
+	applyRequestCORS(r)
 	if r.Method == http.MethodHead {
 		r.Response.WriteHeader(http.StatusOK)
 	} else {
-		r.Response.ServeFile(filePath)
+		r.Response.ServeFile(indexPath)
 	}
 	r.ExitAll()
 }

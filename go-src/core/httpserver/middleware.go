@@ -1,6 +1,8 @@
 package httpserver
 
 import (
+	"net/http"
+	"strings"
 	"sync/atomic"
 
 	"github.com/gogf/gf/v2/net/ghttp"
@@ -23,17 +25,49 @@ func middlewareRestartGuard(r *ghttp.Request) {
 }
 
 func middlewareCORS(r *ghttp.Request) {
-	options := r.Response.DefaultCORSOptions()
-	// CMS/App 自定义鉴权头
-	for _, header := range []string{"token", "authId", "reqId", PackageNameHeader, H5ClientHeader} {
-		if options.AllowHeaders == "" {
-			options.AllowHeaders = header
-			continue
+	applyRequestCORS(r)
+	if r.Method == http.MethodOptions {
+		if r.Response.Status == 0 {
+			r.Response.WriteHeader(http.StatusNoContent)
 		}
-		options.AllowHeaders += "," + header
+		return
 	}
-	r.Response.CORS(options)
 	r.Middleware.Next()
+}
+
+// applyRequestCORS 默认允许任意跨域,不做来源/头/方法限制.
+func applyRequestCORS(r *ghttp.Request) {
+	if r == nil {
+		return
+	}
+	h := r.Response.Header()
+	origin := strings.TrimSpace(r.Header.Get("Origin"))
+	if origin == "" {
+		origin = "*"
+	}
+	h.Set("Access-Control-Allow-Origin", origin)
+	h.Set("Access-Control-Allow-Credentials", "true")
+	h.Set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,PATCH,HEAD,OPTIONS")
+	allowHeaders := strings.TrimSpace(r.Header.Get("Access-Control-Request-Headers"))
+	if allowHeaders == "" {
+		allowHeaders = "*"
+	}
+	h.Set("Access-Control-Allow-Headers", allowHeaders)
+	h.Set("Access-Control-Expose-Headers", "*")
+	h.Set("Access-Control-Max-Age", "86400")
+}
+
+func handleStaticCORS(r *ghttp.Request) bool {
+	if r == nil {
+		return false
+	}
+	applyRequestCORS(r)
+	if r.Method == http.MethodOptions {
+		r.Response.WriteHeader(http.StatusNoContent)
+		r.ExitAll()
+		return true
+	}
+	return false
 }
 
 // 请求入口:收到 header 后记录日志.
