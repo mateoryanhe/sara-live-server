@@ -61,6 +61,34 @@
           </div>
         </el-form-item>
 
+        <el-form-item :label="t('pages.appVersionCfg.downloadUrlArm')" prop="downloadUrlArm">
+          <el-input
+              v-model="formData.downloadUrlArm"
+              maxlength="512"
+              show-word-limit
+              clearable
+              :placeholder="t('pages.appVersionCfg.downloadUrlArmTip')"
+              style="max-width: 560px"
+          />
+          <div class="form-tip">
+            {{ t('pages.appVersionCfg.downloadUrlArmTip') }}
+          </div>
+        </el-form-item>
+
+        <el-form-item :label="t('pages.appVersionCfg.downloadUrlAbi')" prop="downloadUrlAbi">
+          <el-input
+              v-model="formData.downloadUrlAbi"
+              maxlength="512"
+              show-word-limit
+              clearable
+              :placeholder="t('pages.appVersionCfg.downloadUrlAbiTip')"
+              style="max-width: 560px"
+          />
+          <div class="form-tip">
+            {{ t('pages.appVersionCfg.downloadUrlAbiTip') }}
+          </div>
+        </el-form-item>
+
         <el-form-item :label="t('pages.appVersionCfg.updateDetails')">
           <div class="detail-panel">
             <div class="detail-toolbar">
@@ -131,6 +159,8 @@ const formData = reactive({
   version: '',
   buildVersion: '',
   downloadUrl: '',
+  downloadUrlArm: '',
+  downloadUrlAbi: '',
   updateDetails: [] as AppVersionUpdateDetailItem[],
 })
 
@@ -147,6 +177,8 @@ const applyCfg = (cfg: AppVersionCfg | null | undefined) => {
   formData.version = cfg?.version || ''
   formData.buildVersion = cfg?.buildVersion || ''
   formData.downloadUrl = cfg?.downloadUrl || ''
+  formData.downloadUrlArm = cfg?.downloadUrlArm || ''
+  formData.downloadUrlAbi = cfg?.downloadUrlAbi || ''
   formData.updateDetails = (cfg?.updateDetails || []).map((item, index) => ({
     content: item.content || '',
     sort: item.sort || index + 1,
@@ -211,6 +243,8 @@ const handleSave = async () => {
       version: formData.version.trim(),
       buildVersion: formData.buildVersion.trim(),
       downloadUrl: formData.downloadUrl.trim(),
+      downloadUrlArm: formData.downloadUrlArm.trim(),
+      downloadUrlAbi: formData.downloadUrlAbi.trim(),
       updateDetails: buildSaveDetails(),
     })
     if (response?.success) {

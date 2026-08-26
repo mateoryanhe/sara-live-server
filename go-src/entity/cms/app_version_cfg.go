@@ -16,6 +16,8 @@ type AppVersionCfg struct {
 	Version             string `gorm:"size:32;default:'';comment:版本号" json:"version"`
 	BuildVersion        string `gorm:"size:32;default:'';comment:构建版本号" json:"buildVersion"`
 	DownloadUrl         string `gorm:"size:512;default:'';comment:下载地址" json:"downloadUrl"`
+	DownloadUrlArm      string `gorm:"size:512;default:'';comment:ARM架构下载地址" json:"downloadUrlArm"`
+	DownloadUrlAbi      string `gorm:"size:512;default:'';comment:ABI架构下载地址" json:"downloadUrlAbi"`
 }
 
 func initAppVersionCfg() {

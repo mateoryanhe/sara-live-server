@@ -17,6 +17,8 @@ type AppVersionCfgItem struct {
 	Version             string                        `json:"version"`
 	BuildVersion        string                        `json:"buildVersion"`
 	DownloadUrl         string                        `json:"downloadUrl"`
+	DownloadUrlArm      string                        `json:"downloadUrlArm"`
+	DownloadUrlAbi      string                        `json:"downloadUrlAbi"`
 	UpdateDetails       []*AppVersionUpdateDetailItem `json:"updateDetails"`
 	CreatedAt           string                        `json:"createdAt"`
 	UpdatedAt           string                        `json:"updatedAt"`
@@ -33,6 +35,8 @@ type SaveAppVersionCfgReq struct {
 	Version             string                        `json:"version" dc:"版本号"`
 	BuildVersion        string                        `json:"buildVersion" dc:"构建版本号"`
 	DownloadUrl         string                        `json:"downloadUrl" dc:"下载地址"`
+	DownloadUrlArm      string                        `json:"downloadUrlArm" dc:"ARM架构下载地址"`
+	DownloadUrlAbi      string                        `json:"downloadUrlAbi" dc:"ABI架构下载地址"`
 	UpdateDetails       []*AppVersionUpdateDetailItem `json:"updateDetails" dc:"更新明细列表"`
 }
 
@@ -50,5 +54,7 @@ type AppVersionQueryRes struct {
 	Version       string                        `json:"version"`
 	BuildVersion  string                        `json:"buildVersion"`
 	DownloadUrl   string                        `json:"downloadUrl"`
+	DownloadUrlArm string                       `json:"downloadUrlArm"`
+	DownloadUrlAbi string                       `json:"downloadUrlAbi"`
 	UpdateDetails []*AppVersionUpdateDetailItem `json:"updateDetails"`
 }

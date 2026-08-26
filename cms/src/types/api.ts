@@ -725,6 +725,8 @@ export interface AppVersionCfg {
     version: string
     buildVersion?: string
     downloadUrl?: string
+    downloadUrlArm?: string
+    downloadUrlAbi?: string
     updateDetails?: AppVersionUpdateDetailItem[]
     createdAt?: string
     updatedAt?: string
@@ -740,6 +742,8 @@ export interface SaveAppVersionCfgReq {
     version: string
     buildVersion?: string
     downloadUrl?: string
+    downloadUrlArm?: string
+    downloadUrlAbi?: string
     updateDetails?: AppVersionUpdateDetailItem[]
 }
 

@@ -13,6 +13,8 @@ type cfgSnapshot struct {
 	Version             string
 	BuildVersion        string
 	DownloadUrl         string
+	DownloadUrlArm      string
+	DownloadUrlAbi      string
 	UpdateDetails       []*appversioncfgdto.AppVersionUpdateDetailItem
 }
 
@@ -51,12 +53,14 @@ func toCfgSnapshot(row *entity.AppVersionCfg, details []*entity.AppVersionUpdate
 		Version:             row.Version,
 		BuildVersion:        row.BuildVersion,
 		DownloadUrl:         row.DownloadUrl,
+		DownloadUrlArm:      row.DownloadUrlArm,
+		DownloadUrlAbi:      row.DownloadUrlAbi,
 		UpdateDetails:       toUpdateDetailItems(details),
 	}
 }
 
 // GetVersionQuerySnapshot 从内存缓存读取 App 版本配置(App 端使用,不查库)
-func GetVersionQuerySnapshot() (enabled bool, version, buildVersion, downloadUrl string, updateDetails []*appversioncfgdto.AppVersionUpdateDetailItem) {
+func GetVersionQuerySnapshot() (enabled bool, version, buildVersion, downloadUrl, downloadUrlArm, downloadUrlAbi string, updateDetails []*appversioncfgdto.AppVersionUpdateDetailItem) {
 	snap := getCfgCache()
-	return snap.VersionQueryEnabled, snap.Version, snap.BuildVersion, snap.DownloadUrl, snap.UpdateDetails
+	return snap.VersionQueryEnabled, snap.Version, snap.BuildVersion, snap.DownloadUrl, snap.DownloadUrlArm, snap.DownloadUrlAbi, snap.UpdateDetails
 }
