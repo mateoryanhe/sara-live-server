@@ -50,6 +50,7 @@ func PhoneLogin(ctx context.Context, req *authdto.PhoneLoginReq) (res *authdto.P
 	}
 
 	applyLoginIpInfo(account, httpReq.GetClientIp())
+	accountdao.PublishAccountList(account.OpenId, account.Channel)
 	tokenStr := xrtoken.AddAppToken(account.ID)
 	userinfodao.GetUserInfoByUserId(account.ID)
 	userlogindevicedao.RefreshLoginDevice(account.ID, req.DeviceInfo)

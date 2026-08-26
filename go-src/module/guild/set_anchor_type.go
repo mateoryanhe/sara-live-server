@@ -37,6 +37,7 @@ func SetGuildAnchorType(ctx context.Context, req *guilddto.SetGuildAnchorTypeReq
 		return &guilddto.SetGuildAnchorTypeRes{Success: true}, nil
 	}
 	user.SetUserType(req.AnchorType)
+	userinfodao.PublishUserInfo(user)
 	liveroom.RefreshRoomListCache(ctx)
 	return &guilddto.SetGuildAnchorTypeRes{Success: true}, nil
 }

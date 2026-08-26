@@ -18,10 +18,10 @@ const (
 	appLiveRecordListCacheMaxSize    = AppLiveRecordListCachePageSize * appLiveRecordListCachedPages
 )
 
-var appLiveRecordListCacheMgr *cache.CacheMgr
+var appLiveRecordListCacheMgr *cache.ListCache[*entity.LiveRecord]
 
 func initAppLiveRecordListCache() {
-	appLiveRecordListCacheMgr = cache.NewCacheMgr()
+	appLiveRecordListCacheMgr = cache.NewListCache[*entity.LiveRecord]()
 }
 
 func appLiveRecordListCacheKey(anchorId uint64) string {
@@ -32,14 +32,13 @@ func getAppLiveRecordListCache(anchorId uint64) []*entity.LiveRecord {
 	if appLiveRecordListCacheMgr == nil || anchorId == 0 {
 		return make([]*entity.LiveRecord, 0)
 	}
-	v := appLiveRecordListCacheMgr.GetData(appLiveRecordListCacheKey(anchorId), func(ctx context.Context) (interface{}, error) {
+	v := appLiveRecordListCacheMgr.MustGetList(gctx.New(), appLiveRecordListCacheKey(anchorId), func(ctx context.Context) ([]*entity.LiveRecord, error) {
 		return loadAppLiveRecordsFromDB(anchorId, 1, appLiveRecordListCacheMaxSize), nil
 	})
-	list, _ := v.([]*entity.LiveRecord)
-	if list == nil {
+	if v == nil {
 		return make([]*entity.LiveRecord, 0)
 	}
-	return list
+	return v
 }
 
 func putAppLiveRecordListCache(anchorId uint64, list []*entity.LiveRecord) {
@@ -49,7 +48,7 @@ func putAppLiveRecordListCache(anchorId uint64, list []*entity.LiveRecord) {
 	if list == nil {
 		list = make([]*entity.LiveRecord, 0)
 	}
-	appLiveRecordListCacheMgr.FlushCache(appLiveRecordListCacheKey(anchorId), list)
+	appLiveRecordListCacheMgr.PublishList(gctx.New(), appLiveRecordListCacheKey(anchorId), list)
 }
 
 // PrependLiveRecordToAppListCache 新开直播后将记录插入列表缓存头部

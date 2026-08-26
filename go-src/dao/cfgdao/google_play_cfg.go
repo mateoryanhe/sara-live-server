@@ -1,6 +1,7 @@
 package cfgdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"strings"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -11,10 +12,10 @@ import (
 
 const googlePlayCfgCacheKey = "google_play_cfg"
 
-var googlePlayCfgCacheMgr *cache.CacheMgr
+var googlePlayCfgCacheMgr *cache.RowCache[*entity.GooglePlayCfg]
 
 func InitGooglePlayCfgDao() {
-	googlePlayCfgCacheMgr = cache.NewPermanentCacheMgr()
+	googlePlayCfgCacheMgr = cache.NewPermanentRowCache[*entity.GooglePlayCfg]()
 }
 
 func loadGooglePlayCfgFromDB() *entity.GooglePlayCfg {
@@ -43,7 +44,7 @@ func ReloadGooglePlayCfgCache() *entity.GooglePlayCfg {
 		return loadGooglePlayCfgFromDB()
 	}
 	row := loadGooglePlayCfgFromDB()
-	googlePlayCfgCacheMgr.FlushCache(googlePlayCfgCacheKey, row)
+	googlePlayCfgCacheMgr.PublishRow(gctx.New(), googlePlayCfgCacheKey, row)
 	return row
 }
 
@@ -52,15 +53,11 @@ func GetGooglePlayCfgFromMemory() *entity.GooglePlayCfg {
 	if googlePlayCfgCacheMgr == nil {
 		return nil
 	}
-	v := googlePlayCfgCacheMgr.GetFromCache(googlePlayCfgCacheKey)
-	if v == nil {
+	v, _ := googlePlayCfgCacheMgr.GetRowCached(gctx.New(), googlePlayCfgCacheKey)
+	if v == nil || v.ID == 0 {
 		return nil
 	}
-	row, _ := v.(*entity.GooglePlayCfg)
-	if row == nil || row.ID == 0 {
-		return nil
-	}
-	return row
+	return v
 }
 
 // GetGooglePlayCfgCached 获取 Google Play 配置(仅读内存,等价于 GetGooglePlayCfgFromMemory)

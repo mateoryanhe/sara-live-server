@@ -87,6 +87,7 @@ func UpdateNickname(ctx context.Context, req *userinfodto.UpdateNicknameReq) (re
 	userId := httpserver.GetAuthId(ctx)
 	data := userinfodao.GetUserInfoByUserId(userId)
 	data.SetNickname(nickname)
+	userinfodao.PublishUserInfo(data)
 	return &userinfodto.UpdateNicknameRes{
 		Nickname: data.Nickname,
 	}, nil
@@ -101,6 +102,7 @@ func UploadAvatar(ctx context.Context, req *userinfodto.UploadAvatarReq) (res *u
 	}
 	data := userinfodao.GetUserInfoByUserId(userId)
 	data.SetAvatar(name)
+	userinfodao.PublishUserInfo(data)
 	return &userinfodto.UploadAvatarRes{
 		Avatar: upload.ResolveAvatarUrlForUser(data.ID, data.Avatar),
 	}, nil

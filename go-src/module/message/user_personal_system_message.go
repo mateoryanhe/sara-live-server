@@ -30,7 +30,9 @@ func addPersonalSystemMessage(userId uint64, messageTypeId uint32, params string
 	messagedao.FlushUserPersonalSystemMessageListCache(userId, newList)
 
 	AddSystemMessageUnread(userId, entity.UserSystemMessageUnreadTypePersonal, 1)
-	messagedao.GetUnReadByUserId(userId).AddSystemUnread(1)
+	unread := messagedao.GetUnReadByUserId(userId)
+	unread.AddSystemUnread(1)
+	messagedao.PublishMessageUnread(unread)
 }
 
 // ListPersonalSystemMessage App端查询个人系统消息列表(只读缓存列表,不分页)

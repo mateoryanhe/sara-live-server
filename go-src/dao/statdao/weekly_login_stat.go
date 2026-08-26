@@ -1,6 +1,7 @@
 package statdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -9,15 +10,15 @@ import (
 	"xr-game-server/entity/stat"
 )
 
-var weeklyLoginStatCacheMgr *cache.CacheMgr
+var weeklyLoginStatCacheMgr *cache.RowCache[*entity.WeeklyLoginStat]
 
 func initWeeklyLoginStatDao() {
-	weeklyLoginStatCacheMgr = cache.NewCacheMgr()
+	weeklyLoginStatCacheMgr = cache.NewRowCache[*entity.WeeklyLoginStat]()
 }
 
 // GetWeeklyLoginStatByWeek 按周标识获取每周登录统计,不存在则新建内存对象
 func GetWeeklyLoginStatByWeek(week string) *entity.WeeklyLoginStat {
-	cacheData := weeklyLoginStatCacheMgr.GetData(week, func(ctx context.Context) (value interface{}, err error) {
+	return weeklyLoginStatCacheMgr.MustGetRow(gctx.New(), week, func(ctx context.Context) (*entity.WeeklyLoginStat, error) {
 		var data *entity.WeeklyLoginStat
 		_ = g.Model(string(entity.TbWeeklyLoginStat)).Unscoped().Where(g.Map{
 			string(db.IdName): week,
@@ -27,7 +28,6 @@ func GetWeeklyLoginStatByWeek(week string) *entity.WeeklyLoginStat {
 		}
 		return entity.NewWeeklyLoginStat(week), nil
 	})
-	return cacheData.(*entity.WeeklyLoginStat)
 }
 
 // ListRecentWeeklyLoginStats 查询最近N周登录统计(按时间正序)

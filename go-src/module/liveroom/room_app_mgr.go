@@ -110,6 +110,7 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 		if err := applyLiveRoomGameRecommends(existing.ID, category, req.GameCodes); err != nil {
 			return nil, err
 		}
+		liveroomdao.FlushRoomCache(existing)
 		return &liveroomdto.CreateLiveRoomRes{
 			RoomId:  strconv.FormatUint(existing.ID, 10),
 			GuildId: strconv.FormatUint(existing.GuildId, 10),
@@ -179,6 +180,7 @@ func UpdateCover(ctx context.Context, req *liveroomdto.UpdateCoverReq) (*liveroo
 	}
 	if room.Cover != req.Cover {
 		room.SetCover(req.Cover)
+		liveroomdao.FlushRoomCache(room)
 	}
 	return &liveroomdto.UpdateCoverRes{Success: true}, nil
 }
@@ -194,7 +196,7 @@ func UpdateNotice(ctx context.Context, req *liveroomdto.UpdateNoticeReq) (*liver
 	}
 	if room.Notice != req.Notice {
 		room.SetNotice(req.Notice)
-		//liveroomdao.FlushRoomCache(room)
+		liveroomdao.FlushRoomCache(room)
 	}
 	return &liveroomdto.UpdateNoticeRes{Success: true}, nil
 }
@@ -309,6 +311,7 @@ func EnsureAnchorRoom(anchorId, guildId uint64) *liveentity.LiveRoom {
 	if room := liveroomdao.GetRoomByAnchor(anchorId); room != nil {
 		if guildId > 0 && room.GuildId != guildId {
 			room.SetGuildId(guildId)
+			liveroomdao.FlushRoomCache(room)
 		}
 		return room
 	}
@@ -316,6 +319,9 @@ func EnsureAnchorRoom(anchorId, guildId uint64) *liveentity.LiveRoom {
 	if room := liveroomdao.GetRoomFromDB(anchorId); room != nil {
 		if guildId > 0 && room.GuildId != guildId {
 			room.SetGuildId(guildId)
+			if room.Status == liveentity.LiveRoomStatusOnShelf {
+				liveroomdao.FlushRoomCache(room)
+			}
 		}
 		if room.Status == liveentity.LiveRoomStatusOnShelf {
 			liveroomdao.AddRoomToCache(room)

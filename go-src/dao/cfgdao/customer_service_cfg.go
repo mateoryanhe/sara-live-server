@@ -2,7 +2,6 @@ package cfgdao
 
 import (
 	"context"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -12,10 +11,10 @@ import (
 
 const customerServiceCfgCacheKey = "cfg"
 
-var customerServiceCfgCacheMgr *cache.CacheMgr
+var customerServiceCfgCacheMgr *cache.RowCache[*entity.CustomerServiceCfg]
 
 func InitCustomerServiceCfgDao() {
-	customerServiceCfgCacheMgr = cache.NewCacheMgr()
+	customerServiceCfgCacheMgr = cache.NewRowCache[*entity.CustomerServiceCfg]()
 }
 
 func loadCustomerServiceCfgFromDB() *entity.CustomerServiceCfg {
@@ -42,8 +41,7 @@ func ReloadCustomerServiceCfgCache() {
 	if customerServiceCfgCacheMgr == nil {
 		return
 	}
-	customerServiceCfgCacheMgr.FlushCache(customerServiceCfgCacheKey, loadCustomerServiceCfgFromDB())
-	customerServiceCfgCacheMgr.Cache.UpdateExpire(gctx.New(), customerServiceCfgCacheKey, time.Hour*24*365*100)
+	customerServiceCfgCacheMgr.PublishRow(gctx.New(), customerServiceCfgCacheKey, loadCustomerServiceCfgFromDB())
 }
 
 // GetCustomerServiceCfgCached 获取客服联系配置(优先读 gcache,未命中再查库)
@@ -51,13 +49,8 @@ func GetCustomerServiceCfgCached() *entity.CustomerServiceCfg {
 	if customerServiceCfgCacheMgr == nil {
 		return loadCustomerServiceCfgFromDB()
 	}
-	v := customerServiceCfgCacheMgr.GetData(customerServiceCfgCacheKey, func(ctx context.Context) (value interface{}, err error) {
+	v := customerServiceCfgCacheMgr.MustGetRow(gctx.New(), customerServiceCfgCacheKey, func(ctx context.Context) (*entity.CustomerServiceCfg, error) {
 		return loadCustomerServiceCfgFromDB(), nil
 	})
-	customerServiceCfgCacheMgr.Cache.UpdateExpire(gctx.New(), customerServiceCfgCacheKey, time.Hour*24*365*100)
-	if v == nil {
-		return nil
-	}
-	row, _ := v.(*entity.CustomerServiceCfg)
-	return row
+	return v
 }

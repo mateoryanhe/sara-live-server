@@ -13,7 +13,7 @@ import (
 // PhoneChangePassword App端修改登录密码(校验旧密码,无需手机验证码)
 func PhoneChangePassword(ctx context.Context, req *authdto.PhoneChangePasswordReq) (*authdto.PhoneChangePasswordRes, error) {
 	userId := httpserver.GetAuthId(ctx)
-	account := accountdao.GetAccountById(userId)
+	account, openId, channel := accountdao.FindAccountInCacheByID(userId)
 	if account == nil || account.Password == "" {
 		return nil, errercode.CreateCode(errercode.LoginFail)
 	}
@@ -21,5 +21,6 @@ func PhoneChangePassword(ctx context.Context, req *authdto.PhoneChangePasswordRe
 		return nil, errercode.CreateCode(errercode.LoginFail)
 	}
 	account.SetPassword(gmd5.MustEncryptString(req.NewPassword))
+	accountdao.PublishAccountList(openId, channel)
 	return &authdto.PhoneChangePasswordRes{Success: true}, nil
 }

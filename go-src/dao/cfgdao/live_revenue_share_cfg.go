@@ -2,7 +2,6 @@ package cfgdao
 
 import (
 	"context"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -12,10 +11,10 @@ import (
 
 const liveRevenueShareCfgCacheKey = "live_revenue_share_cfg"
 
-var liveRevenueShareCfgCacheMgr *cache.CacheMgr
+var liveRevenueShareCfgCacheMgr *cache.RowCache[*entity.LiveRevenueShareCfg]
 
 func InitLiveRevenueShareCfgDao() {
-	liveRevenueShareCfgCacheMgr = cache.NewCacheMgr()
+	liveRevenueShareCfgCacheMgr = cache.NewRowCache[*entity.LiveRevenueShareCfg]()
 }
 
 func loadLiveRevenueShareCfgFromDB() *entity.LiveRevenueShareCfg {
@@ -41,21 +40,15 @@ func ReloadLiveRevenueShareCfgCache() {
 	if liveRevenueShareCfgCacheMgr == nil {
 		return
 	}
-	liveRevenueShareCfgCacheMgr.FlushCache(liveRevenueShareCfgCacheKey, loadLiveRevenueShareCfgFromDB())
-	liveRevenueShareCfgCacheMgr.Cache.UpdateExpire(gctx.New(), liveRevenueShareCfgCacheKey, time.Hour*24*365*100)
+	liveRevenueShareCfgCacheMgr.PublishRow(gctx.New(), liveRevenueShareCfgCacheKey, loadLiveRevenueShareCfgFromDB())
 }
 
 func GetLiveRevenueShareCfgCached() *entity.LiveRevenueShareCfg {
 	if liveRevenueShareCfgCacheMgr == nil {
 		return loadLiveRevenueShareCfgFromDB()
 	}
-	v := liveRevenueShareCfgCacheMgr.GetData(liveRevenueShareCfgCacheKey, func(ctx context.Context) (value interface{}, err error) {
+	v := liveRevenueShareCfgCacheMgr.MustGetRow(gctx.New(), liveRevenueShareCfgCacheKey, func(ctx context.Context) (*entity.LiveRevenueShareCfg, error) {
 		return loadLiveRevenueShareCfgFromDB(), nil
 	})
-	liveRevenueShareCfgCacheMgr.Cache.UpdateExpire(gctx.New(), liveRevenueShareCfgCacheKey, time.Hour*24*365*100)
-	if v == nil {
-		return nil
-	}
-	row, _ := v.(*entity.LiveRevenueShareCfg)
-	return row
+	return v
 }

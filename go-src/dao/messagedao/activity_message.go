@@ -15,10 +15,10 @@ import (
 
 const activityMessageCacheKey = "all"
 
-var activityMessageCacheMgr *cache.CacheMgr
+var activityMessageCacheMgr *cache.ListCache[*entity.ActivityMessage]
 
 func initActivityMessageDao() {
-	activityMessageCacheMgr = cache.NewCacheMgr()
+	activityMessageCacheMgr = cache.NewListCache[*entity.ActivityMessage]()
 }
 
 func loadAllActivityMessagesFromDB() []*entity.ActivityMessage {
@@ -34,14 +34,10 @@ func GetAllActivityMessagesCached() []*entity.ActivityMessage {
 	if activityMessageCacheMgr == nil {
 		return loadAllActivityMessagesFromDB()
 	}
-	v := activityMessageCacheMgr.GetData(activityMessageCacheKey, func(ctx context.Context) (interface{}, error) {
+	v := activityMessageCacheMgr.MustGetList(gctx.New(), activityMessageCacheKey, func(ctx context.Context) ([]*entity.ActivityMessage, error) {
 		return loadAllActivityMessagesFromDB(), nil
 	})
-	if v == nil {
-		return nil
-	}
-	rows, _ := v.([]*entity.ActivityMessage)
-	return rows
+	return v
 }
 
 // RemoveActivityMessageCache 活动消息变更后移除 gcache
@@ -49,7 +45,7 @@ func RemoveActivityMessageCache() {
 	if activityMessageCacheMgr == nil {
 		return
 	}
-	_, _ = activityMessageCacheMgr.Cache.Remove(gctx.New(), activityMessageCacheKey)
+	activityMessageCacheMgr.RemoveList(gctx.New(), activityMessageCacheKey)
 }
 
 func GetActivityMessageById(id uint64) *entity.ActivityMessage {

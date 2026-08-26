@@ -12,18 +12,18 @@ import (
 
 const unreadDetailPageSize = 40
 
-var messageUnreadDetailCacheMgr *cache.CacheMgr
+var messageUnreadDetailCacheMgr *cache.RowCache[*entity.UserMessageUnreadDetail]
 
 func initMessageUnreadDetailDao() {
-	messageUnreadDetailCacheMgr = cache.NewCacheMgr()
+	messageUnreadDetailCacheMgr = cache.NewRowCache[*entity.UserMessageUnreadDetail]()
 }
 
 // GetUnreadDetailByReceiverSender 按接收者与发送者查询未读明细,优先读缓存,缓存未命中再查库
 func GetUnreadDetailByReceiverSender(senderId, userId uint64) *entity.UserMessageUnreadDetail {
 	id := entity.BuildUserMessageUnreadDetailId(userId, senderId)
-	v := messageUnreadDetailCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
+	v := messageUnreadDetailCacheMgr.MustGetRow(gctx.New(), id, func(ctx context.Context) (*entity.UserMessageUnreadDetail, error) {
 		var row *entity.UserMessageUnreadDetail
-		if err = g.Model(string(entity.TbUserMessageUnreadDetail)).Where("id = ?", id).Scan(&row); err != nil {
+		if err := g.Model(string(entity.TbUserMessageUnreadDetail)).Where("id = ?", id).Scan(&row); err != nil {
 			return entity.NewUserMessageUnreadDetail(userId, senderId), err
 		}
 		if row == nil || row.ID == "" {
@@ -31,14 +31,10 @@ func GetUnreadDetailByReceiverSender(senderId, userId uint64) *entity.UserMessag
 		}
 		return row, nil
 	})
-	if v == nil {
+	if v == nil || v.ID == "" {
 		return nil
 	}
-	row, _ := v.(*entity.UserMessageUnreadDetail)
-	if row == nil || row.ID == "" {
-		return nil
-	}
-	return row
+	return v
 }
 
 // FlushUnreadDetailCache 刷新单条未读明细缓存
@@ -46,7 +42,7 @@ func FlushUnreadDetailCache(detail *entity.UserMessageUnreadDetail) {
 	if detail == nil || detail.ID == "" || messageUnreadDetailCacheMgr == nil {
 		return
 	}
-	messageUnreadDetailCacheMgr.FlushCache(detail.ID, detail)
+	messageUnreadDetailCacheMgr.PublishRow(gctx.New(), detail.ID, detail)
 }
 
 func listCachedUnreadDetailsByUserId(userId uint64) []*entity.UserMessageUnreadDetail {
@@ -54,18 +50,14 @@ func listCachedUnreadDetailsByUserId(userId uint64) []*entity.UserMessageUnreadD
 		return nil
 	}
 	ctx := gctx.New()
-	keys, err := messageUnreadDetailCacheMgr.Cache.Keys(ctx)
+	keys, err := messageUnreadDetailCacheMgr.Keys(ctx)
 	if err != nil || len(keys) == 0 {
 		return nil
 	}
 
 	list := make([]*entity.UserMessageUnreadDetail, 0)
 	for _, key := range keys {
-		value, err := messageUnreadDetailCacheMgr.Cache.Get(ctx, key)
-		if err != nil || value == nil || value.IsNil() {
-			continue
-		}
-		item, ok := value.Val().(*entity.UserMessageUnreadDetail)
+		item, ok := messageUnreadDetailCacheMgr.GetRowCached(ctx, key)
 		if !ok || item == nil || item.UserId != userId {
 			continue
 		}

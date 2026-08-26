@@ -27,14 +27,20 @@ func RecordValidAudience(userId uint64, statAt time.Time) {
 func recordPeriodAudienceUser(statAt time.Time, userId uint64) {
 	date := entity.FormatDailyLoginStatDate(statAt)
 	if statdao.TryRecordDailyAudience(date, userId) {
-		statdao.GetDailyLoginStatByDate(date).AddAudienceUserCount(1)
+		dailyStat := statdao.GetDailyLoginStatByDate(date)
+		dailyStat.AddAudienceUserCount(1)
+		statdao.PublishDailyLoginStat(dailyStat)
 	}
 	week := entity.FormatWeeklyLoginStatKey(statAt)
 	if statdao.TryRecordWeeklyAudience(week, userId) {
-		statdao.GetWeeklyLoginStatByWeek(week).AddAudienceUserCount(1)
+		weeklyStat := statdao.GetWeeklyLoginStatByWeek(week)
+		weeklyStat.AddAudienceUserCount(1)
+		statdao.PublishWeeklyLoginStat(weeklyStat)
 	}
 	month := entity.FormatMonthlyLoginStatKey(statAt)
 	if statdao.TryRecordMonthlyAudience(month, userId) {
-		statdao.GetMonthlyLoginStatByMonth(month).AddAudienceUserCount(1)
+		monthlyStat := statdao.GetMonthlyLoginStatByMonth(month)
+		monthlyStat.AddAudienceUserCount(1)
+		statdao.PublishMonthlyLoginStat(monthlyStat)
 	}
 }

@@ -20,6 +20,7 @@ func Ban(ctx context.Context, req *accountdto.BanReq) (resp *accountdto.BanRes, 
 	now := time.Now()
 	account.SetBanTime(&now)
 	account.SetBanApplyTime(req.BanApplyTime)
+	accountdao.PublishAccountList(req.OpenId, req.Channel)
 	push.Kick(req.AccountId)
 	invalidateAppToken(req.AccountId)
 
@@ -35,5 +36,6 @@ func UnBan(ctx context.Context, req *accountdto.UnBanReq) (bool, error) {
 	account.SetBanTime(nil)
 	account.SetBanApplyTime(nil)
 	account.SetUpdatedAt(time.Now())
+	accountdao.PublishAccountList(req.OpenId, req.Channel)
 	return true, nil
 }

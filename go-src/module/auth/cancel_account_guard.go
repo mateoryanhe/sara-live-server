@@ -16,10 +16,10 @@ const (
 	appCancelDailyKeyLayout = "2006-01-02"
 )
 
-var appCancelGuardCacheMgr *cache.CacheMgr
+var appCancelGuardCacheMgr *cache.RowCache[int]
 
 func initAppCancelGuard() {
-	appCancelGuardCacheMgr = cache.NewCacheMgr()
+	appCancelGuardCacheMgr = cache.NewRowCache[int]()
 }
 
 func checkAppCancelAccountGuard(openId string, channel uint) error {
@@ -45,21 +45,15 @@ func recordAppCancelAccountSuccess(openId string, channel uint) {
 	ctx := gctx.New()
 	key := appCancelDailyKey(openId, channel)
 	count := 1
-	if val, _ := appCancelGuardCacheMgr.Cache.Get(ctx, key); val != nil {
-		if current, ok := val.Val().(int); ok && current > 0 {
-			count = current + 1
-		}
+	if current, ok := appCancelGuardCacheMgr.GetRowCached(ctx, key); ok && current > 0 {
+		count = current + 1
 	}
 	setAppCancelGuardCache(key, count, ttlUntilNextDay())
 }
 
 func getAppCancelDailyCount(openId string, channel uint) int {
 	ctx := gctx.New()
-	val, _ := appCancelGuardCacheMgr.Cache.Get(ctx, appCancelDailyKey(openId, channel))
-	if val == nil {
-		return 0
-	}
-	count, ok := val.Val().(int)
+	count, ok := appCancelGuardCacheMgr.GetRowCached(ctx, appCancelDailyKey(openId, channel))
 	if !ok || count <= 0 {
 		return 0
 	}
@@ -80,6 +74,6 @@ func ttlUntilNextDay() time.Duration {
 	return ttl
 }
 
-func setAppCancelGuardCache(key string, data any, ttl time.Duration) {
-	_ = appCancelGuardCacheMgr.Cache.Set(gctx.New(), key, data, ttl)
+func setAppCancelGuardCache(key string, data int, ttl time.Duration) {
+	_ = appCancelGuardCacheMgr.SetRow(gctx.New(), key, data, ttl)
 }

@@ -45,10 +45,13 @@ func onGoldConsumeEvent(data any) {
 func recordPeriodGoldConsume(statAt time.Time, amount float64) {
 	daily := statdao.GetDailyLoginStatByDate(entity.FormatDailyLoginStatDate(statAt))
 	daily.AddGoldConsumeAmount(amount)
+	statdao.PublishDailyLoginStat(daily)
 
 	weekly := statdao.GetWeeklyLoginStatByWeek(entity.FormatWeeklyLoginStatKey(statAt))
 	weekly.AddGoldConsumeAmount(amount)
+	statdao.PublishWeeklyLoginStat(weekly)
 
 	monthly := statdao.GetMonthlyLoginStatByMonth(entity.FormatMonthlyLoginStatKey(statAt))
 	monthly.AddGoldConsumeAmount(amount)
+	statdao.PublishMonthlyLoginStat(monthly)
 }

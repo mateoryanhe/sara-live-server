@@ -12,10 +12,10 @@ import (
 
 const walletExchangeCfgCacheKey = "wallet_exchange_cfg"
 
-var walletExchangeCfgCacheMgr *cache.CacheMgr
+var walletExchangeCfgCacheMgr *cache.RowCache[*entity.WalletExchangeCfg]
 
 func InitWalletExchangeCfgDao() {
-	walletExchangeCfgCacheMgr = cache.NewCacheMgr()
+	walletExchangeCfgCacheMgr = cache.NewRowCache[*entity.WalletExchangeCfg]()
 }
 
 func loadWalletExchangeCfgFromDB() *entity.WalletExchangeCfg {
@@ -41,21 +41,17 @@ func ReloadWalletExchangeCfgCache() {
 	if walletExchangeCfgCacheMgr == nil {
 		return
 	}
-	walletExchangeCfgCacheMgr.FlushCache(walletExchangeCfgCacheKey, loadWalletExchangeCfgFromDB())
-	walletExchangeCfgCacheMgr.Cache.UpdateExpire(gctx.New(), walletExchangeCfgCacheKey, time.Hour*24*365*100)
+	walletExchangeCfgCacheMgr.PublishRow(gctx.New(), walletExchangeCfgCacheKey, loadWalletExchangeCfgFromDB())
+	_ = walletExchangeCfgCacheMgr.SetRow(gctx.New(), walletExchangeCfgCacheKey, loadWalletExchangeCfgFromDB(), time.Hour*24*365*100)
 }
 
 func GetWalletExchangeCfgCached() *entity.WalletExchangeCfg {
 	if walletExchangeCfgCacheMgr == nil {
 		return loadWalletExchangeCfgFromDB()
 	}
-	v := walletExchangeCfgCacheMgr.GetData(walletExchangeCfgCacheKey, func(ctx context.Context) (value interface{}, err error) {
+	v := walletExchangeCfgCacheMgr.MustGetRow(gctx.New(), walletExchangeCfgCacheKey, func(ctx context.Context) (*entity.WalletExchangeCfg, error) {
 		return loadWalletExchangeCfgFromDB(), nil
 	})
-	walletExchangeCfgCacheMgr.Cache.UpdateExpire(gctx.New(), walletExchangeCfgCacheKey, time.Hour*24*365*100)
-	if v == nil {
-		return nil
-	}
-	row, _ := v.(*entity.WalletExchangeCfg)
-	return row
+	_ = walletExchangeCfgCacheMgr.SetRow(gctx.New(), walletExchangeCfgCacheKey, v, time.Hour*24*365*100)
+	return v
 }

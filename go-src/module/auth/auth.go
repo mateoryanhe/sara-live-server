@@ -39,6 +39,7 @@ func TestLogin(ctx context.Context, req *authdto.TestLoginReq) (res *authdto.Tes
 	} else {
 		applyLoginIpInfo(data, clientIP)
 	}
+	accountdao.PublishAccountList(data.OpenId, data.Channel)
 	tokenStr := xrtoken.AddAppToken(data.ID)
 	userinfodao.GetUserInfoByUserId(data.ID)
 	res = &authdto.TestLoginRes{

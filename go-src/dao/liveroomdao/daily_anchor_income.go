@@ -16,6 +16,7 @@ func withDailyAnchorEffectiveLive(roomId uint64, at time.Time, fn func(*entity.D
 		return
 	}
 	fn(row)
+	PublishDailyAnchorEffectiveLive(row)
 }
 
 // MirrorDailyAnchorGiftEarn 同步礼物收益到主播日表

@@ -1,6 +1,7 @@
 package livefollowdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"fmt"
 
@@ -16,7 +17,7 @@ const (
 	followingListCacheMaxSize    = FollowingListCachePageSize * followingListCacheMaxPages
 )
 
-var followingListCacheMgr *cache.CacheMgr
+var followingListCacheMgr *cache.ListCache[*entity.LiveFollow]
 
 func followingListCacheKey(userId uint64) string {
 	return fmt.Sprintf("live_follow_following_list:%d", userId)
@@ -26,14 +27,9 @@ func getFollowingListCache(userId uint64) []*entity.LiveFollow {
 	if followingListCacheMgr == nil || userId == 0 {
 		return make([]*entity.LiveFollow, 0)
 	}
-	v := followingListCacheMgr.GetData(followingListCacheKey(userId), func(ctx context.Context) (interface{}, error) {
+	return followingListCacheMgr.MustGetList(gctx.New(), followingListCacheKey(userId), func(ctx context.Context) ([]*entity.LiveFollow, error) {
 		return loadFollowingsFromDB(userId, 1, followingListCacheMaxSize), nil
 	})
-	list, _ := v.([]*entity.LiveFollow)
-	if list == nil {
-		return make([]*entity.LiveFollow, 0)
-	}
-	return list
 }
 
 func putFollowingListCache(userId uint64, list []*entity.LiveFollow) {
@@ -43,7 +39,7 @@ func putFollowingListCache(userId uint64, list []*entity.LiveFollow) {
 	if list == nil {
 		list = make([]*entity.LiveFollow, 0)
 	}
-	followingListCacheMgr.FlushCache(followingListCacheKey(userId), list)
+	followingListCacheMgr.PublishList(gctx.New(), followingListCacheKey(userId), list)
 }
 
 // PrependFollowingToListCache 关注成功后写入列表缓存头部
@@ -73,7 +69,7 @@ func RemoveFollowingFromListCache(userId, anchorId uint64) {
 	if followingListCacheMgr == nil || userId == 0 || anchorId == 0 {
 		return
 	}
-	if followingListCacheMgr.GetFromCache(followingListCacheKey(userId)) == nil {
+	if _, ok := followingListCacheMgr.GetListCached(gctx.New(), followingListCacheKey(userId)); !ok {
 		return
 	}
 	list := getFollowingListCache(userId)

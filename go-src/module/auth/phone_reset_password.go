@@ -26,6 +26,7 @@ func PhoneResetPassword(ctx context.Context, req *authdto.PhoneResetPasswordReq)
 	}
 
 	account.SetPassword(gmd5.MustEncryptString(req.Password))
+	accountdao.PublishAccountList(account.OpenId, account.Channel)
 
 	return &authdto.PhoneResetPasswordRes{Success: true}, nil
 }

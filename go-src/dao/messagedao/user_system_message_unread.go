@@ -1,6 +1,7 @@
 package messagedao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -10,10 +11,10 @@ import (
 
 const SystemMessageUnreadListCacheMax = 100
 
-var systemMessageUnreadListCacheMgr *cache.CacheMgr
+var systemMessageUnreadListCacheMgr *cache.ListCache[*entity.UserSystemMessageUnread]
 
 func initSystemMessageUnreadDao() {
-	systemMessageUnreadListCacheMgr = cache.NewCacheMgr()
+	systemMessageUnreadListCacheMgr = cache.NewListCache[*entity.UserSystemMessageUnread]()
 }
 
 // GetSystemMessageUnreadListCache 获取用户系统消息未读列表(优先读缓存,未命中查库)
@@ -21,7 +22,7 @@ func GetSystemMessageUnreadListCache(userId uint64) []*entity.UserSystemMessageU
 	if userId == 0 || systemMessageUnreadListCacheMgr == nil {
 		return nil
 	}
-	v := systemMessageUnreadListCacheMgr.GetData(userId, func(ctx context.Context) (interface{}, error) {
+	v := systemMessageUnreadListCacheMgr.MustGetList(gctx.New(), userId, func(ctx context.Context) ([]*entity.UserSystemMessageUnread, error) {
 		list := make([]*entity.UserSystemMessageUnread, 0)
 		_ = g.Model(string(entity.TbUserSystemMessageUnread)).Ctx(context.Background()).
 			Where("user_id = ? AND unread_count > 0", userId).
@@ -30,8 +31,7 @@ func GetSystemMessageUnreadListCache(userId uint64) []*entity.UserSystemMessageU
 			Scan(&list)
 		return list, nil
 	})
-	list, _ := v.([]*entity.UserSystemMessageUnread)
-	return list
+	return v
 }
 
 // FlushSystemMessageUnreadListCache 刷新用户系统消息未读列表缓存
@@ -42,5 +42,5 @@ func FlushSystemMessageUnreadListCache(userId uint64, list []*entity.UserSystemM
 	if list == nil {
 		list = make([]*entity.UserSystemMessageUnread, 0)
 	}
-	systemMessageUnreadListCacheMgr.FlushCache(userId, list)
+	systemMessageUnreadListCacheMgr.PublishList(gctx.New(), userId, list)
 }

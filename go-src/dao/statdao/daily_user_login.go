@@ -1,6 +1,7 @@
 package statdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"time"
 
@@ -9,14 +10,14 @@ import (
 	"xr-game-server/entity/stat"
 )
 
-var dailyUserLoginCacheMgr *cache.CacheMgr
+var dailyUserLoginCacheMgr *cache.RowCache[*entity.DailyUserLogin]
 
 func initDailyUserLoginDao() {
-	dailyUserLoginCacheMgr = cache.NewCacheMgr()
+	dailyUserLoginCacheMgr = cache.NewRowCache[*entity.DailyUserLogin]()
 }
 
 func getDailyUserLoginById(id string, date string, userId uint64) *entity.DailyUserLogin {
-	v := dailyUserLoginCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
+	v := dailyUserLoginCacheMgr.MustGetRow(gctx.New(), id, func(ctx context.Context) (*entity.DailyUserLogin, error) {
 		var row *entity.DailyUserLogin
 		_ = g.Model(string(entity.TbDailyUserLogin)).Where("id = ?", id).Scan(&row)
 		if row == nil {
@@ -24,11 +25,7 @@ func getDailyUserLoginById(id string, date string, userId uint64) *entity.DailyU
 		}
 		return row, nil
 	})
-	if v == nil {
-		return nil
-	}
-	row, _ := v.(*entity.DailyUserLogin)
-	return row
+	return v
 }
 
 // TryRecordDailyLogin 记录用户当日首次登录;已登录过返回 false
@@ -40,5 +37,6 @@ func TryRecordDailyLogin(date string, userId uint64) bool {
 	}
 	now := time.Now()
 	data.SetCreatedAt(&now)
+	publishDailyUserLogin(data)
 	return true
 }

@@ -80,6 +80,7 @@ func setUserAsAnchorBatch(accountId uint64, userType uint8) error {
 		return errercode.CreateCode(errercode.InvalidParam)
 	}
 	user.SetUserType(userType)
+	userinfodao.PublishUserInfo(user)
 	EnsureAnchorRoom(accountId, 0)
 	return nil
 }
@@ -104,6 +105,7 @@ func ExitGuild(ctx context.Context, req *accountdto.ExitGuildReq) (*accountdto.E
 		liveroomdao.ArchiveAndClearUnsettledIncome(req.AnchorId, guildId)
 		liveroomdao.ClearRecentUnsettledDailyLiveDuration(req.AnchorId)
 		room.SetGuildId(0)
+		liveroomdao.FlushRoomCache(room)
 	}
 	RefreshRoomListCache(ctx)
 	return &accountdto.ExitGuildRes{Success: true}, nil

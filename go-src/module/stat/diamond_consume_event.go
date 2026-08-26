@@ -61,10 +61,13 @@ func onDiamondConsumeEvent(data any) {
 func recordPeriodDiamondConsume(statAt time.Time, amount float64) {
 	daily := statdao.GetDailyLoginStatByDate(entity.FormatDailyLoginStatDate(statAt))
 	daily.AddDiamondConsumeAmount(amount)
+	statdao.PublishDailyLoginStat(daily)
 
 	weekly := statdao.GetWeeklyLoginStatByWeek(entity.FormatWeeklyLoginStatKey(statAt))
 	weekly.AddDiamondConsumeAmount(amount)
+	statdao.PublishWeeklyLoginStat(weekly)
 
 	monthly := statdao.GetMonthlyLoginStatByMonth(entity.FormatMonthlyLoginStatKey(statAt))
 	monthly.AddDiamondConsumeAmount(amount)
+	statdao.PublishMonthlyLoginStat(monthly)
 }

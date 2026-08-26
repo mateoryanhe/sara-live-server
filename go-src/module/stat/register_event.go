@@ -36,16 +36,19 @@ func recordDailyRegister(now time.Time) {
 	date := entity.FormatDailyLoginStatDate(now)
 	stat := statdao.GetDailyLoginStatByDate(date)
 	stat.AddRegisterCount(1)
+		statdao.PublishDailyLoginStat(stat)
 }
 
 func recordWeeklyRegister(now time.Time) {
 	week := entity.FormatWeeklyLoginStatKey(now)
 	stat := statdao.GetWeeklyLoginStatByWeek(week)
 	stat.AddRegisterCount(1)
+		statdao.PublishWeeklyLoginStat(stat)
 }
 
 func recordMonthlyRegister(now time.Time) {
 	month := entity.FormatMonthlyLoginStatKey(now)
 	stat := statdao.GetMonthlyLoginStatByMonth(month)
 	stat.AddRegisterCount(1)
+		statdao.PublishMonthlyLoginStat(stat)
 }

@@ -28,12 +28,12 @@ const (
 )
 
 var (
-	cacheMgr *cache.CacheMgr
+	cacheMgr *cache.RowCache[any]
 )
 
 // Init 初始化验证码模块
 func Init() {
-	cacheMgr = cache.NewCacheMgr()
+	cacheMgr = cache.NewRowCache[any]()
 }
 
 // SendCode 发送验证码
@@ -74,7 +74,7 @@ func checkPhoneLimit(phoneKey string) error {
 	ctx := gctx.New()
 
 	// 1分钟内已发送则拒绝
-	if ok, _ := cacheMgr.Cache.Contains(ctx, phoneLimitKey); ok {
+	if cacheMgr.ContainsRow(ctx, phoneLimitKey) {
 		return errercode.CreateCode(errercode.RequestTooFrequent)
 	}
 
@@ -105,7 +105,7 @@ func sendSMS(areaCode, phone, code string) {
 }
 
 func setCacheWithTTL(key interface{}, data any, ttl time.Duration) {
-	_ = cacheMgr.Cache.Set(gctx.New(), key, data, ttl)
+	_ = cacheMgr.SetRow(gctx.New(), key, data, ttl)
 }
 
 // getVerifyCodeKey 获取验证码缓存key
@@ -142,11 +142,11 @@ func incrementDailyCount(key string) {
 // getDailyCount 获取每日发送次数
 func getDailyCount(key string) int {
 	ctx := gctx.New()
-	val, _ := cacheMgr.Cache.Get(ctx, key)
+	val, _ := cacheMgr.GetRowCached(ctx, key)
 	if val == nil {
 		return 0
 	}
-	count, ok := val.Val().(int)
+	count, ok := val.(int)
 	if !ok {
 		return 0
 	}
@@ -154,13 +154,11 @@ func getDailyCount(key string) int {
 }
 
 func isPhoneBlacklisted(phoneKey string) bool {
-	ctx := gctx.New()
-	ok, _ := cacheMgr.Cache.Contains(ctx, getPhoneBlacklistKey(phoneKey))
-	return ok
+	return cacheMgr.ContainsRow(gctx.New(), getPhoneBlacklistKey(phoneKey))
 }
 
 func clearVerifyFailCount(phoneKey string) {
-	_, _ = cacheMgr.Cache.Remove(gctx.New(), getVerifyFailCountKey(phoneKey))
+	cacheMgr.RemoveRow(gctx.New(), getVerifyFailCountKey(phoneKey))
 }
 
 func onVerifyFailure(phoneKey string, failCode errercode.XRCode) (bool, error) {
@@ -175,16 +173,16 @@ func markVerifyFailure(phoneKey string) error {
 	key := getVerifyFailCountKey(phoneKey)
 	count := 1
 
-	val, _ := cacheMgr.Cache.Get(ctx, key)
+	val, _ := cacheMgr.GetRowCached(ctx, key)
 	if val != nil {
-		if current, ok := val.Val().(int); ok && current > 0 {
+		if current, ok := val.(int); ok && current > 0 {
 			count = current + 1
 		}
 	}
 
 	if count >= VerifyFailLimit {
 		setCacheWithTTL(getPhoneBlacklistKey(phoneKey), time.Now().Unix(), PhoneBlacklistTime)
-		_, _ = cacheMgr.Cache.Remove(ctx, key)
+		cacheMgr.RemoveRow(ctx, key)
 		return errercode.CreateCode(errercode.PhoneVerifyBlocked)
 	}
 
@@ -208,12 +206,12 @@ func VerifyCode(areaCode, phone, code string) (bool, error) {
 	cacheKey := getVerifyCodeKey(phoneKey)
 	cacheCtx := gctx.New()
 
-	val, _ := cacheMgr.Cache.Get(cacheCtx, cacheKey)
+	val, _ := cacheMgr.GetRowCached(cacheCtx, cacheKey)
 	if val == nil {
 		return onVerifyFailure(phoneKey, errercode.VerifyCodeExpired)
 	}
 
-	storedCode, ok := val.Val().(string)
+	storedCode, ok := val.(string)
 	if !ok {
 		return onVerifyFailure(phoneKey, errercode.VerifyCodeInvalid)
 	}
@@ -223,7 +221,7 @@ func VerifyCode(areaCode, phone, code string) (bool, error) {
 	}
 
 	clearVerifyFailCount(phoneKey)
-	_, _ = cacheMgr.Cache.Remove(cacheCtx, cacheKey)
+	cacheMgr.RemoveRow(cacheCtx, cacheKey)
 
 	return true, nil
 }

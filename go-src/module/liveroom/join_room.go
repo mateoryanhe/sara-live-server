@@ -45,6 +45,7 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 	}
 	if existing != nil && existing.KickTime != nil {
 		existing.SetKickTime(nil)
+		liveroomdao.PublishLiveRoomOnline(existing)
 	}
 
 	if err := ensureCanJoinPrivateRoom(userId, room); err != nil {
@@ -60,6 +61,7 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 	existing.SetStatus(entity.LiveRoomOnlineStatusOnline)
 	existing.SetJoinTime(&now)
 	existing.SetHeartTime(&now)
+	liveroomdao.PublishLiveRoomOnline(existing)
 	addToOnline(userId, room.ID)
 	markContributionRankDataChanged(room.ID)
 	refreshRoomAudienceCaches(room.ID)
@@ -78,6 +80,7 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 		if user := userinfodao.GetUserInfoByUserId(userId); user != nil {
 			user.SetLiveRoomId(room.ID)
 			user.SetLiveRoomVer(httpserver.GetReqId(ctx))
+			userinfodao.PublishUserInfo(user)
 		}
 	}
 	broadcastAudienceJoin(room.ID, userId, getLenForRoom(room.ID))
@@ -93,6 +96,7 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 		if liveroomdao.TryRecordLiveRecordAudience(room.LiveRecordId, userId) {
 			if liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId); liveRecord != nil {
 				liveRecord.AddTotalAudience(1)
+				liveroomdao.PublishLiveRecord(liveRecord)
 			}
 		}
 	}
@@ -115,6 +119,7 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 		//设置使用免费时长中
 		if pay.FreeTime > 0 {
 			pay.SetFreeUsed(true)
+			liveroomdao.PublishLiveRoomBillingPay(pay)
 		}
 		//预扣费
 		err := joinChargePrivateRoom(userId, room.ID)

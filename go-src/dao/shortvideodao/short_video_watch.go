@@ -1,6 +1,7 @@
 package shortvideodao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"sort"
 
@@ -15,10 +16,10 @@ const (
 	watchCacheMaxSize      = 1000
 )
 
-var watchCacheMgr *cache.CacheMgr
+var watchCacheMgr *cache.RowCache[*userWatchMap]
 
 func initShortVideoWatchDao() {
-	watchCacheMgr = cache.NewCacheMgr()
+	watchCacheMgr = cache.NewRowCache[*userWatchMap]()
 }
 
 type userWatchMap = gmap.KVMap[uint64, *entity.ShortVideoWatch]
@@ -28,14 +29,13 @@ func getWatchMap(userId uint64) *userWatchMap {
 	if watchCacheMgr == nil || userId == 0 {
 		return gmap.NewKVMap[uint64, *entity.ShortVideoWatch](true)
 	}
-	v := watchCacheMgr.GetData(userId, func(ctx context.Context) (interface{}, error) {
+	v := watchCacheMgr.MustGetRow(gctx.New(), userId, func(ctx context.Context) (*userWatchMap, error) {
 		return loadAllShortVideoWatchFromDB(userId), nil
 	})
-	m, _ := v.(*userWatchMap)
-	if m == nil {
+	if v == nil {
 		return gmap.NewKVMap[uint64, *entity.ShortVideoWatch](true)
 	}
-	return m
+	return v
 }
 
 func loadAllShortVideoWatchFromDB(userId uint64) *userWatchMap {
@@ -55,6 +55,13 @@ func loadAllShortVideoWatchFromDB(userId uint64) *userWatchMap {
 		}
 	}
 	return m
+}
+
+// PublishUserWatchCache 发布用户观看记录 map 缓存.
+func PublishUserWatchCache(userId uint64) {
+	if m := getWatchMap(userId); m != nil {
+		PublishWatchMap(userId, m)
+	}
 }
 
 func GetOneShortVideoWatch(userId, videoId uint64) *entity.ShortVideoWatch {
@@ -110,10 +117,9 @@ func removeWatchFromCacheByVideoId(videoId uint64) {
 	if watchCacheMgr == nil || videoId == 0 {
 		return
 	}
-	vals, _ := watchCacheMgr.Cache.Values(context.Background())
-	for _, v := range vals {
-		m, ok := v.(*userWatchMap)
-		if !ok || m == nil {
+	vals, _ := watchCacheMgr.Values(context.Background())
+	for _, m := range vals {
+		if m == nil {
 			continue
 		}
 		m.Remove(videoId)

@@ -15,6 +15,7 @@ func SetCanRank(_ context.Context, req *accountdto.SetCanRankReq) (*accountdto.S
 		return &accountdto.SetCanRankRes{Success: true}, nil
 	}
 	ext.SetCanRank(req.CanRank)
+	userinfodao.PublishUserExt(ext)
 	event.Pub(gameevent.RankListRefreshEvent, nil)
 	return &accountdto.SetCanRankRes{Success: true}, nil
 }

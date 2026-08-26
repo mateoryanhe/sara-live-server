@@ -1,6 +1,7 @@
 package statdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"time"
 
@@ -9,14 +10,14 @@ import (
 	"xr-game-server/entity/stat"
 )
 
-var weeklyUserLoginCacheMgr *cache.CacheMgr
+var weeklyUserLoginCacheMgr *cache.RowCache[*entity.WeeklyUserLogin]
 
 func initWeeklyUserLoginDao() {
-	weeklyUserLoginCacheMgr = cache.NewCacheMgr()
+	weeklyUserLoginCacheMgr = cache.NewRowCache[*entity.WeeklyUserLogin]()
 }
 
 func getWeeklyUserLoginById(id string, week string, userId uint64) *entity.WeeklyUserLogin {
-	v := weeklyUserLoginCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
+	v := weeklyUserLoginCacheMgr.MustGetRow(gctx.New(), id, func(ctx context.Context) (*entity.WeeklyUserLogin, error) {
 		var row *entity.WeeklyUserLogin
 		_ = g.Model(string(entity.TbWeeklyUserLogin)).Where("id = ?", id).Scan(&row)
 		if row == nil {
@@ -24,11 +25,7 @@ func getWeeklyUserLoginById(id string, week string, userId uint64) *entity.Weekl
 		}
 		return row, nil
 	})
-	if v == nil {
-		return nil
-	}
-	row, _ := v.(*entity.WeeklyUserLogin)
-	return row
+	return v
 }
 
 // TryRecordWeeklyLogin 记录用户当周首次登录;已登录过返回 false
@@ -40,5 +37,6 @@ func TryRecordWeeklyLogin(week string, userId uint64) bool {
 	}
 	now := time.Now()
 	data.SetCreatedAt(&now)
+	publishWeeklyUserLogin(data)
 	return true
 }

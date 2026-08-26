@@ -1,6 +1,7 @@
 package statdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"time"
 
@@ -9,10 +10,10 @@ import (
 	"xr-game-server/entity/stat"
 )
 
-var monthlyUserDiamondConsumeCacheMgr *cache.CacheMgr
+var monthlyUserDiamondConsumeCacheMgr *cache.RowCache[*entity.MonthlyUserDiamondConsume]
 
 func initMonthlyUserDiamondConsumeDao() {
-	monthlyUserDiamondConsumeCacheMgr = cache.NewCacheMgr()
+	monthlyUserDiamondConsumeCacheMgr = cache.NewRowCache[*entity.MonthlyUserDiamondConsume]()
 }
 
 // TryRecordMonthlyDiamondConsume 记录用户当月首次钻石消费;已消费过返回 false
@@ -21,7 +22,7 @@ func TryRecordMonthlyDiamondConsume(month string, userId uint64) bool {
 		return false
 	}
 	id := entity.BuildMonthlyUserDiamondConsumeId(month, userId)
-	v := monthlyUserDiamondConsumeCacheMgr.GetData(id, func(ctx context.Context) (interface{}, error) {
+	v := monthlyUserDiamondConsumeCacheMgr.MustGetRow(gctx.New(), id, func(ctx context.Context) (*entity.MonthlyUserDiamondConsume, error) {
 		var row *entity.MonthlyUserDiamondConsume
 		_ = g.Model(string(entity.TbMonthlyUserDiamondConsume)).Where("id = ?", id).Scan(&row)
 		if row == nil {
@@ -32,11 +33,11 @@ func TryRecordMonthlyDiamondConsume(month string, userId uint64) bool {
 	if v == nil {
 		return false
 	}
-	data, _ := v.(*entity.MonthlyUserDiamondConsume)
-	if data == nil || data.CreatedAt != nil {
+	if v == nil || v.CreatedAt != nil {
 		return false
 	}
 	now := time.Now()
-	data.SetCreatedAt(&now)
+	v.SetCreatedAt(&now)
+	publishMonthlyUserDiamondConsume(v)
 	return true
 }

@@ -1,6 +1,7 @@
 package livefollowdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"fmt"
 
@@ -9,7 +10,7 @@ import (
 	"xr-game-server/entity/live"
 )
 
-var followerListCacheMgr *cache.CacheMgr
+var followerListCacheMgr *cache.ListCache[*entity.LiveFollow]
 
 func followerListCacheKey(anchorId uint64) string {
 	return fmt.Sprintf("live_follow_follower_list:%d", anchorId)
@@ -19,14 +20,9 @@ func getFollowerListCache(anchorId uint64) []*entity.LiveFollow {
 	if followerListCacheMgr == nil || anchorId == 0 {
 		return make([]*entity.LiveFollow, 0)
 	}
-	v := followerListCacheMgr.GetData(followerListCacheKey(anchorId), func(ctx context.Context) (interface{}, error) {
+	return followerListCacheMgr.MustGetList(gctx.New(), followerListCacheKey(anchorId), func(ctx context.Context) ([]*entity.LiveFollow, error) {
 		return loadFollowersFromDB(anchorId, 1, followingListCacheMaxSize), nil
 	})
-	list, _ := v.([]*entity.LiveFollow)
-	if list == nil {
-		return make([]*entity.LiveFollow, 0)
-	}
-	return list
 }
 
 func putFollowerListCache(anchorId uint64, list []*entity.LiveFollow) {
@@ -36,7 +32,7 @@ func putFollowerListCache(anchorId uint64, list []*entity.LiveFollow) {
 	if list == nil {
 		list = make([]*entity.LiveFollow, 0)
 	}
-	followerListCacheMgr.FlushCache(followerListCacheKey(anchorId), list)
+	followerListCacheMgr.PublishList(gctx.New(), followerListCacheKey(anchorId), list)
 }
 
 // PrependFollowerToListCache 关注成功后写入主播粉丝列表缓存头部
@@ -66,7 +62,7 @@ func RemoveFollowerFromListCache(anchorId, userId uint64) {
 	if followerListCacheMgr == nil || anchorId == 0 || userId == 0 {
 		return
 	}
-	if followerListCacheMgr.GetFromCache(followerListCacheKey(anchorId)) == nil {
+	if _, ok := followerListCacheMgr.GetListCached(gctx.New(), followerListCacheKey(anchorId)); !ok {
 		return
 	}
 	list := getFollowerListCache(anchorId)

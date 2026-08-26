@@ -18,10 +18,10 @@ const (
 	appGameBetListCacheMaxSize    = AppGameBetListCachePageSize * appGameBetListCachedPages
 )
 
-var appGameBetListCacheMgr *cache.CacheMgr
+var appGameBetListCacheMgr *cache.ListCache[*entity.GameBetLog]
 
 func initAppGameBetListCache() {
-	appGameBetListCacheMgr = cache.NewCacheMgr()
+	appGameBetListCacheMgr = cache.NewListCache[*entity.GameBetLog]()
 }
 
 func appGameBetListCacheKey(userId uint64) string {
@@ -32,14 +32,13 @@ func getAppGameBetListCache(userId uint64) []*entity.GameBetLog {
 	if appGameBetListCacheMgr == nil || userId == 0 {
 		return make([]*entity.GameBetLog, 0)
 	}
-	v := appGameBetListCacheMgr.GetData(appGameBetListCacheKey(userId), func(ctx context.Context) (interface{}, error) {
+	v := appGameBetListCacheMgr.MustGetList(gctx.New(), appGameBetListCacheKey(userId), func(ctx context.Context) ([]*entity.GameBetLog, error) {
 		return loadAppGameBetLogsFromDB(userId, 1, appGameBetListCacheMaxSize), nil
 	})
-	list, _ := v.([]*entity.GameBetLog)
-	if list == nil {
+	if v == nil {
 		return make([]*entity.GameBetLog, 0)
 	}
-	return list
+	return v
 }
 
 func putAppGameBetListCache(userId uint64, list []*entity.GameBetLog) {
@@ -49,7 +48,7 @@ func putAppGameBetListCache(userId uint64, list []*entity.GameBetLog) {
 	if list == nil {
 		list = make([]*entity.GameBetLog, 0)
 	}
-	appGameBetListCacheMgr.FlushCache(appGameBetListCacheKey(userId), list)
+	appGameBetListCacheMgr.PublishList(gctx.New(), appGameBetListCacheKey(userId), list)
 }
 
 // PrependGameBetToAppListCache 新下注记录插入列表缓存头部,超出容量则截断

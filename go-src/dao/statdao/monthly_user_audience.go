@@ -1,6 +1,7 @@
 package statdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"time"
 
@@ -9,10 +10,10 @@ import (
 	"xr-game-server/entity/stat"
 )
 
-var monthlyUserAudienceCacheMgr *cache.CacheMgr
+var monthlyUserAudienceCacheMgr *cache.RowCache[*entity.MonthlyUserAudience]
 
 func initMonthlyUserAudienceDao() {
-	monthlyUserAudienceCacheMgr = cache.NewCacheMgr()
+	monthlyUserAudienceCacheMgr = cache.NewRowCache[*entity.MonthlyUserAudience]()
 }
 
 // TryRecordMonthlyAudience 记录用户当月首次成为观众;已记录过返回 false
@@ -21,7 +22,7 @@ func TryRecordMonthlyAudience(month string, userId uint64) bool {
 		return false
 	}
 	id := entity.BuildMonthlyUserAudienceId(month, userId)
-	v := monthlyUserAudienceCacheMgr.GetData(id, func(ctx context.Context) (interface{}, error) {
+	v := monthlyUserAudienceCacheMgr.MustGetRow(gctx.New(), id, func(ctx context.Context) (*entity.MonthlyUserAudience, error) {
 		var row *entity.MonthlyUserAudience
 		_ = g.Model(string(entity.TbMonthlyUserAudience)).Where("id = ?", id).Scan(&row)
 		if row == nil {
@@ -32,11 +33,11 @@ func TryRecordMonthlyAudience(month string, userId uint64) bool {
 	if v == nil {
 		return false
 	}
-	data, _ := v.(*entity.MonthlyUserAudience)
-	if data == nil || data.CreatedAt != nil {
+	if v == nil || v.CreatedAt != nil {
 		return false
 	}
 	now := time.Now()
-	data.SetCreatedAt(&now)
+	v.SetCreatedAt(&now)
+	publishMonthlyUserAudience(v)
 	return true
 }

@@ -32,6 +32,7 @@ func WatchShortVideoStart(ctx context.Context, req *shortvideodto.WatchShortVide
 	// 累计观看次数(不去重,每次开始观看+1)
 	if stat := shortvideodao.GetStatByVideoId(req.VideoId); stat != nil {
 		stat.AddWatchCount(1)
+		shortvideodao.PublishShortVideoStat(stat)
 	}
 
 	//记录视频观看人数
@@ -43,13 +44,16 @@ func WatchShortVideoStart(ctx context.Context, req *shortvideodto.WatchShortVide
 		stat := shortvideodao.GetStatByVideoId(watch.VideoId)
 		if stat != nil {
 			stat.AddViewCount(1)
+			shortvideodao.PublishShortVideoStat(stat)
 			if video.AuthorId > 0 {
 				if authorStat := shortvideodao.GetAuthorStatByAuthorId(video.AuthorId); authorStat != nil {
 					authorStat.AddViewCount(1)
+					shortvideodao.PublishShortVideoAuthorStat(authorStat)
 				}
 			}
 		}
 	}
+	shortvideodao.PublishUserWatchCache(userId)
 
 	return &shortvideodto.WatchShortVideoStartRes{}, nil
 }
@@ -95,15 +99,18 @@ func PayShortVideo(ctx context.Context, req *shortvideodto.PayShortVideoReq) (*s
 
 	now := time.Now()
 	watch.SetPaidTime(&now)
+	shortvideodao.PublishUserWatchCache(userId)
 
 	lockName := fmt.Sprintf("pay_shortvideo_%v", req.VideoId)
 	gmlock.Lock(lockName)
 	defer gmlock.Unlock(lockName)
 	if stat := shortvideodao.GetStatByVideoId(req.VideoId); stat != nil {
 		stat.AddTotalDiamondIncome(price)
+		shortvideodao.PublishShortVideoStat(stat)
 		if video.AuthorId > 0 {
 			if authorStat := shortvideodao.GetAuthorStatByAuthorId(video.AuthorId); authorStat != nil {
 				authorStat.AddTotalDiamondIncome(price)
+				shortvideodao.PublishShortVideoAuthorStat(authorStat)
 			}
 		}
 	}

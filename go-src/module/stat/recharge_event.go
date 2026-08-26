@@ -63,14 +63,20 @@ func recordPeriodRechargeUser(statAt time.Time, userId uint64) {
 	}
 	date := statentity.FormatDailyLoginStatDate(statAt)
 	if statdao.TryRecordDailyRecharge(date, userId) {
-		statdao.GetDailyLoginStatByDate(date).AddRechargeUserCount(1)
+		dailyStat := statdao.GetDailyLoginStatByDate(date)
+		dailyStat.AddRechargeUserCount(1)
+		statdao.PublishDailyLoginStat(dailyStat)
 	}
 	week := statentity.FormatWeeklyLoginStatKey(statAt)
 	if statdao.TryRecordWeeklyRecharge(week, userId) {
-		statdao.GetWeeklyLoginStatByWeek(week).AddRechargeUserCount(1)
+		weeklyStat := statdao.GetWeeklyLoginStatByWeek(week)
+		weeklyStat.AddRechargeUserCount(1)
+		statdao.PublishWeeklyLoginStat(weeklyStat)
 	}
 	month := statentity.FormatMonthlyLoginStatKey(statAt)
 	if statdao.TryRecordMonthlyRecharge(month, userId) {
-		statdao.GetMonthlyLoginStatByMonth(month).AddRechargeUserCount(1)
+		monthlyStat := statdao.GetMonthlyLoginStatByMonth(month)
+		monthlyStat.AddRechargeUserCount(1)
+		statdao.PublishMonthlyLoginStat(monthlyStat)
 	}
 }

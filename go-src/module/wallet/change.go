@@ -17,14 +17,16 @@ func DiamondAdd(userId uint64, amount float64, reason currency.Reason) (float64,
 		return 0, errercode.CreateCode(errercode.DiamondAmountInvalid)
 	}
 
+	var before, after float64
 	data := userinfodao.GetUserInfoByUserId(userId)
-
-	before := data.Diamond
+	before = data.Diamond
 	data.AddDiamond(amount)
-	after := data.Diamond
+	after = data.Diamond
+	userinfodao.PublishUserInfo(data)
 	if reason == currency.ReasonRefund {
 		stat := userinfodao.GetUserCumulativeStatByUserId(userId)
 		stat.AddTotalDiamondConsume(-amount)
+		userinfodao.PublishUserCumulativeStat(stat)
 	}
 	event.Pub(gameevent.CurrencyChangeEvent, gameevent.NewCurrencyChangeEventData(
 		userId, gameevent.CurrencyTypeDiamond, gameevent.CurrencyActionAdd,
@@ -108,12 +110,14 @@ func DiamondSub(userId uint64, amount float64, reason currency.Reason) (float64,
 		pushDiamondToApp(userId, data.Diamond)
 		return 0, errercode.CreateCode(errercode.DiamondNotEnough)
 	}
+
 	before := data.Diamond
 	data.SubDiamond(amount)
 	after := data.Diamond
-	//统计钻石消耗
+	userinfodao.PublishUserInfo(data)
 	stat := userinfodao.GetUserCumulativeStatByUserId(userId)
 	stat.AddTotalDiamondConsume(amount)
+	userinfodao.PublishUserCumulativeStat(stat)
 
 	event.Pub(gameevent.CurrencyChangeEvent, gameevent.NewCurrencyChangeEventData(
 		userId, gameevent.CurrencyTypeDiamond, gameevent.CurrencyActionSub,
@@ -128,11 +132,13 @@ func GoldAdd(userId uint64, amount float64, reason currency.Reason, meta ...*gam
 	if amount <= 0 {
 		return 0, errercode.CreateCode(errercode.GoldAmountInvalid)
 	}
-	data := userinfodao.GetUserInfoByUserId(userId)
 
-	before := data.Gold
+	var before, after float64
+	data := userinfodao.GetUserInfoByUserId(userId)
+	before = data.Gold
 	data.AddGold(amount)
-	after := data.Gold
+	after = data.Gold
+	userinfodao.PublishUserInfo(data)
 	event.Pub(gameevent.CurrencyChangeEvent, gameevent.NewCurrencyChangeEventData(
 		userId, gameevent.CurrencyTypeGold, gameevent.CurrencyActionAdd,
 		amount, before, after, reason, meta...,
@@ -151,12 +157,15 @@ func GoldSub(userId uint64, amount float64, reason currency.Reason, meta ...*gam
 		pushGoldToApp(userId, data.Gold)
 		return 0, errercode.CreateCode(errercode.GoldNotEnough)
 	}
+
 	before := data.Gold
 	data.SubGold(amount)
 	after := data.Gold
-	//统计金币消耗
+	userinfodao.PublishUserInfo(data)
 	stat := userinfodao.GetUserCumulativeStatByUserId(userId)
 	stat.AddTotalGoldConsume(amount)
+	userinfodao.PublishUserCumulativeStat(stat)
+
 	event.Pub(gameevent.CurrencyChangeEvent, gameevent.NewCurrencyChangeEventData(
 		userId, gameevent.CurrencyTypeGold, gameevent.CurrencyActionSub,
 		amount, before, after, reason, meta...,

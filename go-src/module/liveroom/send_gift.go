@@ -152,6 +152,7 @@ func recordSendGiftStats(result *sendGiftResult) {
 		if result.room.LiveRecordId > 0 && liveroomdao.TryRecordLiveRecordGiftSender(result.room.LiveRecordId, result.senderId) {
 			liveRecord.AddTotalGiftSender(1)
 		}
+		liveroomdao.PublishLiveRecord(liveRecord)
 	}
 	liveroomdao.GetLiveRoomIncomeUnsettled(result.room.ID).AddGiftEarn(result.totalCost)
 	liveroomdao.GetLiveRoomIncomeTotal(result.room.ID).AddGiftEarn(result.totalCost)
@@ -165,6 +166,7 @@ func recordSendGiftStats(result *sendGiftResult) {
 	onlineId := entity.BuildLiveRoomOnlineId(result.senderId, result.room.ID)
 	if online := liveroomdao.GetOnlineById(onlineId, result.senderId, result.room.ID); online != nil {
 		online.AddTotalReward(result.totalCost)
+		liveroomdao.PublishLiveRoomOnline(online)
 	}
 	refreshRoomAudienceCaches(result.room.ID)
 }

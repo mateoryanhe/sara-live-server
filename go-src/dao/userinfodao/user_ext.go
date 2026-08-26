@@ -15,17 +15,17 @@ import (
 
 const cancelCodeValidDuration = 3 * 24 * time.Hour
 
-var userExtCacheMgr *cache.CacheMgr
+var userExtCacheMgr *cache.RowCache[*entity.UserExt]
 
 func initUserExtDao() {
-	userExtCacheMgr = cache.NewCacheMgr()
+	userExtCacheMgr = cache.NewRowCache[*entity.UserExt]()
 }
 
 // GetUserExtByUserId 获取用户扩展信息,不存在则新建内存对象(异步入库,默认允许上排行榜)
 func GetUserExtByUserId(userId uint64) *entity.UserExt {
-	cacheData := userExtCacheMgr.GetData(userId, func(ctx context.Context) (value interface{}, err error) {
+	return userExtCacheMgr.MustGetRow(gctx.New(), userId, func(ctx context.Context) (*entity.UserExt, error) {
 		var data *entity.UserExt
-		err = g.Model(string(entity.TbUserExt)).Unscoped().Where(g.Map{
+		_ = g.Model(string(entity.TbUserExt)).Unscoped().Where(g.Map{
 			string(db.IdName): userId,
 		}).Scan(&data)
 		if data != nil {
@@ -36,7 +36,14 @@ func GetUserExtByUserId(userId uint64) *entity.UserExt {
 		}
 		return entity.NewUserExt(userId), nil
 	})
-	return cacheData.(*entity.UserExt)
+}
+
+// PublishUserExt 原地修改后刷新缓存.
+func PublishUserExt(data *entity.UserExt) {
+	if data == nil || data.ID == 0 || userExtCacheMgr == nil {
+		return
+	}
+	userExtCacheMgr.PublishRow(gctx.New(), data.ID, data)
 }
 
 // GetUserExtFromMemory 仅从内存缓存读取用户扩展信息,未命中返回 nil
@@ -44,15 +51,11 @@ func GetUserExtFromMemory(userId uint64) *entity.UserExt {
 	if userId == 0 || userExtCacheMgr == nil {
 		return nil
 	}
-	v := userExtCacheMgr.GetFromCache(userId)
+	v, _ := userExtCacheMgr.GetRowCached(gctx.New(), userId)
 	if v == nil {
 		return nil
 	}
-	ext, ok := v.(*entity.UserExt)
-	if !ok || ext == nil {
-		return nil
-	}
-	return ext
+	return v
 }
 
 // IsRechargeWhitelist 用户是否在充值白名单(创建 App 订单后直接到账)
@@ -73,6 +76,7 @@ func MarkFirstRechargeDone(userId uint64) bool {
 		return false
 	}
 	ext.SetFirstRecharge(false)
+	PublishUserExt(ext)
 	return true
 }
 
@@ -84,6 +88,7 @@ func SaveRegisterInfo(userId uint64, info *entity.DeviceInfo) {
 	ext := GetUserExtByUserId(userId)
 	ext.SetPackageName(strings.TrimSpace(info.PackageName))
 	ext.SetAppVersion(strings.TrimSpace(info.AppVersion))
+	PublishUserExt(ext)
 }
 
 // IsCancelCodeValid 注销码是否存在且在有效期内
@@ -108,6 +113,7 @@ func EnsureCancelCode(userId uint64) *entity.UserExt {
 	ext := GetUserExtByUserId(userId)
 	if !IsCancelCodeValid(ext) {
 		refreshCancelCode(ext)
+		PublishUserExt(ext)
 	}
 	return ext
 }
@@ -157,7 +163,7 @@ func PreloadUserExtToCache(userIds []uint64) {
 		if row == nil || row.ID == 0 {
 			continue
 		}
-		userExtCacheMgr.FlushCache(row.ID, row)
+		userExtCacheMgr.PublishRow(gctx.New(), row.ID, row)
 	}
 }
 
@@ -182,8 +188,12 @@ func IncFollowCount(userId, anchorId uint64) {
 	if userId == 0 || anchorId == 0 {
 		return
 	}
-	GetUserExtByUserId(userId).AddFollowCount(1)
-	GetUserExtByUserId(anchorId).AddFollowerCount(1)
+	userExt := GetUserExtByUserId(userId)
+	userExt.AddFollowCount(1)
+	PublishUserExt(userExt)
+	anchorExt := GetUserExtByUserId(anchorId)
+	anchorExt.AddFollowerCount(1)
+	PublishUserExt(anchorExt)
 }
 
 // DecFollowCount 取消关注后减少双方计数
@@ -191,6 +201,10 @@ func DecFollowCount(userId, anchorId uint64) {
 	if userId == 0 || anchorId == 0 {
 		return
 	}
-	GetUserExtByUserId(userId).SubFollowCount(1)
-	GetUserExtByUserId(anchorId).SubFollowerCount(1)
+	userExt := GetUserExtByUserId(userId)
+	userExt.SubFollowCount(1)
+	PublishUserExt(userExt)
+	anchorExt := GetUserExtByUserId(anchorId)
+	anchorExt.SubFollowerCount(1)
+	PublishUserExt(anchorExt)
 }

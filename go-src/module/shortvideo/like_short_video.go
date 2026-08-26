@@ -31,6 +31,7 @@ func LikeShortVideo(ctx context.Context, req *shortvideodto.LikeShortVideoReq) (
 	}
 
 	watch.SetStatus(entity.ShortVideoLikeStatusLiked)
+	shortvideodao.PublishUserWatchCache(userId)
 
 	lockName := fmt.Sprintf("like_shortvideo_%v", req.VideoId)
 	gmlock.Lock(lockName)
@@ -41,9 +42,11 @@ func LikeShortVideo(ctx context.Context, req *shortvideodto.LikeShortVideoReq) (
 		return &shortvideodto.LikeShortVideoRes{LikeCount: 0}, nil
 	}
 	stat.AddLikeCount(1)
+	shortvideodao.PublishShortVideoStat(stat)
 	if row.AuthorId > 0 {
 		if authorStat := shortvideodao.GetAuthorStatByAuthorId(row.AuthorId); authorStat != nil {
 			authorStat.AddLikeCount(1)
+			shortvideodao.PublishShortVideoAuthorStat(authorStat)
 		}
 	}
 

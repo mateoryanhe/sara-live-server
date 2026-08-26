@@ -63,6 +63,7 @@ func SetAudienceMute(ctx context.Context, req *liveroomdto.SetAudienceMuteReq) (
 	}
 
 	online.SetMuted(req.Muted)
+	liveroomdao.PublishLiveRoomOnline(online)
 	push.Data(req.UserId, cmd.LiveRoomAudienceMute, &liveroomdto.AudienceMutePushItem{
 		RoomId: strconv.FormatUint(anchorId, 10),
 		UserId: strconv.FormatUint(req.UserId, 10),
@@ -90,6 +91,7 @@ func CancelAudienceMute(ctx context.Context, req *liveroomdto.CancelAudienceMute
 	}
 
 	online.SetMuted(false)
+	liveroomdao.PublishLiveRoomOnline(online)
 	push.Data(req.UserId, cmd.LiveRoomAudienceMute, &liveroomdto.AudienceMutePushItem{
 		RoomId: strconv.FormatUint(anchorId, 10),
 		UserId: strconv.FormatUint(req.UserId, 10),

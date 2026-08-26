@@ -65,6 +65,7 @@ func loginByDevice(ctx context.Context, deviceInfo *entity.DeviceInfo, channel u
 	} else {
 		applyLoginIpInfo(account, clientIP)
 	}
+	accountdao.PublishAccountList(account.OpenId, account.Channel)
 
 	tokenStr := xrtoken.AddAppToken(account.ID)
 	userinfodao.GetUserInfoByUserId(account.ID)

@@ -9,12 +9,12 @@ import (
 	"xr-game-server/entity/call"
 )
 
-var orderCacheMgr *cache.CacheMgr
+var orderCacheMgr *cache.RowCache[*entity.CallOrder]
 
 // Init 初始化通话相关 DAO 缓存
 func Init() {
-	orderCacheMgr = cache.NewCacheMgr()
-	userCacheMgr = cache.NewCacheMgr()
+	orderCacheMgr = cache.NewRowCache[*entity.CallOrder]()
+	userCacheMgr = cache.NewRowCache[*entity.CallUser]()
 }
 
 // GetOrderById 按主键查询通话订单(走缓存)
@@ -22,19 +22,15 @@ func GetOrderById(id uint64) *entity.CallOrder {
 	if id == 0 || orderCacheMgr == nil {
 		return nil
 	}
-	v := orderCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
+	v := orderCacheMgr.MustGetRow(gctx.New(), id, func(ctx context.Context) (*entity.CallOrder, error) {
 		var ret entity.CallOrder
-		err = g.DB().Model(string(entity.TbCallOrder)).WherePri(id).Scan(&ret)
+		err := g.DB().Model(string(entity.TbCallOrder)).WherePri(id).Scan(&ret)
 		if err != nil || ret.ID == 0 {
 			return nil, err
 		}
 		return &ret, nil
 	})
-	if v == nil {
-		return nil
-	}
-	o, _ := v.(*entity.CallOrder)
-	return o
+	return v
 }
 
 // AddOrderToCache 新建通话订单后写入缓存
@@ -42,7 +38,7 @@ func AddOrderToCache(o *entity.CallOrder) {
 	if o == nil || orderCacheMgr == nil {
 		return
 	}
-	orderCacheMgr.FlushCache(o.ID, o)
+	orderCacheMgr.PublishRow(gctx.New(), o.ID, o)
 }
 
 // FlushOrderCache 通话订单变更后刷新缓存
@@ -55,12 +51,8 @@ func GetOrderFromCache(id uint64) *entity.CallOrder {
 	if id == 0 || orderCacheMgr == nil {
 		return nil
 	}
-	v := orderCacheMgr.GetFromCache(id)
-	if v == nil {
-		return nil
-	}
-	o, _ := v.(*entity.CallOrder)
-	return o
+	v, _ := orderCacheMgr.GetRowCached(gctx.New(), id)
+	return v
 }
 
 // LoadUnclosedOrders 启动时加载未关闭通话订单(仅初始化调用一次)

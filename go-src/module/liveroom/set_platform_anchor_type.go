@@ -32,6 +32,7 @@ func SetPlatformAnchorType(ctx context.Context, req *accountdto.SetPlatformAncho
 		return &accountdto.SetPlatformAnchorTypeRes{Success: true}, nil
 	}
 	user.SetUserType(req.AnchorType)
+	userinfodao.PublishUserInfo(user)
 	RefreshRoomListCache(ctx)
 	return &accountdto.SetPlatformAnchorTypeRes{Success: true}, nil
 }

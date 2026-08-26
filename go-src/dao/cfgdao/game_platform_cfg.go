@@ -1,6 +1,7 @@
 package cfgdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"strings"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -11,10 +12,10 @@ import (
 
 const gamePlatformCfgCacheKey = "game_platform_cfg"
 
-var gamePlatformCfgCacheMgr *cache.CacheMgr
+var gamePlatformCfgCacheMgr *cache.RowCache[*entity.GamePlatformCfg]
 
 func InitGamePlatformCfgDao() {
-	gamePlatformCfgCacheMgr = cache.NewPermanentCacheMgr()
+	gamePlatformCfgCacheMgr = cache.NewPermanentRowCache[*entity.GamePlatformCfg]()
 }
 
 func loadGamePlatformCfgFromDB() *entity.GamePlatformCfg {
@@ -41,7 +42,7 @@ func ReloadGamePlatformCfgCache() *entity.GamePlatformCfg {
 		return loadGamePlatformCfgFromDB()
 	}
 	row := loadGamePlatformCfgFromDB()
-	gamePlatformCfgCacheMgr.FlushCache(gamePlatformCfgCacheKey, row)
+	gamePlatformCfgCacheMgr.PublishRow(gctx.New(), gamePlatformCfgCacheKey, row)
 	return row
 }
 
@@ -49,15 +50,11 @@ func GetGamePlatformCfgFromMemory() *entity.GamePlatformCfg {
 	if gamePlatformCfgCacheMgr == nil {
 		return nil
 	}
-	v := gamePlatformCfgCacheMgr.GetFromCache(gamePlatformCfgCacheKey)
-	if v == nil {
+	v, _ := gamePlatformCfgCacheMgr.GetRowCached(gctx.New(), gamePlatformCfgCacheKey)
+	if v == nil || v.ID == 0 {
 		return nil
 	}
-	row, _ := v.(*entity.GamePlatformCfg)
-	if row == nil || row.ID == 0 {
-		return nil
-	}
-	return row
+	return v
 }
 
 // GetVendorUrlFromMemory 从内存读取厂家 API 根地址.

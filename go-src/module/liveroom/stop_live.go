@@ -60,6 +60,7 @@ func stopLive(anchorId uint64) *entity.LiveRecord {
 	broadcastAnchorStopLive(anchorId, liveRecordId)
 	room.SetLiveRecordId(0)
 	room.SetHeartTime(nil)
+	liveroomdao.FlushRoomCache(room)
 	flushRoomList(gctx.New())
 
 	//清除直播记录
@@ -72,6 +73,7 @@ func stopLive(anchorId uint64) *entity.LiveRecord {
 	}
 	now := time.Now()
 	liveRecord.SetEndTime(&now)
+	liveroomdao.PublishLiveRecord(liveRecord)
 	// 单场直播时长大于30分钟才计入日表累计时长
 	if liveRecord.TotalLiveDuration > entity.MinAccumulateLiveSessionSec {
 		liveroomdao.AddDailyLiveDuration(anchorId, now, liveRecord.TotalLiveDuration)

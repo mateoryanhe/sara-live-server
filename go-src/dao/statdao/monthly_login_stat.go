@@ -1,6 +1,7 @@
 package statdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -9,15 +10,15 @@ import (
 	"xr-game-server/entity/stat"
 )
 
-var monthlyLoginStatCacheMgr *cache.CacheMgr
+var monthlyLoginStatCacheMgr *cache.RowCache[*entity.MonthlyLoginStat]
 
 func initMonthlyLoginStatDao() {
-	monthlyLoginStatCacheMgr = cache.NewCacheMgr()
+	monthlyLoginStatCacheMgr = cache.NewRowCache[*entity.MonthlyLoginStat]()
 }
 
 // GetMonthlyLoginStatByMonth 按月标识获取每月登录统计,不存在则新建内存对象
 func GetMonthlyLoginStatByMonth(month string) *entity.MonthlyLoginStat {
-	cacheData := monthlyLoginStatCacheMgr.GetData(month, func(ctx context.Context) (value interface{}, err error) {
+	return monthlyLoginStatCacheMgr.MustGetRow(gctx.New(), month, func(ctx context.Context) (*entity.MonthlyLoginStat, error) {
 		var data *entity.MonthlyLoginStat
 		_ = g.Model(string(entity.TbMonthlyLoginStat)).Unscoped().Where(g.Map{
 			string(db.IdName): month,
@@ -27,7 +28,6 @@ func GetMonthlyLoginStatByMonth(month string) *entity.MonthlyLoginStat {
 		}
 		return entity.NewMonthlyLoginStat(month), nil
 	})
-	return cacheData.(*entity.MonthlyLoginStat)
 }
 
 // ListRecentMonthlyLoginStats 查询最近N月登录统计(按时间正序)

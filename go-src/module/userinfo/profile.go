@@ -23,6 +23,7 @@ func UpdateGender(ctx context.Context, req *userinfodto.UpdateGenderReq) (*useri
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	data.SetGender(req.Gender)
+	userinfodao.PublishUserInfo(data)
 	return &userinfodto.UpdateGenderRes{Gender: data.Gender}, nil
 }
 
@@ -44,6 +45,7 @@ func UpdateBirthday(ctx context.Context, req *userinfodto.UpdateBirthdayReq) (*u
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	data.SetBirthday(&birthday)
+	userinfodao.PublishUserInfo(data)
 	return &userinfodto.UpdateBirthdayRes{Birthday: formatBirthday(data.Birthday)}, nil
 }
 

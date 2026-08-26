@@ -25,4 +25,5 @@ func onRegisterAssignNickname(data any) {
 		lang = randomnick.DefaultLang
 	}
 	user.SetNickname(randomnick.PickRandom(lang))
+	userinfodao.PublishUserInfo(user)
 }

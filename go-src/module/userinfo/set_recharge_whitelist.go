@@ -14,5 +14,6 @@ func SetRechargeWhitelist(_ context.Context, req *accountdto.SetRechargeWhitelis
 		return &accountdto.SetRechargeWhitelistRes{Success: true}, nil
 	}
 	ext.SetRechargeWhitelist(req.RechargeWhitelist)
+	userinfodao.PublishUserExt(ext)
 	return &accountdto.SetRechargeWhitelistRes{Success: true}, nil
 }

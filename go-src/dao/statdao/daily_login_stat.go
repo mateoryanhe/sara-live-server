@@ -1,6 +1,7 @@
 package statdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -9,15 +10,15 @@ import (
 	"xr-game-server/entity/stat"
 )
 
-var dailyLoginStatCacheMgr *cache.CacheMgr
+var dailyLoginStatCacheMgr *cache.RowCache[*entity.DailyLoginStat]
 
 func initDailyLoginStatDao() {
-	dailyLoginStatCacheMgr = cache.NewCacheMgr()
+	dailyLoginStatCacheMgr = cache.NewRowCache[*entity.DailyLoginStat]()
 }
 
 // GetDailyLoginStatByDate 按日期获取每日登录统计,不存在则新建内存对象
 func GetDailyLoginStatByDate(date string) *entity.DailyLoginStat {
-	cacheData := dailyLoginStatCacheMgr.GetData(date, func(ctx context.Context) (value interface{}, err error) {
+	return dailyLoginStatCacheMgr.MustGetRow(gctx.New(), date, func(ctx context.Context) (*entity.DailyLoginStat, error) {
 		var data *entity.DailyLoginStat
 		_ = g.Model(string(entity.TbDailyLoginStat)).Unscoped().Where(g.Map{
 			string(db.IdName): date,
@@ -27,7 +28,6 @@ func GetDailyLoginStatByDate(date string) *entity.DailyLoginStat {
 		}
 		return entity.NewDailyLoginStat(date), nil
 	})
-	return cacheData.(*entity.DailyLoginStat)
 }
 
 // ListRecentDailyLoginStats 查询最近N天登录统计(按时间正序)

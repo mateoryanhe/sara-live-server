@@ -108,6 +108,7 @@ func applyLiveRoomCallRevenue(roomId, liveRecordId, callerId, orderId uint64, am
 	billing := revenueType == liverevenue.LiveRoomVideoCallBilling
 	if liveRecord := liveroomdao.GetLiveRecordById(liveRecordId); liveRecord != nil {
 		liveRecord.ApplyVideoCallIncomeDelta(amount, ticket, billing)
+		liveroomdao.PublishLiveRecord(liveRecord)
 	}
 	applyRoomCallRevenueDelta(room, amount, ticket, billing)
 
@@ -131,6 +132,7 @@ func refundLiveRoomCallRevenue(order *callentity.CallOrder, liveRecordId uint64,
 
 	if log := liveroomdao.FindLatestUnrefundedVideoCallBillingLog(order.ID, order.CallerId); log != nil {
 		log.SetStatus(liveentity.LiveRevenueLogStatusRefunded)
+		liveroomdao.PublishRevenueLog(log)
 	}
 
 	room := liveroomdao.GetRoomById(order.ReceiverId)
@@ -139,6 +141,7 @@ func refundLiveRoomCallRevenue(order *callentity.CallOrder, liveRecordId uint64,
 	}
 	if liveRecord := liveroomdao.GetLiveRecordById(liveRecordId); liveRecord != nil {
 		liveRecord.ApplyVideoCallIncomeDelta(-refundAmount, false, true)
+		liveroomdao.PublishLiveRecord(liveRecord)
 	}
 	applyRoomCallRevenueDelta(room, -refundAmount, false, true)
 	liveroom.NotifyLiveRecordTotalIncome(room)

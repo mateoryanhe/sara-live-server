@@ -9,10 +9,10 @@ import (
 	"xr-game-server/entity/cms"
 )
 
-var rolePermissionCacheMgr *cache.CacheMgr
+var rolePermissionCacheMgr *cache.ListCache[*entity.Permission]
 
 func initRolePermissionCache() {
-	rolePermissionCacheMgr = cache.NewCacheMgr()
+	rolePermissionCacheMgr = cache.NewListCache[*entity.Permission]()
 }
 
 func loadRolePermissionsFromDB(roleId uint64) []*entity.Permission {
@@ -26,17 +26,10 @@ func GetGetPermissionList(roleId uint64) []*entity.Permission {
 	if roleId == 0 || rolePermissionCacheMgr == nil {
 		return []*entity.Permission{}
 	}
-	v := rolePermissionCacheMgr.GetData(roleId, func(ctx context.Context) (value interface{}, err error) {
+	v := rolePermissionCacheMgr.MustGetList(gctx.New(), roleId, func(ctx context.Context) ([]*entity.Permission, error) {
 		return loadRolePermissionsFromDB(roleId), nil
 	})
-	if v == nil {
-		return []*entity.Permission{}
-	}
-	list, _ := v.([]*entity.Permission)
-	if list == nil {
-		return []*entity.Permission{}
-	}
-	return list
+	return v
 }
 
 // CheckCmsApiPermission CMS 中间件按 URL 校验用户接口权限
@@ -152,8 +145,8 @@ func refreshRolePermissionCacheIfExists(roleId uint64) {
 	if rolePermissionCacheMgr == nil || roleId == 0 {
 		return
 	}
-	if rolePermissionCacheMgr.GetFromCache(roleId) != nil {
-		rolePermissionCacheMgr.FlushCache(roleId, loadRolePermissionsFromDB(roleId))
+	if _, ok := rolePermissionCacheMgr.GetListCached(gctx.New(), roleId); ok {
+		rolePermissionCacheMgr.PublishList(gctx.New(), roleId, loadRolePermissionsFromDB(roleId))
 	}
 }
 
@@ -161,7 +154,7 @@ func removeRolePermissionCacheIfExists(roleId uint64) {
 	if rolePermissionCacheMgr == nil || roleId == 0 {
 		return
 	}
-	if rolePermissionCacheMgr.GetFromCache(roleId) != nil {
-		_, _ = rolePermissionCacheMgr.Cache.Remove(gctx.New(), roleId)
+	if _, ok := rolePermissionCacheMgr.GetListCached(gctx.New(), roleId); ok {
+		rolePermissionCacheMgr.RemoveList(gctx.New(), roleId)
 	}
 }

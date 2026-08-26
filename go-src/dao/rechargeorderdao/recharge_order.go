@@ -10,10 +10,10 @@ import (
 	"xr-game-server/entity/recharge"
 )
 
-var orderCacheMgr *cache.CacheMgr
+var orderCacheMgr *cache.RowCache[*entity.RechargeOrder]
 
 func InitRechargeOrderDao() {
-	orderCacheMgr = cache.NewCacheMgr()
+	orderCacheMgr = cache.NewRowCache[*entity.RechargeOrder]()
 }
 
 // GetById 按主键查询充值订单(走缓存)
@@ -21,19 +21,15 @@ func GetById(id uint64) *entity.RechargeOrder {
 	if id == 0 {
 		return nil
 	}
-	v := orderCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
+	v := orderCacheMgr.MustGetRow(gctx.New(), id, func(ctx context.Context) (*entity.RechargeOrder, error) {
 		var ret entity.RechargeOrder
-		err = g.DB().Model(string(entity.TbRechargeOrder)).WherePri(id).Scan(&ret)
+		err := g.DB().Model(string(entity.TbRechargeOrder)).WherePri(id).Scan(&ret)
 		if err != nil || ret.ID == 0 {
 			return nil, err
 		}
 		return &ret, nil
 	})
-	if v == nil {
-		return nil
-	}
-	o, _ := v.(*entity.RechargeOrder)
-	return o
+	return v
 }
 
 // AddOrderToCache 新建订单后写入缓存
@@ -41,7 +37,7 @@ func AddOrderToCache(o *entity.RechargeOrder) {
 	if o == nil {
 		return
 	}
-	orderCacheMgr.FlushCache(o.ID, o)
+	orderCacheMgr.PublishRow(gctx.New(), o.ID, o)
 }
 
 // FlushOrderCache 订单变更后刷新缓存
@@ -49,7 +45,7 @@ func FlushOrderCache(o *entity.RechargeOrder) {
 	if o == nil {
 		return
 	}
-	orderCacheMgr.FlushCache(o.ID, o)
+	orderCacheMgr.PublishRow(gctx.New(), o.ID, o)
 }
 
 // GetFromCacheById 仅从内存缓存读取订单,未命中返回 nil(不查库)
@@ -57,12 +53,8 @@ func GetFromCacheById(id uint64) *entity.RechargeOrder {
 	if id == 0 || orderCacheMgr == nil {
 		return nil
 	}
-	v := orderCacheMgr.GetFromCache(id)
-	if v == nil {
-		return nil
-	}
-	o, _ := v.(*entity.RechargeOrder)
-	return o
+	v, _ := orderCacheMgr.GetRowCached(gctx.New(), id)
+	return v
 }
 
 // mergeOrderFromCache 列表项优先使用内存缓存中的最新订单数据
@@ -81,7 +73,7 @@ func RemoveOrderCache(orderId uint64) {
 	if orderCacheMgr == nil || orderId == 0 {
 		return
 	}
-	_, _ = orderCacheMgr.Cache.Remove(gctx.New(), orderId)
+	orderCacheMgr.RemoveRow(gctx.New(), orderId)
 }
 
 // GetByThirdOrderId 按第三方订单号查询(Google orderId 幂等)

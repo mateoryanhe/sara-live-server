@@ -1,6 +1,7 @@
 package userlogindevicedao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"strings"
 
@@ -10,17 +11,17 @@ import (
 	"xr-game-server/entity/user"
 )
 
-var loginDeviceCacheMgr *cache.CacheMgr
+var loginDeviceCacheMgr *cache.RowCache[*entity.UserLoginDevice]
 
 func InitUserLoginDeviceDao() {
-	loginDeviceCacheMgr = cache.NewCacheMgr()
+	loginDeviceCacheMgr = cache.NewRowCache[*entity.UserLoginDevice]()
 }
 
 // GetByUserId 获取用户登录设备信息,不存在则新建内存对象(异步入库)
 func GetByUserId(userId uint64) *entity.UserLoginDevice {
-	cacheData := loginDeviceCacheMgr.GetData(userId, func(ctx context.Context) (value interface{}, err error) {
+	return loginDeviceCacheMgr.MustGetRow(gctx.New(), userId, func(ctx context.Context) (*entity.UserLoginDevice, error) {
 		var data *entity.UserLoginDevice
-		err = g.Model(string(entity.TbUserLoginDevice)).Unscoped().Where(g.Map{
+		_ = g.Model(string(entity.TbUserLoginDevice)).Unscoped().Where(g.Map{
 			string(db.IdName): userId,
 		}).Scan(&data)
 		if data != nil {
@@ -28,7 +29,14 @@ func GetByUserId(userId uint64) *entity.UserLoginDevice {
 		}
 		return entity.NewUserLoginDevice(userId), nil
 	})
-	return cacheData.(*entity.UserLoginDevice)
+}
+
+// PublishLoginDevice 原地修改登录设备后刷新缓存.
+func PublishLoginDevice(data *entity.UserLoginDevice) {
+	if data == nil || data.ID == 0 || loginDeviceCacheMgr == nil {
+		return
+	}
+	loginDeviceCacheMgr.PublishRow(gctx.New(), data.ID, data)
 }
 
 // RefreshLoginDevice 刷新用户登录设备信息(缓冲写入,不直接入库)
@@ -38,6 +46,7 @@ func RefreshLoginDevice(userId uint64, info *entity.DeviceInfo) {
 	}
 	device := GetByUserId(userId)
 	device.Refresh(info)
+	PublishLoginDevice(device)
 }
 
 // FindUserIdByDeviceId 根据设备码查找最近在该设备登录的用户ID

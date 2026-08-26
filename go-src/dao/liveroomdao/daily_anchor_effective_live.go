@@ -14,10 +14,10 @@ import (
 
 const recentUnsettledDailyEffectiveLiveLimit = 8
 
-var dailyAnchorEffectiveLiveCacheMgr *cache.CacheMgr
+var dailyAnchorEffectiveLiveCacheMgr *cache.RowCache[*entity.DailyAnchorEffectiveLive]
 
 func initDailyAnchorEffectiveLiveDao() {
-	dailyAnchorEffectiveLiveCacheMgr = cache.NewCacheMgr()
+	dailyAnchorEffectiveLiveCacheMgr = cache.NewRowCache[*entity.DailyAnchorEffectiveLive]()
 }
 
 // GetDailyAnchorEffectiveLive 按日期+直播间获取每日直播时长(缓存;无则新建缓冲对象)
@@ -26,7 +26,7 @@ func GetDailyAnchorEffectiveLive(date string, roomId uint64) *entity.DailyAnchor
 		return nil
 	}
 	id := entity.BuildDailyAnchorEffectiveLiveId(date, roomId)
-	v := dailyAnchorEffectiveLiveCacheMgr.GetData(id, func(ctx context.Context) (interface{}, error) {
+	v := dailyAnchorEffectiveLiveCacheMgr.MustGetRow(gctx.New(), id, func(ctx context.Context) (*entity.DailyAnchorEffectiveLive, error) {
 		var row *entity.DailyAnchorEffectiveLive
 		_ = g.Model(string(entity.TbDailyAnchorEffectiveLive)).Where("id = ?", id).Scan(&row)
 		if row == nil {
@@ -34,11 +34,7 @@ func GetDailyAnchorEffectiveLive(date string, roomId uint64) *entity.DailyAnchor
 		}
 		return row, nil
 	})
-	if v == nil {
-		return nil
-	}
-	row, _ := v.(*entity.DailyAnchorEffectiveLive)
-	return row
+	return v
 }
 
 // ClearRecentUnsettledDailyLiveDuration 主播下架:直查DB取最近8条未结算日表,直播时长置0
@@ -193,10 +189,8 @@ func resolveDailyAnchorEffectiveLiveTarget(row *entity.DailyAnchorEffectiveLive)
 		return nil
 	}
 	if dailyAnchorEffectiveLiveCacheMgr != nil {
-		if v := dailyAnchorEffectiveLiveCacheMgr.GetFromCache(row.ID); v != nil {
-			if cached, ok := v.(*entity.DailyAnchorEffectiveLive); ok && cached != nil {
-				return cached
-			}
+		if v, _ := dailyAnchorEffectiveLiveCacheMgr.GetRowCached(gctx.New(), row.ID); v != nil {
+			return v
 		}
 	}
 	return row
@@ -213,6 +207,7 @@ func AddDailyLiveDuration(roomId uint64, at time.Time, durationSec float64) {
 		return
 	}
 	row.AddLiveDuration(durationSec)
+	PublishDailyAnchorEffectiveLive(row)
 	ForRoomGuild(roomId, func(guildId uint64) {
 		AddDailyGuildLiveDuration(guildId, at, durationSec)
 	})

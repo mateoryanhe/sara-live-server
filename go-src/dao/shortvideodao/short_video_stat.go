@@ -21,13 +21,13 @@ const (
 )
 
 var (
-	shortVideoStatCacheMgr *cache.CacheMgr
-	authorStatListCacheMgr *cache.CacheMgr
+	shortVideoStatCacheMgr *cache.RowCache[*entity.ShortVideoStat]
+	authorStatListCacheMgr *cache.ListCache[*entity.ShortVideoStat]
 )
 
 func initShortVideoStatDao() {
-	shortVideoStatCacheMgr = cache.NewPermanentCacheMgr()
-	authorStatListCacheMgr = cache.NewCacheMgr()
+	shortVideoStatCacheMgr = cache.NewPermanentRowCache[*entity.ShortVideoStat]()
+	authorStatListCacheMgr = cache.NewListCache[*entity.ShortVideoStat]()
 }
 
 func authorStatListCacheKey(authorId uint64) string {
@@ -39,9 +39,9 @@ func GetStatByVideoId(videoId uint64) *entity.ShortVideoStat {
 	if videoId == 0 || shortVideoStatCacheMgr == nil {
 		return nil
 	}
-	cacheData := shortVideoStatCacheMgr.GetData(videoId, func(ctx context.Context) (value interface{}, err error) {
+	return shortVideoStatCacheMgr.MustGetRow(gctx.New(), videoId, func(ctx context.Context) (*entity.ShortVideoStat, error) {
 		var row *entity.ShortVideoStat
-		err = g.Model(string(entity.TbShortVideoStat)).Where(g.Map{
+		_ = g.Model(string(entity.TbShortVideoStat)).Where(g.Map{
 			string(db.IdName): videoId,
 		}).Scan(&row)
 		if row != nil && row.ID != 0 {
@@ -57,12 +57,6 @@ func GetStatByVideoId(videoId uint64) *entity.ShortVideoStat {
 		}
 		return entity.NewShortVideoStat(videoId, authorId, title, publishedAt), nil
 	})
-	if cacheData == nil {
-		return nil
-	}
-
-	stat, _ := cacheData.(*entity.ShortVideoStat)
-	return stat
 }
 
 // GetStatFromCacheByVideoId 仅从内存缓存读取统计数据,未命中不访问数据库
@@ -70,26 +64,21 @@ func GetStatFromCacheByVideoId(videoId uint64) *entity.ShortVideoStat {
 	if videoId == 0 || shortVideoStatCacheMgr == nil {
 		return nil
 	}
-	v := shortVideoStatCacheMgr.GetFromCache(videoId)
-	if v == nil {
-		return nil
-	}
-	stat, _ := v.(*entity.ShortVideoStat)
-	return stat
+	v, _ := shortVideoStatCacheMgr.GetRowCached(gctx.New(), videoId)
+	return v
 }
 
 func getAuthorStatListCache(authorId uint64) []*entity.ShortVideoStat {
 	if authorStatListCacheMgr == nil || authorId == 0 {
 		return make([]*entity.ShortVideoStat, 0)
 	}
-	v := authorStatListCacheMgr.GetData(authorStatListCacheKey(authorId), func(ctx context.Context) (interface{}, error) {
+	v := authorStatListCacheMgr.MustGetList(gctx.New(), authorStatListCacheKey(authorId), func(ctx context.Context) ([]*entity.ShortVideoStat, error) {
 		return loadStatListPageFromDB(authorId, 1, statListCacheMaxSize), nil
 	})
-	list, _ := v.([]*entity.ShortVideoStat)
-	if list == nil {
+	if v == nil {
 		return make([]*entity.ShortVideoStat, 0)
 	}
-	return list
+	return v
 }
 
 func putAuthorStatListCache(authorId uint64, list []*entity.ShortVideoStat) {
@@ -99,7 +88,7 @@ func putAuthorStatListCache(authorId uint64, list []*entity.ShortVideoStat) {
 	if list == nil {
 		list = make([]*entity.ShortVideoStat, 0)
 	}
-	authorStatListCacheMgr.FlushCache(authorStatListCacheKey(authorId), list)
+	authorStatListCacheMgr.PublishList(gctx.New(), authorStatListCacheKey(authorId), list)
 }
 
 // PrependStatToAuthorListCache CMS审核通过时将统计记录写入作者列表缓存并按ID降序排序
@@ -189,7 +178,7 @@ func RemoveStatCacheByVideoId(videoId uint64) {
 	if shortVideoStatCacheMgr == nil || videoId == 0 {
 		return
 	}
-	_, _ = shortVideoStatCacheMgr.Cache.Remove(gctx.New(), videoId)
+	shortVideoStatCacheMgr.RemoveRow(gctx.New(), videoId)
 }
 
 // RefreshAuthorStatListCacheOnVideoDelete CMS删除视频时刷新作者统计列表缓存(移除该视频,其余项用最新统计替换并排序)
@@ -198,18 +187,14 @@ func RefreshAuthorStatListCacheOnVideoDelete(authorId, videoId uint64) {
 		return
 	}
 	key := authorStatListCacheKey(authorId)
-	v := authorStatListCacheMgr.GetFromCache(key)
-	if v == nil {
-		return
-	}
-	list, _ := v.([]*entity.ShortVideoStat)
-	if len(list) == 0 {
+	v, _ := authorStatListCacheMgr.GetListCached(gctx.New(), key)
+	if v == nil || len(v) == 0 {
 		return
 	}
 	found := false
 	newObj := GetStatByVideoId(videoId)
-	newList := make([]*entity.ShortVideoStat, 0, len(list))
-	for _, row := range list {
+	newList := make([]*entity.ShortVideoStat, 0, len(v))
+	for _, row := range v {
 		if row == nil {
 			continue
 		}

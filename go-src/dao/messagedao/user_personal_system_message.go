@@ -1,6 +1,7 @@
 package messagedao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -10,10 +11,10 @@ import (
 
 const UserPersonalSystemMessageListCacheMax = 50
 
-var userPersonalSystemMessageListCacheMgr *cache.CacheMgr
+var userPersonalSystemMessageListCacheMgr *cache.ListCache[*entity.UserPersonalSystemMessage]
 
 func initUserPersonalSystemMessageDao() {
-	userPersonalSystemMessageListCacheMgr = cache.NewCacheMgr()
+	userPersonalSystemMessageListCacheMgr = cache.NewListCache[*entity.UserPersonalSystemMessage]()
 }
 
 // GetUserPersonalSystemMessageListCache 获取用户个人系统消息列表缓存(前50条,按创建时间倒序)
@@ -21,7 +22,7 @@ func GetUserPersonalSystemMessageListCache(userId uint64) []*entity.UserPersonal
 	if userId == 0 || userPersonalSystemMessageListCacheMgr == nil {
 		return nil
 	}
-	v := userPersonalSystemMessageListCacheMgr.GetData(userId, func(ctx context.Context) (interface{}, error) {
+	v := userPersonalSystemMessageListCacheMgr.MustGetList(gctx.New(), userId, func(ctx context.Context) ([]*entity.UserPersonalSystemMessage, error) {
 		list := make([]*entity.UserPersonalSystemMessage, 0)
 		_ = g.Model(string(entity.TbUserPersonalSystemMessage)).Ctx(context.Background()).
 			Where("user_id = ?", userId).
@@ -30,8 +31,7 @@ func GetUserPersonalSystemMessageListCache(userId uint64) []*entity.UserPersonal
 			Scan(&list)
 		return list, nil
 	})
-	list, _ := v.([]*entity.UserPersonalSystemMessage)
-	return list
+	return v
 }
 
 // FlushUserPersonalSystemMessageListCache 刷新用户个人系统消息列表缓存
@@ -42,5 +42,5 @@ func FlushUserPersonalSystemMessageListCache(userId uint64, list []*entity.UserP
 	if list == nil {
 		list = make([]*entity.UserPersonalSystemMessage, 0)
 	}
-	userPersonalSystemMessageListCacheMgr.FlushCache(userId, list)
+	userPersonalSystemMessageListCacheMgr.PublishList(gctx.New(), userId, list)
 }

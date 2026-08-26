@@ -10,10 +10,10 @@ import (
 	"xr-game-server/entity/user"
 )
 
-var userCumulativeStatCacheMgr *cache.CacheMgr
+var userCumulativeStatCacheMgr *cache.RowCache[*entity.UserCumulativeStat]
 
 func initUserCumulativeStatDao() {
-	userCumulativeStatCacheMgr = cache.NewCacheMgr()
+	userCumulativeStatCacheMgr = cache.NewRowCache[*entity.UserCumulativeStat]()
 }
 
 // PreloadUserCumulativeStatToCache 批量预热 user_cumulative_stats 缓存
@@ -34,15 +34,23 @@ func PreloadUserCumulativeStatToCache(userIds []uint64) {
 		if row == nil || row.ID == 0 {
 			continue
 		}
-		userCumulativeStatCacheMgr.FlushCache(row.ID, row)
+		userCumulativeStatCacheMgr.PublishRow(gctx.New(), row.ID, row)
 	}
+}
+
+// PublishUserCumulativeStat 原地修改后刷新缓存.
+func PublishUserCumulativeStat(data *entity.UserCumulativeStat) {
+	if data == nil || data.ID == 0 || userCumulativeStatCacheMgr == nil {
+		return
+	}
+	userCumulativeStatCacheMgr.PublishRow(gctx.New(), data.ID, data)
 }
 
 // GetUserCumulativeStatByUserId 根据玩家ID获取累计数值,命中不了缓存从数据库拉取,数据库不存在则新建
 func GetUserCumulativeStatByUserId(userId uint64) *entity.UserCumulativeStat {
-	cacheData := userCumulativeStatCacheMgr.GetData(userId, func(ctx context.Context) (value interface{}, err error) {
+	return userCumulativeStatCacheMgr.MustGetRow(gctx.New(), userId, func(ctx context.Context) (*entity.UserCumulativeStat, error) {
 		var data *entity.UserCumulativeStat
-		err = g.Model(string(entity.TbUserCumulativeStat)).Unscoped().Where(g.Map{
+		_ = g.Model(string(entity.TbUserCumulativeStat)).Unscoped().Where(g.Map{
 			string(db.IdName): userId,
 		}).Scan(&data)
 		if data != nil {
@@ -50,5 +58,4 @@ func GetUserCumulativeStatByUserId(userId uint64) *entity.UserCumulativeStat {
 		}
 		return entity.NewUserCumulativeStat(userId), nil
 	})
-	return cacheData.(*entity.UserCumulativeStat)
 }

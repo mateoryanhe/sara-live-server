@@ -80,6 +80,7 @@ func flushAnchorId(room *entity.LiveRoom) {
 	//刷新房间状态,防止离线
 	now := time.Now()
 	room.SetHeartTime(&now)
+	liveroomdao.FlushRoomCache(room)
 	period := CommonPeriod
 	if cfg := liveroomdao.GetLiveRoomCfg(room.ID); cfg != nil && cfg.Category == entity.LiveRoomCategoryPrivate {
 		period = PrivatePeriod
@@ -88,6 +89,7 @@ func flushAnchorId(room *entity.LiveRoom) {
 	//记录本次直播
 	liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId)
 	liveRecord.AddTotalLiveDuration(sec)
+	liveroomdao.PublishLiveRecord(liveRecord)
 	//直播间未结算+生涯累计时长
 	if unsettled := liveroomdao.GetLiveRoomIncomeUnsettled(room.ID); unsettled != nil {
 		unsettled.AddTotalLiveDuration(sec)
@@ -107,6 +109,7 @@ func flushAudience(userId uint64, room *entity.LiveRoom) {
 		return
 	}
 	onlineData.SetHeartTime(&timeNow)
+	liveroomdao.PublishLiveRoomOnline(onlineData)
 }
 
 func addTask(userId uint64) {
@@ -146,6 +149,7 @@ func chkAudience(roomId uint64) {
 		onlineData := liveroomdao.GetOnlineById(onlineId, data, roomId)
 		if onlineData.HeartTime == nil {
 			onlineData.SetHeartTime(&now)
+			liveroomdao.PublishLiveRoomOnline(onlineData)
 		}
 		diff := now.Sub(*onlineData.HeartTime)
 		//如果相差超过5分钟,判定离线

@@ -13,7 +13,7 @@ import (
 	"xr-game-server/entity/user"
 )
 
-var accountCacheMgr *cache.CacheMgr
+var accountCacheMgr *cache.ListCache[*entity.Account]
 
 func GetAccountById(accountId uint64) *entity.Account {
 	var account *entity.Account
@@ -25,7 +25,7 @@ func GetAccountById(accountId uint64) *entity.Account {
 }
 
 func InitAccountDao() {
-	accountCacheMgr = cache.NewCacheMgr()
+	accountCacheMgr = cache.NewListCache[*entity.Account]()
 }
 
 func GetUserInfo(req *accountdto.QueryUserInfoReq) (int, []*accountdto.UserInfoDto) {

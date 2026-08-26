@@ -89,6 +89,7 @@ func SendPaidDanmaku(ctx context.Context, req *liveroomdto.SendPaidDanmakuReq) (
 
 	if liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId); liveRecord != nil {
 		liveRecord.AddPaidDanmakuEarn(price)
+		liveroomdao.PublishLiveRecord(liveRecord)
 	}
 	liveroomdao.GetLiveRoomIncomeUnsettled(room.ID).AddPaidDanmakuEarn(price)
 	liveroomdao.GetLiveRoomIncomeTotal(room.ID).AddPaidDanmakuEarn(price)
@@ -102,6 +103,7 @@ func SendPaidDanmaku(ctx context.Context, req *liveroomdto.SendPaidDanmakuReq) (
 	onlineId := entity.BuildLiveRoomOnlineId(senderId, req.RoomId)
 	if online := liveroomdao.GetOnlineById(onlineId, senderId, req.RoomId); online != nil {
 		online.AddTotalReward(price)
+		liveroomdao.PublishLiveRoomOnline(online)
 	}
 	refreshRoomAudienceCaches(req.RoomId)
 

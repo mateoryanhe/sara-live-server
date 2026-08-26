@@ -22,15 +22,21 @@ func recordPeriodGoldConsumeUser(statAt time.Time, userId uint64) {
 	}
 	date := statentity.FormatDailyLoginStatDate(statAt)
 	if statdao.TryRecordDailyGoldConsume(date, userId) {
-		statdao.GetDailyLoginStatByDate(date).AddGoldConsumeUserCount(1)
+		dailyStat := statdao.GetDailyLoginStatByDate(date)
+		dailyStat.AddGoldConsumeUserCount(1)
+		statdao.PublishDailyLoginStat(dailyStat)
 	}
 	week := statentity.FormatWeeklyLoginStatKey(statAt)
 	if statdao.TryRecordWeeklyGoldConsume(week, userId) {
-		statdao.GetWeeklyLoginStatByWeek(week).AddGoldConsumeUserCount(1)
+		weeklyStat := statdao.GetWeeklyLoginStatByWeek(week)
+		weeklyStat.AddGoldConsumeUserCount(1)
+		statdao.PublishWeeklyLoginStat(weeklyStat)
 	}
 	month := statentity.FormatMonthlyLoginStatKey(statAt)
 	if statdao.TryRecordMonthlyGoldConsume(month, userId) {
-		statdao.GetMonthlyLoginStatByMonth(month).AddGoldConsumeUserCount(1)
+		monthlyStat := statdao.GetMonthlyLoginStatByMonth(month)
+		monthlyStat.AddGoldConsumeUserCount(1)
+		statdao.PublishMonthlyLoginStat(monthlyStat)
 	}
 }
 
@@ -40,14 +46,20 @@ func recordPeriodDiamondConsumeUser(statAt time.Time, userId uint64) {
 	}
 	date := statentity.FormatDailyLoginStatDate(statAt)
 	if statdao.TryRecordDailyDiamondConsume(date, userId) {
-		statdao.GetDailyLoginStatByDate(date).AddDiamondConsumeUserCount(1)
+		dailyStat := statdao.GetDailyLoginStatByDate(date)
+		dailyStat.AddDiamondConsumeUserCount(1)
+		statdao.PublishDailyLoginStat(dailyStat)
 	}
 	week := statentity.FormatWeeklyLoginStatKey(statAt)
 	if statdao.TryRecordWeeklyDiamondConsume(week, userId) {
-		statdao.GetWeeklyLoginStatByWeek(week).AddDiamondConsumeUserCount(1)
+		weeklyStat := statdao.GetWeeklyLoginStatByWeek(week)
+		weeklyStat.AddDiamondConsumeUserCount(1)
+		statdao.PublishWeeklyLoginStat(weeklyStat)
 	}
 	month := statentity.FormatMonthlyLoginStatKey(statAt)
 	if statdao.TryRecordMonthlyDiamondConsume(month, userId) {
-		statdao.GetMonthlyLoginStatByMonth(month).AddDiamondConsumeUserCount(1)
+		monthlyStat := statdao.GetMonthlyLoginStatByMonth(month)
+		monthlyStat.AddDiamondConsumeUserCount(1)
+		statdao.PublishMonthlyLoginStat(monthlyStat)
 	}
 }

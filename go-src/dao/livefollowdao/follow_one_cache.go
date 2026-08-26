@@ -1,6 +1,7 @@
 package livefollowdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -8,20 +9,16 @@ import (
 	"xr-game-server/entity/live"
 )
 
-var followCacheMgr *cache.CacheMgr
+var followCacheMgr *cache.RowCache[*entity.LiveFollow]
 
 // GetById 按复合ID获取(走缓存)
 func GetById(id string) *entity.LiveFollow {
-	v := followCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
+	v := followCacheMgr.MustGetRow(gctx.New(), id, func(ctx context.Context) (*entity.LiveFollow, error) {
 		var f *entity.LiveFollow
 		_ = g.Model(string(entity.TbLiveFollow)).Ctx(ctx).Where("id = ?", id).Scan(&f)
 		return f, nil
 	})
-	if v == nil {
-		return nil
-	}
-	f, _ := v.(*entity.LiveFollow)
-	return f
+	return v
 }
 
 // GetByUserAnchor 按 (userId, anchorId) 获取(走缓存)
@@ -34,7 +31,7 @@ func AddFollowToCache(f *entity.LiveFollow) {
 	if f == nil || followCacheMgr == nil {
 		return
 	}
-	followCacheMgr.FlushCache(f.ID, f)
+	followCacheMgr.PublishRow(gctx.New(), f.ID, f)
 }
 
 // IsBlocked 查询 userId 是否已拉黑 targetId

@@ -69,10 +69,12 @@ func chargePrivateRoomTicketIfNeeded(userId uint64, room *entity.LiveRoom, now t
 	}
 	pay.SetLastTicketAt(now)
 	pay.SetFreeTime(uint64(livecfg.GetPrivateRoomFreeWatchDuration().Seconds()))
+	liveroomdao.PublishLiveRoomBillingPay(pay)
 
 	// 单场直播记录 + 主播收益(实体内加锁)
 	if liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId); liveRecord != nil {
 		liveRecord.AddPrivateRoomTicketEarn(ticketPrice)
+		liveroomdao.PublishLiveRecord(liveRecord)
 	}
 	liveroomdao.GetLiveRoomIncomeUnsettled(room.ID).AddPrivateRoomTicketEarn(ticketPrice)
 	liveroomdao.GetLiveRoomIncomeTotal(room.ID).AddPrivateRoomTicketEarn(ticketPrice)
@@ -119,10 +121,12 @@ func chargePrivateRoomBillingIfNeeded(userId uint64, room *entity.LiveRoom) (flo
 		}
 		recordPrivateRoomBillingRevenue(room, userId, cfg.Billing)
 		pay.SetLastPaidAt(now.Add(time.Minute))
+		liveroomdao.PublishLiveRoomBillingPay(pay)
 		return 0, nil
 
 	} else {
 		pay.SubFreeTime(PrivatePeriod)
+		liveroomdao.PublishLiveRoomBillingPay(pay)
 	}
 	return billingPrice, nil
 }
@@ -158,6 +162,7 @@ func clearFreeTime(userId uint64, roomId uint64) {
 	diff := now.Sub(*existing.JoinTime)
 	pay.SubFreeTime(uint64(diff.Seconds()))
 	pay.SetFreeUsed(false)
+	liveroomdao.PublishLiveRoomBillingPay(pay)
 }
 
 func joinChargePrivateRoom(userId uint64, roomId uint64) error {
@@ -187,6 +192,7 @@ func joinChargePrivateRoom(userId uint64, roomId uint64) error {
 	}
 	recordPrivateRoomBillingRevenue(room, userId, cfg.Billing)
 	pay.SetLastPaidAt(now.Add(time.Minute))
+	liveroomdao.PublishLiveRoomBillingPay(pay)
 	return nil
 }
 
@@ -196,6 +202,7 @@ func recordPrivateRoomBillingRevenue(room *entity.LiveRoom, userId uint64, amoun
 	}
 	if liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId); liveRecord != nil {
 		liveRecord.AddPrivateRoomWatchEarn(amount)
+		liveroomdao.PublishLiveRecord(liveRecord)
 	}
 	liveroomdao.GetLiveRoomIncomeUnsettled(room.ID).AddPrivateRoomWatchEarn(amount)
 	liveroomdao.GetLiveRoomIncomeTotal(room.ID).AddPrivateRoomWatchEarn(amount)

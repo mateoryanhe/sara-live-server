@@ -1,6 +1,7 @@
 package statdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"time"
 
@@ -9,10 +10,10 @@ import (
 	"xr-game-server/entity/stat"
 )
 
-var dailyUserAudienceCacheMgr *cache.CacheMgr
+var dailyUserAudienceCacheMgr *cache.RowCache[*entity.DailyUserAudience]
 
 func initDailyUserAudienceDao() {
-	dailyUserAudienceCacheMgr = cache.NewCacheMgr()
+	dailyUserAudienceCacheMgr = cache.NewRowCache[*entity.DailyUserAudience]()
 }
 
 // TryRecordDailyAudience 记录用户当日首次成为观众;已记录过返回 false
@@ -21,7 +22,7 @@ func TryRecordDailyAudience(date string, userId uint64) bool {
 		return false
 	}
 	id := entity.BuildDailyUserAudienceId(date, userId)
-	v := dailyUserAudienceCacheMgr.GetData(id, func(ctx context.Context) (interface{}, error) {
+	v := dailyUserAudienceCacheMgr.MustGetRow(gctx.New(), id, func(ctx context.Context) (*entity.DailyUserAudience, error) {
 		var row *entity.DailyUserAudience
 		_ = g.Model(string(entity.TbDailyUserAudience)).Where("id = ?", id).Scan(&row)
 		if row == nil {
@@ -32,11 +33,11 @@ func TryRecordDailyAudience(date string, userId uint64) bool {
 	if v == nil {
 		return false
 	}
-	data, _ := v.(*entity.DailyUserAudience)
-	if data == nil || data.CreatedAt != nil {
+	if v == nil || v.CreatedAt != nil {
 		return false
 	}
 	now := time.Now()
-	data.SetCreatedAt(&now)
+	v.SetCreatedAt(&now)
+	publishDailyUserAudience(v)
 	return true
 }

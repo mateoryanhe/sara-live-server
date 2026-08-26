@@ -1,6 +1,7 @@
 package statdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"time"
 
@@ -9,14 +10,14 @@ import (
 	"xr-game-server/entity/stat"
 )
 
-var monthlyUserRechargeCacheMgr *cache.CacheMgr
+var monthlyUserRechargeCacheMgr *cache.RowCache[*entity.MonthlyUserRecharge]
 
 func initMonthlyUserRechargeDao() {
-	monthlyUserRechargeCacheMgr = cache.NewCacheMgr()
+	monthlyUserRechargeCacheMgr = cache.NewRowCache[*entity.MonthlyUserRecharge]()
 }
 
 func getMonthlyUserRechargeById(id string, month string, userId uint64) *entity.MonthlyUserRecharge {
-	v := monthlyUserRechargeCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
+	v := monthlyUserRechargeCacheMgr.MustGetRow(gctx.New(), id, func(ctx context.Context) (*entity.MonthlyUserRecharge, error) {
 		var row *entity.MonthlyUserRecharge
 		_ = g.Model(string(entity.TbMonthlyUserRecharge)).Where("id = ?", id).Scan(&row)
 		if row == nil {
@@ -24,11 +25,7 @@ func getMonthlyUserRechargeById(id string, month string, userId uint64) *entity.
 		}
 		return row, nil
 	})
-	if v == nil {
-		return nil
-	}
-	row, _ := v.(*entity.MonthlyUserRecharge)
-	return row
+	return v
 }
 
 // TryRecordMonthlyRecharge 记录用户当月首次充值;本月已充值过返回 false
@@ -43,5 +40,6 @@ func TryRecordMonthlyRecharge(month string, userId uint64) bool {
 	}
 	now := time.Now()
 	data.SetCreatedAt(&now)
+	publishMonthlyUserRecharge(data)
 	return true
 }

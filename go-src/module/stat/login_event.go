@@ -16,9 +16,10 @@ func initLoginEvent() {
 
 func onLoginEvent(data any) {
 	val := data.(uint64)
-	userInfo := userinfodao.GetUserInfoByUserId(val)
 	now := time.Now()
+	userInfo := userinfodao.GetUserInfoByUserId(val)
 	userInfo.SetLastLoginTime(&now)
+	userinfodao.PublishUserInfo(userInfo)
 
 	lockName := "stat_login"
 	gmlock.Lock(lockName)
@@ -34,6 +35,7 @@ func recordDailyLogin(now time.Time, userId uint64) {
 	if statdao.TryRecordDailyLogin(date, userId) {
 		stat := statdao.GetDailyLoginStatByDate(date)
 		stat.AddLoginCount(1)
+		statdao.PublishDailyLoginStat(stat)
 	}
 }
 
@@ -42,6 +44,7 @@ func recordWeeklyLogin(now time.Time, userId uint64) {
 	if statdao.TryRecordWeeklyLogin(week, userId) {
 		stat := statdao.GetWeeklyLoginStatByWeek(week)
 		stat.AddLoginCount(1)
+		statdao.PublishWeeklyLoginStat(stat)
 	}
 }
 
@@ -50,5 +53,6 @@ func recordMonthlyLogin(now time.Time, userId uint64) {
 	if statdao.TryRecordMonthlyLogin(month, userId) {
 		stat := statdao.GetMonthlyLoginStatByMonth(month)
 		stat.AddLoginCount(1)
+		statdao.PublishMonthlyLoginStat(stat)
 	}
 }

@@ -1,6 +1,7 @@
 package statdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"time"
 
@@ -9,10 +10,10 @@ import (
 	"xr-game-server/entity/stat"
 )
 
-var dailyUserDiamondConsumeCacheMgr *cache.CacheMgr
+var dailyUserDiamondConsumeCacheMgr *cache.RowCache[*entity.DailyUserDiamondConsume]
 
 func initDailyUserDiamondConsumeDao() {
-	dailyUserDiamondConsumeCacheMgr = cache.NewCacheMgr()
+	dailyUserDiamondConsumeCacheMgr = cache.NewRowCache[*entity.DailyUserDiamondConsume]()
 }
 
 // TryRecordDailyDiamondConsume 记录用户当日首次钻石消费;已消费过返回 false
@@ -21,7 +22,7 @@ func TryRecordDailyDiamondConsume(date string, userId uint64) bool {
 		return false
 	}
 	id := entity.BuildDailyUserDiamondConsumeId(date, userId)
-	v := dailyUserDiamondConsumeCacheMgr.GetData(id, func(ctx context.Context) (interface{}, error) {
+	v := dailyUserDiamondConsumeCacheMgr.MustGetRow(gctx.New(), id, func(ctx context.Context) (*entity.DailyUserDiamondConsume, error) {
 		var row *entity.DailyUserDiamondConsume
 		_ = g.Model(string(entity.TbDailyUserDiamondConsume)).Where("id = ?", id).Scan(&row)
 		if row == nil {
@@ -32,11 +33,11 @@ func TryRecordDailyDiamondConsume(date string, userId uint64) bool {
 	if v == nil {
 		return false
 	}
-	data, _ := v.(*entity.DailyUserDiamondConsume)
-	if data == nil || data.CreatedAt != nil {
+	if v == nil || v.CreatedAt != nil {
 		return false
 	}
 	now := time.Now()
-	data.SetCreatedAt(&now)
+	v.SetCreatedAt(&now)
+	publishDailyUserDiamondConsume(v)
 	return true
 }

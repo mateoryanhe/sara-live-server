@@ -13,15 +13,15 @@ const (
 	phoneLoginFailExpire = 2 * time.Hour
 )
 
-var phoneLoginCacheMgr *cache.CacheMgr
+var phoneLoginCacheMgr *cache.RowCache[int64]
 
 func initPhoneLoginGuard() {
-	phoneLoginCacheMgr = cache.NewCacheMgr()
+	phoneLoginCacheMgr = cache.NewRowCache[int64]()
 }
 
 func checkPhoneLoginLimit(phoneKey string) error {
 	ctx := gctx.New()
-	if blocked, _ := phoneLoginCacheMgr.Cache.Contains(ctx, phoneLoginBlockKey(phoneKey)); blocked {
+	if phoneLoginCacheMgr.ContainsRow(ctx, phoneLoginBlockKey(phoneKey)) {
 		return errercode.CreateCode(errercode.RequestTooFrequent)
 	}
 	return nil
@@ -32,27 +32,25 @@ func markPhoneLoginFailure(phoneKey string) error {
 	key := phoneLoginFailKey(phoneKey)
 	count := 1
 
-	val, _ := phoneLoginCacheMgr.Cache.Get(ctx, key)
-	if val != nil {
-		if current, ok := val.Val().(int); ok && current > 0 {
-			count = current + 1
-		}
+	current, ok := phoneLoginCacheMgr.GetRowCached(ctx, key)
+	if ok && current > 0 {
+		count = int(current + 1)
 	}
 
 	if count >= phoneLoginFailLimit {
 		setPhoneLoginCache(phoneLoginBlockKey(phoneKey), time.Now().Unix(), phoneLoginFailExpire)
-		_, _ = phoneLoginCacheMgr.Cache.Remove(ctx, key)
+		phoneLoginCacheMgr.RemoveRow(ctx, key)
 		return errercode.CreateCode(errercode.RequestTooFrequent)
 	}
 
-	setPhoneLoginCache(key, count, phoneLoginFailExpire)
+	setPhoneLoginCache(key, int64(count), phoneLoginFailExpire)
 	return nil
 }
 
 func clearPhoneLoginFailure(phoneKey string) {
 	ctx := gctx.New()
-	_, _ = phoneLoginCacheMgr.Cache.Remove(ctx, phoneLoginFailKey(phoneKey))
-	_, _ = phoneLoginCacheMgr.Cache.Remove(ctx, phoneLoginBlockKey(phoneKey))
+	phoneLoginCacheMgr.RemoveRow(ctx, phoneLoginFailKey(phoneKey))
+	phoneLoginCacheMgr.RemoveRow(ctx, phoneLoginBlockKey(phoneKey))
 }
 
 func phoneLoginFailKey(phoneKey string) string {
@@ -63,6 +61,6 @@ func phoneLoginBlockKey(phoneKey string) string {
 	return "phone_login_block:" + phoneKey
 }
 
-func setPhoneLoginCache(key string, data any, ttl time.Duration) {
-	_ = phoneLoginCacheMgr.Cache.Set(gctx.New(), key, data, ttl)
+func setPhoneLoginCache(key string, data int64, ttl time.Duration) {
+	_ = phoneLoginCacheMgr.SetRow(gctx.New(), key, data, ttl)
 }

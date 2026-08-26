@@ -1,6 +1,7 @@
 package statdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"time"
 
@@ -9,14 +10,14 @@ import (
 	"xr-game-server/entity/stat"
 )
 
-var monthlyUserLoginCacheMgr *cache.CacheMgr
+var monthlyUserLoginCacheMgr *cache.RowCache[*entity.MonthlyUserLogin]
 
 func initMonthlyUserLoginDao() {
-	monthlyUserLoginCacheMgr = cache.NewCacheMgr()
+	monthlyUserLoginCacheMgr = cache.NewRowCache[*entity.MonthlyUserLogin]()
 }
 
 func getMonthlyUserLoginById(id string, month string, userId uint64) *entity.MonthlyUserLogin {
-	v := monthlyUserLoginCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
+	v := monthlyUserLoginCacheMgr.MustGetRow(gctx.New(), id, func(ctx context.Context) (*entity.MonthlyUserLogin, error) {
 		var row *entity.MonthlyUserLogin
 		_ = g.Model(string(entity.TbMonthlyUserLogin)).Where("id = ?", id).Scan(&row)
 		if row == nil {
@@ -24,11 +25,7 @@ func getMonthlyUserLoginById(id string, month string, userId uint64) *entity.Mon
 		}
 		return row, nil
 	})
-	if v == nil {
-		return nil
-	}
-	row, _ := v.(*entity.MonthlyUserLogin)
-	return row
+	return v
 }
 
 // TryRecordMonthlyLogin 记录用户当月首次登录;已登录过返回 false
@@ -40,5 +37,6 @@ func TryRecordMonthlyLogin(month string, userId uint64) bool {
 	}
 	now := time.Now()
 	data.SetCreatedAt(&now)
+	publishMonthlyUserLogin(data)
 	return true
 }

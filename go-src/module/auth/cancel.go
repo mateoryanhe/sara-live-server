@@ -21,6 +21,7 @@ func CancelUser(ctx context.Context, req *accountdto.CancelReq) (bool, error) {
 		return false, errercode.CreateCode(errercode.InvalidParam)
 	}
 	account.SetCancel(true)
+	accountdao.PublishAccountList(req.OpenId, req.Channel)
 	invalidateAppToken(req.AccountId)
 	push.Kick(req.AccountId)
 	return true, nil
@@ -38,6 +39,7 @@ func UnCancelUser(ctx context.Context, req *accountdto.UnCancelReq) (bool, error
 		return false, errercode.CreateCode(errercode.AccountAlreadyExists)
 	}
 	account.SetCancel(false)
+	accountdao.PublishAccountList(req.OpenId, req.Channel)
 	return true, nil
 }
 
@@ -72,6 +74,7 @@ func doAppCancelAccount(accountId uint64) error {
 		return err
 	}
 	account.SetCancel(true)
+	accountdao.PublishAccountList(dbAcc.OpenId, dbAcc.Channel)
 	recordAppCancelAccountSuccess(dbAcc.OpenId, dbAcc.Channel)
 	invalidateAppToken(accountId)
 	push.Kick(accountId)

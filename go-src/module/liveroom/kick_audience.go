@@ -49,6 +49,7 @@ func pushKickAudience(anchorId, userId uint64, refreshKickTime bool) {
 	if refreshKickTime {
 		kickAt = time.Now()
 		online.SetKickTime(&kickAt)
+		liveroomdao.PublishLiveRoomOnline(online)
 		banSeconds = int64(entity.LiveRoomKickBanDuration / time.Second)
 	} else if online.KickTime == nil || !online.IsKickBanned() {
 		return
@@ -109,6 +110,7 @@ func CancelKickBan(ctx context.Context, req *liveroomdto.CancelKickBanReq) (*liv
 	}
 
 	online.SetKickTime(nil)
+	liveroomdao.PublishLiveRoomOnline(online)
 	push.Data(req.UserId, cmd.LiveRoomAudienceKickCancel, &liveroomdto.AudienceKickCancelPushItem{
 		RoomId: strconv.FormatUint(anchorId, 10),
 		UserId: strconv.FormatUint(req.UserId, 10),

@@ -13,10 +13,10 @@ import (
 
 const UserActivityMessageListCacheASize = 50
 
-var userActivityMessageListCacheAMgr *cache.CacheMgr
+var userActivityMessageListCacheAMgr *cache.ListCache[*entity.UserActivityMessage]
 
 func initUserActivityMessageDao() {
-	userActivityMessageListCacheAMgr = cache.NewCacheMgr()
+	userActivityMessageListCacheAMgr = cache.NewListCache[*entity.UserActivityMessage]()
 }
 
 // GetUserActivityMessageListCacheA 获取用户活动消息列表缓存A(前50条,按发布时间倒序)
@@ -24,7 +24,7 @@ func GetUserActivityMessageListCacheA(userId uint64) []*entity.UserActivityMessa
 	if userId == 0 || userActivityMessageListCacheAMgr == nil {
 		return nil
 	}
-	v := userActivityMessageListCacheAMgr.GetData(userId, func(ctx context.Context) (interface{}, error) {
+	v := userActivityMessageListCacheAMgr.MustGetList(gctx.New(), userId, func(ctx context.Context) ([]*entity.UserActivityMessage, error) {
 		list := make([]*entity.UserActivityMessage, 0)
 		_ = g.Model(string(entity.TbUserActivityMessage)).Ctx(context.Background()).
 			Where("user_id = ?", userId).
@@ -33,8 +33,7 @@ func GetUserActivityMessageListCacheA(userId uint64) []*entity.UserActivityMessa
 			Scan(&list)
 		return list, nil
 	})
-	list, _ := v.([]*entity.UserActivityMessage)
-	return list
+	return v
 }
 
 // GetUserActivityMessageListFromCacheA 仅从内存缓存读取用户活动消息列表,未命中不访问数据库
@@ -42,23 +41,19 @@ func GetUserActivityMessageListFromCacheA(userId uint64) ([]*entity.UserActivity
 	if userId == 0 || userActivityMessageListCacheAMgr == nil {
 		return nil, false
 	}
-	v := userActivityMessageListCacheAMgr.GetFromCache(userId)
-	if v == nil {
+	v, ok := userActivityMessageListCacheAMgr.GetListCached(gctx.New(), userId)
+	if !ok || v == nil {
 		return nil, false
 	}
-	list, _ := v.([]*entity.UserActivityMessage)
-	if list == nil {
-		list = make([]*entity.UserActivityMessage, 0)
-	}
-	return list, true
+	return v, true
 }
 
 // GetCachedUserActivityMessageUserIds 获取已有活动消息列表缓存的用户ID
 func GetCachedUserActivityMessageUserIds() []uint64 {
-	if userActivityMessageListCacheAMgr == nil || userActivityMessageListCacheAMgr.Cache == nil {
+	if userActivityMessageListCacheAMgr == nil {
 		return nil
 	}
-	keys := userActivityMessageListCacheAMgr.Cache.MustKeys(gctx.New())
+	keys, _ := userActivityMessageListCacheAMgr.Keys(gctx.New())
 	userIds := make([]uint64, 0, len(keys))
 	for _, key := range keys {
 		userId, ok := key.(uint64)
@@ -81,7 +76,7 @@ func FlushUserActivityMessageListCacheA(userId uint64, list []*entity.UserActivi
 	if len(list) > UserActivityMessageListCacheASize {
 		list = list[:UserActivityMessageListCacheASize]
 	}
-	userActivityMessageListCacheAMgr.FlushCache(userId, list)
+	userActivityMessageListCacheAMgr.PublishList(gctx.New(), userId, list)
 }
 
 // PrependUserActivityMessageToListCacheA 向已有缓存头部插入活动消息,未命中缓存不访问数据库
@@ -109,7 +104,7 @@ func PrependUserActivityMessageToListCacheA(userId uint64, row *entity.UserActiv
 	if len(newList) > UserActivityMessageListCacheASize {
 		newList = newList[:UserActivityMessageListCacheASize]
 	}
-	userActivityMessageListCacheAMgr.FlushCache(userId, newList)
+	userActivityMessageListCacheAMgr.PublishList(gctx.New(), userId, newList)
 	return true
 }
 
@@ -136,7 +131,7 @@ func RemoveUserActivityMessageFromListCacheA(userId uint64, activityMessageId ui
 	if !found {
 		return false
 	}
-	userActivityMessageListCacheAMgr.FlushCache(userId, newList)
+	userActivityMessageListCacheAMgr.PublishList(gctx.New(), userId, newList)
 	return true
 }
 
@@ -166,8 +161,8 @@ func RemoveUserActivityMessageByActivityMessageId(activityMessageId uint64) erro
 
 // ClearAllUserActivityMessageListCacheA 清空用户活动消息列表缓存A
 func ClearAllUserActivityMessageListCacheA() {
-	if userActivityMessageListCacheAMgr == nil || userActivityMessageListCacheAMgr.Cache == nil {
+	if userActivityMessageListCacheAMgr == nil {
 		return
 	}
-	_ = userActivityMessageListCacheAMgr.Cache.Clear(gctx.New())
+	if ks, e := userActivityMessageListCacheAMgr.Keys(gctx.New()); e == nil { for _, k := range ks { userActivityMessageListCacheAMgr.RemoveList(gctx.New(), k) } }
 }

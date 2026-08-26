@@ -84,6 +84,7 @@ func BanAnchor(_ context.Context, req *accountdto.BanAnchorReq) (*accountdto.Ban
 	room.SetBan(true)
 	room.SetBanApplyTime(req.BanApplyTime)
 	room.SetBanReason(banReason)
+	liveroomdao.FlushRoomCache(room)
 	NotifyAnchorBanned(req.AccountId, req.BanApplyTime, banReason)
 	return &accountdto.BanRes{}, nil
 }
@@ -100,5 +101,6 @@ func UnBanAnchor(_ context.Context, req *accountdto.UnBanAnchorReq) (bool, error
 	room.SetBan(false)
 	room.SetBanApplyTime(nil)
 	room.SetBanReason("")
+	liveroomdao.FlushRoomCache(room)
 	return true, nil
 }

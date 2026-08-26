@@ -16,6 +16,7 @@ func withDailyGuildEffectiveLive(guildId uint64, at time.Time, fn func(*entity.D
 		return
 	}
 	fn(row)
+	PublishDailyGuildEffectiveLive(row)
 }
 
 // MirrorDailyGuildGiftEarn 同步礼物收益到工会日表

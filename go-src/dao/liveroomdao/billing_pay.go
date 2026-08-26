@@ -1,6 +1,7 @@
 package liveroomdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -8,17 +9,17 @@ import (
 	"xr-game-server/entity/live"
 )
 
-var liveRoomBillingPayCacheMgr *cache.CacheMgr
+var liveRoomBillingPayCacheMgr *cache.RowCache[*entity.LiveRoomBillingPay]
 
 func initLiveRoomBillingPayDao() {
-	liveRoomBillingPayCacheMgr = cache.NewCacheMgr()
+	liveRoomBillingPayCacheMgr = cache.NewRowCache[*entity.LiveRoomBillingPay]()
 }
 
 func getLiveRoomBillingPayById(id string, userId, roomId uint64) *entity.LiveRoomBillingPay {
 	if liveRoomBillingPayCacheMgr == nil {
 		return nil
 	}
-	v := liveRoomBillingPayCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
+	v := liveRoomBillingPayCacheMgr.MustGetRow(gctx.New(), id, func(ctx context.Context) (*entity.LiveRoomBillingPay, error) {
 		var row *entity.LiveRoomBillingPay
 		_ = g.Model(string(entity.TbLiveRoomBillingPay)).Where("id = ?", id).Scan(&row)
 		if row == nil {
@@ -26,11 +27,7 @@ func getLiveRoomBillingPayById(id string, userId, roomId uint64) *entity.LiveRoo
 		}
 		return row, nil
 	})
-	if v == nil {
-		return nil
-	}
-	row, _ := v.(*entity.LiveRoomBillingPay)
-	return row
+	return v
 }
 
 // GetLiveRoomBillingPay 获取观众在某场直播的按分钟计费记录

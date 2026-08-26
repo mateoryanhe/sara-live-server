@@ -55,6 +55,7 @@ func SendPrivateMessage(ctx context.Context, req *messagedto.AppSendPrivateMessa
 	//刷新未读消息缓存
 	unReadData := messagedao.GetUnReadByUserId(req.ReceiverId)
 	unReadData.AddPrivateUnread(1)
+	messagedao.PublishMessageUnread(unReadData)
 
 	receiverUnreadDetail := messagedao.GetUnreadDetailByReceiverSender(senderId, req.ReceiverId)
 	receiverUnreadDetail.AddUnread(1)
@@ -167,6 +168,7 @@ func ClearPrivateMessageUnread(ctx context.Context, req *messagedto.AppClearPriv
 		clearedCount = unReadDetail.UnreadCount
 		unReadDetail.ClearUnread(clearedCount)
 		unReadData.SubPrivateUnread(clearedCount)
+		messagedao.PublishMessageUnread(unReadData)
 		messagedao.FlushUnreadDetailCache(unReadDetail)
 	}
 	updatePrivateMessageUnreadListCacheUnread(userId, req.TargetId, 0)
@@ -195,6 +197,7 @@ func BatchDeletePrivateMessage(ctx context.Context, req *messagedto.AppBatchDele
 			clearedCount := unReadDetail.UnreadCount
 			if unReadData != nil {
 				unReadData.SubPrivateUnread(clearedCount)
+				messagedao.PublishMessageUnread(unReadData)
 			}
 			unReadDetail.ClearUnread(clearedCount)
 		}
@@ -240,6 +243,7 @@ func ClearAllPrivateMessageUnread(ctx context.Context, req *messagedto.AppClearA
 
 	if unReadData != nil && clearedCount > 0 {
 		unReadData.SubPrivateUnread(clearedCount)
+		messagedao.PublishMessageUnread(unReadData)
 	}
 	xrpool.AddWithRecover(ctx, func(poolCtx context.Context) {
 		dbCtx := gctx.New()

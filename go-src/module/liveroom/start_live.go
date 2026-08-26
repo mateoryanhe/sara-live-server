@@ -77,6 +77,7 @@ func startAnchorLive(ctx context.Context, room *entity.LiveRoom, heartTime time.
 	liveRecord := liveroomdao.GetLiveRecordById(liveRecordId)
 	liveRecord.SetStartTime(time.Now())
 	liveRecord.SetAnchorId(room.ID)
+	liveroomdao.PublishLiveRecord(liveRecord)
 	liveroomdao.PrependLiveRecordToAppListCache(room.ID, liveRecord)
 	liveroomdao.FlushRoomCache(room)
 	flushRoomList(ctx)

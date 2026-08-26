@@ -1,6 +1,7 @@
 package statdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"time"
 
@@ -9,10 +10,10 @@ import (
 	"xr-game-server/entity/stat"
 )
 
-var weeklyUserGoldConsumeCacheMgr *cache.CacheMgr
+var weeklyUserGoldConsumeCacheMgr *cache.RowCache[*entity.WeeklyUserGoldConsume]
 
 func initWeeklyUserGoldConsumeDao() {
-	weeklyUserGoldConsumeCacheMgr = cache.NewCacheMgr()
+	weeklyUserGoldConsumeCacheMgr = cache.NewRowCache[*entity.WeeklyUserGoldConsume]()
 }
 
 // TryRecordWeeklyGoldConsume 记录用户当周首次金币消费;已消费过返回 false
@@ -21,7 +22,7 @@ func TryRecordWeeklyGoldConsume(week string, userId uint64) bool {
 		return false
 	}
 	id := entity.BuildWeeklyUserGoldConsumeId(week, userId)
-	v := weeklyUserGoldConsumeCacheMgr.GetData(id, func(ctx context.Context) (interface{}, error) {
+	v := weeklyUserGoldConsumeCacheMgr.MustGetRow(gctx.New(), id, func(ctx context.Context) (*entity.WeeklyUserGoldConsume, error) {
 		var row *entity.WeeklyUserGoldConsume
 		_ = g.Model(string(entity.TbWeeklyUserGoldConsume)).Where("id = ?", id).Scan(&row)
 		if row == nil {
@@ -32,11 +33,11 @@ func TryRecordWeeklyGoldConsume(week string, userId uint64) bool {
 	if v == nil {
 		return false
 	}
-	data, _ := v.(*entity.WeeklyUserGoldConsume)
-	if data == nil || data.CreatedAt != nil {
+	if v == nil || v.CreatedAt != nil {
 		return false
 	}
 	now := time.Now()
-	data.SetCreatedAt(&now)
+	v.SetCreatedAt(&now)
+	publishWeeklyUserGoldConsume(v)
 	return true
 }

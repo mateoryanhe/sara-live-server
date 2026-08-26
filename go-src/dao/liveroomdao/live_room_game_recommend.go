@@ -1,6 +1,7 @@
 package liveroomdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"strings"
 
@@ -10,10 +11,10 @@ import (
 	"xr-game-server/entity/live"
 )
 
-var liveRoomGameRecommendCacheMgr *cache.CacheMgr
+var liveRoomGameRecommendCacheMgr *cache.ListCache[*entity.LiveRoomGameRecommend]
 
 func InitLiveRoomGameRecommendDao() {
-	liveRoomGameRecommendCacheMgr = cache.NewPermanentCacheMgr()
+	liveRoomGameRecommendCacheMgr = cache.NewPermanentListCache[*entity.LiveRoomGameRecommend]()
 }
 
 func loadActiveLiveRoomGameRecommendsByRoomIDFromDB(liveRoomID uint64) []*entity.LiveRoomGameRecommend {
@@ -36,14 +37,13 @@ func GetActiveLiveRoomGameRecommendsByRoomID(liveRoomID uint64) []*entity.LiveRo
 	if liveRoomGameRecommendCacheMgr == nil {
 		return cloneLiveRoomGameRecommendList(loadActiveLiveRoomGameRecommendsByRoomIDFromDB(liveRoomID))
 	}
-	v := liveRoomGameRecommendCacheMgr.GetData(liveRoomID, func(ctx context.Context) (interface{}, error) {
+	v := liveRoomGameRecommendCacheMgr.MustGetList(gctx.New(), liveRoomID, func(ctx context.Context) ([]*entity.LiveRoomGameRecommend, error) {
 		return loadActiveLiveRoomGameRecommendsByRoomIDFromDB(liveRoomID), nil
 	})
 	if v == nil {
 		return make([]*entity.LiveRoomGameRecommend, 0)
 	}
-	list, _ := v.([]*entity.LiveRoomGameRecommend)
-	return cloneLiveRoomGameRecommendList(list)
+	return cloneLiveRoomGameRecommendList(v)
 }
 
 func GetLiveRoomGameRecommendByID(id uint64) *entity.LiveRoomGameRecommend {
@@ -99,7 +99,7 @@ func refreshLiveRoomGameRecommendCache(liveRoomID uint64) {
 	if liveRoomGameRecommendCacheMgr == nil || liveRoomID == 0 {
 		return
 	}
-	liveRoomGameRecommendCacheMgr.FlushCache(liveRoomID, loadActiveLiveRoomGameRecommendsByRoomIDFromDB(liveRoomID))
+	liveRoomGameRecommendCacheMgr.PublishList(gctx.New(), liveRoomID, loadActiveLiveRoomGameRecommendsByRoomIDFromDB(liveRoomID))
 }
 
 // PreloadLiveRoomGameRecommendToCache 启动时批量预热全部有效推荐游戏(按直播间分组,永不过期).
@@ -119,7 +119,7 @@ func PreloadLiveRoomGameRecommendToCache() int {
 		grouped[row.LiveRoomId] = append(grouped[row.LiveRoomId], row)
 	}
 	for liveRoomID, list := range grouped {
-		liveRoomGameRecommendCacheMgr.FlushCache(liveRoomID, cloneLiveRoomGameRecommendList(list))
+		liveRoomGameRecommendCacheMgr.PublishList(gctx.New(), liveRoomID, cloneLiveRoomGameRecommendList(list))
 	}
 	return len(grouped)
 }

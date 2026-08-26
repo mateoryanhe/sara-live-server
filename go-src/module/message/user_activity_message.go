@@ -115,7 +115,9 @@ func syncNewActivityMessages(userId uint64) {
 
 	delta := uint64(len(newRows))
 	AddSystemMessageUnread(userId, entity.UserSystemMessageUnreadTypeActivity, delta)
-	messagedao.GetUnReadByUserId(userId).AddSystemUnread(delta)
+	unread := messagedao.GetUnReadByUserId(userId)
+	unread.AddSystemUnread(delta)
+	messagedao.PublishMessageUnread(unread)
 }
 
 func mergeUserActivityMessageList(newRows, existing []*entity.UserActivityMessage) []*entity.UserActivityMessage {
@@ -156,7 +158,9 @@ func prependPublishedActivityMessageToCachedUsers(msg *entity.ActivityMessage) {
 			continue
 		}
 		AddSystemMessageUnread(userId, entity.UserSystemMessageUnreadTypeActivity, 1)
-		messagedao.GetUnReadByUserId(userId).AddSystemUnread(1)
+		unread := messagedao.GetUnReadByUserId(userId)
+		unread.AddSystemUnread(1)
+		messagedao.PublishMessageUnread(unread)
 	}
 }
 

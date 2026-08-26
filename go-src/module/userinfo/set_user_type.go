@@ -21,5 +21,6 @@ func SetUserType(_ context.Context, req *accountdto.SetUserTypeReq) (*accountdto
 		return &accountdto.SetUserTypeRes{Success: true}, nil
 	}
 	user.SetUserType(req.UserType)
+	userinfodao.PublishUserInfo(user)
 	return &accountdto.SetUserTypeRes{Success: true}, nil
 }

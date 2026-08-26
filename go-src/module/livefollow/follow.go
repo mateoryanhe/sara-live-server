@@ -71,6 +71,7 @@ func recordNewFollowerDuringLive(anchorId, userId uint64) {
 	}
 	if liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId); liveRecord != nil {
 		liveRecord.AddTotalNewFollower(1)
+		liveroomdao.PublishLiveRecord(liveRecord)
 	}
 }
 

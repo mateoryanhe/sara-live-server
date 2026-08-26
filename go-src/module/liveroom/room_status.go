@@ -101,6 +101,7 @@ func doOffShelfLiveRoom(ctx context.Context, anchorId uint64) (*accountdto.SetLi
 	// 最近未结算日有效直播次数清零(直查DB)
 	liveroomdao.ClearRecentUnsettledDailyLiveDuration(anchorId)
 	room.SetStatus(entity.LiveRoomStatusOffShelf)
+	liveroomdao.FlushRoomCache(room)
 	liveroomdao.RemoveRoomFromCache(anchorId)
 	return &accountdto.SetLiveRoomStatusRes{Success: true, Status: entity.LiveRoomStatusOffShelf}, nil
 }

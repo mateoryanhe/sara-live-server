@@ -1,6 +1,7 @@
 package gamevendordao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"strings"
 
@@ -12,10 +13,10 @@ import (
 
 const vendorTransferIdempotencyCacheKeyPrefix = "vendor_transfer:done:"
 
-var vendorTransferIdempotencyCache *cache.CacheMgr
+var vendorTransferIdempotencyCache *cache.RowCache[bool]
 
 func initVendorTransferIdempotencyCache() {
-	vendorTransferIdempotencyCache = cache.NewCacheMgr()
+	vendorTransferIdempotencyCache = cache.NewRowCache[bool]()
 }
 
 func vendorTransferIdempotencyCacheKey(transactionID string) string {
@@ -34,11 +35,10 @@ func IsVendorTransferProcessed(transactionID string) bool {
 	if transactionID == "" || vendorTransferIdempotencyCache == nil {
 		return false
 	}
-	v := vendorTransferIdempotencyCache.GetData(vendorTransferIdempotencyCacheKey(transactionID), func(ctx context.Context) (interface{}, error) {
+	v := vendorTransferIdempotencyCache.MustGetRow(gctx.New(), vendorTransferIdempotencyCacheKey(transactionID), func(ctx context.Context) (bool, error) {
 		return existsVendorTransferTransactionInDB(transactionID), nil
 	})
-	processed, _ := v.(bool)
-	return processed
+	return v
 }
 
 // MarkVendorTransferProcessed 处理成功后刷新缓存, 后续 GetData 直接命中.
@@ -47,5 +47,5 @@ func MarkVendorTransferProcessed(transactionID string) {
 	if transactionID == "" || vendorTransferIdempotencyCache == nil {
 		return
 	}
-	vendorTransferIdempotencyCache.FlushCache(vendorTransferIdempotencyCacheKey(transactionID), true)
+	vendorTransferIdempotencyCache.PublishRow(gctx.New(), vendorTransferIdempotencyCacheKey(transactionID), true)
 }

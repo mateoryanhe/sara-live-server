@@ -32,6 +32,7 @@ func createCMSAuthorUser(nickname, avatar string) (uint64, error) {
 		user.SetAvatar(avatar)
 	}
 	user.SetUserType(entity.UserTypeCMSAuthor)
+	userinfodao.PublishUserInfo(user)
 	userinfodao.GetUserCumulativeStatByUserId(account.ID)
 	return account.ID, nil
 }

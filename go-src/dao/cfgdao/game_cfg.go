@@ -1,6 +1,7 @@
 package cfgdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"strings"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -11,10 +12,10 @@ import (
 
 const gameCfgCacheKey = "all"
 
-var gameCfgCacheMgr *cache.CacheMgr
+var gameCfgCacheMgr *cache.ListCache[*entity.GameCfg]
 
 func InitGameCfgDao() {
-	gameCfgCacheMgr = cache.NewPermanentCacheMgr()
+	gameCfgCacheMgr = cache.NewPermanentListCache[*entity.GameCfg]()
 }
 
 func loadAllGameCfgFromDB() []*entity.GameCfg {
@@ -28,7 +29,7 @@ func ReloadGameCfgCache() {
 	if gameCfgCacheMgr == nil {
 		return
 	}
-	gameCfgCacheMgr.FlushCache(gameCfgCacheKey, loadAllGameCfgFromDB())
+	gameCfgCacheMgr.PublishList(gctx.New(), gameCfgCacheKey, loadAllGameCfgFromDB())
 }
 
 // GetAllGameCfgFromMemory 获取全部上架游戏配置(仅内存).
@@ -36,15 +37,11 @@ func GetAllGameCfgFromMemory() []*entity.GameCfg {
 	if gameCfgCacheMgr == nil {
 		return make([]*entity.GameCfg, 0)
 	}
-	v := gameCfgCacheMgr.GetFromCache(gameCfgCacheKey)
+	v, _ := gameCfgCacheMgr.GetListCached(gctx.New(), gameCfgCacheKey)
 	if v == nil {
 		return make([]*entity.GameCfg, 0)
 	}
-	list, _ := v.([]*entity.GameCfg)
-	if list == nil {
-		return make([]*entity.GameCfg, 0)
-	}
-	return append(make([]*entity.GameCfg, 0, len(list)), list...)
+	return append(make([]*entity.GameCfg, 0, len(v)), v...)
 }
 
 func GetGameCfgCodeSetFromMemory() map[string]struct{} {

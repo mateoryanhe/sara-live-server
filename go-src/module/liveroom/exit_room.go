@@ -35,6 +35,7 @@ func exitRoom(userId uint64, roomId uint64) {
 	broadcastAudienceLeave(roomId, userId, getLenForRoom(roomId))
 	if existing != nil && existing.Status != entity.LiveRoomOnlineStatusOffline {
 		existing.SetStatus(entity.LiveRoomOnlineStatusOffline)
+		liveroomdao.PublishLiveRoomOnline(existing)
 	}
 	removeOnline(userId, roomId)
 	markContributionRankDataChanged(roomId)

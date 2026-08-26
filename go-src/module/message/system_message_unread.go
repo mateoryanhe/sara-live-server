@@ -65,6 +65,7 @@ func clearAllSystemMessageUnread(userId uint64) {
 	messagedao.FlushSystemMessageUnreadListCache(userId, make([]*entity.UserSystemMessageUnread, 0))
 	if unReadData != nil && unReadData.SystemUnread > 0 {
 		unReadData.SubSystemUnread(unReadData.SystemUnread)
+		messagedao.PublishMessageUnread(unReadData)
 	}
 }
 
@@ -102,6 +103,7 @@ func ClearSystemMessageUnread(ctx context.Context, req *messagedto.AppClearSyste
 	unReadData := messagedao.GetUnReadByUserId(userId)
 	if cleared > 0 {
 		unReadData.SubSystemUnread(cleared)
+		messagedao.PublishMessageUnread(unReadData)
 	}
 
 	row := systemMessageUnreadRow(userId, req.MsgType)

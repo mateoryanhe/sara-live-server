@@ -8,6 +8,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"xr-game-server/core/cache"
 	"xr-game-server/core/phoneutil"
 	"xr-game-server/entity/user"
 	"xr-game-server/module/usermaxid"
@@ -52,8 +53,8 @@ func loadAccountListFromDB(openId string, channel uint) []*entity.Account {
 	return list
 }
 
-func dbLoaderForOpenId(openId string, channel uint) func(context.Context) (interface{}, error) {
-	return func(ctx context.Context) (interface{}, error) {
+func dbLoaderForOpenId(openId string, channel uint) cache.Loader[[]*entity.Account] {
+	return func(ctx context.Context) ([]*entity.Account, error) {
 		return loadAccountListFromDB(openId, channel), nil
 	}
 }
@@ -65,8 +66,7 @@ func GetAccountList(openId string, channel uint) []*entity.Account {
 		return nil
 	}
 	key := accountListCacheKey(channel, openId)
-	data := accountCacheMgr.GetData(key, dbLoaderForOpenId(openId, channel))
-	return castAccountList(data)
+	return accountCacheMgr.MustGetList(gctx.New(), key, dbLoaderForOpenId(openId, channel))
 }
 
 func castAccountList(data any) []*entity.Account {
@@ -122,7 +122,7 @@ func appendAccountToListCache(openId string, channel uint, account *entity.Accou
 	key := accountListCacheKey(channel, openId)
 	list := GetAccountList(openId, channel)
 	newList := append(append([]*entity.Account{}, list...), account)
-	accountCacheMgr.FlushCache(key, newList)
+	accountCacheMgr.PublishList(gctx.New(), key, newList)
 }
 
 // RegisterAccount 注册新账号并写入列表缓存(ID 由 usermaxid 分配)
@@ -176,6 +176,17 @@ func GetOrRegisterDeviceAccount(deviceId string, channel uint) (*entity.Account,
 	return acc, true
 }
 
+// PublishAccountList 账号列表原地修改后刷新缓存.
+func PublishAccountList(openId string, channel uint) {
+	openId = LogicalOpenId(openId)
+	if openId == "" || channel == 0 || accountCacheMgr == nil {
+		return
+	}
+	key := accountListCacheKey(channel, openId)
+	list := GetAccountList(openId, channel)
+	accountCacheMgr.PublishList(gctx.New(), key, list)
+}
+
 // SyncAccountListCache 从数据库刷新列表缓存
 func SyncAccountListCache(openId string, channel uint) {
 	openId = LogicalOpenId(openId)
@@ -184,25 +195,27 @@ func SyncAccountListCache(openId string, channel uint) {
 	}
 	key := accountListCacheKey(channel, openId)
 	list := loadAccountListFromDB(openId, channel)
-	accountCacheMgr.FlushCache(key, list)
+	accountCacheMgr.PublishList(gctx.New(), key, list)
 }
 
 // FindAccountInCacheByID 遍历缓存查找账号(App 注销优先走缓存)
 func FindAccountInCacheByID(accountId uint64) (*entity.Account, string, uint) {
-	if accountId == 0 || accountCacheMgr == nil || accountCacheMgr.Cache == nil {
+	if accountId == 0 || accountCacheMgr == nil {
 		return nil, "", 0
 	}
 	ctx := gctx.New()
-	keys, err := accountCacheMgr.Cache.KeyStrings(ctx)
+	keys, err := accountCacheMgr.Keys(ctx)
 	if err != nil {
 		return nil, "", 0
 	}
 	for _, key := range keys {
-		channel, openId, ok := parseAccountListCacheKey(key)
+		keyStr, ok := key.(string)
+		if !ok { continue }
+		channel, openId, ok := parseAccountListCacheKey(keyStr)
 		if !ok {
 			continue
 		}
-		if acc := findAccountByID(castAccountList(accountCacheMgr.GetFromCache(key)), accountId); acc != nil {
+		if acc := findAccountByID(func() []*entity.Account { l, _ := accountCacheMgr.GetListCached(ctx, key); return l }(), accountId); acc != nil {
 			return acc, openId, channel
 		}
 	}

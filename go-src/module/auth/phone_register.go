@@ -56,6 +56,8 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 	// 初始化用户信息
 	data := userinfodao.GetUserInfoByUserId(account.ID)
 	data.SetPhone(phone)
+	userinfodao.PublishUserInfo(data)
+	accountdao.PublishAccountList(account.OpenId, account.Channel)
 	userlogindevicedao.RefreshLoginDevice(account.ID, req.DeviceInfo)
 	userinfodao.SaveRegisterInfo(account.ID, req.DeviceInfo)
 	now := time.Now()
@@ -70,6 +72,7 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 		}
 		if data.InviterId == 0 {
 			data.SetInviterId(inviterId)
+			userinfodao.PublishUserInfo(data)
 		}
 	}
 

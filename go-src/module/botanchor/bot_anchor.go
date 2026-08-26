@@ -51,6 +51,7 @@ func CreateBotAnchor(_ context.Context, req *botanchordto.CreateBotAnchorReq) (*
 	}
 	user.SetUserType(userentity.UserTypeBotAnchor)
 	user.SetBotAnchorStatus(userentity.BotAnchorStatusEnabled)
+	userinfodao.PublishUserInfo(user)
 
 	room := liveroom.EnsureAnchorRoom(account.ID, req.GuildId)
 	room.SetTitle(strings.TrimSpace(req.RoomTitle))
@@ -90,6 +91,7 @@ func UpdateBotAnchor(_ context.Context, req *botanchordto.UpdateBotAnchorReq) (*
 	if req.Avatar != nil {
 		user.SetAvatar(strings.TrimSpace(*req.Avatar))
 	}
+	userinfodao.PublishUserInfo(user)
 
 	category := req.Category
 	if category == 0 {
@@ -109,6 +111,7 @@ func UpdateBotAnchor(_ context.Context, req *botanchordto.UpdateBotAnchorReq) (*
 		cfg.SetIsTest(req.IsTest)
 	}
 
+	liveroomdao.FlushRoomCache(room)
 	return &botanchordto.UpdateBotAnchorRes{Success: true}, nil
 }
 
@@ -122,6 +125,7 @@ func SetBotAnchorStatus(ctx context.Context, req *botanchordto.SetBotAnchorStatu
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	user.SetBotAnchorStatus(req.Status)
+	userinfodao.PublishUserInfo(user)
 	switch req.Status {
 	case userentity.BotAnchorStatusEnabled:
 		enableBotAnchorRoomCache(req.ID, liveroomdao.GetAnchorGuildId(req.ID))

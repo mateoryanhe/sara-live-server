@@ -19,6 +19,7 @@ func onRechargeArrived(val any) {
 	stat := userinfodao.GetUserCumulativeStatByUserId(order.UserId)
 	stat.AddTotalRecharge(order.Price)
 	stat.AddTotalPayCount(1)
+	userinfodao.PublishUserCumulativeStat(stat)
 
 	totalRecharge := stat.TotalRecharge
 
@@ -41,6 +42,7 @@ func onRechargeArrived(val any) {
 	}
 
 	user.SetVipLevel(targetLevel)
+	userinfodao.PublishUserInfo(user)
 	pushVipLevelToApp(order.UserId, targetLevel)
 
 }

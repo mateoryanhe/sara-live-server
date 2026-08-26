@@ -1,6 +1,7 @@
 package statdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"time"
 
@@ -9,14 +10,14 @@ import (
 	"xr-game-server/entity/stat"
 )
 
-var weeklyUserRechargeCacheMgr *cache.CacheMgr
+var weeklyUserRechargeCacheMgr *cache.RowCache[*entity.WeeklyUserRecharge]
 
 func initWeeklyUserRechargeDao() {
-	weeklyUserRechargeCacheMgr = cache.NewCacheMgr()
+	weeklyUserRechargeCacheMgr = cache.NewRowCache[*entity.WeeklyUserRecharge]()
 }
 
 func getWeeklyUserRechargeById(id string, week string, userId uint64) *entity.WeeklyUserRecharge {
-	v := weeklyUserRechargeCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
+	v := weeklyUserRechargeCacheMgr.MustGetRow(gctx.New(), id, func(ctx context.Context) (*entity.WeeklyUserRecharge, error) {
 		var row *entity.WeeklyUserRecharge
 		_ = g.Model(string(entity.TbWeeklyUserRecharge)).Where("id = ?", id).Scan(&row)
 		if row == nil {
@@ -24,11 +25,7 @@ func getWeeklyUserRechargeById(id string, week string, userId uint64) *entity.We
 		}
 		return row, nil
 	})
-	if v == nil {
-		return nil
-	}
-	row, _ := v.(*entity.WeeklyUserRecharge)
-	return row
+	return v
 }
 
 // TryRecordWeeklyRecharge 记录用户当周首次充值;本周已充值过返回 false
@@ -43,5 +40,6 @@ func TryRecordWeeklyRecharge(week string, userId uint64) bool {
 	}
 	now := time.Now()
 	data.SetCreatedAt(&now)
+	publishWeeklyUserRecharge(data)
 	return true
 }

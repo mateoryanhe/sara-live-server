@@ -1,6 +1,7 @@
 package message
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"fmt"
 	"time"
@@ -18,7 +19,7 @@ const (
 	privateMessageUnreadListCacheMax = privateMessageUnreadListPageSize * 2
 )
 
-var privateMessageUnreadListCacheMgr = cache.NewCacheMgr()
+var privateMessageUnreadListCacheMgr = cache.NewListCache[*messagedto.AppPrivateMessageUnreadDetailItem]()
 
 func unreadListKey(userId uint64) string {
 	return fmt.Sprintf("private_msg_unread_list:%d", userId)
@@ -28,7 +29,7 @@ func getPrivateMessageUnreadList(userId uint64) []*messagedto.AppPrivateMessageU
 	if userId == 0 {
 		return nil
 	}
-	v := privateMessageUnreadListCacheMgr.GetData(unreadListKey(userId), func(ctx context.Context) (interface{}, error) {
+	v := privateMessageUnreadListCacheMgr.MustGetList(gctx.New(), unreadListKey(userId), func(ctx context.Context) ([]*messagedto.AppPrivateMessageUnreadDetailItem, error) {
 		rows := messagedao.ListPrivateMessageUnreadWithLastMessageFromDBLimit(userId, privateMessageUnreadListCacheMax, 0)
 		list := make([]*messagedto.AppPrivateMessageUnreadDetailItem, 0, len(rows))
 		for _, row := range rows {
@@ -41,8 +42,7 @@ func getPrivateMessageUnreadList(userId uint64) []*messagedto.AppPrivateMessageU
 		}
 		return list, nil
 	})
-	list, _ := v.([]*messagedto.AppPrivateMessageUnreadDetailItem)
-	return list
+	return v
 }
 
 func putPrivateMessageUnreadList(userId uint64, list []*messagedto.AppPrivateMessageUnreadDetailItem) {
@@ -52,7 +52,7 @@ func putPrivateMessageUnreadList(userId uint64, list []*messagedto.AppPrivateMes
 	if list == nil {
 		list = make([]*messagedto.AppPrivateMessageUnreadDetailItem, 0)
 	}
-	privateMessageUnreadListCacheMgr.FlushCache(unreadListKey(userId), list)
+	privateMessageUnreadListCacheMgr.PublishList(gctx.New(), unreadListKey(userId), list)
 }
 
 func firstPagePrivateMessageUnreadList(userId uint64) []*messagedto.AppPrivateMessageUnreadDetailItem {

@@ -39,6 +39,6 @@ func ClearAllPrivateUnreadCache(userId uint64) {
 			continue
 		}
 		item.UnreadCount = 0
-		//messageUnreadDetailCacheMgr.FlushCache(item.ID, item)
+		//messageUnreadDetailCacheMgr.Publish(gctx.New(), item.ID, item)
 	}
 }

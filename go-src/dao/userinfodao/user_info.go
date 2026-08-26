@@ -11,12 +11,12 @@ import (
 	userentity "xr-game-server/entity/user"
 )
 
-var userInfoCacheMgr *cache.CacheMgr
-var shareCodeUserIdCacheMgr *cache.CacheMgr
+var userInfoCacheMgr *cache.RowCache[*userentity.UserInfo]
+var shareCodeUserIdCacheMgr *cache.RowCache[uint64]
 
 func InitUserInfoDao() {
-	userInfoCacheMgr = cache.NewCacheMgr()
-	shareCodeUserIdCacheMgr = cache.NewCacheMgr()
+	userInfoCacheMgr = cache.NewRowCache[*userentity.UserInfo]()
+	shareCodeUserIdCacheMgr = cache.NewRowCache[uint64]()
 	initUserCumulativeStatDao()
 	initUserExtDao()
 }
@@ -26,27 +26,28 @@ func GetUserIdByShareCode(shareCode string) uint64 {
 	if shareCode == "" {
 		return 0
 	}
-	cacheData := shareCodeUserIdCacheMgr.GetData(shareCode, func(ctx context.Context) (value interface{}, err error) {
+	return shareCodeUserIdCacheMgr.MustGetRow(gctx.New(), shareCode, func(ctx context.Context) (uint64, error) {
 		var userId uint64
-		err = g.Model(string(userentity.TbUserInfo)).Unscoped().Where(g.Map{
+		err := g.Model(string(userentity.TbUserInfo)).Unscoped().Where(g.Map{
 			string(userentity.UserInfoShareCode): shareCode,
 		}).Fields(string(db.IdName)).Scan(&userId)
 		return userId, err
 	})
-	if cacheData == nil {
-		return 0
+}
+
+// PublishUserInfo 原地修改 UserInfo 后调用,刷新缓存条目.
+func PublishUserInfo(data *userentity.UserInfo) {
+	if data == nil || data.ID == 0 || userInfoCacheMgr == nil {
+		return
 	}
-	if userId, ok := cacheData.(uint64); ok {
-		return userId
-	}
-	return 0
+	userInfoCacheMgr.PublishRow(gctx.New(), data.ID, data)
 }
 
 // GetUserInfoByUserId 根据用户ID获取用户基础信息,命中不了缓存从数据库拉取,数据库不存在则新建
 func GetUserInfoByUserId(userId uint64) *userentity.UserInfo {
-	cacheData := userInfoCacheMgr.GetData(userId, func(ctx context.Context) (value interface{}, err error) {
+	return userInfoCacheMgr.MustGetRow(gctx.New(), userId, func(ctx context.Context) (*userentity.UserInfo, error) {
 		var data *userentity.UserInfo
-		err = g.Model(string(userentity.TbUserInfo)).Unscoped().Where(g.Map{
+		_ = g.Model(string(userentity.TbUserInfo)).Unscoped().Where(g.Map{
 			string(db.IdName): userId,
 		}).Scan(&data)
 		if data != nil {
@@ -56,7 +57,6 @@ func GetUserInfoByUserId(userId uint64) *userentity.UserInfo {
 		newData := userentity.NewUserInfo(userId)
 		return newData, nil
 	})
-	return cacheData.(*userentity.UserInfo)
 }
 
 // GetUserInfoFromMemory 仅从内存缓存读取用户基础信息,未命中返回 nil
@@ -64,15 +64,8 @@ func GetUserInfoFromMemory(userId uint64) *userentity.UserInfo {
 	if userId == 0 || userInfoCacheMgr == nil {
 		return nil
 	}
-	v := userInfoCacheMgr.GetFromCache(userId)
-	if v == nil {
-		return nil
-	}
-	info, ok := v.(*userentity.UserInfo)
-	if !ok || info == nil {
-		return nil
-	}
-	return info
+	v, _ := userInfoCacheMgr.GetRowCached(gctx.New(), userId)
+	return v
 }
 
 // GetNicknameMapByUserIds 批量查询用户昵称(CMS列表等场景使用)

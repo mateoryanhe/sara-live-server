@@ -64,9 +64,9 @@ func PreloadUserInfoToCache(users []*userentity.UserInfo) {
 		if user == nil || user.ID == 0 {
 			continue
 		}
-		userInfoCacheMgr.FlushCache(user.ID, user)
+		userInfoCacheMgr.PublishRow(gctx.New(), user.ID, user)
 		if user.ShareCode != "" && shareCodeUserIdCacheMgr != nil {
-			shareCodeUserIdCacheMgr.FlushCache(user.ShareCode, user.ID)
+			shareCodeUserIdCacheMgr.PublishRow(gctx.New(), user.ShareCode, user.ID)
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package livefollowdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"fmt"
 
@@ -9,7 +10,7 @@ import (
 	"xr-game-server/entity/live"
 )
 
-var blockListCacheMgr *cache.CacheMgr
+var blockListCacheMgr *cache.ListCache[*entity.LiveFollow]
 
 func blockListCacheKey(userId uint64) string {
 	return fmt.Sprintf("live_follow_block_list:%d", userId)
@@ -19,10 +20,9 @@ func getBlockListCache(userId uint64) []*entity.LiveFollow {
 	if blockListCacheMgr == nil || userId == 0 {
 		return make([]*entity.LiveFollow, 0)
 	}
-	v := blockListCacheMgr.GetData(blockListCacheKey(userId), func(ctx context.Context) (interface{}, error) {
+	list := blockListCacheMgr.MustGetList(gctx.New(), blockListCacheKey(userId), func(ctx context.Context) ([]*entity.LiveFollow, error) {
 		return loadBlockedListFromDB(userId, 1, followingListCacheMaxSize), nil
 	})
-	list, _ := v.([]*entity.LiveFollow)
 	if list == nil {
 		return make([]*entity.LiveFollow, 0)
 	}
@@ -36,7 +36,7 @@ func putBlockListCache(userId uint64, list []*entity.LiveFollow) {
 	if list == nil {
 		list = make([]*entity.LiveFollow, 0)
 	}
-	blockListCacheMgr.FlushCache(blockListCacheKey(userId), list)
+	blockListCacheMgr.PublishList(gctx.New(), blockListCacheKey(userId), list)
 }
 
 // PrependBlockedToListCache 拉黑成功后写入列表缓存头部
@@ -66,7 +66,7 @@ func RemoveBlockedFromListCache(userId, targetId uint64) {
 	if blockListCacheMgr == nil || userId == 0 || targetId == 0 {
 		return
 	}
-	if blockListCacheMgr.GetFromCache(blockListCacheKey(userId)) == nil {
+	if _, ok := blockListCacheMgr.GetListCached(gctx.New(), blockListCacheKey(userId)); !ok {
 		return
 	}
 	list := getBlockListCache(userId)

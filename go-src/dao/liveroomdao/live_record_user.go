@@ -1,6 +1,7 @@
 package liveroomdao
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"time"
 
@@ -9,17 +10,17 @@ import (
 	"xr-game-server/entity/live"
 )
 
-var liveRecordUserCacheMgr *cache.CacheMgr
+var liveRecordUserCacheMgr *cache.RowCache[*entity.LiveRecordUser]
 
 func initLiveRecordUserDao() {
-	liveRecordUserCacheMgr = cache.NewCacheMgr()
+	liveRecordUserCacheMgr = cache.NewRowCache[*entity.LiveRecordUser]()
 }
 
 func getLiveRecordUserById(id string, liveRecordId, userId uint64) *entity.LiveRecordUser {
 	if liveRecordUserCacheMgr == nil {
 		return nil
 	}
-	v := liveRecordUserCacheMgr.GetData(id, func(ctx context.Context) (value interface{}, err error) {
+	v := liveRecordUserCacheMgr.MustGetRow(gctx.New(), id, func(ctx context.Context) (*entity.LiveRecordUser, error) {
 		var row *entity.LiveRecordUser
 		_ = g.Model(string(entity.TbLiveRecordUser)).Where("id = ?", id).Scan(&row)
 		if row == nil {
@@ -27,11 +28,7 @@ func getLiveRecordUserById(id string, liveRecordId, userId uint64) *entity.LiveR
 		}
 		return row, nil
 	})
-	if v == nil {
-		return nil
-	}
-	row, _ := v.(*entity.LiveRecordUser)
-	return row
+	return v
 }
 
 // TryRecordLiveRecordAudience 记录观众进入本场直播;本场已统计过返回 false

@@ -13,10 +13,10 @@ import (
 
 const recentUnsettledDailyGuildEffectiveLiveLimit = 8
 
-var dailyGuildEffectiveLiveCacheMgr *cache.CacheMgr
+var dailyGuildEffectiveLiveCacheMgr *cache.RowCache[*entity.DailyGuildEffectiveLive]
 
 func initDailyGuildEffectiveLiveDao() {
-	dailyGuildEffectiveLiveCacheMgr = cache.NewCacheMgr()
+	dailyGuildEffectiveLiveCacheMgr = cache.NewRowCache[*entity.DailyGuildEffectiveLive]()
 }
 
 func GetDailyGuildEffectiveLive(date string, guildId uint64) *entity.DailyGuildEffectiveLive {
@@ -24,7 +24,7 @@ func GetDailyGuildEffectiveLive(date string, guildId uint64) *entity.DailyGuildE
 		return nil
 	}
 	id := entity.BuildDailyGuildEffectiveLiveId(date, guildId)
-	v := dailyGuildEffectiveLiveCacheMgr.GetData(id, func(ctx context.Context) (interface{}, error) {
+	v := dailyGuildEffectiveLiveCacheMgr.MustGetRow(gctx.New(), id, func(ctx context.Context) (*entity.DailyGuildEffectiveLive, error) {
 		var row *entity.DailyGuildEffectiveLive
 		_ = g.Model(string(entity.TbDailyGuildEffectiveLive)).Where("id = ?", id).Scan(&row)
 		if row == nil {
@@ -32,11 +32,7 @@ func GetDailyGuildEffectiveLive(date string, guildId uint64) *entity.DailyGuildE
 		}
 		return row, nil
 	})
-	if v == nil {
-		return nil
-	}
-	row, _ := v.(*entity.DailyGuildEffectiveLive)
-	return row
+	return v
 }
 
 // ListRecentUnsettledDailyGuildEffectiveLives 直查DB:某工会最近N条未结算日表,命中缓存则用缓存数据
@@ -146,10 +142,8 @@ func resolveDailyGuildEffectiveLiveTarget(row *entity.DailyGuildEffectiveLive) *
 		return nil
 	}
 	if dailyGuildEffectiveLiveCacheMgr != nil {
-		if v := dailyGuildEffectiveLiveCacheMgr.GetFromCache(row.ID); v != nil {
-			if cached, ok := v.(*entity.DailyGuildEffectiveLive); ok && cached != nil {
-				return cached
-			}
+		if v, _ := dailyGuildEffectiveLiveCacheMgr.GetRowCached(gctx.New(), row.ID); v != nil {
+			return v
 		}
 	}
 	return row
@@ -166,4 +160,5 @@ func AddDailyGuildLiveDuration(guildId uint64, at time.Time, durationSec float64
 		return
 	}
 	row.AddLiveDuration(durationSec)
+	PublishDailyGuildEffectiveLive(row)
 }
