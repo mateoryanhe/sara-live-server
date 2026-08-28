@@ -26,6 +26,24 @@ func setupStaticPaths() {
 	bindCMSStaticFallback(ctx)
 }
 
+// setupStaticPageNoCache 启用静态入口页不缓存策略(见 writeStaticFile)
+func setupStaticPageNoCache() {
+	g.Log().Warning(context.Background(), "index.html 已禁用浏览器缓存")
+}
+
+func isNoCacheStaticPage(filePath string) bool {
+	return strings.EqualFold(filepath.Base(filePath), "index.html")
+}
+
+func applyNoCacheStaticPageHeaders(r *ghttp.Request) {
+	if r == nil || r.Response == nil {
+		return
+	}
+	r.Response.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+	r.Response.Header().Set("Pragma", "no-cache")
+	r.Response.Header().Set("Expires", "0")
+}
+
 func serveConfiguredStaticPath(r *ghttp.Request) {
 	if r == nil {
 		return
@@ -108,6 +126,9 @@ func isCMSAssetRequest(rel string) bool {
 
 func writeStaticFile(r *ghttp.Request, filePath string) {
 	applyRequestCORS(r)
+	if isNoCacheStaticPage(filePath) {
+		applyNoCacheStaticPageHeaders(r)
+	}
 	if r.Method == http.MethodHead {
 		r.Response.WriteHeader(http.StatusOK)
 		return

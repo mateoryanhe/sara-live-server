@@ -30,6 +30,7 @@ func InitHttpServer() {
 	hotrestart.RegisterEnterRestartPhase(EnterRestartClosingPhase)
 	setupDomainSites()
 	setupStaticPaths()
+	setupStaticPageNoCache()
 	initHTTPServerLogger()
 	httpServer.SetErrorStack(true)
 	httpServer.Use(middlewareCORS, middlewareRestartGuard)

@@ -98,12 +98,7 @@ func serveDomainStatic(r *ghttp.Request, root string) {
 	}
 	filePath, ok := buildDomainStaticFilePath(root, reqPath)
 	if ok && gfile.Exists(filePath) && !gfile.IsDir(filePath) {
-		applyRequestCORS(r)
-		if r.Method == http.MethodHead {
-			r.Response.WriteHeader(http.StatusOK)
-		} else {
-			r.Response.ServeFile(filePath)
-		}
+		writeStaticFile(r, filePath)
 		r.ExitAll()
 		return
 	}
@@ -191,12 +186,7 @@ func serveCMSDomainSPA(r *ghttp.Request, root, reqPath string) {
 		r.ExitAll()
 		return
 	}
-	applyRequestCORS(r)
-	if r.Method == http.MethodHead {
-		r.Response.WriteHeader(http.StatusOK)
-	} else {
-		r.Response.ServeFile(indexPath)
-	}
+	writeStaticFile(r, indexPath)
 	r.ExitAll()
 }
 
@@ -280,11 +270,7 @@ func serveCMSStaticFallback(r *ghttp.Request, root, indexPath string) {
 	if ok && gfile.Exists(filePath) && !gfile.IsDir(filePath) {
 		return
 	}
-	if r.Method == http.MethodHead {
-		r.Response.WriteHeader(http.StatusOK)
-	} else {
-		r.Response.ServeFile(indexPath)
-	}
+	writeStaticFile(r, indexPath)
 	r.ExitAll()
 }
 
