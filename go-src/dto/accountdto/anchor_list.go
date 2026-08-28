@@ -28,6 +28,7 @@ type AnchorListItem struct {
 	GuildName                    string     `json:"guildName" dc:"工会名称"`
 	IP                           string     `json:"ip" dc:"登录IP"`
 	RoomTitle                    string     `json:"roomTitle"`
+	RoomCover                    string     `json:"roomCover" dc:"直播间封面URL"`
 	RoomId                       uint64     `json:"roomId,string" dc:"直播间ID"`
 	Category                     uint8      `json:"category" dc:"分类(1=hot,2=game,3=私密)"`
 	PrivateInviteType            uint8      `json:"privateInviteType" dc:"私密邀请类型(1=接受所有人,3=拒绝所有人)"`

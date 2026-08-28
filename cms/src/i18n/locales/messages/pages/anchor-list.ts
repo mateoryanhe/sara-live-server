@@ -125,6 +125,11 @@ const zh = {
   offShelfSuccess: '下架成功',
   onShelfFailed: '上架失败',
   offShelfFailed: '下架失败',
+  liveRoomCover: '直播间封面',
+  uploadRoomCover: '上传封面',
+  uploadRoomCoverTitle: '上传直播间封面',
+  uploadRoomCoverSuccess: '直播间封面已更新',
+  clearRoomCover: '清除封面',
 } as const
 
 const en: Record<keyof typeof zh, string> = {
@@ -253,6 +258,11 @@ const en: Record<keyof typeof zh, string> = {
   offShelfSuccess: 'Unpublished successfully',
   onShelfFailed: 'Failed to publish',
   offShelfFailed: 'Failed to unpublish',
+  liveRoomCover: 'Live Room Cover',
+  uploadRoomCover: 'Upload Cover',
+  uploadRoomCoverTitle: 'Upload Live Room Cover',
+  uploadRoomCoverSuccess: 'Live room cover updated',
+  clearRoomCover: 'Clear Cover',
 }
 
 const es: Record<keyof typeof zh, string> = {
@@ -381,6 +391,11 @@ const es: Record<keyof typeof zh, string> = {
   offShelfSuccess: 'Unpublished successfully',
   onShelfFailed: 'Failed to publish',
   offShelfFailed: 'Failed to unpublish',
+  liveRoomCover: 'Live Room Cover',
+  uploadRoomCover: 'Upload Cover',
+  uploadRoomCoverTitle: 'Upload Live Room Cover',
+  uploadRoomCoverSuccess: 'Live room cover updated',
+  clearRoomCover: 'Clear Cover',
 }
 
 const pt: Record<keyof typeof zh, string> = {
@@ -509,6 +524,11 @@ const pt: Record<keyof typeof zh, string> = {
   offShelfSuccess: 'Unpublished successfully',
   onShelfFailed: 'Failed to publish',
   offShelfFailed: 'Failed to unpublish',
+  liveRoomCover: 'Live Room Cover',
+  uploadRoomCover: 'Upload Cover',
+  uploadRoomCoverTitle: 'Upload Live Room Cover',
+  uploadRoomCoverSuccess: 'Live room cover updated',
+  clearRoomCover: 'Clear Cover',
 }
 
 const hi: Record<keyof typeof zh, string> = {
@@ -637,6 +657,11 @@ const hi: Record<keyof typeof zh, string> = {
   offShelfSuccess: 'Unpublished successfully',
   onShelfFailed: 'Failed to publish',
   offShelfFailed: 'Failed to unpublish',
+  liveRoomCover: 'Live Room Cover',
+  uploadRoomCover: 'Upload Cover',
+  uploadRoomCoverTitle: 'Upload Live Room Cover',
+  uploadRoomCoverSuccess: 'Live room cover updated',
+  clearRoomCover: 'Clear Cover',
 }
 
 const id: Record<keyof typeof zh, string> = {
@@ -765,6 +790,11 @@ const id: Record<keyof typeof zh, string> = {
   offShelfSuccess: 'Unpublished successfully',
   onShelfFailed: 'Failed to publish',
   offShelfFailed: 'Failed to unpublish',
+  liveRoomCover: 'Live Room Cover',
+  uploadRoomCover: 'Upload Cover',
+  uploadRoomCoverTitle: 'Upload Live Room Cover',
+  uploadRoomCoverSuccess: 'Live room cover updated',
+  clearRoomCover: 'Clear Cover',
 }
 
 export const anchorListMessages = definePageMessages(zh, en, es, pt, hi, id)

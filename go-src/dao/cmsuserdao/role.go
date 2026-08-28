@@ -76,7 +76,7 @@ func GetRoleList(req *cmsroledto.RoleListReq) (int, []*cmsroledto.RoleListRes) {
 	//获取总数
 	countSql := str.GetCountSQL(sql)
 	total, _ := g.DB().GetCount(ctx, countSql, param)
-	sql += ` limit ` + strconv.Itoa(req.PageSize) + ` offset ` + strconv.Itoa(req.PageIndex-1)
+	sql += ` limit ` + strconv.Itoa(req.PageSize) + ` offset ` + strconv.Itoa(req.PageOffset())
 	g.DB().GetScan(ctx, &ret, sql, param)
 	return total, ret
 }

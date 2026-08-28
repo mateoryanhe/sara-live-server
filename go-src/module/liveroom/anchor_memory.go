@@ -242,6 +242,7 @@ func fillAnchorRoomFields(item *accountdto.AnchorListItem, room *liveentity.Live
 		return
 	}
 	item.RoomTitle = room.Title
+	item.RoomCover = upload.GetUrlByName(room.Cover)
 	item.RoomId = room.ID
 	if cfg := liveroomdao.GetLiveRoomCfgForCMS(room.ID); cfg != nil {
 		item.Category = cfg.Category

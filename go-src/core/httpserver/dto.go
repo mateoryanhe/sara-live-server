@@ -39,6 +39,14 @@ type CMSQueryReq struct {
 	PageSize  int `json:"pageSize"  dc:"页大小"`
 }
 
+// PageOffset 分页 SQL offset（pageIndex 从 1 开始）
+func (r CMSQueryReq) PageOffset() int {
+	if r.PageIndex <= 1 || r.PageSize <= 0 {
+		return 0
+	}
+	return (r.PageIndex - 1) * r.PageSize
+}
+
 type CMSQueryResp struct {
 	Total int         `json:"total" dc:"总数"`
 	Data  interface{} `json:"data"  dc:"列表"`

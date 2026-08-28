@@ -7,10 +7,18 @@ server {
     location /res/ {
         alias /path/to/your/dist/;  # 修改为实际的dist目录路径
         try_files $uri $uri/ /res/index.html;  # 支持Vue Router的history模式
-        
-        # 设置静态资源缓存
-        expires 1y;
-        add_header Cache-Control "public, immutable";
+
+        # 带 hash 的 js/css 等可长期缓存；index.html 必须单独禁止缓存
+        location ~* \.(js|css|woff2?|ttf|eot|svg|png|jpg|jpeg|gif|webp|ico)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+
+        location = /res/index.html {
+            add_header Cache-Control "no-cache, no-store, must-revalidate";
+            add_header Pragma "no-cache";
+            add_header Expires "0";
+        }
         
         # 防止访问隐藏文件（如.git等）
         location ~ /\. {

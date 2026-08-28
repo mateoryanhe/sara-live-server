@@ -236,6 +236,16 @@ export interface SetUserAvatarRes {
     avatar?: string
 }
 
+export interface SetLiveRoomCoverReq {
+    anchorId: string
+    cover: string
+}
+
+export interface SetLiveRoomCoverRes {
+    success: boolean
+    cover?: string
+}
+
 export interface SetCanRankReq {
     accountId: string
     canRank: boolean
@@ -287,6 +297,7 @@ export interface AnchorListItem {
     guildName?: string
     ip?: string
     roomTitle?: string
+    roomCover?: string
     roomId?: string
     category?: number
     privateInviteType?: number

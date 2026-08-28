@@ -7,6 +7,7 @@ import (
 	"xr-game-server/dto/accountdto"
 	"xr-game-server/entity/live"
 	"xr-game-server/errercode"
+	"xr-game-server/module/upload"
 )
 
 // QueryAnchorDetail CMS获取主播详情(含直播间与各收益表)
@@ -37,7 +38,7 @@ func buildAnchorLiveRoomDetail(room *entity.LiveRoom) *accountdto.AnchorLiveRoom
 		ID:           room.ID,
 		GuildId:      room.GuildId,
 		Title:        room.Title,
-		Cover:        room.Cover,
+		Cover:        upload.GetUrlByName(room.Cover),
 		Notice:       room.Notice,
 		LiveRecordId: room.LiveRecordId,
 		HeartTime:    room.HeartTime,

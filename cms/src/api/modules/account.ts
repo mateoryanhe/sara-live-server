@@ -26,6 +26,8 @@ import type {
     SetPlatformAnchorTypeRes,
     SetUserAvatarReq,
     SetUserAvatarRes,
+    SetLiveRoomCoverReq,
+    SetLiveRoomCoverRes,
     SetUserTypeReq,
     UnBanAnchorReq,
     UnBanReq,
@@ -125,6 +127,10 @@ const accountApi = {
     // 上架/下架主播直播间
     setLiveRoomStatus: (data: SetLiveRoomStatusReq) => {
         return request.post<SetLiveRoomStatusRes>('/account/setLiveRoomStatus', data)
+    },
+
+    setLiveRoomCover: (data: SetLiveRoomCoverReq) => {
+        return request.post<SetLiveRoomCoverRes>('/account/setLiveRoomCover', data)
     },
 
     // 退出工会(将工会ID置为0)

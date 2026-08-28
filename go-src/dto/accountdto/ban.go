@@ -55,6 +55,18 @@ type SetLiveRoomStatusRes struct {
 	Status  uint8 `json:"status" dc:"当前状态(0-下架,1-上架)"`
 }
 
+// SetLiveRoomCoverReq CMS设置直播间封面(cover 为 uploadFile 返回的文件名,空字符串表示清除)
+type SetLiveRoomCoverReq struct {
+	g.Meta   `path:"/setLiveRoomCover" method:"post" summary:"CMS设置直播间封面" tags:"账号"`
+	AnchorId uint64 `json:"anchorId" v:"required#主播ID不能为空" dc:"主播账号ID"`
+	Cover    string `json:"cover" dc:"封面文件名(uploadFile返回的fileName,空字符串表示清除)"`
+}
+
+type SetLiveRoomCoverRes struct {
+	Success bool   `json:"success"`
+	Cover   string `json:"cover"`
+}
+
 // QueryOffShelfLiveRoomListReq CMS回收站:查询已下架直播间(直查DB)
 type QueryOffShelfLiveRoomListReq struct {
 	g.Meta `path:"/getOffShelfLiveRoomList" method:"post" summary:"获取下架直播间列表(回收站)" tags:"账号"`

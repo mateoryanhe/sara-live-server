@@ -262,7 +262,7 @@ func GetCMSUserList(req *cmsuserdto.CMSUserListReq) (int, []*cmsuserdto.CMSUserL
 	sql += ` order by u.created_at desc`
 	countSql := str.GetCountSQL(sql)
 	total, _ := g.DB().GetCount(ctx, countSql, param)
-	sql += ` limit ` + strconv.Itoa(req.PageSize) + ` offset ` + strconv.Itoa(req.PageIndex-1)
+	sql += ` limit ` + strconv.Itoa(req.PageSize) + ` offset ` + strconv.Itoa(req.PageOffset())
 	g.DB().GetScan(ctx, &ret, sql, param)
 	return total, ret
 }

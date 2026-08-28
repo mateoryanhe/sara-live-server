@@ -42,18 +42,26 @@
       <div class="table-scroll">
       <el-table v-loading="loading" :data="tableData" style="width: 100%">
         <el-table-column fixed label="#" type="index" width="55" :index="formatRowIndex"/>
-         <el-table-column :label="t('common.avatar')" width="80">
+        <el-table-column
+            :label="t('pages.anchorList.liveRoomCover')"
+            align="center"
+            class-name="cover-col"
+            label-class-name="cover-col"
+            width="100"
+        >
           <template #default="{ row }">
-            <el-image
-                v-if="row.avatar"
-                :preview-src-list="[row.avatar]"
-                :src="row.avatar"
-                fit="cover"
-                hide-on-click-modal
-                preview-teleported
-                style="width:40px;height:40px;border-radius:50%"
-            />
-            <span v-else>-</span>
+            <div class="cover-cell">
+              <el-image
+                  v-if="listCoverUrl(row)"
+                  :preview-src-list="[listCoverUrl(row)]"
+                  :src="listCoverUrl(row)"
+                  fit="cover"
+                  hide-on-click-modal
+                  preview-teleported
+                  :class="isAvatarCoverFallback(row) ? 'cover-cell-avatar' : 'cover-cell-image'"
+              />
+              <span v-else>-</span>
+            </div>
           </template>
         </el-table-column>
         
@@ -176,10 +184,15 @@
         <el-table-column :label="t('pages.anchorList.profileUpdatedAt')" prop="createdAt" width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>
-        <el-table-column fixed="right" :label="t('common.actions')" width="280">
+        <el-table-column fixed="right" :label="t('common.actions')" width="320">
           <template #default="{ row }">
-            <el-button v-if="canViewDetail" link type="primary" @click="openDetail(row)">
-              {{ t('common.detail') }}
+            <el-button
+                v-if="can('uploadRoomCover')"
+                link
+                type="primary"
+                @click="openRoomCoverDialog(row)"
+            >
+              {{ t('pages.anchorList.uploadRoomCover') }}
             </el-button>
             <el-button
                 v-if="can('offShelf')"
@@ -322,6 +335,53 @@
 
     </el-dialog>
 
+    <el-dialog
+        v-model="roomCoverDialogVisible"
+        :title="t('pages.anchorList.uploadRoomCoverTitle')"
+        width="440px"
+        @closed="resetRoomCoverForm"
+    >
+      <el-form label-width="100px">
+        <el-form-item :label="t('pages.anchorList.anchorId')">
+          <el-input v-model="roomCoverForm.anchorId" disabled/>
+        </el-form-item>
+        <el-form-item :label="t('common.nickname')">
+          <el-input v-model="roomCoverForm.nickname" disabled/>
+        </el-form-item>
+        <el-form-item :label="t('pages.anchorList.liveRoomCover')">
+          <div class="room-cover-upload-wrap">
+            <el-upload
+                :before-upload="beforeRoomCoverUpload"
+                :disabled="roomCoverUploading"
+                :http-request="doRoomCoverUpload"
+                :show-file-list="false"
+                accept="image/*"
+                class="room-cover-uploader"
+            >
+              <el-image
+                  v-if="roomCoverPreviewUrl"
+                  :src="roomCoverPreviewUrl"
+                  fit="cover"
+                  style="width:120px;height:120px;border-radius:4px"
+              />
+              <div v-else class="room-cover-uploader-placeholder">
+                <el-icon class="room-cover-uploader-icon">
+                  <Plus/>
+                </el-icon>
+              </div>
+            </el-upload>
+            <el-button v-if="roomCoverForm.cover || roomCoverPreviewUrl" link type="danger" @click="clearRoomCover">
+              {{ t('pages.anchorList.clearRoomCover') }}
+            </el-button>
+          </div>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="roomCoverDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button :loading="roomCoverSubmitting" type="primary" @click="submitRoomCover">{{ t('common.confirm') }}</el-button>
+      </template>
+    </el-dialog>
+
   </div>
 
 </template>
@@ -336,9 +396,11 @@ import {useI18n} from 'vue-i18n'
 
 import {useRouter} from 'vue-router'
 
-import {ElForm, ElMessage, ElMessageBox, type FormRules} from 'element-plus'
+import {ElForm, ElMessage, ElMessageBox, type FormRules, type UploadRequestOptions} from 'element-plus'
 
-import {accountApi} from '@/api'
+import {accountApi, uploadApi} from '@/api'
+
+import {Plus} from '@element-plus/icons-vue'
 
 import type {AnchorListItem, BanAnchorReq, UnBanAnchorReq} from '@/types/api'
 
@@ -363,6 +425,17 @@ const banDialogVisible = ref(false)
 const banSubmitting = ref(false)
 
 const banFormRef = ref<InstanceType<typeof ElForm>>()
+
+const roomCoverDialogVisible = ref(false)
+const roomCoverSubmitting = ref(false)
+const roomCoverUploading = ref(false)
+const roomCoverPreviewUrl = ref('')
+const roomCoverChanged = ref(false)
+const roomCoverForm = reactive({
+  anchorId: '',
+  nickname: '',
+  cover: '',
+})
 
 
 
@@ -569,6 +642,10 @@ const handleSizeChange = (size: number) => {
 
 const formatRowIndex = (index: number) =>
     (pagination.pageIndex - 1) * pagination.pageSize + index + 1
+
+const listCoverUrl = (row: AnchorListItem) => row.roomCover || row.avatar || ''
+
+const isAvatarCoverFallback = (row: AnchorListItem) => !row.roomCover && !!row.avatar
 
 const resetBanForm = () => {
 
@@ -788,6 +865,86 @@ const handleExitGuild = async (row: AnchorListItem) => {
   }
 }
 
+const resetRoomCoverForm = () => {
+  roomCoverForm.anchorId = ''
+  roomCoverForm.nickname = ''
+  roomCoverForm.cover = ''
+  roomCoverPreviewUrl.value = ''
+  roomCoverChanged.value = false
+}
+
+const openRoomCoverDialog = (row: AnchorListItem) => {
+  roomCoverForm.anchorId = String(row.id)
+  roomCoverForm.nickname = row.nickname || '-'
+  roomCoverForm.cover = ''
+  roomCoverPreviewUrl.value = row.roomCover || row.avatar || ''
+  roomCoverChanged.value = false
+  roomCoverDialogVisible.value = true
+}
+
+const beforeRoomCoverUpload = (file: File): boolean => {
+  if (!file.type.startsWith('image/')) {
+    ElMessage.error(t('pages.userList.imageOnly'))
+    return false
+  }
+  return true
+}
+
+const doRoomCoverUpload = async (options: UploadRequestOptions) => {
+  const file = options.file as File
+  roomCoverUploading.value = true
+  try {
+    const res = await uploadApi.uploadFile(file)
+    roomCoverForm.cover = res.fileName
+    roomCoverChanged.value = true
+    roomCoverPreviewUrl.value = URL.createObjectURL(file)
+    ElMessage.success(t('pages.userList.uploadSuccess'))
+  } catch (error) {
+    console.error('upload room cover failed:', error)
+    ElMessage.error(t('pages.userList.uploadFailed'))
+  } finally {
+    roomCoverUploading.value = false
+  }
+}
+
+const clearRoomCover = () => {
+  roomCoverForm.cover = ''
+  roomCoverPreviewUrl.value = ''
+  roomCoverChanged.value = true
+}
+
+const patchAnchorRow = (anchorId: string, patch: Partial<AnchorListItem>) => {
+  const idx = tableData.value.findIndex(item => String(item.id) === anchorId)
+  if (idx >= 0) {
+    tableData.value[idx] = {...tableData.value[idx], ...patch}
+  }
+}
+
+const submitRoomCover = async () => {
+  if (!roomCoverChanged.value) {
+    roomCoverDialogVisible.value = false
+    return
+  }
+  roomCoverSubmitting.value = true
+  try {
+    const res = await accountApi.setLiveRoomCover({
+      anchorId: roomCoverForm.anchorId,
+      cover: roomCoverForm.cover,
+    })
+    if (res?.success) {
+      patchAnchorRow(roomCoverForm.anchorId, {roomCover: res.cover || ''})
+      roomCoverDialogVisible.value = false
+      ElMessage.success(t('pages.anchorList.uploadRoomCoverSuccess'))
+    } else {
+      ElMessage.error(t('pages.userList.uploadFailed'))
+    }
+  } catch (error) {
+    console.error('setLiveRoomCover failed:', error)
+  } finally {
+    roomCoverSubmitting.value = false
+  }
+}
+
 </script>
 
 
@@ -879,6 +1036,65 @@ const handleExitGuild = async (row: AnchorListItem) => {
 
   flex-wrap: wrap;
 
+}
+
+.room-cover-upload-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.room-cover-uploader :deep(.el-upload) {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+
+.room-cover-uploader :deep(.el-upload:hover) {
+  border-color: var(--el-color-primary);
+}
+
+.room-cover-uploader-placeholder {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.room-cover-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+}
+
+:deep(.cover-col .cell) {
+  white-space: nowrap;
+}
+
+.cover-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.cover-cell-image {
+  width: 56px;
+  height: 56px;
+  border-radius: 4px;
+  display: block;
+  flex-shrink: 0;
+}
+
+.cover-cell-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: block;
+  flex-shrink: 0;
 }
 
 </style>

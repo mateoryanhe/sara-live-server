@@ -45,7 +45,7 @@ func MiddlewareH5Crypto(r *ghttp.Request) {
 				r.RequestURI,
 				err,
 			)
-			WriteFailJson(r, int(errercode.InvalidParam))
+			WriteFailJson(r, int(errercode.H5PayloadDecodeFail))
 			return
 		}
 		r.Request.Body = io.NopCloser(bytes.NewReader(plainBody))

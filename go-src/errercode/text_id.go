@@ -104,5 +104,6 @@ func init() {
 		SimulatorLoginDenied:            "Login simulator tidak diizinkan",
 		GuildLeaderDisabled:             "Pengguna CMS pemimpin guild dinonaktifkan",
 		AppImageFileTooLarge:            "File gambar melebihi batas ukuran",
+		H5PayloadDecodeFail:             "Gagal mendekode body permintaan H5",
 	}
 }

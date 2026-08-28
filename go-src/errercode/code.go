@@ -191,6 +191,8 @@ const (
 	GuildLeaderDisabled XRCode = 151
 	// AppImageFileTooLarge App端图片超过大小限制
 	AppImageFileTooLarge XRCode = 152
+	// H5PayloadDecodeFail H5请求体解码失败
+	H5PayloadDecodeFail XRCode = 153
 )
 
 type XError struct {

@@ -53,6 +53,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '资源域名'},
         },
         {
+            path: 'h5-live-deploy',
+            name: 'H5LiveDeployManagement',
+            component: () => import('@/views/config/h5-live-deploy.vue'),
+            meta: {title: 'H5直播部署'},
+        },
+        {
             path: 'data-sync',
             name: 'DataSyncCfgManagement',
             component: () => import('@/views/config/data-sync.vue'),

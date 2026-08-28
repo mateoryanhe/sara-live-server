@@ -106,6 +106,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		SimulatorLoginDenied:            "Simulator login is not allowed",
 		GuildLeaderDisabled:             "Guild leader CMS user is disabled",
 		AppImageFileTooLarge:            "Image file exceeds size limit",
+		H5PayloadDecodeFail:             "H5 request body decode failed",
 	},
 	lang.LangZHCN: {
 		Success:                         "成功",
@@ -208,6 +209,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		SimulatorLoginDenied:            "不允许模拟器登录",
 		GuildLeaderDisabled:             "工会长对应的CMS用户已停用",
 		AppImageFileTooLarge:            "图片文件超过大小限制",
+		H5PayloadDecodeFail:             "H5请求体解码失败",
 	},
 	lang.LangZHTW: {
 		Success:                         "成功",
@@ -310,6 +312,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		SimulatorLoginDenied:            "不允許模擬器登入",
 		GuildLeaderDisabled:             "工會長對應的CMS用戶已停用",
 		AppImageFileTooLarge:            "圖片文件超過大小限制",
+		H5PayloadDecodeFail:             "H5請求體解碼失敗",
 	},
 }
 

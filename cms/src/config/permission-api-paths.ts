@@ -40,6 +40,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'AnchorListManagement:viewUserDetail': '/account/getUserDetail',
     'AnchorListManagement:viewGuildDetail': '/guild/getGuildDetail',
     'AnchorListManagement:offShelf': '/account/setLiveRoomStatus',
+    'AnchorListManagement:uploadRoomCover': '/account/setLiveRoomCover',
 
     PlatformAnchorList: '/account/getAnchorList',
     'PlatformAnchorList:view': '/account/getAnchorList',

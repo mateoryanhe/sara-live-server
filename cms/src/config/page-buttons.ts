@@ -131,7 +131,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'diamondLog', label: '查看钻石流水'},
         {key: 'exportDiamondLog', label: '导出钻石流水'},
     ],
-    AnchorListManagement: [BTN.view, BTN.search, BTN.edit, {key: 'viewDetail', label: '查看详情'}, {key: 'viewUserDetail', label: '查看用户详情'}, {key: 'viewGuildDetail', label: '查看工会详情'}, {key: 'offShelf', label: '下架'}],
+    AnchorListManagement: [BTN.view, BTN.search, BTN.edit, {key: 'viewDetail', label: '查看详情'}, {key: 'viewUserDetail', label: '查看用户详情'}, {key: 'viewGuildDetail', label: '查看工会详情'}, {key: 'offShelf', label: '下架'}, {key: 'uploadRoomCover', label: '上传直播间封面'}],
     PlatformAnchorList: [
         BTN.view,
         BTN.search,

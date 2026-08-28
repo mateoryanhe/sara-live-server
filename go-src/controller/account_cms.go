@@ -37,6 +37,10 @@ func (a *AccountController) SetLiveRoomStatus(ctx context.Context, req *accountd
 	return liveroom.SetLiveRoomStatus(ctx, req)
 }
 
+func (a *AccountController) SetLiveRoomCover(ctx context.Context, req *accountdto.SetLiveRoomCoverReq) (*accountdto.SetLiveRoomCoverRes, error) {
+	return liveroom.SetLiveRoomCover(ctx, req)
+}
+
 func (a *AccountController) UnBan(ctx context.Context, req *accountdto.UnBanReq) (bool, error) {
 	return auth.UnBan(ctx, req)
 }
