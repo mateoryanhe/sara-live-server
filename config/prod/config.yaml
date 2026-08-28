@@ -76,5 +76,5 @@ database:
     extra: "charset=utf8mb4&parseTime=True&loc=Local"
     maxIdle: 20
     maxOpen: 40
-    maxLifetime: "30s"
-    debug: true
+    maxLifetime: "30m"
+    debug: false
