@@ -91,7 +91,8 @@ import {nextTick, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {RESOURCE_METRIC_MAX_POINTS, sysStatApi} from '@/api'
 import type {ResourceMetricPoint} from '@/types/api'
-import ResourceMetricChart from './components/resource-metric-chart.vue'
+import ResourceMetricChart from './components/resource-metric-chart.vue'
+import {formatServerDateTimeFromDate} from '@/utils/server-datetime'
 
 type MetricTab = 'memory' | 'heap' | 'ratio' | 'cpu' | 'online'
 

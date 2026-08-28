@@ -3,7 +3,6 @@ package datasync
 import (
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -20,8 +19,9 @@ func SyncFirstRechargeActivityCfg(_ context.Context, _ *datasyncdto.SyncFirstRec
 	if row == nil || row.ID == 0 {
 		return nil, errInvalidParam()
 	}
+	privileges := cfgdao.LoadFirstRechargeActivityPrivileges()
 
-	fileNames := collectFirstRechargeActivityFileNames(row)
+	fileNames := collectFirstRechargeActivityFileNames(row, privileges)
 	files := make([]*datasyncdto.SyncFileItem, 0, len(fileNames))
 	for _, name := range fileNames {
 		content, err := upload.ReadUploadedFileBytes(name)
@@ -35,8 +35,9 @@ func SyncFirstRechargeActivityCfg(_ context.Context, _ *datasyncdto.SyncFirstRec
 	}
 
 	payload := &datasyncdto.ReceiveFirstRechargeActivityCfgReq{
-		Row:   row,
-		Files: files,
+		Row:        row,
+		Privileges: privileges,
+		Files:      files,
 	}
 	var receiveRes datasyncdto.ReceiveFirstRechargeActivityCfgRes
 	if err := postSyncReceive("/dataSync/receiveFirstRechargeActivityCfg", payload, &receiveRes); err != nil {
@@ -75,6 +76,9 @@ func ReceiveFirstRechargeActivityCfg(_ context.Context, req *datasyncdto.Receive
 	if err := cfgdao.SaveFirstRechargeActivityCfg(req.Row); err != nil {
 		return nil, fmt.Errorf("save first recharge activity cfg id=%d: %w", req.Row.ID, err)
 	}
+	if err := cfgdao.ReplaceAllFirstRechargeActivityPrivileges(req.Privileges); err != nil {
+		return nil, fmt.Errorf("save first recharge activity privileges: %w", err)
+	}
 	activity.ReloadFirstRechargeActivityCache()
 
 	return &datasyncdto.ReceiveFirstRechargeActivityCfgRes{
@@ -84,7 +88,7 @@ func ReceiveFirstRechargeActivityCfg(_ context.Context, req *datasyncdto.Receive
 	}, nil
 }
 
-func collectFirstRechargeActivityFileNames(row *activityentity.FirstRechargeActivityCfg) []string {
+func collectFirstRechargeActivityFileNames(row *activityentity.FirstRechargeActivityCfg, privileges []*activityentity.FirstRechargeActivityPrivilege) []string {
 	if row == nil {
 		return nil
 	}
@@ -103,14 +107,11 @@ func collectFirstRechargeActivityFileNames(row *activityentity.FirstRechargeActi
 	}
 
 	appendFileName(row.Icon)
-
-	if row.Privileges != "" {
-		var privileges []activityentity.FirstRechargePrivilege
-		if err := json.Unmarshal([]byte(row.Privileges), &privileges); err == nil {
-			for _, item := range privileges {
-				appendFileName(item.Icon)
-			}
+	for _, item := range privileges {
+		if item == nil {
+			continue
 		}
+		appendFileName(item.Icon)
 	}
 	return names
 }

@@ -9,6 +9,7 @@ import (
 	"xr-game-server/entity/live"
 	"xr-game-server/gameevent"
 	"xr-game-server/module/liverevenuesharecfg"
+	"xr-game-server/module/wallet"
 )
 
 func initAnchorSettlement() {
@@ -24,6 +25,7 @@ func settleOnShelfAnchors() {
 	cfgs := anchorsalarycfgdao.ListAllOrderBySalaryDesc()
 	rooms := liveroomdao.GetAllLiveRoom()
 	ctx := gctx.New()
+	liveroomdao.ResetGuildWeeklyAnchorSalary()
 	g.Log().Infof(ctx, "anchor weekly settlement start, rooms=%d, salaryCfgs=%d", len(rooms), len(cfgs))
 	for _, room := range rooms {
 		if room == nil || room.ID == 0 {
@@ -49,27 +51,36 @@ func settleOneAnchor(roomId uint64, cfgs []*entity.AnchorSalaryCfg) {
 
 	snap := unsettled.SnapshotAndClear()
 	anchorSharePercent := liverevenuesharecfg.ResolveAnchorSharePercent()
+	flowCommission := liverevenuesharecfg.CalcSettlementShareAmount(0, snap.TotalIncome)
+	flowCommissionUsd := wallet.CalcDiamondToUsd(flowCommission)
 	shareAmount := liverevenuesharecfg.CalcSettlementShareAmount(salary, snap.TotalIncome)
+	shareAmountUsd := wallet.CalcDiamondToUsd(shareAmount)
 	settled := liveroomdao.GetLiveRoomIncomeSettled(roomId)
 	if settled != nil {
 		settled.AddAmounts(&snap)
 		settled.AddSettlementSalary(salary)
 		settled.AddSettlementShareAmount(shareAmount)
+		settled.AddSettlementShareAmountUsd(shareAmountUsd)
 	}
 	if salary != 0 {
 		if total := liveroomdao.GetLiveRoomIncomeTotal(roomId); total != nil {
 			total.AddSettlementSalary(salary)
 		}
+		liveroomdao.MirrorGuildAnchorSettlementSalary(roomId, salary)
 	}
 	if shareAmount != 0 {
 		if total := liveroomdao.GetLiveRoomIncomeTotal(roomId); total != nil {
 			total.AddSettlementShareAmount(shareAmount)
+			total.AddSettlementShareAmountUsd(shareAmountUsd)
 		}
+	}
+	if flowCommissionUsd != 0 {
+		liveroomdao.MirrorGuildAnchorSettlementShareAmountUsd(roomId, flowCommissionUsd)
 	}
 	if hasDaily {
 		liveroomdao.MarkDailyEffectiveLivesSettled(dailyRows)
 	}
-	_ = entity.NewAnchorIncomeSettlementLog(roomId, &snap, salary, shareAmount, anchorSharePercent)
+	_ = entity.NewAnchorIncomeSettlementLog(roomId, &snap, salary, shareAmount, shareAmountUsd, anchorSharePercent)
 }
 
 // matchAnchorSalaryAmount 按薪资降序取最高满足档(结算规则后续按日表时长/workDays完善)

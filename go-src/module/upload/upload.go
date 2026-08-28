@@ -51,7 +51,7 @@ var allowedShortVideoExt = map[string]struct{}{
 
 // UploadImage 保存单张图片(CMS 等后台使用,不做内容审核)
 func UploadImage(file *ghttp.UploadFile) (string, error) {
-	name, _, err := saveUploadedImageFile(file)
+	name, _, err := saveUploadedImageFile(file, 0)
 	return name, err
 }
 
@@ -175,8 +175,8 @@ func UploadCMSFile(file *ghttp.UploadFile) (string, error) {
 	return newName, nil
 }
 
-// UploadShortVideoFile 保存短视频文件;大小上限由 server.clientMaxBodySize 控制
-func UploadShortVideoFile(file *ghttp.UploadFile) (string, error) {
+// UploadShortVideoFile 保存短视频文件;maxBytes 为业务大小上限(字节),0 表示不限制
+func UploadShortVideoFile(file *ghttp.UploadFile, maxBytes int64) (string, error) {
 	if file == nil {
 		return "", errors.New("upload file is empty")
 	}
@@ -190,17 +190,13 @@ func UploadShortVideoFile(file *ghttp.UploadFile) (string, error) {
 		return "", err
 	}
 	newName := newStoredFileName(ext)
+	fullPath := filepath.Join(dir, newName)
 	src, err := file.Open()
 	if err != nil {
 		return "", err
 	}
 	defer src.Close()
-	dst, err := os.Create(filepath.Join(dir, newName))
-	if err != nil {
-		return "", err
-	}
-	defer dst.Close()
-	if _, err := io.Copy(dst, src); err != nil {
+	if _, err = copyUploadContent(src, fullPath, maxBytes, errVideoFileTooLarge); err != nil {
 		return "", err
 	}
 	return newName, nil
@@ -208,15 +204,15 @@ func UploadShortVideoFile(file *ghttp.UploadFile) (string, error) {
 
 // StreamUploadShortVideoPart 流式保存短视频 multipart 文件字段
 func StreamUploadShortVideoPart(part *multipart.Part, maxBytes int64) (string, error) {
-	return streamUploadMultipartPart(part, allowedShortVideoExt, maxBytes)
+	return streamUploadMultipartPart(part, allowedShortVideoExt, maxBytes, errVideoFileTooLarge)
 }
 
 // StreamUploadImagePart 流式保存图片 multipart 文件字段
 func StreamUploadImagePart(part *multipart.Part, maxBytes int64) (string, error) {
-	return streamUploadMultipartPart(part, allowedImageExt, maxBytes)
+	return streamUploadMultipartPart(part, allowedImageExt, maxBytes, errImageFileTooLarge)
 }
 
-func streamUploadMultipartPart(part *multipart.Part, allowedExt map[string]struct{}, maxBytes int64) (string, error) {
+func streamUploadMultipartPart(part *multipart.Part, allowedExt map[string]struct{}, maxBytes int64, tooLargeErr error) (string, error) {
 	if part == nil || strings.TrimSpace(part.FileName()) == "" {
 		return "", errors.New("upload file is empty")
 	}
@@ -231,37 +227,61 @@ func streamUploadMultipartPart(part *multipart.Part, allowedExt map[string]struc
 	}
 	newName := newStoredFileName(ext)
 	dstPath := filepath.Join(dir, newName)
-	dst, err := os.Create(dstPath)
-	if err != nil {
+	if _, err := copyUploadContent(part, dstPath, maxBytes, tooLargeErr); err != nil {
 		return "", err
 	}
+	return newName, nil
+}
 
-	reader := io.Reader(part)
+var (
+	errFileTooLarge      = errors.New("upload file too large")
+	errImageFileTooLarge = errors.New("upload image file too large")
+	errVideoFileTooLarge = errors.New("upload video file too large")
+)
+
+func copyUploadContent(src io.Reader, dstPath string, maxBytes int64, tooLargeErr error) (int64, error) {
+	dst, err := os.Create(dstPath)
+	if err != nil {
+		return 0, err
+	}
+
+	reader := io.Reader(src)
 	if maxBytes > 0 {
-		reader = io.LimitReader(part, maxBytes+1)
+		reader = io.LimitReader(src, maxBytes+1)
 	}
 	written, copyErr := io.Copy(dst, reader)
 	closeErr := dst.Close()
 	if copyErr != nil {
 		os.Remove(dstPath)
-		return "", mapUploadReadErr(copyErr)
+		return 0, mapUploadReadErr(copyErr)
 	}
 	if closeErr != nil {
 		os.Remove(dstPath)
-		return "", closeErr
+		return 0, closeErr
 	}
 	if maxBytes > 0 && written > maxBytes {
 		os.Remove(dstPath)
-		return "", errFileTooLarge
+		if tooLargeErr != nil {
+			return 0, tooLargeErr
+		}
+		return 0, errFileTooLarge
 	}
-	return newName, nil
+	return written, nil
 }
-
-var errFileTooLarge = errors.New("upload file too large")
 
 // IsUploadFileTooLarge 判断是否超过上传大小限制
 func IsUploadFileTooLarge(err error) bool {
-	return err == errFileTooLarge
+	return err == errFileTooLarge || err == errImageFileTooLarge || err == errVideoFileTooLarge
+}
+
+// IsUploadImageFileTooLarge 判断 App 图片是否超过大小限制
+func IsUploadImageFileTooLarge(err error) bool {
+	return err == errImageFileTooLarge
+}
+
+// IsUploadVideoFileTooLarge 判断短视频是否超过大小限制
+func IsUploadVideoFileTooLarge(err error) bool {
+	return err == errVideoFileTooLarge
 }
 
 func sanitizeStoredFileName(name string) string {

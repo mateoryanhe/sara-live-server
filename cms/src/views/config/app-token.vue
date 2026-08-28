@@ -103,6 +103,7 @@ import {computed, nextTick, onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import appTokenApi from '@/api/modules/appToken'
 import type {AppToken, SaveAppTokenReq} from '@/types/api'
+import {formatServerDateTime as formatDate, formatServerNowPlusDays} from '@/utils/server-datetime'
 
 const {t} = useI18n()
 const tableData = ref<AppToken[]>([])
@@ -129,19 +130,7 @@ const formRules = computed(() => ({
   id: [{required: true, message: t('pages.appToken.userIdRequired'), trigger: 'blur'}],
 }))
 
-const formatDate = (value?: string | null) => {
-  if (!value) {
-    return '-'
-  }
-  return value.replace('T', ' ').slice(0, 19)
-}
-
-const defaultExpireAt = () => {
-  const date = new Date()
-  date.setDate(date.getDate() + 30)
-  const pad = (value: number) => String(value).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
-}
+const defaultExpireAt = () => formatServerNowPlusDays(30)
 
 const fetchList = async () => {
   loading.value = true

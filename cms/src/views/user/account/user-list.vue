@@ -209,6 +209,7 @@
                       {{ scope.row.cancel ? t('pages.userList.uncancel') : t('pages.userList.cancelAccount') }}
                     </el-dropdown-item>
                     <el-dropdown-item v-if="can('setUserType') && !scope.row.isAnchor" command="setUserType">{{ t('pages.userList.setUserType') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="can('uploadAvatar')" command="uploadAvatar">{{ t('pages.userList.uploadAvatar') }}</el-dropdown-item>
                     <el-dropdown-item v-if="showSetAnchorType && isAnchorUser(scope.row)" command="setAnchorType">{{ t('pages.guildMembers.setAnchorType') }}</el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
@@ -351,6 +352,53 @@
     </el-dialog>
 
     <el-dialog
+        v-model="avatarDialogVisible"
+        :title="t('pages.userList.uploadAvatarTitle')"
+        width="440px"
+        @closed="resetAvatarForm"
+    >
+      <el-form label-width="100px">
+        <el-form-item :label="t('common.userId')">
+          <el-input v-model="avatarForm.userId" disabled/>
+        </el-form-item>
+        <el-form-item :label="t('common.nickname')">
+          <el-input v-model="avatarForm.nickname" disabled/>
+        </el-form-item>
+        <el-form-item :label="t('pages.userList.avatar')">
+          <div class="avatar-upload-wrap">
+            <el-upload
+                :before-upload="beforeAvatarUpload"
+                :disabled="avatarUploading"
+                :http-request="doAvatarUpload"
+                :show-file-list="false"
+                accept="image/*"
+                class="avatar-uploader"
+            >
+              <el-image
+                  v-if="avatarPreviewUrl"
+                  :src="avatarPreviewUrl"
+                  fit="cover"
+                  style="width:80px;height:80px;border-radius:50%"
+              />
+              <div v-else class="avatar-uploader-placeholder">
+                <el-icon class="avatar-uploader-icon">
+                  <Plus/>
+                </el-icon>
+              </div>
+            </el-upload>
+            <el-button v-if="avatarForm.avatar || avatarPreviewUrl" link type="danger" @click="clearAvatar">
+              {{ t('pages.userList.clearAvatar') }}
+            </el-button>
+          </div>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="avatarDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button :loading="avatarSubmitting" type="primary" @click="submitAvatar">{{ t('common.confirm') }}</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog
         v-model="gamePickerDialogVisible"
         :title="gamePickerDialogTitle"
         destroy-on-close
@@ -414,9 +462,9 @@
 <script lang="ts" setup>
 import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
-import {accountApi, diamondApi, goldApi, guildApi} from '@/api'
-import {ArrowDown} from '@element-plus/icons-vue'
-import {ElForm, ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
+import {accountApi, diamondApi, goldApi, guildApi, uploadApi} from '@/api'
+import {ArrowDown, Plus} from '@element-plus/icons-vue'
+import {ElForm, ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
 import {useRoute, useRouter} from 'vue-router'
 import type {BanReq, CancelReq, GameShelfItem, UnBanReq, UnCancelReq, UserInfo} from '@/types/api.ts'
 import {gamePlatformApi} from '@/api/modules/gamePlatform'
@@ -447,6 +495,7 @@ const ROW_ACTION_KEYS = [
   'rechargeWhitelistOff',
   'cancel',
   'setUserType',
+  'uploadAvatar',
   'openGame',
 ] as const
 
@@ -471,6 +520,17 @@ const anchorTypeDialogVisible = ref(false)
 const anchorTypeDialogTitle = ref('')
 const anchorTypeSubmitting = ref(false)
 const anchorTypeFormRef = ref<InstanceType<typeof ElForm>>()
+
+const avatarDialogVisible = ref(false)
+const avatarSubmitting = ref(false)
+const avatarUploading = ref(false)
+const avatarPreviewUrl = ref('')
+const avatarChanged = ref(false)
+const avatarForm = reactive({
+  userId: '',
+  nickname: '',
+  avatar: '',
+})
 
 const gamePickerDialogVisible = ref(false)
 const gamePickerLoading = ref(false)
@@ -918,6 +978,82 @@ const handleRowCommand = (row: UserInfo, command: string) => {
     case 'setAnchorType':
       openAnchorTypeDialog(row)
       break
+    case 'uploadAvatar':
+      openAvatarDialog(row)
+      break
+  }
+}
+
+const resetAvatarForm = () => {
+  avatarForm.userId = ''
+  avatarForm.nickname = ''
+  avatarForm.avatar = ''
+  avatarPreviewUrl.value = ''
+  avatarChanged.value = false
+}
+
+const openAvatarDialog = (row: UserInfo) => {
+  avatarForm.userId = String(row.id)
+  avatarForm.nickname = row.nickname || '-'
+  avatarForm.avatar = ''
+  avatarPreviewUrl.value = row.avatar || ''
+  avatarChanged.value = false
+  avatarDialogVisible.value = true
+}
+
+const beforeAvatarUpload = (file: File): boolean => {
+  if (!file.type.startsWith('image/')) {
+    ElMessage.error(t('pages.userList.imageOnly'))
+    return false
+  }
+  return true
+}
+
+const doAvatarUpload = async (options: UploadRequestOptions) => {
+  const file = options.file as File
+  avatarUploading.value = true
+  try {
+    const res = await uploadApi.uploadFile(file)
+    avatarForm.avatar = res.fileName
+    avatarChanged.value = true
+    avatarPreviewUrl.value = URL.createObjectURL(file)
+    ElMessage.success(t('pages.userList.uploadSuccess'))
+  } catch (error) {
+    console.error('upload avatar failed:', error)
+    ElMessage.error(t('pages.userList.uploadFailed'))
+  } finally {
+    avatarUploading.value = false
+  }
+}
+
+const clearAvatar = () => {
+  avatarForm.avatar = ''
+  avatarPreviewUrl.value = ''
+  avatarChanged.value = true
+}
+
+const submitAvatar = async () => {
+  if (!avatarChanged.value) {
+    avatarDialogVisible.value = false
+    return
+  }
+  avatarSubmitting.value = true
+  try {
+    const res = await accountApi.setUserAvatar({
+      accountId: avatarForm.userId,
+      avatar: avatarForm.avatar,
+    })
+    if (res?.success) {
+      avatarDialogVisible.value = false
+      ElMessage.success(t('pages.userList.uploadAvatarSuccess'))
+      await fetchUserList(true)
+    } else {
+      ElMessage.error(t('pages.userList.uploadFailed'))
+    }
+  } catch (error) {
+    console.error('setUserAvatar failed:', error)
+  } finally {
+    avatarSubmitting.value = false
   }
 }
 
@@ -1081,11 +1217,7 @@ const submitCurrencyChange = async () => {
   })
 }
 
-const defaultBanApplyTime = () => {
-  const d = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
-}
+const defaultBanApplyTime = () => formatServerNowPlusDays(7)
 
 const disabledBanDate = (time: Date) => time.getTime() < Date.now()
 
@@ -1397,5 +1529,36 @@ onMounted(() => {
 .id-cell .el-button--link,
 .id-cell .el-button.is-link {
   flex-shrink: 0;
+}
+
+.avatar-upload-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar-uploader :deep(.el-upload) {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 50%;
+  cursor: pointer;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader :deep(.el-upload:hover) {
+  border-color: var(--el-color-primary);
+}
+
+.avatar-uploader-placeholder {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-uploader-icon {
+  font-size: 24px;
+  color: #8c939d;
 }
 </style>

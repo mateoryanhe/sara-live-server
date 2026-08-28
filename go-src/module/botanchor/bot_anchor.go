@@ -63,6 +63,10 @@ func CreateBotAnchor(_ context.Context, req *botanchordto.CreateBotAnchorReq) (*
 		if req.CloudPlayerVideo != "" {
 			cfg.SetCloudPlayerVideo(strings.TrimSpace(req.CloudPlayerVideo))
 		}
+		cfg.SetCloudPlayerFrameRate(req.CloudPlayerFrameRate)
+		cfg.SetCloudPlayerBitrate(req.CloudPlayerBitrate)
+		cfg.SetCloudPlayerWidth(req.CloudPlayerWidth)
+		cfg.SetCloudPlayerHeight(req.CloudPlayerHeight)
 		cfg.SetPushStream(req.PushStream)
 		cfg.SetIsTest(req.IsTest)
 	}
@@ -106,6 +110,18 @@ func UpdateBotAnchor(_ context.Context, req *botanchordto.UpdateBotAnchorReq) (*
 		cfg.SetTagId(req.TagId)
 		if req.CloudPlayerVideo != nil {
 			cfg.SetCloudPlayerVideo(strings.TrimSpace(*req.CloudPlayerVideo))
+		}
+		if req.CloudPlayerFrameRate != nil {
+			cfg.SetCloudPlayerFrameRate(*req.CloudPlayerFrameRate)
+		}
+		if req.CloudPlayerBitrate != nil {
+			cfg.SetCloudPlayerBitrate(*req.CloudPlayerBitrate)
+		}
+		if req.CloudPlayerWidth != nil {
+			cfg.SetCloudPlayerWidth(*req.CloudPlayerWidth)
+		}
+		if req.CloudPlayerHeight != nil {
+			cfg.SetCloudPlayerHeight(*req.CloudPlayerHeight)
 		}
 		cfg.SetPushStream(req.PushStream)
 		cfg.SetIsTest(req.IsTest)

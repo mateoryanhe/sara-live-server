@@ -6,6 +6,7 @@ func Init() {
 	initUserInfo()
 	initUserLoginDevice()
 	initUserExt()
+	initUserRechargeCfgFirstRecharge()
 	initUserCumulativeStat()
 	initCurrencyLog()
 	initRandomNickname()

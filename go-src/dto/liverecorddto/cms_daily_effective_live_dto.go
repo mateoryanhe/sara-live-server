@@ -16,6 +16,7 @@ type CMSDailyEffectiveLiveListReq struct {
 	AnchorIds        []string `json:"anchorIds" dc:"主播ID列表(可选,多选)"`
 	LiveDateStart    string   `json:"liveDateStart" dc:"日期起(YYYY-MM-DD,可选)"`
 	LiveDateEnd      string   `json:"liveDateEnd"   dc:"日期止(YYYY-MM-DD,可选)"`
+	Keyword          string   `json:"keyword" dc:"关键字(可选,模糊匹配流水ID/主播ID/昵称)"`
 	Settled          int8     `json:"settled"       dc:"结算状态(-1全部,0未结算,1已结算)"`
 }
 

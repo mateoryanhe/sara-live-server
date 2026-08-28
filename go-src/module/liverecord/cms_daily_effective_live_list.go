@@ -20,6 +20,7 @@ func GetCMSDailyEffectiveLiveList(_ context.Context, req *liverecorddto.CMSDaily
 		RoomIds:       roomIds,
 		LiveDateStart: req.LiveDateStart,
 		LiveDateEnd:   req.LiveDateEnd,
+		Keyword:       req.Keyword,
 		Settled:       req.Settled,
 		PageIndex:     req.PageIndex,
 		PageSize:      req.PageSize,
@@ -68,6 +69,8 @@ func toCMSDailyEffectiveLiveItem(row *liveentity.DailyAnchorEffectiveLive, profi
 			TotalVideoCallIncome:         amounts.TotalVideoCallIncome,
 			TotalVideoCallTicketIncome:   amounts.TotalVideoCallTicketIncome,
 			TotalVideoCallBillingIncome:  amounts.TotalVideoCallBillingIncome,
+			TotalShortVideoIncome:        amounts.TotalShortVideoIncome,
+			TotalGameIncome:              amounts.TotalGameIncome,
 			TotalLiveDuration:            amounts.TotalLiveDuration,
 		},
 	}

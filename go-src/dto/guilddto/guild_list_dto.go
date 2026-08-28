@@ -12,12 +12,13 @@ type GuildListReq struct {
 }
 
 type GuildListRes struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	LeaderId    string `json:"leaderId"`
-	LeaderName  string `json:"leaderName"`
-	Description string `json:"description"`
-	Status      uint8  `json:"status"`
-	CreatedAt   string `json:"createdAt"`
-	UpdatedAt   string `json:"updatedAt"`
+	ID                   string  `json:"id"`
+	Name                 string  `json:"name"`
+	LeaderId             string  `json:"leaderId"`
+	LeaderName           string  `json:"leaderName"`
+	Description          string  `json:"description"`
+	Status               uint8   `json:"status"`
+	UnsettledTotalIncome float64 `json:"unsettledTotalIncome" dc:"未结算工会总收益"`
+	CreatedAt            string  `json:"createdAt"`
+	UpdatedAt            string  `json:"updatedAt"`
 }

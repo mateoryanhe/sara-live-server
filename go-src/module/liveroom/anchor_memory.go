@@ -84,6 +84,9 @@ func filterAnchorRooms(rooms []*liveentity.LiveRoom, key string, guildId uint64,
 			if room.GuildId == 0 {
 				continue
 			}
+			if guildId > 0 && room.GuildId != guildId {
+				continue
+			}
 		} else if guildId > 0 {
 			if room.GuildId != guildId {
 				continue
@@ -240,14 +243,14 @@ func fillAnchorRoomFields(item *accountdto.AnchorListItem, room *liveentity.Live
 	}
 	item.RoomTitle = room.Title
 	item.RoomId = room.ID
-	if cfg := liveroomdao.GetLiveRoomCfgFromCache(room.ID); cfg != nil {
+	if cfg := liveroomdao.GetLiveRoomCfgForCMS(room.ID); cfg != nil {
 		item.Category = cfg.Category
 		item.PrivateInviteType = liveentity.NormalizePrivateInviteType(cfg.PrivateInviteType, cfg.Category)
 		item.Ticket = cfg.Ticket
 		item.Billing = cfg.Billing
 	}
-	// 主播列表收益只读永久缓存(生涯累计),不查库
-	if income := liveroomdao.GetLiveRoomIncomeTotalFromCache(room.ID); income != nil {
+	// 主播列表收益读未结算(缓存优先,否则直查DB,不新建)
+	if income := liveroomdao.GetLiveRoomIncomeUnsettledForCMS(room.ID); income != nil {
 		item.TotalIncome = income.TotalIncome
 		item.TotalGiftIncome = income.TotalGiftIncome
 		item.TotalPaidDanmakuIncome = income.TotalPaidDanmakuIncome

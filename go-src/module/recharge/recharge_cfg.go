@@ -6,9 +6,11 @@ import (
 	"strings"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/cfgdao"
+	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/rechargecfgdto"
 	"xr-game-server/entity/recharge"
 	"xr-game-server/errercode"
+	"xr-game-server/module/activity"
 	"xr-game-server/module/upload"
 )
 
@@ -133,12 +135,24 @@ func OffShelf(_ context.Context, req *rechargecfgdto.OffShelfRechargeCfgReq) (*r
 // 缓存在服务启动时加载,CMS 端创建/修改/删除/上下架时重新从 DB 加载。
 func GetAppList(ctx context.Context, req *rechargecfgdto.AppRechargeCfgListReq) (*rechargecfgdto.AppRechargeCfgListRes, error) {
 	packageName := strings.TrimSpace(httpserver.GetPackageNameFromContext(ctx))
+	userId := httpserver.GetAuthId(ctx)
+	cfgRatio := activity.ConfiguredFirstRechargeRatio()
 	all := getRechargeCfgCache()
 	list := make([]*rechargecfgdto.AppRechargeCfgItem, 0)
 	for _, item := range all {
-		if item.CfgType == req.CfgType && item.PackageName == packageName {
-			list = append(list, item)
+		if item == nil || item.CfgType != req.CfgType || item.PackageName != packageName {
+			continue
 		}
+		copyItem := *item
+		if userId > 0 {
+			copyItem.FirstRecharge = userinfodao.IsRechargeCfgFirstRecharge(userId, item.ID)
+		} else {
+			copyItem.FirstRecharge = true
+		}
+		if copyItem.FirstRecharge {
+			copyItem.FirstRechargeRatio = cfgRatio
+		}
+		list = append(list, &copyItem)
 	}
 	return &rechargecfgdto.AppRechargeCfgListRes{List: list}, nil
 }

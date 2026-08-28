@@ -25,10 +25,20 @@ export const logRoutes: RouteRecordRaw = {
             meta: {title: '每日流水', parentTitle: '直播日志'},
         },
         {
-            path: 'call/video-call-log-list',
+            path: 'live/weekly-unsettled-live-list',
+            name: 'LiveWeeklyUnsettledLiveList',
+            component: () => import('@/views/log/live/weekly-unsettled-live-list.vue'),
+            meta: {title: '本周流水', parentTitle: '直播日志'},
+        },
+        {
+            path: 'live/video-call-log-list',
             name: 'VideoCallLogList',
-            component: () => import('@/views/log/call/video-call-log-list.vue'),
-            meta: {title: '视频通话日志', parentTitle: '通话日志'},
+            component: () => import('@/views/log/live/video-call-log-list.vue'),
+            meta: {title: '视频通话日志', parentTitle: '直播日志'},
+        },
+        {
+            path: 'call/video-call-log-list',
+            redirect: '/log/live/video-call-log-list',
         },
     ],
 }

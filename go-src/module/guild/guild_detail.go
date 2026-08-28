@@ -45,6 +45,8 @@ func toIncomeAmountsItem(a *liveentity.LiveRoomIncomeAmounts) accountdto.LiveRoo
 		TotalVideoCallIncome:         a.TotalVideoCallIncome,
 		TotalVideoCallTicketIncome:   a.TotalVideoCallTicketIncome,
 		TotalVideoCallBillingIncome:  a.TotalVideoCallBillingIncome,
+		TotalShortVideoIncome:        a.TotalShortVideoIncome,
+		TotalGameIncome:              a.TotalGameIncome,
 		TotalLiveDuration:            a.TotalLiveDuration,
 	}
 }
@@ -71,6 +73,8 @@ func toIncomeSettledItem(row *liveentity.GuildIncomeSettled) *accountdto.LiveRoo
 		LiveRoomIncomeAmountsItem: toIncomeAmountsItem(&row.LiveRoomIncomeAmounts),
 		SettlementSalary:          row.SettlementSalary,
 		SettlementShareAmount:     row.SettlementShareAmount,
+		SettlementShareAmountUsd:  row.SettlementShareAmountUsd,
+		SettlementReceivableUsd:   row.SettlementReceivableUsd,
 	}
 	if !row.UpdatedAt.IsZero() {
 		updatedAt := row.UpdatedAt
@@ -87,6 +91,8 @@ func toIncomeTotalItem(row *liveentity.GuildIncomeTotal) *accountdto.LiveRoomInc
 		LiveRoomIncomeAmountsItem: toIncomeAmountsItem(&row.LiveRoomIncomeAmounts),
 		SettlementSalary:          row.SettlementSalary,
 		SettlementShareAmount:     row.SettlementShareAmount,
+		SettlementShareAmountUsd:  row.SettlementShareAmountUsd,
+		SettlementReceivableUsd:   row.SettlementReceivableUsd,
 	}
 	if !row.UpdatedAt.IsZero() {
 		updatedAt := row.UpdatedAt

@@ -189,6 +189,8 @@ const (
 	ShortVideoPriceTierNonExist XRCode = 150
 	// GuildLeaderDisabled 工会长对应的CMS用户已停用
 	GuildLeaderDisabled XRCode = 151
+	// AppImageFileTooLarge App端图片超过大小限制
+	AppImageFileTooLarge XRCode = 152
 )
 
 type XError struct {

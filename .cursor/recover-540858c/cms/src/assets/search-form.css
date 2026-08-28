@@ -1,0 +1,41 @@
+/* CMS 列表页筛选区：inline 表单项横向排列，避免每项独占一行 */
+.search-form.el-form--inline,
+.search-form .el-form.el-form--inline,
+.page-container .el-card__body > .el-form.el-form--inline,
+.page-container .el-card__body > .search-form > .el-form.el-form--inline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 8px;
+}
+
+.search-form.el-form--inline > .el-form-item,
+.search-form .el-form.el-form--inline > .el-form-item,
+.page-container .el-card__body > .el-form.el-form--inline > .el-form-item,
+.page-container .el-card__body > .search-form > .el-form.el-form--inline > .el-form-item {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    width: auto;
+    max-width: 100%;
+    margin-right: 12px;
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+
+.search-form.el-form--inline > .el-form-item .el-form-item__content,
+.search-form .el-form.el-form--inline > .el-form-item .el-form-item__content,
+.page-container .el-card__body > .el-form.el-form--inline > .el-form-item .el-form-item__content,
+.page-container .el-card__body > .search-form > .el-form.el-form--inline > .el-form-item .el-form-item__content {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 0;
+}
+
+.search-form.el-form--inline > .el-form-item .el-form-item__label,
+.search-form .el-form.el-form--inline > .el-form-item .el-form-item__label,
+.page-container .el-card__body > .el-form.el-form--inline > .el-form-item .el-form-item__label,
+.page-container .el-card__body > .search-form > .el-form.el-form--inline > .el-form-item .el-form-item__label {
+    white-space: nowrap;
+    flex-shrink: 0;
+}

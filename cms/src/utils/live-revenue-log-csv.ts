@@ -1,6 +1,6 @@
 import type {LiveRevenueLogItem} from '@/types/api'
+import {formatServerDateTimeForExport} from '@/utils/server-datetime'
 import type {CsvColumn} from './csv-export'
-import {formatLiveRecordCsvDate} from './live-record-csv'
 
 type TranslateFn = (key: string) => string
 
@@ -27,6 +27,6 @@ export function buildLiveRevenueLogCsvColumns(
       header: t('common.status'),
       value: row => row.statusText || (row.status === 1 ? t(`${ns}.refunded`) : t('common.normal')),
     },
-    {header: t('common.createdAt'), value: row => formatLiveRecordCsvDate(row.createdAt)},
+    {header: t('common.createdAt'), value: row => formatServerDateTimeForExport(row.createdAt)},
   ]
 }

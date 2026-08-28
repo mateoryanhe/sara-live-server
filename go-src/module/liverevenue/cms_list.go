@@ -11,6 +11,7 @@ import (
 	"xr-game-server/dto/liverevenuedto"
 	"xr-game-server/entity/live"
 	userentity "xr-game-server/entity/user"
+	"xr-game-server/module/upload"
 )
 
 func parseUint64Filter(val string) uint64 {
@@ -33,8 +34,8 @@ func collectRevenueLogUserIds(rows []*entity.LiveRevenueLog) []uint64 {
 		if row.SenderId > 0 {
 			userIds = append(userIds, row.SenderId)
 		}
-		if row.ReceiverId > 0 {
-			userIds = append(userIds, row.ReceiverId)
+		if row.RoomId > 0 {
+			userIds = append(userIds, row.RoomId)
 		}
 	}
 	return userIds
@@ -60,7 +61,7 @@ func toCMSItem(v *entity.LiveRevenueLog, profileMap map[uint64]*userentity.UserI
 		RoomId:          v.RoomId,
 		LiveRecordId:    v.LiveRecordId,
 		SenderId:        v.SenderId,
-		ReceiverId:      v.ReceiverId,
+		ReceiverId:      v.RoomId,
 		BizId:           v.BizId,
 		Count:           v.Count,
 		UnitPrice:       v.UnitPrice,
@@ -72,10 +73,11 @@ func toCMSItem(v *entity.LiveRevenueLog, profileMap map[uint64]*userentity.UserI
 	if profileMap != nil {
 		if sender := profileMap[v.SenderId]; sender != nil {
 			item.SenderNickname = sender.Nickname
+			item.SenderAvatar = upload.ResolveAvatarUrlForUser(v.SenderId, sender.Avatar)
 		}
-		if receiver := profileMap[v.ReceiverId]; receiver != nil {
+		if receiver := profileMap[v.RoomId]; receiver != nil {
 			item.ReceiverNickname = receiver.Nickname
-			item.ReceiverAvatar = receiver.Avatar
+			item.ReceiverAvatar = upload.ResolveAvatarUrlForUser(v.RoomId, receiver.Avatar)
 		}
 	}
 	if v.RevenueType == uint8(liverevenueconst.Gift) {
@@ -91,6 +93,7 @@ func GetCMSList(_ context.Context, req *liverevenuedto.CMSLiveRevenueLogListReq)
 	total, rows := liveroomdao.RevenueLogCMSList(&liveroomdao.RevenueLogCMSListFilter{
 		ReceiverIds:  liveroomdao.ParseRevenueLogReceiverIds(req.ReceiverId, req.PlatformAnchorId, req.GuildAnchorId, req.ReceiverIds),
 		LiveRecordId: parseUint64Filter(req.LiveRecordId),
+		Keyword:      req.Keyword,
 		RevenueType:  req.RevenueType,
 		StartTime:    req.StartTime,
 		EndTime:      req.EndTime,

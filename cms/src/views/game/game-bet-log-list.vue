@@ -93,8 +93,9 @@ import {ElMessage} from 'element-plus'
 import {gameBetLogApi} from '@/api'
 import type {GameBetLogItem} from '@/types/api'
 import {formatAmount} from '@/utils/number-format'
+import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 
-const {t, locale} = useI18n()
+const {t} = useI18n()
 const loading = ref(false)
 const tableData = ref<GameBetLogItem[]>([])
 
@@ -157,16 +158,6 @@ const handleSizeChange = (size: number) => {
   fetchList()
 }
 
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) {
-    return '-'
-  }
-  try {
-    return new Date(dateString).toLocaleString(locale.value)
-  } catch {
-    return '-'
-  }
-}
 
 onMounted(() => {
   fetchList()

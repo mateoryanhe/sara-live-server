@@ -29,8 +29,9 @@ func AddGameBetLog(userId uint64, gameCode, nameEn, cover string, platformType g
 	)
 	if amount > 0 {
 		gamebetdao.PrependGameBetToAppListCache(userId, row)
-		if liveRecordId > 0 {
-			event.Pub(gameevent.GameBetCreatedEvent, gameevent.NewGameBetCreatedEventData(userId, liveRecordId, amount))
+		event.Pub(gameevent.GameBetCreatedEvent, gameevent.NewGameBetCreatedEventData(userId, liveRecordId, amount))
+		if liveRoomId > 0 {
+			RecordLiveRoomGameBetIncome(liveRoomId, liveRecordId, amount)
 		}
 	}
 	return row

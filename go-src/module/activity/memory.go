@@ -25,7 +25,8 @@ type cfgSnapshot struct {
 	RechargeBtnTextPt string
 	RechargeBtnTextHi string
 	RechargeBtnTextId string
-	Privileges        []activityentity.FirstRechargePrivilege
+	FirstRechargeRatio float64
+	Privileges        []*activityentity.FirstRechargeActivityPrivilege
 	CreatedAt         string
 	UpdatedAt         string
 }
@@ -33,7 +34,9 @@ type cfgSnapshot struct {
 var cfgCache atomic.Value
 
 func reloadCfgMemory() {
-	cfgCache.Store(toCfgSnapshot(cfgdao.LoadFirstRechargeActivityCfg()))
+	row := cfgdao.LoadFirstRechargeActivityCfg()
+	privileges := cfgdao.LoadFirstRechargeActivityPrivileges()
+	cfgCache.Store(toCfgSnapshot(row, privileges))
 }
 
 // ReloadFirstRechargeActivityCache 从 DB 重新加载缓存(供启动/保存后调用)
@@ -56,7 +59,7 @@ func getCfgCache() *cfgSnapshot {
 	return snap
 }
 
-func toCfgSnapshot(row *activityentity.FirstRechargeActivityCfg) *cfgSnapshot {
+func toCfgSnapshot(row *activityentity.FirstRechargeActivityCfg, privileges []*activityentity.FirstRechargeActivityPrivilege) *cfgSnapshot {
 	if row == nil {
 		return &cfgSnapshot{}
 	}
@@ -75,7 +78,8 @@ func toCfgSnapshot(row *activityentity.FirstRechargeActivityCfg) *cfgSnapshot {
 		RechargeBtnTextPt: row.RechargeBtnTextPt,
 		RechargeBtnTextHi: row.RechargeBtnTextHi,
 		RechargeBtnTextId: row.RechargeBtnTextId,
-		Privileges:        parsePrivileges(row.Privileges),
+		FirstRechargeRatio: normalizeFirstRechargeRatio(row.FirstRechargeRatio),
+		Privileges:        privileges,
 		CreatedAt:         formatTime(row.CreatedAt),
 		UpdatedAt:         formatTime(row.UpdatedAt),
 	}
@@ -100,6 +104,7 @@ func toCfgItemFromSnapshot(snap *cfgSnapshot) *activitydto.FirstRechargeActivity
 		RechargeBtnTextPt: snap.RechargeBtnTextPt,
 		RechargeBtnTextHi: snap.RechargeBtnTextHi,
 		RechargeBtnTextId: snap.RechargeBtnTextId,
+		FirstRechargeRatio: snap.FirstRechargeRatio,
 		Privileges:        toPrivilegeDTOItems(snap.Privileges),
 		CreatedAt:         snap.CreatedAt,
 		UpdatedAt:         snap.UpdatedAt,
@@ -107,24 +112,26 @@ func toCfgItemFromSnapshot(snap *cfgSnapshot) *activitydto.FirstRechargeActivity
 }
 
 func toAppRes(snap *cfgSnapshot) *activitydto.AppFirstRechargeActivityCfgRes {
-	if snap == nil {
+	if snap == nil || snap.ID == 0 {
 		return &activitydto.AppFirstRechargeActivityCfgRes{
-			Privileges: []*activitydto.AppFirstRechargePrivilegeItem{},
+			FirstRechargeRatio: defaultFirstRechargeRatio,
+			Privileges:        []*activitydto.AppFirstRechargePrivilegeItem{},
 		}
 	}
 	return &activitydto.AppFirstRechargeActivityCfgRes{
-		Enabled:           snap.Enabled,
-		Icon:              snap.Icon,
-		TitleEn:           snap.TitleEn,
-		TitleEs:           snap.TitleEs,
-		TitlePt:           snap.TitlePt,
-		TitleHi:           snap.TitleHi,
-		TitleId:           snap.TitleId,
-		RechargeBtnTextEn: snap.RechargeBtnTextEn,
-		RechargeBtnTextEs: snap.RechargeBtnTextEs,
-		RechargeBtnTextPt: snap.RechargeBtnTextPt,
-		RechargeBtnTextHi: snap.RechargeBtnTextHi,
-		RechargeBtnTextId: snap.RechargeBtnTextId,
-		Privileges:        toPrivilegeAppItems(snap.Privileges),
+		Enabled:            snap.Enabled,
+		Icon:               snap.Icon,
+		TitleEn:            snap.TitleEn,
+		TitleEs:            snap.TitleEs,
+		TitlePt:            snap.TitlePt,
+		TitleHi:            snap.TitleHi,
+		TitleId:            snap.TitleId,
+		RechargeBtnTextEn:  snap.RechargeBtnTextEn,
+		RechargeBtnTextEs:  snap.RechargeBtnTextEs,
+		RechargeBtnTextPt:  snap.RechargeBtnTextPt,
+		RechargeBtnTextHi:  snap.RechargeBtnTextHi,
+		RechargeBtnTextId:  snap.RechargeBtnTextId,
+		FirstRechargeRatio: snap.FirstRechargeRatio,
+		Privileges:         toPrivilegeAppItems(snap.Privileges),
 	}
 }

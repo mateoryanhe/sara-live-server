@@ -1,0 +1,42 @@
+{
+
+  "go.goroot": "C:\\Users\\hw\\go\\go1.26.2",
+
+  "go.alternateTools": {
+
+    "gopls": "C:\\Users\\hw\\go\\bin\\gopls.exe"
+
+  },
+
+  "go.buildFlags": ["-o", "${workspaceFolder}/go-build/xr-game-server"],
+
+  "go.useLanguageServer": true,
+
+  "go.toolsManagement.autoUpdate": true,
+
+  "go.toolsEnvVars": {
+
+    "GOWORK": "${workspaceFolder}/go.work"
+
+  },
+
+  "gopls": {
+
+    "directoryFilters": ["-cms", "-pub-tool", "-official-site", "-docs", "-go-build", "-node_modules"]
+
+  },
+
+  "[go]": {
+
+    "editor.formatOnSave": true,
+
+    "editor.codeActionsOnSave": {
+
+      "source.organizeImports": "explicit"
+
+    }
+
+  }
+
+}
+

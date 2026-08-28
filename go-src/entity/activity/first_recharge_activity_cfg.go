@@ -22,9 +22,9 @@ type FirstRechargeActivityCfg struct {
 	RechargeBtnTextEn string `gorm:"size:64;default:'';comment:充值按钮文案(英文)" json:"rechargeBtnTextEn"`
 	RechargeBtnTextEs string `gorm:"size:64;default:'';comment:充值按钮文案(西班牙语)" json:"rechargeBtnTextEs"`
 	RechargeBtnTextPt string `gorm:"size:64;default:'';comment:充值按钮文案(葡萄牙语)" json:"rechargeBtnTextPt"`
-	RechargeBtnTextHi string `gorm:"size:64;default:'';comment:充值按钮文案(印地语)" json:"rechargeBtnTextHi"`
-	RechargeBtnTextId string `gorm:"size:64;default:'';comment:充值按钮文案(印尼语)" json:"rechargeBtnTextId"`
-	Privileges        string `gorm:"type:text;comment:特权列表JSON" json:"privileges"`
+	RechargeBtnTextHi string  `gorm:"size:64;default:'';comment:充值按钮文案(印地语)" json:"rechargeBtnTextHi"`
+	RechargeBtnTextId string  `gorm:"size:64;default:'';comment:充值按钮文案(印尼语)" json:"rechargeBtnTextId"`
+	FirstRechargeRatio float64 `gorm:"type:decimal(6,2);default:20;comment:首充比例(%)" json:"firstRechargeRatio"`
 }
 
 func initFirstRechargeActivityCfg() {

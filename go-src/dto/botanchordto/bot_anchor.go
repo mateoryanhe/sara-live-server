@@ -27,6 +27,10 @@ type BotAnchorListItem struct {
 	TagName              string     `json:"tagName" dc:"直播间标签名称"`
 	CloudPlayerVideo     string     `json:"cloudPlayerVideo" dc:"云播放器MP4视频访问URL"`
 	CloudPlayerVideoFile string     `json:"cloudPlayerVideoFile" dc:"云播放器MP4视频存储文件名/路径"`
+	CloudPlayerFrameRate uint8      `json:"cloudPlayerFrameRate" dc:"云播放器输出帧率(fps,默认24)"`
+	CloudPlayerBitrate   int        `json:"cloudPlayerBitrate" dc:"云播放器输出码率(Kbps,默认400)"`
+	CloudPlayerWidth     int        `json:"cloudPlayerWidth" dc:"云播放器输出宽度(px,默认960)"`
+	CloudPlayerHeight    int        `json:"cloudPlayerHeight" dc:"云播放器输出高度(px,默认540)"`
 	PushStream           bool       `json:"pushStream" dc:"是否推流"`
 	IsTest               bool       `json:"isTest" dc:"是否测试机器人主播"`
 	BotAnchorStatus      uint8      `json:"botAnchorStatus" dc:"状态(0停用,1启用)"`
@@ -44,8 +48,12 @@ type CreateBotAnchorReq struct {
 	RoomTitle        string `json:"roomTitle" dc:"直播间标题"`
 	Category         uint8  `json:"category" v:"in:1,2,3" dc:"直播间类型(1=hot,2=game,3=私密)"`
 	TagId            uint64 `json:"tagId,string" dc:"直播间标签ID(0表示无)"`
-	CloudPlayerVideo string `json:"cloudPlayerVideo" dc:"云播放器MP4视频文件名或URL"`
-	PushStream       bool   `json:"pushStream" dc:"是否推流"`
+	CloudPlayerVideo     string `json:"cloudPlayerVideo" dc:"云播放器MP4视频文件名或URL"`
+	CloudPlayerFrameRate uint8  `json:"cloudPlayerFrameRate" dc:"云播放器输出帧率(fps,1-30,默认24)"`
+	CloudPlayerBitrate   int    `json:"cloudPlayerBitrate" dc:"云播放器输出码率(Kbps,1-10000,默认400)"`
+	CloudPlayerWidth     int    `json:"cloudPlayerWidth" dc:"云播放器输出宽度(px,1-4096,默认960)"`
+	CloudPlayerHeight    int    `json:"cloudPlayerHeight" dc:"云播放器输出高度(px,1-2160,默认540)"`
+	PushStream           bool   `json:"pushStream" dc:"是否推流"`
 	IsTest           bool   `json:"isTest" dc:"是否测试机器人主播"`
 }
 
@@ -63,8 +71,12 @@ type UpdateBotAnchorReq struct {
 	RoomTitle        string  `json:"roomTitle" dc:"直播间标题"`
 	Category         uint8   `json:"category" v:"in:1,2,3" dc:"直播间类型(1=hot,2=game,3=私密)"`
 	TagId            uint64  `json:"tagId,string" dc:"直播间标签ID(0表示无)"`
-	CloudPlayerVideo *string `json:"cloudPlayerVideo" dc:"云播放器MP4视频文件名或URL,不传表示不修改"`
-	PushStream       bool    `json:"pushStream" dc:"是否推流"`
+	CloudPlayerVideo     *string `json:"cloudPlayerVideo" dc:"云播放器MP4视频文件名或URL,不传表示不修改"`
+	CloudPlayerFrameRate *uint8  `json:"cloudPlayerFrameRate" dc:"云播放器输出帧率(fps,1-30),不传表示不修改"`
+	CloudPlayerBitrate   *int    `json:"cloudPlayerBitrate" dc:"云播放器输出码率(Kbps,1-10000),不传表示不修改"`
+	CloudPlayerWidth     *int    `json:"cloudPlayerWidth" dc:"云播放器输出宽度(px,1-4096),不传表示不修改"`
+	CloudPlayerHeight    *int    `json:"cloudPlayerHeight" dc:"云播放器输出高度(px,1-2160),不传表示不修改"`
+	PushStream           bool    `json:"pushStream" dc:"是否推流"`
 	IsTest           bool    `json:"isTest" dc:"是否测试机器人主播"`
 }
 

@@ -1,0 +1,21 @@
+---
+description: 处理 sara-live-server 任务前先读取本地 agent 备忘
+alwaysApply: true
+---
+
+处理本仓库任务前，先阅读：
+
+`.cursor/agent-notes/README.md`
+
+若任务涉及服务器、CMS 列表、日志页或部署，继续读同目录下对应专题 md（servers / cms-conventions / changelog-notes）。
+
+**本机安全 / Git 备份 / 误删恢复** → `workspace-safety.mdc`（必读，含 2026-08-28 事故教训）。
+
+**Go 编译**勿用 `-o .../`（会生成字面 `...` 目录），见 `go-build-output.mdc`；清理 `...` 目录方式见 `workspace-safety.mdc`。
+
+**直播测试服** → `直播测试服`（ec2-user @ 54.241.124.37）  
+**直播正式服** → `直播正式服`（ec2-user @ 52.9.70.64）  
+
+远程/数据库**删除类操作必须先问用户**（见 `server-safety.mdc`）。
+
+任务结束后，若发现新的环境事实或项目约定，简短更新上述文件。

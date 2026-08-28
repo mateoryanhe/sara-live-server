@@ -4,7 +4,14 @@
       <template #header>
         <div class="card-header">
           <span>{{ t('menu.RechargeOrderList') }}</span>
-          <el-button v-if="canManualCreateOrder" type="primary" @click="openCreateOrderDialog">{{ t('pages.rechargeOrderList.manualCreateOrder') }}</el-button>
+          <div class="header-actions">
+            <el-button v-if="canCreateOrderByRechargeCfg" type="primary" @click="openCreateOrderByCfgDialog">
+              {{ t('pages.rechargeOrderList.createOrderByRechargeCfg') }}
+            </el-button>
+            <el-button v-if="canManualCreateOrder" @click="openCreateOrderDialog">
+              {{ t('pages.rechargeOrderList.manualCreateOrder') }}
+            </el-button>
+          </div>
         </div>
       </template>
 
@@ -138,6 +145,54 @@
         <el-button :loading="creatingOrder" type="primary" @click="handleCreateOrder">{{ t('common.confirm') }}</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog
+        v-model="createOrderByCfgDialogVisible"
+        :title="t('pages.rechargeOrderList.createOrderByCfgDialogTitle')"
+        width="760px"
+        @closed="resetCreateOrderByCfgForm"
+    >
+      <el-form ref="createOrderByCfgFormRef" :model="createOrderByCfgForm" :rules="createOrderByCfgRules" label-width="90px">
+        <el-form-item :label="t('pages.rechargeOrderList.playerId')" prop="userId">
+          <el-input v-model="createOrderByCfgForm.userId" clearable :placeholder="t('pages.rechargeOrderList.enterPlayerId')"/>
+        </el-form-item>
+        <el-form-item :label="t('pages.rechargeOrderList.selectRechargeCfg')" prop="cfgId">
+          <el-table
+              v-loading="rechargeCfgLoading"
+              :data="rechargeCfgOptions"
+              highlight-current-row
+              max-height="360"
+              style="width: 100%"
+              @current-change="handleRechargeCfgSelect"
+          >
+            <el-table-column width="48">
+              <template #default="{ row }">
+                <el-radio v-model="createOrderByCfgForm.cfgId" :label="row.id">&nbsp;</el-radio>
+              </template>
+            </el-table-column>
+            <el-table-column :label="t('pages.rechargeOrderList.cfgId')" prop="id" width="100"/>
+            <el-table-column :label="t('pages.rechargeOrderList.rechargeCfgName')" min-width="120" prop="name"/>
+            <el-table-column :label="t('pages.rechargeOrderList.price')" width="100">
+              <template #default="{ row }">{{ formatAmount(row.price) }}</template>
+            </el-table-column>
+            <el-table-column :label="t('pages.rechargeOrderList.gold')" width="120">
+              <template #default="{ row }">{{ formatAmount((row.gold || 0) + (row.extraGold || 0)) }}</template>
+            </el-table-column>
+            <el-table-column :label="t('pages.rechargeOrderList.rechargeCfgStatus')" width="100">
+              <template #default="{ row }">
+                <el-tag :type="row.status === 1 ? 'success' : 'info'">
+                  {{ row.status === 1 ? t('pages.rechargeOrderList.cfgStatusOnShelf') : t('pages.rechargeOrderList.cfgStatusOffShelf') }}
+                </el-tag>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="createOrderByCfgDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button :loading="creatingOrderByCfg" type="primary" @click="handleCreateOrderByCfg">{{ t('common.confirm') }}</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -145,11 +200,12 @@
 import {useI18n} from 'vue-i18n'
 import {computed, onMounted, reactive, ref} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
-import {rechargeOrderApi} from '@/api'
-import type {RechargeOrder} from '@/types/api.ts'
+import {rechargeCfgApi, rechargeOrderApi} from '@/api'
+import type {RechargeCfg, RechargeOrder} from '@/types/api.ts'
 import {usePagePermission} from '@/composables/usePagePermission'
 import {useUserDetailNav} from '@/composables/useUserDetailNav'
 import {formatAmount, NUMBER_INPUT_DECIMALS} from '@/utils/number-format'
+import {toServerDayStartUnix, toServerDayEndUnix, formatServerDateTime} from '@/utils/server-datetime'
 
 interface SearchForm {
   orderId: string
@@ -162,12 +218,18 @@ const {t} = useI18n()
 const {can} = usePagePermission('RechargeOrderList')
 const {canViewUserDetail, openUserDetail} = useUserDetailNav('RechargeOrderList')
 const canManualCreateOrder = computed(() => can('manualCreateOrder'))
+const canCreateOrderByRechargeCfg = computed(() => can('createOrderByRechargeCfg'))
 const canManualRecharge = computed(() => can('manualRecharge'))
 const loading = ref(false)
 const manualRechargingId = ref('')
 const createOrderDialogVisible = ref(false)
+const createOrderByCfgDialogVisible = ref(false)
 const creatingOrder = ref(false)
+const creatingOrderByCfg = ref(false)
+const rechargeCfgLoading = ref(false)
+const rechargeCfgOptions = ref<RechargeCfg[]>([])
 const createOrderFormRef = ref<FormInstance>()
+const createOrderByCfgFormRef = ref<FormInstance>()
 const tableData = ref<RechargeOrder[]>([])
 const total = ref(0)
 const currentPage = ref(1)
@@ -185,18 +247,20 @@ const createOrderForm = reactive({
   amount: undefined as number | undefined,
 })
 
+const createOrderByCfgForm = reactive({
+  userId: '',
+  cfgId: '',
+})
+
 const createOrderRules = computed<FormRules>(() => ({
   userId: [{required: true, message: t('pages.rechargeOrderList.playerIdRequired'), trigger: 'blur'}],
   amount: [{required: true, message: t('pages.rechargeOrderList.orderAmountRequired'), trigger: 'change'}],
 }))
 
-const toDayStartUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T00:00:00`).getTime() / 1000)
-}
-
-const toDayEndUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T23:59:59`).getTime() / 1000)
-}
+const createOrderByCfgRules = computed<FormRules>(() => ({
+  userId: [{required: true, message: t('pages.rechargeOrderList.playerIdRequired'), trigger: 'blur'}],
+  cfgId: [{required: true, message: t('pages.rechargeOrderList.rechargeCfgRequired'), trigger: 'change'}],
+}))
 
 const buildQueryParams = () => {
   const [startDate, endDate] = searchForm.dateRange || []
@@ -206,8 +270,8 @@ const buildQueryParams = () => {
     orderId: searchForm.orderId.trim(),
     userId: searchForm.userId.trim(),
     statusFilter: searchForm.statusFilter,
-    startTime: startDate ? toDayStartUnix(startDate) : 0,
-    endTime: endDate ? toDayEndUnix(endDate) : 0,
+    startTime: startDate ? toServerDayStartUnix(startDate) : 0,
+    endTime: endDate ? toServerDayEndUnix(endDate) : 0,
   }
 }
 
@@ -288,6 +352,71 @@ const openCreateOrderDialog = () => {
   createOrderDialogVisible.value = true
 }
 
+const fetchRechargeCfgOptions = async () => {
+  rechargeCfgLoading.value = true
+  try {
+    const response = await rechargeCfgApi.getRechargeCfgList({
+      pageIndex: 1,
+      pageSize: 200,
+      statusFilter: 0,
+    })
+    rechargeCfgOptions.value = (response.data || []).slice().sort((a, b) => (a.sort || 0) - (b.sort || 0))
+  } catch (error) {
+    console.error('Failed to load recharge cfg list:', error)
+    ElMessage.error(t('pages.rechargeOrderList.loadRechargeCfgFailed'))
+    rechargeCfgOptions.value = []
+  } finally {
+    rechargeCfgLoading.value = false
+  }
+}
+
+const openCreateOrderByCfgDialog = async () => {
+  createOrderByCfgDialogVisible.value = true
+  if (rechargeCfgOptions.value.length === 0) {
+    await fetchRechargeCfgOptions()
+  }
+}
+
+const resetCreateOrderByCfgForm = () => {
+  createOrderByCfgForm.userId = ''
+  createOrderByCfgForm.cfgId = ''
+  createOrderByCfgFormRef.value?.clearValidate()
+}
+
+const handleRechargeCfgSelect = (row: RechargeCfg | undefined) => {
+  createOrderByCfgForm.cfgId = row?.id || ''
+  createOrderByCfgFormRef.value?.validateField('cfgId').catch(() => undefined)
+}
+
+const handleCreateOrderByCfg = async () => {
+  if (!createOrderByCfgFormRef.value) return
+  try {
+    await createOrderByCfgFormRef.value.validate()
+  } catch {
+    return
+  }
+
+  creatingOrderByCfg.value = true
+  try {
+    const res = await rechargeOrderApi.manualCreateOrder({
+      userId: createOrderByCfgForm.userId.trim(),
+      cfgId: createOrderByCfgForm.cfgId,
+    })
+    createOrderByCfgDialogVisible.value = false
+    ElMessage.success(t('pages.rechargeOrderList.createOrderSuccess', {
+      orderId: res.orderId,
+      price: formatAmount(res.price),
+      gold: formatAmount(res.gold),
+    }))
+    currentPage.value = 1
+    await fetchOrderList()
+  } catch (error) {
+    console.error('Manual create order by cfg failed:', error)
+  } finally {
+    creatingOrderByCfg.value = false
+  }
+}
+
 const resetCreateOrderForm = () => {
   createOrderForm.userId = ''
   createOrderForm.amount = undefined
@@ -325,7 +454,7 @@ const handleCreateOrder = async () => {
 
 const formatUnixTime = (ts: number | null | undefined) => {
   if (!ts) return '-'
-  return new Date(ts * 1000).toLocaleString()
+  return formatServerDateTime(ts)
 }
 
 const statusLabel = (status: number) => {
@@ -370,6 +499,18 @@ onMounted(() => {
   justify-content: space-between;
   font-size: 16px;
   font-weight: bold;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .search-form {

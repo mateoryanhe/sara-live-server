@@ -65,7 +65,7 @@ func SendPaidDanmaku(ctx context.Context, req *liveroomdto.SendPaidDanmakuReq) (
 	}
 
 	eventData := entity.NewLiveRevenueLogRecord(
-		room.ID, room.LiveRecordId, senderId, room.ID, 0, 1, price, price, uint8(liverevenue.PaidDanmaku),
+		room.ID, room.LiveRecordId, senderId, 0, 1, price, price, uint8(liverevenue.PaidDanmaku),
 	)
 
 	sender := userinfodao.GetUserInfoByUserId(senderId)

@@ -260,7 +260,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('LiveRevenueLogList') || hasMenuPermission('LiveRecordList') || hasMenuPermission('LiveDailyEffectiveLiveList') || hasMenuPermission('VideoCallLogList') || hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList') || hasMenuPermission('AnchorIncomeSettlementLogList') || hasMenuPermission('GuildIncomeSettlementLogList')"
+            v-if="hasMenuPermission('LiveRevenueLogList') || hasMenuPermission('LiveRecordList') || hasMenuPermission('LiveDailyEffectiveLiveList') || hasMenuPermission('LiveWeeklyUnsettledLiveList') || hasMenuPermission('VideoCallLogList') || hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList') || hasMenuPermission('AnchorIncomeSettlementLogList') || hasMenuPermission('GuildIncomeSettlementLogList')"
             index="/log">
           <template #title>
             <el-icon>
@@ -293,15 +293,13 @@
               </el-icon>
               <span>{{ t('menu.LiveDailyEffectiveLiveList') }}</span>
             </el-menu-item>
-          </el-sub-menu>
-          <el-sub-menu index="/log/call">
-            <template #title>
+            <el-menu-item v-if="hasMenuPermission('LiveWeeklyUnsettledLiveList')" index="/log/live/weekly-unsettled-live-list">
               <el-icon>
-                <VideoCamera/>
+                <Calendar/>
               </el-icon>
-              <span>{{ t('menu.CallLogGroup') }}</span>
-            </template>
-            <el-menu-item v-if="hasMenuPermission('VideoCallLogList')" index="/log/call/video-call-log-list">
+              <span>{{ t('menu.LiveWeeklyUnsettledLiveList') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('VideoCallLogList')" index="/log/live/video-call-log-list">
               <el-icon>
                 <VideoCamera/>
               </el-icon>

@@ -17,8 +17,10 @@ const (
 type GuildIncomeSettled struct {
 	migrate.OneModel
 	LiveRoomIncomeAmounts
-	SettlementSalary      float64 `gorm:"type:decimal(16,4);default:0;comment:结算薪资" json:"settlementSalary"`
-	SettlementShareAmount float64 `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额" json:"settlementShareAmount"`
+	SettlementSalary         float64 `gorm:"type:decimal(16,4);default:0;comment:结算薪资" json:"settlementSalary"`
+	SettlementShareAmount    float64 `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额" json:"settlementShareAmount"`
+	SettlementShareAmountUsd float64 `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额(USD)" json:"settlementShareAmountUsd"`
+	SettlementReceivableUsd  float64 `gorm:"type:decimal(16,4);default:0;comment:结算可收金额(USD)=流水分佣+开播薪资" json:"settlementReceivableUsd"`
 }
 
 func NewGuildIncomeSettled(guildId uint64) *GuildIncomeSettled {
@@ -63,9 +65,27 @@ func (r *GuildIncomeSettled) AddSettlementShareAmount(v float64) {
 	addIncomeAmount(TbGuildIncomeSettled, LiveRoomIncomeSettlementShareAmount, r.ID, &r.SettlementShareAmount, v, false, &r.UpdatedAt)
 }
 
+// AddSettlementShareAmountUsd 累加结算分佣金额(USD)
+func (r *GuildIncomeSettled) AddSettlementShareAmountUsd(v float64) {
+	if r == nil || v == 0 {
+		return
+	}
+	addIncomeAmount(TbGuildIncomeSettled, LiveRoomIncomeSettlementShareAmountUsd, r.ID, &r.SettlementShareAmountUsd, v, false, &r.UpdatedAt)
+}
+
+// AddSettlementReceivableUsd 累加结算可收金额(USD)
+func (r *GuildIncomeSettled) AddSettlementReceivableUsd(v float64) {
+	if r == nil || v == 0 {
+		return
+	}
+	addIncomeAmount(TbGuildIncomeSettled, LiveRoomIncomeSettlementReceivableUsd, r.ID, &r.SettlementReceivableUsd, v, false, &r.UpdatedAt)
+}
+
 func initGuildIncomeSettled() {
 	regLiveRoomIncomeCols(TbGuildIncomeSettled)
 	syndb.RegQuick(TbGuildIncomeSettled, LiveRoomIncomeSettlementSalary)
 	syndb.RegQuick(TbGuildIncomeSettled, LiveRoomIncomeSettlementShareAmount)
+	syndb.RegQuick(TbGuildIncomeSettled, LiveRoomIncomeSettlementShareAmountUsd)
+	syndb.RegQuick(TbGuildIncomeSettled, LiveRoomIncomeSettlementReceivableUsd)
 	migrate.AutoMigrate(&GuildIncomeSettled{})
 }

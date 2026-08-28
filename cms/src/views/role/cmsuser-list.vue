@@ -21,10 +21,11 @@
               <el-option :value="0" :label="t('common.disabled')"/>
             </el-select>
           </el-form-item>
-          <el-form-item :label="t('pages.cmsUserList.admin')" width="100">
-            <el-select v-model="searchForm.admin" clearable :placeholder="t('pages.cmsUserList.isAdminPlaceholder')">
-              <el-option :value="true" :label="t('common.yes')"/>
-              <el-option :value="false" :label="t('common.no')"/>
+          <el-form-item :label="t('pages.cmsUserList.adminType')" width="120">
+            <el-select v-model="searchForm.adminType" clearable :placeholder="t('pages.cmsUserList.adminTypePlaceholder')">
+              <el-option :value="0" :label="t('pages.cmsUserList.adminTypeNone')"/>
+              <el-option :value="1" :label="t('pages.cmsUserList.adminTypeNormal')"/>
+              <el-option :value="2" :label="t('pages.cmsUserList.adminTypeSuper')"/>
             </el-select>
           </el-form-item>
           <el-form-item>
@@ -43,10 +44,10 @@
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column :label="t('pages.cmsUserList.admin')" width="100">
+          <el-table-column :label="t('pages.cmsUserList.adminType')" width="140">
             <template #default="{ row }">
-              <el-tag :type="row.admin ? 'primary' : 'info'">
-                {{ row.admin ? t('common.yes') : t('common.no') }}
+              <el-tag :type="adminTypeTagType(resolveAdminType(row))">
+                {{ adminTypeLabel(resolveAdminType(row)) }}
               </el-tag>
             </template>
           </el-table-column>
@@ -105,18 +106,17 @@
             <el-radio :label="0">{{ t('common.disabled') }}</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item :label="t('pages.cmsUserList.admin')" prop="admin">
-          <el-switch
-              v-model="currentRow.admin"
-              :active-text="t('common.yes')"
-              :inactive-text="t('common.no')"
-              inline-prompt
-          />
+        <el-form-item :label="t('pages.cmsUserList.adminType')" prop="adminType">
+          <el-radio-group v-model="currentRow.adminType">
+            <el-radio :label="0">{{ t('pages.cmsUserList.adminTypeNone') }}</el-radio>
+            <el-radio :label="1">{{ t('pages.cmsUserList.adminTypeNormal') }}</el-radio>
+            <el-radio :label="2">{{ t('pages.cmsUserList.adminTypeSuper') }}</el-radio>
+          </el-radio-group>
         </el-form-item>
         <el-form-item :label="t('pages.cmsUserList.role')" prop="roleId">
           <el-select
               v-model="currentRow.roleId"
-              :disabled="currentRow.admin"
+              :disabled="currentRow.adminType > 0"
               clearable
               filterable
               :placeholder="t('pages.cmsUserList.selectRole')"
@@ -129,7 +129,7 @@
                 :value="String(role.id)"
             />
           </el-select>
-          <div v-if="currentRow.admin" class="field-hint">{{ t('pages.cmsUserList.adminRoleHint') }}</div>
+          <div v-if="currentRow.adminType > 0" class="field-hint">{{ t('pages.cmsUserList.adminRoleHint') }}</div>
           <div v-else-if="roleOptions.length === 0" class="field-hint warn">{{ t('pages.cmsUserList.noRolesHint') }}</div>
         </el-form-item>
         <el-form-item :label="t('common.remark')" prop="remark">
@@ -195,7 +195,7 @@ import {copyTextToClipboard, createRandomPassword} from '@/utils/random-password
 interface SearchForm {
   name: string
   status: number | null
-  admin: boolean | null
+  adminType: number | null
 }
 
 interface CMSUserForm {
@@ -203,7 +203,7 @@ interface CMSUserForm {
   name: string
   pwd: string
   status: number
-  admin: boolean
+  adminType: number
   roleId: string
   remark: string
 }
@@ -220,7 +220,7 @@ const roleOptions = ref<Role[]>([])
 const searchForm = reactive<SearchForm>({
   name: '',
   status: null,
-  admin: null
+  adminType: null
 })
 
 const dialogVisible = ref(false)
@@ -230,7 +230,7 @@ const currentRow = ref<CMSUserForm>({
   name: '',
   pwd: '',
   status: 1,
-  admin: false,
+  adminType: 0,
   roleId: '',
   remark: ''
 })
@@ -244,7 +244,7 @@ const resetPasswordForm = ref({
   name: '',
   pwd: '',
   status: 1,
-  admin: false,
+  adminType: 0,
   roleId: '',
   remark: '',
 })
@@ -257,7 +257,7 @@ const resetPasswordRules = computed<FormRules>(() => ({
 }))
 
 const validateRoleId = (_rule: unknown, value: string, callback: (error?: Error) => void) => {
-  if (currentRow.value.admin) {
+  if (currentRow.value.adminType > 0) {
     callback()
     return
   }
@@ -283,14 +283,43 @@ const formRules = computed<FormRules>(() => ({
 }))
 
 watch(
-    () => currentRow.value.admin,
-    (isAdmin) => {
-      if (isAdmin) {
+    () => currentRow.value.adminType,
+    (adminType) => {
+      if (adminType > 0) {
         currentRow.value.roleId = ''
         formRef.value?.clearValidate('roleId')
       }
     },
 )
+
+const resolveAdminType = (row: Pick<CMSUser, 'adminType' | 'admin'>): number => {
+  if (row.adminType === 1 || row.adminType === 2) {
+    return row.adminType
+  }
+  return row.admin ? 2 : 0
+}
+
+const adminTypeLabel = (adminType: number) => {
+  switch (adminType) {
+    case 1:
+      return t('pages.cmsUserList.adminTypeNormal')
+    case 2:
+      return t('pages.cmsUserList.adminTypeSuper')
+    default:
+      return t('pages.cmsUserList.adminTypeNone')
+  }
+}
+
+const adminTypeTagType = (adminType: number): 'info' | 'warning' | 'primary' => {
+  switch (adminType) {
+    case 1:
+      return 'warning'
+    case 2:
+      return 'primary'
+    default:
+      return 'info'
+  }
+}
 
 const generateRandomPassword = () => {
   currentRow.value.pwd = createRandomPassword()
@@ -322,7 +351,7 @@ const resetResetPasswordForm = () => {
     name: '',
     pwd: '',
     status: 1,
-    admin: false,
+    adminType: 0,
     roleId: '',
     remark: '',
   }
@@ -335,7 +364,7 @@ const handleResetPassword = (row: CMSUser) => {
     name: row.name,
     pwd: createRandomPassword(),
     status: row.status,
-    admin: row.admin,
+    adminType: resolveAdminType(row),
     roleId: row.roleId ? String(row.roleId) : '',
     remark: row.remark || '',
   }
@@ -352,13 +381,13 @@ const handleResetPasswordSave = async () => {
     }
     resetPasswordSubmitting.value = true
     try {
-      const {id, name, pwd, status, admin, roleId, remark} = resetPasswordForm.value
+      const {id, name, pwd, status, adminType, roleId, remark} = resetPasswordForm.value
       await cmsUserApi.updateCMSUser({
         id,
         name,
         pwd,
         status,
-        admin,
+        adminType,
         roleId,
         remark,
       })
@@ -393,7 +422,8 @@ const fetchCMSUserList = async () => {
     const response = await cmsUserApi.getCMSUserList({
       name: searchForm.name,
       status: searchForm.status || undefined,
-      admin: searchForm.admin ?? undefined,
+      ...(searchForm.adminType === 0 ? {nonAdmin: true} : {}),
+      ...(searchForm.adminType === 1 || searchForm.adminType === 2 ? {adminType: searchForm.adminType} : {}),
       pageIndex: currentPage.value,
       pageSize: pageSize.value
     })
@@ -429,7 +459,7 @@ const handleAdd = () => {
     name: '',
     pwd: createRandomPassword(),
     status: 1,
-    admin: false,
+    adminType: 0,
     roleId: '',
     remark: ''
   }
@@ -443,7 +473,7 @@ const handleEdit = (row: CMSUser) => {
     name: row.name,
     pwd: '',
     status: row.status,
-    admin: row.admin,
+    adminType: resolveAdminType(row),
     roleId: row.roleId ? String(row.roleId) : '',
     remark: row.remark || ''
   }
@@ -478,23 +508,23 @@ const handleSave = async () => {
     if (valid) {
       try {
         if (currentRow.value.id) {
-          const {id, name, pwd, status, admin, roleId, remark} = currentRow.value
+          const {id, name, pwd, status, adminType, roleId, remark} = currentRow.value
           await cmsUserApi.updateCMSUser({
             id: String(id),
             name,
             pwd: pwd || undefined,
             status,
-            admin,
+            adminType,
             roleId,
             remark,
           })
         } else {
-          const {name, pwd, status, admin, roleId, remark} = currentRow.value
+          const {name, pwd, status, adminType, roleId, remark} = currentRow.value
           await cmsUserApi.createCMSUser({
             name,
             pwd,
             status,
-            admin,
+            adminType,
             roleId,
             remark,
           })
@@ -526,7 +556,7 @@ const fetchRoleList = async () => {
 const resetSearch = () => {
   searchForm.name = ''
   searchForm.status = null
-  searchForm.admin = null
+  searchForm.adminType = null
   fetchCMSUserList()
 }
 

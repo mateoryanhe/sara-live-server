@@ -12,17 +12,19 @@ type CMSLoginReq struct {
 }
 
 type CMSLoginRes struct {
-	AuthId  uint64               `json:"authId"`
-	Token   string               `json:"token"`
-	Admin   bool                 `json:"admin" summary:"超级管理员"`
-	Modules []*entity.Permission `json:"modules" summary:"模块列表"`
+	AuthId     uint64               `json:"authId"`
+	Token      string               `json:"token"`
+	Admin      bool                 `json:"admin" summary:"是否管理员(含普通/超级)"`
+	SuperAdmin bool                 `json:"superAdmin" summary:"是否超级管理员"`
+	Modules    []*entity.Permission `json:"modules" summary:"模块列表"`
 }
 
-func NewCMSLoginRes(userId uint64, token string, admin bool, module []*entity.Permission) *CMSLoginRes {
+func NewCMSLoginRes(userId uint64, token string, admin, superAdmin bool, module []*entity.Permission) *CMSLoginRes {
 	return &CMSLoginRes{
-		AuthId:  userId,
-		Token:   token,
-		Admin:   admin,
-		Modules: module,
+		AuthId:     userId,
+		Token:      token,
+		Admin:      admin,
+		SuperAdmin: superAdmin,
+		Modules:    module,
 	}
 }

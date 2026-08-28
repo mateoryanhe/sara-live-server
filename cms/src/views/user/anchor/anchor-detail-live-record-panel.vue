@@ -39,10 +39,6 @@
           <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column :label="t('pages.liveRecordList.anchorId')" min-width="180" prop="anchorId"/>
-      <el-table-column :label="t('pages.liveRecordList.anchorNickname')" min-width="120" prop="nickname">
-        <template #default="{ row }">{{ row.nickname || '-' }}</template>
-      </el-table-column>
       <el-table-column :label="t('common.startTime')" width="170">
         <template #default="{ row }">{{ formatDate(row.startTime) }}</template>
       </el-table-column>
@@ -129,18 +125,12 @@ const pagination = reactive({
   total: 0,
 })
 
-const formatDateString = (date: Date) => {
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
-}
-
 const createDefaultDateRange = () => {
   const end = new Date()
-  const start = new Date()
-  start.setDate(end.getDate() - 6)
+  const start = new Date(end.getTime() - 6 * 86400000)
   return {
-    startDate: formatDateString(start),
-    endDate: formatDateString(end),
+    startDate: formatServerDateOnly(start),
+    endDate: formatServerDateOnly(end),
   }
 }
 

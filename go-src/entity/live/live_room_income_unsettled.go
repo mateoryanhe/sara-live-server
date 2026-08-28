@@ -78,6 +78,16 @@ func (r *LiveRoomIncomeUnsettled) AddPrivateRoomWatchEarn(v float64) {
 	addIncomeEarn(TbLiveRoomIncomeUnsettled, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalPrivateRoomWatchIncome, &r.TotalPrivateRoomWatchIncome)
 }
 
+// AddShortVideoEarn 短视频付费观看收益(总收益+短视频细分,内部加锁)
+func (r *LiveRoomIncomeUnsettled) AddShortVideoEarn(v float64) {
+	addIncomeEarn(TbLiveRoomIncomeUnsettled, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalShortVideoIncome, &r.TotalShortVideoIncome)
+}
+
+// AddGameEarn 游戏收益(总收益按钻石折算 + 游戏细分金币下注额,内部加锁)
+func (r *LiveRoomIncomeUnsettled) AddGameEarn(goldAmount, incomeDelta float64) {
+	addGameEarn(TbLiveRoomIncomeUnsettled, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, goldAmount, incomeDelta)
+}
+
 // AddAmounts 累加一笔金额到未结算表(一次加锁)
 func (r *LiveRoomIncomeUnsettled) AddAmounts(a *LiveRoomIncomeAmounts) {
 	if a == nil || a.IsZero() {

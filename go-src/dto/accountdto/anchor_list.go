@@ -11,7 +11,7 @@ type QueryAnchorListReq struct {
 	g.Meta `path:"/getAnchorList" method:"post" summary:"获取主播列表" tags:"账号"`
 	httpserver.CMSQueryReq
 	Key          string `json:"key" dc:"查询关键字(用户ID模糊/昵称/手机号/分享码)"`
-	GuildId      uint64 `json:"guildId" dc:"工会ID(可选,大于0时按工会过滤)"`
+	GuildId      uint64 `json:"guildId,string" dc:"工会ID(可选,大于0时按工会过滤)"`
 	PlatformOnly bool   `json:"platformOnly" dc:"仅平台主播(guild_id=0)"`
 	GuildOnly    bool   `json:"guildOnly" dc:"仅工会主播(guild_id>0)"`
 	LiveStatus   *uint8 `json:"liveStatus" dc:"直播状态过滤(0未开播,1直播中,不传则不过滤)"`
@@ -34,14 +34,14 @@ type AnchorListItem struct {
 	Ticket                       float64    `json:"ticket" dc:"门票价格(钻石,私密直播间)"`
 	Billing                      float64    `json:"billing" dc:"计费价格(每分钟钻石,私密直播间)"`
 	LiveStatus                   uint8      `json:"liveStatus" dc:"直播状态(0未开播,1直播中)"`
-	TotalIncome                  float64    `json:"totalIncome" dc:"生涯累计直播收益(缓存)"`
-	TotalGiftIncome              float64    `json:"totalGiftIncome" dc:"累计礼物收益"`
-	TotalPaidDanmakuIncome       float64    `json:"totalPaidDanmakuIncome" dc:"累计付费弹幕收益"`
-	TotalPrivateRoomTicketIncome float64    `json:"totalPrivateRoomTicketIncome" dc:"累计私密直播间门票收益"`
-	TotalPrivateRoomWatchIncome  float64    `json:"totalPrivateRoomWatchIncome" dc:"累计私密房观看收益"`
-	TotalVideoCallIncome         float64    `json:"totalVideoCallIncome" dc:"累计直播间视频通话收益"`
-	TotalVideoCallTicketIncome   float64    `json:"totalVideoCallTicketIncome" dc:"累计直播间视频通话门票收益"`
-	TotalVideoCallBillingIncome  float64    `json:"totalVideoCallBillingIncome" dc:"累计直播间视频通话计费收益"`
+	TotalIncome                  float64    `json:"totalIncome" dc:"未结算总直播收益"`
+	TotalGiftIncome              float64    `json:"totalGiftIncome" dc:"未结算礼物收益"`
+	TotalPaidDanmakuIncome       float64    `json:"totalPaidDanmakuIncome" dc:"未结算付费弹幕收益"`
+	TotalPrivateRoomTicketIncome float64    `json:"totalPrivateRoomTicketIncome" dc:"未结算私密直播间门票收益"`
+	TotalPrivateRoomWatchIncome  float64    `json:"totalPrivateRoomWatchIncome" dc:"未结算私密房观看收益"`
+	TotalVideoCallIncome         float64    `json:"totalVideoCallIncome" dc:"未结算直播间视频通话收益"`
+	TotalVideoCallTicketIncome   float64    `json:"totalVideoCallTicketIncome" dc:"未结算直播间视频通话门票收益"`
+	TotalVideoCallBillingIncome  float64    `json:"totalVideoCallBillingIncome" dc:"未结算直播间视频通话计费收益"`
 	Ban                          bool       `json:"ban" dc:"是否封禁"`
 	BanApplyTime                 *time.Time `json:"banApplyTime" dc:"封禁截止时间"`
 	BanReason                    string     `json:"banReason" dc:"封禁原因"`

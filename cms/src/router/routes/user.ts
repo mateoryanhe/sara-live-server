@@ -75,13 +75,13 @@ export const userRoutes: RouteRecordRaw = {
         {
             path: 'currency-log/gold-log-list',
             name: 'GoldCurrencyLogList',
-            component: () => import('@/views/user/currency-log/currency-log-list.vue'),
+            component: () => import('@/views/user/currency-log/gold-log-list.vue'),
             meta: {title: '金币流水', currencyType: 1},
         },
         {
             path: 'currency-log/diamond-log-list',
             name: 'DiamondCurrencyLogList',
-            component: () => import('@/views/user/currency-log/currency-log-list.vue'),
+            component: () => import('@/views/user/currency-log/diamond-log-list.vue'),
             meta: {title: '钻石流水', currencyType: 2},
         },
     ],

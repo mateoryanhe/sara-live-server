@@ -31,6 +31,7 @@ type CMSIncomeSettlementLogItem struct {
 	Id                           uint64     `json:"id,string"`
 	RoomId                       uint64     `json:"roomId,string"`
 	RoomNickname                 string     `json:"roomNickname"`
+	RoomAvatar                   string     `json:"roomAvatar"`
 	GuildId                      uint64     `json:"guildId,string"`
 	GuildName                    string     `json:"guildName"`
 	TotalIncome                  float64    `json:"totalIncome"`
@@ -41,10 +42,14 @@ type CMSIncomeSettlementLogItem struct {
 	TotalVideoCallIncome         float64    `json:"totalVideoCallIncome"`
 	TotalVideoCallTicketIncome   float64    `json:"totalVideoCallTicketIncome"`
 	TotalVideoCallBillingIncome  float64    `json:"totalVideoCallBillingIncome"`
+	TotalShortVideoIncome        float64    `json:"totalShortVideoIncome"`
+	TotalGameIncome              float64    `json:"totalGameIncome"`
 	TotalLiveDuration            float64    `json:"totalLiveDuration"`
-	SettlementSalary             float64    `json:"settlementSalary"`
-	SettlementShareAmount        float64    `json:"settlementShareAmount"`
-	AnchorSharePercent           float64    `json:"anchorSharePercent"`
+	SettlementSalary          float64    `json:"settlementSalary"`
+	SettlementShareAmount     float64    `json:"settlementShareAmount"`
+	SettlementShareAmountUsd  float64    `json:"settlementShareAmountUsd"`
+	SettlementReceivableUsd   float64    `json:"settlementReceivableUsd"`
+	AnchorSharePercent        float64    `json:"anchorSharePercent"`
 	GuildSharePercent            float64    `json:"guildSharePercent"`
 	CreatedAt                    *time.Time `json:"createdAt"`
 }

@@ -33,6 +33,14 @@ func getWeekStart(t time.Time) time.Time {
 	return time.Date(t.Year(), t.Month(), t.Day()-offset, 0, 0, 0, 0, t.Location())
 }
 
+// WeekDateRange 返回时间所在周的周一与周日(YYYY-MM-DD, 周一为一周开始)
+func WeekDateRange(t time.Time) (start, end string) {
+	weekStart := getWeekStart(t.Local())
+	weekEnd := weekStart.AddDate(0, 0, 6)
+	const dateLayout = "2006-01-02"
+	return weekStart.Format(dateLayout), weekEnd.Format(dateLayout)
+}
+
 // IsSameMonth 判断两个时间是否属于同一个月
 func IsSameMonth(t1, t2 time.Time) bool {
 	// 转换到同一时区（这里使用本地时区，也可以根据需要使用UTC等）

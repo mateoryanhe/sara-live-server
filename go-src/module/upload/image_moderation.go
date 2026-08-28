@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -275,8 +274,11 @@ func RequireAppImageCompliant(ctx context.Context, fileName string) error {
 
 // UploadImageForApp App 端上传:先落本地,再 ImageModeration 审核,违规则删文件并返回错误码
 func UploadImageForApp(ctx context.Context, file *ghttp.UploadFile) (string, error) {
-	name, fullPath, err := saveUploadedImageFile(file)
+	name, fullPath, err := saveUploadedImageFile(file, int64(GetAppImageMaxSize()))
 	if err != nil {
+		if IsUploadImageFileTooLarge(err) {
+			return "", errercode.CreateCode(errercode.AppImageFileTooLarge)
+		}
 		return "", err
 	}
 	if err := RequireAppImageCompliant(ctx, name); err != nil {
@@ -286,8 +288,8 @@ func UploadImageForApp(ctx context.Context, file *ghttp.UploadFile) (string, err
 	return name, nil
 }
 
-// saveUploadedImageFile 校验并保存图片到 images 目录,返回文件名与绝对路径
-func saveUploadedImageFile(file *ghttp.UploadFile) (name, fullPath string, err error) {
+// saveUploadedImageFile 校验并保存图片到 images 目录,返回文件名与绝对路径;maxBytes 为 0 时不限制大小
+func saveUploadedImageFile(file *ghttp.UploadFile, maxBytes int64) (name, fullPath string, err error) {
 	if file == nil {
 		return "", "", fmt.Errorf("upload file is empty")
 	}
@@ -306,15 +308,7 @@ func saveUploadedImageFile(file *ghttp.UploadFile) (name, fullPath string, err e
 		return "", "", err
 	}
 	defer src.Close()
-	dst, err := os.Create(fullPath)
-	if err != nil {
-		return "", "", err
-	}
-	if _, err = io.Copy(dst, src); err != nil {
-		_ = dst.Close()
-		return "", "", err
-	}
-	if err = dst.Close(); err != nil {
+	if _, err = copyUploadContent(src, fullPath, maxBytes, errImageFileTooLarge); err != nil {
 		return "", "", err
 	}
 	return name, fullPath, nil

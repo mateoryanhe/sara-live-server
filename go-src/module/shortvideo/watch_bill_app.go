@@ -112,6 +112,7 @@ func PayShortVideo(ctx context.Context, req *shortvideodto.PayShortVideoReq) (*s
 				authorStat.AddTotalDiamondIncome(price)
 				shortvideodao.PublishShortVideoAuthorStat(authorStat)
 			}
+			RecordShortVideoPayIncome(video.AuthorId, price)
 		}
 	}
 

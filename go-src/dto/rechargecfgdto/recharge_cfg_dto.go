@@ -128,9 +128,11 @@ type AppRechargeCfgItem struct {
 	Price       float64 `json:"price" dc:"现实货币价格(单位:USD)"`
 	Currency    string  `json:"currency"`
 	ProductId   string  `json:"productId"`
-	Sort        int     `json:"sort"`
-	Description string  `json:"description"`
-	Status      uint8   `gorm:"default:0;comment:状态(0-下架,1-上架)" json:"status"`
+	Sort          int     `json:"sort"`
+	Description   string  `json:"description"`
+	Status             uint8   `gorm:"default:0;comment:状态(0-下架,1-上架)" json:"status"`
+	FirstRecharge      bool    `json:"firstRecharge" dc:"该档位是否未首充(true=可享受首充加赠)"`
+	FirstRechargeRatio float64 `json:"firstRechargeRatio" dc:"该档位首充加赠比例(%),已首充则为0"`
 }
 
 type AppRechargeCfgListRes struct {

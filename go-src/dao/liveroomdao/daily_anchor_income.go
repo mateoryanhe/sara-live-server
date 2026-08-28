@@ -16,7 +16,6 @@ func withDailyAnchorEffectiveLive(roomId uint64, at time.Time, fn func(*entity.D
 		return
 	}
 	fn(row)
-	PublishDailyAnchorEffectiveLive(row)
 }
 
 // MirrorDailyAnchorGiftEarn 同步礼物收益到主播日表
@@ -44,6 +43,20 @@ func MirrorDailyAnchorPrivateRoomTicketEarn(roomId uint64, at time.Time, amount 
 func MirrorDailyAnchorPrivateRoomWatchEarn(roomId uint64, at time.Time, amount float64) {
 	withDailyAnchorEffectiveLive(roomId, at, func(row *entity.DailyAnchorEffectiveLive) {
 		row.AddPrivateRoomWatchEarn(amount)
+	})
+}
+
+// MirrorDailyAnchorShortVideoEarn 同步短视频付费观看收益到主播日表
+func MirrorDailyAnchorShortVideoEarn(roomId uint64, at time.Time, amount float64) {
+	withDailyAnchorEffectiveLive(roomId, at, func(row *entity.DailyAnchorEffectiveLive) {
+		row.AddShortVideoEarn(amount)
+	})
+}
+
+// MirrorDailyAnchorGameEarn 同步游戏收益到主播日表
+func MirrorDailyAnchorGameEarn(roomId uint64, at time.Time, goldAmount, incomeDelta float64) {
+	withDailyAnchorEffectiveLive(roomId, at, func(row *entity.DailyAnchorEffectiveLive) {
+		row.AddGameEarn(goldAmount, incomeDelta)
 	})
 }
 

@@ -8,6 +8,7 @@ const PASSWORD_KEY = 'cms_saved_pwd'
 const DISPLAY_NAME_KEY = 'username'
 const PERMISSIONS_KEY = 'cms_user_permissions'
 const ADMIN_KEY = 'cms_user_admin'
+const SUPER_ADMIN_KEY = 'cms_user_super_admin'
 
 export interface SavedCredentials {
     userName: string
@@ -18,6 +19,7 @@ export interface AuthSession {
     token: string
     authId: string
     admin: boolean
+    superAdmin: boolean
     modules: Permission[]
 }
 
@@ -65,9 +67,11 @@ export function restoreAuthSession(): boolean {
     }
 
     const admin = localStorage.getItem(ADMIN_KEY) === 'true'
+    const superAdminRaw = localStorage.getItem(SUPER_ADMIN_KEY)
+    const superAdmin = superAdminRaw === null ? admin : superAdminRaw === 'true'
     const rawModules = localStorage.getItem(PERMISSIONS_KEY)
     if (admin) {
-        setUserPermissions([], true)
+        setUserPermissions([], true, superAdmin)
         return true
     }
 
@@ -85,8 +89,9 @@ export function setAuthSession(session: AuthSession): void {
     localStorage.setItem(TOKEN_KEY, session.token)
     localStorage.setItem(AUTH_ID_KEY, session.authId)
     localStorage.setItem(ADMIN_KEY, session.admin ? 'true' : 'false')
+    localStorage.setItem(SUPER_ADMIN_KEY, session.superAdmin ? 'true' : 'false')
     localStorage.setItem(PERMISSIONS_KEY, JSON.stringify(session.modules || []))
-    setUserPermissions(session.modules || [], session.admin)
+    setUserPermissions(session.modules || [], session.admin, session.superAdmin)
 }
 
 export function clearAuthSession(): void {
@@ -94,6 +99,7 @@ export function clearAuthSession(): void {
     localStorage.removeItem(AUTH_ID_KEY)
     localStorage.removeItem(PERMISSIONS_KEY)
     localStorage.removeItem(ADMIN_KEY)
+    localStorage.removeItem(SUPER_ADMIN_KEY)
     clearPermissions()
 }
 

@@ -42,7 +42,7 @@ func StartLiveForBotAnchor(ctx context.Context, anchorId, guildId uint64) error 
 	if cfg == nil || !cfg.PushStream {
 		return nil
 	}
-	playerId, tokenExpireAt, err := agora.StartBotAnchorCloudPlayer(ctx, anchorId, cfg.CloudPlayerVideo)
+	playerId, tokenExpireAt, err := agora.StartBotAnchorCloudPlayer(ctx, anchorId, cfg.CloudPlayerVideo, cfg.EffectiveCloudPlayerFrameRate(), cfg.EffectiveCloudPlayerBitrate(), cfg.EffectiveCloudPlayerWidth(), cfg.EffectiveCloudPlayerHeight())
 	if err != nil {
 		stopLive(anchorId)
 		return err

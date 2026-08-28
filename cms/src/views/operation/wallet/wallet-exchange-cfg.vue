@@ -28,6 +28,15 @@
           />
         </el-form-item>
 
+        <el-form-item :label="t('pages.walletExchangeCfg.usdToGoldRate')">
+          <el-input-number
+              v-model="formData.usdToGoldRate"
+              :min="1"
+              :step="1"
+              controls-position="right"
+          />
+        </el-form-item>
+
         <el-form-item :label="t('pages.walletExchangeCfg.exchangeFeePercent')">
           <el-input-number
               v-model="formData.exchangeFeePercent"
@@ -66,6 +75,7 @@ const loading = ref(false)
 const formData = reactive({
   id: '0',
   goldToDiamondRate: 100,
+  usdToGoldRate: 100,
   exchangeFeePercent: 3,
 })
 
@@ -78,6 +88,7 @@ const applyCfg = (cfg: WalletExchangeCfg | null | undefined) => {
   if (!cfg) {
     formData.id = '0'
     formData.goldToDiamondRate = 100
+    formData.usdToGoldRate = 100
     formData.exchangeFeePercent = 3
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
@@ -85,6 +96,7 @@ const applyCfg = (cfg: WalletExchangeCfg | null | undefined) => {
   }
   formData.id = cfg.id || '0'
   formData.goldToDiamondRate = cfg.goldToDiamondRate || 100
+  formData.usdToGoldRate = cfg.usdToGoldRate || 100
   formData.exchangeFeePercent = cfg.exchangeFeePercent ?? 3
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
@@ -108,6 +120,10 @@ const handleSave = async () => {
     ElMessage.warning(t('pages.walletExchangeCfg.rateMustPositive'))
     return
   }
+  if (formData.usdToGoldRate <= 0) {
+    ElMessage.warning(t('pages.walletExchangeCfg.usdRateMustPositive'))
+    return
+  }
   if (formData.exchangeFeePercent < 0) {
     ElMessage.warning(t('pages.walletExchangeCfg.feeCannotNegative'))
     return
@@ -118,6 +134,7 @@ const handleSave = async () => {
     const response = await walletApi.saveWalletExchangeCfg({
       id: formData.id === '0' ? 0 : Number(formData.id),
       goldToDiamondRate: formData.goldToDiamondRate,
+      usdToGoldRate: formData.usdToGoldRate,
       exchangeFeePercent: formData.exchangeFeePercent,
     })
     if (response?.success) {

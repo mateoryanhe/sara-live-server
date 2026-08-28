@@ -148,6 +148,7 @@ const handleLogin = async () => {
             token: res.token,
             authId: res.authId.toString(),
             admin: res.admin,
+            superAdmin: res.superAdmin,
             modules: res.modules || [],
           })
           saveLoginCredentials(loginForm.userName, loginForm.pwd)

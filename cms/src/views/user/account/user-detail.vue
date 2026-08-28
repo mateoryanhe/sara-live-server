@@ -57,7 +57,7 @@
                   </el-descriptions-item>
                   <el-descriptions-item :label="t('pages.userList.liveRoomId')">{{ detail.profile?.liveRoomId || '-' }}</el-descriptions-item>
                   <el-descriptions-item :label="t('pages.userList.liveRoomVer')">{{ detail.profile?.liveRoomVer || '-' }}</el-descriptions-item>
-                  <el-descriptions-item :label="t('pages.userList.channel')">{{ detail.account?.channel ?? '-' }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.channel')">{{ channelLabel(detail.account?.channel) }}</el-descriptions-item>
                 </el-descriptions>
               </el-tab-pane>
 
@@ -247,6 +247,20 @@ const userTypeLabelMap = computed<Record<number, string>>(() => ({
 const userTypeLabel = (userType?: number) => {
   if (userType === undefined || userType === null) return '-'
   return userTypeLabelMap.value[userType] || t('pages.userList.userTypeNormal')
+}
+
+const channelLabelMap = computed<Record<number, string>>(() => ({
+  1: t('pages.userList.channelTest'),
+  2: t('pages.userList.channelPhone'),
+  3: t('pages.userList.channelBotAnchor'),
+  4: t('pages.userList.channelDevice'),
+  5: t('pages.userList.channelShortVideoAuthor'),
+  6: t('pages.userList.channelH5Device'),
+}))
+
+const channelLabel = (channel?: number) => {
+  if (channel === undefined || channel === null) return '-'
+  return channelLabelMap.value[channel] || t('pages.userList.channelUnknown')
 }
 
 const genderLabel = (gender?: number) => {

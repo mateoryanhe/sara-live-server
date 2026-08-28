@@ -94,6 +94,10 @@ func (a *AccountController) SetUserType(ctx context.Context, req *accountdto.Set
 	return userinfo.SetUserType(ctx, req)
 }
 
+func (a *AccountController) SetUserAvatar(ctx context.Context, req *accountdto.SetUserAvatarReq) (*accountdto.SetUserAvatarRes, error) {
+	return userinfo.SetUserAvatar(ctx, req)
+}
+
 func (a *AccountController) SetCanRank(ctx context.Context, req *accountdto.SetCanRankReq) (*accountdto.SetCanRankRes, error) {
 	return userinfo.SetCanRank(ctx, req)
 }

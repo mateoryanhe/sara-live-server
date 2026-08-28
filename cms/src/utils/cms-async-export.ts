@@ -116,4 +116,5 @@ export const CMS_EXPORT_TYPE_GUILD_DAILY_EFFECTIVE_LIVE = 'guildDailyEffectiveLi
 export const CMS_EXPORT_TYPE_GUILD_ANCHOR_DAILY_EFFECTIVE_LIVE = 'guildAnchorDailyEffectiveLive'
 export const CMS_EXPORT_TYPE_MY_GUILD_ANCHOR_DAILY_EFFECTIVE_LIVE = 'myGuildAnchorDailyEffectiveLive'
 export const CMS_EXPORT_TYPE_LIVE_DAILY_EFFECTIVE_LIVE = 'liveDailyEffectiveLive'
+export const CMS_EXPORT_TYPE_LIVE_WEEKLY_UNSETTLED_LIVE = 'liveWeeklyUnsettledLive'
 export const CMS_EXPORT_TYPE_CURRENCY_LOG = 'currencyLog'

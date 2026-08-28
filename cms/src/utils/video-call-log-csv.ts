@@ -1,6 +1,6 @@
 import type {VideoCallLogItem} from '@/types/api'
+import {formatServerDateTimeForExport} from '@/utils/server-datetime'
 import type {CsvColumn} from './csv-export'
-import {formatLiveRecordCsvDate} from './live-record-csv'
 
 type TranslateFn = (key: string) => string
 
@@ -9,14 +9,16 @@ export function buildVideoCallLogCsvColumns(
   ns = 'pages.videoCallLogList',
 ): CsvColumn<VideoCallLogItem>[] {
   return [
+    {header: t('common.createdAt'), value: row => formatServerDateTimeForExport(row.createdAt)},
     {header: t('pages.rechargeOrderList.orderId'), value: row => row.id},
+    {header: t(`${ns}.callDuration`), value: row => row.callDuration},
+    {header: t(`${ns}.totalCostDiamond`), value: row => row.totalCost},
     {header: t('common.status'), value: row => row.statusText ?? ''},
-    {header: t(`${ns}.source`), value: row => row.sourceText ?? ''},
     {header: t(`${ns}.callerId`), value: row => row.callerId},
     {header: t(`${ns}.callerNickname`), value: row => row.callerNickname ?? ''},
     {header: t(`${ns}.receiverId`), value: row => row.receiverId},
     {header: t(`${ns}.receiverNickname`), value: row => row.receiverNickname ?? ''},
-    {header: t(`${ns}.callTime`), value: row => formatLiveRecordCsvDate(row.callStartTime)},
+    {header: t(`${ns}.callTime`), value: row => formatServerDateTimeForExport(row.callStartTime)},
     {header: t(`${ns}.answerTime`), value: row => formatLiveRecordCsvDate(row.answerTime)},
     {header: t(`${ns}.callerLastHeart`), value: row => formatLiveRecordCsvDate(row.callerHeartTime)},
     {header: t(`${ns}.receiverLastHeart`), value: row => formatLiveRecordCsvDate(row.receiverHeartTime)},

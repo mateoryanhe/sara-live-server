@@ -16,7 +16,6 @@ func withDailyGuildEffectiveLive(guildId uint64, at time.Time, fn func(*entity.D
 		return
 	}
 	fn(row)
-	PublishDailyGuildEffectiveLive(row)
 }
 
 // MirrorDailyGuildGiftEarn 同步礼物收益到工会日表
@@ -44,6 +43,20 @@ func MirrorDailyGuildPrivateRoomTicketEarn(guildId uint64, at time.Time, amount 
 func MirrorDailyGuildPrivateRoomWatchEarn(guildId uint64, at time.Time, amount float64) {
 	withDailyGuildEffectiveLive(guildId, at, func(row *entity.DailyGuildEffectiveLive) {
 		row.AddPrivateRoomWatchEarn(amount)
+	})
+}
+
+// MirrorDailyGuildShortVideoEarn 同步短视频付费观看收益到工会日表
+func MirrorDailyGuildShortVideoEarn(guildId uint64, at time.Time, amount float64) {
+	withDailyGuildEffectiveLive(guildId, at, func(row *entity.DailyGuildEffectiveLive) {
+		row.AddShortVideoEarn(amount)
+	})
+}
+
+// MirrorDailyGuildGameEarn 同步游戏收益到工会日表
+func MirrorDailyGuildGameEarn(guildId uint64, at time.Time, goldAmount, incomeDelta float64) {
+	withDailyGuildEffectiveLive(guildId, at, func(row *entity.DailyGuildEffectiveLive) {
+		row.AddGameEarn(goldAmount, incomeDelta)
 	})
 }
 

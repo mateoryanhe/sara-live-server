@@ -65,11 +65,7 @@
       </el-form>
 
       <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width: 100%">
-        <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.roomId')" min-width="180" prop="roomId"/>
-        <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.roomNickname')" min-width="120">
-          <template #default="{ row }">{{ row.roomNickname || '-' }}</template>
-        </el-table-column>
-        <el-table-column :label="t('common.avatar')" width="80">
+      <el-table-column :label="t('common.avatar')" width="80">
           <template #default="{ row }">
             <el-image
                 v-if="row.roomAvatar"
@@ -83,7 +79,13 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.dailyLiveDate')" min-width="120" prop="liveDate"/>
+         <el-table-column :label="t('pages.anchorList.dailyLiveDate')" min-width="120" prop="liveDate"/>
+        <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.roomId')" min-width="180" prop="roomId"/>
+        <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.roomNickname')" min-width="120">
+          <template #default="{ row }">{{ row.roomNickname || '-' }}</template>
+        </el-table-column>
+        
+       
         <el-table-column :label="t('pages.liveDailyEffectiveLiveList.unsettledTotalIncome')" align="right" min-width="140">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.unsettledTotalIncome) }}</span></template>
         </el-table-column>

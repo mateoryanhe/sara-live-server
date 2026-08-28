@@ -12,6 +12,7 @@ import (
 	"xr-game-server/entity/recharge"
 	"xr-game-server/errercode"
 	"xr-game-server/gameevent"
+	"xr-game-server/module/activity"
 	"xr-game-server/module/wallet"
 )
 
@@ -44,16 +45,30 @@ func completeOrder(o *entity.RechargeOrder, reason currency.Reason) (float64, er
 	if order.Gold <= 0 {
 		return 0, errercode.CreateCode(errercode.RechargeGoldInvalid)
 	}
-	after, err := wallet.GoldAdd(order.UserId, order.Gold, reason)
+	goldToAdd := order.Gold
+	isTierFirstRecharge := order.CfgId > 0 && userinfodao.IsRechargeCfgFirstRecharge(order.UserId, order.CfgId)
+	if isTierFirstRecharge {
+		goldToAdd = activity.ApplyFirstRechargeBonus(order.Gold)
+	}
+	logReason := reason
+	if reason == currency.ReasonRecharge {
+		logReason = resolveRechargeReason(order, isTierFirstRecharge)
+	}
+	after, err := wallet.GoldAdd(order.UserId, goldToAdd, logReason)
 	if err != nil {
 		return 0, err
+	}
+	if goldToAdd != order.Gold {
+		order.SetGold(goldToAdd)
 	}
 	paidAt := time.Now()
 	order.SetStatus(entity.RechargeOrderStatusCompleted)
 	order.SetPaidAt(paidAt)
 	order.SetUpdatedAt(paidAt)
-	if userinfodao.MarkFirstRechargeDone(order.UserId) {
-		event.Pub(gameevent.FirstRechargeCompletedEvent, order)
+	if order.CfgId > 0 && userinfodao.MarkRechargeCfgFirstRechargeDone(order.UserId, order.CfgId) {
+		if userinfodao.MarkFirstRechargeDone(order.UserId) {
+			event.Pub(gameevent.FirstRechargeCompletedEvent, order)
+		}
 	}
 
 	CancelRechargeOrderTimeout(order.ID)
@@ -70,4 +85,32 @@ func CompleteOrder(orderId uint64) (float64, error) {
 		return 0, errercode.CreateCode(errercode.RechargeOrderNonExist)
 	}
 	return completeOrder(o, currency.ReasonRecharge)
+}
+
+func resolveRechargeReason(order *entity.RechargeOrder, isTierFirstRecharge bool) currency.Reason {
+	if order == nil {
+		return currency.ReasonRecharge
+	}
+	if order.Source == entity.RechargeOrderSourceManual {
+		return currency.ReasonRechargeManual
+	}
+	if userinfodao.IsRechargeWhitelist(order.UserId) {
+		return currency.ReasonRechargeWhitelist
+	}
+	if order.CfgId == 0 {
+		return currency.ReasonRechargeCustom
+	}
+	if isTierFirstRecharge {
+		return currency.ReasonRechargeFirstBonus
+	}
+	switch order.PayChannel {
+	case entity.RechargeCfgTypeGoogle:
+		return currency.ReasonRechargeGoogle
+	case entity.RechargeCfgTypeIOS:
+		return currency.ReasonRechargeIOS
+	case entity.RechargeCfgTypeChannel:
+		return currency.ReasonRechargeChannel
+	default:
+		return currency.ReasonRechargeTier
+	}
 }

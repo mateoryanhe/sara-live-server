@@ -53,7 +53,7 @@ const USER_LIST_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
     {
         id: 'account',
         titleKey: 'pages.moduleList.groupAccount',
-        buttonKeys: ['ban', 'rankOff', 'rankOn', 'rechargeWhitelistOn', 'rechargeWhitelistOff', 'cancel', 'setUserType'],
+        buttonKeys: ['ban', 'rankOff', 'rankOn', 'rechargeWhitelistOn', 'rechargeWhitelistOff', 'cancel', 'setUserType', 'uploadAvatar'],
     },
 ]
 
@@ -221,8 +221,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('LiveRecordList'),
                 page('LiveRevenueLogList'),
                 page('LiveDailyEffectiveLiveList'),
-            ]),
-            group('log-call', 'menu.CallLogGroup', [
+                page('LiveWeeklyUnsettledLiveList'),
                 page('VideoCallLogList'),
             ]),
             group('log-user', 'menu.UserLogGroup', [

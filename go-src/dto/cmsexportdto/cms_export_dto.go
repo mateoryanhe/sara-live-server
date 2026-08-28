@@ -19,6 +19,7 @@ const (
 	ExportTypeGuildAnchorDailyEffectiveLive    = "guildAnchorDailyEffectiveLive"
 	ExportTypeMyGuildAnchorDailyEffectiveLive  = "myGuildAnchorDailyEffectiveLive"
 	ExportTypeLiveDailyEffectiveLive             = "liveDailyEffectiveLive"
+	ExportTypeLiveWeeklyUnsettledLive            = "liveWeeklyUnsettledLive"
 	ExportTypeCurrencyLog                      = "currencyLog"
 )
 
@@ -81,6 +82,8 @@ type CMSExportLiveRecordPayload struct {
 	PlatformAnchorId string   `json:"platformAnchorId"`
 	GuildAnchorId    string   `json:"guildAnchorId"`
 	AnchorIds        []string `json:"anchorIds"`
+	LiveRecordId     string   `json:"liveRecordId"`
+	Keyword          string   `json:"keyword"`
 	StartTime        int64    `json:"startTime"`
 	EndTime          int64    `json:"endTime"`
 }
@@ -92,6 +95,7 @@ type CMSExportLiveRevenueLogPayload struct {
 	GuildAnchorId    string   `json:"guildAnchorId"`
 	ReceiverIds      []string `json:"receiverIds"`
 	LiveRecordId     string   `json:"liveRecordId"`
+	Keyword          string   `json:"keyword"`
 	RevenueType      uint8    `json:"revenueType"`
 	StartTime        int64    `json:"startTime"`
 	EndTime          int64    `json:"endTime"`
@@ -99,12 +103,15 @@ type CMSExportLiveRevenueLogPayload struct {
 
 type CMSExportVideoCallLogPayload struct {
 	CMSExportHeadersPayload
-	CallerId   string `json:"callerId"`
-	ReceiverId string `json:"receiverId"`
-	Source     uint8  `json:"source"`
-	Status     uint8  `json:"status"`
-	StartTime  int64  `json:"startTime"`
-	EndTime    int64  `json:"endTime"`
+	CallerId         string   `json:"callerId"`
+	ReceiverId       string   `json:"receiverId"`
+	PlatformAnchorId string   `json:"platformAnchorId"`
+	GuildAnchorId    string   `json:"guildAnchorId"`
+	ReceiverIds      []string `json:"receiverIds"`
+	Source           uint8    `json:"source"`
+	Status           uint8    `json:"status"`
+	StartTime        int64    `json:"startTime"`
+	EndTime          int64    `json:"endTime"`
 }
 
 type CMSExportAnchorIncomeSettlementLogPayload struct {
@@ -190,7 +197,17 @@ type CMSExportLiveDailyEffectiveLivePayload struct {
 	AnchorIds        []string `json:"anchorIds"`
 	LiveDateStart    string   `json:"liveDateStart"`
 	LiveDateEnd      string   `json:"liveDateEnd"`
+	Keyword          string   `json:"keyword"`
 	Settled          int8     `json:"settled"`
+}
+
+type CMSExportLiveWeeklyUnsettledLivePayload struct {
+	CMSExportHeadersPayload
+	AnchorId         string   `json:"anchorId"`
+	PlatformAnchorId string   `json:"platformAnchorId"`
+	GuildAnchorId    string   `json:"guildAnchorId"`
+	AnchorIds        []string `json:"anchorIds"`
+	Keyword          string   `json:"keyword"`
 }
 
 type CMSExportCurrencyLogPayload struct {

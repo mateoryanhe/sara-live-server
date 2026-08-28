@@ -190,6 +190,7 @@ func anchorSettlementAmountCells(row *liveentity.AnchorIncomeSettlementLog) []st
 		formatCSVFloat(row.SettlementSalary),
 		formatCSVFloat(row.AnchorSharePercent),
 		formatCSVFloat(row.SettlementShareAmount),
+		formatCSVFloat(row.SettlementShareAmountUsd),
 	)
 }
 
@@ -197,6 +198,8 @@ func guildSettlementAmountCells(row *liveentity.GuildIncomeSettlementLog) []stri
 	return append(incomeAmountCSVCells(&row.LiveRoomIncomeAmounts),
 		formatCSVFloat(row.GuildSharePercent),
 		formatCSVFloat(row.SettlementShareAmount),
+		formatCSVFloat(row.SettlementShareAmountUsd),
+		formatCSVFloat(row.SettlementReceivableUsd),
 	)
 }
 

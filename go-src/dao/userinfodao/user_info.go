@@ -19,6 +19,7 @@ func InitUserInfoDao() {
 	shareCodeUserIdCacheMgr = cache.NewRowCache[uint64]()
 	initUserCumulativeStatDao()
 	initUserExtDao()
+	initUserRechargeCfgFirstRechargeDao()
 }
 
 // GetUserIdByShareCode 根据分享码获取玩家ID,不存在则返回 0

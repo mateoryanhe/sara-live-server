@@ -23,7 +23,6 @@ const (
 	LiveRevenueLogRoomId       db.TbCol = "room_id"
 	LiveRevenueLogLiveRecordId db.TbCol = "live_record_id"
 	LiveRevenueLogSenderId     db.TbCol = "sender_id"
-	LiveRevenueLogReceiverId   db.TbCol = "receiver_id"
 	LiveRevenueLogBizId        db.TbCol = "biz_id"
 	LiveRevenueLogCount        db.TbCol = "count"
 	LiveRevenueLogUnitPrice    db.TbCol = "unit_price"
@@ -31,17 +30,16 @@ const (
 	LiveRevenueLogStatus       db.TbCol = "status"
 )
 
-// LiveRevenueLog 直播收益流水(礼物/付费弹幕/游戏下注等)
+// LiveRevenueLog 直播间社交流水(礼物/付费弹幕/私密房/门票/视频通话等钻石消费)
 type LiveRevenueLog struct {
 	migrate.OneModel
-	RevenueType  uint8   `gorm:"index;default:1;comment:收益类型(1礼物,2付费弹幕,3游戏下注)" json:"revenueType"`
-	RoomId       uint64  `gorm:"index;default:0;comment:直播间ID" json:"roomId"`
+	RevenueType  uint8   `gorm:"index;default:1;comment:流水类型(1礼物,2付费弹幕,4私密房计费,5门票,6视频通话门票,7视频通话计费)" json:"revenueType"`
+	RoomId       uint64  `gorm:"index;default:0;comment:直播间ID(主播用户ID)" json:"roomId"`
 	LiveRecordId uint64  `gorm:"index;default:0;comment:直播记录ID" json:"liveRecordId"`
 	SenderId     uint64  `gorm:"index;default:0;comment:付款用户ID" json:"senderId"`
-	ReceiverId   uint64  `gorm:"index;default:0;comment:收益用户ID(主播)" json:"receiverId"`
-	BizId        uint64  `gorm:"index;default:0;comment:业务关联ID(礼物ID/弹幕ID/游戏ID等)" json:"bizId"`
-	Count        int     `gorm:"default:0;comment:数量" json:"count"`
-	UnitPrice    float64 `gorm:"default:0;comment:单价(钻石)" json:"unitPrice"`
+	BizId        uint64  `gorm:"index;default:0;comment:业务关联ID(礼物ID/通话订单ID等)" json:"bizId"`
+	Count        int     `gorm:"default:0;comment:数量(礼物件数,其余类型多为0或1)" json:"count"`
+	UnitPrice    float64 `gorm:"default:0;comment:单价(钻石,礼物场景有效)" json:"unitPrice"`
 	TotalAmount  float64 `gorm:"default:0;comment:流水金额(钻石)" json:"totalAmount"`
 	Status       uint8   `gorm:"index;default:0;comment:状态(0正常,1已退款)" json:"status"`
 }
@@ -55,7 +53,7 @@ func NewLiveRevenueLog(id uint64) *LiveRevenueLog {
 	return ret
 }
 
-func NewLiveRevenueLogRecord(roomId, liveRecordId, senderId, receiverId, bizId uint64, count int, unitPrice, totalAmount float64, revenueType ...uint8) *LiveRevenueLog {
+func NewLiveRevenueLogRecord(roomId, liveRecordId, senderId, bizId uint64, count int, unitPrice, totalAmount float64, revenueType ...uint8) *LiveRevenueLog {
 	ret := NewLiveRevenueLog(snowflake.GetId())
 	rt := uint8(liverevenue.Gift)
 	if len(revenueType) > 0 && liverevenue.IsValid(liverevenue.Type(revenueType[0])) {
@@ -65,7 +63,6 @@ func NewLiveRevenueLogRecord(roomId, liveRecordId, senderId, receiverId, bizId u
 	ret.SetRoomId(roomId)
 	ret.SetLiveRecordId(liveRecordId)
 	ret.SetSenderId(senderId)
-	ret.SetReceiverId(receiverId)
 	ret.SetBizId(bizId)
 	ret.SetCount(count)
 	ret.SetUnitPrice(unitPrice)
@@ -102,13 +99,6 @@ func (r *LiveRevenueLog) SetLiveRecordId(v uint64) {
 func (r *LiveRevenueLog) SetSenderId(v uint64) {
 	r.SenderId = v
 	syndb.AddData(TbLiveRevenueLog, LiveRevenueLogSenderId, &syndb.ColData{
-		IdVal: r.ID, ColVal: v,
-	})
-}
-
-func (r *LiveRevenueLog) SetReceiverId(v uint64) {
-	r.ReceiverId = v
-	syndb.AddData(TbLiveRevenueLog, LiveRevenueLogReceiverId, &syndb.ColData{
 		IdVal: r.ID, ColVal: v,
 	})
 }
@@ -169,7 +159,6 @@ func initLiveRevenueLog() {
 	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogRoomId)
 	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogLiveRecordId)
 	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogSenderId)
-	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogReceiverId)
 	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogBizId)
 	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogCount)
 	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogUnitPrice)

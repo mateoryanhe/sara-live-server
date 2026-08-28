@@ -115,9 +115,9 @@ func applyLiveRoomCallRevenue(roomId, liveRecordId, callerId, orderId uint64, am
 	var eventData *liveentity.LiveRevenueLog
 	switch revenueType {
 	case liverevenue.LiveRoomVideoCallTicket:
-		eventData = liveentity.NewLiveRevenueLogRecord(roomId, liveRecordId, callerId, roomId, orderId, 0, 0, amount, uint8(liverevenue.LiveRoomVideoCallTicket))
+		eventData = liveentity.NewLiveRevenueLogRecord(roomId, liveRecordId, callerId, orderId, 0, 0, amount, uint8(liverevenue.LiveRoomVideoCallTicket))
 	case liverevenue.LiveRoomVideoCallBilling:
-		eventData = liveentity.NewLiveRevenueLogRecord(roomId, liveRecordId, callerId, roomId, orderId, 1, amount, amount, uint8(liverevenue.LiveRoomVideoCallBilling))
+		eventData = liveentity.NewLiveRevenueLogRecord(roomId, liveRecordId, callerId, orderId, 1, amount, amount, uint8(liverevenue.LiveRoomVideoCallBilling))
 	default:
 		return
 	}

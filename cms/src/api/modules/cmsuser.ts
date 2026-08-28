@@ -8,6 +8,7 @@ export interface CMSUser {
     pwd: string
     status: number
     admin: boolean
+    adminType: number
     roleId: string
     roleName?: string
     remark?: string
@@ -21,6 +22,7 @@ export interface CMSUserQuery extends PageQuery {
     roleId?: string
     status?: number
     admin?: boolean
+    adminType?: number
     roleType?: number
     nonAdmin?: boolean
 }
@@ -37,7 +39,7 @@ export const cmsUserApi = {
         name: string
         pwd: string
         status: number
-        admin: boolean
+        adminType: number
         roleId: string
         remark?: string
     }) => {
@@ -60,7 +62,7 @@ export const cmsUserApi = {
         name: string
         pwd?: string
         status: number
-        admin: boolean
+        adminType: number
         roleId: string
         remark?: string
     }) => {

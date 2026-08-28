@@ -34,7 +34,6 @@
             <IncomePanel
                 :data="incomeData?.incomeSettled"
                 show-settlement-share
-                :settlement-share-amount="incomeData?.incomeSettled?.settlementShareAmount"
                 :updated-at="incomeData?.incomeSettled?.updatedAt"
             />
           </el-tab-pane>
@@ -43,7 +42,6 @@
             <IncomePanel
                 :data="incomeData?.incomeTotal"
                 show-settlement-share
-                :settlement-share-amount="incomeData?.incomeTotal?.settlementShareAmount"
                 :updated-at="incomeData?.incomeTotal?.updatedAt"
             />
           </el-tab-pane>

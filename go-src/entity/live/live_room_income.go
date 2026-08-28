@@ -19,9 +19,13 @@ const (
 	LiveRoomIncomeTotalVideoCallIncome         db.TbCol = "total_video_call_income"
 	LiveRoomIncomeTotalVideoCallTicketIncome   db.TbCol = "total_video_call_ticket_income"
 	LiveRoomIncomeTotalVideoCallBillingIncome  db.TbCol = "total_video_call_billing_income"
+	LiveRoomIncomeTotalShortVideoIncome        db.TbCol = "total_short_video_income"
+	LiveRoomIncomeTotalGameIncome              db.TbCol = "total_game_income"
 	LiveRoomIncomeTotalLiveDuration            db.TbCol = "total_live_duration"
 	LiveRoomIncomeSettlementSalary             db.TbCol = "settlement_salary"
 	LiveRoomIncomeSettlementShareAmount        db.TbCol = "settlement_share_amount"
+	LiveRoomIncomeSettlementShareAmountUsd     db.TbCol = "settlement_share_amount_usd"
+	LiveRoomIncomeSettlementReceivableUsd      db.TbCol = "settlement_receivable_usd"
 )
 
 // LiveRoomIncomeAmounts 直播间/工会收益字段(房间与工会收益表共用结构)
@@ -34,6 +38,8 @@ type LiveRoomIncomeAmounts struct {
 	TotalVideoCallIncome         float64 `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话收益" json:"totalVideoCallIncome"`
 	TotalVideoCallTicketIncome   float64 `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话门票收益" json:"totalVideoCallTicketIncome"`
 	TotalVideoCallBillingIncome  float64 `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话计费收益" json:"totalVideoCallBillingIncome"`
+	TotalShortVideoIncome        float64 `gorm:"type:decimal(10,4);default:0;comment:累计短视频付费观看收益" json:"totalShortVideoIncome"`
+	TotalGameIncome              float64 `gorm:"type:decimal(10,4);default:0;comment:累计游戏收益(金币下注额)" json:"totalGameIncome"`
 	TotalLiveDuration            float64 `gorm:"default:0;comment:累计直播时长(秒)" json:"totalLiveDuration"`
 }
 
@@ -50,6 +56,8 @@ func (a *LiveRoomIncomeAmounts) clearAmounts() {
 	a.TotalVideoCallIncome = 0
 	a.TotalVideoCallTicketIncome = 0
 	a.TotalVideoCallBillingIncome = 0
+	a.TotalShortVideoIncome = 0
+	a.TotalGameIncome = 0
 	a.TotalLiveDuration = 0
 }
 
@@ -66,6 +74,8 @@ func (a *LiveRoomIncomeAmounts) IsZero() bool {
 		a.TotalVideoCallIncome == 0 &&
 		a.TotalVideoCallTicketIncome == 0 &&
 		a.TotalVideoCallBillingIncome == 0 &&
+		a.TotalShortVideoIncome == 0 &&
+		a.TotalGameIncome == 0 &&
 		a.TotalLiveDuration == 0
 }
 
@@ -98,6 +108,12 @@ func addIncomeAmountsLocked(tb db.TbName, id any, dst *LiveRoomIncomeAmounts, sr
 	if src.TotalVideoCallBillingIncome != 0 {
 		addIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallBillingIncome, id, &dst.TotalVideoCallBillingIncome, src.TotalVideoCallBillingIncome)
 	}
+	if src.TotalShortVideoIncome > 0 {
+		addIncomeAmountLocked(tb, LiveRoomIncomeTotalShortVideoIncome, id, &dst.TotalShortVideoIncome, src.TotalShortVideoIncome)
+	}
+	if src.TotalGameIncome > 0 {
+		addIncomeAmountLocked(tb, LiveRoomIncomeTotalGameIncome, id, &dst.TotalGameIncome, src.TotalGameIncome)
+	}
 	if src.TotalLiveDuration > 0 {
 		addIncomeAmountLocked(tb, LiveRoomIncomeTotalLiveDuration, id, &dst.TotalLiveDuration, src.TotalLiveDuration)
 	}
@@ -117,6 +133,8 @@ func clearIncomeAmountsLocked(tb db.TbName, id any, a *LiveRoomIncomeAmounts, up
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallIncome, id, 0)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallTicketIncome, id, 0)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallBillingIncome, id, 0)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalShortVideoIncome, id, 0)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalGameIncome, id, 0)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalLiveDuration, id, 0)
 	touchIncomeUpdatedAt(tb, id, updatedAt)
 }
@@ -155,6 +173,26 @@ func addIncomeEarn(tb db.TbName, id uint64, a *LiveRoomIncomeAmounts, updatedAt 
 		return
 	}
 	addIncomeEarnWithLockKey(tb, liveRoomIncomeLockKey(tb, id), id, a, updatedAt, amount, extraCol, extra)
+}
+
+// addGameEarn 一次加锁:总收益(钻石折算) + 游戏收益(金币下注额)
+func addGameEarn(tb db.TbName, id uint64, a *LiveRoomIncomeAmounts, updatedAt *time.Time, goldAmount, incomeDelta float64) {
+	if a == nil || id == 0 || goldAmount <= 0 {
+		return
+	}
+	addGameEarnWithLockKey(tb, liveRoomIncomeLockKey(tb, id), id, a, updatedAt, goldAmount, incomeDelta)
+}
+
+// addGameEarnWithLockKey 自定义锁键与主键类型的游戏收益累加(用于日表等复合主键)
+func addGameEarnWithLockKey(tb db.TbName, lockKey string, id any, a *LiveRoomIncomeAmounts, updatedAt *time.Time, goldAmount, incomeDelta float64) {
+	if a == nil || id == nil || lockKey == "" || goldAmount <= 0 {
+		return
+	}
+	gmlock.Lock(lockKey)
+	defer gmlock.Unlock(lockKey)
+	addIncomeAmountLocked(tb, LiveRoomIncomeTotalIncome, id, &a.TotalIncome, incomeDelta)
+	addIncomeAmountLocked(tb, LiveRoomIncomeTotalGameIncome, id, &a.TotalGameIncome, goldAmount)
+	touchIncomeUpdatedAt(tb, id, updatedAt)
 }
 
 // addIncomeEarnWithLockKey 自定义锁键与主键类型的收益累加(用于日表等复合主键)
@@ -208,6 +246,8 @@ func regLiveRoomIncomeCols(tb db.TbName) {
 	syndb.RegQuick(tb, LiveRoomIncomeTotalVideoCallIncome)
 	syndb.RegQuick(tb, LiveRoomIncomeTotalVideoCallTicketIncome)
 	syndb.RegQuick(tb, LiveRoomIncomeTotalVideoCallBillingIncome)
+	syndb.RegQuick(tb, LiveRoomIncomeTotalShortVideoIncome)
+	syndb.RegQuick(tb, LiveRoomIncomeTotalGameIncome)
 	syndb.RegQuick(tb, LiveRoomIncomeTotalLiveDuration)
 }
 

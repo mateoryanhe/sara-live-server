@@ -5,14 +5,97 @@ import (
 
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/frame/g"
+	"xr-game-server/constants/db"
 	"xr-game-server/entity/live"
+	"xr-game-server/module/wallet"
 )
 
 var (
 	guildIncomeUnsettledCache = gmap.NewKVMap[uint64, *entity.GuildIncomeUnsettled](false)
 	guildIncomeSettledCache   = gmap.NewKVMap[uint64, *entity.GuildIncomeSettled](false)
 	guildIncomeTotalCache     = gmap.NewKVMap[uint64, *entity.GuildIncomeTotal](false)
+	guildWeeklyAnchorSalary       = gmap.NewKVMap[uint64, float64](false)
+	guildWeeklyAnchorShareAmountUsd = gmap.NewKVMap[uint64, float64](false)
 )
+
+// ResetGuildWeeklyAnchorSalary 周结算开始前清空工会本周主播结算累计(内存)
+func ResetGuildWeeklyAnchorSalary() {
+	guildWeeklyAnchorSalary.Clear()
+	guildWeeklyAnchorShareAmountUsd.Clear()
+}
+
+// TakeGuildWeeklyAnchorSalary 取出并清除工会本周主播直播薪资合计(用于工会结算流水)
+func TakeGuildWeeklyAnchorSalary(guildId uint64) float64 {
+	if guildId == 0 {
+		return 0
+	}
+	v := guildWeeklyAnchorSalary.Get(guildId)
+	guildWeeklyAnchorSalary.Remove(guildId)
+	return v
+}
+
+func addGuildWeeklyAnchorSalary(guildId uint64, salary float64) {
+	if guildId == 0 || salary == 0 {
+		return
+	}
+	guildWeeklyAnchorSalary.Set(guildId, guildWeeklyAnchorSalary.Get(guildId)+salary)
+}
+
+// TakeGuildWeeklyAnchorShareAmountUsd 取出并清除工会本周主播结算分佣(USD)合计
+func TakeGuildWeeklyAnchorShareAmountUsd(guildId uint64) float64 {
+	if guildId == 0 {
+		return 0
+	}
+	v := guildWeeklyAnchorShareAmountUsd.Get(guildId)
+	guildWeeklyAnchorShareAmountUsd.Remove(guildId)
+	return v
+}
+
+func addGuildWeeklyAnchorShareAmountUsd(guildId uint64, amountUsd float64) {
+	if guildId == 0 || amountUsd == 0 {
+		return
+	}
+	guildWeeklyAnchorShareAmountUsd.Set(guildId, guildWeeklyAnchorShareAmountUsd.Get(guildId)+amountUsd)
+}
+
+// MirrorGuildAnchorSettlementSalary 主播结算薪资同步累加到所属工会(已结算+生涯累计+可收USD)
+func MirrorGuildAnchorSettlementSalary(roomId uint64, salary float64) {
+	if salary == 0 {
+		return
+	}
+	salaryUsd := wallet.CalcDiamondToUsd(salary)
+	ForRoomGuild(roomId, func(guildId uint64) {
+		if settled := GetGuildIncomeSettled(guildId); settled != nil {
+			settled.AddSettlementSalary(salary)
+			if salaryUsd != 0 {
+				settled.AddSettlementReceivableUsd(salaryUsd)
+			}
+		}
+		if total := GetGuildIncomeTotal(guildId); total != nil {
+			total.AddSettlementSalary(salary)
+			if salaryUsd != 0 {
+				total.AddSettlementReceivableUsd(salaryUsd)
+			}
+		}
+		addGuildWeeklyAnchorSalary(guildId, salary)
+	})
+}
+
+// MirrorGuildAnchorSettlementShareAmountUsd 主播流水分佣(USD)同步累加到所属工会(已结算+生涯累计+本周流水)
+func MirrorGuildAnchorSettlementShareAmountUsd(roomId uint64, shareAmountUsd float64) {
+	if shareAmountUsd == 0 {
+		return
+	}
+	ForRoomGuild(roomId, func(guildId uint64) {
+		if settled := GetGuildIncomeSettled(guildId); settled != nil {
+			settled.AddSettlementReceivableUsd(shareAmountUsd)
+		}
+		if total := GetGuildIncomeTotal(guildId); total != nil {
+			total.AddSettlementReceivableUsd(shareAmountUsd)
+		}
+		addGuildWeeklyAnchorShareAmountUsd(guildId, shareAmountUsd)
+	})
+}
 
 // GetGuildIncomeUnsettled 工会未结算收益(仅内存,无则新建并写入缓存)
 func GetGuildIncomeUnsettled(guildId uint64) *entity.GuildIncomeUnsettled {
@@ -121,6 +204,34 @@ func MirrorGuildPrivateRoomWatchEarn(roomId uint64, amount float64) {
 	})
 }
 
+// MirrorGuildShortVideoEarn 同步短视频付费观看收益到工会
+func MirrorGuildShortVideoEarn(roomId uint64, amount float64) {
+	at := time.Now()
+	ForRoomGuild(roomId, func(guildId uint64) {
+		if u := GetGuildIncomeUnsettled(guildId); u != nil {
+			u.AddShortVideoEarn(amount)
+		}
+		if t := GetGuildIncomeTotal(guildId); t != nil {
+			t.AddShortVideoEarn(amount)
+		}
+		MirrorDailyGuildShortVideoEarn(guildId, at, amount)
+	})
+}
+
+// MirrorGuildGameEarn 同步游戏收益到工会
+func MirrorGuildGameEarn(roomId uint64, goldAmount, incomeDelta float64) {
+	at := time.Now()
+	ForRoomGuild(roomId, func(guildId uint64) {
+		if u := GetGuildIncomeUnsettled(guildId); u != nil {
+			u.AddGameEarn(goldAmount, incomeDelta)
+		}
+		if t := GetGuildIncomeTotal(guildId); t != nil {
+			t.AddGameEarn(goldAmount, incomeDelta)
+		}
+		MirrorDailyGuildGameEarn(guildId, at, goldAmount, incomeDelta)
+	})
+}
+
 // MirrorGuildLiveDuration 同步直播时长到工会
 func MirrorGuildLiveDuration(roomId uint64, sec float64) {
 	at := time.Now()
@@ -164,6 +275,44 @@ func getGuildIncomeUnsettledForArchive(guildId uint64) *entity.GuildIncomeUnsett
 		return nil
 	}
 	return &row
+}
+
+// ListGuildIncomeUnsettledTotalForCMS 批量查询工会未结算总收益(缓存优先,否则直查DB,不新建)
+func ListGuildIncomeUnsettledTotalForCMS(guildIds []uint64) map[uint64]float64 {
+	ret := make(map[uint64]float64)
+	if len(guildIds) == 0 {
+		return ret
+	}
+	seen := make(map[uint64]struct{}, len(guildIds))
+	missing := make([]uint64, 0, len(guildIds))
+	for _, guildId := range guildIds {
+		if guildId == 0 {
+			continue
+		}
+		if _, ok := seen[guildId]; ok {
+			continue
+		}
+		seen[guildId] = struct{}{}
+		if guildIncomeUnsettledCache.Contains(guildId) {
+			if row := guildIncomeUnsettledCache.Get(guildId); row != nil {
+				ret[guildId] = row.TotalIncome
+			}
+			continue
+		}
+		missing = append(missing, guildId)
+	}
+	if len(missing) == 0 {
+		return ret
+	}
+	rows := make([]*entity.GuildIncomeUnsettled, 0, len(missing))
+	_ = g.Model(string(entity.TbGuildIncomeUnsettled)).Unscoped().
+		WhereIn(string(db.IdName), missing).Scan(&rows)
+	for _, row := range rows {
+		if row != nil && row.ID != 0 {
+			ret[row.ID] = row.TotalIncome
+		}
+	}
+	return ret
 }
 
 // GetGuildIncomeUnsettledForCMS 未结算收益(缓存优先,否则直查DB,不新建)

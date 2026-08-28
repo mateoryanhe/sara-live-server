@@ -3,7 +3,9 @@ package cmsexport
 import (
 	"context"
 	"encoding/json"
+	"time"
 
+	"xr-game-server/core/xrtime"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/cmsexportdto"
@@ -72,6 +74,7 @@ func exportLiveDailyEffectiveLiveCSV(ctx context.Context, payload json.RawMessag
 			RoomIds:       liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
 			LiveDateStart: req.LiveDateStart,
 			LiveDateEnd:   req.LiveDateEnd,
+			Keyword:       req.Keyword,
 			Settled:       req.Settled,
 			PageIndex:     pageIndex,
 			PageSize:      pageSize,
@@ -85,6 +88,55 @@ func exportLiveDailyEffectiveLiveCSV(ctx context.Context, payload json.RawMessag
 		}
 		return total, csvRows
 	}, onProgress)
+}
+
+func exportLiveWeeklyUnsettledLiveCSV(ctx context.Context, payload json.RawMessage, onProgress func(exportedRows, totalRows int)) (*exportResult, error) {
+	var req cmsexportdto.CMSExportLiveWeeklyUnsettledLivePayload
+	if err := json.Unmarshal(payload, &req); err != nil {
+		return nil, err
+	}
+	weekStart, weekEnd := xrtime.WeekDateRange(time.Now())
+	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
+		total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSMultiList(&liveroomdao.DailyAnchorEffectiveLiveCMSMultiListFilter{
+			RoomIds:       liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
+			LiveDateStart: weekStart,
+			LiveDateEnd:   weekEnd,
+			Keyword:       req.Keyword,
+			Settled:       0,
+			PageIndex:     pageIndex,
+			PageSize:      pageSize,
+		})
+		roomIds := collectDailyAnchorRoomIds(rows)
+		nicknameMap := userinfodao.GetNicknameMapByUserIds(roomIds)
+		weeklyIncomeMap := liveroomdao.ListWeeklyUnsettledIncomeByRoomIds(roomIds, weekStart, weekEnd)
+		csvRows := make([][]string, 0, len(rows))
+		for _, row := range rows {
+			csvRows = append(csvRows, liveWeeklyUnsettledLiveToCSVRow(row, nicknameMap, weeklyIncomeMap))
+		}
+		return total, csvRows
+	}, onProgress)
+}
+
+func liveWeeklyUnsettledLiveToCSVRow(row *liveentity.DailyAnchorEffectiveLive, nicknameMap map[uint64]string, weeklyIncomeMap map[uint64]float64) []string {
+	if row == nil {
+		return nil
+	}
+	roomNickname := ""
+	if nicknameMap != nil {
+		roomNickname = nicknameMap[row.RoomId]
+	}
+	weeklyIncome := ""
+	if weeklyIncomeMap != nil {
+		weeklyIncome = formatCSVFloat(weeklyIncomeMap[row.RoomId])
+	}
+	return []string{
+		row.LiveDate,
+		formatCSVUint(row.RoomId),
+		roomNickname,
+		weeklyIncome,
+		formatLiveDurationMinutes(row.LiveDuration),
+		formatCSVFloat(row.TotalIncome),
+	}
 }
 
 func exportGuildAnchorDailyEffectiveLiveCSV(ctx context.Context, payload json.RawMessage, onProgress func(exportedRows, totalRows int)) (*exportResult, error) {

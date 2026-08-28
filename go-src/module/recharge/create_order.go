@@ -6,6 +6,7 @@ import (
 	"strings"
 	"xr-game-server/core/event"
 	"xr-game-server/core/httpserver"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dao/rechargeorderdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/rechargeorderdto"
@@ -87,13 +88,36 @@ func CMSCreateOrder(ctx context.Context, req *rechargeorderdto.CMSCreateRecharge
 	if userinfodao.GetUserInfoByUserId(userId) == nil {
 		return nil, errercode.CreateCode(errercode.SysError)
 	}
-	if req.Amount <= 0 {
-		return nil, errercode.CreateCode(errercode.RechargeAmountInvalid)
-	}
 
-	goldAmount := req.Amount * 100
-	order := entity.NewRechargeOrder(userId, 0, req.Amount, defaultCurrency, goldAmount, entity.RechargeOrderSourceManual)
-	order.SetRemark("CMS人工创建")
+	cfgId, _ := strconv.ParseUint(strings.TrimSpace(req.CfgId), 10, 64)
+	var order *entity.RechargeOrder
+	if cfgId > 0 {
+		cfg := cfgdao.GetRechargeCfgById(cfgId)
+		if cfg == nil {
+			return nil, errercode.CreateCode(errercode.RechargeCfgNonExist)
+		}
+		if cfg.Price <= 0 {
+			return nil, errercode.CreateCode(errercode.RechargeAmountInvalid)
+		}
+		goldAmount := float64(cfg.Gold + cfg.ExtraGold)
+		if goldAmount <= 0 {
+			return nil, errercode.CreateCode(errercode.RechargeGoldInvalid)
+		}
+		cur := cfg.Currency
+		if cur == "" {
+			cur = defaultCurrency
+		}
+		order = entity.NewRechargeOrder(userId, cfg.ID, cfg.Price, cur, goldAmount, entity.RechargeOrderSourceManual)
+		order.SetRemark("CMS人工创建(充值档位)")
+		order.SetPayChannel(cfg.CfgType)
+	} else {
+		if req.Amount <= 0 {
+			return nil, errercode.CreateCode(errercode.RechargeAmountInvalid)
+		}
+		goldAmount := req.Amount * 100
+		order = entity.NewRechargeOrder(userId, 0, req.Amount, defaultCurrency, goldAmount, entity.RechargeOrderSourceManual)
+		order.SetRemark("CMS人工创建")
+	}
 	if operatorId := httpserver.GetAuthId(ctx); operatorId > 0 {
 		order.SetOperatorId(operatorId)
 	}

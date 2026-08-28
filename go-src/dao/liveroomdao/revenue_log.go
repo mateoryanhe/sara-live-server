@@ -60,7 +60,6 @@ func FindLatestUnrefundedVideoCallBillingLog(orderId, callerId uint64) *entity.L
 	log.RoomId = row.RoomId
 	log.LiveRecordId = row.LiveRecordId
 	log.SenderId = row.SenderId
-	log.ReceiverId = row.ReceiverId
 	log.BizId = row.BizId
 	log.Count = row.Count
 	log.UnitPrice = row.UnitPrice

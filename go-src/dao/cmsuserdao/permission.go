@@ -38,7 +38,10 @@ func CheckCmsApiPermission(userId uint64, apiPath string) bool {
 	if user == nil {
 		return false
 	}
-	if user.Admin {
+	if entity.CMSUserIsAdmin(user) {
+		if !entity.CMSUserIsSuperAdmin(user) && isDataSyncApiPath(apiPath) {
+			return false
+		}
 		return true
 	}
 	return RoleHasApiPath(user.RoleId, apiPath)
@@ -105,6 +108,8 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/liveRecord/cmsLiveRecordList", "/liveRecord/cmsDailyEffectiveLiveList", "/liveRevenueLog/cmsLiveRevenueLogList", "/account/getAnchorList", "/guild/cmsGuildAnchorDailyEffectiveLiveList", "/guild/cmsMyGuildAnchorDailyEffectiveLiveList", "/guild/getMyOwnedGuildAnchorList"}
 	case "/liveRecord/cmsDailyEffectiveLiveList":
 		return []string{"/liveRecord/cmsLiveRecordList", "/account/getAnchorList", "/guild/guildList"}
+	case "/liveRecord/cmsWeeklyUnsettledLiveList":
+		return []string{"/liveRecord/cmsLiveRecordList", "/account/getAnchorList", "/guild/guildList"}
 	case "/liveRevenueLog/cmsLiveRevenueLogList":
 		return []string{"/liveRecord/cmsLiveRecordList", "/account/getAnchorList", "/guild/guildList"}
 	case "/liveRecord/cmsLiveRecordList":
@@ -115,6 +120,8 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/shortVideo/shortVideoList"}
 	case "/shortVideo/onShelfShortVideo", "/shortVideo/offShelfShortVideo":
 		return []string{"/shortVideo/updateShortVideo"}
+	case "/rechargeCfg/rechargeCfgList":
+		return []string{"/rechargeOrder/manualCreateOrder"}
 	default:
 		return nil
 	}

@@ -6,6 +6,7 @@ type CMSAddDiamondReq struct {
 	g.Meta `path:"/add" method:"post" summary:"CMS增加用户钻石" tags:"钻石管理"`
 	UserId uint64  `json:"userId" v:"required#用户ID不能为空" dc:"用户ID"`
 	Amount float64 `json:"amount" v:"required|min:0.0001#钻石数量不能为空|钻石数量必须大于0" dc:"增加数量(正数)"`
+	Reason uint8   `json:"reason" v:"required|in:6,7#调整原因不能为空|调整原因无效" dc:"调整原因 6测试 7GM补偿"`
 }
 
 type CMSAddDiamondRes struct {
@@ -16,6 +17,7 @@ type CMSSubDiamondReq struct {
 	g.Meta `path:"/sub" method:"post" summary:"CMS扣减用户钻石" tags:"钻石管理"`
 	UserId uint64  `json:"userId" v:"required#用户ID不能为空" dc:"用户ID"`
 	Amount float64 `json:"amount" v:"required|min:0.0001#钻石数量不能为空|钻石数量必须大于0" dc:"扣减数量(正数)"`
+	Reason uint8   `json:"reason" v:"required|in:6,7#调整原因不能为空|调整原因无效" dc:"调整原因 6测试 7GM补偿"`
 }
 
 type CMSSubDiamondRes struct {

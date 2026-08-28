@@ -31,6 +31,7 @@ type FirstRechargeActivityCfgItem struct {
 	RechargeBtnTextPt string                        `json:"rechargeBtnTextPt"`
 	RechargeBtnTextHi string                        `json:"rechargeBtnTextHi"`
 	RechargeBtnTextId string                        `json:"rechargeBtnTextId"`
+	FirstRechargeRatio float64                      `json:"firstRechargeRatio"`
 	Privileges        []*FirstRechargePrivilegeItem `json:"privileges"`
 	CreatedAt         string                        `json:"createdAt"`
 	UpdatedAt         string                        `json:"updatedAt"`
@@ -55,6 +56,7 @@ type SaveFirstRechargeActivityCfgReq struct {
 	RechargeBtnTextPt string                        `json:"rechargeBtnTextPt"`
 	RechargeBtnTextHi string                        `json:"rechargeBtnTextHi"`
 	RechargeBtnTextId string                        `json:"rechargeBtnTextId"`
+	FirstRechargeRatio float64                      `json:"firstRechargeRatio"`
 	Privileges        []*FirstRechargePrivilegeItem `json:"privileges"`
 }
 
@@ -99,5 +101,6 @@ type AppFirstRechargeActivityCfgRes struct {
 	RechargeBtnTextPt string                           `json:"rechargeBtnTextPt" dc:"充值按钮文案(葡萄牙语)"`
 	RechargeBtnTextHi string                           `json:"rechargeBtnTextHi" dc:"充值按钮文案(印地语)"`
 	RechargeBtnTextId string                           `json:"rechargeBtnTextId" dc:"充值按钮文案(印尼语)"`
+	FirstRechargeRatio float64                         `json:"firstRechargeRatio" dc:"首充比例(%)"`
 	Privileges        []*AppFirstRechargePrivilegeItem `json:"privileges" dc:"特权列表(按CMS配置顺序),icon为CDN URL,描述按语言取值"`
 }

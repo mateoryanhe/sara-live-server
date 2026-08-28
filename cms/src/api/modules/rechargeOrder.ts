@@ -13,7 +13,7 @@ export const rechargeOrderApi = {
         )
     },
 
-    manualCreateOrder: (params: { userId: string; amount: number }) => {
+    manualCreateOrder: (params: { userId: string; amount?: number; cfgId?: string }) => {
         return request.post<{
             orderId: string
             price: number

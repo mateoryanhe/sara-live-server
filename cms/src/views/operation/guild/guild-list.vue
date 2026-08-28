@@ -45,12 +45,18 @@
             </template>
           </el-table-column>
           <el-table-column :label="t('pages.guildList.guildName')" prop="name"/>
+          <el-table-column :label="t('pages.guildList.unsettledTotalIncome')" width="140">
+            <template #default="{ row }">
+              <span class="money-amount">{{ formatWalletBalance(row.unsettledTotalIncome) }}</span>
+            </template>
+          </el-table-column>
           <el-table-column :label="t('pages.guildList.leader')" width="140" show-overflow-tooltip>
             <template #default="{ row }">
               {{ formatLeader(row) }}
             </template>
           </el-table-column>
           <el-table-column :label="t('pages.guildList.description')" prop="description" show-overflow-tooltip/>
+          
           <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
           <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
           <el-table-column fixed="right" :label="t('common.actions')" width="660">
@@ -189,6 +195,7 @@ import CmsUserPickerDialog from '@/components/CmsUserPickerDialog.vue'
 import type {CMSUser} from '@/api/modules/cmsuser'
 import type {Guild, GuildAnchorImportResultState, ImportGuildAnchorRow} from '@/types/api.ts'
 import {usePagePermission} from '@/composables/usePagePermission'
+import {formatWalletBalance} from '@/utils/number-format'
 
 const GUILD_ANCHOR_IMPORT_RESULT_KEY = 'guildAnchorImportResult'
 

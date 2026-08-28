@@ -28,13 +28,15 @@ func CreateCMSUser(ctx context.Context, req *cmsuserdto.CreateCMSUserReq) (res *
 		return nil, errors.New("CMS用户名称已存在")
 	}
 
+	adminType := entity.NormalizeCMSUserAdminType(req.AdminType)
 	user := entity.CMSUser{
-		Name:   req.Name,
-		Pwd:    req.Pwd,
-		Status: req.Status,
-		Admin:  req.Admin,
-		RoleId: req.RoleId,
-		Remark: req.Remark,
+		Name:      req.Name,
+		Pwd:       req.Pwd,
+		Status:    req.Status,
+		AdminType: adminType,
+		Admin:     entity.CMSUserAdminFromType(adminType),
+		RoleId:    req.RoleId,
+		Remark:    req.Remark,
 	}
 
 	err = cmsuserdao.CreateCMSUser(&user)
@@ -98,6 +100,7 @@ func UpdateCMSUser(ctx context.Context, req *cmsuserdto.UpdateCMSUserReq) (res *
 	oldStatus := user.Status
 	oldName := user.Name
 	oldRoleId := user.RoleId
+	oldAdminType := user.AdminType
 	operatorId := httpserver.GetAuthId(ctx)
 	if oldStatus == common.True && req.Status == common.False && user.ID == operatorId {
 		return nil, errors.New("不能停用自己的账号")
@@ -115,7 +118,9 @@ func UpdateCMSUser(ctx context.Context, req *cmsuserdto.UpdateCMSUserReq) (res *
 		user.Pwd = req.Pwd
 	}
 	user.Status = req.Status
-	user.Admin = req.Admin
+	adminType := entity.NormalizeCMSUserAdminType(req.AdminType)
+	user.AdminType = adminType
+	user.Admin = entity.CMSUserAdminFromType(adminType)
 	user.RoleId = req.RoleId
 	user.Remark = req.Remark
 
@@ -129,7 +134,7 @@ func UpdateCMSUser(ctx context.Context, req *cmsuserdto.UpdateCMSUserReq) (res *
 	if oldStatus == common.True && req.Status == common.False {
 		invalidateCmsToken(user.ID)
 	}
-	if pwdChanged || user.RoleId != oldRoleId {
+	if pwdChanged || user.RoleId != oldRoleId || user.AdminType != oldAdminType {
 		invalidateCmsToken(user.ID)
 	}
 

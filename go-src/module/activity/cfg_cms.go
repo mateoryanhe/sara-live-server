@@ -30,7 +30,7 @@ func SaveFirstRechargeActivityCfg(_ context.Context, req *activitydto.SaveFirstR
 		RechargeBtnTextPt: req.RechargeBtnTextPt,
 		RechargeBtnTextHi: req.RechargeBtnTextHi,
 		RechargeBtnTextId: req.RechargeBtnTextId,
-		Privileges:        marshalPrivileges(privilegesFromDTO(req.Privileges)),
+		FirstRechargeRatio: normalizeFirstRechargeRatio(req.FirstRechargeRatio),
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -49,6 +49,9 @@ func SaveFirstRechargeActivityCfg(_ context.Context, req *activitydto.SaveFirstR
 	if err := cfgdao.SaveFirstRechargeActivityCfg(row); err != nil {
 		return nil, err
 	}
+	if err := cfgdao.ReplaceAllFirstRechargeActivityPrivileges(privilegeRowsFromDTO(req.Privileges)); err != nil {
+		return nil, err
+	}
 	reloadCfgMemory()
 	return &activitydto.SaveFirstRechargeActivityCfgRes{
 		Success: true,
@@ -58,7 +61,8 @@ func SaveFirstRechargeActivityCfg(_ context.Context, req *activitydto.SaveFirstR
 
 func defaultCfgItem() *activitydto.FirstRechargeActivityCfgItem {
 	return &activitydto.FirstRechargeActivityCfgItem{
-		Privileges: []*activitydto.FirstRechargePrivilegeItem{},
+		FirstRechargeRatio: defaultFirstRechargeRatio,
+		Privileges:        []*activitydto.FirstRechargePrivilegeItem{},
 	}
 }
 

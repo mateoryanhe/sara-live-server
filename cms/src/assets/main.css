@@ -1,4 +1,5 @@
 @import './base.css';
+@import './search-form.css';
 
 #app {
     max-width: 100%;

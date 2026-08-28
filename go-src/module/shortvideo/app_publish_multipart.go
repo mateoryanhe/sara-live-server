@@ -234,6 +234,12 @@ func mapAppPublishMultipartErr(err error) error {
 	if errors.As(err, &bizErr) {
 		return err
 	}
+	if upload.IsUploadVideoFileTooLarge(err) {
+		return errercode.CreateCode(errercode.ShortVideoFileTooLarge)
+	}
+	if upload.IsUploadImageFileTooLarge(err) {
+		return errercode.CreateCode(errercode.AppImageFileTooLarge)
+	}
 	if upload.IsUploadFileTooLarge(err) {
 		return errercode.CreateCode(errercode.ShortVideoFileTooLarge)
 	}

@@ -15,8 +15,9 @@ const (
 type LiveRoomIncomeTotal struct {
 	migrate.OneModel
 	LiveRoomIncomeAmounts
-	SettlementSalary      float64 `gorm:"type:decimal(16,4);default:0;comment:结算薪资" json:"settlementSalary"`
-	SettlementShareAmount float64 `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额" json:"settlementShareAmount"`
+	SettlementSalary          float64 `gorm:"type:decimal(16,4);default:0;comment:结算薪资" json:"settlementSalary"`
+	SettlementShareAmount     float64 `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额" json:"settlementShareAmount"`
+	SettlementShareAmountUsd  float64 `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额(USD)" json:"settlementShareAmountUsd"`
 }
 
 func NewLiveRoomIncomeTotal(roomId uint64) *LiveRoomIncomeTotal {
@@ -78,6 +79,16 @@ func (r *LiveRoomIncomeTotal) AddPrivateRoomWatchEarn(v float64) {
 	addIncomeEarn(TbLiveRoomIncomeTotal, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalPrivateRoomWatchIncome, &r.TotalPrivateRoomWatchIncome)
 }
 
+// AddShortVideoEarn 短视频付费观看收益(总收益+短视频细分,内部加锁)
+func (r *LiveRoomIncomeTotal) AddShortVideoEarn(v float64) {
+	addIncomeEarn(TbLiveRoomIncomeTotal, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalShortVideoIncome, &r.TotalShortVideoIncome)
+}
+
+// AddGameEarn 游戏收益(总收益按钻石折算 + 游戏细分金币下注额,内部加锁)
+func (r *LiveRoomIncomeTotal) AddGameEarn(goldAmount, incomeDelta float64) {
+	addGameEarn(TbLiveRoomIncomeTotal, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, goldAmount, incomeDelta)
+}
+
 // AddSettlementSalary 累加结算薪资
 func (r *LiveRoomIncomeTotal) AddSettlementSalary(v float64) {
 	if r == nil || v == 0 {
@@ -94,9 +105,18 @@ func (r *LiveRoomIncomeTotal) AddSettlementShareAmount(v float64) {
 	addIncomeAmount(TbLiveRoomIncomeTotal, LiveRoomIncomeSettlementShareAmount, r.ID, &r.SettlementShareAmount, v, false, &r.UpdatedAt)
 }
 
+// AddSettlementShareAmountUsd 累加结算分佣金额(USD)
+func (r *LiveRoomIncomeTotal) AddSettlementShareAmountUsd(v float64) {
+	if r == nil || v == 0 {
+		return
+	}
+	addIncomeAmount(TbLiveRoomIncomeTotal, LiveRoomIncomeSettlementShareAmountUsd, r.ID, &r.SettlementShareAmountUsd, v, false, &r.UpdatedAt)
+}
+
 func initLiveRoomIncomeTotal() {
 	regLiveRoomIncomeCols(TbLiveRoomIncomeTotal)
 	syndb.RegQuick(TbLiveRoomIncomeTotal, LiveRoomIncomeSettlementSalary)
 	syndb.RegQuick(TbLiveRoomIncomeTotal, LiveRoomIncomeSettlementShareAmount)
+	syndb.RegQuick(TbLiveRoomIncomeTotal, LiveRoomIncomeSettlementShareAmountUsd)
 	migrate.AutoMigrate(&LiveRoomIncomeTotal{})
 }

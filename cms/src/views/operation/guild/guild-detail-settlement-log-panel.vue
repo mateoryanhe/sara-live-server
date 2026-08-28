@@ -8,12 +8,59 @@
         type="info"
     />
 
-    <div class="toolbar">
-      <el-button v-if="canExport" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
-    </div>
+    <el-form :model="searchForm" class="search-form" inline label-width="100px">
+      <el-form-item :label="t('common.createdAt')">
+        <el-date-picker
+            v-model="searchForm.dateRange"
+            clearable
+            :end-placeholder="t('pages.anchorIncomeSettlementLogList.endDate')"
+            format="YYYY-MM-DD"
+            :range-separator="t('pages.anchorIncomeSettlementLogList.dateRangeSeparator')"
+            :start-placeholder="t('pages.anchorIncomeSettlementLogList.startDate')"
+            style="width: 260px"
+            type="daterange"
+            value-format="YYYY-MM-DD"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
+        <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
+        <el-button v-if="canExport" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
+      </el-form-item>
+    </el-form>
 
     <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width:100%">
-      <el-table-column :label="t('pages.guildIncomeSettlementLogList.logId')" min-width="180" prop="id"/>
+      <el-table-column :label="t('common.createdAt')" min-width="170">
+        <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
+      </el-table-column>
+      <el-table-column
+          :label="t('pages.anchorList.settlementSalary')"
+          align="right"
+          min-width="140"
+      >
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementSalary) }}</span></template>
+      </el-table-column>
+      <el-table-column
+          :label="t('pages.anchorList.settlementFlowCommission')"
+          align="right"
+          min-width="120"
+      >
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementShareAmount) }}</span></template>
+      </el-table-column>
+      <el-table-column
+          :label="t('pages.anchorList.settlementShareAmountUsd')"
+          align="right"
+          min-width="130"
+      >
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementShareAmountUsd) }}</span></template>
+      </el-table-column>
+      <el-table-column
+          :label="t('pages.anchorList.settlementReceivableUsd')"
+          align="right"
+          min-width="280"
+      >
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementReceivableUsd) }}</span></template>
+      </el-table-column>
       <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalIncome')" align="right" min-width="120">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
       </el-table-column>
@@ -22,12 +69,6 @@
       </el-table-column>
       <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalPaidDanmakuIncome')" align="right" min-width="130">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
-      </el-table-column>
-      <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalPrivateRoomTicketIncome')" align="right" min-width="140">
-        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomTicketIncome) }}</span></template>
-      </el-table-column>
-      <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalPrivateRoomWatchIncome')" align="right" min-width="140">
-        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomWatchIncome) }}</span></template>
       </el-table-column>
       <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalVideoCallIncome')" align="right" min-width="130">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
@@ -38,17 +79,17 @@
       <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalVideoCallBillingIncome')" align="right" min-width="150">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallBillingIncome) }}</span></template>
       </el-table-column>
+      <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalShortVideoIncome')" align="right" min-width="130">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalShortVideoIncome) }}</span></template>
+      </el-table-column>
+      <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalGameIncome')" align="right" min-width="120">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameIncome) }}</span></template>
+      </el-table-column>
       <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalLiveDuration')" min-width="120">
         <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
       </el-table-column>
-      <el-table-column :label="t('pages.guildIncomeSettlementLogList.guildSharePercent')" min-width="110">
+      <el-table-column :label="t('pages.guildIncomeSettlementLogList.guildSharePercent')" min-width="150">
         <template #default="{ row }">{{ formatSharePercent(row.guildSharePercent) }}</template>
-      </el-table-column>
-      <el-table-column :label="t('pages.guildIncomeSettlementLogList.settlementShareAmount')" align="right" min-width="130">
-        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementShareAmount) }}</span></template>
-      </el-table-column>
-      <el-table-column :label="t('common.createdAt')" min-width="170">
-        <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
       </el-table-column>
     </el-table>
 
@@ -57,7 +98,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, ref, watch} from 'vue'
+import {computed, reactive, ref, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage} from 'element-plus'
 import {guildIncomeSettlementLogApi} from '@/api/modules/guild-income-settlement-log'
@@ -82,9 +123,18 @@ const loading = ref(false)
 const tableData = ref<GuildIncomeSettlementLogItem[]>([])
 const loaded = ref(false)
 
-const buildFilterParams = () => ({
-  guildId: props.guildId,
+const searchForm = reactive({
+  dateRange: [] as string[],
 })
+
+const buildFilterParams = () => {
+  const [startDate, endDate] = searchForm.dateRange || []
+  return {
+    guildId: props.guildId,
+    startTime: startDate ? toServerDayStartUnix(startDate) : 0,
+    endTime: endDate ? toServerDayEndUnix(endDate) : 0,
+  }
+}
 
 const fetchList = async () => {
   if (!props.guildId) {
@@ -106,6 +156,15 @@ const fetchList = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const handleSearch = () => {
+  fetchList()
+}
+
+const handleReset = () => {
+  searchForm.dateRange = []
+  fetchList()
 }
 
 const handleExport = async () => {
@@ -140,6 +199,7 @@ const formatDate = (dateString: string | null | undefined) => {
 const resetState = () => {
   loaded.value = false
   tableData.value = []
+  searchForm.dateRange = []
 }
 
 watch(
@@ -168,9 +228,11 @@ watch(
   margin-bottom: 16px;
 }
 
-.toolbar {
+.search-form {
   margin-bottom: 16px;
-  display: flex;
-  justify-content: flex-end;
+}
+
+.search-form :deep(.el-form-item__label) {
+  white-space: nowrap;
 }
 </style>

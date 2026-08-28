@@ -80,7 +80,8 @@ type CMSManualRechargeRes struct {
 type CMSCreateRechargeOrderReq struct {
 	g.Meta `path:"/manualCreateOrder" method:"post" summary:"后台人工创建充值订单" tags:"充值订单"`
 	UserId string  `json:"userId" v:"required#玩家ID不能为空" dc:"玩家用户ID"`
-	Amount float64 `json:"amount" v:"required#订单金额不能为空" dc:"订单金额(USD)"`
+	CfgId  string  `json:"cfgId" dc:"充值档位ID(与 amount 二选一,优先 cfgId)"`
+	Amount float64 `json:"amount" dc:"订单金额(USD,自定义金额时使用)"`
 }
 
 type CMSCreateRechargeOrderRes struct {

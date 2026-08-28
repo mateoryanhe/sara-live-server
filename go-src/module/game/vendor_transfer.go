@@ -34,6 +34,7 @@ func HandleVendorTransfer(ctx context.Context, req *gameplatformdto.VendorTransf
 	bodyParams := collectVendorTransferBodyParams(ctx)
 	fillVendorTransferReq(req, bodyParams)
 	req.IP = resolveVendorCallbackIP(ctx, req.IP, bodyParams)
+	req.IP = resolveVendorCallbackIP(ctx, req.IP, bodyParams)
 
 	vendorDetailLog().Infof(ctx,
 		"vendor transfer request transaction_id=%s player_name=%s bet_id=%s bet_amount=%v win_amount=%v real_transfer_amount=%v",
@@ -90,7 +91,7 @@ func HandleVendorTransfer(ctx context.Context, req *gameplatformdto.VendorTransf
 	gameName, gameCategory := resolveVendorTransferGameMeta(gameID, req.Platform)
 	nameEn, cover := resolveVendorTransferGameInfo(gameID)
 
-	balance, fail := applyVendorTransferWallet(userID, req.BetAmount, req.WinAmount, gameName, gameCategory, transactionID)
+	balance, fail := applyVendorTransferWallet(userID, req.BetAmount, req.WinAmount, gameID, gameName, gameCategory, transactionID)
 	if fail != nil {
 		resp := vendorTransferFail(fail.Code, fail.Message)
 		vendorDetailLog().Warningf(ctx, "vendor transfer failed transaction_id=%s code=%d msg=%s", transactionID, fail.Code, fail.Message)
@@ -156,9 +157,10 @@ func validateVendorTransferReq(req *gameplatformdto.VendorTransferReq) *vendorCa
 }
 
 // applyVendorTransferWallet 下注扣金币、派彩加金币.
-func applyVendorTransferWallet(userID uint64, betAmount, winAmount float64, gameName, gameCategory, transactionID string) (float64, *vendorCallbackFail) {
+func applyVendorTransferWallet(userID uint64, betAmount, winAmount float64, gameId, gameName, gameCategory, transactionID string) (float64, *vendorCallbackFail) {
 	balance := userinfodao.GetUserInfoByUserId(userID).Gold
 	gameMeta := &gameevent.CurrencyChangeMeta{
+		GameId:        gameId,
 		GameName:      gameName,
 		GameCategory:  gameCategory,
 		BusinessType:  currency.BusinessTypeGame,
@@ -244,8 +246,9 @@ func recordVendorTransferBetLog(userID uint64, gameCode, nameEn, cover string, p
 		liveRecordID,
 	)
 	gamebetdao.PrependGameBetToAppListCache(userID, row)
-	if liveRecordID > 0 {
-		event.Pub(gameevent.GameBetCreatedEvent, gameevent.NewGameBetCreatedEventData(userID, liveRecordID, amount))
+	event.Pub(gameevent.GameBetCreatedEvent, gameevent.NewGameBetCreatedEventData(userID, liveRecordID, amount))
+	if liveRoomID > 0 {
+		RecordLiveRoomGameBetIncome(liveRoomID, liveRecordID, amount)
 	}
 }
 

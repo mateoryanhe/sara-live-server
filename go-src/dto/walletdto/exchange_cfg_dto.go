@@ -10,6 +10,7 @@ type WalletExchangeCfgItem struct {
 	ID                 string  `json:"id"`
 	GoldToDiamondRate  int     `json:"goldToDiamondRate"`
 	ExchangeFeePercent float64 `json:"exchangeFeePercent"`
+	UsdToGoldRate      int     `json:"usdToGoldRate"`
 	CreatedAt          string  `json:"createdAt"`
 	UpdatedAt          string  `json:"updatedAt"`
 }
@@ -23,6 +24,7 @@ type SaveWalletExchangeCfgReq struct {
 	ID                 uint64  `json:"id,string" dc:"配置ID,更新时传"`
 	GoldToDiamondRate  int     `json:"goldToDiamondRate" v:"required|min:1#兑换比例不能为空|兑换比例必须大于0" dc:"1金币兑换钻石数"`
 	ExchangeFeePercent float64 `json:"exchangeFeePercent" v:"min:0#手续费不能为负数" dc:"App手动兑换手续费(%)，从兑换钻石中扣除"`
+	UsdToGoldRate      int     `json:"usdToGoldRate" v:"required|min:1#美金兑换金币比例不能为空|美金兑换金币比例必须大于0" dc:"1美金兑换金币数"`
 }
 
 type SaveWalletExchangeCfgRes struct {

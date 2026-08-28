@@ -93,6 +93,7 @@ import {ElMessage, ElMessageBox} from 'element-plus'
 import {accountApi} from '@/api'
 import type {OffShelfLiveRoomItem} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
+import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 
 const LIVE_ROOM_CATEGORY_HOT = 1
 const LIVE_ROOM_CATEGORY_GAME = 2
@@ -109,11 +110,6 @@ const pagination = reactive({
   pageSize: 10,
   total: 0,
 })
-
-const formatDate = (value?: string | null) => {
-  if (!value) return '-'
-  return value.replace('T', ' ').slice(0, 19)
-}
 
 const categoryLabel = (category?: number) => {
   switch (category) {

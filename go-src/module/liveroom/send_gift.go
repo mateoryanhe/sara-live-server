@@ -110,7 +110,7 @@ func prepareSendGift(ctx context.Context, roomId, giftId uint64, count int) (*se
 		remaining = userinfodao.GetUserInfoByUserId(senderId).Diamond
 	}
 
-	eventData := entity.NewLiveRevenueLogRecord(room.ID, room.LiveRecordId, senderId, room.ID, giftId, count, giftItem.Price, totalCost, uint8(liverevenue.Gift))
+	eventData := entity.NewLiveRevenueLogRecord(room.ID, room.LiveRecordId, senderId, giftId, count, giftItem.Price, totalCost, uint8(liverevenue.Gift))
 
 	sender := userinfodao.GetUserInfoByUserId(senderId)
 	payload := &liveroomdto.GiftPushItem{

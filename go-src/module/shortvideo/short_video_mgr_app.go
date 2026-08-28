@@ -230,8 +230,11 @@ func uploadShortVideoFile(file *ghttp.UploadFile) (string, error) {
 	if err := ensureShortVideoUploadDiskSpace(); err != nil {
 		return "", err
 	}
-	name, err := upload.UploadShortVideoFile(file)
+	name, err := upload.UploadShortVideoFile(file, int64(getShortVideoMaxFileSize()))
 	if err != nil {
+		if upload.IsUploadVideoFileTooLarge(err) {
+			return "", errercode.CreateCode(errercode.ShortVideoFileTooLarge)
+		}
 		return "", errercode.CreateCode(errercode.InvalidParam)
 	}
 	return name, nil

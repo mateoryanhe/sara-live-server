@@ -5,9 +5,12 @@ import (
 	"strconv"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/calldao"
+	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/calldto"
 	"xr-game-server/entity/call"
+	userentity "xr-game-server/entity/user"
+	"xr-game-server/module/upload"
 )
 
 func parseUint64Filter(val string) uint64 {
@@ -66,7 +69,7 @@ func callOrderStatusText(o *entity.CallOrder) string {
 	return o.StatusText()
 }
 
-func toCMSVideoCallItem(v *entity.CallOrder, nicknameMap map[uint64]string) *calldto.CMSVideoCallLogItem {
+func toCMSVideoCallItem(v *entity.CallOrder, nicknameMap map[uint64]string, profileMap map[uint64]*userentity.UserInfo) *calldto.CMSVideoCallLogItem {
 	if v == nil {
 		return nil
 	}
@@ -97,14 +100,23 @@ func toCMSVideoCallItem(v *entity.CallOrder, nicknameMap map[uint64]string) *cal
 		item.CallerNickname = nicknameMap[v.CallerId]
 		item.ReceiverNickname = nicknameMap[v.ReceiverId]
 	}
+	if profileMap != nil {
+		if profile := profileMap[v.CallerId]; profile != nil {
+			item.CallerAvatar = upload.ResolveAvatarUrlForUser(v.CallerId, profile.Avatar)
+		}
+		if profile := profileMap[v.ReceiverId]; profile != nil {
+			item.ReceiverIsAnchor = profile.IsAnchor()
+		}
+	}
 	return item
 }
 
 // GetCMSVideoCallLogList CMS分页查询视频通话日志
 func GetCMSVideoCallLogList(_ context.Context, req *calldto.CMSVideoCallLogListReq) (*httpserver.CMSQueryResp, error) {
+	receiverIds := liveroomdao.ParseRevenueLogReceiverIds(req.ReceiverId, req.PlatformAnchorId, req.GuildAnchorId, req.ReceiverIds)
 	total, rows := calldao.CallOrderCMSList(&calldao.CallOrderCMSListFilter{
-		CallerId:   parseUint64Filter(req.CallerId),
-		ReceiverId: parseUint64Filter(req.ReceiverId),
+		CallerId:    parseUint64Filter(req.CallerId),
+		ReceiverIds: receiverIds,
 		Source:     req.Source,
 		Status:     req.Status,
 		CallType:   entity.CallOrderTypeVideo,
@@ -113,10 +125,12 @@ func GetCMSVideoCallLogList(_ context.Context, req *calldto.CMSVideoCallLogListR
 		PageIndex:  req.PageIndex,
 		PageSize:   req.PageSize,
 	})
-	nicknameMap := userinfodao.GetNicknameMapByUserIds(collectCallOrderUserIds(rows))
+	userIds := collectCallOrderUserIds(rows)
+	nicknameMap := userinfodao.GetNicknameMapByUserIds(userIds)
+	profileMap := userinfodao.GetUserProfileMapByUserIds(userIds)
 	list := make([]*calldto.CMSVideoCallLogItem, 0, len(rows))
 	for _, row := range rows {
-		list = append(list, toCMSVideoCallItem(row, nicknameMap))
+		list = append(list, toCMSVideoCallItem(row, nicknameMap, profileMap))
 	}
 	return httpserver.NewCMSQueryResp(total, list), nil
 }

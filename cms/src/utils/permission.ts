@@ -10,6 +10,7 @@ import {
 // 存储用户权限信息
 let userPermissions: Permission[] = []
 let isAdmin = false
+let isSuperAdmin = false
 
 /** 已授权的 module 字符串集合，便于快速查找 */
 let permissionModuleSet = new Set<string>()
@@ -23,9 +24,10 @@ function rebuildPermissionSet() {
 /**
  * 设置用户权限信息
  */
-export const setUserPermissions = (modules: Permission[], admin: boolean) => {
+export const setUserPermissions = (modules: Permission[], admin: boolean, superAdmin = false) => {
     userPermissions = modules || []
     isAdmin = admin
+    isSuperAdmin = superAdmin
     rebuildPermissionSet()
 }
 
@@ -75,6 +77,9 @@ export const hasPermission = (pageName: string): boolean => {
  * @param action 按钮 key（page-buttons 中定义）
  */
 export const hasButtonPermission = (pageName: string, action: string): boolean => {
+    if (action === 'sync' && isAdmin && !isSuperAdmin) {
+        return false
+    }
     if (isAdmin) {
         return true
     }
@@ -113,8 +118,11 @@ export const getUserPermissions = (): Permission[] => userPermissions
 
 export const getIsAdmin = (): boolean => isAdmin
 
+export const getIsSuperAdmin = (): boolean => isSuperAdmin
+
 export const clearPermissions = () => {
     userPermissions = []
     isAdmin = false
+    isSuperAdmin = false
     permissionModuleSet.clear()
 }

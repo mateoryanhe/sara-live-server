@@ -1,0 +1,42 @@
+---
+description: 本机工作区安全：防误删、Git 备份与代码恢复约定
+alwaysApply: true
+---
+
+## 背景（2026-08-28）
+
+误删 `go-src/.../` 时，`rd /s /q` 路径转义错误，导致 `.git`、`cms`、`go-src` 等大量文件永久丢失；8 个未 push 的 commit 一并消失。恢复依赖 Cursor Local History + 聊天记录重做。
+
+## 禁止：危险的 Windows 删除命令
+
+- **禁止** Agent 自行执行 `rd /s /q`、`del /s /q`、`Remove-Item -Recurse -Force` 删除**项目目录、`.git`、盘符根路径**或含 `...` 字面名的路径。
+- **禁止** 在 `D:\` 或未加 `-LiteralPath` 的路径上对含 `...` 的目录做递归删除（PowerShell 会把 `...` 当通配符）。
+- 删除前必须：**先向用户确认**、路径用 `-LiteralPath` 或 .NET 字面路径、只删明确存在的单个目标。
+
+删除名为 `...` 的误生成目录（见 `go-build-output.mdc`）：
+
+```powershell
+[System.IO.Directory]::Delete('D:\company-code\sara-live-server\go-src\module\logquery\...', $true)
+```
+
+## Git：未 push = 未备份
+
+- 完成一批功能或一天工作结束前，**提醒用户 `git push`**；不要长期堆多个仅本地 commit。
+- 用户明确要求 commit 时再提交；commit 后若领先 `origin/master`，主动提示 push。
+- **禁止** 在未备份情况下对整仓做 `git init`、覆盖 `.git`、或大范围 `reset --hard`；若 GitHub 恢复后需保留 Local History，先说明会丢失本地 reflog。
+
+## 脚本与重构
+
+- **禁止** 未经用户同意运行 `go-src/scripts/merge_modules.py`（曾产生半完成 `module/cfg`/`module/rank` 导致编译失败）。
+- 大规模移动/合并模块前：先 `go build` 通过，再小步提交。
+
+## 若再次发生代码丢失
+
+按优先级：
+
+1. **停止写入**该盘，尝试恢复 `.git`（Recuva / WinFR）— 成功率低
+2. **Cursor Timeline** / **GoLand Local History** — 按文件恢复
+3. **按 agent-transcripts 聊天记录重做** — 本仓库已验证可行
+4. GitHub `origin/master` 仅作最旧基线，不含未 push 工作
+
+任务结束若涉及环境/流程教训，更新 `.cursor/agent-notes/README.md`。

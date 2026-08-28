@@ -14,38 +14,65 @@ import (
 	"xr-game-server/dto/agoradto"
 	"xr-game-server/errercode"
 	"xr-game-server/module/upload"
+	liveentity "xr-game-server/entity/live"
 )
 
 const logSourceAgoraCloudPlayer = "AgoraCloudPlayer"
 
-type cloudPlayerCreateReq struct {
-	Player cloudPlayerBody `json:"player"`
+type cloudPlayerVideoOptions struct {
+	Width     int `json:"width,omitempty"`
+	Height    int `json:"height,omitempty"`
+	FrameRate int `json:"frameRate,omitempty"`
+	Bitrate   int `json:"bitrate,omitempty"`
 }
 
 type cloudPlayerBody struct {
-	Account     string `json:"account"`
-	ChannelName string `json:"channelName"`
-	StreamUrl   string `json:"streamUrl"`
-	Token       string `json:"token,omitempty"`
-	Name        string `json:"name,omitempty"`
-	RepeatTime  int    `json:"repeatTime,omitempty"`
-	IdleTimeout int    `json:"idleTimeout,omitempty"`
+	Account      string                   `json:"account"`
+	ChannelName  string                   `json:"channelName"`
+	StreamUrl    string                   `json:"streamUrl"`
+	Token        string                   `json:"token,omitempty"`
+	Name         string                   `json:"name,omitempty"`
+	RepeatTime   int                      `json:"repeatTime,omitempty"`
+	IdleTimeout  int                      `json:"idleTimeout,omitempty"`
+	VideoOptions *cloudPlayerVideoOptions `json:"videoOptions,omitempty"`
+}
+
+type cloudPlayerCreateReq struct {
+	Player cloudPlayerBody `json:"player"`
 }
 
 type cloudPlayerUpdateReq struct {
 	Player cloudPlayerBody `json:"player"`
 }
 
-func buildBotAnchorCloudPlayerBody(anchorId uint64, cloudPlayerVideo, token string) (cloudPlayerBody, error) {
+func buildBotAnchorCloudPlayerBody(anchorId uint64, cloudPlayerVideo, token string, frameRate, bitrate, width, height int) (cloudPlayerBody, error) {
 	streamUrl := strings.TrimSpace(upload.ResolveCloudPlayerVideoUrl(cloudPlayerVideo))
 	if streamUrl == "" {
 		return cloudPlayerBody{}, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if frameRate <= 0 {
+		frameRate = liveentity.DefaultCloudPlayerFrameRate
+	}
+	if bitrate <= 0 {
+		bitrate = liveentity.DefaultCloudPlayerBitrate
+	}
+	if width <= 0 {
+		width = liveentity.DefaultCloudPlayerWidth
+	}
+	if height <= 0 {
+		height = liveentity.DefaultCloudPlayerHeight
 	}
 	return cloudPlayerBody{
 		Account:     buildUserAccount(anchorId),
 		ChannelName: strconv.FormatUint(anchorId, 10),
 		StreamUrl:   streamUrl,
 		Token:       token,
+		VideoOptions: &cloudPlayerVideoOptions{
+			Width:     width,
+			Height:    height,
+			FrameRate: frameRate,
+			Bitrate:   bitrate,
+		},
 	}, nil
 }
 
@@ -56,7 +83,7 @@ type cloudPlayerCreateResp struct {
 }
 
 // StartBotAnchorCloudPlayer 机器人主播开播时创建声网云播放器
-func StartBotAnchorCloudPlayer(ctx context.Context, anchorId uint64, cloudPlayerVideo string) (string, int64, error) {
+func StartBotAnchorCloudPlayer(ctx context.Context, anchorId uint64, cloudPlayerVideo string, frameRate, bitrate, width, height int) (string, int64, error) {
 	cfg := getAgoraCfgCache()
 	if err := validateAgoraRestCfg(cfg); err != nil {
 		return "", 0, err
@@ -68,7 +95,7 @@ func StartBotAnchorCloudPlayer(ctx context.Context, anchorId uint64, cloudPlayer
 		return "", 0, err
 	}
 
-	playerBody, err := buildBotAnchorCloudPlayerBody(anchorId, cloudPlayerVideo, token)
+	playerBody, err := buildBotAnchorCloudPlayerBody(anchorId, cloudPlayerVideo, token, frameRate, bitrate, width, height)
 	if err != nil {
 		return "", 0, err
 	}

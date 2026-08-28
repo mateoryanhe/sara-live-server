@@ -7,11 +7,10 @@ import (
 	"time"
 
 	"github.com/gogf/gf/v2/os/gctx"
-	"xr-game-server/constants/currency"
 	"xr-game-server/core/event"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/xrtimer"
-	"xr-game-server/dao/currencylogdao"
+	"xr-game-server/dao/gamebetdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/gameconsumrankdto"
 	"xr-game-server/gameevent"
@@ -19,10 +18,10 @@ import (
 )
 
 const (
-	defaultPageSize              = 20
-	maxPageSize                  = 100
-	gameConsumeRankTickInterval  = 3 * time.Minute
-	gameConsumeRankRefreshDelay  = 10 * time.Minute
+	defaultPageSize             = 20
+	maxPageSize                 = 100
+	gameConsumeRankTickInterval = 3 * time.Minute
+	gameConsumeRankRefreshDelay = 10 * time.Minute
 )
 
 type rankItem struct {
@@ -54,25 +53,19 @@ func init() {
 	})
 }
 
-// Init 初始化游戏消费榜缓存,订阅游戏金币消费事件,每3分钟检查是否需要刷新
+// Init 初始化游戏消费榜缓存,订阅游戏下注事件,每3分钟检查是否需要刷新
 func Init() {
 	loadGameConsumeRankCache()
-	event.Sub(gameevent.CurrencyChangeEvent, onGameGoldConsumeEvent)
+	event.Sub(gameevent.GameBetCreatedEvent, onGameBetCreatedEvent)
 	event.Sub(gameevent.RankListRefreshEvent, onRankListRefreshEvent)
 	xrtimer.AddSingleton(gctx.New(), gameConsumeRankTickInterval, func(ctx context.Context) {
 		tryRefreshGameConsumeRankCache()
 	})
 }
 
-func onGameGoldConsumeEvent(data any) {
-	ev, ok := data.(*gameevent.CurrencyChangeEventData)
-	if !ok || ev == nil {
-		return
-	}
-	if ev.Type != gameevent.CurrencyTypeGold || ev.Action != gameevent.CurrencyActionSub || ev.Amount <= 0 {
-		return
-	}
-	if ev.BusinessType != currency.BusinessTypeGame && ev.Reason != currency.ReasonGameBet {
+func onGameBetCreatedEvent(data any) {
+	ev, ok := data.(*gameevent.GameBetCreatedEventData)
+	if !ok || ev == nil || ev.Amount <= 0 {
 		return
 	}
 	markGameConsumeRankDataChanged()
@@ -102,9 +95,9 @@ func tryRefreshGameConsumeRankCache() {
 func loadGameConsumeRankCache() {
 	now := time.Now()
 	snapshot := &rankSnapshot{
-		Today:     buildRankItems(currencylogdao.SumGameGoldConsumeByUser(startOfDay(now), now)),
-		Last7:     buildRankItems(currencylogdao.SumGameGoldConsumeByUser(now.AddDate(0, 0, -7), now)),
-		Last30:    buildRankItems(currencylogdao.SumGameGoldConsumeByUser(now.AddDate(0, 0, -30), now)),
+		Today:     buildRankItems(gamebetdao.SumGameBetByUser(startOfDay(now), now)),
+		Last7:     buildRankItems(gamebetdao.SumGameBetByUser(now.AddDate(0, 0, -7), now)),
+		Last30:    buildRankItems(gamebetdao.SumGameBetByUser(now.AddDate(0, 0, -30), now)),
 		UpdatedAt: now.Unix(),
 	}
 	gameConsumeRankCache.Store(snapshot)
@@ -114,7 +107,7 @@ func startOfDay(t time.Time) time.Time {
 	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 }
 
-func buildRankItems(rows []*currencylogdao.DiamondConsumeStatRow) []*rankItem {
+func buildRankItems(rows []*gamebetdao.GameConsumeRankRow) []*rankItem {
 	if len(rows) == 0 {
 		return make([]*rankItem, 0)
 	}
@@ -129,7 +122,7 @@ func buildRankItems(rows []*currencylogdao.DiamondConsumeStatRow) []*rankItem {
 		item := &rankItem{
 			Rank:          rankNo,
 			UserId:        row.UserId,
-			ConsumeAmount: row.Total,
+			ConsumeAmount: row.TotalAmount,
 		}
 		if profile := userinfodao.GetUserInfoByUserId(row.UserId); profile != nil {
 			item.Nickname = profile.Nickname

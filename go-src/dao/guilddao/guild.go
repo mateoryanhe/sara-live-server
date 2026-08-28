@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
+	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/guilddto"
 	liveentity "xr-game-server/entity/live"
 )
@@ -204,9 +205,17 @@ func GetOffShelfGuildList(req *guilddto.OffShelfGuildListReq) (int, []*guilddto.
 		Scan(&rows)
 
 	list := make([]*guilddto.GuildListRes, 0, len(rows))
+	guildIds := make([]uint64, 0, len(rows))
 	for _, row := range rows {
 		if item := toGuildListRes(row); item != nil {
 			list = append(list, item)
+			guildIds = append(guildIds, row.ID)
+		}
+	}
+	unsettledMap := liveroomdao.ListGuildIncomeUnsettledTotalForCMS(guildIds)
+	for _, item := range list {
+		if guildId, err := strconv.ParseUint(item.ID, 10, 64); err == nil {
+			item.UnsettledTotalIncome = unsettledMap[guildId]
 		}
 	}
 	return total, list
@@ -243,9 +252,17 @@ func GetGuildList(req *guilddto.GuildListReq) (int, []*guilddto.GuildListRes) {
 		Scan(&rows)
 
 	list := make([]*guilddto.GuildListRes, 0, len(rows))
+	guildIds := make([]uint64, 0, len(rows))
 	for _, row := range rows {
 		if item := toGuildListRes(row); item != nil {
 			list = append(list, item)
+			guildIds = append(guildIds, row.ID)
+		}
+	}
+	unsettledMap := liveroomdao.ListGuildIncomeUnsettledTotalForCMS(guildIds)
+	for _, item := range list {
+		if guildId, err := strconv.ParseUint(item.ID, 10, 64); err == nil {
+			item.UnsettledTotalIncome = unsettledMap[guildId]
 		}
 	}
 	return total, list

@@ -8,6 +8,14 @@
       </template>
 
       <el-form :model="searchForm" class="search-form" inline label-width="88px">
+        <el-form-item :label="t('common.keyword')">
+          <el-input
+              v-model="searchForm.keyword"
+              clearable
+              :placeholder="t('pages.liveRecordList.keywordPlaceholder')"
+              style="width: 220px"
+          />
+        </el-form-item>
         <el-form-item :label="t('pages.liveRecordList.platformAnchor')">
           <div class="anchor-filter anchor-filter--compact">
             <el-input
@@ -94,14 +102,16 @@
           </template>
         </el-table-column>
         <el-table-column :label="t('pages.liveRecordList.anchorNickname')" min-width="120" prop="nickname">
-          <template #default="{ row }">{{ row.nickname || '-' }}</template>
-        </el-table-column>
-        <el-table-column :label="t('menu.UserDetail')" width="110">
           <template #default="{ row }">
-            <el-button v-if="row.anchorId" link type="primary" @click="openUserDetail(row.anchorId)">
-              {{ t('pages.userList.viewDetail') }}
+            <el-button
+                v-if="canViewUserDetail && row.anchorId && row.nickname"
+                link
+                type="primary"
+                @click="openUserDetail(row.anchorId)"
+            >
+              {{ row.nickname }}
             </el-button>
-            <span v-else>-</span>
+            <span v-else>{{ row.nickname || '-' }}</span>
           </template>
         </el-table-column>
         <el-table-column :label="t('common.startTime')" width="170">
@@ -186,11 +196,12 @@ import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExpor
 import {CMS_EXPORT_TYPE_LIVE_RECORD} from '@/utils/cms-async-export'
 import {buildLiveRecordCsvColumns} from '@/utils/live-record-csv'
 import {formatWalletBalance} from '@/utils/number-format'
+import {formatServerDateTime as formatDate, toServerDayStartUnix, toServerDayEndUnix} from '@/utils/server-datetime'
 
 const {t} = useI18n()
 const router = useRouter()
 const {can} = usePagePermission('LiveRecordList')
-const {openUserDetail} = useUserDetailNav('LiveRecordList')
+const {canViewUserDetail, openUserDetail} = useUserDetailNav('LiveRecordList')
 const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
 const tableData = ref<LiveRecordItem[]>([])
@@ -200,6 +211,7 @@ const platformAnchorPickerVisible = ref(false)
 const guildAnchorPickerVisible = ref(false)
 
 const searchForm = reactive({
+  keyword: '',
   startDate: '',
   endDate: '',
 })
@@ -273,26 +285,20 @@ const pagination = reactive({
   total: 0,
 })
 
-const toDayStartUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T00:00:00`).getTime() / 1000)
-}
-
-const toDayEndUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T23:59:59`).getTime() / 1000)
-}
-
 const buildQueryParams = () => ({
   pageIndex: pagination.pageIndex,
   pageSize: pagination.pageSize,
   anchorIds: buildSelectedAnchorIds(),
-  startTime: searchForm.startDate ? toDayStartUnix(searchForm.startDate) : 0,
-  endTime: searchForm.endDate ? toDayEndUnix(searchForm.endDate) : 0,
+  keyword: searchForm.keyword.trim() || undefined,
+  startTime: searchForm.startDate ? toServerDayStartUnix(searchForm.startDate) : 0,
+  endTime: searchForm.endDate ? toServerDayEndUnix(searchForm.endDate) : 0,
 })
 
 const buildFilterParams = () => ({
   anchorIds: buildSelectedAnchorIds(),
-  startTime: searchForm.startDate ? toDayStartUnix(searchForm.startDate) : 0,
-  endTime: searchForm.endDate ? toDayEndUnix(searchForm.endDate) : 0,
+  keyword: searchForm.keyword.trim() || undefined,
+  startTime: searchForm.startDate ? toServerDayStartUnix(searchForm.startDate) : 0,
+  endTime: searchForm.endDate ? toServerDayEndUnix(searchForm.endDate) : 0,
 })
 
 const fetchList = async () => {
@@ -317,6 +323,7 @@ const handleSearch = () => {
 const handleReset = () => {
   selectedPlatformAnchors.value = []
   selectedGuildAnchors.value = []
+  searchForm.keyword = ''
   searchForm.startDate = ''
   searchForm.endDate = ''
   pagination.pageIndex = 1
@@ -353,15 +360,6 @@ const handleExport = async () => {
     },
     `live-record-${Date.now()}.csv`,
   )
-}
-
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) return '-'
-  try {
-    return new Date(dateString).toLocaleString()
-  } catch {
-    return '-'
-  }
 }
 
 const formatDuration = (seconds: number | null | undefined) => {

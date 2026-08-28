@@ -17,6 +17,19 @@
             style="width: 200px"
         />
       </el-form-item>
+      <el-form-item :label="t('pages.anchorList.dailyLiveDate')">
+        <el-date-picker
+            v-model="searchForm.dateRange"
+            clearable
+            :end-placeholder="t('pages.anchorList.liveDateEnd')"
+            format="YYYY-MM-DD"
+            :range-separator="t('pages.anchorList.liveDateRangeSeparator')"
+            :start-placeholder="t('pages.anchorList.liveDateStart')"
+            style="width: 260px"
+            type="daterange"
+            value-format="YYYY-MM-DD"
+        />
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
         <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
@@ -26,16 +39,44 @@
 
     <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width:100%">
       <el-table-column :label="t('pages.anchorList.dailyRecordId')" min-width="180" prop="id"/>
-      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.roomId')" min-width="180" prop="roomId"/>
+      <el-table-column :label="t('common.avatar')" width="80">
+        <template #default="{ row }">
+          <el-image
+              v-if="row.roomAvatar"
+              :preview-src-list="[row.roomAvatar]"
+              :src="row.roomAvatar"
+              fit="cover"
+              hide-on-click-modal
+              preview-teleported
+              style="width:40px;height:40px;border-radius:50%"
+          />
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.roomId')" min-width="180">
+        <template #default="{ row }">
+          <el-button v-if="row.roomId" link type="primary" @click="openAnchorDetail(row.roomId)">
+            {{ row.roomId }}
+          </el-button>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
       <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.roomNickname')" min-width="120">
-        <template #default="{ row }">{{ row.roomNickname || '-' }}</template>
+        <template #default="{ row }">
+          <el-button
+              v-if="canViewUserDetail && row.roomId && row.roomNickname"
+              link
+              type="primary"
+              @click="openUserDetail(row.roomId)"
+          >
+            {{ row.roomNickname }}
+          </el-button>
+          <span v-else>{{ row.roomNickname || '-' }}</span>
+        </template>
       </el-table-column>
       <el-table-column :label="t('pages.anchorList.dailyLiveDate')" min-width="120" prop="liveDate"/>
       <el-table-column :label="t('pages.anchorList.dailyLiveDuration')" min-width="150">
         <template #default="{ row }">{{ formatLiveDurationMinutes(row.liveDuration, t) }}</template>
-      </el-table-column>
-      <el-table-column :label="t('pages.anchorList.dailyReportedLiveDuration')" min-width="150">
-        <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
       </el-table-column>
       <el-table-column :label="t('pages.anchorList.liveIncome')" align="right" min-width="120">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
@@ -46,14 +87,11 @@
       <el-table-column :label="t('pages.anchorList.paidDanmakuIncome')" align="right" min-width="130">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
       </el-table-column>
-      <el-table-column :label="t('pages.anchorList.privateRoomTicketIncome')" align="right" min-width="140">
-        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomTicketIncome) }}</span></template>
-      </el-table-column>
-      <el-table-column :label="t('pages.anchorList.privateRoomWatchIncome')" align="right" min-width="140">
-        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomWatchIncome) }}</span></template>
-      </el-table-column>
       <el-table-column :label="t('pages.anchorList.videoCallIncome')" align="right" min-width="130">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
+      </el-table-column>
+      <el-table-column :label="t('pages.anchorList.gameIncome')" align="right" min-width="120">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameIncome) }}</span></template>
       </el-table-column>
       <el-table-column :label="t('pages.anchorList.dailySettled')" min-width="100">
         <template #default="{ row }">
@@ -68,14 +106,6 @@
       <el-table-column :label="t('pages.anchorList.roomUpdatedAt')" min-width="170">
         <template #default="{ row }">{{ formatDate(row.updatedAt) }}</template>
       </el-table-column>
-      <el-table-column :label="t('menu.UserDetail')" width="110">
-        <template #default="{ row }">
-          <el-button v-if="canViewUserDetail && row.roomId" link type="primary" @click="openUserDetail(row.roomId)">
-            {{ t('pages.userList.viewDetail') }}
-          </el-button>
-          <span v-else>-</span>
-        </template>
-      </el-table-column>
     </el-table>
 
     <el-empty v-if="!loading && tableData.length === 0" :description="t('pages.guildList.noAnchorDailyEffectiveLiveData')"/>
@@ -85,6 +115,7 @@
 <script lang="ts" setup>
 import {computed, reactive, ref, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
+import {useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {guildApi} from '@/api'
 import type {GuildAnchorDailyEffectiveLiveItem} from '@/types/api'
@@ -102,6 +133,7 @@ const props = defineProps<{
 }>()
 
 const {t} = useI18n()
+const router = useRouter()
 const {can} = usePagePermission('GuildDetail')
 const {canViewUserDetail, openUserDetail} = useUserDetailNav('GuildDetail')
 const canExport = computed(() => can('exportAnchorDailyEffectiveLive'))
@@ -112,15 +144,21 @@ const loaded = ref(false)
 
 const searchForm = reactive({
   roomId: '',
+  dateRange: [] as string[],
 })
 
 const DEFAULT_PAGE_SIZE = 8
 
-const buildFilterParams = () => ({
-  guildId: props.guildId,
-  roomId: searchForm.roomId.trim() || undefined,
-  settled: 0,
-})
+const buildFilterParams = () => {
+  const [liveDateStart, liveDateEnd] = searchForm.dateRange || []
+  return {
+    guildId: props.guildId,
+    roomId: searchForm.roomId.trim() || undefined,
+    liveDateStart: liveDateStart || undefined,
+    liveDateEnd: liveDateEnd || undefined,
+    settled: 0,
+  }
+}
 
 const fetchList = async () => {
   if (!props.guildId) {
@@ -150,6 +188,7 @@ const handleSearch = () => {
 
 const handleReset = () => {
   searchForm.roomId = ''
+  searchForm.dateRange = []
   fetchList()
 }
 
@@ -182,6 +221,7 @@ const resetState = () => {
   loaded.value = false
   tableData.value = []
   searchForm.roomId = ''
+  searchForm.dateRange = []
 }
 
 watch(

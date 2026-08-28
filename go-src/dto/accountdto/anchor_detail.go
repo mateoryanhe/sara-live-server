@@ -22,6 +22,8 @@ type LiveRoomIncomeAmountsItem struct {
 	TotalVideoCallIncome         float64 `json:"totalVideoCallIncome"`
 	TotalVideoCallTicketIncome   float64 `json:"totalVideoCallTicketIncome"`
 	TotalVideoCallBillingIncome  float64 `json:"totalVideoCallBillingIncome"`
+	TotalShortVideoIncome        float64 `json:"totalShortVideoIncome"`
+	TotalGameIncome              float64 `json:"totalGameIncome"`
 	TotalLiveDuration            float64 `json:"totalLiveDuration"`
 }
 
@@ -34,17 +36,21 @@ type LiveRoomIncomeUnsettledItem struct {
 // LiveRoomIncomeSettledItem 已结算收益
 type LiveRoomIncomeSettledItem struct {
 	LiveRoomIncomeAmountsItem
-	SettlementSalary      float64    `json:"settlementSalary"`
-	SettlementShareAmount float64    `json:"settlementShareAmount"`
-	UpdatedAt             *time.Time `json:"updatedAt"`
+	SettlementSalary          float64    `json:"settlementSalary"`
+	SettlementShareAmount     float64    `json:"settlementShareAmount"`
+	SettlementShareAmountUsd  float64    `json:"settlementShareAmountUsd"`
+	SettlementReceivableUsd   float64    `json:"settlementReceivableUsd"`
+	UpdatedAt                 *time.Time `json:"updatedAt"`
 }
 
 // LiveRoomIncomeTotalItem 生涯累计收益
 type LiveRoomIncomeTotalItem struct {
 	LiveRoomIncomeAmountsItem
-	SettlementSalary      float64    `json:"settlementSalary"`
-	SettlementShareAmount float64    `json:"settlementShareAmount"`
-	UpdatedAt             *time.Time `json:"updatedAt"`
+	SettlementSalary          float64    `json:"settlementSalary"`
+	SettlementShareAmount     float64    `json:"settlementShareAmount"`
+	SettlementShareAmountUsd  float64    `json:"settlementShareAmountUsd"`
+	SettlementReceivableUsd   float64    `json:"settlementReceivableUsd"`
+	UpdatedAt                 *time.Time `json:"updatedAt"`
 }
 
 // AnchorLiveRoomDetailItem 直播间详情
@@ -71,9 +77,9 @@ type AnchorLiveRoomDetailItem struct {
 
 // LiveRoomIncomeArchiveItem 下架未结算收益归档
 type LiveRoomIncomeArchiveItem struct {
-	ID      uint64 `json:"id,string"`
-	RoomId  uint64 `json:"roomId,string"`
-	GuildId uint64 `json:"guildId,string"`
+	ID               uint64     `json:"id,string"`
+	RoomId           uint64     `json:"roomId,string"`
+	GuildId          uint64     `json:"guildId,string"`
 	LiveRoomIncomeAmountsItem
 	SettlementSalary float64    `json:"settlementSalary"`
 	CreatedAt        *time.Time `json:"createdAt"`

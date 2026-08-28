@@ -2,17 +2,20 @@ package liveroomdao
 
 import (
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/entity/live"
+	userentity "xr-game-server/entity/user"
 )
 
 // LiveRecordCMSListFilter CMS直播记录查询条件
 type LiveRecordCMSListFilter struct {
 	AnchorIds    []uint64
 	LiveRecordId uint64
+	Keyword      string
 	StartTime    int64
 	EndTime      int64
 	PageIndex    int
@@ -87,25 +90,38 @@ func LiveRecordCMSList(f *LiveRecordCMSListFilter) (int, []*entity.LiveRecord) {
 		f.PageSize = 20
 	}
 	ctx := gctx.New()
-	m := g.Model(string(entity.TbLiveRecord)).Ctx(ctx)
+	keyword := strings.TrimSpace(f.Keyword)
+	aliased := keyword != ""
+	colPrefix := ""
+	var m = g.Model(string(entity.TbLiveRecord)).Ctx(ctx)
+	if aliased {
+		like := "%" + keyword + "%"
+		colPrefix = "lr."
+		m = g.Model(string(entity.TbLiveRecord)+" lr").Ctx(ctx).
+			LeftJoin(string(userentity.TbUserInfo)+" u", "u.id = lr."+string(entity.LiveRecordAnchorId)).
+			Where("(CAST(lr.id AS CHAR) LIKE ? OR CAST(lr."+string(entity.LiveRecordAnchorId)+" AS CHAR) LIKE ? OR u."+string(userentity.UserInfoNickname)+" LIKE ?)", like, like, like)
+	}
 	if anchorIds := f.anchorIds(); len(anchorIds) > 0 {
-		m = m.Where(string(entity.LiveRecordAnchorId)+" IN (?)", anchorIds)
+		m = m.Where(colPrefix+string(entity.LiveRecordAnchorId)+" IN (?)", anchorIds)
 	}
 	if f.LiveRecordId > 0 {
-		m = m.Where("id = ?", f.LiveRecordId)
+		m = m.Where(colPrefix+"id = ?", f.LiveRecordId)
 	}
 	if f.StartTime > 0 {
-		m = m.Where(string(entity.LiveRecordStartTime)+" >= ?", time.Unix(f.StartTime, 0))
+		m = m.Where(colPrefix+string(entity.LiveRecordStartTime)+" >= ?", time.Unix(f.StartTime, 0))
 	}
 	if f.EndTime > 0 {
-		m = m.Where(string(entity.LiveRecordStartTime)+" <= ?", time.Unix(f.EndTime, 0))
+		m = m.Where(colPrefix+string(entity.LiveRecordStartTime)+" <= ?", time.Unix(f.EndTime, 0))
 	}
 	total, err := m.Clone().Count()
 	if err != nil {
 		return 0, list
 	}
-	_ = m.Clone().Order("id desc").
-		Limit(f.PageSize).Offset((f.PageIndex - 1) * f.PageSize).
-		Scan(&list)
+	query := m.Clone().Order(colPrefix + "id desc").
+		Limit(f.PageSize).Offset((f.PageIndex - 1) * f.PageSize)
+	if aliased {
+		query = query.Fields("lr.*")
+	}
+	_ = query.Scan(&list)
 	return total, mergeLiveRecordsFromCache(list)
 }

@@ -34,6 +34,18 @@
 
     <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width:100%">
       <el-table-column :label="t('pages.anchorIncomeSettlementLogList.logId')" min-width="180" prop="id"/>
+      <el-table-column :label="t('pages.anchorIncomeSettlementLogList.settlementSalary')" align="right" min-width="140">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementSalary) }}</span></template>
+      </el-table-column>
+      <el-table-column :label="t('pages.anchorIncomeSettlementLogList.settlementFlowCommission')" align="right" min-width="140">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementShareAmount) }}</span></template>
+      </el-table-column>
+      <el-table-column :label="t('pages.anchorIncomeSettlementLogList.settlementShareAmountUsd')" align="right" min-width="130">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementShareAmountUsd) }}</span></template>
+      </el-table-column>
+      <el-table-column :label="t('pages.anchorIncomeSettlementLogList.anchorSharePercent')" min-width="120">
+        <template #default="{ row }">{{ formatSharePercent(row.anchorSharePercent) }}</template>
+      </el-table-column>
       <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalIncome')" align="right" min-width="120">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
       </el-table-column>
@@ -42,12 +54,6 @@
       </el-table-column>
       <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalPaidDanmakuIncome')" align="right" min-width="130">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
-      </el-table-column>
-      <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalPrivateRoomTicketIncome')" align="right" min-width="140">
-        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomTicketIncome) }}</span></template>
-      </el-table-column>
-      <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalPrivateRoomWatchIncome')" align="right" min-width="140">
-        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomWatchIncome) }}</span></template>
       </el-table-column>
       <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalVideoCallIncome')" align="right" min-width="130">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
@@ -58,17 +64,14 @@
       <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalVideoCallBillingIncome')" align="right" min-width="150">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallBillingIncome) }}</span></template>
       </el-table-column>
+      <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalShortVideoIncome')" align="right" min-width="130">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalShortVideoIncome) }}</span></template>
+      </el-table-column>
+      <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalGameIncome')" align="right" min-width="120">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameIncome) }}</span></template>
+      </el-table-column>
       <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalLiveDuration')" min-width="120">
         <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
-      </el-table-column>
-      <el-table-column :label="t('pages.anchorIncomeSettlementLogList.settlementSalary')" align="right" min-width="120">
-        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementSalary) }}</span></template>
-      </el-table-column>
-      <el-table-column :label="t('pages.anchorIncomeSettlementLogList.anchorSharePercent')" min-width="110" prop="anchorSharePercent">
-        <template #default="{ row }">{{ formatSharePercent(row.anchorSharePercent) }}</template>
-      </el-table-column>
-      <el-table-column :label="t('pages.anchorIncomeSettlementLogList.settlementShareAmount')" align="right" min-width="130">
-        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementShareAmount) }}</span></template>
       </el-table-column>
       <el-table-column :label="t('common.createdAt')" min-width="170">
         <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>

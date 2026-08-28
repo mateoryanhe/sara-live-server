@@ -47,6 +47,7 @@ const menu = {
   LiveRevenueLogList: '直播收益流水',
   LiveRecordList: '直播记录',
   LiveDailyEffectiveLiveList: '每日流水',
+  LiveWeeklyUnsettledLiveList: '本周流水',
   CallLogGroup: '通话日志',
   VideoCallLogList: '视频通话日志',
   UserLogGroup: '用户日志',

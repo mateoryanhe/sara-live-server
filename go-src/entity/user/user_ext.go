@@ -1,12 +1,18 @@
 package entity
 
 import (
+	"fmt"
 	"time"
+
 	"xr-game-server/constants/db"
 	"xr-game-server/core/math"
 	"xr-game-server/core/migrate"
 	"xr-game-server/core/syndb"
 )
+
+func userExtLockKey(userId uint64) string {
+	return fmt.Sprintf("user_ext:%d", userId)
+}
 
 const (
 	TbUserExt db.TbName = "user_exts"
@@ -21,8 +27,9 @@ const (
 	UserExtFollowerCount      db.TbCol = "follower_count"
 	UserExtCancelCode         db.TbCol = "cancel_code"
 	UserExtCancelCodeExpireAt db.TbCol = "cancel_code_expire_at"
-	UserExtRechargeWhitelist  db.TbCol = "recharge_whitelist"
-	UserExtFirstRecharge      db.TbCol = "first_recharge"
+	UserExtRechargeWhitelist         db.TbCol = "recharge_whitelist"
+	UserExtFirstRecharge             db.TbCol = "first_recharge"
+	UserExtShortVideoUnsettledIncome db.TbCol = "short_video_unsettled_income"
 )
 
 // UserExt 用户扩展信息(与用户一一对应,主键ID即用户ID)
@@ -36,8 +43,9 @@ type UserExt struct {
 	FollowerCount      uint64     `gorm:"default:0;comment:当前粉丝数" json:"followerCount"`
 	CancelCode         string     `gorm:"size:128;default:'';comment:注销码" json:"cancelCode"`
 	CancelCodeExpireAt *time.Time `gorm:"index;comment:注销码过期时间" json:"cancelCodeExpireAt"`
-	RechargeWhitelist  bool       `gorm:"default:0;comment:充值白名单(创建订单后直接到账)" json:"rechargeWhitelist"`
-	FirstRecharge      bool       `gorm:"default:1;comment:是否首次充值(1=未首充,0=已首充)" json:"firstRecharge"`
+	RechargeWhitelist         bool       `gorm:"default:0;comment:充值白名单(创建订单后直接到账)" json:"rechargeWhitelist"`
+	FirstRecharge             bool       `gorm:"default:1;comment:是否首次充值(1=未首充,0=已首充)" json:"firstRecharge"`
+	ShortVideoUnsettledIncome float64    `gorm:"type:decimal(16,4);default:0;comment:短视频未结算收益(非主播作者)" json:"shortVideoUnsettledIncome"`
 }
 
 func NewUserExt(userId uint64) *UserExt {
@@ -124,6 +132,33 @@ func (receiver *UserExt) SetFirstRecharge(v bool) {
 	})
 }
 
+func (receiver *UserExt) AddShortVideoUnsettledIncome(amount float64) {
+	if amount <= 0 {
+		return
+	}
+	receiver.ShortVideoUnsettledIncome = math.AddFloat64(receiver.ShortVideoUnsettledIncome, amount)
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddData(TbUserExt, UserExtShortVideoUnsettledIncome, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: receiver.ShortVideoUnsettledIncome,
+	})
+}
+
+// ClearShortVideoUnsettledIncome 清零短视频未结算收益并返回清零前的金额
+func (receiver *UserExt) ClearShortVideoUnsettledIncome() float64 {
+	prev := receiver.ShortVideoUnsettledIncome
+	if prev <= 0 {
+		return 0
+	}
+	receiver.ShortVideoUnsettledIncome = 0
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddData(TbUserExt, UserExtShortVideoUnsettledIncome, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: float64(0),
+	})
+	return prev
+}
+
 func (receiver *UserExt) AddFollowCount(val uint64) {
 	if val == 0 {
 		return
@@ -201,6 +236,7 @@ func initUserExt() {
 	syndb.RegQuick(TbUserExt, UserExtCancelCodeExpireAt)
 	syndb.RegQuick(TbUserExt, UserExtRechargeWhitelist)
 	syndb.RegQuick(TbUserExt, UserExtFirstRecharge)
+	syndb.RegQuick(TbUserExt, UserExtShortVideoUnsettledIncome)
 
 	migrate.AutoMigrate(&UserExt{})
 }

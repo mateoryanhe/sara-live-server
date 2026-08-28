@@ -24,6 +24,8 @@ import type {
     SetSeniorAnchorReq,
     SetPlatformAnchorTypeReq,
     SetPlatformAnchorTypeRes,
+    SetUserAvatarReq,
+    SetUserAvatarRes,
     SetUserTypeReq,
     UnBanAnchorReq,
     UnBanReq,
@@ -106,6 +108,10 @@ const accountApi = {
 
     setUserType: (data: SetUserTypeReq) => {
         return request.post<boolean>('/account/setUserType', data)
+    },
+
+    setUserAvatar: (data: SetUserAvatarReq) => {
+        return request.post<SetUserAvatarRes>('/account/setUserAvatar', data)
     },
 
     setCanRank: (data: SetCanRankReq) => {

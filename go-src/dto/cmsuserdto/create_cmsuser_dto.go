@@ -9,8 +9,8 @@ type CreateCMSUserReq struct {
 	Name   string `json:"name" v:"required#CMS用户名称不能为空" dc:"CMS用户名称"`
 	Pwd    string `json:"pwd" v:"required#密码不能为空" dc:"密码"`
 	Status uint8  `json:"status" dc:"状态(0-禁用,1-启用)"`
-	Admin  bool   `json:"admin" dc:"是否是管理员"`
-	RoleId uint64 `json:"roleId" dc:"角色ID"`
+	AdminType uint8  `json:"adminType" dc:"管理员类型 0非管理员 1普通管理员 2超级管理员"`
+	RoleId    uint64 `json:"roleId" dc:"角色ID"`
 	Remark string `json:"remark" dc:"备注"`
 }
 

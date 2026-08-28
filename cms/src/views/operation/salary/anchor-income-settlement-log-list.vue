@@ -70,10 +70,32 @@
       </el-form>
 
       <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width: 100%">
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.logId')" fixed="left" min-width="180" prop="id"/>
+        <el-table-column :label="t('common.createdAt')" fixed="left" width="170">
+          <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
+        </el-table-column>
+        <el-table-column :label="t('common.avatar')" width="80">
+          <template #default="{ row }">
+            <el-image
+                v-if="row.roomAvatar"
+                :preview-src-list="[row.roomAvatar]"
+                :src="row.roomAvatar"
+                fit="cover"
+                hide-on-click-modal
+                preview-teleported
+                style="width:40px;height:40px;border-radius:50%"
+            />
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
         <el-table-column :label="t('pages.anchorIncomeSettlementLogList.roomId')" min-width="180" prop="roomId"/>
         <el-table-column :label="t('pages.anchorIncomeSettlementLogList.roomNickname')" min-width="120" prop="roomNickname">
           <template #default="{ row }">{{ row.roomNickname || '-' }}</template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.settlementSalary')" align="right" min-width="120">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementSalary) }}</span></template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.settlementShareAmount')" align="right" min-width="130">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementShareAmount) }}</span></template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalIncome')" align="right" min-width="120">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
@@ -84,12 +106,6 @@
         <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalPaidDanmakuIncome')" align="right" min-width="130">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalPrivateRoomTicketIncome')" align="right" min-width="140">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomTicketIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalPrivateRoomWatchIncome')" align="right" min-width="140">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomWatchIncome) }}</span></template>
-        </el-table-column>
         <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalVideoCallIncome')" align="right" min-width="130">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
         </el-table-column>
@@ -99,20 +115,17 @@
         <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalVideoCallBillingIncome')" align="right" min-width="150">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallBillingIncome) }}</span></template>
         </el-table-column>
+        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalShortVideoIncome')" align="right" min-width="130">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalShortVideoIncome) }}</span></template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalGameIncome')" align="right" min-width="120">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameIncome) }}</span></template>
+        </el-table-column>
         <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalLiveDuration')" min-width="120">
           <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.settlementSalary')" align="right" min-width="120">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementSalary) }}</span></template>
-        </el-table-column>
         <el-table-column :label="t('pages.anchorIncomeSettlementLogList.anchorSharePercent')" min-width="110" prop="anchorSharePercent">
           <template #default="{ row }">{{ formatSharePercent(row.anchorSharePercent) }}</template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.settlementShareAmount')" align="right" min-width="130">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementShareAmount) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('common.createdAt')" fixed="right" width="170">
-          <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>
       </el-table>
 
@@ -159,6 +172,7 @@ import {CMS_EXPORT_TYPE_ANCHOR_INCOME_SETTLEMENT_LOG} from '@/utils/cms-async-ex
 import {buildAnchorSettlementLogCsvColumns} from '@/utils/income-settlement-log-csv'
 import {formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
+import {formatServerDateTime as formatDate, toServerDayStartUnix, toServerDayEndUnix} from '@/utils/server-datetime'
 
 const {t} = useI18n()
 const {can} = usePagePermission('AnchorIncomeSettlementLogList')
@@ -244,18 +258,10 @@ const pagination = reactive({
   total: 0,
 })
 
-const toDayStartUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T00:00:00`).getTime() / 1000)
-}
-
-const toDayEndUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T23:59:59`).getTime() / 1000)
-}
-
 const buildFilterParams = () => ({
   anchorIds: buildSelectedAnchorIds(),
-  startTime: searchForm.startDate ? toDayStartUnix(searchForm.startDate) : 0,
-  endTime: searchForm.endDate ? toDayEndUnix(searchForm.endDate) : 0,
+  startTime: searchForm.startDate ? toServerDayStartUnix(searchForm.startDate) : 0,
+  endTime: searchForm.endDate ? toServerDayEndUnix(searchForm.endDate) : 0,
 })
 
 const buildQueryParams = () => ({
@@ -317,15 +323,6 @@ const handleExport = async () => {
 const formatSharePercent = (value: number | null | undefined) => {
   if (value == null || Number.isNaN(value)) return '-'
   return `${value}%`
-}
-
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) return '-'
-  try {
-    return new Date(dateString).toLocaleString()
-  } catch {
-    return '-'
-  }
 }
 
 onMounted(() => {

@@ -11,6 +11,7 @@ import (
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/botanchordto"
+	liveentity "xr-game-server/entity/live"
 	"xr-game-server/entity/user"
 	"xr-game-server/module/liveroom"
 	"xr-game-server/module/upload"
@@ -203,6 +204,10 @@ func buildBotAnchorListItem(userId uint64) *botanchordto.BotAnchorListItem {
 		item.Category = cfg.Category
 		item.TagId = cfg.TagId
 		item.CloudPlayerVideoFile = cfg.CloudPlayerVideo
+		item.CloudPlayerFrameRate = liveentity.NormalizeCloudPlayerFrameRate(cfg.CloudPlayerFrameRate)
+		item.CloudPlayerBitrate = liveentity.NormalizeCloudPlayerBitrate(cfg.CloudPlayerBitrate)
+		item.CloudPlayerWidth = liveentity.NormalizeCloudPlayerWidth(cfg.CloudPlayerWidth)
+		item.CloudPlayerHeight = liveentity.NormalizeCloudPlayerHeight(cfg.CloudPlayerHeight)
 		item.PushStream = cfg.PushStream
 		item.IsTest = cfg.IsTest
 		if tag := liveroom.GetRoomTagFromMemoryById(cfg.TagId); tag != nil {

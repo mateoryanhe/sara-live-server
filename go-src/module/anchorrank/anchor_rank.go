@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"sync/atomic"
 	"time"
-	"xr-game-server/constants/liverevenue"
 	"xr-game-server/core/event"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/xrtimer"
@@ -70,13 +69,10 @@ func onRevenueEvent(data any) {
 	if !ok || log == nil {
 		return
 	}
-	if log.ReceiverId == 0 || log.TotalAmount <= 0 {
+	if log.RoomId == 0 || log.TotalAmount <= 0 {
 		return
 	}
 	if log.Status != entity.LiveRevenueLogStatusNormal {
-		return
-	}
-	if log.RevenueType == uint8(liverevenue.GameBet) {
 		return
 	}
 	markAnchorRankDataChanged()
@@ -125,18 +121,18 @@ func buildRankItems(rows []*liveroomdao.AnchorRevenueStatRow) []*rankItem {
 	list := make([]*rankItem, 0, len(rows))
 	rankNo := 0
 	for _, row := range rows {
-		if row == nil || row.ReceiverId == 0 {
+		if row == nil || row.RoomId == 0 {
 			continue
 		}
 		rankNo++
 		item := &rankItem{
 			Rank:          rankNo,
-			UserId:        row.ReceiverId,
+			UserId:        row.RoomId,
 			RevenueAmount: row.TotalAmount,
 		}
-		if profile := userinfodao.GetUserInfoByUserId(row.ReceiverId); profile != nil {
+		if profile := userinfodao.GetUserInfoByUserId(row.RoomId); profile != nil {
 			item.Nickname = profile.Nickname
-			item.Avatar = upload.ResolveAvatarUrlForUser(row.ReceiverId, profile.Avatar)
+			item.Avatar = upload.ResolveAvatarUrlForUser(row.RoomId, profile.Avatar)
 			item.VipLevel = profile.VipLevel
 			item.Gender = profile.Gender
 			item.Age = calcAge(profile.Birthday)

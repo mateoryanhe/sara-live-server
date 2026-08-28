@@ -8,9 +8,26 @@
         type="info"
     />
 
-    <div class="toolbar">
-      <el-button v-if="canExport" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
-    </div>
+    <el-form :model="searchForm" class="search-form" inline label-width="100px">
+      <el-form-item :label="t('pages.anchorList.dailyLiveDate')">
+        <el-date-picker
+            v-model="searchForm.dateRange"
+            clearable
+            :end-placeholder="t('pages.anchorList.liveDateEnd')"
+            format="YYYY-MM-DD"
+            :range-separator="t('pages.anchorList.liveDateRangeSeparator')"
+            :start-placeholder="t('pages.anchorList.liveDateStart')"
+            style="width: 260px"
+            type="daterange"
+            value-format="YYYY-MM-DD"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
+        <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
+        <el-button v-if="canExport" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
+      </el-form-item>
+    </el-form>
 
     <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width:100%">
       <el-table-column :label="t('pages.anchorList.dailyRecordId')" min-width="180" prop="id"/>
@@ -29,12 +46,6 @@
       </el-table-column>
       <el-table-column :label="t('pages.anchorList.paidDanmakuIncome')" align="right" min-width="130">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
-      </el-table-column>
-      <el-table-column :label="t('pages.anchorList.privateRoomTicketIncome')" align="right" min-width="140">
-        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomTicketIncome) }}</span></template>
-      </el-table-column>
-      <el-table-column :label="t('pages.anchorList.privateRoomWatchIncome')" align="right" min-width="140">
-        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomWatchIncome) }}</span></template>
       </el-table-column>
       <el-table-column :label="t('pages.anchorList.videoCallIncome')" align="right" min-width="130">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
@@ -59,7 +70,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, ref, watch} from 'vue'
+import {computed, reactive, ref, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage} from 'element-plus'
 import {guildApi} from '@/api'
@@ -84,12 +95,21 @@ const loading = ref(false)
 const tableData = ref<GuildDailyEffectiveLiveItem[]>([])
 const loaded = ref(false)
 
+const searchForm = reactive({
+  dateRange: [] as string[],
+})
+
 const DEFAULT_PAGE_SIZE = 8
 
-const buildFilterParams = () => ({
-  guildId: props.guildId,
-  settled: 0,
-})
+const buildFilterParams = () => {
+  const [liveDateStart, liveDateEnd] = searchForm.dateRange || []
+  return {
+    guildId: props.guildId,
+    liveDateStart: liveDateStart || undefined,
+    liveDateEnd: liveDateEnd || undefined,
+    settled: 0,
+  }
+}
 
 const fetchList = async () => {
   if (!props.guildId) {
@@ -111,6 +131,15 @@ const fetchList = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const handleSearch = () => {
+  fetchList()
+}
+
+const handleReset = () => {
+  searchForm.dateRange = []
+  fetchList()
 }
 
 const handleExport = async () => {
@@ -142,6 +171,7 @@ const formatDate = (dateString: string | null | undefined) => {
 const resetState = () => {
   loaded.value = false
   tableData.value = []
+  searchForm.dateRange = []
 }
 
 watch(
@@ -170,9 +200,11 @@ watch(
   margin-bottom: 16px;
 }
 
-.toolbar {
+.search-form {
   margin-bottom: 16px;
-  display: flex;
-  justify-content: flex-end;
+}
+
+.search-form :deep(.el-form-item__label) {
+  white-space: nowrap;
 }
 </style>

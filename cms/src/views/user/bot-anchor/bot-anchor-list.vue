@@ -294,6 +294,42 @@
         <el-form-item :label="t('pages.botAnchorList.pushStream')">
           <el-switch v-model="formData.pushStream"/>
         </el-form-item>
+        <el-form-item :label="t('pages.botAnchorList.cloudPlayerFrameRate')" prop="cloudPlayerFrameRate">
+          <el-input-number
+              v-model="formData.cloudPlayerFrameRate"
+              :max="30"
+              :min="1"
+              :placeholder="t('pages.botAnchorList.frameRateRange')"
+              style="width: 200px"
+          />
+        </el-form-item>
+        <el-form-item :label="t('pages.botAnchorList.cloudPlayerBitrate')" prop="cloudPlayerBitrate">
+          <el-input-number
+              v-model="formData.cloudPlayerBitrate"
+              :max="10000"
+              :min="1"
+              :placeholder="t('pages.botAnchorList.bitrateRange')"
+              style="width: 200px"
+          />
+        </el-form-item>
+        <el-form-item :label="t('pages.botAnchorList.cloudPlayerWidth')" prop="cloudPlayerWidth">
+          <el-input-number
+              v-model="formData.cloudPlayerWidth"
+              :max="4096"
+              :min="1"
+              :placeholder="t('pages.botAnchorList.widthRange')"
+              style="width: 200px"
+          />
+        </el-form-item>
+        <el-form-item :label="t('pages.botAnchorList.cloudPlayerHeight')" prop="cloudPlayerHeight">
+          <el-input-number
+              v-model="formData.cloudPlayerHeight"
+              :max="2160"
+              :min="1"
+              :placeholder="t('pages.botAnchorList.heightRange')"
+              style="width: 200px"
+          />
+        </el-form-item>
         <el-form-item :label="t('pages.botAnchorList.testAccount')">
           <el-switch v-model="formData.isTest"/>
           <span class="form-tip">{{ t('pages.botAnchorList.isTestTip') }}</span>
@@ -357,11 +393,16 @@ import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type TableIn
 import {Plus} from '@element-plus/icons-vue'
 import {botAnchorApi, liveRoomTagApi, uploadApi} from '@/api'
 import type {BotAnchorListItem, LiveRoomTag} from '@/types/api'
+import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 
 const {t} = useI18n()
 const LIVE_ROOM_CATEGORY_HOT = 1
 const LIVE_ROOM_CATEGORY_GAME = 2
 const LIVE_ROOM_CATEGORY_PRIVATE = 3
+const DEFAULT_CLOUD_PLAYER_FRAME_RATE = 24
+const DEFAULT_CLOUD_PLAYER_BITRATE = 400
+const DEFAULT_CLOUD_PLAYER_WIDTH = 960
+const DEFAULT_CLOUD_PLAYER_HEIGHT = 540
 
 interface SearchForm {
   key: string
@@ -376,6 +417,10 @@ interface BotAnchorForm {
   category: number
   tagId: number
   cloudPlayerVideo: string
+  cloudPlayerFrameRate: number
+  cloudPlayerBitrate: number
+  cloudPlayerWidth: number
+  cloudPlayerHeight: number
   pushStream: boolean
   isTest: boolean
 }
@@ -411,6 +456,10 @@ const formData = ref<BotAnchorForm>({
   category: LIVE_ROOM_CATEGORY_HOT,
   tagId: 0,
   cloudPlayerVideo: '',
+  cloudPlayerFrameRate: DEFAULT_CLOUD_PLAYER_FRAME_RATE,
+  cloudPlayerBitrate: DEFAULT_CLOUD_PLAYER_BITRATE,
+  cloudPlayerWidth: DEFAULT_CLOUD_PLAYER_WIDTH,
+  cloudPlayerHeight: DEFAULT_CLOUD_PLAYER_HEIGHT,
   pushStream: false,
   isTest: false
 })
@@ -427,7 +476,11 @@ const formRules = computed<FormRules>(() => ({
     {min: 1, max: 32, message: t('pages.botAnchorList.nicknameLength'), trigger: 'blur'}
   ],
   roomTitle: [{max: 128, message: t('pages.botAnchorList.roomTitleMaxLength'), trigger: 'blur'}],
-  category: [{required: true, message: t('pages.botAnchorList.categoryRequired'), trigger: 'change'}]
+  category: [{required: true, message: t('pages.botAnchorList.categoryRequired'), trigger: 'change'}],
+  cloudPlayerFrameRate: [{type: 'number', min: 1, max: 30, message: t('pages.botAnchorList.frameRateRange'), trigger: 'change'}],
+  cloudPlayerBitrate: [{type: 'number', min: 1, max: 10000, message: t('pages.botAnchorList.bitrateRange'), trigger: 'change'}],
+  cloudPlayerWidth: [{type: 'number', min: 1, max: 4096, message: t('pages.botAnchorList.widthRange'), trigger: 'change'}],
+  cloudPlayerHeight: [{type: 'number', min: 1, max: 2160, message: t('pages.botAnchorList.heightRange'), trigger: 'change'}]
 }))
 
 const isStartableRow = (row: BotAnchorListItem) => row.botAnchorStatus === 1 && row.liveStatus !== 1
@@ -510,13 +563,6 @@ const openVideoPreview = (url: string) => {
   videoDialogVisible.value = true
 }
 
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) return '-'
-  const date = new Date(dateString)
-  if (Number.isNaN(date.getTime())) return dateString
-  return date.toLocaleString(undefined, {hour12: false})
-}
-
 const fetchList = async () => {
   loading.value = true
   try {
@@ -570,6 +616,10 @@ const handleAdd = () => {
     category: LIVE_ROOM_CATEGORY_HOT,
     tagId: 0,
     cloudPlayerVideo: '',
+    cloudPlayerFrameRate: DEFAULT_CLOUD_PLAYER_FRAME_RATE,
+    cloudPlayerBitrate: DEFAULT_CLOUD_PLAYER_BITRATE,
+    cloudPlayerWidth: DEFAULT_CLOUD_PLAYER_WIDTH,
+    cloudPlayerHeight: DEFAULT_CLOUD_PLAYER_HEIGHT,
     pushStream: false,
     isTest: false
   }
@@ -591,6 +641,10 @@ const handleEdit = (row: BotAnchorListItem) => {
     category: row.category || LIVE_ROOM_CATEGORY_HOT,
     tagId: Number(row.tagId) || 0,
     cloudPlayerVideo: row.cloudPlayerVideoFile || '',
+    cloudPlayerFrameRate: row.cloudPlayerFrameRate || DEFAULT_CLOUD_PLAYER_FRAME_RATE,
+    cloudPlayerBitrate: row.cloudPlayerBitrate || DEFAULT_CLOUD_PLAYER_BITRATE,
+    cloudPlayerWidth: row.cloudPlayerWidth || DEFAULT_CLOUD_PLAYER_WIDTH,
+    cloudPlayerHeight: row.cloudPlayerHeight || DEFAULT_CLOUD_PLAYER_HEIGHT,
     pushStream: !!row.pushStream,
     isTest: !!row.isTest
   }
@@ -685,6 +739,10 @@ const handleSave = async () => {
           tagId: number
           pushStream: boolean
           isTest: boolean
+          cloudPlayerFrameRate: number
+          cloudPlayerBitrate: number
+          cloudPlayerWidth: number
+          cloudPlayerHeight: number
           avatar?: string
           cloudPlayerVideo?: string
         } = {
@@ -694,7 +752,11 @@ const handleSave = async () => {
           category: formData.value.category,
           tagId: formData.value.tagId || 0,
           pushStream: formData.value.pushStream,
-          isTest: formData.value.isTest
+          isTest: formData.value.isTest,
+          cloudPlayerFrameRate: formData.value.cloudPlayerFrameRate,
+          cloudPlayerBitrate: formData.value.cloudPlayerBitrate,
+          cloudPlayerWidth: formData.value.cloudPlayerWidth,
+          cloudPlayerHeight: formData.value.cloudPlayerHeight,
         }
         if (avatarChanged.value) {
           payload.avatar = formData.value.avatar
@@ -712,6 +774,10 @@ const handleSave = async () => {
           category: formData.value.category,
           tagId: formData.value.tagId || 0,
           cloudPlayerVideo: formData.value.cloudPlayerVideo || undefined,
+          cloudPlayerFrameRate: formData.value.cloudPlayerFrameRate,
+          cloudPlayerBitrate: formData.value.cloudPlayerBitrate,
+          cloudPlayerWidth: formData.value.cloudPlayerWidth,
+          cloudPlayerHeight: formData.value.cloudPlayerHeight,
           pushStream: formData.value.pushStream,
           isTest: formData.value.isTest
         })

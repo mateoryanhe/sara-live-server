@@ -11,6 +11,7 @@ import (
 	"xr-game-server/dto/guilddto"
 	"xr-game-server/dto/incomesettlementdto"
 	"xr-game-server/entity/live"
+	"xr-game-server/module/upload"
 )
 
 func parseUint64Filter(val string) uint64 {
@@ -39,9 +40,12 @@ func fillCMSItemFromAnchor(row *entity.AnchorIncomeSettlementLog) *incomesettlem
 		TotalVideoCallIncome:         row.TotalVideoCallIncome,
 		TotalVideoCallTicketIncome:   row.TotalVideoCallTicketIncome,
 		TotalVideoCallBillingIncome:  row.TotalVideoCallBillingIncome,
+		TotalShortVideoIncome:        row.TotalShortVideoIncome,
+		TotalGameIncome:              row.TotalGameIncome,
 		TotalLiveDuration:            row.TotalLiveDuration,
 		SettlementSalary:             row.SettlementSalary,
 		SettlementShareAmount:        row.SettlementShareAmount,
+		SettlementShareAmountUsd:     row.SettlementShareAmountUsd,
 		AnchorSharePercent:           row.AnchorSharePercent,
 		CreatedAt:                    &row.CreatedAt,
 	}
@@ -63,9 +67,13 @@ func fillCMSItemFromGuild(row *entity.GuildIncomeSettlementLog) *incomesettlemen
 		TotalVideoCallIncome:         row.TotalVideoCallIncome,
 		TotalVideoCallTicketIncome:   row.TotalVideoCallTicketIncome,
 		TotalVideoCallBillingIncome:  row.TotalVideoCallBillingIncome,
+		TotalShortVideoIncome:        row.TotalShortVideoIncome,
+		TotalGameIncome:              row.TotalGameIncome,
 		TotalLiveDuration:            row.TotalLiveDuration,
 		SettlementSalary:             row.SettlementSalary,
 		SettlementShareAmount:        row.SettlementShareAmount,
+		SettlementShareAmountUsd:     row.SettlementShareAmountUsd,
+		SettlementReceivableUsd:      row.SettlementReceivableUsd,
 		GuildSharePercent:            row.GuildSharePercent,
 		CreatedAt:                    &row.CreatedAt,
 	}
@@ -102,12 +110,21 @@ func GetAnchorCMSList(_ context.Context, req *incomesettlementdto.CMSAnchorIncom
 		PageIndex: req.PageIndex,
 		PageSize:  req.PageSize,
 	})
-	nicknameMap := userinfodao.GetNicknameMapByUserIds(collectAnchorRoomIds(rows))
+	profileRoomIds := collectAnchorRoomIds(rows)
+	nicknameMap := userinfodao.GetNicknameMapByUserIds(profileRoomIds)
+	profileMap := userinfodao.GetUserProfileMapByUserIds(profileRoomIds)
 	list := make([]*incomesettlementdto.CMSIncomeSettlementLogItem, 0, len(rows))
 	for _, row := range rows {
 		item := fillCMSItemFromAnchor(row)
-		if item != nil && nicknameMap != nil {
-			item.RoomNickname = nicknameMap[row.RoomId]
+		if item != nil {
+			if nicknameMap != nil {
+				item.RoomNickname = nicknameMap[row.RoomId]
+			}
+			if profileMap != nil {
+				if profile := profileMap[row.RoomId]; profile != nil {
+					item.RoomAvatar = upload.ResolveAvatarUrlForUser(row.RoomId, profile.Avatar)
+				}
+			}
 		}
 		list = append(list, item)
 	}
@@ -151,6 +168,7 @@ func GetAnchorCMSListByGuildIds(_ context.Context, guildIds []uint64, req *guild
 	})
 	roomIds := collectAnchorRoomIds(rows)
 	nicknameMap := userinfodao.GetNicknameMapByUserIds(roomIds)
+	profileMap := userinfodao.GetUserProfileMapByUserIds(roomIds)
 	guildIdMap := liveroomdao.GetGuildIdMapByRoomIds(roomIds)
 	guildNameMap := guilddao.GetNameMapByIds(collectGuildIdsFromMap(guildIdMap))
 	list = make([]*incomesettlementdto.CMSIncomeSettlementLogItem, 0, len(rows))
@@ -161,6 +179,11 @@ func GetAnchorCMSListByGuildIds(_ context.Context, guildIds []uint64, req *guild
 		}
 		if nicknameMap != nil {
 			item.RoomNickname = nicknameMap[row.RoomId]
+		}
+		if profileMap != nil {
+			if profile := profileMap[row.RoomId]; profile != nil {
+				item.RoomAvatar = upload.ResolveAvatarUrlForUser(row.RoomId, profile.Avatar)
+			}
 		}
 		if guildIdMap != nil {
 			item.GuildId = guildIdMap[row.RoomId]

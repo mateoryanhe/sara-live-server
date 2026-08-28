@@ -38,10 +38,49 @@
     </el-form>
 
     <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width:100%">
-      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.logId')" fixed="left" min-width="180" prop="id"/>
-      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.roomId')" min-width="180" prop="roomId"/>
+      <el-table-column :label="t('common.createdAt')" fixed="left" min-width="170">
+        <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
+      </el-table-column>
+      <el-table-column :label="t('common.avatar')" fixed="left" width="80">
+        <template #default="{ row }">
+          <el-image
+              v-if="row.roomAvatar"
+              :preview-src-list="[row.roomAvatar]"
+              :src="row.roomAvatar"
+              fit="cover"
+              hide-on-click-modal
+              preview-teleported
+              style="width:40px;height:40px;border-radius:50%"
+          />
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.roomId')" min-width="180">
+        <template #default="{ row }">
+          <el-button v-if="row.roomId" link type="primary" @click="openAnchorDetail(row.roomId)">
+            {{ row.roomId }}
+          </el-button>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
       <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.roomNickname')" min-width="120">
-        <template #default="{ row }">{{ row.roomNickname || '-' }}</template>
+        <template #default="{ row }">
+          <el-button
+              v-if="canViewUserDetail && row.roomId && row.roomNickname"
+              link
+              type="primary"
+              @click="openUserDetail(row.roomId)"
+          >
+            {{ row.roomNickname }}
+          </el-button>
+          <span v-else>{{ row.roomNickname || '-' }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.settlementSalary')" align="right" min-width="140">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementSalary) }}</span></template>
+      </el-table-column>
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.settlementShareAmount')" align="right" min-width="120">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementShareAmount) }}</span></template>
       </el-table-column>
       <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalIncome')" align="right" min-width="120">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
@@ -52,12 +91,6 @@
       <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalPaidDanmakuIncome')" align="right" min-width="130">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
       </el-table-column>
-      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalPrivateRoomTicketIncome')" align="right" min-width="140">
-        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomTicketIncome) }}</span></template>
-      </el-table-column>
-      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalPrivateRoomWatchIncome')" align="right" min-width="140">
-        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPrivateRoomWatchIncome) }}</span></template>
-      </el-table-column>
       <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalVideoCallIncome')" align="right" min-width="130">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
       </el-table-column>
@@ -67,28 +100,17 @@
       <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalVideoCallBillingIncome')" align="right" min-width="150">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallBillingIncome) }}</span></template>
       </el-table-column>
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalShortVideoIncome')" align="right" min-width="130">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalShortVideoIncome) }}</span></template>
+      </el-table-column>
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalGameIncome')" align="right" min-width="120">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameIncome) }}</span></template>
+      </el-table-column>
       <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalLiveDuration')" min-width="120">
         <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
       </el-table-column>
-      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.settlementSalary')" align="right" min-width="120">
-        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementSalary) }}</span></template>
-      </el-table-column>
-      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.anchorSharePercent')" min-width="110">
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.anchorSharePercent')" min-width="120">
         <template #default="{ row }">{{ formatSharePercent(row.anchorSharePercent) }}</template>
-      </el-table-column>
-      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.settlementShareAmount')" align="right" min-width="130">
-        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementShareAmount) }}</span></template>
-      </el-table-column>
-      <el-table-column :label="t('menu.UserDetail')" width="110">
-        <template #default="{ row }">
-          <el-button v-if="canViewUserDetail && row.roomId" link type="primary" @click="openUserDetail(row.roomId)">
-            {{ t('pages.userList.viewDetail') }}
-          </el-button>
-          <span v-else>-</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="t('common.createdAt')" fixed="right" width="170">
-        <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
       </el-table-column>
     </el-table>
 
@@ -111,6 +133,7 @@
 <script lang="ts" setup>
 import {reactive, ref, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
+import {useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {guildApi} from '@/api'
 import type {AnchorIncomeSettlementLogItem} from '@/types/api'
@@ -127,6 +150,7 @@ const props = defineProps<{
 }>()
 
 const {t} = useI18n()
+const router = useRouter()
 const {canViewUserDetail, openUserDetail} = useUserDetailNav('GuildDetail')
 const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
@@ -139,16 +163,10 @@ const pagination = reactive({
   total: 0,
 })
 
-const formatDateString = (date: Date) => {
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
-}
-
 const createDefaultDateRange = () => {
   const end = new Date()
-  const start = new Date()
-  start.setDate(end.getDate() - 6)
-  return [formatDateString(start), formatDateString(end)] as string[]
+  const start = new Date(end.getTime() - 6 * 86400000)
+  return [formatServerDateOnly(start), formatServerDateOnly(end)] as string[]
 }
 
 const searchForm = reactive({

@@ -94,6 +94,17 @@ type SetUserTypeRes struct {
 	Success bool `json:"success"`
 }
 
+type SetUserAvatarReq struct {
+	g.Meta    `path:"/setUserAvatar" method:"post" summary:"CMS设置用户头像" tags:"账号"`
+	AccountId uint64 `json:"accountId" v:"required#用户ID不能为空" dc:"用户ID"`
+	Avatar    string `json:"avatar" dc:"头像文件名(uploadFile返回的fileName,空字符串表示清除)"`
+}
+
+type SetUserAvatarRes struct {
+	Success bool   `json:"success"`
+	Avatar  string `json:"avatar"`
+}
+
 type SetCanRankReq struct {
 	g.Meta    `path:"/setCanRank" method:"post" summary:"设置用户是否可上排行榜" tags:"账号"`
 	AccountId uint64 `json:"accountId" v:"required#用户ID不能为空" dc:"用户ID"`

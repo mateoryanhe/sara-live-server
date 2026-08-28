@@ -103,5 +103,6 @@ func init() {
 		ShortVideoPriceTierNonExist:     "Tier harga video pendek tidak ditemukan",
 		SimulatorLoginDenied:            "Login simulator tidak diizinkan",
 		GuildLeaderDisabled:             "Pengguna CMS pemimpin guild dinonaktifkan",
+		AppImageFileTooLarge:            "File gambar melebihi batas ukuran",
 	}
 }

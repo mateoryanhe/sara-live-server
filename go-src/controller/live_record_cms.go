@@ -26,3 +26,8 @@ func (c *LiveRecordCMSController) CMSLiveRecordList(ctx context.Context, req *li
 func (c *LiveRecordCMSController) CMSDailyEffectiveLiveList(ctx context.Context, req *liverecorddto.CMSDailyEffectiveLiveListReq) (res *httpserver.CMSQueryResp, err error) {
 	return liverecord.GetCMSDailyEffectiveLiveList(ctx, req)
 }
+
+// CMSWeeklyUnsettledLiveList CMS分页查询本周未结算流水
+func (c *LiveRecordCMSController) CMSWeeklyUnsettledLiveList(ctx context.Context, req *liverecorddto.CMSWeeklyUnsettledLiveListReq) (res *httpserver.CMSQueryResp, err error) {
+	return liverecord.GetCMSWeeklyUnsettledLiveList(ctx, req)
+}

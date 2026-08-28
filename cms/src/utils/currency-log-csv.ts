@@ -1,4 +1,5 @@
 import type {CsvColumn} from './csv-export'
+import {formatServerDateTimeForExport} from '@/utils/server-datetime'
 
 type TranslateFn = (key: string) => string
 
@@ -10,17 +11,6 @@ export type CurrencyLogCsvRow = {
   after: number
   reasonText?: string
   createdAt?: string | null
-}
-
-export function formatCurrencyLogCsvDate(dateString: string | null | undefined): string {
-  if (!dateString) {
-    return ''
-  }
-  try {
-    return new Date(dateString).toLocaleString()
-  } catch {
-    return ''
-  }
 }
 
 export function buildCurrencyLogCsvColumns(t: TranslateFn, currencyType: 1 | 2): CsvColumn<CurrencyLogCsvRow>[] {
@@ -41,7 +31,7 @@ export function buildCurrencyLogCsvColumns(t: TranslateFn, currencyType: 1 | 2):
     {header: t('pages.currencyLogList.beforeChange'), value: row => row.before},
     {header: t('pages.currencyLogList.afterChange'), value: row => row.after},
     {header: t('pages.currencyLogList.reason'), value: row => row.reasonText || ''},
-    {header: t('pages.currencyLogList.time'), value: row => formatCurrencyLogCsvDate(row.createdAt)},
+    {header: t('pages.currencyLogList.time'), value: row => formatServerDateTimeForExport(row.createdAt)},
   ]
 }
 

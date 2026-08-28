@@ -25,6 +25,7 @@ func exportLiveRevenueLogCSV(ctx context.Context, payload json.RawMessage, onPro
 		total, rows := liveroomdao.RevenueLogCMSList(&liveroomdao.RevenueLogCMSListFilter{
 			ReceiverIds:  receiverIds,
 			LiveRecordId: parseUint64Filter(req.LiveRecordId),
+			Keyword:      req.Keyword,
 			RevenueType:  req.RevenueType,
 			StartTime:   req.StartTime,
 			EndTime:     req.EndTime,
@@ -46,9 +47,10 @@ func exportVideoCallLogCSV(ctx context.Context, payload json.RawMessage, onProgr
 		return nil, err
 	}
 	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
+		receiverIds := liveroomdao.ParseRevenueLogReceiverIds(req.ReceiverId, req.PlatformAnchorId, req.GuildAnchorId, req.ReceiverIds)
 		total, rows := calldao.CallOrderCMSList(&calldao.CallOrderCMSListFilter{
-			CallerId:   parseUint64Filter(req.CallerId),
-			ReceiverId: parseUint64Filter(req.ReceiverId),
+			CallerId:    parseUint64Filter(req.CallerId),
+			ReceiverIds: receiverIds,
 			Source:     req.Source,
 			Status:     req.Status,
 			CallType:   callentity.CallOrderTypeVideo,
@@ -75,8 +77,8 @@ func collectRevenueLogUserIds(rows []*liveentity.LiveRevenueLog) []uint64 {
 		if row.SenderId > 0 {
 			userIds = append(userIds, row.SenderId)
 		}
-		if row.ReceiverId > 0 {
-			userIds = append(userIds, row.ReceiverId)
+		if row.RoomId > 0 {
+			userIds = append(userIds, row.RoomId)
 		}
 	}
 	return userIds
@@ -112,7 +114,7 @@ func liveRevenueLogToCSVRow(v *liveentity.LiveRevenueLog, nicknameMap map[uint64
 	receiverNickname := ""
 	if nicknameMap != nil {
 		senderNickname = nicknameMap[v.SenderId]
-		receiverNickname = nicknameMap[v.ReceiverId]
+		receiverNickname = nicknameMap[v.RoomId]
 	}
 	return []string{
 		formatCSVUint(v.ID),
@@ -121,7 +123,7 @@ func liveRevenueLogToCSVRow(v *liveentity.LiveRevenueLog, nicknameMap map[uint64
 		formatCSVUint(v.LiveRecordId),
 		formatCSVUint(v.SenderId),
 		senderNickname,
-		formatCSVUint(v.ReceiverId),
+		formatCSVUint(v.RoomId),
 		receiverNickname,
 		formatCSVUint(v.BizId),
 		bizName,

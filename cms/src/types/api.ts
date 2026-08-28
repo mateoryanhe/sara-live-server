@@ -226,6 +226,16 @@ export interface SetUserTypeReq {
     userType: number
 }
 
+export interface SetUserAvatarReq {
+    accountId: string
+    avatar: string
+}
+
+export interface SetUserAvatarRes {
+    success: boolean
+    avatar?: string
+}
+
 export interface SetCanRankReq {
     accountId: string
     canRank: boolean
@@ -309,6 +319,8 @@ export interface LiveRoomIncomeAmounts {
     totalVideoCallIncome?: number
     totalVideoCallTicketIncome?: number
     totalVideoCallBillingIncome?: number
+    totalShortVideoIncome?: number
+    totalGameIncome?: number
     totalLiveDuration?: number
 }
 
@@ -340,12 +352,16 @@ export interface LiveRoomIncomeUnsettledDetail extends LiveRoomIncomeAmounts {
 export interface LiveRoomIncomeSettledDetail extends LiveRoomIncomeAmounts {
     settlementSalary?: number
     settlementShareAmount?: number
+    settlementShareAmountUsd?: number
+    settlementReceivableUsd?: number
     updatedAt?: string | null
 }
 
 export interface LiveRoomIncomeTotalDetail extends LiveRoomIncomeAmounts {
     settlementSalary?: number
     settlementShareAmount?: number
+    settlementShareAmountUsd?: number
+    settlementReceivableUsd?: number
     updatedAt?: string | null
 }
 
@@ -605,6 +621,7 @@ export interface CurrencyLogItem {
     id: string
     userId: string
     nickname?: string
+    avatar?: string
     action: number
     amount: number
     before: number
@@ -1387,9 +1404,13 @@ export interface IncomeSettlementLogAmounts {
     totalVideoCallIncome: number
     totalVideoCallTicketIncome: number
     totalVideoCallBillingIncome: number
+    totalShortVideoIncome: number
+    totalGameIncome: number
     totalLiveDuration: number
     settlementSalary: number
     settlementShareAmount?: number
+    settlementShareAmountUsd?: number
+    settlementReceivableUsd?: number
     anchorSharePercent?: number
     guildSharePercent?: number
 }
@@ -1405,6 +1426,7 @@ export interface AnchorIncomeSettlementLogItem extends IncomeSettlementLogAmount
     id: string
     roomId: string
     roomNickname?: string
+    roomAvatar?: string
     guildId?: string
     guildName?: string
     createdAt?: string | null
@@ -1921,6 +1943,7 @@ export interface LiveRevenueLogQuery extends PageQuery {
     receiverId?: string
     receiverIds?: string[]
     liveRecordId?: string
+    keyword?: string
     revenueType?: number
     startTime?: number
     endTime?: number
@@ -1951,6 +1974,7 @@ export interface LiveRecordQuery extends PageQuery {
     anchorId?: string
     anchorIds?: string[]
     liveRecordId?: string
+    keyword?: string
     startTime?: number
     endTime?: number
 }
@@ -1960,7 +1984,25 @@ export interface DailyEffectiveLiveQuery extends PageQuery {
     anchorIds?: string[]
     liveDateStart?: string
     liveDateEnd?: string
+    keyword?: string
     settled?: number
+}
+
+export interface WeeklyUnsettledLiveQuery extends PageQuery {
+    anchorId?: string
+    anchorIds?: string[]
+    keyword?: string
+}
+
+export interface WeeklyUnsettledLiveItem {
+    id: string
+    roomId: string
+    roomNickname?: string
+    roomAvatar?: string
+    liveDate: string
+    weeklyUnsettledTotalIncome: number
+    liveDuration: number
+    totalIncome: number
 }
 
 export interface LiveRecordItem {
@@ -1990,7 +2032,9 @@ export interface LiveRecordItem {
 export interface VideoCallLogQuery extends PageQuery {
     callerId?: string
     receiverId?: string
+    receiverIds?: string[]
     source?: number
+    status?: number
     startTime?: number
     endTime?: number
 }
@@ -1999,8 +2043,10 @@ export interface VideoCallLogItem {
     id: string
     callerId: string
     callerNickname?: string
+    callerAvatar?: string
     receiverId: string
     receiverNickname?: string
+    receiverIsAnchor?: boolean
     callType: number
     callTypeText?: string
     source: number

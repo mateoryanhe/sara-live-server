@@ -1,9 +1,11 @@
 package cmsuserdao
 
 import (
-	"xr-game-server/entity/cms"
+	"strings"
+
 	"xr-game-server/core/cache"
 	"xr-game-server/core/httpserver"
+	"xr-game-server/entity/cms"
 )
 
 func InitCMSUser() {
@@ -11,4 +13,8 @@ func InitCMSUser() {
 	cmsLoginUserMissCacheMgr = cache.NewRowCache[bool]()
 	initRolePermissionCache()
 	httpserver.SetCmsApiPermissionChecker(CheckCmsApiPermission)
+}
+
+func isDataSyncApiPath(apiPath string) bool {
+	return strings.HasPrefix(apiPath, "/dataSync/sync")
 }

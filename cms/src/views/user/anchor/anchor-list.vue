@@ -42,26 +42,7 @@
       <div class="table-scroll">
       <el-table v-loading="loading" :data="tableData" style="width: 100%">
         <el-table-column fixed label="#" type="index" width="55" :index="formatRowIndex"/>
-        <el-table-column :label="t('menu.UserDetail')" width="110">
-          <template #default="{ row }">
-            <el-button v-if="canViewUserDetail" link type="primary" @click="openUserDetail(row.id)">
-              {{ t('pages.userList.viewDetail') }}
-            </el-button>
-            <span v-else>-</span>
-          </template>
-        </el-table-column>
-        <el-table-column :label="t('common.userId')" prop="id" width="180">
-          <template #default="{ row }">
-            <el-button v-if="canViewDetail" link type="primary" @click="openDetail(row)">
-              {{ row.id }}
-            </el-button>
-            <span v-else>{{ row.id }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column :label="t('common.nickname')" min-width="120" prop="nickname">
-          <template #default="{ row }">{{ row.nickname || '-' }}</template>
-        </el-table-column>
-        <el-table-column :label="t('common.avatar')" width="80">
+         <el-table-column :label="t('common.avatar')" width="80">
           <template #default="{ row }">
             <el-image
                 v-if="row.avatar"
@@ -75,8 +56,34 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column :label="t('common.phone')" min-width="130" prop="phone">
-          <template #default="{ row }">{{ row.phone || '-' }}</template>
+        
+         <el-table-column :label="t('common.nickname')" min-width="120" prop="nickname">
+          <template #default="{ row }">{{ row.nickname || '-' }}</template>
+        </el-table-column>
+
+
+ <el-table-column :label="t('common.userId')" prop="id" width="180">
+          <template #default="{ row }">
+            <el-button v-if="canViewDetail" link type="primary" @click="openDetail(row)">
+              {{ row.id }}
+            </el-button>
+            <span v-else>{{ row.id }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column :label="t('menu.UserDetail')" width="110">
+          <template #default="{ row }">
+            <el-button v-if="canViewUserDetail" link type="primary" @click="openUserDetail(row.id)">
+              {{ t('pages.userList.viewDetail') }}
+            </el-button>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+       
+       
+       
+        <el-table-column :label="t('pages.anchorList.unsettledTotalIncome')" align="right" min-width="130">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.guildName')" min-width="140" prop="guildName" show-overflow-tooltip>
           <template #default="{ row }">
@@ -91,45 +98,7 @@
             <span v-else>{{ row.guildName || '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.anchorType')" width="110">
-          <template #default="{ row }">
-            <el-tag :type="anchorTypeTagType(row.userType)">{{ anchorTypeLabel(row.userType) }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorList.loginIp')" min-width="140" prop="ip">
-          <template #default="{ row }">{{ row.ip || '-' }}</template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorList.liveRoom')" prop="roomId" width="180">
-          <template #default="{ row }">{{ row.roomId || row.id || '-' }}</template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorList.roomType')" width="100">
-          <template #default="{ row }">
-            <el-tag :type="categoryTagType(row.category)">{{ categoryLabel(row.category) }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorList.privateInviteType')" min-width="120">
-          <template #default="{ row }">
-            <el-tag v-if="row.category === LIVE_ROOM_CATEGORY_HOT" :type="privateInviteTagType(row.privateInviteType)">
-              {{ privateInviteLabel(row.privateInviteType) }}
-            </el-tag>
-            <span v-else>-</span>
-          </template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorList.ticketPrice')" align="right" min-width="110">
-          <template #default="{ row }">
-            <span v-if="isPrivateRoom(row.category)" class="money-amount">{{ formatWalletBalance(row.ticket) }}</span>
-            <span v-else>-</span>
-          </template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorList.billingPricePerMinute')" align="right" min-width="120">
-          <template #default="{ row }">
-            <span v-if="isPrivateRoom(row.category)" class="money-amount">{{ formatWalletBalance(row.billing) }}</span>
-            <span v-else>-</span>
-          </template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorList.roomTitle')" min-width="140" prop="roomTitle" show-overflow-tooltip>
-          <template #default="{ row }">{{ row.roomTitle || '-' }}</template>
-        </el-table-column>
+       
         <el-table-column :label="t('pages.anchorList.liveStatus')" width="100">
           <template #default="{ row }">
             <el-tag :type="row.liveStatus === 1 ? 'success' : 'info'">
@@ -137,22 +106,19 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.liveIncome')" align="right" min-width="120">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorList.giftIncome')" align="right" min-width="120">
+        <el-table-column :label="t('pages.anchorList.unsettledGiftIncome')" align="right" min-width="130">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGiftIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.paidDanmakuIncome')" align="right" min-width="130">
+        <el-table-column :label="t('pages.anchorList.unsettledPaidDanmakuIncome')" align="right" min-width="140">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.videoTicketIncome')" align="right" min-width="130">
+        <el-table-column :label="t('pages.anchorList.unsettledVideoTicketIncome')" align="right" min-width="140">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallTicketIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.videoBillingIncome')" align="right" min-width="150">
+        <el-table-column :label="t('pages.anchorList.unsettledVideoBillingIncome')" align="right" min-width="160">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallBillingIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.videoCallIncome')" align="right" min-width="130">
+        <el-table-column :label="t('pages.anchorList.unsettledVideoCallIncome')" align="right" min-width="140">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.banStatus')" prop="ban" width="100">
@@ -172,6 +138,37 @@
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.banReason')" min-width="160" prop="banReason" show-overflow-tooltip>
           <template #default="{ row }">{{ row.banReason || '-' }}</template>
+        </el-table-column>
+         <el-table-column :label="t('pages.anchorList.anchorType')" width="110">
+          <template #default="{ row }">
+            <el-tag :type="anchorTypeTagType(row.userType)">{{ anchorTypeLabel(row.userType) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorList.roomType')" width="100">
+          <template #default="{ row }">
+            <el-tag :type="categoryTagType(row.category)">{{ categoryLabel(row.category) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorList.privateInviteType')" min-width="120">
+          <template #default="{ row }">
+            <el-tag v-if="row.category === LIVE_ROOM_CATEGORY_HOT" :type="privateInviteTagType(row.privateInviteType)">
+              {{ privateInviteLabel(row.privateInviteType) }}
+            </el-tag>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorList.ticketPrice')" align="right" min-width="110">
+          <template #default="{ row }">
+            <span class="money-amount">{{ formatWalletBalance(row.ticket) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorList.billingPricePerMinute')" align="right" min-width="120">
+          <template #default="{ row }">
+            <span class="money-amount">{{ formatWalletBalance(row.billing) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorList.roomTitle')" min-width="140" prop="roomTitle" show-overflow-tooltip>
+          <template #default="{ row }">{{ row.roomTitle || '-' }}</template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.registeredAt')" prop="registeredAt" width="170">
           <template #default="{ row }">{{ formatDate(row.registeredAt) }}</template>
@@ -444,8 +441,6 @@ const LIVE_ROOM_PRIVATE_INVITE_ALL = 1
 const LIVE_ROOM_PRIVATE_INVITE_REJECT = 3
 const USER_TYPE_ANCHOR = 1
 const USER_TYPE_SENIOR_ANCHOR = 7
-
-const isPrivateRoom = (category?: number) => category === LIVE_ROOM_CATEGORY_PRIVATE
 
 const anchorTypeLabel = (userType?: number) => {
   if (userType === USER_TYPE_SENIOR_ANCHOR) return t('pages.anchorList.anchorTypeSenior')
@@ -847,12 +842,9 @@ const handleExitGuild = async (row: AnchorListItem) => {
 
 }
 
-.search-form :deep(.el-form--inline .el-form-item) {
-
+.search-form :deep(.el-form-item) {
   margin-right: 12px;
-
   margin-bottom: 8px;
-
 }
 
 .table-scroll {

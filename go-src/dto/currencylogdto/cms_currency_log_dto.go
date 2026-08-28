@@ -21,12 +21,14 @@ type CMSCurrencyLogItem struct {
 	Id           uint64     `json:"id,string"`
 	UserId       uint64     `json:"userId,string"`
 	Nickname     string     `json:"nickname"`
+	Avatar       string     `json:"avatar"`
 	Action       uint8      `json:"action" dc:"1加 2减"`
 	Amount       float64    `json:"amount"`
 	Before       float64    `json:"before"`
 	After        float64    `json:"after"`
 	Reason       uint8      `json:"reason"`
 	ReasonText   string     `json:"reasonText"`
+	GameId       string     `json:"gameId"`
 	GameName     string     `json:"gameName"`
 	GameCategory string     `json:"gameCategory"`
 	BusinessType uint8      `json:"businessType" dc:"商业类型 1社交 2游戏"`

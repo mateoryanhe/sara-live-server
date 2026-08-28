@@ -120,6 +120,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'rechargeWhitelistOff', label: '移出充值白名单'},
         {key: 'cancel', label: '注销/取消注销'},
         {key: 'setUserType', label: '修改用户类型'},
+        {key: 'uploadAvatar', label: '上传头像'},
         {key: 'setAnchorType', label: '设置主播类型'},
         {key: 'openGame', label: '打开游戏'},
     ],
@@ -271,6 +272,25 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.export,
     ],
     LiveRevenueLogList: [
+        BTN.view,
+        BTN.search,
+        BTN.export,
+        {key: 'viewUserDetail', label: '查看用户详情'},
+    ],
+    VideoCallLogList: [
+        BTN.view,
+        BTN.search,
+        BTN.export,
+        {key: 'viewUserDetail', label: '查看用户详情'},
+        {key: 'viewAnchorDetail', label: '查看主播详情'},
+    ],
+    GoldCurrencyLogList: [
+        BTN.view,
+        BTN.search,
+        BTN.export,
+        {key: 'viewUserDetail', label: '查看用户详情'},
+    ],
+    DiamondCurrencyLogList: [
         BTN.view,
         BTN.search,
         BTN.export,

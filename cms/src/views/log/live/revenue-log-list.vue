@@ -8,6 +8,14 @@
       </template>
 
       <el-form :model="searchForm" class="search-form" inline label-width="88px">
+        <el-form-item :label="t('common.keyword')">
+          <el-input
+              v-model="searchForm.keyword"
+              clearable
+              :placeholder="t('pages.revenueLogList.keywordPlaceholder')"
+              style="width: 220px"
+          />
+        </el-form-item>
         <el-form-item :label="t('pages.liveRecordList.platformAnchor')">
           <div class="anchor-filter anchor-filter--compact">
             <el-input
@@ -81,15 +89,16 @@
       </el-form>
 
       <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width: 100%">
-        <el-table-column :label="t('pages.revenueLogList.logId')" min-width="180" prop="id"/>
-        <el-table-column :label="t('pages.revenueLogList.revenueType')" min-width="140" prop="revenueTypeText">
-          <template #default="{ row }">{{ row.revenueTypeText || formatRevenueType(row.revenueType) }}</template>
+        <el-table-column :label="t('common.createdAt')" min-width="170">
+          <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>
-        <el-table-column :label="t('pages.revenueLogList.liveRoomId')" min-width="180" prop="roomId"/>
-        <el-table-column :label="t('pages.revenueLogList.liveRecordId')" min-width="180" prop="liveRecordId"/>
-        <el-table-column :label="t('pages.revenueLogList.payerUserId')" min-width="180" prop="senderId"/>
-        <el-table-column :label="t('pages.revenueLogList.payerNickname')" min-width="120" prop="senderNickname">
-          <template #default="{ row }">{{ row.senderNickname || '-' }}</template>
+        <el-table-column :label="t('pages.revenueLogList.liveRoomId')" min-width="180" prop="roomId">
+          <template #default="{ row }">
+            <el-button v-if="row.roomId" link type="primary" @click="openAnchorDetail(row.roomId)">
+              {{ row.roomId }}
+            </el-button>
+            <span v-else>-</span>
+          </template>
         </el-table-column>
         <el-table-column :label="t('pages.revenueLogList.receiverUserId')" min-width="180" prop="receiverId">
           <template #default="{ row }">
@@ -114,19 +123,47 @@
           </template>
         </el-table-column>
         <el-table-column :label="t('pages.revenueLogList.receiverNickname')" min-width="120" prop="receiverNickname">
-          <template #default="{ row }">{{ row.receiverNickname || '-' }}</template>
-        </el-table-column>
-        <el-table-column :label="t('menu.UserDetail')" width="110">
           <template #default="{ row }">
-            <el-button v-if="row.receiverId" link type="primary" @click="openUserDetail(row.receiverId)">
-              {{ t('pages.userList.viewDetail') }}
+            <el-button
+                v-if="canViewUserDetail && row.receiverId && row.receiverNickname"
+                link
+                type="primary"
+                @click="openUserDetail(row.receiverId)"
+            >
+              {{ row.receiverNickname }}
             </el-button>
+            <span v-else>{{ row.receiverNickname || '-' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('pages.revenueLogList.payerUserId')" min-width="180" prop="senderId"/>
+        <el-table-column
+            :label="t('pages.revenueLogList.payerUserAvatar')"
+            class-name="col-nowrap"
+            label-class-name="col-nowrap"
+            width="100"
+        >
+          <template #default="{ row }">
+            <el-image
+                v-if="row.senderAvatar"
+                :preview-src-list="[row.senderAvatar]"
+                :src="row.senderAvatar"
+                fit="cover"
+                hide-on-click-modal
+                preview-teleported
+                style="width:40px;height:40px;border-radius:50%"
+            />
             <span v-else>-</span>
           </template>
+        </el-table-column>
+        <el-table-column :label="t('pages.revenueLogList.payerNickname')" min-width="120" prop="senderNickname">
+          <template #default="{ row }">{{ row.senderNickname || '-' }}</template>
         </el-table-column>
         <el-table-column :label="t('pages.revenueLogList.bizId')" min-width="180" prop="bizId"/>
         <el-table-column :label="t('pages.revenueLogList.bizName')" min-width="120" prop="bizName">
           <template #default="{ row }">{{ row.bizName || '-' }}</template>
+        </el-table-column>
+        <el-table-column :label="t('pages.revenueLogList.revenueType')" min-width="140" prop="revenueTypeText">
+          <template #default="{ row }">{{ row.revenueTypeText || formatRevenueType(row.revenueType) }}</template>
         </el-table-column>
         <el-table-column :label="t('pages.revenueLogList.count')" prop="count" width="80"/>
         <el-table-column :label="t('pages.revenueLogList.unitPriceDiamond')" prop="unitPrice" width="110"/>
@@ -137,9 +174,6 @@
               {{ row.statusText || (row.status === 1 ? t('pages.revenueLogList.refunded') : t('common.normal')) }}
             </el-tag>
           </template>
-        </el-table-column>
-        <el-table-column :label="t('common.createdAt')" width="170">
-          <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>
       </el-table>
 
@@ -187,11 +221,12 @@ import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExpor
 import {CMS_EXPORT_TYPE_LIVE_REVENUE_LOG} from '@/utils/cms-async-export'
 import {buildLiveRevenueLogCsvColumns} from '@/utils/live-revenue-log-csv'
 import {createLiveRevenueTypeFormatter, LIVE_REVENUE_TYPE_OPTIONS} from '@/utils/live-revenue-type'
+import {formatServerDateTime as formatDate, toServerDayStartUnix, toServerDayEndUnix} from '@/utils/server-datetime'
 
 const {t} = useI18n()
 const router = useRouter()
 const {can} = usePagePermission('LiveRevenueLogList')
-const {openUserDetail} = useUserDetailNav('LiveRevenueLogList')
+const {openUserDetail, canViewUserDetail} = useUserDetailNav('LiveRevenueLogList')
 const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const revenueTypeOptions = LIVE_REVENUE_TYPE_OPTIONS
 const formatRevenueType = createLiveRevenueTypeFormatter(t)
@@ -203,6 +238,7 @@ const platformAnchorPickerVisible = ref(false)
 const guildAnchorPickerVisible = ref(false)
 
 const searchForm = reactive({
+  keyword: '',
   revenueType: 0,
   startDate: '',
   endDate: '',
@@ -277,28 +313,22 @@ const pagination = reactive({
   total: 0,
 })
 
-const toDayStartUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T00:00:00`).getTime() / 1000)
-}
-
-const toDayEndUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T23:59:59`).getTime() / 1000)
-}
-
 const buildQueryParams = () => ({
   pageIndex: pagination.pageIndex,
   pageSize: pagination.pageSize,
   receiverIds: buildSelectedReceiverIds(),
+  keyword: searchForm.keyword.trim() || undefined,
   revenueType: searchForm.revenueType || 0,
-  startTime: searchForm.startDate ? toDayStartUnix(searchForm.startDate) : 0,
-  endTime: searchForm.endDate ? toDayEndUnix(searchForm.endDate) : 0,
+  startTime: searchForm.startDate ? toServerDayStartUnix(searchForm.startDate) : 0,
+  endTime: searchForm.endDate ? toServerDayEndUnix(searchForm.endDate) : 0,
 })
 
 const buildFilterParams = () => ({
   receiverIds: buildSelectedReceiverIds(),
+  keyword: searchForm.keyword.trim() || undefined,
   revenueType: searchForm.revenueType || 0,
-  startTime: searchForm.startDate ? toDayStartUnix(searchForm.startDate) : 0,
-  endTime: searchForm.endDate ? toDayEndUnix(searchForm.endDate) : 0,
+  startTime: searchForm.startDate ? toServerDayStartUnix(searchForm.startDate) : 0,
+  endTime: searchForm.endDate ? toServerDayEndUnix(searchForm.endDate) : 0,
 })
 
 const fetchList = async () => {
@@ -323,6 +353,7 @@ const handleSearch = () => {
 const handleReset = () => {
   selectedPlatformAnchors.value = []
   selectedGuildAnchors.value = []
+  searchForm.keyword = ''
   searchForm.revenueType = 0
   searchForm.startDate = ''
   searchForm.endDate = ''
@@ -362,18 +393,7 @@ const handleExport = async () => {
   )
 }
 
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) return '-'
-  try {
-    return new Date(dateString).toLocaleString()
-  } catch {
-    return '-'
-  }
-}
 
-onMounted(() => {
-  fetchList()
-})
 </script>
 
 <style scoped>
@@ -410,5 +430,9 @@ onMounted(() => {
   margin-top: 16px;
   display: flex;
   justify-content: flex-end;
+}
+
+:deep(.col-nowrap .cell) {
+  white-space: nowrap;
 }
 </style>

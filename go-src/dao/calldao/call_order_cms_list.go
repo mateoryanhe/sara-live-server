@@ -10,15 +10,16 @@ import (
 
 // CallOrderCMSListFilter CMS通话订单查询条件
 type CallOrderCMSListFilter struct {
-	CallerId   uint64
-	ReceiverId uint64
-	Source     uint8
-	Status     uint8
-	CallType   uint8
-	StartTime  int64
-	EndTime    int64
-	PageIndex  int
-	PageSize   int
+	CallerId    uint64
+	ReceiverId  uint64
+	ReceiverIds []uint64
+	Source      uint8
+	Status      uint8
+	CallType    uint8
+	StartTime   int64
+	EndTime     int64
+	PageIndex   int
+	PageSize    int
 }
 
 // CallOrderCMSList CMS分页查询通话订单(按ID倒序)
@@ -38,7 +39,9 @@ func CallOrderCMSList(f *CallOrderCMSListFilter) (int, []*entity.CallOrder) {
 	if f.CallerId > 0 {
 		m = m.Where(string(entity.CallOrderCallerId)+" = ?", f.CallerId)
 	}
-	if f.ReceiverId > 0 {
+	if len(f.ReceiverIds) > 0 {
+		m = m.Where(string(entity.CallOrderReceiverId)+" IN (?)", f.ReceiverIds)
+	} else if f.ReceiverId > 0 {
 		m = m.Where(string(entity.CallOrderReceiverId)+" = ?", f.ReceiverId)
 	}
 	if f.Source > 0 {

@@ -23,6 +23,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'UserList:rechargeWhitelistOff': '/account/setRechargeWhitelist',
     'UserList:cancel': '/account/cancel',
     'UserList:setUserType': '/account/setUserType',
+    'UserList:uploadAvatar': '/account/setUserAvatar',
     'UserList:setAnchorType': '/account/setPlatformAnchorType',
     'UserList:openGame': '/gamePlatform/gameShelfList',
     UserDetail: '/account/getUserDetail',
@@ -104,11 +105,13 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GoldCurrencyLogList:view': '/currencyLog/cmsCurrencyLogList',
     'GoldCurrencyLogList:search': '/currencyLog/cmsCurrencyLogList',
     'GoldCurrencyLogList:export': '/currencyLog/cmsCurrencyLogList',
+    'GoldCurrencyLogList:viewUserDetail': '/account/getUserDetail',
 
     DiamondCurrencyLogList: '/currencyLog/cmsCurrencyLogList',
     'DiamondCurrencyLogList:view': '/currencyLog/cmsCurrencyLogList',
     'DiamondCurrencyLogList:search': '/currencyLog/cmsCurrencyLogList',
     'DiamondCurrencyLogList:export': '/currencyLog/cmsCurrencyLogList',
+    'DiamondCurrencyLogList:viewUserDetail': '/account/getUserDetail',
 
     BannerManagement: '/banner/bannerList',
     'BannerManagement:view': '/banner/bannerList',
@@ -279,6 +282,8 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'VideoCallLogList:view': '/call/cmsVideoCallLogList',
     'VideoCallLogList:search': '/call/cmsVideoCallLogList',
     'VideoCallLogList:export': '/cmsExport/submitJob',
+    'VideoCallLogList:viewUserDetail': '/account/getUserDetail',
+    'VideoCallLogList:viewAnchorDetail': '/account/getAnchorDetail',
 
     ShortVideoManagement: '/shortVideo/shortVideoList',
     'ShortVideoManagement:view': '/shortVideo/shortVideoList',

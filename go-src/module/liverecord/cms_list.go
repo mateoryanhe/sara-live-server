@@ -59,6 +59,7 @@ func GetCMSList(_ context.Context, req *liverecorddto.CMSLiveRecordListReq) (*ht
 	total, rows := liveroomdao.LiveRecordCMSList(&liveroomdao.LiveRecordCMSListFilter{
 		AnchorIds:    liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
 		LiveRecordId: parseUint64Filter(req.LiveRecordId),
+		Keyword:      req.Keyword,
 		StartTime:    req.StartTime,
 		EndTime:      req.EndTime,
 		PageIndex:    req.PageIndex,

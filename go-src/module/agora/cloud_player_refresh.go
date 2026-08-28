@@ -135,7 +135,7 @@ func refreshCloudPlayerTokenForAnchor(ctx context.Context, anchorId uint64) {
 	}
 	restoreCloudPlayerSequence(playerId)
 
-	expireAt, err := updateBotAnchorCloudPlayerToken(ctx, anchorId, playerId, cfg.CloudPlayerVideo)
+	expireAt, err := updateBotAnchorCloudPlayerToken(ctx, anchorId, playerId, cfg.CloudPlayerVideo, cfg.EffectiveCloudPlayerFrameRate(), cfg.EffectiveCloudPlayerBitrate(), cfg.EffectiveCloudPlayerWidth(), cfg.EffectiveCloudPlayerHeight())
 	if err == nil {
 		expireTime := time.Unix(expireAt, 0)
 		cfg.SetCloudPlayerTokenExpireAt(&expireTime)
@@ -158,7 +158,7 @@ func recreateBotAnchorCloudPlayer(ctx context.Context, anchorId uint64, room *en
 		g.Log().Warningf(ctx, "stop old cloud player before recreate failed anchorId=%d playerId=%s err=%v", anchorId, oldPlayerId, stopErr)
 	}
 
-	newPlayerId, newExpireAt, createErr := StartBotAnchorCloudPlayer(ctx, anchorId, cfg.CloudPlayerVideo)
+	newPlayerId, newExpireAt, createErr := StartBotAnchorCloudPlayer(ctx, anchorId, cfg.CloudPlayerVideo, cfg.EffectiveCloudPlayerFrameRate(), cfg.EffectiveCloudPlayerBitrate(), cfg.EffectiveCloudPlayerWidth(), cfg.EffectiveCloudPlayerHeight())
 	if createErr != nil {
 		xrlog.ErrorWithErr(ctx, logSourceAgoraCloudPlayer,
 			fmt.Sprintf("recreate failed anchorId=%d oldPlayerId=%s", anchorId, oldPlayerId),
@@ -173,7 +173,7 @@ func recreateBotAnchorCloudPlayer(ctx context.Context, anchorId uint64, room *en
 	g.Log().Infof(ctx, "cloud player recreated anchorId=%d playerId=%s", anchorId, newPlayerId)
 }
 
-func updateBotAnchorCloudPlayerToken(ctx context.Context, anchorId uint64, playerId, cloudPlayerVideo string) (int64, error) {
+func updateBotAnchorCloudPlayerToken(ctx context.Context, anchorId uint64, playerId, cloudPlayerVideo string, frameRate, bitrate, width, height int) (int64, error) {
 	playerId = strings.TrimSpace(playerId)
 	if anchorId == 0 || playerId == "" {
 		return 0, nil
@@ -190,7 +190,7 @@ func updateBotAnchorCloudPlayerToken(ctx context.Context, anchorId uint64, playe
 		return 0, err
 	}
 
-	playerBody, err := buildBotAnchorCloudPlayerBody(anchorId, cloudPlayerVideo, token)
+	playerBody, err := buildBotAnchorCloudPlayerBody(anchorId, cloudPlayerVideo, token, frameRate, bitrate, width, height)
 	if err != nil {
 		return 0, err
 	}

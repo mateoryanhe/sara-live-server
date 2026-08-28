@@ -17,11 +17,13 @@ func exportLiveRecordCSV(ctx context.Context, payload json.RawMessage, onProgres
 	}
 	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 		total, rows := liveroomdao.LiveRecordCMSList(&liveroomdao.LiveRecordCMSListFilter{
-			AnchorIds: liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
-			StartTime: req.StartTime,
-			EndTime:   req.EndTime,
-			PageIndex: pageIndex,
-			PageSize:  pageSize,
+			AnchorIds:    liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
+			LiveRecordId: parseUint64Filter(req.LiveRecordId),
+			Keyword:      req.Keyword,
+			StartTime:    req.StartTime,
+			EndTime:      req.EndTime,
+			PageIndex:    pageIndex,
+			PageSize:     pageSize,
 		})
 		csvRows := make([][]string, 0, len(rows))
 		for _, row := range rows {

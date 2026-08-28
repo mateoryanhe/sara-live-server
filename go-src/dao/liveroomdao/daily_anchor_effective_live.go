@@ -2,6 +2,7 @@ package liveroomdao
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/gogf/gf/v2/database/gdb"
@@ -10,6 +11,7 @@ import (
 	"xr-game-server/constants/db"
 	"xr-game-server/core/cache"
 	"xr-game-server/entity/live"
+	userentity "xr-game-server/entity/user"
 )
 
 const recentUnsettledDailyEffectiveLiveLimit = 8
@@ -102,7 +104,7 @@ func DailyAnchorEffectiveLiveCMSList(f *DailyAnchorEffectiveLiveCMSListFilter) (
 	ctx := gctx.New()
 	m := g.Model(string(entity.TbDailyAnchorEffectiveLive)).Ctx(ctx).
 		Where(string(entity.DailyAnchorEffectiveLiveRoomId)+" = ?", f.RoomId)
-	m = applyDailyAnchorEffectiveLiveCMSFilters(m, f.LiveDateStart, f.LiveDateEnd, f.Settled)
+	m = applyDailyAnchorEffectiveLiveCMSFilters(m, f.LiveDateStart, f.LiveDateEnd, f.Settled, "")
 	total, err := m.Clone().Count()
 	if err != nil {
 		return 0, list
@@ -120,6 +122,7 @@ type DailyAnchorEffectiveLiveCMSMultiListFilter struct {
 	RoomIds       []uint64
 	LiveDateStart string
 	LiveDateEnd   string
+	Keyword       string
 	Settled       int8
 	PageIndex     int
 	PageSize      int
@@ -138,34 +141,76 @@ func DailyAnchorEffectiveLiveCMSMultiList(f *DailyAnchorEffectiveLiveCMSMultiLis
 		f.PageSize = 20
 	}
 	ctx := gctx.New()
-	m := g.Model(string(entity.TbDailyAnchorEffectiveLive)).Ctx(ctx)
-	if len(f.RoomIds) > 0 {
-		m = m.Where(string(entity.DailyAnchorEffectiveLiveRoomId)+" IN (?)", f.RoomIds)
+	keyword := strings.TrimSpace(f.Keyword)
+	aliased := keyword != ""
+	colPrefix := ""
+	var m = g.Model(string(entity.TbDailyAnchorEffectiveLive)).Ctx(ctx)
+	if aliased {
+		like := "%" + keyword + "%"
+		colPrefix = "d."
+		m = g.Model(string(entity.TbDailyAnchorEffectiveLive)+" d").Ctx(ctx).
+			LeftJoin(string(userentity.TbUserInfo)+" u", "u.id = d."+string(entity.DailyAnchorEffectiveLiveRoomId)).
+			Where("(d.id LIKE ? OR CAST(d."+string(entity.DailyAnchorEffectiveLiveRoomId)+" AS CHAR) LIKE ? OR u."+string(userentity.UserInfoNickname)+" LIKE ?)", like, like, like)
 	}
-	m = applyDailyAnchorEffectiveLiveCMSFilters(m, f.LiveDateStart, f.LiveDateEnd, f.Settled)
+	if len(f.RoomIds) > 0 {
+		m = m.Where(colPrefix+string(entity.DailyAnchorEffectiveLiveRoomId)+" IN (?)", f.RoomIds)
+	}
+	m = applyDailyAnchorEffectiveLiveCMSFilters(m, f.LiveDateStart, f.LiveDateEnd, f.Settled, colPrefix)
 	total, err := m.Clone().Count()
 	if err != nil {
 		return 0, list
 	}
-	_ = m.Clone().
-		Order(string(entity.DailyAnchorEffectiveLiveLiveDate) + " desc, id desc").
+	query := m.Clone().
+		Order(colPrefix+string(entity.DailyAnchorEffectiveLiveLiveDate)+" desc, "+colPrefix+"id desc").
 		Limit(f.PageSize).
-		Offset((f.PageIndex - 1) * f.PageSize).
-		Scan(&list)
+		Offset((f.PageIndex - 1) * f.PageSize)
+	if aliased {
+		query = query.Fields("d.*")
+	}
+	_ = query.Scan(&list)
 	return total, mergeDailyAnchorEffectiveLivesFromCache(list)
 }
 
-func applyDailyAnchorEffectiveLiveCMSFilters(m *gdb.Model, liveDateStart, liveDateEnd string, settled int8) *gdb.Model {
+// ListWeeklyUnsettledIncomeByRoomIds 批量汇总本周未结算直播收益(按 room_id)
+func ListWeeklyUnsettledIncomeByRoomIds(roomIds []uint64, liveDateStart, liveDateEnd string) map[uint64]float64 {
+	ret := make(map[uint64]float64)
+	if len(roomIds) == 0 || liveDateStart == "" || liveDateEnd == "" {
+		return ret
+	}
+	type sumRow struct {
+		RoomId uint64  `json:"room_id"`
+		Total  float64 `json:"total"`
+	}
+	rows := make([]sumRow, 0, len(roomIds))
+	ctx := gctx.New()
+	_ = g.Model(string(entity.TbDailyAnchorEffectiveLive)).Ctx(ctx).
+		Fields("room_id, SUM("+string(entity.LiveRoomIncomeTotalIncome)+") AS total").
+		Where(string(entity.DailyAnchorEffectiveLiveRoomId)+" IN (?)", roomIds).
+		Where(string(entity.DailyAnchorEffectiveLiveSettled)+" = ?", false).
+		Where(string(entity.DailyAnchorEffectiveLiveLiveDate)+" >= ?", liveDateStart).
+		Where(string(entity.DailyAnchorEffectiveLiveLiveDate)+" <= ?", liveDateEnd).
+		Group(string(entity.DailyAnchorEffectiveLiveRoomId)).
+		Scan(&rows)
+	for _, row := range rows {
+		if row.RoomId == 0 {
+			continue
+		}
+		ret[row.RoomId] = row.Total
+	}
+	return ret
+}
+
+func applyDailyAnchorEffectiveLiveCMSFilters(m *gdb.Model, liveDateStart, liveDateEnd string, settled int8, colPrefix string) *gdb.Model {
 	if liveDateStart != "" {
-		m = m.Where(string(entity.DailyAnchorEffectiveLiveLiveDate)+" >= ?", liveDateStart)
+		m = m.Where(colPrefix+string(entity.DailyAnchorEffectiveLiveLiveDate)+" >= ?", liveDateStart)
 	}
 	if liveDateEnd != "" {
-		m = m.Where(string(entity.DailyAnchorEffectiveLiveLiveDate)+" <= ?", liveDateEnd)
+		m = m.Where(colPrefix+string(entity.DailyAnchorEffectiveLiveLiveDate)+" <= ?", liveDateEnd)
 	}
 	if settled == 0 {
-		m = m.Where(string(entity.DailyAnchorEffectiveLiveSettled)+" = ?", false)
+		m = m.Where(colPrefix+string(entity.DailyAnchorEffectiveLiveSettled)+" = ?", false)
 	} else if settled == 1 {
-		m = m.Where(string(entity.DailyAnchorEffectiveLiveSettled)+" = ?", true)
+		m = m.Where(colPrefix+string(entity.DailyAnchorEffectiveLiveSettled)+" = ?", true)
 	}
 	return m
 }

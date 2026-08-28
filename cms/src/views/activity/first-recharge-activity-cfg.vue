@@ -27,6 +27,19 @@
               <div class="form-tip">{{ t('pages.firstRechargeActivityCfg.enabledTip') }}</div>
             </el-form-item>
 
+            <el-form-item :label="t('pages.firstRechargeActivityCfg.firstRechargeRatio')">
+              <el-input-number
+                  v-model="formData.firstRechargeRatio"
+                  :max="100"
+                  :min="0"
+                  :precision="2"
+                  :step="1"
+                  controls-position="right"
+              />
+              <span class="field-tip">%</span>
+              <div class="form-tip">{{ t('pages.firstRechargeActivityCfg.firstRechargeRatioTip') }}</div>
+            </el-form-item>
+
             <el-form-item :label="t('pages.firstRechargeActivityCfg.icon')">
               <div class="icon-upload-wrap">
                 <el-upload
@@ -256,6 +269,7 @@ const formData = reactive({
   rechargeBtnTextPt: '',
   rechargeBtnTextHi: '',
   rechargeBtnTextId: '',
+  firstRechargeRatio: 10,
 })
 
 const privilegeList = ref<FirstRechargePrivilegeItem[]>([])
@@ -307,6 +321,7 @@ const applyCfg = (cfg: FirstRechargeActivityCfg | null | undefined) => {
   formData.rechargeBtnTextPt = cfg?.rechargeBtnTextPt || ''
   formData.rechargeBtnTextHi = cfg?.rechargeBtnTextHi || ''
   formData.rechargeBtnTextId = cfg?.rechargeBtnTextId || ''
+  formData.firstRechargeRatio = cfg?.firstRechargeRatio ?? 10
   privilegeList.value = clonePrivilegeList(cfg?.privileges)
   metaInfo.createdAt = cfg?.createdAt || ''
   metaInfo.updatedAt = cfg?.updatedAt || ''
@@ -446,6 +461,7 @@ const buildSavePayload = () => ({
   rechargeBtnTextPt: formData.rechargeBtnTextPt.trim(),
   rechargeBtnTextHi: formData.rechargeBtnTextHi.trim(),
   rechargeBtnTextId: formData.rechargeBtnTextId.trim(),
+  firstRechargeRatio: formData.firstRechargeRatio,
   privileges: privilegeList.value.map(item => ({
     iconName: (item.iconName || item.icon || '').trim(),
     descEn: (item.descEn || '').trim(),
@@ -457,6 +473,10 @@ const buildSavePayload = () => ({
 })
 
 const handleSave = async () => {
+  if (formData.firstRechargeRatio < 0 || formData.firstRechargeRatio > 100) {
+    ElMessage.error(t('pages.firstRechargeActivityCfg.firstRechargeRatioInvalid'))
+    return
+  }
   try {
     const response = await firstRechargeActivityApi.saveFirstRechargeActivityCfg(buildSavePayload())
     if (response?.success) {

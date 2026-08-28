@@ -11,6 +11,7 @@ import (
 	"xr-game-server/dao/cmsuserdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/authdto"
+	"xr-game-server/entity/cms"
 	"xr-game-server/errercode"
 )
 
@@ -63,5 +64,11 @@ func CMSLogin(ctx context.Context, req *authdto.CMSLoginReq) (res *authdto.CMSLo
 	}
 	tokenStr := xrtoken.AddCmsToken(data.ID)
 	perm := cmsuserdao.GetGetPermissionList(data.RoleId)
-	return authdto.NewCMSLoginRes(data.ID, tokenStr, data.Admin, perm), nil
+	return authdto.NewCMSLoginRes(
+		data.ID,
+		tokenStr,
+		entity.CMSUserIsAdmin(data),
+		entity.CMSUserIsSuperAdmin(data),
+		perm,
+	), nil
 }

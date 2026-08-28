@@ -18,6 +18,7 @@ func GetWalletExchangeCfg(_ context.Context, _ *walletdto.GetWalletExchangeCfgRe
 			Cfg: &walletdto.WalletExchangeCfgItem{
 				GoldToDiamondRate:  DefaultGoldToDiamondRate,
 				ExchangeFeePercent: DefaultExchangeFeePercent,
+				UsdToGoldRate:      DefaultUsdToGoldRate,
 			},
 		}, nil
 	}
@@ -31,11 +32,15 @@ func SaveWalletExchangeCfg(_ context.Context, req *walletdto.SaveWalletExchangeC
 	if req.ExchangeFeePercent < 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
+	if req.UsdToGoldRate <= 0 {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 
 	existing := cfgdao.GetWalletExchangeCfgCached()
 	row := &entity.WalletExchangeCfg{
 		GoldToDiamondRate:  req.GoldToDiamondRate,
 		ExchangeFeePercent: req.ExchangeFeePercent,
+		UsdToGoldRate:      req.UsdToGoldRate,
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -65,10 +70,15 @@ func toWalletExchangeCfgItem(cfg *entity.WalletExchangeCfg) *walletdto.WalletExc
 	if cfg == nil {
 		return nil
 	}
+	usdToGold := cfg.UsdToGoldRate
+	if usdToGold <= 0 {
+		usdToGold = DefaultUsdToGoldRate
+	}
 	return &walletdto.WalletExchangeCfgItem{
 		ID:                 strconv.FormatUint(cfg.ID, 10),
 		GoldToDiamondRate:  cfg.GoldToDiamondRate,
 		ExchangeFeePercent: cfg.ExchangeFeePercent,
+		UsdToGoldRate:      usdToGold,
 		CreatedAt:          formatCfgTime(cfg.CreatedAt),
 		UpdatedAt:          formatCfgTime(cfg.UpdatedAt),
 	}

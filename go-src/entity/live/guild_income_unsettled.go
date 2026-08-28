@@ -46,6 +46,14 @@ func (r *GuildIncomeUnsettled) AddPrivateRoomWatchEarn(v float64) {
 	addIncomeEarn(TbGuildIncomeUnsettled, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalPrivateRoomWatchIncome, &r.TotalPrivateRoomWatchIncome)
 }
 
+func (r *GuildIncomeUnsettled) AddShortVideoEarn(v float64) {
+	addIncomeEarn(TbGuildIncomeUnsettled, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalShortVideoIncome, &r.TotalShortVideoIncome)
+}
+
+func (r *GuildIncomeUnsettled) AddGameEarn(goldAmount, incomeDelta float64) {
+	addGameEarn(TbGuildIncomeUnsettled, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, goldAmount, incomeDelta)
+}
+
 func (r *GuildIncomeUnsettled) AddAmounts(a *LiveRoomIncomeAmounts) {
 	if a == nil || a.IsZero() {
 		return
