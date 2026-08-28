@@ -633,7 +633,7 @@
       <el-main class="main-content">
         <router-view v-slot="{ Component, route: currentRoute }">
           <keep-alive :max="15">
-            <component :is="Component" v-if="Component" :key="currentRoute.path"/>
+            <component :is="Component" v-if="Component" :key="currentRoute.fullPath"/>
           </keep-alive>
         </router-view>
       </el-main>

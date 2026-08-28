@@ -10,14 +10,14 @@
 
       <div v-loading="loading">
         <el-empty v-if="!loading && !detail" :description="t('pages.anchorList.detailNotFound')"/>
-        <el-tabs v-else-if="detail" v-model="activeTab">
+        <el-tabs v-else-if="detail" :key="anchorId" v-model="activeTab" class="anchor-detail-tabs">
           <el-tab-pane :label="t('pages.anchorList.tabBasic')" name="basic">
-            <el-descriptions v-if="detail.anchor" :column="1" border>
-              <el-descriptions-item :label="t('common.userId')">{{ detail.anchor.id }}</el-descriptions-item>
-              <el-descriptions-item :label="t('common.nickname')">{{ detail.anchor.nickname || '-' }}</el-descriptions-item>
+            <el-descriptions :column="1" border>
+              <el-descriptions-item :label="t('common.userId')">{{ detail.anchor?.id ?? '-' }}</el-descriptions-item>
+              <el-descriptions-item :label="t('common.nickname')">{{ detail.anchor?.nickname || '-' }}</el-descriptions-item>
               <el-descriptions-item :label="t('common.avatar')">
                 <el-image
-                    v-if="detail.anchor.avatar"
+                    v-if="detail.anchor?.avatar"
                     :preview-src-list="[detail.anchor.avatar]"
                     :src="detail.anchor.avatar"
                     fit="cover"
@@ -27,24 +27,24 @@
                 />
                 <span v-else>-</span>
               </el-descriptions-item>
-              <el-descriptions-item :label="t('common.phone')">{{ detail.anchor.phone || '-' }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.anchorList.guildId')">{{ detail.anchor.guildId || '-' }}</el-descriptions-item>
+              <el-descriptions-item :label="t('common.phone')">{{ detail.anchor?.phone || '-' }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.guildId')">{{ detail.anchor?.guildId || '-' }}</el-descriptions-item>
               <el-descriptions-item :label="t('pages.anchorList.anchorType')">
-                <el-tag :type="anchorTypeTagType(detail.anchor.userType)">{{ anchorTypeLabel(detail.anchor.userType) }}</el-tag>
+                <el-tag :type="anchorTypeTagType(detail.anchor?.userType)">{{ anchorTypeLabel(detail.anchor?.userType) }}</el-tag>
               </el-descriptions-item>
-              <el-descriptions-item :label="t('pages.anchorList.loginIp')">{{ detail.anchor.ip || '-' }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.loginIp')">{{ detail.anchor?.ip || '-' }}</el-descriptions-item>
               <el-descriptions-item :label="t('pages.anchorList.banStatus')">
-                <el-tag v-if="detail.anchor.ban" type="danger">{{ t('common.banned') }}</el-tag>
+                <el-tag v-if="detail.anchor?.ban" type="danger">{{ t('common.banned') }}</el-tag>
                 <el-tag v-else type="success">{{ t('common.normal') }}</el-tag>
               </el-descriptions-item>
-              <el-descriptions-item :label="t('pages.anchorList.banUntil')">{{ formatDate(detail.anchor.banApplyTime) }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.anchorList.banReason')">{{ detail.anchor.banReason || '-' }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.anchorList.registeredAt')">{{ formatDate(detail.anchor.registeredAt) }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.anchorList.profileUpdatedAt')">{{ formatDate(detail.anchor.createdAt) }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.banUntil')">{{ formatDate(detail.anchor?.banApplyTime) }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.banReason')">{{ detail.anchor?.banReason || '-' }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.registeredAt')">{{ formatDate(detail.anchor?.registeredAt) }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.profileUpdatedAt')">{{ formatDate(detail.anchor?.createdAt) }}</el-descriptions-item>
             </el-descriptions>
           </el-tab-pane>
 
-          <el-tab-pane :label="t('pages.anchorList.tabLiveRoom')" name="liveRoom">
+          <el-tab-pane :label="t('pages.anchorList.tabLiveRoom')" lazy name="liveRoom">
             <el-descriptions v-if="detail.liveRoom" :column="1" border>
               <el-descriptions-item :label="t('pages.anchorList.liveRoom')">{{ detail.liveRoom.id || '-' }}</el-descriptions-item>
               <el-descriptions-item :label="t('pages.anchorList.guildId')">{{ detail.liveRoom.guildId || '-' }}</el-descriptions-item>
@@ -101,11 +101,11 @@
             </el-descriptions>
           </el-tab-pane>
 
-          <el-tab-pane :label="t('pages.anchorList.tabIncomeUnsettled')" name="incomeUnsettled">
+          <el-tab-pane :label="t('pages.anchorList.tabIncomeUnsettled')" lazy name="incomeUnsettled">
             <IncomePanel :data="detail.incomeUnsettled" :updated-at="detail.incomeUnsettled?.updatedAt"/>
           </el-tab-pane>
 
-          <el-tab-pane :label="t('pages.anchorList.tabIncomeSettled')" name="incomeSettled">
+          <el-tab-pane :label="t('pages.anchorList.tabIncomeSettled')" lazy name="incomeSettled">
             <IncomePanel
                 :data="detail.incomeSettled"
                 :settlement-salary="detail.incomeSettled?.settlementSalary"
@@ -115,7 +115,7 @@
             />
           </el-tab-pane>
 
-          <el-tab-pane :label="t('pages.anchorList.tabIncomeTotal')" name="incomeTotal">
+          <el-tab-pane :label="t('pages.anchorList.tabIncomeTotal')" lazy name="incomeTotal">
             <IncomePanel
                 :data="detail.incomeTotal"
                 :settlement-salary="detail.incomeTotal?.settlementSalary"
@@ -125,19 +125,19 @@
             />
           </el-tab-pane>
 
-          <el-tab-pane :label="t('pages.anchorList.tabDailyEffectiveLive')" name="dailyEffectiveLive">
+          <el-tab-pane :label="t('pages.anchorList.tabDailyEffectiveLive')" lazy name="dailyEffectiveLive">
             <DailyLivePanel :active="activeTab === 'dailyEffectiveLive'" :anchor-id="anchorId"/>
           </el-tab-pane>
 
-          <el-tab-pane :label="t('pages.anchorList.tabLiveRecord')" name="liveRecord">
+          <el-tab-pane :label="t('pages.anchorList.tabLiveRecord')" lazy name="liveRecord">
             <LiveRecordPanel :active="activeTab === 'liveRecord'" :anchor-id="anchorId"/>
           </el-tab-pane>
 
-          <el-tab-pane :label="t('pages.anchorList.tabSettlementLog')" name="settlementLog">
+          <el-tab-pane :label="t('pages.anchorList.tabSettlementLog')" lazy name="settlementLog">
             <SettlementLogPanel :active="activeTab === 'settlementLog'" :anchor-id="anchorId"/>
           </el-tab-pane>
 
-          <el-tab-pane :label="t('pages.anchorList.tabIncomeArchive')" name="incomeArchive">
+          <el-tab-pane :label="t('pages.anchorList.tabIncomeArchive')" lazy name="incomeArchive">
             <el-table v-if="detail.incomeArchives?.length" :data="detail.incomeArchives" style="width:100%">
               <el-table-column :label="t('pages.anchorList.archiveId')" min-width="180" prop="id"/>
               <el-table-column :label="t('pages.anchorList.guildId')" min-width="120" prop="guildId"/>
@@ -188,7 +188,7 @@ import DailyLivePanel from './anchor-detail-daily-live-panel.vue'
 import LiveRecordPanel from './anchor-detail-live-record-panel.vue'
 import SettlementLogPanel from './anchor-detail-settlement-log-panel.vue'
 import type {AnchorDetail} from '@/types/api'
-import {formatAmount} from '@/utils/number-format'
+import {formatAmount, formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 
 const {t} = useI18n()
@@ -197,7 +197,6 @@ const router = useRouter()
 
 const loading = ref(false)
 const detail = ref<AnchorDetail | null>(null)
-const activeTab = ref(typeof route.query.tab === 'string' ? route.query.tab : 'basic')
 
 const LIVE_ROOM_CATEGORY_HOT = 1
 const LIVE_ROOM_CATEGORY_GAME = 2
@@ -206,6 +205,27 @@ const LIVE_ROOM_PRIVATE_INVITE_ALL = 1
 const LIVE_ROOM_PRIVATE_INVITE_REJECT = 3
 const USER_TYPE_ANCHOR = 1
 const USER_TYPE_SENIOR_ANCHOR = 7
+
+const ANCHOR_DETAIL_TAB_NAMES = new Set([
+  'basic',
+  'liveRoom',
+  'incomeUnsettled',
+  'incomeSettled',
+  'incomeTotal',
+  'dailyEffectiveLive',
+  'liveRecord',
+  'settlementLog',
+  'incomeArchive',
+])
+
+const resolveActiveTab = (tab: unknown) => {
+  if (typeof tab === 'string' && ANCHOR_DETAIL_TAB_NAMES.has(tab)) {
+    return tab
+  }
+  return 'basic'
+}
+
+const activeTab = ref(resolveActiveTab(route.query.tab))
 
 const anchorId = computed(() => {
   const value = route.query.id
@@ -266,6 +286,8 @@ const categoryTagType = (category?: number) => {
   return 'info'
 }
 
+const isPrivateRoom = (category?: number) => category === LIVE_ROOM_CATEGORY_PRIVATE
+
 const formatDate = (dateString: string | null | undefined) => {
   if (!dateString) return '-'
   try {
@@ -308,15 +330,13 @@ const goBack = () => {
   router.push({name: 'AnchorListManagement'})
 }
 
-watch(anchorId, (_id, prev) => {
+watch(anchorId, () => {
   if (!isAnchorDetailRoute()) {
     return
   }
-  if (prev !== undefined) {
-    activeTab.value = typeof route.query.tab === 'string' ? route.query.tab : 'basic'
-    fetchDetail()
-  }
-})
+  activeTab.value = resolveActiveTab(route.query.tab)
+  void fetchDetail()
+}, {immediate: true})
 
 watch(
   () => route.query.tab,
@@ -324,9 +344,7 @@ watch(
     if (!isAnchorDetailRoute()) {
       return
     }
-    if (typeof tab === 'string' && tab) {
-      activeTab.value = tab
-    }
+    activeTab.value = resolveActiveTab(tab)
   },
 )
 
@@ -334,7 +352,7 @@ onActivated(() => {
   if (!isAnchorDetailRoute()) {
     return
   }
-  fetchDetail()
+  void fetchDetail()
 })
 </script>
 

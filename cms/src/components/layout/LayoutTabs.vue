@@ -272,7 +272,7 @@ onUnmounted(() => {
   font-size: 13px;
 }
 
-:deep(.el-tabs__content) {
+.layout-tabs__list :deep(.el-tabs__content) {
   display: none;
 }
 </style>
