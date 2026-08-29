@@ -5,11 +5,6 @@ server:
   staticSites:  # *.bigtktool.shop 通配证书, certFile/keyFile 可省略; www 不配此项,默认 API
     - domain: "lzg.bigtktool.shop"
       path: "/home/ec2-user/cdn/cms"
-    - domain: "cms-export.bigtktool.shop"
-      path: "/home/ec2-user/cdn/cms-export"
-      ttlMinutes: 30                # CMS 文件导出过期清理(分钟)
-    - domain: "images.bigtktool.shop"
-      path: "/home/ec2-user/cdn/images"
     - domain: "web.bigtktool.shop"
       path: "/home/ec2-user/cdn/official-site"
     - domain: "h5-live.bigtktool.shop"

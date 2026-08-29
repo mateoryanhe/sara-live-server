@@ -11,7 +11,6 @@ import (
 
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/util/guid"
-	"xr-game-server/core/cfg"
 )
 
 // allowedImageExt 允许的图片扩展名
@@ -56,13 +55,7 @@ func UploadImage(file *ghttp.UploadFile) (string, error) {
 }
 
 func getImageDir() string {
-	if root := cfg.GetImageStaticRoot(); root != "" {
-		return root
-	}
-	if prefix := cfg.GetImageStaticPrefix(); prefix != "" {
-		return cfg.ResolvePhysicalDir(prefix)
-	}
-	return cfg.GetServerRoot()
+	return GetStoragePath()
 }
 
 func getCMSDir() string {

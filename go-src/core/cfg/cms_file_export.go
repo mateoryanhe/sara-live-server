@@ -17,14 +17,25 @@ var (
 	cmsFileExportStaticPrefix string
 	cmsFileExportRoot         string
 	cmsFileExportTTLMinutes   int
+
+	cmsExportStoragePathOverride func() string
+	cmsExportTtlOverride         func() int
 )
+
+func RegisterCMSExportStoragePathOverride(fn func() string) {
+	cmsExportStoragePathOverride = fn
+}
+
+func RegisterCMSExportTtlOverride(fn func() int) {
+	cmsExportTtlOverride = fn
+}
 
 func initCMSFileExportCfg() {
 	cmsFileExportStaticPrefix = CMSFileExportStaticPrefix
 	cmsFileExportRoot = ""
 	cmsFileExportTTLMinutes = defaultCMSFileExportTTLMinutes
 
-	for _, item := range staticPathCfgs {
+	for _, item := range GetStaticPathCfgs() {
 		if item == nil || item.Prefix != CMSFileExportStaticPrefix {
 			continue
 		}
@@ -54,23 +65,34 @@ func GetCMSFileExportStaticPrefix() string {
 
 // GetCMSFileExportRoot CMS 文件导出物理目录
 func GetCMSFileExportRoot() string {
+	if cmsExportStoragePathOverride != nil {
+		if p := strings.TrimSpace(cmsExportStoragePathOverride()); p != "" {
+			return p
+		}
+	}
 	return cmsFileExportRoot
 }
 
 // GetCMSFileExportTTLMinutes 导出文件过期清理时间(分钟)
 func GetCMSFileExportTTLMinutes() int {
+	if cmsExportTtlOverride != nil {
+		if ttl := cmsExportTtlOverride(); ttl > 0 {
+			return ttl
+		}
+	}
 	if cmsFileExportTTLMinutes <= 0 {
 		return defaultCMSFileExportTTLMinutes
 	}
 	return cmsFileExportTTLMinutes
 }
 
-// ResolveCMSFileExportDir CMS 文件导出目录(所有导出共用同一目录)
+// ResolveCMSFileExportDir CMS 文件导出目录(与上传资源共用 storagePath)
 func ResolveCMSFileExportDir() string {
-	if cmsFileExportRoot == "" {
+	root := GetCMSFileExportRoot()
+	if root == "" {
 		return "."
 	}
-	return cmsFileExportRoot
+	return root
 }
 
 // BuildCMSFileExportURLPrefix CMS 文件导出 URL 前缀

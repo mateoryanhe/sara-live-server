@@ -1,6 +1,7 @@
 package upload
 
 import (
+	"path/filepath"
 	"strings"
 	"sync/atomic"
 
@@ -9,12 +10,17 @@ import (
 )
 
 const (
-	defaultResourceDomain  = "http://127.0.0.1"
-	defaultAppImageMaxSize = 1048576 // 1MB
+	defaultResourceDomain   = "http://127.0.0.1"
+	defaultStoragePath      = "/home/ec2-user/cdn/images"
+	defaultCmsExportTTL     = 30
+	defaultAppImageMaxSize  = 1048576 // 1MB
 )
 
 type resourceCfgSnapshot struct {
 	ResourceDomain                 string
+	ResourceDomainConfigured       bool
+	StoragePath                    string
+	CmsExportTtlMinutes            int
 	AppImageMaxSize                uint64
 	ImageModerationEnabled         bool
 	ImageModerationAccessKeyId     string
@@ -27,8 +33,10 @@ type resourceCfgSnapshot struct {
 var (
 	resourceCfgCache atomic.Value // *resourceCfgSnapshot
 	emptyResourceCfg = &resourceCfgSnapshot{
-		ResourceDomain:  defaultResourceDomain,
-		AppImageMaxSize: defaultAppImageMaxSize,
+		ResourceDomain:      defaultResourceDomain,
+		StoragePath:         defaultStoragePath,
+		CmsExportTtlMinutes: defaultCmsExportTTL,
+		AppImageMaxSize:     defaultAppImageMaxSize,
 	}
 )
 
@@ -54,6 +62,9 @@ func toResourceCfgSnapshot(row *entity.UploadResourceCfg) *resourceCfgSnapshot {
 	}
 	s := &resourceCfgSnapshot{
 		ResourceDomain:                 normalizeDomain(row.ResourceDomain),
+		ResourceDomainConfigured:       strings.TrimSpace(row.ResourceDomain) != "",
+		StoragePath:                    normalizeStoragePath(row.StoragePath),
+		CmsExportTtlMinutes:            normalizeCmsExportTtl(row.CmsExportTtlMinutes),
 		AppImageMaxSize:                normalizeAppImageMaxSize(row.AppImageMaxSize),
 		ImageModerationEnabled:         row.ImageModerationEnabled,
 		ImageModerationAccessKeyId:     strings.TrimSpace(row.ImageModerationAccessKeyId),
@@ -91,4 +102,47 @@ func normalizeAppImageMaxSize(size uint64) uint64 {
 		return defaultAppImageMaxSize
 	}
 	return size
+}
+
+func normalizeStoragePath(path string) string {
+	path = strings.TrimSpace(path)
+	if path == "" {
+		return defaultStoragePath
+	}
+	return filepath.Clean(path)
+}
+
+func isAbsoluteStoragePath(path string) bool {
+	path = strings.TrimSpace(path)
+	if path == "" {
+		return false
+	}
+	if strings.HasPrefix(path, "/") {
+		return true
+	}
+	if len(path) >= 3 && path[1] == ':' {
+		c := path[0]
+		if (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') {
+			sep := path[2]
+			return sep == '/' || sep == '\\'
+		}
+	}
+	return strings.HasPrefix(path, `\\`) || strings.HasPrefix(path, "//")
+}
+
+func normalizeCmsExportTtl(minutes int) int {
+	if minutes <= 0 {
+		return defaultCmsExportTTL
+	}
+	return minutes
+}
+
+// GetStoragePath 统一文件存储物理目录(头像/图片/短视频/CMS导出)
+func GetStoragePath() string {
+	return getResourceCfgCache().StoragePath
+}
+
+// GetCmsExportTtlMinutes CMS 文件导出过期清理时间(分钟)
+func GetCmsExportTtlMinutes() int {
+	return getResourceCfgCache().CmsExportTtlMinutes
 }

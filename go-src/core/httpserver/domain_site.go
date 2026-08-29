@@ -36,9 +36,9 @@ func setupDomainSites() {
 	ctx := gctx.New()
 	domainSiteEntries = make([]domainSiteEntry, 0, len(sites))
 	for _, site := range sites {
-		root := gfile.RealPath(site.Root)
+		root := resolveDomainSiteRoot(ctx, site.Root)
 		if root == "" {
-			g.Log().Warningf(ctx, "域名站点根目录不存在,已跳过 domain=%s root=%s", site.Domain, site.Root)
+			g.Log().Warningf(ctx, "域名站点根目录无效,已跳过 domain=%s root=%s", site.Domain, site.Root)
 			continue
 		}
 		domainSiteEntries = append(domainSiteEntries, domainSiteEntry{
@@ -65,6 +65,23 @@ func setupDomainSites() {
 		g.Log().Warningf(ctx, "已启用域名静态目录映射,共 %d 项", len(domainSiteEntries))
 		bindDomainStaticHooks()
 	}
+}
+
+func resolveDomainSiteRoot(ctx context.Context, root string) string {
+	root = strings.TrimSpace(root)
+	if root == "" {
+		return ""
+	}
+	if real := gfile.RealPath(root); real != "" {
+		return real
+	}
+	if err := gfile.Mkdir(root); err != nil {
+		g.Log().Warningf(ctx, "创建域名站点根目录失败 root=%s err=%v", root, err)
+	}
+	if real := gfile.RealPath(root); real != "" {
+		return real
+	}
+	return filepath.Clean(root)
 }
 
 func bindDomainStaticHooks() {
@@ -106,9 +123,7 @@ func serveDomainStatic(r *ghttp.Request, root string) {
 		serveCMSDomainSPA(r, root, reqPath)
 		return
 	}
-	applyRequestCORS(r)
-	r.Response.WriteStatus(http.StatusNotFound)
-	r.ExitAll()
+	// 非 CMS 站点且文件不存在时不拦截,交给 serverRoot / API 路由继续处理
 }
 
 func mapStaticSiteRequestPath(root, path string) string {
@@ -116,13 +131,22 @@ func mapStaticSiteRequestPath(root, path string) string {
 		return mapCMSDomainRequestPath(path)
 	}
 	if isImagesDomainRoot(root) {
-		return mapLegacyPrefixRequestPath(path, cfg.GetImageStaticPrefix())
+		prefix := cfg.GetImageStaticPrefix()
+		if prefix == "" {
+			prefix = "/images"
+		}
+		return mapLegacyPrefixRequestPath(path, prefix)
 	}
 	return path
 }
 
 func isImagesDomainRoot(root string) bool {
-	return strings.EqualFold(filepath.Base(filepath.Clean(root)), "images")
+	root = filepath.Clean(root)
+	if strings.EqualFold(filepath.Base(root), "images") {
+		return true
+	}
+	imgRoot := cfg.GetStaticPathRoot("/images")
+	return imgRoot != "" && filepath.Clean(imgRoot) == root
 }
 
 func mapLegacyPrefixRequestPath(path, prefix string) string {

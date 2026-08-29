@@ -26,9 +26,15 @@ func SaveUploadResourceCfg(_ context.Context, req *uploaddto.SaveUploadResourceC
 	if req.AppImageMaxSizeMB < 1 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
+	storagePath := normalizeStoragePath(req.StoragePath)
+	if !isAbsoluteStoragePath(storagePath) {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 	existing := cfgdao.LoadUploadResourceCfg()
 	row := &entity.UploadResourceCfg{
 		ResourceDomain:                 strings.TrimSpace(req.ResourceDomain),
+		StoragePath:                    storagePath,
+		CmsExportTtlMinutes:            req.CmsExportTtlMinutes,
 		AppImageMaxSize:                uint64(req.AppImageMaxSizeMB) * uploadCfgMB,
 		ImageModerationEnabled:         req.ImageModerationEnabled,
 		ImageModerationAccessKeyId:     strings.TrimSpace(req.ImageModerationAccessKeyId),
@@ -67,6 +73,7 @@ func SaveUploadResourceCfg(_ context.Context, req *uploaddto.SaveUploadResourceC
 	}
 	invalidateImageGreenClient()
 	reloadResourceCfgMemory()
+	registerStaticMappings()
 	return &uploaddto.SaveUploadResourceCfgRes{
 		Success: true,
 		ID:      strconv.FormatUint(row.ID, 10),
@@ -81,6 +88,8 @@ func toUploadResourceCfgItem(cfg *entity.UploadResourceCfg) *uploaddto.UploadRes
 	return &uploaddto.UploadResourceCfgItem{
 		ID:                             strconv.FormatUint(cfg.ID, 10),
 		ResourceDomain:                 snap.ResourceDomain,
+		StoragePath:                    snap.StoragePath,
+		CmsExportTtlMinutes:            snap.CmsExportTtlMinutes,
 		AppImageMaxSizeMB:              appImageMaxSizeMB(snap.AppImageMaxSize),
 		ImageModerationEnabled:         snap.ImageModerationEnabled,
 		ImageModerationAccessKeyId:     cfg.ImageModerationAccessKeyId,

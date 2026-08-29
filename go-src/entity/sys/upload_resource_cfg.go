@@ -13,6 +13,8 @@ const (
 type UploadResourceCfg struct {
 	migrate.OneModel
 	ResourceDomain  string `gorm:"size:256;default:'';comment:资源访问域名" json:"resourceDomain"`
+	StoragePath     string `gorm:"size:512;default:'/home/ec2-user/cdn/images';comment:统一文件存储路径(头像/图片/短视频/CMS导出)" json:"storagePath"`
+	CmsExportTtlMinutes int `gorm:"default:30;comment:CMS文件导出过期清理(分钟)" json:"cmsExportTtlMinutes"`
 	AppImageMaxSize uint64 `gorm:"default:1048576;comment:App端图片上传大小上限(字节)" json:"appImageMaxSize"`
 	// App 端图片审核(阿里云 ImageModeration)
 	ImageModerationEnabled         bool   `gorm:"default:0;comment:是否开启App图片审核" json:"imageModerationEnabled"`

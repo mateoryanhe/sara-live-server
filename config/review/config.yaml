@@ -4,12 +4,6 @@ server:
   staticSites:  # *.bigtktool.shop 通配证书, certFile/keyFile 可省略; www 不配此项,默认 API
     - domain: "review.saralive.net"
       path: "/home/ec2-user/cdn/cms"
-    - domain: "review-export.saralive.net"
-      path: "/home/ec2-user/cdn/cms-export"
-      ttlMinutes: 30                # CMS 文件导出过期清理(分钟)
-    - domain: "reviewpng.saralive.net"
-      prefix: "/images"
-      path: "/home/ec2-user/cdn/images"
   httpsCertPath: "/home/ec2-user/ssl/cf-origin/cf-origin.pem"
   httpsKeyPath: "/home/ec2-user/ssl/cf-origin/cf-origin.key"
   clientMaxBodySize: "5g"   # HTTP 请求体/上传上限(唯一大小限制,Go业务层不再校验)

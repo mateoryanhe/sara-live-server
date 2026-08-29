@@ -16,7 +16,7 @@ var domainSiteCfgs []*DomainSiteCfg
 
 // GetDomainSiteCfgs 获取域名站点配置
 func GetDomainSiteCfgs() []*DomainSiteCfg {
-	return domainSiteCfgs
+	return mergedDomainSiteCfgs()
 }
 
 func normalizeDomainSiteCfgs(list []*DomainSiteCfg) []*DomainSiteCfg {

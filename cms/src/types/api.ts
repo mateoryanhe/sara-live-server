@@ -1894,6 +1894,8 @@ export interface ReloadVendorGameCacheRes {
 export interface UploadResourceCfg {
     id: string
     resourceDomain: string
+    storagePath?: string
+    cmsExportTtlMinutes?: number
     appImageMaxSizeMB: number
     imageModerationEnabled: boolean
     imageModerationAccessKeyId: string
@@ -1912,6 +1914,8 @@ export interface GetUploadResourceCfgRes {
 export interface SaveUploadResourceCfgReq {
     id?: number
     resourceDomain: string
+    storagePath: string
+    cmsExportTtlMinutes: number
     appImageMaxSizeMB: number
     imageModerationEnabled: boolean
     imageModerationAccessKeyId: string

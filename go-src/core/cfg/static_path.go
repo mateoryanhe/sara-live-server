@@ -37,6 +37,16 @@ func GetImageStaticPrefix() string {
 	return imageStaticPrefix
 }
 
+// SetImageStaticPrefix 设置图片 URL 前缀(供 CMS 资源域名配置使用,不依赖 httpserver 路径注册)
+func SetImageStaticPrefix(prefix string) {
+	prefix = normalizeURLPrefix(strings.TrimSpace(prefix))
+	if prefix == "" || prefix == "/" {
+		imageStaticPrefix = ""
+		return
+	}
+	imageStaticPrefix = prefix
+}
+
 // GetImageStaticRoot 图片物理目录,来自 staticSites 映射
 func GetImageStaticRoot() string {
 	if imageStaticPrefix == "" {
@@ -52,7 +62,7 @@ func GetImageStaticPathSegment() string {
 
 // GetStaticPathCfgs 获取静态路径映射(按前缀长度降序,优先最长匹配)
 func GetStaticPathCfgs() []*StaticPathCfg {
-	return staticPathCfgs
+	return mergedStaticPathCfgs()
 }
 
 // GetServerRoot 默认静态资源根目录
@@ -64,12 +74,12 @@ func initImageStaticCfg() {
 	ctx := gctx.New()
 	prefix := resolveImageStaticPrefix(ctx)
 	if prefix == "" {
-		g.Log().Error(ctx, "未找到图片静态站点,请在 server.staticSites 中配置 images 域名或 prefix:/images")
+		// 无 yaml 配置时,由 upload 模块在 Init 后注册 /images 并 RefreshImageStaticCfg
 		return
 	}
 	root := strings.TrimSpace(GetStaticPathRoot(prefix))
 	if root == "" {
-		g.Log().Errorf(ctx, "图片静态 prefix=%s 在 server.staticSites 中未找到对应 path", prefix)
+		g.Log().Warningf(ctx, "图片静态 prefix=%s 尚未配置 path,等待 CMS 上传资源配置", prefix)
 		return
 	}
 	if gfile.RealPath(root) == "" {
@@ -84,7 +94,7 @@ func resolveImageStaticPrefix(ctx context.Context) string {
 	if explicit != "" && explicit != "/" {
 		return explicit
 	}
-	for _, item := range staticPathCfgs {
+	for _, item := range mergedStaticPathCfgs() {
 		if item == nil {
 			continue
 		}
@@ -133,7 +143,7 @@ func MatchStaticPath(urlPath string) (root string, rel string, ok bool) {
 	if urlPath == "/" {
 		urlPath = "/"
 	}
-	for _, item := range staticPathCfgs {
+	for _, item := range mergedStaticPathCfgs() {
 		if item == nil {
 			continue
 		}
@@ -155,7 +165,7 @@ func MatchStaticPath(urlPath string) (root string, rel string, ok bool) {
 // GetStaticPathRoot 获取指定前缀的物理目录,未配置时返回空
 func GetStaticPathRoot(prefix string) string {
 	prefix = normalizeURLPrefix(prefix)
-	for _, item := range staticPathCfgs {
+	for _, item := range mergedStaticPathCfgs() {
 		if item != nil && item.Prefix == prefix {
 			return item.Path
 		}
