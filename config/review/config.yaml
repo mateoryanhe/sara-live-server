@@ -1,0 +1,81 @@
+server:
+  ###系统配置
+  address: 443  #http服务端口
+  staticSites:  # *.bigtktool.shop 通配证书, certFile/keyFile 可省略; www 不配此项,默认 API
+    - domain: "review.saralive.net"
+      path: "/home/ec2-user/cdn/cms"
+    - domain: "review-export.saralive.net"
+      path: "/home/ec2-user/cdn/cms-export"
+      ttlMinutes: 30                # CMS 文件导出过期清理(分钟)
+    - domain: "reviewpng.saralive.net"
+      prefix: "/images"
+      path: "/home/ec2-user/cdn/images"
+  httpsCertPath: "/home/ec2-user/ssl/cf-origin/cf-origin.pem"
+  httpsKeyPath: "/home/ec2-user/ssl/cf-origin/cf-origin.key"
+  clientMaxBodySize: "5g"   # HTTP 请求体/上传上限(唯一大小限制,Go业务层不再校验)
+  readTimeout: "120m"
+  writeTimeout: "120m"
+  gzipEnabled: true         # 开启 gzip 响应压缩
+  graceful: true
+  hotRestartFlushTimeout: 1  # 第一阶段最长等待(秒),到点即Restart;后台并行刷盘
+  hotRestartExitTimeout: 5   # 第二阶段旧进程固定等待(秒)再强制退出
+  # PProf配置
+  pprofEnabled: true # 是否开启PProf性能调试特性。默认为false
+  pprofPattern: "/66dcd8e25ab3b339546ea1de5eb2d443e6fca76c76d11709f10533be8bd87d7d/pprof"    # 开启PProf时有效，表示PProf特性的页面访问路径，对当前Server绑定的所有域名有效
+  ####自定义配置
+  dumpRouterMap: false
+
+bufferSize:
+  db:
+    tickIntervalMs: 1000   # 调度周期(毫秒)
+    cpuIdlePercent: 70     # 系统 CPU 空闲比例达到该值才批量落库
+    maxPendingWaitMs: 5000 # Pending 最长等待(毫秒),超时强制落库
+    batchSize: 100         # 每轮全局批量落库上限(所有 queue 共用)
+  websocket:
+    size: 30 # 推送批量大小(未配置时默认10)
+  goPool:
+    size: 400 # 协程池大小(未配置时走默认池)
+
+logger:
+  detail:                               # API详情日志；启动时同步为默认 g.Log()
+    path: "/home/ec2-user/log/"
+    file: "detail.log"
+    header: true
+    flags: 1                            # 仅异步,时间靠 timeFormat,不含源码路径,便于 CMS 解析
+    timeFormat: "2006-01-02T15:04:05.000"
+    stdout: false
+    rotateSize: "100m"              # 保留最近3天的按日日志，过期直接删（不产生时间戳备份）
+    rotateBackupLimit: 0          # 0=不保留备份，过期直接删，不产生 detail-xxx.20260720....log
+  access:                               # HTTP Server access 日志(替代 GF 内置 access 日志)
+    path: "/home/ec2-user/log/"
+    file: "access.log"
+    header: true                        # 保留时间戳与 TraceId,供日志查询过滤与解析
+    levelPrint: false
+    flags: 1                            # 仅时间戳,不含源码路径/级别,便于 CMS 解析
+    timeFormat: "2006-01-02T15:04:05.000"
+    stdout: false
+    rotateSize: "100m"              # 保留最近3天的按日日志，过期直接删（不产生时间戳备份）
+    rotateBackupLimit: 0          # 0=不保留备份，过期直接删，不产生 detail-xxx.20260720....log
+  error:                                # HTTP 框架错误 + xrlog 错误日志，g.Log("error")
+    path: "/home/ec2-user/log/"
+    file: "error.log"
+    flags: 1                            # 仅异步,时间靠 timeFormat,不含源码路径,便于 CMS 解析
+    header: true                        # 保留时间戳与 TraceId,供日志查询过滤与解析
+    timeFormat: "2006-01-02T15:04:05.000"
+    stdout: false
+    rotateSize: "100m"              # 保留最近3天的按日日志，过期直接删（不产生时间戳备份）
+    rotateBackupLimit: 0          # 0=不保留备份，过期直接删，不产生 detail-xxx.20260720....log
+
+database:
+  logger:
+    path: '/home/ec2-user/log/gf_app'
+    level: "all"
+    stdout: false
+    queryOnly: true   # 仅记录 SELECT/UPDATE/DELETE,不记录 INSERT/SHOW
+  default:
+    link: "mysql:root:Appledev882116@tcp(127.0.0.1:13307)/live_db"
+    extra: "charset=utf8mb4&parseTime=True&loc=Local"
+    maxIdle: 2
+    maxOpen: 8
+    maxLifetime: "30s"
+    debug: true

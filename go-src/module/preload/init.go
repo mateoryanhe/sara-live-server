@@ -12,6 +12,7 @@ import (
 func Init() {
 	hotrestart.RegisterHotRestartAuthProvider(cfgdao.GetHotRestartAuth)
 	cfg.ApplyMemoryLimit(cfgdao.GetMemoryLimitM())
+	initRegisterInitCurrency()
 	preloadRecentLoginUsers(cfgdao.GetRecentLoginPreloadLimit())
 	preloadLiveRoomGameRecommends()
 }

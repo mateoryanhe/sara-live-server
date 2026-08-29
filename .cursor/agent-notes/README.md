@@ -17,7 +17,16 @@
 |------|------|------|
 | `直播测试服` | ec2-user @ 54.241.124.37 | Go、MariaDB |
 | `直播正式服` | ec2-user @ 52.9.70.64 | 正式 Go |
+| `直播审核服` | ec2-user @ 18.144.165.177 | 审核专用（~1GB RAM） |
 | `直播测试服-h5` | h5-live @ 54.241.124.37 | H5/SFTP |
+
+## 审核服 MariaDB（2026-08-28）
+
+- **机器**：1 vCPU / ~957MiB RAM / 30G 盘；已加 **512MiB swap**（`vm.swappiness=10`）
+- **MariaDB 10.11**，配置 `/etc/my.cnf.d/99-sara-live-review.cnf`
+- **端口** `13307`，仅 `127.0.0.1`；库 `live_db`；root 密码与测试/dev 一致
+- **内存**：`innodb_buffer_pool_size=96M`，`max_connections=20`，`performance_schema=OFF`，无 binlog
+- Go 连接串（与 dev 同格式）：`mysql:root:***@tcp(127.0.0.1:13307)/live_db`
 
 ## 2026-08-28 代码丢失（摘要）
 

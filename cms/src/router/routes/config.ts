@@ -19,6 +19,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '账号配置'},
         },
         {
+            path: 'app-version-cfg',
+            name: 'AppVersionCfgManagement',
+            component: () => import('@/views/config/app-version-cfg.vue'),
+            meta: {title: 'App版本查询'},
+        },
+        {
             path: 'server-runtime-cfg',
             name: 'ServerRuntimeCfgManagement',
             component: () => import('@/views/config/server-runtime-cfg.vue'),
@@ -27,6 +33,12 @@ export const configRoutes: RouteRecordRaw = {
         {
             path: 'preload-cfg',
             redirect: '/config/server-runtime-cfg',
+        },
+        {
+            path: 'simulator-cpu-keyword',
+            name: 'SimulatorCpuKeywordManagement',
+            component: () => import('@/views/config/simulator-cpu-keyword-list.vue'),
+            meta: {title: '模拟器CPU关键字'},
         },
         {
             path: 'text-moderation',

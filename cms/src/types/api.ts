@@ -839,6 +839,8 @@ export interface SaveFirstRechargeActivityCfgRes {
 export interface PreloadCfg {
     id?: string
     recentLoginLimit: number
+    initGold?: number
+    initDiamond?: number
     hotRestartAuth?: string
     memoryLimitM?: number
     ipGeoDbPath?: string
@@ -853,6 +855,8 @@ export interface GetPreloadCfgRes {
 export interface SavePreloadCfgReq {
     id?: string | number
     recentLoginLimit: number
+    initGold: number
+    initDiamond: number
     hotRestartAuth: string
     memoryLimitM: number
     ipGeoDbPath: string

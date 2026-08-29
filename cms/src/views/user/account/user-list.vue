@@ -257,6 +257,16 @@
               style="width: 100%"
           />
         </el-form-item>
+        <el-form-item :label="t('pages.userList.adjustReason')" prop="reason">
+          <el-select v-model="currencyForm.reason" :placeholder="t('pages.userList.selectAdjustReason')" style="width: 100%">
+            <el-option
+                v-for="item in currencyAdjustReasonOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="currencyDialogVisible = false">{{ t('common.cancel') }}</el-button>
@@ -506,6 +516,9 @@ const loading = ref(false)
 type CurrencyType = 'gold' | 'diamond'
 type CurrencyMode = 'add' | 'sub'
 
+const GM_ADJUST_REASON_TEST = 6
+const GM_ADJUST_REASON_COMPENSATION = 7
+
 const currencyDialogVisible = ref(false)
 const currencyType = ref<CurrencyType>('gold')
 const currencyMode = ref<CurrencyMode>('add')
@@ -653,14 +666,21 @@ interface CurrencyForm {
   nickname: string
   currentBalanceText: string
   amount: number
+  reason: number
 }
 
 const currencyForm = reactive<CurrencyForm>({
   userId: '',
   nickname: '',
   currentBalanceText: '',
-  amount: 1
+  amount: 1,
+  reason: GM_ADJUST_REASON_TEST,
 })
+
+const currencyAdjustReasonOptions = computed(() => [
+  {label: t('pages.userList.adjustReasonTest'), value: GM_ADJUST_REASON_TEST},
+  {label: t('pages.userList.adjustReasonCompensation'), value: GM_ADJUST_REASON_COMPENSATION},
+])
 
 const currencyName = computed(() =>
     currencyType.value === 'gold' ? t('pages.userList.gold') : t('pages.userList.diamond')
@@ -694,7 +714,10 @@ const currencyFormRules = computed<FormRules>(() => ({
       },
       trigger: 'blur'
     }
-  ]
+  ],
+  reason: [
+    {required: true, message: t('pages.userList.selectAdjustReasonRequired'), trigger: 'change'},
+  ],
 }))
 
 const searchForm = reactive({
@@ -804,6 +827,7 @@ const resetCurrencyForm = () => {
   currencyForm.nickname = ''
   currencyForm.currentBalanceText = ''
   currencyForm.amount = 1
+  currencyForm.reason = GM_ADJUST_REASON_TEST
   currencyFormRef.value?.clearValidate()
 }
 
@@ -814,6 +838,7 @@ const openCurrencyDialog = (row: UserInfo, type: CurrencyType, mode: CurrencyMod
   currencyForm.nickname = row.nickname || '-'
   currencyForm.currentBalanceText = formatWalletBalance(type === 'gold' ? row.gold : row.diamond)
   currencyForm.amount = 1
+  currencyForm.reason = GM_ADJUST_REASON_TEST
   currencyDialogVisible.value = true
 }
 
@@ -1202,7 +1227,8 @@ const submitCurrencyChange = async () => {
     try {
       const payload = {
         userId: currencyForm.userId,
-        amount: currencyForm.amount
+        amount: currencyForm.amount,
+        reason: currencyForm.reason,
       }
       const api = currencyType.value === 'gold' ? goldApi : diamondApi
       if (currencyMode.value === 'add') {

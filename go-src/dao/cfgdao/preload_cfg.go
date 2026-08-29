@@ -12,6 +12,8 @@ const (
 	DefaultHotRestartAuth          = "nGH66S4TjBjQqCKyWJAM"
 	DefaultMemoryLimitM            = 300
 	DefaultIpGeoDbPath             = "/home/ec2-user/xgameserver/GeoLite2-Country.mmdb"
+	DefaultInitGold                = 0
+	DefaultInitDiamond             = 0
 )
 
 func LoadPreloadCfg() *entity.PreloadCfg {
@@ -68,4 +70,20 @@ func GetIpGeoDbPath() string {
 		}
 	}
 	return DefaultIpGeoDbPath
+}
+
+func GetInitGold() float64 {
+	cfg := LoadPreloadCfg()
+	if cfg == nil || cfg.InitGold < 0 {
+		return DefaultInitGold
+	}
+	return cfg.InitGold
+}
+
+func GetInitDiamond() float64 {
+	cfg := LoadPreloadCfg()
+	if cfg == nil || cfg.InitDiamond < 0 {
+		return DefaultInitDiamond
+	}
+	return cfg.InitDiamond
 }

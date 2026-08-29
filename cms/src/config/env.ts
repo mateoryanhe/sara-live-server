@@ -28,6 +28,13 @@ const config: Record<string, EnvConfig> = {
         TIMEOUT: 30000,
         SUCCESS_CODE: 200,
         BASE_PATH: ''  // 测试环境不需要额外的基础路径
+    },
+    review: {
+        BASE_API: import.meta.env.VITE_API_BASE_URL || 'https://v1.saralive.net',
+        ENV: 'review',
+        TIMEOUT: 30000,
+        SUCCESS_CODE: 200,
+        BASE_PATH: ''
     }
 }
 

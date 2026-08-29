@@ -27,6 +27,8 @@ func SavePreloadCfg(_ context.Context, req *preloadcfgdto.SavePreloadCfgReq) (*p
 		HotRestartAuth:   strings.TrimSpace(req.HotRestartAuth),
 		MemoryLimitM:     req.MemoryLimitM,
 		IpGeoDbPath:      strings.TrimSpace(req.IpGeoDbPath),
+		InitGold:         req.InitGold,
+		InitDiamond:      req.InitDiamond,
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -57,6 +59,8 @@ func defaultPreloadCfgItem() *preloadcfgdto.PreloadCfgItem {
 		HotRestartAuth:   cfgdao.DefaultHotRestartAuth,
 		MemoryLimitM:     cfgdao.DefaultMemoryLimitM,
 		IpGeoDbPath:      cfgdao.DefaultIpGeoDbPath,
+		InitGold:         cfgdao.DefaultInitGold,
+		InitDiamond:      cfgdao.DefaultInitDiamond,
 	}
 }
 
@@ -86,6 +90,8 @@ func toPreloadCfgItem(cfg *entity.PreloadCfg) *preloadcfgdto.PreloadCfgItem {
 		HotRestartAuth:   auth,
 		MemoryLimitM:     memoryM,
 		IpGeoDbPath:      ipGeoPath,
+		InitGold:         cfg.InitGold,
+		InitDiamond:      cfg.InitDiamond,
 		CreatedAt:        formatPreloadCfgTime(cfg.CreatedAt),
 		UpdatedAt:        formatPreloadCfgTime(cfg.UpdatedAt),
 	}
