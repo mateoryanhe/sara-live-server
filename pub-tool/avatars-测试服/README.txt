@@ -14,9 +14,9 @@
   说明: 该目录可能由 sudo 启动的服务创建(属主 root),脚本会使用 sudo unzip 写入
 
 前置条件
-  1. 本目录放置 plink.exe、pscp.exe（PuTTY 工具，与 cms-测试服 相同）
+  1. 本目录放置 plink.exe、pscp.exe（PuTTY 工具，与 cms-test 相同）
   2. config.bat 中 SSH_KEY_PATH 指向有效的 .ppk 私钥
-  3. ec2-user 具备免密 sudo（与 go-测试服 部署脚本相同）
+  3. ec2-user 具备免密 sudo（与 go-test 部署脚本相同）
   4. 远程 serverRoot 为 /home/ec2-user/cdn（见 config/test/config.yaml）
   5. 远程服务器已安装 unzip
 

@@ -10,7 +10,7 @@ CMS 审核服一键构建上传说明（PuTTY + .ppk 密钥）
             CMS: https://review.saralive.net/
 
 前置条件
-  1. 本目录放置 plink.exe、pscp.exe（PuTTY 工具，可从 cms-测试服 复制）
+  1. 本目录放置 plink.exe、pscp.exe（PuTTY 工具，可从 cms-test 复制）
   2. config.bat 中 SSH_KEY_PATH 指向有效的 .ppk 私钥
   3. 已安装 Node.js / npm，且 cms 目录可正常构建
   4. 审核服已安装 unzip

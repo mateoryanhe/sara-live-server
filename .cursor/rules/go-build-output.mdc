@@ -10,7 +10,7 @@ alwaysApply: true
 - **正确**：输出到 `go-build/`
   - Linux：`go build -o ../go-build/xr-game-server .`（在 `go-src` 目录）
   - Windows 本地：`go build -o ../go-build/xr-game-server.exe .`
-  - 或运行 `go-src/build.bat`、`pub-tool/go-测试服/deploy.bat`
+  - 或运行 `go-src/build.bat`、`pub-tool/go-test/deploy.bat`
 - **禁止**：`-o .../xxx` 或 `-o .../xr-game-server.exe`
 
 在 Windows 上，`...` 会被当成**字面文件夹名**，产生 `go-src/.../` 等垃圾目录（已在 `.gitignore` 忽略）。

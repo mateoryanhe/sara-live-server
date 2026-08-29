@@ -11,7 +11,7 @@
 默认不传参数时为 test 环境。
 
 前置条件
-  1. 本目录放置 plink.exe、pscp.exe（PuTTY 工具，可与 cms-测试服 共用）
+  1. 本目录放置 plink.exe、pscp.exe（PuTTY 工具，可与 cms-test 共用）
   2. config.bat 中 SSH_KEY_PATH 指向有效的 .ppk 私钥
   3. 远程服务器已安装 unzip
   4. 服务器 serverRoot 或 domainSites 已配置可访问官网目录

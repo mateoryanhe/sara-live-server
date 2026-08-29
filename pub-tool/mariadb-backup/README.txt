@@ -34,4 +34,4 @@ live_db 导入/导出
 ----
 - 典型流程：正式服 export.bat -> 测试服 import.bat
 - backup / D:\var 含生产数据，请勿提交 Git
-- plink.exe、pscp.exe 需在本目录（可从 go-正式服 复制）
+- plink.exe、pscp.exe 需在本目录（可从 go-prod 复制）

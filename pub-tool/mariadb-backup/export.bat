@@ -5,12 +5,12 @@ cd /d "%~dp0"
 call "%~dp0config-export.bat"
 
 if not exist "plink.exe" (
-    echo Error: plink.exe not found. Copy from pub-tool\go-正式服\
+    echo Error: plink.exe not found. Copy from pub-tool\go-prod\
     pause
     exit /b 1
 )
 if not exist "pscp.exe" (
-    echo Error: pscp.exe not found. Copy from pub-tool\go-正式服\
+    echo Error: pscp.exe not found. Copy from pub-tool\go-prod\
     pause
     exit /b 1
 )

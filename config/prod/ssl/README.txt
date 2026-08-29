@@ -14,7 +14,7 @@ Cloudflare 控制台
 - 源站证书仅用于 Cloudflare 到源站 HTTPS,浏览器不信任此证书
 
 部署
-- 运行 pub-tool/go-正式服/deploy.bat 会自动上传证书到服务器
+- 运行 pub-tool/go-prod/deploy.bat 会自动上传证书到服务器
 - 或手动:
   mkdir -p /home/ec2-user/ssl/cf-origin
   chmod 644 cf-origin.pem
