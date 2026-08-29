@@ -3,6 +3,8 @@ REM Remote server configuration
 set REMOTE_HOST=18.144.165.177
 set REMOTE_USER=ec2-user
 set REMOTE_DIR=/home/ec2-user/xgameserver
+REM 审核服 /tmp 仅 ~479MB tmpfs,大文件走磁盘 staging(勿用 /tmp)
+set REMOTE_STAGE=/home/ec2-user/staging
 
 REM Local path configuration
 set LOCAL_PROJECT_PATH=D:\company-code\sara-live-server

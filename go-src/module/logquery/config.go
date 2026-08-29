@@ -110,8 +110,8 @@ func (c logQueryConfig) exportAbsDir() string {
 	return cfg.ResolveCMSFileExportDir()
 }
 
-func (c logQueryConfig) exportURLPrefix() string {
-	return cfg.BuildCMSFileExportURLPrefix()
+func (c logQueryConfig) exportFileURL(fileName string) string {
+	return cfg.BuildCMSFileExportURL(fileName)
 }
 
 func (c logQueryConfig) exportTTLMinutes() int {

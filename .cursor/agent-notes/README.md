@@ -28,6 +28,13 @@
 - **内存**：`innodb_buffer_pool_size=96M`，`max_connections=20`，`performance_schema=OFF`，无 binlog
 - Go 连接串（与 dev 同格式）：`mysql:root:***@tcp(127.0.0.1:13307)/live_db`
 
+## 审核服磁盘与 /tmp（2026-08-29）
+
+- **`/tmp` 为 tmpfs ~479MB**（约半内存），**勿用于 800MB+ 传输**（会写满失败）
+- 大文件/压缩包：用 **`/home/ec2-user/staging`** 中转，解压到目标如 **`/home/ec2-user/cdn/images`**
+- 根盘 `/` 约 30G，剩余空间充足；**不宜扩大 /tmp**（受内存限制，扩了易 OOM）
+- 已改脚本：`go-review/deploy.bat`、`cms-review/upload.bat`、`avatars-审核服/upload.bat` 均走 staging
+
 ## 2026-08-28 代码丢失（摘要）
 
 - **原因**：清理 `go-src/.../` 误用 `rd /s /q`，路径转义错误，永久删除 `.git` 与大量源码；回收站无备份。

@@ -19,7 +19,7 @@ func GetLogPaths(_ context.Context, _ *logquerydto.CMSGetLogPathsReq) (*logquery
 		ErrorPrefix:            logCfg.ErrorPrefix,
 		FileExportStaticPrefix: cfg.GetCMSFileExportStaticPrefix(),
 		FileExportAbsDir:       logCfg.exportAbsDir(),
-		FileExportURLPrefix:    logCfg.exportURLPrefix(),
+		FileExportURLPrefix:    cfg.BuildCMSFileExportURLPrefix(),
 		FileExportTTLMinutes:   cfg.GetCMSFileExportTTLMinutes(),
 		LinuxOnly:              true,
 	}, nil

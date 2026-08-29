@@ -150,7 +150,8 @@ if errorlevel 1 (
     exit /b 1
 )
 
-pscp.exe -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% "%ZIP_FILE%" %REMOTE_USER%@%REMOTE_HOST%:/tmp/%ZIP_FILE%
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "mkdir -p '%REMOTE_STAGE%'"
+pscp.exe -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% "%ZIP_FILE%" %REMOTE_USER%@%REMOTE_HOST%:%REMOTE_STAGE%/%ZIP_FILE%
 if errorlevel 1 (
     echo Error: Zip upload failed
     del "%ZIP_FILE%"
@@ -158,10 +159,10 @@ if errorlevel 1 (
     exit /b 1
 )
 
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "STAGE=/tmp/cms-stage-$$; REMOTE='%REMOTE_DIR%'; ZIP=/tmp/%ZIP_FILE%; rm -rf $STAGE; mkdir -p $STAGE $REMOTE; unzip -o $ZIP -d $STAGE; ec=$?; if [ $ec -ne 0 ] && [ $ec -ne 1 ]; then rm -rf $STAGE; rm -f $ZIP; exit $ec; fi; for f in $STAGE/*; do [ -e $f ] || continue; rm -rf $REMOTE/$(basename $f); done; cp -a $STAGE/. $REMOTE/; rm -rf $STAGE; rm -f $ZIP; test -f $REMOTE/index.html"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "STAGE=%REMOTE_STAGE%/cms-stage-$$; REMOTE='%REMOTE_DIR%'; ZIP=%REMOTE_STAGE%/%ZIP_FILE%; rm -rf $STAGE; mkdir -p $STAGE $REMOTE; unzip -o $ZIP -d $STAGE; ec=$?; if [ $ec -ne 0 ] && [ $ec -ne 1 ]; then rm -rf $STAGE; rm -f $ZIP; exit $ec; fi; for f in $STAGE/*; do [ -e $f ] || continue; rm -rf $REMOTE/$(basename $f); done; cp -a $STAGE/. $REMOTE/; rm -rf $STAGE; rm -f $ZIP; test -f $REMOTE/index.html"
 if errorlevel 1 (
     echo Error: Remote extraction failed or index.html missing. Details:
-    plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "ls -la '%REMOTE_DIR%' 2>&1; ls -la /tmp/%ZIP_FILE% 2>&1; unzip -t /tmp/%ZIP_FILE% 2>&1 || true"
+    plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "ls -la '%REMOTE_DIR%' 2>&1; ls -la %REMOTE_STAGE%/%ZIP_FILE% 2>&1; unzip -t %REMOTE_STAGE%/%ZIP_FILE% 2>&1 || true"
     del "%ZIP_FILE%"
     pause
     exit /b 1

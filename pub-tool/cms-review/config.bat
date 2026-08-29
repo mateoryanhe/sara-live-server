@@ -16,3 +16,5 @@ set BUILD_OUTPUT_DIR=D:\root\cms
 
 REM 审核服 CMS 静态目录（对应 config/review/config.yaml -> review.saralive.net）
 set REMOTE_DIR=/home/ec2-user/cdn/cms
+REM 审核服 /tmp 仅 ~479MB tmpfs,上传/解压走磁盘 staging
+set REMOTE_STAGE=/home/ec2-user/staging

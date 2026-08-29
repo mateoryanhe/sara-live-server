@@ -128,7 +128,7 @@ func createShellExport(logType string, patterns []string, startDate, endDate str
 	removeFile(rawPath)
 	removeFile(pagePath)
 
-	fileURL := cfg.exportURLPrefix() + "/" + fileName
+	fileURL := cfg.exportFileURL(fileName)
 	record := &exportRecord{
 		exportID:  exportID,
 		fileName:  fileName,
@@ -191,7 +191,7 @@ func createTraceShellExport(traceId, startDate, endDate string) (*shellExportRes
 	if err := writeFile(exportPath, []byte(builder.String())); err != nil {
 		return nil, err
 	}
-	fileURL := cfg.exportURLPrefix() + "/" + fileName
+	fileURL := cfg.exportFileURL(fileName)
 	record := &exportRecord{
 		exportID:  exportID,
 		fileName:  fileName,
@@ -258,7 +258,7 @@ func createAccessStatsExport(startDate, endDate string, topN int) (*shellExportR
 	removeFile(filepath.Join(workDir, exportID+".url"))
 	removeFile(filepath.Join(workDir, exportID+".ip"))
 
-	fileURL := cfg.exportURLPrefix() + "/" + fileName
+	fileURL := cfg.exportFileURL(fileName)
 	record := &exportRecord{exportID: exportID, fileName: fileName, absPath: exportPath, fileURL: fileURL, createdAt: time.Now()}
 	exportRecords.Store(exportID, record)
 	return &shellExportResult{ExportID: exportID, FileName: fileName, FileUrl: fileURL}, nil
@@ -379,7 +379,7 @@ END {
 	removeFile(rawPath)
 	removeFile(bucketPath)
 
-	fileURL := cfg.exportURLPrefix() + "/" + fileName
+	fileURL := cfg.exportFileURL(fileName)
 	record := &exportRecord{exportID: exportID, fileName: fileName, absPath: exportPath, fileURL: fileURL, createdAt: time.Now()}
 	exportRecords.Store(exportID, record)
 	return &shellExportResult{ExportID: exportID, FileName: fileName, FileUrl: fileURL}, nil

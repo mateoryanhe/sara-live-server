@@ -6,6 +6,8 @@ import "xr-game-server/core/cfg"
 func Init() {
 	cfg.RegisterCMSExportStoragePathOverride(GetStoragePath)
 	cfg.RegisterCMSExportTtlOverride(GetCmsExportTtlMinutes)
+	cfg.RegisterCMSExportURLBuilder(GetUrlByName)
+	cfg.RegisterCMSExportURLPrefixProvider(GetResourceDomain)
 	reloadResourceCfgMemory()
 	registerStaticMappings()
 }

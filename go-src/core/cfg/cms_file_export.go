@@ -8,18 +8,15 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 )
 
-const (
-	CMSFileExportStaticPrefix      = "/cms-export"
-	defaultCMSFileExportTTLMinutes = 30
-)
+const defaultCMSFileExportTTLMinutes = 30
 
 var (
-	cmsFileExportStaticPrefix string
 	cmsFileExportRoot         string
 	cmsFileExportTTLMinutes   int
-
 	cmsExportStoragePathOverride func() string
 	cmsExportTtlOverride         func() int
+	cmsExportURLBuilder          func(fileName string) string
+	cmsExportURLPrefixProvider   func() string
 )
 
 func RegisterCMSExportStoragePathOverride(fn func() string) {
@@ -30,37 +27,37 @@ func RegisterCMSExportTtlOverride(fn func() int) {
 	cmsExportTtlOverride = fn
 }
 
+// RegisterCMSExportURLBuilder 注册导出文件 URL 构建(与上传资源共用,由 upload 模块提供)
+func RegisterCMSExportURLBuilder(fn func(fileName string) string) {
+	cmsExportURLBuilder = fn
+}
+
+// RegisterCMSExportURLPrefixProvider 注册导出 URL 根路径展示(一般为 CMS 资源域名)
+func RegisterCMSExportURLPrefixProvider(fn func() string) {
+	cmsExportURLPrefixProvider = fn
+}
+
 func initCMSFileExportCfg() {
-	cmsFileExportStaticPrefix = CMSFileExportStaticPrefix
 	cmsFileExportRoot = ""
 	cmsFileExportTTLMinutes = defaultCMSFileExportTTLMinutes
 
-	for _, item := range GetStaticPathCfgs() {
-		if item == nil || item.Prefix != CMSFileExportStaticPrefix {
-			continue
-		}
-		cmsFileExportRoot = strings.TrimSpace(item.Path)
-		if item.TTLMinutes > 0 {
-			cmsFileExportTTLMinutes = item.TTLMinutes
-		}
-		break
-	}
-
 	ctx := gctx.New()
-	if cmsFileExportRoot == "" {
-		g.Log().Warningf(ctx, "server.staticSites 未配置 %s,CMS 文件导出将不可用", CMSFileExportStaticPrefix)
+	if cmsExportStoragePathOverride == nil {
+		g.Log().Warningf(ctx, "CMS 文件导出目录尚未配置,等待 upload 模块加载 storagePath")
 		return
 	}
-	g.Log().Warningf(ctx, "CMS文件导出已加载 staticPrefix=%s root=%s ttlMinutes=%d",
-		cmsFileExportStaticPrefix, cmsFileExportRoot, cmsFileExportTTLMinutes)
+	root := GetCMSFileExportRoot()
+	if root == "" {
+		g.Log().Warningf(ctx, "CMS 文件导出目录为空")
+		return
+	}
+	g.Log().Warningf(ctx, "CMS文件导出已加载 root=%s urlPrefix=%s ttlMinutes=%d",
+		root, BuildCMSFileExportURLPrefix(), GetCMSFileExportTTLMinutes())
 }
 
-// GetCMSFileExportStaticPrefix CMS 文件导出下载 URL 前缀
+// GetCMSFileExportStaticPrefix 兼容旧字段,返回资源访问根 URL
 func GetCMSFileExportStaticPrefix() string {
-	if cmsFileExportStaticPrefix == "" {
-		return CMSFileExportStaticPrefix
-	}
-	return cmsFileExportStaticPrefix
+	return BuildCMSFileExportURLPrefix()
 }
 
 // GetCMSFileExportRoot CMS 文件导出物理目录
@@ -95,17 +92,26 @@ func ResolveCMSFileExportDir() string {
 	return root
 }
 
-// BuildCMSFileExportURLPrefix CMS 文件导出 URL 前缀
+// BuildCMSFileExportURLPrefix CMS 资源访问根 URL(用于日志页展示)
 func BuildCMSFileExportURLPrefix() string {
-	return GetCMSFileExportStaticPrefix()
+	if cmsExportURLPrefixProvider != nil {
+		return strings.TrimRight(strings.TrimSpace(cmsExportURLPrefixProvider()), "/")
+	}
+	return ""
 }
 
-// BuildCMSFileExportURL 构建文件下载 URL,如 /cms-export/{fileName}
+// BuildCMSFileExportURL 构建导出文件下载 URL(与上传资源 URL 规则一致)
 func BuildCMSFileExportURL(fileName string) string {
-	prefix := BuildCMSFileExportURLPrefix()
 	fileName = strings.Trim(strings.ReplaceAll(fileName, "\\", "/"), "/")
 	if fileName == "" {
-		return prefix
+		return BuildCMSFileExportURLPrefix()
+	}
+	if cmsExportURLBuilder != nil {
+		return cmsExportURLBuilder(fileName)
+	}
+	prefix := BuildCMSFileExportURLPrefix()
+	if prefix == "" {
+		return "/" + fileName
 	}
 	return prefix + "/" + fileName
 }

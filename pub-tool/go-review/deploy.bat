@@ -130,10 +130,11 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-echo Uploading deployment package to /tmp...
+echo Uploading deployment package to %REMOTE_STAGE%...
 
-REM Upload to /tmp first (ec2-user always writable), avoid permission denied on app dir
-pscp.exe -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% "%DEPLOY_PACKAGE%" %REMOTE_USER%@%REMOTE_HOST%:/tmp/deploy_package.zip
+REM 审核服 /tmp 为 tmpfs 仅 ~479MB,大文件上传到磁盘 staging
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "mkdir -p %REMOTE_STAGE%"
+pscp.exe -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% "%DEPLOY_PACKAGE%" %REMOTE_USER%@%REMOTE_HOST%:%REMOTE_STAGE%/deploy_package.zip
 if %errorlevel% neq 0 (
     echo Error: File upload failed
     pause
@@ -149,12 +150,12 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-REM Extract deployment package from /tmp into target directory
+REM Extract deployment package from staging into target directory
 echo Extracting deployment package...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "unzip -o /tmp/deploy_package.zip -d %REMOTE_DIR% && rm -f /tmp/deploy_package.zip"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "unzip -o %REMOTE_STAGE%/deploy_package.zip -d %REMOTE_DIR% && rm -f %REMOTE_STAGE%/deploy_package.zip"
 if %errorlevel% neq 0 (
     echo Error: Remote extraction failed
-    plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "rm -f /tmp/deploy_package.zip"
+    plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "rm -f %REMOTE_STAGE%/deploy_package.zip"
     pause
     exit /b 1
 )
