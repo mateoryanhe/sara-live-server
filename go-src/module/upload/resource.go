@@ -3,12 +3,10 @@ package upload
 import (
 	"net"
 	"net/url"
-	"path/filepath"
 	"strings"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"xr-game-server/core/cfg"
 )
 
 // GetResourceDomain 静态资源访问域名
@@ -44,7 +42,7 @@ func GetSafetyCenterUrl() string {
 	return buildResourceUrl("/safety-center.html")
 }
 
-// buildResourceUrl 给资源路径拼接域名;name 为空返回空;已是完整 URL 则原样返回
+// buildResourceUrl 拼接 CMS 配置的资源访问根路径 + 相对路径;路径由 CMS 自行填写,服务端不再推导
 func buildResourceUrl(name string) string {
 	if name == "" {
 		return ""
@@ -52,49 +50,54 @@ func buildResourceUrl(name string) string {
 	if strings.HasPrefix(name, "http://") || strings.HasPrefix(name, "https://") {
 		return name
 	}
-	domain := GetResourceDomain()
-	path := strings.TrimLeft(name, "/")
-	return domain + "/" + path
+	base, pathPrefix := parseResourceDomainBase(GetResourceDomain())
+	if base == "" {
+		return ""
+	}
+	return joinResourceURL(base, pathPrefix, strings.TrimLeft(name, "/"))
 }
 
-func buildImageResourcePath(fileName string) string {
+func buildImageResourceUrl(fileName string) string {
 	fileName = strings.Trim(strings.ReplaceAll(fileName, "\\", "/"), "/")
 	if fileName == "" {
 		return ""
 	}
-	// 本地 IP: 存储目录相对 serverRoot(如 /images/a.jpg); 正式服域名: 独立 CDN 根路径(如 /a.jpg)
-	if usesLocalServerRootStatic() {
-		if rel, ok := imageURLPathUnderServerRoot(fileName); ok {
-			return "/" + filepath.ToSlash(rel)
+	return buildResourceUrl("/" + fileName)
+}
+
+// parseResourceDomainBase 拆分资源域名为 host 根 URL 与可选路径前缀(如 /images)
+func parseResourceDomainBase(raw string) (base string, pathPrefix string) {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return "", ""
+	}
+	u, err := url.Parse(raw)
+	if err != nil || u.Host == "" {
+		return strings.TrimRight(raw, "/"), ""
+	}
+	base = u.Scheme + "://" + u.Host
+	pathPrefix = strings.Trim(strings.ReplaceAll(u.Path, "\\", "/"), "/")
+	return base, pathPrefix
+}
+
+// joinResourceURL 拼接资源 URL,避免域名路径前缀与文件路径重复
+func joinResourceURL(base, pathPrefix, relPath string) string {
+	base = strings.TrimRight(strings.TrimSpace(base), "/")
+	relPath = strings.Trim(strings.ReplaceAll(relPath, "\\", "/"), "/")
+	pathPrefix = strings.Trim(strings.ReplaceAll(pathPrefix, "\\", "/"), "/")
+	if relPath == "" {
+		if pathPrefix == "" {
+			return base
 		}
+		return base + "/" + pathPrefix
 	}
-	return "/" + fileName
-}
-
-// usesLocalServerRootStatic 本地调试走 config.yaml serverRoot; 正式服域名走 CMS 域名静态站点
-func usesLocalServerRootStatic() bool {
-	if IsResourceDomainConfigured() {
-		return isLoopbackHost(resourceDomainHost(GetResourceDomain()))
+	if pathPrefix != "" {
+		if relPath == pathPrefix || strings.HasPrefix(relPath, pathPrefix+"/") {
+			return base + "/" + relPath
+		}
+		return base + "/" + pathPrefix + "/" + relPath
 	}
-	return g.Cfg().MustGet(gctx.New(), "server.debugEnv").Bool()
-}
-
-// imageURLPathUnderServerRoot 存储目录在 serverRoot 下时,返回相对 URL 路径(如 images/a.jpg)
-func imageURLPathUnderServerRoot(fileName string) (string, bool) {
-	storageRoot := filepath.Clean(GetStoragePath())
-	serverRoot := filepath.Clean(cfg.GetServerRoot())
-	if storageRoot == "" || serverRoot == "" {
-		return "", false
-	}
-	rel, err := filepath.Rel(serverRoot, filepath.Join(storageRoot, fileName))
-	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
-		return "", false
-	}
-	return rel, true
-}
-
-func buildImageResourceUrl(fileName string) string {
-	return buildResourceUrl(buildImageResourcePath(fileName))
+	return base + "/" + relPath
 }
 
 func resourceDomainHost(domain string) string {

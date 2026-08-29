@@ -132,7 +132,7 @@ type AppRechargeCfgItem struct {
 	Description   string  `json:"description"`
 	Status             uint8   `gorm:"default:0;comment:状态(0-下架,1-上架)" json:"status"`
 	FirstRecharge      bool    `json:"firstRecharge" dc:"该档位是否未首充(true=可享受首充加赠)"`
-	FirstRechargeRatio float64 `json:"firstRechargeRatio" dc:"该档位首充加赠比例(%),已首充则为0"`
+	FirstRechargeRatio float64 `json:"firstRechargeRatio" dc:"首充赠送比例(%),firstRecharge=true 时取自首充活动配置;已首充则为0"`
 }
 
 type AppRechargeCfgListRes struct {

@@ -151,6 +151,8 @@ func GetAppList(ctx context.Context, req *rechargecfgdto.AppRechargeCfgListReq) 
 		}
 		if copyItem.FirstRecharge {
 			copyItem.FirstRechargeRatio = cfgRatio
+		} else {
+			copyItem.FirstRechargeRatio = 0
 		}
 		list = append(list, &copyItem)
 	}
