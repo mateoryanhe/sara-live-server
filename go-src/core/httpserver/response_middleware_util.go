@@ -82,7 +82,7 @@ func writeResponse(r *ghttp.Request, wrapSuccess func(any) any) {
 	result := buildResponseResult(r, wrapSuccess)
 	finalizeHandlerError(r, handlerErr)
 	respContent := string(result.resp)
-	if isH5CryptoRequest(r) {
+	if isH5CryptoRequest(r) && !shouldH5PlaintextResponse(result.code) {
 		writeH5ResponseBody(r, result.resp, writeStart)
 		return
 	}

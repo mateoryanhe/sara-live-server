@@ -57,6 +57,11 @@ func isH5CryptoRequest(r *ghttp.Request) bool {
 	return r.GetCtxVar(h5CryptoEnabledCtxKey).Bool()
 }
 
+// shouldH5PlaintextResponse H5 请求体解码失败时明文返回,便于前端展示错误
+func shouldH5PlaintextResponse(code int) bool {
+	return code == int(errercode.H5PayloadDecodeFail)
+}
+
 func stashH5DecryptMs(r *ghttp.Request, ms int64) {
 	if r == nil {
 		return
