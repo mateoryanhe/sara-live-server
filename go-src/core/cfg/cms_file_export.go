@@ -124,3 +124,24 @@ func JoinCMSFileExportPath(name string) string {
 	}
 	return filepath.Join(ResolveCMSFileExportDir(), name)
 }
+
+// IsCMSFileExportArtifact 判断是否为 CMS/日志导出产物。
+// 导出与上传资源共用 storagePath,过期清理必须只删这类文件,不能按 mtime 清空整目录。
+func IsCMSFileExportArtifact(name string) bool {
+	lower := strings.ToLower(strings.TrimSpace(name))
+	if lower == "" {
+		return false
+	}
+	switch {
+	case strings.HasSuffix(lower, ".csv"):
+		return true
+	case strings.HasSuffix(lower, ".stats.tsv"), strings.HasSuffix(lower, ".trend.tsv"):
+		return true
+	case strings.HasSuffix(lower, ".trace.log"):
+		return true
+	case strings.HasSuffix(lower, ".log"):
+		return true
+	default:
+		return false
+	}
+}

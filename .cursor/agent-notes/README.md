@@ -35,6 +35,14 @@
 - 根盘 `/` 约 30G，剩余空间充足；**不宜扩大 /tmp**（受内存限制，扩了易 OOM）
 - 已改脚本：`go-review/deploy.bat`、`cms-review/upload.bat`、`avatars-审核服/upload.bat` 均走 staging
 
+## 审核服 cdn/images 被秒清（2026-08-31）
+
+- **现象**：解压/还原 `/home/ec2-user/cdn/images` 后约 1 分钟内变空（非人工 `rm`）。
+- **根因**：CMS/日志导出清理（`cmsexport`/`logquery` 的 `cleanExportDir`）与上传资源**共用** `storage_path=/home/ec2-user/cdn/images`，按 mtime>TTL(30min) 删除目录内**所有文件**；tar 还原保留旧 mtime，会被当成过期导出删光。
+- **修复**：`IsCMSFileExportArtifact` — 清理只删 `.csv`/`.log`/`.tsv` 等导出产物；已部署审核服。
+- **临时止血**：`find ... -exec touch {} +` 刷新 mtime（修代码前可用）。
+- **解压注意**：包内路径是 `images/...`，应解到 `/home/ec2-user/cdn/` 或用 `staging/restore-review-images.sh`，勿在 `cdn/images/` 内直接 `tar`（会套一层 `images/images`）。
+
 ## 2026-08-28 代码丢失（摘要）
 
 - **原因**：清理 `go-src/.../` 误用 `rd /s /q`，路径转义错误，永久删除 `.git` 与大量源码；回收站无备份。

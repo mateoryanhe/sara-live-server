@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	appcfg "xr-game-server/core/cfg"
 	"xr-game-server/core/xrtimer"
 	"xr-game-server/dto/logquerydto"
 
@@ -438,7 +439,7 @@ func cleanExportDir(dir string, expireBefore time.Time) {
 		return
 	}
 	for _, entry := range entries {
-		if entry.IsDir() {
+		if entry.IsDir() || !appcfg.IsCMSFileExportArtifact(entry.Name()) {
 			continue
 		}
 		info, err := entry.Info()
