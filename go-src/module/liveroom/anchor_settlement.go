@@ -12,6 +12,10 @@ import (
 	"xr-game-server/module/wallet"
 )
 
+// writeAnchorSettlementUsd 是否把结算美金写入主播账面.
+// 当前由工会账面归集、工会长分配;待主播转账功能上线后再打开.
+const writeAnchorSettlementUsd = false
+
 func initAnchorSettlement() {
 	event.Sub(gameevent.WeekEvent, onWeekAnchorSettlement)
 }
@@ -26,7 +30,7 @@ func settleOnShelfAnchors() {
 	rooms := liveroomdao.GetAllLiveRoom()
 	ctx := gctx.New()
 	liveroomdao.ResetGuildWeeklyAnchorSalary()
-	g.Log().Infof(ctx, "anchor weekly settlement start, rooms=%d, salaryCfgs=%d", len(rooms), len(cfgs))
+	g.Log().Infof(ctx, "anchor weekly settlement start, rooms=%d, salaryCfgs=%d, writeUsd=%v", len(rooms), len(cfgs), writeAnchorSettlementUsd)
 	for _, room := range rooms {
 		if room == nil || room.ID == 0 {
 			continue
@@ -55,32 +59,44 @@ func settleOneAnchor(roomId uint64, cfgs []*entity.AnchorSalaryCfg) {
 	flowCommissionUsd := wallet.CalcDiamondToUsd(flowCommission)
 	shareAmount := liverevenuesharecfg.CalcSettlementShareAmount(salary, snap.TotalIncome)
 	shareAmountUsd := wallet.CalcDiamondToUsd(shareAmount)
+
 	settled := liveroomdao.GetLiveRoomIncomeSettled(roomId)
 	if settled != nil {
 		settled.AddAmounts(&snap)
 		settled.AddSettlementSalary(salary)
 		settled.AddSettlementShareAmount(shareAmount)
-		settled.AddSettlementShareAmountUsd(shareAmountUsd)
+		if writeAnchorSettlementUsd {
+			settled.AddSettlementShareAmountUsd(shareAmountUsd)
+		}
 	}
 	if salary != 0 {
 		if total := liveroomdao.GetLiveRoomIncomeTotal(roomId); total != nil {
 			total.AddSettlementSalary(salary)
 		}
+		// 开播底薪同步到工会(含折算美金可收)
 		liveroomdao.MirrorGuildAnchorSettlementSalary(roomId, salary)
 	}
 	if shareAmount != 0 {
 		if total := liveroomdao.GetLiveRoomIncomeTotal(roomId); total != nil {
 			total.AddSettlementShareAmount(shareAmount)
-			total.AddSettlementShareAmountUsd(shareAmountUsd)
+			if writeAnchorSettlementUsd {
+				total.AddSettlementShareAmountUsd(shareAmountUsd)
+			}
 		}
 	}
+	// 主播流水分佣美金入工会账面,由工会长分配(不写主播结算美金)
 	if flowCommissionUsd != 0 {
 		liveroomdao.MirrorGuildAnchorSettlementShareAmountUsd(roomId, flowCommissionUsd)
 	}
 	if hasDaily {
 		liveroomdao.MarkDailyEffectiveLivesSettled(dailyRows)
 	}
-	_ = entity.NewAnchorIncomeSettlementLog(roomId, &snap, salary, shareAmount, shareAmountUsd, anchorSharePercent)
+
+	logUsd := float64(0)
+	if writeAnchorSettlementUsd {
+		logUsd = shareAmountUsd
+	}
+	_ = entity.NewAnchorIncomeSettlementLog(roomId, &snap, salary, shareAmount, logUsd, anchorSharePercent)
 }
 
 // matchAnchorSalaryAmount 按薪资降序取最高满足档(结算规则后续按日表时长/workDays完善)
