@@ -10,7 +10,6 @@ if /i not "%DEPLOY_ENV%"=="test" if /i not "%DEPLOY_ENV%"=="prod" (
     echo Usage: %~nx0 [test^|prod]
     echo   test - 使用 cms/.env.test 构建并部署到测试目录
     echo   prod - 使用 cms/.env.production 构建并部署到生产目录
-    pause
     exit /b 1
 )
 
@@ -38,26 +37,22 @@ echo.
 
 if not exist "%VUE_PROJECT_DIR%" (
     echo Error: Vue project directory does not exist: %VUE_PROJECT_DIR%
-    pause
     exit /b 1
 )
 
 if not exist "%SSH_KEY_PATH%" (
     echo Error: SSH key file does not exist: %SSH_KEY_PATH%
     echo Please set SSH_KEY_PATH in config.bat to your .ppk file.
-    pause
     exit /b 1
 )
 
 if not exist "plink.exe" (
     echo Error: plink.exe not found in %~dp0
-    pause
     exit /b 1
 )
 
 if not exist "pscp.exe" (
     echo Error: pscp.exe not found in %~dp0
-    pause
     exit /b 1
 )
 
@@ -67,7 +62,6 @@ cd /d "%VUE_PROJECT_DIR%"
 
 if not exist "package.json" (
     echo Error: package.json not found in %VUE_PROJECT_DIR%
-    pause
     exit /b 1
 )
 
@@ -76,7 +70,6 @@ call npm run %BUILD_CMD%
 if errorlevel 1 (
     echo Error: Vue build failed
     cd /d "%~dp0"
-    pause
     exit /b 1
 )
 
@@ -84,13 +77,11 @@ cd /d "%~dp0"
 
 if not exist "%BUILD_OUTPUT_DIR%" (
     echo Error: Build output directory does not exist: %BUILD_OUTPUT_DIR%
-    pause
     exit /b 1
 )
 
 if not exist "%BUILD_OUTPUT_DIR%\index.html" (
     echo Error: index.html not found in build output: %BUILD_OUTPUT_DIR%
-    pause
     exit /b 1
 )
 
@@ -105,7 +96,6 @@ if errorlevel 1 (
 plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "echo Connection successful"
 if errorlevel 1 (
     echo Error: Cannot connect to %REMOTE_HOST% with key %SSH_KEY_PATH%
-    pause
     exit /b 1
 )
 
@@ -136,26 +126,22 @@ if !ZIP_OK! EQU 0 (
 
 if !ZIP_OK! EQU 0 (
     echo Error: Failed to create zip file. Please install tar or 7-Zip.
-    pause
     exit /b 1
 )
 
 if not exist "%ZIP_FILE%" (
     echo Error: Failed to create zip file
-    pause
     exit /b 1
 )
 
 if "%REMOTE_DIR%"=="" (
     echo Error: REMOTE_DIR is not configured in config.bat
     del "%ZIP_FILE%"
-    pause
     exit /b 1
 )
 if /i "%REMOTE_DIR%"=="/" (
     echo Error: REMOTE_DIR cannot be /
     del "%ZIP_FILE%"
-    pause
     exit /b 1
 )
 
@@ -165,7 +151,6 @@ plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE
 if errorlevel 1 (
     echo Error: Failed to prepare remote directory
     del "%ZIP_FILE%"
-    pause
     exit /b 1
 )
 
@@ -173,7 +158,6 @@ pscp.exe -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% "%ZIP_FILE%" %REMOTE_USER%@%REMOTE
 if errorlevel 1 (
     echo Error: Zip upload failed
     del "%ZIP_FILE%"
-    pause
     exit /b 1
 )
 
@@ -184,7 +168,6 @@ if errorlevel 1 (
     echo Error: Remote extraction failed or index.html missing. Details:
     plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "ls -la '%REMOTE_DIR%' 2>&1; ls -la /tmp/%ZIP_FILE% 2>&1; unzip -t /tmp/%ZIP_FILE% 2>&1 || true"
     del "%ZIP_FILE%"
-    pause
     exit /b 1
 )
 
@@ -198,5 +181,4 @@ del "%ZIP_FILE%"
 echo.
 echo Build and upload completed! [%DEPLOY_ENV%] -^> %REMOTE_DIR%
 echo Access: https://cms.bigtktool.shop/
-pause
 endlocal

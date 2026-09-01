@@ -15,6 +15,11 @@ type SyncVipCfgReq struct {
 	IDs    []uint64 `json:"ids" v:"required|min-length:1#请选择要同步的配置" dc:"要同步的VIP配置ID列表"`
 }
 
+type SyncVipCfgAssetsReq struct {
+	g.Meta `path:"/syncVipCfgAssets" method:"post" summary:"仅同步VIP图标与动画资源到目标环境" tags:"数据同步"`
+	IDs    []uint64 `json:"ids" v:"required|min-length:1#请选择要同步的配置" dc:"要同步资源的VIP配置ID列表"`
+}
+
 type SyncVipCfgRes struct {
 	Success   bool   `json:"success"`
 	RowCount  int    `json:"rowCount"`

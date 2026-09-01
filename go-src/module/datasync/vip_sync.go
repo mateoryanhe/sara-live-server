@@ -53,6 +53,43 @@ func SyncVipCfg(_ context.Context, req *datasyncdto.SyncVipCfgReq) (*datasyncdto
 	}, nil
 }
 
+// SyncVipCfgAssets 仅同步所选 VIP 配置关联的图标/动画等资源文件,不写入配置表。
+func SyncVipCfgAssets(_ context.Context, req *datasyncdto.SyncVipCfgAssetsReq) (*datasyncdto.SyncVipCfgRes, error) {
+	if req == nil || len(req.IDs) == 0 {
+		return nil, errInvalidParam()
+	}
+
+	rows := cfgdao.GetVipCfgsByIDs(req.IDs)
+	if len(rows) == 0 {
+		return nil, errInvalidParam()
+	}
+	fileNames := collectVipCfgFileNames(rows)
+	files := make([]*datasyncdto.SyncFileItem, 0, len(fileNames))
+	for _, name := range fileNames {
+		content, err := upload.ReadUploadedFileBytes(name)
+		if err != nil {
+			return nil, fmt.Errorf("read resource file %s: %w", name, err)
+		}
+		files = append(files, &datasyncdto.SyncFileItem{
+			Name: name,
+			Data: base64.StdEncoding.EncodeToString(content),
+		})
+	}
+
+	payload := &datasyncdto.ReceiveVipCfgReq{Files: files}
+	var receiveRes datasyncdto.ReceiveVipCfgRes
+	if err := postSyncReceive("/dataSync/receiveVipCfg", payload, &receiveRes); err != nil {
+		return nil, err
+	}
+
+	return &datasyncdto.SyncVipCfgRes{
+		Success:   receiveRes.Success,
+		RowCount:  0,
+		FileCount: receiveRes.FileCount,
+		Message:   fmt.Sprintf("已同步 %d 个VIP图标/动画资源", receiveRes.FileCount),
+	}, nil
+}
+
 // ReceiveVipCfg 接收 VIP 配置同步,按主键 upsert 并写入资源文件
 func ReceiveVipCfg(_ context.Context, req *datasyncdto.ReceiveVipCfgReq) (*datasyncdto.ReceiveVipCfgRes, error) {
 	if req == nil {

@@ -167,6 +167,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.delete,
         {key: 'sort', label: '排序'},
         {key: 'sync', label: '同步数据'},
+        {key: 'syncAssets', label: '同步图标&动画'},
     ],
     GuildManagement: [
         BTN.view,
@@ -248,6 +249,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     VipCfgManagement: [
         ...DEFAULT_CRUD_BUTTONS,
         {key: 'sync', label: '同步数据'},
+        {key: 'syncAssets', label: '同步图标&动画'},
     ],
     RechargeCfgManagement: [
         ...DEFAULT_CRUD_BUTTONS,

@@ -77,7 +77,7 @@ export const hasPermission = (pageName: string): boolean => {
  * @param action 按钮 key（page-buttons 中定义）
  */
 export const hasButtonPermission = (pageName: string, action: string): boolean => {
-    if (action === 'sync' && isAdmin && !isSuperAdmin) {
+    if ((action === 'sync' || action === 'syncAssets') && isAdmin && !isSuperAdmin) {
         return false
     }
     if (isAdmin) {

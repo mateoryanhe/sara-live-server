@@ -2,9 +2,9 @@
 setlocal EnableDelayedExpansion
 cd /d "%~dp0"
 
-set "TARGET=%~dp0launch.cmd"
+set "TARGET=%~dp0deploy.bat"
 if not exist "!TARGET!" (
-  echo Error: deploy launcher not found: !TARGET!
+  echo Error: deploy script not found: !TARGET!
   exit /b 1
 )
 

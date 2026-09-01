@@ -18,6 +18,16 @@
           >
             {{ t('common.syncData') }}
           </el-button>
+          <el-button
+              v-if="hasButtonPermission('VipCfgManagement', 'syncAssets')"
+              :disabled="selectedRows.length === 0"
+              :loading="syncingAssets"
+              type="warning"
+              plain
+              @click="handleSyncAssets"
+          >
+            {{ t('pages.vipCfgList.syncAssets') }}
+          </el-button>
         </div>
 
         <div v-if="selectedRows.length" class="selection-tip">{{ t('common.selectedCount', {count: selectedRows.length}) }}</div>
@@ -699,6 +709,7 @@ const {t} = useI18n()
 
 const loading = ref(false)
 const syncing = ref(false)
+const syncingAssets = ref(false)
 const selectedRows = ref<VipCfg[]>([])
 const activeTab = ref('basic')
 const tableData = ref<VipCfg[]>([])
@@ -1096,6 +1107,45 @@ const handleSyncData = async () => {
     }
   } finally {
     syncing.value = false
+  }
+}
+
+const handleSyncAssets = async () => {
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning(t('pages.vipCfgList.selectSyncFirst'))
+    return
+  }
+  const ids = selectedRows.value.map((row) => Number(row.id)).filter((id) => id > 0)
+  if (ids.length === 0) {
+    ElMessage.warning(t('pages.vipCfgList.invalidSelection'))
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+        t('pages.vipCfgList.syncAssetsConfirm', {count: ids.length}),
+        t('pages.vipCfgList.syncAssets'),
+        {
+          confirmButtonText: t('common.confirmSync'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning',
+        }
+    )
+    syncingAssets.value = true
+    const response = await dataSyncApi.syncVipCfgAssets({ids})
+    if (response?.success) {
+      ElMessage.success(response.message || t('pages.vipCfgList.syncAssetsSuccessDetail', {
+        files: response.fileCount,
+      }))
+    } else {
+      ElMessage.error(t('pages.vipCfgList.syncFailed'))
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('sync vip assets failed:', error)
+      ElMessage.error(t('pages.vipCfgList.syncFailedCheckConfig'))
+    }
+  } finally {
+    syncingAssets.value = false
   }
 }
 

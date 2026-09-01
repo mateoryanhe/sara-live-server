@@ -1,3 +1,4 @@
 @echo off
 cd /d "%~dp0"
-call "%~dp0一键部署.bat"
+REM ASCII-only entry for taskbar launcher (avoid Chinese filename encoding issues)
+call "%~dp0deploy.bat"

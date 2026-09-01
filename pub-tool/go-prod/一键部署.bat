@@ -4,4 +4,6 @@ echo XR Game Server Auto Deployment Script (Using PuTTY Tools)
 echo.
 echo Starting deployment...
 call deploy.bat
-pause
+echo.
+echo ===== finished — close this window when done =====
+cmd /k

@@ -26,6 +26,7 @@ func main() {
 		return
 	}
 
+	// /k: keep console open after script ends so deploy result stays visible (close window manually).
 	cmd := exec.Command("cmd.exe", "/k", script)
 	cmd.Dir = exeDir
 	cmd.Stdin = os.Stdin
@@ -35,6 +36,8 @@ func main() {
 
 	if err := cmd.Run(); err != nil {
 		fmt.Println(err)
+		waitExit(1)
+		return
 	}
 }
 

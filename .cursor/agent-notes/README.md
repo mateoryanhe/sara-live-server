@@ -38,10 +38,16 @@
 ## 审核服 cdn/images 被秒清（2026-08-31）
 
 - **现象**：解压/还原 `/home/ec2-user/cdn/images` 后约 1 分钟内变空（非人工 `rm`）。
-- **根因**：CMS/日志导出清理（`cmsexport`/`logquery` 的 `cleanExportDir`）与上传资源**共用** `storage_path=/home/ec2-user/cdn/images`，按 mtime>TTL(30min) 删除目录内**所有文件**；tar 还原保留旧 mtime，会被当成过期导出删光。
-- **修复**：`IsCMSFileExportArtifact` — 清理只删 `.csv`/`.log`/`.tsv` 等导出产物；已部署审核服。
-- **临时止血**：`find ... -exec touch {} +` 刷新 mtime（修代码前可用）。
-- **解压注意**：包内路径是 `images/...`，应解到 `/home/ec2-user/cdn/` 或用 `staging/restore-review-images.sh`，勿在 `cdn/images/` 内直接 `tar`（会套一层 `images/images`）。
+- **根因**：CMS/日志导出清理与上传资源**共用** `storage_path`，按 mtime 扫目录误删。
+- **修复（2026-09-01）**：统一 `module/fileexport`；每个导出文件 `xrtimer.AddOnce(TTL)` 定点删除；前端 `deleteExport` 主动删并取消 timer；**不再扫目录**。重启丢 timer 可接受。
+- **解压注意**：包内路径是 `images/...`，应解到 `/home/ec2-user/cdn/` 或用 `staging/restore-review-images.sh`。
+
+## 任务栏一键部署（Win11）
+
+- 入口用 **ASCII** 脚本：`go-test/deploy.bat`、`cms-test/upload.bat`（勿把中文 `一键部署.bat` 编进 launcher，cmd 编码会乱码）
+- `taskbar-launcher` 用 `cmd /k`：结束后窗口保持打开，方便看成功/失败；发版 bat **无 pause**（不必回车，关窗即可）
+- 已去 pause：`go-test`/`go-prod`/`go-review` 的 `deploy.bat`、`cms-test/upload.bat`，以及对应 `一键部署.bat`
+- 固定：`pub-tool/go-test/pin-to-taskbar.bat` 或 `pub-tool/pin-all-taskbar.bat`，再拖桌面快捷方式到任务栏
 
 ## 2026-08-28 代码丢失（摘要）
 

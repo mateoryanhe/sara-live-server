@@ -1,62 +1,15 @@
 package logquery
 
 import (
-	"context"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
-	appcfg "xr-game-server/core/cfg"
-	"xr-game-server/core/xrtimer"
 	"xr-game-server/dto/logquerydto"
-
-	"github.com/gogf/gf/v2/os/gctx"
-	"github.com/gogf/gf/v2/util/guid"
+	"xr-game-server/module/fileexport"
 )
-
-type exportRecord struct {
-	exportID  string
-	fileName  string
-	absPath   string
-	fileURL   string
-	createdAt time.Time
-}
-
-var (
-	exportRecords  sync.Map
-	exportInitOnce sync.Once
-)
-
-func initExportCleanup() {
-	exportInitOnce.Do(func() {
-		refreshLogQueryConfig()
-		xrtimer.AddSingleton(gctx.New(), time.Minute, cleanupLogQueryExports)
-	})
-}
-
-func cleanupLogQueryExports(_ context.Context) {
-	logQueryConfigMu.RLock()
-	ready := logQueryConfigReady
-	cfg := logQueryConfigCache
-	logQueryConfigMu.RUnlock()
-	if !ready {
-		return
-	}
-	expireBefore := time.Now().Add(-time.Duration(cfg.exportTTLMinutes()) * time.Minute)
-	exportRecords.Range(func(key, value any) bool {
-		record, ok := value.(*exportRecord)
-		if !ok || record.createdAt.After(expireBefore) {
-			return true
-		}
-		removeFile(record.absPath)
-		exportRecords.Delete(key)
-		return true
-	})
-	cleanExportDir(cfg.exportAbsDir(), expireBefore)
-}
 
 type shellExportResult struct {
 	ExportID  string `json:"exportId"`
@@ -67,11 +20,21 @@ type shellExportResult struct {
 	PageSize  int    `json:"pageSize"`
 }
 
+func toShellExportResult(rec *fileexport.Record) *shellExportResult {
+	if rec == nil {
+		return nil
+	}
+	return &shellExportResult{
+		ExportID: rec.ExportID,
+		FileName: rec.FileName,
+		FileUrl:  rec.FileURL,
+	}
+}
+
 func createShellExport(logType string, patterns []string, startDate, endDate string, pageIndex, pageSize int, minHandlerMs, maxHandlerMs float64) (*shellExportResult, error) {
 	if err := ensureLinuxLogQuery(); err != nil {
 		return nil, err
 	}
-	initExportCleanup()
 
 	cfg := loadLogQueryConfig().normalized()
 	if pageIndex <= 0 {
@@ -85,80 +48,73 @@ func createShellExport(logType string, patterns []string, startDate, endDate str
 	}
 
 	files := listLogFilesByPrefix(cfg.LogDir, cfg.prefixForType(logType), startDate, endDate)
-	exportID := guid.S()
-	fileName := exportID + ".log"
+	rec, err := fileexport.Create(".log")
+	if err != nil {
+		return nil, err
+	}
+	exportID := rec.ExportID
 	workDir := filepath.Join(cfg.exportAbsDir(), ".work")
 	rawPath := filepath.Join(workDir, exportID+".raw")
 	pagePath := filepath.Join(workDir, exportID+".page")
-	exportPath := filepath.Join(cfg.exportAbsDir(), fileName)
+	exportPath := rec.AbsPath
 
-	if logType == logTypeError {
-		if err := grepFilesWithLogContinuationToFile(patterns, files, cfg.MaxMatchLines, rawPath, true); err != nil {
-			return nil, err
-		}
-	} else if err := grepFilesToReversedFile(patterns, files, cfg.MaxMatchLines, rawPath); err != nil {
-		return nil, err
-	}
-	var filterErr error
-	rawPath, filterErr = applyLogTimeRangeFilter(rawPath, startDate, endDate, logType == logTypeError)
-	if filterErr != nil {
-		removeFile(rawPath)
-		return nil, filterErr
-	}
-	if logType == logTypeAccess {
-		rawPath, filterErr = applyAccessLogQueryExcludeFilter(rawPath)
-		if filterErr != nil {
-			removeFile(rawPath)
-			return nil, filterErr
-		}
-		rawPath, filterErr = applyAccessHandlerMsFilter(rawPath, minHandlerMs, maxHandlerMs)
-		if filterErr != nil {
-			removeFile(rawPath)
-			return nil, filterErr
-		}
-	}
-	if err := paginateFile(rawPath, pagePath, pageIndex, pageSize); err != nil {
-		removeFile(rawPath)
-		return nil, err
-	}
-	if err := copyFile(pagePath, exportPath); err != nil {
+	fail := func(err error) (*shellExportResult, error) {
+		_ = fileexport.Delete(exportID)
 		removeFile(rawPath)
 		removeFile(pagePath)
 		return nil, err
 	}
+
+	if logType == logTypeError {
+		if err := grepFilesWithLogContinuationToFile(patterns, files, cfg.MaxMatchLines, rawPath, true); err != nil {
+			return fail(err)
+		}
+	} else if err := grepFilesToReversedFile(patterns, files, cfg.MaxMatchLines, rawPath); err != nil {
+		return fail(err)
+	}
+	var filterErr error
+	rawPath, filterErr = applyLogTimeRangeFilter(rawPath, startDate, endDate, logType == logTypeError)
+	if filterErr != nil {
+		return fail(filterErr)
+	}
+	if logType == logTypeAccess {
+		rawPath, filterErr = applyAccessLogQueryExcludeFilter(rawPath)
+		if filterErr != nil {
+			return fail(filterErr)
+		}
+		rawPath, filterErr = applyAccessHandlerMsFilter(rawPath, minHandlerMs, maxHandlerMs)
+		if filterErr != nil {
+			return fail(filterErr)
+		}
+	}
+	if err := paginateFile(rawPath, pagePath, pageIndex, pageSize); err != nil {
+		return fail(err)
+	}
+	if err := copyFile(pagePath, exportPath); err != nil {
+		return fail(err)
+	}
 	removeFile(rawPath)
 	removeFile(pagePath)
 
-	fileURL := cfg.exportFileURL(fileName)
-	record := &exportRecord{
-		exportID:  exportID,
-		fileName:  fileName,
-		absPath:   exportPath,
-		fileURL:   fileURL,
-		createdAt: time.Now(),
-	}
-	exportRecords.Store(exportID, record)
-
-	return &shellExportResult{
-		ExportID:  exportID,
-		FileName:  fileName,
-		FileUrl:   fileURL,
-		PageIndex: pageIndex,
-		PageSize:  pageSize,
-	}, nil
+	result := toShellExportResult(rec)
+	result.PageIndex = pageIndex
+	result.PageSize = pageSize
+	return result, nil
 }
 
 func createTraceShellExport(traceId, startDate, endDate string) (*shellExportResult, error) {
 	if err := ensureLinuxLogQuery(); err != nil {
 		return nil, err
 	}
-	initExportCleanup()
 	cfg := loadLogQueryConfig().normalized()
 	patterns := buildTracePatterns(traceId)
-	exportID := guid.S()
-	fileName := exportID + ".trace.log"
+	rec, err := fileexport.Create(".trace.log")
+	if err != nil {
+		return nil, err
+	}
+	exportID := rec.ExportID
 	workDir := filepath.Join(cfg.exportAbsDir(), ".work")
-	exportPath := filepath.Join(cfg.exportAbsDir(), fileName)
+	exportPath := rec.AbsPath
 
 	sections := []struct {
 		tag    string
@@ -179,6 +135,7 @@ func createTraceShellExport(traceId, startDate, endDate string) (*shellExportRes
 			grepErr = grepFilesToFile(patterns, files, cfg.MaxMatchLines, rawPath)
 		}
 		if grepErr != nil {
+			_ = fileexport.Delete(exportID)
 			return nil, grepErr
 		}
 		data, _ := os.ReadFile(rawPath)
@@ -190,48 +147,45 @@ func createTraceShellExport(traceId, startDate, endDate string) (*shellExportRes
 		}
 	}
 	if err := writeFile(exportPath, []byte(builder.String())); err != nil {
+		_ = fileexport.Delete(exportID)
 		return nil, err
 	}
-	fileURL := cfg.exportFileURL(fileName)
-	record := &exportRecord{
-		exportID:  exportID,
-		fileName:  fileName,
-		absPath:   exportPath,
-		fileURL:   fileURL,
-		createdAt: time.Now(),
-	}
-	exportRecords.Store(exportID, record)
-	return &shellExportResult{
-		ExportID: exportID,
-		FileName: fileName,
-		FileUrl:  fileURL,
-		Total:    0,
-	}, nil
+	return toShellExportResult(rec), nil
 }
 
 func createAccessStatsExport(startDate, endDate string, topN int) (*shellExportResult, error) {
 	if err := ensureLinuxLogQuery(); err != nil {
 		return nil, err
 	}
-	initExportCleanup()
 	cfg := loadLogQueryConfig().normalized()
 	if topN <= 0 {
 		topN = 20
 	}
 	files := listLogFilesByPrefix(cfg.LogDir, cfg.AccessPrefix, startDate, endDate)
-	exportID := guid.S()
-	fileName := exportID + ".stats.tsv"
+	rec, err := fileexport.Create(".stats.tsv")
+	if err != nil {
+		return nil, err
+	}
+	exportID := rec.ExportID
 	workDir := filepath.Join(cfg.exportAbsDir(), ".work")
 	rawPath := filepath.Join(workDir, exportID+".raw")
-	exportPath := filepath.Join(cfg.exportAbsDir(), fileName)
+	exportPath := rec.AbsPath
+
+	fail := func(err error) (*shellExportResult, error) {
+		_ = fileexport.Delete(exportID)
+		removeFile(rawPath)
+		removeFile(filepath.Join(workDir, exportID+".url"))
+		removeFile(filepath.Join(workDir, exportID+".ip"))
+		return nil, err
+	}
 
 	if err := grepFilesToFile(nil, files, cfg.MaxMatchLines, rawPath); err != nil {
-		return nil, err
+		return fail(err)
 	}
 	var filterErr error
 	rawPath, filterErr = applyLogTimeRangeFilter(rawPath, startDate, endDate, false)
 	if filterErr != nil {
-		return nil, filterErr
+		return fail(filterErr)
 	}
 	// access 日志格式: time {traceId} status "METHOD scheme host /path HTTP/1.1" ...
 	script := `awk -F'"' 'NF>=2 {split($2,p," "); if (length(p)>=4) print p[4]}' ` + shellQuote(rawPath) +
@@ -253,48 +207,52 @@ func createAccessStatsExport(startDate, endDate string, topN int) (*shellExportR
 		builder.Write(ipData)
 	}
 	if err := writeFile(exportPath, []byte(builder.String())); err != nil {
-		return nil, err
+		return fail(err)
 	}
 	removeFile(rawPath)
 	removeFile(filepath.Join(workDir, exportID+".url"))
 	removeFile(filepath.Join(workDir, exportID+".ip"))
 
-	fileURL := cfg.exportFileURL(fileName)
-	record := &exportRecord{exportID: exportID, fileName: fileName, absPath: exportPath, fileURL: fileURL, createdAt: time.Now()}
-	exportRecords.Store(exportID, record)
-	return &shellExportResult{ExportID: exportID, FileName: fileName, FileUrl: fileURL}, nil
+	return toShellExportResult(rec), nil
 }
 
 func createAccessTrendExport(req *logquerydto.CMSGetAccessTrendReq) (*shellExportResult, error) {
 	if err := ensureLinuxLogQuery(); err != nil {
 		return nil, err
 	}
-	initExportCleanup()
 	cfg := loadLogQueryConfig().normalized()
 	intervalMinutes := resolveTrendIntervalMinutes(req.StartDate, req.EndDate, req.IntervalMinutes)
 	patterns := buildAccessPatterns(req.TraceId, req.AuthId, req.Url, req.Ip, req.StatusCode)
 
 	files := listLogFilesByPrefix(cfg.LogDir, cfg.AccessPrefix, req.StartDate, req.EndDate)
-	exportID := guid.S()
-	fileName := exportID + ".trend.tsv"
+	rec, err := fileexport.Create(".trend.tsv")
+	if err != nil {
+		return nil, err
+	}
+	exportID := rec.ExportID
 	workDir := filepath.Join(cfg.exportAbsDir(), ".work")
 	rawPath := filepath.Join(workDir, exportID+".raw")
 	bucketPath := filepath.Join(workDir, exportID+".bucket")
-	exportPath := filepath.Join(cfg.exportAbsDir(), fileName)
+	exportPath := rec.AbsPath
+
+	fail := func(err error) (*shellExportResult, error) {
+		_ = fileexport.Delete(exportID)
+		removeFile(rawPath)
+		removeFile(bucketPath)
+		return nil, err
+	}
 
 	if err := grepFilesToFile(patterns, files, cfg.MaxMatchLines, rawPath); err != nil {
-		return nil, err
+		return fail(err)
 	}
 	var filterErr error
 	rawPath, filterErr = applyLogTimeRangeFilter(rawPath, req.StartDate, req.EndDate, false)
 	if filterErr != nil {
-		removeFile(rawPath)
-		return nil, filterErr
+		return fail(filterErr)
 	}
 	rawPath, filterErr = applyAccessLogQueryExcludeFilter(rawPath)
 	if filterErr != nil {
-		removeFile(rawPath)
-		return nil, filterErr
+		return fail(filterErr)
 	}
 
 	minMs := 0.0
@@ -341,15 +299,12 @@ END {
   print "peakCount\t" peak
 }' ` + shellQuote(rawPath) + ` > ` + shellQuote(bucketPath)
 	if err := runShellScript(awkScript); err != nil {
-		removeFile(rawPath)
-		return nil, err
+		return fail(err)
 	}
 
 	bucketData, err := os.ReadFile(bucketPath)
 	if err != nil {
-		removeFile(rawPath)
-		removeFile(bucketPath)
-		return nil, err
+		return fail(err)
 	}
 	var builder strings.Builder
 	builder.WriteString("points\n")
@@ -373,17 +328,12 @@ END {
 		}
 	}
 	if err := writeFile(exportPath, []byte(builder.String())); err != nil {
-		removeFile(rawPath)
-		removeFile(bucketPath)
-		return nil, err
+		return fail(err)
 	}
 	removeFile(rawPath)
 	removeFile(bucketPath)
 
-	fileURL := cfg.exportFileURL(fileName)
-	record := &exportRecord{exportID: exportID, fileName: fileName, absPath: exportPath, fileURL: fileURL, createdAt: time.Now()}
-	exportRecords.Store(exportID, record)
-	return &shellExportResult{ExportID: exportID, FileName: fileName, FileUrl: fileURL}, nil
+	return toShellExportResult(rec), nil
 }
 
 func resolveTrendIntervalMinutes(startDate, endDate string, requested int) int {
@@ -418,34 +368,5 @@ func normalizeTrendInterval(minutes int) int {
 }
 
 func deleteExport(exportID string) error {
-	value, ok := exportRecords.Load(exportID)
-	if ok {
-		if record, ok := value.(*exportRecord); ok {
-			removeFile(record.absPath)
-		}
-		exportRecords.Delete(exportID)
-	}
-	cfg := loadLogQueryConfig()
-	removeFile(filepath.Join(cfg.exportAbsDir(), exportID+".log"))
-	removeFile(filepath.Join(cfg.exportAbsDir(), exportID+".trace.log"))
-	removeFile(filepath.Join(cfg.exportAbsDir(), exportID+".stats.tsv"))
-	removeFile(filepath.Join(cfg.exportAbsDir(), exportID+".trend.tsv"))
-	return nil
-}
-
-func cleanExportDir(dir string, expireBefore time.Time) {
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return
-	}
-	for _, entry := range entries {
-		if entry.IsDir() || !appcfg.IsCMSFileExportArtifact(entry.Name()) {
-			continue
-		}
-		info, err := entry.Info()
-		if err != nil || info.ModTime().After(expireBefore) {
-			continue
-		}
-		removeFile(filepath.Join(dir, entry.Name()))
-	}
+	return fileexport.Delete(exportID)
 }

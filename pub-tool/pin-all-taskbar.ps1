@@ -66,9 +66,9 @@ $cmsDir = Join-Path $root 'cms-test'
 $goIco = Ensure-Icon -Dir $goDir -BaseName 'deploy-go' -AssetPngName 'go-test-deploy-icon.png'
 $cmsIco = Ensure-Icon -Dir $cmsDir -BaseName 'deploy-cms' -AssetPngName 'cms-test-deploy-icon.png'
 
-$goScript = Join-Path $goDir 'launch.cmd'
+$goScript = Join-Path $goDir 'deploy.bat'
 if (-not (Test-Path -LiteralPath $goScript)) {
-    throw "Go deploy launcher not found: $goScript"
+    throw "Go deploy script not found: $goScript"
 }
 
 Write-Host '[1/2] Go test deploy'

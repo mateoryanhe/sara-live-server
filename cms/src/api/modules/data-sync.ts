@@ -25,6 +25,10 @@ export const dataSyncApi = {
         return request.post<SyncVipCfgRes>('/dataSync/syncVipCfg', data)
     },
 
+    syncVipCfgAssets: (data: SyncVipCfgReq) => {
+        return request.post<SyncVipCfgRes>('/dataSync/syncVipCfgAssets', data)
+    },
+
     syncActivityMessage: (data: SyncActivityMessageReq) => {
         return request.post<SyncActivityMessageRes>('/dataSync/syncActivityMessage', data)
     },
@@ -35,6 +39,10 @@ export const dataSyncApi = {
 
     syncGift: (data: SyncIdsReq) => {
         return request.post<SyncBatchRes>('/dataSync/syncGift', data)
+    },
+
+    syncGiftAssets: (data: SyncIdsReq) => {
+        return request.post<SyncBatchRes>('/dataSync/syncGiftAssets', data)
     },
 
     syncRechargeCfg: (data: SyncIdsReq) => {

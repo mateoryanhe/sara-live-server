@@ -28,6 +28,10 @@ func (c *DataSyncCMSController) SyncVipCfg(ctx context.Context, req *datasyncdto
 	return datasync.SyncVipCfg(ctx, req)
 }
 
+func (c *DataSyncCMSController) SyncVipCfgAssets(ctx context.Context, req *datasyncdto.SyncVipCfgAssetsReq) (*datasyncdto.SyncVipCfgRes, error) {
+	return datasync.SyncVipCfgAssets(ctx, req)
+}
+
 func (c *DataSyncCMSController) SyncActivityMessage(ctx context.Context, req *datasyncdto.SyncActivityMessageReq) (*datasyncdto.SyncActivityMessageRes, error) {
 	return datasync.SyncActivityMessage(ctx, req)
 }
@@ -38,6 +42,10 @@ func (c *DataSyncCMSController) SyncBanner(ctx context.Context, req *datasyncdto
 
 func (c *DataSyncCMSController) SyncGift(ctx context.Context, req *datasyncdto.SyncGiftReq) (*datasyncdto.SyncBatchRes, error) {
 	return datasync.SyncGift(ctx, req)
+}
+
+func (c *DataSyncCMSController) SyncGiftAssets(ctx context.Context, req *datasyncdto.SyncGiftAssetsReq) (*datasyncdto.SyncBatchRes, error) {
+	return datasync.SyncGiftAssets(ctx, req)
 }
 
 func (c *DataSyncCMSController) SyncRechargeCfg(ctx context.Context, req *datasyncdto.SyncRechargeCfgReq) (*datasyncdto.SyncBatchRes, error) {

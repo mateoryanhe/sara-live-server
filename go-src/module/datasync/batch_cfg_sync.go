@@ -70,6 +70,32 @@ func SyncGift(_ context.Context, req *datasyncdto.SyncGiftReq) (*datasyncdto.Syn
 	return newSyncBatchRes(&receiveRes, "礼物"), nil
 }
 
+// SyncGiftAssets 仅同步所选礼物的图标/动画文件,不写入礼物表行。
+func SyncGiftAssets(_ context.Context, req *datasyncdto.SyncGiftAssetsReq) (*datasyncdto.SyncBatchRes, error) {
+	if req == nil || len(req.IDs) == 0 {
+		return nil, errInvalidParam()
+	}
+	rows := cfgdao.GetGiftsByIDs(req.IDs)
+	if len(rows) == 0 {
+		return nil, errInvalidParam()
+	}
+	files, err := buildSyncFiles(collectGiftFileNames(rows))
+	if err != nil {
+		return nil, err
+	}
+	payload := &datasyncdto.ReceiveGiftReq{Files: files}
+	var receiveRes datasyncdto.ReceiveBatchRes
+	if err := postSyncReceive("/dataSync/receiveGift", payload, &receiveRes); err != nil {
+		return nil, err
+	}
+	return &datasyncdto.SyncBatchRes{
+		Success:   receiveRes.Success,
+		RowCount:  0,
+		FileCount: receiveRes.FileCount,
+		Message:   fmt.Sprintf("已同步 %d 个礼物图标/动画资源", receiveRes.FileCount),
+	}, nil
+}
+
 func ReceiveGift(_ context.Context, req *datasyncdto.ReceiveGiftReq) (*datasyncdto.ReceiveBatchRes, error) {
 	if req == nil {
 		return nil, errInvalidParam()

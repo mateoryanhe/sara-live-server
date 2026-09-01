@@ -35,6 +35,11 @@ type SyncGiftReq struct {
 	IDs    []uint64 `json:"ids" v:"required|min-length:1#请选择要同步的礼物" dc:"要同步的礼物ID列表"`
 }
 
+type SyncGiftAssetsReq struct {
+	g.Meta `path:"/syncGiftAssets" method:"post" summary:"仅同步礼物图标与动画资源到目标环境" tags:"数据同步"`
+	IDs    []uint64 `json:"ids" v:"required|min-length:1#请选择要同步的礼物" dc:"要同步资源的礼物ID列表"`
+}
+
 type ReceiveGiftReq struct {
 	g.Meta `path:"/receiveGift" method:"post" summary:"接收礼物同步" tags:"数据同步"`
 	Rows   []*entity.LiveGift `json:"rows"`

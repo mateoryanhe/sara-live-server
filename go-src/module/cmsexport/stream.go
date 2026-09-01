@@ -3,6 +3,8 @@ package cmsexport
 import (
 	"context"
 	"fmt"
+
+	"xr-game-server/module/fileexport"
 )
 
 const defaultExportPageSize = 500
@@ -30,8 +32,7 @@ func streamCSVExport(
 
 	writer, err := newCSVWriter(filePath, headers)
 	if err != nil {
-		removeFile(filePath)
-		exportRecords.Delete(record.exportID)
+		_ = fileexport.Delete(record.ExportID)
 		return nil, err
 	}
 
@@ -41,8 +42,7 @@ func streamCSVExport(
 
 	abort := func() (*exportResult, error) {
 		_ = writer.close()
-		removeFile(filePath)
-		exportRecords.Delete(record.exportID)
+		_ = fileexport.Delete(record.ExportID)
 		return nil, errExportEmpty
 	}
 
@@ -50,8 +50,7 @@ func streamCSVExport(
 		select {
 		case <-ctx.Done():
 			_ = writer.close()
-			removeFile(filePath)
-			exportRecords.Delete(record.exportID)
+			_ = fileexport.Delete(record.ExportID)
 			return nil, ctx.Err()
 		default:
 		}
@@ -72,8 +71,7 @@ func streamCSVExport(
 			}
 			if exportedRows < totalRows {
 				_ = writer.close()
-				removeFile(filePath)
-				exportRecords.Delete(record.exportID)
+				_ = fileexport.Delete(record.ExportID)
 				return nil, fmt.Errorf("export incomplete: exported %d of %d rows", exportedRows, totalRows)
 			}
 			break
@@ -81,8 +79,7 @@ func streamCSVExport(
 		for _, row := range rows {
 			if err := writer.writeRow(row); err != nil {
 				_ = writer.close()
-				removeFile(filePath)
-				exportRecords.Delete(record.exportID)
+				_ = fileexport.Delete(record.ExportID)
 				return nil, err
 			}
 			exportedRows++
@@ -97,8 +94,7 @@ func streamCSVExport(
 	}
 
 	if err := writer.close(); err != nil {
-		removeFile(filePath)
-		exportRecords.Delete(record.exportID)
+		_ = fileexport.Delete(record.ExportID)
 		return nil, err
 	}
 	return finalizeExportRecord(record, exportedRows), nil

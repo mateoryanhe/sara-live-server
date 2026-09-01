@@ -201,6 +201,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'VipCfgManagement:edit': '/vipCfg/updateVipCfg',
     'VipCfgManagement:delete': '/vipCfg/deleteVipCfg',
     'VipCfgManagement:sync': '/dataSync/syncVipCfg',
+    'VipCfgManagement:syncAssets': '/dataSync/syncVipCfgAssets',
 
     AppPkgManagement: '/appPkg/appPkgList',
     'AppPkgManagement:view': '/appPkg/appPkgList',
@@ -232,6 +233,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GiftManagement:delete': '/gift/deleteGift',
     'GiftManagement:sort': '/gift/updateGift',
     'GiftManagement:sync': '/dataSync/syncGift',
+    'GiftManagement:syncAssets': '/dataSync/syncGiftAssets',
 
     AgoraCfgManagement: '/agora/getAgoraCfg',
     'AgoraCfgManagement:view': '/agora/getAgoraCfg',

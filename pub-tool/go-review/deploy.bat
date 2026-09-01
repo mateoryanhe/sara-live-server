@@ -18,32 +18,27 @@ echo.
 REM Check necessary files and directories
 if not exist "%LOCAL_GO_SRC%" (
     echo Error: Source code directory does not exist: %LOCAL_GO_SRC%
-    pause
     exit /b 1
 )
 
 if not exist "%LOCAL_CONFIG_PATH%" (
     echo Error: Configuration directory does not exist: %LOCAL_CONFIG_PATH%
-    pause
     exit /b 1
 )
 
 if not exist "%SSH_KEY_PATH%" (
     echo Error: SSH key does not exist: %SSH_KEY_PATH%
-    pause
     exit /b 1
 )
 
 REM Check if PuTTY tools exist
 if not exist "plink.exe" (
     echo Error: plink.exe does not exist in current directory
-    pause
     exit /b 1
 )
 
 if not exist "pscp.exe" (
     echo Error: pscp.exe does not exist in current directory
-    pause
     exit /b 1
 )
 
@@ -66,7 +61,6 @@ go build -o "%LOCAL_BUILD_PATH%\%APP_NAME%" .
 if %errorlevel% neq 0 (
     echo Error: Go program compilation failed
     cd /d "%~dp0"
-    pause
     exit /b 1
 )
 echo Compilation completed!
@@ -126,7 +120,6 @@ echo Testing server connection...
 plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "echo 'Connection successful'"
 if %errorlevel% neq 0 (
     echo Error: Unable to connect to server %REMOTE_HOST%
-    pause
     exit /b 1
 )
 
@@ -137,7 +130,6 @@ plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REM
 pscp.exe -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% "%DEPLOY_PACKAGE%" %REMOTE_USER%@%REMOTE_HOST%:%REMOTE_STAGE%/deploy_package.zip
 if %errorlevel% neq 0 (
     echo Error: File upload failed
-    pause
     exit /b 1
 )
 
@@ -146,7 +138,6 @@ echo Preparing remote directory...
 plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "sudo mkdir -p %REMOTE_DIR% && sudo chown -R %REMOTE_USER%:%REMOTE_USER% %REMOTE_DIR% && rm -f %REMOTE_DIR%/%APP_NAME% %REMOTE_DIR%/config.yaml %REMOTE_DIR%/%APP_NAME%.log %REMOTE_DIR%/deploy_package.zip"
 if %errorlevel% neq 0 (
     echo Error: Failed to prepare remote directory %REMOTE_DIR%
-    pause
     exit /b 1
 )
 
@@ -156,7 +147,6 @@ plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REM
 if %errorlevel% neq 0 (
     echo Error: Remote extraction failed
     plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "rm -f %REMOTE_STAGE%/deploy_package.zip"
-    pause
     exit /b 1
 )
 
@@ -173,7 +163,6 @@ echo Creating remote start script...
 plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "printf '%%s\n' '#!/bin/sh' 'cd %REMOTE_DIR%' 'nohup ./%APP_NAME% >/dev/null 2>&1 &' > %REMOTE_DIR%/start.sh && chmod +x %REMOTE_DIR%/start.sh"
 if %errorlevel% neq 0 (
     echo Error: Failed to create remote start script
-    pause
     exit /b 1
 )
 
@@ -187,7 +176,6 @@ echo No running process, cold starting...
 plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "sudo %REMOTE_DIR%/start.sh"
 if !errorlevel! neq 0 (
     echo Error: Remote start script failed
-    pause
     exit /b 1
 )
 goto hot_restart_done
@@ -210,7 +198,6 @@ echo Hot restart config from %LOCAL_CONFIG_PATH%: flush=!HOT_RESTART_FLUSH_TIMEO
 plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "curl -sf -k 'https://127.0.0.1/internal/hotRestart?auth=%HOT_RESTART_AUTH%' || exit 1"
 if !errorlevel! neq 0 (
     echo Error: Hot restart API call failed
-    pause
     exit /b 1
 )
 echo Hot restart triggered, waiting for new process ^(max !HOT_RESTART_WAIT_MAX!s, flush=!HOT_RESTART_FLUSH_TIMEOUT!s exit=!HOT_RESTART_EXIT_TIMEOUT!s^)...
@@ -257,7 +244,6 @@ if not defined REMOTE_PID (
     echo ERROR: %APP_NAME% process not found!
     echo Recent error log:
     plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "tail -30 /home/ec2-user/log/error*.log 2>/dev/null || echo '(no error log)'"
-    pause
     exit /b 1
 )
 
@@ -272,7 +258,6 @@ if errorlevel 1 (
     echo ERROR: port 443 not listening
     echo Recent error log:
     plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "tail -30 /home/ec2-user/log/error*.log 2>/dev/null || echo '(no error log)'"
-    pause
     exit /b 1
 )
 
@@ -281,7 +266,3 @@ echo ================================
 echo Verify OK: %APP_NAME% ^(PID: !REMOTE_PID!^) is running
 echo ================================
 endlocal
-
-echo.
-echo Press any key to exit...
-pause >nul
