@@ -13,6 +13,7 @@ type VipCfgController struct{}
 
 func initVipCfgController() {
 	httpserver.RegCMS(VipCfgUrl, &VipCfgController{})
+	initVipAssetPreviewController()
 }
 
 func (c *VipCfgController) VipCfgList(ctx context.Context, req *vipcfgdto.VipCfgListReq) (*httpserver.CMSQueryResp, error) {

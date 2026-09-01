@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/datasyncdto"
 	"xr-game-server/entity/live"
@@ -53,7 +54,7 @@ func SyncVipCfg(_ context.Context, req *datasyncdto.SyncVipCfgReq) (*datasyncdto
 	}, nil
 }
 
-// SyncVipCfgAssets 仅同步所选 VIP 配置关联的图标/动画等资源文件,不写入配置表。
+// SyncVipCfgAssets 同步所选 VIP 配置的图标/动画等资源文件,并更新目标环境库中资源名字段后刷新缓存。
 func SyncVipCfgAssets(_ context.Context, req *datasyncdto.SyncVipCfgAssetsReq) (*datasyncdto.SyncVipCfgRes, error) {
 	if req == nil || len(req.IDs) == 0 {
 		return nil, errInvalidParam()
@@ -76,7 +77,7 @@ func SyncVipCfgAssets(_ context.Context, req *datasyncdto.SyncVipCfgAssetsReq) (
 		})
 	}
 
-	payload := &datasyncdto.ReceiveVipCfgReq{Files: files}
+	payload := &datasyncdto.ReceiveVipCfgReq{Rows: rows, Files: files, AssetsOnly: true}
 	var receiveRes datasyncdto.ReceiveVipCfgRes
 	if err := postSyncReceive("/dataSync/receiveVipCfg", payload, &receiveRes); err != nil {
 		return nil, err
@@ -84,9 +85,9 @@ func SyncVipCfgAssets(_ context.Context, req *datasyncdto.SyncVipCfgAssetsReq) (
 
 	return &datasyncdto.SyncVipCfgRes{
 		Success:   receiveRes.Success,
-		RowCount:  0,
+		RowCount:  receiveRes.RowCount,
 		FileCount: receiveRes.FileCount,
-		Message:   fmt.Sprintf("已同步 %d 个VIP图标/动画资源", receiveRes.FileCount),
+		Message:   fmt.Sprintf("已同步 %d 条VIP资源名、%d 个文件", receiveRes.RowCount, receiveRes.FileCount),
 	}, nil
 }
 
@@ -111,15 +112,15 @@ func ReceiveVipCfg(_ context.Context, req *datasyncdto.ReceiveVipCfgReq) (*datas
 		fileCount++
 	}
 
-	rowCount := 0
-	for _, row := range req.Rows {
-		if row == nil || row.ID == 0 {
-			continue
-		}
-		if err := cfgdao.CreateVipCfg(row); err != nil {
-			return nil, fmt.Errorf("save vip cfg id=%d: %w", row.ID, err)
-		}
-		rowCount++
+	var rowCount int
+	var err error
+	if req.AssetsOnly {
+		rowCount, err = saveVipCfgAssets(req.Rows)
+	} else {
+		rowCount, err = saveVipCfgs(req.Rows)
+	}
+	if err != nil {
+		return nil, err
 	}
 
 	vip.ReloadVipCfgMemory()
@@ -129,6 +130,45 @@ func ReceiveVipCfg(_ context.Context, req *datasyncdto.ReceiveVipCfgReq) (*datas
 		RowCount:  rowCount,
 		FileCount: fileCount,
 	}, nil
+}
+
+func saveVipCfgs(rows []*entity.VipCfg) (int, error) {
+	rowCount := 0
+	for _, row := range rows {
+		if row == nil || row.ID == 0 {
+			continue
+		}
+		if err := cfgdao.CreateVipCfg(row); err != nil {
+			return rowCount, fmt.Errorf("save vip cfg id=%d: %w", row.ID, err)
+		}
+		rowCount++
+	}
+	return rowCount, nil
+}
+
+func saveVipCfgAssets(rows []*entity.VipCfg) (int, error) {
+	rowCount := 0
+	for _, row := range rows {
+		if row == nil || row.ID == 0 {
+			continue
+		}
+		_, err := g.DB().Model(string(entity.TbVipCfg)).
+			WherePri(row.ID).
+			Data(g.Map{
+				"level_icon":              row.LevelIcon,
+				"animation":               row.Animation,
+				"animation_icon":          row.AnimationIcon,
+				"comment_effect":          row.CommentEffect,
+				"comment_effect_icon":     row.CommentEffectIcon,
+				"customer_service_icon":   row.CustomerServiceIcon,
+			}).
+			Update()
+		if err != nil {
+			return rowCount, fmt.Errorf("update vip cfg assets id=%d: %w", row.ID, err)
+		}
+		rowCount++
+	}
+	return rowCount, nil
 }
 
 func collectVipCfgFileNames(rows []*entity.VipCfg) []string {

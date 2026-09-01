@@ -15,6 +15,7 @@ type GiftController struct{}
 
 func initGiftController() {
 	httpserver.RegCMS(GiftUrl, &GiftController{})
+	initGiftAssetPreviewController()
 }
 
 // GiftList 分页获取礼物列表

@@ -20,7 +20,7 @@ type VipCfg struct {
 	Level                  uint32  `gorm:"uniqueIndex;default:0;comment:VIP等级" json:"level"`
 	LevelName              string  `gorm:"size:64;default:'';comment:等级名称" json:"levelName"`
 	LevelIcon              string  `gorm:"size:255;default:'';comment:VIP等级图标资源文件名" json:"levelIcon"`
-	UpgradeRechargeLimit   float64 `gorm:"type:decimal(18,4);default:0;comment:升级充值上限(USD)" json:"upgradeRechargeLimit"`
+	UpgradeRechargeLimit   float64 `gorm:"type:decimal(18,4);default:0;comment:升级充值金币上限" json:"upgradeRechargeLimit"`
 	AnimationSwitch        uint8   `gorm:"default:0;comment:进场特效开关(0关,1开,仅App端使用)" json:"animationSwitch"`
 	Animation              string  `gorm:"size:255;default:'';comment:进场特效动画资源文件名" json:"animation"`
 	AnimationIcon          string  `gorm:"size:255;default:'';comment:进场特效图标资源文件名" json:"animationIcon"`

@@ -35,6 +35,15 @@ func CreateGift(gift *entity.LiveGift) error {
 	return err
 }
 
+func GetAllGiftsForAssetPreview() []*entity.LiveGift {
+	var rows []*entity.LiveGift
+	_ = g.DB().Model(string(entity.TbLiveGift)).
+		Fields("id, name, icon, animation, status, sort").
+		Order("sort desc, id asc").
+		Scan(&rows)
+	return rows
+}
+
 func GetGiftsByIDs(ids []uint64) []*entity.LiveGift {
 	if len(ids) == 0 {
 		return nil

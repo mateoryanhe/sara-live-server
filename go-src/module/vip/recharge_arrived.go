@@ -3,6 +3,7 @@ package vip
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"xr-game-server/dao/rechargeorderdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/entity/recharge"
 )
@@ -19,11 +20,21 @@ func onRechargeArrived(val any) {
 	stat := userinfodao.GetUserCumulativeStatByUserId(order.UserId)
 	stat.AddTotalRecharge(order.Price)
 	stat.AddTotalPayCount(1)
+	if stat.TotalRechargeGold <= 0 {
+		// 首次写入:从已完成订单汇总(含当前订单),避免与 lazy backfill 重复累加
+		if gold := rechargeorderdao.SumCompletedRechargeGoldByUserId(order.UserId); gold > 0 {
+			stat.SetTotalRechargeGold(gold)
+		} else if order.Gold > 0 {
+			stat.AddTotalRechargeGold(order.Gold)
+		}
+	} else if order.Gold > 0 {
+		stat.AddTotalRechargeGold(order.Gold)
+	}
 	userinfodao.PublishUserCumulativeStat(stat)
 
-	totalRecharge := stat.TotalRecharge
+	totalRechargeGold := stat.TotalRechargeGold
 
-	targetLevel := calcTargetVipLevel(totalRecharge)
+	targetLevel := calcTargetVipLevel(totalRechargeGold)
 	if targetLevel == 0 {
 		return
 	}
@@ -47,11 +58,11 @@ func onRechargeArrived(val any) {
 
 }
 
-// calcTargetVipLevel 根据累计充值(USD)计算应达到的VIP等级。
-// 配置中每级 UpgradeRechargeLimit 为该等级累计充值上限(如 L1=10,L2=20,...,L10=100):
-// 累计充值 < 10 → L1; 累计充值 = 10 → L2; 累计充值 >= 最高级上限 → 最高等级。
-func calcTargetVipLevel(totalRecharge float64) uint32 {
-	if totalRecharge <= 0 {
+// calcTargetVipLevel 根据累计充值到账金币计算应达到的VIP等级。
+// 配置中每级 UpgradeRechargeLimit 为该等级累计充值金币上限(如 L1=1000,L2=5000):
+// 累计金币 < L1上限 → L1; 累计金币 >= 最高级上限 → 最高等级。
+func calcTargetVipLevel(totalRechargeGold float64) uint32 {
+	if totalRechargeGold <= 0 {
 		return 0
 	}
 	cfgs := GetAllVipCfgFromMemory()
@@ -59,7 +70,7 @@ func calcTargetVipLevel(totalRecharge float64) uint32 {
 		return 0
 	}
 	for _, cfg := range cfgs {
-		if cfg.UpgradeRechargeLimit > totalRecharge {
+		if cfg.UpgradeRechargeLimit > totalRechargeGold {
 			return cfg.Level
 		}
 	}

@@ -76,7 +76,7 @@ type CreateVipCfgReq struct {
 	AnimationSwitch        uint8   `json:"animationSwitch" v:"in:0,1#进场特效开关无效" dc:"进场特效开关(0关,1开,仅App端使用)"`
 	CommentEffectSwitch    uint8   `json:"commentEffectSwitch" v:"in:0,1#公屏评论特效开关无效" dc:"公屏评论特效开关(0关,1开,仅App端使用)"`
 	CustomerServiceSwitch  uint8   `json:"customerServiceSwitch" v:"in:0,1#客服优先开关无效" dc:"客服优先开关(0关,1开,仅App端使用)"`
-	UpgradeRechargeLimit   float64 `json:"upgradeRechargeLimit" dc:"升级充值上限(USD,保留4位小数)"`
+	UpgradeRechargeLimit   float64 `json:"upgradeRechargeLimit" dc:"升级充值金币上限(保留4位小数)"`
 	Animation              string  `json:"animation" dc:"进场特效动画资源文件名(mp4)"`
 	AnimationIcon          string  `json:"animationIcon" dc:"进场特效图标资源文件名"`
 	AnimationTitleEn       string  `json:"animationTitleEn" dc:"进场特效标题(英文)"`
@@ -128,7 +128,7 @@ type UpdateVipCfgReq struct {
 	AnimationSwitch        uint8   `json:"animationSwitch" v:"in:0,1#进场特效开关无效" dc:"进场特效开关(0关,1开,仅App端使用)"`
 	CommentEffectSwitch    uint8   `json:"commentEffectSwitch" v:"in:0,1#公屏评论特效开关无效" dc:"公屏评论特效开关(0关,1开,仅App端使用)"`
 	CustomerServiceSwitch  uint8   `json:"customerServiceSwitch" v:"in:0,1#客服优先开关无效" dc:"客服优先开关(0关,1开,仅App端使用)"`
-	UpgradeRechargeLimit   float64 `json:"upgradeRechargeLimit" dc:"升级充值上限(USD,保留4位小数)"`
+	UpgradeRechargeLimit   float64 `json:"upgradeRechargeLimit" dc:"升级充值金币上限(保留4位小数)"`
 	Animation              string  `json:"animation" dc:"进场特效动画资源文件名(mp4)"`
 	AnimationIcon          string  `json:"animationIcon" dc:"进场特效图标资源文件名"`
 	AnimationTitleEn       string  `json:"animationTitleEn" dc:"进场特效标题(英文)"`
@@ -212,7 +212,7 @@ type AppVipCfgItem struct {
 	Level                uint32                 `json:"level" dc:"VIP等级"`
 	LevelName            string                 `json:"levelName" dc:"等级名称"`
 	LevelIcon            string                 `json:"levelIcon" dc:"VIP等级图标完整URL"`
-	UpgradeRechargeLimit float64                `json:"upgradeRechargeLimit,string" dc:"升级所需累计充值上限(USD,保留4位小数)"`
+	UpgradeRechargeLimit float64                `json:"upgradeRechargeLimit,string" dc:"升级所需累计充值金币上限(保留4位小数)"`
 	PrivilegeList        []*AppVipPrivilegeItem `json:"privilegeList" dc:"已开启的特权列表(按进场/公屏评论/客服优先顺序)"`
 }
 

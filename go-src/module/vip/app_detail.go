@@ -15,10 +15,10 @@ func GetAppVipDetail(ctx context.Context, _ *vipdto.AppVipDetailReq) (*vipdto.Ap
 	user := userinfodao.GetUserInfoByUserId(userId)
 	stat := userinfodao.GetUserCumulativeStatByUserId(userId)
 
-	totalRecharge := stat.TotalRecharge
+	totalRechargeGold := getVipProgressGold(stat)
 	res := &vipdto.AppVipDetailRes{
 		VipLevel:      user.VipLevel,
-		TotalRecharge: totalRecharge,
+		TotalRecharge: totalRechargeGold,
 	}
 
 	if user.VipLevel > 0 {
@@ -37,8 +37,8 @@ func GetAppVipDetail(ctx context.Context, _ *vipdto.AppVipDetailReq) (*vipdto.Ap
 	res.NextLevel = nextCfg.Level
 	res.NextCfg = nextCfg
 	res.NextUpgradeLimit = nextCfg.UpgradeRechargeLimit
-	if totalRecharge < nextCfg.UpgradeRechargeLimit {
-		res.RechargeToNextLevel = coremath.SubFloat64(nextCfg.UpgradeRechargeLimit, totalRecharge)
+	if totalRechargeGold < nextCfg.UpgradeRechargeLimit {
+		res.RechargeToNextLevel = coremath.SubFloat64(nextCfg.UpgradeRechargeLimit, totalRechargeGold)
 	}
 	return res, nil
 }

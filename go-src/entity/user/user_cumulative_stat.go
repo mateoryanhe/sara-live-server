@@ -14,6 +14,7 @@ const (
 
 const (
 	UserCumulativeStatTotalRecharge       db.TbCol = "total_recharge"
+	UserCumulativeStatTotalRechargeGold   db.TbCol = "total_recharge_gold"
 	UserCumulativeStatTotalWithdraw       db.TbCol = "total_withdraw"
 	UserCumulativeStatTotalPayCount       db.TbCol = "total_pay_count"
 	UserCumulativeStatTotalDiamondConsume db.TbCol = "total_diamond_consume"
@@ -23,7 +24,8 @@ const (
 // UserCumulativeStat 玩家累计数值(与用户一一对应,主键ID即用户ID)
 type UserCumulativeStat struct {
 	migrate.OneModel
-	TotalRecharge       float64 `gorm:"default:0;comment:累计充值" json:"totalRecharge"`
+	TotalRecharge       float64 `gorm:"default:0;comment:累计充值(USD)" json:"totalRecharge"`
+	TotalRechargeGold   float64 `gorm:"default:0;comment:累计充值到账金币" json:"totalRechargeGold"`
 	TotalWithdraw       float64 `gorm:"default:0;comment:累计提现" json:"totalWithdraw"`
 	TotalPayCount       uint64  `gorm:"default:0;comment:累计付费次数" json:"totalPayCount"`
 	TotalDiamondConsume float64 `gorm:"default:0;comment:累计钻石消费" json:"totalDiamondConsume"`
@@ -47,6 +49,27 @@ func (receiver *UserCumulativeStat) AddTotalRecharge(val float64) bool {
 		ColVal: receiver.TotalRecharge,
 	})
 	return true
+}
+
+func (receiver *UserCumulativeStat) AddTotalRechargeGold(val float64) bool {
+	if val <= 0 {
+		return false
+	}
+	receiver.TotalRechargeGold = math.AddFloat64(receiver.TotalRechargeGold, val)
+
+	syndb.AddData(TbUserCumulativeStat, UserCumulativeStatTotalRechargeGold, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: receiver.TotalRechargeGold,
+	})
+	return true
+}
+
+func (receiver *UserCumulativeStat) SetTotalRechargeGold(val float64) {
+	receiver.TotalRechargeGold = val
+	syndb.AddData(TbUserCumulativeStat, UserCumulativeStatTotalRechargeGold, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: receiver.TotalRechargeGold,
+	})
 }
 
 func (receiver *UserCumulativeStat) AddTotalWithdraw(val float64) bool {
@@ -110,6 +133,7 @@ func initUserCumulativeStat() {
 	syndb.RegLazy(TbUserCumulativeStat, db.CreatedAtName)
 	syndb.RegLazy(TbUserCumulativeStat, db.UpdatedAtName)
 	syndb.RegLazy(TbUserCumulativeStat, UserCumulativeStatTotalRecharge)
+	syndb.RegLazy(TbUserCumulativeStat, UserCumulativeStatTotalRechargeGold)
 	syndb.RegLazy(TbUserCumulativeStat, UserCumulativeStatTotalWithdraw)
 	syndb.RegLazy(TbUserCumulativeStat, UserCumulativeStatTotalPayCount)
 	syndb.RegLazy(TbUserCumulativeStat, UserCumulativeStatTotalDiamondConsume)

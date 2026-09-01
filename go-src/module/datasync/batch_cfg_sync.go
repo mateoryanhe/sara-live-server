@@ -70,7 +70,7 @@ func SyncGift(_ context.Context, req *datasyncdto.SyncGiftReq) (*datasyncdto.Syn
 	return newSyncBatchRes(&receiveRes, "礼物"), nil
 }
 
-// SyncGiftAssets 仅同步所选礼物的图标/动画文件,不写入礼物表行。
+// SyncGiftAssets 同步所选礼物的图标/动画文件,并更新目标环境库中的 icon/animation 字段后刷新缓存。
 func SyncGiftAssets(_ context.Context, req *datasyncdto.SyncGiftAssetsReq) (*datasyncdto.SyncBatchRes, error) {
 	if req == nil || len(req.IDs) == 0 {
 		return nil, errInvalidParam()
@@ -83,16 +83,16 @@ func SyncGiftAssets(_ context.Context, req *datasyncdto.SyncGiftAssetsReq) (*dat
 	if err != nil {
 		return nil, err
 	}
-	payload := &datasyncdto.ReceiveGiftReq{Files: files}
+	payload := &datasyncdto.ReceiveGiftReq{Rows: rows, Files: files, AssetsOnly: true}
 	var receiveRes datasyncdto.ReceiveBatchRes
 	if err := postSyncReceive("/dataSync/receiveGift", payload, &receiveRes); err != nil {
 		return nil, err
 	}
 	return &datasyncdto.SyncBatchRes{
 		Success:   receiveRes.Success,
-		RowCount:  0,
+		RowCount:  receiveRes.RowCount,
 		FileCount: receiveRes.FileCount,
-		Message:   fmt.Sprintf("已同步 %d 个礼物图标/动画资源", receiveRes.FileCount),
+		Message:   fmt.Sprintf("已同步 %d 条礼物资源名、%d 个文件", receiveRes.RowCount, receiveRes.FileCount),
 	}, nil
 }
 
@@ -104,7 +104,12 @@ func ReceiveGift(_ context.Context, req *datasyncdto.ReceiveGiftReq) (*datasyncd
 	if err != nil {
 		return nil, err
 	}
-	rowCount, err := saveLiveGifts(req.Rows)
+	var rowCount int
+	if req.AssetsOnly {
+		rowCount, err = saveLiveGiftAssets(req.Rows)
+	} else {
+		rowCount, err = saveLiveGifts(req.Rows)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -170,6 +175,27 @@ func saveLiveGifts(rows []*entity.LiveGift) (int, error) {
 		}
 		if _, err := g.DB().Model(string(entity.TbLiveGift)).Save(row); err != nil {
 			return rowCount, fmt.Errorf("save gift id=%d: %w", row.ID, err)
+		}
+		rowCount++
+	}
+	return rowCount, nil
+}
+
+func saveLiveGiftAssets(rows []*entity.LiveGift) (int, error) {
+	rowCount := 0
+	for _, row := range rows {
+		if row == nil || row.ID == 0 {
+			continue
+		}
+		_, err := g.DB().Model(string(entity.TbLiveGift)).
+			WherePri(row.ID).
+			Data(g.Map{
+				"icon":      row.Icon,
+				"animation": row.Animation,
+			}).
+			Update()
+		if err != nil {
+			return rowCount, fmt.Errorf("update gift assets id=%d: %w", row.ID, err)
 		}
 		rowCount++
 	}

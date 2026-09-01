@@ -74,6 +74,14 @@ func RegNonAuthHandler(prefix, pattern string, handler ghttp.HandlerFunc) {
 	})
 }
 
+// RegNonAuthGETHandler 绑定无需鉴权的 GET Handler(返回 HTML 等原始响应)
+func RegNonAuthGETHandler(pattern string, handler ghttp.HandlerFunc) {
+	httpServer.Group("/", func(group *ghttp.RouterGroup) {
+		group.Middleware(middlewareLogReq)
+		group.GET(pattern, handler)
+	})
+}
+
 // RegRootNonAuthCustomizeRes 根路径绑定,无需鉴权,自定义响应(第三方 webhook 等).
 func RegRootNonAuthCustomizeRes(handlerOrObject ...interface{}) {
 	httpServer.Group("/", func(group *ghttp.RouterGroup) {

@@ -1134,6 +1134,7 @@ const handleSyncAssets = async () => {
     const response = await dataSyncApi.syncVipCfgAssets({ids})
     if (response?.success) {
       ElMessage.success(response.message || t('pages.vipCfgList.syncAssetsSuccessDetail', {
+        rows: response.rowCount,
         files: response.fileCount,
       }))
     } else {

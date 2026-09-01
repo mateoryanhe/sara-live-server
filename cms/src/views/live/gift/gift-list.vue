@@ -718,6 +718,7 @@ const handleSyncAssets = async () => {
     const response = await dataSyncApi.syncGiftAssets({ids})
     if (response?.success) {
       ElMessage.success(response.message || t('pages.giftList.syncAssetsSuccessDetail', {
+        rows: response.rowCount,
         files: response.fileCount
       }))
     } else {

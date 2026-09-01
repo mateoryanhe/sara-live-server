@@ -13,11 +13,11 @@ type AppVipDetailReq struct {
 type AppVipDetailRes struct {
 	VipLevel            uint32                   `json:"vipLevel" dc:"当前VIP等级(0表示无VIP)"`
 	LevelName           string                   `json:"levelName" dc:"当前等级名称"`
-	TotalRecharge       float64                  `json:"totalRecharge,string" dc:"累计充值(USD,保留4位小数)"`
+	TotalRecharge       float64                  `json:"totalRecharge,string" dc:"累计充值到账金币(保留4位小数)"`
 	IsMaxLevel          bool                     `json:"isMaxLevel" dc:"是否已是最高VIP等级"`
 	NextLevel           uint32                   `json:"nextLevel" dc:"下一VIP等级(0表示已是最高级或无下一级)"`
-	NextUpgradeLimit    float64                  `json:"nextUpgradeLimit,string" dc:"下一级升级门槛(USD,保留4位小数)"`
-	RechargeToNextLevel float64                  `json:"rechargeToNextLevel,string" dc:"距离下一级还需充值(USD,保留4位小数)"`
+	NextUpgradeLimit    float64                  `json:"nextUpgradeLimit,string" dc:"下一级升级门槛(金币,保留4位小数)"`
+	RechargeToNextLevel float64                  `json:"rechargeToNextLevel,string" dc:"距离下一级还需充值金币(保留4位小数)"`
 	CurrentCfg          *vipcfgdto.AppVipCfgItem `json:"currentCfg" dc:"当前等级权益配置"`
 	NextCfg             *vipcfgdto.AppVipCfgItem `json:"nextCfg" dc:"下一等级权益配置"`
 }

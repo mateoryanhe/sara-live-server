@@ -43,9 +43,9 @@ const zh = {
   invalidSelection: '所选礼物无效',
   syncConfirm: '将把已选 {count} 条礼物及关联图标/动画同步到目标环境（按 ID 覆盖或新增）。是否继续？',
   syncAssets: '同步图标&动画',
-  syncAssetsConfirm: '将把已选 {count} 条礼物的图标与动画资源同步到目标环境（仅文件，不改礼物配置）。是否继续？',
+  syncAssetsConfirm: '将把已选 {count} 条礼物的图标与动画同步到目标环境（更新资源文件、库中资源名并刷新缓存，不改名称/价格等其它配置）。是否继续？',
   syncSuccessDetail: '同步成功：{rows} 条，{files} 个文件',
-  syncAssetsSuccessDetail: '资源同步成功：{files} 个文件',
+  syncAssetsSuccessDetail: '资源同步成功：{rows} 条资源名，{files} 个文件',
   syncFailed: '同步失败',
   syncFailedCheckConfig: '同步失败，请检查数据同步配置与目标服务',
 } as const
