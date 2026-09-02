@@ -308,6 +308,16 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.save,
         {key: 'deploy', label: '上传部署'},
     ],
+    FiatCurrencyManagement: [
+        BTN.view,
+        BTN.search,
+        BTN.create,
+        BTN.edit,
+        BTN.delete,
+        {key: 'reloadCfgCache', label: '刷新配置缓存'},
+        {key: 'reloadRateCache', label: '刷新汇率缓存'},
+        {key: 'previewRate', label: '查询汇率'},
+    ],
 }
 
 /** 页面是否配置了多个按钮（需按按钮粒度授权，页面级 module 不再代表全部按钮） */

@@ -193,6 +193,14 @@ const (
 	AppImageFileTooLarge XRCode = 152
 	// H5PayloadDecodeFail H5请求体解码失败
 	H5PayloadDecodeFail XRCode = 153
+	// FiatCurrencyExist 法币配置已存在
+	FiatCurrencyExist XRCode = 154
+	// FiatCurrencyNonExist 法币配置不存在
+	FiatCurrencyNonExist XRCode = 155
+	// FiatCurrencyDisabled 法币配置已禁用
+	FiatCurrencyDisabled XRCode = 156
+	// FiatExchangeRateUnavailable 法币汇率暂不可用
+	FiatExchangeRateUnavailable XRCode = 157
 )
 
 type XError struct {

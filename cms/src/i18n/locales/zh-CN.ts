@@ -35,6 +35,7 @@ const menu = {
   RandomNicknameManagement: '随机昵称库',
   CustomerServiceCfgManagement: '客服联系配置',
   WalletExchangeCfgManagement: '金币兑换配置',
+  FiatCurrencyManagement: '法币配置',
   LiveManagement: '直播管理',
   GiftManagement: '礼物管理',
   AgoraCfgManagement: '声网配置',

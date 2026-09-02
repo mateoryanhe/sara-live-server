@@ -107,6 +107,10 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		GuildLeaderDisabled:             "Guild leader CMS user is disabled",
 		AppImageFileTooLarge:            "Image file exceeds size limit",
 		H5PayloadDecodeFail:             "H5 request body decode failed",
+		FiatCurrencyExist:               "Fiat currency config already exists",
+		FiatCurrencyNonExist:            "Fiat currency config does not exist",
+		FiatCurrencyDisabled:            "Fiat currency config is disabled",
+		FiatExchangeRateUnavailable:     "Fiat exchange rate is unavailable",
 	},
 	lang.LangZHCN: {
 		Success:                         "成功",
@@ -210,6 +214,10 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		GuildLeaderDisabled:             "工会长对应的CMS用户已停用",
 		AppImageFileTooLarge:            "图片文件超过大小限制",
 		H5PayloadDecodeFail:             "H5请求体解码失败",
+		FiatCurrencyExist:               "法币配置已存在",
+		FiatCurrencyNonExist:            "法币配置不存在",
+		FiatCurrencyDisabled:            "法币配置已禁用",
+		FiatExchangeRateUnavailable:     "法币汇率暂不可用",
 	},
 	lang.LangZHTW: {
 		Success:                         "成功",
@@ -313,6 +321,10 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		GuildLeaderDisabled:             "工會長對應的CMS用戶已停用",
 		AppImageFileTooLarge:            "圖片文件超過大小限制",
 		H5PayloadDecodeFail:             "H5請求體解碼失敗",
+		FiatCurrencyExist:               "法幣配置已存在",
+		FiatCurrencyNonExist:            "法幣配置不存在",
+		FiatCurrencyDisabled:            "法幣配置已禁用",
+		FiatExchangeRateUnavailable:     "法幣匯率暫不可用",
 	},
 }
 

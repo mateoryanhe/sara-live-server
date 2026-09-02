@@ -1641,6 +1641,43 @@ export interface SaveWalletExchangeCfgRes {
     id: string
 }
 
+export interface FiatCurrency {
+    id: string
+    currencyCode: string
+    name: string
+    symbol: string
+    icon?: string
+    iconName?: string
+    adjustPercent: number
+    currencyType: number
+    sort: number
+    status: number
+    createdAt?: string
+    updatedAt?: string
+}
+
+export interface FiatCurrencyQuery {
+    pageIndex: number
+    pageSize: number
+    currencyCode?: string
+    name?: string
+    typeFilter?: number
+    statusFilter?: number
+}
+
+export interface FiatExchangeRate {
+    base: string
+    quote: string
+    marketRate: number
+    adjustPercent: number
+    rate: number
+    inverseRate: number
+    source: string
+    rateDate: string
+    cached: boolean
+    cacheExpiresAt: number
+}
+
 export interface LiveRevenueShareCfg {
     id: string
     anchorSharePercent: number

@@ -22,6 +22,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   RandomNicknameManagement: 'Apodos aleatorios',
   CustomerServiceCfgManagement: 'Atención al cliente',
   WalletExchangeCfgManagement: 'Cambio de monedas',
+  FiatCurrencyManagement: 'Moneda fiat',
   LiveManagement: 'En vivo',
   GiftManagement: 'Regalos',
   AgoraCfgManagement: 'Config. Agora',

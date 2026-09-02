@@ -8,9 +8,12 @@ import (
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/rechargecfgdto"
+	fiatentity "xr-game-server/entity/fiat"
 	"xr-game-server/entity/recharge"
 	"xr-game-server/errercode"
 	"xr-game-server/module/activity"
+	"xr-game-server/module/fiatcurrency"
+	"xr-game-server/module/fxrate"
 	"xr-game-server/module/upload"
 )
 
@@ -134,13 +137,44 @@ func OffShelf(_ context.Context, req *rechargecfgdto.OffShelfRechargeCfgReq) (*r
 // GetAppList App端查询(仅返回已上架,走内存缓存)
 // 缓存在服务启动时加载,CMS 端创建/修改/删除/上下架时重新从 DB 加载。
 func GetAppList(ctx context.Context, req *rechargecfgdto.AppRechargeCfgListReq) (*rechargecfgdto.AppRechargeCfgListRes, error) {
-	packageName := strings.TrimSpace(httpserver.GetPackageNameFromContext(ctx))
+	_ = req
+	return &rechargecfgdto.AppRechargeCfgListRes{
+		List: buildAppRechargeCfgList(ctx, nil, "", 0),
+	}, nil
+}
+
+// GetAppListByCurrency App按币种查询充值列表.
+// 法币: Price=USD价×(1+加点%)×实时汇率; 加密币: 直接显示原金额,不查汇率.
+func GetAppListByCurrency(ctx context.Context, req *rechargecfgdto.AppRechargeCfgListByCurrencyReq) (*rechargecfgdto.AppRechargeCfgListRes, error) {
+	cfg := cfgdao.GetFiatCurrencyCfgByCode(req.CurrencyCode)
+	if cfg == nil {
+		return nil, errercode.CreateCode(errercode.FiatCurrencyNonExist)
+	}
+	if cfg.Status != fiatentity.FiatCurrencyStatusEnabled {
+		return nil, errercode.CreateCode(errercode.FiatCurrencyDisabled)
+	}
+
+	var rate *fxrate.QuoteRate
+	if cfg.CurrencyType == fiatentity.FiatCurrencyTypeFiat {
+		resolved, err := fiatcurrency.ResolveEnabledUsdToQuoteRate(ctx, cfg.CurrencyCode)
+		if err != nil {
+			return nil, err
+		}
+		rate = resolved
+	}
+
+	return &rechargecfgdto.AppRechargeCfgListRes{
+		List: buildAppRechargeCfgList(ctx, rate, cfg.CurrencyCode, cfg.CurrencyType),
+	}, nil
+}
+
+func buildAppRechargeCfgList(ctx context.Context, rate *fxrate.QuoteRate, currencyCode string, currencyType uint8) []*rechargecfgdto.AppRechargeCfgItem {
 	userId := httpserver.GetAuthId(ctx)
 	cfgRatio := activity.ConfiguredFirstRechargeRatio()
 	all := getRechargeCfgCache()
-	list := make([]*rechargecfgdto.AppRechargeCfgItem, 0)
+	list := make([]*rechargecfgdto.AppRechargeCfgItem, 0, len(all))
 	for _, item := range all {
-		if item == nil || item.CfgType != req.CfgType || item.PackageName != packageName {
+		if item == nil {
 			continue
 		}
 		copyItem := *item
@@ -154,9 +188,21 @@ func GetAppList(ctx context.Context, req *rechargecfgdto.AppRechargeCfgListReq) 
 		} else {
 			copyItem.FirstRechargeRatio = 0
 		}
+		switch currencyType {
+		case fiatentity.FiatCurrencyTypeFiat:
+			if rate != nil {
+				copyItem.Price = fxrate.ConvertUsdToQuote(item.Price, rate)
+				copyItem.Currency = rate.Quote
+			}
+		case fiatentity.FiatCurrencyTypeCrypto:
+			// 加密币直接显示原金额,不查汇率
+			if currencyCode != "" {
+				copyItem.Currency = currencyCode
+			}
+		}
 		list = append(list, &copyItem)
 	}
-	return &rechargecfgdto.AppRechargeCfgListRes{List: list}, nil
+	return list
 }
 
 func validateRechargeCfgProductId(productId string, cfgType uint8, packageName string, excludeID uint64) error {

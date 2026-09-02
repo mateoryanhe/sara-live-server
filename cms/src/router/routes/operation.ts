@@ -125,6 +125,12 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {title: '金币兑换配置'},
         },
         {
+            path: 'wallet/fiat-currency-list',
+            name: 'FiatCurrencyManagement',
+            component: () => import('@/views/operation/wallet/fiat-currency-list.vue'),
+            meta: {title: '法币配置'},
+        },
+        {
             path: 'salary/anchor-salary-cfg-list',
             name: 'AnchorSalaryCfgManagement',
             component: () => import('@/views/operation/salary/anchor-salary-cfg-list.vue'),

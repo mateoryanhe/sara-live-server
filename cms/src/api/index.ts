@@ -35,6 +35,7 @@ import {gamePlatformApi} from './modules/gamePlatform'
 import {gameWinLogApi} from './modules/gameWinLog'
 import {gameBetLogApi} from './modules/gameBetLog'
 import {dataSyncApi} from './modules/data-sync'
+import {fiatCurrencyApi} from './modules/fiatCurrency'
 
 export {
     authApi,
@@ -75,6 +76,7 @@ export {
     gameWinLogApi,
     gameBetLogApi,
     dataSyncApi,
+    fiatCurrencyApi,
 }
 
 export default {
@@ -116,4 +118,5 @@ export default {
     gameWinLogApi,
     gameBetLogApi,
     dataSyncApi,
+    fiatCurrencyApi,
 }

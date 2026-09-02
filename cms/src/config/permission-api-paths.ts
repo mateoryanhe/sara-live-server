@@ -222,6 +222,16 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'WalletExchangeCfgManagement:view': '/wallet/getWalletExchangeCfg',
     'WalletExchangeCfgManagement:save': '/wallet/saveWalletExchangeCfg',
 
+    FiatCurrencyManagement: '/fiatCurrency/fiatCurrencyList',
+    'FiatCurrencyManagement:view': '/fiatCurrency/fiatCurrencyList',
+    'FiatCurrencyManagement:search': '/fiatCurrency/fiatCurrencyList',
+    'FiatCurrencyManagement:create': '/fiatCurrency/createFiatCurrency',
+    'FiatCurrencyManagement:edit': '/fiatCurrency/updateFiatCurrency',
+    'FiatCurrencyManagement:delete': '/fiatCurrency/deleteFiatCurrency',
+    'FiatCurrencyManagement:reloadCfgCache': '/fiatCurrency/reloadFiatCurrencyCache',
+    'FiatCurrencyManagement:reloadRateCache': '/fiatCurrency/reloadFiatExchangeRateCache',
+    'FiatCurrencyManagement:previewRate': '/fiatCurrency/getFiatExchangeRate',
+
     LiveRevenueShareCfgManagement: '/liveRevenueShareCfg/getLiveRevenueShareCfg',
     'LiveRevenueShareCfgManagement:view': '/liveRevenueShareCfg/getLiveRevenueShareCfg',
     'LiveRevenueShareCfgManagement:save': '/liveRevenueShareCfg/saveLiveRevenueShareCfg',

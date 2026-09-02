@@ -58,7 +58,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('GuildAnchorDailyLiveManagement') || hasMenuPermission('PlatformAnchorList') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('LiveRevenueShareCfgManagement')"
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('GuildAnchorDailyLiveManagement') || hasMenuPermission('PlatformAnchorList') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('FiatCurrencyManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('LiveRevenueShareCfgManagement')"
             index="/operation">
           <template #title>
             <el-icon>
@@ -89,7 +89,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement')"
+              v-if="hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('FiatCurrencyManagement')"
               index="/operation/group/recharge">
             <template #title>
               <el-icon>
@@ -114,6 +114,12 @@
                 <Coin/>
               </el-icon>
               <span>{{ t('menu.WalletExchangeCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('FiatCurrencyManagement')" index="/operation/wallet/fiat-currency-list">
+              <el-icon>
+                <Money/>
+              </el-icon>
+              <span>{{ t('menu.FiatCurrencyManagement') }}</span>
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu

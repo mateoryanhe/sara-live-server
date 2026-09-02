@@ -105,5 +105,9 @@ func init() {
 		GuildLeaderDisabled:             "Pengguna CMS pemimpin guild dinonaktifkan",
 		AppImageFileTooLarge:            "File gambar melebihi batas ukuran",
 		H5PayloadDecodeFail:             "Gagal mendekode body permintaan H5",
+		FiatCurrencyExist:               "Konfigurasi mata uang fiat sudah ada",
+		FiatCurrencyNonExist:            "Konfigurasi mata uang fiat tidak ditemukan",
+		FiatCurrencyDisabled:            "Konfigurasi mata uang fiat dinonaktifkan",
+		FiatExchangeRateUnavailable:     "Kurs fiat tidak tersedia",
 	}
 }

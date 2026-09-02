@@ -112,8 +112,7 @@ type OffShelfRechargeCfgRes struct {
 
 // AppRechargeCfgListReq App端查询充值配置(仅返回已上架)
 type AppRechargeCfgListReq struct {
-	g.Meta  `path:"/rechargeCfgListForApp" method:"post" summary:"App查询充值配置列表(已上架)" tags:"充值配置"`
-	CfgType uint8 `json:"cfgType" v:"required|in:1,2,3#类型不能为空|类型无效" dc:"类型(1iOS,2Google,3渠道)"`
+	g.Meta `path:"/rechargeCfgListForApp" method:"post" summary:"App查询充值配置列表(已上架)" tags:"充值配置"`
 }
 
 // AppRechargeCfgItem App端单条
@@ -137,4 +136,10 @@ type AppRechargeCfgItem struct {
 
 type AppRechargeCfgListRes struct {
 	List []*AppRechargeCfgItem `json:"list"`
+}
+
+// AppRechargeCfgListByCurrencyReq App按币种查询充值配置(价格按实时汇率+加点换算)
+type AppRechargeCfgListByCurrencyReq struct {
+	g.Meta       `path:"/rechargeCfgListByCurrencyForApp" method:"post" summary:"App按币种查询充值配置列表" tags:"充值配置"`
+	CurrencyCode string `json:"currencyCode" v:"required|length:3,8#币种代码不能为空|币种代码长度需在3到8之间" dc:"币种代码(如IDR)"`
 }

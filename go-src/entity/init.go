@@ -9,6 +9,7 @@ import (
 	liveentity "xr-game-server/entity/live"
 	msgentity "xr-game-server/entity/message"
 	rechargeentity "xr-game-server/entity/recharge"
+	fiatentity "xr-game-server/entity/fiat"
 	sventity "xr-game-server/entity/shortvideo"
 	statentity "xr-game-server/entity/stat"
 	sysentity "xr-game-server/entity/sys"
@@ -22,6 +23,7 @@ func Init() {
 	liveentity.Init()
 	sventity.Init()
 	rechargeentity.Init()
+	fiatentity.Init()
 	activityentity.Init()
 	initAppPkg()
 	gameentity.Init()

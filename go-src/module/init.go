@@ -14,6 +14,7 @@ import (
 	"xr-game-server/module/call"
 	"xr-game-server/module/currencylog"
 	"xr-game-server/module/customerservice"
+	"xr-game-server/module/fiatcurrency"
 	"xr-game-server/module/game"
 	"xr-game-server/module/gameconsumrank"
 	"xr-game-server/module/h5livedeploy"
@@ -59,6 +60,7 @@ func Init() {
 	privateroombilling.Init()
 	vip.Init()
 	apppkg.Init()
+	fiatcurrency.Init()
 	game.Init()
 	h5livedeploy.Init()
 	ipgeo.Init()
