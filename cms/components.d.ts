@@ -14,6 +14,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     AnchorPickerDialog: typeof import('./src/components/AnchorPickerDialog.vue')['default']
     AnchorRemoteSelect: typeof import('./src/components/AnchorRemoteSelect.vue')['default']
+    ChannelRechargeTestDialog: typeof import('./src/components/ChannelRechargeTestDialog.vue')['default']
     CmsUserPickerDialog: typeof import('./src/components/CmsUserPickerDialog.vue')['default']
     ElAlert: typeof import('element-plus/es')['ElAlert']
     ElAside: typeof import('element-plus/es')['ElAside']
@@ -85,6 +86,7 @@ declare module 'vue' {
 declare global {
   const AnchorPickerDialog: typeof import('./src/components/AnchorPickerDialog.vue')['default']
   const AnchorRemoteSelect: typeof import('./src/components/AnchorRemoteSelect.vue')['default']
+  const ChannelRechargeTestDialog: typeof import('./src/components/ChannelRechargeTestDialog.vue')['default']
   const CmsUserPickerDialog: typeof import('./src/components/CmsUserPickerDialog.vue')['default']
   const ElAlert: typeof import('element-plus/es')['ElAlert']
   const ElAside: typeof import('element-plus/es')['ElAside']

@@ -28,9 +28,6 @@
           <el-form-item :label="t('pages.rechargeCfgList.tierName')">
             <el-input v-model="searchForm.name" clearable :placeholder="t('pages.rechargeCfgList.nameFuzzy')"/>
           </el-form-item>
-          <el-form-item :label="t('pages.rechargeCfgList.packageName')">
-            <el-input v-model="searchForm.packageName" clearable :placeholder="t('pages.rechargeCfgList.packageNameFuzzy')"/>
-          </el-form-item>
           <el-form-item :label="t('pages.rechargeCfgList.cfgType')">
             <el-select v-model="searchForm.typeFilter" :placeholder="t('common.all')" style="width: 140px">
               <el-option :value="0" :label="t('common.all')"/>
@@ -60,7 +57,6 @@
           <el-table-column type="selection" width="48"/>
           <el-table-column label="ID" prop="id" width="100"/>
           <el-table-column :label="t('pages.rechargeCfgList.tierName')" prop="name" min-width="120"/>
-          <el-table-column :label="t('pages.rechargeCfgList.packageName')" prop="packageName" min-width="160" show-overflow-tooltip/>
           <el-table-column :label="t('pages.rechargeCfgList.cfgType')" width="100">
             <template #default="{ row }">
               {{ cfgTypeLabel(row.cfgType) }}
@@ -80,19 +76,12 @@
             </template>
           </el-table-column>
           <el-table-column :label="t('pages.rechargeCfgList.baseGold')" prop="gold" width="100"/>
-          <el-table-column :label="t('pages.rechargeCfgList.extraGold')" prop="extraGold" width="100"/>
-          <el-table-column :label="t('pages.rechargeCfgList.totalGold')" width="100">
-            <template #default="{ row }">
-              {{ totalGold(row) }}
-            </template>
-          </el-table-column>
           <el-table-column :label="t('common.price')" width="120">
             <template #default="{ row }">
-              {{ formatPrice(row.price) }}
+              {{ formatNumberDisplay(row.price, '-', RECHARGE_PRICE_DECIMALS) }}
             </template>
           </el-table-column>
           <el-table-column :label="t('pages.rechargeCfgList.productSku')" prop="productId" min-width="140" show-overflow-tooltip/>
-          <el-table-column :label="t('common.sort')" prop="sort" width="80"/>
           <el-table-column :label="t('common.status')" width="90">
             <template #default="{ row }">
               <el-tag :type="row.status === 1 ? 'success' : 'info'">
@@ -146,11 +135,8 @@
         <el-form-item :label="t('pages.rechargeCfgList.tierName')" prop="name">
           <el-input v-model="currentRow.name" :placeholder="t('pages.rechargeCfgList.tierNamePlaceholder')"/>
         </el-form-item>
-        <el-form-item :label="t('pages.rechargeCfgList.packageName')" prop="packageName">
-          <el-input v-model="currentRow.packageName" :placeholder="t('pages.rechargeCfgList.packageNamePlaceholder')"/>
-        </el-form-item>
         <el-form-item :label="t('pages.rechargeCfgList.cfgType')" prop="cfgType">
-          <el-select v-model="currentRow.cfgType" :placeholder="t('pages.rechargeCfgList.selectType')" style="width: 100%">
+          <el-select v-model="currentRow.cfgType" clearable :placeholder="t('pages.rechargeCfgList.selectType')" style="width: 100%">
             <el-option v-for="item in cfgTypeOptions" :key="item.value" :label="item.label" :value="item.value"/>
           </el-select>
         </el-form-item>
@@ -186,12 +172,14 @@
         <el-form-item :label="t('pages.rechargeCfgList.baseGold')" prop="gold">
           <el-input-number v-model="currentRow.gold" :min="1" controls-position="right"/>
         </el-form-item>
-        <el-form-item :label="t('pages.rechargeCfgList.extraGold')" prop="extraGold">
-          <el-input-number v-model="currentRow.extraGold" :min="0" controls-position="right"/>
-          <div class="form-tip">{{ t('pages.rechargeCfgList.goldCreditTip') }}</div>
-        </el-form-item>
         <el-form-item :label="t('common.price')" prop="price">
-          <el-input-number v-model="currentRow.price" :min="0.0001" :precision="NUMBER_INPUT_DECIMALS" :step="0.01" controls-position="right"/>
+          <el-input-number
+              v-model="currentRow.price"
+              :min="0.0001"
+              :precision="RECHARGE_PRICE_DECIMALS"
+              :step="0.0001"
+              controls-position="right"
+          />
           <div class="form-tip">{{ t('pages.rechargeCfgList.priceTip') }}</div>
         </el-form-item>
         <el-form-item
@@ -203,9 +191,6 @@
               v-model="currentRow.productId"
               :placeholder="productSkuPlaceholder"
           />
-        </el-form-item>
-        <el-form-item :label="t('common.sort')" prop="sort">
-          <el-input-number v-model="currentRow.sort" controls-position="right"/>
         </el-form-item>
         <el-form-item :label="t('common.description')" prop="description">
           <el-input v-model="currentRow.description" :placeholder="descriptionPlaceholder" type="textarea"/>
@@ -227,11 +212,13 @@ import {Plus} from '@element-plus/icons-vue'
 import {dataSyncApi, rechargeCfgApi, uploadApi} from '@/api'
 import type {RechargeCfg} from '@/types/api.ts'
 import {hasButtonPermission} from '@/utils/permission'
-import {formatPrice, NUMBER_INPUT_DECIMALS, truncateNumber} from '@/utils/number-format'
+import {formatNumberDisplay, truncateNumber} from '@/utils/number-format'
+
+/** 充值档位 USD 价支持 4 位小数(与库字段 decimal(10,4) 一致) */
+const RECHARGE_PRICE_DECIMALS = 4
 
 interface SearchForm {
   name: string
-  packageName: string
   typeFilter: number
   statusFilter: number
 }
@@ -239,14 +226,11 @@ interface SearchForm {
 interface RechargeCfgForm {
   id: string
   name: string
-  packageName: string
-  cfgType: number
+  cfgType: number | null
   icon: string
   gold: number
-  extraGold: number
   price: number
   productId: string
-  sort: number
   description: string
 }
 
@@ -262,7 +246,7 @@ const cfgTypeLabel = (cfgType: number) => {
   return cfgTypeOptions.value.find((item) => item.value === cfgType)?.label ?? t('pages.rechargeCfgList.unknown')
 }
 
-const isStoreSkuRequired = (cfgType: number) => cfgType === 1 || cfgType === 2
+const isStoreSkuRequired = (cfgType: number | null | undefined) => cfgType === 1 || cfgType === 2
 
 const productSkuPlaceholder = computed(() =>
     isStoreSkuRequired(currentRow.value.cfgType)
@@ -282,7 +266,6 @@ const pageSize = ref(10)
 
 const searchForm = reactive<SearchForm>({
   name: '',
-  packageName: '',
   typeFilter: 0,
   statusFilter: 0
 })
@@ -292,14 +275,11 @@ const dialogTitle = ref('')
 const defaultForm = (): RechargeCfgForm => ({
   id: '',
   name: '',
-  packageName: '',
-  cfgType: 1,
+  cfgType: null,
   icon: '',
   gold: 1,
-  extraGold: 0,
   price: 0.99,
   productId: '',
-  sort: 0,
   description: ''
 })
 const currentRow = ref<RechargeCfgForm>(defaultForm())
@@ -307,10 +287,6 @@ const formRef = ref<FormInstance>()
 const iconUploading = ref(false)
 const iconPreviewUrl = ref('')
 let objectPreviewUrl: string | null = null
-
-const totalGold = (row: RechargeCfg) => {
-  return (Number(row.gold) || 0) + (Number(row.extraGold) || 0)
-}
 
 const revokeObjectPreview = () => {
   if (objectPreviewUrl) {
@@ -373,11 +349,6 @@ const formRules = computed<FormRules>(() => ({
     {required: true, message: t('pages.rechargeCfgList.nameRequired'), trigger: 'blur'},
     {min: 1, max: 64, message: t('pages.rechargeCfgList.nameLength'), trigger: 'blur'}
   ],
-  packageName: [
-    {required: true, message: t('pages.rechargeCfgList.packageNameRequired'), trigger: 'blur'},
-    {min: 1, max: 128, message: t('pages.rechargeCfgList.packageNameLength'), trigger: 'blur'}
-  ],
-  cfgType: [{required: true, message: t('pages.rechargeCfgList.typeRequired'), trigger: 'change'}],
   gold: [{required: true, message: t('pages.rechargeCfgList.goldRequired'), trigger: 'change'}],
   price: [{required: true, message: t('pages.rechargeCfgList.priceRequired'), trigger: 'change'}],
   productId: [
@@ -408,7 +379,6 @@ const fetchList = async () => {
   try {
     const response = await rechargeCfgApi.getRechargeCfgList({
       name: searchForm.name,
-      packageName: searchForm.packageName,
       typeFilter: searchForm.typeFilter,
       statusFilter: searchForm.statusFilter,
       pageIndex: currentPage.value,
@@ -451,14 +421,14 @@ const handleEdit = (row: RechargeCfg) => {
   currentRow.value = {
     id: row.id,
     name: row.name,
-    packageName: row.packageName || '',
-    cfgType: Number(row.cfgType) || 1,
+    cfgType: (() => {
+      const v = Number(row.cfgType)
+      return v === 1 || v === 2 || v === 3 ? v : null
+    })(),
     icon: row.iconName || '',
     gold: Number(row.gold) || 1,
-    extraGold: Number(row.extraGold) || 0,
-    price: truncateNumber(row.price) || 0.99,
+    price: truncateNumber(row.price, RECHARGE_PRICE_DECIMALS) || 0.99,
     productId: row.productId || '',
-    sort: Number(row.sort) || 0,
     description: row.description || ''
   }
   setIconPreview(row.icon || '')
@@ -525,14 +495,11 @@ const handleSave = async () => {
     try {
       const payload = {
         name: currentRow.value.name,
-        packageName: currentRow.value.packageName,
-        cfgType: currentRow.value.cfgType,
+        cfgType: currentRow.value.cfgType ?? 0,
         icon: currentRow.value.icon,
         gold: currentRow.value.gold,
-        extraGold: currentRow.value.extraGold,
         price: currentRow.value.price,
         productId: currentRow.value.productId,
-        sort: currentRow.value.sort,
         description: currentRow.value.description
       }
       if (currentRow.value.id) {
@@ -552,7 +519,6 @@ const handleSave = async () => {
 
 const resetSearch = () => {
   searchForm.name = ''
-  searchForm.packageName = ''
   searchForm.typeFilter = 0
   searchForm.statusFilter = 0
   currentPage.value = 1

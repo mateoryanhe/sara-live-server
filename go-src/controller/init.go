@@ -38,9 +38,11 @@ func Init() {
 	initAliyunTextModerationCMSController()      // 阿里云文本审核(CMS)
 	initPrivacyPolicyCMSController()             // 隐私政策配置(CMS)
 	initGooglePlayCMSController()                // Google Play 配置(CMS)
+	initYhPayCMSController()                     // yhpay支付配置(CMS)
 	initDataSyncCMSController()                  // 数据同步配置(CMS)
 	initDataSyncReceiveController()              // 数据同步接收(跨环境)
 	initGooglePlayWebhookController()            // Google Play RTDN Webhook
+	initYhPayWebhookController()                 // yhpay支付回调
 	initCustomerServiceCMSController()           // 客服联系配置(CMS)
 	initCustomerServiceAppController()           // 客服联系配置(App)
 	initWalletCMSController()                    // 钱包配置(CMS)
@@ -69,8 +71,8 @@ func Init() {
 	initLiveFollowAppController()                // 关注主播(App)
 	initRechargeCfgController()                  // 充值配置管理(CMS)
 	initRechargeCfgAppController()               // 充值配置查询(App)
-	initRechargeCfgAppPublicController()         // 充值配置按币种查询(App,无需鉴权)
 	initRechargeOrderController()                // 充值订单(CMS:查询/手动充值)
+	initRechargeOrderAppPublicController()       // 渠道充值建单(App,无需鉴权)
 	initCurrencyLogController()                  // 货币流水(CMS)
 	initLiveRevenueLogController()               // 直播收益流水(CMS)
 	initAnchorIncomeSettlementLogCMSController() // 主播结算流水(CMS)

@@ -176,7 +176,7 @@
               <template #default="{ row }">{{ formatAmount(row.price) }}</template>
             </el-table-column>
             <el-table-column :label="t('pages.rechargeOrderList.gold')" width="120">
-              <template #default="{ row }">{{ formatAmount((row.gold || 0) + (row.extraGold || 0)) }}</template>
+              <template #default="{ row }">{{ formatAmount(row.gold || 0) }}</template>
             </el-table-column>
             <el-table-column :label="t('pages.rechargeOrderList.rechargeCfgStatus')" width="100">
               <template #default="{ row }">
@@ -360,7 +360,7 @@ const fetchRechargeCfgOptions = async () => {
       pageSize: 200,
       statusFilter: 0,
     })
-    rechargeCfgOptions.value = (response.data || []).slice().sort((a, b) => (a.sort || 0) - (b.sort || 0))
+    rechargeCfgOptions.value = (response.data || []).slice().sort((a, b) => (a.price || 0) - (b.price || 0))
   } catch (error) {
     console.error('Failed to load recharge cfg list:', error)
     ElMessage.error(t('pages.rechargeOrderList.loadRechargeCfgFailed'))

@@ -86,6 +86,7 @@ const menu = {
   TextModerationCfgManagement: '敏感词过滤',
   PrivacyPolicyCfgManagement: '隐私政策',
   GooglePlayCfgManagement: 'Google Play',
+  YhPayCfgManagement: 'yhpay支付',
   UploadResourceCfgManagement: '资源域名',
   H5LiveDeployManagement: 'H5直播部署',
   DataSyncCfgManagement: '数据同步',

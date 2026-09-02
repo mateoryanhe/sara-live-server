@@ -140,3 +140,28 @@ type AppCheckRechargeOrderSuccessRes struct {
 	Price       float64 `json:"price"       dc:"订单金额(USD)"`
 	Gold        float64 `json:"gold"        dc:"到账金币数量"`
 }
+
+// AppCreateChannelRechargeOrderReq App渠道充值建单(yhpay,无需鉴权)
+type AppCreateChannelRechargeOrderReq struct {
+	g.Meta       `path:"/createChannelRechargeOrder" method:"post" summary:"App创建渠道充值订单(yhpay,无需鉴权)" tags:"充值订单"`
+	UserId       string `json:"userId"       v:"required#用户ID不能为空" dc:"玩家用户ID"`
+	CfgId        uint64 `json:"cfgId"        v:"required#充值档位ID不能为空" dc:"充值档位ID"`
+	CurrencyCode string `json:"currencyCode" v:"required#币种不能为空" dc:"币种代码(来自FiatCurrencyCfg,USDT走加密入款)"`
+}
+
+type AppCreateChannelRechargeOrderRes struct {
+	OrderId  string  `json:"orderId"  dc:"本系统订单号,用于轮询checkRechargeOrderSuccess"`
+	PayUrl   string  `json:"payUrl"   dc:"支付收银台URL,App用WebView打开"`
+	Price    float64 `json:"price"    dc:"应付金额(法币为换算后金额,USDT为USD档位价)"`
+	Currency string  `json:"currency" dc:"币种"`
+	Status   uint8   `json:"status"   dc:"订单状态(创建后=0待支付)"`
+}
+
+// CMSCreateChannelRechargeOrderReq CMS第三方充值测试
+type CMSCreateChannelRechargeOrderReq struct {
+	g.Meta       `path:"/createChannelRechargeOrderTest" method:"post" summary:"CMS第三方充值测试建单" tags:"充值订单"`
+	UserId       string `json:"userId"       v:"required#玩家ID不能为空" dc:"玩家用户ID"`
+	CfgId        uint64 `json:"cfgId"        v:"required#充值档位ID不能为空" dc:"充值档位ID"`
+	CurrencyCode string `json:"currencyCode" v:"required#币种不能为空" dc:"币种代码"`
+	PackageName  string `json:"packageName"  dc:"可选包名,默认cms.yhpay.test"`
+}

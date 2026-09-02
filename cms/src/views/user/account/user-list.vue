@@ -189,7 +189,8 @@
                 <template #dropdown>
                   <el-dropdown-menu>
                     <el-dropdown-item v-if="can('openGame')" command="openGame">{{ t('pages.userList.openGame') }}</el-dropdown-item>
-                    <el-dropdown-item v-if="canViewDetail" :divided="can('openGame')" command="viewDetail">{{ t('pages.userList.viewDetail') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="can('channelRechargeTest')" :divided="can('openGame')" command="channelRechargeTest">{{ t('pages.userList.channelRechargeTest') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="canViewDetail" :divided="can('openGame') || can('channelRechargeTest')" command="viewDetail">{{ t('pages.userList.viewDetail') }}</el-dropdown-item>
                     <el-dropdown-item v-if="can('setAnchor') && !scope.row.isAnchor" :divided="canViewDetail || can('openGame')" command="setAnchor">{{ t('pages.userList.setAnchor') }}</el-dropdown-item>
                     <el-dropdown-item v-if="can('setSeniorAnchor') && !scope.row.isAnchor" command="setSeniorAnchor">{{ t('pages.userList.setSeniorAnchor') }}</el-dropdown-item>
                     <el-dropdown-item v-if="can('goldAdd')" :divided="!scope.row.isAnchor" command="gold-add">
@@ -466,6 +467,8 @@
         />
       </div>
     </el-dialog>
+
+    <ChannelRechargeTestDialog v-model="channelTestVisible" :user-id="channelTestUserId"/>
   </div>
 </template>
 
@@ -478,6 +481,7 @@ import {ElForm, ElMessage, ElMessageBox, type FormInstance, type FormRules, type
 import {useRoute, useRouter} from 'vue-router'
 import type {BanReq, CancelReq, GameShelfItem, UnBanReq, UnCancelReq, UserInfo} from '@/types/api.ts'
 import {gamePlatformApi} from '@/api/modules/gamePlatform'
+import ChannelRechargeTestDialog from '@/components/ChannelRechargeTestDialog.vue'
 import {formatWalletBalance, NUMBER_INPUT_DECIMALS} from '@/utils/number-format'
 import {usePagePermission} from '@/composables/usePagePermission'
 
@@ -507,10 +511,13 @@ const ROW_ACTION_KEYS = [
   'setUserType',
   'uploadAvatar',
   'openGame',
+  'channelRechargeTest',
 ] as const
 
 const hasRowActions = computed(() => canViewDetail.value || ROW_ACTION_KEYS.some(key => can(key)))
 
+const channelTestVisible = ref(false)
+const channelTestUserId = ref('')
 const userList = ref<UserInfo[]>([])
 const loading = ref(false)
 type CurrencyType = 'gold' | 'diamond'
@@ -953,10 +960,18 @@ const openGamePicker = (row: UserInfo) => {
   gamePickerDialogVisible.value = true
 }
 
+const openChannelRechargeTest = (row: UserInfo) => {
+  channelTestUserId.value = String(row.id || '')
+  channelTestVisible.value = true
+}
+
 const handleRowCommand = (row: UserInfo, command: string) => {
   switch (command) {
     case 'openGame':
       openGamePicker(row)
+      break
+    case 'channelRechargeTest':
+      openChannelRechargeTest(row)
       break
     case 'viewDetail':
       openDetail(row)

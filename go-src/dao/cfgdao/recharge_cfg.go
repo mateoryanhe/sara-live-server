@@ -20,10 +20,10 @@ func GetRechargeCfgById(id uint64) *entity.RechargeCfg {
 	return &cfg
 }
 
-func GetRechargeCfgByNameTypeAndPackage(name string, cfgType uint8, packageName string) *entity.RechargeCfg {
+func GetRechargeCfgByNameAndType(name string, cfgType uint8) *entity.RechargeCfg {
 	var cfg entity.RechargeCfg
 	err := g.DB().Model(string(entity.TbRechargeCfg)).
-		Where("name = ? AND cfg_type = ? AND package_name = ?", name, cfgType, packageName).
+		Where("name = ? AND cfg_type = ?", name, cfgType).
 		Scan(&cfg)
 	if err != nil {
 		return nil
@@ -34,15 +34,14 @@ func GetRechargeCfgByNameTypeAndPackage(name string, cfgType uint8, packageName 
 	return &cfg
 }
 
-func GetRechargeCfgByProductIdTypeAndPackage(productId string, cfgType uint8, packageName string) *entity.RechargeCfg {
+func GetRechargeCfgByProductIdAndType(productId string, cfgType uint8) *entity.RechargeCfg {
 	productId = strings.TrimSpace(productId)
-	packageName = strings.TrimSpace(packageName)
-	if productId == "" || packageName == "" {
+	if productId == "" {
 		return nil
 	}
 	var cfg entity.RechargeCfg
 	err := g.DB().Model(string(entity.TbRechargeCfg)).
-		Where("product_id = ? AND cfg_type = ? AND package_name = ?", productId, cfgType, packageName).
+		Where("product_id = ? AND cfg_type = ?", productId, cfgType).
 		Scan(&cfg)
 	if err != nil {
 		return nil
@@ -88,7 +87,7 @@ func GetOnShelfRechargeCfg() []*entity.RechargeCfg {
 	ret := make([]*entity.RechargeCfg, 0)
 	err := g.DB().Model(string(entity.TbRechargeCfg)).
 		Where("status = ?", entity.RechargeCfgStatusOnShelf).
-		Order("sort desc, price asc, created_at desc").
+		Order("price asc, id asc").
 		Scan(&ret)
 	if err != nil {
 		return nil
@@ -97,8 +96,8 @@ func GetOnShelfRechargeCfg() []*entity.RechargeCfg {
 }
 
 func GetRechargeCfgList(req *rechargecfgdto.RechargeCfgListReq) (int, []*rechargecfgdto.RechargeCfgListRes) {
-	sql := `select id, name, package_name, cfg_type, icon, gold, extra_gold, price, currency, product_id,
-                   sort, status, description, created_at, updated_at
+	sql := `select id, name, cfg_type, icon, gold, price, currency, product_id,
+                   status, description, created_at, updated_at
             from recharge_cfgs
             where 1=1 `
 	param := make([]any, 0)
@@ -108,10 +107,6 @@ func GetRechargeCfgList(req *rechargecfgdto.RechargeCfgListReq) (int, []*recharg
 	if req.Name != "" {
 		sql += ` and name LIKE ?`
 		param = append(param, fmt.Sprintf("%%%s%%", req.Name))
-	}
-	if req.PackageName != "" {
-		sql += ` and package_name LIKE ?`
-		param = append(param, fmt.Sprintf("%%%s%%", req.PackageName))
 	}
 	switch req.TypeFilter {
 	case 1, 2, 3:
@@ -127,7 +122,7 @@ func GetRechargeCfgList(req *rechargecfgdto.RechargeCfgListReq) (int, []*recharg
 		param = append(param, entity.RechargeCfgStatusOnShelf)
 	}
 
-	sql += ` order by sort desc, price asc, created_at desc`
+	sql += ` order by price asc, id asc`
 	countSql := str.GetCountSQL(sql)
 	total, _ := g.DB().GetCount(ctx, countSql, param)
 	sql += ` limit ` + strconv.Itoa(req.PageSize) + ` offset ` + strconv.Itoa(req.PageOffset())

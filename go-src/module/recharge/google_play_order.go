@@ -107,7 +107,7 @@ func processGooglePlayPurchase(ctx context.Context, packageName, sku, purchaseTo
 		return nil
 	}
 
-	rechargeCfg := GetGoogleRechargeCfgByProductId(packageName, sku)
+	rechargeCfg := GetGoogleRechargeCfgByProductId(sku)
 	if rechargeCfg == nil {
 		logGooglePlayError(ctx, "google play unknown sku=%s pkg=%s", sku, packageName)
 		if fixedOrderId > 0 {

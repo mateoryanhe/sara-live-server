@@ -59,6 +59,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: 'Google Play'},
         },
         {
+            path: 'yhpay',
+            name: 'YhPayCfgManagement',
+            component: () => import('@/views/config/yhpay.vue'),
+            meta: {title: 'yhpay支付'},
+        },
+        {
             path: 'upload-resource',
             name: 'UploadResourceCfgManagement',
             component: () => import('@/views/config/upload-resource.vue'),

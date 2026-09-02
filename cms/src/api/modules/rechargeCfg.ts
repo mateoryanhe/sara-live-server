@@ -8,14 +8,11 @@ export const rechargeCfgApi = {
 
     createRechargeCfg: (data: {
         name: string
-        packageName: string
         cfgType: number
         icon: string
         gold: number
-        extraGold: number
         price: number
         productId: string
-        sort: number
         description: string
     }) => {
         return request.post<{ id: string }>('/rechargeCfg/createRechargeCfg', data)
@@ -24,14 +21,11 @@ export const rechargeCfgApi = {
     updateRechargeCfg: (data: {
         id: string | number
         name: string
-        packageName: string
         cfgType: number
         icon: string
         gold: number
-        extraGold: number
         price: number
         productId: string
-        sort: number
         description: string
     }) => {
         return request.post<boolean>('/rechargeCfg/updateRechargeCfg', data)

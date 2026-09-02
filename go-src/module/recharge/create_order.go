@@ -36,7 +36,7 @@ func CreateOrder(ctx context.Context, req *rechargeorderdto.AppCreateRechargeOrd
 		if cfg.Price == 0 {
 			return nil, errercode.CreateCode(errercode.RechargeAmountInvalid)
 		}
-		goldAmount := float64(cfg.Gold + cfg.ExtraGold)
+		goldAmount := float64(cfg.Gold)
 		if goldAmount <= 0 {
 			return nil, errercode.CreateCode(errercode.RechargeGoldInvalid)
 		}
@@ -99,7 +99,7 @@ func CMSCreateOrder(ctx context.Context, req *rechargeorderdto.CMSCreateRecharge
 		if cfg.Price <= 0 {
 			return nil, errercode.CreateCode(errercode.RechargeAmountInvalid)
 		}
-		goldAmount := float64(cfg.Gold + cfg.ExtraGold)
+		goldAmount := float64(cfg.Gold)
 		if goldAmount <= 0 {
 			return nil, errercode.CreateCode(errercode.RechargeGoldInvalid)
 		}

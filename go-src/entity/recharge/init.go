@@ -5,4 +5,5 @@ func Init() {
 	initRechargeCfg()
 	initRechargeOrder()
 	initGooglePlayCfg()
+	initYhPayCfg()
 }

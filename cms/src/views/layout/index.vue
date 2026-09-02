@@ -454,7 +454,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
+            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('YhPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
             index="/config">
           <template #title>
             <el-icon>
@@ -525,7 +525,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('DataSyncCfgManagement')"
+              v-if="hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('YhPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('DataSyncCfgManagement')"
               index="/config/group/platform">
             <template #title>
               <el-icon>
@@ -538,6 +538,12 @@
                 <CreditCard/>
               </el-icon>
               <span>{{ t('menu.GooglePlayCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('YhPayCfgManagement')" index="/config/yhpay">
+              <el-icon>
+                <Wallet/>
+              </el-icon>
+              <span>{{ t('menu.YhPayCfgManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('UploadResourceCfgManagement')" index="/config/upload-resource">
               <el-icon>

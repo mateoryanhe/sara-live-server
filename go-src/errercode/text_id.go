@@ -109,5 +109,7 @@ func init() {
 		FiatCurrencyNonExist:            "Konfigurasi mata uang fiat tidak ditemukan",
 		FiatCurrencyDisabled:            "Konfigurasi mata uang fiat dinonaktifkan",
 		FiatExchangeRateUnavailable:     "Kurs fiat tidak tersedia",
+		YhPayNotConfigured:              "Pembayaran saluran belum dikonfigurasi",
+		YhPayCreateFailed:               "Gagal membuat pembayaran saluran",
 	}
 }

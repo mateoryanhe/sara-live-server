@@ -201,6 +201,10 @@ const (
 	FiatCurrencyDisabled XRCode = 156
 	// FiatExchangeRateUnavailable 法币汇率暂不可用
 	FiatExchangeRateUnavailable XRCode = 157
+	// YhPayNotConfigured yhpay未配置或未启用
+	YhPayNotConfigured XRCode = 158
+	// YhPayCreateFailed yhpay创建支付失败
+	YhPayCreateFailed XRCode = 159
 )
 
 type XError struct {

@@ -26,6 +26,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'UserList:uploadAvatar': '/account/setUserAvatar',
     'UserList:setAnchorType': '/account/setPlatformAnchorType',
     'UserList:openGame': '/gamePlatform/gameShelfList',
+    'UserList:channelRechargeTest': '/rechargeOrder/createChannelRechargeOrderTest',
     UserDetail: '/account/getUserDetail',
     'UserDetail:goldLog': '/currencyLog/cmsCurrencyLogList',
     'UserDetail:exportGoldLog': '/cmsExport/submitJob',
@@ -100,6 +101,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'RechargeOrderList:search': '/rechargeOrder/rechargeOrderList',
     'RechargeOrderList:viewUserDetail': '/account/getUserDetail',
     'RechargeOrderList:manualCreateOrder': '/rechargeOrder/manualCreateOrder',
+    'RechargeOrderList:createOrderByRechargeCfg': '/rechargeOrder/manualCreateOrder',
     'RechargeOrderList:manualRecharge': '/rechargeOrder/manualRecharge',
 
     GoldCurrencyLogList: '/currencyLog/cmsCurrencyLogList',
@@ -421,6 +423,10 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     GooglePlayCfgManagement: '/googlePlay/getGooglePlayCfg',
     'GooglePlayCfgManagement:view': '/googlePlay/getGooglePlayCfg',
     'GooglePlayCfgManagement:save': '/googlePlay/saveGooglePlayCfg',
+
+    YhPayCfgManagement: '/yhpay/getYhPayCfg',
+    'YhPayCfgManagement:view': '/yhpay/getYhPayCfg',
+    'YhPayCfgManagement:save': '/yhpay/saveYhPayCfg',
 
     UploadResourceCfgManagement: '/upload/getUploadResourceCfg',
     'UploadResourceCfgManagement:view': '/upload/getUploadResourceCfg',

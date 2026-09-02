@@ -31,3 +31,8 @@ func (c *RechargeOrderController) ManualRecharge(ctx context.Context, req *recha
 func (c *RechargeOrderController) ManualCreateOrder(ctx context.Context, req *rechargeorderdto.CMSCreateRechargeOrderReq) (res *rechargeorderdto.CMSCreateRechargeOrderRes, err error) {
 	return recharge.CMSCreateOrder(ctx, req)
 }
+
+// CreateChannelRechargeOrderTest CMS第三方充值测试建单并返回支付URL
+func (c *RechargeOrderController) CreateChannelRechargeOrderTest(ctx context.Context, req *rechargeorderdto.CMSCreateChannelRechargeOrderReq) (res *rechargeorderdto.AppCreateChannelRechargeOrderRes, err error) {
+	return recharge.CMSCreateChannelRechargeOrder(ctx, req)
+}

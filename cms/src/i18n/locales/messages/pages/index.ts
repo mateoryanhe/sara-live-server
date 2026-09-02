@@ -63,6 +63,7 @@ import {preloadCfgMessages} from './preload-cfg'
 import {textModerationMessages} from './text-moderation'
 import {privacyPolicyMessages} from './privacy-policy'
 import {googlePlayMessages} from './google-play'
+import {yhpayMessages} from './yhpay'
 import {uploadResourceMessages} from './upload-resource'
 import {h5LiveDeployMessages} from './h5-live-deploy'
 import {dataSyncMessages} from './data-sync'
@@ -134,6 +135,7 @@ const pageMessageBuilders = [
   ['textModeration', textModerationMessages],
   ['privacyPolicy', privacyPolicyMessages],
   ['googlePlay', googlePlayMessages],
+  ['yhpay', yhpayMessages],
   ['uploadResource', uploadResourceMessages],
   ['h5LiveDeploy', h5LiveDeployMessages],
   ['dataSync', dataSyncMessages],

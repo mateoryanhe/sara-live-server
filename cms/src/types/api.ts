@@ -1053,19 +1053,14 @@ export interface GiftQuery extends PageQuery {
 export interface RechargeCfg {
     id: string
     name: string
-    packageName: string
     cfgType: number
     icon: string
     iconName: string
-    /** 基础到账金币数(接口字段仍为 diamond) */
-    diamond: number
-    /** 额外赠送金币数(接口字段仍为 extraDiamond) */
-    extraDiamond: number
+    gold: number
     price: number
     /** 固定 USD，仅列表展示用 */
     currency?: string
     productId: string
-    sort: number
     status: number
     description: string
     createdAt: string
@@ -1074,7 +1069,6 @@ export interface RechargeCfg {
 
 export interface RechargeCfgQuery extends PageQuery {
     name?: string
-    packageName?: string
     typeFilter?: number
     statusFilter?: number
 }
@@ -1721,6 +1715,43 @@ export interface SaveGooglePlayCfgReq {
 }
 
 export interface SaveGooglePlayCfgRes {
+    success: boolean
+    id: string
+}
+
+export interface YhPayCfg {
+    id: string
+    enabled: boolean
+    merchantCode: string
+    apiKey: string
+    apiHost: string
+    cryptoApiHost: string
+    callbackBaseUrl: string
+    returnUrl: string
+    failedReturnUrl: string
+    cryptoNetwork: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetYhPayCfgRes {
+    cfg: YhPayCfg | null
+}
+
+export interface SaveYhPayCfgReq {
+    id?: number
+    enabled: boolean
+    merchantCode: string
+    apiKey: string
+    apiHost: string
+    cryptoApiHost: string
+    callbackBaseUrl?: string
+    returnUrl?: string
+    failedReturnUrl?: string
+    cryptoNetwork?: string
+}
+
+export interface SaveYhPayCfgRes {
     success: boolean
     id: string
 }

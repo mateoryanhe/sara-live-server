@@ -86,6 +86,7 @@ const CONFIG_PAGES = new Set([
     'TextModerationCfgManagement',
     'PrivacyPolicyCfgManagement',
     'GooglePlayCfgManagement',
+    'YhPayCfgManagement',
     'UploadResourceCfgManagement',
     'DataSyncCfgManagement',
     'AgoraCfgManagement',
@@ -123,6 +124,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'uploadAvatar', label: '上传头像'},
         {key: 'setAnchorType', label: '设置主播类型'},
         {key: 'openGame', label: '打开游戏'},
+        {key: 'channelRechargeTest', label: '第三方充值测试'},
     ],
     UserDetail: [
         BTN.view,
@@ -261,6 +263,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'viewUserDetail', label: '查看用户详情'},
         {key: 'manualCreateOrder', label: '人工创建订单'},
         {key: 'manualRecharge', label: '人工补单'},
+        {key: 'createOrderByRechargeCfg', label: '按档位创建订单'},
     ],
     LiveRecordList: [
         BTN.view,

@@ -55,6 +55,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   TextModerationCfgManagement: 'Moderação de texto',
   PrivacyPolicyCfgManagement: 'Política de privacidade',
   GooglePlayCfgManagement: 'Google Play',
+  YhPayCfgManagement: 'yhpay',
   UploadResourceCfgManagement: 'CDN de recursos',
   DataSyncCfgManagement: 'Sincronização de dados',
   ResourceMonitor: 'Monitor de recursos',

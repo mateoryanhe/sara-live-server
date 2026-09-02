@@ -12,7 +12,6 @@ type RechargeCfgListReq struct {
 	g.Meta `path:"/rechargeCfgList" method:"post" summary:"获取充值配置列表" tags:"充值配置"`
 	httpserver.CMSQueryReq
 	Name         string `json:"name"         dc:"名称(模糊匹配)"`
-	PackageName  string `json:"packageName"  dc:"包名(模糊匹配)"`
 	TypeFilter   int    `json:"typeFilter"   dc:"类型过滤(0=全部, 1=iOS, 2=Google, 3=渠道)"`
 	StatusFilter int    `json:"statusFilter" dc:"状态过滤(0=全部, 1=只看下架, 2=只看上架)"`
 }
@@ -21,16 +20,13 @@ type RechargeCfgListReq struct {
 type RechargeCfgListRes struct {
 	ID          string  `json:"id"`
 	Name        string  `json:"name"`
-	PackageName string  `json:"packageName"`
 	CfgType     uint8   `json:"cfgType"`
 	Icon        string  `json:"icon" dc:"图标完整URL(列表展示)"`
 	IconName    string  `json:"iconName" dc:"图标资源文件名(编辑保存用)"`
-	Gold        uint64  `json:"gold" dc:"基础到账金币数"`
-	ExtraGold   uint64  `json:"extraGold" dc:"额外赠送金币数"`
+	Gold        uint64  `json:"gold" dc:"到账金币数"`
 	Price       float64 `json:"price" dc:"现实货币价格(单位:USD)"`
 	Currency    string  `json:"currency"`
 	ProductId   string  `json:"productId"`
-	Sort        int     `json:"sort"`
 	Status      uint8   `json:"status"`
 	Description string  `json:"description"`
 	CreatedAt   string  `json:"createdAt"`
@@ -41,14 +37,11 @@ type RechargeCfgListRes struct {
 type CreateRechargeCfgReq struct {
 	g.Meta      `path:"/createRechargeCfg" method:"post" summary:"创建充值配置" tags:"充值配置"`
 	Name        string  `json:"name"         v:"required|length:1,64#名称不能为空|名称长度需在1到64之间" dc:"档位名称"`
-	PackageName string  `json:"packageName"  v:"required|length:1,128#包名不能为空|包名长度需在1到128之间" dc:"App包名"`
-	CfgType     uint8   `json:"cfgType"      v:"required|in:1,2,3#类型不能为空|类型无效" dc:"类型(1iOS,2Google,3渠道)"`
+	CfgType     uint8   `json:"cfgType"      v:"in:0,1,2,3#类型无效" dc:"类型(0未指定,1iOS,2Google,3渠道),可选"`
 	Icon        string  `json:"icon"         v:"max-length:255#图标URL最长255字符" dc:"图标URL"`
-	Gold        uint64  `json:"gold"      v:"required|min:1#基础到账金币数不能为空|基础到账金币数需大于0" dc:"基础到账金币数"`
-	ExtraGold   uint64  `json:"extraGold" dc:"额外赠送金币数"`
+	Gold        uint64  `json:"gold"      v:"required|min:1#到账金币数不能为空|到账金币数需大于0" dc:"到账金币数"`
 	Price       float64 `json:"price"        v:"required|min:0.0001#价格不能为空|价格需大于0" dc:"现实货币价格(单位:USD)"`
 	ProductId   string  `json:"productId"    v:"max-length:64#商品ID最长64字符" dc:"第三方商品SKU"`
-	Sort        int     `json:"sort"         dc:"排序值(越大越靠前)"`
 	Description string  `json:"description"  v:"max-length:255#描述最长255字符" dc:"描述"`
 }
 
@@ -61,14 +54,11 @@ type UpdateRechargeCfgReq struct {
 	g.Meta      `path:"/updateRechargeCfg" method:"post" summary:"修改充值配置" tags:"充值配置"`
 	ID          uint64  `json:"id"           v:"required#ID不能为空" dc:"档位ID"`
 	Name        string  `json:"name"         v:"required|length:1,64#名称不能为空|名称长度需在1到64之间" dc:"档位名称"`
-	PackageName string  `json:"packageName"  v:"required|length:1,128#包名不能为空|包名长度需在1到128之间" dc:"App包名"`
-	CfgType     uint8   `json:"cfgType"      v:"required|in:1,2,3#类型不能为空|类型无效" dc:"类型(1iOS,2Google,3渠道)"`
+	CfgType     uint8   `json:"cfgType"      v:"in:0,1,2,3#类型无效" dc:"类型(0未指定,1iOS,2Google,3渠道),可选"`
 	Icon        string  `json:"icon"         v:"max-length:255#图标URL最长255字符" dc:"图标URL"`
-	Gold        uint64  `json:"gold"      v:"required|min:1#基础到账金币数不能为空|基础到账金币数需大于0" dc:"基础到账金币数"`
-	ExtraGold   uint64  `json:"extraGold" dc:"额外赠送金币数"`
+	Gold        uint64  `json:"gold"      v:"required|min:1#到账金币数不能为空|到账金币数需大于0" dc:"到账金币数"`
 	Price       float64 `json:"price"        v:"required|min:0.0001#价格不能为空|价格需大于0" dc:"现实货币价格(单位:USD)"`
 	ProductId   string  `json:"productId"    v:"max-length:64#商品ID最长64字符" dc:"第三方商品SKU"`
-	Sort        int     `json:"sort"         dc:"排序值"`
 	Description string  `json:"description"  v:"max-length:255#描述最长255字符" dc:"描述"`
 }
 
@@ -117,18 +107,15 @@ type AppRechargeCfgListReq struct {
 
 // AppRechargeCfgItem App端单条
 type AppRechargeCfgItem struct {
-	ID          uint64  `json:"id"`
-	Name        string  `json:"name"`
-	PackageName string  `json:"packageName"`
-	CfgType     uint8   `json:"cfgType"`
-	Icon        string  `json:"icon"`
-	Gold        uint64  `json:"gold" dc:"基础到账金币数"`
-	ExtraGold   uint64  `json:"extraGold" dc:"额外赠送金币数"`
-	Price       float64 `json:"price" dc:"现实货币价格(单位:USD)"`
-	Currency    string  `json:"currency"`
-	ProductId   string  `json:"productId"`
-	Sort          int     `json:"sort"`
-	Description   string  `json:"description"`
+	ID                 uint64  `json:"id"`
+	Name               string  `json:"name"`
+	CfgType            uint8   `json:"cfgType"`
+	Icon               string  `json:"icon"`
+	Gold               uint64  `json:"gold" dc:"到账金币数"`
+	Price              float64 `json:"price" dc:"现实货币价格(单位:USD)"`
+	Currency           string  `json:"currency"`
+	ProductId          string  `json:"productId"`
+	Description        string  `json:"description"`
 	Status             uint8   `gorm:"default:0;comment:状态(0-下架,1-上架)" json:"status"`
 	FirstRecharge      bool    `json:"firstRecharge" dc:"该档位是否未首充(true=可享受首充加赠)"`
 	FirstRechargeRatio float64 `json:"firstRechargeRatio" dc:"首充赠送比例(%),firstRecharge=true 时取自首充活动配置;已首充则为0"`
@@ -136,10 +123,4 @@ type AppRechargeCfgItem struct {
 
 type AppRechargeCfgListRes struct {
 	List []*AppRechargeCfgItem `json:"list"`
-}
-
-// AppRechargeCfgListByCurrencyReq App按币种查询充值配置(价格按实时汇率+加点换算)
-type AppRechargeCfgListByCurrencyReq struct {
-	g.Meta       `path:"/rechargeCfgListByCurrencyForApp" method:"post" summary:"App按币种查询充值配置列表" tags:"充值配置"`
-	CurrencyCode string `json:"currencyCode" v:"required|length:3,8#币种代码不能为空|币种代码长度需在3到8之间" dc:"币种代码(如IDR)"`
 }

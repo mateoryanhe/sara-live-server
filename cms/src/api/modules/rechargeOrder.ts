@@ -23,4 +23,19 @@ export const rechargeOrderApi = {
             success: boolean
         }>('/rechargeOrder/manualCreateOrder', params)
     },
+
+    createChannelRechargeOrderTest: (params: {
+        userId: string
+        cfgId: number
+        currencyCode: string
+        packageName?: string
+    }) => {
+        return request.post<{
+            orderId: string
+            payUrl: string
+            price: number
+            currency: string
+            status: number
+        }>('/rechargeOrder/createChannelRechargeOrderTest', params)
+    },
 }
