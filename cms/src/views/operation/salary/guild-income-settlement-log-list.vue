@@ -35,11 +35,26 @@
         <el-table-column :label="t('common.createdAt')" fixed="left" width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.guildId')" min-width="180" prop="guildId"/>
+        <el-table-column :label="t('pages.guildIncomeSettlementLogList.guildId')" min-width="180">
+          <template #default="{ row }">
+            <el-button v-if="row.guildId" link type="primary" @click="openGuildDetail(row)">
+              {{ row.guildId }}
+            </el-button>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
         <el-table-column :label="t('pages.guildIncomeSettlementLogList.guildName')" min-width="120" prop="guildName">
           <template #default="{ row }">{{ row.guildName || '-' }}</template>
         </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.settlementShareAmount')" align="right" min-width="130">
+        <el-table-column
+            :label="t('pages.guildIncomeSettlementLogList.settlementSalary')"
+            align="right"
+            label-class-name="header-nowrap"
+            min-width="150"
+        >
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementSalary) }}</span></template>
+        </el-table-column>
+        <el-table-column :label="t('pages.guildIncomeSettlementLogList.settlementShareAmount')" align="right" min-width="110">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementShareAmount) }}</span></template>
         </el-table-column>
         <el-table-column :label="t('pages.guildIncomeSettlementLogList.settlementReceivableUsd')" align="right" min-width="150">
@@ -95,6 +110,7 @@
 <script lang="ts" setup>
 import {useI18n} from 'vue-i18n'
 import {onMounted, reactive, ref} from 'vue'
+import {useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {guildIncomeSettlementLogApi} from '@/api/modules/guild-income-settlement-log'
 import type {GuildIncomeSettlementLogItem} from '@/types/api'
@@ -106,6 +122,7 @@ import {formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 
 const {t} = useI18n()
+const router = useRouter()
 const {can} = usePagePermission('GuildIncomeSettlementLogList')
 const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
@@ -198,6 +215,19 @@ const formatSharePercent = (value: number | null | undefined) => {
   return `${value}%`
 }
 
+const openGuildDetail = (row: GuildIncomeSettlementLogItem) => {
+  if (!row.guildId || Number(row.guildId) === 0) {
+    return
+  }
+  router.push({
+    name: 'GuildDetail',
+    query: {
+      id: String(row.guildId),
+      name: row.guildName || '',
+    },
+  })
+}
+
 const formatDate = (dateString: string | null | undefined) => {
   if (!dateString) return '-'
   try {
@@ -231,5 +261,9 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
   margin-top: 16px;
+}
+
+:deep(th.header-nowrap > .cell) {
+  white-space: nowrap;
 }
 </style>

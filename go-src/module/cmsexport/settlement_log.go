@@ -164,9 +164,15 @@ func guildSettlementLogToCSVRow(row *liveentity.GuildIncomeSettlementLog, guildN
 		formatCSVUint(row.ID),
 		formatCSVUint(row.GuildId),
 		guildName,
+		formatCSVFloat(row.SettlementSalary),
+		formatCSVFloat(row.SettlementShareAmount),
 	}
-	cells = append(cells, guildSettlementAmountCells(row)...)
-	cells = append(cells, formatCSVTime(row.CreatedAt))
+	cells = append(cells, incomeAmountCSVCells(&row.LiveRoomIncomeAmounts)...)
+	cells = append(cells,
+		formatCSVFloat(row.GuildSharePercent),
+		formatCSVFloat(row.SettlementReceivableUsd),
+		formatCSVTime(row.CreatedAt),
+	)
 	return cells
 }
 
@@ -191,15 +197,6 @@ func anchorSettlementAmountCells(row *liveentity.AnchorIncomeSettlementLog) []st
 		formatCSVFloat(row.AnchorSharePercent),
 		formatCSVFloat(row.SettlementShareAmount),
 		formatCSVFloat(row.SettlementShareAmountUsd),
-	)
-}
-
-func guildSettlementAmountCells(row *liveentity.GuildIncomeSettlementLog) []string {
-	return append(incomeAmountCSVCells(&row.LiveRoomIncomeAmounts),
-		formatCSVFloat(row.GuildSharePercent),
-		formatCSVFloat(row.SettlementShareAmount),
-		formatCSVFloat(row.SettlementShareAmountUsd),
-		formatCSVFloat(row.SettlementReceivableUsd),
 	)
 }
 

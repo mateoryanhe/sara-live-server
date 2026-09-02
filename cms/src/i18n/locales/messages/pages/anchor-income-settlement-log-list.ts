@@ -22,7 +22,7 @@ const zh = {
   totalShortVideoIncome: '短视频收益',
   totalGameIncome: '游戏收益',
   totalLiveDuration: '直播时长(分钟)',
-  settlementSalary: '开播底薪（钻石）',
+  settlementSalary: '开播底薪(钻石)',
   settlementFlowCommission: '结算钻石',
   anchorSharePercent: '主播分佣(%)',
   settlementShareAmountUsd: '结算美金(USD)',

@@ -117,9 +117,6 @@
         <el-table-column :label="t('pages.anchorList.dailyLiveDuration')" min-width="150">
           <template #default="{ row }">{{ formatLiveDurationMinutes(row.liveDuration, t) }}</template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.dailyReportedLiveDuration')" min-width="150">
-          <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
-        </el-table-column>
         <el-table-column :label="t('pages.liveDailyEffectiveLiveList.dailyLiveIncome')" align="right" min-width="130">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
         </el-table-column>
@@ -143,6 +140,9 @@
         </el-table-column>
         <el-table-column :label="t('pages.liveDailyEffectiveLiveList.dailyGameIncome')" align="right" min-width="130">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameIncome) }}</span></template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorList.dailyReportedLiveDuration')" min-width="150">
+          <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.dailySettled')" min-width="100">
           <template #default="{ row }">
@@ -204,7 +204,7 @@ import {CMS_EXPORT_TYPE_LIVE_DAILY_EFFECTIVE_LIVE} from '@/utils/cms-async-expor
 import {buildLiveDailyEffectiveLiveListCsvColumns} from '@/utils/daily-effective-live-csv'
 import {formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
-import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
+import {formatServerDateTime as formatDate, getServerWeekDateRange} from '@/utils/server-datetime'
 
 const {t} = useI18n()
 const router = useRouter()
@@ -219,10 +219,12 @@ const selectedGuildAnchors = ref<AnchorListItem[]>([])
 const platformAnchorPickerVisible = ref(false)
 const guildAnchorPickerVisible = ref(false)
 
+const defaultWeek = getServerWeekDateRange()
+
 const searchForm = reactive({
   keyword: '',
-  startDate: '',
-  endDate: '',
+  startDate: defaultWeek.start,
+  endDate: defaultWeek.end,
 })
 
 const pagination = reactive({
@@ -328,11 +330,12 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
+  const week = getServerWeekDateRange()
   selectedPlatformAnchors.value = []
   selectedGuildAnchors.value = []
   searchForm.keyword = ''
-  searchForm.startDate = ''
-  searchForm.endDate = ''
+  searchForm.startDate = week.start
+  searchForm.endDate = week.end
   pagination.pageIndex = 1
   fetchList()
 }

@@ -55,7 +55,7 @@ function guildAmountColumns(t: TranslateFn, ns: string): CsvColumn<SettlementLog
   return [
     ...incomeAmountColumns(t, ns),
     {header: t(`${ns}.guildSharePercent`), value: row => row.guildSharePercent ?? ''},
-    {header: t(`${ns}.settlementShareAmount`), value: row => row.settlementShareAmount ?? ''},
+    {header: t(`${ns}.settlementReceivableUsd`), value: row => row.settlementReceivableUsd ?? ''},
   ]
 }
 
@@ -67,6 +67,8 @@ export function buildGuildSettlementLogCsvColumns(
     {header: t(`${ns}.logId`), value: row => row.id},
     {header: t(`${ns}.guildId`), value: row => row.guildId ?? ''},
     {header: t(`${ns}.guildName`), value: row => row.guildName ?? ''},
+    {header: t(`${ns}.settlementSalary`), value: row => row.settlementSalary ?? ''},
+    {header: t(`${ns}.settlementShareAmount`), value: row => row.settlementShareAmount ?? ''},
     ...guildAmountColumns(t, ns),
     {header: t('common.createdAt'), value: row => formatServerDateTimeForExport(row.createdAt)},
   ]

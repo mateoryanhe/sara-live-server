@@ -87,14 +87,36 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.roomId')" min-width="180" prop="roomId"/>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.roomNickname')" min-width="120" prop="roomNickname">
-          <template #default="{ row }">{{ row.roomNickname || '-' }}</template>
+        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.roomId')" min-width="180">
+          <template #default="{ row }">
+            <el-button v-if="row.roomId" link type="primary" @click="openAnchorDetail(row.roomId)">
+              {{ row.roomId }}
+            </el-button>
+            <span v-else>-</span>
+          </template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.settlementSalary')" align="right" min-width="120">
+        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.roomNickname')" min-width="120">
+          <template #default="{ row }">
+            <el-button
+                v-if="canViewUserDetail && row.roomId && row.roomNickname"
+                link
+                type="primary"
+                @click="openUserDetail(row.roomId)"
+            >
+              {{ row.roomNickname }}
+            </el-button>
+            <span v-else>{{ row.roomNickname || '-' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+            :label="t('pages.anchorIncomeSettlementLogList.settlementSalary')"
+            align="right"
+            label-class-name="header-nowrap"
+            min-width="150"
+        >
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementSalary) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.settlementShareAmount')" align="right" min-width="130">
+        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.settlementFlowCommission')" align="right" min-width="110">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementShareAmount) }}</span></template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalIncome')" align="right" min-width="120">
@@ -161,12 +183,14 @@
 <script lang="ts" setup>
 import {useI18n} from 'vue-i18n'
 import {computed, onMounted, reactive, ref} from 'vue'
+import {useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {anchorIncomeSettlementLogApi} from '@/api/modules/anchor-income-settlement-log'
 import type {AnchorIncomeSettlementLogItem, AnchorListItem} from '@/types/api'
 import AnchorPickerDialog from '@/components/AnchorPickerDialog.vue'
 import GuildAnchorPickerDialog from '@/components/GuildAnchorPickerDialog.vue'
 import {usePagePermission} from '@/composables/usePagePermission'
+import {useUserDetailNav} from '@/composables/useUserDetailNav'
 import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
 import {CMS_EXPORT_TYPE_ANCHOR_INCOME_SETTLEMENT_LOG} from '@/utils/cms-async-export'
 import {buildAnchorSettlementLogCsvColumns} from '@/utils/income-settlement-log-csv'
@@ -175,7 +199,9 @@ import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 import {formatServerDateTime as formatDate, toServerDayStartUnix, toServerDayEndUnix} from '@/utils/server-datetime'
 
 const {t} = useI18n()
+const router = useRouter()
 const {can} = usePagePermission('AnchorIncomeSettlementLogList')
+const {canViewUserDetail, openUserDetail} = useUserDetailNav('AnchorIncomeSettlementLogList')
 const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
 const tableData = ref<AnchorIncomeSettlementLogItem[]>([])
@@ -325,6 +351,16 @@ const formatSharePercent = (value: number | null | undefined) => {
   return `${value}%`
 }
 
+const openAnchorDetail = (anchorId: string | number) => {
+  if (!anchorId) {
+    return
+  }
+  router.push({
+    path: '/user/anchor/anchor-detail',
+    query: {id: String(anchorId)},
+  })
+}
+
 onMounted(() => {
   fetchList()
 })
@@ -364,5 +400,9 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
   margin-top: 16px;
+}
+
+:deep(th.header-nowrap > .cell) {
+  white-space: nowrap;
 }
 </style>
