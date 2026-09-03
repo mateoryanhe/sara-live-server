@@ -8,6 +8,17 @@
       </template>
 
       <el-form ref="formRef" :model="formData" class="cfg-form" label-width="200px">
+        <el-form-item :label="t('pages.accountCfg.envType')">
+          <el-radio-group v-model="formData.envType">
+            <el-radio :value="0">{{ t('pages.accountCfg.envTypeProd') }}</el-radio>
+            <el-radio :value="1">{{ t('pages.accountCfg.envTypeReview') }}</el-radio>
+            <el-radio :value="2">{{ t('pages.accountCfg.envTypeTest') }}</el-radio>
+          </el-radio-group>
+          <div class="form-tip">
+            {{ t('pages.accountCfg.envTypeTip') }}
+          </div>
+        </el-form-item>
+
         <el-form-item :label="t('pages.accountCfg.cancelAccountByCodeEnabled')">
           <el-switch
               v-model="formData.cancelAccountByCodeEnabled"
@@ -58,6 +69,7 @@ const formData = reactive({
   id: '0',
   cancelAccountByCodeEnabled: false,
   blockSimulatorLogin: false,
+  envType: 0,
 })
 
 const metaInfo = reactive({
@@ -65,10 +77,16 @@ const metaInfo = reactive({
   updatedAt: '',
 })
 
+const normalizeEnvType = (v: unknown) => {
+  const n = Number(v)
+  return n === 1 || n === 2 ? n : 0
+}
+
 const applyCfg = (cfg: AccountCfg | null | undefined) => {
   formData.id = cfg?.id || '0'
   formData.cancelAccountByCodeEnabled = !!cfg?.cancelAccountByCodeEnabled
   formData.blockSimulatorLogin = !!cfg?.blockSimulatorLogin
+  formData.envType = normalizeEnvType(cfg?.envType)
   metaInfo.createdAt = cfg?.createdAt || ''
   metaInfo.updatedAt = cfg?.updatedAt || ''
 }
@@ -92,6 +110,7 @@ const handleSave = async () => {
       id: formData.id === '0' ? 0 : Number(formData.id),
       cancelAccountByCodeEnabled: formData.cancelAccountByCodeEnabled,
       blockSimulatorLogin: formData.blockSimulatorLogin,
+      envType: normalizeEnvType(formData.envType),
     })
     if (response?.success) {
       ElMessage.success(t('pages.accountCfg.saveSuccess'))

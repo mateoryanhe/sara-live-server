@@ -10,6 +10,7 @@ import (
 type cfgSnapshot struct {
 	CancelAccountByCodeEnabled bool
 	BlockSimulatorLogin        bool
+	EnvType                    uint8
 }
 
 var cfgCache atomic.Value
@@ -37,6 +38,7 @@ func toCfgSnapshot(row *entity.AccountCfg) *cfgSnapshot {
 	return &cfgSnapshot{
 		CancelAccountByCodeEnabled: row.CancelAccountByCodeEnabled,
 		BlockSimulatorLogin:        row.BlockSimulatorLogin,
+		EnvType:                    row.EnvType,
 	}
 }
 
@@ -48,4 +50,9 @@ func IsCancelAccountByCodeEnabled() bool {
 // IsSimulatorLoginBlocked 是否拦截模拟器登录(默认 false=不拦截)
 func IsSimulatorLoginBlocked() bool {
 	return getCfgCache().BlockSimulatorLogin
+}
+
+// GetEnvType 环境类型(0正式服,1提审服,2测试服)
+func GetEnvType() uint8 {
+	return getCfgCache().EnvType
 }

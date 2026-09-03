@@ -71,4 +71,6 @@ const (
 	LiveRoomTotalIncome = 37
 	//首充成功推送(推送给指定用户)
 	FirstRechargeSuccessPush = 38
+	//直播间主播邀请观众通话推送(推送给被邀请观众)
+	LiveRoomCallInvite = 39
 )

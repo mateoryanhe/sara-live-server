@@ -20,6 +20,11 @@ func (c *CallAppController) LiveRoomCall(ctx context.Context, req *calldto.LiveR
 	return call.LiveRoomCall(ctx, req)
 }
 
+// BatchInviteLiveRoomCall 主播批量邀请观众通话
+func (c *CallAppController) BatchInviteLiveRoomCall(ctx context.Context, req *calldto.BatchInviteLiveRoomCallReq) (*calldto.BatchInviteLiveRoomCallRes, error) {
+	return call.BatchInviteLiveRoomCall(ctx, req)
+}
+
 // AnchorRejectCall 拒接通话
 func (c *CallAppController) AnchorRejectCall(ctx context.Context, req *calldto.AnchorRejectCallReq) (*calldto.AnchorRejectCallRes, error) {
 	return call.AnchorRejectCall(ctx, req)

@@ -21,4 +21,5 @@ type SysCfgResp struct {
 	UsdToGoldRate               int     `json:"usdToGoldRate" dc:"美金兑换金币比例(1美金=N金币)"`
 	AboutSiteUrl                string  `json:"aboutSiteUrl" dc:"About页面URL"`
 	SafetyCenterUrl             string  `json:"safetyCenterUrl" dc:"安全中心页面URL"`
+	EnvType                     uint8   `json:"envType" dc:"环境类型(0正式服,1提审服,2测试服)"`
 }

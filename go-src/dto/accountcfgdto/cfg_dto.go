@@ -10,6 +10,7 @@ type AccountCfgItem struct {
 	ID                         string `json:"id"`
 	CancelAccountByCodeEnabled bool   `json:"cancelAccountByCodeEnabled"`
 	BlockSimulatorLogin        bool   `json:"blockSimulatorLogin"`
+	EnvType                    uint8  `json:"envType"`
 	CreatedAt                  string `json:"createdAt"`
 	UpdatedAt                  string `json:"updatedAt"`
 }
@@ -23,6 +24,7 @@ type SaveAccountCfgReq struct {
 	ID                         uint64 `json:"id" dc:"配置ID,首次保存可为0"`
 	CancelAccountByCodeEnabled bool   `json:"cancelAccountByCodeEnabled" dc:"注销码销户开关(官网公开接口)"`
 	BlockSimulatorLogin        bool   `json:"blockSimulatorLogin" dc:"拦截模拟器登录(默认关闭=不拦截)"`
+	EnvType                    uint8  `json:"envType" v:"in:0,1,2#环境类型无效" dc:"环境类型(0正式服,1提审服,2测试服)"`
 }
 
 type SaveAccountCfgRes struct {

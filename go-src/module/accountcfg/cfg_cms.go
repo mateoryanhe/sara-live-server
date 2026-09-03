@@ -17,16 +17,23 @@ func GetAccountCfg(_ context.Context, _ *accountcfgdto.GetAccountCfgReq) (*accou
 		return &accountcfgdto.GetAccountCfgRes{Cfg: &accountcfgdto.AccountCfgItem{
 			CancelAccountByCodeEnabled: false,
 			BlockSimulatorLogin:        false,
+			EnvType:                    entity.AccountEnvTypeProd,
 		}}, nil
 	}
 	return &accountcfgdto.GetAccountCfgRes{Cfg: toCfgItem(cfg)}, nil
 }
 
 func SaveAccountCfg(_ context.Context, req *accountcfgdto.SaveAccountCfgReq) (*accountcfgdto.SaveAccountCfgRes, error) {
+	if req.EnvType != entity.AccountEnvTypeProd &&
+		req.EnvType != entity.AccountEnvTypeReview &&
+		req.EnvType != entity.AccountEnvTypeTest {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 	existing := cfgdao.LoadAccountCfg()
 	row := &entity.AccountCfg{
 		CancelAccountByCodeEnabled: req.CancelAccountByCodeEnabled,
 		BlockSimulatorLogin:        req.BlockSimulatorLogin,
+		EnvType:                    req.EnvType,
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -60,6 +67,7 @@ func toCfgItem(cfg *entity.AccountCfg) *accountcfgdto.AccountCfgItem {
 		ID:                         strconv.FormatUint(cfg.ID, 10),
 		CancelAccountByCodeEnabled: cfg.CancelAccountByCodeEnabled,
 		BlockSimulatorLogin:        cfg.BlockSimulatorLogin,
+		EnvType:                    cfg.EnvType,
 		CreatedAt:                  formatTime(cfg.CreatedAt),
 		UpdatedAt:                  formatTime(cfg.UpdatedAt),
 	}

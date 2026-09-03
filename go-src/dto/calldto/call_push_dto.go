@@ -74,3 +74,15 @@ type CallAnchorAcceptedAudiencePushItem struct {
 	AnchorAvatar   string `json:"anchorAvatar" dc:"主播头像"`
 	Message        string `json:"message" dc:"提示文案"`
 }
+
+// CallInvitePushItem 主播邀请观众通话推送载荷(推送给被邀请观众)
+type CallInvitePushItem struct {
+	RoomId         string  `json:"roomId" dc:"直播间ID"`
+	AnchorId       string  `json:"anchorId" dc:"主播ID"`
+	CallType       uint8   `json:"callType" dc:"通话类型(1-语音,2-视频)"`
+	Ticket         float64 `json:"ticket" dc:"门票价格(钻石)"`
+	Billing        float64 `json:"billing" dc:"每分钟价格(钻石)"`
+	AnchorNickname string  `json:"anchorNickname" dc:"主播昵称"`
+	AnchorAvatar   string  `json:"anchorAvatar" dc:"主播头像"`
+	Message        string  `json:"message" dc:"提示文案"`
+}

@@ -711,6 +711,7 @@ export interface AccountCfg {
     id?: string
     cancelAccountByCodeEnabled: boolean
     blockSimulatorLogin: boolean
+    envType: number
     createdAt?: string
     updatedAt?: string
 }
@@ -735,6 +736,7 @@ export interface SaveAccountCfgReq {
     id?: string | number
     cancelAccountByCodeEnabled: boolean
     blockSimulatorLogin: boolean
+    envType: number
 }
 
 export interface SaveAccountCfgRes {

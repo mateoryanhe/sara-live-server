@@ -5,6 +5,7 @@ import (
 	"time"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/sysdto"
+	"xr-game-server/module/accountcfg"
 	"xr-game-server/module/apppkg"
 	"xr-game-server/module/livecfg"
 	"xr-game-server/module/privacypolicy"
@@ -47,5 +48,6 @@ func GetSysCfg(ctx context.Context, req *sysdto.SysCfgReq) (*sysdto.SysCfgResp, 
 		UsdToGoldRate:               exchangeCfg.UsdToGoldRate,
 		AboutSiteUrl:                resolveAboutSiteUrl(),
 		SafetyCenterUrl:             resolveSafetyCenterUrl(),
+		EnvType:                     accountcfg.GetEnvType(),
 	}, nil
 }
