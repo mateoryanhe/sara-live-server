@@ -214,7 +214,7 @@ const handleChannelTestCfgPick = async (row: RechargeCfg & {displayPrice?: numbe
     }
     ElMessage.success(t('pages.rechargeOrderList.channelTestCreated', {
       orderId: res.orderId,
-      price: formatAmount(res.price),
+      price: formatAmount(res.payAmount ?? res.price),
       currency: res.currency,
     }))
     window.open(res.payUrl, '_blank')

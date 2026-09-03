@@ -123,7 +123,7 @@ func toUserCumulativeStatDetailItem(stat *userentity.UserCumulativeStat) *accoun
 		return &accountdto.UserCumulativeStatDetailItem{}
 	}
 	item := &accountdto.UserCumulativeStatDetailItem{
-		TotalRecharge:       stat.TotalRecharge,
+		TotalRecharge:       stat.TotalRechargeGold,
 		TotalWithdraw:       stat.TotalWithdraw,
 		TotalPayCount:       stat.TotalPayCount,
 		TotalDiamondConsume: stat.TotalDiamondConsume,

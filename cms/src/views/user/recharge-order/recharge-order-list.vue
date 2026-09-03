@@ -71,6 +71,9 @@
         <el-table-column :label="t('pages.rechargeOrderList.price')" prop="price" width="120">
           <template #default="{ row }">{{ formatAmount(row.price) }}</template>
         </el-table-column>
+        <el-table-column :label="t('pages.rechargeOrderList.payAmount')" prop="payAmount" width="130">
+          <template #default="{ row }">{{ row.payAmount ? formatAmount(row.payAmount) : '-' }}</template>
+        </el-table-column>
         <el-table-column :label="t('pages.rechargeOrderList.gold')" prop="gold" width="120">
           <template #default="{ row }">{{ formatAmount(row.gold) }}</template>
         </el-table-column>

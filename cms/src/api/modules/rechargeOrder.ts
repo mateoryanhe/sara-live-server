@@ -34,6 +34,7 @@ export const rechargeOrderApi = {
             orderId: string
             payUrl: string
             price: number
+            payAmount: number
             currency: string
             status: number
         }>('/rechargeOrder/createChannelRechargeOrderTest', params)

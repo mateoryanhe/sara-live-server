@@ -79,11 +79,6 @@ func ResolveRoom(anchorId uint64) *entity.LiveRoom {
 	return GetRoomFromDB(anchorId)
 }
 
-// HasLiveRoom 是否已有直播间记录(roomId==用户ID)
-func HasLiveRoom(anchorId uint64) bool {
-	return ResolveRoom(anchorId) != nil
-}
-
 // ListLivingRoomIds 查询正在直播的直播间ID(live_record_id > 0),仅返回 id 列
 func ListLivingRoomIds() []uint64 {
 	type idRow struct {

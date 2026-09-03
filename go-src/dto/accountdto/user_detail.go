@@ -73,7 +73,7 @@ type UserExtDetailItem struct {
 
 // UserCumulativeStatDetailItem 累计统计(user_cumulative_stats)
 type UserCumulativeStatDetailItem struct {
-	TotalRecharge       float64    `json:"totalRecharge"`
+	TotalRecharge       float64    `json:"totalRecharge" dc:"累计充值到账金币(total_recharge_gold)"`
 	TotalWithdraw       float64    `json:"totalWithdraw"`
 	TotalPayCount       uint64     `json:"totalPayCount"`
 	TotalDiamondConsume float64    `json:"totalDiamondConsume"`

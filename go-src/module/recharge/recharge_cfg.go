@@ -130,12 +130,25 @@ func OffShelf(_ context.Context, req *rechargecfgdto.OffShelfRechargeCfgReq) (*r
 func GetAppList(ctx context.Context, req *rechargecfgdto.AppRechargeCfgListReq) (*rechargecfgdto.AppRechargeCfgListRes, error) {
 	_ = req
 	return &rechargecfgdto.AppRechargeCfgListRes{
-		List: buildAppRechargeCfgList(ctx),
+		List: buildAppRechargeCfgList(httpserver.GetAuthId(ctx)),
 	}, nil
 }
 
-func buildAppRechargeCfgList(ctx context.Context) []*rechargecfgdto.AppRechargeCfgItem {
-	userId := httpserver.GetAuthId(ctx)
+// GetAppListByUserId App端按上报用户ID查询(无需鉴权,仅返回已上架,走内存缓存)
+func GetAppListByUserId(_ context.Context, req *rechargecfgdto.AppRechargeCfgListByUserIdReq) (*rechargecfgdto.AppRechargeCfgListRes, error) {
+	userId, err := strconv.ParseUint(strings.TrimSpace(req.UserId), 10, 64)
+	if err != nil || userId == 0 {
+		return nil, errercode.CreateCode(errercode.EmptyUserId)
+	}
+	if userinfodao.GetUserInfoByUserId(userId) == nil {
+		return nil, errercode.CreateCode(errercode.SysError)
+	}
+	return &rechargecfgdto.AppRechargeCfgListRes{
+		List: buildAppRechargeCfgList(userId),
+	}, nil
+}
+
+func buildAppRechargeCfgList(userId uint64) []*rechargecfgdto.AppRechargeCfgItem {
 	cfgRatio := activity.ConfiguredFirstRechargeRatio()
 	all := getRechargeCfgCache()
 	list := make([]*rechargecfgdto.AppRechargeCfgItem, 0, len(all))

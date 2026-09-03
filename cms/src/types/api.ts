@@ -2007,6 +2007,7 @@ export interface RechargeOrder {
     nickname: string
     cfgId: string
     price: number
+    payAmount?: number
     currency: string
     gold: number
     status: number

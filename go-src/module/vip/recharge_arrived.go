@@ -3,7 +3,6 @@ package vip
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"xr-game-server/dao/rechargeorderdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/entity/recharge"
 )
@@ -20,14 +19,7 @@ func onRechargeArrived(val any) {
 	stat := userinfodao.GetUserCumulativeStatByUserId(order.UserId)
 	stat.AddTotalRecharge(order.Price)
 	stat.AddTotalPayCount(1)
-	if stat.TotalRechargeGold <= 0 {
-		// 首次写入:从已完成订单汇总(含当前订单),避免与 lazy backfill 重复累加
-		if gold := rechargeorderdao.SumCompletedRechargeGoldByUserId(order.UserId); gold > 0 {
-			stat.SetTotalRechargeGold(gold)
-		} else if order.Gold > 0 {
-			stat.AddTotalRechargeGold(order.Gold)
-		}
-	} else if order.Gold > 0 {
+	if order.Gold > 0 {
 		stat.AddTotalRechargeGold(order.Gold)
 	}
 	userinfodao.PublishUserCumulativeStat(stat)

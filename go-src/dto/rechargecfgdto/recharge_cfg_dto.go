@@ -105,6 +105,12 @@ type AppRechargeCfgListReq struct {
 	g.Meta `path:"/rechargeCfgListForApp" method:"post" summary:"App查询充值配置列表(已上架)" tags:"充值配置"`
 }
 
+// AppRechargeCfgListByUserIdReq App端按用户ID查询充值配置(无需鉴权,仅返回已上架)
+type AppRechargeCfgListByUserIdReq struct {
+	g.Meta `path:"/rechargeCfgListByUserId" method:"post" summary:"App按用户ID查询充值配置列表(已上架,无需鉴权)" tags:"充值配置"`
+	UserId string `json:"userId" v:"required#用户ID不能为空" dc:"玩家用户ID"`
+}
+
 // AppRechargeCfgItem App端单条
 type AppRechargeCfgItem struct {
 	ID                 uint64  `json:"id"`

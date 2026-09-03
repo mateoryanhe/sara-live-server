@@ -100,9 +100,9 @@ func createChannelRechargeOrder(ctx context.Context, userId uint64, packageName 
 	if payAmount <= 0 {
 		return nil, errercode.CreateCode(errercode.RechargeAmountInvalid)
 	}
-	orderCurrency := currencyCode
 
-	order := entity.NewRechargeOrder(userId, rechargeCfg.ID, payAmount, orderCurrency, goldAmount, entity.RechargeOrderSourceApp)
+	order := entity.NewRechargeOrder(userId, rechargeCfg.ID, rechargeCfg.Price, currencyCode, goldAmount, entity.RechargeOrderSourceApp)
+	order.SetPayAmount(payAmount)
 	order.SetPayChannel(entity.RechargeCfgTypeChannel)
 	order.SetPackageName(packageName)
 	rechargeorderdao.AddOrderToCache(order)
@@ -117,11 +117,12 @@ func createChannelRechargeOrder(ctx context.Context, userId uint64, packageName 
 			}
 		}
 		return &rechargeorderdto.AppCreateChannelRechargeOrderRes{
-			OrderId:  orderIdStr,
-			PayUrl:   "",
-			Price:    order.Price,
-			Currency: order.Currency,
-			Status:   order.Status,
+			OrderId:   orderIdStr,
+			PayUrl:    "",
+			Price:     order.Price,
+			PayAmount: order.PayAmount,
+			Currency:  order.Currency,
+			Status:    order.Status,
 		}, nil
 	}
 
@@ -150,14 +151,15 @@ func createChannelRechargeOrder(ctx context.Context, userId uint64, packageName 
 			orderIdStr, userId, currencyCode, payAmount, err)
 		return nil, errercode.CreateCode(errercode.YhPayCreateFailed)
 	}
-	xrlog.DetailLog.Infof(ctx, "yhpay create pay url ok orderId=%s userId=%d currency=%s payAmount=%v",
-		orderIdStr, userId, currencyCode, payAmount)
+	xrlog.DetailLog.Infof(ctx, "yhpay create pay url ok orderId=%s userId=%d currency=%s priceUsd=%v payAmount=%v",
+		orderIdStr, userId, currencyCode, order.Price, payAmount)
 
 	return &rechargeorderdto.AppCreateChannelRechargeOrderRes{
-		OrderId:  orderIdStr,
-		PayUrl:   payUrl,
-		Price:    order.Price,
-		Currency: order.Currency,
-		Status:   order.Status,
+		OrderId:   orderIdStr,
+		PayUrl:    payUrl,
+		Price:     order.Price,
+		PayAmount: order.PayAmount,
+		Currency:  order.Currency,
+		Status:    order.Status,
 	}, nil
 }

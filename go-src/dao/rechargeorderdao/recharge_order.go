@@ -191,20 +191,3 @@ func LoadPendingOrders() []*entity.RechargeOrder {
 	}
 	return orders
 }
-
-// SumCompletedRechargeGoldByUserId 统计用户已完成充值订单累计到账金币
-func SumCompletedRechargeGoldByUserId(userId uint64) float64 {
-	if userId == 0 {
-		return 0
-	}
-	ctx := gctx.New()
-	val, err := g.Model(string(entity.TbRechargeOrder)).Ctx(ctx).
-		Where(string(entity.RechargeOrderUserId)+" = ?", userId).
-		Where(string(entity.RechargeOrderStatus)+" = ?", entity.RechargeOrderStatusCompleted).
-		Sum(string(entity.RechargeOrderGold))
-	if err != nil {
-		g.Log().Errorf(ctx, "sum completed recharge gold failed userId=%d: %v", userId, err)
-		return 0
-	}
-	return val
-}

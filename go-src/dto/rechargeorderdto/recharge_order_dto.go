@@ -12,11 +12,12 @@ type RechargeOrderItem struct {
 	ID           string  `json:"id"`
 	UserId       uint64  `json:"userId"`
 	CfgId        uint64  `json:"cfgId"`
-	Price        float64 `json:"price"`    // 实付金额(USD)
-	Currency     string  `json:"currency"` // 币种
-	Gold         float64 `json:"gold"`     // 充值发放金币数
-	Status       uint8   `json:"status"`   // 0待支付 1已完成 2已取消
-	Source       uint8   `json:"source"`   // 1App 2后台手动
+	Price        float64 `json:"price"`     // 配置美金金额(USD)
+	PayAmount    float64 `json:"payAmount"` // 渠道实付金额(如IDR)
+	Currency     string  `json:"currency"`  // 实际支付货币(如USD/IDR)
+	Gold         float64 `json:"gold"`      // 充值发放金币数
+	Status       uint8   `json:"status"`    // 0待支付 1已完成 2已取消
+	Source       uint8   `json:"source"`    // 1App 2后台手动
 	PayChannel   uint8   `json:"payChannel"`
 	ThirdOrderId string  `json:"thirdOrderId"`
 	PackageName  string  `json:"packageName"`
@@ -46,7 +47,8 @@ type CMSRechargeOrderListItem struct {
 	UserId       string  `json:"userId"`
 	Nickname     string  `json:"nickname"`
 	CfgId        string  `json:"cfgId"`
-	Price        float64 `json:"price"`
+	Price        float64 `json:"price" dc:"配置美金金额(USD)"`
+	PayAmount    float64 `json:"payAmount" dc:"渠道实付金额(如IDR)"`
 	Currency     string  `json:"currency"`
 	Gold         float64 `json:"gold"`
 	Status       uint8   `json:"status"`
@@ -150,11 +152,12 @@ type AppCreateChannelRechargeOrderReq struct {
 }
 
 type AppCreateChannelRechargeOrderRes struct {
-	OrderId  string  `json:"orderId"  dc:"本系统订单号,用于轮询checkRechargeOrderSuccess"`
-	PayUrl   string  `json:"payUrl"   dc:"支付收银台URL,App用WebView打开"`
-	Price    float64 `json:"price"    dc:"应付金额(IDR换算后金额)"`
-	Currency string  `json:"currency" dc:"币种"`
-	Status   uint8   `json:"status"   dc:"订单状态(创建后=0待支付)"`
+	OrderId   string  `json:"orderId"   dc:"本系统订单号,用于轮询checkRechargeOrderSuccess"`
+	PayUrl    string  `json:"payUrl"    dc:"支付收银台URL,App用WebView打开"`
+	Price     float64 `json:"price"     dc:"配置美金金额(USD)"`
+	PayAmount float64 `json:"payAmount" dc:"渠道实付金额(IDR)"`
+	Currency  string  `json:"currency"  dc:"实际支付货币(如IDR)"`
+	Status    uint8   `json:"status"    dc:"订单状态(创建后=0待支付)"`
 }
 
 // CMSCreateChannelRechargeOrderReq CMS第三方充值测试

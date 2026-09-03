@@ -29,6 +29,7 @@ const (
 	RechargeOrderUserId       db.TbCol = "user_id"
 	RechargeOrderCfgId        db.TbCol = "cfg_id"
 	RechargeOrderPrice        db.TbCol = "price"
+	RechargeOrderPayAmount    db.TbCol = "pay_amount"
 	RechargeOrderCurrency     db.TbCol = "currency"
 	RechargeOrderGold         db.TbCol = "gold"
 	RechargeOrderStatus       db.TbCol = "status"
@@ -47,8 +48,9 @@ type RechargeOrder struct {
 	migrate.OneModel
 	UserId       uint64    `gorm:"index;default:0;comment:充值用户ID" json:"userId"`
 	CfgId        uint64    `gorm:"index;default:0;comment:充值档位ID(0=手动输入金额)" json:"cfgId"`
-	Price        float64   `gorm:"type:decimal(10,4);default:0;comment:实付金额(单位:USD)" json:"price"`
-	Currency     string    `gorm:"size:8;default:'CNY';comment:货币(CNY/USD等)" json:"currency"`
+	Price        float64   `gorm:"type:decimal(10,4);default:0;comment:配置美金金额(USD)" json:"price"`
+	PayAmount    float64   `gorm:"type:decimal(18,4);default:0;comment:渠道实付金额(如IDR,非渠道为0)" json:"payAmount"`
+	Currency     string    `gorm:"size:8;default:'USD';comment:实际支付货币(如USD/IDR)" json:"currency"`
 	Gold         float64   `gorm:"default:0;comment:发放金币数(订单完成时增加到玩家金币)" json:"gold"`
 	Status       uint8     `gorm:"index;default:0;comment:状态(0-待支付,1-已完成,2-已取消)" json:"status"`
 	Source       uint8     `gorm:"default:0;comment:来源(1-App玩家发起,2-后台手动)" json:"source"`
@@ -61,6 +63,7 @@ type RechargeOrder struct {
 }
 
 // NewRechargeOrder 构造一条新订单(ID 由 snowflake 生成,各字段通过 Setter 推入 syndb 缓冲)
+// price 为配置美金金额;渠道实付请再调 SetPayAmount
 func NewRechargeOrder(userId, cfgId uint64, price float64, currency string, gold float64, source uint8) *RechargeOrder {
 	ret := &RechargeOrder{}
 	ret.ID = snowflake.GetId()
@@ -90,6 +93,11 @@ func (r *RechargeOrder) SetCfgId(v uint64) {
 func (r *RechargeOrder) SetPrice(v float64) {
 	r.Price = v
 	syndb.AddData(TbRechargeOrder, RechargeOrderPrice, &syndb.ColData{IdVal: r.ID, ColVal: v})
+}
+
+func (r *RechargeOrder) SetPayAmount(v float64) {
+	r.PayAmount = v
+	syndb.AddData(TbRechargeOrder, RechargeOrderPayAmount, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *RechargeOrder) SetCurrency(v string) {
@@ -159,6 +167,7 @@ func initRechargeOrder() {
 	syndb.RegQuick(TbRechargeOrder, RechargeOrderUserId)
 	syndb.RegQuick(TbRechargeOrder, RechargeOrderCfgId)
 	syndb.RegQuick(TbRechargeOrder, RechargeOrderPrice)
+	syndb.RegQuick(TbRechargeOrder, RechargeOrderPayAmount)
 	syndb.RegQuick(TbRechargeOrder, RechargeOrderCurrency)
 	syndb.RegQuick(TbRechargeOrder, RechargeOrderGold)
 	syndb.RegQuick(TbRechargeOrder, RechargeOrderStatus)

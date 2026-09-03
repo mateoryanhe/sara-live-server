@@ -9,7 +9,6 @@ import (
 	"xr-game-server/constants/followstatus"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/livefollowdao"
-	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/userinfodto"
 	"xr-game-server/errercode"
@@ -43,7 +42,6 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		VipLevel:      data.VipLevel,
 		IsAnchor:      data.IsAnchor(),
 		UserType:      data.UserType,
-		HasLiveRoom:   liveroomdao.HasLiveRoom(data.ID),
 		PrettyId:      prettyId,
 		Gender:        data.Gender,
 		Birthday:      formatBirthday(data.Birthday),
