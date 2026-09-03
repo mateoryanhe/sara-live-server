@@ -121,6 +121,9 @@
                   {{ detail.userExt.rechargeWhitelist ? t('common.yes') : t('common.no') }}
                 </el-tag>
               </el-descriptions-item>
+              <el-descriptions-item :label="t('pages.userList.shortVideoUnsettledIncome')">
+                <span class="money-amount">{{ formatWalletBalance(detail.userExt.shortVideoUnsettledIncome) }}</span>
+              </el-descriptions-item>
               <el-descriptions-item :label="t('pages.userList.cancelCode')">{{ detail.userExt.cancelCode || '-' }}</el-descriptions-item>
               <el-descriptions-item :label="t('pages.userList.cancelCodeExpireAt')">{{ formatDate(detail.userExt.cancelCodeExpireAt) }}</el-descriptions-item>
               <el-descriptions-item :label="t('pages.userList.extUpdatedAt')">{{ formatDate(detail.userExt.updatedAt) }}</el-descriptions-item>
@@ -187,6 +190,35 @@
                 :user-id="userId"
             />
           </el-tab-pane>
+
+          <el-tab-pane v-if="canViewGameBetLog" :label="t('pages.userList.tabGameBetLog')" name="gameBetLog">
+            <GameLogPanel
+                :active="activeTab === 'gameBetLog'"
+                export-permission="exportGameBetLog"
+                log-type="bet"
+                :user-id="userId"
+            />
+          </el-tab-pane>
+
+          <el-tab-pane v-if="canViewGameWinLog" :label="t('pages.userList.tabGameWinLog')" name="gameWinLog">
+            <GameLogPanel
+                :active="activeTab === 'gameWinLog'"
+                export-permission="exportGameWinLog"
+                log-type="win"
+                :user-id="userId"
+            />
+          </el-tab-pane>
+
+          <el-tab-pane
+              v-if="canViewShortVideoAuthorSettlementLog"
+              :label="t('pages.userList.tabShortVideoAuthorSettlementLog')"
+              name="shortVideoAuthorSettlementLog"
+          >
+            <ShortVideoAuthorSettlementLogPanel
+                :active="activeTab === 'shortVideoAuthorSettlementLog'"
+                :user-id="userId"
+            />
+          </el-tab-pane>
         </el-tabs>
       </div>
     </el-card>
@@ -200,6 +232,8 @@ import {useRoute, useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {accountApi} from '@/api'
 import CurrencyLogPanel from './user-detail-currency-log-panel.vue'
+import GameLogPanel from './user-detail-game-log-panel.vue'
+import ShortVideoAuthorSettlementLogPanel from './user-detail-short-video-author-settlement-log-panel.vue'
 import type {UserCumulativeStatDetailItem, UserDetail} from '@/types/api.ts'
 import {formatStatCount, formatWalletBalance} from '@/utils/number-format'
 import {usePagePermission} from '@/composables/usePagePermission'
@@ -208,6 +242,9 @@ const {t} = useI18n()
 const {can} = usePagePermission('UserDetail')
 const canViewGoldLog = computed(() => can('goldLog'))
 const canViewDiamondLog = computed(() => can('diamondLog'))
+const canViewGameBetLog = computed(() => can('gameBetLog'))
+const canViewGameWinLog = computed(() => can('gameWinLog'))
+const canViewShortVideoAuthorSettlementLog = computed(() => can('shortVideoAuthorSettlementLog'))
 const route = useRoute()
 const router = useRouter()
 

@@ -88,6 +88,10 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/guild/cmsGuildAnchorIncomeSettlementLogList", "/guild/getGuildDetail", "/guild/guildList", "/account/getAnchorList"}
 	case "/guild/setGuildAnchorType":
 		return []string{"/account/setPlatformAnchorType"}
+	case "/guild/getGuildTransferInfo":
+		return []string{"/guild/saveGuildTransferInfo"}
+	case "/guild/saveGuildTransferInfo":
+		return []string{"/guild/getGuildTransferInfo"}
 	case "/cmsExport/getJob":
 		return []string{"/cmsExport/submitJob"}
 	case "/cmsExport/deleteExport":

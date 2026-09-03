@@ -132,6 +132,12 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'exportGoldLog', label: '导出金币流水'},
         {key: 'diamondLog', label: '查看钻石流水'},
         {key: 'exportDiamondLog', label: '导出钻石流水'},
+        {key: 'gameBetLog', label: '查看游戏消费记录'},
+        {key: 'exportGameBetLog', label: '导出游戏消费记录'},
+        {key: 'gameWinLog', label: '查看游戏奖励记录'},
+        {key: 'exportGameWinLog', label: '导出游戏奖励记录'},
+        {key: 'shortVideoAuthorSettlementLog', label: '查看短视频作者结算日志'},
+        {key: 'exportShortVideoAuthorSettlementLog', label: '导出短视频作者结算日志'},
     ],
     AnchorListManagement: [BTN.view, BTN.search, BTN.edit, {key: 'viewDetail', label: '查看详情'}, {key: 'viewUserDetail', label: '查看用户详情'}, {key: 'viewGuildDetail', label: '查看工会详情'}, {key: 'offShelf', label: '下架'}, {key: 'uploadRoomCover', label: '上传直播间封面'}],
     PlatformAnchorList: [
@@ -200,6 +206,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'joinGuildAnchor', label: '加入工会'},
         {key: 'batchSetAnchor', label: '导入普通主播'},
         {key: 'batchSetSeniorAnchor', label: '导入高级主播'},
+        {key: 'transferInfo', label: '转账信息'},
     ],
     AnchorDetail: [
         BTN.view,
@@ -313,6 +320,18 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.export,
         {key: 'viewUserDetail', label: '查看用户详情'},
     ],
+    GameBetLogListManagement: [
+        BTN.view,
+        BTN.search,
+        BTN.export,
+        {key: 'viewUserDetail', label: '查看用户详情'},
+    ],
+    GameWinLogListManagement: [
+        BTN.view,
+        BTN.search,
+        BTN.export,
+        {key: 'viewUserDetail', label: '查看用户详情'},
+    ],
     FirstRechargeActivityManagement: [
         BTN.view,
         BTN.save,
@@ -321,6 +340,10 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     H5LiveDeployManagement: [
         BTN.view,
         BTN.save,
+        {key: 'deploy', label: '上传部署'},
+    ],
+    ThirdPayDeployManagement: [
+        BTN.view,
         {key: 'deploy', label: '上传部署'},
     ],
     FiatCurrencyManagement: [

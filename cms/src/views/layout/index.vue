@@ -266,7 +266,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('LiveRevenueLogList') || hasMenuPermission('LiveRecordList') || hasMenuPermission('LiveDailyEffectiveLiveList') || hasMenuPermission('LiveWeeklyUnsettledLiveList') || hasMenuPermission('VideoCallLogList') || hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList') || hasMenuPermission('AnchorIncomeSettlementLogList') || hasMenuPermission('GuildIncomeSettlementLogList')"
+            v-if="hasMenuPermission('LiveRevenueLogList') || hasMenuPermission('LiveRecordList') || hasMenuPermission('LiveDailyEffectiveLiveList') || hasMenuPermission('LiveWeeklyUnsettledLiveList') || hasMenuPermission('VideoCallLogList') || hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList') || hasMenuPermission('AnchorIncomeSettlementLogList') || hasMenuPermission('GuildIncomeSettlementLogList') || hasMenuPermission('GameBetLogListManagement') || hasMenuPermission('GameWinLogListManagement')"
             index="/log">
           <template #title>
             <el-icon>
@@ -356,6 +356,28 @@
               <span>{{ t('menu.GuildIncomeSettlementLogList') }}</span>
             </el-menu-item>
           </el-sub-menu>
+          <el-sub-menu
+              v-if="hasMenuPermission('GameBetLogListManagement') || hasMenuPermission('GameWinLogListManagement')"
+              index="/log/game">
+            <template #title>
+              <el-icon>
+                <Cpu/>
+              </el-icon>
+              <span>{{ t('menu.GameLogGroup') }}</span>
+            </template>
+            <el-menu-item v-if="hasMenuPermission('GameBetLogListManagement')" index="/log/game/game-bet-log-list">
+              <el-icon>
+                <Money/>
+              </el-icon>
+              <span>{{ t('menu.GameBetLogListManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('GameWinLogListManagement')" index="/log/game/game-win-log-list">
+              <el-icon>
+                <Coin/>
+              </el-icon>
+              <span>{{ t('menu.GameWinLogListManagement') }}</span>
+            </el-menu-item>
+          </el-sub-menu>
         </el-sub-menu>
         <el-sub-menu
             v-if="hasMenuPermission('ShortVideoManagement') || hasMenuPermission('ShortVideoCategoryManagement') || hasMenuPermission('ShortVideoPriceTierManagement') || hasMenuPermission('ShortVideoCfgManagement') || hasMenuPermission('ShortVideoWatchManagement')"
@@ -398,7 +420,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('GamePlatformCfgManagement') || hasMenuPermission('GameVendorGameListManagement') || hasMenuPermission('GameShelfListManagement') || hasMenuPermission('GameBetLogListManagement') || hasMenuPermission('GameWinLogListManagement')"
+            v-if="hasMenuPermission('GamePlatformCfgManagement') || hasMenuPermission('GameVendorGameListManagement') || hasMenuPermission('GameShelfListManagement')"
             index="/game">
           <template #title>
             <el-icon>
@@ -424,18 +446,6 @@
             </el-icon>
             <span>{{ t('menu.GameVendorGameListManagement') }}</span>
           </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('GameBetLogListManagement')" index="/game/game-bet-log-list">
-            <el-icon>
-              <Money/>
-            </el-icon>
-            <span>{{ t('menu.GameBetLogListManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('GameWinLogListManagement')" index="/game/game-win-log-list">
-            <el-icon>
-              <Coin/>
-            </el-icon>
-            <span>{{ t('menu.GameWinLogListManagement') }}</span>
-          </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
             v-if="hasMenuPermission('FirstRechargeActivityManagement')"
@@ -454,7 +464,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('YhPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
+            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('YhPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
             index="/config">
           <template #title>
             <el-icon>
@@ -525,7 +535,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('YhPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('DataSyncCfgManagement')"
+              v-if="hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('YhPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('DataSyncCfgManagement')"
               index="/config/group/platform">
             <template #title>
               <el-icon>
@@ -556,6 +566,12 @@
                 <UploadFilled/>
               </el-icon>
               <span>{{ t('menu.H5LiveDeployManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('ThirdPayDeployManagement')" index="/config/third-pay-deploy">
+              <el-icon>
+                <UploadFilled/>
+              </el-icon>
+              <span>{{ t('menu.ThirdPayDeployManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('DataSyncCfgManagement')" index="/config/data-sync">
               <el-icon>

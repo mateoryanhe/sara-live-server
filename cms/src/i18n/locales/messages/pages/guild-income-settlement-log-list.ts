@@ -25,7 +25,7 @@ const zh = {
   totalLiveDuration: '直播时长(秒)',
   guildSharePercent: '工会分佣比例(%)',
   settlementShareAmount: '结算钻石',
-  settlementReceivableUsd: '结算可收金额(USD)=流水分佣+开播薪资',
+  settlementReceivableUsd: '可收金额(USD)',
   fetchFailed: '获取工会结算流水失败',
 } as const
 

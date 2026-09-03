@@ -55,6 +55,10 @@ func (c *ShortVideoController) ShortVideoWatchList(ctx context.Context, req *sho
 	return shortvideo.GetShortVideoWatchList(ctx, req)
 }
 
+func (c *ShortVideoController) CMSAuthorSettlementLogList(ctx context.Context, req *shortvideodto.CMSAuthorSettlementLogListReq) (*httpserver.CMSQueryResp, error) {
+	return shortvideo.GetCMSAuthorSettlementLogList(ctx, req)
+}
+
 func (c *ShortVideoController) ShortVideoCategoryList(ctx context.Context, req *shortvideodto.ShortVideoCategoryListReq) (*httpserver.CMSQueryResp, error) {
 	return shortvideo.GetShortVideoCategoryList(ctx, req)
 }

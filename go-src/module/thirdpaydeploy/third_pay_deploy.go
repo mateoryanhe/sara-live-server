@@ -1,4 +1,4 @@
-package h5livedeploy
+package thirdpaydeploy
 
 import (
 	"archive/zip"
@@ -11,10 +11,10 @@ import (
 
 	"github.com/gogf/gf/v2/net/ghttp"
 	"xr-game-server/core/cfg"
-	"xr-game-server/dto/h5livedeploydto"
+	"xr-game-server/dto/thirdpaydeploydto"
 )
 
-func DeployZipFromRequest(r *ghttp.Request) (*h5livedeploydto.DeployH5LiveZipRes, error) {
+func DeployZipFromRequest(r *ghttp.Request) (*thirdpaydeploydto.DeployThirdPayZipRes, error) {
 	if r == nil || r.Request == nil {
 		return nil, errors.New("upload file is empty")
 	}
@@ -46,7 +46,7 @@ func DeployZipFromRequest(r *ghttp.Request) (*h5livedeploydto.DeployH5LiveZipRes
 			part.Close()
 			return nil, fmt.Errorf("file ext not allowed: %s", ext)
 		}
-		tmpFile, err := os.CreateTemp("", "h5-live-deploy-*.zip")
+		tmpFile, err := os.CreateTemp("", "third-pay-deploy-*.zip")
 		if err != nil {
 			part.Close()
 			return nil, err
@@ -74,18 +74,18 @@ func DeployZipFromRequest(r *ghttp.Request) (*h5livedeploydto.DeployH5LiveZipRes
 	if err != nil {
 		return nil, err
 	}
-	return &h5livedeploydto.DeployH5LiveZipRes{
+	return &thirdpaydeploydto.DeployThirdPayZipRes{
 		FileCount:  fileCount,
 		DirCount:   dirCount,
 		DeployPath: deployDir,
-		UrlPrefix:  h5livedeploydto.H5LiveStaticPrefix,
+		UrlPrefix:  thirdpaydeploydto.ThirdPayStaticPrefix,
 	}, nil
 }
 
 func getDeployDir() (string, error) {
-	root := strings.TrimSpace(cfg.GetStaticPathRoot(h5livedeploydto.H5LiveStaticPrefix))
+	root := strings.TrimSpace(cfg.GetStaticPathRoot(thirdpaydeploydto.ThirdPayStaticPrefix))
 	if root == "" {
-		return "", fmt.Errorf("static path not configured for prefix %s", h5livedeploydto.H5LiveStaticPrefix)
+		return "", fmt.Errorf("static path not configured for prefix %s", thirdpaydeploydto.ThirdPayStaticPrefix)
 	}
 	if err := os.MkdirAll(root, 0755); err != nil {
 		return "", fmt.Errorf("create deploy dir %s: %w", root, err)

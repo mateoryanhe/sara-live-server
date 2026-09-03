@@ -122,3 +122,13 @@ func (c *GuildController) GetGuildDailyEffectiveLiveList(ctx context.Context, re
 func (c *GuildController) CMSGuildAnchorDailyEffectiveLiveList(ctx context.Context, req *guilddto.CMSGuildAnchorDailyEffectiveLiveListReq) (*httpserver.CMSQueryResp, error) {
 	return guild.GetGuildAnchorDailyEffectiveLiveList(ctx, req)
 }
+
+// GetGuildTransferInfo CMS获取工会收款/转账信息
+func (c *GuildController) GetGuildTransferInfo(ctx context.Context, req *guilddto.GetGuildTransferInfoReq) (*guilddto.GetGuildTransferInfoRes, error) {
+	return guild.GetGuildTransferInfo(ctx, req)
+}
+
+// SaveGuildTransferInfo CMS保存工会收款/转账信息(直写DB)
+func (c *GuildController) SaveGuildTransferInfo(ctx context.Context, req *guilddto.SaveGuildTransferInfoReq) (*guilddto.SaveGuildTransferInfoRes, error) {
+	return guild.SaveGuildTransferInfo(ctx, req)
+}

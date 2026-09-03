@@ -10,10 +10,12 @@ import type {
     GuildDetailIncome,
     GuildIncomeArchivesRes,
     GuildQuery,
+    GuildTransferInfo,
     ImportGuildAnchorsReq,
     ImportGuildAnchorsRes,
     JoinGuildAnchorReq,
     JoinGuildAnchorRes,
+    SaveGuildTransferInfoReq,
     SetGuildAnchorTypeReq,
     SetGuildAnchorTypeRes,
     MyGuildAnchorIncomeSettlementLogQuery,
@@ -98,6 +100,14 @@ export const guildApi = {
 
     setGuildAnchorType: (data: SetGuildAnchorTypeReq) => {
         return request.post<SetGuildAnchorTypeRes>('/guild/setGuildAnchorType', data)
+    },
+
+    getGuildTransferInfo: (guildId: string | number) => {
+        return request.post<{info: GuildTransferInfo | null}>('/guild/getGuildTransferInfo', {guildId})
+    },
+
+    saveGuildTransferInfo: (data: SaveGuildTransferInfoReq) => {
+        return request.post<{success: boolean}>('/guild/saveGuildTransferInfo', data)
     },
 
     getGuildDetail: (guildId: string) => {

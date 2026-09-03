@@ -59,12 +59,19 @@
           
           <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
           <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
-          <el-table-column fixed="right" :label="t('common.actions')" width="660">
+          <el-table-column fixed="right" :label="t('common.actions')" width="760">
             <template #default="{ row }">
               <el-button v-if="canViewDetail" size="small" @click="openDetail(row)">
                 {{ t('pages.guildList.viewDetail') }}
               </el-button>
               <el-button size="small" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
+              <el-button
+                  v-if="can('transferInfo')"
+                  size="small"
+                  @click="openTransferInfoDialog(row)"
+              >
+                {{ t('pages.guildList.transferInfo') }}
+              </el-button>
               <el-button
                   v-if="can('viewMembers')"
                   size="small"
@@ -182,6 +189,69 @@
         <el-button :loading="importing" type="primary" @click="handleImportSubmit">{{ t('common.confirm') }}</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="transferDialogVisible" :title="transferDialogTitle" destroy-on-close width="560px">
+      <el-form
+          ref="transferFormRef"
+          v-loading="transferLoading"
+          :model="transferForm"
+          :rules="transferFormRules"
+          label-width="100px"
+      >
+        <el-form-item :label="t('pages.guildList.transferCurrency')" prop="currency">
+          <el-input
+              v-model="transferForm.currency"
+              clearable
+              maxlength="8"
+              :placeholder="t('pages.guildList.transferCurrencyPlaceholder')"
+              @input="transferForm.currency = transferForm.currency.toUpperCase()"
+          />
+        </el-form-item>
+        <el-form-item :label="t('pages.guildList.transferPayeeName')" prop="payeeName">
+          <el-input
+              v-model="transferForm.payeeName"
+              clearable
+              :placeholder="t('pages.guildList.transferPayeeNamePlaceholder')"
+          />
+        </el-form-item>
+        <el-form-item :label="t('pages.guildList.transferBankName')" prop="bankName">
+          <el-input
+              v-model="transferForm.bankName"
+              clearable
+              :placeholder="t('pages.guildList.transferBankNamePlaceholder')"
+          />
+        </el-form-item>
+        <el-form-item :label="t('pages.guildList.transferAccountNo')" prop="accountNo">
+          <el-input
+              v-model="transferForm.accountNo"
+              clearable
+              :placeholder="t('pages.guildList.transferAccountNoPlaceholder')"
+          />
+        </el-form-item>
+        <el-form-item :label="t('pages.guildList.transferBankCode')" prop="bankCode">
+          <el-input
+              v-model="transferForm.bankCode"
+              clearable
+              :placeholder="t('pages.guildList.transferBankCodePlaceholder')"
+          />
+        </el-form-item>
+        <el-form-item :label="t('pages.guildList.transferRemark')" prop="remark">
+          <el-input
+              v-model="transferForm.remark"
+              :autosize="{ minRows: 2, maxRows: 4 }"
+              :placeholder="t('pages.guildList.transferRemarkPlaceholder')"
+              type="textarea"
+          />
+        </el-form-item>
+        <el-form-item v-if="transferForm.updatedAt" :label="t('pages.guildList.transferLastUpdated')">
+          <span>{{ transferForm.updatedAt }}</span>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="transferDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button :loading="transferSaving" type="primary" @click="handleTransferSave">{{ t('common.save') }}</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -224,6 +294,18 @@ interface ImportGuildForm {
   userIdsText: string
 }
 
+interface TransferInfoForm {
+  guildId: string
+  guildName: string
+  currency: string
+  payeeName: string
+  bankName: string
+  accountNo: string
+  bankCode: string
+  remark: string
+  updatedAt: string
+}
+
 const {t} = useI18n()
 const router = useRouter()
 const {can} = usePagePermission('GuildManagement')
@@ -245,6 +327,23 @@ const importForm = ref<ImportGuildForm>({
   guildName: '',
   anchorType: 1,
   userIdsText: '',
+})
+
+const transferDialogVisible = ref(false)
+const transferDialogTitle = ref('')
+const transferLoading = ref(false)
+const transferSaving = ref(false)
+const transferFormRef = ref<FormInstance>()
+const transferForm = ref<TransferInfoForm>({
+  guildId: '',
+  guildName: '',
+  currency: '',
+  payeeName: '',
+  bankName: '',
+  accountNo: '',
+  bankCode: '',
+  remark: '',
+  updatedAt: '',
 })
 
 const searchForm = reactive<SearchForm>({
@@ -307,6 +406,13 @@ const handleLeaderSelect = (user: CMSUser) => {
 const importFormRules = computed<FormRules>(() => ({
   userIdsText: [
     {required: true, message: t('pages.guildList.importUserIdsRequired'), trigger: 'blur'},
+  ],
+}))
+
+const transferFormRules = computed<FormRules>(() => ({
+  currency: [
+    {required: true, message: t('pages.guildList.transferCurrencyRequired'), trigger: 'blur'},
+    {min: 3, max: 8, message: t('pages.guildList.transferCurrencyRequired'), trigger: 'blur'},
   ],
 }))
 
@@ -594,6 +700,75 @@ const handleImportSubmit = async () => {
       importing.value = false
     }
   })
+}
+
+const openTransferInfoDialog = async (row: Guild) => {
+  selectedGuild.value = row
+  transferDialogTitle.value = t('pages.guildList.transferInfoTitle', {name: row.name})
+  transferForm.value = {
+    guildId: row.id,
+    guildName: row.name,
+    currency: '',
+    payeeName: '',
+    bankName: '',
+    accountNo: '',
+    bankCode: '',
+    remark: '',
+    updatedAt: '',
+  }
+  transferDialogVisible.value = true
+  transferLoading.value = true
+  try {
+    const response = await guildApi.getGuildTransferInfo(row.id)
+    const info = response?.info
+    transferForm.value = {
+      guildId: row.id,
+      guildName: row.name,
+      currency: info?.currency ?? '',
+      payeeName: info?.payeeName ?? '',
+      bankName: info?.bankName ?? '',
+      accountNo: info?.accountNo ?? '',
+      bankCode: info?.bankCode ?? '',
+      remark: info?.remark ?? '',
+      updatedAt: info?.updatedAt ?? '',
+    }
+  } catch (error) {
+    console.error('fetch guild transfer info failed:', error)
+    ElMessage.error(t('pages.guildList.transferFetchFailed'))
+  } finally {
+    transferLoading.value = false
+    transferFormRef.value?.clearValidate()
+  }
+}
+
+const handleTransferSave = async () => {
+  if (!transferFormRef.value) {
+    return
+  }
+  try {
+    await transferFormRef.value.validate()
+  } catch {
+    return
+  }
+  transferSaving.value = true
+  try {
+    await guildApi.saveGuildTransferInfo({
+      guildId: transferForm.value.guildId,
+      currency: transferForm.value.currency.trim().toUpperCase(),
+      payeeName: transferForm.value.payeeName.trim(),
+      bankName: transferForm.value.bankName.trim(),
+      accountNo: transferForm.value.accountNo.trim(),
+      bankCode: transferForm.value.bankCode.trim(),
+      remark: transferForm.value.remark.trim(),
+    })
+    ElMessage.success(t('pages.guildList.transferSaveSuccess'))
+    transferDialogVisible.value = false
+  } catch (error) {
+    console.error('save guild transfer info failed:', error)
+    ElMessage.error(t('pages.guildList.transferSaveFailed'))
+  } finally {
+    transferSaving.value = false
+  }
 }
 
 onMounted(() => {

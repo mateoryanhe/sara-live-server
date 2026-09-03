@@ -101,15 +101,16 @@ func toUserExtDetailItem(ext *userentity.UserExt) *accountdto.UserExtDetailItem 
 		return nil
 	}
 	item := &accountdto.UserExtDetailItem{
-		CanRank:           ext.CanRank,
-		PrettyId:          ext.PrettyId,
-		PackageName:       ext.PackageName,
-		AppVersion:        ext.AppVersion,
-		FollowCount:       ext.FollowCount,
-		FollowerCount:     ext.FollowerCount,
-		CancelCode:        ext.CancelCode,
-		CancelCodeExpireAt: ext.CancelCodeExpireAt,
-		RechargeWhitelist: ext.RechargeWhitelist,
+		CanRank:                   ext.CanRank,
+		PrettyId:                  ext.PrettyId,
+		PackageName:               ext.PackageName,
+		AppVersion:                ext.AppVersion,
+		FollowCount:               ext.FollowCount,
+		FollowerCount:             ext.FollowerCount,
+		CancelCode:                ext.CancelCode,
+		CancelCodeExpireAt:        ext.CancelCodeExpireAt,
+		RechargeWhitelist:         ext.RechargeWhitelist,
+		ShortVideoUnsettledIncome: ext.ShortVideoUnsettledIncome,
 	}
 	if !ext.UpdatedAt.IsZero() {
 		updatedAt := ext.UpdatedAt

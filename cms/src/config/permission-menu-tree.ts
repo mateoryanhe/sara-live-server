@@ -74,6 +74,7 @@ const GUILD_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
             'joinGuildAnchor',
             'batchSetAnchor',
             'batchSetSeniorAnchor',
+            'transferInfo',
         ],
     },
     {
@@ -233,6 +234,10 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('AnchorIncomeSettlementLogList'),
                 page('GuildIncomeSettlementLogList'),
             ]),
+            group('log-game', 'menu.GameLogGroup', [
+                page('GameBetLogListManagement'),
+                page('GameWinLogListManagement'),
+            ]),
         ],
     },
     {
@@ -255,8 +260,6 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             page('GameShelfListManagement', {subPages: [{pageName: 'GameVendorConfig'}]}),
             page('GamePlatformCfgManagement'),
             page('GameVendorGameListManagement'),
-            page('GameBetLogListManagement'),
-            page('GameWinLogListManagement'),
         ],
     },
     {
@@ -289,6 +292,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('UploadResourceCfgManagement'),
                 page('DataSyncCfgManagement'),
                 page('H5LiveDeployManagement'),
+                page('ThirdPayDeployManagement'),
             ]),
             group('config-ops', 'menu.ConfigOpsGroup', [
                 page('ResourceMonitor'),

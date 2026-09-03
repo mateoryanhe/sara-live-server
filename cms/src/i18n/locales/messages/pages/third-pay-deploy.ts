@@ -1,0 +1,111 @@
+import {definePageMessages} from './_define'
+
+const zh = {
+  urlPrefix: '静态访问前缀',
+  deployPath: '部署目录',
+  uploadTitle: '上传 ZIP 包',
+  uploadTip: '将第三方支付前端构建产物打包为 zip 后上传，服务端会自动解压到上述目录，并通过静态路径对外提供访问。',
+  dragTip: '将 zip 文件拖到此处，或点击选择',
+  fileTip: '仅支持 .zip 格式；zip 内路径会相对解压到部署目录，请勿包含 ../ 等非法路径',
+  deployBtn: '上传并部署',
+  deploySuccess: '部署成功',
+  deployFailed: '部署失败',
+  fetchInfoFailed: '获取部署信息失败',
+  zipOnly: '仅支持上传 zip 文件',
+  singleFileOnly: '一次只能上传一个 zip 文件',
+  resultPath: '部署目录：{path}',
+  resultFiles: '写入文件：{count} 个',
+  resultDirs: '创建目录：{count} 个',
+}
+
+const en = {
+  urlPrefix: 'Static URL prefix',
+  deployPath: 'Deploy directory',
+  uploadTitle: 'Upload ZIP package',
+  uploadTip: 'Upload a zip of the third-party payment frontend build. The server extracts it to the deploy directory and serves it via the static path.',
+  dragTip: 'Drop zip here or click to select',
+  fileTip: 'Only .zip is allowed. Paths inside the zip are extracted relative to the deploy directory.',
+  deployBtn: 'Upload & deploy',
+  deploySuccess: 'Deployed successfully',
+  deployFailed: 'Deploy failed',
+  fetchInfoFailed: 'Failed to load deploy info',
+  zipOnly: 'Only zip files are allowed',
+  singleFileOnly: 'Only one zip file at a time',
+  resultPath: 'Deploy path: {path}',
+  resultFiles: 'Files written: {count}',
+  resultDirs: 'Directories created: {count}',
+}
+
+const es = {
+  urlPrefix: 'Prefijo URL estático',
+  deployPath: 'Directorio de despliegue',
+  uploadTitle: 'Subir paquete ZIP',
+  uploadTip: 'Sube un zip del frontend de pago; el servidor lo extrae al directorio de despliegue.',
+  dragTip: 'Arrastra el zip aquí o haz clic para seleccionar',
+  fileTip: 'Solo se permite .zip',
+  deployBtn: 'Subir y desplegar',
+  deploySuccess: 'Desplegado correctamente',
+  deployFailed: 'Error al desplegar',
+  fetchInfoFailed: 'Error al cargar información',
+  zipOnly: 'Solo archivos zip',
+  singleFileOnly: 'Solo un archivo zip a la vez',
+  resultPath: 'Ruta: {path}',
+  resultFiles: 'Archivos: {count}',
+  resultDirs: 'Directorios: {count}',
+}
+
+const pt = {
+  urlPrefix: 'Prefixo URL estático',
+  deployPath: 'Diretório de deploy',
+  uploadTitle: 'Enviar pacote ZIP',
+  uploadTip: 'Envie um zip do build de pagamento; o servidor extrai para o diretório de deploy.',
+  dragTip: 'Solte o zip aqui ou clique para selecionar',
+  fileTip: 'Apenas .zip é permitido',
+  deployBtn: 'Enviar e implantar',
+  deploySuccess: 'Implantado com sucesso',
+  deployFailed: 'Falha ao implantar',
+  fetchInfoFailed: 'Falha ao carregar informações',
+  zipOnly: 'Apenas arquivos zip',
+  singleFileOnly: 'Apenas um zip por vez',
+  resultPath: 'Caminho: {path}',
+  resultFiles: 'Arquivos: {count}',
+  resultDirs: 'Diretórios: {count}',
+}
+
+const hi = {
+  urlPrefix: 'स्थिर URL उपसर्ग',
+  deployPath: 'डिप्लॉय निर्देशिका',
+  uploadTitle: 'ZIP पैकेज अपलोड',
+  uploadTip: 'पेमेंट फ्रंटएंड बिल्ड का zip अपलोड करें; सर्वर इसे डिप्लॉय निर्देशिका में निकालेगा।',
+  dragTip: 'zip यहाँ छोड़ें या चुनने के लिए क्लिक करें',
+  fileTip: 'केवल .zip अनुमत',
+  deployBtn: 'अपलोड और डिप्लॉय',
+  deploySuccess: 'सफलतापूर्वक डिप्लॉय',
+  deployFailed: 'डिप्लॉय विफल',
+  fetchInfoFailed: 'जानकारी लोड विफल',
+  zipOnly: 'केवल zip फ़ाइल',
+  singleFileOnly: 'एक समय में एक zip',
+  resultPath: 'पथ: {path}',
+  resultFiles: 'फ़ाइलें: {count}',
+  resultDirs: 'निर्देशिकाएँ: {count}',
+}
+
+const id = {
+  urlPrefix: 'Prefiks URL statis',
+  deployPath: 'Direktori deploy',
+  uploadTitle: 'Unggah paket ZIP',
+  uploadTip: 'Unggah zip build pembayaran; server mengekstrak ke direktori deploy.',
+  dragTip: 'Letakkan zip di sini atau klik untuk memilih',
+  fileTip: 'Hanya .zip yang diizinkan',
+  deployBtn: 'Unggah & deploy',
+  deploySuccess: 'Berhasil di-deploy',
+  deployFailed: 'Deploy gagal',
+  fetchInfoFailed: 'Gagal memuat info deploy',
+  zipOnly: 'Hanya file zip',
+  singleFileOnly: 'Hanya satu zip per unggahan',
+  resultPath: 'Path: {path}',
+  resultFiles: 'File: {count}',
+  resultDirs: 'Direktori: {count}',
+}
+
+export const thirdPayDeployMessages = definePageMessages(zh, en, es, pt, hi, id)

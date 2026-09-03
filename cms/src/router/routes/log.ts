@@ -40,5 +40,17 @@ export const logRoutes: RouteRecordRaw = {
             path: 'call/video-call-log-list',
             redirect: '/log/live/video-call-log-list',
         },
+        {
+            path: 'game/game-bet-log-list',
+            name: 'GameBetLogListManagement',
+            component: () => import('@/views/log/game/game-bet-log-list.vue'),
+            meta: {title: '游戏消费记录', parentTitle: '游戏日志'},
+        },
+        {
+            path: 'game/game-win-log-list',
+            name: 'GameWinLogListManagement',
+            component: () => import('@/views/log/game/game-win-log-list.vue'),
+            meta: {title: '游戏奖励记录', parentTitle: '游戏日志'},
+        },
     ],
 }

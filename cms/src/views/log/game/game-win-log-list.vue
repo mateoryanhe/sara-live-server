@@ -23,12 +23,20 @@
         <el-form-item>
           <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
           <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
+          <el-button v-if="can('export')" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
         </el-form-item>
       </el-form>
 
-      <el-table v-loading="loading" :data="tableData" style="width: 100%">
+      <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width: 100%">
         <el-table-column :label="t('pages.gameWinLogList.recordId')" min-width="180" prop="id"/>
-        <el-table-column :label="t('common.userId')" min-width="180" prop="userId"/>
+        <el-table-column :label="t('common.userId')" min-width="180" prop="userId">
+          <template #default="{ row }">
+            <el-button v-if="canViewUserDetail && row.userId" link type="primary" @click="openUserDetail(row.userId)">
+              {{ row.userId }}
+            </el-button>
+            <span v-else>{{ row.userId || '-' }}</span>
+          </template>
+        </el-table-column>
         <el-table-column :label="t('pages.gameWinLogList.userNickname')" min-width="140" prop="nickname">
           <template #default="{ row }">{{ row.nickname || '-' }}</template>
         </el-table-column>
@@ -82,8 +90,16 @@ import {gameWinLogApi} from '@/api'
 import type {GameWinLogItem} from '@/types/api'
 import {formatAmount} from '@/utils/number-format'
 import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
+import {usePagePermission} from '@/composables/usePagePermission'
+import {useUserDetailNav} from '@/composables/useUserDetailNav'
+import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
+import {CMS_EXPORT_TYPE_GAME_WIN_LOG} from '@/utils/cms-async-export'
+import {buildGameWinLogCsvColumns} from '@/utils/game-log-csv'
 
 const {t} = useI18n()
+const {can} = usePagePermission('GameWinLogListManagement')
+const {canViewUserDetail, openUserDetail} = useUserDetailNav('GameWinLogListManagement')
+const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
 const tableData = ref<GameWinLogItem[]>([])
 
@@ -100,14 +116,18 @@ const pagination = reactive({
   total: 0,
 })
 
+const buildFilterParams = () => ({
+  userId: searchForm.userId.trim(),
+  gameCode: searchForm.gameCode.trim(),
+  orderId: searchForm.orderId.trim(),
+  platformType: searchForm.platformType.trim(),
+})
+
 const fetchList = async () => {
   loading.value = true
   try {
     const response = await gameWinLogApi.getGameWinLogList({
-      userId: searchForm.userId.trim(),
-      gameCode: searchForm.gameCode.trim(),
-      orderId: searchForm.orderId.trim(),
-      platformType: searchForm.platformType.trim(),
+      ...buildFilterParams(),
       pageIndex: pagination.pageIndex,
       pageSize: pagination.pageSize,
     })
@@ -146,6 +166,16 @@ const handleSizeChange = (size: number) => {
   fetchList()
 }
 
+const handleExport = async () => {
+  await runExport(
+    CMS_EXPORT_TYPE_GAME_WIN_LOG,
+    {
+      headers: buildCsvHeaders(buildGameWinLogCsvColumns(t)),
+      ...buildFilterParams(),
+    },
+    `game-win-log-${Date.now()}.csv`,
+  )
+}
 
 onMounted(() => {
   fetchList()

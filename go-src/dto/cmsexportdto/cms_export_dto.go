@@ -21,6 +21,9 @@ const (
 	ExportTypeLiveDailyEffectiveLive             = "liveDailyEffectiveLive"
 	ExportTypeLiveWeeklyUnsettledLive            = "liveWeeklyUnsettledLive"
 	ExportTypeCurrencyLog                      = "currencyLog"
+	ExportTypeGameBetLog                       = "gameBetLog"
+	ExportTypeGameWinLog                       = "gameWinLog"
+	ExportTypeShortVideoAuthorSettlementLog    = "shortVideoAuthorSettlementLog"
 )
 
 type CMSExportResult struct {
@@ -216,4 +219,27 @@ type CMSExportCurrencyLogPayload struct {
 	CurrencyType uint8  `json:"currencyType"`
 	StartTime    int64  `json:"startTime"`
 	EndTime      int64  `json:"endTime"`
+}
+
+type CMSExportGameBetLogPayload struct {
+	CMSExportHeadersPayload
+	UserId       string `json:"userId"`
+	GameCode     string `json:"gameCode"`
+	OrderId      string `json:"orderId"`
+	PlatformType string `json:"platformType"`
+}
+
+type CMSExportGameWinLogPayload struct {
+	CMSExportHeadersPayload
+	UserId       string `json:"userId"`
+	GameCode     string `json:"gameCode"`
+	OrderId      string `json:"orderId"`
+	PlatformType string `json:"platformType"`
+}
+
+type CMSExportShortVideoAuthorSettlementLogPayload struct {
+	CMSExportHeadersPayload
+	UserId    string `json:"userId"`
+	StartTime int64  `json:"startTime"`
+	EndTime   int64  `json:"endTime"`
 }

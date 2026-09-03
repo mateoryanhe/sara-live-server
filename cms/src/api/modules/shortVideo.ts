@@ -13,6 +13,8 @@ import type {
     ShortVideoPriceTierQuery,
     ShortVideoQuery,
     ShortVideoStorageStat,
+    ShortVideoAuthorSettlementLogItem,
+    ShortVideoAuthorSettlementLogQuery,
     ShortVideoWatchQuery,
     ShortVideoWatchRecord,
 } from '@/types/api'
@@ -33,6 +35,13 @@ export const shortVideoApi = {
 
     getShortVideoWatchList: (params: ShortVideoWatchQuery) => {
         return request.post<PageResponse<ShortVideoWatchRecord>>('/shortVideo/shortVideoWatchList', params)
+    },
+
+    getAuthorSettlementLogList: (params: ShortVideoAuthorSettlementLogQuery) => {
+        return request.post<PageResponse<ShortVideoAuthorSettlementLogItem>>(
+            '/shortVideo/cmsAuthorSettlementLogList',
+            params,
+        )
     },
 
     getShortVideoCfg: () => {

@@ -49,6 +49,7 @@ import {shortVideoCfgMessages} from './short-video-cfg'
 import {shortVideoCategoryListMessages} from './short-video-category-list'
 import {shortVideoPriceTierListMessages} from './short-video-price-tier-list'
 import {shortVideoWatchListMessages} from './short-video-watch-list'
+import {shortVideoAuthorSettlementLogListMessages} from './short-video-author-settlement-log-list'
 import {accountCfgMessages} from './account-cfg'
 import {appVersionCfgMessages} from './app-version-cfg'
 import {firstRechargeActivityCfgMessages} from './first-recharge-activity-cfg'
@@ -66,6 +67,7 @@ import {googlePlayMessages} from './google-play'
 import {yhpayMessages} from './yhpay'
 import {uploadResourceMessages} from './upload-resource'
 import {h5LiveDeployMessages} from './h5-live-deploy'
+import {thirdPayDeployMessages} from './third-pay-deploy'
 import {dataSyncMessages} from './data-sync'
 import {resourceMonitorMessages} from './resource-monitor'
 import {serverLogExplorerMessages} from './server-log-explorer'
@@ -121,6 +123,7 @@ const pageMessageBuilders = [
   ['shortVideoCategoryList', shortVideoCategoryListMessages],
   ['shortVideoPriceTierList', shortVideoPriceTierListMessages],
   ['shortVideoWatchList', shortVideoWatchListMessages],
+  ['shortVideoAuthorSettlementLogList', shortVideoAuthorSettlementLogListMessages],
   ['accountCfg', accountCfgMessages],
   ['appVersionCfg', appVersionCfgMessages],
   ['firstRechargeActivityCfg', firstRechargeActivityCfgMessages],
@@ -138,6 +141,7 @@ const pageMessageBuilders = [
   ['yhpay', yhpayMessages],
   ['uploadResource', uploadResourceMessages],
   ['h5LiveDeploy', h5LiveDeployMessages],
+  ['thirdPayDeploy', thirdPayDeployMessages],
   ['dataSync', dataSyncMessages],
   ['resourceMonitor', resourceMonitorMessages],
   ['serverLogExplorer', serverLogExplorerMessages],

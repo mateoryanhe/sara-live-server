@@ -32,6 +32,12 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'UserDetail:exportGoldLog': '/cmsExport/submitJob',
     'UserDetail:diamondLog': '/currencyLog/cmsCurrencyLogList',
     'UserDetail:exportDiamondLog': '/cmsExport/submitJob',
+    'UserDetail:gameBetLog': '/gameBetLog/cmsGameBetLogList',
+    'UserDetail:exportGameBetLog': '/cmsExport/submitJob',
+    'UserDetail:gameWinLog': '/gameWinLog/cmsGameWinLogList',
+    'UserDetail:exportGameWinLog': '/cmsExport/submitJob',
+    'UserDetail:shortVideoAuthorSettlementLog': '/shortVideo/cmsAuthorSettlementLogList',
+    'UserDetail:exportShortVideoAuthorSettlementLog': '/cmsExport/submitJob',
 
     AnchorListManagement: '/account/getAnchorList',
     'AnchorListManagement:view': '/account/getAnchorList',
@@ -157,6 +163,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GuildManagement:joinGuildAnchor': '/guild/joinGuildAnchor',
     'GuildManagement:batchSetAnchor': '/guild/importGuildAnchors',
     'GuildManagement:batchSetSeniorAnchor': '/guild/importGuildAnchors',
+    'GuildManagement:transferInfo': '/guild/saveGuildTransferInfo',
 
     GuildCMSUserManagement: '/cmsuser/cmsUserList',
     'GuildCMSUserManagement:view': '/cmsuser/cmsUserList',
@@ -364,15 +371,17 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'FirstRechargeActivityManagement:save': '/firstRechargeActivity/saveFirstRechargeActivityCfg',
     'FirstRechargeActivityManagement:sync': '/dataSync/syncFirstRechargeActivityCfg',
 
-    GameWinLogListManagement: '/gameWinLog/cmsGameWinLogList',
-    'GameWinLogListManagement:view': '/gameWinLog/cmsGameWinLogList',
-    'GameWinLogListManagement:search': '/gameWinLog/cmsGameWinLogList',
-    'GameWinLogListManagement:export': '/gameWinLog/cmsGameWinLogList',
-
     GameBetLogListManagement: '/gameBetLog/cmsGameBetLogList',
     'GameBetLogListManagement:view': '/gameBetLog/cmsGameBetLogList',
     'GameBetLogListManagement:search': '/gameBetLog/cmsGameBetLogList',
-    'GameBetLogListManagement:export': '/gameBetLog/cmsGameBetLogList',
+    'GameBetLogListManagement:export': '/cmsExport/submitJob',
+    'GameBetLogListManagement:viewUserDetail': '/account/getUserDetail',
+
+    GameWinLogListManagement: '/gameWinLog/cmsGameWinLogList',
+    'GameWinLogListManagement:view': '/gameWinLog/cmsGameWinLogList',
+    'GameWinLogListManagement:search': '/gameWinLog/cmsGameWinLogList',
+    'GameWinLogListManagement:export': '/cmsExport/submitJob',
+    'GameWinLogListManagement:viewUserDetail': '/account/getUserDetail',
 
     AppTokenConfig: '/appToken/getAppToken',
     'AppTokenConfig:view': '/appToken/getAppToken',
@@ -445,6 +454,10 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'H5LiveDeployManagement:view': '/h5LiveDeploy/getH5LiveDeployInfo',
     'H5LiveDeployManagement:save': '/h5LiveDeploy/saveH5LiveDeployCfg',
     'H5LiveDeployManagement:deploy': '/h5LiveDeploy/deployZip',
+
+    ThirdPayDeployManagement: '/thirdPayDeploy/getThirdPayDeployInfo',
+    'ThirdPayDeployManagement:view': '/thirdPayDeploy/getThirdPayDeployInfo',
+    'ThirdPayDeployManagement:deploy': '/thirdPayDeploy/deployZip',
 
     ResourceMonitor: '/resourceMetric/getResourceMetricMemoryTrend',
     'ResourceMonitor:view': '/resourceMetric/getResourceMetricMemoryTrend',

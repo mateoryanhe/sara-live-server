@@ -77,6 +77,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: 'H5直播部署'},
         },
         {
+            path: 'third-pay-deploy',
+            name: 'ThirdPayDeployManagement',
+            component: () => import('@/views/config/third-pay-deploy.vue'),
+            meta: {title: '第三方支付部署'},
+        },
+        {
             path: 'data-sync',
             name: 'DataSyncCfgManagement',
             component: () => import('@/views/config/data-sync.vue'),

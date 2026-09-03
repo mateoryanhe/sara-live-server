@@ -87,7 +87,12 @@
         <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalLiveDuration')" min-width="120">
           <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
         </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.guildSharePercent')" min-width="110" prop="guildSharePercent">
+        <el-table-column
+            :label="t('pages.guildIncomeSettlementLogList.guildSharePercent')"
+            label-class-name="header-nowrap"
+            min-width="130"
+            prop="guildSharePercent"
+        >
           <template #default="{ row }">{{ formatSharePercent(row.guildSharePercent) }}</template>
         </el-table-column>
       </el-table>

@@ -118,3 +118,6 @@ export const CMS_EXPORT_TYPE_MY_GUILD_ANCHOR_DAILY_EFFECTIVE_LIVE = 'myGuildAnch
 export const CMS_EXPORT_TYPE_LIVE_DAILY_EFFECTIVE_LIVE = 'liveDailyEffectiveLive'
 export const CMS_EXPORT_TYPE_LIVE_WEEKLY_UNSETTLED_LIVE = 'liveWeeklyUnsettledLive'
 export const CMS_EXPORT_TYPE_CURRENCY_LOG = 'currencyLog'
+export const CMS_EXPORT_TYPE_GAME_BET_LOG = 'gameBetLog'
+export const CMS_EXPORT_TYPE_GAME_WIN_LOG = 'gameWinLog'
+export const CMS_EXPORT_TYPE_SHORT_VIDEO_AUTHOR_SETTLEMENT_LOG = 'shortVideoAuthorSettlementLog'

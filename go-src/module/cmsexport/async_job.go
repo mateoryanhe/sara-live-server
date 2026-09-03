@@ -176,7 +176,10 @@ func isSupportedExportType(exportType string) bool {
 		cmsexportdto.ExportTypeMyGuildAnchorDailyEffectiveLive,
 		cmsexportdto.ExportTypeLiveDailyEffectiveLive,
 		cmsexportdto.ExportTypeLiveWeeklyUnsettledLive,
-		cmsexportdto.ExportTypeCurrencyLog:
+		cmsexportdto.ExportTypeCurrencyLog,
+		cmsexportdto.ExportTypeGameBetLog,
+		cmsexportdto.ExportTypeGameWinLog,
+		cmsexportdto.ExportTypeShortVideoAuthorSettlementLog:
 		return true
 	default:
 		return false
@@ -248,6 +251,12 @@ func executeExportJob(ctx context.Context, exportType string, cmsUserId uint64, 
 		return exportLiveWeeklyUnsettledLiveCSV(ctx, payload, onProgress)
 	case cmsexportdto.ExportTypeCurrencyLog:
 		return exportCurrencyLogCSV(ctx, payload, onProgress)
+	case cmsexportdto.ExportTypeGameBetLog:
+		return exportGameBetLogCSV(ctx, payload, onProgress)
+	case cmsexportdto.ExportTypeGameWinLog:
+		return exportGameWinLogCSV(ctx, payload, onProgress)
+	case cmsexportdto.ExportTypeShortVideoAuthorSettlementLog:
+		return exportShortVideoAuthorSettlementLogCSV(ctx, payload, onProgress)
 	default:
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}

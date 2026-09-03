@@ -515,6 +515,7 @@ export interface UserExtDetailItem {
     cancelCode?: string
     cancelCodeExpireAt?: string | null
     rechargeWhitelist?: boolean
+    shortVideoUnsettledIncome?: number
     updatedAt?: string | null
 }
 
@@ -904,6 +905,27 @@ export interface Guild {
     status: number
     createdAt: string
     updatedAt: string
+}
+
+export interface GuildTransferInfo {
+    guildId: string
+    currency: string
+    payeeName: string
+    bankName: string
+    accountNo: string
+    bankCode: string
+    remark: string
+    updatedAt?: string
+}
+
+export interface SaveGuildTransferInfoReq {
+    guildId: string | number
+    currency: string
+    payeeName?: string
+    bankName?: string
+    accountNo?: string
+    bankCode?: string
+    remark?: string
 }
 
 export interface GuildQuery extends PageQuery {
@@ -1297,6 +1319,21 @@ export interface ShortVideoWatchQuery extends PageQuery {
     userId?: string
     startTime?: number
     endTime?: number
+}
+
+export interface ShortVideoAuthorSettlementLogQuery extends PageQuery {
+    userId?: string
+    startTime?: number
+    endTime?: number
+}
+
+export interface ShortVideoAuthorSettlementLogItem {
+    id: string
+    userId: string
+    unsettledIncome: number
+    settlementDiamond: number
+    anchorSharePercent: number
+    createdAt?: string | null
 }
 
 export interface CreateShortVideoReq {
