@@ -15,8 +15,8 @@ type YhPayCfg struct {
 	Enabled         bool   `gorm:"default:0;comment:是否启用" json:"enabled"`
 	MerchantCode    string `gorm:"size:64;default:'';comment:Merchant ID/商户号" json:"merchantCode"`
 	ApiKey          string `gorm:"size:256;default:'';comment:API Key/密钥" json:"apiKey"`
-	ApiHost         string `gorm:"size:256;default:'';comment:法币API Host(DepositV2)" json:"apiHost"`
-	CryptoApiHost   string `gorm:"size:256;default:'';comment:USDT加密入款API Host" json:"cryptoApiHost"`
+	ApiHost         string `gorm:"size:256;default:'';comment:API Host(IDR手动入款)" json:"apiHost"`
+	CryptoApiHost   string `gorm:"size:256;default:'';comment:USDT加密入款API Host(预留)" json:"cryptoApiHost"`
 	CallbackBaseUrl string `gorm:"size:256;default:'';comment:本服务对外回调根地址(如https://www.example.com)" json:"callbackBaseUrl"`
 	ReturnUrl       string `gorm:"size:512;default:'';comment:支付成功浏览器跳转" json:"returnUrl"`
 	FailedReturnUrl string `gorm:"size:512;default:'';comment:支付失败浏览器跳转" json:"failedReturnUrl"`

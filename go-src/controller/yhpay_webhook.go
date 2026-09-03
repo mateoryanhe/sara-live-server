@@ -10,13 +10,8 @@ const YhPayWebhookUrl = "/webhook/yhpay"
 
 func initYhPayWebhookController() {
 	httpserver.RegNonAuthHandler(YhPayWebhookUrl, "/payin", handleYhPayPayinHTTP)
-	httpserver.RegNonAuthHandler(YhPayWebhookUrl, "/crypto", handleYhPayCryptoHTTP)
 }
 
 func handleYhPayPayinHTTP(r *ghttp.Request) {
 	recharge.HandleYhPayPayinCallback(r)
-}
-
-func handleYhPayCryptoHTTP(r *ghttp.Request) {
-	recharge.HandleYhPayCryptoCallback(r)
 }

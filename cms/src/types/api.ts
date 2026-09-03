@@ -1725,11 +1725,9 @@ export interface YhPayCfg {
     merchantCode: string
     apiKey: string
     apiHost: string
-    cryptoApiHost: string
     callbackBaseUrl: string
     returnUrl: string
     failedReturnUrl: string
-    cryptoNetwork: string
     createdAt: string
     updatedAt: string
 }
@@ -1744,11 +1742,9 @@ export interface SaveYhPayCfgReq {
     merchantCode: string
     apiKey: string
     apiHost: string
-    cryptoApiHost: string
     callbackBaseUrl?: string
     returnUrl?: string
     failedReturnUrl?: string
-    cryptoNetwork?: string
 }
 
 export interface SaveYhPayCfgRes {

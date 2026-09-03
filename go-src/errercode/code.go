@@ -205,6 +205,8 @@ const (
 	YhPayNotConfigured XRCode = 158
 	// YhPayCreateFailed yhpay创建支付失败
 	YhPayCreateFailed XRCode = 159
+	// YhPayCurrencyNotSupported yhpay暂不支持该币种
+	YhPayCurrencyNotSupported XRCode = 160
 )
 
 type XError struct {

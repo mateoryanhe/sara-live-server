@@ -111,5 +111,6 @@ func init() {
 		FiatExchangeRateUnavailable:     "Kurs fiat tidak tersedia",
 		YhPayNotConfigured:              "Pembayaran saluran belum dikonfigurasi",
 		YhPayCreateFailed:               "Gagal membuat pembayaran saluran",
+		YhPayCurrencyNotSupported:       "Mata uang pembayaran saluran belum didukung",
 	}
 }

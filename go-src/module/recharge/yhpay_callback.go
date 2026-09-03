@@ -24,7 +24,23 @@ func writeYhPayAck(r *ghttp.Request, code int, message string) {
 	r.Response.WriteJson(&yhPayCallbackAck{ErrorCode: code, Message: message})
 }
 
-// HandleYhPayPayinCallback DepositV2 入款回调(form-urlencoded)
+type yhPayManualPayinCallbackBody struct {
+	MerchantCode   string  `json:"MerchantCode"`
+	InvoiceNo      string  `json:"InvoiceNo"`
+	Currency       string  `json:"Currency"`
+	Amount         string  `json:"Amount"`
+	OriginalAmount float64 `json:"OriginalAmount"`
+	PaymentDate    string  `json:"PaymentDate"`
+	RefId          string  `json:"RefId"`
+	ReceiverBank   string  `json:"ReceiverBank"`
+	ReceiverAccount string `json:"ReceiverAccount"`
+	Status         int     `json:"Status"`
+	Signature      string  `json:"Signature"`
+	StatusMessage  string  `json:"StatusMessage"`
+	DeclineReason  string  `json:"DeclineReason"`
+}
+
+// HandleYhPayPayinCallback IDR 手动提交入款回调(JSON)
 func HandleYhPayPayinCallback(r *ghttp.Request) {
 	ctx := r.Context()
 	cfg := cfgdao.GetYhPayCfgCached()
@@ -33,102 +49,38 @@ func HandleYhPayPayinCallback(r *ghttp.Request) {
 		return
 	}
 
-	itemID := strings.TrimSpace(r.GetForm("ItemID").String())
-	statusStr := strings.TrimSpace(r.GetForm("status").String())
-	amount := strings.TrimSpace(r.GetForm("Amount").String())
-	currencyCode := strings.TrimSpace(r.GetForm("Currency").String())
-	transaction := strings.TrimSpace(r.GetForm("transaction").String())
-	createdAt := strings.TrimSpace(r.GetForm("created_at").String())
-	signature2 := strings.TrimSpace(r.GetForm("signature2").String())
-
-	xrlog.DetailLog.Infof(ctx, "yhpay payin callback recv itemID=%s status=%s amount=%s currency=%s transaction=%s created_at=%s",
-		itemID, statusStr, amount, currencyCode, transaction, createdAt)
-
-	expect := yhPayHMAC(cfg.ApiKey, transaction+statusStr+currencyCode+amount+createdAt)
-	if !strings.EqualFold(expect, signature2) {
-		xrlog.DetailLog.Warningf(ctx, "yhpay payin bad signature itemID=%s", itemID)
-		writeYhPayAck(r, 3, "Invalid Parameter")
-		return
-	}
-
-	status, _ := strconv.Atoi(statusStr)
-	if status != 1 && status != 3 {
-		xrlog.DetailLog.Infof(ctx, "yhpay payin ignored status=%d itemID=%s", status, itemID)
-		writeYhPayAck(r, 0, "Operation Success")
-		return
-	}
-
-	if err := completeYhPayOrder(ctx, itemID, transaction); err != nil {
-		xrlog.DetailLog.Errorf(ctx, "yhpay payin complete failed itemID=%s err=%v", itemID, err)
-		writeYhPayAck(r, 4, "Operation Failed")
-		return
-	}
-	xrlog.DetailLog.Infof(ctx, "yhpay payin complete ok itemID=%s transaction=%s status=%d", itemID, transaction, status)
-	writeYhPayAck(r, 0, "Operation Success")
-}
-
-type yhPayCryptoCallbackBody struct {
-	InvoiceNo           string  `json:"InvoiceNo"`
-	MerchantCode        string  `json:"MerchantCode"`
-	SenderWalletAddress string  `json:"SenderWalletAddress"`
-	Reference           string  `json:"Reference"`
-	ExchangeRate        float64 `json:"ExchangeRate"`
-	FiatCurrency        string  `json:"FiatCurrency"`
-	CryptoCurrency      string  `json:"CryptoCurrency"`
-	FiatAmount          float64 `json:"FiatAmount"`
-	CryptoAmount        float64 `json:"CryptoAmount"`
-	Status              int     `json:"Status"`
-	RefId               string  `json:"RefId"`
-	PaymentDate         string  `json:"PaymentDate"`
-	Signature           string  `json:"Signature"`
-	StatusMessage       string  `json:"StatusMessage"`
-	DeclineReason       string  `json:"DeclineReason"`
-}
-
-// HandleYhPayCryptoCallback 加密货币入款回调(JSON)
-func HandleYhPayCryptoCallback(r *ghttp.Request) {
-	ctx := r.Context()
-	cfg := cfgdao.GetYhPayCfgCached()
-	if cfg == nil || !cfg.Enabled {
-		writeYhPayAck(r, 4, "Operation Failed")
-		return
-	}
-
-	var body yhPayCryptoCallbackBody
+	var body yhPayManualPayinCallbackBody
 	if err := r.Parse(&body); err != nil {
-		xrlog.DetailLog.Warningf(ctx, "yhpay crypto callback parse failed err=%v", err)
+		xrlog.DetailLog.Warningf(ctx, "yhpay manual payin callback parse failed err=%v", err)
 		writeYhPayAck(r, 3, "Invalid Parameter")
 		return
 	}
-	xrlog.DetailLog.Infof(ctx, "yhpay crypto callback recv refId=%s invoice=%s status=%d fiat=%s/%.2f crypto=%s/%.8f msg=%s",
-		body.RefId, body.InvoiceNo, body.Status, body.FiatCurrency, body.FiatAmount, body.CryptoCurrency, body.CryptoAmount, body.StatusMessage)
+
+	xrlog.DetailLog.Infof(ctx, "yhpay manual payin callback recv refId=%s invoice=%s status=%d currency=%s amount=%s msg=%s reason=%s",
+		body.RefId, body.InvoiceNo, body.Status, body.Currency, body.Amount, body.StatusMessage, body.DeclineReason)
 
 	sig := strings.TrimSpace(body.Signature)
-	payloadA := body.InvoiceNo + body.SenderWalletAddress + body.FiatCurrency +
-		formatYhPayAmount(body.FiatAmount) + body.CryptoCurrency +
-		strconv.FormatFloat(body.CryptoAmount, 'f', -1, 64) + body.PaymentDate
-	payloadB := body.InvoiceNo + body.SenderWalletAddress + body.FiatCurrency +
-		strconv.FormatFloat(body.FiatAmount, 'f', -1, 64) + body.CryptoCurrency +
-		strconv.FormatFloat(body.CryptoAmount, 'f', -1, 64) + body.PaymentDate
-	if !strings.EqualFold(yhPayHMAC(cfg.ApiKey, payloadA), sig) &&
-		!strings.EqualFold(yhPayHMAC(cfg.ApiKey, payloadB), sig) {
-		xrlog.DetailLog.Warningf(ctx, "yhpay crypto bad signature refId=%s", body.RefId)
+	expect := yhPayHMAC(cfg.ApiKey, body.InvoiceNo+body.ReceiverBank+body.ReceiverAccount+
+		strings.ToUpper(strings.TrimSpace(body.Currency))+strings.TrimSpace(body.Amount)+body.PaymentDate)
+	if !strings.EqualFold(expect, sig) {
+		xrlog.DetailLog.Warningf(ctx, "yhpay manual payin bad signature refId=%s", body.RefId)
 		writeYhPayAck(r, 3, "Invalid Parameter")
 		return
 	}
 
-	if body.Status != 1 && body.Status != 3 {
-		xrlog.DetailLog.Infof(ctx, "yhpay crypto ignored status=%d refId=%s", body.Status, body.RefId)
+	// 3=批准 Approved, 2=拒绝 Rejected；仅最终状态会回调
+	if body.Status != 3 {
+		xrlog.DetailLog.Infof(ctx, "yhpay manual payin ignored status=%d refId=%s", body.Status, body.RefId)
 		writeYhPayAck(r, 0, "Operation Success")
 		return
 	}
 
 	if err := completeYhPayOrder(ctx, strings.TrimSpace(body.RefId), strings.TrimSpace(body.InvoiceNo)); err != nil {
-		xrlog.DetailLog.Errorf(ctx, "yhpay crypto complete failed refId=%s err=%v", body.RefId, err)
+		xrlog.DetailLog.Errorf(ctx, "yhpay manual payin complete failed refId=%s err=%v", body.RefId, err)
 		writeYhPayAck(r, 4, "Operation Failed")
 		return
 	}
-	xrlog.DetailLog.Infof(ctx, "yhpay crypto complete ok refId=%s invoice=%s status=%d", body.RefId, body.InvoiceNo, body.Status)
+	xrlog.DetailLog.Infof(ctx, "yhpay manual payin complete ok refId=%s invoice=%s status=%d", body.RefId, body.InvoiceNo, body.Status)
 	writeYhPayAck(r, 0, "Operation Success")
 }
 

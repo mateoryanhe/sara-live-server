@@ -29,11 +29,9 @@ func SaveYhPayCfg(_ context.Context, req *yhpaydto.SaveYhPayCfgReq) (*yhpaydto.S
 	merchantCode := strings.TrimSpace(req.MerchantCode)
 	apiKey := strings.TrimSpace(req.ApiKey)
 	apiHost := strings.TrimRight(strings.TrimSpace(req.ApiHost), "/")
-	cryptoApiHost := strings.TrimRight(strings.TrimSpace(req.CryptoApiHost), "/")
-	if merchantCode == "" || apiKey == "" || apiHost == "" || cryptoApiHost == "" {
+	if merchantCode == "" || apiKey == "" || apiHost == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	cryptoNetwork := "TRC20"
 
 	existing := cfgdao.GetYhPayCfgCached()
 	row := &entity.YhPayCfg{
@@ -41,11 +39,9 @@ func SaveYhPayCfg(_ context.Context, req *yhpaydto.SaveYhPayCfgReq) (*yhpaydto.S
 		MerchantCode:    merchantCode,
 		ApiKey:          apiKey,
 		ApiHost:         apiHost,
-		CryptoApiHost:   cryptoApiHost,
 		CallbackBaseUrl: strings.TrimRight(strings.TrimSpace(req.CallbackBaseUrl), "/"),
 		ReturnUrl:       strings.TrimSpace(req.ReturnUrl),
 		FailedReturnUrl: strings.TrimSpace(req.FailedReturnUrl),
-		CryptoNetwork:   cryptoNetwork,
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -53,9 +49,13 @@ func SaveYhPayCfg(_ context.Context, req *yhpaydto.SaveYhPayCfgReq) (*yhpaydto.S
 		}
 		row.ID = req.ID
 		row.CreatedAt = existing.CreatedAt
+		row.CryptoApiHost = existing.CryptoApiHost
+		row.CryptoNetwork = existing.CryptoNetwork
 	} else if existing != nil {
 		row.ID = existing.ID
 		row.CreatedAt = existing.CreatedAt
+		row.CryptoApiHost = existing.CryptoApiHost
+		row.CryptoNetwork = existing.CryptoNetwork
 	}
 	row.UpdatedAt = time.Now()
 	if row.CreatedAt.IsZero() {
@@ -81,11 +81,9 @@ func toYhPayCfgItem(cfg *entity.YhPayCfg) *yhpaydto.YhPayCfgItem {
 		MerchantCode:    cfg.MerchantCode,
 		ApiKey:          cfg.ApiKey,
 		ApiHost:         cfg.ApiHost,
-		CryptoApiHost:   cfg.CryptoApiHost,
 		CallbackBaseUrl: cfg.CallbackBaseUrl,
 		ReturnUrl:       cfg.ReturnUrl,
 		FailedReturnUrl: cfg.FailedReturnUrl,
-		CryptoNetwork:   cfg.CryptoNetwork,
 		CreatedAt:       formatYhPayTime(cfg.CreatedAt),
 		UpdatedAt:       formatYhPayTime(cfg.UpdatedAt),
 	}

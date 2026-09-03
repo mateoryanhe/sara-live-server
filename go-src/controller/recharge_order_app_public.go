@@ -15,7 +15,7 @@ func initRechargeOrderAppPublicController() {
 	httpserver.RegNonAuthAPI(RechargeOrderAppUrl, &RechargeOrderAppPublicController{})
 }
 
-// CreateChannelRechargeOrder App渠道充值建单(yhpay,无需鉴权,userId由App上报)
+// CreateChannelRechargeOrder App渠道充值建单(yhpay IDR手动入款,无需鉴权,userId由App上报)
 func (c *RechargeOrderAppPublicController) CreateChannelRechargeOrder(ctx context.Context, req *rechargeorderdto.AppCreateChannelRechargeOrderReq) (res *rechargeorderdto.AppCreateChannelRechargeOrderRes, err error) {
 	return recharge.CreateChannelRechargeOrder(ctx, req)
 }

@@ -23,7 +23,7 @@ import (
 
 const cmsYhPayTestPackageName = "cms.yhpay.test"
 
-// CreateChannelRechargeOrder App渠道充值建单(yhpay DepositV2 / USDT加密入款,无需鉴权,userId由App上报)
+// CreateChannelRechargeOrder App渠道充值建单(yhpay IDR手动入款,无需鉴权,userId由App上报)
 func CreateChannelRechargeOrder(ctx context.Context, req *rechargeorderdto.AppCreateChannelRechargeOrderReq) (*rechargeorderdto.AppCreateChannelRechargeOrderRes, error) {
 	userId, err := strconv.ParseUint(strings.TrimSpace(req.UserId), 10, 64)
 	if err != nil || userId == 0 {
@@ -85,19 +85,22 @@ func createChannelRechargeOrder(ctx context.Context, userId uint64, packageName 
 		return nil, errercode.CreateCode(errercode.RechargeGoldInvalid)
 	}
 
-	payAmount := rechargeCfg.Price
-	orderCurrency := currencyCode
-	useCrypto := fiatCfg.CurrencyType == fiatentity.FiatCurrencyTypeCrypto || currencyCode == "USDT"
-	if !useCrypto {
-		rate, err := fiatcurrency.ResolveEnabledUsdToQuoteRate(ctx, currencyCode)
-		if err != nil {
-			return nil, err
-		}
-		payAmount = fxrate.ConvertUsdToQuote(rechargeCfg.Price, rate)
-		if payAmount <= 0 {
-			return nil, errercode.CreateCode(errercode.RechargeAmountInvalid)
-		}
+	if currencyCode != yhPaySupportedCurrency {
+		return nil, errercode.CreateCode(errercode.YhPayCurrencyNotSupported)
 	}
+	if fiatCfg.CurrencyType == fiatentity.FiatCurrencyTypeCrypto {
+		return nil, errercode.CreateCode(errercode.YhPayCurrencyNotSupported)
+	}
+
+	rate, err := fiatcurrency.ResolveEnabledUsdToQuoteRate(ctx, currencyCode)
+	if err != nil {
+		return nil, err
+	}
+	payAmount := fxrate.ConvertUsdToQuote(rechargeCfg.Price, rate)
+	if payAmount <= 0 {
+		return nil, errercode.CreateCode(errercode.RechargeAmountInvalid)
+	}
+	orderCurrency := currencyCode
 
 	order := entity.NewRechargeOrder(userId, rechargeCfg.ID, payAmount, orderCurrency, goldAmount, entity.RechargeOrderSourceApp)
 	order.SetPayChannel(entity.RechargeCfgTypeChannel)
@@ -141,19 +144,14 @@ func createChannelRechargeOrder(ctx context.Context, userId uint64, packageName 
 		}
 	}
 
-	var payUrl string
-	if useCrypto {
-		payUrl, err = createYhPayCryptoDeposit(ctx, cfg, orderIdStr, playerName, playerIP, currencyCode, rechargeCfg.Price)
-	} else {
-		payUrl, err = createYhPayDepositV2(ctx, cfg, orderIdStr, strconv.FormatUint(userId, 10), playerName, currencyCode, payAmount)
-	}
+	payUrl, err := createYhPayManualDeposit(ctx, cfg, orderIdStr, playerName, playerIP, currencyCode, payAmount)
 	if err != nil {
-		xrlog.DetailLog.Errorf(ctx, "yhpay create pay url failed orderId=%s userId=%d currency=%s payAmount=%v useCrypto=%v err=%v",
-			orderIdStr, userId, currencyCode, payAmount, useCrypto, err)
+		xrlog.DetailLog.Errorf(ctx, "yhpay create pay url failed orderId=%s userId=%d currency=%s payAmount=%v err=%v",
+			orderIdStr, userId, currencyCode, payAmount, err)
 		return nil, errercode.CreateCode(errercode.YhPayCreateFailed)
 	}
-	xrlog.DetailLog.Infof(ctx, "yhpay create pay url ok orderId=%s userId=%d currency=%s payAmount=%v useCrypto=%v",
-		orderIdStr, userId, currencyCode, payAmount, useCrypto)
+	xrlog.DetailLog.Infof(ctx, "yhpay create pay url ok orderId=%s userId=%d currency=%s payAmount=%v",
+		orderIdStr, userId, currencyCode, payAmount)
 
 	return &rechargeorderdto.AppCreateChannelRechargeOrderRes{
 		OrderId:  orderIdStr,

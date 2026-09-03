@@ -17,7 +17,6 @@
         <p>{{ t('pages.yhpay.noticeLine1') }}</p>
         <p>{{ t('pages.yhpay.noticeLine2') }}</p>
         <p>{{ t('pages.yhpay.noticeLine3') }}</p>
-        <p>{{ t('pages.yhpay.noticeLine4') }}</p>
       </el-alert>
 
       <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="160px">
@@ -31,10 +30,6 @@
           <el-input v-model="formData.apiHost" clearable :placeholder="t('pages.yhpay.apiHostPlaceholder')"/>
           <span class="form-tip">{{ t('pages.yhpay.apiHostTip') }}</span>
         </el-form-item>
-        <el-form-item :label="t('pages.yhpay.cryptoApiHost')" prop="cryptoApiHost">
-          <el-input v-model="formData.cryptoApiHost" clearable :placeholder="t('pages.yhpay.cryptoApiHostPlaceholder')"/>
-          <span class="form-tip">{{ t('pages.yhpay.cryptoApiHostTip') }}</span>
-        </el-form-item>
         <el-form-item :label="t('pages.yhpay.callbackBaseUrl')" prop="callbackBaseUrl">
           <el-input v-model="formData.callbackBaseUrl" clearable :placeholder="t('pages.yhpay.callbackBaseUrlPlaceholder')"/>
           <span class="form-tip">{{ t('pages.yhpay.callbackBaseUrlTip') }}</span>
@@ -44,10 +39,6 @@
         </el-form-item>
         <el-form-item :label="t('pages.yhpay.failedReturnUrl')" prop="failedReturnUrl">
           <el-input v-model="formData.failedReturnUrl" clearable :placeholder="t('pages.yhpay.failedReturnUrlPlaceholder')"/>
-        </el-form-item>
-        <el-form-item :label="t('pages.yhpay.cryptoNetwork')">
-          <span>{{ t('pages.yhpay.cryptoNetworkFixed') }}</span>
-          <span class="form-tip">{{ t('pages.yhpay.cryptoNetworkTip') }}</span>
         </el-form-item>
 
         <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.yhpay.lastUpdated')">
@@ -79,13 +70,10 @@ const formData = reactive({
   merchantCode: '',
   apiKey: '',
   apiHost: '',
-  cryptoApiHost: '',
   callbackBaseUrl: '',
   returnUrl: '',
   failedReturnUrl: '',
 })
-
-const FIXED_CRYPTO_NETWORK = 'TRC20'
 
 const metaInfo = reactive({
   createdAt: '',
@@ -96,7 +84,6 @@ const formRules = computed(() => ({
   merchantCode: [{required: true, message: t('pages.yhpay.merchantCodeRequired'), trigger: 'blur'}],
   apiKey: [{required: true, message: t('pages.yhpay.apiKeyRequired'), trigger: 'blur'}],
   apiHost: [{required: true, message: t('pages.yhpay.apiHostRequired'), trigger: 'blur'}],
-  cryptoApiHost: [{required: true, message: t('pages.yhpay.cryptoApiHostRequired'), trigger: 'blur'}],
 }))
 
 const applyCfg = (cfg: YhPayCfg | null | undefined) => {
@@ -105,7 +92,6 @@ const applyCfg = (cfg: YhPayCfg | null | undefined) => {
     formData.merchantCode = ''
     formData.apiKey = ''
     formData.apiHost = ''
-    formData.cryptoApiHost = ''
     formData.callbackBaseUrl = ''
     formData.returnUrl = ''
     formData.failedReturnUrl = ''
@@ -117,7 +103,6 @@ const applyCfg = (cfg: YhPayCfg | null | undefined) => {
   formData.merchantCode = cfg.merchantCode || ''
   formData.apiKey = cfg.apiKey || ''
   formData.apiHost = cfg.apiHost || ''
-  formData.cryptoApiHost = cfg.cryptoApiHost || ''
   formData.callbackBaseUrl = cfg.callbackBaseUrl || ''
   formData.returnUrl = cfg.returnUrl || ''
   formData.failedReturnUrl = cfg.failedReturnUrl || ''
@@ -148,11 +133,9 @@ const handleSave = async () => {
       merchantCode: formData.merchantCode.trim(),
       apiKey: formData.apiKey.trim(),
       apiHost: formData.apiHost.trim(),
-      cryptoApiHost: formData.cryptoApiHost.trim(),
       callbackBaseUrl: formData.callbackBaseUrl.trim(),
       returnUrl: formData.returnUrl.trim(),
       failedReturnUrl: formData.failedReturnUrl.trim(),
-      cryptoNetwork: FIXED_CRYPTO_NETWORK,
     })
     if (response?.success) {
       ElMessage.success(t('pages.yhpay.saveSuccess'))

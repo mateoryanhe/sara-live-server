@@ -17,12 +17,11 @@ import (
 	"xr-game-server/entity/recharge"
 )
 
+const yhPaySupportedCurrency = "IDR"
+
 const (
-	yhPayDepositV2Path      = "/Payin/DepositV2"
-	yhPayDepositBanksPath   = "/Payin/DepositSenderBank/"
-	yhPayCryptoDepositPath  = "/api/crypto/deposit"
-	yhPayPayinCallbackPath  = "/webhook/yhpay/payin"
-	yhPayCryptoCallbackPath = "/webhook/yhpay/crypto"
+	yhPayManualDepositPath    = "/Payin/Manual/Deposit"
+	yhPayPayinCallbackPath    = "/webhook/yhpay/payin"
 )
 
 func yhPayHMAC(secret, payload string) string {
@@ -78,63 +77,33 @@ func yhPayLogSafeJSON(raw []byte) string {
 	return truncateYhPayLog(string(b), yhPayLogBodyMax)
 }
 
-type yhPayDepositV2Req struct {
-	MerchantCode      string `json:"MerchantCode"`
-	ReturnURL         string `json:"ReturnURL"`
-	FailedReturnURL   string `json:"FailedReturnURL"`
-	HTTPPostURL       string `json:"HTTPPostURL"`
-	Amount            string `json:"Amount"`
-	Currency          string `json:"Currency"`
-	ItemID            string `json:"ItemID"`
-	ItemDescription   string `json:"ItemDescription"`
-	PlayerId          string `json:"PlayerId"`
-	Hash              string `json:"Hash"`
-	BankCode          string `json:"BankCode"`
-	SenderVerification int   `json:"SenderVerification"`
-	ClientFullName    string `json:"ClientFullName"`
+type yhPayManualDepositReq struct {
+	MerchantCode   string `json:"merchant_code"`
+	RefId          string `json:"ref_id"`
+	CurrencyCode   string `json:"currency_code"`
+	Amount         string `json:"amount"`
+	Hash           string `json:"hash"`
+	CallbackURL    string `json:"callback_url"`
+	ReturnURL      string `json:"return_url"`
+	PlayerUsername string `json:"player_username"`
+	PlayerIP       string `json:"player_ip"`
 }
 
-type yhPayDepositV2Res struct {
-	Transaction any    `json:"transaction"`
-	Status      int    `json:"status"`
-	Token       string `json:"token"`
-	RedirectTo  string `json:"redirect_to"`
-	Amount      any    `json:"Amount"`
-	Currency    string `json:"Currency"`
-	Message     string `json:"message"`
-}
-
-type yhPayBankListRes struct {
-	ErrorCode int    `json:"error_code"`
-	Message   string `json:"message"`
-	Bank      []struct {
-		BankCode string `json:"BankCode"`
-		BankName string `json:"BankName"`
-	} `json:"Bank"`
-}
-
-type yhPayCryptoDepositReq struct {
-	MerchantCode       string `json:"merchant_code"`
-	RefId              string `json:"ref_id"`
-	PlayerUsername     string `json:"player_username"`
-	PlayerIp           string `json:"player_ip"`
-	FiatCurrencyCode   string `json:"fiat_currency_code"`
-	FiatAmount         string `json:"fiat_amount"`
-	CryptoCurrencyCode string `json:"crypto_currency_code"`
-	Network            string `json:"network"`
-	ClientUrl          string `json:"client_url"`
-	Hash               string `json:"hash"`
-	Lang               string `json:"lang"`
-}
-
-type yhPayCryptoDepositRes struct {
-	ErrorCode     int     `json:"errorcode"`
-	Message       string  `json:"message"`
+type yhPayManualDepositRes struct {
+	ErrorCode     int     `json:"error_code"`
+	ErrorMessage  string  `json:"error_message"`
 	InvoiceNumber string  `json:"invoice_number"`
+	RefId         string  `json:"ref_id"`
 	CurrencyCode  string  `json:"currency_code"`
 	Amount        float64 `json:"amount"`
 	Token         string  `json:"token"`
 	RedirectTo    string  `json:"redirect_to"`
+	BankCode      string  `json:"bank_code"`
+	BankName      string  `json:"bank_name"`
+	AccountName   string  `json:"account_name"`
+	AccountNumber string  `json:"account_number"`
+	StatusCode    int     `json:"status_code"`
+	StatusMessage string  `json:"status_message"`
 }
 
 func yhPayPostJSON(ctx context.Context, fullURL string, body any, out any) error {
@@ -186,131 +155,55 @@ func yhPayFiatApiHost(cfg *entity.YhPayCfg) string {
 	return strings.TrimRight(strings.TrimSpace(cfg.ApiHost), "/")
 }
 
-func yhPayCryptoApiHost(cfg *entity.YhPayCfg) string {
-	if cfg == nil {
-		return ""
-	}
-	if host := strings.TrimRight(strings.TrimSpace(cfg.CryptoApiHost), "/"); host != "" {
-		return host
-	}
-	// 兼容旧配置:未单独填 USDT host 时回退法币 host
-	return yhPayFiatApiHost(cfg)
-}
-
-func pickYhPayBankCode(ctx context.Context, cfg *entity.YhPayCfg, currency string) (string, error) {
+func createYhPayManualDeposit(ctx context.Context, cfg *entity.YhPayCfg, orderId, playerName, playerIP, currency string, amount float64) (payUrl string, err error) {
 	host := yhPayFiatApiHost(cfg)
 	if host == "" {
-		return "", fmt.Errorf("yhpay fiat api host not configured")
+		return "", fmt.Errorf("yhpay api host not configured")
 	}
-	url := host + yhPayDepositBanksPath
-	var res yhPayBankListRes
-	if err := yhPayPostJSON(ctx, url, map[string]string{
-		"MerchantCode": cfg.MerchantCode,
-		"Currency":     currency,
-		"APIKey":       cfg.ApiKey,
-	}, &res); err != nil {
-		return "", err
+	currency = strings.ToUpper(strings.TrimSpace(currency))
+	if currency != yhPaySupportedCurrency {
+		return "", fmt.Errorf("yhpay unsupported currency=%s", currency)
 	}
-	if res.ErrorCode != 0 || len(res.Bank) == 0 {
-		return "", fmt.Errorf("yhpay no bank available currency=%s code=%d msg=%s", currency, res.ErrorCode, res.Message)
-	}
-	bankCode := strings.TrimSpace(res.Bank[0].BankCode)
-	xrlog.DetailLog.Infof(ctx, "yhpay bank picked currency=%s bankCode=%s bankCount=%d", currency, bankCode, len(res.Bank))
-	return bankCode, nil
-}
 
-func createYhPayDepositV2(ctx context.Context, cfg *entity.YhPayCfg, orderId, playerId, playerName, currency string, amount float64) (payUrl string, err error) {
-	host := yhPayFiatApiHost(cfg)
-	if host == "" {
-		return "", fmt.Errorf("yhpay fiat api host not configured")
-	}
-	bankCode, err := pickYhPayBankCode(ctx, cfg, currency)
-	if err != nil {
-		return "", err
-	}
 	amountStr := formatYhPayAmount(amount)
-	itemID := orderId
-	hash := yhPayHMAC(cfg.ApiKey, cfg.MerchantCode+itemID+currency+amountStr)
+	hash := yhPayHMAC(cfg.ApiKey, cfg.MerchantCode+orderId+currency+amountStr)
 	callbackURL := strings.TrimRight(cfg.CallbackBaseUrl, "/") + yhPayPayinCallbackPath
 	returnURL := cfg.ReturnUrl
 	if returnURL == "" {
 		returnURL = cfg.CallbackBaseUrl
 	}
-	failedURL := cfg.FailedReturnUrl
-	if failedURL == "" {
-		failedURL = returnURL
-	}
-	reqBody := &yhPayDepositV2Req{
-		MerchantCode:       cfg.MerchantCode,
-		ReturnURL:          returnURL,
-		FailedReturnURL:    failedURL,
-		HTTPPostURL:        callbackURL,
-		Amount:             amountStr,
-		Currency:           currency,
-		ItemID:             itemID,
-		ItemDescription:    "recharge " + orderId,
-		PlayerId:           playerId,
-		Hash:               hash,
-		BankCode:           bankCode,
-		SenderVerification: 0,
-		ClientFullName:     playerName,
-	}
-	var res yhPayDepositV2Res
-	url := host + yhPayDepositV2Path
-	if err = yhPayPostJSON(ctx, url, reqBody, &res); err != nil {
-		return "", err
-	}
-	payUrl = normalizeYhPayRedirect(res.RedirectTo)
-	if payUrl == "" {
-		if res.Message != "" {
-			return "", fmt.Errorf("yhpay depositv2 failed: %s", res.Message)
-		}
-		return "", fmt.Errorf("yhpay depositv2 empty redirect status=%d", res.Status)
-	}
-	xrlog.DetailLog.Infof(ctx, "yhpay depositv2 ok orderId=%s currency=%s amount=%s bankCode=%s status=%d payUrl=%s",
-		orderId, currency, amountStr, bankCode, res.Status, payUrl)
-	return payUrl, nil
-}
 
-func createYhPayCryptoDeposit(ctx context.Context, cfg *entity.YhPayCfg, orderId, playerName, playerIP, cryptoCode string, usdAmount float64) (payUrl string, err error) {
-	host := yhPayCryptoApiHost(cfg)
-	if host == "" {
-		return "", fmt.Errorf("yhpay crypto api host not configured")
+	reqBody := &yhPayManualDepositReq{
+		MerchantCode:   cfg.MerchantCode,
+		RefId:          orderId,
+		CurrencyCode:   currency,
+		Amount:         amountStr,
+		Hash:           hash,
+		CallbackURL:    callbackURL,
+		ReturnURL:      returnURL,
+		PlayerUsername: playerName,
+		PlayerIP:       playerIP,
 	}
-	fiatCurrency := "USD"
-	fiatAmount := formatYhPayAmount(usdAmount)
-	network := "TRC20"
-	clientURL := cfg.CallbackBaseUrl
-	if clientURL == "" {
-		clientURL = cfg.ReturnUrl
-	}
-	hashPayload := cfg.MerchantCode + orderId + playerName + playerIP + fiatCurrency + fiatAmount + cryptoCode + clientURL
-	reqBody := &yhPayCryptoDepositReq{
-		MerchantCode:       cfg.MerchantCode,
-		RefId:              orderId,
-		PlayerUsername:     playerName,
-		PlayerIp:           playerIP,
-		FiatCurrencyCode:   fiatCurrency,
-		FiatAmount:         fiatAmount,
-		CryptoCurrencyCode: cryptoCode,
-		Network:            network,
-		ClientUrl:          clientURL,
-		Hash:               yhPayHMAC(cfg.ApiKey, hashPayload),
-		Lang:               "en",
-	}
-	var res yhPayCryptoDepositRes
-	url := host + yhPayCryptoDepositPath
+	var res yhPayManualDepositRes
+	url := host + yhPayManualDepositPath
 	if err = yhPayPostJSON(ctx, url, reqBody, &res); err != nil {
 		return "", err
 	}
 	if res.ErrorCode != 0 {
-		return "", fmt.Errorf("yhpay crypto deposit failed code=%d msg=%s", res.ErrorCode, res.Message)
+		msg := strings.TrimSpace(res.ErrorMessage)
+		if msg == "" {
+			msg = strings.TrimSpace(res.StatusMessage)
+		}
+		if msg == "" {
+			msg = fmt.Sprintf("error_code=%d", res.ErrorCode)
+		}
+		return "", fmt.Errorf("yhpay manual deposit failed: %s", msg)
 	}
 	payUrl = normalizeYhPayRedirect(res.RedirectTo)
 	if payUrl == "" {
-		return "", fmt.Errorf("yhpay crypto empty redirect")
+		return "", fmt.Errorf("yhpay manual deposit empty redirect invoice=%s", res.InvoiceNumber)
 	}
-	xrlog.DetailLog.Infof(ctx, "yhpay crypto deposit ok orderId=%s crypto=%s usd=%s invoice=%s payUrl=%s",
-		orderId, cryptoCode, fiatAmount, res.InvoiceNumber, payUrl)
+	xrlog.DetailLog.Infof(ctx, "yhpay manual deposit ok orderId=%s currency=%s amount=%s invoice=%s bank=%s payUrl=%s",
+		orderId, currency, amountStr, res.InvoiceNumber, res.BankCode, payUrl)
 	return payUrl, nil
 }

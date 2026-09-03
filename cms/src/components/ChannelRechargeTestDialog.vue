@@ -45,11 +45,11 @@
       <el-table-column :label="t('pages.rechargeOrderList.cfgId')" prop="id" width="100"/>
       <el-table-column :label="t('pages.rechargeOrderList.rechargeCfgName')" min-width="120" prop="name"/>
       <el-table-column :label="t('pages.rechargeOrderList.priceUsd')" width="100">
-        <template #default="{ row }">{{ formatAmount(row.price) }}</template>
+        <template #default="{ row }">{{ formatNumberDisplay(row.price, '-', RECHARGE_PRICE_DECIMALS) }}</template>
       </el-table-column>
       <el-table-column :label="t('pages.rechargeOrderList.priceLocal')" width="140">
         <template #default="{ row }">
-          {{ formatAmount(row.displayPrice) }}
+          {{ formatNumberDisplay(row.displayPrice, '-', RECHARGE_PRICE_DECIMALS) }}
           {{ channelTestForm.currencyCode || '' }}
         </template>
       </el-table-column>
@@ -73,7 +73,10 @@ import {useI18n} from 'vue-i18n'
 import {ElMessage, type FormInstance, type FormRules} from 'element-plus'
 import {fiatCurrencyApi, rechargeCfgApi, rechargeOrderApi} from '@/api'
 import type {FiatCurrency, RechargeCfg} from '@/types/api.ts'
-import {formatAmount} from '@/utils/number-format'
+import {formatAmount, formatNumberDisplay} from '@/utils/number-format'
+
+/** 与充值档位页一致：测试档位可能是 0.0001 这类小金额 */
+const RECHARGE_PRICE_DECIMALS = 4
 
 const props = defineProps<{
   modelValue: boolean
@@ -125,7 +128,10 @@ const loadCurrencies = async () => {
       pageSize: 200,
       statusFilter: 2,
     })
-    channelTestCurrencyList.value = (response.data || []).slice().sort((a, b) => (b.sort || 0) - (a.sort || 0))
+    channelTestCurrencyList.value = (response.data || [])
+        .filter((item) => item.currencyType !== 2)
+        .slice()
+        .sort((a, b) => (b.sort || 0) - (a.sort || 0))
   } catch (error) {
     console.error('load fiat currency failed:', error)
     ElMessage.error(t('pages.rechargeOrderList.loadCurrencyFailed'))

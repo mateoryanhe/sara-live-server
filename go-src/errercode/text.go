@@ -113,6 +113,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		FiatExchangeRateUnavailable:     "Fiat exchange rate is unavailable",
 		YhPayNotConfigured:              "Channel payment is not configured",
 		YhPayCreateFailed:               "Failed to create channel payment",
+		YhPayCurrencyNotSupported:       "Channel payment currency is not supported yet",
 	},
 	lang.LangZHCN: {
 		Success:                         "成功",
@@ -222,6 +223,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		FiatExchangeRateUnavailable:     "法币汇率暂不可用",
 		YhPayNotConfigured:              "渠道支付未配置或未启用",
 		YhPayCreateFailed:               "创建渠道支付失败",
+		YhPayCurrencyNotSupported:       "渠道支付暂不支持该币种",
 	},
 	lang.LangZHTW: {
 		Success:                         "成功",
@@ -331,6 +333,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		FiatExchangeRateUnavailable:     "法幣匯率暫不可用",
 		YhPayNotConfigured:              "渠道支付未配置或未啟用",
 		YhPayCreateFailed:               "建立渠道支付失敗",
+		YhPayCurrencyNotSupported:       "渠道支付暫不支援該幣種",
 	},
 }
 
