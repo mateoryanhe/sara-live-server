@@ -75,6 +75,8 @@ func fillCMSItemFromGuild(row *entity.GuildIncomeSettlementLog) *incomesettlemen
 		SettlementShareAmountUsd:     row.SettlementShareAmountUsd,
 		SettlementReceivableUsd:      row.SettlementReceivableUsd,
 		GuildSharePercent:            row.GuildSharePercent,
+		Status:                       row.Status,
+		TransferAt:                   row.TransferAt,
 		CreatedAt:                    &row.CreatedAt,
 	}
 	return item
@@ -134,18 +136,37 @@ func GetAnchorCMSList(_ context.Context, req *incomesettlementdto.CMSAnchorIncom
 // GetGuildCMSList CMS分页查询工会结算流水
 func GetGuildCMSList(_ context.Context, req *incomesettlementdto.CMSGuildIncomeSettlementLogListReq) (*httpserver.CMSQueryResp, error) {
 	total, rows := liveroomdao.GuildIncomeSettlementLogCMSList(&liveroomdao.GuildIncomeSettlementLogCMSListFilter{
-		GuildId:   parseUint64Filter(req.GuildId),
-		StartTime: req.StartTime,
-		EndTime:   req.EndTime,
-		PageIndex: req.PageIndex,
-		PageSize:  req.PageSize,
+		GuildId:                  parseUint64Filter(req.GuildId),
+		StartTime:                req.StartTime,
+		EndTime:                  req.EndTime,
+		Status:                   req.Status,
+		OrderByReceivableUsdDesc: req.OrderByReceivableUsdDesc,
+		PageIndex:                req.PageIndex,
+		PageSize:                 req.PageSize,
 	})
-	guildNameMap := guilddao.GetNameMapByIds(collectGuildIds(rows))
+	guildIds := collectGuildIds(rows)
+	guildNameMap := guilddao.GetNameMapByIds(guildIds)
+	var transferMap map[uint64]*entity.LiveGuildTransferInfo
+	if req.IncludeTransferInfo {
+		transferMap = guilddao.GetGuildTransferInfoMapByIds(guildIds)
+	}
 	list := make([]*incomesettlementdto.CMSIncomeSettlementLogItem, 0, len(rows))
 	for _, row := range rows {
 		item := fillCMSItemFromGuild(row)
-		if item != nil && guildNameMap != nil {
+		if item == nil {
+			continue
+		}
+		if guildNameMap != nil {
 			item.GuildName = guildNameMap[row.GuildId]
+		}
+		if transferMap != nil {
+			if info := transferMap[row.GuildId]; info != nil {
+				item.TransferCurrency = info.Currency
+				item.TransferPayeeName = info.PayeeName
+				item.TransferBankName = info.BankName
+				item.TransferAccountNo = info.AccountNo
+				item.TransferBankCode = info.BankCode
+			}
 		}
 		list = append(list, item)
 	}

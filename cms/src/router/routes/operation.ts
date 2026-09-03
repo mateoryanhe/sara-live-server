@@ -25,6 +25,12 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {title: '工会管理'},
         },
         {
+            path: 'guild/guild-transfer-list',
+            name: 'GuildTransferManagement',
+            component: () => import('@/views/operation/guild/guild-transfer-list.vue'),
+            meta: {title: '工会转账'},
+        },
+        {
             path: 'guild/guild-cms-user-list',
             name: 'GuildCMSUserManagement',
             component: () => import('@/views/operation/guild/guild-cms-user-list.vue'),

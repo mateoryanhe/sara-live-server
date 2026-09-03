@@ -32,9 +32,7 @@ export const shortVideoRoutes: RouteRecordRaw = {
         },
         {
             path: 'short-video-watch-list',
-            name: 'ShortVideoWatchManagement',
-            component: () => import('@/views/shortvideo/short-video-watch-list.vue'),
-            meta: {title: '观看记录'},
+            redirect: '/log/live/short-video-watch-list',
         },
     ],
 }

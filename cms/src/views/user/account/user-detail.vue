@@ -209,6 +209,18 @@
             />
           </el-tab-pane>
 
+          <el-tab-pane v-if="canViewShortVideo" :label="t('pages.userList.tabShortVideo')" name="shortVideo">
+            <ShortVideoPanel :active="activeTab === 'shortVideo'" :user-id="userId"/>
+          </el-tab-pane>
+
+          <el-tab-pane v-if="canViewShortVideoWatch" :label="t('pages.userList.tabShortVideoWatch')" name="shortVideoWatch">
+            <ShortVideoWatchPanel :active="activeTab === 'shortVideoWatch'" :user-id="userId"/>
+          </el-tab-pane>
+
+          <el-tab-pane v-if="canViewShortVideoPurchase" :label="t('pages.userList.tabShortVideoPurchase')" name="shortVideoPurchase">
+            <ShortVideoWatchPanel :active="activeTab === 'shortVideoPurchase'" only-paid :user-id="userId"/>
+          </el-tab-pane>
+
           <el-tab-pane
               v-if="canViewShortVideoAuthorSettlementLog"
               :label="t('pages.userList.tabShortVideoAuthorSettlementLog')"
@@ -234,6 +246,8 @@ import {accountApi} from '@/api'
 import CurrencyLogPanel from './user-detail-currency-log-panel.vue'
 import GameLogPanel from './user-detail-game-log-panel.vue'
 import ShortVideoAuthorSettlementLogPanel from './user-detail-short-video-author-settlement-log-panel.vue'
+import ShortVideoWatchPanel from './user-detail-short-video-watch-panel.vue'
+import ShortVideoPanel from '../anchor/anchor-detail-short-video-panel.vue'
 import type {UserCumulativeStatDetailItem, UserDetail} from '@/types/api.ts'
 import {formatStatCount, formatWalletBalance} from '@/utils/number-format'
 import {usePagePermission} from '@/composables/usePagePermission'
@@ -244,6 +258,9 @@ const canViewGoldLog = computed(() => can('goldLog'))
 const canViewDiamondLog = computed(() => can('diamondLog'))
 const canViewGameBetLog = computed(() => can('gameBetLog'))
 const canViewGameWinLog = computed(() => can('gameWinLog'))
+const canViewShortVideo = computed(() => can('shortVideo'))
+const canViewShortVideoWatch = computed(() => can('shortVideoWatch'))
+const canViewShortVideoPurchase = computed(() => can('shortVideoPurchase'))
 const canViewShortVideoAuthorSettlementLog = computed(() => can('shortVideoAuthorSettlementLog'))
 const route = useRoute()
 const router = useRouter()

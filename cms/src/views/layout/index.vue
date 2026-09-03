@@ -58,7 +58,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('GuildAnchorDailyLiveManagement') || hasMenuPermission('PlatformAnchorList') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('FiatCurrencyManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('LiveRevenueShareCfgManagement')"
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildTransferManagement') || hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('GuildAnchorDailyLiveManagement') || hasMenuPermission('PlatformAnchorList') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('FiatCurrencyManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('LiveRevenueShareCfgManagement')"
             index="/operation">
           <template #title>
             <el-icon>
@@ -123,7 +123,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('GuildManagement') || hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('GuildAnchorDailyLiveManagement') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('PlatformAnchorList')"
+              v-if="hasMenuPermission('GuildManagement') || hasMenuPermission('GuildTransferManagement') || hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('GuildAnchorDailyLiveManagement') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('PlatformAnchorList')"
               index="/operation/group/guild">
             <template #title>
               <el-icon>
@@ -136,6 +136,12 @@
                 <User/>
               </el-icon>
               <span>{{ t('menu.GuildManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('GuildTransferManagement')" index="/operation/guild/guild-transfer-list">
+              <el-icon>
+                <Wallet/>
+              </el-icon>
+              <span>{{ t('menu.GuildTransferManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('GuildCMSUserManagement')" index="/operation/guild/guild-cms-user-list">
               <el-icon>
@@ -266,7 +272,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('LiveRevenueLogList') || hasMenuPermission('LiveRecordList') || hasMenuPermission('LiveDailyEffectiveLiveList') || hasMenuPermission('LiveWeeklyUnsettledLiveList') || hasMenuPermission('VideoCallLogList') || hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList') || hasMenuPermission('AnchorIncomeSettlementLogList') || hasMenuPermission('GuildIncomeSettlementLogList') || hasMenuPermission('GameBetLogListManagement') || hasMenuPermission('GameWinLogListManagement')"
+            v-if="hasMenuPermission('LiveRevenueLogList') || hasMenuPermission('LiveRecordList') || hasMenuPermission('LiveDailyEffectiveLiveList') || hasMenuPermission('LiveWeeklyUnsettledLiveList') || hasMenuPermission('VideoCallLogList') || hasMenuPermission('ShortVideoWatchManagement') || hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList') || hasMenuPermission('AnchorIncomeSettlementLogList') || hasMenuPermission('GuildIncomeSettlementLogList') || hasMenuPermission('GameBetLogListManagement') || hasMenuPermission('GameWinLogListManagement')"
             index="/log">
           <template #title>
             <el-icon>
@@ -310,6 +316,12 @@
                 <VideoCamera/>
               </el-icon>
               <span>{{ t('menu.VideoCallLogList') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('ShortVideoWatchManagement')" index="/log/live/short-video-watch-list">
+              <el-icon>
+                <View/>
+              </el-icon>
+              <span>{{ t('menu.ShortVideoWatchManagement') }}</span>
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
@@ -380,7 +392,7 @@
           </el-sub-menu>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('ShortVideoManagement') || hasMenuPermission('ShortVideoCategoryManagement') || hasMenuPermission('ShortVideoPriceTierManagement') || hasMenuPermission('ShortVideoCfgManagement') || hasMenuPermission('ShortVideoWatchManagement')"
+            v-if="hasMenuPermission('ShortVideoManagement') || hasMenuPermission('ShortVideoCategoryManagement') || hasMenuPermission('ShortVideoPriceTierManagement') || hasMenuPermission('ShortVideoCfgManagement')"
             index="/shortvideo">
           <template #title>
             <el-icon>
@@ -411,12 +423,6 @@
               <Setting/>
             </el-icon>
             <span>{{ t('menu.ShortVideoCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('ShortVideoWatchManagement')" index="/shortvideo/short-video-watch-list">
-            <el-icon>
-              <View/>
-            </el-icon>
-            <span>{{ t('menu.ShortVideoWatchManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu

@@ -137,6 +137,10 @@
             <SettlementLogPanel :active="activeTab === 'settlementLog'" :anchor-id="anchorId"/>
           </el-tab-pane>
 
+          <el-tab-pane v-if="canViewShortVideo" :label="t('pages.anchorList.tabShortVideo')" lazy name="shortVideo">
+            <ShortVideoPanel :active="activeTab === 'shortVideo'" :user-id="anchorId"/>
+          </el-tab-pane>
+
           <el-tab-pane :label="t('pages.anchorList.tabIncomeArchive')" lazy name="incomeArchive">
             <el-table v-if="detail.incomeArchives?.length" :data="detail.incomeArchives" style="width:100%">
               <el-table-column :label="t('pages.anchorList.archiveId')" min-width="180" prop="id"/>
@@ -187,11 +191,15 @@ import IncomePanel from './anchor-detail-income-panel.vue'
 import DailyLivePanel from './anchor-detail-daily-live-panel.vue'
 import LiveRecordPanel from './anchor-detail-live-record-panel.vue'
 import SettlementLogPanel from './anchor-detail-settlement-log-panel.vue'
+import ShortVideoPanel from './anchor-detail-short-video-panel.vue'
 import type {AnchorDetail} from '@/types/api'
 import {formatAmount, formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
+import {usePagePermission} from '@/composables/usePagePermission'
 
 const {t} = useI18n()
+const {can} = usePagePermission('AnchorDetail')
+const canViewShortVideo = computed(() => can('shortVideo'))
 const route = useRoute()
 const router = useRouter()
 
@@ -215,6 +223,7 @@ const ANCHOR_DETAIL_TAB_NAMES = new Set([
   'dailyEffectiveLive',
   'liveRecord',
   'settlementLog',
+  'shortVideo',
   'incomeArchive',
 ])
 

@@ -58,6 +58,7 @@ import {anchorSalaryCfgListMessages} from './anchor-salary-cfg-list'
 import {liveRevenueShareCfgMessages} from './live-revenue-share-cfg'
 import {anchorIncomeSettlementLogListMessages} from './anchor-income-settlement-log-list'
 import {guildIncomeSettlementLogListMessages} from './guild-income-settlement-log-list'
+import {guildTransferListMessages} from './guild-transfer-list'
 import {appTokenMessages} from './app-token'
 import {serverRuntimeCfgMessages} from './server-runtime-cfg'
 import {preloadCfgMessages} from './preload-cfg'
@@ -132,6 +133,7 @@ const pageMessageBuilders = [
   ['liveRevenueShareCfg', liveRevenueShareCfgMessages],
   ['anchorIncomeSettlementLogList', anchorIncomeSettlementLogListMessages],
   ['guildIncomeSettlementLogList', guildIncomeSettlementLogListMessages],
+  ['guildTransferList', guildTransferListMessages],
   ['appToken', appTokenMessages],
   ['preloadCfg', preloadCfgMessages],
   ['serverRuntimeCfg', serverRuntimeCfgMessages],

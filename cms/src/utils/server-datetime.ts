@@ -88,6 +88,18 @@ export function getServerWeekDateRange(ref: Date = new Date()): { start: string;
     }
 }
 
+/** UTC 上周一至上周日（YYYY-MM-DD） */
+export function getServerLastWeekDateRange(ref: Date = new Date()): { start: string; end: string } {
+    const thisWeek = getServerWeekDateRange(ref)
+    const thisStartMs = Date.parse(`${thisWeek.start}T00:00:00.000Z`)
+    const lastStartMs = thisStartMs - 7 * 86400000
+    const lastEndMs = lastStartMs + 6 * 86400000
+    return {
+        start: formatUtcDateOnlyFromMs(lastStartMs),
+        end: formatUtcDateOnlyFromMs(lastEndMs),
+    }
+}
+
 /** 当前 UTC 时间 + N 天，用于默认表单值 */
 export function formatServerNowPlusDays(days: number): string {
     return formatUtcDateTimeParts(new Date(Date.now() + days * 86400000))

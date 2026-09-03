@@ -136,6 +136,9 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'exportGameBetLog', label: '导出游戏消费记录'},
         {key: 'gameWinLog', label: '查看游戏奖励记录'},
         {key: 'exportGameWinLog', label: '导出游戏奖励记录'},
+        {key: 'shortVideo', label: '查看短视频作品'},
+        {key: 'shortVideoWatch', label: '查看短视频观看记录'},
+        {key: 'shortVideoPurchase', label: '查看短视频购买记录'},
         {key: 'shortVideoAuthorSettlementLog', label: '查看短视频作者结算日志'},
         {key: 'exportShortVideoAuthorSettlementLog', label: '导出短视频作者结算日志'},
     ],
@@ -208,6 +211,12 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'batchSetSeniorAnchor', label: '导入高级主播'},
         {key: 'transferInfo', label: '转账信息'},
     ],
+    GuildTransferManagement: [
+        BTN.view,
+        BTN.search,
+        {key: 'batchApprove', label: '批量审核'},
+        {key: 'batchTransfer', label: '批量转账'},
+    ],
     AnchorDetail: [
         BTN.view,
         {key: 'dailyEffectiveLive', label: '查看每日流水'},
@@ -217,6 +226,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'liveRecordRevenue', label: '查看直播记录收益流水'},
         {key: 'settlementLog', label: '查看结算流水'},
         {key: 'exportSettlementLog', label: '导出结算流水'},
+        {key: 'shortVideo', label: '查看短视频'},
     ],
     GuildDetail: [
         BTN.view,

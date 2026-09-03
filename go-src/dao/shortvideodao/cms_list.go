@@ -14,6 +14,7 @@ type WatchListFilter struct {
 	EndTime   int64
 	PageIndex int
 	PageSize  int
+	OnlyPaid  bool
 }
 
 func GetList(f *WatchListFilter) (int, []*entity.ShortVideoWatch) {
@@ -34,18 +35,27 @@ func GetList(f *WatchListFilter) (int, []*entity.ShortVideoWatch) {
 	if f.UserId > 0 {
 		m = m.Where(string(entity.ShortVideoWatchUserId)+" = ?", f.UserId)
 	}
+	if f.OnlyPaid {
+		m = m.Where(string(entity.ShortVideoWatchPaidTime) + " IS NOT NULL")
+	}
+	timeCol := "updated_at"
+	orderBy := "updated_at desc, id desc"
+	if f.OnlyPaid {
+		timeCol = string(entity.ShortVideoWatchPaidTime)
+		orderBy = string(entity.ShortVideoWatchPaidTime) + " desc, id desc"
+	}
 	if f.StartTime > 0 {
-		m = m.Where("updated_at >= ?", time.Unix(f.StartTime, 0))
+		m = m.Where(timeCol+" >= ?", time.Unix(f.StartTime, 0))
 	}
 	if f.EndTime > 0 {
-		m = m.Where("updated_at <= ?", time.Unix(f.EndTime, 0))
+		m = m.Where(timeCol+" <= ?", time.Unix(f.EndTime, 0))
 	}
 
 	total, err := m.Clone().Count()
 	if err != nil {
 		return 0, list
 	}
-	_ = m.Clone().Order("updated_at desc, id desc").
+	_ = m.Clone().Order(orderBy).
 		Limit(f.PageSize).Offset((f.PageIndex - 1) * f.PageSize).
 		Scan(&list)
 	return total, list

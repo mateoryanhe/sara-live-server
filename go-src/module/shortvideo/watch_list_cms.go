@@ -16,6 +16,7 @@ func GetShortVideoWatchList(_ context.Context, req *shortvideodto.ShortVideoWatc
 		EndTime:   req.EndTime,
 		PageIndex: req.PageIndex,
 		PageSize:  req.PageSize,
+		OnlyPaid:  req.OnlyPaid,
 	})
 
 	list := make([]*shortvideodto.ShortVideoWatchListItem, 0, len(rows))
@@ -38,6 +39,7 @@ func GetShortVideoWatchList(_ context.Context, req *shortvideodto.ShortVideoWatc
 		}
 		if video := shortvideodao.GetShortVideoById(row.VideoId); video != nil {
 			item.VideoTitle = video.Title
+			item.PayDiamond = video.PayDiamond
 		}
 		list = append(list, item)
 	}

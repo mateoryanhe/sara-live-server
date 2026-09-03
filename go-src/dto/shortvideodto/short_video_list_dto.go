@@ -10,6 +10,7 @@ type ShortVideoListReq struct {
 	httpserver.CMSQueryReq
 	Title          string `json:"title" dc:"标题(模糊匹配)"`
 	AuthorNickname string `json:"authorNickname" dc:"作者昵称(模糊匹配)"`
+	AuthorId       string `json:"authorId" dc:"作者用户ID(精确匹配,可选)"`
 	StatusFilter   int    `json:"statusFilter" dc:"状态过滤(0=全部, 1=只看下架, 2=只看上架)"`
 	SortField      string `json:"sortField" dc:"排序字段(空=创建时间倒序, viewCount=观看人数升序, totalDiamondIncome=钻石收益升序)"`
 }

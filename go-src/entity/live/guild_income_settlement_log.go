@@ -14,11 +14,19 @@ const (
 )
 
 const (
-	GuildIncomeSettlementLogGuildId               db.TbCol = "guild_id"
-	GuildIncomeSettlementLogSettlementSalary      db.TbCol = "settlement_salary"
+	GuildIncomeSettlementLogGuildId                  db.TbCol = "guild_id"
+	GuildIncomeSettlementLogSettlementSalary         db.TbCol = "settlement_salary"
 	GuildIncomeSettlementLogSettlementShareAmount    db.TbCol = "settlement_share_amount"
 	GuildIncomeSettlementLogSettlementShareAmountUsd db.TbCol = "settlement_share_amount_usd"
 	GuildIncomeSettlementLogGuildSharePercent        db.TbCol = "guild_share_percent"
+	GuildIncomeSettlementLogStatus                   db.TbCol = "status"
+	GuildIncomeSettlementLogTransferAt               db.TbCol = "transfer_at"
+)
+
+const (
+	GuildIncomeSettlementStatusPending   uint8 = 0 // 未审核
+	GuildIncomeSettlementStatusApproved  uint8 = 1 // 审核通过
+	GuildIncomeSettlementStatusTransferred uint8 = 2 // 转账成功
 )
 
 // GuildIncomeSettlementLog 工会周结算成功日志(每次结算一条,历史留存)
@@ -26,11 +34,13 @@ type GuildIncomeSettlementLog struct {
 	migrate.OneModel
 	GuildId uint64 `gorm:"index;default:0;comment:工会ID" json:"guildId"`
 	LiveRoomIncomeAmounts
-	SettlementSalary          float64 `gorm:"type:decimal(16,4);default:0;comment:结算薪资" json:"settlementSalary"`
-	SettlementShareAmount     float64 `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额" json:"settlementShareAmount"`
-	SettlementShareAmountUsd  float64 `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额(USD)" json:"settlementShareAmountUsd"`
-	SettlementReceivableUsd   float64 `gorm:"type:decimal(16,4);default:0;comment:结算可收金额(USD)=流水分佣+开播薪资" json:"settlementReceivableUsd"`
-	GuildSharePercent         float64 `gorm:"type:decimal(6,2);default:0;comment:本次结算工会分佣比例(%)" json:"guildSharePercent"`
+	SettlementSalary         float64    `gorm:"type:decimal(16,4);default:0;comment:结算薪资" json:"settlementSalary"`
+	SettlementShareAmount    float64    `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额" json:"settlementShareAmount"`
+	SettlementShareAmountUsd float64    `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额(USD)" json:"settlementShareAmountUsd"`
+	SettlementReceivableUsd  float64    `gorm:"type:decimal(16,4);default:0;comment:结算可收金额(USD)=流水分佣+开播薪资" json:"settlementReceivableUsd"`
+	GuildSharePercent        float64    `gorm:"type:decimal(6,2);default:0;comment:本次结算工会分佣比例(%)" json:"guildSharePercent"`
+	Status                   uint8      `gorm:"index;default:0;comment:状态(0未审核1审核通过2转账成功)" json:"status"`
+	TransferAt               *time.Time `gorm:"comment:转账时间" json:"transferAt"`
 }
 
 // NewGuildIncomeSettlementLog 新建一条工会结算日志并入库
@@ -50,12 +60,36 @@ func NewGuildIncomeSettlementLog(guildId uint64, a *LiveRoomIncomeAmounts, salar
 	ret.SettlementShareAmountUsd = shareAmountUsd
 	ret.SettlementReceivableUsd = receivableUsd
 	ret.GuildSharePercent = guildSharePercent
+	ret.Status = GuildIncomeSettlementStatusPending
 
 	syndb.AddData(TbGuildIncomeSettlementLog, db.CreatedAtName, &syndb.ColData{IdVal: ret.ID, ColVal: now})
 	syndb.AddData(TbGuildIncomeSettlementLog, db.UpdatedAtName, &syndb.ColData{IdVal: ret.ID, ColVal: now})
 	syndb.AddData(TbGuildIncomeSettlementLog, GuildIncomeSettlementLogGuildId, &syndb.ColData{IdVal: ret.ID, ColVal: guildId})
 	writeGuildIncomeSettlementLogAmounts(ret.ID, a, salary, shareAmount, shareAmountUsd, receivableUsd, guildSharePercent)
+	ret.SetStatus(GuildIncomeSettlementStatusPending)
 	return ret
+}
+
+func (r *GuildIncomeSettlementLog) SetStatus(v uint8) {
+	if r == nil {
+		return
+	}
+	r.Status = v
+	now := time.Now()
+	r.UpdatedAt = now
+	syndb.AddData(TbGuildIncomeSettlementLog, GuildIncomeSettlementLogStatus, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGuildIncomeSettlementLog, db.UpdatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: now})
+}
+
+func (r *GuildIncomeSettlementLog) SetTransferAt(v *time.Time) {
+	if r == nil {
+		return
+	}
+	r.TransferAt = v
+	now := time.Now()
+	r.UpdatedAt = now
+	syndb.AddData(TbGuildIncomeSettlementLog, GuildIncomeSettlementLogTransferAt, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(TbGuildIncomeSettlementLog, db.UpdatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: now})
 }
 
 func initGuildIncomeSettlementLog() {
@@ -68,5 +102,7 @@ func initGuildIncomeSettlementLog() {
 	syndb.RegQuick(TbGuildIncomeSettlementLog, GuildIncomeSettlementLogSettlementShareAmountUsd)
 	syndb.RegQuick(TbGuildIncomeSettlementLog, LiveRoomIncomeSettlementReceivableUsd)
 	syndb.RegQuick(TbGuildIncomeSettlementLog, GuildIncomeSettlementLogGuildSharePercent)
+	syndb.RegQuick(TbGuildIncomeSettlementLog, GuildIncomeSettlementLogStatus)
+	syndb.RegQuick(TbGuildIncomeSettlementLog, GuildIncomeSettlementLogTransferAt)
 	migrate.AutoMigrate(&GuildIncomeSettlementLog{})
 }

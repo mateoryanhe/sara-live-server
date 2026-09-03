@@ -36,6 +36,9 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'UserDetail:exportGameBetLog': '/cmsExport/submitJob',
     'UserDetail:gameWinLog': '/gameWinLog/cmsGameWinLogList',
     'UserDetail:exportGameWinLog': '/cmsExport/submitJob',
+    'UserDetail:shortVideo': '/shortVideo/shortVideoList',
+    'UserDetail:shortVideoWatch': '/shortVideo/shortVideoWatchList',
+    'UserDetail:shortVideoPurchase': '/shortVideo/shortVideoWatchList',
     'UserDetail:shortVideoAuthorSettlementLog': '/shortVideo/cmsAuthorSettlementLogList',
     'UserDetail:exportShortVideoAuthorSettlementLog': '/cmsExport/submitJob',
 
@@ -67,6 +70,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'AnchorDetail:liveRecordRevenue': '/liveRevenueLog/cmsLiveRevenueLogList',
     'AnchorDetail:settlementLog': '/anchorIncomeSettlementLog/cmsAnchorIncomeSettlementLogList',
     'AnchorDetail:exportSettlementLog': '/cmsExport/submitJob',
+    'AnchorDetail:shortVideo': '/shortVideo/shortVideoList',
 
     LiveRoomRecycleBinManagement: '/account/getOffShelfLiveRoomList',
     'LiveRoomRecycleBinManagement:view': '/account/getOffShelfLiveRoomList',
@@ -164,6 +168,11 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GuildManagement:batchSetAnchor': '/guild/importGuildAnchors',
     'GuildManagement:batchSetSeniorAnchor': '/guild/importGuildAnchors',
     'GuildManagement:transferInfo': '/guild/saveGuildTransferInfo',
+    GuildTransferManagement: '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
+    'GuildTransferManagement:view': '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
+    'GuildTransferManagement:search': '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
+    'GuildTransferManagement:batchApprove': '/guildIncomeSettlementLog/cmsBatchApproveGuildSettlement',
+    'GuildTransferManagement:batchTransfer': '/guildIncomeSettlementLog/cmsBatchTransferGuildSettlement',
 
     GuildCMSUserManagement: '/cmsuser/cmsUserList',
     'GuildCMSUserManagement:view': '/cmsuser/cmsUserList',

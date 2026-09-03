@@ -178,6 +178,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                         {pageName: 'GuildAnchorImportResult'},
                     ],
                 }),
+                page('GuildTransferManagement'),
                 page('GuildCMSUserManagement', {buttonGroups: GUILD_CMS_USER_BUTTON_GROUPS}),
                 page('GuildAnchorDailyLiveManagement', {buttonGroups: GUILD_ANCHOR_DAILY_LIVE_BUTTON_GROUPS}),
                 page('PlatformAnchorList'),
@@ -225,6 +226,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('LiveDailyEffectiveLiveList'),
                 page('LiveWeeklyUnsettledLiveList'),
                 page('VideoCallLogList'),
+                page('ShortVideoWatchManagement'),
             ]),
             group('log-user', 'menu.UserLogGroup', [
                 page('GoldCurrencyLogList'),
@@ -249,7 +251,6 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             page('ShortVideoCategoryManagement'),
             page('ShortVideoPriceTierManagement'),
             page('ShortVideoCfgManagement'),
-            page('ShortVideoWatchManagement'),
         ],
     },
     {

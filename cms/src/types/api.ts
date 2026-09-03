@@ -1300,6 +1300,7 @@ export interface ShortVideo {
 export interface ShortVideoQuery extends PageQuery {
     title?: string
     authorNickname?: string
+    authorId?: string
     statusFilter?: number
     sortField?: '' | 'viewCount' | 'totalDiamondIncome'
 }
@@ -1310,6 +1311,7 @@ export interface ShortVideoWatchRecord {
     nickname: string
     videoId: string
     videoTitle: string
+    payDiamond?: number
     paidTime: string
     createdAt: string
     updatedAt: string
@@ -1319,6 +1321,7 @@ export interface ShortVideoWatchQuery extends PageQuery {
     userId?: string
     startTime?: number
     endTime?: number
+    onlyPaid?: boolean
 }
 
 export interface ShortVideoAuthorSettlementLogQuery extends PageQuery {
@@ -1495,12 +1498,22 @@ export interface GuildIncomeSettlementLogQuery extends PageQuery {
     guildId?: string
     startTime?: number
     endTime?: number
+    status?: number
+    orderByReceivableUsdDesc?: boolean
+    includeTransferInfo?: boolean
 }
 
 export interface GuildIncomeSettlementLogItem extends IncomeSettlementLogAmounts {
     id: string
     guildId: string
     guildName?: string
+    status?: number
+    transferAt?: string | null
+    transferCurrency?: string
+    transferPayeeName?: string
+    transferBankName?: string
+    transferAccountNo?: string
+    transferBankCode?: string
     createdAt?: string | null
 }
 

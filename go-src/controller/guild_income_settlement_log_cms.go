@@ -18,3 +18,11 @@ func initGuildIncomeSettlementLogCMSController() {
 func (c *GuildIncomeSettlementLogCMSController) CMSGuildIncomeSettlementLogList(ctx context.Context, req *incomesettlementdto.CMSGuildIncomeSettlementLogListReq) (*httpserver.CMSQueryResp, error) {
 	return incomesettlement.GetGuildCMSList(ctx, req)
 }
+
+func (c *GuildIncomeSettlementLogCMSController) CMSBatchApproveGuildSettlement(ctx context.Context, req *incomesettlementdto.CMSBatchApproveGuildSettlementReq) (*incomesettlementdto.CMSBatchApproveGuildSettlementRes, error) {
+	return incomesettlement.BatchApproveGuildSettlement(ctx, req)
+}
+
+func (c *GuildIncomeSettlementLogCMSController) CMSBatchTransferGuildSettlement(ctx context.Context, req *incomesettlementdto.CMSBatchTransferGuildSettlementReq) (*incomesettlementdto.CMSBatchTransferGuildSettlementRes, error) {
+	return incomesettlement.BatchTransferGuildSettlement(ctx, req)
+}

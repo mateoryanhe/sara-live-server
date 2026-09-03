@@ -144,9 +144,13 @@ func GetOnShelfShortVideos() []*entity.ShortVideo {
 func GetShortVideoList(req *shortvideodto.ShortVideoListReq) (int, []*shortvideodto.ShortVideoListRes) {
 	titleKeyword := strings.ToLower(strings.TrimSpace(req.Title))
 	authorKeyword := strings.ToLower(strings.TrimSpace(req.AuthorNickname))
+	authorIdFilter := parseUint64Filter(req.AuthorId)
 	filtered := make([]*entity.ShortVideo, 0)
 	for _, video := range shortVideoCacheMgr.Values() {
 		if video == nil {
+			continue
+		}
+		if authorIdFilter > 0 && video.AuthorId != authorIdFilter {
 			continue
 		}
 		if titleKeyword != "" && !strings.Contains(strings.ToLower(video.Title), titleKeyword) {
@@ -301,6 +305,17 @@ func shortVideoListPageRange(total, pageIndex, pageSize int) (int, int) {
 		end = total
 	}
 	return start, end
+}
+
+func parseUint64Filter(val string) uint64 {
+	if val == "" {
+		return 0
+	}
+	n, err := strconv.ParseUint(strings.TrimSpace(val), 10, 64)
+	if err != nil {
+		return 0
+	}
+	return n
 }
 
 func formatShortVideoTime(t time.Time) string {
