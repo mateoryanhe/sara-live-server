@@ -4,9 +4,9 @@ import "github.com/gogf/gf/v2/frame/g"
 
 type CMSResourceMetricMemoryTrendReq struct {
 	g.Meta    `path:"/getResourceMetricMemoryTrend" method:"post" summary:"获取内存资源趋势" tags:"资源监控"`
-	StartTime string `json:"startTime" dc:"开始时间 YYYY-MM-DD HH:mm:ss,空则默认最近3天"`
+	StartTime string `json:"startTime" dc:"开始时间 YYYY-MM-DD HH:mm:ss,空则默认最近3天(粗采样)"`
 	EndTime   string `json:"endTime" dc:"结束时间 YYYY-MM-DD HH:mm:ss,空则默认当前时间"`
-	Limit     int    `json:"limit" dc:"最多返回条数,默认1000,最大1000"`
+	Limit     int    `json:"limit" dc:"最多返回条数,默认10000,最大10000"`
 }
 
 type CMSResourceMetricHeapTrendReq struct {

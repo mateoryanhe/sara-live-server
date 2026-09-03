@@ -18,8 +18,25 @@ type trendQuery struct {
 	Limit     int
 }
 
+// trendPoint 细/粗采样统一视图,供 CMS 映射
+type trendPoint struct {
+	RecordedAt          time.Time
+	ProcMemMb           float64
+	ProcHeapAllocMb     float64
+	ProcHeapInuseMb     float64
+	ProcHeapSysMb       float64
+	ProcHeapUsedPercent float64
+	ProcHeapIdlePercent float64
+	ProcCpuPercent      float64
+	SysMemUsedMb        float64
+	SysMemTotalMb       float64
+	SysMemUsedPercent   float64
+	SysCpuPercent       float64
+	OnlineCount         uint64
+}
+
 func GetCMSResourceMetricMemoryTrend(_ context.Context, req *resourcemetricdto.CMSResourceMetricMemoryTrendReq) (*resourcemetricdto.CMSResourceMetricMemoryTrendRes, error) {
-	rows := listTrendRows(toTrendQuery(req.StartTime, req.EndTime, req.Limit))
+	rows := listTrendPoints(toTrendQuery(req.StartTime, req.EndTime, req.Limit))
 	points := make([]*resourcemetricdto.CMSResourceMetricMemoryPoint, 0, len(rows))
 	for _, row := range rows {
 		if row == nil {
@@ -37,7 +54,7 @@ func GetCMSResourceMetricMemoryTrend(_ context.Context, req *resourcemetricdto.C
 }
 
 func GetCMSResourceMetricHeapTrend(_ context.Context, req *resourcemetricdto.CMSResourceMetricHeapTrendReq) (*resourcemetricdto.CMSResourceMetricHeapTrendRes, error) {
-	rows := listTrendRows(toTrendQuery(req.StartTime, req.EndTime, req.Limit))
+	rows := listTrendPoints(toTrendQuery(req.StartTime, req.EndTime, req.Limit))
 	points := make([]*resourcemetricdto.CMSResourceMetricHeapPoint, 0, len(rows))
 	for _, row := range rows {
 		if row == nil {
@@ -54,7 +71,7 @@ func GetCMSResourceMetricHeapTrend(_ context.Context, req *resourcemetricdto.CMS
 }
 
 func GetCMSResourceMetricRatioTrend(_ context.Context, req *resourcemetricdto.CMSResourceMetricRatioTrendReq) (*resourcemetricdto.CMSResourceMetricRatioTrendRes, error) {
-	rows := listTrendRows(toTrendQuery(req.StartTime, req.EndTime, req.Limit))
+	rows := listTrendPoints(toTrendQuery(req.StartTime, req.EndTime, req.Limit))
 	points := make([]*resourcemetricdto.CMSResourceMetricRatioPoint, 0, len(rows))
 	for _, row := range rows {
 		if row == nil {
@@ -70,7 +87,7 @@ func GetCMSResourceMetricRatioTrend(_ context.Context, req *resourcemetricdto.CM
 }
 
 func GetCMSResourceMetricCpuTrend(_ context.Context, req *resourcemetricdto.CMSResourceMetricCpuTrendReq) (*resourcemetricdto.CMSResourceMetricCpuTrendRes, error) {
-	rows := listTrendRows(toTrendQuery(req.StartTime, req.EndTime, req.Limit))
+	rows := listTrendPoints(toTrendQuery(req.StartTime, req.EndTime, req.Limit))
 	points := make([]*resourcemetricdto.CMSResourceMetricCpuPoint, 0, len(rows))
 	for _, row := range rows {
 		if row == nil {
@@ -86,7 +103,7 @@ func GetCMSResourceMetricCpuTrend(_ context.Context, req *resourcemetricdto.CMSR
 }
 
 func GetCMSResourceMetricOnlineTrend(_ context.Context, req *resourcemetricdto.CMSResourceMetricOnlineTrendReq) (*resourcemetricdto.CMSResourceMetricOnlineTrendRes, error) {
-	rows := listTrendRows(toTrendQuery(req.StartTime, req.EndTime, req.Limit))
+	rows := listTrendPoints(toTrendQuery(req.StartTime, req.EndTime, req.Limit))
 	points := make([]*resourcemetricdto.CMSResourceMetricOnlinePoint, 0, len(rows))
 	for _, row := range rows {
 		if row == nil {
@@ -104,16 +121,82 @@ func toTrendQuery(startTime, endTime string, limit int) trendQuery {
 	return trendQuery{StartTime: startTime, EndTime: endTime, Limit: limit}
 }
 
-func listTrendRows(q trendQuery) []*entity.SysResourceMetric {
+func listTrendPoints(q trendQuery) []*trendPoint {
 	start, end := resolveTrendTimeRange(q)
 	limit := resolveTrendLimit(q.Limit)
-	return resourcemetricdao.ListByTimeRange(start, end, limit)
+	if useFineTrend(start, end) {
+		return fineToTrendPoints(resourcemetricdao.ListFineByTimeRange(start, end, limit))
+	}
+	return aggToTrendPoints(resourcemetricdao.ListAggByTimeRange(start, end, limit))
+}
+
+// useFineTrend 查询窗口完全落在细采样保留期内时用细数据,否则用粗数据
+func useFineTrend(start, end time.Time) bool {
+	now := time.Now()
+	fineStart := now.Add(-FineRetention)
+	if start.Before(fineStart) {
+		return false
+	}
+	if end.Before(fineStart) {
+		return false
+	}
+	return true
+}
+
+func fineToTrendPoints(rows []*entity.SysResourceMetric) []*trendPoint {
+	list := make([]*trendPoint, 0, len(rows))
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		list = append(list, &trendPoint{
+			RecordedAt:          row.RecordedAt,
+			ProcMemMb:           row.ProcMemMb,
+			ProcHeapAllocMb:     row.ProcHeapAllocMb,
+			ProcHeapInuseMb:     row.ProcHeapInuseMb,
+			ProcHeapSysMb:       row.ProcHeapSysMb,
+			ProcHeapUsedPercent: row.ProcHeapUsedPercent,
+			ProcHeapIdlePercent: row.ProcHeapIdlePercent,
+			ProcCpuPercent:      row.ProcCpuPercent,
+			SysMemUsedMb:        row.SysMemUsedMb,
+			SysMemTotalMb:       row.SysMemTotalMb,
+			SysMemUsedPercent:   row.SysMemUsedPercent,
+			SysCpuPercent:       row.SysCpuPercent,
+			OnlineCount:         row.OnlineCount,
+		})
+	}
+	return list
+}
+
+func aggToTrendPoints(rows []*entity.SysResourceMetricAgg) []*trendPoint {
+	list := make([]*trendPoint, 0, len(rows))
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		list = append(list, &trendPoint{
+			RecordedAt:          row.RecordedAt,
+			ProcMemMb:           row.ProcMemMb,
+			ProcHeapAllocMb:     row.ProcHeapAllocMb,
+			ProcHeapInuseMb:     row.ProcHeapInuseMb,
+			ProcHeapSysMb:       row.ProcHeapSysMb,
+			ProcHeapUsedPercent: row.ProcHeapUsedPercent,
+			ProcHeapIdlePercent: row.ProcHeapIdlePercent,
+			ProcCpuPercent:      row.ProcCpuPercent,
+			SysMemUsedMb:        row.SysMemUsedMb,
+			SysMemTotalMb:       row.SysMemTotalMb,
+			SysMemUsedPercent:   row.SysMemUsedPercent,
+			SysCpuPercent:       row.SysCpuPercent,
+			OnlineCount:         row.OnlineCount,
+		})
+	}
+	return list
 }
 
 func resolveTrendTimeRange(q trendQuery) (start, end time.Time) {
 	now := time.Now()
 	end = now
-	start = now.Add(-MetricRetention)
+	start = now.Add(-CoarseRetention)
 	if t, ok := parseTrendTime(q.EndTime); ok {
 		end = t
 	}
@@ -140,10 +223,10 @@ func parseTrendTime(raw string) (time.Time, bool) {
 
 func resolveTrendLimit(limit int) int {
 	if limit <= 0 {
-		return 1000
+		return maxTrendPoints
 	}
-	if limit > 1000 {
-		return 1000
+	if limit > maxTrendPoints {
+		return maxTrendPoints
 	}
 	return limit
 }

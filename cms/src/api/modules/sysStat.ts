@@ -6,7 +6,7 @@ import type {
     UserStatTrend,
 } from '@/types/api'
 
-export const RESOURCE_METRIC_MAX_POINTS = 1000
+export const RESOURCE_METRIC_MAX_POINTS = 10000
 
 const buildResourceMetricQuery = (params: ResourceMetricTrendQuery = {}) => ({
     startTime: params.startTime || '',

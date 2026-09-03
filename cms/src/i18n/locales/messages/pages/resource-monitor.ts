@@ -1,7 +1,7 @@
 import {definePageMessages} from './_define'
 
 const zh = {
-  searchTip: '每10分钟采样，每个模块单次最多展示 {max} 条',
+  searchTip: '细采样10秒保留24小时；粗采样5分钟保留3天。查询窗口在24小时内用细数据，否则用粗数据。单次最多 {max} 点',
   tabMemory: '内存',
   tabHeap: '堆内存',
   tabRatio: '比例',
@@ -46,7 +46,7 @@ const zh = {
 }
 
 const en = {
-  searchTip: 'Sampled every 10 minutes; up to {max} points per module per query',
+  searchTip: 'Fine: every 10s for 24h; coarse: every 5min for 3d. Ranges within 24h use fine data, else coarse. Up to {max} points',
   tabMemory: 'Memory',
   tabHeap: 'Heap',
   tabRatio: 'Ratio',
@@ -91,7 +91,7 @@ const en = {
 }
 
 const es = {
-  searchTip: 'Muestreo cada 10 min; hasta {max} puntos por módulo',
+  searchTip: 'Fino: cada 10s / 24h; grueso: cada 5min / 3d. ≤24h usa fino, si no grueso. Hasta {max} puntos',
   tabMemory: 'Memoria',
   tabHeap: 'Heap',
   tabRatio: 'Proporción',
@@ -136,7 +136,7 @@ const es = {
 }
 
 const pt = {
-  searchTip: 'Amostragem a cada 10 min; até {max} pontos por módulo',
+  searchTip: 'Fino: a cada 10s / 24h; grosso: a cada 5min / 3d. ≤24h usa fino, senão grosso. Até {max} pontos',
   tabMemory: 'Memória',
   tabHeap: 'Heap',
   tabRatio: 'Proporção',
@@ -181,7 +181,7 @@ const pt = {
 }
 
 const hi = {
-  searchTip: 'हर 10 मिनट पर नमूना; प्रति मॉड्यूल अधिकतम {max} बिंदु',
+  searchTip: 'सूक्ष्म: हर 10से / 24घं; मोटा: हर 5मि / 3दिन। ≤24घं सूक्ष्म, अन्यथा मोटा। अधिकतम {max} बिंदु',
   tabMemory: 'मेमोरी',
   tabHeap: 'Heap',
   tabRatio: 'अनुपात',
@@ -226,7 +226,7 @@ const hi = {
 }
 
 const id = {
-  searchTip: 'Sampling setiap 10 menit; maks {max} titik per modul',
+  searchTip: 'Halus: tiap 10d / 24j; kasar: tiap 5m / 3h. ≤24j pakai halus, selain itu kasar. Maks {max} titik',
   tabMemory: 'Memori',
   tabHeap: 'Heap',
   tabRatio: 'Rasio',

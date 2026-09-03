@@ -7,4 +7,5 @@ func Init() {
 	initDataSyncCfg()
 	initH5LiveDeployCfg()
 	initSysResourceMetric()
+	initSysResourceMetricAgg()
 }
