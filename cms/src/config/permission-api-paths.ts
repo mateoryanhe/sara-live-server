@@ -73,6 +73,11 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'BotAnchorManagement:create': '/botAnchor/createBotAnchor',
     'BotAnchorManagement:edit': '/botAnchor/updateBotAnchor',
     'BotAnchorManagement:delete': '/botAnchor/setBotAnchorStatus',
+    'BotAnchorManagement:startLive': '/botAnchor/startBotAnchorLive',
+    'BotAnchorManagement:stopLive': '/botAnchor/stopBotAnchorLive',
+    'BotAnchorManagement:batchStartLive': '/botAnchor/batchStartBotAnchorLive',
+    'BotAnchorManagement:batchStopLive': '/botAnchor/batchStopBotAnchorLive',
+    'BotAnchorManagement:batchDisable': '/botAnchor/batchDisableBotAnchor',
 
     BanUser: '/account/ban',
     'BanUser:view': '/account/ban',

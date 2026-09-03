@@ -145,6 +145,18 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'setAnchorType', label: '设置主播类型'},
     ],
     LiveRoomRecycleBinManagement: [BTN.view, BTN.search, {key: 'onShelf', label: '上架'}],
+    BotAnchorManagement: [
+        BTN.view,
+        BTN.search,
+        BTN.create,
+        BTN.edit,
+        BTN.delete,
+        {key: 'startLive', label: '开播'},
+        {key: 'stopLive', label: '下播'},
+        {key: 'batchStartLive', label: '批量开播'},
+        {key: 'batchStopLive', label: '批量下播'},
+        {key: 'batchDisable', label: '批量停用'},
+    ],
     RoleManagement: [
         BTN.view,
         BTN.search,

@@ -131,7 +131,13 @@ type BatchStopBotAnchorLiveReq struct {
 	IDs    []uint64 `json:"ids,string" v:"required|min-length:1#请至少选择一个机器人主播"`
 }
 
-// BatchBotAnchorLiveRes CMS批量开播/下播响应
+// BatchDisableBotAnchorReq CMS批量停用机器人主播
+type BatchDisableBotAnchorReq struct {
+	g.Meta `path:"/batchDisableBotAnchor" method:"post" summary:"批量停用机器人主播" tags:"机器人主播"`
+	IDs    []uint64 `json:"ids,string" v:"required|min-length:1#请至少选择一个机器人主播"`
+}
+
+// BatchBotAnchorLiveRes CMS批量开播/下播/停用响应
 type BatchBotAnchorLiveRes struct {
 	SuccessCount int      `json:"successCount"`
 	FailCount    int      `json:"failCount"`

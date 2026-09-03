@@ -615,6 +615,10 @@ export interface BatchStopBotAnchorLiveReq {
     ids: string[]
 }
 
+export interface BatchDisableBotAnchorReq {
+    ids: string[]
+}
+
 export interface BatchBotAnchorLiveRes {
     successCount: number
     failCount: number

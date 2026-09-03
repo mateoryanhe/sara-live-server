@@ -8,8 +8,9 @@
       </template>
 
       <div class="table-header">
-        <el-button type="primary" @click="handleAdd">{{ t('pages.botAnchorList.addBotAnchor') }}</el-button>
+        <el-button v-if="can('create')" type="primary" @click="handleAdd">{{ t('pages.botAnchorList.addBotAnchor') }}</el-button>
         <el-button
+            v-if="can('batchStartLive')"
             :disabled="!canBatchStartLive"
             :loading="batchOperating"
             type="success"
@@ -18,12 +19,22 @@
           {{ t('pages.botAnchorList.batchStartLive') }}
         </el-button>
         <el-button
+            v-if="can('batchStopLive')"
             :disabled="!canBatchStopLive"
             :loading="batchOperating"
             type="danger"
             @click="handleBatchStopLive"
         >
           {{ t('pages.botAnchorList.batchStopLive') }}
+        </el-button>
+        <el-button
+            v-if="can('batchDisable')"
+            :disabled="!canBatchDisable"
+            :loading="batchOperating"
+            type="warning"
+            @click="handleBatchDisable"
+        >
+          {{ t('pages.botAnchorList.batchDisable') }}
         </el-button>
         <span v-if="selectedRows.length" class="selection-tip">
           {{ t('common.selectedCount', {count: selectedRows.length}) }}
@@ -145,9 +156,9 @@
         </el-table-column>
         <el-table-column fixed="right" :label="t('common.actions')" width="280">
           <template #default="{ row }">
-            <el-button link type="primary" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
+            <el-button v-if="can('edit')" link type="primary" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
             <el-button
-                v-if="row.botAnchorStatus === 1 && row.liveStatus !== 1"
+                v-if="can('startLive') && row.botAnchorStatus === 1 && row.liveStatus !== 1"
                 link
                 type="success"
                 @click="handleStartLive(row)"
@@ -155,7 +166,7 @@
               {{ t('pages.botAnchorList.startLive') }}
             </el-button>
             <el-button
-                v-if="row.botAnchorStatus === 1 && row.liveStatus === 1"
+                v-if="can('stopLive') && row.botAnchorStatus === 1 && row.liveStatus === 1"
                 link
                 type="danger"
                 @click="handleStopLive(row)"
@@ -163,6 +174,7 @@
               {{ t('pages.botAnchorList.stopLive') }}
             </el-button>
             <el-button
+                v-if="can('delete')"
                 :type="row.botAnchorStatus === 1 ? 'warning' : 'success'"
                 link
                 @click="toggleStatus(row)"
@@ -394,8 +406,10 @@ import {Plus} from '@element-plus/icons-vue'
 import {botAnchorApi, liveRoomTagApi, uploadApi} from '@/api'
 import type {BotAnchorListItem, LiveRoomTag} from '@/types/api'
 import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
+import {usePagePermission} from '@/composables/usePagePermission'
 
 const {t} = useI18n()
+const {can} = usePagePermission('BotAnchorManagement')
 const LIVE_ROOM_CATEGORY_HOT = 1
 const LIVE_ROOM_CATEGORY_GAME = 2
 const LIVE_ROOM_CATEGORY_PRIVATE = 3
@@ -485,12 +499,15 @@ const formRules = computed<FormRules>(() => ({
 
 const isStartableRow = (row: BotAnchorListItem) => row.botAnchorStatus === 1 && row.liveStatus !== 1
 const isStoppableRow = (row: BotAnchorListItem) => row.botAnchorStatus === 1 && row.liveStatus === 1
-const isRowSelectable = (row: BotAnchorListItem) => isStartableRow(row) || isStoppableRow(row)
+const isDisableableRow = (row: BotAnchorListItem) => row.botAnchorStatus === 1
+const isRowSelectable = (row: BotAnchorListItem) => isDisableableRow(row)
 
 const startableSelectedRows = computed(() => selectedRows.value.filter(isStartableRow))
 const stoppableSelectedRows = computed(() => selectedRows.value.filter(isStoppableRow))
+const disableableSelectedRows = computed(() => selectedRows.value.filter(isDisableableRow))
 const canBatchStartLive = computed(() => startableSelectedRows.value.length > 0 && !batchOperating.value)
 const canBatchStopLive = computed(() => stoppableSelectedRows.value.length > 0 && !batchOperating.value)
+const canBatchDisable = computed(() => disableableSelectedRows.value.length > 0 && !batchOperating.value)
 
 const handleSelectionChange = (rows: BotAnchorListItem[]) => {
   selectedRows.value = rows
@@ -890,6 +907,46 @@ const handleBatchStopLive = async () => {
     if (error !== 'cancel') {
       console.error('batchStopLive failed:', error)
       ElMessage.error(t('pages.botAnchorList.batchStopFailed'))
+    }
+  } finally {
+    batchOperating.value = false
+  }
+}
+
+const handleBatchDisable = async () => {
+  const rows = disableableSelectedRows.value
+  if (!rows.length) {
+    ElMessage.warning(t('pages.botAnchorList.selectDisableable'))
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+        t('pages.botAnchorList.batchDisableConfirm', {count: rows.length}),
+        t('pages.botAnchorList.batchDisableTitle'),
+        {
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning'
+        }
+    )
+    batchOperating.value = true
+    const response = await botAnchorApi.batchDisableBotAnchor({ids: rows.map((row) => row.id)})
+    if (response.failCount > 0) {
+      ElMessage.warning(
+          t('pages.botAnchorList.batchDisablePartial', {
+            success: response.successCount,
+            fail: response.failCount
+          })
+      )
+    } else {
+      ElMessage.success(t('pages.botAnchorList.batchDisableSuccess', {count: response.successCount}))
+    }
+    clearSelection()
+    fetchList()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('batchDisable failed:', error)
+      ElMessage.error(t('pages.botAnchorList.batchDisableFailed'))
     }
   } finally {
     batchOperating.value = false

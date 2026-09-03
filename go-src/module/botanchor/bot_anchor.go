@@ -194,6 +194,17 @@ func BatchStopBotAnchorLive(ctx context.Context, req *botanchordto.BatchStopBotA
 	})
 }
 
+// BatchDisableBotAnchor CMS批量停用机器人主播
+func BatchDisableBotAnchor(ctx context.Context, req *botanchordto.BatchDisableBotAnchorReq) (*botanchordto.BatchBotAnchorLiveRes, error) {
+	return batchBotAnchorLive(ctx, req.IDs, func(id uint64) error {
+		_, err := SetBotAnchorStatus(ctx, &botanchordto.SetBotAnchorStatusReq{
+			ID:     id,
+			Status: userentity.BotAnchorStatusDisabled,
+		})
+		return err
+	})
+}
+
 func batchBotAnchorLive(ctx context.Context, ids []uint64, action func(uint64) error) (*botanchordto.BatchBotAnchorLiveRes, error) {
 	res := &botanchordto.BatchBotAnchorLiveRes{}
 	seen := make(map[uint64]struct{}, len(ids))
