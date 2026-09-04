@@ -54,7 +54,7 @@ func CMSCreateChannelRechargeOrder(ctx context.Context, req *rechargeorderdto.CM
 
 func createChannelRechargeOrder(ctx context.Context, userId uint64, packageName string, cfgId uint64, currencyCode string, forcePayUrl bool) (*rechargeorderdto.AppCreateChannelRechargeOrderRes, error) {
 	packageName = strings.TrimSpace(packageName)
-	if userId == 0 || packageName == "" || cfgId == 0 {
+	if userId == 0 || cfgId == 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	currencyCode = strings.ToUpper(strings.TrimSpace(currencyCode))
