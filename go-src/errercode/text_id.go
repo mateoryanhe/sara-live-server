@@ -74,7 +74,7 @@ func init() {
 		ImageModerationFailed:           "Layanan moderasi gambar tidak tersedia",
 		TicketExist:                     "Nama tiket sudah ada",
 		TicketNonExist:                  "Tiket tidak ditemukan",
-		PrivateRoomBillingNonExist:      "Konfigurasi penagihan ruang privat tidak ditemukan",
+		PrivateRoomBillingNonExist:      "Konfigurasi tagihan panggilan 1v1 tidak ditemukan",
 		LiveRoomPrivateAudienceFull:     "Penonton ruang privat penuh",
 		LiveRoomNotLive:                 "Ruang live tidak sedang siaran",
 		LiveRoomPaidDanmakuDisabled:     "Danmaku berbayar tidak diaktifkan",

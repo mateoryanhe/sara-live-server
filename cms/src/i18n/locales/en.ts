@@ -28,7 +28,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   GiftManagement: 'Gifts',
   AgoraCfgManagement: 'Agora Config',
   TicketManagement: 'Tickets',
-  PrivateRoomBillingManagement: 'Private Room Billing',
+  PrivateRoomBillingManagement: '1v1 Call Billing',
   LiveCfgManagement: 'Live Config',
   LiveRoomTagManagement: 'Room Tags',
   LogManagement: 'Logs',

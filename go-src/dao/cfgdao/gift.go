@@ -108,7 +108,7 @@ func GetGiftList(req *giftdto.GiftListReq) (int, []*giftdto.GiftListRes) {
 		param = append(param, entity.LiveGiftStatusOnShelf)
 	}
 
-	sql += ` order by sort desc, created_at desc`
+	sql += ` order by price asc, id asc`
 	countSql := str.GetCountSQL(sql)
 	total, _ := g.DB().GetCount(ctx, countSql, param)
 	sql += ` limit ` + strconv.Itoa(req.PageSize) + ` offset ` + strconv.Itoa(req.PageOffset())

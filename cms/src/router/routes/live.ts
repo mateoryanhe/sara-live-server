@@ -28,7 +28,7 @@ export const liveRoutes: RouteRecordRaw = {
             path: 'private-room-billing/billing-list',
             name: 'PrivateRoomBillingManagement',
             component: () => import('@/views/live/private-room-billing/billing-list.vue'),
-            meta: {title: '私密直播间计费'},
+            meta: {title: '1v1通话计费'},
         },
         {
             path: 'live-config/live-config',
