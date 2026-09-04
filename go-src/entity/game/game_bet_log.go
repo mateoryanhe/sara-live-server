@@ -27,15 +27,16 @@ const (
 // GameBetLog 游戏下注记录
 type GameBetLog struct {
 	migrate.OneModel
-	UserId       uint64  `gorm:"index;default:0;comment:用户ID" json:"userId"`
-	GameCode     string  `gorm:"size:64;default:'';comment:游戏编码" json:"gameCode"`
-	NameEn       string  `gorm:"size:128;default:'';comment:英文名称" json:"nameEn"`
-	Cover        string  `gorm:"size:512;default:'';comment:封面" json:"cover"`
-	Amount       float64 `gorm:"default:0;comment:下注金额" json:"amount"`
-	PlatformType string  `gorm:"size:32;default:'';comment:平台类型" json:"platformType"`
-	OrderId      string  `gorm:"size:64;default:'';index;comment:订单ID" json:"orderId"`
-	LiveRoomId   uint64  `gorm:"index;default:0;comment:直播间ID" json:"liveRoomId"`
-	LiveRecordId uint64  `gorm:"index;default:0;comment:直播记录ID" json:"liveRecordId"`
+	CreatedAt    time.Time `gorm:"index:idx_game_bet_created"`
+	UserId       uint64    `gorm:"index;default:0;comment:用户ID" json:"userId"`
+	GameCode     string    `gorm:"size:64;default:'';comment:游戏编码" json:"gameCode"`
+	NameEn       string    `gorm:"size:128;default:'';comment:英文名称" json:"nameEn"`
+	Cover        string    `gorm:"size:512;default:'';comment:封面" json:"cover"`
+	Amount       float64   `gorm:"default:0;comment:下注金额" json:"amount"`
+	PlatformType string    `gorm:"size:32;default:'';comment:平台类型" json:"platformType"`
+	OrderId      string    `gorm:"size:64;default:'';index;comment:订单ID" json:"orderId"`
+	LiveRoomId   uint64    `gorm:"index;default:0;comment:直播间ID" json:"liveRoomId"`
+	LiveRecordId uint64    `gorm:"index;default:0;comment:直播记录ID" json:"liveRecordId"`
 }
 
 func NewGameBetLog(userId uint64, gameCode, nameEn, cover string, platformType gameplatform.Platform, orderId string, amount float64, liveRoomId, liveRecordId uint64) *GameBetLog {

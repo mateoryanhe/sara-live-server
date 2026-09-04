@@ -39,7 +39,7 @@ const (
 type LiveRecord struct {
 	migrate.OneModel
 	AnchorId                     uint64     `gorm:"index;default:0;comment:主播ID" json:"anchorId"`
-	StartTime                    time.Time  `gorm:"comment:直播开始时间" json:"startTime"`
+	StartTime                    time.Time  `gorm:"index;comment:直播开始时间" json:"startTime"`
 	EndTime                      *time.Time `gorm:"comment:直播结束时间" json:"endTime"`
 	TotalAudience                uint64     `gorm:"default:0;comment:累计观众人数" json:"totalAudience"`
 	TotalLiveDuration            float64    `gorm:"default:0;comment:累计直播时长(秒)" json:"totalLiveDuration"`

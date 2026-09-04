@@ -29,13 +29,13 @@ const (
 
 type Account struct {
 	migrate.OneModel
-	OpenId          string     `gorm:"default:'';comment:开放id"`
+	OpenId          string     `gorm:"index:idx_account_channel_openid,priority:2;default:'';comment:开放id"`
 	PhoneAreaCode   string     `gorm:"default:'';comment:手机区号"`
 	IP              string     `gorm:"default:'';comment:登录IP"`
 	RegisterIp      string     `gorm:"default:'';comment:注册IP"`
 	RegisterCountry string     `gorm:"default:'';comment:注册IP所在国家"`
 	LoginCountry    string     `gorm:"default:'';comment:登录IP所在国家"`
-	Channel         uint       `gorm:"default:0;comment:渠道id"`
+	Channel         uint       `gorm:"index:idx_account_channel_openid,priority:1;default:0;comment:渠道id"`
 	Ban             bool       `gorm:"default:0;comment:封号"`
 	BanTime         *time.Time `gorm:"comment:封号时间"`
 	BanApplyTime    *time.Time `gorm:"comment:封号生效时间"`

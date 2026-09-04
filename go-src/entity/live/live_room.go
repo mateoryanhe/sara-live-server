@@ -65,6 +65,7 @@ func DefaultPrivateInviteType(category uint8) uint8 {
 // LiveRoom 直播间(LiveRoom.ID 与 UserInfo.ID 均为主播用户ID,每个主播仅一个直播间)
 type LiveRoom struct {
 	migrate.OneModel
+	UpdatedAt    time.Time  `gorm:"index:idx_live_room_status_updated,priority:2" json:"-"`
 	GuildId      uint64     `gorm:"index;default:0;comment:所属工会ID" json:"guildId"`
 	Title        string     `gorm:"size:128;default:'';comment:直播间标题" json:"title"`
 	Cover        string     `gorm:"size:255;default:'';comment:封面图URL" json:"cover"`
@@ -74,7 +75,7 @@ type LiveRoom struct {
 	Ban          bool       `gorm:"default:0;comment:封禁状态" json:"ban"`
 	BanApplyTime *time.Time `gorm:"comment:封禁截止时间" json:"banApplyTime"`
 	BanReason    string     `gorm:"size:512;default:'';comment:封禁原因" json:"banReason"`
-	Status       uint8      `gorm:"default:1;comment:状态(0-下架,1-上架)" json:"status"`
+	Status       uint8      `gorm:"index:idx_live_room_status_updated,priority:1;default:1;comment:状态(0-下架,1-上架)" json:"status"`
 }
 
 // NewLiveRoom 构造内存对象,字段写入通过 syndb 异步入库

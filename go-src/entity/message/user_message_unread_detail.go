@@ -30,11 +30,11 @@ const (
 type UserMessageUnreadDetail struct {
 	ID          string    `gorm:"primaryKey;size:64;comment:复合ID(userId_senderId)" json:"id"`
 	UnreadCount uint64    `gorm:"default:0;comment:未读数量" json:"unreadCount"`
-	UserId      uint64    `gorm:"default:0;comment:用户id" json:"userId"`
+	UserId      uint64    `gorm:"index:idx_umud_user_mutual_updated,priority:1;default:0;comment:用户id" json:"userId"`
 	SenderId    uint64    `gorm:"default:0;comment:用户id" json:"senderId"`
-	MutualChat  uint8     `gorm:"default:0;comment:双方是否互发私信(0否,1是)" json:"mutualChat"`
+	MutualChat  uint8     `gorm:"index:idx_umud_user_mutual_updated,priority:2;default:0;comment:双方是否互发私信(0否,1是)" json:"mutualChat"`
 	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
+	UpdatedAt   time.Time `gorm:"index:idx_umud_user_mutual_updated,priority:3" json:"updatedAt"`
 }
 
 func BuildUserMessageUnreadDetailId(receiverId, senderId uint64) string {

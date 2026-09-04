@@ -64,18 +64,18 @@ const (
 // 走 syndb 快速同步缓冲(quick chan),变更通过 Setter 推送到队列由 worker 周期性 Save 到 DB
 type CallOrder struct {
 	migrate.OneModel
-	CallerId            uint64     `gorm:"index;default:0;comment:呼叫者ID" json:"callerId"`
-	ReceiverId          uint64     `gorm:"index;default:0;comment:接收者ID" json:"receiverId"`
+	CallerId            uint64     `gorm:"index:idx_call_caller_start,priority:1;default:0;comment:呼叫者ID" json:"callerId"`
+	ReceiverId          uint64     `gorm:"index:idx_call_receiver_start,priority:1;default:0;comment:接收者ID" json:"receiverId"`
 	Status              uint8      `gorm:"index;default:1;comment:订单状态(1-呼叫中,2-已接听,3-通话中,4-已结束,5-拒接,6-呼叫超时,7-心跳超时,8-钻石不足)" json:"status"`
-	CallStartTime       time.Time  `gorm:"index;comment:呼叫开始时间" json:"callStartTime"`
-	AnswerTime          *time.Time `gorm:"index;comment:接听时间" json:"answerTime"`
-	CallerConfirmTime   *time.Time `gorm:"index;comment:呼叫者确认时间" json:"callerConfirmTime"`
-	ReceiverConfirmTime *time.Time `gorm:"index;comment:接听者确认时间" json:"receiverConfirmTime"`
-	CallerHeartTime     *time.Time `gorm:"index;comment:呼叫者最后心跳时间" json:"callerHeartTime"`
-	ReceiverHeartTime   *time.Time `gorm:"index;comment:接听者最后心跳时间" json:"receiverHeartTime"`
-	CallerHangUpTime    *time.Time `gorm:"index;comment:呼叫者挂断时间" json:"callerHangUpTime"`
-	ReceiverHangUpTime  *time.Time `gorm:"index;comment:接听者挂断时间" json:"receiverHangUpTime"`
-	OrderEndTime        *time.Time `gorm:"index;comment:订单结束时间" json:"orderEndTime"`
+	CallStartTime       time.Time  `gorm:"index:idx_call_caller_start,priority:2;index:idx_call_receiver_start,priority:2;comment:呼叫开始时间" json:"callStartTime"`
+	AnswerTime          *time.Time `gorm:"comment:接听时间" json:"answerTime"`
+	CallerConfirmTime   *time.Time `gorm:"comment:呼叫者确认时间" json:"callerConfirmTime"`
+	ReceiverConfirmTime *time.Time `gorm:"comment:接听者确认时间" json:"receiverConfirmTime"`
+	CallerHeartTime     *time.Time `gorm:"comment:呼叫者最后心跳时间" json:"callerHeartTime"`
+	ReceiverHeartTime   *time.Time `gorm:"comment:接听者最后心跳时间" json:"receiverHeartTime"`
+	CallerHangUpTime    *time.Time `gorm:"comment:呼叫者挂断时间" json:"callerHangUpTime"`
+	ReceiverHangUpTime  *time.Time `gorm:"comment:接听者挂断时间" json:"receiverHangUpTime"`
+	OrderEndTime        *time.Time `gorm:"comment:订单结束时间" json:"orderEndTime"`
 	CallDuration        uint32     `gorm:"default:0;comment:通话时长(秒)" json:"callDuration"`
 	CallType            uint8      `gorm:"default:1;comment:通话类型(1-语音,2-视频)" json:"callType"`
 	Source              uint8      `gorm:"default:1;comment:来源(1-直播间,2-私信)" json:"source"`
@@ -83,7 +83,7 @@ type CallOrder struct {
 	TicketPrice         float64    `gorm:"type:decimal(10,4);default:0;comment:门票价格" json:"ticketPrice"`
 	PricePerMinute      float64    `gorm:"type:decimal(10,4);default:0;comment:分钟计费价格(每分钟)" json:"pricePerMinute"`
 	TotalCost           float64    `gorm:"type:decimal(10,4);default:0;comment:总费用" json:"totalCost"`
-	ChargeTime          *time.Time `gorm:"index;comment:扣费时间" json:"chargeTime"`
+	ChargeTime          *time.Time `gorm:"comment:扣费时间" json:"chargeTime"`
 	BillingDuration     uint32     `gorm:"default:0;comment:计费时长(分钟)" json:"billingDuration"`
 }
 

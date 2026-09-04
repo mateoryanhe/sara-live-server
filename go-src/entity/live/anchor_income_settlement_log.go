@@ -24,12 +24,13 @@ const (
 // AnchorIncomeSettlementLog 主播周结算成功日志(每次结算一条,历史留存)
 type AnchorIncomeSettlementLog struct {
 	migrate.OneModel
-	RoomId uint64 `gorm:"index;default:0;comment:直播间ID(==主播用户ID)" json:"roomId"`
+	CreatedAt time.Time `gorm:"index:idx_ais_room_created,priority:2" json:"-"`
+	RoomId    uint64    `gorm:"index:idx_ais_room_created,priority:1;default:0;comment:直播间ID(==主播用户ID)" json:"roomId"`
 	LiveRoomIncomeAmounts
-	SettlementSalary          float64 `gorm:"type:decimal(16,4);default:0;comment:本次结算薪资" json:"settlementSalary"`
-	SettlementShareAmount     float64 `gorm:"type:decimal(16,4);default:0;comment:本次结算分佣金额" json:"settlementShareAmount"`
-	SettlementShareAmountUsd  float64 `gorm:"type:decimal(16,4);default:0;comment:本次结算分佣金额(USD)" json:"settlementShareAmountUsd"`
-	AnchorSharePercent        float64 `gorm:"type:decimal(6,2);default:0;comment:本次结算主播分佣比例(%)" json:"anchorSharePercent"`
+	SettlementSalary         float64 `gorm:"type:decimal(16,4);default:0;comment:本次结算薪资" json:"settlementSalary"`
+	SettlementShareAmount    float64 `gorm:"type:decimal(16,4);default:0;comment:本次结算分佣金额" json:"settlementShareAmount"`
+	SettlementShareAmountUsd float64 `gorm:"type:decimal(16,4);default:0;comment:本次结算分佣金额(USD)" json:"settlementShareAmountUsd"`
+	AnchorSharePercent       float64 `gorm:"type:decimal(6,2);default:0;comment:本次结算主播分佣比例(%)" json:"anchorSharePercent"`
 }
 
 // NewAnchorIncomeSettlementLog 新建一条主播结算日志并入库

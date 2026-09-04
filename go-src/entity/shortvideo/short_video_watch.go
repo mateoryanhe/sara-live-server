@@ -32,8 +32,8 @@ const (
 type ShortVideoWatch struct {
 	ID          string     `gorm:"primaryKey;comment:复合ID(userId_videoId)" json:"id"`
 	UserId      uint64     `gorm:"index:idx_user_video,priority:1;default:0;comment:用户ID" json:"userId"`
-	VideoId     uint64     `gorm:"index:idx_user_video,priority:2;default:0;comment:短视频ID" json:"videoId"`
-	PaidTime    *time.Time `gorm:"comment:付费时间" json:"paidTime"`
+	VideoId     uint64     `gorm:"index:idx_user_video,priority:2;index;default:0;comment:短视频ID" json:"videoId"`
+	PaidTime    *time.Time `gorm:"index;comment:付费时间" json:"paidTime"`
 	ViewCounted uint8      `gorm:"default:0;comment:是否已计入观看人数(0否,1是)" json:"viewCounted"`
 	Status      uint8      `gorm:"index:idx_user_video,priority:3;default:0;comment:状态(0已取消,1已点赞)" json:"status"`
 	CreatedAt   time.Time  `json:"createdAt"`

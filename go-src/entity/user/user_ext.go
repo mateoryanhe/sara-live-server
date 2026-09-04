@@ -36,13 +36,13 @@ const (
 type UserExt struct {
 	migrate.OneModel
 	CanRank            bool       `gorm:"default:1;comment:是否可上排行榜" json:"canRank"`
-	PrettyId           uint64     `gorm:"index;default:0;comment:靓号(默认等于用户ID)" json:"prettyId"`
+	PrettyId           uint64     `gorm:"default:0;comment:靓号(默认等于用户ID)" json:"prettyId"`
 	PackageName        string     `gorm:"default:'';comment:注册包名" json:"packageName"`
 	AppVersion         string     `gorm:"default:'';comment:注册版本号" json:"appVersion"`
 	FollowCount        uint64     `gorm:"default:0;comment:当前关注数" json:"followCount"`
 	FollowerCount      uint64     `gorm:"default:0;comment:当前粉丝数" json:"followerCount"`
-	CancelCode         string     `gorm:"size:128;default:'';comment:注销码" json:"cancelCode"`
-	CancelCodeExpireAt *time.Time `gorm:"index;comment:注销码过期时间" json:"cancelCodeExpireAt"`
+	CancelCode         string     `gorm:"size:128;default:'';index;comment:注销码" json:"cancelCode"`
+	CancelCodeExpireAt *time.Time `gorm:"comment:注销码过期时间" json:"cancelCodeExpireAt"`
 	RechargeWhitelist         bool       `gorm:"default:0;comment:充值白名单(创建订单后直接到账)" json:"rechargeWhitelist"`
 	FirstRecharge             bool       `gorm:"default:1;comment:是否首次充值(1=未首充,0=已首充)" json:"firstRecharge"`
 	ShortVideoUnsettledIncome float64    `gorm:"type:decimal(16,4);default:0;comment:短视频未结算收益(非主播作者)" json:"shortVideoUnsettledIncome"`

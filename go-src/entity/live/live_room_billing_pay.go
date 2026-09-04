@@ -28,7 +28,7 @@ type LiveRoomBillingPay struct {
 	ID           string     `gorm:"primaryKey;size:96;comment:复合ID(userId_roomId)" json:"id"`
 	UserId       uint64     `gorm:"index;default:0;comment:用户ID" json:"userId"`
 	RoomId       uint64     `gorm:"index;default:0;comment:直播间ID" json:"roomId"`
-	FreeTime     uint64     `gorm:"index;default:0;comment:免费时长" json:"freeTime"`
+	FreeTime     uint64     `gorm:"default:0;comment:免费时长" json:"freeTime"`
 	FreeUsed     bool       `gorm:"default:0;comment:免费使用标记" json:"freeUsed"`
 	LastPaidAt   *time.Time `gorm:"comment:最近一次观看时间" json:"lastPaidAt"`
 	LastTicketAt *time.Time `gorm:"comment:最近一次扣门票时间" json:"lastTicketAt"`

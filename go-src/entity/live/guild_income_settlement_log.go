@@ -32,14 +32,15 @@ const (
 // GuildIncomeSettlementLog 工会周结算成功日志(每次结算一条,历史留存)
 type GuildIncomeSettlementLog struct {
 	migrate.OneModel
-	GuildId uint64 `gorm:"index;default:0;comment:工会ID" json:"guildId"`
+	CreatedAt time.Time `gorm:"index:idx_gis_guild_status_created,priority:3" json:"-"`
+	GuildId   uint64    `gorm:"index:idx_gis_guild_status_created,priority:1;default:0;comment:工会ID" json:"guildId"`
 	LiveRoomIncomeAmounts
 	SettlementSalary         float64    `gorm:"type:decimal(16,4);default:0;comment:结算薪资" json:"settlementSalary"`
 	SettlementShareAmount    float64    `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额" json:"settlementShareAmount"`
 	SettlementShareAmountUsd float64    `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额(USD)" json:"settlementShareAmountUsd"`
 	SettlementReceivableUsd  float64    `gorm:"type:decimal(16,4);default:0;comment:结算可收金额(USD)=流水分佣+开播薪资" json:"settlementReceivableUsd"`
 	GuildSharePercent        float64    `gorm:"type:decimal(6,2);default:0;comment:本次结算工会分佣比例(%)" json:"guildSharePercent"`
-	Status                   uint8      `gorm:"index;default:0;comment:状态(0未审核1审核通过2转账成功)" json:"status"`
+	Status                   uint8      `gorm:"index:idx_gis_guild_status_created,priority:2;default:0;comment:状态(0未审核1审核通过2转账成功)" json:"status"`
 	TransferAt               *time.Time `gorm:"comment:转账时间" json:"transferAt"`
 }
 

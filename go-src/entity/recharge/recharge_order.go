@@ -46,16 +46,16 @@ const (
 // 走 syndb 快速同步缓冲(quick chan),变更通过 Setter 推送到队列由 worker 周期性 Save 到 DB
 type RechargeOrder struct {
 	migrate.OneModel
-	UserId       uint64    `gorm:"index;default:0;comment:充值用户ID" json:"userId"`
-	CfgId        uint64    `gorm:"index;default:0;comment:充值档位ID(0=手动输入金额)" json:"cfgId"`
+	UserId       uint64    `gorm:"index:idx_ro_user_status,priority:1;default:0;comment:充值用户ID" json:"userId"`
+	CfgId        uint64    `gorm:"default:0;comment:充值档位ID(0=手动输入金额)" json:"cfgId"`
 	Price        float64   `gorm:"type:decimal(10,4);default:0;comment:配置美金金额(USD)" json:"price"`
 	PayAmount    float64   `gorm:"type:decimal(18,4);default:0;comment:渠道实付金额(如IDR,非渠道为0)" json:"payAmount"`
 	Currency     string    `gorm:"size:8;default:'USD';comment:实际支付货币(如USD/IDR)" json:"currency"`
 	Gold         float64   `gorm:"default:0;comment:发放金币数(订单完成时增加到玩家金币)" json:"gold"`
-	Status       uint8     `gorm:"index;default:0;comment:状态(0-待支付,1-已完成,2-已取消)" json:"status"`
+	Status       uint8     `gorm:"index:idx_ro_user_status,priority:2;index;default:0;comment:状态(0-待支付,1-已完成,2-已取消)" json:"status"`
 	Source       uint8     `gorm:"default:0;comment:来源(1-App玩家发起,2-后台手动)" json:"source"`
 	PayChannel   uint8     `gorm:"size:32;default:0;comment:支付渠道" json:"payChannel"`
-	ThirdOrderId string    `gorm:"size:64;default:'';comment:第三方订单号" json:"thirdOrderId"`
+	ThirdOrderId string    `gorm:"size:64;default:'';index;comment:第三方订单号" json:"thirdOrderId"`
 	Remark       string    `gorm:"size:255;default:'';comment:备注" json:"remark"`
 	OperatorId   uint64    `gorm:"default:0;comment:后台操作员ID(手动充值时记录)" json:"operatorId"`
 	PackageName  string    `gorm:"size:128;default:'';comment:发起充值App包名" json:"packageName"`

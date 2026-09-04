@@ -61,7 +61,7 @@ type UserInfo struct {
 	UserType        uint8      `gorm:"default:0;comment:用户类型(0普通用户,1普通主播,2机器人主播,3机器人观众,4测试人员,5CMS短视频作者,7高级主播)" json:"userType"`
 	InviterId       uint64     `gorm:"index;default:0;comment:邀请人用户ID(0为无)"`
 	VipLevel        uint32     `gorm:"default:0;comment:VIP等级(0为无)"`
-	LastLoginTime   *time.Time `gorm:"comment:最后登录时间" json:"lastLoginTime"`
+	LastLoginTime   *time.Time `gorm:"index;comment:最后登录时间" json:"lastLoginTime"`
 	LiveRoomId      uint64     `gorm:"index;default:0;comment:当前所在直播间ID(观众,0为不在直播间)" json:"liveRoomId"`
 	LiveRoomVer     uint64     `gorm:"default:0;comment:当前所在直播间版本(观众,0为无,通常为liveRecordId)" json:"liveRoomVer"`
 	Gender          uint8      `gorm:"default:0;comment:性别(0未知,1男,2女)" json:"gender"`

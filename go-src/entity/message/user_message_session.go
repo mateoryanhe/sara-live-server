@@ -22,8 +22,9 @@ const (
 // 走 syndb 快速同步缓冲(quick chan),变更通过 Setter 推送到队列由 worker 周期性 Save 到 DB
 type UserMessageSession struct {
 	migrate.MoreModel
+	IsDeleted bool   `gorm:"index:idx_ums_session_deleted,priority:2;default:0" json:"-"`
 	MessageId uint64 `gorm:"index;default:0;comment:消息ID" json:"messageId"`
-	SessionId string `gorm:"index;size:250;default:'';comment:会话ID(userId_targetId)" json:"sessionId"`
+	SessionId string `gorm:"index:idx_ums_session_deleted,priority:1;size:250;default:'';comment:会话ID(userId_targetId)" json:"sessionId"`
 }
 
 // BuildUserMessageSessionId 构建会话ID: 当前用户_目标用户

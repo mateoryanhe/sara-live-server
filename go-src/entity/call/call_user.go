@@ -22,7 +22,7 @@ const (
 type CallUser struct {
 	ID          uint64     `gorm:"primaryKey;comment:用户ID" json:"id"`
 	CallOrderId uint64     `gorm:"index;default:0;comment:通话订单ID" json:"callOrderId"`
-	HeartTime   *time.Time `gorm:"index;comment:心跳时间" json:"heartTime"`
+	HeartTime   *time.Time `gorm:"comment:心跳时间" json:"heartTime"`
 }
 
 func NewCallUser(userId, callOrderId uint64) *CallUser {

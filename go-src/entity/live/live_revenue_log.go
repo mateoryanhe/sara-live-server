@@ -33,15 +33,17 @@ const (
 // LiveRevenueLog 直播间社交流水(礼物/付费弹幕/私密房/门票/视频通话等钻石消费)
 type LiveRevenueLog struct {
 	migrate.OneModel
-	RevenueType  uint8   `gorm:"index;default:1;comment:流水类型(1礼物,2付费弹幕,4私密房计费,5门票,6视频通话门票,7视频通话计费)" json:"revenueType"`
-	RoomId       uint64  `gorm:"index;default:0;comment:直播间ID(主播用户ID)" json:"roomId"`
-	LiveRecordId uint64  `gorm:"index;default:0;comment:直播记录ID" json:"liveRecordId"`
-	SenderId     uint64  `gorm:"index;default:0;comment:付款用户ID" json:"senderId"`
-	BizId        uint64  `gorm:"index;default:0;comment:业务关联ID(礼物ID/通话订单ID等)" json:"bizId"`
-	Count        int     `gorm:"default:0;comment:数量(礼物件数,其余类型多为0或1)" json:"count"`
-	UnitPrice    float64 `gorm:"default:0;comment:单价(钻石,礼物场景有效)" json:"unitPrice"`
-	TotalAmount  float64 `gorm:"default:0;comment:流水金额(钻石)" json:"totalAmount"`
-	Status       uint8   `gorm:"index;default:0;comment:状态(0正常,1已退款)" json:"status"`
+	// CreatedAt 覆盖嵌入字段: 主播榜(status+时间)、贡献榜(room+status+时间)
+	CreatedAt    time.Time `gorm:"index:idx_lrl_status_created,priority:2;index:idx_lrl_room_status_created,priority:3" json:"-"`
+	RevenueType  uint8     `gorm:"index:idx_lrl_biz_sender_type_status,priority:3;default:1;comment:流水类型(1礼物,2付费弹幕,4私密房计费,5门票,6视频通话门票,7视频通话计费)" json:"revenueType"`
+	RoomId       uint64    `gorm:"index:idx_lrl_room_status_created,priority:1;default:0;comment:直播间ID(主播用户ID)" json:"roomId"`
+	LiveRecordId uint64    `gorm:"index;default:0;comment:直播记录ID" json:"liveRecordId"`
+	SenderId     uint64    `gorm:"index:idx_lrl_biz_sender_type_status,priority:2;default:0;comment:付款用户ID" json:"senderId"`
+	BizId        uint64    `gorm:"index:idx_lrl_biz_sender_type_status,priority:1;default:0;comment:业务关联ID(礼物ID/通话订单ID等)" json:"bizId"`
+	Count        int       `gorm:"default:0;comment:数量(礼物件数,其余类型多为0或1)" json:"count"`
+	UnitPrice    float64   `gorm:"default:0;comment:单价(钻石,礼物场景有效)" json:"unitPrice"`
+	TotalAmount  float64   `gorm:"default:0;comment:流水金额(钻石)" json:"totalAmount"`
+	Status       uint8     `gorm:"index:idx_lrl_status_created,priority:1;index:idx_lrl_room_status_created,priority:2;index:idx_lrl_biz_sender_type_status,priority:4;default:0;comment:状态(0正常,1已退款)" json:"status"`
 }
 
 func NewLiveRevenueLog(id uint64) *LiveRevenueLog {
