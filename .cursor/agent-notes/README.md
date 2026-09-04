@@ -55,4 +55,11 @@
 - **恢复**：GitHub reset 到 `0abdb09` + Cursor History + 聊天记录重做 8 个 commit + 未提交改动。
 - **教训**：见 `workspace-safety.mdc`；**做完务必 `git push`**。
 
+## module/stat 队列（2026-09-04）
+
+- 无界 `gqueue` + `event.HotStart` 后 `xrtimer` 每秒非阻塞拉空；生产端只 `Push`，校验在消费端
+- 登录：`SetLastLoginTime` 同步；日/周/月统计入队
+- 观众：`gameevent.ValidAudienceEvent`（`join_room` Pub）
+- 热重启：`PrepareRestart` 排空 + `hotrestart.RegisterStatQueueFlush` 与 syndb 同阶段刷盘
+
 任务结束后若有新事实，简短更新本文件或新增专题 md。

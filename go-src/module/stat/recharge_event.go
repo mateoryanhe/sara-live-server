@@ -3,9 +3,6 @@ package stat
 import (
 	"time"
 
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gctx"
-	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/core/event"
 	"xr-game-server/dao/statdao"
 	"xr-game-server/entity/recharge"
@@ -18,9 +15,12 @@ func initRechargeEvent() {
 }
 
 func onRechargeArrivedEvent(data any) {
-	order, ok := data.(*entity.RechargeOrder)
+	enqueue(&statJob{Kind: jobRecharge, Payload: data})
+}
+
+func consumeRechargeJob(job *statJob) {
+	order, ok := job.Payload.(*entity.RechargeOrder)
 	if !ok || order == nil {
-		g.Log().Errorf(gctx.New(), "RechargeArrivedEvent payload type error: %T", data)
 		return
 	}
 	if order.Price <= 0 {
@@ -34,10 +34,6 @@ func onRechargeArrivedEvent(data any) {
 	if statAt.IsZero() {
 		statAt = time.Now()
 	}
-
-	lockName := "stat_recharge"
-	gmlock.Lock(lockName)
-	defer gmlock.Unlock(lockName)
 
 	if stat := statdao.GetSysStat(); stat != nil {
 		stat.AddTotalRecharge(order.Price)

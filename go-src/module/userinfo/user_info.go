@@ -3,6 +3,7 @@ package userinfo
 import (
 	"context"
 	"strings"
+	"time"
 	"xr-game-server/core/event"
 	"xr-game-server/gameevent"
 
@@ -52,6 +53,9 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		Age:           calcAge(data.Birthday),
 	}
 	if req.UserId == 0 {
+		now := time.Now()
+		data.SetLastLoginTime(&now)
+		userinfodao.PublishUserInfo(data)
 		event.Pub(gameevent.LoginEvent, authUserId)
 	}
 	return ret, nil

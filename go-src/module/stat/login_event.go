@@ -1,11 +1,10 @@
 package stat
 
 import (
-	"github.com/gogf/gf/v2/os/gmlock"
 	"time"
+
 	"xr-game-server/core/event"
 	"xr-game-server/dao/statdao"
-	"xr-game-server/dao/userinfodao"
 	"xr-game-server/entity/stat"
 	"xr-game-server/gameevent"
 )
@@ -15,19 +14,21 @@ func initLoginEvent() {
 }
 
 func onLoginEvent(data any) {
-	val := data.(uint64)
-	now := time.Now()
-	userInfo := userinfodao.GetUserInfoByUserId(val)
-	userInfo.SetLastLoginTime(&now)
-	userinfodao.PublishUserInfo(userInfo)
+	enqueue(&statJob{Kind: jobLogin, At: time.Now(), Payload: data})
+}
 
-	lockName := "stat_login"
-	gmlock.Lock(lockName)
-	defer gmlock.Unlock(lockName)
-
-	recordDailyLogin(now, val)
-	recordWeeklyLogin(now, val)
-	recordMonthlyLogin(now, val)
+func consumeLoginJob(job *statJob) {
+	userId, ok := job.Payload.(uint64)
+	if !ok || userId == 0 {
+		return
+	}
+	now := job.At
+	if now.IsZero() {
+		now = time.Now()
+	}
+	recordDailyLogin(now, userId)
+	recordWeeklyLogin(now, userId)
+	recordMonthlyLogin(now, userId)
 }
 
 func recordDailyLogin(now time.Time, userId uint64) {

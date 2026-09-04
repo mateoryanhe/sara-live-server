@@ -1,8 +1,8 @@
 package stat
 
 import (
-	"github.com/gogf/gf/v2/os/gmlock"
 	"time"
+
 	"xr-game-server/core/event"
 	"xr-game-server/dao/statdao"
 	"xr-game-server/entity/stat"
@@ -14,7 +14,11 @@ func initRegisterEvent() {
 }
 
 func onRegisterEvent(data any) {
-	val, ok := data.(*gameevent.RegisterEventData)
+	enqueue(&statJob{Kind: jobRegister, Payload: data})
+}
+
+func consumeRegisterJob(job *statJob) {
+	val, ok := job.Payload.(*gameevent.RegisterEventData)
 	if !ok || val == nil || val.UserId == 0 {
 		return
 	}
@@ -22,11 +26,6 @@ func onRegisterEvent(data any) {
 	if now.IsZero() {
 		now = time.Now()
 	}
-
-	lockName := "stat_register"
-	gmlock.Lock(lockName)
-	defer gmlock.Unlock(lockName)
-
 	recordDailyRegister(now)
 	recordWeeklyRegister(now)
 	recordMonthlyRegister(now)
@@ -36,19 +35,19 @@ func recordDailyRegister(now time.Time) {
 	date := entity.FormatDailyLoginStatDate(now)
 	stat := statdao.GetDailyLoginStatByDate(date)
 	stat.AddRegisterCount(1)
-		statdao.PublishDailyLoginStat(stat)
+	statdao.PublishDailyLoginStat(stat)
 }
 
 func recordWeeklyRegister(now time.Time) {
 	week := entity.FormatWeeklyLoginStatKey(now)
 	stat := statdao.GetWeeklyLoginStatByWeek(week)
 	stat.AddRegisterCount(1)
-		statdao.PublishWeeklyLoginStat(stat)
+	statdao.PublishWeeklyLoginStat(stat)
 }
 
 func recordMonthlyRegister(now time.Time) {
 	month := entity.FormatMonthlyLoginStatKey(now)
 	stat := statdao.GetMonthlyLoginStatByMonth(month)
 	stat.AddRegisterCount(1)
-		statdao.PublishMonthlyLoginStat(stat)
+	statdao.PublishMonthlyLoginStat(stat)
 }

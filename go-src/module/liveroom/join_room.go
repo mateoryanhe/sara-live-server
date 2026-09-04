@@ -11,7 +11,7 @@ import (
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/entity/live"
 	"xr-game-server/errercode"
-	"xr-game-server/module/stat"
+	"xr-game-server/gameevent"
 )
 
 // JoinRoom 玩家加入直播间,记录状态置为 Online
@@ -92,7 +92,7 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 	}
 	// 直播中且非主播本人:有效观众(单场去重 + 日/周/月跨直播间去重)
 	if room.LiveRecordId > 0 && userId != req.RoomId {
-		stat.RecordValidAudience(userId, time.Now())
+		event.Pub(gameevent.ValidAudienceEvent, gameevent.NewValidAudienceEventData(userId, time.Now()))
 		if liveroomdao.TryRecordLiveRecordAudience(room.LiveRecordId, userId) {
 			if liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId); liveRecord != nil {
 				liveRecord.AddTotalAudience(1)

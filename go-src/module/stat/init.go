@@ -1,10 +1,10 @@
 package stat
 
 func Init() {
+	initStatQueue()
 	initLoginEvent()
 	initRegisterEvent()
 	initRechargeEvent()
-	initGoldChangeEvent()
-	initGoldConsumeEvent()
-	initDiamondConsumeEvent()
+	initCurrencyStatEvent()
+	initAudienceEvent()
 }

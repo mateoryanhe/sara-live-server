@@ -16,6 +16,7 @@ const (
 	AppToken               Type = "AppToken"
 	CmsToken               Type = "CmsToken"
 	PrepareRestart         Type = "PrepareRestart"
+	HotStart               Type = "HotStart" // HTTP 就绪后的热启动(定时任务等在此挂载)
 	LiveRoomAudienceJoined Type = "LiveRoomAudienceJoined"
 )
 

@@ -9,6 +9,7 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/util/gconv"
+	"xr-game-server/core/event"
 	"xr-game-server/core/hotrestart"
 	"xr-game-server/core/startup"
 	"xr-game-server/core/xrlog"
@@ -53,6 +54,7 @@ func waitHTTPServerReadyAndLogStartupEnd() {
 		time.Sleep(5 * time.Millisecond)
 	}
 	startup.LogEnd(ctx)
+	event.Pub(event.HotStart, nil)
 }
 
 func GetAuthId(ctx context.Context) uint64 {

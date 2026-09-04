@@ -3,25 +3,30 @@ package stat
 import (
 	"time"
 
-	"github.com/gogf/gf/v2/os/gmlock"
+	"xr-game-server/core/event"
 	"xr-game-server/dao/statdao"
 	"xr-game-server/entity/stat"
+	"xr-game-server/gameevent"
 )
 
-// RecordValidAudience 记录有效观众(跨直播间去重,日/周/月各计一次)
-func RecordValidAudience(userId uint64, statAt time.Time) {
-	if userId == 0 {
+func initAudienceEvent() {
+	event.Sub(gameevent.ValidAudienceEvent, onValidAudienceEvent)
+}
+
+func onValidAudienceEvent(data any) {
+	enqueue(&statJob{Kind: jobAudience, Payload: data})
+}
+
+func consumeAudienceJob(job *statJob) {
+	ev, ok := job.Payload.(*gameevent.ValidAudienceEventData)
+	if !ok || ev == nil || ev.UserId == 0 {
 		return
 	}
+	statAt := ev.StatAt
 	if statAt.IsZero() {
 		statAt = time.Now()
 	}
-
-	lockName := "stat_audience"
-	gmlock.Lock(lockName)
-	defer gmlock.Unlock(lockName)
-
-	recordPeriodAudienceUser(statAt, userId)
+	recordPeriodAudienceUser(statAt, ev.UserId)
 }
 
 func recordPeriodAudienceUser(statAt time.Time, userId uint64) {
