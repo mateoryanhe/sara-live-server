@@ -7,11 +7,13 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import {ElementPlusResolver} from 'unplugin-vue-components/resolvers'
+import {appVersionPlugin} from './vite-plugin-app-version'
 
 // https://vite.dev/config/
 export default defineConfig(({mode}) => {
     const env = loadEnv(mode, process.cwd(), '')
     const base = env.VITE_BASE_PATH || '/'
+    const appVersion = `${mode}-${Date.now().toString(36)}`
 
     return {
         base,
@@ -25,6 +27,7 @@ export default defineConfig(({mode}) => {
             Components({
                 resolvers: [ElementPlusResolver()],
             }),
+            appVersionPlugin({version: appVersion}),
         ],
         resolve: {
             alias: {

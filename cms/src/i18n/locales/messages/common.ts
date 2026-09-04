@@ -18,6 +18,7 @@ export const commonMessages = {
     fuzzyMatch: '模糊匹配', pleaseEnter: '请输入', pleaseSelect: '请选择', loading: '加载中...',
     success: '成功', failed: '失败', copy: '复制', refresh: '刷新', export: '导出', exportSuccess: '导出成功', exportFailed: '导出失败', exportEmpty: '没有可导出的数据', exportQueuePending: '前方还有 {count} 个导出任务', exportQueueStarting: '导出任务即将开始...', exportRunning: '正在导出...', exportProgress: '正在导出 {exported}/{total} 条', exportTimeout: '导出超时，请稍后重试', import: '导入',
     open: '开启', close: '关闭', live: '直播中', offline: '未开播', banned: '已封禁',
+    appUpdateTitle: '发现新版本', appUpdateMessage: '后台已更新，刷新后即可使用新功能（无需重新登录）。', appUpdateConfirm: '立即刷新',
   },
   en: {
     language: 'Language', logout: 'Log out', admin: 'Admin', footer: 'XR Game Server Admin', logo: 'XR Game Server',
@@ -38,6 +39,7 @@ export const commonMessages = {
     fuzzyMatch: 'Fuzzy match', pleaseEnter: 'Please enter', pleaseSelect: 'Please select', loading: 'Loading...',
     success: 'Success', failed: 'Failed', copy: 'Copy', refresh: 'Refresh', export: 'Export', exportSuccess: 'Export successful', exportFailed: 'Export failed', exportEmpty: 'No data to export', exportQueuePending: '{count} export task(s) ahead', exportQueueStarting: 'Export starting soon...', exportRunning: 'Exporting...', exportProgress: 'Exporting {exported}/{total} rows', exportTimeout: 'Export timed out, please try again', import: 'Import',
     open: 'Open', close: 'Close', live: 'Live', offline: 'Offline', banned: 'Banned',
+    appUpdateTitle: 'Update available', appUpdateMessage: 'A new CMS version is ready. Refresh to apply it (you stay signed in).', appUpdateConfirm: 'Refresh now',
   },
   es: {
     language: 'Idioma', logout: 'Cerrar sesión', admin: 'Administrador', footer: 'Consola XR Game Server', logo: 'XR Game Server',
@@ -58,6 +60,7 @@ export const commonMessages = {
     fuzzyMatch: 'Coincidencia difusa', pleaseEnter: 'Introduce', pleaseSelect: 'Selecciona', loading: 'Cargando...',
     success: 'Éxito', failed: 'Fallido', copy: 'Copiar', refresh: 'Actualizar', export: 'Exportar', exportSuccess: 'Exportación exitosa', exportFailed: 'Error al exportar', exportEmpty: 'No hay datos para exportar', exportQueuePending: 'Hay {count} exportación(es) en cola', exportQueueStarting: 'La exportación comenzará pronto...', exportRunning: 'Exportando...', exportProgress: 'Exportando {exported}/{total} filas', exportTimeout: 'Tiempo de exportación agotado', import: 'Importar',
     open: 'Abrir', close: 'Cerrar', live: 'En vivo', offline: 'Offline', banned: 'Baneado',
+    appUpdateTitle: 'Nueva versión', appUpdateMessage: 'Hay una nueva versión del CMS. Actualiza para aplicarla (sigues conectado).', appUpdateConfirm: 'Actualizar ahora',
   },
   pt: {
     language: 'Idioma', logout: 'Sair', admin: 'Administrador', footer: 'Console XR Game Server', logo: 'XR Game Server',
@@ -78,6 +81,7 @@ export const commonMessages = {
     fuzzyMatch: 'Correspondência aproximada', pleaseEnter: 'Digite', pleaseSelect: 'Selecione', loading: 'Carregando...',
     success: 'Sucesso', failed: 'Falhou', copy: 'Copiar', refresh: 'Atualizar', export: 'Exportar', exportSuccess: 'Exportação concluída', exportFailed: 'Falha ao exportar', exportEmpty: 'Nenhum dado para exportar', exportQueuePending: 'Há {count} exportação(ões) na fila', exportQueueStarting: 'A exportação começará em breve...', exportRunning: 'Exportando...', exportProgress: 'Exportando {exported}/{total} linhas', exportTimeout: 'Tempo de exportação esgotado', import: 'Importar',
     open: 'Abrir', close: 'Fechar', live: 'Ao vivo', offline: 'Offline', banned: 'Banido',
+    appUpdateTitle: 'Nova versão', appUpdateMessage: 'Há uma nova versão do CMS. Atualize para aplicar (você permanece logado).', appUpdateConfirm: 'Atualizar agora',
   },
   hi: {
     language: 'भाषा', logout: 'लॉग आउट', admin: 'व्यवस्थापक', footer: 'XR Game Server एडमिन', logo: 'XR Game Server',
@@ -98,6 +102,7 @@ export const commonMessages = {
     fuzzyMatch: 'फ़ज़ी मिलान', pleaseEnter: 'दर्ज करें', pleaseSelect: 'चुनें', loading: 'लोड हो रहा है...',
     success: 'सफल', failed: 'विफल', copy: 'कॉपी', refresh: 'रीफ़्रेश', export: 'निर्यात', exportSuccess: 'निर्यात सफल', exportFailed: 'निर्यात विफल', exportEmpty: 'निर्यात करने के लिए कोई डेटा नहीं', exportQueuePending: 'सामने {count} निर्यात कार्य', exportQueueStarting: 'निर्यात जल्द शुरू होगा...', exportRunning: 'निर्यात हो रहा है...', exportProgress: 'निर्यात {exported}/{total} पंक्तियाँ', exportTimeout: 'निर्यात समय समाप्त', import: 'आयात',
     open: 'खोलें', close: 'बंद', live: 'लाइव', offline: 'ऑफ़लाइन', banned: 'प्रतिबंधित',
+    appUpdateTitle: 'नया संस्करण', appUpdateMessage: 'CMS का नया संस्करण तैयार है। लागू करने के लिए रीफ़्रेश करें (लॉगिन बना रहेगा)।', appUpdateConfirm: 'अभी रीफ़्रेश करें',
   },
   id: {
     language: 'Bahasa', logout: 'Keluar', admin: 'Admin', footer: 'XR Game Server Admin', logo: 'XR Game Server',
@@ -118,6 +123,7 @@ export const commonMessages = {
     fuzzyMatch: 'Pencocokan fuzzy', pleaseEnter: 'Masukkan', pleaseSelect: 'Pilih', loading: 'Memuat...',
     success: 'Berhasil', failed: 'Gagal', copy: 'Salin', refresh: 'Segarkan', export: 'Ekspor', exportSuccess: 'Ekspor berhasil', exportFailed: 'Ekspor gagal', exportEmpty: 'Tidak ada data untuk diekspor', exportQueuePending: 'Ada {count} tugas ekspor di depan', exportQueueStarting: 'Ekspor akan segera dimulai...', exportRunning: 'Mengekspor...', exportProgress: 'Mengekspor {exported}/{total} baris', exportTimeout: 'Waktu ekspor habis', import: 'Impor',
     open: 'Buka', close: 'Tutup', live: 'Live', offline: 'Offline', banned: 'Diblokir',
+    appUpdateTitle: 'Versi baru', appUpdateMessage: 'Versi CMS baru tersedia. Segarkan untuk menerapkan (Anda tetap masuk).', appUpdateConfirm: 'Segarkan sekarang',
   },
 } as const
 

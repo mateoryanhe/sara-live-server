@@ -28,11 +28,12 @@ func setupStaticPaths() {
 
 // setupStaticPageNoCache 启用静态入口页不缓存策略(见 writeStaticFile)
 func setupStaticPageNoCache() {
-	g.Log().Warning(context.Background(), "index.html 已禁用浏览器缓存")
+	g.Log().Warning(context.Background(), "index.html/version.json 已禁用浏览器缓存")
 }
 
 func isNoCacheStaticPage(filePath string) bool {
-	return strings.EqualFold(filepath.Base(filePath), "index.html")
+	name := strings.ToLower(filepath.Base(filePath))
+	return name == "index.html" || name == "version.json"
 }
 
 func applyNoCacheStaticPageHeaders(r *ghttp.Request) {
