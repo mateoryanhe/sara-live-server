@@ -53,7 +53,6 @@ const buildOption = (points: UserStatTrendPoint[]): EChartsOption => {
         : undefined,
     tooltip: {
       trigger: 'axis',
-      axisPointer: {type: 'shadow'},
     },
     grid: {
       left: 48,
@@ -63,6 +62,7 @@ const buildOption = (points: UserStatTrendPoint[]): EChartsOption => {
     },
     xAxis: {
       type: 'category',
+      boundaryGap: false,
       data: times,
       axisLabel: {
         rotate: times.length > 10 ? 35 : 0,
@@ -75,10 +75,13 @@ const buildOption = (points: UserStatTrendPoint[]): EChartsOption => {
     series: [
       {
         name: seriesName,
-        type: 'bar',
-        barMaxWidth: 40,
+        type: 'line',
+        smooth: true,
+        showSymbol: times.length <= 30,
         data: points.map((item) => Number(item.barMetrics?.[cfg.key] ?? 0)),
         itemStyle: {color: cfg.color},
+        lineStyle: {width: 2, color: cfg.color},
+        areaStyle: {opacity: 0.08, color: cfg.color},
       },
     ],
   }

@@ -1,97 +1,104 @@
 <template>
-  <div v-loading="loading" class="page-container">
+  <div v-loading="pageLoading" class="page-container">
     <el-card>
-      <template #header>
-        <div class="card-header">
-          <span>{{ t('pages.dashboard.basicData') }}</span>
-          <el-button :loading="loading" @click="fetchSysStat">{{ t('common.refresh') }}</el-button>
-        </div>
-      </template>
-
-      <div class="basic-stat-rows">
-        <div
-            v-for="(row, rowIndex) in basicStatCardRows"
-            :key="rowIndex"
-            class="basic-stat-row"
-        >
-          <div
-              v-for="card in row"
-              :key="card.key"
-              class="stat-card"
-              :class="card.theme"
-          >
-            <div class="stat-label">{{ card.label }}</div>
-            <div class="stat-value">
-              {{ card.format === 'count' ? formatCount(card.value) : formatAmount(card.value) }}
-            </div>
+      <el-tabs v-model="activeMainTab" lazy @tab-change="handleMainTabChange">
+        <el-tab-pane :label="t('pages.dashboard.basicData')" name="basic">
+          <div class="tab-toolbar">
+            <el-button :loading="loading" @click="fetchSysStat">{{ t('common.refresh') }}</el-button>
           </div>
-        </div>
-      </div>
-    </el-card>
-
-    <el-card class="user-stat-card">
-      <template #header>
-        <div class="card-header">
-          <span>{{ t('pages.dashboard.userData') }}</span>
-          <el-button :loading="trendLoading" @click="fetchUserStatTrend">{{ t('common.refresh') }}</el-button>
-        </div>
-      </template>
-
-      <el-tabs v-model="activePeriod" lazy @tab-change="handleTabChange">
-        <el-tab-pane :label="t('pages.dashboard.periodDaily')" name="daily">
-          <UserStatChart ref="dailyLineChartRef" :data="userStatTrend.daily" :title="t('pages.dashboard.activeRegisterDaily')"/>
-          <BarMetricSection
-              :metric-key="activeBarMetric"
-              :metric-tabs="barMetricTabs"
-              @update:metric-key="(v) => { activeBarMetric = v; handleBarMetricChange() }"
-          >
-            <UserStatBarChart
-                ref="dailyBarChartRef"
-                :data="userStatTrend.daily"
-                :metric-key="activeBarMetric"
-                :title="barChartTitle"
-            />
-          </BarMetricSection>
+          <div class="basic-stat-board">
+            <section
+                v-for="section in basicStatSections"
+                :key="section.key"
+                class="basic-stat-section"
+            >
+              <div class="basic-stat-section-head">
+                <span class="basic-stat-section-title">{{ section.title }}</span>
+                <span class="basic-stat-section-line"/>
+              </div>
+              <div class="basic-stat-grid" :class="section.gridClass">
+                <div
+                    v-for="card in section.cards"
+                    :key="card.key"
+                    class="stat-card"
+                    :class="card.theme"
+                >
+                  <div class="stat-label">{{ card.label }}</div>
+                  <div class="stat-value">
+                    {{ card.format === 'count' ? formatCount(card.value) : formatAmount(card.value) }}
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
         </el-tab-pane>
-        <el-tab-pane :label="t('pages.dashboard.periodWeekly')" name="weekly">
-          <UserStatChart ref="weeklyLineChartRef" :data="userStatTrend.weekly" :title="t('pages.dashboard.activeRegisterWeekly')"/>
-          <BarMetricSection
-              :metric-key="activeBarMetric"
-              :metric-tabs="barMetricTabs"
-              @update:metric-key="(v) => { activeBarMetric = v; handleBarMetricChange() }"
-          >
-            <UserStatBarChart
-                ref="weeklyBarChartRef"
-                :data="userStatTrend.weekly"
-                :metric-key="activeBarMetric"
-                :title="barChartTitle"
-            />
-          </BarMetricSection>
+
+        <el-tab-pane :label="t('pages.dashboard.userData')" name="user">
+          <div class="tab-toolbar">
+            <el-button :loading="trendLoading" @click="fetchUserStatTrend">{{ t('common.refresh') }}</el-button>
+          </div>
+          <el-tabs v-model="activePeriod" lazy @tab-change="handlePeriodTabChange">
+            <el-tab-pane :label="t('pages.dashboard.periodDaily')" name="daily">
+              <UserStatChart ref="dailyLineChartRef" :data="userStatTrend.daily" :title="t('pages.dashboard.activeRegisterDaily')"/>
+              <BarMetricSection
+                  :metric-key="activeBarMetric"
+                  :metric-tabs="barMetricTabs"
+                  @update:metric-key="(v) => { activeBarMetric = v; handleBarMetricChange() }"
+              >
+                <UserStatBarChart
+                    ref="dailyBarChartRef"
+                    :data="userStatTrend.daily"
+                    :metric-key="activeBarMetric"
+                    :title="barChartTitle"
+                />
+              </BarMetricSection>
+            </el-tab-pane>
+            <el-tab-pane :label="t('pages.dashboard.periodWeekly')" name="weekly">
+              <UserStatChart ref="weeklyLineChartRef" :data="userStatTrend.weekly" :title="t('pages.dashboard.activeRegisterWeekly')"/>
+              <BarMetricSection
+                  :metric-key="activeBarMetric"
+                  :metric-tabs="barMetricTabs"
+                  @update:metric-key="(v) => { activeBarMetric = v; handleBarMetricChange() }"
+              >
+                <UserStatBarChart
+                    ref="weeklyBarChartRef"
+                    :data="userStatTrend.weekly"
+                    :metric-key="activeBarMetric"
+                    :title="barChartTitle"
+                />
+              </BarMetricSection>
+            </el-tab-pane>
+            <el-tab-pane :label="t('pages.dashboard.periodMonthly')" name="monthly">
+              <UserStatChart ref="monthlyLineChartRef" :data="userStatTrend.monthly" :title="t('pages.dashboard.activeRegisterMonthly')"/>
+              <BarMetricSection
+                  :metric-key="activeBarMetric"
+                  :metric-tabs="barMetricTabs"
+                  @update:metric-key="(v) => { activeBarMetric = v; handleBarMetricChange() }"
+              >
+                <UserStatBarChart
+                    ref="monthlyBarChartRef"
+                    :data="userStatTrend.monthly"
+                    :metric-key="activeBarMetric"
+                    :title="barChartTitle"
+                />
+              </BarMetricSection>
+            </el-tab-pane>
+          </el-tabs>
         </el-tab-pane>
-        <el-tab-pane :label="t('pages.dashboard.periodMonthly')" name="monthly">
-          <UserStatChart ref="monthlyLineChartRef" :data="userStatTrend.monthly" :title="t('pages.dashboard.activeRegisterMonthly')"/>
-          <BarMetricSection
-              :metric-key="activeBarMetric"
-              :metric-tabs="barMetricTabs"
-              @update:metric-key="(v) => { activeBarMetric = v; handleBarMetricChange() }"
-          >
-            <UserStatBarChart
-                ref="monthlyBarChartRef"
-                :data="userStatTrend.monthly"
-                :metric-key="activeBarMetric"
-                :title="barChartTitle"
-            />
-          </BarMetricSection>
+
+        <el-tab-pane :label="t('pages.dashboard.onlineUsers')" name="online">
+          <div class="tab-toolbar">
+            <el-button :loading="onlineLoading" @click="fetchResourceMetricTrend">{{ t('common.refresh') }}</el-button>
+          </div>
+          <ResourceMetricChart
+              ref="onlineChartRef"
+              :data="resourceMetricTrend.points"
+              metric-type="online"
+              :title="t('pages.dashboard.onlineChartTitle')"
+              class="online-chart"
+          />
         </el-tab-pane>
       </el-tabs>
-
-      <ResourceMetricChart
-          ref="onlineChartRef"
-          :data="resourceMetricTrend.points"
-          metric-type="online"
-          :title="t('pages.dashboard.onlineChartTitle')"
-          class="online-chart"
-      />
     </el-card>
   </div>
 </template>
@@ -113,9 +120,21 @@ const ResourceMetricChart = defineAsyncComponent(() => import('@/views/config/co
 const {t, locale} = useI18n()
 const loading = ref(false)
 const trendLoading = ref(false)
+const onlineLoading = ref(false)
+const activeMainTab = ref('basic')
 const activePeriod = ref('daily')
 const enabledBarSeries = getUserStatBarMetricTabs()
 const activeBarMetric = ref(enabledBarSeries[0]?.key ?? 'rechargeUser')
+
+const pageLoading = computed(() => {
+  if (activeMainTab.value === 'basic') {
+    return loading.value
+  }
+  if (activeMainTab.value === 'user') {
+    return trendLoading.value
+  }
+  return onlineLoading.value
+})
 
 const barMetricTabs = computed(() =>
     enabledBarSeries.map((item) => ({
@@ -200,33 +219,43 @@ type BasicStatCard = BasicStatCardConfig & {
   value: number | string
 }
 
-const BASIC_STAT_CARD_CONFIG: BasicStatCardConfig[] = [
-  {key: 'totalGold', labelKey: 'statTotalGold', theme: 'stat-card-gold', format: 'amount'},
-  {key: 'todayRecharge', labelKey: 'statTodayRecharge', theme: 'stat-card-today-recharge', format: 'amount'},
-  {key: 'todayGoldConsume', labelKey: 'statTodayGoldConsume', theme: 'stat-card-today-gold-consume', format: 'amount'},
-  {key: 'todayDiamondConsume', labelKey: 'statTodayDiamondConsume', theme: 'stat-card-today-diamond-consume', format: 'amount'},
-  {key: 'todayRegisterUser', labelKey: 'statTodayRegisterUser', theme: 'stat-card-today-register', format: 'count'},
-  {key: 'totalRecharge', labelKey: 'statTotalRecharge', theme: 'stat-card-recharge', format: 'amount'},
-  {key: 'totalWithdraw', labelKey: 'statTotalWithdraw', theme: 'stat-card-withdraw', format: 'amount'},
-  {key: 'totalGoldConsume', labelKey: 'statTotalGoldConsume', theme: 'stat-card-total-gold-consume', format: 'amount'},
-  {key: 'totalDiamondConsume', labelKey: 'statTotalDiamondConsume', theme: 'stat-card-total-diamond-consume', format: 'amount'},
-  {key: 'totalRegisterUser', labelKey: 'statTotalRegisterUser', theme: 'stat-card-register', format: 'count'},
+const TODAY_STAT_CARD_CONFIG: BasicStatCardConfig[] = [
+  {key: 'todayRecharge', labelKey: 'statTodayRecharge', theme: 'tone-teal', format: 'amount'},
+  {key: 'todayGoldConsume', labelKey: 'statTodayGoldConsume', theme: 'tone-rose', format: 'amount'},
+  {key: 'todayDiamondConsume', labelKey: 'statTodayDiamondConsume', theme: 'tone-sky', format: 'amount'},
+  {key: 'todayRegisterUser', labelKey: 'statTodayRegisterUser', theme: 'tone-pink', format: 'count'},
 ]
 
-const BASIC_STAT_ROW_SIZE = 5
+const TOTAL_STAT_CARD_CONFIG: BasicStatCardConfig[] = [
+  {key: 'totalGold', labelKey: 'statTotalGold', theme: 'tone-amber', format: 'amount'},
+  {key: 'totalRecharge', labelKey: 'statTotalRecharge', theme: 'tone-blue', format: 'amount'},
+  {key: 'totalWithdraw', labelKey: 'statTotalWithdraw', theme: 'tone-green', format: 'amount'},
+  {key: 'totalGoldConsume', labelKey: 'statTotalGoldConsume', theme: 'tone-orange', format: 'amount'},
+  {key: 'totalDiamondConsume', labelKey: 'statTotalDiamondConsume', theme: 'tone-violet', format: 'amount'},
+  {key: 'totalRegisterUser', labelKey: 'statTotalRegisterUser', theme: 'tone-indigo', format: 'count'},
+]
 
-const basicStatCardRows = computed<BasicStatCard[][]>(() => {
-  const cards: BasicStatCard[] = BASIC_STAT_CARD_CONFIG.map((cfg) => ({
-    ...cfg,
-    label: t(`pages.dashboard.${cfg.labelKey}`),
-    value: sysStat[cfg.key] ?? 0,
-  }))
-  const rows: BasicStatCard[][] = []
-  for (let i = 0; i < cards.length; i += BASIC_STAT_ROW_SIZE) {
-    rows.push(cards.slice(i, i + BASIC_STAT_ROW_SIZE))
-  }
-  return rows
-})
+const toBasicStatCards = (configs: BasicStatCardConfig[]): BasicStatCard[] =>
+    configs.map((cfg) => ({
+      ...cfg,
+      label: t(`pages.dashboard.${cfg.labelKey}`),
+      value: sysStat[cfg.key] ?? 0,
+    }))
+
+const basicStatSections = computed(() => [
+  {
+    key: 'today',
+    title: t('pages.dashboard.sectionToday'),
+    gridClass: 'basic-stat-grid-today',
+    cards: toBasicStatCards(TODAY_STAT_CARD_CONFIG),
+  },
+  {
+    key: 'total',
+    title: t('pages.dashboard.sectionTotal'),
+    gridClass: 'basic-stat-grid-total',
+    cards: toBasicStatCards(TOTAL_STAT_CARD_CONFIG),
+  },
+])
 
 const fetchSysStat = async () => {
   loading.value = true
@@ -251,27 +280,32 @@ const fetchSysStat = async () => {
 }
 
 const fetchResourceMetricTrend = async () => {
-  const data = await sysStatApi.getResourceMetricOnlineTrend({limit: RESOURCE_METRIC_MAX_POINTS})
-  resourceMetricTrend.points = data.points || []
-  await nextTick()
-  setTimeout(() => {
-    onlineChartRef.value?.resize()
-  }, 0)
+  onlineLoading.value = true
+  try {
+    const data = await sysStatApi.getResourceMetricOnlineTrend({limit: RESOURCE_METRIC_MAX_POINTS})
+    resourceMetricTrend.points = data.points || []
+    await nextTick()
+    setTimeout(() => {
+      onlineChartRef.value?.resize()
+    }, 0)
+  } catch (error) {
+    console.error('fetch online trend failed:', error)
+    ElMessage.error(t('pages.dashboard.fetchOnlineTrendFailed'))
+  } finally {
+    onlineLoading.value = false
+  }
 }
 
 const fetchUserStatTrend = async () => {
   trendLoading.value = true
   try {
-    const [data] = await Promise.all([
-      sysStatApi.getUserStatTrend(),
-      fetchResourceMetricTrend(),
-    ])
+    const data = await sysStatApi.getUserStatTrend()
     userStatTrend.daily = data.daily || []
     userStatTrend.weekly = data.weekly || []
     userStatTrend.monthly = data.monthly || []
     await nextTick()
     setTimeout(() => {
-      resizeActiveChart()
+      resizeUserCharts()
     }, 0)
   } catch (error) {
     console.error('fetch user stat trend failed:', error)
@@ -281,8 +315,7 @@ const fetchUserStatTrend = async () => {
   }
 }
 
-const resizeActiveChart = () => {
-  onlineChartRef.value?.resize()
+const resizeUserCharts = () => {
   if (activePeriod.value === 'daily') {
     dailyLineChartRef.value?.resize()
     dailyBarChartRef.value?.resize()
@@ -297,14 +330,25 @@ const resizeActiveChart = () => {
   monthlyBarChartRef.value?.resize()
 }
 
-const handleTabChange = async () => {
+const handleMainTabChange = async () => {
   await nextTick()
-  resizeActiveChart()
+  if (activeMainTab.value === 'user') {
+    resizeUserCharts()
+    return
+  }
+  if (activeMainTab.value === 'online') {
+    onlineChartRef.value?.resize()
+  }
+}
+
+const handlePeriodTabChange = async () => {
+  await nextTick()
+  resizeUserCharts()
 }
 
 const handleBarMetricChange = async () => {
   await nextTick()
-  resizeActiveChart()
+  resizeUserCharts()
 }
 
 const formatCount = (value: string | number | null | undefined) => {
@@ -317,6 +361,7 @@ const formatCount = (value: string | number | null | undefined) => {
 onMounted(() => {
   fetchSysStat()
   fetchUserStatTrend()
+  fetchResourceMetricTrend()
 })
 </script>
 
@@ -325,106 +370,166 @@ onMounted(() => {
   padding: 20px;
 }
 
-.card-header {
+.tab-toolbar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.user-stat-card {
-  margin-top: 20px;
+  justify-content: flex-end;
+  margin-bottom: 16px;
 }
 
 .online-chart {
-  margin-top: 20px;
+  margin-top: 0;
 }
 
-.basic-stat-rows {
+.basic-stat-board {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 28px;
 }
 
-.basic-stat-row {
+.basic-stat-section-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.basic-stat-section-title {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.basic-stat-section-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, #e2e8f0, transparent);
+}
+
+.basic-stat-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 20px;
+  gap: 14px;
+}
+
+.basic-stat-grid-today {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.basic-stat-grid-total {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .stat-card {
-  border-radius: 12px;
-  padding: 20px 16px;
-  color: #fff;
-  min-height: 108px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  padding: 18px 18px 18px 20px;
+  min-height: 112px;
+  background: #f8fafc;
+  border: 1px solid #e8eef5;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--stat-accent, #94a3b8);
+}
+
+.stat-card:hover {
+  border-color: #d7e3f0;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+  transform: translateY(-1px);
 }
 
 .stat-label {
-  font-size: 14px;
-  opacity: 0.9;
-  margin-bottom: 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #64748b;
+  margin-bottom: 14px;
 }
 
 .stat-value {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
   word-break: break-all;
 }
 
+.tone-teal {
+  --stat-accent: #0d9488;
+  background: linear-gradient(180deg, #f0fdfa 0%, #f8fafc 100%);
+}
+
+.tone-rose {
+  --stat-accent: #e11d48;
+  background: linear-gradient(180deg, #fff1f2 0%, #f8fafc 100%);
+}
+
+.tone-sky {
+  --stat-accent: #0284c7;
+  background: linear-gradient(180deg, #f0f9ff 0%, #f8fafc 100%);
+}
+
+.tone-pink {
+  --stat-accent: #db2777;
+  background: linear-gradient(180deg, #fdf2f8 0%, #f8fafc 100%);
+}
+
+.tone-amber {
+  --stat-accent: #d97706;
+  background: linear-gradient(180deg, #fffbeb 0%, #f8fafc 100%);
+}
+
+.tone-blue {
+  --stat-accent: #2563eb;
+  background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 100%);
+}
+
+.tone-green {
+  --stat-accent: #16a34a;
+  background: linear-gradient(180deg, #f0fdf4 0%, #f8fafc 100%);
+}
+
+.tone-orange {
+  --stat-accent: #ea580c;
+  background: linear-gradient(180deg, #fff7ed 0%, #f8fafc 100%);
+}
+
+.tone-violet {
+  --stat-accent: #7c3aed;
+  background: linear-gradient(180deg, #f5f3ff 0%, #f8fafc 100%);
+}
+
+.tone-indigo {
+  --stat-accent: #4f46e5;
+  background: linear-gradient(180deg, #eef2ff 0%, #f8fafc 100%);
+}
+
 @media (max-width: 1200px) {
-  .basic-stat-row {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .basic-stat-grid-today,
+  .basic-stat-grid-total {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 768px) {
-  .basic-stat-row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .basic-stat-grid-today,
+  .basic-stat-grid-total {
+    grid-template-columns: 1fr;
   }
 
   .stat-value {
-    font-size: 20px;
+    font-size: 22px;
   }
-}
-
-.stat-card-gold {
-  background: linear-gradient(135deg, #f6ad55, #ed8936);
-}
-
-.stat-card-recharge {
-  background: linear-gradient(135deg, #63b3ed, #3182ce);
-}
-
-.stat-card-withdraw {
-  background: linear-gradient(135deg, #68d391, #38a169);
-}
-
-.stat-card-register {
-  background: linear-gradient(135deg, #b794f4, #805ad5);
-}
-
-.stat-card-today-recharge {
-  background: linear-gradient(135deg, #4fd1c5, #319795);
-}
-
-.stat-card-today-register {
-  background: linear-gradient(135deg, #f687b3, #d53f8c);
-}
-
-.stat-card-total-gold-consume {
-  background: linear-gradient(135deg, #fbd38d, #dd6b20);
-}
-
-.stat-card-today-gold-consume {
-  background: linear-gradient(135deg, #fc8181, #c53030);
-}
-
-.stat-card-total-diamond-consume {
-  background: linear-gradient(135deg, #9f7aea, #6b46c1);
-}
-
-.stat-card-today-diamond-consume {
-  background: linear-gradient(135deg, #76e4f7, #3182ce);
 }
 </style>

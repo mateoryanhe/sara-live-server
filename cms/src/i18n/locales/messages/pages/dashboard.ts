@@ -3,6 +3,9 @@ import {definePageMessages} from './_define'
 const zh = {
   basicData: '基础数据',
   userData: '用户数据',
+  onlineUsers: '在线人数',
+  sectionToday: '今日',
+  sectionTotal: '累计',
   periodDaily: '日',
   periodWeekly: '周',
   periodMonthly: '月',
@@ -31,12 +34,16 @@ const zh = {
   registerUsers: '新注册用户数',
   fetchSysStatFailed: '获取系统总数据失败',
   fetchUserTrendFailed: '获取用户数据趋势失败',
+  fetchOnlineTrendFailed: '获取在线人数趋势失败',
   chartTitleWithPeriod: '{label} ({period})',
 }
 
 const en = {
   basicData: 'Overview',
   userData: 'User metrics',
+  onlineUsers: 'Online users',
+  sectionToday: 'Today',
+  sectionTotal: 'Totals',
   periodDaily: 'Daily',
   periodWeekly: 'Weekly',
   periodMonthly: 'Monthly',
@@ -65,12 +72,16 @@ const en = {
   registerUsers: 'New registrations',
   fetchSysStatFailed: 'Failed to load system stats',
   fetchUserTrendFailed: 'Failed to load user trend data',
+  fetchOnlineTrendFailed: 'Failed to load online user trend',
   chartTitleWithPeriod: '{label} ({period})',
 }
 
 const es = {
   basicData: 'Datos básicos',
   userData: 'Datos de usuarios',
+  onlineUsers: 'Usuarios en línea',
+  sectionToday: 'Hoy',
+  sectionTotal: 'Acumulado',
   periodDaily: 'Día',
   periodWeekly: 'Semana',
   periodMonthly: 'Mes',
@@ -99,12 +110,16 @@ const es = {
   registerUsers: 'Nuevos registros',
   fetchSysStatFailed: 'Error al cargar estadísticas del sistema',
   fetchUserTrendFailed: 'Error al cargar tendencia de usuarios',
+  fetchOnlineTrendFailed: 'Error al cargar tendencia de usuarios en línea',
   chartTitleWithPeriod: '{label} ({period})',
 }
 
 const pt = {
   basicData: 'Dados básicos',
   userData: 'Dados de usuários',
+  onlineUsers: 'Usuários online',
+  sectionToday: 'Hoje',
+  sectionTotal: 'Acumulado',
   periodDaily: 'Dia',
   periodWeekly: 'Semana',
   periodMonthly: 'Mês',
@@ -133,12 +148,16 @@ const pt = {
   registerUsers: 'Novos registros',
   fetchSysStatFailed: 'Falha ao carregar estatísticas do sistema',
   fetchUserTrendFailed: 'Falha ao carregar tendência de usuários',
+  fetchOnlineTrendFailed: 'Falha ao carregar tendência de usuários online',
   chartTitleWithPeriod: '{label} ({period})',
 }
 
 const hi = {
   basicData: 'मूल डेटा',
   userData: 'उपयोगकर्ता डेटा',
+  onlineUsers: 'ऑनलाइन उपयोगकर्ता',
+  sectionToday: 'आज',
+  sectionTotal: 'कुल',
   periodDaily: 'दैनिक',
   periodWeekly: 'साप्ताहिक',
   periodMonthly: 'मासिक',
@@ -167,12 +186,16 @@ const hi = {
   registerUsers: 'नए पंजीकरण',
   fetchSysStatFailed: 'सिस्टम आँकड़े लोड विफल',
   fetchUserTrendFailed: 'उपयोगकर्ता रुझान लोड विफल',
+  fetchOnlineTrendFailed: 'ऑनलाइन उपयोगकर्ता रुझान लोड विफल',
   chartTitleWithPeriod: '{label} ({period})',
 }
 
 const id = {
   basicData: 'Data dasar',
   userData: 'Data pengguna',
+  onlineUsers: 'Pengguna online',
+  sectionToday: 'Hari ini',
+  sectionTotal: 'Akumulasi',
   periodDaily: 'Harian',
   periodWeekly: 'Mingguan',
   periodMonthly: 'Bulanan',
@@ -201,6 +224,7 @@ const id = {
   registerUsers: 'Pendaftaran baru',
   fetchSysStatFailed: 'Gagal memuat statistik sistem',
   fetchUserTrendFailed: 'Gagal memuat tren pengguna',
+  fetchOnlineTrendFailed: 'Gagal memuat tren pengguna online',
   chartTitleWithPeriod: '{label} ({period})',
 }
 
