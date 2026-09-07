@@ -114,6 +114,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		YhPayNotConfigured:              "Channel payment is not configured",
 		YhPayCreateFailed:               "Failed to create channel payment",
 		YhPayCurrencyNotSupported:       "Channel payment currency is not supported yet",
+		EmailAlreadyInUse:               "Email is already in use",
+		EmailAlreadyBound:               "Account already has an email bound",
 	},
 	lang.LangZHCN: {
 		Success:                         "成功",
@@ -224,6 +226,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		YhPayNotConfigured:              "渠道支付未配置或未启用",
 		YhPayCreateFailed:               "创建渠道支付失败",
 		YhPayCurrencyNotSupported:       "渠道支付暂不支持该币种",
+		EmailAlreadyInUse:               "邮箱已被使用",
+		EmailAlreadyBound:               "账号已绑定邮箱",
 	},
 	lang.LangZHTW: {
 		Success:                         "成功",
@@ -334,6 +338,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		YhPayNotConfigured:              "渠道支付未配置或未啟用",
 		YhPayCreateFailed:               "建立渠道支付失敗",
 		YhPayCurrencyNotSupported:       "渠道支付暫不支援該幣種",
+		EmailAlreadyInUse:               "郵箱已被使用",
+		EmailAlreadyBound:               "帳號已綁定郵箱",
 	},
 }
 

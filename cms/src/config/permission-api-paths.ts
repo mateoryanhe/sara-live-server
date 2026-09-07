@@ -450,6 +450,9 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     YhPayCfgManagement: '/yhpay/getYhPayCfg',
     'YhPayCfgManagement:view': '/yhpay/getYhPayCfg',
     'YhPayCfgManagement:save': '/yhpay/saveYhPayCfg',
+    CfEmailCfgManagement: '/cfEmail/getCfEmailCfg',
+    'CfEmailCfgManagement:view': '/cfEmail/getCfEmailCfg',
+    'CfEmailCfgManagement:save': '/cfEmail/saveCfEmailCfg',
 
     UploadResourceCfgManagement: '/upload/getUploadResourceCfg',
     'UploadResourceCfgManagement:view': '/upload/getUploadResourceCfg',

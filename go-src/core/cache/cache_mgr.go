@@ -15,6 +15,32 @@ const (
 // Loader 缓存未命中时加载数据.
 type Loader[T any] func(ctx context.Context) (T, error)
 
+// cacheSlot 包装真实缓存值.
+// gcache 对 loader/Set 得到的 nil 不落库(甚至会删 key)，因此永远存非 nil 的 *cacheSlot，
+// 这样空切片、nil 指针、数值 0 等都能正常负缓存。
+type cacheSlot[T any] struct {
+	v T
+}
+
+func wrapSlot[T any](v T) *cacheSlot[T] {
+	return &cacheSlot[T]{v: v}
+}
+
+func unwrapSlot[T any](raw any) (T, bool) {
+	var zero T
+	if raw == nil {
+		return zero, false
+	}
+	if slot, ok := raw.(*cacheSlot[T]); ok {
+		return slot.v, true
+	}
+	// 兼容旧直接存 T 的条目(热升级窗口)
+	if v, ok := raw.(T); ok {
+		return v, true
+	}
+	return zero, false
+}
+
 type cacheCore[T any] struct {
 	cache *gcache.Cache
 	ttl   time.Duration
@@ -34,16 +60,20 @@ func (c *cacheCore[T]) load(ctx context.Context, key any, loader Loader[T]) (T, 
 	}
 	ctx = c.ctx(ctx)
 	data, err := c.cache.GetOrSetFuncLock(ctx, key, func(ctx context.Context) (any, error) {
-		return loader(ctx)
+		v, err := loader(ctx)
+		if err != nil {
+			return nil, err
+		}
+		// 必须返回非 nil，否则 gcache 不会写入
+		return wrapSlot(v), nil
 	}, c.ttl)
-	if err != nil || data.IsNil() {
+	if err != nil || data == nil || data.IsNil() {
 		return zero, false
 	}
 	if c.ttl > 0 {
 		_, _ = c.cache.UpdateExpire(ctx, key, c.ttl)
 	}
-	typed, ok := data.Val().(T)
-	return typed, ok
+	return unwrapSlot[T](data.Val())
 }
 
 func (c *cacheCore[T]) peek(ctx context.Context, key any) (T, bool) {
@@ -52,11 +82,10 @@ func (c *cacheCore[T]) peek(ctx context.Context, key any) (T, bool) {
 		return zero, false
 	}
 	v, err := c.cache.Get(c.ctx(ctx), key)
-	if err != nil || v.IsNil() {
+	if err != nil || v == nil || v.IsNil() {
 		return zero, false
 	}
-	typed, ok := v.Val().(T)
-	return typed, ok
+	return unwrapSlot[T](v.Val())
 }
 
 func (c *cacheCore[T]) publish(ctx context.Context, key any, data T) {
@@ -64,10 +93,11 @@ func (c *cacheCore[T]) publish(ctx context.Context, key any, data T) {
 		return
 	}
 	ctx = c.ctx(ctx)
-	if _, exist, err := c.cache.Update(ctx, key, data); err == nil && exist {
+	slot := wrapSlot(data)
+	if _, exist, err := c.cache.Update(ctx, key, slot); err == nil && exist {
 		return
 	}
-	_ = c.cache.Set(ctx, key, data, c.ttl)
+	_ = c.cache.Set(ctx, key, slot, c.ttl)
 }
 
 func (c *cacheCore[T]) set(ctx context.Context, key any, data T, ttl ...time.Duration) error {
@@ -78,7 +108,7 @@ func (c *cacheCore[T]) set(ctx context.Context, key any, data T, ttl ...time.Dur
 	if len(ttl) > 0 {
 		d = ttl[0]
 	}
-	return c.cache.Set(c.ctx(ctx), key, data, d)
+	return c.cache.Set(c.ctx(ctx), key, wrapSlot(data), d)
 }
 
 func (c *cacheCore[T]) remove(ctx context.Context, keys ...any) {
@@ -113,10 +143,7 @@ func (c *cacheCore[T]) values(ctx context.Context) ([]T, error) {
 	}
 	out := make([]T, 0, len(vals))
 	for _, v := range vals {
-		if v == nil {
-			continue
-		}
-		if typed, ok := v.(T); ok {
+		if typed, ok := unwrapSlot[T](v); ok {
 			out = append(out, typed)
 		}
 	}

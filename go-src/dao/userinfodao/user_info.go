@@ -19,6 +19,7 @@ func InitUserInfoDao() {
 	shareCodeUserIdCacheMgr = cache.NewRowCache[uint64]()
 	initUserCumulativeStatDao()
 	initUserExtDao()
+	initEmailUserIdCache()
 	initUserRechargeCfgFirstRechargeDao()
 }
 

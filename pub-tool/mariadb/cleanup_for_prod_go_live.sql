@@ -64,6 +64,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- vip_cfgs                             VIP 配置
 -- wallet_exchange_cfgs                 钱包兑换配置
 -- yhpay_cfgs                           第三方支付(YhPay)配置
+-- cf_email_cfgs                        Cloudflare Email Sending 发信配置
 
 -- -----------------------------------------------------------------------------
 -- 【删除】用户体系

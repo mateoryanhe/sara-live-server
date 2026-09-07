@@ -87,6 +87,7 @@ const CONFIG_PAGES = new Set([
     'PrivacyPolicyCfgManagement',
     'GooglePlayCfgManagement',
     'YhPayCfgManagement',
+    'CfEmailCfgManagement',
     'UploadResourceCfgManagement',
     'DataSyncCfgManagement',
     'AgoraCfgManagement',

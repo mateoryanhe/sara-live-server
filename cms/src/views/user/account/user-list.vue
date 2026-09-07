@@ -271,7 +271,14 @@
       </el-form>
       <template #footer>
         <el-button @click="currencyDialogVisible = false">{{ t('common.cancel') }}</el-button>
-        <el-button type="primary" @click="submitCurrencyChange">{{ t('common.confirm') }}</el-button>
+        <el-button
+            :disabled="currencySubmitting"
+            :loading="currencySubmitting"
+            type="primary"
+            @click="submitCurrencyChange"
+        >
+          {{ t('common.confirm') }}
+        </el-button>
       </template>
     </el-dialog>
 
@@ -530,6 +537,9 @@ const currencyDialogVisible = ref(false)
 const currencyType = ref<CurrencyType>('gold')
 const currencyMode = ref<CurrencyMode>('add')
 const currencyFormRef = ref<FormInstance>()
+const currencySubmitting = ref(false)
+const CURRENCY_SUBMIT_CD_MS = 1000
+let currencySubmitCdTimer: ReturnType<typeof setTimeout> | null = null
 const banDialogVisible = ref(false)
 const banSubmitting = ref(false)
 const banFormRef = ref<FormInstance>()
@@ -836,6 +846,11 @@ const resetCurrencyForm = () => {
   currencyForm.amount = 1
   currencyForm.reason = GM_ADJUST_REASON_TEST
   currencyFormRef.value?.clearValidate()
+  if (currencySubmitCdTimer) {
+    clearTimeout(currencySubmitCdTimer)
+    currencySubmitCdTimer = null
+  }
+  currencySubmitting.value = false
 }
 
 const openCurrencyDialog = (row: UserInfo, type: CurrencyType, mode: CurrencyMode) => {
@@ -1236,9 +1251,11 @@ const afterCurrencyChangeSuccess = () => {
 }
 
 const submitCurrencyChange = async () => {
-  if (!currencyFormRef.value) return
+  if (currencySubmitting.value || !currencyFormRef.value) return
   await currencyFormRef.value.validate(async (valid) => {
     if (!valid) return
+    currencySubmitting.value = true
+    const unlockAt = Date.now() + CURRENCY_SUBMIT_CD_MS
     try {
       const payload = {
         userId: currencyForm.userId,
@@ -1254,6 +1271,15 @@ const submitCurrencyChange = async () => {
       afterCurrencyChangeSuccess()
     } catch (error) {
       console.error('currencyChange failed:', error)
+    } finally {
+      const waitMs = Math.max(0, unlockAt - Date.now())
+      if (currencySubmitCdTimer) {
+        clearTimeout(currencySubmitCdTimer)
+      }
+      currencySubmitCdTimer = setTimeout(() => {
+        currencySubmitting.value = false
+        currencySubmitCdTimer = null
+      }, waitMs)
     }
   })
 }

@@ -37,6 +37,7 @@ import {gameBetLogApi} from './modules/gameBetLog'
 import {dataSyncApi} from './modules/data-sync'
 import {fiatCurrencyApi} from './modules/fiatCurrency'
 import {yhpayApi} from './modules/yhpay'
+import {cfEmailApi} from './modules/cf-email'
 
 export {
     authApi,
@@ -79,6 +80,7 @@ export {
     dataSyncApi,
     fiatCurrencyApi,
     yhpayApi,
+    cfEmailApi,
 }
 
 export default {
@@ -122,4 +124,5 @@ export default {
     dataSyncApi,
     fiatCurrencyApi,
     yhpayApi,
+    cfEmailApi,
 }

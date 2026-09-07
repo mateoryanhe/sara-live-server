@@ -9,6 +9,7 @@ import (
 	"xr-game-server/core/push"
 	"xr-game-server/core/xrtoken"
 	"xr-game-server/dao/accountdao"
+	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/accountdto"
 	"xr-game-server/dto/userinfodto"
 	"xr-game-server/entity/user"
@@ -22,6 +23,7 @@ func CancelUser(ctx context.Context, req *accountdto.CancelReq) (bool, error) {
 	}
 	account.SetCancel(true)
 	accountdao.PublishAccountList(req.OpenId, req.Channel)
+	invalidateEmailIndexOnCancel(req.OpenId, req.Channel, req.AccountId)
 	invalidateAppToken(req.AccountId)
 	push.Kick(req.AccountId)
 	return true, nil
@@ -38,8 +40,21 @@ func UnCancelUser(ctx context.Context, req *accountdto.UnCancelReq) (bool, error
 	if active := accountdao.FindActiveAccount(req.OpenId, req.Channel); active != nil && active.ID != req.AccountId {
 		return false, errercode.CreateCode(errercode.AccountAlreadyExists)
 	}
+	// 恢复前检查邮箱是否仍可启用(未被其它未注销账号占用)
+	email := ""
+	if req.Channel == EmailChannel {
+		email = normalizeEmailKey(req.OpenId)
+	} else {
+		email = accountBoundEmail(req.AccountId)
+	}
+	if err := ensureEmailAvailable(email, req.AccountId); err != nil {
+		return false, err
+	}
 	account.SetCancel(false)
 	accountdao.PublishAccountList(req.OpenId, req.Channel)
+	if email != "" {
+		userinfodao.PublishEmailUserIdCache(email, req.AccountId)
+	}
 	return true, nil
 }
 
@@ -76,9 +91,20 @@ func doAppCancelAccount(accountId uint64) error {
 	account.SetCancel(true)
 	accountdao.PublishAccountList(dbAcc.OpenId, dbAcc.Channel)
 	recordAppCancelAccountSuccess(dbAcc.OpenId, dbAcc.Channel)
+	invalidateEmailIndexOnCancel(dbAcc.OpenId, dbAcc.Channel, accountId)
 	invalidateAppToken(accountId)
 	push.Kick(accountId)
 	return nil
+}
+
+func invalidateEmailIndexOnCancel(openId string, channel uint, accountId uint64) {
+	if email := accountBoundEmail(accountId); email != "" {
+		userinfodao.InvalidateEmailUserIdCache(email)
+		return
+	}
+	if channel == EmailChannel {
+		userinfodao.InvalidateEmailUserIdCache(openId)
+	}
 }
 
 func invalidateAppToken(userId uint64) {

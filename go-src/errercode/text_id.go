@@ -112,5 +112,7 @@ func init() {
 		YhPayNotConfigured:              "Pembayaran saluran belum dikonfigurasi",
 		YhPayCreateFailed:               "Gagal membuat pembayaran saluran",
 		YhPayCurrencyNotSupported:       "Mata uang pembayaran saluran belum didukung",
+		EmailAlreadyInUse:               "Email sudah digunakan",
+		EmailAlreadyBound:               "Akun sudah terikat email",
 	}
 }

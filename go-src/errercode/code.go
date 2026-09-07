@@ -207,6 +207,10 @@ const (
 	YhPayCreateFailed XRCode = 159
 	// YhPayCurrencyNotSupported yhpay暂不支持该币种
 	YhPayCurrencyNotSupported XRCode = 160
+	// EmailAlreadyInUse 邮箱已被未注销账号使用
+	EmailAlreadyInUse XRCode = 161
+	// EmailAlreadyBound 当前账号已绑定邮箱
+	EmailAlreadyBound XRCode = 162
 )
 
 type XError struct {

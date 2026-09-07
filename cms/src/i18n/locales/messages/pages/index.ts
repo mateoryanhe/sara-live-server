@@ -66,6 +66,7 @@ import {textModerationMessages} from './text-moderation'
 import {privacyPolicyMessages} from './privacy-policy'
 import {googlePlayMessages} from './google-play'
 import {yhpayMessages} from './yhpay'
+import {cfEmailMessages} from './cf-email'
 import {uploadResourceMessages} from './upload-resource'
 import {h5LiveDeployMessages} from './h5-live-deploy'
 import {thirdPayDeployMessages} from './third-pay-deploy'
@@ -141,6 +142,7 @@ const pageMessageBuilders = [
   ['privacyPolicy', privacyPolicyMessages],
   ['googlePlay', googlePlayMessages],
   ['yhpay', yhpayMessages],
+  ['cfEmail', cfEmailMessages],
   ['uploadResource', uploadResourceMessages],
   ['h5LiveDeploy', h5LiveDeployMessages],
   ['thirdPayDeploy', thirdPayDeployMessages],

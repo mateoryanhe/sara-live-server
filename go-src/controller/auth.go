@@ -33,6 +33,14 @@ func (s *AuthController) SendCode(ctx context.Context, req *verificationcodedto.
 	return verification_code.SendCode(ctx, req)
 }
 
+func (s *AuthController) SendEmailCode(ctx context.Context, req *authdto.SendEmailCodeReq) (*authdto.SendEmailCodeRes, error) {
+	return auth.SendEmailCode(ctx, req)
+}
+
+func (s *AuthController) EmailLogin(ctx context.Context, req *authdto.EmailLoginReq) (*authdto.EmailLoginRes, error) {
+	return auth.EmailLogin(ctx, req)
+}
+
 func (s *AuthController) PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (*authdto.PhoneRegisterRes, error) {
 	return auth.PhoneRegister(ctx, req)
 }

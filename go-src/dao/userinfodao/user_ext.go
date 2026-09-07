@@ -44,6 +44,9 @@ func PublishUserExt(data *entity.UserExt) {
 		return
 	}
 	userExtCacheMgr.PublishRow(gctx.New(), data.ID, data)
+	if email := strings.ToLower(strings.TrimSpace(data.Email)); email != "" {
+		PublishEmailUserIdCache(email, data.ID)
+	}
 }
 
 // GetUserExtFromMemory 仅从内存缓存读取用户扩展信息,未命中返回 nil

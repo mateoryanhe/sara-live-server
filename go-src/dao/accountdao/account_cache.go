@@ -43,13 +43,17 @@ func parseAccountListCacheKey(key string) (channel uint, openId string, ok bool)
 func loadAccountListFromDB(openId string, channel uint) []*entity.Account {
 	openId = LogicalOpenId(openId)
 	if openId == "" || channel == 0 {
-		return nil
+		return []*entity.Account{}
 	}
 	var list []*entity.Account
 	_ = g.Model(string(entity.TbAccount)).Unscoped().Where(
 		"channel = ? AND open_id = ?",
 		channel, openId,
 	).Order("id desc").Scan(&list)
+	// 空结果也缓存空切片(非 nil)，避免 gcache 丢弃 nil 导致反复打库
+	if list == nil {
+		return []*entity.Account{}
+	}
 	return list
 }
 

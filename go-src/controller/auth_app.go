@@ -19,3 +19,8 @@ func initAuthAppController() {
 func (c *AuthAppController) PhoneChangePassword(ctx context.Context, req *authdto.PhoneChangePasswordReq) (*authdto.PhoneChangePasswordRes, error) {
 	return auth.PhoneChangePassword(ctx, req)
 }
+
+// BindEmail App端绑定邮箱(需登录+验证码)
+func (c *AuthAppController) BindEmail(ctx context.Context, req *authdto.BindEmailReq) (*authdto.BindEmailRes, error) {
+	return auth.BindEmail(ctx, req)
+}

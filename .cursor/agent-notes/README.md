@@ -62,4 +62,16 @@
 - 观众：`gameevent.ValidAudienceEvent`（`join_room` Pub）
 - 热重启：`PrepareRestart` 排空 + `hotrestart.RegisterStatQueueFlush` 与 syndb 同阶段刷盘
 
+## Cloudflare Email Sending（2026-09-04）
+
+- 验证码发信走 CF Email Service REST：`POST /accounts/{account_id}/email/sending/send`（非 AWS SES / 非 CloudFront）
+- CMS 表 `cf_email_cfgs`：enabled / accountId / apiToken / fromEmail（如 `noreply@mail.saralive.net`）
+- 入口：`POST /auth/sendEmailCode`、`POST /auth/emailLogin`（免鉴权）、`POST /auth/bindEmail`（需登录）
+- 渠道 `EmailChannel=7`；绑定写 `user_exts.email`
+- 占用规则：仅看未注销账号（EmailChannel open_id 或已绑定 email）；注销即释放；UnCancel 再检查邮箱
+- `user_exts.email` → userId 走 `emailUserIdCacheMgr`（绑定 Publish / 注销 Invalidate）
+- 验证码：发信成功写入 `emailVerifyCodeCache`（5 分钟）；登录/绑定校验后删除；调试码 `981200`
+- 发信限流（双 gcache，不入库）：`emailSendCooldownCache` 1 分钟；`emailSendDailyCache` 每日 10 次、TTL 到本地 0 点
+- 菜单：配置 → Cloudflare邮件（`/cfEmail`）
+
 任务结束后若有新事实，简短更新本文件或新增专题 md。

@@ -8,13 +8,13 @@ require (
 	github.com/alibabacloud-go/green-20220302/v3 v3.3.0
 	github.com/alibabacloud-go/tea v1.5.0
 	github.com/alibabacloud-go/tea-utils/v2 v2.0.9
-	github.com/bits-and-blooms/bloom/v3 v3.7.1
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/bytedance/sonic v1.15.2
 	github.com/gogf/gf/contrib/drivers/mysql/v2 v2.10.2
 	github.com/gogf/gf/v2 v2.10.2
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
+	github.com/oschwald/geoip2-golang/v2 v2.2.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/shirou/gopsutil/v3 v3.24.5
 	google.golang.org/api v0.291.0
@@ -31,7 +31,6 @@ require (
 	github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.5 // indirect
 	github.com/alibabacloud-go/debug v1.0.1 // indirect
 	github.com/aliyun/credentials-go v1.4.5 // indirect
-	github.com/bits-and-blooms/bitset v1.24.4 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic/loader v0.5.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -67,7 +66,6 @@ require (
 	github.com/olekukonko/errors v1.3.0 // indirect
 	github.com/olekukonko/ll v0.1.8 // indirect
 	github.com/olekukonko/tablewriter v1.1.4 // indirect
-	github.com/oschwald/geoip2-golang/v2 v2.2.0 // indirect
 	github.com/oschwald/maxminddb-golang/v2 v2.3.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect

@@ -1808,6 +1808,33 @@ export interface SaveYhPayCfgRes {
     id: string
 }
 
+export interface CfEmailCfg {
+    id: string
+    enabled: boolean
+    accountId: string
+    apiToken: string
+    fromEmail: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetCfEmailCfgRes {
+    cfg: CfEmailCfg | null
+}
+
+export interface SaveCfEmailCfgReq {
+    id?: number
+    enabled: boolean
+    accountId: string
+    apiToken: string
+    fromEmail: string
+}
+
+export interface SaveCfEmailCfgRes {
+    success: boolean
+    id: string
+}
+
 export interface DataSyncCfg {
     id: string
     targetApiBase: string

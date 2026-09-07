@@ -65,6 +65,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: 'yhpay支付'},
         },
         {
+            path: 'cf-email',
+            name: 'CfEmailCfgManagement',
+            component: () => import('@/views/config/cf-email.vue'),
+            meta: {title: 'Cloudflare邮件'},
+        },
+        {
             path: 'upload-resource',
             name: 'UploadResourceCfgManagement',
             component: () => import('@/views/config/upload-resource.vue'),
