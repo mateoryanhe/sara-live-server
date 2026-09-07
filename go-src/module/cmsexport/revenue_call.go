@@ -13,24 +13,33 @@ import (
 	"xr-game-server/dto/cmsexportdto"
 	callentity "xr-game-server/entity/call"
 	liveentity "xr-game-server/entity/live"
+	"xr-game-server/module/cmsvis"
 )
 
-func exportLiveRevenueLogCSV(ctx context.Context, payload json.RawMessage, onProgress func(exportedRows, totalRows int)) (*exportResult, error) {
+func exportLiveRevenueLogCSV(ctx context.Context, cmsUserId uint64, payload json.RawMessage, onProgress func(exportedRows, totalRows int)) (*exportResult, error) {
 	var req cmsexportdto.CMSExportLiveRevenueLogPayload
 	if err := json.Unmarshal(payload, &req); err != nil {
 		return nil, err
 	}
+	guildIds, restrict, empty := cmsvis.VisibilityGuildFilterForUser(cmsUserId)
+	if empty {
+		return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
+			return 0, nil
+		}, onProgress)
+	}
 	receiverIds := liveroomdao.ParseRevenueLogReceiverIds(req.ReceiverId, req.PlatformAnchorId, req.GuildAnchorId, req.ReceiverIds)
 	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 		total, rows := liveroomdao.RevenueLogCMSList(&liveroomdao.RevenueLogCMSListFilter{
-			ReceiverIds:  receiverIds,
-			LiveRecordId: parseUint64Filter(req.LiveRecordId),
-			Keyword:      req.Keyword,
-			RevenueType:  req.RevenueType,
-			StartTime:   req.StartTime,
-			EndTime:     req.EndTime,
-			PageIndex:   pageIndex,
-			PageSize:    pageSize,
+			ReceiverIds:   receiverIds,
+			GuildIds:      guildIds,
+			FilterByGuild: restrict,
+			LiveRecordId:  parseUint64Filter(req.LiveRecordId),
+			Keyword:       req.Keyword,
+			RevenueType:   req.RevenueType,
+			StartTime:     req.StartTime,
+			EndTime:       req.EndTime,
+			PageIndex:     pageIndex,
+			PageSize:      pageSize,
 		})
 		nicknameMap := userinfodao.GetNicknameMapByUserIds(collectRevenueLogUserIds(rows))
 		csvRows := make([][]string, 0, len(rows))
@@ -41,23 +50,31 @@ func exportLiveRevenueLogCSV(ctx context.Context, payload json.RawMessage, onPro
 	}, onProgress)
 }
 
-func exportVideoCallLogCSV(ctx context.Context, payload json.RawMessage, onProgress func(exportedRows, totalRows int)) (*exportResult, error) {
+func exportVideoCallLogCSV(ctx context.Context, cmsUserId uint64, payload json.RawMessage, onProgress func(exportedRows, totalRows int)) (*exportResult, error) {
 	var req cmsexportdto.CMSExportVideoCallLogPayload
 	if err := json.Unmarshal(payload, &req); err != nil {
 		return nil, err
 	}
+	guildIds, restrict, empty := cmsvis.VisibilityGuildFilterForUser(cmsUserId)
+	if empty {
+		return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
+			return 0, nil
+		}, onProgress)
+	}
 	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 		receiverIds := liveroomdao.ParseRevenueLogReceiverIds(req.ReceiverId, req.PlatformAnchorId, req.GuildAnchorId, req.ReceiverIds)
 		total, rows := calldao.CallOrderCMSList(&calldao.CallOrderCMSListFilter{
-			CallerId:    parseUint64Filter(req.CallerId),
-			ReceiverIds: receiverIds,
-			Source:     req.Source,
-			Status:     req.Status,
-			CallType:   callentity.CallOrderTypeVideo,
-			StartTime:  req.StartTime,
-			EndTime:    req.EndTime,
-			PageIndex:  pageIndex,
-			PageSize:   pageSize,
+			CallerId:      parseUint64Filter(req.CallerId),
+			ReceiverIds:   receiverIds,
+			GuildIds:      guildIds,
+			FilterByGuild: restrict,
+			Source:        req.Source,
+			Status:        req.Status,
+			CallType:      callentity.CallOrderTypeVideo,
+			StartTime:     req.StartTime,
+			EndTime:       req.EndTime,
+			PageIndex:     pageIndex,
+			PageSize:      pageSize,
 		})
 		nicknameMap := userinfodao.GetNicknameMapByUserIds(collectCallOrderUserIds(rows))
 		csvRows := make([][]string, 0, len(rows))

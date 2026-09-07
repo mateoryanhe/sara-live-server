@@ -11,15 +11,22 @@ import (
 	"xr-game-server/dto/liverecorddto"
 	liveentity "xr-game-server/entity/live"
 	userentity "xr-game-server/entity/user"
+	"xr-game-server/module/cmsvis"
 	"xr-game-server/module/upload"
 )
 
 // GetCMSWeeklyUnsettledLiveList CMS分页查询本周未结算流水
-func GetCMSWeeklyUnsettledLiveList(_ context.Context, req *liverecorddto.CMSWeeklyUnsettledLiveListReq) (*httpserver.CMSQueryResp, error) {
+func GetCMSWeeklyUnsettledLiveList(ctx context.Context, req *liverecorddto.CMSWeeklyUnsettledLiveListReq) (*httpserver.CMSQueryResp, error) {
+	guildIds, restrict, empty := cmsvis.VisibilityGuildFilter(ctx)
+	if empty {
+		return httpserver.NewCMSQueryResp(0, []*liverecorddto.CMSWeeklyUnsettledLiveItem{}), nil
+	}
 	weekStart, weekEnd := xrtime.WeekDateRange(time.Now())
 	roomIds := liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds)
 	total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSMultiList(&liveroomdao.DailyAnchorEffectiveLiveCMSMultiListFilter{
 		RoomIds:       roomIds,
+		GuildIds:      guildIds,
+		FilterByGuild: restrict,
 		LiveDateStart: weekStart,
 		LiveDateEnd:   weekEnd,
 		Keyword:       req.Keyword,

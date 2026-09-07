@@ -8,6 +8,7 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liverecorddto"
 	"xr-game-server/entity/live"
+	"xr-game-server/module/cmsvis"
 	"xr-game-server/module/upload"
 )
 
@@ -55,15 +56,21 @@ func toCMSItem(v *entity.LiveRecord) *liverecorddto.CMSLiveRecordItem {
 }
 
 // GetCMSList CMS分页查询直播记录
-func GetCMSList(_ context.Context, req *liverecorddto.CMSLiveRecordListReq) (*httpserver.CMSQueryResp, error) {
+func GetCMSList(ctx context.Context, req *liverecorddto.CMSLiveRecordListReq) (*httpserver.CMSQueryResp, error) {
+	guildIds, restrict, empty := cmsvis.VisibilityGuildFilter(ctx)
+	if empty {
+		return httpserver.NewCMSQueryResp(0, []*liverecorddto.CMSLiveRecordItem{}), nil
+	}
 	total, rows := liveroomdao.LiveRecordCMSList(&liveroomdao.LiveRecordCMSListFilter{
-		AnchorIds:    liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
-		LiveRecordId: parseUint64Filter(req.LiveRecordId),
-		Keyword:      req.Keyword,
-		StartTime:    req.StartTime,
-		EndTime:      req.EndTime,
-		PageIndex:    req.PageIndex,
-		PageSize:     req.PageSize,
+		AnchorIds:     liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
+		GuildIds:      guildIds,
+		FilterByGuild: restrict,
+		LiveRecordId:  parseUint64Filter(req.LiveRecordId),
+		Keyword:       req.Keyword,
+		StartTime:     req.StartTime,
+		EndTime:       req.EndTime,
+		PageIndex:     req.PageIndex,
+		PageSize:      req.PageSize,
 	})
 	list := make([]*liverecorddto.CMSLiveRecordItem, 0, len(rows))
 	for _, row := range rows {

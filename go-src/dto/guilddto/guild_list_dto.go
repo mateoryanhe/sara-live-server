@@ -11,6 +11,13 @@ type GuildListReq struct {
 	Name string `json:"name" dc:"工会名称"`
 }
 
+// GuildListForVisibilityReq 可见性管理页拉全部上架工会(不按可见性表过滤)
+type GuildListForVisibilityReq struct {
+	g.Meta `path:"/guildListForVisibility" method:"post" summary:"可见性管理拉取全部上架工会" tags:"直播工会"`
+	httpserver.CMSQueryReq
+	Name string `json:"name" dc:"工会名称"`
+}
+
 type GuildListRes struct {
 	ID                   string  `json:"id"`
 	Name                 string  `json:"name"`

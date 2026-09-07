@@ -180,6 +180,13 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GuildCMSUserManagement:create': '/cmsuser/createGuildCMSUser',
     'GuildCMSUserManagement:resetPassword': '/cmsuser/updateCMSUser',
 
+    GuildVisibilityManagement: '/guild/guildVisibilityByUserList',
+    'GuildVisibilityManagement:view': '/guild/guildVisibilityByUserList',
+    'GuildVisibilityManagement:search': '/guild/guildVisibilityByUserList',
+    'GuildVisibilityManagement:grant': '/guild/batchGrantGuildVisibility',
+    'GuildVisibilityManagement:revoke': '/guild/batchRevokeGuildVisibility',
+    'GuildVisibilityManagement:listGuilds': '/guild/guildListForVisibility',
+
     GuildAnchorDailyLiveManagement: '/guild/cmsMyGuildAnchorDailyEffectiveLiveList',
     'GuildAnchorDailyLiveManagement:view': '/guild/cmsMyGuildAnchorDailyEffectiveLiveList',
     'GuildAnchorDailyLiveManagement:search': '/guild/cmsMyGuildAnchorDailyEffectiveLiveList',

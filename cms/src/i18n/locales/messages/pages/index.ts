@@ -19,6 +19,7 @@ import {guildMembersMessages} from './guild-members'
 import {guildProfileMessages} from './guild-profile'
 import {guildProfileMembersMessages} from './guild-profile-members'
 import {guildCmsUserListMessages} from './guild-cms-user-list'
+import {guildVisibilityListMessages} from './guild-visibility-list'
 import {guildAnchorIncomeSettlementLogListMessages} from './guild-anchor-income-settlement-log-list'
 import {rechargeCfgListMessages} from './recharge-cfg-list'
 import {appPkgListMessages} from './app-pkg-list'
@@ -95,6 +96,7 @@ const pageMessageBuilders = [
   ['guildProfile', guildProfileMessages],
   ['guildProfileMembers', guildProfileMembersMessages],
   ['guildCmsUserList', guildCmsUserListMessages],
+  ['guildVisibilityList', guildVisibilityListMessages],
   ['guildAnchorIncomeSettlementLogList', guildAnchorIncomeSettlementLogListMessages],
   ['rechargeCfgList', rechargeCfgListMessages],
   ['appPkgList', appPkgListMessages],

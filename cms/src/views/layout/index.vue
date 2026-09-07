@@ -58,7 +58,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildTransferManagement') || hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('GuildAnchorDailyLiveManagement') || hasMenuPermission('PlatformAnchorList') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('FiatCurrencyManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('LiveRevenueShareCfgManagement')"
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildTransferManagement') || hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('GuildVisibilityManagement') || hasMenuPermission('GuildAnchorDailyLiveManagement') || hasMenuPermission('PlatformAnchorList') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('FiatCurrencyManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('LiveRevenueShareCfgManagement')"
             index="/operation">
           <template #title>
             <el-icon>
@@ -123,7 +123,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('GuildManagement') || hasMenuPermission('GuildTransferManagement') || hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('GuildAnchorDailyLiveManagement') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('PlatformAnchorList')"
+              v-if="hasMenuPermission('GuildManagement') || hasMenuPermission('GuildTransferManagement') || hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('GuildVisibilityManagement') || hasMenuPermission('GuildAnchorDailyLiveManagement') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('PlatformAnchorList')"
               index="/operation/group/guild">
             <template #title>
               <el-icon>
@@ -148,6 +148,12 @@
                 <UserFilled/>
               </el-icon>
               <span>{{ t('menu.GuildCMSUserManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('GuildVisibilityManagement')" index="/operation/guild/guild-visibility-list">
+              <el-icon>
+                <View/>
+              </el-icon>
+              <span>{{ t('menu.GuildVisibilityManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('GuildAnchorDailyLiveManagement')" index="/operation/guild/guild-anchor-daily-live-list">
               <el-icon>

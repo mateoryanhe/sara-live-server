@@ -8,22 +8,31 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/cmsexportdto"
 	"xr-game-server/entity/live"
+	"xr-game-server/module/cmsvis"
 )
 
-func exportLiveRecordCSV(ctx context.Context, payload json.RawMessage, onProgress func(exportedRows, totalRows int)) (*exportResult, error) {
+func exportLiveRecordCSV(ctx context.Context, cmsUserId uint64, payload json.RawMessage, onProgress func(exportedRows, totalRows int)) (*exportResult, error) {
 	var req cmsexportdto.CMSExportLiveRecordPayload
 	if err := json.Unmarshal(payload, &req); err != nil {
 		return nil, err
 	}
+	guildIds, restrict, empty := cmsvis.VisibilityGuildFilterForUser(cmsUserId)
+	if empty {
+		return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
+			return 0, nil
+		}, onProgress)
+	}
 	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 		total, rows := liveroomdao.LiveRecordCMSList(&liveroomdao.LiveRecordCMSListFilter{
-			AnchorIds:    liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
-			LiveRecordId: parseUint64Filter(req.LiveRecordId),
-			Keyword:      req.Keyword,
-			StartTime:    req.StartTime,
-			EndTime:      req.EndTime,
-			PageIndex:    pageIndex,
-			PageSize:     pageSize,
+			AnchorIds:     liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds),
+			GuildIds:      guildIds,
+			FilterByGuild: restrict,
+			LiveRecordId:  parseUint64Filter(req.LiveRecordId),
+			Keyword:       req.Keyword,
+			StartTime:     req.StartTime,
+			EndTime:       req.EndTime,
+			PageIndex:     pageIndex,
+			PageSize:      pageSize,
 		})
 		csvRows := make([][]string, 0, len(rows))
 		for _, row := range rows {

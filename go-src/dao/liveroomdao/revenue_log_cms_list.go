@@ -12,15 +12,17 @@ import (
 
 // RevenueLogCMSListFilter CMS直播收益流水查询条件
 type RevenueLogCMSListFilter struct {
-	ReceiverId   uint64
-	ReceiverIds  []uint64
-	LiveRecordId uint64
-	Keyword      string
-	RevenueType  uint8
-	StartTime    int64
-	EndTime      int64
-	PageIndex    int
-	PageSize     int
+	ReceiverId    uint64
+	ReceiverIds   []uint64
+	GuildIds      []uint64
+	FilterByGuild bool
+	LiveRecordId  uint64
+	Keyword       string
+	RevenueType   uint8
+	StartTime     int64
+	EndTime       int64
+	PageIndex     int
+	PageSize      int
 }
 
 func (f *RevenueLogCMSListFilter) receiverIds() []uint64 {
@@ -47,6 +49,9 @@ func RevenueLogCMSList(f *RevenueLogCMSListFilter) (int, []*entity.LiveRevenueLo
 	if f == nil {
 		return 0, list
 	}
+	if f.FilterByGuild && len(f.GuildIds) == 0 {
+		return 0, list
+	}
 	if f.PageIndex <= 0 {
 		f.PageIndex = 1
 	}
@@ -55,16 +60,22 @@ func RevenueLogCMSList(f *RevenueLogCMSListFilter) (int, []*entity.LiveRevenueLo
 	}
 	ctx := gctx.New()
 	keyword := strings.TrimSpace(f.Keyword)
-	aliased := keyword != ""
+	needAlias := keyword != "" || f.FilterByGuild
 	colPrefix := ""
 	var m = g.Model(string(entity.TbLiveRevenueLog)).Ctx(ctx)
-	if aliased {
-		like := "%" + keyword + "%"
+	if needAlias {
 		colPrefix = "rl."
-		m = g.Model(string(entity.TbLiveRevenueLog)+" rl").Ctx(ctx).
-			LeftJoin(string(userentity.TbUserInfo)+" u_recv", "u_recv.id = rl."+string(entity.LiveRevenueLogRoomId)).
-			LeftJoin(string(userentity.TbUserInfo)+" u_send", "u_send.id = rl."+string(entity.LiveRevenueLogSenderId)).
-			Where("(CAST(rl.id AS CHAR) LIKE ? OR CAST(rl."+string(entity.LiveRevenueLogLiveRecordId)+" AS CHAR) LIKE ? OR CAST(rl."+string(entity.LiveRevenueLogRoomId)+" AS CHAR) LIKE ? OR CAST(rl."+string(entity.LiveRevenueLogSenderId)+" AS CHAR) LIKE ? OR u_recv."+string(userentity.UserInfoNickname)+" LIKE ? OR u_send."+string(userentity.UserInfoNickname)+" LIKE ?)", like, like, like, like, like, like)
+		m = g.Model(string(entity.TbLiveRevenueLog) + " rl").Ctx(ctx)
+		if keyword != "" {
+			like := "%" + keyword + "%"
+			m = m.LeftJoin(string(userentity.TbUserInfo)+" u_recv", "u_recv.id = rl."+string(entity.LiveRevenueLogRoomId)).
+				LeftJoin(string(userentity.TbUserInfo)+" u_send", "u_send.id = rl."+string(entity.LiveRevenueLogSenderId)).
+				Where("(CAST(rl.id AS CHAR) LIKE ? OR CAST(rl."+string(entity.LiveRevenueLogLiveRecordId)+" AS CHAR) LIKE ? OR CAST(rl."+string(entity.LiveRevenueLogRoomId)+" AS CHAR) LIKE ? OR CAST(rl."+string(entity.LiveRevenueLogSenderId)+" AS CHAR) LIKE ? OR u_recv."+string(userentity.UserInfoNickname)+" LIKE ? OR u_send."+string(userentity.UserInfoNickname)+" LIKE ?)", like, like, like, like, like, like)
+		}
+		if f.FilterByGuild {
+			m = m.InnerJoin(string(entity.TbLiveRoom)+" r", "r.id = rl."+string(entity.LiveRevenueLogRoomId)).
+				WhereIn("r."+string(entity.LiveRoomGuildId), f.GuildIds)
+		}
 	}
 	if receiverIds := f.receiverIds(); len(receiverIds) > 0 {
 		m = m.Where(colPrefix+string(entity.LiveRevenueLogRoomId)+" IN (?)", receiverIds)
@@ -87,7 +98,7 @@ func RevenueLogCMSList(f *RevenueLogCMSListFilter) (int, []*entity.LiveRevenueLo
 	}
 	query := m.Clone().Order(colPrefix + "id desc").
 		Limit(f.PageSize).Offset((f.PageIndex - 1) * f.PageSize)
-	if aliased {
+	if needAlias {
 		query = query.Fields("rl.*")
 	}
 	_ = query.Scan(&list)

@@ -224,11 +224,11 @@ func runExportJob(job *exportJob) {
 func executeExportJob(ctx context.Context, exportType string, cmsUserId uint64, payload json.RawMessage, onProgress func(exportedRows, totalRows int)) (*exportResult, error) {
 	switch exportType {
 	case cmsexportdto.ExportTypeLiveRecord:
-		return exportLiveRecordCSV(ctx, payload, onProgress)
+		return exportLiveRecordCSV(ctx, cmsUserId, payload, onProgress)
 	case cmsexportdto.ExportTypeLiveRevenueLog:
-		return exportLiveRevenueLogCSV(ctx, payload, onProgress)
+		return exportLiveRevenueLogCSV(ctx, cmsUserId, payload, onProgress)
 	case cmsexportdto.ExportTypeVideoCallLog:
-		return exportVideoCallLogCSV(ctx, payload, onProgress)
+		return exportVideoCallLogCSV(ctx, cmsUserId, payload, onProgress)
 	case cmsexportdto.ExportTypeAnchorIncomeSettlementLog:
 		return exportAnchorIncomeSettlementLogCSV(ctx, payload, onProgress)
 	case cmsexportdto.ExportTypeGuildIncomeSettlementLog:
@@ -246,9 +246,9 @@ func executeExportJob(ctx context.Context, exportType string, cmsUserId uint64, 
 	case cmsexportdto.ExportTypeMyGuildAnchorDailyEffectiveLive:
 		return exportMyGuildAnchorDailyEffectiveLiveCSV(ctx, cmsUserId, payload, onProgress)
 	case cmsexportdto.ExportTypeLiveDailyEffectiveLive:
-		return exportLiveDailyEffectiveLiveCSV(ctx, payload, onProgress)
+		return exportLiveDailyEffectiveLiveCSV(ctx, cmsUserId, payload, onProgress)
 	case cmsexportdto.ExportTypeLiveWeeklyUnsettledLive:
-		return exportLiveWeeklyUnsettledLiveCSV(ctx, payload, onProgress)
+		return exportLiveWeeklyUnsettledLiveCSV(ctx, cmsUserId, payload, onProgress)
 	case cmsexportdto.ExportTypeCurrencyLog:
 		return exportCurrencyLogCSV(ctx, payload, onProgress)
 	case cmsexportdto.ExportTypeGameBetLog:

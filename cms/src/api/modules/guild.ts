@@ -27,6 +27,7 @@ import type {
     MyGuildProfileListRes,
     PageResponse,
     UpdateMyGuildProfileReq,
+    GuildVisibilityItem,
 } from '@/types/api'
 
 // 直播工会管理API
@@ -34,6 +35,10 @@ export const guildApi = {
     // 获取工会列表
     getGuildList: (params: GuildQuery) => {
         return request.post<PageResponse<Guild>>('/guild/guildList', params)
+    },
+
+    getGuildListForVisibility: (params: GuildQuery) => {
+        return request.post<PageResponse<Guild>>('/guild/guildListForVisibility', params)
     },
 
     // 创建工会
@@ -132,5 +137,29 @@ export const guildApi = {
 
     getMyOwnedGuildAnchorList: (params: MyOwnedGuildAnchorListQuery) => {
         return request.post<PageResponse<MyGuildAnchorListItem>>('/guild/getMyOwnedGuildAnchorList', params)
+    },
+
+    getGuildVisibilityList: (guildId: string | number) => {
+        return request.post<{list: GuildVisibilityItem[]}>('/guild/guildVisibilityList', {guildId})
+    },
+
+    getGuildVisibilityByUserList: (cmsUserId: string | number) => {
+        return request.post<{list: GuildVisibilityItem[]}>('/guild/guildVisibilityByUserList', {cmsUserId})
+    },
+
+    grantGuildVisibility: (data: {guildId: string | number; cmsUserId: string | number}) => {
+        return request.post<{success: boolean}>('/guild/grantGuildVisibility', data)
+    },
+
+    batchGrantGuildVisibility: (data: {cmsUserId: string | number; guildIds: Array<string | number>}) => {
+        return request.post<{success: boolean; grantedCount: number}>('/guild/batchGrantGuildVisibility', data)
+    },
+
+    revokeGuildVisibility: (data: {guildId: string | number; cmsUserId: string | number}) => {
+        return request.post<{success: boolean}>('/guild/revokeGuildVisibility', data)
+    },
+
+    batchRevokeGuildVisibility: (data: {cmsUserId: string | number; guildIds: Array<string | number>}) => {
+        return request.post<{success: boolean; revokedCount: number}>('/guild/batchRevokeGuildVisibility', data)
     },
 }

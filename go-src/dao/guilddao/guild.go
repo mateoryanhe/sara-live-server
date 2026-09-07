@@ -175,7 +175,7 @@ func OnShelfGuild(id uint64) error {
 }
 
 // GetOffShelfGuildList 分页查询已下架工会(直连数据库)
-func GetOffShelfGuildList(req *guilddto.OffShelfGuildListReq) (int, []*guilddto.GuildListRes) {
+func GetOffShelfGuildList(req *guilddto.OffShelfGuildListReq, visibleGuildIds []uint64, filterByVisibility bool) (int, []*guilddto.GuildListRes) {
 	if req == nil {
 		return 0, []*guilddto.GuildListRes{}
 	}
@@ -188,8 +188,15 @@ func GetOffShelfGuildList(req *guilddto.OffShelfGuildListReq) (int, []*guilddto.
 		pageSize = 10
 	}
 
+	if filterByVisibility && len(visibleGuildIds) == 0 {
+		return 0, []*guilddto.GuildListRes{}
+	}
+
 	m := g.DB().Model(string(liveentity.TbLiveGuild)).
 		Where(string(liveentity.LiveGuildStatus), liveentity.LiveGuildStatusOffShelf)
+	if filterByVisibility {
+		m = m.Where("id IN (?)", visibleGuildIds)
+	}
 	if keyword := strings.TrimSpace(req.Name); keyword != "" {
 		m = m.WhereLike(string(liveentity.LiveGuildName), "%"+keyword+"%")
 	}
@@ -222,7 +229,7 @@ func GetOffShelfGuildList(req *guilddto.OffShelfGuildListReq) (int, []*guilddto.
 }
 
 // GetGuildList 从数据库分页查询工会列表(不含已下架)
-func GetGuildList(req *guilddto.GuildListReq) (int, []*guilddto.GuildListRes) {
+func GetGuildList(req *guilddto.GuildListReq, visibleGuildIds []uint64, filterByVisibility bool) (int, []*guilddto.GuildListRes) {
 	if req == nil {
 		return 0, []*guilddto.GuildListRes{}
 	}
@@ -235,8 +242,15 @@ func GetGuildList(req *guilddto.GuildListReq) (int, []*guilddto.GuildListRes) {
 		pageSize = 10
 	}
 
+	if filterByVisibility && len(visibleGuildIds) == 0 {
+		return 0, []*guilddto.GuildListRes{}
+	}
+
 	m := g.DB().Model(string(liveentity.TbLiveGuild)).
 		Where(string(liveentity.LiveGuildStatus), liveentity.LiveGuildStatusOnShelf)
+	if filterByVisibility {
+		m = m.Where("id IN (?)", visibleGuildIds)
+	}
 	if keyword := strings.TrimSpace(req.Name); keyword != "" {
 		m = m.WhereLike(string(liveentity.LiveGuildName), "%"+keyword+"%")
 	}

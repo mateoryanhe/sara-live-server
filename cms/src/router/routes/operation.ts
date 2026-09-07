@@ -37,6 +37,12 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {title: '工会CMS用户'},
         },
         {
+            path: 'guild/guild-visibility-list',
+            name: 'GuildVisibilityManagement',
+            component: () => import('@/views/operation/guild/guild-visibility-list.vue'),
+            meta: {title: '工会可见性'},
+        },
+        {
             path: 'guild/guild-anchor-daily-live-list',
             name: 'GuildAnchorDailyLiveManagement',
             component: () => import('@/views/operation/guild/guild-anchor-daily-live-list.vue'),

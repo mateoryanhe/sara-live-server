@@ -10,6 +10,7 @@ import (
 	"xr-game-server/dto/calldto"
 	"xr-game-server/entity/call"
 	userentity "xr-game-server/entity/user"
+	"xr-game-server/module/cmsvis"
 	"xr-game-server/module/upload"
 )
 
@@ -112,18 +113,24 @@ func toCMSVideoCallItem(v *entity.CallOrder, nicknameMap map[uint64]string, prof
 }
 
 // GetCMSVideoCallLogList CMS分页查询视频通话日志
-func GetCMSVideoCallLogList(_ context.Context, req *calldto.CMSVideoCallLogListReq) (*httpserver.CMSQueryResp, error) {
+func GetCMSVideoCallLogList(ctx context.Context, req *calldto.CMSVideoCallLogListReq) (*httpserver.CMSQueryResp, error) {
+	guildIds, restrict, empty := cmsvis.VisibilityGuildFilter(ctx)
+	if empty {
+		return httpserver.NewCMSQueryResp(0, []*calldto.CMSVideoCallLogItem{}), nil
+	}
 	receiverIds := liveroomdao.ParseRevenueLogReceiverIds(req.ReceiverId, req.PlatformAnchorId, req.GuildAnchorId, req.ReceiverIds)
 	total, rows := calldao.CallOrderCMSList(&calldao.CallOrderCMSListFilter{
-		CallerId:    parseUint64Filter(req.CallerId),
-		ReceiverIds: receiverIds,
-		Source:     req.Source,
-		Status:     req.Status,
-		CallType:   entity.CallOrderTypeVideo,
-		StartTime:  req.StartTime,
-		EndTime:    req.EndTime,
-		PageIndex:  req.PageIndex,
-		PageSize:   req.PageSize,
+		CallerId:      parseUint64Filter(req.CallerId),
+		ReceiverIds:   receiverIds,
+		GuildIds:      guildIds,
+		FilterByGuild: restrict,
+		Source:        req.Source,
+		Status:        req.Status,
+		CallType:      entity.CallOrderTypeVideo,
+		StartTime:     req.StartTime,
+		EndTime:       req.EndTime,
+		PageIndex:     req.PageIndex,
+		PageSize:      req.PageSize,
 	})
 	userIds := collectCallOrderUserIds(rows)
 	nicknameMap := userinfodao.GetNicknameMapByUserIds(userIds)

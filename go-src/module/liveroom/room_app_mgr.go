@@ -226,12 +226,13 @@ func ViewerCanUseLiveRoomCall(userId uint64) bool {
 	return stat != nil && stat.TotalRecharge >= liveentity.LiveRoomCallMinTotalRechargeUSD
 }
 
-// CanInitiateLiveRoomCall 当前用户是否可向该直播间发起 1v1 通话(与 AllowCallIcon 规则一致)
+// CanInitiateLiveRoomCall 当前用户是否可向该直播间发起 1v1 通话
+// 暂不校验累计充值满 10 USD(AllowCallIcon 仍校验,便于客户端隐藏入口)
 func CanInitiateLiveRoomCall(room *liveentity.LiveRoom, cfg *liveentity.LiveRoomCfg, userId uint64) bool {
-	return allowShowCallIcon(room, cfg, userId)
+	return canInitiateLiveRoomCallBase(room, cfg, userId)
 }
 
-func allowShowCallIcon(room *liveentity.LiveRoom, cfg *liveentity.LiveRoomCfg, userId uint64) bool {
+func canInitiateLiveRoomCallBase(room *liveentity.LiveRoom, cfg *liveentity.LiveRoomCfg, userId uint64) bool {
 	if room == nil || cfg == nil || userId == 0 || userId == room.ID {
 		return false
 	}
@@ -239,6 +240,13 @@ func allowShowCallIcon(room *liveentity.LiveRoom, cfg *liveentity.LiveRoomCfg, u
 		return false
 	}
 	if liveentity.NormalizePrivateInviteType(cfg.PrivateInviteType, cfg.Category) == liveentity.LiveRoomPrivateInviteReject {
+		return false
+	}
+	return true
+}
+
+func allowShowCallIcon(room *liveentity.LiveRoom, cfg *liveentity.LiveRoomCfg, userId uint64) bool {
+	if !canInitiateLiveRoomCallBase(room, cfg, userId) {
 		return false
 	}
 	return ViewerCanUseLiveRoomCall(userId)

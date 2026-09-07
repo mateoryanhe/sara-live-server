@@ -11,6 +11,7 @@ import (
 	"xr-game-server/dto/liverevenuedto"
 	"xr-game-server/entity/live"
 	userentity "xr-game-server/entity/user"
+	"xr-game-server/module/cmsvis"
 	"xr-game-server/module/upload"
 )
 
@@ -89,16 +90,22 @@ func toCMSItem(v *entity.LiveRevenueLog, profileMap map[uint64]*userentity.UserI
 }
 
 // GetCMSList CMS分页查询直播收益流水
-func GetCMSList(_ context.Context, req *liverevenuedto.CMSLiveRevenueLogListReq) (*httpserver.CMSQueryResp, error) {
+func GetCMSList(ctx context.Context, req *liverevenuedto.CMSLiveRevenueLogListReq) (*httpserver.CMSQueryResp, error) {
+	guildIds, restrict, empty := cmsvis.VisibilityGuildFilter(ctx)
+	if empty {
+		return httpserver.NewCMSQueryResp(0, []*liverevenuedto.CMSLiveRevenueLogItem{}), nil
+	}
 	total, rows := liveroomdao.RevenueLogCMSList(&liveroomdao.RevenueLogCMSListFilter{
-		ReceiverIds:  liveroomdao.ParseRevenueLogReceiverIds(req.ReceiverId, req.PlatformAnchorId, req.GuildAnchorId, req.ReceiverIds),
-		LiveRecordId: parseUint64Filter(req.LiveRecordId),
-		Keyword:      req.Keyword,
-		RevenueType:  req.RevenueType,
-		StartTime:    req.StartTime,
-		EndTime:      req.EndTime,
-		PageIndex:    req.PageIndex,
-		PageSize:     req.PageSize,
+		ReceiverIds:   liveroomdao.ParseRevenueLogReceiverIds(req.ReceiverId, req.PlatformAnchorId, req.GuildAnchorId, req.ReceiverIds),
+		GuildIds:      guildIds,
+		FilterByGuild: restrict,
+		LiveRecordId:  parseUint64Filter(req.LiveRecordId),
+		Keyword:       req.Keyword,
+		RevenueType:   req.RevenueType,
+		StartTime:     req.StartTime,
+		EndTime:       req.EndTime,
+		PageIndex:     req.PageIndex,
+		PageSize:      req.PageSize,
 	})
 	profileMap := userinfodao.GetUserProfileMapByUserIds(collectRevenueLogUserIds(rows))
 	list := make([]*liverevenuedto.CMSLiveRevenueLogItem, 0, len(rows))

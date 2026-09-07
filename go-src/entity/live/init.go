@@ -23,6 +23,7 @@ func Init() {
 	initLivePrivateRoomBilling()
 	initLiveCfg()
 	initLiveGuild()
+	initLiveGuildVisibility()
 	initLiveGuildTransferInfo()
 	InitLiveGift()
 	initHomeBanner()

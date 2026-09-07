@@ -10,14 +10,21 @@ import (
 	"xr-game-server/dto/liverecorddto"
 	liveentity "xr-game-server/entity/live"
 	userentity "xr-game-server/entity/user"
+	"xr-game-server/module/cmsvis"
 	"xr-game-server/module/upload"
 )
 
 // GetCMSDailyEffectiveLiveList CMS分页查询每日流水
-func GetCMSDailyEffectiveLiveList(_ context.Context, req *liverecorddto.CMSDailyEffectiveLiveListReq) (*httpserver.CMSQueryResp, error) {
+func GetCMSDailyEffectiveLiveList(ctx context.Context, req *liverecorddto.CMSDailyEffectiveLiveListReq) (*httpserver.CMSQueryResp, error) {
+	guildIds, restrict, empty := cmsvis.VisibilityGuildFilter(ctx)
+	if empty {
+		return httpserver.NewCMSQueryResp(0, []*liverecorddto.CMSDailyEffectiveLiveItem{}), nil
+	}
 	roomIds := liveroomdao.ParseLiveRecordAnchorIds(req.AnchorId, req.PlatformAnchorId, req.GuildAnchorId, req.AnchorIds)
 	total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSMultiList(&liveroomdao.DailyAnchorEffectiveLiveCMSMultiListFilter{
 		RoomIds:       roomIds,
+		GuildIds:      guildIds,
+		FilterByGuild: restrict,
 		LiveDateStart: req.LiveDateStart,
 		LiveDateEnd:   req.LiveDateEnd,
 		Keyword:       req.Keyword,

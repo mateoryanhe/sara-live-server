@@ -24,6 +24,7 @@ const menu = {
   GuildManagement: '工会管理',
   GuildTransferManagement: '工会转账',
   GuildCMSUserManagement: '工会CMS用户',
+  GuildVisibilityManagement: '工会可见性',
   GuildAnchorDailyLiveManagement: '名下主播每日流水',
   GuildMembers: '工会成员',
   GuildDetail: '工会详情',

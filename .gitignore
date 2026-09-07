@@ -15,3 +15,6 @@ go-src/module/logquery/.../
 # Go test / coverage
 *.test
 *.out
+
+# Flutter client（本地开发，暂不入库）
+flutter-client/

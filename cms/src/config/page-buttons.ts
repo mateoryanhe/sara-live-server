@@ -244,6 +244,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     ],
     GuildRecycleBinManagement: [BTN.view, BTN.search, {key: 'onShelf', label: '上架'}],
     GuildCMSUserManagement: [BTN.view, BTN.search, BTN.create, {key: 'resetPassword', label: '重设密码'}],
+    GuildVisibilityManagement: [BTN.view, BTN.search, {key: 'listGuilds', label: '全部上架工会'}, {key: 'grant', label: '批量授权'}, {key: 'revoke', label: '批量撤销'}],
     GuildAnchorDailyLiveManagement: [BTN.view, BTN.search, BTN.export],
     GuildProfileManagement: [
         ...DEFAULT_VIEW_BUTTONS,

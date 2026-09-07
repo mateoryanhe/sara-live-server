@@ -16,6 +16,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   ActivityMessageManagement: 'Mensajes de actividad',
   GuildManagement: 'Gremios',
   GuildTransferManagement: 'Transferencia de gremio',
+  GuildVisibilityManagement: 'Visibilidad del gremio',
   GuildProfileManagement: 'Perfil del gremio',
   RechargeCfgManagement: 'Config. de recarga',
   VipCfgManagement: 'Config. VIP',

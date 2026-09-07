@@ -82,6 +82,20 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/account/getAnchorDetail"}
 	case "/guild/getGuildDailyEffectiveLiveList":
 		return []string{"/guild/getGuildDetail"}
+	case "/guild/guildVisibilityList":
+		return []string{"/guild/guildVisibilityByUserList", "/guild/grantGuildVisibility", "/guild/batchGrantGuildVisibility", "/guild/revokeGuildVisibility", "/guild/batchRevokeGuildVisibility", "/guild/guildListForVisibility", "/cmsuser/cmsUserList"}
+	case "/guild/guildVisibilityByUserList":
+		return []string{"/guild/guildVisibilityList", "/guild/batchGrantGuildVisibility", "/guild/batchRevokeGuildVisibility", "/guild/guildListForVisibility", "/cmsuser/cmsUserList"}
+	case "/guild/grantGuildVisibility":
+		return []string{"/guild/guildVisibilityList", "/guild/guildVisibilityByUserList", "/guild/batchGrantGuildVisibility", "/guild/revokeGuildVisibility", "/guild/guildListForVisibility", "/cmsuser/cmsUserList"}
+	case "/guild/batchGrantGuildVisibility":
+		return []string{"/guild/guildVisibilityList", "/guild/guildVisibilityByUserList", "/guild/grantGuildVisibility", "/guild/batchRevokeGuildVisibility", "/guild/guildListForVisibility", "/cmsuser/cmsUserList"}
+	case "/guild/revokeGuildVisibility":
+		return []string{"/guild/guildVisibilityList", "/guild/guildVisibilityByUserList", "/guild/grantGuildVisibility", "/guild/batchRevokeGuildVisibility"}
+	case "/guild/batchRevokeGuildVisibility":
+		return []string{"/guild/guildVisibilityList", "/guild/guildVisibilityByUserList", "/guild/batchGrantGuildVisibility", "/guild/revokeGuildVisibility"}
+	case "/guild/guildListForVisibility":
+		return []string{"/guild/guildVisibilityByUserList", "/guild/batchGrantGuildVisibility", "/guild/batchRevokeGuildVisibility", "/cmsuser/cmsUserList"}
 	case "/guild/guildList":
 		return []string{"/guild/cmsGuildAnchorDailyEffectiveLiveList", "/guild/cmsMyGuildAnchorDailyEffectiveLiveList", "/liveRecord/cmsLiveRecordList", "/liveRecord/cmsDailyEffectiveLiveList", "/liveRevenueLog/cmsLiveRevenueLogList"}
 	case "/guild/cmsGuildAnchorDailyEffectiveLiveList":

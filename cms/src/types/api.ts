@@ -903,8 +903,18 @@ export interface Guild {
     leaderName?: string
     description: string
     status: number
+    unsettledTotalIncome?: number
     createdAt: string
     updatedAt: string
+}
+
+export interface GuildVisibilityItem {
+    id: string
+    guildId: string
+    guildName?: string
+    cmsUserId: string
+    cmsUserName: string
+    createdAt: string
 }
 
 export interface GuildTransferInfo {

@@ -12,6 +12,7 @@ import (
 	"xr-game-server/dto/guilddto"
 	liveentity "xr-game-server/entity/live"
 	"xr-game-server/errercode"
+	"xr-game-server/module/cmsvis"
 	"xr-game-server/module/liveroom"
 )
 
@@ -19,9 +20,28 @@ func genGuildId() uint64 {
 	return snowflake.GetId()
 }
 
+// resolveGuildListVisibility 非管理员仅看可见性表中的工会;管理员/超管看全部
+func resolveGuildListVisibility(ctx context.Context) (visibleGuildIds []uint64, filterByVisibility bool) {
+	return cmsvis.ResolveGuildListVisibility(ctx)
+}
+
 // GetGuildList 获取直播工会列表
 func GetGuildList(ctx context.Context, req *guilddto.GuildListReq) (res *httpserver.CMSQueryResp, err error) {
-	total, guilds := guilddao.GetGuildList(req)
+	visibleIds, filter := resolveGuildListVisibility(ctx)
+	total, guilds := guilddao.GetGuildList(req, visibleIds, filter)
+	return &httpserver.CMSQueryResp{
+		Total: total,
+		Data:  guilds,
+	}, nil
+}
+
+// GetGuildListForVisibility 可见性管理页拉取全部上架工会(不按可见性表过滤)
+func GetGuildListForVisibility(_ context.Context, req *guilddto.GuildListForVisibilityReq) (res *httpserver.CMSQueryResp, err error) {
+	listReq := &guilddto.GuildListReq{
+		CMSQueryReq: req.CMSQueryReq,
+		Name:        req.Name,
+	}
+	total, guilds := guilddao.GetGuildList(listReq, nil, false)
 	return &httpserver.CMSQueryResp{
 		Total: total,
 		Data:  guilds,
@@ -30,7 +50,8 @@ func GetGuildList(ctx context.Context, req *guilddto.GuildListReq) (res *httpser
 
 // GetOffShelfGuildList 获取已下架工会列表(垃圾库,直查DB)
 func GetOffShelfGuildList(ctx context.Context, req *guilddto.OffShelfGuildListReq) (res *httpserver.CMSQueryResp, err error) {
-	total, guilds := guilddao.GetOffShelfGuildList(req)
+	visibleIds, filter := resolveGuildListVisibility(ctx)
+	total, guilds := guilddao.GetOffShelfGuildList(req, visibleIds, filter)
 	return &httpserver.CMSQueryResp{
 		Total: total,
 		Data:  guilds,
@@ -55,6 +76,11 @@ func CreateGuild(ctx context.Context, req *guilddto.CreateGuildReq) (res *guildd
 	)
 	if err = guilddao.CreateGuild(guild); err != nil {
 		return nil, err
+	}
+
+	// 创建人默认可见
+	if creatorId := httpserver.GetAuthId(ctx); creatorId > 0 {
+		_ = guilddao.AddGuildVisibility(guild.ID, creatorId)
 	}
 
 	return &guilddto.CreateGuildRes{ID: strconv.FormatUint(guild.ID, 10)}, nil

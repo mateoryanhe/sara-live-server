@@ -120,6 +120,8 @@ func DailyAnchorEffectiveLiveCMSList(f *DailyAnchorEffectiveLiveCMSListFilter) (
 // DailyAnchorEffectiveLiveCMSMultiListFilter CMS多主播每日流水查询条件
 type DailyAnchorEffectiveLiveCMSMultiListFilter struct {
 	RoomIds       []uint64
+	GuildIds      []uint64
+	FilterByGuild bool
 	LiveDateStart string
 	LiveDateEnd   string
 	Keyword       string
@@ -134,6 +136,9 @@ func DailyAnchorEffectiveLiveCMSMultiList(f *DailyAnchorEffectiveLiveCMSMultiLis
 	if f == nil {
 		return 0, list
 	}
+	if f.FilterByGuild && len(f.GuildIds) == 0 {
+		return 0, list
+	}
 	if f.PageIndex <= 0 {
 		f.PageIndex = 1
 	}
@@ -142,15 +147,21 @@ func DailyAnchorEffectiveLiveCMSMultiList(f *DailyAnchorEffectiveLiveCMSMultiLis
 	}
 	ctx := gctx.New()
 	keyword := strings.TrimSpace(f.Keyword)
-	aliased := keyword != ""
+	needAlias := keyword != "" || f.FilterByGuild
 	colPrefix := ""
 	var m = g.Model(string(entity.TbDailyAnchorEffectiveLive)).Ctx(ctx)
-	if aliased {
-		like := "%" + keyword + "%"
+	if needAlias {
 		colPrefix = "d."
-		m = g.Model(string(entity.TbDailyAnchorEffectiveLive)+" d").Ctx(ctx).
-			LeftJoin(string(userentity.TbUserInfo)+" u", "u.id = d."+string(entity.DailyAnchorEffectiveLiveRoomId)).
-			Where("(d.id LIKE ? OR CAST(d."+string(entity.DailyAnchorEffectiveLiveRoomId)+" AS CHAR) LIKE ? OR u."+string(userentity.UserInfoNickname)+" LIKE ?)", like, like, like)
+		m = g.Model(string(entity.TbDailyAnchorEffectiveLive) + " d").Ctx(ctx)
+		if keyword != "" {
+			like := "%" + keyword + "%"
+			m = m.LeftJoin(string(userentity.TbUserInfo)+" u", "u.id = d."+string(entity.DailyAnchorEffectiveLiveRoomId)).
+				Where("(d.id LIKE ? OR CAST(d."+string(entity.DailyAnchorEffectiveLiveRoomId)+" AS CHAR) LIKE ? OR u."+string(userentity.UserInfoNickname)+" LIKE ?)", like, like, like)
+		}
+		if f.FilterByGuild {
+			m = m.InnerJoin(string(entity.TbLiveRoom)+" r", "r.id = d."+string(entity.DailyAnchorEffectiveLiveRoomId)).
+				WhereIn("r."+string(entity.LiveRoomGuildId), f.GuildIds)
+		}
 	}
 	if len(f.RoomIds) > 0 {
 		m = m.Where(colPrefix+string(entity.DailyAnchorEffectiveLiveRoomId)+" IN (?)", f.RoomIds)
@@ -161,10 +172,10 @@ func DailyAnchorEffectiveLiveCMSMultiList(f *DailyAnchorEffectiveLiveCMSMultiLis
 		return 0, list
 	}
 	query := m.Clone().
-		Order(colPrefix+string(entity.DailyAnchorEffectiveLiveLiveDate)+" desc, "+colPrefix+"id desc").
+		Order(colPrefix + string(entity.DailyAnchorEffectiveLiveLiveDate) + " desc, " + colPrefix + "id desc").
 		Limit(f.PageSize).
 		Offset((f.PageIndex - 1) * f.PageSize)
-	if aliased {
+	if needAlias {
 		query = query.Fields("d.*")
 	}
 	_ = query.Scan(&list)

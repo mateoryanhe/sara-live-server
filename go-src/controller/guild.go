@@ -23,6 +23,11 @@ func (c *GuildController) GuildList(ctx context.Context, req *guilddto.GuildList
 	return guild.GetGuildList(ctx, req)
 }
 
+// GuildListForVisibility 可见性管理拉取全部上架工会
+func (c *GuildController) GuildListForVisibility(ctx context.Context, req *guilddto.GuildListForVisibilityReq) (res *httpserver.CMSQueryResp, err error) {
+	return guild.GetGuildListForVisibility(ctx, req)
+}
+
 // OffShelfGuildList 获取已下架工会列表(垃圾库)
 func (c *GuildController) OffShelfGuildList(ctx context.Context, req *guilddto.OffShelfGuildListReq) (res *httpserver.CMSQueryResp, err error) {
 	return guild.GetOffShelfGuildList(ctx, req)
@@ -131,4 +136,34 @@ func (c *GuildController) GetGuildTransferInfo(ctx context.Context, req *guilddt
 // SaveGuildTransferInfo CMS保存工会收款/转账信息(直写DB)
 func (c *GuildController) SaveGuildTransferInfo(ctx context.Context, req *guilddto.SaveGuildTransferInfoReq) (*guilddto.SaveGuildTransferInfoRes, error) {
 	return guild.SaveGuildTransferInfo(ctx, req)
+}
+
+// GuildVisibilityList 查询工会可见性授权列表
+func (c *GuildController) GuildVisibilityList(ctx context.Context, req *guilddto.GuildVisibilityListReq) (*guilddto.GuildVisibilityListRes, error) {
+	return guild.GetGuildVisibilityList(ctx, req)
+}
+
+// GuildVisibilityByUserList 查询CMS用户已授权工会列表
+func (c *GuildController) GuildVisibilityByUserList(ctx context.Context, req *guilddto.GuildVisibilityByUserListReq) (*guilddto.GuildVisibilityByUserListRes, error) {
+	return guild.GetGuildVisibilityByUserList(ctx, req)
+}
+
+// GrantGuildVisibility 授权CMS用户工会可见性
+func (c *GuildController) GrantGuildVisibility(ctx context.Context, req *guilddto.GrantGuildVisibilityReq) (*guilddto.GrantGuildVisibilityRes, error) {
+	return guild.GrantGuildVisibility(ctx, req)
+}
+
+// BatchGrantGuildVisibility 批量授权CMS用户工会可见性
+func (c *GuildController) BatchGrantGuildVisibility(ctx context.Context, req *guilddto.BatchGrantGuildVisibilityReq) (*guilddto.BatchGrantGuildVisibilityRes, error) {
+	return guild.BatchGrantGuildVisibility(ctx, req)
+}
+
+// RevokeGuildVisibility 撤销CMS用户工会可见性
+func (c *GuildController) RevokeGuildVisibility(ctx context.Context, req *guilddto.RevokeGuildVisibilityReq) (*guilddto.RevokeGuildVisibilityRes, error) {
+	return guild.RevokeGuildVisibility(ctx, req)
+}
+
+// BatchRevokeGuildVisibility 批量撤销CMS用户工会可见性
+func (c *GuildController) BatchRevokeGuildVisibility(ctx context.Context, req *guilddto.BatchRevokeGuildVisibilityReq) (*guilddto.BatchRevokeGuildVisibilityRes, error) {
+	return guild.BatchRevokeGuildVisibility(ctx, req)
 }

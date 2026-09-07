@@ -13,13 +13,15 @@ import (
 
 // LiveRecordCMSListFilter CMS直播记录查询条件
 type LiveRecordCMSListFilter struct {
-	AnchorIds    []uint64
-	LiveRecordId uint64
-	Keyword      string
-	StartTime    int64
-	EndTime      int64
-	PageIndex    int
-	PageSize     int
+	AnchorIds     []uint64
+	GuildIds      []uint64
+	FilterByGuild bool // true 时仅返回 GuildIds 对应工会(空则无数据)
+	LiveRecordId  uint64
+	Keyword       string
+	StartTime     int64
+	EndTime       int64
+	PageIndex     int
+	PageSize      int
 }
 
 func (f *LiveRecordCMSListFilter) anchorIds() []uint64 {
@@ -83,6 +85,9 @@ func LiveRecordCMSList(f *LiveRecordCMSListFilter) (int, []*entity.LiveRecord) {
 	if f == nil {
 		return 0, list
 	}
+	if f.FilterByGuild && len(f.GuildIds) == 0 {
+		return 0, list
+	}
 	if f.PageIndex <= 0 {
 		f.PageIndex = 1
 	}
@@ -91,15 +96,21 @@ func LiveRecordCMSList(f *LiveRecordCMSListFilter) (int, []*entity.LiveRecord) {
 	}
 	ctx := gctx.New()
 	keyword := strings.TrimSpace(f.Keyword)
-	aliased := keyword != ""
+	needAlias := keyword != "" || f.FilterByGuild
 	colPrefix := ""
 	var m = g.Model(string(entity.TbLiveRecord)).Ctx(ctx)
-	if aliased {
-		like := "%" + keyword + "%"
+	if needAlias {
 		colPrefix = "lr."
-		m = g.Model(string(entity.TbLiveRecord)+" lr").Ctx(ctx).
-			LeftJoin(string(userentity.TbUserInfo)+" u", "u.id = lr."+string(entity.LiveRecordAnchorId)).
-			Where("(CAST(lr.id AS CHAR) LIKE ? OR CAST(lr."+string(entity.LiveRecordAnchorId)+" AS CHAR) LIKE ? OR u."+string(userentity.UserInfoNickname)+" LIKE ?)", like, like, like)
+		m = g.Model(string(entity.TbLiveRecord) + " lr").Ctx(ctx)
+		if keyword != "" {
+			like := "%" + keyword + "%"
+			m = m.LeftJoin(string(userentity.TbUserInfo)+" u", "u.id = lr."+string(entity.LiveRecordAnchorId)).
+				Where("(CAST(lr.id AS CHAR) LIKE ? OR CAST(lr."+string(entity.LiveRecordAnchorId)+" AS CHAR) LIKE ? OR u."+string(userentity.UserInfoNickname)+" LIKE ?)", like, like, like)
+		}
+		if f.FilterByGuild {
+			m = m.InnerJoin(string(entity.TbLiveRoom)+" r", "r.id = lr."+string(entity.LiveRecordAnchorId)).
+				WhereIn("r."+string(entity.LiveRoomGuildId), f.GuildIds)
+		}
 	}
 	if anchorIds := f.anchorIds(); len(anchorIds) > 0 {
 		m = m.Where(colPrefix+string(entity.LiveRecordAnchorId)+" IN (?)", anchorIds)
@@ -119,7 +130,7 @@ func LiveRecordCMSList(f *LiveRecordCMSListFilter) (int, []*entity.LiveRecord) {
 	}
 	query := m.Clone().Order(colPrefix + "id desc").
 		Limit(f.PageSize).Offset((f.PageIndex - 1) * f.PageSize)
-	if aliased {
+	if needAlias {
 		query = query.Fields("lr.*")
 	}
 	_ = query.Scan(&list)

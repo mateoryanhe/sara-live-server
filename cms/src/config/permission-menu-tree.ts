@@ -101,6 +101,10 @@ const GUILD_CMS_USER_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
     {id: 'access', titleKey: 'pages.moduleList.groupAccess', buttonKeys: ['view', 'search', 'create', 'resetPassword']},
 ]
 
+const GUILD_VISIBILITY_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
+    {id: 'access', titleKey: 'pages.moduleList.groupAccess', buttonKeys: ['view', 'search', 'grant', 'revoke']},
+]
+
 function group(
     id: string,
     titleKey: string,
@@ -180,6 +184,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 }),
                 page('GuildTransferManagement'),
                 page('GuildCMSUserManagement', {buttonGroups: GUILD_CMS_USER_BUTTON_GROUPS}),
+                page('GuildVisibilityManagement', {buttonGroups: GUILD_VISIBILITY_BUTTON_GROUPS}),
                 page('GuildAnchorDailyLiveManagement', {buttonGroups: GUILD_ANCHOR_DAILY_LIVE_BUTTON_GROUPS}),
                 page('PlatformAnchorList'),
                 page('GuildRecycleBinManagement'),
