@@ -11,6 +11,7 @@ import (
 	"xr-game-server/dto/guilddto"
 	"xr-game-server/dto/incomesettlementdto"
 	"xr-game-server/entity/live"
+	"xr-game-server/module/cmsvis"
 	"xr-game-server/module/upload"
 )
 
@@ -134,9 +135,15 @@ func GetAnchorCMSList(_ context.Context, req *incomesettlementdto.CMSAnchorIncom
 }
 
 // GetGuildCMSList CMS分页查询工会结算流水
-func GetGuildCMSList(_ context.Context, req *incomesettlementdto.CMSGuildIncomeSettlementLogListReq) (*httpserver.CMSQueryResp, error) {
+func GetGuildCMSList(ctx context.Context, req *incomesettlementdto.CMSGuildIncomeSettlementLogListReq) (*httpserver.CMSQueryResp, error) {
+	guildIds, restrict, empty := cmsvis.VisibilityGuildFilter(ctx)
+	if empty {
+		return httpserver.NewCMSQueryResp(0, []*incomesettlementdto.CMSIncomeSettlementLogItem{}), nil
+	}
 	total, rows := liveroomdao.GuildIncomeSettlementLogCMSList(&liveroomdao.GuildIncomeSettlementLogCMSListFilter{
 		GuildId:                  parseUint64Filter(req.GuildId),
+		GuildIds:                 guildIds,
+		FilterByGuild:            restrict,
 		StartTime:                req.StartTime,
 		EndTime:                  req.EndTime,
 		Status:                   req.Status,
@@ -144,11 +151,11 @@ func GetGuildCMSList(_ context.Context, req *incomesettlementdto.CMSGuildIncomeS
 		PageIndex:                req.PageIndex,
 		PageSize:                 req.PageSize,
 	})
-	guildIds := collectGuildIds(rows)
-	guildNameMap := guilddao.GetNameMapByIds(guildIds)
+	rowGuildIds := collectGuildIds(rows)
+	guildNameMap := guilddao.GetNameMapByIds(rowGuildIds)
 	var transferMap map[uint64]*entity.LiveGuildTransferInfo
 	if req.IncludeTransferInfo {
-		transferMap = guilddao.GetGuildTransferInfoMapByIds(guildIds)
+		transferMap = guilddao.GetGuildTransferInfoMapByIds(rowGuildIds)
 	}
 	list := make([]*incomesettlementdto.CMSIncomeSettlementLogItem, 0, len(rows))
 	for _, row := range rows {

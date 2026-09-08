@@ -11,6 +11,8 @@ import (
 // GuildIncomeSettlementLogCMSListFilter CMS工会结算流水查询条件
 type GuildIncomeSettlementLogCMSListFilter struct {
 	GuildId                  uint64
+	GuildIds                 []uint64
+	FilterByGuild            bool // true 时仅返回 GuildIds 对应工会(空则无数据)
 	StartTime                int64
 	EndTime                  int64
 	Status                   *uint8
@@ -25,6 +27,9 @@ func GuildIncomeSettlementLogCMSList(f *GuildIncomeSettlementLogCMSListFilter) (
 	if f == nil {
 		return 0, list
 	}
+	if f.FilterByGuild && len(f.GuildIds) == 0 {
+		return 0, list
+	}
 	if f.PageIndex <= 0 {
 		f.PageIndex = 1
 	}
@@ -33,8 +38,23 @@ func GuildIncomeSettlementLogCMSList(f *GuildIncomeSettlementLogCMSListFilter) (
 	}
 	ctx := gctx.New()
 	m := g.Model(string(entity.TbGuildIncomeSettlementLog)).Ctx(ctx)
+	guildIdCol := string(entity.GuildIncomeSettlementLogGuildId)
 	if f.GuildId > 0 {
-		m = m.Where(string(entity.GuildIncomeSettlementLogGuildId)+" = ?", f.GuildId)
+		if f.FilterByGuild {
+			allowed := false
+			for _, id := range f.GuildIds {
+				if id == f.GuildId {
+					allowed = true
+					break
+				}
+			}
+			if !allowed {
+				return 0, list
+			}
+		}
+		m = m.Where(guildIdCol+" = ?", f.GuildId)
+	} else if f.FilterByGuild {
+		m = m.WhereIn(guildIdCol, f.GuildIds)
 	}
 	if f.StartTime > 0 {
 		m = m.Where("created_at >= ?", time.Unix(f.StartTime, 0))

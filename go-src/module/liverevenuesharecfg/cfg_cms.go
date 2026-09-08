@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	DefaultAnchorSharePercent = 30
+	DefaultAnchorSharePercent = 10
 	DefaultGuildSharePercent  = 10
 )
 

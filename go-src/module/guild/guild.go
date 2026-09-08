@@ -14,6 +14,7 @@ import (
 	"xr-game-server/errercode"
 	"xr-game-server/module/cmsvis"
 	"xr-game-server/module/liveroom"
+	"xr-game-server/module/liverevenuesharecfg"
 )
 
 func genGuildId() uint64 {
@@ -66,6 +67,13 @@ func CreateGuild(ctx context.Context, req *guilddto.CreateGuildReq) (res *guildd
 	if err = validateGuildLeader(req.LeaderId); err != nil {
 		return nil, err
 	}
+	if req.GuildType != liveentity.LiveGuildTypeNormal && req.GuildType != liveentity.LiveGuildTypeCoinMerchant {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	sharePercent, err := resolveGuildSharePercent(req.GuildType, req.SharePercent, 0, false)
+	if err != nil {
+		return nil, err
+	}
 
 	guild := liveentity.NewLiveGuild(
 		genGuildId(),
@@ -74,12 +82,18 @@ func CreateGuild(ctx context.Context, req *guilddto.CreateGuildReq) (res *guildd
 		resolveLeaderName(req.LeaderId),
 		req.Description,
 	)
+	guild.GuildType = req.GuildType
+	guild.SharePercent = sharePercent
+	creatorId := httpserver.GetAuthId(ctx)
+	if creatorId > 0 {
+		guild.CreatorId = creatorId
+		guild.CreatorName = resolveLeaderName(creatorId)
+	}
 	if err = guilddao.CreateGuild(guild); err != nil {
 		return nil, err
 	}
-
 	// 创建人默认可见
-	if creatorId := httpserver.GetAuthId(ctx); creatorId > 0 {
+	if creatorId > 0 {
 		_ = guilddao.AddGuildVisibility(guild.ID, creatorId)
 	}
 
@@ -99,16 +113,49 @@ func UpdateGuild(ctx context.Context, req *guilddto.UpdateGuildReq) (res *guildd
 	if err = validateGuildLeader(req.LeaderId); err != nil {
 		return nil, err
 	}
+	if req.GuildType != liveentity.LiveGuildTypeNormal && req.GuildType != liveentity.LiveGuildTypeCoinMerchant {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	sharePercent, err := resolveGuildSharePercent(req.GuildType, req.SharePercent, guild.SharePercent, true)
+	if err != nil {
+		return nil, err
+	}
 
 	guild.Name = req.Name
 	guild.LeaderId = req.LeaderId
 	guild.LeaderName = resolveLeaderName(req.LeaderId)
 	guild.Description = req.Description
+	guild.GuildType = req.GuildType
+	guild.SharePercent = sharePercent
 	if err = guilddao.UpdateGuild(guild); err != nil {
 		return nil, err
 	}
 
 	return &guilddto.UpdateGuildRes{Success: true}, nil
+}
+
+// resolveGuildSharePercent 普通工会强制用全局工会分佣;币商工会才允许自定义单一分佣比例
+func resolveGuildSharePercent(
+	guildType uint8,
+	shareIn *float64,
+	existing float64,
+	useExisting bool,
+) (sharePercent float64, err error) {
+	if guildType != liveentity.LiveGuildTypeCoinMerchant {
+		return liverevenuesharecfg.ResolveGuildSharePercent(), nil
+	}
+	if useExisting {
+		sharePercent = existing
+	} else {
+		sharePercent = liverevenuesharecfg.ResolveGuildSharePercent()
+	}
+	if shareIn != nil {
+		if *shareIn < 0 || *shareIn > 100 {
+			return 0, errercode.CreateCode(errercode.InvalidParam)
+		}
+		sharePercent = *shareIn
+	}
+	return sharePercent, nil
 }
 
 // DeleteGuild 下架直播工会(同步下架工会下全部主播间,并归档清零工会未结算收益/日有效次数)

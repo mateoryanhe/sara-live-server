@@ -10,6 +10,7 @@ import (
 	"xr-game-server/dto/cmsexportdto"
 	liveentity "xr-game-server/entity/live"
 	"xr-game-server/errercode"
+	"xr-game-server/module/cmsvis"
 )
 
 func exportAnchorIncomeSettlementLogCSV(ctx context.Context, payload json.RawMessage, onProgress func(exportedRows, totalRows int)) (*exportResult, error) {
@@ -35,18 +36,26 @@ func exportAnchorIncomeSettlementLogCSV(ctx context.Context, payload json.RawMes
 	}, onProgress)
 }
 
-func exportGuildIncomeSettlementLogCSV(ctx context.Context, payload json.RawMessage, onProgress func(exportedRows, totalRows int)) (*exportResult, error) {
+func exportGuildIncomeSettlementLogCSV(ctx context.Context, cmsUserId uint64, payload json.RawMessage, onProgress func(exportedRows, totalRows int)) (*exportResult, error) {
 	var req cmsexportdto.CMSExportGuildIncomeSettlementLogPayload
 	if err := json.Unmarshal(payload, &req); err != nil {
 		return nil, err
 	}
+	guildIds, restrict, empty := cmsvis.VisibilityGuildFilterForUser(cmsUserId)
+	if empty {
+		return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
+			return 0, nil
+		}, onProgress)
+	}
 	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
 		total, rows := liveroomdao.GuildIncomeSettlementLogCMSList(&liveroomdao.GuildIncomeSettlementLogCMSListFilter{
-			GuildId:   parseUint64Filter(req.GuildId),
-			StartTime: req.StartTime,
-			EndTime:   req.EndTime,
-			PageIndex: pageIndex,
-			PageSize:  pageSize,
+			GuildId:       parseUint64Filter(req.GuildId),
+			GuildIds:      guildIds,
+			FilterByGuild: restrict,
+			StartTime:     req.StartTime,
+			EndTime:       req.EndTime,
+			PageIndex:     pageIndex,
+			PageSize:      pageSize,
 		})
 		guildNameMap := guilddao.GetNameMapByIds(collectGuildSettlementGuildIds(rows))
 		csvRows := make([][]string, 0, len(rows))

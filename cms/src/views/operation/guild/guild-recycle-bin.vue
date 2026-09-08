@@ -29,6 +29,11 @@
             {{ formatLeader(row) }}
           </template>
         </el-table-column>
+        <el-table-column :label="t('pages.guildList.creator')" width="160" show-overflow-tooltip>
+          <template #default="{ row }">
+            {{ formatCreator(row) }}
+          </template>
+        </el-table-column>
         <el-table-column :label="t('pages.guildRecycleBin.description')" prop="description" show-overflow-tooltip/>
         <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
         <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
@@ -86,6 +91,16 @@ const formatLeader = (row: Guild) => {
     return `${row.leaderName} (${row.leaderId})`
   }
   return row.leaderId || '-'
+}
+
+const formatCreator = (row: Guild) => {
+  if (row.creatorName) {
+    return `${row.creatorName} (${row.creatorId})`
+  }
+  if (row.creatorId && row.creatorId !== '0') {
+    return row.creatorId
+  }
+  return '-'
 }
 
 const fetchList = async () => {

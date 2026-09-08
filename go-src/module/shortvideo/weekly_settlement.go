@@ -59,7 +59,7 @@ func settleOneNonAnchorAuthorShortVideoIncome(userId uint64, anchorSharePercent 
 	}
 	userinfodao.PublishUserExt(ext)
 
-	settlementDiamond := liverevenuesharecfg.CalcSettlementShareAmount(0, unsettledIncome)
+	settlementDiamond := liverevenuesharecfg.CalcSettlementShareAmount(0, unsettledIncome, anchorSharePercent)
 	if settlementDiamond > 0 {
 		if _, err := wallet.DiamondAdd(userId, settlementDiamond, currency.ReasonShortVideoAuthorSettlement); err != nil {
 			g.Log().Errorf(gctx.New(), "short video author settlement diamond add failed userId=%d income=%.4f diamond=%.4f err=%v",

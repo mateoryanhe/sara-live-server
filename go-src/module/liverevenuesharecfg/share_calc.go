@@ -23,13 +23,13 @@ func ResolveGuildSharePercent() float64 {
 	return cfg.GuildSharePercent
 }
 
-// CalcSettlementShareAmount 结算分佣金额 = 结算薪资 + 主播分佣比例% * 未结算总流水(TotalIncome)
-func CalcSettlementShareAmount(salary, unsettledTotalIncome float64) float64 {
-	commission := unsettledTotalIncome * ResolveAnchorSharePercent() / 100
+// CalcSettlementShareAmount 结算分佣金额 = 结算薪资 + 分佣比例% * 未结算总流水(TotalIncome)
+func CalcSettlementShareAmount(salary, unsettledTotalIncome, sharePercent float64) float64 {
+	commission := unsettledTotalIncome * sharePercent / 100
 	return math.AddFloat64(salary, commission)
 }
 
-// CalcGuildSettlementShareAmount 工会结算分佣金额 = 工会分佣比例% * 未结算总流水(TotalIncome)
-func CalcGuildSettlementShareAmount(unsettledTotalIncome float64) float64 {
-	return unsettledTotalIncome * ResolveGuildSharePercent() / 100
+// CalcGuildSettlementShareAmount 工会结算分佣金额 = 分佣比例% * 未结算总流水(TotalIncome)
+func CalcGuildSettlementShareAmount(unsettledTotalIncome, guildSharePercent float64) float64 {
+	return unsettledTotalIncome * guildSharePercent / 100
 }

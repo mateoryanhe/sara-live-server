@@ -35,7 +35,6 @@
     </el-form>
 
     <el-table v-loading="loading" :data="tableData" highlight-current-row style="width: 100%">
-      <el-table-column fixed label="#" type="index" width="55" :index="formatRowIndex"/>
       <el-table-column label="ID" prop="id" width="100"/>
       <el-table-column :label="t('pages.cmsUserList.username')" min-width="140" prop="name"/>
       <el-table-column :label="t('pages.cmsUserList.role')" min-width="120" prop="roleName">
@@ -53,7 +52,7 @@
       </el-table-column>
       <el-table-column fixed="right" :label="t('common.actions')" width="100">
         <template #default="{ row }">
-          <el-button link type="primary" @click="handleSelect(row)">{{ t('pages.guildList.pickLeader') }}</el-button>
+          <el-button link type="primary" @click="handleSelect(row)">{{ actionSelectText }}</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -82,8 +81,10 @@ import type {Role} from '@/api/modules/role'
 const props = withDefaults(defineProps<{
   modelValue: boolean
   title?: string
+  selectText?: string
 }>(), {
   title: '',
+  selectText: '',
 })
 
 const emit = defineEmits<{
@@ -109,6 +110,10 @@ const visible = computed({
   get: () => props.modelValue,
   set: (value: boolean) => emit('update:modelValue', value),
 })
+
+const actionSelectText = computed(() =>
+    props.selectText || t('pages.guildList.pickLeader'),
+)
 
 const fetchRoleOptions = async () => {
   if (roleOptions.value.length > 0) {
@@ -163,9 +168,6 @@ const handleSizeChange = (size: number) => {
   currentPage.value = 1
   fetchList()
 }
-
-const formatRowIndex = (index: number) =>
-    (currentPage.value - 1) * pageSize.value + index + 1
 
 const handleSelect = (row: CMSUser) => {
   if (row.status !== 1) {

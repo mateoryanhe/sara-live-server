@@ -25,6 +25,10 @@ type GuildListRes struct {
 	LeaderName           string  `json:"leaderName"`
 	Description          string  `json:"description"`
 	Status               uint8   `json:"status"`
+	GuildType            uint8   `json:"guildType" dc:"工会类型(0普通,1币商)"`
+	SharePercent         float64 `json:"sharePercent" dc:"分佣比例(%)"`
+	CreatorId            string  `json:"creatorId" dc:"创建者CMS用户ID"`
+	CreatorName          string  `json:"creatorName" dc:"创建者CMS用户名"`
 	UnsettledTotalIncome float64 `json:"unsettledTotalIncome" dc:"未结算工会总收益"`
 	CreatedAt            string  `json:"createdAt"`
 	UpdatedAt            string  `json:"updatedAt"`

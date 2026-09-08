@@ -17,7 +17,7 @@ const (
 // LiveRevenueShareCfg 流水分佣配置(CMS 管理,通常仅一条)
 type LiveRevenueShareCfg struct {
 	migrate.OneModel
-	AnchorSharePercent float64 `gorm:"type:decimal(6,2);default:30;comment:主播流水分佣比例(%)" json:"anchorSharePercent"`
+	AnchorSharePercent float64 `gorm:"type:decimal(6,2);default:10;comment:主播流水分佣比例(%)" json:"anchorSharePercent"`
 	GuildSharePercent  float64 `gorm:"type:decimal(6,2);default:10;comment:工会流水分佣比例(%)" json:"guildSharePercent"`
 }
 

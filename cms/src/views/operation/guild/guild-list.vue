@@ -45,6 +45,12 @@
             </template>
           </el-table-column>
           <el-table-column :label="t('pages.guildList.guildName')" prop="name"/>
+          <el-table-column :label="t('pages.guildList.guildType')" width="110">
+            <template #default="{ row }">{{ guildTypeLabel(row.guildType) }}</template>
+          </el-table-column>
+          <el-table-column :label="t('pages.guildList.sharePercent')" width="120">
+            <template #default="{ row }">{{ row.sharePercent ?? '-' }}</template>
+          </el-table-column>
           <el-table-column :label="t('pages.guildList.unsettledTotalIncome')" width="140">
             <template #default="{ row }">
               <span class="money-amount">{{ formatWalletBalance(row.unsettledTotalIncome) }}</span>
@@ -53,6 +59,11 @@
           <el-table-column :label="t('pages.guildList.leader')" width="140" show-overflow-tooltip>
             <template #default="{ row }">
               {{ formatLeader(row) }}
+            </template>
+          </el-table-column>
+          <el-table-column :label="t('pages.guildList.creator')" width="140" show-overflow-tooltip>
+            <template #default="{ row }">
+              {{ formatCreator(row) }}
             </template>
           </el-table-column>
           <el-table-column :label="t('pages.guildList.description')" prop="description" show-overflow-tooltip/>
@@ -127,10 +138,41 @@
     </el-card>
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px">
-      <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="100px">
+      <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="140px">
         <el-form-item :label="t('pages.guildList.guildName')" prop="name">
           <el-input v-model="currentRow.name" :placeholder="t('pages.guildList.guildNamePlaceholder')"/>
         </el-form-item>
+        <el-form-item :label="t('pages.guildList.guildType')" prop="guildType">
+          <el-select
+              v-model="currentRow.guildType"
+              :placeholder="t('pages.guildList.selectGuildType')"
+              style="width: 100%"
+              @change="onGuildTypeChange"
+          >
+            <el-option :label="t('pages.guildList.guildTypeNormal')" :value="0"/>
+            <el-option :label="t('pages.guildList.guildTypeCoinMerchant')" :value="1"/>
+          </el-select>
+        </el-form-item>
+        <template v-if="isCoinMerchantGuild">
+          <el-form-item :label="t('pages.guildList.sharePercent')" prop="sharePercent">
+            <el-input-number
+                v-model="currentRow.sharePercent"
+                :max="100"
+                :min="0"
+                :precision="2"
+                :step="1"
+                controls-position="right"
+                style="width: 100%"
+            />
+          </el-form-item>
+          <el-alert
+              :closable="false"
+              show-icon
+              :title="t('pages.guildList.sharePercentTip')"
+              type="info"
+              style="margin-bottom: 12px"
+          />
+        </template>
         <el-form-item :label="t('pages.guildList.leader')" prop="leaderId">
           <div class="leader-picker-field">
             <el-input
@@ -261,6 +303,7 @@ import {useI18n} from 'vue-i18n'
 import {useRouter} from 'vue-router'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {guildApi} from '@/api'
+import {liveRevenueShareCfgApi} from '@/api/modules/live-revenue-share-cfg'
 import CmsUserPickerDialog from '@/components/CmsUserPickerDialog.vue'
 import type {CMSUser} from '@/api/modules/cmsuser'
 import type {Guild, GuildAnchorImportResultState, ImportGuildAnchorRow} from '@/types/api.ts'
@@ -278,6 +321,8 @@ interface GuildForm {
   name: string
   leaderId: string
   description: string
+  guildType: number
+  sharePercent: number
 }
 
 interface JoinGuildForm {
@@ -368,6 +413,8 @@ const currentRow = ref<GuildForm>({
   name: '',
   leaderId: '',
   description: '',
+  guildType: 0,
+  sharePercent: 10,
 })
 
 const formRef = ref<FormInstance>()
@@ -387,6 +434,16 @@ const formatLeader = (row: Guild) => {
     return `${row.leaderName} (${row.leaderId})`
   }
   return row.leaderId || '-'
+}
+
+const formatCreator = (row: Guild) => {
+  if (row.creatorName) {
+    return `${row.creatorName} (${row.creatorId})`
+  }
+  if (row.creatorId && row.creatorId !== '0') {
+    return row.creatorId
+  }
+  return '-'
 }
 
 const openLeaderPicker = () => {
@@ -431,10 +488,36 @@ const formRules = computed<FormRules>(() => ({
     {required: true, message: t('pages.guildList.nameRequired'), trigger: 'blur'},
     {min: 2, max: 32, message: t('pages.guildList.nameLength'), trigger: 'blur'}
   ],
+  guildType: [
+    {required: true, message: t('pages.guildList.selectGuildType'), trigger: 'change'},
+  ],
   description: [
     {max: 200, message: t('pages.guildList.descriptionMaxLength'), trigger: 'blur'}
   ]
 }))
+
+const loadDefaultSharePercent = async () => {
+  try {
+    const response = await liveRevenueShareCfgApi.getCfg()
+    return response.cfg?.guildSharePercent ?? 10
+  } catch {
+    return 10
+  }
+}
+
+const isCoinMerchantGuild = computed(() => Number(currentRow.value.guildType) === 1)
+
+const guildTypeLabel = (guildType?: number) => {
+  if (guildType === 1) return t('pages.guildList.guildTypeCoinMerchant')
+  return t('pages.guildList.guildTypeNormal')
+}
+
+const onGuildTypeChange = async (guildType: number) => {
+  if (Number(guildType) === 1) {
+    return
+  }
+  currentRow.value.sharePercent = await loadDefaultSharePercent()
+}
 
 const fetchGuildList = async () => {
   loading.value = true
@@ -474,13 +557,16 @@ const handleCurrentRowChange = (row: Guild | null) => {
   selectedGuild.value = row
 }
 
-const handleAdd = () => {
+const handleAdd = async () => {
   dialogTitle.value = t('pages.guildList.addGuild')
+  const sharePercent = await loadDefaultSharePercent()
   currentRow.value = {
     id: '',
     name: '',
     leaderId: '',
     description: '',
+    guildType: 0,
+    sharePercent,
   }
   selectedLeader.value = null
   dialogVisible.value = true
@@ -494,6 +580,8 @@ const handleEdit = (row: Guild) => {
     name: row.name,
     leaderId,
     description: row.description,
+    guildType: row.guildType ?? 0,
+    sharePercent: row.sharePercent ?? 10,
   }
   selectedLeader.value = leaderId && row.leaderName
       ? {id: leaderId, name: row.leaderName} as CMSUser
@@ -532,11 +620,17 @@ const handleSave = async () => {
     if (valid) {
       try {
         const leaderId = Number(currentRow.value.leaderId) || 0
+        const payload = {
+          name: currentRow.value.name,
+          leaderId,
+          description: currentRow.value.description,
+          guildType: currentRow.value.guildType,
+          sharePercent: currentRow.value.sharePercent,
+        }
         if (currentRow.value.id) {
-          await guildApi.updateGuild({...currentRow.value, leaderId})
+          await guildApi.updateGuild({...payload, id: currentRow.value.id})
         } else {
-          const {name, description} = currentRow.value
-          await guildApi.createGuild({name, leaderId, description})
+          await guildApi.createGuild(payload)
         }
 
         ElMessage.success(currentRow.value.id ? t('common.updateSuccess') : t('common.createSuccess'))
@@ -783,6 +877,8 @@ const openDetail = (row: Guild) => {
       name: row.name,
       leaderId: row.leaderId,
       leaderName: row.leaderName ?? '',
+      creatorId: row.creatorId ?? '',
+      creatorName: row.creatorName ?? '',
       description: row.description ?? '',
       status: String(row.status ?? 1),
       createdAt: row.createdAt ?? '',

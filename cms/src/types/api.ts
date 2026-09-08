@@ -903,6 +903,10 @@ export interface Guild {
     leaderName?: string
     description: string
     status: number
+    guildType?: number
+    sharePercent?: number
+    creatorId?: string
+    creatorName?: string
     unsettledTotalIncome?: number
     createdAt: string
     updatedAt: string

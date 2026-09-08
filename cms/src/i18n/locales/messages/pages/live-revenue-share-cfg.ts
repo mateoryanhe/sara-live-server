@@ -3,7 +3,7 @@ import {definePageMessages} from './_define'
 const zh = {
   tipTitle: '说明',
   tipLine1: '配置直播流水的主播、工会分佣比例，单位为百分比。',
-  tipLine2: '首次保存后写入数据库；未配置时默认主播 30%、工会 10%。',
+  tipLine2: '首次保存后写入数据库；未配置时默认主播 10%、工会 10%。',
   anchorSharePercent: '主播分佣比例',
   guildSharePercent: '工会分佣比例',
   lastUpdated: '最近更新',
@@ -17,7 +17,7 @@ export const liveRevenueShareCfgMessages = definePageMessages(
   {
     tipTitle: 'Note',
     tipLine1: 'Configure anchor and guild revenue share percentages for live streams.',
-    tipLine2: 'Saved to database on first save. Defaults: anchor 30%, guild 10%.',
+    tipLine2: 'Saved to database on first save. Defaults: anchor 10%, guild 10%.',
     anchorSharePercent: 'Anchor Share (%)',
     guildSharePercent: 'Guild Share (%)',
     lastUpdated: 'Last Updated',
@@ -28,7 +28,7 @@ export const liveRevenueShareCfgMessages = definePageMessages(
   {
     tipTitle: 'Nota',
     tipLine1: 'Configure los porcentajes de reparto de ingresos en vivo para ancla y gremio.',
-    tipLine2: 'Se guarda en la base de datos al guardar. Por defecto: ancla 30%, gremio 10%.',
+    tipLine2: 'Se guarda en la base de datos al guardar. Por defecto: ancla 10%, gremio 10%.',
     anchorSharePercent: 'Reparto ancla (%)',
     guildSharePercent: 'Reparto gremio (%)',
     lastUpdated: 'Última actualización',
@@ -39,7 +39,7 @@ export const liveRevenueShareCfgMessages = definePageMessages(
   {
     tipTitle: 'Nota',
     tipLine1: 'Configure as percentagens de repasse de receita ao vivo para âncora e guilda.',
-    tipLine2: 'Gravado no banco ao salvar. Padrão: âncora 30%, guilda 10%.',
+    tipLine2: 'Gravado no banco ao salvar. Padrão: âncora 10%, guilda 10%.',
     anchorSharePercent: 'Reparto âncora (%)',
     guildSharePercent: 'Reparto guilda (%)',
     lastUpdated: 'Última atualização',
@@ -50,7 +50,7 @@ export const liveRevenueShareCfgMessages = definePageMessages(
   {
     tipTitle: 'नोट',
     tipLine1: 'लाइव स्ट्रीम के लिए एंकर और गिल्ड राजस्व हिस्सेदारी प्रतिशत कॉन्फ़िग करें।',
-    tipLine2: 'सहेजने पर DB में लिखा जाता है। डिफ़ॉल्ट: एंकर 30%, गिल्ड 10%।',
+    tipLine2: 'सहेजने पर DB में लिखा जाता है। डिफ़ॉल्ट: एंकर 10%, गिल्ड 10%।',
     anchorSharePercent: 'एंकर हिस्सा (%)',
     guildSharePercent: 'गिल्ड हिस्सा (%)',
     lastUpdated: 'अंतिम अपडेट',
@@ -61,7 +61,7 @@ export const liveRevenueShareCfgMessages = definePageMessages(
   {
     tipTitle: 'Catatan',
     tipLine1: 'Konfigurasi persentase bagi hasil live untuk anchor dan guild.',
-    tipLine2: 'Disimpan ke database saat simpan. Default: anchor 30%, guild 10%.',
+    tipLine2: 'Disimpan ke database saat simpan. Default: anchor 10%, guild 10%.',
     anchorSharePercent: 'Bagi hasil anchor (%)',
     guildSharePercent: 'Bagi hasil guild (%)',
     lastUpdated: 'Terakhir diperbarui',

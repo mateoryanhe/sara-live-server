@@ -287,14 +287,18 @@ func toGuildListRes(row *liveentity.LiveGuild) *guilddto.GuildListRes {
 		return nil
 	}
 	return &guilddto.GuildListRes{
-		ID:          strconv.FormatUint(row.ID, 10),
-		Name:        row.Name,
-		LeaderId:    strconv.FormatUint(row.LeaderId, 10),
-		LeaderName:  row.LeaderName,
-		Description: row.Description,
-		Status:      row.Status,
-		CreatedAt:   formatGuildTime(row.CreatedAt),
-		UpdatedAt:   formatGuildTime(row.UpdatedAt),
+		ID:           strconv.FormatUint(row.ID, 10),
+		Name:         row.Name,
+		LeaderId:     strconv.FormatUint(row.LeaderId, 10),
+		LeaderName:   row.LeaderName,
+		Description:  row.Description,
+		Status:       row.Status,
+		GuildType:    row.GuildType,
+		SharePercent: row.SharePercent,
+		CreatorId:    strconv.FormatUint(row.CreatorId, 10),
+		CreatorName:  row.CreatorName,
+		CreatedAt:    formatGuildTime(row.CreatedAt),
+		UpdatedAt:    formatGuildTime(row.UpdatedAt),
 	}
 }
 

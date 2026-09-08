@@ -1,9 +1,12 @@
 import {definePageMessagesFromEn} from './_define'
 
 const zh = {
-  tip: '选择 CMS 用户后，将左侧未授权工会移到右侧即授权；移回左侧即撤销。请在角色权限中单独授权本页。',
+  tip: '选择 CMS 用户后，勾选左侧未授权工会点「授权」；勾选右侧已授权工会点「撤销」。请在角色权限中单独授权本页。',
   selectCmsUser: '选择CMS用户',
-  selectCmsUserPlaceholder: '请选择要授权的CMS用户',
+  selectCmsUserPlaceholder: '请点击选择CMS用户',
+  pickerTitle: '选择CMS用户',
+  pickCmsUser: '选择',
+  clearCmsUser: '清除',
   cmsUserRequired: '请先选择CMS用户',
   leftTitle: '未授权工会',
   rightTitle: '已授权工会',
@@ -24,9 +27,12 @@ const zh = {
 } as const
 
 export const guildVisibilityListMessages = definePageMessagesFromEn(zh, {
-  tip: 'Select a CMS user. Move guilds from left to right to grant; move back to revoke. Grant this page via role permissions.',
+  tip: 'Select a CMS user. Check guilds on the left and Grant; check on the right and Revoke. Grant this page via role permissions.',
   selectCmsUser: 'CMS User',
-  selectCmsUserPlaceholder: 'Select a CMS user',
+  selectCmsUserPlaceholder: 'Click to select a CMS user',
+  pickerTitle: 'Select CMS User',
+  pickCmsUser: 'Select',
+  clearCmsUser: 'Clear',
   cmsUserRequired: 'Please select a CMS user first',
   leftTitle: 'Available guilds',
   rightTitle: 'Granted guilds',
@@ -45,3 +51,4 @@ export const guildVisibilityListMessages = definePageMessagesFromEn(zh, {
   noGrantPermission: 'No grant permission',
   noRevokePermission: 'No revoke permission',
 })
+

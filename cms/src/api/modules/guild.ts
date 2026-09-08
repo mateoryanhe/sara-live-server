@@ -46,6 +46,8 @@ export const guildApi = {
         name: string
         leaderId: number
         description: string
+        guildType: number
+        sharePercent: number
     }) => {
         return request.post<{ id: string }>('/guild/createGuild', data)
     },
@@ -56,6 +58,8 @@ export const guildApi = {
         name: string
         leaderId: number
         description: string
+        guildType: number
+        sharePercent: number
     }) => {
         return request.post<boolean>('/guild/updateGuild', data)
     },

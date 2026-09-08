@@ -30,12 +30,21 @@ func settleOnShelfGuilds() {
 		if guild == nil || guild.ID == 0 {
 			continue
 		}
-		settleOneGuild(guild.ID)
+		settleOneGuild(guild)
 	}
 	g.Log().Infof(ctx, "guild weekly settlement done")
 }
 
-func settleOneGuild(guildId uint64) {
+// resolveGuildSettlementSharePercent 币商工会用自身 sharePercent;普通工会用全局工会分佣
+func resolveGuildSettlementSharePercent(guild *entity.LiveGuild) float64 {
+	if guild != nil && guild.GuildType == entity.LiveGuildTypeCoinMerchant {
+		return guild.SharePercent
+	}
+	return liverevenuesharecfg.ResolveGuildSharePercent()
+}
+
+func settleOneGuild(guild *entity.LiveGuild) {
+	guildId := guild.ID
 	dailyRows := liveroomdao.ListRecentUnsettledDailyGuildEffectiveLives(guildId)
 	unsettled := liveroomdao.GetGuildIncomeUnsettled(guildId)
 	if unsettled == nil {
@@ -43,6 +52,7 @@ func settleOneGuild(guildId uint64) {
 	}
 	hasDaily := len(dailyRows) > 0
 	hasUnsettled := !unsettled.IsZero()
+	guildSharePercent := resolveGuildSettlementSharePercent(guild)
 	if !hasDaily && !hasUnsettled {
 		weeklySalary := liveroomdao.TakeGuildWeeklyAnchorSalary(guildId)
 		weeklyAnchorShareAmountUsd := liveroomdao.TakeGuildWeeklyAnchorShareAmountUsd(guildId)
@@ -51,7 +61,6 @@ func settleOneGuild(guildId uint64) {
 		}
 		weeklySalaryUsd := wallet.CalcDiamondToUsd(weeklySalary)
 		receivableUsd := math.AddFloat64(weeklyAnchorShareAmountUsd, weeklySalaryUsd)
-		guildSharePercent := liverevenuesharecfg.ResolveGuildSharePercent()
 		_ = entity.NewGuildIncomeSettlementLog(guildId, &entity.LiveRoomIncomeAmounts{}, weeklySalary, 0, 0, receivableUsd, guildSharePercent)
 		return
 	}
@@ -59,8 +68,7 @@ func settleOneGuild(guildId uint64) {
 	snap := unsettled.SnapshotAndClear()
 	weeklySalary := liveroomdao.TakeGuildWeeklyAnchorSalary(guildId)
 	weeklyAnchorShareAmountUsd := liveroomdao.TakeGuildWeeklyAnchorShareAmountUsd(guildId)
-	guildSharePercent := liverevenuesharecfg.ResolveGuildSharePercent()
-	shareAmount := liverevenuesharecfg.CalcGuildSettlementShareAmount(snap.TotalIncome)
+	shareAmount := liverevenuesharecfg.CalcGuildSettlementShareAmount(snap.TotalIncome, guildSharePercent)
 	shareAmountUsd := wallet.CalcDiamondToUsd(shareAmount)
 	weeklySalaryUsd := wallet.CalcDiamondToUsd(weeklySalary)
 	receivableUsd := math.AddFloat64(shareAmountUsd, math.AddFloat64(weeklyAnchorShareAmountUsd, weeklySalaryUsd))

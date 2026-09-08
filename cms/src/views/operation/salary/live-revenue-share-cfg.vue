@@ -68,7 +68,7 @@ const loading = ref(false)
 
 const formData = reactive({
   id: '0',
-  anchorSharePercent: 30,
+  anchorSharePercent: 10,
   guildSharePercent: 10,
 })
 
@@ -80,14 +80,14 @@ const metaInfo = reactive({
 const applyCfg = (cfg: LiveRevenueShareCfg | null | undefined) => {
   if (!cfg) {
     formData.id = '0'
-    formData.anchorSharePercent = 30
+    formData.anchorSharePercent = 10
     formData.guildSharePercent = 10
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
     return
   }
   formData.id = cfg.id || '0'
-  formData.anchorSharePercent = cfg.anchorSharePercent ?? 30
+  formData.anchorSharePercent = cfg.anchorSharePercent ?? 10
   formData.guildSharePercent = cfg.guildSharePercent ?? 10
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''

@@ -16,6 +16,7 @@
               <el-descriptions-item label="ID">{{ guildBasic.id }}</el-descriptions-item>
               <el-descriptions-item :label="t('pages.guildList.guildName')">{{ guildBasic.name || '-' }}</el-descriptions-item>
               <el-descriptions-item :label="t('pages.guildList.leader')">{{ formatLeader(guildBasic) }}</el-descriptions-item>
+              <el-descriptions-item :label="t('pages.guildList.creator')">{{ formatCreator(guildBasic) }}</el-descriptions-item>
               <el-descriptions-item :label="t('pages.guildList.description')">{{ guildBasic.description || '-' }}</el-descriptions-item>
               <el-descriptions-item :label="t('pages.guildList.shelfStatus')">
                 <el-tag v-if="guildBasic.status === 1" type="success">{{ t('common.onShelf') }}</el-tag>
@@ -116,6 +117,8 @@ const guildBasic = computed<Guild | null>(() => {
     name: parseQueryValue('name'),
     leaderId: parseQueryValue('leaderId'),
     leaderName: parseQueryValue('leaderName'),
+    creatorId: parseQueryValue('creatorId'),
+    creatorName: parseQueryValue('creatorName'),
     description: parseQueryValue('description'),
     status: Number.isNaN(status) ? 0 : status,
     createdAt: parseQueryValue('createdAt'),
@@ -138,6 +141,16 @@ const formatLeader = (guild: Guild) => {
     return `${guild.leaderName} (${guild.leaderId})`
   }
   return guild.leaderId || '-'
+}
+
+const formatCreator = (guild: Guild) => {
+  if (guild.creatorName) {
+    return `${guild.creatorName} (${guild.creatorId})`
+  }
+  if (guild.creatorId && guild.creatorId !== '0') {
+    return guild.creatorId
+  }
+  return '-'
 }
 
 const formatDate = (dateString: string | null | undefined) => {

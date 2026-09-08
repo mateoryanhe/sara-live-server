@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/event"
 	"xr-game-server/dao/anchorsalarycfgdao"
+	"xr-game-server/dao/guilddao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/entity/live"
 	"xr-game-server/gameevent"
@@ -28,6 +29,7 @@ func onWeekAnchorSettlement(_ any) {
 func settleOnShelfAnchors() {
 	cfgs := anchorsalarycfgdao.ListAllOrderBySalaryDesc()
 	rooms := liveroomdao.GetAllLiveRoom()
+	coinMerchantGuildIds := loadCoinMerchantGuildIdSet()
 	ctx := gctx.New()
 	liveroomdao.ResetGuildWeeklyAnchorSalary()
 	g.Log().Infof(ctx, "anchor weekly settlement start, rooms=%d, salaryCfgs=%d, writeUsd=%v", len(rooms), len(cfgs), writeAnchorSettlementUsd)
@@ -35,18 +37,50 @@ func settleOnShelfAnchors() {
 		if room == nil || room.ID == 0 {
 			continue
 		}
-		settleOneAnchor(room.ID, cfgs)
+		settleOneAnchor(room, cfgs, coinMerchantGuildIds)
 	}
 	g.Log().Infof(ctx, "anchor weekly settlement done")
 }
 
-func settleOneAnchor(roomId uint64, cfgs []*entity.AnchorSalaryCfg) {
+func loadCoinMerchantGuildIdSet() map[uint64]struct{} {
+	set := make(map[uint64]struct{})
+	for _, guild := range guilddao.ListOnShelfGuilds() {
+		if guild != nil && guild.GuildType == entity.LiveGuildTypeCoinMerchant {
+			set[guild.ID] = struct{}{}
+		}
+	}
+	return set
+}
+
+// resolveAnchorSettlementSharePercent 币商工会名下主播流水分佣按 0%;其余用全局主播分佣
+func resolveAnchorSettlementSharePercent(room *entity.LiveRoom, coinMerchantGuildIds map[uint64]struct{}) float64 {
+	if isCoinMerchantGuildAnchor(room, coinMerchantGuildIds) {
+		return 0
+	}
+	return liverevenuesharecfg.ResolveAnchorSharePercent()
+}
+
+func isCoinMerchantGuildAnchor(room *entity.LiveRoom, coinMerchantGuildIds map[uint64]struct{}) bool {
+	if room == nil || room.GuildId == 0 || coinMerchantGuildIds == nil {
+		return false
+	}
+	_, ok := coinMerchantGuildIds[room.GuildId]
+	return ok
+}
+
+func settleOneAnchor(room *entity.LiveRoom, cfgs []*entity.AnchorSalaryCfg, coinMerchantGuildIds map[uint64]struct{}) {
+	roomId := room.ID
 	dailyRows := liveroomdao.ListRecentUnsettledDailyEffectiveLives(roomId)
 	unsettled := liveroomdao.GetLiveRoomIncomeUnsettled(roomId)
 	if unsettled == nil {
 		return
 	}
-	salary := matchAnchorSalaryAmount(countAnchorWeeklyWorkDays(dailyRows), dailyRows, cfgs)
+	coinMerchantAnchor := isCoinMerchantGuildAnchor(room, coinMerchantGuildIds)
+	// 币商工会无开播底薪
+	salary := float64(0)
+	if !coinMerchantAnchor {
+		salary = matchAnchorSalaryAmount(countAnchorWeeklyWorkDays(dailyRows), dailyRows, cfgs)
+	}
 	hasDaily := len(dailyRows) > 0
 	hasUnsettled := !unsettled.IsZero()
 	if !hasDaily && !hasUnsettled && salary == 0 {
@@ -54,10 +88,10 @@ func settleOneAnchor(roomId uint64, cfgs []*entity.AnchorSalaryCfg) {
 	}
 
 	snap := unsettled.SnapshotAndClear()
-	anchorSharePercent := liverevenuesharecfg.ResolveAnchorSharePercent()
-	flowCommission := liverevenuesharecfg.CalcSettlementShareAmount(0, snap.TotalIncome)
+	anchorSharePercent := resolveAnchorSettlementSharePercent(room, coinMerchantGuildIds)
+	flowCommission := liverevenuesharecfg.CalcSettlementShareAmount(0, snap.TotalIncome, anchorSharePercent)
 	flowCommissionUsd := wallet.CalcDiamondToUsd(flowCommission)
-	shareAmount := liverevenuesharecfg.CalcSettlementShareAmount(salary, snap.TotalIncome)
+	shareAmount := liverevenuesharecfg.CalcSettlementShareAmount(salary, snap.TotalIncome, anchorSharePercent)
 	shareAmountUsd := wallet.CalcDiamondToUsd(shareAmount)
 
 	settled := liveroomdao.GetLiveRoomIncomeSettled(roomId)
