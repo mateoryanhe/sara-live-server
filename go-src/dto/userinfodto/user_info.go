@@ -96,14 +96,15 @@ type GetCurrencyLogReq struct {
 }
 
 type CurrencyLogItem struct {
-	Id           uint64  `json:"id"`
-	UserId       uint64  `json:"userId"`
-	Type         uint8   `json:"type"`   // 1金币 2钻石
-	Action       uint8   `json:"action"` // 1加 2减
-	Amount       float64 `json:"amount"`
-	Before       float64 `json:"before"`
-	After        float64 `json:"after"`
-	Reason       uint8   `json:"reason"` // 货币变动原因枚举,参见 constants/currency.Reason
+	Id             uint64  `json:"id"`
+	UserId         uint64  `json:"userId"`
+	Type           uint8   `json:"type"`   // 1金币 2钻石
+	Action         uint8   `json:"action"` // 1加 2减
+	Amount         float64 `json:"amount"`
+	Before         float64 `json:"before"`
+	After          float64 `json:"after"`
+	Reason         uint8   `json:"reason"`     // 货币变动原因枚举,参见 constants/currency.Reason
+	ReasonText     string  `json:"reasonText"` // 按 Accept-Language 本地化文案
 	GameId         string  `json:"gameId"`
 	GameName       string  `json:"gameName"`
 	GameCategory   string  `json:"gameCategory"`

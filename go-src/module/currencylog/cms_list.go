@@ -42,7 +42,7 @@ func collectCurrencyLogUserIds(rows []*entity.CurrencyLog) []uint64 {
 	return ids
 }
 
-func toCMSItem(v *entity.CurrencyLog, profileMap map[uint64]*entity.UserInfo) *currencylogdto.CMSCurrencyLogItem {
+func toCMSItem(v *entity.CurrencyLog, profileMap map[uint64]*entity.UserInfo, langCode currency.Lang) *currencylogdto.CMSCurrencyLogItem {
 	if v == nil {
 		return nil
 	}
@@ -54,7 +54,7 @@ func toCMSItem(v *entity.CurrencyLog, profileMap map[uint64]*entity.UserInfo) *c
 		Before:           v.Before,
 		After:            v.After,
 		Reason:           v.Reason,
-		ReasonText:       currency.Reason(v.Reason).Text(currency.LangZHCN),
+		ReasonText:       currency.Reason(v.Reason).Text(langCode),
 		GameId:           v.GameId,
 		GameName:         v.GameName,
 		GameCategory:     v.GameCategory,
@@ -71,8 +71,8 @@ func toCMSItem(v *entity.CurrencyLog, profileMap map[uint64]*entity.UserInfo) *c
 	return item
 }
 
-// GetCMSList CMS分页查询货币流水
-func GetCMSList(_ context.Context, req *currencylogdto.CMSCurrencyLogListReq) (*httpserver.CMSQueryResp, error) {
+// GetCMSList CMS分页查询货币流水;reasonText 按 Accept-Language 本地化
+func GetCMSList(ctx context.Context, req *currencylogdto.CMSCurrencyLogListReq) (*httpserver.CMSQueryResp, error) {
 	total, rows := currencylogdao.CMSList(&currencylogdao.CMSListFilter{
 		UserId:       parseUserIdFilter(req.UserId),
 		CurrencyType: req.CurrencyType,
@@ -82,9 +82,10 @@ func GetCMSList(_ context.Context, req *currencylogdto.CMSCurrencyLogListReq) (*
 		PageSize:     req.PageSize,
 	})
 	profileMap := userinfodao.GetUserProfileMapByUserIds(collectCurrencyLogUserIds(rows))
+	langCode := httpserver.GetLangFromContext(ctx)
 	list := make([]*currencylogdto.CMSCurrencyLogItem, 0, len(rows))
 	for _, row := range rows {
-		list = append(list, toCMSItem(row, profileMap))
+		list = append(list, toCMSItem(row, profileMap, langCode))
 	}
 	return httpserver.NewCMSQueryResp(total, list), nil
 }

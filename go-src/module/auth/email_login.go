@@ -55,11 +55,10 @@ func EmailLogin(ctx context.Context, req *authdto.EmailLoginReq) (*authdto.Email
 	}
 
 	httpReq := g.RequestFromCtx(ctx)
-	clientIP := httpReq.GetClientIp()
 	if isNewUser {
-		applyRegisterIpInfo(account, clientIP)
+		applyRegisterIpInfo(account, httpReq)
 	} else {
-		applyLoginIpInfo(account, clientIP)
+		applyLoginIpInfo(account, httpReq)
 	}
 	accountdao.PublishAccountList(account.OpenId, account.Channel)
 

@@ -61,6 +61,12 @@ export const userRoutes: RouteRecordRaw = {
             meta: {title: '机器人主播'},
         },
         {
+            path: 'coin-merchant/coin-merchant-list',
+            name: 'CoinMerchantManagement',
+            component: () => import('@/views/user/coin-merchant/coin-merchant-list.vue'),
+            meta: {title: '币商'},
+        },
+        {
             path: 'account/ban-user',
             name: 'BanUser',
             component: () => import('@/views/user/account/ban-user.vue'),

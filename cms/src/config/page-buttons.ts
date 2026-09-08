@@ -122,6 +122,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'rechargeWhitelistOff', label: '移出充值白名单'},
         {key: 'cancel', label: '注销/取消注销'},
         {key: 'setUserType', label: '修改用户类型'},
+        {key: 'setCoinMerchantUserType', label: '设为币商'},
         {key: 'uploadAvatar', label: '上传头像'},
         {key: 'setAnchorType', label: '设置主播类型'},
         {key: 'openGame', label: '打开游戏'},
@@ -166,6 +167,13 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'batchStartLive', label: '批量开播'},
         {key: 'batchStopLive', label: '批量下播'},
         {key: 'batchDisable', label: '批量停用'},
+    ],
+    CoinMerchantManagement: [
+        BTN.view,
+        BTN.search,
+        BTN.create,
+        {key: 'resetPassword', label: '重置密码'},
+        {key: 'cancel', label: '注销'},
     ],
     RoleManagement: [
         BTN.view,
@@ -288,6 +296,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         ...DEFAULT_CRUD_BUTTONS,
         {key: 'sync', label: '同步数据'},
     ],
+    CoinMerchantRechargeCfgManagement: [...DEFAULT_CRUD_BUTTONS],
     RechargeOrderList: [
         BTN.view,
         BTN.search,

@@ -34,11 +34,10 @@ func TestLogin(ctx context.Context, req *authdto.TestLoginReq) (res *authdto.Tes
 		return nil, errercode.CreateCode(errercode.Ban)
 	}
 	httpReq := g.RequestFromCtx(ctx)
-	clientIP := httpReq.GetClientIp()
 	if isNewUser {
-		applyRegisterIpInfo(data, clientIP)
+		applyRegisterIpInfo(data, httpReq)
 	} else {
-		applyLoginIpInfo(data, clientIP)
+		applyLoginIpInfo(data, httpReq)
 	}
 	accountdao.PublishAccountList(data.OpenId, data.Channel)
 	tokenStr := xrtoken.AddAppToken(data.ID)

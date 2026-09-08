@@ -49,6 +49,10 @@ func (s *AuthController) PhoneLogin(ctx context.Context, req *authdto.PhoneLogin
 	return auth.PhoneLogin(ctx, req)
 }
 
+func (s *AuthController) CoinMerchantLogin(ctx context.Context, req *authdto.CoinMerchantLoginReq) (*authdto.CoinMerchantLoginRes, error) {
+	return auth.CoinMerchantLogin(ctx, req)
+}
+
 func (s *AuthController) DeviceLogin(ctx context.Context, req *authdto.DeviceLoginReq) (*authdto.DeviceLoginRes, error) {
 	return auth.DeviceLogin(ctx, req)
 }

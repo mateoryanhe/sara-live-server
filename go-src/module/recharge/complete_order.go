@@ -46,7 +46,9 @@ func completeOrder(o *entity.RechargeOrder, reason currency.Reason) (float64, er
 		return 0, errercode.CreateCode(errercode.RechargeGoldInvalid)
 	}
 	goldToAdd := order.Gold
-	isTierFirstRecharge := order.CfgId > 0 && userinfodao.IsRechargeCfgFirstRecharge(order.UserId, order.CfgId)
+	// 币商档位与普通充值档位 ID 空间独立,不做档位首充加赠
+	isTierFirstRecharge := order.PayChannel != entity.RechargeCfgTypeCoinMerchant &&
+		order.CfgId > 0 && userinfodao.IsRechargeCfgFirstRecharge(order.UserId, order.CfgId)
 	if isTierFirstRecharge {
 		goldToAdd = activity.ApplyFirstRechargeBonus(order.Gold)
 	}
@@ -65,7 +67,8 @@ func completeOrder(o *entity.RechargeOrder, reason currency.Reason) (float64, er
 	order.SetStatus(entity.RechargeOrderStatusCompleted)
 	order.SetPaidAt(paidAt)
 	order.SetUpdatedAt(paidAt)
-	if order.CfgId > 0 && userinfodao.MarkRechargeCfgFirstRechargeDone(order.UserId, order.CfgId) {
+	if order.CfgId > 0 && order.PayChannel != entity.RechargeCfgTypeCoinMerchant &&
+		userinfodao.MarkRechargeCfgFirstRechargeDone(order.UserId, order.CfgId) {
 		if userinfodao.MarkFirstRechargeDone(order.UserId) {
 			event.Pub(gameevent.FirstRechargeCompletedEvent, order)
 		}
@@ -110,6 +113,8 @@ func resolveRechargeReason(order *entity.RechargeOrder, isTierFirstRecharge bool
 		return currency.ReasonRechargeIOS
 	case entity.RechargeCfgTypeChannel:
 		return currency.ReasonRechargeChannel
+	case entity.RechargeCfgTypeCoinMerchant:
+		return currency.ReasonRechargeCoinMerchant
 	default:
 		return currency.ReasonRechargeTier
 	}

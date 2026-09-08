@@ -8,4 +8,5 @@ const (
 	ShortVideoAuthorChannel = 5 // CMS短视频作者专用渠道
 	H5DeviceChannel         = 6 // H5设备码快捷登录/注册
 	EmailChannel            = 7 // 邮箱验证码登录/注册
+	CoinMerchantChannel     = 8 // CMS币商账号
 )

@@ -49,7 +49,7 @@ func PhoneLogin(ctx context.Context, req *authdto.PhoneLoginReq) (res *authdto.P
 		return nil, errercode.CreateCode(errercode.Ban)
 	}
 
-	applyLoginIpInfo(account, httpReq.GetClientIp())
+	applyLoginIpInfo(account, httpReq)
 	accountdao.PublishAccountList(account.OpenId, account.Channel)
 	tokenStr := xrtoken.AddAppToken(account.ID)
 	userinfodao.GetUserInfoByUserId(account.ID)

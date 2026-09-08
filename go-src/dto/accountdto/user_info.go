@@ -87,7 +87,7 @@ type BatchSetAnchorRes struct {
 type SetUserTypeReq struct {
 	g.Meta    `path:"/setUserType" method:"post" summary:"修改用户类型" tags:"账号"`
 	AccountId uint64 `json:"accountId" v:"required#用户ID不能为空" dc:"用户ID"`
-	UserType  uint8  `json:"userType" v:"required|in:0,4#用户类型不能为空|仅允许普通用户或测试人员" dc:"用户类型(0普通用户,4测试人员)"`
+	UserType  uint8  `json:"userType" v:"required|in:0,4,6#用户类型不能为空|仅允许普通用户/测试人员/币商" dc:"用户类型(0普通用户,4测试人员,6币商)"`
 }
 
 type SetUserTypeRes struct {

@@ -219,6 +219,7 @@ type CMSExportCurrencyLogPayload struct {
 	CurrencyType uint8  `json:"currencyType"`
 	StartTime    int64  `json:"startTime"`
 	EndTime      int64  `json:"endTime"`
+	Lang         string `json:"lang" dc:"导出文案语言(如zh-CN/en/id);空则默认英文"`
 }
 
 type CMSExportGameBetLogPayload struct {

@@ -20,6 +20,8 @@ import {guildProfileMessages} from './guild-profile'
 import {guildProfileMembersMessages} from './guild-profile-members'
 import {guildCmsUserListMessages} from './guild-cms-user-list'
 import {guildVisibilityListMessages} from './guild-visibility-list'
+import {coinMerchantListMessages} from './coin-merchant-list'
+import {coinMerchantRechargeCfgListMessages} from './coin-merchant-recharge-cfg-list'
 import {guildAnchorIncomeSettlementLogListMessages} from './guild-anchor-income-settlement-log-list'
 import {rechargeCfgListMessages} from './recharge-cfg-list'
 import {appPkgListMessages} from './app-pkg-list'
@@ -97,6 +99,8 @@ const pageMessageBuilders = [
   ['guildProfileMembers', guildProfileMembersMessages],
   ['guildCmsUserList', guildCmsUserListMessages],
   ['guildVisibilityList', guildVisibilityListMessages],
+  ['coinMerchantList', coinMerchantListMessages],
+  ['coinMerchantRechargeCfgList', coinMerchantRechargeCfgListMessages],
   ['guildAnchorIncomeSettlementLogList', guildAnchorIncomeSettlementLogListMessages],
   ['rechargeCfgList', rechargeCfgListMessages],
   ['appPkgList', appPkgListMessages],

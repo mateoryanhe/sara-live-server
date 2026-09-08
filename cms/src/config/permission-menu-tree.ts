@@ -53,7 +53,7 @@ const USER_LIST_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
     {
         id: 'account',
         titleKey: 'pages.moduleList.groupAccount',
-        buttonKeys: ['ban', 'rankOff', 'rankOn', 'rechargeWhitelistOn', 'rechargeWhitelistOff', 'cancel', 'setUserType', 'uploadAvatar'],
+        buttonKeys: ['ban', 'rankOff', 'rankOn', 'rechargeWhitelistOn', 'rechargeWhitelistOff', 'cancel', 'setUserType', 'setCoinMerchantUserType', 'uploadAvatar'],
     },
 ]
 
@@ -155,6 +155,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             }),
             page('LiveRoomRecycleBinManagement'),
             page('BotAnchorManagement'),
+            page('CoinMerchantManagement'),
             page('RechargeOrderList'),
         ],
     },
@@ -169,32 +170,39 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             ]),
             group('operation-recharge', 'menu.OperationRechargeGroup', [
                 page('RechargeCfgManagement'),
+                page('CoinMerchantRechargeCfgManagement'),
                 page('VipCfgManagement'),
                 page('WalletExchangeCfgManagement'),
                 page('FiatCurrencyManagement'),
             ]),
             group('operation-guild', 'menu.OperationGuildGroup', [
-                page('GuildManagement', {
-                    buttonGroups: GUILD_BUTTON_GROUPS,
-                    subPages: [
-                        {pageName: 'GuildDetail'},
-                        {pageName: 'GuildMembers'},
-                        {pageName: 'GuildAnchorImportResult'},
-                    ],
-                }),
-                page('GuildTransferManagement'),
-                page('GuildCMSUserManagement', {buttonGroups: GUILD_CMS_USER_BUTTON_GROUPS}),
-                page('GuildVisibilityManagement', {buttonGroups: GUILD_VISIBILITY_BUTTON_GROUPS}),
-                page('GuildAnchorDailyLiveManagement', {buttonGroups: GUILD_ANCHOR_DAILY_LIVE_BUTTON_GROUPS}),
-                page('PlatformAnchorList'),
-                page('GuildRecycleBinManagement'),
-                page('GuildProfileManagement', {
-                    buttonGroups: GUILD_PROFILE_BUTTON_GROUPS,
-                    subPages: [
-                        {pageName: 'GuildProfileMembers'},
-                        {pageName: 'GuildProfileAnchorDailyLive'},
-                    ],
-                }),
+                group('operation-guild-basic', 'menu.OperationGuildBasicGroup', [
+                    page('GuildManagement', {
+                        buttonGroups: GUILD_BUTTON_GROUPS,
+                        subPages: [
+                            {pageName: 'GuildDetail'},
+                            {pageName: 'GuildMembers'},
+                            {pageName: 'GuildAnchorImportResult'},
+                        ],
+                    }),
+                    page('PlatformAnchorList'),
+                    page('GuildRecycleBinManagement'),
+                ]),
+                group('operation-guild-access', 'menu.OperationGuildAccessGroup', [
+                    page('GuildCMSUserManagement', {buttonGroups: GUILD_CMS_USER_BUTTON_GROUPS}),
+                    page('GuildVisibilityManagement', {buttonGroups: GUILD_VISIBILITY_BUTTON_GROUPS}),
+                ]),
+                group('operation-guild-data', 'menu.OperationGuildDataGroup', [
+                    page('GuildProfileManagement', {
+                        buttonGroups: GUILD_PROFILE_BUTTON_GROUPS,
+                        subPages: [
+                            {pageName: 'GuildProfileMembers'},
+                            {pageName: 'GuildProfileAnchorDailyLive'},
+                        ],
+                    }),
+                    page('GuildAnchorDailyLiveManagement', {buttonGroups: GUILD_ANCHOR_DAILY_LIVE_BUTTON_GROUPS}),
+                    page('GuildTransferManagement'),
+                ]),
             ]),
             group('operation-settlement', 'menu.OperationSettlementGroup', [
                 page('AnchorSalaryCfgManagement'),

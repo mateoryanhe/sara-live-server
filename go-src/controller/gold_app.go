@@ -17,3 +17,8 @@ func initGoldAppController() {
 func (c *GoldAppController) ExchangeGoldToDiamond(ctx context.Context, req *golddto.AppExchangeGoldToDiamondReq) (*golddto.AppExchangeGoldToDiamondRes, error) {
 	return wallet.AppExchangeGoldToDiamond(ctx, req)
 }
+
+// TransferGold App端转赠金币给指定用户(币商扣款,目标用户到账)
+func (c *GoldAppController) TransferGold(ctx context.Context, req *golddto.AppTransferGoldReq) (*golddto.AppTransferGoldRes, error) {
+	return wallet.AppTransferGold(ctx, req)
+}

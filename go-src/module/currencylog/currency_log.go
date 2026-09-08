@@ -4,7 +4,9 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"xr-game-server/constants/currency"
 	"xr-game-server/core/event"
+	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/currencylogdao"
 	"xr-game-server/dto/userinfodto"
 	"xr-game-server/entity/user"
@@ -42,9 +44,10 @@ func onCurrencyChange(val any) {
 	)
 }
 
-// GetByUserId 查询用户的货币流水(分页)
+// GetByUserId 查询用户的货币流水(分页);reasonText 按 Accept-Language 本地化
 func GetByUserId(ctx context.Context, req *userinfodto.GetCurrencyLogReq) (*userinfodto.GetCurrencyLogRes, error) {
 	total, list := currencylogdao.GetByUserId(req.UserId, req.PageIndex, req.PageSize)
+	langCode := httpserver.GetLangFromContext(ctx)
 	items := make([]*userinfodto.CurrencyLogItem, 0, len(list))
 	for _, v := range list {
 		items = append(items, &userinfodto.CurrencyLogItem{
@@ -56,6 +59,7 @@ func GetByUserId(ctx context.Context, req *userinfodto.GetCurrencyLogReq) (*user
 			Before:       v.Before,
 			After:        v.After,
 			Reason:       v.Reason,
+			ReasonText:   currency.Reason(v.Reason).Text(langCode),
 			GameId:         v.GameId,
 			GameName:       v.GameName,
 			GameCategory:   v.GameCategory,

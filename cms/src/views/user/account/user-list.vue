@@ -210,6 +210,10 @@
                       {{ scope.row.cancel ? t('pages.userList.uncancel') : t('pages.userList.cancelAccount') }}
                     </el-dropdown-item>
                     <el-dropdown-item v-if="can('setUserType') && !scope.row.isAnchor" command="setUserType">{{ t('pages.userList.setUserType') }}</el-dropdown-item>
+                    <el-dropdown-item
+                        v-if="can('setCoinMerchantUserType') && Number(scope.row.userType ?? 0) === USER_TYPE_NORMAL"
+                        command="setCoinMerchantUserType"
+                    >{{ t('pages.userList.setCoinMerchantUserType') }}</el-dropdown-item>
                     <el-dropdown-item v-if="can('uploadAvatar')" command="uploadAvatar">{{ t('pages.userList.uploadAvatar') }}</el-dropdown-item>
                     <el-dropdown-item v-if="showSetAnchorType && isAnchorUser(scope.row)" command="setAnchorType">{{ t('pages.guildMembers.setAnchorType') }}</el-dropdown-item>
                   </el-dropdown-menu>
@@ -498,7 +502,9 @@ const canViewDetail = computed(() => can('viewDetail'))
 const canViewAnchorDetail = computed(() => can('viewAnchorDetail'))
 const showSetAnchorType = computed(() => can('setAnchorType'))
 
+const USER_TYPE_NORMAL = 0
 const USER_TYPE_ANCHOR = 1
+const USER_TYPE_COIN_MERCHANT = 6
 const USER_TYPE_SENIOR_ANCHOR = 7
 
 const ROW_ACTION_KEYS = [
@@ -516,6 +522,7 @@ const ROW_ACTION_KEYS = [
   'rechargeWhitelistOff',
   'cancel',
   'setUserType',
+  'setCoinMerchantUserType',
   'uploadAvatar',
   'openGame',
   'channelRechargeTest',
@@ -607,6 +614,7 @@ const userTypeLabelMap = computed<Record<number, string>>(() => ({
   3: t('pages.userList.userTypeBotViewer'),
   4: t('pages.userList.userTypeTester'),
   5: t('pages.userList.userTypeCmsAuthor'),
+  6: t('pages.userList.userTypeCoinMerchant'),
   7: t('pages.userList.userTypeSeniorAnchor'),
 }))
 
@@ -994,6 +1002,9 @@ const handleRowCommand = (row: UserInfo, command: string) => {
     case 'setUserType':
       openUserTypeDialog(row)
       break
+    case 'setCoinMerchantUserType':
+      handleSetCoinMerchantUserType(row)
+      break
     case 'gold-add':
       openCurrencyDialog(row, 'gold', 'add')
       break
@@ -1146,6 +1157,34 @@ const submitUserType = async () => {
       userTypeSubmitting.value = false
     }
   })
+}
+
+const handleSetCoinMerchantUserType = async (row: UserInfo) => {
+  if (Number(row.userType ?? 0) !== USER_TYPE_NORMAL) {
+    ElMessage.warning(t('pages.userList.setCoinMerchantUserTypeOnlyNormal'))
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+        t('pages.userList.setCoinMerchantUserTypeConfirm', {id: row.id}),
+        t('pages.userList.setCoinMerchantUserTypeTitle'),
+        {
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning'
+        }
+    )
+    await accountApi.setUserType({
+      accountId: String(row.id),
+      userType: USER_TYPE_COIN_MERCHANT
+    })
+    ElMessage.success(t('pages.userList.setCoinMerchantUserTypeSuccess'))
+    await fetchUserList()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('setCoinMerchantUserType failed:', error)
+    }
+  }
 }
 
 const handleSetAnchor = async (row: UserInfo) => {

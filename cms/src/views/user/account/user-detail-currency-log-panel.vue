@@ -83,7 +83,7 @@ const props = defineProps<{
   exportPermission: 'exportGoldLog' | 'exportDiamondLog'
 }>()
 
-const {t} = useI18n()
+const {t, locale} = useI18n()
 const {can} = usePagePermission('UserDetail')
 const canExport = computed(() => can(props.exportPermission))
 const amountColumnLabel = computed(() =>
@@ -190,6 +190,7 @@ const handleExport = async () => {
       CMS_EXPORT_TYPE_CURRENCY_LOG,
       {
         headers: buildCsvHeaders(buildCurrencyLogCsvColumns(t, props.currencyType)),
+        lang: String(locale.value || 'en'),
         ...buildFilterParams(),
       },
       `${exportFilePrefix.value}-${props.userId}-${Date.now()}.csv`,

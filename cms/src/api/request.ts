@@ -8,6 +8,7 @@ import envConfig from '@/config/env'
 import {ElMessage} from "element-plus"
 import {redirectToLogin} from '@/utils/auth-redirect'
 import {getAuthId, getToken} from '@/utils/auth'
+import {i18n} from '@/i18n'
 
 const AUTH_ERROR_CODES = new Set([1, 2, 3])
 
@@ -44,6 +45,7 @@ service.interceptors.request.use(
         if (authId) {
             config.headers!['authId'] = authId
         }
+        config.headers!['Accept-Language'] = String(i18n.global.locale.value || 'en')
 
         return config
     },

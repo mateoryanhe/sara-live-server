@@ -111,7 +111,7 @@ func completeYhPayOrder(ctx context.Context, orderIdStr, thirdOrderId string) er
 	if order.Status == entity.RechargeOrderStatusCompleted {
 		return nil
 	}
-	if order.PayChannel != entity.RechargeCfgTypeChannel {
+	if order.PayChannel != entity.RechargeCfgTypeChannel && order.PayChannel != entity.RechargeCfgTypeCoinMerchant {
 		return errercode.CreateCode(errercode.RechargeOrderStateInvalid)
 	}
 	if thirdOrderId != "" && order.ThirdOrderId != thirdOrderId {

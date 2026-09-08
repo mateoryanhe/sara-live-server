@@ -96,6 +96,26 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/guild/guildVisibilityList", "/guild/guildVisibilityByUserList", "/guild/batchGrantGuildVisibility", "/guild/revokeGuildVisibility"}
 	case "/guild/guildListForVisibility":
 		return []string{"/guild/guildVisibilityByUserList", "/guild/batchGrantGuildVisibility", "/guild/batchRevokeGuildVisibility", "/cmsuser/cmsUserList"}
+	case "/coinMerchant/coinMerchantList":
+		return []string{"/coinMerchant/createCoinMerchant", "/coinMerchant/resetCoinMerchantPassword", "/coinMerchant/cancelCoinMerchant"}
+	case "/coinMerchant/createCoinMerchant":
+		return []string{"/coinMerchant/coinMerchantList", "/coinMerchant/resetCoinMerchantPassword", "/coinMerchant/cancelCoinMerchant"}
+	case "/coinMerchant/resetCoinMerchantPassword":
+		return []string{"/coinMerchant/coinMerchantList", "/coinMerchant/createCoinMerchant", "/coinMerchant/cancelCoinMerchant"}
+	case "/coinMerchant/cancelCoinMerchant":
+		return []string{"/coinMerchant/coinMerchantList", "/coinMerchant/createCoinMerchant", "/coinMerchant/resetCoinMerchantPassword"}
+	case "/coinMerchantRechargeCfg/coinMerchantRechargeCfgList":
+		return []string{"/coinMerchantRechargeCfg/createCoinMerchantRechargeCfg", "/coinMerchantRechargeCfg/updateCoinMerchantRechargeCfg", "/coinMerchantRechargeCfg/deleteCoinMerchantRechargeCfg", "/coinMerchantRechargeCfg/onShelfCoinMerchantRechargeCfg", "/coinMerchantRechargeCfg/offShelfCoinMerchantRechargeCfg"}
+	case "/coinMerchantRechargeCfg/createCoinMerchantRechargeCfg":
+		return []string{"/coinMerchantRechargeCfg/coinMerchantRechargeCfgList", "/coinMerchantRechargeCfg/updateCoinMerchantRechargeCfg"}
+	case "/coinMerchantRechargeCfg/updateCoinMerchantRechargeCfg":
+		return []string{"/coinMerchantRechargeCfg/coinMerchantRechargeCfgList", "/coinMerchantRechargeCfg/createCoinMerchantRechargeCfg", "/coinMerchantRechargeCfg/onShelfCoinMerchantRechargeCfg", "/coinMerchantRechargeCfg/offShelfCoinMerchantRechargeCfg"}
+	case "/coinMerchantRechargeCfg/deleteCoinMerchantRechargeCfg":
+		return []string{"/coinMerchantRechargeCfg/coinMerchantRechargeCfgList"}
+	case "/coinMerchantRechargeCfg/onShelfCoinMerchantRechargeCfg":
+		return []string{"/coinMerchantRechargeCfg/coinMerchantRechargeCfgList", "/coinMerchantRechargeCfg/offShelfCoinMerchantRechargeCfg", "/coinMerchantRechargeCfg/updateCoinMerchantRechargeCfg"}
+	case "/coinMerchantRechargeCfg/offShelfCoinMerchantRechargeCfg":
+		return []string{"/coinMerchantRechargeCfg/coinMerchantRechargeCfgList", "/coinMerchantRechargeCfg/onShelfCoinMerchantRechargeCfg", "/coinMerchantRechargeCfg/updateCoinMerchantRechargeCfg"}
 	case "/guild/guildList":
 		return []string{"/guild/cmsGuildAnchorDailyEffectiveLiveList", "/guild/cmsMyGuildAnchorDailyEffectiveLiveList", "/liveRecord/cmsLiveRecordList", "/liveRecord/cmsDailyEffectiveLiveList", "/liveRevenueLog/cmsLiveRevenueLogList"}
 	case "/guild/cmsGuildAnchorDailyEffectiveLiveList":

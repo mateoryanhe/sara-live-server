@@ -46,9 +46,9 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 	// 设置密码
 	account.SetPassword(gmd5.MustEncryptString(req.Password))
 
-	// 设置IP与国家
+	// 设置IP与国家(优先 CF-IPCountry 中文名)
 	httpReq := g.RequestFromCtx(ctx)
-	applyRegisterIpInfo(account, httpReq.GetClientIp())
+	applyRegisterIpInfo(account, httpReq)
 
 	// 生成token
 	tokenStr := xrtoken.AddAppToken(account.ID)

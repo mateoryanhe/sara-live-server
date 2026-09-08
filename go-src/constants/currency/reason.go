@@ -67,6 +67,12 @@ const (
 	ReasonRechargeManual Reason = 29
 	// ReasonShortVideoAuthorSettlement 非主播作者短视频周结算到账
 	ReasonShortVideoAuthorSettlement Reason = 30
+	// ReasonRechargeCoinMerchant 币商充值(yhpay)
+	ReasonRechargeCoinMerchant Reason = 31
+	// ReasonGoldTransferOut 转赠金币(转出方)
+	ReasonGoldTransferOut Reason = 32
+	// ReasonGoldTransferIn 转赠金币(接收方)
+	ReasonGoldTransferIn Reason = 33
 )
 
 // String 返回枚举的英文标识(用于日志/调试,不参与多语言展示;
@@ -133,6 +139,12 @@ func (r Reason) String() string {
 		return "RechargeManual"
 	case ReasonShortVideoAuthorSettlement:
 		return "ShortVideoAuthorSettlement"
+	case ReasonRechargeCoinMerchant:
+		return "RechargeCoinMerchant"
+	case ReasonGoldTransferOut:
+		return "GoldTransferOut"
+	case ReasonGoldTransferIn:
+		return "GoldTransferIn"
 	default:
 		return "Unknown"
 	}

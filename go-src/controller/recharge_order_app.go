@@ -22,6 +22,11 @@ func (c *RechargeOrderAppController) CreateRechargeOrder(ctx context.Context, re
 	return recharge.CreateOrder(ctx, req)
 }
 
+// CreateCoinMerchantChannelRechargeOrder 币商App用yhpay建单(档位来自币商充值配置)
+func (c *RechargeOrderAppController) CreateCoinMerchantChannelRechargeOrder(ctx context.Context, req *rechargeorderdto.AppCreateCoinMerchantChannelRechargeOrderReq) (*rechargeorderdto.AppCreateChannelRechargeOrderRes, error) {
+	return recharge.CreateCoinMerchantChannelRechargeOrder(ctx, req)
+}
+
 // MyRechargeOrderList App端查询本人充值订单分页列表
 func (c *RechargeOrderAppController) MyRechargeOrderList(ctx context.Context, req *rechargeorderdto.AppMyRechargeOrderListReq) (res *rechargeorderdto.AppMyRechargeOrderListRes, err error) {
 	return recharge.GetMyOrderList(ctx, req)

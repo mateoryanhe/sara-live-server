@@ -67,7 +67,12 @@
 - 观众：`gameevent.ValidAudienceEvent`（`join_room` Pub）
 - 热重启：`PrepareRestart` 排空 + `hotrestart.RegisterStatQueueFlush` 与 syndb 同阶段刷盘
 
-## Cloudflare Email Sending（2026-09-04）
+## 货币流水 reason 多语言（2026-09-08）
+
+- 文案：`constants/currency/reason_text.go`（zh-CN / zh-TW / en / id；其它语言回落 en）
+- App：`POST /userInfo/getCurrencyLog` 返回 `reason` + `reasonText`（按请求头 `Accept-Language`）
+- CMS：列表同理；axios 自动带当前界面语言的 `Accept-Language`；异步导出 payload 带 `lang`
+
 
 - 验证码发信走 CF Email Service REST：`POST /accounts/{account_id}/email/sending/send`（非 AWS SES / 非 CloudFront）
 - CMS 表 `cf_email_cfgs`：enabled / accountId / apiToken / fromEmail（如 `noreply@mail.saralive.net`）
@@ -78,6 +83,24 @@
 - 验证码：发信成功写入 `emailVerifyCodeCache`（5 分钟）；登录/绑定校验后删除；调试码 `981200`
 - 发信限流（双 gcache，不入库）：`emailSendCooldownCache` 1 分钟；`emailSendDailyCache` 每日 10 次、TTL 到本地 0 点
 - 菜单：配置 → Cloudflare邮件（`/cfEmail`）
+
+## 工会菜单分组（2026-09-07）
+
+- 运营 → 工会管理 拆三层：`基础管理` / `账号权限` / `数据流水`
+- 权限树 `PERMISSION_MENU_TREE` 同步嵌套；页面 module 名不变（已授权角色无需改库）
+- `GuildManagement` 菜单文案改为「工会列表」（避免与父级「工会管理」重复）
+
+- 渠道 `CoinMerchantChannel=8`；`UserTypeCoinMerchant=6`（不参与系统统计）
+- 账号仍走 `accounts` + `user_infos` 缓冲；用户名=`open_id`，密码 MD5 存 `accounts.password`
+- CMS：用户管理 → 币商；接口 `/coinMerchant/*`（列表/新建/重置密码/注销）
+- App 登录：`POST /auth/coinMerchantLogin`（免鉴权；username+password；不自动注册；token=`userId.token`）
+- 充值档位：表 `coin_merchant_recharge_cfgs`（name/USD price/gold/status）；写库后整体刷 `atomic` 上架缓存；CMS 在「充值会员 → 币商充值档位」
+- App 查档位：`POST /coinMerchantRechargeCfg/coinMerchantRechargeCfgListForApp`（需登录，仅上架缓存）
+- App yhpay 下单：`POST /rechargeOrder/createCoinMerchantChannelRechargeOrder`（需登录+`UserTypeCoinMerchant`；`cfgId`+`currencyCode=IDR`；`payChannel=4`；无首充加赠；回调复用 `/webhook/yhpay/payin`）
+- 轮询成功：`POST /rechargeOrder/checkRechargeOrderSuccess`（与普通充值相同）
+- App 转赠金币：`POST /gold/transferGold`（仅币商；`targetUserId`+`amount` 最多2位小数；扣币商加目标用户；流水 reason 32转出/33收入）
+
+- 优先读请求头 `CF-IPCountry`（如 `US`→`美国`），无效/`XX`/`T1` 再回退 GeoLite；入库存中文名
 
 ## Flutter / Android 本机工具链（2026-09-07）
 

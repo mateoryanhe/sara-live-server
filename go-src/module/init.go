@@ -2,16 +2,17 @@ package module
 
 import (
 	"xr-game-server/module/accountcfg"
-	"xr-game-server/module/appversioncfg"
 	"xr-game-server/module/activity"
 	"xr-game-server/module/agora"
 	"xr-game-server/module/aliyunmoderation"
 	"xr-game-server/module/anchorrank"
 	"xr-game-server/module/apppkg"
+	"xr-game-server/module/appversioncfg"
 	"xr-game-server/module/auth"
 	"xr-game-server/module/banner"
 	"xr-game-server/module/botanchor"
 	"xr-game-server/module/call"
+	"xr-game-server/module/coinmerchant"
 	"xr-game-server/module/currencylog"
 	"xr-game-server/module/customerservice"
 	"xr-game-server/module/fiatcurrency"
@@ -52,6 +53,7 @@ func Init() {
 	currencylog.Init()
 	message.Init()
 	recharge.Init()
+	coinmerchant.Init()
 	richrank.Init()
 	gameconsumrank.Init()
 	anchorrank.Init()

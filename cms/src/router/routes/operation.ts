@@ -107,6 +107,12 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {title: '充值配置'},
         },
         {
+            path: 'recharge/coin-merchant-recharge-cfg-list',
+            name: 'CoinMerchantRechargeCfgManagement',
+            component: () => import('@/views/operation/recharge/coin-merchant-recharge-cfg-list.vue'),
+            meta: {title: '币商充值档位'},
+        },
+        {
             path: 'vip/vip-cfg-list',
             name: 'VipCfgManagement',
             component: () => import('@/views/operation/vip/vip-cfg-list.vue'),

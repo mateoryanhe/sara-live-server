@@ -168,3 +168,10 @@ type CMSCreateChannelRechargeOrderReq struct {
 	CurrencyCode string `json:"currencyCode" v:"required#币种不能为空" dc:"币种代码"`
 	PackageName  string `json:"packageName"  dc:"可选包名,默认cms.yhpay.test"`
 }
+
+// AppCreateCoinMerchantChannelRechargeOrderReq 币商App用yhpay建单(需鉴权)
+type AppCreateCoinMerchantChannelRechargeOrderReq struct {
+	g.Meta       `path:"/createCoinMerchantChannelRechargeOrder" method:"post" summary:"币商App创建yhpay充值订单" tags:"充值订单"`
+	CfgId        uint64 `json:"cfgId"        v:"required#充值档位ID不能为空" dc:"币商充值档位ID"`
+	CurrencyCode string `json:"currencyCode" v:"required#币种不能为空" dc:"币种代码(当前仅支持IDR)"`
+}

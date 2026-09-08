@@ -18,7 +18,7 @@
           <span>{{ t('menu.Dashboard') }}</span>
         </el-menu-item>
         <el-sub-menu
-            v-if="hasMenuPermission('UserList') || hasMenuPermission('AnchorListManagement') || hasMenuPermission('LiveRoomRecycleBinManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('RechargeOrderList')"
+            v-if="hasMenuPermission('UserList') || hasMenuPermission('AnchorListManagement') || hasMenuPermission('LiveRoomRecycleBinManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('CoinMerchantManagement') || hasMenuPermission('RechargeOrderList')"
             index="/user/account">
           <template #title>
             <el-icon>
@@ -50,6 +50,12 @@
             </el-icon>
             <span>{{ t('menu.BotAnchorManagement') }}</span>
           </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('CoinMerchantManagement')" index="/user/coin-merchant/coin-merchant-list">
+            <el-icon>
+              <Coin/>
+            </el-icon>
+            <span>{{ t('menu.CoinMerchantManagement') }}</span>
+          </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('RechargeOrderList')" index="/user/recharge-order/recharge-order-list">
             <el-icon>
               <Wallet/>
@@ -58,7 +64,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildTransferManagement') || hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('GuildVisibilityManagement') || hasMenuPermission('GuildAnchorDailyLiveManagement') || hasMenuPermission('PlatformAnchorList') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('FiatCurrencyManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('LiveRevenueShareCfgManagement')"
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildTransferManagement') || hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('GuildVisibilityManagement') || hasMenuPermission('GuildAnchorDailyLiveManagement') || hasMenuPermission('PlatformAnchorList') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('CoinMerchantRechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('FiatCurrencyManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('LiveRevenueShareCfgManagement')"
             index="/operation">
           <template #title>
             <el-icon>
@@ -89,7 +95,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('FiatCurrencyManagement')"
+              v-if="hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('CoinMerchantRechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('FiatCurrencyManagement')"
               index="/operation/group/recharge">
             <template #title>
               <el-icon>
@@ -102,6 +108,12 @@
                 <Wallet/>
               </el-icon>
               <span>{{ t('menu.RechargeCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('CoinMerchantRechargeCfgManagement')" index="/operation/recharge/coin-merchant-recharge-cfg-list">
+              <el-icon>
+                <Money/>
+              </el-icon>
+              <span>{{ t('menu.CoinMerchantRechargeCfgManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('VipCfgManagement')" index="/operation/vip/vip-cfg-list">
               <el-icon>
@@ -131,54 +143,84 @@
               </el-icon>
               <span>{{ t('menu.OperationGuildGroup') }}</span>
             </template>
-            <el-menu-item v-if="hasMenuPermission('GuildManagement')" index="/operation/guild/guild-list">
-              <el-icon>
-                <User/>
-              </el-icon>
-              <span>{{ t('menu.GuildManagement') }}</span>
-            </el-menu-item>
-            <el-menu-item v-if="hasMenuPermission('GuildTransferManagement')" index="/operation/guild/guild-transfer-list">
-              <el-icon>
-                <Wallet/>
-              </el-icon>
-              <span>{{ t('menu.GuildTransferManagement') }}</span>
-            </el-menu-item>
-            <el-menu-item v-if="hasMenuPermission('GuildCMSUserManagement')" index="/operation/guild/guild-cms-user-list">
-              <el-icon>
-                <UserFilled/>
-              </el-icon>
-              <span>{{ t('menu.GuildCMSUserManagement') }}</span>
-            </el-menu-item>
-            <el-menu-item v-if="hasMenuPermission('GuildVisibilityManagement')" index="/operation/guild/guild-visibility-list">
-              <el-icon>
-                <View/>
-              </el-icon>
-              <span>{{ t('menu.GuildVisibilityManagement') }}</span>
-            </el-menu-item>
-            <el-menu-item v-if="hasMenuPermission('GuildAnchorDailyLiveManagement')" index="/operation/guild/guild-anchor-daily-live-list">
-              <el-icon>
-                <Document/>
-              </el-icon>
-              <span>{{ t('menu.GuildAnchorDailyLiveManagement') }}</span>
-            </el-menu-item>
-            <el-menu-item v-if="hasMenuPermission('PlatformAnchorList')" index="/operation/guild/platform-anchor-list">
-              <el-icon>
-                <VideoPlay/>
-              </el-icon>
-              <span>{{ t('menu.PlatformAnchorList') }}</span>
-            </el-menu-item>
-            <el-menu-item v-if="hasMenuPermission('GuildRecycleBinManagement')" index="/operation/guild/guild-recycle-bin">
-              <el-icon>
-                <Delete/>
-              </el-icon>
-              <span>{{ t('menu.GuildRecycleBinManagement') }}</span>
-            </el-menu-item>
-            <el-menu-item v-if="hasMenuPermission('GuildProfileManagement')" index="/operation/guild/guild-profile">
-              <el-icon>
-                <EditPen/>
-              </el-icon>
-              <span>{{ t('menu.GuildProfileManagement') }}</span>
-            </el-menu-item>
+            <el-sub-menu
+                v-if="hasMenuPermission('GuildManagement') || hasMenuPermission('PlatformAnchorList') || hasMenuPermission('GuildRecycleBinManagement')"
+                index="/operation/group/guild/basic">
+              <template #title>
+                <el-icon>
+                  <Collection/>
+                </el-icon>
+                <span>{{ t('menu.OperationGuildBasicGroup') }}</span>
+              </template>
+              <el-menu-item v-if="hasMenuPermission('GuildManagement')" index="/operation/guild/guild-list">
+                <el-icon>
+                  <User/>
+                </el-icon>
+                <span>{{ t('menu.GuildManagement') }}</span>
+              </el-menu-item>
+              <el-menu-item v-if="hasMenuPermission('PlatformAnchorList')" index="/operation/guild/platform-anchor-list">
+                <el-icon>
+                  <VideoPlay/>
+                </el-icon>
+                <span>{{ t('menu.PlatformAnchorList') }}</span>
+              </el-menu-item>
+              <el-menu-item v-if="hasMenuPermission('GuildRecycleBinManagement')" index="/operation/guild/guild-recycle-bin">
+                <el-icon>
+                  <Delete/>
+                </el-icon>
+                <span>{{ t('menu.GuildRecycleBinManagement') }}</span>
+              </el-menu-item>
+            </el-sub-menu>
+            <el-sub-menu
+                v-if="hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('GuildVisibilityManagement')"
+                index="/operation/group/guild/access">
+              <template #title>
+                <el-icon>
+                  <Lock/>
+                </el-icon>
+                <span>{{ t('menu.OperationGuildAccessGroup') }}</span>
+              </template>
+              <el-menu-item v-if="hasMenuPermission('GuildCMSUserManagement')" index="/operation/guild/guild-cms-user-list">
+                <el-icon>
+                  <UserFilled/>
+                </el-icon>
+                <span>{{ t('menu.GuildCMSUserManagement') }}</span>
+              </el-menu-item>
+              <el-menu-item v-if="hasMenuPermission('GuildVisibilityManagement')" index="/operation/guild/guild-visibility-list">
+                <el-icon>
+                  <View/>
+                </el-icon>
+                <span>{{ t('menu.GuildVisibilityManagement') }}</span>
+              </el-menu-item>
+            </el-sub-menu>
+            <el-sub-menu
+                v-if="hasMenuPermission('GuildProfileManagement') || hasMenuPermission('GuildAnchorDailyLiveManagement') || hasMenuPermission('GuildTransferManagement')"
+                index="/operation/group/guild/data">
+              <template #title>
+                <el-icon>
+                  <Document/>
+                </el-icon>
+                <span>{{ t('menu.OperationGuildDataGroup') }}</span>
+              </template>
+              <el-menu-item v-if="hasMenuPermission('GuildProfileManagement')" index="/operation/guild/guild-profile">
+                <el-icon>
+                  <EditPen/>
+                </el-icon>
+                <span>{{ t('menu.GuildProfileManagement') }}</span>
+              </el-menu-item>
+              <el-menu-item v-if="hasMenuPermission('GuildAnchorDailyLiveManagement')" index="/operation/guild/guild-anchor-daily-live-list">
+                <el-icon>
+                  <Document/>
+                </el-icon>
+                <span>{{ t('menu.GuildAnchorDailyLiveManagement') }}</span>
+              </el-menu-item>
+              <el-menu-item v-if="hasMenuPermission('GuildTransferManagement')" index="/operation/guild/guild-transfer-list">
+                <el-icon>
+                  <Wallet/>
+                </el-icon>
+                <span>{{ t('menu.GuildTransferManagement') }}</span>
+              </el-menu-item>
+            </el-sub-menu>
           </el-sub-menu>
           <el-sub-menu
               v-if="hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('LiveRevenueShareCfgManagement')"
