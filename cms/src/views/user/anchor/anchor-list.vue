@@ -90,7 +90,12 @@
        
        
        
-        <el-table-column :label="t('pages.anchorList.unsettledTotalIncome')" align="right" min-width="130">
+        <el-table-column
+            :label="t('pages.anchorList.unsettledTotalIncome')"
+            align="right"
+            label-class-name="header-nowrap"
+            min-width="130"
+        >
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.guildName')" min-width="140" prop="guildName" show-overflow-tooltip>
@@ -114,19 +119,45 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.unsettledGiftIncome')" align="right" min-width="130">
+        <el-table-column
+            :label="t('pages.anchorList.unsettledGiftIncome')"
+            align="right"
+            label-class-name="header-nowrap"
+            min-width="130"
+        >
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGiftIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.unsettledPaidDanmakuIncome')" align="right" min-width="140">
+        <el-table-column
+            :label="t('pages.anchorList.unsettledPaidDanmakuIncome')"
+            align="right"
+            label-class-name="header-nowrap"
+            min-width="140"
+        >
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.unsettledVideoTicketIncome')" align="right" min-width="140">
+        <el-table-column
+            :label="t('pages.anchorList.unsettledVideoTicketIncome')"
+            align="right"
+            label-class-name="header-nowrap"
+            min-width="140"
+        >
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallTicketIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.unsettledVideoBillingIncome')" align="right" min-width="160">
+        <el-table-column
+            :label="t('pages.anchorList.unsettledVideoBillingIncome')"
+            align="right"
+            label-class-name="header-nowrap"
+            min-width="180"
+            width="180"
+        >
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallBillingIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.unsettledVideoCallIncome')" align="right" min-width="140">
+        <el-table-column
+            :label="t('pages.anchorList.unsettledVideoCallIncome')"
+            align="right"
+            label-class-name="header-nowrap"
+            min-width="140"
+        >
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.banStatus')" prop="ban" width="100">
@@ -184,39 +215,47 @@
         <el-table-column :label="t('pages.anchorList.profileUpdatedAt')" prop="createdAt" width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>
-        <el-table-column fixed="right" :label="t('common.actions')" width="320">
+        <el-table-column
+            fixed="right"
+            :label="t('common.actions')"
+            class-name="actions-col"
+            label-class-name="actions-col"
+            width="168"
+        >
           <template #default="{ row }">
-            <el-button
-                v-if="can('uploadRoomCover')"
-                link
-                type="primary"
-                @click="openRoomCoverDialog(row)"
-            >
-              {{ t('pages.anchorList.uploadRoomCover') }}
-            </el-button>
-            <el-button
-                v-if="can('offShelf')"
-                type="warning"
-                link
-                @click="handleOffShelf(row)"
-            >
-              {{ t('common.offShelf') }}
-            </el-button>
-            <el-button
-                :type="row.ban ? 'warning' : 'danger'"
-                link
-                @click="toggleBanStatus(row)"
-            >
-              {{ row.ban ? t('pages.anchorList.unban') : t('pages.anchorList.ban') }}
-            </el-button>
-            <el-button
-                v-if="Number(row.guildId) !== 0"
-                link
-                type="danger"
-                @click="handleExitGuild(row)"
-            >
-              {{ t('pages.anchorList.exitGuild') }}
-            </el-button>
+            <div class="actions-cell">
+              <el-button
+                  v-if="can('uploadRoomCover')"
+                  link
+                  type="primary"
+                  @click="openRoomCoverDialog(row)"
+              >
+                {{ t('pages.anchorList.uploadRoomCover') }}
+              </el-button>
+              <el-button
+                  v-if="can('offShelf')"
+                  type="warning"
+                  link
+                  @click="handleOffShelf(row)"
+              >
+                {{ t('common.offShelf') }}
+              </el-button>
+              <el-button
+                  :type="row.ban ? 'warning' : 'danger'"
+                  link
+                  @click="toggleBanStatus(row)"
+              >
+                {{ row.ban ? t('pages.anchorList.unban') : t('pages.anchorList.ban') }}
+              </el-button>
+              <el-button
+                  v-if="Number(row.guildId) !== 0"
+                  link
+                  type="danger"
+                  @click="handleExitGuild(row)"
+              >
+                {{ t('pages.anchorList.exitGuild') }}
+              </el-button>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -1071,6 +1110,31 @@ const submitRoomCover = async () => {
 
 :deep(.cover-col .cell) {
   white-space: nowrap;
+}
+
+:deep(th.header-nowrap > .cell) {
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+  word-break: keep-all;
+}
+
+:deep(.actions-col .cell) {
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.actions-cell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 2px;
+  line-height: 1.2;
+}
+
+.actions-cell :deep(.el-button) {
+  margin: 0;
+  padding: 0 4px;
 }
 
 .cover-cell {
