@@ -95,7 +95,7 @@ const menu = {
   PrivacyPolicyCfgManagement: '隐私政策',
   GooglePlayCfgManagement: 'Google Play',
   YhPayCfgManagement: 'yhpay支付',
-  CfEmailCfgManagement: 'Cloudflare邮件',
+  CfEmailCfgManagement: 'Amazon SES邮件',
   UploadResourceCfgManagement: '资源域名',
   H5LiveDeployManagement: 'H5直播部署',
   ThirdPayDeployManagement: '第三方支付部署',

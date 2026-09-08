@@ -58,5 +58,10 @@ func GetCfEmailCfgCached() *sysentity.CfEmailCfg {
 
 func CfEmailEnabled() bool {
 	row := GetCfEmailCfgCached()
-	return row != nil && row.Enabled && row.AccountId != "" && row.ApiToken != "" && row.FromEmail != ""
+	return row != nil &&
+		row.Enabled &&
+		row.Region != "" &&
+		row.AccessKeyId != "" &&
+		row.SecretAccessKey != "" &&
+		row.FromEmail != ""
 }

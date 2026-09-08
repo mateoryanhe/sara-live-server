@@ -75,7 +75,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   PrivacyPolicyCfgManagement: 'Política de privacidade',
   GooglePlayCfgManagement: 'Google Play',
   YhPayCfgManagement: 'yhpay',
-  CfEmailCfgManagement: 'Email Cloudflare',
+  CfEmailCfgManagement: 'Email Amazon SES',
   UploadResourceCfgManagement: 'CDN de recursos',
   H5LiveDeployManagement: 'Deploy H5 Live',
   ThirdPayDeployManagement: 'Deploy pagamento terceiros',

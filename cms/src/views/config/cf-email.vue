@@ -19,7 +19,7 @@
         <p>{{ t('pages.cfEmail.noticeLine3') }}</p>
       </el-alert>
 
-      <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="160px">
+      <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="180px">
         <el-form-item :label="t('pages.cfEmail.enabled')">
           <el-switch
               v-model="formData.enabled"
@@ -27,16 +27,19 @@
               :inactive-text="t('common.close')"
           />
         </el-form-item>
-        <el-form-item :label="t('pages.cfEmail.accountId')" prop="accountId">
-          <el-input v-model="formData.accountId" clearable :placeholder="t('pages.cfEmail.accountIdPlaceholder')"/>
+        <el-form-item :label="t('pages.cfEmail.region')" prop="region">
+          <el-input v-model="formData.region" clearable :placeholder="t('pages.cfEmail.regionPlaceholder')"/>
         </el-form-item>
-        <el-form-item :label="t('pages.cfEmail.apiToken')" prop="apiToken">
+        <el-form-item :label="t('pages.cfEmail.accessKeyId')" prop="accessKeyId">
+          <el-input v-model="formData.accessKeyId" clearable :placeholder="t('pages.cfEmail.accessKeyIdPlaceholder')"/>
+        </el-form-item>
+        <el-form-item :label="t('pages.cfEmail.secretAccessKey')" prop="secretAccessKey">
           <el-input
-              v-model="formData.apiToken"
+              v-model="formData.secretAccessKey"
               clearable
               show-password
               type="password"
-              :placeholder="t('pages.cfEmail.apiTokenPlaceholder')"
+              :placeholder="t('pages.cfEmail.secretAccessKeyPlaceholder')"
           />
         </el-form-item>
         <el-form-item :label="t('pages.cfEmail.fromEmail')" prop="fromEmail">
@@ -71,8 +74,9 @@ const formRef = ref()
 const formData = reactive({
   id: '0',
   enabled: false,
-  accountId: '',
-  apiToken: '',
+  region: '',
+  accessKeyId: '',
+  secretAccessKey: '',
   fromEmail: '',
 })
 
@@ -82,8 +86,9 @@ const metaInfo = reactive({
 })
 
 const formRules = computed(() => ({
-  accountId: [{required: true, message: t('pages.cfEmail.accountIdRequired'), trigger: 'blur'}],
-  apiToken: [{required: true, message: t('pages.cfEmail.apiTokenRequired'), trigger: 'blur'}],
+  region: [{required: true, message: t('pages.cfEmail.regionRequired'), trigger: 'blur'}],
+  accessKeyId: [{required: true, message: t('pages.cfEmail.accessKeyIdRequired'), trigger: 'blur'}],
+  secretAccessKey: [{required: true, message: t('pages.cfEmail.secretAccessKeyRequired'), trigger: 'blur'}],
   fromEmail: [{required: true, message: t('pages.cfEmail.fromEmailRequired'), trigger: 'blur'}],
 }))
 
@@ -91,8 +96,9 @@ const applyCfg = (cfg: CfEmailCfg | null | undefined) => {
   if (!cfg) {
     formData.id = '0'
     formData.enabled = false
-    formData.accountId = ''
-    formData.apiToken = ''
+    formData.region = ''
+    formData.accessKeyId = ''
+    formData.secretAccessKey = ''
     formData.fromEmail = ''
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
@@ -100,8 +106,9 @@ const applyCfg = (cfg: CfEmailCfg | null | undefined) => {
   }
   formData.id = cfg.id || '0'
   formData.enabled = !!cfg.enabled
-  formData.accountId = cfg.accountId || ''
-  formData.apiToken = cfg.apiToken || ''
+  formData.region = cfg.region || ''
+  formData.accessKeyId = cfg.accessKeyId || ''
+  formData.secretAccessKey = cfg.secretAccessKey || ''
   formData.fromEmail = cfg.fromEmail || ''
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
@@ -131,8 +138,9 @@ const handleSave = async () => {
     await cfEmailApi.saveCfEmailCfg({
       id: idNum,
       enabled: formData.enabled,
-      accountId: formData.accountId.trim(),
-      apiToken: formData.apiToken.trim(),
+      region: formData.region.trim(),
+      accessKeyId: formData.accessKeyId.trim(),
+      secretAccessKey: formData.secretAccessKey.trim(),
       fromEmail: formData.fromEmail.trim(),
     })
     ElMessage.success(t('pages.cfEmail.saveSuccess'))

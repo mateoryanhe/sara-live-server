@@ -1825,8 +1825,9 @@ export interface SaveYhPayCfgRes {
 export interface CfEmailCfg {
     id: string
     enabled: boolean
-    accountId: string
-    apiToken: string
+    region: string
+    accessKeyId: string
+    secretAccessKey: string
     fromEmail: string
     createdAt: string
     updatedAt: string
@@ -1839,8 +1840,9 @@ export interface GetCfEmailCfgRes {
 export interface SaveCfEmailCfgReq {
     id?: number
     enabled: boolean
-    accountId: string
-    apiToken: string
+    region: string
+    accessKeyId: string
+    secretAccessKey: string
     fromEmail: string
 }
 

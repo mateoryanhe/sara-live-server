@@ -11,7 +11,7 @@ import (
 	"xr-game-server/dto/authdto"
 )
 
-// SendEmailCode App 发邮箱验证码:服务端生成 6 位码并走 Cloudflare 发信(含冷却/日限与验证码缓存).
+// SendEmailCode App 发邮箱验证码:服务端生成 6 位码并走 AWS SES 发信(含冷却/日限与验证码缓存).
 func SendEmailCode(ctx context.Context, req *authdto.SendEmailCodeReq) (*authdto.SendEmailCodeRes, error) {
 	lang := req.Lang
 	if lang == "" {

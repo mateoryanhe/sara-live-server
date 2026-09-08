@@ -26,19 +26,21 @@ func GetCfEmailCfg(_ context.Context, _ *cfemaildto.GetCfEmailCfgReq) (*cfemaild
 }
 
 func SaveCfEmailCfg(_ context.Context, req *cfemaildto.SaveCfEmailCfgReq) (*cfemaildto.SaveCfEmailCfgRes, error) {
-	accountId := strings.TrimSpace(req.AccountId)
-	apiToken := strings.TrimSpace(req.ApiToken)
+	region := strings.TrimSpace(req.Region)
+	accessKeyId := strings.TrimSpace(req.AccessKeyId)
+	secretAccessKey := strings.TrimSpace(req.SecretAccessKey)
 	fromEmail := strings.TrimSpace(req.FromEmail)
-	if accountId == "" || apiToken == "" || fromEmail == "" {
+	if region == "" || accessKeyId == "" || secretAccessKey == "" || fromEmail == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 
 	existing := cfgdao.GetCfEmailCfgCached()
 	row := &sysentity.CfEmailCfg{
-		Enabled:   req.Enabled,
-		AccountId: accountId,
-		ApiToken:  apiToken,
-		FromEmail: fromEmail,
+		Enabled:         req.Enabled,
+		Region:          region,
+		AccessKeyId:     accessKeyId,
+		SecretAccessKey: secretAccessKey,
+		FromEmail:       fromEmail,
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -69,13 +71,14 @@ func toCfEmailCfgItem(cfg *sysentity.CfEmailCfg) *cfemaildto.CfEmailCfgItem {
 		return nil
 	}
 	return &cfemaildto.CfEmailCfgItem{
-		ID:        strconv.FormatUint(cfg.ID, 10),
-		Enabled:   cfg.Enabled,
-		AccountId: cfg.AccountId,
-		ApiToken:  cfg.ApiToken,
-		FromEmail: cfg.FromEmail,
-		CreatedAt: formatCfEmailTime(cfg.CreatedAt),
-		UpdatedAt: formatCfEmailTime(cfg.UpdatedAt),
+		ID:              strconv.FormatUint(cfg.ID, 10),
+		Enabled:         cfg.Enabled,
+		Region:          cfg.Region,
+		AccessKeyId:     cfg.AccessKeyId,
+		SecretAccessKey: cfg.SecretAccessKey,
+		FromEmail:       cfg.FromEmail,
+		CreatedAt:       formatCfEmailTime(cfg.CreatedAt),
+		UpdatedAt:       formatCfEmailTime(cfg.UpdatedAt),
 	}
 }
 

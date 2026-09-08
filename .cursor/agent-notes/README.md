@@ -74,15 +74,15 @@
 - CMS：列表同理；axios 自动带当前界面语言的 `Accept-Language`；异步导出 payload 带 `lang`
 
 
-- 验证码发信走 CF Email Service REST：`POST /accounts/{account_id}/email/sending/send`（非 AWS SES / 非 CloudFront）
-- CMS 表 `cf_email_cfgs`：enabled / accountId / apiToken / fromEmail（如 `noreply@mail.saralive.net`）
+- 验证码发信走 **AWS SES**（`ses.SendEmail`）
+- CMS 表 `cf_email_cfgs`：enabled / region / accessKeyId / secretAccessKey / fromEmail（发件身份须已在 SES 验证）
 - 入口：`POST /auth/sendEmailCode`、`POST /auth/emailLogin`（免鉴权）、`POST /auth/bindEmail`（需登录）
 - 渠道 `EmailChannel=7`；绑定写 `user_exts.email`
 - 占用规则：仅看未注销账号（EmailChannel open_id 或已绑定 email）；注销即释放；UnCancel 再检查邮箱
 - `user_exts.email` → userId 走 `emailUserIdCacheMgr`（绑定 Publish / 注销 Invalidate）
 - 验证码：发信成功写入 `emailVerifyCodeCache`（5 分钟）；登录/绑定校验后删除；调试码 `981200`
 - 发信限流（双 gcache，不入库）：`emailSendCooldownCache` 1 分钟；`emailSendDailyCache` 每日 10 次、TTL 到本地 0 点
-- 菜单：配置 → Cloudflare邮件（`/cfEmail`）
+- 菜单：配置 → Amazon SES邮件（路由仍为 `/cfEmail`）
 
 ## 工会菜单分组（2026-09-07）
 
