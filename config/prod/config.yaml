@@ -69,7 +69,7 @@ logger:
 
 database:
   default:
-    link: "mysql:root:c63eac559a03dece518e3eb7a601b30e@tcp(127.0.0.1:14501)/live_db"
+    link: "mysql:root:c63eac559a03dece518e3eb7a601b30e@tcp(127.0.0.1:14501)/live_prod"
     extra: "charset=utf8mb4&parseTime=True&loc=Local"
     maxIdle: 20
     maxOpen: 40
