@@ -20,15 +20,19 @@ type shellExportResult struct {
 	PageSize  int    `json:"pageSize"`
 }
 
-func toShellExportResult(rec *fileexport.Record) *shellExportResult {
+func toShellExportResult(rec *fileexport.Record) (*shellExportResult, error) {
 	if rec == nil {
-		return nil
+		return nil, nil
+	}
+	if err := fileexport.Publish(rec); err != nil {
+		_ = fileexport.Delete(rec.ExportID)
+		return nil, err
 	}
 	return &shellExportResult{
 		ExportID: rec.ExportID,
 		FileName: rec.FileName,
 		FileUrl:  rec.FileURL,
-	}
+	}, nil
 }
 
 func createShellExport(logType string, patterns []string, startDate, endDate string, pageIndex, pageSize int, minHandlerMs, maxHandlerMs float64) (*shellExportResult, error) {
@@ -96,7 +100,10 @@ func createShellExport(logType string, patterns []string, startDate, endDate str
 	removeFile(rawPath)
 	removeFile(pagePath)
 
-	result := toShellExportResult(rec)
+	result, err := toShellExportResult(rec)
+	if err != nil {
+		return nil, err
+	}
 	result.PageIndex = pageIndex
 	result.PageSize = pageSize
 	return result, nil
@@ -150,7 +157,7 @@ func createTraceShellExport(traceId, startDate, endDate string) (*shellExportRes
 		_ = fileexport.Delete(exportID)
 		return nil, err
 	}
-	return toShellExportResult(rec), nil
+	return toShellExportResult(rec)
 }
 
 func createAccessStatsExport(startDate, endDate string, topN int) (*shellExportResult, error) {
@@ -213,7 +220,7 @@ func createAccessStatsExport(startDate, endDate string, topN int) (*shellExportR
 	removeFile(filepath.Join(workDir, exportID+".url"))
 	removeFile(filepath.Join(workDir, exportID+".ip"))
 
-	return toShellExportResult(rec), nil
+	return toShellExportResult(rec)
 }
 
 func createAccessTrendExport(req *logquerydto.CMSGetAccessTrendReq) (*shellExportResult, error) {
@@ -333,7 +340,7 @@ END {
 	removeFile(rawPath)
 	removeFile(bucketPath)
 
-	return toShellExportResult(rec), nil
+	return toShellExportResult(rec)
 }
 
 func resolveTrendIntervalMinutes(startDate, endDate string, requested int) int {

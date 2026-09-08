@@ -2066,6 +2066,13 @@ export interface UploadResourceCfg {
     imageModerationRegionId: string
     imageModerationEndpoint: string
     imageModerationService: string
+    s3Enabled?: boolean
+    s3PublicDomain?: string
+    s3Endpoint?: string
+    s3Bucket?: string
+    s3AccessKeyId?: string
+    s3SecretAccessKey?: string
+    s3KeyPrefix?: string
     createdAt: string
     updatedAt: string
 }
@@ -2086,6 +2093,13 @@ export interface SaveUploadResourceCfgReq {
     imageModerationRegionId: string
     imageModerationEndpoint: string
     imageModerationService: string
+    s3Enabled?: boolean
+    s3PublicDomain?: string
+    s3Endpoint?: string
+    s3Bucket?: string
+    s3AccessKeyId?: string
+    s3SecretAccessKey?: string
+    s3KeyPrefix?: string
 }
 
 export interface SaveUploadResourceCfgRes {

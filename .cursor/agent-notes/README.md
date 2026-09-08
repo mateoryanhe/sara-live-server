@@ -150,3 +150,14 @@
 - **工会周结算**：币商工会用自身 `share_percent`；普通工会仍用全局工会分佣
 - **主播周结算**：币商工会名下主播流水分佣按 **0%**，开播底薪也按 **0**（币商工会无开播底薪）；其余主播用全局主播分佣 + 薪资档
 
+## 上传资源 / Cloudflare R2（2026-09-08）
+
+- CMS：`/config/upload-resource` 增加 **云桶开关**（S3 兼容，面向 CF R2）
+- 字段：`s3Enabled` / **`s3PublicDomain`（云桶访问域名，App 拼文件 URL）** / `s3Endpoint`（R2 S3 API）/ `s3Bucket` / AK·SK / `s3KeyPrefix`（如 `test`、`prod`）；Region 固定代码内 `auto`，CMS 不展示
+- **开**：服务端收文件 → 写本地 → `PutObject`；公开 URL 用 `s3PublicDomain` + 前缀拼 Key
+- AWS SDK v2 默认 CRC32 与 R2 不兼容，客户端须 `RequestChecksumCalculation=WhenRequired`，否则 PutObject 易 **401 Unauthorized**
+- **关**：公开 URL 仍用原来的 `resourceDomain`（本地静态）
+- 业务子路径自动拼：`images/`、`shortvideo/`、`cms/`、`export/`；库内存相对路径如 `shortvideo/uuid.mp4`（仅新上传；历史本地文件暂不迁移）
+- CMS 导出：写完后 Publish 上桶；TTL / 主动删除同时删本地 + 云对象
+- **关**：行为与原先纯本地一致（存储名仍为纯文件名）
+

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -272,9 +271,9 @@ func RequireAppImageCompliant(ctx context.Context, fileName string) error {
 	return moderateAppImage(ctx, cfg, fileName)
 }
 
-// UploadImageForApp App 端上传:先落本地,再 ImageModeration 审核,违规则删文件并返回错误码
+// UploadImageForApp App 端上传:先落盘(+云桶),再 ImageModeration 审核,违规则删文件并返回错误码
 func UploadImageForApp(ctx context.Context, file *ghttp.UploadFile) (string, error) {
-	name, fullPath, err := saveUploadedImageFile(file, int64(GetAppImageMaxSize()))
+	name, _, err := saveUploadedImageFile(file, int64(GetAppImageMaxSize()))
 	if err != nil {
 		if IsUploadImageFileTooLarge(err) {
 			return "", errercode.CreateCode(errercode.AppImageFileTooLarge)
@@ -282,13 +281,13 @@ func UploadImageForApp(ctx context.Context, file *ghttp.UploadFile) (string, err
 		return "", err
 	}
 	if err := RequireAppImageCompliant(ctx, name); err != nil {
-		_ = os.Remove(fullPath)
+		DeleteUploadedFile(name)
 		return "", err
 	}
 	return name, nil
 }
 
-// saveUploadedImageFile 校验并保存图片到 images 目录,返回文件名与绝对路径;maxBytes 为 0 时不限制大小
+// saveUploadedImageFile 校验并保存图片,返回存储名与本地绝对路径;maxBytes 为 0 时不限制大小
 func saveUploadedImageFile(file *ghttp.UploadFile, maxBytes int64) (name, fullPath string, err error) {
 	if file == nil {
 		return "", "", fmt.Errorf("upload file is empty")
@@ -297,19 +296,10 @@ func saveUploadedImageFile(file *ghttp.UploadFile, maxBytes int64) (name, fullPa
 	if _, ok := allowedImageExt[ext]; !ok {
 		return "", "", fmt.Errorf("image ext not allowed: %s", ext)
 	}
-	dir := getImageDir()
-	if err = os.MkdirAll(dir, 0755); err != nil {
-		return "", "", err
-	}
-	name = newStoredFileName(ext)
-	fullPath = filepath.Join(dir, name)
 	src, err := file.Open()
 	if err != nil {
 		return "", "", err
 	}
 	defer src.Close()
-	if _, err = copyUploadContent(src, fullPath, maxBytes, errImageFileTooLarge); err != nil {
-		return "", "", err
-	}
-	return name, fullPath, nil
+	return storeUploadedContent(src, StoreCatImages, ext, maxBytes, errImageFileTooLarge)
 }

@@ -70,6 +70,44 @@ func newStoredFileName(ext string) string {
 	return guid.S() + ext
 }
 
+func storedNameForCategory(category, baseName string) string {
+	if IsS3Enabled() {
+		return joinStoreCategory(category, baseName)
+	}
+	return baseName
+}
+
+func localPathForStored(storedName string) string {
+	safe := sanitizeStoredRelativePath(storedName)
+	if safe == "" {
+		return ""
+	}
+	return filepath.Join(getImageDir(), filepath.FromSlash(safe))
+}
+
+// storeUploadedContent 先落本地,开启 S3 后再 PutObject;返回业务侧存储名
+func storeUploadedContent(src io.Reader, category, ext string, maxBytes int64, tooLargeErr error) (storedName, localPath string, err error) {
+	baseName := newStoredFileName(ext)
+	storedName = storedNameForCategory(category, baseName)
+	localPath = localPathForStored(storedName)
+	if localPath == "" {
+		return "", "", errors.New("invalid stored name")
+	}
+	if err = os.MkdirAll(filepath.Dir(localPath), 0755); err != nil {
+		return "", "", err
+	}
+	if _, err = copyUploadContent(src, localPath, maxBytes, tooLargeErr); err != nil {
+		return "", "", err
+	}
+	if IsS3Enabled() {
+		if err = putLocalFileToS3(storedName, localPath); err != nil {
+			_ = os.Remove(localPath)
+			return "", "", err
+		}
+	}
+	return storedName, localPath, nil
+}
+
 // UploadCMSFileFromRequest 流式读取 multipart 的 file 字段,不触发 ParseMultipartForm
 func UploadCMSFileFromRequest(r *ghttp.Request) (string, error) {
 	if r == nil || r.Request == nil {
@@ -78,10 +116,6 @@ func UploadCMSFileFromRequest(r *ghttp.Request) (string, error) {
 	reader, err := r.Request.MultipartReader()
 	if err != nil {
 		return "", mapUploadReadErr(err)
-	}
-	dir := getCMSDir()
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return "", err
 	}
 
 	for {
@@ -101,25 +135,12 @@ func UploadCMSFileFromRequest(r *ghttp.Request) (string, error) {
 			part.Close()
 			return "", fmt.Errorf("file ext not allowed: %s", ext)
 		}
-		newName := newStoredFileName(ext)
-		dstPath := filepath.Join(dir, newName)
-		dst, err := os.Create(dstPath)
-		if err != nil {
-			part.Close()
-			return "", err
-		}
-		_, copyErr := io.Copy(dst, part)
+		name, _, storeErr := storeUploadedContent(part, StoreCatCMS, ext, 0, nil)
 		part.Close()
-		closeErr := dst.Close()
-		if copyErr != nil {
-			os.Remove(dstPath)
-			return "", mapUploadReadErr(copyErr)
+		if storeErr != nil {
+			return "", mapUploadReadErr(storeErr)
 		}
-		if closeErr != nil {
-			os.Remove(dstPath)
-			return "", closeErr
-		}
-		return newName, nil
+		return name, nil
 	}
 	return "", errors.New("upload file is empty")
 }
@@ -146,26 +167,13 @@ func UploadCMSFile(file *ghttp.UploadFile) (string, error) {
 	if _, ok := allowedCMSExt[ext]; !ok {
 		return "", fmt.Errorf("file ext not allowed: %s", ext)
 	}
-
-	dir := getCMSDir()
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return "", err
-	}
-	newName := newStoredFileName(ext)
 	src, err := file.Open()
 	if err != nil {
 		return "", err
 	}
 	defer src.Close()
-	dst, err := os.Create(filepath.Join(dir, newName))
-	if err != nil {
-		return "", err
-	}
-	defer dst.Close()
-	if _, err := io.Copy(dst, src); err != nil {
-		return "", err
-	}
-	return newName, nil
+	name, _, err := storeUploadedContent(src, StoreCatCMS, ext, 0, nil)
+	return name, err
 }
 
 // UploadShortVideoFile 保存短视频文件;maxBytes 为业务大小上限(字节),0 表示不限制
@@ -177,35 +185,26 @@ func UploadShortVideoFile(file *ghttp.UploadFile, maxBytes int64) (string, error
 	if _, ok := allowedShortVideoExt[ext]; !ok {
 		return "", fmt.Errorf("video ext not allowed: %s", ext)
 	}
-
-	dir := getImageDir()
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return "", err
-	}
-	newName := newStoredFileName(ext)
-	fullPath := filepath.Join(dir, newName)
 	src, err := file.Open()
 	if err != nil {
 		return "", err
 	}
 	defer src.Close()
-	if _, err = copyUploadContent(src, fullPath, maxBytes, errVideoFileTooLarge); err != nil {
-		return "", err
-	}
-	return newName, nil
+	name, _, err := storeUploadedContent(src, StoreCatShortVideo, ext, maxBytes, errVideoFileTooLarge)
+	return name, err
 }
 
 // StreamUploadShortVideoPart 流式保存短视频 multipart 文件字段
 func StreamUploadShortVideoPart(part *multipart.Part, maxBytes int64) (string, error) {
-	return streamUploadMultipartPart(part, allowedShortVideoExt, maxBytes, errVideoFileTooLarge)
+	return streamUploadMultipartPart(part, StoreCatShortVideo, allowedShortVideoExt, maxBytes, errVideoFileTooLarge)
 }
 
 // StreamUploadImagePart 流式保存图片 multipart 文件字段
 func StreamUploadImagePart(part *multipart.Part, maxBytes int64) (string, error) {
-	return streamUploadMultipartPart(part, allowedImageExt, maxBytes, errImageFileTooLarge)
+	return streamUploadMultipartPart(part, StoreCatImages, allowedImageExt, maxBytes, errImageFileTooLarge)
 }
 
-func streamUploadMultipartPart(part *multipart.Part, allowedExt map[string]struct{}, maxBytes int64, tooLargeErr error) (string, error) {
+func streamUploadMultipartPart(part *multipart.Part, category string, allowedExt map[string]struct{}, maxBytes int64, tooLargeErr error) (string, error) {
 	if part == nil || strings.TrimSpace(part.FileName()) == "" {
 		return "", errors.New("upload file is empty")
 	}
@@ -213,17 +212,8 @@ func streamUploadMultipartPart(part *multipart.Part, allowedExt map[string]struc
 	if _, ok := allowedExt[ext]; !ok {
 		return "", fmt.Errorf("file ext not allowed: %s", ext)
 	}
-
-	dir := getImageDir()
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return "", err
-	}
-	newName := newStoredFileName(ext)
-	dstPath := filepath.Join(dir, newName)
-	if _, err := copyUploadContent(part, dstPath, maxBytes, tooLargeErr); err != nil {
-		return "", err
-	}
-	return newName, nil
+	name, _, err := storeUploadedContent(part, category, ext, maxBytes, tooLargeErr)
+	return name, err
 }
 
 var (
@@ -277,7 +267,8 @@ func IsUploadVideoFileTooLarge(err error) bool {
 	return err == errVideoFileTooLarge
 }
 
-func sanitizeStoredFileName(name string) string {
+// sanitizeStoredRelativePath 允许 images/uuid.ext 一类相对路径,禁止 .. 与绝对 URL
+func sanitizeStoredRelativePath(name string) string {
 	name = strings.TrimSpace(name)
 	if name == "" {
 		return ""
@@ -285,35 +276,60 @@ func sanitizeStoredFileName(name string) string {
 	if strings.HasPrefix(name, "http://") || strings.HasPrefix(name, "https://") {
 		return ""
 	}
-	if strings.Contains(name, "/") || strings.Contains(name, "\\") {
+	name = strings.Trim(strings.ReplaceAll(name, "\\", "/"), "/")
+	if name == "" || strings.Contains(name, "..") {
 		return ""
 	}
-	return filepath.Base(name)
+	parts := strings.Split(name, "/")
+	for _, p := range parts {
+		if p == "" || p == "." || p == ".." {
+			return ""
+		}
+	}
+	return name
+}
+
+func sanitizeStoredFileName(name string) string {
+	return sanitizeStoredRelativePath(name)
 }
 
 // ReadUploadedFileBytes 读取已上传资源文件内容
 func ReadUploadedFileBytes(name string) ([]byte, error) {
-	safeName := sanitizeStoredFileName(name)
+	safeName := sanitizeStoredRelativePath(name)
 	if safeName == "" {
 		return nil, errors.New("invalid file name")
 	}
-	return os.ReadFile(filepath.Join(getImageDir(), safeName))
+	localPath := filepath.Join(getImageDir(), filepath.FromSlash(safeName))
+	data, err := os.ReadFile(localPath)
+	if err == nil {
+		return data, nil
+	}
+	if IsS3Enabled() {
+		return getObjectBytesFromS3(safeName)
+	}
+	return nil, err
 }
 
 // SaveUploadedFileBytes 按原文件名写入资源文件(用于跨环境同步)
 func SaveUploadedFileBytes(name string, data []byte) error {
-	safeName := sanitizeStoredFileName(name)
+	safeName := sanitizeStoredRelativePath(name)
 	if safeName == "" {
 		return errors.New("invalid file name")
 	}
-	dir := getImageDir()
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	localPath := filepath.Join(getImageDir(), filepath.FromSlash(safeName))
+	if err := os.MkdirAll(filepath.Dir(localPath), 0755); err != nil {
 		return err
 	}
-	return os.WriteFile(filepath.Join(dir, safeName), data, 0644)
+	if err := os.WriteFile(localPath, data, 0644); err != nil {
+		return err
+	}
+	if IsS3Enabled() {
+		return putBytesToS3(safeName, data)
+	}
+	return nil
 }
 
-// DeleteUploadedFile 删除 images 目录下的资源文件;无效文件名或文件不存在时忽略
+// DeleteUploadedFile 删除本地与云桶中的资源;无效文件名忽略
 func DeleteUploadedFile(name string) {
 	if name == "" {
 		return
@@ -321,8 +337,10 @@ func DeleteUploadedFile(name string) {
 	if strings.HasPrefix(name, "http://") || strings.HasPrefix(name, "https://") {
 		return
 	}
-	if strings.Contains(name, "/") || strings.Contains(name, "\\") {
+	safeName := sanitizeStoredRelativePath(name)
+	if safeName == "" {
 		return
 	}
-	_ = os.Remove(filepath.Join(getImageDir(), name))
+	_ = os.Remove(filepath.Join(getImageDir(), filepath.FromSlash(safeName)))
+	deleteObjectFromS3(safeName)
 }

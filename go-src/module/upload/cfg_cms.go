@@ -42,6 +42,14 @@ func SaveUploadResourceCfg(_ context.Context, req *uploaddto.SaveUploadResourceC
 		ImageModerationRegionId:        strings.TrimSpace(req.ImageModerationRegionId),
 		ImageModerationEndpoint:        strings.TrimSpace(req.ImageModerationEndpoint),
 		ImageModerationService:         strings.TrimSpace(req.ImageModerationService),
+		S3Enabled:                      req.S3Enabled,
+		S3PublicDomain:                 strings.TrimSpace(req.S3PublicDomain),
+		S3Endpoint:                     strings.TrimSpace(req.S3Endpoint),
+		S3Region:                       defaultS3Region,
+		S3Bucket:                       strings.TrimSpace(req.S3Bucket),
+		S3AccessKeyId:                  strings.TrimSpace(req.S3AccessKeyId),
+		S3SecretAccessKey:              strings.TrimSpace(req.S3SecretAccessKey),
+		S3KeyPrefix:                    strings.TrimSpace(req.S3KeyPrefix),
 	}
 	if row.ImageModerationEnabled {
 		if row.ImageModerationAccessKeyId == "" {
@@ -52,6 +60,17 @@ func SaveUploadResourceCfg(_ context.Context, req *uploaddto.SaveUploadResourceC
 		}
 		if existing != nil && row.ImageModerationAccessKeySecret == "" {
 			row.ImageModerationAccessKeySecret = existing.ImageModerationAccessKeySecret
+		}
+	}
+	if row.S3Enabled {
+		if row.S3PublicDomain == "" || row.S3Endpoint == "" || row.S3Bucket == "" || row.S3AccessKeyId == "" {
+			return nil, errercode.CreateCode(errercode.InvalidParam)
+		}
+		if existing == nil && row.S3SecretAccessKey == "" {
+			return nil, errercode.CreateCode(errercode.InvalidParam)
+		}
+		if existing != nil && row.S3SecretAccessKey == "" {
+			row.S3SecretAccessKey = existing.S3SecretAccessKey
 		}
 	}
 	if req.ID > 0 {
@@ -72,6 +91,7 @@ func SaveUploadResourceCfg(_ context.Context, req *uploaddto.SaveUploadResourceC
 		return nil, err
 	}
 	invalidateImageGreenClient()
+	invalidateS3Client()
 	reloadResourceCfgMemory()
 	registerStaticMappings()
 	return &uploaddto.SaveUploadResourceCfgRes{
@@ -97,6 +117,13 @@ func toUploadResourceCfgItem(cfg *entity.UploadResourceCfg) *uploaddto.UploadRes
 		ImageModerationRegionId:        snap.ImageModerationRegionId,
 		ImageModerationEndpoint:        snap.ImageModerationEndpoint,
 		ImageModerationService:         snap.ImageModerationService,
+		S3Enabled:                      snap.S3Enabled,
+		S3PublicDomain:                 snap.S3PublicDomain,
+		S3Endpoint:                     snap.S3Endpoint,
+		S3Bucket:                       snap.S3Bucket,
+		S3AccessKeyId:                  snap.S3AccessKeyId,
+		S3SecretAccessKey:              maskCfgSecret(cfg.S3SecretAccessKey),
+		S3KeyPrefix:                    strings.TrimSuffix(snap.S3KeyPrefix, "/"),
 		CreatedAt:                      formatCfgTime(cfg.CreatedAt),
 		UpdatedAt:                      formatCfgTime(cfg.UpdatedAt),
 	}

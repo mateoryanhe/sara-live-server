@@ -43,7 +43,19 @@ type entry struct {
 	timer  *gtimer.Entry
 }
 
-var records sync.Map // exportID -> *entry
+var (
+	records      sync.Map // exportID -> *entry
+	publishHook  func(*Record) error
+	remoteRemove func(fileName string)
+)
+
+func RegisterPublisher(fn func(*Record) error) {
+	publishHook = fn
+}
+
+func RegisterRemover(fn func(fileName string)) {
+	remoteRemove = fn
+}
 
 func Ready() bool {
 	return appcfg.GetCMSFileExportRoot() != ""
@@ -82,6 +94,20 @@ func Register(exportID, fileName string) (*Record, error) {
 	return rec, nil
 }
 
+// Publish 文件写完后调用:上传云桶(若开启)并刷新下载 URL。
+func Publish(rec *Record) error {
+	if rec == nil {
+		return nil
+	}
+	if publishHook != nil {
+		if err := publishHook(rec); err != nil {
+			return err
+		}
+	}
+	rec.FileURL = appcfg.BuildCMSFileExportURL(rec.FileName)
+	return nil
+}
+
 // Delete 取消 timer 并删除该导出文件（前端主动删除 / 导出失败回滚 / timer 到期）。
 func Delete(exportID string) error {
 	if exportID == "" {
@@ -91,12 +117,13 @@ func Delete(exportID string) error {
 
 	if v, ok := records.LoadAndDelete(exportID); ok {
 		if e, ok := v.(*entry); ok && e != nil && e.record != nil {
-			removeFile(e.record.AbsPath)
+			removeLocalAndRemote(e.record.AbsPath, e.record.FileName)
 		}
 	}
 	// 重启后 map 为空，或文件名后缀与登记不一致时兜底
 	for _, suffix := range knownSuffixes {
-		removeFile(appcfg.JoinCMSFileExportPath(exportID + suffix))
+		name := exportID + suffix
+		removeLocalAndRemote(appcfg.JoinCMSFileExportPath(name), name)
 	}
 	return nil
 }
@@ -128,9 +155,11 @@ func cancelTimer(exportID string) {
 	}
 }
 
-func removeFile(path string) {
-	if path == "" {
-		return
+func removeLocalAndRemote(absPath, fileName string) {
+	if absPath != "" {
+		_ = os.Remove(absPath)
 	}
-	_ = os.Remove(path)
+	if remoteRemove != nil && fileName != "" {
+		remoteRemove(fileName)
+	}
 }

@@ -38,15 +38,82 @@
           <span class="form-tip">{{ t('pages.uploadResource.appImageMaxSizeTip') }}</span>
         </el-form-item>
 
+        <el-divider content-position="left">{{ t('pages.uploadResource.s3Section') }}</el-divider>
+
+        <el-form-item :label="t('pages.uploadResource.enableS3')">
+          <div class="switch-block">
+            <el-switch
+                v-model="formData.s3Enabled"
+                :active-value="true"
+                :inactive-value="false"
+                :active-text="t('common.open')"
+                :inactive-text="t('common.close')"
+                @change="onS3EnabledChange"
+            />
+            <div class="form-tip">{{ t('pages.uploadResource.enableS3Tip') }}</div>
+          </div>
+        </el-form-item>
+
+        <template v-if="formData.s3Enabled === true">
+          <el-form-item :label="t('pages.uploadResource.s3PublicDomain')" prop="s3PublicDomain">
+            <el-input
+                v-model="formData.s3PublicDomain"
+                clearable
+                :placeholder="t('pages.uploadResource.s3PublicDomainPlaceholder')"
+            />
+            <div class="form-tip">{{ t('pages.uploadResource.s3PublicDomainTip') }}</div>
+          </el-form-item>
+
+          <el-form-item :label="t('pages.uploadResource.s3Endpoint')" prop="s3Endpoint">
+            <el-input
+                v-model="formData.s3Endpoint"
+                clearable
+                :placeholder="t('pages.uploadResource.s3EndpointPlaceholder')"
+            />
+            <div class="form-tip">{{ t('pages.uploadResource.s3EndpointTip') }}</div>
+          </el-form-item>
+
+          <el-form-item :label="t('pages.uploadResource.s3Bucket')" prop="s3Bucket">
+            <el-input v-model="formData.s3Bucket" clearable :placeholder="t('pages.uploadResource.s3BucketPlaceholder')"/>
+          </el-form-item>
+
+          <el-form-item :label="t('pages.uploadResource.s3KeyPrefix')" prop="s3KeyPrefix">
+            <el-input
+                v-model="formData.s3KeyPrefix"
+                clearable
+                :placeholder="t('pages.uploadResource.s3KeyPrefixPlaceholder')"
+            />
+            <div class="form-tip">{{ t('pages.uploadResource.s3KeyPrefixTip') }}</div>
+          </el-form-item>
+
+          <el-form-item label="AccessKey ID" prop="s3AccessKeyId">
+            <el-input v-model="formData.s3AccessKeyId" clearable :placeholder="t('pages.uploadResource.s3AccessKeyIdPlaceholder')"/>
+          </el-form-item>
+
+          <el-form-item label="Secret Access Key" prop="s3SecretAccessKey">
+            <el-input
+                v-model="formData.s3SecretAccessKey"
+                clearable
+                :placeholder="t('pages.uploadResource.accessKeySecretPlaceholder')"
+                show-password
+                type="password"
+            />
+          </el-form-item>
+        </template>
+
         <el-divider content-position="left">{{ t('pages.uploadResource.imageModerationSection') }}</el-divider>
 
         <el-form-item :label="t('pages.uploadResource.enableImageModeration')">
-          <el-switch
-              v-model="formData.imageModerationEnabled"
-              :active-text="t('common.open')"
-              :inactive-text="t('common.close')"
-          />
-          <span class="form-tip">{{ t('pages.uploadResource.enableImageModerationTip') }}</span>
+          <div class="switch-block">
+            <el-switch
+                v-model="formData.imageModerationEnabled"
+                :active-value="true"
+                :inactive-value="false"
+                :active-text="t('common.open')"
+                :inactive-text="t('common.close')"
+            />
+            <div class="form-tip">{{ t('pages.uploadResource.enableImageModerationTip') }}</div>
+          </div>
         </el-form-item>
 
         <template v-if="formData.imageModerationEnabled">
@@ -101,7 +168,7 @@
 
 <script lang="ts" setup>
 import {useI18n} from 'vue-i18n'
-import {computed, onMounted, reactive, ref, watch} from 'vue'
+import {computed, nextTick, onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage} from 'element-plus'
 import {uploadResourceApi} from '@/api/modules/upload-resource'
 import type {UploadResourceCfg} from '@/types/api'
@@ -110,6 +177,8 @@ const {t} = useI18n()
 const loading = ref(false)
 const formRef = ref()
 const imageSecretTouched = ref(false)
+const s3SecretTouched = ref(false)
+const applyingCfg = ref(false)
 
 const DEFAULT_STORAGE_PATH = '/home/ec2-user/cdn/images'
 
@@ -133,6 +202,13 @@ const formData = reactive({
   storagePath: DEFAULT_STORAGE_PATH,
   cmsExportTtlMinutes: 30,
   appImageMaxSizeMB: 1,
+  s3Enabled: false,
+  s3PublicDomain: '',
+  s3Endpoint: '',
+  s3Bucket: '',
+  s3AccessKeyId: '',
+  s3SecretAccessKey: '',
+  s3KeyPrefix: '',
   imageModerationEnabled: false,
   imageModerationAccessKeyId: '',
   imageModerationAccessKeySecret: '',
@@ -170,6 +246,70 @@ const formRules = computed(() => ({
     {required: true, message: t('pages.uploadResource.appImageMaxSizeRequired'), trigger: 'blur'},
     {type: 'number', min: 1, message: t('pages.uploadResource.appImageMaxSizeMin'), trigger: 'blur'},
   ],
+  s3PublicDomain: [
+    {
+      validator: (_: unknown, value: string, callback: (e?: Error) => void) => {
+        if (!formData.s3Enabled) {
+          callback()
+          return
+        }
+        if (!value?.trim()) {
+          callback(new Error(t('pages.uploadResource.s3PublicDomainRequired')))
+          return
+        }
+        callback()
+      },
+      trigger: 'blur',
+    },
+  ],
+  s3Endpoint: [
+    {
+      validator: (_: unknown, value: string, callback: (e?: Error) => void) => {
+        if (!formData.s3Enabled) {
+          callback()
+          return
+        }
+        if (!value?.trim()) {
+          callback(new Error(t('pages.uploadResource.s3EndpointRequired')))
+          return
+        }
+        callback()
+      },
+      trigger: 'blur',
+    },
+  ],
+  s3Bucket: [
+    {
+      validator: (_: unknown, value: string, callback: (e?: Error) => void) => {
+        if (!formData.s3Enabled) {
+          callback()
+          return
+        }
+        if (!value?.trim()) {
+          callback(new Error(t('pages.uploadResource.s3BucketRequired')))
+          return
+        }
+        callback()
+      },
+      trigger: 'blur',
+    },
+  ],
+  s3AccessKeyId: [
+    {
+      validator: (_: unknown, value: string, callback: (e?: Error) => void) => {
+        if (!formData.s3Enabled) {
+          callback()
+          return
+        }
+        if (!value?.trim()) {
+          callback(new Error(t('pages.uploadResource.s3AccessKeyRequired')))
+          return
+        }
+        callback()
+      },
+      trigger: 'blur',
+    },
+  ],
   imageModerationAccessKeyId: [
     {
       validator: (_: unknown, value: string, callback: (e?: Error) => void) => {
@@ -191,41 +331,84 @@ const formRules = computed(() => ({
 watch(
     () => formData.imageModerationAccessKeySecret,
     () => {
-      imageSecretTouched.value = true
+      if (!applyingCfg.value) {
+        imageSecretTouched.value = true
+      }
     },
 )
 
-const applyCfg = (cfg: UploadResourceCfg | null | undefined) => {
-  imageSecretTouched.value = false
-  if (!cfg) {
-    formData.id = '0'
-    formData.resourceDomain = 'http://127.0.0.1'
-    formData.storagePath = DEFAULT_STORAGE_PATH
-    formData.cmsExportTtlMinutes = 30
-    formData.appImageMaxSizeMB = 1
-    formData.imageModerationEnabled = false
-    formData.imageModerationAccessKeyId = ''
-    formData.imageModerationAccessKeySecret = ''
-    formData.imageModerationRegionId = 'cn-shanghai'
-    formData.imageModerationEndpoint = 'green-cip.cn-shanghai.aliyuncs.com'
-    formData.imageModerationService = 'profilePhotoCheck'
-    metaInfo.createdAt = ''
-    metaInfo.updatedAt = ''
-    return
-  }
-  formData.id = cfg.id || '0'
-  formData.resourceDomain = cfg.resourceDomain || 'http://127.0.0.1'
-  formData.storagePath = cfg.storagePath || DEFAULT_STORAGE_PATH
-  formData.cmsExportTtlMinutes = cfg.cmsExportTtlMinutes ?? 30
-  formData.appImageMaxSizeMB = cfg.appImageMaxSizeMB || 1
-  formData.imageModerationEnabled = !!cfg.imageModerationEnabled
-  formData.imageModerationAccessKeyId = cfg.imageModerationAccessKeyId || ''
+watch(
+    () => formData.s3SecretAccessKey,
+    () => {
+      if (!applyingCfg.value) {
+        s3SecretTouched.value = true
+      }
+    },
+)
+
+const onS3EnabledChange = async (val: string | number | boolean) => {
+  formData.s3Enabled = val === true
+  await nextTick()
+  formRef.value?.clearValidate?.(['s3PublicDomain', 's3Endpoint', 's3Bucket', 's3AccessKeyId', 's3SecretAccessKey'])
+}
+
+const resetFormDefaults = () => {
+  formData.id = '0'
+  formData.resourceDomain = 'http://127.0.0.1'
+  formData.storagePath = DEFAULT_STORAGE_PATH
+  formData.cmsExportTtlMinutes = 30
+  formData.appImageMaxSizeMB = 1
+  formData.s3Enabled = false
+  formData.s3PublicDomain = ''
+  formData.s3Endpoint = ''
+  formData.s3Bucket = ''
+  formData.s3AccessKeyId = ''
+  formData.s3SecretAccessKey = ''
+  formData.s3KeyPrefix = ''
+  formData.imageModerationEnabled = false
+  formData.imageModerationAccessKeyId = ''
   formData.imageModerationAccessKeySecret = ''
-  formData.imageModerationRegionId = cfg.imageModerationRegionId || 'cn-shanghai'
-  formData.imageModerationEndpoint = cfg.imageModerationEndpoint || 'green-cip.cn-shanghai.aliyuncs.com'
-  formData.imageModerationService = cfg.imageModerationService || 'profilePhotoCheck'
-  metaInfo.createdAt = cfg.createdAt || ''
-  metaInfo.updatedAt = cfg.updatedAt || ''
+  formData.imageModerationRegionId = 'cn-shanghai'
+  formData.imageModerationEndpoint = 'green-cip.cn-shanghai.aliyuncs.com'
+  formData.imageModerationService = 'profilePhotoCheck'
+  metaInfo.createdAt = ''
+  metaInfo.updatedAt = ''
+}
+
+const applyCfg = (cfg: UploadResourceCfg | null | undefined) => {
+  applyingCfg.value = true
+  imageSecretTouched.value = false
+  s3SecretTouched.value = false
+  try {
+    if (!cfg) {
+      resetFormDefaults()
+      return
+    }
+    formData.id = cfg.id || '0'
+    formData.resourceDomain = cfg.resourceDomain || 'http://127.0.0.1'
+    formData.storagePath = cfg.storagePath || DEFAULT_STORAGE_PATH
+    formData.cmsExportTtlMinutes = cfg.cmsExportTtlMinutes ?? 30
+    formData.appImageMaxSizeMB = cfg.appImageMaxSizeMB || 1
+    formData.s3Enabled = cfg.s3Enabled === true
+    formData.s3PublicDomain = cfg.s3PublicDomain || ''
+    formData.s3Endpoint = cfg.s3Endpoint || ''
+    formData.s3Bucket = cfg.s3Bucket || ''
+    formData.s3AccessKeyId = cfg.s3AccessKeyId || ''
+    formData.s3SecretAccessKey = ''
+    formData.s3KeyPrefix = cfg.s3KeyPrefix || ''
+    formData.imageModerationEnabled = cfg.imageModerationEnabled === true
+    formData.imageModerationAccessKeyId = cfg.imageModerationAccessKeyId || ''
+    formData.imageModerationAccessKeySecret = ''
+    formData.imageModerationRegionId = cfg.imageModerationRegionId || 'cn-shanghai'
+    formData.imageModerationEndpoint = cfg.imageModerationEndpoint || 'green-cip.cn-shanghai.aliyuncs.com'
+    formData.imageModerationService = cfg.imageModerationService || 'profilePhotoCheck'
+    metaInfo.createdAt = cfg.createdAt || ''
+    metaInfo.updatedAt = cfg.updatedAt || ''
+  } finally {
+    nextTick(() => {
+      applyingCfg.value = false
+    })
+  }
 }
 
 const fetchCfg = async () => {
@@ -242,15 +425,28 @@ const fetchCfg = async () => {
 }
 
 const handleSave = async () => {
+  const wantS3 = formData.s3Enabled === true
   try {
     await formRef.value.validate()
-    loading.value = true
+  } catch {
+    ElMessage.warning(t('pages.uploadResource.formInvalid'))
+    return
+  }
+  loading.value = true
+  try {
     const response = await uploadResourceApi.saveUploadResourceCfg({
       id: formData.id === '0' ? 0 : Number(formData.id),
       resourceDomain: formData.resourceDomain.trim(),
       storagePath: formData.storagePath.trim(),
       cmsExportTtlMinutes: formData.cmsExportTtlMinutes,
       appImageMaxSizeMB: formData.appImageMaxSizeMB,
+      s3Enabled: wantS3,
+      s3PublicDomain: formData.s3PublicDomain.trim(),
+      s3Endpoint: formData.s3Endpoint.trim(),
+      s3Bucket: formData.s3Bucket.trim(),
+      s3AccessKeyId: formData.s3AccessKeyId.trim(),
+      s3SecretAccessKey: s3SecretTouched.value ? formData.s3SecretAccessKey.trim() : '',
+      s3KeyPrefix: formData.s3KeyPrefix.trim(),
       imageModerationEnabled: formData.imageModerationEnabled,
       imageModerationAccessKeyId: formData.imageModerationAccessKeyId.trim(),
       imageModerationAccessKeySecret: imageSecretTouched.value
@@ -266,6 +462,9 @@ const handleSave = async () => {
         formData.id = response.id
       }
       await fetchCfg()
+      if (wantS3 && formData.s3Enabled !== true) {
+        ElMessage.warning(t('pages.uploadResource.s3NotPersisted'))
+      }
     } else {
       ElMessage.error(t('pages.uploadResource.saveFailed'))
     }
@@ -303,5 +502,12 @@ onMounted(() => {
   color: #909399;
   font-size: 13px;
   line-height: 1.4;
+}
+
+.switch-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
 }
 </style>

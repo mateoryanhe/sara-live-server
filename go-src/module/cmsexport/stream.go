@@ -97,5 +97,9 @@ func streamCSVExport(
 		_ = fileexport.Delete(record.ExportID)
 		return nil, err
 	}
+	if err := fileexport.Publish(record); err != nil {
+		_ = fileexport.Delete(record.ExportID)
+		return nil, err
+	}
 	return finalizeExportRecord(record, exportedRows), nil
 }

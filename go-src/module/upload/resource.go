@@ -62,7 +62,17 @@ func buildImageResourceUrl(fileName string) string {
 	if fileName == "" {
 		return ""
 	}
-	return buildResourceUrl("/" + fileName)
+	if IsS3Enabled() {
+		prefix := strings.Trim(GetS3KeyPrefix(), "/")
+		if prefix != "" && fileName != prefix && !strings.HasPrefix(fileName, prefix+"/") {
+			fileName = prefix + "/" + fileName
+		}
+	}
+	base, pathPrefix := parseResourceDomainBase(GetFileAccessDomain())
+	if base == "" {
+		return ""
+	}
+	return joinResourceURL(base, pathPrefix, fileName)
 }
 
 // parseResourceDomainBase 拆分资源域名为 host 根 URL 与可选路径前缀(如 /images)

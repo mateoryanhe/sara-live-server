@@ -23,6 +23,15 @@ type UploadResourceCfg struct {
 	ImageModerationRegionId        string `gorm:"size:32;default:'cn-shanghai';comment:图片审核地域" json:"imageModerationRegionId"`
 	ImageModerationEndpoint        string `gorm:"size:128;default:'green-cip.cn-shanghai.aliyuncs.com';comment:图片审核接入点" json:"imageModerationEndpoint"`
 	ImageModerationService         string `gorm:"size:64;default:'profilePhotoCheck';comment:图片审核Service" json:"imageModerationService"`
+	// S3 兼容对象存储(Cloudflare R2 / AWS S3 等);开启后新上传与 CMS 导出走 PutObject
+	S3Enabled         bool   `gorm:"default:0;comment:是否开启S3兼容云桶" json:"s3Enabled"`
+	S3PublicDomain    string `gorm:"size:256;default:'';comment:云桶公开访问域名(R2自定义域)" json:"s3PublicDomain"`
+	S3Endpoint        string `gorm:"size:256;default:'';comment:S3 API Endpoint(R2必填)" json:"s3Endpoint"`
+	S3Region          string `gorm:"size:64;default:'auto';comment:内部固定auto,CMS不再配置" json:"s3Region"`
+	S3Bucket          string `gorm:"size:128;default:'';comment:桶名" json:"s3Bucket"`
+	S3AccessKeyId     string `gorm:"size:128;default:'';comment:S3 AccessKeyId" json:"s3AccessKeyId"`
+	S3SecretAccessKey string `gorm:"size:256;default:'';comment:S3 SecretAccessKey" json:"s3SecretAccessKey"`
+	S3KeyPrefix       string `gorm:"size:128;default:'';comment:对象Key环境前缀如test/或prod/" json:"s3KeyPrefix"`
 }
 
 func initUploadResourceCfg() {

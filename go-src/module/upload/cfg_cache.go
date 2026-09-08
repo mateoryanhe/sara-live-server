@@ -28,6 +28,14 @@ type resourceCfgSnapshot struct {
 	ImageModerationRegionId        string
 	ImageModerationEndpoint        string
 	ImageModerationService         string
+	S3Enabled                      bool
+	S3PublicDomain                 string
+	S3Endpoint                     string
+	S3Region                       string
+	S3Bucket                       string
+	S3AccessKeyId                  string
+	S3SecretAccessKey              string
+	S3KeyPrefix                    string
 }
 
 var (
@@ -72,6 +80,14 @@ func toResourceCfgSnapshot(row *entity.UploadResourceCfg) *resourceCfgSnapshot {
 		ImageModerationRegionId:        strings.TrimSpace(row.ImageModerationRegionId),
 		ImageModerationEndpoint:        strings.TrimSpace(row.ImageModerationEndpoint),
 		ImageModerationService:         strings.TrimSpace(row.ImageModerationService),
+		S3Enabled:                      row.S3Enabled,
+		S3PublicDomain:                 normalizeOptionalDomain(row.S3PublicDomain),
+		S3Endpoint:                     strings.TrimSpace(row.S3Endpoint),
+		S3Region:                       strings.TrimSpace(row.S3Region),
+		S3Bucket:                       strings.TrimSpace(row.S3Bucket),
+		S3AccessKeyId:                  strings.TrimSpace(row.S3AccessKeyId),
+		S3SecretAccessKey:              strings.TrimSpace(row.S3SecretAccessKey),
+		S3KeyPrefix:                    normalizeS3KeyPrefix(row.S3KeyPrefix),
 	}
 	if s.ImageModerationRegionId == "" {
 		s.ImageModerationRegionId = defaultImageModerationRegion
@@ -82,7 +98,18 @@ func toResourceCfgSnapshot(row *entity.UploadResourceCfg) *resourceCfgSnapshot {
 	if s.ImageModerationService == "" {
 		s.ImageModerationService = defaultImageModerationService
 	}
+	if s.S3Region == "" {
+		s.S3Region = defaultS3Region
+	}
 	return s
+}
+
+func normalizeS3KeyPrefix(prefix string) string {
+	prefix = strings.Trim(strings.ReplaceAll(strings.TrimSpace(prefix), "\\", "/"), "/")
+	if prefix == "" {
+		return ""
+	}
+	return prefix + "/"
 }
 
 func normalizeDomain(domain string) string {
@@ -90,9 +117,18 @@ func normalizeDomain(domain string) string {
 	if domain == "" {
 		return defaultResourceDomain
 	}
+	return normalizeOptionalDomain(domain)
+}
+
+// normalizeOptionalDomain 规范化可选域名;空串保持为空(不回落默认本机)
+func normalizeOptionalDomain(domain string) string {
+	domain = strings.TrimSpace(domain)
+	if domain == "" {
+		return ""
+	}
 	lower := strings.ToLower(domain)
 	if !strings.HasPrefix(lower, "http://") && !strings.HasPrefix(lower, "https://") {
-		domain = "http://" + domain
+		domain = "https://" + domain
 	}
 	return strings.TrimRight(domain, "/")
 }
@@ -145,4 +181,29 @@ func GetStoragePath() string {
 // GetCmsExportTtlMinutes CMS 文件导出过期清理时间(分钟)
 func GetCmsExportTtlMinutes() int {
 	return getResourceCfgCache().CmsExportTtlMinutes
+}
+
+// IsS3Enabled 是否开启 S3 兼容云桶(R2 等)
+func IsS3Enabled() bool {
+	return getResourceCfgCache().S3Enabled
+}
+
+// GetS3PublicDomain 云桶公开访问域名(R2 自定义域);未配置为空
+func GetS3PublicDomain() string {
+	return getResourceCfgCache().S3PublicDomain
+}
+
+// GetFileAccessDomain App/CMS 拼文件 URL 用的域名:开云桶用云桶域,否则用资源域名
+func GetFileAccessDomain() string {
+	if IsS3Enabled() {
+		if d := GetS3PublicDomain(); d != "" {
+			return d
+		}
+	}
+	return GetResourceDomain()
+}
+
+// GetS3KeyPrefix 环境对象前缀,形如 test/ 或 prod/;未配置为空
+func GetS3KeyPrefix() string {
+	return getResourceCfgCache().S3KeyPrefix
 }
