@@ -477,6 +477,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     UploadResourceCfgManagement: '/upload/getUploadResourceCfg',
     'UploadResourceCfgManagement:view': '/upload/getUploadResourceCfg',
     'UploadResourceCfgManagement:save': '/upload/saveUploadResourceCfg',
+    'UploadResourceCfgManagement:syncLocalToS3': '/upload/syncLocalStorageToS3',
 
     DataSyncCfgManagement: '/dataSync/getDataSyncCfg',
     'DataSyncCfgManagement:view': '/dataSync/getDataSyncCfg',

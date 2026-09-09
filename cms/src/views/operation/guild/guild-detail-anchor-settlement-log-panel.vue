@@ -143,7 +143,7 @@ import {CMS_EXPORT_TYPE_GUILD_ANCHOR_INCOME_SETTLEMENT_LOG} from '@/utils/cms-as
 import {buildGuildAnchorSettlementLogCsvColumns} from '@/utils/income-settlement-log-csv'
 import {formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
-import {formatServerDateOnly} from '@/utils/server-datetime'
+import {formatServerDateOnly, formatServerDateTime as formatDate, toServerDayStartUnix, toServerDayEndUnix} from '@/utils/server-datetime'
 
 const props = defineProps<{
   guildId: string
@@ -175,21 +175,14 @@ const searchForm = reactive({
   dateRange: createDefaultDateRange(),
 })
 
-const toDayStartUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T00:00:00`).getTime() / 1000)
-}
-
-const toDayEndUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T23:59:59`).getTime() / 1000)
-}
 
 const buildFilterParams = () => {
   const [startDate, endDate] = searchForm.dateRange || []
   return {
     guildId: props.guildId,
     roomId: searchForm.roomId.trim(),
-    startTime: startDate ? toDayStartUnix(startDate) : 0,
-    endTime: endDate ? toDayEndUnix(endDate) : 0,
+    startTime: startDate ? toServerDayStartUnix(startDate) : 0,
+    endTime: endDate ? toServerDayEndUnix(endDate) : 0,
   }
 }
 
@@ -260,15 +253,6 @@ const handleExport = async () => {
 const formatSharePercent = (value: number | null | undefined) => {
   if (value == null || Number.isNaN(value)) return '-'
   return `${value}%`
-}
-
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) return '-'
-  try {
-    return new Date(dateString).toLocaleString()
-  } catch {
-    return '-'
-  }
 }
 
 const resetState = () => {

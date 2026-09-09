@@ -25,3 +25,4 @@ alwaysApply: false
 - 未 push / 未提交要标明
 - 先 `git log`（当天）+ `git status` 核对，再写
 - 不要长篇解释；不要复述任务过程
+- **前端范围**：日报**不要写** Flutter/App、H5 等客户端工作；**CMS 页面算日报内容**（可写）；其余写 Go 后端、部署、DB、配置、云桶/运维等

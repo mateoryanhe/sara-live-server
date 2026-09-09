@@ -9,6 +9,7 @@
 | [workspace-safety.mdc](../rules/workspace-safety.mdc) | **本机误删、Git push、代码恢复**（2026-08-28 事故） |
 | [go-build-output.mdc](../rules/go-build-output.mdc) | Go 编译 `-o` 路径，勿生成 `...` 目录 |
 | [server-safety.mdc](../rules/server-safety.mdc) | 远程/数据库删除须问用户 |
+| [flutter-push-subscribe.mdc](../rules/flutter-push-subscribe.mdc) | Flutter：PushBus 上 **Repository 与 ViewModel 各自订阅**（勿中心 revision 转 UI） |
 | [read-agent-notes.mdc](../rules/read-agent-notes.mdc) | 任务前必读入口 |
 
 ## SSH
@@ -53,6 +54,7 @@
 
 - Go：`pub-tool/go-local/start.bat`（或 `一键启动.bat`）— 停 9443 → `go build` 到 `go-build/xr-game-server.exe` → 以 `config/local` 为 cwd 启动（读 `config/local/config.yaml`）
 - CMS：`pub-tool/cms-local/start.bat` — `npm run dev`（5173）
+- **时间展示/日筛选**：统一 `cms/src/utils/server-datetime.ts`（UTC+0）；勿用 `toLocaleString()` / 本地 `getHours()`
 
 ## 2026-08-28 代码丢失（摘要）
 
@@ -112,6 +114,8 @@
 - 会话加载：`. D:\tools\env-flutter.ps1` 或 `D:\tools\env-flutter.bat`（会把 `127.0.0.1:port` 代理补成 `http://`）
 - 重装脚本：`D:\tools\install-flutter-android.ps1`；补包：`D:\tools\install-android-packages.ps1`
 - App 工程：`flutter-client/`（已 gitignore）；打 APK：`flutter-client\build-apk.bat`
+- Web 本地：`flutter-client\start-web.bat` 或 `pub-tool/flutter-local/一键启动.bat`（`flutter run -d chrome`）
+- **推送规则**：`PushBus` 上 **Repository 与 ViewModel 各自订阅**（失效缓存 / 刷 UI）；见 `.cursor/rules/flutter-push-subscribe.mdc`、`lib/sara_live_core.dart` §6
 - 注意：本机 `HTTP_PROXY` 若无协议，sdkmanager 会挂；VS 未装不影响 Android APK
 
 ## CMS 本地启动（2026-09-07）
@@ -150,14 +154,15 @@
 - **工会周结算**：币商工会用自身 `share_percent`；普通工会仍用全局工会分佣
 - **主播周结算**：币商工会名下主播流水分佣按 **0%**，开播底薪也按 **0**（币商工会无开播底薪）；其余主播用全局主播分佣 + 薪资档
 
-## 上传资源 / Cloudflare R2（2026-09-08）
+## 上传资源 / Cloudflare R2（2026-09-08，落点 2026-09-09）
 
-- CMS：`/config/upload-resource` 增加 **云桶开关**（S3 兼容，面向 CF R2）
+- CMS：`/config/upload-resource` **云桶开关**（S3 兼容，面向 CF R2）
 - 字段：`s3Enabled` / **`s3PublicDomain`（云桶访问域名，App 拼文件 URL）** / `s3Endpoint`（R2 S3 API）/ `s3Bucket` / AK·SK / `s3KeyPrefix`（如 `test`、`prod`）；Region 固定代码内 `auto`，CMS 不展示
-- **开**：服务端收文件 → 写本地 → `PutObject`；公开 URL 用 `s3PublicDomain` + 前缀拼 Key
-- AWS SDK v2 默认 CRC32 与 R2 不兼容，客户端须 `RequestChecksumCalculation=WhenRequired`，否则 PutObject 易 **401 Unauthorized**
-- **关**：公开 URL 仍用原来的 `resourceDomain`（本地静态）
-- 业务子路径自动拼：`images/`、`shortvideo/`、`cms/`、`export/`；库内存相对路径如 `shortvideo/uuid.mp4`（仅新上传；历史本地文件暂不迁移）
-- CMS 导出：写完后 Publish 上桶；TTL / 主动删除同时删本地 + 云对象
-- **关**：行为与原先纯本地一致（存储名仍为纯文件名）
+- **开（只写云）**：multipart **流式** `Upload` 直传云桶，**不写本地/临时文件**；App/CMS 公开 URL 走 `s3PublicDomain`；读优先云对象
+- **关（只写本地）**：只落 `storagePath`，URL 用 `resourceDomain`
+- AWS SDK v2 默认 CRC32 与 R2 不兼容，须 `RequestChecksumCalculation=WhenRequired`，否则 PutObject 易 **401 Unauthorized**
+- 业务子路径：`images/`、`shortvideo/`、`cms/`、`export/`；库内存如 `shortvideo/uuid.mp4`（仅开云桶时的新上传）
+- **CMS 导出**：开云桶时写完 → Publish 上云 → **立刻删本地导出文件**；TTL / `deleteExport` 清云对象（导出生成过程仍短暂落盘再上传，因 CSV 流式分页）
+- **历史迁移**：按钮「刷本地到云桶」→ `POST /upload/syncLocalStorageToS3`（扫旧本地，跳过 `export/`）
+- 开云桶时短视频上传**跳过**本地磁盘水位检查
 

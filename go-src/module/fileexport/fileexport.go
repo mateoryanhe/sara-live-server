@@ -94,7 +94,7 @@ func Register(exportID, fileName string) (*Record, error) {
 	return rec, nil
 }
 
-// Publish 文件写完后调用:上传云桶(若开启)并刷新下载 URL。
+// Publish 文件写完后调用:开云桶则上传并(由 hook)删本地;关则仅刷新本地下载 URL。
 func Publish(rec *Record) error {
 	if rec == nil {
 		return nil

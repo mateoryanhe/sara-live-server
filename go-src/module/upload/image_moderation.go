@@ -271,7 +271,7 @@ func RequireAppImageCompliant(ctx context.Context, fileName string) error {
 	return moderateAppImage(ctx, cfg, fileName)
 }
 
-// UploadImageForApp App 端上传:先落盘(+云桶),再 ImageModeration 审核,违规则删文件并返回错误码
+// UploadImageForApp App 端上传:按云桶开关落云或本地,再 ImageModeration 审核,违规则删文件并返回错误码
 func UploadImageForApp(ctx context.Context, file *ghttp.UploadFile) (string, error) {
 	name, _, err := saveUploadedImageFile(file, int64(GetAppImageMaxSize()))
 	if err != nil {

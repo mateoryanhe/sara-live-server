@@ -88,6 +88,7 @@ import {usePagePermission} from '@/composables/usePagePermission'
 import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
 import {CMS_EXPORT_TYPE_GAME_BET_LOG, CMS_EXPORT_TYPE_GAME_WIN_LOG} from '@/utils/cms-async-export'
 import {buildGameBetLogCsvColumns, buildGameWinLogCsvColumns} from '@/utils/game-log-csv'
+import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 
 const props = defineProps<{
   userId: string
@@ -206,17 +207,6 @@ const handleExport = async () => {
       },
       `${exportFilePrefix.value}-${props.userId}-${Date.now()}.csv`,
   )
-}
-
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) {
-    return '-'
-  }
-  try {
-    return new Date(dateString).toLocaleString()
-  } catch {
-    return '-'
-  }
 }
 
 const resetState = () => {

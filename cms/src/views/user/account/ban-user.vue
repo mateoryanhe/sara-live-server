@@ -53,6 +53,7 @@ import {useRoute, useRouter} from 'vue-router'
 import {ElForm, ElMessage, type FormRules} from 'element-plus'
 import {accountApi} from '@/api'
 import type {BanAnchorReq, BanReq} from '@/types/api.ts'
+import {formatServerNowPlusDays} from '@/utils/server-datetime'
 
 const {t} = useI18n()
 const router = useRouter()
@@ -97,7 +98,7 @@ onMounted(() => {
     form.openId = userData.openId as string || ''
     form.ip = userData.ip as string || ''
     form.channel = Number(userData.channel) || 0
-    form.banApplyTime = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+    form.banApplyTime = formatServerNowPlusDays(7)
   } else {
     router.push(returnPath.value)
   }

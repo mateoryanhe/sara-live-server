@@ -75,6 +75,7 @@ import {usePagePermission} from '@/composables/usePagePermission'
 import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
 import {CMS_EXPORT_TYPE_CURRENCY_LOG} from '@/utils/cms-async-export'
 import {buildCurrencyLogCsvColumns} from '@/utils/currency-log-csv'
+import {formatServerDateTime as formatDate, toServerDayStartUnix, toServerDayEndUnix} from '@/utils/server-datetime'
 
 const props = defineProps<{
   userId: string
@@ -112,21 +113,14 @@ const pagination = reactive({
   total: 0,
 })
 
-const toDayStartUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T00:00:00`).getTime() / 1000)
-}
-
-const toDayEndUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T23:59:59`).getTime() / 1000)
-}
 
 const buildFilterParams = () => {
   const [startDate, endDate] = searchForm.dateRange || []
   return {
     userId: props.userId,
     currencyType: props.currencyType,
-    startTime: startDate ? toDayStartUnix(startDate) : 0,
-    endTime: endDate ? toDayEndUnix(endDate) : 0,
+    startTime: startDate ? toServerDayStartUnix(startDate) : 0,
+    endTime: endDate ? toServerDayEndUnix(endDate) : 0,
   }
 }
 
@@ -195,17 +189,6 @@ const handleExport = async () => {
       },
       `${exportFilePrefix.value}-${props.userId}-${Date.now()}.csv`,
   )
-}
-
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) {
-    return '-'
-  }
-  try {
-    return new Date(dateString).toLocaleString()
-  } catch {
-    return '-'
-  }
 }
 
 const actionLabel = (action: number) => {

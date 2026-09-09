@@ -105,6 +105,7 @@ import {
   getServerWeekDateRange,
   toServerDayEndUnix,
   toServerDayStartUnix,
+  formatServerDateTime as formatDate,
 } from '@/utils/server-datetime'
 
 const {t} = useI18n()
@@ -240,15 +241,6 @@ const statusTagType = (status: number | undefined) => {
   if (status === 1) return 'success'
   if (status === 2) return 'info'
   return 'warning'
-}
-
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) return '-'
-  try {
-    return new Date(dateString).toLocaleString()
-  } catch {
-    return '-'
-  }
 }
 
 onMounted(() => {

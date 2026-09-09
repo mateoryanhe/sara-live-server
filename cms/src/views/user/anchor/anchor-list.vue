@@ -446,6 +446,7 @@ import type {AnchorListItem, BanAnchorReq, UnBanAnchorReq} from '@/types/api'
 import {formatWalletBalance} from '@/utils/number-format'
 import {usePagePermission} from '@/composables/usePagePermission'
 import {useUserDetailNav} from '@/composables/useUserDetailNav'
+import {formatServerDateTime as formatDate, formatServerNowPlusDays} from '@/utils/server-datetime'
 
 const {t} = useI18n()
 
@@ -532,15 +533,7 @@ const banRules = computed<FormRules>(() => ({
 
 
 
-const defaultBanApplyTime = () => {
-
-  const date = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-
-  const pad = (n: number) => String(n).padStart(2, '0')
-
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
-
-}
+const defaultBanApplyTime = () => formatServerNowPlusDays(7)
 
 
 
@@ -590,15 +583,6 @@ const categoryTagType = (category?: number) => {
   if (category === LIVE_ROOM_CATEGORY_GAME) return 'success'
   if (category === LIVE_ROOM_CATEGORY_HOT) return 'danger'
   return 'info'
-}
-
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) return '-'
-  try {
-    return new Date(dateString).toLocaleString()
-  } catch {
-    return '-'
-  }
 }
 
 const fetchList = async () => {

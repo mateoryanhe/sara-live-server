@@ -37,6 +37,7 @@ import {guildApi} from '@/api'
 import type {GuildIncomeArchiveItem} from '@/types/api'
 import {formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
+import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 
 const props = defineProps<{
   guildId: string
@@ -63,15 +64,6 @@ const fetchList = async () => {
     ElMessage.error(t('pages.guildList.archiveFetchFailed'))
   } finally {
     loading.value = false
-  }
-}
-
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) return '-'
-  try {
-    return new Date(dateString).toLocaleString()
-  } catch {
-    return '-'
   }
 }
 

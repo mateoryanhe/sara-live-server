@@ -1,6 +1,8 @@
 package upload
 
 import (
+	"os"
+
 	"xr-game-server/core/cfg"
 	"xr-game-server/module/fileexport"
 )
@@ -15,7 +17,17 @@ func Init() {
 		if rec == nil {
 			return nil
 		}
-		return PublishLocalFileToS3(StoreCatExport, rec.FileName, rec.AbsPath)
+		if !IsS3Enabled() {
+			return nil
+		}
+		if err := PublishLocalFileToS3(StoreCatExport, rec.FileName, rec.AbsPath); err != nil {
+			return err
+		}
+		// 开云桶:导出只保留云对象,立刻删本地落盘,TTL/主动删除只清云
+		if rec.AbsPath != "" {
+			_ = os.Remove(rec.AbsPath)
+		}
+		return nil
 	})
 	fileexport.RegisterRemover(func(fileName string) {
 		DeleteExportStored(fileName)

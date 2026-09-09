@@ -2107,6 +2107,29 @@ export interface SaveUploadResourceCfgRes {
     id: string
 }
 
+export interface SyncLocalToS3Status {
+    running: boolean
+    root?: string
+    keyPrefix?: string
+    startedAt?: string
+    finishedAt?: string
+    total: number
+    done: number
+    success: number
+    failed: number
+    skipped: number
+    lastKey?: string
+    lastError?: string
+}
+
+export interface SyncLocalStorageToS3Res extends SyncLocalToS3Status {
+    started: boolean
+    alreadyRunning: boolean
+    message?: string
+}
+
+export interface GetSyncLocalStorageToS3StatusRes extends SyncLocalToS3Status {}
+
 // 充值订单
 export interface RechargeOrder {
     id: string

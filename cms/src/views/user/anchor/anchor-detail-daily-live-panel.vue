@@ -99,6 +99,7 @@ import {CMS_EXPORT_TYPE_ANCHOR_DAILY_EFFECTIVE_LIVE} from '@/utils/cms-async-exp
 import {buildAnchorDailyEffectiveLiveCsvColumns} from '@/utils/daily-effective-live-csv'
 import {formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
+import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 
 const props = defineProps<{
   anchorId: string
@@ -212,15 +213,6 @@ const handleExport = async () => {
     },
     `anchor-daily-flow-${props.anchorId}-${Date.now()}.csv`,
   )
-}
-
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) return '-'
-  try {
-    return new Date(dateString).toLocaleString()
-  } catch {
-    return '-'
-  }
 }
 
 const resetState = () => {

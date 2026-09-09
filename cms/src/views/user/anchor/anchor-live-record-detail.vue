@@ -125,6 +125,7 @@ import {buildLiveRevenueLogCsvColumns} from '@/utils/live-revenue-log-csv'
 import {createLiveRevenueTypeFormatter, LIVE_REVENUE_TYPE_OPTIONS} from '@/utils/live-revenue-type'
 import {formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
+import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 
 const {t} = useI18n()
 const route = useRoute()
@@ -295,15 +296,6 @@ const goBack = () => {
     return
   }
   router.push({name: 'AnchorListManagement'})
-}
-
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) return '-'
-  try {
-    return new Date(dateString).toLocaleString()
-  } catch {
-    return '-'
-  }
 }
 
 watch([anchorId, liveRecordId], () => {

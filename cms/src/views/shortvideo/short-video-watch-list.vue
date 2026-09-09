@@ -41,10 +41,14 @@
           <template #default="{ row }">{{ row.videoTitle || '-' }}</template>
         </el-table-column>
         <el-table-column :label="t('pages.shortVideoWatchList.paidTime')" prop="paidTime" width="170">
-          <template #default="{ row }">{{ row.paidTime || '-' }}</template>
+          <template #default="{ row }">{{ formatDate(row.paidTime) }}</template>
         </el-table-column>
-        <el-table-column :label="t('common.createdAt')" prop="createdAt" width="170"/>
-        <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="170"/>
+        <el-table-column :label="t('common.createdAt')" prop="createdAt" width="170">
+          <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
+        </el-table-column>
+        <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="170">
+          <template #default="{ row }">{{ formatDate(row.updatedAt) }}</template>
+        </el-table-column>
       </el-table>
 
       <div class="pagination-container">
@@ -68,6 +72,7 @@ import {onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {shortVideoApi} from '@/api/modules/shortVideo'
 import type {ShortVideoWatchRecord} from '@/types/api'
+import {formatServerDateTime as formatDate, toServerDayStartUnix, toServerDayEndUnix} from '@/utils/server-datetime'
 
 interface SearchForm {
   userId: string
@@ -86,13 +91,6 @@ const searchForm = reactive<SearchForm>({
   dateRange: [],
 })
 
-const toDayStartUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T00:00:00`).getTime() / 1000)
-}
-
-const toDayEndUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T23:59:59`).getTime() / 1000)
-}
 
 const buildQueryParams = () => {
   const [startDate, endDate] = searchForm.dateRange || []
@@ -100,8 +98,8 @@ const buildQueryParams = () => {
     pageIndex: currentPage.value,
     pageSize: pageSize.value,
     userId: searchForm.userId.trim(),
-    startTime: startDate ? toDayStartUnix(startDate) : 0,
-    endTime: endDate ? toDayEndUnix(endDate) : 0,
+    startTime: startDate ? toServerDayStartUnix(startDate) : 0,
+    endTime: endDate ? toServerDayEndUnix(endDate) : 0,
   }
 }
 

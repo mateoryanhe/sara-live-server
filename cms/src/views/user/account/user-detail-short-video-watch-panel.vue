@@ -64,6 +64,7 @@ import {ElMessage} from 'element-plus'
 import {shortVideoApi} from '@/api'
 import type {ShortVideoWatchRecord} from '@/types/api'
 import {formatWalletBalance} from '@/utils/number-format'
+import {formatServerDateTime as formatDate, toServerDayStartUnix, toServerDayEndUnix} from '@/utils/server-datetime'
 
 const props = withDefaults(defineProps<{
   userId: string
@@ -94,20 +95,13 @@ const dateFilterLabel = computed(() =>
         : t('common.updatedAt'),
 )
 
-const toDayStartUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T00:00:00`).getTime() / 1000)
-}
-
-const toDayEndUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T23:59:59`).getTime() / 1000)
-}
 
 const buildQueryParams = () => {
   const [startDate, endDate] = searchForm.dateRange || []
   return {
     userId: props.userId,
-    startTime: startDate ? toDayStartUnix(startDate) : 0,
-    endTime: endDate ? toDayEndUnix(endDate) : 0,
+    startTime: startDate ? toServerDayStartUnix(startDate) : 0,
+    endTime: endDate ? toServerDayEndUnix(endDate) : 0,
     onlyPaid: props.onlyPaid,
     pageIndex: pagination.pageIndex,
     pageSize: pagination.pageSize,
@@ -158,15 +152,6 @@ const handleSizeChange = (size: number) => {
 
 const formatRowIndex = (index: number) =>
     (pagination.pageIndex - 1) * pagination.pageSize + index + 1
-
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) return '-'
-  try {
-    return new Date(dateString).toLocaleString()
-  } catch {
-    return '-'
-  }
-}
 
 const resetState = () => {
   loaded.value = false

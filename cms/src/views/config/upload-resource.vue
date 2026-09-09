@@ -160,6 +160,50 @@
         <el-form-item>
           <el-button type="primary" @click="handleSave">{{ t('common.saveConfig') }}</el-button>
           <el-button @click="fetchCfg">{{ t('common.refresh') }}</el-button>
+          <el-button
+              :disabled="syncing || !formData.s3Enabled"
+              :loading="syncing"
+              type="warning"
+              @click="handleSyncLocalToS3"
+          >
+            {{ t('pages.uploadResource.syncLocalToS3') }}
+          </el-button>
+          <div class="form-tip">{{ t('pages.uploadResource.syncLocalToS3Tip') }}</div>
+        </el-form-item>
+
+        <el-form-item v-if="syncStatus.startedAt || syncStatus.running" :label="t('pages.uploadResource.syncLocalStatus')">
+          <div class="sync-status">
+            <div>
+              <el-tag :type="syncStatus.running ? 'warning' : 'success'" size="small">
+                {{ syncStatus.running ? t('pages.uploadResource.syncLocalRunning') : t('pages.uploadResource.syncLocalIdle') }}
+              </el-tag>
+              <span class="sync-meta">
+                {{ syncStatus.root || formData.storagePath }}
+                <template v-if="syncStatus.keyPrefix"> · prefix={{ syncStatus.keyPrefix }}</template>
+              </span>
+            </div>
+            <div class="sync-line">
+              {{
+                t('pages.uploadResource.syncLocalProgress', {
+                  done: syncStatus.done,
+                  total: syncStatus.total,
+                  success: syncStatus.success,
+                  failed: syncStatus.failed,
+                  skipped: syncStatus.skipped,
+                })
+              }}
+            </div>
+            <div v-if="syncStatus.lastKey" class="sync-line muted">
+              {{ t('pages.uploadResource.syncLocalLastKey') }}: {{ syncStatus.lastKey }}
+            </div>
+            <div v-if="syncStatus.lastError" class="sync-line error">
+              {{ t('pages.uploadResource.syncLocalLastError') }}: {{ syncStatus.lastError }}
+            </div>
+            <div v-if="syncStatus.startedAt || syncStatus.finishedAt" class="sync-line muted">
+              <template v-if="syncStatus.startedAt">start {{ syncStatus.startedAt }}</template>
+              <template v-if="syncStatus.finishedAt"> · end {{ syncStatus.finishedAt }}</template>
+            </div>
+          </div>
         </el-form-item>
       </el-form>
     </el-card>
@@ -168,17 +212,80 @@
 
 <script lang="ts" setup>
 import {useI18n} from 'vue-i18n'
-import {computed, nextTick, onMounted, reactive, ref, watch} from 'vue'
-import {ElMessage} from 'element-plus'
+import {computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch} from 'vue'
+import {ElMessage, ElMessageBox} from 'element-plus'
 import {uploadResourceApi} from '@/api/modules/upload-resource'
-import type {UploadResourceCfg} from '@/types/api'
+import type {SyncLocalToS3Status, UploadResourceCfg} from '@/types/api'
 
 const {t} = useI18n()
 const loading = ref(false)
+const syncing = ref(false)
 const formRef = ref()
 const imageSecretTouched = ref(false)
 const s3SecretTouched = ref(false)
 const applyingCfg = ref(false)
+let syncPollTimer: ReturnType<typeof setInterval> | null = null
+
+const syncStatus = reactive<SyncLocalToS3Status>({
+  running: false,
+  root: '',
+  keyPrefix: '',
+  startedAt: '',
+  finishedAt: '',
+  total: 0,
+  done: 0,
+  success: 0,
+  failed: 0,
+  skipped: 0,
+  lastKey: '',
+  lastError: '',
+})
+
+const applySyncStatus = (s: Partial<SyncLocalToS3Status> | null | undefined) => {
+  if (!s) {
+    return
+  }
+  syncStatus.running = s.running === true
+  syncStatus.root = s.root || ''
+  syncStatus.keyPrefix = s.keyPrefix || ''
+  syncStatus.startedAt = s.startedAt || ''
+  syncStatus.finishedAt = s.finishedAt || ''
+  syncStatus.total = s.total ?? 0
+  syncStatus.done = s.done ?? 0
+  syncStatus.success = s.success ?? 0
+  syncStatus.failed = s.failed ?? 0
+  syncStatus.skipped = s.skipped ?? 0
+  syncStatus.lastKey = s.lastKey || ''
+  syncStatus.lastError = s.lastError || ''
+}
+
+const stopSyncPoll = () => {
+  if (syncPollTimer) {
+    clearInterval(syncPollTimer)
+    syncPollTimer = null
+  }
+}
+
+const pollSyncStatusOnce = async () => {
+  try {
+    const status = await uploadResourceApi.getSyncLocalStorageToS3Status()
+    applySyncStatus(status)
+    if (!status?.running) {
+      stopSyncPoll()
+      syncing.value = false
+    }
+  } catch (error) {
+    console.error('poll sync local to s3 status failed:', error)
+  }
+}
+
+const startSyncPoll = () => {
+  stopSyncPoll()
+  syncPollTimer = setInterval(() => {
+    void pollSyncStatusOnce()
+  }, 2000)
+  void pollSyncStatusOnce()
+}
 
 const DEFAULT_STORAGE_PATH = '/home/ec2-user/cdn/images'
 
@@ -475,8 +582,51 @@ const handleSave = async () => {
   }
 }
 
+const handleSyncLocalToS3 = async () => {
+  if (!formData.s3Enabled) {
+    ElMessage.warning(t('pages.uploadResource.syncLocalNeedS3'))
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+        t('pages.uploadResource.syncLocalToS3Confirm', {path: formData.storagePath || DEFAULT_STORAGE_PATH}),
+        t('pages.uploadResource.syncLocalToS3'),
+        {type: 'warning', confirmButtonText: t('common.confirm'), cancelButtonText: t('common.cancel')},
+    )
+  } catch {
+    return
+  }
+  syncing.value = true
+  try {
+    const res = await uploadResourceApi.syncLocalStorageToS3()
+    applySyncStatus(res)
+    if (res?.alreadyRunning) {
+      ElMessage.warning(t('pages.uploadResource.syncLocalAlreadyRunning'))
+    } else if (res?.started) {
+      ElMessage.success(t('pages.uploadResource.syncLocalStarted'))
+    } else {
+      ElMessage.warning(res?.message || t('pages.uploadResource.syncLocalFailed'))
+    }
+    startSyncPoll()
+  } catch (error) {
+    console.error('sync local to s3 failed:', error)
+    syncing.value = false
+    ElMessage.error(t('pages.uploadResource.syncLocalFailed'))
+  }
+}
+
 onMounted(() => {
   fetchCfg()
+  void pollSyncStatusOnce().then(() => {
+    if (syncStatus.running) {
+      syncing.value = true
+      startSyncPoll()
+    }
+  })
+})
+
+onBeforeUnmount(() => {
+  stopSyncPoll()
 })
 </script>
 
@@ -509,5 +659,33 @@ onMounted(() => {
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
+}
+
+.sync-status {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 640px;
+}
+
+.sync-meta {
+  margin-left: 8px;
+  color: #606266;
+  font-size: 13px;
+}
+
+.sync-line {
+  font-size: 13px;
+  color: #303133;
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+.sync-line.muted {
+  color: #909399;
+}
+
+.sync-line.error {
+  color: #f56c6c;
 }
 </style>

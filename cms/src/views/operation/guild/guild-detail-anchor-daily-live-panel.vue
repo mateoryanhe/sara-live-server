@@ -126,6 +126,7 @@ import {CMS_EXPORT_TYPE_GUILD_ANCHOR_DAILY_EFFECTIVE_LIVE} from '@/utils/cms-asy
 import {buildGuildAnchorDailyEffectiveLiveCsvColumns} from '@/utils/daily-effective-live-csv'
 import {formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
+import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 
 const props = defineProps<{
   guildId: string
@@ -206,15 +207,6 @@ const handleExport = async () => {
     },
     `guild-anchor-daily-flow-${props.guildId}-${Date.now()}.csv`,
   )
-}
-
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) return '-'
-  try {
-    return new Date(dateString).toLocaleString()
-  } catch {
-    return '-'
-  }
 }
 
 const resetState = () => {

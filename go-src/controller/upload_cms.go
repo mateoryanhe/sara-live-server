@@ -39,3 +39,11 @@ func (c *UploadController) GetUploadResourceCfg(ctx context.Context, req *upload
 func (c *UploadController) SaveUploadResourceCfg(ctx context.Context, req *uploaddto.SaveUploadResourceCfgReq) (*uploaddto.SaveUploadResourceCfgRes, error) {
 	return upload.SaveUploadResourceCfg(ctx, req)
 }
+
+func (c *UploadController) SyncLocalStorageToS3(_ context.Context, _ *uploaddto.SyncLocalStorageToS3Req) (*uploaddto.SyncLocalStorageToS3Res, error) {
+	return upload.StartSyncLocalStorageToS3()
+}
+
+func (c *UploadController) GetSyncLocalStorageToS3Status(_ context.Context, _ *uploaddto.GetSyncLocalStorageToS3StatusReq) (*uploaddto.GetSyncLocalStorageToS3StatusRes, error) {
+	return upload.GetSyncLocalStorageToS3Status(), nil
+}

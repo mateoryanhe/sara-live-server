@@ -109,6 +109,7 @@ import {CMS_EXPORT_TYPE_GUILD_INCOME_SETTLEMENT_LOG} from '@/utils/cms-async-exp
 import {buildGuildSettlementLogCsvColumns} from '@/utils/income-settlement-log-csv'
 import {formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
+import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 
 const props = defineProps<{
   guildId: string
@@ -185,15 +186,6 @@ const handleExport = async () => {
 const formatSharePercent = (value: number | null | undefined) => {
   if (value == null || Number.isNaN(value)) return '0%'
   return `${value}%`
-}
-
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) return '-'
-  try {
-    return new Date(dateString).toLocaleString()
-  } catch {
-    return '-'
-  }
 }
 
 const resetState = () => {

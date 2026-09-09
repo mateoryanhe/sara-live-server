@@ -85,6 +85,7 @@ import SettlementLogPanel from './guild-detail-settlement-log-panel.vue'
 import AnchorSettlementLogPanel from './guild-detail-anchor-settlement-log-panel.vue'
 import AnchorDailyLivePanel from './guild-detail-anchor-daily-live-panel.vue'
 import type {Guild, GuildDetailIncome} from '@/types/api'
+import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 
 const {t} = useI18n()
 const route = useRoute()
@@ -151,15 +152,6 @@ const formatCreator = (guild: Guild) => {
     return guild.creatorId
   }
   return '-'
-}
-
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) return '-'
-  try {
-    return new Date(dateString).toLocaleString()
-  } catch {
-    return '-'
-  }
 }
 
 const fetchIncome = async () => {

@@ -14,6 +14,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -121,7 +122,7 @@ func contentTypeByExt(ext string) string {
 	return "application/octet-stream"
 }
 
-func putLocalFileToS3(storedName, localPath string) error {
+func putStreamToS3(storedName string, body io.Reader) error {
 	client, bucket, err := getS3Client()
 	if err != nil {
 		return err
@@ -130,28 +131,28 @@ func putLocalFileToS3(storedName, localPath string) error {
 	if key == "" {
 		return errors.New("empty s3 object key")
 	}
+	ctx := gctx.New()
+	uploader := manager.NewUploader(client)
+	_, err = uploader.Upload(ctx, &s3.PutObjectInput{
+		Bucket:      aws.String(bucket),
+		Key:         aws.String(key),
+		Body:        body,
+		ContentType: aws.String(contentTypeByExt(filepath.Ext(storedName))),
+	})
+	if err != nil {
+		g.Log().Warningf(ctx, "s3 Upload stream failed key=%s err=%v", key, err)
+		return err
+	}
+	return nil
+}
+
+func putLocalFileToS3(storedName, localPath string) error {
 	f, err := os.Open(localPath)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	st, err := f.Stat()
-	if err != nil {
-		return err
-	}
-	ctx := gctx.New()
-	_, err = client.PutObject(ctx, &s3.PutObjectInput{
-		Bucket:        aws.String(bucket),
-		Key:           aws.String(key),
-		Body:          f,
-		ContentLength: aws.Int64(st.Size()),
-		ContentType:   aws.String(contentTypeByExt(filepath.Ext(storedName))),
-	})
-	if err != nil {
-		g.Log().Warningf(ctx, "s3 PutObject failed key=%s err=%v", key, err)
-		return err
-	}
-	return nil
+	return putStreamToS3(storedName, f)
 }
 
 func putBytesToS3(storedName string, data []byte) error {
@@ -222,7 +223,7 @@ func deleteObjectFromS3(storedName string) {
 	}
 }
 
-// PublishLocalFileToS3 将本地已写好的文件上传到云桶(CMS 导出等)
+// PublishLocalFileToS3 将本地临时文件上传到云桶(CMS 导出写完后调用;成功后由调用方删本地)
 func PublishLocalFileToS3(category, fileName, absPath string) error {
 	if !IsS3Enabled() {
 		return nil
@@ -243,7 +244,7 @@ func BuildExportFileURL(fileName string) string {
 	return GetUrlByName(fileName)
 }
 
-// DeleteExportStored 删除导出对象(本地由 fileexport 删;此处删云桶)
+// DeleteExportStored 删除导出云对象(开云桶时 TTL/主动删除走这里;本地由 fileexport 顺带清)
 func DeleteExportStored(fileName string) {
 	fileName = strings.Trim(strings.ReplaceAll(fileName, "\\", "/"), "/")
 	if fileName == "" {

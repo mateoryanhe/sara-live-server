@@ -103,6 +103,11 @@ const CONFIG_PAGES = new Set([
 
 /** 各页面自定义按钮（未列出的页面按类型使用默认集） */
 export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
+    UploadResourceCfgManagement: [
+        BTN.view,
+        BTN.save,
+        {key: 'syncLocalToS3', label: '本地刷到云桶'},
+    ],
     Dashboard: DEFAULT_VIEW_BUTTONS,
     UserList: [
         BTN.view,

@@ -495,8 +495,9 @@ import {gamePlatformApi} from '@/api/modules/gamePlatform'
 import ChannelRechargeTestDialog from '@/components/ChannelRechargeTestDialog.vue'
 import {formatWalletBalance, NUMBER_INPUT_DECIMALS} from '@/utils/number-format'
 import {usePagePermission} from '@/composables/usePagePermission'
+import {formatServerDateTime as formatDate, formatServerNowPlusDays} from '@/utils/server-datetime'
 
-const {t, locale} = useI18n()
+const {t} = useI18n()
 const {can} = usePagePermission('UserList')
 const canViewDetail = computed(() => can('viewDetail'))
 const canViewAnchorDetail = computed(() => can('viewAnchorDetail'))
@@ -1541,17 +1542,6 @@ const formatVipLevel = (val: number | null | undefined) => {
     return '-'
   }
   return String(val)
-}
-
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) {
-    return '-'
-  }
-  try {
-    return new Date(dateString).toLocaleString(locale.value)
-  } catch {
-    return '-'
-  }
 }
 
 onMounted(() => {

@@ -85,10 +85,29 @@ func localPathForStored(storedName string) string {
 	return filepath.Join(getImageDir(), filepath.FromSlash(safe))
 }
 
-// storeUploadedContent 先落本地,开启 S3 后再 PutObject;返回业务侧存储名
+// storeUploadedContent 按云桶开关写入:开则流式直传云(不落盘);关则只写本地
 func storeUploadedContent(src io.Reader, category, ext string, maxBytes int64, tooLargeErr error) (storedName, localPath string, err error) {
 	baseName := newStoredFileName(ext)
 	storedName = storedNameForCategory(category, baseName)
+	if IsS3Enabled() {
+		counter := &countReader{r: src}
+		body := io.Reader(counter)
+		if maxBytes > 0 {
+			body = io.LimitReader(counter, maxBytes+1)
+		}
+		if err = putStreamToS3(storedName, body); err != nil {
+			deleteObjectFromS3(storedName)
+			return "", "", mapUploadReadErr(err)
+		}
+		if maxBytes > 0 && counter.n > maxBytes {
+			deleteObjectFromS3(storedName)
+			if tooLargeErr != nil {
+				return "", "", tooLargeErr
+			}
+			return "", "", errFileTooLarge
+		}
+		return storedName, "", nil
+	}
 	localPath = localPathForStored(storedName)
 	if localPath == "" {
 		return "", "", errors.New("invalid stored name")
@@ -96,16 +115,26 @@ func storeUploadedContent(src io.Reader, category, ext string, maxBytes int64, t
 	if err = os.MkdirAll(filepath.Dir(localPath), 0755); err != nil {
 		return "", "", err
 	}
-	if _, err = copyUploadContent(src, localPath, maxBytes, tooLargeErr); err != nil {
+	dst, createErr := os.Create(localPath)
+	if createErr != nil {
+		return "", "", createErr
+	}
+	if _, err = copyUploadContentToFile(src, dst, localPath, maxBytes, tooLargeErr); err != nil {
 		return "", "", err
 	}
-	if IsS3Enabled() {
-		if err = putLocalFileToS3(storedName, localPath); err != nil {
-			_ = os.Remove(localPath)
-			return "", "", err
-		}
-	}
 	return storedName, localPath, nil
+}
+
+// countReader 统计已读字节,供云直传后校验大小上限
+type countReader struct {
+	r io.Reader
+	n int64
+}
+
+func (c *countReader) Read(p []byte) (int, error) {
+	n, err := c.r.Read(p)
+	c.n += int64(n)
+	return n, err
 }
 
 // UploadCMSFileFromRequest 流式读取 multipart 的 file 字段,不触发 ParseMultipartForm
@@ -222,12 +251,7 @@ var (
 	errVideoFileTooLarge = errors.New("upload video file too large")
 )
 
-func copyUploadContent(src io.Reader, dstPath string, maxBytes int64, tooLargeErr error) (int64, error) {
-	dst, err := os.Create(dstPath)
-	if err != nil {
-		return 0, err
-	}
-
+func copyUploadContentToFile(src io.Reader, dst *os.File, dstPath string, maxBytes int64, tooLargeErr error) (int64, error) {
 	reader := io.Reader(src)
 	if maxBytes > 0 {
 		reader = io.LimitReader(src, maxBytes+1)
@@ -293,43 +317,39 @@ func sanitizeStoredFileName(name string) string {
 	return sanitizeStoredRelativePath(name)
 }
 
-// ReadUploadedFileBytes 读取已上传资源文件内容
+// ReadUploadedFileBytes 读取已上传资源;开云桶优先读云,本地仅作历史兼容回落
 func ReadUploadedFileBytes(name string) ([]byte, error) {
 	safeName := sanitizeStoredRelativePath(name)
 	if safeName == "" {
 		return nil, errors.New("invalid file name")
 	}
-	localPath := filepath.Join(getImageDir(), filepath.FromSlash(safeName))
-	data, err := os.ReadFile(localPath)
-	if err == nil {
-		return data, nil
-	}
 	if IsS3Enabled() {
-		return getObjectBytesFromS3(safeName)
+		data, err := getObjectBytesFromS3(safeName)
+		if err == nil {
+			return data, nil
+		}
 	}
-	return nil, err
+	localPath := filepath.Join(getImageDir(), filepath.FromSlash(safeName))
+	return os.ReadFile(localPath)
 }
 
-// SaveUploadedFileBytes 按原文件名写入资源文件(用于跨环境同步)
+// SaveUploadedFileBytes 按原文件名写入资源(跨环境同步等);开云桶只写云
 func SaveUploadedFileBytes(name string, data []byte) error {
 	safeName := sanitizeStoredRelativePath(name)
 	if safeName == "" {
 		return errors.New("invalid file name")
 	}
+	if IsS3Enabled() {
+		return putBytesToS3(safeName, data)
+	}
 	localPath := filepath.Join(getImageDir(), filepath.FromSlash(safeName))
 	if err := os.MkdirAll(filepath.Dir(localPath), 0755); err != nil {
 		return err
 	}
-	if err := os.WriteFile(localPath, data, 0644); err != nil {
-		return err
-	}
-	if IsS3Enabled() {
-		return putBytesToS3(safeName, data)
-	}
-	return nil
+	return os.WriteFile(localPath, data, 0644)
 }
 
-// DeleteUploadedFile 删除本地与云桶中的资源;无效文件名忽略
+// DeleteUploadedFile 删除资源;开云桶删云对象,并顺带清可能残留的本地文件
 func DeleteUploadedFile(name string) {
 	if name == "" {
 		return

@@ -475,20 +475,20 @@ let serverTimeSyncClientMs = 0
 let serverTimeTickTimer: ReturnType<typeof setInterval> | null = null
 
 const formatLocalDate = (date: Date) => {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
+  const year = date.getUTCFullYear()
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(date.getUTCDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
 }
 
 const formatServerDateTime = (date: Date) => {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const hour = String(date.getHours()).padStart(2, '0')
-  const minute = String(date.getMinutes()).padStart(2, '0')
-  const second = String(date.getSeconds()).padStart(2, '0')
-  const millisecond = String(date.getMilliseconds()).padStart(3, '0')
+  const year = date.getUTCFullYear()
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(date.getUTCDate()).padStart(2, '0')
+  const hour = String(date.getUTCHours()).padStart(2, '0')
+  const minute = String(date.getUTCMinutes()).padStart(2, '0')
+  const second = String(date.getUTCSeconds()).padStart(2, '0')
+  const millisecond = String(date.getUTCMilliseconds()).padStart(3, '0')
   return `${year}-${month}-${day} ${hour}:${minute}:${second}.${millisecond}`
 }
 
@@ -501,7 +501,7 @@ const parseServerTime = (value?: string) => {
     return null
   }
   const [, year, month, day, hour, minute, second, millisecond = '0'] = match
-  return new Date(
+  return new Date(Date.UTC(
       Number(year),
       Number(month) - 1,
       Number(day),
@@ -509,7 +509,7 @@ const parseServerTime = (value?: string) => {
       Number(minute),
       Number(second),
       Number(millisecond.padEnd(3, '0')),
-  )
+  ))
 }
 
 const updateServerTimeDisplay = () => {
@@ -581,20 +581,26 @@ const getActiveTabDateRange = (): string[] => {
 }
 
 const formatLocalDateTime = (date: Date) => {
-  const hour = String(date.getHours()).padStart(2, '0')
-  const minute = String(date.getMinutes()).padStart(2, '0')
-  const second = String(date.getSeconds()).padStart(2, '0')
+  const hour = String(date.getUTCHours()).padStart(2, '0')
+  const minute = String(date.getUTCMinutes()).padStart(2, '0')
+  const second = String(date.getUTCSeconds()).padStart(2, '0')
   return `${formatLocalDate(date)} ${hour}:${minute}:${second}`
 }
 
 const buildDefaultLogQueryDateRange = (baseDate = new Date()) => {
-  const end = new Date(baseDate)
-  end.setDate(end.getDate() + 2)
-  end.setHours(23, 59, 59, 0)
-  const start = new Date(end)
-  start.setDate(end.getDate() - 7)
-  start.setHours(0, 0, 0, 0)
-  return [formatLocalDateTime(start), formatLocalDateTime(end)]
+  const endMs = Date.UTC(
+      baseDate.getUTCFullYear(),
+      baseDate.getUTCMonth(),
+      baseDate.getUTCDate() + 2,
+      23, 59, 59, 0,
+  )
+  const startMs = Date.UTC(
+      baseDate.getUTCFullYear(),
+      baseDate.getUTCMonth(),
+      baseDate.getUTCDate() + 2 - 7,
+      0, 0, 0, 0,
+  )
+  return [formatLocalDateTime(new Date(startMs)), formatLocalDateTime(new Date(endMs))]
 }
 
 const defaultLogQueryDateRange = () => buildDefaultLogQueryDateRange(serverTimeBaseMs ? new Date(serverTimeBaseMs) : new Date())

@@ -125,6 +125,7 @@ import {CMS_EXPORT_TYPE_GUILD_INCOME_SETTLEMENT_LOG} from '@/utils/cms-async-exp
 import {buildGuildSettlementLogCsvColumns} from '@/utils/income-settlement-log-csv'
 import {formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
+import {formatServerDateTime as formatDate, toServerDayStartUnix, toServerDayEndUnix} from '@/utils/server-datetime'
 
 const {t} = useI18n()
 const router = useRouter()
@@ -144,20 +145,13 @@ const pagination = reactive({
   total: 0,
 })
 
-const toDayStartUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T00:00:00`).getTime() / 1000)
-}
-
-const toDayEndUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T23:59:59`).getTime() / 1000)
-}
 
 const buildFilterParams = () => {
   const [startDate, endDate] = searchForm.dateRange || []
   return {
     guildId: searchForm.guildId.trim(),
-    startTime: startDate ? toDayStartUnix(startDate) : 0,
-    endTime: endDate ? toDayEndUnix(endDate) : 0,
+    startTime: startDate ? toServerDayStartUnix(startDate) : 0,
+    endTime: endDate ? toServerDayEndUnix(endDate) : 0,
   }
 }
 
@@ -231,15 +225,6 @@ const openGuildDetail = (row: GuildIncomeSettlementLogItem) => {
       name: row.guildName || '',
     },
   })
-}
-
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) return '-'
-  try {
-    return new Date(dateString).toLocaleString()
-  } catch {
-    return '-'
-  }
 }
 
 onMounted(() => {

@@ -104,7 +104,7 @@ import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExpor
 import {CMS_EXPORT_TYPE_LIVE_RECORD} from '@/utils/cms-async-export'
 import {buildLiveRecordCsvColumns} from '@/utils/live-record-csv'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
-import {formatServerDateOnly} from '@/utils/server-datetime'
+import {formatServerDateOnly, formatServerDateTime as formatDate, toServerDayStartUnix, toServerDayEndUnix} from '@/utils/server-datetime'
 
 const props = defineProps<{
   anchorId: string
@@ -137,18 +137,11 @@ const createDefaultDateRange = () => {
 
 const searchForm = reactive(createDefaultDateRange())
 
-const toDayStartUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T00:00:00`).getTime() / 1000)
-}
-
-const toDayEndUnix = (dateStr: string): number => {
-  return Math.floor(new Date(`${dateStr}T23:59:59`).getTime() / 1000)
-}
 
 const buildFilterParams = () => ({
   anchorId: props.anchorId,
-  startTime: searchForm.startDate ? toDayStartUnix(searchForm.startDate) : 0,
-  endTime: searchForm.endDate ? toDayEndUnix(searchForm.endDate) : 0,
+  startTime: searchForm.startDate ? toServerDayStartUnix(searchForm.startDate) : 0,
+  endTime: searchForm.endDate ? toServerDayEndUnix(searchForm.endDate) : 0,
 })
 
 const buildQueryParams = () => ({
@@ -225,15 +218,6 @@ const handleExport = async () => {
     },
     `anchor-live-record-${props.anchorId}-${Date.now()}.csv`,
   )
-}
-
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) return '-'
-  try {
-    return new Date(dateString).toLocaleString()
-  } catch {
-    return '-'
-  }
 }
 
 const resetState = () => {

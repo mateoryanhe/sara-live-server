@@ -251,6 +251,7 @@ import ShortVideoPanel from '../anchor/anchor-detail-short-video-panel.vue'
 import type {UserCumulativeStatDetailItem, UserDetail} from '@/types/api.ts'
 import {formatStatCount, formatWalletBalance} from '@/utils/number-format'
 import {usePagePermission} from '@/composables/usePagePermission'
+import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 
 const {t} = useI18n()
 const {can} = usePagePermission('UserDetail')
@@ -328,15 +329,6 @@ const botAnchorStatusLabel = (status?: number) => {
   if (status === 1) return t('pages.userList.botAnchorEnabled')
   if (status === 0) return t('pages.userList.botAnchorDisabled')
   return '-'
-}
-
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) return '-'
-  try {
-    return new Date(dateString).toLocaleString()
-  } catch {
-    return '-'
-  }
 }
 
 const isUserDetailRoute = () => route.name === 'UserDetail'

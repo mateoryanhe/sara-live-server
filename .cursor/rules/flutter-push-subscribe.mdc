@@ -1,0 +1,53 @@
+---
+description: Flutter App 推送订阅规则 — Repository 与 ViewModel 各自订 PushBus
+globs: flutter-client/**/*.dart
+alwaysApply: false
+---
+
+# Flutter 推送：各自订阅（禁止中心转发 UI）
+
+`WsClient` → `PushBus.dispatch`；**数据缓存层与 ViewModel 分别 `pushBus.add`**，不要用 AppScope 里的 `ValueNotifier`/总线再转一圈驱动页面。
+
+## 分工
+
+| 订阅方 | 订什么 | 做什么 |
+|--------|--------|--------|
+| **Repository（cache）** | 业务 `cmd` + 本机 `PushCmd.wsConnected` | `invalidate` / 小 patch，**不碰 UI** |
+| **ViewModel** | 同一批推送 | `forceRefresh`（可 `silent`）拉 HTTP → 调 UI 接口 |
+| **AppScope** | 仅连/断 WS、把帧丢进 `PushBus`；重连时 `dispatch(wsConnected)` | 不做业务失效、不通知具体页面 |
+
+## 生命周期
+
+- ViewModel：构造里 `pushBus.add`，`dispose` 里 `remove`（页面 `dispose` 调 VM.dispose）
+- Repository：在 `AppScope.create` 时绑定，`AppScope.dispose` 时解绑
+- 登录 `handleLoggedIn` 连 `/ws`；登出断开并清缓存
+
+## 禁止
+
+```dart
+// ❌ AppScope 收推送 → vipRevision++ → Page 监听再 load
+scope.vipRevision.value++;
+
+// ❌ 只有 ViewModel 订推送、Repository 不失效（易读到脏缓存）
+// ❌ UI Widget 直接 pushBus.add / 直接打 HTTP
+```
+
+## 推荐
+
+```dart
+// ✅ Repository
+void _onPush(PushMessage m) {
+  if (m.cmd == PushCmd.vipLevel || m.cmd == PushCmd.wsConnected) {
+    invalidate(userId);
+  }
+}
+
+// ✅ ViewModel
+void _onPush(PushMessage m) {
+  if (m.cmd == PushCmd.vipLevel || m.cmd == PushCmd.wsConnected) {
+    unawaited(load(forceRefresh: true, silent: true));
+  }
+}
+```
+
+新业务推送（金币/钻石等）照此模式各订各的。细节见 `flutter-client/lib/sara_live_core.dart` 原则 §6。

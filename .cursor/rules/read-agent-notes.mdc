@@ -9,6 +9,8 @@ alwaysApply: true
 
 若任务涉及服务器、CMS 列表、日志页或部署，继续读同目录下对应专题 md（servers / cms-conventions / changelog-notes）。
 
+**Flutter App**（`flutter-client/`）推送约定 → `flutter-push-subscribe.mdc`（Repository / ViewModel 各自订 PushBus）。
+
 **本机安全 / Git 备份 / 误删恢复** → `workspace-safety.mdc`（必读，含 2026-08-28 事故教训）。
 
 **Go 编译**勿用 `-o .../`（会生成字面 `...` 目录），见 `go-build-output.mdc`；清理 `...` 目录方式见 `workspace-safety.mdc`。

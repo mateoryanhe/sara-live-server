@@ -196,6 +196,7 @@ import type {AnchorDetail} from '@/types/api'
 import {formatAmount, formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 import {usePagePermission} from '@/composables/usePagePermission'
+import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 
 const {t} = useI18n()
 const {can} = usePagePermission('AnchorDetail')
@@ -296,15 +297,6 @@ const categoryTagType = (category?: number) => {
 }
 
 const isPrivateRoom = (category?: number) => category === LIVE_ROOM_CATEGORY_PRIVATE
-
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) return '-'
-  try {
-    return new Date(dateString).toLocaleString()
-  } catch {
-    return '-'
-  }
-}
 
 const isAnchorDetailRoute = () => route.name === 'AnchorDetail'
 
