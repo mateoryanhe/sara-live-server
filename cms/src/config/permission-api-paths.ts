@@ -274,6 +274,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'FiatCurrencyManagement:reloadCfgCache': '/fiatCurrency/reloadFiatCurrencyCache',
     'FiatCurrencyManagement:reloadRateCache': '/fiatCurrency/reloadFiatExchangeRateCache',
     'FiatCurrencyManagement:previewRate': '/fiatCurrency/getFiatExchangeRate',
+    'FiatCurrencyManagement:sync': '/dataSync/syncFiatCurrency',
 
     LiveRevenueShareCfgManagement: '/liveRevenueShareCfg/getLiveRevenueShareCfg',
     'LiveRevenueShareCfgManagement:view': '/liveRevenueShareCfg/getLiveRevenueShareCfg',

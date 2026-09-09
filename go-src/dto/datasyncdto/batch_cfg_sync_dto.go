@@ -2,6 +2,7 @@ package datasyncdto
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
+	fiatentity "xr-game-server/entity/fiat"
 	"xr-game-server/entity/live"
 	rechargeentity "xr-game-server/entity/recharge"
 )
@@ -55,5 +56,16 @@ type SyncRechargeCfgReq struct {
 type ReceiveRechargeCfgReq struct {
 	g.Meta `path:"/receiveRechargeCfg" method:"post" summary:"接收充值配置同步" tags:"数据同步"`
 	Rows   []*rechargeentity.RechargeCfg `json:"rows"`
+	Files  []*SyncFileItem               `json:"files"`
+}
+
+type SyncFiatCurrencyReq struct {
+	g.Meta `path:"/syncFiatCurrency" method:"post" summary:"同步法币配置到目标环境" tags:"数据同步"`
+	IDs    []uint64 `json:"ids" v:"required|min-length:1#请选择要同步的法币配置" dc:"要同步的法币配置ID列表"`
+}
+
+type ReceiveFiatCurrencyReq struct {
+	g.Meta `path:"/receiveFiatCurrency" method:"post" summary:"接收法币配置同步" tags:"数据同步"`
+	Rows   []*fiatentity.FiatCurrencyCfg `json:"rows"`
 	Files  []*SyncFileItem               `json:"files"`
 }

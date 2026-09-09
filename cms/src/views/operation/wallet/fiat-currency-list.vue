@@ -9,8 +9,21 @@
 
       <div class="toolbar">
         <el-button v-if="can('create')" type="primary" @click="handleAdd">{{ t('pages.fiatCurrencyList.addCurrency') }}</el-button>
+        <el-button
+            v-if="can('sync')"
+            :disabled="selectedRows.length === 0"
+            :loading="syncing"
+            type="warning"
+            @click="handleSyncData"
+        >
+          {{ t('common.syncData') }}
+        </el-button>
         <el-button v-if="can('reloadCfgCache')" @click="handleReloadCfgCache">{{ t('pages.fiatCurrencyList.reloadCfgCache') }}</el-button>
         <el-button v-if="can('reloadRateCache')" @click="handleReloadAllRateCache">{{ t('pages.fiatCurrencyList.reloadRateCache') }}</el-button>
+      </div>
+
+      <div v-if="selectedRows.length" class="selection-tip">
+        {{ t('common.selectedCount', {count: selectedRows.length}) }}
       </div>
 
       <el-form :inline="true" :model="searchForm" class="search-form">
@@ -40,7 +53,14 @@
         </el-form-item>
       </el-form>
 
-      <el-table v-loading="loading" :data="tableData" style="width: 100%">
+      <el-table
+          v-loading="loading"
+          :data="tableData"
+          row-key="id"
+          style="width: 100%"
+          @selection-change="handleSelectionChange"
+      >
+        <el-table-column type="selection" width="48"/>
         <el-table-column label="ID" prop="id" width="100"/>
         <el-table-column :label="t('pages.fiatCurrencyList.icon')" width="90">
           <template #default="{ row }">
@@ -206,6 +226,8 @@ import {useI18n} from 'vue-i18n'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
 import {Plus} from '@element-plus/icons-vue'
 import {fiatCurrencyApi, uploadApi} from '@/api'
+import {dataSyncApi} from '@/api/modules/data-sync'
+import {confirmDataSync} from '@/utils/confirm-data-sync'
 import type {FiatCurrency, FiatExchangeRate} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
 
@@ -225,7 +247,9 @@ const {t} = useI18n()
 const {can} = usePagePermission('FiatCurrencyManagement')
 
 const loading = ref(false)
+const syncing = ref(false)
 const tableData = ref<FiatCurrency[]>([])
+const selectedRows = ref<FiatCurrency[]>([])
 const pagination = reactive({
   pageIndex: 1,
   pageSize: 10,
@@ -439,6 +463,47 @@ const handleDelete = async (row: FiatCurrency) => {
   }
 }
 
+const handleSelectionChange = (rows: FiatCurrency[]) => {
+  selectedRows.value = rows
+}
+
+const handleSyncData = async () => {
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning(t('pages.fiatCurrencyList.selectSyncFirst'))
+    return
+  }
+  const ids = selectedRows.value.map((row) => Number(row.id)).filter((id) => id > 0)
+  if (ids.length === 0) {
+    ElMessage.warning(t('pages.fiatCurrencyList.invalidSelection'))
+    return
+  }
+  try {
+    await confirmDataSync({
+      detail: t('pages.fiatCurrencyList.syncConfirm', {count: ids.length}),
+      title: t('common.syncData'),
+    })
+    syncing.value = true
+    const response = await dataSyncApi.syncFiatCurrency({ids})
+    if (response?.success) {
+      ElMessage.success(
+          response.message || t('pages.fiatCurrencyList.syncSuccessDetail', {
+            rows: response.rowCount,
+            files: response.fileCount,
+          })
+      )
+    } else {
+      ElMessage.error(t('pages.fiatCurrencyList.syncFailed'))
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('sync failed:', error)
+      ElMessage.error(t('pages.fiatCurrencyList.syncFailedCheckConfig'))
+    }
+  } finally {
+    syncing.value = false
+  }
+}
+
 const handleReloadCfgCache = async () => {
   try {
     await fiatCurrencyApi.reloadCfgCache()
@@ -509,6 +574,12 @@ onMounted(() => {
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 16px;
+}
+
+.selection-tip {
+  margin-bottom: 12px;
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
 }
 
 .search-form {

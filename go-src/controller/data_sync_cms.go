@@ -52,6 +52,10 @@ func (c *DataSyncCMSController) SyncRechargeCfg(ctx context.Context, req *datasy
 	return datasync.SyncRechargeCfg(ctx, req)
 }
 
+func (c *DataSyncCMSController) SyncFiatCurrency(ctx context.Context, req *datasyncdto.SyncFiatCurrencyReq) (*datasyncdto.SyncBatchRes, error) {
+	return datasync.SyncFiatCurrency(ctx, req)
+}
+
 func (c *DataSyncCMSController) SyncFirstRechargeActivityCfg(ctx context.Context, req *datasyncdto.SyncFirstRechargeActivityCfgReq) (*datasyncdto.SyncFirstRechargeActivityCfgRes, error) {
 	return datasync.SyncFirstRechargeActivityCfg(ctx, req)
 }

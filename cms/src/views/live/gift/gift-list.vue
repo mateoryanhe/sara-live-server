@@ -283,6 +283,7 @@ import {useI18n} from 'vue-i18n'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
 import {Document, Plus} from '@element-plus/icons-vue'
 import {dataSyncApi, giftApi, uploadApi} from '@/api'
+import {confirmDataSync} from '@/utils/confirm-data-sync'
 import type {Gift} from '@/types/api.ts'
 import {hasButtonPermission} from '@/utils/permission'
 import {
@@ -673,11 +674,10 @@ const handleSyncData = async () => {
     return
   }
   try {
-    await ElMessageBox.confirm(
-        t('pages.giftList.syncConfirm', {count: ids.length}),
-        t('common.syncData'),
-        {confirmButtonText: t('common.confirmSync'), cancelButtonText: t('common.cancel'), type: 'warning'}
-    )
+    await confirmDataSync({
+      detail: t('pages.giftList.syncConfirm', {count: ids.length}),
+      title: t('common.syncData'),
+    })
     syncing.value = true
     const response = await dataSyncApi.syncGift({ids})
     if (response?.success) {
@@ -709,11 +709,10 @@ const handleSyncAssets = async () => {
     return
   }
   try {
-    await ElMessageBox.confirm(
-        t('pages.giftList.syncAssetsConfirm', {count: ids.length}),
-        t('pages.giftList.syncAssets'),
-        {confirmButtonText: t('common.confirmSync'), cancelButtonText: t('common.cancel'), type: 'warning'}
-    )
+    await confirmDataSync({
+      detail: t('pages.giftList.syncAssetsConfirm', {count: ids.length}),
+      title: t('pages.giftList.syncAssets'),
+    })
     syncingAssets.value = true
     const response = await dataSyncApi.syncGiftAssets({ids})
     if (response?.success) {

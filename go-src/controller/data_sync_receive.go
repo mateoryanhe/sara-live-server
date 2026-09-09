@@ -34,6 +34,10 @@ func (c *DataSyncReceiveController) ReceiveRechargeCfg(ctx context.Context, req 
 	return datasync.ReceiveRechargeCfg(ctx, req)
 }
 
+func (c *DataSyncReceiveController) ReceiveFiatCurrency(ctx context.Context, req *datasyncdto.ReceiveFiatCurrencyReq) (*datasyncdto.ReceiveBatchRes, error) {
+	return datasync.ReceiveFiatCurrency(ctx, req)
+}
+
 func (c *DataSyncReceiveController) ReceiveFirstRechargeActivityCfg(ctx context.Context, req *datasyncdto.ReceiveFirstRechargeActivityCfgReq) (*datasyncdto.ReceiveFirstRechargeActivityCfgRes, error) {
 	return datasync.ReceiveFirstRechargeActivityCfg(ctx, req)
 }

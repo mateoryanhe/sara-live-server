@@ -425,6 +425,7 @@ import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadR
 import {Plus} from '@element-plus/icons-vue'
 import {activityMessageApi, type ActivityMessageForm} from '@/api/modules/activityMessage'
 import {dataSyncApi, uploadApi} from '@/api'
+import {confirmDataSync} from '@/utils/confirm-data-sync'
 import type {ActivityMessage} from '@/types/api'
 import {hasButtonPermission} from '@/utils/permission'
 
@@ -754,15 +755,10 @@ const handleSyncData = async () => {
     return
   }
   try {
-    await ElMessageBox.confirm(
-        t('pages.activityMessageList.syncConfirm', {count: ids.length}),
-        t('common.syncData'),
-        {
-          confirmButtonText: t('common.confirmSync'),
-          cancelButtonText: t('common.cancel'),
-          type: 'warning',
-        }
-    )
+    await confirmDataSync({
+      detail: t('pages.activityMessageList.syncConfirm', {count: ids.length}),
+      title: t('common.syncData'),
+    })
     syncing.value = true
     const response = await dataSyncApi.syncActivityMessage({ids})
     if (response?.success) {

@@ -2,6 +2,7 @@ package cmsuserdao
 
 import (
 	"context"
+	"strings"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -55,8 +56,21 @@ func RoleHasApiPath(roleId uint64, apiPath string) bool {
 	if roleHasApiPathExact(roleId, apiPath) {
 		return true
 	}
+	// 有任意数据同步按钮权限时,允许只读目标 API 配置(同步前确认弹窗)
+	if apiPath == "/dataSync/getDataSyncCfg" && roleHasDataSyncSyncPermission(roleId) {
+		return true
+	}
 	for _, alias := range cmsApiPermissionAliasPaths(apiPath) {
 		if roleHasApiPathExact(roleId, alias) {
+			return true
+		}
+	}
+	return false
+}
+
+func roleHasDataSyncSyncPermission(roleId uint64) bool {
+	for _, p := range GetGetPermissionList(roleId) {
+		if p != nil && strings.HasPrefix(p.ApiPath, "/dataSync/sync") {
 			return true
 		}
 	}

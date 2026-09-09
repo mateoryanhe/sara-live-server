@@ -386,6 +386,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'reloadCfgCache', label: '刷新配置缓存'},
         {key: 'reloadRateCache', label: '刷新汇率缓存'},
         {key: 'previewRate', label: '查询汇率'},
+        {key: 'sync', label: '同步数据'},
     ],
 }
 

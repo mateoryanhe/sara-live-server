@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/datasyncdto"
+	fiatentity "xr-game-server/entity/fiat"
 	"xr-game-server/entity/live"
 	rechargeentity "xr-game-server/entity/recharge"
 	"xr-game-server/module/banner"
@@ -153,6 +154,42 @@ func ReceiveRechargeCfg(_ context.Context, req *datasyncdto.ReceiveRechargeCfgRe
 	return &datasyncdto.ReceiveBatchRes{Success: true, RowCount: rowCount, FileCount: fileCount}, nil
 }
 
+func SyncFiatCurrency(_ context.Context, req *datasyncdto.SyncFiatCurrencyReq) (*datasyncdto.SyncBatchRes, error) {
+	if req == nil || len(req.IDs) == 0 {
+		return nil, errInvalidParam()
+	}
+	rows := cfgdao.GetFiatCurrencyCfgsByIDs(req.IDs)
+	if len(rows) == 0 {
+		return nil, errInvalidParam()
+	}
+	files, err := buildSyncFiles(collectFiatCurrencyFileNames(rows))
+	if err != nil {
+		return nil, err
+	}
+	payload := &datasyncdto.ReceiveFiatCurrencyReq{Rows: rows, Files: files}
+	var receiveRes datasyncdto.ReceiveBatchRes
+	if err := postSyncReceive("/dataSync/receiveFiatCurrency", payload, &receiveRes); err != nil {
+		return nil, err
+	}
+	return newSyncBatchRes(&receiveRes, "法币配置"), nil
+}
+
+func ReceiveFiatCurrency(_ context.Context, req *datasyncdto.ReceiveFiatCurrencyReq) (*datasyncdto.ReceiveBatchRes, error) {
+	if req == nil {
+		return nil, errInvalidParam()
+	}
+	fileCount, err := saveSyncFiles(req.Files)
+	if err != nil {
+		return nil, err
+	}
+	rowCount, err := saveFiatCurrencyCfgs(req.Rows)
+	if err != nil {
+		return nil, err
+	}
+	cfgdao.ReloadFiatCurrencyCfgCache()
+	return &datasyncdto.ReceiveBatchRes{Success: true, RowCount: rowCount, FileCount: fileCount}, nil
+}
+
 func saveHomeBanners(rows []*entity.HomeBanner) (int, error) {
 	rowCount := 0
 	for _, row := range rows {
@@ -216,6 +253,20 @@ func saveRechargeCfgs(rows []*rechargeentity.RechargeCfg) (int, error) {
 	return rowCount, nil
 }
 
+func saveFiatCurrencyCfgs(rows []*fiatentity.FiatCurrencyCfg) (int, error) {
+	rowCount := 0
+	for _, row := range rows {
+		if row == nil || row.ID == 0 {
+			continue
+		}
+		if _, err := g.DB().Model(string(fiatentity.TbFiatCurrencyCfg)).Save(row); err != nil {
+			return rowCount, fmt.Errorf("save fiat currency id=%d: %w", row.ID, err)
+		}
+		rowCount++
+	}
+	return rowCount, nil
+}
+
 func collectBannerFileNames(rows []*entity.HomeBanner) []string {
 	seen := make(map[string]struct{})
 	names := make([]string, 0)
@@ -242,6 +293,18 @@ func collectGiftFileNames(rows []*entity.LiveGift) []string {
 }
 
 func collectRechargeCfgFileNames(rows []*rechargeentity.RechargeCfg) []string {
+	seen := make(map[string]struct{})
+	names := make([]string, 0)
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		names = appendUniqueFileName(seen, names, row.Icon)
+	}
+	return names
+}
+
+func collectFiatCurrencyFileNames(rows []*fiatentity.FiatCurrencyCfg) []string {
 	seen := make(map[string]struct{})
 	names := make([]string, 0)
 	for _, row := range rows {

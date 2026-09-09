@@ -650,6 +650,7 @@ import {useI18n} from 'vue-i18n'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
 import {Plus} from '@element-plus/icons-vue'
 import {dataSyncApi, uploadApi, vipCfgApi} from '@/api'
+import {confirmDataSync} from '@/utils/confirm-data-sync'
 import type {VipCfg} from '@/types/api.ts'
 import {hasButtonPermission} from '@/utils/permission'
 import {getExt, isVideoUrl, resolveMediaPreviewType} from '@/utils/media-preview'
@@ -1081,15 +1082,10 @@ const handleSyncData = async () => {
     return
   }
   try {
-    await ElMessageBox.confirm(
-        t('pages.vipCfgList.syncConfirm', {count: ids.length}),
-        t('common.syncData'),
-        {
-          confirmButtonText: t('common.confirmSync'),
-          cancelButtonText: t('common.cancel'),
-          type: 'warning',
-        }
-    )
+    await confirmDataSync({
+      detail: t('pages.vipCfgList.syncConfirm', {count: ids.length}),
+      title: t('common.syncData'),
+    })
     syncing.value = true
     const response = await dataSyncApi.syncVipCfg({ids})
     if (response?.success) {
@@ -1121,15 +1117,10 @@ const handleSyncAssets = async () => {
     return
   }
   try {
-    await ElMessageBox.confirm(
-        t('pages.vipCfgList.syncAssetsConfirm', {count: ids.length}),
-        t('pages.vipCfgList.syncAssets'),
-        {
-          confirmButtonText: t('common.confirmSync'),
-          cancelButtonText: t('common.cancel'),
-          type: 'warning',
-        }
-    )
+    await confirmDataSync({
+      detail: t('pages.vipCfgList.syncAssetsConfirm', {count: ids.length}),
+      title: t('pages.vipCfgList.syncAssets'),
+    })
     syncingAssets.value = true
     const response = await dataSyncApi.syncVipCfgAssets({ids})
     if (response?.success) {

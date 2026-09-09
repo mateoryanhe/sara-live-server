@@ -210,6 +210,7 @@ import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
 import {Plus} from '@element-plus/icons-vue'
 import {dataSyncApi, rechargeCfgApi, uploadApi} from '@/api'
+import {confirmDataSync} from '@/utils/confirm-data-sync'
 import type {RechargeCfg} from '@/types/api.ts'
 import {hasButtonPermission} from '@/utils/permission'
 import {formatNumberDisplay, truncateNumber} from '@/utils/number-format'
@@ -540,11 +541,10 @@ const handleSyncData = async () => {
     return
   }
   try {
-    await ElMessageBox.confirm(
-        t('pages.rechargeCfgList.syncConfirm', {count: ids.length}),
-        t('common.syncData'),
-        {confirmButtonText: t('common.confirmSync'), cancelButtonText: t('common.cancel'), type: 'warning'}
-    )
+    await confirmDataSync({
+      detail: t('pages.rechargeCfgList.syncConfirm', {count: ids.length}),
+      title: t('common.syncData'),
+    })
     syncing.value = true
     const response = await dataSyncApi.syncRechargeCfg({ids})
     if (response?.success) {

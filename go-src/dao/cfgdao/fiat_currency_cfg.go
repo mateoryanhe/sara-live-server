@@ -73,6 +73,15 @@ func GetFiatCurrencyCfgById(id uint64) *fiatentity.FiatCurrencyCfg {
 	return nil
 }
 
+func GetFiatCurrencyCfgsByIDs(ids []uint64) []*fiatentity.FiatCurrencyCfg {
+	if len(ids) == 0 {
+		return nil
+	}
+	var rows []*fiatentity.FiatCurrencyCfg
+	_ = g.DB().Model(string(fiatentity.TbFiatCurrencyCfg)).WhereIn("id", ids).Scan(&rows)
+	return rows
+}
+
 func GetFiatCurrencyCfgByCode(currencyCode string) *fiatentity.FiatCurrencyCfg {
 	code := normalizeFiatCurrencyCode(currencyCode)
 	if code == "" {

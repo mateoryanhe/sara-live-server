@@ -238,6 +238,7 @@ import {ElMessage, ElMessageBox, type FormInstance, type UploadRequestOptions} f
 import {Plus} from '@element-plus/icons-vue'
 import firstRechargeActivityApi from '@/api/modules/first-recharge-activity'
 import dataSyncApi from '@/api/modules/data-sync'
+import {confirmDataSync} from '@/utils/confirm-data-sync'
 import uploadApi from '@/api/modules/upload'
 import type {FirstRechargeActivityCfg, FirstRechargePrivilegeItem} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
@@ -499,11 +500,10 @@ const handleSyncData = async () => {
     return
   }
   try {
-    await ElMessageBox.confirm(
-        t('pages.firstRechargeActivityCfg.syncConfirm'),
-        t('common.syncData'),
-        {type: 'warning'},
-    )
+    await confirmDataSync({
+      detail: t('pages.firstRechargeActivityCfg.syncConfirm'),
+      title: t('common.syncData'),
+    })
   } catch {
     return
   }
