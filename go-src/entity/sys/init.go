@@ -6,6 +6,7 @@ func Init() {
 	initPreloadCfg()
 	initDataSyncCfg()
 	initH5LiveDeployCfg()
+	initCoinMerchantDeployCfg()
 	initCfEmailCfg()
 	initSysResourceMetric()
 	initSysResourceMetricAgg()

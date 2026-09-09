@@ -154,7 +154,13 @@
 - **工会周结算**：币商工会用自身 `share_percent`；普通工会仍用全局工会分佣
 - **主播周结算**：币商工会名下主播流水分佣按 **0%**，开播底薪也按 **0**（币商工会无开播底薪）；其余主播用全局主播分佣 + 薪资档
 
-## 上传资源 / Cloudflare R2（2026-09-08，落点 2026-09-09）
+## 币商 H5 部署（2026-09-09）
+
+- CMS：`/config/coin-merchant-deploy`（仿 H5 直播部署：密钥保存 + zip 上传解压）
+- 静态前缀 `/coin-merchant`；测试域 `coin-merchant.bigtktool.shop` → `/home/ec2-user/cdn/coin-merchant`；正式 `coin-merchant.saralive.net`
+- 表 `coin_merchant_deploy_cfgs.deploy_secret`；`coinmerchantdeploy.Init` → `SetCoinMerchantDeploySecretProvider`
+- App 组中间件 `MiddlewareH5Crypto`：`X-H5-Client=1` 用 H5 密钥；`X-Coin-Merchant-Client=1` 用币商密钥；算法同 AES-256-GCM + base64；无对应 Header 则明文
+- 角色需授权页 `CoinMerchantDeployManagement`
 
 - CMS：`/config/upload-resource` **云桶开关**（S3 兼容，面向 CF R2）
 - 字段：`s3Enabled` / **`s3PublicDomain`（云桶访问域名，App 拼文件 URL）** / `s3Endpoint`（R2 S3 API）/ `s3Bucket` / AK·SK / `s3KeyPrefix`（如 `test`、`prod`）；Region 固定代码内 `auto`，CMS 不展示

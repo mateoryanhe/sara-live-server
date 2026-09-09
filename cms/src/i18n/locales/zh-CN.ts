@@ -98,6 +98,7 @@ const menu = {
   CfEmailCfgManagement: 'Amazon SES邮件',
   UploadResourceCfgManagement: '资源域名',
   H5LiveDeployManagement: 'H5直播部署',
+  CoinMerchantDeployManagement: '币商H5部署',
   ThirdPayDeployManagement: '第三方支付部署',
   DataSyncCfgManagement: '数据同步',
   ResourceMonitor: '资源监控',

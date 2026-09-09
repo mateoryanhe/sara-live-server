@@ -19,35 +19,57 @@ import (
 )
 
 const (
-	// H5ClientHeader 标识 H5 端请求/响应,值为 1 或 true 时启用 body 加解密
+	// H5ClientHeader 标识 H5 直播端请求/响应,值为 1 或 true 时启用 body 加解密
 	H5ClientHeader = "X-H5-Client"
+	// CoinMerchantClientHeader 标识币商 H5 端请求/响应,值为 1 或 true 时启用 body 加解密
+	CoinMerchantClientHeader = "X-Coin-Merchant-Client"
 )
 
 const (
-	h5CryptoEnabledCtxKey = "httpserver.h5CryptoEnabled"
-	h5DecryptMsCtxKey     = "httpserver.h5DecryptMs"
+	h5CryptoEnabledCtxKey   = "httpserver.h5CryptoEnabled"
+	h5DecryptMsCtxKey       = "httpserver.h5DecryptMs"
+	clientCryptoKindCtxKey  = "httpserver.clientCryptoKind"
+	clientCryptoKindH5      = "h5"
+	clientCryptoKindCoinMer = "coin-merchant"
 )
 
-var h5DeploySecretProvider func() string
+var (
+	h5DeploySecretProvider           func() string
+	coinMerchantDeploySecretProvider func() string
+)
 
 // SetH5DeploySecretProvider 注入 H5 部署密钥读取函数(由 h5livedeploy 模块初始化时注册)
 func SetH5DeploySecretProvider(fn func() string) {
 	h5DeploySecretProvider = fn
 }
 
+// SetCoinMerchantDeploySecretProvider 注入币商部署密钥读取函数(由 coinmerchantdeploy 模块初始化时注册)
+func SetCoinMerchantDeploySecretProvider(fn func() string) {
+	coinMerchantDeploySecretProvider = fn
+}
+
 func isH5ClientRequest(r *ghttp.Request) bool {
+	return isTruthyClientHeader(r, H5ClientHeader)
+}
+
+func isCoinMerchantClientRequest(r *ghttp.Request) bool {
+	return isTruthyClientHeader(r, CoinMerchantClientHeader)
+}
+
+func isTruthyClientHeader(r *ghttp.Request, header string) bool {
 	if r == nil {
 		return false
 	}
-	v := strings.TrimSpace(r.GetHeader(H5ClientHeader))
+	v := strings.TrimSpace(r.GetHeader(header))
 	return v == "1" || strings.EqualFold(v, "true")
 }
 
-func markH5CryptoRequest(r *ghttp.Request) {
+func markH5CryptoRequest(r *ghttp.Request, kind string) {
 	if r == nil {
 		return
 	}
 	r.SetCtxVar(h5CryptoEnabledCtxKey, true)
+	r.SetCtxVar(clientCryptoKindCtxKey, kind)
 }
 
 func isH5CryptoRequest(r *ghttp.Request) bool {
@@ -57,7 +79,14 @@ func isH5CryptoRequest(r *ghttp.Request) bool {
 	return r.GetCtxVar(h5CryptoEnabledCtxKey).Bool()
 }
 
-// shouldH5PlaintextResponse H5 请求体解码失败时明文返回,便于前端展示错误
+func clientCryptoKind(r *ghttp.Request) string {
+	if r == nil {
+		return ""
+	}
+	return strings.TrimSpace(r.GetCtxVar(clientCryptoKindCtxKey).String())
+}
+
+// shouldH5PlaintextResponse H5/币商 请求体解码失败时明文返回,便于前端展示错误
 func shouldH5PlaintextResponse(code int) bool {
 	return code == int(errercode.H5PayloadDecodeFail)
 }
@@ -81,6 +110,27 @@ func getH5DeploySecret() string {
 		return ""
 	}
 	return strings.TrimSpace(h5DeploySecretProvider())
+}
+
+func getCoinMerchantDeploySecret() string {
+	if coinMerchantDeploySecretProvider == nil {
+		return ""
+	}
+	return strings.TrimSpace(coinMerchantDeploySecretProvider())
+}
+
+func getClientCryptoSecret(r *ghttp.Request) string {
+	if clientCryptoKind(r) == clientCryptoKindCoinMer {
+		return getCoinMerchantDeploySecret()
+	}
+	return getH5DeploySecret()
+}
+
+func clientCryptoEchoHeader(r *ghttp.Request) string {
+	if clientCryptoKind(r) == clientCryptoKindCoinMer {
+		return CoinMerchantClientHeader
+	}
+	return H5ClientHeader
 }
 
 func deriveH5CryptoKey(secret string) []byte {
@@ -153,13 +203,14 @@ func writeH5ResponseBody(r *ghttp.Request, plain []byte, writeStart *gtime.Time)
 	if writeStart != nil {
 		start = writeStart
 	}
-	secret := getH5DeploySecret()
+	secret := getClientCryptoSecret(r)
 	encryptStart := gtime.Now()
 	encrypted, err := encryptH5Payload(secret, plain)
 	encryptMs := elapsedMs(encryptStart)
 	if err != nil {
 		xrlog.DetailLog.Errorf(r.Context(),
-			"H5响应加密失败,reqId=%v,authId=%v,decryptMs=%vms,encryptMs=%vms,url=%v,err=%v",
+			"客户端响应加密失败,kind=%v,reqId=%v,authId=%v,decryptMs=%vms,encryptMs=%vms,url=%v,err=%v",
+			clientCryptoKind(r),
 			r.GetHeader(ReqId, ""),
 			authIdFromRequest(r),
 			h5DecryptMsFromRequest(r),
@@ -173,7 +224,7 @@ func writeH5ResponseBody(r *ghttp.Request, plain []byte, writeStart *gtime.Time)
 		encrypted = plain
 		encryptMs = 0
 	}
-	r.Response.Header().Set(H5ClientHeader, "1")
+	r.Response.Header().Set(clientCryptoEchoHeader(r), "1")
 	r.Response.Header().Set("Content-Type", contentTypeJson)
 	r.Response.Write(encrypted)
 	stashAPIResponseBufferWrittenAt(r)
@@ -186,7 +237,8 @@ func logH5Crypto(r *ghttp.Request, decryptMs, encryptMs int64, plainBytes, encry
 		return
 	}
 	xrlog.DetailLog.Infof(r.Context(),
-		"H5加解密完成,reqId=%v,authId=%v,decryptMs=%vms,encryptMs=%vms,plainBytes=%v,encryptedBytes=%v,url=%v",
+		"客户端加解密完成,kind=%v,reqId=%v,authId=%v,decryptMs=%vms,encryptMs=%vms,plainBytes=%v,encryptedBytes=%v,url=%v",
+		clientCryptoKind(r),
 		r.GetHeader(ReqId, ""),
 		authIdFromRequest(r),
 		decryptMs,

@@ -83,6 +83,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: 'H5直播部署'},
         },
         {
+            path: 'coin-merchant-deploy',
+            name: 'CoinMerchantDeployManagement',
+            component: () => import('@/views/config/coin-merchant-deploy.vue'),
+            meta: {title: '币商H5部署'},
+        },
+        {
             path: 'third-pay-deploy',
             name: 'ThirdPayDeployManagement',
             component: () => import('@/views/config/third-pay-deploy.vue'),

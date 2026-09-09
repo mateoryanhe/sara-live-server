@@ -518,7 +518,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('YhPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
+            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('YhPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
             index="/config">
           <template #title>
             <el-icon>
@@ -589,7 +589,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('YhPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('DataSyncCfgManagement')"
+              v-if="hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('YhPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('DataSyncCfgManagement')"
               index="/config/group/platform">
             <template #title>
               <el-icon>
@@ -620,6 +620,12 @@
                 <UploadFilled/>
               </el-icon>
               <span>{{ t('menu.H5LiveDeployManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('CoinMerchantDeployManagement')" index="/config/coin-merchant-deploy">
+              <el-icon>
+                <UploadFilled/>
+              </el-icon>
+              <span>{{ t('menu.CoinMerchantDeployManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('ThirdPayDeployManagement')" index="/config/third-pay-deploy">
               <el-icon>

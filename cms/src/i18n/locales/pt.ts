@@ -78,6 +78,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   CfEmailCfgManagement: 'Email Amazon SES',
   UploadResourceCfgManagement: 'CDN de recursos',
   H5LiveDeployManagement: 'Deploy H5 Live',
+  CoinMerchantDeployManagement: 'Deploy H5 comerciante',
   ThirdPayDeployManagement: 'Deploy pagamento terceiros',
   DataSyncCfgManagement: 'Sincronização de dados',
   ResourceMonitor: 'Monitor de recursos',

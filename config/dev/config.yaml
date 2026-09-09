@@ -9,6 +9,8 @@ server:
       path: "/home/ec2-user/cdn/official-site"
     - domain: "h5-live.bigtktool.shop"
       path: "/home/ec2-user/cdn/h5-live"
+    - domain: "coin-merchant.bigtktool.shop"
+      path: "/home/ec2-user/cdn/coin-merchant"
     - domain: "third-pay.bigtktool.shop"
       path: "/home/ec2-user/cdn/third-pay"
   httpsCertPath: "/home/ec2-user/www.bigtktool.shop_ecc/fullchain.pem"

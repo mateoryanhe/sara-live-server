@@ -488,6 +488,11 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'H5LiveDeployManagement:save': '/h5LiveDeploy/saveH5LiveDeployCfg',
     'H5LiveDeployManagement:deploy': '/h5LiveDeploy/deployZip',
 
+    CoinMerchantDeployManagement: '/coinMerchantDeploy/getCoinMerchantDeployInfo',
+    'CoinMerchantDeployManagement:view': '/coinMerchantDeploy/getCoinMerchantDeployInfo',
+    'CoinMerchantDeployManagement:save': '/coinMerchantDeploy/saveCoinMerchantDeployCfg',
+    'CoinMerchantDeployManagement:deploy': '/coinMerchantDeploy/deployZip',
+
     ThirdPayDeployManagement: '/thirdPayDeploy/getThirdPayDeployInfo',
     'ThirdPayDeployManagement:view': '/thirdPayDeploy/getThirdPayDeployInfo',
     'ThirdPayDeployManagement:deploy': '/thirdPayDeploy/deployZip',
