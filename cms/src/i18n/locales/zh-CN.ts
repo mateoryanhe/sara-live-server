@@ -96,6 +96,7 @@ const menu = {
   GooglePlayCfgManagement: 'Google Play',
   YhPayCfgManagement: 'yhpay支付',
   CfEmailCfgManagement: 'Amazon SES邮件',
+  DbBackupCfgManagement: '数据库备份',
   UploadResourceCfgManagement: '资源域名',
   H5LiveDeployManagement: 'H5直播部署',
   CoinMerchantDeployManagement: '币商H5部署',

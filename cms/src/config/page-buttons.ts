@@ -88,6 +88,7 @@ const CONFIG_PAGES = new Set([
     'GooglePlayCfgManagement',
     'YhPayCfgManagement',
     'CfEmailCfgManagement',
+    'DbBackupCfgManagement',
     'UploadResourceCfgManagement',
     'DataSyncCfgManagement',
     'AgoraCfgManagement',
@@ -103,6 +104,13 @@ const CONFIG_PAGES = new Set([
 
 /** 各页面自定义按钮（未列出的页面按类型使用默认集） */
 export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
+    DbBackupCfgManagement: [
+        BTN.view,
+        BTN.save,
+        {key: 'runNow', label: '立即备份'},
+        {key: 'list', label: '备份列表'},
+        {key: 'restore', label: '还原'},
+    ],
     UploadResourceCfgManagement: [
         BTN.view,
         BTN.save,

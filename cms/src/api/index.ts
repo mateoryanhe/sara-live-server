@@ -38,6 +38,7 @@ import {dataSyncApi} from './modules/data-sync'
 import {fiatCurrencyApi} from './modules/fiatCurrency'
 import {yhpayApi} from './modules/yhpay'
 import {cfEmailApi} from './modules/cf-email'
+import {dbBackupApi} from './modules/db-backup'
 
 export {
     authApi,
@@ -81,6 +82,7 @@ export {
     fiatCurrencyApi,
     yhpayApi,
     cfEmailApi,
+    dbBackupApi,
 }
 
 export default {
@@ -125,4 +127,5 @@ export default {
     fiatCurrencyApi,
     yhpayApi,
     cfEmailApi,
+    dbBackupApi,
 }

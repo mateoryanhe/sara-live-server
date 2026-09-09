@@ -71,6 +71,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: 'Cloudflare邮件'},
         },
         {
+            path: 'db-backup',
+            name: 'DbBackupCfgManagement',
+            component: () => import('@/views/config/db-backup.vue'),
+            meta: {title: '数据库备份'},
+        },
+        {
             path: 'upload-resource',
             name: 'UploadResourceCfgManagement',
             component: () => import('@/views/config/upload-resource.vue'),

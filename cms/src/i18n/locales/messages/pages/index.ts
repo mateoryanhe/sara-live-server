@@ -70,6 +70,7 @@ import {privacyPolicyMessages} from './privacy-policy'
 import {googlePlayMessages} from './google-play'
 import {yhpayMessages} from './yhpay'
 import {cfEmailMessages} from './cf-email'
+import {dbBackupMessages} from './db-backup'
 import {uploadResourceMessages} from './upload-resource'
 import {h5LiveDeployMessages} from './h5-live-deploy'
 import {coinMerchantDeployMessages} from './coin-merchant-deploy'
@@ -150,6 +151,7 @@ const pageMessageBuilders = [
   ['googlePlay', googlePlayMessages],
   ['yhpay', yhpayMessages],
   ['cfEmail', cfEmailMessages],
+  ['dbBackup', dbBackupMessages],
   ['uploadResource', uploadResourceMessages],
   ['h5LiveDeploy', h5LiveDeployMessages],
   ['coinMerchantDeploy', coinMerchantDeployMessages],

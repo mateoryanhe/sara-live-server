@@ -475,6 +475,13 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'CfEmailCfgManagement:view': '/cfEmail/getCfEmailCfg',
     'CfEmailCfgManagement:save': '/cfEmail/saveCfEmailCfg',
 
+    DbBackupCfgManagement: '/dbBackup/getDbBackupCfg',
+    'DbBackupCfgManagement:view': '/dbBackup/getDbBackupCfg',
+    'DbBackupCfgManagement:save': '/dbBackup/saveDbBackupCfg',
+    'DbBackupCfgManagement:runNow': '/dbBackup/runDbBackupNow',
+    'DbBackupCfgManagement:list': '/dbBackup/listDbBackupFiles',
+    'DbBackupCfgManagement:restore': '/dbBackup/restoreDbBackup',
+
     UploadResourceCfgManagement: '/upload/getUploadResourceCfg',
     'UploadResourceCfgManagement:view': '/upload/getUploadResourceCfg',
     'UploadResourceCfgManagement:save': '/upload/saveUploadResourceCfg',

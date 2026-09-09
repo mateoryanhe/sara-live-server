@@ -43,6 +43,7 @@ func Init() {
 	initGooglePlayCMSController()                // Google Play 配置(CMS)
 	initYhPayCMSController()                     // yhpay支付配置(CMS)
 	initCfEmailCMSController()                   // AWS SES邮件发信配置(CMS)
+	initDbBackupCMSController()                  // 数据库备份(CMS)
 	initDataSyncCMSController()                  // 数据同步配置(CMS)
 	initDataSyncReceiveController()              // 数据同步接收(跨环境)
 	initGooglePlayWebhookController()            // Google Play RTDN Webhook

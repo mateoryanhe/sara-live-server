@@ -172,3 +172,12 @@
 - **历史迁移**：按钮「刷本地到云桶」→ `POST /upload/syncLocalStorageToS3`（扫旧本地，跳过 `export/`）
 - 开云桶时短视频上传**跳过**本地磁盘水位检查
 
+## 数据库备份（2026-09-09）
+
+- CMS：`/config/db-backup`（`DbBackupCfgManagement`）
+- 表 `db_backup_cfgs`：`enabled` / `storage_prefix`（首次 `guid/db_backup`）/ `retain_days`（默认 1）/ 最近成功失败摘要
+- 定时：订阅 `DayEvent`（每天 0 点）；关开关或未开云桶则跳过
+- 流程：`mysqldump|gzip` → 临时目录 `{storagePath父}/staging/db-backup` → 上传云桶 → 按保留天数删旧对象
+- 还原：选 `.sql.gz` + 填目标库名（不存在则 `CREATE DATABASE`）；仅允许当前 `storage_prefix` 下文件
+- 依赖：云桶开启；主机装 `mysqldump`/`mysql`（或 mariadb 同名工具）
+

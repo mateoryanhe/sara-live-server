@@ -76,6 +76,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   GooglePlayCfgManagement: 'Google Play',
   YhPayCfgManagement: 'yhpay',
   CfEmailCfgManagement: 'Amazon SES Email',
+  DbBackupCfgManagement: 'DB Backup',
   UploadResourceCfgManagement: 'Resource CDN',
   H5LiveDeployManagement: 'H5 Live Deploy',
   CoinMerchantDeployManagement: 'Coin Merchant H5 Deploy',

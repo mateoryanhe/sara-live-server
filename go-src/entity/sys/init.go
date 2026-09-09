@@ -8,6 +8,7 @@ func Init() {
 	initH5LiveDeployCfg()
 	initCoinMerchantDeployCfg()
 	initCfEmailCfg()
+	initDbBackupCfg()
 	initSysResourceMetric()
 	initSysResourceMetricAgg()
 }

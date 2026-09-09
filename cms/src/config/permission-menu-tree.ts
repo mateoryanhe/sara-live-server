@@ -304,6 +304,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('GooglePlayCfgManagement'),
                 page('YhPayCfgManagement'),
                 page('CfEmailCfgManagement'),
+                page('DbBackupCfgManagement'),
                 page('UploadResourceCfgManagement'),
                 page('DataSyncCfgManagement'),
                 page('H5LiveDeployManagement'),

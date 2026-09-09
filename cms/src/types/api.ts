@@ -1851,6 +1851,65 @@ export interface SaveCfEmailCfgRes {
     id: string
 }
 
+export interface DbBackupCfg {
+    id: string
+    enabled: boolean
+    storagePrefix: string
+    retainDays: number
+    lastSuccessAt: string
+    lastError: string
+    lastObjectKey: string
+    lastFileSize: number
+    lastTargetHint: string
+    s3Enabled: boolean
+    sourceDatabase: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetDbBackupCfgRes {
+    cfg: DbBackupCfg | null
+}
+
+export interface SaveDbBackupCfgReq {
+    id?: number
+    enabled: boolean
+    retainDays: number
+}
+
+export interface SaveDbBackupCfgRes {
+    success: boolean
+    id: string
+}
+
+export interface RunDbBackupNowRes {
+    success: boolean
+    objectKey: string
+    fileSize: number
+    message: string
+}
+
+export interface DbBackupFileItem {
+    objectKey: string
+    fileName: string
+    size: number
+    lastModified: string
+}
+
+export interface ListDbBackupFilesRes {
+    list: DbBackupFileItem[]
+}
+
+export interface RestoreDbBackupReq {
+    objectKey: string
+    targetDatabase: string
+}
+
+export interface RestoreDbBackupRes {
+    success: boolean
+    message: string
+}
+
 export interface DataSyncCfg {
     id: string
     targetApiBase: string

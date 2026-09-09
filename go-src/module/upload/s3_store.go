@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
@@ -28,6 +29,13 @@ const (
 	StoreCatCMS        = "cms"
 	StoreCatExport     = "export"
 )
+
+// S3ObjectInfo 云对象元信息(StoredName 为业务相对路径,不含环境 s3KeyPrefix)
+type S3ObjectInfo struct {
+	StoredName   string
+	Size         int64
+	LastModified time.Time
+}
 
 var (
 	s3ClientMu  sync.Mutex
@@ -251,4 +259,116 @@ func DeleteExportStored(fileName string) {
 		return
 	}
 	deleteObjectFromS3(joinStoreCategory(StoreCatExport, fileName))
+}
+
+// PutStoredFileToS3 按业务相对路径上传本地文件到云桶(如 db backup)
+func PutStoredFileToS3(storedName, localPath string) error {
+	if !IsS3Enabled() {
+		return errors.New("s3 disabled")
+	}
+	storedName = sanitizeStoredRelativePath(storedName)
+	if storedName == "" {
+		return errors.New("invalid stored name")
+	}
+	return putLocalFileToS3(storedName, localPath)
+}
+
+// DownloadStoredFileFromS3 将云对象下载到本地路径
+func DownloadStoredFileFromS3(storedName, localPath string) error {
+	if !IsS3Enabled() {
+		return errors.New("s3 disabled")
+	}
+	storedName = sanitizeStoredRelativePath(storedName)
+	if storedName == "" {
+		return errors.New("invalid stored name")
+	}
+	client, bucket, err := getS3Client()
+	if err != nil {
+		return err
+	}
+	key := objectKeyFromStored(storedName)
+	if key == "" {
+		return errors.New("empty s3 object key")
+	}
+	if err := os.MkdirAll(filepath.Dir(localPath), 0755); err != nil {
+		return err
+	}
+	ctx := gctx.New()
+	out, err := client.GetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		return err
+	}
+	defer out.Body.Close()
+	f, err := os.Create(localPath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	_, err = io.Copy(f, out.Body)
+	return err
+}
+
+// DeleteStoredFileFromS3 按业务相对路径删除云对象
+func DeleteStoredFileFromS3(storedName string) {
+	storedName = sanitizeStoredRelativePath(storedName)
+	if storedName == "" {
+		return
+	}
+	deleteObjectFromS3(storedName)
+}
+
+// ListStoredObjectsByPrefix 列出云桶中以 storedPrefix 开头的对象(StoredName 已去掉环境前缀)
+func ListStoredObjectsByPrefix(storedPrefix string) ([]S3ObjectInfo, error) {
+	if !IsS3Enabled() {
+		return nil, errors.New("s3 disabled")
+	}
+	storedPrefix = strings.Trim(strings.ReplaceAll(storedPrefix, "\\", "/"), "/")
+	if storedPrefix == "" {
+		return nil, errors.New("empty prefix")
+	}
+	client, bucket, err := getS3Client()
+	if err != nil {
+		return nil, err
+	}
+	fullPrefix := objectKeyFromStored(storedPrefix)
+	if fullPrefix != "" && !strings.HasSuffix(fullPrefix, "/") {
+		fullPrefix += "/"
+	}
+	envPrefix := strings.Trim(GetS3KeyPrefix(), "/")
+	ctx := gctx.New()
+	var out []S3ObjectInfo
+	var token *string
+	for {
+		resp, err := client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
+			Bucket:            aws.String(bucket),
+			Prefix:            aws.String(fullPrefix),
+			ContinuationToken: token,
+		})
+		if err != nil {
+			return nil, err
+		}
+		for _, obj := range resp.Contents {
+			if obj.Key == nil {
+				continue
+			}
+			key := strings.Trim(*obj.Key, "/")
+			stored := key
+			if envPrefix != "" && (key == envPrefix || strings.HasPrefix(key, envPrefix+"/")) {
+				stored = strings.TrimPrefix(key, envPrefix+"/")
+			}
+			info := S3ObjectInfo{StoredName: stored, Size: aws.ToInt64(obj.Size)}
+			if obj.LastModified != nil {
+				info.LastModified = *obj.LastModified
+			}
+			out = append(out, info)
+		}
+		if !aws.ToBool(resp.IsTruncated) {
+			break
+		}
+		token = resp.NextContinuationToken
+	}
+	return out, nil
 }
