@@ -24,21 +24,15 @@
         <el-table v-loading="loading" :data="tableData" style="width: 100%">
           <el-table-column label="ID" prop="id" width="100"/>
           <el-table-column :label="t('pages.appPkgList.packageName')" min-width="220" prop="packageName" show-overflow-tooltip/>
-          <el-table-column :label="t('pages.appPkgList.secretKey')" min-width="300">
+          <el-table-column :label="t('pages.appPkgList.attributionEnabled')" prop="attributionEnabled" width="110">
             <template #default="{ row }">
-              <div class="secret-key-cell">
-                <span
-                    :title="isSecretKeyVisible(row.id) ? t('pages.appPkgList.clickToHide') : t('pages.appPkgList.clickToShow')"
-                    class="secret-key-text"
-                    @click="toggleSecretKeyVisible(row.id)"
-                >
-                  {{ formatSecretKeyDisplay(row) }}
-                </span>
-                <el-button link type="primary" @click="copySecretKey(row.secretKey)">{{ t('common.copy') }}</el-button>
-              </div>
+              <el-tag :type="row.attributionEnabled ? 'success' : 'info'" size="small">
+                {{ row.attributionEnabled ? t('common.enabled') : t('common.disabled') }}
+              </el-tag>
             </template>
           </el-table-column>
-          <el-table-column :label="t('common.remark')" min-width="180" prop="remark" show-overflow-tooltip/>
+          <el-table-column :label="t('pages.appPkgList.attributionProvider')" min-width="120" prop="attributionProvider" show-overflow-tooltip/>
+          <el-table-column :label="t('common.remark')" min-width="160" prop="remark" show-overflow-tooltip/>
           <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
           <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
           <el-table-column fixed="right" :label="t('common.actions')" width="160">
@@ -63,26 +57,41 @@
       </div>
     </el-card>
 
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="640px">
-      <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="120px">
-        <el-form-item :label="t('pages.appPkgList.packageName')" prop="packageName">
-          <el-input v-model="currentRow.packageName" :placeholder="t('pages.appPkgList.packageNamePlaceholder')"/>
-        </el-form-item>
-        <el-form-item :label="t('pages.appPkgList.secretKey')" prop="secretKey">
-          <div class="secret-key-input">
-            <el-input v-model="currentRow.secretKey" :placeholder="t('pages.appPkgList.secretKeyPlaceholder')" show-password type="password"/>
-            <el-button @click="generateSecretKeyForForm">{{ t('pages.appPkgList.autoGenerate') }}</el-button>
-          </div>
-        </el-form-item>
-        <el-form-item :label="t('pages.appPkgList.privacyPolicyUrl')" prop="privacyPolicyUrl">
-          <el-input v-model="currentRow.privacyPolicyUrl" clearable :placeholder="t('pages.appPkgList.privacyPolicyPlaceholder')"/>
-        </el-form-item>
-        <el-form-item :label="t('pages.appPkgList.termsOfServiceUrl')" prop="termsOfServiceUrl">
-          <el-input v-model="currentRow.termsOfServiceUrl" clearable :placeholder="t('pages.appPkgList.termsPlaceholder')"/>
-        </el-form-item>
-        <el-form-item :label="t('common.remark')" prop="remark">
-          <el-input v-model="currentRow.remark" :rows="3" :placeholder="t('pages.appPkgList.remarkOptional')" type="textarea"/>
-        </el-form-item>
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="680px" @closed="activeTab = 'basic'">
+      <el-form ref="formRef" :model="currentRow" :rules="formRules" label-width="140px">
+        <el-tabs v-model="activeTab">
+          <el-tab-pane :label="t('pages.appPkgList.tabBasic')" name="basic">
+            <el-form-item :label="t('pages.appPkgList.packageName')" prop="packageName">
+              <el-input v-model="currentRow.packageName" :placeholder="t('pages.appPkgList.packageNamePlaceholder')"/>
+            </el-form-item>
+            <el-form-item :label="t('common.remark')" prop="remark">
+              <el-input v-model="currentRow.remark" :rows="3" :placeholder="t('pages.appPkgList.remarkOptional')" type="textarea"/>
+            </el-form-item>
+          </el-tab-pane>
+          <el-tab-pane :label="t('pages.appPkgList.tabAppsFlyer')" name="appsFlyer">
+            <el-form-item :label="t('pages.appPkgList.attributionEnabled')" prop="attributionEnabled">
+              <el-switch v-model="currentRow.attributionEnabled"/>
+            </el-form-item>
+            <el-form-item :label="t('pages.appPkgList.attributionProvider')" prop="attributionProvider">
+              <el-select
+                  v-model="currentRow.attributionProvider"
+                  clearable
+                  allow-create
+                  filterable
+                  :placeholder="t('pages.appPkgList.attributionProviderPlaceholder')"
+                  style="width: 100%"
+              >
+                <el-option label="appsFlyer" value="appsFlyer"/>
+              </el-select>
+            </el-form-item>
+            <el-form-item :label="t('pages.appPkgList.appsFlyerDevKey')" prop="appsFlyerDevKey">
+              <el-input v-model="currentRow.appsFlyerDevKey" clearable :placeholder="t('pages.appPkgList.appsFlyerDevKeyPlaceholder')"/>
+            </el-form-item>
+            <el-form-item :label="t('pages.appPkgList.appsFlyerAppId')" prop="appsFlyerAppId">
+              <el-input v-model="currentRow.appsFlyerAppId" clearable :placeholder="t('pages.appPkgList.appsFlyerAppIdPlaceholder')"/>
+            </el-form-item>
+          </el-tab-pane>
+        </el-tabs>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
@@ -106,10 +115,11 @@ interface SearchForm {
 interface AppPkgForm {
   id: string
   packageName: string
-  secretKey: string
-  privacyPolicyUrl: string
-  termsOfServiceUrl: string
   remark: string
+  attributionEnabled: boolean
+  attributionProvider: string
+  appsFlyerDevKey: string
+  appsFlyerAppId: string
 }
 
 const {t} = useI18n()
@@ -118,6 +128,7 @@ const tableData = ref<AppPkg[]>([])
 const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
+const activeTab = ref('basic')
 
 const searchForm = reactive<SearchForm>({
   packageName: ''
@@ -128,93 +139,20 @@ const dialogTitle = ref('')
 const defaultForm = (): AppPkgForm => ({
   id: '',
   packageName: '',
-  secretKey: '',
-  privacyPolicyUrl: '',
-  termsOfServiceUrl: '',
-  remark: ''
+  remark: '',
+  attributionEnabled: false,
+  attributionProvider: '',
+  appsFlyerDevKey: '',
+  appsFlyerAppId: ''
 })
 const currentRow = ref<AppPkgForm>(defaultForm())
 const formRef = ref<FormInstance>()
-const visibleSecretKeyIds = ref<Set<string>>(new Set())
-
-const generateSecretKey = () => crypto.randomUUID().replace(/-/g, '')
-
-const generateSecretKeyForForm = () => {
-  currentRow.value.secretKey = generateSecretKey()
-}
-
-const isSecretKeyVisible = (id: string) => visibleSecretKeyIds.value.has(id)
-
-const toggleSecretKeyVisible = (id: string) => {
-  const next = new Set(visibleSecretKeyIds.value)
-  if (next.has(id)) {
-    next.delete(id)
-  } else {
-    next.add(id)
-  }
-  visibleSecretKeyIds.value = next
-}
-
-const maskSecretKey = (value: string) => {
-  if (!value) {
-    return '-'
-  }
-  return '•'.repeat(16)
-}
-
-const formatSecretKeyDisplay = (row: AppPkg) => {
-  if (!row.secretKey) {
-    return '-'
-  }
-  return isSecretKeyVisible(row.id) ? row.secretKey : maskSecretKey(row.secretKey)
-}
-
-const copySecretKey = async (value?: string) => {
-  if (!value) {
-    ElMessage.warning(t('pages.appPkgList.nothingToCopy'))
-    return
-  }
-  try {
-    await navigator.clipboard.writeText(value)
-    ElMessage.success(t('pages.appPkgList.copied'))
-  } catch (error) {
-    console.error('copy secret key failed:', error)
-    ElMessage.error(t('pages.appPkgList.copyFailed'))
-  }
-}
-
-const clearVisibleSecretKeys = () => {
-  visibleSecretKeyIds.value = new Set()
-}
-
-const validateOptionalUrl = (_: unknown, value: string, callback: (e?: Error) => void) => {
-  const url = value?.trim()
-  if (!url) {
-    callback()
-    return
-  }
-  if (url.length > 512) {
-    callback(new Error(t('pages.appPkgList.urlMaxLength')))
-    return
-  }
-  if (!/^https?:\/\//i.test(url)) {
-    callback(new Error(t('pages.appPkgList.urlMustHttp')))
-    return
-  }
-  callback()
-}
 
 const formRules = computed<FormRules>(() => ({
   packageName: [
     {required: true, message: t('pages.appPkgList.packageNameRequired'), trigger: 'blur'},
     {min: 1, max: 128, message: t('pages.appPkgList.packageNameLength'), trigger: 'blur'}
-  ],
-  secretKey: [
-    {required: true, message: t('pages.appPkgList.secretKeyRequired'), trigger: 'blur'},
-    {min: 1, max: 256, message: t('pages.appPkgList.secretKeyLength'), trigger: 'blur'}
-  ],
-  privacyPolicyUrl: [{validator: validateOptionalUrl, trigger: 'blur'}],
-  termsOfServiceUrl: [{validator: validateOptionalUrl, trigger: 'blur'}]
+  ]
 }))
 
 const fetchList = async () => {
@@ -227,7 +165,6 @@ const fetchList = async () => {
     })
     tableData.value = response.data
     total.value = response.total
-    clearVisibleSecretKeys()
   } catch (error) {
     console.error('fetch app pkg list failed:', error)
     ElMessage.error(t('pages.appPkgList.fetchFailed'))
@@ -259,6 +196,7 @@ const resetSearch = () => {
 const handleAdd = () => {
   dialogTitle.value = t('pages.appPkgList.addAppPkg')
   currentRow.value = defaultForm()
+  activeTab.value = 'basic'
   dialogVisible.value = true
 }
 
@@ -267,11 +205,13 @@ const handleEdit = (row: AppPkg) => {
   currentRow.value = {
     id: row.id,
     packageName: row.packageName,
-    secretKey: row.secretKey,
-    privacyPolicyUrl: row.privacyPolicyUrl || '',
-    termsOfServiceUrl: row.termsOfServiceUrl || '',
-    remark: row.remark || ''
+    remark: row.remark || '',
+    attributionEnabled: !!row.attributionEnabled,
+    attributionProvider: row.attributionProvider || '',
+    appsFlyerDevKey: row.appsFlyerDevKey || '',
+    appsFlyerAppId: row.appsFlyerAppId || ''
   }
+  activeTab.value = 'basic'
   dialogVisible.value = true
 }
 
@@ -281,15 +221,17 @@ const handleSave = async () => {
   }
   await formRef.value.validate(async (valid) => {
     if (!valid) {
+      activeTab.value = 'basic'
       return
     }
     try {
       const payload = {
         packageName: currentRow.value.packageName.trim(),
-        secretKey: currentRow.value.secretKey.trim(),
-        privacyPolicyUrl: currentRow.value.privacyPolicyUrl.trim(),
-        termsOfServiceUrl: currentRow.value.termsOfServiceUrl.trim(),
-        remark: currentRow.value.remark.trim()
+        remark: currentRow.value.remark.trim(),
+        attributionEnabled: currentRow.value.attributionEnabled,
+        attributionProvider: currentRow.value.attributionProvider.trim(),
+        appsFlyerDevKey: currentRow.value.appsFlyerDevKey.trim(),
+        appsFlyerAppId: currentRow.value.appsFlyerAppId.trim()
       }
       if (currentRow.value.id) {
         await appPkgApi.updateAppPkg({
@@ -345,34 +287,5 @@ onMounted(() => {
   margin-top: 16px;
   display: flex;
   justify-content: flex-end;
-}
-
-.secret-key-cell {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.secret-key-text {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  cursor: pointer;
-  font-family: Consolas, Monaco, monospace;
-  user-select: none;
-}
-
-.secret-key-input {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-}
-
-.secret-key-input .el-input {
-  flex: 1;
 }
 </style>

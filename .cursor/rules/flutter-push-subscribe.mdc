@@ -1,24 +1,25 @@
 ---
-description: Flutter App 推送订阅规则 — Repository 与 ViewModel 各自订 PushBus
+description: Flutter App 事件订阅 — Repository 与 ViewModel 各自订 AppBus
 globs: flutter-client/**/*.dart
 alwaysApply: false
 ---
 
-# Flutter 推送：各自订阅（禁止中心转发 UI）
+# Flutter 事件：各自订阅（禁止中心转发 UI）
 
-`WsClient` → `PushBus.dispatch`；**数据缓存层与 ViewModel 分别 `pushBus.add`**，不要用 AppScope 里的 `ValueNotifier`/总线再转一圈驱动页面。
+统一 [AppBus]：`StartupBusEvent`（启动）与 `WsBusEvent`（WS / 本机 wsConnected）用**类型**区分；**数据缓存层与 ViewModel 分别 `appBus.add`**，不要用 AppScope 里的 `ValueNotifier`/总线再转一圈驱动页面。
 
 ## 分工
 
 | 订阅方 | 订什么 | 做什么 |
 |--------|--------|--------|
-| **Repository（cache）** | 业务 `cmd` + 本机 `PushCmd.wsConnected` | `invalidate` / 小 patch，**不碰 UI** |
-| **ViewModel** | 同一批推送 | `forceRefresh`（可 `silent`）拉 HTTP → 调 UI 接口 |
-| **AppScope** | 仅连/断 WS、把帧丢进 `PushBus`；重连时 `dispatch(wsConnected)` | 不做业务失效、不通知具体页面 |
+| **Repository（cache）** | `WsBusEvent`：业务 `cmd` + `PushCmd.wsConnected` | `invalidate` / 小 patch，**不碰 UI** |
+| **ViewModel** | 同一批 `WsBusEvent` | `forceRefresh`（可 `silent`）拉 HTTP → 调 UI 接口 |
+| **启动模块**（如 ApiDiskCache） | `StartupBusEvent.started` | 启动清理等；`started` 有 sticky |
+| **AppScope** | 连/断 WS；帧 → `WsBusEvent`；create 末尾 `StartupBusEvent.started` | 不做业务失效、不通知具体页面 |
 
 ## 生命周期
 
-- ViewModel：构造里 `pushBus.add`，`dispose` 里 `remove`（页面 `dispose` 调 VM.dispose）
+- ViewModel：构造里 `appBus.add`，`dispose` 里 `remove`（页面 `dispose` 调 VM.dispose）
 - Repository：在 `AppScope.create` 时绑定，`AppScope.dispose` 时解绑
 - 登录 `handleLoggedIn` 连 `/ws`；登出断开并清缓存
 
@@ -29,23 +30,24 @@ alwaysApply: false
 scope.vipRevision.value++;
 
 // ❌ 只有 ViewModel 订推送、Repository 不失效（易读到脏缓存）
-// ❌ UI Widget 直接 pushBus.add / 直接打 HTTP
+// ❌ UI Widget 直接 appBus.add / 直接打 HTTP
 ```
 
 ## 推荐
 
 ```dart
-// ✅ Repository
-void _onPush(PushMessage m) {
-  if (m.cmd == PushCmd.vipLevel || m.cmd == PushCmd.wsConnected) {
-    invalidate(userId);
+// ✅ Repository / ViewModel
+void _onBus(AppBusEvent e) {
+  if (e is! WsBusEvent) return;
+  if (e.cmd == PushCmd.vipLevel || e.cmd == PushCmd.wsConnected) {
+    invalidate(userId); // 或 forceRefresh
   }
 }
 
-// ✅ ViewModel
-void _onPush(PushMessage m) {
-  if (m.cmd == PushCmd.vipLevel || m.cmd == PushCmd.wsConnected) {
-    unawaited(load(forceRefresh: true, silent: true));
+// ✅ 启动
+void _onBus(AppBusEvent e) {
+  if (e is StartupBusEvent && e.kind == StartupKind.started) {
+    // 清理 API 磁盘缓存等
   }
 }
 ```

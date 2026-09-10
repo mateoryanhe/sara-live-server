@@ -163,3 +163,16 @@ type AppReportReq struct {
 type AppReportRes struct {
 	Success bool `json:"success"`
 }
+
+// ReportAttributionReq App端上报归因配置/结果
+type ReportAttributionReq struct {
+	g.Meta               `path:"/reportAttribution" method:"post" summary:"上报归因信息" tags:"用户信息"`
+	AttributionEnabled   *bool  `json:"attributionEnabled" dc:"是否启用归因"`
+	AttributionProvider  string `json:"attributionProvider" dc:"归因渠道"`
+	AppsFlyerDevKey      string `json:"appsFlyerDevKey" dc:"AppsFlyer Dev Key"`
+	AppsFlyerAppId       string `json:"appsFlyerAppId" dc:"AppsFlyer App ID"`
+}
+
+type ReportAttributionRes struct {
+	Success bool `json:"success"`
+}

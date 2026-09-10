@@ -101,6 +101,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '第三方支付部署'},
         },
         {
+            path: 'app-pkg-list',
+            name: 'AppPkgManagement',
+            component: () => import('@/views/operation/app-pkg/app-pkg-list.vue'),
+            meta: {title: 'App包管理'},
+        },
+        {
             path: 'data-sync',
             name: 'DataSyncCfgManagement',
             component: () => import('@/views/config/data-sync.vue'),

@@ -174,6 +174,8 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/shortVideo/updateShortVideo"}
 	case "/rechargeCfg/rechargeCfgList":
 		return []string{"/rechargeOrder/manualCreateOrder"}
+	case "/rechargeOrder/getChannelPayUserProfileForTest":
+		return []string{"/rechargeOrder/createChannelRechargeOrderTest"}
 	default:
 		return nil
 	}

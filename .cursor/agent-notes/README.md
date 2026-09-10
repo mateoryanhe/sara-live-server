@@ -119,6 +119,10 @@
 - App 工程：`flutter-client/`（主体 gitignore）
 - Web 本地：`flutter-client\start-web.bat` 或 `pub-tool/flutter-local/一键启动.bat`（`flutter run -d chrome`）
 - **推送规则**：`PushBus` 上 **Repository 与 ViewModel 各自订阅**（失效缓存 / 刷 UI）；见 `.cursor/rules/flutter-push-subscribe.mdc`、`lib/sara_live_core.dart` §6
+- **客户端缓存分层（2026-09-10，约定）**：两类分开，勿混用
+  - **API 接口数据**：业务 KV（`CacheKey`：`user:{id}:…` / `global:…`）；内存 L1 + 可选磁盘 L2（Hive/文件 JSON 等，设计待定）；推送/登出要打穿失效
+  - **文件资源**（图片、礼物动画等 URL 文件）：**统一用同一套文件缓存插件**（`flutter_cache_manager`；图片可用 `cached_network_image` 等基于它的封装，共用/配置同一 CacheManager 实例，勿再拆第二套磁盘文件缓存）
+- **App 统一事件总线（2026-09-10）**：`AppBus`（`lib/core/bus/`）；类型区分 `StartupBusEvent` / `WsBusEvent`；同一套 `add`/`remove`/`publish`。`started` sticky；WS 经 `WsClient`→`WsBusEvent`。例：`ApiDiskCache.bind` 订启动清理 API 磁盘（L2 待落地）。勿再拆 PushBus/AppEventBus
 - 注意：本机 `HTTP_PROXY` 若无协议，sdkmanager 会挂；VS 未装不影响 Android APK
 
 ## CMS 本地启动（2026-09-07）

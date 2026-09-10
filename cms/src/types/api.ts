@@ -1178,10 +1178,11 @@ export interface VipCfgQuery extends PageQuery {
 export interface AppPkg {
     id: string
     packageName: string
-    secretKey: string
-    privacyPolicyUrl?: string
-    termsOfServiceUrl?: string
     remark: string
+    attributionEnabled?: boolean
+    attributionProvider?: string
+    appsFlyerDevKey?: string
+    appsFlyerAppId?: string
     createdAt: string
     updatedAt: string
 }

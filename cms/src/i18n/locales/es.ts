@@ -68,6 +68,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   GameBetLogListManagement: 'Registros de apuestas',
   GameWinLogListManagement: 'Registros de premios',
   ConfigManagement: 'Config. del sistema',
+  ConfigDeployGroup: 'Despliegue frontend',
   AppTokenConfig: 'Token de app',
   AccountCfgManagement: 'Config. de cuenta',
   PreloadCfgManagement: 'Config. de precarga',

@@ -36,3 +36,8 @@ func (c *RechargeOrderController) ManualCreateOrder(ctx context.Context, req *re
 func (c *RechargeOrderController) CreateChannelRechargeOrderTest(ctx context.Context, req *rechargeorderdto.CMSCreateChannelRechargeOrderReq) (res *rechargeorderdto.AppCreateChannelRechargeOrderRes, err error) {
 	return recharge.CMSCreateChannelRechargeOrder(ctx, req)
 }
+
+// GetChannelPayUserProfileForTest CMS第三方充值测试查询付款人资料
+func (c *RechargeOrderController) GetChannelPayUserProfileForTest(ctx context.Context, req *rechargeorderdto.CMSGetChannelPayUserProfileReq) (*rechargeorderdto.AppGetChannelPayUserProfileRes, error) {
+	return recharge.GetChannelPayUserProfile(ctx, &rechargeorderdto.AppGetChannelPayUserProfileReq{UserId: req.UserId})
+}

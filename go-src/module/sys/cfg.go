@@ -33,7 +33,7 @@ func GetSysCfg(ctx context.Context, req *sysdto.SysCfgReq) (*sysdto.SysCfgResp, 
 	globalPrivacy := privacypolicy.GetPrivacyPolicyUrl()
 	globalTerms := privacypolicy.GetTermsOfServiceUrl()
 	exchangeCfg := wallet.GetExchangeCfgSnapshot()
-	return &sysdto.SysCfgResp{
+	resp := &sysdto.SysCfgResp{
 		SysTime:                     time.Now().UnixMilli(),
 		PaidDanmakuPrice:            livecfg.GetPaidDanmakuPrice(),
 		PrivateRoomFreeWatchSeconds: livecfg.GetPrivateRoomFreeWatchSeconds(),
@@ -49,5 +49,12 @@ func GetSysCfg(ctx context.Context, req *sysdto.SysCfgReq) (*sysdto.SysCfgResp, 
 		AboutSiteUrl:                resolveAboutSiteUrl(),
 		SafetyCenterUrl:             resolveSafetyCenterUrl(),
 		EnvType:                     accountcfg.GetEnvType(),
-	}, nil
+	}
+	if pkg := apppkg.GetAppPkgFromMemoryByPackageName(packageName); pkg != nil {
+		resp.AttributionEnabled = pkg.AttributionEnabled
+		resp.AttributionProvider = pkg.AttributionProvider
+		resp.AppsFlyerDevKey = pkg.AppsFlyerDevKey
+		resp.AppsFlyerAppId = pkg.AppsFlyerAppId
+	}
+	return resp, nil
 }

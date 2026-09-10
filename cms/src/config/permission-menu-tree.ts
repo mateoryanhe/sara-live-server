@@ -209,7 +209,6 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('LiveRevenueShareCfgManagement'),
             ]),
             group('operation-app', 'menu.OperationAppGroup', [
-                page('AppPkgManagement'),
                 page('RandomNicknameManagement'),
                 page('CustomerServiceCfgManagement'),
             ]),
@@ -298,7 +297,6 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             group('config-security', 'menu.ConfigSecurityGroup', [
                 page('SimulatorCpuKeywordManagement'),
                 page('TextModerationCfgManagement'),
-                page('PrivacyPolicyCfgManagement'),
             ]),
             group('config-platform', 'menu.ConfigPlatformGroup', [
                 page('GooglePlayCfgManagement'),
@@ -307,6 +305,10 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('DbBackupCfgManagement'),
                 page('UploadResourceCfgManagement'),
                 page('DataSyncCfgManagement'),
+            ]),
+            group('config-deploy', 'menu.ConfigDeployGroup', [
+                page('AppPkgManagement'),
+                page('PrivacyPolicyCfgManagement'),
                 page('H5LiveDeployManagement'),
                 page('CoinMerchantDeployManagement'),
                 page('ThirdPayDeployManagement'),

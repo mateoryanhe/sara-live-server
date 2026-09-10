@@ -20,22 +20,26 @@ func GetList(_ context.Context, req *apppkgdto.AppPkgListReq) (*httpserver.CMSQu
 	return httpserver.NewCMSQueryResp(total, list), nil
 }
 
+func applyAttributionFields(row *entity.AppPkg, enabled bool, provider, devKey, appId string) {
+	row.AttributionEnabled = enabled
+	row.AttributionProvider = strings.TrimSpace(provider)
+	row.AppsFlyerDevKey = strings.TrimSpace(devKey)
+	row.AppsFlyerAppId = strings.TrimSpace(appId)
+}
+
 func Create(_ context.Context, req *apppkgdto.CreateAppPkgReq) (*apppkgdto.CreateAppPkgRes, error) {
 	packageName := strings.TrimSpace(req.PackageName)
-	secretKey := strings.TrimSpace(req.SecretKey)
-	if packageName == "" || secretKey == "" {
+	if packageName == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	if findAppPkgByPackageNameFromMemory(packageName, 0) != nil {
 		return nil, errercode.CreateCode(errercode.AppPkgExist)
 	}
 	row := &entity.AppPkg{
-		PackageName:       packageName,
-		SecretKey:         secretKey,
-		PrivacyPolicyUrl:  strings.TrimSpace(req.PrivacyPolicyUrl),
-		TermsOfServiceUrl: strings.TrimSpace(req.TermsOfServiceUrl),
-		Remark:            strings.TrimSpace(req.Remark),
+		PackageName: packageName,
+		Remark:      strings.TrimSpace(req.Remark),
 	}
+	applyAttributionFields(row, req.AttributionEnabled, req.AttributionProvider, req.AppsFlyerDevKey, req.AppsFlyerAppId)
 	if err := cfgdao.CreateAppPkg(row); err != nil {
 		return nil, err
 	}
@@ -49,8 +53,7 @@ func Update(_ context.Context, req *apppkgdto.UpdateAppPkgReq) (*apppkgdto.Updat
 		return nil, errercode.CreateCode(errercode.AppPkgNonExist)
 	}
 	packageName := strings.TrimSpace(req.PackageName)
-	secretKey := strings.TrimSpace(req.SecretKey)
-	if packageName == "" || secretKey == "" {
+	if packageName == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	if existing := findAppPkgByPackageNameFromMemory(packageName, req.ID); existing != nil {
@@ -58,10 +61,8 @@ func Update(_ context.Context, req *apppkgdto.UpdateAppPkgReq) (*apppkgdto.Updat
 	}
 	updated := *row
 	updated.PackageName = packageName
-	updated.SecretKey = secretKey
-	updated.PrivacyPolicyUrl = strings.TrimSpace(req.PrivacyPolicyUrl)
-	updated.TermsOfServiceUrl = strings.TrimSpace(req.TermsOfServiceUrl)
 	updated.Remark = strings.TrimSpace(req.Remark)
+	applyAttributionFields(&updated, req.AttributionEnabled, req.AttributionProvider, req.AppsFlyerDevKey, req.AppsFlyerAppId)
 	if err := cfgdao.UpdateAppPkg(&updated); err != nil {
 		return nil, err
 	}

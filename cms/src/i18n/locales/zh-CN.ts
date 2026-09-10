@@ -80,6 +80,7 @@ const menu = {
   ConfigBasicGroup: '基础配置',
   ConfigSecurityGroup: '安全合规',
   ConfigPlatformGroup: '平台与资源',
+  ConfigDeployGroup: '前端部署',
   ConfigOpsGroup: '运维监控',
   AppTokenConfig: 'App Token',
   AccountCfgManagement: '账号配置',

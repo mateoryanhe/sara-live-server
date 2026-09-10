@@ -59,3 +59,7 @@ func (c *UserInfoController) Feedback(ctx context.Context, req *userinfodto.AppF
 func (c *UserInfoController) Report(ctx context.Context, req *userinfodto.AppReportReq) (res *userinfodto.AppReportRes, err error) {
 	return userinfo.SubmitReport(ctx, req)
 }
+
+func (c *UserInfoController) ReportAttribution(ctx context.Context, req *userinfodto.ReportAttributionReq) (res *userinfodto.ReportAttributionRes, err error) {
+	return userinfo.ReportAttribution(ctx, req)
+}

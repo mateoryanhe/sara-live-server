@@ -68,6 +68,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   GameBetLogListManagement: 'बेट लॉग',
   GameWinLogListManagement: 'जीत लॉग',
   ConfigManagement: 'सिस्टम कॉन्फ़िग',
+  ConfigDeployGroup: 'फ्रंटएंड डिप्लॉय',
   AppTokenConfig: 'ऐप टोकन',
   AccountCfgManagement: 'अकाउंट कॉन्फ़िग',
   PreloadCfgManagement: 'प्रीलोड कॉन्फ़िग',

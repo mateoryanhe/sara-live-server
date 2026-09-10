@@ -27,7 +27,10 @@ export const rechargeOrderApi = {
     createChannelRechargeOrderTest: (params: {
         userId: string
         cfgId: number
+        currencyCode?: string
         packageName?: string
+        payName?: string
+        payEmail?: string
     }) => {
         return request.post<{
             orderId: string
@@ -37,5 +40,12 @@ export const rechargeOrderApi = {
             currency: string
             status: number
         }>('/rechargeOrder/createChannelRechargeOrderTest', params)
+    },
+
+    getChannelPayUserProfile: (params: { userId: string }) => {
+        return request.post<{ name: string; email: string }>(
+            '/rechargeOrder/getChannelPayUserProfileForTest',
+            params,
+        )
     },
 }

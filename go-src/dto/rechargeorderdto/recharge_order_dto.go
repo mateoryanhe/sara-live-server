@@ -173,6 +173,12 @@ type CMSCreateChannelRechargeOrderReq struct {
 	PayEmail     string `json:"payEmail"     dc:"可选付款人邮箱"`
 }
 
+// CMSGetChannelPayUserProfileReq CMS测试弹窗查询玩家已存付款人资料
+type CMSGetChannelPayUserProfileReq struct {
+	g.Meta `path:"/getChannelPayUserProfileForTest" method:"post" summary:"CMS第三方充值测试查付款人资料" tags:"充值订单"`
+	UserId string `json:"userId" v:"required#玩家ID不能为空" dc:"玩家用户ID"`
+}
+
 // AppCreateCoinMerchantChannelRechargeOrderReq 币商App渠道建单(需鉴权)
 type AppCreateCoinMerchantChannelRechargeOrderReq struct {
 	g.Meta       `path:"/createCoinMerchantChannelRechargeOrder" method:"post" summary:"币商App创建渠道充值订单" tags:"充值订单"`

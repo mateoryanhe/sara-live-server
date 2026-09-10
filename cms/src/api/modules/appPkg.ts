@@ -1,29 +1,25 @@
 import {request} from '../request'
 import type {AppPkg, AppPkgQuery, PageResponse} from '@/types/api'
 
+export type AppPkgSavePayload = {
+    packageName: string
+    remark?: string
+    attributionEnabled?: boolean
+    attributionProvider?: string
+    appsFlyerDevKey?: string
+    appsFlyerAppId?: string
+}
+
 export const appPkgApi = {
     getAppPkgList: (params: AppPkgQuery) => {
         return request.post<PageResponse<AppPkg>>('/appPkg/appPkgList', params)
     },
 
-    createAppPkg: (data: {
-        packageName: string
-        secretKey: string
-        privacyPolicyUrl?: string
-        termsOfServiceUrl?: string
-        remark?: string
-    }) => {
+    createAppPkg: (data: AppPkgSavePayload) => {
         return request.post<{ id: string }>('/appPkg/createAppPkg', data)
     },
 
-    updateAppPkg: (data: {
-        id: string | number
-        packageName: string
-        secretKey: string
-        privacyPolicyUrl?: string
-        termsOfServiceUrl?: string
-        remark?: string
-    }) => {
+    updateAppPkg: (data: AppPkgSavePayload & { id: string | number }) => {
         return request.post<boolean>('/appPkg/updateAppPkg', data)
     },
 

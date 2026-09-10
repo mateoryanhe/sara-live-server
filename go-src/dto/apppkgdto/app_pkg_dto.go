@@ -14,24 +14,26 @@ type AppPkgListReq struct {
 
 // AppPkgListRes 列表项
 type AppPkgListRes struct {
-	ID                string `json:"id"`
-	PackageName       string `json:"packageName"`
-	SecretKey         string `json:"secretKey"`
-	PrivacyPolicyUrl  string `json:"privacyPolicyUrl"`
-	TermsOfServiceUrl string `json:"termsOfServiceUrl"`
-	Remark            string `json:"remark"`
-	CreatedAt         string `json:"createdAt"`
-	UpdatedAt         string `json:"updatedAt"`
+	ID                   string `json:"id"`
+	PackageName          string `json:"packageName"`
+	Remark               string `json:"remark"`
+	AttributionEnabled   bool   `json:"attributionEnabled"`
+	AttributionProvider  string `json:"attributionProvider"`
+	AppsFlyerDevKey      string `json:"appsFlyerDevKey"`
+	AppsFlyerAppId       string `json:"appsFlyerAppId"`
+	CreatedAt            string `json:"createdAt"`
+	UpdatedAt            string `json:"updatedAt"`
 }
 
 // CreateAppPkgReq 创建App包配置
 type CreateAppPkgReq struct {
-	g.Meta            `path:"/createAppPkg" method:"post" summary:"创建App包配置" tags:"App包管理"`
-	PackageName       string `json:"packageName" v:"required#包名不能为空"`
-	SecretKey         string `json:"secretKey" v:"required#密钥不能为空"`
-	PrivacyPolicyUrl  string `json:"privacyPolicyUrl" v:"max-length:512#隐私政策URL长度不能超过512"`
-	TermsOfServiceUrl string `json:"termsOfServiceUrl" v:"max-length:512#用户服务协议URL长度不能超过512"`
-	Remark            string `json:"remark"`
+	g.Meta               `path:"/createAppPkg" method:"post" summary:"创建App包配置" tags:"App包管理"`
+	PackageName          string `json:"packageName" v:"required#包名不能为空"`
+	Remark               string `json:"remark"`
+	AttributionEnabled   bool   `json:"attributionEnabled"`
+	AttributionProvider  string `json:"attributionProvider"`
+	AppsFlyerDevKey      string `json:"appsFlyerDevKey"`
+	AppsFlyerAppId       string `json:"appsFlyerAppId"`
 }
 
 type CreateAppPkgRes struct {
@@ -40,13 +42,14 @@ type CreateAppPkgRes struct {
 
 // UpdateAppPkgReq 更新App包配置
 type UpdateAppPkgReq struct {
-	g.Meta            `path:"/updateAppPkg" method:"post" summary:"修改App包配置" tags:"App包管理"`
-	ID                uint64 `json:"id,string" v:"required#ID不能为空"`
-	PackageName       string `json:"packageName" v:"required#包名不能为空"`
-	SecretKey         string `json:"secretKey" v:"required#密钥不能为空"`
-	PrivacyPolicyUrl  string `json:"privacyPolicyUrl" v:"max-length:512#隐私政策URL长度不能超过512"`
-	TermsOfServiceUrl string `json:"termsOfServiceUrl" v:"max-length:512#用户服务协议URL长度不能超过512"`
-	Remark            string `json:"remark"`
+	g.Meta               `path:"/updateAppPkg" method:"post" summary:"修改App包配置" tags:"App包管理"`
+	ID                   uint64 `json:"id,string" v:"required#ID不能为空"`
+	PackageName          string `json:"packageName" v:"required#包名不能为空"`
+	Remark               string `json:"remark"`
+	AttributionEnabled   bool   `json:"attributionEnabled"`
+	AttributionProvider  string `json:"attributionProvider"`
+	AppsFlyerDevKey      string `json:"appsFlyerDevKey"`
+	AppsFlyerAppId       string `json:"appsFlyerAppId"`
 }
 
 type UpdateAppPkgRes struct {

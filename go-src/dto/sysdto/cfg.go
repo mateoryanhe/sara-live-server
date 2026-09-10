@@ -22,4 +22,8 @@ type SysCfgResp struct {
 	AboutSiteUrl                string  `json:"aboutSiteUrl" dc:"About页面URL"`
 	SafetyCenterUrl             string  `json:"safetyCenterUrl" dc:"安全中心页面URL"`
 	EnvType                     uint8   `json:"envType" dc:"环境类型(0正式服,1提审服,2测试服)"`
+	AttributionEnabled          bool    `json:"attributionEnabled" dc:"是否启用归因"`
+	AttributionProvider         string  `json:"attributionProvider" dc:"归因渠道"`
+	AppsFlyerDevKey             string  `json:"appsFlyerDevKey" dc:"AppsFlyer Dev Key"`
+	AppsFlyerAppId              string  `json:"appsFlyerAppId" dc:"AppsFlyer App ID"`
 }

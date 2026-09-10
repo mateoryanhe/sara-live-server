@@ -120,9 +120,7 @@ export const operationRoutes: RouteRecordRaw = {
         },
         {
             path: 'app-pkg/app-pkg-list',
-            name: 'AppPkgManagement',
-            component: () => import('@/views/operation/app-pkg/app-pkg-list.vue'),
-            meta: {title: 'App包管理'},
+            redirect: '/config/app-pkg-list',
         },
         {
             path: 'random-nickname/random-nickname-cfg',
