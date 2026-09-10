@@ -212,3 +212,12 @@ type AppSaveChannelPayUserProfileRes struct {
 	Name    string `json:"name"`
 	Email   string `json:"email"`
 }
+
+// RechargeSuccessPushItem 充值成功推送载荷(cmd=40)
+type RechargeSuccessPushItem struct {
+	OrderId     string  `json:"orderId" dc:"充值订单ID"`
+	Gold        uint64  `json:"gold" dc:"本次到账金币数"`
+	GoldBalance uint64  `json:"goldBalance" dc:"到账后金币余额"`
+	Price       float64 `json:"price" dc:"订单金额(USD)"`
+	PayChannel  uint8   `json:"payChannel" dc:"支付渠道"`
+}

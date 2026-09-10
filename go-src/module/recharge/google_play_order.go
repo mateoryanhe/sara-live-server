@@ -66,12 +66,15 @@ func handleGoogleOneTimeProductPurchased(ctx context.Context, packageName, sku, 
 	return processGooglePlayPurchase(ctx, packageName, sku, purchaseToken, 0, 0)
 }
 
-// ScheduleGooglePlayPurchaseVerify App 上报 purchaseToken 后异步验单并完成充值
-func ScheduleGooglePlayPurchaseVerify(ctx context.Context, userId, orderId uint64, packageName, productId, purchaseToken string) {
-	xrpool.AddWithRecover(ctx, func(poolCtx context.Context) {
-		dbCtx := gctx.New()
-		if err := verifyGooglePlayPurchaseByAppReport(dbCtx, userId, orderId, packageName, productId, purchaseToken); err != nil {
-			logGooglePlayError(dbCtx, "app async verify failed orderId=%d err=%v", orderId, err)
+// ScheduleGooglePlayPurchaseVerify App 上报 purchaseToken 后异步验单并完成充值.
+// 必须用独立 context,勿传 HTTP request ctx(请求结束后取消会导致任务中断/难排查).
+func ScheduleGooglePlayPurchaseVerify(_ context.Context, userId, orderId uint64, packageName, productId, purchaseToken string) {
+	dbCtx := gctx.New()
+	logGooglePlayInfo(dbCtx, "app async verify scheduled orderId=%d userId=%d pkg=%s sku=%s", orderId, userId, packageName, productId)
+	xrpool.AddWithRecover(dbCtx, func(poolCtx context.Context) {
+		runCtx := gctx.New()
+		if err := verifyGooglePlayPurchaseByAppReport(runCtx, userId, orderId, packageName, productId, purchaseToken); err != nil {
+			logGooglePlayError(runCtx, "app async verify failed orderId=%d err=%v", orderId, err)
 		}
 	})
 }

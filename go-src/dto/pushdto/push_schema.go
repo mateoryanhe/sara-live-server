@@ -11,6 +11,7 @@ import (
 	"xr-game-server/dto/livefollowdto"
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/dto/messagedto"
+	"xr-game-server/dto/rechargeorderdto"
 	"xr-game-server/dto/vipdto"
 )
 
@@ -338,6 +339,16 @@ type FirstRechargeSuccessPushReq struct {
 type FirstRechargeSuccessPushResp struct {
 	Cmd  int                                       `json:"cmd" dc:"命令字 38"`
 	Data *activitydto.FirstRechargeSuccessPushItem `json:"data"`
+}
+
+// RechargeSuccessPushReq cmd=40 充值成功
+type RechargeSuccessPushReq struct {
+	g.Meta `path:"/rechargeSuccess" method:"post" summary:"推送 cmd=40 充值成功(推送给指定用户)" description:"每次充值到账成功后推送" tags:"推送-钱包"`
+}
+
+type RechargeSuccessPushResp struct {
+	Cmd  int                                      `json:"cmd" dc:"命令字 40"`
+	Data *rechargeorderdto.RechargeSuccessPushItem `json:"data"`
 }
 
 // DiamondPushReq cmd=10 钻石余额

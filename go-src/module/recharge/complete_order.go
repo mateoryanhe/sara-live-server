@@ -77,6 +77,7 @@ func completeOrder(o *entity.RechargeOrder, reason currency.Reason) (float64, er
 	CancelRechargeOrderTimeout(order.ID)
 	event.Pub(gameevent.RechargeArrivedEvent, order)
 	rechargeorderdao.FlushOrderCache(order)
+	pushRechargeSuccessToApp(order.UserId, order, after)
 	return after, nil
 }
 

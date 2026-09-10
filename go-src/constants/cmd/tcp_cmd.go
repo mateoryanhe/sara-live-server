@@ -73,4 +73,6 @@ const (
 	FirstRechargeSuccessPush = 38
 	//直播间主播邀请观众通话推送(推送给被邀请观众)
 	LiveRoomCallInvite = 39
+	//充值成功推送(推送给指定用户,每次充值到账都会推)
+	RechargeSuccessPush = 40
 )
