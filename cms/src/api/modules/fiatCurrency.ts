@@ -2,7 +2,6 @@ import {request} from '../request'
 import type {
     FiatCurrency,
     FiatCurrencyQuery,
-    FiatExchangeRate,
     PageResponse,
 } from '@/types/api'
 
@@ -16,7 +15,6 @@ export const fiatCurrencyApi = {
         name: string
         symbol: string
         icon?: string
-        adjustPercent?: number
         currencyType: number
         sort?: number
         status?: number
@@ -30,7 +28,6 @@ export const fiatCurrencyApi = {
         name: string
         symbol: string
         icon?: string
-        adjustPercent?: number
         currencyType: number
         sort?: number
         status?: number
@@ -44,15 +41,5 @@ export const fiatCurrencyApi = {
 
     reloadCfgCache: () => {
         return request.post<{ success: boolean }>('/fiatCurrency/reloadFiatCurrencyCache', {})
-    },
-
-    reloadRateCache: (currencyCode?: string) => {
-        return request.post<{ success: boolean }>('/fiatCurrency/reloadFiatExchangeRateCache', {
-            currencyCode: currencyCode || '',
-        })
-    },
-
-    getExchangeRate: (currencyCode: string) => {
-        return request.post<FiatExchangeRate>('/fiatCurrency/getFiatExchangeRate', {currencyCode})
     },
 }

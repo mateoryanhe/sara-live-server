@@ -63,7 +63,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- upload_resource_cfgs                 上传资源配置
 -- vip_cfgs                             VIP 配置
 -- wallet_exchange_cfgs                 钱包兑换配置
--- yhpay_cfgs                           第三方支付(YhPay)配置
+-- (legacy) yhpay_cfgs                  已废弃渠道配置表，可手工 DROP；代码已不再使用
 -- cf_email_cfgs                        Cloudflare Email Sending 发信配置
 
 -- -----------------------------------------------------------------------------

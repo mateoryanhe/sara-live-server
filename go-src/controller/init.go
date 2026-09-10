@@ -41,13 +41,13 @@ func Init() {
 	initAliyunTextModerationCMSController()      // 阿里云文本审核(CMS)
 	initPrivacyPolicyCMSController()             // 隐私政策配置(CMS)
 	initGooglePlayCMSController()                // Google Play 配置(CMS)
-	initYhPayCMSController()                     // yhpay支付配置(CMS)
+	initHaiPayCMSController()                    // HaiPay渠道支付配置(CMS)
 	initCfEmailCMSController()                   // AWS SES邮件发信配置(CMS)
 	initDbBackupCMSController()                  // 数据库备份(CMS)
 	initDataSyncCMSController()                  // 数据同步配置(CMS)
 	initDataSyncReceiveController()              // 数据同步接收(跨环境)
 	initGooglePlayWebhookController()            // Google Play RTDN Webhook
-	initYhPayWebhookController()                 // yhpay支付回调
+	initHaiPayWebhookController()                // HaiPay代收回调
 	initCustomerServiceCMSController()           // 客服联系配置(CMS)
 	initCustomerServiceAppController()           // 客服联系配置(App)
 	initWalletCMSController()                    // 钱包配置(CMS)

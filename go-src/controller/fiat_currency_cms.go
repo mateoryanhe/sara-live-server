@@ -35,11 +35,3 @@ func (c *FiatCurrencyCMSController) DeleteFiatCurrency(ctx context.Context, req 
 func (c *FiatCurrencyCMSController) ReloadFiatCurrencyCache(ctx context.Context, req *fiatcurrencydto.ReloadFiatCurrencyCacheReq) (res *fiatcurrencydto.ReloadFiatCurrencyCacheRes, err error) {
 	return fiatcurrency.ReloadCfgCache(ctx, req)
 }
-
-func (c *FiatCurrencyCMSController) ReloadFiatExchangeRateCache(ctx context.Context, req *fiatcurrencydto.ReloadFiatExchangeRateCacheReq) (res *fiatcurrencydto.ReloadFiatExchangeRateCacheRes, err error) {
-	return fiatcurrency.ReloadExchangeRateCache(ctx, req)
-}
-
-func (c *FiatCurrencyCMSController) GetFiatExchangeRate(ctx context.Context, req *fiatcurrencydto.GetFiatExchangeRateReq) (res *fiatcurrencydto.GetFiatExchangeRateRes, err error) {
-	return fiatcurrency.GetExchangeRate(ctx, req)
-}

@@ -3,6 +3,7 @@ package dao
 import (
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/calldao"
+	"xr-game-server/dao/channelpaydao"
 	"xr-game-server/dao/cmsuserdao"
 	"xr-game-server/dao/gamebetdao"
 	"xr-game-server/dao/gamevendordao"
@@ -29,6 +30,7 @@ func Init() {
 	livefollowdao.InitLiveFollowDao()
 	shortvideodao.Init()
 	rechargeorderdao.InitRechargeOrderDao()
+	channelpaydao.Init()
 	calldao.Init()
 	messagedao.Init()
 	statdao.Init()

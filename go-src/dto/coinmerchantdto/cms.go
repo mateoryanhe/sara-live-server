@@ -29,7 +29,7 @@ type CoinMerchantItem struct {
 type CreateCoinMerchantReq struct {
 	g.Meta   `path:"/createCoinMerchant" method:"post" summary:"新建币商" tags:"币商"`
 	Username string `json:"username" v:"required|length:2,32#用户名不能为空|用户名长度2-32" dc:"用户名(openId)"`
-	Password string `json:"password" v:"required|length:6,32#密码不能为空|密码长度6-32" dc:"明文密码(服务端MD5入库)"`
+	Password string `json:"password" v:"required|length:32,32#密码不能为空|密码须为32位MD5" dc:"客户端MD5密文,直接入库"`
 }
 
 // CreateCoinMerchantRes 新建结果
@@ -42,7 +42,7 @@ type CreateCoinMerchantRes struct {
 type ResetCoinMerchantPasswordReq struct {
 	g.Meta    `path:"/resetCoinMerchantPassword" method:"post" summary:"重置币商密码" tags:"币商"`
 	AccountId uint64 `json:"accountId" v:"required#账号ID不能为空" dc:"账号ID"`
-	Password  string `json:"password" v:"required|length:6,32#密码不能为空|密码长度6-32" dc:"明文密码(服务端MD5入库)"`
+	Password  string `json:"password" v:"required|length:32,32#密码不能为空|密码须为32位MD5" dc:"客户端MD5密文,直接入库"`
 }
 
 // ResetCoinMerchantPasswordRes 重置结果

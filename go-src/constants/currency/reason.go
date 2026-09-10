@@ -67,7 +67,7 @@ const (
 	ReasonRechargeManual Reason = 29
 	// ReasonShortVideoAuthorSettlement 非主播作者短视频周结算到账
 	ReasonShortVideoAuthorSettlement Reason = 30
-	// ReasonRechargeCoinMerchant 币商充值(yhpay)
+  // ReasonRechargeCoinMerchant 币商充值(渠道支付)
 	ReasonRechargeCoinMerchant Reason = 31
 	// ReasonGoldTransferOut 转赠金币(转出方)
 	ReasonGoldTransferOut Reason = 32

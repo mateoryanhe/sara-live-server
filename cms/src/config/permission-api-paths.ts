@@ -272,8 +272,6 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'FiatCurrencyManagement:edit': '/fiatCurrency/updateFiatCurrency',
     'FiatCurrencyManagement:delete': '/fiatCurrency/deleteFiatCurrency',
     'FiatCurrencyManagement:reloadCfgCache': '/fiatCurrency/reloadFiatCurrencyCache',
-    'FiatCurrencyManagement:reloadRateCache': '/fiatCurrency/reloadFiatExchangeRateCache',
-    'FiatCurrencyManagement:previewRate': '/fiatCurrency/getFiatExchangeRate',
     'FiatCurrencyManagement:sync': '/dataSync/syncFiatCurrency',
 
     LiveRevenueShareCfgManagement: '/liveRevenueShareCfg/getLiveRevenueShareCfg',
@@ -468,9 +466,10 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GooglePlayCfgManagement:view': '/googlePlay/getGooglePlayCfg',
     'GooglePlayCfgManagement:save': '/googlePlay/saveGooglePlayCfg',
 
-    YhPayCfgManagement: '/yhpay/getYhPayCfg',
-    'YhPayCfgManagement:view': '/yhpay/getYhPayCfg',
-    'YhPayCfgManagement:save': '/yhpay/saveYhPayCfg',
+    HaiPayCfgManagement: '/haipay/getHaiPayCfg',
+    'HaiPayCfgManagement:view': '/haipay/getHaiPayCfg',
+    'HaiPayCfgManagement:save': '/haipay/saveHaiPayCfg',
+
     CfEmailCfgManagement: '/cfEmail/getCfEmailCfg',
     'CfEmailCfgManagement:view': '/cfEmail/getCfEmailCfg',
     'CfEmailCfgManagement:save': '/cfEmail/saveCfEmailCfg',

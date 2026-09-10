@@ -19,7 +19,6 @@
           {{ t('common.syncData') }}
         </el-button>
         <el-button v-if="can('reloadCfgCache')" @click="handleReloadCfgCache">{{ t('pages.fiatCurrencyList.reloadCfgCache') }}</el-button>
-        <el-button v-if="can('reloadRateCache')" @click="handleReloadAllRateCache">{{ t('pages.fiatCurrencyList.reloadRateCache') }}</el-button>
       </div>
 
       <div v-if="selectedRows.length" class="selection-tip">
@@ -85,7 +84,6 @@
         </el-table-column>
         <el-table-column :label="t('pages.fiatCurrencyList.currencyName')" min-width="140" prop="name"/>
         <el-table-column :label="t('pages.fiatCurrencyList.symbol')" min-width="90" prop="symbol"/>
-        <el-table-column :label="t('pages.fiatCurrencyList.adjustPercent')" align="right" min-width="120" prop="adjustPercent"/>
         <el-table-column :label="t('common.sort')" prop="sort" width="80"/>
         <el-table-column :label="t('common.status')" width="100">
           <template #default="{ row }">
@@ -96,11 +94,8 @@
         </el-table-column>
         <el-table-column :label="t('common.createdAt')" prop="createdAt" width="170"/>
         <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="170"/>
-        <el-table-column fixed="right" :label="t('common.actions')" width="260">
+        <el-table-column fixed="right" :label="t('common.actions')" width="180">
           <template #default="{ row }">
-            <el-button v-if="can('previewRate')" link type="primary" @click="handlePreviewRate(row)">
-              {{ t('pages.fiatCurrencyList.previewRate') }}
-            </el-button>
             <el-button v-if="can('edit')" link type="primary" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
             <el-button v-if="can('delete')" link type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
           </template>
@@ -172,10 +167,6 @@
             </el-button>
           </div>
         </el-form-item>
-        <el-form-item :label="t('pages.fiatCurrencyList.adjustPercent')" prop="adjustPercent">
-          <el-input-number v-model="currentRow.adjustPercent" :precision="4" :step="0.1" controls-position="right"/>
-          <div class="form-tip">{{ t('pages.fiatCurrencyList.adjustPercentTip') }}</div>
-        </el-form-item>
         <el-form-item :label="t('common.sort')" prop="sort">
           <el-input-number v-model="currentRow.sort" controls-position="right"/>
           <div class="form-tip">{{ t('pages.fiatCurrencyList.sortHigherFirst') }}</div>
@@ -192,31 +183,6 @@
         <el-button type="primary" @click="handleSave">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
-
-    <el-dialog v-model="rateDialogVisible" :title="t('pages.fiatCurrencyList.ratePreviewTitle')" destroy-on-close width="520px">
-      <el-descriptions v-if="ratePreview" :column="1" border>
-        <el-descriptions-item :label="t('pages.fiatCurrencyList.currencyCode')">{{ ratePreview.quote }}</el-descriptions-item>
-        <el-descriptions-item :label="t('pages.fiatCurrencyList.marketRate')">
-          {{ t('pages.fiatCurrencyList.oneUsdEquals') }} {{ formatRate(ratePreview.marketRate) }} {{ ratePreview.quote }}
-        </el-descriptions-item>
-        <el-descriptions-item :label="t('pages.fiatCurrencyList.adjustPercent')">{{ ratePreview.adjustPercent }}%</el-descriptions-item>
-        <el-descriptions-item :label="t('pages.fiatCurrencyList.finalRate')">
-          {{ t('pages.fiatCurrencyList.oneUsdEquals') }} {{ formatRate(ratePreview.rate) }} {{ ratePreview.quote }}
-        </el-descriptions-item>
-        <el-descriptions-item :label="t('pages.fiatCurrencyList.inverseRate')">
-          1 {{ ratePreview.quote }} = {{ formatRate(ratePreview.inverseRate) }} {{ ratePreview.base }}
-        </el-descriptions-item>
-        <el-descriptions-item :label="t('pages.fiatCurrencyList.rateSource')">{{ ratePreview.source }}</el-descriptions-item>
-        <el-descriptions-item :label="t('pages.fiatCurrencyList.rateDate')">{{ ratePreview.rateDate || '-' }}</el-descriptions-item>
-        <el-descriptions-item :label="t('common.status')">
-          {{ ratePreview.cached ? t('pages.fiatCurrencyList.cached') : t('pages.fiatCurrencyList.liveFetched') }}
-        </el-descriptions-item>
-      </el-descriptions>
-      <template #footer>
-        <el-button v-if="can('reloadRateCache')" @click="handleReloadRowRateCache">{{ t('pages.fiatCurrencyList.reloadRateCache') }}</el-button>
-        <el-button type="primary" @click="rateDialogVisible = false">{{ t('common.confirm') }}</el-button>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
@@ -228,7 +194,7 @@ import {Plus} from '@element-plus/icons-vue'
 import {fiatCurrencyApi, uploadApi} from '@/api'
 import {dataSyncApi} from '@/api/modules/data-sync'
 import {confirmDataSync} from '@/utils/confirm-data-sync'
-import type {FiatCurrency, FiatExchangeRate} from '@/types/api'
+import type {FiatCurrency} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
 
 interface CurrencyForm {
@@ -237,7 +203,6 @@ interface CurrencyForm {
   name: string
   symbol: string
   icon: string
-  adjustPercent: number
   currencyType: number
   sort: number
   status: number
@@ -270,7 +235,6 @@ const defaultForm = (): CurrencyForm => ({
   name: '',
   symbol: '',
   icon: '',
-  adjustPercent: 0,
   currencyType: 1,
   sort: 0,
   status: 1,
@@ -281,10 +245,6 @@ const formRef = ref<FormInstance>()
 const iconUploading = ref(false)
 const iconPreviewUrl = ref('')
 let objectPreviewUrl = ''
-
-const rateDialogVisible = ref(false)
-const ratePreview = ref<FiatExchangeRate | null>(null)
-const previewCurrencyCode = ref('')
 
 const formRules = computed<FormRules>(() => ({
   currencyCode: [
@@ -346,13 +306,6 @@ const doUpload = async (options: UploadRequestOptions) => {
   }
 }
 
-const formatRate = (value: number | null | undefined) => {
-  if (value == null || Number.isNaN(value)) {
-    return '-'
-  }
-  return new Intl.NumberFormat(undefined, {maximumFractionDigits: 6}).format(value)
-}
-
 const fetchList = async () => {
   loading.value = true
   try {
@@ -403,7 +356,6 @@ const handleEdit = (row: FiatCurrency) => {
     name: row.name,
     symbol: row.symbol,
     icon: row.iconName || '',
-    adjustPercent: Number(row.adjustPercent) || 0,
     currencyType: Number(row.currencyType) === 2 ? 2 : 1,
     sort: Number(row.sort) || 0,
     status: Number(row.status) || 0,
@@ -420,7 +372,6 @@ const handleSave = async () => {
       name: currentRow.value.name.trim(),
       symbol: currentRow.value.symbol.trim(),
       icon: currentRow.value.icon.trim(),
-      adjustPercent: currentRow.value.adjustPercent,
       currencyType: currentRow.value.currencyType,
       sort: currentRow.value.sort,
       status: currentRow.value.status,
@@ -510,46 +461,6 @@ const handleReloadCfgCache = async () => {
     ElMessage.success(t('pages.fiatCurrencyList.reloadCfgCacheSuccess'))
   } catch (error) {
     console.error('reload fiat currency cfg cache failed:', error)
-  }
-}
-
-const handleReloadAllRateCache = async () => {
-  try {
-    await fiatCurrencyApi.reloadRateCache()
-    ElMessage.success(t('pages.fiatCurrencyList.reloadRateCacheSuccess'))
-  } catch (error) {
-    console.error('reload all fiat exchange rate cache failed:', error)
-  }
-}
-
-const handleReloadRowRateCache = async () => {
-  if (!previewCurrencyCode.value) {
-    return
-  }
-  try {
-    await fiatCurrencyApi.reloadRateCache(previewCurrencyCode.value)
-    ElMessage.success(t('pages.fiatCurrencyList.reloadRateCacheSuccess'))
-    await loadRatePreview(previewCurrencyCode.value)
-  } catch (error) {
-    console.error('reload fiat exchange rate cache failed:', error)
-  }
-}
-
-const loadRatePreview = async (currencyCode: string) => {
-  const response = await fiatCurrencyApi.getExchangeRate(currencyCode)
-  ratePreview.value = response
-}
-
-const handlePreviewRate = async (row: FiatCurrency) => {
-  previewCurrencyCode.value = row.currencyCode
-  rateDialogVisible.value = true
-  ratePreview.value = null
-  try {
-    await loadRatePreview(row.currencyCode)
-  } catch (error) {
-    console.error('preview fiat exchange rate failed:', error)
-    rateDialogVisible.value = false
-    ElMessage.error(t('pages.fiatCurrencyList.previewRateFailed'))
   }
 }
 

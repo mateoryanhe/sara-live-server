@@ -16,5 +16,7 @@ go-src/module/logquery/.../
 *.test
 *.out
 
-# Flutter client（本地开发，暂不入库）
-flutter-client/
+# Flutter client（本地开发暂不入库；scripts 可入库）
+flutter-client/*
+!flutter-client/scripts/
+!flutter-client/scripts/**

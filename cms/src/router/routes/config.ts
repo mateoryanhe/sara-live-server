@@ -59,10 +59,10 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: 'Google Play'},
         },
         {
-            path: 'yhpay',
-            name: 'YhPayCfgManagement',
-            component: () => import('@/views/config/yhpay.vue'),
-            meta: {title: 'yhpay支付'},
+            path: 'haipay',
+            name: 'HaiPayCfgManagement',
+            component: () => import('@/views/config/haipay.vue'),
+            meta: {title: 'HaiPay支付'},
         },
         {
             path: 'cf-email',

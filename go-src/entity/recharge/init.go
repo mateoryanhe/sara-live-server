@@ -6,5 +6,6 @@ func Init() {
 	initCoinMerchantRechargeCfg()
 	initRechargeOrder()
 	initGooglePlayCfg()
-	initYhPayCfg()
+	initHaiPayCfg()
+	initChannelPayUserProfile()
 }

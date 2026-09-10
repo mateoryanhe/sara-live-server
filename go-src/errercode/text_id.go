@@ -108,10 +108,9 @@ func init() {
 		FiatCurrencyExist:               "Konfigurasi mata uang fiat sudah ada",
 		FiatCurrencyNonExist:            "Konfigurasi mata uang fiat tidak ditemukan",
 		FiatCurrencyDisabled:            "Konfigurasi mata uang fiat dinonaktifkan",
-		FiatExchangeRateUnavailable:     "Kurs fiat tidak tersedia",
-		YhPayNotConfigured:              "Pembayaran saluran belum dikonfigurasi",
-		YhPayCreateFailed:               "Gagal membuat pembayaran saluran",
-		YhPayCurrencyNotSupported:       "Mata uang pembayaran saluran belum didukung",
+		ChannelPayNotConfigured:         "Pembayaran saluran belum dikonfigurasi",
+		ChannelPayCreateFailed:          "Gagal membuat pembayaran saluran",
+		ChannelPayCurrencyNotSupported:  "Mata uang pembayaran saluran belum didukung",
 		EmailAlreadyInUse:               "Email sudah digunakan",
 		EmailAlreadyBound:               "Akun sudah terikat email",
 	}

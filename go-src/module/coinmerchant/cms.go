@@ -7,7 +7,6 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/gogf/gf/v2/crypto/gmd5"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/httpserver"
@@ -92,7 +91,7 @@ func CreateCoinMerchant(_ context.Context, req *coinmerchantdto.CreateCoinMercha
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	password := strings.TrimSpace(req.Password)
-	if len(password) < 6 || len(password) > 32 {
+	if len(password) != 32 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	if accountdao.FindActiveAccount(username, auth.CoinMerchantChannel) != nil {
@@ -103,7 +102,7 @@ func CreateCoinMerchant(_ context.Context, req *coinmerchantdto.CreateCoinMercha
 	if account == nil || account.ID == 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	account.SetPassword(gmd5.MustEncryptString(password))
+	account.SetPassword(strings.ToLower(password))
 	accountdao.PublishAccountList(account.OpenId, account.Channel)
 
 	user := userinfodao.GetUserInfoByUserId(account.ID)
@@ -121,14 +120,14 @@ func CreateCoinMerchant(_ context.Context, req *coinmerchantdto.CreateCoinMercha
 // ResetCoinMerchantPassword CMS重置币商密码
 func ResetCoinMerchantPassword(_ context.Context, req *coinmerchantdto.ResetCoinMerchantPasswordReq) (*coinmerchantdto.ResetCoinMerchantPasswordRes, error) {
 	password := strings.TrimSpace(req.Password)
-	if req.AccountId == 0 || len(password) < 6 || len(password) > 32 {
+	if req.AccountId == 0 || len(password) != 32 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	account, err := getCoinMerchantAccount(req.AccountId)
 	if err != nil {
 		return nil, err
 	}
-	account.SetPassword(gmd5.MustEncryptString(password))
+	account.SetPassword(strings.ToLower(password))
 	accountdao.PublishAccountList(account.OpenId, account.Channel)
 	return &coinmerchantdto.ResetCoinMerchantPasswordRes{Success: true}, nil
 }

@@ -10,7 +10,6 @@ import (
 	"xr-game-server/dto/fiatcurrencydto"
 	fiatentity "xr-game-server/entity/fiat"
 	"xr-game-server/errercode"
-	"xr-game-server/module/fxrate"
 	"xr-game-server/module/upload"
 )
 
@@ -36,9 +35,8 @@ func validateCurrencyCode(code string) error {
 	return nil
 }
 
-func reloadCaches(currencyCode string) {
+func reloadCaches() {
 	cfgdao.ReloadFiatCurrencyCfgCache()
-	fxrate.ReloadExchangeRateCache(currencyCode)
 }
 
 // GetList CMS 分页查询法币配置
@@ -50,17 +48,16 @@ func GetList(_ context.Context, req *fiatcurrencydto.FiatCurrencyListReq) (*http
 			continue
 		}
 		item := &fiatcurrencydto.FiatCurrencyItem{
-			ID:            row.ID,
-			CurrencyCode:  row.CurrencyCode,
-			Name:          row.Name,
-			Symbol:        row.Symbol,
-			IconName:      row.Icon,
-			AdjustPercent: row.AdjustPercent,
-			CurrencyType:  row.CurrencyType,
-			Sort:          row.Sort,
-			Status:        row.Status,
-			CreatedAt:     row.CreatedAt,
-			UpdatedAt:     row.UpdatedAt,
+			ID:           row.ID,
+			CurrencyCode: row.CurrencyCode,
+			Name:         row.Name,
+			Symbol:       row.Symbol,
+			IconName:     row.Icon,
+			CurrencyType: row.CurrencyType,
+			Sort:         row.Sort,
+			Status:       row.Status,
+			CreatedAt:    row.CreatedAt,
+			UpdatedAt:    row.UpdatedAt,
 		}
 		item.Icon = upload.GetUrlByName(item.IconName)
 		list = append(list, item)
@@ -77,19 +74,18 @@ func Create(_ context.Context, req *fiatcurrencydto.CreateFiatCurrencyReq) (*fia
 		return nil, errercode.CreateCode(errercode.FiatCurrencyExist)
 	}
 	row := &fiatentity.FiatCurrencyCfg{
-		CurrencyCode:  code,
-		Name:          strings.TrimSpace(req.Name),
-		Symbol:        strings.TrimSpace(req.Symbol),
-		Icon:          strings.TrimSpace(req.Icon),
-		AdjustPercent: req.AdjustPercent,
-		CurrencyType:  normalizeCurrencyType(req.CurrencyType),
-		Sort:          req.Sort,
-		Status:        req.Status,
+		CurrencyCode: code,
+		Name:         strings.TrimSpace(req.Name),
+		Symbol:       strings.TrimSpace(req.Symbol),
+		Icon:         strings.TrimSpace(req.Icon),
+		CurrencyType: normalizeCurrencyType(req.CurrencyType),
+		Sort:         req.Sort,
+		Status:       req.Status,
 	}
 	if err := cfgdao.CreateFiatCurrencyCfg(row); err != nil {
 		return nil, err
 	}
-	reloadCaches(code)
+	reloadCaches()
 	return &fiatcurrencydto.CreateFiatCurrencyRes{ID: strconv.FormatUint(row.ID, 10)}, nil
 }
 
@@ -105,22 +101,17 @@ func Update(_ context.Context, req *fiatcurrencydto.UpdateFiatCurrencyReq) (*fia
 	if existing := cfgdao.GetFiatCurrencyCfgByCode(code); existing != nil && existing.ID != req.ID {
 		return nil, errercode.CreateCode(errercode.FiatCurrencyExist)
 	}
-	oldCode := row.CurrencyCode
 	row.CurrencyCode = code
 	row.Name = strings.TrimSpace(req.Name)
 	row.Symbol = strings.TrimSpace(req.Symbol)
 	row.Icon = strings.TrimSpace(req.Icon)
-	row.AdjustPercent = req.AdjustPercent
 	row.CurrencyType = normalizeCurrencyType(req.CurrencyType)
 	row.Sort = req.Sort
 	row.Status = req.Status
 	if err := cfgdao.UpdateFiatCurrencyCfg(row); err != nil {
 		return nil, err
 	}
-	reloadCaches(oldCode)
-	if oldCode != code {
-		reloadCaches(code)
-	}
+	reloadCaches()
 	return &fiatcurrencydto.UpdateFiatCurrencyRes{Success: true}, nil
 }
 
@@ -132,79 +123,11 @@ func Delete(_ context.Context, req *fiatcurrencydto.DeleteFiatCurrencyReq) (*fia
 	if err := cfgdao.DeleteFiatCurrencyCfg(req.ID); err != nil {
 		return nil, err
 	}
-	reloadCaches(row.CurrencyCode)
+	reloadCaches()
 	return &fiatcurrencydto.DeleteFiatCurrencyRes{Success: true}, nil
 }
 
 func ReloadCfgCache(_ context.Context, _ *fiatcurrencydto.ReloadFiatCurrencyCacheReq) (*fiatcurrencydto.ReloadFiatCurrencyCacheRes, error) {
 	cfgdao.ReloadFiatCurrencyCfgCache()
 	return &fiatcurrencydto.ReloadFiatCurrencyCacheRes{Success: true}, nil
-}
-
-func ReloadExchangeRateCache(_ context.Context, req *fiatcurrencydto.ReloadFiatExchangeRateCacheReq) (*fiatcurrencydto.ReloadFiatExchangeRateCacheRes, error) {
-	code := normalizeCurrencyCode(req.CurrencyCode)
-	if code != "" {
-		if err := validateCurrencyCode(code); err != nil {
-			return nil, err
-		}
-	}
-	fxrate.ReloadExchangeRateCache(code)
-	return &fiatcurrencydto.ReloadFiatExchangeRateCacheRes{Success: true}, nil
-}
-
-func GetExchangeRate(ctx context.Context, req *fiatcurrencydto.GetFiatExchangeRateReq) (*fiatcurrencydto.GetFiatExchangeRateRes, error) {
-	code := normalizeCurrencyCode(req.CurrencyCode)
-	if err := validateCurrencyCode(code); err != nil {
-		return nil, err
-	}
-	cfg := cfgdao.GetFiatCurrencyCfgByCode(code)
-	if cfg == nil {
-		return nil, errercode.CreateCode(errercode.FiatCurrencyNonExist)
-	}
-	if cfg.Status != fiatentity.FiatCurrencyStatusEnabled {
-		return nil, errercode.CreateCode(errercode.FiatCurrencyDisabled)
-	}
-	rate, err := fxrate.GetUsdToQuoteRate(ctx, code, cfg.AdjustPercent)
-	if err != nil {
-		return nil, errercode.CreateCode(errercode.FiatExchangeRateUnavailable)
-	}
-	return toExchangeRateRes(rate), nil
-}
-
-// ResolveEnabledUsdToQuoteRate 服务端内部:按 CMS 启用的法币配置查询最终汇率
-func ResolveEnabledUsdToQuoteRate(ctx context.Context, currencyCode string) (*fxrate.QuoteRate, error) {
-	code := normalizeCurrencyCode(currencyCode)
-	if err := validateCurrencyCode(code); err != nil {
-		return nil, err
-	}
-	cfg := cfgdao.GetFiatCurrencyCfgByCode(code)
-	if cfg == nil {
-		return nil, errercode.CreateCode(errercode.FiatCurrencyNonExist)
-	}
-	if cfg.Status != fiatentity.FiatCurrencyStatusEnabled {
-		return nil, errercode.CreateCode(errercode.FiatCurrencyDisabled)
-	}
-	rate, err := fxrate.GetUsdToQuoteRate(ctx, code, cfg.AdjustPercent)
-	if err != nil {
-		return nil, errercode.CreateCode(errercode.FiatExchangeRateUnavailable)
-	}
-	return rate, nil
-}
-
-func toExchangeRateRes(rate *fxrate.QuoteRate) *fiatcurrencydto.GetFiatExchangeRateRes {
-	if rate == nil {
-		return &fiatcurrencydto.GetFiatExchangeRateRes{}
-	}
-	return &fiatcurrencydto.GetFiatExchangeRateRes{
-		Base:           rate.Base,
-		Quote:          rate.Quote,
-		MarketRate:     rate.MarketRate,
-		AdjustPercent:  rate.AdjustPercent,
-		Rate:           rate.Rate,
-		InverseRate:    rate.InverseRate,
-		Source:         rate.Source,
-		RateDate:       rate.RateDate,
-		Cached:         rate.Cached,
-		CacheExpiresAt: rate.CacheExpiresAt,
-	}
 }

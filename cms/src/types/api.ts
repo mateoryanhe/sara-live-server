@@ -1712,7 +1712,6 @@ export interface FiatCurrency {
     symbol: string
     icon?: string
     iconName?: string
-    adjustPercent: number
     currencyType: number
     sort: number
     status: number
@@ -1727,19 +1726,6 @@ export interface FiatCurrencyQuery {
     name?: string
     typeFilter?: number
     statusFilter?: number
-}
-
-export interface FiatExchangeRate {
-    base: string
-    quote: string
-    marketRate: number
-    adjustPercent: number
-    rate: number
-    inverseRate: number
-    source: string
-    rateDate: string
-    cached: boolean
-    cacheExpiresAt: number
 }
 
 export interface LiveRevenueShareCfg {
@@ -1789,35 +1775,47 @@ export interface SaveGooglePlayCfgRes {
     id: string
 }
 
-export interface YhPayCfg {
+export interface HaiPayCfg {
     id: string
     enabled: boolean
-    merchantCode: string
-    apiKey: string
+    appId: number
     apiHost: string
+    merchantSecretKey: string
+    merchantPrivateKey: string
+    haiPayPublicKey: string
     callbackBaseUrl: string
     returnUrl: string
-    failedReturnUrl: string
+    failReturnUrl: string
+    cancelUrl: string
+    paymentMethods: string
+    subject: string
+    defaultRegion: string
     createdAt: string
     updatedAt: string
 }
 
-export interface GetYhPayCfgRes {
-    cfg: YhPayCfg | null
+export interface GetHaiPayCfgRes {
+    cfg: HaiPayCfg | null
 }
 
-export interface SaveYhPayCfgReq {
+export interface SaveHaiPayCfgReq {
     id?: number
     enabled: boolean
-    merchantCode: string
-    apiKey: string
+    appId: number
     apiHost: string
+    merchantSecretKey: string
+    merchantPrivateKey: string
+    haiPayPublicKey: string
     callbackBaseUrl?: string
     returnUrl?: string
-    failedReturnUrl?: string
+    failReturnUrl?: string
+    cancelUrl?: string
+    paymentMethods?: string
+    subject?: string
+    defaultRegion?: string
 }
 
-export interface SaveYhPayCfgRes {
+export interface SaveHaiPayCfgRes {
     success: boolean
     id: string
 }

@@ -22,7 +22,7 @@ func (c *RechargeOrderAppController) CreateRechargeOrder(ctx context.Context, re
 	return recharge.CreateOrder(ctx, req)
 }
 
-// CreateCoinMerchantChannelRechargeOrder 币商App用yhpay建单(档位来自币商充值配置)
+// CreateCoinMerchantChannelRechargeOrder 币商App渠道建单(档位来自币商充值配置)
 func (c *RechargeOrderAppController) CreateCoinMerchantChannelRechargeOrder(ctx context.Context, req *rechargeorderdto.AppCreateCoinMerchantChannelRechargeOrderReq) (*rechargeorderdto.AppCreateChannelRechargeOrderRes, error) {
 	return recharge.CreateCoinMerchantChannelRechargeOrder(ctx, req)
 }

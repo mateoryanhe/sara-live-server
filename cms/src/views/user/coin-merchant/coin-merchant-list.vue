@@ -154,6 +154,7 @@ import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'elemen
 import {coinMerchantApi, type CoinMerchantItem} from '@/api/modules/coin-merchant'
 import {usePagePermission} from '@/composables/usePagePermission'
 import {copyTextToClipboard, createRandomPassword} from '@/utils/random-password'
+import {md5Hex} from '@/utils/md5'
 import {formatWalletBalance} from '@/utils/number-format'
 import {formatServerDateTime} from '@/utils/server-datetime'
 
@@ -268,7 +269,7 @@ const handleCreateSave = async () => {
   try {
     await coinMerchantApi.create({
       username: createForm.value.username.trim(),
-      password: createForm.value.password,
+      password: md5Hex(createForm.value.password),
     })
     ElMessage.success(t('pages.coinMerchantList.createSuccess'))
     createVisible.value = false
@@ -312,7 +313,7 @@ const handleResetSave = async () => {
   try {
     await coinMerchantApi.resetPassword({
       accountId: resetForm.value.accountId,
-      password: resetForm.value.password,
+      password: md5Hex(resetForm.value.password),
     })
     ElMessage.success(t('pages.coinMerchantList.resetPasswordSuccess'))
     resetVisible.value = false

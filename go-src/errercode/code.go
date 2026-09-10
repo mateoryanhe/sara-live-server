@@ -199,14 +199,12 @@ const (
 	FiatCurrencyNonExist XRCode = 155
 	// FiatCurrencyDisabled 法币配置已禁用
 	FiatCurrencyDisabled XRCode = 156
-	// FiatExchangeRateUnavailable 法币汇率暂不可用
-	FiatExchangeRateUnavailable XRCode = 157
-	// YhPayNotConfigured yhpay未配置或未启用
-	YhPayNotConfigured XRCode = 158
-	// YhPayCreateFailed yhpay创建支付失败
-	YhPayCreateFailed XRCode = 159
-	// YhPayCurrencyNotSupported yhpay暂不支持该币种
-	YhPayCurrencyNotSupported XRCode = 160
+	// ChannelPayNotConfigured 渠道支付未配置或未启用
+	ChannelPayNotConfigured XRCode = 158
+	// ChannelPayCreateFailed 渠道支付创建失败
+	ChannelPayCreateFailed XRCode = 159
+	// ChannelPayCurrencyNotSupported 渠道支付暂不支持该币种
+	ChannelPayCurrencyNotSupported XRCode = 160
 	// EmailAlreadyInUse 邮箱已被未注销账号使用
 	EmailAlreadyInUse XRCode = 161
 	// EmailAlreadyBound 当前账号已绑定邮箱

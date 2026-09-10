@@ -27,7 +27,6 @@ export const rechargeOrderApi = {
     createChannelRechargeOrderTest: (params: {
         userId: string
         cfgId: number
-        currencyCode: string
         packageName?: string
     }) => {
         return request.post<{

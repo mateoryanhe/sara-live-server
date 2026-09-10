@@ -26,6 +26,7 @@ server:
   pprofEnabled: true # 是否开启PProf性能调试特性。默认为false
   pprofPattern: "/66dcd8e25ab3b339546ea1de5eb2d443e6fca76c76d11709f10533be8bd87d7d/pprof"    # 开启PProf时有效，表示PProf特性的页面访问路径，对当前Server绑定的所有域名有效
   ####自定义配置
+  id: 2  # 雪花算法 node(测试服); 各环境必须唯一,范围 1-1023
   dumpRouterMap: false
 
 bufferSize:

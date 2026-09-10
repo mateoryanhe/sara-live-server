@@ -98,7 +98,7 @@
 - App 登录：`POST /auth/coinMerchantLogin`（免鉴权；username+password；不自动注册；token=`userId.token`）
 - 充值档位：表 `coin_merchant_recharge_cfgs`（name/USD price/gold/status）；写库后整体刷 `atomic` 上架缓存；CMS 在「充值会员 → 币商充值档位」
 - App 查档位：`POST /coinMerchantRechargeCfg/coinMerchantRechargeCfgListForApp`（需登录，仅上架缓存）
-- App yhpay 下单：`POST /rechargeOrder/createCoinMerchantChannelRechargeOrder`（需登录+`UserTypeCoinMerchant`；`cfgId`+`currencyCode=IDR`；`payChannel=4`；无首充加赠；回调复用 `/webhook/yhpay/payin`）
+- App 币商渠道下单：`POST /rechargeOrder/createCoinMerchantChannelRechargeOrder`（需登录+`UserTypeCoinMerchant`；`cfgId`+`currencyCode`；`payChannel=4`；无首充加赠；支付由 `ChannelPayProvider` 出 payUrl，成功后 `CompleteChannelPayOrder`）
 - 轮询成功：`POST /rechargeOrder/checkRechargeOrderSuccess`（与普通充值相同）
 - App 转赠金币：`POST /gold/transferGold`（仅币商；`targetUserId`+`amount` 最多2位小数；扣币商加目标用户；流水 reason 32转出/33收入）
 
@@ -112,8 +112,11 @@
   - Android SDK：`D:\tools\android-sdk`（platform 34/35/36、build-tools、NDK 28.2）
 - 中国镜像：`PUB_HOSTED_URL=https://pub.flutter-io.cn`，`FLUTTER_STORAGE_BASE_URL=https://storage.flutter-io.cn`
 - 会话加载：`. D:\tools\env-flutter.ps1` 或 `D:\tools\env-flutter.bat`（会把 `127.0.0.1:port` 代理补成 `http://`）
+- **工程内脚本**（仅 Win，`scripts/` 可入库）：
+  - 环境：`flutter-client/scripts/env/` — `config.bat` 填路径；`setup.bat` / `setup.bat install`
+  - 打 APK：`flutter-client/scripts/apk/build.bat`（`release` 默认 / `debug`）或双击 `一键打包.bat`
 - 重装脚本：`D:\tools\install-flutter-android.ps1`；补包：`D:\tools\install-android-packages.ps1`
-- App 工程：`flutter-client/`（已 gitignore）；打 APK：`flutter-client\build-apk.bat`
+- App 工程：`flutter-client/`（主体 gitignore）
 - Web 本地：`flutter-client\start-web.bat` 或 `pub-tool/flutter-local/一键启动.bat`（`flutter run -d chrome`）
 - **推送规则**：`PushBus` 上 **Repository 与 ViewModel 各自订阅**（失效缓存 / 刷 UI）；见 `.cursor/rules/flutter-push-subscribe.mdc`、`lib/sara_live_core.dart` §6
 - 注意：本机 `HTTP_PROXY` 若无协议，sdkmanager 会挂；VS 未装不影响 Android APK
@@ -180,4 +183,37 @@
 - 流程：`mysqldump|gzip` → 临时目录 `{storagePath父}/staging/db-backup` → 上传云桶 → 按保留天数删旧对象
 - 还原：选 `.sql.gz` + 填目标库名（不存在则 `CREATE DATABASE`）；仅允许当前 `storage_prefix` 下文件
 - 依赖：云桶开启；主机装 `mysqldump`/`mysql`（或 mariadb 同名工具）
+
+## 充值渠道策略（2026-09-09）
+
+- **Google Play：必须保留，接入/重构第三方渠道时一律不动**
+- 第三方渠道目标：**多国收单**（至少印尼、印度、菲律宾、马来西亚、南美等），非仅 IDR
+- **支付 SDK / 通道会频繁替换**：业务线与通道实现必须解耦（见下「可插拔 Provider」）
+- 统一业务流：建本地充值单 → Provider 出 `payUrl` → 异步 notify 验签 → `CompleteOrder` 发币
+- App/CMS **对外 API、订单模型、档位/币商逻辑不跟某个 SDK 绑定**；换通道只换 Provider + 配置，不重做业务
+- **已落地（2026-09-09）**：去掉 yhpay；`ChannelPayProvider` + **HaiPay 全球收银台美金包装** Provider
+- **已去掉汇率**：删除 `module/fxrate`、CMS 加点/查汇率；法币表与渠道支付解耦
+- HaiPay：`POST /global/cashier/collect/apply`，`currency=USD`；`region` = App `currencyCode`（区域码如 ID/PH，或 IDR 等）直接映射，空则 CMS `defaultRegion`；订单落库 **USD**；notify=`/webhook/haipay/collect/notify`
+- App 区域列表：`POST /fiatCurrency/fiatCurrencyListForApp` **硬编码** HaiPay region（`currencyCode`=区域码）；CMS 法币页与此无关
+- CMS：`/config/haipay`（`HaiPayCfgManagement`）；表 `haipay_cfgs`
+- 付款人资料：表 `channel_pay_user_profiles`（主键=userId，RowCache）；**无需登录** `getChannelPayUserProfile` / `saveChannelPayUserProfile`（传 `userId`）；空则 App 引导填写再下单
+- 表 `yhpay_cfgs` / 列 `fiat_currency_cfgs.adjust_percent` 可残留库中；不强制 DROP
+- Google Play 不动
+
+### 可插拔渠道 Provider（约定）
+
+```
+App/CMS 建单 API  ──►  recharge 业务（写订单、白名单）
+                              │ QuotePay → 美金包装固定 USD
+                              ▼
+                     ChannelPayProvider（RegisterChannelPayProvider）
+                     CreatePay → payUrl；notify → CompleteChannelPayOrder
+                              │
+                           HaiPay（当前）
+```
+
+- **稳定层**：渠道/币商建单 / CMS 测试 / `CompleteChannelPayOrder` / `PayChannel` 3·4
+- **易变层**：各 SDK HTTP、签名、配置表/CMS、webhook
+- **错误码**：158–160 = `ChannelPayNotConfigured` / `CreateFailed` / `CurrencyNotSupported`
+- **Google Play / iOS**：永远不进 ChannelPayProvider
 

@@ -180,17 +180,16 @@ func toFiatCurrencyListItem(row *fiatentity.FiatCurrencyCfg) *fiatcurrencydto.Fi
 		return nil
 	}
 	return &fiatcurrencydto.FiatCurrencyItem{
-		ID:            strconv.FormatUint(row.ID, 10),
-		CurrencyCode:  row.CurrencyCode,
-		Name:          row.Name,
-		Symbol:        row.Symbol,
-		Icon:          row.Icon,
-		AdjustPercent: row.AdjustPercent,
-		CurrencyType:  row.CurrencyType,
-		Sort:          row.Sort,
-		Status:        row.Status,
-		CreatedAt:     FormatFiatCurrencyTime(row.CreatedAt),
-		UpdatedAt:     FormatFiatCurrencyTime(row.UpdatedAt),
+		ID:           strconv.FormatUint(row.ID, 10),
+		CurrencyCode: row.CurrencyCode,
+		Name:         row.Name,
+		Symbol:       row.Symbol,
+		Icon:         row.Icon,
+		CurrencyType: row.CurrencyType,
+		Sort:         row.Sort,
+		Status:       row.Status,
+		CreatedAt:    FormatFiatCurrencyTime(row.CreatedAt),
+		UpdatedAt:    FormatFiatCurrencyTime(row.UpdatedAt),
 	}
 }
 

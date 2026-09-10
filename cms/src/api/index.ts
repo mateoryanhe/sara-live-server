@@ -36,7 +36,7 @@ import {gameWinLogApi} from './modules/gameWinLog'
 import {gameBetLogApi} from './modules/gameBetLog'
 import {dataSyncApi} from './modules/data-sync'
 import {fiatCurrencyApi} from './modules/fiatCurrency'
-import {yhpayApi} from './modules/yhpay'
+import {haipayApi} from './modules/haipay'
 import {cfEmailApi} from './modules/cf-email'
 import {dbBackupApi} from './modules/db-backup'
 
@@ -80,7 +80,7 @@ export {
     gameBetLogApi,
     dataSyncApi,
     fiatCurrencyApi,
-    yhpayApi,
+    haipayApi,
     cfEmailApi,
     dbBackupApi,
 }
@@ -125,7 +125,7 @@ export default {
     gameBetLogApi,
     dataSyncApi,
     fiatCurrencyApi,
-    yhpayApi,
+    haipayApi,
     cfEmailApi,
     dbBackupApi,
 }

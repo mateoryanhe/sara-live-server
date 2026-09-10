@@ -20,7 +20,7 @@ const (
 	RechargeCfgTypeIOS          uint8 = 1 // iOS
 	RechargeCfgTypeGoogle       uint8 = 2 // Google
 	RechargeCfgTypeChannel      uint8 = 3 // 渠道
-	RechargeCfgTypeCoinMerchant uint8 = 4 // 币商(yhpay,档位来自 coin_merchant_recharge_cfgs)
+	RechargeCfgTypeCoinMerchant uint8 = 4 // 币商(渠道支付,档位来自 coin_merchant_recharge_cfgs)
 )
 
 const RechargeCfgCurrencyUSD = "USD"

@@ -16,6 +16,7 @@ server:
   pprofEnabled: true
   pprofPattern: "/66dcd8e25ab3b339546ea1de5eb2d443e6fca76c76d11709f10533be8bd87d7d/pprof"
   ####自定义配置
+  id: 1  # 雪花算法 node(本地); 各环境必须唯一,范围 1-1023
   debugEnv: true #是否开启debug环境,不会检查权限
   dumpRouterMap: false
   # 远程环境 staticSites 示例见 config/dev/config.yaml

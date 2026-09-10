@@ -94,7 +94,7 @@ const menu = {
   TextModerationCfgManagement: '敏感词过滤',
   PrivacyPolicyCfgManagement: '隐私政策',
   GooglePlayCfgManagement: 'Google Play',
-  YhPayCfgManagement: 'yhpay支付',
+  HaiPayCfgManagement: 'HaiPay支付',
   CfEmailCfgManagement: 'Amazon SES邮件',
   DbBackupCfgManagement: '数据库备份',
   UploadResourceCfgManagement: '资源域名',
