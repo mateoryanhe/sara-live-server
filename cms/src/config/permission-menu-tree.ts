@@ -157,6 +157,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             page('BotAnchorManagement'),
             page('CoinMerchantManagement'),
             page('RechargeOrderList'),
+            page('SimulatorDeviceWhitelistManagement'),
         ],
     },
     {

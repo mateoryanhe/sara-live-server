@@ -18,8 +18,8 @@ export async function confirmDataSync(options: ConfirmDataSyncOptions): Promise<
   const t = i18n.global.t
   let target = ''
   try {
-    const cfg = await dataSyncApi.getDataSyncCfg()
-    target = String(cfg?.targetApiBase || '').trim()
+    const res = await dataSyncApi.getDataSyncCfg()
+    target = String(res?.cfg?.targetApiBase || '').trim()
   } catch (error) {
     console.error('fetch data sync cfg failed:', error)
     ElMessage.error(t('common.syncFetchTargetFailed'))

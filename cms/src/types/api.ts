@@ -733,6 +733,17 @@ export interface SimulatorCpuKeywordQuery extends PageQuery {
     key?: string
 }
 
+export interface SimulatorDeviceWhitelist {
+    id: string
+    deviceId: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface SimulatorDeviceWhitelistQuery extends PageQuery {
+    key?: string
+}
+
 export interface GetAccountCfgRes {
     cfg?: AccountCfg | null
 }

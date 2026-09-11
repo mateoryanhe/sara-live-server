@@ -1,0 +1,66 @@
+import {definePageMessages} from './_define'
+
+const zh = {
+  addDevice: '新增设备',
+  editDevice: '编辑设备',
+  deviceId: '设备码',
+  deviceIdTip: '与 App 上报的 deviceId 精确匹配；开启「拦截模拟器登录」后，白名单设备可放行',
+  searchPlaceholder: '搜索设备码',
+  deleteConfirm: '确定要删除设备码「{deviceId}」吗？',
+  fetchFailed: '获取模拟器设备白名单失败',
+  deviceIdRequired: '请输入设备码',
+} as const
+
+export const simulatorDeviceWhitelistListMessages = definePageMessages(
+  zh,
+  {
+    addDevice: 'Add Device',
+    editDevice: 'Edit Device',
+    deviceId: 'Device ID',
+    deviceIdTip: 'Exact match with App-reported deviceId; whitelisted devices bypass simulator login block',
+    searchPlaceholder: 'Search device ID',
+    deleteConfirm: 'Delete device "{deviceId}"?',
+    fetchFailed: 'Failed to load simulator device whitelist',
+    deviceIdRequired: 'Enter device ID',
+  },
+  {
+    addDevice: 'Añadir dispositivo',
+    editDevice: 'Editar dispositivo',
+    deviceId: 'ID de dispositivo',
+    deviceIdTip: 'Coincidencia exacta con deviceId del App; la lista blanca evita el bloqueo de simulador',
+    searchPlaceholder: 'Buscar ID de dispositivo',
+    deleteConfirm: '¿Eliminar dispositivo «{deviceId}»?',
+    fetchFailed: 'Error al cargar lista blanca de simulador',
+    deviceIdRequired: 'Introduce ID de dispositivo',
+  },
+  {
+    addDevice: 'Adicionar dispositivo',
+    editDevice: 'Editar dispositivo',
+    deviceId: 'ID do dispositivo',
+    deviceIdTip: 'Correspondência exata com deviceId do App; whitelist libera bloqueio de simulador',
+    searchPlaceholder: 'Buscar ID do dispositivo',
+    deleteConfirm: 'Excluir dispositivo "{deviceId}"?',
+    fetchFailed: 'Falha ao carregar whitelist de simulador',
+    deviceIdRequired: 'Informe o ID do dispositivo',
+  },
+  {
+    addDevice: 'डिवाइस जोड़ें',
+    editDevice: 'डिवाइस संपादित करें',
+    deviceId: 'डिवाइस ID',
+    deviceIdTip: 'App के deviceId से सटीक मिलान; व्हाइटलिस्ट सिम्युलेटर ब्लॉक से छूट',
+    searchPlaceholder: 'डिवाइस ID खोजें',
+    deleteConfirm: 'डिवाइस "{deviceId}" हटाएँ?',
+    fetchFailed: 'सिम्युलेटर डिवाइस व्हाइटलिस्ट लोड विफल',
+    deviceIdRequired: 'डिवाइस ID दर्ज करें',
+  },
+  {
+    addDevice: 'Tambah perangkat',
+    editDevice: 'Edit perangkat',
+    deviceId: 'ID perangkat',
+    deviceIdTip: 'Cocok persis dengan deviceId App; whitelist dilewati blok login simulator',
+    searchPlaceholder: 'Cari ID perangkat',
+    deleteConfirm: 'Hapus perangkat «{deviceId}»?',
+    fetchFailed: 'Gagal memuat whitelist perangkat simulator',
+    deviceIdRequired: 'Masukkan ID perangkat',
+  },
+)

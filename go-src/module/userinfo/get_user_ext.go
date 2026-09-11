@@ -39,6 +39,7 @@ func GetUserExt(ctx context.Context, req *userinfodto.GetUserExtReq) (*userinfod
 		CancelCode:            ext.CancelCode,
 		CancelCodeExpireAt:    ext.CancelCodeExpireAt,
 		FirstRecharge:         ext.FirstRecharge,
+		InviterId:             ext.InviterId,
 		ShortVideoViewCount:   shortVideoViewCount,
 		ShortVideoTotalIncome: shortVideoTotalIncome,
 		ShortVideoLikeCount:   shortVideoLikeCount,

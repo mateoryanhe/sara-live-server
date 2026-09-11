@@ -18,7 +18,7 @@
           <span>{{ t('menu.Dashboard') }}</span>
         </el-menu-item>
         <el-sub-menu
-            v-if="hasMenuPermission('UserList') || hasMenuPermission('AnchorListManagement') || hasMenuPermission('LiveRoomRecycleBinManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('CoinMerchantManagement') || hasMenuPermission('RechargeOrderList')"
+            v-if="hasMenuPermission('UserList') || hasMenuPermission('AnchorListManagement') || hasMenuPermission('LiveRoomRecycleBinManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('CoinMerchantManagement') || hasMenuPermission('RechargeOrderList') || hasMenuPermission('SimulatorDeviceWhitelistManagement')"
             index="/user/account">
           <template #title>
             <el-icon>
@@ -61,6 +61,12 @@
               <Wallet/>
             </el-icon>
             <span>{{ t('menu.RechargeOrderList') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('SimulatorDeviceWhitelistManagement')" index="/user/simulator-device-whitelist">
+            <el-icon>
+              <Monitor/>
+            </el-icon>
+            <span>{{ t('menu.SimulatorDeviceWhitelistManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu

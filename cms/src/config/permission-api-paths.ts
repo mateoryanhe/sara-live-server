@@ -430,6 +430,13 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'SimulatorCpuKeywordManagement:edit': '/simulatorCpuKeyword/updateSimulatorCpuKeyword',
     'SimulatorCpuKeywordManagement:delete': '/simulatorCpuKeyword/deleteSimulatorCpuKeyword',
 
+    SimulatorDeviceWhitelistManagement: '/simulatorDeviceWhitelist/simulatorDeviceWhitelistList',
+    'SimulatorDeviceWhitelistManagement:view': '/simulatorDeviceWhitelist/simulatorDeviceWhitelistList',
+    'SimulatorDeviceWhitelistManagement:search': '/simulatorDeviceWhitelist/simulatorDeviceWhitelistList',
+    'SimulatorDeviceWhitelistManagement:create': '/simulatorDeviceWhitelist/createSimulatorDeviceWhitelist',
+    'SimulatorDeviceWhitelistManagement:edit': '/simulatorDeviceWhitelist/updateSimulatorDeviceWhitelist',
+    'SimulatorDeviceWhitelistManagement:delete': '/simulatorDeviceWhitelist/deleteSimulatorDeviceWhitelist',
+
     AnchorSalaryCfgManagement: '/anchorSalaryCfg/anchorSalaryCfgList',
     'AnchorSalaryCfgManagement:view': '/anchorSalaryCfg/anchorSalaryCfgList',
     'AnchorSalaryCfgManagement:search': '/anchorSalaryCfg/anchorSalaryCfgList',

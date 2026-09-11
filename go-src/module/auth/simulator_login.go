@@ -7,14 +7,18 @@ import (
 	"xr-game-server/errercode"
 	"xr-game-server/module/accountcfg"
 	"xr-game-server/module/simulatorcpukeyword"
+	"xr-game-server/module/simulatordevicewhitelist"
 )
 
-// ensureSimulatorLoginAllowed 配置开启拦截时,按上报 cpuModel 拒绝模拟器登录(默认不拦截)
+// ensureSimulatorLoginAllowed 配置开启拦截时,按上报 cpuModel 拒绝模拟器登录(默认不拦截;设备白名单放行)
 func ensureSimulatorLoginAllowed(info *entity.DeviceInfo) error {
 	if info == nil || !isSimulatorByCPU(info) {
 		return nil
 	}
 	if !accountcfg.IsSimulatorLoginBlocked() {
+		return nil
+	}
+	if simulatordevicewhitelist.IsWhitelisted(info.DeviceId) {
 		return nil
 	}
 	return errercode.CreateCode(errercode.SimulatorLoginDenied)

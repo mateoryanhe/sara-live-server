@@ -10,6 +10,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   BotAnchorManagement: 'Host Bot',
   CoinMerchantManagement: 'Pedagang Koin',
   RechargeOrderList: 'Pesanan Isi Ulang',
+  SimulatorDeviceWhitelistManagement: 'Whitelist Simulator',
   GoldCurrencyLogList: 'Log Koin Emas',
   DiamondCurrencyLogList: 'Log Berlian',
   OperationManagement: 'Operasi',

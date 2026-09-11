@@ -10,6 +10,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   BotAnchorManagement: 'Apresentadores bot',
   CoinMerchantManagement: 'Comerciantes de moedas',
   RechargeOrderList: 'Pedidos de recarga',
+  SimulatorDeviceWhitelistManagement: 'Whitelist de simulador',
   GoldCurrencyLogList: 'Registro de moedas de ouro',
   DiamondCurrencyLogList: 'Registro de diamantes',
   OperationManagement: 'Operações',

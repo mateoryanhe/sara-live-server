@@ -63,3 +63,7 @@ func (c *UserInfoController) Report(ctx context.Context, req *userinfodto.AppRep
 func (c *UserInfoController) ReportAttribution(ctx context.Context, req *userinfodto.ReportAttributionReq) (res *userinfodto.ReportAttributionRes, err error) {
 	return userinfo.ReportAttribution(ctx, req)
 }
+
+func (c *UserInfoController) ReportInviter(ctx context.Context, req *userinfodto.ReportInviterReq) (res *userinfodto.ReportInviterRes, err error) {
+	return userinfo.ReportInviter(ctx, req)
+}

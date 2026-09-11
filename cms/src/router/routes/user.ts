@@ -79,6 +79,12 @@ export const userRoutes: RouteRecordRaw = {
             meta: {title: '充值订单'},
         },
         {
+            path: 'simulator-device-whitelist',
+            name: 'SimulatorDeviceWhitelistManagement',
+            component: () => import('@/views/user/simulator-device-whitelist-list.vue'),
+            meta: {title: '模拟器白名单'},
+        },
+        {
             path: 'currency-log/gold-log-list',
             name: 'GoldCurrencyLogList',
             component: () => import('@/views/user/currency-log/gold-log-list.vue'),

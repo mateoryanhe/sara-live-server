@@ -36,6 +36,7 @@ import (
 	"xr-game-server/module/richrank"
 	"xr-game-server/module/shortvideo"
 	"xr-game-server/module/simulatorcpukeyword"
+	"xr-game-server/module/simulatordevicewhitelist"
 	"xr-game-server/module/stat"
 	"xr-game-server/module/ticket"
 	"xr-game-server/module/upload"
@@ -80,6 +81,7 @@ func Init() {
 	appversioncfg.Init()
 	activity.Init()
 	simulatorcpukeyword.Init()
+	simulatordevicewhitelist.Init()
 	customerservice.Init()
 	wallet.Init()
 	liverevenuesharecfg.Init()

@@ -57,6 +57,7 @@ import {accountCfgMessages} from './account-cfg'
 import {appVersionCfgMessages} from './app-version-cfg'
 import {firstRechargeActivityCfgMessages} from './first-recharge-activity-cfg'
 import {simulatorCpuKeywordListMessages} from './simulator-cpu-keyword-list'
+import {simulatorDeviceWhitelistListMessages} from './simulator-device-whitelist-list'
 import {anchorSalaryCfgListMessages} from './anchor-salary-cfg-list'
 import {liveRevenueShareCfgMessages} from './live-revenue-share-cfg'
 import {anchorIncomeSettlementLogListMessages} from './anchor-income-settlement-log-list'
@@ -138,6 +139,7 @@ const pageMessageBuilders = [
   ['appVersionCfg', appVersionCfgMessages],
   ['firstRechargeActivityCfg', firstRechargeActivityCfgMessages],
   ['simulatorCpuKeywordList', simulatorCpuKeywordListMessages],
+  ['simulatorDeviceWhitelistList', simulatorDeviceWhitelistListMessages],
   ['anchorSalaryCfgList', anchorSalaryCfgListMessages],
   ['liveRevenueShareCfg', liveRevenueShareCfgMessages],
   ['anchorIncomeSettlementLogList', anchorIncomeSettlementLogListMessages],

@@ -52,6 +52,7 @@ type GetUserExtRes struct {
 	CancelCode            string     `json:"cancelCode" dc:"注销码"`
 	CancelCodeExpireAt    *time.Time `json:"cancelCodeExpireAt" dc:"注销码过期时间"`
 	FirstRecharge         bool       `json:"firstRecharge" dc:"是否首次充值(未首充为true)"`
+	InviterId             uint64     `json:"inviterId,string" dc:"邀请者用户ID(0为无)"`
 	ShortVideoViewCount   uint64     `json:"shortVideoViewCount" dc:"累计短视频观看人数"`
 	ShortVideoTotalIncome float64    `json:"shortVideoTotalIncome" dc:"累计短视频收入总额(钻石)"`
 	ShortVideoLikeCount   uint64     `json:"shortVideoLikeCount" dc:"累计短视频点赞总数"`
@@ -175,4 +176,15 @@ type ReportAttributionReq struct {
 
 type ReportAttributionRes struct {
 	Success bool `json:"success"`
+}
+
+// ReportInviterReq App端上报邀请者用户ID
+type ReportInviterReq struct {
+	g.Meta    `path:"/reportInviter" method:"post" summary:"上报邀请者ID" tags:"用户信息"`
+	InviterId uint64 `json:"inviterId" v:"required|min:1#邀请者ID不能为空|邀请者ID无效" dc:"邀请者用户ID"`
+}
+
+type ReportInviterRes struct {
+	Success   bool   `json:"success"`
+	InviterId uint64 `json:"inviterId,string" dc:"当前邀请者用户ID"`
 }

@@ -12,6 +12,7 @@ const menu = {
   BotAnchorManagement: '机器人主播',
   CoinMerchantManagement: '币商',
   RechargeOrderList: '充值订单',
+  SimulatorDeviceWhitelistManagement: '模拟器白名单',
   GoldCurrencyLogList: '金币流水',
   DiamondCurrencyLogList: '钻石流水',
   OperationManagement: '运营管理',

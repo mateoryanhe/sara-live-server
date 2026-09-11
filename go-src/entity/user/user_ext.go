@@ -31,6 +31,7 @@ const (
 	UserExtFirstRecharge             db.TbCol = "first_recharge"
 	UserExtShortVideoUnsettledIncome db.TbCol = "short_video_unsettled_income"
 	UserExtEmail                     db.TbCol = "email"
+	UserExtInviterId                 db.TbCol = "inviter_id"
 )
 
 // UserExt 用户扩展信息(与用户一一对应,主键ID即用户ID)
@@ -48,6 +49,7 @@ type UserExt struct {
 	FirstRecharge             bool       `gorm:"default:1;comment:是否首次充值(1=未首充,0=已首充)" json:"firstRecharge"`
 	ShortVideoUnsettledIncome float64    `gorm:"type:decimal(16,4);default:0;comment:短视频未结算收益(非主播作者)" json:"shortVideoUnsettledIncome"`
 	Email                     string     `gorm:"size:256;index;default:'';comment:绑定邮箱(规范化小写)" json:"email"`
+	InviterId                 uint64     `gorm:"index;default:0;comment:邀请者用户ID(0为无)" json:"inviterId"`
 }
 
 func NewUserExt(userId uint64) *UserExt {
@@ -140,6 +142,15 @@ func (receiver *UserExt) SetEmail(email string) {
 	syndb.AddData(TbUserExt, UserExtEmail, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: email,
+	})
+}
+
+func (receiver *UserExt) SetInviterId(inviterId uint64) {
+	receiver.InviterId = inviterId
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddData(TbUserExt, UserExtInviterId, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: inviterId,
 	})
 }
 
@@ -249,6 +260,7 @@ func initUserExt() {
 	syndb.RegQuick(TbUserExt, UserExtFirstRecharge)
 	syndb.RegQuick(TbUserExt, UserExtShortVideoUnsettledIncome)
 	syndb.RegQuick(TbUserExt, UserExtEmail)
+	syndb.RegQuick(TbUserExt, UserExtInviterId)
 
 	migrate.AutoMigrate(&UserExt{})
 }

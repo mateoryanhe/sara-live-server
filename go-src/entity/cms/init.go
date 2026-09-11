@@ -10,4 +10,5 @@ func Init() {
 	initAppVersionCfg()
 	initAppVersionUpdateDetail()
 	initSimulatorCpuKeyword()
+	initSimulatorDeviceWhitelist()
 }
