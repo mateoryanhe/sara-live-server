@@ -77,6 +77,7 @@ const menu = {
   GameWinLogListManagement: '游戏奖励记录',
   ActivityManagement: '活动管理',
   FirstRechargeActivityManagement: '首充活动配置',
+  InviteRechargeRewardManagement: '邀请充值返还',
   ConfigManagement: '系统配置',
   ConfigBasicGroup: '基础配置',
   ConfigSecurityGroup: '安全合规',

@@ -398,6 +398,9 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'FirstRechargeActivityManagement:view': '/firstRechargeActivity/getFirstRechargeActivityCfg',
     'FirstRechargeActivityManagement:save': '/firstRechargeActivity/saveFirstRechargeActivityCfg',
     'FirstRechargeActivityManagement:sync': '/dataSync/syncFirstRechargeActivityCfg',
+    InviteRechargeRewardManagement: '/inviteRechargeReward/getInviteRechargeRewardCfg',
+    'InviteRechargeRewardManagement:view': '/inviteRechargeReward/getInviteRechargeRewardCfg',
+    'InviteRechargeRewardManagement:save': '/inviteRechargeReward/saveInviteRechargeRewardCfg',
 
     GameBetLogListManagement: '/gameBetLog/cmsGameBetLogList',
     'GameBetLogListManagement:view': '/gameBetLog/cmsGameBetLogList',

@@ -175,6 +175,7 @@ const sysStat = reactive<SysStat>({
   totalGoldConsume: 0,
   totalDiamondConsume: 0,
   totalRecharge: 0,
+  totalVirtualRecharge: 0,
   totalWithdraw: 0,
   totalRegisterUser: 0,
   todayRecharge: 0,
@@ -201,6 +202,7 @@ type BasicStatCardKey = keyof Pick<
     | 'todayDiamondConsume'
     | 'todayRegisterUser'
     | 'totalRecharge'
+    | 'totalVirtualRecharge'
     | 'totalWithdraw'
     | 'totalGoldConsume'
     | 'totalDiamondConsume'
@@ -229,6 +231,7 @@ const TODAY_STAT_CARD_CONFIG: BasicStatCardConfig[] = [
 const TOTAL_STAT_CARD_CONFIG: BasicStatCardConfig[] = [
   {key: 'totalGold', labelKey: 'statTotalGold', theme: 'tone-amber', format: 'amount'},
   {key: 'totalRecharge', labelKey: 'statTotalRecharge', theme: 'tone-blue', format: 'amount'},
+  {key: 'totalVirtualRecharge', labelKey: 'statTotalVirtualRecharge', theme: 'tone-sky', format: 'amount'},
   {key: 'totalWithdraw', labelKey: 'statTotalWithdraw', theme: 'tone-green', format: 'amount'},
   {key: 'totalGoldConsume', labelKey: 'statTotalGoldConsume', theme: 'tone-orange', format: 'amount'},
   {key: 'totalDiamondConsume', labelKey: 'statTotalDiamondConsume', theme: 'tone-violet', format: 'amount'},
@@ -265,6 +268,7 @@ const fetchSysStat = async () => {
     sysStat.totalGoldConsume = data.totalGoldConsume ?? 0
     sysStat.totalDiamondConsume = data.totalDiamondConsume ?? 0
     sysStat.totalRecharge = data.totalRecharge ?? 0
+    sysStat.totalVirtualRecharge = data.totalVirtualRecharge ?? 0
     sysStat.totalWithdraw = data.totalWithdraw ?? 0
     sysStat.totalRegisterUser = data.totalRegisterUser ?? 0
     sysStat.todayRecharge = data.todayRecharge ?? 0
@@ -417,7 +421,7 @@ onMounted(() => {
 }
 
 .basic-stat-grid-total {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .stat-card {

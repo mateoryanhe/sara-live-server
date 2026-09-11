@@ -35,6 +35,7 @@ export interface SysStat {
     totalGoldConsume: number
     totalDiamondConsume: number
     totalRecharge: number
+    totalVirtualRecharge?: number
     totalWithdraw: number
     totalRegisterUser: string | number
     todayRecharge: number
@@ -850,6 +851,31 @@ export interface SaveFirstRechargeActivityCfgReq {
 }
 
 export interface SaveFirstRechargeActivityCfgRes {
+    success: boolean
+    id?: string
+}
+
+export interface InviteRechargeRewardCfg {
+    id?: string
+    enabled: boolean
+    rewardPercent: number
+    validDays: number
+    createdAt?: string
+    updatedAt?: string
+}
+
+export interface GetInviteRechargeRewardCfgRes {
+    cfg?: InviteRechargeRewardCfg | null
+}
+
+export interface SaveInviteRechargeRewardCfgReq {
+    id?: string | number
+    enabled: boolean
+    rewardPercent: number
+    validDays: number
+}
+
+export interface SaveInviteRechargeRewardCfgRes {
     success: boolean
     id?: string
 }

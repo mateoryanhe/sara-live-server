@@ -29,6 +29,7 @@ const (
 	UserExtCancelCodeExpireAt db.TbCol = "cancel_code_expire_at"
 	UserExtRechargeWhitelist         db.TbCol = "recharge_whitelist"
 	UserExtFirstRecharge             db.TbCol = "first_recharge"
+	UserExtFirstRechargeAt           db.TbCol = "first_recharge_at"
 	UserExtShortVideoUnsettledIncome db.TbCol = "short_video_unsettled_income"
 	UserExtEmail                     db.TbCol = "email"
 	UserExtInviterId                 db.TbCol = "inviter_id"
@@ -47,6 +48,7 @@ type UserExt struct {
 	CancelCodeExpireAt *time.Time `gorm:"comment:注销码过期时间" json:"cancelCodeExpireAt"`
 	RechargeWhitelist         bool       `gorm:"default:0;comment:充值白名单(创建订单后直接到账)" json:"rechargeWhitelist"`
 	FirstRecharge             bool       `gorm:"default:1;comment:是否首次充值(1=未首充,0=已首充)" json:"firstRecharge"`
+	FirstRechargeAt           *time.Time `gorm:"comment:账号首充完成时间" json:"firstRechargeAt"`
 	ShortVideoUnsettledIncome float64    `gorm:"type:decimal(16,4);default:0;comment:短视频未结算收益(非主播作者)" json:"shortVideoUnsettledIncome"`
 	Email                     string     `gorm:"size:256;index;default:'';comment:绑定邮箱(规范化小写)" json:"email"`
 	InviterId                 uint64     `gorm:"index;default:0;comment:邀请者用户ID(0为无)" json:"inviterId"`
@@ -133,6 +135,15 @@ func (receiver *UserExt) SetFirstRecharge(v bool) {
 	syndb.AddData(TbUserExt, UserExtFirstRecharge, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: v,
+	})
+}
+
+func (receiver *UserExt) SetFirstRechargeAt(val *time.Time) {
+	receiver.FirstRechargeAt = val
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddData(TbUserExt, UserExtFirstRechargeAt, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: val,
 	})
 }
 
@@ -258,6 +269,7 @@ func initUserExt() {
 	syndb.RegQuick(TbUserExt, UserExtCancelCodeExpireAt)
 	syndb.RegQuick(TbUserExt, UserExtRechargeWhitelist)
 	syndb.RegQuick(TbUserExt, UserExtFirstRecharge)
+	syndb.RegQuick(TbUserExt, UserExtFirstRechargeAt)
 	syndb.RegQuick(TbUserExt, UserExtShortVideoUnsettledIncome)
 	syndb.RegQuick(TbUserExt, UserExtEmail)
 	syndb.RegQuick(TbUserExt, UserExtInviterId)

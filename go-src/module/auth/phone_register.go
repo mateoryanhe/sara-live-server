@@ -74,6 +74,11 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 			data.SetInviterId(inviterId)
 			userinfodao.PublishUserInfo(data)
 		}
+		ext := userinfodao.GetUserExtByUserId(account.ID)
+		if ext.InviterId == 0 {
+			ext.SetInviterId(inviterId)
+			userinfodao.PublishUserExt(ext)
+		}
 	}
 
 	res = &authdto.PhoneRegisterRes{

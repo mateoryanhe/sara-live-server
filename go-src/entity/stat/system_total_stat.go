@@ -21,6 +21,7 @@ const (
 	SystemTotalStatTotalGoldConsume    db.TbCol = "total_gold_consume"
 	SystemTotalStatTotalDiamondConsume db.TbCol = "total_diamond_consume"
 	SystemTotalStatTotalRecharge       db.TbCol = "total_recharge"
+	SystemTotalStatTotalVirtualRecharge db.TbCol = "total_virtual_recharge"
 	SystemTotalStatTotalWithdraw       db.TbCol = "total_withdraw"
 	SystemTotalStatTotalRegisterUser   db.TbCol = "total_register_user"
 )
@@ -28,12 +29,13 @@ const (
 // SystemTotalStat 系统总数据(全局单条记录,默认ID=1)
 type SystemTotalStat struct {
 	migrate.OneModel
-	TotalGold           float64 `gorm:"default:0;comment:金币总额" json:"totalGold"`
-	TotalGoldConsume    float64 `gorm:"default:0;comment:金币总消费" json:"totalGoldConsume"`
-	TotalDiamondConsume float64 `gorm:"default:0;comment:钻石总消费" json:"totalDiamondConsume"`
-	TotalRecharge       float64 `gorm:"default:0;comment:总充值金额" json:"totalRecharge"`
-	TotalWithdraw       float64 `gorm:"default:0;comment:总提现金额" json:"totalWithdraw"`
-	TotalRegisterUser   uint64  `gorm:"default:0;comment:总注册用户数" json:"totalRegisterUser"`
+	TotalGold            float64 `gorm:"default:0;comment:金币总额" json:"totalGold"`
+	TotalGoldConsume     float64 `gorm:"default:0;comment:金币总消费" json:"totalGoldConsume"`
+	TotalDiamondConsume  float64 `gorm:"default:0;comment:钻石总消费" json:"totalDiamondConsume"`
+	TotalRecharge        float64 `gorm:"default:0;comment:总充值金额(真实USD)" json:"totalRecharge"`
+	TotalVirtualRecharge float64 `gorm:"default:0;comment:虚拟美金累计(充值白名单)" json:"totalVirtualRecharge"`
+	TotalWithdraw        float64 `gorm:"default:0;comment:总提现金额" json:"totalWithdraw"`
+	TotalRegisterUser    uint64  `gorm:"default:0;comment:总注册用户数" json:"totalRegisterUser"`
 }
 
 // NewSystemTotalStat 构造系统总数据记录,字段写入通过 syndb lazy 异步入库
@@ -82,6 +84,15 @@ func (s *SystemTotalStat) AddTotalRecharge(val float64) {
 	syndb.AddData(TbSystemTotalStat, SystemTotalStatTotalRecharge, &syndb.ColData{
 		IdVal:  s.ID,
 		ColVal: s.TotalRecharge,
+	})
+}
+
+func (s *SystemTotalStat) AddTotalVirtualRecharge(val float64) {
+	s.TotalVirtualRecharge = math.AddFloat64(s.TotalVirtualRecharge, val)
+
+	syndb.AddData(TbSystemTotalStat, SystemTotalStatTotalVirtualRecharge, &syndb.ColData{
+		IdVal:  s.ID,
+		ColVal: s.TotalVirtualRecharge,
 	})
 }
 
@@ -134,6 +145,7 @@ func initSystemTotalStat() {
 	syndb.RegLazy(TbSystemTotalStat, SystemTotalStatTotalGoldConsume)
 	syndb.RegLazy(TbSystemTotalStat, SystemTotalStatTotalDiamondConsume)
 	syndb.RegLazy(TbSystemTotalStat, SystemTotalStatTotalRecharge)
+	syndb.RegLazy(TbSystemTotalStat, SystemTotalStatTotalVirtualRecharge)
 	syndb.RegLazy(TbSystemTotalStat, SystemTotalStatTotalWithdraw)
 	syndb.RegLazy(TbSystemTotalStat, SystemTotalStatTotalRegisterUser)
 	migrate.AutoMigrate(&SystemTotalStat{})

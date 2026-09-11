@@ -204,6 +204,25 @@
 - 表 `yhpay_cfgs` / 列 `fiat_currency_cfgs.adjust_percent` 可残留库中；不强制 DROP
 - Google Play 不动
 
+## 邀请充值返还（2026-09-11）
+
+- 订阅 `RechargeGoldArrivedEvent`：被邀请人已账号首充且在 `first_recharge_at + validDays` 内，每次充值给邀请人 `CreditedGold * rewardPercent%`（reason=34）
+- CMS：活动管理 → 邀请充值返还（默认 5% / 30 天）；表 `invite_recharge_reward_cfgs`
+- 排除：白名单、币商；人工确认也计返佣；手机号注册邀请码同步写 `user_exts.inviter_id`
+
+## 充值事件（逐步收敛）
+
+流水线：`completeOrder` → `UsdIncomeArrivedEvent` → **wallet** 加赠发币 → `RechargeGoldArrivedEvent`
+
+| 事件 | 含义 | 订阅 |
+|------|------|------|
+| `UsdIncomeArrivedEvent` | 美金入账(待发币, Kind 区分) | wallet、报表、用户累计美金 |
+| `RechargeGoldArrivedEvent` | 充值金币到账(含 IsAccountFirst/IsTierFirst) | VIP、邀请返佣、首充推送 |
+| `RechargeOrderCreatedEvent` | 建单 | 订单超时等 |
+
+- 白名单 → `total_virtual_recharge`；真实 USD → `total_recharge`；用户 `total_recharge` 含虚拟
+- 币商：发币但不走 VIP/邀请返佣/账号档位首充
+
 ### 可插拔渠道 Provider（约定）
 
 ```

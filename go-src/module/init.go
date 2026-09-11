@@ -54,6 +54,7 @@ func Init() {
 	auth.InitAuth()
 	preload.Init()
 	currencylog.Init()
+	wallet.Init() // 须早于 vip/stat:美金入账时先发币加赠,再累计
 	message.Init()
 	recharge.Init()
 	coinmerchant.Init()
@@ -83,7 +84,6 @@ func Init() {
 	simulatorcpukeyword.Init()
 	simulatordevicewhitelist.Init()
 	customerservice.Init()
-	wallet.Init()
 	liverevenuesharecfg.Init()
 	logquery.Init()
 

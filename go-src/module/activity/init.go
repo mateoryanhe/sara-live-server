@@ -7,5 +7,7 @@ import (
 
 func Init() {
 	ReloadFirstRechargeActivityCache()
-	event.Sub(gameevent.FirstRechargeCompletedEvent, onFirstRechargeCompleted)
+	ReloadInviteRechargeRewardCache()
+	event.Sub(gameevent.RechargeGoldArrivedEvent, onRechargeGoldArrivedForFirstRecharge)
+	event.Sub(gameevent.RechargeGoldArrivedEvent, onInviteRechargeGoldArrived)
 }

@@ -69,7 +69,8 @@ func IsRechargeWhitelist(userId uint64) bool {
 	return GetUserExtByUserId(userId).RechargeWhitelist
 }
 
-// MarkFirstRechargeDone 首充到账后标记为非首次充值,返回本次是否为首次充值(仅档位充值 cfgId>0 时调用).
+// MarkFirstRechargeDone 账号首充到账后标记为非首次充值,返回本次是否为账号首次充值。
+// 仅普通用户档位充值调用;币商充值无账号首充概念。
 func MarkFirstRechargeDone(userId uint64) bool {
 	if userId == 0 {
 		return false
@@ -78,7 +79,11 @@ func MarkFirstRechargeDone(userId uint64) bool {
 	if !ext.FirstRecharge {
 		return false
 	}
+	now := time.Now()
 	ext.SetFirstRecharge(false)
+	if ext.FirstRechargeAt == nil {
+		ext.SetFirstRechargeAt(&now)
+	}
 	PublishUserExt(ext)
 	return true
 }

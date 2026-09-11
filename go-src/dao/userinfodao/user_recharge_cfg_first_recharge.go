@@ -37,7 +37,8 @@ func publishUserRechargeCfgFirstRechargeList(userId uint64, list []*entity.UserR
 	userRechargeCfgFirstRechargeCacheMgr.PublishList(gctx.New(), userId, list)
 }
 
-// IsRechargeCfgFirstRecharge 指定充值档位是否尚未首充(无记录视为未首充)
+// IsRechargeCfgFirstRecharge 指定普通充值档位是否尚未首充(无记录视为未首充)。
+// 仅用于 recharge_cfgs;与币商档位 ID 空间独立,勿用币商 cfgId 查询。
 func IsRechargeCfgFirstRecharge(userId, cfgId uint64) bool {
 	if userId == 0 || cfgId == 0 {
 		return false
@@ -72,7 +73,8 @@ func HasAnyRechargeCfgFirstRecharge(userId uint64) bool {
 	return false
 }
 
-// MarkRechargeCfgFirstRechargeDone 标记指定档位首充完成,返回本次是否为该档位首次到账
+// MarkRechargeCfgFirstRechargeDone 标记指定普通充值档位首充完成,返回本次是否为该档位首次到账。
+// 仅用于 recharge_cfgs(普通用户);币商档位(coin_merchant_recharge_cfgs)禁止调用。
 func MarkRechargeCfgFirstRechargeDone(userId, cfgId uint64) bool {
 	if userId == 0 || cfgId == 0 {
 		return false

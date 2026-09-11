@@ -282,6 +282,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
         titleKey: 'menu.ActivityManagement',
         children: [
             page('FirstRechargeActivityManagement'),
+            page('InviteRechargeRewardManagement'),
         ],
     },
     {

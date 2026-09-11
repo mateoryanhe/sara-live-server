@@ -12,5 +12,11 @@ export const activityRoutes: RouteRecordRaw = {
             component: () => import('@/views/activity/first-recharge-activity-cfg.vue'),
             meta: {title: '首充活动配置'},
         },
+        {
+            path: 'invite-recharge-reward-cfg',
+            name: 'InviteRechargeRewardManagement',
+            component: () => import('@/views/activity/invite-recharge-reward-cfg.vue'),
+            meta: {title: '邀请充值返还'},
+        },
     ],
 }

@@ -56,6 +56,7 @@ import {shortVideoAuthorSettlementLogListMessages} from './short-video-author-se
 import {accountCfgMessages} from './account-cfg'
 import {appVersionCfgMessages} from './app-version-cfg'
 import {firstRechargeActivityCfgMessages} from './first-recharge-activity-cfg'
+import {inviteRechargeRewardCfgMessages} from './invite-recharge-reward-cfg'
 import {simulatorCpuKeywordListMessages} from './simulator-cpu-keyword-list'
 import {simulatorDeviceWhitelistListMessages} from './simulator-device-whitelist-list'
 import {anchorSalaryCfgListMessages} from './anchor-salary-cfg-list'
@@ -138,6 +139,7 @@ const pageMessageBuilders = [
   ['accountCfg', accountCfgMessages],
   ['appVersionCfg', appVersionCfgMessages],
   ['firstRechargeActivityCfg', firstRechargeActivityCfgMessages],
+  ['inviteRechargeRewardCfg', inviteRechargeRewardCfgMessages],
   ['simulatorCpuKeywordList', simulatorCpuKeywordListMessages],
   ['simulatorDeviceWhitelistList', simulatorDeviceWhitelistListMessages],
   ['anchorSalaryCfgList', anchorSalaryCfgListMessages],

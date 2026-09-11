@@ -10,7 +10,8 @@ type CMSSysStatReq struct {
 // CMSSysStatRes CMS系统总数据
 type CMSSysStatRes struct {
 	TotalGold           float64 `json:"totalGold"`
-	TotalRecharge       float64 `json:"totalRecharge"`
+	TotalRecharge       float64 `json:"totalRecharge" dc:"总充值金额(真实USD)"`
+	TotalVirtualRecharge float64 `json:"totalVirtualRecharge" dc:"虚拟美金累计(充值白名单)"`
 	TotalWithdraw       float64 `json:"totalWithdraw"`
 	TotalRegisterUser   uint64  `json:"totalRegisterUser,string"`
 	TotalGoldConsume    float64 `json:"totalGoldConsume"    dc:"金币总消费"`

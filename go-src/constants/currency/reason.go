@@ -73,6 +73,8 @@ const (
 	ReasonGoldTransferOut Reason = 32
 	// ReasonGoldTransferIn 转赠金币(接收方)
 	ReasonGoldTransferIn Reason = 33
+	// ReasonInviteRechargeReward 邀请充值返还(邀请人)
+	ReasonInviteRechargeReward Reason = 34
 )
 
 // String 返回枚举的英文标识(用于日志/调试,不参与多语言展示;
@@ -145,6 +147,8 @@ func (r Reason) String() string {
 		return "GoldTransferOut"
 	case ReasonGoldTransferIn:
 		return "GoldTransferIn"
+	case ReasonInviteRechargeReward:
+		return "InviteRechargeReward"
 	default:
 		return "Unknown"
 	}

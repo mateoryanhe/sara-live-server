@@ -57,6 +57,7 @@ func Init() {
 	initAppVersionCfgCMSController()             // App版本配置(CMS)
 	initAppVersionAppController()                // App版本查询(App)
 	initFirstRechargeActivityCMSController()     // 首充活动配置(CMS)
+	initInviteRechargeRewardCMSController()      // 邀请充值返还配置(CMS)
 	initFirstRechargeActivityAppController()     // 首充活动配置(App)
 	initSimulatorCpuKeywordCMSController()       // 模拟器CPU关键词(CMS)
 	initSimulatorDeviceWhitelistCMSController()  // 模拟器设备白名单(CMS)

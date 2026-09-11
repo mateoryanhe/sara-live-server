@@ -100,6 +100,7 @@ const CONFIG_PAGES = new Set([
     'ShortVideoCfgManagement',
     'GamePlatformCfgManagement',
     'FirstRechargeActivityManagement',
+    'InviteRechargeRewardManagement',
 ])
 
 /** 各页面自定义按钮（未列出的页面按类型使用默认集） */
@@ -370,6 +371,10 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.view,
         BTN.save,
         {key: 'sync', label: '同步数据'},
+    ],
+    InviteRechargeRewardManagement: [
+        BTN.view,
+        BTN.save,
     ],
     H5LiveDeployManagement: [
         BTN.view,

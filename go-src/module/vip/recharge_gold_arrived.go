@@ -5,33 +5,36 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/entity/recharge"
+	userentity "xr-game-server/entity/user"
+	"xr-game-server/gameevent"
 )
 
-func onRechargeArrived(val any) {
-	data, ok := val.(*entity.RechargeOrder)
-	if !ok || data == nil {
-		g.Log().Errorf(gctx.New(), "RechargeArrivedEvent payload type error: %T", val)
+// onRechargeGoldArrived 普通用户充值金币到账后只读累计充值金币并尝试 VIP 升级。
+// TotalRechargeGold 由 wallet 发币时写入;币商无 VIP,跳过。
+func onRechargeGoldArrived(val any) {
+	data, ok := val.(*gameevent.RechargeGoldArrivedEventData)
+	if !ok || data == nil || data.Order == nil {
+		g.Log().Errorf(gctx.New(), "RechargeGoldArrivedEvent payload type error: %T", val)
 		return
 	}
-	order := data
-
-	//充值成功完成
-	stat := userinfodao.GetUserCumulativeStatByUserId(order.UserId)
-	stat.AddTotalRecharge(order.Price)
-	stat.AddTotalPayCount(1)
-	if order.Gold > 0 {
-		stat.AddTotalRechargeGold(order.Gold)
+	order := data.Order
+	if order.UserId == 0 {
+		return
 	}
-	userinfodao.PublishUserCumulativeStat(stat)
+	if isCoinMerchantVipSkip(data.Kind, order) {
+		return
+	}
 
-	totalRechargeGold := stat.TotalRechargeGold
-
-	targetLevel := calcTargetVipLevel(totalRechargeGold)
+	stat := userinfodao.GetUserCumulativeStatByUserId(order.UserId)
+	targetLevel := calcTargetVipLevel(stat.TotalRechargeGold)
 	if targetLevel == 0 {
 		return
 	}
 
 	user := userinfodao.GetUserInfoByUserId(order.UserId)
+	if user == nil || user.UserType == userentity.UserTypeCoinMerchant {
+		return
+	}
 	if targetLevel <= user.VipLevel {
 		return
 	}
@@ -47,7 +50,13 @@ func onRechargeArrived(val any) {
 	user.SetVipLevel(targetLevel)
 	userinfodao.PublishUserInfo(user)
 	pushVipLevelToApp(order.UserId, targetLevel)
+}
 
+func isCoinMerchantVipSkip(kind gameevent.UsdIncomeKind, order *entity.RechargeOrder) bool {
+	if kind == gameevent.UsdIncomeKindCoinMerchant {
+		return true
+	}
+	return order != nil && order.PayChannel == entity.RechargeCfgTypeCoinMerchant
 }
 
 // calcTargetVipLevel 根据累计充值到账金币计算应达到的VIP等级。
