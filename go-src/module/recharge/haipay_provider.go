@@ -128,7 +128,7 @@ func (p *haiPayProvider) CreatePay(ctx context.Context, req *ChannelPayCreateReq
 		body["body"] = "order:" + remark
 	}
 
-	sign, err := haiPaySign(body, cfg.MerchantSecretKey, cfg.MerchantPrivateKey)
+	sign, err := haiPaySign(ctx, body, cfg.MerchantSecretKey, cfg.MerchantPrivateKey)
 	if err != nil {
 		return nil, fmt.Errorf("haipay sign: %w", err)
 	}
@@ -149,16 +149,11 @@ func (p *haiPayProvider) CreatePay(ctx context.Context, req *ChannelPayCreateReq
 	if res.Data == nil {
 		return nil, fmt.Errorf("haipay apply empty data")
 	}
-	// 响应验签：仅 data 内字段
+	// 下单响应不验签：仅打印待验签串便于与对方比对；以异步 notify 为准
 	dataMap := map[string]any{}
 	rawData, _ := json.Marshal(res.Data)
 	_ = json.Unmarshal(rawData, &dataMap)
-	if sig, _ := dataMap["sign"].(string); strings.TrimSpace(sig) != "" {
-		if err = haiPayVerify(dataMap, cfg.MerchantSecretKey, cfg.HaiPayPublicKey, sig); err != nil {
-			xrlog.DetailLog.Warningf(ctx, "haipay apply response verify failed orderId=%s err=%v", req.OrderID, err)
-			return nil, fmt.Errorf("haipay response verify failed: %w", err)
-		}
-	}
+	xrlog.DetailLog.Infof(ctx, "haipay sign content(response)=%s", haiPayBuildSignContent(dataMap, cfg.MerchantSecretKey))
 	payURL := strings.TrimSpace(res.Data.PayUrl)
 	if payURL == "" {
 		return nil, fmt.Errorf("haipay empty payUrl")

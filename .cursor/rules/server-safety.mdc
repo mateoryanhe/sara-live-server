@@ -7,9 +7,10 @@ alwaysApply: true
 
 以下操作 **Agent 不得自行执行**，必须先说明影响并等用户确认：
 
+- **发版/部署**（含测试服、审核服、正式服）：`deploy.bat`、上传二进制、热重启/冷启动 Go、CMS 上传等。**仅本地改代码 / `go build` 可以；发版必须用户明确同意**（2026-09-11 约定）
 - SSH 到测试/正式服上的 **删除**：文件、目录、进程、Docker 容器、数据库 **DROP/TRUNCATE/DELETE**、清表、回滚数据
 - 修改生产/测试 **配置** 导致服务不可用（如错删 `config.yaml`、改 nginx）
-- **重启** 正式服 Go 服务或数据库（测试服可视任务说明执行）
+- **重启** 正式服 Go 服务或数据库（测试服重启同样须先征得同意，除非用户当次任务明确说「部署/重启」）
 
 ## SSH 主机（备忘）
 
@@ -21,7 +22,7 @@ alwaysApply: true
 
 ## 允许（常规）
 
-- 只读：`tail` 日志、`SELECT` 查询、 `git status`、`go build`、部署脚本 **dry-run 式阅读**
-- 用户明确指令下的测试服部署/build
+- 只读：`tail` 日志、`SELECT` 查询、`git status`、本机 `go build`、部署脚本 **阅读**
+- **用户明确说「部署/发版到 xxx」之后**，才可执行对应 deploy/upload
 
 本机误删防范见 `workspace-safety.mdc`。

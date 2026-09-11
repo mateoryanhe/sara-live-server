@@ -8,7 +8,7 @@
 |------|------|
 | [workspace-safety.mdc](../rules/workspace-safety.mdc) | **本机误删、Git push、代码恢复**（2026-08-28 事故） |
 | [go-build-output.mdc](../rules/go-build-output.mdc) | Go 编译 `-o` 路径，勿生成 `...` 目录 |
-| [server-safety.mdc](../rules/server-safety.mdc) | 远程/数据库删除须问用户 |
+| [server-safety.mdc](../rules/server-safety.mdc) | 远程/数据库删除须问用户；**发版须用户同意** |
 | [flutter-push-subscribe.mdc](../rules/flutter-push-subscribe.mdc) | Flutter：PushBus 上 **Repository 与 ViewModel 各自订阅**（勿中心 revision 转 UI） |
 | [read-agent-notes.mdc](../rules/read-agent-notes.mdc) | 任务前必读入口 |
 

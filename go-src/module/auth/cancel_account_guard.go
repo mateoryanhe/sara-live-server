@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	appCancelListMaxSize    = 100
-	appCancelDailyLimit     = 3
+	appCancelListMaxSize    = 3 // 同一 openId+channel 账号列表上限(含已注销)
+	appCancelDailyLimit     = 1 // 同一 openId+channel 每天最多注销次数
 	appCancelDailyKeyLayout = "2006-01-02"
 )
 

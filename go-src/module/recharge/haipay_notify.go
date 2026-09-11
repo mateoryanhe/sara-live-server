@@ -32,8 +32,8 @@ func HandleHaiPayCollectNotify(r *ghttp.Request) {
 	}
 
 	sign, _ := params["sign"].(string)
-	if err := haiPayVerify(params, cfg.MerchantSecretKey, cfg.HaiPayPublicKey, sign); err != nil {
-		xrlog.DetailLog.Warningf(ctx, "haipay notify verify failed err=%v", err)
+	if err := haiPayVerify(ctx, params, cfg.MerchantSecretKey, cfg.HaiPayPublicKey, sign); err != nil {
+		xrlog.DetailLog.Warningf(ctx, "haipay notify verify failed err=%v body=%s", err, haiPaySafeJSON(raw))
 		r.Response.WriteStatus(400)
 		r.Response.Write([]byte("bad sign"))
 		return

@@ -29,7 +29,7 @@ type vendorGameStartResp struct {
 	Message string `json:"message"`
 }
 
-func fetchVendorGameStartURL(ctx context.Context, gameCode, platform, ops, lang string) (string, error) {
+func fetchVendorGameStartURL(ctx context.Context, gameCode, platform, ops, lang, urlParams string) (string, error) {
 	if !cfgdao.GamePlatformCfgReady() {
 		return "", fmt.Errorf("game platform cfg not ready")
 	}
@@ -42,6 +42,7 @@ func fetchVendorGameStartURL(ctx context.Context, gameCode, platform, ops, lang 
 	platform = strings.TrimSpace(platform)
 	ops = strings.TrimSpace(ops)
 	lang = strings.TrimSpace(lang)
+	urlParams = strings.TrimSpace(urlParams)
 	if gameCode == "" || platform == "" || ops == "" {
 		return "", fmt.Errorf("game start params invalid")
 	}
@@ -58,6 +59,9 @@ func fetchVendorGameStartURL(ctx context.Context, gameCode, platform, ops, lang 
 		"platform": platform,
 		"ops":      ops,
 		"lang":     lang,
+	}
+	if urlParams != "" {
+		body["urlParams"] = urlParams
 	}
 	return postVendorGameStart(ctx, baseURL, body, operatorToken, secretKey)
 }
@@ -80,7 +84,7 @@ func postVendorGameStart(
 	headers := buildVendorRequestHeaders(operatorToken, timestamp, signValue)
 
 	url := buildVendorAPIURL(baseURL, vendorGameStartPath)
-	bodyBytes, err := json.Marshal(body)
+	bodyBytes, err := marshalVendorJSON(body)
 	if err != nil {
 		return "", err
 	}

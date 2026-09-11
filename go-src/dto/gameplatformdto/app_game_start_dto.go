@@ -4,8 +4,9 @@ import "github.com/gogf/gf/v2/frame/g"
 
 // AppGameStartReq App 获取游戏启动链接
 type AppGameStartReq struct {
-	g.Meta   `path:"/appGameStart" method:"post" summary:"App获取游戏启动链接" tags:"游戏"`
-	GameCode string `json:"gameCode" v:"required#游戏编码不能为空" dc:"游戏编码(对应第三方 gameId)"`
+	g.Meta    `path:"/appGameStart" method:"post" summary:"App获取游戏启动链接" tags:"游戏"`
+	GameCode  string `json:"gameCode" v:"required#游戏编码不能为空" dc:"游戏编码(对应第三方 gameId)"`
+	UrlParams string `json:"urlParams" dc:"透传给厂商的 urlParams（原样上报）"`
 }
 
 // AppGameStartRes App 游戏启动链接响应

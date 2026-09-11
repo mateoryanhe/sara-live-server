@@ -250,7 +250,7 @@ func GetCMSGameStartLink(ctx context.Context, req *gameplatformdto.CMSGameStartL
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 
-	link, err := fetchVendorGameStartURL(ctx, gameCode, platform, strconv.FormatUint(req.UserId, 10), "en")
+	link, err := fetchVendorGameStartURL(ctx, gameCode, platform, strconv.FormatUint(req.UserId, 10), "en", "")
 	if err != nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}

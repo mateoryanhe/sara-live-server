@@ -1,6 +1,7 @@
 package game
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"strings"
@@ -77,12 +78,27 @@ func vendorAPICostMs(start time.Time) int64 {
 }
 
 func logVendorAPIJSON(ctx context.Context, title string, payload any) {
-	raw, err := json.Marshal(payload)
+	raw, err := marshalVendorJSON(payload)
 	if err != nil {
 		vendorDetailLog().Warningf(ctx, "%s marshal failed: %v", title, err)
 		return
 	}
 	vendorDetailLog().Infof(ctx, "%s: %s", title, string(raw))
+}
+
+// marshalVendorJSON 关闭 HTML 转义，避免 urlParams 里的 & 变成 \u0026。
+func marshalVendorJSON(v any) ([]byte, error) {
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	enc.SetEscapeHTML(false)
+	if err := enc.Encode(v); err != nil {
+		return nil, err
+	}
+	b := buf.Bytes()
+	if n := len(b); n > 0 && b[n-1] == '\n' {
+		b = b[:n-1]
+	}
+	return b, nil
 }
 
 func buildVendorRequestHeaders(operatorToken, timestamp, signValue string) map[string]string {

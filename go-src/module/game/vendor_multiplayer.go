@@ -77,7 +77,7 @@ func postVendorMultiplayerStart(
 	headers := buildVendorRequestHeaders(operatorToken, timestamp, signValue)
 
 	url := buildVendorAPIURL(baseURL, vendorMultiplayerStartPath)
-	bodyBytes, err := json.Marshal(body)
+	bodyBytes, err := marshalVendorJSON(body)
 	if err != nil {
 		return "", 0, err
 	}

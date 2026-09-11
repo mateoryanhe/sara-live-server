@@ -1,6 +1,7 @@
 package recharge
 
 import (
+	"context"
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
@@ -12,6 +13,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"xr-game-server/core/xrlog"
 )
 
 func haiPayNormalizeKeyMaterial(raw string) string {
@@ -153,8 +156,9 @@ func haiPayBuildSignContent(params map[string]any, merchantSecretKey string) str
 	return strings.Join(parts, "&")
 }
 
-func haiPaySign(params map[string]any, merchantSecretKey, privateKeyPEM string) (string, error) {
+func haiPaySign(ctx context.Context, params map[string]any, merchantSecretKey, privateKeyPEM string) (string, error) {
 	content := haiPayBuildSignContent(params, merchantSecretKey)
+	xrlog.DetailLog.Infof(ctx, "haipay sign content(request)=%s", content)
 	priv, err := haiPayParsePrivateKey(privateKeyPEM)
 	if err != nil {
 		return "", err
@@ -167,12 +171,13 @@ func haiPaySign(params map[string]any, merchantSecretKey, privateKeyPEM string) 
 	return base64.StdEncoding.EncodeToString(sig), nil
 }
 
-func haiPayVerify(params map[string]any, merchantSecretKey, publicKeyPEM, signBase64 string) error {
+func haiPayVerify(ctx context.Context, params map[string]any, merchantSecretKey, publicKeyPEM, signBase64 string) error {
 	signBase64 = strings.TrimSpace(signBase64)
 	if signBase64 == "" {
 		return fmt.Errorf("empty sign")
 	}
 	content := haiPayBuildSignContent(params, merchantSecretKey)
+	xrlog.DetailLog.Infof(ctx, "haipay sign content(notify)=%s", content)
 	pub, err := haiPayParsePublicKey(publicKeyPEM)
 	if err != nil {
 		return err
