@@ -18,6 +18,7 @@
             <el-option :label="t('pages.guildTransferList.statusPending')" :value="0"/>
             <el-option :label="t('pages.guildTransferList.statusApproved')" :value="1"/>
             <el-option :label="t('pages.guildTransferList.statusTransferred')" :value="2"/>
+            <el-option :label="t('pages.guildTransferList.statusTransferring')" :value="3"/>
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -64,6 +65,11 @@
         <el-table-column :label="t('pages.guildTransferList.transferCurrency')" min-width="90">
           <template #default="{ row }">{{ row.transferCurrency || '-' }}</template>
         </el-table-column>
+        <el-table-column :label="t('pages.guildTransferList.transferLocalAmount')" align="right" min-width="120">
+          <template #default="{ row }">
+            <span class="money-amount">{{ row.transferLocalAmount ? formatWalletBalance(row.transferLocalAmount) : '-' }}</span>
+          </template>
+        </el-table-column>
         <el-table-column :label="t('pages.guildTransferList.transferPayeeName')" min-width="120">
           <template #default="{ row }">{{ row.transferPayeeName || '-' }}</template>
         </el-table-column>
@@ -75,6 +81,9 @@
         </el-table-column>
         <el-table-column :label="t('pages.guildTransferList.transferBankCode')" min-width="110">
           <template #default="{ row }">{{ row.transferBankCode || '-' }}</template>
+        </el-table-column>
+        <el-table-column :label="t('pages.guildTransferList.transferFailMsg')" min-width="160">
+          <template #default="{ row }">{{ row.transferFailMsg || '-' }}</template>
         </el-table-column>
       </el-table>
 
@@ -220,26 +229,49 @@ const handleBatchTransfer = async () => {
     ElMessage.warning(t('pages.guildTransferList.selectRows'))
     return
   }
+  const approvedIds = selectedRows.value
+      .filter(row => row.status === 1)
+      .map(row => row.id)
+  if (!approvedIds.length) {
+    ElMessage.warning(t('pages.guildTransferList.selectRows'))
+    return
+  }
   try {
-    const res = await guildIncomeSettlementLogApi.batchTransfer({
-      ids: selectedRows.value.map(row => row.id),
-    })
-    ElMessage.warning(res.message || t('pages.guildTransferList.transferReserved'))
+    await ElMessageBox.confirm(
+        t('pages.guildTransferList.transferConfirm', {count: approvedIds.length}),
+        t('pages.guildTransferList.batchTransfer'),
+        {type: 'warning'},
+    )
+  } catch {
+    return
+  }
+  try {
+    const res = await guildIncomeSettlementLogApi.batchTransfer({ids: approvedIds})
+    const success = res.successCount || 0
+    const fail = res.failCount || 0
+    if (success > 0) {
+      ElMessage.success(res.message || t('pages.guildTransferList.transferSuccess', {success, fail}))
+    } else {
+      ElMessage.warning(res.message || t('pages.guildTransferList.transferFailed'))
+    }
+    await fetchList()
   } catch (error) {
-    console.error('Batch transfer reserved call failed:', error)
-    ElMessage.warning(t('pages.guildTransferList.transferReserved'))
+    console.error('Batch transfer failed:', error)
+    ElMessage.error(t('pages.guildTransferList.transferFailed'))
   }
 }
 
 const statusLabel = (status: number | undefined) => {
   if (status === 1) return t('pages.guildTransferList.statusApproved')
   if (status === 2) return t('pages.guildTransferList.statusTransferred')
+  if (status === 3) return t('pages.guildTransferList.statusTransferring')
   return t('pages.guildTransferList.statusPending')
 }
 
 const statusTagType = (status: number | undefined) => {
   if (status === 1) return 'success'
   if (status === 2) return 'info'
+  if (status === 3) return ''
   return 'warning'
 }
 

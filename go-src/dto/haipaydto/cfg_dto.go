@@ -21,6 +21,10 @@ type HaiPayCfgItem struct {
 	PaymentMethods     string `json:"paymentMethods"`
 	Subject            string `json:"subject"`
 	DefaultRegion      string `json:"defaultRegion"`
+	PayoutEnabled      bool   `json:"payoutEnabled"`
+	PayoutAppIds       string `json:"payoutAppIds"`
+	PayoutUsdRates     string `json:"payoutUsdRates"`
+	PayoutSubject      string `json:"payoutSubject"`
 	CreatedAt          string `json:"createdAt"`
 	UpdatedAt          string `json:"updatedAt"`
 }
@@ -45,6 +49,10 @@ type SaveHaiPayCfgReq struct {
 	PaymentMethods     string `json:"paymentMethods"`
 	Subject            string `json:"subject"`
 	DefaultRegion      string `json:"defaultRegion"`
+	PayoutEnabled      bool   `json:"payoutEnabled"`
+	PayoutAppIds       string `json:"payoutAppIds"`
+	PayoutUsdRates     string `json:"payoutUsdRates"`
+	PayoutSubject      string `json:"payoutSubject"`
 }
 
 type SaveHaiPayCfgRes struct {

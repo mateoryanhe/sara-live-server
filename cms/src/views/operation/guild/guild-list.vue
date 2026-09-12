@@ -232,21 +232,45 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="transferDialogVisible" :title="transferDialogTitle" destroy-on-close width="560px">
+    <el-dialog v-model="transferDialogVisible" :title="transferDialogTitle" destroy-on-close width="600px">
       <el-form
           ref="transferFormRef"
           v-loading="transferLoading"
           :model="transferForm"
           :rules="transferFormRules"
-          label-width="100px"
+          label-width="110px"
       >
-        <el-form-item :label="t('pages.guildList.transferCurrency')" prop="currency">
-          <el-input
-              v-model="transferForm.currency"
+        <el-form-item :label="t('pages.guildList.transferCountry')" prop="countryCode">
+          <el-select
+              v-model="transferForm.countryCode"
               clearable
-              maxlength="8"
-              :placeholder="t('pages.guildList.transferCurrencyPlaceholder')"
-              @input="transferForm.currency = transferForm.currency.toUpperCase()"
+              filterable
+              style="width: 100%"
+              :placeholder="t('pages.guildList.transferCountryPlaceholder')"
+              @change="onTransferCountryChange"
+          >
+            <el-option
+                v-for="c in transferCountries"
+                :key="c.countryCode"
+                :label="`${c.nameZh || c.nameEn} (${c.countryCode}) · ${c.currency}`"
+                :value="c.countryCode"
+            >
+              <span class="transfer-country-option">
+                <img v-if="c.icon" :src="c.icon" alt="" class="transfer-flag"/>
+                <span>{{ c.nameZh || c.nameEn }} ({{ c.countryCode }}) · {{ c.currency }}</span>
+              </span>
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item :label="t('pages.guildList.transferCurrency')">
+          <el-input :model-value="transferForm.currency" disabled/>
+          <div class="form-tip">{{ t('pages.guildList.transferCurrencyHint') }}</div>
+        </el-form-item>
+        <el-form-item :label="t('pages.guildList.transferAccountType')" prop="accountType">
+          <el-input
+              v-model="transferForm.accountType"
+              clearable
+              :placeholder="t('pages.guildList.transferAccountTypePlaceholder')"
           />
         </el-form-item>
         <el-form-item :label="t('pages.guildList.transferPayeeName')" prop="payeeName">
@@ -254,6 +278,20 @@
               v-model="transferForm.payeeName"
               clearable
               :placeholder="t('pages.guildList.transferPayeeNamePlaceholder')"
+          />
+        </el-form-item>
+        <el-form-item :label="t('pages.guildList.transferPhone')" prop="phone">
+          <el-input
+              v-model="transferForm.phone"
+              clearable
+              :placeholder="t('pages.guildList.transferPhonePlaceholder')"
+          />
+        </el-form-item>
+        <el-form-item :label="t('pages.guildList.transferEmail')" prop="email">
+          <el-input
+              v-model="transferForm.email"
+              clearable
+              :placeholder="t('pages.guildList.transferEmailPlaceholder')"
           />
         </el-form-item>
         <el-form-item :label="t('pages.guildList.transferBankName')" prop="bankName">
@@ -306,7 +344,7 @@ import {guildApi} from '@/api'
 import {liveRevenueShareCfgApi} from '@/api/modules/live-revenue-share-cfg'
 import CmsUserPickerDialog from '@/components/CmsUserPickerDialog.vue'
 import type {CMSUser} from '@/api/modules/cmsuser'
-import type {Guild, GuildAnchorImportResultState, ImportGuildAnchorRow} from '@/types/api.ts'
+import type {Guild, GuildAnchorImportResultState, GuildTransferCountryOption, ImportGuildAnchorRow} from '@/types/api.ts'
 import {usePagePermission} from '@/composables/usePagePermission'
 import {formatWalletBalance} from '@/utils/number-format'
 
@@ -342,8 +380,12 @@ interface ImportGuildForm {
 interface TransferInfoForm {
   guildId: string
   guildName: string
+  countryCode: string
   currency: string
+  accountType: string
   payeeName: string
+  phone: string
+  email: string
   bankName: string
   accountNo: string
   bankCode: string
@@ -382,14 +424,19 @@ const transferFormRef = ref<FormInstance>()
 const transferForm = ref<TransferInfoForm>({
   guildId: '',
   guildName: '',
+  countryCode: '',
   currency: '',
+  accountType: 'BANK_ACCOUNT',
   payeeName: '',
+  phone: '',
+  email: '',
   bankName: '',
   accountNo: '',
   bankCode: '',
   remark: '',
   updatedAt: '',
 })
+const transferCountries = ref<GuildTransferCountryOption[]>([])
 
 const searchForm = reactive<SearchForm>({
   name: ''
@@ -467,11 +514,15 @@ const importFormRules = computed<FormRules>(() => ({
 }))
 
 const transferFormRules = computed<FormRules>(() => ({
-  currency: [
-    {required: true, message: t('pages.guildList.transferCurrencyRequired'), trigger: 'blur'},
-    {min: 3, max: 8, message: t('pages.guildList.transferCurrencyRequired'), trigger: 'blur'},
+  countryCode: [
+    {required: true, message: t('pages.guildList.transferCountryRequired'), trigger: 'change'},
   ],
 }))
+
+const onTransferCountryChange = (code: string) => {
+  const hit = transferCountries.value.find(c => c.countryCode === code)
+  transferForm.value.currency = hit?.currency || ''
+}
 
 const joinFormRules = computed<FormRules>(() => ({
   userId: [
@@ -802,29 +853,42 @@ const openTransferInfoDialog = async (row: Guild) => {
   transferForm.value = {
     guildId: row.id,
     guildName: row.name,
+    countryCode: '',
     currency: '',
+    accountType: 'BANK_ACCOUNT',
     payeeName: '',
+    phone: '',
+    email: '',
     bankName: '',
     accountNo: '',
     bankCode: '',
     remark: '',
     updatedAt: '',
   }
+  transferCountries.value = []
   transferDialogVisible.value = true
   transferLoading.value = true
   try {
     const response = await guildApi.getGuildTransferInfo(row.id)
     const info = response?.info
+    transferCountries.value = response?.countries ?? []
     transferForm.value = {
       guildId: row.id,
       guildName: row.name,
+      countryCode: info?.countryCode ?? '',
       currency: info?.currency ?? '',
+      accountType: info?.accountType || 'BANK_ACCOUNT',
       payeeName: info?.payeeName ?? '',
+      phone: info?.phone ?? '',
+      email: info?.email ?? '',
       bankName: info?.bankName ?? '',
       accountNo: info?.accountNo ?? '',
       bankCode: info?.bankCode ?? '',
       remark: info?.remark ?? '',
       updatedAt: info?.updatedAt ?? '',
+    }
+    if (!transferForm.value.currency && transferForm.value.countryCode) {
+      onTransferCountryChange(transferForm.value.countryCode)
     }
   } catch (error) {
     console.error('fetch guild transfer info failed:', error)
@@ -848,8 +912,11 @@ const handleTransferSave = async () => {
   try {
     await guildApi.saveGuildTransferInfo({
       guildId: transferForm.value.guildId,
-      currency: transferForm.value.currency.trim().toUpperCase(),
+      countryCode: transferForm.value.countryCode.trim().toUpperCase(),
+      accountType: transferForm.value.accountType.trim() || 'BANK_ACCOUNT',
       payeeName: transferForm.value.payeeName.trim(),
+      phone: transferForm.value.phone.trim(),
+      email: transferForm.value.email.trim(),
       bankName: transferForm.value.bankName.trim(),
       accountNo: transferForm.value.accountNo.trim(),
       bankCode: transferForm.value.bankCode.trim(),
@@ -943,4 +1010,23 @@ const handleViewMembers = (row: Guild) => {
   flex: 1;
 }
 
+.form-tip {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  line-height: 1.4;
+}
+
+.transfer-country-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.transfer-flag {
+  width: 18px;
+  height: 12px;
+  object-fit: cover;
+  border-radius: 2px;
+}
 </style>

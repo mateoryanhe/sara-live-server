@@ -171,6 +171,8 @@
 - 普通工会强制写全局「工会分佣」；币商工会可自定义；默认取流水分佣配置的工会分佣，未配置则 **10%**
 - **工会周结算**：币商工会用自身 `share_percent`；普通工会仍用全局工会分佣
 - **主播周结算**：币商工会名下主播流水分佣按 **0%**，开播底薪也按 **0**（币商工会无开播底薪）；其余主播用全局主播分佣 + 薪资档
+- **工会转账信息**（2026-09-12）：`live_guild_transfer_infos` 对齐 HaiPay 代付——选 **CountryCode**（`country.HaiPayPayoutCountryCodes`）自动推导 **Currency**（如 ID→IDR）；另存 accountType/phone/email/payeeName/accountNo/bankCode；CMS 工会列表「转账信息」下拉国家
+- **HaiPay 代付发薪**（2026-09-12）：CMS HaiPay 配 `payoutEnabled` + `payoutAppIds`(如`IDR:25280`) + `payoutUsdRates`(如`IDR:16000`)；工会转账页审核通过后「批量转账」调 `/{currency}/pay/apply`；回调 `/webhook/haipay/payout/notify`（status=2→转账成功，3→回审核通过可重试）；金额=`settlementReceivableUsd × 汇率`
 
 ## 币商 H5 部署（2026-09-09）
 

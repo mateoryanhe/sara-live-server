@@ -41,16 +41,17 @@ type CMSBatchApproveGuildSettlementRes struct {
 	FailCount    int `json:"failCount"`
 }
 
-// CMSBatchTransferGuildSettlementReq CMS批量转账(预留)
+// CMSBatchTransferGuildSettlementReq CMS批量代付工会结算
 type CMSBatchTransferGuildSettlementReq struct {
-	g.Meta `path:"/cmsBatchTransferGuildSettlement" method:"post" summary:"CMS批量转账工会结算(预留)" tags:"工会结算流水"`
+	g.Meta `path:"/cmsBatchTransferGuildSettlement" method:"post" summary:"CMS批量HaiPay代付工会结算" tags:"工会结算流水"`
 	Ids    []string `json:"ids" v:"required#请选择结算流水"`
 }
 
-// CMSBatchTransferGuildSettlementRes CMS批量转账预留结果
+// CMSBatchTransferGuildSettlementRes CMS批量代付结果
 type CMSBatchTransferGuildSettlementRes struct {
-	Reserved bool   `json:"reserved"`
-	Message  string `json:"message"`
+	SuccessCount int    `json:"successCount"`
+	FailCount    int    `json:"failCount"`
+	Message      string `json:"message"`
 }
 
 // CMSIncomeSettlementLogItem CMS结算流水列表项(主播/工会共用收益快照字段)
@@ -80,6 +81,10 @@ type CMSIncomeSettlementLogItem struct {
 	GuildSharePercent            float64    `json:"guildSharePercent"`
 	Status                       uint8      `json:"status"`
 	TransferAt                   *time.Time `json:"transferAt"`
+	TransferOrderId              string     `json:"transferOrderId"`
+	TransferPlatformNo           string     `json:"transferPlatformNo"`
+	TransferLocalAmount          float64    `json:"transferLocalAmount"`
+	TransferFailMsg              string     `json:"transferFailMsg"`
 	TransferCurrency             string     `json:"transferCurrency"`
 	TransferPayeeName            string     `json:"transferPayeeName"`
 	TransferBankName             string     `json:"transferBankName"`

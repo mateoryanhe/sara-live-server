@@ -11,6 +11,7 @@ import type {
     GuildIncomeArchivesRes,
     GuildQuery,
     GuildTransferInfo,
+    GetGuildTransferInfoRes,
     ImportGuildAnchorsReq,
     ImportGuildAnchorsRes,
     JoinGuildAnchorReq,
@@ -112,7 +113,7 @@ export const guildApi = {
     },
 
     getGuildTransferInfo: (guildId: string | number) => {
-        return request.post<{info: GuildTransferInfo | null}>('/guild/getGuildTransferInfo', {guildId})
+        return request.post<GetGuildTransferInfoRes>('/guild/getGuildTransferInfo', {guildId})
     },
 
     saveGuildTransferInfo: (data: SaveGuildTransferInfoReq) => {

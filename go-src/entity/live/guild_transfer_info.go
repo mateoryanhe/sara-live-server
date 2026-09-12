@@ -11,15 +11,25 @@ const (
 	TbLiveGuildTransferInfo db.TbName = "live_guild_transfer_infos"
 )
 
+const (
+	// GuildTransferAccountTypeBank 默认银行卡代付(HaiPay accountType)
+	GuildTransferAccountTypeBank = "BANK_ACCOUNT"
+)
+
 // LiveGuildTransferInfo 工会收款/转账信息(主键ID=工会ID,直写数据库)
+// 对齐 HaiPay 代付: 选国家(CountryCode)→推导 Currency; name/phone/email/accountType/bankCode/accountNo
 type LiveGuildTransferInfo struct {
 	migrate.OneModel
-	Currency  string `gorm:"size:16;not null;default:'';comment:收款币种(如IDR)" json:"currency"`
-	PayeeName string `gorm:"size:128;default:'';comment:收款人姓名" json:"payeeName"`
-	BankName  string `gorm:"size:128;default:'';comment:银行名称" json:"bankName"`
-	AccountNo string `gorm:"size:128;default:'';comment:收款账号" json:"accountNo"`
-	BankCode  string `gorm:"size:64;default:'';comment:银行代码" json:"bankCode"`
-	Remark    string `gorm:"size:255;default:'';comment:备注" json:"remark"`
+	CountryCode string `gorm:"size:8;not null;default:'';comment:国家/地区ISO简码(如ID),与country包一致" json:"countryCode"`
+	Currency    string `gorm:"size:16;not null;default:'';comment:代付币种(由CountryCode推导,如IDR)" json:"currency"`
+	AccountType string `gorm:"size:32;not null;default:'BANK_ACCOUNT';comment:HaiPay accountType" json:"accountType"`
+	PayeeName   string `gorm:"size:128;default:'';comment:收款人姓名(HaiPay name)" json:"payeeName"`
+	Phone       string `gorm:"size:32;default:'';comment:收款人手机(HaiPay phone)" json:"phone"`
+	Email       string `gorm:"size:128;default:'';comment:收款人邮箱(HaiPay email)" json:"email"`
+	BankName    string `gorm:"size:128;default:'';comment:银行名称(展示用,可选)" json:"bankName"`
+	AccountNo   string `gorm:"size:128;default:'';comment:收款账号(HaiPay accountNo)" json:"accountNo"`
+	BankCode    string `gorm:"size:64;default:'';comment:银行/支付编码(HaiPay bankCode)" json:"bankCode"`
+	Remark      string `gorm:"size:255;default:'';comment:备注" json:"remark"`
 }
 
 func NewLiveGuildTransferInfo(guildId uint64) *LiveGuildTransferInfo {
@@ -30,6 +40,7 @@ func NewLiveGuildTransferInfo(guildId uint64) *LiveGuildTransferInfo {
 			CreatedAt: now,
 			UpdatedAt: now,
 		},
+		AccountType: GuildTransferAccountTypeBank,
 	}
 }
 

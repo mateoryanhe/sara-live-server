@@ -179,13 +179,13 @@ type ReportAttributionRes struct {
 	Success bool `json:"success"`
 }
 
-// ReportInviterReq App端上报邀请者用户ID
+// ReportInviterReq App端上报邀请码(服务器解析为邀请者userId;后续可扩展新格式)
 type ReportInviterReq struct {
-	g.Meta    `path:"/reportInviter" method:"post" summary:"上报邀请者ID" tags:"用户信息"`
-	InviterId uint64 `json:"inviterId" v:"required|min:1#邀请者ID不能为空|邀请者ID无效" dc:"邀请者用户ID"`
+	g.Meta     `path:"/reportInviter" method:"post" summary:"上报邀请码" tags:"用户信息"`
+	InviteCode string `json:"inviteCode" v:"required#邀请码不能为空" dc:"邀请码字符串(当前为分享码shareCode;后续可扩展新格式)"`
 }
 
 type ReportInviterRes struct {
 	Success   bool   `json:"success"`
-	InviterId uint64 `json:"inviterId,string" dc:"当前邀请者用户ID"`
+	InviterId uint64 `json:"inviterId,string" dc:"解析后的邀请者用户ID"`
 }

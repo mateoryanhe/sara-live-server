@@ -78,6 +78,11 @@ func fillCMSItemFromGuild(row *entity.GuildIncomeSettlementLog) *incomesettlemen
 		GuildSharePercent:            row.GuildSharePercent,
 		Status:                       row.Status,
 		TransferAt:                   row.TransferAt,
+		TransferOrderId:              row.TransferOrderId,
+		TransferPlatformNo:           row.TransferPlatformNo,
+		TransferLocalAmount:          row.TransferLocalAmount,
+		TransferFailMsg:              row.TransferFailMsg,
+		TransferCurrency:             row.TransferCurrency,
 		CreatedAt:                    &row.CreatedAt,
 	}
 	return item
@@ -168,7 +173,9 @@ func GetGuildCMSList(ctx context.Context, req *incomesettlementdto.CMSGuildIncom
 		}
 		if transferMap != nil {
 			if info := transferMap[row.GuildId]; info != nil {
-				item.TransferCurrency = info.Currency
+				if item.TransferCurrency == "" {
+					item.TransferCurrency = info.Currency
+				}
 				item.TransferPayeeName = info.PayeeName
 				item.TransferBankName = info.BankName
 				item.TransferAccountNo = info.AccountNo

@@ -16,6 +16,7 @@ import (
 	"xr-game-server/dto/authdto"
 	"xr-game-server/errercode"
 	"xr-game-server/gameevent"
+	"xr-game-server/module/userinfo"
 	"xr-game-server/module/verification_code"
 )
 
@@ -63,7 +64,7 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 	now := time.Now()
 	event.Pub(gameevent.RegisterEvent, gameevent.NewRegisterEventDataFromCtx(ctx, account.ID, now))
 	if req.InviteCode != "" {
-		inviterId := userinfodao.GetUserIdByShareCode(req.InviteCode)
+		inviterId := userinfo.ResolveInviteCodeToUserId(req.InviteCode)
 		if inviterId == 0 {
 			return nil, errercode.CreateCode(errercode.InvalidParam)
 		}

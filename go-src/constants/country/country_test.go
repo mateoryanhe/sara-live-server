@@ -2,6 +2,21 @@ package country
 
 import "testing"
 
+func TestHaiPayPayoutCountryCurrency(t *testing.T) {
+	if got := HaiPayPayoutCurrency("id"); got != "IDR" {
+		t.Fatalf("ID currency=%q", got)
+	}
+	if got := HaiPayPayoutCountryFromCurrency("idr"); got != "ID" {
+		t.Fatalf("IDR country=%q", got)
+	}
+	if IsHaiPayPayoutCountry("US") {
+		t.Fatal("US should not be payout country by default")
+	}
+	if n := len(ListHaiPayPayoutCountries()); n == 0 {
+		t.Fatal("empty payout countries")
+	}
+}
+
 func TestGetAndFlagIcon(t *testing.T) {
 	c, ok := Get("id")
 	if !ok {

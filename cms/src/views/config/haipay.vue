@@ -69,6 +69,26 @@
           <el-input v-model="formData.defaultRegion" clearable :placeholder="t('pages.haipay.defaultRegionPlaceholder')"/>
           <span class="form-tip">{{ t('pages.haipay.defaultRegionTip') }}</span>
         </el-form-item>
+
+        <el-divider content-position="left">{{ t('pages.haipay.payoutSection') }}</el-divider>
+        <el-form-item :label="t('pages.haipay.payoutEnabled')" prop="payoutEnabled">
+          <el-switch v-model="formData.payoutEnabled"/>
+        </el-form-item>
+        <el-form-item :label="t('pages.haipay.payoutAppIds')" prop="payoutAppIds">
+          <el-input v-model="formData.payoutAppIds" clearable
+                    :placeholder="t('pages.haipay.payoutAppIdsPlaceholder')"/>
+          <span class="form-tip">{{ t('pages.haipay.payoutAppIdsTip') }}</span>
+        </el-form-item>
+        <el-form-item :label="t('pages.haipay.payoutUsdRates')" prop="payoutUsdRates">
+          <el-input v-model="formData.payoutUsdRates" clearable
+                    :placeholder="t('pages.haipay.payoutUsdRatesPlaceholder')"/>
+          <span class="form-tip">{{ t('pages.haipay.payoutUsdRatesTip') }}</span>
+        </el-form-item>
+        <el-form-item :label="t('pages.haipay.payoutSubject')" prop="payoutSubject">
+          <el-input v-model="formData.payoutSubject" clearable
+                    :placeholder="t('pages.haipay.payoutSubjectPlaceholder')"/>
+        </el-form-item>
+
         <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.haipay.lastUpdated')">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
@@ -107,6 +127,10 @@ const formData = reactive({
   paymentMethods: '',
   subject: 'Recharge',
   defaultRegion: 'ID',
+  payoutEnabled: false,
+  payoutAppIds: '',
+  payoutUsdRates: '',
+  payoutSubject: 'GuildSettlement',
 })
 
 const metaInfo = reactive({
@@ -138,6 +162,10 @@ const applyCfg = (cfg: HaiPayCfg | null | undefined) => {
     formData.paymentMethods = ''
     formData.subject = 'Recharge'
     formData.defaultRegion = 'ID'
+    formData.payoutEnabled = false
+    formData.payoutAppIds = ''
+    formData.payoutUsdRates = ''
+    formData.payoutSubject = 'GuildSettlement'
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
     return
@@ -156,6 +184,10 @@ const applyCfg = (cfg: HaiPayCfg | null | undefined) => {
   formData.paymentMethods = cfg.paymentMethods || ''
   formData.subject = cfg.subject || 'Recharge'
   formData.defaultRegion = cfg.defaultRegion || 'ID'
+  formData.payoutEnabled = !!cfg.payoutEnabled
+  formData.payoutAppIds = cfg.payoutAppIds || ''
+  formData.payoutUsdRates = cfg.payoutUsdRates || ''
+  formData.payoutSubject = cfg.payoutSubject || 'GuildSettlement'
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
 }
@@ -193,6 +225,10 @@ const handleSave = async () => {
       paymentMethods: formData.paymentMethods.trim(),
       subject: formData.subject.trim() || 'Recharge',
       defaultRegion: (formData.defaultRegion || 'ID').trim().toUpperCase(),
+      payoutEnabled: formData.payoutEnabled,
+      payoutAppIds: formData.payoutAppIds.trim(),
+      payoutUsdRates: formData.payoutUsdRates.trim(),
+      payoutSubject: formData.payoutSubject.trim() || 'GuildSettlement',
     })
     if (response?.success) {
       ElMessage.success(t('pages.haipay.saveSuccess'))

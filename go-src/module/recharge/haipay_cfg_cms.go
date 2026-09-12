@@ -37,6 +37,9 @@ func SaveHaiPayCfg(_ context.Context, req *haipaydto.SaveHaiPayCfgReq) (*haipayd
 	if req.Enabled && strings.TrimSpace(req.CallbackBaseUrl) == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
+	if req.PayoutEnabled && strings.TrimSpace(req.CallbackBaseUrl) == "" {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 
 	existing := cfgdao.GetHaiPayCfgCached()
 	row := &entity.HaiPayCfg{
@@ -53,9 +56,16 @@ func SaveHaiPayCfg(_ context.Context, req *haipaydto.SaveHaiPayCfgReq) (*haipayd
 		PaymentMethods:     strings.TrimSpace(req.PaymentMethods),
 		Subject:            strings.TrimSpace(req.Subject),
 		DefaultRegion:      strings.ToUpper(strings.TrimSpace(req.DefaultRegion)),
+		PayoutEnabled:      req.PayoutEnabled,
+		PayoutAppIds:       strings.TrimSpace(req.PayoutAppIds),
+		PayoutUsdRates:     strings.TrimSpace(req.PayoutUsdRates),
+		PayoutSubject:      strings.TrimSpace(req.PayoutSubject),
 	}
 	if row.Subject == "" {
 		row.Subject = "Recharge"
+	}
+	if row.PayoutSubject == "" {
+		row.PayoutSubject = "GuildSettlement"
 	}
 	if row.DefaultRegion == "" {
 		row.DefaultRegion = "ID"
@@ -106,6 +116,10 @@ func toHaiPayCfgItem(cfg *entity.HaiPayCfg) *haipaydto.HaiPayCfgItem {
 		PaymentMethods:     cfg.PaymentMethods,
 		Subject:            cfg.Subject,
 		DefaultRegion:      cfg.DefaultRegion,
+		PayoutEnabled:      cfg.PayoutEnabled,
+		PayoutAppIds:       cfg.PayoutAppIds,
+		PayoutUsdRates:     cfg.PayoutUsdRates,
+		PayoutSubject:      cfg.PayoutSubject,
 		CreatedAt:          formatHaiPayCfgTime(cfg.CreatedAt),
 		UpdatedAt:          formatHaiPayCfgTime(cfg.UpdatedAt),
 	}

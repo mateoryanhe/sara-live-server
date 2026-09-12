@@ -958,10 +958,22 @@ export interface GuildVisibilityItem {
     createdAt: string
 }
 
+export interface GuildTransferCountryOption {
+    countryCode: string
+    nameEn: string
+    nameZh: string
+    currency: string
+    icon?: string
+}
+
 export interface GuildTransferInfo {
     guildId: string
+    countryCode: string
     currency: string
+    accountType: string
     payeeName: string
+    phone: string
+    email: string
     bankName: string
     accountNo: string
     bankCode: string
@@ -971,12 +983,20 @@ export interface GuildTransferInfo {
 
 export interface SaveGuildTransferInfoReq {
     guildId: string | number
-    currency: string
+    countryCode: string
+    accountType?: string
     payeeName?: string
+    phone?: string
+    email?: string
     bankName?: string
     accountNo?: string
     bankCode?: string
     remark?: string
+}
+
+export interface GetGuildTransferInfoRes {
+    info: GuildTransferInfo | null
+    countries: GuildTransferCountryOption[]
 }
 
 export interface GuildQuery extends PageQuery {
@@ -1561,6 +1581,10 @@ export interface GuildIncomeSettlementLogItem extends IncomeSettlementLogAmounts
     guildName?: string
     status?: number
     transferAt?: string | null
+    transferOrderId?: string
+    transferPlatformNo?: string
+    transferLocalAmount?: number
+    transferFailMsg?: string
     transferCurrency?: string
     transferPayeeName?: string
     transferBankName?: string
@@ -1828,6 +1852,10 @@ export interface HaiPayCfg {
     paymentMethods: string
     subject: string
     defaultRegion: string
+    payoutEnabled?: boolean
+    payoutAppIds?: string
+    payoutUsdRates?: string
+    payoutSubject?: string
     createdAt: string
     updatedAt: string
 }
@@ -1851,6 +1879,10 @@ export interface SaveHaiPayCfgReq {
     paymentMethods?: string
     subject?: string
     defaultRegion?: string
+    payoutEnabled?: boolean
+    payoutAppIds?: string
+    payoutUsdRates?: string
+    payoutSubject?: string
 }
 
 export interface SaveHaiPayCfgRes {
