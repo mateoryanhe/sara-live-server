@@ -143,10 +143,9 @@ type AppCheckRechargeOrderSuccessRes struct {
 	Gold        float64 `json:"gold"        dc:"到账金币数量"`
 }
 
-// AppCreateChannelRechargeOrderReq App渠道充值建单(无需鉴权)
+// AppCreateChannelRechargeOrderReq App渠道充值建单(需登录,userId取鉴权)
 type AppCreateChannelRechargeOrderReq struct {
-	g.Meta       `path:"/createChannelRechargeOrder" method:"post" summary:"App创建渠道充值订单(无需鉴权)" tags:"充值订单"`
-	UserId       string `json:"userId"       v:"required#用户ID不能为空" dc:"玩家用户ID"`
+	g.Meta       `path:"/createChannelRechargeOrder" method:"post" summary:"App创建渠道充值订单(需登录)" tags:"充值订单"`
 	CfgId        uint64 `json:"cfgId"        v:"required#充值档位ID不能为空" dc:"充值档位ID"`
 	CurrencyCode string `json:"currencyCode" dc:"可选,HaiPay region 简码如ID(或法币码IDR映射);空则CMS默认region"`
 	PayName      string `json:"payName"      dc:"可选付款人姓名;有则写入资料表下次免填"`
@@ -192,10 +191,9 @@ type AppCreateCoinMerchantChannelRechargeOrderReq struct {
 	PayPhone     string `json:"payPhone"     dc:"可选付款人手机号;可空;有则写入资料表"`
 }
 
-// AppGetChannelPayUserProfileReq App查询渠道付款人资料(无需鉴权)
+// AppGetChannelPayUserProfileReq App查询渠道付款人资料(需登录)
 type AppGetChannelPayUserProfileReq struct {
-	g.Meta `path:"/getChannelPayUserProfile" method:"post" summary:"App查询渠道付款人name/email/phone(无需鉴权)" tags:"充值订单"`
-	UserId string `json:"userId" v:"required#用户ID不能为空" dc:"玩家用户ID"`
+	g.Meta `path:"/getChannelPayUserProfile" method:"post" summary:"App查询渠道付款人name/email/phone(需登录)" tags:"充值订单"`
 }
 
 type AppGetChannelPayUserProfileRes struct {
@@ -204,10 +202,9 @@ type AppGetChannelPayUserProfileRes struct {
 	Phone string `json:"phone" dc:"已存付款人手机号,空表示未填过"`
 }
 
-// AppSaveChannelPayUserProfileReq App保存渠道付款人资料(无需鉴权)
+// AppSaveChannelPayUserProfileReq App保存渠道付款人资料(需登录)
 type AppSaveChannelPayUserProfileReq struct {
-	g.Meta `path:"/saveChannelPayUserProfile" method:"post" summary:"App保存渠道付款人name/email/phone(无需鉴权)" tags:"充值订单"`
-	UserId string `json:"userId" v:"required#用户ID不能为空" dc:"玩家用户ID"`
+	g.Meta `path:"/saveChannelPayUserProfile" method:"post" summary:"App保存渠道付款人name/email/phone(需登录)" tags:"充值订单"`
 	Name   string `json:"name"  dc:"付款人姓名"`
 	Email  string `json:"email" dc:"付款人邮箱"`
 	Phone  string `json:"phone" dc:"可选付款人手机号"`

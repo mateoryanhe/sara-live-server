@@ -99,8 +99,9 @@
 - 充值档位：表 `coin_merchant_recharge_cfgs`（name/USD price/gold/status）；写库后整体刷 `atomic` 上架缓存；CMS 在「充值会员 → 币商充值档位」
 - App 查档位：`POST /coinMerchantRechargeCfg/coinMerchantRechargeCfgListForApp`（需登录，仅上架缓存）
 - App 币商渠道下单：`POST /rechargeOrder/createCoinMerchantChannelRechargeOrder`（需登录+`UserTypeCoinMerchant`；`cfgId`+`currencyCode`；`payChannel=4`；`source=6` 币商；无首充加赠；支付由 `ChannelPayProvider` 出 payUrl，成功后 `CompleteChannelPayOrder`）
-- 订单 `source`：`1`安卓 / `2`后台 / `3`H5（免登录渠道建单默认） / `5`苹果 / `6`币商；与 `payChannel`（支付回调通道）分开
-- 免登录渠道建单：`POST /rechargeOrder/createChannelRechargeOrder`（可选 `payPhone`、`source`：0/空=H5，1=安卓，5=苹果）
+- 订单 `source`：`1`安卓 / `2`后台 / `3`H5（body 未传时默认） / `5`苹果 / `6`币商；与 `payChannel`（支付回调通道）分开
+- App 渠道建单：`POST /rechargeOrder/createChannelRechargeOrder`（**需登录**；可选 `payPhone`、`source`：0/空=H5，1=安卓，5=苹果）
+- 付款人资料 get/save：**需登录**（`getChannelPayUserProfile` / `saveChannelPayUserProfile`，userId 取 token）；CMS 测试仍走 `getChannelPayUserProfileForTest` / `createChannelRechargeOrderTest`
 - 轮询成功：`POST /rechargeOrder/checkRechargeOrderSuccess`（与普通充值相同）
 - App 转赠金币：`POST /gold/transferGold`（仅币商；`targetUserId`+`amount` 最多2位小数；扣币商加目标用户；流水 reason 32转出/33收入）
 
@@ -211,7 +212,7 @@
 - HaiPay 验签：下单应答 / 回调都只按对方返回的实际字段拼串，**不注入 appId**（请求签名仍带 appId）；应答验签失败只打日志不拦支付
 - App 区域列表：`POST /fiatCurrency/fiatCurrencyListForApp` **硬编码** HaiPay region（`currencyCode`=区域码）；CMS 法币页与此无关
 - CMS：`/config/haipay`（`HaiPayCfgManagement`）；表 `haipay_cfgs`
-- 付款人资料：表 `channel_pay_user_profiles`（主键=userId，RowCache）；**无需登录** `getChannelPayUserProfile` / `saveChannelPayUserProfile`（传 `userId`）；空则 App 引导填写再下单
+- 付款人资料：表 `channel_pay_user_profiles`（主键=userId，RowCache）；**需登录** `getChannelPayUserProfile` / `saveChannelPayUserProfile`（userId 取 token）；空则 App 引导填写再下单；CMS 测试走 `*ForTest`
 - 表 `yhpay_cfgs` / 列 `fiat_currency_cfgs.adjust_percent` 可残留库中；不强制 DROP
 - Google Play 不动
 

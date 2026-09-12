@@ -80,7 +80,6 @@ func Init() {
 	initRechargeCfgAppController()               // 充值配置查询(App)
 	initRechargeCfgAppPublicController()         // 按用户ID查充值配置(App,无需鉴权)
 	initRechargeOrderController()                // 充值订单(CMS:查询/手动充值)
-	initRechargeOrderAppPublicController()       // 渠道充值建单(App,无需鉴权)
 	initCurrencyLogController()                  // 货币流水(CMS)
 	initLiveRevenueLogController()               // 直播收益流水(CMS)
 	initAnchorIncomeSettlementLogCMSController() // 主播结算流水(CMS)

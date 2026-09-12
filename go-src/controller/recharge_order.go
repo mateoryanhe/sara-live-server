@@ -2,8 +2,12 @@ package controller
 
 import (
 	"context"
+	"strconv"
+	"strings"
+
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/rechargeorderdto"
+	"xr-game-server/errercode"
 	"xr-game-server/module/recharge"
 )
 
@@ -39,5 +43,9 @@ func (c *RechargeOrderController) CreateChannelRechargeOrderTest(ctx context.Con
 
 // GetChannelPayUserProfileForTest CMS第三方充值测试查询付款人资料
 func (c *RechargeOrderController) GetChannelPayUserProfileForTest(ctx context.Context, req *rechargeorderdto.CMSGetChannelPayUserProfileReq) (*rechargeorderdto.AppGetChannelPayUserProfileRes, error) {
-	return recharge.GetChannelPayUserProfile(ctx, &rechargeorderdto.AppGetChannelPayUserProfileReq{UserId: req.UserId})
+	userId, err := strconv.ParseUint(strings.TrimSpace(req.UserId), 10, 64)
+	if err != nil || userId == 0 {
+		return nil, errercode.CreateCode(errercode.EmptyUserId)
+	}
+	return recharge.GetChannelPayUserProfileByUserId(userId)
 }

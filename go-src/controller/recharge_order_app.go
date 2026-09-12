@@ -22,9 +22,24 @@ func (c *RechargeOrderAppController) CreateRechargeOrder(ctx context.Context, re
 	return recharge.CreateOrder(ctx, req)
 }
 
+// CreateChannelRechargeOrder App渠道充值建单(需登录)
+func (c *RechargeOrderAppController) CreateChannelRechargeOrder(ctx context.Context, req *rechargeorderdto.AppCreateChannelRechargeOrderReq) (res *rechargeorderdto.AppCreateChannelRechargeOrderRes, err error) {
+	return recharge.CreateChannelRechargeOrder(ctx, req)
+}
+
 // CreateCoinMerchantChannelRechargeOrder 币商App渠道建单(档位来自币商充值配置)
 func (c *RechargeOrderAppController) CreateCoinMerchantChannelRechargeOrder(ctx context.Context, req *rechargeorderdto.AppCreateCoinMerchantChannelRechargeOrderReq) (*rechargeorderdto.AppCreateChannelRechargeOrderRes, error) {
 	return recharge.CreateCoinMerchantChannelRechargeOrder(ctx, req)
+}
+
+// GetChannelPayUserProfile App查询渠道付款人资料(需登录)
+func (c *RechargeOrderAppController) GetChannelPayUserProfile(ctx context.Context, req *rechargeorderdto.AppGetChannelPayUserProfileReq) (*rechargeorderdto.AppGetChannelPayUserProfileRes, error) {
+	return recharge.GetChannelPayUserProfile(ctx, req)
+}
+
+// SaveChannelPayUserProfile App保存渠道付款人资料(需登录)
+func (c *RechargeOrderAppController) SaveChannelPayUserProfile(ctx context.Context, req *rechargeorderdto.AppSaveChannelPayUserProfileReq) (*rechargeorderdto.AppSaveChannelPayUserProfileRes, error) {
+	return recharge.SaveChannelPayUserProfile(ctx, req)
 }
 
 // MyRechargeOrderList App端查询本人充值订单分页列表

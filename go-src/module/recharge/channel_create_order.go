@@ -22,10 +22,10 @@ import (
 
 const cmsChannelPayTestPackageName = "cms.channelpay.test"
 
-// CreateChannelRechargeOrder App渠道充值建单(无需鉴权,userId由App上报)
+// CreateChannelRechargeOrder App渠道充值建单(需登录,userId取鉴权)
 func CreateChannelRechargeOrder(ctx context.Context, req *rechargeorderdto.AppCreateChannelRechargeOrderReq) (*rechargeorderdto.AppCreateChannelRechargeOrderRes, error) {
-	userId, err := strconv.ParseUint(strings.TrimSpace(req.UserId), 10, 64)
-	if err != nil || userId == 0 {
+	userId := httpserver.GetAuthId(ctx)
+	if userId == 0 {
 		return nil, errercode.CreateCode(errercode.EmptyUserId)
 	}
 	if err := requireExistingAppUser(userId); err != nil {

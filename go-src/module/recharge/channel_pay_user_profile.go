@@ -7,6 +7,7 @@ import (
 	"strings"
 	"unicode"
 
+	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/channelpaydao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/rechargeorderdto"
@@ -122,12 +123,14 @@ func isLikelyRealPayName(name string) bool {
 	return true
 }
 
-// GetChannelPayUserProfile App 查询已存付款人资料(无需鉴权,userId 由 App 上报)
-func GetChannelPayUserProfile(_ context.Context, req *rechargeorderdto.AppGetChannelPayUserProfileReq) (*rechargeorderdto.AppGetChannelPayUserProfileRes, error) {
-	userId, err := strconv.ParseUint(strings.TrimSpace(req.UserId), 10, 64)
-	if err != nil || userId == 0 {
-		return nil, errercode.CreateCode(errercode.EmptyUserId)
-	}
+// GetChannelPayUserProfile App 查询已存付款人资料(需登录)
+func GetChannelPayUserProfile(ctx context.Context, _ *rechargeorderdto.AppGetChannelPayUserProfileReq) (*rechargeorderdto.AppGetChannelPayUserProfileRes, error) {
+	userId := httpserver.GetAuthId(ctx)
+	return GetChannelPayUserProfileByUserId(userId)
+}
+
+// GetChannelPayUserProfileByUserId 按 userId 查询付款人资料(CMS 测试等)
+func GetChannelPayUserProfileByUserId(userId uint64) (*rechargeorderdto.AppGetChannelPayUserProfileRes, error) {
 	if err := requireExistingAppUser(userId); err != nil {
 		return nil, err
 	}
@@ -140,12 +143,9 @@ func GetChannelPayUserProfile(_ context.Context, req *rechargeorderdto.AppGetCha
 	return res, nil
 }
 
-// SaveChannelPayUserProfile App 保存付款人资料(无需鉴权；填好后再下单)
-func SaveChannelPayUserProfile(_ context.Context, req *rechargeorderdto.AppSaveChannelPayUserProfileReq) (*rechargeorderdto.AppSaveChannelPayUserProfileRes, error) {
-	userId, err := strconv.ParseUint(strings.TrimSpace(req.UserId), 10, 64)
-	if err != nil || userId == 0 {
-		return nil, errercode.CreateCode(errercode.EmptyUserId)
-	}
+// SaveChannelPayUserProfile App 保存付款人资料(需登录)
+func SaveChannelPayUserProfile(ctx context.Context, req *rechargeorderdto.AppSaveChannelPayUserProfileReq) (*rechargeorderdto.AppSaveChannelPayUserProfileRes, error) {
+	userId := httpserver.GetAuthId(ctx)
 	if err := requireExistingAppUser(userId); err != nil {
 		return nil, err
 	}
