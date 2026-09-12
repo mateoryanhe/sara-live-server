@@ -76,6 +76,7 @@ import {dbBackupMessages} from './db-backup'
 import {uploadResourceMessages} from './upload-resource'
 import {h5LiveDeployMessages} from './h5-live-deploy'
 import {coinMerchantDeployMessages} from './coin-merchant-deploy'
+import {countryFlagDeployMessages} from './country-flag-deploy'
 import {thirdPayDeployMessages} from './third-pay-deploy'
 import {dataSyncMessages} from './data-sync'
 import {resourceMonitorMessages} from './resource-monitor'
@@ -159,6 +160,7 @@ const pageMessageBuilders = [
   ['uploadResource', uploadResourceMessages],
   ['h5LiveDeploy', h5LiveDeployMessages],
   ['coinMerchantDeploy', coinMerchantDeployMessages],
+  ['countryFlagDeploy', countryFlagDeployMessages],
   ['thirdPayDeploy', thirdPayDeployMessages],
   ['dataSync', dataSyncMessages],
   ['resourceMonitor', resourceMonitorMessages],

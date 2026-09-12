@@ -7,6 +7,7 @@ func Init() {
 	initDataSyncCfg()
 	initH5LiveDeployCfg()
 	initCoinMerchantDeployCfg()
+	initCountryFlagCfg()
 	initCfEmailCfg()
 	initDbBackupCfg()
 	initSysResourceMetric()

@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"xr-game-server/constants/country"
 	"xr-game-server/core/xrlog"
 	"xr-game-server/dao/cfgdao"
 )
@@ -31,13 +32,6 @@ var haiPayCurrencyToRegion = map[string]string{
 	"KRW": "KR", "KWD": "KW", "MYR": "MY", "OMR": "OM", "PHP": "PH",
 	"PKR": "PK", "QAR": "QA", "SAR": "SA", "SGD": "SG", "THB": "TH",
 	"TRY": "TR", "TWD": "TW", "USD": "US", "VND": "VN",
-}
-
-var haiPayValidRegions = map[string]struct{}{
-	"AE": {}, "AT": {}, "BE": {}, "BH": {}, "BR": {}, "EG": {}, "GB": {}, "HK": {},
-	"ID": {}, "IN": {}, "JP": {}, "KR": {}, "KW": {}, "MY": {}, "NL": {}, "OM": {},
-	"PH": {}, "PK": {}, "PL": {}, "QA": {}, "SA": {}, "SG": {}, "TH": {}, "TR": {},
-	"TW": {}, "US": {}, "VN": {}, "IT": {}, "EU": {},
 }
 
 type haiPayProvider struct{}
@@ -131,6 +125,8 @@ func (p *haiPayProvider) CreatePay(ctx context.Context, req *ChannelPayCreateReq
 		body["phone"] = phone
 	}
 
+	// 签名前：业务字段 + 拼串（含 key），便于与 HaiPay 对账
+	xrlog.DetailLog.Infof(ctx, "haipay apply sign-before(request) params=%s", haiPaySafeParams(body))
 	sign, err := haiPaySign(ctx, body, cfg.MerchantSecretKey, cfg.MerchantPrivateKey)
 	if err != nil {
 		return nil, fmt.Errorf("haipay sign: %w", err)
@@ -142,6 +138,22 @@ func (p *haiPayProvider) CreatePay(ctx context.Context, req *ChannelPayCreateReq
 	if err = haiPayPostJSON(ctx, url, body, &res); err != nil {
 		return nil, err
 	}
+	// 响应签名前数据：整包 + data（有则打印拼串）
+	resMap := map[string]any{
+		"status": res.Status,
+		"error":  res.Error,
+		"msg":    res.Msg,
+	}
+	if res.Data != nil {
+		dataMap := map[string]any{}
+		rawData, _ := json.Marshal(res.Data)
+		_ = json.Unmarshal(rawData, &dataMap)
+		resMap["data"] = dataMap
+		xrlog.DetailLog.Infof(ctx, "haipay apply sign-before(response) data=%s content=%s",
+			haiPaySafeParams(dataMap), haiPayBuildSignContent(dataMap, cfg.MerchantSecretKey))
+	} else {
+		xrlog.DetailLog.Infof(ctx, "haipay apply sign-before(response) params=%s", haiPaySafeParams(resMap))
+	}
 	if res.Status != "1" {
 		msg := strings.TrimSpace(res.Msg)
 		if msg == "" {
@@ -152,11 +164,6 @@ func (p *haiPayProvider) CreatePay(ctx context.Context, req *ChannelPayCreateReq
 	if res.Data == nil {
 		return nil, fmt.Errorf("haipay apply empty data")
 	}
-	// 下单响应不验签：仅打印待验签串便于与对方比对；以异步 notify 为准
-	dataMap := map[string]any{}
-	rawData, _ := json.Marshal(res.Data)
-	_ = json.Unmarshal(rawData, &dataMap)
-	xrlog.DetailLog.Infof(ctx, "haipay sign content(response)=%s", haiPayBuildSignContent(dataMap, cfg.MerchantSecretKey))
 	payURL := strings.TrimSpace(res.Data.PayUrl)
 	if payURL == "" {
 		return nil, fmt.Errorf("haipay empty payUrl")
@@ -175,10 +182,8 @@ func haiPayResolveRegion(currencyOrRegion string) (string, error) {
 	if region, ok := haiPayCurrencyToRegion[code]; ok {
 		return region, nil
 	}
-	if len(code) == 2 {
-		if _, ok := haiPayValidRegions[code]; ok {
-			return code, nil
-		}
+	if country.IsHaiPayRegion(code) {
+		return code, nil
 	}
 	return "", fmt.Errorf("unsupported region currency=%s", code)
 }
@@ -214,18 +219,21 @@ func haiPayPostJSON(ctx context.Context, fullURL string, payload any, out any) e
 	}
 	req.Header.Set("Content-Type", "application/json")
 	client := &http.Client{Timeout: haiPayHTTPTimeout}
+	start := time.Now()
 	resp, err := client.Do(req)
 	if err != nil {
-		xrlog.DetailLog.Errorf(ctx, "haipay http do failed url=%s err=%v", fullURL, err)
+		costMs := time.Since(start).Milliseconds()
+		xrlog.DetailLog.Errorf(ctx, "haipay http do failed url=%s costMs=%d err=%v", fullURL, costMs, err)
 		return err
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
+	costMs := time.Since(start).Milliseconds()
 	if err != nil {
-		xrlog.DetailLog.Errorf(ctx, "haipay http read failed url=%s status=%d err=%v", fullURL, resp.StatusCode, err)
+		xrlog.DetailLog.Errorf(ctx, "haipay http read failed url=%s status=%d costMs=%d err=%v", fullURL, resp.StatusCode, costMs, err)
 		return err
 	}
-	xrlog.DetailLog.Infof(ctx, "haipay http response url=%s status=%d body=%s", fullURL, resp.StatusCode, haiPaySafeJSON(body))
+	xrlog.DetailLog.Infof(ctx, "haipay http response url=%s status=%d costMs=%d body=%s", fullURL, resp.StatusCode, costMs, haiPaySafeJSON(body))
 	if len(body) == 0 {
 		return fmt.Errorf("haipay empty response status=%d", resp.StatusCode)
 	}
@@ -240,14 +248,26 @@ func haiPaySafeJSON(raw []byte) string {
 	if err := json.Unmarshal(raw, &m); err != nil {
 		return haiPayTruncateLog(string(raw), haiPayLogBodyMax)
 	}
+	return haiPaySafeParams(m)
+}
+
+// haiPaySafeParams 打日志用：脱敏 sign/密钥，保留签名前业务字段
+func haiPaySafeParams(m map[string]any) string {
+	if m == nil {
+		return "{}"
+	}
+	cp := make(map[string]any, len(m))
+	for k, v := range m {
+		cp[k] = v
+	}
 	for _, k := range []string{"sign", "merchantSecretKey", "merchantPrivateKey", "haiPayPublicKey"} {
-		if _, ok := m[k]; ok {
-			m[k] = "***"
+		if _, ok := cp[k]; ok {
+			cp[k] = "***"
 		}
 	}
-	b, err := json.Marshal(m)
+	b, err := json.Marshal(cp)
 	if err != nil {
-		return haiPayTruncateLog(string(raw), haiPayLogBodyMax)
+		return "{}"
 	}
 	return haiPayTruncateLog(string(b), haiPayLogBodyMax)
 }

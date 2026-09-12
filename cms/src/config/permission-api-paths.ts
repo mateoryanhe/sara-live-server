@@ -28,6 +28,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'UserList:setAnchorType': '/account/setPlatformAnchorType',
     'UserList:openGame': '/gamePlatform/gameShelfList',
     'UserList:channelRechargeTest': '/rechargeOrder/createChannelRechargeOrderTest',
+    'RechargeOrderList:channelRechargeTest': '/rechargeOrder/createChannelRechargeOrderTest',
     UserDetail: '/account/getUserDetail',
     'UserDetail:goldLog': '/currencyLog/cmsCurrencyLogList',
     'UserDetail:exportGoldLog': '/cmsExport/submitJob',
@@ -509,6 +510,10 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'CoinMerchantDeployManagement:view': '/coinMerchantDeploy/getCoinMerchantDeployInfo',
     'CoinMerchantDeployManagement:save': '/coinMerchantDeploy/saveCoinMerchantDeployCfg',
     'CoinMerchantDeployManagement:deploy': '/coinMerchantDeploy/deployZip',
+
+    CountryFlagDeployManagement: '/countryFlagDeploy/getCountryFlagDeployInfo',
+    'CountryFlagDeployManagement:view': '/countryFlagDeploy/getCountryFlagDeployInfo',
+    'CountryFlagDeployManagement:deploy': '/countryFlagDeploy/deployZip',
 
     ThirdPayDeployManagement: '/thirdPayDeploy/getThirdPayDeployInfo',
     'ThirdPayDeployManagement:view': '/thirdPayDeploy/getThirdPayDeployInfo',

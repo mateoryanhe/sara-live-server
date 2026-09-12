@@ -14,6 +14,7 @@ import (
 	"xr-game-server/module/call"
 	"xr-game-server/module/coinmerchant"
 	"xr-game-server/module/coinmerchantdeploy"
+	"xr-game-server/module/countryflagdeploy"
 	"xr-game-server/module/currencylog"
 	"xr-game-server/module/customerservice"
 	"xr-game-server/module/dbbackup"
@@ -70,6 +71,7 @@ func Init() {
 	game.Init()
 	h5livedeploy.Init()
 	coinmerchantdeploy.Init()
+	countryflagdeploy.Init()
 	dbbackup.Init()
 	ipgeo.Init()
 	agora.Init()

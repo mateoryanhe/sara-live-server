@@ -85,6 +85,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   UploadResourceCfgManagement: 'रिसोर्स CDN',
   H5LiveDeployManagement: 'H5 लाइव डिप्लॉय',
   CoinMerchantDeployManagement: 'कॉइन मर्चेंट H5 डिप्लॉय',
+  CountryFlagDeployManagement: 'देश ध्वज डिप्लॉय',
   ThirdPayDeployManagement: 'थर्ड-पार्टी पे डिप्लॉय',
   DataSyncCfgManagement: 'डेटा सिंक',
   ResourceMonitor: 'रिसोर्स मॉनिटर',

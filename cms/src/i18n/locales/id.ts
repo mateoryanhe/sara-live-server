@@ -85,6 +85,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   UploadResourceCfgManagement: 'Domain Resource',
   H5LiveDeployManagement: 'Deploy H5 Live',
   CoinMerchantDeployManagement: 'Deploy H5 coin merchant',
+  CountryFlagDeployManagement: 'Deploy bendera negara',
   ThirdPayDeployManagement: 'Deploy pembayaran pihak ketiga',
   DataSyncCfgManagement: 'Sinkronisasi Data',
   ResourceMonitor: 'Monitor Resource',

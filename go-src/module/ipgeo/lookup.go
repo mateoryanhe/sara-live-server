@@ -8,6 +8,7 @@ import (
 
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/oschwald/geoip2-golang/v2"
+	"xr-game-server/constants/country"
 	"xr-game-server/core/xrlog"
 	"xr-game-server/dao/cfgdao"
 )
@@ -63,9 +64,23 @@ func Lookup(ip string) *CountryInfo {
 	if code == "" {
 		return nil
 	}
+	code = NormalizeCountryCode(code)
+	if code == "" {
+		return nil
+	}
+	name := ""
+	if c, ok := country.Get(code); ok {
+		name = strings.TrimSpace(c.NameZh)
+		if name == "" {
+			name = strings.TrimSpace(c.NameEn)
+		}
+	}
+	if name == "" {
+		name = pickCountryName(record.Country.Names)
+	}
 	return &CountryInfo{
 		Code: code,
-		Name: pickCountryName(record.Country.Names),
+		Name: name,
 	}
 }
 

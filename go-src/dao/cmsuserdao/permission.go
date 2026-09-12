@@ -176,6 +176,8 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/rechargeOrder/manualCreateOrder"}
 	case "/rechargeOrder/getChannelPayUserProfileForTest":
 		return []string{"/rechargeOrder/createChannelRechargeOrderTest"}
+	case "/fiatCurrency/haiPayRegionList":
+		return []string{"/rechargeOrder/createChannelRechargeOrderTest"}
 	default:
 		return nil
 	}

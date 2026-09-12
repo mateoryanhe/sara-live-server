@@ -17,17 +17,23 @@
       </el-form-item>
     </el-form>
 
-    <!-- Step 1: 选择 HaiPay region（App 侧 currencyCode） -->
+    <!-- Step 1: 选择 HaiPay region（App 侧 currencyCode=国家简码） -->
     <template v-if="step === 'region'">
       <el-table
+          v-loading="regionLoading"
           :data="regionList"
           highlight-current-row
           max-height="420"
           style="width: 100%"
           @row-click="handleRegionPick"
       >
-        <el-table-column :label="t('pages.rechargeOrderList.currencyCode')" prop="code" width="120"/>
-        <el-table-column :label="t('pages.rechargeOrderList.currencyName')" min-width="200" prop="name"/>
+        <el-table-column :label="t('pages.rechargeOrderList.currencyCode')" prop="code" width="90"/>
+        <el-table-column :label="t('pages.rechargeOrderList.currencyName')" min-width="220">
+          <template #default="{ row }">
+            {{ row.nameZh || row.nameEn || row.name || row.code }}
+            <span v-if="row.nameZh && row.nameEn" class="region-en"> / {{ row.nameEn }}</span>
+          </template>
+        </el-table-column>
         <el-table-column :label="t('common.actions')" width="120">
           <template #default="{ row }">
             <el-button link type="primary" @click.stop="handleRegionPick(row)">
@@ -110,45 +116,20 @@
 import {computed, reactive, ref, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage, type FormInstance, type FormRules} from 'element-plus'
-import {rechargeCfgApi, rechargeOrderApi} from '@/api'
+import {fiatCurrencyApi, rechargeCfgApi, rechargeOrderApi} from '@/api'
+import type {HaiPayRegionItem} from '@/api/modules/fiatCurrency'
 import type {RechargeCfg} from '@/types/api.ts'
 import {formatAmount, formatNumberDisplay} from '@/utils/number-format'
 
 /** 与充值档位页一致：测试档位可能是 0.0001 这类小金额 */
 const RECHARGE_PRICE_DECIMALS = 4
 
-/** 与 go-src/module/fiatcurrency/app.go appHaiPayRegions 保持一致；currencyCode 即 HaiPay region */
-const HAI_PAY_REGIONS: { code: string; name: string }[] = [
-  {code: 'ID', name: 'Indonesia'},
-  {code: 'PH', name: 'Philippines'},
-  {code: 'MY', name: 'Malaysia'},
-  {code: 'IN', name: 'India'},
-  {code: 'TH', name: 'Thailand'},
-  {code: 'VN', name: 'Vietnam'},
-  {code: 'SG', name: 'Singapore'},
-  {code: 'HK', name: 'Hong Kong'},
-  {code: 'TW', name: 'Taiwan'},
-  {code: 'JP', name: 'Japan'},
-  {code: 'KR', name: 'South Korea'},
-  {code: 'PK', name: 'Pakistan'},
-  {code: 'BR', name: 'Brazil'},
-  {code: 'US', name: 'United States'},
-  {code: 'GB', name: 'United Kingdom'},
-  {code: 'EU', name: 'European Union'},
-  {code: 'IT', name: 'Italy'},
-  {code: 'AT', name: 'Austria'},
-  {code: 'BE', name: 'Belgium'},
-  {code: 'NL', name: 'Netherlands'},
-  {code: 'PL', name: 'Poland'},
-  {code: 'TR', name: 'Türkiye'},
-  {code: 'AE', name: 'United Arab Emirates'},
-  {code: 'SA', name: 'Saudi Arabia'},
-  {code: 'QA', name: 'Qatar'},
-  {code: 'KW', name: 'Kuwait'},
-  {code: 'BH', name: 'Bahrain'},
-  {code: 'OM', name: 'Oman'},
-  {code: 'EG', name: 'Egypt'},
-]
+type RegionRow = {
+  code: string
+  name: string
+  nameEn: string
+  nameZh: string
+}
 
 const props = defineProps<{
   modelValue: boolean
@@ -162,8 +143,9 @@ const emit = defineEmits<{
 
 const {t} = useI18n()
 const step = ref<'region' | 'cfg'>('region')
-const selectedRegion = ref<{ code: string; name: string } | null>(null)
-const regionList = HAI_PAY_REGIONS
+const selectedRegion = ref<RegionRow | null>(null)
+const regionList = ref<RegionRow[]>([])
+const regionLoading = ref(false)
 const channelTestCfgLoading = ref(false)
 const channelTestCreating = ref(false)
 const channelTestCfgList = ref<RechargeCfg[]>([])
@@ -188,6 +170,30 @@ const dialogTitle = computed(() => {
   }
   return t('pages.rechargeOrderList.channelTestCurrencyTitle')
 })
+
+const mapRegionItem = (item: HaiPayRegionItem): RegionRow => {
+  const code = String(item.currencyCode || item.symbol || '').trim().toUpperCase()
+  return {
+    code,
+    name: String(item.name || item.nameEn || code),
+    nameEn: String(item.nameEn || item.name || ''),
+    nameZh: String(item.nameZh || ''),
+  }
+}
+
+const loadRegionList = async () => {
+  regionLoading.value = true
+  try {
+    const res = await fiatCurrencyApi.haiPayRegionList()
+    regionList.value = (res?.list || []).map(mapRegionItem).filter((r) => !!r.code)
+  } catch (error) {
+    console.error('load haiPay regions failed:', error)
+    ElMessage.error(t('pages.rechargeOrderList.loadRechargeCfgFailed'))
+    regionList.value = []
+  } finally {
+    regionLoading.value = false
+  }
+}
 
 const channelTestRules = computed<FormRules>(() => ({
   userId: [{required: true, message: t('pages.rechargeOrderList.playerIdRequired'), trigger: 'blur'}],
@@ -303,7 +309,7 @@ const createOrderWithPayer = async (row: RechargeCfg, payName: string, payEmail:
   }
 }
 
-const handleRegionPick = async (row: { code: string; name: string }) => {
+const handleRegionPick = async (row: RegionRow) => {
   if (!row?.code || channelTestCfgLoading.value) return
   if (!channelTestFormRef.value) return
   try {
@@ -365,11 +371,17 @@ watch(
       payerDialogVisible.value = false
       pendingCfg.value = null
       cachedPayerByUserId.value = {}
+      void loadRegionList()
     },
 )
 </script>
 
 <style scoped>
+.region-en {
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+}
+
 .step-bar {
   display: flex;
   align-items: center;

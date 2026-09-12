@@ -129,13 +129,13 @@
           </el-table-column>
 
           <el-table-column label="IP" prop="ip" width="150"/>
-          <el-table-column :label="t('pages.userList.loginCountry')" prop="loginCountry" width="120">
+          <el-table-column :label="t('pages.userList.loginCountry')" prop="loginCountry" min-width="168" show-overflow-tooltip>
             <template #default="scope">{{ scope.row.loginCountry || '-' }}</template>
           </el-table-column>
           <el-table-column :label="t('pages.userList.registerIp')" prop="registerIp" width="150">
             <template #default="scope">{{ scope.row.registerIp || '-' }}</template>
           </el-table-column>
-          <el-table-column :label="t('pages.userList.registerCountry')" prop="registerCountry" width="120">
+          <el-table-column :label="t('pages.userList.registerCountry')" prop="registerCountry" min-width="168" show-overflow-tooltip>
             <template #default="scope">{{ scope.row.registerCountry || '-' }}</template>
           </el-table-column>
           <el-table-column :label="t('pages.userList.deviceType')" prop="deviceType" width="100">

@@ -95,6 +95,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '币商H5部署'},
         },
         {
+            path: 'country-flag-deploy',
+            name: 'CountryFlagDeployManagement',
+            component: () => import('@/views/config/country-flag-deploy.vue'),
+            meta: {title: '国旗资源部署'},
+        },
+        {
             path: 'third-pay-deploy',
             name: 'ThirdPayDeployManagement',
             component: () => import('@/views/config/third-pay-deploy.vue'),

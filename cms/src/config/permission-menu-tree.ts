@@ -313,6 +313,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('PrivacyPolicyCfgManagement'),
                 page('H5LiveDeployManagement'),
                 page('CoinMerchantDeployManagement'),
+                page('CountryFlagDeployManagement'),
                 page('ThirdPayDeployManagement'),
             ]),
             group('config-ops', 'menu.ConfigOpsGroup', [

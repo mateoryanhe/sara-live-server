@@ -4,6 +4,6 @@ package ipgeo
 type CountryInfo struct {
 	// ISO 3166-1 alpha-2,如 CN、US
 	Code string
-	// 国家名称(优先中文,否则英文)
+	// 展示名(优先 constants/country.NameZh)
 	Name string
 }

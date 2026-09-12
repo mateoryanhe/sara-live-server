@@ -148,7 +148,7 @@ type AppCreateChannelRechargeOrderReq struct {
 	g.Meta       `path:"/createChannelRechargeOrder" method:"post" summary:"App创建渠道充值订单(无需鉴权)" tags:"充值订单"`
 	UserId       string `json:"userId"       v:"required#用户ID不能为空" dc:"玩家用户ID"`
 	CfgId        uint64 `json:"cfgId"        v:"required#充值档位ID不能为空" dc:"充值档位ID"`
-	CurrencyCode string `json:"currencyCode" dc:"可选,法币码如IDR,映射HaiPay region;空则CMS默认region"`
+	CurrencyCode string `json:"currencyCode" dc:"可选,HaiPay region 简码如ID(或法币码IDR映射);空则CMS默认region"`
 	PayName      string `json:"payName"      dc:"可选付款人姓名;有则写入资料表下次免填"`
 	PayEmail     string `json:"payEmail"     dc:"可选付款人邮箱;有则写入资料表下次免填"`
 	PayPhone     string `json:"payPhone"     dc:"可选付款人手机号;可空;有则写入资料表"`
@@ -186,7 +186,7 @@ type CMSGetChannelPayUserProfileReq struct {
 type AppCreateCoinMerchantChannelRechargeOrderReq struct {
 	g.Meta       `path:"/createCoinMerchantChannelRechargeOrder" method:"post" summary:"币商App创建渠道充值订单" tags:"充值订单"`
 	CfgId        uint64 `json:"cfgId"        v:"required#充值档位ID不能为空" dc:"币商充值档位ID"`
-	CurrencyCode string `json:"currencyCode" dc:"可选,法币码如IDR,映射HaiPay region;空则CMS默认region"`
+	CurrencyCode string `json:"currencyCode" dc:"可选,HaiPay region 简码如ID(或法币码IDR映射);空则CMS默认region"`
 	PayName      string `json:"payName"      dc:"可选付款人姓名;有则写入资料表下次免填"`
 	PayEmail     string `json:"payEmail"     dc:"可选付款人邮箱;有则写入资料表下次免填"`
 	PayPhone     string `json:"payPhone"     dc:"可选付款人手机号;可空;有则写入资料表"`

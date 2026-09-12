@@ -35,3 +35,7 @@ func (c *FiatCurrencyCMSController) DeleteFiatCurrency(ctx context.Context, req 
 func (c *FiatCurrencyCMSController) ReloadFiatCurrencyCache(ctx context.Context, req *fiatcurrencydto.ReloadFiatCurrencyCacheReq) (res *fiatcurrencydto.ReloadFiatCurrencyCacheRes, err error) {
 	return fiatcurrency.ReloadCfgCache(ctx, req)
 }
+
+func (c *FiatCurrencyCMSController) HaiPayRegionList(ctx context.Context, req *fiatcurrencydto.HaiPayRegionListReq) (*fiatcurrencydto.AppFiatCurrencyListRes, error) {
+	return fiatcurrency.GetHaiPayRegionList(ctx, req)
+}

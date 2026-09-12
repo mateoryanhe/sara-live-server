@@ -386,6 +386,10 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.save,
         {key: 'deploy', label: '上传部署'},
     ],
+    CountryFlagDeployManagement: [
+        BTN.view,
+        {key: 'deploy', label: '上传发布'},
+    ],
     ThirdPayDeployManagement: [
         BTN.view,
         {key: 'deploy', label: '上传部署'},

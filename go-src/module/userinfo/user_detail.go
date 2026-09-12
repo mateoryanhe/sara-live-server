@@ -10,6 +10,7 @@ import (
 	"xr-game-server/dto/accountdto"
 	userentity "xr-game-server/entity/user"
 	"xr-game-server/errercode"
+	"xr-game-server/module/ipgeo"
 	"xr-game-server/module/upload"
 )
 
@@ -39,8 +40,8 @@ func toUserAccountDetailItem(account *userentity.Account) *accountdto.UserAccoun
 		OpenId:          account.OpenId,
 		IP:              account.IP,
 		RegisterIp:      account.RegisterIp,
-		RegisterCountry: account.RegisterCountry,
-		LoginCountry:    account.LoginCountry,
+		RegisterCountry: ipgeo.FormatCountryDisplay(account.RegisterCountry),
+		LoginCountry:    ipgeo.FormatCountryDisplay(account.LoginCountry),
 		Channel:         account.Channel,
 		PhoneAreaCode:   account.PhoneAreaCode,
 		Ban:             account.Ban,

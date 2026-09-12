@@ -8,6 +8,7 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/accountdto"
 	"xr-game-server/entity/user"
+	"xr-game-server/module/ipgeo"
 	"xr-game-server/module/upload"
 )
 
@@ -19,8 +20,8 @@ func QueryUserInfo(ctx context.Context, req *accountdto.QueryUserInfoReq) (res *
 			val.OpenId = accountCache.OpenId
 			val.IP = accountCache.IP
 			val.RegisterIp = accountCache.RegisterIp
-			val.RegisterCountry = accountCache.RegisterCountry
-			val.LoginCountry = accountCache.LoginCountry
+			val.RegisterCountry = ipgeo.FormatCountryDisplay(accountCache.RegisterCountry)
+			val.LoginCountry = ipgeo.FormatCountryDisplay(accountCache.LoginCountry)
 			val.Channel = accountCache.Channel
 			val.PhoneAreaCode = accountCache.PhoneAreaCode
 			val.Cancel = accountCache.Cancel

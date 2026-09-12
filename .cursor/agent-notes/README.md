@@ -104,7 +104,15 @@
 - 轮询成功：`POST /rechargeOrder/checkRechargeOrderSuccess`（与普通充值相同）
 - App 转赠金币：`POST /gold/transferGold`（仅币商；`targetUserId`+`amount` 最多2位小数；扣币商加目标用户；流水 reason 32转出/33收入）
 
-- 优先读请求头 `CF-IPCountry`（如 `US`→`美国`），无效/`XX`/`T1` 再回退 GeoLite；入库存中文名
+- 优先读请求头 `CF-IPCountry`（如 `US`），无效/`XX`/`T1` 再回退 GeoLite；入库存 **ISO 简码**；CMS 展示中文/英文名
+
+## 国家静态表（2026-09-12）
+
+- 包：`go-src/constants/country` — 全量 ISO（约 250，含 `EU`/`TW`）；字段 `Code` + `NameEn` + `NameZh` + `FlagIcon`(文件名)；完整路径 `RelPath(code, version)` → `country-flags/{version}/{code}.png`
+- 国旗生成：`pub-tool/country-flags/`（本地生成 PNG，**无上传脚本**）
+- CMS 发布：`CountryFlagDeployManagement` → 上传 zip → 新 `version` 入库(`country_flag_cfgs`) → 清旧 version 目录；物理路径 `{images}/country-flags/{version}/`
+- IP 定位：注册/登录入库 `accounts.register_country` / `login_country` 存 **Code**；CMS 用户列表/详情展示 `NameZh / NameEn`（`country.FormatZhEn`）
+- HaiPay 选型：`country.HaiPayRegionCodes` 唯一白名单；App `fiatCurrencyListForApp` / CMS `haiPayRegionList` 返回 `currencyCode(=Code)` + `nameEn` + `nameZh` + 国旗 `icon`
 
 ## Flutter / Android 本机工具链（2026-09-07）
 
