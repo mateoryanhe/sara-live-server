@@ -15,6 +15,7 @@ type ChannelPayCreateReq struct {
 	PlayerName string
 	PlayerIP   string
 	Email      string
+	Phone      string
 	Region     string // 可选覆盖；空则 Provider 用自身默认(如 HaiPay DefaultRegion)
 	Amount     float64
 	PriceUsd   float64

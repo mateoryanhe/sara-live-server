@@ -1,6 +1,7 @@
 package httpserver
 
 import (
+	"context"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
@@ -11,6 +12,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
 	"xr-game-server/core/xrjson"
@@ -54,6 +56,16 @@ func isH5ClientRequest(r *ghttp.Request) bool {
 
 func isCoinMerchantClientRequest(r *ghttp.Request) bool {
 	return isTruthyClientHeader(r, CoinMerchantClientHeader)
+}
+
+// IsH5ClientFromContext 请求是否带 X-H5-Client(直播 H5)
+func IsH5ClientFromContext(ctx context.Context) bool {
+	return isH5ClientRequest(g.RequestFromCtx(ctx))
+}
+
+// IsCoinMerchantClientFromContext 请求是否带 X-Coin-Merchant-Client(币商 H5)
+func IsCoinMerchantClientFromContext(ctx context.Context) bool {
+	return isCoinMerchantClientRequest(g.RequestFromCtx(ctx))
 }
 
 func isTruthyClientHeader(r *ghttp.Request, header string) bool {

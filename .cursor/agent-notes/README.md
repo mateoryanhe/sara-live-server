@@ -98,7 +98,9 @@
 - App 登录：`POST /auth/coinMerchantLogin`（免鉴权；username+password；不自动注册；token=`userId.token`）
 - 充值档位：表 `coin_merchant_recharge_cfgs`（name/USD price/gold/status）；写库后整体刷 `atomic` 上架缓存；CMS 在「充值会员 → 币商充值档位」
 - App 查档位：`POST /coinMerchantRechargeCfg/coinMerchantRechargeCfgListForApp`（需登录，仅上架缓存）
-- App 币商渠道下单：`POST /rechargeOrder/createCoinMerchantChannelRechargeOrder`（需登录+`UserTypeCoinMerchant`；`cfgId`+`currencyCode`；`payChannel=4`；无首充加赠；支付由 `ChannelPayProvider` 出 payUrl，成功后 `CompleteChannelPayOrder`）
+- App 币商渠道下单：`POST /rechargeOrder/createCoinMerchantChannelRechargeOrder`（需登录+`UserTypeCoinMerchant`；`cfgId`+`currencyCode`；`payChannel=4`；`source=6` 币商；无首充加赠；支付由 `ChannelPayProvider` 出 payUrl，成功后 `CompleteChannelPayOrder`）
+- 订单 `source`：`1`安卓 / `2`后台 / `3`H5（免登录渠道建单默认） / `5`苹果 / `6`币商；与 `payChannel`（支付回调通道）分开
+- 免登录渠道建单：`POST /rechargeOrder/createChannelRechargeOrder`（可选 `payPhone`、`source`：0/空=H5，1=安卓，5=苹果）
 - 轮询成功：`POST /rechargeOrder/checkRechargeOrderSuccess`（与普通充值相同）
 - App 转赠金币：`POST /gold/transferGold`（仅币商；`targetUserId`+`amount` 最多2位小数；扣币商加目标用户；流水 reason 32转出/33收入）
 

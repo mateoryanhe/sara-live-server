@@ -127,6 +127,9 @@ func (p *haiPayProvider) CreatePay(ctx context.Context, req *ChannelPayCreateReq
 	if remark := strings.TrimSpace(req.OrderID); remark != "" {
 		body["body"] = "order:" + remark
 	}
+	if phone := strings.TrimSpace(req.Phone); phone != "" {
+		body["phone"] = phone
+	}
 
 	sign, err := haiPaySign(ctx, body, cfg.MerchantSecretKey, cfg.MerchantPrivateKey)
 	if err != nil {

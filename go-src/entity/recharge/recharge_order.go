@@ -19,10 +19,13 @@ const (
 	RechargeOrderStatusCancelled uint8 = 2 // 已取消
 )
 
-// 充值订单来源
+// 充值订单来源(创建入口,与 payChannel 无关)
 const (
-	RechargeOrderSourceApp    uint8 = 1 // App玩家发起
-	RechargeOrderSourceManual uint8 = 2 // 后台手动充值
+	RechargeOrderSourceAndroid      uint8 = 1 // 安卓
+	RechargeOrderSourceManual       uint8 = 2 // 后台
+	RechargeOrderSourceH5           uint8 = 3 // H5
+	RechargeOrderSourceIOS          uint8 = 5 // 苹果
+	RechargeOrderSourceCoinMerchant uint8 = 6 // 币商
 )
 
 const (
@@ -53,7 +56,7 @@ type RechargeOrder struct {
 	Currency     string    `gorm:"size:8;default:'USD';comment:实际支付货币(如USD/IDR)" json:"currency"`
 	Gold         float64   `gorm:"default:0;comment:发放金币数(订单完成时增加到玩家金币)" json:"gold"`
 	Status       uint8     `gorm:"index:idx_ro_user_status,priority:2;index;default:0;comment:状态(0-待支付,1-已完成,2-已取消)" json:"status"`
-	Source       uint8     `gorm:"default:0;comment:来源(1-App玩家发起,2-后台手动)" json:"source"`
+	Source       uint8     `gorm:"default:0;comment:来源(1-安卓,2-后台,3-H5,5-苹果,6-币商)" json:"source"`
 	PayChannel   uint8     `gorm:"size:32;default:0;comment:支付渠道" json:"payChannel"`
 	ThirdOrderId string    `gorm:"size:64;default:'';index;comment:第三方订单号" json:"thirdOrderId"`
 	Remark       string    `gorm:"size:255;default:'';comment:备注" json:"remark"`

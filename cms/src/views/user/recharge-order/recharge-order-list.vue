@@ -483,7 +483,20 @@ const statusTagType = (status: number) => {
 }
 
 const sourceLabel = (source: number) => {
-  return source === 2 ? t('pages.rechargeOrderList.sourceManual') : t('pages.rechargeOrderList.sourceApp')
+  switch (source) {
+    case 1:
+      return t('pages.rechargeOrderList.sourceAndroid')
+    case 2:
+      return t('pages.rechargeOrderList.sourceManual')
+    case 3:
+      return t('pages.rechargeOrderList.sourceH5')
+    case 5:
+      return t('pages.rechargeOrderList.sourceIOS')
+    case 6:
+      return t('pages.rechargeOrderList.sourceCoinMerchant')
+    default:
+      return String(source || '-')
+  }
 }
 
 onMounted(() => {

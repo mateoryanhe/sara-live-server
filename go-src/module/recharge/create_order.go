@@ -44,14 +44,14 @@ func CreateOrder(ctx context.Context, req *rechargeorderdto.AppCreateRechargeOrd
 		if cur == "" {
 			cur = defaultCurrency
 		}
-		order = entity.NewRechargeOrder(userId, cfg.ID, cfg.Price, cur, goldAmount, entity.RechargeOrderSourceApp)
+		order = entity.NewRechargeOrder(userId, cfg.ID, cfg.Price, cur, goldAmount, entity.RechargeOrderSourceAndroid)
 		order.SetPayChannel(cfg.CfgType)
 	} else {
 		if 0 >= req.Amount {
 			return nil, errercode.CreateCode(errercode.RechargeAmountInvalid)
 		}
 		//自定义金额
-		order = entity.NewRechargeOrder(userId, 0, req.Amount, defaultCurrency, 0, entity.RechargeOrderSourceApp)
+		order = entity.NewRechargeOrder(userId, 0, req.Amount, defaultCurrency, 0, entity.RechargeOrderSourceAndroid)
 		order.SetPayChannel(req.PayChannel)
 		order.SetGold(req.Amount * 100)
 	}
