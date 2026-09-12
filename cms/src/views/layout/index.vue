@@ -502,7 +502,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('FirstRechargeActivityManagement')"
+            v-if="hasMenuPermission('FirstRechargeActivityManagement') || hasMenuPermission('InviteRechargeRewardManagement')"
             index="/activity">
           <template #title>
             <el-icon>
@@ -515,6 +515,12 @@
               <Present/>
             </el-icon>
             <span>{{ t('menu.FirstRechargeActivityManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('InviteRechargeRewardManagement')" index="/activity/invite-recharge-reward-cfg">
+            <el-icon>
+              <Present/>
+            </el-icon>
+            <span>{{ t('menu.InviteRechargeRewardManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -583,7 +589,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('CfEmailCfgManagement')"
+              v-if="hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('CfEmailCfgManagement')"
               index="/config/group/platform">
             <template #title>
               <el-icon>
@@ -609,6 +615,12 @@
               </el-icon>
               <span>{{ t('menu.UploadResourceCfgManagement') }}</span>
             </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('CountryFlagDeployManagement')" index="/config/country-flag-deploy">
+              <el-icon>
+                <Picture/>
+              </el-icon>
+              <span>{{ t('menu.CountryFlagDeployManagement') }}</span>
+            </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('DbBackupCfgManagement')" index="/config/db-backup">
               <el-icon>
                 <FolderOpened/>
@@ -623,7 +635,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement')"
+              v-if="hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement')"
               index="/config/group/deploy">
             <template #title>
               <el-icon>
@@ -654,12 +666,6 @@
                 <UploadFilled/>
               </el-icon>
               <span>{{ t('menu.CoinMerchantDeployManagement') }}</span>
-            </el-menu-item>
-            <el-menu-item v-if="hasMenuPermission('CountryFlagDeployManagement')" index="/config/country-flag-deploy">
-              <el-icon>
-                <UploadFilled/>
-              </el-icon>
-              <span>{{ t('menu.CountryFlagDeployManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('ThirdPayDeployManagement')" index="/config/third-pay-deploy">
               <el-icon>

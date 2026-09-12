@@ -2,11 +2,12 @@ import {definePageMessagesFromEn} from './_define'
 
 const zh = {
   version: '当前版本',
-  urlPrefix: '静态访问前缀',
+  urlPrefix: '资源访问前缀',
   deployPath: '资源根目录',
   lastUpdated: '最近更新',
+  fileCount: '国旗数量',
   uploadTitle: '上传国旗 ZIP',
-  uploadTip: '将 pub-tool/country-flags/flags 打成 zip 上传。服务端生成新 version 目录、写入数据库，并删除旧 version 目录。',
+  uploadTip: '将 pub-tool/country-flags/flags 打成 zip 上传。写入与头像相同的资源存储（本地 storagePath / 云桶），生成新 version，并清理旧 version。',
   dragTip: '将 zip 文件拖到此处，或点击选择',
   fileTip: '仅支持 .zip；包内需含两位简码 png（如 id.png），可放在任意子目录',
   deployBtn: '上传并发布',
@@ -18,18 +19,24 @@ const zh = {
   resultVersion: '新版本：{version}',
   resultPath: '版本目录：{path}',
   resultFiles: '写入 PNG：{count} 个',
-  resultRemoved: '清理旧版本目录：{count} 个',
+  resultRemoved: '清理旧版本：{count} 个',
   resultUrl: '访问前缀：{url}',
   emptyVersion: '尚未发布',
+  previewTitle: '当前版本国旗',
+  previewSearch: '搜索简码 / 中文 / 英文',
+  previewEmpty: '当前版本暂无国旗文件',
+  previewFilteredEmpty: '无匹配结果',
+  previewCount: '共 {total} 面，显示 {shown} 面',
 }
 
 const en = {
   version: 'Current version',
-  urlPrefix: 'Static URL prefix',
+  urlPrefix: 'CDN URL prefix',
   deployPath: 'Resource root',
   lastUpdated: 'Last updated',
+  fileCount: 'Flag count',
   uploadTitle: 'Upload flag ZIP',
-  uploadTip: 'Zip pub-tool/country-flags/flags and upload. Server creates a new version dir, saves it to DB, and deletes old version dirs.',
+  uploadTip: 'Zip pub-tool/country-flags/flags and upload. Files go to the same storage as avatars (local storagePath / S3), with a new version; old versions are cleaned up.',
   dragTip: 'Drop zip here or click to select',
   fileTip: 'Only .zip. Include 2-letter png files (e.g. id.png); nested folders are OK.',
   deployBtn: 'Upload & publish',
@@ -44,6 +51,11 @@ const en = {
   resultRemoved: 'Old version dirs removed: {count}',
   resultUrl: 'URL prefix: {url}',
   emptyVersion: 'Not published yet',
+  previewTitle: 'Flags in current version',
+  previewSearch: 'Search code / Chinese / English',
+  previewEmpty: 'No flag files in current version',
+  previewFilteredEmpty: 'No matches',
+  previewCount: '{total} total, showing {shown}',
 }
 
 export const countryFlagDeployMessages = definePageMessagesFromEn(zh, en)

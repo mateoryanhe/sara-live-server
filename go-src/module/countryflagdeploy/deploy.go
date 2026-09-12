@@ -11,14 +11,16 @@ import (
 	"time"
 
 	"github.com/gogf/gf/v2/net/ghttp"
+	"xr-game-server/constants/country"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/countryflagdeploydto"
 	"xr-game-server/entity/sys"
+	"xr-game-server/module/upload"
 )
 
 var errImageRootNotConfigured = errors.New("image static root not configured")
 
-// DeployZipFromRequest 上传 zip → 新 version 目录 → 入库 → 删除旧 version 目录
+// DeployZipFromRequest 上传 zip → 按头像同一套 upload 存储写入 country-flags/{version} → 入库 → 清理旧 version
 func DeployZipFromRequest(r *ghttp.Request) (*countryflagdeploydto.DeployCountryFlagZipRes, error) {
 	if r == nil || r.Request == nil {
 		return nil, errors.New("upload file is empty")
@@ -26,9 +28,6 @@ func DeployZipFromRequest(r *ghttp.Request) (*countryflagdeploydto.DeployCountry
 	root, err := getFlagsRoot()
 	if err != nil {
 		return nil, err
-	}
-	if err := os.MkdirAll(root, 0755); err != nil {
-		return nil, fmt.Errorf("create flags root %s: %w", root, err)
 	}
 
 	zipPath, err := saveUploadZip(r)
@@ -38,23 +37,18 @@ func DeployZipFromRequest(r *ghttp.Request) (*countryflagdeploydto.DeployCountry
 	defer os.Remove(zipPath)
 
 	version := time.Now().Format("20060102150405")
-	versionDir := filepath.Join(root, version)
-	if err := os.MkdirAll(versionDir, 0755); err != nil {
-		return nil, fmt.Errorf("create version dir %s: %w", versionDir, err)
-	}
-
-	fileCount, err := extractFlagPNGs(zipPath, versionDir)
+	fileCount, err := extractAndStoreFlagPNGs(zipPath, version)
 	if err != nil {
-		os.RemoveAll(versionDir)
+		cleanupVersion(version)
 		return nil, err
 	}
 	if fileCount == 0 {
-		os.RemoveAll(versionDir)
+		cleanupVersion(version)
 		return nil, errors.New("zip has no png flag files")
 	}
 
 	if err := saveVersion(version); err != nil {
-		os.RemoveAll(versionDir)
+		cleanupVersion(version)
 		return nil, err
 	}
 	ReloadCountryFlagCache()
@@ -63,7 +57,7 @@ func DeployZipFromRequest(r *ghttp.Request) (*countryflagdeploydto.DeployCountry
 	return &countryflagdeploydto.DeployCountryFlagZipRes{
 		Version:    version,
 		FileCount:  fileCount,
-		DeployPath: versionDir,
+		DeployPath: filepath.Join(root, version),
 		UrlPrefix:  buildURLPrefix(version),
 		Removed:    removed,
 	}, nil
@@ -85,21 +79,69 @@ func saveVersion(version string) error {
 }
 
 func cleanupOldVersions(root, keepVersion string) int {
-	entries, err := os.ReadDir(root)
+	removed := 0
+	if entries, err := os.ReadDir(root); err == nil {
+		for _, e := range entries {
+			if !e.IsDir() {
+				continue
+			}
+			name := e.Name()
+			if name == keepVersion || name == "." || name == ".." {
+				continue
+			}
+			path := filepath.Join(root, name)
+			if err := os.RemoveAll(path); err == nil {
+				removed++
+			}
+		}
+	}
+	removed += cleanupOldVersionsOnS3(keepVersion)
+	return removed
+}
+
+func cleanupVersion(version string) {
+	version = strings.TrimSpace(version)
+	if version == "" {
+		return
+	}
+	if root, err := getFlagsRoot(); err == nil {
+		_ = os.RemoveAll(filepath.Join(root, version))
+	}
+	prefix := country.AssetDir + "/" + version
+	objs, err := upload.ListStoredObjectsByPrefix(prefix)
+	if err != nil {
+		// 未开 S3 时 List 会报错,本地已在上面清理
+		return
+	}
+	for _, o := range objs {
+		upload.DeleteUploadedFile(o.StoredName)
+	}
+}
+
+func cleanupOldVersionsOnS3(keepVersion string) int {
+	if !upload.IsS3Enabled() {
+		return 0
+	}
+	objs, err := upload.ListStoredObjectsByPrefix(country.AssetDir)
 	if err != nil {
 		return 0
 	}
+	removedKeys := map[string]struct{}{}
 	removed := 0
-	for _, e := range entries {
-		if !e.IsDir() {
+	for _, o := range objs {
+		name := strings.Trim(strings.ReplaceAll(o.StoredName, "\\", "/"), "/")
+		parts := strings.Split(name, "/")
+		// country-flags/{version}/xx.png
+		if len(parts) < 3 || parts[0] != country.AssetDir {
 			continue
 		}
-		name := e.Name()
-		if name == keepVersion || name == "." || name == ".." {
+		ver := parts[1]
+		if ver == keepVersion {
 			continue
 		}
-		path := filepath.Join(root, name)
-		if err := os.RemoveAll(path); err == nil {
+		upload.DeleteUploadedFile(name)
+		if _, ok := removedKeys[ver]; !ok {
+			removedKeys[ver] = struct{}{}
 			removed++
 		}
 	}
@@ -150,14 +192,13 @@ func saveUploadZip(r *ghttp.Request) (string, error) {
 	return "", errors.New("upload file is empty")
 }
 
-func extractFlagPNGs(zipPath, destDir string) (fileCount int, err error) {
+func extractAndStoreFlagPNGs(zipPath, version string) (fileCount int, err error) {
 	reader, err := zip.OpenReader(zipPath)
 	if err != nil {
 		return 0, err
 	}
 	defer reader.Close()
 
-	destDir = filepath.Clean(destDir)
 	for _, file := range reader.File {
 		name := strings.TrimSpace(file.Name)
 		if name == "" || file.FileInfo().IsDir() || strings.HasSuffix(name, "/") {
@@ -175,32 +216,26 @@ func extractFlagPNGs(zipPath, destDir string) (fileCount int, err error) {
 		if len(code) != 2 {
 			continue
 		}
-		targetPath := filepath.Join(destDir, code+".png")
-		if err := extractZipFile(file, targetPath); err != nil {
+		rel := country.RelPath(code, version)
+		if rel == "" {
+			continue
+		}
+		src, openErr := file.Open()
+		if openErr != nil {
+			return fileCount, openErr
+		}
+		data, readErr := io.ReadAll(src)
+		src.Close()
+		if readErr != nil {
+			return fileCount, readErr
+		}
+		// 与头像一致:开 S3 只写云,否则写统一 storagePath
+		if err := upload.SaveUploadedFileBytes(rel, data); err != nil {
 			return fileCount, err
 		}
 		fileCount++
 	}
 	return fileCount, nil
-}
-
-func extractZipFile(file *zip.File, targetPath string) error {
-	src, err := file.Open()
-	if err != nil {
-		return err
-	}
-	defer src.Close()
-	dst, err := os.OpenFile(targetPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
-	if err != nil {
-		return err
-	}
-	defer dst.Close()
-	_, err = io.Copy(dst, src)
-	return err
-}
-
-func joinFlagsRoot(imageRoot string) string {
-	return filepath.Join(imageRoot, countryflagdeploydto.CountryFlagStaticDir)
 }
 
 func shouldSkipZipEntry(name string) bool {

@@ -1,6 +1,14 @@
 import type {AxiosProgressEvent} from 'axios'
 import {request} from '../request'
 
+export interface CountryFlagPreviewItem {
+    code: string
+    nameEn: string
+    nameZh: string
+    file: string
+    icon: string
+}
+
 export interface CountryFlagDeployInfo {
     id: string
     version: string
@@ -8,6 +16,8 @@ export interface CountryFlagDeployInfo {
     deployPath: string
     acceptExt: string
     updatedAt: string
+    fileCount: number
+    flags: CountryFlagPreviewItem[]
 }
 
 export interface DeployCountryFlagZipRes {

@@ -177,7 +177,9 @@ func haiPayVerify(ctx context.Context, params map[string]any, merchantSecretKey,
 		return fmt.Errorf("empty sign")
 	}
 	content := haiPayBuildSignContent(params, merchantSecretKey)
-	xrlog.DetailLog.Infof(ctx, "haipay sign content(notify)=%s", content)
+	xrlog.DetailLog.Infof(ctx, "haipay sign content(verify)=%s", content)
+	// 便于与 CMS/HaiPay 后台比对当前使用的验签公钥(完整原文)
+	xrlog.DetailLog.Infof(ctx, "haipay verify publicKey=%s", haiPayNormalizeKeyMaterial(publicKeyPEM))
 	pub, err := haiPayParsePublicKey(publicKeyPEM)
 	if err != nil {
 		return err

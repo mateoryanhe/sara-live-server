@@ -138,22 +138,6 @@ func (p *haiPayProvider) CreatePay(ctx context.Context, req *ChannelPayCreateReq
 	if err = haiPayPostJSON(ctx, url, body, &res); err != nil {
 		return nil, err
 	}
-	// 响应签名前数据：整包 + data（有则打印拼串）
-	resMap := map[string]any{
-		"status": res.Status,
-		"error":  res.Error,
-		"msg":    res.Msg,
-	}
-	if res.Data != nil {
-		dataMap := map[string]any{}
-		rawData, _ := json.Marshal(res.Data)
-		_ = json.Unmarshal(rawData, &dataMap)
-		resMap["data"] = dataMap
-		xrlog.DetailLog.Infof(ctx, "haipay apply sign-before(response) data=%s content=%s",
-			haiPaySafeParams(dataMap), haiPayBuildSignContent(dataMap, cfg.MerchantSecretKey))
-	} else {
-		xrlog.DetailLog.Infof(ctx, "haipay apply sign-before(response) params=%s", haiPaySafeParams(resMap))
-	}
 	if res.Status != "1" {
 		msg := strings.TrimSpace(res.Msg)
 		if msg == "" {
@@ -163,6 +147,14 @@ func (p *haiPayProvider) CreatePay(ctx context.Context, req *ChannelPayCreateReq
 	}
 	if res.Data == nil {
 		return nil, fmt.Errorf("haipay apply empty data")
+	}
+	// 验签只对应答 data 内实际字段;验签失败只打日志不阻断(HaiPay 已出单可付款,回调仍严格验签)
+	dataMap := map[string]any{}
+	rawData, _ := json.Marshal(res.Data)
+	_ = json.Unmarshal(rawData, &dataMap)
+	xrlog.DetailLog.Infof(ctx, "haipay apply sign-before(response) data=%s", haiPaySafeParams(dataMap))
+	if err = haiPayVerify(ctx, dataMap, cfg.MerchantSecretKey, cfg.HaiPayPublicKey, res.Data.Sign); err != nil {
+		xrlog.DetailLog.Warningf(ctx, "haipay apply verify failed(skip block) orderId=%s err=%v", req.OrderID, err)
 	}
 	payURL := strings.TrimSpace(res.Data.PayUrl)
 	if payURL == "" {

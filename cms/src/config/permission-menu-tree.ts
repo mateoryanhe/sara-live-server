@@ -306,6 +306,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('CfEmailCfgManagement'),
                 page('DbBackupCfgManagement'),
                 page('UploadResourceCfgManagement'),
+                page('CountryFlagDeployManagement'),
                 page('DataSyncCfgManagement'),
             ]),
             group('config-deploy', 'menu.ConfigDeployGroup', [
@@ -313,7 +314,6 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('PrivacyPolicyCfgManagement'),
                 page('H5LiveDeployManagement'),
                 page('CoinMerchantDeployManagement'),
-                page('CountryFlagDeployManagement'),
                 page('ThirdPayDeployManagement'),
             ]),
             group('config-ops', 'menu.ConfigOpsGroup', [

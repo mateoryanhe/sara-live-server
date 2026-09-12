@@ -7,14 +7,17 @@ import (
 	"xr-game-server/core/event"
 	"xr-game-server/gameevent"
 
+	"xr-game-server/constants/country"
 	"xr-game-server/constants/followstatus"
 	"xr-game-server/core/httpserver"
+	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/livefollowdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/userinfodto"
 	"xr-game-server/errercode"
 	"xr-game-server/module/aliyunmoderation"
 	"xr-game-server/module/anchorrank"
+	"xr-game-server/module/countryflagdeploy"
 	"xr-game-server/module/upload"
 )
 
@@ -51,6 +54,7 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		FollowStatus:  resolveFollowStatus(authUserId, targetUserId),
 		TotalIncome:   float64(anchorrank.GetUserLast30DayRevenue(targetUserId)),
 		Age:           calcAge(data.Birthday),
+		FlagIcon:      resolveUserFlagIcon(targetUserId),
 	}
 	if req.UserId == 0 {
 		now := time.Now()
@@ -74,6 +78,29 @@ func resolveFollowStatus(viewerId, targetUserId uint64) uint8 {
 		return followstatus.Following
 	}
 	return followstatus.NotFollowing
+}
+
+// resolveUserFlagIcon 优先注册国,空则登录国;拼当前国旗版本完整 URL。
+func resolveUserFlagIcon(userId uint64) string {
+	account := accountdao.GetAccountById(userId)
+	if account == nil {
+		return ""
+	}
+	code := strings.TrimSpace(account.RegisterCountry)
+	if code == "" {
+		code = strings.TrimSpace(account.LoginCountry)
+	}
+	if code == "" {
+		return ""
+	}
+	if !country.Exists(code) {
+		return ""
+	}
+	rel := country.RelPath(code, countryflagdeploy.CurrentVersion())
+	if rel == "" {
+		return ""
+	}
+	return upload.GetUrlByName(rel)
 }
 
 // UpdateNickname 修改昵称

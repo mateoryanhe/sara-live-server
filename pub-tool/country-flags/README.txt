@@ -15,10 +15,12 @@ flagcdn.com（例: https://flagcdn.com/w80/id.png）
 ----
 1. 双击 一键生成.bat（或 generate.bat）生成 flags/
 2. 将 flags 目录打成 zip
-3. 在 CMS「配置 → 国旗资源部署」上传 zip 发布
-   - 服务端生成新 version 目录：{images}/country-flags/{version}/{code}.png
+3. 在 CMS「配置 → 平台与资源 → 国旗资源部署」上传 zip 发布
+   - 与头像同一套 upload 存储：本地 storagePath 或云桶(S3/R2)
+   - 相对路径：country-flags/{version}/{code}.png
    - version 写入表 country_flag_cfgs
-   - 自动删除旧 version 目录
+   - App 通过 GetUrlByName（与头像同一资源域名）访问
+   - 自动清理旧 version（本地目录 + 云对象）
 
 说明
 ----

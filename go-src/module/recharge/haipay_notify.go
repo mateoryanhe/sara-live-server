@@ -23,6 +23,8 @@ func HandleHaiPayCollectNotify(r *ghttp.Request) {
 	}
 
 	raw := r.GetBody()
+	// TODO(临时): 排查验签用,回调完整 body(含 sign),确认后可删
+	xrlog.DetailLog.Infof(ctx, "haipay notify raw body=%s", haiPayTruncateLog(string(raw), haiPayLogBodyMax))
 	var params map[string]any
 	if err := json.Unmarshal(raw, &params); err != nil {
 		xrlog.DetailLog.Warningf(ctx, "haipay notify parse failed err=%v body=%s", err, haiPayTruncateLog(string(raw), 1024))
@@ -32,6 +34,7 @@ func HandleHaiPayCollectNotify(r *ghttp.Request) {
 	}
 
 	sign, _ := params["sign"].(string)
+	// 与下单应答一致:只按回调 body 实际字段验签,不注入 appId
 	if err := haiPayVerify(ctx, params, cfg.MerchantSecretKey, cfg.HaiPayPublicKey, sign); err != nil {
 		xrlog.DetailLog.Warningf(ctx, "haipay notify verify failed err=%v body=%s", err, haiPaySafeJSON(raw))
 		r.Response.WriteStatus(400)

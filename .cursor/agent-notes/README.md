@@ -110,7 +110,7 @@
 
 - 包：`go-src/constants/country` — 全量 ISO（约 250，含 `EU`/`TW`）；字段 `Code` + `NameEn` + `NameZh` + `FlagIcon`(文件名)；完整路径 `RelPath(code, version)` → `country-flags/{version}/{code}.png`
 - 国旗生成：`pub-tool/country-flags/`（本地生成 PNG，**无上传脚本**）
-- CMS 发布：`CountryFlagDeployManagement` → 上传 zip → 新 `version` 入库(`country_flag_cfgs`) → 清旧 version 目录；物理路径 `{images}/country-flags/{version}/`
+- CMS 发布：`CountryFlagDeployManagement`（平台与资源）→ zip → `upload.SaveUploadedFileBytes`（与头像同一 storagePath/S3）→ `country-flags/{version}/{code}.png` → 入库 → 清旧 version；App URL=`GetUrlByName`
 - IP 定位：注册/登录入库 `accounts.register_country` / `login_country` 存 **Code**；CMS 用户列表/详情展示 `NameZh / NameEn`（`country.FormatZhEn`）
 - HaiPay 选型：`country.HaiPayRegionCodes` 唯一白名单；App `fiatCurrencyListForApp` / CMS `haiPayRegionList` 返回 `currencyCode(=Code)` + `nameEn` + `nameZh` + 国旗 `icon`
 
@@ -208,6 +208,7 @@
 - **已落地（2026-09-09）**：去掉 yhpay；`ChannelPayProvider` + **HaiPay 全球收银台美金包装** Provider
 - **已去掉汇率**：删除 `module/fxrate`、CMS 加点/查汇率；法币表与渠道支付解耦
 - HaiPay：`POST /global/cashier/collect/apply`，`currency=USD`；`region` = App `currencyCode`（区域码如 ID/PH，或 IDR 等）直接映射，空则 CMS `defaultRegion`；订单落库 **USD**；notify=`/webhook/haipay/collect/notify`
+- HaiPay 验签：下单应答 / 回调都只按对方返回的实际字段拼串，**不注入 appId**（请求签名仍带 appId）；应答验签失败只打日志不拦支付
 - App 区域列表：`POST /fiatCurrency/fiatCurrencyListForApp` **硬编码** HaiPay region（`currencyCode`=区域码）；CMS 法币页与此无关
 - CMS：`/config/haipay`（`HaiPayCfgManagement`）；表 `haipay_cfgs`
 - 付款人资料：表 `channel_pay_user_profiles`（主键=userId，RowCache）；**无需登录** `getChannelPayUserProfile` / `saveChannelPayUserProfile`（传 `userId`）；空则 App 引导填写再下单
