@@ -10,6 +10,27 @@
 
           <span>{{ t('menu.AnchorListManagement') }}</span>
 
+          <div class="header-actions">
+            <el-button
+                v-if="canBatchShelf"
+                :disabled="!canBatchOnShelf"
+                :loading="shelfOperating"
+                type="success"
+                @click="handleBatchOnShelf"
+            >
+              {{ t('common.batchOnShelf') }}
+            </el-button>
+            <el-button
+                v-if="canBatchShelf"
+                :disabled="!canBatchOffShelf"
+                :loading="shelfOperating"
+                type="warning"
+                @click="handleBatchOffShelf"
+            >
+              {{ t('common.batchOffShelf') }}
+            </el-button>
+          </div>
+
         </div>
 
       </template>
@@ -39,8 +60,19 @@
 
       </el-form>
 
+      <div v-if="selectedRows.length" class="selection-tip">
+        {{ t('common.selectedCount', {count: selectedRows.length}) }}
+      </div>
+
       <div class="table-scroll">
-      <el-table v-loading="loading" :data="tableData" style="width: 100%">
+      <el-table
+          v-loading="loading"
+          :data="tableData"
+          :row-key="anchorRowKey"
+          style="width: 100%"
+          @selection-change="handleSelectionChange"
+      >
+        <el-table-column type="selection" width="48"/>
         <el-table-column fixed label="#" type="index" width="55" :index="formatRowIndex"/>
         <el-table-column
             :label="t('pages.anchorList.liveRoomCover')"
@@ -201,7 +233,7 @@
             <span class="money-amount">{{ formatWalletBalance(row.ticket) }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.billingPricePerMinute')" align="right" min-width="120">
+        <el-table-column :label="t('pages.anchorList.billingPricePerMinute')" align="right" label-class-name="header-nowrap" min-width="160" width="160">
           <template #default="{ row }">
             <span class="money-amount">{{ formatWalletBalance(row.billing) }}</span>
           </template>
@@ -218,44 +250,44 @@
         <el-table-column
             fixed="right"
             :label="t('common.actions')"
-            class-name="actions-col"
-            label-class-name="actions-col"
-            width="168"
+            width="100"
         >
           <template #default="{ row }">
-            <div class="actions-cell">
-              <el-button
-                  v-if="can('uploadRoomCover')"
-                  link
-                  type="primary"
-                  @click="openRoomCoverDialog(row)"
-              >
-                {{ t('pages.anchorList.uploadRoomCover') }}
+            <el-dropdown trigger="click" @command="(cmd: string) => handleRowCommand(row, cmd)">
+              <el-button size="small" type="primary">
+                {{ t('common.actions') }}
+                <el-icon class="el-icon--right">
+                  <ArrowDown/>
+                </el-icon>
               </el-button>
-              <el-button
-                  v-if="can('offShelf')"
-                  type="warning"
-                  link
-                  @click="handleOffShelf(row)"
-              >
-                {{ t('common.offShelf') }}
-              </el-button>
-              <el-button
-                  :type="row.ban ? 'warning' : 'danger'"
-                  link
-                  @click="toggleBanStatus(row)"
-              >
-                {{ row.ban ? t('pages.anchorList.unban') : t('pages.anchorList.ban') }}
-              </el-button>
-              <el-button
-                  v-if="Number(row.guildId) !== 0"
-                  link
-                  type="danger"
-                  @click="handleExitGuild(row)"
-              >
-                {{ t('pages.anchorList.exitGuild') }}
-              </el-button>
-            </div>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item v-if="can('uploadRoomCover')" command="uploadRoomCover">
+                    {{ t('pages.anchorList.uploadRoomCover') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                      v-if="can('offShelf')"
+                      :divided="can('uploadRoomCover')"
+                      command="offShelf"
+                  >
+                    {{ t('common.offShelf') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                      :divided="can('uploadRoomCover') || can('offShelf')"
+                      command="toggleBan"
+                  >
+                    {{ row.ban ? t('pages.anchorList.unban') : t('pages.anchorList.ban') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                      v-if="Number(row.guildId) !== 0"
+                      divided
+                      command="exitGuild"
+                  >
+                    {{ t('pages.anchorList.exitGuild') }}
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </template>
         </el-table-column>
       </el-table>
@@ -439,7 +471,7 @@ import {ElForm, ElMessage, ElMessageBox, type FormRules, type UploadRequestOptio
 
 import {accountApi, uploadApi} from '@/api'
 
-import {Plus} from '@element-plus/icons-vue'
+import {ArrowDown, Plus} from '@element-plus/icons-vue'
 
 import type {AnchorListItem, BanAnchorReq, UnBanAnchorReq} from '@/types/api'
 
@@ -455,10 +487,23 @@ const {can} = usePagePermission('AnchorListManagement')
 const {canViewUserDetail, openUserDetail} = useUserDetailNav('AnchorListManagement')
 const canViewDetail = computed(() => can('viewDetail'))
 const canViewGuildDetail = computed(() => can('viewGuildDetail'))
+const canBatchShelf = computed(() => can('offShelf') || can('onShelf') || can('batchOffShelf') || can('batchOnShelf'))
 
 const loading = ref(false)
 
 const tableData = ref<AnchorListItem[]>([])
+const selectedRows = ref<AnchorListItem[]>([])
+const shelfOperating = ref(false)
+const onShelfSelectedRows = computed(() => selectedRows.value.filter(row => Number(row.status) === 1))
+const offShelfSelectedRows = computed(() => selectedRows.value.filter(row => Number(row.status) !== 1))
+const canBatchOnShelf = computed(() => offShelfSelectedRows.value.length > 0 && !shelfOperating.value)
+const canBatchOffShelf = computed(() => onShelfSelectedRows.value.length > 0 && !shelfOperating.value)
+
+const anchorRowKey = (row: AnchorListItem) => String(row.id)
+
+const handleSelectionChange = (rows: AnchorListItem[]) => {
+  selectedRows.value = rows
+}
 
 const banDialogVisible = ref(false)
 
@@ -843,6 +888,115 @@ onMounted(() => {
 
 })
 
+const handleRowCommand = (row: AnchorListItem, command: string) => {
+  switch (command) {
+    case 'uploadRoomCover':
+      openRoomCoverDialog(row)
+      break
+    case 'offShelf':
+      void handleOffShelf(row)
+      break
+    case 'toggleBan':
+      void toggleBanStatus(row)
+      break
+    case 'exitGuild':
+      void handleExitGuild(row)
+      break
+  }
+}
+
+const applyLiveRoomStatusBatch = async (rows: AnchorListItem[], status: 0 | 1) => {
+  let success = 0
+  let fail = 0
+  for (const row of rows) {
+    try {
+      await accountApi.setLiveRoomStatus({
+        anchorId: row.id,
+        status,
+      })
+      success++
+    } catch (error) {
+      fail++
+      console.error('set live room status failed:', row.id, error)
+    }
+  }
+  return {success, fail}
+}
+
+const handleBatchOnShelf = async () => {
+  const rows = offShelfSelectedRows.value
+  if (!rows.length) {
+    ElMessage.warning(t('pages.anchorList.selectOffShelfAnchors'))
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+        t('pages.anchorList.batchOnShelfConfirm', {count: rows.length}),
+        t('pages.anchorList.batchOnShelfTitle'),
+        {
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning',
+        },
+    )
+  } catch {
+    return
+  }
+  shelfOperating.value = true
+  try {
+    const {success, fail} = await applyLiveRoomStatusBatch(rows, 1)
+    if (fail > 0) {
+      ElMessage.warning(t('pages.anchorList.batchOnShelfPartial', {success, fail}))
+    } else {
+      ElMessage.success(t('pages.anchorList.batchOnShelfSuccess', {count: success}))
+    }
+    selectedRows.value = []
+    await fetchList()
+  } catch (error) {
+    console.error('batch on shelf failed:', error)
+    ElMessage.error(t('pages.anchorList.batchOnShelfFailed'))
+  } finally {
+    shelfOperating.value = false
+  }
+}
+
+const handleBatchOffShelf = async () => {
+  const rows = onShelfSelectedRows.value
+  if (!rows.length) {
+    ElMessage.warning(t('pages.anchorList.selectOnShelfAnchors'))
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+        t('pages.anchorList.batchOffShelfConfirm', {count: rows.length}),
+        t('pages.anchorList.batchOffShelfTitle'),
+        {
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning',
+        },
+    )
+  } catch {
+    return
+  }
+  shelfOperating.value = true
+  try {
+    const {success, fail} = await applyLiveRoomStatusBatch(rows, 0)
+    if (fail > 0) {
+      ElMessage.warning(t('pages.anchorList.batchOffShelfPartial', {success, fail}))
+    } else {
+      ElMessage.success(t('pages.anchorList.batchOffShelfSuccess', {count: success}))
+    }
+    selectedRows.value = []
+    await fetchList()
+  } catch (error) {
+    console.error('batch off shelf failed:', error)
+    ElMessage.error(t('pages.anchorList.batchOffShelfFailed'))
+  } finally {
+    shelfOperating.value = false
+  }
+}
+
 const handleOffShelf = async (row: AnchorListItem) => {
   try {
     await ElMessageBox.confirm(
@@ -1002,9 +1156,23 @@ const submitRoomCover = async () => {
 
   justify-content: space-between;
 
+  gap: 12px;
+
 }
 
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
 
+.selection-tip {
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
 
 .search-form {
 
@@ -1101,24 +1269,6 @@ const submitRoomCover = async () => {
   overflow: visible;
   text-overflow: clip;
   word-break: keep-all;
-}
-
-:deep(.actions-col .cell) {
-  overflow: visible;
-  text-overflow: clip;
-}
-
-.actions-cell {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0 2px;
-  line-height: 1.2;
-}
-
-.actions-cell :deep(.el-button) {
-  margin: 0;
-  padding: 0 4px;
 }
 
 .cover-cell {

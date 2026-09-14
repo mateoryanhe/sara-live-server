@@ -2,8 +2,10 @@ package recharge
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/constants/currency"
@@ -13,7 +15,7 @@ import (
 	"xr-game-server/errercode"
 )
 
-// CompleteChannelPayOrder 渠道/币商支付成功后发币（各 Provider 验签通过后调用）
+// CompleteChannelPayOrder 渠道/币商支付成功后发币（HaiPay 以查单确认成功后调用）
 func CompleteChannelPayOrder(ctx context.Context, orderIdStr, thirdOrderId string) error {
 	orderId, err := strconv.ParseUint(strings.TrimSpace(orderIdStr), 10, 64)
 	if err != nil || orderId == 0 {
@@ -49,4 +51,44 @@ func CompleteChannelPayOrder(ctx context.Context, orderIdStr, thirdOrderId strin
 	}
 	_, err = completeOrder(order, currency.ReasonRecharge)
 	return err
+}
+
+// FailChannelPayOrder HaiPay 查单非成功时，将待支付渠道单标为失败。已完成/已取消/已失败幂等。
+func FailChannelPayOrder(ctx context.Context, orderIdStr, thirdOrderId string, platformStatus int) error {
+	orderId, err := strconv.ParseUint(strings.TrimSpace(orderIdStr), 10, 64)
+	if err != nil || orderId == 0 {
+		return errercode.CreateCode(errercode.RechargeOrderNonExist)
+	}
+	thirdOrderId = strings.TrimSpace(thirdOrderId)
+
+	lockKey := rechargeOrderLockKey(orderId)
+	gmlock.Lock(lockKey)
+	defer gmlock.Unlock(lockKey)
+
+	order := rechargeorderdao.GetById(orderId)
+	if order == nil {
+		return errercode.CreateCode(errercode.RechargeOrderNonExist)
+	}
+	if order.Status == entity.RechargeOrderStatusCompleted {
+		return nil
+	}
+	if order.Status == entity.RechargeOrderStatusCancelled || order.Status == entity.RechargeOrderStatusFailed {
+		return nil
+	}
+	if order.PayChannel != entity.RechargeCfgTypeChannel && order.PayChannel != entity.RechargeCfgTypeCoinMerchant {
+		return errercode.CreateCode(errercode.RechargeOrderStateInvalid)
+	}
+	if thirdOrderId != "" && order.ThirdOrderId != thirdOrderId {
+		order.SetThirdOrderId(thirdOrderId)
+	}
+	now := time.Now()
+	order.SetStatus(entity.RechargeOrderStatusFailed)
+	order.SetUpdatedAt(now)
+	if remark := strings.TrimSpace(order.Remark); remark == "" {
+		order.SetRemark(fmt.Sprintf("haipay status=%d", platformStatus))
+	}
+	CancelRechargeOrderTimeout(order.ID)
+	rechargeorderdao.FlushOrderCache(order)
+	xrlog.DetailLog.Infof(ctx, "channelPay mark failed orderId=%d platformStatus=%d third=%s", orderId, platformStatus, thirdOrderId)
+	return nil
 }

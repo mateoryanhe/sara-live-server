@@ -52,6 +52,9 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'AnchorListManagement:viewUserDetail': '/account/getUserDetail',
     'AnchorListManagement:viewGuildDetail': '/guild/getGuildDetail',
     'AnchorListManagement:offShelf': '/account/setLiveRoomStatus',
+    'AnchorListManagement:onShelf': '/account/setLiveRoomStatus',
+    'AnchorListManagement:batchOffShelf': '/account/setLiveRoomStatus',
+    'AnchorListManagement:batchOnShelf': '/account/setLiveRoomStatus',
     'AnchorListManagement:uploadRoomCover': '/account/setLiveRoomCover',
 
     PlatformAnchorList: '/account/getAnchorList',

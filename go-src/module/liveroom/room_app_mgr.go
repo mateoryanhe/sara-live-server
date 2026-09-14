@@ -121,8 +121,8 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 	room := liveentity.NewLiveRoom(
 		anchorId,
 		liveroomdao.GetAnchorGuildId(anchorId),
-		coverName,
 		req.Title,
+		coverName,
 		req.Notice,
 	)
 	liveroomdao.AddRoomToCache(room)

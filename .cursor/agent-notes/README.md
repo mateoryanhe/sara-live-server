@@ -211,7 +211,7 @@
 - **已落地（2026-09-09）**：去掉 yhpay；`ChannelPayProvider` + **HaiPay 全球收银台美金包装** Provider
 - **已去掉汇率**：删除 `module/fxrate`、CMS 加点/查汇率；法币表与渠道支付解耦
 - HaiPay：`POST /global/cashier/collect/apply`，`currency=USD`；`region` = App `currencyCode`（区域码如 ID/PH，或 IDR 等）直接映射，空则 CMS `defaultRegion`；订单落库 **USD**；notify=`/webhook/haipay/collect/notify`
-- HaiPay 验签：下单应答 / 回调都只按对方返回的实际字段拼串，**不注入 appId**（请求签名仍带 appId）；应答验签失败只打日志不拦支付
+- HaiPay 验签：下单应答 / 查单应答 / 回调拼串均不注入 appId；**发币不以回调验签为准**（2026-09-14）：notify 收到后 `POST /global/cashier/collect/query`（appId+orderId+orderNo，商户私钥签名），`status=2` → `CompleteChannelPayOrder`；**非成功** → `FailChannelPayOrder`（`RechargeOrderStatusFailed=3`，CMS 显示「失败」，remark=`haipay status=N`）；超时仍用 `Cancelled=2`；回调/查单应答验签失败只打日志
 - App 区域列表：`POST /fiatCurrency/fiatCurrencyListForApp` **硬编码** HaiPay region（`currencyCode`=区域码）；CMS 法币页与此无关
 - CMS：`/config/haipay`（`HaiPayCfgManagement`）；表 `haipay_cfgs`
 - 付款人资料：表 `channel_pay_user_profiles`（主键=userId，RowCache）；**需登录** `getChannelPayUserProfile` / `saveChannelPayUserProfile`（userId 取 token）；空则 App 引导填写再下单；CMS 测试走 `*ForTest`
@@ -253,4 +253,17 @@ App/CMS 建单 API  ──►  recharge 业务（写订单、白名单）
 - **易变层**：各 SDK HTTP、签名、配置表/CMS、webhook
 - **错误码**：158–160 = `ChannelPayNotConfigured` / `CreateFailed` / `CurrencyNotSupported`
 - **Google Play / iOS**：永远不进 ChannelPayProvider
+
+## live_rooms.status 未入库（2026-09-14）
+
+- **现象**：CMS 下架成功（内存踢缓存），重启后又全上架；库里 `status` 全是 1，但 `updated_at` 会变。
+- **根因**：`SetStatus` 调了 `syndb.AddData`，但 `initLiveRoom` 漏了 `RegQuick(LiveRoomStatus)`；未注册列 `AddData` 静默丢弃。
+- **修复**：`entity/live/live_room.go` 补 `syndb.RegQuick(TbLiveRoom, LiveRoomStatus)`。全 entity 交叉扫过：其余 `AddData` 常量列均已 Reg（收益表靠 `regLiveRoomIncomeCols`）。
+- **已下架状态**：修代码前丢的 DB 状态无法自动恢复，需 CMS 重下架或 SQL。
+
+## CreateRoom title/cover 参数反了（2026-09-14）
+
+- **现象**：`/liveRoom/roomList` 里 title 像文件名（`xxx.jpg`），cover 像被拼成 CDN+原标题（如 `https://.../Hi`）。
+- **根因**：`room_app_mgr.CreateRoom` 调 `NewLiveRoom(anchorId, guildId, title, cover, notice)` 时把 `coverName` 和 `req.Title` 传反了；仅影响**新建**房间（已有房间走 update 分支不受影响）。
+- **修复**：改为 `NewLiveRoom(..., req.Title, coverName, req.Notice)`。已写反的数据需手工/脚本对调或主播重设。
 

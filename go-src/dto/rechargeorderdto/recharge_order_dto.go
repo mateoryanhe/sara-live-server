@@ -16,7 +16,7 @@ type RechargeOrderItem struct {
 	PayAmount    float64 `json:"payAmount"` // 渠道实付金额(如IDR)
 	Currency     string  `json:"currency"`  // 实际支付货币(如USD/IDR)
 	Gold         float64 `json:"gold"`      // 充值发放金币数
-	Status       uint8   `json:"status"`    // 0待支付 1已完成 2已取消
+  Status       uint8   `json:"status"`    // 0待支付 1已完成 2已取消 3失败
 	Source       uint8   `json:"source"`    // 1安卓 2后台 3H5 5苹果 6币商
 	PayChannel   uint8   `json:"payChannel"`
 	ThirdOrderId string  `json:"thirdOrderId"`
@@ -35,7 +35,7 @@ type CMSRechargeOrderListReq struct {
 	httpserver.CMSQueryReq
 	UserId       string `json:"userId"       dc:"按用户ID过滤(空=全部)"`
 	OrderId      string `json:"orderId"      dc:"按订单ID精确查询(空=不过滤)"`
-	StatusFilter int    `json:"statusFilter" dc:"状态过滤(0=全部,1=待支付,2=已完成,3=已取消)"`
+	StatusFilter int    `json:"statusFilter" dc:"状态过滤(0=全部,1=待支付,2=已完成,3=已取消,4=失败)"`
 	Source       int    `json:"source"       dc:"来源过滤(0=全部,1=安卓,2=后台,3=H5,5=苹果,6=币商)"`
 	StartTime    int64  `json:"startTime"    dc:"创建时间起(秒, 0=不过滤)"`
 	EndTime      int64  `json:"endTime"      dc:"创建时间止(秒, 0=不过滤)"`
@@ -119,7 +119,7 @@ type AppMyRechargeOrderListReq struct {
 	g.Meta       `path:"/myRechargeOrderList" method:"post" summary:"App查询本人充值订单列表" tags:"充值订单"`
 	PageIndex    int `json:"pageIndex"    dc:"页码(从1开始)"`
 	PageSize     int `json:"pageSize"     dc:"每页数量"`
-	StatusFilter int `json:"statusFilter" dc:"状态过滤(0=全部,1=待支付,2=已完成,3=已取消)"`
+	StatusFilter int `json:"statusFilter" dc:"状态过滤(0=全部,1=待支付,2=已完成,3=已取消,4=失败)"`
 }
 
 type AppMyRechargeOrderListRes struct {

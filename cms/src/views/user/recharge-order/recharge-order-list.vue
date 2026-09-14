@@ -41,6 +41,7 @@
             <el-option :value="1" :label="t('pages.rechargeOrderList.statusPending')"/>
             <el-option :value="2" :label="t('pages.rechargeOrderList.statusCompleted')"/>
             <el-option :value="3" :label="t('pages.rechargeOrderList.statusCancelled')"/>
+            <el-option :value="4" :label="t('pages.rechargeOrderList.statusFailed')"/>
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -100,7 +101,7 @@
         <el-table-column v-if="canManualRecharge" fixed="right" :label="t('common.actions')" width="120">
           <template #default="{ row }">
             <el-button
-                v-if="row.status === 0"
+                v-if="row.status === 0 || row.status === 3"
                 :loading="manualRechargingId === row.id"
                 size="small"
                 type="primary"
@@ -466,6 +467,8 @@ const statusLabel = (status: number) => {
       return t('pages.rechargeOrderList.statusCompleted')
     case 2:
       return t('pages.rechargeOrderList.statusCancelled')
+    case 3:
+      return t('pages.rechargeOrderList.statusFailed')
     default:
       return t('pages.rechargeOrderList.statusPending')
   }
@@ -477,6 +480,8 @@ const statusTagType = (status: number) => {
       return 'success'
     case 2:
       return 'info'
+    case 3:
+      return 'danger'
     default:
       return 'warning'
   }

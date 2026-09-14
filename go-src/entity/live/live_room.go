@@ -207,6 +207,7 @@ func initLiveRoom() {
 	syndb.RegQuick(TbLiveRoom, LiveRoomBan)
 	syndb.RegQuick(TbLiveRoom, LiveRoomBanApplyTime)
 	syndb.RegQuick(TbLiveRoom, LiveRoomBanReason)
+	syndb.RegQuick(TbLiveRoom, LiveRoomStatus)
 	syndb.RegLazy(TbLiveRoom, LiveRoomHeartTime)
 	migrate.AutoMigrate(&LiveRoom{})
 }

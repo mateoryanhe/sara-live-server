@@ -85,7 +85,7 @@ func parseUint64Filter(val string) uint64 {
 
 // ===== App =====
 
-// resolveStatusFilter 将外部 StatusFilter (0=全部, 1=待支付, 2=已完成, 3=已取消)
+// resolveStatusFilter 将外部 StatusFilter (0=全部, 1=待支付, 2=已完成, 3=已取消, 4=失败)
 // 转换为 DAO 使用的 statusVal (<0=不过滤,>=0=实际状态枚举值)
 func resolveStatusFilter(f int) int {
 	switch f {
@@ -95,13 +95,15 @@ func resolveStatusFilter(f int) int {
 		return int(entity.RechargeOrderStatusCompleted)
 	case 3:
 		return int(entity.RechargeOrderStatusCancelled)
+	case 4:
+		return int(entity.RechargeOrderStatusFailed)
 	default:
 		return -1
 	}
 }
 
 // GetMyOrderList App 端查询本人充值订单分页列表
-// statusFilter: 0=全部(默认), 1=待支付, 2=已完成, 3=已取消
+// statusFilter: 0=全部(默认), 1=待支付, 2=已完成, 3=已取消, 4=失败
 func GetMyOrderList(ctx context.Context, req *rechargeorderdto.AppMyRechargeOrderListReq) (*rechargeorderdto.AppMyRechargeOrderListRes, error) {
 	userId := httpserver.GetAuthId(ctx)
 	total, rows := rechargeorderdao.ListByUserId(userId, resolveStatusFilter(req.StatusFilter), req.PageIndex, req.PageSize)
@@ -115,7 +117,7 @@ func GetMyOrderList(ctx context.Context, req *rechargeorderdto.AppMyRechargeOrde
 // ===== CMS =====
 
 // GetCMSList 后台分页查询充值订单
-// statusFilter: 0=全部, 1=待支付, 2=已完成, 3=已取消;source: 0=全部, 1=App, 2=后台手动
+// statusFilter: 0=全部, 1=待支付, 2=已完成, 3=已取消, 4=失败;source: 0=全部, 1=App, 2=后台手动
 func GetCMSList(_ context.Context, req *rechargeorderdto.CMSRechargeOrderListReq) (*httpserver.CMSQueryResp, error) {
 	total, rows := rechargeorderdao.CMSList(&rechargeorderdao.CMSListFilter{
 		UserId:    parseUint64Filter(req.UserId),
