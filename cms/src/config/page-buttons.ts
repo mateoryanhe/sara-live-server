@@ -81,6 +81,7 @@ const CONFIG_PAGES = new Set([
     'AccountCfgManagement',
     'AppVersionCfgManagement',
     'SimulatorCpuKeywordManagement',
+    'DeviceRegisterRiskCfgManagement',
     'ServerRuntimeCfgManagement',
     'PreloadCfgManagement',
     'TextModerationCfgManagement',

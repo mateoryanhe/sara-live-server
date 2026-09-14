@@ -75,6 +75,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   ConfigDeployGroup: 'फ्रंटएंड डिप्लॉय',
   AppTokenConfig: 'ऐप टोकन',
   AccountCfgManagement: 'अकाउंट कॉन्फ़िग',
+  DeviceRegisterRiskCfgManagement: 'डिवाइस पंजीकरण जोखिम',
   PreloadCfgManagement: 'प्रीलोड कॉन्फ़िग',
   TextModerationCfgManagement: 'टेक्स्ट मॉडरेशन',
   PrivacyPolicyCfgManagement: 'गोपनीयता नीति',

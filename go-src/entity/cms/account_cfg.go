@@ -22,6 +22,9 @@ type AccountCfg struct {
 	CancelAccountByCodeEnabled bool  `gorm:"default:0;comment:注销码销户开关(官网公开接口)" json:"cancelAccountByCodeEnabled"`
 	BlockSimulatorLogin        bool  `gorm:"default:0;comment:拦截模拟器登录(默认关闭=不拦截)" json:"blockSimulatorLogin"`
 	EnvType                    uint8 `gorm:"default:0;comment:环境类型(0正式服,1提审服,2测试服)" json:"envType"`
+	DeviceRegisterRiskEnabled  bool  `gorm:"default:1;comment:设备码注册风控开关(默认开启)" json:"deviceRegisterRiskEnabled"`
+	DeviceAccountMaxCount      int   `gorm:"default:3;comment:同设备最大账号数(含已注销)" json:"deviceAccountMaxCount"`
+	DeviceCancelDailyLimit     int   `gorm:"default:1;comment:同设备每天最多注销次数" json:"deviceCancelDailyLimit"`
 }
 
 func initAccountCfg() {

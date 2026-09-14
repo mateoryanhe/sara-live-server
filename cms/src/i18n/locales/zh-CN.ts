@@ -88,6 +88,7 @@ const menu = {
   AccountCfgManagement: '账号配置',
   AppVersionCfgManagement: 'App版本查询',
   SimulatorCpuKeywordManagement: '模拟器CPU关键词',
+  DeviceRegisterRiskCfgManagement: '设备码注册风控',
   AnchorSalaryCfgManagement: '主播结算薪资',
   LiveRevenueShareCfgManagement: '流水分佣配置',
   AnchorIncomeSettlementLogList: '主播结算流水',

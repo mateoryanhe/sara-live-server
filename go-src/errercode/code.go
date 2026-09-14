@@ -209,6 +209,8 @@ const (
 	EmailAlreadyInUse XRCode = 161
 	// EmailAlreadyBound 当前账号已绑定邮箱
 	EmailAlreadyBound XRCode = 162
+	// DeviceAccountRegisterLimit 同设备账号数量已达上限(含已注销)
+	DeviceAccountRegisterLimit XRCode = 163
 )
 
 type XError struct {

@@ -75,6 +75,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   ConfigDeployGroup: 'Deploy frontend',
   AppTokenConfig: 'Token do app',
   AccountCfgManagement: 'Config. de conta',
+  DeviceRegisterRiskCfgManagement: 'Controle registro por dispositivo',
   PreloadCfgManagement: 'Config. de pré-carregamento',
   TextModerationCfgManagement: 'Moderação de texto',
   PrivacyPolicyCfgManagement: 'Política de privacidade',

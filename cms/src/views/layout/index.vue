@@ -524,7 +524,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer') || hasMenuPermission('CfEmailCfgManagement')"
+            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer') || hasMenuPermission('CfEmailCfgManagement')"
             index="/config">
           <template #title>
             <el-icon>
@@ -567,7 +567,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('TextModerationCfgManagement')"
+              v-if="hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('TextModerationCfgManagement')"
               index="/config/group/security">
             <template #title>
               <el-icon>
@@ -580,6 +580,12 @@
                 <Cpu/>
               </el-icon>
               <span>{{ t('menu.SimulatorCpuKeywordManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('DeviceRegisterRiskCfgManagement')" index="/config/device-register-risk-cfg">
+              <el-icon>
+                <Iphone/>
+              </el-icon>
+              <span>{{ t('menu.DeviceRegisterRiskCfgManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('TextModerationCfgManagement')" index="/config/text-moderation">
               <el-icon>

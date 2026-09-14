@@ -54,6 +54,7 @@ import {shortVideoPriceTierListMessages} from './short-video-price-tier-list'
 import {shortVideoWatchListMessages} from './short-video-watch-list'
 import {shortVideoAuthorSettlementLogListMessages} from './short-video-author-settlement-log-list'
 import {accountCfgMessages} from './account-cfg'
+import {deviceRegisterRiskCfgMessages} from './device-register-risk-cfg'
 import {appVersionCfgMessages} from './app-version-cfg'
 import {firstRechargeActivityCfgMessages} from './first-recharge-activity-cfg'
 import {inviteRechargeRewardCfgMessages} from './invite-recharge-reward-cfg'
@@ -138,6 +139,7 @@ const pageMessageBuilders = [
   ['shortVideoWatchList', shortVideoWatchListMessages],
   ['shortVideoAuthorSettlementLogList', shortVideoAuthorSettlementLogListMessages],
   ['accountCfg', accountCfgMessages],
+  ['deviceRegisterRiskCfg', deviceRegisterRiskCfgMessages],
   ['appVersionCfg', appVersionCfgMessages],
   ['firstRechargeActivityCfg', firstRechargeActivityCfgMessages],
   ['inviteRechargeRewardCfg', inviteRechargeRewardCfgMessages],

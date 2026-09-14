@@ -267,3 +267,10 @@ App/CMS 建单 API  ──►  recharge 业务（写订单、白名单）
 - **根因**：`room_app_mgr.CreateRoom` 调 `NewLiveRoom(anchorId, guildId, title, cover, notice)` 时把 `coverName` 和 `req.Title` 传反了；仅影响**新建**房间（已有房间走 update 分支不受影响）。
 - **修复**：改为 `NewLiveRoom(..., req.Title, coverName, req.Notice)`。已写反的数据需手工/脚本对调或主播重设。
 
+## 设备码注册风控 CMS（2026-09-14）
+
+- 菜单：**系统配置 → 安全合规 → 设备码注册风控**
+- 配置落在 `account_cfgs`：开关 / 最大注册数(默认3) / 每天最多注销次(默认1)
+- 与「账号配置」共用 `/accountCfg/getAccountCfg|saveAccountCfg`，两页保存时都会回传对方字段，避免互相覆盖
+- 无配置行时内存默认：风控**开启** + 3 + 1（与原先硬编码一致）
+

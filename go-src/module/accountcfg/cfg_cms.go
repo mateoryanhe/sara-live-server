@@ -18,6 +18,9 @@ func GetAccountCfg(_ context.Context, _ *accountcfgdto.GetAccountCfgReq) (*accou
 			CancelAccountByCodeEnabled: false,
 			BlockSimulatorLogin:        false,
 			EnvType:                    entity.AccountEnvTypeProd,
+			DeviceRegisterRiskEnabled:  true,
+			DeviceAccountMaxCount:      defaultDeviceAccountMaxCount,
+			DeviceCancelDailyLimit:     defaultDeviceCancelDailyLimit,
 		}}, nil
 	}
 	return &accountcfgdto.GetAccountCfgRes{Cfg: toCfgItem(cfg)}, nil
@@ -29,11 +32,22 @@ func SaveAccountCfg(_ context.Context, req *accountcfgdto.SaveAccountCfgReq) (*a
 		req.EnvType != entity.AccountEnvTypeTest {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
+	maxCount := req.DeviceAccountMaxCount
+	if maxCount <= 0 {
+		maxCount = defaultDeviceAccountMaxCount
+	}
+	dailyLimit := req.DeviceCancelDailyLimit
+	if dailyLimit <= 0 {
+		dailyLimit = defaultDeviceCancelDailyLimit
+	}
 	existing := cfgdao.LoadAccountCfg()
 	row := &entity.AccountCfg{
 		CancelAccountByCodeEnabled: req.CancelAccountByCodeEnabled,
 		BlockSimulatorLogin:        req.BlockSimulatorLogin,
 		EnvType:                    req.EnvType,
+		DeviceRegisterRiskEnabled:  req.DeviceRegisterRiskEnabled,
+		DeviceAccountMaxCount:      maxCount,
+		DeviceCancelDailyLimit:     dailyLimit,
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -63,11 +77,22 @@ func toCfgItem(cfg *entity.AccountCfg) *accountcfgdto.AccountCfgItem {
 	if cfg == nil {
 		return nil
 	}
+	maxCount := cfg.DeviceAccountMaxCount
+	if maxCount <= 0 {
+		maxCount = defaultDeviceAccountMaxCount
+	}
+	dailyLimit := cfg.DeviceCancelDailyLimit
+	if dailyLimit <= 0 {
+		dailyLimit = defaultDeviceCancelDailyLimit
+	}
 	return &accountcfgdto.AccountCfgItem{
 		ID:                         strconv.FormatUint(cfg.ID, 10),
 		CancelAccountByCodeEnabled: cfg.CancelAccountByCodeEnabled,
 		BlockSimulatorLogin:        cfg.BlockSimulatorLogin,
 		EnvType:                    cfg.EnvType,
+		DeviceRegisterRiskEnabled:  cfg.DeviceRegisterRiskEnabled,
+		DeviceAccountMaxCount:      maxCount,
+		DeviceCancelDailyLimit:     dailyLimit,
 		CreatedAt:                  formatTime(cfg.CreatedAt),
 		UpdatedAt:                  formatTime(cfg.UpdatedAt),
 	}

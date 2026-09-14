@@ -55,7 +55,7 @@ func ScheduleRechargeOrderTimeout(orderId uint64, createdAt time.Time) {
 	rechargeOrderTimeoutEntries.Store(orderId, entry)
 }
 
-// CancelRechargeOrderTimeout 订单已完成/已取消时移除超时检查
+// CancelRechargeOrderTimeout 订单已完成/已取消(超时)/失败时移除超时检查
 func CancelRechargeOrderTimeout(orderId uint64) {
 	if orderId == 0 {
 		return

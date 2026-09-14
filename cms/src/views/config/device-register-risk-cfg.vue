@@ -3,45 +3,47 @@
     <el-card v-loading="loading">
       <template #header>
         <div class="card-header">
-          <span>{{ t('menu.AccountCfgManagement') }}</span>
+          <span>{{ t('menu.DeviceRegisterRiskCfgManagement') }}</span>
         </div>
       </template>
 
       <el-form ref="formRef" :model="formData" class="cfg-form" label-width="200px">
-        <el-form-item :label="t('pages.accountCfg.envType')">
-          <el-radio-group v-model="formData.envType">
-            <el-radio :value="0">{{ t('pages.accountCfg.envTypeProd') }}</el-radio>
-            <el-radio :value="1">{{ t('pages.accountCfg.envTypeReview') }}</el-radio>
-            <el-radio :value="2">{{ t('pages.accountCfg.envTypeTest') }}</el-radio>
-          </el-radio-group>
-          <div class="form-tip">
-            {{ t('pages.accountCfg.envTypeTip') }}
-          </div>
-        </el-form-item>
-
-        <el-form-item :label="t('pages.accountCfg.cancelAccountByCodeEnabled')">
+        <el-form-item :label="t('pages.deviceRegisterRiskCfg.enabled')">
           <el-switch
-              v-model="formData.cancelAccountByCodeEnabled"
+              v-model="formData.deviceRegisterRiskEnabled"
               :active-text="t('common.open')"
               :inactive-text="t('common.close')"
           />
           <div class="form-tip">
-            {{ t('pages.accountCfg.cancelAccountByCodeTip') }}
+            {{ t('pages.deviceRegisterRiskCfg.enabledTip') }}
           </div>
         </el-form-item>
 
-        <el-form-item :label="t('pages.accountCfg.blockSimulatorLogin')">
-          <el-switch
-              v-model="formData.blockSimulatorLogin"
-              :active-text="t('common.open')"
-              :inactive-text="t('common.close')"
+        <el-form-item :label="t('pages.deviceRegisterRiskCfg.maxCount')">
+          <el-input-number
+              v-model="formData.deviceAccountMaxCount"
+              :min="1"
+              :max="100"
+              :disabled="!formData.deviceRegisterRiskEnabled"
           />
           <div class="form-tip">
-            {{ t('pages.accountCfg.blockSimulatorLoginTip') }}
+            {{ t('pages.deviceRegisterRiskCfg.maxCountTip') }}
           </div>
         </el-form-item>
 
-        <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.accountCfg.lastUpdated')">
+        <el-form-item :label="t('pages.deviceRegisterRiskCfg.dailyCancelLimit')">
+          <el-input-number
+              v-model="formData.deviceCancelDailyLimit"
+              :min="1"
+              :max="100"
+              :disabled="!formData.deviceRegisterRiskEnabled"
+          />
+          <div class="form-tip">
+            {{ t('pages.deviceRegisterRiskCfg.dailyCancelLimitTip') }}
+          </div>
+        </el-form-item>
+
+        <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.deviceRegisterRiskCfg.lastUpdated')">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
 
@@ -108,8 +110,8 @@ const fetchCfg = async () => {
     const response = await accountCfgApi.getAccountCfg()
     applyCfg(response.cfg)
   } catch (error) {
-    console.error('fetch account cfg failed:', error)
-    ElMessage.error(t('pages.accountCfg.fetchCfgFailed'))
+    console.error('fetch device register risk cfg failed:', error)
+    ElMessage.error(t('pages.deviceRegisterRiskCfg.fetchCfgFailed'))
   } finally {
     loading.value = false
   }
@@ -127,16 +129,16 @@ const handleSave = async () => {
       deviceCancelDailyLimit: normalizePositiveInt(formData.deviceCancelDailyLimit, 1),
     })
     if (response?.success) {
-      ElMessage.success(t('pages.accountCfg.saveSuccess'))
+      ElMessage.success(t('pages.deviceRegisterRiskCfg.saveSuccess'))
       if (response.id) {
         formData.id = response.id
       }
       await fetchCfg()
     } else {
-      ElMessage.error(t('pages.accountCfg.saveFailed'))
+      ElMessage.error(t('pages.deviceRegisterRiskCfg.saveFailed'))
     }
   } catch (error) {
-    console.error('save account cfg failed:', error)
+    console.error('save device register risk cfg failed:', error)
   }
 }
 

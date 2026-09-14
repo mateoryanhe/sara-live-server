@@ -75,6 +75,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   ConfigDeployGroup: 'Deploy frontend',
   AppTokenConfig: 'App Token',
   AccountCfgManagement: 'Konfigurasi Akun',
+  DeviceRegisterRiskCfgManagement: 'Kontrol registrasi perangkat',
   PreloadCfgManagement: 'Konfigurasi Preload',
   TextModerationCfgManagement: 'Moderasi Teks',
   PrivacyPolicyCfgManagement: 'Kebijakan Privasi',

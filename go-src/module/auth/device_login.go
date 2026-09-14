@@ -48,6 +48,9 @@ func loginByDevice(ctx context.Context, deviceInfo *entity.DeviceInfo, channel u
 	account := accountdao.FindActiveAccount(deviceId, channel)
 	isNewUser := false
 	if account == nil {
+		if err := checkDeviceRegisterAccountLimit(deviceId, channel); err != nil {
+			return nil, err
+		}
 		account = accountdao.RegisterAccount(deviceId, channel)
 		isNewUser = true
 	}

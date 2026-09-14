@@ -298,6 +298,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             ]),
             group('config-security', 'menu.ConfigSecurityGroup', [
                 page('SimulatorCpuKeywordManagement'),
+                page('DeviceRegisterRiskCfgManagement'),
                 page('TextModerationCfgManagement'),
             ]),
             group('config-platform', 'menu.ConfigPlatformGroup', [

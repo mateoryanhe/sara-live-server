@@ -16,7 +16,7 @@ const (
 const (
 	RechargeOrderStatusPending   uint8 = 0 // 待支付
 	RechargeOrderStatusCompleted uint8 = 1 // 已完成(金币已发放)
-	RechargeOrderStatusCancelled uint8 = 2 // 已取消(超时等)
+	RechargeOrderStatusCancelled uint8 = 2 // 已取消(xrtimer 支付超时专用)
 	RechargeOrderStatusFailed    uint8 = 3 // 失败(渠道支付失败/用户取消支付等)
 )
 
@@ -56,7 +56,7 @@ type RechargeOrder struct {
 	PayAmount    float64   `gorm:"type:decimal(18,4);default:0;comment:渠道实付金额(如IDR,非渠道为0)" json:"payAmount"`
 	Currency     string    `gorm:"size:8;default:'USD';comment:实际支付货币(如USD/IDR)" json:"currency"`
 	Gold         float64   `gorm:"default:0;comment:发放金币数(订单完成时增加到玩家金币)" json:"gold"`
-	Status       uint8     `gorm:"index:idx_ro_user_status,priority:2;index;default:0;comment:状态(0-待支付,1-已完成,2-已取消,3-失败)" json:"status"`
+	Status       uint8     `gorm:"index:idx_ro_user_status,priority:2;index;default:0;comment:状态(0-待支付,1-已完成,2-已取消/支付超时,3-失败)" json:"status"`
 	Source       uint8     `gorm:"default:0;comment:来源(1-安卓,2-后台,3-H5,5-苹果,6-币商)" json:"source"`
 	PayChannel   uint8     `gorm:"size:32;default:0;comment:支付渠道" json:"payChannel"`
 	ThirdOrderId string    `gorm:"size:64;default:'';index;comment:第三方订单号" json:"thirdOrderId"`

@@ -8,13 +8,10 @@ import (
 	"xr-game-server/core/cache"
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/errercode"
+	"xr-game-server/module/accountcfg"
 )
 
-const (
-	appCancelListMaxSize    = 3 // 同一 openId+channel 账号列表上限(含已注销)
-	appCancelDailyLimit     = 1 // 同一 openId+channel 每天最多注销次数
-	appCancelDailyKeyLayout = "2006-01-02"
-)
+const appCancelDailyKeyLayout = "2006-01-02"
 
 var appCancelGuardCacheMgr *cache.RowCache[int]
 
@@ -22,17 +19,41 @@ func initAppCancelGuard() {
 	appCancelGuardCacheMgr = cache.NewRowCache[int]()
 }
 
+// checkAppCancelAccountGuard 注销侧:风控开启时校验每日注销次数
 func checkAppCancelAccountGuard(openId string, channel uint) error {
 	openId = accountdao.LogicalOpenId(openId)
 	if openId == "" || channel == 0 {
 		return errercode.CreateCode(errercode.InvalidParam)
 	}
-	list := accountdao.GetAccountList(openId, channel)
-	if len(list) >= appCancelListMaxSize {
+	if !accountcfg.IsDeviceRegisterRiskEnabled() {
+		return nil
+	}
+	limit := accountcfg.GetDeviceCancelDailyLimit()
+	if limit <= 0 {
+		return nil
+	}
+	if getAppCancelDailyCount(openId, channel) >= limit {
+		return errercode.CreateCode(errercode.RequestTooFrequent)
+	}
+	return nil
+}
+
+// checkDeviceRegisterAccountLimit 设备码新注册前:风控开启时校验同设备账号数上限(含已注销)
+func checkDeviceRegisterAccountLimit(openId string, channel uint) error {
+	openId = accountdao.LogicalOpenId(openId)
+	if openId == "" || channel == 0 {
 		return errercode.CreateCode(errercode.InvalidParam)
 	}
-	if getAppCancelDailyCount(openId, channel) >= appCancelDailyLimit {
-		return errercode.CreateCode(errercode.RequestTooFrequent)
+	if !accountcfg.IsDeviceRegisterRiskEnabled() {
+		return nil
+	}
+	maxCount := accountcfg.GetDeviceAccountMaxCount()
+	if maxCount <= 0 {
+		return nil
+	}
+	list := accountdao.GetAccountList(openId, channel)
+	if len(list) >= maxCount {
+		return errercode.CreateCode(errercode.DeviceAccountRegisterLimit)
 	}
 	return nil
 }
@@ -40,6 +61,9 @@ func checkAppCancelAccountGuard(openId string, channel uint) error {
 func recordAppCancelAccountSuccess(openId string, channel uint) {
 	openId = accountdao.LogicalOpenId(openId)
 	if openId == "" || channel == 0 {
+		return
+	}
+	if !accountcfg.IsDeviceRegisterRiskEnabled() {
 		return
 	}
 	ctx := gctx.New()

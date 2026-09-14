@@ -718,6 +718,9 @@ export interface AccountCfg {
     cancelAccountByCodeEnabled: boolean
     blockSimulatorLogin: boolean
     envType: number
+    deviceRegisterRiskEnabled: boolean
+    deviceAccountMaxCount: number
+    deviceCancelDailyLimit: number
     createdAt?: string
     updatedAt?: string
 }
@@ -754,6 +757,9 @@ export interface SaveAccountCfgReq {
     cancelAccountByCodeEnabled: boolean
     blockSimulatorLogin: boolean
     envType: number
+    deviceRegisterRiskEnabled: boolean
+    deviceAccountMaxCount: number
+    deviceCancelDailyLimit: number
 }
 
 export interface SaveAccountCfgRes {

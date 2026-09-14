@@ -28,8 +28,8 @@ func ManualRecharge(ctx context.Context, req *rechargeorderdto.CMSManualRecharge
 
 	after, err := completeOrder(order, currency.ReasonRechargeManual)
 	if err != nil {
-		// 发放失败,标记订单为已取消,避免遗留"待支付"脏数据
-		order.SetStatus(entity.RechargeOrderStatusCancelled)
+		// 发放失败,标记订单为失败,避免遗留"待支付"脏数据
+		order.SetStatus(entity.RechargeOrderStatusFailed)
 		order.SetUpdatedAt(time.Now())
 		CancelRechargeOrderTimeout(order.ID)
 		rechargeorderdao.FlushOrderCache(order)

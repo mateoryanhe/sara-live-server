@@ -41,6 +41,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '模拟器CPU关键字'},
         },
         {
+            path: 'device-register-risk-cfg',
+            name: 'DeviceRegisterRiskCfgManagement',
+            component: () => import('@/views/config/device-register-risk-cfg.vue'),
+            meta: {title: '设备码注册风控'},
+        },
+        {
             path: 'text-moderation',
             name: 'TextModerationCfgManagement',
             component: () => import('@/views/config/text-moderation.vue'),
