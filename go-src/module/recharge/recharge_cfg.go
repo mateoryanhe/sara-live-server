@@ -11,7 +11,6 @@ import (
 	"xr-game-server/entity/recharge"
 	"xr-game-server/errercode"
 	"xr-game-server/module/activity"
-	"xr-game-server/module/upload"
 )
 
 // ===== CMS =====
@@ -19,10 +18,6 @@ import (
 // GetList CMS分页查询(全部状态)
 func GetList(_ context.Context, req *rechargecfgdto.RechargeCfgListReq) (*httpserver.CMSQueryResp, error) {
 	total, list := cfgdao.GetRechargeCfgList(req)
-	for _, row := range list {
-		row.IconName = row.Icon
-		row.Icon = upload.GetUrlByName(row.IconName)
-	}
 	return &httpserver.CMSQueryResp{Total: total, Data: list}, nil
 }
 
@@ -37,7 +32,6 @@ func Create(_ context.Context, req *rechargecfgdto.CreateRechargeCfgReq) (*recha
 	cfg := &entity.RechargeCfg{
 		Name:        req.Name,
 		CfgType:     req.CfgType,
-		Icon:        req.Icon,
 		Gold:        req.Gold,
 		Price:       req.Price,
 		Currency:    entity.RechargeCfgCurrencyUSD,
@@ -67,7 +61,6 @@ func Update(_ context.Context, req *rechargecfgdto.UpdateRechargeCfgReq) (*recha
 
 	cfg.Name = req.Name
 	cfg.CfgType = req.CfgType
-	cfg.Icon = req.Icon
 	cfg.Gold = req.Gold
 	cfg.Price = req.Price
 	cfg.Currency = entity.RechargeCfgCurrencyUSD
@@ -188,4 +181,3 @@ func validateRechargeCfgProductId(productId string, cfgType uint8, excludeID uin
 	}
 	return nil
 }
-

@@ -7,6 +7,8 @@ import type {
 
 export interface HaiPayRegionItem {
     currencyCode: string
+    fiatCurrencyCode: string
+    fiatCurrencyCodes: string[]
     name: string
     nameEn: string
     nameZh: string

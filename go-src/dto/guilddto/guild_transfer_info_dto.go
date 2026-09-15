@@ -10,13 +10,22 @@ type GetGuildTransferInfoReq struct {
 	GuildId uint64 `json:"guildId" v:"required#工会ID不能为空" dc:"工会ID"`
 }
 
-// GuildTransferCountryOption 代付可选国家(统一 country 包)
+// GuildTransferWalletOption HaiPay 代付钱包选项。
+type GuildTransferWalletOption struct {
+	Code string `json:"code" dc:"HaiPay钱包支付编码"`
+	Name string `json:"name" dc:"钱包名称"`
+}
+
+// GuildTransferCountryOption 代付可选国家(统一 country 包)。
 type GuildTransferCountryOption struct {
-	CountryCode string `json:"countryCode" dc:"国家简码"`
-	NameEn      string `json:"nameEn"`
-	NameZh      string `json:"nameZh"`
-	Currency    string `json:"currency" dc:"代付币种,如IDR"`
-	Icon        string `json:"icon" dc:"国旗URL"`
+	CountryCode  string                      `json:"countryCode" dc:"国家简码"`
+	NameEn       string                      `json:"nameEn"`
+	NameZh       string                      `json:"nameZh"`
+	Currency     string                      `json:"currency" dc:"代付币种,如IDR"`
+	Region       string                      `json:"region" dc:"HaiPay代付地区分类"`
+	AccountTypes []string                    `json:"accountTypes" dc:"该币种支持的HaiPay账户类型"`
+	Wallets      []GuildTransferWalletOption `json:"wallets" dc:"当前已接入的电子钱包"`
+	Icon         string                      `json:"icon" dc:"国旗URL"`
 }
 
 type GuildTransferInfoItem struct {
@@ -44,6 +53,7 @@ type SaveGuildTransferInfoReq struct {
 	g.Meta      `path:"/saveGuildTransferInfo" method:"post" summary:"保存工会转账信息" tags:"直播工会"`
 	GuildId     uint64 `json:"guildId" v:"required#工会ID不能为空" dc:"工会ID"`
 	CountryCode string `json:"countryCode" v:"required|length:2,8#国家不能为空|国家简码无效" dc:"国家/地区ISO简码(如ID)"`
+	Currency    string `json:"currency" v:"max-length:16#币种最长16字符" dc:"代付币种(优先使用,兼容旧客户端可留空)"`
 	AccountType string `json:"accountType" v:"max-length:32#accountType最长32" dc:"默认BANK_ACCOUNT"`
 	PayeeName   string `json:"payeeName" v:"max-length:128#收款人姓名最长128字符" dc:"收款人姓名"`
 	Phone       string `json:"phone" v:"max-length:32#手机号最长32字符" dc:"收款人手机"`

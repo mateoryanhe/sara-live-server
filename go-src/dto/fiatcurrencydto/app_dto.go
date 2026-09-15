@@ -15,14 +15,16 @@ type HaiPayRegionListReq struct {
 
 // AppFiatCurrencyItem 支付区域项(currencyCode=HaiPay region 简码,与 country.Code 一致)
 type AppFiatCurrencyItem struct {
-	CurrencyCode string `json:"currencyCode" dc:"HaiPay region 简码,建单原样上报"`
-	Name         string `json:"name" dc:"英文名(兼容旧字段,同 nameEn)"`
-	NameEn       string `json:"nameEn" dc:"英文名称"`
-	NameZh       string `json:"nameZh" dc:"中文名称"`
-	Symbol       string `json:"symbol" dc:"展示符号,同简码"`
-	Icon         string `json:"icon" dc:"国旗URL(country-flags/{version}/{code}.png)"`
-	CurrencyType uint8  `json:"currencyType" dc:"固定1"`
-	Sort         int    `json:"sort"`
+	CurrencyCode      string   `json:"currencyCode" dc:"HaiPay region 简码,建单原样上报"`
+	FiatCurrencyCode  string   `json:"fiatCurrencyCode" dc:"实际下单币种:支持USD则为USD,否则为当地币"`
+	FiatCurrencyCodes []string `json:"fiatCurrencyCodes" dc:"国家/地区支持的全部ISO 4217法币代码"`
+	Name              string   `json:"name" dc:"英文名(兼容旧字段,同 nameEn)"`
+	NameEn            string   `json:"nameEn" dc:"英文名称"`
+	NameZh            string   `json:"nameZh" dc:"中文名称"`
+	Symbol            string   `json:"symbol" dc:"展示符号,同简码"`
+	Icon              string   `json:"icon" dc:"国旗URL(country-flags/{version}/{code}.png)"`
+	CurrencyType      uint8    `json:"currencyType" dc:"固定1"`
+	Sort              int      `json:"sort"`
 }
 
 type AppFiatCurrencyListRes struct {

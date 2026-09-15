@@ -26,10 +26,9 @@ func requireExistingAppUser(userId uint64) error {
 }
 
 // resolveChannelPayPayer 优先用已存付款资料，其次请求入参，再回落昵称/绑定邮箱
-func resolveChannelPayPayer(userId uint64, reqName, reqEmail, reqPhone string) (name, email, phone string) {
+func resolveChannelPayPayer(userId uint64, reqName, reqEmail string) (name, email string) {
 	reqName = strings.TrimSpace(reqName)
 	reqEmail = strings.ToLower(strings.TrimSpace(reqEmail))
-	reqPhone = strings.TrimSpace(reqPhone)
 
 	if profile := channelpaydao.GetExisting(userId); profile != nil {
 		if strings.TrimSpace(profile.Name) != "" {
@@ -38,18 +37,12 @@ func resolveChannelPayPayer(userId uint64, reqName, reqEmail, reqPhone string) (
 		if strings.TrimSpace(profile.Email) != "" {
 			email = strings.ToLower(strings.TrimSpace(profile.Email))
 		}
-		if strings.TrimSpace(profile.Phone) != "" {
-			phone = strings.TrimSpace(profile.Phone)
-		}
 	}
 	if reqName != "" {
 		name = reqName
 	}
 	if reqEmail != "" && !strings.HasSuffix(reqEmail, "@noreply.local") {
 		email = reqEmail
-	}
-	if reqPhone != "" {
-		phone = reqPhone
 	}
 	if name == "" {
 		if user := userinfodao.GetUserInfoFromMemory(userId); user != nil && strings.TrimSpace(user.Nickname) != "" {
@@ -70,10 +63,10 @@ func resolveChannelPayPayer(userId uint64, reqName, reqEmail, reqPhone string) (
 		email = fmt.Sprintf("user%d@noreply.local", userId)
 	}
 	// 仅真实入参才落库（且调用方已校验用户存在）
-	if reqName != "" || (reqEmail != "" && !strings.HasSuffix(reqEmail, "@noreply.local")) || reqPhone != "" {
-		channelpaydao.UpsertPayerInfo(userId, reqName, reqEmail, reqPhone)
+	if reqName != "" || (reqEmail != "" && !strings.HasSuffix(reqEmail, "@noreply.local")) {
+		channelpaydao.UpsertPayerInfo(userId, reqName, reqEmail)
 	}
-	return name, email, phone
+	return name, email
 }
 
 func normalizePayDisplayName(name string) string {
@@ -138,7 +131,6 @@ func GetChannelPayUserProfileByUserId(userId uint64) (*rechargeorderdto.AppGetCh
 	if row := channelpaydao.GetExisting(userId); row != nil {
 		res.Name = strings.TrimSpace(row.Name)
 		res.Email = strings.TrimSpace(row.Email)
-		res.Phone = strings.TrimSpace(row.Phone)
 	}
 	return res, nil
 }
@@ -151,19 +143,17 @@ func SaveChannelPayUserProfile(ctx context.Context, req *rechargeorderdto.AppSav
 	}
 	name := strings.TrimSpace(req.Name)
 	email := strings.ToLower(strings.TrimSpace(req.Email))
-	phone := strings.TrimSpace(req.Phone)
 	if name == "" || email == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	if !isLikelyRealPayEmail(email) {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	row := channelpaydao.UpsertPayerInfo(userId, name, email, phone)
+	row := channelpaydao.UpsertPayerInfo(userId, name, email)
 	res := &rechargeorderdto.AppSaveChannelPayUserProfileRes{Success: true}
 	if row != nil {
 		res.Name = strings.TrimSpace(row.Name)
 		res.Email = strings.TrimSpace(row.Email)
-		res.Phone = strings.TrimSpace(row.Phone)
 	}
 	return res, nil
 }

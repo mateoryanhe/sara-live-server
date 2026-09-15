@@ -43,7 +43,16 @@ func SaveGuildTransferInfo(_ context.Context, req *guilddto.SaveGuildTransferInf
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	countryCode := strings.ToUpper(strings.TrimSpace(req.CountryCode))
-	currency := country.HaiPayPayoutCurrency(countryCode)
+	currency := strings.ToUpper(strings.TrimSpace(req.Currency))
+	if currency != "" {
+		currencyCountry := country.HaiPayPayoutCountryFromCurrency(currency)
+		if currencyCountry == "" || (countryCode != "" && countryCode != currencyCountry) {
+			return nil, errercode.CreateCode(errercode.InvalidParam)
+		}
+		countryCode = currencyCountry
+	} else {
+		currency = country.HaiPayPayoutCurrency(countryCode)
+	}
 	if currency == "" || !country.IsHaiPayPayoutCountry(countryCode) {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
@@ -52,9 +61,17 @@ func SaveGuildTransferInfo(_ context.Context, req *guilddto.SaveGuildTransferInf
 		return nil, errercode.CreateCode(errercode.GuildNonExist)
 	}
 
-	accountType := strings.TrimSpace(req.AccountType)
+	accountType := strings.ToUpper(strings.TrimSpace(req.AccountType))
 	if accountType == "" {
 		accountType = liveentity.GuildTransferAccountTypeBank
+	}
+	if !country.IsHaiPayPayoutAccountType(currency, accountType) {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if strings.TrimSpace(req.PayeeName) == "" || strings.TrimSpace(req.Phone) == "" ||
+		strings.TrimSpace(req.Email) == "" || strings.TrimSpace(req.AccountNo) == "" ||
+		strings.TrimSpace(req.BankCode) == "" {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 
 	row := liveentity.NewLiveGuildTransferInfo(req.GuildId)
@@ -117,24 +134,34 @@ func toGuildTransferInfoItem(row *liveentity.LiveGuildTransferInfo) *guilddto.Gu
 }
 
 func buildGuildTransferCountryOptions() []*guilddto.GuildTransferCountryOption {
-	regions := country.ListHaiPayPayoutCountries()
+	options := country.ListHaiPayPayoutOptions()
 	version := countryflagdeploy.CurrentVersion()
-	out := make([]*guilddto.GuildTransferCountryOption, 0, len(regions))
-	for _, c := range regions {
-		cur := country.HaiPayPayoutCurrency(c.Code)
-		if cur == "" {
-			continue
+	out := make([]*guilddto.GuildTransferCountryOption, 0, len(options))
+	for _, option := range options {
+		c, ok := country.Get(option.CountryCode)
+		if !ok {
+			c = country.Country{Code: option.CountryCode, NameEn: option.CountryCode}
 		}
 		icon := ""
 		if rel := country.RelPath(c.Code, version); rel != "" {
 			icon = upload.GetUrlByName(rel)
 		}
+		walletOptions := make([]guilddto.GuildTransferWalletOption, 0, len(option.Wallets))
+		for _, wallet := range option.Wallets {
+			walletOptions = append(walletOptions, guilddto.GuildTransferWalletOption{
+				Code: wallet.Code,
+				Name: wallet.Name,
+			})
+		}
 		out = append(out, &guilddto.GuildTransferCountryOption{
-			CountryCode: c.Code,
-			NameEn:      c.NameEn,
-			NameZh:      c.NameZh,
-			Currency:    cur,
-			Icon:        icon,
+			CountryCode:  c.Code,
+			NameEn:       c.NameEn,
+			NameZh:       c.NameZh,
+			Currency:     option.Currency,
+			Region:       option.Region,
+			AccountTypes: append([]string(nil), option.AccountTypes...),
+			Wallets:      walletOptions,
+			Icon:         icon,
 		})
 	}
 	return out

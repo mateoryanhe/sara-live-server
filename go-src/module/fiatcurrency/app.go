@@ -24,23 +24,29 @@ func GetHaiPayRegionList(_ context.Context, _ *fiatcurrencydto.HaiPayRegionListR
 }
 
 func buildHaiPayRegionItems() []*fiatcurrencydto.AppFiatCurrencyItem {
-	regions := country.ListHaiPayRegions()
+	options := country.ListHaiPayCollectionOptions()
 	version := countryflagdeploy.CurrentVersion()
-	list := make([]*fiatcurrencydto.AppFiatCurrencyItem, 0, len(regions))
-	for i, c := range regions {
+	list := make([]*fiatcurrencydto.AppFiatCurrencyItem, 0, len(options))
+	for i, option := range options {
+		c, ok := country.Get(option.CountryCode)
+		if !ok {
+			c = country.Country{Code: option.CountryCode, NameEn: option.CountryCode}
+		}
 		icon := ""
 		if rel := country.RelPath(c.Code, version); rel != "" {
 			icon = upload.GetUrlByName(rel)
 		}
 		list = append(list, &fiatcurrencydto.AppFiatCurrencyItem{
-			CurrencyCode: c.Code,
-			Name:         c.NameEn,
-			NameEn:       c.NameEn,
-			NameZh:       c.NameZh,
-			Symbol:       c.Code,
-			Icon:         icon,
-			CurrencyType: fiatentity.FiatCurrencyTypeFiat,
-			Sort:         len(regions) - i,
+			CurrencyCode:      c.Code,
+			FiatCurrencyCode:  country.HaiPayCollectionCurrency(option.CountryCode),
+			FiatCurrencyCodes: option.Currencies,
+			Name:              c.NameEn,
+			NameEn:            c.NameEn,
+			NameZh:            c.NameZh,
+			Symbol:            c.Code,
+			Icon:              icon,
+			CurrencyType:      fiatentity.FiatCurrencyTypeFiat,
+			Sort:              len(options) - i,
 		})
 	}
 	return list

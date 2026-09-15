@@ -62,19 +62,6 @@
               {{ cfgTypeLabel(row.cfgType) }}
             </template>
           </el-table-column>
-          <el-table-column :label="t('common.icon')" width="90">
-            <template #default="{ row }">
-              <el-image
-                  v-if="row.icon"
-                  :preview-src-list="[row.icon]"
-                  :src="row.icon"
-                  fit="cover"
-                  preview-teleported
-                  style="width: 48px; height: 48px"
-              />
-              <span v-else>-</span>
-            </template>
-          </el-table-column>
           <el-table-column :label="t('pages.rechargeCfgList.baseGold')" prop="gold" width="100"/>
           <el-table-column :label="t('common.price')" width="120">
             <template #default="{ row }">
@@ -140,35 +127,6 @@
             <el-option v-for="item in cfgTypeOptions" :key="item.value" :label="item.label" :value="item.value"/>
           </el-select>
         </el-form-item>
-        <el-form-item :label="t('common.icon')" prop="icon">
-          <div class="icon-upload-wrap">
-            <el-upload
-                :before-upload="beforeIconUpload"
-                :disabled="iconUploading"
-                :http-request="doUpload"
-                :show-file-list="false"
-                accept="image/*"
-                action="#"
-                class="icon-uploader"
-            >
-              <img v-if="iconPreviewUrl" :src="iconPreviewUrl" alt="icon" class="icon-preview"/>
-              <div v-else class="icon-uploader-placeholder">
-                <el-icon class="icon-uploader-icon">
-                  <Plus/>
-                </el-icon>
-                <span>{{ t('pages.rechargeCfgList.clickUploadIcon') }}</span>
-              </div>
-            </el-upload>
-            <el-button
-                v-if="iconPreviewUrl || currentRow.icon"
-                link
-                type="danger"
-                @click="clearIcon"
-            >
-              {{ t('pages.rechargeCfgList.removeIcon') }}
-            </el-button>
-          </div>
-        </el-form-item>
         <el-form-item :label="t('pages.rechargeCfgList.baseGold')" prop="gold">
           <el-input-number v-model="currentRow.gold" :min="1" controls-position="right"/>
         </el-form-item>
@@ -207,9 +165,8 @@
 <script lang="ts" setup>
 import {useI18n} from 'vue-i18n'
 import {computed, onMounted, reactive, ref, watch} from 'vue'
-import {ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions} from 'element-plus'
-import {Plus} from '@element-plus/icons-vue'
-import {dataSyncApi, rechargeCfgApi, uploadApi} from '@/api'
+import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
+import {dataSyncApi, rechargeCfgApi} from '@/api'
 import {confirmDataSync} from '@/utils/confirm-data-sync'
 import type {RechargeCfg} from '@/types/api.ts'
 import {hasButtonPermission} from '@/utils/permission'
@@ -228,7 +185,6 @@ interface RechargeCfgForm {
   id: string
   name: string
   cfgType: number | null
-  icon: string
   gold: number
   price: number
   productId: string
@@ -277,7 +233,6 @@ const defaultForm = (): RechargeCfgForm => ({
   id: '',
   name: '',
   cfgType: null,
-  icon: '',
   gold: 1,
   price: 0.99,
   productId: '',
@@ -285,65 +240,10 @@ const defaultForm = (): RechargeCfgForm => ({
 })
 const currentRow = ref<RechargeCfgForm>(defaultForm())
 const formRef = ref<FormInstance>()
-const iconUploading = ref(false)
-const iconPreviewUrl = ref('')
-let objectPreviewUrl: string | null = null
-
-const revokeObjectPreview = () => {
-  if (objectPreviewUrl) {
-    URL.revokeObjectURL(objectPreviewUrl)
-    objectPreviewUrl = null
-  }
-}
-
-const setIconPreview = (url: string, fromObject = false) => {
-  revokeObjectPreview()
-  iconPreviewUrl.value = url
-  if (fromObject) {
-    objectPreviewUrl = url
-  }
-}
-
-const clearIcon = () => {
-  currentRow.value.icon = ''
-  setIconPreview('')
-  formRef.value?.validateField('icon').catch(() => undefined)
-}
-
-watch(dialogVisible, (visible) => {
-  if (!visible) {
-    revokeObjectPreview()
-    iconPreviewUrl.value = ''
-  }
-})
 
 watch(() => currentRow.value.cfgType, () => {
   formRef.value?.validateField('productId').catch(() => undefined)
 })
-
-const beforeIconUpload = (file: File): boolean => {
-  if (!file.type.startsWith('image/')) {
-    ElMessage.error(t('pages.rechargeCfgList.imageOnly'))
-    return false
-  }
-  return true
-}
-
-const doUpload = async (options: UploadRequestOptions) => {
-  const file = options.file as File
-  iconUploading.value = true
-  try {
-    const res = await uploadApi.uploadFile(file)
-    currentRow.value.icon = res.fileName
-    setIconPreview(URL.createObjectURL(file), true)
-    ElMessage.success(t('pages.rechargeCfgList.uploadSuccess'))
-  } catch (error) {
-    console.error('upload failed:', error)
-    ElMessage.error(t('pages.rechargeCfgList.uploadFailed'))
-  } finally {
-    iconUploading.value = false
-  }
-}
 
 const formRules = computed<FormRules>(() => ({
   name: [
@@ -413,7 +313,6 @@ const handleCurrentChange = (page: number) => {
 const handleAdd = () => {
   dialogTitle.value = t('pages.rechargeCfgList.addCfg')
   currentRow.value = defaultForm()
-  setIconPreview('')
   dialogVisible.value = true
 }
 
@@ -426,13 +325,11 @@ const handleEdit = (row: RechargeCfg) => {
       const v = Number(row.cfgType)
       return v === 1 || v === 2 || v === 3 ? v : null
     })(),
-    icon: row.iconName || '',
     gold: Number(row.gold) || 1,
     price: truncateNumber(row.price, RECHARGE_PRICE_DECIMALS) || 0.99,
     productId: row.productId || '',
     description: row.description || ''
   }
-  setIconPreview(row.icon || '')
   dialogVisible.value = true
 }
 
@@ -497,7 +394,6 @@ const handleSave = async () => {
       const payload = {
         name: currentRow.value.name,
         cfgType: currentRow.value.cfgType ?? 0,
-        icon: currentRow.value.icon,
         gold: currentRow.value.gold,
         price: currentRow.value.price,
         productId: currentRow.value.productId,
@@ -550,8 +446,7 @@ const handleSyncData = async () => {
     if (response?.success) {
       ElMessage.success(
           response.message || t('pages.rechargeCfgList.syncSuccessDetail', {
-            rows: response.rowCount,
-            files: response.fileCount
+            rows: response.rowCount
           })
       )
     } else {
@@ -611,45 +506,4 @@ onMounted(() => {
   color: var(--el-text-color-secondary);
 }
 
-.icon-upload-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.icon-uploader :deep(.el-upload) {
-  border: 1px dashed var(--el-border-color);
-  border-radius: 8px;
-  cursor: pointer;
-  overflow: hidden;
-  transition: border-color 0.2s;
-}
-
-.icon-uploader :deep(.el-upload:hover) {
-  border-color: var(--el-color-primary);
-}
-
-.icon-uploader-placeholder {
-  width: 96px;
-  height: 96px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: var(--el-text-color-secondary);
-  font-size: 13px;
-  gap: 8px;
-}
-
-.icon-uploader-icon {
-  font-size: 28px;
-}
-
-.icon-preview {
-  width: 96px;
-  height: 96px;
-  display: block;
-  object-fit: cover;
-}
 </style>

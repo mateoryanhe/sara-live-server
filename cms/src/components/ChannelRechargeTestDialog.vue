@@ -2,7 +2,7 @@
   <el-dialog
       :model-value="modelValue"
       :title="dialogTitle"
-      width="760px"
+      width="820px"
       @closed="resetChannelTest"
       @update:model-value="emit('update:modelValue', $event)"
   >
@@ -28,6 +28,7 @@
           @row-click="handleRegionPick"
       >
         <el-table-column :label="t('pages.rechargeOrderList.currencyCode')" prop="code" width="90"/>
+        <el-table-column :label="t('pages.rechargeOrderList.fiatCurrencyCode')" prop="currency" width="180"/>
         <el-table-column :label="t('pages.rechargeOrderList.currencyName')" min-width="220">
           <template #default="{ row }">
             {{ row.nameZh || row.nameEn || row.name || row.code }}
@@ -48,7 +49,7 @@
     <template v-else>
       <div class="step-bar">
         <el-button link type="primary" @click="backToRegion">← {{ t('pages.rechargeOrderList.backToSelectRegion') }}</el-button>
-        <span class="step-region">{{ selectedRegion?.code }} · {{ selectedRegion?.name }}</span>
+        <span class="step-region">{{ selectedRegion?.code }} · {{ selectedRegion?.currency }} · {{ selectedRegion?.name }}</span>
       </div>
       <el-table
           v-loading="channelTestCfgLoading || channelTestCreating"
@@ -126,6 +127,7 @@ const RECHARGE_PRICE_DECIMALS = 4
 
 type RegionRow = {
   code: string
+  currency: string
   name: string
   nameEn: string
   nameZh: string
@@ -173,8 +175,15 @@ const dialogTitle = computed(() => {
 
 const mapRegionItem = (item: HaiPayRegionItem): RegionRow => {
   const code = String(item.currencyCode || item.symbol || '').trim().toUpperCase()
+  const preferredCurrency = String(item.fiatCurrencyCode || '').trim().toUpperCase()
+  const currencies = (Array.isArray(item.fiatCurrencyCodes) && item.fiatCurrencyCodes.length > 0
+      ? item.fiatCurrencyCodes
+      : [item.fiatCurrencyCode])
+      .map((currency) => String(currency || '').trim().toUpperCase())
+      .filter(Boolean)
   return {
     code,
+    currency: currencies.length > 1 ? `${preferredCurrency} / ${currencies.join(', ')}` : preferredCurrency,
     name: String(item.name || item.nameEn || code),
     nameEn: String(item.nameEn || item.name || ''),
     nameZh: String(item.nameZh || ''),

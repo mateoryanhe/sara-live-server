@@ -21,8 +21,6 @@ type RechargeCfgListRes struct {
 	ID          string  `json:"id"`
 	Name        string  `json:"name"`
 	CfgType     uint8   `json:"cfgType"`
-	Icon        string  `json:"icon" dc:"图标完整URL(列表展示)"`
-	IconName    string  `json:"iconName" dc:"图标资源文件名(编辑保存用)"`
 	Gold        uint64  `json:"gold" dc:"到账金币数"`
 	Price       float64 `json:"price" dc:"现实货币价格(单位:USD)"`
 	Currency    string  `json:"currency"`
@@ -38,7 +36,6 @@ type CreateRechargeCfgReq struct {
 	g.Meta      `path:"/createRechargeCfg" method:"post" summary:"创建充值配置" tags:"充值配置"`
 	Name        string  `json:"name"         v:"required|length:1,64#名称不能为空|名称长度需在1到64之间" dc:"档位名称"`
 	CfgType     uint8   `json:"cfgType"      v:"in:0,1,2,3#类型无效" dc:"类型(0未指定,1iOS,2Google,3渠道),可选"`
-	Icon        string  `json:"icon"         v:"max-length:255#图标URL最长255字符" dc:"图标URL"`
 	Gold        uint64  `json:"gold"      v:"required|min:1#到账金币数不能为空|到账金币数需大于0" dc:"到账金币数"`
 	Price       float64 `json:"price"        v:"required|min:0.0001#价格不能为空|价格需大于0" dc:"现实货币价格(单位:USD)"`
 	ProductId   string  `json:"productId"    v:"max-length:64#商品ID最长64字符" dc:"第三方商品SKU"`
@@ -55,7 +52,6 @@ type UpdateRechargeCfgReq struct {
 	ID          uint64  `json:"id"           v:"required#ID不能为空" dc:"档位ID"`
 	Name        string  `json:"name"         v:"required|length:1,64#名称不能为空|名称长度需在1到64之间" dc:"档位名称"`
 	CfgType     uint8   `json:"cfgType"      v:"in:0,1,2,3#类型无效" dc:"类型(0未指定,1iOS,2Google,3渠道),可选"`
-	Icon        string  `json:"icon"         v:"max-length:255#图标URL最长255字符" dc:"图标URL"`
 	Gold        uint64  `json:"gold"      v:"required|min:1#到账金币数不能为空|到账金币数需大于0" dc:"到账金币数"`
 	Price       float64 `json:"price"        v:"required|min:0.0001#价格不能为空|价格需大于0" dc:"现实货币价格(单位:USD)"`
 	ProductId   string  `json:"productId"    v:"max-length:64#商品ID最长64字符" dc:"第三方商品SKU"`
@@ -116,7 +112,6 @@ type AppRechargeCfgItem struct {
 	ID                 uint64  `json:"id"`
 	Name               string  `json:"name"`
 	CfgType            uint8   `json:"cfgType"`
-	Icon               string  `json:"icon"`
 	Gold               uint64  `json:"gold" dc:"到账金币数"`
 	Price              float64 `json:"price" dc:"现实货币价格(单位:USD)"`
 	Currency           string  `json:"currency"`

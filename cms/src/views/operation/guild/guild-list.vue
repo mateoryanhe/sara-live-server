@@ -232,7 +232,13 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="transferDialogVisible" :title="transferDialogTitle" destroy-on-close width="600px">
+    <el-dialog
+        v-model="transferDialogVisible"
+        :title="transferDialogTitle"
+        destroy-on-close
+        width="600px"
+        @closed="transferCurrencyDialogVisible = false"
+    >
       <el-form
           ref="transferFormRef"
           v-loading="transferLoading"
@@ -240,38 +246,40 @@
           :rules="transferFormRules"
           label-width="110px"
       >
-        <el-form-item :label="t('pages.guildList.transferCountry')" prop="countryCode">
-          <el-select
-              v-model="transferForm.countryCode"
-              clearable
-              filterable
-              style="width: 100%"
-              :placeholder="t('pages.guildList.transferCountryPlaceholder')"
-              @change="onTransferCountryChange"
+        <el-form-item :label="t('pages.guildList.transferCurrency')" prop="currency">
+          <el-input
+              :model-value="transferCurrencyDisplay"
+              :disabled="transferLoading"
+              :placeholder="t('pages.guildList.transferCurrencyPlaceholder')"
+              class="transfer-currency-picker"
+              readonly
+              @click="openTransferCurrencyDialog"
           >
-            <el-option
-                v-for="c in transferCountries"
-                :key="c.countryCode"
-                :label="`${c.nameZh || c.nameEn} (${c.countryCode}) · ${c.currency}`"
-                :value="c.countryCode"
-            >
-              <span class="transfer-country-option">
-                <img v-if="c.icon" :src="c.icon" alt="" class="transfer-flag"/>
-                <span>{{ c.nameZh || c.nameEn }} ({{ c.countryCode }}) · {{ c.currency }}</span>
-              </span>
-            </el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item :label="t('pages.guildList.transferCurrency')">
-          <el-input :model-value="transferForm.currency" disabled/>
+            <template #append>
+              <el-button @click.stop="openTransferCurrencyDialog">
+                {{ t('pages.guildList.transferCurrencySelect') }}
+              </el-button>
+            </template>
+          </el-input>
           <div class="form-tip">{{ t('pages.guildList.transferCurrencyHint') }}</div>
         </el-form-item>
         <el-form-item :label="t('pages.guildList.transferAccountType')" prop="accountType">
-          <el-input
+          <el-select
               v-model="transferForm.accountType"
               clearable
+              :disabled="!transferForm.currency"
+              style="width: 100%"
               :placeholder="t('pages.guildList.transferAccountTypePlaceholder')"
-          />
+              @change="onTransferAccountTypeChange"
+          >
+            <el-option
+                v-for="accountType in transferAccountTypeOptions"
+                :key="accountType"
+                :label="accountTypeLabel(accountType)"
+                :value="accountType"
+            />
+          </el-select>
+          <div class="form-tip">{{ t('pages.guildList.transferAccountTypeHint') }}</div>
         </el-form-item>
         <el-form-item :label="t('pages.guildList.transferPayeeName')" prop="payeeName">
           <el-input
@@ -309,7 +317,22 @@
           />
         </el-form-item>
         <el-form-item :label="t('pages.guildList.transferBankCode')" prop="bankCode">
+          <el-select
+              v-if="transferBankCodeOptions.length > 0"
+              v-model="transferForm.bankCode"
+              clearable
+              style="width: 100%"
+              :placeholder="t('pages.guildList.transferBankCodePlaceholder')"
+          >
+            <el-option
+                v-for="option in transferBankCodeOptions"
+                :key="option.value"
+                :label="option.label"
+                :value="option.value"
+            />
+          </el-select>
           <el-input
+              v-else
               v-model="transferForm.bankCode"
               clearable
               :placeholder="t('pages.guildList.transferBankCodePlaceholder')"
@@ -331,6 +354,74 @@
         <el-button @click="transferDialogVisible = false">{{ t('common.cancel') }}</el-button>
         <el-button :loading="transferSaving" type="primary" @click="handleTransferSave">{{ t('common.save') }}</el-button>
       </template>
+    </el-dialog>
+
+    <el-dialog
+        v-model="transferCurrencyDialogVisible"
+        :title="t('pages.guildList.transferCurrencyDialogTitle')"
+        append-to-body
+        width="880px"
+    >
+      <div class="transfer-currency-toolbar">
+        <el-input
+            v-model="transferCurrencyKeyword"
+            clearable
+            :placeholder="t('pages.guildList.transferCurrencySearchPlaceholder')"
+        />
+      </div>
+      <el-tabs v-model="transferCurrencyRegion" class="transfer-currency-tabs">
+        <el-tab-pane
+            v-for="region in transferCurrencyRegionOptions"
+            :key="region"
+            :label="transferCurrencyRegionLabel(region)"
+            :name="region"
+        />
+      </el-tabs>
+      <el-table
+          :data="filteredTransferCountries"
+          highlight-current-row
+          max-height="440"
+          style="width: 100%"
+          @row-click="handleTransferCurrencyPick"
+      >
+        <el-table-column :label="t('pages.guildList.transferCurrency')" prop="currency" width="100"/>
+        <el-table-column :label="t('pages.guildList.transferCurrencyRegion')" width="115">
+          <template #default="{ row }">
+            {{ transferCurrencyRegionLabel(transferCurrencyRegionFor(row)) }}
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('pages.guildList.transferCountry')" min-width="245">
+          <template #default="{ row }">
+            <span class="transfer-country-option">
+              <img v-if="row.icon" :src="row.icon" alt="" class="transfer-flag"/>
+              <span>
+                {{ row.nameZh || row.nameEn || row.countryCode }}
+                <span v-if="row.nameZh && row.nameEn" class="transfer-country-en"> / {{ row.nameEn }}</span>
+                ({{ row.countryCode }})
+              </span>
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('pages.guildList.transferAccountType')" min-width="230">
+          <template #default="{ row }">
+            <el-tag
+                v-for="accountType in row.accountTypes"
+                :key="accountType"
+                class="transfer-account-type-tag"
+                effect="plain"
+            >
+              {{ accountTypeLabel(accountType) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('common.actions')" width="90">
+          <template #default="{ row }">
+            <el-button link type="primary" @click.stop="handleTransferCurrencyPick(row)">
+              {{ t('pages.guildList.transferCurrencySelect') }}
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
     </el-dialog>
   </div>
 </template>
@@ -418,6 +509,9 @@ const importForm = ref<ImportGuildForm>({
 
 const transferDialogVisible = ref(false)
 const transferDialogTitle = ref('')
+const transferCurrencyDialogVisible = ref(false)
+const transferCurrencyKeyword = ref('')
+const transferCurrencyRegion = ref('ALL')
 const transferLoading = ref(false)
 const transferSaving = ref(false)
 const transferFormRef = ref<FormInstance>()
@@ -426,7 +520,7 @@ const transferForm = ref<TransferInfoForm>({
   guildName: '',
   countryCode: '',
   currency: '',
-  accountType: 'BANK_ACCOUNT',
+  accountType: '',
   payeeName: '',
   phone: '',
   email: '',
@@ -437,6 +531,80 @@ const transferForm = ref<TransferInfoForm>({
   updatedAt: '',
 })
 const transferCountries = ref<GuildTransferCountryOption[]>([])
+const transferCurrencyRegionOrder = [
+  'NORTH_AMERICA',
+  'EUROPE',
+  'SOUTH_AMERICA',
+  'ASIA',
+  'MIDDLE_EAST',
+  'AFRICA',
+] as const
+const transferCurrencyRegionFor = (item: GuildTransferCountryOption) => {
+  return item.region || ''
+}
+const transferCurrencyRegionOptions = computed(() => {
+  const available = new Set(transferCountries.value.map(transferCurrencyRegionFor))
+  return ['ALL', ...transferCurrencyRegionOrder.filter(region => available.has(region))]
+})
+const transferCurrencyRegionLabel = (region: string) => {
+  const labelKeys: Record<string, string> = {
+    ALL: 'transferCurrencyRegionAll',
+    NORTH_AMERICA: 'transferCurrencyRegionNorthAmerica',
+    EUROPE: 'transferCurrencyRegionEurope',
+    SOUTH_AMERICA: 'transferCurrencyRegionSouthAmerica',
+    ASIA: 'transferCurrencyRegionAsia',
+    MIDDLE_EAST: 'transferCurrencyRegionMiddleEast',
+    AFRICA: 'transferCurrencyRegionAfrica',
+  }
+  const key = labelKeys[region]
+  return key ? t(`pages.guildList.${key}`) : region
+}
+const normalizeTransferCurrencySearch = (value: string) => {
+  return value.toLocaleLowerCase().replace(/[\s_-]+/g, '')
+}
+const filteredTransferCountries = computed(() => {
+  const keywords = transferCurrencyKeyword.value
+      .trim()
+      .split(/\s+/)
+      .map(normalizeTransferCurrencySearch)
+      .filter(Boolean)
+  return transferCountries.value.filter(item => {
+    const region = transferCurrencyRegionFor(item)
+    if (transferCurrencyRegion.value !== 'ALL' && region !== transferCurrencyRegion.value) {
+      return false
+    }
+    if (keywords.length === 0) return true
+    const searchable = normalizeTransferCurrencySearch([
+      item.currency,
+      item.countryCode,
+      item.nameZh,
+      item.nameEn,
+      region,
+      ...item.accountTypes,
+    ].join(' '))
+    return keywords.every(keyword => searchable.includes(keyword))
+  })
+})
+const selectedTransferCurrency = computed(() => {
+  const currency = transferForm.value.currency.trim().toUpperCase()
+  return transferCountries.value.find(item => item.currency === currency) ?? null
+})
+const transferCurrencyDisplay = computed(() => {
+  const selected = selectedTransferCurrency.value
+  if (!selected) return ''
+  const countryName = selected.nameZh || selected.nameEn || selected.countryCode
+  return `${selected.currency} · ${countryName} (${selected.countryCode})`
+})
+const transferAccountTypeOptions = computed(() => {
+  return selectedTransferCurrency.value?.accountTypes ?? []
+})
+const transferBankCodeOptions = computed(() => {
+  if (transferForm.value.accountType !== 'EWALLET') return []
+  return (selectedTransferCurrency.value?.wallets ?? []).map(wallet => ({
+    label: `${wallet.name} (${wallet.code})`,
+    value: wallet.code,
+  }))
+})
 
 const searchForm = reactive<SearchForm>({
   name: ''
@@ -514,14 +682,65 @@ const importFormRules = computed<FormRules>(() => ({
 }))
 
 const transferFormRules = computed<FormRules>(() => ({
-  countryCode: [
-    {required: true, message: t('pages.guildList.transferCountryRequired'), trigger: 'change'},
+  currency: [
+    {required: true, message: t('pages.guildList.transferCurrencyRequired'), trigger: 'change'},
+  ],
+  accountType: [
+    {required: true, message: t('pages.guildList.transferAccountTypePlaceholder'), trigger: 'change'},
+  ],
+  payeeName: [
+    {required: true, message: t('pages.guildList.transferPayeeNamePlaceholder'), trigger: 'blur'},
+  ],
+  phone: [
+    {required: true, message: t('pages.guildList.transferPhonePlaceholder'), trigger: 'blur'},
+  ],
+  email: [
+    {required: true, message: t('pages.guildList.transferEmailPlaceholder'), trigger: 'blur'},
+  ],
+  accountNo: [
+    {required: true, message: t('pages.guildList.transferAccountNoPlaceholder'), trigger: 'blur'},
+  ],
+  bankCode: [
+    {required: true, message: t('pages.guildList.transferBankCodePlaceholder'), trigger: 'blur'},
   ],
 }))
 
-const onTransferCountryChange = (code: string) => {
-  const hit = transferCountries.value.find(c => c.countryCode === code)
-  transferForm.value.currency = hit?.currency || ''
+const accountTypeLabel = (accountType: string) => {
+  if (accountType === 'BANK_ACCOUNT') {
+    return `${t('pages.guildList.transferAccountTypeBank')} (BANK_ACCOUNT)`
+  }
+  if (accountType === 'EWALLET') {
+    return `${t('pages.guildList.transferAccountTypeEWallet')} (EWALLET)`
+  }
+  return accountType
+}
+
+const onTransferCurrencyChange = (currency: string) => {
+  const hit = transferCountries.value.find(c => c.currency === currency)
+  transferForm.value.countryCode = hit?.countryCode || ''
+  const accountTypes = hit?.accountTypes ?? []
+  transferForm.value.accountType = accountTypes.length === 1 ? (accountTypes[0] ?? '') : ''
+  transferForm.value.bankName = ''
+  transferForm.value.bankCode = ''
+}
+
+const openTransferCurrencyDialog = () => {
+  if (transferLoading.value) return
+  transferCurrencyKeyword.value = ''
+  transferCurrencyRegion.value = 'ALL'
+  transferCurrencyDialogVisible.value = true
+}
+
+const handleTransferCurrencyPick = (row: GuildTransferCountryOption) => {
+  if (!row?.currency) return
+  onTransferCurrencyChange(row.currency)
+  transferCurrencyDialogVisible.value = false
+  transferFormRef.value?.clearValidate(['currency', 'accountType'])
+}
+
+const onTransferAccountTypeChange = () => {
+  transferForm.value.bankName = ''
+  transferForm.value.bankCode = ''
 }
 
 const joinFormRules = computed<FormRules>(() => ({
@@ -855,7 +1074,7 @@ const openTransferInfoDialog = async (row: Guild) => {
     guildName: row.name,
     countryCode: '',
     currency: '',
-    accountType: 'BANK_ACCOUNT',
+    accountType: '',
     payeeName: '',
     phone: '',
     email: '',
@@ -866,6 +1085,7 @@ const openTransferInfoDialog = async (row: Guild) => {
     updatedAt: '',
   }
   transferCountries.value = []
+  transferCurrencyDialogVisible.value = false
   transferDialogVisible.value = true
   transferLoading.value = true
   try {
@@ -877,7 +1097,7 @@ const openTransferInfoDialog = async (row: Guild) => {
       guildName: row.name,
       countryCode: info?.countryCode ?? '',
       currency: info?.currency ?? '',
-      accountType: info?.accountType || 'BANK_ACCOUNT',
+      accountType: info?.accountType || '',
       payeeName: info?.payeeName ?? '',
       phone: info?.phone ?? '',
       email: info?.email ?? '',
@@ -888,7 +1108,20 @@ const openTransferInfoDialog = async (row: Guild) => {
       updatedAt: info?.updatedAt ?? '',
     }
     if (!transferForm.value.currency && transferForm.value.countryCode) {
-      onTransferCountryChange(transferForm.value.countryCode)
+      transferForm.value.currency = transferCountries.value.find(
+          item => item.countryCode === transferForm.value.countryCode,
+      )?.currency ?? ''
+    }
+    const selectedCurrency = transferCountries.value.find(
+        item => item.currency === transferForm.value.currency,
+    )
+    if (selectedCurrency) {
+      transferForm.value.countryCode = selectedCurrency.countryCode
+      if (!selectedCurrency.accountTypes.includes(transferForm.value.accountType)) {
+        transferForm.value.accountType = selectedCurrency.accountTypes.length === 1
+            ? (selectedCurrency.accountTypes[0] ?? '')
+            : ''
+      }
     }
   } catch (error) {
     console.error('fetch guild transfer info failed:', error)
@@ -913,7 +1146,8 @@ const handleTransferSave = async () => {
     await guildApi.saveGuildTransferInfo({
       guildId: transferForm.value.guildId,
       countryCode: transferForm.value.countryCode.trim().toUpperCase(),
-      accountType: transferForm.value.accountType.trim() || 'BANK_ACCOUNT',
+      currency: transferForm.value.currency.trim().toUpperCase(),
+      accountType: transferForm.value.accountType.trim().toUpperCase(),
       payeeName: transferForm.value.payeeName.trim(),
       phone: transferForm.value.phone.trim(),
       email: transferForm.value.email.trim(),
@@ -1017,10 +1251,35 @@ const handleViewMembers = (row: Guild) => {
   line-height: 1.4;
 }
 
+.transfer-currency-picker {
+  cursor: pointer;
+}
+
+.transfer-currency-picker :deep(.el-input__inner) {
+  cursor: pointer;
+}
+
+.transfer-currency-toolbar {
+  margin-bottom: 2px;
+}
+
+.transfer-currency-tabs :deep(.el-tabs__header) {
+  margin-bottom: 12px;
+}
+
 .transfer-country-option {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+}
+
+.transfer-country-en {
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+}
+
+.transfer-account-type-tag + .transfer-account-type-tag {
+  margin-left: 6px;
 }
 
 .transfer-flag {

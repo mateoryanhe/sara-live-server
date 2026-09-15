@@ -69,7 +69,6 @@
           <el-input v-model="formData.defaultRegion" clearable :placeholder="t('pages.haipay.defaultRegionPlaceholder')"/>
           <span class="form-tip">{{ t('pages.haipay.defaultRegionTip') }}</span>
         </el-form-item>
-
         <el-divider content-position="left">{{ t('pages.haipay.payoutSection') }}</el-divider>
         <el-form-item :label="t('pages.haipay.payoutEnabled')" prop="payoutEnabled">
           <el-switch v-model="formData.payoutEnabled"/>
@@ -78,11 +77,6 @@
           <el-input v-model="formData.payoutAppIds" clearable
                     :placeholder="t('pages.haipay.payoutAppIdsPlaceholder')"/>
           <span class="form-tip">{{ t('pages.haipay.payoutAppIdsTip') }}</span>
-        </el-form-item>
-        <el-form-item :label="t('pages.haipay.payoutUsdRates')" prop="payoutUsdRates">
-          <el-input v-model="formData.payoutUsdRates" clearable
-                    :placeholder="t('pages.haipay.payoutUsdRatesPlaceholder')"/>
-          <span class="form-tip">{{ t('pages.haipay.payoutUsdRatesTip') }}</span>
         </el-form-item>
         <el-form-item :label="t('pages.haipay.payoutSubject')" prop="payoutSubject">
           <el-input v-model="formData.payoutSubject" clearable
@@ -129,7 +123,6 @@ const formData = reactive({
   defaultRegion: 'ID',
   payoutEnabled: false,
   payoutAppIds: '',
-  payoutUsdRates: '',
   payoutSubject: 'GuildSettlement',
 })
 
@@ -164,7 +157,6 @@ const applyCfg = (cfg: HaiPayCfg | null | undefined) => {
     formData.defaultRegion = 'ID'
     formData.payoutEnabled = false
     formData.payoutAppIds = ''
-    formData.payoutUsdRates = ''
     formData.payoutSubject = 'GuildSettlement'
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
@@ -186,7 +178,6 @@ const applyCfg = (cfg: HaiPayCfg | null | undefined) => {
   formData.defaultRegion = cfg.defaultRegion || 'ID'
   formData.payoutEnabled = !!cfg.payoutEnabled
   formData.payoutAppIds = cfg.payoutAppIds || ''
-  formData.payoutUsdRates = cfg.payoutUsdRates || ''
   formData.payoutSubject = cfg.payoutSubject || 'GuildSettlement'
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
@@ -227,7 +218,6 @@ const handleSave = async () => {
       defaultRegion: (formData.defaultRegion || 'ID').trim().toUpperCase(),
       payoutEnabled: formData.payoutEnabled,
       payoutAppIds: formData.payoutAppIds.trim(),
-      payoutUsdRates: formData.payoutUsdRates.trim(),
       payoutSubject: formData.payoutSubject.trim() || 'GuildSettlement',
     })
     if (response?.success) {

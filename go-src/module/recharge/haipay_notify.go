@@ -76,7 +76,7 @@ func HandleHaiPayCollectNotify(r *ghttp.Request) {
 			if oid, e := strconv.ParseUint(orderId, 10, 64); e == nil && oid > 0 {
 				if order := rechargeorderdao.GetById(oid); order != nil && order.UserId > 0 {
 					if requireExistingAppUser(order.UserId) == nil {
-						channelpaydao.UpsertPayerInfo(order.UserId, notifyName, notifyEmail, "")
+						channelpaydao.UpsertPayerInfo(order.UserId, notifyName, notifyEmail)
 					}
 				}
 			}

@@ -96,7 +96,7 @@ func GetOnShelfRechargeCfg() []*entity.RechargeCfg {
 }
 
 func GetRechargeCfgList(req *rechargecfgdto.RechargeCfgListReq) (int, []*rechargecfgdto.RechargeCfgListRes) {
-	sql := `select id, name, cfg_type, icon, gold, price, currency, product_id,
+	sql := `select id, name, cfg_type, gold, price, currency, product_id,
                    status, description, created_at, updated_at
             from recharge_cfgs
             where 1=1 `

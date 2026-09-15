@@ -15,6 +15,7 @@ import (
 	"xr-game-server/entity/live"
 	"xr-game-server/errercode"
 	"xr-game-server/module/cmsvis"
+	"xr-game-server/module/fxrate"
 	"xr-game-server/module/recharge"
 )
 
@@ -98,7 +99,7 @@ func BatchTransferGuildSettlement(ctx context.Context, req *incomesettlementdto.
 	cfg := cfgdao.GetHaiPayCfgCached()
 	if cfg == nil || !cfg.PayoutEnabled {
 		return &incomesettlementdto.CMSBatchTransferGuildSettlementRes{
-			Message: "HaiPay代付未启用,请先在CMS配置 payoutEnabled / payoutAppIds / payoutUsdRates",
+			Message: "HaiPay代付未启用,请先在CMS配置 payoutEnabled / payoutAppIds",
 		}, nil
 	}
 	visibleSet, restrict, empty := guildVisibleSet(ctx)
@@ -131,7 +132,7 @@ func BatchTransferGuildSettlement(ctx context.Context, req *incomesettlementdto.
 		res.SuccessCount++
 	}
 	if res.SuccessCount == 0 && res.FailCount > 0 {
-		res.Message = "代付提交失败,请检查工会转账信息/汇率/代付appId"
+		res.Message = "代付提交失败,请检查工会转账信息/汇率接口/代付appId"
 	} else if res.FailCount > 0 {
 		res.Message = fmt.Sprintf("部分成功:成功%d 失败%d", res.SuccessCount, res.FailCount)
 	} else {
@@ -155,12 +156,11 @@ func submitGuildHaiPayPayout(ctx context.Context, row *entity.GuildIncomeSettlem
 	if currency == "" {
 		return fmt.Errorf("transfer currency empty")
 	}
-	cfg := cfgdao.GetHaiPayCfgCached()
-	rate, err := recharge.HaiPayPayoutUsdRate(cfg, currency)
+	conversion, err := fxrate.ConvertUSD(ctx, row.SettlementReceivableUsd, currency)
 	if err != nil {
 		return err
 	}
-	localAmount := row.SettlementReceivableUsd * rate
+	localAmount := conversion.TargetAmount
 	if localAmount <= 0 {
 		return fmt.Errorf("local amount <= 0")
 	}

@@ -126,32 +126,28 @@ func SyncRechargeCfg(_ context.Context, req *datasyncdto.SyncRechargeCfgReq) (*d
 	if len(rows) == 0 {
 		return nil, errInvalidParam()
 	}
-	files, err := buildSyncFiles(collectRechargeCfgFileNames(rows))
-	if err != nil {
-		return nil, err
-	}
-	payload := &datasyncdto.ReceiveRechargeCfgReq{Rows: rows, Files: files}
+	payload := &datasyncdto.ReceiveRechargeCfgReq{Rows: rows}
 	var receiveRes datasyncdto.ReceiveBatchRes
 	if err := postSyncReceive("/dataSync/receiveRechargeCfg", payload, &receiveRes); err != nil {
 		return nil, err
 	}
-	return newSyncBatchRes(&receiveRes, "充值配置"), nil
+	return &datasyncdto.SyncBatchRes{
+		Success:  receiveRes.Success,
+		RowCount: receiveRes.RowCount,
+		Message:  fmt.Sprintf("已同步 %d 条充值配置", receiveRes.RowCount),
+	}, nil
 }
 
 func ReceiveRechargeCfg(_ context.Context, req *datasyncdto.ReceiveRechargeCfgReq) (*datasyncdto.ReceiveBatchRes, error) {
 	if req == nil {
 		return nil, errInvalidParam()
 	}
-	fileCount, err := saveSyncFiles(req.Files)
-	if err != nil {
-		return nil, err
-	}
 	rowCount, err := saveRechargeCfgs(req.Rows)
 	if err != nil {
 		return nil, err
 	}
 	recharge.ReloadRechargeCfgCache()
-	return &datasyncdto.ReceiveBatchRes{Success: true, RowCount: rowCount, FileCount: fileCount}, nil
+	return &datasyncdto.ReceiveBatchRes{Success: true, RowCount: rowCount}, nil
 }
 
 func SyncFiatCurrency(_ context.Context, req *datasyncdto.SyncFiatCurrencyReq) (*datasyncdto.SyncBatchRes, error) {
@@ -288,18 +284,6 @@ func collectGiftFileNames(rows []*entity.LiveGift) []string {
 		}
 		names = appendUniqueFileName(seen, names, row.Icon)
 		names = appendUniqueFileName(seen, names, row.Animation)
-	}
-	return names
-}
-
-func collectRechargeCfgFileNames(rows []*rechargeentity.RechargeCfg) []string {
-	seen := make(map[string]struct{})
-	names := make([]string, 0)
-	for _, row := range rows {
-		if row == nil {
-			continue
-		}
-		names = appendUniqueFileName(seen, names, row.Icon)
 	}
 	return names
 }

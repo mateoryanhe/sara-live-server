@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"xr-game-server/constants/country"
 	"xr-game-server/core/xrlog"
 	"xr-game-server/dao/cfgdao"
 	liveentity "xr-game-server/entity/live"
@@ -60,23 +61,6 @@ func HaiPayPayoutAppId(cfg *rechargeentity.HaiPayCfg, currency string) (int64, e
 		return 0, fmt.Errorf("invalid payout appId currency=%s raw=%s", currency, raw)
 	}
 	return id, nil
-}
-
-func HaiPayPayoutUsdRate(cfg *rechargeentity.HaiPayCfg, currency string) (float64, error) {
-	if cfg == nil {
-		return 0, fmt.Errorf("haipay cfg nil")
-	}
-	currency = strings.ToUpper(strings.TrimSpace(currency))
-	m := haiPayParseKVMap(cfg.PayoutUsdRates)
-	raw, ok := m[currency]
-	if !ok || raw == "" {
-		return 0, fmt.Errorf("payout usd rate missing for currency=%s", currency)
-	}
-	rate, err := strconv.ParseFloat(raw, 64)
-	if err != nil || rate <= 0 {
-		return 0, fmt.Errorf("invalid payout usd rate currency=%s raw=%s", currency, raw)
-	}
-	return rate, nil
 }
 
 func haiPayFormatPayoutAmount(currency string, amount float64) string {
@@ -143,6 +127,10 @@ func HaiPayApplyPayout(ctx context.Context, req *HaiPayPayoutApplyReq) (*HaiPayP
 	accountType := strings.TrimSpace(req.AccountType)
 	if accountType == "" {
 		accountType = liveentity.GuildTransferAccountTypeBank
+	}
+	accountType = strings.ToUpper(accountType)
+	if !country.IsHaiPayPayoutAccountType(currency, accountType) {
+		return nil, fmt.Errorf("unsupported payout accountType=%s currency=%s", accountType, currency)
 	}
 	name := strings.TrimSpace(req.Name)
 	email := strings.ToLower(strings.TrimSpace(req.Email))

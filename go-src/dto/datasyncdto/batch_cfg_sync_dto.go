@@ -56,7 +56,6 @@ type SyncRechargeCfgReq struct {
 type ReceiveRechargeCfgReq struct {
 	g.Meta `path:"/receiveRechargeCfg" method:"post" summary:"接收充值配置同步" tags:"数据同步"`
 	Rows   []*rechargeentity.RechargeCfg `json:"rows"`
-	Files  []*SyncFileItem               `json:"files"`
 }
 
 type SyncFiatCurrencyReq struct {

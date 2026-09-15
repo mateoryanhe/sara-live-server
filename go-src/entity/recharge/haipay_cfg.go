@@ -9,7 +9,7 @@ const (
 	TbHaiPayCfg db.TbName = "haipay_cfgs"
 )
 
-// HaiPayCfg HaiPay 全球收银台(美金包装) + 代付配置，CMS 管理，通常一条
+// HaiPayCfg HaiPay 全球收银台 + 代付配置，CMS 管理，通常一条
 type HaiPayCfg struct {
 	migrate.OneModel
 	Enabled            bool   `gorm:"default:0;comment:是否启用收银台代收" json:"enabled"`
@@ -27,10 +27,8 @@ type HaiPayCfg struct {
 	DefaultRegion      string `gorm:"size:8;default:'ID';comment:全球收银台默认region(如ID/PH/US)" json:"defaultRegion"`
 	PayoutEnabled      bool   `gorm:"default:0;comment:是否启用工会代付" json:"payoutEnabled"`
 	// PayoutAppIds 代付 appId 映射,如 IDR:25280,PHP:25281 (按币种,与收银台 appId 通常不同)
-	PayoutAppIds string `gorm:"size:512;default:'';comment:代付appId映射 CUR:appId 逗号分隔" json:"payoutAppIds"`
-	// PayoutUsdRates 1USD 兑当地币,如 IDR:16000,PHP:58
-	PayoutUsdRates string `gorm:"size:512;default:'';comment:代付汇率映射 CUR:rate 逗号分隔" json:"payoutUsdRates"`
-	PayoutSubject  string `gorm:"size:128;default:'GuildSettlement';comment:代付标题" json:"payoutSubject"`
+	PayoutAppIds  string `gorm:"size:512;default:'';comment:代付appId映射 CUR:appId 逗号分隔" json:"payoutAppIds"`
+	PayoutSubject string `gorm:"size:128;default:'GuildSettlement';comment:代付标题" json:"payoutSubject"`
 }
 
 func (HaiPayCfg) TableName() string {

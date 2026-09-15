@@ -30,7 +30,6 @@ type RechargeCfg struct {
 	migrate.OneModel
 	Name        string  `gorm:"size:64;comment:档位名称" json:"name"`
 	CfgType     uint8   `gorm:"column:cfg_type;default:0;comment:类型(0未指定,1iOS,2Google,3渠道,4币商)" json:"cfgType"`
-	Icon        string  `gorm:"size:255;default:'';comment:图标URL" json:"icon"`
 	Gold        uint64  `gorm:"default:0;comment:到账金币数" json:"gold"`
 	Price       float64 `gorm:"type:decimal(10,4);default:0;comment:现实货币价格(单位:USD)" json:"price"`
 	Currency    string  `gorm:"size:8;default:'USD';comment:货币(固定USD)" json:"currency"`

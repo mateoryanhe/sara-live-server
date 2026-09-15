@@ -26,7 +26,6 @@ func toAppItem(r *entity.RechargeCfg) *rechargecfgdto.AppRechargeCfgItem {
 		ID:          r.ID,
 		Name:        r.Name,
 		CfgType:     r.CfgType,
-		Icon:        r.Icon,
 		Gold:        r.Gold,
 		Price:       r.Price,
 		Currency:    r.Currency,

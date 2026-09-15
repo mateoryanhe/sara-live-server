@@ -1,4 +1,4 @@
-import request from '../request'
+import {request} from '../request'
 import type {GetHaiPayCfgRes, SaveHaiPayCfgReq, SaveHaiPayCfgRes} from '@/types/api'
 
 export const haipayApi = {

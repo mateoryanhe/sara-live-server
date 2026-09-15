@@ -150,7 +150,6 @@ type AppCreateChannelRechargeOrderReq struct {
 	CurrencyCode string `json:"currencyCode" dc:"可选,HaiPay region 简码如ID(或法币码IDR映射);空则CMS默认region"`
 	PayName      string `json:"payName"      dc:"可选付款人姓名;有则写入资料表下次免填"`
 	PayEmail     string `json:"payEmail"     dc:"可选付款人邮箱;有则写入资料表下次免填"`
-	PayPhone     string `json:"payPhone"     dc:"可选付款人手机号;可空;有则写入资料表"`
 	Source       uint8  `json:"source"       dc:"可选来源;0/空=H5(3),1=安卓,5=苹果"`
 }
 
@@ -158,8 +157,8 @@ type AppCreateChannelRechargeOrderRes struct {
 	OrderId   string  `json:"orderId"   dc:"本系统订单号,用于轮询checkRechargeOrderSuccess"`
 	PayUrl    string  `json:"payUrl"    dc:"支付收银台URL,App用WebView打开"`
 	Price     float64 `json:"price"     dc:"配置美金金额(USD)"`
-	PayAmount float64 `json:"payAmount" dc:"渠道实付/入账金额(美金包装下为USD)"`
-	Currency  string  `json:"currency"  dc:"订单结算货币(美金包装下为USD)"`
+	PayAmount float64 `json:"payAmount" dc:"按上报区域换算后的渠道实付金额"`
+	Currency  string  `json:"currency"  dc:"实际代收币种:区域支持USD则为USD,否则为当地币"`
 	Status    uint8   `json:"status"    dc:"订单状态(创建后=0待支付)"`
 }
 
@@ -168,11 +167,10 @@ type CMSCreateChannelRechargeOrderReq struct {
 	g.Meta       `path:"/createChannelRechargeOrderTest" method:"post" summary:"CMS第三方充值测试建单" tags:"充值订单"`
 	UserId       string `json:"userId"       v:"required#玩家ID不能为空" dc:"玩家用户ID"`
 	CfgId        uint64 `json:"cfgId"        v:"required#充值档位ID不能为空" dc:"充值档位ID"`
-	CurrencyCode string `json:"currencyCode" dc:"可选,法币码映射region;空则CMS默认region"`
+	CurrencyCode string `json:"currencyCode" dc:"可选,HaiPay region 简码如ID(兼容法币码IDR映射);空则CMS默认region"`
 	PackageName  string `json:"packageName"  dc:"可选包名,默认cms.channelpay.test"`
 	PayName      string `json:"payName"      dc:"可选付款人姓名"`
 	PayEmail     string `json:"payEmail"     dc:"可选付款人邮箱"`
-	PayPhone     string `json:"payPhone"     dc:"可选付款人手机号"`
 }
 
 // CMSGetChannelPayUserProfileReq CMS测试弹窗查询玩家已存付款人资料
@@ -188,33 +186,29 @@ type AppCreateCoinMerchantChannelRechargeOrderReq struct {
 	CurrencyCode string `json:"currencyCode" dc:"可选,HaiPay region 简码如ID(或法币码IDR映射);空则CMS默认region"`
 	PayName      string `json:"payName"      dc:"可选付款人姓名;有则写入资料表下次免填"`
 	PayEmail     string `json:"payEmail"     dc:"可选付款人邮箱;有则写入资料表下次免填"`
-	PayPhone     string `json:"payPhone"     dc:"可选付款人手机号;可空;有则写入资料表"`
 }
 
 // AppGetChannelPayUserProfileReq App查询渠道付款人资料(需登录)
 type AppGetChannelPayUserProfileReq struct {
-	g.Meta `path:"/getChannelPayUserProfile" method:"post" summary:"App查询渠道付款人name/email/phone(需登录)" tags:"充值订单"`
+	g.Meta `path:"/getChannelPayUserProfile" method:"post" summary:"App查询渠道付款人name/email(需登录)" tags:"充值订单"`
 }
 
 type AppGetChannelPayUserProfileRes struct {
 	Name  string `json:"name"  dc:"已存付款人姓名,空表示未填过"`
 	Email string `json:"email" dc:"已存付款人邮箱,空表示未填过"`
-	Phone string `json:"phone" dc:"已存付款人手机号,空表示未填过"`
 }
 
 // AppSaveChannelPayUserProfileReq App保存渠道付款人资料(需登录)
 type AppSaveChannelPayUserProfileReq struct {
-	g.Meta `path:"/saveChannelPayUserProfile" method:"post" summary:"App保存渠道付款人name/email/phone(需登录)" tags:"充值订单"`
+	g.Meta `path:"/saveChannelPayUserProfile" method:"post" summary:"App保存渠道付款人name/email(需登录)" tags:"充值订单"`
 	Name   string `json:"name"  dc:"付款人姓名"`
 	Email  string `json:"email" dc:"付款人邮箱"`
-	Phone  string `json:"phone" dc:"可选付款人手机号"`
 }
 
 type AppSaveChannelPayUserProfileRes struct {
 	Success bool   `json:"success"`
 	Name    string `json:"name"`
 	Email   string `json:"email"`
-	Phone   string `json:"phone"`
 }
 
 // RechargeSuccessPushItem 充值成功推送载荷(cmd=40)

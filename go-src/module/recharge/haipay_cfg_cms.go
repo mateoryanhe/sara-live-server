@@ -58,7 +58,6 @@ func SaveHaiPayCfg(_ context.Context, req *haipaydto.SaveHaiPayCfgReq) (*haipayd
 		DefaultRegion:      strings.ToUpper(strings.TrimSpace(req.DefaultRegion)),
 		PayoutEnabled:      req.PayoutEnabled,
 		PayoutAppIds:       strings.TrimSpace(req.PayoutAppIds),
-		PayoutUsdRates:     strings.TrimSpace(req.PayoutUsdRates),
 		PayoutSubject:      strings.TrimSpace(req.PayoutSubject),
 	}
 	if row.Subject == "" {
@@ -118,7 +117,6 @@ func toHaiPayCfgItem(cfg *entity.HaiPayCfg) *haipaydto.HaiPayCfgItem {
 		DefaultRegion:      cfg.DefaultRegion,
 		PayoutEnabled:      cfg.PayoutEnabled,
 		PayoutAppIds:       cfg.PayoutAppIds,
-		PayoutUsdRates:     cfg.PayoutUsdRates,
 		PayoutSubject:      cfg.PayoutSubject,
 		CreatedAt:          formatHaiPayCfgTime(cfg.CreatedAt),
 		UpdatedAt:          formatHaiPayCfgTime(cfg.UpdatedAt),

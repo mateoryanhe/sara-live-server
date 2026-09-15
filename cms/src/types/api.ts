@@ -969,6 +969,9 @@ export interface GuildTransferCountryOption {
     nameEn: string
     nameZh: string
     currency: string
+    region: string
+    accountTypes: string[]
+    wallets?: Array<{code: string; name: string}>
     icon?: string
 }
 
@@ -990,6 +993,7 @@ export interface GuildTransferInfo {
 export interface SaveGuildTransferInfoReq {
     guildId: string | number
     countryCode: string
+    currency?: string
     accountType?: string
     payeeName?: string
     phone?: string
@@ -1159,8 +1163,6 @@ export interface RechargeCfg {
     id: string
     name: string
     cfgType: number
-    icon: string
-    iconName: string
     gold: number
     price: number
     /** 固定 USD，仅列表展示用 */
@@ -1860,7 +1862,6 @@ export interface HaiPayCfg {
     defaultRegion: string
     payoutEnabled?: boolean
     payoutAppIds?: string
-    payoutUsdRates?: string
     payoutSubject?: string
     createdAt: string
     updatedAt: string
@@ -1887,7 +1888,6 @@ export interface SaveHaiPayCfgReq {
     defaultRegion?: string
     payoutEnabled?: boolean
     payoutAppIds?: string
-    payoutUsdRates?: string
     payoutSubject?: string
 }
 
