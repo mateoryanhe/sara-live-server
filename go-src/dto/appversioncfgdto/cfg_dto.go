@@ -50,11 +50,11 @@ type AppVersionQueryReq struct {
 }
 
 type AppVersionQueryRes struct {
-	Enabled       bool                          `json:"enabled" dc:"App版本查询开关(仅透传,由App端自行处理)"`
-	Version       string                        `json:"version"`
-	BuildVersion  string                        `json:"buildVersion"`
-	DownloadUrl   string                        `json:"downloadUrl"`
-	DownloadUrlArm string                       `json:"downloadUrlArm"`
-	DownloadUrlAbi string                       `json:"downloadUrlAbi"`
-	UpdateDetails []*AppVersionUpdateDetailItem `json:"updateDetails"`
+	Enabled        bool                          `json:"enabled" dc:"App版本查询开关(仅透传,由App端自行处理)"`
+	Version        string                        `json:"version"`
+	BuildVersion   string                        `json:"buildVersion"`
+	DownloadUrl    string                        `json:"downloadUrl"`
+	DownloadUrlArm string                        `json:"downloadUrlArm"`
+	DownloadUrlAbi string                        `json:"downloadUrlAbi"`
+	UpdateDetails  []*AppVersionUpdateDetailItem `json:"updateDetails"`
 }

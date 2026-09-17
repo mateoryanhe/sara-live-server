@@ -7,5 +7,7 @@ func Init() {
 	initRechargeOrder()
 	initGooglePlayCfg()
 	initHaiPayCfg()
+	initHaiPayCollectionCountryCfg()
+	initHaiPayCoinMerchantCollectionCfg()
 	initChannelPayUserProfile()
 }

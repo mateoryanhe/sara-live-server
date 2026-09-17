@@ -12,29 +12,13 @@ import (
 )
 
 var userInfoCacheMgr *cache.RowCache[*userentity.UserInfo]
-var shareCodeUserIdCacheMgr *cache.RowCache[uint64]
 
 func InitUserInfoDao() {
 	userInfoCacheMgr = cache.NewRowCache[*userentity.UserInfo]()
-	shareCodeUserIdCacheMgr = cache.NewRowCache[uint64]()
 	initUserCumulativeStatDao()
 	initUserExtDao()
 	initEmailUserIdCache()
 	initUserRechargeCfgFirstRechargeDao()
-}
-
-// GetUserIdByShareCode 根据分享码获取玩家ID,不存在则返回 0
-func GetUserIdByShareCode(shareCode string) uint64 {
-	if shareCode == "" {
-		return 0
-	}
-	return shareCodeUserIdCacheMgr.MustGetRow(gctx.New(), shareCode, func(ctx context.Context) (uint64, error) {
-		var userId uint64
-		err := g.Model(string(userentity.TbUserInfo)).Unscoped().Where(g.Map{
-			string(userentity.UserInfoShareCode): shareCode,
-		}).Fields(string(db.IdName)).Scan(&userId)
-		return userId, err
-	})
 }
 
 // PublishUserInfo 原地修改 UserInfo 后调用,刷新缓存条目.

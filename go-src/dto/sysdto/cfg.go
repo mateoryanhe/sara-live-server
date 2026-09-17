@@ -8,6 +8,8 @@ type SysCfgReq struct {
 
 type SysCfgResp struct {
 	SysTime                     int64   `json:"sysTime"`
+	T                           string  `json:"t" dc:"第三方支付域名"`
+	TVisable                    bool    `json:"tVisable" dc:"是否显示第三方支付"`
 	PaidDanmakuPrice            float64 `json:"paidDanmakuPrice" dc:"直播间付费弹幕价格(钻石)"`
 	PrivateRoomFreeWatchSeconds uint32  `json:"privateRoomFreeWatchSeconds" dc:"私密直播间免费观看时长(秒)"`
 	PrivacyPolicyUrl            string  `json:"privacyPolicyUrl" dc:"隐私政策页面URL"`

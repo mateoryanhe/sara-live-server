@@ -20,6 +20,8 @@ type ShortVideoListRes struct {
 	Title              string  `json:"title"`
 	Video              string  `json:"video" dc:"视频完整URL(列表展示)"`
 	VideoName          string  `json:"videoName" dc:"视频资源文件名(编辑保存用)"`
+	PreviewVideo       string  `json:"previewVideo" dc:"试看视频完整URL(列表展示)"`
+	PreviewVideoName   string  `json:"previewVideoName" dc:"试看视频资源文件名"`
 	Cover              string  `json:"cover" dc:"封面完整URL(列表展示)"`
 	CoverName          string  `json:"coverName" dc:"封面资源文件名(编辑保存用)"`
 	Sort               int     `json:"sort"`

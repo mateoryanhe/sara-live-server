@@ -65,8 +65,5 @@ func PreloadUserInfoToCache(users []*userentity.UserInfo) {
 			continue
 		}
 		userInfoCacheMgr.PublishRow(gctx.New(), user.ID, user)
-		if user.ShareCode != "" && shareCodeUserIdCacheMgr != nil {
-			shareCodeUserIdCacheMgr.PublishRow(gctx.New(), user.ShareCode, user.ID)
-		}
 	}
 }

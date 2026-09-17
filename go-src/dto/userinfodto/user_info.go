@@ -98,20 +98,20 @@ type GetCurrencyLogReq struct {
 }
 
 type CurrencyLogItem struct {
-	Id             uint64  `json:"id"`
-	UserId         uint64  `json:"userId"`
-	Type           uint8   `json:"type"`   // 1金币 2钻石
-	Action         uint8   `json:"action"` // 1加 2减
-	Amount         float64 `json:"amount"`
-	Before         float64 `json:"before"`
-	After          float64 `json:"after"`
-	Reason         uint8   `json:"reason"`     // 货币变动原因枚举,参见 constants/currency.Reason
-	ReasonText     string  `json:"reasonText"` // 按 Accept-Language 本地化文案
-	GameId         string  `json:"gameId"`
-	GameName       string  `json:"gameName"`
-	GameCategory   string  `json:"gameCategory"`
-	BusinessType   uint8   `json:"businessType"` // 1社交 2游戏
-	CreateAt       int64   `json:"createAt"`
+	Id           uint64  `json:"id"`
+	UserId       uint64  `json:"userId"`
+	Type         uint8   `json:"type"`   // 1金币 2钻石
+	Action       uint8   `json:"action"` // 1加 2减
+	Amount       float64 `json:"amount"`
+	Before       float64 `json:"before"`
+	After        float64 `json:"after"`
+	Reason       uint8   `json:"reason"`     // 货币变动原因枚举,参见 constants/currency.Reason
+	ReasonText   string  `json:"reasonText"` // 按 Accept-Language 本地化文案
+	GameId       string  `json:"gameId"`
+	GameName     string  `json:"gameName"`
+	GameCategory string  `json:"gameCategory"`
+	BusinessType uint8   `json:"businessType"` // 1社交 2游戏
+	CreateAt     int64   `json:"createAt"`
 }
 
 type GetCurrencyLogRes struct {
@@ -168,21 +168,30 @@ type AppReportRes struct {
 
 // ReportAttributionReq App端上报归因配置/结果
 type ReportAttributionReq struct {
-	g.Meta               `path:"/reportAttribution" method:"post" summary:"上报归因信息" tags:"用户信息"`
-	AttributionEnabled   *bool  `json:"attributionEnabled" dc:"是否启用归因"`
-	AttributionProvider  string `json:"attributionProvider" dc:"归因渠道"`
-	AppsFlyerDevKey      string `json:"appsFlyerDevKey" dc:"AppsFlyer Dev Key"`
-	AppsFlyerAppId       string `json:"appsFlyerAppId" dc:"AppsFlyer App ID"`
+	g.Meta              `path:"/reportAttribution" method:"post" summary:"上报归因信息" tags:"用户信息"`
+	AttributionEnabled  *bool  `json:"attributionEnabled" dc:"是否启用归因"`
+	AttributionProvider string `json:"attributionProvider" dc:"归因渠道"`
+	AppsFlyerDevKey     string `json:"appsFlyerDevKey" dc:"AppsFlyer Dev Key"`
+	AppsFlyerAppId      string `json:"appsFlyerAppId" dc:"AppsFlyer App ID"`
 }
 
 type ReportAttributionRes struct {
 	Success bool `json:"success"`
 }
 
-// ReportInviterReq App端上报邀请码(服务器解析为邀请者userId;后续可扩展新格式)
+// GetUserInfoByInviteCodeReq App端根据邀请码查询邀请人基础信息
+type GetUserInfoByInviteCodeReq struct {
+	g.Meta     `path:"/getByInviteCode" method:"post" summary:"根据邀请码查询邀请人信息" tags:"用户信息"`
+	InviteCode string `json:"inviteCode" v:"required#邀请码不能为空" dc:"邀请码,即邀请人的userId"`
+}
+
+// GetUserInfoByInviteCodeRes 与 GetUserInfoRes 保持完全一致。
+type GetUserInfoByInviteCodeRes = GetUserInfoRes
+
+// ReportInviterReq App端上报邀请码(邀请码即邀请者userId)
 type ReportInviterReq struct {
 	g.Meta     `path:"/reportInviter" method:"post" summary:"上报邀请码" tags:"用户信息"`
-	InviteCode string `json:"inviteCode" v:"required#邀请码不能为空" dc:"邀请码字符串(当前为分享码shareCode;后续可扩展新格式)"`
+	InviteCode string `json:"inviteCode" v:"required#邀请码不能为空" dc:"邀请码,即邀请人的userId"`
 }
 
 type ReportInviterRes struct {

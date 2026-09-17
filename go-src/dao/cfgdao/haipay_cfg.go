@@ -26,6 +26,9 @@ func loadHaiPayCfgFromDB() *entity.HaiPayCfg {
 	if row.ID == 0 {
 		return nil
 	}
+	if row.GlobalCashierAppId <= 0 {
+		row.GlobalCashierAppId = entity.DefaultHaiPayGlobalCashierAppID
+	}
 	return &row
 }
 
@@ -59,10 +62,7 @@ func GetHaiPayCfgCached() *entity.HaiPayCfg {
 
 func HaiPayEnabled() bool {
 	row := GetHaiPayCfgCached()
-	if row == nil || !row.Enabled {
-		return false
-	}
-	if row.AppId <= 0 {
+	if row == nil {
 		return false
 	}
 	if strings.TrimSpace(row.ApiHost) == "" {
@@ -72,9 +72,6 @@ func HaiPayEnabled() bool {
 		return false
 	}
 	if strings.TrimSpace(row.MerchantPrivateKey) == "" {
-		return false
-	}
-	if strings.TrimSpace(row.HaiPayPublicKey) == "" {
 		return false
 	}
 	return true

@@ -213,6 +213,8 @@
 - HaiPay：`POST /global/cashier/collect/apply`，`currency=USD`；`region` = App `currencyCode`（区域码如 ID/PH，或 IDR 等）直接映射，空则 CMS `defaultRegion`；订单落库 **USD**；notify=`/webhook/haipay/collect/notify`
 - HaiPay 验签：下单应答 / 查单应答 / 回调拼串均不注入 appId；**发币不以回调验签为准**（2026-09-14）：notify 收到后 `POST /global/cashier/collect/query`（appId+orderId+orderNo，商户私钥签名），`status=2` → `CompleteChannelPayOrder`；**非成功** → `FailChannelPayOrder`（`RechargeOrderStatusFailed=3`，CMS 显示「失败」，remark=`haipay status=N`）；超时仍用 `Cancelled=2`；回调/查单应答验签失败只打日志
 - App 区域列表：`POST /fiatCurrency/fiatCurrencyListForApp` **硬编码** HaiPay region（`currencyCode`=区域码）；CMS 法币页与此无关
+- HaiPay 本地代收国家配置：`App 可见`是国家/地区是否可用及是否下发给 App 的唯一开关；代收币种只决定 `/{currency}/collect/apply` 接口。AppId 或支付方式配置异常不得反向把地区判成关闭，应在创建订单时返回对应配置错误。
+- HaiPay 代收支付方式按 `业务类型 + 国家/地区 + 币种` 隔离保存和缓存；每个币种只允许一条支付方式，同一国家的 USD 与本地币方式不可混用。业务类型是可扩展维度，当前 1普通用户代收、2币商代收、3普通用户代付、4工会代付，共用表结构与 DAO。
 - CMS：`/config/haipay`（`HaiPayCfgManagement`）；表 `haipay_cfgs`
 - 付款人资料：表 `channel_pay_user_profiles`（主键=userId，RowCache）；**需登录** `getChannelPayUserProfile` / `saveChannelPayUserProfile`（userId 取 token）；空则 App 引导填写再下单；CMS 测试走 `*ForTest`
 - 表 `yhpay_cfgs` / 列 `fiat_currency_cfgs.adjust_percent` 可残留库中；不强制 DROP
@@ -273,4 +275,3 @@ App/CMS 建单 API  ──►  recharge 业务（写订单、白名单）
 - 配置落在 `account_cfgs`：开关 / 最大注册数(默认3) / 每天最多注销次(默认1)
 - 与「账号配置」共用 `/accountCfg/getAccountCfg|saveAccountCfg`，两页保存时都会回传对方字段，避免互相覆盖
 - 无配置行时内存默认：风控**开启** + 3 + 1（与原先硬编码一致）
-

@@ -2,6 +2,7 @@ package userinfo
 
 import (
 	"context"
+	"strconv"
 	"strings"
 
 	"xr-game-server/core/httpserver"
@@ -11,19 +12,29 @@ import (
 	"xr-game-server/errercode"
 )
 
-// ResolveInviteCodeToUserId 邀请码 → 邀请者 userId。
-// 当前仅支持 shareCode；后续新格式在此扩展(如带前缀码)，勿散落各调用点。
+// ResolveInviteCodeToUserId 邀请码即邀请者 userId，解析失败返回 0。
 func ResolveInviteCodeToUserId(inviteCode string) uint64 {
 	code := strings.TrimSpace(inviteCode)
 	if code == "" {
 		return 0
 	}
-	// 现有格式: user_infos.share_code
-	if id := userinfodao.GetUserIdByShareCode(code); id != 0 {
-		return id
+	userId, err := strconv.ParseUint(code, 10, 64)
+	if err != nil {
+		return 0
 	}
-	// TODO: 新格式邀请码解析
-	return 0
+	return userId
+}
+
+// GetUserInfoByInviteCode 根据邀请码查询邀请人基础信息，应答与 GetUserInfo 保持一致。
+func GetUserInfoByInviteCode(ctx context.Context, req *userinfodto.GetUserInfoByInviteCodeReq) (*userinfodto.GetUserInfoByInviteCodeRes, error) {
+	if req == nil {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	userId := ResolveInviteCodeToUserId(req.InviteCode)
+	if userId == 0 || accountdao.GetAccountById(userId) == nil {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	return GetUserInfo(ctx, &userinfodto.GetUserInfoReq{UserId: userId})
 }
 
 // ReportInviter App端上报邀请码(仅首次生效,写入 user_exts)

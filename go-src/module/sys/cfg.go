@@ -3,7 +3,10 @@ package sys
 import (
 	"context"
 	"time"
+
+	corecfg "xr-game-server/core/cfg"
 	"xr-game-server/core/httpserver"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/sysdto"
 	"xr-game-server/module/accountcfg"
 	"xr-game-server/module/apppkg"
@@ -33,8 +36,14 @@ func GetSysCfg(ctx context.Context, req *sysdto.SysCfgReq) (*sysdto.SysCfgResp, 
 	globalPrivacy := privacypolicy.GetPrivacyPolicyUrl()
 	globalTerms := privacypolicy.GetTermsOfServiceUrl()
 	exchangeCfg := wallet.GetExchangeCfgSnapshot()
+	tVisable := false
+	if haiPayCfg := cfgdao.GetHaiPayCfgCached(); haiPayCfg != nil {
+		tVisable = haiPayCfg.TVisable
+	}
 	resp := &sysdto.SysCfgResp{
 		SysTime:                     time.Now().UnixMilli(),
+		T:                           corecfg.GetThirdPayDomain(),
+		TVisable:                    tVisable,
 		PaidDanmakuPrice:            livecfg.GetPaidDanmakuPrice(),
 		PrivateRoomFreeWatchSeconds: livecfg.GetPrivateRoomFreeWatchSeconds(),
 		PrivacyPolicyUrl:            apppkg.ResolvePrivacyPolicyUrl(packageName, globalPrivacy),

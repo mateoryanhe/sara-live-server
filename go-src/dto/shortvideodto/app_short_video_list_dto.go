@@ -38,6 +38,7 @@ type AppShortVideoItem struct {
 	ID               string  `json:"id"`
 	Title            string  `json:"title"`
 	Video            string  `json:"video" dc:"视频完整URL"`
+	PreviewVideo     string  `json:"previewVideo" dc:"试看视频完整URL,未上传时为空"`
 	Cover            string  `json:"cover" dc:"封面完整URL"`
 	IsPaid           uint8   `json:"isPaid" dc:"是否付费(0免费,1付费)"`
 	PayDiamond       float64 `json:"payDiamond" dc:"付费钻石(一次性)"`
@@ -96,6 +97,7 @@ type AppShortVideoUploadRecordItem struct {
 	ID                 string  `json:"id"`
 	Title              string  `json:"title"`
 	Video              string  `json:"video" dc:"视频完整URL"`
+	PreviewVideo       string  `json:"previewVideo" dc:"试看视频完整URL,未上传时为空"`
 	Cover              string  `json:"cover" dc:"封面完整URL"`
 	Status             uint8   `json:"status" dc:"状态(0下架,1上架)"`
 	CategoryId         int     `json:"categoryId" dc:"视频分类ID"`

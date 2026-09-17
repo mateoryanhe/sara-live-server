@@ -60,37 +60,6 @@ func haiPayParsePrivateKey(raw string) (*rsa.PrivateKey, error) {
 	return rsaKey, nil
 }
 
-func haiPayParsePublicKey(raw string) (*rsa.PublicKey, error) {
-	raw = haiPayNormalizeKeyMaterial(raw)
-	if raw == "" {
-		return nil, fmt.Errorf("empty public key")
-	}
-	if block, _ := pem.Decode([]byte(raw)); block != nil {
-		key, err := x509.ParsePKIXPublicKey(block.Bytes)
-		if err != nil {
-			return nil, err
-		}
-		rsaKey, ok := key.(*rsa.PublicKey)
-		if !ok {
-			return nil, fmt.Errorf("not rsa public key")
-		}
-		return rsaKey, nil
-	}
-	der, err := base64.StdEncoding.DecodeString(strings.ReplaceAll(raw, "\n", ""))
-	if err != nil {
-		return nil, err
-	}
-	key, err := x509.ParsePKIXPublicKey(der)
-	if err != nil {
-		return nil, err
-	}
-	rsaKey, ok := key.(*rsa.PublicKey)
-	if !ok {
-		return nil, fmt.Errorf("not rsa public key")
-	}
-	return rsaKey, nil
-}
-
 func haiPayValueToSignString(v any) (string, bool) {
 	if v == nil {
 		return "", false
@@ -169,25 +138,4 @@ func haiPaySign(ctx context.Context, params map[string]any, merchantSecretKey, p
 		return "", err
 	}
 	return base64.StdEncoding.EncodeToString(sig), nil
-}
-
-func haiPayVerify(ctx context.Context, params map[string]any, merchantSecretKey, publicKeyPEM, signBase64 string) error {
-	signBase64 = strings.TrimSpace(signBase64)
-	if signBase64 == "" {
-		return fmt.Errorf("empty sign")
-	}
-	content := haiPayBuildSignContent(params, merchantSecretKey)
-	xrlog.DetailLog.Infof(ctx, "haipay verify params=%s", haiPaySafeParams(params))
-	// 便于与 CMS/HaiPay 后台比对当前使用的验签公钥(完整原文)
-	xrlog.DetailLog.Infof(ctx, "haipay verify publicKey=%s", haiPayNormalizeKeyMaterial(publicKeyPEM))
-	pub, err := haiPayParsePublicKey(publicKeyPEM)
-	if err != nil {
-		return err
-	}
-	sig, err := base64.StdEncoding.DecodeString(signBase64)
-	if err != nil {
-		return err
-	}
-	sum := sha256.Sum256([]byte(content))
-	return rsa.VerifyPKCS1v15(pub, crypto.SHA256, sum[:], sig)
 }

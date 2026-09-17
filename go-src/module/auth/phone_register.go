@@ -65,7 +65,7 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 	event.Pub(gameevent.RegisterEvent, gameevent.NewRegisterEventDataFromCtx(ctx, account.ID, now))
 	if req.InviteCode != "" {
 		inviterId := userinfo.ResolveInviteCodeToUserId(req.InviteCode)
-		if inviterId == 0 {
+		if inviterId == 0 || accountdao.GetAccountById(inviterId) == nil {
 			return nil, errercode.CreateCode(errercode.InvalidParam)
 		}
 		if inviterId == account.ID {

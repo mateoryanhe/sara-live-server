@@ -94,6 +94,7 @@ func toAppShortVideoItem(row *entity.ShortVideo, stat *entity.ShortVideoStat, us
 		ID:               strconv.FormatUint(row.ID, 10),
 		Title:            row.Title,
 		Video:            upload.GetUrlByName(row.Video),
+		PreviewVideo:     upload.GetUrlByName(row.PreviewVideo),
 		Cover:            upload.GetUrlByName(row.Cover),
 		IsPaid:           row.IsPaid,
 		PayDiamond:       row.PayDiamond,

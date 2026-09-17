@@ -15,16 +15,16 @@ import (
 	"xr-game-server/constants/country"
 	"xr-game-server/core/xrlog"
 	"xr-game-server/dao/cfgdao"
+	rechargeentity "xr-game-server/entity/recharge"
 	"xr-game-server/module/fxrate"
 )
 
 const (
-	haiPayProviderName           = "haipay"
-	haiPayGlobalCashierApplyPath = "/global/cashier/collect/apply"
-	haiPayCollectNotifyPath      = "/webhook/haipay/collect/notify"
-	haiPayMinUsdAmount           = 0.99
-	haiPayHTTPTimeout            = 30 * time.Second
-	haiPayLogBodyMax             = 4096
+	haiPayProviderName      = "haipay"
+	haiPayCollectNotifyPath = "/webhook/haipay/collect/notify"
+	haiPayMinUsdAmount      = 0.99
+	haiPayHTTPTimeout       = 30 * time.Second
+	haiPayLogBodyMax        = 4096
 )
 
 type haiPayProvider struct{}
@@ -34,18 +34,17 @@ func (p *haiPayProvider) Name() string { return haiPayProviderName }
 func (p *haiPayProvider) Enabled() bool { return cfgdao.HaiPayEnabled() }
 
 func (p *haiPayProvider) resolveRegion(regionHint string) (string, error) {
-	cfg := cfgdao.GetHaiPayCfgCached()
 	regionHint = strings.TrimSpace(regionHint)
-	if regionHint == "" && cfg != nil {
-		regionHint = strings.TrimSpace(cfg.DefaultRegion)
-	}
 	if regionHint == "" {
-		regionHint = "ID"
+		return "", fmt.Errorf("haipay region required")
 	}
 	return haiPayResolveRegion(regionHint)
 }
 
-func (p *haiPayProvider) QuotePay(ctx context.Context, priceUsd float64, regionHint string) (payCurrency string, payAmount float64, err error) {
+func (p *haiPayProvider) QuotePay(ctx context.Context, priceUsd float64, regionHint string, payChannel uint8) (payCurrency string, payAmount float64, err error) {
+	if isHaiPayGlobalCashierBiz(haiPayCollectionBizType(payChannel)) {
+		return p.quoteGlobalCashier(ctx, priceUsd, regionHint)
+	}
 	if priceUsd < haiPayMinUsdAmount {
 		return "", 0, fmt.Errorf("haipay usd amount must be >= %.2f", haiPayMinUsdAmount)
 	}
@@ -53,7 +52,10 @@ func (p *haiPayProvider) QuotePay(ctx context.Context, priceUsd float64, regionH
 	if err != nil {
 		return "", 0, err
 	}
-	currency := country.HaiPayCollectionCurrency(region)
+	currency, _, enabled := haiPayCollectionCountrySelection(region, payChannel)
+	if !enabled {
+		return "", 0, fmt.Errorf("haipay collection region disabled region=%s", region)
+	}
 	if currency == "" {
 		return "", 0, fmt.Errorf("haipay collection currency missing for region=%s", region)
 	}
@@ -61,8 +63,8 @@ func (p *haiPayProvider) QuotePay(ctx context.Context, priceUsd float64, regionH
 	if err != nil {
 		return "", 0, err
 	}
-	// 下单接口按两位小数提交，订单也保存同一个舍入后的金额，避免查单对账出现尾差。
-	amount := math.Round(conversion.TargetAmount*100) / 100
+	// 订单保存值必须和本地代收接口实际提交精度一致，避免查单对账出现尾差。
+	amount := haiPayRoundCollectionAmount(currency, conversion.TargetAmount)
 	if amount <= 0 {
 		return "", 0, fmt.Errorf("haipay collection amount invalid region=%s currency=%s priceUsd=%v rate=%v", region, currency, priceUsd, conversion.Rate)
 	}
@@ -71,6 +73,9 @@ func (p *haiPayProvider) QuotePay(ctx context.Context, priceUsd float64, regionH
 }
 
 func (p *haiPayProvider) CreatePay(ctx context.Context, req *ChannelPayCreateReq) (*ChannelPayCreateRes, error) {
+	if isHaiPayGlobalCashierBiz(haiPayCollectionBizType(req.PayChannel)) {
+		return p.createGlobalCashierPay(ctx, req)
+	}
 	cfg := cfgdao.GetHaiPayCfgCached()
 	if cfg == nil || !cfgdao.HaiPayEnabled() {
 		return nil, fmt.Errorf("haipay not configured")
@@ -80,7 +85,10 @@ func (p *haiPayProvider) CreatePay(ctx context.Context, req *ChannelPayCreateReq
 		return nil, err
 	}
 	currency := strings.ToUpper(strings.TrimSpace(req.Currency))
-	wantCurrency := country.HaiPayCollectionCurrency(region)
+	wantCurrency, methods, enabled := haiPayCollectionCountrySelection(region, req.PayChannel)
+	if !enabled {
+		return nil, fmt.Errorf("haipay collection region disabled region=%s", region)
+	}
 	if currency == "" || currency != wantCurrency {
 		return nil, fmt.Errorf("haipay collection currency mismatch region=%s currency=%s want=%s", region, currency, wantCurrency)
 	}
@@ -91,6 +99,21 @@ func (p *haiPayProvider) CreatePay(ctx context.Context, req *ChannelPayCreateReq
 	if currency == "USD" && amount < haiPayMinUsdAmount {
 		return nil, fmt.Errorf("haipay usd amount must be >= %.2f got=%v", haiPayMinUsdAmount, amount)
 	}
+	method, err := selectHaiPayCollectionMethod(methods, req.PayType, req.InBankCode)
+	if err != nil {
+		return nil, fmt.Errorf("haipay collection payment method region=%s currency=%s: %w", region, currency, err)
+	}
+	if err = validateHaiPayCollectionMethodAmount(region, currency, method, amount); err != nil {
+		return nil, err
+	}
+	if req.PayChannel != rechargeentity.RechargeCfgTypeCoinMerchant {
+		return nil, fmt.Errorf("haipay unsupported local collection channel=%d", req.PayChannel)
+	}
+	credential, credentialErr := haiPayCoinMerchantCollectionCredential(region, currency)
+	if credentialErr != nil {
+		return nil, credentialErr
+	}
+	appID := credential.AppId
 
 	name := strings.TrimSpace(req.PlayerName)
 	if name == "" {
@@ -103,8 +126,12 @@ func (p *haiPayProvider) CreatePay(ctx context.Context, req *ChannelPayCreateReq
 	if email == "" {
 		email = fmt.Sprintf("user%d@noreply.local", req.UserID)
 	}
+	phone := strings.TrimSpace(req.Phone)
+	if phone == "" {
+		return nil, fmt.Errorf("haipay local collect phone missing userId=%d region=%s", req.UserID, region)
+	}
 
-	amountStr := fmt.Sprintf("%.2f", amount)
+	amountStr := haiPayFormatCollectionAmount(currency, amount)
 	notifyURL := strings.TrimRight(cfg.CallbackBaseUrl, "/") + haiPayCollectNotifyPath
 	returnURL := strings.TrimSpace(cfg.ReturnUrl)
 	if returnURL == "" {
@@ -120,24 +147,20 @@ func (p *haiPayProvider) CreatePay(ctx context.Context, req *ChannelPayCreateReq
 	}
 
 	body := map[string]any{
-		"appId":           cfg.AppId,
+		"appId":           appID,
 		"orderId":         req.OrderID,
 		"name":            name,
+		"phone":           phone,
 		"email":           email,
 		"amount":          amountStr,
 		"currency":        currency,
+		"payType":         method.PayType,
+		"inBankCode":      method.InBankCode,
 		"callBackUrl":     returnURL,
 		"callBackFailUrl": failURL,
 		"notifyUrl":       notifyURL,
 		"subject":         subject,
-		"region":          region,
 		"partnerUserId":   strconv.FormatUint(req.UserID, 10),
-	}
-	if cancel := strings.TrimSpace(cfg.CancelUrl); cancel != "" {
-		body["cancelUrl"] = cancel
-	}
-	if methods := strings.TrimSpace(cfg.PaymentMethods); methods != "" {
-		body["paymentMethods"] = methods
 	}
 	if remark := strings.TrimSpace(req.OrderID); remark != "" {
 		body["body"] = "order:" + remark
@@ -152,7 +175,7 @@ func (p *haiPayProvider) CreatePay(ctx context.Context, req *ChannelPayCreateReq
 	body["sign"] = sign
 
 	var res haiPayApplyAPIRes
-	url := strings.TrimRight(cfg.ApiHost, "/") + haiPayGlobalCashierApplyPath
+	url := strings.TrimRight(cfg.ApiHost, "/") + haiPayLocalCollectPath(currency, "apply")
 	if err = haiPayPostJSON(ctx, url, body, &res); err != nil {
 		return nil, err
 	}
@@ -169,12 +192,131 @@ func (p *haiPayProvider) CreatePay(ctx context.Context, req *ChannelPayCreateReq
 	// 普通充值与币商充值的下单应答统一不验签；最终支付状态由回调触发主动查单确认。
 	payURL := strings.TrimSpace(res.Data.PayUrl)
 	if payURL == "" {
+		payURL = strings.TrimSpace(res.Data.QrCode)
+	}
+	if payURL == "" {
 		return nil, fmt.Errorf("haipay empty payUrl")
 	}
 	return &ChannelPayCreateRes{
 		PayURL:       payURL,
 		ThirdOrderID: strings.TrimSpace(res.Data.OrderNo),
 	}, nil
+}
+
+type haiPayCollectionMethod struct {
+	PayType    string
+	InBankCode string
+}
+
+// haiPayCollectionCountrySelection 返回 CMS 配置的本地代收币种和可用支付方式。
+// 国家/地区是否可用只由 App 可见开关决定；币种只决定本地代收接口。
+// 不匹配当前币种的历史支付方式会被忽略，并在创建订单时以“未配置支付方式”明确报错。
+func haiPayCollectionCountrySelection(region string, payChannel uint8) (currency string, methods []haiPayCollectionMethod, enabled bool) {
+	if payChannel == rechargeentity.RechargeCfgTypeCoinMerchant {
+		config := cfgdao.GetHaiPayCoinMerchantCollectionCfgCached(region)
+		if !cfgdao.HaiPayCoinMerchantCollectionCfgComplete(config) {
+			return country.HaiPayCollectionCurrency(region), nil, false
+		}
+		currency = strings.ToUpper(strings.TrimSpace(config.CurrencyCode))
+		payType := strings.ToUpper(strings.TrimSpace(config.PayType))
+		canonicalCode, ok := country.ResolveHaiPayCollectionPaymentMethodCode(
+			region, currency, payType, config.InBankCode,
+		)
+		if !ok || canonicalCode == "" {
+			return currency, nil, false
+		}
+		return currency, []haiPayCollectionMethod{{PayType: payType, InBankCode: canonicalCode}}, config.Enabled
+	}
+	bizType := haiPayCollectionBizType(payChannel)
+	aggregate := cfgdao.GetHaiPayCollectionCountryCfgCached(bizType, region)
+	if aggregate == nil || aggregate.Config == nil {
+		return country.HaiPayCollectionCurrency(region), nil, false
+	}
+	currency = strings.ToUpper(strings.TrimSpace(aggregate.Config.CurrencyCode))
+	enabled = aggregate.Config.Enabled
+	return currency, nil, enabled
+}
+
+func haiPayCoinMerchantCollectionCredential(region, currency string) (*rechargeentity.HaiPayCoinMerchantCollectionCfg, error) {
+	config := cfgdao.GetHaiPayCoinMerchantCollectionCfgCached(region)
+	if !cfgdao.HaiPayCoinMerchantCollectionCfgComplete(config) {
+		return nil, fmt.Errorf("haipay coin merchant collection config missing region=%s", strings.ToUpper(strings.TrimSpace(region)))
+	}
+	wantCurrency := strings.ToUpper(strings.TrimSpace(currency))
+	if strings.ToUpper(strings.TrimSpace(config.CurrencyCode)) != wantCurrency {
+		return nil, fmt.Errorf("haipay coin merchant collection currency mismatch region=%s currency=%s", region, wantCurrency)
+	}
+	return config, nil
+}
+
+func haiPayCollectionBizType(payChannel uint8) rechargeentity.HaiPayBizType {
+	if payChannel == rechargeentity.RechargeCfgTypeCoinMerchant {
+		return rechargeentity.HaiPayBizTypeCoinMerchantCollection
+	}
+	return rechargeentity.HaiPayBizTypeNormalCollection
+}
+
+func selectHaiPayCollectionMethod(methods []haiPayCollectionMethod, payType, inBankCode string) (haiPayCollectionMethod, error) {
+	payType = strings.ToUpper(strings.TrimSpace(payType))
+	inBankCode = strings.TrimSpace(inBankCode)
+	if len(methods) == 0 {
+		return haiPayCollectionMethod{}, fmt.Errorf("no configured method")
+	}
+	if len(methods) > 1 {
+		return haiPayCollectionMethod{}, fmt.Errorf("multiple configured methods for active currency")
+	}
+	configured := methods[0]
+	if payType == "" && inBankCode == "" {
+		// App 不上报支付类型和支付编码，服务端使用当前国家和代收币种唯一配置的一条。
+		return configured, nil
+	}
+	if payType == "" || inBankCode == "" {
+		return haiPayCollectionMethod{}, fmt.Errorf("payType and inBankCode must be supplied together")
+	}
+	if configured.PayType == payType && strings.EqualFold(configured.InBankCode, inBankCode) {
+		return configured, nil
+	}
+	return haiPayCollectionMethod{}, fmt.Errorf("method is not enabled payType=%s inBankCode=%s", payType, inBankCode)
+}
+
+func validateHaiPayCollectionMethodAmount(region, currency string, selected haiPayCollectionMethod, amount float64) error {
+	for _, method := range country.ListHaiPayCollectionPaymentMethods(region) {
+		if !method.Available || method.CurrencyCode != currency || method.PayType != selected.PayType || !strings.EqualFold(method.InBankCode, selected.InBankCode) {
+			continue
+		}
+		minAmount, minErr := strconv.ParseFloat(method.MinAmount, 64)
+		maxAmount, maxErr := strconv.ParseFloat(method.MaxAmount, 64)
+		if minErr == nil && amount < minAmount {
+			return fmt.Errorf("haipay collection amount below limit amount=%v min=%s currency=%s method=%s/%s", amount, method.MinAmount, currency, selected.PayType, selected.InBankCode)
+		}
+		if maxErr == nil && amount > maxAmount {
+			return fmt.Errorf("haipay collection amount above limit amount=%v max=%s currency=%s method=%s/%s", amount, method.MaxAmount, currency, selected.PayType, selected.InBankCode)
+		}
+		return nil
+	}
+	return fmt.Errorf("haipay collection method catalog missing region=%s currency=%s method=%s/%s", region, currency, selected.PayType, selected.InBankCode)
+}
+
+func haiPayLocalCollectPath(currency, action string) string {
+	return "/" + strings.ToLower(strings.TrimSpace(currency)) + "/collect/" + strings.TrimSpace(action)
+}
+
+func haiPayFormatCollectionAmount(currency string, amount float64) string {
+	switch strings.ToUpper(strings.TrimSpace(currency)) {
+	case "IDR", "VND", "KRW", "JPY", "CLP", "UGX", "XAF":
+		return fmt.Sprintf("%.0f", math.Round(amount))
+	default:
+		return fmt.Sprintf("%.2f", amount)
+	}
+}
+
+func haiPayRoundCollectionAmount(currency string, amount float64) float64 {
+	switch strings.ToUpper(strings.TrimSpace(currency)) {
+	case "IDR", "VND", "KRW", "JPY", "CLP", "UGX", "XAF":
+		return math.Round(amount)
+	default:
+		return math.Round(amount*100) / 100
+	}
 }
 
 func haiPayResolveRegion(currencyOrRegion string) (string, error) {
@@ -188,6 +330,12 @@ func haiPayResolveRegion(currencyOrRegion string) (string, error) {
 	if country.IsHaiPayRegion(code) {
 		return code, nil
 	}
+	if region := country.HaiPayGlobalCashierCountryFromCurrency(code); region != "" {
+		return region, nil
+	}
+	if country.IsHaiPayGlobalCashierRegion(code) {
+		return code, nil
+	}
 	return "", fmt.Errorf("unsupported region currency=%s", code)
 }
 
@@ -196,10 +344,12 @@ type haiPayApplyAPIRes struct {
 	Error  string `json:"error"`
 	Msg    string `json:"msg"`
 	Data   *struct {
-		OrderId string `json:"orderId"`
-		OrderNo string `json:"orderNo"`
-		PayUrl  string `json:"payUrl"`
-		Sign    string `json:"sign"`
+		OrderId  string `json:"orderId"`
+		OrderNo  string `json:"orderNo"`
+		PayUrl   string `json:"payUrl"`
+		BankNo   string `json:"bankNo"`
+		BankCode string `json:"bankCode"`
+		QrCode   string `json:"qrCode"`
 	} `json:"data"`
 }
 
@@ -263,7 +413,7 @@ func haiPaySafeParams(m map[string]any) string {
 	for k, v := range m {
 		cp[k] = v
 	}
-	for _, k := range []string{"sign", "merchantSecretKey", "merchantPrivateKey", "haiPayPublicKey"} {
+	for _, k := range []string{"sign", "merchantSecretKey", "merchantPrivateKey"} {
 		if _, ok := cp[k]; ok {
 			cp[k] = "***"
 		}

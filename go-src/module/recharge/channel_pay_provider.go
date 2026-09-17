@@ -15,8 +15,11 @@ type ChannelPayCreateReq struct {
 	PlayerName string
 	PlayerIP   string
 	Email      string
-	Region     string // 可选覆盖；空则 Provider 用自身默认(如 HaiPay DefaultRegion)
+	Phone      string
+	Region     string // 支付地区；HaiPay 本地代收必填
 	Currency   string // Provider 根据 region 报价后返回的实际支付币种
+	PayType    string // App 从地区列表中选择的本地代收支付类型
+	InBankCode string // App 从地区列表中选择的本地代收支付编码
 	Amount     float64
 	PriceUsd   float64
 	PayChannel uint8
@@ -32,8 +35,8 @@ type ChannelPayCreateRes struct {
 type ChannelPayProvider interface {
 	Name() string
 	Enabled() bool
-	// QuotePay 根据地区决定订单落库币种，并将 USD 档位价格换算为实际支付金额。
-	QuotePay(ctx context.Context, priceUsd float64, region string) (payCurrency string, payAmount float64, err error)
+	// QuotePay 根据地区和业务类型决定订单落库币种，并将 USD 档位价格换算为实际支付金额。
+	QuotePay(ctx context.Context, priceUsd float64, region string, payChannel uint8) (payCurrency string, payAmount float64, err error)
 	CreatePay(ctx context.Context, req *ChannelPayCreateReq) (*ChannelPayCreateRes, error)
 }
 

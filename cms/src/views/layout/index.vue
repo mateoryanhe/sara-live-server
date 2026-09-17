@@ -70,7 +70,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildTransferManagement') || hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('GuildVisibilityManagement') || hasMenuPermission('GuildAnchorDailyLiveManagement') || hasMenuPermission('PlatformAnchorList') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('CoinMerchantRechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('FiatCurrencyManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('LiveRevenueShareCfgManagement')"
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('GuildTransferManagement') || hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('GuildVisibilityManagement') || hasMenuPermission('GuildAnchorDailyLiveManagement') || hasMenuPermission('PlatformAnchorList') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildProfileManagement') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('CoinMerchantRechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('CustomerServiceCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('PaymentCountryCfgManagement') || hasMenuPermission('CoinMerchantPaymentCountryCfgManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('LiveRevenueShareCfgManagement')"
             index="/operation">
           <template #title>
             <el-icon>
@@ -101,7 +101,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('CoinMerchantRechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('FiatCurrencyManagement')"
+              v-if="hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('CoinMerchantRechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('PaymentCountryCfgManagement') || hasMenuPermission('CoinMerchantPaymentCountryCfgManagement')"
               index="/operation/group/recharge">
             <template #title>
               <el-icon>
@@ -133,11 +133,17 @@
               </el-icon>
               <span>{{ t('menu.WalletExchangeCfgManagement') }}</span>
             </el-menu-item>
-            <el-menu-item v-if="hasMenuPermission('FiatCurrencyManagement')" index="/operation/wallet/fiat-currency-list">
+            <el-menu-item v-if="hasMenuPermission('PaymentCountryCfgManagement')" index="/operation/recharge/payment-country-cfg">
               <el-icon>
-                <Money/>
+                <CreditCard/>
               </el-icon>
-              <span>{{ t('menu.FiatCurrencyManagement') }}</span>
+              <span>{{ t('menu.PaymentCountryCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('CoinMerchantPaymentCountryCfgManagement')" index="/operation/recharge/coin-merchant-payment-country-cfg">
+              <el-icon>
+                <CreditCard/>
+              </el-icon>
+              <span>{{ t('menu.CoinMerchantPaymentCountryCfgManagement') }}</span>
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu

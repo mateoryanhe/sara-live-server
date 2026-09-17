@@ -100,8 +100,24 @@ type haiPayPayoutAPIRes struct {
 	Data   *struct {
 		OrderId string `json:"orderId"`
 		OrderNo string `json:"orderNo"`
-		Sign    string `json:"sign"`
 	} `json:"data"`
+}
+
+type haiPayPayoutQueryData struct {
+	OrderId  string `json:"orderId"`
+	OrderNo  string `json:"orderNo"`
+	Amount   string `json:"amount"`
+	Fee      string `json:"fee"`
+	Status   int    `json:"status"`
+	PayTime  string `json:"payTime"`
+	ErrorMsg string `json:"errorMsg"`
+}
+
+type haiPayPayoutQueryAPIRes struct {
+	Status string                 `json:"status"`
+	Error  string                 `json:"error"`
+	Msg    string                 `json:"msg"`
+	Data   *haiPayPayoutQueryData `json:"data"`
 }
 
 // HaiPayApplyPayout 调用 /{currency}/pay/apply 代付
@@ -193,16 +209,82 @@ func HaiPayApplyPayout(ctx context.Context, req *HaiPayPayoutApplyReq) (*HaiPayP
 	if res.Data == nil {
 		return nil, fmt.Errorf("haipay payout empty data")
 	}
-	dataMap := map[string]any{
-		"orderId": res.Data.OrderId,
-		"orderNo": res.Data.OrderNo,
-		"sign":    res.Data.Sign,
-	}
-	if err := haiPayVerify(ctx, dataMap, cfg.MerchantSecretKey, cfg.HaiPayPublicKey, res.Data.Sign); err != nil {
-		xrlog.DetailLog.Warningf(ctx, "haipay payout apply verify failed(skip block) orderId=%s err=%v", req.OrderID, err)
-	}
 	return &HaiPayPayoutApplyRes{
 		OrderID: strings.TrimSpace(res.Data.OrderId),
 		OrderNo: strings.TrimSpace(res.Data.OrderNo),
 	}, nil
+}
+
+// haiPayQueryPayout 主动查询代付订单。回调只用于触发查单，最终状态以该接口结果为准。
+func haiPayQueryPayout(ctx context.Context, row *liveentity.GuildIncomeSettlementLog) (*haiPayPayoutQueryData, error) {
+	if row == nil || row.ID == 0 {
+		return nil, fmt.Errorf("empty payout settlement")
+	}
+	cfg := cfgdao.GetHaiPayCfgCached()
+	if cfg == nil || !cfg.PayoutEnabled {
+		return nil, fmt.Errorf("haipay payout not enabled")
+	}
+	currency := strings.ToUpper(strings.TrimSpace(row.TransferCurrency))
+	orderID := strings.TrimSpace(row.TransferOrderId)
+	if currency == "" || orderID == "" {
+		return nil, fmt.Errorf("haipay payout local order incomplete")
+	}
+	appID, err := HaiPayPayoutAppId(cfg, currency)
+	if err != nil {
+		return nil, err
+	}
+	body := map[string]any{
+		"appId":   appID,
+		"orderId": orderID,
+	}
+	if orderNo := strings.TrimSpace(row.TransferPlatformNo); orderNo != "" {
+		body["orderNo"] = orderNo
+	}
+	sign, err := haiPaySign(ctx, body, cfg.MerchantSecretKey, cfg.MerchantPrivateKey)
+	if err != nil {
+		return nil, fmt.Errorf("haipay payout query sign: %w", err)
+	}
+	body["sign"] = sign
+
+	var res haiPayPayoutQueryAPIRes
+	url := strings.TrimRight(cfg.ApiHost, "/") + "/" + strings.ToLower(currency) + "/pay/query"
+	if err = haiPayPostJSON(ctx, url, body, &res); err != nil {
+		return nil, err
+	}
+	if res.Status != "1" {
+		msg := strings.TrimSpace(res.Msg)
+		if msg == "" {
+			msg = res.Error
+		}
+		return nil, fmt.Errorf("haipay payout query failed status=%s error=%s msg=%s", res.Status, res.Error, msg)
+	}
+	if res.Data == nil {
+		return nil, fmt.Errorf("haipay payout query empty data")
+	}
+	queryOrderID := strings.TrimSpace(res.Data.OrderId)
+	if queryOrderID == "" || queryOrderID != orderID {
+		return nil, fmt.Errorf("haipay payout query order mismatch got=%s want=%s", queryOrderID, orderID)
+	}
+	localOrderNo := strings.TrimSpace(row.TransferPlatformNo)
+	queryOrderNo := strings.TrimSpace(res.Data.OrderNo)
+	if localOrderNo != "" && (queryOrderNo == "" || queryOrderNo != localOrderNo) {
+		return nil, fmt.Errorf("haipay payout query platform order mismatch got=%s want=%s", queryOrderNo, localOrderNo)
+	}
+	if res.Data.Status == haiPayCollectStatusSuccess {
+		queryAmount, amountErr := haiPayAmountCents(res.Data.Amount)
+		if amountErr != nil {
+			return nil, fmt.Errorf("invalid haipay payout query amount %q: %w", res.Data.Amount, amountErr)
+		}
+		expectedText := haiPayFormatPayoutAmount(currency, row.TransferLocalAmount)
+		expectedAmount, amountErr := haiPayAmountCents(expectedText)
+		if amountErr != nil {
+			return nil, fmt.Errorf("invalid local payout amount %q: %w", expectedText, amountErr)
+		}
+		if queryAmount != expectedAmount {
+			return nil, fmt.Errorf("haipay payout amount mismatch query=%s local=%s currency=%s", res.Data.Amount, expectedText, currency)
+		}
+	}
+	xrlog.DetailLog.Infof(ctx, "haipay payout query ok orderId=%s orderNo=%s status=%d amount=%s currency=%s",
+		orderID, res.Data.OrderNo, res.Data.Status, res.Data.Amount, currency)
+	return res.Data, nil
 }

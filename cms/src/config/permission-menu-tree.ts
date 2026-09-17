@@ -174,7 +174,8 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('CoinMerchantRechargeCfgManagement'),
                 page('VipCfgManagement'),
                 page('WalletExchangeCfgManagement'),
-                page('FiatCurrencyManagement'),
+                page('PaymentCountryCfgManagement'),
+                page('CoinMerchantPaymentCountryCfgManagement'),
             ]),
             group('operation-guild', 'menu.OperationGuildGroup', [
                 group('operation-guild-basic', 'menu.OperationGuildBasicGroup', [

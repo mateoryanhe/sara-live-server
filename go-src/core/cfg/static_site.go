@@ -14,10 +14,13 @@ type StaticSiteCfg struct {
 	Prefix     string `json:"prefix"     dc:"URL前缀,如 /images;省略时从 domain 首段推导"`
 	Path       string `json:"path"       dc:"物理目录绝对路径"`
 	Root       string `json:"root"       dc:"物理目录,兼容旧字段"`
+	T          bool   `json:"t"          dc:"是否为下发给App的第三方支付站点"`
 	TTLMinutes int    `json:"ttlMinutes" dc:"CMS文件导出过期清理(分钟),仅 cms-export 使用"`
 	CertFile   string `json:"certFile"   dc:"HTTPS证书文件路径"`
 	KeyFile    string `json:"keyFile"    dc:"HTTPS私钥文件路径"`
 }
+
+var thirdPayDomain string
 
 func staticSitePhysicalDir(item *StaticSiteCfg) string {
 	if item == nil {
@@ -32,9 +35,28 @@ func staticSitePhysicalDir(item *StaticSiteCfg) string {
 func initStaticSiteCfg() {
 	ctx := gctx.New()
 	sites := loadStaticSiteCfgs(ctx)
+	thirdPayDomain = findThirdPayDomain(sites)
 	staticPathCfgs = buildStaticPathCfgsFromSites(sites)
 	domainSiteCfgs = buildDomainSiteCfgsFromSites(sites)
 	initImageStaticCfg()
+}
+
+// GetThirdPayDomain 返回标记为 t 的第三方支付站点域名。
+func GetThirdPayDomain() string {
+	return thirdPayDomain
+}
+
+func findThirdPayDomain(sites []*StaticSiteCfg) string {
+	for _, site := range sites {
+		if site == nil || !site.T {
+			continue
+		}
+		domains := SplitDomains(site.Domain)
+		if len(domains) > 0 {
+			return domains[0]
+		}
+	}
+	return ""
 }
 
 func loadStaticSiteCfgs(ctx context.Context) []*StaticSiteCfg {

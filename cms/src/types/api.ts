@@ -1356,6 +1356,8 @@ export interface ShortVideo {
     title: string
     video: string
     videoName: string
+    previewVideo: string
+    previewVideoName: string
     cover: string
     coverName: string
     sort: number
@@ -1775,29 +1777,6 @@ export interface SaveWalletExchangeCfgRes {
     id: string
 }
 
-export interface FiatCurrency {
-    id: string
-    currencyCode: string
-    name: string
-    symbol: string
-    icon?: string
-    iconName?: string
-    currencyType: number
-    sort: number
-    status: number
-    createdAt?: string
-    updatedAt?: string
-}
-
-export interface FiatCurrencyQuery {
-    pageIndex: number
-    pageSize: number
-    currencyCode?: string
-    name?: string
-    typeFilter?: number
-    statusFilter?: number
-}
-
 export interface LiveRevenueShareCfg {
     id: string
     anchorSharePercent: number
@@ -1847,19 +1826,17 @@ export interface SaveGooglePlayCfgRes {
 
 export interface HaiPayCfg {
     id: string
-    enabled: boolean
-    appId: number
     apiHost: string
+    globalCashierAppId: number
+    tVisable: boolean
     merchantSecretKey: string
     merchantPrivateKey: string
-    haiPayPublicKey: string
     callbackBaseUrl: string
     returnUrl: string
     failReturnUrl: string
     cancelUrl: string
     paymentMethods: string
     subject: string
-    defaultRegion: string
     payoutEnabled?: boolean
     payoutAppIds?: string
     payoutSubject?: string
@@ -1873,19 +1850,17 @@ export interface GetHaiPayCfgRes {
 
 export interface SaveHaiPayCfgReq {
     id?: number
-    enabled: boolean
-    appId: number
     apiHost: string
+    globalCashierAppId: number
+    tVisable: boolean
     merchantSecretKey: string
     merchantPrivateKey: string
-    haiPayPublicKey: string
     callbackBaseUrl?: string
     returnUrl?: string
     failReturnUrl?: string
     cancelUrl?: string
     paymentMethods?: string
     subject?: string
-    defaultRegion?: string
     payoutEnabled?: boolean
     payoutAppIds?: string
     payoutSubject?: string

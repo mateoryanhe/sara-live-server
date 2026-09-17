@@ -195,7 +195,7 @@
                 :before-upload="beforeVideoSelect"
                 :disabled="saving"
                 :show-file-list="false"
-                accept=".mp4,.webm,.mov,video/mp4,video/webm,video/quicktime"
+                accept=".mp4,video/mp4"
                 action="#"
                 class="video-uploader"
             >
@@ -504,7 +504,7 @@ const detectVideoDuration = (file: File): Promise<number> => {
   })
 }
 
-const allowedVideoExt = ['.mp4', '.webm', '.mov']
+const allowedVideoExt = ['.mp4']
 
 const getFileExt = (name: string) => {
   const idx = name.lastIndexOf('.')

@@ -55,8 +55,8 @@ func Publish(data *entity.ChannelPayUserProfile) {
 	channelPayUserProfileCacheMgr.PublishRow(gctx.New(), data.ID, data)
 }
 
-// UpsertPayerInfo 写入非空 name/email。user 必须在 user_infos 中真实存在，否则不写库。
-func UpsertPayerInfo(userId uint64, name, email string) *entity.ChannelPayUserProfile {
+// UpsertPayerInfo 写入非空 name/email/phone。user 必须在 user_infos 中真实存在，否则不写库。
+func UpsertPayerInfo(userId uint64, name, email, phone string) *entity.ChannelPayUserProfile {
 	if userId == 0 {
 		return nil
 	}
@@ -65,10 +65,11 @@ func UpsertPayerInfo(userId uint64, name, email string) *entity.ChannelPayUserPr
 	}
 	name = strings.TrimSpace(name)
 	email = strings.ToLower(strings.TrimSpace(email))
+	phone = strings.TrimSpace(phone)
 	if isPlaceholderPayEmail(email) {
 		email = ""
 	}
-	if name == "" && email == "" {
+	if name == "" && email == "" && phone == "" {
 		return GetExisting(userId)
 	}
 
@@ -83,6 +84,10 @@ func UpsertPayerInfo(userId uint64, name, email string) *entity.ChannelPayUserPr
 	}
 	if email != "" && email != row.Email {
 		row.SetEmail(email)
+		changed = true
+	}
+	if phone != "" && phone != row.Phone {
+		row.SetPhone(phone)
 		changed = true
 	}
 	if changed {

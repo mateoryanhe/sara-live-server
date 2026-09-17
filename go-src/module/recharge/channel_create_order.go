@@ -32,7 +32,7 @@ func CreateChannelRechargeOrder(ctx context.Context, req *rechargeorderdto.AppCr
 		return nil, err
 	}
 	packageName := strings.TrimSpace(httpserver.GetPackageNameFromContext(ctx))
-	return createChannelRechargeOrder(ctx, userId, packageName, req.CfgId, req.CurrencyCode, req.PayName, req.PayEmail, resolveBodyChannelOrderSource(req.Source), false)
+	return createChannelRechargeOrder(ctx, userId, packageName, req.CfgId, req.CurrencyCode, req.PayName, req.PayEmail, req.PayPhone, "", "", resolveBodyChannelOrderSource(req.Source), false)
 }
 
 // CMSCreateChannelRechargeOrder CMS第三方充值测试建单并返回支付URL
@@ -48,10 +48,10 @@ func CMSCreateChannelRechargeOrder(ctx context.Context, req *rechargeorderdto.CM
 	if packageName == "" {
 		packageName = cmsChannelPayTestPackageName
 	}
-	return createChannelRechargeOrder(ctx, userId, packageName, req.CfgId, req.CurrencyCode, req.PayName, req.PayEmail, entity.RechargeOrderSourceManual, true)
+	return createChannelRechargeOrder(ctx, userId, packageName, req.CfgId, req.CurrencyCode, req.PayName, req.PayEmail, req.PayPhone, req.PayType, req.InBankCode, entity.RechargeOrderSourceManual, true)
 }
 
-func createChannelRechargeOrder(ctx context.Context, userId uint64, packageName string, cfgId uint64, currencyCode, payName, payEmail string, source uint8, forcePayUrl bool) (*rechargeorderdto.AppCreateChannelRechargeOrderRes, error) {
+func createChannelRechargeOrder(ctx context.Context, userId uint64, packageName string, cfgId uint64, currencyCode, payName, payEmail, payPhone, payType, inBankCode string, source uint8, forcePayUrl bool) (*rechargeorderdto.AppCreateChannelRechargeOrderRes, error) {
 	packageName = strings.TrimSpace(packageName)
 	if userId == 0 || cfgId == 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
@@ -80,7 +80,7 @@ func createChannelRechargeOrder(ctx context.Context, userId uint64, packageName 
 	if err != nil {
 		return nil, err
 	}
-	payCurrency, payAmount, err := provider.QuotePay(ctx, rechargeCfg.Price, region)
+	payCurrency, payAmount, err := provider.QuotePay(ctx, rechargeCfg.Price, region, entity.RechargeCfgTypeChannel)
 	if err != nil || payAmount <= 0 || strings.TrimSpace(payCurrency) == "" {
 		xrlog.DetailLog.Errorf(ctx, "channelPay quote failed provider=%s priceUsd=%v err=%v",
 			provider.Name(), rechargeCfg.Price, err)
@@ -93,6 +93,7 @@ func createChannelRechargeOrder(ctx context.Context, userId uint64, packageName 
 	}
 	order := entity.NewRechargeOrder(userId, rechargeCfg.ID, rechargeCfg.Price, payCurrency, goldAmount, source)
 	order.SetPayAmount(payAmount)
+	order.SetPayRegion(region)
 	order.SetPayChannel(entity.RechargeCfgTypeChannel)
 	order.SetPackageName(packageName)
 	rechargeorderdao.AddOrderToCache(order)
@@ -116,7 +117,7 @@ func createChannelRechargeOrder(ctx context.Context, userId uint64, packageName 
 		}, nil
 	}
 
-	return createChannelPayURL(ctx, order, userId, orderIdStr, rechargeCfg.Price, payAmount, entity.RechargeCfgTypeChannel, provider, region, payName, payEmail)
+	return createChannelPayURL(ctx, order, userId, orderIdStr, rechargeCfg.Price, payAmount, entity.RechargeCfgTypeChannel, provider, region, payName, payEmail, payPhone, payType, inBankCode)
 }
 
 // CreateCoinMerchantChannelRechargeOrder 币商App渠道建单(需登录;档位来自币商充值配置缓存)
@@ -133,10 +134,10 @@ func CreateCoinMerchantChannelRechargeOrder(ctx context.Context, req *rechargeor
 		return nil, errercode.CreateCode(errercode.NoPermission)
 	}
 	packageName := strings.TrimSpace(httpserver.GetPackageNameFromContext(ctx))
-	return createCoinMerchantChannelRechargeOrder(ctx, userId, packageName, req.CfgId, req.CurrencyCode, req.PayName, req.PayEmail)
+	return createCoinMerchantChannelRechargeOrder(ctx, userId, packageName, req.CfgId, req.CurrencyCode, req.PayName, req.PayEmail, req.PayPhone, "", "")
 }
 
-func createCoinMerchantChannelRechargeOrder(ctx context.Context, userId uint64, packageName string, cfgId uint64, currencyCode, payName, payEmail string) (*rechargeorderdto.AppCreateChannelRechargeOrderRes, error) {
+func createCoinMerchantChannelRechargeOrder(ctx context.Context, userId uint64, packageName string, cfgId uint64, currencyCode, payName, payEmail, payPhone, payType, inBankCode string) (*rechargeorderdto.AppCreateChannelRechargeOrderRes, error) {
 	packageName = strings.TrimSpace(packageName)
 	if userId == 0 || cfgId == 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
@@ -162,7 +163,7 @@ func createCoinMerchantChannelRechargeOrder(ctx context.Context, userId uint64, 
 	if err != nil {
 		return nil, err
 	}
-	payCurrency, payAmount, err := provider.QuotePay(ctx, rechargeCfg.Price, region)
+	payCurrency, payAmount, err := provider.QuotePay(ctx, rechargeCfg.Price, region, entity.RechargeCfgTypeCoinMerchant)
 	if err != nil || payAmount <= 0 || strings.TrimSpace(payCurrency) == "" {
 		xrlog.DetailLog.Errorf(ctx, "channelPay coinMerchant quote failed provider=%s priceUsd=%v err=%v",
 			provider.Name(), rechargeCfg.Price, err)
@@ -172,6 +173,7 @@ func createCoinMerchantChannelRechargeOrder(ctx context.Context, userId uint64, 
 
 	order := entity.NewRechargeOrder(userId, rechargeCfg.ID, rechargeCfg.Price, payCurrency, goldAmount, entity.RechargeOrderSourceCoinMerchant)
 	order.SetPayAmount(payAmount)
+	order.SetPayRegion(region)
 	order.SetPayChannel(entity.RechargeCfgTypeCoinMerchant)
 	order.SetPackageName(packageName)
 	rechargeorderdao.AddOrderToCache(order)
@@ -195,10 +197,10 @@ func createCoinMerchantChannelRechargeOrder(ctx context.Context, userId uint64, 
 		}, nil
 	}
 
-	return createChannelPayURL(ctx, order, userId, orderIdStr, rechargeCfg.Price, payAmount, entity.RechargeCfgTypeCoinMerchant, provider, region, payName, payEmail)
+	return createChannelPayURL(ctx, order, userId, orderIdStr, rechargeCfg.Price, payAmount, entity.RechargeCfgTypeCoinMerchant, provider, region, payName, payEmail, payPhone, payType, inBankCode)
 }
 
-func createChannelPayURL(ctx context.Context, order *entity.RechargeOrder, userId uint64, orderIdStr string, priceUsd, payAmount float64, payChannel uint8, provider ChannelPayProvider, region, payName, payEmail string) (*rechargeorderdto.AppCreateChannelRechargeOrderRes, error) {
+func createChannelPayURL(ctx context.Context, order *entity.RechargeOrder, userId uint64, orderIdStr string, priceUsd, payAmount float64, payChannel uint8, provider ChannelPayProvider, region, payName, payEmail, payPhone, payType, inBankCode string) (*rechargeorderdto.AppCreateChannelRechargeOrderRes, error) {
 	if provider == nil {
 		var err error
 		provider, err = resolveActiveChannelPayProvider()
@@ -207,7 +209,7 @@ func createChannelPayURL(ctx context.Context, order *entity.RechargeOrder, userI
 		}
 	}
 
-	playerName, email := resolveChannelPayPayer(userId, payName, payEmail)
+	playerName, email, phone := resolveChannelPayPayer(userId, payName, payEmail, payPhone)
 	playerName = normalizePayDisplayName(playerName)
 	playerIP := "127.0.0.1"
 	if r := g.RequestFromCtx(ctx); r != nil {
@@ -222,8 +224,11 @@ func createChannelPayURL(ctx context.Context, order *entity.RechargeOrder, userI
 		PlayerName: playerName,
 		PlayerIP:   playerIP,
 		Email:      email,
+		Phone:      phone,
 		Region:     region,
 		Currency:   order.Currency,
+		PayType:    payType,
+		InBankCode: inBankCode,
 		Amount:     payAmount,
 		PriceUsd:   priceUsd,
 		PayChannel: payChannel,
@@ -240,9 +245,9 @@ func createChannelPayURL(ctx context.Context, order *entity.RechargeOrder, userI
 	if third := strings.TrimSpace(payRes.ThirdOrderID); third != "" {
 		order.SetThirdOrderId(third)
 	}
-	if isLikelyRealPayName(playerName) || isLikelyRealPayEmail(email) {
+	if isLikelyRealPayName(playerName) || isLikelyRealPayEmail(email) || strings.TrimSpace(phone) != "" {
 		if requireExistingAppUser(userId) == nil {
-			channelpaydao.UpsertPayerInfo(userId, playerName, email)
+			channelpaydao.UpsertPayerInfo(userId, playerName, email, phone)
 		}
 	}
 

@@ -19,8 +19,10 @@ func GetShortVideoList(_ context.Context, req *shortvideodto.ShortVideoListReq) 
 	total, list := shortvideodao.GetShortVideoList(req)
 	for _, row := range list {
 		row.VideoName = row.Video
+		row.PreviewVideoName = row.PreviewVideo
 		row.CoverName = row.Cover
 		row.Video = upload.GetUrlByName(row.VideoName)
+		row.PreviewVideo = upload.GetUrlByName(row.PreviewVideoName)
 		row.Cover = upload.GetUrlByName(row.CoverName)
 	}
 	return &httpserver.CMSQueryResp{Total: total, Data: list}, nil
@@ -44,6 +46,9 @@ func CreateShortVideo(ctx context.Context, req *shortvideodto.CreateShortVideoRe
 		return nil, err
 	}
 	videoName := strings.TrimSpace(req.Video)
+	if videoName != "" && !upload.IsShortVideoFileNameAllowed(videoName) {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 	if videoName == "" {
 		if req.File == nil {
 			return nil, errercode.CreateCode(errercode.InvalidParam)
@@ -146,6 +151,7 @@ func removeShortVideoRow(row *entity.ShortVideo) error {
 		return errercode.CreateCode(errercode.ShortVideoNonExist)
 	}
 	videoName := row.Video
+	previewVideoName := row.PreviewVideo
 	coverName := row.Cover
 	if err := shortvideodao.Delete(row.ID); err != nil {
 		return err
@@ -158,6 +164,7 @@ func removeShortVideoRow(row *entity.ShortVideo) error {
 	//再移除单条缓存
 	shortvideodao.RemoveStatCacheByVideoId(row.ID)
 	upload.DeleteUploadedFile(videoName)
+	upload.DeleteUploadedFile(previewVideoName)
 	upload.DeleteUploadedFile(coverName)
 	reloadAllAppShortVideoListCaches()
 	return nil

@@ -12,13 +12,19 @@ func TestHaiPayCollectionCatalog(t *testing.T) {
 	if got := HaiPayCollectionCurrency("hk"); got != "USD" {
 		t.Fatalf("HK collection currency=%q", got)
 	}
-	if got := HaiPayCollectionCurrency("in"); got != "INR" {
+	if got := HaiPayCollectionCurrency("in"); got != "USD" {
 		t.Fatalf("IN collection currency=%q", got)
 	}
-	if got := HaiPayCollectionCountryFromCurrency("eur"); got != "EU" {
-		t.Fatalf("EUR collection country=%q", got)
+	if got := HaiPayCollectionCountryFromCurrency("eur"); got != "" {
+		t.Fatalf("shared EUR must not infer a collection country, got=%q", got)
 	}
-	if got := HaiPayCollectionCurrency("pl"); got != "EUR" {
+	if got := HaiPayCollectionCountryFromCurrency("usd"); got != "" {
+		t.Fatalf("shared USD must not infer a collection country, got=%q", got)
+	}
+	if got := HaiPayCollectionCountryFromCurrency("bdt"); got != "BD" {
+		t.Fatalf("BDT collection country=%q", got)
+	}
+	if got := HaiPayCollectionCurrency("pl"); got != "USD" {
 		t.Fatalf("PL collection currency=%q", got)
 	}
 	if got := HaiPayCollectionCountryFromCurrency("pln"); got != "" {
@@ -29,35 +35,35 @@ func TestHaiPayCollectionCatalog(t *testing.T) {
 	}
 	options := ListHaiPayCollectionOptions()
 	want := []HaiPayCollectionOption{
-		{CountryCode: "AE", Currencies: []string{"AED"}},
-		{CountryCode: "AT", Currencies: []string{"EUR"}},
-		{CountryCode: "BE", Currencies: []string{"EUR"}},
-		{CountryCode: "BH", Currencies: []string{"BHD"}},
+		{CountryCode: "AT", Currencies: []string{"EUR", "USD"}},
+		{CountryCode: "BE", Currencies: []string{"EUR", "USD"}},
+		{CountryCode: "IT", Currencies: []string{"EUR", "USD"}},
+		{CountryCode: "NL", Currencies: []string{"EUR", "USD"}},
+		{CountryCode: "PL", Currencies: []string{"USD"}},
+		{CountryCode: "TR", Currencies: []string{"TRY"}},
 		{CountryCode: "BR", Currencies: []string{"BRL"}},
-		{CountryCode: "EG", Currencies: []string{"EGP"}},
-		{CountryCode: "GB", Currencies: []string{"GBP"}},
 		{CountryCode: "HK", Currencies: []string{"HKD", "USD"}},
-		{CountryCode: "ID", Currencies: []string{"IDR", "USD"}},
-		{CountryCode: "IN", Currencies: []string{"INR"}},
+		{CountryCode: "SG", Currencies: []string{"SGD", "USD"}},
+		{CountryCode: "TW", Currencies: []string{"TWD", "USD"}},
 		{CountryCode: "JP", Currencies: []string{"JPY", "USD"}},
 		{CountryCode: "KR", Currencies: []string{"KRW", "USD"}},
-		{CountryCode: "KW", Currencies: []string{"KWD"}},
-		{CountryCode: "MY", Currencies: []string{"MYR", "USD"}},
-		{CountryCode: "NL", Currencies: []string{"EUR"}},
-		{CountryCode: "OM", Currencies: []string{"OMR"}},
 		{CountryCode: "PH", Currencies: []string{"PHP"}},
-		{CountryCode: "PK", Currencies: []string{"PKR"}},
-		{CountryCode: "PL", Currencies: []string{"EUR"}},
-		{CountryCode: "QA", Currencies: []string{"QAR"}},
-		{CountryCode: "SA", Currencies: []string{"SAR"}},
-		{CountryCode: "SG", Currencies: []string{"SGD", "USD"}},
 		{CountryCode: "TH", Currencies: []string{"THB", "USD"}},
-		{CountryCode: "TR", Currencies: []string{"TRY"}},
-		{CountryCode: "TW", Currencies: []string{"TWD", "USD"}},
-		{CountryCode: "US", Currencies: []string{"USD"}},
 		{CountryCode: "VN", Currencies: []string{"VND", "USD"}},
-		{CountryCode: "IT", Currencies: []string{"EUR"}},
-		{CountryCode: "EU", Currencies: []string{"EUR"}},
+		{CountryCode: "ID", Currencies: []string{"IDR", "USD"}},
+		{CountryCode: "IN", Currencies: []string{"INR", "USD"}},
+		{CountryCode: "MY", Currencies: []string{"MYR", "USD"}},
+		{CountryCode: "PK", Currencies: []string{"PKR", "USD"}},
+		{CountryCode: "BD", Currencies: []string{"BDT"}},
+		{CountryCode: "EG", Currencies: []string{"EGP", "USD"}},
+		{CountryCode: "SA", Currencies: []string{"SAR", "USD"}},
+		{CountryCode: "AE", Currencies: []string{"AED", "USD"}},
+		{CountryCode: "KW", Currencies: []string{"KWD", "USD"}},
+		{CountryCode: "QA", Currencies: []string{"QAR", "USD"}},
+		{CountryCode: "OM", Currencies: []string{"OMR", "USD"}},
+		{CountryCode: "BH", Currencies: []string{"BHD", "USD"}},
+		{CountryCode: "JO", Currencies: []string{"JOD"}},
+		{CountryCode: "IQ", Currencies: []string{"IQD"}},
 	}
 	if !reflect.DeepEqual(options, want) {
 		t.Fatalf("collection catalog mismatch\ngot:  %#v\nwant: %#v", options, want)
@@ -66,12 +72,175 @@ func TestHaiPayCollectionCatalog(t *testing.T) {
 		t.Fatalf("collection options=%d regions=%d", len(options), len(HaiPayRegionCodes))
 	}
 	options[0].CountryCode = "changed"
-	options[7].Currencies[0] = "changed"
+	options[8].Currencies[0] = "changed"
 	if IsHaiPayRegion("changed") {
 		t.Fatal("collection catalog must be copied")
 	}
 	if got := HaiPayCollectionCurrencies("HK")[0]; got != "HKD" {
 		t.Fatalf("collection currency catalog was mutated: %q", got)
+	}
+}
+
+func TestHaiPayCollectionPaymentMethods(t *testing.T) {
+	methodCount := 0
+	for countryCode, countryMethods := range haiPayCollectionPaymentMethodsByCountry {
+		supportedCurrencies := HaiPayCollectionCurrencies(countryCode)
+		for _, method := range countryMethods {
+			methodCount++
+			if !method.Available || method.CurrencyCode == "" || method.PayType == "" || method.InBankCode == "" ||
+				method.MinAmount == "" || method.MaxAmount == "" {
+				t.Fatalf("incomplete available method country=%s method=%+v", countryCode, method)
+			}
+			if !IsHaiPayCollectionPaymentMethod(countryCode, method.CurrencyCode, method.PayType, method.InBankCode) {
+				t.Fatalf("catalog method rejected country=%s method=%+v", countryCode, method)
+			}
+			if !containsCode(supportedCurrencies, method.CurrencyCode) {
+				t.Fatalf("payment method currency is not selectable country=%s method=%+v supported=%v", countryCode, method, supportedCurrencies)
+			}
+		}
+	}
+	if len(haiPayCollectionPaymentMethodsByCountry) != 28 || methodCount != 142 || len(haiPayGlobalCollectionPaymentMethods) != 3 {
+		t.Fatalf("payment method catalog countries=%d methods=%d", len(haiPayCollectionPaymentMethodsByCountry), methodCount)
+	}
+	for _, option := range ListHaiPayCollectionOptions() {
+		if option.CountryCode == "TR" {
+			if HasHaiPayCollectionPaymentMethodCatalog(option.CountryCode) {
+				t.Fatal("Turkey collection methods are all under maintenance")
+			}
+			continue
+		}
+		if !HasHaiPayCollectionPaymentMethodCatalog(option.CountryCode) {
+			t.Fatalf("missing collection payment method catalog country=%s", option.CountryCode)
+		}
+	}
+
+	methods := ListHaiPayCollectionPaymentMethods("hk")
+	if len(methods) != 7 {
+		t.Fatalf("HK collection payment methods=%v", methods)
+	}
+	if methods[0].CurrencyCode != "HKD" || methods[0].PayType != "EWALLET" || methods[0].InBankCode != "WXPAY_SCANCODE" {
+		t.Fatalf("unexpected HK payment method=%+v", methods[0])
+	}
+	if !IsHaiPayCollectionPaymentMethod("HK", "HKD", "EWALLET", "WXPAY_SCANCODE") {
+		t.Fatal("HKD WXPAY_SCANCODE must be available")
+	}
+	if IsHaiPayCollectionPaymentMethod("HK", "HKD", "EWALLET", "HK_WXPAY_SCANCODE_USD") {
+		t.Fatal("USD payment code must not be accepted for HKD")
+	}
+	if IsHaiPayCollectionPaymentMethod("HK", "USD", "BANK_TRANSFER", "PAYME_USD") {
+		t.Fatal("PAYME_USD is under maintenance and must not be accepted")
+	}
+	if got, ok := ResolveHaiPayCollectionPaymentMethodCode("ID", "IDR", "QR", "DYNAMIC"); !ok || got != "dynamic" {
+		t.Fatalf("ID dynamic canonical code=%q ok=%v", got, ok)
+	}
+	indonesiaMethods := ListHaiPayCollectionPaymentMethods("ID")
+	if len(indonesiaMethods) != 13 {
+		t.Fatalf("ID available collection payment methods=%d want=13", len(indonesiaMethods))
+	}
+	if IsHaiPayCollectionPaymentMethod("ID", "IDR", "VA", "002") ||
+		IsHaiPayCollectionPaymentMethod("ID", "USD", "VA", "ID_BRI_USD") {
+		t.Fatal("Indonesia methods under maintenance must not be configurable")
+	}
+	if !IsHaiPayCollectionPaymentMethod("AT", "EUR", "BANK_TRANSFER", "EPS_EUR") ||
+		!IsHaiPayCollectionPaymentMethod("KR", "KRW", "BANK_TRANSFER", "KAKAOPAY_KRW") ||
+		!IsHaiPayCollectionPaymentMethod("AE", "AED", "VA", "BANK_TRANSFER") ||
+		!IsHaiPayCollectionPaymentMethod("ID", "USD", "EWALLET", "APPLE_PAY") {
+		t.Fatal("new official collection payment methods must be configurable")
+	}
+	if IsHaiPayCollectionPaymentMethod("PL", "EUR", "BANK_TRANSFER", "BLIK_USD") ||
+		IsHaiPayCollectionPaymentMethod("TR", "TRY", "EWALLET", "PAPARA") ||
+		IsHaiPayCollectionPaymentMethod("ID", "IDR", "EWALLET", "APPLE_PAY") {
+		t.Fatal("currency-mismatched or maintenance methods must not be configurable")
+	}
+	methods[0].InBankCode = "changed"
+	if got := ListHaiPayCollectionPaymentMethods("HK")[0].InBankCode; got != "WXPAY_SCANCODE" {
+		t.Fatalf("payment method catalog was mutated: %q", got)
+	}
+}
+
+func containsCode(values []string, target string) bool {
+	for _, value := range values {
+		if value == target {
+			return true
+		}
+	}
+	return false
+}
+
+func TestHaiPayGlobalCashierOptions(t *testing.T) {
+	expected := map[string][]string{
+		"US": {"USD"}, "MX": {"MXN"},
+		"AT": {"EUR"}, "BE": {"EUR"}, "GB": {"GBP"}, "NL": {"EUR"},
+		"PL": {"EUR"}, "TR": {"TRY"}, "IT": {"EUR"}, "EU": {"EUR"},
+		"BR": {"BRL"},
+		"HK": {"HKD", "USD"}, "SG": {"SGD", "USD"}, "TW": {"TWD", "USD"},
+		"JP": {"JPY", "USD"}, "KR": {"KRW", "USD"}, "PH": {"PHP"},
+		"TH": {"THB", "USD"}, "VN": {"VND", "USD"}, "ID": {"IDR", "USD"},
+		"MY": {"MYR", "USD"}, "PK": {"PKR"}, "BD": {"BDT"}, "IN": {"INR"},
+		"EG": {"EGP"}, "SA": {"SAR"}, "KW": {"KWD"}, "BH": {"BHD"},
+		"AE": {"AED"}, "OM": {"OMR"}, "QA": {"QAR"}, "JO": {"JOD"}, "IQ": {"IQD"},
+		"NG": {"NGN"}, "GH": {"GHS"}, "KE": {"KES"}, "ZA": {"ZAR"},
+		"CM": {"XAF"}, "TZ": {"TZS"},
+	}
+	options := ListHaiPayGlobalCashierOptions()
+	if len(options) != len(expected) {
+		t.Fatalf("global cashier options=%d want=%d", len(options), len(expected))
+	}
+	continentCounts := make(map[string]int)
+	for _, option := range options {
+		want, ok := expected[option.CountryCode]
+		if !ok {
+			t.Fatalf("unexpected global cashier region=%s", option.CountryCode)
+		}
+		if len(option.Currencies) != len(want) {
+			t.Fatalf("region=%s currencies=%v want=%v", option.CountryCode, option.Currencies, want)
+		}
+		for i := range want {
+			if option.Currencies[i] != want[i] {
+				t.Fatalf("region=%s currencies=%v want=%v", option.CountryCode, option.Currencies, want)
+			}
+		}
+		continent := HaiPayGlobalCashierContinent(option.CountryCode)
+		if !IsHaiPayGlobalCashierRegion(option.CountryCode) || continent == "" {
+			t.Fatalf("global cashier region metadata missing region=%s", option.CountryCode)
+		}
+		continentCounts[continent]++
+	}
+	expectedContinentCounts := map[string]int{
+		HaiPayPayoutRegionNorthAmerica: 2,
+		HaiPayPayoutRegionEurope:       8,
+		HaiPayPayoutRegionSouthAmerica: 1,
+		HaiPayPayoutRegionAsia:         13,
+		HaiPayPayoutRegionMiddleEast:   9,
+		HaiPayPayoutRegionAfrica:       6,
+	}
+	if !reflect.DeepEqual(continentCounts, expectedContinentCounts) {
+		t.Fatalf("global cashier continent counts=%v want=%v", continentCounts, expectedContinentCounts)
+	}
+	if got := HaiPayGlobalCashierCurrency("ID"); got != "USD" {
+		t.Fatalf("ID default global cashier currency=%q want=USD", got)
+	}
+	if got := HaiPayGlobalCashierCountryFromCurrency("IDR"); got != "ID" {
+		t.Fatalf("IDR region=%q want=ID", got)
+	}
+	if got := HaiPayGlobalCashierCountryFromCurrency("USD"); got != "" {
+		t.Fatalf("shared USD must require explicit region, got=%q", got)
+	}
+	if got := HaiPayGlobalCashierCountryFromCurrency("EUR"); got != "" {
+		t.Fatalf("shared EUR must require explicit region, got=%q", got)
+	}
+	options[0].Currencies[0] = "changed"
+	if got := ListHaiPayGlobalCashierOptions()[0].Currencies[0]; got != "USD" {
+		t.Fatalf("global cashier catalog was mutated: %q", got)
+	}
+	if !IsHaiPayGlobalCashierRegion("US") || !IsHaiPayGlobalCashierRegion("AT") {
+		t.Fatal("existing global cashier regions must remain available")
+	}
+	if got := HaiPayGlobalCashierContinent("MX"); got != HaiPayPayoutRegionNorthAmerica {
+		t.Fatalf("MX continent=%q", got)
+	}
+	if got := HaiPayGlobalCashierContinent("NG"); got != HaiPayPayoutRegionAfrica {
+		t.Fatalf("NG continent=%q", got)
 	}
 }
 

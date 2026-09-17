@@ -30,11 +30,7 @@ func SaveHaiPayCfg(_ context.Context, req *haipaydto.SaveHaiPayCfgReq) (*haipayd
 	apiHost := strings.TrimRight(strings.TrimSpace(req.ApiHost), "/")
 	merchantSecret := strings.TrimSpace(req.MerchantSecretKey)
 	merchantPrivate := strings.TrimSpace(req.MerchantPrivateKey)
-	haiPayPublic := strings.TrimSpace(req.HaiPayPublicKey)
-	if req.AppId <= 0 || apiHost == "" || merchantSecret == "" || merchantPrivate == "" || haiPayPublic == "" {
-		return nil, errercode.CreateCode(errercode.InvalidParam)
-	}
-	if req.Enabled && strings.TrimSpace(req.CallbackBaseUrl) == "" {
+	if apiHost == "" || req.GlobalCashierAppId <= 0 || merchantSecret == "" || merchantPrivate == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	if req.PayoutEnabled && strings.TrimSpace(req.CallbackBaseUrl) == "" {
@@ -43,19 +39,17 @@ func SaveHaiPayCfg(_ context.Context, req *haipaydto.SaveHaiPayCfgReq) (*haipayd
 
 	existing := cfgdao.GetHaiPayCfgCached()
 	row := &entity.HaiPayCfg{
-		Enabled:            req.Enabled,
-		AppId:              req.AppId,
 		ApiHost:            apiHost,
+		GlobalCashierAppId: req.GlobalCashierAppId,
+		TVisable:           req.TVisable,
 		MerchantSecretKey:  merchantSecret,
 		MerchantPrivateKey: merchantPrivate,
-		HaiPayPublicKey:    haiPayPublic,
 		CallbackBaseUrl:    strings.TrimRight(strings.TrimSpace(req.CallbackBaseUrl), "/"),
 		ReturnUrl:          strings.TrimSpace(req.ReturnUrl),
 		FailReturnUrl:      strings.TrimSpace(req.FailReturnUrl),
 		CancelUrl:          strings.TrimSpace(req.CancelUrl),
 		PaymentMethods:     strings.TrimSpace(req.PaymentMethods),
 		Subject:            strings.TrimSpace(req.Subject),
-		DefaultRegion:      strings.ToUpper(strings.TrimSpace(req.DefaultRegion)),
 		PayoutEnabled:      req.PayoutEnabled,
 		PayoutAppIds:       strings.TrimSpace(req.PayoutAppIds),
 		PayoutSubject:      strings.TrimSpace(req.PayoutSubject),
@@ -65,12 +59,6 @@ func SaveHaiPayCfg(_ context.Context, req *haipaydto.SaveHaiPayCfgReq) (*haipayd
 	}
 	if row.PayoutSubject == "" {
 		row.PayoutSubject = "GuildSettlement"
-	}
-	if row.DefaultRegion == "" {
-		row.DefaultRegion = "ID"
-	}
-	if _, err := haiPayResolveRegion(row.DefaultRegion); err != nil {
-		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -102,19 +90,17 @@ func toHaiPayCfgItem(cfg *entity.HaiPayCfg) *haipaydto.HaiPayCfgItem {
 	}
 	return &haipaydto.HaiPayCfgItem{
 		ID:                 strconv.FormatUint(cfg.ID, 10),
-		Enabled:            cfg.Enabled,
-		AppId:              cfg.AppId,
 		ApiHost:            cfg.ApiHost,
+		GlobalCashierAppId: cfg.GlobalCashierAppId,
+		TVisable:           cfg.TVisable,
 		MerchantSecretKey:  cfg.MerchantSecretKey,
 		MerchantPrivateKey: cfg.MerchantPrivateKey,
-		HaiPayPublicKey:    cfg.HaiPayPublicKey,
 		CallbackBaseUrl:    cfg.CallbackBaseUrl,
 		ReturnUrl:          cfg.ReturnUrl,
 		FailReturnUrl:      cfg.FailReturnUrl,
 		CancelUrl:          cfg.CancelUrl,
 		PaymentMethods:     cfg.PaymentMethods,
 		Subject:            cfg.Subject,
-		DefaultRegion:      cfg.DefaultRegion,
 		PayoutEnabled:      cfg.PayoutEnabled,
 		PayoutAppIds:       cfg.PayoutAppIds,
 		PayoutSubject:      cfg.PayoutSubject,

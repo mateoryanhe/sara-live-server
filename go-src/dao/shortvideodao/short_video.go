@@ -208,6 +208,7 @@ func toShortVideoListRes(video *entity.ShortVideo) *shortvideodto.ShortVideoList
 		ID:                 strconv.FormatUint(video.ID, 10),
 		Title:              video.Title,
 		Video:              video.Video,
+		PreviewVideo:       video.PreviewVideo,
 		Cover:              video.Cover,
 		Sort:               video.Sort,
 		Status:             video.Status,

@@ -395,14 +395,13 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.view,
         {key: 'deploy', label: '上传部署'},
     ],
-    FiatCurrencyManagement: [
+    PaymentCountryCfgManagement: [
         BTN.view,
-        BTN.search,
-        BTN.create,
         BTN.edit,
-        BTN.delete,
-        {key: 'reloadCfgCache', label: '刷新配置缓存'},
-        {key: 'sync', label: '同步数据'},
+    ],
+    CoinMerchantPaymentCountryCfgManagement: [
+        BTN.view,
+        BTN.edit,
     ],
 }
 

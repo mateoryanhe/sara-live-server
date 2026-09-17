@@ -21,7 +21,14 @@ func PublishShortVideoAppFromRequest(ctx context.Context, r *ghttp.Request) (*sh
 	if err != nil {
 		return nil, err
 	}
-	return publishShortVideoApp(ctx, input)
+	res, err := publishShortVideoApp(ctx, input)
+	if err != nil {
+		upload.DeleteUploadedFile(input.VideoName)
+		upload.DeleteUploadedFile(input.PreviewVideoName)
+		upload.DeleteUploadedFile(input.CoverName)
+		return nil, err
+	}
+	return res, nil
 }
 
 func publishShortVideoApp(ctx context.Context, input *appPublishShortVideoInput) (*shortvideodto.AppPublishShortVideoRes, error) {
@@ -72,11 +79,13 @@ func publishShortVideoApp(ctx context.Context, input *appPublishShortVideoInput)
 		input.Duration,
 		freeWatchSeconds,
 	)
+	row.SetPreviewVideo(input.PreviewVideoName)
 	shortvideodao.AddShortVideoToCache(row)
 	loadAppShortVideoListCache()
 	res := &shortvideodto.AppPublishShortVideoRes{
-		ID:    strconv.FormatUint(row.ID, 10),
-		Video: upload.GetUrlByName(input.VideoName),
+		ID:           strconv.FormatUint(row.ID, 10),
+		Video:        upload.GetUrlByName(input.VideoName),
+		PreviewVideo: upload.GetUrlByName(input.PreviewVideoName),
 	}
 	if input.CoverName != "" {
 		res.Cover = upload.GetUrlByName(input.CoverName)
@@ -178,6 +187,7 @@ func toAppShortVideoUploadRecordItem(row *entity.ShortVideo) *shortvideodto.AppS
 		ID:                 strconv.FormatUint(row.ID, 10),
 		Title:              row.Title,
 		Video:              upload.GetUrlByName(row.Video),
+		PreviewVideo:       upload.GetUrlByName(row.PreviewVideo),
 		Cover:              upload.GetUrlByName(row.Cover),
 		Status:             row.Status,
 		CategoryId:         row.CategoryId,

@@ -35,6 +35,7 @@ const (
 	RechargeOrderPrice        db.TbCol = "price"
 	RechargeOrderPayAmount    db.TbCol = "pay_amount"
 	RechargeOrderCurrency     db.TbCol = "currency"
+	RechargeOrderPayRegion    db.TbCol = "pay_region"
 	RechargeOrderGold         db.TbCol = "gold"
 	RechargeOrderStatus       db.TbCol = "status"
 	RechargeOrderSource       db.TbCol = "source"
@@ -55,6 +56,7 @@ type RechargeOrder struct {
 	Price        float64   `gorm:"type:decimal(10,4);default:0;comment:配置美金金额(USD)" json:"price"`
 	PayAmount    float64   `gorm:"type:decimal(18,4);default:0;comment:渠道实付金额(如IDR,非渠道为0)" json:"payAmount"`
 	Currency     string    `gorm:"size:8;default:'USD';comment:实际支付货币(如USD/IDR)" json:"currency"`
+	PayRegion    string    `gorm:"size:8;default:'';comment:渠道下单国家地区编码" json:"payRegion"`
 	Gold         float64   `gorm:"default:0;comment:发放金币数(订单完成时增加到玩家金币)" json:"gold"`
 	Status       uint8     `gorm:"index:idx_ro_user_status,priority:2;index;default:0;comment:状态(0-待支付,1-已完成,2-已取消/支付超时,3-失败)" json:"status"`
 	Source       uint8     `gorm:"default:0;comment:来源(1-安卓,2-后台,3-H5,5-苹果,6-币商)" json:"source"`
@@ -107,6 +109,11 @@ func (r *RechargeOrder) SetPayAmount(v float64) {
 func (r *RechargeOrder) SetCurrency(v string) {
 	r.Currency = v
 	syndb.AddData(TbRechargeOrder, RechargeOrderCurrency, &syndb.ColData{IdVal: r.ID, ColVal: v})
+}
+
+func (r *RechargeOrder) SetPayRegion(v string) {
+	r.PayRegion = v
+	syndb.AddData(TbRechargeOrder, RechargeOrderPayRegion, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *RechargeOrder) SetGold(v float64) {
@@ -173,6 +180,7 @@ func initRechargeOrder() {
 	syndb.RegQuick(TbRechargeOrder, RechargeOrderPrice)
 	syndb.RegQuick(TbRechargeOrder, RechargeOrderPayAmount)
 	syndb.RegQuick(TbRechargeOrder, RechargeOrderCurrency)
+	syndb.RegQuick(TbRechargeOrder, RechargeOrderPayRegion)
 	syndb.RegQuick(TbRechargeOrder, RechargeOrderGold)
 	syndb.RegQuick(TbRechargeOrder, RechargeOrderStatus)
 	syndb.RegQuick(TbRechargeOrder, RechargeOrderSource)

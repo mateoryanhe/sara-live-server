@@ -51,6 +51,15 @@
         <el-button link type="primary" @click="backToRegion">← {{ t('pages.rechargeOrderList.backToSelectRegion') }}</el-button>
         <span class="step-region">{{ selectedRegion?.code }} · {{ selectedRegion?.currency }} · {{ selectedRegion?.name }}</span>
       </div>
+      <el-alert v-if="selectedRegion && selectedRegion.paymentMethods.length === 0"
+                :closable="false" show-icon type="warning"
+                :title="t('pages.rechargeOrderList.noPaymentMethod')"/>
+      <el-form-item v-else :label="t('pages.rechargeOrderList.paymentMethod')">
+        <el-select v-model="selectedMethodKey" style="width: 100%" :placeholder="t('pages.rechargeOrderList.selectPaymentMethod')">
+          <el-option v-for="method in selectedRegion?.paymentMethods || []"
+                     :key="methodKey(method)" :label="methodLabel(method)" :value="methodKey(method)"/>
+        </el-select>
+      </el-form-item>
       <el-table
           v-loading="channelTestCfgLoading || channelTestCreating"
           :data="channelTestCfgList"
@@ -78,7 +87,7 @@
     </template>
   </el-dialog>
 
-  <!-- 首次（无资料）填写 name / email -->
+  <!-- 首次（无资料）填写 name / email / phone -->
   <el-dialog
       v-model="payerDialogVisible"
       :close-on-click-modal="false"
@@ -101,6 +110,13 @@
             v-model="payerForm.payEmail"
             clearable
             :placeholder="t('pages.rechargeOrderList.payEmailPlaceholder')"
+        />
+      </el-form-item>
+      <el-form-item :label="t('pages.rechargeOrderList.payPhone')" prop="payPhone">
+        <el-input
+            v-model="payerForm.payPhone"
+            clearable
+            :placeholder="t('pages.rechargeOrderList.payPhonePlaceholder')"
         />
       </el-form-item>
     </el-form>
@@ -131,6 +147,7 @@ type RegionRow = {
   name: string
   nameEn: string
   nameZh: string
+  paymentMethods: HaiPayRegionItem['paymentMethods']
 }
 
 const props = defineProps<{
@@ -146,6 +163,7 @@ const emit = defineEmits<{
 const {t} = useI18n()
 const step = ref<'region' | 'cfg'>('region')
 const selectedRegion = ref<RegionRow | null>(null)
+const selectedMethodKey = ref('')
 const regionList = ref<RegionRow[]>([])
 const regionLoading = ref(false)
 const channelTestCfgLoading = ref(false)
@@ -162,9 +180,10 @@ const channelTestForm = reactive({
 const payerForm = reactive({
   payName: '',
   payEmail: '',
+  payPhone: '',
 })
 /** 已加载过的玩家资料缓存（同一次弹窗内） */
-const cachedPayerByUserId = ref<Record<string, { name: string; email: string }>>({})
+const cachedPayerByUserId = ref<Record<string, { name: string; email: string; phone: string }>>({})
 
 const dialogTitle = computed(() => {
   if (step.value === 'cfg' && selectedRegion.value) {
@@ -187,8 +206,18 @@ const mapRegionItem = (item: HaiPayRegionItem): RegionRow => {
     name: String(item.name || item.nameEn || code),
     nameEn: String(item.nameEn || item.name || ''),
     nameZh: String(item.nameZh || ''),
+    paymentMethods: Array.isArray(item.paymentMethods) ? item.paymentMethods : [],
   }
 }
+
+const methodKey = (method: {payType: string; inBankCode: string}) => `${method.payType}\u0000${method.inBankCode}`
+const methodLabel = (method: HaiPayRegionItem['paymentMethods'][number]) => {
+  const limit = method.minAmount && method.maxAmount ? `${method.minAmount}-${method.maxAmount}` : ''
+  return [method.payType, method.inBankCode, method.description, limit].filter(Boolean).join(' · ')
+}
+const selectedPaymentMethod = computed(() => selectedRegion.value?.paymentMethods.find(
+    (method) => methodKey(method) === selectedMethodKey.value,
+) || null)
 
 const loadRegionList = async () => {
   regionLoading.value = true
@@ -218,6 +247,7 @@ const payerRules = computed<FormRules>(() => ({
       trigger: ['blur', 'change'],
     },
   ],
+  payPhone: [{required: true, message: t('pages.rechargeOrderList.payPhoneRequired'), trigger: 'blur'}],
 }))
 
 const cfgGold = (row: RechargeCfg) => {
@@ -229,11 +259,13 @@ const resetChannelTest = () => {
   channelTestForm.userId = lockedUserId.value
   channelTestCfgList.value = []
   selectedRegion.value = null
+  selectedMethodKey.value = ''
   step.value = 'region'
   payerDialogVisible.value = false
   pendingCfg.value = null
   payerForm.payName = ''
   payerForm.payEmail = ''
+  payerForm.payPhone = ''
   cachedPayerByUserId.value = {}
   channelTestFormRef.value?.clearValidate()
 }
@@ -241,6 +273,7 @@ const resetChannelTest = () => {
 const backToRegion = () => {
   step.value = 'region'
   selectedRegion.value = null
+  selectedMethodKey.value = ''
   channelTestCfgList.value = []
 }
 
@@ -270,18 +303,23 @@ const loadPayerProfile = async (userId: string) => {
     const res = await rechargeOrderApi.getChannelPayUserProfile({userId})
     const name = String(res?.name || '').trim()
     const email = String(res?.email || '').trim()
-    const profile = {name, email}
+    const phone = String(res?.phone || '').trim()
+    const profile = {name, email, phone}
     cachedPayerByUserId.value = {...cachedPayerByUserId.value, [userId]: profile}
     return profile
   } catch {
-    return {name: '', email: ''}
+    return {name: '', email: '', phone: ''}
   }
 }
 
-const createOrderWithPayer = async (row: RechargeCfg, payName: string, payEmail: string) => {
+const createOrderWithPayer = async (row: RechargeCfg, payName: string, payEmail: string, payPhone: string) => {
   if (!selectedRegion.value?.code) {
     ElMessage.warning(t('pages.rechargeOrderList.currencyRequired'))
     step.value = 'region'
+    return
+  }
+  if (!selectedPaymentMethod.value) {
+    ElMessage.warning(t('pages.rechargeOrderList.selectPaymentMethod'))
     return
   }
   channelTestCreating.value = true
@@ -293,6 +331,9 @@ const createOrderWithPayer = async (row: RechargeCfg, payName: string, payEmail:
       currencyCode: selectedRegion.value.code,
       payName: payName.trim(),
       payEmail: payEmail.trim(),
+      payPhone: payPhone.trim(),
+      payType: selectedPaymentMethod.value.payType,
+      inBankCode: selectedPaymentMethod.value.inBankCode,
     })
     if (!res?.payUrl) {
       ElMessage.error(t('pages.rechargeOrderList.openPayUrlFailed'))
@@ -300,7 +341,7 @@ const createOrderWithPayer = async (row: RechargeCfg, payName: string, payEmail:
     }
     cachedPayerByUserId.value = {
       ...cachedPayerByUserId.value,
-      [userId]: {name: payName.trim(), email: payEmail.trim()},
+      [userId]: {name: payName.trim(), email: payEmail.trim(), phone: payPhone.trim()},
     }
     ElMessage.success(t('pages.rechargeOrderList.channelTestCreated', {
       orderId: res.orderId,
@@ -327,6 +368,8 @@ const handleRegionPick = async (row: RegionRow) => {
     return
   }
   selectedRegion.value = row
+  const onlyMethod = row.paymentMethods.length === 1 ? row.paymentMethods[0] : undefined
+  selectedMethodKey.value = onlyMethod ? methodKey(onlyMethod) : ''
   step.value = 'cfg'
   await loadChannelTestCfgList()
 }
@@ -347,14 +390,15 @@ const handleChannelTestCfgPick = async (row: RechargeCfg) => {
 
   const userId = channelTestForm.userId.trim()
   const profile = await loadPayerProfile(userId)
-  if (profile.name && profile.email) {
-    await createOrderWithPayer(row, profile.name, profile.email)
+  if (profile.name && profile.email && profile.phone) {
+    await createOrderWithPayer(row, profile.name, profile.email, profile.phone)
     return
   }
 
   pendingCfg.value = row
   payerForm.payName = profile.name
   payerForm.payEmail = profile.email
+  payerForm.payPhone = profile.phone
   payerDialogVisible.value = true
   payerFormRef.value?.clearValidate()
 }
@@ -366,7 +410,7 @@ const confirmPayerAndCreate = async () => {
   } catch {
     return
   }
-  await createOrderWithPayer(pendingCfg.value, payerForm.payName, payerForm.payEmail)
+  await createOrderWithPayer(pendingCfg.value, payerForm.payName, payerForm.payEmail, payerForm.payPhone)
 }
 
 watch(
@@ -376,6 +420,7 @@ watch(
       channelTestForm.userId = lockedUserId.value
       channelTestCfgList.value = []
       selectedRegion.value = null
+      selectedMethodKey.value = ''
       step.value = 'region'
       payerDialogVisible.value = false
       pendingCfg.value = null

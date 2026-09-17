@@ -14,6 +14,7 @@ const (
 const (
 	ShortVideoTitle            db.TbCol = "title"
 	ShortVideoVideo            db.TbCol = "video"
+	ShortVideoPreviewVideo     db.TbCol = "preview_video"
 	ShortVideoCover            db.TbCol = "cover"
 	ShortVideoSort             db.TbCol = "sort"
 	ShortVideoStatusCol        db.TbCol = "status"
@@ -57,6 +58,7 @@ type ShortVideo struct {
 	migrate.OneModel
 	Title            string  `gorm:"size:64;comment:标题" json:"title"`
 	Video            string  `gorm:"size:255;default:'';comment:视频资源名" json:"video"`
+	PreviewVideo     string  `gorm:"size:255;default:'';comment:试看视频资源名" json:"previewVideo"`
 	Cover            string  `gorm:"size:255;default:'';comment:封面资源名" json:"cover"`
 	Sort             int     `gorm:"default:0;comment:排序值(越大越靠前)" json:"sort"`
 	Status           uint8   `gorm:"default:0;comment:状态(0-下架,1-上架)" json:"status"`
@@ -105,6 +107,14 @@ func (v *ShortVideo) SetVideo(val string) {
 	v.Video = val
 	v.touchUpdatedAt()
 	syndb.AddData(TbShortVideo, ShortVideoVideo, &syndb.ColData{
+		IdVal: v.ID, ColVal: val,
+	})
+}
+
+func (v *ShortVideo) SetPreviewVideo(val string) {
+	v.PreviewVideo = val
+	v.touchUpdatedAt()
+	syndb.AddData(TbShortVideo, ShortVideoPreviewVideo, &syndb.ColData{
 		IdVal: v.ID, ColVal: val,
 	})
 }
@@ -223,6 +233,7 @@ func initShortVideo() {
 	syndb.RegQuick(TbShortVideo, db.UpdatedAtName)
 	syndb.RegQuick(TbShortVideo, ShortVideoTitle)
 	syndb.RegQuick(TbShortVideo, ShortVideoVideo)
+	syndb.RegQuick(TbShortVideo, ShortVideoPreviewVideo)
 	syndb.RegQuick(TbShortVideo, ShortVideoCover)
 	syndb.RegQuick(TbShortVideo, ShortVideoSort)
 	syndb.RegQuick(TbShortVideo, ShortVideoStatusCol)

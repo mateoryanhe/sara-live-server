@@ -49,10 +49,6 @@ export const dataSyncApi = {
         return request.post<SyncBatchRes>('/dataSync/syncRechargeCfg', data)
     },
 
-    syncFiatCurrency: (data: SyncIdsReq) => {
-        return request.post<SyncBatchRes>('/dataSync/syncFiatCurrency', data)
-    },
-
     syncFirstRechargeActivityCfg: () => {
         return request.post<SyncFirstRechargeActivityCfgRes>('/dataSync/syncFirstRechargeActivityCfg', {})
     },

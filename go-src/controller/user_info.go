@@ -64,6 +64,10 @@ func (c *UserInfoController) ReportAttribution(ctx context.Context, req *userinf
 	return userinfo.ReportAttribution(ctx, req)
 }
 
+func (c *UserInfoController) GetUserInfoByInviteCode(ctx context.Context, req *userinfodto.GetUserInfoByInviteCodeReq) (res *userinfodto.GetUserInfoByInviteCodeRes, err error) {
+	return userinfo.GetUserInfoByInviteCode(ctx, req)
+}
+
 func (c *UserInfoController) ReportInviter(ctx context.Context, req *userinfodto.ReportInviterReq) (res *userinfodto.ReportInviterRes, err error) {
 	return userinfo.ReportInviter(ctx, req)
 }

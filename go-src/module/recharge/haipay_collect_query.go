@@ -2,7 +2,6 @@ package recharge
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"math/big"
 	"strconv"
@@ -11,11 +10,10 @@ import (
 	"xr-game-server/core/xrlog"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dao/rechargeorderdao"
+	rechargeentity "xr-game-server/entity/recharge"
 )
 
-const haiPayGlobalCashierQueryPath = "/global/cashier/collect/query/v2"
-
-// 全球收银台代收订单状态(与 HaiPay 文档一致)
+// HaiPay 代收订单状态（本地代收与全球收银台一致）
 const (
 	haiPayCollectStatusSuccess = 2 // 成功（终态）
 	haiPayCollectStatusFailed  = 3 // 失败（终态）
@@ -34,7 +32,6 @@ type haiPayCollectQueryData struct {
 	OriginalCurrency  string `json:"originalCurrency"`
 	OriginalAmount    string `json:"originalAmount"`
 	FloatExchangeRate string `json:"floatExchangeRate"`
-	Sign              string `json:"sign"`
 }
 
 type haiPayCollectQueryAPIRes struct {
@@ -45,10 +42,10 @@ type haiPayCollectQueryAPIRes struct {
 }
 
 // haiPayQueryCollect 主动查单；返回平台订单状态与 orderNo。
-// orderNo 可空，会尝试从本地订单 ThirdOrderId 补全（全球收银台 query 要求 orderNo）。
+// orderNo 会优先从本地订单 ThirdOrderId 补全；全球收银台 query v2 必须携带 orderNo。
 func haiPayQueryCollect(ctx context.Context, orderId, orderNo string) (platformStatus int, platformOrderNo string, err error) {
 	cfg := cfgdao.GetHaiPayCfgCached()
-	if cfg == nil || !cfg.Enabled {
+	if cfg == nil || !cfgdao.HaiPayEnabled() {
 		return 0, "", fmt.Errorf("haipay not configured")
 	}
 	orderId = strings.TrimSpace(orderId)
@@ -58,25 +55,54 @@ func haiPayQueryCollect(ctx context.Context, orderId, orderNo string) (platformS
 	}
 	var localOrderPayAmount float64
 	var localOrderCurrency string
+	var localOrderPayRegion string
+	var localOrderPayChannel uint8
 	hasLocalOrder := false
 	if oid, e := strconv.ParseUint(orderId, 10, 64); e == nil && oid > 0 {
 		if order := rechargeorderdao.GetById(oid); order != nil {
 			localOrderPayAmount = order.PayAmount
 			localOrderCurrency = strings.ToUpper(strings.TrimSpace(order.Currency))
+			localOrderPayRegion = strings.ToUpper(strings.TrimSpace(order.PayRegion))
+			localOrderPayChannel = order.PayChannel
 			hasLocalOrder = true
 			if orderNo == "" {
 				orderNo = strings.TrimSpace(order.ThirdOrderId)
 			}
 		}
 	}
-	if orderNo == "" {
-		return 0, "", fmt.Errorf("empty orderNo for query")
+	if !hasLocalOrder || localOrderCurrency == "" {
+		return 0, "", fmt.Errorf("haipay collect local order not found or currency missing orderId=%s", orderId)
+	}
+	globalCashier := isHaiPayGlobalCashierBiz(haiPayCollectionBizType(localOrderPayChannel))
+	var appID int64
+	if globalCashier {
+		if cfg.GlobalCashierAppId <= 0 {
+			return 0, "", fmt.Errorf("haipay global cashier appId missing")
+		}
+		if orderNo == "" {
+			return 0, "", fmt.Errorf("haipay global cashier query orderNo missing orderId=%s", orderId)
+		}
+		appID = cfg.GlobalCashierAppId
+	} else {
+		if localOrderPayChannel != rechargeentity.RechargeCfgTypeCoinMerchant {
+			return 0, "", fmt.Errorf("haipay unsupported local collection channel=%d", localOrderPayChannel)
+		}
+		if localOrderPayRegion == "" {
+			return 0, "", fmt.Errorf("haipay coin merchant collection region missing orderId=%s", orderId)
+		}
+		credential, credentialErr := haiPayCoinMerchantCollectionCredential(localOrderPayRegion, localOrderCurrency)
+		if credentialErr != nil {
+			return 0, "", credentialErr
+		}
+		appID = credential.AppId
 	}
 
 	body := map[string]any{
-		"appId":   cfg.AppId,
+		"appId":   appID,
 		"orderId": orderId,
-		"orderNo": orderNo,
+	}
+	if orderNo != "" {
+		body["orderNo"] = orderNo
 	}
 	xrlog.DetailLog.Infof(ctx, "haipay collect query sign-before params=%s", haiPaySafeParams(body))
 	sign, err := haiPaySign(ctx, body, cfg.MerchantSecretKey, cfg.MerchantPrivateKey)
@@ -86,7 +112,11 @@ func haiPayQueryCollect(ctx context.Context, orderId, orderNo string) (platformS
 	body["sign"] = sign
 
 	var res haiPayCollectQueryAPIRes
-	url := strings.TrimRight(cfg.ApiHost, "/") + haiPayGlobalCashierQueryPath
+	queryPath := haiPayLocalCollectPath(localOrderCurrency, "query")
+	if globalCashier {
+		queryPath = haiPayGlobalCollectQueryV2Path
+	}
+	url := strings.TrimRight(cfg.ApiHost, "/") + queryPath
 	if err = haiPayPostJSON(ctx, url, body, &res); err != nil {
 		return 0, "", err
 	}
@@ -100,22 +130,15 @@ func haiPayQueryCollect(ctx context.Context, orderId, orderNo string) (platformS
 	if res.Data == nil {
 		return 0, "", fmt.Errorf("haipay query empty data")
 	}
-	// 查单应答验签失败只打日志：以官方 HTTPS 查单结果为准发币，规避平台公钥不一致导致无法入账
-	dataMap := map[string]any{}
-	rawData, _ := json.Marshal(res.Data)
-	_ = json.Unmarshal(rawData, &dataMap)
-	if err = haiPayVerify(ctx, dataMap, cfg.MerchantSecretKey, cfg.HaiPayPublicKey, res.Data.Sign); err != nil {
-		xrlog.DetailLog.Warningf(ctx, "haipay collect query verify failed(skip) orderId=%s err=%v", orderId, err)
-	}
-
 	platformOrderNo = strings.TrimSpace(res.Data.OrderNo)
 	if platformOrderNo == "" {
 		platformOrderNo = orderNo
 	}
 	platformStatus = res.Data.Status
 	if platformStatus == haiPayCollectStatusSuccess {
-		if !hasLocalOrder {
-			return 0, "", fmt.Errorf("haipay collect local order not found orderId=%s", orderId)
+		// 本地代收查单响应不返回 currency；请求 URL 已绑定本地订单币种。
+		if !globalCashier && strings.TrimSpace(res.Data.Currency) == "" {
+			res.Data.Currency = localOrderCurrency
 		}
 		amountField, checkedAmount, checkErr := haiPayCheckCollectPayAmount(res.Data, localOrderCurrency, localOrderPayAmount)
 		if checkErr != nil {
@@ -134,8 +157,7 @@ func haiPayQueryCollect(ctx context.Context, orderId, orderNo string) (platformS
 }
 
 // haiPayCheckCollectPayAmount 选择与本地订单币种匹配的查单金额，再按最小单位（分）比较。
-// 全球收银台发生换汇时，currency/amount 是付款币种和金额，originalCurrency/originalAmount
-// 是下单币种和金额；未换汇时使用 currency/amount。
+// 本地代收使用 amount；全球收银台按订单币种选择 originalAmount 或 amount。
 func haiPayCheckCollectPayAmount(data *haiPayCollectQueryData, orderCurrency string, orderPayAmount float64) (field, queryAmount string, err error) {
 	if data == nil {
 		return "", "", fmt.Errorf("empty haipay query data")

@@ -2,45 +2,48 @@ package country
 
 import "strings"
 
-// HaiPayCollectionOption 描述全球收银台的国家/地区与支持币种。
+// HaiPayCollectionOption 描述 HaiPay 国家本地代收接口的国家/地区与支持币种。
 // CountryCode 是 HaiPay region；Currencies 是官网列出的 ISO 4217 币种代码。
 type HaiPayCollectionOption struct {
 	CountryCode string
 	Currencies  []string
 }
 
-// haiPayCollectionOptions 是 HaiPay 代收国家与币种的唯一数据源。
-// 顺序与全球收银台“地区编码”表一致。
+// haiPayCollectionOptions 是 HaiPay 本地代收国家与币种的唯一数据源。
+// 顺序按官网国家目录的洲分组排列；不包含只有代付接口的地区。
 var haiPayCollectionOptions = []HaiPayCollectionOption{
-	{CountryCode: "AE", Currencies: []string{"AED"}},
-	{CountryCode: "AT", Currencies: []string{"EUR"}},
-	{CountryCode: "BE", Currencies: []string{"EUR"}},
-	{CountryCode: "BH", Currencies: []string{"BHD"}},
+	{CountryCode: "AT", Currencies: []string{"EUR", "USD"}},
+	{CountryCode: "BE", Currencies: []string{"EUR", "USD"}},
+	{CountryCode: "IT", Currencies: []string{"EUR", "USD"}},
+	{CountryCode: "NL", Currencies: []string{"EUR", "USD"}},
+	{CountryCode: "PL", Currencies: []string{"USD"}},
+	{CountryCode: "TR", Currencies: []string{"TRY"}},
+
 	{CountryCode: "BR", Currencies: []string{"BRL"}},
-	{CountryCode: "EG", Currencies: []string{"EGP"}},
-	{CountryCode: "GB", Currencies: []string{"GBP"}},
+
 	{CountryCode: "HK", Currencies: []string{"HKD", "USD"}},
-	{CountryCode: "ID", Currencies: []string{"IDR", "USD"}},
-	{CountryCode: "IN", Currencies: []string{"INR"}},
+	{CountryCode: "SG", Currencies: []string{"SGD", "USD"}},
+	{CountryCode: "TW", Currencies: []string{"TWD", "USD"}},
 	{CountryCode: "JP", Currencies: []string{"JPY", "USD"}},
 	{CountryCode: "KR", Currencies: []string{"KRW", "USD"}},
-	{CountryCode: "KW", Currencies: []string{"KWD"}},
-	{CountryCode: "MY", Currencies: []string{"MYR", "USD"}},
-	{CountryCode: "NL", Currencies: []string{"EUR"}},
-	{CountryCode: "OM", Currencies: []string{"OMR"}},
 	{CountryCode: "PH", Currencies: []string{"PHP"}},
-	{CountryCode: "PK", Currencies: []string{"PKR"}},
-	{CountryCode: "PL", Currencies: []string{"EUR"}},
-	{CountryCode: "QA", Currencies: []string{"QAR"}},
-	{CountryCode: "SA", Currencies: []string{"SAR"}},
-	{CountryCode: "SG", Currencies: []string{"SGD", "USD"}},
 	{CountryCode: "TH", Currencies: []string{"THB", "USD"}},
-	{CountryCode: "TR", Currencies: []string{"TRY"}},
-	{CountryCode: "TW", Currencies: []string{"TWD", "USD"}},
-	{CountryCode: "US", Currencies: []string{"USD"}},
 	{CountryCode: "VN", Currencies: []string{"VND", "USD"}},
-	{CountryCode: "IT", Currencies: []string{"EUR"}},
-	{CountryCode: "EU", Currencies: []string{"EUR"}},
+	{CountryCode: "ID", Currencies: []string{"IDR", "USD"}},
+	{CountryCode: "IN", Currencies: []string{"INR", "USD"}},
+	{CountryCode: "MY", Currencies: []string{"MYR", "USD"}},
+	{CountryCode: "PK", Currencies: []string{"PKR", "USD"}},
+	{CountryCode: "BD", Currencies: []string{"BDT"}},
+
+	{CountryCode: "EG", Currencies: []string{"EGP", "USD"}},
+	{CountryCode: "SA", Currencies: []string{"SAR", "USD"}},
+	{CountryCode: "AE", Currencies: []string{"AED", "USD"}},
+	{CountryCode: "KW", Currencies: []string{"KWD", "USD"}},
+	{CountryCode: "QA", Currencies: []string{"QAR", "USD"}},
+	{CountryCode: "OM", Currencies: []string{"OMR", "USD"}},
+	{CountryCode: "BH", Currencies: []string{"BHD", "USD"}},
+	{CountryCode: "JO", Currencies: []string{"JOD"}},
+	{CountryCode: "IQ", Currencies: []string{"IQD"}},
 }
 
 // HaiPayRegionCodes 保留给旧调用方使用；数据由 haiPayCollectionOptions 自动生成。
@@ -62,14 +65,35 @@ func init() {
 		HaiPayRegionCodes = append(HaiPayRegionCodes, item.CountryCode)
 		haiPayCollectionByCountry[item.CountryCode] = *item
 		for _, currency := range item.Currencies {
-			if _, exists := haiPayCollectionCountryByCurrency[currency]; !exists {
+			if existing, exists := haiPayCollectionCountryByCurrency[currency]; !exists {
 				haiPayCollectionCountryByCurrency[currency] = item.CountryCode
+			} else if existing != item.CountryCode {
+				// EUR/USD 等共享币种不能反推出国家；App 必须上报地区。
+				haiPayCollectionCountryByCurrency[currency] = ""
 			}
 		}
 	}
-	// EUR/USD 对应多个地区；按区域不明确的旧币种入参分别回落 EU/US。
-	haiPayCollectionCountryByCurrency["EUR"] = "EU"
-	haiPayCollectionCountryByCurrency["USD"] = "US"
+	for currency, countryCode := range haiPayCollectionCountryByCurrency {
+		if countryCode == "" {
+			delete(haiPayCollectionCountryByCurrency, currency)
+		}
+	}
+}
+
+// HaiPayCollectionContinent 返回与 HaiPay 后台一致的地区分组。
+func HaiPayCollectionContinent(countryCode string) string {
+	switch normalizeCode(countryCode) {
+	case "AT", "BE", "IT", "NL", "PL", "TR":
+		return HaiPayPayoutRegionEurope
+	case "BR":
+		return HaiPayPayoutRegionSouthAmerica
+	case "HK", "SG", "TW", "JP", "KR", "PH", "TH", "VN", "ID", "IN", "MY", "PK", "BD":
+		return HaiPayPayoutRegionAsia
+	case "EG", "SA", "AE", "KW", "QA", "OM", "BH", "JO", "IQ":
+		return HaiPayPayoutRegionMiddleEast
+	default:
+		return ""
+	}
 }
 
 // ListHaiPayCollectionOptions 返回代收国家和币种目录的深拷贝。
@@ -107,7 +131,8 @@ func HaiPayCollectionCurrencies(countryCode string) []string {
 	return append([]string(nil), haiPayCollectionByCountry[normalizeCode(countryCode)].Currencies...)
 }
 
-// HaiPayCollectionCountryFromCurrency 返回法币默认对应的 HaiPay region。
+// HaiPayCollectionCountryFromCurrency 仅在币种唯一对应一个地区时返回 HaiPay region。
+// USD、EUR 等共享币种必须由 App 上报国家/地区，不能在服务端猜测。
 func HaiPayCollectionCountryFromCurrency(currency string) string {
 	return haiPayCollectionCountryByCurrency[strings.ToUpper(strings.TrimSpace(currency))]
 }

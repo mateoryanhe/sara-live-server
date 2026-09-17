@@ -31,6 +31,9 @@ export const rechargeOrderApi = {
         packageName?: string
         payName?: string
         payEmail?: string
+        payPhone?: string
+        payType?: string
+        inBankCode?: string
     }) => {
         return request.post<{
             orderId: string
@@ -43,7 +46,7 @@ export const rechargeOrderApi = {
     },
 
     getChannelPayUserProfile: (params: { userId: string }) => {
-        return request.post<{ name: string; email: string }>(
+        return request.post<{ name: string; email: string; phone: string }>(
             '/rechargeOrder/getChannelPayUserProfileForTest',
             params,
         )

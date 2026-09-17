@@ -43,9 +43,14 @@ var allowedCMSExt = map[string]struct{}{
 }
 
 var allowedShortVideoExt = map[string]struct{}{
-	".mp4":  {},
-	".webm": {},
-	".mov":  {},
+	".mp4": {},
+}
+
+// IsShortVideoFileNameAllowed 短视频主文件和试看文件统一只允许 MP4.
+func IsShortVideoFileNameAllowed(name string) bool {
+	ext := strings.ToLower(filepath.Ext(strings.TrimSpace(name)))
+	_, ok := allowedShortVideoExt[ext]
+	return ok
 }
 
 // UploadImage 保存单张图片(CMS 等后台使用,不做内容审核)
@@ -211,7 +216,7 @@ func UploadShortVideoFile(file *ghttp.UploadFile, maxBytes int64) (string, error
 		return "", errors.New("upload file is empty")
 	}
 	ext := strings.ToLower(filepath.Ext(file.Filename))
-	if _, ok := allowedShortVideoExt[ext]; !ok {
+	if !IsShortVideoFileNameAllowed(file.Filename) {
 		return "", fmt.Errorf("video ext not allowed: %s", ext)
 	}
 	src, err := file.Open()

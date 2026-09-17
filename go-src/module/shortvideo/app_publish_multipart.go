@@ -14,6 +14,7 @@ import (
 
 type appPublishShortVideoInput struct {
 	VideoName        string
+	PreviewVideoName string
 	CoverName        string
 	Title            string
 	IsPaid           uint8
@@ -42,6 +43,9 @@ func parseAppPublishShortVideoMultipart(ctx context.Context, r *ghttp.Request) (
 		if ret.VideoName != "" {
 			upload.DeleteUploadedFile(ret.VideoName)
 		}
+		if ret.PreviewVideoName != "" {
+			upload.DeleteUploadedFile(ret.PreviewVideoName)
+		}
 		if ret.CoverName != "" {
 			upload.DeleteUploadedFile(ret.CoverName)
 		}
@@ -66,6 +70,14 @@ func parseAppPublishShortVideoMultipart(ctx context.Context, r *ghttp.Request) (
 				return nil, errercode.CreateCode(errercode.InvalidParam)
 			}
 			ret.VideoName, err = upload.StreamUploadShortVideoPart(part, int64(getShortVideoMaxFileSize()))
+		case "previewFile":
+			if strings.TrimSpace(part.FileName()) == "" {
+				err = nil
+			} else if ret.PreviewVideoName != "" {
+				err = errercode.CreateCode(errercode.InvalidParam)
+			} else {
+				ret.PreviewVideoName, err = upload.StreamUploadShortVideoPart(part, int64(getShortVideoMaxFileSize()))
+			}
 		case "cover":
 			if strings.TrimSpace(part.FileName()) == "" {
 				err = nil
@@ -96,6 +108,7 @@ func parseAppPublishShortVideoMultipart(ctx context.Context, r *ghttp.Request) (
 	}
 
 	if ret.VideoName == "" {
+		cleanup()
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	if err := fillAppPublishShortVideoInput(ret, fields); err != nil {

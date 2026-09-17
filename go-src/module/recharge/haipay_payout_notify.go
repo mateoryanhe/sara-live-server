@@ -2,7 +2,6 @@ package recharge
 
 import (
 	"encoding/json"
-	"strconv"
 	"strings"
 	"time"
 
@@ -33,23 +32,11 @@ func HandleHaiPayPayoutNotify(r *ghttp.Request) {
 		return
 	}
 
-	sign, _ := params["sign"].(string)
-	if err := haiPayVerify(ctx, params, cfg.MerchantSecretKey, cfg.HaiPayPublicKey, sign); err != nil {
-		xrlog.DetailLog.Warningf(ctx, "haipay payout notify verify failed err=%v body=%s", err, haiPaySafeJSON(raw))
-		// 与代收一致:验签失败仍记日志;代付资金敏感,暂拒绝以免误标成功
-		r.Response.WriteStatus(400)
-		r.Response.Write([]byte("bad sign"))
-		return
-	}
-
 	orderId, _ := haiPayValueToSignString(params["orderId"])
-	orderNo, _ := haiPayValueToSignString(params["orderNo"])
-	statusVal, _ := haiPayValueToSignString(params["status"])
-	status, _ := strconv.Atoi(statusVal)
-	errMsg, _ := haiPayValueToSignString(params["errorMsg"])
-
-	xrlog.DetailLog.Infof(ctx, "haipay payout notify orderId=%s orderNo=%s status=%d errMsg=%s",
-		orderId, orderNo, status, errMsg)
+	notifyOrderNo, _ := haiPayValueToSignString(params["orderNo"])
+	notifyStatus, _ := haiPayValueToSignString(params["status"])
+	xrlog.DetailLog.Infof(ctx, "haipay payout notify trigger orderId=%s orderNo=%s notifyStatus=%s",
+		orderId, notifyOrderNo, notifyStatus)
 
 	row := liveroomdao.GetGuildIncomeSettlementLogByTransferOrderId(strings.TrimSpace(orderId))
 	if row == nil {
@@ -58,23 +45,30 @@ func HandleHaiPayPayoutNotify(r *ghttp.Request) {
 		r.Response.Write([]byte("OK"))
 		return
 	}
+	if row.Status == liveentity.GuildIncomeSettlementStatusTransferred {
+		r.Response.WriteStatus(200)
+		r.Response.Write([]byte("OK"))
+		return
+	}
+	query, err := haiPayQueryPayout(ctx, row)
+	if err != nil {
+		xrlog.DetailLog.Warningf(ctx, "haipay payout notify query failed orderId=%s err=%v", orderId, err)
+		r.Response.WriteStatus(500)
+		r.Response.Write([]byte("query fail"))
+		return
+	}
 
-	switch status {
+	switch query.Status {
 	case 2: // 放款成功
-		if row.Status == liveentity.GuildIncomeSettlementStatusTransferred {
-			r.Response.WriteStatus(200)
-			r.Response.Write([]byte("OK"))
-			return
-		}
 		now := time.Now()
-		if orderNo != "" {
+		if orderNo := strings.TrimSpace(query.OrderNo); orderNo != "" {
 			row.SetTransferPayout(row.TransferOrderId, orderNo, row.TransferCurrency, row.TransferLocalAmount)
 		}
 		row.SetStatus(liveentity.GuildIncomeSettlementStatusTransferred)
 		row.SetTransferAt(&now)
 		row.SetTransferFailMsg("")
 	case 3: // 放款失败 → 回审核通过可重试
-		msg := strings.TrimSpace(errMsg)
+		msg := strings.TrimSpace(query.ErrorMsg)
 		if msg == "" {
 			msg = "payout failed"
 		}
@@ -82,7 +76,7 @@ func HandleHaiPayPayoutNotify(r *ghttp.Request) {
 		row.SetTransferFailMsg(msg)
 		// 保留 TransferOrderId 便于排查;重试会换新单号覆盖
 	default:
-		xrlog.DetailLog.Infof(ctx, "haipay payout notify ignored status=%d orderId=%s", status, orderId)
+		xrlog.DetailLog.Infof(ctx, "haipay payout notify query pending status=%d orderId=%s", query.Status, orderId)
 	}
 
 	r.Response.WriteStatus(200)

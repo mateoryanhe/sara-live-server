@@ -8,7 +8,7 @@ import (
 // CreateShortVideoReq CMS上传短视频(作者类型为 CMS)
 type CreateShortVideoReq struct {
 	g.Meta           `path:"/createShortVideo" method:"post" summary:"CMS上传短视频" tags:"短视频"`
-	File             *ghttp.UploadFile `json:"file" type:"file" dc:"短视频文件(与 video 二选一)"`
+	File             *ghttp.UploadFile `json:"file" type:"file" dc:"短视频文件(与 video 二选一,仅支持 mp4)"`
 	Cover            *ghttp.UploadFile `json:"cover" type:"file" dc:"封面图片(可选,与 coverName 二选一)"`
 	Video            string            `json:"video" dc:"已上传视频文件名(与 file 二选一)"`
 	CoverName        string            `json:"coverName" dc:"已上传封面文件名(可选)"`

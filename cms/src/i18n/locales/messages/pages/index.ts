@@ -28,7 +28,7 @@ import {appPkgListMessages} from './app-pkg-list'
 import {randomNicknameCfgMessages} from './random-nickname-cfg'
 import {customerServiceCfgMessages} from './customer-service-cfg'
 import {walletExchangeCfgMessages} from './wallet-exchange-cfg'
-import {fiatCurrencyListMessages} from './fiat-currency-list'
+import {paymentCountryCfgMessages} from './payment-country-cfg'
 import {agoraCfgMessages} from './agora-cfg'
 import {ticketListMessages} from './ticket-list'
 import {billingListMessages} from './billing-list'
@@ -113,7 +113,7 @@ const pageMessageBuilders = [
   ['randomNicknameCfg', randomNicknameCfgMessages],
   ['customerServiceCfg', customerServiceCfgMessages],
   ['walletExchangeCfg', walletExchangeCfgMessages],
-  ['fiatCurrencyList', fiatCurrencyListMessages],
+  ['paymentCountryCfg', paymentCountryCfgMessages],
   ['agoraCfg', agoraCfgMessages],
   ['ticketList', ticketListMessages],
   ['billingList', billingListMessages],

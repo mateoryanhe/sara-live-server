@@ -15,6 +15,7 @@ const (
 const (
 	ChannelPayUserProfileName  db.TbCol = "name"
 	ChannelPayUserProfileEmail db.TbCol = "email"
+	ChannelPayUserProfilePhone db.TbCol = "phone"
 )
 
 // ChannelPayUserProfile 渠道支付付款人资料(主键=userId，缓存模式同 user_infos)
@@ -22,6 +23,7 @@ type ChannelPayUserProfile struct {
 	migrate.OneModel
 	Name  string `gorm:"size:128;default:'';comment:付款人姓名(HaiPay name)" json:"name"`
 	Email string `gorm:"size:256;default:'';comment:付款人邮箱" json:"email"`
+	Phone string `gorm:"size:64;default:'';comment:付款人手机号" json:"phone"`
 }
 
 func (ChannelPayUserProfile) TableName() string {
@@ -54,6 +56,15 @@ func (p *ChannelPayUserProfile) SetEmail(email string) {
 	})
 }
 
+func (p *ChannelPayUserProfile) SetPhone(phone string) {
+	p.Phone = phone
+	p.SetUpdatedAt(time.Now())
+	syndb.AddData(TbChannelPayUserProfile, ChannelPayUserProfilePhone, &syndb.ColData{
+		IdVal:  p.ID,
+		ColVal: phone,
+	})
+}
+
 func (p *ChannelPayUserProfile) SetCreatedAt(val time.Time) {
 	p.CreatedAt = val
 	syndb.AddData(TbChannelPayUserProfile, db.CreatedAtName, &syndb.ColData{
@@ -76,4 +87,5 @@ func initChannelPayUserProfile() {
 	syndb.RegLazy(TbChannelPayUserProfile, db.UpdatedAtName)
 	syndb.RegQuick(TbChannelPayUserProfile, ChannelPayUserProfileName)
 	syndb.RegQuick(TbChannelPayUserProfile, ChannelPayUserProfileEmail)
+	syndb.RegQuick(TbChannelPayUserProfile, ChannelPayUserProfilePhone)
 }

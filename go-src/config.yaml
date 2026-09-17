@@ -61,7 +61,7 @@ logger:
 
 database:
   logger:
-    path: "d:\log\sql"
+    path: 'd:\log\sql'
     level: "all"
     stdout: true
   default:

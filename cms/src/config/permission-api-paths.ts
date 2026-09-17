@@ -269,14 +269,13 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'WalletExchangeCfgManagement:view': '/wallet/getWalletExchangeCfg',
     'WalletExchangeCfgManagement:save': '/wallet/saveWalletExchangeCfg',
 
-    FiatCurrencyManagement: '/fiatCurrency/fiatCurrencyList',
-    'FiatCurrencyManagement:view': '/fiatCurrency/fiatCurrencyList',
-    'FiatCurrencyManagement:search': '/fiatCurrency/fiatCurrencyList',
-    'FiatCurrencyManagement:create': '/fiatCurrency/createFiatCurrency',
-    'FiatCurrencyManagement:edit': '/fiatCurrency/updateFiatCurrency',
-    'FiatCurrencyManagement:delete': '/fiatCurrency/deleteFiatCurrency',
-    'FiatCurrencyManagement:reloadCfgCache': '/fiatCurrency/reloadFiatCurrencyCache',
-    'FiatCurrencyManagement:sync': '/dataSync/syncFiatCurrency',
+    PaymentCountryCfgManagement: '/paymentCountryCfg/getCollectionCountryCfg',
+    'PaymentCountryCfgManagement:view': '/paymentCountryCfg/getCollectionCountryCfg',
+    'PaymentCountryCfgManagement:edit': '/paymentCountryCfg/saveCollectionCountryCfg',
+
+    CoinMerchantPaymentCountryCfgManagement: '/coinMerchantPaymentCountryCfg/getCollectionCountryCfg',
+    'CoinMerchantPaymentCountryCfgManagement:view': '/coinMerchantPaymentCountryCfg/getCollectionCountryCfg',
+    'CoinMerchantPaymentCountryCfgManagement:edit': '/coinMerchantPaymentCountryCfg/saveCollectionCountryCfg',
 
     LiveRevenueShareCfgManagement: '/liveRevenueShareCfg/getLiveRevenueShareCfg',
     'LiveRevenueShareCfgManagement:view': '/liveRevenueShareCfg/getLiveRevenueShareCfg',

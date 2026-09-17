@@ -2,6 +2,28 @@ package recharge
 
 import "testing"
 
+func TestSelectHaiPayCollectionMethodUsesConfiguredMethod(t *testing.T) {
+	methods := []haiPayCollectionMethod{{PayType: "CASHIER", InBankCode: "ID_OVO_USD"}}
+
+	got, err := selectHaiPayCollectionMethod(methods, "", "")
+	if err != nil {
+		t.Fatalf("select configured payment method: %v", err)
+	}
+	if got != methods[0] {
+		t.Fatalf("selected method = %#v, want configured method %#v", got, methods[0])
+	}
+}
+
+func TestSelectHaiPayCollectionMethodRejectsMultipleConfiguredMethods(t *testing.T) {
+	methods := []haiPayCollectionMethod{
+		{PayType: "CASHIER", InBankCode: "ID_OVO_USD"},
+		{PayType: "EWALLET", InBankCode: "ID_DANA_USD"},
+	}
+	if _, err := selectHaiPayCollectionMethod(methods, "", ""); err == nil {
+		t.Fatal("multiple methods should be rejected")
+	}
+}
+
 func TestHaiPayCheckCollectPayAmount(t *testing.T) {
 	tests := []struct {
 		name           string

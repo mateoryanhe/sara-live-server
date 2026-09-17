@@ -20,15 +20,18 @@
       </el-alert>
 
       <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="180px">
-        <el-form-item :label="t('pages.haipay.enabled')" prop="enabled">
-          <el-switch v-model="formData.enabled"/>
-        </el-form-item>
-        <el-form-item :label="t('pages.haipay.appId')" prop="appId">
-          <el-input v-model="formData.appId" clearable :placeholder="t('pages.haipay.appIdPlaceholder')"/>
-        </el-form-item>
         <el-form-item :label="t('pages.haipay.apiHost')" prop="apiHost">
           <el-input v-model="formData.apiHost" clearable :placeholder="t('pages.haipay.apiHostPlaceholder')"/>
           <span class="form-tip">{{ t('pages.haipay.apiHostTip') }}</span>
+        </el-form-item>
+        <el-form-item :label="t('pages.haipay.globalCashierAppId')" prop="globalCashierAppId">
+          <el-input-number v-model="formData.globalCashierAppId" :min="1" :step="1"
+                           controls-position="right" style="width: 100%"/>
+          <span class="form-tip">{{ t('pages.haipay.globalCashierAppIdTip') }}</span>
+        </el-form-item>
+        <el-form-item :label="t('pages.haipay.thirdPayVisible')" prop="tVisable">
+          <el-switch v-model="formData.tVisable"/>
+          <span class="form-tip">{{ t('pages.haipay.thirdPayVisibleTip') }}</span>
         </el-form-item>
         <el-form-item :label="t('pages.haipay.merchantSecretKey')" prop="merchantSecretKey">
           <el-input v-model="formData.merchantSecretKey" clearable show-password type="password"
@@ -38,10 +41,6 @@
           <el-input v-model="formData.merchantPrivateKey" :rows="5" type="textarea"
                     :placeholder="t('pages.haipay.merchantPrivateKeyPlaceholder')"/>
           <span class="form-tip">{{ t('pages.haipay.keyTip') }}</span>
-        </el-form-item>
-        <el-form-item :label="t('pages.haipay.haiPayPublicKey')" prop="haiPayPublicKey">
-          <el-input v-model="formData.haiPayPublicKey" :rows="5" type="textarea"
-                    :placeholder="t('pages.haipay.haiPayPublicKeyPlaceholder')"/>
         </el-form-item>
         <el-form-item :label="t('pages.haipay.callbackBaseUrl')" prop="callbackBaseUrl">
           <el-input v-model="formData.callbackBaseUrl" clearable
@@ -58,16 +57,8 @@
         <el-form-item :label="t('pages.haipay.cancelUrl')" prop="cancelUrl">
           <el-input v-model="formData.cancelUrl" clearable :placeholder="t('pages.haipay.cancelUrlPlaceholder')"/>
         </el-form-item>
-        <el-form-item :label="t('pages.haipay.paymentMethods')" prop="paymentMethods">
-          <el-input v-model="formData.paymentMethods" clearable
-                    :placeholder="t('pages.haipay.paymentMethodsPlaceholder')"/>
-        </el-form-item>
         <el-form-item :label="t('pages.haipay.subject')" prop="subject">
           <el-input v-model="formData.subject" clearable :placeholder="t('pages.haipay.subjectPlaceholder')"/>
-        </el-form-item>
-        <el-form-item :label="t('pages.haipay.defaultRegion')" prop="defaultRegion">
-          <el-input v-model="formData.defaultRegion" clearable :placeholder="t('pages.haipay.defaultRegionPlaceholder')"/>
-          <span class="form-tip">{{ t('pages.haipay.defaultRegionTip') }}</span>
         </el-form-item>
         <el-divider content-position="left">{{ t('pages.haipay.payoutSection') }}</el-divider>
         <el-form-item :label="t('pages.haipay.payoutEnabled')" prop="payoutEnabled">
@@ -108,19 +99,17 @@ const formRef = ref()
 
 const formData = reactive({
   id: '0',
-  enabled: false,
-  appId: '',
   apiHost: '',
+  globalCashierAppId: 25272,
+  tVisable: false,
   merchantSecretKey: '',
   merchantPrivateKey: '',
-  haiPayPublicKey: '',
   callbackBaseUrl: '',
   returnUrl: '',
   failReturnUrl: '',
   cancelUrl: '',
   paymentMethods: '',
   subject: 'Recharge',
-  defaultRegion: 'ID',
   payoutEnabled: false,
   payoutAppIds: '',
   payoutSubject: 'GuildSettlement',
@@ -132,29 +121,26 @@ const metaInfo = reactive({
 })
 
 const formRules = computed(() => ({
-  appId: [{required: true, message: t('pages.haipay.appIdRequired'), trigger: 'blur'}],
   apiHost: [{required: true, message: t('pages.haipay.apiHostRequired'), trigger: 'blur'}],
+  globalCashierAppId: [{required: true, type: 'number', min: 1, message: t('pages.haipay.globalCashierAppIdRequired'), trigger: 'change'}],
   merchantSecretKey: [{required: true, message: t('pages.haipay.merchantSecretKeyRequired'), trigger: 'blur'}],
   merchantPrivateKey: [{required: true, message: t('pages.haipay.merchantPrivateKeyRequired'), trigger: 'blur'}],
-  haiPayPublicKey: [{required: true, message: t('pages.haipay.haiPayPublicKeyRequired'), trigger: 'blur'}],
 }))
 
 const applyCfg = (cfg: HaiPayCfg | null | undefined) => {
   if (!cfg) {
     formData.id = '0'
-    formData.enabled = false
-    formData.appId = ''
     formData.apiHost = ''
+    formData.globalCashierAppId = 25272
+    formData.tVisable = false
     formData.merchantSecretKey = ''
     formData.merchantPrivateKey = ''
-    formData.haiPayPublicKey = ''
     formData.callbackBaseUrl = ''
     formData.returnUrl = ''
     formData.failReturnUrl = ''
     formData.cancelUrl = ''
     formData.paymentMethods = ''
     formData.subject = 'Recharge'
-    formData.defaultRegion = 'ID'
     formData.payoutEnabled = false
     formData.payoutAppIds = ''
     formData.payoutSubject = 'GuildSettlement'
@@ -163,19 +149,17 @@ const applyCfg = (cfg: HaiPayCfg | null | undefined) => {
     return
   }
   formData.id = cfg.id || '0'
-  formData.enabled = !!cfg.enabled
-  formData.appId = cfg.appId ? String(cfg.appId) : ''
   formData.apiHost = cfg.apiHost || ''
+  formData.globalCashierAppId = cfg.globalCashierAppId > 0 ? cfg.globalCashierAppId : 25272
+  formData.tVisable = !!cfg.tVisable
   formData.merchantSecretKey = cfg.merchantSecretKey || ''
   formData.merchantPrivateKey = cfg.merchantPrivateKey || ''
-  formData.haiPayPublicKey = cfg.haiPayPublicKey || ''
   formData.callbackBaseUrl = cfg.callbackBaseUrl || ''
   formData.returnUrl = cfg.returnUrl || ''
   formData.failReturnUrl = cfg.failReturnUrl || ''
   formData.cancelUrl = cfg.cancelUrl || ''
   formData.paymentMethods = cfg.paymentMethods || ''
   formData.subject = cfg.subject || 'Recharge'
-  formData.defaultRegion = cfg.defaultRegion || 'ID'
   formData.payoutEnabled = !!cfg.payoutEnabled
   formData.payoutAppIds = cfg.payoutAppIds || ''
   formData.payoutSubject = cfg.payoutSubject || 'GuildSettlement'
@@ -200,22 +184,19 @@ const handleSave = async () => {
   await formRef.value?.validate()
   loading.value = true
   try {
-    const appIdNum = Number(formData.appId)
     const response = await haipayApi.saveHaiPayCfg({
       id: formData.id && formData.id !== '0' ? Number(formData.id) : undefined,
-      enabled: formData.enabled,
-      appId: appIdNum,
       apiHost: formData.apiHost.trim(),
+      globalCashierAppId: formData.globalCashierAppId,
+      tVisable: formData.tVisable,
       merchantSecretKey: formData.merchantSecretKey.trim(),
       merchantPrivateKey: formData.merchantPrivateKey.trim(),
-      haiPayPublicKey: formData.haiPayPublicKey.trim(),
       callbackBaseUrl: formData.callbackBaseUrl.trim(),
       returnUrl: formData.returnUrl.trim(),
       failReturnUrl: formData.failReturnUrl.trim(),
       cancelUrl: formData.cancelUrl.trim(),
       paymentMethods: formData.paymentMethods.trim(),
       subject: formData.subject.trim() || 'Recharge',
-      defaultRegion: (formData.defaultRegion || 'ID').trim().toUpperCase(),
       payoutEnabled: formData.payoutEnabled,
       payoutAppIds: formData.payoutAppIds.trim(),
       payoutSubject: formData.payoutSubject.trim() || 'GuildSettlement',

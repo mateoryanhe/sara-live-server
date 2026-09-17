@@ -11,7 +11,7 @@ type PhoneRegisterReq struct {
 	Phone         string             `json:"phone" v:"required" summary:"手机号"`
 	Code          string             `json:"code" v:"required" summary:"验证码"`
 	Password      string             `json:"password" v:"required|length:6,32" summary:"密码"`
-	InviteCode    string             `json:"inviteCode" summary:"邀请码(邀请人的分享码)"`
+	InviteCode    string             `json:"inviteCode" summary:"邀请码(邀请人的userId)"`
 	DeviceInfo    *entity.DeviceInfo `json:"deviceInfo"  dc:"设备信息"`
 }
 
