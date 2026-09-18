@@ -943,6 +943,18 @@ export interface SavePreloadCfgRes {
     id?: string
 }
 
+export interface StaticCacheRule {
+    id: string
+    fileName: string
+    remark: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface StaticCacheRuleQuery extends PageQuery {
+    key?: string
+}
+
 // 角色相关类型
 export interface Role {
     id: string

@@ -536,7 +536,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer') || hasMenuPermission('CfEmailCfgManagement')"
+            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer') || hasMenuPermission('CfEmailCfgManagement')"
             index="/config">
           <template #title>
             <el-icon>
@@ -659,7 +659,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement')"
+              v-if="hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement')"
               index="/config/group/deploy">
             <template #title>
               <el-icon>
@@ -667,6 +667,12 @@
               </el-icon>
               <span>{{ t('menu.ConfigDeployGroup') }}</span>
             </template>
+            <el-menu-item v-if="hasMenuPermission('StaticCacheCfgManagement')" index="/config/static-cache-cfg">
+              <el-icon>
+                <Document/>
+              </el-icon>
+              <span>{{ t('menu.StaticCacheCfgManagement') }}</span>
+            </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('AppPkgManagement')" index="/config/app-pkg-list">
               <el-icon>
                 <Box/>

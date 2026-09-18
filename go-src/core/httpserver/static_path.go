@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
@@ -26,14 +27,27 @@ func setupStaticPaths() {
 	bindCMSStaticFallback(ctx)
 }
 
-// setupStaticPageNoCache 启用静态入口页不缓存策略(见 writeStaticFile)
+var staticNoCacheMatcher atomic.Value // func(string) bool
+
+// SetStaticNoCacheMatcher 注册静态文件不缓存匹配器. 匹配数据由 module 层维护.
+func SetStaticNoCacheMatcher(matcher func(string) bool) {
+	if matcher != nil {
+		staticNoCacheMatcher.Store(matcher)
+	}
+}
+
+// setupStaticPageNoCache 启用数据库驱动的静态文件不缓存策略(见 writeStaticFile).
 func setupStaticPageNoCache() {
-	g.Log().Warning(context.Background(), "index.html/version.json 已禁用浏览器缓存")
+	g.Log().Warning(context.Background(), "静态文件缓存规则已由数据库与进程缓存接管")
 }
 
 func isNoCacheStaticPage(filePath string) bool {
-	name := strings.ToLower(filepath.Base(filePath))
-	return name == "index.html" || name == "version.json"
+	raw := staticNoCacheMatcher.Load()
+	if raw == nil {
+		return false
+	}
+	matcher, ok := raw.(func(string) bool)
+	return ok && matcher(filePath)
 }
 
 func applyNoCacheStaticPageHeaders(r *ghttp.Request) {

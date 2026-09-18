@@ -79,6 +79,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   AccountCfgManagement: 'अकाउंट कॉन्फ़िग',
   DeviceRegisterRiskCfgManagement: 'डिवाइस पंजीकरण जोखिम',
   PreloadCfgManagement: 'प्रीलोड कॉन्फ़िग',
+  StaticCacheCfgManagement: 'स्टैटिक पेज कैश',
   TextModerationCfgManagement: 'टेक्स्ट मॉडरेशन',
   PrivacyPolicyCfgManagement: 'गोपनीयता नीति',
   GooglePlayCfgManagement: 'Google Play',

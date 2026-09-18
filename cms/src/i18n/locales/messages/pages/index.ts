@@ -68,6 +68,7 @@ import {guildIncomeSettlementLogListMessages} from './guild-income-settlement-lo
 import {guildTransferListMessages} from './guild-transfer-list'
 import {appTokenMessages} from './app-token'
 import {serverRuntimeCfgMessages} from './server-runtime-cfg'
+import {staticCacheCfgMessages} from './static-cache-cfg'
 import {preloadCfgMessages} from './preload-cfg'
 import {textModerationMessages} from './text-moderation'
 import {privacyPolicyMessages} from './privacy-policy'
@@ -156,6 +157,7 @@ const pageMessageBuilders = [
   ['appToken', appTokenMessages],
   ['preloadCfg', preloadCfgMessages],
   ['serverRuntimeCfg', serverRuntimeCfgMessages],
+  ['staticCacheCfg', staticCacheCfgMessages],
   ['textModeration', textModerationMessages],
   ['privacyPolicy', privacyPolicyMessages],
   ['googlePlay', googlePlayMessages],

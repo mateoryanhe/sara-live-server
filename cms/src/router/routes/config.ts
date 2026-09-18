@@ -31,6 +31,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '服务器运行配置'},
         },
         {
+            path: 'static-cache-cfg',
+            name: 'StaticCacheCfgManagement',
+            component: () => import('@/views/config/static-cache-cfg.vue'),
+            meta: {title: '静态网页缓存'},
+        },
+        {
             path: 'preload-cfg',
             redirect: '/config/server-runtime-cfg',
         },

@@ -221,188 +221,6 @@
       </template>
     </el-dialog>
 
-    <el-dialog
-        v-model="transferDialogVisible"
-        :title="transferDialogTitle"
-        destroy-on-close
-        width="760px"
-        @closed="transferCurrencyDialogVisible = false"
-    >
-      <el-form
-          ref="transferFormRef"
-          v-loading="transferLoading"
-          :model="transferForm"
-          :rules="transferFormRules"
-          label-width="110px"
-      >
-        <el-form-item :label="t('pages.guildList.transferCurrency')" prop="currency">
-          <el-input
-              :model-value="transferCurrencyDisplay"
-              :disabled="transferLoading"
-              :placeholder="t('pages.guildList.transferCurrencyPlaceholder')"
-              class="transfer-currency-picker"
-              readonly
-              @click="openTransferCurrencyDialog"
-          >
-            <template #append>
-              <el-button @click.stop="openTransferCurrencyDialog">
-                {{ t('pages.guildList.transferCurrencySelect') }}
-              </el-button>
-            </template>
-          </el-input>
-          <div class="form-tip">{{ t('pages.guildList.transferCurrencyHint') }}</div>
-        </el-form-item>
-        <el-form-item :label="t('pages.guildList.transferAccountType')" prop="accountType">
-          <el-select
-              v-model="transferForm.accountType"
-              clearable
-              :disabled="!transferForm.currency"
-              style="width: 100%"
-              :placeholder="t('pages.guildList.transferAccountTypePlaceholder')"
-              @change="onTransferAccountTypeChange"
-          >
-            <el-option
-                v-for="accountType in transferAccountTypeOptions"
-                :key="accountType"
-                :label="accountTypeLabel(accountType)"
-                :value="accountType"
-            />
-          </el-select>
-          <div class="form-tip">{{ t('pages.guildList.transferAccountTypeHint') }}</div>
-        </el-form-item>
-        <el-form-item :label="t('pages.guildList.transferBankCode')" prop="bankCode">
-          <el-select
-              v-model="transferForm.bankCode"
-              clearable
-              filterable
-              :disabled="!transferForm.accountType"
-              style="width: 100%"
-              :placeholder="t('pages.guildList.transferBankCodePlaceholder')"
-          >
-            <el-option
-                v-for="option in transferBankCodeOptions"
-                :key="option.value"
-                :label="option.label"
-                :value="option.value"
-            />
-          </el-select>
-          <div v-if="selectedTransferMethod" class="form-tip">
-            {{ selectedTransferMethod.description }} · {{ selectedTransferMethod.limit }} {{ transferForm.currency }}
-          </div>
-        </el-form-item>
-        <el-form-item :label="t('pages.guildList.transferPayeeName')" prop="payeeName">
-          <el-input
-              v-model="transferForm.payeeName"
-              clearable
-              :placeholder="t('pages.guildList.transferPayeeNamePlaceholder')"
-          />
-        </el-form-item>
-        <el-form-item :label="t('pages.guildList.transferPhone')" prop="phone">
-          <el-input
-              v-model="transferForm.phone"
-              clearable
-              :placeholder="t('pages.guildList.transferPhonePlaceholder')"
-          />
-        </el-form-item>
-        <el-form-item :label="t('pages.guildList.transferEmail')" prop="email">
-          <el-input
-              v-model="transferForm.email"
-              clearable
-              :placeholder="t('pages.guildList.transferEmailPlaceholder')"
-          />
-        </el-form-item>
-        <el-form-item :label="t('pages.guildList.transferAccountNo')" prop="accountNo">
-          <el-input
-              v-model="transferForm.accountNo"
-              clearable
-              :placeholder="t('pages.guildList.transferAccountNoPlaceholder')"
-          />
-        </el-form-item>
-        <el-form-item :label="t('pages.guildList.transferRemark')" prop="remark">
-          <el-input
-              v-model="transferForm.remark"
-              :autosize="{ minRows: 2, maxRows: 4 }"
-              :placeholder="t('pages.guildList.transferRemarkPlaceholder')"
-              type="textarea"
-          />
-        </el-form-item>
-        <el-form-item v-if="transferForm.updatedAt" :label="t('pages.guildList.transferLastUpdated')">
-          <span>{{ transferForm.updatedAt }}</span>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="transferDialogVisible = false">{{ t('common.cancel') }}</el-button>
-        <el-button :loading="transferSaving" type="primary" @click="handleTransferSave">{{ t('common.save') }}</el-button>
-      </template>
-    </el-dialog>
-
-    <el-dialog
-        v-model="transferCurrencyDialogVisible"
-        :title="t('pages.guildList.transferCurrencyDialogTitle')"
-        append-to-body
-        width="880px"
-    >
-      <div class="transfer-currency-toolbar">
-        <el-input
-            v-model="transferCurrencyKeyword"
-            clearable
-            :placeholder="t('pages.guildList.transferCurrencySearchPlaceholder')"
-        />
-      </div>
-      <el-tabs v-model="transferCurrencyRegion" class="transfer-currency-tabs">
-        <el-tab-pane
-            v-for="region in transferCurrencyRegionOptions"
-            :key="region"
-            :label="transferCurrencyRegionLabel(region)"
-            :name="region"
-        />
-      </el-tabs>
-      <el-table
-          :data="filteredTransferCountries"
-          highlight-current-row
-          max-height="440"
-          style="width: 100%"
-          @row-click="handleTransferCurrencyPick"
-      >
-        <el-table-column :label="t('pages.guildList.transferCurrency')" prop="currency" width="100"/>
-        <el-table-column :label="t('pages.guildList.transferCurrencyRegion')" width="115">
-          <template #default="{ row }">
-            {{ transferCurrencyRegionLabel(transferCurrencyRegionFor(row)) }}
-          </template>
-        </el-table-column>
-        <el-table-column :label="t('pages.guildList.transferCountry')" min-width="245">
-          <template #default="{ row }">
-            <span class="transfer-country-option">
-              <img v-if="row.icon" :src="row.icon" alt="" class="transfer-flag"/>
-              <span>
-                {{ row.nameZh || row.nameEn || row.countryCode }}
-                <span v-if="row.nameZh && row.nameEn" class="transfer-country-en"> / {{ row.nameEn }}</span>
-                ({{ row.countryCode }})
-              </span>
-            </span>
-          </template>
-        </el-table-column>
-        <el-table-column :label="t('pages.guildList.transferAccountType')" min-width="230">
-          <template #default="{ row }">
-            <el-tag
-                v-for="accountType in row.accountTypes"
-                :key="accountType"
-                class="transfer-account-type-tag"
-                effect="plain"
-            >
-              {{ accountTypeLabel(accountType) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column :label="t('common.actions')" width="90">
-          <template #default="{ row }">
-            <el-button link type="primary" @click.stop="handleTransferCurrencyPick(row)">
-              {{ t('pages.guildList.transferCurrencySelect') }}
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-dialog>
   </div>
 </template>
 
@@ -416,7 +234,7 @@ import {guildApi} from '@/api'
 import {liveRevenueShareCfgApi} from '@/api/modules/live-revenue-share-cfg'
 import CmsUserPickerDialog from '@/components/CmsUserPickerDialog.vue'
 import type {CMSUser} from '@/api/modules/cmsuser'
-import type {Guild, GuildAnchorImportResultState, GuildTransferCountryOption, ImportGuildAnchorRow} from '@/types/api.ts'
+import type {Guild, GuildAnchorImportResultState, ImportGuildAnchorRow} from '@/types/api.ts'
 import {usePagePermission} from '@/composables/usePagePermission'
 import {formatWalletBalance} from '@/utils/number-format'
 
@@ -447,22 +265,6 @@ interface ImportGuildForm {
   guildName: string
   anchorType: 1 | 7
   userIdsText: string
-}
-
-interface TransferInfoForm {
-  guildId: string
-  guildName: string
-  countryCode: string
-  currency: string
-  accountType: string
-  payeeName: string
-  phone: string
-  email: string
-  bankName: string
-  accountNo: string
-  bankCode: string
-  remark: string
-  updatedAt: string
 }
 
 const {t} = useI18n()
@@ -496,117 +298,6 @@ const importForm = ref<ImportGuildForm>({
   guildName: '',
   anchorType: 1,
   userIdsText: '',
-})
-
-const transferDialogVisible = ref(false)
-const transferDialogTitle = ref('')
-const transferCurrencyDialogVisible = ref(false)
-const transferCurrencyKeyword = ref('')
-const transferCurrencyRegion = ref('ALL')
-const transferLoading = ref(false)
-const transferSaving = ref(false)
-const transferFormRef = ref<FormInstance>()
-const transferForm = ref<TransferInfoForm>({
-  guildId: '',
-  guildName: '',
-  countryCode: '',
-  currency: '',
-  accountType: '',
-  payeeName: '',
-  phone: '',
-  email: '',
-  bankName: '',
-  accountNo: '',
-  bankCode: '',
-  remark: '',
-  updatedAt: '',
-})
-const transferCountries = ref<GuildTransferCountryOption[]>([])
-const transferCurrencyRegionOrder = [
-  'NORTH_AMERICA',
-  'EUROPE',
-  'SOUTH_AMERICA',
-  'ASIA',
-  'MIDDLE_EAST',
-  'AFRICA',
-] as const
-const transferCurrencyRegionFor = (item: GuildTransferCountryOption) => {
-  return item.region || ''
-}
-const transferCurrencyRegionOptions = computed(() => {
-  const available = new Set(transferCountries.value.map(transferCurrencyRegionFor))
-  return ['ALL', ...transferCurrencyRegionOrder.filter(region => available.has(region))]
-})
-const transferCurrencyRegionLabel = (region: string) => {
-  const labelKeys: Record<string, string> = {
-    ALL: 'transferCurrencyRegionAll',
-    NORTH_AMERICA: 'transferCurrencyRegionNorthAmerica',
-    EUROPE: 'transferCurrencyRegionEurope',
-    SOUTH_AMERICA: 'transferCurrencyRegionSouthAmerica',
-    ASIA: 'transferCurrencyRegionAsia',
-    MIDDLE_EAST: 'transferCurrencyRegionMiddleEast',
-    AFRICA: 'transferCurrencyRegionAfrica',
-  }
-  const key = labelKeys[region]
-  return key ? t(`pages.guildList.${key}`) : region
-}
-const normalizeTransferCurrencySearch = (value: string) => {
-  return value.toLocaleLowerCase().replace(/[\s_-]+/g, '')
-}
-const filteredTransferCountries = computed(() => {
-  const keywords = transferCurrencyKeyword.value
-      .trim()
-      .split(/\s+/)
-      .map(normalizeTransferCurrencySearch)
-      .filter(Boolean)
-  return transferCountries.value.filter(item => {
-    const region = transferCurrencyRegionFor(item)
-    if (transferCurrencyRegion.value !== 'ALL' && region !== transferCurrencyRegion.value) {
-      return false
-    }
-    if (keywords.length === 0) return true
-    const searchable = normalizeTransferCurrencySearch([
-      item.currency,
-      item.countryCode,
-      item.nameZh,
-      item.nameEn,
-      region,
-      ...item.accountTypes,
-      ...(item.methods ?? []).flatMap(method => [method.accountType, method.bankCode, method.description]),
-    ].join(' '))
-    return keywords.every(keyword => searchable.includes(keyword))
-  })
-})
-const selectedTransferCurrency = computed(() => {
-  const currency = transferForm.value.currency.trim().toUpperCase()
-  return transferCountries.value.find(item => item.currency === currency) ?? null
-})
-const transferCurrencyDisplay = computed(() => {
-  const selected = selectedTransferCurrency.value
-  if (!selected) return ''
-  const countryName = selected.nameZh || selected.nameEn || selected.countryCode
-  return `${selected.currency} · ${countryName} (${selected.countryCode})`
-})
-const transferAccountTypeOptions = computed(() => {
-  return selectedTransferCurrency.value?.accountTypes ?? []
-})
-const transferBankCodeOptions = computed(() => {
-  const accountType = transferForm.value.accountType
-  if (!accountType) return []
-  return (selectedTransferCurrency.value?.methods ?? [])
-      .filter(method => method.accountType === accountType)
-      .map(method => ({
-        label: `${method.description} (${method.bankCode}) · ${method.limit} ${transferForm.value.currency}`,
-        value: method.bankCode,
-      }))
-})
-const selectedTransferMethod = computed(() => {
-  const accountType = transferForm.value.accountType
-  const bankCode = transferForm.value.bankCode
-  if (!accountType || !bankCode) return null
-  return (selectedTransferCurrency.value?.methods ?? []).find(method => (
-      method.accountType === accountType && method.bankCode === bankCode
-  )) ?? null
 })
 
 const searchForm = reactive<SearchForm>({
@@ -683,75 +374,6 @@ const importFormRules = computed<FormRules>(() => ({
     {required: true, message: t('pages.guildList.importUserIdsRequired'), trigger: 'blur'},
   ],
 }))
-
-const transferFormRules = computed<FormRules>(() => ({
-  currency: [
-    {required: true, message: t('pages.guildList.transferCurrencyRequired'), trigger: 'change'},
-  ],
-  accountType: [
-    {required: true, message: t('pages.guildList.transferAccountTypePlaceholder'), trigger: 'change'},
-  ],
-  payeeName: [
-    {required: true, message: t('pages.guildList.transferPayeeNamePlaceholder'), trigger: 'blur'},
-  ],
-  phone: [
-    {required: true, message: t('pages.guildList.transferPhonePlaceholder'), trigger: 'blur'},
-  ],
-  email: [
-    {required: true, message: t('pages.guildList.transferEmailPlaceholder'), trigger: 'blur'},
-  ],
-  accountNo: [
-    {required: true, message: t('pages.guildList.transferAccountNoPlaceholder'), trigger: 'blur'},
-  ],
-  bankCode: [
-    {required: true, message: t('pages.guildList.transferBankCodePlaceholder'), trigger: 'blur'},
-  ],
-}))
-
-const accountTypeLabel = (accountType: string) => {
-  if (accountType === 'BANK_ACCOUNT') {
-    return `${t('pages.guildList.transferAccountTypeBank')} (BANK_ACCOUNT)`
-  }
-  if (accountType === 'EWALLET') {
-    return `${t('pages.guildList.transferAccountTypeEWallet')} (EWALLET)`
-  }
-  return accountType
-}
-
-const onTransferCurrencyChange = (currency: string) => {
-  const hit = transferCountries.value.find(c => c.currency === currency)
-  transferForm.value.countryCode = hit?.countryCode || ''
-  const accountTypes = hit?.accountTypes ?? []
-  transferForm.value.accountType = accountTypes.length === 1 ? (accountTypes[0] ?? '') : ''
-  transferForm.value.bankName = ''
-  transferForm.value.bankCode = ''
-  if (transferForm.value.accountType) {
-    const methods = (hit?.methods ?? []).filter(method => method.accountType === transferForm.value.accountType)
-    transferForm.value.bankCode = methods.length === 1 ? (methods[0]?.bankCode ?? '') : ''
-  }
-}
-
-const openTransferCurrencyDialog = () => {
-  if (transferLoading.value) return
-  transferCurrencyKeyword.value = ''
-  transferCurrencyRegion.value = 'ALL'
-  transferCurrencyDialogVisible.value = true
-}
-
-const handleTransferCurrencyPick = (row: GuildTransferCountryOption) => {
-  if (!row?.currency) return
-  onTransferCurrencyChange(row.currency)
-  transferCurrencyDialogVisible.value = false
-  transferFormRef.value?.clearValidate(['currency', 'accountType'])
-}
-
-const onTransferAccountTypeChange = () => {
-  transferForm.value.bankName = ''
-  transferForm.value.bankCode = ''
-  const methods = (selectedTransferCurrency.value?.methods ?? [])
-      .filter(method => method.accountType === transferForm.value.accountType)
-  transferForm.value.bankCode = methods.length === 1 ? (methods[0]?.bankCode ?? '') : ''
-}
 
 const joinFormRules = computed<FormRules>(() => ({
   userId: [
@@ -846,7 +468,7 @@ const handleRowCommand = (row: Guild, command: string) => {
       handleEdit(row)
       break
     case 'transferInfo':
-      openTransferInfoDialog(row)
+      openTransferInfoPage(row)
       break
     case 'viewMembers':
       handleViewMembers(row)
@@ -1105,117 +727,12 @@ const handleImportSubmit = async () => {
   })
 }
 
-const openTransferInfoDialog = async (row: Guild) => {
-  selectedGuild.value = row
-  transferDialogTitle.value = t('pages.guildList.transferInfoTitle', {name: row.name})
-  transferForm.value = {
-    guildId: row.id,
-    guildName: row.name,
-    countryCode: '',
-    currency: '',
-    accountType: '',
-    payeeName: '',
-    phone: '',
-    email: '',
-    bankName: '',
-    accountNo: '',
-    bankCode: '',
-    remark: '',
-    updatedAt: '',
-  }
-  transferCountries.value = []
-  transferCurrencyDialogVisible.value = false
-  transferDialogVisible.value = true
-  transferLoading.value = true
-  try {
-    const response = await guildApi.getGuildTransferInfo(row.id)
-    const info = response?.info
-    transferCountries.value = response?.countries ?? []
-    transferForm.value = {
-      guildId: row.id,
-      guildName: row.name,
-      countryCode: info?.countryCode ?? '',
-      currency: info?.currency ?? '',
-      accountType: info?.accountType || '',
-      payeeName: info?.payeeName ?? '',
-      phone: info?.phone ?? '',
-      email: info?.email ?? '',
-      bankName: info?.bankName ?? '',
-      accountNo: info?.accountNo ?? '',
-      bankCode: info?.bankCode ?? '',
-      remark: info?.remark ?? '',
-      updatedAt: info?.updatedAt ?? '',
-    }
-    if (!transferForm.value.currency && transferForm.value.countryCode) {
-      transferForm.value.currency = transferCountries.value.find(
-          item => item.countryCode === transferForm.value.countryCode,
-      )?.currency ?? ''
-    }
-    const selectedCurrency = transferCountries.value.find(
-        item => item.currency === transferForm.value.currency,
-    )
-    if (selectedCurrency) {
-      transferForm.value.countryCode = selectedCurrency.countryCode
-      if (!selectedCurrency.accountTypes.includes(transferForm.value.accountType)) {
-        transferForm.value.accountType = selectedCurrency.accountTypes.length === 1
-            ? (selectedCurrency.accountTypes[0] ?? '')
-            : ''
-      }
-      const methodExists = (selectedCurrency.methods ?? []).some(method => (
-          method.accountType === transferForm.value.accountType &&
-          method.bankCode === transferForm.value.bankCode
-      ))
-      if (!methodExists) {
-        transferForm.value.bankCode = ''
-      }
-    } else {
-      transferForm.value.countryCode = ''
-      transferForm.value.currency = ''
-      transferForm.value.accountType = ''
-      transferForm.value.bankCode = ''
-      transferForm.value.bankName = ''
-    }
-  } catch (error) {
-    console.error('fetch guild transfer info failed:', error)
-    ElMessage.error(t('pages.guildList.transferFetchFailed'))
-  } finally {
-    transferLoading.value = false
-    transferFormRef.value?.clearValidate()
-  }
-}
-
-const handleTransferSave = async () => {
-  if (!transferFormRef.value) {
-    return
-  }
-  try {
-    await transferFormRef.value.validate()
-  } catch {
-    return
-  }
-  transferSaving.value = true
-  try {
-    await guildApi.saveGuildTransferInfo({
-      guildId: transferForm.value.guildId,
-      countryCode: transferForm.value.countryCode.trim().toUpperCase(),
-      currency: transferForm.value.currency.trim().toUpperCase(),
-      accountType: transferForm.value.accountType.trim().toUpperCase(),
-      payeeName: transferForm.value.payeeName.trim(),
-      phone: transferForm.value.phone.trim(),
-      email: transferForm.value.email.trim(),
-      bankName: transferForm.value.bankName.trim(),
-      accountNo: transferForm.value.accountNo.trim(),
-      bankCode: transferForm.value.bankCode.trim(),
-      remark: transferForm.value.remark.trim(),
-    })
-    ElMessage.success(t('pages.guildList.transferSaveSuccess'))
-    transferDialogVisible.value = false
-  } catch (error) {
-    console.error('save guild transfer info failed:', error)
-    ElMessage.error(t('pages.guildList.transferSaveFailed'))
-  } finally {
-    transferSaving.value = false
-  }
+const openTransferInfoPage = (row: Guild) => {
+  router.push({
+    name: 'GuildTransferInfoEdit',
+    params: {guildId: row.id},
+    query: {guildName: row.name},
+  })
 }
 
 onMounted(() => {
@@ -1296,48 +813,4 @@ const handleViewMembers = (row: Guild) => {
   flex: 1;
 }
 
-.form-tip {
-  margin-top: 4px;
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  line-height: 1.4;
-}
-
-.transfer-currency-picker {
-  cursor: pointer;
-}
-
-.transfer-currency-picker :deep(.el-input__inner) {
-  cursor: pointer;
-}
-
-.transfer-currency-toolbar {
-  margin-bottom: 2px;
-}
-
-.transfer-currency-tabs :deep(.el-tabs__header) {
-  margin-bottom: 12px;
-}
-
-.transfer-country-option {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.transfer-country-en {
-  color: var(--el-text-color-secondary);
-  font-size: 12px;
-}
-
-.transfer-account-type-tag + .transfer-account-type-tag {
-  margin-left: 6px;
-}
-
-.transfer-flag {
-  width: 18px;
-  height: 12px;
-  object-fit: cover;
-  border-radius: 2px;
-}
 </style>

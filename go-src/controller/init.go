@@ -68,6 +68,7 @@ func Init() {
 	initAnchorSalaryCfgCMSController()               // 主播结算薪资分档配置(CMS)
 	initLiveRevenueShareCfgCMSController()           // 流水分佣配置(CMS)
 	initPreloadCfgCMSController()                    // 预热配置(CMS)
+	initStaticCacheCfgCMSController()                // 静态网页缓存配置(CMS)
 	initGiftController()                             // 礼物配置(CMS)
 	initGiftAppController()                          // 礼物列表(App)
 	initBannerController()                           // 首页Banner(CMS)

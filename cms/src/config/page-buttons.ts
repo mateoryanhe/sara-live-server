@@ -107,6 +107,7 @@ const CONFIG_PAGES = new Set([
 
 /** 各页面自定义按钮（未列出的页面按类型使用默认集） */
 export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
+    StaticCacheCfgManagement: [...DEFAULT_CRUD_BUTTONS],
     DbBackupCfgManagement: [
         BTN.view,
         BTN.save,

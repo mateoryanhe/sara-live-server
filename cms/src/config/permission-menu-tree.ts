@@ -313,6 +313,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('DataSyncCfgManagement'),
             ]),
             group('config-deploy', 'menu.ConfigDeployGroup', [
+                page('StaticCacheCfgManagement'),
                 page('AppPkgManagement'),
                 page('AppVersionCfgManagement'),
                 page('PrivacyPolicyCfgManagement'),

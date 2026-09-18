@@ -41,6 +41,7 @@ import {haipayApi} from './modules/haipay'
 import {cfEmailApi} from './modules/cf-email'
 import {firebaseApi} from './modules/firebase'
 import {dbBackupApi} from './modules/db-backup'
+import {staticCacheCfgApi} from './modules/static-cache-cfg'
 
 export {
     authApi,
@@ -87,6 +88,7 @@ export {
     cfEmailApi,
     firebaseApi,
     dbBackupApi,
+    staticCacheCfgApi,
 }
 
 export default {
@@ -134,4 +136,5 @@ export default {
     cfEmailApi,
     firebaseApi,
     dbBackupApi,
+    staticCacheCfgApi,
 }

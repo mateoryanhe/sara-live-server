@@ -97,6 +97,7 @@ const menu = {
   GuildIncomeSettlementLogList: '工会结算流水',
   PreloadCfgManagement: '服务器运行配置',
   ServerRuntimeCfgManagement: '服务器运行配置',
+  StaticCacheCfgManagement: '静态网页缓存',
   TextModerationCfgManagement: '敏感词过滤',
   PrivacyPolicyCfgManagement: '隐私政策',
   GooglePlayCfgManagement: 'Google Play',

@@ -39,6 +39,7 @@ import (
 	"xr-game-server/module/simulatorcpukeyword"
 	"xr-game-server/module/simulatordevicewhitelist"
 	"xr-game-server/module/stat"
+	"xr-game-server/module/staticcachecfg"
 	"xr-game-server/module/ticket"
 	"xr-game-server/module/upload"
 	"xr-game-server/module/userinfo"
@@ -49,6 +50,7 @@ import (
 )
 
 func Init() {
+	staticcachecfg.Init()
 	upload.Init()
 	randomnick.Init()
 	usermaxid.Init()

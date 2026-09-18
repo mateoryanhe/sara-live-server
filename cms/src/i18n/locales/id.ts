@@ -79,6 +79,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   AccountCfgManagement: 'Konfigurasi Akun',
   DeviceRegisterRiskCfgManagement: 'Kontrol registrasi perangkat',
   PreloadCfgManagement: 'Konfigurasi Preload',
+  StaticCacheCfgManagement: 'Cache Halaman Statis',
   TextModerationCfgManagement: 'Moderasi Teks',
   PrivacyPolicyCfgManagement: 'Kebijakan Privasi',
   GooglePlayCfgManagement: 'Google Play',

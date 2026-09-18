@@ -11,6 +11,7 @@ func Init() {
 	initCfEmailCfg()
 	initFirebaseCfg()
 	initDbBackupCfg()
+	initStaticCacheRule()
 	initSysResourceMetric()
 	initSysResourceMetricAgg()
 }

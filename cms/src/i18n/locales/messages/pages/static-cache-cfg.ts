@@ -1,0 +1,76 @@
+import {definePageMessages} from './_define'
+
+const zh = {
+  noticeTitle: '静态网页不缓存规则',
+  noticeBody: '按文件名忽略大小写匹配。新增、修改或删除后立即写入数据库并刷新当前服务进程缓存，无需重启。命中文件会返回 no-cache、no-store、must-revalidate。',
+  addRule: '新增文件名',
+  editRule: '编辑文件名',
+  fileName: '文件名称',
+  fileNameTip: '只填写文件名，不要包含目录，例如 index.html。首次空表默认写入 index.html 和 version.js。',
+  cachePolicy: '响应缓存策略',
+  remark: '备注',
+  searchPlaceholder: '搜索文件名或备注',
+  fileNameRequired: '请输入文件名称',
+  fileNameInvalid: '文件名称不能包含目录分隔符',
+  deleteConfirm: '确定删除「{fileName}」的不缓存规则吗？',
+  fetchFailed: '获取静态网页缓存规则失败',
+  createSuccess: '新增成功，缓存规则已立即生效',
+  updateSuccess: '修改成功，缓存规则已立即生效',
+  deleteSuccess: '删除成功，缓存规则已立即生效',
+} as const
+
+const en = {
+  noticeTitle: 'Static page no-cache rules',
+  noticeBody: 'Rules match file names case-insensitively. Changes are saved to the database and refresh the current process cache immediately without a restart.',
+  addRule: 'Add File Name',
+  editRule: 'Edit File Name',
+  fileName: 'File Name',
+  fileNameTip: 'Enter a file name without a directory, such as index.html. An empty table is initialized with index.html and version.js.',
+  cachePolicy: 'Response Cache Policy',
+  remark: 'Remark',
+  searchPlaceholder: 'Search file name or remark',
+  fileNameRequired: 'Enter a file name',
+  fileNameInvalid: 'File name cannot contain a directory separator',
+  deleteConfirm: 'Delete the no-cache rule for "{fileName}"?',
+  fetchFailed: 'Failed to load static cache rules',
+  createSuccess: 'Created and applied immediately',
+  updateSuccess: 'Updated and applied immediately',
+  deleteSuccess: 'Deleted and applied immediately',
+} as const
+
+export const staticCacheCfgMessages = definePageMessages(
+  zh,
+  en,
+  {
+    ...en,
+    noticeTitle: 'Reglas sin caché para páginas estáticas',
+    addRule: 'Añadir archivo',
+    editRule: 'Editar archivo',
+    fileName: 'Nombre de archivo',
+    remark: 'Nota',
+  },
+  {
+    ...en,
+    noticeTitle: 'Regras sem cache para páginas estáticas',
+    addRule: 'Adicionar arquivo',
+    editRule: 'Editar arquivo',
+    fileName: 'Nome do arquivo',
+    remark: 'Observação',
+  },
+  {
+    ...en,
+    noticeTitle: 'स्टैटिक पेज नो-कैश नियम',
+    addRule: 'फ़ाइल नाम जोड़ें',
+    editRule: 'फ़ाइल नाम संपादित करें',
+    fileName: 'फ़ाइल नाम',
+    remark: 'टिप्पणी',
+  },
+  {
+    ...en,
+    noticeTitle: 'Aturan tanpa cache halaman statis',
+    addRule: 'Tambah nama file',
+    editRule: 'Edit nama file',
+    fileName: 'Nama file',
+    remark: 'Catatan',
+  },
+)

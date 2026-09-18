@@ -63,10 +63,7 @@ func initMonitor() {
 	}
 	collectionTimerMu.Unlock()
 
-	// 清理历史数据不属于采集任务,关闭采集后仍按保留策略执行.
-	xrtimer.AddSingleton(gctx.New(), CoarseInterval, func(ctx context.Context) {
-		cleanupExpiredResourceMetrics()
-	})
+	// 清理历史数据不属于采集任务,关闭采集后仍在每天零点按保留策略执行.
 	event.Sub(gameevent.DayEvent, onDayCleanupResourceMetrics)
 }
 

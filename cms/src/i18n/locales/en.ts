@@ -84,6 +84,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   SimulatorCpuKeywordManagement: 'Simulator CPU Keywords',
   DeviceRegisterRiskCfgManagement: 'Device Register Risk',
   PreloadCfgManagement: 'Preload Config',
+  StaticCacheCfgManagement: 'Static Page Cache',
   TextModerationCfgManagement: 'Text Moderation',
   PrivacyPolicyCfgManagement: 'Privacy Policy',
   GooglePlayCfgManagement: 'Google Play',
