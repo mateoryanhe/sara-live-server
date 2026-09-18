@@ -17,17 +17,19 @@ func GetCMSSysStat(_ context.Context, _ *statdto.CMSSysStatReq) (*statdto.CMSSys
 	}
 	todayStat := statdao.GetDailyLoginStatByDate(entity.FormatDailyLoginStatDate(time.Now()))
 	return &statdto.CMSSysStatRes{
-		TotalGold:           stat.TotalGold,
-		TotalGoldConsume:    stat.TotalGoldConsume,
-		TotalDiamondConsume: stat.TotalDiamondConsume,
-		TotalRecharge:        stat.TotalRecharge,
-		TotalVirtualRecharge: stat.TotalVirtualRecharge,
-		TotalWithdraw:        stat.TotalWithdraw,
-		TotalRegisterUser:   stat.TotalRegisterUser,
-		TodayRecharge:       todayStat.RechargeAmount,
-		TodayGoldConsume:    todayStat.GoldConsumeAmount,
-		TodayDiamondConsume: todayStat.DiamondConsumeAmount,
-		TodayRegisterUser:   todayStat.RegisterCount,
-		OnlineCount:         uint64(push.OnlineCount()),
+		TotalGold:                 stat.TotalGold,
+		TotalGoldConsume:          stat.TotalGoldConsume,
+		TotalDiamondConsume:       stat.TotalDiamondConsume,
+		TotalRecharge:             stat.TotalRecharge,
+		TotalNormalUserRecharge:   stat.TotalNormalUserRecharge,
+		TotalCoinMerchantRecharge: stat.TotalCoinMerchantRecharge,
+		TotalVirtualRecharge:      stat.TotalVirtualRecharge,
+		TotalWithdraw:             stat.TotalWithdraw,
+		TotalRegisterUser:         stat.TotalRegisterUser,
+		TodayRecharge:             todayStat.RechargeAmount,
+		TodayGoldConsume:          todayStat.GoldConsumeAmount,
+		TodayDiamondConsume:       todayStat.DiamondConsumeAmount,
+		TodayRegisterUser:         todayStat.RegisterCount,
+		OnlineCount:               uint64(push.OnlineCount()),
 	}, nil
 }

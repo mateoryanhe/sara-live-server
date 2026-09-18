@@ -47,6 +47,12 @@ export const logRoutes: RouteRecordRaw = {
             redirect: '/log/live/video-call-log-list',
         },
         {
+            path: 'user/coin-merchant-transfer-log-list',
+            name: 'CoinMerchantTransferLogList',
+            component: () => import('@/views/log/user/coin-merchant-transfer-log-list.vue'),
+            meta: {title: '币商转账日志', parentTitle: '用户日志'},
+        },
+        {
             path: 'game/game-bet-log-list',
             name: 'GameBetLogListManagement',
             component: () => import('@/views/log/game/game-bet-log-list.vue'),

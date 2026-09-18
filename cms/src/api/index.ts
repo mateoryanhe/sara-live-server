@@ -17,6 +17,7 @@ import {goldApi} from './modules/gold'
 import {diamondApi} from './modules/diamond'
 import {rechargeOrderApi} from './modules/rechargeOrder'
 import {currencyLogApi} from './modules/currencyLog'
+import {coinMerchantTransferLogApi} from './modules/coinMerchantTransferLog'
 import {liveRevenueLogApi} from './modules/liveRevenueLog'
 import {liveRecordApi} from './modules/liveRecord'
 import {videoCallLogApi} from './modules/videoCallLog'
@@ -61,6 +62,7 @@ export {
     diamondApi,
     rechargeOrderApi,
     currencyLogApi,
+    coinMerchantTransferLogApi,
     liveRevenueLogApi,
     liveRecordApi,
     videoCallLogApi,
@@ -107,6 +109,7 @@ export default {
     diamondApi,
     rechargeOrderApi,
     currencyLogApi,
+    coinMerchantTransferLogApi,
     liveRevenueLogApi,
     liveRecordApi,
     videoCallLogApi,

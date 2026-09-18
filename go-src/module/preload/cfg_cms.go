@@ -10,6 +10,7 @@ import (
 	"xr-game-server/dto/preloadcfgdto"
 	"xr-game-server/entity/sys"
 	"xr-game-server/errercode"
+	"xr-game-server/module/resourcemonitor"
 )
 
 func GetPreloadCfg(_ context.Context, _ *preloadcfgdto.GetPreloadCfgReq) (*preloadcfgdto.GetPreloadCfgRes, error) {
@@ -23,12 +24,13 @@ func GetPreloadCfg(_ context.Context, _ *preloadcfgdto.GetPreloadCfgReq) (*prelo
 func SavePreloadCfg(_ context.Context, req *preloadcfgdto.SavePreloadCfgReq) (*preloadcfgdto.SavePreloadCfgRes, error) {
 	existing := cfgdao.LoadPreloadCfg()
 	row := &entity.PreloadCfg{
-		RecentLoginLimit: req.RecentLoginLimit,
-		HotRestartAuth:   strings.TrimSpace(req.HotRestartAuth),
-		MemoryLimitM:     req.MemoryLimitM,
-		IpGeoDbPath:      strings.TrimSpace(req.IpGeoDbPath),
-		InitGold:         req.InitGold,
-		InitDiamond:      req.InitDiamond,
+		RecentLoginLimit:                req.RecentLoginLimit,
+		HotRestartAuth:                  strings.TrimSpace(req.HotRestartAuth),
+		MemoryLimitM:                    req.MemoryLimitM,
+		IpGeoDbPath:                     strings.TrimSpace(req.IpGeoDbPath),
+		InitGold:                        req.InitGold,
+		InitDiamond:                     req.InitDiamond,
+		ResourceMetricCollectionEnabled: req.ResourceMetricCollectionEnabled,
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -47,6 +49,7 @@ func SavePreloadCfg(_ context.Context, req *preloadcfgdto.SavePreloadCfgReq) (*p
 	if err := cfgdao.SavePreloadCfg(row); err != nil {
 		return nil, err
 	}
+	resourcemonitor.SetCollectionEnabled(row.ResourceMetricCollectionEnabled)
 	return &preloadcfgdto.SavePreloadCfgRes{
 		Success: true,
 		ID:      strconv.FormatUint(row.ID, 10),
@@ -55,12 +58,13 @@ func SavePreloadCfg(_ context.Context, req *preloadcfgdto.SavePreloadCfgReq) (*p
 
 func defaultPreloadCfgItem() *preloadcfgdto.PreloadCfgItem {
 	return &preloadcfgdto.PreloadCfgItem{
-		RecentLoginLimit: cfgdao.DefaultRecentLoginPreloadLimit,
-		HotRestartAuth:   cfgdao.DefaultHotRestartAuth,
-		MemoryLimitM:     cfgdao.DefaultMemoryLimitM,
-		IpGeoDbPath:      cfgdao.DefaultIpGeoDbPath,
-		InitGold:         cfgdao.DefaultInitGold,
-		InitDiamond:      cfgdao.DefaultInitDiamond,
+		RecentLoginLimit:                cfgdao.DefaultRecentLoginPreloadLimit,
+		HotRestartAuth:                  cfgdao.DefaultHotRestartAuth,
+		MemoryLimitM:                    cfgdao.DefaultMemoryLimitM,
+		IpGeoDbPath:                     cfgdao.DefaultIpGeoDbPath,
+		InitGold:                        cfgdao.DefaultInitGold,
+		InitDiamond:                     cfgdao.DefaultInitDiamond,
+		ResourceMetricCollectionEnabled: cfgdao.DefaultResourceMetricCollectionEnabled,
 	}
 }
 
@@ -85,15 +89,16 @@ func toPreloadCfgItem(cfg *entity.PreloadCfg) *preloadcfgdto.PreloadCfgItem {
 		ipGeoPath = cfgdao.DefaultIpGeoDbPath
 	}
 	return &preloadcfgdto.PreloadCfgItem{
-		ID:               strconv.FormatUint(cfg.ID, 10),
-		RecentLoginLimit: limit,
-		HotRestartAuth:   auth,
-		MemoryLimitM:     memoryM,
-		IpGeoDbPath:      ipGeoPath,
-		InitGold:         cfg.InitGold,
-		InitDiamond:      cfg.InitDiamond,
-		CreatedAt:        formatPreloadCfgTime(cfg.CreatedAt),
-		UpdatedAt:        formatPreloadCfgTime(cfg.UpdatedAt),
+		ID:                              strconv.FormatUint(cfg.ID, 10),
+		RecentLoginLimit:                limit,
+		HotRestartAuth:                  auth,
+		MemoryLimitM:                    memoryM,
+		IpGeoDbPath:                     ipGeoPath,
+		InitGold:                        cfg.InitGold,
+		InitDiamond:                     cfg.InitDiamond,
+		CreatedAt:                       formatPreloadCfgTime(cfg.CreatedAt),
+		ResourceMetricCollectionEnabled: cfg.ResourceMetricCollectionEnabled,
+		UpdatedAt:                       formatPreloadCfgTime(cfg.UpdatedAt),
 	}
 }
 

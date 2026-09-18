@@ -13,6 +13,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   SimulatorDeviceWhitelistManagement: 'Whitelist Simulator',
   GoldCurrencyLogList: 'Log Koin Emas',
   DiamondCurrencyLogList: 'Log Berlian',
+  CoinMerchantTransferLogList: 'Log Transfer Pedagang Koin',
   OperationManagement: 'Operasi',
   OperationContentGroup: 'Konten',
   OperationRechargeGroup: 'Isi Ulang & VIP',

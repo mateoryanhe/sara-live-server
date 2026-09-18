@@ -5,15 +5,18 @@ import (
 	"os"
 	"runtime"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/gogf/gf/v2/os/gctx"
+	"github.com/gogf/gf/v2/os/gtimer"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/shirou/gopsutil/v3/process"
 	"xr-game-server/core/event"
 	"xr-game-server/core/push"
 	"xr-game-server/core/xrtimer"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dao/resourcemetricdao"
 	"xr-game-server/entity/sys"
 	"xr-game-server/gameevent"
@@ -22,18 +25,25 @@ import (
 var currentProcess *process.Process
 
 type cpuBaseline struct {
-	at        time.Time
-	sysTotal  float64
-	sysIdle   float64
-	procBusy  float64
-	hasSys    bool
-	hasProc   bool
+	at       time.Time
+	sysTotal float64
+	sysIdle  float64
+	procBusy float64
+	hasSys   bool
+	hasProc  bool
 }
 
 var (
-	cpuMu       sync.Mutex
-	cpuPrev     cpuBaseline
-	cpuNumLogical = runtime.NumCPU()
+	cpuMu              sync.Mutex
+	cpuPrev            cpuBaseline
+	cpuNumLogical      = runtime.NumCPU()
+	collectionEnabled  atomic.Bool
+	collectionTimerMu  sync.Mutex
+	monitorInitialized bool
+	initialMetricEntry *gtimer.Entry
+	backfillEntry      *gtimer.Entry
+	fineMetricEntry    *gtimer.Entry
+	coarseMetricEntry  *gtimer.Entry
 )
 
 func initMonitor() {
@@ -45,25 +55,93 @@ func initMonitor() {
 	if n, err := cpu.Counts(true); err == nil && n > 0 {
 		cpuNumLogical = n
 	}
-	// 先采一次基线(不阻塞等待),再按细间隔写入
-	xrtimer.AddOnce(gctx.New(), 2*time.Second, func(ctx context.Context) {
-		recordResourceMetric()
-	})
-	xrtimer.AddOnce(gctx.New(), 5*time.Second, func(ctx context.Context) {
-		backfillMissingAggs()
-	})
-	xrtimer.AddSingleton(gctx.New(), FineInterval, func(ctx context.Context) {
-		recordResourceMetric()
-	})
+	collectionEnabled.Store(cfgdao.GetResourceMetricCollectionEnabled())
+	collectionTimerMu.Lock()
+	monitorInitialized = true
+	if collectionEnabled.Load() {
+		startCollectionTimersLocked()
+	}
+	collectionTimerMu.Unlock()
+
+	// 清理历史数据不属于采集任务,关闭采集后仍按保留策略执行.
 	xrtimer.AddSingleton(gctx.New(), CoarseInterval, func(ctx context.Context) {
-		rollupLastCompletedBucket()
 		cleanupExpiredResourceMetrics()
 	})
 	event.Sub(gameevent.DayEvent, onDayCleanupResourceMetrics)
 }
 
 func recordResourceMetric() {
+	if !CollectionEnabled() {
+		return
+	}
 	enqueueResourceMetric(time.Now())
+}
+
+// SetCollectionEnabled 更新资源指标采集开关. 状态变化时清空 CPU 基线,避免恢复采集后跨停用时段计算差值.
+func SetCollectionEnabled(enabled bool) {
+	previous := collectionEnabled.Swap(enabled)
+	if previous == enabled {
+		return
+	}
+	cpuMu.Lock()
+	cpuPrev = cpuBaseline{}
+	cpuMu.Unlock()
+
+	collectionTimerMu.Lock()
+	defer collectionTimerMu.Unlock()
+	if !monitorInitialized {
+		return
+	}
+	if enabled {
+		startCollectionTimersLocked()
+		return
+	}
+	stopCollectionTimersLocked()
+}
+
+// CollectionEnabled 返回当前进程内的资源指标采集状态.
+func CollectionEnabled() bool {
+	return collectionEnabled.Load()
+}
+
+func startCollectionTimersLocked() {
+	if fineMetricEntry != nil || coarseMetricEntry != nil {
+		return
+	}
+	// 先采一次基线(不阻塞等待),再按细间隔写入.
+	initialMetricEntry = xrtimer.AddOnce(gctx.New(), 2*time.Second, func(ctx context.Context) {
+		recordResourceMetric()
+	})
+	backfillEntry = xrtimer.AddOnce(gctx.New(), 5*time.Second, func(ctx context.Context) {
+		if CollectionEnabled() {
+			backfillMissingAggs()
+		}
+	})
+	fineMetricEntry = xrtimer.AddSingleton(gctx.New(), FineInterval, func(ctx context.Context) {
+		recordResourceMetric()
+	})
+	coarseMetricEntry = xrtimer.AddSingleton(gctx.New(), CoarseInterval, func(ctx context.Context) {
+		if CollectionEnabled() {
+			rollupLastCompletedBucket()
+		}
+	})
+}
+
+func stopCollectionTimersLocked() {
+	closeTimerEntry(initialMetricEntry)
+	closeTimerEntry(backfillEntry)
+	closeTimerEntry(fineMetricEntry)
+	closeTimerEntry(coarseMetricEntry)
+	initialMetricEntry = nil
+	backfillEntry = nil
+	fineMetricEntry = nil
+	coarseMetricEntry = nil
+}
+
+func closeTimerEntry(entry *gtimer.Entry) {
+	if entry != nil {
+		entry.Close()
+	}
 }
 
 func onDayCleanupResourceMetrics(_ any) {

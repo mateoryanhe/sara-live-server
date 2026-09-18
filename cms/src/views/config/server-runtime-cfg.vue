@@ -35,6 +35,14 @@
         </el-form-item>
 
         <el-divider content-position="left">{{ t('pages.serverRuntimeCfg.sectionRuntime') }}</el-divider>
+        <el-form-item :label="t('pages.serverRuntimeCfg.resourceMetricCollectionEnabled')">
+          <el-switch
+              v-model="formData.resourceMetricCollectionEnabled"
+              :active-text="t('pages.serverRuntimeCfg.enabled')"
+              :inactive-text="t('pages.serverRuntimeCfg.disabled')"
+          />
+          <div class="form-tip">{{ t('pages.serverRuntimeCfg.resourceMetricCollectionEnabledTip') }}</div>
+        </el-form-item>
         <el-form-item :label="t('pages.serverRuntimeCfg.hotRestartAuth')" prop="hotRestartAuth">
           <el-input v-model="formData.hotRestartAuth" maxlength="128" show-password autocomplete="new-password"/>
           <div class="form-tip">{{ t('pages.serverRuntimeCfg.hotRestartAuthTip') }}</div>
@@ -81,6 +89,7 @@ const formData = reactive({
   hotRestartAuth: '',
   memoryLimitM: 300,
   ipGeoDbPath: '',
+  resourceMetricCollectionEnabled: true,
 })
 
 const metaInfo = reactive({
@@ -123,6 +132,7 @@ const applyCfg = (cfg: PreloadCfg | null | undefined) => {
   formData.hotRestartAuth = cfg?.hotRestartAuth || ''
   formData.memoryLimitM = Number(cfg?.memoryLimitM) || 300
   formData.ipGeoDbPath = cfg?.ipGeoDbPath || ''
+  formData.resourceMetricCollectionEnabled = cfg?.resourceMetricCollectionEnabled !== false
   metaInfo.createdAt = cfg?.createdAt || ''
   metaInfo.updatedAt = cfg?.updatedAt || ''
 }
@@ -153,6 +163,7 @@ const handleSave = async () => {
         hotRestartAuth: formData.hotRestartAuth.trim(),
         memoryLimitM: formData.memoryLimitM,
         ipGeoDbPath: formData.ipGeoDbPath.trim(),
+        resourceMetricCollectionEnabled: formData.resourceMetricCollectionEnabled,
       })
       if (response?.success) {
         ElMessage.success(t('pages.serverRuntimeCfg.saveSuccessRestart'))

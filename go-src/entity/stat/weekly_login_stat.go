@@ -14,29 +14,33 @@ const (
 )
 
 const (
-	WeeklyLoginStatCount                   db.TbCol = "count"
-	WeeklyLoginStatRegisterCount           db.TbCol = "register_count"
-	WeeklyLoginStatRechargeAmount          db.TbCol = "recharge_amount"
-	WeeklyLoginStatGoldConsumeAmount       db.TbCol = "gold_consume_amount"
-	WeeklyLoginStatDiamondConsumeAmount    db.TbCol = "diamond_consume_amount"
-	WeeklyLoginStatRechargeUserCount       db.TbCol = "recharge_user_count"
-	WeeklyLoginStatGoldConsumeUserCount    db.TbCol = "gold_consume_user_count"
-	WeeklyLoginStatDiamondConsumeUserCount db.TbCol = "diamond_consume_user_count"
-	WeeklyLoginStatAudienceUserCount       db.TbCol = "audience_user_count"
+	WeeklyLoginStatCount                      db.TbCol = "count"
+	WeeklyLoginStatRegisterCount              db.TbCol = "register_count"
+	WeeklyLoginStatRechargeAmount             db.TbCol = "recharge_amount"
+	WeeklyLoginStatNormalUserRechargeAmount   db.TbCol = "normal_user_recharge_amount"
+	WeeklyLoginStatCoinMerchantRechargeAmount db.TbCol = "coin_merchant_recharge_amount"
+	WeeklyLoginStatGoldConsumeAmount          db.TbCol = "gold_consume_amount"
+	WeeklyLoginStatDiamondConsumeAmount       db.TbCol = "diamond_consume_amount"
+	WeeklyLoginStatRechargeUserCount          db.TbCol = "recharge_user_count"
+	WeeklyLoginStatGoldConsumeUserCount       db.TbCol = "gold_consume_user_count"
+	WeeklyLoginStatDiamondConsumeUserCount    db.TbCol = "diamond_consume_user_count"
+	WeeklyLoginStatAudienceUserCount          db.TbCol = "audience_user_count"
 )
 
 // WeeklyLoginStat 每周登录统计(主键ID即周标识,如 2026-W21)
 type WeeklyLoginStat struct {
-	ID                      string  `gorm:"primaryKey;size:16;comment:周标识(YYYY-Www)" json:"week"`
-	Count                   uint64  `gorm:"default:0;comment:登录数量" json:"count"`
-	RegisterCount           uint64  `gorm:"default:0;comment:注册人数" json:"registerCount"`
-	RechargeAmount          float64 `gorm:"type:decimal(10,4);default:0;comment:充值金额(USD)" json:"rechargeAmount"`
-	GoldConsumeAmount       float64 `gorm:"default:0;comment:金币消费金额" json:"goldConsumeAmount"`
-	DiamondConsumeAmount    float64 `gorm:"default:0;comment:钻石消费金额" json:"diamondConsumeAmount"`
-	RechargeUserCount       uint64  `gorm:"default:0;comment:充值人数(去重)" json:"rechargeUserCount"`
-	GoldConsumeUserCount    uint64  `gorm:"default:0;comment:金币消费人数(去重)" json:"goldConsumeUserCount"`
-	DiamondConsumeUserCount uint64  `gorm:"default:0;comment:钻石消费人数(去重)" json:"diamondConsumeUserCount"`
-	AudienceUserCount       uint64  `gorm:"default:0;comment:有效观众人数(去重,跨直播间)" json:"audienceUserCount"`
+	ID                         string  `gorm:"primaryKey;size:16;comment:周标识(YYYY-Www)" json:"week"`
+	Count                      uint64  `gorm:"default:0;comment:登录数量" json:"count"`
+	RegisterCount              uint64  `gorm:"default:0;comment:注册人数" json:"registerCount"`
+	RechargeAmount             float64 `gorm:"type:decimal(10,4);default:0;comment:全部真实美金入账(USD)" json:"rechargeAmount"`
+	NormalUserRechargeAmount   float64 `gorm:"type:decimal(10,4);default:0;comment:普通用户真实美金入账(USD)" json:"normalUserRechargeAmount"`
+	CoinMerchantRechargeAmount float64 `gorm:"type:decimal(10,4);default:0;comment:币商真实美金入账(USD)" json:"coinMerchantRechargeAmount"`
+	GoldConsumeAmount          float64 `gorm:"default:0;comment:金币消费金额" json:"goldConsumeAmount"`
+	DiamondConsumeAmount       float64 `gorm:"default:0;comment:钻石消费金额" json:"diamondConsumeAmount"`
+	RechargeUserCount          uint64  `gorm:"default:0;comment:充值人数(去重)" json:"rechargeUserCount"`
+	GoldConsumeUserCount       uint64  `gorm:"default:0;comment:金币消费人数(去重)" json:"goldConsumeUserCount"`
+	DiamondConsumeUserCount    uint64  `gorm:"default:0;comment:钻石消费人数(去重)" json:"diamondConsumeUserCount"`
+	AudienceUserCount          uint64  `gorm:"default:0;comment:有效观众人数(去重,跨直播间)" json:"audienceUserCount"`
 }
 
 // FormatWeeklyLoginStatKey 格式化周统计标识(ISO周)
@@ -47,16 +51,18 @@ func FormatWeeklyLoginStatKey(t time.Time) string {
 
 func NewWeeklyLoginStat(week string) *WeeklyLoginStat {
 	return &WeeklyLoginStat{
-		ID:                      week,
-		Count:                   0,
-		RegisterCount:           0,
-		RechargeAmount:          0,
-		GoldConsumeAmount:       0,
-		DiamondConsumeAmount:    0,
-		RechargeUserCount:       0,
-		GoldConsumeUserCount:    0,
-		DiamondConsumeUserCount: 0,
-		AudienceUserCount:       0,
+		ID:                         week,
+		Count:                      0,
+		RegisterCount:              0,
+		RechargeAmount:             0,
+		NormalUserRechargeAmount:   0,
+		CoinMerchantRechargeAmount: 0,
+		GoldConsumeAmount:          0,
+		DiamondConsumeAmount:       0,
+		RechargeUserCount:          0,
+		GoldConsumeUserCount:       0,
+		DiamondConsumeUserCount:    0,
+		AudienceUserCount:          0,
 	}
 }
 
@@ -81,6 +87,22 @@ func (r *WeeklyLoginStat) AddRechargeAmount(val float64) {
 	syndb.AddData(TbWeeklyLoginStat, WeeklyLoginStatRechargeAmount, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.RechargeAmount,
+	})
+}
+
+func (r *WeeklyLoginStat) AddNormalUserRechargeAmount(val float64) {
+	r.NormalUserRechargeAmount = math.AddFloat64(r.NormalUserRechargeAmount, val)
+	syndb.AddData(TbWeeklyLoginStat, WeeklyLoginStatNormalUserRechargeAmount, &syndb.ColData{
+		IdVal:  r.ID,
+		ColVal: r.NormalUserRechargeAmount,
+	})
+}
+
+func (r *WeeklyLoginStat) AddCoinMerchantRechargeAmount(val float64) {
+	r.CoinMerchantRechargeAmount = math.AddFloat64(r.CoinMerchantRechargeAmount, val)
+	syndb.AddData(TbWeeklyLoginStat, WeeklyLoginStatCoinMerchantRechargeAmount, &syndb.ColData{
+		IdVal:  r.ID,
+		ColVal: r.CoinMerchantRechargeAmount,
 	})
 }
 
@@ -136,6 +158,8 @@ func initWeeklyLoginStat() {
 	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatCount)
 	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatRegisterCount)
 	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatRechargeAmount)
+	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatNormalUserRechargeAmount)
+	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatCoinMerchantRechargeAmount)
 	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatGoldConsumeAmount)
 	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatDiamondConsumeAmount)
 	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatRechargeUserCount)

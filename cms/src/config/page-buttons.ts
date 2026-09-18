@@ -357,6 +357,11 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.export,
         {key: 'viewUserDetail', label: '查看用户详情'},
     ],
+    CoinMerchantTransferLogList: [
+        BTN.view,
+        BTN.search,
+        {key: 'viewUserDetail', label: '查看用户详情'},
+    ],
     GameBetLogListManagement: [
         BTN.view,
         BTN.search,

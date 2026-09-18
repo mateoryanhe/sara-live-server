@@ -8,6 +8,7 @@ import {liveRoomRecycleBinMessages} from './live-room-recycle-bin'
 import {botAnchorListMessages} from './bot-anchor-list'
 import {rechargeOrderListMessages} from './recharge-order-list'
 import {currencyLogListMessages} from './currency-log-list'
+import {coinMerchantTransferLogListMessages} from './coin-merchant-transfer-log-list'
 import {banUserMessages} from './ban-user'
 import {bannerListMessages} from './banner-list'
 import {activityMessageListMessages} from './activity-message-list'
@@ -94,6 +95,7 @@ const pageMessageBuilders = [
   ['botAnchorList', botAnchorListMessages],
   ['rechargeOrderList', rechargeOrderListMessages],
   ['currencyLogList', currencyLogListMessages],
+  ['coinMerchantTransferLogList', coinMerchantTransferLogListMessages],
   ['banUser', banUserMessages],
   ['bannerList', bannerListMessages],
   ['activityMessageList', activityMessageListMessages],

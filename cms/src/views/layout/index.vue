@@ -326,7 +326,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('LiveRevenueLogList') || hasMenuPermission('LiveRecordList') || hasMenuPermission('LiveDailyEffectiveLiveList') || hasMenuPermission('LiveWeeklyUnsettledLiveList') || hasMenuPermission('VideoCallLogList') || hasMenuPermission('ShortVideoWatchManagement') || hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList') || hasMenuPermission('AnchorIncomeSettlementLogList') || hasMenuPermission('GuildIncomeSettlementLogList') || hasMenuPermission('GameBetLogListManagement') || hasMenuPermission('GameWinLogListManagement')"
+            v-if="hasMenuPermission('LiveRevenueLogList') || hasMenuPermission('LiveRecordList') || hasMenuPermission('LiveDailyEffectiveLiveList') || hasMenuPermission('LiveWeeklyUnsettledLiveList') || hasMenuPermission('VideoCallLogList') || hasMenuPermission('ShortVideoWatchManagement') || hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList') || hasMenuPermission('CoinMerchantTransferLogList') || hasMenuPermission('AnchorIncomeSettlementLogList') || hasMenuPermission('GuildIncomeSettlementLogList') || hasMenuPermission('GameBetLogListManagement') || hasMenuPermission('GameWinLogListManagement')"
             index="/log">
           <template #title>
             <el-icon>
@@ -379,7 +379,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList')"
+              v-if="hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList') || hasMenuPermission('CoinMerchantTransferLogList')"
               index="/log/user">
             <template #title>
               <el-icon>
@@ -398,6 +398,12 @@
                 <Money/>
               </el-icon>
               <span>{{ t('menu.DiamondCurrencyLogList') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('CoinMerchantTransferLogList')" index="/log/user/coin-merchant-transfer-log-list">
+              <el-icon>
+                <Document/>
+              </el-icon>
+              <span>{{ t('menu.CoinMerchantTransferLogList') }}</span>
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
@@ -539,7 +545,7 @@
             <span>{{ t('menu.ConfigManagement') }}</span>
           </template>
           <el-sub-menu
-              v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement')"
+              v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement')"
               index="/config/group/basic">
             <template #title>
               <el-icon>
@@ -558,12 +564,6 @@
                 <User/>
               </el-icon>
               <span>{{ t('menu.AccountCfgManagement') }}</span>
-            </el-menu-item>
-            <el-menu-item v-if="hasMenuPermission('AppVersionCfgManagement')" index="/config/app-version-cfg">
-              <el-icon>
-                <Iphone/>
-              </el-icon>
-              <span>{{ t('menu.AppVersionCfgManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement')" index="/config/server-runtime-cfg">
               <el-icon>
@@ -659,7 +659,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement')"
+              v-if="hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement')"
               index="/config/group/deploy">
             <template #title>
               <el-icon>
@@ -672,6 +672,12 @@
                 <Box/>
               </el-icon>
               <span>{{ t('menu.AppPkgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('AppVersionCfgManagement')" index="/config/app-version-cfg">
+              <el-icon>
+                <Iphone/>
+              </el-icon>
+              <span>{{ t('menu.AppVersionCfgManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('PrivacyPolicyCfgManagement')" index="/config/privacy-policy">
               <el-icon>

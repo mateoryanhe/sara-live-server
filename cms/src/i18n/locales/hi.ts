@@ -13,6 +13,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   SimulatorDeviceWhitelistManagement: 'सिम्युलेटर व्हाइटलिस्ट',
   GoldCurrencyLogList: 'गोल्ड लॉग',
   DiamondCurrencyLogList: 'डायमंड लॉग',
+  CoinMerchantTransferLogList: 'कॉइन मर्चेंट ट्रांसफ़र लॉग',
   OperationManagement: 'ऑपरेशन',
   OperationContentGroup: 'सामग्री',
   OperationRechargeGroup: 'रिचार्ज और VIP',

@@ -19,7 +19,7 @@ export const userRoutes: RouteRecordRaw = {
             meta: {
                 title: '用户详情',
                 hidden: true,
-                parentPermission: ['UserList', 'PlatformAnchorList', 'GuildManagement', 'GuildProfileManagement', 'AnchorListManagement', 'LiveRecordList', 'LiveRevenueLogList'],
+                parentPermission: ['UserList', 'PlatformAnchorList', 'GuildManagement', 'GuildProfileManagement', 'AnchorListManagement', 'LiveRecordList', 'LiveRevenueLogList', 'CoinMerchantTransferLogList'],
             },
         },
         {

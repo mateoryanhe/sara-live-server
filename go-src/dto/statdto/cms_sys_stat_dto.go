@@ -9,16 +9,18 @@ type CMSSysStatReq struct {
 
 // CMSSysStatRes CMS系统总数据
 type CMSSysStatRes struct {
-	TotalGold           float64 `json:"totalGold"`
-	TotalRecharge       float64 `json:"totalRecharge" dc:"总充值金额(真实USD)"`
-	TotalVirtualRecharge float64 `json:"totalVirtualRecharge" dc:"虚拟美金累计(充值白名单)"`
-	TotalWithdraw       float64 `json:"totalWithdraw"`
-	TotalRegisterUser   uint64  `json:"totalRegisterUser,string"`
-	TotalGoldConsume    float64 `json:"totalGoldConsume"    dc:"金币总消费"`
-	TotalDiamondConsume float64 `json:"totalDiamondConsume" dc:"钻石总消费"`
-	TodayRecharge       float64 `json:"todayRecharge"       dc:"今日充值金额(USD)"`
-	TodayGoldConsume    float64 `json:"todayGoldConsume"    dc:"今日金币消费金额"`
-	TodayDiamondConsume float64 `json:"todayDiamondConsume" dc:"今日钻石消费金额"`
-	TodayRegisterUser   uint64  `json:"todayRegisterUser,string" dc:"今日注册用户数"`
-	OnlineCount         uint64  `json:"onlineCount,string" dc:"在线人数"`
+	TotalGold                 float64 `json:"totalGold"`
+	TotalRecharge             float64 `json:"totalRecharge" dc:"全部美金入账累计(真实USD)"`
+	TotalNormalUserRecharge   float64 `json:"totalNormalUserRecharge" dc:"普通用户美金入账累计(真实USD)"`
+	TotalCoinMerchantRecharge float64 `json:"totalCoinMerchantRecharge" dc:"币商美金入账累计(真实USD)"`
+	TotalVirtualRecharge      float64 `json:"totalVirtualRecharge" dc:"虚拟美金累计(充值白名单)"`
+	TotalWithdraw             float64 `json:"totalWithdraw"`
+	TotalRegisterUser         uint64  `json:"totalRegisterUser,string"`
+	TotalGoldConsume          float64 `json:"totalGoldConsume"    dc:"金币总消费"`
+	TotalDiamondConsume       float64 `json:"totalDiamondConsume" dc:"钻石总消费"`
+	TodayRecharge             float64 `json:"todayRecharge"       dc:"今日充值金额(USD)"`
+	TodayGoldConsume          float64 `json:"todayGoldConsume"    dc:"今日金币消费金额"`
+	TodayDiamondConsume       float64 `json:"todayDiamondConsume" dc:"今日钻石消费金额"`
+	TodayRegisterUser         uint64  `json:"todayRegisterUser,string" dc:"今日注册用户数"`
+	OnlineCount               uint64  `json:"onlineCount,string" dc:"在线人数"`
 }

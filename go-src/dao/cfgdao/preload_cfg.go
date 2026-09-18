@@ -8,12 +8,13 @@ import (
 )
 
 const (
-	DefaultRecentLoginPreloadLimit = 100
-	DefaultHotRestartAuth          = "nGH66S4TjBjQqCKyWJAM"
-	DefaultMemoryLimitM            = 300
-	DefaultIpGeoDbPath             = "/home/ec2-user/xgameserver/GeoLite2-Country.mmdb"
-	DefaultInitGold                = 0
-	DefaultInitDiamond             = 0
+	DefaultRecentLoginPreloadLimit         = 100
+	DefaultHotRestartAuth                  = "nGH66S4TjBjQqCKyWJAM"
+	DefaultMemoryLimitM                    = 300
+	DefaultIpGeoDbPath                     = "/home/ec2-user/xgameserver/GeoLite2-Country.mmdb"
+	DefaultInitGold                        = 0
+	DefaultInitDiamond                     = 0
+	DefaultResourceMetricCollectionEnabled = true
 )
 
 func LoadPreloadCfg() *entity.PreloadCfg {
@@ -86,4 +87,13 @@ func GetInitDiamond() float64 {
 		return DefaultInitDiamond
 	}
 	return cfg.InitDiamond
+}
+
+// GetResourceMetricCollectionEnabled 读取服务器资源指标采集开关,未配置时默认开启.
+func GetResourceMetricCollectionEnabled() bool {
+	cfg := LoadPreloadCfg()
+	if cfg == nil {
+		return DefaultResourceMetricCollectionEnabled
+	}
+	return cfg.ResourceMetricCollectionEnabled
 }

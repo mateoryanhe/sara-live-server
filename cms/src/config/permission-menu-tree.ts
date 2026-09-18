@@ -245,6 +245,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             group('log-user', 'menu.UserLogGroup', [
                 page('GoldCurrencyLogList'),
                 page('DiamondCurrencyLogList'),
+                page('CoinMerchantTransferLogList'),
             ]),
             group('log-settlement', 'menu.SettlementLogGroup', [
                 page('AnchorIncomeSettlementLogList'),
@@ -294,7 +295,6 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             group('config-basic', 'menu.ConfigBasicGroup', [
                 page('AppTokenConfig'),
                 page('AccountCfgManagement'),
-                page('AppVersionCfgManagement'),
                 page('ServerRuntimeCfgManagement', {subPages: [{pageName: 'PreloadCfgManagement', titleKey: 'menu.PreloadCfgManagement'}]}),
             ]),
             group('config-security', 'menu.ConfigSecurityGroup', [
@@ -314,6 +314,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             ]),
             group('config-deploy', 'menu.ConfigDeployGroup', [
                 page('AppPkgManagement'),
+                page('AppVersionCfgManagement'),
                 page('PrivacyPolicyCfgManagement'),
                 page('H5LiveDeployManagement'),
                 page('CoinMerchantDeployManagement'),

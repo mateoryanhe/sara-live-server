@@ -35,6 +35,8 @@ export interface SysStat {
     totalGoldConsume: number
     totalDiamondConsume: number
     totalRecharge: number
+    totalNormalUserRecharge: number
+    totalCoinMerchantRecharge: number
     totalVirtualRecharge?: number
     totalWithdraw: number
     totalRegisterUser: string | number
@@ -648,6 +650,28 @@ export interface CurrencyLogItem {
     createdAt?: string | null
 }
 
+export interface CoinMerchantTransferLogQuery extends PageQuery {
+    coinMerchantUserId?: string
+    startTime?: number
+    endTime?: number
+}
+
+export interface CoinMerchantTransferLogItem {
+    id: string
+    coinMerchantUserId: string
+    coinMerchantNickname?: string
+    coinMerchantAvatar?: string
+    targetUserId: string
+    targetNickname?: string
+    targetAvatar?: string
+    amount: number
+    senderGoldBefore: number
+    senderGoldAfter: number
+    targetGoldBefore: number
+    targetGoldAfter: number
+    createdAt?: string | null
+}
+
 export interface GameWinLogQuery extends PageQuery {
     userId?: string
     gameCode?: string
@@ -894,6 +918,7 @@ export interface PreloadCfg {
     hotRestartAuth?: string
     memoryLimitM?: number
     ipGeoDbPath?: string
+    resourceMetricCollectionEnabled: boolean
     createdAt?: string
     updatedAt?: string
 }
@@ -910,6 +935,7 @@ export interface SavePreloadCfgReq {
     hotRestartAuth: string
     memoryLimitM: number
     ipGeoDbPath: string
+    resourceMetricCollectionEnabled: boolean
 }
 
 export interface SavePreloadCfgRes {

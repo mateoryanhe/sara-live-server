@@ -136,6 +136,11 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GoldCurrencyLogList:export': '/currencyLog/cmsCurrencyLogList',
     'GoldCurrencyLogList:viewUserDetail': '/account/getUserDetail',
 
+    CoinMerchantTransferLogList: '/gold/cmsCoinMerchantTransferLogList',
+    'CoinMerchantTransferLogList:view': '/gold/cmsCoinMerchantTransferLogList',
+    'CoinMerchantTransferLogList:search': '/gold/cmsCoinMerchantTransferLogList',
+    'CoinMerchantTransferLogList:viewUserDetail': '/account/getUserDetail',
+
     DiamondCurrencyLogList: '/currencyLog/cmsCurrencyLogList',
     'DiamondCurrencyLogList:view': '/currencyLog/cmsCurrencyLogList',
     'DiamondCurrencyLogList:search': '/currencyLog/cmsCurrencyLogList',

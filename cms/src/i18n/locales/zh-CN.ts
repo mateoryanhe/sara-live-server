@@ -15,6 +15,7 @@ const menu = {
   SimulatorDeviceWhitelistManagement: '模拟器白名单',
   GoldCurrencyLogList: '金币流水',
   DiamondCurrencyLogList: '钻石流水',
+  CoinMerchantTransferLogList: '币商转账日志',
   OperationManagement: '运营管理',
   OperationContentGroup: '运营内容',
   OperationRechargeGroup: '充值会员',

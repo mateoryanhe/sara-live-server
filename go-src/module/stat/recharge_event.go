@@ -5,6 +5,7 @@ import (
 
 	"xr-game-server/core/event"
 	"xr-game-server/dao/statdao"
+	rechargeentity "xr-game-server/entity/recharge"
 	statentity "xr-game-server/entity/stat"
 	"xr-game-server/gameevent"
 )
@@ -46,31 +47,64 @@ func consumeRechargeJob(job *statJob) {
 		return
 	}
 
-	if !shouldCountUserStat(order.UserId) {
-		return
+	isCoinMerchant := isCoinMerchantUsdIncome(data)
+
+	// 真实美金先计入不区分业务类型的总额，再分别累计普通用户与币商入账。
+	if stat := statdao.GetSysStat(); stat != nil {
+		stat.AddTotalRecharge(amount)
+		if isCoinMerchant {
+			stat.AddTotalCoinMerchantRecharge(amount)
+		} else {
+			stat.AddTotalNormalUserRecharge(amount)
+		}
 	}
 
 	statAt := order.PaidAt
 	if statAt.IsZero() {
 		statAt = time.Now()
 	}
+	recordPeriodRecharge(statAt, amount, isCoinMerchant)
 
-	if stat := statdao.GetSysStat(); stat != nil {
-		stat.AddTotalRecharge(amount)
+	if !shouldCountUserStat(order.UserId) {
+		return
 	}
-	recordPeriodRecharge(statAt, amount)
 	recordPeriodRechargeUser(statAt, order.UserId)
 }
 
-func recordPeriodRecharge(statAt time.Time, amount float64) {
+func isCoinMerchantUsdIncome(data *gameevent.UsdIncomeArrivedEventData) bool {
+	if data == nil {
+		return false
+	}
+	if data.Kind == gameevent.UsdIncomeKindCoinMerchant {
+		return true
+	}
+	return data.Order != nil && data.Order.PayChannel == rechargeentity.RechargeCfgTypeCoinMerchant
+}
+
+func recordPeriodRecharge(statAt time.Time, amount float64, isCoinMerchant bool) {
 	daily := statdao.GetDailyLoginStatByDate(statentity.FormatDailyLoginStatDate(statAt))
 	daily.AddRechargeAmount(amount)
+	if isCoinMerchant {
+		daily.AddCoinMerchantRechargeAmount(amount)
+	} else {
+		daily.AddNormalUserRechargeAmount(amount)
+	}
 
 	weekly := statdao.GetWeeklyLoginStatByWeek(statentity.FormatWeeklyLoginStatKey(statAt))
 	weekly.AddRechargeAmount(amount)
+	if isCoinMerchant {
+		weekly.AddCoinMerchantRechargeAmount(amount)
+	} else {
+		weekly.AddNormalUserRechargeAmount(amount)
+	}
 
 	monthly := statdao.GetMonthlyLoginStatByMonth(statentity.FormatMonthlyLoginStatKey(statAt))
 	monthly.AddRechargeAmount(amount)
+	if isCoinMerchant {
+		monthly.AddCoinMerchantRechargeAmount(amount)
+	} else {
+		monthly.AddNormalUserRechargeAmount(amount)
+	}
 }
 
 func recordPeriodRechargeUser(statAt time.Time, userId uint64) {
