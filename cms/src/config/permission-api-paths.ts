@@ -483,6 +483,10 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GooglePlayCfgManagement:view': '/googlePlay/getGooglePlayCfg',
     'GooglePlayCfgManagement:save': '/googlePlay/saveGooglePlayCfg',
 
+    FirebaseCfgManagement: '/firebase/getFirebaseCfg',
+    'FirebaseCfgManagement:view': '/firebase/getFirebaseCfg',
+    'FirebaseCfgManagement:save': '/firebase/saveFirebaseCfg',
+
     HaiPayCfgManagement: '/haipay/getHaiPayCfg',
     'HaiPayCfgManagement:view': '/haipay/getHaiPayCfg',
     'HaiPayCfgManagement:save': '/haipay/saveHaiPayCfg',

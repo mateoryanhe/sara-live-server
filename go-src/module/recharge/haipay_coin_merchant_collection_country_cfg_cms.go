@@ -19,9 +19,9 @@ func GetHaiPayCoinMerchantCollectionCountryCfg(ctx context.Context, req *haipayd
 		groups[continent] = &haipaydto.CollectionCountryCfgGroup{Continent: continent, Countries: []*haipaydto.CollectionCountryCfgItem{}}
 	}
 	configured := cfgdao.GetHaiPayCoinMerchantCollectionCfgMapCached()
-	for _, option := range country.ListHaiPayCollectionOptions() {
-		continent := country.HaiPayCollectionContinent(option.CountryCode)
-		defaultCurrency := country.HaiPayCollectionCurrency(option.CountryCode)
+	for _, option := range haiPayCoinMerchantCollectionOptions() {
+		continent := country.HaiPayGlobalCashierContinent(option.CountryCode)
+		defaultCurrency := haiPayCoinMerchantCollectionCurrency(option.CountryCode)
 		item := &haipaydto.CollectionCountryCfgItem{
 			CountryCode: option.CountryCode, Continent: continent,
 			SupportedCurrencies:    append([]string(nil), option.Currencies...),
@@ -88,8 +88,8 @@ func SaveHaiPayCoinMerchantCollectionCountryCfg(ctx context.Context, req *haipay
 	countryCode := strings.ToUpper(strings.TrimSpace(req.CountryCode))
 	currencyCode := strings.ToUpper(strings.TrimSpace(req.CurrencyCode))
 	payType := strings.ToUpper(strings.TrimSpace(req.PayType))
-	if !country.IsHaiPayRegion(countryCode) ||
-		!containsHaiPayString(country.HaiPayCollectionCurrencies(countryCode), currencyCode) || req.AppId <= 0 {
+	if !haiPayCoinMerchantCollectionRegion(countryCode) ||
+		!containsHaiPayString(haiPayCoinMerchantCollectionCurrencies(countryCode), currencyCode) || req.AppId <= 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	canonicalCode, ok := country.ResolveHaiPayCollectionPaymentMethodCode(
@@ -108,4 +108,48 @@ func SaveHaiPayCoinMerchantCollectionCountryCfg(ctx context.Context, req *haipay
 	}
 	cfgdao.ReloadHaiPayCoinMerchantCollectionCfgCache()
 	return &haipaydto.SaveCollectionCountryCfgRes{Success: true, ID: id}, nil
+}
+
+// haiPayCoinMerchantCollectionOptions 与普通用户全球收银台使用同一份国家目录，
+// 已有本地代收国家仍保留官网代收方式总表中的币种，避免丢失原有 USD 方式。
+func haiPayCoinMerchantCollectionOptions() []country.HaiPayCollectionOption {
+	localByCountry := make(map[string]country.HaiPayCollectionOption)
+	for _, option := range country.ListHaiPayCollectionOptions() {
+		localByCountry[option.CountryCode] = option
+	}
+
+	options := country.ListHaiPayGlobalCashierOptions()
+	for index := range options {
+		if local, ok := localByCountry[options[index].CountryCode]; ok {
+			options[index].Currencies = append([]string(nil), local.Currencies...)
+		}
+	}
+	return options
+}
+
+func haiPayCoinMerchantCollectionCurrencies(countryCode string) []string {
+	countryCode = strings.ToUpper(strings.TrimSpace(countryCode))
+	for _, option := range haiPayCoinMerchantCollectionOptions() {
+		if option.CountryCode == countryCode {
+			return append([]string(nil), option.Currencies...)
+		}
+	}
+	return nil
+}
+
+func haiPayCoinMerchantCollectionCurrency(countryCode string) string {
+	currencies := haiPayCoinMerchantCollectionCurrencies(countryCode)
+	for _, currencyCode := range currencies {
+		if currencyCode == "USD" {
+			return currencyCode
+		}
+	}
+	if len(currencies) == 0 {
+		return ""
+	}
+	return currencies[0]
+}
+
+func haiPayCoinMerchantCollectionRegion(countryCode string) bool {
+	return len(haiPayCoinMerchantCollectionCurrencies(countryCode)) > 0
 }

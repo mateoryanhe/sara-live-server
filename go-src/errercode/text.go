@@ -115,7 +115,9 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ChannelPayCurrencyNotSupported:  "Channel payment currency is not supported yet",
 		EmailAlreadyInUse:               "Email is already in use",
 		EmailAlreadyBound:               "Account already has an email bound",
-		DeviceAccountRegisterLimit:     "Too many accounts on this device",
+		DeviceAccountRegisterLimit:      "Too many accounts on this device",
+		FirebaseAlreadyInUse:            "Firebase account is already in use",
+		FirebaseAlreadyBound:            "Account already has a Firebase account bound",
 	},
 	lang.LangZHCN: {
 		Success:                         "成功",
@@ -227,7 +229,9 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ChannelPayCurrencyNotSupported:  "渠道支付暂不支持该币种",
 		EmailAlreadyInUse:               "邮箱已被使用",
 		EmailAlreadyBound:               "账号已绑定邮箱",
-		DeviceAccountRegisterLimit:     "该设备注册账号数已达上限",
+		DeviceAccountRegisterLimit:      "该设备注册账号数已达上限",
+		FirebaseAlreadyInUse:            "Firebase账号已被使用",
+		FirebaseAlreadyBound:            "账号已绑定Firebase账号",
 	},
 	lang.LangZHTW: {
 		Success:                         "成功",
@@ -339,7 +343,9 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		ChannelPayCurrencyNotSupported:  "渠道支付暫不支援該幣種",
 		EmailAlreadyInUse:               "郵箱已被使用",
 		EmailAlreadyBound:               "帳號已綁定郵箱",
-		DeviceAccountRegisterLimit:     "此裝置註冊帳號數已達上限",
+		DeviceAccountRegisterLimit:      "此裝置註冊帳號數已達上限",
+		FirebaseAlreadyInUse:            "Firebase帳號已被使用",
+		FirebaseAlreadyBound:            "帳號已綁定Firebase帳號",
 	},
 }
 

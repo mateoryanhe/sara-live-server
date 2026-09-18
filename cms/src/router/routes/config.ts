@@ -65,6 +65,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: 'Google Play'},
         },
         {
+            path: 'firebase',
+            name: 'FirebaseCfgManagement',
+            component: () => import('@/views/config/firebase.vue'),
+            meta: {title: 'Firebase登录'},
+        },
+        {
             path: 'haipay',
             name: 'HaiPayCfgManagement',
             component: () => import('@/views/config/haipay.vue'),
@@ -74,7 +80,7 @@ export const configRoutes: RouteRecordRaw = {
             path: 'cf-email',
             name: 'CfEmailCfgManagement',
             component: () => import('@/views/config/cf-email.vue'),
-            meta: {title: 'Cloudflare邮件'},
+            meta: {title: 'Amazon SES邮件'},
         },
         {
             path: 'db-backup',

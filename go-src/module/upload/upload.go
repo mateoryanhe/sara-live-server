@@ -1,6 +1,7 @@
 package upload
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -8,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/util/guid"
@@ -90,26 +92,57 @@ func localPathForStored(storedName string) string {
 	return filepath.Join(getImageDir(), filepath.FromSlash(safe))
 }
 
-// storeUploadedContent 按云桶开关写入:开则流式直传云(不落盘);关则只写本地
+// storeUploadedContent 保存长度未知的流。
 func storeUploadedContent(src io.Reader, category, ext string, maxBytes int64, tooLargeErr error) (storedName, localPath string, err error) {
+	return storeUploadedContentContext(context.Background(), src, -1, category, ext, maxBytes, tooLargeErr)
+}
+
+// storeUploadedContentWithSize 保存长度已知的流。云存储可直接 PutObject，避免 Uploader 的 5MB 分片缓冲。
+func storeUploadedContentWithSize(ctx context.Context, src io.Reader, size int64, category, ext string, maxBytes int64, tooLargeErr error) (storedName, localPath string, err error) {
+	return storeUploadedContentContext(ctx, src, size, category, ext, maxBytes, tooLargeErr)
+}
+
+// storeUploadedContentContext 按云桶开关写入：开则流式写云，关则流式写本地。
+// size < 0 表示未知长度；已知长度会在上传前校验大小并直接使用 PutObject。
+func storeUploadedContentContext(ctx context.Context, src io.Reader, size int64, category, ext string, maxBytes int64, tooLargeErr error) (storedName, localPath string, err error) {
+	if src == nil {
+		return "", "", errUploadFileEmpty
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	if size == 0 {
+		return "", "", errUploadFileEmpty
+	}
+	if maxBytes > 0 && size >= 0 && size > maxBytes {
+		return "", "", uploadTooLargeError(tooLargeErr)
+	}
 	baseName := newStoredFileName(ext)
 	storedName = storedNameForCategory(category, baseName)
 	if IsS3Enabled() {
+		if size >= 0 {
+			if err = putSizedStreamToS3(ctx, storedName, src, size); err != nil {
+				deleteObjectFromS3(storedName)
+				return "", "", mapUploadReadErr(err)
+			}
+			return storedName, "", nil
+		}
 		counter := &countReader{r: src}
 		body := io.Reader(counter)
 		if maxBytes > 0 {
 			body = io.LimitReader(counter, maxBytes+1)
 		}
-		if err = putStreamToS3(storedName, body); err != nil {
+		if err = putStreamToS3(ctx, storedName, body); err != nil {
 			deleteObjectFromS3(storedName)
 			return "", "", mapUploadReadErr(err)
 		}
 		if maxBytes > 0 && counter.n > maxBytes {
 			deleteObjectFromS3(storedName)
-			if tooLargeErr != nil {
-				return "", "", tooLargeErr
-			}
-			return "", "", errFileTooLarge
+			return "", "", uploadTooLargeError(tooLargeErr)
+		}
+		if counter.n == 0 {
+			deleteObjectFromS3(storedName)
+			return "", "", errUploadFileEmpty
 		}
 		return storedName, "", nil
 	}
@@ -128,6 +161,13 @@ func storeUploadedContent(src io.Reader, category, ext string, maxBytes int64, t
 		return "", "", err
 	}
 	return storedName, localPath, nil
+}
+
+func uploadTooLargeError(tooLargeErr error) error {
+	if tooLargeErr != nil {
+		return tooLargeErr
+	}
+	return errFileTooLarge
 }
 
 // countReader 统计已读字节,供云直传后校验大小上限
@@ -169,7 +209,7 @@ func UploadCMSFileFromRequest(r *ghttp.Request) (string, error) {
 			part.Close()
 			return "", fmt.Errorf("file ext not allowed: %s", ext)
 		}
-		name, _, storeErr := storeUploadedContent(part, StoreCatCMS, ext, 0, nil)
+		name, _, storeErr := storeUploadedContentContext(r.Context(), part, -1, StoreCatCMS, ext, 0, nil)
 		part.Close()
 		if storeErr != nil {
 			return "", mapUploadReadErr(storeErr)
@@ -206,7 +246,7 @@ func UploadCMSFile(file *ghttp.UploadFile) (string, error) {
 		return "", err
 	}
 	defer src.Close()
-	name, _, err := storeUploadedContent(src, StoreCatCMS, ext, 0, nil)
+	name, _, err := storeUploadedContentWithSize(context.Background(), src, file.Size, StoreCatCMS, ext, 0, nil)
 	return name, err
 }
 
@@ -224,21 +264,31 @@ func UploadShortVideoFile(file *ghttp.UploadFile, maxBytes int64) (string, error
 		return "", err
 	}
 	defer src.Close()
-	name, _, err := storeUploadedContent(src, StoreCatShortVideo, ext, maxBytes, errVideoFileTooLarge)
+	name, _, err := storeUploadedContentWithSize(context.Background(), src, file.Size, StoreCatShortVideo, ext, maxBytes, errVideoFileTooLarge)
 	return name, err
 }
 
 // StreamUploadShortVideoPart 流式保存短视频 multipart 文件字段
 func StreamUploadShortVideoPart(part *multipart.Part, maxBytes int64) (string, error) {
-	return streamUploadMultipartPart(part, StoreCatShortVideo, allowedShortVideoExt, maxBytes, errVideoFileTooLarge)
+	return StreamUploadShortVideoPartContext(context.Background(), part, maxBytes)
+}
+
+// StreamUploadShortVideoPartContext 流式保存短视频，并将请求取消传递给云存储。
+func StreamUploadShortVideoPartContext(ctx context.Context, part *multipart.Part, maxBytes int64) (string, error) {
+	return streamUploadMultipartPart(ctx, part, StoreCatShortVideo, allowedShortVideoExt, maxBytes, errVideoFileTooLarge)
 }
 
 // StreamUploadImagePart 流式保存图片 multipart 文件字段
 func StreamUploadImagePart(part *multipart.Part, maxBytes int64) (string, error) {
-	return streamUploadMultipartPart(part, StoreCatImages, allowedImageExt, maxBytes, errImageFileTooLarge)
+	return StreamUploadImagePartContext(context.Background(), part, maxBytes)
 }
 
-func streamUploadMultipartPart(part *multipart.Part, category string, allowedExt map[string]struct{}, maxBytes int64, tooLargeErr error) (string, error) {
+// StreamUploadImagePartContext 流式保存图片，并将请求取消传递给云存储。
+func StreamUploadImagePartContext(ctx context.Context, part *multipart.Part, maxBytes int64) (string, error) {
+	return streamUploadMultipartPart(ctx, part, StoreCatImages, allowedImageExt, maxBytes, errImageFileTooLarge)
+}
+
+func streamUploadMultipartPart(ctx context.Context, part *multipart.Part, category string, allowedExt map[string]struct{}, maxBytes int64, tooLargeErr error) (string, error) {
 	if part == nil || strings.TrimSpace(part.FileName()) == "" {
 		return "", errors.New("upload file is empty")
 	}
@@ -246,22 +296,32 @@ func streamUploadMultipartPart(part *multipart.Part, category string, allowedExt
 	if _, ok := allowedExt[ext]; !ok {
 		return "", fmt.Errorf("file ext not allowed: %s", ext)
 	}
-	name, _, err := storeUploadedContent(part, category, ext, maxBytes, tooLargeErr)
+	name, _, err := storeUploadedContentContext(ctx, part, -1, category, ext, maxBytes, tooLargeErr)
 	return name, err
 }
 
 var (
+	errUploadFileEmpty   = errors.New("upload file is empty")
 	errFileTooLarge      = errors.New("upload file too large")
 	errImageFileTooLarge = errors.New("upload image file too large")
 	errVideoFileTooLarge = errors.New("upload video file too large")
 )
+
+var uploadCopyBufferPool = sync.Pool{
+	New: func() any {
+		buffer := make([]byte, 32*1024)
+		return &buffer
+	},
+}
 
 func copyUploadContentToFile(src io.Reader, dst *os.File, dstPath string, maxBytes int64, tooLargeErr error) (int64, error) {
 	reader := io.Reader(src)
 	if maxBytes > 0 {
 		reader = io.LimitReader(src, maxBytes+1)
 	}
-	written, copyErr := io.Copy(dst, reader)
+	buffer := uploadCopyBufferPool.Get().(*[]byte)
+	defer uploadCopyBufferPool.Put(buffer)
+	written, copyErr := io.CopyBuffer(dst, reader, *buffer)
 	closeErr := dst.Close()
 	if copyErr != nil {
 		os.Remove(dstPath)
@@ -273,10 +333,11 @@ func copyUploadContentToFile(src io.Reader, dst *os.File, dstPath string, maxByt
 	}
 	if maxBytes > 0 && written > maxBytes {
 		os.Remove(dstPath)
-		if tooLargeErr != nil {
-			return 0, tooLargeErr
-		}
-		return 0, errFileTooLarge
+		return 0, uploadTooLargeError(tooLargeErr)
+	}
+	if written == 0 {
+		os.Remove(dstPath)
+		return 0, errUploadFileEmpty
 	}
 	return written, nil
 }

@@ -19,38 +19,40 @@ const (
 )
 
 const (
-	UserExtCanRank            db.TbCol = "can_rank"
-	UserExtPrettyId           db.TbCol = "pretty_id"
-	UserExtPackageName        db.TbCol = "package_name"
-	UserExtAppVersion         db.TbCol = "app_version"
-	UserExtFollowCount        db.TbCol = "follow_count"
-	UserExtFollowerCount      db.TbCol = "follower_count"
-	UserExtCancelCode         db.TbCol = "cancel_code"
-	UserExtCancelCodeExpireAt db.TbCol = "cancel_code_expire_at"
+	UserExtCanRank                   db.TbCol = "can_rank"
+	UserExtPrettyId                  db.TbCol = "pretty_id"
+	UserExtPackageName               db.TbCol = "package_name"
+	UserExtAppVersion                db.TbCol = "app_version"
+	UserExtFollowCount               db.TbCol = "follow_count"
+	UserExtFollowerCount             db.TbCol = "follower_count"
+	UserExtCancelCode                db.TbCol = "cancel_code"
+	UserExtCancelCodeExpireAt        db.TbCol = "cancel_code_expire_at"
 	UserExtRechargeWhitelist         db.TbCol = "recharge_whitelist"
 	UserExtFirstRecharge             db.TbCol = "first_recharge"
 	UserExtFirstRechargeAt           db.TbCol = "first_recharge_at"
 	UserExtShortVideoUnsettledIncome db.TbCol = "short_video_unsettled_income"
 	UserExtEmail                     db.TbCol = "email"
+	UserExtFirebaseUID               db.TbCol = "firebase_uid"
 	UserExtInviterId                 db.TbCol = "inviter_id"
 )
 
 // UserExt 用户扩展信息(与用户一一对应,主键ID即用户ID)
 type UserExt struct {
 	migrate.OneModel
-	CanRank            bool       `gorm:"default:1;comment:是否可上排行榜" json:"canRank"`
-	PrettyId           uint64     `gorm:"default:0;comment:靓号(默认等于用户ID)" json:"prettyId"`
-	PackageName        string     `gorm:"default:'';comment:注册包名" json:"packageName"`
-	AppVersion         string     `gorm:"default:'';comment:注册版本号" json:"appVersion"`
-	FollowCount        uint64     `gorm:"default:0;comment:当前关注数" json:"followCount"`
-	FollowerCount      uint64     `gorm:"default:0;comment:当前粉丝数" json:"followerCount"`
-	CancelCode         string     `gorm:"size:128;default:'';index;comment:注销码" json:"cancelCode"`
-	CancelCodeExpireAt *time.Time `gorm:"comment:注销码过期时间" json:"cancelCodeExpireAt"`
+	CanRank                   bool       `gorm:"default:1;comment:是否可上排行榜" json:"canRank"`
+	PrettyId                  uint64     `gorm:"default:0;comment:靓号(默认等于用户ID)" json:"prettyId"`
+	PackageName               string     `gorm:"default:'';comment:注册包名" json:"packageName"`
+	AppVersion                string     `gorm:"default:'';comment:注册版本号" json:"appVersion"`
+	FollowCount               uint64     `gorm:"default:0;comment:当前关注数" json:"followCount"`
+	FollowerCount             uint64     `gorm:"default:0;comment:当前粉丝数" json:"followerCount"`
+	CancelCode                string     `gorm:"size:128;default:'';index;comment:注销码" json:"cancelCode"`
+	CancelCodeExpireAt        *time.Time `gorm:"comment:注销码过期时间" json:"cancelCodeExpireAt"`
 	RechargeWhitelist         bool       `gorm:"default:0;comment:充值白名单(创建订单后直接到账)" json:"rechargeWhitelist"`
 	FirstRecharge             bool       `gorm:"default:1;comment:是否首次充值(1=未首充,0=已首充)" json:"firstRecharge"`
 	FirstRechargeAt           *time.Time `gorm:"comment:账号首充完成时间" json:"firstRechargeAt"`
 	ShortVideoUnsettledIncome float64    `gorm:"type:decimal(16,4);default:0;comment:短视频未结算收益(非主播作者)" json:"shortVideoUnsettledIncome"`
 	Email                     string     `gorm:"size:256;index;default:'';comment:绑定邮箱(规范化小写)" json:"email"`
+	FirebaseUID               string     `gorm:"size:128;index;default:'';comment:绑定Firebase UID" json:"firebaseUid"`
 	InviterId                 uint64     `gorm:"index;default:0;comment:邀请者用户ID(0为无)" json:"inviterId"`
 }
 
@@ -153,6 +155,15 @@ func (receiver *UserExt) SetEmail(email string) {
 	syndb.AddData(TbUserExt, UserExtEmail, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: email,
+	})
+}
+
+func (receiver *UserExt) SetFirebaseUID(firebaseUID string) {
+	receiver.FirebaseUID = firebaseUID
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddData(TbUserExt, UserExtFirebaseUID, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: firebaseUID,
 	})
 }
 
@@ -272,6 +283,7 @@ func initUserExt() {
 	syndb.RegQuick(TbUserExt, UserExtFirstRechargeAt)
 	syndb.RegQuick(TbUserExt, UserExtShortVideoUnsettledIncome)
 	syndb.RegQuick(TbUserExt, UserExtEmail)
+	syndb.RegQuick(TbUserExt, UserExtFirebaseUID)
 	syndb.RegQuick(TbUserExt, UserExtInviterId)
 
 	migrate.AutoMigrate(&UserExt{})

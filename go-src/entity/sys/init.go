@@ -9,6 +9,7 @@ func Init() {
 	initCoinMerchantDeployCfg()
 	initCountryFlagCfg()
 	initCfEmailCfg()
+	initFirebaseCfg()
 	initDbBackupCfg()
 	initSysResourceMetric()
 	initSysResourceMetricAgg()

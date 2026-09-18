@@ -179,7 +179,7 @@ func UpdateGameShelf(_ context.Context, req *gameplatformdto.UpdateGameShelfReq)
 	liveGameName := strings.TrimSpace(req.LiveGameName)
 	liveGameCover := strings.TrimSpace(req.LiveGameCover)
 	if liveGameCover != "" && !strings.HasPrefix(liveGameCover, "http://") && !strings.HasPrefix(liveGameCover, "https://") {
-		liveGameCover = normalizeVendorGameCover(liveGameCover)
+		liveGameCover = strings.Trim(strings.ReplaceAll(liveGameCover, "\\", "/"), "/")
 	}
 	ok, err := cfgdao.UpdateGameCfgLiveDisplay(gameCode, liveGameName, liveGameCover)
 	if err != nil {

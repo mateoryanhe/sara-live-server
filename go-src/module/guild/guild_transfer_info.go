@@ -29,8 +29,7 @@ func GetGuildTransferInfo(_ context.Context, req *guilddto.GetGuildTransferInfoR
 	row := guilddao.GetGuildTransferInfo(req.GuildId)
 	if row == nil {
 		res.Info = &guilddto.GuildTransferInfoItem{
-			GuildId:     strconv.FormatUint(req.GuildId, 10),
-			AccountType: liveentity.GuildTransferAccountTypeBank,
+			GuildId: strconv.FormatUint(req.GuildId, 10),
 		}
 		return res, nil
 	}
@@ -62,10 +61,8 @@ func SaveGuildTransferInfo(_ context.Context, req *guilddto.SaveGuildTransferInf
 	}
 
 	accountType := strings.ToUpper(strings.TrimSpace(req.AccountType))
-	if accountType == "" {
-		accountType = liveentity.GuildTransferAccountTypeBank
-	}
-	if !country.IsHaiPayPayoutAccountType(currency, accountType) {
+	method, ok := country.FindHaiPayPayoutMethod(currency, accountType, req.BankCode)
+	if !ok {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	if strings.TrimSpace(req.PayeeName) == "" || strings.TrimSpace(req.Phone) == "" ||
@@ -80,13 +77,13 @@ func SaveGuildTransferInfo(_ context.Context, req *guilddto.SaveGuildTransferInf
 	}
 	row.CountryCode = countryCode
 	row.Currency = currency
-	row.AccountType = accountType
+	row.AccountType = method.AccountType
 	row.PayeeName = strings.TrimSpace(req.PayeeName)
 	row.Phone = strings.TrimSpace(req.Phone)
 	row.Email = strings.ToLower(strings.TrimSpace(req.Email))
-	row.BankName = strings.TrimSpace(req.BankName)
+	row.BankName = method.Description
 	row.AccountNo = strings.TrimSpace(req.AccountNo)
-	row.BankCode = strings.TrimSpace(req.BankCode)
+	row.BankCode = method.BankCode
 	row.Remark = strings.TrimSpace(req.Remark)
 	row.UpdatedAt = time.Now()
 
@@ -113,10 +110,7 @@ func toGuildTransferInfoItem(row *liveentity.LiveGuildTransferInfo) *guilddto.Gu
 	if currency == "" && countryCode != "" {
 		currency = country.HaiPayPayoutCurrency(countryCode)
 	}
-	accountType := strings.TrimSpace(row.AccountType)
-	if accountType == "" {
-		accountType = liveentity.GuildTransferAccountTypeBank
-	}
+	accountType := strings.ToUpper(strings.TrimSpace(row.AccountType))
 	return &guilddto.GuildTransferInfoItem{
 		GuildId:     strconv.FormatUint(row.ID, 10),
 		CountryCode: countryCode,
@@ -153,6 +147,15 @@ func buildGuildTransferCountryOptions() []*guilddto.GuildTransferCountryOption {
 				Name: wallet.Name,
 			})
 		}
+		methodOptions := make([]guilddto.GuildTransferMethodOption, 0, len(option.Methods))
+		for _, method := range option.Methods {
+			methodOptions = append(methodOptions, guilddto.GuildTransferMethodOption{
+				AccountType: method.AccountType,
+				BankCode:    method.BankCode,
+				Limit:       method.Limit,
+				Description: method.Description,
+			})
+		}
 		out = append(out, &guilddto.GuildTransferCountryOption{
 			CountryCode:  c.Code,
 			NameEn:       c.NameEn,
@@ -161,6 +164,7 @@ func buildGuildTransferCountryOptions() []*guilddto.GuildTransferCountryOption {
 			Region:       option.Region,
 			AccountTypes: append([]string(nil), option.AccountTypes...),
 			Wallets:      walletOptions,
+			Methods:      methodOptions,
 			Icon:         icon,
 		})
 	}

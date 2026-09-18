@@ -14,10 +14,19 @@ const (
 	HaiPayPayoutRegionAfrica       = "AFRICA"
 )
 
-// HaiPayPayoutWallet 描述已接入电子钱包的支付编码。
+// HaiPayPayoutWallet 描述电子钱包支付编码，保留给现有调用方使用。
 type HaiPayPayoutWallet struct {
 	Code string
 	Name string
+}
+
+// HaiPayPayoutMethod 描述 HaiPay 当前可用的一条代付方式。
+// AccountType 与 BankCode 必须成对使用，不能跨币种或账户类型混用。
+type HaiPayPayoutMethod struct {
+	AccountType string
+	BankCode    string
+	Limit       string
+	Description string
 }
 
 // HaiPayPayoutOption 描述一个国家/地区当前已接入的代付能力。
@@ -27,39 +36,7 @@ type HaiPayPayoutOption struct {
 	Region       string
 	AccountTypes []string
 	Wallets      []HaiPayPayoutWallet
-}
-
-// haiPayPayoutOptions 是代付国家、币种、地区和账户类型的唯一数据源。
-// 历史币种若当前文档未列出电子钱包，保守地只开放银行账户。
-// 美国 ACH 还需要路由编码和地址字段，当前只开放现有资料表能完整支持的电子钱包。
-var haiPayPayoutOptions = []HaiPayPayoutOption{
-	{
-		CountryCode: "US", Currency: "USD", Region: HaiPayPayoutRegionNorthAmerica,
-		AccountTypes: []string{HaiPayPayoutAccountTypeEWallet},
-		Wallets: []HaiPayPayoutWallet{
-			{Code: "VENMO", Name: "Venmo"},
-			{Code: "ECASHAPP", Name: "CashApp"},
-		},
-	},
-	{CountryCode: "MX", Currency: "MXN", Region: HaiPayPayoutRegionNorthAmerica, AccountTypes: []string{HaiPayPayoutAccountTypeBank}},
-	{CountryCode: "TR", Currency: "TRY", Region: HaiPayPayoutRegionEurope, AccountTypes: []string{HaiPayPayoutAccountTypeBank, HaiPayPayoutAccountTypeEWallet}},
-	{CountryCode: "BR", Currency: "BRL", Region: HaiPayPayoutRegionSouthAmerica, AccountTypes: []string{HaiPayPayoutAccountTypeEWallet}},
-	{CountryCode: "ID", Currency: "IDR", Region: HaiPayPayoutRegionAsia, AccountTypes: []string{HaiPayPayoutAccountTypeBank, HaiPayPayoutAccountTypeEWallet}},
-	{CountryCode: "PH", Currency: "PHP", Region: HaiPayPayoutRegionAsia, AccountTypes: []string{HaiPayPayoutAccountTypeBank, HaiPayPayoutAccountTypeEWallet}},
-	{CountryCode: "MY", Currency: "MYR", Region: HaiPayPayoutRegionAsia, AccountTypes: []string{HaiPayPayoutAccountTypeBank, HaiPayPayoutAccountTypeEWallet}},
-	{CountryCode: "IN", Currency: "INR", Region: HaiPayPayoutRegionAsia, AccountTypes: []string{HaiPayPayoutAccountTypeBank}},
-	{CountryCode: "TH", Currency: "THB", Region: HaiPayPayoutRegionAsia, AccountTypes: []string{HaiPayPayoutAccountTypeBank}},
-	{CountryCode: "VN", Currency: "VND", Region: HaiPayPayoutRegionAsia, AccountTypes: []string{HaiPayPayoutAccountTypeBank}},
-	{CountryCode: "PK", Currency: "PKR", Region: HaiPayPayoutRegionAsia, AccountTypes: []string{HaiPayPayoutAccountTypeBank, HaiPayPayoutAccountTypeEWallet}},
-	{CountryCode: "KR", Currency: "KRW", Region: HaiPayPayoutRegionAsia, AccountTypes: []string{HaiPayPayoutAccountTypeBank}},
-	{CountryCode: "TW", Currency: "TWD", Region: HaiPayPayoutRegionAsia, AccountTypes: []string{HaiPayPayoutAccountTypeBank}},
-	{CountryCode: "BD", Currency: "BDT", Region: HaiPayPayoutRegionAsia, AccountTypes: []string{HaiPayPayoutAccountTypeEWallet}},
-	{CountryCode: "AE", Currency: "AED", Region: HaiPayPayoutRegionMiddleEast, AccountTypes: []string{HaiPayPayoutAccountTypeBank}},
-	{CountryCode: "EG", Currency: "EGP", Region: HaiPayPayoutRegionMiddleEast, AccountTypes: []string{HaiPayPayoutAccountTypeBank, HaiPayPayoutAccountTypeEWallet}},
-	{CountryCode: "KE", Currency: "KES", Region: HaiPayPayoutRegionAfrica, AccountTypes: []string{HaiPayPayoutAccountTypeBank}},
-	{CountryCode: "NG", Currency: "NGN", Region: HaiPayPayoutRegionAfrica, AccountTypes: []string{HaiPayPayoutAccountTypeBank}},
-	{CountryCode: "ZA", Currency: "ZAR", Region: HaiPayPayoutRegionAfrica, AccountTypes: []string{HaiPayPayoutAccountTypeBank}},
-	{CountryCode: "TZ", Currency: "TZS", Region: HaiPayPayoutRegionAfrica, AccountTypes: []string{HaiPayPayoutAccountTypeBank}},
+	Methods      []HaiPayPayoutMethod
 }
 
 // HaiPayPayoutCountryCodes 保留给旧调用方使用；数据由 haiPayPayoutOptions 自动生成。
@@ -72,18 +49,40 @@ func init() {
 	HaiPayPayoutCountryCodes = make([]string, 0, len(haiPayPayoutOptions))
 	haiPayPayoutByCountry = make(map[string]HaiPayPayoutOption, len(haiPayPayoutOptions))
 	haiPayPayoutByCurrency = make(map[string]HaiPayPayoutOption, len(haiPayPayoutOptions))
-	for _, item := range haiPayPayoutOptions {
+	for itemIndex := range haiPayPayoutOptions {
+		item := &haiPayPayoutOptions[itemIndex]
 		item.CountryCode = normalizeCode(item.CountryCode)
 		item.Currency = strings.ToUpper(strings.TrimSpace(item.Currency))
+		accountTypeSeen := make(map[string]struct{})
+		item.AccountTypes = item.AccountTypes[:0]
+		item.Wallets = item.Wallets[:0]
+		for methodIndex := range item.Methods {
+			method := &item.Methods[methodIndex]
+			method.AccountType = strings.ToUpper(strings.TrimSpace(method.AccountType))
+			method.BankCode = strings.TrimSpace(method.BankCode)
+			method.Limit = strings.TrimSpace(method.Limit)
+			method.Description = strings.TrimSpace(method.Description)
+			if _, ok := accountTypeSeen[method.AccountType]; !ok {
+				accountTypeSeen[method.AccountType] = struct{}{}
+				item.AccountTypes = append(item.AccountTypes, method.AccountType)
+			}
+			if method.AccountType == HaiPayPayoutAccountTypeEWallet {
+				item.Wallets = append(item.Wallets, HaiPayPayoutWallet{
+					Code: method.BankCode,
+					Name: method.Description,
+				})
+			}
+		}
 		HaiPayPayoutCountryCodes = append(HaiPayPayoutCountryCodes, item.CountryCode)
-		haiPayPayoutByCountry[item.CountryCode] = item
-		haiPayPayoutByCurrency[item.Currency] = item
+		haiPayPayoutByCountry[item.CountryCode] = *item
+		haiPayPayoutByCurrency[item.Currency] = *item
 	}
 }
 
 func cloneHaiPayPayoutOption(item HaiPayPayoutOption) HaiPayPayoutOption {
 	item.AccountTypes = append([]string(nil), item.AccountTypes...)
 	item.Wallets = append([]HaiPayPayoutWallet(nil), item.Wallets...)
+	item.Methods = append([]HaiPayPayoutMethod(nil), item.Methods...)
 	return item
 }
 
@@ -122,6 +121,30 @@ func ListHaiPayPayoutAccountTypes(currency string) []string {
 func ListHaiPayPayoutWallets(currency string) []HaiPayPayoutWallet {
 	item := haiPayPayoutByCurrency[strings.ToUpper(strings.TrimSpace(currency))]
 	return append([]HaiPayPayoutWallet(nil), item.Wallets...)
+}
+
+// ListHaiPayPayoutMethods 返回币种当前可用的具体代付方式。
+func ListHaiPayPayoutMethods(currency string) []HaiPayPayoutMethod {
+	item := haiPayPayoutByCurrency[strings.ToUpper(strings.TrimSpace(currency))]
+	return append([]HaiPayPayoutMethod(nil), item.Methods...)
+}
+
+// FindHaiPayPayoutMethod 校验并返回 accountType 与 bankCode 对应的官方可用方式。
+func FindHaiPayPayoutMethod(currency, accountType, bankCode string) (HaiPayPayoutMethod, bool) {
+	currency = strings.ToUpper(strings.TrimSpace(currency))
+	accountType = strings.ToUpper(strings.TrimSpace(accountType))
+	bankCode = strings.TrimSpace(bankCode)
+	for _, method := range haiPayPayoutByCurrency[currency].Methods {
+		if method.AccountType == accountType && strings.EqualFold(method.BankCode, bankCode) {
+			return method, true
+		}
+	}
+	return HaiPayPayoutMethod{}, false
+}
+
+func IsHaiPayPayoutMethod(currency, accountType, bankCode string) bool {
+	_, ok := FindHaiPayPayoutMethod(currency, accountType, bankCode)
+	return ok
 }
 
 func IsHaiPayPayoutAccountType(currency, accountType string) bool {

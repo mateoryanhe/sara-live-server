@@ -5,6 +5,7 @@ REM 远程服务器
 set REMOTE_HOST=52.9.70.64
 set REMOTE_USER=ec2-user
 set REMOTE_PORT=22
+set REMOTE_STAGE=/home/ec2-user/staging
 
 REM SSH 密钥（PuTTY 格式 .ppk）
 set SSH_KEY_PATH=D:\tools\ppk\live-test.ppk

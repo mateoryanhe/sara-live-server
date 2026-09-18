@@ -1,10 +1,11 @@
 package cfgdao
 
 import (
-	"github.com/gogf/gf/v2/os/gctx"
 	"strings"
+	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/cache"
 	"xr-game-server/entity/game"
@@ -130,6 +131,27 @@ func SetGameCfgPlatform(gameCode, platform string) (bool, error) {
 	}
 	result, err := g.DB().Model(string(entity.TbGameCfg)).Where("game_code = ?", gameCode).Data(g.Map{
 		"platform": platform,
+	}).Update()
+	if err != nil {
+		return false, err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+	return affected > 0, nil
+}
+
+// SetGameCfgCover 更新已上架游戏的自有封面对象路径.
+func SetGameCfgCover(gameCode, cover string) (bool, error) {
+	gameCode = strings.TrimSpace(gameCode)
+	cover = strings.TrimSpace(cover)
+	if gameCode == "" {
+		return false, nil
+	}
+	result, err := g.DB().Model(string(entity.TbGameCfg)).Where("game_code = ?", gameCode).Data(g.Map{
+		"cover":      cover,
+		"updated_at": time.Now(),
 	}).Update()
 	if err != nil {
 		return false, err

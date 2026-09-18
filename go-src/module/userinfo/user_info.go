@@ -124,11 +124,23 @@ func UpdateNickname(ctx context.Context, req *userinfodto.UpdateNicknameReq) (re
 
 // UploadAvatar 上传头像,保存图片并写回 user_infos.avatar
 func UploadAvatar(ctx context.Context, req *userinfodto.UploadAvatarReq) (res *userinfodto.UploadAvatarRes, err error) {
-	userId := httpserver.GetAuthId(ctx)
 	name, err := upload.UploadImageForApp(ctx, req.File)
 	if err != nil {
 		return nil, err
 	}
+	res, err = UpdateAvatarFromStoredFile(ctx, name)
+	if err != nil {
+		upload.DeleteUploadedFile(name)
+	}
+	return res, err
+}
+
+// UpdateAvatarFromStoredFile 将上传模块返回的对象路径写入用户资料。
+func UpdateAvatarFromStoredFile(ctx context.Context, name string) (res *userinfodto.UploadAvatarRes, err error) {
+	if strings.TrimSpace(name) == "" {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	userId := httpserver.GetAuthId(ctx)
 	data := userinfodao.GetUserInfoByUserId(userId)
 	data.SetAvatar(name)
 	userinfodao.PublishUserInfo(data)

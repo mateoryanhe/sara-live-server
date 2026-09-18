@@ -9,6 +9,7 @@ import type {
     DeleteGameShelfReq,
     DeleteGameShelfRes,
     GetGamePlatformCfgRes,
+    ReloadVendorGameCacheReq,
     ReloadVendorGameCacheRes,
     SaveGamePlatformCfgReq,
     SaveGamePlatformCfgRes,
@@ -41,8 +42,8 @@ export const gamePlatformApi = {
         return request.post<{ total: number; data: GameShelfItem[] }>('/gamePlatform/gameShelfList', params)
     },
 
-    reloadVendorGameCache: () => {
-        return request.post<ReloadVendorGameCacheRes>('/gamePlatform/reloadVendorGameCache', {})
+    reloadVendorGameCache: (data: ReloadVendorGameCacheReq = {}) => {
+        return request.post<ReloadVendorGameCacheRes>('/gamePlatform/reloadVendorGameCache', data)
     },
 
     addGameShelf: (data: AddGameShelfReq) => {

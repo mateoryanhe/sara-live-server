@@ -2,9 +2,12 @@ package controller
 
 import (
 	"context"
+
+	"github.com/gogf/gf/v2/net/ghttp"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/module/liveroom"
+	"xr-game-server/module/upload"
 )
 
 const (
@@ -14,12 +17,26 @@ const (
 type LiveRoomAppController struct{}
 
 func initLiveRoomAppController() {
+	httpserver.RegAPIHandler(LiveRoomAppUrl, "/create", handleCreateLiveRoom)
 	httpserver.RegAPI(LiveRoomAppUrl, &LiveRoomAppController{})
 }
 
-// CreateRoom 创建直播间
-func (c *LiveRoomAppController) CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *liveroomdto.CreateLiveRoomRes, err error) {
-	return liveroom.CreateRoom(ctx, req)
+// handleCreateLiveRoom 使用原始 Handler 流式读取 multipart，避免 ParseMultipartForm 缓存整个封面文件。
+func handleCreateLiveRoom(r *ghttp.Request) {
+	req, coverName, err := parseCreateRoomMultipart(r.Context(), r)
+	if err != nil {
+		r.SetError(err)
+		return
+	}
+	res, err := liveroom.CreateRoomWithStoredCover(r.Context(), req, coverName)
+	if err != nil {
+		if coverName != "" {
+			upload.DeleteUploadedFile(coverName)
+		}
+		r.SetError(err)
+		return
+	}
+	httpserver.SetHandlerResponseData(r, res)
 }
 
 // StartLive 开播

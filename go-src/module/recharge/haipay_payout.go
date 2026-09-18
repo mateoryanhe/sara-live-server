@@ -140,18 +140,15 @@ func HaiPayApplyPayout(ctx context.Context, req *HaiPayPayoutApplyReq) (*HaiPayP
 	if req.Amount <= 0 {
 		return nil, fmt.Errorf("invalid amount")
 	}
-	accountType := strings.TrimSpace(req.AccountType)
-	if accountType == "" {
-		accountType = liveentity.GuildTransferAccountTypeBank
-	}
-	accountType = strings.ToUpper(accountType)
-	if !country.IsHaiPayPayoutAccountType(currency, accountType) {
-		return nil, fmt.Errorf("unsupported payout accountType=%s currency=%s", accountType, currency)
+	accountType := strings.ToUpper(strings.TrimSpace(req.AccountType))
+	method, ok := country.FindHaiPayPayoutMethod(currency, accountType, req.BankCode)
+	if !ok {
+		return nil, fmt.Errorf("unsupported payout method currency=%s accountType=%s bankCode=%s", currency, accountType, strings.TrimSpace(req.BankCode))
 	}
 	name := strings.TrimSpace(req.Name)
 	email := strings.ToLower(strings.TrimSpace(req.Email))
 	phone := strings.TrimSpace(req.Phone)
-	bankCode := strings.TrimSpace(req.BankCode)
+	bankCode := method.BankCode
 	accountNo := strings.TrimSpace(req.AccountNo)
 	if name == "" || email == "" || phone == "" || bankCode == "" || accountNo == "" {
 		return nil, fmt.Errorf("missing payout payee fields")

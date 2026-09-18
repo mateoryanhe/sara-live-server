@@ -274,15 +274,15 @@ func TestHaiPayPayoutCountryCurrency(t *testing.T) {
 	if got := HaiPayPayoutRegion("EG"); got != HaiPayPayoutRegionMiddleEast {
 		t.Fatalf("EG region=%q", got)
 	}
-	if got := HaiPayPayoutRegion("ZA"); got != HaiPayPayoutRegionAfrica {
-		t.Fatalf("ZA region=%q", got)
+	if got := HaiPayPayoutRegion("EU"); got != HaiPayPayoutRegionEurope {
+		t.Fatalf("EU region=%q", got)
 	}
 	if got := HaiPayPayoutRegion("US"); got != HaiPayPayoutRegionNorthAmerica {
 		t.Fatalf("US region=%q", got)
 	}
-	if IsHaiPayPayoutAccountType("USD", HaiPayPayoutAccountTypeBank) ||
+	if !IsHaiPayPayoutAccountType("USD", HaiPayPayoutAccountTypeBank) ||
 		!IsHaiPayPayoutAccountType("USD", HaiPayPayoutAccountTypeEWallet) {
-		t.Fatal("USD should expose e-wallet until ACH fields are supported")
+		t.Fatal("USD should expose bank account and e-wallet")
 	}
 	for _, code := range HaiPayPayoutCountryCodes {
 		if got := HaiPayPayoutRegion(code); got == "" {
@@ -297,6 +297,27 @@ func TestHaiPayPayoutCountryCurrency(t *testing.T) {
 	options := ListHaiPayPayoutOptions()
 	if len(options) == 0 || len(options) != len(HaiPayPayoutCountryCodes) {
 		t.Fatalf("payout options=%d countries=%d", len(options), len(HaiPayPayoutCountryCodes))
+	}
+	methodCount := 0
+	methodKeys := make(map[string]struct{})
+	for _, option := range options {
+		if len(option.Methods) == 0 {
+			t.Fatalf("payout option %s has no available methods", option.CountryCode)
+		}
+		for _, method := range option.Methods {
+			if method.AccountType == "" || method.BankCode == "" || method.Limit == "" || method.Description == "" {
+				t.Fatalf("incomplete payout method for %s: %+v", option.Currency, method)
+			}
+			key := option.Currency + "|" + method.AccountType + "|" + method.BankCode
+			if _, exists := methodKeys[key]; exists {
+				t.Fatalf("duplicate payout method %s", key)
+			}
+			methodKeys[key] = struct{}{}
+			methodCount++
+		}
+	}
+	if methodCount != 478 {
+		t.Fatalf("available payout methods=%d, want 478", methodCount)
 	}
 	options[0].AccountTypes[0] = "changed"
 	if IsHaiPayPayoutAccountType("USD", "changed") {
@@ -313,6 +334,22 @@ func TestHaiPayPayoutCountryCurrency(t *testing.T) {
 	options[0].Wallets[0].Code = "changed"
 	if got := ListHaiPayPayoutOptions()[0].Wallets[0].Code; got != "VENMO" {
 		t.Fatalf("payout option wallet catalog was mutated: %q", got)
+	}
+	methods := ListHaiPayPayoutMethods("USD")
+	if len(methods) != 3 {
+		t.Fatalf("USD methods=%d, want 3", len(methods))
+	}
+	if !IsHaiPayPayoutMethod("USD", HaiPayPayoutAccountTypeBank, "ACH") ||
+		!IsHaiPayPayoutMethod("USD", HaiPayPayoutAccountTypeEWallet, "VENMO") ||
+		IsHaiPayPayoutMethod("USD", HaiPayPayoutAccountTypeBank, "VENMO") {
+		t.Fatal("USD payout method pairs are incorrect")
+	}
+	if method, ok := FindHaiPayPayoutMethod("usd", "bank_account", "ach"); !ok || method.Limit != "10-200000" {
+		t.Fatalf("USD ACH method=%+v ok=%v", method, ok)
+	}
+	methods[0].BankCode = "changed"
+	if got := ListHaiPayPayoutMethods("USD")[0].BankCode; got != "VENMO" {
+		t.Fatalf("payout method catalog was mutated: %q", got)
 	}
 }
 

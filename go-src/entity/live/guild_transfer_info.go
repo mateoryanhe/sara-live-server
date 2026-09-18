@@ -26,7 +26,7 @@ type LiveGuildTransferInfo struct {
 	PayeeName   string `gorm:"size:128;default:'';comment:收款人姓名(HaiPay name)" json:"payeeName"`
 	Phone       string `gorm:"size:32;default:'';comment:收款人手机(HaiPay phone)" json:"phone"`
 	Email       string `gorm:"size:128;default:'';comment:收款人邮箱(HaiPay email)" json:"email"`
-	BankName    string `gorm:"size:128;default:'';comment:银行名称(展示用,可选)" json:"bankName"`
+	BankName    string `gorm:"size:128;default:'';comment:HaiPay支付方式说明(由支付编码自动填充)" json:"bankName"`
 	AccountNo   string `gorm:"size:128;default:'';comment:收款账号(HaiPay accountNo)" json:"accountNo"`
 	BankCode    string `gorm:"size:64;default:'';comment:银行/支付编码(HaiPay bankCode)" json:"bankCode"`
 	Remark      string `gorm:"size:255;default:'';comment:备注" json:"remark"`

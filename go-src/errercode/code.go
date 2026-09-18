@@ -211,6 +211,10 @@ const (
 	EmailAlreadyBound XRCode = 162
 	// DeviceAccountRegisterLimit 同设备账号数量已达上限(含已注销)
 	DeviceAccountRegisterLimit XRCode = 163
+	// FirebaseAlreadyInUse Firebase账号已被未注销账号使用
+	FirebaseAlreadyInUse XRCode = 164
+	// FirebaseAlreadyBound 当前账号已绑定Firebase账号
+	FirebaseAlreadyBound XRCode = 165
 )
 
 type XError struct {

@@ -17,6 +17,7 @@ type UserInfoController struct {
 }
 
 func initUserInfoController() {
+	httpserver.RegAPIHandler(UserInfoUrl, "/uploadAvatar", handleUploadAvatar)
 	httpserver.RegAPI(UserInfoUrl, &UserInfoController{})
 }
 
@@ -42,10 +43,6 @@ func (c *UserInfoController) UpdateBirthday(ctx context.Context, req *userinfodt
 
 func (c *UserInfoController) GetCurrencyLog(ctx context.Context, req *userinfodto.GetCurrencyLogReq) (res *userinfodto.GetCurrencyLogRes, err error) {
 	return currencylog.GetByUserId(ctx, req)
-}
-
-func (c *UserInfoController) UploadAvatar(ctx context.Context, req *userinfodto.UploadAvatarReq) (res *userinfodto.UploadAvatarRes, err error) {
-	return userinfo.UploadAvatar(ctx, req)
 }
 
 func (c *UserInfoController) CancelAccount(ctx context.Context, req *userinfodto.CancelAccountReq) (res *userinfodto.CancelAccountRes, err error) {

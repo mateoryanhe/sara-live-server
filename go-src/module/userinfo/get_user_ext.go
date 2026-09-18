@@ -2,8 +2,10 @@ package userinfo
 
 import (
 	"context"
+	"strings"
 
 	"xr-game-server/core/httpserver"
+	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/shortvideodao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/userinfodto"
@@ -20,6 +22,10 @@ func GetUserExt(ctx context.Context, req *userinfodto.GetUserExtReq) (*userinfod
 	if targetUserId == authUserId {
 		ext = userinfodao.EnsureCancelCode(targetUserId)
 	}
+	var channel uint
+	if account := accountdao.GetAccountById(targetUserId); account != nil {
+		channel = account.Channel
+	}
 	authorStat := shortvideodao.GetAuthorStatByAuthorId(targetUserId)
 	var shortVideoViewCount, shortVideoLikeCount uint64
 	var shortVideoTotalIncome float64
@@ -30,6 +36,7 @@ func GetUserExt(ctx context.Context, req *userinfodto.GetUserExtReq) (*userinfod
 	}
 	return &userinfodto.GetUserExtRes{
 		UserId:                targetUserId,
+		Channel:               channel,
 		PrettyId:              ext.PrettyId,
 		CanRank:               ext.CanRank,
 		PackageName:           ext.PackageName,
@@ -39,6 +46,8 @@ func GetUserExt(ctx context.Context, req *userinfodto.GetUserExtReq) (*userinfod
 		CancelCode:            ext.CancelCode,
 		CancelCodeExpireAt:    ext.CancelCodeExpireAt,
 		FirstRecharge:         ext.FirstRecharge,
+		EmailBound:            strings.TrimSpace(ext.Email) != "",
+		FirebaseBound:         strings.TrimSpace(ext.FirebaseUID) != "",
 		InviterId:             ext.InviterId,
 		ShortVideoViewCount:   shortVideoViewCount,
 		ShortVideoTotalIncome: shortVideoTotalIncome,

@@ -69,14 +69,14 @@ func parseAppPublishShortVideoMultipart(ctx context.Context, r *ghttp.Request) (
 				cleanup()
 				return nil, errercode.CreateCode(errercode.InvalidParam)
 			}
-			ret.VideoName, err = upload.StreamUploadShortVideoPart(part, int64(getShortVideoMaxFileSize()))
+			ret.VideoName, err = upload.StreamUploadShortVideoPartContext(ctx, part, int64(getShortVideoMaxFileSize()))
 		case "previewFile":
 			if strings.TrimSpace(part.FileName()) == "" {
 				err = nil
 			} else if ret.PreviewVideoName != "" {
 				err = errercode.CreateCode(errercode.InvalidParam)
 			} else {
-				ret.PreviewVideoName, err = upload.StreamUploadShortVideoPart(part, int64(getShortVideoMaxFileSize()))
+				ret.PreviewVideoName, err = upload.StreamUploadShortVideoPartContext(ctx, part, int64(getShortVideoMaxFileSize()))
 			}
 		case "cover":
 			if strings.TrimSpace(part.FileName()) == "" {
@@ -85,7 +85,7 @@ func parseAppPublishShortVideoMultipart(ctx context.Context, r *ghttp.Request) (
 				err = errercode.CreateCode(errercode.InvalidParam)
 			} else {
 				maxCoverBytes := int64(getShortVideoMaxCoverFileSize()) * 1024 * 1024
-				ret.CoverName, err = upload.StreamUploadImagePart(part, maxCoverBytes)
+				ret.CoverName, err = upload.StreamUploadImagePartContext(ctx, part, maxCoverBytes)
 			}
 		default:
 			if part.FileName() == "" {

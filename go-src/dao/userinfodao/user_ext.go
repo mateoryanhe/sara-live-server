@@ -47,6 +47,9 @@ func PublishUserExt(data *entity.UserExt) {
 	if email := strings.ToLower(strings.TrimSpace(data.Email)); email != "" {
 		PublishEmailUserIdCache(email, data.ID)
 	}
+	if firebaseUID := strings.TrimSpace(data.FirebaseUID); firebaseUID != "" {
+		PublishFirebaseUserIdCache(firebaseUID, data.ID)
+	}
 }
 
 // GetUserExtFromMemory 仅从内存缓存读取用户扩展信息,未命中返回 nil

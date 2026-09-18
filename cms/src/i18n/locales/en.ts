@@ -86,6 +86,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   TextModerationCfgManagement: 'Text Moderation',
   PrivacyPolicyCfgManagement: 'Privacy Policy',
   GooglePlayCfgManagement: 'Google Play',
+  FirebaseCfgManagement: 'Firebase Login',
   HaiPayCfgManagement: 'HaiPay',
   CfEmailCfgManagement: 'Amazon SES Email',
   DbBackupCfgManagement: 'DB Backup',

@@ -44,6 +44,7 @@ type GetUserExtReq struct {
 
 type GetUserExtRes struct {
 	UserId                uint64     `json:"userId,string"`
+	Channel               uint       `json:"channel" dc:"登录渠道：1=测试，2=手机号，3=机器人主播，4=设备码，5=CMS短视频作者，6=H5设备码，7=邮箱，8=币商，9=Firebase"`
 	PrettyId              uint64     `json:"prettyId,string" dc:"靓号"`
 	CanRank               bool       `json:"canRank" dc:"是否可上排行榜"`
 	PackageName           string     `json:"packageName" dc:"注册包名"`
@@ -53,6 +54,8 @@ type GetUserExtRes struct {
 	CancelCode            string     `json:"cancelCode" dc:"注销码"`
 	CancelCodeExpireAt    *time.Time `json:"cancelCodeExpireAt" dc:"注销码过期时间"`
 	FirstRecharge         bool       `json:"firstRecharge" dc:"是否首次充值(未首充为true)"`
+	EmailBound            bool       `json:"emailBound" dc:"是否已绑定邮箱"`
+	FirebaseBound         bool       `json:"firebaseBound" dc:"是否已绑定Firebase账号"`
 	InviterId             uint64     `json:"inviterId,string" dc:"邀请者用户ID(0为无)"`
 	ShortVideoViewCount   uint64     `json:"shortVideoViewCount" dc:"累计短视频观看人数"`
 	ShortVideoTotalIncome float64    `json:"shortVideoTotalIncome" dc:"累计短视频收入总额(钻石)"`

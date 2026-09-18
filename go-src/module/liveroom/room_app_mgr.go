@@ -61,20 +61,10 @@ func applyLiveRoomGameRecommends(roomID uint64, category uint8, gameCodes []stri
 //  1. 调用者必须已是主播(UserInfo.UserType 为普通主播或机器人主播)
 //  2. 同一主播只能拥有一个直播间(再次调用直接返回已有信息)
 func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *liveroomdto.CreateLiveRoomRes, err error) {
-	anchorId := httpserver.GetAuthId(ctx)
-	logCreateRoomAppUpload(ctx, anchorId, req)
-
-	user := userinfodao.GetUserInfoByUserId(anchorId)
-	if user == nil || !user.IsAnchor() {
-		return nil, errercode.CreateCode(errercode.LiveRoomNotAnchor)
-	}
-	if err := aliyunmoderation.RequireTextCompliant(aliyunmoderation.SceneComment, req.Title, req.Notice); err != nil {
+	anchorId, err := validateCreateRoom(ctx, req)
+	if err != nil {
 		return nil, err
 	}
-	//if err := validateLiveRoomTag(req.TagId); err != nil {
-	//	return nil, err
-	//}
-
 	coverName := ""
 	if req.Cover != nil && req.Cover.Size > 0 {
 		coverName, err = upload.UploadImageForApp(ctx, req.Cover)
@@ -82,7 +72,39 @@ func CreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (res *l
 			return nil, err
 		}
 	}
+	res, err = createRoomWithStoredCover(ctx, req, anchorId, coverName)
+	if err != nil && coverName != "" {
+		upload.DeleteUploadedFile(coverName)
+	}
+	return res, err
+}
 
+// CreateRoomWithStoredCover 接收控制器已流式保存的封面对象路径。
+func CreateRoomWithStoredCover(ctx context.Context, req *liveroomdto.CreateLiveRoomReq, coverName string) (res *liveroomdto.CreateLiveRoomRes, err error) {
+	anchorId, err := validateCreateRoom(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return createRoomWithStoredCover(ctx, req, anchorId, coverName)
+}
+
+func validateCreateRoom(ctx context.Context, req *liveroomdto.CreateLiveRoomReq) (uint64, error) {
+	if req == nil {
+		return 0, errercode.CreateCode(errercode.InvalidParam)
+	}
+	anchorId := httpserver.GetAuthId(ctx)
+	logCreateRoomAppUpload(ctx, anchorId, req)
+	user := userinfodao.GetUserInfoByUserId(anchorId)
+	if user == nil || !user.IsAnchor() {
+		return 0, errercode.CreateCode(errercode.LiveRoomNotAnchor)
+	}
+	if err := aliyunmoderation.RequireTextCompliant(aliyunmoderation.SceneComment, req.Title, req.Notice); err != nil {
+		return 0, err
+	}
+	return anchorId, nil
+}
+
+func createRoomWithStoredCover(ctx context.Context, req *liveroomdto.CreateLiveRoomReq, anchorId uint64, coverName string) (res *liveroomdto.CreateLiveRoomRes, err error) {
 	category := normalizeLiveRoomCategory(req.Category)
 
 	// 同一主播仅允许一个直播间(roomId == anchorId);CMS预创建的空直播间允许App完善资料

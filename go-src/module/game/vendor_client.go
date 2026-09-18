@@ -192,7 +192,7 @@ func fetchVendorGamePageOnce(
 			Name:     strings.TrimSpace(item.Name),
 			NameEn:   strings.TrimSpace(item.NameEn),
 			Category: strings.TrimSpace(item.Category),
-			Cover:    normalizeVendorGameCover(item.Cover),
+			Cover:    strings.TrimSpace(item.Cover),
 			Platform: strings.TrimSpace(item.Platform),
 		})
 	}

@@ -3,7 +3,7 @@ import {definePageMessages} from './_define'
 export const gameListMessages = definePageMessages(
   {
     noteTitle: '说明',
-    tipLine1: '游戏库数据保存在 vendor_game_libs 表中。点击「同步数据」从第三方全量拉取并覆盖游戏库；搜索/分页仅查询本地游戏库表。上架游戏写入 game_cfgs，App 端只展示已上架游戏。',
+    tipLine1: '游戏库数据保存在 vendor_game_libs 表中。点击「同步数据」会全量拉取第三方游戏，将封面下载到当前启用的 R2 或本地存储，再覆盖游戏库；搜索/分页仅查询本地游戏库表。',
     tipLine2: '勾选游戏后可批量上架/下架；表格右侧「操作」列可单条上架/下架。',
     gameCode: '游戏编码',
     gameCodePlaceholder: '游戏编码(模糊匹配)',
@@ -18,7 +18,7 @@ export const gameListMessages = definePageMessages(
     offShelfStatus: '未上架',
     cover: '封面',
     fetchFailed: '获取游戏列表失败',
-    syncConfirm: '确定从第三方全量同步游戏库吗？将覆盖本地游戏库表数据。',
+    syncConfirm: '确定从第三方全量同步游戏库吗？系统会逐张下载并保存封面，成功后覆盖本地游戏库并更新已上架游戏封面，可能需要一些时间。',
     syncSuccess: '同步成功，共同步 {count} 个游戏',
     syncFailed: '同步游戏库失败',
     onShelfSuccess: '上架成功',
@@ -40,7 +40,7 @@ export const gameListMessages = definePageMessages(
   },
   {
     noteTitle: 'Note',
-    tipLine1: 'Game library data is stored in vendor_game_libs. Click Sync Data to pull the full list from the vendor and overwrite the local table; search and pagination query the local library only. Published games are saved to game_cfgs; the App shows published games only.',
+    tipLine1: 'Game library data is stored in vendor_game_libs. Sync Data pulls the full vendor list, downloads covers to the currently enabled R2 or local storage, and then replaces the local library.',
     tipLine2: 'Select games to batch publish/unpublish, or use Actions on each row for a single game.',
     gameCode: 'Game Code',
     gameCodePlaceholder: 'Game code (fuzzy match)',
@@ -55,7 +55,7 @@ export const gameListMessages = definePageMessages(
     offShelfStatus: 'Unpublished',
     cover: 'Cover',
     fetchFailed: 'Failed to load game list',
-    syncConfirm: 'Sync the full game library from the vendor? This will overwrite local vendor_game_libs data.',
+    syncConfirm: 'Sync the full vendor game library? Covers will be downloaded and stored one at a time; after success, the local library and published-game covers will be updated. This may take some time.',
     syncSuccess: 'Synced successfully, {count} games in total',
     syncFailed: 'Failed to sync game library',
     onShelfSuccess: 'Published successfully',

@@ -41,6 +41,8 @@ export default defineConfig(({mode}) => {
         },
         build: {
             outDir: 'D:\\root\\cms',
+            // outDir 在项目目录之外，Vite 默认不会清空；必须显式清理，避免旧 hash 资源持续累积进发版包。
+            emptyOutDir: true,
             assetsDir: 'assets',
             sourcemap: false,
             minify: 'terser',

@@ -77,6 +77,11 @@ func AppTransferGold(ctx context.Context, req *golddto.AppTransferGoldReq) (*gol
 		}
 		return nil, err
 	}
+	userentity.NewCoinMerchantGoldTransferLog(
+		fromUserId, toUserId, amount,
+		senderGold+amount, senderGold,
+		targetGold-amount, targetGold,
+	)
 
 	return &golddto.AppTransferGoldRes{
 		Amount:         amount,

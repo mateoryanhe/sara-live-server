@@ -9,4 +9,5 @@ const (
 	H5DeviceChannel         = 6 // H5设备码快捷登录/注册
 	EmailChannel            = 7 // 邮箱验证码登录/注册
 	CoinMerchantChannel     = 8 // CMS币商账号
+	FirebaseChannel         = 9 // Firebase Authentication登录/注册
 )

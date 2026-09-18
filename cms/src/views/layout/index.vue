@@ -1,8 +1,8 @@
 <template>
   <el-container class="layout-container">
     <!-- 侧边栏 -->
-    <el-aside class="aside" width="220px">
-      <div class="logo">{{ t('common.logo') }}</div>
+    <el-aside class="aside" :width="isCollapse ? '64px' : '260px'">
+      <div class="logo">{{ isCollapse ? 'XR' : t('common.logo') }}</div>
       <el-menu
           :collapse="isCollapse"
           :default-active="activeMenu"
@@ -530,7 +530,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer') || hasMenuPermission('CfEmailCfgManagement')"
+            v-if="hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer') || hasMenuPermission('CfEmailCfgManagement')"
             index="/config">
           <template #title>
             <el-icon>
@@ -601,7 +601,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('CfEmailCfgManagement')"
+              v-if="hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('CfEmailCfgManagement')"
               index="/config/group/platform">
             <template #title>
               <el-icon>
@@ -615,11 +615,23 @@
               </el-icon>
               <span>{{ t('menu.GooglePlayCfgManagement') }}</span>
             </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('FirebaseCfgManagement')" index="/config/firebase">
+              <el-icon>
+                <Key/>
+              </el-icon>
+              <span>{{ t('menu.FirebaseCfgManagement') }}</span>
+            </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('HaiPayCfgManagement')" index="/config/haipay">
               <el-icon>
                 <Wallet/>
               </el-icon>
               <span>{{ t('menu.HaiPayCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('CfEmailCfgManagement')" index="/config/cf-email">
+              <el-icon>
+                <Document/>
+              </el-icon>
+              <span>{{ t('menu.CfEmailCfgManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('UploadResourceCfgManagement')" index="/config/upload-resource">
               <el-icon>
@@ -991,12 +1003,6 @@ const hasMenuPermission = (moduleName: string) => {
 
 .el-sub-menu .el-menu-item.is-active {
   color: #409eff !important;
-}
-
-/* 菜单收起时的样式 */
-.el-aside:not(.el-menu--collapse) {
-  width: 220px;
-  height: 100%;
 }
 
 /* 滚动条样式 */

@@ -229,7 +229,11 @@ func ListHaiPayCollectionPaymentMethods(countryCode string) []HaiPayCollectionPa
 	countryCode = normalizeCode(countryCode)
 	methods := haiPayCollectionPaymentMethodsByCountry[countryCode]
 	out := append([]HaiPayCollectionPaymentMethod(nil), methods...)
-	for _, currency := range HaiPayCollectionCurrencies(countryCode) {
+	currencies := HaiPayCollectionCurrencies(countryCode)
+	if len(currencies) == 0 {
+		currencies = HaiPayGlobalCashierCurrencies(countryCode)
+	}
+	for _, currency := range currencies {
 		if currency == "USD" {
 			out = append(out, haiPayGlobalCollectionPaymentMethods...)
 			break

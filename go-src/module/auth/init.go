@@ -6,4 +6,5 @@ func InitAuth() {
 	initAppToken()
 	initCmsToken()
 	initCfEmailCfg()
+	initFirebaseCfg()
 }

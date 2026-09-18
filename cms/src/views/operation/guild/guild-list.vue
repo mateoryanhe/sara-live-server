@@ -70,55 +70,44 @@
           
           <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
           <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
-          <el-table-column fixed="right" :label="t('common.actions')" width="760">
+          <el-table-column fixed="right" :label="t('common.actions')" width="100">
             <template #default="{ row }">
-              <el-button v-if="canViewDetail" size="small" @click="openDetail(row)">
-                {{ t('pages.guildList.viewDetail') }}
-              </el-button>
-              <el-button size="small" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
-              <el-button
-                  v-if="can('transferInfo')"
-                  size="small"
-                  @click="openTransferInfoDialog(row)"
-              >
-                {{ t('pages.guildList.transferInfo') }}
-              </el-button>
-              <el-button
-                  v-if="can('viewMembers')"
-                  size="small"
-                  @click="handleViewMembers(row)"
-              >
-                {{ t('pages.guildList.viewMembers') }}
-              </el-button>
-              <el-button
-                  v-if="can('joinGuildAnchor')"
-                  size="small"
-                  @click="openJoinDialog(row)"
-              >
-                {{ t('pages.guildList.joinGuildAnchor') }}
-              </el-button>
-              <el-button
-                  v-if="can('batchSetAnchor')"
-                  size="small"
-                  @click="openImportDialog(row, 1)"
-              >
-                {{ t('pages.guildList.importNormalAnchor') }}
-              </el-button>
-              <el-button
-                  v-if="can('batchSetSeniorAnchor')"
-                  size="small"
-                  @click="openImportDialog(row, 7)"
-              >
-                {{ t('pages.guildList.importSeniorAnchor') }}
-              </el-button>
-              <el-button
-                  v-if="can('offShelf')"
-                  size="small"
-                  type="warning"
-                  @click="handleOffShelf(row)"
-              >
-                {{ t('common.offShelf') }}
-              </el-button>
+              <el-dropdown v-if="hasRowActions" trigger="click" @command="(cmd: string) => handleRowCommand(row, cmd)">
+                <el-button size="small" type="primary">
+                  {{ t('common.actions') }}
+                  <el-icon class="el-icon--right">
+                    <ArrowDown/>
+                  </el-icon>
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item v-if="canViewDetail" command="viewDetail">
+                      {{ t('pages.guildList.viewDetail') }}
+                    </el-dropdown-item>
+                    <el-dropdown-item v-if="can('edit')" command="edit">
+                      {{ t('common.edit') }}
+                    </el-dropdown-item>
+                    <el-dropdown-item v-if="can('transferInfo')" command="transferInfo">
+                      {{ t('pages.guildList.transferInfo') }}
+                    </el-dropdown-item>
+                    <el-dropdown-item v-if="can('viewMembers')" command="viewMembers">
+                      {{ t('pages.guildList.viewMembers') }}
+                    </el-dropdown-item>
+                    <el-dropdown-item v-if="can('joinGuildAnchor')" divided command="joinGuildAnchor">
+                      {{ t('pages.guildList.joinGuildAnchor') }}
+                    </el-dropdown-item>
+                    <el-dropdown-item v-if="can('batchSetAnchor')" command="batchSetAnchor">
+                      {{ t('pages.guildList.importNormalAnchor') }}
+                    </el-dropdown-item>
+                    <el-dropdown-item v-if="can('batchSetSeniorAnchor')" command="batchSetSeniorAnchor">
+                      {{ t('pages.guildList.importSeniorAnchor') }}
+                    </el-dropdown-item>
+                    <el-dropdown-item v-if="can('offShelf')" divided command="offShelf">
+                      {{ t('common.offShelf') }}
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
             </template>
           </el-table-column>
         </el-table>
@@ -236,7 +225,7 @@
         v-model="transferDialogVisible"
         :title="transferDialogTitle"
         destroy-on-close
-        width="600px"
+        width="760px"
         @closed="transferCurrencyDialogVisible = false"
     >
       <el-form
@@ -281,6 +270,26 @@
           </el-select>
           <div class="form-tip">{{ t('pages.guildList.transferAccountTypeHint') }}</div>
         </el-form-item>
+        <el-form-item :label="t('pages.guildList.transferBankCode')" prop="bankCode">
+          <el-select
+              v-model="transferForm.bankCode"
+              clearable
+              filterable
+              :disabled="!transferForm.accountType"
+              style="width: 100%"
+              :placeholder="t('pages.guildList.transferBankCodePlaceholder')"
+          >
+            <el-option
+                v-for="option in transferBankCodeOptions"
+                :key="option.value"
+                :label="option.label"
+                :value="option.value"
+            />
+          </el-select>
+          <div v-if="selectedTransferMethod" class="form-tip">
+            {{ selectedTransferMethod.description }} · {{ selectedTransferMethod.limit }} {{ transferForm.currency }}
+          </div>
+        </el-form-item>
         <el-form-item :label="t('pages.guildList.transferPayeeName')" prop="payeeName">
           <el-input
               v-model="transferForm.payeeName"
@@ -302,40 +311,11 @@
               :placeholder="t('pages.guildList.transferEmailPlaceholder')"
           />
         </el-form-item>
-        <el-form-item :label="t('pages.guildList.transferBankName')" prop="bankName">
-          <el-input
-              v-model="transferForm.bankName"
-              clearable
-              :placeholder="t('pages.guildList.transferBankNamePlaceholder')"
-          />
-        </el-form-item>
         <el-form-item :label="t('pages.guildList.transferAccountNo')" prop="accountNo">
           <el-input
               v-model="transferForm.accountNo"
               clearable
               :placeholder="t('pages.guildList.transferAccountNoPlaceholder')"
-          />
-        </el-form-item>
-        <el-form-item :label="t('pages.guildList.transferBankCode')" prop="bankCode">
-          <el-select
-              v-if="transferBankCodeOptions.length > 0"
-              v-model="transferForm.bankCode"
-              clearable
-              style="width: 100%"
-              :placeholder="t('pages.guildList.transferBankCodePlaceholder')"
-          >
-            <el-option
-                v-for="option in transferBankCodeOptions"
-                :key="option.value"
-                :label="option.label"
-                :value="option.value"
-            />
-          </el-select>
-          <el-input
-              v-else
-              v-model="transferForm.bankCode"
-              clearable
-              :placeholder="t('pages.guildList.transferBankCodePlaceholder')"
           />
         </el-form-item>
         <el-form-item :label="t('pages.guildList.transferRemark')" prop="remark">
@@ -431,6 +411,7 @@ import {computed, onMounted, reactive, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {useRouter} from 'vue-router'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
+import {ArrowDown} from '@element-plus/icons-vue'
 import {guildApi} from '@/api'
 import {liveRevenueShareCfgApi} from '@/api/modules/live-revenue-share-cfg'
 import CmsUserPickerDialog from '@/components/CmsUserPickerDialog.vue'
@@ -488,6 +469,16 @@ const {t} = useI18n()
 const router = useRouter()
 const {can} = usePagePermission('GuildManagement')
 const canViewDetail = computed(() => can('viewDetail'))
+const GUILD_ROW_ACTION_KEYS = [
+  'edit',
+  'transferInfo',
+  'viewMembers',
+  'joinGuildAnchor',
+  'batchSetAnchor',
+  'batchSetSeniorAnchor',
+  'offShelf',
+] as const
+const hasRowActions = computed(() => canViewDetail.value || GUILD_ROW_ACTION_KEYS.some(key => can(key)))
 const loading = ref(false)
 const importing = ref(false)
 const leaderPickerVisible = ref(false)
@@ -581,6 +572,7 @@ const filteredTransferCountries = computed(() => {
       item.nameEn,
       region,
       ...item.accountTypes,
+      ...(item.methods ?? []).flatMap(method => [method.accountType, method.bankCode, method.description]),
     ].join(' '))
     return keywords.every(keyword => searchable.includes(keyword))
   })
@@ -599,11 +591,22 @@ const transferAccountTypeOptions = computed(() => {
   return selectedTransferCurrency.value?.accountTypes ?? []
 })
 const transferBankCodeOptions = computed(() => {
-  if (transferForm.value.accountType !== 'EWALLET') return []
-  return (selectedTransferCurrency.value?.wallets ?? []).map(wallet => ({
-    label: `${wallet.name} (${wallet.code})`,
-    value: wallet.code,
-  }))
+  const accountType = transferForm.value.accountType
+  if (!accountType) return []
+  return (selectedTransferCurrency.value?.methods ?? [])
+      .filter(method => method.accountType === accountType)
+      .map(method => ({
+        label: `${method.description} (${method.bankCode}) · ${method.limit} ${transferForm.value.currency}`,
+        value: method.bankCode,
+      }))
+})
+const selectedTransferMethod = computed(() => {
+  const accountType = transferForm.value.accountType
+  const bankCode = transferForm.value.bankCode
+  if (!accountType || !bankCode) return null
+  return (selectedTransferCurrency.value?.methods ?? []).find(method => (
+      method.accountType === accountType && method.bankCode === bankCode
+  )) ?? null
 })
 
 const searchForm = reactive<SearchForm>({
@@ -722,6 +725,10 @@ const onTransferCurrencyChange = (currency: string) => {
   transferForm.value.accountType = accountTypes.length === 1 ? (accountTypes[0] ?? '') : ''
   transferForm.value.bankName = ''
   transferForm.value.bankCode = ''
+  if (transferForm.value.accountType) {
+    const methods = (hit?.methods ?? []).filter(method => method.accountType === transferForm.value.accountType)
+    transferForm.value.bankCode = methods.length === 1 ? (methods[0]?.bankCode ?? '') : ''
+  }
 }
 
 const openTransferCurrencyDialog = () => {
@@ -741,6 +748,9 @@ const handleTransferCurrencyPick = (row: GuildTransferCountryOption) => {
 const onTransferAccountTypeChange = () => {
   transferForm.value.bankName = ''
   transferForm.value.bankCode = ''
+  const methods = (selectedTransferCurrency.value?.methods ?? [])
+      .filter(method => method.accountType === transferForm.value.accountType)
+  transferForm.value.bankCode = methods.length === 1 ? (methods[0]?.bankCode ?? '') : ''
 }
 
 const joinFormRules = computed<FormRules>(() => ({
@@ -825,6 +835,35 @@ const formatRowIndex = (index: number) =>
 
 const handleCurrentRowChange = (row: Guild | null) => {
   selectedGuild.value = row
+}
+
+const handleRowCommand = (row: Guild, command: string) => {
+  switch (command) {
+    case 'viewDetail':
+      openDetail(row)
+      break
+    case 'edit':
+      handleEdit(row)
+      break
+    case 'transferInfo':
+      openTransferInfoDialog(row)
+      break
+    case 'viewMembers':
+      handleViewMembers(row)
+      break
+    case 'joinGuildAnchor':
+      openJoinDialog(row)
+      break
+    case 'batchSetAnchor':
+      openImportDialog(row, 1)
+      break
+    case 'batchSetSeniorAnchor':
+      openImportDialog(row, 7)
+      break
+    case 'offShelf':
+      handleOffShelf(row)
+      break
+  }
 }
 
 const handleAdd = async () => {
@@ -1122,6 +1161,19 @@ const openTransferInfoDialog = async (row: Guild) => {
             ? (selectedCurrency.accountTypes[0] ?? '')
             : ''
       }
+      const methodExists = (selectedCurrency.methods ?? []).some(method => (
+          method.accountType === transferForm.value.accountType &&
+          method.bankCode === transferForm.value.bankCode
+      ))
+      if (!methodExists) {
+        transferForm.value.bankCode = ''
+      }
+    } else {
+      transferForm.value.countryCode = ''
+      transferForm.value.currency = ''
+      transferForm.value.accountType = ''
+      transferForm.value.bankCode = ''
+      transferForm.value.bankName = ''
     }
   } catch (error) {
     console.error('fetch guild transfer info failed:', error)

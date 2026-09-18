@@ -138,7 +138,7 @@ import {computed, onMounted, reactive, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {gamePlatformApi} from '@/api/modules/gamePlatform'
-import type {VendorGame} from '@/types/api'
+import type {ReloadVendorGameCacheRes, VendorGame} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
 
 const {t} = useI18n()
@@ -171,6 +171,29 @@ const canBatchOnShelf = computed(() => selectedRows.value.some(row => !row.onShe
 const canBatchOffShelf = computed(() => selectedRows.value.some(row => row.onShelf))
 
 const vendorGameRowKey = (row: VendorGame) => `${row.gameCode}@${row.platform}`
+const vendorSyncPollIntervalMs = 2000
+const vendorSyncPollMaxAttempts = 900
+
+const waitForVendorSync = async (): Promise<ReloadVendorGameCacheRes> => {
+  for (let attempt = 0; attempt < vendorSyncPollMaxAttempts; attempt += 1) {
+    await new Promise(resolve => window.setTimeout(resolve, vendorSyncPollIntervalMs))
+    const status = await gamePlatformApi.reloadVendorGameCache({statusOnly: true}) as unknown as ReloadVendorGameCacheRes
+    if (!status.running) {
+      return status
+    }
+  }
+  throw new Error('vendor game sync polling timed out')
+}
+
+const applyVendorSyncResult = async (result: ReloadVendorGameCacheRes) => {
+  if (!result.success) {
+    ElMessage.error(result.errorMessage || t('pages.gameList.syncFailed'))
+    return
+  }
+  ElMessage.success(t('pages.gameList.syncSuccess', {count: result.count || 0}))
+  currentPage.value = 1
+  await fetchList()
+}
 
 const fetchList = async () => {
   loading.value = true
@@ -223,14 +246,9 @@ const handleSyncVendorLibrary = async () => {
   }
   syncing.value = true
   try {
-    const response = await gamePlatformApi.reloadVendorGameCache()
-    if (response?.success) {
-      ElMessage.success(t('pages.gameList.syncSuccess', {count: response.count || 0}))
-      currentPage.value = 1
-      await fetchList()
-    } else {
-      ElMessage.error(t('pages.gameList.syncFailed'))
-    }
+    const response = await gamePlatformApi.reloadVendorGameCache() as unknown as ReloadVendorGameCacheRes
+    const result = response.running ? await waitForVendorSync() : response
+    await applyVendorSyncResult(result)
   } catch (error) {
     console.error('sync vendor game library failed:', error)
     ElMessage.error(t('pages.gameList.syncFailed'))
@@ -239,8 +257,20 @@ const handleSyncVendorLibrary = async () => {
   }
 }
 
-onMounted(() => {
-  fetchList()
+onMounted(async () => {
+  await fetchList()
+  try {
+    const status = await gamePlatformApi.reloadVendorGameCache({statusOnly: true}) as unknown as ReloadVendorGameCacheRes
+    if (!status.running) {
+      return
+    }
+    syncing.value = true
+    await applyVendorSyncResult(await waitForVendorSync())
+  } catch (error) {
+    console.error('restore vendor game sync status failed:', error)
+  } finally {
+    syncing.value = false
+  }
 })
 
 const handleSizeChange = (size: number) => {

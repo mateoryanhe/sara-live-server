@@ -13,7 +13,7 @@ const (
 type GameCfg struct {
 	migrate.OneModel
 	GameCode      string `gorm:"uniqueIndex;size:64;comment:游戏编码" json:"gameCode"`
-	Cover         string `gorm:"size:512;default:'';comment:封面" json:"cover"`
+	Cover         string `gorm:"size:512;default:'';comment:自有资源封面对象路径" json:"cover"`
 	NameEn        string `gorm:"size:128;default:'';comment:英文名称" json:"nameEn"`
 	LiveGameName  string `gorm:"size:128;default:'';comment:直播游戏名称" json:"liveGameName"`
 	LiveGameCover string `gorm:"size:512;default:'';comment:直播游戏封面" json:"liveGameCover"`

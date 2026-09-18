@@ -18,6 +18,7 @@ func InitUserInfoDao() {
 	initUserCumulativeStatDao()
 	initUserExtDao()
 	initEmailUserIdCache()
+	initFirebaseUserIdCache()
 	initUserRechargeCfgFirstRechargeDao()
 }
 

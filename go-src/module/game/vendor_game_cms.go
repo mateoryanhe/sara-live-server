@@ -42,16 +42,13 @@ func GetVendorGameList(_ context.Context, req *gameplatformdto.VendorGameListReq
 	return httpserver.NewCMSQueryResp(total, list), nil
 }
 
-// ReloadVendorGameCacheCMS 从第三方全量同步游戏库表.
-func ReloadVendorGameCacheCMS(ctx context.Context, _ *gameplatformdto.ReloadVendorGameCacheReq) (*gameplatformdto.ReloadVendorGameCacheRes, error) {
-	count, err := SyncVendorGameLibraryFromVendor(ctx)
-	if err != nil {
-		return nil, err
+// ReloadVendorGameCacheCMS 启动后台串行同步，或读取当前同步状态.
+func ReloadVendorGameCacheCMS(_ context.Context, req *gameplatformdto.ReloadVendorGameCacheReq) (*gameplatformdto.ReloadVendorGameCacheRes, error) {
+	if req != nil && req.StatusOnly {
+		return getVendorGameSyncJobResponse(), nil
 	}
-	return &gameplatformdto.ReloadVendorGameCacheRes{
-		Success: true,
-		Count:   count,
-	}, nil
+	response, _ := startVendorGameSyncJob()
+	return response, nil
 }
 
 func toVendorGameListItem(row *VendorGame, shelfSet map[string]struct{}) *gameplatformdto.VendorGameListItem {

@@ -161,7 +161,7 @@ if /i "%REMOTE_DIR%"=="/" (
 
 REM ---------- Upload and extract ----------
 echo [4/5] Uploading to server...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "mkdir -p '%REMOTE_DIR%'"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "mkdir -p '%REMOTE_DIR%' '%REMOTE_STAGE%'"
 if errorlevel 1 (
     echo Error: Failed to prepare remote directory
     del "%ZIP_FILE%"
@@ -169,9 +169,10 @@ if errorlevel 1 (
     exit /b 1
 )
 
-pscp.exe -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% "%ZIP_FILE%" %REMOTE_USER%@%REMOTE_HOST%:/tmp/%ZIP_FILE%
+pscp.exe -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% "%ZIP_FILE%" %REMOTE_USER%@%REMOTE_HOST%:%REMOTE_STAGE%/%ZIP_FILE%
 if errorlevel 1 (
     echo Error: Zip upload failed
+    plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "rm -f %REMOTE_STAGE%/%ZIP_FILE%"
     del "%ZIP_FILE%"
     pause
     exit /b 1
@@ -179,10 +180,10 @@ if errorlevel 1 (
 
 REM 解压到临时目录后仅覆盖包内顶层文件/目录，保留 log-query-export 等服务器侧目录
 REM unzip 在仅有 warning 时返回 1，需与真正失败区分
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "STAGE=/tmp/cms-stage-$$; REMOTE='%REMOTE_DIR%'; ZIP=/tmp/%ZIP_FILE%; rm -rf $STAGE; mkdir -p $STAGE $REMOTE; unzip -o $ZIP -d $STAGE; ec=$?; if [ $ec -ne 0 ] && [ $ec -ne 1 ]; then rm -rf $STAGE; rm -f $ZIP; exit $ec; fi; for f in $STAGE/*; do [ -e $f ] || continue; rm -rf $REMOTE/$(basename $f); done; cp -a $STAGE/. $REMOTE/; rm -rf $STAGE; rm -f $ZIP; test -f $REMOTE/index.html"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "STAGE=%REMOTE_STAGE%/cms-stage-$$; REMOTE='%REMOTE_DIR%'; ZIP=%REMOTE_STAGE%/%ZIP_FILE%; cleanup() { rm -rf $STAGE; rm -f $ZIP; }; trap cleanup EXIT HUP INT TERM; mkdir -p $STAGE $REMOTE; unzip -oq $ZIP -d $STAGE </dev/null; ec=$?; if [ $ec -ne 0 ] && [ $ec -ne 1 ]; then exit $ec; fi; for f in $STAGE/*; do [ -e $f ] || continue; rm -rf $REMOTE/$(basename $f); done; cp -a $STAGE/. $REMOTE/; test -f $REMOTE/index.html"
 if errorlevel 1 (
     echo Error: Remote extraction failed or index.html missing. Details:
-    plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "ls -la '%REMOTE_DIR%' 2>&1; ls -la /tmp/%ZIP_FILE% 2>&1; unzip -t /tmp/%ZIP_FILE% 2>&1 || true"
+    plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch %REMOTE_USER%@%REMOTE_HOST% "df -h '%REMOTE_STAGE%' '%REMOTE_DIR%' 2>&1; ls -la '%REMOTE_DIR%' 2>&1; ls -la %REMOTE_STAGE%/%ZIP_FILE% 2>&1; unzip -t %REMOTE_STAGE%/%ZIP_FILE% 2>&1 </dev/null || true"
     del "%ZIP_FILE%"
     pause
     exit /b 1

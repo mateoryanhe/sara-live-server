@@ -972,6 +972,12 @@ export interface GuildTransferCountryOption {
     region: string
     accountTypes: string[]
     wallets?: Array<{code: string; name: string}>
+    methods: Array<{
+        accountType: string
+        bankCode: string
+        limit: string
+        description: string
+    }>
     icon?: string
 }
 
@@ -1824,6 +1830,31 @@ export interface SaveGooglePlayCfgRes {
     id: string
 }
 
+export interface FirebaseCfg {
+    id: string
+    projectId: string
+    clientConfigJson: string
+    serviceAccountJson: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetFirebaseCfgRes {
+    cfg: FirebaseCfg | null
+}
+
+export interface SaveFirebaseCfgReq {
+    id?: number
+    projectId: string
+    clientConfigJson: string
+    serviceAccountJson: string
+}
+
+export interface SaveFirebaseCfgRes {
+    success: boolean
+    id: string
+}
+
 export interface HaiPayCfg {
     id: string
     apiHost: string
@@ -2160,6 +2191,13 @@ export interface AddGameShelfRes {
 export interface ReloadVendorGameCacheRes {
     success: boolean
     count: number
+    running: boolean
+    started: boolean
+    errorMessage: string
+}
+
+export interface ReloadVendorGameCacheReq {
+    statusOnly?: boolean
 }
 
 export interface UploadResourceCfg {

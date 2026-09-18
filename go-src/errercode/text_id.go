@@ -113,6 +113,8 @@ func init() {
 		ChannelPayCurrencyNotSupported:  "Mata uang pembayaran saluran belum didukung",
 		EmailAlreadyInUse:               "Email sudah digunakan",
 		EmailAlreadyBound:               "Akun sudah terikat email",
-		DeviceAccountRegisterLimit:     "Jumlah akun di perangkat ini telah mencapai batas",
+		DeviceAccountRegisterLimit:      "Jumlah akun di perangkat ini telah mencapai batas",
+		FirebaseAlreadyInUse:            "Akun Firebase sudah digunakan",
+		FirebaseAlreadyBound:            "Akun sudah terikat dengan akun Firebase",
 	}
 }

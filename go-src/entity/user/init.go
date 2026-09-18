@@ -9,6 +9,7 @@ func Init() {
 	initUserRechargeCfgFirstRecharge()
 	initUserCumulativeStat()
 	initCurrencyLog()
+	initCoinMerchantGoldTransferLog()
 	initUserAttributionReport()
 	initRandomNickname()
 	initWalletExchangeCfg()

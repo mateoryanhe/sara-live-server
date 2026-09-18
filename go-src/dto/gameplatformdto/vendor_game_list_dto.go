@@ -28,11 +28,15 @@ type VendorGameListItem struct {
 
 // ReloadVendorGameCacheReq CMS 从第三方全量同步游戏库
 type ReloadVendorGameCacheReq struct {
-	g.Meta `path:"/reloadVendorGameCache" method:"post" summary:"从第三方全量同步游戏库" tags:"游戏平台配置"`
+	g.Meta     `path:"/reloadVendorGameCache" method:"post" summary:"从第三方全量同步游戏库" tags:"游戏平台配置"`
+	StatusOnly bool `json:"statusOnly" dc:"仅查询当前同步状态"`
 }
 
 // ReloadVendorGameCacheRes CMS 重新拉取结果
 type ReloadVendorGameCacheRes struct {
-	Success bool `json:"success"`
-	Count   int  `json:"count"`
+	Success      bool   `json:"success"`
+	Count        int    `json:"count"`
+	Running      bool   `json:"running"`
+	Started      bool   `json:"started"`
+	ErrorMessage string `json:"errorMessage"`
 }

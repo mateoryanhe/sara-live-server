@@ -24,3 +24,8 @@ func (c *AuthAppController) PhoneChangePassword(ctx context.Context, req *authdt
 func (c *AuthAppController) BindEmail(ctx context.Context, req *authdto.BindEmailReq) (*authdto.BindEmailRes, error) {
 	return auth.BindEmail(ctx, req)
 }
+
+// BindFirebase App端绑定 Firebase 账号（需登录+有效 Firebase ID Token）。
+func (c *AuthAppController) BindFirebase(ctx context.Context, req *authdto.BindFirebaseReq) (*authdto.BindFirebaseRes, error) {
+	return auth.BindFirebase(ctx, req)
+}

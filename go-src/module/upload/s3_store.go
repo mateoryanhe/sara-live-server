@@ -23,6 +23,8 @@ import (
 
 const defaultS3Region = "auto"
 
+const s3StreamUploadConcurrency = 1
+
 const (
 	StoreCatImages     = "images"
 	StoreCatShortVideo = "shortvideo"
@@ -130,7 +132,8 @@ func contentTypeByExt(ext string) string {
 	return "application/octet-stream"
 }
 
-func putStreamToS3(storedName string, body io.Reader) error {
+// putStreamToS3 上传长度未知的流。并发设为 1，将单次上传缓冲限制在最小 S3 分片范围。
+func putStreamToS3(ctx context.Context, storedName string, body io.Reader) error {
 	client, bucket, err := getS3Client()
 	if err != nil {
 		return err
@@ -139,8 +142,13 @@ func putStreamToS3(storedName string, body io.Reader) error {
 	if key == "" {
 		return errors.New("empty s3 object key")
 	}
-	ctx := gctx.New()
-	uploader := manager.NewUploader(client)
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	uploader := manager.NewUploader(client, func(u *manager.Uploader) {
+		u.PartSize = manager.MinUploadPartSize
+		u.Concurrency = s3StreamUploadConcurrency
+	})
 	_, err = uploader.Upload(ctx, &s3.PutObjectInput{
 		Bucket:      aws.String(bucket),
 		Key:         aws.String(key),
@@ -154,13 +162,44 @@ func putStreamToS3(storedName string, body io.Reader) error {
 	return nil
 }
 
+// putSizedStreamToS3 上传长度已知的流，直接 PutObject，避免 Uploader 预读 5MB 分片。
+func putSizedStreamToS3(ctx context.Context, storedName string, body io.Reader, size int64) error {
+	client, bucket, err := getS3Client()
+	if err != nil {
+		return err
+	}
+	key := objectKeyFromStored(storedName)
+	if key == "" {
+		return errors.New("empty s3 object key")
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	_, err = client.PutObject(ctx, &s3.PutObjectInput{
+		Bucket:        aws.String(bucket),
+		Key:           aws.String(key),
+		Body:          body,
+		ContentLength: aws.Int64(size),
+		ContentType:   aws.String(contentTypeByExt(filepath.Ext(storedName))),
+	})
+	if err != nil {
+		g.Log().Warningf(ctx, "s3 PutObject stream failed key=%s size=%d err=%v", key, size, err)
+		return err
+	}
+	return nil
+}
+
 func putLocalFileToS3(storedName, localPath string) error {
 	f, err := os.Open(localPath)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	return putStreamToS3(storedName, f)
+	info, err := f.Stat()
+	if err != nil {
+		return err
+	}
+	return putSizedStreamToS3(context.Background(), storedName, f, info.Size())
 }
 
 func putBytesToS3(storedName string, data []byte) error {

@@ -16,7 +16,7 @@ type VendorGameLib struct {
 	Name     string `gorm:"size:128;default:'';comment:中文名称" json:"name"`
 	NameEn   string `gorm:"size:128;default:'';comment:英文名称" json:"nameEn"`
 	Category string `gorm:"size:64;default:'';comment:分类" json:"category"`
-	Cover    string `gorm:"size:512;default:'';comment:封面相对路径" json:"cover"`
+	Cover    string `gorm:"size:512;default:'';comment:自有资源封面对象路径" json:"cover"`
 	Platform string `gorm:"uniqueIndex:idx_vendor_game_lib_code_platform;size:32;default:'';comment:平台编码" json:"platform"`
 }
 

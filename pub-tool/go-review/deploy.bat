@@ -127,9 +127,14 @@ echo Uploading deployment package to %REMOTE_STAGE%...
 
 REM 审核服 /tmp 为 tmpfs 仅 ~479MB,大文件上传到磁盘 staging
 plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "mkdir -p %REMOTE_STAGE%"
+if %errorlevel% neq 0 (
+    echo Error: Failed to prepare remote staging directory %REMOTE_STAGE%
+    exit /b 1
+)
 pscp.exe -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% "%DEPLOY_PACKAGE%" %REMOTE_USER%@%REMOTE_HOST%:%REMOTE_STAGE%/deploy_package.zip
 if %errorlevel% neq 0 (
     echo Error: File upload failed
+    plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "rm -f %REMOTE_STAGE%/deploy_package.zip"
     exit /b 1
 )
 
@@ -138,15 +143,15 @@ echo Preparing remote directory...
 plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "sudo mkdir -p %REMOTE_DIR% && sudo chown -R %REMOTE_USER%:%REMOTE_USER% %REMOTE_DIR% && rm -f %REMOTE_DIR%/%APP_NAME% %REMOTE_DIR%/config.yaml %REMOTE_DIR%/%APP_NAME%.log %REMOTE_DIR%/deploy_package.zip"
 if %errorlevel% neq 0 (
     echo Error: Failed to prepare remote directory %REMOTE_DIR%
+    plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "rm -f %REMOTE_STAGE%/deploy_package.zip"
     exit /b 1
 )
 
-REM Extract deployment package from staging into target directory
+REM Extract non-interactively; the trap removes the remote package on success, error or interruption
 echo Extracting deployment package...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "unzip -o %REMOTE_STAGE%/deploy_package.zip -d %REMOTE_DIR% && rm -f %REMOTE_STAGE%/deploy_package.zip"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "ZIP=%REMOTE_STAGE%/deploy_package.zip; cleanup() { rm -f $ZIP; }; trap cleanup EXIT HUP INT TERM; unzip -oq $ZIP -d %REMOTE_DIR% </dev/null"
 if %errorlevel% neq 0 (
     echo Error: Remote extraction failed
-    plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "rm -f %REMOTE_STAGE%/deploy_package.zip"
     exit /b 1
 )
 

@@ -6,8 +6,8 @@ import (
 	"xr-game-server/dao/cfgdao"
 )
 
-// repairShelfPlatformFromVendorLibrary 游戏库同步后, 用 vendorGame.Platform 修正已上架记录.
-func repairShelfPlatformFromVendorLibrary() {
+// repairShelfMetadataFromVendorLibrary 游戏库同步后更新已上架游戏的第三方元数据.
+func repairShelfMetadataFromVendorLibrary() {
 	updated := false
 	for _, row := range cfgdao.GetAllGameCfgFromMemory() {
 		if row == nil {
@@ -18,14 +18,19 @@ func repairShelfPlatformFromVendorLibrary() {
 			continue
 		}
 		platform := strings.TrimSpace(libRow.Platform)
-		if platform == "" || platform == strings.TrimSpace(row.Platform) {
-			continue
+		cover := strings.TrimSpace(libRow.Cover)
+		if platform != "" && platform != strings.TrimSpace(row.Platform) {
+			ok, err := cfgdao.SetGameCfgPlatform(row.GameCode, platform)
+			if err == nil && ok {
+				updated = true
+			}
 		}
-		ok, err := cfgdao.SetGameCfgPlatform(row.GameCode, platform)
-		if err != nil || !ok {
-			continue
+		if cover != strings.TrimSpace(row.Cover) {
+			ok, err := cfgdao.SetGameCfgCover(row.GameCode, cover)
+			if err == nil && ok {
+				updated = true
+			}
 		}
-		updated = true
 	}
 	if updated {
 		cfgdao.ReloadGameCfgCache()

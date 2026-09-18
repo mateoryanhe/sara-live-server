@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/golddto"
 	"xr-game-server/module/wallet"
@@ -21,4 +22,9 @@ func (c *GoldAppController) ExchangeGoldToDiamond(ctx context.Context, req *gold
 // TransferGold App端转赠金币给指定用户(币商扣款,目标用户到账)
 func (c *GoldAppController) TransferGold(ctx context.Context, req *golddto.AppTransferGoldReq) (*golddto.AppTransferGoldRes, error) {
 	return wallet.AppTransferGold(ctx, req)
+}
+
+// GetCoinMerchantTransferRecordList App端分页查询当前币商的金币转账记录。
+func (c *GoldAppController) GetCoinMerchantTransferRecordList(ctx context.Context, req *golddto.AppCoinMerchantGoldTransferRecordListReq) (*golddto.AppCoinMerchantGoldTransferRecordListRes, error) {
+	return wallet.GetAppCoinMerchantGoldTransferRecordList(ctx, req)
 }

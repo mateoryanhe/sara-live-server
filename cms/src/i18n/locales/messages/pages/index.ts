@@ -71,6 +71,7 @@ import {preloadCfgMessages} from './preload-cfg'
 import {textModerationMessages} from './text-moderation'
 import {privacyPolicyMessages} from './privacy-policy'
 import {googlePlayMessages} from './google-play'
+import {firebaseMessages} from './firebase'
 import {haipayMessages} from './haipay'
 import {cfEmailMessages} from './cf-email'
 import {dbBackupMessages} from './db-backup'
@@ -156,6 +157,7 @@ const pageMessageBuilders = [
   ['textModeration', textModerationMessages],
   ['privacyPolicy', privacyPolicyMessages],
   ['googlePlay', googlePlayMessages],
+  ['firebase', firebaseMessages],
   ['haipay', haipayMessages],
   ['cfEmail', cfEmailMessages],
   ['dbBackup', dbBackupMessages],

@@ -21,6 +21,13 @@
 | `直播审核服` | ec2-user @ 18.144.165.177 | 审核专用（~1GB RAM） |
 | `直播测试服-h5` | h5-live @ 54.241.124.37 | H5/SFTP |
 
+### SSH 密钥与连接方式
+
+- OpenSSH 已在 `C:\Users\hw\.ssh\config` 配置主机别名；查询日志时优先直接使用 `ssh 直播测试服`、`ssh 直播审核服`、`ssh 直播正式服`，不要改用 IP 绕过别名。
+- 上述 OpenSSH 别名使用私钥 `D:\root\1v1.pem`。
+- PuTTY 部署脚本使用测试服密钥 `D:\tools\ppk\live-test.ppk`；仅运行既有 `plink.exe` / `pscp.exe` 脚本时使用该 PPK。
+- 只读日志查询无需再次询问；部署、重启、删除和数据库写操作仍按 `server-safety.mdc` 执行。
+
 ## 审核服 MariaDB（2026-08-28）
 
 - **机器**：1 vCPU / ~957MiB RAM / 30G 盘；已加 **512MiB swap**（`vm.swappiness=10`）
@@ -29,12 +36,13 @@
 - **内存**：`innodb_buffer_pool_size=96M`，`max_connections=20`，`performance_schema=OFF`，无 binlog
 - Go 连接串（与 dev 同格式）：`mysql:root:***@tcp(127.0.0.1:13307)/live_db`
 
-## 审核服磁盘与 /tmp（2026-08-29）
+## 服务器磁盘与 /tmp（2026-09-18）
 
-- **`/tmp` 为 tmpfs ~479MB**（约半内存），**勿用于 800MB+ 传输**（会写满失败）
+- 审核服 **`/tmp` 为 tmpfs ~479MB**，测试服 **`/tmp` 为 tmpfs ~457MB**；压缩包与解压目录同时存在时很容易写满
 - 大文件/压缩包：用 **`/home/ec2-user/staging`** 中转，解压到目标如 **`/home/ec2-user/cdn/images`**
 - 根盘 `/` 约 30G，剩余空间充足；**不宜扩大 /tmp**（受内存限制，扩了易 OOM）
-- 已改脚本：`go-review/deploy.bat`、`cms-review/upload.bat`、`avatars-审核服/upload.bat` 均走 staging
+- Go/CMS 的测试、审核、正式发版脚本均走 staging，解压为非交互模式，并在成功、失败或中断时清理远端包和临时目录
+- CMS 的 `D:\root\cms` 位于 Vite 项目根目录之外，必须保持 `emptyOutDir: true`，避免旧 hash 资源累积进发版包
 
 ## 审核服 cdn/images 被秒清（2026-08-31）
 

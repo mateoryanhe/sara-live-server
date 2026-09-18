@@ -24,6 +24,7 @@ func CancelUser(ctx context.Context, req *accountdto.CancelReq) (bool, error) {
 	account.SetCancel(true)
 	accountdao.PublishAccountList(req.OpenId, req.Channel)
 	invalidateEmailIndexOnCancel(req.OpenId, req.Channel, req.AccountId)
+	invalidateFirebaseIndexOnCancel(req.OpenId, req.Channel, req.AccountId)
 	invalidateAppToken(req.AccountId)
 	push.Kick(req.AccountId)
 	return true, nil
@@ -50,10 +51,20 @@ func UnCancelUser(ctx context.Context, req *accountdto.UnCancelReq) (bool, error
 	if err := ensureEmailAvailable(email, req.AccountId); err != nil {
 		return false, err
 	}
+	firebaseUID := accountBoundFirebaseUID(req.AccountId)
+	if firebaseUID == "" && req.Channel == FirebaseChannel {
+		firebaseUID = normalizeFirebaseUID(req.OpenId)
+	}
+	if err := ensureFirebaseUIDAvailable(firebaseUID, req.AccountId); err != nil {
+		return false, err
+	}
 	account.SetCancel(false)
 	accountdao.PublishAccountList(req.OpenId, req.Channel)
 	if email != "" {
 		userinfodao.PublishEmailUserIdCache(email, req.AccountId)
+	}
+	if firebaseUID != "" {
+		userinfodao.PublishFirebaseUserIdCache(firebaseUID, req.AccountId)
 	}
 	return true, nil
 }
@@ -92,9 +103,20 @@ func doAppCancelAccount(accountId uint64) error {
 	accountdao.PublishAccountList(dbAcc.OpenId, dbAcc.Channel)
 	recordAppCancelAccountSuccess(dbAcc.OpenId, dbAcc.Channel)
 	invalidateEmailIndexOnCancel(dbAcc.OpenId, dbAcc.Channel, accountId)
+	invalidateFirebaseIndexOnCancel(dbAcc.OpenId, dbAcc.Channel, accountId)
 	invalidateAppToken(accountId)
 	push.Kick(accountId)
 	return nil
+}
+
+func invalidateFirebaseIndexOnCancel(openId string, channel uint, accountId uint64) {
+	if firebaseUID := accountBoundFirebaseUID(accountId); firebaseUID != "" {
+		userinfodao.InvalidateFirebaseUserIdCache(firebaseUID)
+		return
+	}
+	if channel == FirebaseChannel {
+		userinfodao.InvalidateFirebaseUserIdCache(openId)
+	}
 }
 
 func invalidateEmailIndexOnCancel(openId string, channel uint, accountId uint64) {

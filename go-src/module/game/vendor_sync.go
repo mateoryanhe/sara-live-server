@@ -20,6 +20,11 @@ func SyncVendorGameLibraryFromVendor(ctx context.Context) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	games = dedupeVendorGames(games)
+	if err := mirrorVendorGameCovers(ctx, games); err != nil {
+		vendorDetailLog().Errorf(ctx, "sync vendor game covers failed err=%v", err)
+		return 0, err
+	}
 	now := time.Now()
 	rows := make([]*entity.VendorGameLib, 0, len(games))
 	for _, game := range games {
@@ -31,9 +36,31 @@ func SyncVendorGameLibraryFromVendor(ctx context.Context) (int, error) {
 	if err := cfgdao.ReplaceAllVendorGameLibs(rows); err != nil {
 		return 0, err
 	}
-	repairShelfPlatformFromVendorLibrary()
+	repairShelfMetadataFromVendorLibrary()
 	vendorDetailLog().Infof(ctx, "sync vendor game library done total=%d", len(rows))
 	return len(rows), nil
+}
+
+func dedupeVendorGames(games []*VendorGame) []*VendorGame {
+	result := make([]*VendorGame, 0, len(games))
+	seen := make(map[string]struct{}, len(games))
+	for _, game := range games {
+		if game == nil {
+			continue
+		}
+		gameCode := strings.TrimSpace(game.GameCode)
+		if gameCode == "" {
+			continue
+		}
+		platform := strings.TrimSpace(game.Platform)
+		key := gameCode + "\x00" + platform
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		result = append(result, game)
+	}
+	return result
 }
 
 // GetVendorGameFromLibrary 从游戏库表读取游戏.

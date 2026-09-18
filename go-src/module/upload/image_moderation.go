@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"path/filepath"
@@ -273,7 +274,23 @@ func RequireAppImageCompliant(ctx context.Context, fileName string) error {
 
 // UploadImageForApp App 端上传:按云桶开关落云或本地,再 ImageModeration 审核,违规则删文件并返回错误码
 func UploadImageForApp(ctx context.Context, file *ghttp.UploadFile) (string, error) {
-	name, _, err := saveUploadedImageFile(file, int64(GetAppImageMaxSize()))
+	name, _, err := saveUploadedImageFileWithContext(ctx, file, int64(GetAppImageMaxSize()))
+	if err != nil {
+		if IsUploadImageFileTooLarge(err) {
+			return "", errercode.CreateCode(errercode.AppImageFileTooLarge)
+		}
+		return "", err
+	}
+	if err := RequireAppImageCompliant(ctx, name); err != nil {
+		DeleteUploadedFile(name)
+		return "", err
+	}
+	return name, nil
+}
+
+// UploadImagePartForApp 将 multipart 图片流直接写入存储并执行 App 图片审核。
+func UploadImagePartForApp(ctx context.Context, part *multipart.Part, maxBytes int64) (string, error) {
+	name, err := StreamUploadImagePartContext(ctx, part, maxBytes)
 	if err != nil {
 		if IsUploadImageFileTooLarge(err) {
 			return "", errercode.CreateCode(errercode.AppImageFileTooLarge)
@@ -289,6 +306,10 @@ func UploadImageForApp(ctx context.Context, file *ghttp.UploadFile) (string, err
 
 // saveUploadedImageFile 校验并保存图片,返回存储名与本地绝对路径;maxBytes 为 0 时不限制大小
 func saveUploadedImageFile(file *ghttp.UploadFile, maxBytes int64) (name, fullPath string, err error) {
+	return saveUploadedImageFileWithContext(context.Background(), file, maxBytes)
+}
+
+func saveUploadedImageFileWithContext(ctx context.Context, file *ghttp.UploadFile, maxBytes int64) (name, fullPath string, err error) {
 	if file == nil {
 		return "", "", fmt.Errorf("upload file is empty")
 	}
@@ -301,5 +322,5 @@ func saveUploadedImageFile(file *ghttp.UploadFile, maxBytes int64) (name, fullPa
 		return "", "", err
 	}
 	defer src.Close()
-	return storeUploadedContent(src, StoreCatImages, ext, maxBytes, errImageFileTooLarge)
+	return storeUploadedContentWithSize(ctx, src, file.Size, StoreCatImages, ext, maxBytes, errImageFileTooLarge)
 }

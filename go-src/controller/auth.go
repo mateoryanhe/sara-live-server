@@ -41,6 +41,10 @@ func (s *AuthController) EmailLogin(ctx context.Context, req *authdto.EmailLogin
 	return auth.EmailLogin(ctx, req)
 }
 
+func (s *AuthController) FirebaseLogin(ctx context.Context, req *authdto.FirebaseLoginReq) (*authdto.FirebaseLoginRes, error) {
+	return auth.FirebaseLogin(ctx, req)
+}
+
 func (s *AuthController) PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (*authdto.PhoneRegisterRes, error) {
 	return auth.PhoneRegister(ctx, req)
 }
