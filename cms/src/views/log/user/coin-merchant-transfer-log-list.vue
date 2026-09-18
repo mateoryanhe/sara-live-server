@@ -81,7 +81,7 @@
             <span v-else>{{ row.targetUserId || '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="t('pages.coinMerchantTransferLogList.targetAvatar')" width="88">
+        <el-table-column :label="t('pages.coinMerchantTransferLogList.targetAvatar')" width="120">
           <template #default="{ row }">
             <el-image
                 v-if="row.targetAvatar"
