@@ -41,7 +41,6 @@ func toCMSItem(v *entity.LiveRecord) *liverecorddto.CMSLiveRecordItem {
 		TotalPrivateRoomTicketIncome: v.TotalPrivateRoomTicketIncome,
 		TotalPrivateRoomWatchIncome:  v.TotalPrivateRoomWatchIncome,
 		TotalVideoCallIncome:         v.TotalVideoCallIncome,
-		TotalVideoCallTicketIncome:   v.TotalVideoCallTicketIncome,
 		TotalVideoCallBillingIncome:  v.TotalVideoCallBillingIncome,
 		TotalGameBet:                 v.TotalGameBet,
 		TotalGiftSender:              v.TotalGiftSender,

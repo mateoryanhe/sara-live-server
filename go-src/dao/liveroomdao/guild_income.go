@@ -11,10 +11,10 @@ import (
 )
 
 var (
-	guildIncomeUnsettledCache = gmap.NewKVMap[uint64, *entity.GuildIncomeUnsettled](false)
-	guildIncomeSettledCache   = gmap.NewKVMap[uint64, *entity.GuildIncomeSettled](false)
-	guildIncomeTotalCache     = gmap.NewKVMap[uint64, *entity.GuildIncomeTotal](false)
-	guildWeeklyAnchorSalary       = gmap.NewKVMap[uint64, float64](false)
+	guildIncomeUnsettledCache       = gmap.NewKVMap[uint64, *entity.GuildIncomeUnsettled](false)
+	guildIncomeSettledCache         = gmap.NewKVMap[uint64, *entity.GuildIncomeSettled](false)
+	guildIncomeTotalCache           = gmap.NewKVMap[uint64, *entity.GuildIncomeTotal](false)
+	guildWeeklyAnchorSalary         = gmap.NewKVMap[uint64, float64](false)
 	guildWeeklyAnchorShareAmountUsd = gmap.NewKVMap[uint64, float64](false)
 )
 
@@ -247,7 +247,7 @@ func MirrorGuildLiveDuration(roomId uint64, sec float64) {
 }
 
 // MirrorGuildVideoCallIncomeDelta 同步通话收益增减到工会
-func MirrorGuildVideoCallIncomeDelta(roomId uint64, amount float64, ticket, billing bool) {
+func MirrorGuildVideoCallIncomeDelta(roomId uint64, amount float64) {
 	at := time.Now()
 	ForRoomGuild(roomId, func(guildId uint64) {
 		unsettled := GetGuildIncomeUnsettled(guildId)
@@ -255,9 +255,9 @@ func MirrorGuildVideoCallIncomeDelta(roomId uint64, amount float64, ticket, bill
 		if unsettled == nil || total == nil {
 			return
 		}
-		entity.ApplyVideoCallIncomeDelta(entity.TbGuildIncomeUnsettled, unsettled.ID, &unsettled.LiveRoomIncomeAmounts, &unsettled.UpdatedAt, amount, ticket, billing)
-		entity.ApplyVideoCallIncomeDelta(entity.TbGuildIncomeTotal, total.ID, &total.LiveRoomIncomeAmounts, &total.UpdatedAt, amount, ticket, billing)
-		MirrorDailyGuildVideoCallIncomeDelta(guildId, at, amount, ticket, billing)
+		entity.ApplyVideoCallIncomeDelta(entity.TbGuildIncomeUnsettled, unsettled.ID, &unsettled.LiveRoomIncomeAmounts, &unsettled.UpdatedAt, amount)
+		entity.ApplyVideoCallIncomeDelta(entity.TbGuildIncomeTotal, total.ID, &total.LiveRoomIncomeAmounts, &total.UpdatedAt, amount)
+		MirrorDailyGuildVideoCallIncomeDelta(guildId, at, amount)
 	})
 }
 

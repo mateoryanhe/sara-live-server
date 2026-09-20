@@ -185,7 +185,6 @@ func videoCallLogToCSVRow(v *callentity.CallOrder, nicknameMap map[uint64]string
 		formatCSVTimePtr(v.ReceiverHeartTime),
 		formatCSVTimePtr(v.OrderEndTime),
 		strconv.FormatUint(uint64(v.CallDuration), 10),
-		formatCSVFloat(v.TicketPrice),
 		formatCSVFloat(v.PricePerMinute),
 		strconv.FormatUint(uint64(v.BillingDuration), 10),
 		formatCSVFloat(v.TotalCost),

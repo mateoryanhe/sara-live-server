@@ -95,7 +95,6 @@ type OffShelfLiveRoomItem struct {
 	TotalPrivateRoomTicketIncome float64    `json:"totalPrivateRoomTicketIncome"`
 	TotalPrivateRoomWatchIncome  float64    `json:"totalPrivateRoomWatchIncome"`
 	TotalVideoCallIncome         float64    `json:"totalVideoCallIncome"`
-	TotalVideoCallTicketIncome   float64    `json:"totalVideoCallTicketIncome"`
 	TotalVideoCallBillingIncome  float64    `json:"totalVideoCallBillingIncome"`
 	UpdatedAt                    *time.Time `json:"updatedAt"`
 	CreatedAt                    *time.Time `json:"createdAt"`

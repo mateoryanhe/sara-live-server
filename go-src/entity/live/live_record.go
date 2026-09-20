@@ -28,7 +28,6 @@ const (
 	LiveRecordTotalPrivateRoomTicketIncome db.TbCol = "total_private_room_ticket_income"
 	LiveRecordTotalPrivateRoomWatchIncome  db.TbCol = "total_private_room_watch_income"
 	LiveRecordTotalVideoCallIncome         db.TbCol = "total_video_call_income"
-	LiveRecordTotalVideoCallTicketIncome   db.TbCol = "total_video_call_ticket_income"
 	LiveRecordTotalVideoCallBillingIncome  db.TbCol = "total_video_call_billing_income"
 	LiveRecordTotalGameBet                 db.TbCol = "total_game_bet"
 	LiveRecordTotalGiftSender              db.TbCol = "total_gift_sender"
@@ -50,7 +49,6 @@ type LiveRecord struct {
 	TotalPrivateRoomTicketIncome float64    `gorm:"type:decimal(10,4);default:0;comment:私密直播间门票收入" json:"totalPrivateRoomTicketIncome"`
 	TotalPrivateRoomWatchIncome  float64    `gorm:"type:decimal(10,4);default:0;comment:私密房观看收入" json:"totalPrivateRoomWatchIncome"`
 	TotalVideoCallIncome         float64    `gorm:"type:decimal(10,4);default:0;comment:直播间视频通话收入" json:"totalVideoCallIncome"`
-	TotalVideoCallTicketIncome   float64    `gorm:"type:decimal(10,4);default:0;comment:直播间视频通话门票收入" json:"totalVideoCallTicketIncome"`
 	TotalVideoCallBillingIncome  float64    `gorm:"type:decimal(10,4);default:0;comment:直播间视频通话计费收入" json:"totalVideoCallBillingIncome"`
 	TotalGameBet                 float64    `gorm:"default:0;comment:游戏下注总金额" json:"totalGameBet"`
 	TotalGiftSender              uint64     `gorm:"default:0;comment:送礼人数(去重)" json:"totalGiftSender"`
@@ -168,12 +166,6 @@ func (r *LiveRecord) AddTotalVideoCallIncome(v float64) {
 	})
 }
 
-func (r *LiveRecord) AddTotalVideoCallTicketIncome(v float64) {
-	r.withLock(func() {
-		r.addFloatLocked(LiveRecordTotalVideoCallTicketIncome, &r.TotalVideoCallTicketIncome, v)
-	})
-}
-
 func (r *LiveRecord) AddTotalVideoCallBillingIncome(v float64) {
 	r.withLock(func() {
 		r.addFloatLocked(LiveRecordTotalVideoCallBillingIncome, &r.TotalVideoCallBillingIncome, v)
@@ -241,16 +233,11 @@ func (r *LiveRecord) AddPrivateRoomWatchEarn(v float64) {
 }
 
 // ApplyVideoCallIncomeDelta 通话收益增减(支持负数退款),内部加锁
-func (r *LiveRecord) ApplyVideoCallIncomeDelta(amount float64, ticket, billing bool) {
+func (r *LiveRecord) ApplyVideoCallIncomeDelta(amount float64) {
 	r.withLock(func() {
 		r.addFloatLocked(LiveRecordTotalIncome, &r.TotalIncome, amount)
 		r.addFloatLocked(LiveRecordTotalVideoCallIncome, &r.TotalVideoCallIncome, amount)
-		if ticket {
-			r.addFloatLocked(LiveRecordTotalVideoCallTicketIncome, &r.TotalVideoCallTicketIncome, amount)
-		}
-		if billing {
-			r.addFloatLocked(LiveRecordTotalVideoCallBillingIncome, &r.TotalVideoCallBillingIncome, amount)
-		}
+		r.addFloatLocked(LiveRecordTotalVideoCallBillingIncome, &r.TotalVideoCallBillingIncome, amount)
 	})
 }
 
@@ -293,7 +280,6 @@ func initLiveRecord() {
 	syndb.RegLazy(TbLiveRecord, LiveRecordTotalPrivateRoomTicketIncome)
 	syndb.RegLazy(TbLiveRecord, LiveRecordTotalPrivateRoomWatchIncome)
 	syndb.RegLazy(TbLiveRecord, LiveRecordTotalVideoCallIncome)
-	syndb.RegLazy(TbLiveRecord, LiveRecordTotalVideoCallTicketIncome)
 	syndb.RegLazy(TbLiveRecord, LiveRecordTotalVideoCallBillingIncome)
 	syndb.RegLazy(TbLiveRecord, LiveRecordTotalGameBet)
 	syndb.RegLazy(TbLiveRecord, LiveRecordTotalGiftSender)

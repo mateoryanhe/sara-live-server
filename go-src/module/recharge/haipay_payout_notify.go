@@ -2,6 +2,7 @@ package recharge
 
 import (
 	"encoding/json"
+	"strconv"
 	"strings"
 	"time"
 
@@ -15,8 +16,7 @@ import (
 // HandleHaiPayPayoutNotify 代付异步通知
 func HandleHaiPayPayoutNotify(r *ghttp.Request) {
 	ctx := r.Context()
-	cfg := cfgdao.GetHaiPayCfgCached()
-	if cfg == nil || !cfg.PayoutEnabled {
+	if !cfgdao.HaiPayEnabled() {
 		r.Response.WriteStatus(503)
 		r.Response.Write([]byte("not configured"))
 		return
@@ -38,7 +38,14 @@ func HandleHaiPayPayoutNotify(r *ghttp.Request) {
 	xrlog.DetailLog.Infof(ctx, "haipay payout notify trigger orderId=%s orderNo=%s notifyStatus=%s",
 		orderId, notifyOrderNo, notifyStatus)
 
-	row := liveroomdao.GetGuildIncomeSettlementLogByTransferOrderId(strings.TrimSpace(orderId))
+	settlementID, err := strconv.ParseUint(strings.TrimSpace(orderId), 10, 64)
+	if err != nil || settlementID == 0 {
+		xrlog.DetailLog.Warningf(ctx, "haipay payout notify invalid settlement orderId=%s err=%v", orderId, err)
+		r.Response.WriteStatus(200)
+		r.Response.Write([]byte("OK"))
+		return
+	}
+	row := liveroomdao.GetGuildIncomeSettlementLogById(settlementID)
 	if row == nil {
 		xrlog.DetailLog.Warningf(ctx, "haipay payout notify settlement not found orderId=%s", orderId)
 		r.Response.WriteStatus(200)
@@ -67,6 +74,7 @@ func HandleHaiPayPayoutNotify(r *ghttp.Request) {
 		row.SetStatus(liveentity.GuildIncomeSettlementStatusTransferred)
 		row.SetTransferAt(&now)
 		row.SetTransferFailMsg("")
+		liveroomdao.PublishGuildIncomeSettlementLog(row)
 	case 3: // 放款失败 → 回审核通过可重试
 		msg := strings.TrimSpace(query.ErrorMsg)
 		if msg == "" {
@@ -74,7 +82,7 @@ func HandleHaiPayPayoutNotify(r *ghttp.Request) {
 		}
 		row.SetStatus(liveentity.GuildIncomeSettlementStatusApproved)
 		row.SetTransferFailMsg(msg)
-		// 保留 TransferOrderId 便于排查;重试会换新单号覆盖
+		liveroomdao.PublishGuildIncomeSettlementLog(row)
 	default:
 		xrlog.DetailLog.Infof(ctx, "haipay payout notify query pending status=%d orderId=%s", query.Status, orderId)
 	}

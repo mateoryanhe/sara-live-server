@@ -39,11 +39,6 @@
               </el-form-item>
 
               <template v-if="isCoinMerchant">
-                <el-form-item :label="t('pages.paymentCountryCfg.appId')" required>
-                  <el-input v-model="editForm.appId" clearable inputmode="numeric" :disabled="!can('edit') || saving"
-                            :placeholder="t('pages.paymentCountryCfg.appIdPlaceholder')"/>
-                </el-form-item>
-
                 <el-form-item :label="t('pages.paymentCountryCfg.paymentType')" required>
                   <el-select v-model="editForm.selectedPayType" clearable filterable
                              :disabled="!can('edit') || saving"
@@ -123,8 +118,7 @@ import {
 } from '@/api/modules/payment-country-cfg'
 import {usePagePermission} from '@/composables/usePagePermission'
 
-type PaymentCountryEditForm = Omit<PaymentCountryCfgItem, 'appId'> & {
-  appId: string
+type PaymentCountryEditForm = PaymentCountryCfgItem & {
   selectedPayType: string
   selectedMethodKey: string
 }
@@ -145,7 +139,6 @@ const saving = ref(false)
 const activeEditTab = ref('config')
 const editForm = ref<PaymentCountryEditForm | null>(null)
 const persistedRow = ref<PaymentCountryCfgItem | null>(null)
-const defaultAppIds = ref<Record<string, number>>({})
 const continent = computed(() => String(route.params.continent || '').trim().toUpperCase())
 const countryCode = computed(() => String(route.params.countryCode || '').trim().toUpperCase())
 const pageTitle = computed(() => t('pages.paymentCountryCfg.editPageTitle', {
@@ -205,7 +198,6 @@ const applyCurrencyDefaults = (form: PaymentCountryEditForm, currencyCode: strin
   const stored = persistedRow.value
   const useStored = !!stored?.id && stored.currencyCode === currencyCode
   const method = useStored ? storedMethodForCurrency(stored, currencyCode) : null
-  form.appId = String(useStored && stored.appId > 0 ? stored.appId : (defaultAppIds.value[currencyCode] || ''))
   form.selectedPayType = method?.payType || ''
   form.selectedMethodKey = method ? methodKey(method) : ''
 }
@@ -213,7 +205,6 @@ const applyCurrencyDefaults = (form: PaymentCountryEditForm, currencyCode: strin
 const buildEditForm = (row: PaymentCountryCfgItem): PaymentCountryEditForm => {
   const form: PaymentCountryEditForm = {
     ...row,
-    appId: '',
     supportedCurrencies: [...row.supportedCurrencies],
     paymentMethods: [...row.paymentMethods],
     selectedPaymentMethods: (row.selectedPaymentMethods || []).map((method) => ({...method})),
@@ -232,7 +223,6 @@ const fetchConfig = async () => {
     const response = isCoinMerchant
         ? await coinMerchantPaymentCountryCfgApi.getConfig()
         : await paymentCountryCfgApi.getConfig()
-    defaultAppIds.value = response.defaultAppIds || {}
     const groups = normalizePaymentCountryCfgGroups(response.continents)
     const group = groups.find((item) => item.continent === continent.value)
     if (!group) {
@@ -268,12 +258,7 @@ const saveConfig = async () => {
   try {
     let response: {success: boolean; id: string}
     if (isCoinMerchant) {
-      const appId = Number(form.appId)
       const method = selectedPaymentMethod.value
-      if (!Number.isSafeInteger(appId) || appId <= 0) {
-        ElMessage.warning(t('pages.paymentCountryCfg.credentialRequired'))
-        return
-      }
       if (!method) {
         ElMessage.warning(t('pages.paymentCountryCfg.methodRequired'))
         return
@@ -281,12 +266,10 @@ const saveConfig = async () => {
       response = await coinMerchantPaymentCountryCfgApi.saveConfig({
         countryCode: form.countryCode,
         currencyCode: form.currencyCode,
-        appId,
         payType: method.payType,
         inBankCode: method.inBankCode,
         enabled: form.enabled,
       })
-      form.appId = String(appId)
       form.selectedPaymentMethods = [{
         currencyCode: form.currencyCode,
         payType: method.payType,
@@ -296,14 +279,12 @@ const saveConfig = async () => {
       response = await paymentCountryCfgApi.saveBasic({
         countryCode: form.countryCode,
         currencyCode: form.currencyCode,
-        appId: 0,
         enabled: form.enabled,
       })
     }
     form.id = response.id || form.id
     persistedRow.value = {
       ...form,
-      appId: Number(form.appId) || 0,
       supportedCurrencies: [...form.supportedCurrencies],
       paymentMethods: [...form.paymentMethods],
       selectedPaymentMethods: form.selectedPaymentMethods.map((method) => ({...method})),

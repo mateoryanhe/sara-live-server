@@ -39,12 +39,8 @@ const zh = {
   operation: '操作',
   basicSettings: '基本配置',
   credentialSettings: '币种账号配置',
-  appId: 'App ID',
-  appIdPlaceholder: '填写所选币种对应的 HaiPay appId',
-  credentialTip: 'appId 按业务类型和币种保存；请求签名统一使用 HaiPay 全局配置中的商户密钥和私钥。',
-  credentialRequired: '启用 App 可见前，必须配置所选币种的 appId',
   methodRequired: '请选择当前代收币种对应的支付类型和支付编码',
-  coinMerchantCombinedTip: '币商代收配置独立保存；代收币种、App ID、支付类型、支付编码和 App 可见性会作为同一条国家配置一起生效。',
+  coinMerchantCombinedTip: '币商代收配置独立保存；服务端按代收币种自动选择固定 AppID，币种、支付类型、支付编码和 App 可见性作为同一条国家配置生效。',
   collectionMethods: '代收方式',
   selected: '已选择',
   selectAtLeastOneMethod: 'App 可见开启时，至少需要新增一种代收方式',
@@ -68,8 +64,8 @@ const zh = {
   saveFailed: '保存代收配置失败',
   fetchFailed: '获取代收配置失败',
   noCountries: '没有匹配的国家/地区',
-  globalCashierTip: '普通用户 App 只上报国家/地区；服务端读取这里选择的代收币种，并使用 HaiPay 全局配置中的收银台 AppId 调用 /global/cashier/collect/apply。',
-  coinMerchantLocalTip: '币商 App 只上报国家/地区；服务端从缓存读取当前币种、AppId 与唯一支付方式，并调用对应本地代收接口。',
+  globalCashierTip: '普通用户 App 只上报国家/地区；服务端读取这里选择的代收币种，并使用固定 CASHIER AppID 调用 /global/cashier/collect/apply。',
+  coinMerchantLocalTip: '币商 App 只上报国家/地区；服务端从缓存读取当前币种和唯一支付方式，按币种选择固定 AppID 后调用对应本地代收接口。',
 }
 
 const en: Record<keyof typeof zh, string> = {
@@ -111,12 +107,8 @@ const en: Record<keyof typeof zh, string> = {
   operation: 'Action',
   basicSettings: 'Basic settings',
   credentialSettings: 'Currency credentials',
-  appId: 'App ID',
-  appIdPlaceholder: 'Enter the HaiPay appId for the selected currency',
-  credentialTip: 'The appId is stored by business type and currency. Request signing uses the merchant secret and private key from the global HaiPay configuration.',
-  credentialRequired: 'Configure the appId for the selected currency before enabling App visibility',
   methodRequired: 'Select the payment type and payment code for the current collection currency',
-  coinMerchantCombinedTip: 'Coin-merchant collection is stored independently. Currency, App ID, payment type, payment code, and App visibility take effect together as one country configuration.',
+  coinMerchantCombinedTip: 'Coin-merchant collection is stored independently. The server selects a fixed AppID by currency; currency, payment type, payment code, and App visibility take effect together.',
   collectionMethods: 'Collection methods',
   selected: 'Selected',
   selectAtLeastOneMethod: 'Add at least one collection method before enabling App visibility',
@@ -140,8 +132,8 @@ const en: Record<keyof typeof zh, string> = {
   saveFailed: 'Failed to save collection config',
   fetchFailed: 'Failed to load collection config',
   noCountries: 'No matching countries or regions',
-  globalCashierTip: 'The standard-user App only reports the country or region. The server reads the selected currency and calls /global/cashier/collect/apply with the Global Cashier AppId.',
-  coinMerchantLocalTip: 'The coin-merchant App only reports the country or region. The server reads the currency, AppId, and single method from cache, then calls the matching local collection endpoint.',
+  globalCashierTip: 'The standard-user App only reports the country or region. The server reads the selected currency and calls /global/cashier/collect/apply with the fixed CASHIER AppID.',
+  coinMerchantLocalTip: 'The coin-merchant App only reports the country or region. The server reads the currency and single method from cache, selects the fixed currency AppID, then calls the matching local endpoint.',
 }
 
 export const paymentCountryCfgMessages = definePageMessagesFromEn(zh, en)

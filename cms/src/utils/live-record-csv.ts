@@ -20,7 +20,6 @@ export function buildLiveRecordCsvColumns(
     {header: t(`${ns}.totalIncome`), value: row => row.totalIncome},
     {header: t(`${ns}.giftIncome`), value: row => row.totalGiftIncome},
     {header: t(`${ns}.paidDanmakuIncome`), value: row => row.totalPaidDanmakuIncome},
-    {header: t(`${ns}.videoTicketIncome`), value: row => row.totalVideoCallTicketIncome},
     {header: t(`${ns}.videoBillingIncome`), value: row => row.totalVideoCallBillingIncome},
     {header: t(`${ns}.videoCallIncome`), value: row => row.totalVideoCallIncome},
     {header: t(`${ns}.giftSenderCount`), value: row => row.totalGiftSender},

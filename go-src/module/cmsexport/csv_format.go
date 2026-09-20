@@ -51,7 +51,7 @@ func formatSettledText(settled bool, yesText, noText string) string {
 
 func incomeAmountCSVCells(amounts *liveentity.LiveRoomIncomeAmounts) []string {
 	if amounts == nil {
-		return []string{"", "", "", "", "", "", "", "", "", "", ""}
+		return []string{"", "", "", "", "", "", "", "", "", ""}
 	}
 	return []string{
 		formatCSVFloat(amounts.TotalIncome),
@@ -60,7 +60,6 @@ func incomeAmountCSVCells(amounts *liveentity.LiveRoomIncomeAmounts) []string {
 		formatCSVFloat(amounts.TotalPrivateRoomTicketIncome),
 		formatCSVFloat(amounts.TotalPrivateRoomWatchIncome),
 		formatCSVFloat(amounts.TotalVideoCallIncome),
-		formatCSVFloat(amounts.TotalVideoCallTicketIncome),
 		formatCSVFloat(amounts.TotalVideoCallBillingIncome),
 		formatCSVFloat(amounts.TotalShortVideoIncome),
 		formatCSVFloat(amounts.TotalGameIncome),
@@ -76,7 +75,6 @@ func incomeAmountItemCSVCells(item accountdto.LiveRoomIncomeAmountsItem) []strin
 		formatCSVFloat(item.TotalPrivateRoomTicketIncome),
 		formatCSVFloat(item.TotalPrivateRoomWatchIncome),
 		formatCSVFloat(item.TotalVideoCallIncome),
-		formatCSVFloat(item.TotalVideoCallTicketIncome),
 		formatCSVFloat(item.TotalVideoCallBillingIncome),
 		formatCSVFloat(item.TotalShortVideoIncome),
 		formatCSVFloat(item.TotalGameIncome),

@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"xr-game-server/core/xrlog"
-	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dao/guilddao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/incomesettlementdto"
@@ -82,6 +80,7 @@ func BatchApproveGuildSettlement(ctx context.Context, req *incomesettlementdto.C
 			}
 		}
 		row.SetStatus(entity.GuildIncomeSettlementStatusApproved)
+		liveroomdao.PublishGuildIncomeSettlementLog(row)
 		res.SuccessCount++
 	}
 	return res, nil
@@ -95,12 +94,6 @@ func BatchTransferGuildSettlement(ctx context.Context, req *incomesettlementdto.
 	ids := parseIdList(req.Ids)
 	if len(ids) == 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
-	}
-	cfg := cfgdao.GetHaiPayCfgCached()
-	if cfg == nil || !cfg.PayoutEnabled {
-		return &incomesettlementdto.CMSBatchTransferGuildSettlementRes{
-			Message: "HaiPay代付未启用,请先在CMS配置 payoutEnabled / payoutAppIds",
-		}, nil
 	}
 	visibleSet, restrict, empty := guildVisibleSet(ctx)
 	res := &incomesettlementdto.CMSBatchTransferGuildSettlementRes{}
@@ -126,13 +119,14 @@ func BatchTransferGuildSettlement(ctx context.Context, req *incomesettlementdto.
 			xrlog.DetailLog.Warningf(ctx, "guild payout submit failed settlementId=%d guildId=%d err=%v",
 				row.ID, row.GuildId, err)
 			row.SetTransferFailMsg(err.Error())
+			liveroomdao.PublishGuildIncomeSettlementLog(row)
 			res.FailCount++
 			continue
 		}
 		res.SuccessCount++
 	}
 	if res.SuccessCount == 0 && res.FailCount > 0 {
-		res.Message = "代付提交失败,请检查工会转账信息/汇率接口/代付appId"
+		res.Message = "代付提交失败,请检查HaiPay全局配置、工会转账信息或汇率接口"
 	} else if res.FailCount > 0 {
 		res.Message = fmt.Sprintf("部分成功:成功%d 失败%d", res.SuccessCount, res.FailCount)
 	} else {
@@ -160,15 +154,16 @@ func submitGuildHaiPayPayout(ctx context.Context, row *entity.GuildIncomeSettlem
 	if err != nil {
 		return err
 	}
-	localAmount := conversion.TargetAmount
+	localAmount := recharge.HaiPayNormalizePayoutAmount(currency, conversion.TargetAmount)
 	if localAmount <= 0 {
 		return fmt.Errorf("local amount <= 0")
 	}
+	xrlog.DetailLog.Infof(ctx,
+		"guild payout fx converted settlementId=%d guildId=%d usdAmount=%.4f currency=%s rate=%v localAmount=%v source=%s cached=%t rateDate=%s",
+		row.ID, row.GuildId, row.SettlementReceivableUsd, currency, conversion.Rate, localAmount,
+		conversion.Source, conversion.Cached, conversion.RateDate)
 
-	orderId := fmt.Sprintf("gis%d_%d", row.ID, time.Now().Unix())
-	if len(orderId) > 48 {
-		orderId = orderId[:48]
-	}
+	orderId := strconv.FormatUint(row.ID, 10)
 	payRes, err := recharge.HaiPayApplyPayout(ctx, &recharge.HaiPayPayoutApplyReq{
 		OrderID:       orderId,
 		Currency:      currency,
@@ -179,8 +174,13 @@ func submitGuildHaiPayPayout(ctx context.Context, row *entity.GuildIncomeSettlem
 		Name:          info.PayeeName,
 		Phone:         info.Phone,
 		Email:         info.Email,
+		Country:       info.CountryCode,
+		IdentifyType:  info.IdentifyType,
+		Address1:      info.Address1,
+		Address2:      info.Address2,
+		Address3:      info.Address3,
+		PostalCode:    info.PostalCode,
 		PartnerUserID: strconv.FormatUint(row.GuildId, 10),
-		Subject:       "",
 		Body:          fmt.Sprintf("guildSettlement:%d", row.ID),
 	})
 	if err != nil {
@@ -189,11 +189,12 @@ func submitGuildHaiPayPayout(ctx context.Context, row *entity.GuildIncomeSettlem
 	platformNo := ""
 	if payRes != nil {
 		platformNo = payRes.OrderNo
-		if payRes.OrderID != "" {
-			orderId = payRes.OrderID
+		if responseOrderID := strings.TrimSpace(payRes.OrderID); responseOrderID != "" && responseOrderID != orderId {
+			return fmt.Errorf("haipay payout order mismatch got=%s want=%s", responseOrderID, orderId)
 		}
 	}
 	row.SetTransferPayout(orderId, platformNo, currency, localAmount)
 	row.SetStatus(entity.GuildIncomeSettlementStatusTransferring)
+	liveroomdao.PublishGuildIncomeSettlementLog(row)
 	return nil
 }

@@ -4,8 +4,11 @@ import (
 	"context"
 	"strings"
 
+	"xr-game-server/constants/userstatus"
 	"xr-game-server/core/httpserver"
+	"xr-game-server/core/push"
 	"xr-game-server/dao/accountdao"
+	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/shortvideodao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/userinfodto"
@@ -37,6 +40,7 @@ func GetUserExt(ctx context.Context, req *userinfodto.GetUserExtReq) (*userinfod
 	return &userinfodto.GetUserExtRes{
 		UserId:                targetUserId,
 		Channel:               channel,
+		UserStatus:            getUserStatus(targetUserId),
 		PrettyId:              ext.PrettyId,
 		CanRank:               ext.CanRank,
 		PackageName:           ext.PackageName,
@@ -53,4 +57,14 @@ func GetUserExt(ctx context.Context, req *userinfodto.GetUserExtReq) (*userinfod
 		ShortVideoTotalIncome: shortVideoTotalIncome,
 		ShortVideoLikeCount:   shortVideoLikeCount,
 	}, nil
+}
+
+func getUserStatus(userId uint64) userstatus.UserStatus {
+	if room := liveroomdao.GetRoomByAnchor(userId); room != nil && room.LiveRecordId > 0 {
+		return userstatus.UserStatusLive
+	}
+	if push.IsOnline(userId) {
+		return userstatus.UserStatusOnline
+	}
+	return userstatus.UserStatusOffline
 }

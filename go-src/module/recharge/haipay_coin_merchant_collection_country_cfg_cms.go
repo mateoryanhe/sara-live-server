@@ -26,7 +26,6 @@ func GetHaiPayCoinMerchantCollectionCountryCfg(ctx context.Context, req *haipayd
 			CountryCode: option.CountryCode, Continent: continent,
 			SupportedCurrencies:    append([]string(nil), option.Currencies...),
 			CurrencyCode:           defaultCurrency,
-			AppId:                  haiPayCollectionDefaultAppIDs[defaultCurrency],
 			Enabled:                false,
 			PaymentMethods:         make([]*haipaydto.CollectionPaymentMethodOption, 0),
 			SelectedPaymentMethods: make([]*haipaydto.CollectionPaymentMethodSelection, 0, 1),
@@ -47,7 +46,6 @@ func GetHaiPayCoinMerchantCollectionCountryCfg(ctx context.Context, req *haipayd
 			if containsHaiPayString(option.Currencies, currencyCode) {
 				item.ID = stored.CountryCode
 				item.CurrencyCode = currencyCode
-				item.AppId = stored.AppId
 				item.Enabled = stored.Enabled
 				payType := strings.ToUpper(strings.TrimSpace(stored.PayType))
 				if code, valid := country.ResolveHaiPayCollectionPaymentMethodCode(
@@ -72,14 +70,9 @@ func GetHaiPayCoinMerchantCollectionCountryCfg(ctx context.Context, req *haipayd
 			continents = append(continents, group)
 		}
 	}
-	defaultAppIDs := make(map[string]int64, len(haiPayCollectionDefaultAppIDs))
-	for currencyCode, appID := range haiPayCollectionDefaultAppIDs {
-		defaultAppIDs[currencyCode] = appID
-	}
 	return &haipaydto.GetCollectionCountryCfgRes{
-		Continents:    continents,
-		PaymentTypes:  append([]string(nil), haiPayCollectionPaymentTypes...),
-		DefaultAppIds: defaultAppIDs,
+		Continents:   continents,
+		PaymentTypes: append([]string(nil), haiPayCollectionPaymentTypes...),
 	}, nil
 }
 
@@ -89,7 +82,11 @@ func SaveHaiPayCoinMerchantCollectionCountryCfg(ctx context.Context, req *haipay
 	currencyCode := strings.ToUpper(strings.TrimSpace(req.CurrencyCode))
 	payType := strings.ToUpper(strings.TrimSpace(req.PayType))
 	if !haiPayCoinMerchantCollectionRegion(countryCode) ||
-		!containsHaiPayString(haiPayCoinMerchantCollectionCurrencies(countryCode), currencyCode) || req.AppId <= 0 {
+		!containsHaiPayString(haiPayCoinMerchantCollectionCurrencies(countryCode), currencyCode) {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	appID, ok := country.LookupHaiPayAppID(currencyCode)
+	if !ok {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	canonicalCode, ok := country.ResolveHaiPayCollectionPaymentMethodCode(
@@ -99,7 +96,7 @@ func SaveHaiPayCoinMerchantCollectionCountryCfg(ctx context.Context, req *haipay
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	row := &entity.HaiPayCoinMerchantCollectionCfg{
-		CountryCode: countryCode, CurrencyCode: currencyCode, AppId: req.AppId,
+		CountryCode: countryCode, CurrencyCode: currencyCode, AppId: appID,
 		PayType: payType, InBankCode: canonicalCode, Enabled: req.Enabled,
 	}
 	id, err := cfgdao.SaveHaiPayCoinMerchantCollectionCfg(row)

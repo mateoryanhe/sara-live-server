@@ -2,7 +2,6 @@ package liveroomdao
 
 import (
 	"time"
-	"strings"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -77,34 +76,5 @@ func GuildIncomeSettlementLogCMSList(f *GuildIncomeSettlementLogCMSListFilter) (
 	_ = m.Clone().Order(orderBy).
 		Limit(f.PageSize).Offset((f.PageIndex - 1) * f.PageSize).
 		Scan(&list)
-	return total, list
-}
-
-// GetGuildIncomeSettlementLogById 按ID查询工会结算流水
-func GetGuildIncomeSettlementLogById(id uint64) *entity.GuildIncomeSettlementLog {
-	if id == 0 {
-		return nil
-	}
-	var row entity.GuildIncomeSettlementLog
-	err := g.Model(string(entity.TbGuildIncomeSettlementLog)).WherePri(id).Scan(&row)
-	if err != nil || row.ID == 0 {
-		return nil
-	}
-	return &row
-}
-
-// GetGuildIncomeSettlementLogByTransferOrderId 按代付商户单号查结算流水
-func GetGuildIncomeSettlementLogByTransferOrderId(orderId string) *entity.GuildIncomeSettlementLog {
-	orderId = strings.TrimSpace(orderId)
-	if orderId == "" {
-		return nil
-	}
-	var row entity.GuildIncomeSettlementLog
-	err := g.Model(string(entity.TbGuildIncomeSettlementLog)).
-		Where(string(entity.GuildIncomeSettlementLogTransferOrderId)+" = ?", orderId).
-		Scan(&row)
-	if err != nil || row.ID == 0 {
-		return nil
-	}
-	return &row
+	return total, mergeGuildIncomeSettlementLogsFromCache(list)
 }

@@ -16,20 +16,20 @@ const (
 )
 
 const (
-	DailyGuildEffectiveLiveGuildId       db.TbCol = "guild_id"
-	DailyGuildEffectiveLiveLiveDate      db.TbCol = "live_date"
-	DailyGuildEffectiveLiveLiveDuration  db.TbCol = "live_duration"
-	DailyGuildEffectiveLiveSettled       db.TbCol = "settled"
+	DailyGuildEffectiveLiveGuildId      db.TbCol = "guild_id"
+	DailyGuildEffectiveLiveLiveDate     db.TbCol = "live_date"
+	DailyGuildEffectiveLiveLiveDuration db.TbCol = "live_duration"
+	DailyGuildEffectiveLiveSettled      db.TbCol = "settled"
 )
 
 // DailyGuildEffectiveLive 工会每日直播时长与收益流水
 // 主键 ID = "{date}_{guildId}",字段经 syndb 缓冲落库
 type DailyGuildEffectiveLive struct {
-	ID           string    `gorm:"primaryKey;size:64;comment:复合ID(date_guildId)" json:"id"`
-	GuildId      uint64    `gorm:"index;default:0;comment:工会ID" json:"guildId"`
-	LiveDate     string    `gorm:"size:10;index;default:'';comment:日期(YYYY-MM-DD)" json:"liveDate"`
-	LiveDuration float64   `gorm:"default:0;comment:当日累计直播时长(秒,仅统计单场>30分钟)" json:"liveDuration"`
-	Settled      bool      `gorm:"default:0;comment:结算标记(0未结算,1已结算)" json:"settled"`
+	ID           string  `gorm:"primaryKey;size:64;comment:复合ID(date_guildId)" json:"id"`
+	GuildId      uint64  `gorm:"index;default:0;comment:工会ID" json:"guildId"`
+	LiveDate     string  `gorm:"size:10;index;default:'';comment:日期(YYYY-MM-DD)" json:"liveDate"`
+	LiveDuration float64 `gorm:"default:0;comment:当日累计直播时长(秒,仅统计单场>30分钟)" json:"liveDuration"`
+	Settled      bool    `gorm:"default:0;comment:结算标记(0未结算,1已结算)" json:"settled"`
 	LiveRoomIncomeAmounts
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -173,11 +173,11 @@ func (r *DailyGuildEffectiveLive) AddGameEarn(goldAmount, incomeDelta float64) {
 }
 
 // ApplyVideoCallIncomeDelta 通话收益增减(支持负数退款,内部加锁)
-func (r *DailyGuildEffectiveLive) ApplyVideoCallIncomeDelta(amount float64, ticket, billing bool) {
+func (r *DailyGuildEffectiveLive) ApplyVideoCallIncomeDelta(amount float64) {
 	if r == nil || r.ID == "" {
 		return
 	}
-	ApplyVideoCallIncomeDeltaWithLockKey(TbDailyGuildEffectiveLive, r.lockKey(), r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, amount, ticket, billing)
+	ApplyVideoCallIncomeDeltaWithLockKey(TbDailyGuildEffectiveLive, r.lockKey(), r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, amount)
 }
 
 // AddTotalLiveDuration 累加心跳上报直播时长(秒,syndb 缓冲)

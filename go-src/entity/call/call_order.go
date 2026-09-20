@@ -53,7 +53,6 @@ const (
 	CallOrderCallType            db.TbCol = "call_type"
 	CallOrderSource              db.TbCol = "source"
 	CallOrderParams              db.TbCol = "params"
-	CallOrderTicketPrice         db.TbCol = "ticket_price"
 	CallOrderPricePerMinute      db.TbCol = "price_per_minute"
 	CallOrderTotalCost           db.TbCol = "total_cost"
 	CallOrderChargeTime          db.TbCol = "charge_time"
@@ -80,14 +79,13 @@ type CallOrder struct {
 	CallType            uint8      `gorm:"default:1;comment:通话类型(1-语音,2-视频)" json:"callType"`
 	Source              uint8      `gorm:"default:1;comment:来源(1-直播间,2-私信)" json:"source"`
 	Params              string     `gorm:"size:512;default:'';comment:扩展参数" json:"params"`
-	TicketPrice         float64    `gorm:"type:decimal(10,4);default:0;comment:门票价格" json:"ticketPrice"`
 	PricePerMinute      float64    `gorm:"type:decimal(10,4);default:0;comment:分钟计费价格(每分钟)" json:"pricePerMinute"`
 	TotalCost           float64    `gorm:"type:decimal(10,4);default:0;comment:总费用" json:"totalCost"`
 	ChargeTime          *time.Time `gorm:"comment:扣费时间" json:"chargeTime"`
 	BillingDuration     uint32     `gorm:"default:0;comment:计费时长(分钟)" json:"billingDuration"`
 }
 
-func NewCallOrder(callerId, receiverId uint64, callType, source uint8, params string, ticketPrice, pricePerMinute float64) *CallOrder {
+func NewCallOrder(callerId, receiverId uint64, callType, source uint8, params string, pricePerMinute float64) *CallOrder {
 	ret := &CallOrder{}
 	ret.ID = snowflake.GetId()
 	now := time.Now()
@@ -99,7 +97,6 @@ func NewCallOrder(callerId, receiverId uint64, callType, source uint8, params st
 	ret.SetCallType(callType)
 	ret.SetSource(source)
 	ret.SetParams(params)
-	ret.SetTicketPrice(ticketPrice)
 	ret.SetPricePerMinute(pricePerMinute)
 	ret.SetStatus(CallOrderStatusCalling)
 	return ret
@@ -350,11 +347,6 @@ func (m *CallOrder) SetParams(v string) {
 	syndb.AddData(TbCallOrder, CallOrderParams, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
-func (m *CallOrder) SetTicketPrice(v float64) {
-	m.TicketPrice = v
-	syndb.AddData(TbCallOrder, CallOrderTicketPrice, &syndb.ColData{IdVal: m.ID, ColVal: v})
-}
-
 func (m *CallOrder) SetPricePerMinute(v float64) {
 	m.PricePerMinute = v
 	syndb.AddData(TbCallOrder, CallOrderPricePerMinute, &syndb.ColData{IdVal: m.ID, ColVal: v})
@@ -413,7 +405,6 @@ func initCallOrder() {
 	syndb.RegQuick(TbCallOrder, CallOrderCallType)
 	syndb.RegQuick(TbCallOrder, CallOrderSource)
 	syndb.RegQuick(TbCallOrder, CallOrderParams)
-	syndb.RegQuick(TbCallOrder, CallOrderTicketPrice)
 	syndb.RegQuick(TbCallOrder, CallOrderPricePerMinute)
 	syndb.RegQuick(TbCallOrder, CallOrderTotalCost)
 	syndb.RegQuick(TbCallOrder, CallOrderChargeTime)

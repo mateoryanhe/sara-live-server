@@ -14,7 +14,6 @@ export interface PaymentCountryCfgItem {
     continent: string
     supportedCurrencies: string[]
     currencyCode: string
-    appId: number
     enabled: boolean
     paymentMethods: PaymentCountryPaymentMethod[]
     selectedPaymentMethods: PaymentCountryMethodSelection[]
@@ -38,7 +37,6 @@ export interface PaymentCountryCfgGroup {
 export interface PaymentCountryCfgResponse {
     continents: PaymentCountryCfgGroup[]
     paymentTypes: string[]
-    defaultAppIds: Record<string, number>
 }
 
 /** 未持久化的目录数据没有配置 ID，App 可见性必须按关闭处理。 */
@@ -59,9 +57,7 @@ const prefix = '/paymentCountryCfg'
 export const paymentCountryCfgApi = {
     getConfig: () => request.post<PaymentCountryCfgResponse>(`${prefix}/getCollectionCountryCfg`, {}),
 
-    saveBasic: (data: Pick<PaymentCountryCfgItem, 'countryCode' | 'currencyCode' | 'enabled'> & {
-        appId: number
-    }) => {
+    saveBasic: (data: Pick<PaymentCountryCfgItem, 'countryCode' | 'currencyCode' | 'enabled'>) => {
         return request.post<{ success: boolean; id: string }>(`${prefix}/saveCollectionCountryCfg`, {
             ...data,
             saveSection: 'basic',
@@ -75,7 +71,6 @@ export const coinMerchantPaymentCountryCfgApi = {
     ),
 
     saveConfig: (data: Pick<PaymentCountryCfgItem, 'countryCode' | 'currencyCode' | 'enabled'> & {
-        appId: number
         payType: string
         inBankCode: string
     }) => request.post<{ success: boolean; id: string }>(

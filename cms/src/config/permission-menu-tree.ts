@@ -304,7 +304,6 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             ]),
             group('config-platform', 'menu.ConfigPlatformGroup', [
                 page('GooglePlayCfgManagement'),
-                page('FirebaseCfgManagement'),
                 page('HaiPayCfgManagement'),
                 page('CfEmailCfgManagement'),
                 page('DbBackupCfgManagement'),
@@ -316,6 +315,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('StaticCacheCfgManagement'),
                 page('AppPkgManagement'),
                 page('AppVersionCfgManagement'),
+                page('FirebaseCfgManagement'),
                 page('PrivacyPolicyCfgManagement'),
                 page('H5LiveDeployManagement'),
                 page('CoinMerchantDeployManagement'),

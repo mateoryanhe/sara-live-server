@@ -153,9 +153,6 @@
         <el-table-column :label="t('pages.videoCallLogList.endTime')" width="170">
           <template #default="{ row }">{{ formatDate(row.orderEndTime) }}</template>
         </el-table-column>
-        <el-table-column :label="t('pages.videoCallLogList.ticketDiamond')" width="110">
-          <template #default="{ row }">{{ formatAmount(row.ticketPrice) }}</template>
-        </el-table-column>
         <el-table-column :label="t('pages.videoCallLogList.pricePerMinuteDiamond')" width="130">
           <template #default="{ row }">{{ formatAmount(row.pricePerMinute) }}</template>
         </el-table-column>

@@ -102,7 +102,6 @@ func buildLiveRoomCallInviteItem(anchorId uint64, cfg *liveentity.LiveRoomCfg) *
 		Message:  liveRoomCallInviteMessage,
 	}
 	if cfg != nil {
-		item.Ticket = cfg.Ticket
 		item.Billing = cfg.Billing
 	}
 	if u := userinfodao.GetUserInfoByUserId(anchorId); u != nil {

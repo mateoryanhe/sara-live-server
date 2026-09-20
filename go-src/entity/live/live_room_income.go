@@ -17,7 +17,6 @@ const (
 	LiveRoomIncomeTotalPrivateRoomTicketIncome db.TbCol = "total_private_room_ticket_income"
 	LiveRoomIncomeTotalPrivateRoomWatchIncome  db.TbCol = "total_private_room_watch_income"
 	LiveRoomIncomeTotalVideoCallIncome         db.TbCol = "total_video_call_income"
-	LiveRoomIncomeTotalVideoCallTicketIncome   db.TbCol = "total_video_call_ticket_income"
 	LiveRoomIncomeTotalVideoCallBillingIncome  db.TbCol = "total_video_call_billing_income"
 	LiveRoomIncomeTotalShortVideoIncome        db.TbCol = "total_short_video_income"
 	LiveRoomIncomeTotalGameIncome              db.TbCol = "total_game_income"
@@ -36,7 +35,6 @@ type LiveRoomIncomeAmounts struct {
 	TotalPrivateRoomTicketIncome float64 `gorm:"default:0;comment:累计私密直播间门票收益" json:"totalPrivateRoomTicketIncome"`
 	TotalPrivateRoomWatchIncome  float64 `gorm:"default:0;comment:累计私密房观看收益" json:"totalPrivateRoomWatchIncome"`
 	TotalVideoCallIncome         float64 `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话收益" json:"totalVideoCallIncome"`
-	TotalVideoCallTicketIncome   float64 `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话门票收益" json:"totalVideoCallTicketIncome"`
 	TotalVideoCallBillingIncome  float64 `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话计费收益" json:"totalVideoCallBillingIncome"`
 	TotalShortVideoIncome        float64 `gorm:"type:decimal(10,4);default:0;comment:累计短视频付费观看收益" json:"totalShortVideoIncome"`
 	TotalGameIncome              float64 `gorm:"type:decimal(10,4);default:0;comment:累计游戏收益(金币下注额)" json:"totalGameIncome"`
@@ -54,7 +52,6 @@ func (a *LiveRoomIncomeAmounts) clearAmounts() {
 	a.TotalPrivateRoomTicketIncome = 0
 	a.TotalPrivateRoomWatchIncome = 0
 	a.TotalVideoCallIncome = 0
-	a.TotalVideoCallTicketIncome = 0
 	a.TotalVideoCallBillingIncome = 0
 	a.TotalShortVideoIncome = 0
 	a.TotalGameIncome = 0
@@ -72,7 +69,6 @@ func (a *LiveRoomIncomeAmounts) IsZero() bool {
 		a.TotalPrivateRoomTicketIncome == 0 &&
 		a.TotalPrivateRoomWatchIncome == 0 &&
 		a.TotalVideoCallIncome == 0 &&
-		a.TotalVideoCallTicketIncome == 0 &&
 		a.TotalVideoCallBillingIncome == 0 &&
 		a.TotalShortVideoIncome == 0 &&
 		a.TotalGameIncome == 0 &&
@@ -102,9 +98,6 @@ func addIncomeAmountsLocked(tb db.TbName, id any, dst *LiveRoomIncomeAmounts, sr
 	if src.TotalVideoCallIncome != 0 {
 		addIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallIncome, id, &dst.TotalVideoCallIncome, src.TotalVideoCallIncome)
 	}
-	if src.TotalVideoCallTicketIncome != 0 {
-		addIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallTicketIncome, id, &dst.TotalVideoCallTicketIncome, src.TotalVideoCallTicketIncome)
-	}
 	if src.TotalVideoCallBillingIncome != 0 {
 		addIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallBillingIncome, id, &dst.TotalVideoCallBillingIncome, src.TotalVideoCallBillingIncome)
 	}
@@ -131,7 +124,6 @@ func clearIncomeAmountsLocked(tb db.TbName, id any, a *LiveRoomIncomeAmounts, up
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalPrivateRoomTicketIncome, id, 0)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalPrivateRoomWatchIncome, id, 0)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallIncome, id, 0)
-	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallTicketIncome, id, 0)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallBillingIncome, id, 0)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalShortVideoIncome, id, 0)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalGameIncome, id, 0)
@@ -210,15 +202,15 @@ func addIncomeEarnWithLockKey(tb db.TbName, lockKey string, id any, a *LiveRoomI
 }
 
 // ApplyVideoCallIncomeDelta 通话收益增减(支持负数退款),内部按表+房间加锁
-func ApplyVideoCallIncomeDelta(tb db.TbName, id uint64, a *LiveRoomIncomeAmounts, updatedAt *time.Time, amount float64, ticket, billing bool) {
+func ApplyVideoCallIncomeDelta(tb db.TbName, id uint64, a *LiveRoomIncomeAmounts, updatedAt *time.Time, amount float64) {
 	if a == nil || id == 0 {
 		return
 	}
-	ApplyVideoCallIncomeDeltaWithLockKey(tb, liveRoomIncomeLockKey(tb, id), id, a, updatedAt, amount, ticket, billing)
+	ApplyVideoCallIncomeDeltaWithLockKey(tb, liveRoomIncomeLockKey(tb, id), id, a, updatedAt, amount)
 }
 
 // ApplyVideoCallIncomeDeltaWithLockKey 自定义锁键与主键类型的通话收益增减
-func ApplyVideoCallIncomeDeltaWithLockKey(tb db.TbName, lockKey string, id any, a *LiveRoomIncomeAmounts, updatedAt *time.Time, amount float64, ticket, billing bool) {
+func ApplyVideoCallIncomeDeltaWithLockKey(tb db.TbName, lockKey string, id any, a *LiveRoomIncomeAmounts, updatedAt *time.Time, amount float64) {
 	if a == nil || id == nil || lockKey == "" {
 		return
 	}
@@ -226,12 +218,7 @@ func ApplyVideoCallIncomeDeltaWithLockKey(tb db.TbName, lockKey string, id any, 
 	defer gmlock.Unlock(lockKey)
 	addIncomeAmountLocked(tb, LiveRoomIncomeTotalIncome, id, &a.TotalIncome, amount)
 	addIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallIncome, id, &a.TotalVideoCallIncome, amount)
-	if ticket {
-		addIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallTicketIncome, id, &a.TotalVideoCallTicketIncome, amount)
-	}
-	if billing {
-		addIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallBillingIncome, id, &a.TotalVideoCallBillingIncome, amount)
-	}
+	addIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallBillingIncome, id, &a.TotalVideoCallBillingIncome, amount)
 	touchIncomeUpdatedAt(tb, id, updatedAt)
 }
 
@@ -244,7 +231,6 @@ func regLiveRoomIncomeCols(tb db.TbName) {
 	syndb.RegQuick(tb, LiveRoomIncomeTotalPrivateRoomTicketIncome)
 	syndb.RegQuick(tb, LiveRoomIncomeTotalPrivateRoomWatchIncome)
 	syndb.RegQuick(tb, LiveRoomIncomeTotalVideoCallIncome)
-	syndb.RegQuick(tb, LiveRoomIncomeTotalVideoCallTicketIncome)
 	syndb.RegQuick(tb, LiveRoomIncomeTotalVideoCallBillingIncome)
 	syndb.RegQuick(tb, LiveRoomIncomeTotalShortVideoIncome)
 	syndb.RegQuick(tb, LiveRoomIncomeTotalGameIncome)

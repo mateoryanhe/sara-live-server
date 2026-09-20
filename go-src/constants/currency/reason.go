@@ -40,8 +40,6 @@ const (
 	ReasonPrivateRoomBilling Reason = 16
 	// ReasonPaidDanmaku 直播间付费弹幕消耗
 	ReasonPaidDanmaku Reason = 17
-	// ReasonLiveRoomVideoCallTicket 直播间视频通话门票
-	ReasonLiveRoomVideoCallTicket Reason = 18
 	// ReasonLiveRoomVideoCallBilling 直播间视频通话计费
 	ReasonLiveRoomVideoCallBilling Reason = 19
 	// ReasonGameBet 游戏消费扣款
@@ -67,7 +65,7 @@ const (
 	ReasonRechargeManual Reason = 29
 	// ReasonShortVideoAuthorSettlement 非主播作者短视频周结算到账
 	ReasonShortVideoAuthorSettlement Reason = 30
-  // ReasonRechargeCoinMerchant 币商充值(渠道支付)
+	// ReasonRechargeCoinMerchant 币商充值(渠道支付)
 	ReasonRechargeCoinMerchant Reason = 31
 	// ReasonGoldTransferOut 转赠金币(转出方)
 	ReasonGoldTransferOut Reason = 32
@@ -115,8 +113,6 @@ func (r Reason) String() string {
 		return "PrivateRoomBilling"
 	case ReasonPaidDanmaku:
 		return "PaidDanmaku"
-	case ReasonLiveRoomVideoCallTicket:
-		return "LiveRoomVideoCallTicket"
 	case ReasonLiveRoomVideoCallBilling:
 		return "LiveRoomVideoCallBilling"
 	case ReasonGameBet:

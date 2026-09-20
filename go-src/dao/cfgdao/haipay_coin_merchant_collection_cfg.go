@@ -66,7 +66,7 @@ func GetHaiPayCoinMerchantCollectionCfgCached(countryCode string) *rechargeentit
 
 func HaiPayCoinMerchantCollectionCfgComplete(row *rechargeentity.HaiPayCoinMerchantCollectionCfg) bool {
 	return row != nil && strings.TrimSpace(row.CountryCode) != "" &&
-		strings.TrimSpace(row.CurrencyCode) != "" && row.AppId > 0 &&
+		strings.TrimSpace(row.CurrencyCode) != "" &&
 		strings.TrimSpace(row.PayType) != "" && strings.TrimSpace(row.InBankCode) != ""
 }
 

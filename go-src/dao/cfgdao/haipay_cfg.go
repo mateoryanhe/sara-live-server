@@ -26,9 +26,6 @@ func loadHaiPayCfgFromDB() *entity.HaiPayCfg {
 	if row.ID == 0 {
 		return nil
 	}
-	if row.GlobalCashierAppId <= 0 {
-		row.GlobalCashierAppId = entity.DefaultHaiPayGlobalCashierAppID
-	}
 	return &row
 }
 

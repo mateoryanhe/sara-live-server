@@ -313,7 +313,6 @@ export interface AnchorListItem {
     totalPrivateRoomTicketIncome?: number
     totalPrivateRoomWatchIncome?: number
     totalVideoCallIncome?: number
-    totalVideoCallTicketIncome?: number
     totalVideoCallBillingIncome?: number
     ban?: boolean
     banApplyTime?: string | null
@@ -331,7 +330,6 @@ export interface LiveRoomIncomeAmounts {
     totalPrivateRoomTicketIncome?: number
     totalPrivateRoomWatchIncome?: number
     totalVideoCallIncome?: number
-    totalVideoCallTicketIncome?: number
     totalVideoCallBillingIncome?: number
     totalShortVideoIncome?: number
     totalGameIncome?: number
@@ -1015,6 +1013,10 @@ export interface GuildTransferCountryOption {
         bankCode: string
         limit: string
         description: string
+        identifyTypeRequired?: boolean
+        identifyTypeOptions?: string[]
+        countryRequired?: boolean
+        addressRequired?: boolean
     }>
     icon?: string
 }
@@ -1030,6 +1032,11 @@ export interface GuildTransferInfo {
     bankName: string
     accountNo: string
     bankCode: string
+    identifyType: string
+    address1: string
+    address2: string
+    address3: string
+    postalCode: string
     remark: string
     updatedAt?: string
 }
@@ -1045,6 +1052,11 @@ export interface SaveGuildTransferInfoReq {
     bankName?: string
     accountNo?: string
     bankCode?: string
+    identifyType?: string
+    address1?: string
+    address2?: string
+    address3?: string
+    postalCode?: string
     remark?: string
 }
 
@@ -1583,7 +1595,6 @@ export interface IncomeSettlementLogAmounts {
     totalPrivateRoomTicketIncome: number
     totalPrivateRoomWatchIncome: number
     totalVideoCallIncome: number
-    totalVideoCallTicketIncome: number
     totalVideoCallBillingIncome: number
     totalShortVideoIncome: number
     totalGameIncome: number
@@ -1896,7 +1907,6 @@ export interface SaveFirebaseCfgRes {
 export interface HaiPayCfg {
     id: string
     apiHost: string
-    globalCashierAppId: number
     tVisable: boolean
     merchantSecretKey: string
     merchantPrivateKey: string
@@ -1906,9 +1916,6 @@ export interface HaiPayCfg {
     cancelUrl: string
     paymentMethods: string
     subject: string
-    payoutEnabled?: boolean
-    payoutAppIds?: string
-    payoutSubject?: string
     createdAt: string
     updatedAt: string
 }
@@ -1920,7 +1927,6 @@ export interface GetHaiPayCfgRes {
 export interface SaveHaiPayCfgReq {
     id?: number
     apiHost: string
-    globalCashierAppId: number
     tVisable: boolean
     merchantSecretKey: string
     merchantPrivateKey: string
@@ -1930,9 +1936,6 @@ export interface SaveHaiPayCfgReq {
     cancelUrl?: string
     paymentMethods?: string
     subject?: string
-    payoutEnabled?: boolean
-    payoutAppIds?: string
-    payoutSubject?: string
 }
 
 export interface SaveHaiPayCfgRes {
@@ -2425,7 +2428,6 @@ export interface LiveRecordItem {
     totalPrivateRoomTicketIncome: number
     totalPrivateRoomWatchIncome: number
     totalVideoCallIncome: number
-    totalVideoCallTicketIncome: number
     totalVideoCallBillingIncome: number
     totalGameBet: number
     totalGiftSender: number
@@ -2462,7 +2464,6 @@ export interface VideoCallLogItem {
     receiverHeartTime?: string | null
     orderEndTime?: string | null
     callDuration: number
-    ticketPrice: number
     pricePerMinute: number
     totalCost: number
     billingDuration: number

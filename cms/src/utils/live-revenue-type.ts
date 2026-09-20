@@ -5,7 +5,6 @@ export const LIVE_REVENUE_TYPE_OPTIONS = [
   {value: 2, labelKey: 'pages.revenueLogList.revenuePaidDanmaku'},
   {value: 4, labelKey: 'pages.revenueLogList.revenuePrivateRoom'},
   {value: 5, labelKey: 'pages.revenueLogList.revenueTicket'},
-  {value: 6, labelKey: 'pages.revenueLogList.revenueLiveRoomVideoCallTicket'},
   {value: 7, labelKey: 'pages.revenueLogList.revenueLiveRoomVideoCallBilling'},
 ] as const
 

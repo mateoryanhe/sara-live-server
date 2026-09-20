@@ -14,7 +14,6 @@ type CollectionCountryCfgItem struct {
 	Continent              string                              `json:"continent"`
 	SupportedCurrencies    []string                            `json:"supportedCurrencies"`
 	CurrencyCode           string                              `json:"currencyCode"`
-	AppId                  int64                               `json:"appId"`
 	Enabled                bool                                `json:"enabled"`
 	PaymentMethods         []*CollectionPaymentMethodOption    `json:"paymentMethods"`
 	SelectedPaymentMethods []*CollectionPaymentMethodSelection `json:"selectedPaymentMethods"`
@@ -42,9 +41,8 @@ type CollectionCountryCfgGroup struct {
 }
 
 type GetCollectionCountryCfgRes struct {
-	Continents    []*CollectionCountryCfgGroup `json:"continents"`
-	PaymentTypes  []string                     `json:"paymentTypes"`
-	DefaultAppIds map[string]int64             `json:"defaultAppIds"`
+	Continents   []*CollectionCountryCfgGroup `json:"continents"`
+	PaymentTypes []string                     `json:"paymentTypes"`
 }
 
 const SaveCollectionCountryCfgSectionBasic = "basic"
@@ -66,7 +64,6 @@ type SaveCoinMerchantCollectionCountryCfgReq struct {
 	g.Meta       `path:"/saveCollectionCountryCfg" method:"post" summary:"保存币商HaiPay国家代收配置" tags:"HaiPay支付配置"`
 	CountryCode  string `json:"countryCode" v:"required|length:2,8#国家地区不能为空|国家地区编码无效"`
 	CurrencyCode string `json:"currencyCode" v:"required|length:3,8#支付币种不能为空|支付币种无效"`
-	AppId        int64  `json:"appId" v:"min:1#AppId无效"`
 	PayType      string `json:"payType" v:"required#支付类型不能为空"`
 	InBankCode   string `json:"inBankCode" v:"required#支付编码不能为空"`
 	Enabled      bool   `json:"enabled"`

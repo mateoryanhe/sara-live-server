@@ -48,9 +48,6 @@ func (r *LiveRoomIncomeUnsettled) AddTotalPrivateRoomWatchIncome(v float64) {
 func (r *LiveRoomIncomeUnsettled) AddTotalVideoCallIncome(v float64) {
 	addIncomeAmount(TbLiveRoomIncomeUnsettled, LiveRoomIncomeTotalVideoCallIncome, r.ID, &r.TotalVideoCallIncome, v, true, &r.UpdatedAt)
 }
-func (r *LiveRoomIncomeUnsettled) AddTotalVideoCallTicketIncome(v float64) {
-	addIncomeAmount(TbLiveRoomIncomeUnsettled, LiveRoomIncomeTotalVideoCallTicketIncome, r.ID, &r.TotalVideoCallTicketIncome, v, true, &r.UpdatedAt)
-}
 func (r *LiveRoomIncomeUnsettled) AddTotalVideoCallBillingIncome(v float64) {
 	addIncomeAmount(TbLiveRoomIncomeUnsettled, LiveRoomIncomeTotalVideoCallBillingIncome, r.ID, &r.TotalVideoCallBillingIncome, v, true, &r.UpdatedAt)
 }

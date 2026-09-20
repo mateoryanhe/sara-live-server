@@ -8,14 +8,13 @@ const (
 	PaidDanmaku              Type = 2 // 付费弹幕
 	PrivateRoom              Type = 4 // 私密直播间按时计费
 	Ticket                   Type = 5 // 私密直播间门票
-	LiveRoomVideoCallTicket  Type = 6 // 直播间视频通话门票
 	LiveRoomVideoCallBilling Type = 7 // 直播间视频通话计费
 )
 
 // IsValid 是否为合法流水类型
 func IsValid(t Type) bool {
 	switch t {
-	case Gift, PaidDanmaku, PrivateRoom, Ticket, LiveRoomVideoCallTicket, LiveRoomVideoCallBilling:
+	case Gift, PaidDanmaku, PrivateRoom, Ticket, LiveRoomVideoCallBilling:
 		return true
 	default:
 		return false
@@ -33,8 +32,6 @@ func Text(t Type) string {
 		return "1v1通话计费"
 	case Ticket:
 		return "直播间门票"
-	case LiveRoomVideoCallTicket:
-		return "直播间视频通话门票"
 	case LiveRoomVideoCallBilling:
 		return "直播间视频通话计费"
 	default:

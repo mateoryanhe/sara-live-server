@@ -30,35 +30,26 @@ func SaveHaiPayCfg(_ context.Context, req *haipaydto.SaveHaiPayCfgReq) (*haipayd
 	apiHost := strings.TrimRight(strings.TrimSpace(req.ApiHost), "/")
 	merchantSecret := strings.TrimSpace(req.MerchantSecretKey)
 	merchantPrivate := strings.TrimSpace(req.MerchantPrivateKey)
-	if apiHost == "" || req.GlobalCashierAppId <= 0 || merchantSecret == "" || merchantPrivate == "" {
-		return nil, errercode.CreateCode(errercode.InvalidParam)
-	}
-	if req.PayoutEnabled && strings.TrimSpace(req.CallbackBaseUrl) == "" {
+	callbackBaseURL := strings.TrimRight(strings.TrimSpace(req.CallbackBaseUrl), "/")
+	if apiHost == "" || merchantSecret == "" || merchantPrivate == "" || callbackBaseURL == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 
 	existing := cfgdao.GetHaiPayCfgCached()
 	row := &entity.HaiPayCfg{
 		ApiHost:            apiHost,
-		GlobalCashierAppId: req.GlobalCashierAppId,
 		TVisable:           req.TVisable,
 		MerchantSecretKey:  merchantSecret,
 		MerchantPrivateKey: merchantPrivate,
-		CallbackBaseUrl:    strings.TrimRight(strings.TrimSpace(req.CallbackBaseUrl), "/"),
+		CallbackBaseUrl:    callbackBaseURL,
 		ReturnUrl:          strings.TrimSpace(req.ReturnUrl),
 		FailReturnUrl:      strings.TrimSpace(req.FailReturnUrl),
 		CancelUrl:          strings.TrimSpace(req.CancelUrl),
 		PaymentMethods:     strings.TrimSpace(req.PaymentMethods),
 		Subject:            strings.TrimSpace(req.Subject),
-		PayoutEnabled:      req.PayoutEnabled,
-		PayoutAppIds:       strings.TrimSpace(req.PayoutAppIds),
-		PayoutSubject:      strings.TrimSpace(req.PayoutSubject),
 	}
 	if row.Subject == "" {
 		row.Subject = "Recharge"
-	}
-	if row.PayoutSubject == "" {
-		row.PayoutSubject = "GuildSettlement"
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -91,7 +82,6 @@ func toHaiPayCfgItem(cfg *entity.HaiPayCfg) *haipaydto.HaiPayCfgItem {
 	return &haipaydto.HaiPayCfgItem{
 		ID:                 strconv.FormatUint(cfg.ID, 10),
 		ApiHost:            cfg.ApiHost,
-		GlobalCashierAppId: cfg.GlobalCashierAppId,
 		TVisable:           cfg.TVisable,
 		MerchantSecretKey:  cfg.MerchantSecretKey,
 		MerchantPrivateKey: cfg.MerchantPrivateKey,
@@ -101,9 +91,6 @@ func toHaiPayCfgItem(cfg *entity.HaiPayCfg) *haipaydto.HaiPayCfgItem {
 		CancelUrl:          cfg.CancelUrl,
 		PaymentMethods:     cfg.PaymentMethods,
 		Subject:            cfg.Subject,
-		PayoutEnabled:      cfg.PayoutEnabled,
-		PayoutAppIds:       cfg.PayoutAppIds,
-		PayoutSubject:      cfg.PayoutSubject,
 		CreatedAt:          formatHaiPayCfgTime(cfg.CreatedAt),
 		UpdatedAt:          formatHaiPayCfgTime(cfg.UpdatedAt),
 	}

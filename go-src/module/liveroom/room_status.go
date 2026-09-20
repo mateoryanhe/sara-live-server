@@ -169,7 +169,6 @@ func QueryOffShelfLiveRoomList(_ context.Context, req *accountdto.QueryOffShelfL
 			item.TotalPrivateRoomTicketIncome = income.TotalPrivateRoomTicketIncome
 			item.TotalPrivateRoomWatchIncome = income.TotalPrivateRoomWatchIncome
 			item.TotalVideoCallIncome = income.TotalVideoCallIncome
-			item.TotalVideoCallTicketIncome = income.TotalVideoCallTicketIncome
 			item.TotalVideoCallBillingIncome = income.TotalVideoCallBillingIncome
 		}
 		list = append(list, item)

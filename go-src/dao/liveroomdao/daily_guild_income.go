@@ -61,9 +61,9 @@ func MirrorDailyGuildGameEarn(guildId uint64, at time.Time, goldAmount, incomeDe
 }
 
 // MirrorDailyGuildVideoCallIncomeDelta 同步通话收益增减到工会日表
-func MirrorDailyGuildVideoCallIncomeDelta(guildId uint64, at time.Time, amount float64, ticket, billing bool) {
+func MirrorDailyGuildVideoCallIncomeDelta(guildId uint64, at time.Time, amount float64) {
 	withDailyGuildEffectiveLive(guildId, at, func(row *entity.DailyGuildEffectiveLive) {
-		row.ApplyVideoCallIncomeDelta(amount, ticket, billing)
+		row.ApplyVideoCallIncomeDelta(amount)
 	})
 }
 

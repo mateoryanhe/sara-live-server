@@ -168,14 +168,6 @@
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
         </el-table-column>
         <el-table-column
-            :label="t('pages.anchorList.unsettledVideoTicketIncome')"
-            align="right"
-            label-class-name="header-nowrap"
-            min-width="140"
-        >
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallTicketIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column
             :label="t('pages.anchorList.unsettledVideoBillingIncome')"
             align="right"
             label-class-name="header-nowrap"

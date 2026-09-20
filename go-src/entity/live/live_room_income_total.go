@@ -15,9 +15,9 @@ const (
 type LiveRoomIncomeTotal struct {
 	migrate.OneModel
 	LiveRoomIncomeAmounts
-	SettlementSalary          float64 `gorm:"type:decimal(16,4);default:0;comment:结算薪资" json:"settlementSalary"`
-	SettlementShareAmount     float64 `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额" json:"settlementShareAmount"`
-	SettlementShareAmountUsd  float64 `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额(USD)" json:"settlementShareAmountUsd"`
+	SettlementSalary         float64 `gorm:"type:decimal(16,4);default:0;comment:结算薪资" json:"settlementSalary"`
+	SettlementShareAmount    float64 `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额" json:"settlementShareAmount"`
+	SettlementShareAmountUsd float64 `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额(USD)" json:"settlementShareAmountUsd"`
 }
 
 func NewLiveRoomIncomeTotal(roomId uint64) *LiveRoomIncomeTotal {
@@ -48,9 +48,6 @@ func (r *LiveRoomIncomeTotal) AddTotalPrivateRoomWatchIncome(v float64) {
 }
 func (r *LiveRoomIncomeTotal) AddTotalVideoCallIncome(v float64) {
 	addIncomeAmount(TbLiveRoomIncomeTotal, LiveRoomIncomeTotalVideoCallIncome, r.ID, &r.TotalVideoCallIncome, v, true, &r.UpdatedAt)
-}
-func (r *LiveRoomIncomeTotal) AddTotalVideoCallTicketIncome(v float64) {
-	addIncomeAmount(TbLiveRoomIncomeTotal, LiveRoomIncomeTotalVideoCallTicketIncome, r.ID, &r.TotalVideoCallTicketIncome, v, true, &r.UpdatedAt)
 }
 func (r *LiveRoomIncomeTotal) AddTotalVideoCallBillingIncome(v float64) {
 	addIncomeAmount(TbLiveRoomIncomeTotal, LiveRoomIncomeTotalVideoCallBillingIncome, r.ID, &r.TotalVideoCallBillingIncome, v, true, &r.UpdatedAt)

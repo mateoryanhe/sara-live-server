@@ -5,6 +5,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"xr-game-server/constants/userstatus"
 )
 
 // GetUserInfoReq 查询当前登录用户的基础信息
@@ -43,23 +44,24 @@ type GetUserExtReq struct {
 }
 
 type GetUserExtRes struct {
-	UserId                uint64     `json:"userId,string"`
-	Channel               uint       `json:"channel" dc:"登录渠道：1=测试，2=手机号，3=机器人主播，4=设备码，5=CMS短视频作者，6=H5设备码，7=邮箱，8=币商，9=Firebase"`
-	PrettyId              uint64     `json:"prettyId,string" dc:"靓号"`
-	CanRank               bool       `json:"canRank" dc:"是否可上排行榜"`
-	PackageName           string     `json:"packageName" dc:"注册包名"`
-	AppVersion            string     `json:"appVersion" dc:"注册版本号"`
-	FollowCount           uint64     `json:"followCount" dc:"当前关注数"`
-	FollowerCount         uint64     `json:"followerCount" dc:"当前粉丝数"`
-	CancelCode            string     `json:"cancelCode" dc:"注销码"`
-	CancelCodeExpireAt    *time.Time `json:"cancelCodeExpireAt" dc:"注销码过期时间"`
-	FirstRecharge         bool       `json:"firstRecharge" dc:"是否首次充值(未首充为true)"`
-	EmailBound            bool       `json:"emailBound" dc:"是否已绑定邮箱"`
-	FirebaseBound         bool       `json:"firebaseBound" dc:"是否已绑定Firebase账号"`
-	InviterId             uint64     `json:"inviterId,string" dc:"邀请者用户ID(0为无)"`
-	ShortVideoViewCount   uint64     `json:"shortVideoViewCount" dc:"累计短视频观看人数"`
-	ShortVideoTotalIncome float64    `json:"shortVideoTotalIncome" dc:"累计短视频收入总额(钻石)"`
-	ShortVideoLikeCount   uint64     `json:"shortVideoLikeCount" dc:"累计短视频点赞总数"`
+	UserId                uint64                `json:"userId,string"`
+	Channel               uint                  `json:"channel" dc:"登录渠道：1=测试，2=手机号，3=机器人主播，4=设备码，5=CMS短视频作者，6=H5设备码，7=邮箱，8=币商，9=Firebase"`
+	UserStatus            userstatus.UserStatus `json:"userStatus" dc:"用户状态：1=在线，2=开播，3=离线"`
+	PrettyId              uint64                `json:"prettyId,string" dc:"靓号"`
+	CanRank               bool                  `json:"canRank" dc:"是否可上排行榜"`
+	PackageName           string                `json:"packageName" dc:"注册包名"`
+	AppVersion            string                `json:"appVersion" dc:"注册版本号"`
+	FollowCount           uint64                `json:"followCount" dc:"当前关注数"`
+	FollowerCount         uint64                `json:"followerCount" dc:"当前粉丝数"`
+	CancelCode            string                `json:"cancelCode" dc:"注销码"`
+	CancelCodeExpireAt    *time.Time            `json:"cancelCodeExpireAt" dc:"注销码过期时间"`
+	FirstRecharge         bool                  `json:"firstRecharge" dc:"是否首次充值(未首充为true)"`
+	EmailBound            bool                  `json:"emailBound" dc:"是否已绑定邮箱"`
+	FirebaseBound         bool                  `json:"firebaseBound" dc:"是否已绑定Firebase账号"`
+	InviterId             uint64                `json:"inviterId,string" dc:"邀请者用户ID(0为无)"`
+	ShortVideoViewCount   uint64                `json:"shortVideoViewCount" dc:"累计短视频观看人数"`
+	ShortVideoTotalIncome float64               `json:"shortVideoTotalIncome" dc:"累计短视频收入总额(钻石)"`
+	ShortVideoLikeCount   uint64                `json:"shortVideoLikeCount" dc:"累计短视频点赞总数"`
 }
 
 // UpdateGenderReq 修改性别

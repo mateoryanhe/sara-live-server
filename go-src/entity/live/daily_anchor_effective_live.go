@@ -28,11 +28,11 @@ const (
 // DailyAnchorEffectiveLive 主播每日直播时长与收益流水
 // 主键 ID = "{date}_{roomId}"(roomId==主播用户ID),字段经 syndb 缓冲落库
 type DailyAnchorEffectiveLive struct {
-	ID           string    `gorm:"primaryKey;size:64;comment:复合ID(date_roomId)" json:"id"`
-	RoomId       uint64    `gorm:"index;default:0;comment:直播间ID(==主播用户ID)" json:"roomId"`
-	LiveDate     string    `gorm:"size:10;index;default:'';comment:日期(YYYY-MM-DD)" json:"liveDate"`
-	LiveDuration float64   `gorm:"default:0;comment:当日累计直播时长(秒,仅统计单场>30分钟)" json:"liveDuration"`
-	Settled      bool      `gorm:"default:0;comment:结算标记(0未结算,1已结算)" json:"settled"`
+	ID           string  `gorm:"primaryKey;size:64;comment:复合ID(date_roomId)" json:"id"`
+	RoomId       uint64  `gorm:"index;default:0;comment:直播间ID(==主播用户ID)" json:"roomId"`
+	LiveDate     string  `gorm:"size:10;index;default:'';comment:日期(YYYY-MM-DD)" json:"liveDate"`
+	LiveDuration float64 `gorm:"default:0;comment:当日累计直播时长(秒,仅统计单场>30分钟)" json:"liveDuration"`
+	Settled      bool    `gorm:"default:0;comment:结算标记(0未结算,1已结算)" json:"settled"`
 	LiveRoomIncomeAmounts
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -184,11 +184,11 @@ func (r *DailyAnchorEffectiveLive) AddGameEarn(goldAmount, incomeDelta float64) 
 }
 
 // ApplyVideoCallIncomeDelta 通话收益增减(支持负数退款,内部加锁)
-func (r *DailyAnchorEffectiveLive) ApplyVideoCallIncomeDelta(amount float64, ticket, billing bool) {
+func (r *DailyAnchorEffectiveLive) ApplyVideoCallIncomeDelta(amount float64) {
 	if r == nil || r.ID == "" {
 		return
 	}
-	ApplyVideoCallIncomeDeltaWithLockKey(TbDailyAnchorEffectiveLive, r.lockKey(), r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, amount, ticket, billing)
+	ApplyVideoCallIncomeDeltaWithLockKey(TbDailyAnchorEffectiveLive, r.lockKey(), r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, amount)
 }
 
 // AddTotalLiveDuration 累加心跳上报直播时长(秒,syndb 缓冲)

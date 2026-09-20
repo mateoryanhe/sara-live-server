@@ -10,7 +10,6 @@ import (
 	"xr-game-server/module/upload"
 )
 
-
 func liveRecordToCMSItem(v *entity.LiveRecord) *liverecorddto.CMSLiveRecordItem {
 	if v == nil {
 		return nil
@@ -29,7 +28,6 @@ func liveRecordToCMSItem(v *entity.LiveRecord) *liverecorddto.CMSLiveRecordItem 
 		TotalPrivateRoomTicketIncome: v.TotalPrivateRoomTicketIncome,
 		TotalPrivateRoomWatchIncome:  v.TotalPrivateRoomWatchIncome,
 		TotalVideoCallIncome:         v.TotalVideoCallIncome,
-		TotalVideoCallTicketIncome:   v.TotalVideoCallTicketIncome,
 		TotalVideoCallBillingIncome:  v.TotalVideoCallBillingIncome,
 		TotalGameBet:                 v.TotalGameBet,
 		TotalGiftSender:              v.TotalGiftSender,

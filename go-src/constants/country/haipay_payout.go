@@ -29,6 +29,57 @@ type HaiPayPayoutMethod struct {
 	Description string
 }
 
+// HaiPayPayoutExtraRequirements 描述特殊代付方式额外需要上报的收款人信息。
+// CountryRequired 使用已选代付国家，无需 CMS 重复录入。
+type HaiPayPayoutExtraRequirements struct {
+	IdentifyTypeRequired bool
+	IdentifyTypeOptions  []string
+	CountryRequired      bool
+	AddressRequired      bool
+}
+
+// HaiPayPayoutExtraRequirementsFor 返回指定币种和支付编码的附加字段规则。
+func HaiPayPayoutExtraRequirementsFor(currency, bankCode string) HaiPayPayoutExtraRequirements {
+	currency = strings.ToUpper(strings.TrimSpace(currency))
+	bankCode = strings.ToUpper(strings.TrimSpace(bankCode))
+	switch {
+	case currency == "BRL" && bankCode == "PIX":
+		return HaiPayPayoutExtraRequirements{
+			IdentifyTypeRequired: true,
+			IdentifyTypeOptions:  []string{"CPF", "PHONE", "EMAIL"},
+		}
+	case currency == "TRY" && bankCode == "PAPARA":
+		return HaiPayPayoutExtraRequirements{
+			IdentifyTypeRequired: true,
+			IdentifyTypeOptions:  []string{"PAPARA_NUMBER", "PHONE", "EMAIL", "TURKISH_ID"},
+		}
+	case currency == "USD" && bankCode == "ACH":
+		return HaiPayPayoutExtraRequirements{
+			IdentifyTypeRequired: true,
+			CountryRequired:      true,
+			AddressRequired:      true,
+		}
+	default:
+		return HaiPayPayoutExtraRequirements{}
+	}
+}
+
+func (r HaiPayPayoutExtraRequirements) IsAllowedIdentifyType(value string) bool {
+	value = strings.ToUpper(strings.TrimSpace(value))
+	if value == "" {
+		return !r.IdentifyTypeRequired
+	}
+	if len(r.IdentifyTypeOptions) == 0 {
+		return true
+	}
+	for _, option := range r.IdentifyTypeOptions {
+		if value == option {
+			return true
+		}
+	}
+	return false
+}
+
 // HaiPayPayoutOption 描述一个国家/地区当前已接入的代付能力。
 type HaiPayPayoutOption struct {
 	CountryCode  string

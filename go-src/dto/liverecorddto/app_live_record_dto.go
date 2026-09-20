@@ -23,7 +23,6 @@ type AppLiveRecordItem struct {
 	TotalPrivateRoomTicketIncome float64 `json:"totalPrivateRoomTicketIncome" dc:"私密直播间门票收入(钻石)"`
 	TotalPrivateRoomWatchIncome  float64 `json:"totalPrivateRoomWatchIncome"  dc:"私密房观看收入(钻石)"`
 	TotalVideoCallIncome         float64 `json:"totalVideoCallIncome"         dc:"直播间视频通话收入(钻石)"`
-	TotalVideoCallTicketIncome   float64 `json:"totalVideoCallTicketIncome"   dc:"直播间视频通话门票收入(钻石)"`
 	TotalVideoCallBillingIncome  float64 `json:"totalVideoCallBillingIncome"  dc:"直播间视频通话计费收入(钻石)"`
 	TotalGameBet                 float64 `json:"totalGameBet"                 dc:"游戏下注总金额"`
 	TotalGiftSender              uint64  `json:"totalGiftSender"   dc:"送礼人数(去重)"`

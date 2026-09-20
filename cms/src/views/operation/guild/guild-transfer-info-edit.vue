@@ -61,6 +61,7 @@
               :disabled="loading || saving || !transferForm.accountType"
               :placeholder="t('pages.guildList.transferBankCodePlaceholder')"
               style="width: 100%"
+              @change="onTransferBankCodeChange"
           >
             <el-option
                 v-for="option in transferBankCodeOptions"
@@ -106,6 +107,76 @@
               :placeholder="t('pages.guildList.transferAccountNoPlaceholder')"
           />
         </el-form-item>
+        <el-form-item
+            v-if="selectedTransferMethod?.identifyTypeRequired"
+            :label="transferIdentifyTypeLabel"
+            prop="identifyType"
+        >
+          <el-select
+              v-if="transferIdentifyTypeOptions.length"
+              v-model="transferForm.identifyType"
+              clearable
+              :disabled="loading || saving"
+              :placeholder="t('pages.guildList.transferIdentifyTypePlaceholder')"
+              style="width: 100%"
+          >
+            <el-option
+                v-for="option in transferIdentifyTypeOptions"
+                :key="option"
+                :label="option"
+                :value="option"
+            />
+          </el-select>
+          <el-input
+              v-else
+              v-model="transferForm.identifyType"
+              clearable
+              :disabled="loading || saving"
+              :placeholder="t('pages.guildList.transferRoutingCodePlaceholder')"
+          />
+          <div class="form-tip">{{ transferIdentifyTypeHint }}</div>
+        </el-form-item>
+        <el-form-item
+            v-if="selectedTransferMethod?.countryRequired"
+            :label="t('pages.guildList.transferBeneficiaryCountry')"
+        >
+          <el-input :model-value="transferForm.countryCode" disabled/>
+          <div class="form-tip">{{ t('pages.guildList.transferBeneficiaryCountryHint') }}</div>
+        </el-form-item>
+        <template v-if="selectedTransferMethod?.addressRequired">
+          <el-form-item :label="t('pages.guildList.transferAddress1')" prop="address1">
+            <el-input
+                v-model="transferForm.address1"
+                clearable
+                :disabled="loading || saving"
+                :placeholder="t('pages.guildList.transferAddress1Placeholder')"
+            />
+          </el-form-item>
+          <el-form-item :label="t('pages.guildList.transferAddress2')" prop="address2">
+            <el-input
+                v-model="transferForm.address2"
+                clearable
+                :disabled="loading || saving"
+                :placeholder="t('pages.guildList.transferAddress2Placeholder')"
+            />
+          </el-form-item>
+          <el-form-item :label="t('pages.guildList.transferAddress3')" prop="address3">
+            <el-input
+                v-model="transferForm.address3"
+                clearable
+                :disabled="loading || saving"
+                :placeholder="t('pages.guildList.transferAddress3Placeholder')"
+            />
+          </el-form-item>
+          <el-form-item :label="t('pages.guildList.transferPostalCode')" prop="postalCode">
+            <el-input
+                v-model="transferForm.postalCode"
+                clearable
+                :disabled="loading || saving"
+                :placeholder="t('pages.guildList.transferPostalCodePlaceholder')"
+            />
+          </el-form-item>
+        </template>
         <el-form-item :label="t('pages.guildList.transferRemark')" prop="remark">
           <el-input
               v-model="transferForm.remark"
@@ -223,6 +294,11 @@ interface TransferInfoForm {
   bankName: string
   accountNo: string
   bankCode: string
+  identifyType: string
+  address1: string
+  address2: string
+  address3: string
+  postalCode: string
   remark: string
   updatedAt: string
 }
@@ -239,6 +315,11 @@ const emptyTransferForm = (): TransferInfoForm => ({
   bankName: '',
   accountNo: '',
   bankCode: '',
+  identifyType: '',
+  address1: '',
+  address2: '',
+  address3: '',
+  postalCode: '',
   remark: '',
   updatedAt: '',
 })
@@ -294,6 +375,17 @@ const transferFormRules = computed<FormRules>(() => ({
   bankCode: [
     {required: true, message: t('pages.guildList.transferBankCodePlaceholder'), trigger: 'change'},
   ],
+  ...(selectedTransferMethod.value?.identifyTypeRequired ? {
+    identifyType: [
+      {required: true, message: t('pages.guildList.transferIdentifyTypeRequired'), trigger: ['blur', 'change']},
+    ],
+  } : {}),
+  ...(selectedTransferMethod.value?.addressRequired ? {
+    address1: [{required: true, message: t('pages.guildList.transferAddress1Placeholder'), trigger: 'blur'}],
+    address2: [{required: true, message: t('pages.guildList.transferAddress2Placeholder'), trigger: 'blur'}],
+    address3: [{required: true, message: t('pages.guildList.transferAddress3Placeholder'), trigger: 'blur'}],
+    postalCode: [{required: true, message: t('pages.guildList.transferPostalCodePlaceholder'), trigger: 'blur'}],
+  } : {}),
 }))
 
 const transferCurrencyRegionFor = (item: GuildTransferCountryOption) => item.region || ''
@@ -370,6 +462,31 @@ const selectedTransferMethod = computed(() => {
       method.accountType === accountType && method.bankCode === bankCode
   )) ?? null
 })
+const transferIdentifyTypeOptions = computed(() => selectedTransferMethod.value?.identifyTypeOptions ?? [])
+const transferIdentifyTypeLabel = computed(() => (
+    selectedTransferMethod.value?.addressRequired
+        ? t('pages.guildList.transferRoutingCode')
+        : t('pages.guildList.transferIdentifyType')
+))
+const transferIdentifyTypeHint = computed(() => {
+  const options = transferIdentifyTypeOptions.value
+  if (options.length) {
+    return t('pages.guildList.transferIdentifyTypeOptionsHint', {options: options.join(' / ')})
+  }
+  return t('pages.guildList.transferRoutingCodeHint')
+})
+
+const clearUnusedTransferExtraFields = () => {
+  if (!selectedTransferMethod.value?.identifyTypeRequired) {
+    transferForm.value.identifyType = ''
+  }
+  if (!selectedTransferMethod.value?.addressRequired) {
+    transferForm.value.address1 = ''
+    transferForm.value.address2 = ''
+    transferForm.value.address3 = ''
+    transferForm.value.postalCode = ''
+  }
+}
 
 const accountTypeLabel = (accountType: string) => {
   if (accountType === 'BANK_ACCOUNT') {
@@ -411,6 +528,7 @@ const normalizeLoadedTransferInfo = () => {
   if (!methodExists) {
     transferForm.value.bankCode = ''
   }
+  clearUnusedTransferExtraFields()
 }
 
 const loadTransferInfo = async () => {
@@ -442,6 +560,11 @@ const loadTransferInfo = async () => {
       bankName: info?.bankName ?? '',
       accountNo: info?.accountNo ?? '',
       bankCode: info?.bankCode ?? '',
+      identifyType: info?.identifyType ?? '',
+      address1: info?.address1 ?? '',
+      address2: info?.address2 ?? '',
+      address3: info?.address3 ?? '',
+      postalCode: info?.postalCode ?? '',
       remark: info?.remark ?? '',
       updatedAt: info?.updatedAt ?? '',
     }
@@ -457,12 +580,19 @@ const loadTransferInfo = async () => {
 }
 
 const onTransferCurrencyChange = (currency: string) => {
-  const hit = transferCountries.value.find(item => item.currency === currency)
+  const normalizedCurrency = currency.trim().toUpperCase()
+  const hit = transferCountries.value.find(item => item.currency === normalizedCurrency)
+  transferForm.value.currency = hit?.currency ?? ''
   transferForm.value.countryCode = hit?.countryCode || ''
   const accountTypes = hit?.accountTypes ?? []
   transferForm.value.accountType = accountTypes.length === 1 ? (accountTypes[0] ?? '') : ''
   transferForm.value.bankName = ''
   transferForm.value.bankCode = ''
+  transferForm.value.identifyType = ''
+  transferForm.value.address1 = ''
+  transferForm.value.address2 = ''
+  transferForm.value.address3 = ''
+  transferForm.value.postalCode = ''
   if (transferForm.value.accountType) {
     const methods = (hit?.methods ?? []).filter(method => method.accountType === transferForm.value.accountType)
     transferForm.value.bankCode = methods.length === 1 ? (methods[0]?.bankCode ?? '') : ''
@@ -489,6 +619,17 @@ const onTransferAccountTypeChange = () => {
   const methods = (selectedTransferCurrency.value?.methods ?? [])
       .filter(method => method.accountType === transferForm.value.accountType)
   transferForm.value.bankCode = methods.length === 1 ? (methods[0]?.bankCode ?? '') : ''
+  transferForm.value.identifyType = ''
+  transferForm.value.address1 = ''
+  transferForm.value.address2 = ''
+  transferForm.value.address3 = ''
+  transferForm.value.postalCode = ''
+}
+
+const onTransferBankCodeChange = () => {
+  transferForm.value.bankName = selectedTransferMethod.value?.description ?? ''
+  clearUnusedTransferExtraFields()
+  transferFormRef.value?.clearValidate(['identifyType', 'address1', 'address2', 'address3', 'postalCode'])
 }
 
 const handleTransferSave = async () => {
@@ -511,6 +652,11 @@ const handleTransferSave = async () => {
       bankName: transferForm.value.bankName.trim(),
       accountNo: transferForm.value.accountNo.trim(),
       bankCode: transferForm.value.bankCode.trim(),
+      identifyType: transferForm.value.identifyType.trim(),
+      address1: transferForm.value.address1.trim(),
+      address2: transferForm.value.address2.trim(),
+      address3: transferForm.value.address3.trim(),
+      postalCode: transferForm.value.postalCode.trim(),
       remark: transferForm.value.remark.trim(),
     })
     ElMessage.success(t('pages.guildList.transferSaveSuccess'))

@@ -35,7 +35,7 @@ type LiveRevenueLog struct {
 	migrate.OneModel
 	// CreatedAt 覆盖嵌入字段: 主播榜(status+时间)、贡献榜(room+status+时间)
 	CreatedAt    time.Time `gorm:"index:idx_lrl_status_created,priority:2;index:idx_lrl_room_status_created,priority:3" json:"-"`
-	RevenueType  uint8     `gorm:"index:idx_lrl_biz_sender_type_status,priority:3;default:1;comment:流水类型(1礼物,2付费弹幕,4私密房计费,5门票,6视频通话门票,7视频通话计费)" json:"revenueType"`
+	RevenueType  uint8     `gorm:"index:idx_lrl_biz_sender_type_status,priority:3;default:1;comment:流水类型(1礼物,2付费弹幕,4私密房计费,5门票,7视频通话计费)" json:"revenueType"`
 	RoomId       uint64    `gorm:"index:idx_lrl_room_status_created,priority:1;default:0;comment:直播间ID(主播用户ID)" json:"roomId"`
 	LiveRecordId uint64    `gorm:"index;default:0;comment:直播记录ID" json:"liveRecordId"`
 	SenderId     uint64    `gorm:"index:idx_lrl_biz_sender_type_status,priority:2;default:0;comment:付款用户ID" json:"senderId"`

@@ -601,7 +601,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('CfEmailCfgManagement')"
+              v-if="hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('CfEmailCfgManagement')"
               index="/config/group/platform">
             <template #title>
               <el-icon>
@@ -614,12 +614,6 @@
                 <CreditCard/>
               </el-icon>
               <span>{{ t('menu.GooglePlayCfgManagement') }}</span>
-            </el-menu-item>
-            <el-menu-item v-if="hasMenuPermission('FirebaseCfgManagement')" index="/config/firebase">
-              <el-icon>
-                <Key/>
-              </el-icon>
-              <span>{{ t('menu.FirebaseCfgManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('HaiPayCfgManagement')" index="/config/haipay">
               <el-icon>
@@ -659,7 +653,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement')"
+              v-if="hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement')"
               index="/config/group/deploy">
             <template #title>
               <el-icon>
@@ -684,6 +678,12 @@
                 <Iphone/>
               </el-icon>
               <span>{{ t('menu.AppVersionCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('FirebaseCfgManagement')" index="/config/firebase">
+              <el-icon>
+                <Key/>
+              </el-icon>
+              <span>{{ t('menu.FirebaseCfgManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('PrivacyPolicyCfgManagement')" index="/config/privacy-policy">
               <el-icon>

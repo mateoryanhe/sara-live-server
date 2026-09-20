@@ -61,9 +61,9 @@ func MirrorDailyAnchorGameEarn(roomId uint64, at time.Time, goldAmount, incomeDe
 }
 
 // MirrorDailyAnchorVideoCallIncomeDelta 同步通话收益增减到主播日表
-func MirrorDailyAnchorVideoCallIncomeDelta(roomId uint64, at time.Time, amount float64, ticket, billing bool) {
+func MirrorDailyAnchorVideoCallIncomeDelta(roomId uint64, at time.Time, amount float64) {
 	withDailyAnchorEffectiveLive(roomId, at, func(row *entity.DailyAnchorEffectiveLive) {
-		row.ApplyVideoCallIncomeDelta(amount, ticket, billing)
+		row.ApplyVideoCallIncomeDelta(amount)
 	})
 }
 

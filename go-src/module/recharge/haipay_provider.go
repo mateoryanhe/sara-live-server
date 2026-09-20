@@ -109,11 +109,13 @@ func (p *haiPayProvider) CreatePay(ctx context.Context, req *ChannelPayCreateReq
 	if req.PayChannel != rechargeentity.RechargeCfgTypeCoinMerchant {
 		return nil, fmt.Errorf("haipay unsupported local collection channel=%d", req.PayChannel)
 	}
-	credential, credentialErr := haiPayCoinMerchantCollectionCredential(region, currency)
-	if credentialErr != nil {
+	if _, credentialErr := haiPayCoinMerchantCollectionCredential(region, currency); credentialErr != nil {
 		return nil, credentialErr
 	}
-	appID := credential.AppId
+	appID, ok := country.LookupHaiPayAppID(currency)
+	if !ok {
+		return nil, fmt.Errorf("haipay appId enum missing currency=%s", currency)
+	}
 
 	name := strings.TrimSpace(req.PlayerName)
 	if name == "" {
@@ -413,7 +415,11 @@ func haiPaySafeParams(m map[string]any) string {
 	for k, v := range m {
 		cp[k] = v
 	}
-	for _, k := range []string{"sign", "merchantSecretKey", "merchantPrivateKey"} {
+	for _, k := range []string{
+		"sign", "merchantSecretKey", "merchantPrivateKey",
+		"name", "phone", "email", "accountNo", "identifyType",
+		"address1", "address2", "address3", "postalCode",
+	} {
 		if _, ok := cp[k]; ok {
 			cp[k] = "***"
 		}

@@ -4,72 +4,54 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"strconv"
 	"strings"
 
 	"xr-game-server/constants/country"
 	"xr-game-server/core/xrlog"
 	"xr-game-server/dao/cfgdao"
 	liveentity "xr-game-server/entity/live"
-	rechargeentity "xr-game-server/entity/recharge"
 )
 
-const haiPayPayoutNotifyPath = "/webhook/haipay/payout/notify"
+const (
+	haiPayPayoutNotifyPath = "/webhook/haipay/payout/notify"
+	haiPayPayoutSubject    = "GuildSettlement"
+)
 
-// haiPayParseKVMap 解析 "IDR:16000,PHP:58" 或 "IDR=16000" 形式键值表
-func haiPayParseKVMap(raw string) map[string]string {
-	out := make(map[string]string)
-	raw = strings.TrimSpace(raw)
-	if raw == "" {
-		return out
-	}
-	for _, part := range strings.Split(raw, ",") {
-		part = strings.TrimSpace(part)
-		if part == "" {
-			continue
-		}
-		sep := ":"
-		if !strings.Contains(part, ":") && strings.Contains(part, "=") {
-			sep = "="
-		}
-		kv := strings.SplitN(part, sep, 2)
-		if len(kv) != 2 {
-			continue
-		}
-		k := strings.ToUpper(strings.TrimSpace(kv[0]))
-		v := strings.TrimSpace(kv[1])
-		if k == "" || v == "" {
-			continue
-		}
-		out[k] = v
-	}
-	return out
-}
-
-func HaiPayPayoutAppId(cfg *rechargeentity.HaiPayCfg, currency string) (int64, error) {
-	if cfg == nil {
-		return 0, fmt.Errorf("haipay cfg nil")
-	}
+func HaiPayPayoutAppID(currency string) (int64, error) {
 	currency = strings.ToUpper(strings.TrimSpace(currency))
-	m := haiPayParseKVMap(cfg.PayoutAppIds)
-	raw, ok := m[currency]
-	if !ok || raw == "" {
-		return 0, fmt.Errorf("payout appId missing for currency=%s", currency)
+	appID, ok := country.LookupHaiPayAppID(currency)
+	if !ok {
+		return 0, fmt.Errorf("payout appId enum missing for currency=%s", currency)
 	}
-	id, err := strconv.ParseInt(raw, 10, 64)
-	if err != nil || id <= 0 {
-		return 0, fmt.Errorf("invalid payout appId currency=%s raw=%s", currency, raw)
-	}
-	return id, nil
+	return appID, nil
 }
 
-func haiPayFormatPayoutAmount(currency string, amount float64) string {
+// HaiPayNormalizePayoutAmount 按 HaiPay 目标币种精度统一代付金额。
+// 零小数币种在提交前取整，其余币种保留两位，调用方应保存该返回值作为实际代付金额。
+func HaiPayNormalizePayoutAmount(currency string, amount float64) float64 {
 	currency = strings.ToUpper(strings.TrimSpace(currency))
 	switch currency {
 	case "IDR", "VND", "KRW", "JPY", "CLP", "UGX", "XAF":
-		return fmt.Sprintf("%.0f", math.Round(amount))
+		return math.Round(amount)
 	default:
-		return fmt.Sprintf("%.2f", amount)
+		return math.Round(amount*100) / 100
+	}
+}
+
+func haiPayFormatPayoutAmount(currency string, amount float64) string {
+	amount = HaiPayNormalizePayoutAmount(currency, amount)
+	if isHaiPayZeroDecimalCurrency(currency) {
+		return fmt.Sprintf("%.0f", amount)
+	}
+	return fmt.Sprintf("%.2f", amount)
+}
+
+func isHaiPayZeroDecimalCurrency(currency string) bool {
+	switch strings.ToUpper(strings.TrimSpace(currency)) {
+	case "IDR", "VND", "KRW", "JPY", "CLP", "UGX", "XAF":
+		return true
+	default:
+		return false
 	}
 }
 
@@ -83,9 +65,53 @@ type HaiPayPayoutApplyReq struct {
 	Name          string
 	Phone         string
 	Email         string
+	Country       string
+	IdentifyType  string
+	Address1      string
+	Address2      string
+	Address3      string
+	PostalCode    string
 	PartnerUserID string
-	Subject       string
 	Body          string
+}
+
+func haiPayPayoutExtraParams(req *HaiPayPayoutApplyReq) (map[string]any, error) {
+	if req == nil {
+		return nil, fmt.Errorf("nil payout req")
+	}
+	requirements := country.HaiPayPayoutExtraRequirementsFor(req.Currency, req.BankCode)
+	params := make(map[string]any)
+	identifyType := strings.TrimSpace(req.IdentifyType)
+	if len(requirements.IdentifyTypeOptions) > 0 {
+		identifyType = strings.ToUpper(identifyType)
+	}
+	if !requirements.IsAllowedIdentifyType(identifyType) {
+		return nil, fmt.Errorf("payout identifyType missing or invalid currency=%s bankCode=%s", strings.ToUpper(strings.TrimSpace(req.Currency)), strings.TrimSpace(req.BankCode))
+	}
+	if requirements.IdentifyTypeRequired {
+		params["identifyType"] = identifyType
+	}
+	if requirements.CountryRequired {
+		countryCode := strings.ToUpper(strings.TrimSpace(req.Country))
+		if countryCode == "" {
+			return nil, fmt.Errorf("payout country missing currency=%s bankCode=%s", strings.ToUpper(strings.TrimSpace(req.Currency)), strings.TrimSpace(req.BankCode))
+		}
+		params["country"] = countryCode
+	}
+	if requirements.AddressRequired {
+		address1 := strings.TrimSpace(req.Address1)
+		address2 := strings.TrimSpace(req.Address2)
+		address3 := strings.TrimSpace(req.Address3)
+		postalCode := strings.TrimSpace(req.PostalCode)
+		if address1 == "" || address2 == "" || address3 == "" || postalCode == "" {
+			return nil, fmt.Errorf("payout address missing currency=%s bankCode=%s", strings.ToUpper(strings.TrimSpace(req.Currency)), strings.TrimSpace(req.BankCode))
+		}
+		params["address1"] = address1
+		params["address2"] = address2
+		params["address3"] = address3
+		params["postalCode"] = postalCode
+	}
+	return params, nil
 }
 
 type HaiPayPayoutApplyRes struct {
@@ -126,18 +152,23 @@ func HaiPayApplyPayout(ctx context.Context, req *HaiPayPayoutApplyReq) (*HaiPayP
 		return nil, fmt.Errorf("nil payout req")
 	}
 	cfg := cfgdao.GetHaiPayCfgCached()
-	if cfg == nil || !cfg.PayoutEnabled {
-		return nil, fmt.Errorf("haipay payout not enabled")
+	if cfg == nil || !cfgdao.HaiPayEnabled() {
+		return nil, fmt.Errorf("haipay config not ready")
+	}
+	callbackBaseURL := strings.TrimRight(strings.TrimSpace(cfg.CallbackBaseUrl), "/")
+	if callbackBaseURL == "" {
+		return nil, fmt.Errorf("haipay callback base url missing")
 	}
 	currency := strings.ToUpper(strings.TrimSpace(req.Currency))
 	if currency == "" {
 		return nil, fmt.Errorf("empty currency")
 	}
-	appId, err := HaiPayPayoutAppId(cfg, currency)
+	appId, err := HaiPayPayoutAppID(currency)
 	if err != nil {
 		return nil, err
 	}
-	if req.Amount <= 0 {
+	normalizedAmount := HaiPayNormalizePayoutAmount(currency, req.Amount)
+	if normalizedAmount <= 0 || math.IsNaN(normalizedAmount) || math.IsInf(normalizedAmount, 0) {
 		return nil, fmt.Errorf("invalid amount")
 	}
 	accountType := strings.ToUpper(strings.TrimSpace(req.AccountType))
@@ -156,15 +187,8 @@ func HaiPayApplyPayout(ctx context.Context, req *HaiPayPayoutApplyReq) (*HaiPayP
 	if !strings.Contains(name, " ") {
 		name = name + " User"
 	}
-	subject := strings.TrimSpace(req.Subject)
-	if subject == "" {
-		subject = strings.TrimSpace(cfg.PayoutSubject)
-	}
-	if subject == "" {
-		subject = "GuildSettlement"
-	}
-	notifyURL := strings.TrimRight(cfg.CallbackBaseUrl, "/") + haiPayPayoutNotifyPath
-	amountStr := haiPayFormatPayoutAmount(currency, req.Amount)
+	notifyURL := callbackBaseURL + haiPayPayoutNotifyPath
+	amountStr := haiPayFormatPayoutAmount(currency, normalizedAmount)
 
 	body := map[string]any{
 		"appId":         appId,
@@ -178,10 +202,17 @@ func HaiPayApplyPayout(ctx context.Context, req *HaiPayPayoutApplyReq) (*HaiPayP
 		"email":         email,
 		"partnerUserId": strings.TrimSpace(req.PartnerUserID),
 		"notifyUrl":     notifyURL,
-		"subject":       subject,
+		"subject":       haiPayPayoutSubject,
 	}
 	if b := strings.TrimSpace(req.Body); b != "" {
 		body["body"] = b
+	}
+	extraParams, err := haiPayPayoutExtraParams(req)
+	if err != nil {
+		return nil, err
+	}
+	for key, value := range extraParams {
+		body[key] = value
 	}
 
 	xrlog.DetailLog.Infof(ctx, "haipay payout apply sign-before currency=%s params=%s", currency, haiPaySafeParams(body))
@@ -218,15 +249,15 @@ func haiPayQueryPayout(ctx context.Context, row *liveentity.GuildIncomeSettlemen
 		return nil, fmt.Errorf("empty payout settlement")
 	}
 	cfg := cfgdao.GetHaiPayCfgCached()
-	if cfg == nil || !cfg.PayoutEnabled {
-		return nil, fmt.Errorf("haipay payout not enabled")
+	if cfg == nil || !cfgdao.HaiPayEnabled() {
+		return nil, fmt.Errorf("haipay config not ready")
 	}
 	currency := strings.ToUpper(strings.TrimSpace(row.TransferCurrency))
 	orderID := strings.TrimSpace(row.TransferOrderId)
 	if currency == "" || orderID == "" {
 		return nil, fmt.Errorf("haipay payout local order incomplete")
 	}
-	appID, err := HaiPayPayoutAppId(cfg, currency)
+	appID, err := HaiPayPayoutAppID(currency)
 	if err != nil {
 		return nil, err
 	}

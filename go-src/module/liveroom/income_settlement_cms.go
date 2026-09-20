@@ -12,7 +12,6 @@ import (
 	"xr-game-server/entity/live"
 )
 
-
 func fillCMSItemFromAnchor(row *entity.AnchorIncomeSettlementLog) *incomesettlementdto.CMSIncomeSettlementLogItem {
 	if row == nil {
 		return nil
@@ -26,7 +25,6 @@ func fillCMSItemFromAnchor(row *entity.AnchorIncomeSettlementLog) *incomesettlem
 		TotalPrivateRoomTicketIncome: row.TotalPrivateRoomTicketIncome,
 		TotalPrivateRoomWatchIncome:  row.TotalPrivateRoomWatchIncome,
 		TotalVideoCallIncome:         row.TotalVideoCallIncome,
-		TotalVideoCallTicketIncome:   row.TotalVideoCallTicketIncome,
 		TotalVideoCallBillingIncome:  row.TotalVideoCallBillingIncome,
 		TotalLiveDuration:            row.TotalLiveDuration,
 		SettlementSalary:             row.SettlementSalary,
@@ -50,7 +48,6 @@ func fillCMSItemFromGuild(row *entity.GuildIncomeSettlementLog) *incomesettlemen
 		TotalPrivateRoomTicketIncome: row.TotalPrivateRoomTicketIncome,
 		TotalPrivateRoomWatchIncome:  row.TotalPrivateRoomWatchIncome,
 		TotalVideoCallIncome:         row.TotalVideoCallIncome,
-		TotalVideoCallTicketIncome:   row.TotalVideoCallTicketIncome,
 		TotalVideoCallBillingIncome:  row.TotalVideoCallBillingIncome,
 		TotalLiveDuration:            row.TotalLiveDuration,
 		SettlementSalary:             row.SettlementSalary,

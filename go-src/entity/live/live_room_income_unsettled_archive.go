@@ -50,7 +50,6 @@ func NewLiveRoomIncomeUnsettledArchive(roomId, guildId uint64, a *LiveRoomIncome
 	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettledArchive, LiveRoomIncomeTotalPrivateRoomTicketIncome, ret.ID, a.TotalPrivateRoomTicketIncome)
 	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettledArchive, LiveRoomIncomeTotalPrivateRoomWatchIncome, ret.ID, a.TotalPrivateRoomWatchIncome)
 	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettledArchive, LiveRoomIncomeTotalVideoCallIncome, ret.ID, a.TotalVideoCallIncome)
-	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettledArchive, LiveRoomIncomeTotalVideoCallTicketIncome, ret.ID, a.TotalVideoCallTicketIncome)
 	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettledArchive, LiveRoomIncomeTotalVideoCallBillingIncome, ret.ID, a.TotalVideoCallBillingIncome)
 	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettledArchive, LiveRoomIncomeTotalShortVideoIncome, ret.ID, a.TotalShortVideoIncome)
 	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettledArchive, LiveRoomIncomeTotalGameIncome, ret.ID, a.TotalGameIncome)

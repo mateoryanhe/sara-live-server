@@ -67,10 +67,6 @@ func (p *haiPayProvider) createGlobalCashierPay(ctx context.Context, req *Channe
 	if currency == "USD" && amount < haiPayMinUsdAmount {
 		return nil, fmt.Errorf("haipay usd amount must be >= %.2f got=%v", haiPayMinUsdAmount, amount)
 	}
-	if cfg.GlobalCashierAppId <= 0 {
-		return nil, fmt.Errorf("haipay global cashier appId missing")
-	}
-
 	name := strings.TrimSpace(req.PlayerName)
 	if name == "" {
 		name = fmt.Sprintf("User %d", req.UserID)
@@ -95,7 +91,7 @@ func (p *haiPayProvider) createGlobalCashierPay(ctx context.Context, req *Channe
 		subject = "Recharge"
 	}
 	body := map[string]any{
-		"appId":           cfg.GlobalCashierAppId,
+		"appId":           int64(country.HaiPayAppIDCashier),
 		"orderId":         req.OrderID,
 		"name":            name,
 		"email":           email,

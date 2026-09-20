@@ -417,7 +417,6 @@ type GetLiveRoomRes struct {
 	TicketTime                  int64   `json:"TicketTime" dc:"私密房门票倒计时"`
 	HasTicket                   bool    `json:"hasTicket"`
 	TotalVideoCallIncome        float64 `json:"totalVideoCallIncome" dc:"累计视频通话收益(仅主播本人查询时返回)"`
-	TotalVideoCallTicketIncome  float64 `json:"totalVideoCallTicketIncome" dc:"累计视频通话门票收益(仅主播本人查询时返回)"`
 	TotalVideoCallBillingIncome float64 `json:"totalVideoCallBillingIncome" dc:"累计视频通话计费收益(仅主播本人查询时返回)"`
 	IsBotAnchor                 bool    `json:"isBotAnchor" dc:"是否机器人主播"`
 	IsTest                      bool    `json:"isTest" dc:"是否测试机器人主播"`

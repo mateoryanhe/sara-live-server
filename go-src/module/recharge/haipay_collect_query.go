@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"xr-game-server/constants/country"
 	"xr-game-server/core/xrlog"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dao/rechargeorderdao"
@@ -76,13 +77,10 @@ func haiPayQueryCollect(ctx context.Context, orderId, orderNo string) (platformS
 	globalCashier := isHaiPayGlobalCashierBiz(haiPayCollectionBizType(localOrderPayChannel))
 	var appID int64
 	if globalCashier {
-		if cfg.GlobalCashierAppId <= 0 {
-			return 0, "", fmt.Errorf("haipay global cashier appId missing")
-		}
 		if orderNo == "" {
 			return 0, "", fmt.Errorf("haipay global cashier query orderNo missing orderId=%s", orderId)
 		}
-		appID = cfg.GlobalCashierAppId
+		appID = int64(country.HaiPayAppIDCashier)
 	} else {
 		if localOrderPayChannel != rechargeentity.RechargeCfgTypeCoinMerchant {
 			return 0, "", fmt.Errorf("haipay unsupported local collection channel=%d", localOrderPayChannel)
@@ -90,11 +88,14 @@ func haiPayQueryCollect(ctx context.Context, orderId, orderNo string) (platformS
 		if localOrderPayRegion == "" {
 			return 0, "", fmt.Errorf("haipay coin merchant collection region missing orderId=%s", orderId)
 		}
-		credential, credentialErr := haiPayCoinMerchantCollectionCredential(localOrderPayRegion, localOrderCurrency)
-		if credentialErr != nil {
+		if _, credentialErr := haiPayCoinMerchantCollectionCredential(localOrderPayRegion, localOrderCurrency); credentialErr != nil {
 			return 0, "", credentialErr
 		}
-		appID = credential.AppId
+		var ok bool
+		appID, ok = country.LookupHaiPayAppID(localOrderCurrency)
+		if !ok {
+			return 0, "", fmt.Errorf("haipay appId enum missing currency=%s", localOrderCurrency)
+		}
 	}
 
 	body := map[string]any{

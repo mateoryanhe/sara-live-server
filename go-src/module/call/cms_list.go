@@ -90,7 +90,6 @@ func toCMSVideoCallItem(v *entity.CallOrder, nicknameMap map[uint64]string, prof
 		ReceiverHeartTime: v.ReceiverHeartTime,
 		OrderEndTime:      v.OrderEndTime,
 		CallDuration:      v.CallDuration,
-		TicketPrice:       v.TicketPrice,
 		PricePerMinute:    v.PricePerMinute,
 		TotalCost:         v.TotalCost,
 		BillingDuration:   v.BillingDuration,

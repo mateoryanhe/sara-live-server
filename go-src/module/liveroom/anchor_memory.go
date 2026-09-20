@@ -258,7 +258,6 @@ func fillAnchorRoomFields(item *accountdto.AnchorListItem, room *liveentity.Live
 		item.TotalPrivateRoomTicketIncome = income.TotalPrivateRoomTicketIncome
 		item.TotalPrivateRoomWatchIncome = income.TotalPrivateRoomWatchIncome
 		item.TotalVideoCallIncome = income.TotalVideoCallIncome
-		item.TotalVideoCallTicketIncome = income.TotalVideoCallTicketIncome
 		item.TotalVideoCallBillingIncome = income.TotalVideoCallBillingIncome
 	}
 	item.LiveStatus = roomLiveStatus(room)

@@ -378,3 +378,28 @@ func TestGetAndFlagIcon(t *testing.T) {
 		t.Fatalf("All len=%d want %d", n, len(all))
 	}
 }
+
+func TestHaiPayPayoutExtraRequirements(t *testing.T) {
+	pix := HaiPayPayoutExtraRequirementsFor(" brl ", "pix")
+	if !pix.IdentifyTypeRequired || pix.AddressRequired ||
+		!pix.IsAllowedIdentifyType("cpf") || pix.IsAllowedIdentifyType("passport") {
+		t.Fatalf("unexpected PIX requirements: %+v", pix)
+	}
+
+	papara := HaiPayPayoutExtraRequirementsFor("TRY", "PAPARA")
+	if !papara.IdentifyTypeRequired || !papara.IsAllowedIdentifyType("PAPARA_NUMBER") ||
+		!papara.IsAllowedIdentifyType("turkish_id") || papara.IsAllowedIdentifyType("") {
+		t.Fatalf("unexpected Papara requirements: %+v", papara)
+	}
+
+	ach := HaiPayPayoutExtraRequirementsFor("USD", "ach")
+	if !ach.IdentifyTypeRequired || !ach.CountryRequired || !ach.AddressRequired ||
+		!ach.IsAllowedIdentifyType("021000021") {
+		t.Fatalf("unexpected ACH requirements: %+v", ach)
+	}
+
+	ordinary := HaiPayPayoutExtraRequirementsFor("USD", "VENMO")
+	if ordinary.IdentifyTypeRequired || ordinary.CountryRequired || ordinary.AddressRequired {
+		t.Fatalf("unexpected ordinary payout requirements: %+v", ordinary)
+	}
+}

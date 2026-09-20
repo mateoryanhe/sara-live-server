@@ -24,7 +24,6 @@ export function buildVideoCallLogCsvColumns(
     {header: t(`${ns}.receiverLastHeart`), value: row => formatLiveRecordCsvDate(row.receiverHeartTime)},
     {header: t(`${ns}.endTime`), value: row => formatLiveRecordCsvDate(row.orderEndTime)},
     {header: t(`${ns}.callDuration`), value: row => row.callDuration},
-    {header: t(`${ns}.ticketDiamond`), value: row => row.ticketPrice},
     {header: t(`${ns}.pricePerMinuteDiamond`), value: row => row.pricePerMinute},
     {header: t(`${ns}.billingDurationMinutes`), value: row => row.billingDuration},
     {header: t(`${ns}.totalCostDiamond`), value: row => row.totalCost},

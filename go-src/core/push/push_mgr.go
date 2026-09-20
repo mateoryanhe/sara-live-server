@@ -173,3 +173,11 @@ func OnlineCount() int {
 	}
 	return clientMap.Size()
 }
+
+// IsOnline 根据当前 WebSocket 连接判断用户是否在线。
+func IsOnline(clientId uint64) bool {
+	if clientId == 0 || clientMap == nil {
+		return false
+	}
+	return clientMap.Contains(clientId)
+}
