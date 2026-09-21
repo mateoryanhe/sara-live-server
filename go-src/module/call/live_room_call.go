@@ -14,6 +14,7 @@ import (
 	"xr-game-server/entity/call"
 	"xr-game-server/errercode"
 	"xr-game-server/module/agora"
+	"xr-game-server/module/livecfg"
 	"xr-game-server/module/liveroom"
 	"xr-game-server/module/wallet"
 )
@@ -55,6 +56,9 @@ func LiveRoomCall(ctx context.Context, req *calldto.LiveRoomCallReq) (*calldto.L
 	}
 
 	requiredDiamond := cfg.Billing
+	if livecfg.IsVideoCallTicketEnabled() {
+		requiredDiamond += cfg.Ticket
+	}
 	if requiredDiamond > 0 {
 		if err := wallet.CanPayWithGoldExchange(callerId, requiredDiamond); err != nil {
 			return nil, err
@@ -64,16 +68,18 @@ func LiveRoomCall(ctx context.Context, req *calldto.LiveRoomCallReq) (*calldto.L
 	order := entity.NewCallOrder(
 		callerId,
 		anchorId,
+		callerId,
 		entity.CallOrderTypeVideo,
 		entity.CallOrderSourceLiveRoom,
 		strconv.FormatUint(room.LiveRecordId, 10),
+		cfg.Ticket,
 		cfg.Billing,
 	)
 	calldao.AddOrderToCache(order)
 	trackActiveCallOrder(order.ID)
 
 	channelName := buildCallChannelName(callerId, anchorId)
-	if err := pushLiveRoomCallRequest(anchorId, callerId, order.ID, channelName, order.CallType); err != nil {
+	if err := pushCallRequest(order, channelName); err != nil {
 		return nil, err
 	}
 

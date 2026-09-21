@@ -25,10 +25,17 @@ const (
 )
 
 const (
-	LiveRoomCategoryHot     uint8 = 1 // hot
-	LiveRoomCategoryGame    uint8 = 2 // game
-	LiveRoomCategoryPrivate uint8 = 3 // 私密
+	LiveRoomCategoryHot      uint8 = 1 // hot
+	LiveRoomCategoryGame     uint8 = 2 // game
+	LiveRoomCategoryOneToOne uint8 = 4 // 1v1房间
 )
+
+// IsValidLiveRoomCategory 判断直播间分类是否已定义。
+func IsValidLiveRoomCategory(category uint8) bool {
+	return category == LiveRoomCategoryHot ||
+		category == LiveRoomCategoryGame ||
+		category == LiveRoomCategoryOneToOne
+}
 
 // 直播间上下架状态
 const (
@@ -43,7 +50,7 @@ const (
 	LiveRoomCallMinTotalRechargeUSD = 10 // 直播间1v1通话最低累计充值(USD)
 )
 
-// NormalizePrivateInviteType 归一化私密邀请类型
+// NormalizePrivateInviteType 归一化视频通话邀请类型
 func NormalizePrivateInviteType(v, category uint8) uint8 {
 	if v == 0 {
 		v = DefaultPrivateInviteType(category)
@@ -54,7 +61,7 @@ func NormalizePrivateInviteType(v, category uint8) uint8 {
 	return v
 }
 
-// DefaultPrivateInviteType 按直播间分类返回私密邀请类型默认值
+// DefaultPrivateInviteType 按直播间分类返回视频通话邀请类型默认值
 func DefaultPrivateInviteType(category uint8) uint8 {
 	if category == LiveRoomCategoryHot {
 		return LiveRoomPrivateInviteReject

@@ -12,41 +12,112 @@ import (
 	callentity "xr-game-server/entity/call"
 	liveentity "xr-game-server/entity/live"
 	"xr-game-server/gameevent"
+	"xr-game-server/module/livecfg"
 	"xr-game-server/module/liveroom"
 	"xr-game-server/module/wallet"
 )
 
-// checkLiveRoomCallDiamondOnAccept 接听时校验呼叫者是否可支付首分钟费用(钻石+按需兑换金币)
+// callDiamondBillingPartyIds 从订单保存的付费者确定主播与付费用户。
+// payer_id=0 仅用于兼容字段上线前尚未结束的旧订单。
+func callDiamondBillingPartyIds(order *callentity.CallOrder) (anchorId, payerId uint64, billable bool) {
+	if order == nil {
+		return 0, 0, false
+	}
+	switch order.Source {
+	case callentity.CallOrderSourceLiveRoom:
+		if order.CallerId == 0 || order.ReceiverId == 0 {
+			return 0, 0, false
+		}
+		payerId = order.PayerId
+		if payerId == 0 {
+			payerId = order.CallerId
+		}
+		if payerId != order.CallerId {
+			return 0, 0, false
+		}
+		return order.ReceiverId, payerId, true
+	case callentity.CallOrderSourceOneToOneRoom:
+		payerId = order.PayerId
+		if payerId == 0 {
+			resolvedAnchorId, resolvedPayerId, ok := resolveRoomCallPartyIds(order.CallerId, order.ReceiverId)
+			if !ok {
+				return 0, 0, false
+			}
+			return resolvedAnchorId, resolvedPayerId, true
+		}
+		switch payerId {
+		case order.CallerId:
+			anchorId = order.ReceiverId
+		case order.ReceiverId:
+			anchorId = order.CallerId
+		default:
+			return 0, 0, false
+		}
+		return anchorId, payerId, anchorId > 0
+	default:
+		return 0, 0, false
+	}
+}
+
+func callDiamondBillingUserId(order *callentity.CallOrder) (uint64, bool) {
+	if order == nil {
+		return 0, false
+	}
+	_, payerId, billable := callDiamondBillingPartyIds(order)
+	return payerId, billable
+}
+
+func liveRoomCallTicketPrice(order *callentity.CallOrder, enabled bool) float64 {
+	if !enabled || order == nil || order.Source != callentity.CallOrderSourceLiveRoom || order.TicketPrice <= 0 {
+		return 0
+	}
+	return order.TicketPrice
+}
+
+// checkLiveRoomCallDiamondOnAccept 接通时按来源校验付费用户是否可支付门票与首分钟费用。
 func checkLiveRoomCallDiamondOnAccept(order *callentity.CallOrder) error {
-	if order == nil || order.Source != callentity.CallOrderSourceLiveRoom {
+	payerId, billable := callDiamondBillingUserId(order)
+	if !billable {
 		return nil
 	}
 
 	requiredDiamond := order.PricePerMinute
+	requiredDiamond = math.AddFloat64(requiredDiamond, liveRoomCallTicketPrice(order, livecfg.IsVideoCallTicketEnabled()))
 	if requiredDiamond <= 0 {
 		return nil
 	}
-	return wallet.CanPayWithGoldExchange(order.CallerId, requiredDiamond)
+	return wallet.CanPayWithGoldExchange(payerId, requiredDiamond)
 }
 
-// chargeLiveRoomCallOnAccept 直播间来源通话接听后扣除首分钟费用
+// chargeLiveRoomCallOnAccept 双方确认接通后扣费。
+// source=1 按开关扣门票并扣首分钟；source=3 只扣首分钟。
 func chargeLiveRoomCallOnAccept(order *callentity.CallOrder, now time.Time) error {
-	if order == nil || order.Source != callentity.CallOrderSourceLiveRoom {
+	if order == nil {
+		return nil
+	}
+	anchorId, payerId, billable := callDiamondBillingPartyIds(order)
+	if !billable {
 		return nil
 	}
 
 	liveRecordId, _ := strconv.ParseUint(order.Params, 10, 64)
-	roomId := order.ReceiverId
-	callerId := order.CallerId
-
 	var totalCost float64
+	ticketPrice := liveRoomCallTicketPrice(order, livecfg.IsVideoCallTicketEnabled())
 
-	if order.PricePerMinute > 0 {
-		if _, err := wallet.DiamondSubWithGoldExchange(callerId, order.PricePerMinute, currency.ReasonLiveRoomVideoCallBilling); err != nil {
+	if ticketPrice > 0 {
+		if _, err := wallet.DiamondSubWithGoldExchange(payerId, ticketPrice, currency.ReasonLiveRoomVideoCallTicket); err != nil {
 			return err
 		}
-		totalCost += order.PricePerMinute
-		recordLiveRoomCallRevenue(roomId, liveRecordId, callerId, order.ID, order.PricePerMinute)
+		totalCost = math.AddFloat64(totalCost, ticketPrice)
+		recordLiveRoomCallRevenue(anchorId, liveRecordId, payerId, order.ID, ticketPrice, liverevenue.LiveRoomVideoCallTicket)
+	}
+
+	if order.PricePerMinute > 0 {
+		if _, err := wallet.DiamondSubWithGoldExchange(payerId, order.PricePerMinute, currency.ReasonLiveRoomVideoCallBilling); err != nil {
+			return err
+		}
+		totalCost = math.AddFloat64(totalCost, order.PricePerMinute)
+		recordLiveRoomCallRevenue(anchorId, liveRecordId, payerId, order.ID, order.PricePerMinute, liverevenue.LiveRoomVideoCallBilling)
 		order.AddBillingDuration(1)
 		nextCharge := now.Add(time.Minute)
 		order.SetChargeTime(&nextCharge)
@@ -56,9 +127,13 @@ func chargeLiveRoomCallOnAccept(order *callentity.CallOrder, now time.Time) erro
 	return nil
 }
 
-// chargeLiveRoomCallBillingIfDue 直播间通话按分钟续费(心跳触发,加锁避免双方重复扣费)
+// chargeLiveRoomCallBillingIfDue 通话按来源进行分钟续费(心跳触发,加锁避免双方重复扣费)
 func chargeLiveRoomCallBillingIfDue(order *callentity.CallOrder, now time.Time) error {
-	if order == nil || order.Source != callentity.CallOrderSourceLiveRoom {
+	if order == nil {
+		return nil
+	}
+	anchorId, payerId, billable := callDiamondBillingPartyIds(order)
+	if !billable {
 		return nil
 	}
 	if !order.IsCallStarted() || order.PricePerMinute <= 0 {
@@ -69,10 +144,10 @@ func chargeLiveRoomCallBillingIfDue(order *callentity.CallOrder, now time.Time) 
 	}
 
 	liveRecordId, _ := strconv.ParseUint(order.Params, 10, 64)
-	if _, err := wallet.DiamondSubWithGoldExchange(order.CallerId, order.PricePerMinute, currency.ReasonLiveRoomVideoCallBilling); err != nil {
+	if _, err := wallet.DiamondSubWithGoldExchange(payerId, order.PricePerMinute, currency.ReasonLiveRoomVideoCallBilling); err != nil {
 		return err
 	}
-	recordLiveRoomCallRevenue(order.ReceiverId, liveRecordId, order.CallerId, order.ID, order.PricePerMinute)
+	recordLiveRoomCallRevenue(anchorId, liveRecordId, payerId, order.ID, order.PricePerMinute, liverevenue.LiveRoomVideoCallBilling)
 	order.SetTotalCost(math.AddFloat64(order.TotalCost, order.PricePerMinute))
 	order.AddBillingDuration(1)
 	nextCharge := now.Add(time.Minute)
@@ -80,12 +155,12 @@ func chargeLiveRoomCallBillingIfDue(order *callentity.CallOrder, now time.Time) 
 	return nil
 }
 
-func recordLiveRoomCallRevenue(roomId, liveRecordId, callerId, orderId uint64, amount float64) {
-	applyLiveRoomCallRevenue(roomId, liveRecordId, callerId, orderId, amount)
+func recordLiveRoomCallRevenue(roomId, liveRecordId, callerId, orderId uint64, amount float64, revenueType liverevenue.Type) {
+	applyLiveRoomCallRevenue(roomId, liveRecordId, callerId, orderId, amount, revenueType)
 }
 
-func applyLiveRoomCallRevenue(roomId, liveRecordId, callerId, orderId uint64, amount float64) {
-	if amount <= 0 || liveRecordId == 0 {
+func applyLiveRoomCallRevenue(roomId, liveRecordId, callerId, orderId uint64, amount float64, revenueType liverevenue.Type) {
+	if amount <= 0 || roomId == 0 {
 		return
 	}
 
@@ -93,56 +168,79 @@ func applyLiveRoomCallRevenue(roomId, liveRecordId, callerId, orderId uint64, am
 	if room == nil {
 		return
 	}
-	if liveRecord := liveroomdao.GetLiveRecordById(liveRecordId); liveRecord != nil {
-		liveRecord.ApplyVideoCallIncomeDelta(amount)
-		liveroomdao.PublishLiveRecord(liveRecord)
+	ticket := revenueType == liverevenue.LiveRoomVideoCallTicket
+	billing := revenueType == liverevenue.LiveRoomVideoCallBilling
+	if !ticket && !billing {
+		return
 	}
-	applyRoomCallRevenueDelta(room, amount)
+	if liveRecordId > 0 {
+		if liveRecord := liveroomdao.GetLiveRecordById(liveRecordId); liveRecord != nil {
+			liveRecord.ApplyVideoCallIncomeDelta(amount, ticket, billing)
+			liveroomdao.PublishLiveRecord(liveRecord)
+		}
+	}
+	applyRoomCallRevenueDelta(room, amount, ticket, billing)
 
-	eventData := liveentity.NewLiveRevenueLogRecord(roomId, liveRecordId, callerId, orderId, 1, amount, amount, uint8(liverevenue.LiveRoomVideoCallBilling))
+	count := 1
+	unitPrice := amount
+	if ticket {
+		count = 0
+		unitPrice = 0
+	}
+	eventData := liveentity.NewLiveRevenueLogRecord(roomId, liveRecordId, callerId, orderId, count, unitPrice, amount, uint8(revenueType))
 	event.Pub(gameevent.RevenueEventEvent, eventData)
-	liveroom.NotifyLiveRecordTotalIncome(room)
+	if liveRecordId > 0 {
+		liveroom.NotifyLiveRecordTotalIncome(room)
+	}
 }
 
-func refundLiveRoomCallRevenue(order *callentity.CallOrder, liveRecordId uint64, refundAmount float64) {
-	if order == nil || refundAmount <= 0 || liveRecordId == 0 {
+func refundLiveRoomCallRevenue(order *callentity.CallOrder, anchorId, payerId, liveRecordId uint64, refundAmount float64) {
+	if order == nil || anchorId == 0 || payerId == 0 || refundAmount <= 0 {
 		return
 	}
 
-	if log := liveroomdao.FindLatestUnrefundedVideoCallBillingLog(order.ID, order.CallerId); log != nil {
+	if log := liveroomdao.FindLatestUnrefundedVideoCallBillingLog(order.ID, payerId); log != nil {
 		log.SetStatus(liveentity.LiveRevenueLogStatusRefunded)
 		liveroomdao.PublishRevenueLog(log)
 	}
 
-	room := liveroomdao.GetRoomById(order.ReceiverId)
+	room := liveroomdao.GetRoomById(anchorId)
 	if room == nil {
 		return
 	}
-	if liveRecord := liveroomdao.GetLiveRecordById(liveRecordId); liveRecord != nil {
-		liveRecord.ApplyVideoCallIncomeDelta(-refundAmount)
-		liveroomdao.PublishLiveRecord(liveRecord)
+	if liveRecordId > 0 {
+		if liveRecord := liveroomdao.GetLiveRecordById(liveRecordId); liveRecord != nil {
+			liveRecord.ApplyVideoCallIncomeDelta(-refundAmount, false, true)
+			liveroomdao.PublishLiveRecord(liveRecord)
+		}
 	}
-	applyRoomCallRevenueDelta(room, -refundAmount)
-	liveroom.NotifyLiveRecordTotalIncome(room)
+	applyRoomCallRevenueDelta(room, -refundAmount, false, true)
+	if liveRecordId > 0 {
+		liveroom.NotifyLiveRecordTotalIncome(room)
+	}
 }
 
-func applyRoomCallRevenueDelta(room *liveentity.LiveRoom, amount float64) {
+func applyRoomCallRevenueDelta(room *liveentity.LiveRoom, amount float64, ticket, billing bool) {
 	unsettled := liveroomdao.GetLiveRoomIncomeUnsettled(room.ID)
 	total := liveroomdao.GetLiveRoomIncomeTotal(room.ID)
 	if unsettled == nil || total == nil {
 		return
 	}
-	liveentity.ApplyVideoCallIncomeDelta(liveentity.TbLiveRoomIncomeUnsettled, unsettled.ID, &unsettled.LiveRoomIncomeAmounts, &unsettled.UpdatedAt, amount)
-	liveentity.ApplyVideoCallIncomeDelta(liveentity.TbLiveRoomIncomeTotal, total.ID, &total.LiveRoomIncomeAmounts, &total.UpdatedAt, amount)
-	liveroomdao.MirrorGuildVideoCallIncomeDelta(room.ID, amount)
-	liveroomdao.MirrorDailyAnchorVideoCallIncomeDelta(room.ID, time.Now(), amount)
+	liveentity.ApplyVideoCallIncomeDelta(liveentity.TbLiveRoomIncomeUnsettled, unsettled.ID, &unsettled.LiveRoomIncomeAmounts, &unsettled.UpdatedAt, amount, ticket, billing)
+	liveentity.ApplyVideoCallIncomeDelta(liveentity.TbLiveRoomIncomeTotal, total.ID, &total.LiveRoomIncomeAmounts, &total.UpdatedAt, amount, ticket, billing)
+	liveroomdao.MirrorGuildVideoCallIncomeDelta(room.ID, amount, ticket, billing)
+	liveroomdao.MirrorDailyAnchorVideoCallIncomeDelta(room.ID, time.Now(), amount, ticket, billing)
 }
 
 const callBillingRefundGrace = 30 * time.Second
 
 // refundLiveRoomCallLastMinuteIfNeeded 结束通话时,若未超过ChargeTime 30秒则退回最后一次分钟扣费
 func refundLiveRoomCallLastMinuteIfNeeded(order *callentity.CallOrder, endTime time.Time) error {
-	if order == nil || order.Source != callentity.CallOrderSourceLiveRoom {
+	if order == nil {
+		return nil
+	}
+	anchorId, payerId, billable := callDiamondBillingPartyIds(order)
+	if !billable {
 		return nil
 	}
 	if order.ChargeTime == nil || order.PricePerMinute <= 0 || order.BillingDuration == 0 {
@@ -153,12 +251,12 @@ func refundLiveRoomCallLastMinuteIfNeeded(order *callentity.CallOrder, endTime t
 	}
 
 	refundAmount := order.PricePerMinute
-	if _, err := wallet.DiamondAdd(order.CallerId, refundAmount, currency.ReasonRefund); err != nil {
+	if _, err := wallet.DiamondAdd(payerId, refundAmount, currency.ReasonRefund); err != nil {
 		return err
 	}
 
 	liveRecordId, _ := strconv.ParseUint(order.Params, 10, 64)
-	refundLiveRoomCallRevenue(order, liveRecordId, refundAmount)
+	refundLiveRoomCallRevenue(order, anchorId, payerId, liveRecordId, refundAmount)
 
 	order.SetTotalCost(math.SubFloat64(order.TotalCost, refundAmount))
 	order.SubBillingDuration(1)

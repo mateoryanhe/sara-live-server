@@ -58,6 +58,8 @@ func callSourceText(v uint8) string {
 		return "直播间"
 	case entity.CallOrderSourcePrivateMessage:
 		return "私信"
+	case entity.CallOrderSourceOneToOneRoom:
+		return "1v1房间"
 	default:
 		return "未知"
 	}
@@ -78,6 +80,7 @@ func toCMSVideoCallItem(v *entity.CallOrder, nicknameMap map[uint64]string, prof
 		Id:                v.ID,
 		CallerId:          v.CallerId,
 		ReceiverId:        v.ReceiverId,
+		PayerId:           v.PayerId,
 		CallType:          v.CallType,
 		CallTypeText:      callTypeText(v.CallType),
 		Source:            v.Source,
@@ -90,6 +93,7 @@ func toCMSVideoCallItem(v *entity.CallOrder, nicknameMap map[uint64]string, prof
 		ReceiverHeartTime: v.ReceiverHeartTime,
 		OrderEndTime:      v.OrderEndTime,
 		CallDuration:      v.CallDuration,
+		TicketPrice:       v.TicketPrice,
 		PricePerMinute:    v.PricePerMinute,
 		TotalCost:         v.TotalCost,
 		BillingDuration:   v.BillingDuration,

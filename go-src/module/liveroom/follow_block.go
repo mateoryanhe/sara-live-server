@@ -22,7 +22,8 @@ func Block(ctx context.Context, req *livefollowdto.BlockReq) (*livefollowdto.Blo
 	if req.TargetId == 0 || req.TargetId == userId {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	if userinfodao.GetUserInfoByUserId(req.TargetId) == nil {
+	target := userinfodao.GetUserInfoByUserId(req.TargetId)
+	if target == nil {
 		return nil, errercode.CreateCode(errercode.SysError)
 	}
 
@@ -37,12 +38,12 @@ func Block(ctx context.Context, req *livefollowdto.BlockReq) (*livefollowdto.Blo
 	if existing == nil {
 		row := entity.NewLiveFollowWithStatus(userId, req.TargetId, entity.LiveFollowStatusBlock)
 		livefollowdao.AddFollowToCache(row)
-		livefollowdao.PrependBlockedToListCache(row)
+		livefollowdao.PrependBlockedToListCache(row, target)
 	} else {
 		wasFollowing := existing.Status == entity.LiveFollowStatusFollow
 		existing.SetStatus(entity.LiveFollowStatusBlock)
 		livefollowdao.AddFollowToCache(existing)
-		livefollowdao.PrependBlockedToListCache(existing)
+		livefollowdao.PrependBlockedToListCache(existing, target)
 		if wasFollowing {
 			userinfodao.DecFollowCount(userId, req.TargetId)
 			livefollowdao.RemoveFollowingFromListCache(userId, req.TargetId)
@@ -90,16 +91,18 @@ func BlockList(ctx context.Context, req *livefollowdto.BlockListReq) (*livefollo
 	pageData := livefollowdao.GetBlockedListByUser(userId, page, pageSize)
 	list := make([]*livefollowdto.BlockListItem, 0, len(pageData))
 	for _, row := range pageData {
+		if row == nil {
+			continue
+		}
+		profile := relationUserListRowWithMemoryProfile(row, row.AnchorId)
 		item := &livefollowdto.BlockListItem{
 			TargetId:  strconv.FormatUint(row.AnchorId, 10),
 			BlockedAt: row.UpdatedAt.Unix(),
-		}
-		if u := userinfodao.GetUserInfoByUserId(row.AnchorId); u != nil {
-			item.Nickname = u.Nickname
-			item.Avatar = upload.ResolveAvatarUrlForUser(row.AnchorId, u.Avatar)
-			item.VipLevel = u.VipLevel
-			item.Gender = u.Gender
-			item.Age = calcAge(u.Birthday)
+			Nickname:  profile.Nickname,
+			Avatar:    upload.ResolveAvatarUrlForUser(row.AnchorId, profile.Avatar),
+			VipLevel:  profile.VipLevel,
+			Gender:    profile.Gender,
+			Age:       calcAge(profile.Birthday),
 		}
 		list = append(list, item)
 	}

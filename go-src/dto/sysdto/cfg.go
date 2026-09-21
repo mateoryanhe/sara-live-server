@@ -7,25 +7,24 @@ type SysCfgReq struct {
 }
 
 type SysCfgResp struct {
-	SysTime                     int64   `json:"sysTime"`
-	T                           string  `json:"t" dc:"第三方支付域名"`
-	TVisable                    bool    `json:"tVisable" dc:"是否显示第三方支付"`
-	PaidDanmakuPrice            float64 `json:"paidDanmakuPrice" dc:"直播间付费弹幕价格(钻石)"`
-	PrivateRoomFreeWatchSeconds uint32  `json:"privateRoomFreeWatchSeconds" dc:"私密直播间免费观看时长(秒)"`
-	PrivacyPolicyUrl            string  `json:"privacyPolicyUrl" dc:"隐私政策页面URL"`
-	TermsOfServiceUrl           string  `json:"termsOfServiceUrl" dc:"用户服务协议页面URL"`
-	CreatorTermsUrl             string  `json:"creatorTermsUrl" dc:"短视频创作者上传合规条款URL"`
-	RoomOwnerTermsUrl           string  `json:"roomOwnerTermsUrl" dc:"房间房主责任条款URL"`
-	VipDescUrl                  string  `json:"vipDescUrl" dc:"VIP描述文档URL"`
-	AppImageMaxSize             uint64  `json:"appImageMaxSize" dc:"App端图片上传大小上限(字节)"`
-	GoldToDiamondRate           int     `json:"goldToDiamondRate" dc:"金币兑换钻石比例(1金币=N钻石)"`
-	ExchangeFeePercent          float64 `json:"exchangeFeePercent" dc:"App手动兑换手续费(%)，从兑换钻石中扣除"`
-	UsdToGoldRate               int     `json:"usdToGoldRate" dc:"美金兑换金币比例(1美金=N金币)"`
-	AboutSiteUrl                string  `json:"aboutSiteUrl" dc:"About页面URL"`
-	SafetyCenterUrl             string  `json:"safetyCenterUrl" dc:"安全中心页面URL"`
-	EnvType                     uint8   `json:"envType" dc:"环境类型(0正式服,1提审服,2测试服)"`
-	AttributionEnabled          bool    `json:"attributionEnabled" dc:"是否启用归因"`
-	AttributionProvider         string  `json:"attributionProvider" dc:"归因渠道"`
-	AppsFlyerDevKey             string  `json:"appsFlyerDevKey" dc:"AppsFlyer Dev Key"`
-	AppsFlyerAppId              string  `json:"appsFlyerAppId" dc:"AppsFlyer App ID"`
+	SysTime             int64   `json:"sysTime"`
+	T                   string  `json:"t" dc:"第三方支付域名"`
+	TVisable            bool    `json:"tVisable" dc:"是否显示第三方支付"`
+	PaidDanmakuPrice    float64 `json:"paidDanmakuPrice" dc:"直播间付费弹幕价格(钻石)"`
+	PrivacyPolicyUrl    string  `json:"privacyPolicyUrl" dc:"隐私政策页面URL"`
+	TermsOfServiceUrl   string  `json:"termsOfServiceUrl" dc:"用户服务协议页面URL"`
+	CreatorTermsUrl     string  `json:"creatorTermsUrl" dc:"短视频创作者上传合规条款URL"`
+	RoomOwnerTermsUrl   string  `json:"roomOwnerTermsUrl" dc:"房间房主责任条款URL"`
+	VipDescUrl          string  `json:"vipDescUrl" dc:"VIP描述文档URL"`
+	AppImageMaxSize     uint64  `json:"appImageMaxSize" dc:"App端图片上传大小上限(字节)"`
+	GoldToDiamondRate   int     `json:"goldToDiamondRate" dc:"金币兑换钻石比例(1金币=N钻石)"`
+	ExchangeFeePercent  float64 `json:"exchangeFeePercent" dc:"App手动兑换手续费(%)，从兑换钻石中扣除"`
+	UsdToGoldRate       int     `json:"usdToGoldRate" dc:"美金兑换金币比例(1美金=N金币)"`
+	AboutSiteUrl        string  `json:"aboutSiteUrl" dc:"About页面URL"`
+	SafetyCenterUrl     string  `json:"safetyCenterUrl" dc:"安全中心页面URL"`
+	EnvType             uint8   `json:"envType" dc:"环境类型(0正式服,1提审服,2测试服)"`
+	AttributionEnabled  bool    `json:"attributionEnabled" dc:"是否启用归因"`
+	AttributionProvider string  `json:"attributionProvider" dc:"归因渠道"`
+	AppsFlyerDevKey     string  `json:"appsFlyerDevKey" dc:"AppsFlyer Dev Key"`
+	AppsFlyerAppId      string  `json:"appsFlyerAppId" dc:"AppsFlyer App ID"`
 }

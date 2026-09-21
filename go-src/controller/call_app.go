@@ -20,6 +20,11 @@ func (c *CallAppController) LiveRoomCall(ctx context.Context, req *calldto.LiveR
 	return call.LiveRoomCall(ctx, req)
 }
 
+// OneToOneRoomCall 1v1房间视频通话呼叫
+func (c *CallAppController) OneToOneRoomCall(ctx context.Context, req *calldto.OneToOneRoomCallReq) (*calldto.OneToOneRoomCallRes, error) {
+	return call.OneToOneRoomCall(ctx, req)
+}
+
 // BatchInviteLiveRoomCall 主播批量邀请观众通话
 func (c *CallAppController) BatchInviteLiveRoomCall(ctx context.Context, req *calldto.BatchInviteLiveRoomCallReq) (*calldto.BatchInviteLiveRoomCallRes, error) {
 	return call.BatchInviteLiveRoomCall(ctx, req)

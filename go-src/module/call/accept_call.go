@@ -28,6 +28,9 @@ func AcceptCall(ctx context.Context, req *calldto.AcceptCallReq) (*calldto.Accep
 	if order == nil {
 		return nil, errercode.CreateCode(errercode.CallOrderNonExist)
 	}
+	if order.ReceiverId != receiverId {
+		return nil, errercode.CreateCode(errercode.NoPermission)
+	}
 
 	if !order.IsCalling() {
 		return nil, errercode.CreateCode(errercode.CallOrderStateInvalid)
@@ -55,7 +58,7 @@ func AcceptCall(ctx context.Context, req *calldto.AcceptCallReq) (*calldto.Accep
 		calldao.FlushOrderCache(order)
 	}
 
-	pushCallAccepted(order.CallerId, receiverId, order.ID, channelName, order.CallType)
+	pushCallAccepted(order, channelName)
 	pushLiveRoomCallAcceptedToAudience(order)
 
 	appId := ""

@@ -14,7 +14,7 @@ const (
 	LivePrivateRoomBillingStatusOnShelf  uint8 = 1
 )
 
-// LivePrivateRoomBilling 私密直播间按分钟计费配置(CMS 管理)
+// LivePrivateRoomBilling 1v1视频通话按分钟计费配置(CMS 管理)
 type LivePrivateRoomBilling struct {
 	migrate.OneModel
 	PricePerMinute float64 `gorm:"type:decimal(10,4);default:0;comment:每分钟钻石价格" json:"pricePerMinute"`

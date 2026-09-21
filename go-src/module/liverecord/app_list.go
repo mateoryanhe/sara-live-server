@@ -18,21 +18,19 @@ func ToAppItem(v *entity.LiveRecord) *liverecorddto.AppLiveRecordItem {
 		return nil
 	}
 	item := &liverecorddto.AppLiveRecordItem{
-		Id:                           strconv.FormatUint(v.ID, 10),
-		StartTime:                    v.StartTime.UnixMilli(),
-		TotalAudience:                v.TotalAudience,
-		TotalLiveDuration:            v.TotalLiveDuration,
-		TotalIncome:                  v.TotalIncome,
-		TotalGiftIncome:              v.TotalGiftIncome,
-		TotalPaidDanmakuIncome:       v.TotalPaidDanmakuIncome,
-		TotalPrivateRoomIncome:       v.TotalPrivateRoomIncome,
-		TotalPrivateRoomTicketIncome: v.TotalPrivateRoomTicketIncome,
-		TotalPrivateRoomWatchIncome:  v.TotalPrivateRoomWatchIncome,
-		TotalVideoCallIncome:         v.TotalVideoCallIncome,
-		TotalVideoCallBillingIncome:  v.TotalVideoCallBillingIncome,
-		TotalGameBet:                 v.TotalGameBet,
-		TotalGiftSender:              v.TotalGiftSender,
-		TotalNewFollower:             v.TotalNewFollower,
+		Id:                          strconv.FormatUint(v.ID, 10),
+		StartTime:                   v.StartTime.UnixMilli(),
+		TotalAudience:               v.TotalAudience,
+		TotalLiveDuration:           v.TotalLiveDuration,
+		TotalIncome:                 v.TotalIncome,
+		TotalGiftIncome:             v.TotalGiftIncome,
+		TotalPaidDanmakuIncome:      v.TotalPaidDanmakuIncome,
+		TotalVideoCallIncome:        v.TotalVideoCallIncome,
+		TotalVideoCallTicketIncome:  v.TotalVideoCallTicketIncome,
+		TotalVideoCallBillingIncome: v.TotalVideoCallBillingIncome,
+		TotalGameBet:                v.TotalGameBet,
+		TotalGiftSender:             v.TotalGiftSender,
+		TotalNewFollower:            v.TotalNewFollower,
 	}
 	if v.EndTime != nil && !v.EndTime.IsZero() {
 		item.EndTime = v.EndTime.UnixMilli()

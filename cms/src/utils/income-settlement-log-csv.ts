@@ -20,6 +20,7 @@ function incomeAmountColumns(t: TranslateFn, ns: string): CsvColumn<SettlementLo
     {header: t(`${ns}.totalGiftIncome`), value: row => row.totalGiftIncome},
     {header: t(`${ns}.totalPaidDanmakuIncome`), value: row => row.totalPaidDanmakuIncome},
     {header: t(`${ns}.totalVideoCallIncome`), value: row => row.totalVideoCallIncome},
+	{header: t(`${ns}.totalVideoCallTicketIncome`), value: row => row.totalVideoCallTicketIncome},
     {header: t(`${ns}.totalVideoCallBillingIncome`), value: row => row.totalVideoCallBillingIncome},
     {header: t(`${ns}.totalShortVideoIncome`), value: row => row.totalShortVideoIncome},
     {header: t(`${ns}.totalGameIncome`), value: row => row.totalGameIncome},

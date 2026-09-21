@@ -17,20 +17,19 @@ func fillCMSItemFromAnchor(row *entity.AnchorIncomeSettlementLog) *incomesettlem
 		return nil
 	}
 	item := &incomesettlementdto.CMSIncomeSettlementLogItem{
-		Id:                           row.ID,
-		RoomId:                       row.RoomId,
-		TotalIncome:                  row.TotalIncome,
-		TotalGiftIncome:              row.TotalGiftIncome,
-		TotalPaidDanmakuIncome:       row.TotalPaidDanmakuIncome,
-		TotalPrivateRoomTicketIncome: row.TotalPrivateRoomTicketIncome,
-		TotalPrivateRoomWatchIncome:  row.TotalPrivateRoomWatchIncome,
-		TotalVideoCallIncome:         row.TotalVideoCallIncome,
-		TotalVideoCallBillingIncome:  row.TotalVideoCallBillingIncome,
-		TotalLiveDuration:            row.TotalLiveDuration,
-		SettlementSalary:             row.SettlementSalary,
-		SettlementShareAmount:        row.SettlementShareAmount,
-		AnchorSharePercent:           row.AnchorSharePercent,
-		CreatedAt:                    &row.CreatedAt,
+		Id:                          row.ID,
+		RoomId:                      row.RoomId,
+		TotalIncome:                 row.TotalIncome,
+		TotalGiftIncome:             row.TotalGiftIncome,
+		TotalPaidDanmakuIncome:      row.TotalPaidDanmakuIncome,
+		TotalVideoCallIncome:        row.TotalVideoCallIncome,
+		TotalVideoCallTicketIncome:  row.TotalVideoCallTicketIncome,
+		TotalVideoCallBillingIncome: row.TotalVideoCallBillingIncome,
+		TotalLiveDuration:           row.TotalLiveDuration,
+		SettlementSalary:            row.SettlementSalary,
+		SettlementShareAmount:       row.SettlementShareAmount,
+		AnchorSharePercent:          row.AnchorSharePercent,
+		CreatedAt:                   &row.CreatedAt,
 	}
 	return item
 }
@@ -40,20 +39,19 @@ func fillCMSItemFromGuild(row *entity.GuildIncomeSettlementLog) *incomesettlemen
 		return nil
 	}
 	item := &incomesettlementdto.CMSIncomeSettlementLogItem{
-		Id:                           row.ID,
-		GuildId:                      row.GuildId,
-		TotalIncome:                  row.TotalIncome,
-		TotalGiftIncome:              row.TotalGiftIncome,
-		TotalPaidDanmakuIncome:       row.TotalPaidDanmakuIncome,
-		TotalPrivateRoomTicketIncome: row.TotalPrivateRoomTicketIncome,
-		TotalPrivateRoomWatchIncome:  row.TotalPrivateRoomWatchIncome,
-		TotalVideoCallIncome:         row.TotalVideoCallIncome,
-		TotalVideoCallBillingIncome:  row.TotalVideoCallBillingIncome,
-		TotalLiveDuration:            row.TotalLiveDuration,
-		SettlementSalary:             row.SettlementSalary,
-		SettlementShareAmount:        row.SettlementShareAmount,
-		GuildSharePercent:            row.GuildSharePercent,
-		CreatedAt:                    &row.CreatedAt,
+		Id:                          row.ID,
+		GuildId:                     row.GuildId,
+		TotalIncome:                 row.TotalIncome,
+		TotalGiftIncome:             row.TotalGiftIncome,
+		TotalPaidDanmakuIncome:      row.TotalPaidDanmakuIncome,
+		TotalVideoCallIncome:        row.TotalVideoCallIncome,
+		TotalVideoCallTicketIncome:  row.TotalVideoCallTicketIncome,
+		TotalVideoCallBillingIncome: row.TotalVideoCallBillingIncome,
+		TotalLiveDuration:           row.TotalLiveDuration,
+		SettlementSalary:            row.SettlementSalary,
+		SettlementShareAmount:       row.SettlementShareAmount,
+		GuildSharePercent:           row.GuildSharePercent,
+		CreatedAt:                   &row.CreatedAt,
 	}
 	return item
 }

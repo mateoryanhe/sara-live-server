@@ -2,23 +2,19 @@ package livecfg
 
 import (
 	"sync/atomic"
-	"time"
+
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/entity/live"
 )
 
-const defaultPrivateRoomFreeWatchSeconds uint32 = 420
-
 type liveCfgSnapshot struct {
-	PaidDanmakuPrice            float64
-	PrivateRoomFreeWatchSeconds uint32
+	PaidDanmakuPrice       float64
+	VideoCallTicketEnabled bool
 }
 
 var (
 	liveCfgCache         atomic.Value // *liveCfgSnapshot
-	emptyLiveCfgSnapshot = &liveCfgSnapshot{
-		PrivateRoomFreeWatchSeconds: defaultPrivateRoomFreeWatchSeconds,
-	}
+	emptyLiveCfgSnapshot = &liveCfgSnapshot{VideoCallTicketEnabled: true}
 )
 
 func reloadLiveCfgMemory() {
@@ -42,8 +38,8 @@ func toLiveCfgSnapshot(row *entity.LiveCfg) *liveCfgSnapshot {
 		return emptyLiveCfgSnapshot
 	}
 	return &liveCfgSnapshot{
-		PaidDanmakuPrice:            row.PaidDanmakuPrice,
-		PrivateRoomFreeWatchSeconds: row.PrivateRoomFreeWatchSeconds,
+		PaidDanmakuPrice:       row.PaidDanmakuPrice,
+		VideoCallTicketEnabled: row.VideoCallTicketEnabled,
 	}
 }
 
@@ -52,12 +48,8 @@ func GetPaidDanmakuPrice() float64 {
 	return getLiveCfgCache().PaidDanmakuPrice
 }
 
-// GetPrivateRoomFreeWatchSeconds 获取私密直播间免费观看时长(秒)
-func GetPrivateRoomFreeWatchSeconds() uint32 {
-	return getLiveCfgCache().PrivateRoomFreeWatchSeconds
-}
-
-// GetPrivateRoomFreeWatchDuration 获取私密直播间免费观看时长
-func GetPrivateRoomFreeWatchDuration() time.Duration {
-	return time.Duration(GetPrivateRoomFreeWatchSeconds()) * time.Second
+// IsVideoCallTicketEnabled 返回直播间来源视频通话接通时是否扣门票。
+// 未配置直播参数时默认开启，保持历史扣费行为。
+func IsVideoCallTicketEnabled() bool {
+	return getLiveCfgCache().VideoCallTicketEnabled
 }

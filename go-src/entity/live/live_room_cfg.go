@@ -38,11 +38,11 @@ const (
 // LiveRoomCfg 直播间配置(主键=房间ID=主播ID)
 type LiveRoomCfg struct {
 	migrate.OneModel
-	PrivateInviteType        uint8      `gorm:"default:1;comment:私密邀请类型(1=接受所有人,3=拒绝所有人)" json:"privateInviteType"`
-	Category                 uint8      `gorm:"default:1;comment:分类(1=hot,2=game,3=私密)" json:"category"`
+	PrivateInviteType        uint8      `gorm:"default:1;comment:视频通话邀请类型(1=接受所有人,3=拒绝所有人)" json:"privateInviteType"`
+	Category                 uint8      `gorm:"default:1;comment:分类(1=hot,2=game,4=1v1房间)" json:"category"`
 	TagId                    uint64     `gorm:"default:0;comment:直播间标签ID" json:"tagId"`
-	Ticket                   float64    `gorm:"type:decimal(10,4);default:0;comment:门票价格(钻石)" json:"ticket"`
-	Billing                  float64    `gorm:"type:decimal(10,4);default:0;comment:计费价格(每分钟钻石)" json:"billing"`
+	Ticket                   float64    `gorm:"type:decimal(10,4);default:0;comment:直播间视频通话门票价格(钻石)" json:"ticket"`
+	Billing                  float64    `gorm:"type:decimal(10,4);default:0;comment:视频通话价格(每分钟钻石)" json:"billing"`
 	CloudPlayerVideo         string     `gorm:"size:512;default:'';comment:云播放器MP4视频URL/路径" json:"cloudPlayerVideo"`
 	CloudPlayerFrameRate     uint8      `gorm:"default:24;comment:云播放器输出帧率(fps)" json:"cloudPlayerFrameRate"`
 	CloudPlayerBitrate       int        `gorm:"default:400;comment:云播放器输出码率(Kbps)" json:"cloudPlayerBitrate"`
@@ -156,7 +156,7 @@ func (r *LiveRoomCfg) SetPrivateInviteType(v uint8) {
 }
 
 func (r *LiveRoomCfg) SetCategory(v uint8) {
-	if v != LiveRoomCategoryHot && v != LiveRoomCategoryGame && v != LiveRoomCategoryPrivate {
+	if !IsValidLiveRoomCategory(v) {
 		v = LiveRoomCategoryHot
 	}
 	r.Category = v

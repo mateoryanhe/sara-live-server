@@ -19,13 +19,6 @@ func PublishLiveRecord(data *entity.LiveRecord) {
 	liveRecordCacheMgr.PublishRow(gctx.New(), data.ID, data)
 }
 
-func PublishLiveRoomBillingPay(data *entity.LiveRoomBillingPay) {
-	if data == nil || data.ID == "" || liveRoomBillingPayCacheMgr == nil {
-		return
-	}
-	liveRoomBillingPayCacheMgr.PublishRow(gctx.New(), data.ID, data)
-}
-
 func PublishRevenueLog(data *entity.LiveRevenueLog) {
 	if data == nil || data.ID == 0 || revenueLogCacheMgr == nil {
 		return

@@ -11,16 +11,19 @@ import (
 	"xr-game-server/errercode"
 )
 
-// AnchorRejectCall 主播拒接通话,支持不是主播,也可以通话
+// AnchorRejectCall 目标用户拒接通话；保留既有函数名兼容接口。
 func AnchorRejectCall(ctx context.Context, req *calldto.AnchorRejectCallReq) (*calldto.AnchorRejectCallRes, error) {
-	anchorId := httpserver.GetAuthId(ctx)
-	if anchorId == 0 {
+	receiverId := httpserver.GetAuthId(ctx)
+	if receiverId == 0 {
 		return nil, errercode.CreateCode(errercode.EmptyUserId)
 	}
 
 	order := calldao.GetOrderById(req.OrderId)
 	if order == nil {
 		return nil, errercode.CreateCode(errercode.CallOrderNonExist)
+	}
+	if order.ReceiverId != receiverId {
+		return nil, errercode.CreateCode(errercode.NoPermission)
 	}
 	if !order.IsCalling() {
 		return nil, errercode.CreateCode(errercode.CallOrderStateInvalid)
@@ -33,7 +36,7 @@ func AnchorRejectCall(ctx context.Context, req *calldto.AnchorRejectCallReq) (*c
 	calldao.FlushOrderCache(order)
 
 	resetCallUser(order.CallerId)
-	pushCallRejected(order.CallerId, anchorId, order.ID)
+	pushCallRejected(order)
 	untrackActiveCallOrder(order.ID)
 
 	return &calldto.AnchorRejectCallRes{Success: true}, nil

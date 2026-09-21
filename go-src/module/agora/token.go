@@ -145,9 +145,8 @@ func GetAppId(_ context.Context, _ *agoradto.GetAppIdReq) (*agoradto.GetAppIdRes
 		return nil, errercode.CreateCode(errercode.AgoraCfgInvalid)
 	}
 	return &agoradto.GetAppIdRes{
-		AppId:                       agoraCfg.AppId,
-		PrivateRoomFreeWatchSeconds: livecfg.GetPrivateRoomFreeWatchSeconds(),
-		PaidDanmakuPrice:            livecfg.GetPaidDanmakuPrice(),
+		AppId:            agoraCfg.AppId,
+		PaidDanmakuPrice: livecfg.GetPaidDanmakuPrice(),
 	}, nil
 }
 

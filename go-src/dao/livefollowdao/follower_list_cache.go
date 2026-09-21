@@ -1,42 +1,43 @@
 package livefollowdao
 
 import (
-	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"fmt"
 
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/cache"
 	"xr-game-server/entity/live"
+	userentity "xr-game-server/entity/user"
 )
 
-var followerListCacheMgr *cache.ListCache[*entity.LiveFollow]
+var followerListCacheMgr *cache.ListCache[*RelationUserListRow]
 
 func followerListCacheKey(anchorId uint64) string {
 	return fmt.Sprintf("live_follow_follower_list:%d", anchorId)
 }
 
-func getFollowerListCache(anchorId uint64) []*entity.LiveFollow {
+func getFollowerListCache(anchorId uint64) []*RelationUserListRow {
 	if followerListCacheMgr == nil || anchorId == 0 {
-		return make([]*entity.LiveFollow, 0)
+		return make([]*RelationUserListRow, 0)
 	}
-	return followerListCacheMgr.MustGetList(gctx.New(), followerListCacheKey(anchorId), func(ctx context.Context) ([]*entity.LiveFollow, error) {
+	return followerListCacheMgr.MustGetList(gctx.New(), followerListCacheKey(anchorId), func(ctx context.Context) ([]*RelationUserListRow, error) {
 		return loadFollowersFromDB(anchorId, 1, followingListCacheMaxSize), nil
 	})
 }
 
-func putFollowerListCache(anchorId uint64, list []*entity.LiveFollow) {
+func putFollowerListCache(anchorId uint64, list []*RelationUserListRow) {
 	if followerListCacheMgr == nil || anchorId == 0 {
 		return
 	}
 	if list == nil {
-		list = make([]*entity.LiveFollow, 0)
+		list = make([]*RelationUserListRow, 0)
 	}
 	followerListCacheMgr.PublishList(gctx.New(), followerListCacheKey(anchorId), list)
 }
 
 // PrependFollowerToListCache 关注成功后写入主播粉丝列表缓存头部
-func PrependFollowerToListCache(f *entity.LiveFollow) {
+func PrependFollowerToListCache(f *entity.LiveFollow, follower *userentity.UserInfo) {
 	if followerListCacheMgr == nil || f == nil || f.UserId == 0 || f.AnchorId == 0 {
 		return
 	}
@@ -44,8 +45,8 @@ func PrependFollowerToListCache(f *entity.LiveFollow) {
 		return
 	}
 	list := getFollowerListCache(f.AnchorId)
-	newList := make([]*entity.LiveFollow, 0, len(list)+1)
-	newList = append(newList, f)
+	newList := make([]*RelationUserListRow, 0, len(list)+1)
+	newList = append(newList, newRelationUserListRow(f, follower))
 	for _, row := range list {
 		if row != nil && row.UserId != f.UserId {
 			newList = append(newList, row)
@@ -66,7 +67,7 @@ func RemoveFollowerFromListCache(anchorId, userId uint64) {
 		return
 	}
 	list := getFollowerListCache(anchorId)
-	newList := make([]*entity.LiveFollow, 0, len(list))
+	newList := make([]*RelationUserListRow, 0, len(list))
 	for _, row := range list {
 		if row != nil && row.UserId != userId {
 			newList = append(newList, row)
@@ -75,18 +76,24 @@ func RemoveFollowerFromListCache(anchorId, userId uint64) {
 	putFollowerListCache(anchorId, newList)
 }
 
-func loadFollowersFromDB(anchorId uint64, page, pageSize int) []*entity.LiveFollow {
-	list := make([]*entity.LiveFollow, 0)
+func loadFollowersFromDB(anchorId uint64, page, pageSize int) []*RelationUserListRow {
+	list := make([]*RelationUserListRow, 0)
 	if anchorId == 0 {
 		return list
 	}
 	if page <= 0 {
 		page = 1
 	}
-	pageSize = FollowingListCachePageSize
-	_ = g.Model(string(entity.TbLiveFollow)).
-		Where("anchor_id = ? AND status = ?", anchorId, entity.LiveFollowStatusFollow).
-		Order("updated_at desc").
+	if pageSize <= 0 || pageSize > followingListCacheMaxSize {
+		pageSize = FollowingListCachePageSize
+	}
+	const relationAlias = "lf"
+	const userAlias = "ui"
+	_ = g.DB().Model(string(entity.TbLiveFollow)+" "+relationAlias).Ctx(gctx.New()).
+		LeftJoin(string(userentity.TbUserInfo)+" "+userAlias, userAlias+".id = "+relationAlias+".user_id").
+		Fields(relationUserListFields(relationAlias, userAlias)...).
+		Where(relationAlias+".anchor_id = ? AND "+relationAlias+".status = ?", anchorId, entity.LiveFollowStatusFollow).
+		Order(relationAlias + ".updated_at desc").
 		Limit(pageSize).
 		Offset((page - 1) * pageSize).
 		Scan(&list)
@@ -94,9 +101,9 @@ func loadFollowersFromDB(anchorId uint64, page, pageSize int) []*entity.LiveFoll
 }
 
 // GetFollowersByAnchor 分页获取某主播的粉丝记录(仅 Status == Follow)
-// 缓存5页数据,前4页且 pageSize=FollowingListCachePageSize 时走缓存,第5页起直接查库
-func GetFollowersByAnchor(anchorId uint64, page, pageSize int) []*entity.LiveFollow {
-	list := make([]*entity.LiveFollow, 0)
+// 缓存8页数据,前7页走缓存,第8页起直接查库
+func GetFollowersByAnchor(anchorId uint64, page, pageSize int) []*RelationUserListRow {
+	list := make([]*RelationUserListRow, 0)
 	if anchorId == 0 {
 		return list
 	}

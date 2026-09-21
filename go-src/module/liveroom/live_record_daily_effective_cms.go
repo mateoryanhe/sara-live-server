@@ -60,14 +60,13 @@ func toCMSDailyEffectiveLiveItem(row *liveentity.DailyAnchorEffectiveLive, profi
 		LiveDuration: row.LiveDuration,
 		Settled:      row.Settled,
 		LiveRoomIncomeAmountsItem: accountdto.LiveRoomIncomeAmountsItem{
-			TotalIncome:                  amounts.TotalIncome,
-			TotalGiftIncome:              amounts.TotalGiftIncome,
-			TotalPaidDanmakuIncome:       amounts.TotalPaidDanmakuIncome,
-			TotalPrivateRoomTicketIncome: amounts.TotalPrivateRoomTicketIncome,
-			TotalPrivateRoomWatchIncome:  amounts.TotalPrivateRoomWatchIncome,
-			TotalVideoCallIncome:         amounts.TotalVideoCallIncome,
-			TotalVideoCallBillingIncome:  amounts.TotalVideoCallBillingIncome,
-			TotalLiveDuration:            amounts.TotalLiveDuration,
+			TotalIncome:                 amounts.TotalIncome,
+			TotalGiftIncome:             amounts.TotalGiftIncome,
+			TotalPaidDanmakuIncome:      amounts.TotalPaidDanmakuIncome,
+			TotalVideoCallIncome:        amounts.TotalVideoCallIncome,
+			TotalVideoCallTicketIncome:  amounts.TotalVideoCallTicketIncome,
+			TotalVideoCallBillingIncome: amounts.TotalVideoCallBillingIncome,
+			TotalLiveDuration:           amounts.TotalLiveDuration,
 		},
 	}
 	if profileMap != nil {

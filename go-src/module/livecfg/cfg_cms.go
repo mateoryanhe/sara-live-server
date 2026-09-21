@@ -20,9 +20,16 @@ func GetLiveCfg(_ context.Context, _ *livecfgdto.GetLiveCfgReq) (*livecfgdto.Get
 
 func SaveLiveCfg(_ context.Context, req *livecfgdto.SaveLiveCfgReq) (*livecfgdto.SaveLiveCfgRes, error) {
 	existing := cfgdao.LoadLiveCfg()
+	videoCallTicketEnabled := true
+	if existing != nil {
+		videoCallTicketEnabled = existing.VideoCallTicketEnabled
+	}
+	if req.VideoCallTicketEnabled != nil {
+		videoCallTicketEnabled = *req.VideoCallTicketEnabled
+	}
 	row := &entity.LiveCfg{
-		PaidDanmakuPrice:            req.PaidDanmakuPrice,
-		PrivateRoomFreeWatchSeconds: req.PrivateRoomFreeWatchSeconds,
+		PaidDanmakuPrice:       req.PaidDanmakuPrice,
+		VideoCallTicketEnabled: videoCallTicketEnabled,
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -53,11 +60,11 @@ func toLiveCfgItem(cfg *entity.LiveCfg) *livecfgdto.LiveCfgItem {
 		return nil
 	}
 	return &livecfgdto.LiveCfgItem{
-		ID:                          strconv.FormatUint(cfg.ID, 10),
-		PaidDanmakuPrice:            cfg.PaidDanmakuPrice,
-		PrivateRoomFreeWatchSeconds: cfg.PrivateRoomFreeWatchSeconds,
-		CreatedAt:                   formatLiveCfgTime(cfg.CreatedAt),
-		UpdatedAt:                   formatLiveCfgTime(cfg.UpdatedAt),
+		ID:                     strconv.FormatUint(cfg.ID, 10),
+		PaidDanmakuPrice:       cfg.PaidDanmakuPrice,
+		VideoCallTicketEnabled: cfg.VideoCallTicketEnabled,
+		CreatedAt:              formatLiveCfgTime(cfg.CreatedAt),
+		UpdatedAt:              formatLiveCfgTime(cfg.UpdatedAt),
 	}
 }
 

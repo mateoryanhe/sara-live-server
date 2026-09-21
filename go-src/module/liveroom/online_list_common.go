@@ -13,6 +13,7 @@ import (
 	"xr-game-server/entity/live"
 	"xr-game-server/errercode"
 	"xr-game-server/module/upload"
+	"xr-game-server/module/userinfo"
 )
 
 var (
@@ -170,6 +171,7 @@ func buildOnlineUserItems(roomId uint64, userIds []uint64) []*liveroomdto.Online
 		userIds = make([]uint64, 0)
 	}
 	list := make([]*liveroomdto.OnlineUserItem, 0, len(userIds))
+	flagIcons := userinfo.ResolveUserFlagIcons(userIds)
 	for _, userId := range userIds {
 		onlineId := entity.BuildLiveRoomOnlineId(userId, roomId)
 		onlineData := liveroomdao.GetOnlineById(onlineId, userId, roomId)
@@ -181,6 +183,7 @@ func buildOnlineUserItems(roomId uint64, userIds []uint64) []*liveroomdto.Online
 		}
 		item := &liveroomdto.OnlineUserItem{
 			UserId:     strconv.FormatUint(userId, 10),
+			FlagIcon:   flagIcons[userId],
 			JoinedAt:   joinTime,
 			JoinedUnix: joinedUnix,
 		}

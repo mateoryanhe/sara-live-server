@@ -32,20 +32,6 @@ func MirrorDailyGuildPaidDanmakuEarn(guildId uint64, at time.Time, amount float6
 	})
 }
 
-// MirrorDailyGuildPrivateRoomTicketEarn 同步私密房门票收益到工会日表
-func MirrorDailyGuildPrivateRoomTicketEarn(guildId uint64, at time.Time, amount float64) {
-	withDailyGuildEffectiveLive(guildId, at, func(row *entity.DailyGuildEffectiveLive) {
-		row.AddPrivateRoomTicketEarn(amount)
-	})
-}
-
-// MirrorDailyGuildPrivateRoomWatchEarn 同步私密房观看收益到工会日表
-func MirrorDailyGuildPrivateRoomWatchEarn(guildId uint64, at time.Time, amount float64) {
-	withDailyGuildEffectiveLive(guildId, at, func(row *entity.DailyGuildEffectiveLive) {
-		row.AddPrivateRoomWatchEarn(amount)
-	})
-}
-
 // MirrorDailyGuildShortVideoEarn 同步短视频付费观看收益到工会日表
 func MirrorDailyGuildShortVideoEarn(guildId uint64, at time.Time, amount float64) {
 	withDailyGuildEffectiveLive(guildId, at, func(row *entity.DailyGuildEffectiveLive) {
@@ -61,9 +47,9 @@ func MirrorDailyGuildGameEarn(guildId uint64, at time.Time, goldAmount, incomeDe
 }
 
 // MirrorDailyGuildVideoCallIncomeDelta 同步通话收益增减到工会日表
-func MirrorDailyGuildVideoCallIncomeDelta(guildId uint64, at time.Time, amount float64) {
+func MirrorDailyGuildVideoCallIncomeDelta(guildId uint64, at time.Time, amount float64, ticket, billing bool) {
 	withDailyGuildEffectiveLive(guildId, at, func(row *entity.DailyGuildEffectiveLive) {
-		row.ApplyVideoCallIncomeDelta(amount)
+		row.ApplyVideoCallIncomeDelta(amount, ticket, billing)
 	})
 }
 

@@ -98,10 +98,12 @@ func buildLiveRoomCallInviteItem(anchorId uint64, cfg *liveentity.LiveRoomCfg) *
 	item := &calldto.CallInvitePushItem{
 		RoomId:   strconv.FormatUint(anchorId, 10),
 		AnchorId: strconv.FormatUint(anchorId, 10),
+		Source:   callentity.CallOrderSourceLiveRoom,
 		CallType: callentity.CallOrderTypeVideo,
 		Message:  liveRoomCallInviteMessage,
 	}
 	if cfg != nil {
+		item.Ticket = cfg.Ticket
 		item.Billing = cfg.Billing
 	}
 	if u := userinfodao.GetUserInfoByUserId(anchorId); u != nil {

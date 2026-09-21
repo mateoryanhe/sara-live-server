@@ -4,6 +4,7 @@ func Init() {
 	initContributionRank()
 	initHeart()
 	initRoomList()
+	initServerOnlineNormalUserList()
 	initRoomTagMemory()
 	initAnchorSettlement()
 	initGuildSettlement()

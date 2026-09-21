@@ -51,6 +51,7 @@
             <el-option :value="0" :label="t('common.all')"/>
             <el-option :value="1" :label="t('pages.videoCallLogList.sourceLiveRoom')"/>
             <el-option :value="2" :label="t('pages.videoCallLogList.sourcePrivateMessage')"/>
+            <el-option :value="3" :label="t('pages.videoCallLogList.sourceOneToOneRoom')"/>
           </el-select>
         </el-form-item>
         <el-form-item :label="t('common.status')">
@@ -96,6 +97,14 @@
         <el-table-column :label="t('pages.videoCallLogList.totalCostDiamond')" width="120">
           <template #default="{ row }">{{ formatAmount(row.totalCost) }}</template>
         </el-table-column>
+        <el-table-column :label="t('pages.videoCallLogList.payerId')" min-width="180" prop="payerId">
+          <template #default="{ row }">
+            <el-button v-if="canViewUserDetail && hasValidPayer(row)" link type="primary" @click="openUserDetail(row.payerId)">
+              {{ row.payerId }}
+            </el-button>
+            <span v-else>{{ row.payerId || '-' }}</span>
+          </template>
+        </el-table-column>
         <el-table-column :label="t('pages.videoCallLogList.billingDurationMinutes')" prop="billingDuration" width="120"/>
         <el-table-column :label="t('common.status')" prop="statusText" width="140"/>
         <el-table-column :label="t('common.avatar')" align="center" width="80">
@@ -114,18 +123,28 @@
         </el-table-column>
         <el-table-column :label="t('pages.videoCallLogList.callerId')" min-width="180" prop="callerId">
           <template #default="{ row }">
-            <el-button v-if="canViewUserDetail && row.callerId" link type="primary" @click="openUserDetail(row.callerId)">
+            <el-button v-if="canOpenParticipantDetail(row, row.callerId)" link type="primary" @click="openParticipantDetail(row, row.callerId)">
               {{ row.callerId }}
             </el-button>
             <span v-else>{{ row.callerId || '-' }}</span>
           </template>
         </el-table-column>
         <el-table-column :label="t('pages.videoCallLogList.callerNickname')" min-width="120">
-          <template #default="{ row }">{{ row.callerNickname || '-' }}</template>
+          <template #default="{ row }">
+            <el-button
+                v-if="row.callerNickname && canOpenParticipantDetail(row, row.callerId)"
+                link
+                type="primary"
+                @click="openParticipantDetail(row, row.callerId)"
+            >
+              {{ row.callerNickname }}
+            </el-button>
+            <span v-else>{{ row.callerNickname || '-' }}</span>
+          </template>
         </el-table-column>
         <el-table-column :label="t('pages.videoCallLogList.receiverId')" min-width="180" prop="receiverId">
           <template #default="{ row }">
-            <el-button v-if="canOpenReceiverDetail(row)" link type="primary" @click="openReceiverDetail(row)">
+            <el-button v-if="canOpenParticipantDetail(row, row.receiverId)" link type="primary" @click="openParticipantDetail(row, row.receiverId)">
               {{ row.receiverId }}
             </el-button>
             <span v-else>{{ row.receiverId || '-' }}</span>
@@ -134,10 +153,10 @@
         <el-table-column :label="t('pages.videoCallLogList.receiverNickname')" min-width="120">
           <template #default="{ row }">
             <el-button
-                v-if="canViewUserDetail && row.receiverId && row.receiverNickname"
+                v-if="row.receiverNickname && canOpenParticipantDetail(row, row.receiverId)"
                 link
                 type="primary"
-                @click="openUserDetail(row.receiverId)"
+                @click="openParticipantDetail(row, row.receiverId)"
             >
               {{ row.receiverNickname }}
             </el-button>
@@ -153,6 +172,9 @@
         <el-table-column :label="t('pages.videoCallLogList.endTime')" width="170">
           <template #default="{ row }">{{ formatDate(row.orderEndTime) }}</template>
         </el-table-column>
+		<el-table-column :label="t('pages.videoCallLogList.ticketDiamond')" width="120">
+		  <template #default="{ row }">{{ formatAmount(row.ticketPrice) }}</template>
+		</el-table-column>
         <el-table-column :label="t('pages.videoCallLogList.pricePerMinuteDiamond')" width="130">
           <template #default="{ row }">{{ formatAmount(row.pricePerMinute) }}</template>
         </el-table-column>
@@ -391,28 +413,58 @@ const formatDuration = (seconds: number | null | undefined) => {
   return t('pages.videoCallLogList.durationSeconds', {s})
 }
 
-const canOpenReceiverDetail = (row: VideoCallLogItem) => {
-  if (!row.receiverId) {
-    return false
+const normalizeUserId = (value: string | number | null | undefined) => {
+  if (value === null || value === undefined) {
+    return ''
   }
-  if (row.receiverIsAnchor) {
-    return canViewAnchorDetail.value
-  }
-  return canViewUserDetail.value
+  return String(value).trim()
 }
 
-const openReceiverDetail = (row: VideoCallLogItem) => {
-  if (!row.receiverId) {
+const participantDetailType = (row: VideoCallLogItem, userId: string | number | null | undefined) => {
+  const participantId = normalizeUserId(userId)
+  const payerId = normalizeUserId(row.payerId)
+  const callerId = normalizeUserId(row.callerId)
+  const receiverId = normalizeUserId(row.receiverId)
+  if (!participantId || !payerId || payerId === '0') {
+    return null
+  }
+  if (payerId !== callerId && payerId !== receiverId) {
+    return null
+  }
+  if (participantId !== callerId && participantId !== receiverId) {
+    return null
+  }
+  return participantId === payerId ? 'user' : 'anchor'
+}
+
+const hasValidPayer = (row: VideoCallLogItem) => {
+  return participantDetailType(row, row.payerId) === 'user'
+}
+
+const canOpenParticipantDetail = (row: VideoCallLogItem, userId: string | number | null | undefined) => {
+  const detailType = participantDetailType(row, userId)
+  if (detailType === 'user') {
+    return canViewUserDetail.value
+  }
+  if (detailType === 'anchor') {
+    return canViewAnchorDetail.value
+  }
+  return false
+}
+
+const openParticipantDetail = (row: VideoCallLogItem, userId: string | number | null | undefined) => {
+  const participantId = normalizeUserId(userId)
+  const detailType = participantDetailType(row, participantId)
+  if (detailType === 'user') {
+    openUserDetail(participantId)
     return
   }
-  if (row.receiverIsAnchor) {
+  if (detailType === 'anchor') {
     router.push({
       path: '/user/anchor/anchor-detail',
-      query: {id: String(row.receiverId)},
+      query: {id: participantId},
     })
-    return
   }
-  openUserDetail(row.receiverId)
 }
 
 onMounted(() => {

@@ -128,14 +128,12 @@ func buildRankItems(rows []*liveroomdao.AnchorRevenueStatRow) []*rankItem {
 		item := &rankItem{
 			Rank:          rankNo,
 			UserId:        row.RoomId,
+			Nickname:      row.Nickname,
+			Avatar:        upload.ResolveAvatarUrlForUser(row.RoomId, row.Avatar),
 			RevenueAmount: row.TotalAmount,
-		}
-		if profile := userinfodao.GetUserInfoByUserId(row.RoomId); profile != nil {
-			item.Nickname = profile.Nickname
-			item.Avatar = upload.ResolveAvatarUrlForUser(row.RoomId, profile.Avatar)
-			item.VipLevel = profile.VipLevel
-			item.Gender = profile.Gender
-			item.Age = calcAge(profile.Birthday)
+			VipLevel:      row.VipLevel,
+			Gender:        row.Gender,
+			Age:           calcAge(row.Birthday),
 		}
 		list = append(list, item)
 	}
@@ -188,7 +186,7 @@ func GetAppAnchorRankList(ctx context.Context, req *anchorrankdto.AppAnchorRankL
 		if row == nil {
 			continue
 		}
-		pageData = append(pageData, &anchorrankdto.AppAnchorRankItem{
+		item := &anchorrankdto.AppAnchorRankItem{
 			Rank:          row.Rank,
 			UserId:        strconv.FormatUint(row.UserId, 10),
 			Nickname:      row.Nickname,
@@ -197,7 +195,15 @@ func GetAppAnchorRankList(ctx context.Context, req *anchorrankdto.AppAnchorRankL
 			VipLevel:      row.VipLevel,
 			Gender:        row.Gender,
 			Age:           row.Age,
-		})
+		}
+		if profile := userinfodao.GetUserInfoFromMemory(row.UserId); profile != nil {
+			item.Nickname = profile.Nickname
+			item.Avatar = upload.ResolveAvatarUrlForUser(row.UserId, profile.Avatar)
+			item.VipLevel = profile.VipLevel
+			item.Gender = profile.Gender
+			item.Age = calcAge(profile.Birthday)
+		}
+		pageData = append(pageData, item)
 	}
 	return &anchorrankdto.AppAnchorRankListRes{
 		Period:    req.Period,

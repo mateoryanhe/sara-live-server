@@ -14,8 +14,13 @@ const richRankTopLimit = 500
 
 // DiamondConsumeStatRow 钻石消费聚合结果
 type DiamondConsumeStatRow struct {
-	UserId uint64  `json:"user_id"`
-	Total  float64 `json:"total"`
+	UserId   uint64     `json:"user_id"`
+	Total    float64    `json:"total"`
+	Nickname string     `json:"nickname"`
+	Avatar   string     `json:"avatar"`
+	VipLevel uint32     `json:"vip_level"`
+	Gender   uint8      `json:"gender"`
+	Birthday *time.Time `json:"birthday"`
 }
 
 // SumDiamondConsumeByUser 统计指定时间范围内社交类钻石消费总额,按用户分组取前500名(不含游戏消费).
@@ -27,24 +32,35 @@ func SumDiamondConsumeByUser(startTime, endTime time.Time) []*DiamondConsumeStat
 	ctx := gctx.New()
 	now := time.Now()
 	err := g.DB().Ctx(ctx).Raw(`
-SELECT cl.user_id, SUM(cl.amount) AS total
-FROM `+string(entity.TbCurrencyLog)+` cl
-INNER JOIN `+string(entity.TbAccount)+` a ON a.id = cl.user_id
-LEFT JOIN `+string(entity.TbUserExt)+` ue ON ue.id = cl.user_id
-WHERE cl.`+string(entity.CurrencyLogType)+` = ?
-  AND cl.`+string(entity.CurrencyLogAction)+` = ?
-  AND cl.created_at >= ?
-  AND cl.created_at <= ?
-  AND IFNULL(a.`+string(entity.AccountCancel)+`, 0) = 0
-  AND (
-    IFNULL(a.`+string(entity.AccountBan)+`, 0) = 0
-    OR (a.`+string(entity.AccountBanApplyTime)+` IS NOT NULL AND a.`+string(entity.AccountBanApplyTime)+` <= ?)
-  )
-  AND (ue.id IS NULL OR IFNULL(ue.`+string(entity.UserExtCanRank)+`, 1) = 1)
-  AND IFNULL(cl.`+string(entity.CurrencyLogBusinessType)+`, ?) <> ?
-GROUP BY cl.user_id
-ORDER BY total DESC
-LIMIT ?
+SELECT ranked.user_id,
+       ranked.total,
+       IFNULL(ui.`+string(entity.UserInfoNickname)+`, '') AS nickname,
+       IFNULL(ui.`+string(entity.UserInfoAvatar)+`, '') AS avatar,
+       IFNULL(ui.`+string(entity.UserInfoVipLevel)+`, 0) AS vip_level,
+       IFNULL(ui.`+string(entity.UserInfoGender)+`, 0) AS gender,
+       ui.`+string(entity.UserInfoBirthday)+` AS birthday
+FROM (
+    SELECT cl.user_id, SUM(cl.amount) AS total
+    FROM `+string(entity.TbCurrencyLog)+` cl
+    INNER JOIN `+string(entity.TbAccount)+` a ON a.id = cl.user_id
+    LEFT JOIN `+string(entity.TbUserExt)+` ue ON ue.id = cl.user_id
+    WHERE cl.`+string(entity.CurrencyLogType)+` = ?
+      AND cl.`+string(entity.CurrencyLogAction)+` = ?
+      AND cl.created_at >= ?
+      AND cl.created_at <= ?
+      AND IFNULL(a.`+string(entity.AccountCancel)+`, 0) = 0
+      AND (
+        IFNULL(a.`+string(entity.AccountBan)+`, 0) = 0
+        OR (a.`+string(entity.AccountBanApplyTime)+` IS NOT NULL AND a.`+string(entity.AccountBanApplyTime)+` <= ?)
+      )
+      AND (ue.id IS NULL OR IFNULL(ue.`+string(entity.UserExtCanRank)+`, 1) = 1)
+      AND IFNULL(cl.`+string(entity.CurrencyLogBusinessType)+`, ?) <> ?
+    GROUP BY cl.user_id
+    ORDER BY total DESC
+    LIMIT ?
+) ranked
+LEFT JOIN `+string(entity.TbUserInfo)+` ui ON ui.id = ranked.user_id
+ORDER BY ranked.total DESC
 `, gameevent.CurrencyTypeDiamond, gameevent.CurrencyActionSub, startTime, endTime, now, currency.BusinessTypeSocial, currency.BusinessTypeGame, richRankTopLimit).Scan(&list)
 	if err != nil {
 		g.Log().Errorf(ctx, "SumDiamondConsumeByUser error: %v", err)

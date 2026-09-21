@@ -9,6 +9,7 @@ import (
 	"time"
 	"xr-game-server/constants/userstatus"
 	"xr-game-server/core/httpserver"
+	"xr-game-server/core/push"
 	"xr-game-server/core/xrtimer"
 	"xr-game-server/dao/livefollowdao"
 	"xr-game-server/dao/liveroomdao"
@@ -152,8 +153,7 @@ func toLiveRoomListItem(room *liveentity.LiveRoom, userId uint64) *liveroomdto.L
 		CreateAt: room.CreatedAt.Unix(),
 	}
 	if cfg != nil {
-		item.Category = cfg.Category
-		item.Ticket = cfg.Ticket
+		item.Category = normalizeLiveRoomCategory(cfg.Category)
 		item.Billing = cfg.Billing
 		item.AllowCallIcon = allowShowCallIcon(room, cfg, userId)
 		if cfg.TagId > 0 {
@@ -414,6 +414,76 @@ func GetRoomList(ctx context.Context, req *liveroomdto.GetLiveRoomListReq) (*liv
 		Page:     page,
 		PageSize: pageSize,
 		List:     buildLiveRoomListItems(filtered[start:end], userId),
+	}, nil
+}
+
+func selectOneToOneRooms(rooms []*liveentity.LiveRoom, statusFilter int) ([]*liveentity.LiveRoom, map[uint64]bool) {
+	filtered := make([]*liveentity.LiveRoom, 0, len(rooms))
+	onlineByRoomID := make(map[uint64]bool, len(rooms))
+	for _, room := range rooms {
+		if room == nil {
+			continue
+		}
+		cfg := liveroomdao.GetLiveRoomCfgFromCache(room.ID)
+		if cfg == nil || cfg.Category != liveentity.LiveRoomCategoryOneToOne {
+			continue
+		}
+		online := push.IsOnline(room.ID)
+		switch statusFilter {
+		case liveroomdto.OneToOneRoomStatusFilterOnline:
+			if !online {
+				continue
+			}
+		case liveroomdto.OneToOneRoomStatusFilterOffline:
+			if online {
+				continue
+			}
+		}
+		onlineByRoomID[room.ID] = online
+		filtered = append(filtered, room)
+	}
+
+	sort.SliceStable(filtered, func(i, j int) bool {
+		return onlineByRoomID[filtered[i].ID] && !onlineByRoomID[filtered[j].ID]
+	})
+	return filtered, onlineByRoomID
+}
+
+func buildOneToOneRoomListItems(rooms []*liveentity.LiveRoom, userID uint64, onlineByRoomID map[uint64]bool) []*liveroomdto.OneToOneRoomListItem {
+	list := make([]*liveroomdto.OneToOneRoomListItem, 0, len(rooms))
+	for _, room := range rooms {
+		if room == nil {
+			continue
+		}
+		onlineStatus := uint8(liveroomdto.OneToOneRoomStatusFilterOffline)
+		if onlineByRoomID[room.ID] {
+			onlineStatus = liveroomdto.OneToOneRoomStatusFilterOnline
+		}
+		list = append(list, &liveroomdto.OneToOneRoomListItem{
+			LiveRoomListItem: *toLiveRoomListItem(room, userID),
+			OnlineStatus:     onlineStatus,
+		})
+	}
+	return list
+}
+
+// GetOneToOneRoomList App 分页查询1v1房间，在线状态来自 WebSocket，在线主播优先。
+func GetOneToOneRoomList(ctx context.Context, req *liveroomdto.GetOneToOneRoomListReq) (*liveroomdto.GetOneToOneRoomListRes, error) {
+	userID := httpserver.GetAuthId(ctx)
+	page, pageSize := normalizeRoomListPage(req.Page, req.PageSize)
+
+	cached := filterRoomsForApp(getRoomListCache())
+	filtered := filterRoomsBySeniorAnchor(cached, userID)
+	filtered = filterRoomsByBlocked(filtered, userID)
+	filtered, onlineByRoomID := selectOneToOneRooms(filtered, req.StatusFilter)
+	total := len(filtered)
+	start, end := roomListPageRange(total, page, pageSize)
+
+	return &liveroomdto.GetOneToOneRoomListRes{
+		Total:    total,
+		Page:     page,
+		PageSize: pageSize,
+		List:     buildOneToOneRoomListItems(filtered[start:end], userID, onlineByRoomID),
 	}, nil
 }
 

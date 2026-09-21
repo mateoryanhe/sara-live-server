@@ -127,14 +127,8 @@ const (
 	ImageModerationCfgInvalid XRCode = 115
 	// ImageModerationFailed 图片审核服务调用失败
 	ImageModerationFailed XRCode = 116
-	// TicketExist 门票名称已存在
-	TicketExist XRCode = 119
-	// TicketNonExist 门票不存在
-	TicketNonExist XRCode = 121
-	// PrivateRoomBillingNonExist 私密直播间计费配置不存在
+	// PrivateRoomBillingNonExist 1v1视频通话计费配置不存在
 	PrivateRoomBillingNonExist XRCode = 123
-	// LiveRoomPrivateAudienceFull 私密直播间观众已满
-	LiveRoomPrivateAudienceFull XRCode = 124
 	// LiveRoomNotLive 直播间未在直播中(未开播或已关播)
 	LiveRoomNotLive XRCode = 125
 	// LiveRoomPaidDanmakuDisabled 付费弹幕未开启(价格未配置)

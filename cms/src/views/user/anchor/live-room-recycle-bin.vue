@@ -97,7 +97,6 @@ import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 
 const LIVE_ROOM_CATEGORY_HOT = 1
 const LIVE_ROOM_CATEGORY_GAME = 2
-const LIVE_ROOM_CATEGORY_PRIVATE = 3
 
 const {t} = useI18n()
 const {can} = usePagePermission('LiveRoomRecycleBinManagement')
@@ -117,8 +116,6 @@ const categoryLabel = (category?: number) => {
       return t('pages.liveRoomRecycleBin.categoryHot')
     case LIVE_ROOM_CATEGORY_GAME:
       return t('pages.liveRoomRecycleBin.categoryGame')
-    case LIVE_ROOM_CATEGORY_PRIVATE:
-      return t('pages.liveRoomRecycleBin.categoryPrivate')
     default:
       return '-'
   }
@@ -130,8 +127,6 @@ const categoryTagType = (category?: number) => {
       return 'danger'
     case LIVE_ROOM_CATEGORY_GAME:
       return 'success'
-    case LIVE_ROOM_CATEGORY_PRIVATE:
-      return 'warning'
     default:
       return 'info'
   }

@@ -64,6 +64,13 @@ type queueFlushDetail struct {
 }
 
 func newColSynCache(tbName string, tbCol string) *ColSynCache {
+	return newColSynCacheWithIDName(tbName, tbCol, string(db.IdName))
+}
+
+func newColSynCacheWithIDName(tbName string, tbCol string, idName string) *ColSynCache {
+	if strings.TrimSpace(idName) == "" {
+		idName = string(db.IdName)
+	}
 	now := time.Now()
 	return &ColSynCache{
 		TbName:           tbName,
@@ -72,7 +79,7 @@ func newColSynCache(tbName string, tbCol string) *ColSynCache {
 		Pending:          make(map[any]*ColData),
 		firstPendingTime: time.Time{},
 		lastFlushTime:    now,
-		IdName:           string(db.IdName),
+		IdName:           idName,
 	}
 }
 

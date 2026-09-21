@@ -59,9 +59,9 @@ func SendGiftToAnchor(ctx context.Context, req *liveroomdto.SendGiftToAnchorReq)
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 
-	payload := buildPrivateGiftPushItem(result.payload, anchorId)
-	push.Data(result.senderId, cmd.LiveRoomPrivateGift, payload)
-	push.Data(anchorId, cmd.LiveRoomPrivateGift, payload)
+	payload := buildDirectGiftPushItem(result.payload, anchorId)
+	push.Data(result.senderId, cmd.LiveRoomDirectGift, payload)
+	push.Data(anchorId, cmd.LiveRoomDirectGift, payload)
 
 	recordSendGiftStats(result)
 	return &liveroomdto.SendGiftToAnchorRes{
@@ -188,11 +188,11 @@ func calcSendGiftTotalCost(unitPrice float64, count int) (float64, error) {
 	return total, nil
 }
 
-func buildPrivateGiftPushItem(gift *liveroomdto.GiftPushItem, anchorId uint64) *liveroomdto.PrivateGiftPushItem {
+func buildDirectGiftPushItem(gift *liveroomdto.GiftPushItem, anchorId uint64) *liveroomdto.DirectGiftPushItem {
 	if gift == nil {
 		return nil
 	}
-	return &liveroomdto.PrivateGiftPushItem{
+	return &liveroomdto.DirectGiftPushItem{
 		RoomId:       gift.RoomId,
 		AnchorId:     anchorId,
 		SenderId:     gift.SenderId,

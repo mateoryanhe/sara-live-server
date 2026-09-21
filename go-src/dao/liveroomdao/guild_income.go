@@ -176,34 +176,6 @@ func MirrorGuildPaidDanmakuEarn(roomId uint64, amount float64) {
 	})
 }
 
-// MirrorGuildPrivateRoomTicketEarn 同步私密房门票收益到工会
-func MirrorGuildPrivateRoomTicketEarn(roomId uint64, amount float64) {
-	at := time.Now()
-	ForRoomGuild(roomId, func(guildId uint64) {
-		if u := GetGuildIncomeUnsettled(guildId); u != nil {
-			u.AddPrivateRoomTicketEarn(amount)
-		}
-		if t := GetGuildIncomeTotal(guildId); t != nil {
-			t.AddPrivateRoomTicketEarn(amount)
-		}
-		MirrorDailyGuildPrivateRoomTicketEarn(guildId, at, amount)
-	})
-}
-
-// MirrorGuildPrivateRoomWatchEarn 同步私密房观看收益到工会
-func MirrorGuildPrivateRoomWatchEarn(roomId uint64, amount float64) {
-	at := time.Now()
-	ForRoomGuild(roomId, func(guildId uint64) {
-		if u := GetGuildIncomeUnsettled(guildId); u != nil {
-			u.AddPrivateRoomWatchEarn(amount)
-		}
-		if t := GetGuildIncomeTotal(guildId); t != nil {
-			t.AddPrivateRoomWatchEarn(amount)
-		}
-		MirrorDailyGuildPrivateRoomWatchEarn(guildId, at, amount)
-	})
-}
-
 // MirrorGuildShortVideoEarn 同步短视频付费观看收益到工会
 func MirrorGuildShortVideoEarn(roomId uint64, amount float64) {
 	at := time.Now()
@@ -247,7 +219,7 @@ func MirrorGuildLiveDuration(roomId uint64, sec float64) {
 }
 
 // MirrorGuildVideoCallIncomeDelta 同步通话收益增减到工会
-func MirrorGuildVideoCallIncomeDelta(roomId uint64, amount float64) {
+func MirrorGuildVideoCallIncomeDelta(roomId uint64, amount float64, ticket, billing bool) {
 	at := time.Now()
 	ForRoomGuild(roomId, func(guildId uint64) {
 		unsettled := GetGuildIncomeUnsettled(guildId)
@@ -255,9 +227,9 @@ func MirrorGuildVideoCallIncomeDelta(roomId uint64, amount float64) {
 		if unsettled == nil || total == nil {
 			return
 		}
-		entity.ApplyVideoCallIncomeDelta(entity.TbGuildIncomeUnsettled, unsettled.ID, &unsettled.LiveRoomIncomeAmounts, &unsettled.UpdatedAt, amount)
-		entity.ApplyVideoCallIncomeDelta(entity.TbGuildIncomeTotal, total.ID, &total.LiveRoomIncomeAmounts, &total.UpdatedAt, amount)
-		MirrorDailyGuildVideoCallIncomeDelta(guildId, at, amount)
+		entity.ApplyVideoCallIncomeDelta(entity.TbGuildIncomeUnsettled, unsettled.ID, &unsettled.LiveRoomIncomeAmounts, &unsettled.UpdatedAt, amount, ticket, billing)
+		entity.ApplyVideoCallIncomeDelta(entity.TbGuildIncomeTotal, total.ID, &total.LiveRoomIncomeAmounts, &total.UpdatedAt, amount, ticket, billing)
+		MirrorDailyGuildVideoCallIncomeDelta(guildId, at, amount, ticket, billing)
 	})
 }
 

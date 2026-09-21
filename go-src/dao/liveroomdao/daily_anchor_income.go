@@ -32,20 +32,6 @@ func MirrorDailyAnchorPaidDanmakuEarn(roomId uint64, at time.Time, amount float6
 	})
 }
 
-// MirrorDailyAnchorPrivateRoomTicketEarn 同步私密房门票收益到主播日表
-func MirrorDailyAnchorPrivateRoomTicketEarn(roomId uint64, at time.Time, amount float64) {
-	withDailyAnchorEffectiveLive(roomId, at, func(row *entity.DailyAnchorEffectiveLive) {
-		row.AddPrivateRoomTicketEarn(amount)
-	})
-}
-
-// MirrorDailyAnchorPrivateRoomWatchEarn 同步私密房观看收益到主播日表
-func MirrorDailyAnchorPrivateRoomWatchEarn(roomId uint64, at time.Time, amount float64) {
-	withDailyAnchorEffectiveLive(roomId, at, func(row *entity.DailyAnchorEffectiveLive) {
-		row.AddPrivateRoomWatchEarn(amount)
-	})
-}
-
 // MirrorDailyAnchorShortVideoEarn 同步短视频付费观看收益到主播日表
 func MirrorDailyAnchorShortVideoEarn(roomId uint64, at time.Time, amount float64) {
 	withDailyAnchorEffectiveLive(roomId, at, func(row *entity.DailyAnchorEffectiveLive) {
@@ -61,9 +47,9 @@ func MirrorDailyAnchorGameEarn(roomId uint64, at time.Time, goldAmount, incomeDe
 }
 
 // MirrorDailyAnchorVideoCallIncomeDelta 同步通话收益增减到主播日表
-func MirrorDailyAnchorVideoCallIncomeDelta(roomId uint64, at time.Time, amount float64) {
+func MirrorDailyAnchorVideoCallIncomeDelta(roomId uint64, at time.Time, amount float64, ticket, billing bool) {
 	withDailyAnchorEffectiveLive(roomId, at, func(row *entity.DailyAnchorEffectiveLive) {
-		row.ApplyVideoCallIncomeDelta(amount)
+		row.ApplyVideoCallIncomeDelta(amount, ticket, billing)
 	})
 }
 

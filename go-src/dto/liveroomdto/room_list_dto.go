@@ -21,11 +21,10 @@ type LiveRoomListItem struct {
 	Cover              string  `json:"cover" dc:"封面图URL(已拼资源域名)"`
 	Notice             string  `json:"notice" dc:"公告"`
 	Status             uint8   `json:"status" dc:"状态(0未开播,1直播中)"`
-	Category           uint8   `json:"category" dc:"分类(1=hot,2=game,3=私密)"`
+	Category           uint8   `json:"category" dc:"分类(1=hot,2=game,4=1v1房间)"`
 	TagId              string  `json:"tagId" dc:"直播间标签ID"`
 	TagName            string  `json:"tagName" dc:"直播间标签名称"`
-	Ticket             float64 `json:"ticket" dc:"门票价格(钻石)"`
-	Billing            float64 `json:"billing" dc:"计费价格(每分钟钻石)"`
+	Billing            float64 `json:"billing" dc:"视频通话价格(每分钟钻石)"`
 	AllowCallIcon      bool    `json:"allowCallIcon" dc:"是否允许显示电话图标按钮(普通主播不显示;接受所有人且累计充值>=10USD时为true)"`
 	CreateAt           int64   `json:"createAt" dc:"创建时间(秒)"`
 	AnchorNickname     string  `json:"anchorNickname" dc:"主播昵称"`
@@ -44,6 +43,33 @@ type GetLiveRoomListRes struct {
 	Page     int                 `json:"page" dc:"当前页码"`
 	PageSize int                 `json:"pageSize" dc:"每页数量"`
 	List     []*LiveRoomListItem `json:"list" dc:"直播间列表"`
+}
+
+const (
+	OneToOneRoomStatusFilterAll     = 0
+	OneToOneRoomStatusFilterOnline  = 1
+	OneToOneRoomStatusFilterOffline = 2
+)
+
+// GetOneToOneRoomListReq App 分页查询1v1房间列表，在线状态以 WebSocket 连接为准。
+type GetOneToOneRoomListReq struct {
+	g.Meta       `path:"/oneToOneRoomList" method:"post" summary:"查询1v1房间列表" tags:"直播间"`
+	Page         int `json:"page" dc:"页码(从1开始,默认1)"`
+	PageSize     int `json:"pageSize" dc:"每页数量(默认20,最大100)"`
+	StatusFilter int `json:"statusFilter" v:"in:0,1,2#在线状态无效" dc:"在线状态过滤(0=全部,1=在线,2=离线)"`
+}
+
+// OneToOneRoomListItem 1v1房间列表条目。
+type OneToOneRoomListItem struct {
+	LiveRoomListItem
+	OnlineStatus uint8 `json:"onlineStatus" dc:"主播WebSocket在线状态(1=在线,2=离线)"`
+}
+
+type GetOneToOneRoomListRes struct {
+	Total    int                     `json:"total" dc:"总条数"`
+	Page     int                     `json:"page" dc:"当前页码"`
+	PageSize int                     `json:"pageSize" dc:"每页数量"`
+	List     []*OneToOneRoomListItem `json:"list" dc:"1v1房间列表(在线主播优先)"`
 }
 
 // GetFollowedLiveRoomListReq App 分页查询当前用户关注的直播间列表

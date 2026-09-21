@@ -43,21 +43,19 @@ const (
 	LiveRoomStopLive = 23
 	//观众列表刷新推送(房间内全体在线用户,含主播)
 	LiveRoomAudienceListRefresh = 24
-	//直播间通话请求推送(推送给主播)
+	//视频通话请求推送(推送给目标用户/接听方)
 	LiveRoomCallRequest = 25
-	//直播间通话被拒接推送(推送给呼叫者)
+	//视频通话被拒接推送(推送给呼叫者)
 	LiveRoomCallRejected = 26
-	//直播间通话被接听推送(推送给呼叫者)
+	//视频通话被接听推送(推送给呼叫者)
 	LiveRoomCallAccepted = 27
-	//直播间通话结束推送(推送给对方)
+	//视频通话结束推送(推送给对方)
 	LiveRoomCallEnded = 28
-	//私密房文字消息推送(推送给发送者与目标用户)
-	LiveRoomPrivateChat = 29
-	//私密房/指定主播送礼推送(推送给发送者与主播)
-	LiveRoomPrivateGift = 30
-	//直播间通话开始推送(推送给呼叫者与接听者)
+	//给指定主播送礼推送(推送给发送者与主播)
+	LiveRoomDirectGift = 30
+	//视频通话开始推送(推送给呼叫者与接听者)
 	LiveRoomCallStarted = 31
-	//直播间通话呼叫超时推送(推送给呼叫者与接听者)
+	//视频通话呼叫超时推送(推送给呼叫者与接听者)
 	LiveRoomCallTimeout = 32
 	//直播间主播接听通话推送(推送给直播间在线观众,不含主播与呼叫者)
 	LiveRoomCallAnchorAcceptedAudience = 33

@@ -47,7 +47,6 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   LiveManagement: 'Ao vivo',
   GiftManagement: 'Presentes',
   AgoraCfgManagement: 'Config. Agora',
-  TicketManagement: 'Tickets',
   PrivateRoomBillingManagement: 'Cobrança de chamada 1v1',
   LiveCfgManagement: 'Config. ao vivo',
   LiveRoomTagManagement: 'Tags de sala',

@@ -41,13 +41,6 @@ func (r *GuildIncomeTotal) AddGiftEarn(v float64) {
 func (r *GuildIncomeTotal) AddPaidDanmakuEarn(v float64) {
 	addIncomeEarn(TbGuildIncomeTotal, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalPaidDanmakuIncome, &r.TotalPaidDanmakuIncome)
 }
-func (r *GuildIncomeTotal) AddPrivateRoomTicketEarn(v float64) {
-	addIncomeEarn(TbGuildIncomeTotal, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalPrivateRoomTicketIncome, &r.TotalPrivateRoomTicketIncome)
-}
-func (r *GuildIncomeTotal) AddPrivateRoomWatchEarn(v float64) {
-	addIncomeEarn(TbGuildIncomeTotal, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalPrivateRoomWatchIncome, &r.TotalPrivateRoomWatchIncome)
-}
-
 func (r *GuildIncomeTotal) AddShortVideoEarn(v float64) {
 	addIncomeEarn(TbGuildIncomeTotal, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalShortVideoIncome, &r.TotalShortVideoIncome)
 }

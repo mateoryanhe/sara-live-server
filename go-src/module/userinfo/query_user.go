@@ -6,6 +6,7 @@ import (
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
+	"xr-game-server/dao/userloginlocationdao"
 	"xr-game-server/dto/accountdto"
 	"xr-game-server/entity/user"
 	"xr-game-server/module/ipgeo"
@@ -14,20 +15,29 @@ import (
 
 func QueryUserInfo(ctx context.Context, req *accountdto.QueryUserInfoReq) (res *httpserver.CMSQueryResp, err error) {
 	total, data := accountdao.GetUserInfo(req)
+	userIds := make([]uint64, 0, len(data))
+	for _, val := range data {
+		if val != nil && val.ID > 0 {
+			userIds = append(userIds, val.ID)
+		}
+	}
+	locations := userloginlocationdao.GetByUserIds(userIds)
 	for _, val := range data {
 		val.IsAnchor = entity.UserTypeIsAnchor(val.UserType)
 		if accountCache := accountdao.GetAccountFromCache(val.OpenId, val.Channel, val.ID); accountCache != nil {
 			val.OpenId = accountCache.OpenId
-			val.IP = accountCache.IP
-			val.RegisterIp = accountCache.RegisterIp
-			val.RegisterCountry = ipgeo.FormatCountryDisplay(accountCache.RegisterCountry)
-			val.LoginCountry = ipgeo.FormatCountryDisplay(accountCache.LoginCountry)
 			val.Channel = accountCache.Channel
 			val.PhoneAreaCode = accountCache.PhoneAreaCode
 			val.Cancel = accountCache.Cancel
 			val.Ban = accountCache.Ban
 			val.BanApplyTime = accountCache.BanApplyTime
 			val.BanTime = accountCache.BanTime
+		}
+		if location := locations[val.ID]; location != nil {
+			val.IP = location.IP
+			val.RegisterIp = location.RegisterIp
+			val.RegisterCountry = ipgeo.FormatCountryDisplay(location.RegisterCountry)
+			val.LoginCountry = ipgeo.FormatCountryDisplay(location.LoginCountry)
 		}
 		if userInfoCache := userinfodao.GetUserInfoFromMemory(val.ID); userInfoCache != nil {
 			val.Nickname = userInfoCache.Nickname

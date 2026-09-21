@@ -51,7 +51,7 @@ func Follow(ctx context.Context, req *livefollowdto.FollowReq) (*livefollowdto.F
 		recordNewFollowerDuringLive(req.AnchorId, userId)
 		follow := livefollowdao.GetByUserAnchor(userId, req.AnchorId)
 		livefollowdao.PrependFollowingToListCache(follow)
-		livefollowdao.PrependFollowerToListCache(follow)
+		livefollowdao.PrependFollowerToListCache(follow, userinfodao.GetUserInfoByUserId(userId))
 		pushFollowCountChange(userId, req.AnchorId)
 	}
 
@@ -149,17 +149,19 @@ func FollowerList(ctx context.Context, req *livefollowdto.FollowerListReq) (*liv
 
 	list := make([]*livefollowdto.FollowerItem, 0, len(pageData))
 	for _, f := range pageData {
+		if f == nil {
+			continue
+		}
+		profile := relationUserListRowWithMemoryProfile(f, f.UserId)
 		item := &livefollowdto.FollowerItem{
 			UserId:     strconv.FormatUint(f.UserId, 10),
 			FollowedAt: f.UpdatedAt.Unix(),
 			Following:  livefollowdao.IsFollowing(anchorId, f.UserId),
-		}
-		if u := userinfodao.GetUserInfoByUserId(f.UserId); u != nil {
-			item.Nickname = u.Nickname
-			item.Avatar = upload.ResolveAvatarUrlForUser(f.UserId, u.Avatar)
-			item.VipLevel = u.VipLevel
-			item.Gender = u.Gender
-			item.Age = calcAge(u.Birthday)
+			Nickname:   profile.Nickname,
+			Avatar:     upload.ResolveAvatarUrlForUser(f.UserId, profile.Avatar),
+			VipLevel:   profile.VipLevel,
+			Gender:     profile.Gender,
+			Age:        calcAge(profile.Birthday),
 		}
 		list = append(list, item)
 	}
@@ -169,6 +171,20 @@ func FollowerList(ctx context.Context, req *livefollowdto.FollowerListReq) (*liv
 		PageSize: pageSize,
 		List:     list,
 	}, nil
+}
+
+// relationUserListRowWithMemoryProfile 仅使用已存在的 user_info 进程缓存校正用户资料。
+// 缓存未命中时保留 DAO JOIN 得到的资料，不触发数据库查询。
+func relationUserListRowWithMemoryProfile(row *livefollowdao.RelationUserListRow, userId uint64) *livefollowdao.RelationUserListRow {
+	resolved := *row
+	if user := userinfodao.GetUserInfoFromMemory(userId); user != nil {
+		resolved.Nickname = user.Nickname
+		resolved.Avatar = user.Avatar
+		resolved.VipLevel = user.VipLevel
+		resolved.Gender = user.Gender
+		resolved.Birthday = user.Birthday
+	}
+	return &resolved
 }
 
 // roomStatus 返回直播间状态;无直播间返回 2

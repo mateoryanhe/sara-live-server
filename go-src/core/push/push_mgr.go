@@ -1,6 +1,7 @@
 package push
 
 import (
+	"sort"
 	"time"
 
 	"github.com/gogf/gf/v2/container/gmap"
@@ -172,6 +173,46 @@ func OnlineCount() int {
 		return 0
 	}
 	return clientMap.Size()
+}
+
+type onlineUserSnapshot struct {
+	userId   uint64
+	onlineAt int64
+}
+
+// OnlineUserIds 返回当前进程已建立 WebSocket 连接的用户ID快照，按上线时间倒序排列。
+func OnlineUserIds() []uint64 {
+	if clientMap == nil {
+		return []uint64{}
+	}
+	keys := clientMap.Keys()
+	snapshots := make([]onlineUserSnapshot, 0, len(keys))
+	for _, key := range keys {
+		userId, ok := key.(uint64)
+		if !ok || userId == 0 {
+			continue
+		}
+		data := clientMap.Get(userId)
+		client, ok := data.(*httpserver.WebSocketClient)
+		if !ok || client == nil {
+			continue
+		}
+		snapshots = append(snapshots, onlineUserSnapshot{
+			userId:   userId,
+			onlineAt: client.OnlineAt,
+		})
+	}
+	sort.Slice(snapshots, func(i, j int) bool {
+		if snapshots[i].onlineAt == snapshots[j].onlineAt {
+			return snapshots[i].userId > snapshots[j].userId
+		}
+		return snapshots[i].onlineAt > snapshots[j].onlineAt
+	})
+	userIds := make([]uint64, 0, len(snapshots))
+	for _, snapshot := range snapshots {
+		userIds = append(userIds, snapshot.userId)
+	}
+	return userIds
 }
 
 // IsOnline 根据当前 WebSocket 连接判断用户是否在线。

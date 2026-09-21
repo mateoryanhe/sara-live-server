@@ -20,15 +20,9 @@
           <span class="form-tip">{{ t('pages.liveConfig.paidDanmakuTip') }}</span>
         </el-form-item>
 
-        <el-form-item :label="t('pages.liveConfig.privateRoomFreeWatchSeconds')" prop="privateRoomFreeWatchSeconds">
-          <el-input-number
-              v-model="formData.privateRoomFreeWatchSeconds"
-              :min="0"
-              :precision="0"
-              controls-position="right"
-              style="width: 220px"
-          />
-          <span class="form-tip">{{ t('pages.liveConfig.privateRoomFreeWatchTip') }}</span>
+        <el-form-item :label="t('pages.liveConfig.videoCallTicketEnabled')">
+          <el-switch v-model="formData.videoCallTicketEnabled"/>
+          <span class="form-tip">{{ t('pages.liveConfig.videoCallTicketEnabledTip') }}</span>
         </el-form-item>
 
         <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.liveConfig.lastUpdated')">
@@ -59,7 +53,7 @@ const formRef = ref()
 const formData = reactive({
   id: '0',
   paidDanmakuPrice: 0,
-  privateRoomFreeWatchSeconds: 420,
+	videoCallTicketEnabled: true,
 })
 
 const metaInfo = reactive({
@@ -72,24 +66,20 @@ const formRules = computed(() => ({
     {required: true, message: t('pages.liveConfig.paidDanmakuRequired'), trigger: 'blur'},
     {type: 'number', min: 0, message: t('pages.liveConfig.priceMinZero'), trigger: 'blur'},
   ],
-  privateRoomFreeWatchSeconds: [
-    {required: true, message: t('pages.liveConfig.freeWatchRequired'), trigger: 'blur'},
-    {type: 'number', min: 0, message: t('pages.liveConfig.freeWatchMinZero'), trigger: 'blur'},
-  ],
 }))
 
 const applyCfg = (cfg: LiveCfg | null | undefined) => {
   if (!cfg) {
     formData.id = '0'
     formData.paidDanmakuPrice = 0
-    formData.privateRoomFreeWatchSeconds = 420
+	formData.videoCallTicketEnabled = true
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
     return
   }
   formData.id = cfg.id || '0'
   formData.paidDanmakuPrice = truncateNumber(cfg.paidDanmakuPrice ?? 0)
-  formData.privateRoomFreeWatchSeconds = cfg.privateRoomFreeWatchSeconds ?? 420
+	formData.videoCallTicketEnabled = cfg.videoCallTicketEnabled ?? true
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
 }
@@ -114,7 +104,7 @@ const handleSave = async () => {
     const response = await liveCfgApi.saveLiveCfg({
       id: formData.id === '0' ? 0 : Number(formData.id),
       paidDanmakuPrice: formData.paidDanmakuPrice,
-      privateRoomFreeWatchSeconds: formData.privateRoomFreeWatchSeconds,
+	  videoCallTicketEnabled: formData.videoCallTicketEnabled,
     })
     if (response?.success) {
       ElMessage.success(t('common.saveConfig'))

@@ -61,6 +61,7 @@ func liveRecordToCSVRow(v *entity.LiveRecord) []string {
 		formatCSVFloat(v.TotalIncome),
 		formatCSVFloat(v.TotalGiftIncome),
 		formatCSVFloat(v.TotalPaidDanmakuIncome),
+		formatCSVFloat(v.TotalVideoCallTicketIncome),
 		formatCSVFloat(v.TotalVideoCallBillingIncome),
 		formatCSVFloat(v.TotalVideoCallIncome),
 		formatCSVUint(v.TotalGiftSender),

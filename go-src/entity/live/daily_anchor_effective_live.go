@@ -151,22 +151,6 @@ func (r *DailyAnchorEffectiveLive) AddPaidDanmakuEarn(v float64) {
 	addIncomeEarnWithLockKey(TbDailyAnchorEffectiveLive, r.lockKey(), r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalPaidDanmakuIncome, &r.TotalPaidDanmakuIncome)
 }
 
-// AddPrivateRoomTicketEarn 私密房门票收益(总收益+门票细分,内部加锁)
-func (r *DailyAnchorEffectiveLive) AddPrivateRoomTicketEarn(v float64) {
-	if r == nil || r.ID == "" {
-		return
-	}
-	addIncomeEarnWithLockKey(TbDailyAnchorEffectiveLive, r.lockKey(), r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalPrivateRoomTicketIncome, &r.TotalPrivateRoomTicketIncome)
-}
-
-// AddPrivateRoomWatchEarn 私密房观看收益(总收益+观看细分,内部加锁)
-func (r *DailyAnchorEffectiveLive) AddPrivateRoomWatchEarn(v float64) {
-	if r == nil || r.ID == "" {
-		return
-	}
-	addIncomeEarnWithLockKey(TbDailyAnchorEffectiveLive, r.lockKey(), r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalPrivateRoomWatchIncome, &r.TotalPrivateRoomWatchIncome)
-}
-
 // AddShortVideoEarn 短视频付费观看收益(总收益+短视频细分,内部加锁)
 func (r *DailyAnchorEffectiveLive) AddShortVideoEarn(v float64) {
 	if r == nil || r.ID == "" {
@@ -184,11 +168,11 @@ func (r *DailyAnchorEffectiveLive) AddGameEarn(goldAmount, incomeDelta float64) 
 }
 
 // ApplyVideoCallIncomeDelta 通话收益增减(支持负数退款,内部加锁)
-func (r *DailyAnchorEffectiveLive) ApplyVideoCallIncomeDelta(amount float64) {
+func (r *DailyAnchorEffectiveLive) ApplyVideoCallIncomeDelta(amount float64, ticket, billing bool) {
 	if r == nil || r.ID == "" {
 		return
 	}
-	ApplyVideoCallIncomeDeltaWithLockKey(TbDailyAnchorEffectiveLive, r.lockKey(), r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, amount)
+	ApplyVideoCallIncomeDeltaWithLockKey(TbDailyAnchorEffectiveLive, r.lockKey(), r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, amount, ticket, billing)
 }
 
 // AddTotalLiveDuration 累加心跳上报直播时长(秒,syndb 缓冲)

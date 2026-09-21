@@ -48,15 +48,6 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 		liveroomdao.PublishLiveRoomOnline(existing)
 	}
 
-	if err := ensureCanJoinPrivateRoom(userId, room); err != nil {
-		return nil, err
-	}
-
-	ticketDeducted, err := chargePrivateRoomTicketIfNeeded(userId, room, now)
-	if err != nil {
-		return nil, err
-	}
-
 	//alreadyOnline := existing.Status == entity.LiveRoomOnlineStatusOnline
 	existing.SetStatus(entity.LiveRoomOnlineStatusOnline)
 	existing.SetJoinTime(&now)
@@ -69,10 +60,9 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 	if userId != room.ID && !viewerCanSeeSeniorAnchorRoom(userId, room) {
 		kickAudience(room.ID, userId)
 		return &liveroomdto.JoinRoomRes{
-			OnlineId:       onlineId,
-			OnlineCount:    getLenForRoom(room.ID),
-			TicketDeducted: ticketDeducted,
-			SysTime:        now.UnixMilli(),
+			OnlineId:    onlineId,
+			OnlineCount: getLenForRoom(room.ID),
+			SysTime:     now.UnixMilli(),
 		}, nil
 	}
 
@@ -102,31 +92,9 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 	}
 
 	res := &liveroomdto.JoinRoomRes{
-		OnlineId:       onlineId,
-		OnlineCount:    getLenForRoom(room.ID),
-		TicketDeducted: ticketDeducted,
-		SysTime:        now.UnixMilli(),
+		OnlineId:    onlineId,
+		OnlineCount: getLenForRoom(room.ID),
+		SysTime:     now.UnixMilli(),
 	}
-	//判断一下房间类型
-	cfg := liveroomdao.GetLiveRoomCfg(room.ID)
-	if cfg != nil && cfg.Category == entity.LiveRoomCategoryPrivate {
-		//结算上次免费时长
-		clearFreeTime(userId, room.ID)
-		//私密房免费时长
-		pay := liveroomdao.GetLiveRoomBillingPay(userId, req.RoomId)
-		res.FreeTime = pay.FreeTime
-		res.TicketTime = pay.GetTicketTime()
-		//设置使用免费时长中
-		if pay.FreeTime > 0 {
-			pay.SetFreeUsed(true)
-			liveroomdao.PublishLiveRoomBillingPay(pay)
-		}
-		//预扣费
-		err := joinChargePrivateRoom(userId, room.ID)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	return res, nil
 }

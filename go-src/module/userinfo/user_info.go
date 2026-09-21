@@ -10,9 +10,9 @@ import (
 	"xr-game-server/constants/country"
 	"xr-game-server/constants/followstatus"
 	"xr-game-server/core/httpserver"
-	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/livefollowdao"
 	"xr-game-server/dao/userinfodao"
+	"xr-game-server/dao/userloginlocationdao"
 	"xr-game-server/dto/userinfodto"
 	"xr-game-server/errercode"
 	"xr-game-server/module/aliyunmoderation"
@@ -54,7 +54,7 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		FollowStatus:  resolveFollowStatus(authUserId, targetUserId),
 		TotalIncome:   float64(anchorrank.GetUserLast30DayRevenue(targetUserId)),
 		Age:           calcAge(data.Birthday),
-		FlagIcon:      resolveUserFlagIcon(targetUserId),
+		FlagIcon:      ResolveUserFlagIcon(targetUserId),
 	}
 	if req.UserId == 0 {
 		now := time.Now()
@@ -80,27 +80,31 @@ func resolveFollowStatus(viewerId, targetUserId uint64) uint8 {
 	return followstatus.NotFollowing
 }
 
-// resolveUserFlagIcon 优先注册国,空则登录国;拼当前国旗版本完整 URL。
-func resolveUserFlagIcon(userId uint64) string {
-	account := accountdao.GetAccountById(userId)
-	if account == nil {
-		return ""
+// ResolveUserFlagIcon 优先注册国,空则登录国;拼当前国旗版本完整 URL。
+func ResolveUserFlagIcon(userId uint64) string {
+	return ResolveUserFlagIcons([]uint64{userId})[userId]
+}
+
+// ResolveUserFlagIcons 批量解析用户国旗完整 URL，列表接口只查询一次登录地域表。
+func ResolveUserFlagIcons(userIds []uint64) map[uint64]string {
+	result := make(map[uint64]string, len(userIds))
+	locations := userloginlocationdao.GetByUserIds(userIds)
+	version := countryflagdeploy.CurrentVersion()
+	for userId, location := range locations {
+		code := strings.TrimSpace(location.RegisterCountry)
+		if code == "" {
+			code = strings.TrimSpace(location.LoginCountry)
+		}
+		if !country.Exists(code) {
+			continue
+		}
+		rel := country.RelPath(code, version)
+		if rel == "" {
+			continue
+		}
+		result[userId] = upload.GetUrlByName(rel)
 	}
-	code := strings.TrimSpace(account.RegisterCountry)
-	if code == "" {
-		code = strings.TrimSpace(account.LoginCountry)
-	}
-	if code == "" {
-		return ""
-	}
-	if !country.Exists(code) {
-		return ""
-	}
-	rel := country.RelPath(code, countryflagdeploy.CurrentVersion())
-	if rel == "" {
-		return ""
-	}
-	return upload.GetUrlByName(rel)
+	return result
 }
 
 // UpdateNickname 修改昵称

@@ -7,11 +7,11 @@ type GetLiveCfgReq struct {
 }
 
 type LiveCfgItem struct {
-	ID                          string  `json:"id"`
-	PaidDanmakuPrice            float64 `json:"paidDanmakuPrice"`
-	PrivateRoomFreeWatchSeconds uint32  `json:"privateRoomFreeWatchSeconds"`
-	CreatedAt                   string  `json:"createdAt"`
-	UpdatedAt                   string  `json:"updatedAt"`
+	ID                     string  `json:"id"`
+	PaidDanmakuPrice       float64 `json:"paidDanmakuPrice"`
+	VideoCallTicketEnabled bool    `json:"videoCallTicketEnabled"`
+	CreatedAt              string  `json:"createdAt"`
+	UpdatedAt              string  `json:"updatedAt"`
 }
 
 type GetLiveCfgRes struct {
@@ -19,10 +19,10 @@ type GetLiveCfgRes struct {
 }
 
 type SaveLiveCfgReq struct {
-	g.Meta                      `path:"/saveLiveCfg" method:"post" summary:"保存直播配置" tags:"直播配置"`
-	ID                          uint64  `json:"id" dc:"配置ID,首次保存可为0"`
-	PaidDanmakuPrice            float64 `json:"paidDanmakuPrice" v:"required|min:0#付费弹幕价格不能为空|付费弹幕价格不能小于0"`
-	PrivateRoomFreeWatchSeconds uint32  `json:"privateRoomFreeWatchSeconds" v:"required|min:0#私密直播间免费观看时长不能为空|免费观看时长不能小于0" dc:"私密直播间免费观看时长(秒)"`
+	g.Meta                 `path:"/saveLiveCfg" method:"post" summary:"保存直播配置" tags:"直播配置"`
+	ID                     uint64  `json:"id" dc:"配置ID,首次保存可为0"`
+	PaidDanmakuPrice       float64 `json:"paidDanmakuPrice" v:"required|min:0#付费弹幕价格不能为空|付费弹幕价格不能小于0"`
+	VideoCallTicketEnabled *bool   `json:"videoCallTicketEnabled" dc:"直播间视频通话接通是否扣门票;不传时保留原值,首次保存默认开启"`
 }
 
 type SaveLiveCfgRes struct {

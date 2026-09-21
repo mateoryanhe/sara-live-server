@@ -79,16 +79,9 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.ticketPrice')" align="right" min-width="110">
-          <template #default="{ row }">
-            <span v-if="isPrivateRoom(row.category)" class="money-amount">{{ formatWalletBalance(row.ticket) }}</span>
-            <span v-else>-</span>
-          </template>
-        </el-table-column>
         <el-table-column :label="t('pages.anchorList.billingPricePerMinute')" align="right" min-width="120">
           <template #default="{ row }">
-            <span v-if="isPrivateRoom(row.category)" class="money-amount">{{ formatWalletBalance(row.billing) }}</span>
-            <span v-else>-</span>
+            <span class="money-amount">{{ formatWalletBalance(row.billing) }}</span>
           </template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.roomTitle')" min-width="140" prop="roomTitle" show-overflow-tooltip>
@@ -100,7 +93,10 @@
         <el-table-column :label="t('pages.anchorList.paidDanmakuIncome')" align="right" min-width="130">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorList.videoBillingIncome')" align="right" min-width="150">
+		<el-table-column :label="t('pages.anchorList.videoTicketIncome')" align="right" min-width="140">
+		  <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallTicketIncome) }}</span></template>
+		</el-table-column>
+		<el-table-column :label="t('pages.anchorList.videoBillingIncome')" align="right" min-width="150">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallBillingIncome) }}</span></template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.videoCallIncome')" align="right" min-width="130">
@@ -354,11 +350,8 @@ const pageTitle = computed(() => {
 
 const LIVE_ROOM_CATEGORY_HOT = 1
 const LIVE_ROOM_CATEGORY_GAME = 2
-const LIVE_ROOM_CATEGORY_PRIVATE = 3
 const LIVE_ROOM_PRIVATE_INVITE_ALL = 1
 const LIVE_ROOM_PRIVATE_INVITE_REJECT = 3
-
-const isPrivateRoom = (category?: number) => category === LIVE_ROOM_CATEGORY_PRIVATE
 
 const anchorTypeLabel = (userType?: number) => {
   if (userType === USER_TYPE_SENIOR_ANCHOR) return t('pages.anchorList.anchorTypeSenior')
@@ -387,12 +380,10 @@ const privateInviteTagType = (type?: number) => {
 const categoryLabel = (category?: number) => {
   if (category === LIVE_ROOM_CATEGORY_HOT) return t('pages.anchorList.categoryHot')
   if (category === LIVE_ROOM_CATEGORY_GAME) return t('pages.anchorList.categoryGame')
-  if (category === LIVE_ROOM_CATEGORY_PRIVATE) return t('pages.anchorList.categoryPrivate')
   return '-'
 }
 
 const categoryTagType = (category?: number) => {
-  if (category === LIVE_ROOM_CATEGORY_PRIVATE) return 'warning'
   if (category === LIVE_ROOM_CATEGORY_GAME) return 'success'
   if (category === LIVE_ROOM_CATEGORY_HOT) return 'danger'
   return 'info'

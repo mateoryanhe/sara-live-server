@@ -3,6 +3,7 @@ package game
 import (
 	"context"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/gogf/gf/v2/container/gmap"
@@ -27,6 +28,11 @@ const (
 type gameConsumeRankRow struct {
 	UserId      uint64
 	TotalAmount float64
+	Nickname    string
+	Avatar      string
+	VipLevel    uint32
+	Gender      uint8
+	Birthday    *time.Time
 }
 
 type gameConsumeRankSnapshot struct {
@@ -37,6 +43,7 @@ type gameConsumeRankSnapshot struct {
 var (
 	gameConsumeRankCache           = gmap.NewKVMap[uint64, *gameConsumeRankSnapshot](true)
 	gameConsumeRankRefreshDeadline = gmap.NewKVMap[uint64, int64](true)
+	gameConsumeRankMu              sync.Mutex
 )
 
 func initGameConsumeRank() {
@@ -47,10 +54,19 @@ func initGameConsumeRank() {
 		}
 	}
 	event.Sub(gameevent.GameBetCreatedEvent, onGameConsumeRankBetCreatedEvent)
+	event.Sub(gameevent.LiveRecordStoppedEvent, onGameConsumeRankLiveRecordStoppedEvent)
 	event.Sub(gameevent.RankListRefreshEvent, onGameConsumeRankRefreshEvent)
 	xrtimer.AddSingleton(gctx.New(), gameConsumeRankTickInterval, func(ctx context.Context) {
 		tryRefreshGameConsumeRankCaches()
 	})
+}
+
+func onGameConsumeRankLiveRecordStoppedEvent(data any) {
+	ev, ok := data.(*gameevent.LiveRecordStoppedEventData)
+	if !ok || ev == nil || ev.LiveRecordId == 0 {
+		return
+	}
+	clearGameConsumeRankCache(ev.LiveRecordId)
 }
 
 func onGameConsumeRankBetCreatedEvent(data any) {
@@ -92,7 +108,7 @@ func tryRefreshGameConsumeRankCaches() {
 			gameConsumeRankRefreshDeadline.Remove(liveRecordId)
 			continue
 		}
-		loadGameConsumeRankCache(liveRecordId)
+		refreshGameConsumeRankCache(liveRecordId)
 	}
 }
 
@@ -100,11 +116,53 @@ func loadGameConsumeRankCache(liveRecordId uint64) {
 	if liveRecordId == 0 {
 		return
 	}
+	gameConsumeRankMu.Lock()
+	defer gameConsumeRankMu.Unlock()
+	loadGameConsumeRankCacheLocked(liveRecordId)
+}
+
+func refreshGameConsumeRankCache(liveRecordId uint64) {
+	if liveRecordId == 0 {
+		return
+	}
+	gameConsumeRankMu.Lock()
+	defer gameConsumeRankMu.Unlock()
+	if gameConsumeRankRefreshDeadline.Get(liveRecordId) == 0 {
+		return
+	}
+	if !isGameConsumeRankLiveRecordActive(liveRecordId) {
+		gameConsumeRankCache.Remove(liveRecordId)
+		gameConsumeRankRefreshDeadline.Remove(liveRecordId)
+		return
+	}
+	loadGameConsumeRankCacheLocked(liveRecordId)
+}
+
+func isGameConsumeRankLiveRecordActive(liveRecordId uint64) bool {
+	liveRecord := liveroomdao.GetLiveRecordById(liveRecordId)
+	if liveRecord == nil || liveRecord.AnchorId == 0 || liveRecord.EndTime != nil {
+		return false
+	}
+	room := liveroomdao.GetRoomById(liveRecord.AnchorId)
+	return room != nil && room.LiveRecordId == liveRecordId
+}
+
+func loadGameConsumeRankCacheLocked(liveRecordId uint64) {
 	rows := loadGameConsumeRankRows(liveRecordId)
 	gameConsumeRankCache.Set(liveRecordId, &gameConsumeRankSnapshot{
 		Rows:      rows,
 		UpdatedAt: time.Now().Unix(),
 	})
+}
+
+func clearGameConsumeRankCache(liveRecordId uint64) {
+	if liveRecordId == 0 {
+		return
+	}
+	gameConsumeRankMu.Lock()
+	defer gameConsumeRankMu.Unlock()
+	gameConsumeRankCache.Remove(liveRecordId)
+	gameConsumeRankRefreshDeadline.Remove(liveRecordId)
 }
 
 func loadGameConsumeRankRows(liveRecordId uint64) []*gameConsumeRankRow {
@@ -117,6 +175,11 @@ func loadGameConsumeRankRows(liveRecordId uint64) []*gameConsumeRankRow {
 		list = append(list, &gameConsumeRankRow{
 			UserId:      row.UserId,
 			TotalAmount: row.TotalAmount,
+			Nickname:    row.Nickname,
+			Avatar:      upload.ResolveAvatarUrlForUser(row.UserId, row.Avatar),
+			VipLevel:    row.VipLevel,
+			Gender:      row.Gender,
+			Birthday:    row.Birthday,
 		})
 	}
 	return list
@@ -208,8 +271,13 @@ func GetAppGameConsumeRank(ctx context.Context, req *gamebetdto.AppGameConsumeRa
 			Rank:          i + 1,
 			UserId:        strconv.FormatUint(row.UserId, 10),
 			ConsumeAmount: row.TotalAmount,
+			Nickname:      row.Nickname,
+			Avatar:        row.Avatar,
+			VipLevel:      row.VipLevel,
+			Gender:        row.Gender,
+			Age:           calcUserAge(row.Birthday),
 		}
-		if u := userinfodao.GetUserInfoByUserId(row.UserId); u != nil {
+		if u := userinfodao.GetUserInfoFromMemory(row.UserId); u != nil {
 			item.Nickname = u.Nickname
 			item.Avatar = upload.ResolveAvatarUrlForUser(row.UserId, u.Avatar)
 			item.VipLevel = u.VipLevel

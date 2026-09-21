@@ -9,6 +9,5 @@ type ReportLiveStartStatusReq struct {
 }
 
 type ReportLiveStartStatusRes struct {
-	Success         bool    `json:"success"`
-	BillingDeducted float64 `json:"billingDeducted" dc:"本次按分钟扣除钻石(未扣为0)"`
+	Success bool `json:"success"`
 }

@@ -13,34 +13,26 @@ const (
 )
 
 const (
-	AccountOpenId          db.TbCol = "open_id"
-	AccountChannel         db.TbCol = "channel"
-	AccountPhoneAreaCode   db.TbCol = "phone_area_code"
-	AccountIP              db.TbCol = "ip"
-	AccountRegisterIp      db.TbCol = "register_ip"
-	AccountRegisterCountry db.TbCol = "register_country"
-	AccountLoginCountry    db.TbCol = "login_country"
-	AccountBan             db.TbCol = "ban"
-	AccountBanTime         db.TbCol = "ban_time"
-	AccountBanApplyTime    db.TbCol = "ban_apply_time"
-	AccountCancel          db.TbCol = "cancel"
-	AccountPassword        db.TbCol = "password"
+	AccountOpenId        db.TbCol = "open_id"
+	AccountChannel       db.TbCol = "channel"
+	AccountPhoneAreaCode db.TbCol = "phone_area_code"
+	AccountBan           db.TbCol = "ban"
+	AccountBanTime       db.TbCol = "ban_time"
+	AccountBanApplyTime  db.TbCol = "ban_apply_time"
+	AccountCancel        db.TbCol = "cancel"
+	AccountPassword      db.TbCol = "password"
 )
 
 type Account struct {
 	migrate.OneModel
-	OpenId          string     `gorm:"index:idx_account_channel_openid,priority:2;default:'';comment:开放id"`
-	PhoneAreaCode   string     `gorm:"default:'';comment:手机区号"`
-	IP              string     `gorm:"default:'';comment:登录IP"`
-	RegisterIp      string     `gorm:"default:'';comment:注册IP"`
-	RegisterCountry string     `gorm:"default:'';comment:注册IP所在国家简码(ISO alpha-2)" json:"registerCountry"`
-	LoginCountry    string     `gorm:"default:'';comment:登录IP所在国家简码(ISO alpha-2)" json:"loginCountry"`
-	Channel         uint       `gorm:"index:idx_account_channel_openid,priority:1;default:0;comment:渠道id"`
-	Ban             bool       `gorm:"default:0;comment:封号"`
-	BanTime         *time.Time `gorm:"comment:封号时间"`
-	BanApplyTime    *time.Time `gorm:"comment:封号生效时间"`
-	Cancel          bool       `gorm:"default:0;comment:注销"`
-	Password        string     `gorm:"default:'';comment:密码"`
+	OpenId        string     `gorm:"index:idx_account_channel_openid,priority:2;default:'';comment:开放id"`
+	PhoneAreaCode string     `gorm:"default:'';comment:手机区号"`
+	Channel       uint       `gorm:"index:idx_account_channel_openid,priority:1;default:0;comment:渠道id"`
+	Ban           bool       `gorm:"default:0;comment:封号"`
+	BanTime       *time.Time `gorm:"comment:封号时间"`
+	BanApplyTime  *time.Time `gorm:"comment:封号生效时间"`
+	Cancel        bool       `gorm:"default:0;comment:注销"`
+	Password      string     `gorm:"default:'';comment:密码"`
 }
 
 func NewAccountWithID(id uint64, openId string, channel uint) *Account {
@@ -64,42 +56,6 @@ func (this *Account) SetOpenId(openId string) {
 	syndb.AddData(TbAccount, AccountOpenId, &syndb.ColData{
 		IdVal:  this.ID,
 		ColVal: openId,
-	})
-}
-
-func (receiver *Account) SetIp(ip string) {
-	receiver.IP = ip
-	receiver.SetUpdatedAt(time.Now())
-	syndb.AddData(TbAccount, AccountIP, &syndb.ColData{
-		IdVal:  receiver.ID,
-		ColVal: ip,
-	})
-}
-
-func (receiver *Account) SetRegisterIp(ip string) {
-	receiver.RegisterIp = ip
-	receiver.SetUpdatedAt(time.Now())
-	syndb.AddData(TbAccount, AccountRegisterIp, &syndb.ColData{
-		IdVal:  receiver.ID,
-		ColVal: ip,
-	})
-}
-
-func (receiver *Account) SetRegisterCountry(country string) {
-	receiver.RegisterCountry = country
-	receiver.SetUpdatedAt(time.Now())
-	syndb.AddData(TbAccount, AccountRegisterCountry, &syndb.ColData{
-		IdVal:  receiver.ID,
-		ColVal: country,
-	})
-}
-
-func (receiver *Account) SetLoginCountry(country string) {
-	receiver.LoginCountry = country
-	receiver.SetUpdatedAt(time.Now())
-	syndb.AddData(TbAccount, AccountLoginCountry, &syndb.ColData{
-		IdVal:  receiver.ID,
-		ColVal: country,
 	})
 }
 
@@ -190,10 +146,6 @@ func initAccount() {
 	syndb.RegQuick(TbAccount, AccountOpenId)
 	syndb.RegQuick(TbAccount, AccountPhoneAreaCode)
 	syndb.RegQuick(TbAccount, AccountChannel)
-	syndb.RegQuick(TbAccount, AccountIP)
-	syndb.RegQuick(TbAccount, AccountRegisterIp)
-	syndb.RegQuick(TbAccount, AccountRegisterCountry)
-	syndb.RegQuick(TbAccount, AccountLoginCountry)
 	syndb.RegQuick(TbAccount, AccountBan)
 	syndb.RegQuick(TbAccount, AccountBanTime)
 	syndb.RegQuick(TbAccount, AccountBanApplyTime)

@@ -6,7 +6,7 @@ import (
 )
 
 type BillingListReq struct {
-	g.Meta `path:"/billingList" method:"post" summary:"获取私密直播间计费列表" tags:"私密直播间计费"`
+	g.Meta `path:"/billingList" method:"post" summary:"获取1v1视频通话计费列表" tags:"1v1视频通话计费"`
 	httpserver.CMSQueryReq
 	StatusFilter int `json:"statusFilter" dc:"状态过滤(0=全部,1=只看下架,2=只看上架)"`
 }

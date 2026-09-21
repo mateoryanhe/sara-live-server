@@ -16,6 +16,9 @@ set LOCAL_BUILD_PATH=%LOCAL_PROJECT_PATH%\go-build
 REM SSH key configuration
 set SSH_KEY_PATH=D:\tools\ppk\live-test.ppk
 
+REM Pinned SSH host key (prevents first-run prompts and host spoofing)
+set "SSH_HOST_KEY=ssh-ed25519 255 SHA256:9+bn/zwcdvzMRcdtGZIwF2wJAdyHjKxdp+q6fLVqw54"
+
 REM Application name
 set APP_NAME=xr-game-server
 

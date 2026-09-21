@@ -304,15 +304,13 @@ export interface AnchorListItem {
     roomId?: string
     category?: number
     privateInviteType?: number
-    ticket?: number
     billing?: number
     liveStatus?: number
     totalIncome?: number
     totalGiftIncome?: number
     totalPaidDanmakuIncome?: number
-    totalPrivateRoomTicketIncome?: number
-    totalPrivateRoomWatchIncome?: number
     totalVideoCallIncome?: number
+	totalVideoCallTicketIncome?: number
     totalVideoCallBillingIncome?: number
     ban?: boolean
     banApplyTime?: string | null
@@ -327,9 +325,8 @@ export interface LiveRoomIncomeAmounts {
     totalIncome?: number
     totalGiftIncome?: number
     totalPaidDanmakuIncome?: number
-    totalPrivateRoomTicketIncome?: number
-    totalPrivateRoomWatchIncome?: number
     totalVideoCallIncome?: number
+	totalVideoCallTicketIncome?: number
     totalVideoCallBillingIncome?: number
     totalShortVideoIncome?: number
     totalGameIncome?: number
@@ -351,7 +348,6 @@ export interface AnchorLiveRoomDetail {
     liveStatus?: number
     category?: number
     privateInviteType?: number
-    ticket?: number
     billing?: number
     createdAt?: string | null
     updatedAt?: string | null
@@ -1381,19 +1377,6 @@ export interface ActivityMessageQuery extends PageQuery {
     statusFilter?: number
 }
 
-export interface Ticket {
-    id: string
-    price: number
-    sort: number
-    status: number
-    createdAt: string
-    updatedAt: string
-}
-
-export interface TicketQuery extends PageQuery {
-    statusFilter?: number
-}
-
 export interface PrivateRoomBilling {
     id: string
     pricePerMinute: number
@@ -1592,9 +1575,8 @@ export interface IncomeSettlementLogAmounts {
     totalIncome: number
     totalGiftIncome: number
     totalPaidDanmakuIncome: number
-    totalPrivateRoomTicketIncome: number
-    totalPrivateRoomWatchIncome: number
     totalVideoCallIncome: number
+	totalVideoCallTicketIncome: number
     totalVideoCallBillingIncome: number
     totalShortVideoIncome: number
     totalGameIncome: number
@@ -1694,7 +1676,7 @@ export interface SaveAgoraCfgRes {
 export interface LiveCfg {
     id: string
     paidDanmakuPrice: number
-    privateRoomFreeWatchSeconds: number
+	videoCallTicketEnabled: boolean
     createdAt: string
     updatedAt: string
 }
@@ -1706,7 +1688,7 @@ export interface GetLiveCfgRes {
 export interface SaveLiveCfgReq {
     id?: number
     paidDanmakuPrice: number
-    privateRoomFreeWatchSeconds: number
+	videoCallTicketEnabled: boolean
 }
 
 export interface SaveLiveCfgRes {
@@ -2424,10 +2406,8 @@ export interface LiveRecordItem {
     totalIncome: number
     totalGiftIncome: number
     totalPaidDanmakuIncome: number
-    totalPrivateRoomIncome: number
-    totalPrivateRoomTicketIncome: number
-    totalPrivateRoomWatchIncome: number
     totalVideoCallIncome: number
+	totalVideoCallTicketIncome: number
     totalVideoCallBillingIncome: number
     totalGameBet: number
     totalGiftSender: number
@@ -2453,6 +2433,7 @@ export interface VideoCallLogItem {
     receiverId: string
     receiverNickname?: string
     receiverIsAnchor?: boolean
+    payerId: string
     callType: number
     callTypeText?: string
     source: number
@@ -2464,6 +2445,7 @@ export interface VideoCallLogItem {
     receiverHeartTime?: string | null
     orderEndTime?: string | null
     callDuration: number
+	ticketPrice: number
     pricePerMinute: number
     totalCost: number
     billingDuration: number

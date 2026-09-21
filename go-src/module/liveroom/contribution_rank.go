@@ -30,6 +30,11 @@ const (
 type contributionRankRow struct {
 	SenderId    uint64
 	TotalAmount float64
+	Nickname    string
+	Avatar      string
+	VipLevel    uint32
+	Gender      uint8
+	Birthday    *time.Time
 }
 
 type contributionRankSnapshot struct {
@@ -162,6 +167,11 @@ func loadContributionRankRows(roomId uint64, startTime, endTime time.Time) []*co
 		list = append(list, &contributionRankRow{
 			SenderId:    row.SenderId,
 			TotalAmount: row.TotalAmount,
+			Nickname:    row.Nickname,
+			Avatar:      upload.ResolveAvatarUrlForUser(row.SenderId, row.Avatar),
+			VipLevel:    row.VipLevel,
+			Gender:      row.Gender,
+			Birthday:    row.Birthday,
 		})
 	}
 	return list
@@ -236,8 +246,13 @@ func GetContributionRank(ctx context.Context, req *liveroomdto.GetContributionRa
 			Rank:               i + 1,
 			UserId:             strconv.FormatUint(row.SenderId, 10),
 			ContributionAmount: row.TotalAmount,
+			Nickname:           row.Nickname,
+			Avatar:             row.Avatar,
+			VipLevel:           row.VipLevel,
+			Gender:             row.Gender,
+			Age:                calcAge(row.Birthday),
 		}
-		if u := userinfodao.GetUserInfoByUserId(row.SenderId); u != nil {
+		if u := userinfodao.GetUserInfoFromMemory(row.SenderId); u != nil {
 			item.Nickname = u.Nickname
 			item.Avatar = upload.ResolveAvatarUrlForUser(row.SenderId, u.Avatar)
 			item.VipLevel = u.VipLevel

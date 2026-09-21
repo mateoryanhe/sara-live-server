@@ -1,11 +1,11 @@
 package message
 
 import (
-	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"fmt"
 	"time"
 
+	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/cache"
 	"xr-game-server/dao/messagedao"
 	"xr-game-server/dao/userinfodao"
@@ -36,9 +36,7 @@ func getPrivateMessageUnreadList(userId uint64) []*messagedto.AppPrivateMessageU
 			if row == nil {
 				continue
 			}
-			item := toPrivateMessageUnreadDetailItemFromRow(row)
-			fillPrivateMessageUnreadSenderInfo(item)
-			list = append(list, item)
+			list = append(list, toPrivateMessageUnreadDetailItemFromRow(row))
 		}
 		return list, nil
 	})
@@ -57,10 +55,17 @@ func putPrivateMessageUnreadList(userId uint64, list []*messagedto.AppPrivateMes
 
 func firstPagePrivateMessageUnreadList(userId uint64) []*messagedto.AppPrivateMessageUnreadDetailItem {
 	list := getPrivateMessageUnreadList(userId)
-	if len(list) > privateMessageUnreadListPageSize {
-		return list[:privateMessageUnreadListPageSize]
+	end := len(list)
+	if end > privateMessageUnreadListPageSize {
+		end = privateMessageUnreadListPageSize
 	}
-	return list
+	result := make([]*messagedto.AppPrivateMessageUnreadDetailItem, 0, end)
+	for _, item := range list[:end] {
+		if current := privateMessageUnreadItemWithMemoryProfiles(item); current != nil {
+			result = append(result, current)
+		}
+	}
+	return result
 }
 
 func prependPrivateMessageUnreadListCache(userId, senderId uint64, msg *entity.UserMessage, sessionId, unreadCount uint64) {
@@ -74,9 +79,9 @@ func prependPrivateMessageUnreadListCache(userId, senderId uint64, msg *entity.U
 	}
 	item := &messagedto.AppPrivateMessageUnreadDetailItem{
 		SenderId: senderId, UnreadCount: unreadCount,
-		UpdatedAt: formatMessageTime(now), LastMessage: toPrivateMessageItem(sessionId, msg),
+		UpdatedAt: formatMessageTime(now), LastMessage: newPrivateMessageItem(sessionId, msg),
 	}
-	fillPrivateMessageUnreadSenderInfo(item)
+	item = privateMessageUnreadItemWithMemoryProfiles(item)
 
 	newList := make([]*messagedto.AppPrivateMessageUnreadDetailItem, 0, len(list)+1)
 	newList = append(newList, item)
@@ -126,18 +131,31 @@ func removePrivateMessageUnreadListCacheSender(userId, senderId uint64) {
 	putPrivateMessageUnreadList(userId, newList)
 }
 
-func fillPrivateMessageUnreadSenderInfo(item *messagedto.AppPrivateMessageUnreadDetailItem) {
-	if item == nil {
-		return
+func privateMessageUnreadItemWithMemoryProfiles(source *messagedto.AppPrivateMessageUnreadDetailItem) *messagedto.AppPrivateMessageUnreadDetailItem {
+	if source == nil {
+		return nil
 	}
-	if sender := userinfodao.GetUserInfoByUserId(item.SenderId); sender != nil {
+
+	item := *source
+	if source.LastMessage != nil {
+		lastMessage := *source.LastMessage
+		item.LastMessage = &lastMessage
+	}
+
+	sender := userinfodao.GetUserInfoFromMemory(item.SenderId)
+	if sender != nil {
 		item.SenderName = sender.Nickname
 		item.SenderAvatar = upload.ResolveAvatarUrlForUser(item.SenderId, sender.Avatar)
 	}
 	if item.LastMessage != nil {
-		if sender := userinfodao.GetUserInfoByUserId(item.LastMessage.SenderId); sender != nil {
-			item.LastMessage.SenderName = sender.Nickname
-			item.LastMessage.SenderAvatar = upload.ResolveAvatarUrlForUser(item.LastMessage.SenderId, sender.Avatar)
+		lastMessageSender := sender
+		if item.LastMessage.SenderId != item.SenderId {
+			lastMessageSender = userinfodao.GetUserInfoFromMemory(item.LastMessage.SenderId)
+		}
+		if lastMessageSender != nil {
+			item.LastMessage.SenderName = lastMessageSender.Nickname
+			item.LastMessage.SenderAvatar = upload.ResolveAvatarUrlForUser(item.LastMessage.SenderId, lastMessageSender.Avatar)
 		}
 	}
+	return &item
 }

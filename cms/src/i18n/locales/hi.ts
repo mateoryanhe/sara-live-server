@@ -47,7 +47,6 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   LiveManagement: 'लाइव',
   GiftManagement: 'उपहार',
   AgoraCfgManagement: 'Agora कॉन्फ़िग',
-  TicketManagement: 'टिकट',
   PrivateRoomBillingManagement: '1v1 कॉल बिलिंग',
   LiveCfgManagement: 'लाइव कॉन्फ़िग',
   LiveRoomTagManagement: 'रूम टैग',

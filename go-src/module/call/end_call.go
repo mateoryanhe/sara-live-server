@@ -56,7 +56,7 @@ func EndCall(ctx context.Context, req *calldto.EndCallReq) (*calldto.EndCallRes,
 	if userId == order.ReceiverId {
 		peerId = order.CallerId
 	}
-	pushCallEnded(peerId, userId, order.ID, order.CallDuration, order.BillingDuration, order.TotalCost)
+	pushCallEnded(peerId, userId, order)
 	untrackActiveCallOrder(order.ID)
 
 	return &calldto.EndCallRes{
@@ -85,8 +85,8 @@ func finishCallOrderOnBillingFailed(order *entity.CallOrder, now time.Time) {
 	resetCallUser(order.ReceiverId)
 
 	endUserId := order.CallerId
-	pushCallEndedDueToBillingFailed(order.ReceiverId, endUserId, order.ID, order.CallDuration, order.BillingDuration, order.TotalCost)
-	pushCallEndedDueToBillingFailed(order.CallerId, endUserId, order.ID, order.CallDuration, order.BillingDuration, order.TotalCost)
+	pushCallEndedDueToBillingFailed(order.ReceiverId, endUserId, order)
+	pushCallEndedDueToBillingFailed(order.CallerId, endUserId, order)
 	untrackActiveCallOrder(order.ID)
 }
 

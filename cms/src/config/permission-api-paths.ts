@@ -299,13 +299,6 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'AgoraCfgManagement:view': '/agora/getAgoraCfg',
     'AgoraCfgManagement:save': '/agora/saveAgoraCfg',
 
-    TicketManagement: '/ticket/ticketList',
-    'TicketManagement:view': '/ticket/ticketList',
-    'TicketManagement:search': '/ticket/ticketList',
-    'TicketManagement:create': '/ticket/createTicket',
-    'TicketManagement:edit': '/ticket/updateTicket',
-    'TicketManagement:delete': '/ticket/deleteTicket',
-
     PrivateRoomBillingManagement: '/privateRoomBilling/billingList',
     'PrivateRoomBillingManagement:view': '/privateRoomBilling/billingList',
     'PrivateRoomBillingManagement:search': '/privateRoomBilling/billingList',

@@ -50,63 +50,6 @@ func SendChat(ctx context.Context, req *liveroomdto.SendChatReq) (*liveroomdto.S
 	return &liveroomdto.SendChatRes{Success: true}, nil
 }
 
-// SendPrivateRoomChat 私密房文字消息(不执行禁言逻辑,仅发送者与目标用户可见)
-func SendPrivateRoomChat(ctx context.Context, req *liveroomdto.SendPrivateRoomChatReq) (*liveroomdto.SendPrivateRoomChatRes, error) {
-	content := strings.TrimSpace(req.Content)
-
-	if content == "" {
-		return nil, errercode.CreateCode(errercode.SysError)
-	}
-
-	senderId := httpserver.GetAuthId(ctx)
-	targetId := req.TargetId
-	if targetId == 0 || targetId == senderId {
-		return nil, errercode.CreateCode(errercode.InvalidParam)
-	}
-	if userinfodao.GetUserInfoByUserId(targetId) == nil {
-		return nil, errercode.CreateCode(errercode.SysError)
-	}
-
-	if err := aliyunmoderation.RequireTextCompliant(aliyunmoderation.SceneChat, content); err != nil {
-		return nil, err
-	}
-
-	pushPrivateRoomChat(senderId, targetId, content)
-	return &liveroomdto.SendPrivateRoomChatRes{Success: true}, nil
-}
-
-func resolvePrivateRoomAnchorId(userId, targetId uint64) uint64 {
-	if room := liveroomdao.GetRoomById(userId); room != nil {
-		if cfg := liveroomdao.GetLiveRoomCfg(room.ID); cfg != nil && cfg.Category == entity.LiveRoomCategoryPrivate {
-			return userId
-		}
-	}
-	if room := liveroomdao.GetRoomById(targetId); room != nil {
-		if cfg := liveroomdao.GetLiveRoomCfg(room.ID); cfg != nil && cfg.Category == entity.LiveRoomCategoryPrivate {
-			return targetId
-		}
-	}
-	return 0
-}
-
-func pushPrivateRoomChat(senderId, targetId uint64, content string) {
-	sender := userinfodao.GetUserInfoByUserId(senderId)
-	payload := &liveroomdto.PrivateRoomChatPushItem{
-		TargetId: strconv.FormatUint(targetId, 10),
-		SenderId: strconv.FormatUint(senderId, 10),
-		Content:  content,
-		SentAt:   time.Now().Unix(),
-	}
-	if sender != nil {
-		payload.SenderName = sender.Nickname
-		payload.SenderAvatar = upload.ResolveAvatarUrlForUser(sender.ID, sender.Avatar)
-		payload.VipLevel = sender.VipLevel
-	}
-
-	push.Data(senderId, cmd.LiveRoomPrivateChat, payload)
-	push.Data(targetId, cmd.LiveRoomPrivateChat, payload)
-}
-
 func pushRoomChat(roomId, senderId uint64, content string) {
 	sender := userinfodao.GetUserInfoByUserId(senderId)
 	payload := &liveroomdto.ChatPushItem{

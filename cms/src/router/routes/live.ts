@@ -19,12 +19,6 @@ export const liveRoutes: RouteRecordRaw = {
             meta: {title: '声网配置'},
         },
         {
-            path: 'ticket/ticket-list',
-            name: 'TicketManagement',
-            component: () => import('@/views/live/ticket/ticket-list.vue'),
-            meta: {title: '门票管理'},
-        },
-        {
             path: 'private-room-billing/billing-list',
             name: 'PrivateRoomBillingManagement',
             component: () => import('@/views/live/private-room-billing/billing-list.vue'),

@@ -49,7 +49,6 @@ const menu = {
   LiveManagement: '直播管理',
   GiftManagement: '礼物管理',
   AgoraCfgManagement: '声网配置',
-  TicketManagement: '门票管理',
   PrivateRoomBillingManagement: '1v1通话计费',
   LiveCfgManagement: '直播配置',
   LiveRoomTagManagement: '直播间标签',

@@ -123,7 +123,7 @@ func finishCallOrderOnRingTimeout(order *entity.CallOrder, now time.Time) {
 
 	resetCallUser(order.CallerId)
 	resetCallUser(order.ReceiverId)
-	pushCallTimeout(order.CallerId, order.ReceiverId, order.ID)
+	pushCallTimeout(order)
 	untrackActiveCallOrder(order.ID)
 }
 
@@ -147,8 +147,8 @@ func finishCallOrderOnHeartTimeout(order *entity.CallOrder, now time.Time) {
 
 	resetCallUser(order.CallerId)
 	resetCallUser(order.ReceiverId)
-	pushCallEnded(order.CallerId, endUserId, order.ID, order.CallDuration, order.BillingDuration, order.TotalCost)
-	pushCallEnded(order.ReceiverId, endUserId, order.ID, order.CallDuration, order.BillingDuration, order.TotalCost)
+	pushCallEnded(order.CallerId, endUserId, order)
+	pushCallEnded(order.ReceiverId, endUserId, order)
 	untrackActiveCallOrder(order.ID)
 }
 

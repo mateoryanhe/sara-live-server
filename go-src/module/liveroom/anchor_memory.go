@@ -9,6 +9,7 @@ import (
 	"xr-game-server/dao/guilddao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
+	"xr-game-server/dao/userloginlocationdao"
 	"xr-game-server/dto/accountdto"
 	liveentity "xr-game-server/entity/live"
 	userentity "xr-game-server/entity/user"
@@ -226,11 +227,13 @@ func buildAnchorListItem(room *liveentity.LiveRoom) *accountdto.AnchorListItem {
 		}
 	}
 	if accountCache, _, _ := accountdao.FindAccountInCacheByID(userId); accountCache != nil {
-		item.IP = accountCache.IP
 		if !accountCache.CreatedAt.IsZero() {
 			registeredAt := accountCache.CreatedAt
 			item.RegisteredAt = &registeredAt
 		}
+	}
+	if location := userloginlocationdao.GetByUserId(userId); location != nil {
+		item.IP = location.IP
 	}
 	fillAnchorRoomFields(item, room)
 	item.Avatar = upload.ResolveAvatarUrlForUser(userId, item.Avatar)
@@ -245,9 +248,8 @@ func fillAnchorRoomFields(item *accountdto.AnchorListItem, room *liveentity.Live
 	item.RoomCover = upload.GetUrlByName(room.Cover)
 	item.RoomId = room.ID
 	if cfg := liveroomdao.GetLiveRoomCfgForCMS(room.ID); cfg != nil {
-		item.Category = cfg.Category
+		item.Category = normalizeLiveRoomCategory(cfg.Category)
 		item.PrivateInviteType = liveentity.NormalizePrivateInviteType(cfg.PrivateInviteType, cfg.Category)
-		item.Ticket = cfg.Ticket
 		item.Billing = cfg.Billing
 	}
 	// 主播列表收益读未结算(缓存优先,否则直查DB,不新建)
@@ -255,9 +257,8 @@ func fillAnchorRoomFields(item *accountdto.AnchorListItem, room *liveentity.Live
 		item.TotalIncome = income.TotalIncome
 		item.TotalGiftIncome = income.TotalGiftIncome
 		item.TotalPaidDanmakuIncome = income.TotalPaidDanmakuIncome
-		item.TotalPrivateRoomTicketIncome = income.TotalPrivateRoomTicketIncome
-		item.TotalPrivateRoomWatchIncome = income.TotalPrivateRoomWatchIncome
 		item.TotalVideoCallIncome = income.TotalVideoCallIncome
+		item.TotalVideoCallTicketIncome = income.TotalVideoCallTicketIncome
 		item.TotalVideoCallBillingIncome = income.TotalVideoCallBillingIncome
 	}
 	item.LiveStatus = roomLiveStatus(room)

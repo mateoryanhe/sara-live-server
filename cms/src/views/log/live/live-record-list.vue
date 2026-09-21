@@ -133,7 +133,10 @@
         <el-table-column :label="t('pages.liveRecordList.paidDanmakuIncome')" align="right" min-width="130">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.liveRecordList.videoBillingIncome')" align="right" min-width="150">
+		<el-table-column :label="t('pages.liveRecordList.videoTicketIncome')" align="right" min-width="140">
+		  <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallTicketIncome) }}</span></template>
+		</el-table-column>
+		<el-table-column :label="t('pages.liveRecordList.videoBillingIncome')" align="right" min-width="150">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallBillingIncome) }}</span></template>
         </el-table-column>
         <el-table-column :label="t('pages.liveRecordList.videoCallIncome')" align="right" min-width="130">

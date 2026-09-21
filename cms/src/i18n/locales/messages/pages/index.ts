@@ -31,7 +31,6 @@ import {customerServiceCfgMessages} from './customer-service-cfg'
 import {walletExchangeCfgMessages} from './wallet-exchange-cfg'
 import {paymentCountryCfgMessages} from './payment-country-cfg'
 import {agoraCfgMessages} from './agora-cfg'
-import {ticketListMessages} from './ticket-list'
 import {billingListMessages} from './billing-list'
 import {liveConfigMessages} from './live-config'
 import {liveRoomTagListMessages} from './live-room-tag-list'
@@ -119,7 +118,6 @@ const pageMessageBuilders = [
   ['walletExchangeCfg', walletExchangeCfgMessages],
   ['paymentCountryCfg', paymentCountryCfgMessages],
   ['agoraCfg', agoraCfgMessages],
-  ['ticketList', ticketListMessages],
   ['billingList', billingListMessages],
   ['liveConfig', liveConfigMessages],
   ['liveRoomTagList', liveRoomTagListMessages],

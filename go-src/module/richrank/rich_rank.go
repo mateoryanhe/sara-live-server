@@ -125,14 +125,12 @@ func buildRankItems(rows []*currencylogdao.DiamondConsumeStatRow) []*rankItem {
 		item := &rankItem{
 			Rank:          rankNo,
 			UserId:        row.UserId,
+			Nickname:      row.Nickname,
+			Avatar:        upload.ResolveAvatarUrlForUser(row.UserId, row.Avatar),
 			ConsumeAmount: row.Total,
-		}
-		if profile := userinfodao.GetUserInfoByUserId(row.UserId); profile != nil {
-			item.Nickname = profile.Nickname
-			item.Avatar = upload.ResolveAvatarUrlForUser(row.UserId, profile.Avatar)
-			item.VipLevel = profile.VipLevel
-			item.Gender = profile.Gender
-			item.Age = calcAge(profile.Birthday)
+			VipLevel:      row.VipLevel,
+			Gender:        row.Gender,
+			Age:           calcAge(row.Birthday),
 		}
 		list = append(list, item)
 	}
@@ -185,7 +183,7 @@ func GetAppRichRankList(ctx context.Context, req *richrankdto.AppRichRankListReq
 		if row == nil {
 			continue
 		}
-		pageData = append(pageData, &richrankdto.AppRichRankItem{
+		item := &richrankdto.AppRichRankItem{
 			Rank:          row.Rank,
 			UserId:        strconv.FormatUint(row.UserId, 10),
 			Nickname:      row.Nickname,
@@ -194,7 +192,15 @@ func GetAppRichRankList(ctx context.Context, req *richrankdto.AppRichRankListReq
 			VipLevel:      row.VipLevel,
 			Gender:        row.Gender,
 			Age:           row.Age,
-		})
+		}
+		if profile := userinfodao.GetUserInfoFromMemory(row.UserId); profile != nil {
+			item.Nickname = profile.Nickname
+			item.Avatar = upload.ResolveAvatarUrlForUser(row.UserId, profile.Avatar)
+			item.VipLevel = profile.VipLevel
+			item.Gender = profile.Gender
+			item.Age = calcAge(profile.Birthday)
+		}
+		pageData = append(pageData, item)
 	}
 	return &richrankdto.AppRichRankListRes{
 		Period:    req.Period,

@@ -19,7 +19,7 @@ import (
 )
 
 func normalizeLiveRoomCategory(category uint8) uint8 {
-	if category == liveentity.LiveRoomCategoryGame || category == liveentity.LiveRoomCategoryPrivate {
+	if liveentity.IsValidLiveRoomCategory(category) {
 		return category
 	}
 	return liveentity.LiveRoomCategoryHot
@@ -298,7 +298,7 @@ func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto
 		Cover:             upload.GetUrlByName(room.Cover),
 		Notice:            room.Notice,
 		Status:            status,
-		Category:          cfg.Category,
+		Category:          normalizeLiveRoomCategory(cfg.Category),
 		TagId:             strconv.FormatUint(cfg.TagId, 10),
 		TagName:           getRoomTagName(cfg.TagId),
 		Ticket:            cfg.Ticket,
@@ -313,20 +313,10 @@ func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto
 	if u := userinfodao.GetUserInfoByUserId(room.ID); u != nil {
 		res.UserType = u.UserType
 	}
-	//判断一下房间类型
-	if cfg.Category == liveentity.LiveRoomCategoryPrivate {
-		clearFreeTime(userId, room.ID)
-		//私密房免费时长
-		pay := liveroomdao.GetLiveRoomBillingPay(userId, req.RoomId)
-
-		res.FreeTime = pay.FreeTime
-		res.TicketTime = pay.GetTicketTime()
-		res.HasTicket = res.TicketTime > 0
-	}
-
 	if userId == room.ID {
 		if income := liveroomdao.GetLiveRoomIncomeTotalFromCache(room.ID); income != nil {
 			res.TotalVideoCallIncome = income.TotalVideoCallIncome
+			res.TotalVideoCallTicketIncome = income.TotalVideoCallTicketIncome
 			res.TotalVideoCallBillingIncome = income.TotalVideoCallBillingIncome
 		}
 	}

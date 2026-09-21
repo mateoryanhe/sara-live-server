@@ -23,12 +23,12 @@ func preloadUserLiveFollowCaches(userId uint64) {
 	blocked := loadBlockedListFromDB(userId, 1, followingListCacheMaxSize)
 	putBlockListCache(userId, blocked)
 	for _, row := range blocked {
-		AddFollowToCache(row)
+		AddFollowToCache(row.liveFollow())
 	}
 
 	followers := loadFollowersFromDB(userId, 1, followingListCacheMaxSize)
 	putFollowerListCache(userId, followers)
 	for _, row := range followers {
-		AddFollowToCache(row)
+		AddFollowToCache(row.liveFollow())
 	}
 }

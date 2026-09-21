@@ -19,6 +19,7 @@
     <el-descriptions-item :label="t('pages.anchorList.giftIncome')"><span class="money-amount">{{ formatWalletBalance(displayData.totalGiftIncome) }}</span></el-descriptions-item>
     <el-descriptions-item :label="t('pages.anchorList.paidDanmakuIncome')"><span class="money-amount">{{ formatWalletBalance(displayData.totalPaidDanmakuIncome) }}</span></el-descriptions-item>
     <el-descriptions-item :label="t('pages.anchorList.videoCallIncome')"><span class="money-amount">{{ formatWalletBalance(displayData.totalVideoCallIncome) }}</span></el-descriptions-item>
+	<el-descriptions-item :label="t('pages.anchorList.videoTicketIncome')"><span class="money-amount">{{ formatWalletBalance(displayData.totalVideoCallTicketIncome) }}</span></el-descriptions-item>
     <el-descriptions-item :label="t('pages.anchorList.videoBillingIncome')"><span class="money-amount">{{ formatWalletBalance(displayData.totalVideoCallBillingIncome) }}</span></el-descriptions-item>
     <el-descriptions-item :label="t('pages.anchorList.shortVideoIncome')"><span class="money-amount">{{ formatWalletBalance(displayData.totalShortVideoIncome) }}</span></el-descriptions-item>
     <el-descriptions-item :label="t('pages.anchorList.gameIncome')"><span class="money-amount">{{ formatWalletBalance(displayData.totalGameIncome) }}</span></el-descriptions-item>
@@ -59,6 +60,7 @@ const displayData = computed<Required<LiveRoomIncomeAmounts>>(() => ({
   totalGiftIncome: props.data?.totalGiftIncome ?? 0,
   totalPaidDanmakuIncome: props.data?.totalPaidDanmakuIncome ?? 0,
   totalVideoCallIncome: props.data?.totalVideoCallIncome ?? 0,
+	totalVideoCallTicketIncome: props.data?.totalVideoCallTicketIncome ?? 0,
   totalVideoCallBillingIncome: props.data?.totalVideoCallBillingIncome ?? 0,
   totalShortVideoIncome: props.data?.totalShortVideoIncome ?? 0,
   totalGameIncome: props.data?.totalGameIncome ?? 0,

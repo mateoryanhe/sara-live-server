@@ -16,6 +16,7 @@ import (
 	"xr-game-server/dao/statdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dao/userlogindevicedao"
+	"xr-game-server/dao/userloginlocationdao"
 )
 
 func Init() {
@@ -23,6 +24,7 @@ func Init() {
 	cmsuserdao.InitCMSUser()
 	userinfodao.InitUserInfoDao()
 	userlogindevicedao.InitUserLoginDeviceDao()
+	userloginlocationdao.Init()
 	guilddao.InitGuildDao()
 	gamebetdao.Init()
 	gamevendordao.Init()

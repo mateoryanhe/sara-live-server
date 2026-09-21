@@ -167,7 +167,16 @@
         >
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
         </el-table-column>
-        <el-table-column
+		<el-table-column
+		    :label="t('pages.anchorList.unsettledVideoTicketIncome')"
+		    align="right"
+		    label-class-name="header-nowrap"
+		    prop="totalVideoCallTicketIncome"
+		    width="170"
+		>
+		  <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallTicketIncome) }}</span></template>
+		</el-table-column>
+		<el-table-column
             :label="t('pages.anchorList.unsettledVideoBillingIncome')"
             align="right"
             label-class-name="header-nowrap"
@@ -218,11 +227,6 @@
               {{ privateInviteLabel(row.privateInviteType) }}
             </el-tag>
             <span v-else>-</span>
-          </template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorList.ticketPrice')" align="right" min-width="110">
-          <template #default="{ row }">
-            <span class="money-amount">{{ formatWalletBalance(row.ticket) }}</span>
           </template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.billingPricePerMinute')" align="right" label-class-name="header-nowrap" min-width="160" width="160">
@@ -578,7 +582,6 @@ const disabledDate = (time: Date) => time.getTime() < Date.now()
 
 const LIVE_ROOM_CATEGORY_HOT = 1
 const LIVE_ROOM_CATEGORY_GAME = 2
-const LIVE_ROOM_CATEGORY_PRIVATE = 3
 const LIVE_ROOM_PRIVATE_INVITE_ALL = 1
 const LIVE_ROOM_PRIVATE_INVITE_REJECT = 3
 const USER_TYPE_ANCHOR = 1
@@ -611,12 +614,10 @@ const privateInviteTagType = (type?: number) => {
 const categoryLabel = (category?: number) => {
   if (category === LIVE_ROOM_CATEGORY_HOT) return t('pages.anchorList.categoryHot')
   if (category === LIVE_ROOM_CATEGORY_GAME) return t('pages.anchorList.categoryGame')
-  if (category === LIVE_ROOM_CATEGORY_PRIVATE) return t('pages.anchorList.categoryPrivate')
   return '-'
 }
 
 const categoryTagType = (category?: number) => {
-  if (category === LIVE_ROOM_CATEGORY_PRIVATE) return 'warning'
   if (category === LIVE_ROOM_CATEGORY_GAME) return 'success'
   if (category === LIVE_ROOM_CATEGORY_HOT) return 'danger'
   return 'info'

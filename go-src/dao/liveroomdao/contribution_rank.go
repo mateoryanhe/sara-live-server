@@ -11,10 +11,15 @@ import (
 	userentity "xr-game-server/entity/user"
 )
 
-// AudienceContributionStatRow 观众贡献聚合结果
+// AudienceContributionStatRow 观众贡献聚合结果及用户资料快照
 type AudienceContributionStatRow struct {
-	SenderId    uint64  `json:"sender_id"`
-	TotalAmount float64 `json:"total_amount"`
+	SenderId    uint64     `json:"sender_id"`
+	TotalAmount float64    `json:"total_amount"`
+	Nickname    string     `json:"nickname"`
+	Avatar      string     `json:"avatar"`
+	VipLevel    uint32     `json:"vip_level"`
+	Gender      uint8      `json:"gender"`
+	Birthday    *time.Time `json:"birthday"`
 }
 
 const contributionRankTopLimit = 500
@@ -46,26 +51,37 @@ func SumAudienceContributionByRoom(roomId uint64, startTime, endTime time.Time, 
 	)
 
 	sql := `
-SELECT rl.sender_id, SUM(rl.total_amount) AS total_amount
-FROM ` + string(liveentity.TbLiveRevenueLog) + ` rl
-INNER JOIN ` + string(userentity.TbAccount) + ` a ON a.id = rl.sender_id
-LEFT JOIN ` + string(userentity.TbUserExt) + ` ue ON ue.id = rl.sender_id
-WHERE rl.room_id = ?
-  AND IFNULL(rl.` + string(liveentity.LiveRevenueLogStatus) + `, 0) = 0
-  AND rl.sender_id IN (` + inPlaceholders + `)
-  AND rl.revenue_type IN (?, ?)
-  AND rl.created_at >= ?
-  AND rl.created_at <= ?
-  AND IFNULL(a.` + string(userentity.AccountCancel) + `, 0) = 0
-  AND (
-    IFNULL(a.` + string(userentity.AccountBan) + `, 0) = 0
-    OR (a.` + string(userentity.AccountBanApplyTime) + ` IS NOT NULL AND a.` + string(userentity.AccountBanApplyTime) + ` <= ?)
-  )
-  AND (ue.id IS NULL OR IFNULL(ue.` + string(userentity.UserExtCanRank) + `, 1) = 1)
-GROUP BY rl.sender_id
-HAVING SUM(rl.total_amount) > 0
-ORDER BY total_amount DESC
-LIMIT ?
+SELECT ranked.sender_id,
+       ranked.total_amount,
+       IFNULL(ui.` + string(userentity.UserInfoNickname) + `, '') AS nickname,
+       IFNULL(ui.` + string(userentity.UserInfoAvatar) + `, '') AS avatar,
+       IFNULL(ui.` + string(userentity.UserInfoVipLevel) + `, 0) AS vip_level,
+       IFNULL(ui.` + string(userentity.UserInfoGender) + `, 0) AS gender,
+       ui.` + string(userentity.UserInfoBirthday) + ` AS birthday
+FROM (
+    SELECT rl.sender_id, SUM(rl.total_amount) AS total_amount
+    FROM ` + string(liveentity.TbLiveRevenueLog) + ` rl
+    INNER JOIN ` + string(userentity.TbAccount) + ` a ON a.id = rl.sender_id
+    LEFT JOIN ` + string(userentity.TbUserExt) + ` ue ON ue.id = rl.sender_id
+    WHERE rl.room_id = ?
+      AND IFNULL(rl.` + string(liveentity.LiveRevenueLogStatus) + `, 0) = 0
+      AND rl.sender_id IN (` + inPlaceholders + `)
+      AND rl.revenue_type IN (?, ?)
+      AND rl.created_at >= ?
+      AND rl.created_at <= ?
+      AND IFNULL(a.` + string(userentity.AccountCancel) + `, 0) = 0
+      AND (
+        IFNULL(a.` + string(userentity.AccountBan) + `, 0) = 0
+        OR (a.` + string(userentity.AccountBanApplyTime) + ` IS NOT NULL AND a.` + string(userentity.AccountBanApplyTime) + ` <= ?)
+      )
+      AND (ue.id IS NULL OR IFNULL(ue.` + string(userentity.UserExtCanRank) + `, 1) = 1)
+    GROUP BY rl.sender_id
+    HAVING SUM(rl.total_amount) > 0
+    ORDER BY total_amount DESC
+    LIMIT ?
+) ranked
+LEFT JOIN ` + string(userentity.TbUserInfo) + ` ui ON ui.id = ranked.sender_id
+ORDER BY ranked.total_amount DESC
 `
 	err := g.DB().Ctx(ctx).Raw(sql, args...).Scan(&list)
 	if err != nil {

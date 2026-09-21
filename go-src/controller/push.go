@@ -51,20 +51,15 @@ func (c *PushController) LiveRoomCallRejected(_ context.Context, _ *pushdto.Live
 	return nil, nil
 }
 
-// LiveRoomCallRequest cmd=25 直播间通话请求
+// LiveRoomCallRequest cmd=25 视频通话请求
 func (c *PushController) LiveRoomCallRequest(_ context.Context, _ *pushdto.LiveRoomCallRequestPushReq) (*pushdto.LiveRoomCallRequestPushResp, error) {
 	return nil, nil
 }
 
-// --- 推送-私密房 ---
+// --- 推送-定向送礼 ---
 
-// LiveRoomPrivateGift cmd=30 给指定主播送礼
-func (c *PushController) LiveRoomPrivateGift(_ context.Context, _ *pushdto.LiveRoomPrivateGiftPushReq) (*pushdto.LiveRoomPrivateGiftPushResp, error) {
-	return nil, nil
-}
-
-// LiveRoomPrivateChat cmd=29 私密房文字消息
-func (c *PushController) LiveRoomPrivateChat(_ context.Context, _ *pushdto.LiveRoomPrivateChatPushReq) (*pushdto.LiveRoomPrivateChatPushResp, error) {
+// LiveRoomDirectGift cmd=30 给指定主播送礼
+func (c *PushController) LiveRoomDirectGift(_ context.Context, _ *pushdto.LiveRoomDirectGiftPushReq) (*pushdto.LiveRoomDirectGiftPushResp, error) {
 	return nil, nil
 }
 

@@ -223,7 +223,6 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
         children: [
             page('GiftManagement'),
             page('AgoraCfgManagement'),
-            page('TicketManagement'),
             page('PrivateRoomBillingManagement'),
             page('LiveCfgManagement'),
             page('LiveRoomTagManagement'),

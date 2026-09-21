@@ -107,7 +107,9 @@ func InitWebsocket() {
 
 type WebSocketClient struct {
 	//用户唯一标识
-	Id         uint64
+	Id uint64
+	// OnlineAt WebSocket 鉴权成功并建立客户端时的上线时间戳(毫秒)
+	OnlineAt   int64
 	Conn       *websocket.Conn
 	dataBuffer *gqueue.TQueue[any]
 	Loop       bool
@@ -117,6 +119,7 @@ type WebSocketClient struct {
 func newClient(id uint64, conn *websocket.Conn) *WebSocketClient {
 	return &WebSocketClient{
 		Id:         id,
+		OnlineAt:   time.Now().UnixMilli(),
 		Conn:       conn,
 		dataBuffer: gqueue.NewTQueue[any](),
 		Loop:       true,

@@ -34,12 +34,10 @@ const (
 	ReasonShortVideoWatch Reason = 13
 	// ReasonAnchorGiftRevenue 主播收到礼物收益
 	ReasonAnchorGiftRevenue Reason = 14
-	// ReasonPrivateRoomTicket 私密直播间门票
-	ReasonPrivateRoomTicket Reason = 15
-	// ReasonPrivateRoomBilling 私密直播间按分钟计费
-	ReasonPrivateRoomBilling Reason = 16
 	// ReasonPaidDanmaku 直播间付费弹幕消耗
 	ReasonPaidDanmaku Reason = 17
+	// ReasonLiveRoomVideoCallTicket 直播间视频通话门票
+	ReasonLiveRoomVideoCallTicket Reason = 18
 	// ReasonLiveRoomVideoCallBilling 直播间视频通话计费
 	ReasonLiveRoomVideoCallBilling Reason = 19
 	// ReasonGameBet 游戏消费扣款
@@ -107,12 +105,10 @@ func (r Reason) String() string {
 		return "ShortVideoWatch"
 	case ReasonAnchorGiftRevenue:
 		return "AnchorGiftRevenue"
-	case ReasonPrivateRoomTicket:
-		return "PrivateRoomTicket"
-	case ReasonPrivateRoomBilling:
-		return "PrivateRoomBilling"
 	case ReasonPaidDanmaku:
 		return "PaidDanmaku"
+	case ReasonLiveRoomVideoCallTicket:
+		return "LiveRoomVideoCallTicket"
 	case ReasonLiveRoomVideoCallBilling:
 		return "LiveRoomVideoCallBilling"
 	case ReasonGameBet:

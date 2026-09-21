@@ -67,3 +67,39 @@ func PreloadUserInfoToCache(users []*userentity.UserInfo) {
 		userInfoCacheMgr.PublishRow(gctx.New(), user.ID, user)
 	}
 }
+
+// EnsureUserInfosCached 批量确保用户基础信息已进入进程缓存。
+// 已命中的用户直接返回；所有未命中的用户合并为一次数据库查询并回填缓存。
+func EnsureUserInfosCached(userIds []uint64) map[uint64]*userentity.UserInfo {
+	result := make(map[uint64]*userentity.UserInfo, len(userIds))
+	if len(userIds) == 0 || userInfoCacheMgr == nil {
+		return result
+	}
+
+	missing := make([]uint64, 0, len(userIds))
+	seen := make(map[uint64]struct{}, len(userIds))
+	for _, userId := range userIds {
+		if userId == 0 {
+			continue
+		}
+		if _, ok := seen[userId]; ok {
+			continue
+		}
+		seen[userId] = struct{}{}
+		if user := GetUserInfoFromMemory(userId); user != nil {
+			result[userId] = user
+			continue
+		}
+		missing = append(missing, userId)
+	}
+
+	loaded := loadUserInfosByUserIds(missing)
+	PreloadUserInfoToCache(loaded)
+	for _, user := range loaded {
+		if user == nil || user.ID == 0 {
+			continue
+		}
+		result[user.ID] = user
+	}
+	return result
+}

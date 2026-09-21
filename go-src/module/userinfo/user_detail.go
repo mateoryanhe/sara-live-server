@@ -7,6 +7,7 @@ import (
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dao/userlogindevicedao"
+	"xr-game-server/dao/userloginlocationdao"
 	"xr-game-server/dto/accountdto"
 	userentity "xr-game-server/entity/user"
 	"xr-game-server/errercode"
@@ -22,7 +23,7 @@ func QueryUserDetail(_ context.Context, req *accountdto.GetUserDetailReq) (*acco
 	}
 	userInfo := userinfodao.GetUserInfoFromDB(req.UserId)
 	return &accountdto.GetUserDetailRes{
-		Account:        toUserAccountDetailItem(account),
+		Account:        toUserAccountDetailItem(account, userloginlocationdao.GetByUserId(req.UserId)),
 		Profile:        toUserProfileDetailItem(userInfo, req.UserId),
 		Wallet:         toUserWalletDetailItem(userInfo),
 		UserExt:        toUserExtDetailItem(userinfodao.GetUserExtFromDB(req.UserId)),
@@ -31,23 +32,25 @@ func QueryUserDetail(_ context.Context, req *accountdto.GetUserDetailReq) (*acco
 	}, nil
 }
 
-func toUserAccountDetailItem(account *userentity.Account) *accountdto.UserAccountDetailItem {
+func toUserAccountDetailItem(account *userentity.Account, location *userentity.UserLoginLocation) *accountdto.UserAccountDetailItem {
 	if account == nil {
 		return nil
 	}
 	item := &accountdto.UserAccountDetailItem{
-		ID:              account.ID,
-		OpenId:          account.OpenId,
-		IP:              account.IP,
-		RegisterIp:      account.RegisterIp,
-		RegisterCountry: ipgeo.FormatCountryDisplay(account.RegisterCountry),
-		LoginCountry:    ipgeo.FormatCountryDisplay(account.LoginCountry),
-		Channel:         account.Channel,
-		PhoneAreaCode:   account.PhoneAreaCode,
-		Ban:             account.Ban,
-		BanTime:         account.BanTime,
-		BanApplyTime:    account.BanApplyTime,
-		Cancel:          account.Cancel,
+		ID:            account.ID,
+		OpenId:        account.OpenId,
+		Channel:       account.Channel,
+		PhoneAreaCode: account.PhoneAreaCode,
+		Ban:           account.Ban,
+		BanTime:       account.BanTime,
+		BanApplyTime:  account.BanApplyTime,
+		Cancel:        account.Cancel,
+	}
+	if location != nil {
+		item.IP = location.IP
+		item.RegisterIp = location.RegisterIp
+		item.RegisterCountry = ipgeo.FormatCountryDisplay(location.RegisterCountry)
+		item.LoginCountry = ipgeo.FormatCountryDisplay(location.LoginCountry)
 	}
 	if !account.CreatedAt.IsZero() {
 		createdAt := account.CreatedAt

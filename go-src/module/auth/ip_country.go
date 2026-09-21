@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/gogf/gf/v2/net/ghttp"
+	"xr-game-server/dao/userloginlocationdao"
 	"xr-game-server/entity/user"
 	"xr-game-server/module/ipgeo"
 )
@@ -12,32 +13,46 @@ func applyRegisterIpInfo(account *entity.Account, r *ghttp.Request) {
 	if account == nil || r == nil {
 		return
 	}
+	location := userloginlocationdao.GetByUserId(account.ID)
+	if location == nil {
+		return
+	}
 	ip := strings.TrimSpace(r.GetClientIp())
 	if ip == "" {
 		return
 	}
-	if account.RegisterIp == "" {
-		account.SetRegisterIp(ip)
+	if location.RegisterIp == "" {
+		location.SetRegisterIP(ip)
 	}
-	if account.RegisterCountry == "" {
+	if location.RegisterCountry == "" {
 		if code := resolveRequestCountryCode(r, ip); code != "" {
-			account.SetRegisterCountry(code)
+			location.SetRegisterCountry(code)
 		}
 	}
-	applyLoginIpInfo(account, r)
+	applyLoginLocation(location, r, ip)
+	userloginlocationdao.Publish(location)
 }
 
 func applyLoginIpInfo(account *entity.Account, r *ghttp.Request) {
 	if account == nil || r == nil {
 		return
 	}
+	location := userloginlocationdao.GetByUserId(account.ID)
+	if location == nil {
+		return
+	}
 	ip := strings.TrimSpace(r.GetClientIp())
 	if ip == "" {
 		return
 	}
-	account.SetIp(ip)
+	applyLoginLocation(location, r, ip)
+	userloginlocationdao.Publish(location)
+}
+
+func applyLoginLocation(location *entity.UserLoginLocation, r *ghttp.Request, ip string) {
+	location.SetIP(ip)
 	if code := resolveRequestCountryCode(r, ip); code != "" {
-		account.SetLoginCountry(code)
+		location.SetLoginCountry(code)
 	}
 }
 

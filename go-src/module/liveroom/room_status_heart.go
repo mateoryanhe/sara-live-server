@@ -14,9 +14,8 @@ import (
 )
 
 const (
-	TimeOut              = 30 * time.Minute
-	PrivatePeriod uint64 = 30
-	CommonPeriod  uint64 = 30
+	TimeOut             = 30 * time.Minute
+	CommonPeriod uint64 = 30
 )
 
 var taskMap = gset.NewTSet[uint64](true)
@@ -52,8 +51,6 @@ func ReportLiveStartStatus(ctx context.Context, req *liveroomdto.ReportLiveStart
 		return &liveroomdto.ReportLiveStartStatusRes{Success: true}, nil
 	}
 
-	var billingDeducted float64
-
 	if userId == room.ID {
 		flushAnchorId(room)
 	} else {
@@ -61,19 +58,10 @@ func ReportLiveStartStatus(ctx context.Context, req *liveroomdto.ReportLiveStart
 		if !isUserInOnlineMap(userId, room.ID) {
 			return &liveroomdto.ReportLiveStartStatusRes{Success: true}, nil
 		}
-		deducted, err := chargePrivateRoomBillingIfNeeded(userId, room)
-		if err != nil {
-			exitRoom(userId, room.ID)
-			return nil, err
-		}
-		billingDeducted = deducted
 		flushAudience(userId, room)
 	}
 
-	return &liveroomdto.ReportLiveStartStatusRes{
-		Success:         true,
-		BillingDeducted: billingDeducted,
-	}, nil
+	return &liveroomdto.ReportLiveStartStatusRes{Success: true}, nil
 }
 
 func flushAnchorId(room *entity.LiveRoom) {
@@ -81,11 +69,7 @@ func flushAnchorId(room *entity.LiveRoom) {
 	now := time.Now()
 	room.SetHeartTime(&now)
 	liveroomdao.FlushRoomCache(room)
-	period := CommonPeriod
-	if cfg := liveroomdao.GetLiveRoomCfg(room.ID); cfg != nil && cfg.Category == entity.LiveRoomCategoryPrivate {
-		period = PrivatePeriod
-	}
-	sec := float64(period)
+	sec := float64(CommonPeriod)
 	//记录本次直播
 	liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId)
 	liveRecord.AddTotalLiveDuration(sec)

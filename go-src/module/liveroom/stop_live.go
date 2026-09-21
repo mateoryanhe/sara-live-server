@@ -6,12 +6,14 @@ import (
 	"strconv"
 	"time"
 	"xr-game-server/constants/cmd"
+	"xr-game-server/core/event"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/push"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/entity/live"
 	"xr-game-server/errercode"
+	"xr-game-server/gameevent"
 	"xr-game-server/module/agora"
 	"xr-game-server/module/liverecord"
 )
@@ -61,6 +63,7 @@ func stopLive(anchorId uint64) *entity.LiveRecord {
 	room.SetLiveRecordId(0)
 	room.SetHeartTime(nil)
 	liveroomdao.FlushRoomCache(room)
+	event.Pub(gameevent.LiveRecordStoppedEvent, gameevent.NewLiveRecordStoppedEventData(liveRecordId))
 	flushRoomList(gctx.New())
 
 	//清除直播记录

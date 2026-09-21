@@ -1,9 +1,9 @@
 package livefollowdao
 
 import (
-	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/os/gctx"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/core/cache"
@@ -83,7 +83,7 @@ func RemoveFollowingFromListCache(userId, anchorId uint64) {
 }
 
 // GetFollowingsByUser 分页获取某用户当前已关注的记录(仅 Status == Follow)
-// 缓存5页数据,前4页且 pageSize=FollowingListCachePageSize 时走缓存,第5页起直接查库
+// 缓存8页数据,前7页走缓存,第8页起直接查库
 func GetFollowingsByUser(userId uint64, page, pageSize int) []*entity.LiveFollow {
 	list := make([]*entity.LiveFollow, 0)
 	if userId == 0 {
@@ -116,7 +116,9 @@ func loadFollowingsFromDB(userId uint64, page, pageSize int) []*entity.LiveFollo
 	if page <= 0 {
 		page = 1
 	}
-	pageSize = FollowingListCachePageSize
+	if pageSize <= 0 || pageSize > followingListCacheMaxSize {
+		pageSize = FollowingListCachePageSize
+	}
 	_ = g.Model(string(entity.TbLiveFollow)).
 		Where("user_id = ? AND status = ?", userId, entity.LiveFollowStatusFollow).
 		Order("updated_at desc").

@@ -405,21 +405,23 @@
     {
       "cmd": 25,
       "name": "LiveRoomCallRequest",
-      "description": "直播间通话请求",
-      "target": "主播(接听方)",
+      "description": "视频通话请求",
+      "target": "目标用户(接听方)",
       "dataType": "CallRequestPushItem",
       "data": {
         "orderId": { "type": "string", "json": "orderId", "description": "通话订单ID" },
+        "source": { "type": "uint8", "json": "source", "description": "业务来源(1-直播间,2-私信,3-1v1房间)" },
         "callerId": { "type": "string", "json": "callerId", "description": "呼叫者ID" },
         "channelName": { "type": "string", "json": "channelName", "description": "声网频道名" },
         "callType": { "type": "uint8", "json": "callType", "description": "通话类型(1-语音,2-视频)" },
         "callerNickname": { "type": "string", "json": "callerNickname", "description": "呼叫者昵称" },
         "callerAvatar": { "type": "string", "json": "callerAvatar", "description": "呼叫者头像URL" },
-        "receiverToken": { "type": "string", "json": "receiverToken", "description": "主播侧声网Token" },
+        "receiverToken": { "type": "string", "json": "receiverToken", "description": "接听方声网Token" },
         "message": { "type": "string", "json": "message", "description": "提示文案" }
       },
       "example": {
         "orderId": "123456789",
+        "source": 1,
         "callerId": "20002",
         "channelName": "20002_10001",
         "callType": 2,
@@ -437,6 +439,7 @@
       "dataType": "CallRejectedPushItem",
       "data": {
         "orderId": { "type": "string", "json": "orderId", "description": "通话订单ID" },
+        "source": { "type": "uint8", "json": "source", "description": "业务来源(1-直播间,2-私信,3-1v1房间)" },
         "receiverId": { "type": "string", "json": "receiverId", "description": "接听方ID" },
         "receiverNickname": { "type": "string", "json": "receiverNickname", "description": "接听方昵称" },
         "receiverAvatar": { "type": "string", "json": "receiverAvatar", "description": "接听方头像URL" },
@@ -444,6 +447,7 @@
       },
       "example": {
         "orderId": "123456789",
+        "source": 1,
         "receiverId": "10001",
         "receiverNickname": "主播A",
         "receiverAvatar": "https://cdn.example.com/anchor.jpg",
@@ -458,6 +462,7 @@
       "dataType": "CallAcceptedPushItem",
       "data": {
         "orderId": { "type": "string", "json": "orderId", "description": "通话订单ID" },
+        "source": { "type": "uint8", "json": "source", "description": "业务来源(1-直播间,2-私信,3-1v1房间)" },
         "receiverId": { "type": "string", "json": "receiverId", "description": "接听方ID" },
         "receiverNickname": { "type": "string", "json": "receiverNickname", "description": "接听方昵称" },
         "receiverAvatar": { "type": "string", "json": "receiverAvatar", "description": "接听方头像URL" },
@@ -467,6 +472,7 @@
       },
       "example": {
         "orderId": "123456789",
+        "source": 1,
         "receiverId": "10001",
         "receiverNickname": "主播A",
         "receiverAvatar": "https://cdn.example.com/anchor.jpg",
@@ -483,6 +489,7 @@
       "dataType": "CallEndedPushItem",
       "data": {
         "orderId": { "type": "string", "json": "orderId", "description": "通话订单ID" },
+        "source": { "type": "uint8", "json": "source", "description": "业务来源(1-直播间,2-私信,3-1v1房间)" },
         "endUserId": { "type": "string", "json": "endUserId", "description": "挂断方用户ID" },
         "endUserNickname": { "type": "string", "json": "endUserNickname", "description": "挂断方昵称" },
         "endUserAvatar": { "type": "string", "json": "endUserAvatar", "description": "挂断方头像URL" },
@@ -493,6 +500,7 @@
       },
       "example": {
         "orderId": "123456789",
+        "source": 1,
         "endUserId": "10001",
         "endUserNickname": "主播A",
         "endUserAvatar": "https://cdn.example.com/anchor.jpg",
@@ -503,36 +511,11 @@
       }
     },
     {
-      "cmd": 29,
-      "name": "LiveRoomPrivateChat",
-      "description": "私密房文字消息",
-      "target": "发送者与目标用户",
-      "dataType": "PrivateRoomChatPushItem",
-      "data": {
-        "roomId": { "type": "string", "json": "roomId", "description": "私密房直播间ID(主播ID)" },
-        "targetId": { "type": "string", "json": "targetId", "description": "目标用户ID" },
-        "senderId": { "type": "string", "json": "senderId", "description": "发送用户ID" },
-        "senderName": { "type": "string", "json": "senderName", "description": "发送用户昵称" },
-        "senderAvatar": { "type": "string", "json": "senderAvatar", "description": "发送用户头像URL" },
-        "content": { "type": "string", "json": "content", "description": "文字内容" },
-        "sentAt": { "type": "int64", "json": "sentAt", "description": "发送时间(秒)" }
-      },
-      "example": {
-        "roomId": "10001",
-        "targetId": "20002",
-        "senderId": "20003",
-        "senderName": "用户B",
-        "senderAvatar": "https://cdn.example.com/b.jpg",
-        "content": "你好",
-        "sentAt": 1717603200
-      }
-    },
-    {
       "cmd": 30,
-      "name": "LiveRoomPrivateGift",
-      "description": "私密房/指定主播送礼",
+      "name": "LiveRoomDirectGift",
+      "description": "指定主播送礼",
       "target": "发送者与主播",
-      "dataType": "PrivateGiftPushItem",
+      "dataType": "DirectGiftPushItem",
       "data": {
         "roomId": { "type": "string", "json": "roomId,string", "description": "直播间ID(主播ID)" },
         "anchorId": { "type": "string", "json": "anchorId,string", "description": "主播用户ID" },
@@ -572,6 +555,7 @@
       "dataType": "CallStartedPushItem",
       "data": {
         "orderId": { "type": "string", "json": "orderId", "description": "通话订单ID" },
+        "source": { "type": "uint8", "json": "source", "description": "业务来源(1-直播间,2-私信,3-1v1房间)" },
         "callerId": { "type": "string", "json": "callerId", "description": "呼叫者ID" },
         "receiverId": { "type": "string", "json": "receiverId", "description": "接听者ID" },
         "channelName": { "type": "string", "json": "channelName", "description": "声网频道名" },
@@ -581,6 +565,7 @@
       },
       "example": {
         "orderId": "123456789",
+        "source": 1,
         "callerId": "20002",
         "receiverId": "10001",
         "channelName": "20002_10001",
@@ -597,12 +582,14 @@
       "dataType": "CallTimeoutPushItem",
       "data": {
         "orderId": { "type": "string", "json": "orderId", "description": "通话订单ID" },
+        "source": { "type": "uint8", "json": "source", "description": "业务来源(1-直播间,2-私信,3-1v1房间)" },
         "callerId": { "type": "string", "json": "callerId", "description": "呼叫者ID" },
         "receiverId": { "type": "string", "json": "receiverId", "description": "接听者ID" },
         "message": { "type": "string", "json": "message", "description": "提示文案" }
       },
       "example": {
         "orderId": "123456789",
+        "source": 1,
         "callerId": "20002",
         "receiverId": "10001",
         "message": "呼叫超时"
@@ -618,6 +605,7 @@
         "roomId": { "type": "string", "json": "roomId", "description": "直播间ID" },
         "anchorId": { "type": "string", "json": "anchorId", "description": "主播ID" },
         "orderId": { "type": "string", "json": "orderId", "description": "通话订单ID" },
+        "source": { "type": "uint8", "json": "source", "description": "业务来源(固定为1-直播间)" },
         "callerId": { "type": "string", "json": "callerId", "description": "呼叫者ID" },
         "callType": { "type": "uint8", "json": "callType", "description": "通话类型(1-语音,2-视频)" },
         "anchorNickname": { "type": "string", "json": "anchorNickname", "description": "主播昵称" },
@@ -628,6 +616,7 @@
         "roomId": "10001",
         "anchorId": "10001",
         "orderId": "123456789",
+        "source": 1,
         "callerId": "20002",
         "callType": 2,
         "anchorNickname": "主播A",
@@ -666,7 +655,7 @@
     {
       "cmd": 37,
       "name": "LiveRoomTotalIncome",
-      "description": "本场直播总收益更新(送礼、付费弹幕、私密房扣费、视频通话等入账后)",
+      "description": "本场直播总收益更新(送礼、付费弹幕、视频通话等入账后)",
       "target": "房间内全体在线用户(含主播)",
       "dataType": "LiveRecordTotalIncomePushItem",
       "data": {
@@ -695,6 +684,35 @@
         "firstRecharge": false,
         "gold": 1000,
         "orderId": "1234567890"
+      }
+    },
+    {
+      "cmd": 39,
+      "name": "LiveRoomCallInvite",
+      "description": "主播邀请直播间观众发起视频通话",
+      "target": "被邀请的直播间观众",
+      "dataType": "CallInvitePushItem",
+      "data": {
+        "roomId": { "type": "string", "json": "roomId", "description": "直播间ID" },
+        "anchorId": { "type": "string", "json": "anchorId", "description": "主播ID" },
+        "source": { "type": "uint8", "json": "source", "description": "业务来源(固定为1-直播间)" },
+        "callType": { "type": "uint8", "json": "callType", "description": "通话类型(1-语音,2-视频)" },
+        "ticket": { "type": "number", "json": "ticket", "description": "视频通话门票价格(钻石)" },
+        "billing": { "type": "number", "json": "billing", "description": "每分钟价格(钻石)" },
+        "anchorNickname": { "type": "string", "json": "anchorNickname", "description": "主播昵称" },
+        "anchorAvatar": { "type": "string", "json": "anchorAvatar", "description": "主播头像URL" },
+        "message": { "type": "string", "json": "message", "description": "提示文案" }
+      },
+      "example": {
+        "roomId": "10001",
+        "anchorId": "10001",
+        "source": 1,
+        "callType": 2,
+        "ticket": 5,
+        "billing": 10,
+        "anchorNickname": "主播A",
+        "anchorAvatar": "https://cdn.example.com/anchor.jpg",
+        "message": "主播邀请你通话"
       }
     }
   ],

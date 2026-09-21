@@ -37,16 +37,15 @@ func toIncomeAmountsItem(a *liveentity.LiveRoomIncomeAmounts) accountdto.LiveRoo
 		return accountdto.LiveRoomIncomeAmountsItem{}
 	}
 	return accountdto.LiveRoomIncomeAmountsItem{
-		TotalIncome:                  a.TotalIncome,
-		TotalGiftIncome:              a.TotalGiftIncome,
-		TotalPaidDanmakuIncome:       a.TotalPaidDanmakuIncome,
-		TotalPrivateRoomTicketIncome: a.TotalPrivateRoomTicketIncome,
-		TotalPrivateRoomWatchIncome:  a.TotalPrivateRoomWatchIncome,
-		TotalVideoCallIncome:         a.TotalVideoCallIncome,
-		TotalVideoCallBillingIncome:  a.TotalVideoCallBillingIncome,
-		TotalShortVideoIncome:        a.TotalShortVideoIncome,
-		TotalGameIncome:              a.TotalGameIncome,
-		TotalLiveDuration:            a.TotalLiveDuration,
+		TotalIncome:                 a.TotalIncome,
+		TotalGiftIncome:             a.TotalGiftIncome,
+		TotalPaidDanmakuIncome:      a.TotalPaidDanmakuIncome,
+		TotalVideoCallIncome:        a.TotalVideoCallIncome,
+		TotalVideoCallTicketIncome:  a.TotalVideoCallTicketIncome,
+		TotalVideoCallBillingIncome: a.TotalVideoCallBillingIncome,
+		TotalShortVideoIncome:       a.TotalShortVideoIncome,
+		TotalGameIncome:             a.TotalGameIncome,
+		TotalLiveDuration:           a.TotalLiveDuration,
 	}
 }
 

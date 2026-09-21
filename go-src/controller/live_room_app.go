@@ -99,6 +99,16 @@ func (c *LiveRoomAppController) RoomList(ctx context.Context, req *liveroomdto.G
 	return liveroom.GetRoomList(ctx, req)
 }
 
+// OneToOneRoomList 分页查询1v1房间列表，按 WebSocket 在线状态过滤并将在线主播排在前面。
+func (c *LiveRoomAppController) OneToOneRoomList(ctx context.Context, req *liveroomdto.GetOneToOneRoomListReq) (res *liveroomdto.GetOneToOneRoomListRes, err error) {
+	return liveroom.GetOneToOneRoomList(ctx, req)
+}
+
+// ServerOnlineNormalUserList 查询当前服务器在线普通用户快照。
+func (c *LiveRoomAppController) ServerOnlineNormalUserList(ctx context.Context, req *liveroomdto.GetServerOnlineNormalUserListReq) (res *liveroomdto.GetServerOnlineNormalUserListRes, err error) {
+	return liveroom.GetServerOnlineNormalUserList(ctx, req)
+}
+
 // NearbyRoomList 以当前直播间为锚点查询相邻直播中直播间
 func (c *LiveRoomAppController) NearbyRoomList(ctx context.Context, req *liveroomdto.GetNearbyLiveRoomListReq) (res *liveroomdto.GetNearbyLiveRoomListRes, err error) {
 	return liveroom.GetNearbyLiveRoomList(ctx, req)
@@ -127,11 +137,6 @@ func (c *LiveRoomAppController) SendGiftToAnchor(ctx context.Context, req *liver
 // SendChat 直播间文字消息
 func (c *LiveRoomAppController) SendChat(ctx context.Context, req *liveroomdto.SendChatReq) (res *liveroomdto.SendChatRes, err error) {
 	return liveroom.SendChat(ctx, req)
-}
-
-// SendPrivateRoomChat 私密房文字消息
-func (c *LiveRoomAppController) SendPrivateRoomChat(ctx context.Context, req *liveroomdto.SendPrivateRoomChatReq) (res *liveroomdto.SendPrivateRoomChatRes, err error) {
-	return liveroom.SendPrivateRoomChat(ctx, req)
 }
 
 // SendPaidDanmaku 直播间付费弹幕

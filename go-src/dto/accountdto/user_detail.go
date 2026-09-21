@@ -12,7 +12,7 @@ type GetUserDetailReq struct {
 	UserId uint64 `json:"userId,string" v:"required#用户ID不能为空" dc:"用户ID"`
 }
 
-// UserAccountDetailItem 账号信息(accounts)
+// UserAccountDetailItem 账号信息(accounts，IP/国家字段来自user_login_locations)
 type UserAccountDetailItem struct {
 	ID              uint64     `json:"id,string"`
 	OpenId          string     `json:"openId"`

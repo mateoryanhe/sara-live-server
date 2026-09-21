@@ -9,10 +9,15 @@ import (
 	userentity "xr-game-server/entity/user"
 )
 
-// GameConsumeRankRow 单场直播游戏消费聚合结果
+// GameConsumeRankRow 游戏消费聚合结果及用户资料快照
 type GameConsumeRankRow struct {
-	UserId      uint64  `json:"user_id"`
-	TotalAmount float64 `json:"total_amount"`
+	UserId      uint64     `json:"user_id"`
+	TotalAmount float64    `json:"total_amount"`
+	Nickname    string     `json:"nickname"`
+	Avatar      string     `json:"avatar"`
+	VipLevel    uint32     `json:"vip_level"`
+	Gender      uint8      `json:"gender"`
+	Birthday    *time.Time `json:"birthday"`
 }
 
 const gameConsumeRankTopLimit = 500
@@ -27,23 +32,34 @@ func SumGameBetByUser(startTime, endTime time.Time) []*GameConsumeRankRow {
 	now := time.Now()
 
 	sql := `
-SELECT bl.` + string(entity.GameBetLogUserId) + ` AS user_id, SUM(bl.` + string(entity.GameBetLogAmount) + `) AS total_amount
-FROM ` + string(entity.TbGameBetLog) + ` bl
-INNER JOIN ` + string(userentity.TbAccount) + ` a ON a.id = bl.` + string(entity.GameBetLogUserId) + `
-LEFT JOIN ` + string(userentity.TbUserExt) + ` ue ON ue.id = bl.` + string(entity.GameBetLogUserId) + `
-WHERE bl.` + string(entity.GameBetLogAmount) + ` > 0
-  AND bl.created_at >= ?
-  AND bl.created_at <= ?
-  AND IFNULL(a.` + string(userentity.AccountCancel) + `, 0) = 0
-  AND (
-    IFNULL(a.` + string(userentity.AccountBan) + `, 0) = 0
-    OR (a.` + string(userentity.AccountBanApplyTime) + ` IS NOT NULL AND a.` + string(userentity.AccountBanApplyTime) + ` <= ?)
-  )
-  AND (ue.id IS NULL OR IFNULL(ue.` + string(userentity.UserExtCanRank) + `, 1) = 1)
-GROUP BY bl.` + string(entity.GameBetLogUserId) + `
-HAVING SUM(bl.` + string(entity.GameBetLogAmount) + `) > 0
-ORDER BY total_amount DESC
-LIMIT ?
+SELECT ranked.user_id,
+       ranked.total_amount,
+       IFNULL(ui.` + string(userentity.UserInfoNickname) + `, '') AS nickname,
+       IFNULL(ui.` + string(userentity.UserInfoAvatar) + `, '') AS avatar,
+       IFNULL(ui.` + string(userentity.UserInfoVipLevel) + `, 0) AS vip_level,
+       IFNULL(ui.` + string(userentity.UserInfoGender) + `, 0) AS gender,
+       ui.` + string(userentity.UserInfoBirthday) + ` AS birthday
+FROM (
+    SELECT bl.` + string(entity.GameBetLogUserId) + ` AS user_id, SUM(bl.` + string(entity.GameBetLogAmount) + `) AS total_amount
+    FROM ` + string(entity.TbGameBetLog) + ` bl
+    INNER JOIN ` + string(userentity.TbAccount) + ` a ON a.id = bl.` + string(entity.GameBetLogUserId) + `
+    LEFT JOIN ` + string(userentity.TbUserExt) + ` ue ON ue.id = bl.` + string(entity.GameBetLogUserId) + `
+    WHERE bl.` + string(entity.GameBetLogAmount) + ` > 0
+      AND bl.created_at >= ?
+      AND bl.created_at <= ?
+      AND IFNULL(a.` + string(userentity.AccountCancel) + `, 0) = 0
+      AND (
+        IFNULL(a.` + string(userentity.AccountBan) + `, 0) = 0
+        OR (a.` + string(userentity.AccountBanApplyTime) + ` IS NOT NULL AND a.` + string(userentity.AccountBanApplyTime) + ` <= ?)
+      )
+      AND (ue.id IS NULL OR IFNULL(ue.` + string(userentity.UserExtCanRank) + `, 1) = 1)
+    GROUP BY bl.` + string(entity.GameBetLogUserId) + `
+    HAVING SUM(bl.` + string(entity.GameBetLogAmount) + `) > 0
+    ORDER BY total_amount DESC
+    LIMIT ?
+) ranked
+LEFT JOIN ` + string(userentity.TbUserInfo) + ` ui ON ui.id = ranked.user_id
+ORDER BY ranked.total_amount DESC
 `
 	err := g.DB().Ctx(ctx).Raw(sql, startTime, endTime, now, gameConsumeRankTopLimit).Scan(&list)
 	if err != nil {
@@ -63,22 +79,33 @@ func SumGameBetByLiveRecord(liveRecordId uint64) []*GameConsumeRankRow {
 	now := time.Now()
 
 	sql := `
-SELECT bl.` + string(entity.GameBetLogUserId) + ` AS user_id, SUM(bl.` + string(entity.GameBetLogAmount) + `) AS total_amount
-FROM ` + string(entity.TbGameBetLog) + ` bl
-INNER JOIN ` + string(userentity.TbAccount) + ` a ON a.id = bl.` + string(entity.GameBetLogUserId) + `
-LEFT JOIN ` + string(userentity.TbUserExt) + ` ue ON ue.id = bl.` + string(entity.GameBetLogUserId) + `
-WHERE bl.` + string(entity.GameBetLogLiveRecordId) + ` = ?
-  AND bl.` + string(entity.GameBetLogAmount) + ` > 0
-  AND IFNULL(a.` + string(userentity.AccountCancel) + `, 0) = 0
-  AND (
-    IFNULL(a.` + string(userentity.AccountBan) + `, 0) = 0
-    OR (a.` + string(userentity.AccountBanApplyTime) + ` IS NOT NULL AND a.` + string(userentity.AccountBanApplyTime) + ` <= ?)
-  )
-  AND (ue.id IS NULL OR IFNULL(ue.` + string(userentity.UserExtCanRank) + `, 1) = 1)
-GROUP BY bl.` + string(entity.GameBetLogUserId) + `
-HAVING SUM(bl.` + string(entity.GameBetLogAmount) + `) > 0
-ORDER BY total_amount DESC
-LIMIT ?
+SELECT ranked.user_id,
+       ranked.total_amount,
+       IFNULL(ui.` + string(userentity.UserInfoNickname) + `, '') AS nickname,
+       IFNULL(ui.` + string(userentity.UserInfoAvatar) + `, '') AS avatar,
+       IFNULL(ui.` + string(userentity.UserInfoVipLevel) + `, 0) AS vip_level,
+       IFNULL(ui.` + string(userentity.UserInfoGender) + `, 0) AS gender,
+       ui.` + string(userentity.UserInfoBirthday) + ` AS birthday
+FROM (
+    SELECT bl.` + string(entity.GameBetLogUserId) + ` AS user_id, SUM(bl.` + string(entity.GameBetLogAmount) + `) AS total_amount
+    FROM ` + string(entity.TbGameBetLog) + ` bl
+    INNER JOIN ` + string(userentity.TbAccount) + ` a ON a.id = bl.` + string(entity.GameBetLogUserId) + `
+    LEFT JOIN ` + string(userentity.TbUserExt) + ` ue ON ue.id = bl.` + string(entity.GameBetLogUserId) + `
+    WHERE bl.` + string(entity.GameBetLogLiveRecordId) + ` = ?
+      AND bl.` + string(entity.GameBetLogAmount) + ` > 0
+      AND IFNULL(a.` + string(userentity.AccountCancel) + `, 0) = 0
+      AND (
+        IFNULL(a.` + string(userentity.AccountBan) + `, 0) = 0
+        OR (a.` + string(userentity.AccountBanApplyTime) + ` IS NOT NULL AND a.` + string(userentity.AccountBanApplyTime) + ` <= ?)
+      )
+      AND (ue.id IS NULL OR IFNULL(ue.` + string(userentity.UserExtCanRank) + `, 1) = 1)
+    GROUP BY bl.` + string(entity.GameBetLogUserId) + `
+    HAVING SUM(bl.` + string(entity.GameBetLogAmount) + `) > 0
+    ORDER BY total_amount DESC
+    LIMIT ?
+) ranked
+LEFT JOIN ` + string(userentity.TbUserInfo) + ` ui ON ui.id = ranked.user_id
+ORDER BY ranked.total_amount DESC
 `
 	err := g.DB().Ctx(ctx).Raw(sql, liveRecordId, now, gameConsumeRankTopLimit).Scan(&list)
 	if err != nil {

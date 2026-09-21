@@ -22,7 +22,18 @@ const (
 const (
 	CallOrderSourceLiveRoom       uint8 = 1 // 直播间
 	CallOrderSourcePrivateMessage uint8 = 2 // 私信
+	CallOrderSourceOneToOneRoom   uint8 = 3 // 1v1房间
 )
+
+// NormalizeCallOrderSource 将未传或未知来源归一为直播间。
+func NormalizeCallOrderSource(source uint8) uint8 {
+	switch source {
+	case CallOrderSourceLiveRoom, CallOrderSourcePrivateMessage, CallOrderSourceOneToOneRoom:
+		return source
+	default:
+		return CallOrderSourceLiveRoom
+	}
+}
 
 // 通话订单状态
 const (
@@ -39,6 +50,7 @@ const (
 const (
 	CallOrderCallerId            db.TbCol = "caller_id"
 	CallOrderReceiverId          db.TbCol = "receiver_id"
+	CallOrderPayerId             db.TbCol = "payer_id"
 	CallOrderStatusCol           db.TbCol = "status"
 	CallOrderCallStartTime       db.TbCol = "call_start_time"
 	CallOrderAnswerTime          db.TbCol = "answer_time"
@@ -53,6 +65,7 @@ const (
 	CallOrderCallType            db.TbCol = "call_type"
 	CallOrderSource              db.TbCol = "source"
 	CallOrderParams              db.TbCol = "params"
+	CallOrderTicketPrice         db.TbCol = "ticket_price"
 	CallOrderPricePerMinute      db.TbCol = "price_per_minute"
 	CallOrderTotalCost           db.TbCol = "total_cost"
 	CallOrderChargeTime          db.TbCol = "charge_time"
@@ -65,6 +78,7 @@ type CallOrder struct {
 	migrate.OneModel
 	CallerId            uint64     `gorm:"index:idx_call_caller_start,priority:1;default:0;comment:呼叫者ID" json:"callerId"`
 	ReceiverId          uint64     `gorm:"index:idx_call_receiver_start,priority:1;default:0;comment:接收者ID" json:"receiverId"`
+	PayerId             uint64     `gorm:"default:0;comment:付费者ID" json:"payerId"`
 	Status              uint8      `gorm:"index;default:1;comment:订单状态(1-呼叫中,2-已接听,3-通话中,4-已结束,5-拒接,6-呼叫超时,7-心跳超时,8-钻石不足)" json:"status"`
 	CallStartTime       time.Time  `gorm:"index:idx_call_caller_start,priority:2;index:idx_call_receiver_start,priority:2;comment:呼叫开始时间" json:"callStartTime"`
 	AnswerTime          *time.Time `gorm:"comment:接听时间" json:"answerTime"`
@@ -77,15 +91,16 @@ type CallOrder struct {
 	OrderEndTime        *time.Time `gorm:"comment:订单结束时间" json:"orderEndTime"`
 	CallDuration        uint32     `gorm:"default:0;comment:通话时长(秒)" json:"callDuration"`
 	CallType            uint8      `gorm:"default:1;comment:通话类型(1-语音,2-视频)" json:"callType"`
-	Source              uint8      `gorm:"default:1;comment:来源(1-直播间,2-私信)" json:"source"`
+	Source              uint8      `gorm:"default:1;comment:来源(1-直播间,2-私信,3-1v1房间)" json:"source"`
 	Params              string     `gorm:"size:512;default:'';comment:扩展参数" json:"params"`
+	TicketPrice         float64    `gorm:"type:decimal(10,4);default:0;comment:直播间视频通话门票价格" json:"ticketPrice"`
 	PricePerMinute      float64    `gorm:"type:decimal(10,4);default:0;comment:分钟计费价格(每分钟)" json:"pricePerMinute"`
 	TotalCost           float64    `gorm:"type:decimal(10,4);default:0;comment:总费用" json:"totalCost"`
 	ChargeTime          *time.Time `gorm:"comment:扣费时间" json:"chargeTime"`
 	BillingDuration     uint32     `gorm:"default:0;comment:计费时长(分钟)" json:"billingDuration"`
 }
 
-func NewCallOrder(callerId, receiverId uint64, callType, source uint8, params string, pricePerMinute float64) *CallOrder {
+func NewCallOrder(callerId, receiverId, payerId uint64, callType, source uint8, params string, ticketPrice, pricePerMinute float64) *CallOrder {
 	ret := &CallOrder{}
 	ret.ID = snowflake.GetId()
 	now := time.Now()
@@ -93,10 +108,12 @@ func NewCallOrder(callerId, receiverId uint64, callType, source uint8, params st
 	ret.SetUpdatedAt(now)
 	ret.SetCallerId(callerId)
 	ret.SetReceiverId(receiverId)
+	ret.SetPayerId(payerId)
 	ret.SetCallStartTime(now)
 	ret.SetCallType(callType)
-	ret.SetSource(source)
+	ret.SetSource(NormalizeCallOrderSource(source))
 	ret.SetParams(params)
+	ret.SetTicketPrice(ticketPrice)
 	ret.SetPricePerMinute(pricePerMinute)
 	ret.SetStatus(CallOrderStatusCalling)
 	return ret
@@ -277,6 +294,11 @@ func (m *CallOrder) SetReceiverId(v uint64) {
 	syndb.AddData(TbCallOrder, CallOrderReceiverId, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
+func (m *CallOrder) SetPayerId(v uint64) {
+	m.PayerId = v
+	syndb.AddData(TbCallOrder, CallOrderPayerId, &syndb.ColData{IdVal: m.ID, ColVal: v})
+}
+
 func (m *CallOrder) SetStatus(v uint8) {
 	m.Status = v
 	syndb.AddData(TbCallOrder, CallOrderStatusCol, &syndb.ColData{IdVal: m.ID, ColVal: v})
@@ -347,6 +369,11 @@ func (m *CallOrder) SetParams(v string) {
 	syndb.AddData(TbCallOrder, CallOrderParams, &syndb.ColData{IdVal: m.ID, ColVal: v})
 }
 
+func (m *CallOrder) SetTicketPrice(v float64) {
+	m.TicketPrice = v
+	syndb.AddData(TbCallOrder, CallOrderTicketPrice, &syndb.ColData{IdVal: m.ID, ColVal: v})
+}
+
 func (m *CallOrder) SetPricePerMinute(v float64) {
 	m.PricePerMinute = v
 	syndb.AddData(TbCallOrder, CallOrderPricePerMinute, &syndb.ColData{IdVal: m.ID, ColVal: v})
@@ -391,6 +418,7 @@ func initCallOrder() {
 	syndb.RegQuick(TbCallOrder, db.UpdatedAtName)
 	syndb.RegQuick(TbCallOrder, CallOrderCallerId)
 	syndb.RegQuick(TbCallOrder, CallOrderReceiverId)
+	syndb.RegQuick(TbCallOrder, CallOrderPayerId)
 	syndb.RegQuick(TbCallOrder, CallOrderStatusCol)
 	syndb.RegQuick(TbCallOrder, CallOrderCallStartTime)
 	syndb.RegQuick(TbCallOrder, CallOrderAnswerTime)
@@ -405,6 +433,7 @@ func initCallOrder() {
 	syndb.RegQuick(TbCallOrder, CallOrderCallType)
 	syndb.RegQuick(TbCallOrder, CallOrderSource)
 	syndb.RegQuick(TbCallOrder, CallOrderParams)
+	syndb.RegQuick(TbCallOrder, CallOrderTicketPrice)
 	syndb.RegQuick(TbCallOrder, CallOrderPricePerMinute)
 	syndb.RegQuick(TbCallOrder, CallOrderTotalCost)
 	syndb.RegQuick(TbCallOrder, CallOrderChargeTime)

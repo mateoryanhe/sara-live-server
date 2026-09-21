@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/cache"
 	"xr-game-server/entity/message"
+	userentity "xr-game-server/entity/user"
 )
 
 const unreadDetailPageSize = 40
@@ -68,25 +69,33 @@ func listCachedUnreadDetailsByUserId(userId uint64) []*entity.UserMessageUnreadD
 
 // PrivateMessageUnreadListRow App端私信未读列表查询行(未读明细 + 会话最后一条消息)
 type PrivateMessageUnreadListRow struct {
-	SenderId          uint64    `json:"sender_id"`
-	UnreadCount       uint64    `json:"unread_count"`
-	UpdatedAt         time.Time `json:"updated_at"`
-	SessionRowId      uint64    `json:"session_row_id"`
-	MessageId         uint64    `json:"message_id"`
-	MessageSenderId   uint64    `json:"message_sender_id"`
-	MessageReceiverId uint64    `json:"message_receiver_id"`
-	MessageContent    string    `json:"message_content"`
-	MessageCreatedAt  time.Time `json:"message_created_at"`
+	SenderId            uint64    `json:"sender_id"`
+	SenderName          string    `json:"sender_name"`
+	SenderAvatar        string    `json:"sender_avatar"`
+	UnreadCount         uint64    `json:"unread_count"`
+	UpdatedAt           time.Time `json:"updated_at"`
+	SessionRowId        uint64    `json:"session_row_id"`
+	MessageId           uint64    `json:"message_id"`
+	MessageSenderId     uint64    `json:"message_sender_id"`
+	MessageSenderName   string    `json:"message_sender_name"`
+	MessageSenderAvatar string    `json:"message_sender_avatar"`
+	MessageReceiverId   uint64    `json:"message_receiver_id"`
+	MessageContent      string    `json:"message_content"`
+	MessageCreatedAt    time.Time `json:"message_created_at"`
 }
 
 const listPrivateMessageUnreadWithLastMessageSQL = `
 SELECT
   d.sender_id,
+  IFNULL(sender_ui.` + string(userentity.UserInfoNickname) + `, '') AS sender_name,
+  IFNULL(sender_ui.` + string(userentity.UserInfoAvatar) + `, '') AS sender_avatar,
   d.unread_count,
   d.updated_at,
   ls.id AS session_row_id,
   lm.id AS message_id,
   lm.sender_id AS message_sender_id,
+  IFNULL(message_sender_ui.` + string(userentity.UserInfoNickname) + `, '') AS message_sender_name,
+  IFNULL(message_sender_ui.` + string(userentity.UserInfoAvatar) + `, '') AS message_sender_avatar,
   lm.receiver_id AS message_receiver_id,
   lm.content AS message_content,
   lm.created_at AS message_created_at
@@ -100,6 +109,8 @@ LEFT JOIN ` + string(entity.TbUserMessageSession) + ` ls ON ls.id = (
   LIMIT 1
 )
 LEFT JOIN ` + string(entity.TbUserMessage) + ` lm ON lm.id = ls.message_id AND lm.is_deleted = 0
+LEFT JOIN ` + string(userentity.TbUserInfo) + ` sender_ui ON sender_ui.id = d.sender_id
+LEFT JOIN ` + string(userentity.TbUserInfo) + ` message_sender_ui ON message_sender_ui.id = lm.sender_id
 WHERE d.user_id = ? AND d.mutual_chat = ?
 ORDER BY d.updated_at DESC
 LIMIT ? OFFSET ?`

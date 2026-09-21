@@ -55,6 +55,20 @@ func GetUserInfoFromMemory(userId uint64) *userentity.UserInfo {
 	return v
 }
 
+// RemoveUserInfosFromMemory 批量删除用户基础信息进程缓存，不影响数据库数据。
+func RemoveUserInfosFromMemory(userIds []uint64) {
+	if len(userIds) == 0 || userInfoCacheMgr == nil {
+		return
+	}
+	keys := make([]any, 0, len(userIds))
+	for _, userId := range userIds {
+		if userId > 0 {
+			keys = append(keys, userId)
+		}
+	}
+	userInfoCacheMgr.RemoveRow(gctx.New(), keys...)
+}
+
 // GetNicknameMapByUserIds 批量查询用户昵称(CMS列表等场景使用)
 func GetNicknameMapByUserIds(userIds []uint64) map[uint64]string {
 	ret := make(map[uint64]string)

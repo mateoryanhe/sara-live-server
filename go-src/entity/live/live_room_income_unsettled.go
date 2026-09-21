@@ -39,14 +39,11 @@ func (r *LiveRoomIncomeUnsettled) AddTotalGiftIncome(v float64) {
 func (r *LiveRoomIncomeUnsettled) AddTotalPaidDanmakuIncome(v float64) {
 	addIncomeAmount(TbLiveRoomIncomeUnsettled, LiveRoomIncomeTotalPaidDanmakuIncome, r.ID, &r.TotalPaidDanmakuIncome, v, true, &r.UpdatedAt)
 }
-func (r *LiveRoomIncomeUnsettled) AddTotalPrivateRoomTicketIncome(v float64) {
-	addIncomeAmount(TbLiveRoomIncomeUnsettled, LiveRoomIncomeTotalPrivateRoomTicketIncome, r.ID, &r.TotalPrivateRoomTicketIncome, v, true, &r.UpdatedAt)
-}
-func (r *LiveRoomIncomeUnsettled) AddTotalPrivateRoomWatchIncome(v float64) {
-	addIncomeAmount(TbLiveRoomIncomeUnsettled, LiveRoomIncomeTotalPrivateRoomWatchIncome, r.ID, &r.TotalPrivateRoomWatchIncome, v, true, &r.UpdatedAt)
-}
 func (r *LiveRoomIncomeUnsettled) AddTotalVideoCallIncome(v float64) {
 	addIncomeAmount(TbLiveRoomIncomeUnsettled, LiveRoomIncomeTotalVideoCallIncome, r.ID, &r.TotalVideoCallIncome, v, true, &r.UpdatedAt)
+}
+func (r *LiveRoomIncomeUnsettled) AddTotalVideoCallTicketIncome(v float64) {
+	addIncomeAmount(TbLiveRoomIncomeUnsettled, LiveRoomIncomeTotalVideoCallTicketIncome, r.ID, &r.TotalVideoCallTicketIncome, v, true, &r.UpdatedAt)
 }
 func (r *LiveRoomIncomeUnsettled) AddTotalVideoCallBillingIncome(v float64) {
 	addIncomeAmount(TbLiveRoomIncomeUnsettled, LiveRoomIncomeTotalVideoCallBillingIncome, r.ID, &r.TotalVideoCallBillingIncome, v, true, &r.UpdatedAt)
@@ -63,16 +60,6 @@ func (r *LiveRoomIncomeUnsettled) AddGiftEarn(v float64) {
 // AddPaidDanmakuEarn 付费弹幕收益(总收益+弹幕细分,内部加锁)
 func (r *LiveRoomIncomeUnsettled) AddPaidDanmakuEarn(v float64) {
 	addIncomeEarn(TbLiveRoomIncomeUnsettled, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalPaidDanmakuIncome, &r.TotalPaidDanmakuIncome)
-}
-
-// AddPrivateRoomTicketEarn 私密房门票收益(总收益+门票细分,内部加锁)
-func (r *LiveRoomIncomeUnsettled) AddPrivateRoomTicketEarn(v float64) {
-	addIncomeEarn(TbLiveRoomIncomeUnsettled, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalPrivateRoomTicketIncome, &r.TotalPrivateRoomTicketIncome)
-}
-
-// AddPrivateRoomWatchEarn 私密房观看收益(总收益+观看细分,内部加锁)
-func (r *LiveRoomIncomeUnsettled) AddPrivateRoomWatchEarn(v float64) {
-	addIncomeEarn(TbLiveRoomIncomeUnsettled, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt, v, LiveRoomIncomeTotalPrivateRoomWatchIncome, &r.TotalPrivateRoomWatchIncome)
 }
 
 // AddShortVideoEarn 短视频付费观看收益(总收益+短视频细分,内部加锁)

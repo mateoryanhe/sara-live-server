@@ -122,14 +122,12 @@ func buildRankItems(rows []*gamebetdao.GameConsumeRankRow) []*rankItem {
 		item := &rankItem{
 			Rank:          rankNo,
 			UserId:        row.UserId,
+			Nickname:      row.Nickname,
+			Avatar:        upload.ResolveAvatarUrlForUser(row.UserId, row.Avatar),
 			ConsumeAmount: row.TotalAmount,
-		}
-		if profile := userinfodao.GetUserInfoByUserId(row.UserId); profile != nil {
-			item.Nickname = profile.Nickname
-			item.Avatar = upload.ResolveAvatarUrlForUser(row.UserId, profile.Avatar)
-			item.VipLevel = profile.VipLevel
-			item.Gender = profile.Gender
-			item.Age = calcAge(profile.Birthday)
+			VipLevel:      row.VipLevel,
+			Gender:        row.Gender,
+			Age:           calcAge(row.Birthday),
 		}
 		list = append(list, item)
 	}
@@ -182,7 +180,7 @@ func GetAppGameConsumeRankList(ctx context.Context, req *gameconsumrankdto.AppGa
 		if row == nil {
 			continue
 		}
-		pageData = append(pageData, &gameconsumrankdto.AppGameConsumeRankItem{
+		item := &gameconsumrankdto.AppGameConsumeRankItem{
 			Rank:          row.Rank,
 			UserId:        strconv.FormatUint(row.UserId, 10),
 			Nickname:      row.Nickname,
@@ -191,7 +189,15 @@ func GetAppGameConsumeRankList(ctx context.Context, req *gameconsumrankdto.AppGa
 			VipLevel:      row.VipLevel,
 			Gender:        row.Gender,
 			Age:           row.Age,
-		})
+		}
+		if profile := userinfodao.GetUserInfoFromMemory(row.UserId); profile != nil {
+			item.Nickname = profile.Nickname
+			item.Avatar = upload.ResolveAvatarUrlForUser(row.UserId, profile.Avatar)
+			item.VipLevel = profile.VipLevel
+			item.Gender = profile.Gender
+			item.Age = calcAge(profile.Birthday)
+		}
+		pageData = append(pageData, item)
 	}
 	return &gameconsumrankdto.AppGameConsumeRankListRes{
 		Period:    req.Period,

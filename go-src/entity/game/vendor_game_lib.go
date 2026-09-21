@@ -22,5 +22,4 @@ type VendorGameLib struct {
 
 func initVendorGameLib() {
 	migrate.AutoMigrate(&VendorGameLib{})
-	migrate.DropIndexIfExists(string(TbVendorGameLib), "idx_vendor_game_libs_game_code")
 }

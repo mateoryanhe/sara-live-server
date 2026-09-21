@@ -7,13 +7,6 @@ REM This script does not compile, package, upload or replace any files.
 
 call "%~dp0config.bat"
 
-echo ========================================
-echo XR Game Server Production Restart
-echo ========================================
-echo Server: %REMOTE_USER%@%REMOTE_HOST%:%REMOTE_PORT%
-echo App:    %REMOTE_DIR%/%APP_NAME%
-echo.
-
 if not defined REMOTE_HOST (
     echo ERROR: REMOTE_HOST is not configured.
     exit /b 1
@@ -35,6 +28,10 @@ if not defined HOT_RESTART_AUTH (
     echo ERROR: HOT_RESTART_AUTH is not configured.
     exit /b 1
 )
+if not defined SSH_HOST_KEY (
+    echo ERROR: SSH_HOST_KEY is not configured.
+    exit /b 1
+)
 if not exist "%SSH_KEY_PATH%" (
     echo ERROR: SSH key does not exist: %SSH_KEY_PATH%
     exit /b 1
@@ -44,16 +41,23 @@ if not exist "%~dp0plink.exe" (
     exit /b 1
 )
 
+echo ========================================
+echo XR Game Server Production Restart
+echo ========================================
+echo Server: %REMOTE_USER%@%REMOTE_HOST%:%REMOTE_PORT%
+echo App:    %REMOTE_DIR%/%APP_NAME%
+echo.
+
 echo [1/4] Testing SSH connection...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "echo connected" >nul
+"%~dp0plink.exe" -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST% "echo connected" >nul
 if errorlevel 1 (
     echo ERROR: Unable to connect to %REMOTE_HOST%.
-    echo Run the deployment script once if this computer has not accepted the server host key.
+    echo Check the network, SSH key, port, and SSH_HOST_KEY in config.bat.
     exit /b 1
 )
 
 echo [2/4] Checking the existing server program...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "test -x %REMOTE_DIR%/%APP_NAME%"
+"%~dp0plink.exe" -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST% "test -x %REMOTE_DIR%/%APP_NAME%"
 if errorlevel 1 (
     echo ERROR: Remote executable does not exist or is not executable: %REMOTE_DIR%/%APP_NAME%
     exit /b 1
@@ -72,12 +76,12 @@ if exist "%LOCAL_CONFIG_PATH%" (
 set /a HOT_RESTART_WAIT_MAX=HOT_RESTART_FLUSH_TIMEOUT+HOT_RESTART_EXIT_TIMEOUT+3
 
 set OLD_PID=
-for /f "delims=" %%i in ('plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "pgrep -xo %APP_NAME% 2>/dev/null || true"') do set OLD_PID=%%i
+for /f "delims=" %%i in ('plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST% "pgrep -xo %APP_NAME% 2>/dev/null || true"') do set OLD_PID=%%i
 
 if not defined OLD_PID goto cold_start
 
 echo [3/4] Process PID !OLD_PID! found. Triggering graceful hot restart...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "curl -sf -k 'https://127.0.0.1/internal/hotRestart?auth=%HOT_RESTART_AUTH%' >/dev/null"
+"%~dp0plink.exe" -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST% "curl -sf -k 'https://127.0.0.1/internal/hotRestart?auth=%HOT_RESTART_AUTH%' >/dev/null"
 if errorlevel 1 (
     echo ERROR: Hot restart API call failed. The running process was left untouched.
     goto show_error_log
@@ -90,7 +94,7 @@ set /a WAIT_LEFT=HOT_RESTART_WAIT_MAX
 timeout /t 1 /nobreak >nul
 set /a WAIT_LEFT-=1
 set NEW_PID=
-for /f "delims=" %%i in ('plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "pgrep -xo %APP_NAME% 2>/dev/null || true"') do set NEW_PID=%%i
+for /f "delims=" %%i in ('plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST% "pgrep -xo %APP_NAME% 2>/dev/null || true"') do set NEW_PID=%%i
 if defined NEW_PID if not "!NEW_PID!"=="!OLD_PID!" goto process_started
 if !WAIT_LEFT! leq 0 (
     echo ERROR: Timed out waiting for a new process. Old PID: !OLD_PID!, current PID: !NEW_PID!
@@ -100,7 +104,7 @@ goto wait_hot_restart
 
 :cold_start
 echo [3/4] No running process was found. Starting the existing server binary...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "test -x %REMOTE_DIR%/start.sh && sudo %REMOTE_DIR%/start.sh"
+"%~dp0plink.exe" -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST% "test -x %REMOTE_DIR%/start.sh && sudo %REMOTE_DIR%/start.sh"
 if errorlevel 1 (
     echo ERROR: Cold start failed. Ensure %REMOTE_DIR%/start.sh exists; run deployment once if it is missing.
     goto show_error_log
@@ -111,7 +115,7 @@ set /a WAIT_LEFT=30
 timeout /t 1 /nobreak >nul
 set /a WAIT_LEFT-=1
 set NEW_PID=
-for /f "delims=" %%i in ('plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "pgrep -xo %APP_NAME% 2>/dev/null || true"') do set NEW_PID=%%i
+for /f "delims=" %%i in ('plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST% "pgrep -xo %APP_NAME% 2>/dev/null || true"') do set NEW_PID=%%i
 if defined NEW_PID goto process_started
 if !WAIT_LEFT! leq 0 (
     echo ERROR: Timed out waiting for the process to start.
@@ -124,7 +128,7 @@ echo [4/4] Process PID !NEW_PID! started. Waiting for port 443...
 set /a READY_WAIT_LEFT=30
 
 :wait_ready
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "ss -tlnp 2>/dev/null | grep -q ':443'"
+"%~dp0plink.exe" -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST% "ss -tlnp 2>/dev/null | grep -q ':443'"
 if not errorlevel 1 goto restart_success
 timeout /t 1 /nobreak >nul
 set /a READY_WAIT_LEFT-=1
@@ -139,11 +143,11 @@ echo.
 echo Restart completed successfully.
 echo Old PID: !OLD_PID!
 echo New PID: !NEW_PID!
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "ps -p !NEW_PID! -o pid,etime,cmd --no-headers"
+"%~dp0plink.exe" -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST% "ps -p !NEW_PID! -o pid,etime,cmd --no-headers"
 exit /b 0
 
 :show_error_log
 echo.
 echo Recent server error log:
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "tail -30 /home/ec2-user/log/error*.log 2>/dev/null || echo '(no error log)'"
+"%~dp0plink.exe" -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST% "tail -30 /home/ec2-user/log/error*.log 2>/dev/null || echo '(no error log)'"
 exit /b 1

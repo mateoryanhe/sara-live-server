@@ -22,7 +22,6 @@ func TestParseCreateRoomMultipart(t *testing.T) {
 		"category":          "2",
 		"tagId":             "3",
 		"gameCodes":         `["game-a","game-b"]`,
-		"ticket":            "1000",
 		"billing":           "25.5",
 		"privateInviteType": "1",
 	} {
@@ -74,7 +73,6 @@ func TestBindCreateRoomMultipartFields(t *testing.T) {
 		"category":          {"2"},
 		"tagId":             {"3"},
 		"gameCodes":         {`["game-a","game-b"]`, "game-c,game-d"},
-		"ticket":            {"1000"},
 		"billing":           {"25.5"},
 		"privateInviteType": {"1"},
 	}
@@ -86,7 +84,7 @@ func TestBindCreateRoomMultipartFields(t *testing.T) {
 	if req.Title != "hi" || req.Notice != "notice" || req.Category != 2 || req.TagId != 3 {
 		t.Fatalf("unexpected basic fields: %+v", req)
 	}
-	if req.Ticket != 1000 || req.Billing != 25.5 || req.PrivateInviteType != 1 {
+	if req.Billing != 25.5 || req.PrivateInviteType != 1 {
 		t.Fatalf("unexpected pricing fields: %+v", req)
 	}
 	wantGameCodes := []string{"game-a", "game-b", "game-c", "game-d"}

@@ -75,11 +75,8 @@
                 </template>
                 <span v-else>-</span>
               </el-descriptions-item>
-              <el-descriptions-item :label="t('pages.anchorList.ticketPrice')">
-                {{ isPrivateRoom(detail.liveRoom.category) ? formatWalletBalance(detail.liveRoom.ticket) : '-' }}
-              </el-descriptions-item>
               <el-descriptions-item :label="t('pages.anchorList.billingPricePerMinute')">
-                {{ isPrivateRoom(detail.liveRoom.category) ? formatAmount(detail.liveRoom.billing) : '-' }}
+                {{ formatAmount(detail.liveRoom.billing) }}
               </el-descriptions-item>
               <el-descriptions-item :label="t('pages.anchorList.liveStatus')">
                 <el-tag :type="detail.liveRoom.liveStatus === 1 ? 'success' : 'info'">
@@ -154,12 +151,6 @@
               <el-table-column :label="t('pages.anchorList.paidDanmakuIncome')" min-width="120">
                 <template #default="{ row }">{{ formatAmount(row.totalPaidDanmakuIncome) }}</template>
               </el-table-column>
-              <el-table-column :label="t('pages.anchorList.privateRoomTicketIncome')" min-width="130">
-                <template #default="{ row }">{{ formatAmount(row.totalPrivateRoomTicketIncome) }}</template>
-              </el-table-column>
-              <el-table-column :label="t('pages.anchorList.privateRoomWatchIncome')" min-width="130">
-                <template #default="{ row }">{{ formatAmount(row.totalPrivateRoomWatchIncome) }}</template>
-              </el-table-column>
               <el-table-column :label="t('pages.anchorList.videoCallIncome')" min-width="120">
                 <template #default="{ row }">{{ formatAmount(row.totalVideoCallIncome) }}</template>
               </el-table-column>
@@ -209,7 +200,6 @@ const detail = ref<AnchorDetail | null>(null)
 
 const LIVE_ROOM_CATEGORY_HOT = 1
 const LIVE_ROOM_CATEGORY_GAME = 2
-const LIVE_ROOM_CATEGORY_PRIVATE = 3
 const LIVE_ROOM_PRIVATE_INVITE_ALL = 1
 const LIVE_ROOM_PRIVATE_INVITE_REJECT = 3
 const USER_TYPE_ANCHOR = 1
@@ -285,18 +275,14 @@ const privateInviteTagType = (type?: number) => {
 const categoryLabel = (category?: number) => {
   if (category === LIVE_ROOM_CATEGORY_HOT) return t('pages.anchorList.categoryHot')
   if (category === LIVE_ROOM_CATEGORY_GAME) return t('pages.anchorList.categoryGame')
-  if (category === LIVE_ROOM_CATEGORY_PRIVATE) return t('pages.anchorList.categoryPrivate')
   return '-'
 }
 
 const categoryTagType = (category?: number) => {
-  if (category === LIVE_ROOM_CATEGORY_PRIVATE) return 'warning'
   if (category === LIVE_ROOM_CATEGORY_GAME) return 'success'
   if (category === LIVE_ROOM_CATEGORY_HOT) return 'danger'
   return 'info'
 }
-
-const isPrivateRoom = (category?: number) => category === LIVE_ROOM_CATEGORY_PRIVATE
 
 const isAnchorDetailRoute = () => route.name === 'AnchorDetail'
 

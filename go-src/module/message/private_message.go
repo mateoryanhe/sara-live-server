@@ -100,9 +100,7 @@ func ListPrivateMessageUnread(ctx context.Context, req *messagedto.AppPrivateMes
 		if row == nil {
 			continue
 		}
-		item := toPrivateMessageUnreadDetailItemFromRow(row)
-		fillPrivateMessageUnreadSenderInfo(item)
-		list = append(list, item)
+		list = append(list, privateMessageUnreadItemWithMemoryProfiles(toPrivateMessageUnreadDetailItemFromRow(row)))
 	}
 	return &messagedto.AppPrivateMessageUnreadListRes{List: list}, nil
 }
@@ -279,9 +277,11 @@ func buildPrivateMessagePushItem(msg *entity.UserMessage) *messagedto.PrivateMes
 
 func toPrivateMessageUnreadDetailItemFromRow(row *messagedao.PrivateMessageUnreadListRow) *messagedto.AppPrivateMessageUnreadDetailItem {
 	item := &messagedto.AppPrivateMessageUnreadDetailItem{
-		SenderId:    row.SenderId,
-		UnreadCount: row.UnreadCount,
-		UpdatedAt:   formatMessageTime(row.UpdatedAt),
+		SenderId:     row.SenderId,
+		SenderName:   row.SenderName,
+		SenderAvatar: upload.ResolveAvatarUrlForUser(row.SenderId, row.SenderAvatar),
+		UnreadCount:  row.UnreadCount,
+		UpdatedAt:    formatMessageTime(row.UpdatedAt),
 	}
 	if row.MessageId > 0 {
 		msg := &entity.UserMessage{
@@ -291,13 +291,15 @@ func toPrivateMessageUnreadDetailItemFromRow(row *messagedao.PrivateMessageUnrea
 		}
 		msg.ID = row.MessageId
 		msg.CreatedAt = row.MessageCreatedAt
-		item.LastMessage = toPrivateMessageItem(row.SessionRowId, msg)
+		item.LastMessage = newPrivateMessageItem(row.SessionRowId, msg)
+		item.LastMessage.SenderName = row.MessageSenderName
+		item.LastMessage.SenderAvatar = upload.ResolveAvatarUrlForUser(row.MessageSenderId, row.MessageSenderAvatar)
 	}
 	return item
 }
 
-func toPrivateMessageItem(sessionId uint64, msg *entity.UserMessage) *messagedto.AppPrivateMessageItem {
-	item := &messagedto.AppPrivateMessageItem{
+func newPrivateMessageItem(sessionId uint64, msg *entity.UserMessage) *messagedto.AppPrivateMessageItem {
+	return &messagedto.AppPrivateMessageItem{
 		Id:          msg.ID,
 		SessionId:   sessionId,
 		SenderId:    msg.SenderId,
@@ -306,6 +308,10 @@ func toPrivateMessageItem(sessionId uint64, msg *entity.UserMessage) *messagedto
 		CreatedAt:   formatMessageTime(msg.CreatedAt),
 		CreatedAtMs: msg.CreatedAt.UnixMilli(),
 	}
+}
+
+func toPrivateMessageItem(sessionId uint64, msg *entity.UserMessage) *messagedto.AppPrivateMessageItem {
+	item := newPrivateMessageItem(sessionId, msg)
 	if sender := userinfodao.GetUserInfoByUserId(msg.SenderId); sender != nil {
 		item.SenderName = sender.Nickname
 		item.SenderAvatar = upload.ResolveAvatarUrlForUser(msg.SenderId, sender.Avatar)

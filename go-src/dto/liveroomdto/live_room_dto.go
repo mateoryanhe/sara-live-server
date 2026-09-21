@@ -12,12 +12,12 @@ type CreateLiveRoomReq struct {
 	Title             string            `json:"title"   dc:"直播间标题"`
 	Cover             *ghttp.UploadFile `json:"cover"  type:"file" dc:"封面图片文件"`
 	Notice            string            `json:"notice" dc:"公告"`
-	Category          uint8             `json:"category"  dc:"分类(1=hot,2=game,3=私密,默认1)"`
+	Category          uint8             `json:"category"  dc:"分类(1=hot,2=game,4=1v1房间,默认1)"`
 	TagId             uint64            `json:"tagId,string"  dc:"直播间标签ID"`
 	GameCodes         []string          `json:"gameCodes" p:"gameCodes" dc:"推荐游戏编码列表(仅游戏直播间category=2时有效)"`
-	Ticket            float64           `json:"ticket" dc:"门票价格(钻石)"`
-	Billing           float64           `json:"billing" dc:"计费价格(每分钟钻石)"`
-	PrivateInviteType uint8             `json:"privateInviteType" v:"in:0,1,3#私密邀请类型不合法" dc:"私密邀请类型(1=接受所有人,3=拒绝所有人,0或不传时category=1默认3其他默认1)"`
+	Ticket            float64           `json:"ticket" v:"min:0#视频通话门票价格不能小于0" dc:"直播间来源视频通话门票价格(钻石)"`
+	Billing           float64           `json:"billing" dc:"视频通话价格(每分钟钻石)"`
+	PrivateInviteType uint8             `json:"privateInviteType" v:"in:0,1,3#视频通话邀请类型不合法" dc:"视频通话邀请类型(1=接受所有人,3=拒绝所有人,0或不传时category=1默认3其他默认1)"`
 }
 
 type CreateLiveRoomRes struct {
@@ -69,16 +69,13 @@ type JoinRoomReq struct {
 }
 
 type JoinRoomRes struct {
-	OnlineId          string  `json:"onlineId"          dc:"在线记录ID(userId_roomId)"`
-	OnlineCount       int     `json:"onlineCount"       dc:"当前在线人数"`
-	TicketDeducted    float64 `json:"ticketDeducted"    dc:"本次扣除门票钻石(未扣为0)"`
-	SysTime           int64   `json:"sysTime,string"`
-	FreeTime          uint64  `json:"freeTime"`
-	TicketTime        int64   `json:"ticketTime"`
-	KickBanned        bool    `json:"kickBanned"        dc:"是否处于踢出封禁期(封禁期内未真正进房)"`
-	KickTime          int64   `json:"kickTime"          dc:"最近踢出时间(秒,0表示无)"`
-	KickBanExpireAt   int64   `json:"kickBanExpireAt"   dc:"踢出封禁截止时间(秒,0表示无)"`
-	KickRemainSeconds int64   `json:"kickRemainSeconds" dc:"踢出封禁剩余秒数"`
+	OnlineId          string `json:"onlineId"          dc:"在线记录ID(userId_roomId)"`
+	OnlineCount       int    `json:"onlineCount"       dc:"当前在线人数"`
+	SysTime           int64  `json:"sysTime,string"`
+	KickBanned        bool   `json:"kickBanned"        dc:"是否处于踢出封禁期(封禁期内未真正进房)"`
+	KickTime          int64  `json:"kickTime"          dc:"最近踢出时间(秒,0表示无)"`
+	KickBanExpireAt   int64  `json:"kickBanExpireAt"   dc:"踢出封禁截止时间(秒,0表示无)"`
+	KickRemainSeconds int64  `json:"kickRemainSeconds" dc:"踢出封禁剩余秒数"`
 }
 
 // LeaveRoomReq 离开直播间
@@ -117,6 +114,7 @@ type OnlineUserItem struct {
 	UserId      string  `json:"userId"   dc:"用户ID"`
 	Nickname    string  `json:"nickname" dc:"昵称"`
 	Avatar      string  `json:"avatar"   dc:"头像URL(已拼资源域名)"`
+	FlagIcon    string  `json:"flagIcon" dc:"国旗完整URL(与getUserInfo一致,无则空)"`
 	JoinedAt    string  `json:"joinedAt" dc:"最近一次加入时间(秒)"`
 	JoinedUnix  int64   `json:"joinedUnix" dc:"最近一次加入时间(秒)"`
 	Muted       bool    `json:"muted"    dc:"是否被禁言"`
@@ -197,8 +195,8 @@ type GiftPushItem struct {
 	SentAt       int64   `json:"sentAt"      dc:"发送时间(秒)"`
 }
 
-// PrivateGiftPushItem 给指定主播送礼推送载荷(仅发送者与主播可见)
-type PrivateGiftPushItem struct {
+// DirectGiftPushItem 给指定主播送礼推送载荷(仅发送者与主播可见)
+type DirectGiftPushItem struct {
 	RoomId       uint64  `json:"roomId,string"      dc:"直播间ID(主播ID)"`
 	AnchorId     uint64  `json:"anchorId,string"    dc:"主播用户ID"`
 	SenderId     uint64  `json:"senderId,string"    dc:"送礼用户ID"`
@@ -329,30 +327,6 @@ type SendChatRes struct {
 	Success bool `json:"success"`
 }
 
-// SendPrivateRoomChatReq App端私密房文字消息
-type SendPrivateRoomChatReq struct {
-	g.Meta   `path:"/sendPrivateRoomChat" method:"post" summary:"私密房文字消息" tags:"直播间"`
-	TargetId uint64 `json:"targetId,string" v:"required|min:1#目标用户ID不能为空|目标用户ID无效" dc:"目标用户ID"`
-	Content  string `json:"content"  dc:"文字内容"`
-}
-
-// SendPrivateRoomChatRes App端私密房文字消息响应
-type SendPrivateRoomChatRes struct {
-	Success bool `json:"success"`
-}
-
-// PrivateRoomChatPushItem 私密房文字消息推送载荷(仅发送者与目标用户可见)
-type PrivateRoomChatPushItem struct {
-	RoomId       string `json:"roomId"       dc:"私密房直播间ID(主播ID)"`
-	TargetId     string `json:"targetId"     dc:"目标用户ID"`
-	SenderId     string `json:"senderId"     dc:"发送用户ID"`
-	SenderName   string `json:"senderName"   dc:"发送用户昵称"`
-	SenderAvatar string `json:"senderAvatar" dc:"发送用户头像"`
-	VipLevel     uint32 `json:"vipLevel"     dc:"VIP等级"`
-	Content      string `json:"content"      dc:"文字内容"`
-	SentAt       int64  `json:"sentAt"       dc:"发送时间(秒)"`
-}
-
 // SendPaidDanmakuReq App端发送付费弹幕
 type SendPaidDanmakuReq struct {
 	g.Meta  `path:"/sendPaidDanmaku" method:"post" summary:"直播间付费弹幕" tags:"直播间"`
@@ -404,19 +378,17 @@ type GetLiveRoomRes struct {
 	Cover                       string  `json:"cover"    dc:"封面图URL"`
 	Notice                      string  `json:"notice"   dc:"公告"`
 	Status                      uint8   `json:"status"   dc:"状态(0未开播,1直播中)"`
-	Category                    uint8   `json:"category" dc:"分类(1=hot,2=game,3=私密)"`
+	Category                    uint8   `json:"category" dc:"分类(1=hot,2=game,4=1v1房间)"`
 	TagId                       string  `json:"tagId" dc:"直播间标签ID"`
 	TagName                     string  `json:"tagName" dc:"直播间标签名称"`
-	Ticket                      float64 `json:"ticket" dc:"门票价格(钻石)"`
-	Billing                     float64 `json:"billing" dc:"计费价格(每分钟钻石)"`
-	PrivateInviteType           uint8   `json:"privateInviteType" dc:"私密邀请类型(1=接受所有人,3=拒绝所有人)"`
+	Ticket                      float64 `json:"ticket" dc:"直播间来源视频通话门票价格(钻石;全局关闭门票时仍返回配置值)"`
+	Billing                     float64 `json:"billing" dc:"视频通话价格(每分钟钻石)"`
+	PrivateInviteType           uint8   `json:"privateInviteType" dc:"视频通话邀请类型(1=接受所有人,3=拒绝所有人)"`
 	AllowCallIcon               bool    `json:"allowCallIcon" dc:"是否允许显示电话图标按钮(普通主播不显示;接受所有人且累计充值>=10USD时为true)"`
 	CreateAt                    int64   `json:"createAt" dc:"创建时间(秒)"`
 	OnlineCount                 int     `json:"onlineCount" dc:"在线观众人数(不含主播)"`
-	FreeTime                    uint64  `json:"freeTime" dc:"私密房免费时间"`
-	TicketTime                  int64   `json:"TicketTime" dc:"私密房门票倒计时"`
-	HasTicket                   bool    `json:"hasTicket"`
 	TotalVideoCallIncome        float64 `json:"totalVideoCallIncome" dc:"累计视频通话收益(仅主播本人查询时返回)"`
+	TotalVideoCallTicketIncome  float64 `json:"totalVideoCallTicketIncome" dc:"累计视频通话门票收益(仅主播本人查询时返回)"`
 	TotalVideoCallBillingIncome float64 `json:"totalVideoCallBillingIncome" dc:"累计视频通话计费收益(仅主播本人查询时返回)"`
 	IsBotAnchor                 bool    `json:"isBotAnchor" dc:"是否机器人主播"`
 	IsTest                      bool    `json:"isTest" dc:"是否测试机器人主播"`

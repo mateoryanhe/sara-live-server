@@ -185,6 +185,7 @@ func videoCallLogToCSVRow(v *callentity.CallOrder, nicknameMap map[uint64]string
 		formatCSVTimePtr(v.ReceiverHeartTime),
 		formatCSVTimePtr(v.OrderEndTime),
 		strconv.FormatUint(uint64(v.CallDuration), 10),
+		formatCSVFloat(v.TicketPrice),
 		formatCSVFloat(v.PricePerMinute),
 		strconv.FormatUint(uint64(v.BillingDuration), 10),
 		formatCSVFloat(v.TotalCost),
@@ -199,6 +200,8 @@ func callSourceText(v uint8) string {
 		return "直播间"
 	case callentity.CallOrderSourcePrivateMessage:
 		return "私信"
+	case callentity.CallOrderSourceOneToOneRoom:
+		return "1v1房间"
 	default:
 		return "未知"
 	}

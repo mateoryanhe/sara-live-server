@@ -24,7 +24,7 @@ const (
 	PushTagMessage        = "推送-消息"
 	PushTagLiveRoom       = "推送-直播间"
 	PushTagCall           = "推送-通话"
-	PushTagPrivateRoom    = "推送-私密房"
+	PushTagDirectGift     = "推送-定向送礼"
 	PushTagFollow         = "推送-关注"
 )
 
@@ -50,9 +50,9 @@ type LiveRoomCallAnchorAcceptedAudiencePushResp struct {
 	Data *calldto.CallAnchorAcceptedAudiencePushItem `json:"data"`
 }
 
-// LiveRoomCallTimeoutPushReq cmd=32 直播间通话呼叫超时
+// LiveRoomCallTimeoutPushReq cmd=32 视频通话呼叫超时
 type LiveRoomCallTimeoutPushReq struct {
-	g.Meta `path:"/liveRoomCallTimeout" method:"post" summary:"推送 cmd=32 直播间通话呼叫超时(推送给呼叫者与接听者)" description:"直播间通话呼叫超时(推送给呼叫者与接听者)" tags:"推送-通话"`
+	g.Meta `path:"/liveRoomCallTimeout" method:"post" summary:"推送 cmd=32 视频通话呼叫超时(推送给呼叫者与接听者)" description:"视频通话呼叫超时(推送给呼叫者与接听者)" tags:"推送-通话"`
 }
 
 type LiveRoomCallTimeoutPushResp struct {
@@ -60,9 +60,9 @@ type LiveRoomCallTimeoutPushResp struct {
 	Data *calldto.CallTimeoutPushItem `json:"data"`
 }
 
-// LiveRoomCallStartedPushReq cmd=31 直播间通话开始
+// LiveRoomCallStartedPushReq cmd=31 视频通话开始
 type LiveRoomCallStartedPushReq struct {
-	g.Meta `path:"/liveRoomCallStarted" method:"post" summary:"推送 cmd=31 直播间通话开始(推送给呼叫者与接听者)" description:"直播间通话开始(推送给呼叫者与接听者)" tags:"推送-通话"`
+	g.Meta `path:"/liveRoomCallStarted" method:"post" summary:"推送 cmd=31 视频通话开始(推送给呼叫者与接听者)" description:"视频通话开始(推送给呼叫者与接听者)" tags:"推送-通话"`
 }
 
 type LiveRoomCallStartedPushResp struct {
@@ -70,9 +70,9 @@ type LiveRoomCallStartedPushResp struct {
 	Data *calldto.CallStartedPushItem `json:"data"`
 }
 
-// LiveRoomCallEndedPushReq cmd=28 直播间通话结束
+// LiveRoomCallEndedPushReq cmd=28 视频通话结束
 type LiveRoomCallEndedPushReq struct {
-	g.Meta `path:"/liveRoomCallEnded" method:"post" summary:"推送 cmd=28 直播间通话结束(推送给对方)" description:"直播间通话结束(推送给对方)" tags:"推送-通话"`
+	g.Meta `path:"/liveRoomCallEnded" method:"post" summary:"推送 cmd=28 视频通话结束(推送给对方)" description:"视频通话结束(推送给对方)" tags:"推送-通话"`
 }
 
 type LiveRoomCallEndedPushResp struct {
@@ -80,9 +80,9 @@ type LiveRoomCallEndedPushResp struct {
 	Data *calldto.CallEndedPushItem `json:"data"`
 }
 
-// LiveRoomCallAcceptedPushReq cmd=27 直播间通话被接听
+// LiveRoomCallAcceptedPushReq cmd=27 视频通话被接听
 type LiveRoomCallAcceptedPushReq struct {
-	g.Meta `path:"/liveRoomCallAccepted" method:"post" summary:"推送 cmd=27 直播间通话被接听(推送给呼叫者)" description:"直播间通话被接听(推送给呼叫者)" tags:"推送-通话"`
+	g.Meta `path:"/liveRoomCallAccepted" method:"post" summary:"推送 cmd=27 视频通话被接听(推送给呼叫者)" description:"视频通话被接听(推送给呼叫者)" tags:"推送-通话"`
 }
 
 type LiveRoomCallAcceptedPushResp struct {
@@ -90,9 +90,9 @@ type LiveRoomCallAcceptedPushResp struct {
 	Data *calldto.CallAcceptedPushItem `json:"data"`
 }
 
-// LiveRoomCallRejectedPushReq cmd=26 直播间通话被拒接
+// LiveRoomCallRejectedPushReq cmd=26 视频通话被拒接
 type LiveRoomCallRejectedPushReq struct {
-	g.Meta `path:"/liveRoomCallRejected" method:"post" summary:"推送 cmd=26 直播间通话被拒接(推送给呼叫者)" description:"直播间通话被拒接(推送给呼叫者)" tags:"推送-通话"`
+	g.Meta `path:"/liveRoomCallRejected" method:"post" summary:"推送 cmd=26 视频通话被拒接(推送给呼叫者)" description:"视频通话被拒接(推送给呼叫者)" tags:"推送-通话"`
 }
 
 type LiveRoomCallRejectedPushResp struct {
@@ -100,9 +100,9 @@ type LiveRoomCallRejectedPushResp struct {
 	Data *calldto.CallRejectedPushItem `json:"data"`
 }
 
-// LiveRoomCallRequestPushReq cmd=25 直播间通话请求
+// LiveRoomCallRequestPushReq cmd=25 视频通话请求
 type LiveRoomCallRequestPushReq struct {
-	g.Meta `path:"/liveRoomCallRequest" method:"post" summary:"推送 cmd=25 直播间通话请求(推送给主播)" description:"直播间通话请求(推送给主播)" tags:"推送-通话"`
+	g.Meta `path:"/liveRoomCallRequest" method:"post" summary:"推送 cmd=25 视频通话请求(推送给目标用户)" description:"视频通话请求(推送给目标用户/接听方)" tags:"推送-通话"`
 }
 
 type LiveRoomCallRequestPushResp struct {
@@ -110,26 +110,16 @@ type LiveRoomCallRequestPushResp struct {
 	Data *calldto.CallRequestPushItem `json:"data"`
 }
 
-// --- 推送-私密房 ---
+// --- 推送-定向送礼 ---
 
-// LiveRoomPrivateGiftPushReq cmd=30 给指定主播送礼
-type LiveRoomPrivateGiftPushReq struct {
-	g.Meta `path:"/liveRoomPrivateGift" method:"post" summary:"推送 cmd=30 给指定主播送礼(推送给发送者与主播)" description:"给指定主播送礼(推送给发送者与主播)" tags:"推送-私密房"`
+// LiveRoomDirectGiftPushReq cmd=30 给指定主播送礼
+type LiveRoomDirectGiftPushReq struct {
+	g.Meta `path:"/liveRoomDirectGift" method:"post" summary:"推送 cmd=30 给指定主播送礼(推送给发送者与主播)" description:"给指定主播送礼(推送给发送者与主播)" tags:"推送-定向送礼"`
 }
 
-type LiveRoomPrivateGiftPushResp struct {
-	Cmd  int                              `json:"cmd" dc:"命令字 30"`
-	Data *liveroomdto.PrivateGiftPushItem `json:"data"`
-}
-
-// LiveRoomPrivateChatPushReq cmd=29 私密房文字消息
-type LiveRoomPrivateChatPushReq struct {
-	g.Meta `path:"/liveRoomPrivateChat" method:"post" summary:"推送 cmd=29 私密房文字消息(推送给发送者与目标用户)" description:"私密房文字消息(推送给发送者与目标用户)" tags:"推送-私密房"`
-}
-
-type LiveRoomPrivateChatPushResp struct {
-	Cmd  int                                  `json:"cmd" dc:"命令字 29"`
-	Data *liveroomdto.PrivateRoomChatPushItem `json:"data"`
+type LiveRoomDirectGiftPushResp struct {
+	Cmd  int                             `json:"cmd" dc:"命令字 30"`
+	Data *liveroomdto.DirectGiftPushItem `json:"data"`
 }
 
 // --- 推送-直播间 ---
@@ -146,7 +136,7 @@ type LiveRoomStartLivePushResp struct {
 
 // LiveRoomTotalIncomePushReq cmd=37 本场直播总收益
 type LiveRoomTotalIncomePushReq struct {
-	g.Meta `path:"/liveRoomTotalIncome" method:"post" summary:"推送 cmd=37 本场直播总收益(房间内全体在线用户,含主播)" description:"送礼、付费弹幕、私密房扣费等导致本场 live_record.total_income 变化后广播" tags:"推送-直播间"`
+	g.Meta `path:"/liveRoomTotalIncome" method:"post" summary:"推送 cmd=37 本场直播总收益(房间内全体在线用户,含主播)" description:"送礼、付费弹幕、视频通话等导致本场 live_record.total_income 变化后广播" tags:"推送-直播间"`
 }
 
 type LiveRoomTotalIncomePushResp struct {
@@ -347,7 +337,7 @@ type RechargeSuccessPushReq struct {
 }
 
 type RechargeSuccessPushResp struct {
-	Cmd  int                                      `json:"cmd" dc:"命令字 40"`
+	Cmd  int                                       `json:"cmd" dc:"命令字 40"`
 	Data *rechargeorderdto.RechargeSuccessPushItem `json:"data"`
 }
 

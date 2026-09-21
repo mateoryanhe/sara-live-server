@@ -16,43 +16,39 @@ const (
 )
 
 const (
-	LiveRecordAnchorId                     db.TbCol = "anchor_id"
-	LiveRecordStartTime                    db.TbCol = "start_time"
-	LiveRecordEndTime                      db.TbCol = "end_time"
-	LiveRecordTotalAudience                db.TbCol = "total_audience"
-	LiveRecordTotalLiveDuration            db.TbCol = "total_live_duration"
-	LiveRecordTotalIncome                  db.TbCol = "total_income"
-	LiveRecordTotalGiftIncome              db.TbCol = "total_gift_income"
-	LiveRecordTotalPaidDanmakuIncome       db.TbCol = "total_paid_danmaku_income"
-	LiveRecordTotalPrivateRoomIncome       db.TbCol = "total_private_room_income"
-	LiveRecordTotalPrivateRoomTicketIncome db.TbCol = "total_private_room_ticket_income"
-	LiveRecordTotalPrivateRoomWatchIncome  db.TbCol = "total_private_room_watch_income"
-	LiveRecordTotalVideoCallIncome         db.TbCol = "total_video_call_income"
-	LiveRecordTotalVideoCallBillingIncome  db.TbCol = "total_video_call_billing_income"
-	LiveRecordTotalGameBet                 db.TbCol = "total_game_bet"
-	LiveRecordTotalGiftSender              db.TbCol = "total_gift_sender"
-	LiveRecordTotalNewFollower             db.TbCol = "total_new_follower"
+	LiveRecordAnchorId                    db.TbCol = "anchor_id"
+	LiveRecordStartTime                   db.TbCol = "start_time"
+	LiveRecordEndTime                     db.TbCol = "end_time"
+	LiveRecordTotalAudience               db.TbCol = "total_audience"
+	LiveRecordTotalLiveDuration           db.TbCol = "total_live_duration"
+	LiveRecordTotalIncome                 db.TbCol = "total_income"
+	LiveRecordTotalGiftIncome             db.TbCol = "total_gift_income"
+	LiveRecordTotalPaidDanmakuIncome      db.TbCol = "total_paid_danmaku_income"
+	LiveRecordTotalVideoCallIncome        db.TbCol = "total_video_call_income"
+	LiveRecordTotalVideoCallTicketIncome  db.TbCol = "total_video_call_ticket_income"
+	LiveRecordTotalVideoCallBillingIncome db.TbCol = "total_video_call_billing_income"
+	LiveRecordTotalGameBet                db.TbCol = "total_game_bet"
+	LiveRecordTotalGiftSender             db.TbCol = "total_gift_sender"
+	LiveRecordTotalNewFollower            db.TbCol = "total_new_follower"
 )
 
 // LiveRecord 单场直播数据记录
 type LiveRecord struct {
 	migrate.OneModel
-	AnchorId                     uint64     `gorm:"index;default:0;comment:主播ID" json:"anchorId"`
-	StartTime                    time.Time  `gorm:"index;comment:直播开始时间" json:"startTime"`
-	EndTime                      *time.Time `gorm:"comment:直播结束时间" json:"endTime"`
-	TotalAudience                uint64     `gorm:"default:0;comment:累计观众人数" json:"totalAudience"`
-	TotalLiveDuration            float64    `gorm:"default:0;comment:累计直播时长(秒)" json:"totalLiveDuration"`
-	TotalIncome                  float64    `gorm:"default:0;comment:总收益" json:"totalIncome"`
-	TotalGiftIncome              float64    `gorm:"default:0;comment:礼物收入" json:"totalGiftIncome"`
-	TotalPaidDanmakuIncome       float64    `gorm:"default:0;comment:付费弹幕收入" json:"totalPaidDanmakuIncome"`
-	TotalPrivateRoomIncome       float64    `gorm:"default:0;comment:私密直播间收入" json:"totalPrivateRoomIncome"`
-	TotalPrivateRoomTicketIncome float64    `gorm:"type:decimal(10,4);default:0;comment:私密直播间门票收入" json:"totalPrivateRoomTicketIncome"`
-	TotalPrivateRoomWatchIncome  float64    `gorm:"type:decimal(10,4);default:0;comment:私密房观看收入" json:"totalPrivateRoomWatchIncome"`
-	TotalVideoCallIncome         float64    `gorm:"type:decimal(10,4);default:0;comment:直播间视频通话收入" json:"totalVideoCallIncome"`
-	TotalVideoCallBillingIncome  float64    `gorm:"type:decimal(10,4);default:0;comment:直播间视频通话计费收入" json:"totalVideoCallBillingIncome"`
-	TotalGameBet                 float64    `gorm:"default:0;comment:游戏下注总金额" json:"totalGameBet"`
-	TotalGiftSender              uint64     `gorm:"default:0;comment:送礼人数(去重)" json:"totalGiftSender"`
-	TotalNewFollower             uint64     `gorm:"default:0;comment:新加粉丝数(去重)" json:"totalNewFollower"`
+	AnchorId                    uint64     `gorm:"index;default:0;comment:主播ID" json:"anchorId"`
+	StartTime                   time.Time  `gorm:"index;comment:直播开始时间" json:"startTime"`
+	EndTime                     *time.Time `gorm:"comment:直播结束时间" json:"endTime"`
+	TotalAudience               uint64     `gorm:"default:0;comment:累计观众人数" json:"totalAudience"`
+	TotalLiveDuration           float64    `gorm:"default:0;comment:累计直播时长(秒)" json:"totalLiveDuration"`
+	TotalIncome                 float64    `gorm:"default:0;comment:总收益" json:"totalIncome"`
+	TotalGiftIncome             float64    `gorm:"default:0;comment:礼物收入" json:"totalGiftIncome"`
+	TotalPaidDanmakuIncome      float64    `gorm:"default:0;comment:付费弹幕收入" json:"totalPaidDanmakuIncome"`
+	TotalVideoCallIncome        float64    `gorm:"type:decimal(10,4);default:0;comment:直播间视频通话收入" json:"totalVideoCallIncome"`
+	TotalVideoCallTicketIncome  float64    `gorm:"type:decimal(10,4);default:0;comment:直播间视频通话门票收入" json:"totalVideoCallTicketIncome"`
+	TotalVideoCallBillingIncome float64    `gorm:"type:decimal(10,4);default:0;comment:直播间视频通话计费收入" json:"totalVideoCallBillingIncome"`
+	TotalGameBet                float64    `gorm:"default:0;comment:游戏下注总金额" json:"totalGameBet"`
+	TotalGiftSender             uint64     `gorm:"default:0;comment:送礼人数(去重)" json:"totalGiftSender"`
+	TotalNewFollower            uint64     `gorm:"default:0;comment:新加粉丝数(去重)" json:"totalNewFollower"`
 }
 
 func liveRecordLockKey(id uint64) string {
@@ -142,27 +138,15 @@ func (r *LiveRecord) AddTotalPaidDanmakuIncome(v float64) {
 	})
 }
 
-func (r *LiveRecord) AddTotalPrivateRoomIncome(v float64) {
-	r.withLock(func() {
-		r.addFloatLocked(LiveRecordTotalPrivateRoomIncome, &r.TotalPrivateRoomIncome, v)
-	})
-}
-
-func (r *LiveRecord) AddTotalPrivateRoomTicketIncome(v float64) {
-	r.withLock(func() {
-		r.addFloatLocked(LiveRecordTotalPrivateRoomTicketIncome, &r.TotalPrivateRoomTicketIncome, v)
-	})
-}
-
-func (r *LiveRecord) AddTotalPrivateRoomWatchIncome(v float64) {
-	r.withLock(func() {
-		r.addFloatLocked(LiveRecordTotalPrivateRoomWatchIncome, &r.TotalPrivateRoomWatchIncome, v)
-	})
-}
-
 func (r *LiveRecord) AddTotalVideoCallIncome(v float64) {
 	r.withLock(func() {
 		r.addFloatLocked(LiveRecordTotalVideoCallIncome, &r.TotalVideoCallIncome, v)
+	})
+}
+
+func (r *LiveRecord) AddTotalVideoCallTicketIncome(v float64) {
+	r.withLock(func() {
+		r.addFloatLocked(LiveRecordTotalVideoCallTicketIncome, &r.TotalVideoCallTicketIncome, v)
 	})
 }
 
@@ -210,34 +194,17 @@ func (r *LiveRecord) AddPaidDanmakuEarn(v float64) {
 	})
 }
 
-// AddPrivateRoomTicketEarn 私密房门票收益(总/私密房/门票,内部加锁)
-func (r *LiveRecord) AddPrivateRoomTicketEarn(v float64) {
-	r.withLock(func() {
-		r.addFloatLocked(LiveRecordTotalIncome, &r.TotalIncome, v)
-		if v > 0 {
-			r.addFloatLocked(LiveRecordTotalPrivateRoomIncome, &r.TotalPrivateRoomIncome, v)
-			r.addFloatLocked(LiveRecordTotalPrivateRoomTicketIncome, &r.TotalPrivateRoomTicketIncome, v)
-		}
-	})
-}
-
-// AddPrivateRoomWatchEarn 私密房观看收益(总/私密房/观看,内部加锁)
-func (r *LiveRecord) AddPrivateRoomWatchEarn(v float64) {
-	r.withLock(func() {
-		r.addFloatLocked(LiveRecordTotalIncome, &r.TotalIncome, v)
-		if v > 0 {
-			r.addFloatLocked(LiveRecordTotalPrivateRoomIncome, &r.TotalPrivateRoomIncome, v)
-			r.addFloatLocked(LiveRecordTotalPrivateRoomWatchIncome, &r.TotalPrivateRoomWatchIncome, v)
-		}
-	})
-}
-
 // ApplyVideoCallIncomeDelta 通话收益增减(支持负数退款),内部加锁
-func (r *LiveRecord) ApplyVideoCallIncomeDelta(amount float64) {
+func (r *LiveRecord) ApplyVideoCallIncomeDelta(amount float64, ticket, billing bool) {
 	r.withLock(func() {
 		r.addFloatLocked(LiveRecordTotalIncome, &r.TotalIncome, amount)
 		r.addFloatLocked(LiveRecordTotalVideoCallIncome, &r.TotalVideoCallIncome, amount)
-		r.addFloatLocked(LiveRecordTotalVideoCallBillingIncome, &r.TotalVideoCallBillingIncome, amount)
+		if ticket {
+			r.addFloatLocked(LiveRecordTotalVideoCallTicketIncome, &r.TotalVideoCallTicketIncome, amount)
+		}
+		if billing {
+			r.addFloatLocked(LiveRecordTotalVideoCallBillingIncome, &r.TotalVideoCallBillingIncome, amount)
+		}
 	})
 }
 
@@ -276,10 +243,8 @@ func initLiveRecord() {
 	syndb.RegLazy(TbLiveRecord, LiveRecordTotalIncome)
 	syndb.RegLazy(TbLiveRecord, LiveRecordTotalGiftIncome)
 	syndb.RegLazy(TbLiveRecord, LiveRecordTotalPaidDanmakuIncome)
-	syndb.RegLazy(TbLiveRecord, LiveRecordTotalPrivateRoomIncome)
-	syndb.RegLazy(TbLiveRecord, LiveRecordTotalPrivateRoomTicketIncome)
-	syndb.RegLazy(TbLiveRecord, LiveRecordTotalPrivateRoomWatchIncome)
 	syndb.RegLazy(TbLiveRecord, LiveRecordTotalVideoCallIncome)
+	syndb.RegLazy(TbLiveRecord, LiveRecordTotalVideoCallTicketIncome)
 	syndb.RegLazy(TbLiveRecord, LiveRecordTotalVideoCallBillingIncome)
 	syndb.RegLazy(TbLiveRecord, LiveRecordTotalGameBet)
 	syndb.RegLazy(TbLiveRecord, LiveRecordTotalGiftSender)

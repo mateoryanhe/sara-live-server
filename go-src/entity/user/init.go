@@ -5,6 +5,7 @@ func Init() {
 	initAccount()
 	initUserInfo()
 	initUserLoginDevice()
+	initUserLoginLocation()
 	initUserExt()
 	initUserRechargeCfgFirstRecharge()
 	initUserCumulativeStat()

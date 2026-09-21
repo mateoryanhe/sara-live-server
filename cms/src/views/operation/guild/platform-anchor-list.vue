@@ -289,12 +289,10 @@ const anchorTypeTagType = (userType?: number) => {
 const categoryLabel = (category?: number) => {
   if (category === 1) return t('pages.anchorList.categoryHot')
   if (category === 2) return t('pages.anchorList.categoryGame')
-  if (category === 3) return t('pages.anchorList.categoryPrivate')
   return '-'
 }
 
 const categoryTagType = (category?: number) => {
-  if (category === 3) return 'warning'
   if (category === 2) return 'success'
   if (category === 1) return 'danger'
   return 'info'

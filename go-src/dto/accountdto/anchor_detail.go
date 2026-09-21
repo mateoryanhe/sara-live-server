@@ -14,16 +14,15 @@ type GetAnchorDetailReq struct {
 
 // LiveRoomIncomeAmountsItem 直播间收益金额字段
 type LiveRoomIncomeAmountsItem struct {
-	TotalIncome                  float64 `json:"totalIncome"`
-	TotalGiftIncome              float64 `json:"totalGiftIncome"`
-	TotalPaidDanmakuIncome       float64 `json:"totalPaidDanmakuIncome"`
-	TotalPrivateRoomTicketIncome float64 `json:"totalPrivateRoomTicketIncome"`
-	TotalPrivateRoomWatchIncome  float64 `json:"totalPrivateRoomWatchIncome"`
-	TotalVideoCallIncome         float64 `json:"totalVideoCallIncome"`
-	TotalVideoCallBillingIncome  float64 `json:"totalVideoCallBillingIncome"`
-	TotalShortVideoIncome        float64 `json:"totalShortVideoIncome"`
-	TotalGameIncome              float64 `json:"totalGameIncome"`
-	TotalLiveDuration            float64 `json:"totalLiveDuration"`
+	TotalIncome                 float64 `json:"totalIncome"`
+	TotalGiftIncome             float64 `json:"totalGiftIncome"`
+	TotalPaidDanmakuIncome      float64 `json:"totalPaidDanmakuIncome"`
+	TotalVideoCallIncome        float64 `json:"totalVideoCallIncome"`
+	TotalVideoCallTicketIncome  float64 `json:"totalVideoCallTicketIncome"`
+	TotalVideoCallBillingIncome float64 `json:"totalVideoCallBillingIncome"`
+	TotalShortVideoIncome       float64 `json:"totalShortVideoIncome"`
+	TotalGameIncome             float64 `json:"totalGameIncome"`
+	TotalLiveDuration           float64 `json:"totalLiveDuration"`
 }
 
 // LiveRoomIncomeUnsettledItem 未结算收益
@@ -68,7 +67,6 @@ type AnchorLiveRoomDetailItem struct {
 	LiveStatus        uint8      `json:"liveStatus"`
 	Category          uint8      `json:"category"`
 	PrivateInviteType uint8      `json:"privateInviteType"`
-	Ticket            float64    `json:"ticket"`
 	Billing           float64    `json:"billing"`
 	CreatedAt         *time.Time `json:"createdAt"`
 	UpdatedAt         *time.Time `json:"updatedAt"`

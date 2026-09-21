@@ -412,7 +412,6 @@ const {t} = useI18n()
 const {can} = usePagePermission('BotAnchorManagement')
 const LIVE_ROOM_CATEGORY_HOT = 1
 const LIVE_ROOM_CATEGORY_GAME = 2
-const LIVE_ROOM_CATEGORY_PRIVATE = 3
 const DEFAULT_CLOUD_PLAYER_FRAME_RATE = 24
 const DEFAULT_CLOUD_PLAYER_BITRATE = 400
 const DEFAULT_CLOUD_PLAYER_WIDTH = 960
@@ -521,12 +520,10 @@ const clearSelection = () => {
 const categoryLabel = (category?: number) => {
   if (category === LIVE_ROOM_CATEGORY_HOT) return t('pages.botAnchorList.categoryHot')
   if (category === LIVE_ROOM_CATEGORY_GAME) return t('pages.botAnchorList.categoryGame')
-  if (category === LIVE_ROOM_CATEGORY_PRIVATE) return t('pages.botAnchorList.categoryPrivate')
   return '-'
 }
 
 const categoryTagType = (category?: number) => {
-  if (category === LIVE_ROOM_CATEGORY_PRIVATE) return 'danger'
   if (category === LIVE_ROOM_CATEGORY_GAME) return 'warning'
   if (category === LIVE_ROOM_CATEGORY_HOT) return 'success'
   return 'info'

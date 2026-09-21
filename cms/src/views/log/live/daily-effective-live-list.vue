@@ -129,7 +129,10 @@
         <el-table-column :label="t('pages.liveDailyEffectiveLiveList.dailyVideoCallIncome')" align="right" min-width="150">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.liveDailyEffectiveLiveList.dailyVideoBillingIncome')" align="right" min-width="170">
+		<el-table-column :label="t('pages.liveDailyEffectiveLiveList.dailyVideoTicketIncome')" align="right" min-width="160">
+		  <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallTicketIncome) }}</span></template>
+		</el-table-column>
+		<el-table-column :label="t('pages.liveDailyEffectiveLiveList.dailyVideoBillingIncome')" align="right" min-width="170">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallBillingIncome) }}</span></template>
         </el-table-column>
         <el-table-column :label="t('pages.liveDailyEffectiveLiveList.dailyShortVideoIncome')" align="right" min-width="150">

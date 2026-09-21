@@ -1,46 +1,47 @@
 package livefollowdao
 
 import (
-	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"fmt"
 
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/cache"
 	"xr-game-server/entity/live"
+	userentity "xr-game-server/entity/user"
 )
 
-var blockListCacheMgr *cache.ListCache[*entity.LiveFollow]
+var blockListCacheMgr *cache.ListCache[*RelationUserListRow]
 
 func blockListCacheKey(userId uint64) string {
 	return fmt.Sprintf("live_follow_block_list:%d", userId)
 }
 
-func getBlockListCache(userId uint64) []*entity.LiveFollow {
+func getBlockListCache(userId uint64) []*RelationUserListRow {
 	if blockListCacheMgr == nil || userId == 0 {
-		return make([]*entity.LiveFollow, 0)
+		return make([]*RelationUserListRow, 0)
 	}
-	list := blockListCacheMgr.MustGetList(gctx.New(), blockListCacheKey(userId), func(ctx context.Context) ([]*entity.LiveFollow, error) {
+	list := blockListCacheMgr.MustGetList(gctx.New(), blockListCacheKey(userId), func(ctx context.Context) ([]*RelationUserListRow, error) {
 		return loadBlockedListFromDB(userId, 1, followingListCacheMaxSize), nil
 	})
 	if list == nil {
-		return make([]*entity.LiveFollow, 0)
+		return make([]*RelationUserListRow, 0)
 	}
 	return list
 }
 
-func putBlockListCache(userId uint64, list []*entity.LiveFollow) {
+func putBlockListCache(userId uint64, list []*RelationUserListRow) {
 	if blockListCacheMgr == nil || userId == 0 {
 		return
 	}
 	if list == nil {
-		list = make([]*entity.LiveFollow, 0)
+		list = make([]*RelationUserListRow, 0)
 	}
 	blockListCacheMgr.PublishList(gctx.New(), blockListCacheKey(userId), list)
 }
 
 // PrependBlockedToListCache 拉黑成功后写入列表缓存头部
-func PrependBlockedToListCache(f *entity.LiveFollow) {
+func PrependBlockedToListCache(f *entity.LiveFollow, target *userentity.UserInfo) {
 	if blockListCacheMgr == nil || f == nil || f.UserId == 0 || f.AnchorId == 0 {
 		return
 	}
@@ -48,8 +49,8 @@ func PrependBlockedToListCache(f *entity.LiveFollow) {
 		return
 	}
 	list := getBlockListCache(f.UserId)
-	newList := make([]*entity.LiveFollow, 0, len(list)+1)
-	newList = append(newList, f)
+	newList := make([]*RelationUserListRow, 0, len(list)+1)
+	newList = append(newList, newRelationUserListRow(f, target))
 	for _, row := range list {
 		if row != nil && row.AnchorId != f.AnchorId {
 			newList = append(newList, row)
@@ -70,7 +71,7 @@ func RemoveBlockedFromListCache(userId, targetId uint64) {
 		return
 	}
 	list := getBlockListCache(userId)
-	newList := make([]*entity.LiveFollow, 0, len(list))
+	newList := make([]*RelationUserListRow, 0, len(list))
 	for _, row := range list {
 		if row != nil && row.AnchorId != targetId {
 			newList = append(newList, row)
@@ -79,18 +80,24 @@ func RemoveBlockedFromListCache(userId, targetId uint64) {
 	putBlockListCache(userId, newList)
 }
 
-func loadBlockedListFromDB(userId uint64, page, pageSize int) []*entity.LiveFollow {
-	list := make([]*entity.LiveFollow, 0)
+func loadBlockedListFromDB(userId uint64, page, pageSize int) []*RelationUserListRow {
+	list := make([]*RelationUserListRow, 0)
 	if userId == 0 {
 		return list
 	}
 	if page <= 0 {
 		page = 1
 	}
-	pageSize = FollowingListCachePageSize
-	_ = g.Model(string(entity.TbLiveFollow)).
-		Where("user_id = ? AND status = ?", userId, entity.LiveFollowStatusBlock).
-		Order("updated_at desc").
+	if pageSize <= 0 || pageSize > followingListCacheMaxSize {
+		pageSize = FollowingListCachePageSize
+	}
+	const relationAlias = "lf"
+	const userAlias = "ui"
+	_ = g.DB().Model(string(entity.TbLiveFollow)+" "+relationAlias).Ctx(gctx.New()).
+		LeftJoin(string(userentity.TbUserInfo)+" "+userAlias, userAlias+".id = "+relationAlias+".anchor_id").
+		Fields(relationUserListFields(relationAlias, userAlias)...).
+		Where(relationAlias+".user_id = ? AND "+relationAlias+".status = ?", userId, entity.LiveFollowStatusBlock).
+		Order(relationAlias + ".updated_at desc").
 		Limit(pageSize).
 		Offset((page - 1) * pageSize).
 		Scan(&list)
@@ -98,9 +105,9 @@ func loadBlockedListFromDB(userId uint64, page, pageSize int) []*entity.LiveFoll
 }
 
 // GetBlockedListByUser 分页获取用户当前拉黑列表(仅 Status == Block)
-// 缓存5页数据,前4页且 pageSize=FollowingListCachePageSize 时走缓存,第5页起直接查库
-func GetBlockedListByUser(userId uint64, page, pageSize int) []*entity.LiveFollow {
-	list := make([]*entity.LiveFollow, 0)
+// 缓存8页数据,前7页走缓存,第8页起直接查库
+func GetBlockedListByUser(userId uint64, page, pageSize int) []*RelationUserListRow {
+	list := make([]*RelationUserListRow, 0)
 	if userId == 0 {
 		return list
 	}
