@@ -22,7 +22,7 @@ func GetUploadResourceCfg(_ context.Context, _ *uploaddto.GetUploadResourceCfgRe
 	return &uploaddto.GetUploadResourceCfgRes{Cfg: toUploadResourceCfgItem(cfg)}, nil
 }
 
-func SaveUploadResourceCfg(_ context.Context, req *uploaddto.SaveUploadResourceCfgReq) (*uploaddto.SaveUploadResourceCfgRes, error) {
+func SaveUploadResourceCfg(ctx context.Context, req *uploaddto.SaveUploadResourceCfgReq) (*uploaddto.SaveUploadResourceCfgRes, error) {
 	if req.AppImageMaxSizeMB < 1 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
@@ -93,7 +93,9 @@ func SaveUploadResourceCfg(_ context.Context, req *uploaddto.SaveUploadResourceC
 	invalidateImageGreenClient()
 	invalidateS3Client()
 	reloadResourceCfgMemory()
-	registerStaticMappings()
+	if err := refreshStaticMappings(ctx); err != nil {
+		return nil, err
+	}
 	return &uploaddto.SaveUploadResourceCfgRes{
 		Success: true,
 		ID:      strconv.FormatUint(row.ID, 10),

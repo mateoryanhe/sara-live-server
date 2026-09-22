@@ -20,7 +20,7 @@ type StaticSiteCfg struct {
 	KeyFile    string `json:"keyFile"    dc:"HTTPS私钥文件路径"`
 }
 
-var thirdPayDomain string
+var staticSiteCfgs []*StaticSiteCfg
 
 func staticSitePhysicalDir(item *StaticSiteCfg) string {
 	if item == nil {
@@ -35,15 +35,39 @@ func staticSitePhysicalDir(item *StaticSiteCfg) string {
 func initStaticSiteCfg() {
 	ctx := gctx.New()
 	sites := loadStaticSiteCfgs(ctx)
-	thirdPayDomain = findThirdPayDomain(sites)
+	staticSiteCfgs = sites
 	staticPathCfgs = buildStaticPathCfgsFromSites(sites)
 	domainSiteCfgs = buildDomainSiteCfgsFromSites(sites)
 	initImageStaticCfg()
 }
 
+// GetStaticSiteDomains 返回指定静态前缀配置的完整域名字符串。
+func GetStaticSiteDomains(prefix string) string {
+	prefix = normalizeURLPrefix(prefix)
+	if site := getRuntimeStaticSite(prefix); site != nil {
+		return strings.TrimSpace(site.Domain)
+	}
+	for _, site := range staticSiteCfgs {
+		if site == nil || site.Prefix != prefix {
+			continue
+		}
+		return strings.TrimSpace(site.Domain)
+	}
+	return ""
+}
+
+// GetStaticSiteDomain 返回指定静态前缀配置的首个域名。
+func GetStaticSiteDomain(prefix string) string {
+	domains := SplitDomains(GetStaticSiteDomains(prefix))
+	if len(domains) == 0 {
+		return ""
+	}
+	return domains[0]
+}
+
 // GetThirdPayDomain 返回标记为 t 的第三方支付站点域名。
 func GetThirdPayDomain() string {
-	return thirdPayDomain
+	return findThirdPayDomain(mergedStaticSiteCfgs())
 }
 
 func findThirdPayDomain(sites []*StaticSiteCfg) string {

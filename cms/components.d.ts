@@ -75,6 +75,7 @@ declare module 'vue' {
     LayoutTabs: typeof import('./src/components/layout/LayoutTabs.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    StaticSiteDeployPage: typeof import('./src/components/config/static-site-deploy-page.vue')['default']
     TheWelcome: typeof import('./src/components/TheWelcome.vue')['default']
     WelcomeItem: typeof import('./src/components/WelcomeItem.vue')['default']
   }
@@ -148,6 +149,7 @@ declare global {
   const LayoutTabs: typeof import('./src/components/layout/LayoutTabs.vue')['default']
   const RouterLink: typeof import('vue-router')['RouterLink']
   const RouterView: typeof import('vue-router')['RouterView']
+  const StaticSiteDeployPage: typeof import('./src/components/config/static-site-deploy-page.vue')['default']
   const TheWelcome: typeof import('./src/components/TheWelcome.vue')['default']
   const WelcomeItem: typeof import('./src/components/WelcomeItem.vue')['default']
 }

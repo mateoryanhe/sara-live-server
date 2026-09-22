@@ -12,9 +12,35 @@
         <el-descriptions-item :label="t('pages.coinMerchantDeploy.deployPath')">
           {{ deployInfo.deployPath }}
         </el-descriptions-item>
+        <el-descriptions-item :label="t('pages.coinMerchantDeploy.lastUploadAt')">
+          {{ deployInfo.lastUploadAt || '-' }}
+        </el-descriptions-item>
       </el-descriptions>
 
       <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="120px">
+        <div class="section-title">{{ t('pages.coinMerchantDeploy.siteMappingTitle') }}</div>
+        <div class="form-tip">{{ t('pages.coinMerchantDeploy.siteMappingTip') }}</div>
+
+        <el-form-item :label="t('pages.coinMerchantDeploy.domain')" prop="domain">
+          <el-input
+              v-model="formData.domain"
+              clearable
+              :disabled="!can('save')"
+              :placeholder="t('pages.coinMerchantDeploy.domainPlaceholder')"
+          />
+        </el-form-item>
+
+        <el-form-item :label="t('pages.coinMerchantDeploy.deployPath')" prop="deployPath">
+          <el-input
+              v-model="formData.deployPath"
+              clearable
+              :disabled="!can('save')"
+              :placeholder="t('pages.coinMerchantDeploy.deployPathPlaceholder')"
+          />
+        </el-form-item>
+
+        <el-divider/>
+
         <div class="section-title">{{ t('pages.coinMerchantDeploy.secretTitle') }}</div>
         <div class="form-tip">{{ t('pages.coinMerchantDeploy.secretTip') }}</div>
 
@@ -43,7 +69,7 @@
 
         <el-form-item v-if="can('save')">
           <el-button :loading="saving" type="primary" @click="handleSaveSecret">
-            {{ t('common.saveConfig') }}
+            {{ t('pages.coinMerchantDeploy.saveAndRefresh') }}
           </el-button>
         </el-form-item>
       </el-form>
@@ -138,6 +164,8 @@ const formRef = ref<FormInstance>()
 
 const formData = reactive({
   id: 0,
+  domain: '',
+  deployPath: '/home/ec2-user/cdn/coin-merchant',
   deploySecret: '',
 })
 
@@ -146,6 +174,8 @@ const metaInfo = reactive({
 })
 
 const formRules = computed<FormRules>(() => ({
+  domain: [{required: true, message: t('pages.coinMerchantDeploy.domainRequired'), trigger: 'blur'}],
+  deployPath: [{required: true, message: t('pages.coinMerchantDeploy.deployPathRequired'), trigger: 'blur'}],
   deploySecret: [{required: true, message: t('pages.coinMerchantDeploy.deploySecretRequired'), trigger: 'blur'}],
 }))
 
@@ -154,6 +184,8 @@ const deployResultTitle = computed(() => t('pages.coinMerchantDeploy.deploySucce
 const applyDeployInfo = (info: CoinMerchantDeployInfo | null | undefined) => {
   deployInfo.value = info ?? null
   formData.id = info?.id ? Number(info.id) : 0
+  formData.domain = info?.domain ?? ''
+  formData.deployPath = info?.deployPath ?? '/home/ec2-user/cdn/coin-merchant'
   formData.deploySecret = info?.deploySecret ?? ''
   metaInfo.updatedAt = info?.updatedAt ?? ''
 }
@@ -202,6 +234,8 @@ const handleSaveSecret = async () => {
   try {
     await coinMerchantDeployApi.saveCoinMerchantDeployCfg({
       id: formData.id,
+      domain: formData.domain.trim(),
+      deployPath: formData.deployPath.trim(),
       deploySecret: formData.deploySecret.trim(),
     })
     ElMessage.success(t('pages.coinMerchantDeploy.saveSuccess'))
@@ -251,6 +285,7 @@ const handleDeploy = async () => {
     deployResult.value = response
     uploadStatus.value = 'success'
     ElMessage.success(t('pages.coinMerchantDeploy.deploySuccess'))
+    await fetchDeployInfo()
   } catch {
     uploadStatus.value = 'exception'
     ElMessage.error(t('pages.coinMerchantDeploy.deployFailed'))

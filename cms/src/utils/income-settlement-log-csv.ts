@@ -17,6 +17,7 @@ type TranslateFn = (key: string) => string
 function incomeAmountColumns(t: TranslateFn, ns: string): CsvColumn<SettlementLogCsvRow>[] {
   return [
     {header: t(`${ns}.totalIncome`), value: row => row.totalIncome},
+    {header: t(`${ns}.totalSocialIncome`), value: row => row.totalSocialIncome},
     {header: t(`${ns}.totalGiftIncome`), value: row => row.totalGiftIncome},
     {header: t(`${ns}.totalPaidDanmakuIncome`), value: row => row.totalPaidDanmakuIncome},
     {header: t(`${ns}.totalVideoCallIncome`), value: row => row.totalVideoCallIncome},

@@ -120,6 +120,9 @@
         <el-table-column :label="t('pages.liveDailyEffectiveLiveList.dailyLiveIncome')" align="right" min-width="130">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
         </el-table-column>
+        <el-table-column :label="t('pages.liveDailyEffectiveLiveList.dailySocialIncome')" align="right" min-width="140">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalSocialIncome) }}</span></template>
+        </el-table-column>
         <el-table-column :label="t('pages.liveDailyEffectiveLiveList.dailyGiftIncome')" align="right" min-width="130">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGiftIncome) }}</span></template>
         </el-table-column>

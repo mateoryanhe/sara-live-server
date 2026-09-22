@@ -24,10 +24,10 @@
         <el-form-item>
           <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
           <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
-          <el-button v-if="can('batchApprove')" :disabled="!selectedRows.length" type="success" @click="handleBatchApprove">
+          <el-button v-if="can('batchApprove')" :disabled="selectedPendingCount === 0" type="success" @click="handleBatchApprove">
             {{ t('pages.guildTransferList.batchApprove') }}
           </el-button>
-          <el-button v-if="can('batchTransfer')" :disabled="!selectedRows.length" type="warning" @click="handleBatchTransfer">
+          <el-button v-if="can('batchTransfer')" :disabled="selectedApprovedCount === 0" type="warning" @click="handleBatchTransfer">
             {{ t('pages.guildTransferList.batchTransfer') }}
           </el-button>
         </el-form-item>
@@ -103,7 +103,7 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {computed, onMounted, reactive, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {guildIncomeSettlementLogApi} from '@/api/modules/guild-income-settlement-log'
@@ -123,6 +123,11 @@ const {can} = usePagePermission('GuildTransferManagement')
 const loading = ref(false)
 const tableData = ref<GuildIncomeSettlementLogItem[]>([])
 const selectedRows = ref<GuildIncomeSettlementLogItem[]>([])
+const settlementStatus = (row: GuildIncomeSettlementLogItem) => Number(row.status)
+const selectedPendingRows = computed(() => selectedRows.value.filter(row => settlementStatus(row) === 0))
+const selectedApprovedRows = computed(() => selectedRows.value.filter(row => settlementStatus(row) === 1))
+const selectedPendingCount = computed(() => selectedPendingRows.value.length)
+const selectedApprovedCount = computed(() => selectedApprovedRows.value.length)
 
 const fixedWeekRange = getServerWeekDateRange()
 
@@ -195,11 +200,11 @@ const handleBatchApprove = async () => {
     ElMessage.warning(t('pages.guildTransferList.selectRows'))
     return
   }
-  const pendingIds = selectedRows.value
-      .filter(row => row.status === 0)
-      .map(row => row.id)
+  const pendingIds = selectedPendingRows.value
+      .map(row => String(row.id || '').trim())
+      .filter(Boolean)
   if (!pendingIds.length) {
-    ElMessage.warning(t('pages.guildTransferList.selectRows'))
+    ElMessage.warning(t('pages.guildTransferList.selectPendingRows'))
     return
   }
   try {
@@ -229,11 +234,11 @@ const handleBatchTransfer = async () => {
     ElMessage.warning(t('pages.guildTransferList.selectRows'))
     return
   }
-  const approvedIds = selectedRows.value
-      .filter(row => row.status === 1)
-      .map(row => row.id)
+  const approvedIds = selectedApprovedRows.value
+      .map(row => String(row.id || '').trim())
+      .filter(Boolean)
   if (!approvedIds.length) {
-    ElMessage.warning(t('pages.guildTransferList.selectRows'))
+    ElMessage.warning(t('pages.guildTransferList.selectApprovedRows'))
     return
   }
   try {
@@ -262,16 +267,18 @@ const handleBatchTransfer = async () => {
 }
 
 const statusLabel = (status: number | undefined) => {
-  if (status === 1) return t('pages.guildTransferList.statusApproved')
-  if (status === 2) return t('pages.guildTransferList.statusTransferred')
-  if (status === 3) return t('pages.guildTransferList.statusTransferring')
+  const normalizedStatus = Number(status)
+  if (normalizedStatus === 1) return t('pages.guildTransferList.statusApproved')
+  if (normalizedStatus === 2) return t('pages.guildTransferList.statusTransferred')
+  if (normalizedStatus === 3) return t('pages.guildTransferList.statusTransferring')
   return t('pages.guildTransferList.statusPending')
 }
 
 const statusTagType = (status: number | undefined) => {
-  if (status === 1) return 'success'
-  if (status === 2) return 'info'
-  if (status === 3) return ''
+  const normalizedStatus = Number(status)
+  if (normalizedStatus === 1) return 'success'
+  if (normalizedStatus === 2) return 'info'
+  if (normalizedStatus === 3) return ''
   return 'warning'
 }
 

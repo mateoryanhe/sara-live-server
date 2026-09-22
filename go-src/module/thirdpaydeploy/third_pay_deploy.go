@@ -12,6 +12,7 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"xr-game-server/core/cfg"
 	"xr-game-server/dto/thirdpaydeploydto"
+	"xr-game-server/module/domainsite"
 )
 
 func DeployZipFromRequest(r *ghttp.Request) (*thirdpaydeploydto.DeployThirdPayZipRes, error) {
@@ -74,6 +75,9 @@ func DeployZipFromRequest(r *ghttp.Request) (*thirdpaydeploydto.DeployThirdPayZi
 	if err != nil {
 		return nil, err
 	}
+	if _, err = domainsite.RecordDeploySuccess(r.Context(), thirdpaydeploydto.ThirdPaySiteKey); err != nil {
+		return nil, fmt.Errorf("files deployed but record upload time failed: %w", err)
+	}
 	return &thirdpaydeploydto.DeployThirdPayZipRes{
 		FileCount:  fileCount,
 		DirCount:   dirCount,
@@ -85,7 +89,7 @@ func DeployZipFromRequest(r *ghttp.Request) (*thirdpaydeploydto.DeployThirdPayZi
 func getDeployDir() (string, error) {
 	root := strings.TrimSpace(cfg.GetStaticPathRoot(thirdpaydeploydto.ThirdPayStaticPrefix))
 	if root == "" {
-		return "", fmt.Errorf("static path not configured for prefix %s", thirdpaydeploydto.ThirdPayStaticPrefix)
+		root = thirdpaydeploydto.DefaultThirdPayDeployPath
 	}
 	if err := os.MkdirAll(root, 0755); err != nil {
 		return "", fmt.Errorf("create deploy dir %s: %w", root, err)

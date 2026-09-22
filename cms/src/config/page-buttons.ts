@@ -92,6 +92,7 @@ const CONFIG_PAGES = new Set([
     'CfEmailCfgManagement',
     'DbBackupCfgManagement',
     'UploadResourceCfgManagement',
+    'CMSDomainMappingManagement',
     'DataSyncCfgManagement',
     'AgoraCfgManagement',
     'LiveCfgManagement',
@@ -400,6 +401,17 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     ],
     ThirdPayDeployManagement: [
         BTN.view,
+        BTN.save,
+        {key: 'deploy', label: '上传部署'},
+    ],
+    OfficialSiteDeployManagement: [
+        BTN.view,
+        BTN.save,
+        {key: 'deploy', label: '上传部署'},
+    ],
+    ThirdPayOfficialSiteDeployManagement: [
+        BTN.view,
+        BTN.save,
         {key: 'deploy', label: '上传部署'},
     ],
     PaymentCountryCfgManagement: [

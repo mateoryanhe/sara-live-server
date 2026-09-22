@@ -45,6 +45,7 @@ func NewLiveRoomIncomeUnsettledArchive(roomId, guildId uint64, a *LiveRoomIncome
 	syndb.AddData(TbLiveRoomIncomeUnsettledArchive, LiveRoomIncomeUnsettledArchiveRoomId, &syndb.ColData{IdVal: ret.ID, ColVal: roomId})
 	syndb.AddData(TbLiveRoomIncomeUnsettledArchive, LiveRoomIncomeUnsettledArchiveGuildId, &syndb.ColData{IdVal: ret.ID, ColVal: guildId})
 	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettledArchive, LiveRoomIncomeTotalIncome, ret.ID, a.TotalIncome)
+	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettledArchive, LiveRoomIncomeTotalSocialIncome, ret.ID, a.TotalSocialIncome)
 	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettledArchive, LiveRoomIncomeTotalGiftIncome, ret.ID, a.TotalGiftIncome)
 	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettledArchive, LiveRoomIncomeTotalPaidDanmakuIncome, ret.ID, a.TotalPaidDanmakuIncome)
 	writeIncomeAmountLocked(TbLiveRoomIncomeUnsettledArchive, LiveRoomIncomeTotalVideoCallIncome, ret.ID, a.TotalVideoCallIncome)

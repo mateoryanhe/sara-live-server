@@ -115,6 +115,24 @@ func resourceDomainHost(domain string) string {
 	if domain == "" {
 		return ""
 	}
+	authority := domain
+	if schemeIndex := strings.Index(authority, "://"); schemeIndex >= 0 {
+		authority = authority[schemeIndex+3:]
+	} else {
+		authority = strings.TrimPrefix(authority, "//")
+	}
+	if pathIndex := strings.IndexAny(authority, "/?#"); pathIndex >= 0 {
+		authority = authority[:pathIndex]
+	}
+	if strings.HasPrefix(authority, "[") {
+		if end := strings.IndexByte(authority, ']'); end > 1 {
+			return authority[1:end]
+		}
+	}
+	// 兼容未加方括号的纯 IPv6；url.URL.Hostname 会把最后一段误认为端口。
+	if net.ParseIP(authority) != nil {
+		return authority
+	}
 	if u, err := url.Parse(domain); err == nil && u.Host != "" {
 		return u.Hostname()
 	}

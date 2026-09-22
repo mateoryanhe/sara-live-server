@@ -35,6 +35,7 @@ type AnchorListItem struct {
 	Billing                     float64    `json:"billing" dc:"视频通话计费价格(钻石/分钟)"`
 	LiveStatus                  uint8      `json:"liveStatus" dc:"直播状态(0未开播,1直播中)"`
 	TotalIncome                 float64    `json:"totalIncome" dc:"未结算总直播收益"`
+	TotalSocialIncome           float64    `json:"totalSocialIncome" dc:"未结算社交流水累计"`
 	TotalGiftIncome             float64    `json:"totalGiftIncome" dc:"未结算礼物收益"`
 	TotalPaidDanmakuIncome      float64    `json:"totalPaidDanmakuIncome" dc:"未结算付费弹幕收益"`
 	TotalVideoCallIncome        float64    `json:"totalVideoCallIncome" dc:"未结算直播间视频通话收益"`

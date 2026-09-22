@@ -64,6 +64,9 @@
       <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalIncome')" align="right" min-width="120">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
       </el-table-column>
+      <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalSocialIncome')" align="right" min-width="130">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalSocialIncome) }}</span></template>
+      </el-table-column>
       <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalGiftIncome')" align="right" min-width="120">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGiftIncome) }}</span></template>
       </el-table-column>

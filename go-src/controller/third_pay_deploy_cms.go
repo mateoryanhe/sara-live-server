@@ -30,3 +30,7 @@ func handleThirdPayDeployZip(r *ghttp.Request) {
 func (c *ThirdPayDeployCMSController) GetThirdPayDeployInfo(ctx context.Context, req *thirdpaydeploydto.GetThirdPayDeployInfoReq) (*thirdpaydeploydto.GetThirdPayDeployInfoRes, error) {
 	return thirdpaydeploy.GetThirdPayDeployInfo(ctx, req)
 }
+
+func (c *ThirdPayDeployCMSController) SaveThirdPayDeployCfg(ctx context.Context, req *thirdpaydeploydto.SaveThirdPayDeployCfgReq) (*thirdpaydeploydto.SaveThirdPayDeployCfgRes, error) {
+	return thirdpaydeploy.SaveThirdPayDeployCfg(ctx, req)
+}

@@ -12,6 +12,7 @@ import (
 
 const (
 	LiveRoomIncomeTotalIncome                 db.TbCol = "total_income"
+	LiveRoomIncomeTotalSocialIncome           db.TbCol = "total_social_income"
 	LiveRoomIncomeTotalGiftIncome             db.TbCol = "total_gift_income"
 	LiveRoomIncomeTotalPaidDanmakuIncome      db.TbCol = "total_paid_danmaku_income"
 	LiveRoomIncomeTotalVideoCallIncome        db.TbCol = "total_video_call_income"
@@ -29,6 +30,7 @@ const (
 // LiveRoomIncomeAmounts 直播间/工会收益字段(房间与工会收益表共用结构)
 type LiveRoomIncomeAmounts struct {
 	TotalIncome                 float64 `gorm:"default:0;comment:直播收益" json:"totalIncome"`
+	TotalSocialIncome           float64 `gorm:"type:decimal(16,4);default:0;comment:累计社交流水(礼物/付费弹幕/视频通话/短视频)" json:"totalSocialIncome"`
 	TotalGiftIncome             float64 `gorm:"default:0;comment:累计礼物收益" json:"totalGiftIncome"`
 	TotalPaidDanmakuIncome      float64 `gorm:"default:0;comment:累计付费弹幕收益" json:"totalPaidDanmakuIncome"`
 	TotalVideoCallIncome        float64 `gorm:"type:decimal(10,4);default:0;comment:累计直播间视频通话收益" json:"totalVideoCallIncome"`
@@ -45,6 +47,7 @@ func liveRoomIncomeLockKey(tb db.TbName, id uint64) string {
 
 func (a *LiveRoomIncomeAmounts) clearAmounts() {
 	a.TotalIncome = 0
+	a.TotalSocialIncome = 0
 	a.TotalGiftIncome = 0
 	a.TotalPaidDanmakuIncome = 0
 	a.TotalVideoCallIncome = 0
@@ -61,6 +64,7 @@ func (a *LiveRoomIncomeAmounts) IsZero() bool {
 		return true
 	}
 	return a.TotalIncome == 0 &&
+		a.TotalSocialIncome == 0 &&
 		a.TotalGiftIncome == 0 &&
 		a.TotalPaidDanmakuIncome == 0 &&
 		a.TotalVideoCallIncome == 0 &&
@@ -78,6 +82,9 @@ func addIncomeAmountsLocked(tb db.TbName, id any, dst *LiveRoomIncomeAmounts, sr
 	}
 	if src.TotalIncome != 0 {
 		addIncomeAmountLocked(tb, LiveRoomIncomeTotalIncome, id, &dst.TotalIncome, src.TotalIncome)
+	}
+	if src.TotalSocialIncome != 0 {
+		addIncomeAmountLocked(tb, LiveRoomIncomeTotalSocialIncome, id, &dst.TotalSocialIncome, src.TotalSocialIncome)
 	}
 	if src.TotalGiftIncome > 0 {
 		addIncomeAmountLocked(tb, LiveRoomIncomeTotalGiftIncome, id, &dst.TotalGiftIncome, src.TotalGiftIncome)
@@ -112,6 +119,7 @@ func clearIncomeAmountsLocked(tb db.TbName, id any, a *LiveRoomIncomeAmounts, up
 	}
 	a.clearAmounts()
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalIncome, id, 0)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalSocialIncome, id, 0)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalGiftIncome, id, 0)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalPaidDanmakuIncome, id, 0)
 	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallIncome, id, 0)
@@ -187,6 +195,7 @@ func addIncomeEarnWithLockKey(tb db.TbName, lockKey string, id any, a *LiveRoomI
 	gmlock.Lock(lockKey)
 	defer gmlock.Unlock(lockKey)
 	addIncomeAmountLocked(tb, LiveRoomIncomeTotalIncome, id, &a.TotalIncome, amount)
+	addIncomeAmountLocked(tb, LiveRoomIncomeTotalSocialIncome, id, &a.TotalSocialIncome, amount)
 	if amount > 0 {
 		addIncomeAmountLocked(tb, extraCol, id, extra, amount)
 	}
@@ -209,6 +218,7 @@ func ApplyVideoCallIncomeDeltaWithLockKey(tb db.TbName, lockKey string, id any, 
 	gmlock.Lock(lockKey)
 	defer gmlock.Unlock(lockKey)
 	addIncomeAmountLocked(tb, LiveRoomIncomeTotalIncome, id, &a.TotalIncome, amount)
+	addIncomeAmountLocked(tb, LiveRoomIncomeTotalSocialIncome, id, &a.TotalSocialIncome, amount)
 	addIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallIncome, id, &a.TotalVideoCallIncome, amount)
 	if ticket {
 		addIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallTicketIncome, id, &a.TotalVideoCallTicketIncome, amount)
@@ -223,6 +233,7 @@ func regLiveRoomIncomeCols(tb db.TbName) {
 	syndb.RegQuick(tb, db.CreatedAtName)
 	syndb.RegQuick(tb, db.UpdatedAtName)
 	syndb.RegQuick(tb, LiveRoomIncomeTotalIncome)
+	syndb.RegQuick(tb, LiveRoomIncomeTotalSocialIncome)
 	syndb.RegQuick(tb, LiveRoomIncomeTotalGiftIncome)
 	syndb.RegQuick(tb, LiveRoomIncomeTotalPaidDanmakuIncome)
 	syndb.RegQuick(tb, LiveRoomIncomeTotalVideoCallIncome)

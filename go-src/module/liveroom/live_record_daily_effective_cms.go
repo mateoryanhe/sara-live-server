@@ -61,6 +61,7 @@ func toCMSDailyEffectiveLiveItem(row *liveentity.DailyAnchorEffectiveLive, profi
 		Settled:      row.Settled,
 		LiveRoomIncomeAmountsItem: accountdto.LiveRoomIncomeAmountsItem{
 			TotalIncome:                 amounts.TotalIncome,
+			TotalSocialIncome:           amounts.TotalSocialIncome,
 			TotalGiftIncome:             amounts.TotalGiftIncome,
 			TotalPaidDanmakuIncome:      amounts.TotalPaidDanmakuIncome,
 			TotalVideoCallIncome:        amounts.TotalVideoCallIncome,

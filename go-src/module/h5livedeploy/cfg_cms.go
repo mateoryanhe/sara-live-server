@@ -6,13 +6,15 @@ import (
 	"strings"
 	"time"
 
+	"xr-game-server/core/cfg"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/h5livedeploydto"
 	"xr-game-server/entity/sys"
 	"xr-game-server/errercode"
+	"xr-game-server/module/domainsite"
 )
 
-func GetH5LiveDeployInfo(_ context.Context, _ *h5livedeploydto.GetH5LiveDeployInfoReq) (*h5livedeploydto.GetH5LiveDeployInfoRes, error) {
+func GetH5LiveDeployInfo(ctx context.Context, _ *h5livedeploydto.GetH5LiveDeployInfoReq) (*h5livedeploydto.GetH5LiveDeployInfoRes, error) {
 	deployPath, err := getDeployDir()
 	if err != nil {
 		return nil, err
@@ -21,18 +23,22 @@ func GetH5LiveDeployInfo(_ context.Context, _ *h5livedeploydto.GetH5LiveDeployIn
 	return &h5livedeploydto.GetH5LiveDeployInfoRes{
 		Info: &h5livedeploydto.H5LiveDeployInfoItem{
 			ID:           formatUintID(snap.ID),
+			Domain:       cfg.GetStaticSiteDomains(h5livedeploydto.H5LiveStaticPrefix),
 			UrlPrefix:    h5livedeploydto.H5LiveStaticPrefix,
 			DeployPath:   deployPath,
 			AcceptExt:    ".zip",
 			DeploySecret: snap.DeploySecret,
 			UpdatedAt:    snap.UpdatedAt,
+			LastUploadAt: domainsite.GetLastUploadAt(ctx, h5livedeploydto.H5LiveSiteKey),
 		},
 	}, nil
 }
 
-func SaveH5LiveDeployCfg(_ context.Context, req *h5livedeploydto.SaveH5LiveDeployCfgReq) (*h5livedeploydto.SaveH5LiveDeployCfgRes, error) {
+func SaveH5LiveDeployCfg(ctx context.Context, req *h5livedeploydto.SaveH5LiveDeployCfgReq) (*h5livedeploydto.SaveH5LiveDeployCfgRes, error) {
 	secret := strings.TrimSpace(req.DeploySecret)
-	if secret == "" {
+	domain := strings.TrimSpace(req.Domain)
+	deployPath := strings.TrimSpace(req.DeployPath)
+	if secret == "" || domain == "" || deployPath == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	existing := cfgdao.LoadH5LiveDeployCfg()
@@ -52,6 +58,15 @@ func SaveH5LiveDeployCfg(_ context.Context, req *h5livedeploydto.SaveH5LiveDeplo
 	row.UpdatedAt = time.Now()
 	if row.CreatedAt.IsZero() {
 		row.CreatedAt = row.UpdatedAt
+	}
+	if _, err := domainsite.SaveStaticSiteMapping(
+		ctx,
+		h5livedeploydto.H5LiveSiteKey,
+		h5livedeploydto.H5LiveStaticPrefix,
+		domain,
+		deployPath,
+	); err != nil {
+		return nil, err
 	}
 	if err := cfgdao.SaveH5LiveDeployCfg(row); err != nil {
 		return nil, err

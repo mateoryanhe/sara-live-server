@@ -2,9 +2,11 @@ import type {AxiosProgressEvent} from 'axios'
 import {request} from '../request'
 
 export interface ThirdPayDeployInfo {
+    domain: string
     urlPrefix: string
     deployPath: string
     acceptExt: string
+    lastUploadAt: string
 }
 
 export interface DeployThirdPayZipRes {
@@ -18,9 +20,22 @@ export interface GetThirdPayDeployInfoRes {
     info: ThirdPayDeployInfo | null
 }
 
+export interface SaveThirdPayDeployCfgReq {
+    domain: string
+    deployPath: string
+}
+
+export interface SaveThirdPayDeployCfgRes {
+    success: boolean
+}
+
 export const thirdPayDeployApi = {
     getThirdPayDeployInfo: () => {
         return request.post<GetThirdPayDeployInfoRes>('/thirdPayDeploy/getThirdPayDeployInfo', {})
+    },
+
+    saveThirdPayDeployCfg: (data: SaveThirdPayDeployCfgReq) => {
+        return request.post<SaveThirdPayDeployCfgRes>('/thirdPayDeploy/saveThirdPayDeployCfg', data)
     },
 
     deployZip: (file: File, onUploadProgress?: (percent: number) => void) => {

@@ -12,7 +12,39 @@
         <el-descriptions-item :label="t('pages.thirdPayDeploy.deployPath')">
           {{ deployInfo.deployPath }}
         </el-descriptions-item>
+        <el-descriptions-item :label="t('pages.thirdPayDeploy.lastUploadAt')">
+          {{ deployInfo.lastUploadAt || '-' }}
+        </el-descriptions-item>
       </el-descriptions>
+
+      <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="120px">
+        <div class="section-title">{{ t('pages.thirdPayDeploy.siteMappingTitle') }}</div>
+        <div class="form-tip">{{ t('pages.thirdPayDeploy.siteMappingTip') }}</div>
+
+        <el-form-item :label="t('pages.thirdPayDeploy.domain')" prop="domain">
+          <el-input
+              v-model="formData.domain"
+              clearable
+              :disabled="!can('save')"
+              :placeholder="t('pages.thirdPayDeploy.domainPlaceholder')"
+          />
+        </el-form-item>
+
+        <el-form-item :label="t('pages.thirdPayDeploy.deployPath')" prop="deployPath">
+          <el-input
+              v-model="formData.deployPath"
+              clearable
+              :disabled="!can('save')"
+              :placeholder="t('pages.thirdPayDeploy.deployPathPlaceholder')"
+          />
+        </el-form-item>
+
+        <el-form-item v-if="can('save')">
+          <el-button :loading="saving" type="primary" @click="handleSaveMapping">
+            {{ t('pages.thirdPayDeploy.saveAndRefresh') }}
+          </el-button>
+        </el-form-item>
+      </el-form>
 
       <div class="upload-section">
         <div class="section-title">{{ t('pages.thirdPayDeploy.uploadTitle') }}</div>
@@ -80,9 +112,9 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onMounted, reactive, ref} from 'vue'
 import {UploadFilled} from '@element-plus/icons-vue'
-import type {UploadFile, UploadFiles} from 'element-plus'
+import type {FormInstance, FormRules, UploadFile, UploadFiles} from 'element-plus'
 import {ElMessage} from 'element-plus'
 import {useI18n} from 'vue-i18n'
 import {thirdPayDeployApi} from '@/api/modules/third-pay-deploy'
@@ -93,24 +125,66 @@ const {t} = useI18n()
 const {can} = usePagePermission('ThirdPayDeployManagement')
 
 const loading = ref(false)
+const saving = ref(false)
 const uploading = ref(false)
 const uploadPercent = ref(0)
 const uploadStatus = ref<'success' | 'exception' | ''>('')
 const deployInfo = ref<ThirdPayDeployInfo | null>(null)
 const selectedFile = ref<File | null>(null)
 const deployResult = ref<DeployThirdPayZipRes | null>(null)
+const formRef = ref<FormInstance>()
+
+const formData = reactive({
+  domain: '',
+  deployPath: '/home/ec2-user/cdn/third-pay',
+})
+
+const formRules = computed<FormRules>(() => ({
+  domain: [{required: true, message: t('pages.thirdPayDeploy.domainRequired'), trigger: 'blur'}],
+  deployPath: [{required: true, message: t('pages.thirdPayDeploy.deployPathRequired'), trigger: 'blur'}],
+}))
 
 const deployResultTitle = computed(() => t('pages.thirdPayDeploy.deploySuccess'))
+
+const applyDeployInfo = (info: ThirdPayDeployInfo | null | undefined) => {
+  deployInfo.value = info ?? null
+  formData.domain = info?.domain ?? ''
+  formData.deployPath = info?.deployPath ?? '/home/ec2-user/cdn/third-pay'
+}
 
 const fetchDeployInfo = async () => {
   loading.value = true
   try {
     const response = await thirdPayDeployApi.getThirdPayDeployInfo()
-    deployInfo.value = response.info ?? null
+    applyDeployInfo(response.info)
   } catch {
     ElMessage.error(t('pages.thirdPayDeploy.fetchInfoFailed'))
   } finally {
     loading.value = false
+  }
+}
+
+const handleSaveMapping = async () => {
+  if (!formRef.value) {
+    return
+  }
+  try {
+    await formRef.value.validate()
+  } catch {
+    return
+  }
+  saving.value = true
+  try {
+    await thirdPayDeployApi.saveThirdPayDeployCfg({
+      domain: formData.domain.trim(),
+      deployPath: formData.deployPath.trim(),
+    })
+    ElMessage.success(t('pages.thirdPayDeploy.saveSuccess'))
+    await fetchDeployInfo()
+  } catch {
+    ElMessage.error(t('pages.thirdPayDeploy.saveFailed'))
+  } finally {
+    saving.value = false
   }
 }
 
@@ -152,6 +226,7 @@ const handleDeploy = async () => {
     deployResult.value = response
     uploadStatus.value = 'success'
     ElMessage.success(t('pages.thirdPayDeploy.deploySuccess'))
+    await fetchDeployInfo()
   } catch {
     uploadStatus.value = 'exception'
     ElMessage.error(t('pages.thirdPayDeploy.deployFailed'))
@@ -167,6 +242,10 @@ onMounted(() => {
 
 <style scoped>
 .deploy-info {
+  margin-bottom: 24px;
+}
+
+.cfg-form {
   margin-bottom: 24px;
 }
 

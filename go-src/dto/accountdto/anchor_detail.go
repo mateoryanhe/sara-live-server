@@ -15,6 +15,7 @@ type GetAnchorDetailReq struct {
 // LiveRoomIncomeAmountsItem 直播间收益金额字段
 type LiveRoomIncomeAmountsItem struct {
 	TotalIncome                 float64 `json:"totalIncome"`
+	TotalSocialIncome           float64 `json:"totalSocialIncome"`
 	TotalGiftIncome             float64 `json:"totalGiftIncome"`
 	TotalPaidDanmakuIncome      float64 `json:"totalPaidDanmakuIncome"`
 	TotalVideoCallIncome        float64 `json:"totalVideoCallIncome"`

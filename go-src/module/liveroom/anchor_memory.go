@@ -255,6 +255,7 @@ func fillAnchorRoomFields(item *accountdto.AnchorListItem, room *liveentity.Live
 	// 主播列表收益读未结算(缓存优先,否则直查DB,不新建)
 	if income := liveroomdao.GetLiveRoomIncomeUnsettledForCMS(room.ID); income != nil {
 		item.TotalIncome = income.TotalIncome
+		item.TotalSocialIncome = income.TotalSocialIncome
 		item.TotalGiftIncome = income.TotalGiftIncome
 		item.TotalPaidDanmakuIncome = income.TotalPaidDanmakuIncome
 		item.TotalVideoCallIncome = income.TotalVideoCallIncome

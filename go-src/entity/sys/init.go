@@ -12,6 +12,8 @@ func Init() {
 	initFirebaseCfg()
 	initDbBackupCfg()
 	initStaticCacheRule()
+	initDomainSiteMapping()
+	initDomainSiteDeployState()
 	initSysResourceMetric()
 	initSysResourceMetricAgg()
 }

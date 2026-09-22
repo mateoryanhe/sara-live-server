@@ -2,18 +2,6 @@ server:
   ###系统配置
   address: 443  #http服务端口
   serverRoot: "/home/ec2-user/cdn/official-site"  # GoFrame 默认静态目录; API 走 www, 官网走 web 子域
-  staticSites:  # *.bigtktool.shop 通配证书, certFile/keyFile 可省略; www 不配此项,默认 API
-    - domain: "lzg.bigtktool.shop"
-      path: "/home/ec2-user/cdn/cms"
-    - domain: "web.bigtktool.shop"
-      path: "/home/ec2-user/cdn/official-site"
-    - domain: "h5-live.bigtktool.shop"
-      path: "/home/ec2-user/cdn/h5-live"
-    - domain: "coin-merchant.bigtktool.shop"
-      path: "/home/ec2-user/cdn/coin-merchant"
-    - domain: "third-pay.bigtktool.shop"
-      path: "/home/ec2-user/cdn/third-pay"
-      t: true  # App 启动配置中的第三方支付域名
   httpsCertPath: "/home/ec2-user/www.bigtktool.shop_ecc/fullchain.pem"
   httpsKeyPath: "/home/ec2-user/www.bigtktool.shop_ecc/privkey.pem"
   clientMaxBodySize: "5g"   # HTTP 请求体/上传上限(唯一大小限制,Go业务层不再校验)

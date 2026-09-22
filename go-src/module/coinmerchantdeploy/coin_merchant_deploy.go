@@ -12,6 +12,7 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"xr-game-server/core/cfg"
 	"xr-game-server/dto/coinmerchantdeploydto"
+	"xr-game-server/module/domainsite"
 )
 
 func DeployZipFromRequest(r *ghttp.Request) (*coinmerchantdeploydto.DeployCoinMerchantZipRes, error) {
@@ -74,6 +75,9 @@ func DeployZipFromRequest(r *ghttp.Request) (*coinmerchantdeploydto.DeployCoinMe
 	if err != nil {
 		return nil, err
 	}
+	if _, err = domainsite.RecordDeploySuccess(r.Context(), coinmerchantdeploydto.CoinMerchantSiteKey); err != nil {
+		return nil, fmt.Errorf("files deployed but record upload time failed: %w", err)
+	}
 	return &coinmerchantdeploydto.DeployCoinMerchantZipRes{
 		FileCount:  fileCount,
 		DirCount:   dirCount,
@@ -85,7 +89,7 @@ func DeployZipFromRequest(r *ghttp.Request) (*coinmerchantdeploydto.DeployCoinMe
 func getDeployDir() (string, error) {
 	root := strings.TrimSpace(cfg.GetStaticPathRoot(coinmerchantdeploydto.CoinMerchantStaticPrefix))
 	if root == "" {
-		return "", fmt.Errorf("static path not configured for prefix %s", coinmerchantdeploydto.CoinMerchantStaticPrefix)
+		root = coinmerchantdeploydto.DefaultCoinMerchantDeployPath
 	}
 	if err := os.MkdirAll(root, 0755); err != nil {
 		return "", fmt.Errorf("create deploy dir %s: %w", root, err)

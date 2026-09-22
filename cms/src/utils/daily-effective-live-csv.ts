@@ -15,6 +15,7 @@ export function buildAnchorDailyEffectiveLiveCsvColumns(
     {header: t(`${ns}.dailyLiveDuration`), value: row => liveDurationSecondsToMinutes(row.liveDuration) ?? ''},
     {header: t(`${ns}.dailyReportedLiveDuration`), value: row => liveDurationSecondsToMinutes(row.totalLiveDuration) ?? ''},
     {header: t(`${ns}.liveIncome`), value: row => row.totalIncome},
+    {header: t(`${ns}.socialIncomeTotal`), value: row => row.totalSocialIncome},
     {header: t(`${ns}.giftIncome`), value: row => row.totalGiftIncome},
     {header: t(`${ns}.paidDanmakuIncome`), value: row => row.totalPaidDanmakuIncome},
     {header: t(`${ns}.videoCallIncome`), value: row => row.totalVideoCallIncome},
@@ -41,6 +42,7 @@ export function buildGuildDailyEffectiveLiveCsvColumns(
     {header: t(`${ns}.dailyLiveDuration`), value: row => liveDurationSecondsToMinutes(row.liveDuration) ?? ''},
     {header: t(`${ns}.dailyReportedLiveDuration`), value: row => liveDurationSecondsToMinutes(row.totalLiveDuration) ?? ''},
     {header: t(`${ns}.liveIncome`), value: row => row.totalIncome},
+    {header: t(`${ns}.socialIncomeTotal`), value: row => row.totalSocialIncome},
     {header: t(`${ns}.giftIncome`), value: row => row.totalGiftIncome},
     {header: t(`${ns}.paidDanmakuIncome`), value: row => row.totalPaidDanmakuIncome},
     {header: t(`${ns}.videoCallIncome`), value: row => row.totalVideoCallIncome},
@@ -67,6 +69,7 @@ export function buildGuildAnchorDailyEffectiveLiveCsvColumns(
     {header: t(`${ns}.dailyLiveDate`), value: row => row.liveDate ?? ''},
     {header: t('pages.liveDailyEffectiveLiveList.unsettledTotalIncome'), value: row => row.unsettledTotalIncome},
     {header: t('pages.liveDailyEffectiveLiveList.dailyLiveIncome'), value: row => row.totalIncome},
+    {header: t('pages.liveDailyEffectiveLiveList.dailySocialIncome'), value: row => row.totalSocialIncome},
     {header: t(`${ns}.dailyLiveDuration`), value: row => liveDurationSecondsToMinutes(row.liveDuration) ?? ''},
   ]
 }
@@ -82,6 +85,7 @@ export function buildLiveDailyEffectiveLiveListCsvColumns(
     {header: t('pages.anchorList.dailyLiveDuration'), value: row => liveDurationSecondsToMinutes(row.liveDuration) ?? ''},
     {header: t('pages.anchorList.dailyReportedLiveDuration'), value: row => liveDurationSecondsToMinutes(row.totalLiveDuration) ?? ''},
     {header: t(`${ns}.dailyLiveIncome`), value: row => row.totalIncome},
+    {header: t(`${ns}.dailySocialIncome`), value: row => row.totalSocialIncome},
     {header: t(`${ns}.dailyGiftIncome`), value: row => row.totalGiftIncome},
     {header: t(`${ns}.dailyPaidDanmakuIncome`), value: row => row.totalPaidDanmakuIncome},
     {header: t(`${ns}.dailyVideoCallIncome`), value: row => row.totalVideoCallIncome},

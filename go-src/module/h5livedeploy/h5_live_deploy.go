@@ -12,6 +12,7 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"xr-game-server/core/cfg"
 	"xr-game-server/dto/h5livedeploydto"
+	"xr-game-server/module/domainsite"
 )
 
 func DeployZipFromRequest(r *ghttp.Request) (*h5livedeploydto.DeployH5LiveZipRes, error) {
@@ -74,6 +75,9 @@ func DeployZipFromRequest(r *ghttp.Request) (*h5livedeploydto.DeployH5LiveZipRes
 	if err != nil {
 		return nil, err
 	}
+	if _, err = domainsite.RecordDeploySuccess(r.Context(), h5livedeploydto.H5LiveSiteKey); err != nil {
+		return nil, fmt.Errorf("files deployed but record upload time failed: %w", err)
+	}
 	return &h5livedeploydto.DeployH5LiveZipRes{
 		FileCount:  fileCount,
 		DirCount:   dirCount,
@@ -85,7 +89,7 @@ func DeployZipFromRequest(r *ghttp.Request) (*h5livedeploydto.DeployH5LiveZipRes
 func getDeployDir() (string, error) {
 	root := strings.TrimSpace(cfg.GetStaticPathRoot(h5livedeploydto.H5LiveStaticPrefix))
 	if root == "" {
-		return "", fmt.Errorf("static path not configured for prefix %s", h5livedeploydto.H5LiveStaticPrefix)
+		root = h5livedeploydto.DefaultH5DeployPath
 	}
 	if err := os.MkdirAll(root, 0755); err != nil {
 		return "", fmt.Errorf("create deploy dir %s: %w", root, err)

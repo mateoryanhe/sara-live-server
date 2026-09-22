@@ -55,6 +55,7 @@ func incomeAmountCSVCells(amounts *liveentity.LiveRoomIncomeAmounts) []string {
 	}
 	return []string{
 		formatCSVFloat(amounts.TotalIncome),
+		formatCSVFloat(amounts.TotalSocialIncome),
 		formatCSVFloat(amounts.TotalGiftIncome),
 		formatCSVFloat(amounts.TotalPaidDanmakuIncome),
 		formatCSVFloat(amounts.TotalVideoCallIncome),
@@ -69,6 +70,7 @@ func incomeAmountCSVCells(amounts *liveentity.LiveRoomIncomeAmounts) []string {
 func incomeAmountItemCSVCells(item accountdto.LiveRoomIncomeAmountsItem) []string {
 	return []string{
 		formatCSVFloat(item.TotalIncome),
+		formatCSVFloat(item.TotalSocialIncome),
 		formatCSVFloat(item.TotalGiftIncome),
 		formatCSVFloat(item.TotalPaidDanmakuIncome),
 		formatCSVFloat(item.TotalVideoCallIncome),

@@ -285,6 +285,7 @@ func guildAnchorDailyEffectiveLiveToCSVRow(row *liveentity.DailyAnchorEffectiveL
 	}
 	cells = append(cells,
 		formatCSVFloat(row.TotalIncome),
+		formatCSVFloat(row.TotalSocialIncome),
 		formatLiveDurationMinutes(row.LiveDuration),
 	)
 	return cells

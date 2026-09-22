@@ -307,6 +307,7 @@ export interface AnchorListItem {
     billing?: number
     liveStatus?: number
     totalIncome?: number
+    totalSocialIncome?: number
     totalGiftIncome?: number
     totalPaidDanmakuIncome?: number
     totalVideoCallIncome?: number
@@ -323,6 +324,7 @@ export interface AnchorListItem {
 
 export interface LiveRoomIncomeAmounts {
     totalIncome?: number
+    totalSocialIncome?: number
     totalGiftIncome?: number
     totalPaidDanmakuIncome?: number
     totalVideoCallIncome?: number
@@ -1573,6 +1575,7 @@ export interface AnchorSalaryCfgQuery extends PageQuery {
 
 export interface IncomeSettlementLogAmounts {
     totalIncome: number
+    totalSocialIncome: number
     totalGiftIncome: number
     totalPaidDanmakuIncome: number
     totalVideoCallIncome: number

@@ -76,6 +76,7 @@ func toIncomeAmountsItem(a *entity.LiveRoomIncomeAmounts) accountdto.LiveRoomInc
 	}
 	return accountdto.LiveRoomIncomeAmountsItem{
 		TotalIncome:                 a.TotalIncome,
+		TotalSocialIncome:           a.TotalSocialIncome,
 		TotalGiftIncome:             a.TotalGiftIncome,
 		TotalPaidDanmakuIncome:      a.TotalPaidDanmakuIncome,
 		TotalVideoCallIncome:        a.TotalVideoCallIncome,

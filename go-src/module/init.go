@@ -18,6 +18,7 @@ import (
 	"xr-game-server/module/currencylog"
 	"xr-game-server/module/customerservice"
 	"xr-game-server/module/dbbackup"
+	"xr-game-server/module/domainsite"
 	"xr-game-server/module/fiatcurrency"
 	"xr-game-server/module/game"
 	"xr-game-server/module/gameconsumrank"
@@ -40,6 +41,7 @@ import (
 	"xr-game-server/module/simulatordevicewhitelist"
 	"xr-game-server/module/stat"
 	"xr-game-server/module/staticcachecfg"
+	"xr-game-server/module/ticket"
 	"xr-game-server/module/upload"
 	"xr-game-server/module/userinfo"
 	"xr-game-server/module/usermaxid"
@@ -51,6 +53,7 @@ import (
 func Init() {
 	staticcachecfg.Init()
 	upload.Init()
+	domainsite.Init()
 	randomnick.Init()
 	usermaxid.Init()
 	auth.InitAuth()
@@ -64,6 +67,7 @@ func Init() {
 	gameconsumrank.Init()
 	anchorrank.Init()
 	banner.Init()
+	ticket.Init()
 	privateroombilling.Init()
 	vip.Init()
 	apppkg.Init()

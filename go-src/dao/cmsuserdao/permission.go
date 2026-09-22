@@ -178,6 +178,10 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/rechargeOrder/createChannelRechargeOrderTest"}
 	case "/fiatCurrency/haiPayRegionList":
 		return []string{"/rechargeOrder/createChannelRechargeOrderTest"}
+	case "/officialSiteDeploy/initFileUpload", "/officialSiteDeploy/uploadFileChunk", "/officialSiteDeploy/completeFileUpload", "/officialSiteDeploy/abortFileUpload":
+		return []string{"/officialSiteDeploy/deployZip"}
+	case "/thirdPayOfficialSiteDeploy/initFileUpload", "/thirdPayOfficialSiteDeploy/uploadFileChunk", "/thirdPayOfficialSiteDeploy/completeFileUpload", "/thirdPayOfficialSiteDeploy/abortFileUpload":
+		return []string{"/thirdPayOfficialSiteDeploy/deployZip"}
 	default:
 		return nil
 	}

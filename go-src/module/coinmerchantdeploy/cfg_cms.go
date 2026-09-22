@@ -6,13 +6,15 @@ import (
 	"strings"
 	"time"
 
+	"xr-game-server/core/cfg"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/coinmerchantdeploydto"
 	"xr-game-server/entity/sys"
 	"xr-game-server/errercode"
+	"xr-game-server/module/domainsite"
 )
 
-func GetCoinMerchantDeployInfo(_ context.Context, _ *coinmerchantdeploydto.GetCoinMerchantDeployInfoReq) (*coinmerchantdeploydto.GetCoinMerchantDeployInfoRes, error) {
+func GetCoinMerchantDeployInfo(ctx context.Context, _ *coinmerchantdeploydto.GetCoinMerchantDeployInfoReq) (*coinmerchantdeploydto.GetCoinMerchantDeployInfoRes, error) {
 	deployPath, err := getDeployDir()
 	if err != nil {
 		return nil, err
@@ -21,18 +23,22 @@ func GetCoinMerchantDeployInfo(_ context.Context, _ *coinmerchantdeploydto.GetCo
 	return &coinmerchantdeploydto.GetCoinMerchantDeployInfoRes{
 		Info: &coinmerchantdeploydto.CoinMerchantDeployInfoItem{
 			ID:           formatUintID(snap.ID),
+			Domain:       cfg.GetStaticSiteDomains(coinmerchantdeploydto.CoinMerchantStaticPrefix),
 			UrlPrefix:    coinmerchantdeploydto.CoinMerchantStaticPrefix,
 			DeployPath:   deployPath,
 			AcceptExt:    ".zip",
 			DeploySecret: snap.DeploySecret,
 			UpdatedAt:    snap.UpdatedAt,
+			LastUploadAt: domainsite.GetLastUploadAt(ctx, coinmerchantdeploydto.CoinMerchantSiteKey),
 		},
 	}, nil
 }
 
-func SaveCoinMerchantDeployCfg(_ context.Context, req *coinmerchantdeploydto.SaveCoinMerchantDeployCfgReq) (*coinmerchantdeploydto.SaveCoinMerchantDeployCfgRes, error) {
+func SaveCoinMerchantDeployCfg(ctx context.Context, req *coinmerchantdeploydto.SaveCoinMerchantDeployCfgReq) (*coinmerchantdeploydto.SaveCoinMerchantDeployCfgRes, error) {
 	secret := strings.TrimSpace(req.DeploySecret)
-	if secret == "" {
+	domain := strings.TrimSpace(req.Domain)
+	deployPath := strings.TrimSpace(req.DeployPath)
+	if secret == "" || domain == "" || deployPath == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	existing := cfgdao.LoadCoinMerchantDeployCfg()
@@ -52,6 +58,15 @@ func SaveCoinMerchantDeployCfg(_ context.Context, req *coinmerchantdeploydto.Sav
 	row.UpdatedAt = time.Now()
 	if row.CreatedAt.IsZero() {
 		row.CreatedAt = row.UpdatedAt
+	}
+	if _, err := domainsite.SaveStaticSiteMapping(
+		ctx,
+		coinmerchantdeploydto.CoinMerchantSiteKey,
+		coinmerchantdeploydto.CoinMerchantStaticPrefix,
+		domain,
+		deployPath,
+	); err != nil {
+		return nil, err
 	}
 	if err := cfgdao.SaveCoinMerchantDeployCfg(row); err != nil {
 		return nil, err

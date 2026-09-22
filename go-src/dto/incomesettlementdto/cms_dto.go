@@ -63,6 +63,7 @@ type CMSIncomeSettlementLogItem struct {
 	GuildId                     uint64     `json:"guildId,string"`
 	GuildName                   string     `json:"guildName"`
 	TotalIncome                 float64    `json:"totalIncome"`
+	TotalSocialIncome           float64    `json:"totalSocialIncome"`
 	TotalGiftIncome             float64    `json:"totalGiftIncome"`
 	TotalPaidDanmakuIncome      float64    `json:"totalPaidDanmakuIncome"`
 	TotalVideoCallIncome        float64    `json:"totalVideoCallIncome"`

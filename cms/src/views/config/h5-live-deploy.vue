@@ -12,9 +12,35 @@
         <el-descriptions-item :label="t('pages.h5LiveDeploy.deployPath')">
           {{ deployInfo.deployPath }}
         </el-descriptions-item>
+        <el-descriptions-item :label="t('pages.h5LiveDeploy.lastUploadAt')">
+          {{ deployInfo.lastUploadAt || '-' }}
+        </el-descriptions-item>
       </el-descriptions>
 
       <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="120px">
+        <div class="section-title">{{ t('pages.h5LiveDeploy.siteMappingTitle') }}</div>
+        <div class="form-tip">{{ t('pages.h5LiveDeploy.siteMappingTip') }}</div>
+
+        <el-form-item :label="t('pages.h5LiveDeploy.domain')" prop="domain">
+          <el-input
+              v-model="formData.domain"
+              clearable
+              :disabled="!can('save')"
+              :placeholder="t('pages.h5LiveDeploy.domainPlaceholder')"
+          />
+        </el-form-item>
+
+        <el-form-item :label="t('pages.h5LiveDeploy.deployPath')" prop="deployPath">
+          <el-input
+              v-model="formData.deployPath"
+              clearable
+              :disabled="!can('save')"
+              :placeholder="t('pages.h5LiveDeploy.deployPathPlaceholder')"
+          />
+        </el-form-item>
+
+        <el-divider/>
+
         <div class="section-title">{{ t('pages.h5LiveDeploy.secretTitle') }}</div>
         <div class="form-tip">{{ t('pages.h5LiveDeploy.secretTip') }}</div>
 
@@ -43,7 +69,7 @@
 
         <el-form-item v-if="can('save')">
           <el-button :loading="saving" type="primary" @click="handleSaveSecret">
-            {{ t('common.saveConfig') }}
+            {{ t('pages.h5LiveDeploy.saveAndRefresh') }}
           </el-button>
         </el-form-item>
       </el-form>
@@ -138,6 +164,8 @@ const formRef = ref<FormInstance>()
 
 const formData = reactive({
   id: 0,
+  domain: '',
+  deployPath: '/home/ec2-user/cdn/h5-live',
   deploySecret: '',
 })
 
@@ -146,6 +174,8 @@ const metaInfo = reactive({
 })
 
 const formRules = computed<FormRules>(() => ({
+  domain: [{required: true, message: t('pages.h5LiveDeploy.domainRequired'), trigger: 'blur'}],
+  deployPath: [{required: true, message: t('pages.h5LiveDeploy.deployPathRequired'), trigger: 'blur'}],
   deploySecret: [{required: true, message: t('pages.h5LiveDeploy.deploySecretRequired'), trigger: 'blur'}],
 }))
 
@@ -154,6 +184,8 @@ const deployResultTitle = computed(() => t('pages.h5LiveDeploy.deploySuccess'))
 const applyDeployInfo = (info: H5LiveDeployInfo | null | undefined) => {
   deployInfo.value = info ?? null
   formData.id = info?.id ? Number(info.id) : 0
+  formData.domain = info?.domain ?? ''
+  formData.deployPath = info?.deployPath ?? '/home/ec2-user/cdn/h5-live'
   formData.deploySecret = info?.deploySecret ?? ''
   metaInfo.updatedAt = info?.updatedAt ?? ''
 }
@@ -202,6 +234,8 @@ const handleSaveSecret = async () => {
   try {
     await h5LiveDeployApi.saveH5LiveDeployCfg({
       id: formData.id,
+      domain: formData.domain.trim(),
+      deployPath: formData.deployPath.trim(),
       deploySecret: formData.deploySecret.trim(),
     })
     ElMessage.success(t('pages.h5LiveDeploy.saveSuccess'))
@@ -251,6 +285,7 @@ const handleDeploy = async () => {
     deployResult.value = response
     uploadStatus.value = 'success'
     ElMessage.success(t('pages.h5LiveDeploy.deploySuccess'))
+    await fetchDeployInfo()
   } catch {
     uploadStatus.value = 'exception'
     ElMessage.error(t('pages.h5LiveDeploy.deployFailed'))

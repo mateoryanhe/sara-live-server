@@ -145,6 +145,9 @@
               <el-table-column :label="t('pages.anchorList.liveIncome')" min-width="110">
                 <template #default="{ row }">{{ formatAmount(row.totalIncome) }}</template>
               </el-table-column>
+              <el-table-column :label="t('pages.anchorList.socialIncomeTotal')" min-width="130">
+                <template #default="{ row }">{{ formatAmount(row.totalSocialIncome) }}</template>
+              </el-table-column>
               <el-table-column :label="t('pages.anchorList.giftIncome')" min-width="110">
                 <template #default="{ row }">{{ formatAmount(row.totalGiftIncome) }}</template>
               </el-table-column>

@@ -19,7 +19,7 @@ export const guildIncomeSettlementLogApi = {
     )
   },
   batchTransfer: (data: { ids: string[] }) => {
-    return request.post<{ reserved: boolean; message: string }>(
+    return request.post<{ successCount: number; failCount: number; message: string }>(
         '/guildIncomeSettlementLog/cmsBatchTransferGuildSettlement',
         data,
     )

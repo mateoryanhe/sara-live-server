@@ -505,6 +505,10 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'UploadResourceCfgManagement:save': '/upload/saveUploadResourceCfg',
     'UploadResourceCfgManagement:syncLocalToS3': '/upload/syncLocalStorageToS3',
 
+    CMSDomainMappingManagement: '/domainSite/getCMSDomainSiteMapping',
+    'CMSDomainMappingManagement:view': '/domainSite/getCMSDomainSiteMapping',
+    'CMSDomainMappingManagement:save': '/domainSite/saveCMSDomainSiteMapping',
+
     DataSyncCfgManagement: '/dataSync/getDataSyncCfg',
     'DataSyncCfgManagement:view': '/dataSync/getDataSyncCfg',
     'DataSyncCfgManagement:save': '/dataSync/saveDataSyncCfg',
@@ -525,7 +529,18 @@ const PERMISSION_API_PATHS: Record<string, string> = {
 
     ThirdPayDeployManagement: '/thirdPayDeploy/getThirdPayDeployInfo',
     'ThirdPayDeployManagement:view': '/thirdPayDeploy/getThirdPayDeployInfo',
+    'ThirdPayDeployManagement:save': '/thirdPayDeploy/saveThirdPayDeployCfg',
     'ThirdPayDeployManagement:deploy': '/thirdPayDeploy/deployZip',
+
+    OfficialSiteDeployManagement: '/officialSiteDeploy/getOfficialSiteDeployInfo',
+    'OfficialSiteDeployManagement:view': '/officialSiteDeploy/getOfficialSiteDeployInfo',
+    'OfficialSiteDeployManagement:save': '/officialSiteDeploy/saveOfficialSiteDeployCfg',
+    'OfficialSiteDeployManagement:deploy': '/officialSiteDeploy/deployZip',
+
+    ThirdPayOfficialSiteDeployManagement: '/thirdPayOfficialSiteDeploy/getThirdPayOfficialSiteDeployInfo',
+    'ThirdPayOfficialSiteDeployManagement:view': '/thirdPayOfficialSiteDeploy/getThirdPayOfficialSiteDeployInfo',
+    'ThirdPayOfficialSiteDeployManagement:save': '/thirdPayOfficialSiteDeploy/saveThirdPayOfficialSiteDeployCfg',
+    'ThirdPayOfficialSiteDeployManagement:deploy': '/thirdPayOfficialSiteDeploy/deployZip',
 
     ResourceMonitor: '/resourceMetric/getResourceMetricMemoryTrend',
     'ResourceMonitor:view': '/resourceMetric/getResourceMetricMemoryTrend',

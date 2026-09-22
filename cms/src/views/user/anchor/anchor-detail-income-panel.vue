@@ -11,6 +11,7 @@
       <span class="money-amount">{{ formatWalletBalance(settlementShareAmountUsd) }}</span>
     </el-descriptions-item>
     <el-descriptions-item :label="t('pages.anchorList.liveIncome')"><span class="money-amount">{{ formatWalletBalance(data.totalIncome) }}</span></el-descriptions-item>
+    <el-descriptions-item :label="t('pages.anchorList.socialIncomeTotal')"><span class="money-amount">{{ formatWalletBalance(data.totalSocialIncome) }}</span></el-descriptions-item>
     <el-descriptions-item :label="t('pages.anchorList.giftIncome')"><span class="money-amount">{{ formatWalletBalance(data.totalGiftIncome) }}</span></el-descriptions-item>
     <el-descriptions-item :label="t('pages.anchorList.paidDanmakuIncome')"><span class="money-amount">{{ formatWalletBalance(data.totalPaidDanmakuIncome) }}</span></el-descriptions-item>
     <el-descriptions-item :label="t('pages.anchorList.videoCallIncome')"><span class="money-amount">{{ formatWalletBalance(data.totalVideoCallIncome) }}</span></el-descriptions-item>

@@ -101,6 +101,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '资源域名'},
         },
         {
+            path: 'cms-domain-mapping',
+            name: 'CMSDomainMappingManagement',
+            component: () => import('@/views/config/cms-domain-mapping.vue'),
+            meta: {title: 'CMS域名映射'},
+        },
+        {
             path: 'h5-live-deploy',
             name: 'H5LiveDeployManagement',
             component: () => import('@/views/config/h5-live-deploy.vue'),
@@ -123,6 +129,18 @@ export const configRoutes: RouteRecordRaw = {
             name: 'ThirdPayDeployManagement',
             component: () => import('@/views/config/third-pay-deploy.vue'),
             meta: {title: '第三方支付部署'},
+        },
+        {
+            path: 'official-site-deploy',
+            name: 'OfficialSiteDeployManagement',
+            component: () => import('@/views/config/official-site-deploy.vue'),
+            meta: {title: '官网部署'},
+        },
+        {
+            path: 'third-pay-official-site-deploy',
+            name: 'ThirdPayOfficialSiteDeployManagement',
+            component: () => import('@/views/config/third-pay-official-site-deploy.vue'),
+            meta: {title: '第三方支付官网部署'},
         },
         {
             path: 'app-pkg-list',

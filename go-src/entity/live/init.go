@@ -18,6 +18,7 @@ func Init() {
 	initAnchorIncomeSettlementLog()
 	initGuildIncomeSettlementLog()
 	initLiveFollow()
+	initLiveTicket()
 	initLivePrivateRoomBilling()
 	initLiveCfg()
 	initLiveGuild()

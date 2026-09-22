@@ -44,6 +44,9 @@
         <el-table-column :label="t('pages.anchorList.liveIncome')" align="right" min-width="120">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
         </el-table-column>
+        <el-table-column :label="t('pages.anchorList.socialIncomeTotal')" align="right" min-width="130">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalSocialIncome) }}</span></template>
+        </el-table-column>
         <el-table-column :label="t('common.phone')" min-width="130" prop="phone">
           <template #default="{ row }">{{ row.phone || '-' }}</template>
         </el-table-column>

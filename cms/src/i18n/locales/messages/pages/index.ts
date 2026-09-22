@@ -77,10 +77,12 @@ import {haipayMessages} from './haipay'
 import {cfEmailMessages} from './cf-email'
 import {dbBackupMessages} from './db-backup'
 import {uploadResourceMessages} from './upload-resource'
+import {cmsDomainMappingMessages} from './cms-domain-mapping'
 import {h5LiveDeployMessages} from './h5-live-deploy'
 import {coinMerchantDeployMessages} from './coin-merchant-deploy'
 import {countryFlagDeployMessages} from './country-flag-deploy'
 import {thirdPayDeployMessages} from './third-pay-deploy'
+import {officialSiteDeployMessages} from './official-site-deploy'
 import {dataSyncMessages} from './data-sync'
 import {resourceMonitorMessages} from './resource-monitor'
 import {serverLogExplorerMessages} from './server-log-explorer'
@@ -164,10 +166,12 @@ const pageMessageBuilders = [
   ['cfEmail', cfEmailMessages],
   ['dbBackup', dbBackupMessages],
   ['uploadResource', uploadResourceMessages],
+  ['cmsDomainMapping', cmsDomainMappingMessages],
   ['h5LiveDeploy', h5LiveDeployMessages],
   ['coinMerchantDeploy', coinMerchantDeployMessages],
   ['countryFlagDeploy', countryFlagDeployMessages],
   ['thirdPayDeploy', thirdPayDeployMessages],
+  ['officialSiteDeploy', officialSiteDeployMessages],
   ['dataSync', dataSyncMessages],
   ['resourceMonitor', resourceMonitorMessages],
   ['serverLogExplorer', serverLogExplorerMessages],

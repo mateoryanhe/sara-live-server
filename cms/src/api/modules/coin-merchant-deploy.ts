@@ -3,11 +3,13 @@ import {request} from '../request'
 
 export interface CoinMerchantDeployInfo {
     id: string
+    domain: string
     urlPrefix: string
     deployPath: string
     acceptExt: string
     deploySecret: string
     updatedAt: string
+    lastUploadAt: string
 }
 
 export interface DeployCoinMerchantZipRes {
@@ -23,6 +25,8 @@ export interface GetCoinMerchantDeployInfoRes {
 
 export interface SaveCoinMerchantDeployCfgReq {
     id: number
+    domain: string
+    deployPath: string
     deploySecret: string
 }
 

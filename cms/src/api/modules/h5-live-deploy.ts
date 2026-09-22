@@ -3,11 +3,13 @@ import {request} from '../request'
 
 export interface H5LiveDeployInfo {
     id: string
+    domain: string
     urlPrefix: string
     deployPath: string
     acceptExt: string
     deploySecret: string
     updatedAt: string
+    lastUploadAt: string
 }
 
 export interface DeployH5LiveZipRes {
@@ -23,6 +25,8 @@ export interface GetH5LiveDeployInfoRes {
 
 export interface SaveH5LiveDeployCfgReq {
     id: number
+    domain: string
+    deployPath: string
     deploySecret: string
 }
 

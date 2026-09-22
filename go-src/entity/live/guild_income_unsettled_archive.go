@@ -39,6 +39,7 @@ func NewGuildIncomeUnsettledArchive(guildId uint64, a *LiveRoomIncomeAmounts) *G
 	syndb.AddData(TbGuildIncomeUnsettledArchive, db.UpdatedAtName, &syndb.ColData{IdVal: ret.ID, ColVal: now})
 	syndb.AddData(TbGuildIncomeUnsettledArchive, GuildIncomeUnsettledArchiveGuildId, &syndb.ColData{IdVal: ret.ID, ColVal: guildId})
 	writeIncomeAmountLocked(TbGuildIncomeUnsettledArchive, LiveRoomIncomeTotalIncome, ret.ID, a.TotalIncome)
+	writeIncomeAmountLocked(TbGuildIncomeUnsettledArchive, LiveRoomIncomeTotalSocialIncome, ret.ID, a.TotalSocialIncome)
 	writeIncomeAmountLocked(TbGuildIncomeUnsettledArchive, LiveRoomIncomeTotalGiftIncome, ret.ID, a.TotalGiftIncome)
 	writeIncomeAmountLocked(TbGuildIncomeUnsettledArchive, LiveRoomIncomeTotalPaidDanmakuIncome, ret.ID, a.TotalPaidDanmakuIncome)
 	writeIncomeAmountLocked(TbGuildIncomeUnsettledArchive, LiveRoomIncomeTotalVideoCallIncome, ret.ID, a.TotalVideoCallIncome)
