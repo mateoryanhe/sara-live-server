@@ -98,6 +98,11 @@ func (c *GuildController) ImportGuildAnchors(ctx context.Context, req *guilddto.
 	return guild.ImportGuildAnchors(ctx, req)
 }
 
+// BatchImportSalaryAnchors 批量导入有底薪主播，不区分工会。
+func (c *GuildController) BatchImportSalaryAnchors(ctx context.Context, req *guilddto.BatchImportSalaryAnchorsReq) (*guilddto.BatchImportSalaryAnchorsRes, error) {
+	return guild.BatchImportSalaryAnchors(ctx, req)
+}
+
 // JoinGuildAnchor CMS加入工会主播
 func (c *GuildController) JoinGuildAnchor(ctx context.Context, req *guilddto.SetAnchorGuildReq) (res *guilddto.SetAnchorGuildRes, err error) {
 	return guild.JoinGuildAnchor(ctx, req)

@@ -9,6 +9,13 @@
       <div class="content">
         <div class="table-header">
           <el-button type="primary" @click="handleAdd">{{ t('pages.guildList.addGuild') }}</el-button>
+          <el-button
+              v-if="can('batchImportSalaryAnchor')"
+              type="warning"
+              @click="openSalaryImportDialog"
+          >
+            {{ t('pages.guildList.batchImportSalaryAnchor') }}
+          </el-button>
         </div>
         <el-alert
             :closable="false"
@@ -221,6 +228,41 @@
       </template>
     </el-dialog>
 
+    <el-dialog
+        v-model="salaryImportDialogVisible"
+        :title="t('pages.guildList.batchImportSalaryAnchorTitle')"
+        width="560px"
+    >
+      <el-alert
+          :closable="false"
+          :title="t('pages.guildList.batchImportSalaryAnchorValidityTip')"
+          class="salary-import-tip"
+          show-icon
+          type="info"
+      />
+      <el-form
+          ref="salaryImportFormRef"
+          :model="salaryImportForm"
+          :rules="importFormRules"
+          label-width="80px"
+      >
+        <el-form-item :label="t('pages.guildList.importUserIds')" prop="userIdsText">
+          <el-input
+              v-model="salaryImportForm.userIdsText"
+              :autosize="{ minRows: 8, maxRows: 16 }"
+              :placeholder="t('pages.guildList.importUserIdsPlaceholder')"
+              type="textarea"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="salaryImportDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button :loading="salaryImporting" type="primary" @click="handleSalaryImportSubmit">
+          {{ t('common.confirm') }}
+        </el-button>
+      </template>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -231,7 +273,6 @@ import {useRouter} from 'vue-router'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {ArrowDown} from '@element-plus/icons-vue'
 import {guildApi} from '@/api'
-import {liveRevenueShareCfgApi} from '@/api/modules/live-revenue-share-cfg'
 import CmsUserPickerDialog from '@/components/CmsUserPickerDialog.vue'
 import type {CMSUser} from '@/api/modules/cmsuser'
 import type {Guild, GuildAnchorImportResultState, ImportGuildAnchorRow} from '@/types/api.ts'
@@ -267,6 +308,10 @@ interface ImportGuildForm {
   userIdsText: string
 }
 
+interface SalaryImportForm {
+  userIdsText: string
+}
+
 const {t} = useI18n()
 const router = useRouter()
 const {can} = usePagePermission('GuildManagement')
@@ -299,6 +344,10 @@ const importForm = ref<ImportGuildForm>({
   anchorType: 1,
   userIdsText: '',
 })
+const salaryImportDialogVisible = ref(false)
+const salaryImporting = ref(false)
+const salaryImportFormRef = ref<FormInstance>()
+const salaryImportForm = ref<SalaryImportForm>({userIdsText: ''})
 
 const searchForm = reactive<SearchForm>({
   name: ''
@@ -398,15 +447,6 @@ const formRules = computed<FormRules>(() => ({
   ]
 }))
 
-const loadDefaultSharePercent = async () => {
-  try {
-    const response = await liveRevenueShareCfgApi.getCfg()
-    return response.cfg?.guildSharePercent ?? 10
-  } catch {
-    return 10
-  }
-}
-
 const isCoinMerchantGuild = computed(() => Number(currentRow.value.guildType) === 1)
 
 const guildTypeLabel = (guildType?: number) => {
@@ -414,11 +454,12 @@ const guildTypeLabel = (guildType?: number) => {
   return t('pages.guildList.guildTypeNormal')
 }
 
-const onGuildTypeChange = async (guildType: number) => {
+const onGuildTypeChange = (guildType: number) => {
   if (Number(guildType) === 1) {
+	currentRow.value.sharePercent = 10
     return
   }
-  currentRow.value.sharePercent = await loadDefaultSharePercent()
+	currentRow.value.sharePercent = 0
 }
 
 const fetchGuildList = async () => {
@@ -488,16 +529,15 @@ const handleRowCommand = (row: Guild, command: string) => {
   }
 }
 
-const handleAdd = async () => {
+const handleAdd = () => {
   dialogTitle.value = t('pages.guildList.addGuild')
-  const sharePercent = await loadDefaultSharePercent()
   currentRow.value = {
     id: '',
     name: '',
     leaderId: '',
     description: '',
     guildType: 0,
-    sharePercent,
+    sharePercent: 0,
   }
   selectedLeader.value = null
   dialogVisible.value = true
@@ -672,6 +712,51 @@ const parseImportUserIds = (text: string): ImportGuildAnchorRow[] => {
   return rows
 }
 
+const openSalaryImportDialog = () => {
+  salaryImportForm.value = {userIdsText: ''}
+  salaryImportDialogVisible.value = true
+  salaryImportFormRef.value?.clearValidate()
+}
+
+const handleSalaryImportSubmit = async () => {
+  if (!salaryImportFormRef.value) {
+    return
+  }
+  await salaryImportFormRef.value.validate(async (valid) => {
+    if (!valid) {
+      return
+    }
+    const ids = parseImportUserIds(salaryImportForm.value.userIdsText).map(row => row.userId)
+    if (ids.length === 0) {
+      ElMessage.warning(t('pages.guildList.importEmpty'))
+      return
+    }
+    salaryImporting.value = true
+    try {
+      const response = await guildApi.batchImportSalaryAnchors({ids})
+      salaryImportDialogVisible.value = false
+      ElMessage.success(t('pages.guildList.batchImportSalaryAnchorResult', {
+        success: response.successCount ?? 0,
+        fail: response.failCount ?? 0,
+      }))
+      const failIds = response.failIds || []
+      if (failIds.length > 0) {
+        const visibleIds = failIds.slice(0, 50).join(', ')
+        const suffix = failIds.length > 50 ? '…' : ''
+        ElMessage.warning({
+          message: t('pages.guildList.batchImportSalaryAnchorFailIds', {ids: `${visibleIds}${suffix}`}),
+          duration: 8000,
+        })
+      }
+    } catch (error) {
+      console.error('batch import salary anchors failed:', error)
+      ElMessage.error(t('pages.guildList.importFailed'))
+    } finally {
+      salaryImporting.value = false
+    }
+  })
+}
+
 const openImportDialog = (row: Guild, anchorType: 1 | 7) => {
   selectedGuild.value = row
   importDialogTitle.value = anchorType === 7
@@ -786,6 +871,10 @@ const handleViewMembers = (row: Guild) => {
 }
 
 .import-tip {
+  margin-bottom: 16px;
+}
+
+.salary-import-tip {
   margin-bottom: 16px;
 }
 

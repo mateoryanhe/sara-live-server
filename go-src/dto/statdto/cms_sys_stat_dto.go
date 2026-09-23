@@ -13,6 +13,8 @@ type CMSSysStatRes struct {
 	TotalRecharge             float64 `json:"totalRecharge" dc:"全部美金入账累计(真实USD)"`
 	TotalNormalUserRecharge   float64 `json:"totalNormalUserRecharge" dc:"普通用户美金入账累计(真实USD)"`
 	TotalCoinMerchantRecharge float64 `json:"totalCoinMerchantRecharge" dc:"币商美金入账累计(真实USD)"`
+	TotalAnchorPayout         float64 `json:"totalAnchorPayout" dc:"主播代付累计(USD)"`
+	WeeklyAnchorPayout        float64 `json:"weeklyAnchorPayout" dc:"本周主播代付金额(USD)"`
 	TotalVirtualRecharge      float64 `json:"totalVirtualRecharge" dc:"虚拟美金累计(充值白名单)"`
 	TotalWithdraw             float64 `json:"totalWithdraw"`
 	TotalRegisterUser         uint64  `json:"totalRegisterUser,string"`

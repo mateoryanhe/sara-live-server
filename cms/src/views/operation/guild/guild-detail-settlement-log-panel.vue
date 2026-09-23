@@ -149,6 +149,7 @@ const fetchList = async () => {
   try {
     const response = await guildIncomeSettlementLogApi.getList({
       ...buildFilterParams(),
+      includeDetail: true,
       pageIndex: 1,
       pageSize: 50,
     })

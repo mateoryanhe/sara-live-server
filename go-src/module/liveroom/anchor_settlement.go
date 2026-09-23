@@ -1,9 +1,12 @@
 package liveroom
 
 import (
+	"time"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/event"
+	"xr-game-server/core/xrtime"
 	"xr-game-server/dao/anchorsalarycfgdao"
 	"xr-game-server/dao/guilddao"
 	"xr-game-server/dao/liveroomdao"
@@ -13,8 +16,8 @@ import (
 	"xr-game-server/module/wallet"
 )
 
-// writeAnchorSettlementUsd 是否把结算美金写入主播账面.
-// 当前由工会账面归集、工会长分配;待主播转账功能上线后再打开.
+// writeAnchorSettlementUsd 仅控制旧版结算是否把美金写入主播账面。
+// 分档结算下，工会主播仍由工会归集；平台主播在实际代付时单独换算并保存 USD。
 const writeAnchorSettlementUsd = false
 
 func initAnchorSettlement() {
@@ -28,16 +31,44 @@ func onWeekAnchorSettlement(_ any) {
 // settleOnShelfAnchors 周一0点:结算全部上架主播薪资+未结算收益
 func settleOnShelfAnchors() {
 	cfgs := anchorsalarycfgdao.ListAllOrderBySalaryDesc()
+	tierCfg := loadAnchorWeeklySettlementCfg()
+	periodEnd := xrtime.WeekStart(time.Now())
 	rooms := liveroomdao.GetAllLiveRoom()
 	coinMerchantGuildIds := loadCoinMerchantGuildIdSet()
 	ctx := gctx.New()
 	liveroomdao.ResetGuildWeeklyAnchorSalary()
+	liveroomdao.ResetGuildWeeklyAnchorSettlement()
 	g.Log().Infof(ctx, "anchor weekly settlement start, rooms=%d, salaryCfgs=%d, writeUsd=%v", len(rooms), len(cfgs), writeAnchorSettlementUsd)
+	// 先检查整个普通工会的配置；任一主播缺少所需配置，本轮整家工会都不结算。
+	for _, room := range rooms {
+		if room == nil || room.ID == 0 || room.GuildId == 0 || isCoinMerchantGuildAnchor(room, coinMerchantGuildIds) {
+			continue
+		}
+		if !normalGuildAnchorTieredReady(room, tierCfg, periodEnd) {
+			liveroomdao.MarkGuildWeeklyAnchorSettlementBlocked(room.GuildId)
+			g.Log().Warningf(ctx, "guild weekly settlement preflight blocked: config missing guildId=%d roomId=%d", room.GuildId, room.ID)
+		}
+	}
 	for _, room := range rooms {
 		if room == nil || room.ID == 0 {
 			continue
 		}
-		settleOneAnchor(room, cfgs, coinMerchantGuildIds)
+		if room.GuildId == 0 {
+			if !settlePlatformAnchorTiered(room, tierCfg, periodEnd) {
+				g.Log().Warningf(ctx, "platform anchor weekly settlement retained roomId=%d", room.ID)
+			}
+			continue
+		}
+		if isCoinMerchantGuildAnchor(room, coinMerchantGuildIds) {
+			settleOneAnchor(room, cfgs, coinMerchantGuildIds)
+			continue
+		}
+		if liveroomdao.IsGuildWeeklyAnchorSettlementBlocked(room.GuildId) {
+			continue
+		}
+		if !settleNormalGuildAnchorTiered(room, tierCfg, periodEnd) {
+			liveroomdao.MarkGuildWeeklyAnchorSettlementBlocked(room.GuildId)
+		}
 	}
 	g.Log().Infof(ctx, "anchor weekly settlement done")
 }

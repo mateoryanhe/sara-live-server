@@ -13,10 +13,16 @@ type GuildIncomeSettlementLogCMSListFilter struct {
 	GuildId                  uint64
 	GuildIds                 []uint64
 	FilterByGuild            bool // true 时仅返回 GuildIds 对应工会(空则无数据)
+	GuildType                *uint8
 	StartTime                int64
 	EndTime                  int64
+	TransferStartTime        int64
+	TransferEndTime          int64
+	PayoutOnly               bool
 	Status                   *uint8
 	OrderByReceivableUsdDesc bool
+	IncludeDetail            bool
+	IncludeTransfer          bool
 	PageIndex                int
 	PageSize                 int
 }
@@ -37,8 +43,21 @@ func GuildIncomeSettlementLogCMSList(f *GuildIncomeSettlementLogCMSListFilter) (
 		f.PageSize = 20
 	}
 	ctx := gctx.New()
-	m := g.Model(string(entity.TbGuildIncomeSettlementLog)).Ctx(ctx)
-	guildIdCol := string(entity.GuildIncomeSettlementLogGuildId)
+	settlementAlias := "s"
+	transferAlias := "t"
+	m := g.Model(string(entity.TbGuildIncomeSettlementLog) + " " + settlementAlias).Ctx(ctx)
+	guildIdCol := settlementAlias + "." + string(entity.GuildIncomeSettlementLogGuildId)
+	if f.GuildType != nil {
+		guildAlias := "g"
+		m = m.InnerJoin(string(entity.TbLiveGuild)+" "+guildAlias,
+			guildAlias+".id = "+guildIdCol).
+			Where(guildAlias+"."+string(entity.LiveGuildGuildType)+" = ?", *f.GuildType)
+	}
+	includePayoutJoin := f.PayoutOnly || f.TransferStartTime > 0 || f.TransferEndTime > 0
+	if includePayoutJoin {
+		m = m.InnerJoin(string(entity.TbGuildIncomeSettlementTransfer)+" "+transferAlias,
+			transferAlias+"."+string(entity.GuildIncomeSettlementTransferSettlementId)+" = "+settlementAlias+".id")
+	}
 	if f.GuildId > 0 {
 		if f.FilterByGuild {
 			allowed := false
@@ -57,24 +76,37 @@ func GuildIncomeSettlementLogCMSList(f *GuildIncomeSettlementLogCMSListFilter) (
 		m = m.WhereIn(guildIdCol, f.GuildIds)
 	}
 	if f.StartTime > 0 {
-		m = m.Where("created_at >= ?", time.Unix(f.StartTime, 0))
+		m = m.Where(settlementAlias+".created_at >= ?", time.Unix(f.StartTime, 0))
 	}
 	if f.EndTime > 0 {
-		m = m.Where("created_at <= ?", time.Unix(f.EndTime, 0))
+		m = m.Where(settlementAlias+".created_at <= ?", time.Unix(f.EndTime, 0))
+	}
+	if f.TransferStartTime > 0 {
+		m = m.Where("COALESCE("+transferAlias+"."+string(entity.GuildIncomeSettlementLogTransferAt)+", "+settlementAlias+".updated_at) >= ?", time.Unix(f.TransferStartTime, 0))
+	}
+	if f.TransferEndTime > 0 {
+		m = m.Where("COALESCE("+transferAlias+"."+string(entity.GuildIncomeSettlementLogTransferAt)+", "+settlementAlias+".updated_at) <= ?", time.Unix(f.TransferEndTime, 0))
 	}
 	if f.Status != nil {
-		m = m.Where(string(entity.GuildIncomeSettlementLogStatus)+" = ?", *f.Status)
+		m = m.Where(settlementAlias+"."+string(entity.GuildIncomeSettlementLogStatus)+" = ?", *f.Status)
 	}
 	total, err := m.Clone().Count()
 	if err != nil {
 		return 0, list
 	}
-	orderBy := "id desc"
-	if f.OrderByReceivableUsdDesc {
-		orderBy = string(entity.LiveRoomIncomeSettlementReceivableUsd) + " desc, id desc"
+	orderBy := settlementAlias + ".id desc"
+	if includePayoutJoin {
+		orderBy = "COALESCE(" + transferAlias + "." + string(entity.GuildIncomeSettlementLogTransferAt) + ", " + settlementAlias + ".updated_at) desc, " + settlementAlias + ".id desc"
+	} else if f.OrderByReceivableUsdDesc {
+		orderBy = settlementAlias + "." + string(entity.LiveRoomIncomeSettlementReceivableUsd) + " desc, " + settlementAlias + ".id desc"
 	}
-	_ = m.Clone().Order(orderBy).
+	_ = m.Clone().Fields(settlementAlias + ".*").Order(orderBy).
 		Limit(f.PageSize).Offset((f.PageIndex - 1) * f.PageSize).
 		Scan(&list)
+	if f.IncludeDetail {
+		hydrateGuildIncomeSettlementLogs(ctx, list)
+	} else if f.IncludeTransfer {
+		hydrateGuildIncomeSettlementTransfers(ctx, list)
+	}
 	return total, mergeGuildIncomeSettlementLogsFromCache(list)
 }

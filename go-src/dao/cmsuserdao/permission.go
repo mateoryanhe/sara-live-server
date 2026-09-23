@@ -110,6 +110,20 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/guild/guildVisibilityList", "/guild/guildVisibilityByUserList", "/guild/batchGrantGuildVisibility", "/guild/revokeGuildVisibility"}
 	case "/guild/guildListForVisibility":
 		return []string{"/guild/guildVisibilityByUserList", "/guild/batchGrantGuildVisibility", "/guild/batchRevokeGuildVisibility", "/cmsuser/cmsUserList"}
+	case "/account/platformAnchorVisibilityList":
+		return []string{"/account/platformAnchorVisibilityByUserList", "/account/grantPlatformAnchorVisibility", "/account/batchGrantPlatformAnchorVisibility", "/account/revokePlatformAnchorVisibility", "/account/batchRevokePlatformAnchorVisibility", "/account/platformAnchorListForVisibility", "/cmsuser/cmsUserList"}
+	case "/account/platformAnchorVisibilityByUserList":
+		return []string{"/account/platformAnchorVisibilityList", "/account/batchGrantPlatformAnchorVisibility", "/account/batchRevokePlatformAnchorVisibility", "/account/platformAnchorListForVisibility", "/cmsuser/cmsUserList"}
+	case "/account/grantPlatformAnchorVisibility":
+		return []string{"/account/platformAnchorVisibilityList", "/account/platformAnchorVisibilityByUserList", "/account/batchGrantPlatformAnchorVisibility", "/account/revokePlatformAnchorVisibility", "/account/platformAnchorListForVisibility", "/cmsuser/cmsUserList"}
+	case "/account/batchGrantPlatformAnchorVisibility":
+		return []string{"/account/platformAnchorVisibilityList", "/account/platformAnchorVisibilityByUserList", "/account/grantPlatformAnchorVisibility", "/account/batchRevokePlatformAnchorVisibility", "/account/platformAnchorListForVisibility", "/cmsuser/cmsUserList"}
+	case "/account/revokePlatformAnchorVisibility":
+		return []string{"/account/platformAnchorVisibilityList", "/account/platformAnchorVisibilityByUserList", "/account/grantPlatformAnchorVisibility", "/account/batchRevokePlatformAnchorVisibility"}
+	case "/account/batchRevokePlatformAnchorVisibility":
+		return []string{"/account/platformAnchorVisibilityList", "/account/platformAnchorVisibilityByUserList", "/account/batchGrantPlatformAnchorVisibility", "/account/revokePlatformAnchorVisibility"}
+	case "/account/platformAnchorListForVisibility":
+		return []string{"/account/platformAnchorVisibilityByUserList", "/account/batchGrantPlatformAnchorVisibility", "/account/batchRevokePlatformAnchorVisibility", "/cmsuser/cmsUserList"}
 	case "/coinMerchant/coinMerchantList":
 		return []string{"/coinMerchant/createCoinMerchant", "/coinMerchant/resetCoinMerchantPassword", "/coinMerchant/cancelCoinMerchant"}
 	case "/coinMerchant/createCoinMerchant":
@@ -140,6 +154,10 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/guild/saveGuildTransferInfo"}
 	case "/guild/saveGuildTransferInfo":
 		return []string{"/guild/getGuildTransferInfo"}
+	case "/account/getAnchorTransferInfo":
+		return []string{"/account/saveAnchorTransferInfo"}
+	case "/account/saveAnchorTransferInfo":
+		return []string{"/account/getAnchorTransferInfo"}
 	case "/cmsExport/getJob":
 		return []string{"/cmsExport/submitJob"}
 	case "/cmsExport/deleteExport":

@@ -131,6 +131,34 @@ func clearIncomeAmountsLocked(tb db.TbName, id any, a *LiveRoomIncomeAmounts, up
 	touchIncomeUpdatedAt(tb, id, updatedAt)
 }
 
+// consumeIncomeAmountsLocked 从未结算金额中扣除已持久化的快照，保留快照之后的并发新增量。
+func consumeIncomeAmountsLocked(tb db.TbName, id any, dst *LiveRoomIncomeAmounts, snap *LiveRoomIncomeAmounts, updatedAt *time.Time) {
+	if dst == nil || snap == nil || snap.IsZero() {
+		return
+	}
+	dst.TotalIncome = math.SubFloat64(dst.TotalIncome, snap.TotalIncome)
+	dst.TotalSocialIncome = math.SubFloat64(dst.TotalSocialIncome, snap.TotalSocialIncome)
+	dst.TotalGiftIncome = math.SubFloat64(dst.TotalGiftIncome, snap.TotalGiftIncome)
+	dst.TotalPaidDanmakuIncome = math.SubFloat64(dst.TotalPaidDanmakuIncome, snap.TotalPaidDanmakuIncome)
+	dst.TotalVideoCallIncome = math.SubFloat64(dst.TotalVideoCallIncome, snap.TotalVideoCallIncome)
+	dst.TotalVideoCallTicketIncome = math.SubFloat64(dst.TotalVideoCallTicketIncome, snap.TotalVideoCallTicketIncome)
+	dst.TotalVideoCallBillingIncome = math.SubFloat64(dst.TotalVideoCallBillingIncome, snap.TotalVideoCallBillingIncome)
+	dst.TotalShortVideoIncome = math.SubFloat64(dst.TotalShortVideoIncome, snap.TotalShortVideoIncome)
+	dst.TotalGameIncome = math.SubFloat64(dst.TotalGameIncome, snap.TotalGameIncome)
+	dst.TotalLiveDuration = math.SubFloat64(dst.TotalLiveDuration, snap.TotalLiveDuration)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalIncome, id, dst.TotalIncome)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalSocialIncome, id, dst.TotalSocialIncome)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalGiftIncome, id, dst.TotalGiftIncome)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalPaidDanmakuIncome, id, dst.TotalPaidDanmakuIncome)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallIncome, id, dst.TotalVideoCallIncome)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallTicketIncome, id, dst.TotalVideoCallTicketIncome)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalVideoCallBillingIncome, id, dst.TotalVideoCallBillingIncome)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalShortVideoIncome, id, dst.TotalShortVideoIncome)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalGameIncome, id, dst.TotalGameIncome)
+	writeIncomeAmountLocked(tb, LiveRoomIncomeTotalLiveDuration, id, dst.TotalLiveDuration)
+	touchIncomeUpdatedAt(tb, id, updatedAt)
+}
+
 func addIncomeAmount(tb db.TbName, col db.TbCol, id uint64, cur *float64, v float64, skipNonPositive bool, updatedAt *time.Time) {
 	if skipNonPositive && v <= 0 {
 		return

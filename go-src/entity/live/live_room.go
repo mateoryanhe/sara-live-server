@@ -12,16 +12,19 @@ const (
 )
 
 const (
-	LiveRoomGuildId      db.TbCol = "guild_id"
-	LiveRoomTitle        db.TbCol = "title"
-	LiveRoomCover        db.TbCol = "cover"
-	LiveRoomNotice       db.TbCol = "notice"
-	LiveRoomLiveId       db.TbCol = "live_record_id"
-	LiveRoomHeartTime    db.TbCol = "heart_time"
-	LiveRoomBan          db.TbCol = "ban"
-	LiveRoomBanApplyTime db.TbCol = "ban_apply_time"
-	LiveRoomBanReason    db.TbCol = "ban_reason"
-	LiveRoomStatus       db.TbCol = "status"
+	LiveRoomGuildId                  db.TbCol = "guild_id"
+	LiveRoomTitle                    db.TbCol = "title"
+	LiveRoomCover                    db.TbCol = "cover"
+	LiveRoomNotice                   db.TbCol = "notice"
+	LiveRoomLiveId                   db.TbCol = "live_record_id"
+	LiveRoomHeartTime                db.TbCol = "heart_time"
+	LiveRoomBan                      db.TbCol = "ban"
+	LiveRoomBanApplyTime             db.TbCol = "ban_apply_time"
+	LiveRoomBanReason                db.TbCol = "ban_reason"
+	LiveRoomStatus                   db.TbCol = "status"
+	LiveRoomHasSalary                db.TbCol = "has_salary"
+	LiveRoomSalaryEffectiveStartTime db.TbCol = "salary_effective_start_time"
+	LiveRoomSalaryEffectiveEndTime   db.TbCol = "salary_effective_end_time"
 )
 
 const (
@@ -72,17 +75,20 @@ func DefaultPrivateInviteType(category uint8) uint8 {
 // LiveRoom 直播间(LiveRoom.ID 与 UserInfo.ID 均为主播用户ID,每个主播仅一个直播间)
 type LiveRoom struct {
 	migrate.OneModel
-	UpdatedAt    time.Time  `gorm:"index:idx_live_room_status_updated,priority:2" json:"-"`
-	GuildId      uint64     `gorm:"index;default:0;comment:所属工会ID" json:"guildId"`
-	Title        string     `gorm:"size:128;default:'';comment:直播间标题" json:"title"`
-	Cover        string     `gorm:"size:255;default:'';comment:封面图URL" json:"cover"`
-	Notice       string     `gorm:"size:512;default:'';comment:公告" json:"notice"`
-	LiveRecordId uint64     `gorm:"default:0;comment:直播记录id" json:"liveRecordId"`
-	HeartTime    *time.Time `gorm:"comment:房间心跳状态,大于5分钟，判断下播" json:"heart_time"`
-	Ban          bool       `gorm:"default:0;comment:封禁状态" json:"ban"`
-	BanApplyTime *time.Time `gorm:"comment:封禁截止时间" json:"banApplyTime"`
-	BanReason    string     `gorm:"size:512;default:'';comment:封禁原因" json:"banReason"`
-	Status       uint8      `gorm:"index:idx_live_room_status_updated,priority:1;default:1;comment:状态(0-下架,1-上架)" json:"status"`
+	UpdatedAt                time.Time  `gorm:"index:idx_live_room_status_updated,priority:2" json:"-"`
+	GuildId                  uint64     `gorm:"index;default:0;comment:所属工会ID" json:"guildId"`
+	Title                    string     `gorm:"size:128;default:'';comment:直播间标题" json:"title"`
+	Cover                    string     `gorm:"size:255;default:'';comment:封面图URL" json:"cover"`
+	Notice                   string     `gorm:"size:512;default:'';comment:公告" json:"notice"`
+	LiveRecordId             uint64     `gorm:"default:0;comment:直播记录id" json:"liveRecordId"`
+	HeartTime                *time.Time `gorm:"comment:房间心跳状态,大于5分钟，判断下播" json:"heart_time"`
+	Ban                      bool       `gorm:"default:0;comment:封禁状态" json:"ban"`
+	BanApplyTime             *time.Time `gorm:"comment:封禁截止时间" json:"banApplyTime"`
+	BanReason                string     `gorm:"size:512;default:'';comment:封禁原因" json:"banReason"`
+	Status                   uint8      `gorm:"index:idx_live_room_status_updated,priority:1;default:1;comment:状态(0-下架,1-上架)" json:"status"`
+	HasSalary                bool       `gorm:"default:0;comment:是否有底薪" json:"hasSalary"`
+	SalaryEffectiveStartTime *time.Time `gorm:"comment:有底薪生效开始时间" json:"salaryEffectiveStartTime"`
+	SalaryEffectiveEndTime   *time.Time `gorm:"comment:有底薪生效结束时间(下周一0点)" json:"salaryEffectiveEndTime"`
 }
 
 // NewLiveRoom 构造内存对象,字段写入通过 syndb 异步入库
@@ -182,6 +188,40 @@ func (r *LiveRoom) SetStatus(v uint8) {
 	})
 }
 
+func (r *LiveRoom) SetHasSalary(v bool) {
+	r.HasSalary = v
+	r.touchUpdatedAt()
+	syndb.AddData(TbLiveRoom, LiveRoomHasSalary, &syndb.ColData{
+		IdVal: r.ID, ColVal: v,
+	})
+}
+
+func (r *LiveRoom) SetSalaryEffectiveStartTime(v *time.Time) {
+	r.SalaryEffectiveStartTime = v
+	r.touchUpdatedAt()
+	syndb.AddData(TbLiveRoom, LiveRoomSalaryEffectiveStartTime, &syndb.ColData{
+		IdVal: r.ID, ColVal: v,
+	})
+}
+
+func (r *LiveRoom) SetSalaryEffectiveEndTime(v *time.Time) {
+	r.SalaryEffectiveEndTime = v
+	r.touchUpdatedAt()
+	syndb.AddData(TbLiveRoom, LiveRoomSalaryEffectiveEndTime, &syndb.ColData{
+		IdVal: r.ID, ColVal: v,
+	})
+}
+
+// IsSalaryEffective 判断指定时刻是否处于有底薪有效期；开始时间包含，结束时间不包含。
+func (r *LiveRoom) IsSalaryEffective(at time.Time) bool {
+	return r != nil &&
+		r.HasSalary &&
+		r.SalaryEffectiveStartTime != nil &&
+		r.SalaryEffectiveEndTime != nil &&
+		!at.Before(*r.SalaryEffectiveStartTime) &&
+		at.Before(*r.SalaryEffectiveEndTime)
+}
+
 func (r *LiveRoom) SetCreatedAt(v time.Time) {
 	r.CreatedAt = v
 	syndb.AddData(TbLiveRoom, db.CreatedAtName, &syndb.ColData{
@@ -215,6 +255,9 @@ func initLiveRoom() {
 	syndb.RegQuick(TbLiveRoom, LiveRoomBanApplyTime)
 	syndb.RegQuick(TbLiveRoom, LiveRoomBanReason)
 	syndb.RegQuick(TbLiveRoom, LiveRoomStatus)
+	syndb.Reg(TbLiveRoom, LiveRoomHasSalary)
+	syndb.Reg(TbLiveRoom, LiveRoomSalaryEffectiveStartTime)
+	syndb.Reg(TbLiveRoom, LiveRoomSalaryEffectiveEndTime)
 	syndb.RegLazy(TbLiveRoom, LiveRoomHeartTime)
 	migrate.AutoMigrate(&LiveRoom{})
 }

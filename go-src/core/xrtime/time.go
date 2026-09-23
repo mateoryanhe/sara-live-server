@@ -17,14 +17,14 @@ func IsSameWeek(t1, t2 time.Time) bool {
 	t1Local := t1.Local()
 	t2Local := t2.Local()
 
-	weekStart1 := getWeekStart(t1Local)
-	weekStart2 := getWeekStart(t2Local)
+	weekStart1 := WeekStart(t1Local)
+	weekStart2 := WeekStart(t2Local)
 
 	return weekStart1.Equal(weekStart2)
 }
 
-// 获取时间所在周的周一
-func getWeekStart(t time.Time) time.Time {
+// WeekStart 返回时间所在自然周的周一 00:00:00。
+func WeekStart(t time.Time) time.Time {
 	weekday := t.Weekday()
 	offset := int(weekday - time.Monday)
 	if offset < 0 {
@@ -35,10 +35,15 @@ func getWeekStart(t time.Time) time.Time {
 
 // WeekDateRange 返回时间所在周的周一与周日(YYYY-MM-DD, 周一为一周开始)
 func WeekDateRange(t time.Time) (start, end string) {
-	weekStart := getWeekStart(t.Local())
+	weekStart := WeekStart(t.Local())
 	weekEnd := weekStart.AddDate(0, 0, 6)
 	const dateLayout = "2006-01-02"
 	return weekStart.Format(dateLayout), weekEnd.Format(dateLayout)
+}
+
+// NextWeekStart 返回时间所在自然周的下周一 00:00:00。
+func NextWeekStart(t time.Time) time.Time {
+	return WeekStart(t.Local()).AddDate(0, 0, 7)
 }
 
 // IsSameMonth 判断两个时间是否属于同一个月

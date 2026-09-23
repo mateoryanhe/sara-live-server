@@ -1,6 +1,7 @@
 package liveroomdao
 
 import (
+	"sync"
 	"time"
 
 	"github.com/gogf/gf/v2/container/gmap"
@@ -16,7 +17,111 @@ var (
 	guildIncomeTotalCache           = gmap.NewKVMap[uint64, *entity.GuildIncomeTotal](false)
 	guildWeeklyAnchorSalary         = gmap.NewKVMap[uint64, float64](false)
 	guildWeeklyAnchorShareAmountUsd = gmap.NewKVMap[uint64, float64](false)
+	guildWeeklySettlementMu         sync.Mutex
+	guildWeeklySettlements          = make(map[uint64]GuildWeeklyAnchorSettlement)
+	guildWeeklySettlementBlocked    = make(map[uint64]struct{})
 )
+
+// GuildWeeklyAnchorSettlement 普通工会主播周结算的原始单位合计。
+type GuildWeeklyAnchorSettlement struct {
+	SalaryDiamond            float64
+	AnchorSocialShareDiamond float64
+	GuildSocialShareDiamond  float64
+	AnchorGameShareGold      float64
+	GuildGameShareGold       float64
+}
+
+// ResetGuildWeeklyAnchorSettlement 周结算开始前清理已完成聚合；上次失败工会的分项保留用于重试。
+func ResetGuildWeeklyAnchorSettlement() {
+	guildWeeklySettlementMu.Lock()
+	retrySettlements := make(map[uint64]GuildWeeklyAnchorSettlement, len(guildWeeklySettlementBlocked))
+	for guildId := range guildWeeklySettlementBlocked {
+		if v, ok := guildWeeklySettlements[guildId]; ok {
+			retrySettlements[guildId] = v
+		}
+	}
+	guildWeeklySettlements = retrySettlements
+	guildWeeklySettlementBlocked = make(map[uint64]struct{})
+	guildWeeklySettlementMu.Unlock()
+}
+
+// MarkGuildWeeklyAnchorSettlementBlocked 标记本轮该工会存在未完成主播结算，禁止生成工会代付单。
+func MarkGuildWeeklyAnchorSettlementBlocked(guildId uint64) {
+	if guildId == 0 {
+		return
+	}
+	guildWeeklySettlementMu.Lock()
+	guildWeeklySettlementBlocked[guildId] = struct{}{}
+	guildWeeklySettlementMu.Unlock()
+}
+
+func IsGuildWeeklyAnchorSettlementBlocked(guildId uint64) bool {
+	if guildId == 0 {
+		return false
+	}
+	guildWeeklySettlementMu.Lock()
+	_, ok := guildWeeklySettlementBlocked[guildId]
+	guildWeeklySettlementMu.Unlock()
+	return ok
+}
+
+// AddGuildWeeklyAnchorSettlement 将单个主播结算分项累加到所属工会。
+func AddGuildWeeklyAnchorSettlement(guildId uint64, v GuildWeeklyAnchorSettlement) {
+	if guildId == 0 {
+		return
+	}
+	guildWeeklySettlementMu.Lock()
+	cur := guildWeeklySettlements[guildId]
+	cur.SalaryDiamond += v.SalaryDiamond
+	cur.AnchorSocialShareDiamond += v.AnchorSocialShareDiamond
+	cur.GuildSocialShareDiamond += v.GuildSocialShareDiamond
+	cur.AnchorGameShareGold += v.AnchorGameShareGold
+	cur.GuildGameShareGold += v.GuildGameShareGold
+	guildWeeklySettlements[guildId] = cur
+	guildWeeklySettlementMu.Unlock()
+}
+
+// TakeGuildWeeklyAnchorSettlement 取出并清除指定工会本轮聚合。
+func TakeGuildWeeklyAnchorSettlement(guildId uint64) GuildWeeklyAnchorSettlement {
+	if guildId == 0 {
+		return GuildWeeklyAnchorSettlement{}
+	}
+	guildWeeklySettlementMu.Lock()
+	ret := guildWeeklySettlements[guildId]
+	delete(guildWeeklySettlements, guildId)
+	guildWeeklySettlementMu.Unlock()
+	return ret
+}
+
+// GetGuildWeeklyAnchorSettlement 仅读取本轮聚合，不删除。
+func GetGuildWeeklyAnchorSettlement(guildId uint64) GuildWeeklyAnchorSettlement {
+	if guildId == 0 {
+		return GuildWeeklyAnchorSettlement{}
+	}
+	guildWeeklySettlementMu.Lock()
+	ret := guildWeeklySettlements[guildId]
+	guildWeeklySettlementMu.Unlock()
+	return ret
+}
+
+// RemoveGuildWeeklyAnchorSettlement 在工会结算流水确认落库后删除本轮聚合。
+func RemoveGuildWeeklyAnchorSettlement(guildId uint64) {
+	if guildId == 0 {
+		return
+	}
+	guildWeeklySettlementMu.Lock()
+	delete(guildWeeklySettlements, guildId)
+	delete(guildWeeklySettlementBlocked, guildId)
+	guildWeeklySettlementMu.Unlock()
+}
+
+func (v GuildWeeklyAnchorSettlement) IsZero() bool {
+	return v.SalaryDiamond == 0 &&
+		v.AnchorSocialShareDiamond == 0 &&
+		v.GuildSocialShareDiamond == 0 &&
+		v.AnchorGameShareGold == 0 &&
+		v.GuildGameShareGold == 0
+}
 
 // ResetGuildWeeklyAnchorSalary 周结算开始前清空工会本周主播结算累计(内存)
 func ResetGuildWeeklyAnchorSalary() {

@@ -19,6 +19,7 @@ const (
 	WeeklyLoginStatRechargeAmount             db.TbCol = "recharge_amount"
 	WeeklyLoginStatNormalUserRechargeAmount   db.TbCol = "normal_user_recharge_amount"
 	WeeklyLoginStatCoinMerchantRechargeAmount db.TbCol = "coin_merchant_recharge_amount"
+	WeeklyLoginStatAnchorPayoutAmount         db.TbCol = "anchor_payout_amount"
 	WeeklyLoginStatGoldConsumeAmount          db.TbCol = "gold_consume_amount"
 	WeeklyLoginStatDiamondConsumeAmount       db.TbCol = "diamond_consume_amount"
 	WeeklyLoginStatRechargeUserCount          db.TbCol = "recharge_user_count"
@@ -35,6 +36,7 @@ type WeeklyLoginStat struct {
 	RechargeAmount             float64 `gorm:"type:decimal(10,4);default:0;comment:全部真实美金入账(USD)" json:"rechargeAmount"`
 	NormalUserRechargeAmount   float64 `gorm:"type:decimal(10,4);default:0;comment:普通用户真实美金入账(USD)" json:"normalUserRechargeAmount"`
 	CoinMerchantRechargeAmount float64 `gorm:"type:decimal(10,4);default:0;comment:币商真实美金入账(USD)" json:"coinMerchantRechargeAmount"`
+	AnchorPayoutAmount         float64 `gorm:"type:decimal(16,4);default:0;comment:主播代付金额(USD)" json:"anchorPayoutAmount"`
 	GoldConsumeAmount          float64 `gorm:"default:0;comment:金币消费金额" json:"goldConsumeAmount"`
 	DiamondConsumeAmount       float64 `gorm:"default:0;comment:钻石消费金额" json:"diamondConsumeAmount"`
 	RechargeUserCount          uint64  `gorm:"default:0;comment:充值人数(去重)" json:"rechargeUserCount"`
@@ -57,6 +59,7 @@ func NewWeeklyLoginStat(week string) *WeeklyLoginStat {
 		RechargeAmount:             0,
 		NormalUserRechargeAmount:   0,
 		CoinMerchantRechargeAmount: 0,
+		AnchorPayoutAmount:         0,
 		GoldConsumeAmount:          0,
 		DiamondConsumeAmount:       0,
 		RechargeUserCount:          0,
@@ -103,6 +106,14 @@ func (r *WeeklyLoginStat) AddCoinMerchantRechargeAmount(val float64) {
 	syndb.AddData(TbWeeklyLoginStat, WeeklyLoginStatCoinMerchantRechargeAmount, &syndb.ColData{
 		IdVal:  r.ID,
 		ColVal: r.CoinMerchantRechargeAmount,
+	})
+}
+
+func (r *WeeklyLoginStat) AddAnchorPayoutAmount(val float64) {
+	r.AnchorPayoutAmount = math.AddFloat64(r.AnchorPayoutAmount, val)
+	syndb.AddData(TbWeeklyLoginStat, WeeklyLoginStatAnchorPayoutAmount, &syndb.ColData{
+		IdVal:  r.ID,
+		ColVal: r.AnchorPayoutAmount,
 	})
 }
 
@@ -160,6 +171,7 @@ func initWeeklyLoginStat() {
 	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatRechargeAmount)
 	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatNormalUserRechargeAmount)
 	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatCoinMerchantRechargeAmount)
+	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatAnchorPayoutAmount)
 	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatGoldConsumeAmount)
 	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatDiamondConsumeAmount)
 	syndb.RegLazy(TbWeeklyLoginStat, WeeklyLoginStatRechargeUserCount)

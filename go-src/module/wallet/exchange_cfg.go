@@ -54,11 +54,31 @@ func CalcDiamondToUsd(diamondAmount float64) float64 {
 		return 0
 	}
 	snap := GetExchangeCfgSnapshot()
+	return CalcDiamondToUsdWithSnapshot(diamondAmount, snap)
+}
+
+// CalcDiamondToUsdWithSnapshot 使用指定的钱包汇率快照换算，供结算审计复用。
+func CalcDiamondToUsdWithSnapshot(diamondAmount float64, snap ExchangeCfgSnapshot) float64 {
+	if diamondAmount <= 0 {
+		return 0
+	}
 	denom := float64(snap.GoldToDiamondRate) * float64(snap.UsdToGoldRate)
 	if denom <= 0 {
 		return 0
 	}
 	return diamondAmount / denom
+}
+
+// CalcSettlementUsdWithSnapshot 按结算时汇率把金币分佣换算为钻石，
+// 再与已有钻石金额合并计算审核用 USD。原始金币流水仍按金币保存。
+func CalcSettlementUsdWithSnapshot(baseDiamond, gameGold float64, snap ExchangeCfgSnapshot) (gameDiamond, totalDiamond, usd float64) {
+	if snap.GoldToDiamondRate <= 0 || snap.UsdToGoldRate <= 0 {
+		return 0, 0, 0
+	}
+	gameDiamond = gameGold * float64(snap.GoldToDiamondRate)
+	totalDiamond = baseDiamond + gameDiamond
+	usd = CalcDiamondToUsdWithSnapshot(totalDiamond, snap)
+	return gameDiamond, totalDiamond, usd
 }
 
 // calcExchangeDiamond 计算兑换钻石: 毛钻石=金币*比例; App手动兑换时手续费从钻石扣(如100钻扣3%得97钻)

@@ -31,14 +31,30 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {
                 title: '编辑转账信息',
                 hidden: true,
-                parentPermission: 'GuildManagement',
+                parentPermission: ['GuildManagement', 'GuildTransferManagement', 'CoinMerchantGuildTransferManagement'],
             },
         },
         {
             path: 'guild/guild-transfer-list',
             name: 'GuildTransferManagement',
             component: () => import('@/views/operation/guild/guild-transfer-list.vue'),
-            meta: {title: '工会转账'},
+            meta: {title: '普通工会转账'},
+        },
+        {
+            path: 'guild/coin-merchant-guild-transfer-list',
+            name: 'CoinMerchantGuildTransferManagement',
+            component: () => import('@/views/operation/guild/guild-transfer-list.vue'),
+            meta: {title: '币商工会转账'},
+        },
+        {
+            path: 'guild/guild-transfer-detail/:id',
+            name: 'GuildTransferDetail',
+            component: () => import('@/views/operation/guild/guild-transfer-detail.vue'),
+            meta: {
+                title: '工会结算详情',
+                hidden: true,
+                parentPermission: ['GuildTransferManagement', 'CoinMerchantGuildTransferManagement'],
+            },
         },
         {
             path: 'guild/guild-cms-user-list',
@@ -53,6 +69,12 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {title: '工会可见性'},
         },
         {
+            path: 'guild/platform-anchor-visibility-list',
+            name: 'PlatformAnchorVisibilityManagement',
+            component: () => import('@/views/operation/guild/platform-anchor-visibility-list.vue'),
+            meta: {title: '平台主播可见性'},
+        },
+        {
             path: 'guild/guild-anchor-daily-live-list',
             name: 'GuildAnchorDailyLiveManagement',
             component: () => import('@/views/operation/guild/guild-anchor-daily-live-list.vue'),
@@ -65,7 +87,7 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {
                 title: '工会详情',
                 hidden: true,
-                parentPermission: ['GuildManagement', 'GuildProfileManagement', 'AnchorListManagement'],
+                parentPermission: ['GuildManagement', 'GuildTransferManagement', 'CoinMerchantGuildTransferManagement', 'GuildProfileManagement', 'AnchorListManagement'],
             },
         },
         {
@@ -73,6 +95,16 @@ export const operationRoutes: RouteRecordRaw = {
             name: 'PlatformAnchorList',
             component: () => import('@/views/operation/guild/platform-anchor-list.vue'),
             meta: {title: '平台主播'},
+        },
+        {
+            path: 'guild/platform-anchor-transfer-info/:anchorId',
+            name: 'PlatformAnchorTransferInfoEdit',
+            component: () => import('@/views/operation/guild/guild-transfer-info-edit.vue'),
+            meta: {
+                title: '编辑平台主播转账信息',
+                hidden: true,
+                parentPermission: 'PlatformAnchorList',
+            },
         },
         {
             path: 'guild/guild-recycle-bin',
@@ -213,10 +245,30 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {title: '主播结算薪资'},
         },
         {
-            path: 'salary/live-revenue-share-cfg',
-            name: 'LiveRevenueShareCfgManagement',
-            component: () => import('@/views/operation/salary/live-revenue-share-cfg.vue'),
-            meta: {title: '流水分佣配置'},
+            path: 'salary/anchor-salary-social-share-cfg-list',
+            name: 'AnchorSalarySocialShareCfgManagement',
+            component: () => import('@/views/operation/salary/anchor-salary-social-share-cfg-list.vue'),
+            meta: {title: '有底薪社交流水分佣配置'},
+        },
+        {
+            path: 'salary/anchor-no-salary-share-cfg',
+            name: 'AnchorNoSalaryShareCfgManagement',
+            component: () => import('@/views/operation/salary/anchor-no-salary-share-cfg.vue'),
+            meta: {title: '无底薪主播提成配置'},
+        },
+        {
+            path: 'salary/anchor-salary-game-share-cfg-list',
+            name: 'AnchorSalaryGameShareCfgManagement',
+            component: () => import('@/views/operation/salary/anchor-game-share-cfg-list.vue'),
+            props: {salaryType: 1},
+            meta: {title: '有底薪游戏流水档位分佣配置'},
+        },
+        {
+            path: 'salary/anchor-no-salary-game-share-cfg-list',
+            name: 'AnchorNoSalaryGameShareCfgManagement',
+            component: () => import('@/views/operation/salary/anchor-game-share-cfg-list.vue'),
+            props: {salaryType: 2},
+            meta: {title: '无底薪游戏流水档位分佣配置'},
         },
         {
             path: 'salary/anchor-income-settlement-log-list',
@@ -225,10 +277,22 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {title: '主播结算流水'},
         },
         {
+            path: 'salary/platform-anchor-payout-list',
+            name: 'PlatformAnchorPayoutList',
+            component: () => import('@/views/operation/salary/platform-anchor-payout-list.vue'),
+            meta: {title: '主播代付'},
+        },
+        {
             path: 'salary/guild-income-settlement-log-list',
             name: 'GuildIncomeSettlementLogList',
             component: () => import('@/views/operation/salary/guild-income-settlement-log-list.vue'),
             meta: {title: '工会结算流水'},
+        },
+        {
+            path: 'salary/guild-payout-detail-list',
+            name: 'GuildPayoutDetailList',
+            component: () => import('@/views/operation/salary/guild-payout-detail-list.vue'),
+            meta: {title: '工会代付详情'},
         },
     ],
 }

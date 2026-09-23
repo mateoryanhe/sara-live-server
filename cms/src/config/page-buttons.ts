@@ -61,6 +61,7 @@ const READONLY_PAGES = new Set([
     'LiveRevenueLogList',
     'AnchorIncomeSettlementLogList',
     'GuildIncomeSettlementLogList',
+    'GuildPayoutDetailList',
     'LiveRecordList',
     'LiveDailyEffectiveLiveList',
     'VideoCallLogList',
@@ -74,6 +75,7 @@ const READONLY_PAGES = new Set([
 /** 只读列表但不含导出 */
 const READONLY_NO_EXPORT_PAGES = new Set([
     'ServerLogExplorer',
+    'GuildPayoutDetailList',
 ])
 
 const CONFIG_PAGES = new Set([
@@ -99,7 +101,6 @@ const CONFIG_PAGES = new Set([
     'RandomNicknameManagement',
     'CustomerServiceCfgManagement',
     'WalletExchangeCfgManagement',
-    'LiveRevenueShareCfgManagement',
     'ShortVideoCfgManagement',
     'GamePlatformCfgManagement',
     'FirstRechargeActivityManagement',
@@ -108,6 +109,22 @@ const CONFIG_PAGES = new Set([
 
 /** 各页面自定义按钮（未列出的页面按类型使用默认集） */
 export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
+	AnchorIncomeSettlementLogList: [
+		BTN.view,
+		BTN.search,
+		BTN.export,
+	],
+	PlatformAnchorPayoutList: [
+		BTN.view,
+		BTN.search,
+		{key: 'batchApprove', label: '批量审核'},
+		{key: 'batchTransfer', label: '批量代付'},
+		{key: 'transferInfo', label: '编辑收款信息'},
+	],
+    AnchorSalarySocialShareCfgManagement: [BTN.view, BTN.create, BTN.edit, BTN.delete],
+    AnchorNoSalaryShareCfgManagement: [BTN.view, BTN.edit],
+    AnchorSalaryGameShareCfgManagement: [BTN.view, BTN.create, BTN.edit, BTN.delete],
+    AnchorNoSalaryGameShareCfgManagement: [BTN.view, BTN.create, BTN.edit, BTN.delete],
     StaticCacheCfgManagement: [...DEFAULT_CRUD_BUTTONS],
     DbBackupCfgManagement: [
         BTN.view,
@@ -172,6 +189,8 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'ban', label: '封禁主播'},
         {key: 'unban', label: '解封主播'},
         {key: 'setAnchorType', label: '设置主播类型'},
+        {key: 'transferInfo', label: '编辑转账信息'},
+        {key: 'batchImportSalaryAnchor', label: '批量导入有底薪主播'},
     ],
     LiveRoomRecycleBinManagement: [BTN.view, BTN.search, {key: 'onShelf', label: '上架'}],
     BotAnchorManagement: [
@@ -236,13 +255,32 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'joinGuildAnchor', label: '加入工会'},
         {key: 'batchSetAnchor', label: '导入普通主播'},
         {key: 'batchSetSeniorAnchor', label: '导入高级主播'},
+        {key: 'batchImportSalaryAnchor', label: '批量导入有底薪主播'},
         {key: 'transferInfo', label: '转账信息'},
     ],
     GuildTransferManagement: [
         BTN.view,
         BTN.search,
+        {key: 'viewDetail', label: '查看结算详情'},
         {key: 'batchApprove', label: '批量审核'},
+        {key: 'reopenApproval', label: '退回审核中'},
+        {key: 'copyPayout', label: '复制代付订单'},
+        {key: 'editReceivable', label: '修改可收金额'},
         {key: 'batchTransfer', label: '批量转账'},
+        {key: 'viewGuildDetail', label: '查看工会详情'},
+        {key: 'transferInfo', label: '编辑转账信息'},
+    ],
+    CoinMerchantGuildTransferManagement: [
+        BTN.view,
+        BTN.search,
+        {key: 'viewDetail', label: '查看结算详情'},
+        {key: 'batchApprove', label: '批量审核'},
+        {key: 'reopenApproval', label: '退回审核中'},
+        {key: 'copyPayout', label: '复制代付订单'},
+        {key: 'editReceivable', label: '修改可收金额'},
+        {key: 'batchTransfer', label: '批量转账'},
+        {key: 'viewGuildDetail', label: '查看工会详情'},
+        {key: 'transferInfo', label: '编辑转账信息'},
     ],
     AnchorDetail: [
         BTN.view,
@@ -271,6 +309,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     GuildRecycleBinManagement: [BTN.view, BTN.search, {key: 'onShelf', label: '上架'}],
     GuildCMSUserManagement: [BTN.view, BTN.search, BTN.create, {key: 'resetPassword', label: '重设密码'}],
     GuildVisibilityManagement: [BTN.view, BTN.search, {key: 'listGuilds', label: '全部上架工会'}, {key: 'grant', label: '批量授权'}, {key: 'revoke', label: '批量撤销'}],
+    PlatformAnchorVisibilityManagement: [BTN.view, BTN.search, {key: 'listAnchors', label: '全部平台主播'}, {key: 'grant', label: '批量授权'}, {key: 'revoke', label: '批量撤销'}],
     GuildAnchorDailyLiveManagement: [BTN.view, BTN.search, BTN.export],
     GuildProfileManagement: [
         ...DEFAULT_VIEW_BUTTONS,

@@ -37,6 +37,8 @@ export interface SysStat {
     totalRecharge: number
     totalNormalUserRecharge: number
     totalCoinMerchantRecharge: number
+    totalAnchorPayout: number
+    weeklyAnchorPayout: number
     totalVirtualRecharge?: number
     totalWithdraw: number
     totalRegisterUser: string | number
@@ -318,8 +320,22 @@ export interface AnchorListItem {
     banReason?: string
     /** 0=下架, 1=上架 */
     status?: number
+    hasSalary?: boolean
+    salaryEffective?: boolean
+    salaryEffectiveStartTime?: string | null
+    salaryEffectiveEndTime?: string | null
     createdAt?: string | null
     registeredAt?: string | null
+}
+
+export interface PlatformAnchorVisibilityItem {
+    id: string
+    anchorId: string
+    anchorName?: string
+    anchorAvatar?: string
+    cmsUserId: string
+    cmsUserName?: string
+    createdAt: string
 }
 
 export interface LiveRoomIncomeAmounts {
@@ -351,6 +367,10 @@ export interface AnchorLiveRoomDetail {
     category?: number
     privateInviteType?: number
     billing?: number
+    hasSalary?: boolean
+    salaryEffective?: boolean
+    salaryEffectiveStartTime?: string | null
+    salaryEffectiveEndTime?: string | null
     createdAt?: string | null
     updatedAt?: string | null
 }
@@ -1063,6 +1083,19 @@ export interface GetGuildTransferInfoRes {
     countries: GuildTransferCountryOption[]
 }
 
+export interface AnchorTransferInfo extends Omit<GuildTransferInfo, 'guildId'> {
+    anchorId: string
+}
+
+export interface SaveAnchorTransferInfoReq extends Omit<SaveGuildTransferInfoReq, 'guildId'> {
+    anchorId: string | number
+}
+
+export interface GetAnchorTransferInfoRes {
+    info: AnchorTransferInfo | null
+    countries: GuildTransferCountryOption[]
+}
+
 export interface GuildQuery extends PageQuery {
     name?: string
 }
@@ -1137,6 +1170,16 @@ export interface ImportGuildAnchorsRes {
     successCount: number
     failCount: number
     fails: ImportGuildAnchorFailItem[]
+}
+
+export interface BatchImportSalaryAnchorsReq {
+    ids: string[]
+}
+
+export interface BatchImportSalaryAnchorsRes {
+    successCount: number
+    failCount: number
+    failIds?: string[]
 }
 
 export interface GuildAnchorImportResultState {
@@ -1573,6 +1616,50 @@ export interface AnchorSalaryCfg {
 export interface AnchorSalaryCfgQuery extends PageQuery {
 }
 
+export interface AnchorSalarySocialShareCfg {
+    id: string
+    level: number
+    socialTotalDiamondRevenue: number
+    anchorSocialSharePercent: number
+    guildSocialSharePercent: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface AnchorNoSalaryShareCfg {
+    id: string
+    anchorSocialSharePercent: number
+    guildSocialSharePercent: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface AnchorGameShareCfg {
+    id: string
+    salaryType: 1 | 2
+    level: number
+    gameTotalGoldRevenue: number
+    anchorGameSharePercent: number
+    guildGameSharePercent: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetAnchorNoSalaryShareCfgRes {
+    cfg: AnchorNoSalaryShareCfg
+}
+
+export interface SaveAnchorNoSalaryShareCfgReq {
+    id: number
+    anchorSocialSharePercent: number
+    guildSocialSharePercent: number
+}
+
+export interface SaveAnchorNoSalaryShareCfgRes {
+    success: boolean
+    id: string
+}
+
 export interface IncomeSettlementLogAmounts {
     totalIncome: number
     totalSocialIncome: number
@@ -1590,6 +1677,20 @@ export interface IncomeSettlementLogAmounts {
     settlementReceivableUsd?: number
     anchorSharePercent?: number
     guildSharePercent?: number
+    hasSalary?: boolean
+    anchorSocialSharePercent?: number
+    guildSocialSharePercent?: number
+    anchorGameSharePercent?: number
+    guildGameSharePercent?: number
+    anchorSocialShareAmount?: number
+    guildSocialShareAmount?: number
+    anchorGameShareAmountGold?: number
+    guildGameShareAmountGold?: number
+    settlementRuleType?: number
+    goldToDiamondRate?: number
+    usdToGoldRate?: number
+    gameShareAmountDiamond?: number
+    totalSettlementDiamond?: number
 }
 
 export interface AnchorIncomeSettlementLogQuery extends PageQuery {
@@ -1597,6 +1698,10 @@ export interface AnchorIncomeSettlementLogQuery extends PageQuery {
     anchorIds?: string[]
     startTime?: number
     endTime?: number
+    status?: number
+    directPayout?: boolean
+    orderByReceivableUsdDesc?: boolean
+    includeTransferInfo?: boolean
 }
 
 export interface AnchorIncomeSettlementLogItem extends IncomeSettlementLogAmounts {
@@ -1606,6 +1711,18 @@ export interface AnchorIncomeSettlementLogItem extends IncomeSettlementLogAmount
     roomAvatar?: string
     guildId?: string
     guildName?: string
+    directPayout?: boolean
+    status?: number
+    transferAt?: string | null
+    transferOrderId?: string
+    transferPlatformNo?: string
+    transferLocalAmount?: number
+    transferFailMsg?: string
+    transferCurrency?: string
+    transferPayeeName?: string
+    transferBankName?: string
+    transferAccountNo?: string
+    transferBankCode?: string
     createdAt?: string | null
 }
 
@@ -1618,10 +1735,16 @@ export interface MyGuildAnchorIncomeSettlementLogQuery extends PageQuery {
 
 export interface GuildIncomeSettlementLogQuery extends PageQuery {
     guildId?: string
+    guildType?: number
     startTime?: number
     endTime?: number
+    transferStartTime?: number
+    transferEndTime?: number
+    payoutOnly?: boolean
     status?: number
     orderByReceivableUsdDesc?: boolean
+    includeDetail?: boolean
+    includeTransfer?: boolean
     includeTransferInfo?: boolean
 }
 
@@ -1641,6 +1764,11 @@ export interface GuildIncomeSettlementLogItem extends IncomeSettlementLogAmounts
     transferAccountNo?: string
     transferBankCode?: string
     createdAt?: string | null
+    updatedAt?: string | null
+}
+
+export interface GuildIncomeSettlementLogDetailRes {
+    item: GuildIncomeSettlementLogItem
 }
 
 export interface AgoraCfg {

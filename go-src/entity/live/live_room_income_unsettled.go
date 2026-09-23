@@ -84,6 +84,25 @@ func (r *LiveRoomIncomeUnsettled) AddAmounts(a *LiveRoomIncomeAmounts) {
 	touchIncomeUpdatedAt(TbLiveRoomIncomeUnsettled, r.ID, &r.UpdatedAt)
 }
 
+// Snapshot 仅读取当前未结算快照，不清零。
+func (r *LiveRoomIncomeUnsettled) Snapshot() LiveRoomIncomeAmounts {
+	key := liveRoomIncomeLockKey(TbLiveRoomIncomeUnsettled, r.ID)
+	gmlock.Lock(key)
+	defer gmlock.Unlock(key)
+	return r.LiveRoomIncomeAmounts
+}
+
+// ConsumeSnapshot 在结算流水确认落库后扣除该快照，保留并发新增流水。
+func (r *LiveRoomIncomeUnsettled) ConsumeSnapshot(snap *LiveRoomIncomeAmounts) {
+	if r == nil || snap == nil || snap.IsZero() {
+		return
+	}
+	key := liveRoomIncomeLockKey(TbLiveRoomIncomeUnsettled, r.ID)
+	gmlock.Lock(key)
+	defer gmlock.Unlock(key)
+	consumeIncomeAmountsLocked(TbLiveRoomIncomeUnsettled, r.ID, &r.LiveRoomIncomeAmounts, snap, &r.UpdatedAt)
+}
+
 // SnapshotAndClear 取出当前未结算金额并清零(一次加锁,用于下架归档)
 func (r *LiveRoomIncomeUnsettled) SnapshotAndClear() LiveRoomIncomeAmounts {
 	key := liveRoomIncomeLockKey(TbLiveRoomIncomeUnsettled, r.ID)

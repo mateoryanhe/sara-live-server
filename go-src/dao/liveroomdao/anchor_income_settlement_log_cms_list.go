@@ -10,12 +10,15 @@ import (
 
 // AnchorIncomeSettlementLogCMSListFilter CMS主播结算流水查询条件
 type AnchorIncomeSettlementLogCMSListFilter struct {
-	RoomId    uint64
-	RoomIds   []uint64
-	StartTime int64
-	EndTime   int64
-	PageIndex int
-	PageSize  int
+	RoomId                   uint64
+	RoomIds                  []uint64
+	StartTime                int64
+	EndTime                  int64
+	Status                   *uint8
+	DirectPayout             *bool
+	OrderByReceivableUsdDesc bool
+	PageIndex                int
+	PageSize                 int
 }
 
 // AnchorIncomeSettlementLogCMSList CMS分页查询主播结算流水(按ID倒序)
@@ -44,14 +47,24 @@ func AnchorIncomeSettlementLogCMSList(f *AnchorIncomeSettlementLogCMSListFilter)
 	if f.EndTime > 0 {
 		m = m.Where("created_at <= ?", time.Unix(f.EndTime, 0))
 	}
+	if f.Status != nil {
+		m = m.Where(string(entity.AnchorIncomeSettlementLogStatus)+" = ?", *f.Status)
+	}
+	if f.DirectPayout != nil {
+		m = m.Where(string(entity.AnchorIncomeSettlementLogDirectPayout)+" = ?", *f.DirectPayout)
+	}
 	total, err := m.Clone().Count()
 	if err != nil {
 		return 0, list
 	}
-	_ = m.Clone().Order("id desc").
+	orderBy := "id desc"
+	if f.OrderByReceivableUsdDesc {
+		orderBy = string(entity.LiveRoomIncomeSettlementReceivableUsd) + " desc, id desc"
+	}
+	_ = m.Clone().Order(orderBy).
 		Limit(f.PageSize).Offset((f.PageIndex - 1) * f.PageSize).
 		Scan(&list)
-	return total, list
+	return total, mergeAnchorIncomeSettlementLogsFromCache(list)
 }
 
 // AnchorIncomeSettlementLogCMSListByGuildIdsFilter CMS按工会ID列表查询主播结算流水
@@ -100,5 +113,5 @@ func AnchorIncomeSettlementLogCMSListByGuildIds(f *AnchorIncomeSettlementLogCMSL
 	_ = m.Clone().Fields("a.*").Order("a.id desc").
 		Limit(f.PageSize).Offset((f.PageIndex - 1) * f.PageSize).
 		Scan(&list)
-	return total, list
+	return total, mergeAnchorIncomeSettlementLogsFromCache(list)
 }

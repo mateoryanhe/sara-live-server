@@ -45,6 +45,10 @@ type AnchorListItem struct {
 	BanApplyTime                *time.Time `json:"banApplyTime" dc:"封禁截止时间"`
 	BanReason                   string     `json:"banReason" dc:"封禁原因"`
 	Status                      uint8      `json:"status" dc:"直播间状态(0-下架,1-上架)"`
+	HasSalary                   bool       `json:"hasSalary" dc:"是否配置过有底薪周期"`
+	SalaryEffective             bool       `json:"salaryEffective" dc:"当前是否处于有底薪生效周期"`
+	SalaryEffectiveStartTime    *time.Time `json:"salaryEffectiveStartTime"`
+	SalaryEffectiveEndTime      *time.Time `json:"salaryEffectiveEndTime"`
 	CreatedAt                   *time.Time `json:"createdAt"`
 	RegisteredAt                *time.Time `json:"registeredAt" dc:"账号注册时间"`
 }

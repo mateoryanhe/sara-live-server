@@ -2,6 +2,7 @@ package liveroom
 
 import (
 	"context"
+	"time"
 
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/accountdto"
@@ -35,17 +36,21 @@ func buildAnchorLiveRoomDetail(room *entity.LiveRoom) *accountdto.AnchorLiveRoom
 		return nil
 	}
 	item := &accountdto.AnchorLiveRoomDetailItem{
-		ID:           room.ID,
-		GuildId:      room.GuildId,
-		Title:        room.Title,
-		Cover:        upload.GetUrlByName(room.Cover),
-		Notice:       room.Notice,
-		LiveRecordId: room.LiveRecordId,
-		HeartTime:    room.HeartTime,
-		Ban:          IsRoomBanned(room),
-		BanApplyTime: room.BanApplyTime,
-		BanReason:    room.BanReason,
-		Status:       room.Status,
+		ID:                       room.ID,
+		GuildId:                  room.GuildId,
+		Title:                    room.Title,
+		Cover:                    upload.GetUrlByName(room.Cover),
+		Notice:                   room.Notice,
+		LiveRecordId:             room.LiveRecordId,
+		HeartTime:                room.HeartTime,
+		Ban:                      IsRoomBanned(room),
+		BanApplyTime:             room.BanApplyTime,
+		BanReason:                room.BanReason,
+		Status:                   room.Status,
+		HasSalary:                room.HasSalary,
+		SalaryEffective:          room.IsSalaryEffective(time.Now()),
+		SalaryEffectiveStartTime: room.SalaryEffectiveStartTime,
+		SalaryEffectiveEndTime:   room.SalaryEffectiveEndTime,
 	}
 	if room.LiveRecordId > 0 {
 		item.LiveStatus = 1

@@ -78,6 +78,22 @@
               <el-descriptions-item :label="t('pages.anchorList.billingPricePerMinute')">
                 {{ formatAmount(detail.liveRoom.billing) }}
               </el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.hasSalary')">
+                <el-tag :type="detail.liveRoom.hasSalary ? 'success' : 'info'">
+                  {{ detail.liveRoom.hasSalary ? t('common.yes') : t('common.no') }}
+                </el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.salaryEffectiveStatus')">
+                <el-tag :type="detail.liveRoom.salaryEffective ? 'success' : 'info'">
+                  {{ detail.liveRoom.salaryEffective ? t('pages.anchorList.salaryEffective') : t('pages.anchorList.salaryInactive') }}
+                </el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.salaryEffectiveStartTime')">
+                {{ formatDate(detail.liveRoom.salaryEffectiveStartTime) }}
+              </el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorList.salaryEffectiveEndTime')">
+                {{ formatDate(detail.liveRoom.salaryEffectiveEndTime) }}
+              </el-descriptions-item>
               <el-descriptions-item :label="t('pages.anchorList.liveStatus')">
                 <el-tag :type="detail.liveRoom.liveStatus === 1 ? 'success' : 'info'">
                   {{ detail.liveRoom.liveStatus === 1 ? t('common.live') : t('common.offline') }}

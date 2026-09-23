@@ -23,6 +23,7 @@ const (
 	SystemTotalStatTotalRecharge             db.TbCol = "total_recharge"
 	SystemTotalStatTotalNormalUserRecharge   db.TbCol = "total_normal_user_recharge"
 	SystemTotalStatTotalCoinMerchantRecharge db.TbCol = "total_coin_merchant_recharge"
+	SystemTotalStatTotalAnchorPayout         db.TbCol = "total_anchor_payout"
 	SystemTotalStatTotalVirtualRecharge      db.TbCol = "total_virtual_recharge"
 	SystemTotalStatTotalWithdraw             db.TbCol = "total_withdraw"
 	SystemTotalStatTotalRegisterUser         db.TbCol = "total_register_user"
@@ -37,6 +38,7 @@ type SystemTotalStat struct {
 	TotalRecharge             float64 `gorm:"default:0;comment:全部美金入账累计(真实USD)" json:"totalRecharge"`
 	TotalNormalUserRecharge   float64 `gorm:"default:0;comment:普通用户美金入账累计(真实USD)" json:"totalNormalUserRecharge"`
 	TotalCoinMerchantRecharge float64 `gorm:"default:0;comment:币商美金入账累计(真实USD)" json:"totalCoinMerchantRecharge"`
+	TotalAnchorPayout         float64 `gorm:"type:decimal(16,4);default:0;comment:主播代付累计(USD)" json:"totalAnchorPayout"`
 	TotalVirtualRecharge      float64 `gorm:"default:0;comment:虚拟美金累计(充值白名单)" json:"totalVirtualRecharge"`
 	TotalWithdraw             float64 `gorm:"default:0;comment:总提现金额" json:"totalWithdraw"`
 	TotalRegisterUser         uint64  `gorm:"default:0;comment:总注册用户数" json:"totalRegisterUser"`
@@ -109,6 +111,15 @@ func (s *SystemTotalStat) AddTotalCoinMerchantRecharge(val float64) {
 	})
 }
 
+func (s *SystemTotalStat) AddTotalAnchorPayout(val float64) {
+	s.TotalAnchorPayout = math.AddFloat64(s.TotalAnchorPayout, val)
+
+	syndb.AddData(TbSystemTotalStat, SystemTotalStatTotalAnchorPayout, &syndb.ColData{
+		IdVal:  s.ID,
+		ColVal: s.TotalAnchorPayout,
+	})
+}
+
 func (s *SystemTotalStat) AddTotalVirtualRecharge(val float64) {
 	s.TotalVirtualRecharge = math.AddFloat64(s.TotalVirtualRecharge, val)
 
@@ -169,6 +180,7 @@ func initSystemTotalStat() {
 	syndb.RegLazy(TbSystemTotalStat, SystemTotalStatTotalRecharge)
 	syndb.RegLazy(TbSystemTotalStat, SystemTotalStatTotalNormalUserRecharge)
 	syndb.RegLazy(TbSystemTotalStat, SystemTotalStatTotalCoinMerchantRecharge)
+	syndb.RegLazy(TbSystemTotalStat, SystemTotalStatTotalAnchorPayout)
 	syndb.RegLazy(TbSystemTotalStat, SystemTotalStatTotalVirtualRecharge)
 	syndb.RegLazy(TbSystemTotalStat, SystemTotalStatTotalWithdraw)
 	syndb.RegLazy(TbSystemTotalStat, SystemTotalStatTotalRegisterUser)

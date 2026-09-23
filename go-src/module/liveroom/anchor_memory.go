@@ -4,6 +4,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/guilddao"
@@ -155,6 +156,54 @@ func queryAnchorListByGuildIdsFromMemory(guildIds []uint64, req *accountdto.Quer
 	return total, ret
 }
 
+func filterPlatformAnchorRoomsByAnchorIds(rooms []*liveentity.LiveRoom, anchorIds []uint64, key string, liveStatus *uint8) []*liveentity.LiveRoom {
+	if len(anchorIds) == 0 {
+		return nil
+	}
+	anchorIdSet := make(map[uint64]struct{}, len(anchorIds))
+	for _, anchorId := range anchorIds {
+		if anchorId > 0 {
+			anchorIdSet[anchorId] = struct{}{}
+		}
+	}
+	if len(anchorIdSet) == 0 {
+		return nil
+	}
+	key = strings.TrimSpace(key)
+	likeKey := strings.ToLower(key)
+	filtered := make([]*liveentity.LiveRoom, 0, len(anchorIdSet))
+	for _, room := range rooms {
+		if room == nil || room.GuildId != 0 || !isRegularAnchorRoom(room) {
+			continue
+		}
+		if _, ok := anchorIdSet[room.ID]; !ok {
+			continue
+		}
+		if liveStatus != nil && roomLiveStatus(room) != *liveStatus {
+			continue
+		}
+		if key != "" && !matchAnchorKey(room.ID, 0, key, likeKey, nil) {
+			continue
+		}
+		filtered = append(filtered, room)
+	}
+	sort.Slice(filtered, func(i, j int) bool { return filtered[i].ID > filtered[j].ID })
+	return filtered
+}
+
+func queryPlatformAnchorListByAnchorIdsFromMemory(anchorIds []uint64, req *accountdto.QueryAnchorListReq) (int, []*accountdto.AnchorListItem) {
+	rooms := filterPlatformAnchorRoomsByAnchorIds(getRoomListCache(), anchorIds, req.Key, req.LiveStatus)
+	total := len(rooms)
+	pageRooms := paginateAnchorRooms(rooms, req.PageIndex, req.PageSize)
+	ret := make([]*accountdto.AnchorListItem, 0, len(pageRooms))
+	for _, room := range pageRooms {
+		if item := buildAnchorListItem(room); item != nil {
+			ret = append(ret, item)
+		}
+	}
+	return total, ret
+}
+
 func roomLiveStatus(room *liveentity.LiveRoom) uint8 {
 	if room != nil && room.LiveRecordId > 0 {
 		return 1
@@ -267,4 +316,8 @@ func fillAnchorRoomFields(item *accountdto.AnchorListItem, room *liveentity.Live
 	item.BanReason = room.BanReason
 	item.Ban = IsRoomBanned(room)
 	item.Status = room.Status
+	item.HasSalary = room.HasSalary
+	item.SalaryEffectiveStartTime = room.SalaryEffectiveStartTime
+	item.SalaryEffectiveEndTime = room.SalaryEffectiveEndTime
+	item.SalaryEffective = room.IsSalaryEffective(time.Now())
 }

@@ -54,6 +54,7 @@ func exportGuildIncomeSettlementLogCSV(ctx context.Context, cmsUserId uint64, pa
 			FilterByGuild: restrict,
 			StartTime:     req.StartTime,
 			EndTime:       req.EndTime,
+			IncludeDetail: true,
 			PageIndex:     pageIndex,
 			PageSize:      pageSize,
 		})

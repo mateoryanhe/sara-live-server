@@ -11,6 +11,7 @@ import (
 	"xr-game-server/dto/guilddto"
 	"xr-game-server/dto/incomesettlementdto"
 	"xr-game-server/entity/live"
+	"xr-game-server/errercode"
 	"xr-game-server/module/cmsvis"
 	"xr-game-server/module/upload"
 )
@@ -47,7 +48,31 @@ func fillCMSItemFromAnchor(row *entity.AnchorIncomeSettlementLog) *incomesettlem
 		SettlementShareAmount:       row.SettlementShareAmount,
 		SettlementShareAmountUsd:    row.SettlementShareAmountUsd,
 		AnchorSharePercent:          row.AnchorSharePercent,
+		HasSalary:                   row.HasSalary,
+		AnchorSocialSharePercent:    row.AnchorSocialSharePercent,
+		GuildSocialSharePercent:     row.GuildSocialSharePercent,
+		AnchorGameSharePercent:      row.AnchorGameSharePercent,
+		GuildGameSharePercent:       row.GuildGameSharePercent,
+		AnchorSocialShareAmount:     row.AnchorSocialShareAmount,
+		GuildSocialShareAmount:      row.GuildSocialShareAmount,
+		AnchorGameShareAmountGold:   row.AnchorGameShareAmountGold,
+		GuildGameShareAmountGold:    row.GuildGameShareAmountGold,
+		SettlementRuleType:          row.SettlementRuleType,
+		DirectPayout:                row.DirectPayout,
+		SettlementReceivableUsd:     row.SettlementReceivableUsd,
+		GoldToDiamondRate:           row.GoldToDiamondRate,
+		UsdToGoldRate:               row.UsdToGoldRate,
+		GameShareAmountDiamond:      row.GameShareAmountDiamond,
+		TotalSettlementDiamond:      row.TotalSettlementDiamond,
+		Status:                      row.Status,
+		TransferAt:                  row.TransferAt,
+		TransferOrderId:             row.TransferOrderId,
+		TransferPlatformNo:          row.TransferPlatformNo,
+		TransferLocalAmount:         row.TransferLocalAmount,
+		TransferFailMsg:             row.TransferFailMsg,
+		TransferCurrency:            row.TransferCurrency,
 		CreatedAt:                   &row.CreatedAt,
+		UpdatedAt:                   &row.UpdatedAt,
 	}
 	return item
 }
@@ -74,6 +99,15 @@ func fillCMSItemFromGuild(row *entity.GuildIncomeSettlementLog) *incomesettlemen
 		SettlementShareAmountUsd:    row.SettlementShareAmountUsd,
 		SettlementReceivableUsd:     row.SettlementReceivableUsd,
 		GuildSharePercent:           row.GuildSharePercent,
+		SettlementRuleType:          row.SettlementRuleType,
+		AnchorSocialShareAmount:     row.AnchorSocialShareAmount,
+		GuildSocialShareAmount:      row.GuildSocialShareAmount,
+		AnchorGameShareAmountGold:   row.AnchorGameShareAmountGold,
+		GuildGameShareAmountGold:    row.GuildGameShareAmountGold,
+		GoldToDiamondRate:           row.GoldToDiamondRate,
+		UsdToGoldRate:               row.UsdToGoldRate,
+		GameShareAmountDiamond:      row.GameShareAmountDiamond,
+		TotalSettlementDiamond:      row.TotalSettlementDiamond,
 		Status:                      row.Status,
 		TransferAt:                  row.TransferAt,
 		TransferOrderId:             row.TransferOrderId,
@@ -82,8 +116,23 @@ func fillCMSItemFromGuild(row *entity.GuildIncomeSettlementLog) *incomesettlemen
 		TransferFailMsg:             row.TransferFailMsg,
 		TransferCurrency:            row.TransferCurrency,
 		CreatedAt:                   &row.CreatedAt,
+		UpdatedAt:                   &row.UpdatedAt,
 	}
 	return item
+}
+
+func fillCMSGuildListItem(row *entity.GuildIncomeSettlementLog) *incomesettlementdto.CMSIncomeSettlementLogItem {
+	if row == nil {
+		return nil
+	}
+	return &incomesettlementdto.CMSIncomeSettlementLogItem{
+		Id:                      row.ID,
+		GuildId:                 row.GuildId,
+		SettlementReceivableUsd: row.SettlementReceivableUsd,
+		Status:                  row.Status,
+		CreatedAt:               &row.CreatedAt,
+		UpdatedAt:               &row.UpdatedAt,
+	}
 }
 
 func collectAnchorRoomIds(rows []*entity.AnchorIncomeSettlementLog) []uint64 {
@@ -107,18 +156,37 @@ func collectGuildIds(rows []*entity.GuildIncomeSettlementLog) []uint64 {
 }
 
 // GetAnchorCMSList CMS分页查询主播结算流水
-func GetAnchorCMSList(_ context.Context, req *incomesettlementdto.CMSAnchorIncomeSettlementLogListReq) (*httpserver.CMSQueryResp, error) {
+func GetAnchorCMSList(ctx context.Context, req *incomesettlementdto.CMSAnchorIncomeSettlementLogListReq) (*httpserver.CMSQueryResp, error) {
 	roomIds := liveroomdao.ParseLiveRecordAnchorIds(req.RoomId, "", "", req.AnchorIds)
+	if req.DirectPayout != nil && *req.DirectPayout {
+		visibleIds, restrict, empty := cmsvis.PlatformAnchorVisibilityFilter(ctx)
+		if empty {
+			return httpserver.NewCMSQueryResp(0, []*incomesettlementdto.CMSIncomeSettlementLogItem{}), nil
+		}
+		if restrict {
+			roomIds = intersectUint64Ids(roomIds, visibleIds)
+			if len(roomIds) == 0 {
+				return httpserver.NewCMSQueryResp(0, []*incomesettlementdto.CMSIncomeSettlementLogItem{}), nil
+			}
+		}
+	}
 	total, rows := liveroomdao.AnchorIncomeSettlementLogCMSList(&liveroomdao.AnchorIncomeSettlementLogCMSListFilter{
-		RoomIds:   roomIds,
-		StartTime: req.StartTime,
-		EndTime:   req.EndTime,
-		PageIndex: req.PageIndex,
-		PageSize:  req.PageSize,
+		RoomIds:                  roomIds,
+		StartTime:                req.StartTime,
+		EndTime:                  req.EndTime,
+		Status:                   req.Status,
+		DirectPayout:             req.DirectPayout,
+		OrderByReceivableUsdDesc: req.OrderByReceivableUsdDesc,
+		PageIndex:                req.PageIndex,
+		PageSize:                 req.PageSize,
 	})
 	profileRoomIds := collectAnchorRoomIds(rows)
 	nicknameMap := userinfodao.GetNicknameMapByUserIds(profileRoomIds)
 	profileMap := userinfodao.GetUserProfileMapByUserIds(profileRoomIds)
+	var transferMap map[uint64]*entity.LiveAnchorTransferInfo
+	if req.IncludeTransferInfo {
+		transferMap = liveroomdao.GetAnchorTransferInfoMapByIds(profileRoomIds)
+	}
 	list := make([]*incomesettlementdto.CMSIncomeSettlementLogItem, 0, len(rows))
 	for _, row := range rows {
 		item := fillCMSItemFromAnchor(row)
@@ -131,10 +199,41 @@ func GetAnchorCMSList(_ context.Context, req *incomesettlementdto.CMSAnchorIncom
 					item.RoomAvatar = upload.ResolveAvatarUrlForUser(row.RoomId, profile.Avatar)
 				}
 			}
+			if transferMap != nil {
+				if info := transferMap[row.RoomId]; info != nil {
+					if item.TransferCurrency == "" {
+						item.TransferCurrency = info.Currency
+					}
+					item.TransferPayeeName = info.PayeeName
+					item.TransferBankName = info.BankName
+					item.TransferAccountNo = info.AccountNo
+					item.TransferBankCode = info.BankCode
+				}
+			}
 		}
 		list = append(list, item)
 	}
 	return httpserver.NewCMSQueryResp(total, list), nil
+}
+
+func intersectUint64Ids(selected, allowed []uint64) []uint64 {
+	if len(allowed) == 0 {
+		return nil
+	}
+	if len(selected) == 0 {
+		return append([]uint64(nil), allowed...)
+	}
+	set := make(map[uint64]struct{}, len(allowed))
+	for _, id := range allowed {
+		set[id] = struct{}{}
+	}
+	out := make([]uint64, 0, len(selected))
+	for _, id := range selected {
+		if _, ok := set[id]; ok {
+			out = append(out, id)
+		}
+	}
+	return out
 }
 
 // GetGuildCMSList CMS分页查询工会结算流水
@@ -147,10 +246,16 @@ func GetGuildCMSList(ctx context.Context, req *incomesettlementdto.CMSGuildIncom
 		GuildId:                  parseUint64Filter(req.GuildId),
 		GuildIds:                 guildIds,
 		FilterByGuild:            restrict,
+		GuildType:                req.GuildType,
 		StartTime:                req.StartTime,
 		EndTime:                  req.EndTime,
+		TransferStartTime:        req.TransferStartTime,
+		TransferEndTime:          req.TransferEndTime,
+		PayoutOnly:               req.PayoutOnly,
 		Status:                   req.Status,
 		OrderByReceivableUsdDesc: req.OrderByReceivableUsdDesc,
+		IncludeDetail:            req.IncludeDetail,
+		IncludeTransfer:          req.IncludeTransfer,
 		PageIndex:                req.PageIndex,
 		PageSize:                 req.PageSize,
 	})
@@ -162,7 +267,10 @@ func GetGuildCMSList(ctx context.Context, req *incomesettlementdto.CMSGuildIncom
 	}
 	list := make([]*incomesettlementdto.CMSIncomeSettlementLogItem, 0, len(rows))
 	for _, row := range rows {
-		item := fillCMSItemFromGuild(row)
+		item := fillCMSGuildListItem(row)
+		if req.IncludeDetail || req.IncludeTransfer {
+			item = fillCMSItemFromGuild(row)
+		}
 		if item == nil {
 			continue
 		}
@@ -183,6 +291,44 @@ func GetGuildCMSList(ctx context.Context, req *incomesettlementdto.CMSGuildIncom
 		list = append(list, item)
 	}
 	return httpserver.NewCMSQueryResp(total, list), nil
+}
+
+// GetGuildCMSDetail 查询一条工会结算主单，并装配结算快照、代付过程和当前收款信息。
+func GetGuildCMSDetail(ctx context.Context, req *incomesettlementdto.CMSGuildIncomeSettlementLogDetailReq) (*incomesettlementdto.CMSGuildIncomeSettlementLogDetailRes, error) {
+	if req == nil {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	id, err := strconv.ParseUint(req.Id, 10, 64)
+	if err != nil || id == 0 {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	visibleSet, restrict, empty := guildVisibleSet(ctx)
+	if empty {
+		return nil, errercode.CreateCode(errercode.NoPermission)
+	}
+	row := liveroomdao.GetGuildIncomeSettlementLogById(id)
+	if row == nil {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if restrict {
+		if _, ok := visibleSet[row.GuildId]; !ok {
+			return nil, errercode.CreateCode(errercode.NoPermission)
+		}
+	}
+	item := fillCMSItemFromGuild(row)
+	if names := guilddao.GetNameMapByIds([]uint64{row.GuildId}); names != nil {
+		item.GuildName = names[row.GuildId]
+	}
+	if info := guilddao.GetGuildTransferInfo(row.GuildId); info != nil {
+		if item.TransferCurrency == "" {
+			item.TransferCurrency = info.Currency
+		}
+		item.TransferPayeeName = info.PayeeName
+		item.TransferBankName = info.BankName
+		item.TransferAccountNo = info.AccountNo
+		item.TransferBankCode = info.BankCode
+	}
+	return &incomesettlementdto.CMSGuildIncomeSettlementLogDetailRes{Item: item}, nil
 }
 
 // GetAnchorCMSListByGuildIds CMS分页查询指定工会下主播结算流水

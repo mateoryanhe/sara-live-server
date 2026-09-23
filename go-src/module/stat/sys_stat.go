@@ -15,7 +15,9 @@ func GetCMSSysStat(_ context.Context, _ *statdto.CMSSysStatReq) (*statdto.CMSSys
 	if stat == nil {
 		stat = entity.NewSystemTotalStat(entity.SystemTotalStatDefaultID)
 	}
-	todayStat := statdao.GetDailyLoginStatByDate(entity.FormatDailyLoginStatDate(time.Now()))
+	now := time.Now()
+	todayStat := statdao.GetDailyLoginStatByDate(entity.FormatDailyLoginStatDate(now))
+	weeklyStat := statdao.GetWeeklyLoginStatByWeek(entity.FormatWeeklyLoginStatKey(now))
 	return &statdto.CMSSysStatRes{
 		TotalGold:                 stat.TotalGold,
 		TotalGoldConsume:          stat.TotalGoldConsume,
@@ -23,6 +25,8 @@ func GetCMSSysStat(_ context.Context, _ *statdto.CMSSysStatReq) (*statdto.CMSSys
 		TotalRecharge:             stat.TotalRecharge,
 		TotalNormalUserRecharge:   stat.TotalNormalUserRecharge,
 		TotalCoinMerchantRecharge: stat.TotalCoinMerchantRecharge,
+		TotalAnchorPayout:         stat.TotalAnchorPayout,
+		WeeklyAnchorPayout:        weeklyStat.AnchorPayoutAmount,
 		TotalVirtualRecharge:      stat.TotalVirtualRecharge,
 		TotalWithdraw:             stat.TotalWithdraw,
 		TotalRegisterUser:         stat.TotalRegisterUser,

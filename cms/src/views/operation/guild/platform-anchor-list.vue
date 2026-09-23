@@ -4,6 +4,13 @@
       <template #header>
         <div class="card-header">
           <span>{{ t('menu.PlatformAnchorList') }}</span>
+          <el-button
+              v-if="can('batchImportSalaryAnchor')"
+              type="warning"
+              @click="openSalaryImportDialog"
+          >
+            {{ t('pages.guildList.batchImportSalaryAnchor') }}
+          </el-button>
         </div>
       </template>
 
@@ -106,30 +113,51 @@
             <el-tag v-else type="info">{{ t('common.offShelf') }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column fixed="right" :label="t('common.actions')" width="280">
+        <el-table-column :label="t('pages.anchorList.salaryEffectiveStatus')" width="120">
           <template #default="{ row }">
-            <el-button v-if="canViewDetail" link type="primary" @click="openDetail(row)">
-              {{ t('common.detail') }}
-            </el-button>
-            <el-button
-                v-if="showSetAnchorType"
-                link
-                type="primary"
-                @click="openAnchorTypeDialog(row)"
+            <el-tooltip
+                :content="salaryValidityText(row)"
+                placement="top"
             >
-              {{ t('pages.guildMembers.setAnchorType') }}
-            </el-button>
-            <el-button v-if="can('offShelf')" type="warning" link @click="handleOffShelf(row)">
-              {{ t('common.offShelf') }}
-            </el-button>
-            <el-button
-                v-if="row.ban ? can('unban') : can('ban')"
-                :type="row.ban ? 'warning' : 'danger'"
-                link
-                @click="toggleBanStatus(row)"
-            >
-              {{ row.ban ? t('pages.anchorList.unban') : t('pages.anchorList.ban') }}
-            </el-button>
+              <el-tag :type="row.salaryEffective ? 'success' : 'info'">
+                {{ row.salaryEffective
+                  ? t('pages.anchorList.salaryEffective')
+                  : t('pages.anchorList.salaryInactive') }}
+              </el-tag>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+        <el-table-column fixed="right" :label="t('common.actions')" width="100">
+          <template #default="{ row }">
+            <el-dropdown v-if="hasRowActions" trigger="click" @command="(cmd: string) => handleRowCommand(row, cmd)">
+              <el-button size="small" type="primary">
+                {{ t('common.actions') }}
+                <el-icon class="el-icon--right"><ArrowDown/></el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item v-if="canViewDetail" command="viewDetail">
+                    {{ t('common.detail') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item v-if="canSetAnchorType(row)" command="setAnchorType">
+                    {{ t('pages.guildMembers.setAnchorType') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item v-if="can('transferInfo')" command="transferInfo">
+                    {{ t('pages.guildList.transferInfo') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item v-if="can('offShelf')" divided command="offShelf">
+                    {{ t('common.offShelf') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                      v-if="row.ban ? can('unban') : can('ban')"
+                      :command="row.ban ? 'unban' : 'ban'"
+                  >
+                    {{ row.ban ? t('pages.anchorList.unban') : t('pages.anchorList.ban') }}
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+            <span v-else>-</span>
           </template>
         </el-table-column>
       </el-table>
@@ -217,6 +245,41 @@
         </el-button>
       </template>
     </el-dialog>
+
+    <el-dialog
+        v-model="salaryImportDialogVisible"
+        :title="t('pages.guildList.batchImportSalaryAnchorTitle')"
+        width="560px"
+    >
+      <el-alert
+          :closable="false"
+          :title="t('pages.guildList.batchImportSalaryAnchorValidityTip')"
+          class="salary-import-tip"
+          show-icon
+          type="info"
+      />
+      <el-form
+          ref="salaryImportFormRef"
+          :model="salaryImportForm"
+          :rules="salaryImportRules"
+          label-width="80px"
+      >
+        <el-form-item :label="t('pages.guildList.importUserIds')" prop="userIdsText">
+          <el-input
+              v-model="salaryImportForm.userIdsText"
+              :autosize="{ minRows: 8, maxRows: 16 }"
+              :placeholder="t('pages.guildList.importUserIdsPlaceholder')"
+              type="textarea"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="salaryImportDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button :loading="salaryImporting" type="primary" @click="handleSalaryImportSubmit">
+          {{ t('common.confirm') }}
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -225,17 +288,28 @@ import {computed, onMounted, reactive, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {useRouter} from 'vue-router'
 import {ElForm, ElMessage, ElMessageBox, type FormRules} from 'element-plus'
-import {accountApi} from '@/api'
+import {ArrowDown} from '@element-plus/icons-vue'
+import {accountApi, guildApi} from '@/api'
 import type {AnchorListItem, BanAnchorReq, UnBanAnchorReq} from '@/types/api'
 import {formatAmount, formatWalletBalance} from '@/utils/number-format'
 import {usePagePermission} from '@/composables/usePagePermission'
 import {useUserDetailNav} from '@/composables/useUserDetailNav'
-import {formatServerNowPlusDays} from '@/utils/server-datetime'
+import {formatServerDateTime, formatServerNowPlusDays} from '@/utils/server-datetime'
 
 const {t} = useI18n()
 const router = useRouter()
 const {can} = usePagePermission('PlatformAnchorList')
+const {canViewUserDetail, openUserDetail} = useUserDetailNav('PlatformAnchorList')
 const canViewDetail = computed(() => can('viewDetail'))
+const USER_TYPE_ANCHOR = 1
+const USER_TYPE_SENIOR_ANCHOR = 7
+const hasRowActions = computed(() => canViewDetail.value || [
+  'setAnchorType',
+  'transferInfo',
+  'offShelf',
+  'ban',
+  'unban',
+].some(key => can(key)))
 const canSetAnchorType = (row: AnchorListItem) => {
   if (!can('setAnchorType')) {
     return false
@@ -257,6 +331,10 @@ const anchorTypeForm = reactive({
   nickname: '',
   anchorType: 1 as 1 | 7,
 })
+const salaryImportDialogVisible = ref(false)
+const salaryImporting = ref(false)
+const salaryImportFormRef = ref<InstanceType<typeof ElForm>>()
+const salaryImportForm = reactive({userIdsText: ''})
 
 const ALL_LIVE_STATUS = -1
 const searchForm = reactive({key: '', liveStatus: 1})
@@ -274,6 +352,12 @@ const banRules = computed<FormRules>(() => ({
 const anchorTypeRules = computed<FormRules>(() => ({
   anchorType: [
     {required: true, message: t('pages.guildMembers.anchorTypeRequired'), trigger: 'change'},
+  ],
+}))
+
+const salaryImportRules = computed<FormRules>(() => ({
+  userIdsText: [
+    {required: true, message: t('pages.guildList.importUserIdsRequired'), trigger: 'blur'},
   ],
 }))
 
@@ -409,6 +493,95 @@ const openDetail = (row: AnchorListItem) => {
   })
 }
 
+const salaryValidityText = (row: AnchorListItem) => {
+  if (!row.salaryEffectiveStartTime || !row.salaryEffectiveEndTime) return '-'
+  return `${formatServerDateTime(row.salaryEffectiveStartTime)} ~ ${formatServerDateTime(row.salaryEffectiveEndTime)}`
+}
+
+const openTransferInfo = (row: AnchorListItem) => {
+  router.push({
+    name: 'PlatformAnchorTransferInfoEdit',
+    params: {anchorId: String(row.id)},
+    query: {anchorName: row.nickname || ''},
+  })
+}
+
+const handleRowCommand = (row: AnchorListItem, command: string) => {
+  switch (command) {
+    case 'viewDetail':
+      openDetail(row)
+      break
+    case 'setAnchorType':
+      openAnchorTypeDialog(row)
+      break
+    case 'transferInfo':
+      openTransferInfo(row)
+      break
+    case 'offShelf':
+      handleOffShelf(row)
+      break
+    case 'ban':
+    case 'unban':
+      toggleBanStatus(row)
+      break
+  }
+}
+
+const parseImportUserIds = (text: string): string[] => {
+  const seen = new Set<string>()
+  const ids: string[] = []
+  for (const token of text.split(/[\s,，;；]+/)) {
+    const id = token.trim()
+    if (!/^\d+$/.test(id) || id === '0' || seen.has(id)) continue
+    seen.add(id)
+    ids.push(id)
+  }
+  return ids
+}
+
+const openSalaryImportDialog = () => {
+  salaryImportForm.userIdsText = ''
+  salaryImportDialogVisible.value = true
+  salaryImportFormRef.value?.clearValidate()
+}
+
+const handleSalaryImportSubmit = async () => {
+  if (!salaryImportFormRef.value) return
+  await salaryImportFormRef.value.validate(async (valid: boolean) => {
+    if (!valid) return
+    const ids = parseImportUserIds(salaryImportForm.userIdsText)
+    if (ids.length === 0) {
+      ElMessage.warning(t('pages.guildList.importEmpty'))
+      return
+    }
+    salaryImporting.value = true
+    try {
+      const response = await guildApi.batchImportSalaryAnchors({ids})
+      salaryImportDialogVisible.value = false
+      ElMessage.success(t('pages.guildList.batchImportSalaryAnchorResult', {
+        success: response.successCount ?? 0,
+        fail: response.failCount ?? 0,
+      }))
+      const failIds = response.failIds || []
+      if (failIds.length > 0) {
+        const visibleIds = failIds.slice(0, 50).join(', ')
+        ElMessage.warning({
+          message: t('pages.guildList.batchImportSalaryAnchorFailIds', {
+            ids: `${visibleIds}${failIds.length > 50 ? '…' : ''}`,
+          }),
+          duration: 8000,
+        })
+      }
+      await fetchList()
+    } catch (error) {
+      console.error('batch import salary anchors failed:', error)
+      ElMessage.error(t('pages.guildList.importFailed'))
+    } finally {
+      salaryImporting.value = false
+    }
+  })
+}
+
 const openBanDialog = (row: AnchorListItem) => {
   banForm.accountId = row.id
   banForm.nickname = row.nickname || '-'
@@ -525,5 +698,9 @@ onMounted(() => {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+
+.salary-import-tip {
+  margin-bottom: 16px;
 }
 </style>

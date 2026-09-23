@@ -4,6 +4,8 @@ import type {
     AnchorDailyEffectiveLiveItem,
     AnchorDailyEffectiveLiveQuery,
     AnchorListItem,
+    GetAnchorTransferInfoRes,
+    BanReq,
     BanAnchorReq,
     BatchSetAnchorReq,
     BatchSetAnchorRes,
@@ -12,11 +14,13 @@ import type {
     ExitGuildReq,
     ExitGuildRes,
     PageResponse,
+    PlatformAnchorVisibilityItem,
     QueryAnchorListReq,
     QueryOffShelfLiveRoomListReq,
     OffShelfLiveRoomItem,
     QueryUserInfoReq,
     SetAnchorReq,
+    SaveAnchorTransferInfoReq,
     SetCanRankReq,
     SetLiveRoomStatusReq,
     SetLiveRoomStatusRes,
@@ -74,6 +78,22 @@ const accountApi = {
 
     getAnchorList: (data: QueryAnchorListReq) => {
         return request.post<PageResponse<AnchorListItem>>('/account/getAnchorList', data)
+    },
+
+    getPlatformAnchorListForVisibility: (data: QueryAnchorListReq) => {
+        return request.post<PageResponse<AnchorListItem>>('/account/platformAnchorListForVisibility', data)
+    },
+
+    getPlatformAnchorVisibilityByUserList: (cmsUserId: string | number) => {
+        return request.post<{list: PlatformAnchorVisibilityItem[]}>('/account/platformAnchorVisibilityByUserList', {cmsUserId})
+    },
+
+    batchGrantPlatformAnchorVisibility: (data: {cmsUserId: string | number; anchorIds: Array<string | number>}) => {
+        return request.post<{success: boolean; grantedCount: number}>('/account/batchGrantPlatformAnchorVisibility', data)
+    },
+
+    batchRevokePlatformAnchorVisibility: (data: {cmsUserId: string | number; anchorIds: Array<string | number>}) => {
+        return request.post<{success: boolean; revokedCount: number}>('/account/batchRevokePlatformAnchorVisibility', data)
     },
 
     getAnchorDetail: (anchorId: string | number) => {
@@ -140,6 +160,14 @@ const accountApi = {
 
     setPlatformAnchorType: (data: SetPlatformAnchorTypeReq) => {
         return request.post<SetPlatformAnchorTypeRes>('/account/setPlatformAnchorType', data)
+    },
+
+    getAnchorTransferInfo: (anchorId: string | number) => {
+        return request.post<GetAnchorTransferInfoRes>('/account/getAnchorTransferInfo', {anchorId})
+    },
+
+    saveAnchorTransferInfo: (data: SaveAnchorTransferInfoReq) => {
+        return request.post<{success: boolean}>('/account/saveAnchorTransferInfo', data)
     },
 }
 

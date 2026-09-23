@@ -33,6 +33,28 @@
           </div>
         </el-tab-pane>
 
+        <el-tab-pane :label="t('pages.dashboard.anchorPayout')" name="anchorPayout">
+          <div class="tab-toolbar">
+            <el-button :loading="loading" @click="fetchSysStat">{{ t('common.refresh') }}</el-button>
+          </div>
+          <div class="basic-stat-grid anchor-payout-stat-grid">
+            <div class="stat-card tone-teal">
+              <div class="stat-label">{{ t('pages.dashboard.statWeeklyAnchorPayout') }}</div>
+              <div class="stat-value">
+                {{ formatAmount(sysStat.weeklyAnchorPayout) }}
+                <span class="stat-unit">USD</span>
+              </div>
+            </div>
+            <div class="stat-card tone-blue">
+              <div class="stat-label">{{ t('pages.dashboard.statTotalAnchorPayout') }}</div>
+              <div class="stat-value">
+                {{ formatAmount(sysStat.totalAnchorPayout) }}
+                <span class="stat-unit">USD</span>
+              </div>
+            </div>
+          </div>
+        </el-tab-pane>
+
         <el-tab-pane :label="t('pages.dashboard.userData')" name="user">
           <div class="tab-toolbar">
             <el-button :loading="trendLoading" @click="fetchUserStatTrend">{{ t('common.refresh') }}</el-button>
@@ -127,7 +149,7 @@ const enabledBarSeries = getUserStatBarMetricTabs()
 const activeBarMetric = ref(enabledBarSeries[0]?.key ?? 'rechargeUser')
 
 const pageLoading = computed(() => {
-  if (activeMainTab.value === 'basic') {
+  if (activeMainTab.value === 'basic' || activeMainTab.value === 'anchorPayout') {
     return loading.value
   }
   if (activeMainTab.value === 'user') {
@@ -177,6 +199,8 @@ const sysStat = reactive<SysStat>({
   totalRecharge: 0,
   totalNormalUserRecharge: 0,
   totalCoinMerchantRecharge: 0,
+  totalAnchorPayout: 0,
+  weeklyAnchorPayout: 0,
   totalVirtualRecharge: 0,
   totalWithdraw: 0,
   totalRegisterUser: 0,
@@ -276,6 +300,8 @@ const fetchSysStat = async () => {
     sysStat.totalRecharge = data.totalRecharge ?? 0
     sysStat.totalNormalUserRecharge = data.totalNormalUserRecharge ?? 0
     sysStat.totalCoinMerchantRecharge = data.totalCoinMerchantRecharge ?? 0
+    sysStat.totalAnchorPayout = data.totalAnchorPayout ?? 0
+    sysStat.weeklyAnchorPayout = data.weeklyAnchorPayout ?? 0
     sysStat.totalVirtualRecharge = data.totalVirtualRecharge ?? 0
     sysStat.totalWithdraw = data.totalWithdraw ?? 0
     sysStat.totalRegisterUser = data.totalRegisterUser ?? 0
@@ -432,6 +458,10 @@ onMounted(() => {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.anchor-payout-stat-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .stat-card {
   position: relative;
   overflow: hidden;
@@ -475,6 +505,14 @@ onMounted(() => {
   color: #0f172a;
   font-variant-numeric: tabular-nums;
   word-break: break-all;
+}
+
+.stat-unit {
+  margin-left: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #64748b;
 }
 
 .tone-teal {
@@ -529,14 +567,16 @@ onMounted(() => {
 
 @media (max-width: 1200px) {
   .basic-stat-grid-today,
-  .basic-stat-grid-total {
+  .basic-stat-grid-total,
+  .anchor-payout-stat-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 768px) {
   .basic-stat-grid-today,
-  .basic-stat-grid-total {
+  .basic-stat-grid-total,
+  .anchor-payout-stat-grid {
     grid-template-columns: 1fr;
   }
 

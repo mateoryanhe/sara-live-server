@@ -5,6 +5,7 @@ func Init() {
 	initLoginEvent()
 	initRegisterEvent()
 	initRechargeEvent()
+	initGuildPayoutEvent()
 	initCurrencyStatEvent()
 	initAudienceEvent()
 }

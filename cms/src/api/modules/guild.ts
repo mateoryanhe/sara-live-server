@@ -14,6 +14,8 @@ import type {
     GetGuildTransferInfoRes,
     ImportGuildAnchorsReq,
     ImportGuildAnchorsRes,
+    BatchImportSalaryAnchorsReq,
+    BatchImportSalaryAnchorsRes,
     JoinGuildAnchorReq,
     JoinGuildAnchorRes,
     SaveGuildTransferInfoReq,
@@ -102,6 +104,10 @@ export const guildApi = {
 
     importGuildAnchors: (data: ImportGuildAnchorsReq) => {
         return request.post<ImportGuildAnchorsRes>('/guild/importGuildAnchors', data)
+    },
+
+    batchImportSalaryAnchors: (data: BatchImportSalaryAnchorsReq) => {
+        return request.post<BatchImportSalaryAnchorsRes>('/guild/batchImportSalaryAnchors', data)
     },
 
     joinGuildAnchor: (data: JoinGuildAnchorReq) => {

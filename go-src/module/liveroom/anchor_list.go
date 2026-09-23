@@ -5,10 +5,19 @@ import (
 
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/accountdto"
+	"xr-game-server/module/cmsvis"
 )
 
 // QueryAnchorList CMS分页查询主播列表(基于 roomListCache)
-func QueryAnchorList(_ context.Context, req *accountdto.QueryAnchorListReq) (*httpserver.CMSQueryResp, error) {
+
+func QueryAnchorList(ctx context.Context, req *accountdto.QueryAnchorListReq) (*httpserver.CMSQueryResp, error) {
+	if req.PlatformOnly {
+		visibleAnchorIds, filter := cmsvis.ResolvePlatformAnchorListVisibility(ctx)
+		if filter {
+			total, data := queryPlatformAnchorListByAnchorIdsFromMemory(visibleAnchorIds, req)
+			return httpserver.NewCMSQueryResp(total, data), nil
+		}
+	}
 	total, data := queryAnchorListFromMemory(req)
 	return httpserver.NewCMSQueryResp(total, data), nil
 }

@@ -13,8 +13,8 @@ import (
 	liveentity "xr-game-server/entity/live"
 	"xr-game-server/errercode"
 	"xr-game-server/module/cmsvis"
-	"xr-game-server/module/liveroom"
 	"xr-game-server/module/liverevenuesharecfg"
+	"xr-game-server/module/liveroom"
 )
 
 func genGuildId() uint64 {
@@ -134,7 +134,7 @@ func UpdateGuild(ctx context.Context, req *guilddto.UpdateGuildReq) (res *guildd
 	return &guilddto.UpdateGuildRes{Success: true}, nil
 }
 
-// resolveGuildSharePercent 普通工会强制用全局工会分佣;币商工会才允许自定义单一分佣比例
+// resolveGuildSharePercent 普通工会改由主播社交/游戏档位计算；币商工会继续使用原有单一比例。
 func resolveGuildSharePercent(
 	guildType uint8,
 	shareIn *float64,
@@ -142,7 +142,7 @@ func resolveGuildSharePercent(
 	useExisting bool,
 ) (sharePercent float64, err error) {
 	if guildType != liveentity.LiveGuildTypeCoinMerchant {
-		return liverevenuesharecfg.ResolveGuildSharePercent(), nil
+		return 0, nil
 	}
 	if useExisting {
 		sharePercent = existing

@@ -21,6 +21,17 @@ type ImportGuildAnchorsRes struct {
 	Fails        []*ImportGuildAnchorFailItem `json:"fails" dc:"失败列表"`
 }
 
+type BatchImportSalaryAnchorsReq struct {
+	g.Meta `path:"/batchImportSalaryAnchors" method:"post" summary:"批量导入有底薪主播" tags:"直播工会"`
+	IDs    []uint64 `json:"ids,string" v:"required|min-length:1#请至少填写一个主播用户ID" dc:"主播用户ID列表"`
+}
+
+type BatchImportSalaryAnchorsRes struct {
+	SuccessCount int      `json:"successCount"`
+	FailCount    int      `json:"failCount"`
+	FailIds      []uint64 `json:"failIds,string"`
+}
+
 type ImportGuildAnchorFailItem struct {
 	UserId   string `json:"userId" dc:"用户ID"`
 	Nickname string `json:"nickname" dc:"用户昵称"`

@@ -69,7 +69,12 @@
         </el-form-item>
       </el-form>
 
-      <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width: 100%">
+      <el-table
+          v-loading="loading || exporting"
+          :data="tableData"
+          :element-loading-text="exportStatusTip || undefined"
+          style="width: 100%"
+      >
         <el-table-column :label="t('common.createdAt')" fixed="left" width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>
@@ -118,6 +123,37 @@
         </el-table-column>
         <el-table-column :label="t('pages.anchorIncomeSettlementLogList.settlementFlowCommission')" align="right" min-width="110">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementShareAmount) }}</span></template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.hasSalary')" align="center" min-width="100">
+          <template #default="{ row }">
+            <el-tag :type="row.hasSalary ? 'success' : 'info'">
+              {{ row.hasSalary ? t('common.yes') : t('common.no') }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.anchorSocialSharePercent')" align="right" min-width="150">
+          <template #default="{ row }">{{ formatSharePercent(row.anchorSocialSharePercent) }}</template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.anchorSocialShareAmount')" align="right" min-width="160">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.anchorSocialShareAmount) }}</span></template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.guildSocialSharePercent')" align="right" min-width="150">
+          <template #default="{ row }">{{ formatSharePercent(row.guildSocialSharePercent) }}</template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.guildSocialShareAmount')" align="right" min-width="160">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.guildSocialShareAmount) }}</span></template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.anchorGameSharePercent')" align="right" min-width="150">
+          <template #default="{ row }">{{ formatSharePercent(row.anchorGameSharePercent) }}</template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.anchorGameShareAmountGold')" align="right" min-width="160">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.anchorGameShareAmountGold) }}</span></template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.guildGameSharePercent')" align="right" min-width="150">
+          <template #default="{ row }">{{ formatSharePercent(row.guildGameSharePercent) }}</template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.guildGameShareAmountGold')" align="right" min-width="160">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.guildGameShareAmountGold) }}</span></template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalIncome')" align="right" min-width="120">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
@@ -232,21 +268,23 @@ const formatGuildAnchorLabel = (anchor: AnchorListItem) => {
 }
 
 const platformAnchorInputValue = computed(() => {
-  if (selectedPlatformAnchors.value.length === 0) {
+  const anchor = selectedPlatformAnchors.value[0]
+  if (!anchor) {
     return ''
   }
   if (selectedPlatformAnchors.value.length === 1) {
-    return formatPlatformAnchorLabel(selectedPlatformAnchors.value[0])
+    return formatPlatformAnchorLabel(anchor)
   }
   return t('pages.liveRecordList.selectedPlatformAnchorsCount', {count: selectedPlatformAnchors.value.length})
 })
 
 const guildAnchorInputValue = computed(() => {
-  if (selectedGuildAnchors.value.length === 0) {
+  const anchor = selectedGuildAnchors.value[0]
+  if (!anchor) {
     return ''
   }
   if (selectedGuildAnchors.value.length === 1) {
-    return formatGuildAnchorLabel(selectedGuildAnchors.value[0])
+    return formatGuildAnchorLabel(anchor)
   }
   return t('pages.liveRecordList.selectedGuildAnchorsCount', {count: selectedGuildAnchors.value.length})
 })

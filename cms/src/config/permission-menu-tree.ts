@@ -74,6 +74,7 @@ const GUILD_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
             'joinGuildAnchor',
             'batchSetAnchor',
             'batchSetSeniorAnchor',
+            'batchImportSalaryAnchor',
             'transferInfo',
         ],
     },
@@ -102,6 +103,10 @@ const GUILD_CMS_USER_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
 ]
 
 const GUILD_VISIBILITY_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
+    {id: 'access', titleKey: 'pages.moduleList.groupAccess', buttonKeys: ['view', 'search', 'grant', 'revoke']},
+]
+
+const PLATFORM_ANCHOR_VISIBILITY_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
     {id: 'access', titleKey: 'pages.moduleList.groupAccess', buttonKeys: ['view', 'search', 'grant', 'revoke']},
 ]
 
@@ -173,42 +178,43 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('RechargeCfgManagement'),
                 page('CoinMerchantRechargeCfgManagement'),
                 page('VipCfgManagement'),
+            ]),
+            group('operation-guild-basic', 'menu.OperationGuildBasicGroup', [
+                page('GuildManagement', {
+                    buttonGroups: GUILD_BUTTON_GROUPS,
+                    subPages: [
+                        {pageName: 'GuildDetail'},
+                        {pageName: 'GuildMembers'},
+                        {pageName: 'GuildAnchorImportResult'},
+                    ],
+                }),
+                page('PlatformAnchorList'),
+                page('GuildRecycleBinManagement'),
+            ]),
+            group('operation-guild-access', 'menu.OperationGuildAccessGroup', [
+                page('GuildCMSUserManagement', {buttonGroups: GUILD_CMS_USER_BUTTON_GROUPS}),
+                page('GuildVisibilityManagement', {buttonGroups: GUILD_VISIBILITY_BUTTON_GROUPS}),
+                page('PlatformAnchorVisibilityManagement', {buttonGroups: PLATFORM_ANCHOR_VISIBILITY_BUTTON_GROUPS}),
+            ]),
+            group('operation-guild-data', 'menu.OperationGuildDataGroup', [
+                page('GuildProfileManagement', {
+                    buttonGroups: GUILD_PROFILE_BUTTON_GROUPS,
+                    subPages: [
+                        {pageName: 'GuildProfileMembers'},
+                        {pageName: 'GuildProfileAnchorDailyLive'},
+                    ],
+                }),
+                page('GuildAnchorDailyLiveManagement', {buttonGroups: GUILD_ANCHOR_DAILY_LIVE_BUTTON_GROUPS}),
+            ]),
+            group('operation-settlement', 'menu.OperationSettlementGroup', [
                 page('WalletExchangeCfgManagement'),
                 page('PaymentCountryCfgManagement'),
                 page('CoinMerchantPaymentCountryCfgManagement'),
-            ]),
-            group('operation-guild', 'menu.OperationGuildGroup', [
-                group('operation-guild-basic', 'menu.OperationGuildBasicGroup', [
-                    page('GuildManagement', {
-                        buttonGroups: GUILD_BUTTON_GROUPS,
-                        subPages: [
-                            {pageName: 'GuildDetail'},
-                            {pageName: 'GuildMembers'},
-                            {pageName: 'GuildAnchorImportResult'},
-                        ],
-                    }),
-                    page('PlatformAnchorList'),
-                    page('GuildRecycleBinManagement'),
-                ]),
-                group('operation-guild-access', 'menu.OperationGuildAccessGroup', [
-                    page('GuildCMSUserManagement', {buttonGroups: GUILD_CMS_USER_BUTTON_GROUPS}),
-                    page('GuildVisibilityManagement', {buttonGroups: GUILD_VISIBILITY_BUTTON_GROUPS}),
-                ]),
-                group('operation-guild-data', 'menu.OperationGuildDataGroup', [
-                    page('GuildProfileManagement', {
-                        buttonGroups: GUILD_PROFILE_BUTTON_GROUPS,
-                        subPages: [
-                            {pageName: 'GuildProfileMembers'},
-                            {pageName: 'GuildProfileAnchorDailyLive'},
-                        ],
-                    }),
-                    page('GuildAnchorDailyLiveManagement', {buttonGroups: GUILD_ANCHOR_DAILY_LIVE_BUTTON_GROUPS}),
-                    page('GuildTransferManagement'),
-                ]),
-            ]),
-            group('operation-settlement', 'menu.OperationSettlementGroup', [
                 page('AnchorSalaryCfgManagement'),
-                page('LiveRevenueShareCfgManagement'),
+                page('AnchorSalarySocialShareCfgManagement'),
+                page('AnchorNoSalaryShareCfgManagement'),
+                page('AnchorSalaryGameShareCfgManagement'),
+                page('AnchorNoSalaryGameShareCfgManagement'),
             ]),
             group('operation-app', 'menu.OperationAppGroup', [
                 page('RandomNicknameManagement'),
@@ -248,7 +254,11 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             ]),
             group('log-settlement', 'menu.SettlementLogGroup', [
                 page('AnchorIncomeSettlementLogList'),
+                page('PlatformAnchorPayoutList'),
                 page('GuildIncomeSettlementLogList'),
+                page('GuildPayoutDetailList'),
+                page('GuildTransferManagement'),
+                page('CoinMerchantGuildTransferManagement'),
             ]),
             group('log-game', 'menu.GameLogGroup', [
                 page('GameBetLogListManagement'),

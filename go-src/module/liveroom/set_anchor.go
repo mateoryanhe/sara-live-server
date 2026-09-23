@@ -3,6 +3,7 @@ package liveroom
 import (
 	"context"
 
+	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/accountdto"
@@ -16,6 +17,7 @@ func SetAnchor(ctx context.Context, req *accountdto.SetAnchorReq) (*accountdto.S
 	if err != nil {
 		return nil, err
 	}
+	grantPlatformAnchorVisibilityToOperator(ctx, req.AccountId)
 	RefreshRoomListCache(ctx)
 	return res, nil
 }
@@ -26,6 +28,7 @@ func SetSeniorAnchor(ctx context.Context, req *accountdto.SetSeniorAnchorReq) (*
 	if err != nil {
 		return nil, err
 	}
+	grantPlatformAnchorVisibilityToOperator(ctx, req.AccountId)
 	RefreshRoomListCache(ctx)
 	return &accountdto.SetSeniorAnchorRes{Success: true}, nil
 }
@@ -56,6 +59,7 @@ func batchSetAnchor(ctx context.Context, ids []uint64, userType uint8) (*account
 			res.FailIds = append(res.FailIds, id)
 			continue
 		}
+		grantPlatformAnchorVisibilityToOperator(ctx, id)
 		res.SuccessCount++
 	}
 	if res.SuccessCount > 0 {
@@ -107,6 +111,18 @@ func ExitGuild(ctx context.Context, req *accountdto.ExitGuildReq) (*accountdto.E
 		room.SetGuildId(0)
 		liveroomdao.FlushRoomCache(room)
 	}
+	grantPlatformAnchorVisibilityToOperator(ctx, req.AnchorId)
 	RefreshRoomListCache(ctx)
 	return &accountdto.ExitGuildRes{Success: true}, nil
+}
+
+func grantPlatformAnchorVisibilityToOperator(ctx context.Context, anchorId uint64) {
+	room := liveroomdao.GetRoomById(anchorId)
+	if room == nil || room.GuildId != 0 {
+		return
+	}
+	cmsUserId := httpserver.GetAuthId(ctx)
+	if cmsUserId > 0 {
+		_ = liveroomdao.AddPlatformAnchorVisibility(anchorId, cmsUserId)
+	}
 }

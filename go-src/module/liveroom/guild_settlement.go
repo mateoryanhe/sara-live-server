@@ -44,6 +44,10 @@ func resolveGuildSettlementSharePercent(guild *entity.LiveGuild) float64 {
 }
 
 func settleOneGuild(guild *entity.LiveGuild) {
+	if guild.GuildType != entity.LiveGuildTypeCoinMerchant {
+		settleOneNormalGuildTiered(guild)
+		return
+	}
 	guildId := guild.ID
 	dailyRows := liveroomdao.ListRecentUnsettledDailyGuildEffectiveLives(guildId)
 	unsettled := liveroomdao.GetGuildIncomeUnsettled(guildId)

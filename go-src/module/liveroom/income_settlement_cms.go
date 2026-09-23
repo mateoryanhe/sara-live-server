@@ -30,6 +30,15 @@ func fillCMSItemFromAnchor(row *entity.AnchorIncomeSettlementLog) *incomesettlem
 		SettlementSalary:            row.SettlementSalary,
 		SettlementShareAmount:       row.SettlementShareAmount,
 		AnchorSharePercent:          row.AnchorSharePercent,
+		HasSalary:                   row.HasSalary,
+		AnchorSocialSharePercent:    row.AnchorSocialSharePercent,
+		GuildSocialSharePercent:     row.GuildSocialSharePercent,
+		AnchorGameSharePercent:      row.AnchorGameSharePercent,
+		GuildGameSharePercent:       row.GuildGameSharePercent,
+		AnchorSocialShareAmount:     row.AnchorSocialShareAmount,
+		GuildSocialShareAmount:      row.GuildSocialShareAmount,
+		AnchorGameShareAmountGold:   row.AnchorGameShareAmountGold,
+		GuildGameShareAmountGold:    row.GuildGameShareAmountGold,
 		CreatedAt:                   &row.CreatedAt,
 	}
 	return item
@@ -53,6 +62,15 @@ func fillCMSItemFromGuild(row *entity.GuildIncomeSettlementLog) *incomesettlemen
 		SettlementSalary:            row.SettlementSalary,
 		SettlementShareAmount:       row.SettlementShareAmount,
 		GuildSharePercent:           row.GuildSharePercent,
+		SettlementRuleType:          row.SettlementRuleType,
+		AnchorSocialShareAmount:     row.AnchorSocialShareAmount,
+		GuildSocialShareAmount:      row.GuildSocialShareAmount,
+		AnchorGameShareAmountGold:   row.AnchorGameShareAmountGold,
+		GuildGameShareAmountGold:    row.GuildGameShareAmountGold,
+		GoldToDiamondRate:           row.GoldToDiamondRate,
+		UsdToGoldRate:               row.UsdToGoldRate,
+		GameShareAmountDiamond:      row.GameShareAmountDiamond,
+		TotalSettlementDiamond:      row.TotalSettlementDiamond,
 		CreatedAt:                   &row.CreatedAt,
 	}
 	return item
@@ -103,11 +121,12 @@ func GetAnchorCMSList(_ context.Context, req *incomesettlementdto.CMSAnchorIncom
 // GetGuildCMSList CMS分页查询工会结算流水
 func GetGuildCMSList(_ context.Context, req *incomesettlementdto.CMSGuildIncomeSettlementLogListReq) (*httpserver.CMSQueryResp, error) {
 	total, rows := liveroomdao.GuildIncomeSettlementLogCMSList(&liveroomdao.GuildIncomeSettlementLogCMSListFilter{
-		GuildId:   parseUint64Filter(req.GuildId),
-		StartTime: req.StartTime,
-		EndTime:   req.EndTime,
-		PageIndex: req.PageIndex,
-		PageSize:  req.PageSize,
+		GuildId:       parseUint64Filter(req.GuildId),
+		StartTime:     req.StartTime,
+		EndTime:       req.EndTime,
+		IncludeDetail: true,
+		PageIndex:     req.PageIndex,
+		PageSize:      req.PageSize,
 	})
 	guildNameMap := guilddao.GetNameMapByIds(collectGuildIds(rows))
 	list := make([]*incomesettlementdto.CMSIncomeSettlementLogItem, 0, len(rows))

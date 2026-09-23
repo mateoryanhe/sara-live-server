@@ -21,6 +21,7 @@ const (
 	jobRecharge
 	jobCurrency
 	jobAudience
+	jobGuildPayout
 )
 
 // statJob 统计队列任务;Payload 为原始事件数据,校验与清洗在消费端完成.
@@ -85,5 +86,7 @@ func handleStatJob(job *statJob) {
 		consumeCurrencyJob(job)
 	case jobAudience:
 		consumeAudienceJob(job)
+	case jobGuildPayout:
+		consumeGuildPayoutJob(job)
 	}
 }

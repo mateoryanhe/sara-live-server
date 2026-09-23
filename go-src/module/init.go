@@ -5,7 +5,9 @@ import (
 	"xr-game-server/module/activity"
 	"xr-game-server/module/agora"
 	"xr-game-server/module/aliyunmoderation"
+	"xr-game-server/module/anchornosalarysharecfg"
 	"xr-game-server/module/anchorrank"
+	"xr-game-server/module/anchorsalarysocialsharecfg"
 	"xr-game-server/module/apppkg"
 	"xr-game-server/module/appversioncfg"
 	"xr-game-server/module/auth"
@@ -90,6 +92,8 @@ func Init() {
 	simulatorcpukeyword.Init()
 	simulatordevicewhitelist.Init()
 	customerservice.Init()
+	anchornosalarysharecfg.Init()
+	anchorsalarysocialsharecfg.Init()
 	liverevenuesharecfg.Init()
 	logquery.Init()
 

@@ -192,7 +192,7 @@
         <el-form-item>
           <el-button @click="goBack">{{ t('pages.guildList.back') }}</el-button>
           <el-button
-              v-if="can('transferInfo')"
+              v-if="canEditTransferInfo"
               :loading="saving"
               :disabled="loading"
               type="primary"
@@ -278,7 +278,7 @@ import {computed, nextTick, onMounted, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {useRoute, useRouter} from 'vue-router'
 import {ElMessage, type FormInstance, type FormRules} from 'element-plus'
-import {guildApi} from '@/api'
+import {accountApi, guildApi} from '@/api'
 import type {GuildTransferCountryOption} from '@/types/api.ts'
 import {usePagePermission} from '@/composables/usePagePermission'
 
@@ -327,15 +327,30 @@ const emptyTransferForm = (): TransferInfoForm => ({
 const {t} = useI18n()
 const route = useRoute()
 const router = useRouter()
-const {can} = usePagePermission('GuildManagement')
-const guildId = computed(() => String(route.params.guildId || '').trim())
+const {can: canGuildManagement} = usePagePermission('GuildManagement')
+const {can: canGuildTransfer} = usePagePermission('GuildTransferManagement')
+const {can: canCoinMerchantGuildTransfer} = usePagePermission('CoinMerchantGuildTransferManagement')
+const {can: canPlatformAnchor} = usePagePermission('PlatformAnchorList')
+const isAnchorTransfer = computed(() => route.name === 'PlatformAnchorTransferInfoEdit')
+const canEditTransferInfo = computed(() => (
+  isAnchorTransfer.value
+    ? canPlatformAnchor('transferInfo')
+    : (canGuildManagement('transferInfo')
+      || canGuildTransfer('transferInfo')
+      || canCoinMerchantGuildTransfer('transferInfo'))
+))
+const guildId = computed(() => String(
+  isAnchorTransfer.value ? route.params.anchorId : route.params.guildId,
+).trim())
 const guildName = computed(() => {
-  const value = route.query.guildName
+  const value = isAnchorTransfer.value ? route.query.anchorName : route.query.guildName
   return String(Array.isArray(value) ? (value[0] ?? '') : (value ?? '')).trim()
 })
-const pageTitle = computed(() => t('pages.guildList.transferInfoTitle', {
+const pageTitle = computed(() => t(
+  isAnchorTransfer.value ? 'pages.anchorList.transferInfoTitle' : 'pages.guildList.transferInfoTitle', {
   name: guildName.value || guildId.value,
-}))
+  },
+))
 const loading = ref(false)
 const saving = ref(false)
 const transferCurrencyDialogVisible = ref(false)
@@ -545,7 +560,9 @@ const loadTransferInfo = async () => {
   transferCountries.value = []
   transferCurrencyDialogVisible.value = false
   try {
-    const response = await guildApi.getGuildTransferInfo(guildId.value)
+    const response = isAnchorTransfer.value
+      ? await accountApi.getAnchorTransferInfo(guildId.value)
+      : await guildApi.getGuildTransferInfo(guildId.value)
     const info = response?.info
     transferCountries.value = response?.countries ?? []
     transferForm.value = {
@@ -641,8 +658,7 @@ const handleTransferSave = async () => {
   }
   saving.value = true
   try {
-    await guildApi.saveGuildTransferInfo({
-      guildId: transferForm.value.guildId,
+    const payload = {
       countryCode: transferForm.value.countryCode.trim().toUpperCase(),
       currency: transferForm.value.currency.trim().toUpperCase(),
       accountType: transferForm.value.accountType.trim().toUpperCase(),
@@ -658,7 +674,12 @@ const handleTransferSave = async () => {
       address3: transferForm.value.address3.trim(),
       postalCode: transferForm.value.postalCode.trim(),
       remark: transferForm.value.remark.trim(),
-    })
+    }
+    if (isAnchorTransfer.value) {
+      await accountApi.saveAnchorTransferInfo({anchorId: transferForm.value.guildId, ...payload})
+    } else {
+      await guildApi.saveGuildTransferInfo({guildId: transferForm.value.guildId, ...payload})
+    }
     ElMessage.success(t('pages.guildList.transferSaveSuccess'))
     await loadTransferInfo()
   } catch (error) {
@@ -670,6 +691,18 @@ const handleTransferSave = async () => {
 }
 
 const goBack = () => {
+  if (isAnchorTransfer.value) {
+    router.push({name: 'PlatformAnchorList'})
+    return
+  }
+  if (route.query.from === 'guildTransfer') {
+    router.push({name: 'GuildTransferManagement'})
+    return
+  }
+  if (route.query.from === 'coinMerchantGuildTransfer') {
+    router.push({name: 'CoinMerchantGuildTransferManagement'})
+    return
+  }
   router.push({name: 'GuildManagement'})
 }
 

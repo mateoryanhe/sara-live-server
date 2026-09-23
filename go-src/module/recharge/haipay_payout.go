@@ -248,12 +248,23 @@ func haiPayQueryPayout(ctx context.Context, row *liveentity.GuildIncomeSettlemen
 	if row == nil || row.ID == 0 {
 		return nil, fmt.Errorf("empty payout settlement")
 	}
+	return haiPayQueryPayoutOrder(ctx, row.TransferCurrency, row.TransferOrderId, row.TransferPlatformNo, row.TransferLocalAmount)
+}
+
+func haiPayQueryAnchorPayout(ctx context.Context, row *liveentity.AnchorIncomeSettlementLog) (*haiPayPayoutQueryData, error) {
+	if row == nil || row.ID == 0 {
+		return nil, fmt.Errorf("empty anchor payout settlement")
+	}
+	return haiPayQueryPayoutOrder(ctx, row.TransferCurrency, row.TransferOrderId, row.TransferPlatformNo, row.TransferLocalAmount)
+}
+
+func haiPayQueryPayoutOrder(ctx context.Context, transferCurrency, transferOrderId, transferPlatformNo string, transferLocalAmount float64) (*haiPayPayoutQueryData, error) {
 	cfg := cfgdao.GetHaiPayCfgCached()
 	if cfg == nil || !cfgdao.HaiPayEnabled() {
 		return nil, fmt.Errorf("haipay config not ready")
 	}
-	currency := strings.ToUpper(strings.TrimSpace(row.TransferCurrency))
-	orderID := strings.TrimSpace(row.TransferOrderId)
+	currency := strings.ToUpper(strings.TrimSpace(transferCurrency))
+	orderID := strings.TrimSpace(transferOrderId)
 	if currency == "" || orderID == "" {
 		return nil, fmt.Errorf("haipay payout local order incomplete")
 	}
@@ -265,7 +276,7 @@ func haiPayQueryPayout(ctx context.Context, row *liveentity.GuildIncomeSettlemen
 		"appId":   appID,
 		"orderId": orderID,
 	}
-	if orderNo := strings.TrimSpace(row.TransferPlatformNo); orderNo != "" {
+	if orderNo := strings.TrimSpace(transferPlatformNo); orderNo != "" {
 		body["orderNo"] = orderNo
 	}
 	sign, err := haiPaySign(ctx, body, cfg.MerchantSecretKey, cfg.MerchantPrivateKey)
@@ -293,7 +304,7 @@ func haiPayQueryPayout(ctx context.Context, row *liveentity.GuildIncomeSettlemen
 	if queryOrderID == "" || queryOrderID != orderID {
 		return nil, fmt.Errorf("haipay payout query order mismatch got=%s want=%s", queryOrderID, orderID)
 	}
-	localOrderNo := strings.TrimSpace(row.TransferPlatformNo)
+	localOrderNo := strings.TrimSpace(transferPlatformNo)
 	queryOrderNo := strings.TrimSpace(res.Data.OrderNo)
 	if localOrderNo != "" && (queryOrderNo == "" || queryOrderNo != localOrderNo) {
 		return nil, fmt.Errorf("haipay payout query platform order mismatch got=%s want=%s", queryOrderNo, localOrderNo)
@@ -303,7 +314,7 @@ func haiPayQueryPayout(ctx context.Context, row *liveentity.GuildIncomeSettlemen
 		if amountErr != nil {
 			return nil, fmt.Errorf("invalid haipay payout query amount %q: %w", res.Data.Amount, amountErr)
 		}
-		expectedText := haiPayFormatPayoutAmount(currency, row.TransferLocalAmount)
+		expectedText := haiPayFormatPayoutAmount(currency, transferLocalAmount)
 		expectedAmount, amountErr := haiPayAmountCents(expectedText)
 		if amountErr != nil {
 			return nil, fmt.Errorf("invalid local payout amount %q: %w", expectedText, amountErr)

@@ -54,23 +54,27 @@ type LiveRoomIncomeTotalItem struct {
 
 // AnchorLiveRoomDetailItem 直播间详情
 type AnchorLiveRoomDetailItem struct {
-	ID                uint64     `json:"id,string"`
-	GuildId           uint64     `json:"guildId,string"`
-	Title             string     `json:"title"`
-	Cover             string     `json:"cover"`
-	Notice            string     `json:"notice"`
-	LiveRecordId      uint64     `json:"liveRecordId,string"`
-	HeartTime         *time.Time `json:"heartTime"`
-	Ban               bool       `json:"ban"`
-	BanApplyTime      *time.Time `json:"banApplyTime"`
-	BanReason         string     `json:"banReason"`
-	Status            uint8      `json:"status"`
-	LiveStatus        uint8      `json:"liveStatus"`
-	Category          uint8      `json:"category"`
-	PrivateInviteType uint8      `json:"privateInviteType"`
-	Billing           float64    `json:"billing"`
-	CreatedAt         *time.Time `json:"createdAt"`
-	UpdatedAt         *time.Time `json:"updatedAt"`
+	ID                       uint64     `json:"id,string"`
+	GuildId                  uint64     `json:"guildId,string"`
+	Title                    string     `json:"title"`
+	Cover                    string     `json:"cover"`
+	Notice                   string     `json:"notice"`
+	LiveRecordId             uint64     `json:"liveRecordId,string"`
+	HeartTime                *time.Time `json:"heartTime"`
+	Ban                      bool       `json:"ban"`
+	BanApplyTime             *time.Time `json:"banApplyTime"`
+	BanReason                string     `json:"banReason"`
+	Status                   uint8      `json:"status"`
+	LiveStatus               uint8      `json:"liveStatus"`
+	Category                 uint8      `json:"category"`
+	PrivateInviteType        uint8      `json:"privateInviteType"`
+	Billing                  float64    `json:"billing"`
+	HasSalary                bool       `json:"hasSalary"`
+	SalaryEffective          bool       `json:"salaryEffective"`
+	SalaryEffectiveStartTime *time.Time `json:"salaryEffectiveStartTime"`
+	SalaryEffectiveEndTime   *time.Time `json:"salaryEffectiveEndTime"`
+	CreatedAt                *time.Time `json:"createdAt"`
+	UpdatedAt                *time.Time `json:"updatedAt"`
 }
 
 // LiveRoomIncomeArchiveItem 下架未结算收益归档

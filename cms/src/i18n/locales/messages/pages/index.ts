@@ -21,6 +21,7 @@ import {guildProfileMessages} from './guild-profile'
 import {guildProfileMembersMessages} from './guild-profile-members'
 import {guildCmsUserListMessages} from './guild-cms-user-list'
 import {guildVisibilityListMessages} from './guild-visibility-list'
+import {platformAnchorVisibilityListMessages} from './platform-anchor-visibility-list'
 import {coinMerchantListMessages} from './coin-merchant-list'
 import {coinMerchantRechargeCfgListMessages} from './coin-merchant-recharge-cfg-list'
 import {guildAnchorIncomeSettlementLogListMessages} from './guild-anchor-income-settlement-log-list'
@@ -61,7 +62,9 @@ import {inviteRechargeRewardCfgMessages} from './invite-recharge-reward-cfg'
 import {simulatorCpuKeywordListMessages} from './simulator-cpu-keyword-list'
 import {simulatorDeviceWhitelistListMessages} from './simulator-device-whitelist-list'
 import {anchorSalaryCfgListMessages} from './anchor-salary-cfg-list'
-import {liveRevenueShareCfgMessages} from './live-revenue-share-cfg'
+import {anchorSalarySocialShareCfgListMessages} from './anchor-salary-social-share-cfg-list'
+import {anchorNoSalaryShareCfgMessages} from './anchor-no-salary-share-cfg'
+import {anchorGameShareCfgListMessages} from './anchor-game-share-cfg-list'
 import {anchorIncomeSettlementLogListMessages} from './anchor-income-settlement-log-list'
 import {guildIncomeSettlementLogListMessages} from './guild-income-settlement-log-list'
 import {guildTransferListMessages} from './guild-transfer-list'
@@ -110,6 +113,7 @@ const pageMessageBuilders = [
   ['guildProfileMembers', guildProfileMembersMessages],
   ['guildCmsUserList', guildCmsUserListMessages],
   ['guildVisibilityList', guildVisibilityListMessages],
+  ['platformAnchorVisibilityList', platformAnchorVisibilityListMessages],
   ['coinMerchantList', coinMerchantListMessages],
   ['coinMerchantRechargeCfgList', coinMerchantRechargeCfgListMessages],
   ['guildAnchorIncomeSettlementLogList', guildAnchorIncomeSettlementLogListMessages],
@@ -150,7 +154,9 @@ const pageMessageBuilders = [
   ['simulatorCpuKeywordList', simulatorCpuKeywordListMessages],
   ['simulatorDeviceWhitelistList', simulatorDeviceWhitelistListMessages],
   ['anchorSalaryCfgList', anchorSalaryCfgListMessages],
-  ['liveRevenueShareCfg', liveRevenueShareCfgMessages],
+  ['anchorSalarySocialShareCfgList', anchorSalarySocialShareCfgListMessages],
+  ['anchorNoSalaryShareCfg', anchorNoSalaryShareCfgMessages],
+  ['anchorGameShareCfgList', anchorGameShareCfgListMessages],
   ['anchorIncomeSettlementLogList', anchorIncomeSettlementLogListMessages],
   ['guildIncomeSettlementLogList', guildIncomeSettlementLogListMessages],
   ['guildTransferList', guildTransferListMessages],

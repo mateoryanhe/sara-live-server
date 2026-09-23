@@ -48,6 +48,15 @@ export function buildAnchorSettlementLogCsvColumns(
     {header: t(`${ns}.roomId`), value: row => row.roomId ?? ''},
     {header: t(`${ns}.roomNickname`), value: row => row.roomNickname ?? ''},
     ...amountColumns(t, ns),
+    {header: t(`${ns}.hasSalary`), value: row => row.hasSalary ? t('common.yes') : t('common.no')},
+    {header: t(`${ns}.anchorSocialSharePercent`), value: row => row.anchorSocialSharePercent ?? ''},
+    {header: t(`${ns}.anchorSocialShareAmount`), value: row => row.anchorSocialShareAmount ?? ''},
+    {header: t(`${ns}.guildSocialSharePercent`), value: row => row.guildSocialSharePercent ?? ''},
+    {header: t(`${ns}.guildSocialShareAmount`), value: row => row.guildSocialShareAmount ?? ''},
+    {header: t(`${ns}.anchorGameSharePercent`), value: row => row.anchorGameSharePercent ?? ''},
+    {header: t(`${ns}.anchorGameShareAmountGold`), value: row => row.anchorGameShareAmountGold ?? ''},
+    {header: t(`${ns}.guildGameSharePercent`), value: row => row.guildGameSharePercent ?? ''},
+    {header: t(`${ns}.guildGameShareAmountGold`), value: row => row.guildGameShareAmountGold ?? ''},
     {header: t('common.createdAt'), value: row => formatServerDateTimeForExport(row.createdAt)},
   ]
 }
@@ -71,6 +80,17 @@ export function buildGuildSettlementLogCsvColumns(
     {header: t(`${ns}.settlementSalary`), value: row => row.settlementSalary ?? ''},
     {header: t(`${ns}.settlementShareAmount`), value: row => row.settlementShareAmount ?? ''},
     ...guildAmountColumns(t, ns),
+    {header: t(`${ns}.settlementRuleType`), value: row => row.settlementRuleType === 1
+      ? t(`${ns}.settlementRuleTiered`)
+      : t(`${ns}.settlementRuleLegacy`)},
+    {header: t(`${ns}.anchorSocialShareAmount`), value: row => row.anchorSocialShareAmount ?? ''},
+    {header: t(`${ns}.guildSocialShareAmount`), value: row => row.guildSocialShareAmount ?? ''},
+    {header: t(`${ns}.anchorGameShareAmountGold`), value: row => row.anchorGameShareAmountGold ?? ''},
+    {header: t(`${ns}.guildGameShareAmountGold`), value: row => row.guildGameShareAmountGold ?? ''},
+    {header: t(`${ns}.goldToDiamondRate`), value: row => row.goldToDiamondRate ?? ''},
+    {header: t(`${ns}.usdToGoldRate`), value: row => row.usdToGoldRate ?? ''},
+    {header: t(`${ns}.gameShareAmountDiamond`), value: row => row.gameShareAmountDiamond ?? ''},
+    {header: t(`${ns}.totalSettlementDiamond`), value: row => row.totalSettlementDiamond ?? ''},
     {header: t('common.createdAt'), value: row => formatServerDateTimeForExport(row.createdAt)},
   ]
 }

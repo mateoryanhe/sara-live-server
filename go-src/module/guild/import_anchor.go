@@ -116,5 +116,6 @@ func importOneGuildAnchor(guild *entity.LiveGuild, userID uint64, anchorType uin
 
 	_ = liveroom.SetUserAsAnchorIfNeeded(userID, anchorType)
 	liveroom.EnsureAnchorRoom(userID, guild.ID)
+	_ = liveroomdao.DeletePlatformAnchorVisibilities(userID)
 	return 0, nickname
 }

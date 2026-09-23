@@ -65,6 +65,37 @@ func (a *AccountController) QueryAnchorList(ctx context.Context, req *accountdto
 	return liveroom.QueryAnchorList(ctx, req)
 }
 
+// PlatformAnchorListForVisibility 可见性管理页拉取全部平台主播。
+func (a *AccountController) PlatformAnchorListForVisibility(ctx context.Context, req *accountdto.PlatformAnchorListForVisibilityReq) (*httpserver.CMSQueryResp, error) {
+	return liveroom.GetPlatformAnchorListForVisibility(ctx, req)
+}
+
+// PlatformAnchorVisibilityList 查询平台主播已授权 CMS 用户。
+func (a *AccountController) PlatformAnchorVisibilityList(ctx context.Context, req *accountdto.PlatformAnchorVisibilityListReq) (*accountdto.PlatformAnchorVisibilityListRes, error) {
+	return liveroom.GetPlatformAnchorVisibilityList(ctx, req)
+}
+
+// PlatformAnchorVisibilityByUserList 查询 CMS 用户已授权平台主播。
+func (a *AccountController) PlatformAnchorVisibilityByUserList(ctx context.Context, req *accountdto.PlatformAnchorVisibilityByUserListReq) (*accountdto.PlatformAnchorVisibilityByUserListRes, error) {
+	return liveroom.GetPlatformAnchorVisibilityByUserList(ctx, req)
+}
+
+func (a *AccountController) GrantPlatformAnchorVisibility(ctx context.Context, req *accountdto.GrantPlatformAnchorVisibilityReq) (*accountdto.GrantPlatformAnchorVisibilityRes, error) {
+	return liveroom.GrantPlatformAnchorVisibility(ctx, req)
+}
+
+func (a *AccountController) BatchGrantPlatformAnchorVisibility(ctx context.Context, req *accountdto.BatchGrantPlatformAnchorVisibilityReq) (*accountdto.BatchGrantPlatformAnchorVisibilityRes, error) {
+	return liveroom.BatchGrantPlatformAnchorVisibility(ctx, req)
+}
+
+func (a *AccountController) RevokePlatformAnchorVisibility(ctx context.Context, req *accountdto.RevokePlatformAnchorVisibilityReq) (*accountdto.RevokePlatformAnchorVisibilityRes, error) {
+	return liveroom.RevokePlatformAnchorVisibility(ctx, req)
+}
+
+func (a *AccountController) BatchRevokePlatformAnchorVisibility(ctx context.Context, req *accountdto.BatchRevokePlatformAnchorVisibilityReq) (*accountdto.BatchRevokePlatformAnchorVisibilityRes, error) {
+	return liveroom.BatchRevokePlatformAnchorVisibility(ctx, req)
+}
+
 func (a *AccountController) GetAnchorDetail(ctx context.Context, req *accountdto.GetAnchorDetailReq) (*accountdto.GetAnchorDetailRes, error) {
 	return liveroom.QueryAnchorDetail(ctx, req)
 }
@@ -118,4 +149,14 @@ func (a *AccountController) ExitGuild(ctx context.Context, req *accountdto.ExitG
 // SetPlatformAnchorType CMS设置平台主播类型
 func (a *AccountController) SetPlatformAnchorType(ctx context.Context, req *accountdto.SetPlatformAnchorTypeReq) (*accountdto.SetPlatformAnchorTypeRes, error) {
 	return liveroom.SetPlatformAnchorType(ctx, req)
+}
+
+// GetAnchorTransferInfo CMS 获取平台主播转账信息。
+func (a *AccountController) GetAnchorTransferInfo(ctx context.Context, req *accountdto.GetAnchorTransferInfoReq) (*accountdto.GetAnchorTransferInfoRes, error) {
+	return liveroom.GetAnchorTransferInfo(ctx, req)
+}
+
+// SaveAnchorTransferInfo CMS 保存平台主播转账信息。
+func (a *AccountController) SaveAnchorTransferInfo(ctx context.Context, req *accountdto.SaveAnchorTransferInfoReq) (*accountdto.SaveAnchorTransferInfoRes, error) {
+	return liveroom.SaveAnchorTransferInfo(ctx, req)
 }
