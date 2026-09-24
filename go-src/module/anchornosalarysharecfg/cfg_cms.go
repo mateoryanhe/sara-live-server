@@ -4,8 +4,8 @@ import (
 	"context"
 	"math"
 	"strconv"
-	"time"
 
+	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/anchornosalarysharecfgdao"
 	"xr-game-server/dto/anchornosalarysharecfgdto"
 	"xr-game-server/entity/live"
@@ -18,84 +18,102 @@ const (
 )
 
 func Init() {
-	if anchornosalarysharecfgdao.GetFirst() != nil {
+	seedDefaultIfEmpty()
+	normalizeLegacySingleton()
+}
+
+func seedDefaultIfEmpty() {
+	if anchornosalarysharecfgdao.CountAll() > 0 {
 		return
 	}
-	_ = anchornosalarysharecfgdao.Save(&entity.AnchorNoSalaryShareCfg{
-		AnchorSocialSharePercent: DefaultAnchorSocialSharePercent,
-		GuildSocialSharePercent:  DefaultGuildSocialSharePercent,
+	_ = anchornosalarysharecfgdao.Create(&entity.AnchorNoSalaryShareCfg{
+		Level:                     1,
+		SocialTotalDiamondRevenue: 0,
+		AnchorSocialSharePercent:  DefaultAnchorSocialSharePercent,
+		GuildSocialSharePercent:   DefaultGuildSocialSharePercent,
 	})
 }
 
-func Get(_ context.Context, _ *anchornosalarysharecfgdto.GetAnchorNoSalaryShareCfgReq) (*anchornosalarysharecfgdto.GetAnchorNoSalaryShareCfgRes, error) {
-	row := anchornosalarysharecfgdao.GetFirst()
-	if row == nil {
-		return &anchornosalarysharecfgdto.GetAnchorNoSalaryShareCfgRes{
-			Cfg: &anchornosalarysharecfgdto.AnchorNoSalaryShareCfgItem{
-				AnchorSocialSharePercent: DefaultAnchorSocialSharePercent,
-				GuildSocialSharePercent:  DefaultGuildSocialSharePercent,
-			},
-		}, nil
+// normalizeLegacySingleton 保留旧版单行配置的比例，并把新增的档位字段补成可编辑的首档。
+func normalizeLegacySingleton() {
+	rows := anchornosalarysharecfgdao.ListAllOrderByThresholdDesc()
+	if len(rows) != 1 || rows[0] == nil || rows[0].Level != 0 {
+		return
 	}
-	return &anchornosalarysharecfgdto.GetAnchorNoSalaryShareCfgRes{Cfg: toItem(row)}, nil
+	rows[0].Level = 1
+	_ = anchornosalarysharecfgdao.Update(rows[0])
 }
 
-func Save(_ context.Context, req *anchornosalarysharecfgdto.SaveAnchorNoSalaryShareCfgReq) (*anchornosalarysharecfgdto.SaveAnchorNoSalaryShareCfgRes, error) {
-	if req == nil || !validPercent(req.AnchorSocialSharePercent) || !validPercent(req.GuildSocialSharePercent) {
+func GetList(_ context.Context, req *anchornosalarysharecfgdto.AnchorNoSalaryShareCfgListReq) (*httpserver.CMSQueryResp, error) {
+	total, list := anchornosalarysharecfgdao.GetList(req)
+	return httpserver.NewCMSQueryResp(total, list), nil
+}
+
+func Create(_ context.Context, req *anchornosalarysharecfgdto.CreateAnchorNoSalaryShareCfgReq) (*anchornosalarysharecfgdto.CreateAnchorNoSalaryShareCfgRes, error) {
+	if req == nil || req.Level == 0 || !validRevenue(req.SocialTotalDiamondRevenue) {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	existing := anchornosalarysharecfgdao.GetFirst()
+	if !validPercent(req.AnchorSocialSharePercent) || !validPercent(req.GuildSocialSharePercent) || anchornosalarysharecfgdao.Exists(req.Level, 0) {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 	row := &entity.AnchorNoSalaryShareCfg{
-		AnchorSocialSharePercent: roundPercent(req.AnchorSocialSharePercent),
-		GuildSocialSharePercent:  roundPercent(req.GuildSocialSharePercent),
+		Level:                     req.Level,
+		SocialTotalDiamondRevenue: roundRevenue(req.SocialTotalDiamondRevenue),
+		AnchorSocialSharePercent:  roundPercent(req.AnchorSocialSharePercent),
+		GuildSocialSharePercent:   roundPercent(req.GuildSocialSharePercent),
 	}
-	if req.ID > 0 {
-		if existing == nil || existing.ID != req.ID {
-			return nil, errercode.CreateCode(errercode.InvalidParam)
-		}
-		row.ID = existing.ID
-		row.CreatedAt = existing.CreatedAt
-	} else if existing != nil {
-		row.ID = existing.ID
-		row.CreatedAt = existing.CreatedAt
-	}
-	row.UpdatedAt = time.Now()
-	if row.CreatedAt.IsZero() {
-		row.CreatedAt = row.UpdatedAt
-	}
-	if err := anchornosalarysharecfgdao.Save(row); err != nil {
+	if err := anchornosalarysharecfgdao.Create(row); err != nil {
 		return nil, err
 	}
-	return &anchornosalarysharecfgdto.SaveAnchorNoSalaryShareCfgRes{
-		Success: true,
-		ID:      strconv.FormatUint(row.ID, 10),
-	}, nil
+	return &anchornosalarysharecfgdto.CreateAnchorNoSalaryShareCfgRes{ID: strconv.FormatUint(row.ID, 10)}, nil
+}
+
+func Update(_ context.Context, req *anchornosalarysharecfgdto.UpdateAnchorNoSalaryShareCfgReq) (*anchornosalarysharecfgdto.UpdateAnchorNoSalaryShareCfgRes, error) {
+	if req == nil || req.Level == 0 || !validRevenue(req.SocialTotalDiamondRevenue) {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if !validPercent(req.AnchorSocialSharePercent) || !validPercent(req.GuildSocialSharePercent) {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	row := anchornosalarysharecfgdao.GetByID(req.ID)
+	if row == nil {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if anchornosalarysharecfgdao.Exists(req.Level, row.ID) {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	row.Level = req.Level
+	row.SocialTotalDiamondRevenue = roundRevenue(req.SocialTotalDiamondRevenue)
+	row.AnchorSocialSharePercent = roundPercent(req.AnchorSocialSharePercent)
+	row.GuildSocialSharePercent = roundPercent(req.GuildSocialSharePercent)
+	if err := anchornosalarysharecfgdao.Update(row); err != nil {
+		return nil, err
+	}
+	return &anchornosalarysharecfgdto.UpdateAnchorNoSalaryShareCfgRes{Success: true}, nil
+}
+
+func Delete(_ context.Context, req *anchornosalarysharecfgdto.DeleteAnchorNoSalaryShareCfgReq) (*anchornosalarysharecfgdto.DeleteAnchorNoSalaryShareCfgRes, error) {
+	if req == nil || anchornosalarysharecfgdao.GetByID(req.ID) == nil {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if err := anchornosalarysharecfgdao.Delete(req.ID); err != nil {
+		return nil, err
+	}
+	return &anchornosalarysharecfgdto.DeleteAnchorNoSalaryShareCfgRes{Success: true}, nil
 }
 
 func validPercent(value float64) bool {
 	return !math.IsNaN(value) && !math.IsInf(value, 0) && value >= 0 && value <= 100
 }
 
+func validRevenue(value float64) bool {
+	return !math.IsNaN(value) && !math.IsInf(value, 0) && value >= 0
+}
+
+func roundRevenue(value float64) float64 {
+	return math.Round(value*10000) / 10000
+}
+
 func roundPercent(value float64) float64 {
 	return math.Round(value*100) / 100
-}
-
-func toItem(row *entity.AnchorNoSalaryShareCfg) *anchornosalarysharecfgdto.AnchorNoSalaryShareCfgItem {
-	if row == nil {
-		return nil
-	}
-	return &anchornosalarysharecfgdto.AnchorNoSalaryShareCfgItem{
-		ID:                       strconv.FormatUint(row.ID, 10),
-		AnchorSocialSharePercent: row.AnchorSocialSharePercent,
-		GuildSocialSharePercent:  row.GuildSocialSharePercent,
-		CreatedAt:                formatTime(row.CreatedAt),
-		UpdatedAt:                formatTime(row.UpdatedAt),
-	}
-}
-
-func formatTime(value time.Time) string {
-	if value.IsZero() {
-		return ""
-	}
-	return value.Format("2006-01-02 15:04:05")
 }

@@ -75,6 +75,7 @@ const GUILD_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
             'batchSetAnchor',
             'batchSetSeniorAnchor',
             'batchImportSalaryAnchor',
+            'batchImmediateSettlement',
             'transferInfo',
         ],
     },
@@ -155,71 +156,59 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 buttonGroups: USER_LIST_BUTTON_GROUPS,
                 subPages: [{pageName: 'UserDetail'}, {pageName: 'BanUser'}],
             }),
-            page('AnchorListManagement', {
-                subPages: [{pageName: 'AnchorDetail'}, {pageName: 'AnchorLiveRecordDetail'}],
-            }),
-            page('LiveRoomRecycleBinManagement'),
-            page('BotAnchorManagement'),
-            page('CoinMerchantManagement'),
             page('RechargeOrderList'),
+            page('RechargeCfgManagement'),
+            page('VipCfgManagement'),
             page('SimulatorDeviceWhitelistManagement'),
+            page('GoldCurrencyLogList'),
+            page('DiamondCurrencyLogList'),
         ],
     },
     {
         kind: 'group',
-        id: 'operation',
-        titleKey: 'menu.OperationManagement',
+        id: 'coin-merchant-module',
+        titleKey: 'menu.CoinMerchantModule',
         children: [
-            group('operation-content', 'menu.OperationContentGroup', [
-                page('BannerManagement'),
-                page('ActivityMessageManagement'),
-            ]),
-            group('operation-recharge', 'menu.OperationRechargeGroup', [
-                page('RechargeCfgManagement'),
-                page('CoinMerchantRechargeCfgManagement'),
-                page('VipCfgManagement'),
-            ]),
-            group('operation-guild-basic', 'menu.OperationGuildBasicGroup', [
-                page('GuildManagement', {
-                    buttonGroups: GUILD_BUTTON_GROUPS,
-                    subPages: [
-                        {pageName: 'GuildDetail'},
-                        {pageName: 'GuildMembers'},
-                        {pageName: 'GuildAnchorImportResult'},
-                    ],
-                }),
-                page('PlatformAnchorList'),
-                page('GuildRecycleBinManagement'),
-            ]),
-            group('operation-guild-access', 'menu.OperationGuildAccessGroup', [
-                page('GuildCMSUserManagement', {buttonGroups: GUILD_CMS_USER_BUTTON_GROUPS}),
-                page('GuildVisibilityManagement', {buttonGroups: GUILD_VISIBILITY_BUTTON_GROUPS}),
-                page('PlatformAnchorVisibilityManagement', {buttonGroups: PLATFORM_ANCHOR_VISIBILITY_BUTTON_GROUPS}),
-            ]),
-            group('operation-guild-data', 'menu.OperationGuildDataGroup', [
-                page('GuildProfileManagement', {
-                    buttonGroups: GUILD_PROFILE_BUTTON_GROUPS,
-                    subPages: [
-                        {pageName: 'GuildProfileMembers'},
-                        {pageName: 'GuildProfileAnchorDailyLive'},
-                    ],
-                }),
-                page('GuildAnchorDailyLiveManagement', {buttonGroups: GUILD_ANCHOR_DAILY_LIVE_BUTTON_GROUPS}),
-            ]),
-            group('operation-settlement', 'menu.OperationSettlementGroup', [
-                page('WalletExchangeCfgManagement'),
-                page('PaymentCountryCfgManagement'),
-                page('CoinMerchantPaymentCountryCfgManagement'),
-                page('AnchorSalaryCfgManagement'),
-                page('AnchorSalarySocialShareCfgManagement'),
-                page('AnchorNoSalaryShareCfgManagement'),
-                page('AnchorSalaryGameShareCfgManagement'),
-                page('AnchorNoSalaryGameShareCfgManagement'),
-            ]),
-            group('operation-app', 'menu.OperationAppGroup', [
-                page('RandomNicknameManagement'),
-                page('CustomerServiceCfgManagement'),
-            ]),
+            page('CoinMerchantManagement'),
+            page('CoinMerchantRechargeCfgManagement'),
+            page('CoinMerchantTransferLogList'),
+            page('CoinMerchantGuildTransferManagement'),
+            page('CoinMerchantPayoutDetailList'),
+        ],
+    },
+    {
+        kind: 'group',
+        id: 'anchor-guild',
+        titleKey: 'menu.AnchorGuildManagement',
+        children: [
+            page('GuildManagement', {
+                buttonGroups: GUILD_BUTTON_GROUPS,
+                subPages: [
+                    {pageName: 'GuildDetail'},
+                    {pageName: 'GuildMembers'},
+                    {pageName: 'GuildAnchorImportResult'},
+                ],
+            }),
+            page('PlatformAnchorList'),
+            page('GuildCMSUserManagement', {buttonGroups: GUILD_CMS_USER_BUTTON_GROUPS}),
+            page('CustomerServiceCfgManagement'),
+            page('LiveRoomRecycleBinManagement'),
+            page('GuildRecycleBinManagement'),
+        ],
+    },
+    {
+        kind: 'group',
+        id: 'settlement',
+        titleKey: 'menu.OperationSettlementGroup',
+        children: [
+            page('WalletExchangeCfgManagement'),
+            page('PaymentCountryCfgManagement'),
+            page('CoinMerchantPaymentCountryCfgManagement'),
+            page('AnchorSalaryCfgManagement'),
+            page('AnchorSalarySocialShareCfgManagement'),
+            page('AnchorNoSalaryShareCfgManagement'),
+            page('AnchorSalaryGameShareCfgManagement'),
+            page('AnchorNoSalaryGameShareCfgManagement'),
         ],
     },
     {
@@ -236,34 +225,27 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
     },
     {
         kind: 'group',
-        id: 'log',
-        titleKey: 'menu.LogManagement',
+        id: 'log-live',
+        titleKey: 'menu.LiveLogGroup',
         children: [
-            group('log-live', 'menu.LiveLogGroup', [
-                page('LiveRecordList'),
-                page('LiveRevenueLogList'),
-                page('LiveDailyEffectiveLiveList'),
-                page('LiveWeeklyUnsettledLiveList'),
-                page('VideoCallLogList'),
-                page('ShortVideoWatchManagement'),
-            ]),
-            group('log-user', 'menu.UserLogGroup', [
-                page('GoldCurrencyLogList'),
-                page('DiamondCurrencyLogList'),
-                page('CoinMerchantTransferLogList'),
-            ]),
-            group('log-settlement', 'menu.SettlementLogGroup', [
-                page('AnchorIncomeSettlementLogList'),
-                page('PlatformAnchorPayoutList'),
-                page('GuildIncomeSettlementLogList'),
-                page('GuildPayoutDetailList'),
-                page('GuildTransferManagement'),
-                page('CoinMerchantGuildTransferManagement'),
-            ]),
-            group('log-game', 'menu.GameLogGroup', [
-                page('GameBetLogListManagement'),
-                page('GameWinLogListManagement'),
-            ]),
+            page('LiveRecordList'),
+            page('LiveRevenueLogList'),
+            page('LiveDailyEffectiveLiveList'),
+            page('LiveWeeklyUnsettledLiveList'),
+            page('VideoCallLogList'),
+        ],
+    },
+    {
+        kind: 'group',
+        id: 'log-settlement',
+        titleKey: 'menu.SettlementLogGroup',
+        children: [
+            page('GuildTransferManagement'),
+            page('PlatformAnchorPayoutList'),
+            page('GuildIncomeSettlementLogList'),
+            page('AnchorIncomeSettlementLogList'),
+            page('GuildPayoutDetailList'),
+            page('PlatformAnchorPayoutDetailList'),
         ],
     },
     {
@@ -275,6 +257,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             page('ShortVideoCategoryManagement'),
             page('ShortVideoPriceTierManagement'),
             page('ShortVideoCfgManagement'),
+            page('ShortVideoWatchManagement'),
         ],
     },
     {
@@ -285,6 +268,8 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             page('GameShelfListManagement', {subPages: [{pageName: 'GameVendorConfig'}]}),
             page('GamePlatformCfgManagement'),
             page('GameVendorGameListManagement'),
+            page('GameBetLogListManagement'),
+            page('GameWinLogListManagement'),
         ],
     },
     {
@@ -292,8 +277,45 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
         id: 'activity',
         titleKey: 'menu.ActivityManagement',
         children: [
+            page('ActivityMessageManagement'),
             page('FirstRechargeActivityManagement'),
             page('InviteRechargeRewardManagement'),
+        ],
+    },
+    {
+        kind: 'group',
+        id: 'frontend-module',
+        titleKey: 'menu.ConfigDeployGroup',
+        children: [
+            group('frontend-config', 'menu.FrontendConfigGroup', [
+                page('AnchorListManagement', {
+                    subPages: [{pageName: 'AnchorDetail'}, {pageName: 'AnchorLiveRecordDetail'}],
+                }),
+                page('BotAnchorManagement'),
+                page('StaticCacheCfgManagement'),
+                page('AppPkgManagement'),
+                page('AppVersionCfgManagement'),
+                page('FirebaseCfgManagement'),
+                page('PrivacyPolicyCfgManagement'),
+            ]),
+            group('frontend-deploy', 'menu.FrontendDeployGroup', [
+                page('H5LiveDeployManagement'),
+                page('CoinMerchantDeployManagement'),
+                page('ThirdPayDeployManagement'),
+                page('OfficialSiteDeployManagement'),
+                page('ThirdPayOfficialSiteDeployManagement'),
+            ]),
+        ],
+    },
+    {
+        kind: 'group',
+        id: 'role',
+        titleKey: 'menu.RoleManagementGroup',
+        children: [
+            page('RoleManagement', {subPages: [{pageName: 'ModuleList', titleKey: 'menu.ModuleList'}]}),
+            page('CMSUserManagement'),
+            page('GuildVisibilityManagement', {buttonGroups: GUILD_VISIBILITY_BUTTON_GROUPS}),
+            page('PlatformAnchorVisibilityManagement', {buttonGroups: PLATFORM_ANCHOR_VISIBILITY_BUTTON_GROUPS}),
         ],
     },
     {
@@ -302,6 +324,8 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
         titleKey: 'menu.ConfigManagement',
         children: [
             group('config-basic', 'menu.ConfigBasicGroup', [
+                page('BannerManagement'),
+                page('RandomNicknameManagement'),
                 page('AppTokenConfig'),
                 page('AccountCfgManagement'),
                 page('ServerRuntimeCfgManagement', {subPages: [{pageName: 'PreloadCfgManagement', titleKey: 'menu.PreloadCfgManagement'}]}),
@@ -321,18 +345,6 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('CountryFlagDeployManagement'),
                 page('DataSyncCfgManagement'),
             ]),
-            group('config-deploy', 'menu.ConfigDeployGroup', [
-                page('StaticCacheCfgManagement'),
-                page('AppPkgManagement'),
-                page('AppVersionCfgManagement'),
-                page('FirebaseCfgManagement'),
-                page('PrivacyPolicyCfgManagement'),
-                page('H5LiveDeployManagement'),
-                page('CoinMerchantDeployManagement'),
-                page('ThirdPayDeployManagement'),
-                page('OfficialSiteDeployManagement'),
-                page('ThirdPayOfficialSiteDeployManagement'),
-            ]),
             group('config-ops', 'menu.ConfigOpsGroup', [
                 page('ResourceMonitor'),
                 page('ServerLogExplorer'),
@@ -341,11 +353,17 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
     },
     {
         kind: 'group',
-        id: 'role',
-        titleKey: 'menu.RoleManagementGroup',
+        id: 'guild-data',
+        titleKey: 'menu.OperationGuildDataGroup',
         children: [
-            page('RoleManagement', {subPages: [{pageName: 'ModuleList', titleKey: 'menu.ModuleList'}]}),
-            page('CMSUserManagement'),
+            page('GuildProfileManagement', {
+                buttonGroups: GUILD_PROFILE_BUTTON_GROUPS,
+                subPages: [
+                    {pageName: 'GuildProfileMembers'},
+                    {pageName: 'GuildProfileAnchorDailyLive'},
+                ],
+            }),
+            page('GuildAnchorDailyLiveManagement', {buttonGroups: GUILD_ANCHOR_DAILY_LIVE_BUTTON_GROUPS}),
         ],
     },
 ]

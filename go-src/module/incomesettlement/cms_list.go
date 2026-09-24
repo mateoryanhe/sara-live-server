@@ -3,8 +3,10 @@ package incomesettlement
 import (
 	"context"
 	"strconv"
+	"time"
 
 	"xr-game-server/core/httpserver"
+	"xr-game-server/core/xrtime"
 	"xr-game-server/dao/guilddao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
@@ -170,10 +172,18 @@ func GetAnchorCMSList(ctx context.Context, req *incomesettlementdto.CMSAnchorInc
 			}
 		}
 	}
+	hideTransferredBefore := int64(0)
+	if req.HideHistoricalTransferred {
+		hideTransferredBefore = xrtime.WeekStart(time.Now()).Unix()
+	}
 	total, rows := liveroomdao.AnchorIncomeSettlementLogCMSList(&liveroomdao.AnchorIncomeSettlementLogCMSListFilter{
 		RoomIds:                  roomIds,
 		StartTime:                req.StartTime,
 		EndTime:                  req.EndTime,
+		TransferStartTime:        req.TransferStartTime,
+		TransferEndTime:          req.TransferEndTime,
+		PayoutOnly:               req.PayoutOnly,
+		HideTransferredBefore:    hideTransferredBefore,
 		Status:                   req.Status,
 		DirectPayout:             req.DirectPayout,
 		OrderByReceivableUsdDesc: req.OrderByReceivableUsdDesc,
@@ -242,6 +252,10 @@ func GetGuildCMSList(ctx context.Context, req *incomesettlementdto.CMSGuildIncom
 	if empty {
 		return httpserver.NewCMSQueryResp(0, []*incomesettlementdto.CMSIncomeSettlementLogItem{}), nil
 	}
+	hideTransferredBefore := int64(0)
+	if req.HideHistoricalTransferred {
+		hideTransferredBefore = xrtime.WeekStart(time.Now()).Unix()
+	}
 	total, rows := liveroomdao.GuildIncomeSettlementLogCMSList(&liveroomdao.GuildIncomeSettlementLogCMSListFilter{
 		GuildId:                  parseUint64Filter(req.GuildId),
 		GuildIds:                 guildIds,
@@ -251,6 +265,7 @@ func GetGuildCMSList(ctx context.Context, req *incomesettlementdto.CMSGuildIncom
 		EndTime:                  req.EndTime,
 		TransferStartTime:        req.TransferStartTime,
 		TransferEndTime:          req.TransferEndTime,
+		HideTransferredBefore:    hideTransferredBefore,
 		PayoutOnly:               req.PayoutOnly,
 		Status:                   req.Status,
 		OrderByReceivableUsdDesc: req.OrderByReceivableUsdDesc,

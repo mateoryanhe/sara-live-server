@@ -16,6 +16,15 @@
           >
             {{ t('pages.guildList.batchImportSalaryAnchor') }}
           </el-button>
+          <el-button
+              v-if="can('batchImmediateSettlement')"
+              :disabled="selectedGuildRows.length === 0"
+              :loading="immediateSettling"
+              type="danger"
+              @click="handleBatchImmediateSettlement"
+          >
+            {{ t('pages.guildImmediateSettlement.button') }}
+          </el-button>
         </div>
         <el-alert
             :closable="false"
@@ -41,7 +50,9 @@
             highlight-current-row
             style="width: 100%"
             @current-change="handleCurrentRowChange"
+            @selection-change="handleSelectionChange"
         >
+          <el-table-column fixed type="selection" width="48"/>
           <el-table-column fixed label="#" type="index" width="55" :index="formatRowIndex"/>
           <el-table-column label="ID" prop="id" width="190">
             <template #default="{ row }">
@@ -328,6 +339,8 @@ const GUILD_ROW_ACTION_KEYS = [
 const hasRowActions = computed(() => canViewDetail.value || GUILD_ROW_ACTION_KEYS.some(key => can(key)))
 const loading = ref(false)
 const importing = ref(false)
+const immediateSettling = ref(false)
+const selectedGuildRows = ref<Guild[]>([])
 const leaderPickerVisible = ref(false)
 const selectedLeader = ref<CMSUser | null>(null)
 const tableData = ref<Guild[]>([])
@@ -471,6 +484,7 @@ const fetchGuildList = async () => {
       pageSize: pageSize.value
     })
     tableData.value = response.data
+    selectedGuildRows.value = []
     total.value = response.total
     if (selectedGuild.value && !tableData.value.some(item => item.id === selectedGuild.value?.id)) {
       selectedGuild.value = null
@@ -498,6 +512,56 @@ const formatRowIndex = (index: number) =>
 
 const handleCurrentRowChange = (row: Guild | null) => {
   selectedGuild.value = row
+}
+
+const handleSelectionChange = (rows: Guild[]) => {
+  selectedGuildRows.value = rows
+}
+
+const handleBatchImmediateSettlement = async () => {
+  const rows = selectedGuildRows.value
+  if (rows.length === 0) {
+    ElMessage.warning(t('pages.guildImmediateSettlement.selectRequired'))
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+      t('pages.guildImmediateSettlement.confirmMessage', {count: rows.length}),
+      t('pages.guildImmediateSettlement.confirmTitle'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        type: 'warning',
+      },
+    )
+    immediateSettling.value = true
+    const response = await guildApi.batchImmediateSettleGuilds({guildIds: rows.map(row => row.id)})
+    const resultMessage = t('pages.guildImmediateSettlement.result', {
+      settled: response.settledCount ?? 0,
+      noData: response.noDataCount ?? 0,
+      fail: response.failCount ?? 0,
+    })
+    if ((response.failCount ?? 0) > 0) {
+      ElMessage.warning({message: resultMessage, duration: 8000})
+    } else {
+      ElMessage.success(resultMessage)
+    }
+    if (response.failGuildIds?.length) {
+      ElMessage.warning({
+        message: t('pages.guildImmediateSettlement.failGuildIds', {ids: response.failGuildIds.join(', ')}),
+        duration: 8000,
+      })
+    }
+    await fetchGuildList()
+  } catch (error) {
+    if (error === 'cancel' || error === 'close') {
+      return
+    }
+    console.error('batch immediate guild settlement failed:', error)
+    ElMessage.error(t('pages.guildImmediateSettlement.requestFailed'))
+  } finally {
+    immediateSettling.value = false
+  }
 }
 
 const handleRowCommand = (row: Guild, command: string) => {

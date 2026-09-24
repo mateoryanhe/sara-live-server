@@ -25,7 +25,10 @@ func initAnchorSettlement() {
 }
 
 func onWeekAnchorSettlement(_ any) {
+	settlementRunMu.Lock()
+	defer settlementRunMu.Unlock()
 	settleOnShelfAnchors()
+	settleOnShelfGuilds()
 }
 
 // settleOnShelfAnchors 周一0点:结算全部上架主播薪资+未结算收益

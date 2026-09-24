@@ -11,14 +11,18 @@ import (
 type CMSAnchorIncomeSettlementLogListReq struct {
 	g.Meta `path:"/cmsAnchorIncomeSettlementLogList" method:"post" summary:"CMS查询主播结算流水" tags:"主播结算流水"`
 	httpserver.CMSQueryReq
-	RoomId                   string   `json:"roomId"    dc:"直播间ID(可选,留空查全部,兼容旧版单选)"`
-	AnchorIds                []string `json:"anchorIds" dc:"主播ID列表(可选,多选)"`
-	StartTime                int64    `json:"startTime" dc:"创建时间起(秒, 0=不过滤)"`
-	EndTime                  int64    `json:"endTime"   dc:"创建时间止(秒, 0=不过滤)"`
-	Status                   *uint8   `json:"status" dc:"平台主播代付状态(可选,0审核中1审核通过2转账成功3代付中)"`
-	DirectPayout             *bool    `json:"directPayout" dc:"是否仅查询平台主播直接代付单"`
-	OrderByReceivableUsdDesc bool     `json:"orderByReceivableUsdDesc" dc:"按可收金额USD降序"`
-	IncludeTransferInfo      bool     `json:"includeTransferInfo" dc:"是否附带平台主播收款信息"`
+	RoomId                    string   `json:"roomId"    dc:"直播间ID(可选,留空查全部,兼容旧版单选)"`
+	AnchorIds                 []string `json:"anchorIds" dc:"主播ID列表(可选,多选)"`
+	StartTime                 int64    `json:"startTime" dc:"创建时间起(秒, 0=不过滤)"`
+	EndTime                   int64    `json:"endTime"   dc:"创建时间止(秒, 0=不过滤)"`
+	TransferStartTime         int64    `json:"transferStartTime" dc:"代付时间起(秒, 0=不过滤)"`
+	TransferEndTime           int64    `json:"transferEndTime" dc:"代付时间止(秒, 0=不过滤)"`
+	PayoutOnly                bool     `json:"payoutOnly" dc:"是否只查询已产生代付过程的平台主播结算单"`
+	HideHistoricalTransferred bool     `json:"hideHistoricalTransferred" dc:"是否隐藏本周一零点以前创建的转账成功记录"`
+	Status                    *uint8   `json:"status" dc:"平台主播代付状态(可选,0审核中1审核通过2转账成功3代付中)"`
+	DirectPayout              *bool    `json:"directPayout" dc:"是否仅查询平台主播直接代付单"`
+	OrderByReceivableUsdDesc  bool     `json:"orderByReceivableUsdDesc" dc:"按可收金额USD降序"`
+	IncludeTransferInfo       bool     `json:"includeTransferInfo" dc:"是否附带平台主播收款信息"`
 }
 
 type CMSBatchApproveAnchorSettlementReq struct {
@@ -46,18 +50,19 @@ type CMSBatchTransferAnchorSettlementRes struct {
 type CMSGuildIncomeSettlementLogListReq struct {
 	g.Meta `path:"/cmsGuildIncomeSettlementLogList" method:"post" summary:"CMS查询工会结算流水" tags:"工会结算流水"`
 	httpserver.CMSQueryReq
-	GuildId                  string `json:"guildId"   dc:"工会ID(可选,留空查全部)"`
-	GuildType                *uint8 `json:"guildType" v:"in:0,1#工会类型仅支持0普通或1币商" dc:"工会类型(可选,0普通工会,1币商工会)"`
-	StartTime                int64  `json:"startTime" dc:"创建时间起(秒, 0=不过滤)"`
-	EndTime                  int64  `json:"endTime"   dc:"创建时间止(秒, 0=不过滤)"`
-	TransferStartTime        int64  `json:"transferStartTime" dc:"代付时间起(秒, 0=不过滤)"`
-	TransferEndTime          int64  `json:"transferEndTime" dc:"代付时间止(秒, 0=不过滤)"`
-	PayoutOnly               bool   `json:"payoutOnly" dc:"是否只查询已产生代付过程的结算单"`
-	Status                   *uint8 `json:"status"    dc:"状态(可选,0审核中1审核通过2转账成功3代付中)"`
-	OrderByReceivableUsdDesc bool   `json:"orderByReceivableUsdDesc" dc:"按可收金额USD降序"`
-	IncludeDetail            bool   `json:"includeDetail" dc:"是否附带结算快照与代付过程"`
-	IncludeTransfer          bool   `json:"includeTransfer" dc:"是否附带代付过程"`
-	IncludeTransferInfo      bool   `json:"includeTransferInfo" dc:"是否附带工会收款信息"`
+	GuildId                   string `json:"guildId"   dc:"工会ID(可选,留空查全部)"`
+	GuildType                 *uint8 `json:"guildType" v:"in:0,1#工会类型仅支持0普通或1币商" dc:"工会类型(可选,0普通工会,1币商工会)"`
+	StartTime                 int64  `json:"startTime" dc:"创建时间起(秒, 0=不过滤)"`
+	EndTime                   int64  `json:"endTime"   dc:"创建时间止(秒, 0=不过滤)"`
+	TransferStartTime         int64  `json:"transferStartTime" dc:"代付时间起(秒, 0=不过滤)"`
+	TransferEndTime           int64  `json:"transferEndTime" dc:"代付时间止(秒, 0=不过滤)"`
+	PayoutOnly                bool   `json:"payoutOnly" dc:"是否只查询已产生代付过程的结算单"`
+	HideHistoricalTransferred bool   `json:"hideHistoricalTransferred" dc:"是否隐藏本周一零点以前创建的转账成功记录"`
+	Status                    *uint8 `json:"status"    dc:"状态(可选,0审核中1审核通过2转账成功3代付中)"`
+	OrderByReceivableUsdDesc  bool   `json:"orderByReceivableUsdDesc" dc:"按可收金额USD降序"`
+	IncludeDetail             bool   `json:"includeDetail" dc:"是否附带结算快照与代付过程"`
+	IncludeTransfer           bool   `json:"includeTransfer" dc:"是否附带代付过程"`
+	IncludeTransferInfo       bool   `json:"includeTransferInfo" dc:"是否附带工会收款信息"`
 }
 
 // CMSGuildIncomeSettlementLogDetailReq CMS查询工会结算主单完整明细。

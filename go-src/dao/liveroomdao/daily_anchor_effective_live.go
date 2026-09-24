@@ -252,7 +252,7 @@ func resolveDailyAnchorEffectiveLiveTarget(row *entity.DailyAnchorEffectiveLive)
 	return row
 }
 
-// AddDailyLiveDuration 累加当日直播时长(下播且单场>30分钟时调用)
+// AddDailyLiveDuration 累加当日有效直播时长(下播且单场超过配置门槛时调用)
 func AddDailyLiveDuration(roomId uint64, at time.Time, durationSec float64) {
 	if roomId == 0 || durationSec <= 0 {
 		return

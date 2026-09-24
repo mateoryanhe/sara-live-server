@@ -23,15 +23,14 @@ func resolveAnchorSettlementTier(
 	hasSalary bool,
 	socialDiamond, gameGold float64,
 	salarySocialTiers []*entity.AnchorSalarySocialShareCfg,
-	noSalarySocialCfg *entity.AnchorNoSalaryShareCfg,
+	noSalarySocialTiers []*entity.AnchorNoSalaryShareCfg,
 	gameTiers []*entity.AnchorGameShareCfg,
 ) anchorSettlementTierResult {
 	ret := anchorSettlementTierResult{HasSalary: hasSalary}
 	if hasSalary {
 		ret.AnchorSocialSharePercent, ret.GuildSocialSharePercent = matchSalarySocialSharePercent(socialDiamond, salarySocialTiers)
-	} else if noSalarySocialCfg != nil {
-		ret.AnchorSocialSharePercent = noSalarySocialCfg.AnchorSocialSharePercent
-		ret.GuildSocialSharePercent = noSalarySocialCfg.GuildSocialSharePercent
+	} else {
+		ret.AnchorSocialSharePercent, ret.GuildSocialSharePercent = matchNoSalarySocialSharePercent(socialDiamond, noSalarySocialTiers)
 	}
 	ret.AnchorGameSharePercent, ret.GuildGameSharePercent = matchGameSharePercent(gameGold, gameTiers)
 	ret.AnchorSocialShareDiamond = calcTierShare(socialDiamond, ret.AnchorSocialSharePercent)
@@ -42,6 +41,15 @@ func resolveAnchorSettlementTier(
 }
 
 func matchSalarySocialSharePercent(totalDiamond float64, tiers []*entity.AnchorSalarySocialShareCfg) (float64, float64) {
+	for _, tier := range tiers {
+		if tier != nil && totalDiamond >= tier.SocialTotalDiamondRevenue {
+			return tier.AnchorSocialSharePercent, tier.GuildSocialSharePercent
+		}
+	}
+	return 0, 0
+}
+
+func matchNoSalarySocialSharePercent(totalDiamond float64, tiers []*entity.AnchorNoSalaryShareCfg) (float64, float64) {
 	for _, tier := range tiers {
 		if tier != nil && totalDiamond >= tier.SocialTotalDiamondRevenue {
 			return tier.AnchorSocialSharePercent, tier.GuildSocialSharePercent

@@ -68,6 +68,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'PlatformAnchorList:setAnchorType': '/account/setPlatformAnchorType',
     'PlatformAnchorList:transferInfo': '/account/saveAnchorTransferInfo',
     'PlatformAnchorList:batchImportSalaryAnchor': '/guild/batchImportSalaryAnchors',
+    'PlatformAnchorList:batchImmediateSettlement': '/account/batchImmediateSettlePlatformAnchors',
 
     AnchorDetail: '/account/getAnchorDetail',
     'AnchorDetail:dailyEffectiveLive': '/account/getAnchorDailyEffectiveLiveList',
@@ -186,6 +187,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GuildManagement:batchSetAnchor': '/guild/importGuildAnchors',
     'GuildManagement:batchSetSeniorAnchor': '/guild/importGuildAnchors',
     'GuildManagement:batchImportSalaryAnchor': '/guild/batchImportSalaryAnchors',
+    'GuildManagement:batchImmediateSettlement': '/guild/batchImmediateSettleGuilds',
     'GuildManagement:transferInfo': '/guild/saveGuildTransferInfo',
     GuildTransferManagement: '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
     'GuildTransferManagement:view': '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
@@ -209,6 +211,9 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'CoinMerchantGuildTransferManagement:batchTransfer': '/guildIncomeSettlementLog/cmsBatchTransferGuildSettlement',
     'CoinMerchantGuildTransferManagement:viewGuildDetail': '/guild/getGuildDetail',
     'CoinMerchantGuildTransferManagement:transferInfo': '/guild/saveGuildTransferInfo',
+    CoinMerchantPayoutDetailList: '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
+    'CoinMerchantPayoutDetailList:view': '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
+    'CoinMerchantPayoutDetailList:search': '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
 
     GuildCMSUserManagement: '/cmsuser/cmsUserList',
     'GuildCMSUserManagement:view': '/cmsuser/cmsUserList',
@@ -299,6 +304,8 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     WalletExchangeCfgManagement: '/wallet/getWalletExchangeCfg',
     'WalletExchangeCfgManagement:view': '/wallet/getWalletExchangeCfg',
     'WalletExchangeCfgManagement:save': '/wallet/saveWalletExchangeCfg',
+    'WalletExchangeCfgManagement:viewEffectiveLive': '/effectiveLiveCfg/getEffectiveLiveCfg',
+    'WalletExchangeCfgManagement:saveEffectiveLive': '/effectiveLiveCfg/saveEffectiveLiveCfg',
 
     PaymentCountryCfgManagement: '/paymentCountryCfg/getCollectionCountryCfg',
     'PaymentCountryCfgManagement:view': '/paymentCountryCfg/getCollectionCountryCfg',
@@ -480,9 +487,11 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'AnchorSalarySocialShareCfgManagement:edit': '/anchorSalarySocialShareCfg/updateAnchorSalarySocialShareCfg',
     'AnchorSalarySocialShareCfgManagement:delete': '/anchorSalarySocialShareCfg/deleteAnchorSalarySocialShareCfg',
 
-    AnchorNoSalaryShareCfgManagement: '/anchorNoSalaryShareCfg/getAnchorNoSalaryShareCfg',
-    'AnchorNoSalaryShareCfgManagement:view': '/anchorNoSalaryShareCfg/getAnchorNoSalaryShareCfg',
-    'AnchorNoSalaryShareCfgManagement:edit': '/anchorNoSalaryShareCfg/saveAnchorNoSalaryShareCfg',
+    AnchorNoSalaryShareCfgManagement: '/anchorNoSalaryShareCfg/anchorNoSalaryShareCfgList',
+    'AnchorNoSalaryShareCfgManagement:view': '/anchorNoSalaryShareCfg/anchorNoSalaryShareCfgList',
+    'AnchorNoSalaryShareCfgManagement:create': '/anchorNoSalaryShareCfg/createAnchorNoSalaryShareCfg',
+    'AnchorNoSalaryShareCfgManagement:edit': '/anchorNoSalaryShareCfg/updateAnchorNoSalaryShareCfg',
+    'AnchorNoSalaryShareCfgManagement:delete': '/anchorNoSalaryShareCfg/deleteAnchorNoSalaryShareCfg',
 
     AnchorSalaryGameShareCfgManagement: '/anchorGameShareCfg/anchorGameShareCfgList',
     'AnchorSalaryGameShareCfgManagement:view': '/anchorGameShareCfg/anchorGameShareCfgList',
@@ -515,6 +524,10 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     GuildPayoutDetailList: '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
     'GuildPayoutDetailList:view': '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
     'GuildPayoutDetailList:search': '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
+
+    PlatformAnchorPayoutDetailList: '/anchorIncomeSettlementLog/cmsAnchorIncomeSettlementLogList',
+    'PlatformAnchorPayoutDetailList:view': '/anchorIncomeSettlementLog/cmsAnchorIncomeSettlementLogList',
+    'PlatformAnchorPayoutDetailList:search': '/anchorIncomeSettlementLog/cmsAnchorIncomeSettlementLogList',
 
     ServerRuntimeCfgManagement: '/preloadCfg/getPreloadCfg',
     'ServerRuntimeCfgManagement:view': '/preloadCfg/getPreloadCfg',

@@ -4,13 +4,24 @@
       <template #header>
         <div class="card-header">
           <span>{{ t('menu.PlatformAnchorList') }}</span>
-          <el-button
-              v-if="can('batchImportSalaryAnchor')"
-              type="warning"
-              @click="openSalaryImportDialog"
-          >
-            {{ t('pages.guildList.batchImportSalaryAnchor') }}
-          </el-button>
+          <div class="header-actions">
+            <el-button
+                v-if="can('batchImportSalaryAnchor')"
+                type="warning"
+                @click="openSalaryImportDialog"
+            >
+              {{ t('pages.guildList.batchImportSalaryAnchor') }}
+            </el-button>
+            <el-button
+                v-if="can('batchImmediateSettlement')"
+                :disabled="selectedAnchorRows.length === 0"
+                :loading="immediateSettling"
+                type="danger"
+                @click="handleBatchImmediateSettlement"
+            >
+              {{ t('pages.platformAnchorImmediateSettlement.button') }}
+            </el-button>
+          </div>
         </div>
       </template>
 
@@ -38,7 +49,13 @@
         </el-form>
       </div>
 
-      <el-table v-loading="loading" :data="tableData" style="width: 100%">
+      <el-table
+          v-loading="loading"
+          :data="tableData"
+          style="width: 100%"
+          @selection-change="handleSelectionChange"
+      >
+        <el-table-column fixed type="selection" width="48"/>
         <el-table-column :label="t('common.userId')" prop="id" width="180">
           <template #default="{ row }">
             <el-button v-if="canViewDetail" link type="primary" @click="openDetail(row)">
@@ -319,6 +336,8 @@ const canSetAnchorType = (row: AnchorListItem) => {
 
 const loading = ref(false)
 const tableData = ref<AnchorListItem[]>([])
+const selectedAnchorRows = ref<AnchorListItem[]>([])
+const immediateSettling = ref(false)
 const banDialogVisible = ref(false)
 const banSubmitting = ref(false)
 const banFormRef = ref<InstanceType<typeof ElForm>>()
@@ -400,6 +419,7 @@ const fetchList = async () => {
       ...(searchForm.liveStatus >= 0 ? {liveStatus: searchForm.liveStatus} : {}),
     })
     tableData.value = response.data || []
+    selectedAnchorRows.value = []
     pagination.total = response.total || 0
   } catch (error) {
     console.error('Failed to load platform anchor list:', error)
@@ -491,6 +511,56 @@ const openDetail = (row: AnchorListItem) => {
     path: '/user/anchor/anchor-detail',
     query: {id: String(row.id)},
   })
+}
+
+const handleSelectionChange = (rows: AnchorListItem[]) => {
+  selectedAnchorRows.value = rows
+}
+
+const handleBatchImmediateSettlement = async () => {
+  const rows = selectedAnchorRows.value
+  if (rows.length === 0) {
+    ElMessage.warning(t('pages.platformAnchorImmediateSettlement.selectRequired'))
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+      t('pages.platformAnchorImmediateSettlement.confirmMessage', {count: rows.length}),
+      t('pages.platformAnchorImmediateSettlement.confirmTitle'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        type: 'warning',
+      },
+    )
+    immediateSettling.value = true
+    const response = await accountApi.batchImmediateSettlePlatformAnchors({anchorIds: rows.map(row => row.id)})
+    const resultMessage = t('pages.platformAnchorImmediateSettlement.result', {
+      settled: response.settledCount ?? 0,
+      noData: response.noDataCount ?? 0,
+      fail: response.failCount ?? 0,
+    })
+    if ((response.failCount ?? 0) > 0) {
+      ElMessage.warning({message: resultMessage, duration: 8000})
+    } else {
+      ElMessage.success(resultMessage)
+    }
+    if (response.failAnchorIds?.length) {
+      ElMessage.warning({
+        message: t('pages.platformAnchorImmediateSettlement.failAnchorIds', {ids: response.failAnchorIds.join(', ')}),
+        duration: 8000,
+      })
+    }
+    await fetchList()
+  } catch (error) {
+    if (error === 'cancel' || error === 'close') {
+      return
+    }
+    console.error('batch immediate platform anchor settlement failed:', error)
+    ElMessage.error(t('pages.platformAnchorImmediateSettlement.requestFailed'))
+  } finally {
+    immediateSettling.value = false
+  }
 }
 
 const salaryValidityText = (row: AnchorListItem) => {
@@ -698,6 +768,12 @@ onMounted(() => {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .salary-import-tip {

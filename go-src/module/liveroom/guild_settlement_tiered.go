@@ -12,23 +12,23 @@ import (
 )
 
 // settleOneNormalGuildTiered 汇总普通工会分项；落库失败时保留工会未结算流水和本轮主播聚合。
-func settleOneNormalGuildTiered(guild *entity.LiveGuild) {
+func settleOneNormalGuildTiered(guild *entity.LiveGuild) bool {
 	if guild == nil || guild.ID == 0 {
-		return
+		return false
 	}
 	if liveroomdao.IsGuildWeeklyAnchorSettlementBlocked(guild.ID) {
 		g.Log().Warningf(gctx.New(), "guild weekly settlement retained: anchor settlement incomplete guildId=%d", guild.ID)
-		return
+		return false
 	}
 	dailyRows := liveroomdao.ListRecentUnsettledDailyGuildEffectiveLives(guild.ID)
 	unsettled := liveroomdao.GetGuildIncomeUnsettled(guild.ID)
 	if unsettled == nil {
-		return
+		return false
 	}
 	weekly := liveroomdao.GetGuildWeeklyAnchorSettlement(guild.ID)
 	snap := unsettled.Snapshot()
 	if len(dailyRows) == 0 && snap.IsZero() && weekly.IsZero() {
-		return
+		return false
 	}
 	exchangeCfg := wallet.GetExchangeCfgSnapshot()
 	gameGold := weekly.AnchorGameShareGold + weekly.GuildGameShareGold
@@ -57,7 +57,7 @@ func settleOneNormalGuildTiered(guild *entity.LiveGuild) {
 		!liveroomdao.VerifyGuildPayoutConversionPersisted(row) {
 		liveroomdao.MarkGuildWeeklyAnchorSettlementBlocked(guild.ID)
 		g.Log().Errorf(gctx.New(), "guild weekly settlement retained: log persist failed guildId=%d logId=%d", guild.ID, row.ID)
-		return
+		return false
 	}
 
 	unsettled.ConsumeSnapshot(&snap)
@@ -74,4 +74,5 @@ func settleOneNormalGuildTiered(guild *entity.LiveGuild) {
 	if len(dailyRows) > 0 {
 		liveroomdao.MarkDailyGuildEffectiveLivesSettled(dailyRows)
 	}
+	return true
 }

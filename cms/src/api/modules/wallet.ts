@@ -1,4 +1,4 @@
-import request from '../request'
+import {request} from '../request'
 import type {GetWalletExchangeCfgRes, SaveWalletExchangeCfgReq, SaveWalletExchangeCfgRes} from '@/types/api'
 
 export const walletApi = {

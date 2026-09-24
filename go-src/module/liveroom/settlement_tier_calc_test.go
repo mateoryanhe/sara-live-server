@@ -34,25 +34,40 @@ func TestResolveAnchorSettlementTierBelowMinimumIsValidZero(t *testing.T) {
 	}
 }
 
-func TestResolveNoSalarySocialShare(t *testing.T) {
-	got := resolveAnchorSettlementTier(false, 1000, 0, nil,
-		&entity.AnchorNoSalaryShareCfg{AnchorSocialSharePercent: 15, GuildSocialSharePercent: 5}, nil,
-	)
-	if got.AnchorSocialShareDiamond != 150 || got.GuildSocialShareDiamond != 50 {
+func TestResolveNoSalarySocialShareUsesHighestMatchedThreshold(t *testing.T) {
+	tiers := []*entity.AnchorNoSalaryShareCfg{
+		{SocialTotalDiamondRevenue: 1000, AnchorSocialSharePercent: 15, GuildSocialSharePercent: 5},
+		{SocialTotalDiamondRevenue: 100, AnchorSocialSharePercent: 8, GuildSocialSharePercent: 3},
+	}
+	got := resolveAnchorSettlementTier(false, 1500, 0, nil, tiers, nil)
+	if got.AnchorSocialSharePercent != 15 || got.GuildSocialSharePercent != 5 {
+		t.Fatalf("unexpected no-salary social tier: %+v", got)
+	}
+	if got.AnchorSocialShareDiamond != 225 || got.GuildSocialShareDiamond != 75 {
 		t.Fatalf("unexpected no-salary social shares: %+v", got)
+	}
+}
+
+func TestResolveNoSalarySocialShareBelowMinimumIsValidZero(t *testing.T) {
+	got := resolveAnchorSettlementTier(false, 99, 0, nil,
+		[]*entity.AnchorNoSalaryShareCfg{{SocialTotalDiamondRevenue: 100, AnchorSocialSharePercent: 15, GuildSocialSharePercent: 5}},
+		nil,
+	)
+	if got.AnchorSocialShareDiamond != 0 || got.GuildSocialShareDiamond != 0 {
+		t.Fatalf("below-minimum no-salary turnover must resolve to zero shares: %+v", got)
 	}
 }
 
 func TestAnchorWeeklySettlementCfgReadyOnlyRequiresUsedRevenueConfig(t *testing.T) {
 	cfg := &anchorWeeklySettlementCfg{
-		salaryCfgs:        []*entity.AnchorSalaryCfg{{}},
-		noSalarySocialCfg: &entity.AnchorNoSalaryShareCfg{},
+		salaryCfgs:          []*entity.AnchorSalaryCfg{{}},
+		noSalarySocialTiers: []*entity.AnchorNoSalaryShareCfg{{}},
 	}
 	if !cfg.ready(true, &entity.LiveRoomIncomeAmounts{}) {
 		t.Fatal("zero-flow salaried settlement should only require salary config")
 	}
 	if !cfg.ready(false, &entity.LiveRoomIncomeAmounts{TotalSocialIncome: 1}) {
-		t.Fatal("no-salary social flow should accept the flat social config")
+		t.Fatal("no-salary social flow should accept the social tier configuration")
 	}
 	if cfg.ready(true, &entity.LiveRoomIncomeAmounts{TotalSocialIncome: 1}) {
 		t.Fatal("salaried social flow must require a social tier")

@@ -16,10 +16,18 @@ func initAnchorNoSalaryShareCfgCMSController() {
 	httpserver.RegCMS(AnchorNoSalaryShareCfgCMSURL, &AnchorNoSalaryShareCfgCMSController{})
 }
 
-func (c *AnchorNoSalaryShareCfgCMSController) GetAnchorNoSalaryShareCfg(ctx context.Context, req *anchornosalarysharecfgdto.GetAnchorNoSalaryShareCfgReq) (*anchornosalarysharecfgdto.GetAnchorNoSalaryShareCfgRes, error) {
-	return anchornosalarysharecfg.Get(ctx, req)
+func (c *AnchorNoSalaryShareCfgCMSController) AnchorNoSalaryShareCfgList(ctx context.Context, req *anchornosalarysharecfgdto.AnchorNoSalaryShareCfgListReq) (*httpserver.CMSQueryResp, error) {
+	return anchornosalarysharecfg.GetList(ctx, req)
 }
 
-func (c *AnchorNoSalaryShareCfgCMSController) SaveAnchorNoSalaryShareCfg(ctx context.Context, req *anchornosalarysharecfgdto.SaveAnchorNoSalaryShareCfgReq) (*anchornosalarysharecfgdto.SaveAnchorNoSalaryShareCfgRes, error) {
-	return anchornosalarysharecfg.Save(ctx, req)
+func (c *AnchorNoSalaryShareCfgCMSController) CreateAnchorNoSalaryShareCfg(ctx context.Context, req *anchornosalarysharecfgdto.CreateAnchorNoSalaryShareCfgReq) (*anchornosalarysharecfgdto.CreateAnchorNoSalaryShareCfgRes, error) {
+	return anchornosalarysharecfg.Create(ctx, req)
+}
+
+func (c *AnchorNoSalaryShareCfgCMSController) UpdateAnchorNoSalaryShareCfg(ctx context.Context, req *anchornosalarysharecfgdto.UpdateAnchorNoSalaryShareCfgReq) (*anchornosalarysharecfgdto.UpdateAnchorNoSalaryShareCfgRes, error) {
+	return anchornosalarysharecfg.Update(ctx, req)
+}
+
+func (c *AnchorNoSalaryShareCfgCMSController) DeleteAnchorNoSalaryShareCfg(ctx context.Context, req *anchornosalarysharecfgdto.DeleteAnchorNoSalaryShareCfgReq) (*anchornosalarysharecfgdto.DeleteAnchorNoSalaryShareCfgRes, error) {
+	return anchornosalarysharecfg.Delete(ctx, req)
 }

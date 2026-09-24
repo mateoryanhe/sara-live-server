@@ -14,6 +14,10 @@ type AnchorIncomeSettlementLogCMSListFilter struct {
 	RoomIds                  []uint64
 	StartTime                int64
 	EndTime                  int64
+	TransferStartTime        int64
+	TransferEndTime          int64
+	PayoutOnly               bool
+	HideTransferredBefore    int64
 	Status                   *uint8
 	DirectPayout             *bool
 	OrderByReceivableUsdDesc bool
@@ -47,6 +51,23 @@ func AnchorIncomeSettlementLogCMSList(f *AnchorIncomeSettlementLogCMSListFilter)
 	if f.EndTime > 0 {
 		m = m.Where("created_at <= ?", time.Unix(f.EndTime, 0))
 	}
+	if f.PayoutOnly {
+		m = m.Where("("+string(entity.AnchorIncomeSettlementLogTransferOrderId)+" <> '' OR "+
+			string(entity.AnchorIncomeSettlementLogTransferFailMsg)+" <> '' OR "+
+			string(entity.AnchorIncomeSettlementLogStatus)+" IN (?, ?))",
+			entity.AnchorIncomeSettlementStatusTransferred, entity.AnchorIncomeSettlementStatusTransferring)
+	}
+	payoutTimeExpr := "COALESCE(" + string(entity.AnchorIncomeSettlementLogTransferAt) + ", updated_at)"
+	if f.TransferStartTime > 0 {
+		m = m.Where(payoutTimeExpr+" >= ?", time.Unix(f.TransferStartTime, 0))
+	}
+	if f.TransferEndTime > 0 {
+		m = m.Where(payoutTimeExpr+" <= ?", time.Unix(f.TransferEndTime, 0))
+	}
+	if f.HideTransferredBefore > 0 {
+		m = m.Where("("+string(entity.AnchorIncomeSettlementLogStatus)+" <> ? OR created_at >= ?)",
+			entity.AnchorIncomeSettlementStatusTransferred, time.Unix(f.HideTransferredBefore, 0))
+	}
 	if f.Status != nil {
 		m = m.Where(string(entity.AnchorIncomeSettlementLogStatus)+" = ?", *f.Status)
 	}
@@ -58,13 +79,38 @@ func AnchorIncomeSettlementLogCMSList(f *AnchorIncomeSettlementLogCMSListFilter)
 		return 0, list
 	}
 	orderBy := "id desc"
-	if f.OrderByReceivableUsdDesc {
+	if f.PayoutOnly || f.TransferStartTime > 0 || f.TransferEndTime > 0 {
+		orderBy = payoutTimeExpr + " desc, id desc"
+	} else if f.OrderByReceivableUsdDesc {
 		orderBy = string(entity.LiveRoomIncomeSettlementReceivableUsd) + " desc, id desc"
 	}
 	_ = m.Clone().Order(orderBy).
 		Limit(f.PageSize).Offset((f.PageIndex - 1) * f.PageSize).
 		Scan(&list)
-	return total, mergeAnchorIncomeSettlementLogsFromCache(list)
+	list = mergeAnchorIncomeSettlementLogsFromCache(list)
+	if f.HideTransferredBefore > 0 {
+		list = filterHistoricalTransferredAnchorSettlements(list, time.Unix(f.HideTransferredBefore, 0))
+	}
+	return total, list
+}
+
+// filterHistoricalTransferredAnchorSettlements 在缓存覆盖数据库状态后再次兜底过滤，
+// 避免 syndb 尚未刷库时把已经转账成功的历史记录短暂显示出来。
+func filterHistoricalTransferredAnchorSettlements(rows []*entity.AnchorIncomeSettlementLog, cutoff time.Time) []*entity.AnchorIncomeSettlementLog {
+	if len(rows) == 0 || cutoff.IsZero() {
+		return rows
+	}
+	filtered := make([]*entity.AnchorIncomeSettlementLog, 0, len(rows))
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		if row.Status == entity.AnchorIncomeSettlementStatusTransferred && row.CreatedAt.Before(cutoff) {
+			continue
+		}
+		filtered = append(filtered, row)
+	}
+	return filtered
 }
 
 // AnchorIncomeSettlementLogCMSListByGuildIdsFilter CMS按工会ID列表查询主播结算流水

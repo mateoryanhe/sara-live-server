@@ -21,6 +21,7 @@ import (
 	"xr-game-server/module/customerservice"
 	"xr-game-server/module/dbbackup"
 	"xr-game-server/module/domainsite"
+	"xr-game-server/module/effectivelivecfg"
 	"xr-game-server/module/fiatcurrency"
 	"xr-game-server/module/game"
 	"xr-game-server/module/gameconsumrank"
@@ -83,6 +84,7 @@ func Init() {
 	agora.Init()
 	call.Init()
 	livecfg.Init()
+	effectivelivecfg.Init()
 	verification_code.Init()
 	aliyunmoderation.Init()
 	privacypolicy.Init()

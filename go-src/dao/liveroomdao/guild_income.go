@@ -45,6 +45,20 @@ func ResetGuildWeeklyAnchorSettlement() {
 	guildWeeklySettlementMu.Unlock()
 }
 
+// PrepareGuildWeeklyAnchorSettlement 准备单个工会的即时结算聚合。
+// 上次失败的分项会保留用于重试；已完成或全新工会会清除残留分项。
+func PrepareGuildWeeklyAnchorSettlement(guildId uint64) {
+	if guildId == 0 {
+		return
+	}
+	guildWeeklySettlementMu.Lock()
+	if _, retry := guildWeeklySettlementBlocked[guildId]; !retry {
+		delete(guildWeeklySettlements, guildId)
+	}
+	delete(guildWeeklySettlementBlocked, guildId)
+	guildWeeklySettlementMu.Unlock()
+}
+
 // MarkGuildWeeklyAnchorSettlementBlocked 标记本轮该工会存在未完成主播结算，禁止生成工会代付单。
 func MarkGuildWeeklyAnchorSettlementBlocked(guildId uint64) {
 	if guildId == 0 {
@@ -127,6 +141,15 @@ func (v GuildWeeklyAnchorSettlement) IsZero() bool {
 func ResetGuildWeeklyAnchorSalary() {
 	guildWeeklyAnchorSalary.Clear()
 	guildWeeklyAnchorShareAmountUsd.Clear()
+}
+
+// ResetGuildWeeklyAnchorLegacySettlement 清除指定币商工会旧版主播结算临时聚合。
+func ResetGuildWeeklyAnchorLegacySettlement(guildId uint64) {
+	if guildId == 0 {
+		return
+	}
+	guildWeeklyAnchorSalary.Remove(guildId)
+	guildWeeklyAnchorShareAmountUsd.Remove(guildId)
 }
 
 // TakeGuildWeeklyAnchorSalary 取出并清除工会本周主播直播薪资合计(用于工会结算流水)

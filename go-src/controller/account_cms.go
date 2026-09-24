@@ -151,6 +151,11 @@ func (a *AccountController) SetPlatformAnchorType(ctx context.Context, req *acco
 	return liveroom.SetPlatformAnchorType(ctx, req)
 }
 
+// BatchImmediateSettlePlatformAnchors CMS批量立即结算平台主播。
+func (a *AccountController) BatchImmediateSettlePlatformAnchors(ctx context.Context, req *accountdto.BatchImmediateSettlePlatformAnchorsReq) (*accountdto.BatchImmediateSettlePlatformAnchorsRes, error) {
+	return liveroom.BatchImmediateSettlePlatformAnchors(ctx, req)
+}
+
 // GetAnchorTransferInfo CMS 获取平台主播转账信息。
 func (a *AccountController) GetAnchorTransferInfo(ctx context.Context, req *accountdto.GetAnchorTransferInfoReq) (*accountdto.GetAnchorTransferInfoRes, error) {
 	return liveroom.GetAnchorTransferInfo(ctx, req)

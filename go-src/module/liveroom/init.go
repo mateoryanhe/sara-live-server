@@ -7,5 +7,4 @@ func Init() {
 	initServerOnlineNormalUserList()
 	initRoomTagMemory()
 	initAnchorSettlement()
-	initGuildSettlement()
 }

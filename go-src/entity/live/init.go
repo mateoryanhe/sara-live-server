@@ -24,6 +24,7 @@ func Init() {
 	initLiveTicket()
 	initLivePrivateRoomBilling()
 	initLiveCfg()
+	initEffectiveLiveCfg()
 	initLiveGuild()
 	initLiveGuildVisibility()
 	initLivePlatformAnchorVisibility()

@@ -3,7 +3,7 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>{{ t('menu.GuildPayoutDetailList') }}</span>
+          <span>{{ pageTitle }}</span>
         </div>
       </template>
 
@@ -83,9 +83,10 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage} from 'element-plus'
 import {useI18n} from 'vue-i18n'
+import {useRoute} from 'vue-router'
 import {guildIncomeSettlementLogApi} from '@/api/modules/guild-income-settlement-log'
 import type {GuildIncomeSettlementLogItem} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
@@ -93,7 +94,12 @@ import {formatWalletBalance} from '@/utils/number-format'
 import {formatServerDateTime as formatDate, toServerDayEndUnix, toServerDayStartUnix} from '@/utils/server-datetime'
 
 const {t} = useI18n()
-const {can} = usePagePermission('GuildPayoutDetailList')
+const route = useRoute()
+const isCoinMerchantPage = computed(() => route.name === 'CoinMerchantPayoutDetailList')
+const {can} = usePagePermission()
+const pageTitle = computed(() => t(isCoinMerchantPage.value
+    ? 'menu.CoinMerchantPayoutDetailList'
+    : 'menu.GuildPayoutDetailList'))
 const loading = ref(false)
 const tableData = ref<GuildIncomeSettlementLogItem[]>([])
 
@@ -110,6 +116,7 @@ const pagination = reactive({
 const buildQueryParams = () => {
   const [startDate, endDate] = searchForm.dateRange || []
   return {
+    guildType: isCoinMerchantPage.value ? 1 : 0,
     payoutOnly: true,
     transferStartTime: startDate ? toServerDayStartUnix(startDate) : 0,
     transferEndTime: endDate ? toServerDayEndUnix(endDate) : 0,
@@ -174,6 +181,13 @@ const handleSizeChange = (size: number) => {
 }
 
 onMounted(fetchList)
+
+watch(() => route.name, (next, previous) => {
+  if (next === previous) return
+  searchForm.dateRange = []
+  pagination.pageIndex = 1
+  fetchList()
+})
 </script>
 
 <style scoped>

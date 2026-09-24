@@ -1,20 +1,101 @@
 <template>
   <div class="page-container">
-    <el-card v-loading="loading">
+    <el-card>
       <template #header>
-        <span>{{ t('menu.AnchorNoSalaryShareCfgManagement') }}</span>
+        <div class="card-header">
+          <span>{{ t('menu.AnchorNoSalaryShareCfgManagement') }}</span>
+          <el-button v-if="can('create')" type="primary" @click="handleAdd">
+            {{ t('pages.anchorNoSalaryShareCfg.addTier') }}
+          </el-button>
+        </div>
       </template>
 
       <el-alert
           :closable="false"
-          :title="t('pages.anchorNoSalaryShareCfg.tip')"
-          class="tip-alert"
-          show-icon
+          :title="t('pages.anchorNoSalaryShareCfg.dynamicTierHint')"
+          class="tier-hint"
           type="info"
       />
 
-      <el-form :model="formData" class="cfg-form" label-width="180px">
-        <el-form-item :label="t('pages.anchorNoSalaryShareCfg.anchorSocialSharePercent')">
+      <el-table v-loading="loading" :data="tableData" style="width: 100%">
+        <el-table-column
+            :label="t('pages.anchorNoSalaryShareCfg.level')"
+            align="center"
+            prop="level"
+            width="120"
+        />
+        <el-table-column
+            :label="t('pages.anchorNoSalaryShareCfg.socialTotalDiamondRevenue')"
+            align="right"
+            min-width="200"
+            prop="socialTotalDiamondRevenue"
+        >
+          <template #default="{row}">
+            <span class="money-amount">{{ formatWalletBalance(row.socialTotalDiamondRevenue) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+            :label="t('pages.anchorNoSalaryShareCfg.anchorSocialSharePercent')"
+            align="right"
+            min-width="180"
+            prop="anchorSocialSharePercent"
+        >
+          <template #default="{row}">{{ formatPercent(row.anchorSocialSharePercent) }}</template>
+        </el-table-column>
+        <el-table-column
+            :label="t('pages.anchorNoSalaryShareCfg.guildSocialSharePercent')"
+            align="right"
+            min-width="180"
+            prop="guildSocialSharePercent"
+        >
+          <template #default="{row}">{{ formatPercent(row.guildSocialSharePercent) }}</template>
+        </el-table-column>
+        <el-table-column :label="t('common.updatedAt')" min-width="180" prop="updatedAt">
+          <template #default="{row}">{{ row.updatedAt || '-' }}</template>
+        </el-table-column>
+        <el-table-column v-if="can('edit') || can('delete')" :label="t('common.actions')" fixed="right" width="150">
+          <template #default="{row}">
+            <el-button v-if="can('edit')" link type="primary" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
+            <el-button v-if="can('delete')" link type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="pagination-container">
+        <el-pagination
+            v-model:current-page="currentPage"
+            v-model:page-size="pageSize"
+            :page-sizes="[10, 20, 50, 100]"
+            :total="total"
+            layout="total, sizes, prev, pager, next, jumper"
+            @size-change="handleSizeChange"
+            @current-change="fetchList"
+        />
+      </div>
+    </el-card>
+
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="560px">
+      <el-form ref="formRef" :model="formData" :rules="formRules" label-width="180px">
+        <el-form-item :label="t('pages.anchorNoSalaryShareCfg.level')" prop="level">
+          <el-input-number v-model="formData.level" :min="1" :precision="0" controls-position="right" style="width: 100%"/>
+        </el-form-item>
+        <el-form-item
+            :label="t('pages.anchorNoSalaryShareCfg.socialTotalDiamondRevenue')"
+            prop="socialTotalDiamondRevenue"
+        >
+          <el-input-number
+              v-model="formData.socialTotalDiamondRevenue"
+              :min="0"
+              :precision="4"
+              :step="1"
+              controls-position="right"
+              style="width: 100%"
+          />
+        </el-form-item>
+        <el-form-item
+            :label="t('pages.anchorNoSalaryShareCfg.anchorSocialSharePercent')"
+            prop="anchorSocialSharePercent"
+        >
           <el-input-number
               v-model="formData.anchorSocialSharePercent"
               :max="100"
@@ -22,10 +103,13 @@
               :precision="2"
               :step="1"
               controls-position="right"
+              style="width: 100%"
           />
         </el-form-item>
-
-        <el-form-item :label="t('pages.anchorNoSalaryShareCfg.guildSocialSharePercent')">
+        <el-form-item
+            :label="t('pages.anchorNoSalaryShareCfg.guildSocialSharePercent')"
+            prop="guildSocialSharePercent"
+        >
           <el-input-number
               v-model="formData.guildSocialSharePercent"
               :max="100"
@@ -33,84 +117,183 @@
               :precision="2"
               :step="1"
               controls-position="right"
+              style="width: 100%"
           />
         </el-form-item>
-
-        <el-form-item v-if="updatedAt" :label="t('pages.anchorNoSalaryShareCfg.lastUpdated')">
-          <span>{{ updatedAt }}</span>
-        </el-form-item>
-
-        <el-form-item>
-          <el-button v-if="can('edit')" type="primary" @click="handleSave">{{ t('common.saveConfig') }}</el-button>
-          <el-button @click="fetchCfg">{{ t('common.refresh') }}</el-button>
-        </el-form-item>
       </el-form>
-    </el-card>
+      <template #footer>
+        <el-button :disabled="saving" @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button :loading="saving" type="primary" @click="handleSave">{{ t('common.save') }}</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import {computed, onMounted, reactive, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
-import {ElMessage} from 'element-plus'
+import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {anchorNoSalaryShareCfgApi} from '@/api/modules/anchor-no-salary-share-cfg'
+import type {AnchorNoSalaryShareCfg} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
+import {formatWalletBalance} from '@/utils/number-format'
 
 const {t} = useI18n()
 const {can} = usePagePermission('AnchorNoSalaryShareCfgManagement')
+
 const loading = ref(false)
-const updatedAt = ref('')
+const saving = ref(false)
+const tableData = ref<AnchorNoSalaryShareCfg[]>([])
+const total = ref(0)
+const currentPage = ref(1)
+const pageSize = ref(20)
+const dialogVisible = ref(false)
+const dialogTitle = ref('')
+const formRef = ref<FormInstance>()
 const formData = reactive({
-  id: '0',
-  anchorSocialSharePercent: 10,
-  guildSocialSharePercent: 10,
+  id: '',
+  level: 0,
+  socialTotalDiamondRevenue: 0,
+  anchorSocialSharePercent: 0,
+  guildSocialSharePercent: 0,
 })
 
-const fetchCfg = async () => {
+const formRules = computed<FormRules>(() => ({
+  level: [
+    {required: true, type: 'number', min: 1, message: t('pages.anchorNoSalaryShareCfg.levelRequired'), trigger: 'change'},
+  ],
+  socialTotalDiamondRevenue: [
+    {required: true, message: t('pages.anchorNoSalaryShareCfg.socialTotalRevenueRequired'), trigger: 'change'},
+  ],
+  anchorSocialSharePercent: [
+    {required: true, message: t('pages.anchorNoSalaryShareCfg.anchorSocialSharePercentRequired'), trigger: 'change'},
+    {
+      validator: (_rule, value, callback) => {
+        const percent = Number(value)
+        if (!Number.isFinite(percent) || percent < 0 || percent > 100) {
+          callback(new Error(t('pages.anchorNoSalaryShareCfg.sharePercentInvalid')))
+          return
+        }
+        callback()
+      },
+      trigger: 'change',
+    },
+  ],
+  guildSocialSharePercent: [
+    {required: true, message: t('pages.anchorNoSalaryShareCfg.guildSocialSharePercentRequired'), trigger: 'change'},
+    {
+      validator: (_rule, value, callback) => {
+        const percent = Number(value)
+        if (!Number.isFinite(percent) || percent < 0 || percent > 100) {
+          callback(new Error(t('pages.anchorNoSalaryShareCfg.sharePercentInvalid')))
+          return
+        }
+        callback()
+      },
+      trigger: 'change',
+    },
+  ],
+}))
+
+const formatPercent = (value: number | null | undefined) => `${Number(value || 0).toFixed(2)}%`
+
+const fetchList = async () => {
   loading.value = true
   try {
-    const response = await anchorNoSalaryShareCfgApi.getCfg()
-    const cfg = response.cfg
-    formData.id = cfg?.id || '0'
-    formData.anchorSocialSharePercent = cfg?.anchorSocialSharePercent ?? 10
-    formData.guildSocialSharePercent = cfg?.guildSocialSharePercent ?? 10
-    updatedAt.value = cfg?.updatedAt || ''
+    const response = await anchorNoSalaryShareCfgApi.getList({
+      pageIndex: currentPage.value,
+      pageSize: pageSize.value,
+    })
+    tableData.value = response.data || []
+    total.value = Number(response.total || 0)
   } catch (error) {
-    console.error('fetch anchor no salary share config failed:', error)
+    console.error('fetch anchor no-salary social share config failed:', error)
     ElMessage.error(t('pages.anchorNoSalaryShareCfg.fetchFailed'))
   } finally {
     loading.value = false
   }
 }
 
-const validPercent = (value: number) => Number.isFinite(value) && value >= 0 && value <= 100
+const resetForm = () => {
+  formData.id = ''
+  formData.level = 1
+  formData.socialTotalDiamondRevenue = 0
+  formData.anchorSocialSharePercent = 0
+  formData.guildSocialSharePercent = 0
+}
+
+const handleAdd = () => {
+  resetForm()
+  dialogTitle.value = t('pages.anchorNoSalaryShareCfg.addTier')
+  dialogVisible.value = true
+}
+
+const handleEdit = (row: AnchorNoSalaryShareCfg) => {
+  formData.id = String(row.id || '')
+  formData.level = Number(row.level || 0)
+  formData.socialTotalDiamondRevenue = Number(row.socialTotalDiamondRevenue || 0)
+  formData.anchorSocialSharePercent = Number(row.anchorSocialSharePercent || 0)
+  formData.guildSocialSharePercent = Number(row.guildSocialSharePercent || 0)
+  dialogTitle.value = t('pages.anchorNoSalaryShareCfg.editTier')
+  dialogVisible.value = true
+}
 
 const handleSave = async () => {
-  if (!validPercent(formData.anchorSocialSharePercent) || !validPercent(formData.guildSocialSharePercent)) {
-    ElMessage.warning(t('pages.anchorNoSalaryShareCfg.percentRangeInvalid'))
-    return
-  }
-  loading.value = true
+  if (!await formRef.value?.validate()) return
+  saving.value = true
   try {
-    const response = await anchorNoSalaryShareCfgApi.saveCfg({
-      id: formData.id === '0' ? 0 : Number(formData.id),
+    const payload = {
+      level: formData.level,
+      socialTotalDiamondRevenue: formData.socialTotalDiamondRevenue,
       anchorSocialSharePercent: formData.anchorSocialSharePercent,
       guildSocialSharePercent: formData.guildSocialSharePercent,
-    })
-    if (!response.success) {
-      ElMessage.error(t('pages.anchorNoSalaryShareCfg.saveFailed'))
-      return
     }
-    ElMessage.success(t('common.updateSuccess'))
-    await fetchCfg()
+    if (formData.id) {
+      await anchorNoSalaryShareCfgApi.update({id: formData.id, ...payload})
+      ElMessage.success(t('common.updateSuccess'))
+    } else {
+      await anchorNoSalaryShareCfgApi.create(payload)
+      ElMessage.success(t('common.createSuccess'))
+    }
+    dialogVisible.value = false
+    await fetchList()
   } catch (error) {
-    console.error('save anchor no salary share config failed:', error)
+    console.error('update anchor no-salary social share config failed:', error)
   } finally {
-    loading.value = false
+    saving.value = false
   }
 }
 
-onMounted(fetchCfg)
+const handleDelete = async (row: AnchorNoSalaryShareCfg) => {
+  try {
+    await ElMessageBox.confirm(
+      t('pages.anchorNoSalaryShareCfg.deleteConfirm', {level: row.level}),
+      t('common.confirmDelete'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        type: 'warning',
+      },
+    )
+    await anchorNoSalaryShareCfgApi.remove(row.id)
+    ElMessage.success(t('common.deleteSuccess'))
+    if (tableData.value.length === 1 && currentPage.value > 1) {
+      currentPage.value -= 1
+    }
+    await fetchList()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('delete anchor no-salary social share config failed:', error)
+    }
+  }
+}
+
+const handleSizeChange = () => {
+  currentPage.value = 1
+  fetchList()
+}
+
+onMounted(fetchList)
 </script>
 
 <style scoped>
@@ -118,11 +301,19 @@ onMounted(fetchCfg)
   padding: 20px;
 }
 
-.tip-alert {
-  margin-bottom: 20px;
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.cfg-form {
-  max-width: 760px;
+.tier-hint {
+  margin-bottom: 16px;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
 }
 </style>

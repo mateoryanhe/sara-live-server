@@ -19,10 +19,18 @@ import (
 type anchorWeeklySettlementCfg struct {
 	salaryCfgs          []*entity.AnchorSalaryCfg
 	salarySocialTiers   []*entity.AnchorSalarySocialShareCfg
-	noSalarySocialCfg   *entity.AnchorNoSalaryShareCfg
+	noSalarySocialTiers []*entity.AnchorNoSalaryShareCfg
 	withSalaryGameTiers []*entity.AnchorGameShareCfg
 	noSalaryGameTiers   []*entity.AnchorGameShareCfg
 }
+
+type tieredAnchorSettlementOutcome uint8
+
+const (
+	tieredAnchorSettlementFailed tieredAnchorSettlementOutcome = iota
+	tieredAnchorSettlementNoData
+	tieredAnchorSettlementCreated
+)
 
 const settlementPersistTimeout = 15 * time.Second
 
@@ -30,7 +38,7 @@ func loadAnchorWeeklySettlementCfg() *anchorWeeklySettlementCfg {
 	return &anchorWeeklySettlementCfg{
 		salaryCfgs:          anchorsalarycfgdao.ListAllOrderBySalaryDesc(),
 		salarySocialTiers:   anchorsalarysocialsharecfgdao.ListAllOrderByThresholdDesc(),
-		noSalarySocialCfg:   anchornosalarysharecfgdao.GetFirst(),
+		noSalarySocialTiers: anchornosalarysharecfgdao.ListAllOrderByThresholdDesc(),
 		withSalaryGameTiers: anchorgamesharecfgdao.ListAllBySalaryTypeOrderByThresholdDesc(entity.AnchorGameShareSalaryTypeWithSalary),
 		noSalaryGameTiers:   anchorgamesharecfgdao.ListAllBySalaryTypeOrderByThresholdDesc(entity.AnchorGameShareSalaryTypeNoSalary),
 	}
@@ -50,7 +58,7 @@ func (c *anchorWeeklySettlementCfg) ready(hasSalary bool, snap *entity.LiveRoomI
 		if hasSalary && len(c.salarySocialTiers) == 0 {
 			return false
 		}
-		if !hasSalary && c.noSalarySocialCfg == nil {
+		if !hasSalary && len(c.noSalarySocialTiers) == 0 {
 			return false
 		}
 	}
@@ -94,16 +102,27 @@ func settlePlatformAnchorTiered(room *entity.LiveRoom, cfg *anchorWeeklySettleme
 }
 
 func settleTieredAnchor(room *entity.LiveRoom, cfg *anchorWeeklySettlementCfg, periodEnd time.Time, directPayout bool) bool {
+	return settleTieredAnchorWithOutcome(room, cfg, periodEnd, directPayout) != tieredAnchorSettlementFailed
+}
+
+func settlePlatformAnchorTieredWithOutcome(room *entity.LiveRoom, cfg *anchorWeeklySettlementCfg, periodEnd time.Time) tieredAnchorSettlementOutcome {
+	if room == nil || room.ID == 0 || room.GuildId != 0 || cfg == nil {
+		return tieredAnchorSettlementFailed
+	}
+	return settleTieredAnchorWithOutcome(room, cfg, periodEnd, true)
+}
+
+func settleTieredAnchorWithOutcome(room *entity.LiveRoom, cfg *anchorWeeklySettlementCfg, periodEnd time.Time, directPayout bool) tieredAnchorSettlementOutcome {
 	dailyRows := liveroomdao.ListRecentUnsettledDailyEffectiveLives(room.ID)
 	unsettled := liveroomdao.GetLiveRoomIncomeUnsettled(room.ID)
 	if unsettled == nil {
-		return false
+		return tieredAnchorSettlementFailed
 	}
 	hasSalary := room.IsSalaryEffective(periodEnd.Add(-time.Nanosecond))
 	snap := unsettled.Snapshot()
 	if !cfg.ready(hasSalary, &snap) {
 		g.Log().Warningf(gctx.New(), "anchor weekly settlement skipped: config missing roomId=%d guildId=%d hasSalary=%v", room.ID, room.GuildId, hasSalary)
-		return false
+		return tieredAnchorSettlementFailed
 	}
 
 	salary := float64(0)
@@ -111,13 +130,13 @@ func settleTieredAnchor(room *entity.LiveRoom, cfg *anchorWeeklySettlementCfg, p
 		salary = matchAnchorSalaryAmount(countAnchorWeeklyWorkDays(dailyRows), dailyRows, cfg.salaryCfgs)
 	}
 	if len(dailyRows) == 0 && snap.IsZero() && salary == 0 {
-		return true
+		return tieredAnchorSettlementNoData
 	}
 	gameTiers := cfg.noSalaryGameTiers
 	if hasSalary {
 		gameTiers = cfg.withSalaryGameTiers
 	}
-	result := resolveAnchorSettlementTier(hasSalary, snap.TotalSocialIncome, snap.TotalGameIncome, cfg.salarySocialTiers, cfg.noSalarySocialCfg, gameTiers)
+	result := resolveAnchorSettlementTier(hasSalary, snap.TotalSocialIncome, snap.TotalGameIncome, cfg.salarySocialTiers, cfg.noSalarySocialTiers, gameTiers)
 	breakdown := &entity.AnchorIncomeSettlementBreakdown{
 		SettlementRuleType:        entity.AnchorIncomeSettlementRuleTiered,
 		HasSalary:                 result.HasSalary,
@@ -149,7 +168,7 @@ func settleTieredAnchor(room *entity.LiveRoom, cfg *anchorWeeklySettlementCfg, p
 		!liveroomdao.VerifyAnchorIncomeSettlementLogPersisted(logRow) ||
 		(directPayout && !liveroomdao.VerifyAnchorPayoutConversionPersisted(logRow)) {
 		g.Log().Errorf(gctx.New(), "anchor weekly settlement retained: log persist failed roomId=%d guildId=%d directPayout=%v logId=%d", room.ID, room.GuildId, directPayout, logRow.ID)
-		return false
+		return tieredAnchorSettlementFailed
 	}
 
 	// 只扣除已记录的快照，保留持久化期间产生的新流水。
@@ -175,5 +194,5 @@ func settleTieredAnchor(room *entity.LiveRoom, cfg *anchorWeeklySettlementCfg, p
 	if len(dailyRows) > 0 {
 		liveroomdao.MarkDailyEffectiveLivesSettled(dailyRows)
 	}
-	return true
+	return tieredAnchorSettlementCreated
 }

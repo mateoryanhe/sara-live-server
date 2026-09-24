@@ -28,7 +28,7 @@ type DailyGuildEffectiveLive struct {
 	ID           string  `gorm:"primaryKey;size:64;comment:复合ID(date_guildId)" json:"id"`
 	GuildId      uint64  `gorm:"index;default:0;comment:工会ID" json:"guildId"`
 	LiveDate     string  `gorm:"size:10;index;default:'';comment:日期(YYYY-MM-DD)" json:"liveDate"`
-	LiveDuration float64 `gorm:"default:0;comment:当日累计直播时长(秒,仅统计单场>30分钟)" json:"liveDuration"`
+	LiveDuration float64 `gorm:"default:0;comment:当日累计有效直播时长(秒,门槛由配置决定)" json:"liveDuration"`
 	Settled      bool    `gorm:"default:0;comment:结算标记(0未结算,1已结算)" json:"settled"`
 	LiveRoomIncomeAmounts
 	CreatedAt time.Time `json:"createdAt"`

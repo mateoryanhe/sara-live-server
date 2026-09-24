@@ -16,6 +16,8 @@ import type {
     ImportGuildAnchorsRes,
     BatchImportSalaryAnchorsReq,
     BatchImportSalaryAnchorsRes,
+    BatchImmediateSettleGuildsReq,
+    BatchImmediateSettleGuildsRes,
     JoinGuildAnchorReq,
     JoinGuildAnchorRes,
     SaveGuildTransferInfoReq,
@@ -108,6 +110,10 @@ export const guildApi = {
 
     batchImportSalaryAnchors: (data: BatchImportSalaryAnchorsReq) => {
         return request.post<BatchImportSalaryAnchorsRes>('/guild/batchImportSalaryAnchors', data)
+    },
+
+    batchImmediateSettleGuilds: (data: BatchImmediateSettleGuildsReq) => {
+        return request.post<BatchImmediateSettleGuildsRes>('/guild/batchImmediateSettleGuilds', data, {timeout: 5 * 60 * 1000})
     },
 
     joinGuildAnchor: (data: JoinGuildAnchorReq) => {

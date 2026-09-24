@@ -7,7 +7,7 @@
         </div>
       </template>
 
-      <el-alert :closable="false" :title="t('pages.guildTransferList.weekHint')" class="week-hint" type="info"/>
+      <el-alert :closable="false" :title="listHint" class="week-hint" type="info"/>
 
       <el-form :model="searchForm" class="search-form" inline label-width="100px">
         <el-form-item :label="t('pages.guildTransferList.guildId')">
@@ -187,12 +187,7 @@ import {guildIncomeSettlementLogApi} from '@/api/modules/guild-income-settlement
 import type {GuildIncomeSettlementLogItem} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
 import {formatWalletBalance} from '@/utils/number-format'
-import {
-  getServerWeekDateRange,
-  toServerDayEndUnix,
-  toServerDayStartUnix,
-  formatServerDateTime as formatDate,
-} from '@/utils/server-datetime'
+import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 
 const {t} = useI18n()
 const route = useRoute()
@@ -204,6 +199,7 @@ const guildType = computed(() => isCoinMerchantPage.value ? 1 : 0)
 const pageTitle = computed(() => t(isCoinMerchantPage.value
     ? 'menu.CoinMerchantGuildTransferManagement'
     : 'menu.GuildTransferManagement'))
+const listHint = computed(() => t('pages.guildTransferList.historyHint'))
 
 const loading = ref(false)
 const tableData = ref<GuildIncomeSettlementLogItem[]>([])
@@ -219,8 +215,6 @@ const selectedPendingRows = computed(() => selectedRows.value.filter(row => sett
 const selectedApprovedRows = computed(() => selectedRows.value.filter(row => settlementStatus(row) === 1))
 const selectedPendingCount = computed(() => selectedPendingRows.value.length)
 const selectedApprovedCount = computed(() => selectedApprovedRows.value.length)
-
-const fixedWeekRange = getServerWeekDateRange()
 
 const searchForm = reactive({
   guildId: '',
@@ -239,9 +233,8 @@ const buildQueryParams = () => ({
   status: searchForm.status !== undefined && searchForm.status !== null && searchForm.status >= 0
       ? searchForm.status
       : undefined,
-  // 固定查本周写入的上周结算，不提供时间筛选
-  startTime: toServerDayStartUnix(fixedWeekRange.start),
-  endTime: toServerDayEndUnix(fixedWeekRange.end),
+  // 普通工会和币商均保留历史待处理单，只隐藏本周以前已成功的记录。
+  hideHistoricalTransferred: true,
   orderByReceivableUsdDesc: true,
   includeDetail: false,
   includeTransfer: true,

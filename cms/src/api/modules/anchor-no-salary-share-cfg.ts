@@ -1,22 +1,43 @@
 import {request} from '../request'
-import type {
-  GetAnchorNoSalaryShareCfgRes,
-  SaveAnchorNoSalaryShareCfgReq,
-  SaveAnchorNoSalaryShareCfgRes,
-} from '@/types/api'
+import type {AnchorNoSalaryShareCfg, PageResponse} from '@/types/api'
 
 export const anchorNoSalaryShareCfgApi = {
-  getCfg: () => {
-    return request.post<GetAnchorNoSalaryShareCfgRes>(
-      '/anchorNoSalaryShareCfg/getAnchorNoSalaryShareCfg',
-      {},
+  getList: (data: {pageIndex: number; pageSize: number}) => {
+    return request.post<PageResponse<AnchorNoSalaryShareCfg>>(
+      '/anchorNoSalaryShareCfg/anchorNoSalaryShareCfgList',
+      data,
     )
   },
 
-  saveCfg: (data: SaveAnchorNoSalaryShareCfgReq) => {
-    return request.post<SaveAnchorNoSalaryShareCfgRes>(
-      '/anchorNoSalaryShareCfg/saveAnchorNoSalaryShareCfg',
+  create: (data: {
+    level: number
+    socialTotalDiamondRevenue: number
+    anchorSocialSharePercent: number
+    guildSocialSharePercent: number
+  }) => {
+    return request.post<{id: string}>(
+      '/anchorNoSalaryShareCfg/createAnchorNoSalaryShareCfg',
       data,
+    )
+  },
+
+  update: (data: {
+    id: string | number
+    level: number
+    socialTotalDiamondRevenue: number
+    anchorSocialSharePercent: number
+    guildSocialSharePercent: number
+  }) => {
+    return request.post<{success: boolean}>(
+      '/anchorNoSalaryShareCfg/updateAnchorNoSalaryShareCfg',
+      data,
+    )
+  },
+
+  remove: (id: string | number) => {
+    return request.post<{success: boolean}>(
+      '/anchorNoSalaryShareCfg/deleteAnchorNoSalaryShareCfg',
+      {id},
     )
   },
 }

@@ -1,7 +1,6 @@
 package officialsitedeploy
 
 import (
-	"archive/zip"
 	"context"
 	"errors"
 	"fmt"
@@ -15,6 +14,7 @@ import (
 	"xr-game-server/dto/officialsitedeploydto"
 	"xr-game-server/errercode"
 	"xr-game-server/module/domainsite"
+	"xr-game-server/module/staticdeploy"
 )
 
 type deployTarget struct {
@@ -175,7 +175,7 @@ func deployZipFromRequest(r *ghttp.Request, target deployTarget) (*officialsited
 	}
 	defer os.Remove(zipPath)
 
-	fileCount, dirCount, err := extractZip(zipPath, deployDir)
+	fileCount, dirCount, err := staticdeploy.DeployZip(zipPath, deployDir)
 	if err != nil {
 		return nil, err
 	}
@@ -199,84 +199,6 @@ func getDeployDir(target deployTarget) (string, error) {
 		return "", fmt.Errorf("create deploy dir %s: %w", root, err)
 	}
 	return root, nil
-}
-
-func extractZip(zipPath, destRoot string) (fileCount, dirCount int, err error) {
-	reader, err := zip.OpenReader(zipPath)
-	if err != nil {
-		return 0, 0, err
-	}
-	defer reader.Close()
-
-	destRoot = filepath.Clean(destRoot)
-	for _, file := range reader.File {
-		name := strings.TrimSpace(file.Name)
-		if name == "" {
-			continue
-		}
-		name = filepath.ToSlash(name)
-		if shouldSkipZipEntry(name) {
-			continue
-		}
-		targetPath, err := safeJoin(destRoot, name)
-		if err != nil {
-			return fileCount, dirCount, err
-		}
-		if file.FileInfo().IsDir() || strings.HasSuffix(name, "/") {
-			if err := os.MkdirAll(targetPath, 0755); err != nil {
-				return fileCount, dirCount, err
-			}
-			dirCount++
-			continue
-		}
-		if err := os.MkdirAll(filepath.Dir(targetPath), 0755); err != nil {
-			return fileCount, dirCount, err
-		}
-		if err := extractZipFile(file, targetPath); err != nil {
-			return fileCount, dirCount, err
-		}
-		fileCount++
-	}
-	return fileCount, dirCount, nil
-}
-
-func extractZipFile(file *zip.File, targetPath string) error {
-	src, err := file.Open()
-	if err != nil {
-		return err
-	}
-	defer src.Close()
-
-	dst, err := os.OpenFile(targetPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, file.Mode().Perm())
-	if err != nil {
-		return err
-	}
-	defer dst.Close()
-
-	_, err = io.Copy(dst, src)
-	return err
-}
-
-func safeJoin(base, name string) (string, error) {
-	name = strings.TrimPrefix(filepath.ToSlash(name), "/")
-	if name == "" || strings.Contains(name, "..") {
-		return "", fmt.Errorf("invalid zip entry path: %s", name)
-	}
-	target := filepath.Clean(filepath.Join(base, filepath.FromSlash(name)))
-	baseClean := filepath.Clean(base)
-	if target != baseClean && !strings.HasPrefix(target, baseClean+string(os.PathSeparator)) {
-		return "", fmt.Errorf("invalid zip entry path: %s", name)
-	}
-	return target, nil
-}
-
-func shouldSkipZipEntry(name string) bool {
-	base := filepath.Base(name)
-	if base == ".DS_Store" || base == "Thumbs.db" {
-		return true
-	}
-	lower := strings.ToLower(name)
-	return strings.HasPrefix(lower, "__macosx/") || strings.Contains(lower, "/__macosx/")
 }
 
 func mapUploadReadErr(err error) error {

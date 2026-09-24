@@ -149,7 +149,7 @@ func resolveDailyGuildEffectiveLiveTarget(row *entity.DailyGuildEffectiveLive) *
 	return row
 }
 
-// AddDailyGuildLiveDuration 累加工会当日直播时长(主播下播且单场>30分钟时同步调用)
+// AddDailyGuildLiveDuration 累加工会当日有效直播时长(主播下播且单场超过配置门槛时同步调用)
 func AddDailyGuildLiveDuration(guildId uint64, at time.Time, durationSec float64) {
 	if guildId == 0 || durationSec <= 0 {
 		return

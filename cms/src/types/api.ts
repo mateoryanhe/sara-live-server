@@ -291,6 +291,17 @@ export interface OffShelfLiveRoomItem {
     createdAt?: string | null
 }
 
+export interface BatchImmediateSettlePlatformAnchorsReq {
+    anchorIds: Array<string | number>
+}
+
+export interface BatchImmediateSettlePlatformAnchorsRes {
+    settledCount: number
+    noDataCount: number
+    failCount: number
+    failAnchorIds: string[]
+}
+
 export interface AnchorListItem {
     id: string
     nickname?: string
@@ -1100,6 +1111,17 @@ export interface GuildQuery extends PageQuery {
     name?: string
 }
 
+export interface BatchImmediateSettleGuildsReq {
+    guildIds: Array<string | number>
+}
+
+export interface BatchImmediateSettleGuildsRes {
+    settledCount: number
+    noDataCount: number
+    failCount: number
+    failGuildIds: string[]
+}
+
 export interface MyGuildProfile {
     id: string
     name: string
@@ -1628,6 +1650,8 @@ export interface AnchorSalarySocialShareCfg {
 
 export interface AnchorNoSalaryShareCfg {
     id: string
+    level: number
+    socialTotalDiamondRevenue: number
     anchorSocialSharePercent: number
     guildSocialSharePercent: number
     createdAt: string
@@ -1645,20 +1669,6 @@ export interface AnchorGameShareCfg {
     updatedAt: string
 }
 
-export interface GetAnchorNoSalaryShareCfgRes {
-    cfg: AnchorNoSalaryShareCfg
-}
-
-export interface SaveAnchorNoSalaryShareCfgReq {
-    id: number
-    anchorSocialSharePercent: number
-    guildSocialSharePercent: number
-}
-
-export interface SaveAnchorNoSalaryShareCfgRes {
-    success: boolean
-    id: string
-}
 
 export interface IncomeSettlementLogAmounts {
     totalIncome: number
@@ -1698,6 +1708,10 @@ export interface AnchorIncomeSettlementLogQuery extends PageQuery {
     anchorIds?: string[]
     startTime?: number
     endTime?: number
+    transferStartTime?: number
+    transferEndTime?: number
+    payoutOnly?: boolean
+    hideHistoricalTransferred?: boolean
     status?: number
     directPayout?: boolean
     orderByReceivableUsdDesc?: boolean
@@ -1724,6 +1738,7 @@ export interface AnchorIncomeSettlementLogItem extends IncomeSettlementLogAmount
     transferAccountNo?: string
     transferBankCode?: string
     createdAt?: string | null
+    updatedAt?: string | null
 }
 
 export interface MyGuildAnchorIncomeSettlementLogQuery extends PageQuery {
@@ -1741,6 +1756,7 @@ export interface GuildIncomeSettlementLogQuery extends PageQuery {
     transferStartTime?: number
     transferEndTime?: number
     payoutOnly?: boolean
+    hideHistoricalTransferred?: boolean
     status?: number
     orderByReceivableUsdDesc?: boolean
     includeDetail?: boolean
@@ -1926,6 +1942,7 @@ export interface WalletExchangeCfg {
     id: string
     goldToDiamondRate: number
     exchangeFeePercent: number
+    usdToGoldRate: number
     createdAt: string
     updatedAt: string
 }
@@ -1938,9 +1955,31 @@ export interface SaveWalletExchangeCfgReq {
     id?: number
     goldToDiamondRate: number
     exchangeFeePercent: number
+    usdToGoldRate: number
 }
 
 export interface SaveWalletExchangeCfgRes {
+    success: boolean
+    id: string
+}
+
+export interface EffectiveLiveCfg {
+    id: string
+    minSessionMinutes: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetEffectiveLiveCfgRes {
+    cfg: EffectiveLiveCfg | null
+}
+
+export interface SaveEffectiveLiveCfgReq {
+    id?: number
+    minSessionMinutes: number
+}
+
+export interface SaveEffectiveLiveCfgRes {
     success: boolean
     id: string
 }

@@ -18,6 +18,7 @@ type GuildIncomeSettlementLogCMSListFilter struct {
 	EndTime                  int64
 	TransferStartTime        int64
 	TransferEndTime          int64
+	HideTransferredBefore    int64
 	PayoutOnly               bool
 	Status                   *uint8
 	OrderByReceivableUsdDesc bool
@@ -87,6 +88,10 @@ func GuildIncomeSettlementLogCMSList(f *GuildIncomeSettlementLogCMSListFilter) (
 	if f.TransferEndTime > 0 {
 		m = m.Where("COALESCE("+transferAlias+"."+string(entity.GuildIncomeSettlementLogTransferAt)+", "+settlementAlias+".updated_at) <= ?", time.Unix(f.TransferEndTime, 0))
 	}
+	if f.HideTransferredBefore > 0 {
+		m = m.Where("("+settlementAlias+"."+string(entity.GuildIncomeSettlementLogStatus)+" <> ? OR "+settlementAlias+".created_at >= ?)",
+			entity.GuildIncomeSettlementStatusTransferred, time.Unix(f.HideTransferredBefore, 0))
+	}
 	if f.Status != nil {
 		m = m.Where(settlementAlias+"."+string(entity.GuildIncomeSettlementLogStatus)+" = ?", *f.Status)
 	}
@@ -108,5 +113,28 @@ func GuildIncomeSettlementLogCMSList(f *GuildIncomeSettlementLogCMSListFilter) (
 	} else if f.IncludeTransfer {
 		hydrateGuildIncomeSettlementTransfers(ctx, list)
 	}
-	return total, mergeGuildIncomeSettlementLogsFromCache(list)
+	list = mergeGuildIncomeSettlementLogsFromCache(list)
+	if f.HideTransferredBefore > 0 {
+		list = filterHistoricalTransferredGuildSettlements(list, time.Unix(f.HideTransferredBefore, 0))
+	}
+	return total, list
+}
+
+// filterHistoricalTransferredGuildSettlements 在缓存覆盖数据库状态后再次兜底过滤，
+// 避免 syndb 尚未刷库时把已经转账成功的历史记录短暂显示出来。
+func filterHistoricalTransferredGuildSettlements(rows []*entity.GuildIncomeSettlementLog, cutoff time.Time) []*entity.GuildIncomeSettlementLog {
+	if len(rows) == 0 || cutoff.IsZero() {
+		return rows
+	}
+	filtered := make([]*entity.GuildIncomeSettlementLog, 0, len(rows))
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		if row.Status == entity.GuildIncomeSettlementStatusTransferred && row.CreatedAt.Before(cutoff) {
+			continue
+		}
+		filtered = append(filtered, row)
+	}
+	return filtered
 }

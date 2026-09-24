@@ -7,6 +7,13 @@
         </div>
       </template>
 
+      <el-alert
+          :closable="false"
+          :title="t('pages.guildTransferList.historyHint')"
+          class="history-hint"
+          type="info"
+      />
+
       <el-form :model="searchForm" class="search-form" inline label-width="88px">
         <el-form-item :label="t('pages.liveRecordList.platformAnchor')">
           <div class="anchor-filter anchor-filter--compact">
@@ -333,6 +340,7 @@ const buildFilterParams = () => ({
   endTime: searchForm.endDate ? toServerDayEndUnix(searchForm.endDate) : 0,
   status: searchForm.status >= 0 ? searchForm.status : undefined,
   directPayout: true,
+  hideHistoricalTransferred: true,
   orderByReceivableUsdDesc: true,
   includeTransferInfo: true,
 })
@@ -503,6 +511,10 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.history-hint {
+  margin-bottom: 16px;
 }
 
 .search-form {

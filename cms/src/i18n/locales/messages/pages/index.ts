@@ -13,6 +13,8 @@ import {banUserMessages} from './ban-user'
 import {bannerListMessages} from './banner-list'
 import {activityMessageListMessages} from './activity-message-list'
 import {guildListMessages} from './guild-list'
+import {guildImmediateSettlementMessages} from './guild-immediate-settlement'
+import {platformAnchorImmediateSettlementMessages} from './platform-anchor-immediate-settlement'
 import {guildRecycleBinMessages} from './guild-recycle-bin'
 import {guildAnchorDailyLiveListMessages} from './guild-anchor-daily-live-list'
 import {guildAnchorImportResultMessages} from './guild-anchor-import-result'
@@ -30,6 +32,7 @@ import {appPkgListMessages} from './app-pkg-list'
 import {randomNicknameCfgMessages} from './random-nickname-cfg'
 import {customerServiceCfgMessages} from './customer-service-cfg'
 import {walletExchangeCfgMessages} from './wallet-exchange-cfg'
+import {effectiveLiveCfgMessages} from './effective-live-cfg'
 import {paymentCountryCfgMessages} from './payment-country-cfg'
 import {agoraCfgMessages} from './agora-cfg'
 import {billingListMessages} from './billing-list'
@@ -105,6 +108,8 @@ const pageMessageBuilders = [
   ['bannerList', bannerListMessages],
   ['activityMessageList', activityMessageListMessages],
   ['guildList', guildListMessages],
+  ['guildImmediateSettlement', guildImmediateSettlementMessages],
+  ['platformAnchorImmediateSettlement', platformAnchorImmediateSettlementMessages],
   ['guildRecycleBin', guildRecycleBinMessages],
   ['guildAnchorDailyLiveList', guildAnchorDailyLiveListMessages],
   ['guildAnchorImportResult', guildAnchorImportResultMessages],
@@ -122,6 +127,7 @@ const pageMessageBuilders = [
   ['randomNicknameCfg', randomNicknameCfgMessages],
   ['customerServiceCfg', customerServiceCfgMessages],
   ['walletExchangeCfg', walletExchangeCfgMessages],
+  ['effectiveLiveCfg', effectiveLiveCfgMessages],
   ['paymentCountryCfg', paymentCountryCfgMessages],
   ['agoraCfg', agoraCfgMessages],
   ['billingList', billingListMessages],

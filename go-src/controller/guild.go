@@ -103,6 +103,11 @@ func (c *GuildController) BatchImportSalaryAnchors(ctx context.Context, req *gui
 	return guild.BatchImportSalaryAnchors(ctx, req)
 }
 
+// BatchImmediateSettleGuilds 批量立即结算所选工会。
+func (c *GuildController) BatchImmediateSettleGuilds(ctx context.Context, req *guilddto.BatchImmediateSettleGuildsReq) (*guilddto.BatchImmediateSettleGuildsRes, error) {
+	return guild.BatchImmediateSettleGuilds(ctx, req)
+}
+
 // JoinGuildAnchor CMS加入工会主播
 func (c *GuildController) JoinGuildAnchor(ctx context.Context, req *guilddto.SetAnchorGuildReq) (res *guilddto.SetAnchorGuildRes, err error) {
 	return guild.JoinGuildAnchor(ctx, req)

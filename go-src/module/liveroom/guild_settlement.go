@@ -3,23 +3,13 @@ package liveroom
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"xr-game-server/core/event"
 	"xr-game-server/core/math"
 	"xr-game-server/dao/guilddao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/entity/live"
-	"xr-game-server/gameevent"
 	"xr-game-server/module/liverevenuesharecfg"
 	"xr-game-server/module/wallet"
 )
-
-func initGuildSettlement() {
-	event.Sub(gameevent.WeekEvent, onWeekGuildSettlement)
-}
-
-func onWeekGuildSettlement(_ any) {
-	settleOnShelfGuilds()
-}
 
 // settleOnShelfGuilds 周一0点:结算全部上架工会未结算收益
 func settleOnShelfGuilds() {
@@ -43,16 +33,18 @@ func resolveGuildSettlementSharePercent(guild *entity.LiveGuild) float64 {
 	return liverevenuesharecfg.ResolveGuildSharePercent()
 }
 
-func settleOneGuild(guild *entity.LiveGuild) {
+func settleOneGuild(guild *entity.LiveGuild) bool {
+	if guild == nil || guild.ID == 0 {
+		return false
+	}
 	if guild.GuildType != entity.LiveGuildTypeCoinMerchant {
-		settleOneNormalGuildTiered(guild)
-		return
+		return settleOneNormalGuildTiered(guild)
 	}
 	guildId := guild.ID
 	dailyRows := liveroomdao.ListRecentUnsettledDailyGuildEffectiveLives(guildId)
 	unsettled := liveroomdao.GetGuildIncomeUnsettled(guildId)
 	if unsettled == nil {
-		return
+		return false
 	}
 	hasDaily := len(dailyRows) > 0
 	hasUnsettled := !unsettled.IsZero()
@@ -61,12 +53,12 @@ func settleOneGuild(guild *entity.LiveGuild) {
 		weeklySalary := liveroomdao.TakeGuildWeeklyAnchorSalary(guildId)
 		weeklyAnchorShareAmountUsd := liveroomdao.TakeGuildWeeklyAnchorShareAmountUsd(guildId)
 		if weeklySalary == 0 && weeklyAnchorShareAmountUsd == 0 {
-			return
+			return false
 		}
 		weeklySalaryUsd := wallet.CalcDiamondToUsd(weeklySalary)
 		receivableUsd := math.AddFloat64(weeklyAnchorShareAmountUsd, weeklySalaryUsd)
 		_ = entity.NewGuildIncomeSettlementLog(guildId, &entity.LiveRoomIncomeAmounts{}, weeklySalary, 0, 0, receivableUsd, guildSharePercent)
-		return
+		return true
 	}
 
 	snap := unsettled.SnapshotAndClear()
@@ -100,4 +92,5 @@ func settleOneGuild(guild *entity.LiveGuild) {
 		liveroomdao.MarkDailyGuildEffectiveLivesSettled(dailyRows)
 	}
 	_ = entity.NewGuildIncomeSettlementLog(guildId, &snap, weeklySalary, shareAmount, shareAmountUsd, receivableUsd, guildSharePercent)
+	return true
 }

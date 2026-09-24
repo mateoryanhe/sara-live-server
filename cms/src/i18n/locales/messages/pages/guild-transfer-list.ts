@@ -2,6 +2,7 @@ import {definePageMessages} from './_define'
 
 const zh = {
   weekHint: '固定查询上周结算流水（周一写入；按可收金额USD降序）。流程：审核中可修改金额 → 审核通过 → 批量转账提交HaiPay代付 → 回调成功后变「转账成功」。',
+  historyHint: '保留所有待处理记录；转账成功且创建时间早于本周一00:00的历史记录不再显示。',
   guildId: '工会ID',
   enterGuildId: '请输入工会ID',
   guildName: '工会名称',
@@ -72,6 +73,7 @@ const zh = {
 
 const en: Record<keyof typeof zh, string> = {
   weekHint: 'Last-week settlements (Mon write; USD desc). Flow: edit while in review → approve → batch HaiPay payout → callback marks transferred.',
+  historyHint: 'All pending records remain visible. Successful transfers created before Monday 00:00 of the current week are hidden.',
   guildId: 'Guild ID',
   enterGuildId: 'Enter guild ID',
   guildName: 'Guild Name',

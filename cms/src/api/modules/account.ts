@@ -10,6 +10,8 @@ import type {
     BatchSetAnchorReq,
     BatchSetAnchorRes,
     BatchSetSeniorAnchorReq,
+    BatchImmediateSettlePlatformAnchorsReq,
+    BatchImmediateSettlePlatformAnchorsRes,
     CancelReq,
     ExitGuildReq,
     ExitGuildRes,
@@ -78,6 +80,10 @@ const accountApi = {
 
     getAnchorList: (data: QueryAnchorListReq) => {
         return request.post<PageResponse<AnchorListItem>>('/account/getAnchorList', data)
+    },
+
+    batchImmediateSettlePlatformAnchors: (data: BatchImmediateSettlePlatformAnchorsReq) => {
+        return request.post<BatchImmediateSettlePlatformAnchorsRes>('/account/batchImmediateSettlePlatformAnchors', data, {timeout: 5 * 60 * 1000})
     },
 
     getPlatformAnchorListForVisibility: (data: QueryAnchorListReq) => {

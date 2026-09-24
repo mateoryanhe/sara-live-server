@@ -10,13 +10,13 @@ export const operationRoutes: RouteRecordRaw = {
             path: 'banner/banner-list',
             name: 'BannerManagement',
             component: () => import('@/views/operation/banner/banner-list.vue'),
-            meta: {title: '首页Banner'},
+            meta: {title: '首页Banner', parentTitle: '基础配置'},
         },
         {
             path: 'activity-message/activity-message-list',
             name: 'ActivityMessageManagement',
             component: () => import('@/views/operation/activity-message/activity-message-list.vue'),
-            meta: {title: '活动消息'},
+            meta: {title: '活动消息', parentTitle: '活动管理'},
         },
         {
             path: 'guild/guild-list',
@@ -38,13 +38,19 @@ export const operationRoutes: RouteRecordRaw = {
             path: 'guild/guild-transfer-list',
             name: 'GuildTransferManagement',
             component: () => import('@/views/operation/guild/guild-transfer-list.vue'),
-            meta: {title: '普通工会转账'},
+            meta: {title: '普通工会代付'},
         },
         {
             path: 'guild/coin-merchant-guild-transfer-list',
             name: 'CoinMerchantGuildTransferManagement',
             component: () => import('@/views/operation/guild/guild-transfer-list.vue'),
-            meta: {title: '币商工会转账'},
+            meta: {title: '币商代付', parentTitle: '币商管理'},
+        },
+        {
+            path: 'guild/coin-merchant-payout-detail-list',
+            name: 'CoinMerchantPayoutDetailList',
+            component: () => import('@/views/operation/salary/guild-payout-detail-list.vue'),
+            meta: {title: '币商代付详情', parentTitle: '币商管理'},
         },
         {
             path: 'guild/guild-transfer-detail/:id',
@@ -78,7 +84,7 @@ export const operationRoutes: RouteRecordRaw = {
             path: 'guild/guild-anchor-daily-live-list',
             name: 'GuildAnchorDailyLiveManagement',
             component: () => import('@/views/operation/guild/guild-anchor-daily-live-list.vue'),
-            meta: {title: '名下主播每日流水'},
+            meta: {title: '名下主播每日流水', parentTitle: '工会数据'},
         },
         {
             path: 'guild/guild-detail',
@@ -140,13 +146,13 @@ export const operationRoutes: RouteRecordRaw = {
             path: 'guild/guild-profile',
             name: 'GuildProfileManagement',
             component: () => import('@/views/operation/guild/guild-profile.vue'),
-            meta: {title: '工会数据查询'},
+            meta: {title: '工会数据查询', parentTitle: '工会数据'},
         },
         {
             path: 'recharge/recharge-cfg-list',
             name: 'RechargeCfgManagement',
             component: () => import('@/views/operation/recharge/recharge-cfg-list.vue'),
-            meta: {title: '充值配置'},
+            meta: {title: '充值配置', parentTitle: '用户管理'},
         },
         {
             path: 'recharge/coin-merchant-recharge-cfg-list',
@@ -158,7 +164,7 @@ export const operationRoutes: RouteRecordRaw = {
             path: 'vip/vip-cfg-list',
             name: 'VipCfgManagement',
             component: () => import('@/views/operation/vip/vip-cfg-list.vue'),
-            meta: {title: 'VIP配置'},
+            meta: {title: 'VIP配置', parentTitle: '用户管理'},
         },
         {
             path: 'app-pkg/app-pkg-list',
@@ -168,19 +174,23 @@ export const operationRoutes: RouteRecordRaw = {
             path: 'random-nickname/random-nickname-cfg',
             name: 'RandomNicknameManagement',
             component: () => import('@/views/operation/random-nickname/random-nickname-cfg.vue'),
-            meta: {title: '随机昵称库'},
+            meta: {title: '随机昵称库', parentTitle: '基础配置'},
         },
         {
             path: 'customer-service/customer-service-cfg',
             name: 'CustomerServiceCfgManagement',
             component: () => import('@/views/operation/customer-service/customer-service-cfg.vue'),
-            meta: {title: '客服联系配置'},
+            meta: {title: '客服联系配置', parentTitle: '主播与工会管理'},
         },
         {
             path: 'wallet/wallet-exchange-cfg',
             name: 'WalletExchangeCfgManagement',
             component: () => import('@/views/operation/wallet/wallet-exchange-cfg.vue'),
-            meta: {title: '金币兑换配置'},
+            meta: {title: '结算基础配置'},
+        },
+        {
+            path: 'salary/effective-live-cfg',
+            redirect: '/operation/wallet/wallet-exchange-cfg',
         },
         {
             path: 'recharge/payment-country-cfg',
@@ -254,7 +264,7 @@ export const operationRoutes: RouteRecordRaw = {
             path: 'salary/anchor-no-salary-share-cfg',
             name: 'AnchorNoSalaryShareCfgManagement',
             component: () => import('@/views/operation/salary/anchor-no-salary-share-cfg.vue'),
-            meta: {title: '无底薪主播提成配置'},
+            meta: {title: '无底薪社交流水分佣配置'},
         },
         {
             path: 'salary/anchor-salary-game-share-cfg-list',
@@ -280,7 +290,7 @@ export const operationRoutes: RouteRecordRaw = {
             path: 'salary/platform-anchor-payout-list',
             name: 'PlatformAnchorPayoutList',
             component: () => import('@/views/operation/salary/platform-anchor-payout-list.vue'),
-            meta: {title: '主播代付'},
+            meta: {title: '平台主播代付'},
         },
         {
             path: 'salary/guild-income-settlement-log-list',
@@ -293,6 +303,12 @@ export const operationRoutes: RouteRecordRaw = {
             name: 'GuildPayoutDetailList',
             component: () => import('@/views/operation/salary/guild-payout-detail-list.vue'),
             meta: {title: '工会代付详情'},
+        },
+        {
+            path: 'salary/platform-anchor-payout-detail-list',
+            name: 'PlatformAnchorPayoutDetailList',
+            component: () => import('@/views/operation/salary/platform-anchor-payout-detail-list.vue'),
+            meta: {title: '平台主播代付详情'},
         },
     ],
 }

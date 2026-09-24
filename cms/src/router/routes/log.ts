@@ -40,7 +40,7 @@ export const logRoutes: RouteRecordRaw = {
             path: 'live/short-video-watch-list',
             name: 'ShortVideoWatchManagement',
             component: () => import('@/views/shortvideo/short-video-watch-list.vue'),
-            meta: {title: '短视频观看记录', parentTitle: '社交日志'},
+            meta: {title: '短视频观看记录', parentTitle: '短视频'},
         },
         {
             path: 'call/video-call-log-list',
@@ -50,19 +50,19 @@ export const logRoutes: RouteRecordRaw = {
             path: 'user/coin-merchant-transfer-log-list',
             name: 'CoinMerchantTransferLogList',
             component: () => import('@/views/log/user/coin-merchant-transfer-log-list.vue'),
-            meta: {title: '币商转账日志', parentTitle: '用户日志'},
+            meta: {title: '币商转账日志', parentTitle: '币商管理'},
         },
         {
             path: 'game/game-bet-log-list',
             name: 'GameBetLogListManagement',
             component: () => import('@/views/log/game/game-bet-log-list.vue'),
-            meta: {title: '游戏消费记录', parentTitle: '游戏日志'},
+            meta: {title: '游戏消费记录', parentTitle: '游戏管理'},
         },
         {
             path: 'game/game-win-log-list',
             name: 'GameWinLogListManagement',
             component: () => import('@/views/log/game/game-win-log-list.vue'),
-            meta: {title: '游戏奖励记录', parentTitle: '游戏日志'},
+            meta: {title: '游戏奖励记录', parentTitle: '游戏管理'},
         },
     ],
 }

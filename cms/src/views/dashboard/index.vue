@@ -256,13 +256,16 @@ const TODAY_STAT_CARD_CONFIG: BasicStatCardConfig[] = [
   {key: 'todayRegisterUser', labelKey: 'statTodayRegisterUser', theme: 'tone-pink', format: 'count'},
 ]
 
-const TOTAL_STAT_CARD_CONFIG: BasicStatCardConfig[] = [
-  {key: 'totalGold', labelKey: 'statTotalGold', theme: 'tone-amber', format: 'amount'},
+const FINANCIAL_TOTAL_STAT_CARD_CONFIG: BasicStatCardConfig[] = [
   {key: 'totalRecharge', labelKey: 'statTotalRecharge', theme: 'tone-blue', format: 'amount'},
   {key: 'totalNormalUserRecharge', labelKey: 'statTotalNormalUserRecharge', theme: 'tone-teal', format: 'amount'},
   {key: 'totalCoinMerchantRecharge', labelKey: 'statTotalCoinMerchantRecharge', theme: 'tone-indigo', format: 'amount'},
   {key: 'totalVirtualRecharge', labelKey: 'statTotalVirtualRecharge', theme: 'tone-sky', format: 'amount'},
   {key: 'totalWithdraw', labelKey: 'statTotalWithdraw', theme: 'tone-green', format: 'amount'},
+]
+
+const BUSINESS_TOTAL_STAT_CARD_CONFIG: BasicStatCardConfig[] = [
+  {key: 'totalGold', labelKey: 'statTotalGold', theme: 'tone-amber', format: 'amount'},
   {key: 'totalGoldConsume', labelKey: 'statTotalGoldConsume', theme: 'tone-orange', format: 'amount'},
   {key: 'totalDiamondConsume', labelKey: 'statTotalDiamondConsume', theme: 'tone-violet', format: 'amount'},
   {key: 'totalRegisterUser', labelKey: 'statTotalRegisterUser', theme: 'tone-indigo', format: 'count'},
@@ -283,10 +286,16 @@ const basicStatSections = computed(() => [
     cards: toBasicStatCards(TODAY_STAT_CARD_CONFIG),
   },
   {
-    key: 'total',
-    title: t('pages.dashboard.sectionTotal'),
+    key: 'financialTotal',
+    title: t('pages.dashboard.sectionFinancialTotal'),
     gridClass: 'basic-stat-grid-total',
-    cards: toBasicStatCards(TOTAL_STAT_CARD_CONFIG),
+    cards: toBasicStatCards(FINANCIAL_TOTAL_STAT_CARD_CONFIG),
+  },
+  {
+    key: 'businessTotal',
+    title: t('pages.dashboard.sectionBusinessTotal'),
+    gridClass: 'basic-stat-grid-total',
+    cards: toBasicStatCards(BUSINESS_TOTAL_STAT_CARD_CONFIG),
   },
 ])
 

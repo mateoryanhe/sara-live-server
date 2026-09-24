@@ -20,6 +20,7 @@ import (
 	"xr-game-server/core/cfg"
 	"xr-game-server/dto/officialsitedeploydto"
 	"xr-game-server/module/domainsite"
+	"xr-game-server/module/staticdeploy"
 )
 
 const (
@@ -259,7 +260,7 @@ func completeSiteFileUpload(ctx context.Context, uploadId string, target deployT
 		UrlPrefix: target.prefix,
 	}
 	if meta.FileType == "zip" {
-		fileCount, dirCount, extractErr := extractZip(assembledPath, deployDir)
+		fileCount, dirCount, extractErr := staticdeploy.DeployZip(assembledPath, deployDir)
 		if extractErr != nil {
 			return nil, extractErr
 		}

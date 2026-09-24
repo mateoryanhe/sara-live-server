@@ -15,6 +15,7 @@ import (
 	"xr-game-server/errercode"
 	"xr-game-server/gameevent"
 	"xr-game-server/module/agora"
+	"xr-game-server/module/effectivelivecfg"
 	"xr-game-server/module/liverecord"
 )
 
@@ -77,8 +78,8 @@ func stopLive(anchorId uint64) *entity.LiveRecord {
 	now := time.Now()
 	liveRecord.SetEndTime(&now)
 	liveroomdao.PublishLiveRecord(liveRecord)
-	// 单场直播时长大于30分钟才计入日表累计时长
-	if liveRecord.TotalLiveDuration > entity.MinAccumulateLiveSessionSec {
+	// 单场直播时长严格大于配置门槛时,整场时长才计入日表累计有效时长.
+	if liveRecord.TotalLiveDuration > effectivelivecfg.MinSessionSeconds() {
 		liveroomdao.AddDailyLiveDuration(anchorId, now, liveRecord.TotalLiveDuration)
 	}
 	return liveRecord

@@ -62,6 +62,8 @@ const READONLY_PAGES = new Set([
     'AnchorIncomeSettlementLogList',
     'GuildIncomeSettlementLogList',
     'GuildPayoutDetailList',
+    'PlatformAnchorPayoutDetailList',
+    'CoinMerchantPayoutDetailList',
     'LiveRecordList',
     'LiveDailyEffectiveLiveList',
     'VideoCallLogList',
@@ -76,6 +78,8 @@ const READONLY_PAGES = new Set([
 const READONLY_NO_EXPORT_PAGES = new Set([
     'ServerLogExplorer',
     'GuildPayoutDetailList',
+    'PlatformAnchorPayoutDetailList',
+    'CoinMerchantPayoutDetailList',
 ])
 
 const CONFIG_PAGES = new Set([
@@ -109,6 +113,12 @@ const CONFIG_PAGES = new Set([
 
 /** 各页面自定义按钮（未列出的页面按类型使用默认集） */
 export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
+    WalletExchangeCfgManagement: [
+        BTN.view,
+        {key: 'save', label: '保存金币兑换配置'},
+        {key: 'viewEffectiveLive', label: '查询有效直播时长配置'},
+        {key: 'saveEffectiveLive', label: '保存有效直播时长配置'},
+    ],
 	AnchorIncomeSettlementLogList: [
 		BTN.view,
 		BTN.search,
@@ -122,7 +132,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
 		{key: 'transferInfo', label: '编辑收款信息'},
 	],
     AnchorSalarySocialShareCfgManagement: [BTN.view, BTN.create, BTN.edit, BTN.delete],
-    AnchorNoSalaryShareCfgManagement: [BTN.view, BTN.edit],
+    AnchorNoSalaryShareCfgManagement: [BTN.view, BTN.create, BTN.edit, BTN.delete],
     AnchorSalaryGameShareCfgManagement: [BTN.view, BTN.create, BTN.edit, BTN.delete],
     AnchorNoSalaryGameShareCfgManagement: [BTN.view, BTN.create, BTN.edit, BTN.delete],
     StaticCacheCfgManagement: [...DEFAULT_CRUD_BUTTONS],
@@ -191,6 +201,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'setAnchorType', label: '设置主播类型'},
         {key: 'transferInfo', label: '编辑转账信息'},
         {key: 'batchImportSalaryAnchor', label: '批量导入有底薪主播'},
+        {key: 'batchImmediateSettlement', label: '批量立即结算'},
     ],
     LiveRoomRecycleBinManagement: [BTN.view, BTN.search, {key: 'onShelf', label: '上架'}],
     BotAnchorManagement: [
@@ -256,6 +267,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'batchSetAnchor', label: '导入普通主播'},
         {key: 'batchSetSeniorAnchor', label: '导入高级主播'},
         {key: 'batchImportSalaryAnchor', label: '批量导入有底薪主播'},
+        {key: 'batchImmediateSettlement', label: '批量立即结算'},
         {key: 'transferInfo', label: '转账信息'},
     ],
     GuildTransferManagement: [
