@@ -85,6 +85,14 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'LiveRoomRecycleBinManagement:search': '/account/getOffShelfLiveRoomList',
     'LiveRoomRecycleBinManagement:onShelf': '/account/setLiveRoomStatus',
 
+    OneToOneRoomManagement: '/oneToOneRoom/list',
+    'OneToOneRoomManagement:view': '/oneToOneRoom/list',
+    'OneToOneRoomManagement:search': '/oneToOneRoom/list',
+    'OneToOneRoomManagement:create': '/oneToOneRoom/create',
+    'OneToOneRoomManagement:edit': '/oneToOneRoom/update',
+    'OneToOneRoomManagement:onShelf': '/oneToOneRoom/setStatus',
+    'OneToOneRoomManagement:offShelf': '/oneToOneRoom/setStatus',
+
     BotAnchorManagement: '/botAnchor/getBotAnchorList',
     'BotAnchorManagement:view': '/botAnchor/getBotAnchorList',
     'BotAnchorManagement:search': '/botAnchor/getBotAnchorList',

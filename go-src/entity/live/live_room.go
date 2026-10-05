@@ -28,16 +28,13 @@ const (
 )
 
 const (
-	LiveRoomCategoryHot      uint8 = 1 // hot
-	LiveRoomCategoryGame     uint8 = 2 // game
-	LiveRoomCategoryOneToOne uint8 = 4 // 1v1房间
+	LiveRoomCategoryHot  uint8 = 1 // hot
+	LiveRoomCategoryGame uint8 = 2 // game
 )
 
 // IsValidLiveRoomCategory 判断直播间分类是否已定义。
 func IsValidLiveRoomCategory(category uint8) bool {
-	return category == LiveRoomCategoryHot ||
-		category == LiveRoomCategoryGame ||
-		category == LiveRoomCategoryOneToOne
+	return category == LiveRoomCategoryHot || category == LiveRoomCategoryGame
 }
 
 // 直播间上下架状态

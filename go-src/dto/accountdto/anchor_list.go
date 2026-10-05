@@ -30,7 +30,7 @@ type AnchorListItem struct {
 	RoomTitle                   string     `json:"roomTitle"`
 	RoomCover                   string     `json:"roomCover" dc:"直播间封面URL"`
 	RoomId                      uint64     `json:"roomId,string" dc:"直播间ID"`
-	Category                    uint8      `json:"category" dc:"分类(1=hot,2=game,4=1v1房间)"`
+	Category                    uint8      `json:"category" dc:"分类(1=hot,2=game)"`
 	PrivateInviteType           uint8      `json:"privateInviteType" dc:"视频通话邀请类型(1=接受所有人,3=拒绝所有人)"`
 	Billing                     float64    `json:"billing" dc:"视频通话计费价格(钻石/分钟)"`
 	LiveStatus                  uint8      `json:"liveStatus" dc:"直播状态(0未开播,1直播中)"`

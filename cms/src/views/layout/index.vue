@@ -71,7 +71,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('LiveRoomRecycleBinManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('PlatformAnchorList') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('CustomerServiceCfgManagement')"
+            v-if="hasMenuPermission('LiveRoomRecycleBinManagement') || hasMenuPermission('OneToOneRoomManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('PlatformAnchorList') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('CustomerServiceCfgManagement')"
             index="/anchor-guild">
           <template #title>
             <el-icon>
@@ -90,6 +90,12 @@
               <VideoPlay/>
             </el-icon>
             <span>{{ t('menu.PlatformAnchorList') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('OneToOneRoomManagement')" index="/user/anchor/one-to-one-room-list">
+            <el-icon>
+              <VideoCamera/>
+            </el-icon>
+            <span>{{ t('menu.OneToOneRoomManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('GuildCMSUserManagement')" index="/operation/guild/guild-cms-user-list">
             <el-icon>

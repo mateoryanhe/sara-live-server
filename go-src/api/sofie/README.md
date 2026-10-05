@@ -32,6 +32,7 @@
 | `profile` | 官网验证码销户 | 免登录 | `POST /userInfo/cancelAccountByCode` | `POST /sofie/profile/closeAccountByOtp` |
 | `profile` | 上传头像 | 需要登录 | `POST /userInfo/uploadAvatar` | `POST /sofie/profile/changePhoto` |
 | `studio` | 创建/更新直播间 | 需要登录 | `POST /liveRoom/create` | `POST /sofie/studio/openBooth` |
+| `studio` | 开通1v1房间 | 需要登录 | `POST /liveRoom/createOneToOne` | `POST /sofie/studio/openDirectBooth` |
 | `studio` | 开播 | 需要登录 | `POST /liveRoom/startLive` | `POST /sofie/studio/beginBroadcast` |
 | `studio` | 下播 | 需要登录 | `POST /liveRoom/stopLive` | `POST /sofie/studio/endBroadcast` |
 | `studio` | 修改封面 | 需要登录 | `POST /liveRoom/updateCover` | `POST /sofie/studio/replaceCover` |
@@ -152,3 +153,4 @@
 
 - `/sysInfo/cfg` 旧接口为 GET，Sofie 对应接口改为 POST，请求体仍按原字段。
 - 创建房间、上传头像、发布短视频仍为 multipart，路径换成 Sofie 新地址即可。
+- Apifox/OpenAPI 仅 `config/local` 开启，独立地址见 `server.sofieOpenapiPath` / `server.sofieSwaggerPath`，不与旧 App 文档混用。

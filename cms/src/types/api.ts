@@ -291,6 +291,19 @@ export interface OffShelfLiveRoomItem {
     createdAt?: string | null
 }
 
+export interface OneToOneRoomItem {
+    userId: string
+    nickname?: string
+    avatar?: string
+    phone?: string
+    guildId?: string
+    roomTitle?: string
+    liveRoomStatus?: number
+    status?: number
+    billing?: number
+    updatedAt?: string | null
+}
+
 export interface BatchImmediateSettlePlatformAnchorsReq {
     anchorIds: Array<string | number>
 }

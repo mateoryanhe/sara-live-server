@@ -287,5 +287,15 @@ App/CMS 建单 API  ──►  recharge 业务（写订单、白名单）
 ## Sofie App 新前缀（2026-10-05）
 
 - 旧 App URL 继续可用；新路径 `POST /sofie/{模块}/{动作}`，模块名和动作名全部另起，请求体字段不变
-- 代码：`go-src/api/sofie/`（`routes_gen.go` 由 `gen_sofie.py` 生成），`main` 在 `controller.Init()` 之后调 `sofie.Init()`
+- 代码：`go-src/api/sofie/`（`routes_gen.go` 由 `gen_sofie.py` 生成），`main` 在 `controller.Init()` 之前调 `sofie.Init()`
+- **新增/改名 App 接口必须改 `gen_sofie.py` 再跑生成**，同步 `routes_gen.go` / `openapi_map_gen.go` / `README.md`；约定见 `.cursor/rules/sofie-app-api.mdc`
 - 对接表：`go-src/api/sofie/README.md`
+- Apifox/OpenAPI 只在 `config/local` 导出：旧 App 用 `openapiPath`/`swaggerPath`，Sofie 用独立的 `sofieOpenapiPath`/`sofieSwaggerPath`，测试/审核/正式配置不要加这些项
+
+## 1v1 房间独立表（2026-10-05）
+
+- 不再使用 `live_room_cfgs.category=4`；1v1 成员在 `one_to_one_rooms`（主键=主播ID，含上下架）
+- 大厅/Hot 列表可同时展示该主播直播间；App 1v1 列表只看 `one_to_one_rooms` 上架
+- 开通：App `POST /liveRoom/createOneToOne`、CMS `/oneToOneRoom/create`；CMS 页 **主播与工会管理 → 1v1房间**
+- 1v1 通话分钟价在 `one_to_one_rooms.billing`，不读 `live_room_cfgs.billing`
+

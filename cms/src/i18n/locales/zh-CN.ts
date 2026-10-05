@@ -11,6 +11,7 @@ const menu = {
   AnchorListManagement: '主播列表',
   AnchorDetail: '主播详情',
   LiveRoomRecycleBinManagement: '主播间回收站',
+  OneToOneRoomManagement: '1v1房间',
   BotAnchorManagement: '机器人主播',
   CoinMerchantManagement: '币商列表',
   RechargeOrderList: '充值订单',

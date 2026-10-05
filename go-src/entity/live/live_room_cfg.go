@@ -39,7 +39,7 @@ const (
 type LiveRoomCfg struct {
 	migrate.OneModel
 	PrivateInviteType        uint8      `gorm:"default:1;comment:视频通话邀请类型(1=接受所有人,3=拒绝所有人)" json:"privateInviteType"`
-	Category                 uint8      `gorm:"default:1;comment:分类(1=hot,2=game,4=1v1房间)" json:"category"`
+	Category                 uint8      `gorm:"default:1;comment:分类(1=hot,2=game)" json:"category"`
 	TagId                    uint64     `gorm:"default:0;comment:直播间标签ID" json:"tagId"`
 	Ticket                   float64    `gorm:"type:decimal(10,4);default:0;comment:直播间视频通话门票价格(钻石)" json:"ticket"`
 	Billing                  float64    `gorm:"type:decimal(10,4);default:0;comment:视频通话价格(每分钟钻石)" json:"billing"`

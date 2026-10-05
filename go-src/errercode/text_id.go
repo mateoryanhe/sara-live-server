@@ -114,5 +114,7 @@ func init() {
 		FirebaseAlreadyInUse:            "Akun Firebase sudah digunakan",
 		FirebaseAlreadyBound:            "Akun sudah terikat dengan akun Firebase",
 		LiveRoomNotOneToOne:             "Ruang saat ini bukan ruang 1v1",
+		OneToOneRoomExist:               "Ruang 1v1 sudah ada",
+		OneToOneRoomNonExist:            "Ruang 1v1 tidak ada",
 	}
 }

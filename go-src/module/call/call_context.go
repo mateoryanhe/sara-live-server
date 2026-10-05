@@ -6,7 +6,6 @@ import (
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	callentity "xr-game-server/entity/call"
-	liveentity "xr-game-server/entity/live"
 	userentity "xr-game-server/entity/user"
 	"xr-game-server/errercode"
 	"xr-game-server/module/liveroom"
@@ -52,25 +51,31 @@ func resolveOneToOneRoomCallContext(callerId, targetId uint64) (*oneToOneRoomCal
 	if !ok {
 		return nil, errercode.CreateCode(errercode.NoPermission)
 	}
-	room := liveroomdao.GetRoomById(anchorId)
+	if !liveroom.IsOneToOneOnShelf(anchorId) {
+		return nil, errercode.CreateCode(errercode.LiveRoomNotOneToOne)
+	}
+	room := liveroomdao.ResolveRoom(anchorId)
 	if room == nil {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
-	cfg := liveroomdao.GetLiveRoomCfg(room.ID)
+	cfg := liveroomdao.GetLiveRoomCfgForCMS(room.ID)
+	if cfg == nil {
+		cfg = liveroomdao.GetLiveRoomCfg(room.ID)
+	}
 	if cfg == nil {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
 	}
-
-	if cfg.Category != liveentity.LiveRoomCategoryOneToOne {
-		return nil, errercode.CreateCode(errercode.LiveRoomNotOneToOne)
-	}
 	if !liveroom.CanInitiateLiveRoomCall(room, cfg, audienceId) {
 		return nil, errercode.CreateCode(errercode.NoPermission)
+	}
+	oneToOne := liveroomdao.GetOneToOneRoom(anchorId)
+	if oneToOne == nil || !oneToOne.IsOnShelf() {
+		return nil, errercode.CreateCode(errercode.LiveRoomNotOneToOne)
 	}
 
 	return &oneToOneRoomCallContext{
 		audienceId:     audienceId,
 		orderParams:    strconv.FormatUint(room.LiveRecordId, 10),
-		pricePerMinute: cfg.Billing,
+		pricePerMinute: oneToOne.Billing,
 	}, nil
 }

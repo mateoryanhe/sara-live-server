@@ -5,6 +5,7 @@ import {giftListMessages} from './gift-list'
 import {vipCfgListMessages} from './vip-cfg-list'
 import {anchorListMessages} from './anchor-list'
 import {liveRoomRecycleBinMessages} from './live-room-recycle-bin'
+import {oneToOneRoomListMessages} from './one-to-one-room-list'
 import {botAnchorListMessages} from './bot-anchor-list'
 import {rechargeOrderListMessages} from './recharge-order-list'
 import {currencyLogListMessages} from './currency-log-list'
@@ -101,6 +102,7 @@ const pageMessageBuilders = [
   ['vipCfgList', vipCfgListMessages],
   ['anchorList', anchorListMessages],
   ['liveRoomRecycleBin', liveRoomRecycleBinMessages],
+  ['oneToOneRoomList', oneToOneRoomListMessages],
   ['botAnchorList', botAnchorListMessages],
   ['rechargeOrderList', rechargeOrderListMessages],
   ['currencyLogList', currencyLogListMessages],

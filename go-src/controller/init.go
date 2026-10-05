@@ -31,6 +31,7 @@ func Init() {
 	initUserInfoPublicController()                   // 用户公开接口(官网销户等)
 	initGuildController()                            // 直播工会管理(CMS)
 	initLiveRoomAppController()                      // 直播间(App)
+	initOneToOneRoomCMSController()                  // 1v1房间(CMS)
 	initLiveRoomTagController()                      // 直播间标签(CMS)
 	initLiveRoomTagAppController()                   // 直播间标签(App)
 	initAgoraAppController()                         // 声网(App)

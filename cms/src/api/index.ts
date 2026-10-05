@@ -23,6 +23,7 @@ import {videoCallLogApi} from './modules/videoCallLog'
 import {agoraApi} from './modules/agora'
 import {liveCfgApi} from './modules/liveCfg'
 import {liveRoomTagApi} from './modules/liveRoomTag'
+import {oneToOneRoomApi} from './modules/oneToOneRoom'
 import {textModerationApi} from './modules/text-moderation'
 import {privacyPolicyApi} from './modules/privacy-policy'
 import {customerServiceApi} from './modules/customer-service'
@@ -68,6 +69,7 @@ export {
     agoraApi,
     liveCfgApi,
     liveRoomTagApi,
+    oneToOneRoomApi,
     textModerationApi,
     privacyPolicyApi,
     customerServiceApi,
@@ -115,6 +117,7 @@ export default {
     agoraApi,
     liveCfgApi,
     liveRoomTagApi,
+    oneToOneRoomApi,
     textModerationApi,
     privacyPolicyApi,
     customerServiceApi,

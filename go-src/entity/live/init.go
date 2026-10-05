@@ -4,6 +4,7 @@ package entity
 func Init() {
 	initLiveRoom()
 	initLiveRoomCfg()
+	initOneToOneRoom()
 	initLiveRoomIncome()
 	initLiveRoomTag()
 	initAnchorSalaryCfg()

@@ -12,7 +12,7 @@ type CreateLiveRoomReq struct {
 	Title             string            `json:"title"   dc:"直播间标题"`
 	Cover             *ghttp.UploadFile `json:"cover"  type:"file" dc:"封面图片文件"`
 	Notice            string            `json:"notice" dc:"公告"`
-	Category          uint8             `json:"category"  dc:"分类(1=hot,2=game,4=1v1房间,默认1)"`
+	Category          uint8             `json:"category"  dc:"分类(1=hot,2=game,默认1)"`
 	TagId             uint64            `json:"tagId,string"  dc:"直播间标签ID"`
 	GameCodes         []string          `json:"gameCodes" p:"gameCodes" dc:"推荐游戏编码列表(仅游戏直播间category=2时有效)"`
 	Ticket            float64           `json:"ticket" v:"min:0#视频通话门票价格不能小于0" dc:"直播间来源视频通话门票价格(钻石)"`
@@ -23,6 +23,16 @@ type CreateLiveRoomReq struct {
 type CreateLiveRoomRes struct {
 	RoomId  string `json:"roomId"  dc:"直播间ID"`
 	GuildId string `json:"guildId" dc:"所属工会ID"`
+}
+
+// CreateOneToOneRoomReq App 将当前主播加入1v1房间池(与直播分类互不影响)
+type CreateOneToOneRoomReq struct {
+	g.Meta  `path:"/createOneToOne" method:"post" summary:"开通1v1房间" tags:"直播间"`
+	Billing float64 `json:"billing" v:"min:0#通话单价不能小于0" dc:"1v1通话每分钟钻石"`
+}
+
+type CreateOneToOneRoomRes struct {
+	RoomId string `json:"roomId" dc:"房间ID(同主播用户ID)"`
 }
 
 // StartLiveReq 开播(主播自身)
@@ -378,7 +388,7 @@ type GetLiveRoomRes struct {
 	Cover                       string  `json:"cover"    dc:"封面图URL"`
 	Notice                      string  `json:"notice"   dc:"公告"`
 	Status                      uint8   `json:"status"   dc:"状态(0未开播,1直播中)"`
-	Category                    uint8   `json:"category" dc:"分类(1=hot,2=game,4=1v1房间)"`
+	Category                    uint8   `json:"category" dc:"分类(1=hot,2=game)"`
 	TagId                       string  `json:"tagId" dc:"直播间标签ID"`
 	TagName                     string  `json:"tagName" dc:"直播间标签名称"`
 	Ticket                      float64 `json:"ticket" dc:"直播间来源视频通话门票价格(钻石;全局关闭门票时仍返回配置值)"`

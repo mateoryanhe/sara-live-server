@@ -175,6 +175,7 @@ func Init() {
 	})
 	httpserver.RegAppRouteGroup("/sofie/studio", []httpserver.AppRoute{
 		{Path: "/openBooth", Handler: controller.HandleCreateLiveRoom},
+		{Path: "/openDirectBooth", Handler: jsonHandler((&controller.LiveRoomAppController{}).CreateOneToOneRoom)},
 		{Path: "/beginBroadcast", Handler: jsonHandler((&controller.LiveRoomAppController{}).StartLive)},
 		{Path: "/endBroadcast", Handler: jsonHandler((&controller.LiveRoomAppController{}).StopLive)},
 		{Path: "/replaceCover", Handler: jsonHandler((&controller.LiveRoomAppController{}).UpdateCover)},
@@ -217,5 +218,6 @@ func Init() {
 	httpserver.RegAppRouteGroup("/sofie/wealth", []httpserver.AppRoute{
 		{Path: "/browseBoard", Handler: jsonHandler((&controller.RichRankAppController{}).AppRichRankList)},
 	})
+	setupSofieOpenApi()
 }
 

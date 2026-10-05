@@ -207,6 +207,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'batchImmediateSettlement', label: '批量立即结算'},
     ],
     LiveRoomRecycleBinManagement: [BTN.view, BTN.search, {key: 'onShelf', label: '上架'}],
+    OneToOneRoomManagement: [BTN.view, BTN.search, BTN.create, BTN.edit, {key: 'onShelf', label: '上架'}, {key: 'offShelf', label: '下架'}],
     BotAnchorManagement: [
         BTN.view,
         BTN.search,

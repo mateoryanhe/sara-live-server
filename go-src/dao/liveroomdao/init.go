@@ -2,6 +2,7 @@ package liveroomdao
 
 func Init() {
 	initLiveRoomDao()
+	initOneToOneRoomDao()
 	initLiveRoomIncomeDao()
 	initAnchorIncomeSettlementLogDao()
 	initGuildIncomeSettlementLogDao()

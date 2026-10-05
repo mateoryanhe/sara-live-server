@@ -35,6 +35,12 @@ export const userRoutes: RouteRecordRaw = {
             meta: {title: '主播间回收站'},
         },
         {
+            path: 'anchor/one-to-one-room-list',
+            name: 'OneToOneRoomManagement',
+            component: () => import('@/views/user/anchor/one-to-one-room-list.vue'),
+            meta: {title: '1v1房间'},
+        },
+        {
             path: 'anchor/live-record-detail',
             name: 'AnchorLiveRecordDetail',
             component: () => import('@/views/user/anchor/anchor-live-record-detail.vue'),

@@ -1,0 +1,22 @@
+---
+description: 新增/改名 App 接口必须同步 Sofie api 目录映射，勿只改旧 controller
+alwaysApply: true
+---
+
+# Sofie App 接口同步
+
+旧 App `POST /{module}/{action}` **继续保留**。Sofie 客户端走独立路径 `POST /sofie/{模块}/{动作}`，模块名和动作名全部另起，请求体字段尽量不变。
+
+## 新增或改名 App 接口时（必做）
+
+不要只在 `go-src/controller/` 注册旧路径。必须同步 `go-src/api/sofie/`：
+
+1. 在 `go-src/api/sofie/gen_sofie.py` 的映射表增加/修改：旧 `module/action` → 新 Sofie `模块/动作`
+2. 在 `go-src/api/sofie` 下执行 `python gen_sofie.py`，重新生成 `routes_gen.go`、`openapi_map_gen.go`、`README.md`
+3. 对接表以 `go-src/api/sofie/README.md` 为准；OpenAPI remap 依赖生成文件，勿手改 `*_gen.go`
+
+CMS 接口不进 Sofie。只给旧 App、不给 Sofie 的接口，在 `gen_sofie.py` 里明确排除并写进 README。
+
+## 文档导出
+
+Apifox/OpenAPI 只在 `config/local`：旧 App 用 `openapiPath`/`swaggerPath`，Sofie 用 `sofieOpenapiPath`/`sofieSwaggerPath`。测试/审核/正式配置不要加这些项。

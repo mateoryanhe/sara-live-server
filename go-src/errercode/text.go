@@ -116,6 +116,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		FirebaseAlreadyInUse:            "Firebase account is already in use",
 		FirebaseAlreadyBound:            "Account already has a Firebase account bound",
 		LiveRoomNotOneToOne:             "Current room is not a 1v1 room",
+		OneToOneRoomExist:               "1v1 room already exists",
+		OneToOneRoomNonExist:            "1v1 room does not exist",
 	},
 	lang.LangZHCN: {
 		Success:                         "成功",
@@ -228,6 +230,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		FirebaseAlreadyInUse:            "Firebase账号已被使用",
 		FirebaseAlreadyBound:            "账号已绑定Firebase账号",
 		LiveRoomNotOneToOne:             "当前房间不是1v1房间",
+		OneToOneRoomExist:               "已开通1v1房间",
+		OneToOneRoomNonExist:            "1v1房间不存在",
 	},
 	lang.LangZHTW: {
 		Success:                         "成功",
@@ -340,6 +344,8 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		FirebaseAlreadyInUse:            "Firebase帳號已被使用",
 		FirebaseAlreadyBound:            "帳號已綁定Firebase帳號",
 		LiveRoomNotOneToOne:             "當前房間不是1v1房間",
+		OneToOneRoomExist:               "已開通1v1房間",
+		OneToOneRoomNonExist:            "1v1房間不存在",
 	},
 }
 
