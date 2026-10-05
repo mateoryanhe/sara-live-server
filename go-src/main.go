@@ -1,6 +1,7 @@
 package main
 
 import (
+	"xr-game-server/api/sofie"
 	"xr-game-server/controller"
 	"xr-game-server/core"
 	"xr-game-server/core/shutdown"
@@ -28,6 +29,7 @@ func main() {
 	module.Init()
 	//httpserver服务器模块启动
 	controller.Init()
+	sofie.Init()
 	//阻塞 main,等待进程退出(GF 信号处理与热重启).
 	shutdown.ListenShutdown()
 }

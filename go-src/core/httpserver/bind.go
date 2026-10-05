@@ -36,6 +36,32 @@ func RegAPIHandler(prefix, pattern string, handler ghttp.HandlerFunc) {
 	})
 }
 
+// AppRoute 一条 App POST 路由
+type AppRoute struct {
+	Path    string
+	Handler ghttp.HandlerFunc
+}
+
+// RegAppRouteGroup 同一前缀批量注册 App POST(需鉴权)
+func RegAppRouteGroup(prefix string, routes []AppRoute) {
+	httpServer.Group(prefix, func(group *ghttp.RouterGroup) {
+		group.Middleware(middlewareLogReq, MiddlewareH5Crypto, MiddlewareAppAuth, apiResponseMiddleware)
+		for _, route := range routes {
+			group.POST(route.Path, route.Handler)
+		}
+	})
+}
+
+// RegNonAuthAppRouteGroup 同一前缀批量注册 App POST(无需鉴权)
+func RegNonAuthAppRouteGroup(prefix string, routes []AppRoute) {
+	httpServer.Group(prefix, func(group *ghttp.RouterGroup) {
+		group.Middleware(middlewareLogReq, MiddlewareH5Crypto, apiResponseMiddleware)
+		for _, route := range routes {
+			group.POST(route.Path, route.Handler)
+		}
+	})
+}
+
 // RegCMS 绑定CMS控制器 需要鉴权
 func RegCMS(prefix string, handlerOrObject ...interface{}) {
 	httpServer.Group(prefix, func(group *ghttp.RouterGroup) {

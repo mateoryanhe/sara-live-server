@@ -283,3 +283,9 @@ App/CMS 建单 API  ──►  recharge 业务（写订单、白名单）
 - 配置落在 `account_cfgs`：开关 / 最大注册数(默认3) / 每天最多注销次(默认1)
 - 与「账号配置」共用 `/accountCfg/getAccountCfg|saveAccountCfg`，两页保存时都会回传对方字段，避免互相覆盖
 - 无配置行时内存默认：风控**开启** + 3 + 1（与原先硬编码一致）
+
+## Sofie App 新前缀（2026-10-05）
+
+- 旧 App URL 继续可用；新路径 `POST /sofie/{模块}/{动作}`，模块名和动作名全部另起，请求体字段不变
+- 代码：`go-src/api/sofie/`（`routes_gen.go` 由 `gen_sofie.py` 生成），`main` 在 `controller.Init()` 之后调 `sofie.Init()`
+- 对接表：`go-src/api/sofie/README.md`

@@ -18,6 +18,11 @@ func initShortVideoAppController() {
 	httpserver.RegAPI(ShortVideoAppUrl, &ShortVideoAppController{})
 }
 
+// HandleAppPublishShortVideo Sofie 等新前缀复用同一套短视频发布解析。
+func HandleAppPublishShortVideo(r *ghttp.Request) {
+	handleAppPublishShortVideo(r)
+}
+
 func handleAppPublishShortVideo(r *ghttp.Request) {
 	res, err := shortvideo.PublishShortVideoAppFromRequest(r.Context(), r)
 	if err != nil {

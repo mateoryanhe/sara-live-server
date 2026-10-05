@@ -2,6 +2,8 @@ package controller
 
 import (
 	"context"
+
+	"github.com/gogf/gf/v2/net/ghttp"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/userinfodto"
 	"xr-game-server/module/auth"
@@ -19,6 +21,11 @@ type UserInfoController struct {
 func initUserInfoController() {
 	httpserver.RegAPIHandler(UserInfoUrl, "/uploadAvatar", handleUploadAvatar)
 	httpserver.RegAPI(UserInfoUrl, &UserInfoController{})
+}
+
+// HandleUploadAvatar Sofie 等新前缀复用同一套头像上传解析。
+func HandleUploadAvatar(r *ghttp.Request) {
+	handleUploadAvatar(r)
 }
 
 func (c *UserInfoController) Get(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *userinfodto.GetUserInfoRes, err error) {

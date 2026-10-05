@@ -21,6 +21,11 @@ func initLiveRoomAppController() {
 	httpserver.RegAPI(LiveRoomAppUrl, &LiveRoomAppController{})
 }
 
+// HandleCreateLiveRoom Sofie 等新前缀复用同一套创建房间 multipart 解析。
+func HandleCreateLiveRoom(r *ghttp.Request) {
+	handleCreateLiveRoom(r)
+}
+
 // handleCreateLiveRoom 使用原始 Handler 流式读取 multipart，避免 ParseMultipartForm 缓存整个封面文件。
 func handleCreateLiveRoom(r *ghttp.Request) {
 	req, coverName, err := parseCreateRoomMultipart(r.Context(), r)
