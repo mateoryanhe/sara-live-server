@@ -113,5 +113,6 @@ func init() {
 		DeviceAccountRegisterLimit:      "Jumlah akun di perangkat ini telah mencapai batas",
 		FirebaseAlreadyInUse:            "Akun Firebase sudah digunakan",
 		FirebaseAlreadyBound:            "Akun sudah terikat dengan akun Firebase",
+		LiveRoomNotOneToOne:             "Ruang saat ini bukan ruang 1v1",
 	}
 }

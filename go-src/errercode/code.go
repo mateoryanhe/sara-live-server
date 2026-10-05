@@ -209,6 +209,8 @@ const (
 	FirebaseAlreadyInUse XRCode = 164
 	// FirebaseAlreadyBound 当前账号已绑定Firebase账号
 	FirebaseAlreadyBound XRCode = 165
+	// LiveRoomNotOneToOne 当前房间不是1v1房间
+	LiveRoomNotOneToOne XRCode = 166
 )
 
 type XError struct {

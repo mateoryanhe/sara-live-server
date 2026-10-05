@@ -62,7 +62,7 @@ func resolveOneToOneRoomCallContext(callerId, targetId uint64) (*oneToOneRoomCal
 	}
 
 	if cfg.Category != liveentity.LiveRoomCategoryOneToOne {
-		return nil, errercode.CreateCode(errercode.NoPermission)
+		return nil, errercode.CreateCode(errercode.LiveRoomNotOneToOne)
 	}
 	if !liveroom.CanInitiateLiveRoomCall(room, cfg, audienceId) {
 		return nil, errercode.CreateCode(errercode.NoPermission)
