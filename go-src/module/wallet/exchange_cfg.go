@@ -1,6 +1,8 @@
 package wallet
 
 import (
+	stdmath "math"
+
 	"xr-game-server/dao/cfgdao"
 )
 
@@ -48,6 +50,23 @@ func GetGoldToDiamondRate() int {
 	return GetExchangeCfgSnapshot().GoldToDiamondRate
 }
 
+// CalcGoldToDiamond 金币折算钻石(按钱包兑换配置:1金币=M钻石)。
+func CalcGoldToDiamond(goldAmount float64) float64 {
+	return CalcGoldToDiamondWithSnapshot(goldAmount, GetExchangeCfgSnapshot())
+}
+
+// CalcGoldToDiamondWithSnapshot 使用指定的钱包汇率快照换算，供收益统计和结算复用。
+func CalcGoldToDiamondWithSnapshot(goldAmount float64, snap ExchangeCfgSnapshot) float64 {
+	if goldAmount <= 0 || snap.GoldToDiamondRate <= 0 || stdmath.IsNaN(goldAmount) || stdmath.IsInf(goldAmount, 0) {
+		return 0
+	}
+	converted := goldAmount * float64(snap.GoldToDiamondRate)
+	if stdmath.IsNaN(converted) || stdmath.IsInf(converted, 0) {
+		return 0
+	}
+	return stdmath.Round(converted*10000) / 10000
+}
+
 // CalcDiamondToUsd 钻石折算美金(按钱包兑换配置: 1USD=N金币, 1金币=M钻石)
 func CalcDiamondToUsd(diamondAmount float64) float64 {
 	if diamondAmount <= 0 {
@@ -75,7 +94,7 @@ func CalcSettlementUsdWithSnapshot(baseDiamond, gameGold float64, snap ExchangeC
 	if snap.GoldToDiamondRate <= 0 || snap.UsdToGoldRate <= 0 {
 		return 0, 0, 0
 	}
-	gameDiamond = gameGold * float64(snap.GoldToDiamondRate)
+	gameDiamond = CalcGoldToDiamondWithSnapshot(gameGold, snap)
 	totalDiamond = baseDiamond + gameDiamond
 	usd = CalcDiamondToUsdWithSnapshot(totalDiamond, snap)
 	return gameDiamond, totalDiamond, usd
@@ -83,7 +102,7 @@ func CalcSettlementUsdWithSnapshot(baseDiamond, gameGold float64, snap ExchangeC
 
 // calcExchangeDiamond 计算兑换钻石: 毛钻石=金币*比例; App手动兑换时手续费从钻石扣(如100钻扣3%得97钻)
 func calcExchangeDiamond(goldAmount float64, snap ExchangeCfgSnapshot, applyAppFee bool) (gross, fee, net float64) {
-	gross = goldAmount * float64(snap.GoldToDiamondRate)
+	gross = CalcGoldToDiamondWithSnapshot(goldAmount, snap)
 	if !applyAppFee || snap.ExchangeFeePercent <= 0 {
 		return gross, 0, gross
 	}

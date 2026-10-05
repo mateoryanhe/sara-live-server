@@ -7,12 +7,12 @@ import (
 
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/effectivelivecfgdto"
-	"xr-game-server/entity/live"
+	"xr-game-server/entity/user"
 	"xr-game-server/errercode"
 )
 
 func GetEffectiveLiveCfg(_ context.Context, _ *effectivelivecfgdto.GetEffectiveLiveCfgReq) (*effectivelivecfgdto.GetEffectiveLiveCfgRes, error) {
-	cfg := cfgdao.GetEffectiveLiveCfgCached()
+	cfg := cfgdao.GetWalletExchangeCfgCached()
 	if cfg == nil {
 		return &effectivelivecfgdto.GetEffectiveLiveCfgRes{
 			Cfg: &effectivelivecfgdto.EffectiveLiveCfgItem{
@@ -28,33 +28,22 @@ func SaveEffectiveLiveCfg(_ context.Context, req *effectivelivecfgdto.SaveEffect
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 
-	existing := cfgdao.GetEffectiveLiveCfgCached()
-	row := &entity.EffectiveLiveCfg{MinSessionMinutes: req.MinSessionMinutes}
-	if req.ID > 0 {
-		if existing == nil || existing.ID != req.ID {
-			return nil, errercode.CreateCode(errercode.InvalidParam)
-		}
-		row.ID = req.ID
-		row.CreatedAt = existing.CreatedAt
-	} else if existing != nil {
-		row.ID = existing.ID
-		row.CreatedAt = existing.CreatedAt
-	}
-	row.UpdatedAt = time.Now()
-	if row.CreatedAt.IsZero() {
-		row.CreatedAt = row.UpdatedAt
-	}
-	if err := cfgdao.SaveEffectiveLiveCfg(row); err != nil {
+	row, matched, err := cfgdao.UpdateWalletExchangeCfg(req.ID, func(row *entity.WalletExchangeCfg) {
+		row.EffectiveLiveMinSessionMinutes = req.MinSessionMinutes
+	})
+	if err != nil {
 		return nil, err
 	}
-	cfgdao.ReloadEffectiveLiveCfgCache()
+	if !matched {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 	return &effectivelivecfgdto.SaveEffectiveLiveCfgRes{
 		Success: true,
 		ID:      strconv.FormatUint(row.ID, 10),
 	}, nil
 }
 
-func toEffectiveLiveCfgItem(cfg *entity.EffectiveLiveCfg) *effectivelivecfgdto.EffectiveLiveCfgItem {
+func toEffectiveLiveCfgItem(cfg *entity.WalletExchangeCfg) *effectivelivecfgdto.EffectiveLiveCfgItem {
 	if cfg == nil {
 		return nil
 	}

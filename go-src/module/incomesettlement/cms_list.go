@@ -159,6 +159,10 @@ func collectGuildIds(rows []*entity.GuildIncomeSettlementLog) []uint64 {
 
 // GetAnchorCMSList CMS分页查询主播结算流水
 func GetAnchorCMSList(ctx context.Context, req *incomesettlementdto.CMSAnchorIncomeSettlementLogListReq) (*httpserver.CMSQueryResp, error) {
+	settlementId := parseUint64Filter(req.SettlementId)
+	if req.SettlementId != "" && settlementId == 0 {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 	roomIds := liveroomdao.ParseLiveRecordAnchorIds(req.RoomId, "", "", req.AnchorIds)
 	if req.DirectPayout != nil && *req.DirectPayout {
 		visibleIds, restrict, empty := cmsvis.PlatformAnchorVisibilityFilter(ctx)
@@ -177,6 +181,7 @@ func GetAnchorCMSList(ctx context.Context, req *incomesettlementdto.CMSAnchorInc
 		hideTransferredBefore = xrtime.WeekStart(time.Now()).Unix()
 	}
 	total, rows := liveroomdao.AnchorIncomeSettlementLogCMSList(&liveroomdao.AnchorIncomeSettlementLogCMSListFilter{
+		SettlementId:             settlementId,
 		RoomIds:                  roomIds,
 		StartTime:                req.StartTime,
 		EndTime:                  req.EndTime,

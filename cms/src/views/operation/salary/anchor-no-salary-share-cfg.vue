@@ -31,7 +31,7 @@
             prop="socialTotalDiamondRevenue"
         >
           <template #default="{row}">
-            <span class="money-amount">{{ formatWalletBalance(row.socialTotalDiamondRevenue) }}</span>
+            <span class="money-amount">{{ formatStatCount(row.socialTotalDiamondRevenue) }}</span>
           </template>
         </el-table-column>
         <el-table-column
@@ -86,7 +86,7 @@
           <el-input-number
               v-model="formData.socialTotalDiamondRevenue"
               :min="0"
-              :precision="4"
+              :precision="0"
               :step="1"
               controls-position="right"
               style="width: 100%"
@@ -130,13 +130,13 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, reactive, ref} from 'vue'
+import {computed, onActivated, reactive, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {anchorNoSalaryShareCfgApi} from '@/api/modules/anchor-no-salary-share-cfg'
 import type {AnchorNoSalaryShareCfg} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
-import {formatWalletBalance} from '@/utils/number-format'
+import {formatStatCount} from '@/utils/number-format'
 
 const {t} = useI18n()
 const {can} = usePagePermission('AnchorNoSalaryShareCfgManagement')
@@ -164,6 +164,17 @@ const formRules = computed<FormRules>(() => ({
   ],
   socialTotalDiamondRevenue: [
     {required: true, message: t('pages.anchorNoSalaryShareCfg.socialTotalRevenueRequired'), trigger: 'change'},
+    {
+      validator: (_rule, value, callback) => {
+        const amount = Number(value)
+        if (!Number.isInteger(amount) || amount < 0) {
+          callback(new Error(t('pages.anchorNoSalaryShareCfg.socialTotalRevenueInteger')))
+          return
+        }
+        callback()
+      },
+      trigger: 'change',
+    },
   ],
   anchorSocialSharePercent: [
     {required: true, message: t('pages.anchorNoSalaryShareCfg.anchorSocialSharePercentRequired'), trigger: 'change'},
@@ -231,7 +242,7 @@ const handleAdd = () => {
 const handleEdit = (row: AnchorNoSalaryShareCfg) => {
   formData.id = String(row.id || '')
   formData.level = Number(row.level || 0)
-  formData.socialTotalDiamondRevenue = Number(row.socialTotalDiamondRevenue || 0)
+  formData.socialTotalDiamondRevenue = Math.trunc(Number(row.socialTotalDiamondRevenue || 0))
   formData.anchorSocialSharePercent = Number(row.anchorSocialSharePercent || 0)
   formData.guildSocialSharePercent = Number(row.guildSocialSharePercent || 0)
   dialogTitle.value = t('pages.anchorNoSalaryShareCfg.editTier')
@@ -293,7 +304,8 @@ const handleSizeChange = () => {
   fetchList()
 }
 
-onMounted(fetchList)
+// 页面由布局 keep-alive 缓存，每次打开都重新读取服务器数据。
+onActivated(fetchList)
 </script>
 
 <style scoped>

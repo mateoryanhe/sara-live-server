@@ -66,6 +66,10 @@ func formatCSVFloat(value float64) string {
 	return strconv.FormatFloat(value, 'f', -1, 64)
 }
 
+func formatCSVBool(value bool) string {
+	return strconv.FormatBool(value)
+}
+
 const excelSafeIntegerMax = uint64(9007199254740991) // 2^53-1, Excel/JS 安全整数上限
 
 func formatCSVUint(value uint64) string {

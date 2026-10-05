@@ -105,7 +105,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, ref, watch} from 'vue'
+import {computed, onActivated, ref, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {useRoute, useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
@@ -321,7 +321,8 @@ watch(() => editForm.value?.selectedPayType, (payType) => {
   if (!allowedKeys.has(form.selectedMethodKey)) form.selectedMethodKey = ''
 })
 
-onMounted(fetchConfig)
+// 普通用户和币商编辑页都会被 keep-alive 缓存，每次打开都重新读取服务器配置。
+onActivated(fetchConfig)
 </script>
 
 <style scoped>

@@ -94,6 +94,9 @@
         <el-table-column :label="t('pages.anchorList.socialIncomeTotal')" align="right" min-width="130">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalSocialIncome) }}</span></template>
         </el-table-column>
+        <el-table-column :label="t('pages.anchorList.gameTotalGoldFlow')" align="right" min-width="140">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameIncome) }}</span></template>
+        </el-table-column>
         <el-table-column :label="t('menu.UserDetail')" width="110">
           <template #default="{ row }">
             <el-button v-if="canViewUserDetail" link type="primary" @click="openUserDetail(row.id)">
@@ -106,12 +109,6 @@
           <template #default="{ row }">
             <el-tag :type="anchorTypeTagType(row.userType)">{{ anchorTypeLabel(row.userType) }}</el-tag>
           </template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorList.loginIp')" min-width="140" prop="ip">
-          <template #default="{ row }">{{ row.ip || '-' }}</template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorList.liveRoom')" prop="roomId" width="180">
-          <template #default="{ row }">{{ row.roomId || row.id || '-' }}</template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.roomType')" width="100">
           <template #default="{ row }">

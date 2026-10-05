@@ -19,6 +19,15 @@ type anchorSettlementTierResult struct {
 	GuildGameShareGold       float64
 }
 
+// withoutGuildShare 平台主播没有所属工会，结算单不得保留工会分佣比例或金额。
+func (r anchorSettlementTierResult) withoutGuildShare() anchorSettlementTierResult {
+	r.GuildSocialSharePercent = 0
+	r.GuildGameSharePercent = 0
+	r.GuildSocialShareDiamond = 0
+	r.GuildGameShareGold = 0
+	return r
+}
+
 func resolveAnchorSettlementTier(
 	hasSalary bool,
 	socialDiamond, gameGold float64,
@@ -41,21 +50,43 @@ func resolveAnchorSettlementTier(
 }
 
 func matchSalarySocialSharePercent(totalDiamond float64, tiers []*entity.AnchorSalarySocialShareCfg) (float64, float64) {
+	validTiers := make([]*entity.AnchorSalarySocialShareCfg, 0, len(tiers))
 	for _, tier := range tiers {
-		if tier != nil && totalDiamond >= tier.SocialTotalDiamondRevenue {
-			return tier.AnchorSocialSharePercent, tier.GuildSocialSharePercent
+		if tier != nil {
+			validTiers = append(validTiers, tier)
 		}
 	}
-	return 0, 0
+	if len(validTiers) == 0 {
+		return 0, 0
+	}
+	matched := validTiers[0]
+	for i := 0; i < len(validTiers)-1; i++ {
+		if totalDiamond < validTiers[i].SocialTotalDiamondRevenue {
+			break
+		}
+		matched = validTiers[i+1]
+	}
+	return matched.AnchorSocialSharePercent, matched.GuildSocialSharePercent
 }
 
 func matchNoSalarySocialSharePercent(totalDiamond float64, tiers []*entity.AnchorNoSalaryShareCfg) (float64, float64) {
+	validTiers := make([]*entity.AnchorNoSalaryShareCfg, 0, len(tiers))
 	for _, tier := range tiers {
-		if tier != nil && totalDiamond >= tier.SocialTotalDiamondRevenue {
-			return tier.AnchorSocialSharePercent, tier.GuildSocialSharePercent
+		if tier != nil {
+			validTiers = append(validTiers, tier)
 		}
 	}
-	return 0, 0
+	if len(validTiers) == 0 {
+		return 0, 0
+	}
+	matched := validTiers[0]
+	for i := 0; i < len(validTiers)-1; i++ {
+		if totalDiamond < validTiers[i].SocialTotalDiamondRevenue {
+			break
+		}
+		matched = validTiers[i+1]
+	}
+	return matched.AnchorSocialSharePercent, matched.GuildSocialSharePercent
 }
 
 func matchGameSharePercent(totalGold float64, tiers []*entity.AnchorGameShareCfg) (float64, float64) {

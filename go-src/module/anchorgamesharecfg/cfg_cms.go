@@ -86,11 +86,11 @@ func validPercent(value float64) bool {
 }
 
 func validGoldRevenue(value float64) bool {
-	return !math.IsNaN(value) && !math.IsInf(value, 0) && value >= 0
+	return !math.IsNaN(value) && !math.IsInf(value, 0) && value >= 0 && math.Trunc(value) == value
 }
 
 func roundGoldRevenue(value float64) float64 {
-	return math.Round(value*10000) / 10000
+	return math.Trunc(value)
 }
 
 func roundPercent(value float64) float64 {

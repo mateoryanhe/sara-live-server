@@ -4,6 +4,7 @@
     <el-aside class="aside" :width="isCollapse ? '64px' : '320px'">
       <div class="logo">{{ isCollapse ? 'XR' : t('common.logo') }}</div>
       <el-menu
+          ref="sidebarMenuRef"
           :collapse="isCollapse"
           :default-active="activeMenu"
           :router="true"
@@ -70,46 +71,6 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('CoinMerchantManagement') || hasMenuPermission('CoinMerchantRechargeCfgManagement') || hasMenuPermission('CoinMerchantTransferLogList') || hasMenuPermission('CoinMerchantGuildTransferManagement') || hasMenuPermission('CoinMerchantPayoutDetailList')"
-            index="/coin-merchant-module">
-          <template #title>
-            <el-icon>
-              <Coin/>
-            </el-icon>
-            <span>{{ t('menu.CoinMerchantModule') }}</span>
-          </template>
-          <el-menu-item v-if="hasMenuPermission('CoinMerchantManagement')" index="/user/coin-merchant/coin-merchant-list">
-            <el-icon>
-              <Coin/>
-            </el-icon>
-            <span>{{ t('menu.CoinMerchantManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('CoinMerchantRechargeCfgManagement')" index="/operation/recharge/coin-merchant-recharge-cfg-list">
-            <el-icon>
-              <Money/>
-            </el-icon>
-            <span>{{ t('menu.CoinMerchantRechargeCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('CoinMerchantTransferLogList')" index="/log/user/coin-merchant-transfer-log-list">
-            <el-icon>
-              <Document/>
-            </el-icon>
-            <span>{{ t('menu.CoinMerchantTransferLogList') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('CoinMerchantGuildTransferManagement')" index="/operation/guild/coin-merchant-guild-transfer-list">
-            <el-icon>
-              <Wallet/>
-            </el-icon>
-            <span>{{ t('menu.CoinMerchantGuildTransferManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('CoinMerchantPayoutDetailList')" index="/operation/guild/coin-merchant-payout-detail-list">
-            <el-icon>
-              <Document/>
-            </el-icon>
-            <span>{{ t('menu.CoinMerchantPayoutDetailList') }}</span>
-          </el-menu-item>
-        </el-sub-menu>
-        <el-sub-menu
             v-if="hasMenuPermission('LiveRoomRecycleBinManagement') || hasMenuPermission('GuildManagement') || hasMenuPermission('PlatformAnchorList') || hasMenuPermission('GuildRecycleBinManagement') || hasMenuPermission('GuildCMSUserManagement') || hasMenuPermission('CustomerServiceCfgManagement')"
             index="/anchor-guild">
           <template #title>
@@ -153,112 +114,6 @@
               <Delete/>
             </el-icon>
             <span>{{ t('menu.GuildRecycleBinManagement') }}</span>
-          </el-menu-item>
-        </el-sub-menu>
-        <el-sub-menu
-            v-if="hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('PaymentCountryCfgManagement') || hasMenuPermission('CoinMerchantPaymentCountryCfgManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('AnchorSalarySocialShareCfgManagement') || hasMenuPermission('AnchorNoSalaryShareCfgManagement') || hasMenuPermission('AnchorSalaryGameShareCfgManagement') || hasMenuPermission('AnchorNoSalaryGameShareCfgManagement')"
-            index="/settlement">
-          <template #title>
-            <el-icon>
-              <CreditCard/>
-            </el-icon>
-            <span>{{ t('menu.OperationSettlementGroup') }}</span>
-          </template>
-          <el-menu-item v-if="hasMenuPermission('WalletExchangeCfgManagement')" index="/operation/wallet/wallet-exchange-cfg">
-            <el-icon>
-              <Coin/>
-            </el-icon>
-            <span>{{ t('menu.WalletExchangeCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('PaymentCountryCfgManagement')" index="/operation/recharge/payment-country-cfg">
-            <el-icon>
-              <CreditCard/>
-            </el-icon>
-            <span>{{ t('menu.PaymentCountryCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('CoinMerchantPaymentCountryCfgManagement')" index="/operation/recharge/coin-merchant-payment-country-cfg">
-            <el-icon>
-              <CreditCard/>
-            </el-icon>
-            <span>{{ t('menu.CoinMerchantPaymentCountryCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('AnchorSalaryCfgManagement')" index="/operation/salary/anchor-salary-cfg-list">
-            <el-icon>
-              <CreditCard/>
-            </el-icon>
-            <span>{{ t('menu.AnchorSalaryCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item
-              v-if="hasMenuPermission('AnchorSalarySocialShareCfgManagement')"
-              index="/operation/salary/anchor-salary-social-share-cfg-list"
-          >
-            <el-icon>
-              <CreditCard/>
-            </el-icon>
-            <span>{{ t('menu.AnchorSalarySocialShareCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item
-              v-if="hasMenuPermission('AnchorNoSalaryShareCfgManagement')"
-              index="/operation/salary/anchor-no-salary-share-cfg"
-          >
-            <el-icon>
-              <CreditCard/>
-            </el-icon>
-            <span>{{ t('menu.AnchorNoSalaryShareCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item
-              v-if="hasMenuPermission('AnchorSalaryGameShareCfgManagement')"
-              index="/operation/salary/anchor-salary-game-share-cfg-list"
-          >
-            <el-icon><CreditCard/></el-icon>
-            <span>{{ t('menu.AnchorSalaryGameShareCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item
-              v-if="hasMenuPermission('AnchorNoSalaryGameShareCfgManagement')"
-              index="/operation/salary/anchor-no-salary-game-share-cfg-list"
-          >
-            <el-icon><CreditCard/></el-icon>
-            <span>{{ t('menu.AnchorNoSalaryGameShareCfgManagement') }}</span>
-          </el-menu-item>
-        </el-sub-menu>
-        <el-sub-menu
-            v-if="hasMenuPermission('GiftManagement') || hasMenuPermission('AgoraCfgManagement') || hasMenuPermission('PrivateRoomBillingManagement') || hasMenuPermission('LiveCfgManagement') || hasMenuPermission('LiveRoomTagManagement')"
-            index="/live">
-          <template #title>
-            <el-icon>
-              <VideoPlay/>
-            </el-icon>
-            <span>{{ t('menu.LiveManagement') }}</span>
-          </template>
-          <el-menu-item v-if="hasMenuPermission('GiftManagement')" index="/live/gift/gift-list">
-            <el-icon>
-              <Present/>
-            </el-icon>
-            <span>{{ t('menu.GiftManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('AgoraCfgManagement')" index="/live/agora-cfg">
-            <el-icon>
-              <Setting/>
-            </el-icon>
-            <span>{{ t('menu.AgoraCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('PrivateRoomBillingManagement')" index="/live/private-room-billing/billing-list">
-            <el-icon>
-              <Lock/>
-            </el-icon>
-            <span>{{ t('menu.PrivateRoomBillingManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('LiveCfgManagement')" index="/live/live-config/live-config">
-            <el-icon>
-              <VideoCamera/>
-            </el-icon>
-            <span>{{ t('menu.LiveCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('LiveRoomTagManagement')" index="/live/live-room-tag/live-room-tag-list">
-            <el-icon>
-              <CollectionTag/>
-            </el-icon>
-            <span>{{ t('menu.LiveRoomTagManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -348,43 +203,43 @@
             </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('ShortVideoManagement') || hasMenuPermission('ShortVideoCategoryManagement') || hasMenuPermission('ShortVideoPriceTierManagement') || hasMenuPermission('ShortVideoCfgManagement') || hasMenuPermission('ShortVideoWatchManagement')"
-            index="/shortvideo">
+            v-if="hasMenuPermission('GiftManagement') || hasMenuPermission('AgoraCfgManagement') || hasMenuPermission('PrivateRoomBillingManagement') || hasMenuPermission('LiveCfgManagement') || hasMenuPermission('LiveRoomTagManagement')"
+            index="/live">
           <template #title>
             <el-icon>
-              <VideoCamera/>
+              <VideoPlay/>
             </el-icon>
-            <span>{{ t('menu.ShortVideoGroup') }}</span>
+            <span>{{ t('menu.LiveManagement') }}</span>
           </template>
-          <el-menu-item v-if="hasMenuPermission('ShortVideoManagement')" index="/shortvideo/short-video-list">
+          <el-menu-item v-if="hasMenuPermission('GiftManagement')" index="/live/gift/gift-list">
             <el-icon>
-              <VideoCamera/>
+              <Present/>
             </el-icon>
-            <span>{{ t('menu.ShortVideoManagement') }}</span>
+            <span>{{ t('menu.GiftManagement') }}</span>
           </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('ShortVideoCategoryManagement')" index="/shortvideo/short-video-category-list">
-            <el-icon>
-              <Collection/>
-            </el-icon>
-            <span>{{ t('menu.ShortVideoCategoryManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('ShortVideoPriceTierManagement')" index="/shortvideo/short-video-price-tier-list">
-            <el-icon>
-              <Money/>
-            </el-icon>
-            <span>{{ t('menu.ShortVideoPriceTierManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('ShortVideoCfgManagement')" index="/shortvideo/short-video-cfg">
+          <el-menu-item v-if="hasMenuPermission('AgoraCfgManagement')" index="/live/agora-cfg">
             <el-icon>
               <Setting/>
             </el-icon>
-            <span>{{ t('menu.ShortVideoCfgManagement') }}</span>
+            <span>{{ t('menu.AgoraCfgManagement') }}</span>
           </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('ShortVideoWatchManagement')" index="/log/live/short-video-watch-list">
+          <el-menu-item v-if="hasMenuPermission('PrivateRoomBillingManagement')" index="/live/private-room-billing/billing-list">
             <el-icon>
-              <View/>
+              <Lock/>
             </el-icon>
-            <span>{{ t('menu.ShortVideoWatchManagement') }}</span>
+            <span>{{ t('menu.PrivateRoomBillingManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('LiveCfgManagement')" index="/live/live-config/live-config">
+            <el-icon>
+              <VideoCamera/>
+            </el-icon>
+            <span>{{ t('menu.LiveCfgManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('LiveRoomTagManagement')" index="/live/live-room-tag/live-room-tag-list">
+            <el-icon>
+              <CollectionTag/>
+            </el-icon>
+            <span>{{ t('menu.LiveRoomTagManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -428,6 +283,86 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
+            v-if="hasMenuPermission('CoinMerchantManagement') || hasMenuPermission('CoinMerchantRechargeCfgManagement') || hasMenuPermission('CoinMerchantTransferLogList') || hasMenuPermission('CoinMerchantGuildTransferManagement') || hasMenuPermission('CoinMerchantPayoutDetailList')"
+            index="/coin-merchant-module">
+          <template #title>
+            <el-icon>
+              <Coin/>
+            </el-icon>
+            <span>{{ t('menu.CoinMerchantModule') }}</span>
+          </template>
+          <el-menu-item v-if="hasMenuPermission('CoinMerchantManagement')" index="/user/coin-merchant/coin-merchant-list">
+            <el-icon>
+              <Coin/>
+            </el-icon>
+            <span>{{ t('menu.CoinMerchantManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('CoinMerchantRechargeCfgManagement')" index="/operation/recharge/coin-merchant-recharge-cfg-list">
+            <el-icon>
+              <Money/>
+            </el-icon>
+            <span>{{ t('menu.CoinMerchantRechargeCfgManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('CoinMerchantTransferLogList')" index="/log/user/coin-merchant-transfer-log-list">
+            <el-icon>
+              <Document/>
+            </el-icon>
+            <span>{{ t('menu.CoinMerchantTransferLogList') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('CoinMerchantGuildTransferManagement')" index="/operation/guild/coin-merchant-guild-transfer-list">
+            <el-icon>
+              <Wallet/>
+            </el-icon>
+            <span>{{ t('menu.CoinMerchantGuildTransferManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('CoinMerchantPayoutDetailList')" index="/operation/guild/coin-merchant-payout-detail-list">
+            <el-icon>
+              <Document/>
+            </el-icon>
+            <span>{{ t('menu.CoinMerchantPayoutDetailList') }}</span>
+          </el-menu-item>
+        </el-sub-menu>
+        <el-sub-menu
+            v-if="hasMenuPermission('ShortVideoManagement') || hasMenuPermission('ShortVideoCategoryManagement') || hasMenuPermission('ShortVideoPriceTierManagement') || hasMenuPermission('ShortVideoCfgManagement') || hasMenuPermission('ShortVideoWatchManagement')"
+            index="/shortvideo">
+          <template #title>
+            <el-icon>
+              <VideoCamera/>
+            </el-icon>
+            <span>{{ t('menu.ShortVideoGroup') }}</span>
+          </template>
+          <el-menu-item v-if="hasMenuPermission('ShortVideoManagement')" index="/shortvideo/short-video-list">
+            <el-icon>
+              <VideoCamera/>
+            </el-icon>
+            <span>{{ t('menu.ShortVideoManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('ShortVideoCategoryManagement')" index="/shortvideo/short-video-category-list">
+            <el-icon>
+              <Collection/>
+            </el-icon>
+            <span>{{ t('menu.ShortVideoCategoryManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('ShortVideoPriceTierManagement')" index="/shortvideo/short-video-price-tier-list">
+            <el-icon>
+              <Money/>
+            </el-icon>
+            <span>{{ t('menu.ShortVideoPriceTierManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('ShortVideoCfgManagement')" index="/shortvideo/short-video-cfg">
+            <el-icon>
+              <Setting/>
+            </el-icon>
+            <span>{{ t('menu.ShortVideoCfgManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('ShortVideoWatchManagement')" index="/log/live/short-video-watch-list">
+            <el-icon>
+              <View/>
+            </el-icon>
+            <span>{{ t('menu.ShortVideoWatchManagement') }}</span>
+          </el-menu-item>
+        </el-sub-menu>
+        <el-sub-menu
             v-if="hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('FirstRechargeActivityManagement') || hasMenuPermission('InviteRechargeRewardManagement')"
             index="/activity">
           <template #title>
@@ -453,6 +388,72 @@
               <Present/>
             </el-icon>
             <span>{{ t('menu.InviteRechargeRewardManagement') }}</span>
+          </el-menu-item>
+        </el-sub-menu>
+        <el-sub-menu
+            v-if="hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('PaymentCountryCfgManagement') || hasMenuPermission('CoinMerchantPaymentCountryCfgManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('AnchorSalarySocialShareCfgManagement') || hasMenuPermission('AnchorNoSalaryShareCfgManagement') || hasMenuPermission('AnchorSalaryGameShareCfgManagement') || hasMenuPermission('AnchorNoSalaryGameShareCfgManagement')"
+            index="/settlement">
+          <template #title>
+            <el-icon>
+              <CreditCard/>
+            </el-icon>
+            <span>{{ t('menu.OperationSettlementGroup') }}</span>
+          </template>
+          <el-menu-item v-if="hasMenuPermission('WalletExchangeCfgManagement')" index="/operation/wallet/wallet-exchange-cfg">
+            <el-icon>
+              <Coin/>
+            </el-icon>
+            <span>{{ t('menu.WalletExchangeCfgManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('PaymentCountryCfgManagement')" index="/operation/recharge/payment-country-cfg">
+            <el-icon>
+              <CreditCard/>
+            </el-icon>
+            <span>{{ t('menu.PaymentCountryCfgManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('CoinMerchantPaymentCountryCfgManagement')" index="/operation/recharge/coin-merchant-payment-country-cfg">
+            <el-icon>
+              <CreditCard/>
+            </el-icon>
+            <span>{{ t('menu.CoinMerchantPaymentCountryCfgManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('AnchorSalaryCfgManagement')" index="/operation/salary/anchor-salary-cfg-list">
+            <el-icon>
+              <CreditCard/>
+            </el-icon>
+            <span>{{ t('menu.AnchorSalaryCfgManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item
+              v-if="hasMenuPermission('AnchorSalarySocialShareCfgManagement')"
+              index="/operation/salary/anchor-salary-social-share-cfg-list"
+          >
+            <el-icon>
+              <CreditCard/>
+            </el-icon>
+            <span>{{ t('menu.AnchorSalarySocialShareCfgManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item
+              v-if="hasMenuPermission('AnchorNoSalaryShareCfgManagement')"
+              index="/operation/salary/anchor-no-salary-share-cfg"
+          >
+            <el-icon>
+              <CreditCard/>
+            </el-icon>
+            <span>{{ t('menu.AnchorNoSalaryShareCfgManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item
+              v-if="hasMenuPermission('AnchorSalaryGameShareCfgManagement')"
+              index="/operation/salary/anchor-salary-game-share-cfg-list"
+          >
+            <el-icon><CreditCard/></el-icon>
+            <span>{{ t('menu.AnchorSalaryGameShareCfgManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item
+              v-if="hasMenuPermission('AnchorNoSalaryGameShareCfgManagement')"
+              index="/operation/salary/anchor-no-salary-game-share-cfg-list"
+          >
+            <el-icon><CreditCard/></el-icon>
+            <span>{{ t('menu.AnchorNoSalaryGameShareCfgManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -815,7 +816,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, ref, watch} from 'vue'
+import {computed, nextTick, ref, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {useI18n} from 'vue-i18n'
 import LayoutTabs from '@/components/layout/LayoutTabs.vue'
@@ -831,10 +832,33 @@ const {t} = useI18n()
 const isCollapse = ref(false)
 const {addTab} = useLayoutTabs()
 
+type SidebarMenuInstance = {
+  open: (index: string) => void
+}
+
+const sidebarMenuRef = ref<SidebarMenuInstance | null>(null)
+const settlementMenuPaths = new Set([
+  '/operation/guild/guild-transfer-list',
+  '/operation/salary/platform-anchor-payout-list',
+  '/operation/salary/guild-income-settlement-log-list',
+  '/operation/salary/anchor-income-settlement-log-list',
+  '/operation/salary/guild-payout-detail-list',
+  '/operation/salary/platform-anchor-payout-detail-list',
+])
+
+const syncRouteParentMenu = async () => {
+  if (!settlementMenuPaths.has(route.path) && route.name !== 'PlatformAnchorSettlementDetail') {
+    return
+  }
+  await nextTick()
+  sidebarMenuRef.value?.open('/log/settlement')
+}
+
 watch(
     () => route.fullPath,
     () => {
       addTab(route)
+      void syncRouteParentMenu()
     },
     {immediate: true},
 )

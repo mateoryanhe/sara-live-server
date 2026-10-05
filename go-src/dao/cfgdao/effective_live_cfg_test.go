@@ -3,20 +3,20 @@ package cfgdao
 import (
 	"testing"
 
-	"xr-game-server/entity/live"
+	"xr-game-server/entity/user"
 )
 
 func TestResolveEffectiveLiveMinSessionMinutes(t *testing.T) {
 	tests := []struct {
 		name string
-		cfg  *entity.EffectiveLiveCfg
+		cfg  *entity.WalletExchangeCfg
 		want int
 	}{
 		{name: "missing config", cfg: nil, want: DefaultEffectiveLiveMinSessionMinutes},
-		{name: "zero value", cfg: &entity.EffectiveLiveCfg{}, want: DefaultEffectiveLiveMinSessionMinutes},
-		{name: "negative value", cfg: &entity.EffectiveLiveCfg{MinSessionMinutes: -1}, want: DefaultEffectiveLiveMinSessionMinutes},
-		{name: "too large value", cfg: &entity.EffectiveLiveCfg{MinSessionMinutes: MaxEffectiveLiveMinSessionMinutes + 1}, want: DefaultEffectiveLiveMinSessionMinutes},
-		{name: "configured value", cfg: &entity.EffectiveLiveCfg{MinSessionMinutes: 45}, want: 45},
+		{name: "zero value", cfg: &entity.WalletExchangeCfg{}, want: DefaultEffectiveLiveMinSessionMinutes},
+		{name: "negative value", cfg: &entity.WalletExchangeCfg{EffectiveLiveMinSessionMinutes: -1}, want: DefaultEffectiveLiveMinSessionMinutes},
+		{name: "too large value", cfg: &entity.WalletExchangeCfg{EffectiveLiveMinSessionMinutes: MaxEffectiveLiveMinSessionMinutes + 1}, want: DefaultEffectiveLiveMinSessionMinutes},
+		{name: "configured value", cfg: &entity.WalletExchangeCfg{EffectiveLiveMinSessionMinutes: 45}, want: 45},
 	}
 
 	for _, tt := range tests {

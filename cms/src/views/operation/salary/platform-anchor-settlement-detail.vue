@@ -3,7 +3,7 @@
     <el-card v-loading="loading">
       <template #header>
         <div class="card-header">
-          <span>{{ t('pages.guildTransferList.detailTitle') }}</span>
+          <span>{{ t('menu.PlatformAnchorPayoutList') }} - {{ t('pages.guildTransferList.viewDetail') }}</span>
           <el-button @click="backToList">{{ t('pages.guildTransferList.backToList') }}</el-button>
         </div>
       </template>
@@ -13,18 +13,42 @@
           <el-tab-pane :label="t('pages.guildTransferList.basicInfo')" name="basic">
             <el-descriptions :column="3" :label-width="detailLabelWidth" border class="detail-descriptions">
               <el-descriptions-item :label="t('pages.guildTransferList.settlementId')">{{ item.id }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.guildTransferList.guildId')">
-                <el-button v-if="can('viewGuildDetail')" link type="primary" @click="openGuildDetail">
-                  {{ item.guildId }}
-                </el-button>
-                <span v-else>{{ item.guildId || '-' }}</span>
-              </el-descriptions-item>
-              <el-descriptions-item :label="t('pages.guildTransferList.guildName')">{{ item.guildName || '-' }}</el-descriptions-item>
-              <el-descriptions-item :label="t('pages.guildTransferList.settlementReceivableUsd')">
-                <strong>{{ amount(item.settlementReceivableUsd) }} USD</strong>
-              </el-descriptions-item>
               <el-descriptions-item :label="t('pages.guildTransferList.status')">
                 <el-tag :type="statusTagType(item.status)">{{ statusLabel(item.status) }}</el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item :label="settlementText('settlementRuleType')">
+                <el-tag :type="Number(item.settlementRuleType) === 1 ? 'success' : 'info'">
+                  {{ settlementRuleLabel }}
+                </el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorIncomeSettlementLogList.roomId')">
+                {{ item.roomId || '-' }}
+              </el-descriptions-item>
+              <el-descriptions-item :label="t('pages.anchorIncomeSettlementLogList.roomNickname')">
+                <el-button
+                    v-if="item.roomId && item.roomNickname"
+                    link
+                    type="primary"
+                    @click="openAnchorDetail"
+                >
+                  {{ item.roomNickname }}
+                </el-button>
+                <span v-else>{{ item.roomNickname || '-' }}</span>
+              </el-descriptions-item>
+              <el-descriptions-item :label="t('common.avatar')">
+                <el-image
+                    v-if="item.roomAvatar"
+                    :preview-src-list="[item.roomAvatar]"
+                    :src="item.roomAvatar"
+                    fit="cover"
+                    hide-on-click-modal
+                    preview-teleported
+                    class="anchor-avatar"
+                />
+                <span v-else>-</span>
+              </el-descriptions-item>
+              <el-descriptions-item :label="t('pages.guildTransferList.settlementReceivableUsd')">
+                <strong>{{ amount(item.settlementReceivableUsd) }} USD</strong>
               </el-descriptions-item>
               <el-descriptions-item :label="t('common.createdAt')">{{ formatDate(item.createdAt) }}</el-descriptions-item>
               <el-descriptions-item :label="t('pages.guildTransferList.updatedAt')">{{ formatDate(item.updatedAt) }}</el-descriptions-item>
@@ -33,7 +57,7 @@
 
           <el-tab-pane :label="t('pages.guildTransferList.incomeSnapshot')" lazy name="income">
             <section class="detail-section">
-              <div class="detail-section-title">{{ anchorSettlementText('snapshotSummary') }}（钻石）</div>
+            <div class="detail-section-title">{{ settlementText('snapshotSummary') }}（钻石）</div>
               <el-descriptions :column="3" :label-width="detailLabelWidth" border class="detail-descriptions">
                 <el-descriptions-item :label="settlementText('totalIncome')">{{ amount(item.totalIncome) }}</el-descriptions-item>
                 <el-descriptions-item :label="settlementText('totalLiveDuration')">
@@ -44,7 +68,7 @@
             </section>
 
             <section class="detail-section">
-              <div class="detail-section-title">{{ anchorSettlementText('socialIncomeSection') }}（钻石）</div>
+            <div class="detail-section-title">{{ settlementText('socialIncomeSection') }}（钻石）</div>
               <el-descriptions :column="3" :label-width="detailLabelWidth" border class="detail-descriptions">
                 <el-descriptions-item :label="settlementText('totalSocialIncome')">{{ amount(item.totalSocialIncome) }}</el-descriptions-item>
                 <el-descriptions-item :label="settlementText('totalGiftIncome')">{{ amount(item.totalGiftIncome) }}</el-descriptions-item>
@@ -59,7 +83,7 @@
             </section>
 
             <section class="detail-section">
-              <div class="detail-section-title">{{ anchorSettlementText('gameIncomeSection') }}（金币）</div>
+            <div class="detail-section-title">{{ settlementText('gameIncomeSection') }}（金币）</div>
               <el-descriptions :column="3" :label-width="detailLabelWidth" border class="detail-descriptions">
                 <el-descriptions-item :label="settlementText('totalGameIncome')">{{ amount(item.totalGameIncome) }}</el-descriptions-item>
                 <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
@@ -70,42 +94,52 @@
 
           <el-tab-pane :label="t('pages.guildTransferList.settlementCalculation')" lazy name="calculation">
             <section class="detail-section">
-              <div class="detail-section-title">{{ anchorSettlementText('calculationSummary') }}</div>
+              <div class="detail-section-title">{{ settlementText('calculationSummary') }}</div>
               <el-descriptions :column="3" :label-width="detailLabelWidth" border class="detail-descriptions">
-                <el-descriptions-item :label="settlementText('settlementRuleType')">{{ settlementRuleLabel }}</el-descriptions-item>
-                <el-descriptions-item :label="settlementText('settlementSalary')">{{ amount(item.settlementSalary) }}</el-descriptions-item>
-                <el-descriptions-item :label="settlementText('settlementShareAmount')">{{ amount(item.settlementShareAmount) }}</el-descriptions-item>
-                <el-descriptions-item :label="t('pages.guildTransferList.settlementShareAmountUsd')">{{ amount(item.settlementShareAmountUsd) }}</el-descriptions-item>
-                <el-descriptions-item :label="settlementText('guildSharePercent')">{{ amount(item.guildSharePercent) }}%</el-descriptions-item>
+                <el-descriptions-item :label="guildSettlementText('totalSettlementDiamond')">{{ amount(item.totalSettlementDiamond) }}</el-descriptions-item>
+                <el-descriptions-item :label="settlementText('settlementShareAmountUsd')">{{ amount(item.settlementReceivableUsd) }}</el-descriptions-item>
                 <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
               </el-descriptions>
             </section>
 
             <section class="detail-section">
-              <div class="detail-section-title">{{ anchorSettlementText('socialShareSection') }}</div>
+              <div class="detail-section-title">{{ settlementText('salarySection') }}</div>
+              <el-descriptions :column="3" :label-width="detailLabelWidth" border class="detail-descriptions">
+                <el-descriptions-item :label="settlementText('settlementSalary')">{{ amount(item.settlementSalary) }}</el-descriptions-item>
+                <el-descriptions-item :label="settlementText('hasSalary')">
+                  <el-tag :type="item.hasSalary ? 'success' : 'info'">
+                    {{ item.hasSalary ? t('common.yes') : t('common.no') }}
+                  </el-tag>
+                </el-descriptions-item>
+                <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
+              </el-descriptions>
+            </section>
+
+            <section class="detail-section">
+              <div class="detail-section-title">{{ settlementText('socialShareSection') }}</div>
               <el-descriptions :column="3" :label-width="detailLabelWidth" border class="detail-descriptions">
                 <el-descriptions-item :label="settlementText('anchorSocialShareAmount')">{{ amount(item.anchorSocialShareAmount) }}</el-descriptions-item>
-                <el-descriptions-item :label="settlementText('guildSocialShareAmount')">{{ amount(item.guildSocialShareAmount) }}</el-descriptions-item>
+                <el-descriptions-item :label="settlementText('anchorSocialSharePercent')">{{ percent(item.anchorSocialSharePercent) }}</el-descriptions-item>
                 <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
               </el-descriptions>
             </section>
 
             <section class="detail-section">
-              <div class="detail-section-title">{{ anchorSettlementText('gameShareSection') }}</div>
+              <div class="detail-section-title">{{ settlementText('gameShareSection') }}</div>
               <el-descriptions :column="3" :label-width="detailLabelWidth" border class="detail-descriptions">
                 <el-descriptions-item :label="settlementText('anchorGameShareAmountGold')">{{ amount(item.anchorGameShareAmountGold) }}</el-descriptions-item>
-                <el-descriptions-item :label="settlementText('guildGameShareAmountGold')">{{ amount(item.guildGameShareAmountGold) }}</el-descriptions-item>
+                <el-descriptions-item :label="settlementText('anchorGameSharePercent')">{{ percent(item.anchorGameSharePercent) }}</el-descriptions-item>
                 <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
               </el-descriptions>
             </section>
 
             <section class="detail-section">
-              <div class="detail-section-title">{{ anchorSettlementText('conversionSection') }}</div>
+              <div class="detail-section-title">{{ settlementText('conversionSection') }}</div>
               <el-descriptions :column="3" :label-width="detailLabelWidth" border class="detail-descriptions">
-                <el-descriptions-item :label="settlementText('goldToDiamondRate')">{{ item.goldToDiamondRate || 0 }}</el-descriptions-item>
-                <el-descriptions-item :label="settlementText('usdToGoldRate')">{{ item.usdToGoldRate || 0 }}</el-descriptions-item>
-                <el-descriptions-item :label="settlementText('gameShareAmountDiamond')">{{ amount(item.gameShareAmountDiamond) }}</el-descriptions-item>
-                <el-descriptions-item :label="settlementText('totalSettlementDiamond')">{{ amount(item.totalSettlementDiamond) }}</el-descriptions-item>
+                <el-descriptions-item :label="guildSettlementText('goldToDiamondRate')">{{ item.goldToDiamondRate || 0 }}</el-descriptions-item>
+                <el-descriptions-item :label="guildSettlementText('usdToGoldRate')">{{ item.usdToGoldRate || 0 }}</el-descriptions-item>
+                <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
+                <el-descriptions-item :label="guildSettlementText('gameShareAmountDiamond')">{{ amount(item.gameShareAmountDiamond) }}</el-descriptions-item>
                 <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
                 <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
               </el-descriptions>
@@ -118,10 +152,7 @@
               <el-descriptions-item :label="t('pages.guildTransferList.transferOrderId')">{{ item.transferOrderId || '-' }}</el-descriptions-item>
               <el-descriptions-item :label="t('pages.guildTransferList.transferPlatformNo')">{{ item.transferPlatformNo || '-' }}</el-descriptions-item>
               <el-descriptions-item :label="t('pages.guildTransferList.transferCurrency')">
-                <el-button v-if="item.transferCurrency && can('transferInfo')" link type="primary" @click="openTransferInfo">
-                  {{ item.transferCurrency }}
-                </el-button>
-                <span v-else>{{ item.transferCurrency || '-' }}</span>
+                {{ item.transferCurrency || '-' }}
               </el-descriptions-item>
               <el-descriptions-item :label="t('pages.guildTransferList.transferLocalAmount')">
                 {{ item.transferLocalAmount ? amount(item.transferLocalAmount) : '-' }}
@@ -148,9 +179,8 @@ import {computed, onMounted, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {useRoute, useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
-import {guildIncomeSettlementLogApi} from '@/api/modules/guild-income-settlement-log'
-import type {GuildIncomeSettlementLogItem} from '@/types/api'
-import {usePagePermission} from '@/composables/usePagePermission'
+import {anchorIncomeSettlementLogApi} from '@/api/modules/anchor-income-settlement-log'
+import type {AnchorIncomeSettlementLogItem} from '@/types/api'
 import {formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
@@ -158,19 +188,15 @@ import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 const {t} = useI18n()
 const route = useRoute()
 const router = useRouter()
-const isCoinMerchant = Number(route.query.guildType) === 1
-const pagePermission = isCoinMerchant
-    ? 'CoinMerchantGuildTransferManagement'
-    : 'GuildTransferManagement'
-const {can} = usePagePermission(pagePermission)
 const loading = ref(false)
 const activeTab = ref('basic')
-const item = ref<GuildIncomeSettlementLogItem | null>(null)
+const item = ref<AnchorIncomeSettlementLogItem | null>(null)
 const detailLabelWidth = 180
 
-const settlementText = (key: string) => t(`pages.guildIncomeSettlementLogList.${key}`)
-const anchorSettlementText = (key: string) => t(`pages.anchorIncomeSettlementLogList.${key}`)
+const settlementText = (key: string) => t(`pages.anchorIncomeSettlementLogList.${key}`)
+const guildSettlementText = (key: string) => t(`pages.guildIncomeSettlementLogList.${key}`)
 const amount = (value: number | null | undefined) => formatWalletBalance(Number(value || 0))
+const percent = (value: number | null | undefined) => `${Number(value || 0)}%`
 const settlementRuleLabel = computed(() => Number(item.value?.settlementRuleType) === 1
     ? settlementText('settlementRuleTiered')
     : settlementText('settlementRuleLegacy'))
@@ -192,41 +218,33 @@ const statusTagType = (status: number | undefined) => {
 }
 
 const fetchDetail = async () => {
-  const id = String(route.params.id || '').trim()
-  if (!id) return
+  const settlementId = String(route.params.id || '').trim()
+  if (!settlementId) return
   loading.value = true
   try {
-    const response = await guildIncomeSettlementLogApi.getDetail({id})
-    item.value = response.item || null
+    const response = await anchorIncomeSettlementLogApi.getList({
+      settlementId,
+      directPayout: true,
+      includeTransferInfo: true,
+      pageIndex: 1,
+      pageSize: 1,
+    })
+    item.value = response.data?.[0] || null
   } catch (error) {
-    console.error('Failed to load guild settlement detail:', error)
-    ElMessage.error(t('pages.guildTransferList.fetchFailed'))
+    console.error('Failed to load platform anchor settlement detail:', error)
+    ElMessage.error(t('pages.anchorIncomeSettlementLogList.fetchFailed'))
   } finally {
     loading.value = false
   }
 }
 
-const backToList = () => router.push({
-  name: isCoinMerchant ? 'CoinMerchantGuildTransferManagement' : 'GuildTransferManagement',
-})
+const backToList = () => router.push({name: 'PlatformAnchorPayoutList'})
 
-const openGuildDetail = () => {
-  if (!item.value?.guildId) return
+const openAnchorDetail = () => {
+  if (!item.value?.roomId) return
   router.push({
-    name: 'GuildDetail',
-    query: {id: item.value.guildId, name: item.value.guildName || ''},
-  })
-}
-
-const openTransferInfo = () => {
-  if (!item.value?.guildId) return
-  router.push({
-    name: 'GuildTransferInfoEdit',
-    params: {guildId: item.value.guildId},
-    query: {
-      guildName: item.value.guildName || '',
-      from: isCoinMerchant ? 'coinMerchantGuildTransfer' : 'guildTransfer',
-    },
+    name: 'AnchorDetail',
+    query: {id: String(item.value.roomId)},
   })
 }
 
@@ -244,8 +262,10 @@ onMounted(fetchDetail)
   justify-content: space-between;
 }
 
-.detail-descriptions :deep(.el-descriptions__table) {
-  table-layout: fixed;
+.anchor-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
 }
 
 .detail-section + .detail-section {
@@ -262,8 +282,11 @@ onMounted(fetchDetail)
   line-height: 20px;
 }
 
+.detail-descriptions :deep(.el-descriptions__table) {
+  table-layout: fixed;
+}
+
 .detail-descriptions :deep(.detail-placeholder-cell) {
   background: var(--el-fill-color-blank);
 }
-
 </style>

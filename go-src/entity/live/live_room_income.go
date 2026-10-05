@@ -75,6 +75,15 @@ func (a *LiveRoomIncomeAmounts) IsZero() bool {
 		a.TotalLiveDuration == 0
 }
 
+// HasSettlementFlow 是否存在需要参与结算的原始流水。
+// TotalIncome 只是展示字段；直播时长及各社交明细也不单独触发结算。
+func (a *LiveRoomIncomeAmounts) HasSettlementFlow() bool {
+	if a == nil {
+		return false
+	}
+	return a.TotalSocialIncome != 0 || a.TotalGameIncome != 0
+}
+
 // addIncomeAmountsLocked 在已持锁前提下累加各收益字段
 func addIncomeAmountsLocked(tb db.TbName, id any, dst *LiveRoomIncomeAmounts, src *LiveRoomIncomeAmounts) {
 	if dst == nil || src == nil || src.IsZero() {

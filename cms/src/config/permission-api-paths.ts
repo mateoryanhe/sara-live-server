@@ -306,6 +306,8 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'WalletExchangeCfgManagement:save': '/wallet/saveWalletExchangeCfg',
     'WalletExchangeCfgManagement:viewEffectiveLive': '/effectiveLiveCfg/getEffectiveLiveCfg',
     'WalletExchangeCfgManagement:saveEffectiveLive': '/effectiveLiveCfg/saveEffectiveLiveCfg',
+    'WalletExchangeCfgManagement:viewPlatformAnchorSettlement': '/platformAnchorSettlementCfg/getPlatformAnchorSettlementCfg',
+    'WalletExchangeCfgManagement:savePlatformAnchorSettlement': '/platformAnchorSettlementCfg/savePlatformAnchorSettlementCfg',
 
     PaymentCountryCfgManagement: '/paymentCountryCfg/getCollectionCountryCfg',
     'PaymentCountryCfgManagement:view': '/paymentCountryCfg/getCollectionCountryCfg',
@@ -512,6 +514,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     PlatformAnchorPayoutList: '/anchorIncomeSettlementLog/cmsAnchorIncomeSettlementLogList',
     'PlatformAnchorPayoutList:view': '/anchorIncomeSettlementLog/cmsAnchorIncomeSettlementLogList',
     'PlatformAnchorPayoutList:search': '/anchorIncomeSettlementLog/cmsAnchorIncomeSettlementLogList',
+    'PlatformAnchorPayoutList:export': '/cmsExport/submitJob',
     'PlatformAnchorPayoutList:batchApprove': '/anchorIncomeSettlementLog/cmsBatchApproveAnchorSettlement',
     'PlatformAnchorPayoutList:batchTransfer': '/anchorIncomeSettlementLog/cmsBatchTransferAnchorSettlement',
     'PlatformAnchorPayoutList:transferInfo': '/account/saveAnchorTransferInfo',

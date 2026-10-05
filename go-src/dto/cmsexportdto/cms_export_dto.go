@@ -18,8 +18,8 @@ const (
 	ExportTypeGuildDailyEffectiveLive          = "guildDailyEffectiveLive"
 	ExportTypeGuildAnchorDailyEffectiveLive    = "guildAnchorDailyEffectiveLive"
 	ExportTypeMyGuildAnchorDailyEffectiveLive  = "myGuildAnchorDailyEffectiveLive"
-	ExportTypeLiveDailyEffectiveLive             = "liveDailyEffectiveLive"
-	ExportTypeLiveWeeklyUnsettledLive            = "liveWeeklyUnsettledLive"
+	ExportTypeLiveDailyEffectiveLive           = "liveDailyEffectiveLive"
+	ExportTypeLiveWeeklyUnsettledLive          = "liveWeeklyUnsettledLive"
 	ExportTypeCurrencyLog                      = "currencyLog"
 	ExportTypeGameBetLog                       = "gameBetLog"
 	ExportTypeGameWinLog                       = "gameWinLog"
@@ -119,10 +119,18 @@ type CMSExportVideoCallLogPayload struct {
 
 type CMSExportAnchorIncomeSettlementLogPayload struct {
 	CMSExportHeadersPayload
-	RoomId    string   `json:"roomId"`
-	AnchorIds []string `json:"anchorIds"`
-	StartTime int64    `json:"startTime"`
-	EndTime   int64    `json:"endTime"`
+	RoomId                    string   `json:"roomId"`
+	AnchorIds                 []string `json:"anchorIds"`
+	StartTime                 int64    `json:"startTime"`
+	EndTime                   int64    `json:"endTime"`
+	TransferStartTime         int64    `json:"transferStartTime"`
+	TransferEndTime           int64    `json:"transferEndTime"`
+	PayoutOnly                bool     `json:"payoutOnly"`
+	HideHistoricalTransferred bool     `json:"hideHistoricalTransferred"`
+	Status                    *uint8   `json:"status"`
+	DirectPayout              *bool    `json:"directPayout"`
+	OrderByReceivableUsdDesc  bool     `json:"orderByReceivableUsdDesc"`
+	IncludePayoutInfo         bool     `json:"includePayoutInfo"`
 }
 
 type CMSExportGuildIncomeSettlementLogPayload struct {

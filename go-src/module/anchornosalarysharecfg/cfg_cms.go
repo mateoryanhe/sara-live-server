@@ -12,31 +12,13 @@ import (
 	"xr-game-server/errercode"
 )
 
-const (
-	DefaultAnchorSocialSharePercent = 10
-	DefaultGuildSocialSharePercent  = 10
-)
-
 func Init() {
-	seedDefaultIfEmpty()
 	normalizeLegacySingleton()
-}
-
-func seedDefaultIfEmpty() {
-	if anchornosalarysharecfgdao.CountAll() > 0 {
-		return
-	}
-	_ = anchornosalarysharecfgdao.Create(&entity.AnchorNoSalaryShareCfg{
-		Level:                     1,
-		SocialTotalDiamondRevenue: 0,
-		AnchorSocialSharePercent:  DefaultAnchorSocialSharePercent,
-		GuildSocialSharePercent:   DefaultGuildSocialSharePercent,
-	})
 }
 
 // normalizeLegacySingleton 保留旧版单行配置的比例，并把新增的档位字段补成可编辑的首档。
 func normalizeLegacySingleton() {
-	rows := anchornosalarysharecfgdao.ListAllOrderByThresholdDesc()
+	rows := anchornosalarysharecfgdao.ListAllOrderByLevelAsc()
 	if len(rows) != 1 || rows[0] == nil || rows[0].Level != 0 {
 		return
 	}
@@ -107,11 +89,11 @@ func validPercent(value float64) bool {
 }
 
 func validRevenue(value float64) bool {
-	return !math.IsNaN(value) && !math.IsInf(value, 0) && value >= 0
+	return !math.IsNaN(value) && !math.IsInf(value, 0) && value >= 0 && math.Trunc(value) == value
 }
 
 func roundRevenue(value float64) float64 {
-	return math.Round(value*10000) / 10000
+	return math.Trunc(value)
 }
 
 func roundPercent(value float64) float64 {

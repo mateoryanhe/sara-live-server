@@ -293,6 +293,16 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {title: '平台主播代付'},
         },
         {
+            path: 'salary/platform-anchor-settlement-detail/:id',
+            name: 'PlatformAnchorSettlementDetail',
+            component: () => import('@/views/operation/salary/platform-anchor-settlement-detail.vue'),
+            meta: {
+                title: '平台主播结算详情',
+                hidden: true,
+                parentPermission: 'PlatformAnchorPayoutList',
+            },
+        },
+        {
             path: 'salary/guild-income-settlement-log-list',
             name: 'GuildIncomeSettlementLogList',
             component: () => import('@/views/operation/salary/guild-income-settlement-log-list.vue'),

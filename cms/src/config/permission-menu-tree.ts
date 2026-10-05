@@ -166,18 +166,6 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
     },
     {
         kind: 'group',
-        id: 'coin-merchant-module',
-        titleKey: 'menu.CoinMerchantModule',
-        children: [
-            page('CoinMerchantManagement'),
-            page('CoinMerchantRechargeCfgManagement'),
-            page('CoinMerchantTransferLogList'),
-            page('CoinMerchantGuildTransferManagement'),
-            page('CoinMerchantPayoutDetailList'),
-        ],
-    },
-    {
-        kind: 'group',
         id: 'anchor-guild',
         titleKey: 'menu.AnchorGuildManagement',
         children: [
@@ -194,33 +182,6 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             page('CustomerServiceCfgManagement'),
             page('LiveRoomRecycleBinManagement'),
             page('GuildRecycleBinManagement'),
-        ],
-    },
-    {
-        kind: 'group',
-        id: 'settlement',
-        titleKey: 'menu.OperationSettlementGroup',
-        children: [
-            page('WalletExchangeCfgManagement'),
-            page('PaymentCountryCfgManagement'),
-            page('CoinMerchantPaymentCountryCfgManagement'),
-            page('AnchorSalaryCfgManagement'),
-            page('AnchorSalarySocialShareCfgManagement'),
-            page('AnchorNoSalaryShareCfgManagement'),
-            page('AnchorSalaryGameShareCfgManagement'),
-            page('AnchorNoSalaryGameShareCfgManagement'),
-        ],
-    },
-    {
-        kind: 'group',
-        id: 'live',
-        titleKey: 'menu.LiveManagement',
-        children: [
-            page('GiftManagement'),
-            page('AgoraCfgManagement'),
-            page('PrivateRoomBillingManagement'),
-            page('LiveCfgManagement'),
-            page('LiveRoomTagManagement'),
         ],
     },
     {
@@ -250,14 +211,14 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
     },
     {
         kind: 'group',
-        id: 'shortvideo',
-        titleKey: 'menu.ShortVideoGroup',
+        id: 'live',
+        titleKey: 'menu.LiveManagement',
         children: [
-            page('ShortVideoManagement'),
-            page('ShortVideoCategoryManagement'),
-            page('ShortVideoPriceTierManagement'),
-            page('ShortVideoCfgManagement'),
-            page('ShortVideoWatchManagement'),
+            page('GiftManagement'),
+            page('AgoraCfgManagement'),
+            page('PrivateRoomBillingManagement'),
+            page('LiveCfgManagement'),
+            page('LiveRoomTagManagement'),
         ],
     },
     {
@@ -274,12 +235,51 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
     },
     {
         kind: 'group',
+        id: 'coin-merchant-module',
+        titleKey: 'menu.CoinMerchantModule',
+        children: [
+            page('CoinMerchantManagement'),
+            page('CoinMerchantRechargeCfgManagement'),
+            page('CoinMerchantTransferLogList'),
+            page('CoinMerchantGuildTransferManagement'),
+            page('CoinMerchantPayoutDetailList'),
+        ],
+    },
+    {
+        kind: 'group',
+        id: 'shortvideo',
+        titleKey: 'menu.ShortVideoGroup',
+        children: [
+            page('ShortVideoManagement'),
+            page('ShortVideoCategoryManagement'),
+            page('ShortVideoPriceTierManagement'),
+            page('ShortVideoCfgManagement'),
+            page('ShortVideoWatchManagement'),
+        ],
+    },
+    {
+        kind: 'group',
         id: 'activity',
         titleKey: 'menu.ActivityManagement',
         children: [
             page('ActivityMessageManagement'),
             page('FirstRechargeActivityManagement'),
             page('InviteRechargeRewardManagement'),
+        ],
+    },
+    {
+        kind: 'group',
+        id: 'settlement',
+        titleKey: 'menu.OperationSettlementGroup',
+        children: [
+            page('WalletExchangeCfgManagement'),
+            page('PaymentCountryCfgManagement'),
+            page('CoinMerchantPaymentCountryCfgManagement'),
+            page('AnchorSalaryCfgManagement'),
+            page('AnchorSalarySocialShareCfgManagement'),
+            page('AnchorNoSalaryShareCfgManagement'),
+            page('AnchorSalaryGameShareCfgManagement'),
+            page('AnchorNoSalaryGameShareCfgManagement'),
         ],
     },
     {

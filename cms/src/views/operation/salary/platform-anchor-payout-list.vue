@@ -65,6 +65,7 @@
         <el-form-item>
           <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
           <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
+          <el-button v-if="can('export')" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
           <el-button
               v-if="can('batchApprove')"
               :disabled="selectedPendingRows.length === 0"
@@ -85,8 +86,9 @@
       </el-form>
 
       <el-table
-          v-loading="loading"
+          v-loading="loading || exporting"
           :data="tableData"
+          :element-loading-text="exportStatusTip || undefined"
           style="width: 100%"
           @selection-change="handleSelectionChange"
       >
@@ -130,7 +132,11 @@
           </template>
         </el-table-column>
         <el-table-column :label="t('pages.guildTransferList.settlementReceivableUsd')" align="right" min-width="150">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementReceivableUsd) }}</span></template>
+          <template #default="{ row }">
+            <el-button link type="primary" @click="openSettlementDetail(row)">
+              <span class="money-amount">{{ formatWalletBalance(row.settlementReceivableUsd) }}</span>
+            </el-button>
+          </template>
         </el-table-column>
         <el-table-column :label="t('pages.guildTransferList.status')" min-width="110">
           <template #default="{ row }">
@@ -161,81 +167,6 @@
         </el-table-column>
         <el-table-column :label="t('pages.guildTransferList.transferFailMsg')" min-width="180" show-overflow-tooltip>
           <template #default="{ row }">{{ row.transferFailMsg || '-' }}</template>
-        </el-table-column>
-        <el-table-column
-            :label="t('pages.anchorIncomeSettlementLogList.settlementSalary')"
-            align="right"
-            label-class-name="header-nowrap"
-            min-width="150"
-        >
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementSalary) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.settlementFlowCommission')" align="right" min-width="110">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementShareAmount) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.hasSalary')" align="center" min-width="100">
-          <template #default="{ row }">
-            <el-tag :type="row.hasSalary ? 'success' : 'info'">
-              {{ row.hasSalary ? t('common.yes') : t('common.no') }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.anchorSocialSharePercent')" align="right" min-width="150">
-          <template #default="{ row }">{{ formatSharePercent(row.anchorSocialSharePercent) }}</template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.anchorSocialShareAmount')" align="right" min-width="160">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.anchorSocialShareAmount) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.guildSocialSharePercent')" align="right" min-width="150">
-          <template #default="{ row }">{{ formatSharePercent(row.guildSocialSharePercent) }}</template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.guildSocialShareAmount')" align="right" min-width="160">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.guildSocialShareAmount) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.anchorGameSharePercent')" align="right" min-width="150">
-          <template #default="{ row }">{{ formatSharePercent(row.anchorGameSharePercent) }}</template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.anchorGameShareAmountGold')" align="right" min-width="160">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.anchorGameShareAmountGold) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.guildGameSharePercent')" align="right" min-width="150">
-          <template #default="{ row }">{{ formatSharePercent(row.guildGameSharePercent) }}</template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.guildGameShareAmountGold')" align="right" min-width="160">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.guildGameShareAmountGold) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalIncome')" align="right" min-width="120">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalSocialIncome')" align="right" min-width="130">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalSocialIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalGiftIncome')" align="right" min-width="120">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGiftIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalPaidDanmakuIncome')" align="right" min-width="130">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalVideoCallIncome')" align="right" min-width="130">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
-        </el-table-column>
-		<el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalVideoCallTicketIncome')" align="right" min-width="150">
-		  <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallTicketIncome) }}</span></template>
-		</el-table-column>
-		<el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalVideoCallBillingIncome')" align="right" min-width="150">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallBillingIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalShortVideoIncome')" align="right" min-width="130">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalShortVideoIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalGameIncome')" align="right" min-width="120">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalLiveDuration')" min-width="120">
-          <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.anchorSharePercent')" min-width="110" prop="anchorSharePercent">
-          <template #default="{ row }">{{ formatSharePercent(row.anchorSharePercent) }}</template>
         </el-table-column>
       </el-table>
 
@@ -273,14 +204,17 @@ import type {AnchorIncomeSettlementLogItem, AnchorListItem} from '@/types/api'
 import AnchorPickerDialog from '@/components/AnchorPickerDialog.vue'
 import {usePagePermission} from '@/composables/usePagePermission'
 import {useUserDetailNav} from '@/composables/useUserDetailNav'
+import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
+import {CMS_EXPORT_TYPE_ANCHOR_INCOME_SETTLEMENT_LOG} from '@/utils/cms-async-export'
+import {buildPlatformAnchorPayoutCsvColumns} from '@/utils/income-settlement-log-csv'
 import {formatWalletBalance} from '@/utils/number-format'
-import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 import {formatServerDateTime as formatDate, toServerDayStartUnix, toServerDayEndUnix} from '@/utils/server-datetime'
 
 const {t} = useI18n()
 const router = useRouter()
 const {can} = usePagePermission('PlatformAnchorPayoutList')
 const {canViewUserDetail, openUserDetail} = useUserDetailNav('PlatformAnchorPayoutList')
+const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
 const tableData = ref<AnchorIncomeSettlementLogItem[]>([])
 const selectedRows = ref<AnchorIncomeSettlementLogItem[]>([])
@@ -379,6 +313,18 @@ const handleReset = () => {
   fetchList()
 }
 
+const handleExport = async () => {
+  await runExport(
+    CMS_EXPORT_TYPE_ANCHOR_INCOME_SETTLEMENT_LOG,
+    {
+      headers: buildCsvHeaders(buildPlatformAnchorPayoutCsvColumns(t)),
+      includePayoutInfo: true,
+      ...buildFilterParams(),
+    },
+    `platform-anchor-payout-${Date.now()}.csv`,
+  )
+}
+
 const handleSelectionChange = (rows: AnchorIncomeSettlementLogItem[]) => {
   selectedRows.value = rows || []
 }
@@ -455,6 +401,12 @@ const openTransferInfo = (row: AnchorIncomeSettlementLogItem) => {
   })
 }
 
+const openSettlementDetail = (row: AnchorIncomeSettlementLogItem) => {
+  const id = String(row.id || '').trim()
+  if (!id) return
+  router.push({name: 'PlatformAnchorSettlementDetail', params: {id}})
+}
+
 const statusLabel = (status: number | undefined) => {
   const normalizedStatus = Number(status)
   if (normalizedStatus === 1) return t('pages.guildTransferList.statusApproved')
@@ -480,11 +432,6 @@ const handleSizeChange = (size: number) => {
   pagination.pageSize = size
   pagination.pageIndex = 1
   fetchList()
-}
-
-const formatSharePercent = (value: number | null | undefined) => {
-  if (value == null || Number.isNaN(value)) return '-'
-  return `${value}%`
 }
 
 const openAnchorDetail = (anchorId: string | number) => {

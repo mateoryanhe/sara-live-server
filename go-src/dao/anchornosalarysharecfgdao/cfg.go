@@ -5,7 +5,6 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"xr-game-server/core/str"
 	"xr-game-server/dto/anchornosalarysharecfgdto"
 	"xr-game-server/entity/live"
 )
@@ -49,23 +48,22 @@ func Exists(level uint32, excludeID uint64) bool {
 	return err == nil && total > 0
 }
 
-// ListAllOrderByThresholdDesc 结算时按钻石流水门槛由高到低匹配最高档。
-func ListAllOrderByThresholdDesc() []*entity.AnchorNoSalaryShareCfg {
+// ListAllOrderByLevelAsc 结算时按等级顺序读取；当前等级的流水值是升级到下一等级的边界。
+func ListAllOrderByLevelAsc() []*entity.AnchorNoSalaryShareCfg {
 	rows := make([]*entity.AnchorNoSalaryShareCfg, 0)
 	_ = g.DB().Model(string(entity.TbAnchorNoSalaryShareCfg)).
-		Order("social_total_diamond_revenue desc, level desc, id desc").Scan(&rows)
+		Order("level asc, id asc").Scan(&rows)
 	return rows
 }
 
 func GetList(req *anchornosalarysharecfgdto.AnchorNoSalaryShareCfgListReq) (int, []*anchornosalarysharecfgdto.AnchorNoSalaryShareCfgItem) {
 	sql := `select id, level, social_total_diamond_revenue, anchor_social_share_percent, guild_social_share_percent, created_at, updated_at
-            from anchor_no_salary_share_cfgs
-            order by level asc, id asc`
+	            from anchor_no_salary_share_cfgs
+	            order by level asc, id asc`
 	ctx := gctx.New()
-	countSQL := str.GetCountSQL(sql)
-	total, _ := g.DB().GetCount(ctx, countSQL, nil)
+	total, _ := g.DB().Model(string(entity.TbAnchorNoSalaryShareCfg)).Count()
 	sql += ` limit ` + strconv.Itoa(req.PageSize) + ` offset ` + strconv.Itoa(req.PageOffset())
 	ret := make([]*anchornosalarysharecfgdto.AnchorNoSalaryShareCfgItem, 0)
-	g.DB().GetScan(ctx, &ret, sql, nil)
+	g.DB().GetScan(ctx, &ret, sql)
 	return total, ret
 }

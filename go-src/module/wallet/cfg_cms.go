@@ -36,30 +36,17 @@ func SaveWalletExchangeCfg(_ context.Context, req *walletdto.SaveWalletExchangeC
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 
-	existing := cfgdao.GetWalletExchangeCfgCached()
-	row := &entity.WalletExchangeCfg{
-		GoldToDiamondRate:  req.GoldToDiamondRate,
-		ExchangeFeePercent: req.ExchangeFeePercent,
-		UsdToGoldRate:      req.UsdToGoldRate,
-	}
-	if req.ID > 0 {
-		if existing == nil || existing.ID != req.ID {
-			return nil, errercode.CreateCode(errercode.InvalidParam)
-		}
-		row.ID = req.ID
-		row.CreatedAt = existing.CreatedAt
-	} else if existing != nil {
-		row.ID = existing.ID
-		row.CreatedAt = existing.CreatedAt
-	}
-	row.UpdatedAt = time.Now()
-	if row.CreatedAt.IsZero() {
-		row.CreatedAt = row.UpdatedAt
-	}
-	if err := cfgdao.SaveWalletExchangeCfg(row); err != nil {
+	row, matched, err := cfgdao.UpdateWalletExchangeCfg(req.ID, func(row *entity.WalletExchangeCfg) {
+		row.GoldToDiamondRate = req.GoldToDiamondRate
+		row.ExchangeFeePercent = req.ExchangeFeePercent
+		row.UsdToGoldRate = req.UsdToGoldRate
+	})
+	if err != nil {
 		return nil, err
 	}
-	cfgdao.ReloadWalletExchangeCfgCache()
+	if !matched {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 	return &walletdto.SaveWalletExchangeCfgRes{
 		Success: true,
 		ID:      strconv.FormatUint(row.ID, 10),

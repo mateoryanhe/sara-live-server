@@ -11,12 +11,12 @@ import (
 	"xr-game-server/constants/followstatus"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/livefollowdao"
+	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dao/userloginlocationdao"
 	"xr-game-server/dto/userinfodto"
 	"xr-game-server/errercode"
 	"xr-game-server/module/aliyunmoderation"
-	"xr-game-server/module/anchorrank"
 	"xr-game-server/module/countryflagdeploy"
 	"xr-game-server/module/upload"
 )
@@ -33,6 +33,12 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 	prettyId := userExt.PrettyId
 	if prettyId == 0 {
 		prettyId = data.ID
+	}
+	unsettledTotalIncome := 0.0
+	if data.IsAnchor() {
+		if income := liveroomdao.GetLiveRoomIncomeUnsettledForCMS(targetUserId); income != nil {
+			unsettledTotalIncome = income.TotalIncome
+		}
 	}
 	ret := &userinfodto.GetUserInfoRes{
 		UserId:        data.ID,
@@ -52,7 +58,7 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		FollowCount:   int(userExt.FollowCount),
 		FollowerCount: int(userExt.FollowerCount),
 		FollowStatus:  resolveFollowStatus(authUserId, targetUserId),
-		TotalIncome:   float64(anchorrank.GetUserLast30DayRevenue(targetUserId)),
+		TotalIncome:   unsettledTotalIncome,
 		Age:           calcAge(data.Birthday),
 		FlagIcon:      ResolveUserFlagIcon(targetUserId),
 	}

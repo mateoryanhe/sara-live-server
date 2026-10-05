@@ -320,6 +320,25 @@ func filterRoomsByBlocked(rooms []*liveentity.LiveRoom, userId uint64) []*liveen
 	return filtered
 }
 
+// filterOutOneToOneRooms 普通直播间列表不展示 1v1 专用房间。
+func filterOutOneToOneRooms(rooms []*liveentity.LiveRoom) []*liveentity.LiveRoom {
+	if len(rooms) == 0 {
+		return rooms
+	}
+	filtered := make([]*liveentity.LiveRoom, 0, len(rooms))
+	for _, room := range rooms {
+		if room == nil {
+			continue
+		}
+		cfg := liveroomdao.GetLiveRoomCfgFromCache(room.ID)
+		if cfg != nil && cfg.Category == liveentity.LiveRoomCategoryOneToOne {
+			continue
+		}
+		filtered = append(filtered, room)
+	}
+	return filtered
+}
+
 // viewerCanSeeSeniorAnchorRoom App 列表中高级主播直播间对已登录用户可见(含 VIP=0,主播本人始终可见)
 func viewerCanSeeSeniorAnchorRoom(viewerUserId uint64, room *liveentity.LiveRoom) bool {
 	if room == nil {
@@ -394,7 +413,8 @@ func GetRoomList(ctx context.Context, req *liveroomdto.GetLiveRoomListReq) (*liv
 		}, nil
 	}
 
-	filtered := filterRoomsByStatus(cached, req.StatusFilter)
+	filtered := filterOutOneToOneRooms(cached)
+	filtered = filterRoomsByStatus(filtered, req.StatusFilter)
 	tagId := req.TagId
 	switch resolveSpecialRoomTagFilterMode(tagId) {
 	case specialRoomTagNameAll:
@@ -593,7 +613,8 @@ func GetHotLiveRoomList(ctx context.Context, req *liveroomdto.GetHotLiveRoomList
 		}, nil
 	}
 
-	filtered := filterRoomsBySeniorAnchor(cached, userId)
+	filtered := filterOutOneToOneRooms(cached)
+	filtered = filterRoomsBySeniorAnchor(filtered, userId)
 	filtered = filterRoomsByBlocked(filtered, userId)
 	total := len(filtered)
 	start, end := roomListPageRange(total, pageIndex, pageSize)
@@ -622,7 +643,8 @@ func GetNearbyLiveRoomList(ctx context.Context, req *liveroomdto.GetNearbyLiveRo
 		}, nil
 	}
 
-	liveRooms := filterRoomsByStatus(cached, int(userstatus.LiveRoomStatusLive))
+	liveRooms := filterOutOneToOneRooms(cached)
+	liveRooms = filterRoomsByStatus(liveRooms, int(userstatus.LiveRoomStatusLive))
 	liveRooms = filterRoomsBySeniorAnchor(liveRooms, userId)
 	liveRooms = filterRoomsByBlocked(liveRooms, userId)
 	currentIdx := findLiveRoomIndex(liveRooms, req.RoomId)

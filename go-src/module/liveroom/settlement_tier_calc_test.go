@@ -6,10 +6,10 @@ import (
 	"xr-game-server/entity/live"
 )
 
-func TestResolveAnchorSettlementTierUsesHighestMatchedThreshold(t *testing.T) {
+func TestResolveAnchorSettlementTierUsesPromotedSocialLevelAndHighestGameThreshold(t *testing.T) {
 	socialTiers := []*entity.AnchorSalarySocialShareCfg{
-		{SocialTotalDiamondRevenue: 1000, AnchorSocialSharePercent: 20, GuildSocialSharePercent: 8},
-		{SocialTotalDiamondRevenue: 100, AnchorSocialSharePercent: 10, GuildSocialSharePercent: 4},
+		{Level: 1, SocialTotalDiamondRevenue: 100, AnchorSocialSharePercent: 10, GuildSocialSharePercent: 4},
+		{Level: 2, SocialTotalDiamondRevenue: 1000, AnchorSocialSharePercent: 20, GuildSocialSharePercent: 8},
 	}
 	gameTiers := []*entity.AnchorGameShareCfg{
 		{GameTotalGoldRevenue: 500, AnchorGameSharePercent: 12, GuildGameSharePercent: 6},
@@ -24,20 +24,23 @@ func TestResolveAnchorSettlementTierUsesHighestMatchedThreshold(t *testing.T) {
 	}
 }
 
-func TestResolveAnchorSettlementTierBelowMinimumIsValidZero(t *testing.T) {
+func TestResolveAnchorSettlementTierUsesFirstSocialLevelBelowUpgradeBoundary(t *testing.T) {
 	got := resolveAnchorSettlementTier(true, 10, 10,
-		[]*entity.AnchorSalarySocialShareCfg{{SocialTotalDiamondRevenue: 100}}, nil,
+		[]*entity.AnchorSalarySocialShareCfg{{Level: 1, SocialTotalDiamondRevenue: 100, AnchorSocialSharePercent: 15, GuildSocialSharePercent: 5}}, nil,
 		[]*entity.AnchorGameShareCfg{{GameTotalGoldRevenue: 100}},
 	)
-	if got.AnchorSocialShareDiamond != 0 || got.GuildSocialShareDiamond != 0 || got.AnchorGameShareGold != 0 || got.GuildGameShareGold != 0 {
-		t.Fatalf("below-minimum turnover must resolve to zero shares: %+v", got)
+	if got.AnchorSocialShareDiamond != 1.5 || got.GuildSocialShareDiamond != 0.5 {
+		t.Fatalf("turnover below the first upgrade boundary must use level 1: %+v", got)
+	}
+	if got.AnchorGameShareGold != 0 || got.GuildGameShareGold != 0 {
+		t.Fatalf("game turnover below its minimum threshold must still resolve to zero: %+v", got)
 	}
 }
 
 func TestResolveNoSalarySocialShareUsesHighestMatchedThreshold(t *testing.T) {
 	tiers := []*entity.AnchorNoSalaryShareCfg{
-		{SocialTotalDiamondRevenue: 1000, AnchorSocialSharePercent: 15, GuildSocialSharePercent: 5},
-		{SocialTotalDiamondRevenue: 100, AnchorSocialSharePercent: 8, GuildSocialSharePercent: 3},
+		{Level: 1, SocialTotalDiamondRevenue: 100, AnchorSocialSharePercent: 8, GuildSocialSharePercent: 3},
+		{Level: 2, SocialTotalDiamondRevenue: 1000, AnchorSocialSharePercent: 15, GuildSocialSharePercent: 5},
 	}
 	got := resolveAnchorSettlementTier(false, 1500, 0, nil, tiers, nil)
 	if got.AnchorSocialSharePercent != 15 || got.GuildSocialSharePercent != 5 {
@@ -48,31 +51,106 @@ func TestResolveNoSalarySocialShareUsesHighestMatchedThreshold(t *testing.T) {
 	}
 }
 
-func TestResolveNoSalarySocialShareBelowMinimumIsValidZero(t *testing.T) {
+func TestResolveNoSalarySocialShareBelowUpgradeBoundaryUsesFirstLevel(t *testing.T) {
 	got := resolveAnchorSettlementTier(false, 99, 0, nil,
-		[]*entity.AnchorNoSalaryShareCfg{{SocialTotalDiamondRevenue: 100, AnchorSocialSharePercent: 15, GuildSocialSharePercent: 5}},
+		[]*entity.AnchorNoSalaryShareCfg{{Level: 1, SocialTotalDiamondRevenue: 100, AnchorSocialSharePercent: 15, GuildSocialSharePercent: 5}},
 		nil,
 	)
-	if got.AnchorSocialShareDiamond != 0 || got.GuildSocialShareDiamond != 0 {
-		t.Fatalf("below-minimum no-salary turnover must resolve to zero shares: %+v", got)
+	if got.AnchorSocialShareDiamond != 14.85 || got.GuildSocialShareDiamond != 4.95 {
+		t.Fatalf("turnover below the first upgrade boundary must use level 1: %+v", got)
 	}
 }
 
-func TestAnchorWeeklySettlementCfgReadyOnlyRequiresUsedRevenueConfig(t *testing.T) {
-	cfg := &anchorWeeklySettlementCfg{
+func TestSocialShareExactBoundaryPromotesToNextLevel(t *testing.T) {
+	salaryTiers := []*entity.AnchorSalarySocialShareCfg{
+		{Level: 1, SocialTotalDiamondRevenue: 200, AnchorSocialSharePercent: 10, GuildSocialSharePercent: 4},
+		{Level: 2, SocialTotalDiamondRevenue: 400, AnchorSocialSharePercent: 20, GuildSocialSharePercent: 8},
+	}
+	anchorPercent, guildPercent := matchSalarySocialSharePercent(200, salaryTiers)
+	if anchorPercent != 20 || guildPercent != 8 {
+		t.Fatalf("salary social turnover at level 1 boundary must promote to level 2: anchor=%v guild=%v", anchorPercent, guildPercent)
+	}
+
+	noSalaryTiers := []*entity.AnchorNoSalaryShareCfg{
+		{Level: 1, SocialTotalDiamondRevenue: 200, AnchorSocialSharePercent: 12, GuildSocialSharePercent: 3},
+		{Level: 2, SocialTotalDiamondRevenue: 400, AnchorSocialSharePercent: 18, GuildSocialSharePercent: 6},
+	}
+	anchorPercent, guildPercent = matchNoSalarySocialSharePercent(200, noSalaryTiers)
+	if anchorPercent != 18 || guildPercent != 6 {
+		t.Fatalf("no-salary social turnover at level 1 boundary must promote to level 2: anchor=%v guild=%v", anchorPercent, guildPercent)
+	}
+}
+
+func TestPlatformAnchorSettlementTierDropsGuildShare(t *testing.T) {
+	got := (anchorSettlementTierResult{
+		HasSalary:                true,
+		AnchorSocialSharePercent: 10,
+		GuildSocialSharePercent:  20,
+		AnchorGameSharePercent:   30,
+		GuildGameSharePercent:    40,
+		AnchorSocialShareDiamond: 50,
+		GuildSocialShareDiamond:  60,
+		AnchorGameShareGold:      70,
+		GuildGameShareGold:       80,
+	}).withoutGuildShare()
+
+	if got.GuildSocialSharePercent != 0 || got.GuildGameSharePercent != 0 ||
+		got.GuildSocialShareDiamond != 0 || got.GuildGameShareGold != 0 {
+		t.Fatalf("platform anchor settlement must not retain guild share: %+v", got)
+	}
+	if got.AnchorSocialSharePercent != 10 || got.AnchorGameSharePercent != 30 ||
+		got.AnchorSocialShareDiamond != 50 || got.AnchorGameShareGold != 70 {
+		t.Fatalf("platform anchor settlement must retain anchor share: %+v", got)
+	}
+}
+
+func TestPlatformAnchorSettlementRequiresMoreThanFiveUsd(t *testing.T) {
+	tests := []struct {
+		name   string
+		amount float64
+		want   bool
+	}{
+		{name: "below minimum", amount: 4.9999, want: false},
+		{name: "exact minimum", amount: 5, want: false},
+		{name: "over minimum", amount: 5.0001, want: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := platformAnchorSettlementAmountEligible(tt.amount, 5); got != tt.want {
+				t.Fatalf("platformAnchorSettlementAmountEligible(%v) = %v, want %v", tt.amount, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestAnchorWeeklySettlementCfgReadyRequiresAllRelevantConfig(t *testing.T) {
+	complete := &anchorWeeklySettlementCfg{
 		salaryCfgs:          []*entity.AnchorSalaryCfg{{}},
+		salarySocialTiers:   []*entity.AnchorSalarySocialShareCfg{{}},
 		noSalarySocialTiers: []*entity.AnchorNoSalaryShareCfg{{}},
+		withSalaryGameTiers: []*entity.AnchorGameShareCfg{{}},
+		noSalaryGameTiers:   []*entity.AnchorGameShareCfg{{}},
 	}
-	if !cfg.ready(true, &entity.LiveRoomIncomeAmounts{}) {
-		t.Fatal("zero-flow salaried settlement should only require salary config")
+	if !complete.ready(true) || !complete.ready(false) {
+		t.Fatal("complete settlement configuration should be ready")
 	}
-	if !cfg.ready(false, &entity.LiveRoomIncomeAmounts{TotalSocialIncome: 1}) {
-		t.Fatal("no-salary social flow should accept the social tier configuration")
+
+	tests := []struct {
+		name      string
+		hasSalary bool
+		cfg       *anchorWeeklySettlementCfg
+	}{
+		{name: "salary config missing", hasSalary: true, cfg: &anchorWeeklySettlementCfg{salarySocialTiers: []*entity.AnchorSalarySocialShareCfg{{}}, withSalaryGameTiers: []*entity.AnchorGameShareCfg{{}}}},
+		{name: "salary social config missing", hasSalary: true, cfg: &anchorWeeklySettlementCfg{salaryCfgs: []*entity.AnchorSalaryCfg{{}}, withSalaryGameTiers: []*entity.AnchorGameShareCfg{{}}}},
+		{name: "salary game config missing", hasSalary: true, cfg: &anchorWeeklySettlementCfg{salaryCfgs: []*entity.AnchorSalaryCfg{{}}, salarySocialTiers: []*entity.AnchorSalarySocialShareCfg{{}}}},
+		{name: "no-salary social config missing", hasSalary: false, cfg: &anchorWeeklySettlementCfg{noSalaryGameTiers: []*entity.AnchorGameShareCfg{{}}}},
+		{name: "no-salary game config missing", hasSalary: false, cfg: &anchorWeeklySettlementCfg{noSalarySocialTiers: []*entity.AnchorNoSalaryShareCfg{{}}}},
 	}
-	if cfg.ready(true, &entity.LiveRoomIncomeAmounts{TotalSocialIncome: 1}) {
-		t.Fatal("salaried social flow must require a social tier")
-	}
-	if cfg.ready(false, &entity.LiveRoomIncomeAmounts{TotalGameIncome: 1}) {
-		t.Fatal("no-salary game flow must require a game tier")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.cfg.ready(tt.hasSalary) {
+				t.Fatal("settlement must stop when a required configuration is missing")
+			}
+		})
 	}
 }

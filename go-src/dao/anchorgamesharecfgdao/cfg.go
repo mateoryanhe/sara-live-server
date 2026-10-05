@@ -5,7 +5,6 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"xr-game-server/core/str"
 	"xr-game-server/dto/anchorgamesharecfgdto"
 	"xr-game-server/entity/live"
 )
@@ -57,13 +56,13 @@ func ListAllBySalaryTypeOrderByThresholdDesc(salaryType uint32) []*entity.Anchor
 func GetList(req *anchorgamesharecfgdto.AnchorGameShareCfgListReq) (int, []*anchorgamesharecfgdto.AnchorGameShareCfgItem) {
 	sql := `select id, salary_type, level, game_total_gold_revenue, anchor_game_share_percent, guild_game_share_percent, created_at, updated_at
             from anchor_game_share_cfgs
-            where salary_type = ` + strconv.FormatUint(uint64(req.SalaryType), 10) + `
-            order by level asc, id asc`
+	            where salary_type = ` + strconv.FormatUint(uint64(req.SalaryType), 10) + `
+	            order by level asc, id asc`
 	ctx := gctx.New()
-	countSQL := str.GetCountSQL(sql)
-	total, _ := g.DB().GetCount(ctx, countSQL, nil)
+	total, _ := g.DB().Model(string(entity.TbAnchorGameShareCfg)).
+		Where("salary_type = ?", req.SalaryType).Count()
 	sql += ` limit ` + strconv.Itoa(req.PageSize) + ` offset ` + strconv.Itoa(req.PageOffset())
 	ret := make([]*anchorgamesharecfgdto.AnchorGameShareCfgItem, 0)
-	g.DB().GetScan(ctx, &ret, sql, nil)
+	g.DB().GetScan(ctx, &ret, sql)
 	return total, ret
 }

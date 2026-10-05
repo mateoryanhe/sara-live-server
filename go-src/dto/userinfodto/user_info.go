@@ -32,7 +32,7 @@ type GetUserInfoRes struct {
 	FollowCount   int     `json:"followCount" dc:"用户关注数"`
 	FollowerCount int     `json:"followerCount" dc:"用户粉丝数"`
 	FollowStatus  uint8   `json:"followStatus" dc:"关注状态(0未关注,1已关注,2互为好友)"`
-	TotalIncome   float64 `json:"totalIncome" dc:"最近30天收益(钻石,来自主播红人榜,未上榜为0)"`
+	TotalIncome   float64 `json:"totalIncome" dc:"未结算累计总收益(钻石，包含社交流水及游戏金币折算收益)"`
 	Age           int64   `json:"age"`
 	FlagIcon      string  `json:"flagIcon" dc:"国旗完整URL(按注册/登录国家简码+当前国旗版本,无则空)"`
 }

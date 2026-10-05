@@ -321,6 +321,7 @@ export interface AnchorListItem {
     liveStatus?: number
     totalIncome?: number
     totalSocialIncome?: number
+    totalGameIncome?: number
     totalGiftIncome?: number
     totalPaidDanmakuIncome?: number
     totalVideoCallIncome?: number
@@ -1704,6 +1705,7 @@ export interface IncomeSettlementLogAmounts {
 }
 
 export interface AnchorIncomeSettlementLogQuery extends PageQuery {
+    settlementId?: string
     roomId?: string
     anchorIds?: string[]
     startTime?: number
@@ -1980,6 +1982,27 @@ export interface SaveEffectiveLiveCfgReq {
 }
 
 export interface SaveEffectiveLiveCfgRes {
+    success: boolean
+    id: string
+}
+
+export interface PlatformAnchorSettlementCfg {
+    id: string
+    minimumSettlementUsd: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetPlatformAnchorSettlementCfgRes {
+    cfg: PlatformAnchorSettlementCfg | null
+}
+
+export interface SavePlatformAnchorSettlementCfgReq {
+    id?: number
+    minimumSettlementUsd: number
+}
+
+export interface SavePlatformAnchorSettlementCfgRes {
     success: boolean
     id: string
 }

@@ -1,9 +1,12 @@
 package liveroom
 
 import (
+	stdmath "math"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"xr-game-server/core/math"
+	xmath "xr-game-server/core/math"
+	"xr-game-server/core/syndb"
 	"xr-game-server/dao/guilddao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/entity/live"
@@ -25,14 +28,6 @@ func settleOnShelfGuilds() {
 	g.Log().Infof(ctx, "guild weekly settlement done")
 }
 
-// resolveGuildSettlementSharePercent 币商工会用自身 sharePercent;普通工会用全局工会分佣
-func resolveGuildSettlementSharePercent(guild *entity.LiveGuild) float64 {
-	if guild != nil && guild.GuildType == entity.LiveGuildTypeCoinMerchant {
-		return guild.SharePercent
-	}
-	return liverevenuesharecfg.ResolveGuildSharePercent()
-}
-
 func settleOneGuild(guild *entity.LiveGuild) bool {
 	if guild == nil || guild.ID == 0 {
 		return false
@@ -46,51 +41,84 @@ func settleOneGuild(guild *entity.LiveGuild) bool {
 	if unsettled == nil {
 		return false
 	}
-	hasDaily := len(dailyRows) > 0
-	hasUnsettled := !unsettled.IsZero()
-	guildSharePercent := resolveGuildSettlementSharePercent(guild)
-	if !hasDaily && !hasUnsettled {
-		weeklySalary := liveroomdao.TakeGuildWeeklyAnchorSalary(guildId)
-		weeklyAnchorShareAmountUsd := liveroomdao.TakeGuildWeeklyAnchorShareAmountUsd(guildId)
-		if weeklySalary == 0 && weeklyAnchorShareAmountUsd == 0 {
-			return false
+	snap := unsettled.Snapshot()
+	if !snap.HasSettlementFlow() {
+		liveroomdao.ResetGuildWeeklyAnchorLegacySettlement(guildId)
+		if len(dailyRows) > 0 {
+			liveroomdao.MarkDailyGuildEffectiveLivesSettled(dailyRows)
 		}
-		weeklySalaryUsd := wallet.CalcDiamondToUsd(weeklySalary)
-		receivableUsd := math.AddFloat64(weeklyAnchorShareAmountUsd, weeklySalaryUsd)
-		_ = entity.NewGuildIncomeSettlementLog(guildId, &entity.LiveRoomIncomeAmounts{}, weeklySalary, 0, 0, receivableUsd, guildSharePercent)
-		return true
+		return false
 	}
 
-	snap := unsettled.SnapshotAndClear()
-	weeklySalary := liveroomdao.TakeGuildWeeklyAnchorSalary(guildId)
-	weeklyAnchorShareAmountUsd := liveroomdao.TakeGuildWeeklyAnchorShareAmountUsd(guildId)
-	shareAmount := liverevenuesharecfg.CalcGuildSettlementShareAmount(snap.TotalIncome, guildSharePercent)
-	shareAmountUsd := wallet.CalcDiamondToUsd(shareAmount)
-	weeklySalaryUsd := wallet.CalcDiamondToUsd(weeklySalary)
-	receivableUsd := math.AddFloat64(shareAmountUsd, math.AddFloat64(weeklyAnchorShareAmountUsd, weeklySalaryUsd))
+	// 币商工会按工会总流水统一结算。名下主播不参与底薪及个人社交/游戏分佣。
+	guildSharePercent := guild.SharePercent
+	exchangeCfg := wallet.GetExchangeCfgSnapshot()
+	socialShareDiamond, gameShareGold, gameShareDiamond, totalShareDiamond, receivableUsd :=
+		calcCoinMerchantGuildSettlement(&snap, guildSharePercent, exchangeCfg)
+	row := entity.NewGuildIncomeSettlementLogWithBreakdown(
+		guildId,
+		&snap,
+		0,
+		totalShareDiamond,
+		receivableUsd,
+		receivableUsd,
+		guildSharePercent,
+		&entity.GuildIncomeSettlementBreakdown{
+			SettlementRuleType:       entity.GuildIncomeSettlementRuleLegacy,
+			GuildSocialShareAmount:   socialShareDiamond,
+			GuildGameShareAmountGold: gameShareGold,
+		},
+	)
+	row.SetPayoutConversion(exchangeCfg.GoldToDiamondRate, exchangeCfg.UsdToGoldRate, gameShareDiamond, totalShareDiamond, receivableUsd)
+	if !syndb.FlushUntilIdle(settlementPersistTimeout) ||
+		!liveroomdao.VerifyGuildIncomeSettlementLogPersisted(row) ||
+		!liveroomdao.VerifyGuildPayoutConversionPersisted(row) {
+		g.Log().Errorf(gctx.New(), "coin merchant guild settlement retained: log persist failed guildId=%d logId=%d", guildId, row.ID)
+		return false
+	}
+
+	// 结算单及换算快照确认落库后再扣除快照，保留落库期间的并发新增流水。
+	unsettled.ConsumeSnapshot(&snap)
+	liveroomdao.ResetGuildWeeklyAnchorLegacySettlement(guildId)
 	settled := liveroomdao.GetGuildIncomeSettled(guildId)
 	if settled != nil {
 		settled.AddAmounts(&snap)
-		settled.AddSettlementShareAmount(shareAmount)
-		settled.AddSettlementShareAmountUsd(shareAmountUsd)
-		if shareAmountUsd != 0 {
-			settled.AddSettlementReceivableUsd(shareAmountUsd)
+		settled.AddSettlementShareAmount(totalShareDiamond)
+		settled.AddSettlementShareAmountUsd(receivableUsd)
+		if receivableUsd != 0 {
+			settled.AddSettlementReceivableUsd(receivableUsd)
 		}
 	}
-	if shareAmount != 0 {
+	if totalShareDiamond != 0 {
 		if total := liveroomdao.GetGuildIncomeTotal(guildId); total != nil {
-			total.AddSettlementShareAmount(shareAmount)
-			total.AddSettlementShareAmountUsd(shareAmountUsd)
+			total.AddSettlementShareAmount(totalShareDiamond)
+			total.AddSettlementShareAmountUsd(receivableUsd)
 		}
 	}
-	if shareAmountUsd != 0 {
+	if receivableUsd != 0 {
 		if total := liveroomdao.GetGuildIncomeTotal(guildId); total != nil {
-			total.AddSettlementReceivableUsd(shareAmountUsd)
+			total.AddSettlementReceivableUsd(receivableUsd)
 		}
 	}
-	if hasDaily {
+	if len(dailyRows) > 0 {
 		liveroomdao.MarkDailyGuildEffectiveLivesSettled(dailyRows)
 	}
-	_ = entity.NewGuildIncomeSettlementLog(guildId, &snap, weeklySalary, shareAmount, shareAmountUsd, receivableUsd, guildSharePercent)
 	return true
+}
+
+// calcCoinMerchantGuildSettlement 按“工会累计总流水 * 币商工会比例”计算。
+// 社交流水单位为钻石；游戏分佣保留金币快照，再按同一份结算汇率换算为钻石和 USD。
+func calcCoinMerchantGuildSettlement(snap *entity.LiveRoomIncomeAmounts, guildSharePercent float64, exchangeCfg wallet.ExchangeCfgSnapshot) (
+	socialShareDiamond, gameShareGold, gameShareDiamond, totalShareDiamond, receivableUsd float64,
+) {
+	if snap == nil {
+		return 0, 0, 0, 0, 0
+	}
+	socialShareDiamond = liverevenuesharecfg.CalcGuildSettlementShareAmount(snap.TotalSocialIncome, guildSharePercent)
+	gameShareGold = liverevenuesharecfg.CalcGuildSettlementShareAmount(snap.TotalGameIncome, guildSharePercent)
+	gameShareDiamond = wallet.CalcGoldToDiamondWithSnapshot(gameShareGold, exchangeCfg)
+	totalShareDiamond = xmath.AddFloat64(socialShareDiamond, gameShareDiamond)
+	receivableUsd = wallet.CalcDiamondToUsdWithSnapshot(totalShareDiamond, exchangeCfg)
+	receivableUsd = stdmath.Round(receivableUsd*10000) / 10000
+	return
 }

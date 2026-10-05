@@ -305,6 +305,7 @@ func fillAnchorRoomFields(item *accountdto.AnchorListItem, room *liveentity.Live
 	if income := liveroomdao.GetLiveRoomIncomeUnsettledForCMS(room.ID); income != nil {
 		item.TotalIncome = income.TotalIncome
 		item.TotalSocialIncome = income.TotalSocialIncome
+		item.TotalGameIncome = income.TotalGameIncome
 		item.TotalGiftIncome = income.TotalGiftIncome
 		item.TotalPaidDanmakuIncome = income.TotalPaidDanmakuIncome
 		item.TotalVideoCallIncome = income.TotalVideoCallIncome

@@ -9,6 +9,13 @@ export type SettlementLogCsvRow = IncomeSettlementLogAmounts & {
   roomNickname?: string
   guildId?: string
   guildName?: string
+  status?: number
+  transferAt?: string | null
+  transferOrderId?: string
+  transferPlatformNo?: string
+  transferLocalAmount?: number
+  transferCurrency?: string
+  transferFailMsg?: string
   createdAt?: string | null
 }
 
@@ -58,6 +65,28 @@ export function buildAnchorSettlementLogCsvColumns(
     {header: t(`${ns}.guildGameSharePercent`), value: row => row.guildGameSharePercent ?? ''},
     {header: t(`${ns}.guildGameShareAmountGold`), value: row => row.guildGameShareAmountGold ?? ''},
     {header: t('common.createdAt'), value: row => formatServerDateTimeForExport(row.createdAt)},
+  ]
+}
+
+export function buildPlatformAnchorPayoutCsvColumns(
+  t: TranslateFn,
+): CsvColumn<SettlementLogCsvRow>[] {
+  const settlementColumns = buildAnchorSettlementLogCsvColumns(t)
+  const settlementDetailColumns = settlementColumns.slice(3, settlementColumns.length - 1)
+  return [
+    {header: t('pages.anchorIncomeSettlementLogList.logId'), value: row => row.id},
+    {header: t('common.createdAt'), value: row => formatServerDateTimeForExport(row.createdAt)},
+    {header: t('pages.anchorIncomeSettlementLogList.roomId'), value: row => row.roomId ?? ''},
+    {header: t('pages.anchorIncomeSettlementLogList.roomNickname'), value: row => row.roomNickname ?? ''},
+    {header: t('pages.guildTransferList.settlementReceivableUsd'), value: row => row.settlementReceivableUsd ?? ''},
+    {header: t('pages.guildTransferList.status'), value: row => row.status ?? ''},
+    {header: t('pages.guildTransferList.transferCurrency'), value: row => row.transferCurrency ?? ''},
+    {header: t('pages.guildTransferList.transferLocalAmount'), value: row => row.transferLocalAmount ?? ''},
+    {header: t('pages.guildTransferList.transferOrderId'), value: row => row.transferOrderId ?? ''},
+    {header: t('pages.guildTransferList.thirdPartyOrderId'), value: row => row.transferPlatformNo ?? ''},
+    {header: t('pages.guildTransferList.transferAt'), value: row => formatServerDateTimeForExport(row.transferAt)},
+    {header: t('pages.guildTransferList.transferFailMsg'), value: row => row.transferFailMsg ?? ''},
+    ...settlementDetailColumns,
   ]
 }
 

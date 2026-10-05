@@ -118,6 +118,8 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'save', label: '保存金币兑换配置'},
         {key: 'viewEffectiveLive', label: '查询有效直播时长配置'},
         {key: 'saveEffectiveLive', label: '保存有效直播时长配置'},
+        {key: 'viewPlatformAnchorSettlement', label: '查询平台主播结算配置'},
+        {key: 'savePlatformAnchorSettlement', label: '保存平台主播结算配置'},
     ],
 	AnchorIncomeSettlementLogList: [
 		BTN.view,
@@ -127,6 +129,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
 	PlatformAnchorPayoutList: [
 		BTN.view,
 		BTN.search,
+		BTN.export,
 		{key: 'batchApprove', label: '批量审核'},
 		{key: 'batchTransfer', label: '批量代付'},
 		{key: 'transferInfo', label: '编辑收款信息'},

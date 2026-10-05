@@ -27,7 +27,7 @@ func settleOneNormalGuildTiered(guild *entity.LiveGuild) bool {
 	}
 	weekly := liveroomdao.GetGuildWeeklyAnchorSettlement(guild.ID)
 	snap := unsettled.Snapshot()
-	if len(dailyRows) == 0 && snap.IsZero() && weekly.IsZero() {
+	if len(dailyRows) == 0 && !snap.HasSettlementFlow() && weekly.IsZero() {
 		return false
 	}
 	exchangeCfg := wallet.GetExchangeCfgSnapshot()

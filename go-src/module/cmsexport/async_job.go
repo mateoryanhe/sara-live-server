@@ -230,7 +230,7 @@ func executeExportJob(ctx context.Context, exportType string, cmsUserId uint64, 
 	case cmsexportdto.ExportTypeVideoCallLog:
 		return exportVideoCallLogCSV(ctx, cmsUserId, payload, onProgress)
 	case cmsexportdto.ExportTypeAnchorIncomeSettlementLog:
-		return exportAnchorIncomeSettlementLogCSV(ctx, payload, onProgress)
+		return exportAnchorIncomeSettlementLogCSV(ctx, cmsUserId, payload, onProgress)
 	case cmsexportdto.ExportTypeGuildIncomeSettlementLog:
 		return exportGuildIncomeSettlementLogCSV(ctx, cmsUserId, payload, onProgress)
 	case cmsexportdto.ExportTypeGuildAnchorIncomeSettlementLog:

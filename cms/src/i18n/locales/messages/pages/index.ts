@@ -33,6 +33,7 @@ import {randomNicknameCfgMessages} from './random-nickname-cfg'
 import {customerServiceCfgMessages} from './customer-service-cfg'
 import {walletExchangeCfgMessages} from './wallet-exchange-cfg'
 import {effectiveLiveCfgMessages} from './effective-live-cfg'
+import {platformAnchorSettlementCfgMessages} from './platform-anchor-settlement-cfg'
 import {paymentCountryCfgMessages} from './payment-country-cfg'
 import {agoraCfgMessages} from './agora-cfg'
 import {billingListMessages} from './billing-list'
@@ -128,6 +129,7 @@ const pageMessageBuilders = [
   ['customerServiceCfg', customerServiceCfgMessages],
   ['walletExchangeCfg', walletExchangeCfgMessages],
   ['effectiveLiveCfg', effectiveLiveCfgMessages],
+  ['platformAnchorSettlementCfg', platformAnchorSettlementCfgMessages],
   ['paymentCountryCfg', paymentCountryCfgMessages],
   ['agoraCfg', agoraCfgMessages],
   ['billingList', billingListMessages],

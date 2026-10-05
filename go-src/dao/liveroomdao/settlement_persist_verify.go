@@ -70,6 +70,9 @@ func VerifyGuildIncomeSettlementLogPersisted(expected *live.GuildIncomeSettlemen
 		settlementFloatEqual(detail.TotalSocialIncome, expected.TotalSocialIncome) &&
 		settlementFloatEqual(detail.TotalGameIncome, expected.TotalGameIncome) &&
 		settlementFloatEqual(detail.SettlementSalary, expected.SettlementSalary) &&
+		settlementFloatEqual(detail.SettlementShareAmount, expected.SettlementShareAmount) &&
+		settlementFloatEqual(detail.SettlementShareAmountUsd, expected.SettlementShareAmountUsd) &&
+		settlementFloatEqual(detail.GuildSharePercent, expected.GuildSharePercent) &&
 		settlementFloatEqual(detail.AnchorSocialShareAmount, expected.AnchorSocialShareAmount) &&
 		settlementFloatEqual(detail.GuildSocialShareAmount, expected.GuildSocialShareAmount) &&
 		settlementFloatEqual(detail.AnchorGameShareAmountGold, expected.AnchorGameShareAmountGold) &&

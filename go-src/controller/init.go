@@ -39,6 +39,7 @@ func Init() {
 	initAgoraCMSController()                         // 声网(CMS)
 	initLiveCfgCMSController()                       // 直播配置(CMS)
 	initEffectiveLiveCfgCMSController()              // 有效直播时长配置(CMS)
+	initPlatformAnchorSettlementCfgCMSController()   // 平台主播最低结算金额配置(CMS)
 	initAliyunTextModerationCMSController()          // 阿里云文本审核(CMS)
 	initPrivacyPolicyCMSController()                 // 隐私政策配置(CMS)
 	initGooglePlayCMSController()                    // Google Play 配置(CMS)

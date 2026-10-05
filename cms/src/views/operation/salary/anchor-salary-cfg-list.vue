@@ -68,7 +68,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onActivated, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {anchorSalaryCfgApi} from '@/api/modules/anchor-salary-cfg'
@@ -207,9 +207,8 @@ const handleDelete = async (row: AnchorSalaryCfg) => {
   }
 }
 
-onMounted(() => {
-  fetchList()
-})
+// 页面由布局 keep-alive 缓存，每次打开都重新读取服务器数据。
+onActivated(fetchList)
 </script>
 
 <style scoped>

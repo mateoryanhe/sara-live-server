@@ -162,6 +162,19 @@ func (r *LiveRecord) AddTotalGameBet(v float64) {
 	})
 }
 
+// AddGameEarn 游戏收益:游戏流水按金币保存，展示用总收益按折算后的钻石保存。
+func (r *LiveRecord) AddGameEarn(goldAmount, diamondAmount float64) {
+	if goldAmount <= 0 {
+		return
+	}
+	r.withLock(func() {
+		r.addFloatLocked(LiveRecordTotalGameBet, &r.TotalGameBet, goldAmount)
+		if diamondAmount > 0 {
+			r.addFloatLocked(LiveRecordTotalIncome, &r.TotalIncome, diamondAmount)
+		}
+	})
+}
+
 func (r *LiveRecord) AddTotalGiftSender(val uint64) {
 	r.withLock(func() {
 		r.addUintLocked(LiveRecordTotalGiftSender, &r.TotalGiftSender, val)

@@ -8,7 +8,6 @@ import (
 
 	"xr-game-server/core/xrlog"
 	"xr-game-server/core/xrtime"
-	"xr-game-server/dao/anchorsalarycfgdao"
 	"xr-game-server/dao/guilddao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/entity/live"
@@ -44,7 +43,6 @@ func BatchSettleGuildsImmediately(ctx context.Context, guildIds []uint64) (*Batc
 
 	result := &BatchGuildSettlementResult{FailGuildIds: make([]uint64, 0)}
 	tierCfg := loadAnchorWeeklySettlementCfg()
-	legacySalaryCfgs := anchorsalarycfgdao.ListAllOrderBySalaryDesc()
 	periodEnd := xrtime.NextWeekStart(time.Now())
 	xrlog.DetailLog.Infof(ctx, "batch immediate guild settlement start guildIds=%v periodEnd=%s", guildIds, periodEnd.Format(time.RFC3339))
 
@@ -54,7 +52,7 @@ func BatchSettleGuildsImmediately(ctx context.Context, guildIds []uint64) (*Batc
 			result.FailGuildIds = append(result.FailGuildIds, guildId)
 			continue
 		}
-		switch settleOneGuildImmediately(guild, tierCfg, legacySalaryCfgs, periodEnd) {
+		switch settleOneGuildImmediately(guild, tierCfg, periodEnd) {
 		case immediateGuildSettlementCreated:
 			result.SettledCount++
 		case immediateGuildSettlementNoData:
@@ -72,7 +70,6 @@ func BatchSettleGuildsImmediately(ctx context.Context, guildIds []uint64) (*Batc
 func settleOneGuildImmediately(
 	guild *entity.LiveGuild,
 	tierCfg *anchorWeeklySettlementCfg,
-	legacySalaryCfgs []*entity.AnchorSalaryCfg,
 	periodEnd time.Time,
 ) immediateGuildSettlementOutcome {
 	if guild == nil || guild.ID == 0 {
@@ -89,7 +86,7 @@ func settleOneGuildImmediately(
 			if room == nil || room.ID == 0 {
 				continue
 			}
-			settleOneAnchor(room, legacySalaryCfgs, coinMerchantGuildIds)
+			settleOneAnchor(room, coinMerchantGuildIds)
 		}
 	} else {
 		// 与周结算一致：先检查整家工会，任一主播缺配置时不消费任何流水。

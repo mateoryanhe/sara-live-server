@@ -7,7 +7,6 @@ import (
 	"xr-game-server/module/aliyunmoderation"
 	"xr-game-server/module/anchornosalarysharecfg"
 	"xr-game-server/module/anchorrank"
-	"xr-game-server/module/anchorsalarysocialsharecfg"
 	"xr-game-server/module/apppkg"
 	"xr-game-server/module/appversioncfg"
 	"xr-game-server/module/auth"
@@ -21,7 +20,6 @@ import (
 	"xr-game-server/module/customerservice"
 	"xr-game-server/module/dbbackup"
 	"xr-game-server/module/domainsite"
-	"xr-game-server/module/effectivelivecfg"
 	"xr-game-server/module/fiatcurrency"
 	"xr-game-server/module/game"
 	"xr-game-server/module/gameconsumrank"
@@ -84,7 +82,6 @@ func Init() {
 	agora.Init()
 	call.Init()
 	livecfg.Init()
-	effectivelivecfg.Init()
 	verification_code.Init()
 	aliyunmoderation.Init()
 	privacypolicy.Init()
@@ -95,7 +92,6 @@ func Init() {
 	simulatordevicewhitelist.Init()
 	customerservice.Init()
 	anchornosalarysharecfg.Init()
-	anchorsalarysocialsharecfg.Init()
 	liverevenuesharecfg.Init()
 	logquery.Init()
 

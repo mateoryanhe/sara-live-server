@@ -12,45 +12,6 @@ import (
 	"xr-game-server/errercode"
 )
 
-type defaultTier struct {
-	level                     uint32
-	socialTotalDiamondRevenue float64
-	anchorSocialSharePercent  float64
-}
-
-var defaultTiers = []defaultTier{
-	{level: 1, socialTotalDiamondRevenue: 10, anchorSocialSharePercent: 1},
-	{level: 2, socialTotalDiamondRevenue: 11, anchorSocialSharePercent: 2},
-	{level: 3, socialTotalDiamondRevenue: 12, anchorSocialSharePercent: 3},
-	{level: 4, socialTotalDiamondRevenue: 13, anchorSocialSharePercent: 4},
-	{level: 5, socialTotalDiamondRevenue: 14, anchorSocialSharePercent: 5},
-	{level: 6, socialTotalDiamondRevenue: 15, anchorSocialSharePercent: 6},
-	{level: 7, socialTotalDiamondRevenue: 16, anchorSocialSharePercent: 7},
-	{level: 8, socialTotalDiamondRevenue: 17, anchorSocialSharePercent: 8},
-	{level: 9, socialTotalDiamondRevenue: 18, anchorSocialSharePercent: 9},
-	{level: 10, socialTotalDiamondRevenue: 19, anchorSocialSharePercent: 10},
-	{level: 11, socialTotalDiamondRevenue: 20, anchorSocialSharePercent: 11},
-	{level: 12, socialTotalDiamondRevenue: 21, anchorSocialSharePercent: 12},
-}
-
-func Init() {
-	seedDefaultsIfEmpty()
-}
-
-func seedDefaultsIfEmpty() {
-	if anchorsalarysocialsharecfgdao.CountAll() > 0 {
-		return
-	}
-	for _, tier := range defaultTiers {
-		_ = anchorsalarysocialsharecfgdao.Create(&entity.AnchorSalarySocialShareCfg{
-			Level:                     tier.level,
-			SocialTotalDiamondRevenue: tier.socialTotalDiamondRevenue,
-			AnchorSocialSharePercent:  tier.anchorSocialSharePercent,
-			GuildSocialSharePercent:   0,
-		})
-	}
-}
-
 func GetList(_ context.Context, req *anchorsalarysocialsharecfgdto.AnchorSalarySocialShareCfgListReq) (*httpserver.CMSQueryResp, error) {
 	total, list := anchorsalarysocialsharecfgdao.GetList(req)
 	return httpserver.NewCMSQueryResp(total, list), nil
@@ -114,11 +75,11 @@ func validPercent(value float64) bool {
 }
 
 func validRevenue(value float64) bool {
-	return !math.IsNaN(value) && !math.IsInf(value, 0) && value >= 0
+	return !math.IsNaN(value) && !math.IsInf(value, 0) && value >= 0 && math.Trunc(value) == value
 }
 
 func roundRevenue(value float64) float64 {
-	return math.Round(value*10000) / 10000
+	return math.Trunc(value)
 }
 
 func roundPercent(value float64) float64 {

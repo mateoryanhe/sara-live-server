@@ -6,19 +6,13 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/event"
+	"xr-game-server/core/syndb"
 	"xr-game-server/core/xrtime"
-	"xr-game-server/dao/anchorsalarycfgdao"
 	"xr-game-server/dao/guilddao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/entity/live"
 	"xr-game-server/gameevent"
-	"xr-game-server/module/liverevenuesharecfg"
-	"xr-game-server/module/wallet"
 )
-
-// writeAnchorSettlementUsd 仅控制旧版结算是否把美金写入主播账面。
-// 分档结算下，工会主播仍由工会归集；平台主播在实际代付时单独换算并保存 USD。
-const writeAnchorSettlementUsd = false
 
 func initAnchorSettlement() {
 	event.Sub(gameevent.WeekEvent, onWeekAnchorSettlement)
@@ -33,7 +27,6 @@ func onWeekAnchorSettlement(_ any) {
 
 // settleOnShelfAnchors 周一0点:结算全部上架主播薪资+未结算收益
 func settleOnShelfAnchors() {
-	cfgs := anchorsalarycfgdao.ListAllOrderBySalaryDesc()
 	tierCfg := loadAnchorWeeklySettlementCfg()
 	periodEnd := xrtime.WeekStart(time.Now())
 	rooms := liveroomdao.GetAllLiveRoom()
@@ -41,7 +34,7 @@ func settleOnShelfAnchors() {
 	ctx := gctx.New()
 	liveroomdao.ResetGuildWeeklyAnchorSalary()
 	liveroomdao.ResetGuildWeeklyAnchorSettlement()
-	g.Log().Infof(ctx, "anchor weekly settlement start, rooms=%d, salaryCfgs=%d, writeUsd=%v", len(rooms), len(cfgs), writeAnchorSettlementUsd)
+	g.Log().Infof(ctx, "anchor weekly settlement start, rooms=%d", len(rooms))
 	// 先检查整个普通工会的配置；任一主播缺少所需配置，本轮整家工会都不结算。
 	for _, room := range rooms {
 		if room == nil || room.ID == 0 || room.GuildId == 0 || isCoinMerchantGuildAnchor(room, coinMerchantGuildIds) {
@@ -63,7 +56,7 @@ func settleOnShelfAnchors() {
 			continue
 		}
 		if isCoinMerchantGuildAnchor(room, coinMerchantGuildIds) {
-			settleOneAnchor(room, cfgs, coinMerchantGuildIds)
+			settleOneAnchor(room, coinMerchantGuildIds)
 			continue
 		}
 		if liveroomdao.IsGuildWeeklyAnchorSettlementBlocked(room.GuildId) {
@@ -86,14 +79,6 @@ func loadCoinMerchantGuildIdSet() map[uint64]struct{} {
 	return set
 }
 
-// resolveAnchorSettlementSharePercent 币商工会名下主播流水分佣按 0%;其余用全局主播分佣
-func resolveAnchorSettlementSharePercent(room *entity.LiveRoom, coinMerchantGuildIds map[uint64]struct{}) float64 {
-	if isCoinMerchantGuildAnchor(room, coinMerchantGuildIds) {
-		return 0
-	}
-	return liverevenuesharecfg.ResolveAnchorSharePercent()
-}
-
 func isCoinMerchantGuildAnchor(room *entity.LiveRoom, coinMerchantGuildIds map[uint64]struct{}) bool {
 	if room == nil || room.GuildId == 0 || coinMerchantGuildIds == nil {
 		return false
@@ -102,69 +87,36 @@ func isCoinMerchantGuildAnchor(room *entity.LiveRoom, coinMerchantGuildIds map[u
 	return ok
 }
 
-func settleOneAnchor(room *entity.LiveRoom, cfgs []*entity.AnchorSalaryCfg, coinMerchantGuildIds map[uint64]struct{}) {
+// settleOneAnchor 仅归档币商工会主播的原始流水。
+// 币商主播没有底薪，也没有主播个人社交/游戏分佣；实际金额只在工会级结算一次。
+func settleOneAnchor(room *entity.LiveRoom, coinMerchantGuildIds map[uint64]struct{}) {
+	if !isCoinMerchantGuildAnchor(room, coinMerchantGuildIds) {
+		return
+	}
 	roomId := room.ID
 	dailyRows := liveroomdao.ListRecentUnsettledDailyEffectiveLives(roomId)
 	unsettled := liveroomdao.GetLiveRoomIncomeUnsettled(roomId)
 	if unsettled == nil {
 		return
 	}
-	coinMerchantAnchor := isCoinMerchantGuildAnchor(room, coinMerchantGuildIds)
-	// 币商工会无开播底薪
-	salary := float64(0)
-	if !coinMerchantAnchor {
-		salary = matchAnchorSalaryAmount(countAnchorWeeklyWorkDays(dailyRows), dailyRows, cfgs)
-	}
-	hasDaily := len(dailyRows) > 0
-	hasUnsettled := !unsettled.IsZero()
-	if !hasDaily && !hasUnsettled && salary == 0 {
+	snap := unsettled.Snapshot()
+	if len(dailyRows) == 0 && !snap.HasSettlementFlow() {
 		return
 	}
 
-	snap := unsettled.SnapshotAndClear()
-	anchorSharePercent := resolveAnchorSettlementSharePercent(room, coinMerchantGuildIds)
-	flowCommission := liverevenuesharecfg.CalcSettlementShareAmount(0, snap.TotalIncome, anchorSharePercent)
-	flowCommissionUsd := wallet.CalcDiamondToUsd(flowCommission)
-	shareAmount := liverevenuesharecfg.CalcSettlementShareAmount(salary, snap.TotalIncome, anchorSharePercent)
-	shareAmountUsd := wallet.CalcDiamondToUsd(shareAmount)
+	logRow := entity.NewAnchorIncomeSettlementLog(roomId, &snap, 0, 0, 0, 0)
+	if !syndb.FlushUntilIdle(settlementPersistTimeout) || !liveroomdao.VerifyAnchorIncomeSettlementLogPersisted(logRow) {
+		g.Log().Errorf(gctx.New(), "coin merchant anchor settlement retained: log persist failed roomId=%d guildId=%d logId=%d", roomId, room.GuildId, logRow.ID)
+		return
+	}
 
-	settled := liveroomdao.GetLiveRoomIncomeSettled(roomId)
-	if settled != nil {
+	unsettled.ConsumeSnapshot(&snap)
+	if settled := liveroomdao.GetLiveRoomIncomeSettled(roomId); settled != nil {
 		settled.AddAmounts(&snap)
-		settled.AddSettlementSalary(salary)
-		settled.AddSettlementShareAmount(shareAmount)
-		if writeAnchorSettlementUsd {
-			settled.AddSettlementShareAmountUsd(shareAmountUsd)
-		}
 	}
-	if salary != 0 {
-		if total := liveroomdao.GetLiveRoomIncomeTotal(roomId); total != nil {
-			total.AddSettlementSalary(salary)
-		}
-		// 开播底薪同步到工会(含折算美金可收)
-		liveroomdao.MirrorGuildAnchorSettlementSalary(roomId, salary)
-	}
-	if shareAmount != 0 {
-		if total := liveroomdao.GetLiveRoomIncomeTotal(roomId); total != nil {
-			total.AddSettlementShareAmount(shareAmount)
-			if writeAnchorSettlementUsd {
-				total.AddSettlementShareAmountUsd(shareAmountUsd)
-			}
-		}
-	}
-	// 主播流水分佣美金入工会账面,由工会长分配(不写主播结算美金)
-	if flowCommissionUsd != 0 {
-		liveroomdao.MirrorGuildAnchorSettlementShareAmountUsd(roomId, flowCommissionUsd)
-	}
-	if hasDaily {
+	if len(dailyRows) > 0 {
 		liveroomdao.MarkDailyEffectiveLivesSettled(dailyRows)
 	}
-
-	logUsd := float64(0)
-	if writeAnchorSettlementUsd {
-		logUsd = shareAmountUsd
-	}
-	_ = entity.NewAnchorIncomeSettlementLog(roomId, &snap, salary, shareAmount, logUsd, anchorSharePercent)
 }
 
 // matchAnchorSalaryAmount 按薪资降序取最高满足档(结算规则后续按日表时长/workDays完善)

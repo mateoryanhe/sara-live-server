@@ -1,7 +1,7 @@
 import {definePageMessagesFromEn} from './_define'
 
 const zh = {
-  dynamicTierHint: '等级和档位均可动态配置；社交流水按钻石统计，达到多个档位时取最高门槛。',
+  dynamicTierHint: '等级和档位均可动态配置；每一档的社交总钻石流水是升级到下一等级的边界，达到边界立即使用下一等级比例，最高等级封顶。',
   level: '等级',
   socialTotalDiamondRevenue: '社交总钻石流水',
   anchorSocialSharePercent: '主播社交提成比(%)',
@@ -11,6 +11,7 @@ const zh = {
   deleteConfirm: '确定删除等级 {level} 的分佣配置吗？',
   fetchFailed: '获取有底薪社交流水分佣配置失败',
   socialTotalRevenueRequired: '请输入社交总流水',
+  socialTotalRevenueInteger: '社交总钻石流水必须是非负整数',
   levelRequired: '请输入大于 0 的等级',
   anchorSocialSharePercentRequired: '请输入主播社交提成比',
   guildSocialSharePercentRequired: '请输入工会社交提成比',
@@ -18,7 +19,7 @@ const zh = {
 } as const
 
 const en: Record<keyof typeof zh, string> = {
-  dynamicTierHint: 'Levels and tiers are configurable. Social revenue is measured in diamonds, and the highest matched threshold applies.',
+  dynamicTierHint: 'Levels and tiers are configurable. Each diamond-revenue value is the boundary for promotion to the next level; reaching it immediately applies the next level, capped at the highest level.',
   level: 'Level',
   socialTotalDiamondRevenue: 'Total Social Revenue (Diamonds)',
   anchorSocialSharePercent: 'Anchor Social Commission (%)',
@@ -28,6 +29,7 @@ const en: Record<keyof typeof zh, string> = {
   deleteConfirm: 'Delete the commission configuration for level {level}?',
   fetchFailed: 'Failed to load salaried social commission tiers',
   socialTotalRevenueRequired: 'Enter total social revenue',
+  socialTotalRevenueInteger: 'Total social diamond revenue must be a non-negative integer',
   levelRequired: 'Enter a level greater than 0',
   anchorSocialSharePercentRequired: 'Enter the anchor social commission percentage',
   guildSocialSharePercentRequired: 'Enter the guild social commission percentage',
