@@ -12,13 +12,14 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
 	userentity "xr-game-server/entity/user"
+	"xr-game-server/module/livecfg"
 	"xr-game-server/module/upload"
 )
 
 const (
-	serverOnlineNormalUserRefreshInterval = 5 * time.Minute
-	serverOnlineNormalUserMax             = 500
-	serverOnlineNormalUserLoadBatch       = 500
+	serverOnlineNormalUserTickInterval = time.Second
+	serverOnlineNormalUserMax          = 500
+	serverOnlineNormalUserLoadBatch    = 500
 )
 
 var serverOnlineNormalUserSnapshot = struct {
@@ -31,7 +32,19 @@ var serverOnlineNormalUserSnapshot = struct {
 
 func initServerOnlineNormalUserList() {
 	refreshServerOnlineNormalUserList(gctx.New())
-	xrtimer.AddSingleton(gctx.New(), serverOnlineNormalUserRefreshInterval, refreshServerOnlineNormalUserList)
+	xrtimer.AddSingleton(gctx.New(), serverOnlineNormalUserTickInterval, maybeRefreshServerOnlineNormalUserList)
+}
+
+func maybeRefreshServerOnlineNormalUserList(ctx context.Context) {
+	intervalMs := int64(livecfg.GetAudienceListRefreshDuration() / time.Millisecond)
+	if intervalMs <= 0 {
+		intervalMs = int64(livecfg.DefaultAudienceListRefreshSeconds) * 1000
+	}
+	_, refreshedAt := getServerOnlineNormalUserSnapshot()
+	if refreshedAt > 0 && time.Now().UnixMilli()-refreshedAt < intervalMs {
+		return
+	}
+	refreshServerOnlineNormalUserList(ctx)
 }
 
 // refreshServerOnlineNormalUserList 从当前进程 WebSocket 在线用户中筛选普通用户。
@@ -72,7 +85,7 @@ func getServerOnlineNormalUserSnapshot() ([]uint64, int64) {
 	return userIds, serverOnlineNormalUserSnapshot.refreshedAt
 }
 
-// GetServerOnlineNormalUserList 返回当前服务器每5分钟生成的在线普通用户快照。
+// GetServerOnlineNormalUserList 返回当前服务器按直播配置间隔生成的在线普通用户快照。
 func GetServerOnlineNormalUserList(_ context.Context, _ *liveroomdto.GetServerOnlineNormalUserListReq) (*liveroomdto.GetServerOnlineNormalUserListRes, error) {
 	userIds, refreshedAt := getServerOnlineNormalUserSnapshot()
 	list := make([]*liveroomdto.ServerOnlineNormalUserItem, 0, len(userIds))

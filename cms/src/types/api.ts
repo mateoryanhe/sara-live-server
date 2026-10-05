@@ -1839,6 +1839,7 @@ export interface LiveCfg {
     id: string
     paidDanmakuPrice: number
 	videoCallTicketEnabled: boolean
+	audienceListRefreshSeconds: number
     createdAt: string
     updatedAt: string
 }
@@ -1851,6 +1852,7 @@ export interface SaveLiveCfgReq {
     id?: number
     paidDanmakuPrice: number
 	videoCallTicketEnabled: boolean
+	audienceListRefreshSeconds: number
 }
 
 export interface SaveLiveCfgRes {
@@ -2104,6 +2106,7 @@ export interface HaiPayCfg {
     cancelUrl: string
     paymentMethods: string
     subject: string
+    useProdAppID: boolean
     createdAt: string
     updatedAt: string
 }
@@ -2124,6 +2127,7 @@ export interface SaveHaiPayCfgReq {
     cancelUrl?: string
     paymentMethods?: string
     subject?: string
+    useProdAppID?: boolean
 }
 
 export interface SaveHaiPayCfgRes {

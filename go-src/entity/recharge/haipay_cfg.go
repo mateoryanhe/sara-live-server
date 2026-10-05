@@ -20,6 +20,7 @@ type HaiPayCfg struct {
 	CancelUrl          string `gorm:"size:512;default:'';comment:取消支付跳转(可选)" json:"cancelUrl"`
 	PaymentMethods     string `gorm:"size:256;default:'';comment:历史全局收银台支付方式,本地代收不使用" json:"paymentMethods"`
 	Subject            string `gorm:"size:128;default:'Recharge';comment:支付标题" json:"subject"`
+	UseProdAppID       bool   `gorm:"default:1;comment:是否使用正式HaiPay AppId(默认开启,关闭=测试)" json:"useProdAppID"`
 }
 
 func (HaiPayCfg) TableName() string {

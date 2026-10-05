@@ -4,7 +4,6 @@ import (
 	"strings"
 	"time"
 
-	"xr-game-server/constants/country"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/migrate"
 )
@@ -35,9 +34,6 @@ func (r *HaiPayCoinMerchantCollectionCfg) Normalize() {
 	}
 	r.CountryCode = strings.ToUpper(strings.TrimSpace(r.CountryCode))
 	r.CurrencyCode = strings.ToUpper(strings.TrimSpace(r.CurrencyCode))
-	if appID, ok := country.LookupHaiPayAppID(r.CurrencyCode); ok {
-		r.AppId = appID
-	}
 	r.PayType = strings.ToUpper(strings.TrimSpace(r.PayType))
 	r.InBankCode = strings.TrimSpace(r.InBankCode)
 }

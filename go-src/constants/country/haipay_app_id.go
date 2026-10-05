@@ -43,7 +43,14 @@ const (
 	HaiPayAppIDCashier HaiPayAppID = 25272
 )
 
-var haiPayAppIDByBusinessCode = map[string]HaiPayAppID{
+const (
+	HaiPayAppIDProdIDR     HaiPayAppID = 7724
+	HaiPayAppIDProdUSD     HaiPayAppID = 7810
+	HaiPayAppIDProdMYR     HaiPayAppID = 7730
+	HaiPayAppIDProdCashier HaiPayAppID = 7545
+)
+
+var haiPayAppIDByBusinessCodeTest = map[string]HaiPayAppID{
 	"IDR": HaiPayAppIDIDR, "PHP": HaiPayAppIDPHP, "USD": HaiPayAppIDUSD,
 	"KRW": HaiPayAppIDKRW, "EUR": HaiPayAppIDEUR, "TWD": HaiPayAppIDTWD,
 	"VND": HaiPayAppIDVND, "THB": HaiPayAppIDTHB, "SAR": HaiPayAppIDSAR,
@@ -58,8 +65,27 @@ var haiPayAppIDByBusinessCode = map[string]HaiPayAppID{
 	"NGN": HaiPayAppIDNGN, "CASHIER": HaiPayAppIDCashier,
 }
 
-// LookupHaiPayAppID 按币种或 CASHIER 业务编码返回固定 AppID。
-func LookupHaiPayAppID(businessCode string) (int64, bool) {
-	appID, ok := haiPayAppIDByBusinessCode[strings.ToUpper(strings.TrimSpace(businessCode))]
+var haiPayAppIDByBusinessCodeProd = map[string]HaiPayAppID{
+	"IDR": HaiPayAppIDProdIDR, "USD": HaiPayAppIDProdUSD, "MYR": HaiPayAppIDProdMYR,
+	"CASHIER": HaiPayAppIDProdCashier,
+}
+
+// LookupHaiPayAppID 按币种或 CASHIER 业务编码返回 AppID。
+// useProd=false 用测试业务 ID，true 用正式业务 ID（当前仅 IDR/USD/MYR/收银台）。
+func LookupHaiPayAppID(businessCode string, useProd bool) (int64, bool) {
+	table := haiPayAppIDByBusinessCodeTest
+	if useProd {
+		table = haiPayAppIDByBusinessCodeProd
+	}
+	appID, ok := table[strings.ToUpper(strings.TrimSpace(businessCode))]
 	return int64(appID), ok
+}
+
+// HaiPayCashierAppID 返回全球收银台 AppID。
+func HaiPayCashierAppID(useProd bool) int64 {
+	appID, ok := LookupHaiPayAppID("CASHIER", useProd)
+	if !ok {
+		return 0
+	}
+	return appID
 }

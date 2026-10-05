@@ -28,6 +28,10 @@
           <el-switch v-model="formData.tVisable"/>
           <span class="form-tip">{{ t('pages.haipay.thirdPayVisibleTip') }}</span>
         </el-form-item>
+        <el-form-item :label="t('pages.haipay.useProdAppID')" prop="useProdAppID">
+          <el-switch v-model="formData.useProdAppID"/>
+          <span class="form-tip">{{ t('pages.haipay.useProdAppIDTip') }}</span>
+        </el-form-item>
         <el-form-item :label="t('pages.haipay.merchantSecretKey')" prop="merchantSecretKey">
           <el-input v-model="formData.merchantSecretKey" clearable show-password type="password"
                     :placeholder="t('pages.haipay.merchantSecretKeyPlaceholder')"/>
@@ -82,6 +86,7 @@ const formData = reactive({
   id: '0',
   apiHost: '',
   tVisable: false,
+  useProdAppID: true,
   merchantSecretKey: '',
   merchantPrivateKey: '',
   callbackBaseUrl: '',
@@ -109,6 +114,7 @@ const applyCfg = (cfg: HaiPayCfg | null | undefined) => {
     formData.id = '0'
     formData.apiHost = ''
     formData.tVisable = false
+    formData.useProdAppID = true
     formData.merchantSecretKey = ''
     formData.merchantPrivateKey = ''
     formData.callbackBaseUrl = ''
@@ -124,6 +130,7 @@ const applyCfg = (cfg: HaiPayCfg | null | undefined) => {
   formData.id = cfg.id || '0'
   formData.apiHost = cfg.apiHost || ''
   formData.tVisable = !!cfg.tVisable
+  formData.useProdAppID = cfg.useProdAppID !== false
   formData.merchantSecretKey = cfg.merchantSecretKey || ''
   formData.merchantPrivateKey = cfg.merchantPrivateKey || ''
   formData.callbackBaseUrl = cfg.callbackBaseUrl || ''
@@ -157,6 +164,7 @@ const handleSave = async () => {
       id: formData.id && formData.id !== '0' ? Number(formData.id) : undefined,
       apiHost: formData.apiHost.trim(),
       tVisable: formData.tVisable,
+      useProdAppID: formData.useProdAppID,
       merchantSecretKey: formData.merchantSecretKey.trim(),
       merchantPrivateKey: formData.merchantPrivateKey.trim(),
       callbackBaseUrl: formData.callbackBaseUrl.trim(),

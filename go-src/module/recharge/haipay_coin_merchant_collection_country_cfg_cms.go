@@ -85,7 +85,7 @@ func SaveHaiPayCoinMerchantCollectionCountryCfg(ctx context.Context, req *haipay
 		!containsHaiPayString(haiPayCoinMerchantCollectionCurrencies(countryCode), currencyCode) {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	appID, ok := country.LookupHaiPayAppID(currencyCode)
+	appID, ok := lookupHaiPayAppID(currencyCode)
 	if !ok {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}

@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	"xr-game-server/constants/country"
 	"xr-game-server/core/xrlog"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dao/rechargeorderdao"
@@ -80,7 +79,7 @@ func haiPayQueryCollect(ctx context.Context, orderId, orderNo string) (platformS
 		if orderNo == "" {
 			return 0, "", fmt.Errorf("haipay global cashier query orderNo missing orderId=%s", orderId)
 		}
-		appID = int64(country.HaiPayAppIDCashier)
+		appID = haiPayCashierAppID()
 	} else {
 		if localOrderPayChannel != rechargeentity.RechargeCfgTypeCoinMerchant {
 			return 0, "", fmt.Errorf("haipay unsupported local collection channel=%d", localOrderPayChannel)
@@ -92,7 +91,7 @@ func haiPayQueryCollect(ctx context.Context, orderId, orderNo string) (platformS
 			return 0, "", credentialErr
 		}
 		var ok bool
-		appID, ok = country.LookupHaiPayAppID(localOrderCurrency)
+		appID, ok = lookupHaiPayAppID(localOrderCurrency)
 		if !ok {
 			return 0, "", fmt.Errorf("haipay appId enum missing currency=%s", localOrderCurrency)
 		}

@@ -112,7 +112,7 @@ func (p *haiPayProvider) CreatePay(ctx context.Context, req *ChannelPayCreateReq
 	if _, credentialErr := haiPayCoinMerchantCollectionCredential(region, currency); credentialErr != nil {
 		return nil, credentialErr
 	}
-	appID, ok := country.LookupHaiPayAppID(currency)
+	appID, ok := lookupHaiPayAppID(currency)
 	if !ok {
 		return nil, fmt.Errorf("haipay appId enum missing currency=%s", currency)
 	}

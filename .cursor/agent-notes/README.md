@@ -299,3 +299,8 @@ App/CMS 建单 API  ──►  recharge 业务（写订单、白名单）
 - 开通：App `POST /liveRoom/createOneToOne`、CMS `/oneToOneRoom/create`；CMS 页 **主播与工会管理 → 1v1房间**
 - 1v1 通话分钟价在 `one_to_one_rooms.billing`，不读 `live_room_cfgs.billing`
 
+## HaiPay AppId 测试/正式（2026-10-05）
+
+- 枚举：`go-src/constants/country/haipay_app_id.go`；测试 25238 起全币种，正式目前仅 USD `7810` / MYR `7730` / IDR `7724` / 收银台 `7545`
+- CMS **系统配置 → HaiPay** 开关 `useProdAppID`（`haipay_cfgs`，**默认开启正式**）；关闭=测试，开启=正式；代收/代付/查单按此选择
+

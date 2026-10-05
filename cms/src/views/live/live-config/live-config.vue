@@ -7,7 +7,7 @@
         </div>
       </template>
 
-      <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="140px">
+      <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="180px">
         <el-form-item :label="t('pages.liveConfig.paidDanmakuPrice')" prop="paidDanmakuPrice">
           <el-input-number
               v-model="formData.paidDanmakuPrice"
@@ -23,6 +23,18 @@
         <el-form-item :label="t('pages.liveConfig.videoCallTicketEnabled')">
           <el-switch v-model="formData.videoCallTicketEnabled"/>
           <span class="form-tip">{{ t('pages.liveConfig.videoCallTicketEnabledTip') }}</span>
+        </el-form-item>
+
+        <el-form-item :label="t('pages.liveConfig.audienceListRefreshSeconds')" prop="audienceListRefreshSeconds">
+          <el-input-number
+              v-model="formData.audienceListRefreshSeconds"
+              :min="1"
+              :precision="0"
+              :step="1"
+              controls-position="right"
+              style="width: 220px"
+          />
+          <span class="form-tip">{{ t('pages.liveConfig.audienceListRefreshTip') }}</span>
         </el-form-item>
 
         <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.liveConfig.lastUpdated')">
@@ -54,6 +66,7 @@ const formData = reactive({
   id: '0',
   paidDanmakuPrice: 0,
 	videoCallTicketEnabled: true,
+	audienceListRefreshSeconds: 300,
 })
 
 const metaInfo = reactive({
@@ -66,6 +79,10 @@ const formRules = computed(() => ({
     {required: true, message: t('pages.liveConfig.paidDanmakuRequired'), trigger: 'blur'},
     {type: 'number', min: 0, message: t('pages.liveConfig.priceMinZero'), trigger: 'blur'},
   ],
+  audienceListRefreshSeconds: [
+    {required: true, message: t('pages.liveConfig.audienceListRefreshRequired'), trigger: 'blur'},
+    {type: 'number', min: 1, message: t('pages.liveConfig.audienceListRefreshMin'), trigger: 'blur'},
+  ],
 }))
 
 const applyCfg = (cfg: LiveCfg | null | undefined) => {
@@ -73,6 +90,7 @@ const applyCfg = (cfg: LiveCfg | null | undefined) => {
     formData.id = '0'
     formData.paidDanmakuPrice = 0
 	formData.videoCallTicketEnabled = true
+	formData.audienceListRefreshSeconds = 300
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
     return
@@ -80,6 +98,7 @@ const applyCfg = (cfg: LiveCfg | null | undefined) => {
   formData.id = cfg.id || '0'
   formData.paidDanmakuPrice = truncateNumber(cfg.paidDanmakuPrice ?? 0)
 	formData.videoCallTicketEnabled = cfg.videoCallTicketEnabled ?? true
+	formData.audienceListRefreshSeconds = cfg.audienceListRefreshSeconds || 300
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
 }
@@ -105,6 +124,7 @@ const handleSave = async () => {
       id: formData.id === '0' ? 0 : Number(formData.id),
       paidDanmakuPrice: formData.paidDanmakuPrice,
 	  videoCallTicketEnabled: formData.videoCallTicketEnabled,
+	  audienceListRefreshSeconds: formData.audienceListRefreshSeconds,
     })
     if (response?.success) {
       ElMessage.success(t('common.saveConfig'))

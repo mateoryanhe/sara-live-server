@@ -73,3 +73,11 @@ func HaiPayEnabled() bool {
 	}
 	return true
 }
+
+func HaiPayUseProdAppID() bool {
+	row := GetHaiPayCfgCached()
+	if row == nil {
+		return true
+	}
+	return row.UseProdAppID
+}

@@ -19,7 +19,7 @@ const (
 
 func HaiPayPayoutAppID(currency string) (int64, error) {
 	currency = strings.ToUpper(strings.TrimSpace(currency))
-	appID, ok := country.LookupHaiPayAppID(currency)
+	appID, ok := lookupHaiPayAppID(currency)
 	if !ok {
 		return 0, fmt.Errorf("payout appId enum missing for currency=%s", currency)
 	}

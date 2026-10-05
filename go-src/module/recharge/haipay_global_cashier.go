@@ -91,7 +91,7 @@ func (p *haiPayProvider) createGlobalCashierPay(ctx context.Context, req *Channe
 		subject = "Recharge"
 	}
 	body := map[string]any{
-		"appId":           int64(country.HaiPayAppIDCashier),
+		"appId":           haiPayCashierAppID(),
 		"orderId":         req.OrderID,
 		"name":            name,
 		"email":           email,

@@ -18,6 +18,7 @@ type HaiPayCfgItem struct {
 	CancelUrl          string `json:"cancelUrl"`
 	PaymentMethods     string `json:"paymentMethods"`
 	Subject            string `json:"subject"`
+	UseProdAppID       bool   `json:"useProdAppID"`
 	CreatedAt          string `json:"createdAt"`
 	UpdatedAt          string `json:"updatedAt"`
 }
@@ -39,6 +40,7 @@ type SaveHaiPayCfgReq struct {
 	CancelUrl          string `json:"cancelUrl"`
 	PaymentMethods     string `json:"paymentMethods"`
 	Subject            string `json:"subject"`
+	UseProdAppID       bool   `json:"useProdAppID" dc:"是否使用正式AppId;默认开启,关闭=测试业务ID"`
 }
 
 type SaveHaiPayCfgRes struct {

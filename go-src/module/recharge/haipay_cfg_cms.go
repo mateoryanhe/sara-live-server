@@ -47,6 +47,7 @@ func SaveHaiPayCfg(_ context.Context, req *haipaydto.SaveHaiPayCfgReq) (*haipayd
 		CancelUrl:          strings.TrimSpace(req.CancelUrl),
 		PaymentMethods:     strings.TrimSpace(req.PaymentMethods),
 		Subject:            strings.TrimSpace(req.Subject),
+		UseProdAppID:       req.UseProdAppID,
 	}
 	if row.Subject == "" {
 		row.Subject = "Recharge"
@@ -91,6 +92,7 @@ func toHaiPayCfgItem(cfg *entity.HaiPayCfg) *haipaydto.HaiPayCfgItem {
 		CancelUrl:          cfg.CancelUrl,
 		PaymentMethods:     cfg.PaymentMethods,
 		Subject:            cfg.Subject,
+		UseProdAppID:       cfg.UseProdAppID,
 		CreatedAt:          formatHaiPayCfgTime(cfg.CreatedAt),
 		UpdatedAt:          formatHaiPayCfgTime(cfg.UpdatedAt),
 	}
