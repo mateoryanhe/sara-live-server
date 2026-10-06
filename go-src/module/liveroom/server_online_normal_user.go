@@ -94,14 +94,17 @@ func GetServerOnlineNormalUserList(_ context.Context, _ *liveroomdto.GetServerOn
 		if user == nil || user.UserType != userentity.UserTypeNormal {
 			continue
 		}
+		ext := userinfodao.GetUserExtByUserId(userId)
 		list = append(list, &liveroomdto.ServerOnlineNormalUserItem{
-			UserId:   strconv.FormatUint(userId, 10),
-			Nickname: user.Nickname,
-			Avatar:   upload.ResolveAvatarUrlForUser(userId, user.Avatar),
-			VipLevel: user.VipLevel,
-			Gender:   user.Gender,
-			Age:      calcAge(user.Birthday),
-			UserType: user.UserType,
+			UserId:        strconv.FormatUint(userId, 10),
+			Nickname:      user.Nickname,
+			Avatar:        upload.ResolveAvatarUrlForUser(userId, user.Avatar),
+			VipLevel:      user.VipLevel,
+			Gender:        user.Gender,
+			Age:           calcAge(user.Birthday),
+			UserType:      user.UserType,
+			FollowCount:   ext.FollowCount,
+			FollowerCount: ext.FollowerCount,
 		})
 	}
 	now := time.Now().UnixMilli()

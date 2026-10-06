@@ -11,7 +11,9 @@ import (
 	"xr-game-server/dto/calldto"
 	callentity "xr-game-server/entity/call"
 	"xr-game-server/errercode"
+	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/module/agora"
+	"xr-game-server/module/livecfg"
 	"xr-game-server/module/wallet"
 )
 
@@ -37,7 +39,9 @@ func OneToOneRoomCall(ctx context.Context, req *calldto.OneToOneRoomCallReq) (*c
 	if err != nil {
 		return nil, err
 	}
-	if callCtx.pricePerMinute > 0 {
+	skipDiamondPrecheck := livecfg.GetOneToOneDailyFreeSeconds() > 0 &&
+		liveroomdao.IsOneToOneDailyFreeAvailable(callCtx.audienceId, callCtx.anchorId)
+	if callCtx.pricePerMinute > 0 && !skipDiamondPrecheck {
 		if err := wallet.CanPayWithGoldExchange(callCtx.audienceId, callCtx.pricePerMinute); err != nil {
 			return nil, err
 		}

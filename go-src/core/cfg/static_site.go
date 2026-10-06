@@ -72,7 +72,7 @@ func GetThirdPayDomain() string {
 
 func findThirdPayDomain(sites []*StaticSiteCfg) string {
 	for _, site := range sites {
-		if site == nil || !site.T {
+		if site == nil || !isThirdPayAppSite(site) {
 			continue
 		}
 		domains := SplitDomains(site.Domain)
@@ -81,6 +81,16 @@ func findThirdPayDomain(sites []*StaticSiteCfg) string {
 		}
 	}
 	return ""
+}
+
+func isThirdPayAppSite(site *StaticSiteCfg) bool {
+	if site == nil {
+		return false
+	}
+	if site.T {
+		return true
+	}
+	return normalizeURLPrefix(site.Prefix) == "/third-pay"
 }
 
 func loadStaticSiteCfgs(ctx context.Context) []*StaticSiteCfg {

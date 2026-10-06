@@ -10,7 +10,7 @@ const TbHaiPayCfg db.TbName = "haipay_cfgs"
 // HaiPayCfg HaiPay 代收 + 代付配置，CMS 管理，通常一条
 type HaiPayCfg struct {
 	migrate.OneModel
-	ApiHost            string `gorm:"size:256;default:'';comment:API Host如https://interface.haipay.asia" json:"apiHost"`
+	ApiHost            string `gorm:"size:256;default:'';comment:API Host正式https://api.haipay.top UAT uat-interface.haipay.asia" json:"apiHost"`
 	TVisable           bool   `gorm:"column:t_visable;default:0;comment:App是否显示第三方支付" json:"tVisable"`
 	MerchantSecretKey  string `gorm:"size:256;default:'';comment:签名串末尾key=商户密钥" json:"merchantSecretKey"`
 	MerchantPrivateKey string `gorm:"type:text;comment:商户RSA私钥(PKCS8,可无PEM头)" json:"merchantPrivateKey"`

@@ -36,6 +36,7 @@ APIS = [
     ("/userInfo/uploadAvatar", "yes", "RAW:controller.HandleUploadAvatar", "上传头像", "profile", "changePhoto"),
     ("/liveRoom/create", "yes", "RAW:controller.HandleCreateLiveRoom", "创建/更新直播间", "studio", "openBooth"),
     ("/liveRoom/createOneToOne", "yes", "(&controller.LiveRoomAppController{}).CreateOneToOneRoom", "开通1v1房间", "studio", "openDirectBooth"),
+    ("/liveRoom/getOneToOne", "yes", "(&controller.LiveRoomAppController{}).GetOneToOneRoom", "查询1v1房间配置", "studio", "fetchDirectBooth"),
     ("/liveRoom/startLive", "yes", "(&controller.LiveRoomAppController{}).StartLive", "开播", "studio", "beginBroadcast"),
     ("/liveRoom/stopLive", "yes", "(&controller.LiveRoomAppController{}).StopLive", "下播", "studio", "endBroadcast"),
     ("/liveRoom/updateCover", "yes", "(&controller.LiveRoomAppController{}).UpdateCover", "修改封面", "studio", "replaceCover"),

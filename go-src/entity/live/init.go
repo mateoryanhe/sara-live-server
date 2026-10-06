@@ -5,6 +5,7 @@ func Init() {
 	initLiveRoom()
 	initLiveRoomCfg()
 	initOneToOneRoom()
+	initOneToOneCallFreeDailyUse()
 	initLiveRoomIncome()
 	initLiveRoomTag()
 	initAnchorSalaryCfg()

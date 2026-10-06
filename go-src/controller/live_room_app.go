@@ -113,6 +113,10 @@ func (c *LiveRoomAppController) CreateOneToOneRoom(ctx context.Context, req *liv
 	return liveroom.CreateOneToOneRoom(ctx, req)
 }
 
+func (c *LiveRoomAppController) GetOneToOneRoom(ctx context.Context, req *liveroomdto.GetOneToOneRoomReq) (*liveroomdto.GetOneToOneRoomRes, error) {
+	return liveroom.GetOneToOneRoom(ctx, req)
+}
+
 // ServerOnlineNormalUserList 查询当前服务器在线普通用户快照。
 func (c *LiveRoomAppController) ServerOnlineNormalUserList(ctx context.Context, req *liveroomdto.GetServerOnlineNormalUserListReq) (res *liveroomdto.GetServerOnlineNormalUserListRes, err error) {
 	return liveroom.GetServerOnlineNormalUserList(ctx, req)

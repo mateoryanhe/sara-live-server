@@ -40,6 +40,7 @@ var openAPIDocRoutes = []openAPIDocRoute{
 	{OldMethod: "post", OldPath: "/userInfo/uploadAvatar", NewPath: "/sofie/profile/changePhoto", Tag: "profile", Summary: "上传头像"},
 	{OldMethod: "post", OldPath: "/liveRoom/create", NewPath: "/sofie/studio/openBooth", Tag: "studio", Summary: "创建/更新直播间"},
 	{OldMethod: "post", OldPath: "/liveRoom/createOneToOne", NewPath: "/sofie/studio/openDirectBooth", Tag: "studio", Summary: "开通1v1房间"},
+	{OldMethod: "post", OldPath: "/liveRoom/getOneToOne", NewPath: "/sofie/studio/fetchDirectBooth", Tag: "studio", Summary: "查询1v1房间配置"},
 	{OldMethod: "post", OldPath: "/liveRoom/startLive", NewPath: "/sofie/studio/beginBroadcast", Tag: "studio", Summary: "开播"},
 	{OldMethod: "post", OldPath: "/liveRoom/stopLive", NewPath: "/sofie/studio/endBroadcast", Tag: "studio", Summary: "下播"},
 	{OldMethod: "post", OldPath: "/liveRoom/updateCover", NewPath: "/sofie/studio/replaceCover", Tag: "studio", Summary: "修改封面"},

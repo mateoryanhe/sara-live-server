@@ -33,6 +33,7 @@
 | `profile` | 上传头像 | 需要登录 | `POST /userInfo/uploadAvatar` | `POST /sofie/profile/changePhoto` |
 | `studio` | 创建/更新直播间 | 需要登录 | `POST /liveRoom/create` | `POST /sofie/studio/openBooth` |
 | `studio` | 开通1v1房间 | 需要登录 | `POST /liveRoom/createOneToOne` | `POST /sofie/studio/openDirectBooth` |
+| `studio` | 查询1v1房间配置 | 需要登录 | `POST /liveRoom/getOneToOne` | `POST /sofie/studio/fetchDirectBooth` |
 | `studio` | 开播 | 需要登录 | `POST /liveRoom/startLive` | `POST /sofie/studio/beginBroadcast` |
 | `studio` | 下播 | 需要登录 | `POST /liveRoom/stopLive` | `POST /sofie/studio/endBroadcast` |
 | `studio` | 修改封面 | 需要登录 | `POST /liveRoom/updateCover` | `POST /sofie/studio/replaceCover` |

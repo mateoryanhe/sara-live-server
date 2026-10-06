@@ -12,6 +12,7 @@ import (
 )
 
 type oneToOneRoomCallContext struct {
+	anchorId       uint64
 	audienceId     uint64
 	orderParams    string
 	pricePerMinute float64
@@ -74,6 +75,7 @@ func resolveOneToOneRoomCallContext(callerId, targetId uint64) (*oneToOneRoomCal
 	}
 
 	return &oneToOneRoomCallContext{
+		anchorId:       anchorId,
 		audienceId:     audienceId,
 		orderParams:    strconv.FormatUint(room.LiveRecordId, 10),
 		pricePerMinute: oneToOne.Billing,

@@ -10,10 +10,13 @@ import (
 
 const DefaultAudienceListRefreshSeconds uint32 = 300
 
+const DefaultOneToOneDailyFreeSeconds uint32 = 30
+
 type liveCfgSnapshot struct {
 	PaidDanmakuPrice           float64
 	VideoCallTicketEnabled     bool
 	AudienceListRefreshSeconds uint32
+	OneToOneDailyFreeSeconds   uint32
 }
 
 var (
@@ -21,6 +24,7 @@ var (
 	emptyLiveCfgSnapshot = &liveCfgSnapshot{
 		VideoCallTicketEnabled:     true,
 		AudienceListRefreshSeconds: DefaultAudienceListRefreshSeconds,
+		OneToOneDailyFreeSeconds:   DefaultOneToOneDailyFreeSeconds,
 	}
 )
 
@@ -55,7 +59,12 @@ func toLiveCfgSnapshot(row *entity.LiveCfg) *liveCfgSnapshot {
 		PaidDanmakuPrice:           row.PaidDanmakuPrice,
 		VideoCallTicketEnabled:     row.VideoCallTicketEnabled,
 		AudienceListRefreshSeconds: NormalizeAudienceListRefreshSeconds(row.AudienceListRefreshSeconds),
+		OneToOneDailyFreeSeconds:   NormalizeOneToOneDailyFreeSeconds(row.OneToOneDailyFreeSeconds),
 	}
+}
+
+func NormalizeOneToOneDailyFreeSeconds(v uint32) uint32 {
+	return v
 }
 
 // GetPaidDanmakuPrice 获取付费弹幕价格(钻石)
@@ -77,4 +86,9 @@ func GetAudienceListRefreshSeconds() uint32 {
 // GetAudienceListRefreshDuration 在线观众列表刷新间隔。
 func GetAudienceListRefreshDuration() time.Duration {
 	return time.Duration(GetAudienceListRefreshSeconds()) * time.Second
+}
+
+// GetOneToOneDailyFreeSeconds 1v1 观众对单主播每日免费通话秒数，0 表示关闭。
+func GetOneToOneDailyFreeSeconds() uint32 {
+	return getLiveCfgCache().OneToOneDailyFreeSeconds
 }

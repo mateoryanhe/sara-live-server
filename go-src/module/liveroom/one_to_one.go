@@ -11,6 +11,7 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/liveroomdto"
 	liveentity "xr-game-server/entity/live"
+	"xr-game-server/core/push"
 	"xr-game-server/errercode"
 	"xr-game-server/module/upload"
 )
@@ -19,7 +20,87 @@ func IsOneToOneOnShelf(anchorId uint64) bool {
 	return liveroomdao.IsOneToOneOnShelf(anchorId)
 }
 
-func enrollOneToOneRoom(anchorId uint64, billing float64) (*liveentity.OneToOneRoom, error) {
+// overlayOneToOneListItem 用 1v1 独立资料覆盖列表中的展示字段(计费仍以 one_to_one_rooms 为准)。
+func overlayOneToOneListItem(item *liveroomdto.LiveRoomListItem, one *liveentity.OneToOneRoom) {
+	if item == nil || one == nil {
+		return
+	}
+	item.Billing = one.Billing
+	if one.Title != "" {
+		item.Title = one.Title
+	}
+	if one.Cover != "" {
+		item.Cover = upload.GetUrlByName(one.Cover)
+	}
+	if one.TagId > 0 {
+		item.TagId = strconv.FormatUint(one.TagId, 10)
+		item.TagName = getRoomTagName(one.TagId)
+	} else {
+		item.TagId = ""
+		item.TagName = ""
+	}
+}
+
+type oneToOneRoomProfile struct {
+	Billing float64
+	Title   string
+	Cover   string
+	TagId   uint64
+}
+
+func applyOneToOneRoomProfile(row *liveentity.OneToOneRoom, profile oneToOneRoomProfile, isNew bool) {
+	if row == nil {
+		return
+	}
+	row.SetBilling(profile.Billing)
+	if isNew || profile.Title != "" {
+		row.SetTitle(profile.Title)
+	}
+	if isNew || profile.Cover != "" {
+		row.SetCover(profile.Cover)
+	}
+	if isNew || profile.TagId > 0 {
+		row.SetTagId(profile.TagId)
+	}
+}
+
+func profileFromCreateReq(req *liveroomdto.CreateOneToOneRoomReq) oneToOneRoomProfile {
+	if req == nil {
+		return oneToOneRoomProfile{}
+	}
+	return oneToOneRoomProfile{
+		Billing: req.Billing,
+		Title:   req.Title,
+		Cover:   req.Cover,
+		TagId:   req.TagId,
+	}
+}
+
+func profileFromCMSCreateReq(req *liveroomdto.CMSCreateOneToOneRoomReq) oneToOneRoomProfile {
+	if req == nil {
+		return oneToOneRoomProfile{}
+	}
+	return oneToOneRoomProfile{
+		Billing: req.Billing,
+		Title:   req.Title,
+		Cover:   req.Cover,
+		TagId:   req.TagId,
+	}
+}
+
+func profileFromCMSUpdateReq(req *liveroomdto.CMSUpdateOneToOneRoomReq) oneToOneRoomProfile {
+	if req == nil {
+		return oneToOneRoomProfile{}
+	}
+	return oneToOneRoomProfile{
+		Billing: req.Billing,
+		Title:   req.Title,
+		Cover:   req.Cover,
+		TagId:   req.TagId,
+	}
+}
+
+func enrollOneToOneRoom(anchorId uint64, profile oneToOneRoomProfile) (*liveentity.OneToOneRoom, error) {
 	user := userinfodao.GetUserInfoByUserId(anchorId)
 	if user == nil || !user.IsAnchor() {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotAnchor)
@@ -28,26 +109,60 @@ func enrollOneToOneRoom(anchorId uint64, billing float64) (*liveentity.OneToOneR
 		return nil, errercode.CreateCode(errercode.OneToOneRoomExist)
 	}
 	EnsureAnchorRoom(anchorId, liveroomdao.GetAnchorGuildId(anchorId))
-	row := liveroomdao.CreateOneToOneRoom(anchorId, billing)
+	row := liveroomdao.CreateOneToOneRoom(anchorId, profile.Billing)
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
+	applyOneToOneRoomProfile(row, profile, true)
 	return row, nil
 }
 
 func CreateOneToOneRoom(ctx context.Context, req *liveroomdto.CreateOneToOneRoomReq) (*liveroomdto.CreateOneToOneRoomRes, error) {
 	anchorId := httpserver.GetAuthId(ctx)
-	billing := float64(0)
-	if req != nil {
-		billing = req.Billing
+	profile := profileFromCreateReq(req)
+	if existing := liveroomdao.GetOneToOneRoom(anchorId); existing != nil {
+		applyOneToOneRoomProfile(existing, profile, false)
+		return &liveroomdto.CreateOneToOneRoomRes{
+			RoomId: strconv.FormatUint(existing.ID, 10),
+		}, nil
 	}
-	row, err := enrollOneToOneRoom(anchorId, billing)
+	row, err := enrollOneToOneRoom(anchorId, profile)
 	if err != nil {
 		return nil, err
 	}
 	return &liveroomdto.CreateOneToOneRoomRes{
 		RoomId: strconv.FormatUint(row.ID, 10),
 	}, nil
+}
+
+// GetOneToOneRoom App 按主播ID查询 one_to_one_rooms 配置。
+func GetOneToOneRoom(_ context.Context, req *liveroomdto.GetOneToOneRoomReq) (*liveroomdto.GetOneToOneRoomRes, error) {
+	if req == nil || req.AnchorId == 0 {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	row := liveroomdao.GetOneToOneRoom(req.AnchorId)
+	if row == nil {
+		return nil, errercode.CreateCode(errercode.OneToOneRoomNonExist)
+	}
+	onlineStatus := uint8(liveroomdto.OneToOneRoomStatusFilterOffline)
+	if push.IsOnline(req.AnchorId) {
+		onlineStatus = liveroomdto.OneToOneRoomStatusFilterOnline
+	}
+	res := &liveroomdto.GetOneToOneRoomRes{
+		RoomId:       strconv.FormatUint(row.ID, 10),
+		Status:       row.Status,
+		Billing:      row.Billing,
+		Title:        row.Title,
+		OnlineStatus: onlineStatus,
+	}
+	if row.Cover != "" {
+		res.Cover = upload.GetUrlByName(row.Cover)
+	}
+	if row.TagId > 0 {
+		res.TagId = strconv.FormatUint(row.TagId, 10)
+		res.TagName = getRoomTagName(row.TagId)
+	}
+	return res, nil
 }
 
 func GetCMSOneToOneRoomList(_ context.Context, req *liveroomdto.CMSOneToOneRoomListReq) (*httpserver.CMSQueryResp, error) {
@@ -98,7 +213,7 @@ func CMSCreateOneToOneRoom(_ context.Context, req *liveroomdto.CMSCreateOneToOne
 	if req == nil || req.UserId == 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	row, err := enrollOneToOneRoom(req.UserId, req.Billing)
+	row, err := enrollOneToOneRoom(req.UserId, profileFromCMSCreateReq(req))
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +230,7 @@ func CMSUpdateOneToOneRoom(_ context.Context, req *liveroomdto.CMSUpdateOneToOne
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.OneToOneRoomNonExist)
 	}
-	row.SetBilling(req.Billing)
+	applyOneToOneRoomProfile(row, profileFromCMSUpdateReq(req), false)
 	return &liveroomdto.CMSUpdateOneToOneRoomRes{}, nil
 }
 
@@ -135,8 +250,16 @@ func CMSSetOneToOneRoomStatus(_ context.Context, req *liveroomdto.CMSSetOneToOne
 
 func buildCMSOneToOneRoomItem(row *liveentity.OneToOneRoom) *liveroomdto.CMSOneToOneRoomItem {
 	item := &liveroomdto.CMSOneToOneRoomItem{
-		UserId: strconv.FormatUint(row.ID, 10),
-		Status: row.Status,
+		UserId:   strconv.FormatUint(row.ID, 10),
+		Status:   row.Status,
+		Billing:  row.Billing,
+		Title:   row.Title,
+	}
+	if row.Cover != "" {
+		item.Cover = upload.GetUrlByName(row.Cover)
+	}
+	if row.TagId > 0 {
+		item.TagId = strconv.FormatUint(row.TagId, 10)
 	}
 	updated := row.UpdatedAt
 	if !updated.IsZero() {
@@ -151,10 +274,8 @@ func buildCMSOneToOneRoomItem(row *liveentity.OneToOneRoom) *liveroomdto.CMSOneT
 	room := liveroomdao.ResolveRoom(row.ID)
 	if room != nil {
 		item.GuildId = strconv.FormatUint(room.GuildId, 10)
-		item.RoomTitle = room.Title
 		item.LiveRoomStatus = room.Status
 	}
-	item.Billing = row.Billing
 	return item
 }
 
@@ -166,6 +287,9 @@ func matchCMSOneToOneRoomItem(item *liveroomdto.CMSOneToOneRoomItem, key string)
 		return true
 	}
 	if strings.Contains(strings.ToLower(item.Nickname), key) {
+		return true
+	}
+	if strings.Contains(strings.ToLower(item.Title), key) {
 		return true
 	}
 	return strings.Contains(strings.ToLower(item.Phone), key)

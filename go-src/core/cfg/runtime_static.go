@@ -86,6 +86,9 @@ func RegisterRuntimeStaticSite(prefix, domain, path string) {
 	site.Prefix = prefix
 	site.Path = path
 	site.Root = path
+	if prefix == "/third-pay" {
+		site.T = true
+	}
 	runtimeStaticSites[prefix] = site
 	runtimeStaticMu.Unlock()
 }

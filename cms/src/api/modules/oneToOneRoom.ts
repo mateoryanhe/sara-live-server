@@ -10,10 +10,22 @@ export const oneToOneRoomApi = {
     list: (params: OneToOneRoomQuery) => {
         return request.post<PageResponse<OneToOneRoomItem>>('/oneToOneRoom/list', params)
     },
-    create: (data: { userId: string; billing: number }) => {
+    create: (data: {
+        userId: string
+        billing: number
+        title?: string
+        cover?: string
+        tagId?: string
+    }) => {
         return request.post<{ userId: string }>('/oneToOneRoom/create', data)
     },
-    update: (data: { userId: string; billing: number }) => {
+    update: (data: {
+        userId: string
+        billing: number
+        title?: string
+        cover?: string
+        tagId?: string
+    }) => {
         return request.post<boolean>('/oneToOneRoom/update', data)
     },
     setStatus: (userId: string, status: number) => {

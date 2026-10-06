@@ -297,7 +297,9 @@ export interface OneToOneRoomItem {
     avatar?: string
     phone?: string
     guildId?: string
-    roomTitle?: string
+    title?: string
+    cover?: string
+    tagId?: string
     liveRoomStatus?: number
     status?: number
     billing?: number
@@ -1840,6 +1842,7 @@ export interface LiveCfg {
     paidDanmakuPrice: number
 	videoCallTicketEnabled: boolean
 	audienceListRefreshSeconds: number
+	oneToOneDailyFreeSeconds: number
     createdAt: string
     updatedAt: string
 }
@@ -1853,6 +1856,7 @@ export interface SaveLiveCfgReq {
     paidDanmakuPrice: number
 	videoCallTicketEnabled: boolean
 	audienceListRefreshSeconds: number
+	oneToOneDailyFreeSeconds: number
 }
 
 export interface SaveLiveCfgRes {

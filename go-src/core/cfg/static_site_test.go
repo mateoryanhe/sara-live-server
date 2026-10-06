@@ -17,8 +17,19 @@ func TestFindThirdPayDomain(t *testing.T) {
 }
 
 func TestFindThirdPayDomainWithoutMarker(t *testing.T) {
-	if got := findThirdPayDomain([]*StaticSiteCfg{{Domain: "third-pay.bigtktool.shop"}}); got != "" {
+	if got := findThirdPayDomain([]*StaticSiteCfg{{Domain: "pay.example.com"}}); got != "" {
 		t.Fatalf("findThirdPayDomain() = %q, want empty domain", got)
+	}
+}
+
+func TestFindThirdPayDomainByPrefix(t *testing.T) {
+	got := findThirdPayDomain([]*StaticSiteCfg{{
+		Domain: "third-pay.saralive.net",
+		Prefix: "/third-pay",
+		Path:   "/home/ec2-user/cdn/third-pay",
+	}})
+	if got != "third-pay.saralive.net" {
+		t.Fatalf("findThirdPayDomain() = %q, want third-pay.saralive.net", got)
 	}
 }
 
@@ -52,6 +63,26 @@ func TestRuntimeStaticSiteOverridesDomainAndPathByPrefix(t *testing.T) {
 	ClearRuntimeStaticMappings()
 	if got := GetStaticSiteDomain("/h5-live"); got != "new-h5.example.com" {
 		t.Fatalf("domain after ClearRuntimeStaticMappings() = %q", got)
+	}
+}
+
+func TestRuntimeThirdPaySiteMarksAppDomainWithoutYamlFlag(t *testing.T) {
+	runtimeStaticMu.Lock()
+	originalRuntimeSites := runtimeStaticSites
+	originalStaticSites := staticSiteCfgs
+	runtimeStaticSites = make(map[string]*StaticSiteCfg)
+	staticSiteCfgs = nil
+	runtimeStaticMu.Unlock()
+	t.Cleanup(func() {
+		runtimeStaticMu.Lock()
+		runtimeStaticSites = originalRuntimeSites
+		staticSiteCfgs = originalStaticSites
+		runtimeStaticMu.Unlock()
+	})
+
+	RegisterRuntimeStaticSite("/third-pay", "third-pay.saralive.net", "/home/ec2-user/cdn/third-pay")
+	if got := GetThirdPayDomain(); got != "third-pay.saralive.net" {
+		t.Fatalf("GetThirdPayDomain() = %q, want third-pay.saralive.net", got)
 	}
 }
 

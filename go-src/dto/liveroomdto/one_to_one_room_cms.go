@@ -20,7 +20,9 @@ type CMSOneToOneRoomItem struct {
 	Avatar         string     `json:"avatar"`
 	Phone          string     `json:"phone"`
 	GuildId        string     `json:"guildId"`
-	RoomTitle      string     `json:"roomTitle"`
+	Title  string `json:"title" dc:"1v1房间标题"`
+	Cover  string `json:"cover" dc:"1v1封面URL"`
+	TagId  string `json:"tagId" dc:"标签ID"`
 	LiveRoomStatus uint8      `json:"liveRoomStatus" dc:"直播间上下架(0下架,1上架)"`
 	Status         uint8      `json:"status" dc:"1v1上下架(0下架,1上架)"`
 	Billing        float64    `json:"billing" dc:"1v1通话每分钟钻石"`
@@ -28,9 +30,12 @@ type CMSOneToOneRoomItem struct {
 }
 
 type CMSCreateOneToOneRoomReq struct {
-	g.Meta  `path:"/create" method:"post" summary:"开通1v1房间" tags:"1v1房间"`
-	UserId  uint64  `json:"userId,string" v:"required#用户ID不能为空" dc:"主播用户ID"`
-	Billing float64 `json:"billing" v:"min:0#通话单价不能小于0" dc:"1v1通话每分钟钻石"`
+	g.Meta   `path:"/create" method:"post" summary:"开通1v1房间" tags:"1v1房间"`
+	UserId   uint64  `json:"userId,string" v:"required#用户ID不能为空" dc:"主播用户ID"`
+	Billing  float64 `json:"billing" v:"min:0#通话单价不能小于0" dc:"1v1通话每分钟钻石"`
+	Title string `json:"title" dc:"1v1房间标题"`
+	Cover string `json:"cover" dc:"1v1封面对象名"`
+	TagId uint64 `json:"tagId,string" dc:"标签ID"`
 }
 
 type CMSCreateOneToOneRoomRes struct {
@@ -38,9 +43,12 @@ type CMSCreateOneToOneRoomRes struct {
 }
 
 type CMSUpdateOneToOneRoomReq struct {
-	g.Meta  `path:"/update" method:"post" summary:"更新1v1房间计费" tags:"1v1房间"`
-	UserId  uint64  `json:"userId,string" v:"required#用户ID不能为空" dc:"主播用户ID"`
-	Billing float64 `json:"billing" v:"min:0#通话单价不能小于0" dc:"1v1通话每分钟钻石"`
+	g.Meta   `path:"/update" method:"post" summary:"更新1v1房间" tags:"1v1房间"`
+	UserId   uint64  `json:"userId,string" v:"required#用户ID不能为空" dc:"主播用户ID"`
+	Billing  float64 `json:"billing" v:"min:0#通话单价不能小于0" dc:"1v1通话每分钟钻石"`
+	Title string `json:"title" dc:"1v1房间标题"`
+	Cover string `json:"cover" dc:"1v1封面对象名"`
+	TagId uint64 `json:"tagId,string" dc:"标签ID"`
 }
 
 type CMSUpdateOneToOneRoomRes struct {

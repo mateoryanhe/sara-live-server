@@ -31,6 +31,7 @@ func SaveLiveCfg(_ context.Context, req *livecfgdto.SaveLiveCfgReq) (*livecfgdto
 		PaidDanmakuPrice:           req.PaidDanmakuPrice,
 		VideoCallTicketEnabled:     videoCallTicketEnabled,
 		AudienceListRefreshSeconds: NormalizeAudienceListRefreshSeconds(req.AudienceListRefreshSeconds),
+		OneToOneDailyFreeSeconds:   NormalizeOneToOneDailyFreeSeconds(req.OneToOneDailyFreeSeconds),
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -65,6 +66,7 @@ func toLiveCfgItem(cfg *entity.LiveCfg) *livecfgdto.LiveCfgItem {
 		PaidDanmakuPrice:           cfg.PaidDanmakuPrice,
 		VideoCallTicketEnabled:     cfg.VideoCallTicketEnabled,
 		AudienceListRefreshSeconds: NormalizeAudienceListRefreshSeconds(cfg.AudienceListRefreshSeconds),
+		OneToOneDailyFreeSeconds:   NormalizeOneToOneDailyFreeSeconds(cfg.OneToOneDailyFreeSeconds),
 		CreatedAt:                  formatLiveCfgTime(cfg.CreatedAt),
 		UpdatedAt:                  formatLiveCfgTime(cfg.UpdatedAt),
 	}

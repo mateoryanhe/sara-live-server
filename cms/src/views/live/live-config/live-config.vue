@@ -37,6 +37,18 @@
           <span class="form-tip">{{ t('pages.liveConfig.audienceListRefreshTip') }}</span>
         </el-form-item>
 
+        <el-form-item :label="t('pages.liveConfig.oneToOneDailyFreeSeconds')">
+          <el-input-number
+              v-model="formData.oneToOneDailyFreeSeconds"
+              :min="0"
+              :precision="0"
+              :step="1"
+              controls-position="right"
+              style="width: 220px"
+          />
+          <span class="form-tip">{{ t('pages.liveConfig.oneToOneDailyFreeSecondsTip') }}</span>
+        </el-form-item>
+
         <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.liveConfig.lastUpdated')">
           <span>{{ metaInfo.updatedAt }}</span>
         </el-form-item>
@@ -67,6 +79,7 @@ const formData = reactive({
   paidDanmakuPrice: 0,
 	videoCallTicketEnabled: true,
 	audienceListRefreshSeconds: 300,
+	oneToOneDailyFreeSeconds: 30,
 })
 
 const metaInfo = reactive({
@@ -91,6 +104,7 @@ const applyCfg = (cfg: LiveCfg | null | undefined) => {
     formData.paidDanmakuPrice = 0
 	formData.videoCallTicketEnabled = true
 	formData.audienceListRefreshSeconds = 300
+	formData.oneToOneDailyFreeSeconds = 30
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
     return
@@ -99,6 +113,7 @@ const applyCfg = (cfg: LiveCfg | null | undefined) => {
   formData.paidDanmakuPrice = truncateNumber(cfg.paidDanmakuPrice ?? 0)
 	formData.videoCallTicketEnabled = cfg.videoCallTicketEnabled ?? true
 	formData.audienceListRefreshSeconds = cfg.audienceListRefreshSeconds || 300
+	formData.oneToOneDailyFreeSeconds = cfg.oneToOneDailyFreeSeconds ?? 30
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
 }
@@ -125,6 +140,7 @@ const handleSave = async () => {
       paidDanmakuPrice: formData.paidDanmakuPrice,
 	  videoCallTicketEnabled: formData.videoCallTicketEnabled,
 	  audienceListRefreshSeconds: formData.audienceListRefreshSeconds,
+	  oneToOneDailyFreeSeconds: formData.oneToOneDailyFreeSeconds,
     })
     if (response?.success) {
       ElMessage.success(t('common.saveConfig'))

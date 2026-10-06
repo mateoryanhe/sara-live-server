@@ -25,14 +25,34 @@ type CreateLiveRoomRes struct {
 	GuildId string `json:"guildId" dc:"所属工会ID"`
 }
 
-// CreateOneToOneRoomReq App 将当前主播加入1v1房间池(与直播分类互不影响)
+// CreateOneToOneRoomReq App 开通或更新 1v1 房间(展示资料与计费独立于普通直播间)
 type CreateOneToOneRoomReq struct {
-	g.Meta  `path:"/createOneToOne" method:"post" summary:"开通1v1房间" tags:"直播间"`
-	Billing float64 `json:"billing" v:"min:0#通话单价不能小于0" dc:"1v1通话每分钟钻石"`
+	g.Meta   `path:"/createOneToOne" method:"post" summary:"开通1v1房间" tags:"直播间"`
+	Billing  float64 `json:"billing" v:"min:0#通话单价不能小于0" dc:"1v1通话每分钟钻石"`
+	Title string `json:"title" dc:"1v1房间标题"`
+	Cover string `json:"cover" dc:"1v1封面对象名(需先上传)"`
+	TagId uint64 `json:"tagId,string" dc:"标签ID"`
 }
 
 type CreateOneToOneRoomRes struct {
 	RoomId string `json:"roomId" dc:"房间ID(同主播用户ID)"`
+}
+
+// GetOneToOneRoomReq App 按主播ID查询 1v1 房间池配置
+type GetOneToOneRoomReq struct {
+	g.Meta   `path:"/getOneToOne" method:"post" summary:"查询1v1房间配置" tags:"直播间"`
+	AnchorId uint64 `json:"anchorId" v:"required|min:1#主播ID不能为空|主播ID无效" dc:"主播用户ID(同直播间ID)"`
+}
+
+type GetOneToOneRoomRes struct {
+	RoomId       string  `json:"roomId" dc:"房间ID(同主播用户ID)"`
+	Status       uint8   `json:"status" dc:"1v1池状态(0=下架,1=上架)"`
+	Billing      float64 `json:"billing" dc:"1v1通话每分钟钻石"`
+	Title   string `json:"title" dc:"1v1房间标题"`
+	Cover   string `json:"cover" dc:"1v1封面URL"`
+	TagId   string `json:"tagId" dc:"标签ID"`
+	TagName      string  `json:"tagName" dc:"标签名称"`
+	OnlineStatus uint8   `json:"onlineStatus" dc:"主播WebSocket在线状态(1=在线,2=离线)"`
 }
 
 // StartLiveReq 开播(主播自身)

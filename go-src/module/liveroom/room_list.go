@@ -478,12 +478,16 @@ func buildOneToOneRoomListItems(rooms []*liveentity.LiveRoom, userID uint64, onl
 		if onlineByRoomID[room.ID] {
 			onlineStatus = liveroomdto.OneToOneRoomStatusFilterOnline
 		}
+		base := toLiveRoomListItem(room, userID)
+		if base == nil {
+			continue
+		}
 		item := &liveroomdto.OneToOneRoomListItem{
-			LiveRoomListItem: *toLiveRoomListItem(room, userID),
+			LiveRoomListItem: *base,
 			OnlineStatus:     onlineStatus,
 		}
 		if oneToOne := liveroomdao.GetOneToOneRoom(room.ID); oneToOne != nil {
-			item.Billing = oneToOne.Billing
+			overlayOneToOneListItem(&item.LiveRoomListItem, oneToOne)
 		}
 		list = append(list, item)
 	}

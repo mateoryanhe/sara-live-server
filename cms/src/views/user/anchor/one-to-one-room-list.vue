@@ -55,8 +55,8 @@
         <el-table-column :label="t('pages.liveRoomRecycleBin.guildId')" prop="guildId" width="120">
           <template #default="{ row }">{{ row.guildId || '-' }}</template>
         </el-table-column>
-        <el-table-column :label="t('pages.oneToOneRoomList.roomTitle')" min-width="140" prop="roomTitle">
-          <template #default="{ row }">{{ row.roomTitle || '-' }}</template>
+        <el-table-column :label="t('pages.oneToOneRoomList.oneToOneTitle')" min-width="140" prop="title">
+          <template #default="{ row }">{{ row.title || '-' }}</template>
         </el-table-column>
         <el-table-column :label="t('pages.oneToOneRoomList.liveRoomStatus')" width="100">
           <template #default="{ row }">
@@ -119,10 +119,19 @@
       </div>
     </el-card>
 
-    <el-dialog v-model="formVisible" :title="dialogTitle" width="420px">
+    <el-dialog v-model="formVisible" :title="dialogTitle" width="480px">
       <el-form ref="formRef" :model="form" :rules="formRules" label-width="100px">
         <el-form-item :label="t('pages.oneToOneRoomList.userId')" prop="userId">
           <el-input v-model="form.userId" :disabled="isEdit" :placeholder="t('pages.oneToOneRoomList.userIdPlaceholder')"/>
+        </el-form-item>
+        <el-form-item :label="t('pages.oneToOneRoomList.oneToOneTitle')">
+          <el-input v-model="form.title" clearable/>
+        </el-form-item>
+        <el-form-item :label="t('pages.oneToOneRoomList.tagId')">
+          <el-input v-model="form.tagId" clearable placeholder="0"/>
+        </el-form-item>
+        <el-form-item :label="t('pages.oneToOneRoomList.coverObject')">
+          <el-input v-model="form.cover" clearable :placeholder="t('pages.oneToOneRoomList.coverObjectTip')"/>
         </el-form-item>
         <el-form-item :label="t('pages.oneToOneRoomList.billing')" prop="billing">
           <el-input-number v-model="form.billing" :min="0" :precision="4" :step="1" style="width: 100%"/>
@@ -155,7 +164,13 @@ const isEdit = ref(false)
 const formRef = ref<FormInstance>()
 const tableData = ref<OneToOneRoomItem[]>([])
 const searchForm = reactive({key: '', status: undefined as number | undefined})
-const form = reactive({userId: '', billing: 0})
+const form = reactive({
+  userId: '',
+  title: '',
+  cover: '',
+  tagId: '',
+  billing: 0,
+})
 const pagination = reactive({
   pageIndex: 1,
   pageSize: 10,
@@ -215,6 +230,9 @@ const handleCurrentChange = (page: number) => {
 const openCreate = () => {
   isEdit.value = false
   form.userId = ''
+  form.title = ''
+  form.cover = ''
+  form.tagId = ''
   form.billing = 0
   formVisible.value = true
 }
@@ -222,6 +240,9 @@ const openCreate = () => {
 const openEdit = (row: OneToOneRoomItem) => {
   isEdit.value = true
   form.userId = row.userId
+  form.title = row.title || ''
+  form.cover = ''
+  form.tagId = row.tagId || ''
   form.billing = Number(row.billing || 0)
   formVisible.value = true
 }
@@ -233,10 +254,17 @@ const submitForm = async () => {
   await formRef.value.validate()
   saving.value = true
   try {
+    const payload = {
+      userId: form.userId.trim(),
+      billing: form.billing,
+      title: form.title.trim(),
+      cover: form.cover.trim(),
+      tagId: form.tagId.trim() || '0',
+    }
     if (isEdit.value) {
-      await oneToOneRoomApi.update({userId: form.userId.trim(), billing: form.billing})
+      await oneToOneRoomApi.update(payload)
     } else {
-      await oneToOneRoomApi.create({userId: form.userId.trim(), billing: form.billing})
+      await oneToOneRoomApi.create(payload)
     }
     ElMessage.success(t('pages.oneToOneRoomList.saveSuccess'))
     formVisible.value = false

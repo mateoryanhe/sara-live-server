@@ -76,6 +76,9 @@ func liveRoomCallTicketPrice(order *callentity.CallOrder, enabled bool) float64 
 
 // checkLiveRoomCallDiamondOnAccept 接通时按来源校验付费用户是否可支付门票与首分钟费用。
 func checkLiveRoomCallDiamondOnAccept(order *callentity.CallOrder) error {
+	if canSkipOneToOneDiamondPrecheckForOrder(order) {
+		return nil
+	}
 	payerId, billable := callDiamondBillingUserId(order)
 	if !billable {
 		return nil
@@ -101,6 +104,10 @@ func chargeLiveRoomCallOnAccept(order *callentity.CallOrder, now time.Time) erro
 	}
 
 	liveRecordId, _ := strconv.ParseUint(order.Params, 10, 64)
+	if tryApplyOneToOneDailyFreeOnAccept(order, anchorId, payerId, now) {
+		order.SetTotalCost(0)
+		return nil
+	}
 	var totalCost float64
 	ticketPrice := liveRoomCallTicketPrice(order, livecfg.IsVideoCallTicketEnabled())
 

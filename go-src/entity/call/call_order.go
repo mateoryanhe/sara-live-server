@@ -69,7 +69,8 @@ const (
 	CallOrderPricePerMinute      db.TbCol = "price_per_minute"
 	CallOrderTotalCost           db.TbCol = "total_cost"
 	CallOrderChargeTime          db.TbCol = "charge_time"
-	CallOrderBillingDuration     db.TbCol = "billing_duration"
+	CallOrderBillingDuration        db.TbCol = "billing_duration"
+	CallOrderOneToOneFreeDeferSec   db.TbCol = "one_to_one_free_defer_sec"
 )
 
 // CallOrder 通话订单
@@ -97,7 +98,8 @@ type CallOrder struct {
 	PricePerMinute      float64    `gorm:"type:decimal(10,4);default:0;comment:分钟计费价格(每分钟)" json:"pricePerMinute"`
 	TotalCost           float64    `gorm:"type:decimal(10,4);default:0;comment:总费用" json:"totalCost"`
 	ChargeTime          *time.Time `gorm:"comment:扣费时间" json:"chargeTime"`
-	BillingDuration     uint32     `gorm:"default:0;comment:计费时长(分钟)" json:"billingDuration"`
+	BillingDuration          uint32 `gorm:"default:0;comment:计费时长(分钟)" json:"billingDuration"`
+	OneToOneFreeDeferSeconds uint32 `gorm:"default:0;comment:1v1接通后延迟首分钟扣费的免费秒数" json:"oneToOneFreeDeferSeconds"`
 }
 
 func NewCallOrder(callerId, receiverId, payerId uint64, callType, source uint8, params string, ticketPrice, pricePerMinute float64) *CallOrder {
@@ -403,6 +405,11 @@ func (m *CallOrder) SubBillingDuration(v uint32) {
 	syndb.AddData(TbCallOrder, CallOrderBillingDuration, &syndb.ColData{IdVal: m.ID, ColVal: m.BillingDuration})
 }
 
+func (m *CallOrder) SetOneToOneFreeDeferSeconds(v uint32) {
+	m.OneToOneFreeDeferSeconds = v
+	syndb.AddData(TbCallOrder, CallOrderOneToOneFreeDeferSec, &syndb.ColData{IdVal: m.ID, ColVal: v})
+}
+
 func (m *CallOrder) SetCreatedAt(v time.Time) {
 	m.CreatedAt = v
 	syndb.AddData(TbCallOrder, db.CreatedAtName, &syndb.ColData{IdVal: m.ID, ColVal: v})
@@ -438,5 +445,6 @@ func initCallOrder() {
 	syndb.RegQuick(TbCallOrder, CallOrderTotalCost)
 	syndb.RegQuick(TbCallOrder, CallOrderChargeTime)
 	syndb.RegQuick(TbCallOrder, CallOrderBillingDuration)
+	syndb.RegQuick(TbCallOrder, CallOrderOneToOneFreeDeferSec)
 	migrate.AutoMigrate(&CallOrder{})
 }

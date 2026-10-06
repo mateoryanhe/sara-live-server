@@ -176,6 +176,7 @@ func Init() {
 	httpserver.RegAppRouteGroup("/sofie/studio", []httpserver.AppRoute{
 		{Path: "/openBooth", Handler: controller.HandleCreateLiveRoom},
 		{Path: "/openDirectBooth", Handler: jsonHandler((&controller.LiveRoomAppController{}).CreateOneToOneRoom)},
+		{Path: "/fetchDirectBooth", Handler: jsonHandler((&controller.LiveRoomAppController{}).GetOneToOneRoom)},
 		{Path: "/beginBroadcast", Handler: jsonHandler((&controller.LiveRoomAppController{}).StartLive)},
 		{Path: "/endBroadcast", Handler: jsonHandler((&controller.LiveRoomAppController{}).StopLive)},
 		{Path: "/replaceCover", Handler: jsonHandler((&controller.LiveRoomAppController{}).UpdateCover)},

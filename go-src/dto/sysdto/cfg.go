@@ -12,6 +12,7 @@ type SysCfgResp struct {
 	TVisable                   bool    `json:"tVisable" dc:"是否显示第三方支付"`
 	PaidDanmakuPrice           float64 `json:"paidDanmakuPrice" dc:"直播间付费弹幕价格(钻石)"`
 	AudienceListRefreshSeconds uint32  `json:"audienceListRefreshSeconds" dc:"在线观众列表刷新间隔(秒)"`
+	OneToOneDailyFreeSeconds   uint32  `json:"oneToOneDailyFreeSeconds" dc:"1v1观众对单主播每日免费通话秒数(0=关闭)"`
 	PrivacyPolicyUrl           string  `json:"privacyPolicyUrl" dc:"隐私政策页面URL"`
 	TermsOfServiceUrl          string  `json:"termsOfServiceUrl" dc:"用户服务协议页面URL"`
 	CreatorTermsUrl            string  `json:"creatorTermsUrl" dc:"短视频创作者上传合规条款URL"`

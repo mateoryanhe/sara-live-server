@@ -14,8 +14,10 @@ type ServerOnlineNormalUserItem struct {
 	Avatar   string `json:"avatar" dc:"头像URL(已拼资源域名)"`
 	VipLevel uint32 `json:"vipLevel" dc:"VIP等级"`
 	Gender   uint8  `json:"gender" dc:"性别(0未知,1男,2女)"`
-	Age      int    `json:"age" dc:"年龄(未设置出生日期时为0)"`
-	UserType uint8  `json:"userType" dc:"用户类型(固定为0普通用户)"`
+	Age           int    `json:"age" dc:"年龄(未设置出生日期时为0)"`
+	UserType      uint8  `json:"userType" dc:"用户类型(固定为0普通用户)"`
+	FollowCount   uint64 `json:"followCount" dc:"当前关注数"`
+	FollowerCount uint64 `json:"followerCount" dc:"当前粉丝数"`
 }
 
 type GetServerOnlineNormalUserListRes struct {
