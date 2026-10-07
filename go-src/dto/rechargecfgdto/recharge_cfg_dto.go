@@ -97,8 +97,9 @@ type OffShelfRechargeCfgRes struct {
 // ===== App =====
 
 // AppRechargeCfgListReq App端查询充值配置(仅返回已上架)
+// 按客户端过滤 cfgType：默认 Google 档位；请求头 X-H5-Client=1 时返回渠道档位。
 type AppRechargeCfgListReq struct {
-	g.Meta `path:"/rechargeCfgListForApp" method:"post" summary:"App查询充值配置列表(已上架)" tags:"充值配置"`
+	g.Meta `path:"/rechargeCfgListForApp" method:"post" summary:"App查询充值配置列表(已上架,按客户端过滤Google/渠道)" tags:"充值配置"`
 }
 
 // AppRechargeCfgListByUserIdReq App端按用户ID查询充值配置(无需鉴权,仅返回已上架)

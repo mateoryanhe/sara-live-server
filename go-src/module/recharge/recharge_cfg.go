@@ -123,12 +123,12 @@ func OffShelf(_ context.Context, req *rechargecfgdto.OffShelfRechargeCfgReq) (*r
 func GetAppList(ctx context.Context, req *rechargecfgdto.AppRechargeCfgListReq) (*rechargecfgdto.AppRechargeCfgListRes, error) {
 	_ = req
 	return &rechargecfgdto.AppRechargeCfgListRes{
-		List: buildAppRechargeCfgList(httpserver.GetAuthId(ctx)),
+		List: buildAppRechargeCfgList(ctx, httpserver.GetAuthId(ctx)),
 	}, nil
 }
 
 // GetAppListByUserId App端按上报用户ID查询(无需鉴权,仅返回已上架,走内存缓存)
-func GetAppListByUserId(_ context.Context, req *rechargecfgdto.AppRechargeCfgListByUserIdReq) (*rechargecfgdto.AppRechargeCfgListRes, error) {
+func GetAppListByUserId(ctx context.Context, req *rechargecfgdto.AppRechargeCfgListByUserIdReq) (*rechargecfgdto.AppRechargeCfgListRes, error) {
 	userId, err := strconv.ParseUint(strings.TrimSpace(req.UserId), 10, 64)
 	if err != nil || userId == 0 {
 		return nil, errercode.CreateCode(errercode.EmptyUserId)
@@ -137,16 +137,29 @@ func GetAppListByUserId(_ context.Context, req *rechargecfgdto.AppRechargeCfgLis
 		return nil, errercode.CreateCode(errercode.SysError)
 	}
 	return &rechargecfgdto.AppRechargeCfgListRes{
-		List: buildAppRechargeCfgList(userId),
+		List: buildAppRechargeCfgList(ctx, userId),
 	}, nil
 }
 
-func buildAppRechargeCfgList(userId uint64) []*rechargecfgdto.AppRechargeCfgItem {
+// appRechargeCfgListCfgTypeForClient App/H5 充值档位列表 cfgType：H5→渠道，其余→Google。
+func appRechargeCfgListCfgTypeForClient(isH5Client bool) uint8 {
+	if isH5Client {
+		return entity.RechargeCfgTypeChannel
+	}
+	return entity.RechargeCfgTypeGoogle
+}
+
+func appRechargeCfgListCfgType(ctx context.Context) uint8 {
+	return appRechargeCfgListCfgTypeForClient(httpserver.IsH5ClientFromContext(ctx))
+}
+
+func buildAppRechargeCfgList(ctx context.Context, userId uint64) []*rechargecfgdto.AppRechargeCfgItem {
 	cfgRatio := activity.ConfiguredFirstRechargeRatio()
+	wantCfgType := appRechargeCfgListCfgType(ctx)
 	all := getRechargeCfgCache()
 	list := make([]*rechargecfgdto.AppRechargeCfgItem, 0, len(all))
 	for _, item := range all {
-		if item == nil {
+		if item == nil || item.CfgType != wantCfgType {
 			continue
 		}
 		copyItem := *item

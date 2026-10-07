@@ -17,7 +17,29 @@ import (
 const (
 	haiPayGlobalCollectApplyPath   = "/global/cashier/collect/apply"
 	haiPayGlobalCollectQueryV2Path = "/global/cashier/collect/query/v2"
+
+	haiPayGlobalCashierRegionIndonesia = "ID"
 )
+
+// haiPayGlobalCashierIntegerIDR 仅全球收银台印尼区 + 印尼盾：HaiPay 要求 amount 不带小数。
+func haiPayGlobalCashierIntegerIDR(region, currency string) bool {
+	return strings.EqualFold(strings.TrimSpace(region), haiPayGlobalCashierRegionIndonesia) &&
+		strings.EqualFold(strings.TrimSpace(currency), "IDR")
+}
+
+func haiPayRoundGlobalCashierAmount(region, currency string, amount float64) float64 {
+	if haiPayGlobalCashierIntegerIDR(region, currency) {
+		return math.Round(amount)
+	}
+	return math.Round(amount*100) / 100
+}
+
+func haiPayFormatGlobalCashierAmount(region, currency string, amount float64) string {
+	if haiPayGlobalCashierIntegerIDR(region, currency) {
+		return fmt.Sprintf("%.0f", math.Round(amount))
+	}
+	return fmt.Sprintf("%.2f", amount)
+}
 
 func (p *haiPayProvider) quoteGlobalCashier(ctx context.Context, priceUSD float64, regionHint string) (string, float64, error) {
 	if priceUSD < haiPayMinUsdAmount {
@@ -35,7 +57,7 @@ func (p *haiPayProvider) quoteGlobalCashier(ctx context.Context, priceUSD float6
 	if err != nil {
 		return "", 0, err
 	}
-	amount := math.Round(conversion.TargetAmount*100) / 100
+	amount := haiPayRoundGlobalCashierAmount(region, currency, conversion.TargetAmount)
 	if amount <= 0 {
 		return "", 0, fmt.Errorf("haipay global cashier amount invalid region=%s currency=%s priceUsd=%v rate=%v", region, currency, priceUSD, conversion.Rate)
 	}
@@ -60,7 +82,7 @@ func (p *haiPayProvider) createGlobalCashierPay(ctx context.Context, req *Channe
 	if currency == "" || currency != configuredCurrency {
 		return nil, fmt.Errorf("haipay global cashier currency mismatch region=%s currency=%s want=%s", region, currency, configuredCurrency)
 	}
-	amount := req.Amount
+	amount := haiPayRoundGlobalCashierAmount(region, currency, req.Amount)
 	if amount <= 0 {
 		return nil, fmt.Errorf("haipay global cashier amount invalid region=%s currency=%s amount=%v", region, currency, amount)
 	}
@@ -95,7 +117,7 @@ func (p *haiPayProvider) createGlobalCashierPay(ctx context.Context, req *Channe
 		"orderId":         req.OrderID,
 		"name":            name,
 		"email":           email,
-		"amount":          fmt.Sprintf("%.2f", amount),
+		"amount":          haiPayFormatGlobalCashierAmount(region, currency, amount),
 		"currency":        currency,
 		"callBackUrl":     returnURL,
 		"callBackFailUrl": failURL,

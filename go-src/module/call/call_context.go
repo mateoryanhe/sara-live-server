@@ -55,29 +55,20 @@ func resolveOneToOneRoomCallContext(callerId, targetId uint64) (*oneToOneRoomCal
 	if !liveroom.IsOneToOneOnShelf(anchorId) {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotOneToOne)
 	}
-	room := liveroomdao.ResolveRoom(anchorId)
-	if room == nil {
-		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
-	}
-	cfg := liveroomdao.GetLiveRoomCfgForCMS(room.ID)
-	if cfg == nil {
-		cfg = liveroomdao.GetLiveRoomCfg(room.ID)
-	}
-	if cfg == nil {
-		return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
-	}
-	if !liveroom.CanInitiateLiveRoomCall(room, cfg, audienceId) {
-		return nil, errercode.CreateCode(errercode.NoPermission)
-	}
 	oneToOne := liveroomdao.GetOneToOneRoom(anchorId)
 	if oneToOne == nil || !oneToOne.IsOnShelf() {
 		return nil, errercode.CreateCode(errercode.LiveRoomNotOneToOne)
+	}
+	// 1v1(source=3)不要求 live_rooms 存在，也不校验 privateInviteType；有开播场次时仍写入 params 供收益关联。
+	orderParams := "0"
+	if room := liveroomdao.ResolveRoom(anchorId); room != nil && room.LiveRecordId > 0 {
+		orderParams = strconv.FormatUint(room.LiveRecordId, 10)
 	}
 
 	return &oneToOneRoomCallContext{
 		anchorId:       anchorId,
 		audienceId:     audienceId,
-		orderParams:    strconv.FormatUint(room.LiveRecordId, 10),
+		orderParams:    orderParams,
 		pricePerMinute: oneToOne.Billing,
 	}, nil
 }
