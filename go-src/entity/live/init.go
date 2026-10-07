@@ -8,7 +8,6 @@ func Init() {
 	initOneToOneCallFreeDailyUse()
 	initLiveRoomIncome()
 	initLiveRoomTag()
-	initAnchorSalaryCfg()
 	initAnchorSalarySocialShareCfg()
 	initAnchorNoSalaryShareCfg()
 	initAnchorGameShareCfg()

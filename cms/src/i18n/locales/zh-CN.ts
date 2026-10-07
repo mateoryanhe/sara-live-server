@@ -97,7 +97,6 @@ const menu = {
   AppVersionCfgManagement: 'App版本查询',
   SimulatorCpuKeywordManagement: '模拟器CPU关键词',
   DeviceRegisterRiskCfgManagement: '设备码注册风控',
-  AnchorSalaryCfgManagement: '主播结算薪资',
   AnchorSalarySocialShareCfgManagement: '有底薪社交流水分佣配置',
   AnchorNoSalaryShareCfgManagement: '无底薪社交流水分佣配置',
   AnchorSalaryGameShareCfgManagement: '有底薪游戏流水档位分佣配置',

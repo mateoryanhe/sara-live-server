@@ -249,12 +249,6 @@ export const operationRoutes: RouteRecordRaw = {
             },
         },
         {
-            path: 'salary/anchor-salary-cfg-list',
-            name: 'AnchorSalaryCfgManagement',
-            component: () => import('@/views/operation/salary/anchor-salary-cfg-list.vue'),
-            meta: {title: '主播结算薪资'},
-        },
-        {
             path: 'salary/anchor-salary-social-share-cfg-list',
             name: 'AnchorSalarySocialShareCfgManagement',
             component: () => import('@/views/operation/salary/anchor-salary-social-share-cfg-list.vue'),

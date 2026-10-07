@@ -68,7 +68,6 @@ func Init() {
 	initFirstRechargeActivityAppController()         // 首充活动配置(App)
 	initSimulatorCpuKeywordCMSController()           // 模拟器CPU关键词(CMS)
 	initSimulatorDeviceWhitelistCMSController()      // 模拟器设备白名单(CMS)
-	initAnchorSalaryCfgCMSController()               // 主播结算薪资分档配置(CMS)
 	initAnchorSalarySocialShareCfgCMSController()    // 有底薪社交流水分佣配置(CMS)
 	initAnchorNoSalaryShareCfgCMSController()        // 无底薪社交流水分佣配置(CMS)
 	initAnchorGameShareCfgCMSController()            // 游戏流水档位分佣配置(CMS)

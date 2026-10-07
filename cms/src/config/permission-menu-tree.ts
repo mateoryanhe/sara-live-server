@@ -276,7 +276,6 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             page('WalletExchangeCfgManagement'),
             page('PaymentCountryCfgManagement'),
             page('CoinMerchantPaymentCountryCfgManagement'),
-            page('AnchorSalaryCfgManagement'),
             page('AnchorSalarySocialShareCfgManagement'),
             page('AnchorNoSalaryShareCfgManagement'),
             page('AnchorSalaryGameShareCfgManagement'),

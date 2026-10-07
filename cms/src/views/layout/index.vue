@@ -397,7 +397,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('PaymentCountryCfgManagement') || hasMenuPermission('CoinMerchantPaymentCountryCfgManagement') || hasMenuPermission('AnchorSalaryCfgManagement') || hasMenuPermission('AnchorSalarySocialShareCfgManagement') || hasMenuPermission('AnchorNoSalaryShareCfgManagement') || hasMenuPermission('AnchorSalaryGameShareCfgManagement') || hasMenuPermission('AnchorNoSalaryGameShareCfgManagement')"
+            v-if="hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('PaymentCountryCfgManagement') || hasMenuPermission('CoinMerchantPaymentCountryCfgManagement') || hasMenuPermission('AnchorSalarySocialShareCfgManagement') || hasMenuPermission('AnchorNoSalaryShareCfgManagement') || hasMenuPermission('AnchorSalaryGameShareCfgManagement') || hasMenuPermission('AnchorNoSalaryGameShareCfgManagement')"
             index="/settlement">
           <template #title>
             <el-icon>
@@ -422,12 +422,6 @@
               <CreditCard/>
             </el-icon>
             <span>{{ t('menu.CoinMerchantPaymentCountryCfgManagement') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('AnchorSalaryCfgManagement')" index="/operation/salary/anchor-salary-cfg-list">
-            <el-icon>
-              <CreditCard/>
-            </el-icon>
-            <span>{{ t('menu.AnchorSalaryCfgManagement') }}</span>
           </el-menu-item>
           <el-menu-item
               v-if="hasMenuPermission('AnchorSalarySocialShareCfgManagement')"

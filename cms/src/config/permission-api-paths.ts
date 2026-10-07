@@ -484,13 +484,6 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'SimulatorDeviceWhitelistManagement:edit': '/simulatorDeviceWhitelist/updateSimulatorDeviceWhitelist',
     'SimulatorDeviceWhitelistManagement:delete': '/simulatorDeviceWhitelist/deleteSimulatorDeviceWhitelist',
 
-    AnchorSalaryCfgManagement: '/anchorSalaryCfg/anchorSalaryCfgList',
-    'AnchorSalaryCfgManagement:view': '/anchorSalaryCfg/anchorSalaryCfgList',
-    'AnchorSalaryCfgManagement:search': '/anchorSalaryCfg/anchorSalaryCfgList',
-    'AnchorSalaryCfgManagement:create': '/anchorSalaryCfg/createAnchorSalaryCfg',
-    'AnchorSalaryCfgManagement:edit': '/anchorSalaryCfg/updateAnchorSalaryCfg',
-    'AnchorSalaryCfgManagement:delete': '/anchorSalaryCfg/deleteAnchorSalaryCfg',
-
     AnchorSalarySocialShareCfgManagement: '/anchorSalarySocialShareCfg/anchorSalarySocialShareCfgList',
     'AnchorSalarySocialShareCfgManagement:view': '/anchorSalarySocialShareCfg/anchorSalarySocialShareCfgList',
     'AnchorSalarySocialShareCfgManagement:create': '/anchorSalarySocialShareCfg/createAnchorSalarySocialShareCfg',

@@ -66,7 +66,6 @@ import {firstRechargeActivityCfgMessages} from './first-recharge-activity-cfg'
 import {inviteRechargeRewardCfgMessages} from './invite-recharge-reward-cfg'
 import {simulatorCpuKeywordListMessages} from './simulator-cpu-keyword-list'
 import {simulatorDeviceWhitelistListMessages} from './simulator-device-whitelist-list'
-import {anchorSalaryCfgListMessages} from './anchor-salary-cfg-list'
 import {anchorSalarySocialShareCfgListMessages} from './anchor-salary-social-share-cfg-list'
 import {anchorNoSalaryShareCfgMessages} from './anchor-no-salary-share-cfg'
 import {anchorGameShareCfgListMessages} from './anchor-game-share-cfg-list'
@@ -163,7 +162,6 @@ const pageMessageBuilders = [
   ['inviteRechargeRewardCfg', inviteRechargeRewardCfgMessages],
   ['simulatorCpuKeywordList', simulatorCpuKeywordListMessages],
   ['simulatorDeviceWhitelistList', simulatorDeviceWhitelistListMessages],
-  ['anchorSalaryCfgList', anchorSalaryCfgListMessages],
   ['anchorSalarySocialShareCfgList', anchorSalarySocialShareCfgListMessages],
   ['anchorNoSalaryShareCfg', anchorNoSalaryShareCfgMessages],
   ['anchorGameShareCfgList', anchorGameShareCfgListMessages],

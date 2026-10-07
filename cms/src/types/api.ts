@@ -1641,19 +1641,6 @@ export interface LiveRoomTag {
 export interface LiveRoomTagQuery extends PageQuery {
 }
 
-export interface AnchorSalaryCfg {
-    id: string
-    weeklyWorkDays: number
-    dailyLiveDurationMinutes: number
-    salaryAmount: number
-    sort: number
-    createdAt: string
-    updatedAt: string
-}
-
-export interface AnchorSalaryCfgQuery extends PageQuery {
-}
-
 export interface AnchorSalarySocialShareCfg {
     id: string
     level: number
