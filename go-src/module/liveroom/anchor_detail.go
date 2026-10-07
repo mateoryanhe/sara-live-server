@@ -99,6 +99,7 @@ func toIncomeUnsettledItem(row *entity.LiveRoomIncomeUnsettled) *accountdto.Live
 	}
 	item := &accountdto.LiveRoomIncomeUnsettledItem{
 		LiveRoomIncomeAmountsItem: toIncomeAmountsItem(&row.LiveRoomIncomeAmounts),
+		EffectiveLiveDays:         row.EffectiveLiveDays,
 	}
 	if !row.UpdatedAt.IsZero() {
 		updatedAt := row.UpdatedAt

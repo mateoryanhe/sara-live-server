@@ -13,6 +13,8 @@ const (
 type AnchorSalarySocialShareCfg struct {
 	migrate.OneModel
 	Level                     uint32  `gorm:"uniqueIndex;default:0;comment:等级" json:"level"`
+	EffectiveLiveDays         uint64  `gorm:"default:0;comment:有效直播天数门槛" json:"effectiveLiveDays"`
+	LiveBaseSalaryDiamond     float64 `gorm:"type:decimal(20,4);default:0;comment:直播底薪(钻石)" json:"liveBaseSalaryDiamond"`
 	SocialTotalDiamondRevenue float64 `gorm:"type:decimal(20,4);default:0;comment:社交总钻石流水" json:"socialTotalDiamondRevenue"`
 	AnchorSocialSharePercent  float64 `orm:"social_share_percent" gorm:"column:social_share_percent;type:decimal(6,2);default:0;comment:主播社交提成比(%)" json:"anchorSocialSharePercent"`
 	GuildSocialSharePercent   float64 `gorm:"type:decimal(6,2);default:0;comment:工会社交提成比(%)" json:"guildSocialSharePercent"`

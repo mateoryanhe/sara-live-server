@@ -15,7 +15,7 @@ func TestResolveAnchorSettlementTierUsesPromotedSocialLevelAndHighestGameThresho
 		{GameTotalGoldRevenue: 500, AnchorGameSharePercent: 12, GuildGameSharePercent: 6},
 		{GameTotalGoldRevenue: 50, AnchorGameSharePercent: 5, GuildGameSharePercent: 2},
 	}
-	got := resolveAnchorSettlementTier(true, 1500, 700, socialTiers, nil, gameTiers)
+	got := resolveAnchorSettlementTier(true, 5, 1500, 700, socialTiers, nil, gameTiers)
 	if got.AnchorSocialShareDiamond != 300 || got.GuildSocialShareDiamond != 120 {
 		t.Fatalf("unexpected social shares: %+v", got)
 	}
@@ -25,8 +25,11 @@ func TestResolveAnchorSettlementTierUsesPromotedSocialLevelAndHighestGameThresho
 }
 
 func TestResolveAnchorSettlementTierUsesFirstSocialLevelBelowUpgradeBoundary(t *testing.T) {
-	got := resolveAnchorSettlementTier(true, 10, 10,
-		[]*entity.AnchorSalarySocialShareCfg{{Level: 1, SocialTotalDiamondRevenue: 100, AnchorSocialSharePercent: 15, GuildSocialSharePercent: 5}}, nil,
+	noSalarySocial := []*entity.AnchorNoSalaryShareCfg{
+		{Level: 1, SocialTotalDiamondRevenue: 100, AnchorSocialSharePercent: 15, GuildSocialSharePercent: 5},
+	}
+	got := resolveAnchorSettlementTier(true, 0, 10, 10,
+		[]*entity.AnchorSalarySocialShareCfg{{Level: 1, EffectiveLiveDays: 1, SocialTotalDiamondRevenue: 100, AnchorSocialSharePercent: 99, GuildSocialSharePercent: 99}}, noSalarySocial,
 		[]*entity.AnchorGameShareCfg{{GameTotalGoldRevenue: 100}},
 	)
 	if got.AnchorSocialShareDiamond != 1.5 || got.GuildSocialShareDiamond != 0.5 {
@@ -42,7 +45,7 @@ func TestResolveNoSalarySocialShareUsesHighestMatchedThreshold(t *testing.T) {
 		{Level: 1, SocialTotalDiamondRevenue: 100, AnchorSocialSharePercent: 8, GuildSocialSharePercent: 3},
 		{Level: 2, SocialTotalDiamondRevenue: 1000, AnchorSocialSharePercent: 15, GuildSocialSharePercent: 5},
 	}
-	got := resolveAnchorSettlementTier(false, 1500, 0, nil, tiers, nil)
+	got := resolveAnchorSettlementTier(false, 0, 1500, 0, nil, tiers, nil)
 	if got.AnchorSocialSharePercent != 15 || got.GuildSocialSharePercent != 5 {
 		t.Fatalf("unexpected no-salary social tier: %+v", got)
 	}
@@ -52,7 +55,7 @@ func TestResolveNoSalarySocialShareUsesHighestMatchedThreshold(t *testing.T) {
 }
 
 func TestResolveNoSalarySocialShareBelowUpgradeBoundaryUsesFirstLevel(t *testing.T) {
-	got := resolveAnchorSettlementTier(false, 99, 0, nil,
+	got := resolveAnchorSettlementTier(false, 0, 99, 0, nil,
 		[]*entity.AnchorNoSalaryShareCfg{{Level: 1, SocialTotalDiamondRevenue: 100, AnchorSocialSharePercent: 15, GuildSocialSharePercent: 5}},
 		nil,
 	)
@@ -66,7 +69,7 @@ func TestSocialShareExactBoundaryPromotesToNextLevel(t *testing.T) {
 		{Level: 1, SocialTotalDiamondRevenue: 200, AnchorSocialSharePercent: 10, GuildSocialSharePercent: 4},
 		{Level: 2, SocialTotalDiamondRevenue: 400, AnchorSocialSharePercent: 20, GuildSocialSharePercent: 8},
 	}
-	anchorPercent, guildPercent := matchSalarySocialSharePercent(200, salaryTiers)
+	anchorPercent, guildPercent := matchSalarySocialSharePercent(200, salaryTiers) // effectiveLiveDays=0 且档内天数门槛为 0
 	if anchorPercent != 20 || guildPercent != 8 {
 		t.Fatalf("salary social turnover at level 1 boundary must promote to level 2: anchor=%v guild=%v", anchorPercent, guildPercent)
 	}
@@ -125,7 +128,6 @@ func TestPlatformAnchorSettlementRequiresMoreThanFiveUsd(t *testing.T) {
 
 func TestAnchorWeeklySettlementCfgReadyRequiresAllRelevantConfig(t *testing.T) {
 	complete := &anchorWeeklySettlementCfg{
-		salaryCfgs:          []*entity.AnchorSalaryCfg{{}},
 		salarySocialTiers:   []*entity.AnchorSalarySocialShareCfg{{}},
 		noSalarySocialTiers: []*entity.AnchorNoSalaryShareCfg{{}},
 		withSalaryGameTiers: []*entity.AnchorGameShareCfg{{}},
@@ -140,9 +142,9 @@ func TestAnchorWeeklySettlementCfgReadyRequiresAllRelevantConfig(t *testing.T) {
 		hasSalary bool
 		cfg       *anchorWeeklySettlementCfg
 	}{
-		{name: "salary config missing", hasSalary: true, cfg: &anchorWeeklySettlementCfg{salarySocialTiers: []*entity.AnchorSalarySocialShareCfg{{}}, withSalaryGameTiers: []*entity.AnchorGameShareCfg{{}}}},
-		{name: "salary social config missing", hasSalary: true, cfg: &anchorWeeklySettlementCfg{salaryCfgs: []*entity.AnchorSalaryCfg{{}}, withSalaryGameTiers: []*entity.AnchorGameShareCfg{{}}}},
-		{name: "salary game config missing", hasSalary: true, cfg: &anchorWeeklySettlementCfg{salaryCfgs: []*entity.AnchorSalaryCfg{{}}, salarySocialTiers: []*entity.AnchorSalarySocialShareCfg{{}}}},
+		{name: "salary social config missing", hasSalary: true, cfg: &anchorWeeklySettlementCfg{noSalarySocialTiers: []*entity.AnchorNoSalaryShareCfg{{}}, withSalaryGameTiers: []*entity.AnchorGameShareCfg{{}}}},
+		{name: "no-salary social fallback missing", hasSalary: true, cfg: &anchorWeeklySettlementCfg{salarySocialTiers: []*entity.AnchorSalarySocialShareCfg{{}}, withSalaryGameTiers: []*entity.AnchorGameShareCfg{{}}}},
+		{name: "salary game config missing", hasSalary: true, cfg: &anchorWeeklySettlementCfg{salarySocialTiers: []*entity.AnchorSalarySocialShareCfg{{}}, noSalarySocialTiers: []*entity.AnchorNoSalaryShareCfg{{}}}},
 		{name: "no-salary social config missing", hasSalary: false, cfg: &anchorWeeklySettlementCfg{noSalaryGameTiers: []*entity.AnchorGameShareCfg{{}}}},
 		{name: "no-salary game config missing", hasSalary: false, cfg: &anchorWeeklySettlementCfg{noSalarySocialTiers: []*entity.AnchorNoSalaryShareCfg{{}}}},
 	}

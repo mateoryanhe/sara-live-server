@@ -1657,6 +1657,8 @@ export interface AnchorSalaryCfgQuery extends PageQuery {
 export interface AnchorSalarySocialShareCfg {
     id: string
     level: number
+    effectiveLiveDays: number
+    liveBaseSalaryDiamond: number
     socialTotalDiamondRevenue: number
     anchorSocialSharePercent: number
     guildSocialSharePercent: number
@@ -1987,6 +1989,7 @@ export interface SaveWalletExchangeCfgRes {
 export interface EffectiveLiveCfg {
     id: string
     minSessionMinutes: number
+    dailyAccumulatedMinutes: number
     createdAt: string
     updatedAt: string
 }
@@ -1998,6 +2001,7 @@ export interface GetEffectiveLiveCfgRes {
 export interface SaveEffectiveLiveCfgReq {
     id?: number
     minSessionMinutes: number
+    dailyAccumulatedMinutes: number
 }
 
 export interface SaveEffectiveLiveCfgRes {

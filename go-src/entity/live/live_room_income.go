@@ -21,6 +21,7 @@ const (
 	LiveRoomIncomeTotalShortVideoIncome       db.TbCol = "total_short_video_income"
 	LiveRoomIncomeTotalGameIncome             db.TbCol = "total_game_income"
 	LiveRoomIncomeTotalLiveDuration           db.TbCol = "total_live_duration"
+	LiveRoomIncomeEffectiveLiveDays           db.TbCol = "effective_live_days"
 	LiveRoomIncomeSettlementSalary            db.TbCol = "settlement_salary"
 	LiveRoomIncomeSettlementShareAmount       db.TbCol = "settlement_share_amount"
 	LiveRoomIncomeSettlementShareAmountUsd    db.TbCol = "settlement_share_amount_usd"

@@ -16,7 +16,8 @@ func GetEffectiveLiveCfg(_ context.Context, _ *effectivelivecfgdto.GetEffectiveL
 	if cfg == nil {
 		return &effectivelivecfgdto.GetEffectiveLiveCfgRes{
 			Cfg: &effectivelivecfgdto.EffectiveLiveCfgItem{
-				MinSessionMinutes: cfgdao.DefaultEffectiveLiveMinSessionMinutes,
+				MinSessionMinutes:       cfgdao.DefaultEffectiveLiveMinSessionMinutes,
+				DailyAccumulatedMinutes: cfgdao.DefaultEffectiveLiveDailyAccumulatedMinutes,
 			},
 		}, nil
 	}
@@ -27,9 +28,13 @@ func SaveEffectiveLiveCfg(_ context.Context, req *effectivelivecfgdto.SaveEffect
 	if req.MinSessionMinutes <= 0 || req.MinSessionMinutes > cfgdao.MaxEffectiveLiveMinSessionMinutes {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
+	if req.DailyAccumulatedMinutes < 0 || req.DailyAccumulatedMinutes > cfgdao.MaxEffectiveLiveDailyAccumulatedMinutes {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 
 	row, matched, err := cfgdao.UpdateWalletExchangeCfg(req.ID, func(row *entity.WalletExchangeCfg) {
 		row.EffectiveLiveMinSessionMinutes = req.MinSessionMinutes
+		row.EffectiveLiveDailyAccumulatedMinutes = req.DailyAccumulatedMinutes
 	})
 	if err != nil {
 		return nil, err
@@ -48,10 +53,11 @@ func toEffectiveLiveCfgItem(cfg *entity.WalletExchangeCfg) *effectivelivecfgdto.
 		return nil
 	}
 	return &effectivelivecfgdto.EffectiveLiveCfgItem{
-		ID:                strconv.FormatUint(cfg.ID, 10),
-		MinSessionMinutes: cfgdao.EffectiveLiveMinSessionMinutes(),
-		CreatedAt:         formatCfgTime(cfg.CreatedAt),
-		UpdatedAt:         formatCfgTime(cfg.UpdatedAt),
+		ID:                      strconv.FormatUint(cfg.ID, 10),
+		MinSessionMinutes:       cfgdao.EffectiveLiveMinSessionMinutes(),
+		DailyAccumulatedMinutes: cfgdao.EffectiveLiveDailyAccumulatedMinutes(),
+		CreatedAt:               formatCfgTime(cfg.CreatedAt),
+		UpdatedAt:               formatCfgTime(cfg.UpdatedAt),
 	}
 }
 

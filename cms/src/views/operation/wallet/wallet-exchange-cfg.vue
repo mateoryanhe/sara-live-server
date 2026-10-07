@@ -80,6 +80,7 @@
             >
               <p>{{ t('pages.effectiveLiveCfg.tipLine1') }}</p>
               <p>{{ t('pages.effectiveLiveCfg.tipLine2') }}</p>
+              <p>{{ t('pages.effectiveLiveCfg.tipLine3') }}</p>
             </el-alert>
 
             <el-form :model="effectiveLiveForm" class="cfg-form" label-width="190px">
@@ -88,6 +89,17 @@
                     v-model="effectiveLiveForm.minSessionMinutes"
                     :max="1440"
                     :min="1"
+                    :step="1"
+                    controls-position="right"
+                />
+                <span class="field-unit">{{ t('pages.effectiveLiveCfg.minutes') }}</span>
+              </el-form-item>
+
+              <el-form-item :label="t('pages.effectiveLiveCfg.dailyAccumulatedMinutes')">
+                <el-input-number
+                    v-model="effectiveLiveForm.dailyAccumulatedMinutes"
+                    :max="1440"
+                    :min="0"
                     :step="1"
                     controls-position="right"
                 />
@@ -199,6 +211,7 @@ const walletMeta = reactive({createdAt: '', updatedAt: ''})
 const effectiveLiveForm = reactive({
   id: '0',
   minSessionMinutes: 30,
+  dailyAccumulatedMinutes: 0,
 })
 const effectiveLiveMeta = reactive({createdAt: '', updatedAt: ''})
 
@@ -220,6 +233,7 @@ const applyWalletCfg = (cfg: WalletExchangeCfg | null | undefined) => {
 const applyEffectiveLiveCfg = (cfg: EffectiveLiveCfg | null | undefined) => {
   effectiveLiveForm.id = cfg?.id || '0'
   effectiveLiveForm.minSessionMinutes = cfg?.minSessionMinutes || 30
+  effectiveLiveForm.dailyAccumulatedMinutes = cfg?.dailyAccumulatedMinutes ?? 0
   effectiveLiveMeta.createdAt = cfg?.createdAt || ''
   effectiveLiveMeta.updatedAt = cfg?.updatedAt || ''
 }
@@ -311,12 +325,17 @@ const handleSaveEffectiveLive = async () => {
     ElMessage.warning(t('pages.effectiveLiveCfg.rangeWarning'))
     return
   }
+  if (effectiveLiveForm.dailyAccumulatedMinutes < 0 || effectiveLiveForm.dailyAccumulatedMinutes > 1440) {
+    ElMessage.warning(t('pages.effectiveLiveCfg.dailyRangeWarning'))
+    return
+  }
 
   effectiveLiveLoading.value = true
   try {
     const response = await effectiveLiveCfgApi.saveEffectiveLiveCfg({
       id: effectiveLiveForm.id === '0' ? 0 : Number(effectiveLiveForm.id),
       minSessionMinutes: effectiveLiveForm.minSessionMinutes,
+      dailyAccumulatedMinutes: effectiveLiveForm.dailyAccumulatedMinutes,
     })
     if (!response?.success) {
       ElMessage.error(t('pages.effectiveLiveCfg.saveFailed'))

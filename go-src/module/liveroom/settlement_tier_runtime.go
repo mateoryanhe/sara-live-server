@@ -9,7 +9,6 @@ import (
 	"xr-game-server/core/syndb"
 	"xr-game-server/dao/anchorgamesharecfgdao"
 	"xr-game-server/dao/anchornosalarysharecfgdao"
-	"xr-game-server/dao/anchorsalarycfgdao"
 	"xr-game-server/dao/anchorsalarysocialsharecfgdao"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dao/liveroomdao"
@@ -18,7 +17,6 @@ import (
 )
 
 type anchorWeeklySettlementCfg struct {
-	salaryCfgs          []*entity.AnchorSalaryCfg
 	salarySocialTiers   []*entity.AnchorSalarySocialShareCfg
 	noSalarySocialTiers []*entity.AnchorNoSalaryShareCfg
 	withSalaryGameTiers []*entity.AnchorGameShareCfg
@@ -37,7 +35,6 @@ const settlementPersistTimeout = 15 * time.Second
 
 func loadAnchorWeeklySettlementCfg() *anchorWeeklySettlementCfg {
 	return &anchorWeeklySettlementCfg{
-		salaryCfgs:          anchorsalarycfgdao.ListAllOrderBySalaryDesc(),
 		salarySocialTiers:   anchorsalarysocialsharecfgdao.ListAllOrderByLevelAsc(),
 		noSalarySocialTiers: anchornosalarysharecfgdao.ListAllOrderByLevelAsc(),
 		withSalaryGameTiers: anchorgamesharecfgdao.ListAllBySalaryTypeOrderByThresholdDesc(entity.AnchorGameShareSalaryTypeWithSalary),
@@ -52,8 +49,8 @@ func (c *anchorWeeklySettlementCfg) ready(hasSalary bool) bool {
 		return false
 	}
 	if hasSalary {
-		return len(c.salaryCfgs) > 0 &&
-			len(c.salarySocialTiers) > 0 &&
+		return len(c.salarySocialTiers) > 0 &&
+			len(c.noSalarySocialTiers) > 0 &&
 			len(c.withSalaryGameTiers) > 0
 	}
 	return len(c.noSalarySocialTiers) > 0 && len(c.noSalaryGameTiers) > 0
@@ -112,10 +109,8 @@ func settleTieredAnchorWithOutcome(room *entity.LiveRoom, cfg *anchorWeeklySettl
 		return tieredAnchorSettlementFailed
 	}
 
-	salary := float64(0)
-	if hasSalary {
-		salary = matchAnchorSalaryAmount(countAnchorWeeklyWorkDays(dailyRows), dailyRows, cfg.salaryCfgs)
-	}
+	effectiveLiveDays := unsettled.EffectiveLiveDays
+	salary := resolveBaseSalaryDiamond(hasSalary, effectiveLiveDays, snap.TotalSocialIncome, cfg.salarySocialTiers)
 	if len(dailyRows) == 0 && !snap.HasSettlementFlow() && salary == 0 {
 		return tieredAnchorSettlementNoData
 	}
@@ -123,7 +118,7 @@ func settleTieredAnchorWithOutcome(room *entity.LiveRoom, cfg *anchorWeeklySettl
 	if hasSalary {
 		gameTiers = cfg.withSalaryGameTiers
 	}
-	result := resolveAnchorSettlementTier(hasSalary, snap.TotalSocialIncome, snap.TotalGameIncome, cfg.salarySocialTiers, cfg.noSalarySocialTiers, gameTiers)
+	result := resolveAnchorSettlementTier(hasSalary, effectiveLiveDays, snap.TotalSocialIncome, snap.TotalGameIncome, cfg.salarySocialTiers, cfg.noSalarySocialTiers, gameTiers)
 	if directPayout {
 		result = result.withoutGuildShare()
 	}

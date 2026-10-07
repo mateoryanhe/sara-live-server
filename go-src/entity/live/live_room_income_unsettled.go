@@ -17,6 +17,7 @@ const (
 type LiveRoomIncomeUnsettled struct {
 	migrate.OneModel
 	LiveRoomIncomeAmounts
+	EffectiveLiveDays uint64 `gorm:"default:0;comment:有效开播天数(累计,清零规则另行配置)" json:"effectiveLiveDays"`
 }
 
 func NewLiveRoomIncomeUnsettled(roomId uint64) *LiveRoomIncomeUnsettled {
@@ -121,7 +122,23 @@ func (r *LiveRoomIncomeUnsettled) Clear() {
 	clearIncomeAmountsLocked(TbLiveRoomIncomeUnsettled, r.ID, &r.LiveRoomIncomeAmounts, &r.UpdatedAt)
 }
 
+// AddEffectiveLiveDay 有效开播天数 +1(下播跨日累计门槛时调用)
+func (r *LiveRoomIncomeUnsettled) AddEffectiveLiveDay() {
+	if r == nil || r.ID == 0 {
+		return
+	}
+	key := liveRoomIncomeLockKey(TbLiveRoomIncomeUnsettled, r.ID)
+	gmlock.Lock(key)
+	defer gmlock.Unlock(key)
+	r.EffectiveLiveDays++
+	touchIncomeUpdatedAt(TbLiveRoomIncomeUnsettled, r.ID, &r.UpdatedAt)
+	syndb.AddData(TbLiveRoomIncomeUnsettled, LiveRoomIncomeEffectiveLiveDays, &syndb.ColData{
+		IdVal: r.ID, ColVal: r.EffectiveLiveDays,
+	})
+}
+
 func initLiveRoomIncomeUnsettled() {
 	regLiveRoomIncomeCols(TbLiveRoomIncomeUnsettled)
+	syndb.RegLazy(TbLiveRoomIncomeUnsettled, LiveRoomIncomeEffectiveLiveDays)
 	migrate.AutoMigrate(&LiveRoomIncomeUnsettled{})
 }

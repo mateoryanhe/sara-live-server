@@ -17,8 +17,10 @@ const (
 	DefaultWalletGoldToDiamondRate            = 100
 	DefaultWalletExchangeFeePercent           = 3.0
 	DefaultWalletUsdToGoldRate                = 100
-	DefaultEffectiveLiveMinSessionMinutes     = 30
-	MaxEffectiveLiveMinSessionMinutes         = 24 * 60
+	DefaultEffectiveLiveMinSessionMinutes          = 30
+	MaxEffectiveLiveMinSessionMinutes              = 24 * 60
+	DefaultEffectiveLiveDailyAccumulatedMinutes    = 0
+	MaxEffectiveLiveDailyAccumulatedMinutes        = 24 * 60
 	DefaultPlatformAnchorMinimumSettlementUsd = 5.0
 	MaxPlatformAnchorMinimumSettlementUsd     = 1000000.0
 )

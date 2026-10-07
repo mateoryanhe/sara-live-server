@@ -57,7 +57,7 @@ func ListAllOrderByLevelAsc() []*entity.AnchorSalarySocialShareCfg {
 }
 
 func GetList(req *anchorsalarysocialsharecfgdto.AnchorSalarySocialShareCfgListReq) (int, []*anchorsalarysocialsharecfgdto.AnchorSalarySocialShareCfgItem) {
-	sql := `select id, level, social_total_diamond_revenue, social_share_percent as anchor_social_share_percent, guild_social_share_percent, created_at, updated_at
+	sql := `select id, level, effective_live_days, live_base_salary_diamond, social_total_diamond_revenue, social_share_percent as anchor_social_share_percent, guild_social_share_percent, created_at, updated_at
 	            from anchor_salary_social_share_cfgs
 	            order by level asc, id asc`
 	ctx := gctx.New()

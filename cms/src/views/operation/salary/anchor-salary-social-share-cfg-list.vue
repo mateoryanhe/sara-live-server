@@ -25,6 +25,22 @@
             width="120"
         />
         <el-table-column
+            :label="t('pages.anchorSalarySocialShareCfgList.effectiveLiveDays')"
+            align="right"
+            min-width="140"
+            prop="effectiveLiveDays"
+        />
+        <el-table-column
+            :label="t('pages.anchorSalarySocialShareCfgList.liveBaseSalaryDiamond')"
+            align="right"
+            min-width="160"
+            prop="liveBaseSalaryDiamond"
+        >
+          <template #default="{row}">
+            <span class="money-amount">{{ formatStatCount(row.liveBaseSalaryDiamond) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
             :label="t('pages.anchorSalarySocialShareCfgList.socialTotalDiamondRevenue')"
             align="right"
             min-width="200"
@@ -74,10 +90,33 @@
       </div>
     </el-card>
 
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="560px">
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="620px">
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="180px">
         <el-form-item :label="t('pages.anchorSalarySocialShareCfgList.level')" prop="level">
           <el-input-number v-model="formData.level" :min="1" :precision="0" controls-position="right" style="width: 100%"/>
+        </el-form-item>
+        <el-form-item :label="t('pages.anchorSalarySocialShareCfgList.effectiveLiveDays')" prop="effectiveLiveDays">
+          <el-input-number
+              v-model="formData.effectiveLiveDays"
+              :min="0"
+              :precision="0"
+              :step="1"
+              controls-position="right"
+              style="width: 100%"
+          />
+        </el-form-item>
+        <el-form-item
+            :label="t('pages.anchorSalarySocialShareCfgList.liveBaseSalaryDiamond')"
+            prop="liveBaseSalaryDiamond"
+        >
+          <el-input-number
+              v-model="formData.liveBaseSalaryDiamond"
+              :min="0"
+              :precision="0"
+              :step="1"
+              controls-position="right"
+              style="width: 100%"
+          />
         </el-form-item>
         <el-form-item
             :label="t('pages.anchorSalarySocialShareCfgList.socialTotalDiamondRevenue')"
@@ -153,6 +192,8 @@ const formRef = ref<FormInstance>()
 const formData = reactive({
   id: '',
   level: 0,
+  effectiveLiveDays: 0,
+  liveBaseSalaryDiamond: 0,
   socialTotalDiamondRevenue: 0,
   anchorSocialSharePercent: 0,
   guildSocialSharePercent: 0,
@@ -161,6 +202,34 @@ const formData = reactive({
 const formRules = computed<FormRules>(() => ({
   level: [
     {required: true, type: 'number', min: 1, message: t('pages.anchorSalarySocialShareCfgList.levelRequired'), trigger: 'change'},
+  ],
+  effectiveLiveDays: [
+    {required: true, message: t('pages.anchorSalarySocialShareCfgList.effectiveLiveDaysInvalid'), trigger: 'change'},
+    {
+      validator: (_rule, value, callback) => {
+        const days = Number(value)
+        if (!Number.isInteger(days) || days < 0) {
+          callback(new Error(t('pages.anchorSalarySocialShareCfgList.effectiveLiveDaysInvalid')))
+          return
+        }
+        callback()
+      },
+      trigger: 'change',
+    },
+  ],
+  liveBaseSalaryDiamond: [
+    {required: true, message: t('pages.anchorSalarySocialShareCfgList.socialTotalRevenueRequired'), trigger: 'change'},
+    {
+      validator: (_rule, value, callback) => {
+        const amount = Number(value)
+        if (!Number.isInteger(amount) || amount < 0) {
+          callback(new Error(t('pages.anchorSalarySocialShareCfgList.liveBaseSalaryDiamondInteger')))
+          return
+        }
+        callback()
+      },
+      trigger: 'change',
+    },
   ],
   socialTotalDiamondRevenue: [
     {required: true, message: t('pages.anchorSalarySocialShareCfgList.socialTotalRevenueRequired'), trigger: 'change'},
@@ -228,6 +297,8 @@ const fetchList = async () => {
 const resetForm = () => {
   formData.id = ''
   formData.level = 1
+  formData.effectiveLiveDays = 0
+  formData.liveBaseSalaryDiamond = 0
   formData.socialTotalDiamondRevenue = 0
   formData.anchorSocialSharePercent = 0
   formData.guildSocialSharePercent = 0
@@ -242,6 +313,8 @@ const handleAdd = () => {
 const handleEdit = (row: AnchorSalarySocialShareCfg) => {
   formData.id = String(row.id || '')
   formData.level = Number(row.level || 0)
+  formData.effectiveLiveDays = Math.trunc(Number(row.effectiveLiveDays || 0))
+  formData.liveBaseSalaryDiamond = Math.trunc(Number(row.liveBaseSalaryDiamond || 0))
   formData.socialTotalDiamondRevenue = Math.trunc(Number(row.socialTotalDiamondRevenue || 0))
   formData.anchorSocialSharePercent = Number(row.anchorSocialSharePercent || 0)
   formData.guildSocialSharePercent = Number(row.guildSocialSharePercent || 0)
@@ -255,6 +328,8 @@ const handleSave = async () => {
   try {
     const payload = {
       level: formData.level,
+      effectiveLiveDays: formData.effectiveLiveDays,
+      liveBaseSalaryDiamond: formData.liveBaseSalaryDiamond,
       socialTotalDiamondRevenue: formData.socialTotalDiamondRevenue,
       anchorSocialSharePercent: formData.anchorSocialSharePercent,
       guildSocialSharePercent: formData.guildSocialSharePercent,

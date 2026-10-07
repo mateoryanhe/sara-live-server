@@ -18,7 +18,7 @@ func GetList(_ context.Context, req *anchorsalarysocialsharecfgdto.AnchorSalaryS
 }
 
 func Create(_ context.Context, req *anchorsalarysocialsharecfgdto.CreateAnchorSalarySocialShareCfgReq) (*anchorsalarysocialsharecfgdto.CreateAnchorSalarySocialShareCfgRes, error) {
-	if req == nil || req.Level == 0 || !validRevenue(req.SocialTotalDiamondRevenue) {
+	if req == nil || req.Level == 0 || !validRevenue(req.SocialTotalDiamondRevenue) || !validRevenue(req.LiveBaseSalaryDiamond) {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	if !validPercent(req.AnchorSocialSharePercent) || !validPercent(req.GuildSocialSharePercent) || anchorsalarysocialsharecfgdao.Exists(req.Level, 0) {
@@ -26,6 +26,8 @@ func Create(_ context.Context, req *anchorsalarysocialsharecfgdto.CreateAnchorSa
 	}
 	row := &entity.AnchorSalarySocialShareCfg{
 		Level:                     req.Level,
+		EffectiveLiveDays:         req.EffectiveLiveDays,
+		LiveBaseSalaryDiamond:     roundRevenue(req.LiveBaseSalaryDiamond),
 		SocialTotalDiamondRevenue: roundRevenue(req.SocialTotalDiamondRevenue),
 		AnchorSocialSharePercent:  roundPercent(req.AnchorSocialSharePercent),
 		GuildSocialSharePercent:   roundPercent(req.GuildSocialSharePercent),
@@ -37,7 +39,7 @@ func Create(_ context.Context, req *anchorsalarysocialsharecfgdto.CreateAnchorSa
 }
 
 func Update(_ context.Context, req *anchorsalarysocialsharecfgdto.UpdateAnchorSalarySocialShareCfgReq) (*anchorsalarysocialsharecfgdto.UpdateAnchorSalarySocialShareCfgRes, error) {
-	if req == nil || req.Level == 0 || !validRevenue(req.SocialTotalDiamondRevenue) {
+	if req == nil || req.Level == 0 || !validRevenue(req.SocialTotalDiamondRevenue) || !validRevenue(req.LiveBaseSalaryDiamond) {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	if !validPercent(req.AnchorSocialSharePercent) || !validPercent(req.GuildSocialSharePercent) {
@@ -51,6 +53,8 @@ func Update(_ context.Context, req *anchorsalarysocialsharecfgdto.UpdateAnchorSa
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	row.Level = req.Level
+	row.EffectiveLiveDays = req.EffectiveLiveDays
+	row.LiveBaseSalaryDiamond = roundRevenue(req.LiveBaseSalaryDiamond)
 	row.SocialTotalDiamondRevenue = roundRevenue(req.SocialTotalDiamondRevenue)
 	row.AnchorSocialSharePercent = roundPercent(req.AnchorSocialSharePercent)
 	row.GuildSocialSharePercent = roundPercent(req.GuildSocialSharePercent)

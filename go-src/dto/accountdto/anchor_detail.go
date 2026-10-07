@@ -29,7 +29,8 @@ type LiveRoomIncomeAmountsItem struct {
 // LiveRoomIncomeUnsettledItem 未结算收益
 type LiveRoomIncomeUnsettledItem struct {
 	LiveRoomIncomeAmountsItem
-	UpdatedAt *time.Time `json:"updatedAt"`
+	EffectiveLiveDays uint64     `json:"effectiveLiveDays"`
+	UpdatedAt         *time.Time `json:"updatedAt"`
 }
 
 // LiveRoomIncomeSettledItem 已结算收益

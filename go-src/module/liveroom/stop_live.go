@@ -80,7 +80,9 @@ func stopLive(anchorId uint64) *entity.LiveRecord {
 	liveroomdao.PublishLiveRecord(liveRecord)
 	// 单场直播时长严格大于配置门槛时,整场时长才计入日表累计有效时长.
 	if liveRecord.TotalLiveDuration > effectivelivecfg.MinSessionSeconds() {
-		liveroomdao.AddDailyLiveDuration(anchorId, now, liveRecord.TotalLiveDuration)
+		sessionSec := liveRecord.TotalLiveDuration
+		liveroomdao.AddDailyLiveDuration(anchorId, now, sessionSec)
+		liveroomdao.TryIncrementEffectiveLiveDays(anchorId, now, sessionSec)
 	}
 	return liveRecord
 }
