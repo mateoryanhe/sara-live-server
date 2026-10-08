@@ -51,13 +51,21 @@ func TestPrepareTieredGuildPayoutKeepsReviewedAmount(t *testing.T) {
 	row := &entity.GuildIncomeSettlementLog{
 		SettlementRuleType:      entity.GuildIncomeSettlementRuleTiered,
 		SettlementReceivableUsd: 12.3456,
-		SettlementSalary:        999999,
+		TotalSettlementDiamond:     8500,
+		GoldToDiamondRate:          100,
+		UsdToGoldRate:              100,
+		AnchorPayoutTotalDiamond:   8000,
+		GuildPayoutTotalDiamond:    500,
+		SettlementSalary:           999999,
 	}
 	if err := prepareTieredGuildPayout(row); err != nil {
 		t.Fatal(err)
 	}
 	if row.SettlementReceivableUsd != 12.3456 {
 		t.Fatalf("reviewed amount changed: %v", row.SettlementReceivableUsd)
+	}
+	if row.TotalSettlementDiamond != 8500 {
+		t.Fatalf("total diamond changed: %v", row.TotalSettlementDiamond)
 	}
 }
 

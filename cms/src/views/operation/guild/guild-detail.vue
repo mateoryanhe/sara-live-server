@@ -56,7 +56,11 @@
           </el-tab-pane>
 
           <el-tab-pane :label="t('pages.guildList.tabSettlementLog')" name="settlementLog">
-            <SettlementLogPanel :active="activeTab === 'settlementLog'" :guild-id="guildId"/>
+            <SettlementLogPanel
+                :active="activeTab === 'settlementLog'"
+                :guild-id="guildId"
+                :guild-type="guildBasic.guildType"
+            />
           </el-tab-pane>
 
           <el-tab-pane :label="t('pages.guildList.tabAnchorSettlementLog')" name="anchorSettlementLog">

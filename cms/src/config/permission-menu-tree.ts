@@ -243,6 +243,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             page('CoinMerchantRechargeCfgManagement'),
             page('CoinMerchantTransferLogList'),
             page('CoinMerchantGuildTransferManagement'),
+            page('CoinMerchantGuildIncomeSettlementLogList'),
             page('CoinMerchantPayoutDetailList'),
         ],
     },

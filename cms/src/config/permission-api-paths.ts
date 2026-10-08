@@ -219,6 +219,11 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'CoinMerchantGuildTransferManagement:batchTransfer': '/guildIncomeSettlementLog/cmsBatchTransferGuildSettlement',
     'CoinMerchantGuildTransferManagement:viewGuildDetail': '/guild/getGuildDetail',
     'CoinMerchantGuildTransferManagement:transferInfo': '/guild/saveGuildTransferInfo',
+    CoinMerchantGuildIncomeSettlementLogList: '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
+    'CoinMerchantGuildIncomeSettlementLogList:view': '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
+    'CoinMerchantGuildIncomeSettlementLogList:search': '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
+    'CoinMerchantGuildIncomeSettlementLogList:export': '/cmsExport/submitJob',
+
     CoinMerchantPayoutDetailList: '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
     'CoinMerchantPayoutDetailList:view': '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
     'CoinMerchantPayoutDetailList:search': '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',

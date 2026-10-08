@@ -53,6 +53,8 @@ type CMSGuildIncomeSettlementLogListReq struct {
 	httpserver.CMSQueryReq
 	GuildId                   string `json:"guildId"   dc:"工会ID(可选,留空查全部)"`
 	GuildType                 *uint8 `json:"guildType" v:"in:0,1#工会类型仅支持0普通或1币商" dc:"工会类型(可选,0普通工会,1币商工会)"`
+	NormalGuildOnly           bool   `json:"normalGuildOnly" dc:"true=仅普通工会(与guildType=0等效,避免部分客户端省略0)"`
+	CoinMerchantGuildOnly     bool   `json:"coinMerchantGuildOnly" dc:"true=仅币商工会(与guildType=1等效)"`
 	StartTime                 int64  `json:"startTime" dc:"创建时间起(秒, 0=不过滤)"`
 	EndTime                   int64  `json:"endTime"   dc:"创建时间止(秒, 0=不过滤)"`
 	TransferStartTime         int64  `json:"transferStartTime" dc:"代付时间起(秒, 0=不过滤)"`
@@ -151,6 +153,7 @@ type CMSIncomeSettlementLogItem struct {
 	TotalShortVideoIncome       float64    `json:"totalShortVideoIncome"`
 	TotalGameIncome             float64    `json:"totalGameIncome"`
 	TotalLiveDuration           float64    `json:"totalLiveDuration"`
+	EffectiveLiveDays           uint64     `json:"effectiveLiveDays"`
 	SettlementSalary            float64    `json:"settlementSalary"`
 	SettlementShareAmount       float64    `json:"settlementShareAmount"`
 	SettlementShareAmountUsd    float64    `json:"settlementShareAmountUsd"`
@@ -171,6 +174,8 @@ type CMSIncomeSettlementLogItem struct {
 	UsdToGoldRate               int        `json:"usdToGoldRate"`
 	GameShareAmountDiamond      float64    `json:"gameShareAmountDiamond"`
 	TotalSettlementDiamond      float64    `json:"totalSettlementDiamond"`
+	GuildPayoutTotalDiamond     float64    `json:"guildPayoutTotalDiamond" dc:"普通工会:工会自身代付总额(钻石)"`
+	AnchorPayoutTotalDiamond    float64    `json:"anchorPayoutTotalDiamond" dc:"普通工会:旗下主播代付总额(钻石)"`
 	Status                      uint8      `json:"status"`
 	TransferAt                  *time.Time `json:"transferAt"`
 	TransferOrderId             string     `json:"transferOrderId"`

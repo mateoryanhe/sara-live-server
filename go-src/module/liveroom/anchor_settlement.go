@@ -104,7 +104,7 @@ func settleOneAnchor(room *entity.LiveRoom, coinMerchantGuildIds map[uint64]stru
 		return
 	}
 
-	logRow := entity.NewAnchorIncomeSettlementLog(roomId, &snap, 0, 0, 0, 0)
+	logRow := entity.NewAnchorIncomeSettlementLog(roomId, &snap, unsettled.EffectiveLiveDays, 0, 0, 0, 0)
 	if !syndb.FlushUntilIdle(settlementPersistTimeout) || !liveroomdao.VerifyAnchorIncomeSettlementLogPersisted(logRow) {
 		g.Log().Errorf(gctx.New(), "coin merchant anchor settlement retained: log persist failed roomId=%d guildId=%d logId=%d", roomId, room.GuildId, logRow.ID)
 		return

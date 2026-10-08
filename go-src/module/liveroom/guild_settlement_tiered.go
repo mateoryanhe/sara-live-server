@@ -39,8 +39,6 @@ func settleOneNormalGuildTiered(guild *entity.LiveGuild) bool {
 		guild.ID,
 		&snap,
 		weekly.SalaryDiamond,
-		weekly.GuildSocialShareDiamond,
-		0,
 		receivableUsd,
 		0,
 		&entity.GuildIncomeSettlementBreakdown{

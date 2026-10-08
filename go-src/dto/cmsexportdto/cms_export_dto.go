@@ -135,9 +135,11 @@ type CMSExportAnchorIncomeSettlementLogPayload struct {
 
 type CMSExportGuildIncomeSettlementLogPayload struct {
 	CMSExportHeadersPayload
-	GuildId   string `json:"guildId"`
-	StartTime int64  `json:"startTime"`
-	EndTime   int64  `json:"endTime"`
+	GuildId               string `json:"guildId"`
+	StartTime             int64  `json:"startTime"`
+	EndTime               int64  `json:"endTime"`
+	NormalGuildOnly       bool   `json:"normalGuildOnly"`
+	CoinMerchantGuildOnly bool   `json:"coinMerchantGuildOnly"`
 }
 
 type CMSExportGuildAnchorIncomeSettlementLogPayload struct {

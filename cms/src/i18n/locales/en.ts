@@ -33,6 +33,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   GuildTransferManagement: 'Standard Guild Payout',
   CoinMerchantGuildTransferManagement: 'Coin Merchant Payout',
   CoinMerchantPayoutDetailList: 'Coin Merchant Payout Details',
+  CoinMerchantGuildIncomeSettlementLogList: 'Coin Merchant Guild Settlement Logs',
   GuildPayoutDetailList: 'Guild Payout Details',
   PlatformAnchorPayoutList: 'Platform Anchor Payouts',
   PlatformAnchorPayoutDetailList: 'Platform Anchor Payout Details',

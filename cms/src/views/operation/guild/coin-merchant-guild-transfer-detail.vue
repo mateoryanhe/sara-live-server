@@ -3,8 +3,8 @@
     <el-card v-loading="loading">
       <template #header>
         <div class="card-header">
-          <span>{{ t('pages.guildTransferList.detailTitle') }}</span>
-          <el-button @click="backToList">{{ t('pages.guildTransferList.backToList') }}</el-button>
+          <span>{{ t('pages.coinMerchantGuildTransferList.detailTitle') }}</span>
+          <el-button @click="backToList">{{ t('pages.coinMerchantGuildTransferList.backToList') }}</el-button>
         </div>
       </template>
 
@@ -71,7 +71,7 @@
                 :closable="false"
                 class="calculation-hint"
                 show-icon
-                :title="t('pages.guildTransferList.calculationTieredHint')"
+                :title="t('pages.guildTransferList.calculationLegacyHint')"
                 type="info"
             />
 
@@ -81,55 +81,26 @@
                 <el-descriptions-item :label="t('pages.guildTransferList.settlementReceivableUsd')">
                   <strong>{{ amount(item.settlementReceivableUsd) }} USD</strong>
                 </el-descriptions-item>
-                <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
-                <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
-              </el-descriptions>
-            </section>
-
-            <section class="detail-section">
-              <div class="detail-section-title">{{ t('pages.guildTransferList.calculationPayoutDiamondSection') }}</div>
-              <el-alert
-                  :closable="false"
-                  class="payout-diamond-hint"
-                  show-icon
-                  :title="t('pages.guildTransferList.calculationPayoutDiamondHint')"
-                  type="info"
-              />
-              <el-descriptions :column="3" :label-width="detailLabelWidth" border class="detail-descriptions">
-                <el-descriptions-item :label="settlementText('totalSettlementDiamond')">
-                  <strong>{{ amount(item.totalSettlementDiamond) }}</strong>
-                </el-descriptions-item>
-                <el-descriptions-item :label="t('pages.guildTransferList.anchorPayoutTotalDiamond')">
-                  {{ amount(item.anchorPayoutTotalDiamond) }}
-                </el-descriptions-item>
-                <el-descriptions-item :label="t('pages.guildTransferList.guildPayoutTotalDiamond')">
-                  {{ amount(item.guildPayoutTotalDiamond) }}
-                </el-descriptions-item>
-              </el-descriptions>
-            </section>
-
-            <section class="detail-section">
-              <div class="detail-section-title">{{ t('pages.guildTransferList.calculationSalarySection') }}</div>
-              <el-descriptions :column="3" :label-width="detailLabelWidth" border class="detail-descriptions">
-                <el-descriptions-item :label="settlementText('settlementSalary')">{{ amount(item.settlementSalary) }}</el-descriptions-item>
-                <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
+                <el-descriptions-item :label="settlementText('totalSettlementDiamond')">{{ amount(item.totalSettlementDiamond) }}</el-descriptions-item>
                 <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
               </el-descriptions>
             </section>
 
             <section class="detail-section">
-              <div class="detail-section-title">{{ t('pages.guildTransferList.calculationDiamondSection') }}</div>
+              <div class="detail-section-title">{{ t('pages.guildTransferList.calculationRuleSection') }}</div>
               <el-descriptions :column="3" :label-width="detailLabelWidth" border class="detail-descriptions">
-                <el-descriptions-item :label="settlementText('anchorSocialShareAmount')">{{ amount(item.anchorSocialShareAmount) }}</el-descriptions-item>
+                <el-descriptions-item :label="settlementText('settlementRuleType')">{{ settlementText('settlementRuleLegacy') }}</el-descriptions-item>
+                <el-descriptions-item :label="settlementText('guildSharePercent')">
+                  {{ item.guildSharePercent ? `${amount(item.guildSharePercent)}%` : '-' }}
+                </el-descriptions-item>
+                <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
+              </el-descriptions>
+            </section>
+
+            <section class="detail-section">
+              <div class="detail-section-title">{{ t('pages.guildTransferList.calculationCoinMerchantShareSection') }}</div>
+              <el-descriptions :column="3" :label-width="detailLabelWidth" border class="detail-descriptions">
                 <el-descriptions-item :label="settlementText('guildSocialShareAmount')">{{ amount(item.guildSocialShareAmount) }}</el-descriptions-item>
-                <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
-              </el-descriptions>
-            </section>
-
-            <section class="detail-section">
-              <div class="detail-section-title">{{ t('pages.guildTransferList.calculationGameSection') }}</div>
-              <el-descriptions :column="3" :label-width="detailLabelWidth" border class="detail-descriptions">
-                <el-descriptions-item :label="settlementText('anchorGameShareAmountGold')">{{ amount(item.anchorGameShareAmountGold) }}</el-descriptions-item>
                 <el-descriptions-item :label="settlementText('guildGameShareAmountGold')">{{ amount(item.guildGameShareAmountGold) }}</el-descriptions-item>
                 <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
               </el-descriptions>
@@ -190,7 +161,7 @@ import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 const {t} = useI18n()
 const route = useRoute()
 const router = useRouter()
-const {can} = usePagePermission('GuildTransferManagement')
+const {can} = usePagePermission('CoinMerchantGuildTransferManagement')
 const loading = ref(false)
 const activeTab = ref('basic')
 const item = ref<GuildIncomeSettlementLogItem | null>(null)
@@ -231,14 +202,14 @@ const fetchDetail = async () => {
     const response = await guildIncomeSettlementLogApi.getDetail({id})
     item.value = response.item || null
   } catch (error) {
-    console.error('Failed to load guild settlement detail:', error)
+    console.error('Failed to load coin merchant guild settlement detail:', error)
     ElMessage.error(t('pages.guildTransferList.fetchFailed'))
   } finally {
     loading.value = false
   }
 }
 
-const backToList = () => router.push({name: 'GuildTransferManagement'})
+const backToList = () => router.push({name: 'CoinMerchantGuildTransferManagement'})
 
 const openGuildDetail = () => {
   if (!item.value?.guildId) return
@@ -255,7 +226,7 @@ const openTransferInfo = () => {
     params: {guildId: item.value.guildId},
     query: {
       guildName: item.value.guildName || '',
-      from: 'guildTransfer',
+      from: 'coinMerchantGuildTransfer',
     },
   })
 }
@@ -282,10 +253,6 @@ onMounted(fetchDetail)
   margin-bottom: 16px;
 }
 
-.payout-diamond-hint {
-  margin-bottom: 10px;
-}
-
 .detail-section + .detail-section {
   margin-top: 20px;
 }
@@ -303,5 +270,4 @@ onMounted(fetchDetail)
 .detail-descriptions :deep(.detail-placeholder-cell) {
   background: var(--el-fill-color-blank);
 }
-
 </style>

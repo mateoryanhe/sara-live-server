@@ -52,7 +52,7 @@ func HandleHaiPayPayoutNotify(r *ghttp.Request) {
 	gmlock.Lock(lockKey)
 	defer gmlock.Unlock(lockKey)
 
-	row := liveroomdao.GetGuildIncomeSettlementLogById(settlementID)
+	row := liveroomdao.ResolveGuildIncomeSettlementLogById(settlementID)
 	if row != nil {
 		handleGuildPayoutNotifyQuery(r, row, orderId)
 		return

@@ -3,7 +3,7 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>{{ t('menu.GuildIncomeSettlementLogList') }}</span>
+          <span>{{ t('menu.CoinMerchantGuildIncomeSettlementLogList') }}</span>
         </div>
       </template>
 
@@ -170,7 +170,7 @@ import {formatServerDateTime as formatDate, toServerDayStartUnix, toServerDayEnd
 
 const {t} = useI18n()
 const router = useRouter()
-const {can} = usePagePermission('GuildIncomeSettlementLogList')
+const {can} = usePagePermission('CoinMerchantGuildIncomeSettlementLogList')
 const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
 const tableData = ref<GuildIncomeSettlementLogItem[]>([])
@@ -198,9 +198,9 @@ const buildFilterParams = () => {
 
 const buildQueryParams = () => ({
   ...buildFilterParams(),
-  guildType: 0,
-  normalGuildOnly: true,
-  coinMerchantGuildOnly: false,
+  guildType: 1,
+  normalGuildOnly: false,
+  coinMerchantGuildOnly: true,
   includeDetail: true,
   pageIndex: pagination.pageIndex,
   pageSize: pagination.pageSize,
@@ -249,10 +249,10 @@ const handleExport = async () => {
     {
       headers: buildCsvHeaders(buildGuildSettlementLogCsvColumns(t)),
       ...buildFilterParams(),
-      normalGuildOnly: true,
-      coinMerchantGuildOnly: false,
+      normalGuildOnly: false,
+      coinMerchantGuildOnly: true,
     },
-    `guild-income-settlement-log-${Date.now()}.csv`,
+    `coin-merchant-guild-income-settlement-log-${Date.now()}.csv`,
   )
 }
 

@@ -13,7 +13,9 @@ type GuildIncomeSettlementLogCMSListFilter struct {
 	GuildId                  uint64
 	GuildIds                 []uint64
 	FilterByGuild            bool // true 时仅返回 GuildIds 对应工会(空则无数据)
-	GuildType                *uint8
+	SettlementStorage        *entity.GuildIncomeSettlementStorage
+	GuildType                *uint8 // 已废弃：请使用 SettlementStorage
+	SettlementRuleType       *uint8
 	StartTime                int64
 	EndTime                  int64
 	TransferStartTime        int64
@@ -44,19 +46,24 @@ func GuildIncomeSettlementLogCMSList(f *GuildIncomeSettlementLogCMSListFilter) (
 		f.PageSize = 20
 	}
 	ctx := gctx.New()
+	storage := entity.GuildIncomeSettlementStorageNormal
+	if f.SettlementStorage != nil {
+		storage = *f.SettlementStorage
+	}
+	logTb, detailTb, transferTb := storage.Tables()
 	settlementAlias := "s"
 	transferAlias := "t"
-	m := g.Model(string(entity.TbGuildIncomeSettlementLog) + " " + settlementAlias).Ctx(ctx)
+	m := g.Model(string(logTb) + " " + settlementAlias).Ctx(ctx)
 	guildIdCol := settlementAlias + "." + string(entity.GuildIncomeSettlementLogGuildId)
-	if f.GuildType != nil {
-		guildAlias := "g"
-		m = m.InnerJoin(string(entity.TbLiveGuild)+" "+guildAlias,
-			guildAlias+".id = "+guildIdCol).
-			Where(guildAlias+"."+string(entity.LiveGuildGuildType)+" = ?", *f.GuildType)
+	if f.SettlementRuleType != nil {
+		detailAlias := "d"
+		m = m.InnerJoin(string(detailTb)+" "+detailAlias,
+			detailAlias+"."+string(entity.GuildIncomeSettlementDetailSettlementId)+" = "+settlementAlias+".id").
+			Where(detailAlias+"."+string(entity.GuildIncomeSettlementLogSettlementRuleType)+" = ?", *f.SettlementRuleType)
 	}
 	includePayoutJoin := f.PayoutOnly || f.TransferStartTime > 0 || f.TransferEndTime > 0
 	if includePayoutJoin {
-		m = m.InnerJoin(string(entity.TbGuildIncomeSettlementTransfer)+" "+transferAlias,
+		m = m.InnerJoin(string(transferTb)+" "+transferAlias,
 			transferAlias+"."+string(entity.GuildIncomeSettlementTransferSettlementId)+" = "+settlementAlias+".id")
 	}
 	if f.GuildId > 0 {
@@ -108,6 +115,11 @@ func GuildIncomeSettlementLogCMSList(f *GuildIncomeSettlementLogCMSListFilter) (
 	_ = m.Clone().Fields(settlementAlias + ".*").Order(orderBy).
 		Limit(f.PageSize).Offset((f.PageIndex - 1) * f.PageSize).
 		Scan(&list)
+	for _, row := range list {
+		if row != nil {
+			row.Storage = storage
+		}
+	}
 	if f.IncludeDetail {
 		hydrateGuildIncomeSettlementLogs(ctx, list)
 	} else if f.IncludeTransfer {

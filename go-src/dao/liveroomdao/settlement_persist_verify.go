@@ -55,12 +55,13 @@ func VerifyGuildIncomeSettlementLogPersisted(expected *live.GuildIncomeSettlemen
 	if expected == nil || expected.ID == 0 {
 		return false
 	}
+	logTb, detailTb, _ := expected.Storage.Tables()
 	var row live.GuildIncomeSettlementLog
-	if err := g.DB().Model(string(live.TbGuildIncomeSettlementLog)).WherePri(expected.ID).Scan(&row); err != nil || row.ID == 0 {
+	if err := g.DB().Model(string(logTb)).WherePri(expected.ID).Scan(&row); err != nil || row.ID == 0 {
 		return false
 	}
 	var detail live.GuildIncomeSettlementDetail
-	if err := g.DB().Model(string(live.TbGuildIncomeSettlementDetail)).
+	if err := g.DB().Model(string(detailTb)).
 		Where(string(live.GuildIncomeSettlementDetailSettlementId)+" = ?", expected.ID).
 		Scan(&detail); err != nil || detail.SettlementId == 0 {
 		return false
@@ -70,8 +71,6 @@ func VerifyGuildIncomeSettlementLogPersisted(expected *live.GuildIncomeSettlemen
 		settlementFloatEqual(detail.TotalSocialIncome, expected.TotalSocialIncome) &&
 		settlementFloatEqual(detail.TotalGameIncome, expected.TotalGameIncome) &&
 		settlementFloatEqual(detail.SettlementSalary, expected.SettlementSalary) &&
-		settlementFloatEqual(detail.SettlementShareAmount, expected.SettlementShareAmount) &&
-		settlementFloatEqual(detail.SettlementShareAmountUsd, expected.SettlementShareAmountUsd) &&
 		settlementFloatEqual(detail.GuildSharePercent, expected.GuildSharePercent) &&
 		settlementFloatEqual(detail.AnchorSocialShareAmount, expected.AnchorSocialShareAmount) &&
 		settlementFloatEqual(detail.GuildSocialShareAmount, expected.GuildSocialShareAmount) &&
@@ -84,19 +83,28 @@ func VerifyGuildPayoutConversionPersisted(expected *live.GuildIncomeSettlementLo
 	if expected == nil || expected.ID == 0 {
 		return false
 	}
+	logTb, detailTb, _ := expected.Storage.Tables()
 	var row live.GuildIncomeSettlementLog
-	if err := g.DB().Model(string(live.TbGuildIncomeSettlementLog)).WherePri(expected.ID).Scan(&row); err != nil || row.ID == 0 {
+	if err := g.DB().Model(string(logTb)).WherePri(expected.ID).Scan(&row); err != nil || row.ID == 0 {
 		return false
 	}
 	var detail live.GuildIncomeSettlementDetail
-	if err := g.DB().Model(string(live.TbGuildIncomeSettlementDetail)).
+	if err := g.DB().Model(string(detailTb)).
 		Where(string(live.GuildIncomeSettlementDetailSettlementId)+" = ?", expected.ID).
 		Scan(&detail); err != nil || detail.SettlementId == 0 {
 		return false
 	}
-	return detail.GoldToDiamondRate == expected.GoldToDiamondRate &&
+	ok := detail.GoldToDiamondRate == expected.GoldToDiamondRate &&
 		detail.UsdToGoldRate == expected.UsdToGoldRate &&
 		settlementFloatEqual(detail.GameShareAmountDiamond, expected.GameShareAmountDiamond) &&
 		settlementFloatEqual(detail.TotalSettlementDiamond, expected.TotalSettlementDiamond) &&
 		settlementFloatEqual(row.SettlementReceivableUsd, expected.SettlementReceivableUsd)
+	if !ok {
+		return false
+	}
+	if expected.SettlementRuleType != live.GuildIncomeSettlementRuleTiered {
+		return true
+	}
+	return settlementFloatEqual(detail.AnchorPayoutTotalDiamond, expected.AnchorPayoutTotalDiamond) &&
+		settlementFloatEqual(detail.GuildPayoutTotalDiamond, expected.GuildPayoutTotalDiamond)
 }

@@ -100,24 +100,25 @@ type AnchorIncomeSettlementLog struct {
 	UsdToGoldRate             int        `gorm:"default:0;comment:代付换算时1USD兑换金币数" json:"usdToGoldRate"`
 	GameShareAmountDiamond    float64    `gorm:"type:decimal(20,4);default:0;comment:主播游戏分佣换算钻石" json:"gameShareAmountDiamond"`
 	TotalSettlementDiamond    float64    `gorm:"type:decimal(20,4);default:0;comment:主播代付换算总钻石" json:"totalSettlementDiamond"`
+	EffectiveLiveDays         uint64     `gorm:"default:0;comment:结算快照有效直播天数" json:"effectiveLiveDays"`
 }
 
 // NewAnchorIncomeSettlementLog 新建一条主播结算日志并入库
-func NewAnchorIncomeSettlementLog(roomId uint64, a *LiveRoomIncomeAmounts, salary, shareAmount, shareAmountUsd, anchorSharePercent float64) *AnchorIncomeSettlementLog {
-	return newAnchorIncomeSettlementLogWithBreakdown(roomId, a, salary, shareAmount, shareAmountUsd, anchorSharePercent, nil, false)
+func NewAnchorIncomeSettlementLog(roomId uint64, a *LiveRoomIncomeAmounts, effectiveLiveDays uint64, salary, shareAmount, shareAmountUsd, anchorSharePercent float64) *AnchorIncomeSettlementLog {
+	return newAnchorIncomeSettlementLogWithBreakdown(roomId, a, effectiveLiveDays, salary, shareAmount, shareAmountUsd, anchorSharePercent, nil, false)
 }
 
 // NewAnchorIncomeSettlementLogWithBreakdown 新建带社交/游戏分项的主播结算日志。
-func NewAnchorIncomeSettlementLogWithBreakdown(roomId uint64, a *LiveRoomIncomeAmounts, salary, shareAmount, shareAmountUsd, anchorSharePercent float64, breakdown *AnchorIncomeSettlementBreakdown) *AnchorIncomeSettlementLog {
-	return newAnchorIncomeSettlementLogWithBreakdown(roomId, a, salary, shareAmount, shareAmountUsd, anchorSharePercent, breakdown, false)
+func NewAnchorIncomeSettlementLogWithBreakdown(roomId uint64, a *LiveRoomIncomeAmounts, effectiveLiveDays uint64, salary, shareAmount, shareAmountUsd, anchorSharePercent float64, breakdown *AnchorIncomeSettlementBreakdown) *AnchorIncomeSettlementLog {
+	return newAnchorIncomeSettlementLogWithBreakdown(roomId, a, effectiveLiveDays, salary, shareAmount, shareAmountUsd, anchorSharePercent, breakdown, false)
 }
 
 // NewPlatformAnchorIncomeSettlementLogWithBreakdown 新建平台主播可直接代付的周结算单。
-func NewPlatformAnchorIncomeSettlementLogWithBreakdown(roomId uint64, a *LiveRoomIncomeAmounts, salary, shareAmount, anchorSharePercent float64, breakdown *AnchorIncomeSettlementBreakdown) *AnchorIncomeSettlementLog {
-	return newAnchorIncomeSettlementLogWithBreakdown(roomId, a, salary, shareAmount, 0, anchorSharePercent, breakdown, true)
+func NewPlatformAnchorIncomeSettlementLogWithBreakdown(roomId uint64, a *LiveRoomIncomeAmounts, effectiveLiveDays uint64, salary, shareAmount, anchorSharePercent float64, breakdown *AnchorIncomeSettlementBreakdown) *AnchorIncomeSettlementLog {
+	return newAnchorIncomeSettlementLogWithBreakdown(roomId, a, effectiveLiveDays, salary, shareAmount, 0, anchorSharePercent, breakdown, true)
 }
 
-func newAnchorIncomeSettlementLogWithBreakdown(roomId uint64, a *LiveRoomIncomeAmounts, salary, shareAmount, shareAmountUsd, anchorSharePercent float64, breakdown *AnchorIncomeSettlementBreakdown, directPayout bool) *AnchorIncomeSettlementLog {
+func newAnchorIncomeSettlementLogWithBreakdown(roomId uint64, a *LiveRoomIncomeAmounts, effectiveLiveDays uint64, salary, shareAmount, shareAmountUsd, anchorSharePercent float64, breakdown *AnchorIncomeSettlementBreakdown, directPayout bool) *AnchorIncomeSettlementLog {
 	if a == nil {
 		a = &LiveRoomIncomeAmounts{}
 	}
@@ -134,6 +135,7 @@ func newAnchorIncomeSettlementLogWithBreakdown(roomId uint64, a *LiveRoomIncomeA
 	ret.AnchorSharePercent = anchorSharePercent
 	ret.DirectPayout = directPayout
 	ret.Status = AnchorIncomeSettlementStatusPending
+	ret.EffectiveLiveDays = effectiveLiveDays
 	if breakdown != nil {
 		ret.SettlementRuleType = breakdown.SettlementRuleType
 		ret.HasSalary = breakdown.HasSalary
@@ -153,6 +155,7 @@ func newAnchorIncomeSettlementLogWithBreakdown(roomId uint64, a *LiveRoomIncomeA
 	syndb.AddData(TbAnchorIncomeSettlementLog, AnchorIncomeSettlementLogDirectPayout, &syndb.ColData{IdVal: ret.ID, ColVal: directPayout})
 	syndb.AddData(TbAnchorIncomeSettlementLog, AnchorIncomeSettlementLogStatus, &syndb.ColData{IdVal: ret.ID, ColVal: AnchorIncomeSettlementStatusPending})
 	writeAnchorIncomeSettlementLogAmounts(ret.ID, a, salary, shareAmount, shareAmountUsd, anchorSharePercent)
+	syndb.AddData(TbAnchorIncomeSettlementLog, LiveRoomIncomeEffectiveLiveDays, &syndb.ColData{IdVal: ret.ID, ColVal: effectiveLiveDays})
 	writeAnchorIncomeSettlementBreakdown(ret.ID, breakdown)
 	return ret
 }
@@ -261,5 +264,6 @@ func initAnchorIncomeSettlementLog() {
 	syndb.RegQuick(TbAnchorIncomeSettlementLog, AnchorIncomeSettlementLogUsdToGoldRate)
 	syndb.RegQuick(TbAnchorIncomeSettlementLog, AnchorIncomeSettlementLogGameShareAmountDiamond)
 	syndb.RegQuick(TbAnchorIncomeSettlementLog, AnchorIncomeSettlementLogTotalSettlementDiamond)
+	syndb.RegQuick(TbAnchorIncomeSettlementLog, LiveRoomIncomeEffectiveLiveDays)
 	migrate.AutoMigrate(&AnchorIncomeSettlementLog{})
 }

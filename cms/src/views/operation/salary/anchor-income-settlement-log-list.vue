@@ -185,6 +185,9 @@
         <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalLiveDuration')" min-width="120">
           <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
         </el-table-column>
+        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.effectiveLiveDays')" min-width="110">
+          <template #default="{ row }">{{ formatEffectiveLiveDays(row.effectiveLiveDays) }}</template>
+        </el-table-column>
         <el-table-column :label="t('pages.anchorIncomeSettlementLogList.anchorSharePercent')" min-width="110" prop="anchorSharePercent">
           <template #default="{ row }">{{ formatSharePercent(row.anchorSharePercent) }}</template>
         </el-table-column>
@@ -238,6 +241,10 @@ import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
 import {formatServerDateTime as formatDate, toServerDayStartUnix, toServerDayEndUnix} from '@/utils/server-datetime'
 
 const {t} = useI18n()
+const formatEffectiveLiveDays = (value: number | null | undefined) => {
+  const days = Math.max(0, Math.trunc(Number(value ?? 0)))
+  return t('pages.anchorIncomeSettlementLogList.effectiveLiveDaysCount', {days})
+}
 const router = useRouter()
 const {can} = usePagePermission('AnchorIncomeSettlementLogList')
 const {canViewUserDetail, openUserDetail} = useUserDetailNav('AnchorIncomeSettlementLogList')

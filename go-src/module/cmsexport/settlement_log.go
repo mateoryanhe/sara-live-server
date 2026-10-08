@@ -81,15 +81,26 @@ func exportGuildIncomeSettlementLogCSV(ctx context.Context, cmsUserId uint64, pa
 		}, onProgress)
 	}
 	return streamCSVExport(ctx, req.Headers, defaultExportPageSize, func(pageIndex, pageSize int) (int, [][]string) {
+		storage := liveentity.GuildIncomeSettlementStorageNormal
+		if req.CoinMerchantGuildOnly {
+			storage = liveentity.GuildIncomeSettlementStorageCoinMerchant
+		}
+		var ruleType *uint8
+		if storage == liveentity.GuildIncomeSettlementStorageNormal {
+			v := liveentity.GuildIncomeSettlementRuleTiered
+			ruleType = &v
+		}
 		total, rows := liveroomdao.GuildIncomeSettlementLogCMSList(&liveroomdao.GuildIncomeSettlementLogCMSListFilter{
-			GuildId:       parseUint64Filter(req.GuildId),
-			GuildIds:      guildIds,
-			FilterByGuild: restrict,
-			StartTime:     req.StartTime,
-			EndTime:       req.EndTime,
-			IncludeDetail: true,
-			PageIndex:     pageIndex,
-			PageSize:      pageSize,
+			GuildId:             parseUint64Filter(req.GuildId),
+			GuildIds:            guildIds,
+			FilterByGuild:       restrict,
+			SettlementStorage:   &storage,
+			SettlementRuleType:  ruleType,
+			StartTime:           req.StartTime,
+			EndTime:             req.EndTime,
+			IncludeDetail:       true,
+			PageIndex:           pageIndex,
+			PageSize:            pageSize,
 		})
 		guildNameMap := guilddao.GetNameMapByIds(collectGuildSettlementGuildIds(rows))
 		csvRows := make([][]string, 0, len(rows))
@@ -253,7 +264,7 @@ func guildSettlementLogToCSVRow(row *liveentity.GuildIncomeSettlementLog, guildN
 		formatCSVUint(row.GuildId),
 		guildName,
 		formatCSVFloat(row.SettlementSalary),
-		formatCSVFloat(row.SettlementShareAmount),
+		formatCSVFloat(row.TotalSettlementDiamond),
 	}
 	cells = append(cells, incomeAmountCSVCells(&row.LiveRoomIncomeAmounts)...)
 	cells = append(cells,

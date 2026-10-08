@@ -43,13 +43,23 @@ export const operationRoutes: RouteRecordRaw = {
         {
             path: 'guild/coin-merchant-guild-transfer-list',
             name: 'CoinMerchantGuildTransferManagement',
-            component: () => import('@/views/operation/guild/guild-transfer-list.vue'),
+            component: () => import('@/views/operation/guild/coin-merchant-guild-transfer-list.vue'),
             meta: {title: '币商代付', parentTitle: '币商管理'},
+        },
+        {
+            path: 'guild/coin-merchant-guild-transfer-detail/:id',
+            name: 'CoinMerchantGuildTransferDetail',
+            component: () => import('@/views/operation/guild/coin-merchant-guild-transfer-detail.vue'),
+            meta: {
+                title: '币商工会结算详情',
+                hidden: true,
+                parentPermission: ['CoinMerchantGuildTransferManagement'],
+            },
         },
         {
             path: 'guild/coin-merchant-payout-detail-list',
             name: 'CoinMerchantPayoutDetailList',
-            component: () => import('@/views/operation/salary/guild-payout-detail-list.vue'),
+            component: () => import('@/views/operation/salary/coin-merchant-guild-payout-detail-list.vue'),
             meta: {title: '币商代付详情', parentTitle: '币商管理'},
         },
         {
@@ -57,9 +67,9 @@ export const operationRoutes: RouteRecordRaw = {
             name: 'GuildTransferDetail',
             component: () => import('@/views/operation/guild/guild-transfer-detail.vue'),
             meta: {
-                title: '工会结算详情',
+                title: '普通工会结算详情',
                 hidden: true,
-                parentPermission: ['GuildTransferManagement', 'CoinMerchantGuildTransferManagement'],
+                parentPermission: ['GuildTransferManagement'],
             },
         },
         {
@@ -301,6 +311,12 @@ export const operationRoutes: RouteRecordRaw = {
             name: 'GuildIncomeSettlementLogList',
             component: () => import('@/views/operation/salary/guild-income-settlement-log-list.vue'),
             meta: {title: '工会结算流水'},
+        },
+        {
+            path: 'salary/coin-merchant-guild-income-settlement-log-list',
+            name: 'CoinMerchantGuildIncomeSettlementLogList',
+            component: () => import('@/views/operation/salary/coin-merchant-guild-income-settlement-log-list.vue'),
+            meta: {title: '币商工会结算流水'},
         },
         {
             path: 'salary/guild-payout-detail-list',

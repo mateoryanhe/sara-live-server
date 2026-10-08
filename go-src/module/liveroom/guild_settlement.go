@@ -55,12 +55,10 @@ func settleOneGuild(guild *entity.LiveGuild) bool {
 	exchangeCfg := wallet.GetExchangeCfgSnapshot()
 	socialShareDiamond, gameShareGold, gameShareDiamond, totalShareDiamond, receivableUsd :=
 		calcCoinMerchantGuildSettlement(&snap, guildSharePercent, exchangeCfg)
-	row := entity.NewGuildIncomeSettlementLogWithBreakdown(
+	row := entity.NewCoinMerchantGuildIncomeSettlementLogWithBreakdown(
 		guildId,
 		&snap,
 		0,
-		totalShareDiamond,
-		receivableUsd,
 		receivableUsd,
 		guildSharePercent,
 		&entity.GuildIncomeSettlementBreakdown{

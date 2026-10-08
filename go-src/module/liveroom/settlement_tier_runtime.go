@@ -155,12 +155,12 @@ func settleTieredAnchorWithOutcome(room *entity.LiveRoom, cfg *anchorWeeklySettl
 	var logRow *entity.AnchorIncomeSettlementLog
 	if directPayout {
 		logRow = entity.NewPlatformAnchorIncomeSettlementLogWithBreakdown(
-			room.ID, &snap, salary, result.AnchorSocialShareDiamond, result.AnchorSocialSharePercent, breakdown,
+			room.ID, &snap, effectiveLiveDays, salary, result.AnchorSocialShareDiamond, result.AnchorSocialSharePercent, breakdown,
 		)
 		logRow.SetPayoutConversion(exchangeCfg.GoldToDiamondRate, exchangeCfg.UsdToGoldRate, gameDiamond, totalDiamond, receivableUsd)
 	} else {
 		logRow = entity.NewAnchorIncomeSettlementLogWithBreakdown(
-			room.ID, &snap, salary, result.AnchorSocialShareDiamond, 0, result.AnchorSocialSharePercent, breakdown,
+			room.ID, &snap, effectiveLiveDays, salary, result.AnchorSocialShareDiamond, 0, result.AnchorSocialSharePercent, breakdown,
 		)
 	}
 	if !syndb.FlushUntilIdle(settlementPersistTimeout) ||

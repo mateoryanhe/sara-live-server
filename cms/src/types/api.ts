@@ -1687,6 +1687,7 @@ export interface IncomeSettlementLogAmounts {
     totalShortVideoIncome: number
     totalGameIncome: number
     totalLiveDuration: number
+    effectiveLiveDays?: number
     settlementSalary: number
     settlementShareAmount?: number
     settlementShareAmountUsd?: number
@@ -1707,6 +1708,8 @@ export interface IncomeSettlementLogAmounts {
     usdToGoldRate?: number
     gameShareAmountDiamond?: number
     totalSettlementDiamond?: number
+    guildPayoutTotalDiamond?: number
+    anchorPayoutTotalDiamond?: number
 }
 
 export interface AnchorIncomeSettlementLogQuery extends PageQuery {
@@ -1758,6 +1761,8 @@ export interface MyGuildAnchorIncomeSettlementLogQuery extends PageQuery {
 export interface GuildIncomeSettlementLogQuery extends PageQuery {
     guildId?: string
     guildType?: number
+    normalGuildOnly?: boolean
+    coinMerchantGuildOnly?: boolean
     startTime?: number
     endTime?: number
     transferStartTime?: number

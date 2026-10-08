@@ -289,7 +289,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('CoinMerchantManagement') || hasMenuPermission('CoinMerchantRechargeCfgManagement') || hasMenuPermission('CoinMerchantTransferLogList') || hasMenuPermission('CoinMerchantGuildTransferManagement') || hasMenuPermission('CoinMerchantPayoutDetailList')"
+            v-if="hasMenuPermission('CoinMerchantManagement') || hasMenuPermission('CoinMerchantRechargeCfgManagement') || hasMenuPermission('CoinMerchantTransferLogList') || hasMenuPermission('CoinMerchantGuildTransferManagement') || hasMenuPermission('CoinMerchantGuildIncomeSettlementLogList') || hasMenuPermission('CoinMerchantPayoutDetailList')"
             index="/coin-merchant-module">
           <template #title>
             <el-icon>
@@ -320,6 +320,12 @@
               <Wallet/>
             </el-icon>
             <span>{{ t('menu.CoinMerchantGuildTransferManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('CoinMerchantGuildIncomeSettlementLogList')" index="/operation/salary/coin-merchant-guild-income-settlement-log-list">
+            <el-icon>
+              <Document/>
+            </el-icon>
+            <span>{{ t('menu.CoinMerchantGuildIncomeSettlementLogList') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('CoinMerchantPayoutDetailList')" index="/operation/guild/coin-merchant-payout-detail-list">
             <el-icon>

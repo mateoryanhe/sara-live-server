@@ -1,5 +1,5 @@
 <template>
-  <GuildTransferListPanel scope="normal"/>
+  <GuildTransferListPanel scope="coinMerchant"/>
 </template>
 
 <script lang="ts" setup>

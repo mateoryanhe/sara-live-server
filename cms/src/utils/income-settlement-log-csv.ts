@@ -33,6 +33,7 @@ function incomeAmountColumns(t: TranslateFn, ns: string): CsvColumn<SettlementLo
     {header: t(`${ns}.totalShortVideoIncome`), value: row => row.totalShortVideoIncome},
     {header: t(`${ns}.totalGameIncome`), value: row => row.totalGameIncome},
     {header: t(`${ns}.totalLiveDuration`), value: row => liveDurationSecondsToMinutes(row.totalLiveDuration) ?? ''},
+    {header: t(`${ns}.effectiveLiveDays`), value: row => row.effectiveLiveDays ?? ''},
   ]
 }
 
@@ -107,7 +108,6 @@ export function buildGuildSettlementLogCsvColumns(
     {header: t(`${ns}.guildId`), value: row => row.guildId ?? ''},
     {header: t(`${ns}.guildName`), value: row => row.guildName ?? ''},
     {header: t(`${ns}.settlementSalary`), value: row => row.settlementSalary ?? ''},
-    {header: t(`${ns}.settlementShareAmount`), value: row => row.settlementShareAmount ?? ''},
     ...guildAmountColumns(t, ns),
     {header: t(`${ns}.settlementRuleType`), value: row => row.settlementRuleType === 1
       ? t(`${ns}.settlementRuleTiered`)

@@ -59,9 +59,9 @@ func fillCMSItemFromGuild(row *entity.GuildIncomeSettlementLog) *incomesettlemen
 		TotalVideoCallTicketIncome:  row.TotalVideoCallTicketIncome,
 		TotalVideoCallBillingIncome: row.TotalVideoCallBillingIncome,
 		TotalLiveDuration:           row.TotalLiveDuration,
-		SettlementSalary:            row.SettlementSalary,
-		SettlementShareAmount:       row.SettlementShareAmount,
-		GuildSharePercent:           row.GuildSharePercent,
+		SettlementSalary:      row.SettlementSalary,
+		GuildSharePercent:   row.GuildSharePercent,
+		SettlementReceivableUsd: row.SettlementReceivableUsd,
 		SettlementRuleType:          row.SettlementRuleType,
 		AnchorSocialShareAmount:     row.AnchorSocialShareAmount,
 		GuildSocialShareAmount:      row.GuildSocialShareAmount,
@@ -71,6 +71,8 @@ func fillCMSItemFromGuild(row *entity.GuildIncomeSettlementLog) *incomesettlemen
 		UsdToGoldRate:               row.UsdToGoldRate,
 		GameShareAmountDiamond:      row.GameShareAmountDiamond,
 		TotalSettlementDiamond:      row.TotalSettlementDiamond,
+		AnchorPayoutTotalDiamond:    row.AnchorPayoutTotalDiamond,
+		GuildPayoutTotalDiamond:     row.GuildPayoutTotalDiamond,
 		CreatedAt:                   &row.CreatedAt,
 	}
 	return item

@@ -46,6 +46,7 @@ func fillCMSItemFromAnchor(row *entity.AnchorIncomeSettlementLog) *incomesettlem
 		TotalShortVideoIncome:       row.TotalShortVideoIncome,
 		TotalGameIncome:             row.TotalGameIncome,
 		TotalLiveDuration:           row.TotalLiveDuration,
+		EffectiveLiveDays:           row.EffectiveLiveDays,
 		SettlementSalary:            row.SettlementSalary,
 		SettlementShareAmount:       row.SettlementShareAmount,
 		SettlementShareAmountUsd:    row.SettlementShareAmountUsd,
@@ -79,6 +80,7 @@ func fillCMSItemFromAnchor(row *entity.AnchorIncomeSettlementLog) *incomesettlem
 	return item
 }
 
+// fillCMSItemFromGuild 仅映射已落库的结算/代付快照字段，不在查询路径重算分项或代付总额。
 func fillCMSItemFromGuild(row *entity.GuildIncomeSettlementLog) *incomesettlementdto.CMSIncomeSettlementLogItem {
 	if row == nil {
 		return nil
@@ -96,11 +98,9 @@ func fillCMSItemFromGuild(row *entity.GuildIncomeSettlementLog) *incomesettlemen
 		TotalShortVideoIncome:       row.TotalShortVideoIncome,
 		TotalGameIncome:             row.TotalGameIncome,
 		TotalLiveDuration:           row.TotalLiveDuration,
-		SettlementSalary:            row.SettlementSalary,
-		SettlementShareAmount:       row.SettlementShareAmount,
-		SettlementShareAmountUsd:    row.SettlementShareAmountUsd,
-		SettlementReceivableUsd:     row.SettlementReceivableUsd,
-		GuildSharePercent:           row.GuildSharePercent,
+		SettlementSalary:        row.SettlementSalary,
+		SettlementReceivableUsd: row.SettlementReceivableUsd,
+		GuildSharePercent:       row.GuildSharePercent,
 		SettlementRuleType:          row.SettlementRuleType,
 		AnchorSocialShareAmount:     row.AnchorSocialShareAmount,
 		GuildSocialShareAmount:      row.GuildSocialShareAmount,
@@ -110,6 +110,8 @@ func fillCMSItemFromGuild(row *entity.GuildIncomeSettlementLog) *incomesettlemen
 		UsdToGoldRate:               row.UsdToGoldRate,
 		GameShareAmountDiamond:      row.GameShareAmountDiamond,
 		TotalSettlementDiamond:      row.TotalSettlementDiamond,
+		AnchorPayoutTotalDiamond:    row.AnchorPayoutTotalDiamond,
+		GuildPayoutTotalDiamond:     row.GuildPayoutTotalDiamond,
 		Status:                      row.Status,
 		TransferAt:                  row.TransferAt,
 		TransferOrderId:             row.TransferOrderId,
@@ -251,6 +253,40 @@ func intersectUint64Ids(selected, allowed []uint64) []uint64 {
 	return out
 }
 
+func guildTypeFilterForCMSList(req *incomesettlementdto.CMSGuildIncomeSettlementLogListReq) *uint8 {
+	if req == nil {
+		return nil
+	}
+	if req.GuildType != nil {
+		return req.GuildType
+	}
+	if req.NormalGuildOnly {
+		v := entity.LiveGuildTypeNormal
+		return &v
+	}
+	if req.CoinMerchantGuildOnly {
+		v := entity.LiveGuildTypeCoinMerchant
+		return &v
+	}
+	return nil
+}
+
+func settlementStorageForCMSList(req *incomesettlementdto.CMSGuildIncomeSettlementLogListReq) entity.GuildIncomeSettlementStorage {
+	guildType := guildTypeFilterForCMSList(req)
+	if storage := entity.GuildIncomeSettlementStorageForGuildType(guildType); storage != nil {
+		return *storage
+	}
+	return entity.GuildIncomeSettlementStorageNormal
+}
+
+func settlementRuleTypeForStorage(storage entity.GuildIncomeSettlementStorage) *uint8 {
+	if storage != entity.GuildIncomeSettlementStorageNormal {
+		return nil
+	}
+	v := entity.GuildIncomeSettlementRuleTiered
+	return &v
+}
+
 // GetGuildCMSList CMS分页查询工会结算流水
 func GetGuildCMSList(ctx context.Context, req *incomesettlementdto.CMSGuildIncomeSettlementLogListReq) (*httpserver.CMSQueryResp, error) {
 	guildIds, restrict, empty := cmsvis.VisibilityGuildFilter(ctx)
@@ -261,11 +297,13 @@ func GetGuildCMSList(ctx context.Context, req *incomesettlementdto.CMSGuildIncom
 	if req.HideHistoricalTransferred {
 		hideTransferredBefore = xrtime.WeekStart(time.Now()).Unix()
 	}
+	storageFilter := settlementStorageForCMSList(req)
 	total, rows := liveroomdao.GuildIncomeSettlementLogCMSList(&liveroomdao.GuildIncomeSettlementLogCMSListFilter{
 		GuildId:                  parseUint64Filter(req.GuildId),
 		GuildIds:                 guildIds,
 		FilterByGuild:            restrict,
-		GuildType:                req.GuildType,
+		SettlementStorage:        &storageFilter,
+		SettlementRuleType:       settlementRuleTypeForStorage(storageFilter),
 		StartTime:                req.StartTime,
 		EndTime:                  req.EndTime,
 		TransferStartTime:        req.TransferStartTime,
@@ -326,7 +364,7 @@ func GetGuildCMSDetail(ctx context.Context, req *incomesettlementdto.CMSGuildInc
 	if empty {
 		return nil, errercode.CreateCode(errercode.NoPermission)
 	}
-	row := liveroomdao.GetGuildIncomeSettlementLogById(id)
+	row := liveroomdao.ResolveGuildIncomeSettlementLogById(id)
 	if row == nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}

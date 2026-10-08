@@ -19,22 +19,20 @@ func writeIncomeSettlementLogAmounts(tb db.TbName, id uint64, a *LiveRoomIncomeA
 	writeIncomeAmountLocked(tb, LiveRoomIncomeSettlementSalary, id, salary)
 }
 
-func writeGuildIncomeSettlementLogAmounts(id uint64, a *LiveRoomIncomeAmounts, salary, shareAmount, shareAmountUsd, guildSharePercent float64) {
-	writeIncomeSettlementLogAmounts(TbGuildIncomeSettlementDetail, id, a, salary)
-	writeIncomeAmountLocked(TbGuildIncomeSettlementDetail, LiveRoomIncomeSettlementShareAmount, id, shareAmount)
-	writeIncomeAmountLocked(TbGuildIncomeSettlementDetail, LiveRoomIncomeSettlementShareAmountUsd, id, shareAmountUsd)
-	writeIncomeAmountLocked(TbGuildIncomeSettlementDetail, GuildIncomeSettlementLogGuildSharePercent, id, guildSharePercent)
+func writeGuildIncomeSettlementLogAmounts(detailTb db.TbName, id uint64, a *LiveRoomIncomeAmounts, salary, guildSharePercent float64) {
+	writeIncomeSettlementLogAmounts(detailTb, id, a, salary)
+	writeIncomeAmountLocked(detailTb, GuildIncomeSettlementLogGuildSharePercent, id, guildSharePercent)
 }
 
-func writeGuildIncomeSettlementBreakdown(id uint64, b *GuildIncomeSettlementBreakdown) {
+func writeGuildIncomeSettlementBreakdown(detailTb db.TbName, id uint64, b *GuildIncomeSettlementBreakdown) {
 	if b == nil {
 		return
 	}
-	syndb.AddData(TbGuildIncomeSettlementDetail, GuildIncomeSettlementLogSettlementRuleType, &syndb.ColData{IdVal: id, ColVal: b.SettlementRuleType})
-	writeIncomeAmountLocked(TbGuildIncomeSettlementDetail, GuildIncomeSettlementLogAnchorSocialShareAmount, id, b.AnchorSocialShareAmount)
-	writeIncomeAmountLocked(TbGuildIncomeSettlementDetail, GuildIncomeSettlementLogGuildSocialShareAmount, id, b.GuildSocialShareAmount)
-	writeIncomeAmountLocked(TbGuildIncomeSettlementDetail, GuildIncomeSettlementLogAnchorGameShareAmountGold, id, b.AnchorGameShareAmountGold)
-	writeIncomeAmountLocked(TbGuildIncomeSettlementDetail, GuildIncomeSettlementLogGuildGameShareAmountGold, id, b.GuildGameShareAmountGold)
+	syndb.AddData(detailTb, GuildIncomeSettlementLogSettlementRuleType, &syndb.ColData{IdVal: id, ColVal: b.SettlementRuleType})
+	writeIncomeAmountLocked(detailTb, GuildIncomeSettlementLogAnchorSocialShareAmount, id, b.AnchorSocialShareAmount)
+	writeIncomeAmountLocked(detailTb, GuildIncomeSettlementLogGuildSocialShareAmount, id, b.GuildSocialShareAmount)
+	writeIncomeAmountLocked(detailTb, GuildIncomeSettlementLogAnchorGameShareAmountGold, id, b.AnchorGameShareAmountGold)
+	writeIncomeAmountLocked(detailTb, GuildIncomeSettlementLogGuildGameShareAmountGold, id, b.GuildGameShareAmountGold)
 }
 
 func writeAnchorIncomeSettlementLogAmounts(id uint64, a *LiveRoomIncomeAmounts, salary, shareAmount, shareAmountUsd, anchorSharePercent float64) {

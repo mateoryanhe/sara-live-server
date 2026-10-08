@@ -72,6 +72,7 @@ import {anchorGameShareCfgListMessages} from './anchor-game-share-cfg-list'
 import {anchorIncomeSettlementLogListMessages} from './anchor-income-settlement-log-list'
 import {guildIncomeSettlementLogListMessages} from './guild-income-settlement-log-list'
 import {guildTransferListMessages} from './guild-transfer-list'
+import {coinMerchantGuildTransferListMessages} from './coin-merchant-guild-transfer-list'
 import {appTokenMessages} from './app-token'
 import {serverRuntimeCfgMessages} from './server-runtime-cfg'
 import {staticCacheCfgMessages} from './static-cache-cfg'
@@ -168,6 +169,7 @@ const pageMessageBuilders = [
   ['anchorIncomeSettlementLogList', anchorIncomeSettlementLogListMessages],
   ['guildIncomeSettlementLogList', guildIncomeSettlementLogListMessages],
   ['guildTransferList', guildTransferListMessages],
+  ['coinMerchantGuildTransferList', coinMerchantGuildTransferListMessages],
   ['appToken', appTokenMessages],
   ['preloadCfg', preloadCfgMessages],
   ['serverRuntimeCfg', serverRuntimeCfgMessages],

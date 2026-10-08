@@ -64,6 +64,7 @@ const READONLY_PAGES = new Set([
     'GuildPayoutDetailList',
     'PlatformAnchorPayoutDetailList',
     'CoinMerchantPayoutDetailList',
+    'CoinMerchantGuildIncomeSettlementLogList',
     'LiveRecordList',
     'LiveDailyEffectiveLiveList',
     'VideoCallLogList',
@@ -80,6 +81,7 @@ const READONLY_NO_EXPORT_PAGES = new Set([
     'GuildPayoutDetailList',
     'PlatformAnchorPayoutDetailList',
     'CoinMerchantPayoutDetailList',
+    'CoinMerchantGuildIncomeSettlementLogList',
 ])
 
 const CONFIG_PAGES = new Set([

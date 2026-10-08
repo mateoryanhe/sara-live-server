@@ -60,8 +60,19 @@
             <div class="detail-section-title">{{ settlementText('snapshotSummary') }}（钻石）</div>
               <el-descriptions :column="3" :label-width="detailLabelWidth" border class="detail-descriptions">
                 <el-descriptions-item :label="settlementText('totalIncome')">{{ amount(item.totalIncome) }}</el-descriptions-item>
+                <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
+                <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
+              </el-descriptions>
+            </section>
+
+            <section class="detail-section">
+              <div class="detail-section-title">{{ settlementText('liveStatsSection') }}</div>
+              <el-descriptions :column="3" :label-width="detailLabelWidth" border class="detail-descriptions">
                 <el-descriptions-item :label="settlementText('totalLiveDuration')">
                   {{ formatLiveDurationMinutes(item.totalLiveDuration, t) }}
+                </el-descriptions-item>
+                <el-descriptions-item :label="settlementText('effectiveLiveDays')">
+                  {{ formatEffectiveLiveDays(item.effectiveLiveDays) }}
                 </el-descriptions-item>
                 <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
               </el-descriptions>
@@ -197,6 +208,10 @@ const settlementText = (key: string) => t(`pages.anchorIncomeSettlementLogList.$
 const guildSettlementText = (key: string) => t(`pages.guildIncomeSettlementLogList.${key}`)
 const amount = (value: number | null | undefined) => formatWalletBalance(Number(value || 0))
 const percent = (value: number | null | undefined) => `${Number(value || 0)}%`
+const formatEffectiveLiveDays = (value: number | null | undefined) => {
+  const days = Math.max(0, Math.trunc(Number(value ?? 0)))
+  return t('pages.anchorIncomeSettlementLogList.effectiveLiveDaysCount', {days})
+}
 const settlementRuleLabel = computed(() => Number(item.value?.settlementRuleType) === 1
     ? settlementText('settlementRuleTiered')
     : settlementText('settlementRuleLegacy'))

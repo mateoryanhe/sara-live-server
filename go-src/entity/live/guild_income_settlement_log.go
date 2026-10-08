@@ -17,10 +17,8 @@ const (
 
 const (
 	GuildIncomeSettlementLogGuildId                   db.TbCol = "guild_id"
-	GuildIncomeSettlementLogSettlementSalary          db.TbCol = "settlement_salary"
-	GuildIncomeSettlementLogSettlementShareAmount     db.TbCol = "settlement_share_amount"
-	GuildIncomeSettlementLogSettlementShareAmountUsd  db.TbCol = "settlement_share_amount_usd"
-	GuildIncomeSettlementLogGuildSharePercent         db.TbCol = "guild_share_percent"
+	GuildIncomeSettlementLogSettlementSalary         db.TbCol = "settlement_salary"
+	GuildIncomeSettlementLogGuildSharePercent        db.TbCol = "guild_share_percent"
 	GuildIncomeSettlementLogStatus                    db.TbCol = "status"
 	GuildIncomeSettlementLogTransferAt                db.TbCol = "transfer_at"
 	GuildIncomeSettlementLogTransferOrderId           db.TbCol = "transfer_order_id"
@@ -37,6 +35,8 @@ const (
 	GuildIncomeSettlementLogUsdToGoldRate             db.TbCol = "usd_to_gold_rate"
 	GuildIncomeSettlementLogGameShareAmountDiamond    db.TbCol = "game_share_amount_diamond"
 	GuildIncomeSettlementLogTotalSettlementDiamond    db.TbCol = "total_settlement_diamond"
+	GuildIncomeSettlementLogAnchorPayoutTotalDiamond  db.TbCol = "anchor_payout_total_diamond"
+	GuildIncomeSettlementLogGuildPayoutTotalDiamond   db.TbCol = "guild_payout_total_diamond"
 	GuildIncomeSettlementDetailSettlementId           db.TbCol = "settlement_id"
 	GuildIncomeSettlementTransferSettlementId         db.TbCol = "settlement_id"
 )
@@ -62,18 +62,18 @@ type GuildIncomeSettlementBreakdown struct {
 
 // GuildIncomeSettlementLog 工会结算主单。数据库主表只保存列表、审核和排序所需字段；
 // 结算快照与代付过程分别落到一对一明细表，结构体继续作为业务聚合对象使用。
+// 普通工会与币商工会使用不同的物理表，由 Storage 区分。
 type GuildIncomeSettlementLog struct {
 	migrate.OneModel
-	CreatedAt               time.Time `gorm:"index:idx_gis_guild_status_created,priority:3" json:"-"`
-	GuildId                 uint64    `gorm:"index:idx_gis_guild_status_created,priority:1;default:0;comment:工会ID" json:"guildId"`
+	Storage                 GuildIncomeSettlementStorage `gorm:"-" json:"-"`
+	CreatedAt               time.Time                    `gorm:"index:idx_gis_guild_status_created,priority:3" json:"-"`
+	GuildId                 uint64                       `gorm:"index:idx_gis_guild_status_created,priority:1;default:0;comment:工会ID" json:"guildId"`
 	SettlementReceivableUsd float64   `gorm:"type:decimal(16,4);default:0;comment:结算可收金额(USD)" json:"settlementReceivableUsd"`
 	Status                  uint8     `gorm:"index:idx_gis_guild_status_created,priority:2;default:0;comment:状态(0审核中1审核通过2转账成功3代付中)" json:"status"`
 
 	LiveRoomIncomeAmounts     `gorm:"-"`
-	SettlementSalary          float64    `gorm:"-" json:"settlementSalary"`
-	SettlementShareAmount     float64    `gorm:"-" json:"settlementShareAmount"`
-	SettlementShareAmountUsd  float64    `gorm:"-" json:"settlementShareAmountUsd"`
-	GuildSharePercent         float64    `gorm:"-" json:"guildSharePercent"`
+	SettlementSalary  float64 `gorm:"-" json:"settlementSalary"`
+	GuildSharePercent float64 `gorm:"-" json:"guildSharePercent"`
 	SettlementRuleType        uint8      `gorm:"-" json:"settlementRuleType"`
 	AnchorSocialShareAmount   float64    `gorm:"-" json:"anchorSocialShareAmount"`
 	GuildSocialShareAmount    float64    `gorm:"-" json:"guildSocialShareAmount"`
@@ -81,9 +81,11 @@ type GuildIncomeSettlementLog struct {
 	GuildGameShareAmountGold  float64    `gorm:"-" json:"guildGameShareAmountGold"`
 	GoldToDiamondRate         int        `gorm:"-" json:"goldToDiamondRate"`
 	UsdToGoldRate             int        `gorm:"-" json:"usdToGoldRate"`
-	GameShareAmountDiamond    float64    `gorm:"-" json:"gameShareAmountDiamond"`
-	TotalSettlementDiamond    float64    `gorm:"-" json:"totalSettlementDiamond"`
-	TransferAt                *time.Time `gorm:"-" json:"transferAt"`
+	GameShareAmountDiamond     float64    `gorm:"-" json:"gameShareAmountDiamond"`
+	TotalSettlementDiamond     float64    `gorm:"-" json:"totalSettlementDiamond"`
+	AnchorPayoutTotalDiamond   float64    `gorm:"-" json:"anchorPayoutTotalDiamond"`
+	GuildPayoutTotalDiamond    float64    `gorm:"-" json:"guildPayoutTotalDiamond"`
+	TransferAt                 *time.Time `gorm:"-" json:"transferAt"`
 	TransferOrderId           string     `gorm:"-" json:"transferOrderId"`
 	TransferPlatformNo        string     `gorm:"-" json:"transferPlatformNo"`
 	TransferLocalAmount       float64    `gorm:"-" json:"transferLocalAmount"`
@@ -95,10 +97,8 @@ type GuildIncomeSettlementLog struct {
 type GuildIncomeSettlementDetail struct {
 	SettlementId uint64 `gorm:"column:settlement_id;primaryKey;autoIncrement:false;comment:工会结算主单ID" json:"settlementId,string"`
 	LiveRoomIncomeAmounts
-	SettlementSalary          float64 `gorm:"type:decimal(16,4);default:0;comment:结算薪资" json:"settlementSalary"`
-	SettlementShareAmount     float64 `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额" json:"settlementShareAmount"`
-	SettlementShareAmountUsd  float64 `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额(USD)" json:"settlementShareAmountUsd"`
-	GuildSharePercent         float64 `gorm:"type:decimal(6,2);default:0;comment:本次结算工会分佣比例(%)" json:"guildSharePercent"`
+	SettlementSalary  float64 `gorm:"type:decimal(16,4);default:0;comment:结算薪资(钻石)" json:"settlementSalary"`
+	GuildSharePercent float64 `gorm:"type:decimal(6,2);default:0;comment:币商工会结算比例(%,普通工会为0)" json:"guildSharePercent"`
 	SettlementRuleType        uint8   `gorm:"default:0;comment:结算规则(0旧版或币商 1普通工会分项结算)" json:"settlementRuleType"`
 	AnchorSocialShareAmount   float64 `gorm:"type:decimal(20,4);default:0;comment:主播社交分佣合计(钻石)" json:"anchorSocialShareAmount"`
 	GuildSocialShareAmount    float64 `gorm:"type:decimal(20,4);default:0;comment:工会社交分佣合计(钻石)" json:"guildSocialShareAmount"`
@@ -106,8 +106,10 @@ type GuildIncomeSettlementDetail struct {
 	GuildGameShareAmountGold  float64 `gorm:"type:decimal(20,4);default:0;comment:工会游戏分佣合计(金币)" json:"guildGameShareAmountGold"`
 	GoldToDiamondRate         int     `gorm:"default:0;comment:代付换算时1金币兑换钻石数" json:"goldToDiamondRate"`
 	UsdToGoldRate             int     `gorm:"default:0;comment:代付换算时1USD兑换金币数" json:"usdToGoldRate"`
-	GameShareAmountDiamond    float64 `gorm:"type:decimal(20,4);default:0;comment:游戏分佣换算钻石" json:"gameShareAmountDiamond"`
-	TotalSettlementDiamond    float64 `gorm:"type:decimal(20,4);default:0;comment:代付换算总钻石" json:"totalSettlementDiamond"`
+	GameShareAmountDiamond     float64 `gorm:"type:decimal(20,4);default:0;comment:游戏分佣换算钻石" json:"gameShareAmountDiamond"`
+	TotalSettlementDiamond     float64 `gorm:"type:decimal(20,4);default:0;comment:代付换算总钻石" json:"totalSettlementDiamond"`
+	AnchorPayoutTotalDiamond   float64 `gorm:"type:decimal(20,4);default:0;comment:旗下主播代付总额(钻石,分项结算快照)" json:"anchorPayoutTotalDiamond"`
+	GuildPayoutTotalDiamond    float64 `gorm:"type:decimal(20,4);default:0;comment:工会自身代付总额(钻石,分项结算快照)" json:"guildPayoutTotalDiamond"`
 }
 
 func (GuildIncomeSettlementDetail) TableName() string {
@@ -129,6 +131,34 @@ func (GuildIncomeSettlementTransfer) TableName() string {
 	return string(TbGuildIncomeSettlementTransfer)
 }
 
+func (GuildIncomeSettlementLog) TableName() string {
+	return string(TbGuildIncomeSettlementLog)
+}
+
+type coinMerchantGuildIncomeSettlementLog struct {
+	GuildIncomeSettlementLog
+}
+
+func (coinMerchantGuildIncomeSettlementLog) TableName() string {
+	return string(TbCoinMerchantGuildIncomeSettlementLog)
+}
+
+type coinMerchantGuildIncomeSettlementDetail struct {
+	GuildIncomeSettlementDetail
+}
+
+func (coinMerchantGuildIncomeSettlementDetail) TableName() string {
+	return string(TbCoinMerchantGuildIncomeSettlementDetail)
+}
+
+type coinMerchantGuildIncomeSettlementTransfer struct {
+	GuildIncomeSettlementTransfer
+}
+
+func (coinMerchantGuildIncomeSettlementTransfer) TableName() string {
+	return string(TbCoinMerchantGuildIncomeSettlementTransfer)
+}
+
 // ApplyDetail 将持久化明细装配回业务聚合对象。
 func (r *GuildIncomeSettlementLog) ApplyDetail(v *GuildIncomeSettlementDetail) {
 	if r == nil || v == nil || v.SettlementId != r.ID {
@@ -136,8 +166,6 @@ func (r *GuildIncomeSettlementLog) ApplyDetail(v *GuildIncomeSettlementDetail) {
 	}
 	r.LiveRoomIncomeAmounts = v.LiveRoomIncomeAmounts
 	r.SettlementSalary = v.SettlementSalary
-	r.SettlementShareAmount = v.SettlementShareAmount
-	r.SettlementShareAmountUsd = v.SettlementShareAmountUsd
 	r.GuildSharePercent = v.GuildSharePercent
 	r.SettlementRuleType = v.SettlementRuleType
 	r.AnchorSocialShareAmount = v.AnchorSocialShareAmount
@@ -148,6 +176,8 @@ func (r *GuildIncomeSettlementLog) ApplyDetail(v *GuildIncomeSettlementDetail) {
 	r.UsdToGoldRate = v.UsdToGoldRate
 	r.GameShareAmountDiamond = v.GameShareAmountDiamond
 	r.TotalSettlementDiamond = v.TotalSettlementDiamond
+	r.AnchorPayoutTotalDiamond = v.AnchorPayoutTotalDiamond
+	r.GuildPayoutTotalDiamond = v.GuildPayoutTotalDiamond
 }
 
 // ApplyTransfer 将持久化代付过程装配回业务聚合对象。
@@ -163,17 +193,22 @@ func (r *GuildIncomeSettlementLog) ApplyTransfer(v *GuildIncomeSettlementTransfe
 	r.TransferFailMsg = v.TransferFailMsg
 }
 
-// NewGuildIncomeSettlementLog 新建一条工会结算日志并入库。
-func NewGuildIncomeSettlementLog(guildId uint64, a *LiveRoomIncomeAmounts, salary, shareAmount, shareAmountUsd, receivableUsd, guildSharePercent float64) *GuildIncomeSettlementLog {
-	return NewGuildIncomeSettlementLogWithBreakdown(guildId, a, salary, shareAmount, shareAmountUsd, receivableUsd, guildSharePercent, nil)
+// NewGuildIncomeSettlementLogWithBreakdown 新建普通工会结算日志（分项/阶梯规则）。
+func NewGuildIncomeSettlementLogWithBreakdown(guildId uint64, a *LiveRoomIncomeAmounts, salary, receivableUsd, guildSharePercent float64, breakdown *GuildIncomeSettlementBreakdown) *GuildIncomeSettlementLog {
+	return newGuildIncomeSettlementLogWithBreakdown(GuildIncomeSettlementStorageNormal, guildId, a, salary, receivableUsd, guildSharePercent, breakdown)
 }
 
-// NewGuildIncomeSettlementLogWithBreakdown 新建带原始单位分项的工会结算日志。
-func NewGuildIncomeSettlementLogWithBreakdown(guildId uint64, a *LiveRoomIncomeAmounts, salary, shareAmount, shareAmountUsd, receivableUsd, guildSharePercent float64, breakdown *GuildIncomeSettlementBreakdown) *GuildIncomeSettlementLog {
+// NewCoinMerchantGuildIncomeSettlementLogWithBreakdown 新建币商工会结算日志（独立物理表）。
+func NewCoinMerchantGuildIncomeSettlementLogWithBreakdown(guildId uint64, a *LiveRoomIncomeAmounts, salary, receivableUsd, guildSharePercent float64, breakdown *GuildIncomeSettlementBreakdown) *GuildIncomeSettlementLog {
+	return newGuildIncomeSettlementLogWithBreakdown(GuildIncomeSettlementStorageCoinMerchant, guildId, a, salary, receivableUsd, guildSharePercent, breakdown)
+}
+
+func newGuildIncomeSettlementLogWithBreakdown(storage GuildIncomeSettlementStorage, guildId uint64, a *LiveRoomIncomeAmounts, salary, receivableUsd, guildSharePercent float64, breakdown *GuildIncomeSettlementBreakdown) *GuildIncomeSettlementLog {
 	if a == nil {
 		a = &LiveRoomIncomeAmounts{}
 	}
-	ret := &GuildIncomeSettlementLog{}
+	ret := &GuildIncomeSettlementLog{Storage: storage}
+	tables := storage.tables()
 	ret.ID = snowflake.GetId()
 	now := time.Now()
 	ret.CreatedAt = now
@@ -181,8 +216,6 @@ func NewGuildIncomeSettlementLogWithBreakdown(guildId uint64, a *LiveRoomIncomeA
 	ret.GuildId = guildId
 	ret.LiveRoomIncomeAmounts = *a
 	ret.SettlementSalary = salary
-	ret.SettlementShareAmount = shareAmount
-	ret.SettlementShareAmountUsd = shareAmountUsd
 	ret.SettlementReceivableUsd = receivableUsd
 	ret.GuildSharePercent = guildSharePercent
 	ret.Status = GuildIncomeSettlementStatusPending
@@ -194,12 +227,12 @@ func NewGuildIncomeSettlementLogWithBreakdown(guildId uint64, a *LiveRoomIncomeA
 		ret.GuildGameShareAmountGold = breakdown.GuildGameShareAmountGold
 	}
 
-	syndb.AddData(TbGuildIncomeSettlementLog, db.CreatedAtName, &syndb.ColData{IdVal: ret.ID, ColVal: now})
-	syndb.AddData(TbGuildIncomeSettlementLog, db.UpdatedAtName, &syndb.ColData{IdVal: ret.ID, ColVal: now})
-	syndb.AddData(TbGuildIncomeSettlementLog, GuildIncomeSettlementLogGuildId, &syndb.ColData{IdVal: ret.ID, ColVal: guildId})
-	syndb.AddData(TbGuildIncomeSettlementLog, LiveRoomIncomeSettlementReceivableUsd, &syndb.ColData{IdVal: ret.ID, ColVal: receivableUsd})
-	writeGuildIncomeSettlementLogAmounts(ret.ID, a, salary, shareAmount, shareAmountUsd, guildSharePercent)
-	writeGuildIncomeSettlementBreakdown(ret.ID, breakdown)
+	syndb.AddData(tables.Log, db.CreatedAtName, &syndb.ColData{IdVal: ret.ID, ColVal: now})
+	syndb.AddData(tables.Log, db.UpdatedAtName, &syndb.ColData{IdVal: ret.ID, ColVal: now})
+	syndb.AddData(tables.Log, GuildIncomeSettlementLogGuildId, &syndb.ColData{IdVal: ret.ID, ColVal: guildId})
+	syndb.AddData(tables.Log, LiveRoomIncomeSettlementReceivableUsd, &syndb.ColData{IdVal: ret.ID, ColVal: receivableUsd})
+	writeGuildIncomeSettlementLogAmounts(tables.Detail, ret.ID, a, salary, guildSharePercent)
+	writeGuildIncomeSettlementBreakdown(tables.Detail, ret.ID, breakdown)
 	ret.SetStatus(GuildIncomeSettlementStatusPending)
 	return ret
 }
@@ -207,7 +240,7 @@ func NewGuildIncomeSettlementLogWithBreakdown(guildId uint64, a *LiveRoomIncomeA
 func (r *GuildIncomeSettlementLog) touchMain() {
 	now := time.Now()
 	r.UpdatedAt = now
-	syndb.AddData(TbGuildIncomeSettlementLog, db.UpdatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: now})
+	syndb.AddData(r.logTable(), db.UpdatedAtName, &syndb.ColData{IdVal: r.ID, ColVal: now})
 }
 
 // SetPayoutConversion 保存本次代付实际使用的换算快照。
@@ -220,11 +253,59 @@ func (r *GuildIncomeSettlementLog) SetPayoutConversion(goldToDiamondRate, usdToG
 	r.GameShareAmountDiamond = gameShareDiamond
 	r.TotalSettlementDiamond = totalDiamond
 	r.SettlementReceivableUsd = receivableUsd
-	syndb.AddData(TbGuildIncomeSettlementDetail, GuildIncomeSettlementLogGoldToDiamondRate, &syndb.ColData{IdVal: r.ID, ColVal: goldToDiamondRate})
-	syndb.AddData(TbGuildIncomeSettlementDetail, GuildIncomeSettlementLogUsdToGoldRate, &syndb.ColData{IdVal: r.ID, ColVal: usdToGoldRate})
-	syndb.AddData(TbGuildIncomeSettlementDetail, GuildIncomeSettlementLogGameShareAmountDiamond, &syndb.ColData{IdVal: r.ID, ColVal: gameShareDiamond})
-	syndb.AddData(TbGuildIncomeSettlementDetail, GuildIncomeSettlementLogTotalSettlementDiamond, &syndb.ColData{IdVal: r.ID, ColVal: totalDiamond})
-	syndb.AddData(TbGuildIncomeSettlementLog, LiveRoomIncomeSettlementReceivableUsd, &syndb.ColData{IdVal: r.ID, ColVal: receivableUsd})
+	syndb.AddData(r.detailTable(), GuildIncomeSettlementLogGoldToDiamondRate, &syndb.ColData{IdVal: r.ID, ColVal: goldToDiamondRate})
+	syndb.AddData(r.detailTable(), GuildIncomeSettlementLogUsdToGoldRate, &syndb.ColData{IdVal: r.ID, ColVal: usdToGoldRate})
+	syndb.AddData(r.detailTable(), GuildIncomeSettlementLogGameShareAmountDiamond, &syndb.ColData{IdVal: r.ID, ColVal: gameShareDiamond})
+	syndb.AddData(r.detailTable(), GuildIncomeSettlementLogTotalSettlementDiamond, &syndb.ColData{IdVal: r.ID, ColVal: totalDiamond})
+	if r.SettlementRuleType == GuildIncomeSettlementRuleTiered {
+		anchorTotal, guildTotal := CalcTieredGuildPayoutDiamondSplit(
+			r.SettlementSalary,
+			r.AnchorSocialShareAmount,
+			r.GuildSocialShareAmount,
+			r.AnchorGameShareAmountGold,
+			r.GuildGameShareAmountGold,
+			goldToDiamondRate,
+		)
+		r.AnchorPayoutTotalDiamond = anchorTotal
+		r.GuildPayoutTotalDiamond = guildTotal
+		syndb.AddData(r.detailTable(), GuildIncomeSettlementLogAnchorPayoutTotalDiamond, &syndb.ColData{IdVal: r.ID, ColVal: anchorTotal})
+		syndb.AddData(r.detailTable(), GuildIncomeSettlementLogGuildPayoutTotalDiamond, &syndb.ColData{IdVal: r.ID, ColVal: guildTotal})
+	}
+	syndb.AddData(r.logTable(), LiveRoomIncomeSettlementReceivableUsd, &syndb.ColData{IdVal: r.ID, ColVal: receivableUsd})
+	r.touchMain()
+}
+
+// TieredGuildConversionSnapshotPersisted 普通工会分项结算的代付换算快照是否已完整落库（查询侧只读这些字段，不再重算）。
+func (r *GuildIncomeSettlementLog) TieredGuildConversionSnapshotPersisted() bool {
+	if r == nil || r.SettlementRuleType != GuildIncomeSettlementRuleTiered {
+		return true
+	}
+	return r.SettlementReceivableUsd > 0 &&
+		r.TotalSettlementDiamond > 0 &&
+		r.GoldToDiamondRate > 0 &&
+		r.UsdToGoldRate > 0
+}
+
+// PersistTieredPayoutDiamondSplit 仅补写主播/工会代付钻石拆分列（使用已落库的分项与汇率，供历史数据或写入路径一次性补齐）。
+func (r *GuildIncomeSettlementLog) PersistTieredPayoutDiamondSplit() {
+	if r == nil || r.ID == 0 || r.SettlementRuleType != GuildIncomeSettlementRuleTiered {
+		return
+	}
+	if r.GoldToDiamondRate <= 0 {
+		return
+	}
+	anchorTotal, guildTotal := CalcTieredGuildPayoutDiamondSplit(
+		r.SettlementSalary,
+		r.AnchorSocialShareAmount,
+		r.GuildSocialShareAmount,
+		r.AnchorGameShareAmountGold,
+		r.GuildGameShareAmountGold,
+		r.GoldToDiamondRate,
+	)
+	r.AnchorPayoutTotalDiamond = anchorTotal
+	r.GuildPayoutTotalDiamond = guildTotal
+	syndb.AddData(r.detailTable(), GuildIncomeSettlementLogAnchorPayoutTotalDiamond, &syndb.ColData{IdVal: r.ID, ColVal: anchorTotal})
+	syndb.AddData(r.detailTable(), GuildIncomeSettlementLogGuildPayoutTotalDiamond, &syndb.ColData{IdVal: r.ID, ColVal: guildTotal})
 	r.touchMain()
 }
 
@@ -233,7 +314,7 @@ func (r *GuildIncomeSettlementLog) SetStatus(v uint8) {
 		return
 	}
 	r.Status = v
-	syndb.AddData(TbGuildIncomeSettlementLog, GuildIncomeSettlementLogStatus, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(r.logTable(), GuildIncomeSettlementLogStatus, &syndb.ColData{IdVal: r.ID, ColVal: v})
 	r.touchMain()
 }
 
@@ -242,7 +323,7 @@ func (r *GuildIncomeSettlementLog) SetSettlementReceivableUsd(v float64) {
 		return
 	}
 	r.SettlementReceivableUsd = v
-	syndb.AddData(TbGuildIncomeSettlementLog, LiveRoomIncomeSettlementReceivableUsd, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(r.logTable(), LiveRoomIncomeSettlementReceivableUsd, &syndb.ColData{IdVal: r.ID, ColVal: v})
 	r.touchMain()
 }
 
@@ -251,7 +332,7 @@ func (r *GuildIncomeSettlementLog) SetTransferAt(v *time.Time) {
 		return
 	}
 	r.TransferAt = v
-	syndb.AddData(TbGuildIncomeSettlementTransfer, GuildIncomeSettlementLogTransferAt, &syndb.ColData{IdVal: r.ID, ColVal: v})
+	syndb.AddData(r.transferTable(), GuildIncomeSettlementLogTransferAt, &syndb.ColData{IdVal: r.ID, ColVal: v})
 	r.touchMain()
 }
 
@@ -264,11 +345,11 @@ func (r *GuildIncomeSettlementLog) SetTransferPayout(orderId, platformNo, curren
 	r.TransferCurrency = currency
 	r.TransferLocalAmount = localAmount
 	r.TransferFailMsg = ""
-	syndb.AddData(TbGuildIncomeSettlementTransfer, GuildIncomeSettlementLogTransferOrderId, &syndb.ColData{IdVal: r.ID, ColVal: orderId})
-	syndb.AddData(TbGuildIncomeSettlementTransfer, GuildIncomeSettlementLogTransferPlatformNo, &syndb.ColData{IdVal: r.ID, ColVal: platformNo})
-	syndb.AddData(TbGuildIncomeSettlementTransfer, GuildIncomeSettlementLogTransferCurrency, &syndb.ColData{IdVal: r.ID, ColVal: currency})
-	syndb.AddData(TbGuildIncomeSettlementTransfer, GuildIncomeSettlementLogTransferLocalAmount, &syndb.ColData{IdVal: r.ID, ColVal: localAmount})
-	syndb.AddData(TbGuildIncomeSettlementTransfer, GuildIncomeSettlementLogTransferFailMsg, &syndb.ColData{IdVal: r.ID, ColVal: ""})
+	syndb.AddData(r.transferTable(), GuildIncomeSettlementLogTransferOrderId, &syndb.ColData{IdVal: r.ID, ColVal: orderId})
+	syndb.AddData(r.transferTable(), GuildIncomeSettlementLogTransferPlatformNo, &syndb.ColData{IdVal: r.ID, ColVal: platformNo})
+	syndb.AddData(r.transferTable(), GuildIncomeSettlementLogTransferCurrency, &syndb.ColData{IdVal: r.ID, ColVal: currency})
+	syndb.AddData(r.transferTable(), GuildIncomeSettlementLogTransferLocalAmount, &syndb.ColData{IdVal: r.ID, ColVal: localAmount})
+	syndb.AddData(r.transferTable(), GuildIncomeSettlementLogTransferFailMsg, &syndb.ColData{IdVal: r.ID, ColVal: ""})
 	r.touchMain()
 }
 
@@ -277,19 +358,20 @@ func (r *GuildIncomeSettlementLog) SetTransferFailMsg(msg string) {
 		return
 	}
 	r.TransferFailMsg = msg
-	syndb.AddData(TbGuildIncomeSettlementTransfer, GuildIncomeSettlementLogTransferFailMsg, &syndb.ColData{IdVal: r.ID, ColVal: msg})
+	syndb.AddData(r.transferTable(), GuildIncomeSettlementLogTransferFailMsg, &syndb.ColData{IdVal: r.ID, ColVal: msg})
 	r.touchMain()
 }
 
-func regGuildIncomeSettlementDetailColumn(column db.TbCol) {
-	syndb.RegWithIDName(TbGuildIncomeSettlementDetail, column, GuildIncomeSettlementDetailSettlementId)
+func regGuildIncomeSettlementDetailColumn(tb db.TbName, column db.TbCol) {
+	syndb.RegWithIDName(tb, column, GuildIncomeSettlementDetailSettlementId)
 }
 
-func regGuildIncomeSettlementTransferColumn(column db.TbCol) {
-	syndb.RegWithIDName(TbGuildIncomeSettlementTransfer, column, GuildIncomeSettlementTransferSettlementId)
+func regGuildIncomeSettlementTransferColumn(tb db.TbName, column db.TbCol) {
+	syndb.RegWithIDName(tb, column, GuildIncomeSettlementTransferSettlementId)
 }
 
-func initGuildIncomeSettlementLog() {
+func initGuildIncomeSettlementLogSyndb(storage GuildIncomeSettlementStorage) {
+	tables := storage.tables()
 	for _, column := range []db.TbCol{
 		db.CreatedAtName,
 		db.UpdatedAtName,
@@ -297,7 +379,7 @@ func initGuildIncomeSettlementLog() {
 		LiveRoomIncomeSettlementReceivableUsd,
 		GuildIncomeSettlementLogStatus,
 	} {
-		syndb.RegQuick(TbGuildIncomeSettlementLog, column)
+		syndb.RegQuick(tables.Log, column)
 	}
 	for _, column := range []db.TbCol{
 		LiveRoomIncomeTotalIncome,
@@ -311,8 +393,6 @@ func initGuildIncomeSettlementLog() {
 		LiveRoomIncomeTotalGameIncome,
 		LiveRoomIncomeTotalLiveDuration,
 		GuildIncomeSettlementLogSettlementSalary,
-		GuildIncomeSettlementLogSettlementShareAmount,
-		GuildIncomeSettlementLogSettlementShareAmountUsd,
 		GuildIncomeSettlementLogGuildSharePercent,
 		GuildIncomeSettlementLogSettlementRuleType,
 		GuildIncomeSettlementLogAnchorSocialShareAmount,
@@ -323,8 +403,10 @@ func initGuildIncomeSettlementLog() {
 		GuildIncomeSettlementLogUsdToGoldRate,
 		GuildIncomeSettlementLogGameShareAmountDiamond,
 		GuildIncomeSettlementLogTotalSettlementDiamond,
+		GuildIncomeSettlementLogAnchorPayoutTotalDiamond,
+		GuildIncomeSettlementLogGuildPayoutTotalDiamond,
 	} {
-		regGuildIncomeSettlementDetailColumn(column)
+		regGuildIncomeSettlementDetailColumn(tables.Detail, column)
 	}
 	for _, column := range []db.TbCol{
 		GuildIncomeSettlementLogTransferAt,
@@ -334,11 +416,19 @@ func initGuildIncomeSettlementLog() {
 		GuildIncomeSettlementLogTransferCurrency,
 		GuildIncomeSettlementLogTransferFailMsg,
 	} {
-		regGuildIncomeSettlementTransferColumn(column)
+		regGuildIncomeSettlementTransferColumn(tables.Transfer, column)
 	}
+}
+
+func initGuildIncomeSettlementLog() {
+	initGuildIncomeSettlementLogSyndb(GuildIncomeSettlementStorageNormal)
+	initGuildIncomeSettlementLogSyndb(GuildIncomeSettlementStorageCoinMerchant)
 	migrate.AutoMigrate(
 		&GuildIncomeSettlementLog{},
 		&GuildIncomeSettlementDetail{},
 		&GuildIncomeSettlementTransfer{},
+		&coinMerchantGuildIncomeSettlementLog{},
+		&coinMerchantGuildIncomeSettlementDetail{},
+		&coinMerchantGuildIncomeSettlementTransfer{},
 	)
 }

@@ -112,6 +112,9 @@
       <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalLiveDuration')" min-width="120">
         <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
       </el-table-column>
+      <el-table-column :label="t('pages.anchorIncomeSettlementLogList.effectiveLiveDays')" min-width="110">
+        <template #default="{ row }">{{ formatEffectiveLiveDays(row.effectiveLiveDays) }}</template>
+      </el-table-column>
       <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.anchorSharePercent')" min-width="120">
         <template #default="{ row }">{{ formatSharePercent(row.anchorSharePercent) }}</template>
       </el-table-column>
@@ -154,6 +157,10 @@ const props = defineProps<{
 }>()
 
 const {t} = useI18n()
+const formatEffectiveLiveDays = (value: number | null | undefined) => {
+  const days = Math.max(0, Math.trunc(Number(value ?? 0)))
+  return t('pages.anchorIncomeSettlementLogList.effectiveLiveDaysCount', {days})
+}
 const router = useRouter()
 const {canViewUserDetail, openUserDetail} = useUserDetailNav('GuildDetail')
 const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()

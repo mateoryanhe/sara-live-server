@@ -33,6 +33,7 @@ const menu = {
   GuildTransferManagement: '普通工会代付',
   CoinMerchantGuildTransferManagement: '币商代付',
   CoinMerchantPayoutDetailList: '币商代付详情',
+  CoinMerchantGuildIncomeSettlementLogList: '币商工会结算流水',
   GuildCMSUserManagement: '工会CMS用户',
   GuildVisibilityManagement: '工会可见性',
   PlatformAnchorVisibilityManagement: '平台主播可见性',

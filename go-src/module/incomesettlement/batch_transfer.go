@@ -72,7 +72,7 @@ func BatchApproveGuildSettlement(ctx context.Context, req *incomesettlementdto.C
 		return res, nil
 	}
 	for _, id := range ids {
-		row := liveroomdao.GetGuildIncomeSettlementLogById(id)
+		row := liveroomdao.ResolveGuildIncomeSettlementLogById(id)
 		if row == nil || row.Status != entity.GuildIncomeSettlementStatusPending {
 			res.FailCount++
 			continue
@@ -99,7 +99,7 @@ func getGuildSettlementForStatus(ctx context.Context, rawId string, status uint8
 	if empty {
 		return nil, errercode.CreateCode(errercode.NoPermission)
 	}
-	row := liveroomdao.GetGuildIncomeSettlementLogById(id)
+	row := liveroomdao.ResolveGuildIncomeSettlementLogById(id)
 	if row == nil || row.Status != status {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
@@ -137,22 +137,25 @@ func CopyGuildSettlementPayout(ctx context.Context, req *incomesettlementdto.CMS
 	if err != nil {
 		return nil, err
 	}
-	cloned := entity.NewGuildIncomeSettlementLogWithBreakdown(
-		source.GuildId,
-		&source.LiveRoomIncomeAmounts,
-		source.SettlementSalary,
-		source.SettlementShareAmount,
-		source.SettlementShareAmountUsd,
-		source.SettlementReceivableUsd,
-		source.GuildSharePercent,
-		&entity.GuildIncomeSettlementBreakdown{
-			SettlementRuleType:        source.SettlementRuleType,
-			AnchorSocialShareAmount:   source.AnchorSocialShareAmount,
-			GuildSocialShareAmount:    source.GuildSocialShareAmount,
-			AnchorGameShareAmountGold: source.AnchorGameShareAmountGold,
-			GuildGameShareAmountGold:  source.GuildGameShareAmountGold,
-		},
-	)
+	breakdown := &entity.GuildIncomeSettlementBreakdown{
+		SettlementRuleType:        source.SettlementRuleType,
+		AnchorSocialShareAmount:   source.AnchorSocialShareAmount,
+		GuildSocialShareAmount:    source.GuildSocialShareAmount,
+		AnchorGameShareAmountGold: source.AnchorGameShareAmountGold,
+		GuildGameShareAmountGold:  source.GuildGameShareAmountGold,
+	}
+	var cloned *entity.GuildIncomeSettlementLog
+	if source.Storage == entity.GuildIncomeSettlementStorageCoinMerchant {
+		cloned = entity.NewCoinMerchantGuildIncomeSettlementLogWithBreakdown(
+			source.GuildId, &source.LiveRoomIncomeAmounts, source.SettlementSalary,
+			source.SettlementReceivableUsd, source.GuildSharePercent, breakdown,
+		)
+	} else {
+		cloned = entity.NewGuildIncomeSettlementLogWithBreakdown(
+			source.GuildId, &source.LiveRoomIncomeAmounts, source.SettlementSalary,
+			source.SettlementReceivableUsd, source.GuildSharePercent, breakdown,
+		)
+	}
 	if cloned == nil || cloned.ID == 0 {
 		return nil, errercode.CreateCode(errercode.SysError)
 	}
@@ -208,7 +211,7 @@ func BatchTransferGuildSettlement(ctx context.Context, req *incomesettlementdto.
 	}
 
 	for _, id := range ids {
-		row := liveroomdao.GetGuildIncomeSettlementLogById(id)
+		row := liveroomdao.ResolveGuildIncomeSettlementLogById(id)
 		if row == nil || row.Status != entity.GuildIncomeSettlementStatusApproved {
 			res.FailCount++
 			continue
@@ -312,8 +315,14 @@ func prepareTieredGuildPayout(row *entity.GuildIncomeSettlementLog) error {
 	if row == nil {
 		return fmt.Errorf("empty settlement")
 	}
-	// 周结算已固定审核金额；人工修改后的审核金额也必须原样用于代付。
-	if row.SettlementReceivableUsd > 0 {
+	// 周结算生成主单时已调用 SetPayoutConversion 落库；代付前只读快照，禁止按最新汇率重算。
+	if row.TieredGuildConversionSnapshotPersisted() {
+		if row.AnchorPayoutTotalDiamond == 0 && row.GuildPayoutTotalDiamond == 0 {
+			row.PersistTieredPayoutDiamondSplit()
+			if !syndb.FlushUntilIdle(15*time.Second) || !liveroomdao.VerifyGuildPayoutConversionPersisted(row) {
+				return fmt.Errorf("payout diamond split persist failed")
+			}
+		}
 		return nil
 	}
 	exchangeCfg := wallet.GetExchangeCfgSnapshot()

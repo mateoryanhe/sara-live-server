@@ -1,5 +1,5 @@
 <template>
-  <GuildPayoutDetailListPanel scope="normal"/>
+  <GuildPayoutDetailListPanel scope="coinMerchant"/>
 </template>
 
 <script lang="ts" setup>

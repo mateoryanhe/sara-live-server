@@ -76,6 +76,9 @@
       <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalLiveDuration')" min-width="120">
         <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
       </el-table-column>
+      <el-table-column :label="t('pages.anchorIncomeSettlementLogList.effectiveLiveDays')" min-width="110">
+        <template #default="{ row }">{{ formatEffectiveLiveDays(row.effectiveLiveDays) }}</template>
+      </el-table-column>
       <el-table-column :label="t('common.createdAt')" min-width="170">
         <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
       </el-table-column>
@@ -117,6 +120,10 @@ const props = defineProps<{
 }>()
 
 const {t} = useI18n()
+const formatEffectiveLiveDays = (value: number | null | undefined) => {
+  const days = Math.max(0, Math.trunc(Number(value ?? 0)))
+  return t('pages.anchorIncomeSettlementLogList.effectiveLiveDaysCount', {days})
+}
 const {can} = usePagePermission('AnchorDetail')
 const canExport = computed(() => can('exportSettlementLog'))
 const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()

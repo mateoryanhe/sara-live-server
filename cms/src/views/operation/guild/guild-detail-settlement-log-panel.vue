@@ -41,18 +41,11 @@
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementSalary) }}</span></template>
       </el-table-column>
       <el-table-column
-          :label="t('pages.anchorList.settlementFlowCommission')"
+          :label="t('pages.guildIncomeSettlementLogList.totalSettlementDiamond')"
           align="right"
-          min-width="120"
+          min-width="140"
       >
-        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementShareAmount) }}</span></template>
-      </el-table-column>
-      <el-table-column
-          :label="t('pages.anchorList.settlementShareAmountUsd')"
-          align="right"
-          min-width="130"
-      >
-        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementShareAmountUsd) }}</span></template>
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalSettlementDiamond) }}</span></template>
       </el-table-column>
       <el-table-column
           :label="t('pages.anchorList.settlementReceivableUsd')"
@@ -117,7 +110,15 @@ import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 const props = defineProps<{
   guildId: string
   active: boolean
+  guildType?: number
 }>()
+
+const guildScopeFilter = computed(() => {
+  if (Number(props.guildType) === 1) {
+    return {guildType: 1 as const, coinMerchantGuildOnly: true, normalGuildOnly: false}
+  }
+  return {guildType: 0 as const, normalGuildOnly: true, coinMerchantGuildOnly: false}
+})
 
 const {t} = useI18n()
 const {can} = usePagePermission('GuildDetail')
@@ -149,6 +150,7 @@ const fetchList = async () => {
   try {
     const response = await guildIncomeSettlementLogApi.getList({
       ...buildFilterParams(),
+      ...guildScopeFilter.value,
       includeDetail: true,
       pageIndex: 1,
       pageSize: 50,
@@ -182,6 +184,7 @@ const handleExport = async () => {
     {
       headers: buildCsvHeaders(buildGuildSettlementLogCsvColumns(t)),
       ...buildFilterParams(),
+      ...guildScopeFilter.value,
     },
     `guild-settlement-log-${props.guildId}-${Date.now()}.csv`,
   )
