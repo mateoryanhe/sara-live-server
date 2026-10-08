@@ -131,6 +131,12 @@ func bindCreateRoomMultipartFields(fields map[string][]string) (*liveroomdto.Cre
 	if req.Category, err = parseCreateRoomUint8(createRoomLastField(fields, "category")); err != nil {
 		return nil, err
 	}
+	if req.VoiceChatMicMode, err = parseCreateRoomUint8(createRoomLastField(fields, "voiceChatMicMode")); err != nil {
+		return nil, err
+	}
+	if req.VoiceChatMicMode != 0 && req.VoiceChatMicMode != 1 && req.VoiceChatMicMode != 2 && req.VoiceChatMicMode != 3 {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 	if req.TagId, err = parseCreateRoomUint64(createRoomLastField(fields, "tagId")); err != nil {
 		return nil, err
 	}

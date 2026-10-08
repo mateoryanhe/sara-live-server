@@ -12,4 +12,5 @@ func Init() {
 	initDailyAnchorEffectiveLiveDao()
 	initDailyGuildEffectiveLiveDao()
 	InitLiveRoomGameRecommendDao()
+	initLiveRoomVoiceChatMicDao()
 }

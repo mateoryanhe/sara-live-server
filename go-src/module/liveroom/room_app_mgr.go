@@ -25,6 +25,30 @@ func normalizeLiveRoomCategory(category uint8) uint8 {
 	return liveentity.LiveRoomCategoryHot
 }
 
+func applyVoiceChatMicModeToCfg(cfg *liveentity.LiveRoomCfg, category, requested uint8) {
+	if cfg == nil || category != liveentity.LiveRoomCategoryVoiceChat {
+		return
+	}
+	if requested > 0 {
+		cfg.SetVoiceChatMicMode(requested)
+		return
+	}
+	if cfg.VoiceChatMicMode == 0 {
+		cfg.SetVoiceChatMicMode(liveentity.VoiceChatMicModeFree)
+	}
+}
+
+func voiceChatMicModeForRoom(roomId uint64) uint8 {
+	cfg := liveroomdao.GetLiveRoomCfgFromCache(roomId)
+	if cfg == nil {
+		cfg = liveroomdao.GetLiveRoomCfg(roomId)
+	}
+	if cfg == nil || normalizeLiveRoomCategory(cfg.Category) != liveentity.LiveRoomCategoryVoiceChat {
+		return 0
+	}
+	return cfg.VoiceChatMicMode
+}
+
 func applyRoomPricing(cfg *liveentity.LiveRoomCfg, ticket, billing float64) {
 	if cfg == nil {
 		return
@@ -128,6 +152,7 @@ func createRoomWithStoredCover(ctx context.Context, req *liveroomdto.CreateLiveR
 			}
 			applyRoomPricing(cfg, req.Ticket, req.Billing)
 			applyPrivateInviteType(cfg, req.PrivateInviteType)
+			applyVoiceChatMicModeToCfg(cfg, category, req.VoiceChatMicMode)
 		}
 		if err := applyLiveRoomGameRecommends(existing.ID, category, req.GameCodes); err != nil {
 			return nil, err
@@ -155,6 +180,7 @@ func createRoomWithStoredCover(ctx context.Context, req *liveroomdto.CreateLiveR
 		cfg.SetTicket(req.Ticket)
 		cfg.SetBilling(req.Billing)
 		applyPrivateInviteType(cfg, req.PrivateInviteType)
+		applyVoiceChatMicModeToCfg(cfg, category, req.VoiceChatMicMode)
 	}
 	if err := applyLiveRoomGameRecommends(room.ID, category, req.GameCodes); err != nil {
 		return nil, err
@@ -299,6 +325,7 @@ func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto
 		Notice:            room.Notice,
 		Status:            status,
 		Category:          normalizeLiveRoomCategory(cfg.Category),
+		VoiceChatMicMode:  voiceChatMicModeForRoom(room.ID),
 		TagId:             strconv.FormatUint(cfg.TagId, 10),
 		TagName:           getRoomTagName(cfg.TagId),
 		Ticket:            cfg.Ticket,

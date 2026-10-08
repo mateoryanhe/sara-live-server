@@ -589,6 +589,40 @@ func collectNearbyLiveRooms(rooms []*liveentity.LiveRoom, currentIdx, direction,
 	return result
 }
 
+func liveRoomCategoryFromCache(room *liveentity.LiveRoom) uint8 {
+	if room == nil {
+		return liveentity.LiveRoomCategoryHot
+	}
+	cfg := liveroomdao.GetLiveRoomCfgFromCache(room.ID)
+	if cfg == nil {
+		if room.Status == liveentity.LiveRoomStatusOnShelf {
+			cfg = liveroomdao.GetLiveRoomCfg(room.ID)
+		} else {
+			cfg = liveroomdao.GetLiveRoomCfgForCMS(room.ID)
+		}
+	}
+	if cfg == nil {
+		return liveentity.LiveRoomCategoryHot
+	}
+	return normalizeLiveRoomCategory(cfg.Category)
+}
+
+func filterRoomsByCategory(rooms []*liveentity.LiveRoom, category uint8) []*liveentity.LiveRoom {
+	if len(rooms) == 0 {
+		return rooms
+	}
+	filtered := make([]*liveentity.LiveRoom, 0, len(rooms))
+	for _, room := range rooms {
+		if room == nil {
+			continue
+		}
+		if liveRoomCategoryFromCache(room) == category {
+			filtered = append(filtered, room)
+		}
+	}
+	return filtered
+}
+
 func buildHotLiveRoomListItems(rooms []*liveentity.LiveRoom, userId uint64, startRank int) []*liveroomdto.HotLiveRoomListItem {
 	list := make([]*liveroomdto.HotLiveRoomListItem, 0, len(rooms))
 	rank := startRank
@@ -605,10 +639,8 @@ func buildHotLiveRoomListItems(rooms []*liveentity.LiveRoom, userId uint64, star
 	return list
 }
 
-// GetHotLiveRoomList App 分页查询 Hot 列表(暂拉取全部直播间,走内存缓存排序,含排名)
-func GetHotLiveRoomList(ctx context.Context, req *liveroomdto.GetHotLiveRoomListReq) (*liveroomdto.GetHotLiveRoomListRes, error) {
+func getCategoryLiveRoomList(ctx context.Context, pageIndex, pageSize int, category uint8) (*liveroomdto.GetHotLiveRoomListRes, error) {
 	userId := httpserver.GetAuthId(ctx)
-	pageIndex, pageSize := normalizeRoomListPage(req.PageIndex, req.PageSize)
 
 	cached := filterRoomsForApp(getRoomListCache())
 	if cached == nil {
@@ -620,7 +652,8 @@ func GetHotLiveRoomList(ctx context.Context, req *liveroomdto.GetHotLiveRoomList
 		}, nil
 	}
 
-	filtered := filterRoomsBySeniorAnchor(cached, userId)
+	filtered := filterRoomsByCategory(cached, category)
+	filtered = filterRoomsBySeniorAnchor(filtered, userId)
 	filtered = filterRoomsByBlocked(filtered, userId)
 	total := len(filtered)
 	start, end := roomListPageRange(total, pageIndex, pageSize)
@@ -635,6 +668,18 @@ func GetHotLiveRoomList(ctx context.Context, req *liveroomdto.GetHotLiveRoomList
 		PageSize:  pageSize,
 		List:      list,
 	}, nil
+}
+
+// GetHotLiveRoomList App 分页查询 Hot 分类列表(走内存缓存排序,含排名)
+func GetHotLiveRoomList(ctx context.Context, req *liveroomdto.GetHotLiveRoomListReq) (*liveroomdto.GetHotLiveRoomListRes, error) {
+	pageIndex, pageSize := normalizeRoomListPage(req.PageIndex, req.PageSize)
+	return getCategoryLiveRoomList(ctx, pageIndex, pageSize, liveentity.LiveRoomCategoryHot)
+}
+
+// GetVoiceChatLiveRoomList App 分页查询语聊房分类列表(走内存缓存排序,含排名)
+func GetVoiceChatLiveRoomList(ctx context.Context, req *liveroomdto.GetVoiceChatLiveRoomListReq) (*liveroomdto.GetVoiceChatLiveRoomListRes, error) {
+	pageIndex, pageSize := normalizeRoomListPage(req.PageIndex, req.PageSize)
+	return getCategoryLiveRoomList(ctx, pageIndex, pageSize, liveentity.LiveRoomCategoryVoiceChat)
 }
 
 // GetNearbyLiveRoomList App 以当前直播间为锚点,获取列表中相邻的直播中直播间(走内存缓存排序)

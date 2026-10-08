@@ -60,6 +60,7 @@ func stopLive(anchorId uint64) *entity.LiveRecord {
 		return nil
 	}
 	liveRecordId := room.LiveRecordId
+	voiceChatMicOnStopLive(anchorId, liveRecordId)
 	broadcastAnchorStopLive(anchorId, liveRecordId)
 	room.SetLiveRecordId(0)
 	room.SetHeartTime(nil)

@@ -392,6 +392,7 @@ const anchorTypeTagType = (userType?: number) => {
 const categoryLabel = (category?: number) => {
   if (category === 1) return t('pages.anchorList.categoryHot')
   if (category === 2) return t('pages.anchorList.categoryGame')
+  if (category === 3) return t('pages.anchorList.categoryVoiceChat')
   return '-'
 }
 

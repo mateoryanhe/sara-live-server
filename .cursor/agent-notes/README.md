@@ -299,6 +299,12 @@ App/CMS 建单 API  ──►  recharge 业务（写订单、白名单）
 - 开通：App `POST /liveRoom/createOneToOne`、CMS `/oneToOneRoom/create`；CMS 页 **主播与工会管理 → 1v1房间**
 - 1v1 通话分钟价在 `one_to_one_rooms.billing`，不读 `live_room_cfgs.billing`
 
+## 语聊房麦位（开发中，未发版）
+
+- 麦位状态只认 `voice_chat_mic_seats.status`（1~4）；创建/开播/上麦等路径必须显式 `SetStatus`
+- **勿写**旧字段迁移、`Effective*`/`Normalize*` 读时兜底、兼容未发布版本的额外分支
+- App 麦位 UI：读 `voiceChatMicState`/cmd41 每席 `status`（1空闲 2锁麦 3在麦 4在麦禁音），说明见 DTO `VoiceChatMicSeatItem.status` 的 dc
+
 ## HaiPay AppId 测试/正式（2026-10-05）
 
 - 枚举：`go-src/constants/country/haipay_app_id.go`；测试 25238 起全币种，正式目前仅 USD `7810` / MYR `7730` / IDR `7724` / 收银台 `7545`

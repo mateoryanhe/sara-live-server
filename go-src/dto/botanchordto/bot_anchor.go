@@ -22,7 +22,7 @@ type BotAnchorListItem struct {
 	GuildId              uint64     `json:"guildId,string"`
 	RoomId               uint64     `json:"roomId,string"`
 	RoomTitle            string     `json:"roomTitle" dc:"直播间标题"`
-	Category             uint8      `json:"category" dc:"直播间类型(1=hot,2=game)"`
+	Category             uint8      `json:"category" dc:"直播间类型(1=hot,2=game,3=语聊房)"`
 	TagId                uint64     `json:"tagId,string" dc:"直播间标签ID"`
 	TagName              string     `json:"tagName" dc:"直播间标签名称"`
 	CloudPlayerVideo     string     `json:"cloudPlayerVideo" dc:"云播放器MP4视频访问URL"`
@@ -46,7 +46,7 @@ type CreateBotAnchorReq struct {
 	Avatar               string `json:"avatar" dc:"头像文件名"`
 	GuildId              uint64 `json:"guildId,string" dc:"工会ID(可选)"`
 	RoomTitle            string `json:"roomTitle" dc:"直播间标题"`
-	Category             uint8  `json:"category" v:"in:1,2" dc:"直播间类型(1=hot,2=game)"`
+	Category             uint8  `json:"category" v:"in:1,2,3" dc:"直播间类型(1=hot,2=game,3=语聊房)"`
 	TagId                uint64 `json:"tagId,string" dc:"直播间标签ID(0表示无)"`
 	CloudPlayerVideo     string `json:"cloudPlayerVideo" dc:"云播放器MP4视频文件名或URL"`
 	CloudPlayerFrameRate uint8  `json:"cloudPlayerFrameRate" dc:"云播放器输出帧率(fps,1-30,默认24)"`
@@ -69,7 +69,7 @@ type UpdateBotAnchorReq struct {
 	Nickname             string  `json:"nickname" v:"required|length:1,32" dc:"昵称"`
 	Avatar               *string `json:"avatar" dc:"头像文件名,不传表示不修改"`
 	RoomTitle            string  `json:"roomTitle" dc:"直播间标题"`
-	Category             uint8   `json:"category" v:"in:1,2" dc:"直播间类型(1=hot,2=game)"`
+	Category             uint8   `json:"category" v:"in:1,2,3" dc:"直播间类型(1=hot,2=game,3=语聊房)"`
 	TagId                uint64  `json:"tagId,string" dc:"直播间标签ID(0表示无)"`
 	CloudPlayerVideo     *string `json:"cloudPlayerVideo" dc:"云播放器MP4视频文件名或URL,不传表示不修改"`
 	CloudPlayerFrameRate *uint8  `json:"cloudPlayerFrameRate" dc:"云播放器输出帧率(fps,1-30),不传表示不修改"`

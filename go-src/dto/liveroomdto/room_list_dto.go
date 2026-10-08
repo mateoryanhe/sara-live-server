@@ -21,7 +21,7 @@ type LiveRoomListItem struct {
 	Cover              string  `json:"cover" dc:"封面图URL(已拼资源域名)"`
 	Notice             string  `json:"notice" dc:"公告"`
 	Status             uint8   `json:"status" dc:"状态(0未开播,1直播中)"`
-	Category           uint8   `json:"category" dc:"分类(1=hot,2=game)"`
+	Category           uint8   `json:"category" dc:"分类(1=hot,2=game,3=语聊房)"`
 	TagId              string  `json:"tagId" dc:"直播间标签ID"`
 	TagName            string  `json:"tagName" dc:"直播间标签名称"`
 	Billing            float64 `json:"billing" dc:"视频通话价格(每分钟钻石)"`
@@ -116,3 +116,12 @@ type GetHotLiveRoomListRes struct {
 	PageSize  int                    `json:"pageSize" dc:"每页数量"`
 	List      []*HotLiveRoomListItem `json:"list" dc:"Hot直播中房间列表"`
 }
+
+// GetVoiceChatLiveRoomListReq App 分页查询语聊房分类直播间列表(走内存缓存排序,含排名)
+type GetVoiceChatLiveRoomListReq struct {
+	g.Meta    `path:"/voiceChatRoomList" method:"post" summary:"查询语聊房直播间列表" tags:"直播间"`
+	PageIndex int `json:"pageIndex" dc:"页码(从1开始,默认1)"`
+	PageSize  int `json:"pageSize" dc:"每页数量(默认20,最大100)"`
+}
+
+type GetVoiceChatLiveRoomListRes = GetHotLiveRoomListRes

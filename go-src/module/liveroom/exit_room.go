@@ -37,6 +37,7 @@ func exitRoom(userId uint64, roomId uint64) {
 		liveroomdao.PublishLiveRoomOnline(existing)
 	}
 	removeOnline(userId, roomId)
+	voiceChatMicOnUserLeave(roomId, userId)
 	markContributionRankDataChanged(roomId)
 	refreshRoomAudienceCaches(roomId)
 }

@@ -29,6 +29,7 @@ func initLiveRoomDao() {
 	}
 	PreloadLiveRoomIncomes(ids)
 	PreloadLiveRoomCfgs(ids)
+	PreloadVoiceChatMicLiveSessionsFromDB()
 }
 
 // GetRoomFromDB 按 roomId 直查数据库(含下架直播间,不走缓存)

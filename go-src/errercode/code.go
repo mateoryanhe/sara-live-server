@@ -215,6 +215,36 @@ const (
 	OneToOneRoomExist XRCode = 167
 	// OneToOneRoomNonExist 1v1房间不存在
 	OneToOneRoomNonExist XRCode = 168
+	// LiveRoomNotVoiceChat 当前直播间不是语聊房
+	LiveRoomNotVoiceChat XRCode = 169
+	// VoiceChatMicAlreadyOn 已在麦上
+	VoiceChatMicAlreadyOn XRCode = 170
+	// VoiceChatMicApplyExist 已提交上麦申请
+	VoiceChatMicApplyExist XRCode = 171
+	// VoiceChatMicApplyNotFound 上麦申请不存在
+	VoiceChatMicApplyNotFound XRCode = 172
+	// VoiceChatMicSeatFull 麦位已满
+	VoiceChatMicSeatFull XRCode = 173
+	// VoiceChatMicNotOnSeat 不在麦上
+	VoiceChatMicNotOnSeat XRCode = 174
+	// VoiceChatMicSeatTaken 麦位已被占用
+	VoiceChatMicSeatTaken XRCode = 175
+	// VoiceChatMicHostSeatLocked 主播位不可下麦或不可操作
+	VoiceChatMicHostSeatLocked XRCode = 176
+	// VoiceChatMicHostNoApply 主播无需申请上麦
+	VoiceChatMicHostNoApply XRCode = 177
+	// VoiceChatMicSeatInvalid 麦位序号无效
+	VoiceChatMicSeatInvalid XRCode = 178
+	// VoiceChatMicModeHostOnly 当前为房主单麦模式
+	VoiceChatMicModeHostOnly XRCode = 179
+	// VoiceChatMicModeNotApply 当前不是申请上麦模式
+	VoiceChatMicModeNotApply XRCode = 180
+	// VoiceChatMicApplyListFull 上麦申请人数已满
+	VoiceChatMicApplyListFull XRCode = 181
+	// VoiceChatMicSeatLocked 该麦位已锁,观众不可上麦
+	VoiceChatMicSeatLocked XRCode = 182
+	// VoiceChatMicSeatNotOccupied 麦位无人,无法禁音
+	VoiceChatMicSeatNotOccupied XRCode = 183
 )
 
 type XError struct {

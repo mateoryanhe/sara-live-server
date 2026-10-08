@@ -14,6 +14,7 @@ const (
 const (
 	LiveRoomCfgPrivateInviteType        db.TbCol = "private_invite_type"
 	LiveRoomCfgCategory                 db.TbCol = "category"
+	LiveRoomCfgVoiceChatMicMode         db.TbCol = "voice_chat_mic_mode"
 	LiveRoomCfgTagId                    db.TbCol = "tag_id"
 	LiveRoomCfgTicket                   db.TbCol = "ticket"
 	LiveRoomCfgBilling                  db.TbCol = "billing"
@@ -39,7 +40,8 @@ const (
 type LiveRoomCfg struct {
 	migrate.OneModel
 	PrivateInviteType        uint8      `gorm:"default:1;comment:视频通话邀请类型(1=接受所有人,3=拒绝所有人)" json:"privateInviteType"`
-	Category                 uint8      `gorm:"default:1;comment:分类(1=hot,2=game)" json:"category"`
+	Category                 uint8      `gorm:"default:1;comment:分类(1=hot,2=game,3=voice chat)" json:"category"`
+	VoiceChatMicMode         uint8      `gorm:"default:0;comment:语聊上麦方式(1=自由,2=申请,3=房主单麦)" json:"voiceChatMicMode"`
 	TagId                    uint64     `gorm:"default:0;comment:直播间标签ID" json:"tagId"`
 	Ticket                   float64    `gorm:"type:decimal(10,4);default:0;comment:直播间视频通话门票价格(钻石)" json:"ticket"`
 	Billing                  float64    `gorm:"type:decimal(10,4);default:0;comment:视频通话价格(每分钟钻石)" json:"billing"`
@@ -162,6 +164,15 @@ func (r *LiveRoomCfg) SetCategory(v uint8) {
 	r.Category = v
 	r.touchUpdatedAt()
 	syndb.AddData(TbLiveRoomCfg, LiveRoomCfgCategory, &syndb.ColData{IdVal: r.ID, ColVal: v})
+}
+
+func (r *LiveRoomCfg) SetVoiceChatMicMode(v uint8) {
+	if v != 0 && !IsValidVoiceChatMicMode(v) {
+		v = VoiceChatMicModeFree
+	}
+	r.VoiceChatMicMode = v
+	r.touchUpdatedAt()
+	syndb.AddData(TbLiveRoomCfg, LiveRoomCfgVoiceChatMicMode, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
 func (r *LiveRoomCfg) SetTagId(v uint64) {

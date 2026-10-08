@@ -28,13 +28,16 @@ const (
 )
 
 const (
-	LiveRoomCategoryHot  uint8 = 1 // hot
-	LiveRoomCategoryGame uint8 = 2 // game
+	LiveRoomCategoryHot       uint8 = 1 // hot
+	LiveRoomCategoryGame      uint8 = 2 // game
+	LiveRoomCategoryVoiceChat uint8 = 3 // voice chat (语聊房)
 )
 
 // IsValidLiveRoomCategory 判断直播间分类是否已定义。
 func IsValidLiveRoomCategory(category uint8) bool {
-	return category == LiveRoomCategoryHot || category == LiveRoomCategoryGame
+	return category == LiveRoomCategoryHot ||
+		category == LiveRoomCategoryGame ||
+		category == LiveRoomCategoryVoiceChat
 }
 
 // 直播间上下架状态

@@ -82,6 +82,10 @@ func startAnchorLive(ctx context.Context, room *entity.LiveRoom, heartTime time.
 	liveroomdao.FlushRoomCache(room)
 	flushRoomList(ctx)
 	broadcastAnchorStartLive(room.ID, liveRecordId, liveRecord.StartTime.Unix())
+	voiceChatMicOnStartLive(room.ID, room.ID)
+	if isVoiceChatRoomId(room.ID) {
+		broadcastVoiceChatMicState(room.ID)
+	}
 	return liveRecordId, nil
 }
 

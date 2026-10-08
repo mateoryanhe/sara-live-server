@@ -132,6 +132,79 @@ func (c *LiveRoomAppController) HotRoomList(ctx context.Context, req *liveroomdt
 	return liveroom.GetHotLiveRoomList(ctx, req)
 }
 
+// VoiceChatRoomList 分页查询语聊房分类直播间列表
+func (c *LiveRoomAppController) VoiceChatRoomList(ctx context.Context, req *liveroomdto.GetVoiceChatLiveRoomListReq) (res *liveroomdto.GetVoiceChatLiveRoomListRes, err error) {
+	return liveroom.GetVoiceChatLiveRoomList(ctx, req)
+}
+
+func (c *LiveRoomAppController) GetVoiceChatMicState(ctx context.Context, req *liveroomdto.GetVoiceChatMicStateReq) (*liveroomdto.GetVoiceChatMicStateRes, error) {
+	return liveroom.GetVoiceChatMicState(ctx, req)
+}
+
+func (c *LiveRoomAppController) ApplyVoiceChatMic(ctx context.Context, req *liveroomdto.ApplyVoiceChatMicReq) (*liveroomdto.ApplyVoiceChatMicRes, error) {
+	return liveroom.ApplyVoiceChatMic(ctx, req)
+}
+
+func (c *LiveRoomAppController) CancelVoiceChatMicApply(ctx context.Context, req *liveroomdto.CancelVoiceChatMicApplyReq) (*liveroomdto.CancelVoiceChatMicApplyRes, error) {
+	return liveroom.CancelVoiceChatMicApply(ctx, req)
+}
+
+func (c *LiveRoomAppController) VoiceChatMicApplyList(ctx context.Context, req *liveroomdto.VoiceChatMicApplyListReq) (*liveroomdto.VoiceChatMicApplyListRes, error) {
+	return liveroom.VoiceChatMicApplyList(ctx, req)
+}
+
+func (c *LiveRoomAppController) ApproveVoiceChatMicApply(ctx context.Context, req *liveroomdto.ApproveVoiceChatMicApplyReq) (*liveroomdto.ApproveVoiceChatMicApplyRes, error) {
+	return liveroom.ApproveVoiceChatMicApply(ctx, req)
+}
+
+func (c *LiveRoomAppController) RejectVoiceChatMicApply(ctx context.Context, req *liveroomdto.RejectVoiceChatMicApplyReq) (*liveroomdto.RejectVoiceChatMicApplyRes, error) {
+	return liveroom.RejectVoiceChatMicApply(ctx, req)
+}
+
+func (c *LiveRoomAppController) LeaveVoiceChatMic(ctx context.Context, req *liveroomdto.LeaveVoiceChatMicReq) (*liveroomdto.LeaveVoiceChatMicRes, error) {
+	return liveroom.LeaveVoiceChatMic(ctx, req)
+}
+
+func (c *LiveRoomAppController) KickVoiceChatMic(ctx context.Context, req *liveroomdto.KickVoiceChatMicReq) (*liveroomdto.KickVoiceChatMicRes, error) {
+	return liveroom.KickVoiceChatMic(ctx, req)
+}
+
+func (c *LiveRoomAppController) LockVoiceChatMicSeat(ctx context.Context, req *liveroomdto.LockVoiceChatMicSeatReq) (*liveroomdto.LockVoiceChatMicSeatRes, error) {
+	return liveroom.LockVoiceChatMicSeat(ctx, req)
+}
+
+func (c *LiveRoomAppController) UnlockVoiceChatMicSeat(ctx context.Context, req *liveroomdto.UnlockVoiceChatMicSeatReq) (*liveroomdto.UnlockVoiceChatMicSeatRes, error) {
+	return liveroom.UnlockVoiceChatMicSeat(ctx, req)
+}
+
+func (c *LiveRoomAppController) MuteVoiceChatMicSeat(ctx context.Context, req *liveroomdto.MuteVoiceChatMicSeatReq) (*liveroomdto.MuteVoiceChatMicSeatRes, error) {
+	return liveroom.MuteVoiceChatMicSeat(ctx, req)
+}
+
+func (c *LiveRoomAppController) UnmuteVoiceChatMicSeat(ctx context.Context, req *liveroomdto.UnmuteVoiceChatMicSeatReq) (*liveroomdto.UnmuteVoiceChatMicSeatRes, error) {
+	return liveroom.UnmuteVoiceChatMicSeat(ctx, req)
+}
+
+func (c *LiveRoomAppController) InviteVoiceChatMic(ctx context.Context, req *liveroomdto.InviteVoiceChatMicReq) (*liveroomdto.InviteVoiceChatMicRes, error) {
+	return liveroom.InviteVoiceChatMic(ctx, req)
+}
+
+func (c *LiveRoomAppController) SwitchVoiceChatMicSeat(ctx context.Context, req *liveroomdto.SwitchVoiceChatMicSeatReq) (*liveroomdto.SwitchVoiceChatMicSeatRes, error) {
+	return liveroom.SwitchVoiceChatMicSeat(ctx, req)
+}
+
+func (c *LiveRoomAppController) BatchLockVoiceChatMicSeats(ctx context.Context, req *liveroomdto.BatchLockVoiceChatMicSeatsReq) (*liveroomdto.BatchLockVoiceChatMicSeatsRes, error) {
+	return liveroom.BatchLockVoiceChatMicSeats(ctx, req)
+}
+
+func (c *LiveRoomAppController) BatchUnlockVoiceChatMicSeats(ctx context.Context, req *liveroomdto.BatchUnlockVoiceChatMicSeatsReq) (*liveroomdto.BatchUnlockVoiceChatMicSeatsRes, error) {
+	return liveroom.BatchUnlockVoiceChatMicSeats(ctx, req)
+}
+
+func (c *LiveRoomAppController) ClearVoiceChatMicApplies(ctx context.Context, req *liveroomdto.ClearVoiceChatMicAppliesReq) (*liveroomdto.ClearVoiceChatMicAppliesRes, error) {
+	return liveroom.ClearVoiceChatMicApplies(ctx, req)
+}
+
 // FollowedRoomList 分页查询我关注的直播间列表
 func (c *LiveRoomAppController) FollowedRoomList(ctx context.Context, req *liveroomdto.GetFollowedLiveRoomListReq) (res *liveroomdto.GetLiveRoomListRes, err error) {
 	return liveroom.GetFollowedRoomList(ctx, req)

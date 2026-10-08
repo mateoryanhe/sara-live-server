@@ -73,4 +73,8 @@ const (
 	LiveRoomCallInvite = 39
 	//充值成功推送(推送给指定用户,每次充值到账都会推)
 	RechargeSuccessPush = 40
+	//语聊房麦位状态变更推送(推送给直播间在线观众与主播)
+	LiveRoomVoiceChatMicState = 41
+	//语聊房麦位禁音推送(推送给被禁音/解禁用户)
+	LiveRoomVoiceChatMicSeatMute = 42
 )
