@@ -7,14 +7,23 @@
         <el-descriptions-item :label="t('pages.anchorList.totalIncomeConvertedDiamond')">
           <span class="money-amount">{{ formatWalletBalance(data.totalIncome) }}</span>
         </el-descriptions-item>
-        <el-descriptions-item :label="t('pages.anchorList.totalLiveDuration')">
+        <el-descriptions-item v-if="!showUnsettledLiveStats" :label="t('pages.anchorList.totalLiveDuration')">
           {{ formatLiveDurationMinutes(data.totalLiveDuration, t) }}
-        </el-descriptions-item>
-        <el-descriptions-item :label="t('pages.anchorList.socialTotalDiamondFlow')">
-          <span class="money-amount">{{ formatWalletBalance(data.totalSocialIncome) }}</span>
         </el-descriptions-item>
         <el-descriptions-item :label="t('pages.anchorList.gameTotalGoldFlow')">
           <span class="money-amount">{{ formatWalletBalance(data.totalGameIncome) }}</span>
+        </el-descriptions-item>
+      </el-descriptions>
+    </section>
+
+    <section v-if="showUnsettledLiveStats" class="detail-section">
+      <div class="detail-section-title">{{ t('pages.anchorList.unsettledLiveStatsSection') }}</div>
+      <el-descriptions :column="2" :label-width="detailLabelWidth" border class="detail-descriptions">
+        <el-descriptions-item :label="t('pages.anchorList.totalLiveDuration')">
+          {{ formatLiveDurationMinutes(data.totalLiveDuration, t) }}
+        </el-descriptions-item>
+        <el-descriptions-item :label="t('pages.anchorList.effectiveLiveDays')">
+          {{ effectiveLiveDaysDisplay }}
         </el-descriptions-item>
       </el-descriptions>
     </section>
@@ -38,6 +47,9 @@
     <section class="detail-section">
       <div class="detail-section-title">{{ t('pages.anchorList.socialIncomeSection') }}</div>
       <el-descriptions :column="2" :label-width="detailLabelWidth" border class="detail-descriptions">
+        <el-descriptions-item :label="t('pages.anchorList.socialTotalDiamondFlow')">
+          <span class="money-amount">{{ formatWalletBalance(data.totalSocialIncome) }}</span>
+        </el-descriptions-item>
         <el-descriptions-item :label="t('pages.anchorList.giftIncome')"><span class="money-amount">{{ formatWalletBalance(data.totalGiftIncome) }}</span></el-descriptions-item>
         <el-descriptions-item :label="t('pages.anchorList.paidDanmakuIncome')"><span class="money-amount">{{ formatWalletBalance(data.totalPaidDanmakuIncome) }}</span></el-descriptions-item>
         <el-descriptions-item :label="t('pages.anchorList.videoCallIncome')"><span class="money-amount">{{ formatWalletBalance(data.totalVideoCallIncome) }}</span></el-descriptions-item>
@@ -63,6 +75,8 @@ import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 
 const props = defineProps<{
   data?: LiveRoomIncomeAmounts | null
+  /** 未结算收益 Tab：有效直播天数与直播时长合并展示 */
+  effectiveLiveDays?: number
   settlementSalary?: number
   settlementShareAmount?: number
   settlementShareAmountUsd?: number | null
@@ -71,6 +85,11 @@ const props = defineProps<{
 
 const {t} = useI18n()
 const detailLabelWidth = 170
+const showUnsettledLiveStats = computed(() => props.effectiveLiveDays != null)
+const effectiveLiveDaysDisplay = computed(() => {
+  const days = Math.max(0, Math.trunc(Number(props.effectiveLiveDays ?? 0)))
+  return t('pages.anchorList.effectiveLiveDaysCount', {days})
+})
 const hasSettlementSummary = computed(() => props.settlementSalary != null
     || props.settlementShareAmount != null
     || props.settlementShareAmountUsd != null)

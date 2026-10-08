@@ -403,6 +403,7 @@ export interface AnchorLiveRoomDetail {
 }
 
 export interface LiveRoomIncomeUnsettledDetail extends LiveRoomIncomeAmounts {
+    effectiveLiveDays?: number
     updatedAt?: string | null
 }
 

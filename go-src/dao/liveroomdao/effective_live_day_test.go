@@ -2,24 +2,24 @@ package liveroomdao
 
 import "testing"
 
-func TestCrossedDailyAccumulatedLiveThreshold(t *testing.T) {
+func TestFirstReachDailyLiveThreshold(t *testing.T) {
+	needSec := float64(60)
 	tests := []struct {
 		name      string
 		beforeSec float64
 		afterSec  float64
-		needSec   float64
 		want      bool
 	}{
-		{name: "disabled threshold", needSec: 0, beforeSec: 0, afterSec: 3600, want: false},
-		{name: "already met", beforeSec: 7200, afterSec: 9000, needSec: 3600, want: false},
-		{name: "still below", beforeSec: 1000, afterSec: 2000, needSec: 3600, want: false},
-		{name: "cross on this session", beforeSec: 3000, afterSec: 3600, needSec: 3600, want: true},
-		{name: "exactly at threshold after", beforeSec: 0, afterSec: 3600, needSec: 3600, want: true},
+		{name: "first reach", beforeSec: 0, afterSec: 120, want: true},
+		{name: "cross exactly", beforeSec: 30, afterSec: 60, want: true},
+		{name: "already met before session", beforeSec: 120, afterSec: 240, want: false},
+		{name: "still below", beforeSec: 0, afterSec: 59, want: false},
+		{name: "late config already above", beforeSec: 5310, afterSec: 5850, want: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := crossedDailyAccumulatedLiveThreshold(tt.beforeSec, tt.afterSec, tt.needSec); got != tt.want {
-				t.Fatalf("crossedDailyAccumulatedLiveThreshold() = %v, want %v", got, tt.want)
+			if got := firstReachDailyLiveThreshold(tt.beforeSec, tt.afterSec, needSec); got != tt.want {
+				t.Fatalf("firstReachDailyLiveThreshold() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -180,7 +180,11 @@
           </el-tab-pane>
 
           <el-tab-pane :label="t('pages.anchorList.tabIncomeUnsettled')" lazy name="incomeUnsettled">
-            <IncomePanel :data="detail.incomeUnsettled" :updated-at="detail.incomeUnsettled?.updatedAt"/>
+            <IncomePanel
+                :data="detail.incomeUnsettled"
+                :effective-live-days="detail.incomeUnsettled ? Number(detail.incomeUnsettled.effectiveLiveDays ?? 0) : undefined"
+                :updated-at="detail.incomeUnsettled?.updatedAt"
+            />
           </el-tab-pane>
 
           <el-tab-pane :label="t('pages.anchorList.tabIncomeSettled')" lazy name="incomeSettled">
