@@ -54,79 +54,11 @@
             <el-tag :type="statusTagType(row.status)">{{ statusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column
-            :label="t('pages.guildIncomeSettlementLogList.settlementSalary')"
-            align="right"
-            label-class-name="header-nowrap"
-            min-width="150"
-        >
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementSalary) }}</span></template>
-        </el-table-column>
         <el-table-column :label="t('pages.guildIncomeSettlementLogList.settlementReceivableUsd')" align="right" min-width="150">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementReceivableUsd) }}</span></template>
         </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.settlementRuleType')" align="center" min-width="130">
-          <template #default="{ row }">
-            <el-tag :type="row.settlementRuleType === 1 ? 'success' : 'info'">
-              {{ row.settlementRuleType === 1
-                ? t('pages.guildIncomeSettlementLogList.settlementRuleTiered')
-                : t('pages.guildIncomeSettlementLogList.settlementRuleLegacy') }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.anchorSocialShareAmount')" align="right" min-width="160">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.anchorSocialShareAmount) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.guildSocialShareAmount')" align="right" min-width="160">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.guildSocialShareAmount) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.anchorGameShareAmountGold')" align="right" min-width="160">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.anchorGameShareAmountGold) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.guildGameShareAmountGold')" align="right" min-width="160">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.guildGameShareAmountGold) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.goldToDiamondRate')" align="right" min-width="150">
-          <template #default="{ row }">{{ row.settlementRuleType === 1 && row.goldToDiamondRate ? row.goldToDiamondRate : '-' }}</template>
-        </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.usdToGoldRate')" align="right" min-width="150">
-          <template #default="{ row }">{{ row.settlementRuleType === 1 && row.usdToGoldRate ? row.usdToGoldRate : '-' }}</template>
-        </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.gameShareAmountDiamond')" align="right" min-width="160">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.gameShareAmountDiamond) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalSettlementDiamond')" align="right" min-width="160">
+        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalSettlementDiamond')" align="right" min-width="150">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalSettlementDiamond) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalIncome')" align="right" min-width="120">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalSocialIncome')" align="right" min-width="130">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalSocialIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalGiftIncome')" align="right" min-width="120">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGiftIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalPaidDanmakuIncome')" align="right" min-width="130">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalPaidDanmakuIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalVideoCallIncome')" align="right" min-width="130">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
-        </el-table-column>
-		<el-table-column :label="t('pages.guildIncomeSettlementLogList.totalVideoCallTicketIncome')" align="right" min-width="150">
-		  <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallTicketIncome) }}</span></template>
-		</el-table-column>
-		<el-table-column :label="t('pages.guildIncomeSettlementLogList.totalVideoCallBillingIncome')" align="right" min-width="150">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallBillingIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalShortVideoIncome')" align="right" min-width="130">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalShortVideoIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalGameIncome')" align="right" min-width="120">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalLiveDuration')" min-width="120">
-          <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
         </el-table-column>
         <el-table-column
             :label="t('pages.guildIncomeSettlementLogList.guildSharePercent')"
@@ -135,6 +67,12 @@
             prop="guildSharePercent"
         >
           <template #default="{ row }">{{ formatSharePercent(row.guildSharePercent) }}</template>
+        </el-table-column>
+        <el-table-column :label="t('pages.guildIncomeSettlementLogList.guildSocialShareAmount')" align="right" min-width="150">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.guildSocialShareAmount) }}</span></template>
+        </el-table-column>
+        <el-table-column :label="t('pages.guildIncomeSettlementLogList.totalGiftIncome')" align="right" min-width="120">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGiftIncome) }}</span></template>
         </el-table-column>
       </el-table>
 

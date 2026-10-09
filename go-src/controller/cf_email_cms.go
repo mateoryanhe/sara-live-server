@@ -23,3 +23,7 @@ func (c *CfEmailCMSController) GetCfEmailCfg(ctx context.Context, req *cfemaildt
 func (c *CfEmailCMSController) SaveCfEmailCfg(ctx context.Context, req *cfemaildto.SaveCfEmailCfgReq) (*cfemaildto.SaveCfEmailCfgRes, error) {
 	return auth.SaveCfEmailCfg(ctx, req)
 }
+
+func (c *CfEmailCMSController) SendCfEmailTest(ctx context.Context, req *cfemaildto.SendCfEmailTestReq) (*cfemaildto.SendCfEmailTestRes, error) {
+	return auth.SendCfEmailTest(ctx, req)
+}

@@ -1,6 +1,8 @@
 package cfgdao
 
 import (
+	"strings"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/constants/db"
@@ -58,10 +60,11 @@ func GetCfEmailCfgCached() *sysentity.CfEmailCfg {
 
 func CfEmailEnabled() bool {
 	row := GetCfEmailCfgCached()
-	return row != nil &&
-		row.Enabled &&
-		row.Region != "" &&
-		row.AccessKeyId != "" &&
-		row.SecretAccessKey != "" &&
-		row.FromEmail != ""
+	if row == nil || !row.Enabled {
+		return false
+	}
+	return strings.TrimSpace(row.SmtpHost) != "" &&
+		strings.TrimSpace(row.SmtpUsername) != "" &&
+		strings.TrimSpace(row.SmtpPassword) != "" &&
+		strings.TrimSpace(row.FromEmail) != ""
 }

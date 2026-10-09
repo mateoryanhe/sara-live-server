@@ -2202,9 +2202,11 @@ export interface SaveHaiPayCfgRes {
 export interface CfEmailCfg {
     id: string
     enabled: boolean
-    region: string
-    accessKeyId: string
-    secretAccessKey: string
+    smtpHost: string
+    smtpPort: number
+    smtpUsername: string
+    smtpPassword: string
+    smtpPasswordConfigured?: boolean
     fromEmail: string
     createdAt: string
     updatedAt: string
@@ -2217,15 +2219,25 @@ export interface GetCfEmailCfgRes {
 export interface SaveCfEmailCfgReq {
     id?: number
     enabled: boolean
-    region: string
-    accessKeyId: string
-    secretAccessKey: string
+    smtpHost: string
+    smtpPort: number
+    smtpUsername: string
+    smtpPassword: string
     fromEmail: string
 }
 
 export interface SaveCfEmailCfgRes {
     success: boolean
     id: string
+}
+
+export interface SendCfEmailTestReq {
+    testEmail: string
+    lang?: string
+}
+
+export interface SendCfEmailTestRes {
+    success: boolean
 }
 
 export interface DbBackupCfg {

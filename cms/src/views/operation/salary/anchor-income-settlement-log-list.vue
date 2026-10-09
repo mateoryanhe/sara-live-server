@@ -188,9 +188,6 @@
         <el-table-column :label="t('pages.anchorIncomeSettlementLogList.effectiveLiveDays')" min-width="110">
           <template #default="{ row }">{{ formatEffectiveLiveDays(row.effectiveLiveDays) }}</template>
         </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.anchorSharePercent')" min-width="110" prop="anchorSharePercent">
-          <template #default="{ row }">{{ formatSharePercent(row.anchorSharePercent) }}</template>
-        </el-table-column>
       </el-table>
 
       <div class="pagination">

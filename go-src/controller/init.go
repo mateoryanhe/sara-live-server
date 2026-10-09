@@ -47,7 +47,7 @@ func Init() {
 	initHaiPayCMSController()                        // HaiPay渠道支付配置(CMS)
 	initPaymentCountryCfgCMSController()             // HaiPay普通用户国家支付配置(CMS)
 	initCoinMerchantPaymentCountryCfgCMSController() // HaiPay币商国家支付配置(CMS)
-	initCfEmailCMSController()                       // AWS SES邮件发信配置(CMS)
+	initCfEmailCMSController()                       // 邮件SMTP发信配置(CMS)
 	initFirebaseCMSController()                      // Firebase登录配置(CMS)
 	initFirebaseAppController()                      // Firebase客户端配置(App,无需鉴权)
 	initMetaPixelCMSController()                     // Meta Pixel Conversions API(CMS)

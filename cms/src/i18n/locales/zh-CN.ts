@@ -119,7 +119,7 @@ const menu = {
   MetaPixelCfgManagement: 'Meta Pixel 上报',
   FirebaseAnalyticsCfgManagement: 'Firebase Analytics 埋点',
   HaiPayCfgManagement: 'HaiPay支付',
-  CfEmailCfgManagement: 'Amazon SES邮件',
+  CfEmailCfgManagement: '邮件SMTP发信',
   DbBackupCfgManagement: '数据库备份',
   UploadResourceCfgManagement: '资源域名',
   CMSDomainMappingManagement: 'CMS域名映射',

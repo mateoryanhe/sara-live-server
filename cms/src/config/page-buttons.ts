@@ -155,6 +155,11 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.save,
         {key: 'syncLocalToS3', label: '本地刷到云桶'},
     ],
+    CfEmailCfgManagement: [
+        BTN.view,
+        BTN.save,
+        {key: 'sendTest', label: '发送测试验证码'},
+    ],
     Dashboard: DEFAULT_VIEW_BUTTONS,
     UserList: [
         BTN.view,

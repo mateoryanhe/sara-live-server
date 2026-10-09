@@ -43,7 +43,6 @@ function amountColumns(t: TranslateFn, ns: string): CsvColumn<SettlementLogCsvRo
     {header: t(`${ns}.settlementSalary`), value: row => row.settlementSalary},
     {header: t(`${ns}.settlementFlowCommission`), value: row => row.settlementShareAmount ?? ''},
     {header: t(`${ns}.settlementShareAmountUsd`), value: row => row.settlementShareAmountUsd ?? ''},
-    {header: t(`${ns}.anchorSharePercent`), value: row => row.anchorSharePercent ?? ''},
   ]
 }
 

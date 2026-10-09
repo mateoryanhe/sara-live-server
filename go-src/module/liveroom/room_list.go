@@ -314,12 +314,16 @@ func filterRoomsByBlocked(rooms []*liveentity.LiveRoom, userId uint64) []*liveen
 	if userId == 0 || len(rooms) == 0 {
 		return rooms
 	}
+	blockedByAnchors := livefollowdao.GetBlockedByAnchorIDSet(userId)
 	filtered := make([]*liveentity.LiveRoom, 0, len(rooms))
 	for _, room := range rooms {
 		if room == nil {
 			continue
 		}
 		if livefollowdao.IsBlocked(userId, room.ID) {
+			continue
+		}
+		if _, hidden := blockedByAnchors[room.ID]; hidden {
 			continue
 		}
 		filtered = append(filtered, room)

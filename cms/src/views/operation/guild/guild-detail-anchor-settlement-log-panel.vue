@@ -115,9 +115,6 @@
       <el-table-column :label="t('pages.anchorIncomeSettlementLogList.effectiveLiveDays')" min-width="110">
         <template #default="{ row }">{{ formatEffectiveLiveDays(row.effectiveLiveDays) }}</template>
       </el-table-column>
-      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.anchorSharePercent')" min-width="120">
-        <template #default="{ row }">{{ formatSharePercent(row.anchorSharePercent) }}</template>
-      </el-table-column>
     </el-table>
 
     <el-empty v-if="!loading && tableData.length === 0" :description="t('pages.guildList.noAnchorSettlementLogData')"/>

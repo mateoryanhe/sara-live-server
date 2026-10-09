@@ -28,6 +28,7 @@ func Block(ctx context.Context, req *livefollowdto.BlockReq) (*livefollowdto.Blo
 	}
 
 	if livefollowdao.IsBlocked(userId, req.TargetId) {
+		livefollowdao.AddBlockedByAnchorToViewerCache(userId, req.TargetId)
 		return &livefollowdto.BlockRes{
 			Success: true,
 			Blocked: true,
@@ -39,11 +40,13 @@ func Block(ctx context.Context, req *livefollowdto.BlockReq) (*livefollowdto.Blo
 		row := entity.NewLiveFollowWithStatus(userId, req.TargetId, entity.LiveFollowStatusBlock)
 		livefollowdao.AddFollowToCache(row)
 		livefollowdao.PrependBlockedToListCache(row, target)
+		livefollowdao.AddBlockedByAnchorToViewerCache(userId, req.TargetId)
 	} else {
 		wasFollowing := existing.Status == entity.LiveFollowStatusFollow
 		existing.SetStatus(entity.LiveFollowStatusBlock)
 		livefollowdao.AddFollowToCache(existing)
 		livefollowdao.PrependBlockedToListCache(existing, target)
+		livefollowdao.AddBlockedByAnchorToViewerCache(userId, req.TargetId)
 		if wasFollowing {
 			userinfodao.DecFollowCount(userId, req.TargetId)
 			livefollowdao.RemoveFollowingFromListCache(userId, req.TargetId)
@@ -72,6 +75,8 @@ func Unblock(ctx context.Context, req *livefollowdto.UnblockReq) (*livefollowdto
 		existing.SetStatus(entity.LiveFollowStatusUnfollow)
 		livefollowdao.AddFollowToCache(existing)
 		livefollowdao.RemoveBlockedFromListCache(userId, req.TargetId)
+		livefollowdao.RemoveBlockedByAnchorFromViewerCache(userId, req.TargetId)
+		ClearViewerKickBanInRoom(userId, req.TargetId)
 	}
 
 	return &livefollowdto.UnblockRes{

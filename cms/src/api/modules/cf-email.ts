@@ -1,5 +1,11 @@
 import request from '../request'
-import type {GetCfEmailCfgRes, SaveCfEmailCfgReq, SaveCfEmailCfgRes} from '@/types/api'
+import type {
+    GetCfEmailCfgRes,
+    SaveCfEmailCfgReq,
+    SaveCfEmailCfgRes,
+    SendCfEmailTestReq,
+    SendCfEmailTestRes,
+} from '@/types/api'
 
 export const cfEmailApi = {
     getCfEmailCfg: () => {
@@ -8,6 +14,10 @@ export const cfEmailApi = {
 
     saveCfEmailCfg: (data: SaveCfEmailCfgReq) => {
         return request.post<SaveCfEmailCfgRes>('/cfEmail/saveCfEmailCfg', data)
+    },
+
+    sendCfEmailTest: (data: SendCfEmailTestReq) => {
+        return request.post<SendCfEmailTestRes>('/cfEmail/sendCfEmailTest', data)
     },
 }
 

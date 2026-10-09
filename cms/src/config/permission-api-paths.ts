@@ -593,6 +593,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     CfEmailCfgManagement: '/cfEmail/getCfEmailCfg',
     'CfEmailCfgManagement:view': '/cfEmail/getCfEmailCfg',
     'CfEmailCfgManagement:save': '/cfEmail/saveCfEmailCfg',
+    'CfEmailCfgManagement:sendTest': '/cfEmail/sendCfEmailTest',
 
     DbBackupCfgManagement: '/dbBackup/getDbBackupCfg',
     'DbBackupCfgManagement:view': '/dbBackup/getDbBackupCfg',

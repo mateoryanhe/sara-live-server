@@ -8,6 +8,7 @@ import (
 	"xr-game-server/constants/cmd"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/push"
+	"xr-game-server/dao/livefollowdao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dto/liveroomdto"
 	"xr-game-server/entity/live"
@@ -19,17 +20,60 @@ func kickAudience(anchorId, userId uint64) {
 	pushKickAudience(anchorId, userId, true)
 }
 
+// anchorBlockedLiveViewer 主播是否已拉黑进入其直播间的用户(不含主播本人,不区分 userType)
+func anchorBlockedLiveViewer(anchorId, viewerId uint64) bool {
+	if anchorId == 0 || viewerId == 0 || anchorId == viewerId {
+		return false
+	}
+	return livefollowdao.IsBlocked(anchorId, viewerId)
+}
+
+// kickViewerBlockedByAnchor 因拉黑踢出观众:写入 kick_time 并推送 cmd=18(banSeconds=100年,与手动踢人同一套 App 逻辑)
+func kickViewerBlockedByAnchor(anchorId, viewerId uint64) {
+	if anchorId == 0 || viewerId == 0 || anchorId == viewerId {
+		return
+	}
+	pushKickAudienceWithBan(anchorId, viewerId, true, entity.LiveRoomBlockKickBanDuration)
+}
+
+// TryKickBlockedViewerFromAnchorLiveRoom 主播正在直播且已拉黑某用户时,将其踢出直播间
+func TryKickBlockedViewerFromAnchorLiveRoom(anchorId, viewerId uint64) {
+	if !anchorBlockedLiveViewer(anchorId, viewerId) {
+		return
+	}
+	room := liveroomdao.GetRoomById(anchorId)
+	if room == nil || room.LiveRecordId == 0 {
+		return
+	}
+	kickViewerBlockedByAnchor(anchorId, viewerId)
+}
+
 // notifyKickBannedAudience 封禁期内尝试进房:推送踢出通知并移出在线列表,但不刷新封禁时间
 func notifyKickBannedAudience(anchorId, userId uint64) {
 	pushKickAudience(anchorId, userId, false)
 }
 
-func kickBanStatus(online *entity.LiveRoomOnline) (kickBanned bool, kickTime, expireAt, remain int64) {
-	if online == nil || !online.IsKickBanned() || online.KickTime == nil {
+func kickBanDurationForOnline(anchorId, userId uint64) time.Duration {
+	if anchorId != 0 && userId != 0 && livefollowdao.IsBlocked(anchorId, userId) {
+		return entity.LiveRoomBlockKickBanDuration
+	}
+	return entity.LiveRoomKickBanDuration
+}
+
+func isOnlineKickBanned(anchorId, userId uint64, online *entity.LiveRoomOnline) bool {
+	if online == nil || online.KickTime == nil {
+		return false
+	}
+	return time.Now().Before(online.KickTime.Add(kickBanDurationForOnline(anchorId, userId)))
+}
+
+func kickBanStatus(anchorId, userId uint64, online *entity.LiveRoomOnline) (kickBanned bool, kickTime, expireAt, remain int64) {
+	if online == nil || online.KickTime == nil || !isOnlineKickBanned(anchorId, userId, online) {
 		return false, 0, 0, 0
 	}
+	banDur := kickBanDurationForOnline(anchorId, userId)
 	kickTime = online.KickTime.Unix()
-	expireAt = online.KickTime.Add(entity.LiveRoomKickBanDuration).Unix()
+	expireAt = online.KickTime.Add(banDur).Unix()
 	remain = expireAt - time.Now().Unix()
 	if remain < 0 {
 		remain = 0
@@ -38,10 +82,19 @@ func kickBanStatus(online *entity.LiveRoomOnline) (kickBanned bool, kickTime, ex
 }
 
 func pushKickAudience(anchorId, userId uint64, refreshKickTime bool) {
+	pushKickAudienceWithBan(anchorId, userId, refreshKickTime, entity.LiveRoomKickBanDuration)
+}
+
+func pushKickAudienceWithBan(anchorId, userId uint64, refreshKickTime bool, banDuration time.Duration) {
 	onlineId := entity.BuildLiveRoomOnlineId(userId, anchorId)
 	online := liveroomdao.GetOnlineById(onlineId, userId, anchorId)
 	if online == nil {
 		return
+	}
+
+	effectiveBan := banDuration
+	if !refreshKickTime {
+		effectiveBan = kickBanDurationForOnline(anchorId, userId)
 	}
 
 	var kickAt time.Time
@@ -50,12 +103,12 @@ func pushKickAudience(anchorId, userId uint64, refreshKickTime bool) {
 		kickAt = time.Now()
 		online.SetKickTime(&kickAt)
 		liveroomdao.PublishLiveRoomOnline(online)
-		banSeconds = int64(entity.LiveRoomKickBanDuration / time.Second)
-	} else if online.KickTime == nil || !online.IsKickBanned() {
+		banSeconds = int64(effectiveBan / time.Second)
+	} else if !isOnlineKickBanned(anchorId, userId, online) {
 		return
 	} else {
 		kickAt = *online.KickTime
-		remain := int64(time.Until(kickAt.Add(entity.LiveRoomKickBanDuration)).Seconds())
+		remain := int64(time.Until(kickAt.Add(effectiveBan)).Seconds())
 		if remain < 0 {
 			remain = 0
 		}
@@ -70,6 +123,24 @@ func pushKickAudience(anchorId, userId uint64, refreshKickTime bool) {
 		UserId:     strconv.FormatUint(userId, 10),
 		KickTime:   kickAt.UnixMilli(),
 		BanSeconds: banSeconds,
+	})
+}
+
+// ClearViewerKickBanInRoom 清除观众在该直播间的 kick_time 并推送 cmd=19(解拉黑时调用)
+func ClearViewerKickBanInRoom(anchorId, viewerId uint64) {
+	if anchorId == 0 || viewerId == 0 {
+		return
+	}
+	onlineId := entity.BuildLiveRoomOnlineId(viewerId, anchorId)
+	online := liveroomdao.GetOnlineById(onlineId, viewerId, anchorId)
+	if online == nil || online.KickTime == nil {
+		return
+	}
+	online.SetKickTime(nil)
+	liveroomdao.PublishLiveRoomOnline(online)
+	push.Data(viewerId, cmd.LiveRoomAudienceKickCancel, &liveroomdto.AudienceKickCancelPushItem{
+		RoomId: strconv.FormatUint(anchorId, 10),
+		UserId: strconv.FormatUint(viewerId, 10),
 	})
 }
 

@@ -26,21 +26,33 @@ func GetCfEmailCfg(_ context.Context, _ *cfemaildto.GetCfEmailCfgReq) (*cfemaild
 }
 
 func SaveCfEmailCfg(_ context.Context, req *cfemaildto.SaveCfEmailCfgReq) (*cfemaildto.SaveCfEmailCfgRes, error) {
-	region := strings.TrimSpace(req.Region)
-	accessKeyId := strings.TrimSpace(req.AccessKeyId)
-	secretAccessKey := strings.TrimSpace(req.SecretAccessKey)
+	smtpHost := strings.TrimSpace(req.SmtpHost)
+	smtpUsername := normalizeSmtpCredential(req.SmtpUsername)
+	smtpPassword := normalizeSmtpCredential(req.SmtpPassword)
 	fromEmail := strings.TrimSpace(req.FromEmail)
-	if region == "" || accessKeyId == "" || secretAccessKey == "" || fromEmail == "" {
+	smtpPort := req.SmtpPort
+	if smtpPort <= 0 {
+		smtpPort = 587
+	}
+	if smtpHost == "" || smtpUsername == "" || fromEmail == "" {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 
 	existing := cfgdao.GetCfEmailCfgCached()
+	if smtpPassword == "" {
+		if existing != nil && strings.TrimSpace(existing.SmtpPassword) != "" {
+			smtpPassword = existing.SmtpPassword
+		} else {
+			return nil, errercode.CreateCode(errercode.InvalidParam)
+		}
+	}
 	row := &sysentity.CfEmailCfg{
-		Enabled:         req.Enabled,
-		Region:          region,
-		AccessKeyId:     accessKeyId,
-		SecretAccessKey: secretAccessKey,
-		FromEmail:       fromEmail,
+		Enabled:      req.Enabled,
+		SmtpHost:     smtpHost,
+		SmtpPort:     smtpPort,
+		SmtpUsername: smtpUsername,
+		SmtpPassword: smtpPassword,
+		FromEmail:    fromEmail,
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -70,15 +82,21 @@ func toCfEmailCfgItem(cfg *sysentity.CfEmailCfg) *cfemaildto.CfEmailCfgItem {
 	if cfg == nil {
 		return nil
 	}
+	port := cfg.SmtpPort
+	if port <= 0 {
+		port = 587
+	}
 	return &cfemaildto.CfEmailCfgItem{
-		ID:              strconv.FormatUint(cfg.ID, 10),
-		Enabled:         cfg.Enabled,
-		Region:          cfg.Region,
-		AccessKeyId:     cfg.AccessKeyId,
-		SecretAccessKey: cfg.SecretAccessKey,
-		FromEmail:       cfg.FromEmail,
-		CreatedAt:       formatCfEmailTime(cfg.CreatedAt),
-		UpdatedAt:       formatCfEmailTime(cfg.UpdatedAt),
+		ID:                     strconv.FormatUint(cfg.ID, 10),
+		Enabled:                cfg.Enabled,
+		SmtpHost:               cfg.SmtpHost,
+		SmtpPort:               port,
+		SmtpUsername:           cfg.SmtpUsername,
+		SmtpPassword:           "",
+		SmtpPasswordConfigured: strings.TrimSpace(cfg.SmtpPassword) != "",
+		FromEmail:              cfg.FromEmail,
+		CreatedAt:              formatCfEmailTime(cfg.CreatedAt),
+		UpdatedAt:              formatCfEmailTime(cfg.UpdatedAt),
 	}
 }
 
@@ -87,4 +105,15 @@ func formatCfEmailTime(t time.Time) string {
 		return ""
 	}
 	return t.Format("2006-01-02 15:04:05")
+}
+
+func SendCfEmailTest(ctx context.Context, req *cfemaildto.SendCfEmailTestReq) (*cfemaildto.SendCfEmailTestRes, error) {
+	lang := strings.TrimSpace(req.Lang)
+	if lang == "" {
+		lang = "en"
+	}
+	if err := SendEmailVerifyCodeForTest(ctx, req.TestEmail, lang); err != nil {
+		return nil, err
+	}
+	return &cfemaildto.SendCfEmailTestRes{Success: true}, nil
 }

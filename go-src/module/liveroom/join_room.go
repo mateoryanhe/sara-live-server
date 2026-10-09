@@ -33,17 +33,17 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 	now := time.Now()
 	onlineId := entity.BuildLiveRoomOnlineId(userId, req.RoomId)
 	existing := liveroomdao.GetOnlineById(onlineId, userId, room.ID)
-	if existing != nil && existing.IsKickBanned() {
+	if existing != nil && isOnlineKickBanned(room.ID, userId, existing) {
 		notifyKickBannedAudience(room.ID, userId)
 		res := &liveroomdto.JoinRoomRes{
 			OnlineId:    onlineId,
 			OnlineCount: getLenForRoom(room.ID),
 			SysTime:     now.UnixMilli(),
 		}
-		res.KickBanned, res.KickTime, res.KickBanExpireAt, res.KickRemainSeconds = kickBanStatus(existing)
+		res.KickBanned, res.KickTime, res.KickBanExpireAt, res.KickRemainSeconds = kickBanStatus(room.ID, userId, existing)
 		return res, nil
 	}
-	if existing != nil && existing.KickTime != nil {
+	if existing != nil && existing.KickTime != nil && !isOnlineKickBanned(room.ID, userId, existing) {
 		existing.SetKickTime(nil)
 		liveroomdao.PublishLiveRoomOnline(existing)
 	}
@@ -56,6 +56,15 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 	addToOnline(userId, room.ID)
 	markContributionRankDataChanged(room.ID)
 	refreshRoomAudienceCaches(room.ID)
+
+	if userId != room.ID && anchorBlockedLiveViewer(room.ID, userId) {
+		kickViewerBlockedByAnchor(room.ID, userId)
+		return &liveroomdto.JoinRoomRes{
+			OnlineId:    onlineId,
+			OnlineCount: getLenForRoom(room.ID),
+			SysTime:     now.UnixMilli(),
+		}, nil
+	}
 
 	if userId != room.ID && !viewerCanSeeSeniorAnchorRoom(userId, room) {
 		kickAudience(room.ID, userId)

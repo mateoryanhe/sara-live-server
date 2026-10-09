@@ -38,7 +38,7 @@ func GetAudienceRestrictStatus(ctx context.Context, req *liveroomdto.GetAudience
 	}
 
 	res.Muted = online.Muted
-	res.KickBanned, res.KickTime, res.KickBanExpireAt, res.KickRemainSeconds = kickBanStatus(online)
+	res.KickBanned, res.KickTime, res.KickBanExpireAt, res.KickRemainSeconds = kickBanStatus(req.RoomId, req.UserId, online)
 	return res, nil
 }
 

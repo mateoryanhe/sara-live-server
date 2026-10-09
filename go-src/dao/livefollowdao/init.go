@@ -11,4 +11,5 @@ func InitLiveFollowDao() {
 	followingListCacheMgr = cache.NewListCache[*entity.LiveFollow]()
 	followerListCacheMgr = cache.NewListCache[*RelationUserListRow]()
 	blockListCacheMgr = cache.NewListCache[*RelationUserListRow]()
+	blockedByAnchorListCacheMgr = cache.NewListCache[uint64]()
 }

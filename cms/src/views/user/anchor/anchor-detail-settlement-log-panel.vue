@@ -43,9 +43,6 @@
       <el-table-column :label="t('pages.anchorIncomeSettlementLogList.settlementShareAmountUsd')" align="right" min-width="130">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.settlementShareAmountUsd) }}</span></template>
       </el-table-column>
-      <el-table-column :label="t('pages.anchorIncomeSettlementLogList.anchorSharePercent')" min-width="120">
-        <template #default="{ row }">{{ formatSharePercent(row.anchorSharePercent) }}</template>
-      </el-table-column>
       <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalIncome')" align="right" min-width="120">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
       </el-table-column>

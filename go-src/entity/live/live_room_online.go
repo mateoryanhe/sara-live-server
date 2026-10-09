@@ -26,6 +26,9 @@ const (
 
 const LiveRoomKickBanDuration = 30 * time.Minute
 
+// LiveRoomBlockKickBanDuration 主播拉黑踢出时的进房限制(与 App 踢人推送 banSeconds 对齐)
+const LiveRoomBlockKickBanDuration = 100 * 365 * 24 * time.Hour
+
 // 在线状态
 const (
 	LiveRoomOnlineStatusOffline uint8 = 0 // 已离开
