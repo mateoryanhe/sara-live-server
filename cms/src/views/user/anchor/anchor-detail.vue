@@ -179,6 +179,10 @@
             <el-empty v-else :description="t('pages.anchorList.noLiveRoomData')"/>
           </el-tab-pane>
 
+          <el-tab-pane :label="t('pages.anchorList.tabOneToOneRoom')" lazy name="oneToOneRoom">
+            <OneToOnePanel :one-to-one-room="detail.oneToOneRoom"/>
+          </el-tab-pane>
+
           <el-tab-pane :label="t('pages.anchorList.tabIncomeUnsettled')" lazy name="incomeUnsettled">
             <IncomePanel
                 :data="detail.incomeUnsettled"
@@ -271,6 +275,7 @@ import DailyLivePanel from './anchor-detail-daily-live-panel.vue'
 import LiveRecordPanel from './anchor-detail-live-record-panel.vue'
 import SettlementLogPanel from './anchor-detail-settlement-log-panel.vue'
 import ShortVideoPanel from './anchor-detail-short-video-panel.vue'
+import OneToOnePanel from './anchor-detail-one-to-one-panel.vue'
 import type {AnchorDetail} from '@/types/api'
 import {formatAmount} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
@@ -298,6 +303,7 @@ const USER_TYPE_SENIOR_ANCHOR = 7
 const ANCHOR_DETAIL_TAB_NAMES = new Set([
   'basic',
   'liveRoom',
+  'oneToOneRoom',
   'incomeUnsettled',
   'incomeSettled',
   'incomeTotal',

@@ -117,6 +117,7 @@ const menu = {
   GooglePlayCfgManagement: 'Google Play',
   FirebaseCfgManagement: 'Firebase登录',
   MetaPixelCfgManagement: 'Meta Pixel 上报',
+  FirebaseAnalyticsCfgManagement: 'Firebase Analytics 埋点',
   HaiPayCfgManagement: 'HaiPay支付',
   CfEmailCfgManagement: 'Amazon SES邮件',
   DbBackupCfgManagement: '数据库备份',

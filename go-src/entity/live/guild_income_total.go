@@ -17,8 +17,10 @@ type GuildIncomeTotal struct {
 	LiveRoomIncomeAmounts
 	SettlementSalary         float64 `gorm:"type:decimal(16,4);default:0;comment:结算薪资" json:"settlementSalary"`
 	SettlementShareAmount    float64 `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额" json:"settlementShareAmount"`
-	SettlementShareAmountUsd float64 `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额(USD)" json:"settlementShareAmountUsd"`
-	SettlementReceivableUsd  float64 `gorm:"type:decimal(16,4);default:0;comment:结算可收金额(USD)=流水分佣+开播薪资" json:"settlementReceivableUsd"`
+	SettlementShareAmountUsd      float64 `gorm:"type:decimal(16,4);default:0;comment:结算分佣金额(USD)" json:"settlementShareAmountUsd"`
+	SettlementReceivableUsd       float64 `gorm:"type:decimal(16,4);default:0;comment:累计可收USD合计(工会+主播，代收口径)" json:"settlementReceivableUsd"`
+	SettlementGuildReceivableUsd  float64 `gorm:"type:decimal(16,4);default:0;comment:累计工会应得USD" json:"settlementGuildReceivableUsd"`
+	SettlementAnchorReceivableUsd float64 `gorm:"type:decimal(16,4);default:0;comment:累计主播应得USD(当前多由工会代收)" json:"settlementAnchorReceivableUsd"`
 }
 
 func NewGuildIncomeTotal(guildId uint64) *GuildIncomeTotal {
@@ -73,12 +75,30 @@ func (r *GuildIncomeTotal) AddSettlementShareAmountUsd(v float64) {
 	addIncomeAmount(TbGuildIncomeTotal, LiveRoomIncomeSettlementShareAmountUsd, r.ID, &r.SettlementShareAmountUsd, v, false, &r.UpdatedAt)
 }
 
-// AddSettlementReceivableUsd 累加结算可收金额(USD)
+// AddSettlementReceivableUsd 累加累计可收 USD 合计(内部同步工会+主播分项)
 func (r *GuildIncomeTotal) AddSettlementReceivableUsd(v float64) {
 	if r == nil || v == 0 {
 		return
 	}
 	addIncomeAmount(TbGuildIncomeTotal, LiveRoomIncomeSettlementReceivableUsd, r.ID, &r.SettlementReceivableUsd, v, false, &r.UpdatedAt)
+}
+
+// AddSettlementGuildReceivableUsd 累加工会自身应得 USD，并同步合计
+func (r *GuildIncomeTotal) AddSettlementGuildReceivableUsd(v float64) {
+	if r == nil || v == 0 {
+		return
+	}
+	addIncomeAmount(TbGuildIncomeTotal, LiveRoomIncomeSettlementGuildReceivableUsd, r.ID, &r.SettlementGuildReceivableUsd, v, false, &r.UpdatedAt)
+	r.AddSettlementReceivableUsd(v)
+}
+
+// AddSettlementAnchorReceivableUsd 累加名下主播应得 USD(代收预留)，并同步合计
+func (r *GuildIncomeTotal) AddSettlementAnchorReceivableUsd(v float64) {
+	if r == nil || v == 0 {
+		return
+	}
+	addIncomeAmount(TbGuildIncomeTotal, LiveRoomIncomeSettlementAnchorReceivableUsd, r.ID, &r.SettlementAnchorReceivableUsd, v, false, &r.UpdatedAt)
+	r.AddSettlementReceivableUsd(v)
 }
 
 func initGuildIncomeTotal() {
@@ -87,5 +107,7 @@ func initGuildIncomeTotal() {
 	syndb.RegQuick(TbGuildIncomeTotal, LiveRoomIncomeSettlementShareAmount)
 	syndb.RegQuick(TbGuildIncomeTotal, LiveRoomIncomeSettlementShareAmountUsd)
 	syndb.RegQuick(TbGuildIncomeTotal, LiveRoomIncomeSettlementReceivableUsd)
+	syndb.RegQuick(TbGuildIncomeTotal, LiveRoomIncomeSettlementGuildReceivableUsd)
+	syndb.RegQuick(TbGuildIncomeTotal, LiveRoomIncomeSettlementAnchorReceivableUsd)
 	migrate.AutoMigrate(&GuildIncomeTotal{})
 }

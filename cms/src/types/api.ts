@@ -412,6 +412,8 @@ export interface LiveRoomIncomeSettledDetail extends LiveRoomIncomeAmounts {
     settlementShareAmount?: number
     settlementShareAmountUsd?: number
     settlementReceivableUsd?: number
+    settlementGuildReceivableUsd?: number
+    settlementAnchorReceivableUsd?: number
     updatedAt?: string | null
 }
 
@@ -420,6 +422,8 @@ export interface LiveRoomIncomeTotalDetail extends LiveRoomIncomeAmounts {
     settlementShareAmount?: number
     settlementShareAmountUsd?: number
     settlementReceivableUsd?: number
+    settlementGuildReceivableUsd?: number
+    settlementAnchorReceivableUsd?: number
     updatedAt?: string | null
 }
 
@@ -434,6 +438,7 @@ export interface LiveRoomIncomeArchiveItem extends LiveRoomIncomeAmounts {
 export interface AnchorDetail {
     anchor?: AnchorListItem
     liveRoom?: AnchorLiveRoomDetail
+    oneToOneRoom?: OneToOneRoomItem | null
     incomeUnsettled?: LiveRoomIncomeUnsettledDetail | null
     incomeSettled?: LiveRoomIncomeSettledDetail | null
     incomeTotal?: LiveRoomIncomeTotalDetail | null
@@ -2120,6 +2125,35 @@ export interface SaveMetaPixelCfgReq {
 }
 
 export interface SaveMetaPixelCfgRes {
+    success: boolean
+    id: string
+}
+
+export interface FirebaseAnalyticsCfg {
+    id: string
+    enabled: number
+    projectId: string
+    clientConfigJson: string
+    serviceAccountJson: string
+    measurementApiSecret: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetFirebaseAnalyticsCfgRes {
+    cfg: FirebaseAnalyticsCfg | null
+}
+
+export interface SaveFirebaseAnalyticsCfgReq {
+    id?: number
+    enabled: number
+    projectId: string
+    clientConfigJson: string
+    serviceAccountJson: string
+    measurementApiSecret: string
+}
+
+export interface SaveFirebaseAnalyticsCfgRes {
     success: boolean
     id: string
 }

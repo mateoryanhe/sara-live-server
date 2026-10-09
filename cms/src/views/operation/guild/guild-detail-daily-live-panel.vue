@@ -53,6 +53,9 @@
       <el-table-column :label="t('pages.anchorList.videoCallIncome')" align="right" min-width="130">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
       </el-table-column>
+      <el-table-column :label="t('pages.anchorList.gameTotalGoldFlow')" align="right" min-width="140">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameIncome) }}</span></template>
+      </el-table-column>
       <el-table-column :label="t('pages.anchorList.dailySettled')" min-width="100">
         <template #default="{ row }">
           <el-tag :type="row.settled ? 'success' : 'warning'">

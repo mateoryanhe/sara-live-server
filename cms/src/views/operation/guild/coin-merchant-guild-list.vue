@@ -84,9 +84,6 @@
                 </el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item v-if="canViewDetail" command="viewDetail">
-                      {{ t('pages.guildList.viewDetail') }}
-                    </el-dropdown-item>
                     <el-dropdown-item v-if="can('edit')" command="edit">
                       {{ t('common.edit') }}
                     </el-dropdown-item>
@@ -259,7 +256,6 @@ interface ImportGuildForm {
 const {t} = useI18n()
 const router = useRouter()
 const {can} = usePagePermission('CoinMerchantGuildListManagement')
-const canViewDetail = computed(() => can('viewDetail'))
 const GUILD_ROW_ACTION_KEYS = [
   'edit',
   'transferInfo',
@@ -269,7 +265,7 @@ const GUILD_ROW_ACTION_KEYS = [
   'batchSetSeniorAnchor',
   'offShelf',
 ] as const
-const hasRowActions = computed(() => canViewDetail.value || GUILD_ROW_ACTION_KEYS.some(key => can(key)))
+const hasRowActions = computed(() => GUILD_ROW_ACTION_KEYS.some(key => can(key)))
 
 const loading = ref(false)
 const importing = ref(false)
@@ -467,9 +463,6 @@ const resetSearch = () => {
 
 const handleRowCommand = (row: Guild, command: string) => {
   switch (command) {
-    case 'viewDetail':
-      openDetail(row)
-      break
     case 'edit':
       handleEdit(row)
       break
@@ -731,17 +724,6 @@ const openTransferInfoPage = (row: Guild) => {
     name: 'GuildTransferInfoEdit',
     params: {guildId: row.id},
     query: {guildName: row.name},
-  })
-}
-
-const openDetail = (row: Guild) => {
-  router.push({
-    name: 'CoinMerchantGuildDetail',
-    query: {
-      id: row.id,
-      name: row.name,
-      sharePercent: String(row.sharePercent ?? ''),
-    },
   })
 }
 

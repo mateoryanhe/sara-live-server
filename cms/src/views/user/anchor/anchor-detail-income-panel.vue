@@ -16,6 +16,29 @@
       </el-descriptions>
     </section>
 
+    <section v-if="hasGuildSettlementSummary" class="detail-section">
+      <div class="detail-section-title">{{ t('pages.guildList.settlementSummarySection') }}</div>
+      <el-descriptions :column="2" :label-width="detailLabelWidth" border class="detail-descriptions">
+        <el-descriptions-item v-if="showGuildSettledSalary" :label="t('pages.guildList.settledSalaryTotal')">
+          <span class="money-amount">{{ formatWalletBalance(guildSettlementSalary) }}</span>
+        </el-descriptions-item>
+        <el-descriptions-item v-if="showGuildSettledShare" :label="t('pages.guildList.settledGuildShareDiamond')">
+          <span class="money-amount">{{ formatWalletBalance(guildSettlementShare) }}</span>
+        </el-descriptions-item>
+        <template v-if="guildSettledView">
+          <el-descriptions-item :label="t('pages.guildList.settledGuildReceivableUsdTotal')">
+            <span class="money-amount">{{ formatWalletBalance(guildSettlementGuildReceivableUsd) }} USD</span>
+          </el-descriptions-item>
+          <el-descriptions-item :label="t('pages.guildList.settledAnchorReceivableUsdTotal')">
+            <span class="money-amount">{{ formatWalletBalance(guildSettlementAnchorReceivableUsd) }} USD</span>
+          </el-descriptions-item>
+          <el-descriptions-item :label="t('pages.guildList.settledReceivableUsdTotal')">
+            <span class="money-amount">{{ formatWalletBalance(guildSettlementReceivableUsd) }} USD</span>
+          </el-descriptions-item>
+        </template>
+      </el-descriptions>
+    </section>
+
     <section v-if="forGuild" class="detail-section">
       <div class="detail-section-title">{{ t('pages.guildList.gameFlowSection') }}</div>
       <el-descriptions :column="2" :label-width="detailLabelWidth" border class="detail-descriptions">
@@ -56,21 +79,6 @@
           <span class="money-amount">{{ formatWalletBalance(settlementReceivableUsd) }}</span>
         </el-descriptions-item>
         <el-descriptions-item v-else class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
-      </el-descriptions>
-    </section>
-
-    <section v-if="hasGuildSettlementSummary" class="detail-section">
-      <div class="detail-section-title">{{ t('pages.guildList.settlementSummarySection') }}</div>
-      <el-descriptions :column="2" :label-width="detailLabelWidth" border class="detail-descriptions">
-        <el-descriptions-item v-if="showGuildSettledSalary" :label="t('pages.guildList.settledSalaryTotal')">
-          <span class="money-amount">{{ formatWalletBalance(guildSettlementSalary) }}</span>
-        </el-descriptions-item>
-        <el-descriptions-item v-if="showGuildSettledShare" :label="t('pages.guildList.settledGuildShareDiamond')">
-          <span class="money-amount">{{ formatWalletBalance(guildSettlementShare) }}</span>
-        </el-descriptions-item>
-        <el-descriptions-item v-if="showGuildSettledReceivable" :label="t('pages.guildList.settledReceivableUsdTotal')">
-          <span class="money-amount">{{ formatWalletBalance(guildSettlementReceivableUsd) }} USD</span>
-        </el-descriptions-item>
       </el-descriptions>
     </section>
 
@@ -120,6 +128,8 @@ const props = defineProps<{
   settlementShareAmount?: number
   settlementShareAmountUsd?: number | null
   /** 工会详情已结算/累计 Tab 展示 */
+  settlementGuildReceivableUsd?: number | null
+  settlementAnchorReceivableUsd?: number | null
   settlementReceivableUsd?: number | null
   /** 工会详情：无有效开播统计，游戏流水独立分区 */
   forGuild?: boolean
@@ -140,13 +150,12 @@ const effectiveLiveDaysDisplay = computed(() => {
 const guildSettledView = computed(() => forGuild.value && props.guildSettledView === true)
 const guildSettlementSalary = computed(() => Number(props.settlementSalary ?? 0))
 const guildSettlementShare = computed(() => Number(props.settlementShareAmount ?? 0))
+const guildSettlementGuildReceivableUsd = computed(() => Number(props.settlementGuildReceivableUsd ?? 0))
+const guildSettlementAnchorReceivableUsd = computed(() => Number(props.settlementAnchorReceivableUsd ?? 0))
 const guildSettlementReceivableUsd = computed(() => Number(props.settlementReceivableUsd ?? 0))
 const showGuildSettledSalary = computed(() => guildSettlementSalary.value !== 0)
 const showGuildSettledShare = computed(() => guildSettlementShare.value !== 0)
-const showGuildSettledReceivable = computed(() => guildSettlementReceivableUsd.value !== 0)
-const hasGuildSettlementSummary = computed(() => guildSettledView.value && (
-  showGuildSettledSalary.value || showGuildSettledShare.value || showGuildSettledReceivable.value
-))
+const hasGuildSettlementSummary = computed(() => guildSettledView.value)
 const hasAnchorSettlementSummary = computed(() => !forGuild.value && (
   props.settlementSalary != null
   || props.settlementShareAmount != null

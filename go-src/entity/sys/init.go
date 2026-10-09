@@ -11,6 +11,7 @@ func Init() {
 	initCfEmailCfg()
 	initFirebaseCfg()
 	initMetaPixelCfg()
+	initFirebaseAnalyticsCfg()
 	initDbBackupCfg()
 	initStaticCacheRule()
 	initDomainSiteMapping()

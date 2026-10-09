@@ -117,7 +117,6 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'CoinMerchantGuildListManagement:edit': '/guild/updateGuild',
     'CoinMerchantGuildListManagement:offShelf': '/guild/deleteGuild',
     'CoinMerchantGuildListManagement:viewMembers': '/account/getAnchorList',
-    'CoinMerchantGuildListManagement:viewDetail': '/guild/getGuildDetail',
     'CoinMerchantGuildListManagement:viewUserDetail': '/account/getUserDetail',
     'CoinMerchantGuildListManagement:viewAnchorSettlementLogs': '/guild/cmsGuildAnchorIncomeSettlementLogList',
     'CoinMerchantGuildListManagement:ban': '/account/banAnchor',
@@ -583,6 +582,9 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     MetaPixelCfgManagement: '/metaPixel/getMetaPixelCfg',
     'MetaPixelCfgManagement:view': '/metaPixel/getMetaPixelCfg',
     'MetaPixelCfgManagement:save': '/metaPixel/saveMetaPixelCfg',
+    FirebaseAnalyticsCfgManagement: '/firebaseAnalytics/getFirebaseAnalyticsCfg',
+    'FirebaseAnalyticsCfgManagement:view': '/firebaseAnalytics/getFirebaseAnalyticsCfg',
+    'FirebaseAnalyticsCfgManagement:save': '/firebaseAnalytics/saveFirebaseAnalyticsCfg',
 
     HaiPayCfgManagement: '/haipay/getHaiPayCfg',
     'HaiPayCfgManagement:view': '/haipay/getHaiPayCfg',

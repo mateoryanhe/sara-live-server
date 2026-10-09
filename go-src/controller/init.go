@@ -51,6 +51,8 @@ func Init() {
 	initFirebaseCMSController()                      // Firebase登录配置(CMS)
 	initFirebaseAppController()                      // Firebase客户端配置(App,无需鉴权)
 	initMetaPixelCMSController()                     // Meta Pixel Conversions API(CMS)
+	initFirebaseAnalyticsCMSController()             // Firebase Analytics 埋点配置(CMS)
+	initFirebaseAnalyticsAppController()             // Firebase Analytics 客户端配置(App,无需鉴权)
 	initDbBackupCMSController()                      // 数据库备份(CMS)
 	initDataSyncCMSController()                      // 数据同步配置(CMS)
 	initDataSyncReceiveController()                  // 数据同步接收(跨环境)

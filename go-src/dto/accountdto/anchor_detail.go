@@ -38,18 +38,22 @@ type LiveRoomIncomeSettledItem struct {
 	LiveRoomIncomeAmountsItem
 	SettlementSalary         float64    `json:"settlementSalary"`
 	SettlementShareAmount    float64    `json:"settlementShareAmount"`
-	SettlementShareAmountUsd float64    `json:"settlementShareAmountUsd"`
-	SettlementReceivableUsd  float64    `json:"settlementReceivableUsd"`
-	UpdatedAt                *time.Time `json:"updatedAt"`
+	SettlementShareAmountUsd      float64    `json:"settlementShareAmountUsd"`
+	SettlementReceivableUsd       float64    `json:"settlementReceivableUsd"`
+	SettlementGuildReceivableUsd  float64    `json:"settlementGuildReceivableUsd"`
+	SettlementAnchorReceivableUsd float64    `json:"settlementAnchorReceivableUsd"`
+	UpdatedAt                     *time.Time `json:"updatedAt"`
 }
 
 // LiveRoomIncomeTotalItem 生涯累计收益
 type LiveRoomIncomeTotalItem struct {
 	LiveRoomIncomeAmountsItem
-	SettlementSalary         float64    `json:"settlementSalary"`
-	SettlementShareAmount    float64    `json:"settlementShareAmount"`
-	SettlementShareAmountUsd float64    `json:"settlementShareAmountUsd"`
-	SettlementReceivableUsd  float64    `json:"settlementReceivableUsd"`
+	SettlementSalary              float64    `json:"settlementSalary"`
+	SettlementShareAmount         float64    `json:"settlementShareAmount"`
+	SettlementShareAmountUsd      float64    `json:"settlementShareAmountUsd"`
+	SettlementReceivableUsd       float64    `json:"settlementReceivableUsd"`
+	SettlementGuildReceivableUsd  float64    `json:"settlementGuildReceivableUsd"`
+	SettlementAnchorReceivableUsd float64    `json:"settlementAnchorReceivableUsd"`
 	UpdatedAt                *time.Time `json:"updatedAt"`
 }
 
@@ -88,12 +92,26 @@ type LiveRoomIncomeArchiveItem struct {
 	CreatedAt        *time.Time `json:"createdAt"`
 }
 
+// AnchorOneToOneRoomDetailItem CMS主播详情-1v1房间(未开通时为 nil)
+type AnchorOneToOneRoomDetailItem struct {
+	UserId         string     `json:"userId"`
+	Title          string     `json:"title"`
+	Cover          string     `json:"cover"`
+	TagId          string     `json:"tagId"`
+	GuildId        string     `json:"guildId"`
+	LiveRoomStatus uint8      `json:"liveRoomStatus"`
+	Status         uint8      `json:"status"`
+	Billing        float64    `json:"billing"`
+	UpdatedAt      *time.Time `json:"updatedAt"`
+}
+
 // GetAnchorDetailRes CMS主播详情
 type GetAnchorDetailRes struct {
-	Anchor          *AnchorListItem              `json:"anchor"`
-	LiveRoom        *AnchorLiveRoomDetailItem    `json:"liveRoom"`
-	IncomeUnsettled *LiveRoomIncomeUnsettledItem `json:"incomeUnsettled"`
-	IncomeSettled   *LiveRoomIncomeSettledItem   `json:"incomeSettled"`
-	IncomeTotal     *LiveRoomIncomeTotalItem     `json:"incomeTotal"`
-	IncomeArchives  []*LiveRoomIncomeArchiveItem `json:"incomeArchives"`
+	Anchor          *AnchorListItem                 `json:"anchor"`
+	LiveRoom        *AnchorLiveRoomDetailItem       `json:"liveRoom"`
+	OneToOneRoom    *AnchorOneToOneRoomDetailItem   `json:"oneToOneRoom"`
+	IncomeUnsettled *LiveRoomIncomeUnsettledItem    `json:"incomeUnsettled"`
+	IncomeSettled   *LiveRoomIncomeSettledItem      `json:"incomeSettled"`
+	IncomeTotal     *LiveRoomIncomeTotalItem        `json:"incomeTotal"`
+	IncomeArchives  []*LiveRoomIncomeArchiveItem    `json:"incomeArchives"`
 }

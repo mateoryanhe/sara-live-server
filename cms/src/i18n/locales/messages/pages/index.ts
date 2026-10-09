@@ -83,6 +83,7 @@ import {privacyPolicyMessages} from './privacy-policy'
 import {googlePlayMessages} from './google-play'
 import {firebaseMessages} from './firebase'
 import {metaPixelMessages} from './meta-pixel'
+import {firebaseAnalyticsMessages} from './firebase-analytics'
 import {haipayMessages} from './haipay'
 import {cfEmailMessages} from './cf-email'
 import {dbBackupMessages} from './db-backup'
@@ -183,6 +184,7 @@ const pageMessageBuilders = [
   ['firebase', firebaseMessages],
   ['haipay', haipayMessages],
   ['metaPixel', metaPixelMessages],
+  ['firebaseAnalytics', firebaseAnalyticsMessages],
   ['cfEmail', cfEmailMessages],
   ['dbBackup', dbBackupMessages],
   ['uploadResource', uploadResourceMessages],

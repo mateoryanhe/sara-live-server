@@ -2,6 +2,7 @@ package liveroom
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"xr-game-server/dao/liveroomdao"
@@ -21,9 +22,14 @@ func QueryAnchorDetail(_ context.Context, req *accountdto.GetAnchorDetailReq) (*
 	if anchor == nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
+	var oneToOneRoom *accountdto.AnchorOneToOneRoomDetailItem
+	if row := liveroomdao.GetOneToOneRoom(room.ID); row != nil {
+		oneToOneRoom = toAnchorOneToOneRoomDetailItem(row)
+	}
 	return &accountdto.GetAnchorDetailRes{
 		Anchor:          anchor,
 		LiveRoom:        buildAnchorLiveRoomDetail(room),
+		OneToOneRoom:    oneToOneRoom,
 		IncomeUnsettled: toIncomeUnsettledItem(liveroomdao.GetLiveRoomIncomeUnsettledForCMS(room.ID)),
 		IncomeSettled:   toIncomeSettledItem(liveroomdao.GetLiveRoomIncomeSettledForCMS(room.ID)),
 		IncomeTotal:     toIncomeTotalItem(liveroomdao.GetLiveRoomIncomeTotalForCMS(room.ID)),
@@ -162,4 +168,31 @@ func toIncomeArchiveItems(rows []*entity.LiveRoomIncomeUnsettledArchive) []*acco
 		list = append(list, item)
 	}
 	return list
+}
+
+func toAnchorOneToOneRoomDetailItem(row *entity.OneToOneRoom) *accountdto.AnchorOneToOneRoomDetailItem {
+	if row == nil || row.ID == 0 {
+		return nil
+	}
+	item := &accountdto.AnchorOneToOneRoomDetailItem{
+		UserId:  strconv.FormatUint(row.ID, 10),
+		Status:  row.Status,
+		Billing: row.Billing,
+		Title:   row.Title,
+	}
+	if row.Cover != "" {
+		item.Cover = upload.GetUrlByName(row.Cover)
+	}
+	if row.TagId > 0 {
+		item.TagId = strconv.FormatUint(row.TagId, 10)
+	}
+	if !row.UpdatedAt.IsZero() {
+		updatedAt := row.UpdatedAt
+		item.UpdatedAt = &updatedAt
+	}
+	if room := liveroomdao.ResolveRoom(row.ID); room != nil {
+		item.GuildId = strconv.FormatUint(room.GuildId, 10)
+		item.LiveRoomStatus = room.Status
+	}
+	return item
 }

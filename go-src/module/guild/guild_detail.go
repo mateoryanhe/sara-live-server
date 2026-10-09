@@ -72,8 +72,10 @@ func toIncomeSettledItem(row *liveentity.GuildIncomeSettled) *accountdto.LiveRoo
 		LiveRoomIncomeAmountsItem: toIncomeAmountsItem(&row.LiveRoomIncomeAmounts),
 		SettlementSalary:          row.SettlementSalary,
 		SettlementShareAmount:     row.SettlementShareAmount,
-		SettlementShareAmountUsd:  row.SettlementShareAmountUsd,
-		SettlementReceivableUsd:   row.SettlementReceivableUsd,
+		SettlementShareAmountUsd:      row.SettlementShareAmountUsd,
+		SettlementReceivableUsd:       row.SettlementReceivableUsd,
+		SettlementGuildReceivableUsd:  row.SettlementGuildReceivableUsd,
+		SettlementAnchorReceivableUsd: row.SettlementAnchorReceivableUsd,
 	}
 	if !row.UpdatedAt.IsZero() {
 		updatedAt := row.UpdatedAt
@@ -87,11 +89,13 @@ func toIncomeTotalItem(row *liveentity.GuildIncomeTotal) *accountdto.LiveRoomInc
 		return nil
 	}
 	item := &accountdto.LiveRoomIncomeTotalItem{
-		LiveRoomIncomeAmountsItem: toIncomeAmountsItem(&row.LiveRoomIncomeAmounts),
-		SettlementSalary:          row.SettlementSalary,
-		SettlementShareAmount:     row.SettlementShareAmount,
-		SettlementShareAmountUsd:  row.SettlementShareAmountUsd,
-		SettlementReceivableUsd:   row.SettlementReceivableUsd,
+		LiveRoomIncomeAmountsItem:     toIncomeAmountsItem(&row.LiveRoomIncomeAmounts),
+		SettlementSalary:              row.SettlementSalary,
+		SettlementShareAmount:         row.SettlementShareAmount,
+		SettlementShareAmountUsd:      row.SettlementShareAmountUsd,
+		SettlementReceivableUsd:       row.SettlementReceivableUsd,
+		SettlementGuildReceivableUsd:  row.SettlementGuildReceivableUsd,
+		SettlementAnchorReceivableUsd: row.SettlementAnchorReceivableUsd,
 	}
 	if !row.UpdatedAt.IsZero() {
 		updatedAt := row.UpdatedAt

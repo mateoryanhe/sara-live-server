@@ -196,13 +196,13 @@ func MirrorGuildAnchorSettlementSalary(roomId uint64, salary float64) {
 		if settled := GetGuildIncomeSettled(guildId); settled != nil {
 			settled.AddSettlementSalary(salary)
 			if salaryUsd != 0 {
-				settled.AddSettlementReceivableUsd(salaryUsd)
+				settled.AddSettlementAnchorReceivableUsd(salaryUsd)
 			}
 		}
 		if total := GetGuildIncomeTotal(guildId); total != nil {
 			total.AddSettlementSalary(salary)
 			if salaryUsd != 0 {
-				total.AddSettlementReceivableUsd(salaryUsd)
+				total.AddSettlementAnchorReceivableUsd(salaryUsd)
 			}
 		}
 		addGuildWeeklyAnchorSalary(guildId, salary)
@@ -216,10 +216,10 @@ func MirrorGuildAnchorSettlementShareAmountUsd(roomId uint64, shareAmountUsd flo
 	}
 	ForRoomGuild(roomId, func(guildId uint64) {
 		if settled := GetGuildIncomeSettled(guildId); settled != nil {
-			settled.AddSettlementReceivableUsd(shareAmountUsd)
+			settled.AddSettlementAnchorReceivableUsd(shareAmountUsd)
 		}
 		if total := GetGuildIncomeTotal(guildId); total != nil {
-			total.AddSettlementReceivableUsd(shareAmountUsd)
+			total.AddSettlementAnchorReceivableUsd(shareAmountUsd)
 		}
 		addGuildWeeklyAnchorShareAmountUsd(guildId, shareAmountUsd)
 	})
@@ -414,7 +414,7 @@ func listGuildIncomeUnsettledFieldForCMS(guildIds []uint64, pick func(row *entit
 		seen[guildId] = struct{}{}
 		if guildIncomeUnsettledCache.Contains(guildId) {
 			if row := guildIncomeUnsettledCache.Get(guildId); row != nil {
-				ret[guildId] = row.TotalIncome
+				ret[guildId] = pick(row)
 			}
 			continue
 		}
@@ -428,7 +428,7 @@ func listGuildIncomeUnsettledFieldForCMS(guildIds []uint64, pick func(row *entit
 		WhereIn(string(db.IdName), missing).Scan(&rows)
 	for _, row := range rows {
 		if row != nil && row.ID != 0 {
-			ret[row.ID] = row.TotalIncome
+			ret[row.ID] = pick(row)
 		}
 	}
 	return ret

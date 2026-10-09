@@ -171,6 +171,7 @@ var openAPIDocRoutes = []openAPIDocRoute{
 	{OldMethod: "post", OldPath: "/customerService/cfg", NewPath: "/sofie/help/fetchContact", Tag: "help", Summary: "客服配置"},
 	{OldMethod: "post", OldPath: "/fiatCurrency/fiatCurrencyListForApp", NewPath: "/sofie/money/browseFiats", Tag: "money", Summary: "法币列表"},
 	{OldMethod: "post", OldPath: "/firebase/getClientCfgForApp", NewPath: "/sofie/googleAuth/fetchClientCfg", Tag: "googleAuth", Summary: "Firebase客户端配置"},
+	{OldMethod: "post", OldPath: "/firebaseAnalytics/getClientCfgForApp", NewPath: "/sofie/analytics/fetchSdkCfg", Tag: "analytics", Summary: "Firebase Analytics客户端配置"},
 	{OldMethod: "post", OldPath: "/coinMerchantRechargeCfg/coinMerchantRechargeCfgListForApp", NewPath: "/sofie/dealer/browsePackages", Tag: "dealer", Summary: "币商充值档位"},
 	{OldMethod: "post", OldPath: "/coinMerchantRechargeCfg/paymentRegionList", NewPath: "/sofie/dealer/browsePayRegions", Tag: "dealer", Summary: "币商支付区域"},
 	{OldMethod: "get", OldPath: "/sysInfo/cfg", NewPath: "/sofie/boot/loadConfig", Tag: "boot", Summary: "系统配置"},

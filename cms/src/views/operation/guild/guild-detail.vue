@@ -42,6 +42,8 @@
                 :data="incomeData?.incomeSettled"
                 :settlement-salary="incomeData?.incomeSettled?.settlementSalary"
                 :settlement-share-amount="incomeData?.incomeSettled?.settlementShareAmount"
+                :settlement-guild-receivable-usd="incomeData?.incomeSettled?.settlementGuildReceivableUsd"
+                :settlement-anchor-receivable-usd="incomeData?.incomeSettled?.settlementAnchorReceivableUsd"
                 :settlement-receivable-usd="incomeData?.incomeSettled?.settlementReceivableUsd"
                 :updated-at="incomeData?.incomeSettled?.updatedAt"
             />
@@ -54,6 +56,8 @@
                 :data="incomeData?.incomeTotal"
                 :settlement-salary="incomeData?.incomeTotal?.settlementSalary"
                 :settlement-share-amount="incomeData?.incomeTotal?.settlementShareAmount"
+                :settlement-guild-receivable-usd="incomeData?.incomeTotal?.settlementGuildReceivableUsd"
+                :settlement-anchor-receivable-usd="incomeData?.incomeTotal?.settlementAnchorReceivableUsd"
                 :settlement-receivable-usd="incomeData?.incomeTotal?.settlementReceivableUsd"
                 :updated-at="incomeData?.incomeTotal?.updatedAt"
             />

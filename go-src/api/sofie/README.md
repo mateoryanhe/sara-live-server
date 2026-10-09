@@ -164,6 +164,7 @@
 | `help` | 客服配置 | 免登录 | `POST /customerService/cfg` | `POST /sofie/help/fetchContact` |
 | `money` | 法币列表 | 免登录 | `POST /fiatCurrency/fiatCurrencyListForApp` | `POST /sofie/money/browseFiats` |
 | `googleAuth` | Firebase客户端配置 | 免登录 | `POST /firebase/getClientCfgForApp` | `POST /sofie/googleAuth/fetchClientCfg` |
+| `analytics` | Firebase Analytics客户端配置 | 免登录 | `POST /firebaseAnalytics/getClientCfgForApp` | `POST /sofie/analytics/fetchSdkCfg` |
 | `dealer` | 币商充值档位 | 需要登录 | `POST /coinMerchantRechargeCfg/coinMerchantRechargeCfgListForApp` | `POST /sofie/dealer/browsePackages` |
 | `dealer` | 币商支付区域 | 需要登录 | `POST /coinMerchantRechargeCfg/paymentRegionList` | `POST /sofie/dealer/browsePayRegions` |
 | `boot` | 系统配置 | 免登录 | `POST /sysInfo/cfg` | `POST /sofie/boot/loadConfig` |

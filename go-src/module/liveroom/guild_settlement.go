@@ -86,7 +86,7 @@ func settleOneGuild(guild *entity.LiveGuild) bool {
 		settled.AddSettlementShareAmount(totalShareDiamond)
 		settled.AddSettlementShareAmountUsd(receivableUsd)
 		if receivableUsd != 0 {
-			settled.AddSettlementReceivableUsd(receivableUsd)
+			settled.AddSettlementGuildReceivableUsd(receivableUsd)
 		}
 	}
 	if totalShareDiamond != 0 {
@@ -97,7 +97,7 @@ func settleOneGuild(guild *entity.LiveGuild) bool {
 	}
 	if receivableUsd != 0 {
 		if total := liveroomdao.GetGuildIncomeTotal(guildId); total != nil {
-			total.AddSettlementReceivableUsd(receivableUsd)
+			total.AddSettlementGuildReceivableUsd(receivableUsd)
 		}
 	}
 	if len(dailyRows) > 0 {

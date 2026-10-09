@@ -83,6 +83,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: 'Meta Pixel'},
         },
         {
+            path: 'firebase-analytics',
+            name: 'FirebaseAnalyticsCfgManagement',
+            component: () => import('@/views/config/firebase-analytics.vue'),
+            meta: {title: 'Firebase Analytics'},
+        },
+        {
             path: 'haipay',
             name: 'HaiPayCfgManagement',
             component: () => import('@/views/config/haipay.vue'),

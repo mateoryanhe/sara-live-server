@@ -24,8 +24,10 @@ const (
 	LiveRoomIncomeEffectiveLiveDays           db.TbCol = "effective_live_days"
 	LiveRoomIncomeSettlementSalary            db.TbCol = "settlement_salary"
 	LiveRoomIncomeSettlementShareAmount       db.TbCol = "settlement_share_amount"
-	LiveRoomIncomeSettlementShareAmountUsd    db.TbCol = "settlement_share_amount_usd"
-	LiveRoomIncomeSettlementReceivableUsd     db.TbCol = "settlement_receivable_usd"
+	LiveRoomIncomeSettlementShareAmountUsd        db.TbCol = "settlement_share_amount_usd"
+	LiveRoomIncomeSettlementReceivableUsd         db.TbCol = "settlement_receivable_usd"
+	LiveRoomIncomeSettlementGuildReceivableUsd    db.TbCol = "settlement_guild_receivable_usd"
+	LiveRoomIncomeSettlementAnchorReceivableUsd   db.TbCol = "settlement_anchor_receivable_usd"
 )
 
 // LiveRoomIncomeAmounts 直播间/工会收益字段(房间与工会收益表共用结构)

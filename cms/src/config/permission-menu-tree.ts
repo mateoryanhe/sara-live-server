@@ -340,6 +340,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             group('config-platform', 'menu.ConfigPlatformGroup', [
                 page('GooglePlayCfgManagement'),
                 page('MetaPixelCfgManagement'),
+                page('FirebaseAnalyticsCfgManagement'),
                 page('HaiPayCfgManagement'),
                 page('CfEmailCfgManagement'),
                 page('DbBackupCfgManagement'),
