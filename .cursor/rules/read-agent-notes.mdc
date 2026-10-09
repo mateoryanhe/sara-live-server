@@ -15,6 +15,8 @@ alwaysApply: true
 
 **Go 编译**勿用 `-o .../`（会生成字面 `...` 目录），见 `go-build-output.mdc`；清理 `...` 目录方式见 `workspace-safety.mdc`。
 
+**Go 异步后台任务**必须用 `xrpool.AddWithRecover`，禁止业务侧裸 `go func()`，见 `go-xrpool-async.mdc`（含 Meta Pixel CAPI）。
+
 **新增 App 接口**必须同步 `go-src/api/sofie/`（改 `gen_sofie.py` 再生成），见 `sofie-app-api.mdc`。
 
 **直播测试服** → `直播测试服`（ec2-user @ 54.241.124.37）  

@@ -8,6 +8,7 @@
 |------|------|
 | [workspace-safety.mdc](../rules/workspace-safety.mdc) | **本机误删、Git push、代码恢复**（2026-08-28 事故） |
 | [go-build-output.mdc](../rules/go-build-output.mdc) | Go 编译 `-o` 路径，勿生成 `...` 目录 |
+| [go-xrpool-async.mdc](../rules/go-xrpool-async.mdc) | Go 异步须 `xrpool.AddWithRecover`，勿裸 `go func` |
 | [server-safety.mdc](../rules/server-safety.mdc) | 远程/数据库删除须问用户；**发版须用户同意** |
 | [flutter-push-subscribe.mdc](../rules/flutter-push-subscribe.mdc) | Flutter：PushBus 上 **Repository 与 ViewModel 各自订阅**（勿中心 revision 转 UI） |
 | [read-agent-notes.mdc](../rules/read-agent-notes.mdc) | 任务前必读入口 |
@@ -177,7 +178,7 @@
 
 - `live_guilds`：`guild_type`(0普通/1币商)、单一字段 `share_percent`（分佣比例%）、`creator_id`/`creator_name`（创建时写入当前 CMS 用户，编辑不改）
 - 普通工会强制写全局「工会分佣」；币商工会可自定义；默认取流水分佣配置的工会分佣，未配置则 **10%**
-- **工会周结算**：币商工会用自身 `share_percent`；普通工会仍用全局工会分佣
+- **工会周结算**：币商工会用自身 `share_percent`，**结算时仅 `total_gift_income`（礼物流水）× 比例 → 可收 USD**；视频通话等其它社交流水照常累计入账，不参与币商工会结算扣减；普通工会仍用阶梯/分项规则
 - **主播周结算**：币商工会名下主播流水分佣按 **0%**，开播底薪也按 **0**（币商工会无开播底薪）；其余主播用全局主播分佣 + 薪资档
 - **工会转账信息**（2026-09-12）：`live_guild_transfer_infos` 对齐 HaiPay 代付——选 **CountryCode**（`country.HaiPayPayoutCountryCodes`）自动推导 **Currency**（如 ID→IDR）；另存 accountType/phone/email/payeeName/accountNo/bankCode；CMS 工会列表「转账信息」下拉国家
 - **HaiPay 代付发薪**（2026-09-12）：CMS HaiPay 配 `payoutEnabled` + `payoutAppIds`(如`IDR:25280`) + `payoutUsdRates`(如`IDR:16000`)；工会转账页审核通过后「批量转账」调 `/{currency}/pay/apply`；回调 `/webhook/haipay/payout/notify`（status=2→转账成功，3→回审核通过可重试）；金额=`settlementReceivableUsd × 汇率`

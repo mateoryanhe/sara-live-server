@@ -3,11 +3,19 @@ package fxrate
 import (
 	"context"
 	"fmt"
+	"os"
 	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"xr-game-server/core/xrpool"
 )
+
+func TestMain(m *testing.M) {
+	xrpool.Init()
+	os.Exit(m.Run())
+}
 
 func TestConvertUSDCoalescesAndCaches(t *testing.T) {
 	const quote = "INR"
@@ -38,7 +46,7 @@ func TestConvertUSDCoalescesAndCaches(t *testing.T) {
 	waitGroup.Add(workers)
 	errors := make(chan error, workers)
 	for range workers {
-		go func() {
+		xrpool.AddWithRecover(context.Background(), func(_ context.Context) {
 			defer waitGroup.Done()
 			conversion, err := ConvertUSD(context.Background(), 2, quote)
 			if err != nil {
@@ -54,7 +62,7 @@ func TestConvertUSDCoalescesAndCaches(t *testing.T) {
 			if conversion.TargetCurrency != quote {
 				t.Errorf("quote=%s want=%s", conversion.TargetCurrency, quote)
 			}
-		}()
+		})
 	}
 	waitGroup.Wait()
 	close(errors)

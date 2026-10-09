@@ -245,6 +245,8 @@ const (
 	VoiceChatMicSeatLocked XRCode = 182
 	// VoiceChatMicSeatNotOccupied 麦位无人,无法禁音
 	VoiceChatMicSeatNotOccupied XRCode = 183
+	// OneToOneRoomCallBothAnchors 1v1房间通话(source=3)双方均为主播
+	OneToOneRoomCallBothAnchors XRCode = 184
 )
 
 type XError struct {

@@ -7,9 +7,18 @@
         <el-descriptions-item :label="t('pages.anchorList.totalIncomeConvertedDiamond')">
           <span class="money-amount">{{ formatWalletBalance(data.totalIncome) }}</span>
         </el-descriptions-item>
-        <el-descriptions-item v-if="!showUnsettledLiveStats" :label="t('pages.anchorList.totalLiveDuration')">
+        <el-descriptions-item v-if="showAnchorLiveDurationInOverview" :label="t('pages.anchorList.totalLiveDuration')">
           {{ formatLiveDurationMinutes(data.totalLiveDuration, t) }}
         </el-descriptions-item>
+        <el-descriptions-item v-if="!forGuild" :label="t('pages.anchorList.gameTotalGoldFlow')">
+          <span class="money-amount">{{ formatWalletBalance(data.totalGameIncome) }}</span>
+        </el-descriptions-item>
+      </el-descriptions>
+    </section>
+
+    <section v-if="forGuild" class="detail-section">
+      <div class="detail-section-title">{{ t('pages.guildList.gameFlowSection') }}</div>
+      <el-descriptions :column="2" :label-width="detailLabelWidth" border class="detail-descriptions">
         <el-descriptions-item :label="t('pages.anchorList.gameTotalGoldFlow')">
           <span class="money-amount">{{ formatWalletBalance(data.totalGameIncome) }}</span>
         </el-descriptions-item>
@@ -28,7 +37,7 @@
       </el-descriptions>
     </section>
 
-    <section v-if="hasSettlementSummary" class="detail-section">
+    <section v-if="hasAnchorSettlementSummary" class="detail-section">
       <div class="detail-section-title">{{ t('pages.anchorList.settlementSummarySection') }}</div>
       <el-descriptions :column="2" :label-width="detailLabelWidth" border class="detail-descriptions">
         <el-descriptions-item :label="t('pages.anchorList.settlementSalary')">
@@ -40,12 +49,33 @@
         <el-descriptions-item :label="t('pages.anchorList.settlementShareAmountUsd')">
           <span class="money-amount">{{ settlementShareAmountUsd == null ? '-' : formatWalletBalance(settlementShareAmountUsd) }}</span>
         </el-descriptions-item>
-        <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
+        <el-descriptions-item
+            v-if="settlementReceivableUsd != null"
+            :label="t('pages.anchorList.settlementReceivableUsd')"
+        >
+          <span class="money-amount">{{ formatWalletBalance(settlementReceivableUsd) }}</span>
+        </el-descriptions-item>
+        <el-descriptions-item v-else class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
       </el-descriptions>
     </section>
 
-    <section class="detail-section">
-      <div class="detail-section-title">{{ t('pages.anchorList.socialIncomeSection') }}</div>
+    <section v-if="hasGuildSettlementSummary" class="detail-section">
+      <div class="detail-section-title">{{ t('pages.guildList.settlementSummarySection') }}</div>
+      <el-descriptions :column="2" :label-width="detailLabelWidth" border class="detail-descriptions">
+        <el-descriptions-item v-if="showGuildSettledSalary" :label="t('pages.guildList.settledSalaryTotal')">
+          <span class="money-amount">{{ formatWalletBalance(guildSettlementSalary) }}</span>
+        </el-descriptions-item>
+        <el-descriptions-item v-if="showGuildSettledShare" :label="t('pages.guildList.settledGuildShareDiamond')">
+          <span class="money-amount">{{ formatWalletBalance(guildSettlementShare) }}</span>
+        </el-descriptions-item>
+        <el-descriptions-item v-if="showGuildSettledReceivable" :label="t('pages.guildList.settledReceivableUsdTotal')">
+          <span class="money-amount">{{ formatWalletBalance(guildSettlementReceivableUsd) }} USD</span>
+        </el-descriptions-item>
+      </el-descriptions>
+    </section>
+
+    <section v-if="showFullSocialBreakdown" class="detail-section">
+      <div class="detail-section-title">{{ socialSectionTitle }}</div>
       <el-descriptions :column="2" :label-width="detailLabelWidth" border class="detail-descriptions">
         <el-descriptions-item :label="t('pages.anchorList.socialTotalDiamondFlow')">
           <span class="money-amount">{{ formatWalletBalance(data.totalSocialIncome) }}</span>
@@ -56,6 +86,15 @@
         <el-descriptions-item :label="t('pages.anchorList.videoTicketIncome')"><span class="money-amount">{{ formatWalletBalance(data.totalVideoCallTicketIncome) }}</span></el-descriptions-item>
         <el-descriptions-item :label="t('pages.anchorList.videoBillingIncome')"><span class="money-amount">{{ formatWalletBalance(data.totalVideoCallBillingIncome) }}</span></el-descriptions-item>
         <el-descriptions-item :label="t('pages.anchorList.shortVideoIncome')"><span class="money-amount">{{ formatWalletBalance(data.totalShortVideoIncome) }}</span></el-descriptions-item>
+      </el-descriptions>
+    </section>
+
+    <section v-else-if="forGuild" class="detail-section">
+      <div class="detail-section-title">{{ t('pages.guildList.settledSocialFlowSection') }}</div>
+      <el-descriptions :column="2" :label-width="detailLabelWidth" border class="detail-descriptions">
+        <el-descriptions-item :label="t('pages.anchorList.socialTotalDiamondFlow')">
+          <span class="money-amount">{{ formatWalletBalance(data.totalSocialIncome) }}</span>
+        </el-descriptions-item>
       </el-descriptions>
     </section>
 
@@ -80,19 +119,44 @@ const props = defineProps<{
   settlementSalary?: number
   settlementShareAmount?: number
   settlementShareAmountUsd?: number | null
+  /** 工会详情已结算/累计 Tab 展示 */
+  settlementReceivableUsd?: number | null
+  /** 工会详情：无有效开播统计，游戏流水独立分区 */
+  forGuild?: boolean
+  /** 工会已结算/生涯累计：结算汇总与社交明细精简 */
+  guildSettledView?: boolean
   updatedAt?: string | null
 }>()
 
 const {t} = useI18n()
 const detailLabelWidth = 170
-const showUnsettledLiveStats = computed(() => props.effectiveLiveDays != null)
+const forGuild = computed(() => props.forGuild === true)
+const showUnsettledLiveStats = computed(() => !forGuild.value && props.effectiveLiveDays != null)
+const showAnchorLiveDurationInOverview = computed(() => !forGuild.value && !showUnsettledLiveStats.value)
 const effectiveLiveDaysDisplay = computed(() => {
   const days = Math.max(0, Math.trunc(Number(props.effectiveLiveDays ?? 0)))
   return t('pages.anchorList.effectiveLiveDaysCount', {days})
 })
-const hasSettlementSummary = computed(() => props.settlementSalary != null
-    || props.settlementShareAmount != null
-    || props.settlementShareAmountUsd != null)
+const guildSettledView = computed(() => forGuild.value && props.guildSettledView === true)
+const guildSettlementSalary = computed(() => Number(props.settlementSalary ?? 0))
+const guildSettlementShare = computed(() => Number(props.settlementShareAmount ?? 0))
+const guildSettlementReceivableUsd = computed(() => Number(props.settlementReceivableUsd ?? 0))
+const showGuildSettledSalary = computed(() => guildSettlementSalary.value !== 0)
+const showGuildSettledShare = computed(() => guildSettlementShare.value !== 0)
+const showGuildSettledReceivable = computed(() => guildSettlementReceivableUsd.value !== 0)
+const hasGuildSettlementSummary = computed(() => guildSettledView.value && (
+  showGuildSettledSalary.value || showGuildSettledShare.value || showGuildSettledReceivable.value
+))
+const hasAnchorSettlementSummary = computed(() => !forGuild.value && (
+  props.settlementSalary != null
+  || props.settlementShareAmount != null
+  || props.settlementShareAmountUsd != null
+  || props.settlementReceivableUsd != null
+))
+const showFullSocialBreakdown = computed(() => !guildSettledView.value)
+const socialSectionTitle = computed(() => (
+  guildSettledView.value ? t('pages.guildList.settledSocialFlowSection') : t('pages.anchorList.socialIncomeSection')
+))
 </script>
 
 <style scoped>

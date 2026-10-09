@@ -48,7 +48,17 @@ func resolveRoomCallPartyIds(callerId, targetId uint64) (anchorId, audienceId ui
 
 // resolveOneToOneRoomCallContext 根据双方用户类型找到主播房间，解析1v1房间呼叫配置。
 func resolveOneToOneRoomCallContext(callerId, targetId uint64) (*oneToOneRoomCallContext, error) {
-	anchorId, audienceId, ok := resolveRoomCallPartyIds(callerId, targetId)
+	caller := userinfodao.GetUserInfoByUserId(callerId)
+	target := userinfodao.GetUserInfoByUserId(targetId)
+	if caller == nil || target == nil {
+		return nil, errercode.CreateCode(errercode.NoPermission)
+	}
+	callerIsAnchor := userentity.UserTypeIsAnchor(caller.UserType)
+	targetIsAnchor := userentity.UserTypeIsAnchor(target.UserType)
+	if callerIsAnchor && targetIsAnchor {
+		return nil, errercode.CreateCode(errercode.OneToOneRoomCallBothAnchors)
+	}
+	anchorId, audienceId, ok := resolveRoomCallPartyIdsByTypes(callerId, caller.UserType, targetId, target.UserType)
 	if !ok {
 		return nil, errercode.CreateCode(errercode.NoPermission)
 	}

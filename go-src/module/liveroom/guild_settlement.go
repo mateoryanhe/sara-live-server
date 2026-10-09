@@ -5,7 +5,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	xmath "xr-game-server/core/math"
+	"xr-game-server/core/math"
 	"xr-game-server/core/syndb"
 	"xr-game-server/dao/guilddao"
 	"xr-game-server/dao/liveroomdao"
@@ -42,7 +42,7 @@ func settleOneGuild(guild *entity.LiveGuild) bool {
 		return false
 	}
 	snap := unsettled.Snapshot()
-	if !snap.HasSettlementFlow() {
+	if !snap.HasCoinMerchantGuildSettlementFlow() {
 		liveroomdao.ResetGuildWeeklyAnchorLegacySettlement(guildId)
 		if len(dailyRows) > 0 {
 			liveroomdao.MarkDailyGuildEffectiveLivesSettled(dailyRows)
@@ -50,14 +50,16 @@ func settleOneGuild(guild *entity.LiveGuild) bool {
 		return false
 	}
 
-	// 币商工会按工会总流水统一结算。名下主播不参与底薪及个人社交/游戏分佣。
+	// 币商工会入账仍与普通工会相同(视频通话等社交流水照常累计)；结算时仅用 TotalGiftIncome。
 	guildSharePercent := guild.SharePercent
 	exchangeCfg := wallet.GetExchangeCfgSnapshot()
 	socialShareDiamond, gameShareGold, gameShareDiamond, totalShareDiamond, receivableUsd :=
 		calcCoinMerchantGuildSettlement(&snap, guildSharePercent, exchangeCfg)
+	logSnap := entity.GiftFlowSettlementSnapshot(&snap)
+	consumeSnap := entity.GiftSettlementConsumeSnap(&snap)
 	row := entity.NewCoinMerchantGuildIncomeSettlementLogWithBreakdown(
 		guildId,
-		&snap,
+		&logSnap,
 		0,
 		receivableUsd,
 		guildSharePercent,
@@ -75,12 +77,12 @@ func settleOneGuild(guild *entity.LiveGuild) bool {
 		return false
 	}
 
-	// 结算单及换算快照确认落库后再扣除快照，保留落库期间的并发新增流水。
-	unsettled.ConsumeSnapshot(&snap)
+	// 结算单及换算快照确认落库后再扣除礼物部分，其它社交流水保留在未结算。
+	unsettled.ConsumeSnapshot(&consumeSnap)
 	liveroomdao.ResetGuildWeeklyAnchorLegacySettlement(guildId)
 	settled := liveroomdao.GetGuildIncomeSettled(guildId)
 	if settled != nil {
-		settled.AddAmounts(&snap)
+		settled.AddAmounts(&consumeSnap)
 		settled.AddSettlementShareAmount(totalShareDiamond)
 		settled.AddSettlementShareAmountUsd(receivableUsd)
 		if receivableUsd != 0 {
@@ -112,10 +114,11 @@ func calcCoinMerchantGuildSettlement(snap *entity.LiveRoomIncomeAmounts, guildSh
 	if snap == nil {
 		return 0, 0, 0, 0, 0
 	}
-	socialShareDiamond = liverevenuesharecfg.CalcGuildSettlementShareAmount(snap.TotalSocialIncome, guildSharePercent)
-	gameShareGold = liverevenuesharecfg.CalcGuildSettlementShareAmount(snap.TotalGameIncome, guildSharePercent)
-	gameShareDiamond = wallet.CalcGoldToDiamondWithSnapshot(gameShareGold, exchangeCfg)
-	totalShareDiamond = xmath.AddFloat64(socialShareDiamond, gameShareDiamond)
+	giftFlow := snap.TotalGiftIncome
+	socialShareDiamond = liverevenuesharecfg.CalcGuildSettlementShareAmount(giftFlow, guildSharePercent)
+	gameShareGold = 0
+	gameShareDiamond = 0
+	totalShareDiamond = math.AddFloat64(socialShareDiamond, gameShareDiamond)
 	receivableUsd = wallet.CalcDiamondToUsdWithSnapshot(totalShareDiamond, exchangeCfg)
 	receivableUsd = stdmath.Round(receivableUsd*10000) / 10000
 	return

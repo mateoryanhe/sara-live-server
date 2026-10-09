@@ -33,33 +33,9 @@
 
           <el-tab-pane :label="t('pages.guildTransferList.incomeSnapshot')" lazy name="income">
             <section class="detail-section">
-              <div class="detail-section-title">{{ anchorSettlementText('snapshotSummary') }}（钻石）</div>
+              <div class="detail-section-title">{{ t('pages.coinMerchantGuildList.giftIncomeCumulative') }}（钻石）</div>
               <el-descriptions :column="3" :label-width="detailLabelWidth" border class="detail-descriptions">
-                <el-descriptions-item :label="settlementText('totalIncome')">{{ amount(item.totalIncome) }}</el-descriptions-item>
-                <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
-                <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
-              </el-descriptions>
-            </section>
-
-            <section class="detail-section">
-              <div class="detail-section-title">{{ anchorSettlementText('socialIncomeSection') }}（钻石）</div>
-              <el-descriptions :column="3" :label-width="detailLabelWidth" border class="detail-descriptions">
-                <el-descriptions-item :label="settlementText('totalSocialIncome')">{{ amount(item.totalSocialIncome) }}</el-descriptions-item>
                 <el-descriptions-item :label="settlementText('totalGiftIncome')">{{ amount(item.totalGiftIncome) }}</el-descriptions-item>
-                <el-descriptions-item :label="settlementText('totalPaidDanmakuIncome')">{{ amount(item.totalPaidDanmakuIncome) }}</el-descriptions-item>
-                <el-descriptions-item :label="settlementText('totalVideoCallIncome')">{{ amount(item.totalVideoCallIncome) }}</el-descriptions-item>
-                <el-descriptions-item :label="settlementText('totalVideoCallTicketIncome')">{{ amount(item.totalVideoCallTicketIncome) }}</el-descriptions-item>
-                <el-descriptions-item :label="settlementText('totalVideoCallBillingIncome')">{{ amount(item.totalVideoCallBillingIncome) }}</el-descriptions-item>
-                <el-descriptions-item :label="settlementText('totalShortVideoIncome')">{{ amount(item.totalShortVideoIncome) }}</el-descriptions-item>
-                <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
-                <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
-              </el-descriptions>
-            </section>
-
-            <section class="detail-section">
-              <div class="detail-section-title">{{ anchorSettlementText('gameIncomeSection') }}（金币）</div>
-              <el-descriptions :column="3" :label-width="detailLabelWidth" border class="detail-descriptions">
-                <el-descriptions-item :label="settlementText('totalGameIncome')">{{ amount(item.totalGameIncome) }}</el-descriptions-item>
                 <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
                 <el-descriptions-item class-name="detail-placeholder-cell" label-class-name="detail-placeholder-cell"/>
               </el-descriptions>
@@ -159,7 +135,6 @@ import {formatWalletBalance} from '@/utils/number-format'
 import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 
 const {t} = useI18n()
-const route = useRoute()
 const router = useRouter()
 const {can} = usePagePermission('CoinMerchantGuildTransferManagement')
 const loading = ref(false)
@@ -214,7 +189,7 @@ const backToList = () => router.push({name: 'CoinMerchantGuildTransferManagement
 const openGuildDetail = () => {
   if (!item.value?.guildId) return
   router.push({
-    name: 'GuildDetail',
+    name: 'CoinMerchantGuildDetail',
     query: {id: item.value.guildId, name: item.value.guildName || ''},
   })
 }

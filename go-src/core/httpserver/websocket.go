@@ -135,15 +135,15 @@ func (w *WebSocketClient) init() {
 	})
 }
 
-// startWorker WebSocket 长连接协程必须独立运行;用 recover 防止 panic 拖垮进程.
+// startWorker WebSocket 长连接 worker 提交到 xrpool,避免裸 go func.
 func (w *WebSocketClient) startWorker(source string, fn func()) {
-	go func() {
+	xrpool.AddWithRecover(gctx.New(), func(ctx context.Context) {
 		defer func() {
-			xrpool.Recover(gctx.New(), source)
+			xrpool.Recover(ctx, source)
 			w.exit()
 		}()
 		fn()
-	}()
+	})
 }
 
 // readPump 独立读协程,连接断开时 ReadMessage 返回错误并退出.

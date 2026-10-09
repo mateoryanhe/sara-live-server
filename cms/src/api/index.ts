@@ -40,6 +40,7 @@ import {fiatCurrencyApi} from './modules/fiatCurrency'
 import {haipayApi} from './modules/haipay'
 import {cfEmailApi} from './modules/cf-email'
 import {firebaseApi} from './modules/firebase'
+import {metaPixelApi} from './modules/meta-pixel'
 import {dbBackupApi} from './modules/db-backup'
 import {staticCacheCfgApi} from './modules/static-cache-cfg'
 
@@ -87,6 +88,7 @@ export {
     haipayApi,
     cfEmailApi,
     firebaseApi,
+    metaPixelApi,
     dbBackupApi,
     staticCacheCfgApi,
 }
@@ -135,6 +137,7 @@ export default {
     haipayApi,
     cfEmailApi,
     firebaseApi,
+    metaPixelApi,
     dbBackupApi,
     staticCacheCfgApi,
 }

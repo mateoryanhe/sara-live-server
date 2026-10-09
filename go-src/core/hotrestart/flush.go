@@ -9,6 +9,7 @@ import (
 	"github.com/gogf/gf/v2/util/gutil"
 	"xr-game-server/core/syndb"
 	"xr-game-server/core/xrlog"
+	"xr-game-server/core/xrpool"
 )
 
 var (
@@ -45,15 +46,11 @@ func statQueueIdle() bool {
 	return fn()
 }
 
-// startPhase1FlushBackground 第一阶段后台刷盘(recover),不阻塞热重启主流程.
+// startPhase1FlushBackground 第一阶段后台刷盘,不阻塞热重启主流程.
 func startPhase1FlushBackground(_ context.Context) {
-	go func() {
-		gutil.TryCatch(gctx.New(), func(ctx context.Context) {
-			flushPhase1UntilIdle(ctx)
-		}, func(catch context.Context, err error) {
-			xrlog.ErrorWithErr(catch, "HotRestart", "syndb第一阶段刷盘panic", err)
-		})
-	}()
+	xrpool.AddWithRecover(gctx.New(), func(ctx context.Context) {
+		flushPhase1UntilIdle(ctx)
+	})
 }
 
 // flushPhase1UntilIdle 先排空 stat 队列再刷 syndb,循环直到两者皆空.

@@ -50,6 +50,7 @@ func Init() {
 	initCfEmailCMSController()                       // AWS SES邮件发信配置(CMS)
 	initFirebaseCMSController()                      // Firebase登录配置(CMS)
 	initFirebaseAppController()                      // Firebase客户端配置(App,无需鉴权)
+	initMetaPixelCMSController()                     // Meta Pixel Conversions API(CMS)
 	initDbBackupCMSController()                      // 数据库备份(CMS)
 	initDataSyncCMSController()                      // 数据同步配置(CMS)
 	initDataSyncReceiveController()                  // 数据同步接收(跨环境)

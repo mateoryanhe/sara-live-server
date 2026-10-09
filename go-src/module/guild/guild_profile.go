@@ -88,15 +88,21 @@ func toMyGuildProfileItem(guild *entity.LiveGuild) *guilddto.MyGuildProfileItem 
 		ID:                   strconv.FormatUint(guild.ID, 10),
 		Name:                 guild.Name,
 		Description:          guild.Description,
-		UnsettledTotalIncome: resolveGuildUnsettledTotalIncome(guild.ID),
+		UnsettledTotalIncome: resolveGuildUnsettledTotalIncome(guild),
 		UpdatedAt:            updatedAt,
 	}
 }
 
-func resolveGuildUnsettledTotalIncome(guildId uint64) float64 {
-	row := liveroomdao.GetGuildIncomeUnsettledForCMS(guildId)
+func resolveGuildUnsettledTotalIncome(guild *entity.LiveGuild) float64 {
+	if guild == nil || guild.ID == 0 {
+		return 0
+	}
+	row := liveroomdao.GetGuildIncomeUnsettledForCMS(guild.ID)
 	if row == nil {
 		return 0
+	}
+	if guild.GuildType == entity.LiveGuildTypeCoinMerchant {
+		return row.TotalGiftIncome
 	}
 	return row.TotalIncome
 }

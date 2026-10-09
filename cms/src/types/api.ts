@@ -1126,6 +1126,8 @@ export interface GetAnchorTransferInfoRes {
 
 export interface GuildQuery extends PageQuery {
     name?: string
+    /** 0 普通工会，1 币商工会；不传则不过滤 */
+    guildType?: number
 }
 
 export interface BatchImmediateSettleGuildsReq {
@@ -2091,6 +2093,33 @@ export interface SaveFirebaseCfgReq {
 }
 
 export interface SaveFirebaseCfgRes {
+    success: boolean
+    id: string
+}
+
+export interface MetaPixelCfg {
+    id: string
+    enabled: number
+    pixelId: string
+    accessToken: string
+    testEventCode: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetMetaPixelCfgRes {
+    cfg: MetaPixelCfg | null
+}
+
+export interface SaveMetaPixelCfgReq {
+    id?: number
+    enabled: number
+    pixelId: string
+    accessToken: string
+    testEventCode?: string
+}
+
+export interface SaveMetaPixelCfgRes {
     success: boolean
     id: string
 }

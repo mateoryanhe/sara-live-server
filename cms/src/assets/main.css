@@ -40,3 +40,17 @@ body {
 .money-amount {
     font-variant-numeric: tabular-nums;
 }
+
+/* CMS 列表表头、数据单元格统一居中 */
+.el-table thead th.el-table__cell,
+.el-table tbody td.el-table__cell {
+    text-align: center;
+}
+
+.el-table thead th.el-table__cell > .cell,
+.el-table tbody td.el-table__cell > .cell {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}

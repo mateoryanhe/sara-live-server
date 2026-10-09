@@ -85,6 +85,32 @@ func (a *LiveRoomIncomeAmounts) HasSettlementFlow() bool {
 	return a.TotalSocialIncome != 0 || a.TotalGameIncome != 0
 }
 
+// HasCoinMerchantGuildSettlementFlow 币商工会结算是否出单(仅看礼物流水；其它社交流水照常累计)。
+func (a *LiveRoomIncomeAmounts) HasCoinMerchantGuildSettlementFlow() bool {
+	if a == nil {
+		return false
+	}
+	return a.TotalGiftIncome != 0
+}
+
+// GiftFlowSettlementSnapshot 币商工会结算单快照：仅保留礼物流水字段。
+func GiftFlowSettlementSnapshot(src *LiveRoomIncomeAmounts) LiveRoomIncomeAmounts {
+	if src == nil || src.TotalGiftIncome == 0 {
+		return LiveRoomIncomeAmounts{}
+	}
+	gift := src.TotalGiftIncome
+	return LiveRoomIncomeAmounts{
+		TotalIncome:       gift,
+		TotalSocialIncome: gift,
+		TotalGiftIncome:   gift,
+	}
+}
+
+// GiftSettlementConsumeSnap 币商工会结算落库后从未结算扣除的礼物部分。
+func GiftSettlementConsumeSnap(src *LiveRoomIncomeAmounts) LiveRoomIncomeAmounts {
+	return GiftFlowSettlementSnapshot(src)
+}
+
 // addIncomeAmountsLocked 在已持锁前提下累加各收益字段
 func addIncomeAmountsLocked(tb db.TbName, id any, dst *LiveRoomIncomeAmounts, src *LiveRoomIncomeAmounts) {
 	if dst == nil || src == nil || src.IsZero() {

@@ -72,6 +72,7 @@ import {anchorGameShareCfgListMessages} from './anchor-game-share-cfg-list'
 import {anchorIncomeSettlementLogListMessages} from './anchor-income-settlement-log-list'
 import {guildIncomeSettlementLogListMessages} from './guild-income-settlement-log-list'
 import {guildTransferListMessages} from './guild-transfer-list'
+import {coinMerchantGuildListMessages} from './coin-merchant-guild-list'
 import {coinMerchantGuildTransferListMessages} from './coin-merchant-guild-transfer-list'
 import {appTokenMessages} from './app-token'
 import {serverRuntimeCfgMessages} from './server-runtime-cfg'
@@ -81,6 +82,7 @@ import {textModerationMessages} from './text-moderation'
 import {privacyPolicyMessages} from './privacy-policy'
 import {googlePlayMessages} from './google-play'
 import {firebaseMessages} from './firebase'
+import {metaPixelMessages} from './meta-pixel'
 import {haipayMessages} from './haipay'
 import {cfEmailMessages} from './cf-email'
 import {dbBackupMessages} from './db-backup'
@@ -124,6 +126,7 @@ const pageMessageBuilders = [
   ['platformAnchorVisibilityList', platformAnchorVisibilityListMessages],
   ['coinMerchantList', coinMerchantListMessages],
   ['coinMerchantRechargeCfgList', coinMerchantRechargeCfgListMessages],
+  ['coinMerchantGuildList', coinMerchantGuildListMessages],
   ['guildAnchorIncomeSettlementLogList', guildAnchorIncomeSettlementLogListMessages],
   ['rechargeCfgList', rechargeCfgListMessages],
   ['appPkgList', appPkgListMessages],
@@ -179,6 +182,7 @@ const pageMessageBuilders = [
   ['googlePlay', googlePlayMessages],
   ['firebase', firebaseMessages],
   ['haipay', haipayMessages],
+  ['metaPixel', metaPixelMessages],
   ['cfEmail', cfEmailMessages],
   ['dbBackup', dbBackupMessages],
   ['uploadResource', uploadResourceMessages],

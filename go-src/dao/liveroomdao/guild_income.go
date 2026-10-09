@@ -377,8 +377,27 @@ func getGuildIncomeUnsettledForArchive(guildId uint64) *entity.GuildIncomeUnsett
 	return &row
 }
 
+// ListGuildIncomeUnsettledGiftTotalForCMS 币商工会 CMS：未结算礼物流水累计(钻石)
+func ListGuildIncomeUnsettledGiftTotalForCMS(guildIds []uint64) map[uint64]float64 {
+	return listGuildIncomeUnsettledFieldForCMS(guildIds, func(row *entity.GuildIncomeUnsettled) float64 {
+		if row == nil {
+			return 0
+		}
+		return row.TotalGiftIncome
+	})
+}
+
 // ListGuildIncomeUnsettledTotalForCMS 批量查询工会未结算总收益(缓存优先,否则直查DB,不新建)
 func ListGuildIncomeUnsettledTotalForCMS(guildIds []uint64) map[uint64]float64 {
+	return listGuildIncomeUnsettledFieldForCMS(guildIds, func(row *entity.GuildIncomeUnsettled) float64 {
+		if row == nil {
+			return 0
+		}
+		return row.TotalIncome
+	})
+}
+
+func listGuildIncomeUnsettledFieldForCMS(guildIds []uint64, pick func(row *entity.GuildIncomeUnsettled) float64) map[uint64]float64 {
 	ret := make(map[uint64]float64)
 	if len(guildIds) == 0 {
 		return ret

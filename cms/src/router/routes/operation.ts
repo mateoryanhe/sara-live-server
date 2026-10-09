@@ -31,7 +31,7 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {
                 title: '编辑转账信息',
                 hidden: true,
-                parentPermission: ['GuildManagement', 'GuildTransferManagement', 'CoinMerchantGuildTransferManagement'],
+                parentPermission: ['GuildManagement', 'GuildTransferManagement', 'CoinMerchantGuildTransferManagement', 'CoinMerchantGuildListManagement'],
             },
         },
         {
@@ -39,6 +39,22 @@ export const operationRoutes: RouteRecordRaw = {
             name: 'GuildTransferManagement',
             component: () => import('@/views/operation/guild/guild-transfer-list.vue'),
             meta: {title: '普通工会代付'},
+        },
+        {
+            path: 'guild/coin-merchant-guild-list',
+            name: 'CoinMerchantGuildListManagement',
+            component: () => import('@/views/operation/guild/coin-merchant-guild-list.vue'),
+            meta: {title: '币商工会列表', parentTitle: '币商管理'},
+        },
+        {
+            path: 'guild/coin-merchant-guild-detail',
+            name: 'CoinMerchantGuildDetail',
+            component: () => import('@/views/operation/guild/coin-merchant-guild-detail.vue'),
+            meta: {
+                title: '币商工会详情',
+                hidden: true,
+                parentPermission: ['CoinMerchantGuildListManagement'],
+            },
         },
         {
             path: 'guild/coin-merchant-guild-transfer-list',
@@ -103,7 +119,7 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {
                 title: '工会详情',
                 hidden: true,
-                parentPermission: ['GuildManagement', 'GuildTransferManagement', 'CoinMerchantGuildTransferManagement', 'GuildProfileManagement', 'AnchorListManagement'],
+                parentPermission: ['GuildManagement', 'GuildTransferManagement', 'CoinMerchantGuildTransferManagement', 'CoinMerchantGuildListManagement', 'GuildProfileManagement', 'AnchorListManagement'],
             },
         },
         {
@@ -132,13 +148,21 @@ export const operationRoutes: RouteRecordRaw = {
             path: 'guild/guild-anchor-import-result',
             name: 'GuildAnchorImportResult',
             component: () => import('@/views/operation/guild/guild-anchor-import-result.vue'),
-            meta: {title: '工会主播导入结果', hidden: true, parentPermission: 'GuildManagement'},
+            meta: {
+                title: '工会主播导入结果',
+                hidden: true,
+                parentPermission: ['GuildManagement', 'CoinMerchantGuildListManagement'],
+            },
         },
         {
             path: 'guild/guild-members',
             name: 'GuildMembers',
             component: () => import('@/views/operation/guild/guild-members.vue'),
-            meta: {title: '工会成员', hidden: true, parentPermission: 'GuildManagement'},
+            meta: {
+                title: '工会成员',
+                hidden: true,
+                parentPermission: ['GuildManagement', 'CoinMerchantGuildListManagement'],
+            },
         },
         {
             path: 'guild/guild-profile-members',

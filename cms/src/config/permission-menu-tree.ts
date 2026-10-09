@@ -240,6 +240,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
         titleKey: 'menu.CoinMerchantModule',
         children: [
             page('CoinMerchantManagement'),
+            page('CoinMerchantGuildListManagement'),
             page('CoinMerchantRechargeCfgManagement'),
             page('CoinMerchantTransferLogList'),
             page('CoinMerchantGuildTransferManagement'),
@@ -338,6 +339,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             ]),
             group('config-platform', 'menu.ConfigPlatformGroup', [
                 page('GooglePlayCfgManagement'),
+                page('MetaPixelCfgManagement'),
                 page('HaiPayCfgManagement'),
                 page('CfEmailCfgManagement'),
                 page('DbBackupCfgManagement'),

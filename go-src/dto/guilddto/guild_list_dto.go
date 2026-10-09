@@ -8,7 +8,8 @@ import (
 type GuildListReq struct {
 	g.Meta `path:"/guildList" method:"post" summary:"获取直播工会列表" tags:"直播工会"`
 	httpserver.CMSQueryReq
-	Name string `json:"name" dc:"工会名称"`
+	Name      string `json:"name" dc:"工会名称"`
+	GuildType *uint8 `json:"guildType" v:"in:0,1#工会类型仅支持0普通或1币商" dc:"工会类型(可选,0普通,1币商)"`
 }
 
 // GuildListForVisibilityReq 可见性管理页拉全部上架工会(不按可见性表过滤)
@@ -29,7 +30,7 @@ type GuildListRes struct {
 	SharePercent         float64 `json:"sharePercent" dc:"分佣比例(%)"`
 	CreatorId            string  `json:"creatorId" dc:"创建者CMS用户ID"`
 	CreatorName          string  `json:"creatorName" dc:"创建者CMS用户名"`
-	UnsettledTotalIncome float64 `json:"unsettledTotalIncome" dc:"未结算工会总收益"`
+	UnsettledTotalIncome float64 `json:"unsettledTotalIncome" dc:"未结算展示(普通工会=总收益;币商工会列表=礼物流水累计,用于结算参考)"`
 	CreatedAt            string  `json:"createdAt"`
 	UpdatedAt            string  `json:"updatedAt"`
 }

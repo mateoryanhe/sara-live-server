@@ -1,0 +1,54 @@
+---
+description: Go 异步任务必须用 xrpool，禁止裸 go func / go 语句
+globs: go-src/**/*.go
+alwaysApply: true
+---
+
+# Go 异步：必须用 xrpool
+
+## 为什么
+
+- 裸 `go func()` / `go someFunc()` 无上限，高并发下协程暴涨可能拖垮进程内存。
+- 业务 panic 若未 recover，可能 **整进程退出**。
+- 项目统一用 `xr-game-server/core/xrpool`：`grpool` 限流 + `AddWithRecover` 捕获 panic 并打 error 日志。
+
+## 必须遵守（零例外）
+
+在 **事件回调、HTTP 处理返回后、定时任务、WebSocket worker、热重启、测试并发** 等所有场景，**禁止**：
+
+```go
+go func() { ... }()
+go someBackgroundFunc()
+```
+
+一律改为：
+
+```go
+import (
+    "context"
+    "github.com/gogf/gf/v2/os/gctx"
+    "xr-game-server/core/xrpool"
+)
+
+xrpool.AddWithRecover(gctx.New(), func(ctx context.Context) {
+    // 异步逻辑；长循环 worker 也在此函数内跑完
+})
+```
+
+需要传递请求 context 时，用该请求的 `ctx` 作为 `AddWithRecover` 第一个参数。
+
+## Meta Pixel（Conversions API）
+
+`module/metapixel/events.go`：注册 / 充值事件里 **仅** 通过 `xrpool.AddWithRecover` 调用 `trackCompleteRegistration` / `trackPurchase`。
+
+## 审查清单
+
+改 Go 代码时：
+
+1. 全文件搜 `go func` 与 `\bgo [a-zA-Z]`（注释、字符串、`go.mod` 除外）— 出现即改为 `xrpool`。
+2. 第三方 HTTP、批量 IO、后台刷盘、热重启、WS 读循环等 **全部** 进池。
+3. `*_test.go` 并发测试在 `TestMain` 里 `xrpool.Init()`，任务用 `AddWithRecover`，勿裸 `go`。
+
+## 长生命周期 worker
+
+WebSocket `readPump`、S3 同步多 worker 等：每个 worker **一次** `AddWithRecover`，在闭包内 `for` 循环直至退出；**不要** 为每个 worker 再起裸 `go`。

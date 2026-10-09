@@ -219,12 +219,7 @@ func GetOffShelfGuildList(req *guilddto.OffShelfGuildListReq, visibleGuildIds []
 			guildIds = append(guildIds, row.ID)
 		}
 	}
-	unsettledMap := liveroomdao.ListGuildIncomeUnsettledTotalForCMS(guildIds)
-	for _, item := range list {
-		if guildId, err := strconv.ParseUint(item.ID, 10, 64); err == nil {
-			item.UnsettledTotalIncome = unsettledMap[guildId]
-		}
-	}
+	attachGuildListUnsettledIncome(list, guildIds)
 	return total, list
 }
 
@@ -254,6 +249,9 @@ func GetGuildList(req *guilddto.GuildListReq, visibleGuildIds []uint64, filterBy
 	if keyword := strings.TrimSpace(req.Name); keyword != "" {
 		m = m.WhereLike(string(liveentity.LiveGuildName), "%"+keyword+"%")
 	}
+	if req.GuildType != nil {
+		m = m.Where(string(liveentity.LiveGuildGuildType), *req.GuildType)
+	}
 
 	total, err := m.Count()
 	if err != nil {
@@ -273,13 +271,27 @@ func GetGuildList(req *guilddto.GuildListReq, visibleGuildIds []uint64, filterBy
 			guildIds = append(guildIds, row.ID)
 		}
 	}
-	unsettledMap := liveroomdao.ListGuildIncomeUnsettledTotalForCMS(guildIds)
-	for _, item := range list {
-		if guildId, err := strconv.ParseUint(item.ID, 10, 64); err == nil {
-			item.UnsettledTotalIncome = unsettledMap[guildId]
-		}
-	}
+	attachGuildListUnsettledIncome(list, guildIds)
 	return total, list
+}
+
+func attachGuildListUnsettledIncome(list []*guilddto.GuildListRes, guildIds []uint64) {
+	if len(list) == 0 {
+		return
+	}
+	unsettledTotalMap := liveroomdao.ListGuildIncomeUnsettledTotalForCMS(guildIds)
+	unsettledGiftMap := liveroomdao.ListGuildIncomeUnsettledGiftTotalForCMS(guildIds)
+	for _, item := range list {
+		guildId, err := strconv.ParseUint(item.ID, 10, 64)
+		if err != nil {
+			continue
+		}
+		if item.GuildType == liveentity.LiveGuildTypeCoinMerchant {
+			item.UnsettledTotalIncome = unsettledGiftMap[guildId]
+			continue
+		}
+		item.UnsettledTotalIncome = unsettledTotalMap[guildId]
+	}
 }
 
 func toGuildListRes(row *liveentity.LiveGuild) *guilddto.GuildListRes {

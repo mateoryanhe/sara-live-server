@@ -10,6 +10,7 @@ func Init() {
 	initCountryFlagCfg()
 	initCfEmailCfg()
 	initFirebaseCfg()
+	initMetaPixelCfg()
 	initDbBackupCfg()
 	initStaticCacheRule()
 	initDomainSiteMapping()

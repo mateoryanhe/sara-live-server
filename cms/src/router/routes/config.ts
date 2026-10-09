@@ -77,6 +77,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: 'Firebase登录'},
         },
         {
+            path: 'meta-pixel',
+            name: 'MetaPixelCfgManagement',
+            component: () => import('@/views/config/meta-pixel.vue'),
+            meta: {title: 'Meta Pixel'},
+        },
+        {
             path: 'haipay',
             name: 'HaiPayCfgManagement',
             component: () => import('@/views/config/haipay.vue'),

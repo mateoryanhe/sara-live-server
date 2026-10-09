@@ -30,6 +30,7 @@ import (
 	"xr-game-server/module/liveroom"
 	"xr-game-server/module/logquery"
 	"xr-game-server/module/message"
+	"xr-game-server/module/metapixel"
 	"xr-game-server/module/preload"
 	"xr-game-server/module/privacypolicy"
 	"xr-game-server/module/privateroombilling"
@@ -58,6 +59,7 @@ func Init() {
 	randomnick.Init()
 	usermaxid.Init()
 	auth.InitAuth()
+	metapixel.Init()
 	preload.Init()
 	currencylog.Init()
 	wallet.Init() // 须早于 vip/stat:美金入账时先发币加赠,再累计

@@ -1,6 +1,7 @@
 package upload
 
 import (
+	"context"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"xr-game-server/core/xrpool"
 	"xr-game-server/dto/uploaddto"
 	"xr-game-server/errercode"
 )
@@ -77,7 +79,9 @@ func StartSyncLocalStorageToS3() (*uploaddto.SyncLocalStorageToS3Res, error) {
 	st.lastError = ""
 	st.mu.Unlock()
 
-	go runSyncLocalStorageToS3(root)
+	xrpool.AddWithRecover(gctx.New(), func(_ context.Context) {
+		runSyncLocalStorageToS3(root)
+	})
 
 	return &uploaddto.SyncLocalStorageToS3Res{
 		Started:             true,
@@ -157,7 +161,7 @@ func runSyncLocalStorageToS3(root string) {
 	var wg sync.WaitGroup
 	for i := 0; i < workers; i++ {
 		wg.Add(1)
-		go func() {
+		xrpool.AddWithRecover(ctx, func(_ context.Context) {
 			defer wg.Done()
 			for j := range ch {
 				putErr := putLocalFileToS3(j.storedName, j.absPath)
@@ -174,7 +178,7 @@ func runSyncLocalStorageToS3(root string) {
 				}
 				localToS3Sync.mu.Unlock()
 			}
-		}()
+		})
 	}
 
 	for _, f := range files {

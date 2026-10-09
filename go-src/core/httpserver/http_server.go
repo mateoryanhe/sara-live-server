@@ -13,6 +13,7 @@ import (
 	"xr-game-server/core/hotrestart"
 	"xr-game-server/core/startup"
 	"xr-game-server/core/xrlog"
+	"xr-game-server/core/xrpool"
 )
 
 const (
@@ -43,7 +44,9 @@ func InitHttpServer() {
 	httpServer.BindHookHandler("/*", ghttp.HookAfterOutput, hookAPIRequestAfterOutput)
 	setupAppOpenApiHook()
 	enableHotRestartGraceful()
-	go waitHTTPServerReadyAndLogStartupEnd()
+	xrpool.AddWithRecover(gctx.New(), func(_ context.Context) {
+		waitHTTPServerReadyAndLogStartupEnd()
+	})
 	httpServer.Run()
 	hotrestart.NotifyOldProcessExit()
 }

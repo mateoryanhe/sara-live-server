@@ -1,6 +1,7 @@
 package hotrestart
 
 import (
+	"context"
 	"crypto/subtle"
 	"os"
 	"strings"
@@ -16,6 +17,7 @@ import (
 	"xr-game-server/core/shutdown"
 	"xr-game-server/core/syndb"
 	"xr-game-server/core/xrlog"
+	"xr-game-server/core/xrpool"
 	"xr-game-server/core/xrtimer"
 )
 
@@ -55,7 +57,9 @@ func TryTriggerHotRestart(auth string) (accepted bool, reason string) {
 	if !hotRestartTriggered.CompareAndSwap(false, true) {
 		return false, "already in progress"
 	}
-	go runHotRestart()
+	xrpool.AddWithRecover(gctx.New(), func(_ context.Context) {
+		runHotRestart()
+	})
 	return true, "accepted"
 }
 

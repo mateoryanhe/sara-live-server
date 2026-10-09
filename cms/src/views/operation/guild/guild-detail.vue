@@ -28,21 +28,33 @@
           </el-tab-pane>
 
           <el-tab-pane :label="t('pages.guildList.tabIncomeUnsettled')" name="incomeUnsettled">
-            <IncomePanel :data="incomeData?.incomeUnsettled" :updated-at="incomeData?.incomeUnsettled?.updatedAt"/>
+            <IncomePanel
+                for-guild
+                :data="incomeData?.incomeUnsettled"
+                :updated-at="incomeData?.incomeUnsettled?.updatedAt"
+            />
           </el-tab-pane>
 
           <el-tab-pane :label="t('pages.guildList.tabIncomeSettled')" name="incomeSettled">
             <IncomePanel
+                for-guild
+                guild-settled-view
                 :data="incomeData?.incomeSettled"
-                show-settlement-share
+                :settlement-salary="incomeData?.incomeSettled?.settlementSalary"
+                :settlement-share-amount="incomeData?.incomeSettled?.settlementShareAmount"
+                :settlement-receivable-usd="incomeData?.incomeSettled?.settlementReceivableUsd"
                 :updated-at="incomeData?.incomeSettled?.updatedAt"
             />
           </el-tab-pane>
 
           <el-tab-pane :label="t('pages.guildList.tabIncomeTotal')" name="incomeTotal">
             <IncomePanel
+                for-guild
+                guild-settled-view
                 :data="incomeData?.incomeTotal"
-                show-settlement-share
+                :settlement-salary="incomeData?.incomeTotal?.settlementSalary"
+                :settlement-share-amount="incomeData?.incomeTotal?.settlementShareAmount"
+                :settlement-receivable-usd="incomeData?.incomeTotal?.settlementReceivableUsd"
                 :updated-at="incomeData?.incomeTotal?.updatedAt"
             />
           </el-tab-pane>
@@ -59,7 +71,7 @@
             <SettlementLogPanel
                 :active="activeTab === 'settlementLog'"
                 :guild-id="guildId"
-                :guild-type="guildBasic.guildType"
+                :guild-type="guildBasic.guildType ?? 0"
             />
           </el-tab-pane>
 
@@ -82,7 +94,7 @@ import {useI18n} from 'vue-i18n'
 import {useRoute, useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {guildApi} from '@/api'
-import IncomePanel from './guild-detail-income-panel.vue'
+import IncomePanel from '@/views/user/anchor/anchor-detail-income-panel.vue'
 import ArchivePanel from './guild-detail-archive-panel.vue'
 import DailyLivePanel from './guild-detail-daily-live-panel.vue'
 import SettlementLogPanel from './guild-detail-settlement-log-panel.vue'
@@ -126,6 +138,7 @@ const guildBasic = computed<Guild | null>(() => {
     creatorName: parseQueryValue('creatorName'),
     description: parseQueryValue('description'),
     status: Number.isNaN(status) ? 0 : status,
+    guildType: Number(parseQueryValue('guildType')) || 0,
     createdAt: parseQueryValue('createdAt'),
     updatedAt: parseQueryValue('updatedAt'),
   }

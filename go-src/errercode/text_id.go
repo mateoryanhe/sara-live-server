@@ -131,5 +131,6 @@ func init() {
 		VoiceChatMicApplyListFull:       "Antrean permintaan mic penuh",
 		VoiceChatMicSeatLocked:          "Kursi mic terkunci",
 		VoiceChatMicSeatNotOccupied:     "Tidak ada orang di kursi mic ini",
+		OneToOneRoomCallBothAnchors:     "Panggilan video ruang 1v1 tidak tersedia antar host",
 	}
 }

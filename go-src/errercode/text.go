@@ -133,6 +133,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		VoiceChatMicApplyListFull:       "Mic request queue is full",
 		VoiceChatMicSeatLocked:          "This mic seat is locked",
 		VoiceChatMicSeatNotOccupied:     "No one is on this mic seat",
+		OneToOneRoomCallBothAnchors:     "1v1 room video calls are not available between anchors",
 	},
 	lang.LangZHCN: {
 		Success:                         "成功",
@@ -262,6 +263,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		VoiceChatMicApplyListFull:       "上麦申请人数已满",
 		VoiceChatMicSeatLocked:          "该麦位已锁，无法上麦",
 		VoiceChatMicSeatNotOccupied:     "该麦位无人，无法禁音",
+		OneToOneRoomCallBothAnchors:     "1v1房间通话不支持主播呼叫主播",
 	},
 	lang.LangZHTW: {
 		Success:                         "成功",
@@ -391,6 +393,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		VoiceChatMicApplyListFull:       "上麥申請人數已滿",
 		VoiceChatMicSeatLocked:          "該麥位已鎖，無法上麥",
 		VoiceChatMicSeatNotOccupied:     "該麥位無人，無法禁音",
+		OneToOneRoomCallBothAnchors:     "1v1房間通話不支援主播呼叫主播",
 	},
 }
 

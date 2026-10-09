@@ -289,7 +289,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('CoinMerchantManagement') || hasMenuPermission('CoinMerchantRechargeCfgManagement') || hasMenuPermission('CoinMerchantTransferLogList') || hasMenuPermission('CoinMerchantGuildTransferManagement') || hasMenuPermission('CoinMerchantGuildIncomeSettlementLogList') || hasMenuPermission('CoinMerchantPayoutDetailList')"
+            v-if="hasMenuPermission('CoinMerchantManagement') || hasMenuPermission('CoinMerchantGuildListManagement') || hasMenuPermission('CoinMerchantRechargeCfgManagement') || hasMenuPermission('CoinMerchantTransferLogList') || hasMenuPermission('CoinMerchantGuildTransferManagement') || hasMenuPermission('CoinMerchantGuildIncomeSettlementLogList') || hasMenuPermission('CoinMerchantPayoutDetailList')"
             index="/coin-merchant-module">
           <template #title>
             <el-icon>
@@ -302,6 +302,12 @@
               <Coin/>
             </el-icon>
             <span>{{ t('menu.CoinMerchantManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('CoinMerchantGuildListManagement')" index="/operation/guild/coin-merchant-guild-list">
+            <el-icon>
+              <Collection/>
+            </el-icon>
+            <span>{{ t('menu.CoinMerchantGuildListManagement') }}</span>
           </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('CoinMerchantRechargeCfgManagement')" index="/operation/recharge/coin-merchant-recharge-cfg-list">
             <el-icon>
@@ -600,7 +606,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer') || hasMenuPermission('CfEmailCfgManagement')"
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('MetaPixelCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer') || hasMenuPermission('CfEmailCfgManagement')"
             index="/config">
           <template #title>
             <el-icon>
@@ -677,7 +683,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('CfEmailCfgManagement')"
+              v-if="hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('MetaPixelCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('CfEmailCfgManagement')"
               index="/config/group/platform">
             <template #title>
               <el-icon>
@@ -690,6 +696,12 @@
                 <CreditCard/>
               </el-icon>
               <span>{{ t('menu.GooglePlayCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('MetaPixelCfgManagement')" index="/config/meta-pixel">
+              <el-icon>
+                <Promotion/>
+              </el-icon>
+              <span>{{ t('menu.MetaPixelCfgManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('HaiPayCfgManagement')" index="/config/haipay">
               <el-icon>
@@ -828,7 +840,7 @@ import {useI18n} from 'vue-i18n'
 import LayoutTabs from '@/components/layout/LayoutTabs.vue'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import {useLayoutTabs} from '@/composables/useLayoutTabs'
-import {ArrowDown, Bell, Box, Calendar, Coin, Collection, CollectionTag, Cpu, CreditCard, Delete, Document, EditPen, Expand, Fold, FolderOpened, Iphone, Key, List, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Refresh, Search, Service, Setting, UploadFilled, User, UserFilled, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Bell, Box, Calendar, Coin, Collection, CollectionTag, Cpu, CreditCard, Delete, Document, EditPen, Expand, Fold, FolderOpened, Iphone, Key, List, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Promotion, Refresh, Search, Service, Setting, UploadFilled, User, UserFilled, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {getIsAdmin, hasPermission} from '@/utils/permission'
 import {clearAuthSession} from '@/utils/auth'
 

@@ -3,19 +3,12 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>{{ t('menu.GuildManagement') }}</span>
+          <span>{{ t('menu.CoinMerchantGuildListManagement') }}</span>
         </div>
       </template>
       <div class="content">
         <div class="table-header">
           <el-button type="primary" @click="handleAdd">{{ t('pages.guildList.addGuild') }}</el-button>
-          <el-button
-              v-if="can('batchImportSalaryAnchor')"
-              type="warning"
-              @click="openSalaryImportDialog"
-          >
-            {{ t('pages.guildList.batchImportSalaryAnchor') }}
-          </el-button>
           <el-button
               v-if="can('batchImmediateSettlement')"
               :disabled="selectedGuildRows.length === 0"
@@ -46,43 +39,41 @@
 
         <el-table
             v-loading="loading"
+            class="coin-merchant-guild-table"
             :data="tableData"
+            fit
             highlight-current-row
             style="width: 100%"
             @current-change="handleCurrentRowChange"
             @selection-change="handleSelectionChange"
         >
-          <el-table-column fixed type="selection" width="48"/>
-          <el-table-column fixed label="#" type="index" width="55" :index="formatRowIndex"/>
-          <el-table-column label="ID" prop="id" width="190">
-            <template #default="{ row }">
-              <el-button v-if="canViewDetail" link type="primary" @click="openDetail(row)">
-                {{ row.id }}
-              </el-button>
-              <span v-else>{{ row.id }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column :label="t('pages.guildList.guildName')" min-width="120" prop="name" show-overflow-tooltip width="160"/>
-          <el-table-column :label="t('pages.guildList.unsettledTotalIncome')" width="140">
+          <el-table-column align="center" header-align="center" type="selection" width="48"/>
+          <el-table-column align="center" header-align="center" label="#" type="index" width="55" :index="formatRowIndex"/>
+          <el-table-column align="center" header-align="center" label="ID" prop="id" width="190"/>
+          <el-table-column
+              class-name="coin-merchant-guild-gift-col"
+              :label="t('pages.coinMerchantGuildList.giftIncomeCumulative')"
+              align="center"
+              header-align="center"
+              min-width="160"
+          >
             <template #default="{ row }">
               <span class="money-amount">{{ formatWalletBalance(row.unsettledTotalIncome) }}</span>
             </template>
           </el-table-column>
-          <el-table-column :label="t('pages.guildList.leader')" width="140" show-overflow-tooltip>
-            <template #default="{ row }">
-              {{ formatLeader(row) }}
-            </template>
+          <el-table-column
+              class-name="coin-merchant-guild-name-col"
+              :label="t('pages.guildList.guildName')"
+              align="center"
+              header-align="center"
+              prop="name"
+              show-overflow-tooltip
+              width="120"
+          />
+          <el-table-column :label="t('pages.guildList.sharePercent')" align="center" header-align="center" width="120">
+            <template #default="{ row }">{{ row.sharePercent ?? '-' }}</template>
           </el-table-column>
-          <el-table-column :label="t('pages.guildList.creator')" width="140" show-overflow-tooltip>
-            <template #default="{ row }">
-              {{ formatCreator(row) }}
-            </template>
-          </el-table-column>
-          <el-table-column :label="t('pages.guildList.description')" prop="description" show-overflow-tooltip/>
-          
-          <el-table-column :label="t('common.createdAt')" prop="createdAt" width="160"/>
-          <el-table-column :label="t('common.updatedAt')" prop="updatedAt" width="160"/>
-          <el-table-column fixed="right" :label="t('common.actions')" width="100">
+          <el-table-column :label="t('common.actions')" align="center" header-align="center" width="100">
             <template #default="{ row }">
               <el-dropdown v-if="hasRowActions" trigger="click" @command="(cmd: string) => handleRowCommand(row, cmd)">
                 <el-button size="small" type="primary">
@@ -158,6 +149,24 @@
         <el-form-item :label="t('pages.guildList.description')" prop="description">
           <el-input v-model="currentRow.description" :placeholder="t('pages.guildList.descriptionPlaceholder')" type="textarea"/>
         </el-form-item>
+        <el-form-item :label="t('pages.guildList.sharePercent')" prop="sharePercent">
+          <el-input-number
+              v-model="currentRow.sharePercent"
+              :max="100"
+              :min="0"
+              :precision="2"
+              :step="1"
+              controls-position="right"
+              style="width: 100%"
+          />
+        </el-form-item>
+        <el-alert
+            :closable="false"
+            show-icon
+            :title="t('pages.guildList.sharePercentTip')"
+            type="info"
+            style="margin-bottom: 12px"
+        />
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
@@ -202,46 +211,11 @@
       </template>
     </el-dialog>
 
-    <el-dialog
-        v-model="salaryImportDialogVisible"
-        :title="t('pages.guildList.batchImportSalaryAnchorTitle')"
-        width="560px"
-    >
-      <el-alert
-          :closable="false"
-          :title="t('pages.guildList.batchImportSalaryAnchorValidityTip')"
-          class="salary-import-tip"
-          show-icon
-          type="info"
-      />
-      <el-form
-          ref="salaryImportFormRef"
-          :model="salaryImportForm"
-          :rules="importFormRules"
-          label-width="80px"
-      >
-        <el-form-item :label="t('pages.guildList.importUserIds')" prop="userIdsText">
-          <el-input
-              v-model="salaryImportForm.userIdsText"
-              :autosize="{ minRows: 8, maxRows: 16 }"
-              :placeholder="t('pages.guildList.importUserIdsPlaceholder')"
-              type="textarea"
-          />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="salaryImportDialogVisible = false">{{ t('common.cancel') }}</el-button>
-        <el-button :loading="salaryImporting" type="primary" @click="handleSalaryImportSubmit">
-          {{ t('common.confirm') }}
-        </el-button>
-      </template>
-    </el-dialog>
-
   </div>
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, reactive, ref} from 'vue'
+import {computed, nextTick, onMounted, reactive, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {useRouter} from 'vue-router'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
@@ -254,6 +228,7 @@ import {usePagePermission} from '@/composables/usePagePermission'
 import {formatWalletBalance} from '@/utils/number-format'
 
 const GUILD_ANCHOR_IMPORT_RESULT_KEY = 'guildAnchorImportResult'
+const GUILD_TYPE_COIN_MERCHANT = 1
 
 interface SearchForm {
   name: string
@@ -264,7 +239,6 @@ interface GuildForm {
   name: string
   leaderId: string
   description: string
-  guildType: number
   sharePercent: number
 }
 
@@ -282,13 +256,9 @@ interface ImportGuildForm {
   userIdsText: string
 }
 
-interface SalaryImportForm {
-  userIdsText: string
-}
-
 const {t} = useI18n()
 const router = useRouter()
-const {can} = usePagePermission('GuildManagement')
+const {can} = usePagePermission('CoinMerchantGuildListManagement')
 const canViewDetail = computed(() => can('viewDetail'))
 const GUILD_ROW_ACTION_KEYS = [
   'edit',
@@ -300,6 +270,7 @@ const GUILD_ROW_ACTION_KEYS = [
   'offShelf',
 ] as const
 const hasRowActions = computed(() => canViewDetail.value || GUILD_ROW_ACTION_KEYS.some(key => can(key)))
+
 const loading = ref(false)
 const importing = ref(false)
 const immediateSettling = ref(false)
@@ -320,14 +291,7 @@ const importForm = ref<ImportGuildForm>({
   anchorType: 1,
   userIdsText: '',
 })
-const salaryImportDialogVisible = ref(false)
-const salaryImporting = ref(false)
-const salaryImportFormRef = ref<FormInstance>()
-const salaryImportForm = ref<SalaryImportForm>({userIdsText: ''})
-
-const searchForm = reactive<SearchForm>({
-  name: ''
-})
+const searchForm = reactive<SearchForm>({name: ''})
 
 const joinDialogVisible = ref(false)
 const joinDialogTitle = ref('')
@@ -347,15 +311,11 @@ const currentRow = ref<GuildForm>({
   name: '',
   leaderId: '',
   description: '',
-  guildType: 0,
-  sharePercent: 0,
+  sharePercent: 10,
 })
-
-const GUILD_TYPE_NORMAL = 0
+const formRef = ref<FormInstance>()
 
 const isEditingGuild = computed(() => Boolean(currentRow.value.id?.trim()))
-
-const formRef = ref<FormInstance>()
 
 const leaderDisplayText = computed(() => {
   if (selectedLeader.value) {
@@ -366,37 +326,6 @@ const leaderDisplayText = computed(() => {
   }
   return ''
 })
-
-const formatLeader = (row: Guild) => {
-  if (row.leaderName) {
-    return `${row.leaderName} (${row.leaderId})`
-  }
-  return row.leaderId || '-'
-}
-
-const formatCreator = (row: Guild) => {
-  if (row.creatorName) {
-    return `${row.creatorName} (${row.creatorId})`
-  }
-  if (row.creatorId && row.creatorId !== '0') {
-    return row.creatorId
-  }
-  return '-'
-}
-
-const openLeaderPicker = () => {
-  leaderPickerVisible.value = true
-}
-
-const clearLeader = () => {
-  currentRow.value.leaderId = ''
-  selectedLeader.value = null
-}
-
-const handleLeaderSelect = (user: CMSUser) => {
-  currentRow.value.leaderId = user.id
-  selectedLeader.value = user
-}
 
 const importFormRules = computed<FormRules>(() => ({
   userIdsText: [
@@ -417,19 +346,36 @@ const joinFormRules = computed<FormRules>(() => ({
 const formRules = computed<FormRules>(() => ({
   name: [
     {required: true, message: t('pages.guildList.nameRequired'), trigger: 'blur'},
-    {min: 2, max: 32, message: t('pages.guildList.nameLength'), trigger: 'blur'}
+    {min: 2, max: 32, message: t('pages.guildList.nameLength'), trigger: 'blur'},
+  ],
+  sharePercent: [
+    {required: true, message: t('pages.coinMerchantGuildList.sharePercentRequired'), trigger: 'change'},
   ],
   description: [
-    {max: 200, message: t('pages.guildList.descriptionMaxLength'), trigger: 'blur'}
-  ]
+    {max: 200, message: t('pages.guildList.descriptionMaxLength'), trigger: 'blur'},
+  ],
 }))
+
+const openLeaderPicker = () => {
+  leaderPickerVisible.value = true
+}
+
+const clearLeader = () => {
+  currentRow.value.leaderId = ''
+  selectedLeader.value = null
+}
+
+const handleLeaderSelect = (user: CMSUser) => {
+  currentRow.value.leaderId = user.id
+  selectedLeader.value = user
+}
 
 const fetchGuildList = async () => {
   loading.value = true
   try {
     const response = await guildApi.getGuildList({
       name: searchForm.name,
-      guildType: GUILD_TYPE_NORMAL,
+      guildType: GUILD_TYPE_COIN_MERCHANT,
       pageIndex: currentPage.value,
       pageSize: pageSize.value,
     })
@@ -440,7 +386,7 @@ const fetchGuildList = async () => {
       selectedGuild.value = null
     }
   } catch (error) {
-    console.error('fetch guild list failed:', error)
+    console.error('fetch coin merchant guild list failed:', error)
     ElMessage.error(t('pages.guildList.fetchFailed'))
   } finally {
     loading.value = false
@@ -457,8 +403,7 @@ const handleCurrentChange = (page: number) => {
   fetchGuildList()
 }
 
-const formatRowIndex = (index: number) =>
-    (currentPage.value - 1) * pageSize.value + index + 1
+const formatRowIndex = (index: number) => (currentPage.value - 1) * pageSize.value + index + 1
 
 const handleCurrentRowChange = (row: Guild | null) => {
   selectedGuild.value = row
@@ -514,6 +459,12 @@ const handleBatchImmediateSettlement = async () => {
   }
 }
 
+const resetSearch = () => {
+  searchForm.name = ''
+  currentPage.value = 1
+  fetchGuildList()
+}
+
 const handleRowCommand = (row: Guild, command: string) => {
   switch (command) {
     case 'viewDetail':
@@ -550,8 +501,7 @@ const handleAdd = () => {
     name: '',
     leaderId: '',
     description: '',
-    guildType: GUILD_TYPE_NORMAL,
-    sharePercent: 0,
+    sharePercent: 10,
   }
   selectedLeader.value = null
   dialogVisible.value = true
@@ -566,12 +516,9 @@ const handleEdit = (row: Guild) => {
     name: row.name,
     leaderId,
     description: row.description,
-    guildType: row.guildType ?? 0,
     sharePercent: row.sharePercent ?? 10,
   }
-  selectedLeader.value = leaderId && row.leaderName
-      ? {id: leaderId, name: row.leaderName} as CMSUser
-      : null
+  selectedLeader.value = leaderId && row.leaderName ? {id: leaderId, name: row.leaderName} as CMSUser : null
   dialogVisible.value = true
   nextTick(() => formRef.value?.clearValidate())
 }
@@ -587,7 +534,6 @@ const handleOffShelf = async (row: Guild) => {
         type: 'warning',
       },
     )
-
     await guildApi.deleteGuild(row.id)
     ElMessage.success(t('pages.guildList.offShelfSuccess'))
     fetchGuildList()
@@ -595,39 +541,40 @@ const handleOffShelf = async (row: Guild) => {
     if (error === 'cancel' || error === 'close') {
       return
     }
-    console.error('off shelf guild failed:', error)
+    console.error('off shelf coin merchant guild failed:', error)
     ElMessage.error(t('pages.guildList.offShelfFailed'))
   }
 }
 
 const handleSave = async () => {
-  if (!formRef.value) return
-
+  if (!formRef.value) {
+    return
+  }
   await formRef.value.validate(async (valid) => {
-    if (valid) {
-      try {
-        const leaderId = Number(currentRow.value.leaderId) || 0
-        const editing = isEditingGuild.value
-        const payload = {
-          name: currentRow.value.name,
-          leaderId,
-          description: currentRow.value.description,
-          guildType: GUILD_TYPE_NORMAL,
-          sharePercent: 0,
-        }
-        if (editing) {
-          await guildApi.updateGuild({...payload, id: currentRow.value.id})
-        } else {
-          await guildApi.createGuild(payload)
-        }
-
-        ElMessage.success(editing ? t('common.updateSuccess') : t('common.createSuccess'))
-        dialogVisible.value = false
-        fetchGuildList()
-      } catch (error) {
-        console.error('save guild failed:', error)
-        ElMessage.error(editing ? t('pages.guildList.updateFailed') : t('pages.guildList.createFailed'))
+    if (!valid) {
+      return
+    }
+    const editing = isEditingGuild.value
+    try {
+      const leaderId = Number(currentRow.value.leaderId) || 0
+      const payload = {
+        name: currentRow.value.name,
+        leaderId,
+        description: currentRow.value.description,
+        guildType: GUILD_TYPE_COIN_MERCHANT,
+        sharePercent: currentRow.value.sharePercent,
       }
+      if (editing) {
+        await guildApi.updateGuild({...payload, id: currentRow.value.id})
+      } else {
+        await guildApi.createGuild(payload)
+      }
+      ElMessage.success(editing ? t('common.updateSuccess') : t('common.createSuccess'))
+      dialogVisible.value = false
+      fetchGuildList()
+    } catch (error) {
+      console.error('save coin merchant guild failed:', error)
+      ElMessage.error(editing ? t('pages.guildList.updateFailed') : t('pages.guildList.createFailed'))
     }
   })
 }
@@ -699,11 +646,6 @@ const handleJoinSubmit = async () => {
   })
 }
 
-const resetSearch = () => {
-  searchForm.name = ''
-  fetchGuildList()
-}
-
 const parseImportUserIds = (text: string): ImportGuildAnchorRow[] => {
   const normalized = text.replace(/^\ufeff/, '').trim()
   if (!normalized) {
@@ -727,51 +669,6 @@ const parseImportUserIds = (text: string): ImportGuildAnchorRow[] => {
     rows.push({userId: token})
   }
   return rows
-}
-
-const openSalaryImportDialog = () => {
-  salaryImportForm.value = {userIdsText: ''}
-  salaryImportDialogVisible.value = true
-  salaryImportFormRef.value?.clearValidate()
-}
-
-const handleSalaryImportSubmit = async () => {
-  if (!salaryImportFormRef.value) {
-    return
-  }
-  await salaryImportFormRef.value.validate(async (valid) => {
-    if (!valid) {
-      return
-    }
-    const ids = parseImportUserIds(salaryImportForm.value.userIdsText).map(row => row.userId)
-    if (ids.length === 0) {
-      ElMessage.warning(t('pages.guildList.importEmpty'))
-      return
-    }
-    salaryImporting.value = true
-    try {
-      const response = await guildApi.batchImportSalaryAnchors({ids})
-      salaryImportDialogVisible.value = false
-      ElMessage.success(t('pages.guildList.batchImportSalaryAnchorResult', {
-        success: response.successCount ?? 0,
-        fail: response.failCount ?? 0,
-      }))
-      const failIds = response.failIds || []
-      if (failIds.length > 0) {
-        const visibleIds = failIds.slice(0, 50).join(', ')
-        const suffix = failIds.length > 50 ? '…' : ''
-        ElMessage.warning({
-          message: t('pages.guildList.batchImportSalaryAnchorFailIds', {ids: `${visibleIds}${suffix}`}),
-          duration: 8000,
-        })
-      }
-    } catch (error) {
-      console.error('batch import salary anchors failed:', error)
-      ElMessage.error(t('pages.guildList.importFailed'))
-    } finally {
-      salaryImporting.value = false
-    }
-  })
 }
 
 const openImportDialog = (row: Guild, anchorType: 1 | 7) => {
@@ -837,25 +734,13 @@ const openTransferInfoPage = (row: Guild) => {
   })
 }
 
-onMounted(() => {
-  fetchGuildList()
-})
-
 const openDetail = (row: Guild) => {
   router.push({
-    name: 'GuildDetail',
+    name: 'CoinMerchantGuildDetail',
     query: {
       id: row.id,
       name: row.name,
-      leaderId: row.leaderId,
-      leaderName: row.leaderName ?? '',
-      creatorId: row.creatorId ?? '',
-      creatorName: row.creatorName ?? '',
-      description: row.description ?? '',
-      status: String(row.status ?? 1),
-      guildType: '0',
-      createdAt: row.createdAt ?? '',
-      updatedAt: row.updatedAt ?? '',
+      sharePercent: String(row.sharePercent ?? ''),
     },
   })
 }
@@ -869,6 +754,10 @@ const handleViewMembers = (row: Guild) => {
     },
   })
 }
+
+onMounted(() => {
+  fetchGuildList()
+})
 </script>
 
 <style scoped>
@@ -889,10 +778,6 @@ const handleViewMembers = (row: Guild) => {
 }
 
 .import-tip {
-  margin-bottom: 16px;
-}
-
-.salary-import-tip {
   margin-bottom: 16px;
 }
 
@@ -918,6 +803,12 @@ const handleViewMembers = (row: Guild) => {
 
 .leader-picker-input {
   flex: 1;
+}
+
+:deep(.coin-merchant-guild-name-col .cell) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 </style>
