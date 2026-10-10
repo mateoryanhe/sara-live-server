@@ -6,7 +6,9 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/liveroomdto"
+	"xr-game-server/dto/trackingdto"
 	"xr-game-server/module/liveroom"
+	"xr-game-server/module/tracking"
 	"xr-game-server/module/upload"
 )
 
@@ -67,6 +69,11 @@ func (c *LiveRoomAppController) UpdateNotice(ctx context.Context, req *liveroomd
 // JoinRoom 加入直播间
 func (c *LiveRoomAppController) JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (res *liveroomdto.JoinRoomRes, err error) {
 	return liveroom.JoinRoom(ctx, req)
+}
+
+// ReportLiveFirstFrameRendered 上报直播首帧画面渲染完成(秀场 category=1)
+func (c *LiveRoomAppController) ReportLiveFirstFrameRendered(ctx context.Context, req *trackingdto.ReportLiveFirstFrameRenderedReq) (*trackingdto.ReportLiveFirstFrameRenderedRes, error) {
+	return tracking.ReportLiveFirstFrameRendered(ctx, req)
 }
 
 // LeaveRoom 离开直播间

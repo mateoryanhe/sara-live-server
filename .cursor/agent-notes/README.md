@@ -292,6 +292,7 @@ App/CMS 建单 API  ──►  recharge 业务（写订单、白名单）
 - **新增/改名 App 接口必须改 `gen_sofie.py` 再跑生成**，同步 `routes_gen.go` / `openapi_map_gen.go` / `README.md`；约定见 `.cursor/rules/sofie-app-api.mdc`
 - 对接表：`go-src/api/sofie/README.md`
 - Apifox/OpenAPI 只在 `config/local` 导出：旧 App 用 `openapiPath`/`swaggerPath`，Sofie 用独立的 `sofieOpenapiPath`/`sofieSwaggerPath`，测试/审核/正式配置不要加这些项
+- `RegAPIHandler` 裸路由（如 `/liveRoom/create`）GoFrame 不会自动生成 OpenAPI；导出时在 `core/httpserver/openapi_raw_routes.go` 的 `MergeOpenApiRawHandlerRoutes` 补全（App 过滤导出与 Sofie remap 前均会 merge）
 
 ## 1v1 房间独立表（2026-10-05）
 
@@ -305,6 +306,12 @@ App/CMS 建单 API  ──►  recharge 业务（写订单、白名单）
 - 麦位状态只认 `voice_chat_mic_seats.status`（1~4）；创建/开播/上麦等路径必须显式 `SetStatus`
 - **勿写**旧字段迁移、`Effective*`/`Normalize*` 读时兜底、兼容未发布版本的额外分支
 - App 麦位 UI：读 `voiceChatMicState`/cmd41 每席 `status`（1空闲 2锁麦 3在麦 4在麦禁音），说明见 DTO `VoiceChatMicSeatItem.status` 的 dc
+- 语聊 WS：cmd41 麦位广播、42 禁音单播、43 申请结果单播、**44 抱下麦单播**（`kickVoiceChatMic` 成功推送给被抱下观众）
+
+## CMS「埋点」一级菜单（2026-10-10）
+
+- **一级目录「埋点」**：每个业务事件单独一页；页内 **总数 + 日/周/月折线图（次数）**。
+- 示例事件：发起视频通话次数。路由/权限/后端统计约定见 **`cms-tracking-events.md`**。
 
 ## HaiPay AppId 测试/正式（2026-10-05）
 

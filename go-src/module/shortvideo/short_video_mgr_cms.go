@@ -68,7 +68,7 @@ func CreateShortVideo(ctx context.Context, req *shortvideodto.CreateShortVideoRe
 			return nil, err
 		}
 	}
-	authorId, err := createCMSAuthorUser(resolveCMSAuthorNickname(req.AuthorNickname), coverName)
+	authorId, err := createCMSAuthorUser(resolveCMSAuthorNickname(req.AuthorNickname))
 	if err != nil {
 		upload.DeleteUploadedFile(videoName)
 		upload.DeleteUploadedFile(coverName)

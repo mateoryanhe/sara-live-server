@@ -28,10 +28,10 @@ func OneToOneRoomCall(ctx context.Context, req *calldto.OneToOneRoomCallReq) (*c
 	if callerId == targetId {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	if err := ensureNotInCall(callerId); err != nil {
+	if err := ensureNotInCall(callerId, errercode.CallUserInCall); err != nil {
 		return nil, err
 	}
-	if err := ensureNotInCall(targetId); err != nil {
+	if err := ensureNotInCall(targetId, errercode.CallTargetUserInCall); err != nil {
 		return nil, err
 	}
 

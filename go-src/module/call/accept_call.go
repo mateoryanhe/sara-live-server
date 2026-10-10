@@ -20,7 +20,7 @@ func AcceptCall(ctx context.Context, req *calldto.AcceptCallReq) (*calldto.Accep
 	if receiverId == 0 {
 		return nil, errercode.CreateCode(errercode.EmptyUserId)
 	}
-	if err := ensureNotInCall(receiverId); err != nil {
+	if err := ensureNotInCall(receiverId, errercode.CallUserInCall); err != nil {
 		return nil, err
 	}
 

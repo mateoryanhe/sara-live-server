@@ -63,6 +63,20 @@ export interface UserStatTrend {
     monthly: UserStatTrendPoint[]
 }
 
+export interface TrackingEventTrendPoint {
+    time: string
+    count: number
+}
+
+export interface HotLiveRoomJoinTrendRes {
+    todayCount: number
+    weekCount: number
+    monthCount: number
+    daily: TrackingEventTrendPoint[]
+    weekly: TrackingEventTrendPoint[]
+    monthly: TrackingEventTrendPoint[]
+}
+
 export interface ResourceMetricPoint {
     time: string
     procMemMb: number
@@ -2125,35 +2139,6 @@ export interface SaveMetaPixelCfgReq {
 }
 
 export interface SaveMetaPixelCfgRes {
-    success: boolean
-    id: string
-}
-
-export interface FirebaseAnalyticsCfg {
-    id: string
-    enabled: number
-    projectId: string
-    clientConfigJson: string
-    serviceAccountJson: string
-    measurementApiSecret: string
-    createdAt: string
-    updatedAt: string
-}
-
-export interface GetFirebaseAnalyticsCfgRes {
-    cfg: FirebaseAnalyticsCfg | null
-}
-
-export interface SaveFirebaseAnalyticsCfgReq {
-    id?: number
-    enabled: number
-    projectId: string
-    clientConfigJson: string
-    serviceAccountJson: string
-    measurementApiSecret: string
-}
-
-export interface SaveFirebaseAnalyticsCfgRes {
     success: boolean
     id: string
 }

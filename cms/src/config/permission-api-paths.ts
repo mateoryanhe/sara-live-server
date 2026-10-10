@@ -4,6 +4,16 @@ import {getPageFromPermissionKey, PERMISSION_SEP} from './page-buttons'
 const PERMISSION_API_PATHS: Record<string, string> = {
     Dashboard: '/sysStat/getSysStat',
     'Dashboard:view': '/sysStat/getSysStat',
+    'Dashboard:goldReset': '/gold/sub',
+    'Dashboard:diamondReset': '/diamond/sub',
+
+    TrackingHotLiveRoomJoinManagement: '/trackingEvent/getHotLiveRoomJoinTrend',
+    'TrackingHotLiveRoomJoinManagement:view': '/trackingEvent/getHotLiveRoomJoinTrend',
+    'TrackingHotLiveRoomJoinManagement:firstFrameTrend': '/trackingEvent/getLiveFirstFrameRenderTrend',
+    'TrackingHotLiveRoomJoinManagement:leaveTrend': '/trackingEvent/getHotLiveRoomLeaveTrend',
+
+    TrackingCall1v1InitiateManagement: '/trackingEvent/getCall1v1InitiateTrend',
+    'TrackingCall1v1InitiateManagement:view': '/trackingEvent/getCall1v1InitiateTrend',
 
     UserList: '/account/getUserInfo',
     'UserList:view': '/account/getUserInfo',
@@ -14,8 +24,10 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'UserList:setSeniorAnchor': '/account/setSeniorAnchor',
     'UserList:goldAdd': '/gold/add',
     'UserList:goldSub': '/gold/sub',
+    'UserList:goldReset': '/gold/sub',
     'UserList:diamondAdd': '/diamond/add',
     'UserList:diamondSub': '/diamond/sub',
+    'UserList:diamondReset': '/diamond/sub',
     'UserList:ban': '/account/ban',
     'UserList:rankOff': '/account/setCanRank',
     'UserList:rankOn': '/account/setCanRank',
@@ -582,9 +594,6 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     MetaPixelCfgManagement: '/metaPixel/getMetaPixelCfg',
     'MetaPixelCfgManagement:view': '/metaPixel/getMetaPixelCfg',
     'MetaPixelCfgManagement:save': '/metaPixel/saveMetaPixelCfg',
-    FirebaseAnalyticsCfgManagement: '/firebaseAnalytics/getFirebaseAnalyticsCfg',
-    'FirebaseAnalyticsCfgManagement:view': '/firebaseAnalytics/getFirebaseAnalyticsCfg',
-    'FirebaseAnalyticsCfgManagement:save': '/firebaseAnalytics/saveFirebaseAnalyticsCfg',
 
     HaiPayCfgManagement: '/haipay/getHaiPayCfg',
     'HaiPayCfgManagement:view': '/haipay/getHaiPayCfg',

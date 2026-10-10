@@ -14,6 +14,28 @@ func initPushController() {
 
 // 以下 handler 仅用于 OpenAPI/Swagger 文档展示,按业务模块划分,模块内 cmd 降序.
 
+// --- 推送-语聊 ---
+
+// LiveRoomVoiceChatMicKicked cmd=44 抱下麦(推送给被抱下麦观众)
+func (c *PushController) LiveRoomVoiceChatMicKicked(_ context.Context, _ *pushdto.LiveRoomVoiceChatMicKickedPushReq) (*pushdto.LiveRoomVoiceChatMicKickedPushResp, error) {
+	return nil, nil
+}
+
+// LiveRoomVoiceChatMicApplyResult cmd=43 上麦申请结果(推送给申请人)
+func (c *PushController) LiveRoomVoiceChatMicApplyResult(_ context.Context, _ *pushdto.LiveRoomVoiceChatMicApplyResultPushReq) (*pushdto.LiveRoomVoiceChatMicApplyResultPushResp, error) {
+	return nil, nil
+}
+
+// LiveRoomVoiceChatMicSeatMute cmd=42 麦位禁音/解禁(推送给麦上用户)
+func (c *PushController) LiveRoomVoiceChatMicSeatMute(_ context.Context, _ *pushdto.LiveRoomVoiceChatMicSeatMutePushReq) (*pushdto.LiveRoomVoiceChatMicSeatMutePushResp, error) {
+	return nil, nil
+}
+
+// LiveRoomVoiceChatMicState cmd=41 语聊麦位全量状态(房间内广播)
+func (c *PushController) LiveRoomVoiceChatMicState(_ context.Context, _ *pushdto.LiveRoomVoiceChatMicStatePushReq) (*pushdto.LiveRoomVoiceChatMicStatePushResp, error) {
+	return nil, nil
+}
+
 // --- 推送-通话 ---
 
 // LiveRoomCallInvite cmd=39 主播邀请观众通话(推送给被邀请观众)

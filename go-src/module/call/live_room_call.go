@@ -33,10 +33,10 @@ func LiveRoomCall(ctx context.Context, req *calldto.LiveRoomCallReq) (*calldto.L
 	if callerId == anchorId {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	if err := ensureNotInCall(callerId); err != nil {
+	if err := ensureNotInCall(callerId, errercode.CallUserInCall); err != nil {
 		return nil, err
 	}
-	if err := ensureNotInCall(anchorId); err != nil {
+	if err := ensureNotInCall(anchorId, errercode.CallTargetUserInCall); err != nil {
 		return nil, err
 	}
 
@@ -100,6 +100,8 @@ func LiveRoomCall(ctx context.Context, req *calldto.LiveRoomCallReq) (*calldto.L
 	if agoraCfg != nil {
 		appId = agoraCfg.AppId
 	}
+
+	pubCall1v1InitiateTracking(callerId, anchorId, now)
 
 	return &calldto.LiveRoomCallRes{
 		OrderId:     strconv.FormatUint(order.ID, 10),

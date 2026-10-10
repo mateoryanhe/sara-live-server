@@ -9,6 +9,9 @@ const (
 	LangZHCN = lang.LangZHCN
 	LangZHTW = lang.LangZHTW
 	LangEN   = lang.LangEN
+	LangES   = lang.LangES
+	LangPT   = lang.LangPT
+	LangHI   = lang.LangHI
 	LangID   = lang.LangID
 )
 

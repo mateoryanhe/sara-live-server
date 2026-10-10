@@ -9,10 +9,12 @@ import {roleRoutes} from './role'
 import {shortVideoRoutes} from './shortvideo'
 import {gameRoutes} from './game'
 import {activityRoutes} from './activity'
+import {trackingRoutes} from './tracking'
 
 /** 按 views 目录分类的业务路由分组 */
 export const layoutRouteGroups: RouteRecordRaw[] = [
     dashboardRoutes,
+    trackingRoutes,
     userRoutes,
     operationRoutes,
     liveRoutes,

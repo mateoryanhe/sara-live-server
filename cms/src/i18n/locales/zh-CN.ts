@@ -3,6 +3,9 @@ import {buildPageMessages} from './messages/pages'
 
 const menu = {
   Dashboard: '仪表盘',
+  TrackingManagement: '埋点',
+  TrackingHotLiveRoomJoinManagement: '进入秀场直播间',
+  TrackingCall1v1InitiateManagement: '1v1视频通话',
   UserManagement: '用户管理',
   CoinMerchantModule: '币商管理',
   AnchorGuildManagement: '主播与工会管理',
@@ -117,7 +120,6 @@ const menu = {
   GooglePlayCfgManagement: 'Google Play',
   FirebaseCfgManagement: 'Firebase登录',
   MetaPixelCfgManagement: 'Meta Pixel 上报',
-  FirebaseAnalyticsCfgManagement: 'Firebase Analytics 埋点',
   HaiPayCfgManagement: 'HaiPay支付',
   CfEmailCfgManagement: '邮件SMTP发信',
   DbBackupCfgManagement: '数据库备份',

@@ -188,6 +188,9 @@
         <el-table-column :label="t('pages.videoCallLogList.receiverLastHeart')" width="170">
           <template #default="{ row }">{{ formatDate(row.receiverHeartTime) }}</template>
         </el-table-column>
+        <el-table-column :label="t('pages.videoCallLogList.callOrderId')" min-width="180" prop="id">
+          <template #default="{ row }">{{ row.id || '-' }}</template>
+        </el-table-column>
       </el-table>
 
       <div class="pagination">

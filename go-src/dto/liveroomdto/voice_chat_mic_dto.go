@@ -19,6 +19,19 @@ type VoiceChatMicSeatItem struct {
 	User      *VoiceChatMicUserBrief `json:"user" dc:"麦上用户(status=3或4时有值;status=1或2时为null)"`
 }
 
+// VoiceChatMicApplyResultPushItem 上麦申请结果推送给申请人(WS cmd43)
+type VoiceChatMicApplyResultPushItem struct {
+	RoomId    string `json:"roomId" dc:"直播间ID"`
+	Approved  bool   `json:"approved" dc:"是否同意(true=同意上麦,false=拒绝)"`
+	SeatIndex int    `json:"seatIndex" dc:"同意时占用的麦位(1~8;拒绝时为0)"`
+}
+
+// VoiceChatMicKickedPushItem 被房主抱下麦推送给该观众(WS cmd44)
+type VoiceChatMicKickedPushItem struct {
+	RoomId    string `json:"roomId" dc:"直播间ID"`
+	SeatIndex int    `json:"seatIndex" dc:"被抱下前所在麦位(1~8)"`
+}
+
 // VoiceChatMicSeatMutePushItem 麦位禁音/解禁推送给麦上用户
 type VoiceChatMicSeatMutePushItem struct {
 	RoomId    string `json:"roomId" dc:"直播间ID"`

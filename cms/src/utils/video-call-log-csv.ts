@@ -30,5 +30,6 @@ export function buildVideoCallLogCsvColumns(
     {header: t(`${ns}.totalCostDiamond`), value: row => row.totalCost},
     {header: t(`${ns}.lastChargeTime`), value: row => formatLiveRecordCsvDate(row.chargeTime)},
     {header: t('common.createdAt'), value: row => formatLiveRecordCsvDate(row.createdAt)},
+    {header: t(`${ns}.callOrderId`), value: row => row.id},
   ]
 }

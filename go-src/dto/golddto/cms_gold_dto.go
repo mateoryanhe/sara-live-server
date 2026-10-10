@@ -17,7 +17,7 @@ type CMSSubGoldReq struct {
 	g.Meta `path:"/sub" method:"post" summary:"CMS扣减用户金币" tags:"金币管理"`
 	UserId uint64  `json:"userId" v:"required#用户ID不能为空" dc:"用户ID"`
 	Amount float64 `json:"amount" v:"required|min:0.0001#金币数量不能为空|金币数量必须大于0" dc:"扣减数量(正数)"`
-	Reason uint8   `json:"reason" v:"required|in:6,7#调整原因不能为空|调整原因无效" dc:"调整原因 6测试 7GM补偿"`
+	Reason uint8   `json:"reason" v:"required|in:6,7,35#调整原因不能为空|调整原因无效" dc:"调整原因 6测试 7GM补偿 35重置余额"`
 }
 
 type CMSSubGoldRes struct {

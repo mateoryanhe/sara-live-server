@@ -15,8 +15,8 @@ import (
 
 const maxCMSAuthorNicknameRunes = 32
 
-// createCMSAuthorUser 为 CMS 上传短视频自动创建作者账号
-func createCMSAuthorUser(nickname, avatar string) (uint64, error) {
+// createCMSAuthorUser 为 CMS 上传短视频自动创建作者账号(头像留空,展示时用系统默认头像)
+func createCMSAuthorUser(nickname string) (uint64, error) {
 	nickname = normalizeCMSAuthorNickname(nickname)
 	if nickname == "" {
 		return 0, fmt.Errorf("empty cms author nickname")
@@ -28,9 +28,6 @@ func createCMSAuthorUser(nickname, avatar string) (uint64, error) {
 	}
 	user := userinfodao.GetUserInfoByUserId(account.ID)
 	user.SetNickname(nickname)
-	if avatar = strings.TrimSpace(avatar); avatar != "" {
-		user.SetAvatar(avatar)
-	}
 	user.SetUserType(entity.UserTypeCMSAuthor)
 	userinfodao.PublishUserInfo(user)
 	userinfodao.GetUserCumulativeStatByUserId(account.ID)

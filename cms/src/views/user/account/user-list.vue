@@ -197,8 +197,10 @@
                       {{ t('pages.userList.addGold') }}
                     </el-dropdown-item>
                     <el-dropdown-item v-if="can('goldSub')" command="gold-sub">{{ t('pages.userList.subGold') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="can('goldReset')" command="gold-reset">{{ t('pages.userList.resetGold') }}</el-dropdown-item>
                     <el-dropdown-item v-if="can('diamondAdd')" divided command="diamond-add">{{ t('pages.userList.addDiamond') }}</el-dropdown-item>
                     <el-dropdown-item v-if="can('diamondSub')" command="diamond-sub">{{ t('pages.userList.subDiamond') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="can('diamondReset')" command="diamond-reset">{{ t('pages.userList.resetDiamond') }}</el-dropdown-item>
                     <el-dropdown-item v-if="can('ban')" divided command="ban">
                       {{ scope.row.ban ? t('pages.userList.unban') : t('pages.userList.ban') }}
                     </el-dropdown-item>
@@ -495,10 +497,12 @@ import {gamePlatformApi} from '@/api/modules/gamePlatform'
 import ChannelRechargeTestDialog from '@/components/ChannelRechargeTestDialog.vue'
 import {formatWalletBalance, NUMBER_INPUT_DECIMALS} from '@/utils/number-format'
 import {usePagePermission} from '@/composables/usePagePermission'
+import {useWalletCurrencyReset} from '@/composables/useWalletCurrencyReset'
 import {formatServerDateTime as formatDate, formatServerNowPlusDays} from '@/utils/server-datetime'
 
 const {t} = useI18n()
 const {can} = usePagePermission('UserList')
+const {resetWalletCurrency, walletBalanceNumber} = useWalletCurrencyReset()
 const canViewDetail = computed(() => can('viewDetail'))
 const canViewAnchorDetail = computed(() => can('viewAnchorDetail'))
 const showSetAnchorType = computed(() => can('setAnchorType'))
@@ -514,8 +518,10 @@ const ROW_ACTION_KEYS = [
   'setAnchorType',
   'goldAdd',
   'goldSub',
+  'goldReset',
   'diamondAdd',
   'diamondSub',
+  'diamondReset',
   'ban',
   'rankOff',
   'rankOn',
@@ -1012,11 +1018,17 @@ const handleRowCommand = (row: UserInfo, command: string) => {
     case 'gold-sub':
       openCurrencyDialog(row, 'gold', 'sub')
       break
+    case 'gold-reset':
+      handleResetWalletCurrency(row, 'gold')
+      break
     case 'diamond-add':
       openCurrencyDialog(row, 'diamond', 'add')
       break
     case 'diamond-sub':
       openCurrencyDialog(row, 'diamond', 'sub')
+      break
+    case 'diamond-reset':
+      handleResetWalletCurrency(row, 'diamond')
       break
     case 'ban':
       handleBanAction(row)
@@ -1282,6 +1294,20 @@ const submitAnchorType = async () => {
       anchorTypeSubmitting.value = false
     }
   })
+}
+
+const handleResetWalletCurrency = async (row: UserInfo, type: CurrencyType) => {
+  const balance = walletBalanceNumber(type === 'gold' ? row.gold : row.diamond)
+  try {
+    const ok = await resetWalletCurrency(row.id, type, balance)
+    if (ok) {
+      await fetchUserList(true)
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('reset wallet currency failed:', error)
+    }
+  }
 }
 
 const afterCurrencyChangeSuccess = () => {

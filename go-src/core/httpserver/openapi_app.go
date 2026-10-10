@@ -109,6 +109,9 @@ func filterAppOpenApiJSON(base *goai.OpenApiV3, cmsSet map[string]struct{}) ([]b
 		}
 		paths[route] = pathMap
 	}
+	if err := MergeOpenApiRawHandlerRoutes(doc); err != nil {
+		return nil, err
+	}
 	return json.Marshal(doc)
 }
 

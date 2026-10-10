@@ -76,12 +76,9 @@ func processAbnormalCallOrder(order *entity.CallOrder, now time.Time) bool {
 		return false
 	}
 	if order.IsCalling() {
+		// 振铃阶段仅做呼叫超时(60s);不要求 callHeart,避免接听前被误判为心跳超时(status=7).
 		if now.Sub(order.CallStartTime) >= callRingTimeout {
 			finishCallOrderOnRingTimeout(order, now)
-			return true
-		}
-		if isCallPartyHeartOffline(order.CallerHeartTime, now) {
-			finishCallOrderOnHeartTimeout(order, now)
 			return true
 		}
 		return false

@@ -3,7 +3,8 @@ package errercode
 import "xr-game-server/constants/lang"
 
 // codeTextMap 错误码的多语言文案表
-// 新增/调整错误码时,需要同步在每个语言映射中维护对应文字
+// 语言: zh-CN / en / es / pt / hi / id(见 text_id.go) / zh-TW; es/pt/hi 初值由 text_lang_init 自 en 复制
+// 新增/调整错误码时: 至少维护 en + zh-CN(+ zh-TW); id 在 text_id.go; es/pt/hi 需重跑服务或同步 en 副本
 var codeTextMap = map[lang.Lang]map[XRCode]string{
 	lang.LangEN: {
 		Success:                         "OK",
@@ -86,6 +87,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		EntryEffectNonExist:             "Entry effect does not exist",
 		ShortVideoMustPayToWatch:        "This short video requires payment to watch",
 		CallUserInCall:                  "You are already in a call",
+		CallTargetUserInCall:            "The user is already in a call",
 		CallOrderNonExist:               "Call order does not exist",
 		CallOrderStateInvalid:           "Call order state does not allow this operation",
 		BotAnchorNonExist:               "Bot anchor does not exist",
@@ -216,6 +218,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		EntryEffectNonExist:             "进场特效不存在",
 		ShortVideoMustPayToWatch:        "短视频必须付费观看",
 		CallUserInCall:                  "您正在通话中,无法发起新通话",
+		CallTargetUserInCall:            "对方正在通话中,请稍后再试",
 		CallOrderNonExist:               "通话订单不存在",
 		CallOrderStateInvalid:           "通话订单状态不允许此操作",
 		BotAnchorNonExist:               "机器人主播不存在",
@@ -346,6 +349,7 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 		EntryEffectNonExist:             "進場特效不存在",
 		ShortVideoMustPayToWatch:        "短視頻必須付費觀看",
 		CallUserInCall:                  "您正在通話中,無法發起新通話",
+		CallTargetUserInCall:            "對方正在通話中,請稍後再試",
 		CallOrderNonExist:               "通話訂單不存在",
 		CallOrderStateInvalid:           "通話訂單狀態不允許此操作",
 		BotAnchorNonExist:               "機器人主播不存在",
@@ -397,18 +401,27 @@ var codeTextMap = map[lang.Lang]map[XRCode]string{
 	},
 }
 
-// GetMsg 返回错误码在指定语言下的提示文字;
-// 未匹配目标语言则回落到默认语言;再未匹配则返回空字符串
+// GetMsg 返回错误码在指定语言下的提示文字; 按 langFallbackChain 逐级回落
 func GetMsg(code XRCode, l lang.Lang) string {
-	if m, ok := codeTextMap[l]; ok {
-		if s, ok2 := m[code]; ok2 {
-			return s
-		}
-	}
-	if m, ok := codeTextMap[lang.DefaultLang]; ok {
-		if s, ok2 := m[code]; ok2 {
-			return s
+	for _, try := range langFallbackChain(l) {
+		if m, ok := codeTextMap[try]; ok {
+			if s, ok2 := m[code]; ok2 && s != "" {
+				return s
+			}
 		}
 	}
 	return ""
+}
+
+func langFallbackChain(l lang.Lang) []lang.Lang {
+	switch l {
+	case lang.LangZHCN:
+		return []lang.Lang{lang.LangZHCN, lang.LangEN}
+	case lang.LangZHTW:
+		return []lang.Lang{lang.LangZHTW, lang.LangZHCN, lang.LangEN}
+	case lang.LangES, lang.LangPT, lang.LangHI, lang.LangID:
+		return []lang.Lang{l, lang.LangEN}
+	default:
+		return []lang.Lang{lang.LangEN, lang.LangZHCN}
+	}
 }

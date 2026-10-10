@@ -84,6 +84,7 @@ func init() {
 		EntryEffectNonExist:             "Efek masuk tidak ditemukan",
 		ShortVideoMustPayToWatch:        "Video pendek ini memerlukan pembayaran untuk ditonton",
 		CallUserInCall:                  "Anda sedang dalam panggilan",
+		CallTargetUserInCall:            "Pengguna sedang dalam panggilan",
 		CallOrderNonExist:               "Pesanan panggilan tidak ditemukan",
 		CallOrderStateInvalid:           "Status pesanan panggilan tidak mengizinkan operasi ini",
 		BotAnchorNonExist:               "Anchor bot tidak ditemukan",

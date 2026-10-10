@@ -45,11 +45,15 @@ export interface PermissionModuleNode {
     children?: PermissionModuleNode[]
 }
 
+const DASHBOARD_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
+    {id: 'currency', titleKey: 'pages.moduleList.groupCurrency', buttonKeys: ['goldReset', 'diamondReset']},
+]
+
 const USER_LIST_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
     {id: 'access', titleKey: 'pages.moduleList.groupAccess', buttonKeys: ['view', 'search']},
     {id: 'navigate', titleKey: 'pages.moduleList.groupNavigate', buttonKeys: ['viewDetail', 'viewAnchorDetail']},
     {id: 'anchor', titleKey: 'pages.moduleList.groupAnchor', buttonKeys: ['setAnchor', 'setSeniorAnchor', 'setAnchorType']},
-    {id: 'currency', titleKey: 'pages.moduleList.groupCurrency', buttonKeys: ['goldAdd', 'goldSub', 'diamondAdd', 'diamondSub']},
+    {id: 'currency', titleKey: 'pages.moduleList.groupCurrency', buttonKeys: ['goldAdd', 'goldSub', 'goldReset', 'diamondAdd', 'diamondSub', 'diamondReset']},
     {
         id: 'account',
         titleKey: 'pages.moduleList.groupAccount',
@@ -145,7 +149,16 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
         kind: 'group',
         id: 'dashboard',
         titleKey: 'menu.Dashboard',
-        children: [page('Dashboard')],
+        children: [page('Dashboard', {buttonGroups: DASHBOARD_BUTTON_GROUPS})],
+    },
+    {
+        kind: 'group',
+        id: 'tracking',
+        titleKey: 'menu.TrackingManagement',
+        children: [
+            page('TrackingHotLiveRoomJoinManagement'),
+            page('TrackingCall1v1InitiateManagement'),
+        ],
     },
     {
         kind: 'group',
@@ -340,7 +353,6 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             group('config-platform', 'menu.ConfigPlatformGroup', [
                 page('GooglePlayCfgManagement'),
                 page('MetaPixelCfgManagement'),
-                page('FirebaseAnalyticsCfgManagement'),
                 page('HaiPayCfgManagement'),
                 page('CfEmailCfgManagement'),
                 page('DbBackupCfgManagement'),

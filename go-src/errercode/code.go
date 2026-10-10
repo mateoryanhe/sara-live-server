@@ -149,7 +149,7 @@ const (
 	EntryEffectNonExist XRCode = 133
 	// ShortVideoMustPayToWatch 短视频必须付费观看
 	ShortVideoMustPayToWatch XRCode = 134
-	// CallUserInCall 用户正在通话中
+	// CallUserInCall 当前用户正在通话中(无法发起或接听新通话)
 	CallUserInCall XRCode = 135
 	// CallOrderNonExist 通话订单不存在
 	CallOrderNonExist XRCode = 136
@@ -247,6 +247,8 @@ const (
 	VoiceChatMicSeatNotOccupied XRCode = 183
 	// OneToOneRoomCallBothAnchors 1v1房间通话(source=3)双方均为主播
 	OneToOneRoomCallBothAnchors XRCode = 184
+	// CallTargetUserInCall 对方用户正在通话中(主叫发起时对方忙线)
+	CallTargetUserInCall XRCode = 185
 )
 
 type XError struct {

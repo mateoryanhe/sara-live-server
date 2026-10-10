@@ -304,6 +304,7 @@ func ApproveVoiceChatMicApply(ctx context.Context, req *liveroomdto.ApproveVoice
 		return nil, errercode.CreateCode(voiceChatMicAssignAudienceSeatErr(room.ID, room.LiveRecordId, preferredSeat))
 	}
 	broadcastVoiceChatMicState(room.ID)
+	pushVoiceChatMicApplyResultToUser(room.ID, req.UserId, true, seatIndex)
 	return &liveroomdto.ApproveVoiceChatMicApplyRes{Success: true, SeatIndex: seatIndex}, nil
 }
 
@@ -354,6 +355,30 @@ func pushVoiceChatMicSeatMuteToUser(roomId, userId uint64, seatIndex int, muted 
 		Muted:     muted,
 	}
 	push.Data(userId, cmd.LiveRoomVoiceChatMicSeatMute, item)
+}
+
+func pushVoiceChatMicApplyResultToUser(roomId, userId uint64, approved bool, seatIndex int) {
+	if roomId == 0 || userId == 0 {
+		return
+	}
+	if !approved {
+		seatIndex = 0
+	}
+	push.Data(userId, cmd.LiveRoomVoiceChatMicApplyResult, &liveroomdto.VoiceChatMicApplyResultPushItem{
+		RoomId:    strconv.FormatUint(roomId, 10),
+		Approved:  approved,
+		SeatIndex: seatIndex,
+	})
+}
+
+func pushVoiceChatMicKickedToUser(roomId, userId uint64, seatIndex int) {
+	if roomId == 0 || userId == 0 {
+		return
+	}
+	push.Data(userId, cmd.LiveRoomVoiceChatMicKicked, &liveroomdto.VoiceChatMicKickedPushItem{
+		RoomId:    strconv.FormatUint(roomId, 10),
+		SeatIndex: seatIndex,
+	})
 }
 
 func setVoiceChatMicSeatMutedByAnchor(room *liveentity.LiveRoom, anchorId uint64, seatIndex int, mute bool) error {
@@ -619,6 +644,7 @@ func RejectVoiceChatMicApply(ctx context.Context, req *liveroomdto.RejectVoiceCh
 		return nil, errercode.CreateCode(errercode.VoiceChatMicApplyNotFound)
 	}
 	liveroomdao.CancelVoiceChatMicApply(room.ID, req.UserId)
+	pushVoiceChatMicApplyResultToUser(room.ID, req.UserId, false, 0)
 	return &liveroomdto.RejectVoiceChatMicApplyRes{Success: true}, nil
 }
 
@@ -657,13 +683,17 @@ func KickVoiceChatMic(ctx context.Context, req *liveroomdto.KickVoiceChatMicReq)
 		return nil, errercode.CreateCode(errercode.VoiceChatMicHostSeatLocked)
 	}
 
-	if seatIndex, _ := voiceChatMicUserOnSeat(room.ID, req.UserId); seatIndex == liveentity.VoiceChatHostSeatIndex {
+	seatIndex, onSeat := voiceChatMicUserOnSeat(room.ID, req.UserId)
+	if onSeat && seatIndex == liveentity.VoiceChatHostSeatIndex {
 		return nil, errercode.CreateCode(errercode.VoiceChatMicHostSeatLocked)
 	}
 	if !voiceChatMicClearUserFromSeat(room.ID, room.LiveRecordId, req.UserId) {
 		return nil, errercode.CreateCode(errercode.VoiceChatMicNotOnSeat)
 	}
 	liveroomdao.CancelVoiceChatMicApply(room.ID, req.UserId)
+	if onSeat {
+		pushVoiceChatMicKickedToUser(room.ID, req.UserId, seatIndex)
+	}
 	broadcastVoiceChatMicState(room.ID)
 	return &liveroomdto.KickVoiceChatMicRes{Success: true}, nil
 }

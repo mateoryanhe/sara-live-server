@@ -71,6 +71,8 @@ const (
 	ReasonGoldTransferIn Reason = 33
 	// ReasonInviteRechargeReward 邀请充值返还(邀请人)
 	ReasonInviteRechargeReward Reason = 34
+	// ReasonGmAdjustReset CMS 后台重置用户金币/钻石余额为 0
+	ReasonGmAdjustReset Reason = 35
 )
 
 // String 返回枚举的英文标识(用于日志/调试,不参与多语言展示;
@@ -141,6 +143,8 @@ func (r Reason) String() string {
 		return "GoldTransferIn"
 	case ReasonInviteRechargeReward:
 		return "InviteRechargeReward"
+	case ReasonGmAdjustReset:
+		return "GmAdjustReset"
 	default:
 		return "Unknown"
 	}

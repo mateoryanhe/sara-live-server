@@ -27,8 +27,11 @@ func finishCallOrderIfHeartTimeout(callUser *entity.CallUser) {
 	finishCallOrderOnHeartTimeout(order, time.Now())
 }
 
-// ensureNotInCall 校验用户是否正在通话中
-func ensureNotInCall(userId uint64) error {
+// ensureNotInCall 校验用户是否正在通话中; busyCode 区分「本人忙线」与「对方忙线」等提示.
+func ensureNotInCall(userId uint64, busyCode errercode.XRCode) error {
+	if busyCode == 0 {
+		busyCode = errercode.CallUserInCall
+	}
 	callUser := calldao.GetUserById(userId)
 	if callUser == nil || callUser.CallOrderId == 0 || callUser.HeartTime == nil {
 		return nil
@@ -37,7 +40,7 @@ func ensureNotInCall(userId uint64) error {
 	finishCallOrderIfHeartTimeout(callUser)
 
 	if time.Since(*callUser.HeartTime) < callActiveHeartInterval {
-		return errercode.CreateCode(errercode.CallUserInCall)
+		return errercode.CreateCode(busyCode)
 	}
 	return nil
 }

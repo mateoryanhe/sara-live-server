@@ -77,4 +77,8 @@ const (
 	LiveRoomVoiceChatMicState = 41
 	//语聊房麦位禁音推送(推送给被禁音/解禁用户)
 	LiveRoomVoiceChatMicSeatMute = 42
+	//语聊房上麦申请结果推送(推送给申请人:房主同意或拒绝)
+	LiveRoomVoiceChatMicApplyResult = 43
+	//语聊房抱下麦推送(推送给被抱下麦的观众)
+	LiveRoomVoiceChatMicKicked = 44
 )

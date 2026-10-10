@@ -83,7 +83,6 @@ import {privacyPolicyMessages} from './privacy-policy'
 import {googlePlayMessages} from './google-play'
 import {firebaseMessages} from './firebase'
 import {metaPixelMessages} from './meta-pixel'
-import {firebaseAnalyticsMessages} from './firebase-analytics'
 import {haipayMessages} from './haipay'
 import {cfEmailMessages} from './cf-email'
 import {dbBackupMessages} from './db-backup'
@@ -98,6 +97,8 @@ import {dataSyncMessages} from './data-sync'
 import {resourceMonitorMessages} from './resource-monitor'
 import {serverLogExplorerMessages} from './server-log-explorer'
 import {dashboardMessages} from './dashboard'
+import {trackingHotLiveRoomJoinMessages} from './tracking-hot-live-room-join'
+import {trackingCall1v1InitiateMessages} from './tracking-call-1v1-initiate'
 
 const pageMessageBuilders = [
   ['userList', userListMessages],
@@ -184,7 +185,6 @@ const pageMessageBuilders = [
   ['firebase', firebaseMessages],
   ['haipay', haipayMessages],
   ['metaPixel', metaPixelMessages],
-  ['firebaseAnalytics', firebaseAnalyticsMessages],
   ['cfEmail', cfEmailMessages],
   ['dbBackup', dbBackupMessages],
   ['uploadResource', uploadResourceMessages],
@@ -198,6 +198,8 @@ const pageMessageBuilders = [
   ['resourceMonitor', resourceMonitorMessages],
   ['serverLogExplorer', serverLogExplorerMessages],
   ['dashboard', dashboardMessages],
+  ['trackingHotLiveRoomJoin', trackingHotLiveRoomJoinMessages],
+  ['trackingCall1v1Initiate', trackingCall1v1InitiateMessages],
 ] as const
 
 export type PageNamespace = typeof pageMessageBuilders[number][0]

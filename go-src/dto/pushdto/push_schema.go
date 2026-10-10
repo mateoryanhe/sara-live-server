@@ -26,7 +26,50 @@ const (
 	PushTagCall           = "推送-通话"
 	PushTagDirectGift     = "推送-定向送礼"
 	PushTagFollow         = "推送-关注"
+	PushTagVoiceChat      = "推送-语聊"
 )
+
+// --- 推送-语聊 ---
+
+// LiveRoomVoiceChatMicKickedPushReq cmd=44 抱下麦(推送给被抱下麦观众)
+type LiveRoomVoiceChatMicKickedPushReq struct {
+	g.Meta `path:"/liveRoomVoiceChatMicKicked" method:"post" summary:"推送 cmd=44 语聊抱下麦(推送给被抱下麦观众)" description:"房主调用 kickVoiceChatMic 抱下麦成功后,单播给该观众;客户端应停止推流并更新麦位 UI(可同时处理 cmd41 广播)" tags:"推送-语聊"`
+}
+
+type LiveRoomVoiceChatMicKickedPushResp struct {
+	Cmd  int                                    `json:"cmd" dc:"命令字 44"`
+	Data *liveroomdto.VoiceChatMicKickedPushItem `json:"data"`
+}
+
+// LiveRoomVoiceChatMicApplyResultPushReq cmd=43 上麦申请结果(推送给申请人)
+type LiveRoomVoiceChatMicApplyResultPushReq struct {
+	g.Meta `path:"/liveRoomVoiceChatMicApplyResult" method:"post" summary:"推送 cmd=43 语聊上麦申请结果(推送给申请人)" description:"房主同意或拒绝上麦申请后,单播给该申请人" tags:"推送-语聊"`
+}
+
+type LiveRoomVoiceChatMicApplyResultPushResp struct {
+	Cmd  int                                          `json:"cmd" dc:"命令字 43"`
+	Data *liveroomdto.VoiceChatMicApplyResultPushItem `json:"data"`
+}
+
+// LiveRoomVoiceChatMicSeatMutePushReq cmd=42 麦位禁音/解禁(推送给该麦上用户)
+type LiveRoomVoiceChatMicSeatMutePushReq struct {
+	g.Meta `path:"/liveRoomVoiceChatMicSeatMute" method:"post" summary:"推送 cmd=42 语聊麦位禁音/解禁(推送给麦上用户)" description:"主播对某麦位禁音或解禁后,推送给该麦位上的用户(单播);客户端应关闭/恢复推流或展示禁音态" tags:"推送-语聊"`
+}
+
+type LiveRoomVoiceChatMicSeatMutePushResp struct {
+	Cmd  int                                       `json:"cmd" dc:"命令字 42"`
+	Data *liveroomdto.VoiceChatMicSeatMutePushItem `json:"data"`
+}
+
+// LiveRoomVoiceChatMicStatePushReq cmd=41 语聊麦位全量状态
+type LiveRoomVoiceChatMicStatePushReq struct {
+	g.Meta `path:"/liveRoomVoiceChatMicState" method:"post" summary:"推送 cmd=41 语聊麦位全量状态(推送给房间内观众,含主播)" description:"上麦/下麦/锁麦/模式变更等导致麦位变化后广播;data 与 POST /liveRoom/voiceChatMicState 响应结构一致" tags:"推送-语聊"`
+}
+
+type LiveRoomVoiceChatMicStatePushResp struct {
+	Cmd  int                                   `json:"cmd" dc:"命令字 41"`
+	Data *liveroomdto.VoiceChatMicStatePayload `json:"data"`
+}
 
 // --- 推送-通话 ---
 

@@ -4,6 +4,9 @@ import type zhCN from './zh-CN'
 
 const menu: Record<keyof typeof zhCN.menu, string> = {
   Dashboard: 'Dashboard',
+  TrackingManagement: 'Tracking',
+  TrackingHotLiveRoomJoinManagement: 'Showcase room joins',
+  TrackingCall1v1InitiateManagement: '1v1 video calls',
   UserManagement: 'Users',
   CoinMerchantModule: 'Coin Merchant Management',
   AnchorGuildManagement: 'Anchors & Guilds',
@@ -109,7 +112,6 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   GooglePlayCfgManagement: 'Google Play',
   FirebaseCfgManagement: 'Firebase Login',
   MetaPixelCfgManagement: 'Meta Pixel (Server)',
-  FirebaseAnalyticsCfgManagement: 'Firebase Analytics',
   HaiPayCfgManagement: 'HaiPay',
   CfEmailCfgManagement: 'Amazon SES Email',
   DbBackupCfgManagement: 'DB Backup',

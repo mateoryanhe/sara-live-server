@@ -2,6 +2,8 @@ package liveroom
 
 import (
 	"context"
+	"time"
+
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
@@ -18,7 +20,9 @@ func LeaveRoom(ctx context.Context, req *liveroomdto.LeaveRoomReq) (*liveroomdto
 	if reqId > 0 && user.LiveRoomId == req.RoomId && user.LiveRoomVer > reqId {
 		return &liveroomdto.LeaveRoomRes{}, nil
 	}
+	now := time.Now()
 	exitRoom(userId, req.RoomId)
+	pubShowcaseLiveRoomLeaveTracking(userId, req.RoomId, now)
 	return &liveroomdto.LeaveRoomRes{
 		OnlineCount: getLenForRoom(req.RoomId),
 	}, nil

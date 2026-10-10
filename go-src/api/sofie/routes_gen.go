@@ -25,9 +25,6 @@ func Init() {
 		{Path: "/signInByH5Device", Handler: jsonHandler((&controller.AuthController{}).H5DeviceLogin)},
 		{Path: "/resetMobileSecret", Handler: jsonHandler((&controller.AuthController{}).PhoneResetPassword)},
 	})
-	httpserver.RegNonAuthAppRouteGroup("/sofie/analytics", []httpserver.AppRoute{
-		{Path: "/fetchSdkCfg", Handler: jsonHandler((&controller.FirebaseAnalyticsAppController{}).GetClientCfgForApp)},
-	})
 	httpserver.RegAppRouteGroup("/sofie/bonus", []httpserver.AppRoute{
 		{Path: "/fetchFirstPay", Handler: jsonHandler((&controller.FirstRechargeActivityAppController{}).FirstRechargeActivityCfgForApp)},
 	})
@@ -185,6 +182,7 @@ func Init() {
 		{Path: "/replaceCover", Handler: jsonHandler((&controller.LiveRoomAppController{}).UpdateCover)},
 		{Path: "/replaceNotice", Handler: jsonHandler((&controller.LiveRoomAppController{}).UpdateNotice)},
 		{Path: "/enterHall", Handler: jsonHandler((&controller.LiveRoomAppController{}).JoinRoom)},
+		{Path: "/notifyLiveFirstFrameReady", Handler: jsonHandler((&controller.LiveRoomAppController{}).ReportLiveFirstFrameRendered)},
 		{Path: "/exitHall", Handler: jsonHandler((&controller.LiveRoomAppController{}).LeaveRoom)},
 		{Path: "/fetchRound", Handler: jsonHandler((&controller.LiveRoomAppController{}).GetLiveRecord)},
 		{Path: "/browseAudience", Handler: jsonHandler((&controller.LiveRoomAppController{}).GetOnlineUserList)},

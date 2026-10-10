@@ -10,7 +10,7 @@ import (
 
 func cmsAdjustReason(reason uint8) currency.Reason {
 	switch currency.Reason(reason) {
-	case currency.ReasonGmAdjustTest, currency.ReasonGmAdjustCompensation:
+	case currency.ReasonGmAdjustTest, currency.ReasonGmAdjustCompensation, currency.ReasonGmAdjustReset:
 		return currency.Reason(reason)
 	default:
 		return currency.ReasonGmAdjustTest

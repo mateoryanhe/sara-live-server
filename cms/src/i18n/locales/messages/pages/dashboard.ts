@@ -50,6 +50,9 @@ const zh = {
   autoRefresh30s: '30 秒',
   autoRefresh60s: '60 秒',
   autoRefresh5m: '5 分钟',
+  walletResetUserIdPlaceholder: '用户 ID（重置金币/钻石）',
+  walletResetUserIdRequired: '请输入用户 ID',
+  walletResetUserNotFound: '未找到该用户',
 }
 
 const en = {
@@ -96,6 +99,15 @@ const en = {
   fetchUserTrendFailed: 'Failed to load user trend data',
   fetchOnlineTrendFailed: 'Failed to load online user trend',
   chartTitleWithPeriod: '{label} ({period})',
+  autoRefresh: 'Auto refresh',
+  autoRefreshOff: 'Off',
+  autoRefresh10s: '10s',
+  autoRefresh30s: '30s',
+  autoRefresh60s: '60s',
+  autoRefresh5m: '5m',
+  walletResetUserIdPlaceholder: 'User ID (reset gold/diamonds)',
+  walletResetUserIdRequired: 'Enter a user ID',
+  walletResetUserNotFound: 'User not found',
 }
 
 const es = {
@@ -142,6 +154,15 @@ const es = {
   fetchUserTrendFailed: 'Error al cargar tendencia de usuarios',
   fetchOnlineTrendFailed: 'Error al cargar tendencia de usuarios en línea',
   chartTitleWithPeriod: '{label} ({period})',
+  autoRefresh: 'Actualización automática',
+  autoRefreshOff: 'Desactivado',
+  autoRefresh10s: '10 s',
+  autoRefresh30s: '30 s',
+  autoRefresh60s: '60 s',
+  autoRefresh5m: '5 min',
+  walletResetUserIdPlaceholder: 'ID de usuario (reset oro/diamantes)',
+  walletResetUserIdRequired: 'Introduzca el ID de usuario',
+  walletResetUserNotFound: 'Usuario no encontrado',
 }
 
 const pt = {
@@ -188,6 +209,15 @@ const pt = {
   fetchUserTrendFailed: 'Falha ao carregar tendência de usuários',
   fetchOnlineTrendFailed: 'Falha ao carregar tendência de usuários online',
   chartTitleWithPeriod: '{label} ({period})',
+  autoRefresh: 'Atualização automática',
+  autoRefreshOff: 'Desligado',
+  autoRefresh10s: '10 s',
+  autoRefresh30s: '30 s',
+  autoRefresh60s: '60 s',
+  autoRefresh5m: '5 min',
+  walletResetUserIdPlaceholder: 'ID do usuário (reset ouro/berlian)',
+  walletResetUserIdRequired: 'Informe o ID do usuário',
+  walletResetUserNotFound: 'Usuário não encontrado',
 }
 
 const hi = {
@@ -234,6 +264,15 @@ const hi = {
   fetchUserTrendFailed: 'उपयोगकर्ता रुझान लोड विफल',
   fetchOnlineTrendFailed: 'ऑनलाइन उपयोगकर्ता रुझान लोड विफल',
   chartTitleWithPeriod: '{label} ({period})',
+  autoRefresh: 'ऑटो रिफ्रेश',
+  autoRefreshOff: 'बंद',
+  autoRefresh10s: '10 से',
+  autoRefresh30s: '30 से',
+  autoRefresh60s: '60 से',
+  autoRefresh5m: '5 मि',
+  walletResetUserIdPlaceholder: 'उपयोगकर्ता ID (गोल्ड/डायमंड रीसेट)',
+  walletResetUserIdRequired: 'उपयोगकर्ता ID दर्ज करें',
+  walletResetUserNotFound: 'उपयोगकर्ता नहीं मिला',
 }
 
 const id = {
@@ -280,6 +319,15 @@ const id = {
   fetchUserTrendFailed: 'Gagal memuat tren pengguna',
   fetchOnlineTrendFailed: 'Gagal memuat tren pengguna online',
   chartTitleWithPeriod: '{label} ({period})',
+  autoRefresh: 'Segarkan otomatis',
+  autoRefreshOff: 'Mati',
+  autoRefresh10s: '10 dtk',
+  autoRefresh30s: '30 dtk',
+  autoRefresh60s: '60 dtk',
+  autoRefresh5m: '5 mnt',
+  walletResetUserIdPlaceholder: 'ID pengguna (reset emas/berlian)',
+  walletResetUserIdRequired: 'Masukkan ID pengguna',
+  walletResetUserNotFound: 'Pengguna tidak ditemukan',
 }
 
 export const dashboardMessages = definePageMessages(zh, en, es, pt, hi, id)

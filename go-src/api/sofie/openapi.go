@@ -8,6 +8,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"xr-game-server/core/httpserver"
 )
 
 func setupSofieOpenApi() {
@@ -47,6 +48,9 @@ func buildSofieOpenApiJSON() ([]byte, error) {
 	}
 	var doc map[string]any
 	if err := json.Unmarshal([]byte(base.String()), &doc); err != nil {
+		return nil, err
+	}
+	if err := httpserver.MergeOpenApiRawHandlerRoutes(doc); err != nil {
 		return nil, err
 	}
 	oldPaths, _ := doc["paths"].(map[string]any)

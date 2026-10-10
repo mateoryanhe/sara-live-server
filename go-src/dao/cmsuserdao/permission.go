@@ -91,7 +91,9 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 	case "/gamePlatform/cmsGameStartLink":
 		return []string{"/gamePlatform/gameShelfList"}
 	case "/account/getUserDetail":
-		return []string{"/account/getUserInfo", "/liveRecord/cmsLiveRecordList", "/liveRevenueLog/cmsLiveRevenueLogList"}
+		return []string{"/account/getUserInfo", "/liveRecord/cmsLiveRecordList", "/liveRevenueLog/cmsLiveRevenueLogList", "/gold/sub", "/diamond/sub"}
+	case "/account/getUserInfo":
+		return []string{"/gold/sub", "/diamond/sub"}
 	case "/account/getAnchorDailyEffectiveLiveList":
 		return []string{"/account/getAnchorDetail"}
 	case "/guild/getGuildDailyEffectiveLiveList":

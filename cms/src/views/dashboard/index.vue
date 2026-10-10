@@ -14,7 +14,32 @@
       </div>
       <el-tabs v-model="activeMainTab" lazy @tab-change="handleMainTabChange">
         <el-tab-pane :label="t('pages.dashboard.basicData')" name="basic">
-          <div class="tab-toolbar">
+          <div class="tab-toolbar tab-toolbar-basic">
+            <el-input
+                v-model="walletResetUserId"
+                clearable
+                class="wallet-reset-user-id"
+                :placeholder="t('pages.dashboard.walletResetUserIdPlaceholder')"
+                @keyup.enter="void handleDashboardWalletReset('gold')"
+            />
+            <el-button
+                v-if="can('goldReset')"
+                type="danger"
+                plain
+                :loading="walletResetSubmitting === 'gold'"
+                @click="() => void handleDashboardWalletReset('gold')"
+            >
+              {{ t('pages.userList.resetGold') }}
+            </el-button>
+            <el-button
+                v-if="can('diamondReset')"
+                type="danger"
+                plain
+                :loading="walletResetSubmitting === 'diamond'"
+                @click="() => void handleDashboardWalletReset('diamond')"
+            >
+              {{ t('pages.userList.resetDiamond') }}
+            </el-button>
             <el-button :loading="loading" @click="() => void fetchSysStat()">{{ t('common.refresh') }}</el-button>
           </div>
           <div class="basic-stat-board">
@@ -151,7 +176,9 @@ import {
   watch,
 } from 'vue'
 import {ElMessage} from 'element-plus'
-import {RESOURCE_METRIC_MAX_POINTS, sysStatApi} from '@/api'
+import {accountApi, RESOURCE_METRIC_MAX_POINTS, sysStatApi} from '@/api'
+import {usePagePermission} from '@/composables/usePagePermission'
+import {type WalletCurrencyType, useWalletCurrencyReset} from '@/composables/useWalletCurrencyReset'
 import type {ResourceMetricTrend, SysStat, UserStatTrend} from '@/types/api'
 import BarMetricSection from './components/bar-metric-section.vue'
 import {getUserStatBarMetricTabs, USER_STAT_BAR_SERIES} from './user-stat-bar-series'
@@ -173,6 +200,10 @@ const AUTO_REFRESH_INTERVALS = [
 ] as const
 
 const {t, locale} = useI18n()
+const {can} = usePagePermission('Dashboard')
+const {resetWalletCurrency, walletBalanceNumber} = useWalletCurrencyReset()
+const walletResetUserId = ref('')
+const walletResetSubmitting = ref<'' | WalletCurrencyType>('')
 const loading = ref(false)
 const trendLoading = ref(false)
 const onlineLoading = ref(false)
@@ -406,6 +437,45 @@ const refreshDashboard = async (silent = false) => {
   }
 }
 
+const resolveWalletResetUser = async (rawUserId: string) => {
+  const userId = rawUserId.trim()
+  if (!userId) {
+    ElMessage.warning(t('pages.dashboard.walletResetUserIdRequired'))
+    return null
+  }
+  const detail = await accountApi.getUserDetail(userId)
+  if (!detail?.account?.id) {
+    ElMessage.warning(t('pages.dashboard.walletResetUserNotFound'))
+    return null
+  }
+  return detail
+}
+
+const handleDashboardWalletReset = async (type: WalletCurrencyType) => {
+  if (walletResetSubmitting.value) {
+    return
+  }
+  walletResetSubmitting.value = type
+  try {
+    const detail = await resolveWalletResetUser(walletResetUserId.value)
+    if (!detail) {
+      return
+    }
+    const userId = detail.account!.id
+    const balance = walletBalanceNumber(type === 'gold' ? detail.wallet?.gold : detail.wallet?.diamond)
+    const ok = await resetWalletCurrency(userId, type, balance)
+    if (ok) {
+      await fetchSysStat(true)
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('dashboard wallet reset failed:', error)
+    }
+  } finally {
+    walletResetSubmitting.value = ''
+  }
+}
+
 const fetchSysStat = async (silent = false) => {
   if (!silent) {
     loading.value = true
@@ -589,7 +659,19 @@ onUnmounted(() => {
 .tab-toolbar {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-bottom: 16px;
+}
+
+.tab-toolbar-basic {
+  justify-content: flex-start;
+}
+
+.wallet-reset-user-id {
+  width: 240px;
+  max-width: 100%;
 }
 
 .online-chart {
