@@ -52,6 +52,10 @@ export const dataSyncApi = {
     syncFirstRechargeActivityCfg: () => {
         return request.post<SyncFirstRechargeActivityCfgRes>('/dataSync/syncFirstRechargeActivityCfg', {})
     },
+
+    syncCfEmailCfg: () => {
+        return request.post<SyncBatchRes>('/dataSync/syncCfEmailCfg', {})
+    },
 }
 
 export default dataSyncApi

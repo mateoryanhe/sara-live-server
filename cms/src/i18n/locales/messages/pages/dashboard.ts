@@ -44,6 +44,12 @@ const zh = {
   fetchUserTrendFailed: '获取用户数据趋势失败',
   fetchOnlineTrendFailed: '获取在线人数趋势失败',
   chartTitleWithPeriod: '{label} ({period})',
+  autoRefresh: '自动刷新',
+  autoRefreshOff: '关闭',
+  autoRefresh10s: '10 秒',
+  autoRefresh30s: '30 秒',
+  autoRefresh60s: '60 秒',
+  autoRefresh5m: '5 分钟',
 }
 
 const en = {

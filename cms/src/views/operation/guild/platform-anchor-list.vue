@@ -317,6 +317,7 @@ const {canViewUserDetail, openUserDetail} = useUserDetailNav('PlatformAnchorList
 const canViewDetail = computed(() => can('viewDetail'))
 const USER_TYPE_ANCHOR = 1
 const USER_TYPE_SENIOR_ANCHOR = 7
+const LIVE_ROOM_CATEGORY_VOICE_CHAT = 5
 const hasRowActions = computed(() => canViewDetail.value || [
   'setAnchorType',
   'transferInfo',
@@ -392,7 +393,7 @@ const anchorTypeTagType = (userType?: number) => {
 const categoryLabel = (category?: number) => {
   if (category === 1) return t('pages.anchorList.categoryHot')
   if (category === 2) return t('pages.anchorList.categoryGame')
-  if (category === 3) return t('pages.anchorList.categoryVoiceChat')
+  if (category === LIVE_ROOM_CATEGORY_VOICE_CHAT) return t('pages.anchorList.categoryVoiceChat')
   return '-'
 }
 

@@ -40,7 +40,7 @@ const (
 type LiveRoomCfg struct {
 	migrate.OneModel
 	PrivateInviteType        uint8      `gorm:"default:1;comment:视频通话邀请类型(1=接受所有人,3=拒绝所有人)" json:"privateInviteType"`
-	Category                 uint8      `gorm:"default:1;comment:分类(1=hot,2=game,3=voice chat)" json:"category"`
+	Category                 uint8      `gorm:"default:1;comment:分类(1=hot,2=game,5=voice chat)" json:"category"`
 	VoiceChatMicMode         uint8      `gorm:"default:0;comment:语聊上麦方式(1=自由,2=申请,3=房主单麦)" json:"voiceChatMicMode"`
 	TagId                    uint64     `gorm:"default:0;comment:直播间标签ID" json:"tagId"`
 	Ticket                   float64    `gorm:"type:decimal(10,4);default:0;comment:直播间视频通话门票价格(钻石)" json:"ticket"`

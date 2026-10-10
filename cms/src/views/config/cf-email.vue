@@ -4,6 +4,14 @@
       <template #header>
         <div class="card-header">
           <span>{{ t('menu.CfEmailCfgManagement') }}</span>
+          <el-button
+              v-if="can('sync')"
+              :loading="syncing"
+              type="warning"
+              @click="handleSyncData"
+          >
+            {{ t('common.syncData') }}
+          </el-button>
         </div>
       </template>
 
@@ -43,6 +51,7 @@
               show-password
               type="password"
               :placeholder="t('pages.cfEmail.smtpPasswordPlaceholder')"
+              @input="onSmtpPasswordInput"
           />
           <span v-if="smtpPasswordConfigured" class="form-tip">{{ t('pages.cfEmail.smtpPasswordKeepHint') }}</span>
         </el-form-item>
@@ -84,9 +93,11 @@
 
 <script lang="ts" setup>
 import {useI18n} from 'vue-i18n'
-import {computed, onMounted, reactive, ref, watch} from 'vue'
+import {computed, nextTick, onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
+import {dataSyncApi} from '@/api/modules/data-sync'
 import {cfEmailApi} from '@/api/modules/cf-email'
+import {confirmDataSync} from '@/utils/confirm-data-sync'
 import type {CfEmailCfg} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
 
@@ -98,6 +109,7 @@ const smtpPasswordConfigured = ref(false)
 const smtpPasswordTouched = ref(false)
 const testEmail = ref('')
 const testSending = ref(false)
+const syncing = ref(false)
 
 const TEST_EMAIL_STORAGE_KEY = 'cms.cfEmail.testEmail'
 
@@ -127,6 +139,10 @@ const formRules = computed(() => ({
       : [{required: true, message: t('pages.cfEmail.smtpPasswordRequired'), trigger: 'blur'}],
   fromEmail: [{required: true, message: t('pages.cfEmail.fromEmailRequired'), trigger: 'blur'}],
 }))
+
+const onSmtpPasswordInput = () => {
+  smtpPasswordTouched.value = true
+}
 
 const applyCfg = (cfg: CfEmailCfg | null | undefined) => {
   if (!cfg) {
@@ -161,6 +177,8 @@ const fetchCfg = async () => {
   try {
     const response = await cfEmailApi.getCfEmailCfg()
     applyCfg(response?.cfg)
+    await nextTick()
+    formRef.value?.clearValidate('smtpPassword')
   } catch {
     ElMessage.error(t('pages.cfEmail.fetchCfgFailed'))
   } finally {
@@ -195,6 +213,39 @@ const handleSave = async () => {
   }
 }
 
+const handleSyncData = async () => {
+  if (!formData.id || formData.id === '0') {
+    ElMessage.warning(t('pages.cfEmail.syncNeedSave'))
+    return
+  }
+  if (!smtpPasswordConfigured.value) {
+    ElMessage.warning(t('pages.cfEmail.syncNeedPassword'))
+    return
+  }
+  try {
+    await confirmDataSync({
+      detail: t('pages.cfEmail.syncConfirm'),
+      title: t('common.syncData'),
+    })
+  } catch {
+    return
+  }
+  syncing.value = true
+  try {
+    const response = await dataSyncApi.syncCfEmailCfg()
+    if (response?.success) {
+      ElMessage.success(response.message || t('pages.cfEmail.syncSuccess'))
+    } else {
+      ElMessage.error(t('pages.cfEmail.syncFailed'))
+    }
+  } catch (error) {
+    console.error('sync cf email cfg failed:', error)
+    ElMessage.error(t('pages.cfEmail.syncFailedCheckConfig'))
+  } finally {
+    syncing.value = false
+  }
+}
+
 const handleSendTest = async () => {
   const addr = testEmail.value.trim()
   if (!addr) {
@@ -218,13 +269,6 @@ const handleSendTest = async () => {
   }
 }
 
-watch(
-  () => formData.smtpPassword,
-  () => {
-    smtpPasswordTouched.value = true
-  },
-)
-
 onMounted(() => {
   const saved = localStorage.getItem(TEST_EMAIL_STORAGE_KEY)
   if (saved) {
@@ -235,6 +279,14 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 16px;
+  font-weight: bold;
+}
+
 .tip-alert {
   margin-bottom: 20px;
 }

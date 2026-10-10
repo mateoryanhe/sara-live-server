@@ -59,3 +59,11 @@ func (c *DataSyncCMSController) SyncFiatCurrency(ctx context.Context, req *datas
 func (c *DataSyncCMSController) SyncFirstRechargeActivityCfg(ctx context.Context, req *datasyncdto.SyncFirstRechargeActivityCfgReq) (*datasyncdto.SyncFirstRechargeActivityCfgRes, error) {
 	return datasync.SyncFirstRechargeActivityCfg(ctx, req)
 }
+
+func (c *DataSyncCMSController) SyncCfEmailCfg(ctx context.Context, req *datasyncdto.SyncCfEmailCfgReq) (*datasyncdto.SyncBatchRes, error) {
+	return datasync.SyncCfEmailCfg(ctx, req)
+}
+
+func (c *DataSyncCMSController) ReceiveCfEmailCfg(ctx context.Context, req *datasyncdto.ReceiveCfEmailCfgReq) (*datasyncdto.ReceiveBatchRes, error) {
+	return datasync.ReceiveCfEmailCfg(ctx, req)
+}

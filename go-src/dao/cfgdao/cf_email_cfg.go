@@ -18,6 +18,11 @@ func InitCfEmailCfgDao() {
 	cfEmailCfgCacheMgr = cache.NewPermanentRowCache[*sysentity.CfEmailCfg]()
 }
 
+// LoadCfEmailCfgForDataSync 从数据库读取完整配置(含 SMTP 密码),供数据同步.
+func LoadCfEmailCfgForDataSync() *sysentity.CfEmailCfg {
+	return loadCfEmailCfgFromDB()
+}
+
 func loadCfEmailCfgFromDB() *sysentity.CfEmailCfg {
 	var row sysentity.CfEmailCfg
 	if err := g.DB().Model(string(sysentity.TbCfEmailCfg)).Order(string(db.IdName) + " asc").Limit(1).Scan(&row); err != nil {

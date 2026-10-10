@@ -30,7 +30,7 @@ const (
 const (
 	LiveRoomCategoryHot       uint8 = 1 // hot
 	LiveRoomCategoryGame      uint8 = 2 // game
-	LiveRoomCategoryVoiceChat uint8 = 3 // voice chat (语聊房)
+	LiveRoomCategoryVoiceChat uint8 = 5 // voice chat (语聊房)
 )
 
 // IsValidLiveRoomCategory 判断直播间分类是否已定义。

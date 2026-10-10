@@ -158,6 +158,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     CfEmailCfgManagement: [
         BTN.view,
         BTN.save,
+        {key: 'sync', label: '同步数据'},
         {key: 'sendTest', label: '发送测试验证码'},
     ],
     Dashboard: DEFAULT_VIEW_BUTTONS,

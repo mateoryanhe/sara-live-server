@@ -141,11 +141,11 @@ func GetChannelPayUserProfileByUserId(userId uint64) (*rechargeorderdto.AppGetCh
 	return res, nil
 }
 
-// SaveChannelPayUserProfile App 保存付款人资料(需登录)
+// SaveChannelPayUserProfile App 保存付款人资料(需登录; userId 取自 Authorization,不再查 user_infos)
 func SaveChannelPayUserProfile(ctx context.Context, req *rechargeorderdto.AppSaveChannelPayUserProfileReq) (*rechargeorderdto.AppSaveChannelPayUserProfileRes, error) {
 	userId := httpserver.GetAuthId(ctx)
-	if err := requireExistingAppUser(userId); err != nil {
-		return nil, err
+	if userId == 0 {
+		return nil, errercode.CreateCode(errercode.EmptyUserId)
 	}
 	name := strings.TrimSpace(req.Name)
 	email := strings.ToLower(strings.TrimSpace(req.Email))

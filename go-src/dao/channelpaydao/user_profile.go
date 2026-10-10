@@ -7,7 +7,6 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/cache"
-	"xr-game-server/dao/userinfodao"
 	"xr-game-server/entity/recharge"
 )
 
@@ -55,12 +54,9 @@ func Publish(data *entity.ChannelPayUserProfile) {
 	channelPayUserProfileCacheMgr.PublishRow(gctx.New(), data.ID, data)
 }
 
-// UpsertPayerInfo 写入非空 name/email/phone。user 必须在 user_infos 中真实存在，否则不写库。
+// UpsertPayerInfo 写入非空 name/email/phone(调用方须已鉴权或自行保证 userId 合法,不查 user_infos).
 func UpsertPayerInfo(userId uint64, name, email, phone string) *entity.ChannelPayUserProfile {
 	if userId == 0 {
-		return nil
-	}
-	if userinfodao.GetUserInfoFromDB(userId) == nil {
 		return nil
 	}
 	name = strings.TrimSpace(name)

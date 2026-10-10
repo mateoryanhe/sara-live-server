@@ -97,7 +97,7 @@ import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 
 const LIVE_ROOM_CATEGORY_HOT = 1
 const LIVE_ROOM_CATEGORY_GAME = 2
-const LIVE_ROOM_CATEGORY_VOICE_CHAT = 3
+const LIVE_ROOM_CATEGORY_VOICE_CHAT = 5
 
 const {t} = useI18n()
 const {can} = usePagePermission('LiveRoomRecycleBinManagement')

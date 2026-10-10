@@ -1,19 +1,25 @@
 package statdao
 
 import (
-	"github.com/gogf/gf/v2/os/gctx"
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/cache"
 	"xr-game-server/entity/stat"
 )
 
-var weeklyLoginStatCacheMgr *cache.RowCache[*entity.WeeklyLoginStat]
+var (
+	weeklyLoginStatCacheMgr     *cache.RowCache[*entity.WeeklyLoginStat]
+	weeklyLoginStatListCacheMgr *cache.ListCache[*entity.WeeklyLoginStat]
+)
 
 func initWeeklyLoginStatDao() {
 	weeklyLoginStatCacheMgr = cache.NewRowCache[*entity.WeeklyLoginStat]()
+	weeklyLoginStatListCacheMgr = cache.NewPermanentListCache[*entity.WeeklyLoginStat]()
 }
 
 // GetWeeklyLoginStatByWeek 按周标识获取每周登录统计,不存在则新建内存对象
@@ -30,12 +36,19 @@ func GetWeeklyLoginStatByWeek(week string) *entity.WeeklyLoginStat {
 	})
 }
 
-// ListRecentWeeklyLoginStats 查询最近N周登录统计(按时间正序)
+// ListRecentWeeklyLoginStats 查询最近N周登录统计(按时间正序). 同一 ISO 周内仅首次查库.
 func ListRecentWeeklyLoginStats(limit int) []*entity.WeeklyLoginStat {
-	list := make([]*entity.WeeklyLoginStat, 0)
 	if limit <= 0 {
 		limit = 12
 	}
+	key := fmt.Sprintf("%d:%s", limit, entity.FormatWeeklyLoginStatKey(time.Now()))
+	return weeklyLoginStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.WeeklyLoginStat, error) {
+		return loadRecentWeeklyLoginStatsFromDB(limit), nil
+	})
+}
+
+func loadRecentWeeklyLoginStatsFromDB(limit int) []*entity.WeeklyLoginStat {
+	list := make([]*entity.WeeklyLoginStat, 0, limit)
 	_ = g.Model(string(entity.TbWeeklyLoginStat)).
 		Order("id desc").
 		Limit(limit).

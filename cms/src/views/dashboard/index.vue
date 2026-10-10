@@ -1,10 +1,21 @@
 <template>
   <div v-loading="pageLoading" class="page-container">
     <el-card>
+      <div class="page-toolbar">
+        <span class="page-toolbar-label">{{ t('pages.dashboard.autoRefresh') }}</span>
+        <el-select v-model="autoRefreshMs" class="auto-refresh-select">
+          <el-option
+              v-for="item in autoRefreshOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+          />
+        </el-select>
+      </div>
       <el-tabs v-model="activeMainTab" lazy @tab-change="handleMainTabChange">
         <el-tab-pane :label="t('pages.dashboard.basicData')" name="basic">
           <div class="tab-toolbar">
-            <el-button :loading="loading" @click="fetchSysStat">{{ t('common.refresh') }}</el-button>
+            <el-button :loading="loading" @click="() => void fetchSysStat()">{{ t('common.refresh') }}</el-button>
           </div>
           <div class="basic-stat-board">
             <section
@@ -35,7 +46,7 @@
 
         <el-tab-pane :label="t('pages.dashboard.anchorPayout')" name="anchorPayout">
           <div class="tab-toolbar">
-            <el-button :loading="loading" @click="fetchSysStat">{{ t('common.refresh') }}</el-button>
+            <el-button :loading="loading" @click="() => void fetchSysStat()">{{ t('common.refresh') }}</el-button>
           </div>
           <div class="basic-stat-grid anchor-payout-stat-grid">
             <div class="stat-card tone-teal">
@@ -57,7 +68,7 @@
 
         <el-tab-pane :label="t('pages.dashboard.userData')" name="user">
           <div class="tab-toolbar">
-            <el-button :loading="trendLoading" @click="fetchUserStatTrend">{{ t('common.refresh') }}</el-button>
+            <el-button :loading="trendLoading" @click="() => void fetchUserStatTrend()">{{ t('common.refresh') }}</el-button>
           </div>
           <el-tabs v-model="activePeriod" lazy @tab-change="handlePeriodTabChange">
             <el-tab-pane :label="t('pages.dashboard.periodDaily')" name="daily">
@@ -110,7 +121,7 @@
 
         <el-tab-pane :label="t('pages.dashboard.onlineUsers')" name="online">
           <div class="tab-toolbar">
-            <el-button :loading="onlineLoading" @click="fetchResourceMetricTrend">{{ t('common.refresh') }}</el-button>
+            <el-button :loading="onlineLoading" @click="() => void fetchResourceMetricTrend()">{{ t('common.refresh') }}</el-button>
           </div>
           <ResourceMetricChart
               ref="onlineChartRef"
@@ -127,7 +138,18 @@
 
 <script lang="ts" setup>
 import {useI18n} from 'vue-i18n'
-import {computed, defineAsyncComponent, nextTick, onMounted, reactive, ref} from 'vue'
+import {
+  computed,
+  defineAsyncComponent,
+  nextTick,
+  onActivated,
+  onDeactivated,
+  onMounted,
+  onUnmounted,
+  reactive,
+  ref,
+  watch,
+} from 'vue'
 import {ElMessage} from 'element-plus'
 import {RESOURCE_METRIC_MAX_POINTS, sysStatApi} from '@/api'
 import type {ResourceMetricTrend, SysStat, UserStatTrend} from '@/types/api'
@@ -139,6 +161,17 @@ const UserStatChart = defineAsyncComponent(() => import('./components/user-stat-
 const UserStatBarChart = defineAsyncComponent(() => import('./components/user-stat-bar-chart.vue'))
 const ResourceMetricChart = defineAsyncComponent(() => import('@/views/config/components/resource-metric-chart.vue'))
 
+const AUTO_REFRESH_STORAGE_KEY = 'dashboard:autoRefreshMs'
+const DEFAULT_AUTO_REFRESH_MS = 60_000
+
+const AUTO_REFRESH_INTERVALS = [
+  {value: 0, labelKey: 'autoRefreshOff'},
+  {value: 10_000, labelKey: 'autoRefresh10s'},
+  {value: 30_000, labelKey: 'autoRefresh30s'},
+  {value: 60_000, labelKey: 'autoRefresh60s'},
+  {value: 300_000, labelKey: 'autoRefresh5m'},
+] as const
+
 const {t, locale} = useI18n()
 const loading = ref(false)
 const trendLoading = ref(false)
@@ -147,6 +180,21 @@ const activeMainTab = ref('basic')
 const activePeriod = ref('daily')
 const enabledBarSeries = getUserStatBarMetricTabs()
 const activeBarMetric = ref(enabledBarSeries[0]?.key ?? 'rechargeUser')
+const autoRefreshMs = ref(readStoredAutoRefreshMs())
+const dashboardRouteActive = ref(false)
+let autoRefreshTimer: ReturnType<typeof setInterval> | null = null
+let dashboardRefreshInFlight = false
+let skipNextActivatedRefresh = false
+
+const isDashboardVisible = () =>
+    dashboardRouteActive.value && typeof document !== 'undefined' && document.visibilityState === 'visible'
+
+const autoRefreshOptions = computed(() =>
+    AUTO_REFRESH_INTERVALS.map((item) => ({
+      value: item.value,
+      label: t(`pages.dashboard.${item.labelKey}`),
+    })),
+)
 
 const pageLoading = computed(() => {
   if (activeMainTab.value === 'basic' || activeMainTab.value === 'anchorPayout') {
@@ -299,8 +347,69 @@ const basicStatSections = computed(() => [
   },
 ])
 
-const fetchSysStat = async () => {
-  loading.value = true
+function readStoredAutoRefreshMs() {
+  try {
+    const raw = localStorage.getItem(AUTO_REFRESH_STORAGE_KEY)
+    if (raw == null || raw === '') {
+      return DEFAULT_AUTO_REFRESH_MS
+    }
+    const parsed = Number(raw)
+    return AUTO_REFRESH_INTERVALS.some((item) => item.value === parsed) ? parsed : DEFAULT_AUTO_REFRESH_MS
+  } catch {
+    return DEFAULT_AUTO_REFRESH_MS
+  }
+}
+
+const clearAutoRefreshTimer = () => {
+  if (autoRefreshTimer != null) {
+    clearInterval(autoRefreshTimer)
+    autoRefreshTimer = null
+  }
+}
+
+const restartAutoRefreshTimer = () => {
+  clearAutoRefreshTimer()
+  if (!isDashboardVisible() || autoRefreshMs.value <= 0) {
+    return
+  }
+  autoRefreshTimer = setInterval(() => {
+    if (!isDashboardVisible()) {
+      clearAutoRefreshTimer()
+      return
+    }
+    void refreshDashboard(true)
+  }, autoRefreshMs.value)
+}
+
+const handleDocumentVisibilityChange = () => {
+  if (isDashboardVisible()) {
+    void refreshDashboard(true)
+    restartAutoRefreshTimer()
+    return
+  }
+  clearAutoRefreshTimer()
+}
+
+const refreshDashboard = async (silent = false) => {
+  if (dashboardRefreshInFlight) {
+    return
+  }
+  dashboardRefreshInFlight = true
+  try {
+    await Promise.all([
+      fetchSysStat(silent),
+      fetchUserStatTrend(silent),
+      fetchResourceMetricTrend(silent),
+    ])
+  } finally {
+    dashboardRefreshInFlight = false
+  }
+}
+
+const fetchSysStat = async (silent = false) => {
+  if (!silent) {
+    loading.value = true
+  }
   try {
     const data = await sysStatApi.getSysStat()
     sysStat.totalGold = data.totalGold ?? 0
@@ -322,12 +431,16 @@ const fetchSysStat = async () => {
     console.error('fetch sys stat failed:', error)
     ElMessage.error(t('pages.dashboard.fetchSysStatFailed'))
   } finally {
-    loading.value = false
+    if (!silent) {
+      loading.value = false
+    }
   }
 }
 
-const fetchResourceMetricTrend = async () => {
-  onlineLoading.value = true
+const fetchResourceMetricTrend = async (silent = false) => {
+  if (!silent) {
+    onlineLoading.value = true
+  }
   try {
     const data = await sysStatApi.getResourceMetricOnlineTrend({limit: RESOURCE_METRIC_MAX_POINTS})
     resourceMetricTrend.points = data.points || []
@@ -339,12 +452,16 @@ const fetchResourceMetricTrend = async () => {
     console.error('fetch online trend failed:', error)
     ElMessage.error(t('pages.dashboard.fetchOnlineTrendFailed'))
   } finally {
-    onlineLoading.value = false
+    if (!silent) {
+      onlineLoading.value = false
+    }
   }
 }
 
-const fetchUserStatTrend = async () => {
-  trendLoading.value = true
+const fetchUserStatTrend = async (silent = false) => {
+  if (!silent) {
+    trendLoading.value = true
+  }
   try {
     const data = await sysStatApi.getUserStatTrend()
     userStatTrend.daily = data.daily || []
@@ -358,7 +475,9 @@ const fetchUserStatTrend = async () => {
     console.error('fetch user stat trend failed:', error)
     ElMessage.error(t('pages.dashboard.fetchUserTrendFailed'))
   } finally {
-    trendLoading.value = false
+    if (!silent) {
+      trendLoading.value = false
+    }
   }
 }
 
@@ -405,16 +524,66 @@ const formatCount = (value: string | number | null | undefined) => {
   return Number(value).toLocaleString(locale.value)
 }
 
+watch(autoRefreshMs, (ms) => {
+  try {
+    localStorage.setItem(AUTO_REFRESH_STORAGE_KEY, String(ms))
+  } catch {
+    // ignore quota / private mode
+  }
+  restartAutoRefreshTimer()
+})
+
 onMounted(() => {
-  fetchSysStat()
-  fetchUserStatTrend()
-  fetchResourceMetricTrend()
+  dashboardRouteActive.value = true
+  skipNextActivatedRefresh = true
+  document.addEventListener('visibilitychange', handleDocumentVisibilityChange)
+  void refreshDashboard(false)
+  restartAutoRefreshTimer()
+})
+
+onActivated(() => {
+  dashboardRouteActive.value = true
+  if (skipNextActivatedRefresh) {
+    skipNextActivatedRefresh = false
+    restartAutoRefreshTimer()
+    return
+  }
+  void refreshDashboard(true)
+  restartAutoRefreshTimer()
+})
+
+onDeactivated(() => {
+  dashboardRouteActive.value = false
+  clearAutoRefreshTimer()
+})
+
+onUnmounted(() => {
+  dashboardRouteActive.value = false
+  document.removeEventListener('visibilitychange', handleDocumentVisibilityChange)
+  clearAutoRefreshTimer()
 })
 </script>
 
 <style scoped>
 .page-container {
   padding: 20px;
+}
+
+.page-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.page-toolbar-label {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.auto-refresh-select {
+  width: 140px;
 }
 
 .tab-toolbar {

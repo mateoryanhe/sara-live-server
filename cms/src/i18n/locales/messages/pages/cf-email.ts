@@ -38,6 +38,12 @@ const zh = {
   sendTestSuccess: '测试验证码已发送，请查收邮件',
   sendTestFailed: '测试发送失败，请查看服务端日志',
   testSectionHint: '使用当前已保存的 SMTP 配置发一封 6 位验证码邮件；不占用 App 限流，验证码不可用于登录。',
+  syncConfirm: '确定将当前邮件 SMTP 发信配置（含密码）同步到目标环境？',
+  syncNeedSave: '请先保存配置后再同步',
+  syncNeedPassword: '库中尚未保存 SMTP 密码，请先保存完整配置后再同步',
+  syncSuccess: '同步成功',
+  syncFailed: '同步失败',
+  syncFailedCheckConfig: '同步失败，请检查「数据同步配置」中的目标地址与 Token',
 }
 
 const en = {
@@ -74,6 +80,12 @@ const en = {
   sendTestSuccess: 'Test code sent; check inbox',
   sendTestFailed: 'Test send failed; check server logs',
   testSectionHint: 'Uses saved SMTP settings; no App rate limit; code cannot be used to log in.',
+  syncConfirm: 'Sync current email SMTP config (including password) to the target environment?',
+  syncNeedSave: 'Save config before syncing',
+  syncNeedPassword: 'SMTP password is not saved yet; save full config before syncing',
+  syncSuccess: 'Synced successfully',
+  syncFailed: 'Sync failed',
+  syncFailedCheckConfig: 'Sync failed; check target URL and token in Data Sync settings',
 }
 
 const es = {
@@ -110,6 +122,12 @@ const es = {
   sendTestSuccess: 'Código enviado; revisa el buzón',
   sendTestFailed: 'Fallo al enviar; revisa logs',
   testSectionHint: 'Usa SMTP guardado; sin límite App; el código no sirve para login.',
+  syncConfirm: '¿Sincronizar la config SMTP de correo (incl. contraseña) al entorno destino?',
+  syncNeedSave: 'Guarde la configuración antes de sincronizar',
+  syncNeedPassword: 'Aún no hay contraseña SMTP guardada; guarde la config completa',
+  syncSuccess: 'Sincronizado correctamente',
+  syncFailed: 'Error al sincronizar',
+  syncFailedCheckConfig: 'Error al sincronizar; revise URL destino y token en Sincronización de datos',
 }
 
 const pt = {
@@ -146,6 +164,12 @@ const pt = {
   sendTestSuccess: 'Código enviado; verifique a caixa de entrada',
   sendTestFailed: 'Falha no envio; veja logs',
   testSectionHint: 'Usa SMTP salvo; sem limite App; código não vale para login.',
+  syncConfirm: 'Sincronizar config SMTP de e-mail (incl. senha) para o ambiente de destino?',
+  syncNeedSave: 'Salve a configuração antes de sincronizar',
+  syncNeedPassword: 'Senha SMTP ainda não salva; salve a config completa',
+  syncSuccess: 'Sincronizado com sucesso',
+  syncFailed: 'Falha ao sincronizar',
+  syncFailedCheckConfig: 'Falha ao sincronizar; verifique URL e token em Sincronização de dados',
 }
 
 const hi = {
@@ -182,6 +206,12 @@ const hi = {
   sendTestSuccess: 'Test code sent',
   sendTestFailed: 'Send failed',
   testSectionHint: 'Saved SMTP; no App limit; code not for login.',
+  syncConfirm: 'Sync email SMTP config (password included) to target environment?',
+  syncNeedSave: 'Save config before syncing',
+  syncNeedPassword: 'SMTP password not saved; save full config first',
+  syncSuccess: 'Synced successfully',
+  syncFailed: 'Sync failed',
+  syncFailedCheckConfig: 'Sync failed; check target URL and token in Data Sync settings',
 }
 
 const id = {
@@ -218,6 +248,12 @@ const id = {
   sendTestSuccess: 'Kode uji terkirim',
   sendTestFailed: 'Gagal kirim',
   testSectionHint: 'Pakai SMTP tersimpan; tanpa batas App; kode tidak untuk login.',
+  syncConfirm: 'Sinkronkan config SMTP email (termasuk password) ke lingkungan target?',
+  syncNeedSave: 'Simpan config sebelum sinkron',
+  syncNeedPassword: 'Password SMTP belum tersimpan; simpan config lengkap dulu',
+  syncSuccess: 'Berhasil disinkronkan',
+  syncFailed: 'Gagal sinkron',
+  syncFailedCheckConfig: 'Gagal sinkron; periksa URL target dan token di Sync Data',
 }
 
 export const cfEmailMessages = definePageMessages(zh, en, es, pt, hi, id)

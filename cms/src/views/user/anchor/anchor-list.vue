@@ -585,7 +585,7 @@ const disabledDate = (time: Date) => time.getTime() < Date.now()
 
 const LIVE_ROOM_CATEGORY_HOT = 1
 const LIVE_ROOM_CATEGORY_GAME = 2
-const LIVE_ROOM_CATEGORY_VOICE_CHAT = 3
+const LIVE_ROOM_CATEGORY_VOICE_CHAT = 5
 const LIVE_ROOM_PRIVATE_INVITE_ALL = 1
 const LIVE_ROOM_PRIVATE_INVITE_REJECT = 3
 const USER_TYPE_ANCHOR = 1

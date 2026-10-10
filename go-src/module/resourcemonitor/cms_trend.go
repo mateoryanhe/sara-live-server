@@ -2,13 +2,25 @@ package resourcemonitor
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
+	"github.com/gogf/gf/v2/os/gctx"
+	"xr-game-server/core/cache"
 	"xr-game-server/dao/resourcemetricdao"
 	"xr-game-server/dto/resourcemetricdto"
 	"xr-game-server/entity/sys"
 )
+
+var cmsTrendPointsCacheMgr *cache.RowCache[[]*trendPoint]
+
+func cmsTrendPointsCache() *cache.RowCache[[]*trendPoint] {
+	if cmsTrendPointsCacheMgr == nil {
+		cmsTrendPointsCacheMgr = cache.NewPermanentRowCache[[]*trendPoint]()
+	}
+	return cmsTrendPointsCacheMgr
+}
 
 const trendTimeLayout = "2006-01-02 15:04:05"
 
@@ -122,12 +134,34 @@ func toTrendQuery(startTime, endTime string, limit int) trendQuery {
 }
 
 func listTrendPoints(q trendQuery) []*trendPoint {
+	key := cmsTrendQueryCacheKey(q)
+	return cmsTrendPointsCache().MustGetRow(gctx.New(), key, func(ctx context.Context) ([]*trendPoint, error) {
+		return loadTrendPointsFromDB(q), nil
+	})
+}
+
+func loadTrendPointsFromDB(q trendQuery) []*trendPoint {
 	start, end := resolveTrendTimeRange(q)
 	limit := resolveTrendLimit(q.Limit)
 	if useFineTrend(start, end) {
 		return fineToTrendPoints(resourcemetricdao.ListFineByTimeRange(start, end, limit))
 	}
 	return aggToTrendPoints(resourcemetricdao.ListAggByTimeRange(start, end, limit))
+}
+
+// cmsTrendQueryCacheKey 仪表盘默认查询按 10 分钟分桶(与细采样间隔一致); 自定义时间范围按参数固定缓存.
+func cmsTrendQueryCacheKey(q trendQuery) string {
+	limit := resolveTrendLimit(q.Limit)
+	if strings.TrimSpace(q.StartTime) != "" || strings.TrimSpace(q.EndTime) != "" {
+		return fmt.Sprintf("custom:%d:%s:%s", limit, strings.TrimSpace(q.StartTime), strings.TrimSpace(q.EndTime))
+	}
+	start, end := resolveTrendTimeRange(q)
+	mode := "agg"
+	if useFineTrend(start, end) {
+		mode = "fine"
+	}
+	bucket := time.Now().Unix() / (10 * 60)
+	return fmt.Sprintf("default:%d:%s:%d", limit, mode, bucket)
 }
 
 // useFineTrend 查询窗口完全落在细采样保留期内时用细数据,否则用粗数据
