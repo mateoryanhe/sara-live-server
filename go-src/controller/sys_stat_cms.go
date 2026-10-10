@@ -24,3 +24,8 @@ func (c *SysStatController) GetSysStat(ctx context.Context, req *statdto.CMSSysS
 func (c *SysStatController) GetUserStatTrend(ctx context.Context, req *statdto.CMSUserStatTrendReq) (res *statdto.CMSUserStatTrendRes, err error) {
 	return stat.GetCMSUserStatTrend(ctx, req)
 }
+
+// ResetBasicDashboardStats CMS 将「基础数据」Tab 统计归零
+func (c *SysStatController) ResetBasicDashboardStats(ctx context.Context, req *statdto.CMSResetBasicDashboardStatsReq) (res *statdto.CMSResetBasicDashboardStatsRes, err error) {
+	return stat.ResetCMSBasicDashboardStats(ctx, req)
+}

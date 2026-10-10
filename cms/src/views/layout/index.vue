@@ -19,7 +19,7 @@
           <span>{{ t('menu.Dashboard') }}</span>
         </el-menu-item>
         <el-sub-menu
-            v-if="hasMenuPermission('TrackingHotLiveRoomJoinManagement') || hasMenuPermission('TrackingCall1v1InitiateManagement')"
+            v-if="hasMenuPermission('TrackingHotLiveRoomJoinManagement') || hasMenuPermission('TrackingCall1v1InitiateManagement') || hasMenuPermission('TrackingMiniGameRoundStartManagement')"
             index="/tracking">
           <template #title>
             <el-icon>
@@ -38,6 +38,12 @@
               <DataLine/>
             </el-icon>
             <span>{{ t('menu.TrackingCall1v1InitiateManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('TrackingMiniGameRoundStartManagement')" index="/tracking/mini-game-round-start">
+            <el-icon>
+              <DataLine/>
+            </el-icon>
+            <span>{{ t('menu.TrackingMiniGameRoundStartManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu

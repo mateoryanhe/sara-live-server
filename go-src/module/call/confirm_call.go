@@ -76,6 +76,7 @@ func applyCallAnswerConfirm(order *entity.CallOrder, userId uint64, now time.Tim
 	}
 	order.SetStatus(entity.CallOrderStatusInCall)
 	pushCallStarted(order, now.Unix())
+	pubCall1v1ConnectSuccessTracking(order, now)
 	return true, nil
 }
 

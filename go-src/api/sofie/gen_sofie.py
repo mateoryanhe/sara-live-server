@@ -43,6 +43,8 @@ APIS = [
     ("/liveRoom/updateNotice", "yes", "(&controller.LiveRoomAppController{}).UpdateNotice", "修改公告", "studio", "replaceNotice"),
     ("/liveRoom/join", "yes", "(&controller.LiveRoomAppController{}).JoinRoom", "加入直播间", "studio", "enterHall"),
     ("/liveRoom/reportLiveFirstFrameRendered", "yes", "(&controller.LiveRoomAppController{}).ReportLiveFirstFrameRendered", "上报直播首帧渲染完成", "studio", "notifyLiveFirstFrameReady"),
+    ("/liveRoom/reportMiniGameExposure", "yes", "(&controller.LiveRoomAppController{}).ReportMiniGameExposure", "上报半屏游戏窗口曝光", "studio", "notifyMiniGameExposure"),
+    ("/liveRoom/reportMiniGameWebViewLoadSuccess", "yes", "(&controller.LiveRoomAppController{}).ReportMiniGameWebViewLoadSuccess", "上报游戏WebView成功加载", "studio", "notifyMiniGameWebViewLoadSuccess"),
     ("/liveRoom/leave", "yes", "(&controller.LiveRoomAppController{}).LeaveRoom", "离开直播间", "studio", "exitHall"),
     ("/liveRoom/getLiveRecord", "yes", "(&controller.LiveRoomAppController{}).GetLiveRecord", "查询本场直播记录", "studio", "fetchRound"),
     ("/liveRoom/onlineList", "yes", "(&controller.LiveRoomAppController{}).GetOnlineUserList", "在线观众列表", "studio", "browseAudience"),

@@ -7,8 +7,8 @@ import (
 	"xr-game-server/gameevent"
 )
 
-// pubShowcaseLiveRoomJoinTracking joinRoom 成功返回前发布秀场进房埋点(由 tracking 模块异步累计).
-func pubShowcaseLiveRoomJoinTracking(userId, roomId uint64, at time.Time) {
+// pubLiveRoomJoinTracking joinRoom 成功返回前发布进房埋点(秀场/游戏类由 tracking 按 category 过滤累计).
+func pubLiveRoomJoinTracking(userId, roomId uint64, at time.Time) {
 	if userId == 0 || roomId == 0 || userId == roomId {
 		return
 	}
@@ -16,4 +16,5 @@ func pubShowcaseLiveRoomJoinTracking(userId, roomId uint64, at time.Time) {
 		at = time.Now()
 	}
 	event.Pub(gameevent.ShowcaseLiveRoomJoinTrackingEvent, gameevent.NewShowcaseLiveRoomJoinTrackingEventData(userId, roomId, at))
+	event.Pub(gameevent.GameLiveRoomJoinTrackingEvent, gameevent.NewGameLiveRoomJoinTrackingEventData(userId, roomId, at))
 }

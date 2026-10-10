@@ -40,6 +40,8 @@
 | `studio` | 修改公告 | 需要登录 | `POST /liveRoom/updateNotice` | `POST /sofie/studio/replaceNotice` |
 | `studio` | 加入直播间 | 需要登录 | `POST /liveRoom/join` | `POST /sofie/studio/enterHall` |
 | `studio` | 上报直播首帧渲染完成 | 需要登录 | `POST /liveRoom/reportLiveFirstFrameRendered` | `POST /sofie/studio/notifyLiveFirstFrameReady` |
+| `studio` | 上报半屏游戏窗口曝光 | 需要登录 | `POST /liveRoom/reportMiniGameExposure` | `POST /sofie/studio/notifyMiniGameExposure` |
+| `studio` | 上报游戏WebView成功加载 | 需要登录 | `POST /liveRoom/reportMiniGameWebViewLoadSuccess` | `POST /sofie/studio/notifyMiniGameWebViewLoadSuccess` |
 | `studio` | 离开直播间 | 需要登录 | `POST /liveRoom/leave` | `POST /sofie/studio/exitHall` |
 | `studio` | 查询本场直播记录 | 需要登录 | `POST /liveRoom/getLiveRecord` | `POST /sofie/studio/fetchRound` |
 | `studio` | 在线观众列表 | 需要登录 | `POST /liveRoom/onlineList` | `POST /sofie/studio/browseAudience` |

@@ -50,9 +50,17 @@ const zh = {
   autoRefresh30s: '30 秒',
   autoRefresh60s: '60 秒',
   autoRefresh5m: '5 分钟',
-  walletResetUserIdPlaceholder: '用户 ID（重置金币/钻石）',
+  walletResetUserIdPlaceholder: '用户 ID（仅重置该用户金币/钻石钱包）',
   walletResetUserIdRequired: '请输入用户 ID',
   walletResetUserNotFound: '未找到该用户',
+  resetBasicData: '重置基础数据统计',
+  resetBasicDataHint: '「重置基础数据统计」会将本页今日/资金累计/业务累计全部归零（仅服务端统计计数，不修改用户钱包余额）。',
+  resetBasicDataTitle: '重置基础数据统计',
+  resetBasicDataTitleFinal: '再次确认',
+  resetBasicDataConfirm1: '将把仪表盘「基础数据」Tab 中的今日指标与全部累计统计归零（不含「主播代付」Tab）。不会修改任何用户的金币/钻石钱包。是否继续？',
+  resetBasicDataConfirm2: '此操作仅重置服务端统计计数，不可自动恢复。确定执行？',
+  resetBasicDataSuccess: '基础数据统计已归零',
+  resetBasicDataFailed: '重置基础数据统计失败',
 }
 
 const en = {
@@ -105,9 +113,17 @@ const en = {
   autoRefresh30s: '30s',
   autoRefresh60s: '60s',
   autoRefresh5m: '5m',
-  walletResetUserIdPlaceholder: 'User ID (reset gold/diamonds)',
+  walletResetUserIdPlaceholder: 'User ID (reset that user’s gold/diamond wallet only)',
   walletResetUserIdRequired: 'Enter a user ID',
   walletResetUserNotFound: 'User not found',
+  resetBasicData: 'Reset overview stats',
+  resetBasicDataHint: 'Reset overview stats zeros all cards on this tab (today + totals). Server-side counters only; user wallet balances are unchanged.',
+  resetBasicDataTitle: 'Reset overview stats',
+  resetBasicDataTitleFinal: 'Confirm again',
+  resetBasicDataConfirm1: 'This zeros all metrics on the Basic Data tab (not the Anchor payout tab). User wallet balances are unchanged. Continue?',
+  resetBasicDataConfirm2: 'This only resets server-side counters and cannot be undone automatically. Proceed?',
+  resetBasicDataSuccess: 'Overview stats reset to zero',
+  resetBasicDataFailed: 'Failed to reset overview stats',
 }
 
 const es = {

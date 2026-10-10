@@ -76,6 +76,16 @@ func (c *LiveRoomAppController) ReportLiveFirstFrameRendered(ctx context.Context
 	return tracking.ReportLiveFirstFrameRendered(ctx, req)
 }
 
+// ReportMiniGameExposure 上报半屏游戏窗口在直播/语聊房内曝光
+func (c *LiveRoomAppController) ReportMiniGameExposure(ctx context.Context, req *trackingdto.ReportMiniGameExposureReq) (*trackingdto.ReportMiniGameExposureRes, error) {
+	return tracking.ReportMiniGameExposure(ctx, req)
+}
+
+// ReportMiniGameWebViewLoadSuccess 上报游戏 WebView 成功加载
+func (c *LiveRoomAppController) ReportMiniGameWebViewLoadSuccess(ctx context.Context, req *trackingdto.ReportMiniGameWebViewLoadSuccessReq) (*trackingdto.ReportMiniGameWebViewLoadSuccessRes, error) {
+	return tracking.ReportMiniGameWebViewLoadSuccess(ctx, req)
+}
+
 // LeaveRoom 离开直播间
 func (c *LiveRoomAppController) LeaveRoom(ctx context.Context, req *liveroomdto.LeaveRoomReq) (res *liveroomdto.LeaveRoomRes, err error) {
 	return liveroom.LeaveRoom(ctx, req)

@@ -17,5 +17,11 @@ export const trackingRoutes: RouteRecordRaw = {
             component: () => import('@/views/tracking/call-1v1-initiate.vue'),
             meta: {title: '1v1视频通话'},
         },
+        {
+            path: 'mini-game-round-start',
+            name: 'TrackingMiniGameRoundStartManagement',
+            component: () => import('@/views/tracking/mini-game-round-start.vue'),
+            meta: {title: '点击开始游戏'},
+        },
     ],
 }

@@ -46,7 +46,7 @@ export interface PermissionModuleNode {
 }
 
 const DASHBOARD_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
-    {id: 'currency', titleKey: 'pages.moduleList.groupCurrency', buttonKeys: ['goldReset', 'diamondReset']},
+    {id: 'dashboardStats', titleKey: 'pages.moduleList.groupDashboardStats', buttonKeys: ['basicDataReset']},
 ]
 
 const USER_LIST_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
@@ -158,6 +158,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
         children: [
             page('TrackingHotLiveRoomJoinManagement'),
             page('TrackingCall1v1InitiateManagement'),
+            page('TrackingMiniGameRoundStartManagement'),
         ],
     },
     {

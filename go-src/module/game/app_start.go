@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 	"strings"
+	"time"
 
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/xrlog"
@@ -39,6 +40,9 @@ func GetAppGameStartLink(ctx context.Context, req *gameplatformdto.AppGameStartR
 	if err != nil {
 		xrlog.ErrorWithErr(ctx, "Game", "fetch vendor game start url failed", err)
 		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if strings.TrimSpace(link) != "" {
+		pubMiniGameRoundStartTracking(userId, gameCode, time.Now())
 	}
 	return &gameplatformdto.AppGameStartRes{Link: link}, nil
 }

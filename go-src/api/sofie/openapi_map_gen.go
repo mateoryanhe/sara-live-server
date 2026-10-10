@@ -47,6 +47,8 @@ var openAPIDocRoutes = []openAPIDocRoute{
 	{OldMethod: "post", OldPath: "/liveRoom/updateNotice", NewPath: "/sofie/studio/replaceNotice", Tag: "studio", Summary: "修改公告"},
 	{OldMethod: "post", OldPath: "/liveRoom/join", NewPath: "/sofie/studio/enterHall", Tag: "studio", Summary: "加入直播间"},
 	{OldMethod: "post", OldPath: "/liveRoom/reportLiveFirstFrameRendered", NewPath: "/sofie/studio/notifyLiveFirstFrameReady", Tag: "studio", Summary: "上报直播首帧渲染完成"},
+	{OldMethod: "post", OldPath: "/liveRoom/reportMiniGameExposure", NewPath: "/sofie/studio/notifyMiniGameExposure", Tag: "studio", Summary: "上报半屏游戏窗口曝光"},
+	{OldMethod: "post", OldPath: "/liveRoom/reportMiniGameWebViewLoadSuccess", NewPath: "/sofie/studio/notifyMiniGameWebViewLoadSuccess", Tag: "studio", Summary: "上报游戏WebView成功加载"},
 	{OldMethod: "post", OldPath: "/liveRoom/leave", NewPath: "/sofie/studio/exitHall", Tag: "studio", Summary: "离开直播间"},
 	{OldMethod: "post", OldPath: "/liveRoom/getLiveRecord", NewPath: "/sofie/studio/fetchRound", Tag: "studio", Summary: "查询本场直播记录"},
 	{OldMethod: "post", OldPath: "/liveRoom/onlineList", NewPath: "/sofie/studio/browseAudience", Tag: "studio", Summary: "在线观众列表"},

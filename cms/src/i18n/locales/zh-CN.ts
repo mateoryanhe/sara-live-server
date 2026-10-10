@@ -6,6 +6,7 @@ const menu = {
   TrackingManagement: '埋点',
   TrackingHotLiveRoomJoinManagement: '进入秀场直播间',
   TrackingCall1v1InitiateManagement: '1v1视频通话',
+  TrackingMiniGameRoundStartManagement: '点击开始游戏',
   UserManagement: '用户管理',
   CoinMerchantModule: '币商管理',
   AnchorGuildManagement: '主播与工会管理',

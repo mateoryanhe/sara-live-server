@@ -171,6 +171,47 @@ func (s *SystemTotalStat) touchUpdatedAt() {
 	})
 }
 
+func (s *SystemTotalStat) persistFloatCol(col db.TbCol, val float64) {
+	syndb.AddData(TbSystemTotalStat, col, &syndb.ColData{
+		IdVal:  s.ID,
+		ColVal: val,
+	})
+}
+
+func (s *SystemTotalStat) persistUintCol(col db.TbCol, val uint64) {
+	syndb.AddData(TbSystemTotalStat, col, &syndb.ColData{
+		IdVal:  s.ID,
+		ColVal: val,
+	})
+}
+
+// ResetBasicDashboardCounters 将 CMS「基础数据」页累计类指标归零(不含主播代付累计).
+func (s *SystemTotalStat) ResetBasicDashboardCounters() {
+	if s == nil {
+		return
+	}
+	s.TotalGold = 0
+	s.TotalGoldConsume = 0
+	s.TotalDiamondConsume = 0
+	s.TotalRecharge = 0
+	s.TotalNormalUserRecharge = 0
+	s.TotalCoinMerchantRecharge = 0
+	s.TotalVirtualRecharge = 0
+	s.TotalWithdraw = 0
+	s.TotalRegisterUser = 0
+
+	s.persistFloatCol(SystemTotalStatTotalGold, 0)
+	s.persistFloatCol(SystemTotalStatTotalGoldConsume, 0)
+	s.persistFloatCol(SystemTotalStatTotalDiamondConsume, 0)
+	s.persistFloatCol(SystemTotalStatTotalRecharge, 0)
+	s.persistFloatCol(SystemTotalStatTotalNormalUserRecharge, 0)
+	s.persistFloatCol(SystemTotalStatTotalCoinMerchantRecharge, 0)
+	s.persistFloatCol(SystemTotalStatTotalVirtualRecharge, 0)
+	s.persistFloatCol(SystemTotalStatTotalWithdraw, 0)
+	s.persistUintCol(SystemTotalStatTotalRegisterUser, 0)
+	s.touchUpdatedAt()
+}
+
 func initSystemTotalStat() {
 	syndb.RegLazy(TbSystemTotalStat, db.CreatedAtName)
 	syndb.RegLazy(TbSystemTotalStat, db.UpdatedAtName)

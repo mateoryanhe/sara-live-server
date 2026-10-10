@@ -18,6 +18,9 @@
         <el-tab-pane :label="t('pages.trackingHotLiveRoomJoin.tabShowcaseLeave')" name="showcaseLeave">
           <p class="page-desc">{{ t('pages.trackingHotLiveRoomJoin.leaveDesc') }}</p>
         </el-tab-pane>
+        <el-tab-pane :label="t('pages.trackingHotLiveRoomJoin.tabGameJoin')" name="gameJoin">
+          <p class="page-desc">{{ t('pages.trackingHotLiveRoomJoin.gameJoinDesc') }}</p>
+        </el-tab-pane>
       </el-tabs>
 
       <div class="summary-grid">
@@ -73,7 +76,7 @@ import {trackingEventApi} from '@/api/modules/tracking-event'
 import type {HotLiveRoomJoinTrendRes} from '@/types/api'
 import CountTrendChart from './components/count-trend-chart.vue'
 
-type TrackingEventKey = 'showcaseJoin' | 'firstFrame' | 'showcaseLeave'
+type TrackingEventKey = 'showcaseJoin' | 'firstFrame' | 'showcaseLeave' | 'gameJoin'
 
 const {t, locale} = useI18n()
 const loading = ref(false)
@@ -95,11 +98,13 @@ const emptyTrend = (): HotLiveRoomJoinTrendRes => ({
 const showcaseJoinTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 const firstFrameTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 const showcaseLeaveTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
+const gameJoinTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 
 const trendByEvent: Record<TrackingEventKey, HotLiveRoomJoinTrendRes> = {
   showcaseJoin: showcaseJoinTrend,
   firstFrame: firstFrameTrend,
   showcaseLeave: showcaseLeaveTrend,
+  gameJoin: gameJoinTrend,
 }
 
 const activeTrend = computed(() => trendByEvent[activeEvent.value])
@@ -112,6 +117,9 @@ const activeSeriesName = computed(() => {
   if (key === 'showcaseLeave') {
     return t('pages.trackingHotLiveRoomJoin.leaveSeriesName')
   }
+  if (key === 'gameJoin') {
+    return t('pages.trackingHotLiveRoomJoin.gameJoinSeriesName')
+  }
   return t('pages.trackingHotLiveRoomJoin.seriesName')
 })
 
@@ -122,6 +130,9 @@ const activeChartDaily = computed(() => {
   }
   if (key === 'showcaseLeave') {
     return t('pages.trackingHotLiveRoomJoin.leaveChartDaily')
+  }
+  if (key === 'gameJoin') {
+    return t('pages.trackingHotLiveRoomJoin.gameJoinChartDaily')
   }
   return t('pages.trackingHotLiveRoomJoin.chartDaily')
 })
@@ -134,6 +145,9 @@ const activeChartWeekly = computed(() => {
   if (key === 'showcaseLeave') {
     return t('pages.trackingHotLiveRoomJoin.leaveChartWeekly')
   }
+  if (key === 'gameJoin') {
+    return t('pages.trackingHotLiveRoomJoin.gameJoinChartWeekly')
+  }
   return t('pages.trackingHotLiveRoomJoin.chartWeekly')
 })
 
@@ -144,6 +158,9 @@ const activeChartMonthly = computed(() => {
   }
   if (key === 'showcaseLeave') {
     return t('pages.trackingHotLiveRoomJoin.leaveChartMonthly')
+  }
+  if (key === 'gameJoin') {
+    return t('pages.trackingHotLiveRoomJoin.gameJoinChartMonthly')
   }
   return t('pages.trackingHotLiveRoomJoin.chartMonthly')
 })
@@ -201,6 +218,11 @@ const fetchShowcaseLeaveTrend = async () => {
   assignTrend(showcaseLeaveTrend, data)
 }
 
+const fetchGameJoinTrend = async () => {
+  const data = await trackingEventApi.getGameLiveRoomJoinTrend()
+  assignTrend(gameJoinTrend, data)
+}
+
 const fetchActiveTrend = async () => {
   loading.value = true
   try {
@@ -208,6 +230,8 @@ const fetchActiveTrend = async () => {
       await fetchFirstFrameTrend()
     } else if (activeEvent.value === 'showcaseLeave') {
       await fetchShowcaseLeaveTrend()
+    } else if (activeEvent.value === 'gameJoin') {
+      await fetchGameJoinTrend()
     } else {
       await fetchShowcaseJoinTrend()
     }

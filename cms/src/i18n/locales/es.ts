@@ -7,6 +7,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   TrackingManagement: 'Tracking',
   TrackingHotLiveRoomJoinManagement: 'Entradas sala escaparate',
   TrackingCall1v1InitiateManagement: 'Videollamadas 1v1',
+  TrackingMiniGameRoundStartManagement: 'Iniciar juego',
   UserManagement: 'Usuarios',
   CoinMerchantModule: 'Gestión de comerciantes de monedas',
   AnchorGuildManagement: 'Anfitriones y gremios',

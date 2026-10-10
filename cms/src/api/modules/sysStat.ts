@@ -18,6 +18,9 @@ export const sysStatApi = {
     getSysStat: () => {
         return request.post<SysStat>('/sysStat/getSysStat', {})
     },
+    resetBasicDashboardStats: () => {
+        return request.post<{ success: boolean }>('/sysStat/resetBasicDashboardStats', {})
+    },
     getUserStatTrend: () => {
         return request.post<UserStatTrend>('/sysStat/getUserStatTrend', {})
     },

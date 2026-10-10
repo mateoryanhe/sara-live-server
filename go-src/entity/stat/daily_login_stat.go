@@ -152,6 +152,34 @@ func (receiver *DailyLoginStat) AddAudienceUserCount(n uint64) {
 	})
 }
 
+// ResetBasicDashboardTodayMetrics 将 CMS「基础数据」页「今日」区块相关指标归零.
+func (receiver *DailyLoginStat) ResetBasicDashboardTodayMetrics() {
+	if receiver == nil || receiver.ID == "" {
+		return
+	}
+	receiver.RegisterCount = 0
+	receiver.RechargeAmount = 0
+	receiver.GoldConsumeAmount = 0
+	receiver.DiamondConsumeAmount = 0
+
+	syndb.AddData(TbDailyLoginStat, DailyLoginStatRegisterCount, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: uint64(0),
+	})
+	syndb.AddData(TbDailyLoginStat, DailyLoginStatRechargeAmount, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: float64(0),
+	})
+	syndb.AddData(TbDailyLoginStat, DailyLoginStatGoldConsumeAmount, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: float64(0),
+	})
+	syndb.AddData(TbDailyLoginStat, DailyLoginStatDiamondConsumeAmount, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: float64(0),
+	})
+}
+
 func initDailyLoginStat() {
 	syndb.RegLazy(TbDailyLoginStat, DailyLoginStatCount)
 	syndb.RegLazy(TbDailyLoginStat, DailyLoginStatRegisterCount)

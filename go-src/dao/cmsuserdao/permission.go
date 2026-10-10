@@ -202,8 +202,64 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/officialSiteDeploy/deployZip"}
 	case "/thirdPayOfficialSiteDeploy/initFileUpload", "/thirdPayOfficialSiteDeploy/uploadFileChunk", "/thirdPayOfficialSiteDeploy/completeFileUpload", "/thirdPayOfficialSiteDeploy/abortFileUpload":
 		return []string{"/thirdPayOfficialSiteDeploy/deployZip"}
+	case "/trackingEvent/getHotLiveRoomJoinTrend":
+		return []string{
+			"/trackingEvent/getLiveFirstFrameRenderTrend",
+			"/trackingEvent/getHotLiveRoomLeaveTrend",
+			"/trackingEvent/getGameLiveRoomJoinTrend",
+		}
+	case "/trackingEvent/getLiveFirstFrameRenderTrend":
+		return []string{
+			"/trackingEvent/getHotLiveRoomJoinTrend",
+			"/trackingEvent/getHotLiveRoomLeaveTrend",
+			"/trackingEvent/getGameLiveRoomJoinTrend",
+		}
+	case "/trackingEvent/getHotLiveRoomLeaveTrend":
+		return []string{
+			"/trackingEvent/getHotLiveRoomJoinTrend",
+			"/trackingEvent/getLiveFirstFrameRenderTrend",
+			"/trackingEvent/getGameLiveRoomJoinTrend",
+		}
+	case "/trackingEvent/getGameLiveRoomJoinTrend":
+		return []string{
+			"/trackingEvent/getHotLiveRoomJoinTrend",
+			"/trackingEvent/getLiveFirstFrameRenderTrend",
+			"/trackingEvent/getHotLiveRoomLeaveTrend",
+		}
+	case "/trackingEvent/getCall1v1InitiateTrend":
+		return []string{
+			"/trackingEvent/getCall1v1RoomCallTrend",
+			"/trackingEvent/getCall1v1ConnectSuccessTrend",
+		}
+	case "/trackingEvent/getCall1v1RoomCallTrend":
+		return []string{
+			"/trackingEvent/getCall1v1InitiateTrend",
+			"/trackingEvent/getCall1v1ConnectSuccessTrend",
+		}
+	case "/trackingEvent/getCall1v1ConnectSuccessTrend":
+		return []string{
+			"/trackingEvent/getCall1v1InitiateTrend",
+			"/trackingEvent/getCall1v1RoomCallTrend",
+		}
+	case "/trackingEvent/getMiniGameRoundStartTrend":
+		return miniGameTrackingTrendAliasPaths()
+	case "/trackingEvent/getMiniGameRoundResultTrend":
+		return miniGameTrackingTrendAliasPaths()
+	case "/trackingEvent/getMiniGameExposureTrend":
+		return miniGameTrackingTrendAliasPaths()
+	case "/trackingEvent/getMiniGameWebViewLoadTrend":
+		return miniGameTrackingTrendAliasPaths()
 	default:
 		return nil
+	}
+}
+
+func miniGameTrackingTrendAliasPaths() []string {
+	return []string{
+		"/trackingEvent/getMiniGameRoundStartTrend",
+		"/trackingEvent/getMiniGameRoundResultTrend",
+		"/trackingEvent/getMiniGameExposureTrend",
+		"/trackingEvent/getMiniGameWebViewLoadTrend",
 	}
 }
 

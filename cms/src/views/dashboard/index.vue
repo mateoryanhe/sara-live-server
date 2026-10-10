@@ -15,33 +15,17 @@
       <el-tabs v-model="activeMainTab" lazy @tab-change="handleMainTabChange">
         <el-tab-pane :label="t('pages.dashboard.basicData')" name="basic">
           <div class="tab-toolbar tab-toolbar-basic">
-            <el-input
-                v-model="walletResetUserId"
-                clearable
-                class="wallet-reset-user-id"
-                :placeholder="t('pages.dashboard.walletResetUserIdPlaceholder')"
-                @keyup.enter="void handleDashboardWalletReset('gold')"
-            />
             <el-button
-                v-if="can('goldReset')"
+                v-if="can('basicDataReset')"
                 type="danger"
-                plain
-                :loading="walletResetSubmitting === 'gold'"
-                @click="() => void handleDashboardWalletReset('gold')"
+                :loading="basicDataResetSubmitting"
+                @click="() => void handleBasicDashboardReset()"
             >
-              {{ t('pages.userList.resetGold') }}
-            </el-button>
-            <el-button
-                v-if="can('diamondReset')"
-                type="danger"
-                plain
-                :loading="walletResetSubmitting === 'diamond'"
-                @click="() => void handleDashboardWalletReset('diamond')"
-            >
-              {{ t('pages.userList.resetDiamond') }}
+              {{ t('pages.dashboard.resetBasicData') }}
             </el-button>
             <el-button :loading="loading" @click="() => void fetchSysStat()">{{ t('common.refresh') }}</el-button>
           </div>
+          <p v-if="can('basicDataReset')" class="basic-data-reset-hint">{{ t('pages.dashboard.resetBasicDataHint') }}</p>
           <div class="basic-stat-board">
             <section
                 v-for="section in basicStatSections"
@@ -175,10 +159,9 @@ import {
   ref,
   watch,
 } from 'vue'
-import {ElMessage} from 'element-plus'
-import {accountApi, RESOURCE_METRIC_MAX_POINTS, sysStatApi} from '@/api'
+import {ElMessage, ElMessageBox} from 'element-plus'
+import {RESOURCE_METRIC_MAX_POINTS, sysStatApi} from '@/api'
 import {usePagePermission} from '@/composables/usePagePermission'
-import {type WalletCurrencyType, useWalletCurrencyReset} from '@/composables/useWalletCurrencyReset'
 import type {ResourceMetricTrend, SysStat, UserStatTrend} from '@/types/api'
 import BarMetricSection from './components/bar-metric-section.vue'
 import {getUserStatBarMetricTabs, USER_STAT_BAR_SERIES} from './user-stat-bar-series'
@@ -201,9 +184,7 @@ const AUTO_REFRESH_INTERVALS = [
 
 const {t, locale} = useI18n()
 const {can} = usePagePermission('Dashboard')
-const {resetWalletCurrency, walletBalanceNumber} = useWalletCurrencyReset()
-const walletResetUserId = ref('')
-const walletResetSubmitting = ref<'' | WalletCurrencyType>('')
+const basicDataResetSubmitting = ref(false)
 const loading = ref(false)
 const trendLoading = ref(false)
 const onlineLoading = ref(false)
@@ -437,42 +418,31 @@ const refreshDashboard = async (silent = false) => {
   }
 }
 
-const resolveWalletResetUser = async (rawUserId: string) => {
-  const userId = rawUserId.trim()
-  if (!userId) {
-    ElMessage.warning(t('pages.dashboard.walletResetUserIdRequired'))
-    return null
-  }
-  const detail = await accountApi.getUserDetail(userId)
-  if (!detail?.account?.id) {
-    ElMessage.warning(t('pages.dashboard.walletResetUserNotFound'))
-    return null
-  }
-  return detail
-}
-
-const handleDashboardWalletReset = async (type: WalletCurrencyType) => {
-  if (walletResetSubmitting.value) {
+const handleBasicDashboardReset = async () => {
+  if (basicDataResetSubmitting.value) {
     return
   }
-  walletResetSubmitting.value = type
+  const boxOpts = {
+    confirmButtonText: t('common.confirm'),
+    cancelButtonText: t('common.cancel'),
+    type: 'warning' as const,
+  }
   try {
-    const detail = await resolveWalletResetUser(walletResetUserId.value)
-    if (!detail) {
-      return
-    }
-    const userId = detail.account!.id
-    const balance = walletBalanceNumber(type === 'gold' ? detail.wallet?.gold : detail.wallet?.diamond)
-    const ok = await resetWalletCurrency(userId, type, balance)
-    if (ok) {
-      await fetchSysStat(true)
-    }
+    await ElMessageBox.confirm(t('pages.dashboard.resetBasicDataConfirm1'), t('pages.dashboard.resetBasicDataTitle'), boxOpts)
+    await ElMessageBox.confirm(t('pages.dashboard.resetBasicDataConfirm2'), t('pages.dashboard.resetBasicDataTitleFinal'), boxOpts)
+  } catch {
+    return
+  }
+  basicDataResetSubmitting.value = true
+  try {
+    await sysStatApi.resetBasicDashboardStats()
+    ElMessage.success(t('pages.dashboard.resetBasicDataSuccess'))
+    await fetchSysStat(true)
   } catch (error) {
-    if (error !== 'cancel') {
-      console.error('dashboard wallet reset failed:', error)
-    }
+    console.error('reset basic dashboard stats failed:', error)
+    ElMessage.error(t('pages.dashboard.resetBasicDataFailed'))
   } finally {
-    walletResetSubmitting.value = ''
+    basicDataResetSubmitting.value = false
   }
 }
 
@@ -667,11 +637,15 @@ onUnmounted(() => {
 
 .tab-toolbar-basic {
   justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.wallet-reset-user-id {
-  width: 240px;
-  max-width: 100%;
+.basic-data-reset-hint {
+  margin: 0 0 16px;
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.5;
 }
 
 .online-chart {

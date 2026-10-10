@@ -106,6 +106,7 @@ func HandleVendorTransfer(ctx context.Context, req *gameplatformdto.VendorTransf
 	}
 
 	gamevendordao.MarkVendorTransferProcessed(transactionID)
+	pubMiniGameRoundResultTracking(userID, gameID, transactionID, statTimeFromVendorUpdatedTime(resolveVendorTransferUpdatedTime(req)))
 
 	resp := vendorTransferSuccess(balance, resolveVendorTransferUpdatedTime(req))
 	vendorDetailLog().Infof(ctx, "vendor transfer success transaction_id=%s user_id=%d balance=%v bet_amount=%v win_amount=%v",

@@ -162,11 +162,11 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     ],
     Dashboard: [
         BTN.view,
-        {key: 'goldReset', label: '重置金币'},
-        {key: 'diamondReset', label: '重置钻石'},
+        {key: 'basicDataReset', label: '重置基础数据统计'},
     ],
     TrackingHotLiveRoomJoinManagement: DEFAULT_VIEW_BUTTONS,
     TrackingCall1v1InitiateManagement: DEFAULT_VIEW_BUTTONS,
+    TrackingMiniGameRoundStartManagement: DEFAULT_VIEW_BUTTONS,
     UserList: [
         BTN.view,
         BTN.search,

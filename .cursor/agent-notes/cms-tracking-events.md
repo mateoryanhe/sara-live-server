@@ -43,14 +43,45 @@
 | `TrackingHotLiveRoomJoinManagement`（CMS 文案：进入秀场直播间） | `hot_live_room_join` | 观众 `joinRoom` 成功且 `live_room_cfgs.category=1`(秀场/Hot)，不含主播本人；每次 +1；`JoinRoom` Pub `ShowcaseLiveRoomJoinTrackingEvent`，`module/tracking` 队列异步消费 | `POST /trackingEvent/getHotLiveRoomJoinTrend` |
 | 同上页 **Tab「直播首帧画面渲染完成」** | `live_first_frame_rendered` | 秀场(category=1)、直播中；App `POST /liveRoom/reportLiveFirstFrameRendered`（Sofie `POST /sofie/studio/notifyLiveFirstFrameReady`）；不含主播；每次成功 +1 | `POST /trackingEvent/getLiveFirstFrameRenderTrend` |
 | 同上页 **Tab「退出直播间」** | `hot_live_room_leave` | 秀场(category=1)；`leaveRoom` 成功 +1，不含主播；仅主动退房 API（非踢出/心跳清理） | `POST /trackingEvent/getHotLiveRoomLeaveTrend` |
+| 同上页 **Tab「进入游戏直播类房间」** | `game_live_room_join` | 游戏直播(category=2)；观众 `joinRoom` 成功 +1，不含主播；`JoinRoom` Pub `GameLiveRoomJoinTrackingEvent`，tracking 队列异步消费 | `POST /trackingEvent/getGameLiveRoomJoinTrend` |
 
-表：`daily_hot_live_room_join_stats` / `weekly_*` / `monthly_*`（仅 `count`）；首帧：`daily_live_first_frame_render_stats` / `weekly_*` / `monthly_*`；退房：`daily_hot_live_room_leave_stats` / `weekly_*` / `monthly_*`。
+表：`daily_hot_live_room_join_stats` / `weekly_*` / `monthly_*`（仅 `count`）；首帧：`daily_live_first_frame_render_stats` / `weekly_*` / `monthly_*`；退房：`daily_hot_live_room_leave_stats` / `weekly_*` / `monthly_*`；游戏进房：`daily_game_live_room_join_stats` / `weekly_*` / `monthly_*`。
 
 | 页面 | event | 口径 | CMS API |
 |------|-------|------|---------|
 | `TrackingCall1v1InitiateManagement`（1v1视频通话） | `call_1v1_initiate` | 秀场 category=1；`liveRoomCall` 成功且 `call_order.source=1`（直播间来源）+1 | `POST /trackingEvent/getCall1v1InitiateTrend` |
 
 表：`daily_call_1v1_initiate_stats` / `weekly_*` / `monthly_*`。
+
+| 同上页 **Tab「1v1房间视频通话」** | `call_1v1_room` | `oneToOneRoomCall` 成功且 `call_order.source=3` +1 | `POST /trackingEvent/getCall1v1RoomCallTrend` |
+
+表：`daily_call_1v1_room_stats` / `weekly_*` / `monthly_*`。
+
+| 同上页 **Tab「双方成功接通」** | `call_1v1_connect_success` | 视频通话；双方 `confirmCall` 且首次扣费成功进入通话中 +1；source=1 限秀场 category=1，source=3 含 1v1 房间 | `POST /trackingEvent/getCall1v1ConnectSuccessTrend` |
+
+表：`daily_call_1v1_connect_success_stats` / `weekly_*` / `monthly_*`。
+
+| 页面 | event | 口径 | CMS API |
+|------|-------|------|---------|
+| `TrackingMiniGameRoundStartManagement`（点击开始游戏） | `mini_game_round_start` | App `appGameStart` 成功返回非空启动 link +1 | `POST /trackingEvent/getMiniGameRoundStartTrend` |
+
+表：`daily_mini_game_round_start_stats` / `weekly_*` / `monthly_*`。
+
+| 同上页 **Tab「单局游戏结算」** | `mini_game_round_result` | 第三方 `vendor transfer` 回调钱包更新成功且 `transaction_id` 首次处理 +1 | `POST /trackingEvent/getMiniGameRoundResultTrend` |
+
+表：`daily_mini_game_round_result_stats` / `weekly_*` / `monthly_*`。
+
+| 同上页 **Tab「半屏游戏曝光」** | `mini_game_exposure` | 登录用户 `reportMiniGameExposure` 成功 +1（暂不要求 body 参数、不做房间/游戏校验） | `POST /trackingEvent/getMiniGameExposureTrend` |
+
+App：`POST /liveRoom/reportMiniGameExposure`（Sofie `POST /sofie/studio/notifyMiniGameExposure`）。
+
+表：`daily_mini_game_exposure_stats` / `weekly_*` / `monthly_*`。
+
+| 同上页 **Tab「WebView 加载成功」** | `mini_game_webview_load_success` | 登录用户 `reportMiniGameWebViewLoadSuccess` 成功 +1（暂不要求 body） | `POST /trackingEvent/getMiniGameWebViewLoadTrend` |
+
+App：`POST /liveRoom/reportMiniGameWebViewLoadSuccess`（Sofie `POST /sofie/studio/notifyMiniGameWebViewLoadSuccess`）。
+
+表：`daily_mini_game_webview_load_stats` / `weekly_*` / `monthly_*`。
 
 ## 新增一个事件的 checklist
 

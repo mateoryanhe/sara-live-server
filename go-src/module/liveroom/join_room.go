@@ -41,7 +41,7 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 			SysTime:     now.UnixMilli(),
 		}
 		res.KickBanned, res.KickTime, res.KickBanExpireAt, res.KickRemainSeconds = kickBanStatus(room.ID, userId, existing)
-		pubShowcaseLiveRoomJoinTracking(userId, room.ID, now)
+		pubLiveRoomJoinTracking(userId, room.ID, now)
 		return res, nil
 	}
 	if existing != nil && existing.KickTime != nil && !isOnlineKickBanned(room.ID, userId, existing) {
@@ -65,7 +65,7 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 			OnlineCount: getLenForRoom(room.ID),
 			SysTime:     now.UnixMilli(),
 		}
-		pubShowcaseLiveRoomJoinTracking(userId, room.ID, now)
+		pubLiveRoomJoinTracking(userId, room.ID, now)
 		return res, nil
 	}
 
@@ -76,7 +76,7 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 			OnlineCount: getLenForRoom(room.ID),
 			SysTime:     now.UnixMilli(),
 		}
-		pubShowcaseLiveRoomJoinTracking(userId, room.ID, now)
+		pubLiveRoomJoinTracking(userId, room.ID, now)
 		return res, nil
 	}
 
@@ -110,6 +110,6 @@ func JoinRoom(ctx context.Context, req *liveroomdto.JoinRoomReq) (*liveroomdto.J
 		OnlineCount: getLenForRoom(room.ID),
 		SysTime:     now.UnixMilli(),
 	}
-	pubShowcaseLiveRoomJoinTracking(userId, room.ID, now)
+	pubLiveRoomJoinTracking(userId, room.ID, now)
 	return res, nil
 }

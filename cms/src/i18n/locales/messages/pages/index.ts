@@ -99,6 +99,7 @@ import {serverLogExplorerMessages} from './server-log-explorer'
 import {dashboardMessages} from './dashboard'
 import {trackingHotLiveRoomJoinMessages} from './tracking-hot-live-room-join'
 import {trackingCall1v1InitiateMessages} from './tracking-call-1v1-initiate'
+import {trackingMiniGameRoundStartMessages} from './tracking-mini-game-round-start'
 
 const pageMessageBuilders = [
   ['userList', userListMessages],
@@ -200,6 +201,7 @@ const pageMessageBuilders = [
   ['dashboard', dashboardMessages],
   ['trackingHotLiveRoomJoin', trackingHotLiveRoomJoinMessages],
   ['trackingCall1v1Initiate', trackingCall1v1InitiateMessages],
+  ['trackingMiniGameRoundStart', trackingMiniGameRoundStartMessages],
 ] as const
 
 export type PageNamespace = typeof pageMessageBuilders[number][0]
