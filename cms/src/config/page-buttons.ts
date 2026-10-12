@@ -167,6 +167,9 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     TrackingHotLiveRoomJoinManagement: DEFAULT_VIEW_BUTTONS,
     TrackingCall1v1InitiateManagement: DEFAULT_VIEW_BUTTONS,
     TrackingMiniGameRoundStartManagement: DEFAULT_VIEW_BUTTONS,
+    TrackingShortVideoManagement: DEFAULT_VIEW_BUTTONS,
+    TrackingVoiceChatRoomManagement: DEFAULT_VIEW_BUTTONS,
+    TrackingRechargeManagement: DEFAULT_VIEW_BUTTONS,
     UserList: [
         BTN.view,
         BTN.search,

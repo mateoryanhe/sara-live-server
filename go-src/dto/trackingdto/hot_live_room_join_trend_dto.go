@@ -22,3 +22,25 @@ type CMSHotLiveRoomJoinTrendRes struct {
 	Weekly     []*CMSTrackingEventTrendPoint `json:"weekly" dc:"按周(最近12周)"`
 	Monthly    []*CMSTrackingEventTrendPoint `json:"monthly" dc:"按月(最近12月)"`
 }
+
+// ReportHotLiveRoomGiftClickReq App 上报秀场直播间礼物面板点击(暂不要求 body)
+type ReportHotLiveRoomGiftClickReq struct {
+	g.Meta `path:"/reportHotLiveRoomGiftClick" method:"post" summary:"上报秀场直播间礼物面板点击" tags:"直播间"`
+}
+
+type ReportHotLiveRoomGiftClickRes struct {
+	Success bool `json:"success"`
+}
+
+type CMSHotLiveRoomGiftClickTrendReq struct {
+	g.Meta `path:"/getHotLiveRoomGiftClickTrend" method:"post" summary:"CMS秀场直播间礼物面板点击次数趋势" tags:"埋点"`
+}
+
+type CMSHotLiveRoomGiftClickTrendRes struct {
+	TodayCount uint64                        `json:"todayCount"`
+	WeekCount  uint64                        `json:"weekCount"`
+	MonthCount uint64                        `json:"monthCount"`
+	Daily      []*CMSTrackingEventTrendPoint `json:"daily"`
+	Weekly     []*CMSTrackingEventTrendPoint `json:"weekly"`
+	Monthly    []*CMSTrackingEventTrendPoint `json:"monthly"`
+}

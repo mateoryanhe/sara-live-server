@@ -86,6 +86,16 @@ func (c *LiveRoomAppController) ReportMiniGameWebViewLoadSuccess(ctx context.Con
 	return tracking.ReportMiniGameWebViewLoadSuccess(ctx, req)
 }
 
+// ReportVoiceRoomGiftClick 上报语聊房礼物面板点击
+func (c *LiveRoomAppController) ReportVoiceRoomGiftClick(ctx context.Context, req *trackingdto.ReportVoiceRoomGiftClickReq) (*trackingdto.ReportVoiceRoomGiftClickRes, error) {
+	return tracking.ReportVoiceRoomGiftClick(ctx, req)
+}
+
+// ReportHotLiveRoomGiftClick 上报秀场直播间礼物面板点击
+func (c *LiveRoomAppController) ReportHotLiveRoomGiftClick(ctx context.Context, req *trackingdto.ReportHotLiveRoomGiftClickReq) (*trackingdto.ReportHotLiveRoomGiftClickRes, error) {
+	return tracking.ReportHotLiveRoomGiftClick(ctx, req)
+}
+
 // LeaveRoom 离开直播间
 func (c *LiveRoomAppController) LeaveRoom(ctx context.Context, req *liveroomdto.LeaveRoomReq) (res *liveroomdto.LeaveRoomRes, err error) {
 	return liveroom.LeaveRoom(ctx, req)

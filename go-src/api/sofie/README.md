@@ -42,6 +42,8 @@
 | `studio` | 上报直播首帧渲染完成 | 需要登录 | `POST /liveRoom/reportLiveFirstFrameRendered` | `POST /sofie/studio/notifyLiveFirstFrameReady` |
 | `studio` | 上报半屏游戏窗口曝光 | 需要登录 | `POST /liveRoom/reportMiniGameExposure` | `POST /sofie/studio/notifyMiniGameExposure` |
 | `studio` | 上报游戏WebView成功加载 | 需要登录 | `POST /liveRoom/reportMiniGameWebViewLoadSuccess` | `POST /sofie/studio/notifyMiniGameWebViewLoadSuccess` |
+| `studio` | 上报语聊房礼物面板点击 | 需要登录 | `POST /liveRoom/reportVoiceRoomGiftClick` | `POST /sofie/studio/notifyVoiceRoomGiftClick` |
+| `studio` | 上报秀场直播间礼物面板点击 | 需要登录 | `POST /liveRoom/reportHotLiveRoomGiftClick` | `POST /sofie/studio/notifyHotLiveRoomGiftClick` |
 | `studio` | 离开直播间 | 需要登录 | `POST /liveRoom/leave` | `POST /sofie/studio/exitHall` |
 | `studio` | 查询本场直播记录 | 需要登录 | `POST /liveRoom/getLiveRecord` | `POST /sofie/studio/fetchRound` |
 | `studio` | 在线观众列表 | 需要登录 | `POST /liveRoom/onlineList` | `POST /sofie/studio/browseAudience` |
@@ -128,6 +130,7 @@
 | `play` | 下注记录 | 需要登录 | `POST /game/appGameBetList` | `POST /sofie/play/browseBets` |
 | `play` | 单场游戏消费榜 | 需要登录 | `POST /game/appGameConsumeRank` | `POST /sofie/play/browseRoundSpend` |
 | `present` | 礼物列表 | 需要登录 | `POST /gift/appGiftList` | `POST /sofie/present/browseCatalog` |
+| `topup` | 上报充值面板曝光 | 需要登录 | `POST /rechargeOrder/reportChargePanelEnter` | `POST /sofie/topup/notifyChargePanelEnter` |
 | `topup` | 创建充值订单 | 需要登录 | `POST /rechargeOrder/createRechargeOrder` | `POST /sofie/topup/openStoreOrder` |
 | `topup` | 渠道充值建单 | 需要登录 | `POST /rechargeOrder/createChannelRechargeOrder` | `POST /sofie/topup/openChannelOrder` |
 | `topup` | 币商渠道建单 | 需要登录 | `POST /rechargeOrder/createCoinMerchantChannelRechargeOrder` | `POST /sofie/topup/openDealerChannelOrder` |

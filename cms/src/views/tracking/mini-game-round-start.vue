@@ -9,6 +9,12 @@
       </template>
 
       <el-tabs v-model="activeEvent" class="event-tabs" @tab-change="handleEventChange">
+        <el-tab-pane :label="t('pages.trackingMiniGameRoundStart.tabGameJoin')" name="gameJoin">
+          <p class="page-desc">{{ t('pages.trackingMiniGameRoundStart.gameJoinDesc') }}</p>
+        </el-tab-pane>
+        <el-tab-pane :label="t('pages.trackingMiniGameRoundStart.tabFirstFrame')" name="firstFrame">
+          <p class="page-desc">{{ t('pages.trackingMiniGameRoundStart.firstFrameDesc') }}</p>
+        </el-tab-pane>
         <el-tab-pane :label="t('pages.trackingMiniGameRoundStart.tabRoundStart')" name="roundStart">
           <p class="page-desc">{{ t('pages.trackingMiniGameRoundStart.desc') }}</p>
         </el-tab-pane>
@@ -76,11 +82,11 @@ import {trackingEventApi} from '@/api/modules/tracking-event'
 import type {HotLiveRoomJoinTrendRes} from '@/types/api'
 import CountTrendChart from './components/count-trend-chart.vue'
 
-type TrackingEventKey = 'roundStart' | 'roundResult' | 'gameExposure' | 'gameWebViewLoad'
+type TrackingEventKey = 'gameJoin' | 'firstFrame' | 'roundStart' | 'roundResult' | 'gameExposure' | 'gameWebViewLoad'
 
 const {t, locale} = useI18n()
 const loading = ref(false)
-const activeEvent = ref<TrackingEventKey>('roundStart')
+const activeEvent = ref<TrackingEventKey>('gameJoin')
 const activePeriod = ref<'daily' | 'weekly' | 'monthly'>('daily')
 const dailyChartRef = ref<InstanceType<typeof CountTrendChart>>()
 const weeklyChartRef = ref<InstanceType<typeof CountTrendChart>>()
@@ -95,12 +101,16 @@ const emptyTrend = (): HotLiveRoomJoinTrendRes => ({
   monthly: [],
 })
 
+const gameJoinTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
+const firstFrameTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 const roundStartTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 const roundResultTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 const gameExposureTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 const gameWebViewLoadTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 
 const trendByEvent: Record<TrackingEventKey, HotLiveRoomJoinTrendRes> = {
+  gameJoin: gameJoinTrend,
+  firstFrame: firstFrameTrend,
   roundStart: roundStartTrend,
   roundResult: roundResultTrend,
   gameExposure: gameExposureTrend,
@@ -111,6 +121,12 @@ const activeTrend = computed(() => trendByEvent[activeEvent.value])
 
 const activeSeriesName = computed(() => {
   const key = activeEvent.value
+  if (key === 'gameJoin') {
+    return t('pages.trackingMiniGameRoundStart.gameJoinSeriesName')
+  }
+  if (key === 'firstFrame') {
+    return t('pages.trackingMiniGameRoundStart.firstFrameSeriesName')
+  }
   if (key === 'roundResult') {
     return t('pages.trackingMiniGameRoundStart.roundResultSeriesName')
   }
@@ -125,6 +141,12 @@ const activeSeriesName = computed(() => {
 
 const activeChartDaily = computed(() => {
   const key = activeEvent.value
+  if (key === 'gameJoin') {
+    return t('pages.trackingMiniGameRoundStart.gameJoinChartDaily')
+  }
+  if (key === 'firstFrame') {
+    return t('pages.trackingMiniGameRoundStart.firstFrameChartDaily')
+  }
   if (key === 'roundResult') {
     return t('pages.trackingMiniGameRoundStart.roundResultChartDaily')
   }
@@ -139,6 +161,12 @@ const activeChartDaily = computed(() => {
 
 const activeChartWeekly = computed(() => {
   const key = activeEvent.value
+  if (key === 'gameJoin') {
+    return t('pages.trackingMiniGameRoundStart.gameJoinChartWeekly')
+  }
+  if (key === 'firstFrame') {
+    return t('pages.trackingMiniGameRoundStart.firstFrameChartWeekly')
+  }
   if (key === 'roundResult') {
     return t('pages.trackingMiniGameRoundStart.roundResultChartWeekly')
   }
@@ -153,6 +181,12 @@ const activeChartWeekly = computed(() => {
 
 const activeChartMonthly = computed(() => {
   const key = activeEvent.value
+  if (key === 'gameJoin') {
+    return t('pages.trackingMiniGameRoundStart.gameJoinChartMonthly')
+  }
+  if (key === 'firstFrame') {
+    return t('pages.trackingMiniGameRoundStart.firstFrameChartMonthly')
+  }
   if (key === 'roundResult') {
     return t('pages.trackingMiniGameRoundStart.roundResultChartMonthly')
   }
@@ -203,6 +237,16 @@ const handleEventChange = () => {
   void fetchActiveTrend()
 }
 
+const fetchGameJoinTrend = async () => {
+  const data = await trackingEventApi.getGameLiveRoomJoinTrend()
+  assignTrend(gameJoinTrend, data)
+}
+
+const fetchFirstFrameTrend = async () => {
+  const data = await trackingEventApi.getGameLiveWatchStreamTrend()
+  assignTrend(firstFrameTrend, data)
+}
+
 const fetchRoundStartTrend = async () => {
   const data = await trackingEventApi.getMiniGameRoundStartTrend()
   assignTrend(roundStartTrend, data)
@@ -226,7 +270,11 @@ const fetchGameWebViewLoadTrend = async () => {
 const fetchActiveTrend = async () => {
   loading.value = true
   try {
-    if (activeEvent.value === 'roundResult') {
+    if (activeEvent.value === 'gameJoin') {
+      await fetchGameJoinTrend()
+    } else if (activeEvent.value === 'firstFrame') {
+      await fetchFirstFrameTrend()
+    } else if (activeEvent.value === 'roundResult') {
       await fetchRoundResultTrend()
     } else if (activeEvent.value === 'gameExposure') {
       await fetchGameExposureTrend()

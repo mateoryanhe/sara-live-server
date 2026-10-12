@@ -25,7 +25,11 @@ const (
 	EventKeyLiveFirstFrameRendered = "live_first_frame_rendered"
 )
 
-// ReportLiveFirstFrameRendered App 上报秀场直播首帧画面渲染完成(每次成功请求 +1,异步落库)
+func liveFirstFrameReportCategory(category uint8) bool {
+	return category == liveentity.LiveRoomCategoryHot || category == liveentity.LiveRoomCategoryGame
+}
+
+// ReportLiveFirstFrameRendered App 上报直播首帧画面渲染完成(秀场 category=1 / 游戏直播 category=2,每次成功 +1,异步落库)
 func ReportLiveFirstFrameRendered(ctx context.Context, req *trackingdto.ReportLiveFirstFrameRenderedReq) (*trackingdto.ReportLiveFirstFrameRenderedRes, error) {
 	userId := httpserver.GetAuthId(ctx)
 	if userId == 0 || req == nil || req.RoomId == 0 {
@@ -42,7 +46,7 @@ func ReportLiveFirstFrameRendered(ctx context.Context, req *trackingdto.ReportLi
 		return nil, errercode.CreateCode(errercode.LiveRoomNotLive)
 	}
 	cfg := liveroomdao.GetLiveRoomCfg(req.RoomId)
-	if cfg == nil || cfg.Category != liveentity.LiveRoomCategoryHot {
+	if cfg == nil || !liveFirstFrameReportCategory(cfg.Category) {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	if userId == room.ID {

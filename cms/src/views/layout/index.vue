@@ -19,7 +19,7 @@
           <span>{{ t('menu.Dashboard') }}</span>
         </el-menu-item>
         <el-sub-menu
-            v-if="hasMenuPermission('TrackingHotLiveRoomJoinManagement') || hasMenuPermission('TrackingCall1v1InitiateManagement') || hasMenuPermission('TrackingMiniGameRoundStartManagement')"
+            v-if="hasMenuPermission('TrackingHotLiveRoomJoinManagement') || hasMenuPermission('TrackingCall1v1InitiateManagement') || hasMenuPermission('TrackingMiniGameRoundStartManagement') || hasMenuPermission('TrackingShortVideoManagement') || hasMenuPermission('TrackingVoiceChatRoomManagement') || hasMenuPermission('TrackingRechargeManagement')"
             index="/tracking">
           <template #title>
             <el-icon>
@@ -44,6 +44,24 @@
               <DataLine/>
             </el-icon>
             <span>{{ t('menu.TrackingMiniGameRoundStartManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('TrackingShortVideoManagement')" index="/tracking/short-video">
+            <el-icon>
+              <DataLine/>
+            </el-icon>
+            <span>{{ t('menu.TrackingShortVideoManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('TrackingVoiceChatRoomManagement')" index="/tracking/voice-chat-room">
+            <el-icon>
+              <DataLine/>
+            </el-icon>
+            <span>{{ t('menu.TrackingVoiceChatRoomManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('TrackingRechargeManagement')" index="/tracking/recharge">
+            <el-icon>
+              <DataLine/>
+            </el-icon>
+            <span>{{ t('menu.TrackingRechargeManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu

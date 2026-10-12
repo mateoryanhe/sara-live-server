@@ -25,6 +25,17 @@ var (
 	miniGameExposureTrackingQueue       = gqueue.NewTQueue[*gameevent.MiniGameExposureTrackingEventData]()
 	gameLiveRoomJoinTrackingQueue       = gqueue.NewTQueue[*gameevent.GameLiveRoomJoinTrackingEventData]()
 	miniGameWebViewLoadTrackingQueue    = gqueue.NewTQueue[*gameevent.MiniGameWebViewLoadTrackingEventData]()
+	shortVideoPlayStartTrackingQueue    = gqueue.NewTQueue[*gameevent.ShortVideoPlayStartTrackingEventData]()
+	shortVideoPaywallClickTrackingQueue = gqueue.NewTQueue[*gameevent.ShortVideoPaywallClickTrackingEventData]()
+	shortVideoPaySuccessTrackingQueue   = gqueue.NewTQueue[*gameevent.ShortVideoPaySuccessTrackingEventData]()
+	shortVideoWatchEndTrackingQueue     = gqueue.NewTQueue[*gameevent.ShortVideoWatchEndTrackingEventData]()
+	voiceRoomEnterTrackingQueue         = gqueue.NewTQueue[*gameevent.VoiceRoomEnterTrackingEventData]()
+	voiceRoomMicRequestTrackingQueue    = gqueue.NewTQueue[*gameevent.VoiceRoomMicRequestTrackingEventData]()
+	voiceRoomGiftClickTrackingQueue     = gqueue.NewTQueue[*gameevent.VoiceRoomGiftClickTrackingEventData]()
+	hotLiveRoomGiftClickTrackingQueue   = gqueue.NewTQueue[*gameevent.HotLiveRoomGiftClickTrackingEventData]()
+	chargePanelEnterTrackingQueue       = gqueue.NewTQueue[*gameevent.ChargePanelEnterTrackingEventData]()
+	chargeClickTrackingQueue            = gqueue.NewTQueue[*gameevent.ChargeClickTrackingEventData]()
+	chargeResultServerTrackingQueue     = gqueue.NewTQueue[*gameevent.ChargeResultServerTrackingEventData]()
 )
 
 func initTrackingQueue() {
@@ -41,6 +52,17 @@ func initTrackingQueue() {
 	event.Sub(gameevent.MiniGameExposureTrackingEvent, onMiniGameExposureTrackingEvent)
 	event.Sub(gameevent.GameLiveRoomJoinTrackingEvent, onGameLiveRoomJoinTrackingEvent)
 	event.Sub(gameevent.MiniGameWebViewLoadTrackingEvent, onMiniGameWebViewLoadTrackingEvent)
+	event.Sub(gameevent.ShortVideoPlayStartTrackingEvent, onShortVideoPlayStartTrackingEvent)
+	event.Sub(gameevent.ShortVideoPaywallClickTrackingEvent, onShortVideoPaywallClickTrackingEvent)
+	event.Sub(gameevent.ShortVideoPaySuccessTrackingEvent, onShortVideoPaySuccessTrackingEvent)
+	event.Sub(gameevent.ShortVideoWatchEndTrackingEvent, onShortVideoWatchEndTrackingEvent)
+	event.Sub(gameevent.VoiceRoomEnterTrackingEvent, onVoiceRoomEnterTrackingEvent)
+	event.Sub(gameevent.VoiceRoomMicRequestTrackingEvent, onVoiceRoomMicRequestTrackingEvent)
+	event.Sub(gameevent.VoiceRoomGiftClickTrackingEvent, onVoiceRoomGiftClickTrackingEvent)
+	event.Sub(gameevent.HotLiveRoomGiftClickTrackingEvent, onHotLiveRoomGiftClickTrackingEvent)
+	event.Sub(gameevent.ChargePanelEnterTrackingEvent, onChargePanelEnterTrackingEvent)
+	event.Sub(gameevent.ChargeClickTrackingEvent, onChargeClickTrackingEvent)
+	event.Sub(gameevent.ChargeResultServerTrackingEvent, onChargeResultServerTrackingEvent)
 }
 
 func onShowcaseLiveRoomJoinTrackingEvent(data any) {
@@ -131,6 +153,94 @@ func onMiniGameWebViewLoadTrackingEvent(data any) {
 	miniGameWebViewLoadTrackingQueue.Push(ev)
 }
 
+func onShortVideoPlayStartTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.ShortVideoPlayStartTrackingEventData)
+	if !ok || ev == nil || ev.UserId == 0 {
+		return
+	}
+	shortVideoPlayStartTrackingQueue.Push(ev)
+}
+
+func onShortVideoPaywallClickTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.ShortVideoPaywallClickTrackingEventData)
+	if !ok || ev == nil || ev.UserId == 0 {
+		return
+	}
+	shortVideoPaywallClickTrackingQueue.Push(ev)
+}
+
+func onShortVideoPaySuccessTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.ShortVideoPaySuccessTrackingEventData)
+	if !ok || ev == nil || ev.UserId == 0 {
+		return
+	}
+	shortVideoPaySuccessTrackingQueue.Push(ev)
+}
+
+func onShortVideoWatchEndTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.ShortVideoWatchEndTrackingEventData)
+	if !ok || ev == nil || ev.UserId == 0 {
+		return
+	}
+	shortVideoWatchEndTrackingQueue.Push(ev)
+}
+
+func onVoiceRoomEnterTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.VoiceRoomEnterTrackingEventData)
+	if !ok || ev == nil || ev.UserId == 0 || ev.RoomId == 0 {
+		return
+	}
+	voiceRoomEnterTrackingQueue.Push(ev)
+}
+
+func onVoiceRoomMicRequestTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.VoiceRoomMicRequestTrackingEventData)
+	if !ok || ev == nil || ev.UserId == 0 {
+		return
+	}
+	voiceRoomMicRequestTrackingQueue.Push(ev)
+}
+
+func onVoiceRoomGiftClickTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.VoiceRoomGiftClickTrackingEventData)
+	if !ok || ev == nil || ev.UserId == 0 {
+		return
+	}
+	voiceRoomGiftClickTrackingQueue.Push(ev)
+}
+
+func onHotLiveRoomGiftClickTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.HotLiveRoomGiftClickTrackingEventData)
+	if !ok || ev == nil || ev.UserId == 0 {
+		return
+	}
+	hotLiveRoomGiftClickTrackingQueue.Push(ev)
+}
+
+func onChargePanelEnterTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.ChargePanelEnterTrackingEventData)
+	if !ok || ev == nil || ev.UserId == 0 {
+		return
+	}
+	chargePanelEnterTrackingQueue.Push(ev)
+}
+
+func onChargeClickTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.ChargeClickTrackingEventData)
+	if !ok || ev == nil || ev.UserId == 0 {
+		return
+	}
+	chargeClickTrackingQueue.Push(ev)
+}
+
+func onChargeResultServerTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.ChargeResultServerTrackingEventData)
+	if !ok || ev == nil || ev.UserId == 0 {
+		return
+	}
+	chargeResultServerTrackingQueue.Push(ev)
+}
+
 func onTrackingHotStart(_ any) {
 	xrtimer.AddSingleton(gctx.New(), trackingConsumeInterval, func(ctx context.Context) {
 		drainTrackingQueue()
@@ -152,7 +262,18 @@ func trackingQueueIdle() bool {
 		miniGameRoundResultTrackingQueue.Len() == 0 &&
 		miniGameExposureTrackingQueue.Len() == 0 &&
 		gameLiveRoomJoinTrackingQueue.Len() == 0 &&
-		miniGameWebViewLoadTrackingQueue.Len() == 0
+		miniGameWebViewLoadTrackingQueue.Len() == 0 &&
+		shortVideoPlayStartTrackingQueue.Len() == 0 &&
+		shortVideoPaywallClickTrackingQueue.Len() == 0 &&
+		shortVideoPaySuccessTrackingQueue.Len() == 0 &&
+		shortVideoWatchEndTrackingQueue.Len() == 0 &&
+		voiceRoomEnterTrackingQueue.Len() == 0 &&
+		voiceRoomMicRequestTrackingQueue.Len() == 0 &&
+		voiceRoomGiftClickTrackingQueue.Len() == 0 &&
+		hotLiveRoomGiftClickTrackingQueue.Len() == 0 &&
+		chargePanelEnterTrackingQueue.Len() == 0 &&
+		chargeClickTrackingQueue.Len() == 0 &&
+		chargeResultServerTrackingQueue.Len() == 0
 }
 
 func drainTrackingQueue() {
@@ -171,6 +292,7 @@ func drainTrackingQueue() {
 		case ev := <-liveFirstFrameRenderTrackingQueue.C:
 			if ev != nil {
 				recordLiveFirstFrameRendered(ev.UserId, ev.RoomId, ev.StatAt)
+				recordGameLiveWatchStream(ev.UserId, ev.RoomId, ev.StatAt)
 			}
 		default:
 			break
@@ -261,6 +383,116 @@ func drainTrackingQueue() {
 		case ev := <-miniGameWebViewLoadTrackingQueue.C:
 			if ev != nil {
 				recordMiniGameWebViewLoad(ev.UserId, ev.StatAt)
+			}
+		default:
+			break
+		}
+	}
+	for {
+		select {
+		case ev := <-shortVideoPlayStartTrackingQueue.C:
+			if ev != nil {
+				recordShortVideoPlayStart(ev.UserId, ev.StatAt)
+			}
+		default:
+			break
+		}
+	}
+	for {
+		select {
+		case ev := <-shortVideoPaywallClickTrackingQueue.C:
+			if ev != nil {
+				recordShortVideoPaywallClick(ev.UserId, ev.StatAt)
+			}
+		default:
+			break
+		}
+	}
+	for {
+		select {
+		case ev := <-shortVideoPaySuccessTrackingQueue.C:
+			if ev != nil {
+				recordShortVideoPaySuccess(ev.UserId, ev.StatAt)
+			}
+		default:
+			break
+		}
+	}
+	for {
+		select {
+		case ev := <-shortVideoWatchEndTrackingQueue.C:
+			if ev != nil {
+				recordShortVideoWatchEnd(ev.UserId, ev.StatAt)
+			}
+		default:
+			break
+		}
+	}
+	for {
+		select {
+		case ev := <-voiceRoomEnterTrackingQueue.C:
+			if ev != nil {
+				recordVoiceRoomEnter(ev.UserId, ev.RoomId, ev.StatAt)
+			}
+		default:
+			break
+		}
+	}
+	for {
+		select {
+		case ev := <-voiceRoomMicRequestTrackingQueue.C:
+			if ev != nil {
+				recordVoiceRoomMicRequest(ev.UserId, ev.StatAt)
+			}
+		default:
+			break
+		}
+	}
+	for {
+		select {
+		case ev := <-voiceRoomGiftClickTrackingQueue.C:
+			if ev != nil {
+				recordVoiceRoomGiftClick(ev.UserId, ev.StatAt)
+			}
+		default:
+			break
+		}
+	}
+	for {
+		select {
+		case ev := <-hotLiveRoomGiftClickTrackingQueue.C:
+			if ev != nil {
+				recordHotLiveRoomGiftClick(ev.UserId, ev.StatAt)
+			}
+		default:
+			break
+		}
+	}
+	for {
+		select {
+		case ev := <-chargePanelEnterTrackingQueue.C:
+			if ev != nil {
+				recordChargePanelEnter(ev.UserId, ev.StatAt)
+			}
+		default:
+			break
+		}
+	}
+	for {
+		select {
+		case ev := <-chargeClickTrackingQueue.C:
+			if ev != nil {
+				recordChargeClick(ev.UserId, ev.StatAt)
+			}
+		default:
+			break
+		}
+	}
+	for {
+		select {
+		case ev := <-chargeResultServerTrackingQueue.C:
+			if ev != nil {
+				recordChargeResultServer(ev.UserId, ev.StatAt)
 			}
 		default:
 			return

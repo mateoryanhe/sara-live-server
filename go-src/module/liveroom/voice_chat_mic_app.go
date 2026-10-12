@@ -200,6 +200,7 @@ func ApplyVoiceChatMic(ctx context.Context, req *liveroomdto.ApplyVoiceChatMicRe
 			return nil, errercode.CreateCode(voiceChatMicAssignAudienceSeatErr(room.ID, room.LiveRecordId, preferredSeat))
 		}
 		broadcastVoiceChatMicState(room.ID)
+		pubVoiceRoomMicRequestTracking(userId, time.Now())
 		return &liveroomdto.ApplyVoiceChatMicRes{Success: true, SeatIndex: seatIndex}, nil
 	}
 
@@ -213,6 +214,7 @@ func ApplyVoiceChatMic(ctx context.Context, req *liveroomdto.ApplyVoiceChatMicRe
 		return nil, errercode.CreateCode(errercode.VoiceChatMicSeatFull)
 	}
 	liveroomdao.UpsertActiveVoiceChatMicApply(room.ID, userId, room.LiveRecordId, time.Now())
+	pubVoiceRoomMicRequestTracking(userId, time.Now())
 	return &liveroomdto.ApplyVoiceChatMicRes{Success: true}, nil
 }
 

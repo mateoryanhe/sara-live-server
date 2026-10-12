@@ -14,6 +14,12 @@ export const trackingEventApi = {
     getGameLiveRoomJoinTrend: () => {
         return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getGameLiveRoomJoinTrend', {})
     },
+    getGameLiveWatchStreamTrend: () => {
+        return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getGameLiveWatchStreamTrend', {})
+    },
+    getHotLiveRoomGiftClickTrend: () => {
+        return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getHotLiveRoomGiftClickTrend', {})
+    },
     getCall1v1InitiateTrend: () => {
         return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getCall1v1InitiateTrend', {})
     },
@@ -34,6 +40,36 @@ export const trackingEventApi = {
     },
     getMiniGameWebViewLoadTrend: () => {
         return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getMiniGameWebViewLoadTrend', {})
+    },
+    getShortVideoPlayStartTrend: () => {
+        return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getShortVideoPlayStartTrend', {})
+    },
+    getShortVideoPaywallClickTrend: () => {
+        return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getShortVideoPaywallClickTrend', {})
+    },
+    getShortVideoPaySuccessTrend: () => {
+        return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getShortVideoPaySuccessTrend', {})
+    },
+    getShortVideoWatchEndTrend: () => {
+        return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getShortVideoWatchEndTrend', {})
+    },
+    getVoiceRoomEnterTrend: () => {
+        return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getVoiceRoomEnterTrend', {})
+    },
+    getVoiceRoomMicRequestTrend: () => {
+        return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getVoiceRoomMicRequestTrend', {})
+    },
+    getVoiceRoomGiftClickTrend: () => {
+        return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getVoiceRoomGiftClickTrend', {})
+    },
+    getChargePanelEnterTrend: () => {
+        return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getChargePanelEnterTrend', {})
+    },
+    getChargeClickTrend: () => {
+        return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getChargeClickTrend', {})
+    },
+    getChargeResultServerTrend: () => {
+        return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getChargeResultServerTrend', {})
     },
 }
 

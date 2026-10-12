@@ -2,9 +2,12 @@ package controller
 
 import (
 	"context"
+
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/rechargeorderdto"
+	"xr-game-server/dto/trackingdto"
 	"xr-game-server/module/recharge"
+	"xr-game-server/module/tracking"
 )
 
 const (
@@ -50,4 +53,9 @@ func (c *RechargeOrderAppController) MyRechargeOrderList(ctx context.Context, re
 // CheckRechargeOrderSuccess App端查询订单是否充值成功
 func (c *RechargeOrderAppController) CheckRechargeOrderSuccess(ctx context.Context, req *rechargeorderdto.AppCheckRechargeOrderSuccessReq) (res *rechargeorderdto.AppCheckRechargeOrderSuccessRes, err error) {
 	return recharge.CheckOrderRechargeSuccess(ctx, req)
+}
+
+// ReportChargePanelEnter 上报充值/礼物面板曝光
+func (c *RechargeOrderAppController) ReportChargePanelEnter(ctx context.Context, req *trackingdto.ReportChargePanelEnterReq) (*trackingdto.ReportChargePanelEnterRes, error) {
+	return tracking.ReportChargePanelEnter(ctx, req)
 }

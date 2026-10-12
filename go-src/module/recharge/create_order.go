@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 	"strings"
+	"time"
 	"xr-game-server/core/event"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/cfgdao"
@@ -59,6 +60,7 @@ func CreateOrder(ctx context.Context, req *rechargeorderdto.AppCreateRechargeOrd
 	order.SetPackageName(packageName)
 	rechargeorderdao.AddOrderToCache(order)
 	ScheduleRechargeOrderTimeout(order.ID, order.CreatedAt)
+	pubChargeClickTracking(userId, time.Now())
 
 	event.Pub(gameevent.RechargeOrderCreatedEvent, gameevent.NewRechargeOrderCreatedEventData(order.ID))
 

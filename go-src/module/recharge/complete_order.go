@@ -2,6 +2,7 @@ package recharge
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/constants/currency"
@@ -50,6 +51,7 @@ func completeOrder(o *entity.RechargeOrder, reason currency.Reason) (float64, er
 
 	CancelRechargeOrderTimeout(order.ID)
 	rechargeorderdao.FlushOrderCache(order)
+	pubChargeResultServerTracking(order.UserId, time.Now())
 	pushRechargeSuccessToApp(order.UserId, order, usdData.GoldBalance)
 	return usdData.GoldBalance, nil
 }

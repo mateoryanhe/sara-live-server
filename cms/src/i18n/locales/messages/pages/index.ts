@@ -100,6 +100,9 @@ import {dashboardMessages} from './dashboard'
 import {trackingHotLiveRoomJoinMessages} from './tracking-hot-live-room-join'
 import {trackingCall1v1InitiateMessages} from './tracking-call-1v1-initiate'
 import {trackingMiniGameRoundStartMessages} from './tracking-mini-game-round-start'
+import {trackingShortVideoMessages} from './tracking-short-video'
+import {trackingVoiceChatRoomMessages} from './tracking-voice-chat-room'
+import {trackingRechargeMessages} from './tracking-recharge'
 
 const pageMessageBuilders = [
   ['userList', userListMessages],
@@ -202,6 +205,9 @@ const pageMessageBuilders = [
   ['trackingHotLiveRoomJoin', trackingHotLiveRoomJoinMessages],
   ['trackingCall1v1Initiate', trackingCall1v1InitiateMessages],
   ['trackingMiniGameRoundStart', trackingMiniGameRoundStartMessages],
+  ['trackingShortVideo', trackingShortVideoMessages],
+  ['trackingVoiceChatRoom', trackingVoiceChatRoomMessages],
+  ['trackingRecharge', trackingRechargeMessages],
 ] as const
 
 export type PageNamespace = typeof pageMessageBuilders[number][0]

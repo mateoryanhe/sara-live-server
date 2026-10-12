@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/core/event"
@@ -98,6 +99,7 @@ func createChannelRechargeOrder(ctx context.Context, userId uint64, packageName 
 	order.SetPackageName(packageName)
 	rechargeorderdao.AddOrderToCache(order)
 	ScheduleRechargeOrderTimeout(order.ID, order.CreatedAt)
+	pubChargeClickTracking(userId, time.Now())
 	event.Pub(gameevent.RechargeOrderCreatedEvent, gameevent.NewRechargeOrderCreatedEventData(order.ID))
 
 	orderIdStr := strconv.FormatUint(order.ID, 10)
@@ -178,6 +180,7 @@ func createCoinMerchantChannelRechargeOrder(ctx context.Context, userId uint64, 
 	order.SetPackageName(packageName)
 	rechargeorderdao.AddOrderToCache(order)
 	ScheduleRechargeOrderTimeout(order.ID, order.CreatedAt)
+	pubChargeClickTracking(userId, time.Now())
 	event.Pub(gameevent.RechargeOrderCreatedEvent, gameevent.NewRechargeOrderCreatedEventData(order.ID))
 
 	orderIdStr := strconv.FormatUint(order.ID, 10)

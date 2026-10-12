@@ -202,30 +202,11 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/officialSiteDeploy/deployZip"}
 	case "/thirdPayOfficialSiteDeploy/initFileUpload", "/thirdPayOfficialSiteDeploy/uploadFileChunk", "/thirdPayOfficialSiteDeploy/completeFileUpload", "/thirdPayOfficialSiteDeploy/abortFileUpload":
 		return []string{"/thirdPayOfficialSiteDeploy/deployZip"}
-	case "/trackingEvent/getHotLiveRoomJoinTrend":
-		return []string{
-			"/trackingEvent/getLiveFirstFrameRenderTrend",
-			"/trackingEvent/getHotLiveRoomLeaveTrend",
-			"/trackingEvent/getGameLiveRoomJoinTrend",
-		}
-	case "/trackingEvent/getLiveFirstFrameRenderTrend":
-		return []string{
-			"/trackingEvent/getHotLiveRoomJoinTrend",
-			"/trackingEvent/getHotLiveRoomLeaveTrend",
-			"/trackingEvent/getGameLiveRoomJoinTrend",
-		}
-	case "/trackingEvent/getHotLiveRoomLeaveTrend":
-		return []string{
-			"/trackingEvent/getHotLiveRoomJoinTrend",
-			"/trackingEvent/getLiveFirstFrameRenderTrend",
-			"/trackingEvent/getGameLiveRoomJoinTrend",
-		}
-	case "/trackingEvent/getGameLiveRoomJoinTrend":
-		return []string{
-			"/trackingEvent/getHotLiveRoomJoinTrend",
-			"/trackingEvent/getLiveFirstFrameRenderTrend",
-			"/trackingEvent/getHotLiveRoomLeaveTrend",
-		}
+	case "/trackingEvent/getHotLiveRoomJoinTrend",
+		"/trackingEvent/getLiveFirstFrameRenderTrend",
+		"/trackingEvent/getHotLiveRoomLeaveTrend",
+		"/trackingEvent/getHotLiveRoomGiftClickTrend":
+		return hotLiveRoomTrackingTrendAliasPaths()
 	case "/trackingEvent/getCall1v1InitiateTrend":
 		return []string{
 			"/trackingEvent/getCall1v1RoomCallTrend",
@@ -241,16 +222,42 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 			"/trackingEvent/getCall1v1InitiateTrend",
 			"/trackingEvent/getCall1v1RoomCallTrend",
 		}
-	case "/trackingEvent/getMiniGameRoundStartTrend":
+	case "/trackingEvent/getMiniGameRoundStartTrend",
+		"/trackingEvent/getMiniGameRoundResultTrend",
+		"/trackingEvent/getMiniGameExposureTrend",
+		"/trackingEvent/getMiniGameWebViewLoadTrend",
+		"/trackingEvent/getGameLiveRoomJoinTrend",
+		"/trackingEvent/getGameLiveWatchStreamTrend":
 		return miniGameTrackingTrendAliasPaths()
-	case "/trackingEvent/getMiniGameRoundResultTrend":
-		return miniGameTrackingTrendAliasPaths()
-	case "/trackingEvent/getMiniGameExposureTrend":
-		return miniGameTrackingTrendAliasPaths()
-	case "/trackingEvent/getMiniGameWebViewLoadTrend":
-		return miniGameTrackingTrendAliasPaths()
+	case "/trackingEvent/getShortVideoPlayStartTrend":
+		return shortVideoTrackingTrendAliasPaths()
+	case "/trackingEvent/getShortVideoPaywallClickTrend":
+		return shortVideoTrackingTrendAliasPaths()
+	case "/trackingEvent/getShortVideoPaySuccessTrend":
+		return shortVideoTrackingTrendAliasPaths()
+	case "/trackingEvent/getShortVideoWatchEndTrend":
+		return shortVideoTrackingTrendAliasPaths()
+	case "/trackingEvent/getVoiceRoomEnterTrend":
+		return voiceChatRoomTrackingTrendAliasPaths()
+	case "/trackingEvent/getVoiceRoomMicRequestTrend":
+		return voiceChatRoomTrackingTrendAliasPaths()
+	case "/trackingEvent/getVoiceRoomGiftClickTrend":
+		return voiceChatRoomTrackingTrendAliasPaths()
+	case "/trackingEvent/getChargePanelEnterTrend",
+		"/trackingEvent/getChargeClickTrend",
+		"/trackingEvent/getChargeResultServerTrend":
+		return rechargeTrackingTrendAliasPaths()
 	default:
 		return nil
+	}
+}
+
+func hotLiveRoomTrackingTrendAliasPaths() []string {
+	return []string{
+		"/trackingEvent/getHotLiveRoomJoinTrend",
+		"/trackingEvent/getLiveFirstFrameRenderTrend",
+		"/trackingEvent/getHotLiveRoomLeaveTrend",
+		"/trackingEvent/getHotLiveRoomGiftClickTrend",
 	}
 }
 
@@ -260,6 +267,33 @@ func miniGameTrackingTrendAliasPaths() []string {
 		"/trackingEvent/getMiniGameRoundResultTrend",
 		"/trackingEvent/getMiniGameExposureTrend",
 		"/trackingEvent/getMiniGameWebViewLoadTrend",
+		"/trackingEvent/getGameLiveRoomJoinTrend",
+		"/trackingEvent/getGameLiveWatchStreamTrend",
+	}
+}
+
+func shortVideoTrackingTrendAliasPaths() []string {
+	return []string{
+		"/trackingEvent/getShortVideoPlayStartTrend",
+		"/trackingEvent/getShortVideoPaywallClickTrend",
+		"/trackingEvent/getShortVideoPaySuccessTrend",
+		"/trackingEvent/getShortVideoWatchEndTrend",
+	}
+}
+
+func voiceChatRoomTrackingTrendAliasPaths() []string {
+	return []string{
+		"/trackingEvent/getVoiceRoomEnterTrend",
+		"/trackingEvent/getVoiceRoomMicRequestTrend",
+		"/trackingEvent/getVoiceRoomGiftClickTrend",
+	}
+}
+
+func rechargeTrackingTrendAliasPaths() []string {
+	return []string{
+		"/trackingEvent/getChargePanelEnterTrend",
+		"/trackingEvent/getChargeClickTrend",
+		"/trackingEvent/getChargeResultServerTrend",
 	}
 }
 

@@ -55,11 +55,17 @@ func WatchShortVideoStart(ctx context.Context, req *shortvideodto.WatchShortVide
 	}
 	shortvideodao.PublishUserWatchCache(userId)
 
+	pubShortVideoPlayStartTracking(userId, time.Now())
 	return &shortvideodto.WatchShortVideoStartRes{}, nil
 }
 
 // WatchShortVideoEnd App端结束观看短视频
-func WatchShortVideoEnd(_ context.Context, _ *shortvideodto.WatchShortVideoEndReq) (*shortvideodto.WatchShortVideoEndRes, error) {
+func WatchShortVideoEnd(ctx context.Context, _ *shortvideodto.WatchShortVideoEndReq) (*shortvideodto.WatchShortVideoEndRes, error) {
+	userId := httpserver.GetAuthId(ctx)
+	if userId == 0 {
+		return nil, errercode.CreateCode(errercode.EmptyUserId)
+	}
+	pubShortVideoWatchEndTracking(userId, time.Now())
 	return &shortvideodto.WatchShortVideoEndRes{}, nil
 }
 
@@ -92,14 +98,17 @@ func PayShortVideo(ctx context.Context, req *shortvideodto.PayShortVideoReq) (*s
 		}, nil
 	}
 
+	now := time.Now()
+	pubShortVideoPaywallClickTracking(userId, now)
+
 	diamond, err := wallet.DiamondSubWithGoldExchange(userId, price, currency.ReasonShortVideoWatch)
 	if err != nil {
 		return nil, err
 	}
 
-	now := time.Now()
 	watch.SetPaidTime(&now)
 	shortvideodao.PublishUserWatchCache(userId)
+	pubShortVideoPaySuccessTracking(userId, now)
 
 	lockName := fmt.Sprintf("pay_shortvideo_%v", req.VideoId)
 	gmlock.Lock(lockName)

@@ -24,8 +24,16 @@ func (c *TrackingEventCMSController) GetGameLiveRoomJoinTrend(ctx context.Contex
 	return tracking.GetCMSGameLiveRoomJoinTrend(ctx, req)
 }
 
+func (c *TrackingEventCMSController) GetHotLiveRoomGiftClickTrend(ctx context.Context, req *trackingdto.CMSHotLiveRoomGiftClickTrendReq) (*trackingdto.CMSHotLiveRoomGiftClickTrendRes, error) {
+	return tracking.GetCMSHotLiveRoomGiftClickTrend(ctx, req)
+}
+
 func (c *TrackingEventCMSController) GetLiveFirstFrameRenderTrend(ctx context.Context, req *trackingdto.CMSLiveFirstFrameRenderTrendReq) (*trackingdto.CMSLiveFirstFrameRenderTrendRes, error) {
 	return tracking.GetCMSLiveFirstFrameRenderTrend(ctx, req)
+}
+
+func (c *TrackingEventCMSController) GetGameLiveWatchStreamTrend(ctx context.Context, req *trackingdto.CMSGameLiveWatchStreamTrendReq) (*trackingdto.CMSGameLiveWatchStreamTrendRes, error) {
+	return tracking.GetCMSGameLiveWatchStreamTrend(ctx, req)
 }
 
 func (c *TrackingEventCMSController) GetHotLiveRoomLeaveTrend(ctx context.Context, req *trackingdto.CMSHotLiveRoomLeaveTrendReq) (*trackingdto.CMSHotLiveRoomLeaveTrendRes, error) {
@@ -58,4 +66,44 @@ func (c *TrackingEventCMSController) GetMiniGameExposureTrend(ctx context.Contex
 
 func (c *TrackingEventCMSController) GetMiniGameWebViewLoadTrend(ctx context.Context, req *trackingdto.CMSMiniGameWebViewLoadTrendReq) (*trackingdto.CMSMiniGameWebViewLoadTrendRes, error) {
 	return tracking.GetCMSMiniGameWebViewLoadTrend(ctx, req)
+}
+
+func (c *TrackingEventCMSController) GetShortVideoPlayStartTrend(ctx context.Context, req *trackingdto.CMSShortVideoPlayStartTrendReq) (*trackingdto.CMSShortVideoPlayStartTrendRes, error) {
+	return tracking.GetCMSShortVideoPlayStartTrend(ctx, req)
+}
+
+func (c *TrackingEventCMSController) GetShortVideoPaywallClickTrend(ctx context.Context, req *trackingdto.CMSShortVideoPaywallClickTrendReq) (*trackingdto.CMSShortVideoPaywallClickTrendRes, error) {
+	return tracking.GetCMSShortVideoPaywallClickTrend(ctx, req)
+}
+
+func (c *TrackingEventCMSController) GetShortVideoPaySuccessTrend(ctx context.Context, req *trackingdto.CMSShortVideoPaySuccessTrendReq) (*trackingdto.CMSShortVideoPaySuccessTrendRes, error) {
+	return tracking.GetCMSShortVideoPaySuccessTrend(ctx, req)
+}
+
+func (c *TrackingEventCMSController) GetShortVideoWatchEndTrend(ctx context.Context, req *trackingdto.CMSShortVideoWatchEndTrendReq) (*trackingdto.CMSShortVideoWatchEndTrendRes, error) {
+	return tracking.GetCMSShortVideoWatchEndTrend(ctx, req)
+}
+
+func (c *TrackingEventCMSController) GetVoiceRoomEnterTrend(ctx context.Context, req *trackingdto.CMSVoiceRoomEnterTrendReq) (*trackingdto.CMSVoiceRoomEnterTrendRes, error) {
+	return tracking.GetCMSVoiceRoomEnterTrend(ctx, req)
+}
+
+func (c *TrackingEventCMSController) GetVoiceRoomMicRequestTrend(ctx context.Context, req *trackingdto.CMSVoiceRoomMicRequestTrendReq) (*trackingdto.CMSVoiceRoomMicRequestTrendRes, error) {
+	return tracking.GetCMSVoiceRoomMicRequestTrend(ctx, req)
+}
+
+func (c *TrackingEventCMSController) GetVoiceRoomGiftClickTrend(ctx context.Context, req *trackingdto.CMSVoiceRoomGiftClickTrendReq) (*trackingdto.CMSVoiceRoomGiftClickTrendRes, error) {
+	return tracking.GetCMSVoiceRoomGiftClickTrend(ctx, req)
+}
+
+func (c *TrackingEventCMSController) GetChargePanelEnterTrend(ctx context.Context, req *trackingdto.CMSChargePanelEnterTrendReq) (*trackingdto.CMSChargePanelEnterTrendRes, error) {
+	return tracking.GetCMSChargePanelEnterTrend(ctx, req)
+}
+
+func (c *TrackingEventCMSController) GetChargeClickTrend(ctx context.Context, req *trackingdto.CMSChargeClickTrendReq) (*trackingdto.CMSChargeClickTrendRes, error) {
+	return tracking.GetCMSChargeClickTrend(ctx, req)
+}
+
+func (c *TrackingEventCMSController) GetChargeResultServerTrend(ctx context.Context, req *trackingdto.CMSChargeResultServerTrendReq) (*trackingdto.CMSChargeResultServerTrendRes, error) {
+	return tracking.GetCMSChargeResultServerTrend(ctx, req)
 }

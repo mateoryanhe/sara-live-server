@@ -18,8 +18,8 @@
         <el-tab-pane :label="t('pages.trackingHotLiveRoomJoin.tabShowcaseLeave')" name="showcaseLeave">
           <p class="page-desc">{{ t('pages.trackingHotLiveRoomJoin.leaveDesc') }}</p>
         </el-tab-pane>
-        <el-tab-pane :label="t('pages.trackingHotLiveRoomJoin.tabGameJoin')" name="gameJoin">
-          <p class="page-desc">{{ t('pages.trackingHotLiveRoomJoin.gameJoinDesc') }}</p>
+        <el-tab-pane :label="t('pages.trackingHotLiveRoomJoin.tabGiftClick')" name="giftClick">
+          <p class="page-desc">{{ t('pages.trackingHotLiveRoomJoin.giftClickDesc') }}</p>
         </el-tab-pane>
       </el-tabs>
 
@@ -76,7 +76,7 @@ import {trackingEventApi} from '@/api/modules/tracking-event'
 import type {HotLiveRoomJoinTrendRes} from '@/types/api'
 import CountTrendChart from './components/count-trend-chart.vue'
 
-type TrackingEventKey = 'showcaseJoin' | 'firstFrame' | 'showcaseLeave' | 'gameJoin'
+type TrackingEventKey = 'showcaseJoin' | 'firstFrame' | 'showcaseLeave' | 'giftClick'
 
 const {t, locale} = useI18n()
 const loading = ref(false)
@@ -98,13 +98,13 @@ const emptyTrend = (): HotLiveRoomJoinTrendRes => ({
 const showcaseJoinTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 const firstFrameTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 const showcaseLeaveTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
-const gameJoinTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
+const giftClickTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 
 const trendByEvent: Record<TrackingEventKey, HotLiveRoomJoinTrendRes> = {
   showcaseJoin: showcaseJoinTrend,
   firstFrame: firstFrameTrend,
   showcaseLeave: showcaseLeaveTrend,
-  gameJoin: gameJoinTrend,
+  giftClick: giftClickTrend,
 }
 
 const activeTrend = computed(() => trendByEvent[activeEvent.value])
@@ -117,8 +117,8 @@ const activeSeriesName = computed(() => {
   if (key === 'showcaseLeave') {
     return t('pages.trackingHotLiveRoomJoin.leaveSeriesName')
   }
-  if (key === 'gameJoin') {
-    return t('pages.trackingHotLiveRoomJoin.gameJoinSeriesName')
+  if (key === 'giftClick') {
+    return t('pages.trackingHotLiveRoomJoin.giftClickSeriesName')
   }
   return t('pages.trackingHotLiveRoomJoin.seriesName')
 })
@@ -131,8 +131,8 @@ const activeChartDaily = computed(() => {
   if (key === 'showcaseLeave') {
     return t('pages.trackingHotLiveRoomJoin.leaveChartDaily')
   }
-  if (key === 'gameJoin') {
-    return t('pages.trackingHotLiveRoomJoin.gameJoinChartDaily')
+  if (key === 'giftClick') {
+    return t('pages.trackingHotLiveRoomJoin.giftClickChartDaily')
   }
   return t('pages.trackingHotLiveRoomJoin.chartDaily')
 })
@@ -145,8 +145,8 @@ const activeChartWeekly = computed(() => {
   if (key === 'showcaseLeave') {
     return t('pages.trackingHotLiveRoomJoin.leaveChartWeekly')
   }
-  if (key === 'gameJoin') {
-    return t('pages.trackingHotLiveRoomJoin.gameJoinChartWeekly')
+  if (key === 'giftClick') {
+    return t('pages.trackingHotLiveRoomJoin.giftClickChartWeekly')
   }
   return t('pages.trackingHotLiveRoomJoin.chartWeekly')
 })
@@ -159,8 +159,8 @@ const activeChartMonthly = computed(() => {
   if (key === 'showcaseLeave') {
     return t('pages.trackingHotLiveRoomJoin.leaveChartMonthly')
   }
-  if (key === 'gameJoin') {
-    return t('pages.trackingHotLiveRoomJoin.gameJoinChartMonthly')
+  if (key === 'giftClick') {
+    return t('pages.trackingHotLiveRoomJoin.giftClickChartMonthly')
   }
   return t('pages.trackingHotLiveRoomJoin.chartMonthly')
 })
@@ -218,9 +218,9 @@ const fetchShowcaseLeaveTrend = async () => {
   assignTrend(showcaseLeaveTrend, data)
 }
 
-const fetchGameJoinTrend = async () => {
-  const data = await trackingEventApi.getGameLiveRoomJoinTrend()
-  assignTrend(gameJoinTrend, data)
+const fetchGiftClickTrend = async () => {
+  const data = await trackingEventApi.getHotLiveRoomGiftClickTrend()
+  assignTrend(giftClickTrend, data)
 }
 
 const fetchActiveTrend = async () => {
@@ -230,8 +230,8 @@ const fetchActiveTrend = async () => {
       await fetchFirstFrameTrend()
     } else if (activeEvent.value === 'showcaseLeave') {
       await fetchShowcaseLeaveTrend()
-    } else if (activeEvent.value === 'gameJoin') {
-      await fetchGameJoinTrend()
+    } else if (activeEvent.value === 'giftClick') {
+      await fetchGiftClickTrend()
     } else {
       await fetchShowcaseJoinTrend()
     }

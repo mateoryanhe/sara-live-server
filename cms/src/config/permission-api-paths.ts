@@ -10,7 +10,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'TrackingHotLiveRoomJoinManagement:view': '/trackingEvent/getHotLiveRoomJoinTrend',
     'TrackingHotLiveRoomJoinManagement:firstFrameTrend': '/trackingEvent/getLiveFirstFrameRenderTrend',
     'TrackingHotLiveRoomJoinManagement:leaveTrend': '/trackingEvent/getHotLiveRoomLeaveTrend',
-    'TrackingHotLiveRoomJoinManagement:gameJoinTrend': '/trackingEvent/getGameLiveRoomJoinTrend',
+    'TrackingHotLiveRoomJoinManagement:giftClickTrend': '/trackingEvent/getHotLiveRoomGiftClickTrend',
 
     TrackingCall1v1InitiateManagement: '/trackingEvent/getCall1v1InitiateTrend',
     'TrackingCall1v1InitiateManagement:view': '/trackingEvent/getCall1v1InitiateTrend',
@@ -22,6 +22,24 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'TrackingMiniGameRoundStartManagement:roundResultTrend': '/trackingEvent/getMiniGameRoundResultTrend',
     'TrackingMiniGameRoundStartManagement:gameExposureTrend': '/trackingEvent/getMiniGameExposureTrend',
     'TrackingMiniGameRoundStartManagement:gameWebViewLoadTrend': '/trackingEvent/getMiniGameWebViewLoadTrend',
+    'TrackingMiniGameRoundStartManagement:gameJoinTrend': '/trackingEvent/getGameLiveRoomJoinTrend',
+    'TrackingMiniGameRoundStartManagement:firstFrameTrend': '/trackingEvent/getGameLiveWatchStreamTrend',
+
+    TrackingShortVideoManagement: '/trackingEvent/getShortVideoPlayStartTrend',
+    'TrackingShortVideoManagement:view': '/trackingEvent/getShortVideoPlayStartTrend',
+    'TrackingShortVideoManagement:paywallClickTrend': '/trackingEvent/getShortVideoPaywallClickTrend',
+    'TrackingShortVideoManagement:paySuccessTrend': '/trackingEvent/getShortVideoPaySuccessTrend',
+    'TrackingShortVideoManagement:watchEndTrend': '/trackingEvent/getShortVideoWatchEndTrend',
+
+    TrackingVoiceChatRoomManagement: '/trackingEvent/getVoiceRoomEnterTrend',
+    'TrackingVoiceChatRoomManagement:view': '/trackingEvent/getVoiceRoomEnterTrend',
+    'TrackingVoiceChatRoomManagement:micRequestTrend': '/trackingEvent/getVoiceRoomMicRequestTrend',
+    'TrackingVoiceChatRoomManagement:giftClickTrend': '/trackingEvent/getVoiceRoomGiftClickTrend',
+
+    TrackingRechargeManagement: '/trackingEvent/getChargePanelEnterTrend',
+    'TrackingRechargeManagement:view': '/trackingEvent/getChargePanelEnterTrend',
+    'TrackingRechargeManagement:chargeClickTrend': '/trackingEvent/getChargeClickTrend',
+    'TrackingRechargeManagement:chargeResultTrend': '/trackingEvent/getChargeResultServerTrend',
 
     UserList: '/account/getUserInfo',
     'UserList:view': '/account/getUserInfo',

@@ -185,6 +185,8 @@ func Init() {
 		{Path: "/notifyLiveFirstFrameReady", Handler: jsonHandler((&controller.LiveRoomAppController{}).ReportLiveFirstFrameRendered)},
 		{Path: "/notifyMiniGameExposure", Handler: jsonHandler((&controller.LiveRoomAppController{}).ReportMiniGameExposure)},
 		{Path: "/notifyMiniGameWebViewLoadSuccess", Handler: jsonHandler((&controller.LiveRoomAppController{}).ReportMiniGameWebViewLoadSuccess)},
+		{Path: "/notifyVoiceRoomGiftClick", Handler: jsonHandler((&controller.LiveRoomAppController{}).ReportVoiceRoomGiftClick)},
+		{Path: "/notifyHotLiveRoomGiftClick", Handler: jsonHandler((&controller.LiveRoomAppController{}).ReportHotLiveRoomGiftClick)},
 		{Path: "/exitHall", Handler: jsonHandler((&controller.LiveRoomAppController{}).LeaveRoom)},
 		{Path: "/fetchRound", Handler: jsonHandler((&controller.LiveRoomAppController{}).GetLiveRecord)},
 		{Path: "/browseAudience", Handler: jsonHandler((&controller.LiveRoomAppController{}).GetOnlineUserList)},
@@ -229,6 +231,7 @@ func Init() {
 		{Path: "/submitHostCode", Handler: jsonHandler((&controller.LiveRoomAppController{}).ReportAnchorCode)},
 	})
 	httpserver.RegAppRouteGroup("/sofie/topup", []httpserver.AppRoute{
+		{Path: "/notifyChargePanelEnter", Handler: jsonHandler((&controller.RechargeOrderAppController{}).ReportChargePanelEnter)},
 		{Path: "/openStoreOrder", Handler: jsonHandler((&controller.RechargeOrderAppController{}).CreateRechargeOrder)},
 		{Path: "/openChannelOrder", Handler: jsonHandler((&controller.RechargeOrderAppController{}).CreateChannelRechargeOrder)},
 		{Path: "/openDealerChannelOrder", Handler: jsonHandler((&controller.RechargeOrderAppController{}).CreateCoinMerchantChannelRechargeOrder)},

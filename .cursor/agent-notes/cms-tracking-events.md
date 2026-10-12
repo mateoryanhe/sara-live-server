@@ -40,12 +40,14 @@
 
 | 页面 | event | 口径 | CMS API |
 |------|-------|------|---------|
-| `TrackingHotLiveRoomJoinManagement`（CMS 文案：进入秀场直播间） | `hot_live_room_join` | 观众 `joinRoom` 成功且 `live_room_cfgs.category=1`(秀场/Hot)，不含主播本人；每次 +1；`JoinRoom` Pub `ShowcaseLiveRoomJoinTrackingEvent`，`module/tracking` 队列异步消费 | `POST /trackingEvent/getHotLiveRoomJoinTrend` |
+| `TrackingHotLiveRoomJoinManagement`（秀场直播间） | `hot_live_room_join` | 观众 `joinRoom` 成功且 `live_room_cfgs.category=1`(秀场/Hot)，不含主播本人；每次 +1；`JoinRoom` Pub `ShowcaseLiveRoomJoinTrackingEvent`，`module/tracking` 队列异步消费 | `POST /trackingEvent/getHotLiveRoomJoinTrend` |
 | 同上页 **Tab「直播首帧画面渲染完成」** | `live_first_frame_rendered` | 秀场(category=1)、直播中；App `POST /liveRoom/reportLiveFirstFrameRendered`（Sofie `POST /sofie/studio/notifyLiveFirstFrameReady`）；不含主播；每次成功 +1 | `POST /trackingEvent/getLiveFirstFrameRenderTrend` |
 | 同上页 **Tab「退出直播间」** | `hot_live_room_leave` | 秀场(category=1)；`leaveRoom` 成功 +1，不含主播；仅主动退房 API（非踢出/心跳清理） | `POST /trackingEvent/getHotLiveRoomLeaveTrend` |
-| 同上页 **Tab「进入游戏直播类房间」** | `game_live_room_join` | 游戏直播(category=2)；观众 `joinRoom` 成功 +1，不含主播；`JoinRoom` Pub `GameLiveRoomJoinTrackingEvent`，tracking 队列异步消费 | `POST /trackingEvent/getGameLiveRoomJoinTrend` |
+| 同上页 **Tab「礼物面板点击」** | `hot_live_room_gift_click` | `reportHotLiveRoomGiftClick` 登录成功 +1（暂不要求 body） | `POST /trackingEvent/getHotLiveRoomGiftClickTrend` |
 
-表：`daily_hot_live_room_join_stats` / `weekly_*` / `monthly_*`（仅 `count`）；首帧：`daily_live_first_frame_render_stats` / `weekly_*` / `monthly_*`；退房：`daily_hot_live_room_leave_stats` / `weekly_*` / `monthly_*`；游戏进房：`daily_game_live_room_join_stats` / `weekly_*` / `monthly_*`。
+App 秀场礼物面板：`POST /liveRoom/reportHotLiveRoomGiftClick`（Sofie `POST /sofie/studio/notifyHotLiveRoomGiftClick`）。
+
+表：`daily_hot_live_room_join_stats` / `weekly_*` / `monthly_*`（仅 `count`）；首帧：`daily_live_first_frame_render_stats` / `weekly_*` / `monthly_*`；退房：`daily_hot_live_room_leave_stats` / `weekly_*` / `monthly_*`；游戏进房：`daily_game_live_room_join_stats` / `weekly_*` / `monthly_*`；秀场礼物点击：`daily_hot_live_room_gift_click_stats` / `weekly_*` / `monthly_*`。
 
 | 页面 | event | 口径 | CMS API |
 |------|-------|------|---------|
@@ -63,7 +65,9 @@
 
 | 页面 | event | 口径 | CMS API |
 |------|-------|------|---------|
-| `TrackingMiniGameRoundStartManagement`（点击开始游戏） | `mini_game_round_start` | App `appGameStart` 成功返回非空启动 link +1 | `POST /trackingEvent/getMiniGameRoundStartTrend` |
+| `TrackingMiniGameRoundStartManagement`（游戏直播间） | `game_live_room_join` | 游戏直播(category=2)；观众 `joinRoom` 成功 +1，不含主播 | `POST /trackingEvent/getGameLiveRoomJoinTrend` |
+| 同上 **Tab「直播首帧画面渲染完成」** | `game_live_watch_stream` | 游戏直播(category=2)；`reportLiveFirstFrameRendered` 成功 +1，不含主播 | `POST /trackingEvent/getGameLiveWatchStreamTrend` |
+| 同上 **Tab「点击开始游戏」** | `mini_game_round_start` | App `appGameStart` 成功返回非空启动 link +1 | `POST /trackingEvent/getMiniGameRoundStartTrend` |
 
 表：`daily_mini_game_round_start_stats` / `weekly_*` / `monthly_*`。
 
@@ -82,6 +86,37 @@ App：`POST /liveRoom/reportMiniGameExposure`（Sofie `POST /sofie/studio/notify
 App：`POST /liveRoom/reportMiniGameWebViewLoadSuccess`（Sofie `POST /sofie/studio/notifyMiniGameWebViewLoadSuccess`）。
 
 表：`daily_mini_game_webview_load_stats` / `weekly_*` / `monthly_*`。
+
+| 页面 | event | 口径 | CMS API |
+|------|-------|------|---------|
+| `TrackingShortVideoManagement`（短视频） | `short_video_play_start` | `watchShortVideoStart` 成功且视频已上架 +1 | `POST /trackingEvent/getShortVideoPlayStartTrend` |
+| 同上 **Tab「付费解锁点击」** | `short_video_paywall_click` | `payShortVideo` 未购时每次确认解锁请求 +1（已购早退不计；扣款失败仍计点击） | `POST /trackingEvent/getShortVideoPaywallClickTrend` |
+| 同上 **Tab「付费成功」** | `short_video_pay_success` | `payShortVideo` 首次扣款成功 +1 | `POST /trackingEvent/getShortVideoPaySuccessTrend` |
+| 同上 **Tab「播放结束」** | `short_video_watch_end` | `watchShortVideoEnd` 登录成功 +1 | `POST /trackingEvent/getShortVideoWatchEndTrend` |
+
+App 确认付费解锁：`POST /shortVideo/payShortVideo`（Sofie `POST /sofie/clip/unlockMedia`），无额外上报接口。
+
+表：各事件 `daily_short_video_*_stats` / `weekly_*` / `monthly_*`。
+
+| 页面 | event | 口径 | CMS API |
+|------|-------|------|---------|
+| `TrackingVoiceChatRoomManagement`（语聊房） | `voice_room_enter` | 语聊 category=5；观众 `joinRoom` 成功 +1，不含主播 | `POST /trackingEvent/getVoiceRoomEnterTrend` |
+| 同上 **Tab「申请上麦」** | `voice_room_mic_request` | `applyVoiceChatMic` 成功 +1 | `POST /trackingEvent/getVoiceRoomMicRequestTrend` |
+| 同上 **Tab「礼物面板点击」** | `voice_room_gift_click` | `reportVoiceRoomGiftClick` 登录成功 +1（暂不要求 body） | `POST /trackingEvent/getVoiceRoomGiftClickTrend` |
+
+App 礼物面板：`POST /liveRoom/reportVoiceRoomGiftClick`（Sofie `POST /sofie/studio/notifyVoiceRoomGiftClick`）。
+
+表：各事件 `daily_voice_room_*_stats` / `weekly_*` / `monthly_*`（进房表名为 `*_voice_room_enter_*`）。
+
+| 页面 | event | 口径 | CMS API |
+|------|-------|------|---------|
+| `TrackingRechargeManagement`（充值） | `charge_panel_enter` | 登录用户 `reportChargePanelEnter` 成功 +1（暂不要求 body） | `POST /trackingEvent/getChargePanelEnterTrend` |
+| 同上 **Tab「充值档位点击」** | `charge_click` | App/渠道/币商建单成功（`createRechargeOrder` 等）+1 | `POST /trackingEvent/getChargeClickTrend` |
+| 同上 **Tab「充值到账成功」** | `charge_result_server` | 支付回调 `completeOrder` 首次发放金币成功 +1 | `POST /trackingEvent/getChargeResultServerTrend` |
+
+App 面板曝光：`POST /rechargeOrder/reportChargePanelEnter`（Sofie `POST /sofie/topup/notifyChargePanelEnter`）。
+
+表：各事件 `daily_charge_*_stats` / `weekly_*` / `monthly_*`（如 `daily_charge_panel_enter_stats`）。
 
 ## 新增一个事件的 checklist
 
