@@ -8,5 +8,5 @@ if "%RESTART_EXIT_CODE%"=="0" (
 ) else (
     echo ===== production restart failed, exit code: %RESTART_EXIT_CODE% =====
 )
-pause
+if /i not "%~1"=="--nopause" pause
 exit /b %RESTART_EXIT_CODE%

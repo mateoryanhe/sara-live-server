@@ -16,6 +16,12 @@ const zh = {
   anchorSocialSharePercentRequired: '请输入主播社交提成比',
   guildSocialSharePercentRequired: '请输入工会社交提成比',
   sharePercentInvalid: '提成比例需在 0～100 之间',
+  selectSyncFirst: '请先勾选要同步的分佣配置',
+  invalidSelection: '所选分佣配置无效',
+  syncConfirm: '将把已选 {count} 条无底薪社交流水分佣配置同步到目标环境（按 ID 覆盖或新增）。是否继续？',
+  syncSuccessDetail: '同步成功：{rows} 条',
+  syncFailed: '同步失败',
+  syncFailedCheckConfig: '同步失败，请检查数据同步配置与目标服务',
 } as const
 
 const en: Record<keyof typeof zh, string> = {

@@ -20,6 +20,12 @@ const zh = {
   anchorSocialSharePercentRequired: '请输入主播社交提成比',
   guildSocialSharePercentRequired: '请输入工会社交提成比',
   sharePercentInvalid: '提成比例需在 0～100 之间',
+  selectSyncFirst: '请先勾选要同步的分佣配置',
+  invalidSelection: '所选分佣配置无效',
+  syncConfirm: '将把已选 {count} 条有底薪社交流水分佣配置同步到目标环境（按 ID 覆盖或新增）。是否继续？',
+  syncSuccessDetail: '同步成功：{rows} 条',
+  syncFailed: '同步失败',
+  syncFailedCheckConfig: '同步失败，请检查数据同步配置与目标服务',
 } as const
 
 const en: Record<keyof typeof zh, string> = {
@@ -42,6 +48,12 @@ const en: Record<keyof typeof zh, string> = {
   anchorSocialSharePercentRequired: 'Enter the anchor social commission percentage',
   guildSocialSharePercentRequired: 'Enter the guild social commission percentage',
   sharePercentInvalid: 'The commission percentage must be between 0 and 100',
+  selectSyncFirst: 'Select commission tiers to sync first',
+  invalidSelection: 'Invalid selection',
+  syncConfirm: 'Sync {count} selected salaried social commission tiers to target (overwrite or add by ID). Continue?',
+  syncSuccessDetail: 'Synced {rows} row(s)',
+  syncFailed: 'Sync failed',
+  syncFailedCheckConfig: 'Sync failed. Check data sync settings and target service.',
 }
 
 export const anchorSalarySocialShareCfgListMessages = definePageMessagesFromEn(zh, en)

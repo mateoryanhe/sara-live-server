@@ -1,4 +1,5 @@
 @echo off
+set "RESTART_TITLE=XR Game Server Production Restart"
 REM Remote server configuration
 set REMOTE_HOST=52.9.70.64
 set REMOTE_USER=ec2-user

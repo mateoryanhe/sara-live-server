@@ -213,8 +213,10 @@ func ApplyVoiceChatMic(ctx context.Context, req *liveroomdto.ApplyVoiceChatMicRe
 	if voiceChatMicFirstEmptyAudienceSeat(room.ID, room.LiveRecordId) < 0 {
 		return nil, errercode.CreateCode(errercode.VoiceChatMicSeatFull)
 	}
-	liveroomdao.UpsertActiveVoiceChatMicApply(room.ID, userId, room.LiveRecordId, time.Now())
-	pubVoiceRoomMicRequestTracking(userId, time.Now())
+	appliedAt := time.Now()
+	liveroomdao.UpsertActiveVoiceChatMicApply(room.ID, userId, room.LiveRecordId, appliedAt)
+	pubVoiceRoomMicRequestTracking(userId, appliedAt)
+	pushVoiceChatMicApplyNotifyToAnchor(room.ID, userId, appliedAt.Unix(), liveroomdao.ActiveVoiceChatMicApplyCount(room.ID, room.LiveRecordId))
 	return &liveroomdto.ApplyVoiceChatMicRes{Success: true}, nil
 }
 
@@ -345,6 +347,22 @@ func setVoiceChatMicSeatLockedByAnchor(room *liveentity.LiveRoom, anchorId uint6
 		broadcastVoiceChatMicState(room.ID)
 	}
 	return nil
+}
+
+func pushVoiceChatMicApplyNotifyToAnchor(roomId, applicantUserId uint64, appliedAtSec int64, pendingTotal int) {
+	if roomId == 0 || applicantUserId == 0 {
+		return
+	}
+	room, err := loadVoiceChatLiveRoom(roomId)
+	if err != nil || room == nil || room.ID == 0 {
+		return
+	}
+	push.Data(room.ID, cmd.LiveRoomVoiceChatMicApplyNotify, &liveroomdto.VoiceChatMicApplyNotifyPushItem{
+		RoomId:       strconv.FormatUint(roomId, 10),
+		Applicant:    toVoiceChatMicUserBrief(applicantUserId),
+		AppliedAt:    appliedAtSec,
+		PendingTotal: pendingTotal,
+	})
 }
 
 func pushVoiceChatMicSeatMuteToUser(roomId, userId uint64, seatIndex int, muted bool) {

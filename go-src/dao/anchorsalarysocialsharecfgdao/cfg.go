@@ -25,6 +25,15 @@ func GetByID(id uint64) *entity.AnchorSalarySocialShareCfg {
 	return &row
 }
 
+func GetByIDs(ids []uint64) []*entity.AnchorSalarySocialShareCfg {
+	if len(ids) == 0 {
+		return nil
+	}
+	rows := make([]*entity.AnchorSalarySocialShareCfg, 0)
+	_ = g.DB().Model(string(entity.TbAnchorSalarySocialShareCfg)).WhereIn("id", ids).Scan(&rows)
+	return rows
+}
+
 func Create(row *entity.AnchorSalarySocialShareCfg) error {
 	_, err := g.DB().Model(string(entity.TbAnchorSalarySocialShareCfg)).Save(row)
 	return err

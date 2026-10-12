@@ -31,6 +31,16 @@ const (
 
 // --- 推送-语聊 ---
 
+// LiveRoomVoiceChatMicApplyNotifyPushReq cmd=45 上麦申请(推送给房主)
+type LiveRoomVoiceChatMicApplyNotifyPushReq struct {
+	g.Meta `path:"/liveRoomVoiceChatMicApplyNotify" method:"post" summary:"推送 cmd=45 语聊上麦申请(推送给房主)" description:"观众在申请上麦模式下调用 applyVoiceChatMic 成功后,单播给房主;客户端可刷新申请列表或展示待处理角标" tags:"推送-语聊"`
+}
+
+type LiveRoomVoiceChatMicApplyNotifyPushResp struct {
+	Cmd  int                                           `json:"cmd" dc:"命令字 45"`
+	Data *liveroomdto.VoiceChatMicApplyNotifyPushItem `json:"data"`
+}
+
 // LiveRoomVoiceChatMicKickedPushReq cmd=44 抱下麦(推送给被抱下麦观众)
 type LiveRoomVoiceChatMicKickedPushReq struct {
 	g.Meta `path:"/liveRoomVoiceChatMicKicked" method:"post" summary:"推送 cmd=44 语聊抱下麦(推送给被抱下麦观众)" description:"房主调用 kickVoiceChatMic 抱下麦成功后,单播给该观众;客户端应停止推流并更新麦位 UI(可同时处理 cmd41 广播)" tags:"推送-语聊"`

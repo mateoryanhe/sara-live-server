@@ -30,6 +30,15 @@ func GetByID(id uint64) *entity.AnchorGameShareCfg {
 	return &row
 }
 
+func GetByIDs(ids []uint64) []*entity.AnchorGameShareCfg {
+	if len(ids) == 0 {
+		return nil
+	}
+	rows := make([]*entity.AnchorGameShareCfg, 0)
+	_ = g.DB().Model(string(entity.TbAnchorGameShareCfg)).WhereIn("id", ids).Scan(&rows)
+	return rows
+}
+
 func Create(row *entity.AnchorGameShareCfg) error {
 	_, err := g.DB().Model(string(entity.TbAnchorGameShareCfg)).Save(row)
 	return err

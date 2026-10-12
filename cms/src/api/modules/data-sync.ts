@@ -49,6 +49,18 @@ export const dataSyncApi = {
         return request.post<SyncBatchRes>('/dataSync/syncRechargeCfg', data)
     },
 
+    syncAnchorSalarySocialShareCfg: (data: SyncIdsReq) => {
+        return request.post<SyncBatchRes>('/dataSync/syncAnchorSalarySocialShareCfg', data)
+    },
+
+    syncAnchorNoSalaryShareCfg: (data: SyncIdsReq) => {
+        return request.post<SyncBatchRes>('/dataSync/syncAnchorNoSalaryShareCfg', data)
+    },
+
+    syncAnchorGameShareCfg: (data: SyncIdsReq) => {
+        return request.post<SyncBatchRes>('/dataSync/syncAnchorGameShareCfg', data)
+    },
+
     syncFirstRechargeActivityCfg: () => {
         return request.post<SyncFirstRechargeActivityCfgRes>('/dataSync/syncFirstRechargeActivityCfg', {})
     },

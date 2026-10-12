@@ -52,6 +52,18 @@ func (c *DataSyncCMSController) SyncRechargeCfg(ctx context.Context, req *datasy
 	return datasync.SyncRechargeCfg(ctx, req)
 }
 
+func (c *DataSyncCMSController) SyncAnchorSalarySocialShareCfg(ctx context.Context, req *datasyncdto.SyncAnchorSalarySocialShareCfgReq) (*datasyncdto.SyncBatchRes, error) {
+	return datasync.SyncAnchorSalarySocialShareCfg(ctx, req)
+}
+
+func (c *DataSyncCMSController) SyncAnchorNoSalaryShareCfg(ctx context.Context, req *datasyncdto.SyncAnchorNoSalaryShareCfgReq) (*datasyncdto.SyncBatchRes, error) {
+	return datasync.SyncAnchorNoSalaryShareCfg(ctx, req)
+}
+
+func (c *DataSyncCMSController) SyncAnchorGameShareCfg(ctx context.Context, req *datasyncdto.SyncAnchorGameShareCfgReq) (*datasyncdto.SyncBatchRes, error) {
+	return datasync.SyncAnchorGameShareCfg(ctx, req)
+}
+
 func (c *DataSyncCMSController) SyncFiatCurrency(ctx context.Context, req *datasyncdto.SyncFiatCurrencyReq) (*datasyncdto.SyncBatchRes, error) {
 	return datasync.SyncFiatCurrency(ctx, req)
 }

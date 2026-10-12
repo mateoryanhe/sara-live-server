@@ -137,10 +137,22 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
 		{key: 'batchTransfer', label: '批量代付'},
 		{key: 'transferInfo', label: '编辑收款信息'},
 	],
-    AnchorSalarySocialShareCfgManagement: [BTN.view, BTN.create, BTN.edit, BTN.delete],
-    AnchorNoSalaryShareCfgManagement: [BTN.view, BTN.create, BTN.edit, BTN.delete],
-    AnchorSalaryGameShareCfgManagement: [BTN.view, BTN.create, BTN.edit, BTN.delete],
-    AnchorNoSalaryGameShareCfgManagement: [BTN.view, BTN.create, BTN.edit, BTN.delete],
+    AnchorSalarySocialShareCfgManagement: [
+        ...DEFAULT_CRUD_BUTTONS,
+        {key: 'sync', label: '同步数据'},
+    ],
+    AnchorNoSalaryShareCfgManagement: [
+        ...DEFAULT_CRUD_BUTTONS,
+        {key: 'sync', label: '同步数据'},
+    ],
+    AnchorSalaryGameShareCfgManagement: [
+        ...DEFAULT_CRUD_BUTTONS,
+        {key: 'sync', label: '同步数据'},
+    ],
+    AnchorNoSalaryGameShareCfgManagement: [
+        ...DEFAULT_CRUD_BUTTONS,
+        {key: 'sync', label: '同步数据'},
+    ],
     StaticCacheCfgManagement: [...DEFAULT_CRUD_BUTTONS],
     DbBackupCfgManagement: [
         BTN.view,

@@ -28,7 +28,6 @@ const (
 )
 
 var (
-	hotRestartOnce         sync.Once
 	hotRestartTriggered    atomic.Bool
 	oldProcessAfterRestart atomic.Bool
 	enterRestartPhaseFunc  func()
@@ -64,35 +63,39 @@ func TryTriggerHotRestart(auth string) (accepted bool, reason string) {
 }
 
 func runHotRestart() {
-	hotRestartOnce.Do(func() {
-		ctx := gctx.New()
-		logPhase1Start(ctx)
-
-		event.Pub(event.PrepareRestart, nil)
-		xrtimer.Pause()
-
-		startPhase1FlushBackground(ctx)
-		time.Sleep(time.Duration(hotRestartPhase1WaitSec()) * time.Second)
-		if syndb.AllCachesIdle() {
-			logPhase1QueueEmpty(ctx)
+	ctx := gctx.New()
+	defer func() {
+		if !oldProcessAfterRestart.Load() {
+			hotRestartTriggered.Store(false)
 		}
-		logPhase1End(ctx)
+	}()
 
-		shutdown.EnableSyncLoggers()
+	logPhase1Start(ctx)
 
-		if err := ghttp.RestartAllServer(ctx, ""); err != nil {
-			xrlog.DetailLog.Errorf(ctx, "热更新---RestartAllServer失败,err=%v", err)
-			return
-		}
+	event.Pub(event.PrepareRestart, nil)
+	xrtimer.Pause()
 
-		oldProcessAfterRestart.Store(true)
-		if enterRestartPhaseFunc != nil {
-			enterRestartPhaseFunc()
-		}
-		logPhase2Start(ctx)
+	startPhase1FlushBackground(ctx)
+	time.Sleep(time.Duration(hotRestartPhase1WaitSec()) * time.Second)
+	if syndb.AllCachesIdle() {
+		logPhase1QueueEmpty(ctx)
+	}
+	logPhase1End(ctx)
 
-		tryExitOldProcess()
-	})
+	shutdown.EnableSyncLoggers()
+
+	if err := ghttp.RestartAllServer(ctx, ""); err != nil {
+		xrlog.DetailLog.Errorf(ctx, "热更新---RestartAllServer失败,err=%v", err)
+		return
+	}
+
+	oldProcessAfterRestart.Store(true)
+	if enterRestartPhaseFunc != nil {
+		enterRestartPhaseFunc()
+	}
+	logPhase2Start(ctx)
+
+	tryExitOldProcess()
 }
 
 var oldProcessExitOnce sync.Once

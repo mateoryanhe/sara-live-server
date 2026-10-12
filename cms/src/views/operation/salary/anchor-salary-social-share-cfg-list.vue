@@ -4,11 +4,26 @@
       <template #header>
         <div class="card-header">
           <span>{{ t('menu.AnchorSalarySocialShareCfgManagement') }}</span>
-          <el-button v-if="can('create')" type="primary" @click="handleAdd">
-            {{ t('pages.anchorSalarySocialShareCfgList.addTier') }}
-          </el-button>
+          <div class="card-header-actions">
+            <el-button
+                v-if="hasButtonPermission('AnchorSalarySocialShareCfgManagement', 'sync')"
+                :disabled="selectedRows.length === 0"
+                :loading="syncing"
+                type="warning"
+                @click="handleSyncData"
+            >
+              {{ t('common.syncData') }}
+            </el-button>
+            <el-button v-if="can('create')" type="primary" @click="handleAdd">
+              {{ t('pages.anchorSalarySocialShareCfgList.addTier') }}
+            </el-button>
+          </div>
         </div>
       </template>
+
+      <div v-if="selectedRows.length" class="selection-tip">
+        {{ t('common.selectedCount', {count: selectedRows.length}) }}
+      </div>
 
       <el-alert
           :closable="false"
@@ -17,7 +32,19 @@
           type="info"
       />
 
-      <el-table v-loading="loading" :data="tableData" style="width: 100%">
+      <el-table
+          v-loading="loading"
+          :data="tableData"
+          row-key="id"
+          style="width: 100%"
+          @selection-change="handleSelectionChange"
+      >
+        <el-table-column
+            v-if="hasButtonPermission('AnchorSalarySocialShareCfgManagement', 'sync')"
+            type="selection"
+            width="48"
+        />
+        <el-table-column label="ID" prop="id" width="100"/>
         <el-table-column
             :label="t('pages.anchorSalarySocialShareCfgList.level')"
             align="center"
@@ -173,15 +200,20 @@ import {computed, onActivated, reactive, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {anchorSalarySocialShareCfgApi} from '@/api/modules/anchor-salary-social-share-cfg'
+import {dataSyncApi} from '@/api/modules/data-sync'
 import type {AnchorSalarySocialShareCfg} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
+import {confirmDataSync} from '@/utils/confirm-data-sync'
 import {formatStatCount} from '@/utils/number-format'
+import {hasButtonPermission} from '@/utils/permission'
 
 const {t} = useI18n()
 const {can} = usePagePermission('AnchorSalarySocialShareCfgManagement')
 
 const loading = ref(false)
 const saving = ref(false)
+const syncing = ref(false)
+const selectedRows = ref<AnchorSalarySocialShareCfg[]>([])
 const tableData = ref<AnchorSalarySocialShareCfg[]>([])
 const total = ref(0)
 const currentPage = ref(1)
@@ -379,6 +411,46 @@ const handleSizeChange = () => {
   fetchList()
 }
 
+const handleSelectionChange = (rows: AnchorSalarySocialShareCfg[]) => {
+  selectedRows.value = rows
+}
+
+const handleSyncData = async () => {
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning(t('pages.anchorSalarySocialShareCfgList.selectSyncFirst'))
+    return
+  }
+  const ids = selectedRows.value.map((row) => Number(row.id)).filter((id) => id > 0)
+  if (ids.length === 0) {
+    ElMessage.warning(t('pages.anchorSalarySocialShareCfgList.invalidSelection'))
+    return
+  }
+  try {
+    await confirmDataSync({
+      detail: t('pages.anchorSalarySocialShareCfgList.syncConfirm', {count: ids.length}),
+      title: t('common.syncData'),
+    })
+    syncing.value = true
+    const response = await dataSyncApi.syncAnchorSalarySocialShareCfg({ids})
+    if (response?.success) {
+      ElMessage.success(
+          response.message || t('pages.anchorSalarySocialShareCfgList.syncSuccessDetail', {
+            rows: response.rowCount,
+          }),
+      )
+    } else {
+      ElMessage.error(t('pages.anchorSalarySocialShareCfgList.syncFailed'))
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('sync anchor salary social share cfg failed:', error)
+      ElMessage.error(t('pages.anchorSalarySocialShareCfgList.syncFailedCheckConfig'))
+    }
+  } finally {
+    syncing.value = false
+  }
+}
+
 // 页面由布局 keep-alive 缓存，每次打开标签都重新读取服务器数据。
 onActivated(fetchList)
 </script>
@@ -392,6 +464,18 @@ onActivated(fetchList)
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.card-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.selection-tip {
+  margin-bottom: 12px;
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
 }
 
 .tier-hint {

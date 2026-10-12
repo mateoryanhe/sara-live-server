@@ -18,6 +18,12 @@ const zh = {
   guildGameSharePercentRequired: '请输入工会游戏提成比',
   sharePercentInvalid: '提成比例需在 0～100 之间',
   deleteConfirm: '确认删除等级 {level} 的游戏分佣配置吗？',
+  selectSyncFirst: '请先勾选要同步的游戏分佣配置',
+  invalidSelection: '所选游戏分佣配置无效',
+  syncConfirm: '将把已选 {count} 条游戏流水档位分佣配置同步到目标环境（按 ID 覆盖或新增，含有/无底薪类型）。是否继续？',
+  syncSuccessDetail: '同步成功：{rows} 条',
+  syncFailed: '同步失败',
+  syncFailedCheckConfig: '同步失败，请检查数据同步配置与目标服务',
 } as const
 
 const en: Record<keyof typeof zh, string> = {

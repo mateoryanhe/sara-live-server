@@ -16,6 +16,11 @@ func initPushController() {
 
 // --- 推送-语聊 ---
 
+// LiveRoomVoiceChatMicApplyNotify cmd=45 上麦申请(推送给房主)
+func (c *PushController) LiveRoomVoiceChatMicApplyNotify(_ context.Context, _ *pushdto.LiveRoomVoiceChatMicApplyNotifyPushReq) (*pushdto.LiveRoomVoiceChatMicApplyNotifyPushResp, error) {
+	return nil, nil
+}
+
 // LiveRoomVoiceChatMicKicked cmd=44 抱下麦(推送给被抱下麦观众)
 func (c *PushController) LiveRoomVoiceChatMicKicked(_ context.Context, _ *pushdto.LiveRoomVoiceChatMicKickedPushReq) (*pushdto.LiveRoomVoiceChatMicKickedPushResp, error) {
 	return nil, nil

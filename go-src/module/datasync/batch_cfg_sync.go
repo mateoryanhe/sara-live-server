@@ -5,6 +5,9 @@ import (
 	"fmt"
 
 	"github.com/gogf/gf/v2/frame/g"
+	"xr-game-server/dao/anchorgamesharecfgdao"
+	"xr-game-server/dao/anchornosalarysharecfgdao"
+	"xr-game-server/dao/anchorsalarysocialsharecfgdao"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/datasyncdto"
 	fiatentity "xr-game-server/entity/fiat"
@@ -186,6 +189,99 @@ func ReceiveFiatCurrency(_ context.Context, req *datasyncdto.ReceiveFiatCurrency
 	return &datasyncdto.ReceiveBatchRes{Success: true, RowCount: rowCount, FileCount: fileCount}, nil
 }
 
+func SyncAnchorSalarySocialShareCfg(_ context.Context, req *datasyncdto.SyncAnchorSalarySocialShareCfgReq) (*datasyncdto.SyncBatchRes, error) {
+	if req == nil || len(req.IDs) == 0 {
+		return nil, errInvalidParam()
+	}
+	rows := anchorsalarysocialsharecfgdao.GetByIDs(req.IDs)
+	if len(rows) == 0 {
+		return nil, errInvalidParam()
+	}
+	payload := &datasyncdto.ReceiveAnchorSalarySocialShareCfgReq{Rows: rows}
+	var receiveRes datasyncdto.ReceiveBatchRes
+	if err := postSyncReceive("/dataSync/receiveAnchorSalarySocialShareCfg", payload, &receiveRes); err != nil {
+		return nil, err
+	}
+	return &datasyncdto.SyncBatchRes{
+		Success:  receiveRes.Success,
+		RowCount: receiveRes.RowCount,
+		Message:  fmt.Sprintf("已同步 %d 条有底薪社交流水分佣配置", receiveRes.RowCount),
+	}, nil
+}
+
+func ReceiveAnchorSalarySocialShareCfg(_ context.Context, req *datasyncdto.ReceiveAnchorSalarySocialShareCfgReq) (*datasyncdto.ReceiveBatchRes, error) {
+	if req == nil {
+		return nil, errInvalidParam()
+	}
+	rowCount, err := saveAnchorSalarySocialShareCfgs(req.Rows)
+	if err != nil {
+		return nil, err
+	}
+	return &datasyncdto.ReceiveBatchRes{Success: true, RowCount: rowCount}, nil
+}
+
+func SyncAnchorNoSalaryShareCfg(_ context.Context, req *datasyncdto.SyncAnchorNoSalaryShareCfgReq) (*datasyncdto.SyncBatchRes, error) {
+	if req == nil || len(req.IDs) == 0 {
+		return nil, errInvalidParam()
+	}
+	rows := anchornosalarysharecfgdao.GetByIDs(req.IDs)
+	if len(rows) == 0 {
+		return nil, errInvalidParam()
+	}
+	payload := &datasyncdto.ReceiveAnchorNoSalaryShareCfgReq{Rows: rows}
+	var receiveRes datasyncdto.ReceiveBatchRes
+	if err := postSyncReceive("/dataSync/receiveAnchorNoSalaryShareCfg", payload, &receiveRes); err != nil {
+		return nil, err
+	}
+	return &datasyncdto.SyncBatchRes{
+		Success:  receiveRes.Success,
+		RowCount: receiveRes.RowCount,
+		Message:  fmt.Sprintf("已同步 %d 条无底薪社交流水分佣配置", receiveRes.RowCount),
+	}, nil
+}
+
+func ReceiveAnchorNoSalaryShareCfg(_ context.Context, req *datasyncdto.ReceiveAnchorNoSalaryShareCfgReq) (*datasyncdto.ReceiveBatchRes, error) {
+	if req == nil {
+		return nil, errInvalidParam()
+	}
+	rowCount, err := saveAnchorNoSalaryShareCfgs(req.Rows)
+	if err != nil {
+		return nil, err
+	}
+	return &datasyncdto.ReceiveBatchRes{Success: true, RowCount: rowCount}, nil
+}
+
+func SyncAnchorGameShareCfg(_ context.Context, req *datasyncdto.SyncAnchorGameShareCfgReq) (*datasyncdto.SyncBatchRes, error) {
+	if req == nil || len(req.IDs) == 0 {
+		return nil, errInvalidParam()
+	}
+	rows := anchorgamesharecfgdao.GetByIDs(req.IDs)
+	if len(rows) == 0 {
+		return nil, errInvalidParam()
+	}
+	payload := &datasyncdto.ReceiveAnchorGameShareCfgReq{Rows: rows}
+	var receiveRes datasyncdto.ReceiveBatchRes
+	if err := postSyncReceive("/dataSync/receiveAnchorGameShareCfg", payload, &receiveRes); err != nil {
+		return nil, err
+	}
+	return &datasyncdto.SyncBatchRes{
+		Success:  receiveRes.Success,
+		RowCount: receiveRes.RowCount,
+		Message:  fmt.Sprintf("已同步 %d 条游戏流水档位分佣配置", receiveRes.RowCount),
+	}, nil
+}
+
+func ReceiveAnchorGameShareCfg(_ context.Context, req *datasyncdto.ReceiveAnchorGameShareCfgReq) (*datasyncdto.ReceiveBatchRes, error) {
+	if req == nil {
+		return nil, errInvalidParam()
+	}
+	rowCount, err := saveAnchorGameShareCfgs(req.Rows)
+	if err != nil {
+		return nil, err
+	}
+	return &datasyncdto.ReceiveBatchRes{Success: true, RowCount: rowCount}, nil
+}
+
 func saveHomeBanners(rows []*entity.HomeBanner) (int, error) {
 	rowCount := 0
 	for _, row := range rows {
@@ -273,6 +369,48 @@ func collectBannerFileNames(rows []*entity.HomeBanner) []string {
 		names = appendUniqueFileName(seen, names, row.Image)
 	}
 	return names
+}
+
+func saveAnchorSalarySocialShareCfgs(rows []*entity.AnchorSalarySocialShareCfg) (int, error) {
+	rowCount := 0
+	for _, row := range rows {
+		if row == nil || row.ID == 0 {
+			continue
+		}
+		if _, err := g.DB().Model(string(entity.TbAnchorSalarySocialShareCfg)).Save(row); err != nil {
+			return rowCount, fmt.Errorf("save anchor salary social share cfg id=%d: %w", row.ID, err)
+		}
+		rowCount++
+	}
+	return rowCount, nil
+}
+
+func saveAnchorNoSalaryShareCfgs(rows []*entity.AnchorNoSalaryShareCfg) (int, error) {
+	rowCount := 0
+	for _, row := range rows {
+		if row == nil || row.ID == 0 {
+			continue
+		}
+		if _, err := g.DB().Model(string(entity.TbAnchorNoSalaryShareCfg)).Save(row); err != nil {
+			return rowCount, fmt.Errorf("save anchor no salary share cfg id=%d: %w", row.ID, err)
+		}
+		rowCount++
+	}
+	return rowCount, nil
+}
+
+func saveAnchorGameShareCfgs(rows []*entity.AnchorGameShareCfg) (int, error) {
+	rowCount := 0
+	for _, row := range rows {
+		if row == nil || row.ID == 0 {
+			continue
+		}
+		if _, err := g.DB().Model(string(entity.TbAnchorGameShareCfg)).Save(row); err != nil {
+			return rowCount, fmt.Errorf("save anchor game share cfg id=%d: %w", row.ID, err)
+		}
+		rowCount++
+	}
+	return rowCount, nil
 }
 
 func collectGiftFileNames(rows []*entity.LiveGift) []string {

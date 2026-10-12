@@ -81,4 +81,6 @@ const (
 	LiveRoomVoiceChatMicApplyResult = 43
 	//语聊房抱下麦推送(推送给被抱下麦的观众)
 	LiveRoomVoiceChatMicKicked = 44
+	//语聊房上麦申请通知(推送给房主:观众提交申请)
+	LiveRoomVoiceChatMicApplyNotify = 45
 )

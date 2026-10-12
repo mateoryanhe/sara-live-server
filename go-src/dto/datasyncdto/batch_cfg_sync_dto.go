@@ -58,6 +58,36 @@ type ReceiveRechargeCfgReq struct {
 	Rows   []*rechargeentity.RechargeCfg `json:"rows"`
 }
 
+type SyncAnchorSalarySocialShareCfgReq struct {
+	g.Meta `path:"/syncAnchorSalarySocialShareCfg" method:"post" summary:"同步有底薪社交流水分佣配置到目标环境" tags:"数据同步"`
+	IDs    []uint64 `json:"ids" v:"required|min-length:1#请选择要同步的有底薪社交流水分佣配置" dc:"要同步的配置ID列表"`
+}
+
+type ReceiveAnchorSalarySocialShareCfgReq struct {
+	g.Meta `path:"/receiveAnchorSalarySocialShareCfg" method:"post" summary:"接收有底薪社交流水分佣配置同步" tags:"数据同步"`
+	Rows   []*entity.AnchorSalarySocialShareCfg `json:"rows"`
+}
+
+type SyncAnchorNoSalaryShareCfgReq struct {
+	g.Meta `path:"/syncAnchorNoSalaryShareCfg" method:"post" summary:"同步无底薪社交流水分佣配置到目标环境" tags:"数据同步"`
+	IDs    []uint64 `json:"ids" v:"required|min-length:1#请选择要同步的无底薪社交流水分佣配置" dc:"要同步的配置ID列表"`
+}
+
+type ReceiveAnchorNoSalaryShareCfgReq struct {
+	g.Meta `path:"/receiveAnchorNoSalaryShareCfg" method:"post" summary:"接收无底薪社交流水分佣配置同步" tags:"数据同步"`
+	Rows   []*entity.AnchorNoSalaryShareCfg `json:"rows"`
+}
+
+type SyncAnchorGameShareCfgReq struct {
+	g.Meta `path:"/syncAnchorGameShareCfg" method:"post" summary:"同步游戏流水档位分佣配置到目标环境" tags:"数据同步"`
+	IDs    []uint64 `json:"ids" v:"required|min-length:1#请选择要同步的游戏流水档位分佣配置" dc:"要同步的配置ID列表"`
+}
+
+type ReceiveAnchorGameShareCfgReq struct {
+	g.Meta `path:"/receiveAnchorGameShareCfg" method:"post" summary:"接收游戏流水档位分佣配置同步" tags:"数据同步"`
+	Rows   []*entity.AnchorGameShareCfg `json:"rows"`
+}
+
 type SyncFiatCurrencyReq struct {
 	g.Meta `path:"/syncFiatCurrency" method:"post" summary:"同步法币配置到目标环境" tags:"数据同步"`
 	IDs    []uint64 `json:"ids" v:"required|min-length:1#请选择要同步的法币配置" dc:"要同步的法币配置ID列表"`

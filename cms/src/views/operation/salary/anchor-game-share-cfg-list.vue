@@ -4,11 +4,26 @@
       <template #header>
         <div class="card-header">
           <span>{{ pageTitle }}</span>
-          <el-button v-if="can('create')" type="primary" @click="handleAdd">
-            {{ t('pages.anchorGameShareCfgList.addTier') }}
-          </el-button>
+          <div class="card-header-actions">
+            <el-button
+                v-if="can('sync')"
+                :disabled="selectedRows.length === 0"
+                :loading="syncing"
+                type="warning"
+                @click="handleSyncData"
+            >
+              {{ t('common.syncData') }}
+            </el-button>
+            <el-button v-if="can('create')" type="primary" @click="handleAdd">
+              {{ t('pages.anchorGameShareCfgList.addTier') }}
+            </el-button>
+          </div>
         </div>
       </template>
+
+      <div v-if="selectedRows.length" class="selection-tip">
+        {{ t('common.selectedCount', {count: selectedRows.length}) }}
+      </div>
 
       <el-alert
           :closable="false"
@@ -17,7 +32,15 @@
           type="info"
       />
 
-      <el-table v-loading="loading" :data="tableData" style="width: 100%">
+      <el-table
+          v-loading="loading"
+          :data="tableData"
+          row-key="id"
+          style="width: 100%"
+          @selection-change="handleSelectionChange"
+      >
+        <el-table-column v-if="can('sync')" type="selection" width="48"/>
+        <el-table-column label="ID" prop="id" width="100"/>
         <el-table-column :label="t('pages.anchorGameShareCfgList.level')" align="center" prop="level" width="100"/>
         <el-table-column
             :label="t('pages.anchorGameShareCfgList.gameTotalGoldRevenue')"
@@ -144,8 +167,10 @@ import {computed, onActivated, reactive, ref, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage, ElMessageBox, type FormInstance, type FormRules} from 'element-plus'
 import {anchorGameShareCfgApi} from '@/api/modules/anchor-game-share-cfg'
+import {dataSyncApi} from '@/api/modules/data-sync'
 import type {AnchorGameShareCfg} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
+import {confirmDataSync} from '@/utils/confirm-data-sync'
 import {formatStatCount} from '@/utils/number-format'
 
 const props = defineProps<{salaryType: 1 | 2}>()
@@ -157,6 +182,8 @@ const pageTitle = computed(() => props.salaryType === 1
 
 const loading = ref(false)
 const saving = ref(false)
+const syncing = ref(false)
+const selectedRows = ref<AnchorGameShareCfg[]>([])
 const tableData = ref<AnchorGameShareCfg[]>([])
 const total = ref(0)
 const currentPage = ref(1)
@@ -308,8 +335,49 @@ const handleSizeChange = () => {
   fetchList()
 }
 
+const handleSelectionChange = (rows: AnchorGameShareCfg[]) => {
+  selectedRows.value = rows
+}
+
+const handleSyncData = async () => {
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning(t('pages.anchorGameShareCfgList.selectSyncFirst'))
+    return
+  }
+  const ids = selectedRows.value.map((row) => Number(row.id)).filter((id) => id > 0)
+  if (ids.length === 0) {
+    ElMessage.warning(t('pages.anchorGameShareCfgList.invalidSelection'))
+    return
+  }
+  try {
+    await confirmDataSync({
+      detail: t('pages.anchorGameShareCfgList.syncConfirm', {count: ids.length}),
+      title: t('common.syncData'),
+    })
+    syncing.value = true
+    const response = await dataSyncApi.syncAnchorGameShareCfg({ids})
+    if (response?.success) {
+      ElMessage.success(
+          response.message || t('pages.anchorGameShareCfgList.syncSuccessDetail', {
+            rows: response.rowCount,
+          }),
+      )
+    } else {
+      ElMessage.error(t('pages.anchorGameShareCfgList.syncFailed'))
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('sync anchor game share cfg failed:', error)
+      ElMessage.error(t('pages.anchorGameShareCfgList.syncFailedCheckConfig'))
+    }
+  } finally {
+    syncing.value = false
+  }
+}
+
 watch(() => props.salaryType, () => {
   currentPage.value = 1
+  selectedRows.value = []
   fetchList()
 })
 // 有底薪和无底薪页面都会被 keep-alive 缓存，每次打开都重新读取对应档位。

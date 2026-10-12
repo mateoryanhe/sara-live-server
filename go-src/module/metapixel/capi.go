@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
+	"xr-game-server/core/xrlog"
 	sysentity "xr-game-server/entity/sys"
 )
 
@@ -59,15 +60,16 @@ func sendCAPIEvents(ctx context.Context, cfg *sysentity.MetaPixelCfg, events []c
 	}
 	url := fmt.Sprintf("https://graph.facebook.com/%s/%s/events?access_token=%s",
 		metaGraphAPIVersion, strings.TrimSpace(cfg.PixelId), strings.TrimSpace(cfg.AccessToken))
+	eventSummary := formatCAPIEventSummary(events)
 	resp, err := g.Client().ContentJson().Post(ctx, url, reqBody)
 	if err != nil {
-		g.Log().Warningf(ctx, "meta pixel capi request failed: %v", err)
+		xrlog.DetailLog.Warningf(ctx, "meta pixel capi request failed events=%s err=%v", eventSummary, err)
 		return
 	}
 	defer resp.Close()
 	body := resp.ReadAllString()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		g.Log().Warningf(ctx, "meta pixel capi bad status=%d body=%s", resp.StatusCode, truncateLog(body))
+		xrlog.DetailLog.Warningf(ctx, "meta pixel capi bad status=%d events=%s body=%s", resp.StatusCode, eventSummary, truncateLog(body))
 		return
 	}
 	var parsed struct {
@@ -76,12 +78,31 @@ func sendCAPIEvents(ctx context.Context, cfg *sysentity.MetaPixelCfg, events []c
 		FBTraceID      string   `json:"fbtrace_id"`
 	}
 	if err := json.Unmarshal([]byte(body), &parsed); err != nil {
-		g.Log().Warningf(ctx, "meta pixel capi decode failed: %v body=%s", err, truncateLog(body))
+		xrlog.DetailLog.Warningf(ctx, "meta pixel capi decode failed events=%s err=%v body=%s", eventSummary, err, truncateLog(body))
 		return
 	}
 	if parsed.EventsReceived <= 0 {
-		g.Log().Warningf(ctx, "meta pixel capi no events received messages=%v trace=%s", parsed.Messages, parsed.FBTraceID)
+		xrlog.DetailLog.Warningf(ctx, "meta pixel capi no events received events=%s messages=%v trace=%s", eventSummary, parsed.Messages, parsed.FBTraceID)
+		return
 	}
+	xrlog.DetailLog.Infof(ctx, "meta pixel capi ok pixelId=%s events=%s received=%d trace=%s messages=%v testMode=%t",
+		strings.TrimSpace(cfg.PixelId), eventSummary, parsed.EventsReceived, parsed.FBTraceID, parsed.Messages, reqBody.TestEventCode != "")
+}
+
+func formatCAPIEventSummary(events []capiEvent) string {
+	if len(events) == 0 {
+		return ""
+	}
+	parts := make([]string, 0, len(events))
+	for _, e := range events {
+		name := strings.TrimSpace(e.EventName)
+		if e.EventID != "" {
+			parts = append(parts, fmt.Sprintf("%s:%s", name, e.EventID))
+			continue
+		}
+		parts = append(parts, name)
+	}
+	return strings.Join(parts, ",")
 }
 
 func truncateLog(s string) string {

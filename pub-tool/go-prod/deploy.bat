@@ -162,69 +162,21 @@ echo Step 3: Hot restart or cold start
 echo ================================
 
 echo Setting execution permissions...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "chmod +x %REMOTE_DIR%/%APP_NAME%"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST% "chmod +x %REMOTE_DIR%/%APP_NAME%"
 
 echo Creating remote start script...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "printf '%%s\n' '#!/bin/sh' 'cd %REMOTE_DIR%' 'nohup ./%APP_NAME% >/dev/null 2>&1 &' > %REMOTE_DIR%/start.sh && chmod +x %REMOTE_DIR%/start.sh"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST% "printf '%%s\n' '#!/bin/sh' 'cd %REMOTE_DIR%' 'nohup ./%APP_NAME% >/dev/null 2>&1 &' > %REMOTE_DIR%/start.sh && chmod +x %REMOTE_DIR%/start.sh"
 if %errorlevel% neq 0 (
     echo Error: Failed to create remote start script
     exit /b 1
 )
 
-echo Checking if %APP_NAME% is running...
-set OLD_PID=
-for /f "delims=" %%i in ('plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "pgrep -xo %APP_NAME% 2>/dev/null || true"') do set OLD_PID=%%i
-
-if defined OLD_PID goto do_hot_restart
-
-echo No running process, cold starting...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "sudo %REMOTE_DIR%/start.sh"
-if !errorlevel! neq 0 (
-    echo Error: Remote start script failed
+call "%~dp0restart.bat"
+if errorlevel 1 (
+    echo Error: Restart after deploy failed
     exit /b 1
 )
-goto hot_restart_done
-
-:do_hot_restart
-echo Process found ^(PID: !OLD_PID!^), triggering GoFrame hot restart...
-
-REM Read hot restart timeouts from LOCAL_CONFIG_PATH (config.bat -> config/prod/config.yaml)
-set HOT_RESTART_FLUSH_TIMEOUT=60
-set HOT_RESTART_EXIT_TIMEOUT=60
-for /f "usebackq tokens=2 delims=:" %%a in (`findstr /i /c:"hotRestartFlushTimeout" "%LOCAL_CONFIG_PATH%"`) do (
-  for /f "tokens=1" %%b in ("%%a") do set HOT_RESTART_FLUSH_TIMEOUT=%%b
-)
-for /f "usebackq tokens=2 delims=:" %%a in (`findstr /i /c:"hotRestartExitTimeout" "%LOCAL_CONFIG_PATH%"`) do (
-  for /f "tokens=1" %%b in ("%%a") do set HOT_RESTART_EXIT_TIMEOUT=%%b
-)
-set /a HOT_RESTART_WAIT_MAX=HOT_RESTART_FLUSH_TIMEOUT+HOT_RESTART_EXIT_TIMEOUT+3
-echo Hot restart config from %LOCAL_CONFIG_PATH%: flush=!HOT_RESTART_FLUSH_TIMEOUT!s exit=!HOT_RESTART_EXIT_TIMEOUT!s waitMax=!HOT_RESTART_WAIT_MAX!s
-
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "curl -sf -k 'https://127.0.0.1/internal/hotRestart?auth=%HOT_RESTART_AUTH%' || exit 1"
-if !errorlevel! neq 0 (
-    echo Error: Hot restart API call failed
-    exit /b 1
-)
-echo Hot restart triggered, waiting for new process ^(max !HOT_RESTART_WAIT_MAX!s, flush=!HOT_RESTART_FLUSH_TIMEOUT!s exit=!HOT_RESTART_EXIT_TIMEOUT!s^)...
-set /a WAIT_LEFT=HOT_RESTART_WAIT_MAX
-:wait_hot_restart
-timeout /t 1 /nobreak >nul
-set /a WAIT_LEFT-=1
-set NEW_PID=
-for /f "delims=" %%i in ('plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "pgrep -xo %APP_NAME% 2>/dev/null || true"') do set NEW_PID=%%i
-if not defined NEW_PID (
-    if !WAIT_LEFT! leq 0 goto hot_restart_timeout
-    goto wait_hot_restart
-)
-if not "!NEW_PID!"=="!OLD_PID!" goto hot_restart_done
-if !WAIT_LEFT! leq 0 goto hot_restart_timeout
-goto wait_hot_restart
-
-:hot_restart_timeout
-echo Warning: Hot restart wait timeout, checking process state...
-
-:hot_restart_done
-echo Program start/restart command completed.
+echo Program start/restart completed.
 
 echo.
 echo ================================
@@ -239,7 +191,7 @@ if exist "%TEMP_DIR%" rmdir /s /q "%TEMP_DIR%"
 if exist "%DEPLOY_PACKAGE%" del "%DEPLOY_PACKAGE%"
 
 echo Verifying if program is running...
-timeout /t 2 /nobreak >nul
+ping -n 3 127.0.0.1 >nul
 echo.
 
 set REMOTE_PID=

@@ -34,6 +34,18 @@ func (c *DataSyncReceiveController) ReceiveRechargeCfg(ctx context.Context, req 
 	return datasync.ReceiveRechargeCfg(ctx, req)
 }
 
+func (c *DataSyncReceiveController) ReceiveAnchorSalarySocialShareCfg(ctx context.Context, req *datasyncdto.ReceiveAnchorSalarySocialShareCfgReq) (*datasyncdto.ReceiveBatchRes, error) {
+	return datasync.ReceiveAnchorSalarySocialShareCfg(ctx, req)
+}
+
+func (c *DataSyncReceiveController) ReceiveAnchorNoSalaryShareCfg(ctx context.Context, req *datasyncdto.ReceiveAnchorNoSalaryShareCfgReq) (*datasyncdto.ReceiveBatchRes, error) {
+	return datasync.ReceiveAnchorNoSalaryShareCfg(ctx, req)
+}
+
+func (c *DataSyncReceiveController) ReceiveAnchorGameShareCfg(ctx context.Context, req *datasyncdto.ReceiveAnchorGameShareCfgReq) (*datasyncdto.ReceiveBatchRes, error) {
+	return datasync.ReceiveAnchorGameShareCfg(ctx, req)
+}
+
 func (c *DataSyncReceiveController) ReceiveFiatCurrency(ctx context.Context, req *datasyncdto.ReceiveFiatCurrencyReq) (*datasyncdto.ReceiveBatchRes, error) {
 	return datasync.ReceiveFiatCurrency(ctx, req)
 }

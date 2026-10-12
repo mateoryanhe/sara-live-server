@@ -37,6 +37,13 @@
 - **内存**：`innodb_buffer_pool_size=96M`，`max_connections=20`，`performance_schema=OFF`，无 binlog
 - Go 连接串（与 dev 同格式）：`mysql:root:***@tcp(127.0.0.1:13307)/live_db`
 
+## 正式服 MariaDB（2026-10-12）
+
+- **机器**：4 vCPU / ~7.6GiB RAM / 4GiB swap；Go 单进程 `/home/ec2-user/xgameserver/xr-game-server`
+- **MariaDB 11.4**，配置 **`/etc/my.cnf.d/99-sara-live.cnf`**（改前备份同目录 `99-sara-live.cnf.bak.*`）
+- **端口** `14501`，仅 `127.0.0.1`；库 `live_prod`
+- **内存/连接**：`innodb_buffer_pool_size=1280M`，**`max_connections=120`**（2026-10-12 自 80 上调，为 Go 热重启双进程留余量）；Go `database.default` **`maxOpen=40` / `maxIdle=20`**
+
 ## 服务器磁盘与 /tmp（2026-09-18）
 
 - 审核服 **`/tmp` 为 tmpfs ~479MB**，测试服 **`/tmp` 为 tmpfs ~457MB**；压缩包与解压目录同时存在时很容易写满

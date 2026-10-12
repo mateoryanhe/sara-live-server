@@ -19,6 +19,14 @@ type VoiceChatMicSeatItem struct {
 	User      *VoiceChatMicUserBrief `json:"user" dc:"麦上用户(status=3或4时有值;status=1或2时为null)"`
 }
 
+// VoiceChatMicApplyNotifyPushItem 观众提交上麦申请后推送给房主(WS cmd45)
+type VoiceChatMicApplyNotifyPushItem struct {
+	RoomId       string                 `json:"roomId" dc:"直播间ID"`
+	Applicant    *VoiceChatMicUserBrief `json:"applicant" dc:"申请观众"`
+	AppliedAt    int64                  `json:"appliedAt" dc:"申请时间(秒)"`
+	PendingTotal int                    `json:"pendingTotal" dc:"当前待处理申请总数(含本条)"`
+}
+
 // VoiceChatMicApplyResultPushItem 上麦申请结果推送给申请人(WS cmd43)
 type VoiceChatMicApplyResultPushItem struct {
 	RoomId    string `json:"roomId" dc:"直播间ID"`
