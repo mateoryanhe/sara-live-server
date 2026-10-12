@@ -76,7 +76,7 @@ func runHotRestart() {
 	xrtimer.Pause()
 
 	startPhase1FlushBackground(ctx)
-	time.Sleep(time.Duration(hotRestartPhase1WaitSec()) * time.Second)
+	waitHotRestartPhase1(ctx, time.Duration(hotRestartPhase1WaitSec())*time.Second)
 	if syndb.AllCachesIdle() {
 		logPhase1QueueEmpty(ctx)
 	}
@@ -86,8 +86,11 @@ func runHotRestart() {
 
 	if err := ghttp.RestartAllServer(ctx, ""); err != nil {
 		xrlog.DetailLog.Errorf(ctx, "热更新---RestartAllServer失败,err=%v", err)
+		xrlog.DetailLog.Errorf(ctx, "hot_restart RestartAllServer failed err=%v", err)
 		return
 	}
+	xrlog.DetailLog.Info(ctx, "热更新---RestartAllServer成功,旧进程进入第二阶段")
+	xrlog.DetailLog.Info(ctx, "hot_restart RestartAllServer ok")
 
 	oldProcessAfterRestart.Store(true)
 	if enterRestartPhaseFunc != nil {

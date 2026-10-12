@@ -276,226 +276,83 @@ func trackingQueueIdle() bool {
 		chargeResultServerTrackingQueue.Len() == 0
 }
 
-func drainTrackingQueue() {
+func drainTrackingTQueue[T any](q *gqueue.TQueue[T], handle func(T)) {
 	for {
 		select {
-		case ev := <-trackingQueue.C:
-			if ev != nil {
-				recordShowcaseLiveRoomJoin(ev.UserId, ev.RoomId, ev.StatAt)
-			}
-		default:
-			break
-		}
-	}
-	for {
-		select {
-		case ev := <-liveFirstFrameRenderTrackingQueue.C:
-			if ev != nil {
-				recordLiveFirstFrameRendered(ev.UserId, ev.RoomId, ev.StatAt)
-				recordGameLiveWatchStream(ev.UserId, ev.RoomId, ev.StatAt)
-			}
-		default:
-			break
-		}
-	}
-	for {
-		select {
-		case ev := <-showcaseLeaveTrackingQueue.C:
-			if ev != nil {
-				recordShowcaseLiveRoomLeave(ev.UserId, ev.RoomId, ev.StatAt)
-			}
-		default:
-			break
-		}
-	}
-	for {
-		select {
-		case ev := <-call1v1InitiateTrackingQueue.C:
-			if ev != nil {
-				recordCall1v1Initiate(ev.CallerId, ev.AnchorId, ev.StatAt)
-			}
-		default:
-			break
-		}
-	}
-	for {
-		select {
-		case ev := <-call1v1RoomTrackingQueue.C:
-			if ev != nil {
-				recordCall1v1Room(ev.CallerId, ev.AnchorId, ev.StatAt)
-			}
-		default:
-			break
-		}
-	}
-	for {
-		select {
-		case ev := <-call1v1ConnectSuccessTrackingQueue.C:
-			if ev != nil {
-				recordCall1v1ConnectSuccess(ev.Source, ev.CallType, ev.CallerId, ev.ReceiverId, ev.StatAt)
-			}
-		default:
-			break
-		}
-	}
-	for {
-		select {
-		case ev := <-miniGameRoundStartTrackingQueue.C:
-			if ev != nil {
-				recordMiniGameRoundStart(ev.UserId, ev.StatAt)
-			}
-		default:
-			break
-		}
-	}
-	for {
-		select {
-		case ev := <-miniGameRoundResultTrackingQueue.C:
-			if ev != nil {
-				recordMiniGameRoundResult(ev.UserId, ev.StatAt)
-			}
-		default:
-			break
-		}
-	}
-	for {
-		select {
-		case ev := <-miniGameExposureTrackingQueue.C:
-			if ev != nil {
-				recordMiniGameExposure(ev.UserId, ev.StatAt)
-			}
-		default:
-			break
-		}
-	}
-	for {
-		select {
-		case ev := <-gameLiveRoomJoinTrackingQueue.C:
-			if ev != nil {
-				recordGameLiveRoomJoin(ev.UserId, ev.RoomId, ev.StatAt)
-			}
-		default:
-			break
-		}
-	}
-	for {
-		select {
-		case ev := <-miniGameWebViewLoadTrackingQueue.C:
-			if ev != nil {
-				recordMiniGameWebViewLoad(ev.UserId, ev.StatAt)
-			}
-		default:
-			break
-		}
-	}
-	for {
-		select {
-		case ev := <-shortVideoPlayStartTrackingQueue.C:
-			if ev != nil {
-				recordShortVideoPlayStart(ev.UserId, ev.StatAt)
-			}
-		default:
-			break
-		}
-	}
-	for {
-		select {
-		case ev := <-shortVideoPaywallClickTrackingQueue.C:
-			if ev != nil {
-				recordShortVideoPaywallClick(ev.UserId, ev.StatAt)
-			}
-		default:
-			break
-		}
-	}
-	for {
-		select {
-		case ev := <-shortVideoPaySuccessTrackingQueue.C:
-			if ev != nil {
-				recordShortVideoPaySuccess(ev.UserId, ev.StatAt)
-			}
-		default:
-			break
-		}
-	}
-	for {
-		select {
-		case ev := <-shortVideoWatchEndTrackingQueue.C:
-			if ev != nil {
-				recordShortVideoWatchEnd(ev.UserId, ev.StatAt)
-			}
-		default:
-			break
-		}
-	}
-	for {
-		select {
-		case ev := <-voiceRoomEnterTrackingQueue.C:
-			if ev != nil {
-				recordVoiceRoomEnter(ev.UserId, ev.RoomId, ev.StatAt)
-			}
-		default:
-			break
-		}
-	}
-	for {
-		select {
-		case ev := <-voiceRoomMicRequestTrackingQueue.C:
-			if ev != nil {
-				recordVoiceRoomMicRequest(ev.UserId, ev.StatAt)
-			}
-		default:
-			break
-		}
-	}
-	for {
-		select {
-		case ev := <-voiceRoomGiftClickTrackingQueue.C:
-			if ev != nil {
-				recordVoiceRoomGiftClick(ev.UserId, ev.StatAt)
-			}
-		default:
-			break
-		}
-	}
-	for {
-		select {
-		case ev := <-hotLiveRoomGiftClickTrackingQueue.C:
-			if ev != nil {
-				recordHotLiveRoomGiftClick(ev.UserId, ev.StatAt)
-			}
-		default:
-			break
-		}
-	}
-	for {
-		select {
-		case ev := <-chargePanelEnterTrackingQueue.C:
-			if ev != nil {
-				recordChargePanelEnter(ev.UserId, ev.StatAt)
-			}
-		default:
-			break
-		}
-	}
-	for {
-		select {
-		case ev := <-chargeClickTrackingQueue.C:
-			if ev != nil {
-				recordChargeClick(ev.UserId, ev.StatAt)
-			}
-		default:
-			break
-		}
-	}
-	for {
-		select {
-		case ev := <-chargeResultServerTrackingQueue.C:
-			if ev != nil {
-				recordChargeResultServer(ev.UserId, ev.StatAt)
-			}
+		case ev := <-q.C:
+			handle(ev)
 		default:
 			return
 		}
 	}
+}
+
+func drainTrackingQueue() {
+	drainTrackingTQueue(trackingQueue, func(ev *gameevent.ShowcaseLiveRoomJoinTrackingEventData) {
+		recordShowcaseLiveRoomJoin(ev.UserId, ev.RoomId, ev.StatAt)
+	})
+	drainTrackingTQueue(liveFirstFrameRenderTrackingQueue, func(ev *gameevent.LiveFirstFrameRenderedTrackingEventData) {
+		recordLiveFirstFrameRendered(ev.UserId, ev.RoomId, ev.StatAt)
+		recordGameLiveWatchStream(ev.UserId, ev.RoomId, ev.StatAt)
+	})
+	drainTrackingTQueue(showcaseLeaveTrackingQueue, func(ev *gameevent.ShowcaseLiveRoomLeaveTrackingEventData) {
+		recordShowcaseLiveRoomLeave(ev.UserId, ev.RoomId, ev.StatAt)
+	})
+	drainTrackingTQueue(call1v1InitiateTrackingQueue, func(ev *gameevent.Call1v1InitiateTrackingEventData) {
+		recordCall1v1Initiate(ev.CallerId, ev.AnchorId, ev.StatAt)
+	})
+	drainTrackingTQueue(call1v1RoomTrackingQueue, func(ev *gameevent.Call1v1RoomTrackingEventData) {
+		recordCall1v1Room(ev.CallerId, ev.AnchorId, ev.StatAt)
+	})
+	drainTrackingTQueue(call1v1ConnectSuccessTrackingQueue, func(ev *gameevent.Call1v1ConnectSuccessTrackingEventData) {
+		recordCall1v1ConnectSuccess(ev.Source, ev.CallType, ev.CallerId, ev.ReceiverId, ev.StatAt)
+	})
+	drainTrackingTQueue(miniGameRoundStartTrackingQueue, func(ev *gameevent.MiniGameRoundStartTrackingEventData) {
+		recordMiniGameRoundStart(ev.UserId, ev.StatAt)
+	})
+	drainTrackingTQueue(miniGameRoundResultTrackingQueue, func(ev *gameevent.MiniGameRoundResultTrackingEventData) {
+		recordMiniGameRoundResult(ev.UserId, ev.StatAt)
+	})
+	drainTrackingTQueue(miniGameExposureTrackingQueue, func(ev *gameevent.MiniGameExposureTrackingEventData) {
+		recordMiniGameExposure(ev.UserId, ev.StatAt)
+	})
+	drainTrackingTQueue(gameLiveRoomJoinTrackingQueue, func(ev *gameevent.GameLiveRoomJoinTrackingEventData) {
+		recordGameLiveRoomJoin(ev.UserId, ev.RoomId, ev.StatAt)
+	})
+	drainTrackingTQueue(miniGameWebViewLoadTrackingQueue, func(ev *gameevent.MiniGameWebViewLoadTrackingEventData) {
+		recordMiniGameWebViewLoad(ev.UserId, ev.StatAt)
+	})
+	drainTrackingTQueue(shortVideoPlayStartTrackingQueue, func(ev *gameevent.ShortVideoPlayStartTrackingEventData) {
+		recordShortVideoPlayStart(ev.UserId, ev.StatAt)
+	})
+	drainTrackingTQueue(shortVideoPaywallClickTrackingQueue, func(ev *gameevent.ShortVideoPaywallClickTrackingEventData) {
+		recordShortVideoPaywallClick(ev.UserId, ev.StatAt)
+	})
+	drainTrackingTQueue(shortVideoPaySuccessTrackingQueue, func(ev *gameevent.ShortVideoPaySuccessTrackingEventData) {
+		recordShortVideoPaySuccess(ev.UserId, ev.StatAt)
+	})
+	drainTrackingTQueue(shortVideoWatchEndTrackingQueue, func(ev *gameevent.ShortVideoWatchEndTrackingEventData) {
+		recordShortVideoWatchEnd(ev.UserId, ev.StatAt)
+	})
+	drainTrackingTQueue(voiceRoomEnterTrackingQueue, func(ev *gameevent.VoiceRoomEnterTrackingEventData) {
+		recordVoiceRoomEnter(ev.UserId, ev.RoomId, ev.StatAt)
+	})
+	drainTrackingTQueue(voiceRoomMicRequestTrackingQueue, func(ev *gameevent.VoiceRoomMicRequestTrackingEventData) {
+		recordVoiceRoomMicRequest(ev.UserId, ev.StatAt)
+	})
+	drainTrackingTQueue(voiceRoomGiftClickTrackingQueue, func(ev *gameevent.VoiceRoomGiftClickTrackingEventData) {
+		recordVoiceRoomGiftClick(ev.UserId, ev.StatAt)
+	})
+	drainTrackingTQueue(hotLiveRoomGiftClickTrackingQueue, func(ev *gameevent.HotLiveRoomGiftClickTrackingEventData) {
+		recordHotLiveRoomGiftClick(ev.UserId, ev.StatAt)
+	})
+	drainTrackingTQueue(chargePanelEnterTrackingQueue, func(ev *gameevent.ChargePanelEnterTrackingEventData) {
+		recordChargePanelEnter(ev.UserId, ev.StatAt)
+	})
+	drainTrackingTQueue(chargeClickTrackingQueue, func(ev *gameevent.ChargeClickTrackingEventData) {
+		recordChargeClick(ev.UserId, ev.StatAt)
+	})
+	drainTrackingTQueue(chargeResultServerTrackingQueue, func(ev *gameevent.ChargeResultServerTrackingEventData) {
+		recordChargeResultServer(ev.UserId, ev.StatAt)
+	})
 }

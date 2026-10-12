@@ -3,6 +3,7 @@ package hotrestart
 import (
 	"context"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/gogf/gf/v2/os/gctx"
@@ -13,10 +14,11 @@ import (
 )
 
 var (
-	statFlushMu    sync.Mutex
-	statDrainFn    func()
-	statIdleFn     func() bool
-	phase1IdlePoll = 50 * time.Millisecond
+	statFlushMu     sync.Mutex
+	statDrainFn     func()
+	statIdleFn      func() bool
+	phase1IdlePoll  = 50 * time.Millisecond
+	phase1FlushDone atomic.Bool
 )
 
 // RegisterStatQueueFlush 由 module/stat 注册:热重启刷盘时先排空统计队列再落 syndb.
@@ -48,9 +50,30 @@ func statQueueIdle() bool {
 
 // startPhase1FlushBackground 第一阶段后台刷盘,不阻塞热重启主流程.
 func startPhase1FlushBackground(_ context.Context) {
+	phase1FlushDone.Store(false)
 	xrpool.AddWithRecover(gctx.New(), func(ctx context.Context) {
 		flushPhase1UntilIdle(ctx)
 	})
+}
+
+func markPhase1FlushDone() {
+	phase1FlushDone.Store(true)
+}
+
+func waitHotRestartPhase1(ctx context.Context, maxWait time.Duration) {
+	const minWait = 2 * time.Second
+	const poll = 100 * time.Millisecond
+	deadline := time.Now().Add(maxWait)
+	time.Sleep(minWait)
+	for time.Now().Before(deadline) {
+		if phase1FlushDone.Load() {
+			xrlog.DetailLog.Info(ctx, "热重启第一阶段刷盘已结束,进入 RestartAllServer")
+			xrlog.DetailLog.Info(ctx, "hot_restart phase1 ready")
+			return
+		}
+		time.Sleep(poll)
+	}
+	xrlog.DetailLog.Warningf(ctx, "热重启第一阶段等待刷盘超时(%ds),仍继续 RestartAllServer", int(maxWait.Seconds()))
 }
 
 // flushPhase1UntilIdle 先排空 stat 队列再刷 syndb,循环直到两者皆空.
@@ -64,9 +87,12 @@ func flushPhase1UntilIdle(ctx context.Context) {
 			drainStatQueue()
 			if syndb.FlushShutdownOnce() == 0 && syndb.AllCachesIdle() && statQueueIdle() {
 				xrlog.DetailLog.Info(ctx, "热重启第一阶段刷盘完成(含stat队列)")
+				xrlog.DetailLog.Info(ctx, "hot_restart phase1 flush idle")
+				markPhase1FlushDone()
 				return
 			}
 		}
+		time.Sleep(phase1IdlePoll)
 	}
 }
 

@@ -29,6 +29,14 @@
 - PuTTY 部署脚本使用测试服密钥 `D:\tools\ppk\live-test.ppk`；仅运行既有 `plink.exe` / `pscp.exe` 脚本时使用该 PPK。
 - 只读日志查询无需再次询问；部署、重启、删除和数据库写操作仍按 `server-safety.mdc` 执行。
 
+## 热重启 / restart.bat（2026-10-12）
+
+- **Go**：阶段一刷盘完成可提前 `RestartAllServer`（`waitHotRestartPhase1`）；成功/失败写 ASCII 日志 `hot_restart RestartAllServer ok|failed`，便于脚本 grep。
+- **restart.bat**：子程序放在 `:xr_restart_main` 之前（避免 `goto wait_hot_loop` 后 `call :label` 失败）；热重启等待 = `flush + HOT_FORK_GRACE(默认90s)`；`detail.log` 出现 `hot_restart RestartAllServer ok` 且 PID 变化即可成功（不必双进程常驻）；远程探测必须用 `echo 'XR_HR_SIG|yes'`，**禁止** `echo XR_HR_SIG|yes`（会管道到 `yes` 命令死循环）；冷启 fallback 时若已有双进程只 SIGTERM 旧 PID；提审/正式 `config.bat` 需 `SSH_HOST_KEY`。
+- **deploy.bat**：打包目录用 `temp_deploy_%RANDOM%` 避免 file-lock 时误打旧 `config.yaml`（曾把正式配置打到提审服）。
+- **提审服 1GB**：CPU 长期 100%、syndb 仅 `force_wait` 时，fork 可能极慢或失败，脚本会等满再冷启；正式服资源充足时以热重启为主。
+- **2026-10-12 热重启卡死**：`tracking.drainTrackingQueue` 空队列时 `default:break` 只跳出 `select` 导致忙等，`PrepareRestart` 同步调用后阶段一永不结束；已改为 `drainTrackingTQueue` 与 stat 一致。
+
 ## 审核服 MariaDB（2026-08-28）
 
 - **机器**：1 vCPU / ~957MiB RAM / 30G 盘；已加 **512MiB swap**（`vm.swappiness=10`）

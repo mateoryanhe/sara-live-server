@@ -72,14 +72,27 @@ echo Step 2: Prepare deployment package
 echo ================================
 set DEPLOY_PACKAGE=%LOCAL_BUILD_PATH%\deploy_package.zip
 
-REM Create temporary directory
-set TEMP_DIR=%LOCAL_BUILD_PATH%\temp_deploy
-if exist "%TEMP_DIR%" rmdir /s /q "%TEMP_DIR%"
+REM Create temporary directory (unique name avoids stale prod config when temp_deploy is file-locked)
+set TEMP_DIR=%LOCAL_BUILD_PATH%\temp_deploy_%RANDOM%_%TIME:~6,2%%TIME:~3,2%%TIME:~0,2%
 mkdir "%TEMP_DIR%"
+if not exist "%TEMP_DIR%" (
+    echo Error: Failed to create temp dir %TEMP_DIR%
+    exit /b 1
+)
 
 REM Copy executable and configuration files to temporary directory
-copy "%LOCAL_BUILD_PATH%\%APP_NAME%" "%TEMP_DIR%\%APP_NAME%" >nul
-if exist "%LOCAL_CONFIG_PATH%" copy "%LOCAL_CONFIG_PATH%" "%TEMP_DIR%\config.yaml" >nul
+copy /y "%LOCAL_BUILD_PATH%\%APP_NAME%" "%TEMP_DIR%\%APP_NAME%" >nul
+if not exist "%LOCAL_CONFIG_PATH%" (
+    echo Error: Missing config: %LOCAL_CONFIG_PATH%
+    rmdir /s /q "%TEMP_DIR%"
+    exit /b 1
+)
+copy /y "%LOCAL_CONFIG_PATH%" "%TEMP_DIR%\config.yaml" >nul
+if not exist "%TEMP_DIR%\config.yaml" (
+    echo Error: config.yaml not copied into deployment package
+    rmdir /s /q "%TEMP_DIR%"
+    exit /b 1
+)
 
 REM Package deployment files
 echo Creating deployment package...
