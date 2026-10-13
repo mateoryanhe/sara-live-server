@@ -10,6 +10,8 @@ type PreloadCfgItem struct {
 	ID                              string  `json:"id"`
 	RecentLoginLimit                int     `json:"recentLoginLimit"`
 	HotRestartAuth                  string  `json:"hotRestartAuth"`
+	HotRestartFlushTimeout          int     `json:"hotRestartFlushTimeout"`
+	HotRestartExitTimeout           int     `json:"hotRestartExitTimeout"`
 	MemoryLimitM                    int     `json:"memoryLimitM"`
 	IpGeoDbPath                     string  `json:"ipGeoDbPath"`
 	InitGold                        float64 `json:"initGold"`
@@ -28,6 +30,8 @@ type SavePreloadCfgReq struct {
 	ID                              uint64  `json:"id" dc:"配置ID,新建传0"`
 	RecentLoginLimit                int     `json:"recentLoginLimit" v:"required|min:1|max:10000#预热数量不能为空|预热数量需大于0|预热数量不能超过10000" dc:"最近登录用户预热数量"`
 	HotRestartAuth                  string  `json:"hotRestartAuth" v:"required|length:8,128#热重启密钥不能为空|热重启密钥长度需在8-128之间" dc:"热重启接口密钥"`
+	HotRestartFlushTimeout          int     `json:"hotRestartFlushTimeout" v:"required|min:1|max:3600#第一阶段时间不能为空|第一阶段时间最小1秒|第一阶段时间最大3600秒" dc:"热重启第一阶段固定等待秒"`
+	HotRestartExitTimeout           int     `json:"hotRestartExitTimeout" v:"required|min:1|max:3600#第二阶段时间不能为空|第二阶段时间最小1秒|第二阶段时间最大3600秒" dc:"热重启第二阶段固定等待秒"`
 	MemoryLimitM                    int     `json:"memoryLimitM" v:"required|min:64|max:32768#内存上限不能为空|内存上限最小64MB|内存上限最大32768MB" dc:"Go堆内存软上限MB"`
 	IpGeoDbPath                     string  `json:"ipGeoDbPath" v:"required|length:1,512#IP库路径不能为空|IP库路径过长" dc:"GeoLite2-Country.mmdb绝对路径"`
 	InitGold                        float64 `json:"initGold" v:"min:0#初始化金币不能为负数" dc:"新用户初始金币"`

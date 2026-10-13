@@ -65,8 +65,8 @@ func sendEmailVerifyCodeOnce(ctx context.Context, toEmail, code, lang string) er
 		return errercode.CreateCode(errercode.SysError)
 	}
 
-	subject, body := buildEmailVerifyContent(lang, code)
-	if err := sendEmailViaSMTP(ctx, ec, toEmail, subject, body); err != nil {
+	subject, plainBody, htmlBody := buildEmailVerifyContent(lang, code)
+	if err := sendEmailViaSMTP(ctx, ec, toEmail, subject, plainBody, htmlBody); err != nil {
 		xrlog.DetailLog.Errorf(ctx, "email verify smtp send err to=%s err=%v", toEmail, err)
 		return errercode.CreateCode(errercode.SysError)
 	}

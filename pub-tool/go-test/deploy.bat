@@ -188,19 +188,13 @@ goto hot_restart_done
 :do_hot_restart
 echo Process found ^(PID: !OLD_PID!^), triggering GoFrame hot restart...
 
-REM Read hot restart timeouts from LOCAL_CONFIG_PATH (config.bat -> config/dev/config.yaml)
-set HOT_RESTART_FLUSH_TIMEOUT=1
-set HOT_RESTART_EXIT_TIMEOUT=10
-for /f "usebackq tokens=2 delims=:" %%a in (`findstr /i /c:"hotRestartFlushTimeout" "%LOCAL_CONFIG_PATH%"`) do (
-  for /f "tokens=1" %%b in ("%%a") do set HOT_RESTART_FLUSH_TIMEOUT=%%b
-)
-for /f "usebackq tokens=2 delims=:" %%a in (`findstr /i /c:"hotRestartExitTimeout" "%LOCAL_CONFIG_PATH%"`) do (
-  for /f "tokens=1" %%b in ("%%a") do set HOT_RESTART_EXIT_TIMEOUT=%%b
-)
+REM 热重启一/二阶段秒数与 CMS preload_cfgs 一致,默认各 60(脚本等待上限用)
+set HOT_RESTART_FLUSH_TIMEOUT=60
+set HOT_RESTART_EXIT_TIMEOUT=60
 REM 含等子进程就绪(最长约180s)+阶段二; 勿用 flush+exit+3
 set /a HOT_CHILD_READY_MAX=180
 set /a HOT_RESTART_WAIT_MAX=HOT_RESTART_FLUSH_TIMEOUT+HOT_RESTART_EXIT_TIMEOUT+HOT_CHILD_READY_MAX+30
-echo Hot restart config from %LOCAL_CONFIG_PATH%: flush=!HOT_RESTART_FLUSH_TIMEOUT!s exit=!HOT_RESTART_EXIT_TIMEOUT!s waitMax=!HOT_RESTART_WAIT_MAX!s
+echo Hot restart wait budget (CMS defaults 60+60): flush=!HOT_RESTART_FLUSH_TIMEOUT!s exit=!HOT_RESTART_EXIT_TIMEOUT!s waitMax=!HOT_RESTART_WAIT_MAX!s
 
 set "HR_TMP=%TEMP%\xr_deploy_hr_%RANDOM%.txt"
 del "!HR_TMP!" 2>nul

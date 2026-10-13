@@ -10,7 +10,7 @@ REM Local path configuration
 set LOCAL_PROJECT_PATH=D:\company-code\sara-live-server
 set LOCAL_GO_SRC=%LOCAL_PROJECT_PATH%\go-src
 set LOCAL_CONFIG_PATH=%LOCAL_PROJECT_PATH%\config\dev\config.yaml
-REM deploy.bat 从此 yaml 读取 hotRestartFlushTimeout / hotRestartExitTimeout
+REM 热重启一/二阶段秒数在 CMS preload_cfgs; deploy/restart 脚本等待默认各 60
 set LOCAL_BUILD_PATH=%LOCAL_PROJECT_PATH%\go-build
 
 REM SSH key configuration

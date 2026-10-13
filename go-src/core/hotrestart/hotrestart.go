@@ -11,8 +11,6 @@ import (
 
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gctx"
-	"xr-game-server/constants/common"
-	"xr-game-server/core/cfg"
 	"xr-game-server/core/event"
 	"xr-game-server/core/shutdown"
 	"xr-game-server/core/syndb"
@@ -32,7 +30,9 @@ var (
 	hotRestartTriggerAt    atomic.Int64 // 毫秒时间戳,用于回收卡死的 in-progress 标志
 	oldProcessAfterRestart atomic.Bool
 	enterRestartPhaseFunc  func()
-	hotRestartAuthProvider func() string
+	hotRestartAuthProvider       func() string
+	hotRestartPhase1WaitProvider func() int
+	hotRestartExitWaitProvider   func() int
 )
 
 const staleHotRestartTriggerAfter = 2 * time.Minute
@@ -40,6 +40,12 @@ const staleHotRestartTriggerAfter = 2 * time.Minute
 // RegisterHotRestartAuthProvider 由 preload 注册,避免包循环依赖.
 func RegisterHotRestartAuthProvider(fn func() string) {
 	hotRestartAuthProvider = fn
+}
+
+// RegisterHotRestartTimeoutProviders 由 preload 注册,避免包循环依赖.
+func RegisterHotRestartTimeoutProviders(phase1WaitSec, exitWaitSec func() int) {
+	hotRestartPhase1WaitProvider = phase1WaitSec
+	hotRestartExitWaitProvider = exitWaitSec
 }
 
 // RegisterEnterRestartPhase 由 httpserver 注册,避免包循环依赖.
@@ -165,17 +171,19 @@ func hotRestartAuth() string {
 }
 
 func hotRestartPhase1WaitSec() int {
-	serverCfg := cfg.GetServerCfg()
-	if serverCfg == nil || serverCfg.HotRestartFlushTimeout <= common.Zero {
-		return defaultHotRestartPhase1Wait
+	if hotRestartPhase1WaitProvider != nil {
+		if sec := hotRestartPhase1WaitProvider(); sec > 0 {
+			return sec
+		}
 	}
-	return serverCfg.HotRestartFlushTimeout
+	return defaultHotRestartPhase1Wait
 }
 
 func hotRestartExitWaitSec() int {
-	serverCfg := cfg.GetServerCfg()
-	if serverCfg == nil || serverCfg.HotRestartExitTimeout <= common.Zero {
-		return defaultHotRestartExitWait
+	if hotRestartExitWaitProvider != nil {
+		if sec := hotRestartExitWaitProvider(); sec > 0 {
+			return sec
+		}
 	}
-	return serverCfg.HotRestartExitTimeout
+	return defaultHotRestartExitWait
 }

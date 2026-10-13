@@ -117,16 +117,9 @@ if errorlevel 1 (
     exit /b 1
 )
 
+REM 热重启一/二阶段秒数见 CMS preload_cfgs,脚本等待默认各 60
 set HOT_RESTART_FLUSH_TIMEOUT=60
 set HOT_RESTART_EXIT_TIMEOUT=60
-if exist "%LOCAL_CONFIG_PATH%" (
-    for /f "usebackq tokens=2 delims=:" %%a in (`findstr /i /c:"hotRestartFlushTimeout" "%LOCAL_CONFIG_PATH%"`) do (
-        for /f "tokens=1" %%b in ("%%a") do set HOT_RESTART_FLUSH_TIMEOUT=%%b
-    )
-    for /f "usebackq tokens=2 delims=:" %%a in (`findstr /i /c:"hotRestartExitTimeout" "%LOCAL_CONFIG_PATH%"`) do (
-        for /f "tokens=1" %%b in ("%%a") do set HOT_RESTART_EXIT_TIMEOUT=%%b
-    )
-)
 if not defined HOT_FORK_GRACE set HOT_FORK_GRACE=90
 set /a HOT_PID_WAIT_MAX=HOT_RESTART_FLUSH_TIMEOUT+HOT_FORK_GRACE
 set /a HOT_TICK=0

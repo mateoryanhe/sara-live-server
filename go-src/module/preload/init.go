@@ -11,6 +11,7 @@ import (
 
 func Init() {
 	hotrestart.RegisterHotRestartAuthProvider(cfgdao.GetHotRestartAuth)
+	hotrestart.RegisterHotRestartTimeoutProviders(cfgdao.GetHotRestartFlushTimeout, cfgdao.GetHotRestartExitTimeout)
 	cfg.ApplyMemoryLimit(cfgdao.GetMemoryLimitM())
 	initRegisterInitCurrency()
 	preloadRecentLoginUsers(cfgdao.GetRecentLoginPreloadLimit())

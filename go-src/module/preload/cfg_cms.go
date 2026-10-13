@@ -26,6 +26,8 @@ func SavePreloadCfg(_ context.Context, req *preloadcfgdto.SavePreloadCfgReq) (*p
 	row := &entity.PreloadCfg{
 		RecentLoginLimit:                req.RecentLoginLimit,
 		HotRestartAuth:                  strings.TrimSpace(req.HotRestartAuth),
+		HotRestartFlushTimeout:          req.HotRestartFlushTimeout,
+		HotRestartExitTimeout:           req.HotRestartExitTimeout,
 		MemoryLimitM:                    req.MemoryLimitM,
 		IpGeoDbPath:                     strings.TrimSpace(req.IpGeoDbPath),
 		InitGold:                        req.InitGold,
@@ -60,6 +62,8 @@ func defaultPreloadCfgItem() *preloadcfgdto.PreloadCfgItem {
 	return &preloadcfgdto.PreloadCfgItem{
 		RecentLoginLimit:                cfgdao.DefaultRecentLoginPreloadLimit,
 		HotRestartAuth:                  cfgdao.DefaultHotRestartAuth,
+		HotRestartFlushTimeout:          cfgdao.DefaultHotRestartFlushTimeout,
+		HotRestartExitTimeout:           cfgdao.DefaultHotRestartExitTimeout,
 		MemoryLimitM:                    cfgdao.DefaultMemoryLimitM,
 		IpGeoDbPath:                     cfgdao.DefaultIpGeoDbPath,
 		InitGold:                        cfgdao.DefaultInitGold,
@@ -84,6 +88,14 @@ func toPreloadCfgItem(cfg *entity.PreloadCfg) *preloadcfgdto.PreloadCfgItem {
 	if auth == "" {
 		auth = cfgdao.DefaultHotRestartAuth
 	}
+	flushSec := cfg.HotRestartFlushTimeout
+	if flushSec <= 0 {
+		flushSec = cfgdao.DefaultHotRestartFlushTimeout
+	}
+	exitSec := cfg.HotRestartExitTimeout
+	if exitSec <= 0 {
+		exitSec = cfgdao.DefaultHotRestartExitTimeout
+	}
 	ipGeoPath := strings.TrimSpace(cfg.IpGeoDbPath)
 	if ipGeoPath == "" {
 		ipGeoPath = cfgdao.DefaultIpGeoDbPath
@@ -92,6 +104,8 @@ func toPreloadCfgItem(cfg *entity.PreloadCfg) *preloadcfgdto.PreloadCfgItem {
 		ID:                              strconv.FormatUint(cfg.ID, 10),
 		RecentLoginLimit:                limit,
 		HotRestartAuth:                  auth,
+		HotRestartFlushTimeout:          flushSec,
+		HotRestartExitTimeout:           exitSec,
 		MemoryLimitM:                    memoryM,
 		IpGeoDbPath:                     ipGeoPath,
 		InitGold:                        cfg.InitGold,

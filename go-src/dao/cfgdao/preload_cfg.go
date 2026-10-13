@@ -10,6 +10,8 @@ import (
 const (
 	DefaultRecentLoginPreloadLimit         = 100
 	DefaultHotRestartAuth                  = "nGH66S4TjBjQqCKyWJAM"
+	DefaultHotRestartFlushTimeout          = 60
+	DefaultHotRestartExitTimeout           = 60
 	DefaultMemoryLimitM                    = 300
 	DefaultIpGeoDbPath                     = "/home/ec2-user/xgameserver/GeoLite2-Country.mmdb"
 	DefaultInitGold                        = 0
@@ -53,6 +55,22 @@ func GetHotRestartAuth() string {
 		}
 	}
 	return DefaultHotRestartAuth
+}
+
+func GetHotRestartFlushTimeout() int {
+	cfg := LoadPreloadCfg()
+	if cfg != nil && cfg.HotRestartFlushTimeout > 0 {
+		return cfg.HotRestartFlushTimeout
+	}
+	return DefaultHotRestartFlushTimeout
+}
+
+func GetHotRestartExitTimeout() int {
+	cfg := LoadPreloadCfg()
+	if cfg != nil && cfg.HotRestartExitTimeout > 0 {
+		return cfg.HotRestartExitTimeout
+	}
+	return DefaultHotRestartExitTimeout
 }
 
 func GetMemoryLimitM() int {

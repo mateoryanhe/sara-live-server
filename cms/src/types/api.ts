@@ -979,6 +979,8 @@ export interface PreloadCfg {
     initGold?: number
     initDiamond?: number
     hotRestartAuth?: string
+    hotRestartFlushTimeout?: number
+    hotRestartExitTimeout?: number
     memoryLimitM?: number
     ipGeoDbPath?: string
     resourceMetricCollectionEnabled: boolean
@@ -996,6 +998,8 @@ export interface SavePreloadCfgReq {
     initGold: number
     initDiamond: number
     hotRestartAuth: string
+    hotRestartFlushTimeout: number
+    hotRestartExitTimeout: number
     memoryLimitM: number
     ipGeoDbPath: string
     resourceMetricCollectionEnabled: boolean

@@ -3,7 +3,9 @@ package auth
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
 	"crypto/tls"
+	"encoding/hex"
 	"fmt"
 	"mime"
 	"net"
@@ -31,27 +33,51 @@ func cfEmailSMTPSettings(cfg *sysentity.CfEmailCfg) (host string, port int, user
 	return host, port, username, password, from, ok
 }
 
-func sendEmailViaSMTP(ctx context.Context, cfg *sysentity.CfEmailCfg, toEmail, subject, body string) error {
+func sendEmailViaSMTP(ctx context.Context, cfg *sysentity.CfEmailCfg, toEmail, subject, plainBody, htmlBody string) error {
 	host, port, username, password, from, ok := cfEmailSMTPSettings(cfg)
 	if !ok {
 		return fmt.Errorf("smtp cfg incomplete")
 	}
 	addr := net.JoinHostPort(host, strconv.Itoa(port))
 	auth := smtp.PlainAuth("", username, password, host)
-	msg := formatPlainTextEmail(from, toEmail, subject, body)
+	msg := formatVerificationEmail(from, toEmail, subject, plainBody, htmlBody)
 	return sendMailStartTLS(ctx, addr, host, auth, from, []string{toEmail}, msg)
 }
 
-func formatPlainTextEmail(from, to, subject, body string) []byte {
+func formatVerificationEmail(from, to, subject, plainBody, htmlBody string) []byte {
 	var buf bytes.Buffer
 	buf.WriteString("From: " + from + "\r\n")
 	buf.WriteString("To: " + to + "\r\n")
 	buf.WriteString("Subject: " + mime.QEncoding.Encode("utf-8", subject) + "\r\n")
 	buf.WriteString("MIME-Version: 1.0\r\n")
-	buf.WriteString("Content-Type: text/plain; charset=UTF-8\r\n")
+	if strings.TrimSpace(htmlBody) == "" {
+		buf.WriteString("Content-Type: text/plain; charset=UTF-8\r\n")
+		buf.WriteString("Content-Transfer-Encoding: 8bit\r\n\r\n")
+		buf.WriteString(plainBody)
+		return buf.Bytes()
+	}
+	boundary := randomMIMEBoundary()
+	buf.WriteString("Content-Type: multipart/alternative; boundary=" + boundary + "\r\n\r\n")
+	writeMIMEPart(&buf, boundary, "text/plain; charset=UTF-8", plainBody)
+	writeMIMEPart(&buf, boundary, "text/html; charset=UTF-8", htmlBody)
+	buf.WriteString("--" + boundary + "--\r\n")
+	return buf.Bytes()
+}
+
+func randomMIMEBoundary() string {
+	var b [12]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		return "xr-email-" + strconv.FormatInt(time.Now().UnixNano(), 10)
+	}
+	return "xr-email-" + hex.EncodeToString(b[:])
+}
+
+func writeMIMEPart(buf *bytes.Buffer, boundary, contentType, body string) {
+	buf.WriteString("--" + boundary + "\r\n")
+	buf.WriteString("Content-Type: " + contentType + "\r\n")
 	buf.WriteString("Content-Transfer-Encoding: 8bit\r\n\r\n")
 	buf.WriteString(body)
-	return buf.Bytes()
+	buf.WriteString("\r\n")
 }
 
 func sendMailStartTLS(ctx context.Context, addr, serverName string, auth smtp.Auth, from string, to []string, msg []byte) error {
