@@ -29,10 +29,13 @@ const (
 
 var (
 	hotRestartTriggered    atomic.Bool
+	hotRestartTriggerAt    atomic.Int64 // 毫秒时间戳,用于回收卡死的 in-progress 标志
 	oldProcessAfterRestart atomic.Bool
 	enterRestartPhaseFunc  func()
 	hotRestartAuthProvider func() string
 )
+
+const staleHotRestartTriggerAfter = 2 * time.Minute
 
 // RegisterHotRestartAuthProvider 由 preload 注册,避免包循环依赖.
 func RegisterHotRestartAuthProvider(fn func() string) {
@@ -44,8 +47,27 @@ func RegisterEnterRestartPhase(fn func()) {
 	enterRestartPhaseFunc = fn
 }
 
+// clearStaleHotRestartTrigger 回收长时间未进入 fork 的 in-progress 标志(如 xrpool 未调度到 runHotRestart).
+func clearStaleHotRestartTrigger(ctx context.Context) {
+	if !hotRestartTriggered.Load() || oldProcessAfterRestart.Load() {
+		return
+	}
+	at := hotRestartTriggerAt.Load()
+	if at <= 0 {
+		return
+	}
+	if time.Since(time.UnixMilli(at)) <= staleHotRestartTriggerAfter {
+		return
+	}
+	hotRestartTriggered.Store(false)
+	hotRestartTriggerAt.Store(0)
+	xrlog.DetailLog.Warning(ctx, "热重启 in-progress 标志超时,已自动回收")
+	xrlog.DetailLog.Warning(ctx, "hot_restart stale trigger cleared")
+}
+
 // TryTriggerHotRestart 校验密钥后异步触发热重启.
 func TryTriggerHotRestart(auth string) (accepted bool, reason string) {
+	ctx := gctx.New()
 	expected := hotRestartAuth()
 	if expected == "" {
 		return false, "hot restart disabled"
@@ -53,9 +75,11 @@ func TryTriggerHotRestart(auth string) (accepted bool, reason string) {
 	if subtle.ConstantTimeCompare([]byte(auth), []byte(expected)) != 1 {
 		return false, "unauthorized"
 	}
+	clearStaleHotRestartTrigger(ctx)
 	if !hotRestartTriggered.CompareAndSwap(false, true) {
 		return false, "already in progress"
 	}
+	hotRestartTriggerAt.Store(time.Now().UnixMilli())
 	xrpool.AddWithRecover(gctx.New(), func(_ context.Context) {
 		runHotRestart()
 	})
@@ -67,6 +91,7 @@ func runHotRestart() {
 	defer func() {
 		if !oldProcessAfterRestart.Load() {
 			hotRestartTriggered.Store(false)
+			hotRestartTriggerAt.Store(0)
 		}
 	}()
 
@@ -83,6 +108,7 @@ func runHotRestart() {
 	logPhase1End(ctx)
 
 	shutdown.EnableSyncLoggers()
+	ensureChildReadyListener()
 
 	if err := ghttp.RestartAllServer(ctx, ""); err != nil {
 		xrlog.DetailLog.Errorf(ctx, "热更新---RestartAllServer失败,err=%v", err)
@@ -93,6 +119,7 @@ func runHotRestart() {
 	xrlog.DetailLog.Info(ctx, "hot_restart RestartAllServer ok")
 
 	oldProcessAfterRestart.Store(true)
+	waitChildStartupReady(ctx)
 	if enterRestartPhaseFunc != nil {
 		enterRestartPhaseFunc()
 	}
@@ -114,7 +141,7 @@ func tryExitOldProcess() {
 
 		shutdown.EnableSyncLoggers()
 		logPhase2WaitEndFlush(ctx)
-		flushPhase2Once(ctx)
+		stopOldProcessContinuousFlush(ctx)
 		if syndb.AllCachesIdle() {
 			logPhase2QueueEmpty(ctx)
 		}

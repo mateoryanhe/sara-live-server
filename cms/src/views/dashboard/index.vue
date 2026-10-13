@@ -176,6 +176,7 @@ const DEFAULT_AUTO_REFRESH_MS = 60_000
 
 const AUTO_REFRESH_INTERVALS = [
   {value: 0, labelKey: 'autoRefreshOff'},
+  {value: 1_000, labelKey: 'autoRefresh1s'},
   {value: 10_000, labelKey: 'autoRefresh10s'},
   {value: 30_000, labelKey: 'autoRefresh30s'},
   {value: 60_000, labelKey: 'autoRefresh60s'},

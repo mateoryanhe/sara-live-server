@@ -197,15 +197,42 @@ for /f "usebackq tokens=2 delims=:" %%a in (`findstr /i /c:"hotRestartFlushTimeo
 for /f "usebackq tokens=2 delims=:" %%a in (`findstr /i /c:"hotRestartExitTimeout" "%LOCAL_CONFIG_PATH%"`) do (
   for /f "tokens=1" %%b in ("%%a") do set HOT_RESTART_EXIT_TIMEOUT=%%b
 )
-set /a HOT_RESTART_WAIT_MAX=HOT_RESTART_FLUSH_TIMEOUT+HOT_RESTART_EXIT_TIMEOUT+3
+REM 含等子进程就绪(最长约180s)+阶段二; 勿用 flush+exit+3
+set /a HOT_CHILD_READY_MAX=180
+set /a HOT_RESTART_WAIT_MAX=HOT_RESTART_FLUSH_TIMEOUT+HOT_RESTART_EXIT_TIMEOUT+HOT_CHILD_READY_MAX+30
 echo Hot restart config from %LOCAL_CONFIG_PATH%: flush=!HOT_RESTART_FLUSH_TIMEOUT!s exit=!HOT_RESTART_EXIT_TIMEOUT!s waitMax=!HOT_RESTART_WAIT_MAX!s
 
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "curl -sf -k 'https://127.0.0.1/internal/hotRestart?auth=%HOT_RESTART_AUTH%' || exit 1"
-if !errorlevel! neq 0 (
-    echo Error: Hot restart API call failed
+set "HR_TMP=%TEMP%\xr_deploy_hr_%RANDOM%.txt"
+del "!HR_TMP!" 2>nul
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "http=$(curl -sk -o /tmp/xr-hr.json -w '%%{http_code}' 'https://127.0.0.1/internal/hotRestart?auth=%HOT_RESTART_AUTH%'); body=$(cat /tmp/xr-hr.json 2>/dev/null | tr -d '\r\n'); printf 'XR_HOT_RESTART|%%s|%%s\n' \"$http\" \"$body\"" > "!HR_TMP!" 2>&1
+set HOT_RESTART_HTTP=
+set HOT_RESTART_BODY=
+for /f "usebackq tokens=1,2,3 delims=|" %%a in (`findstr /b "XR_HOT_RESTART" "!HR_TMP!" 2^>nul`) do (
+    set HOT_RESTART_HTTP=%%b
+    set HOT_RESTART_BODY=%%c
+)
+if not defined HOT_RESTART_HTTP (
+    echo Error: Hot restart API probe failed
+    type "!HR_TMP!" 2>nul
+    del "!HR_TMP!" 2>nul
     exit /b 1
 )
-echo Hot restart triggered, waiting for new process ^(max !HOT_RESTART_WAIT_MAX!s, flush=!HOT_RESTART_FLUSH_TIMEOUT!s exit=!HOT_RESTART_EXIT_TIMEOUT!s^)...
+del "!HR_TMP!" 2>nul
+echo Hot restart API: HTTP=!HOT_RESTART_HTTP! body=!HOT_RESTART_BODY!
+set DO_HOT_WAIT=0
+if "!HOT_RESTART_HTTP!"=="200" set DO_HOT_WAIT=1
+echo !HOT_RESTART_BODY!| findstr /i "already in progress" >nul
+if not errorlevel 1 set DO_HOT_WAIT=1
+echo !HOT_RESTART_BODY!| findstr /i "unauthorized" >nul
+if not errorlevel 1 (
+    echo Error: HOT_RESTART_AUTH mismatch ^(check CMS preloadCfg hotRestartAuth^)
+    exit /b 1
+)
+if "!DO_HOT_WAIT!"=="0" (
+    echo Error: Hot restart rejected HTTP=!HOT_RESTART_HTTP!
+    exit /b 1
+)
+echo Hot restart accepted or already in progress, waiting for PID switch ^(max !HOT_RESTART_WAIT_MAX!s^)...
 set /a WAIT_LEFT=HOT_RESTART_WAIT_MAX
 :wait_hot_restart
 timeout /t 1 /nobreak >nul
@@ -221,7 +248,18 @@ if !WAIT_LEFT! leq 0 goto hot_restart_timeout
 goto wait_hot_restart
 
 :hot_restart_timeout
-echo Warning: Hot restart wait timeout, checking process state...
+echo Warning: Hot restart wait timeout, trying cold start fallback...
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "pkill -x %APP_NAME% 2>/dev/null; sleep 1; pgrep -x %APP_NAME% >/dev/null && exit 1; exit 0"
+if !errorlevel! neq 0 (
+    echo Error: Could not stop old process for cold start
+    exit /b 1
+)
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "sudo %REMOTE_DIR%/start.sh"
+if !errorlevel! neq 0 (
+    echo Error: Cold start fallback failed
+    exit /b 1
+)
+echo Cold start fallback completed.
 
 :hot_restart_done
 echo Program start/restart command completed.

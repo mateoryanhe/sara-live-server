@@ -202,22 +202,24 @@ func ApplyVoiceChatMic(ctx context.Context, req *liveroomdto.ApplyVoiceChatMicRe
 		broadcastVoiceChatMicState(room.ID)
 		pubVoiceRoomMicRequestTracking(userId, time.Now())
 		return &liveroomdto.ApplyVoiceChatMicRes{Success: true, SeatIndex: seatIndex}, nil
+	case liveentity.VoiceChatMicModeApply:
+		if voiceChatMicHasApply(room.ID, userId) {
+			return nil, errercode.CreateCode(errercode.VoiceChatMicApplyExist)
+		}
+		if liveroomdao.ActiveVoiceChatMicApplyCount(room.ID, room.LiveRecordId) >= liveentity.VoiceChatMicApplyListMax {
+			return nil, errercode.CreateCode(errercode.VoiceChatMicApplyListFull)
+		}
+		if voiceChatMicFirstEmptyAudienceSeat(room.ID, room.LiveRecordId) < 0 {
+			return nil, errercode.CreateCode(errercode.VoiceChatMicSeatFull)
+		}
+		appliedAt := time.Now()
+		liveroomdao.UpsertActiveVoiceChatMicApply(room.ID, userId, room.LiveRecordId, appliedAt)
+		pubVoiceRoomMicRequestTracking(userId, appliedAt)
+		pushVoiceChatMicApplyNotifyToAnchor(room.ID, userId, appliedAt.Unix(), liveroomdao.ActiveVoiceChatMicApplyCount(room.ID, room.LiveRecordId))
+		return &liveroomdto.ApplyVoiceChatMicRes{Success: true}, nil
+	default:
+		return nil, errercode.CreateCode(errercode.VoiceChatMicModeNotApply)
 	}
-
-	if voiceChatMicHasApply(room.ID, userId) {
-		return nil, errercode.CreateCode(errercode.VoiceChatMicApplyExist)
-	}
-	if liveroomdao.ActiveVoiceChatMicApplyCount(room.ID, room.LiveRecordId) >= liveentity.VoiceChatMicApplyListMax {
-		return nil, errercode.CreateCode(errercode.VoiceChatMicApplyListFull)
-	}
-	if voiceChatMicFirstEmptyAudienceSeat(room.ID, room.LiveRecordId) < 0 {
-		return nil, errercode.CreateCode(errercode.VoiceChatMicSeatFull)
-	}
-	appliedAt := time.Now()
-	liveroomdao.UpsertActiveVoiceChatMicApply(room.ID, userId, room.LiveRecordId, appliedAt)
-	pubVoiceRoomMicRequestTracking(userId, appliedAt)
-	pushVoiceChatMicApplyNotifyToAnchor(room.ID, userId, appliedAt.Unix(), liveroomdao.ActiveVoiceChatMicApplyCount(room.ID, room.LiveRecordId))
-	return &liveroomdto.ApplyVoiceChatMicRes{Success: true}, nil
 }
 
 // CancelVoiceChatMicApply 取消上麦申请

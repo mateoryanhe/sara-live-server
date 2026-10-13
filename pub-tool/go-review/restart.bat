@@ -132,6 +132,7 @@ set /a HOT_PID_WAIT_MAX=HOT_RESTART_FLUSH_TIMEOUT+HOT_FORK_GRACE
 set /a HOT_TICK=0
 set HOT_RESTART_FAILED=0
 set HOT_FORK_SIGNAL=0
+set HOT_DID_FORK=0
 
 call :remote_pgrep_state OLD_PID
 set USE_COLD=0
@@ -180,16 +181,19 @@ if "!HOT_RESTART_FAILED!"=="1" (
 call :remote_hot_fork_signal
 if "!HOT_FORK_SIGNAL!"=="1" if defined NEW_PID if not "!NEW_PID!"=="!OLD_PID!" (
     echo Hot fork OK: detail.log RestartAllServer ok, PID !NEW_PID! ^(was !OLD_PID!^)
+    set HOT_DID_FORK=1
     set DO_HOT_WAIT=0
     goto process_started
 )
 if "!HOT_FORK_SIGNAL!"=="1" if !HOT_PROC_COUNT! geq 2 (
     echo Hot fork OK: !HOT_PROC_COUNT! processes, newest PID !NEW_PID! ^(old !OLD_PID! exits in ~!HOT_RESTART_EXIT_TIMEOUT!s^)
+    set HOT_DID_FORK=1
     set DO_HOT_WAIT=0
     goto process_started
 )
 if defined HOT_PROC_COUNT if !HOT_PROC_COUNT! geq 2 (
     echo Hot fork OK: !HOT_PROC_COUNT! processes, newest PID !NEW_PID!
+    set HOT_DID_FORK=1
     set DO_HOT_WAIT=0
     goto process_started
 )
@@ -249,7 +253,7 @@ echo [4/4] Process PID !NEW_PID! running. Waiting for port 443...
 set /a READY_WAIT_LEFT=45
 :ready_loop
 %PLINK_SSH% "ss -tlnp 2>/dev/null | grep -q ':443' && curl -sk -o /dev/null -w '%%{http_code}' --max-time 3 'https://127.0.0.1/internal/hotRestart?auth=invalid' | grep -qE '^403$|^200$'"
-if not errorlevel 1 goto restart_success
+if not errorlevel 1 goto wait_old_process_exit
 call :sleep_seconds 1
 set /a READY_WAIT_LEFT-=1
 if !READY_WAIT_LEFT! leq 0 (
@@ -257,6 +261,29 @@ if !READY_WAIT_LEFT! leq 0 (
     goto show_error_log
 )
 goto ready_loop
+
+:wait_old_process_exit
+if not "!HOT_DID_FORK!"=="1" goto restart_success
+if not defined OLD_PID goto restart_success
+if not defined NEW_PID goto restart_success
+echo [5/5] Phase2: waiting for old PID !OLD_PID! to exit ^(max !HOT_RESTART_EXIT_TIMEOUT!s + 15s grace^)...
+set /a OLD_EXIT_WAIT_LEFT=HOT_RESTART_EXIT_TIMEOUT+15
+:old_exit_loop
+%PLINK_SSH% "kill -0 !OLD_PID! 2>/dev/null"
+if errorlevel 1 (
+    echo Old PID !OLD_PID! exited.
+    call :remote_pgrep_state NEW_PID
+    goto restart_success
+)
+call :sleep_seconds 1
+set /a OLD_EXIT_WAIT_LEFT-=1
+set /a MOD=!OLD_EXIT_WAIT_LEFT! %% 10
+if !MOD!==0 echo   ... old PID !OLD_PID! still running, !OLD_EXIT_WAIT_LEFT!s left
+if !OLD_EXIT_WAIT_LEFT! leq 0 (
+    echo WARN: Old PID !OLD_PID! still alive after phase2 wait; continuing ^(check detail.log^).
+    goto restart_success
+)
+goto old_exit_loop
 
 :restart_success
 echo.

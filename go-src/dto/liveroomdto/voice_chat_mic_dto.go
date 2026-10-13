@@ -78,7 +78,7 @@ type ApplyVoiceChatMicReq struct {
 
 type ApplyVoiceChatMicRes struct {
 	Success   bool `json:"success"`
-	SeatIndex int  `json:"seatIndex" dc:"自由上麦成功时占用的麦位序号(1~8)"`
+	SeatIndex int  `json:"seatIndex,omitempty" dc:"自由上麦成功时占用的麦位序号(1~8);申请模式不下发"`
 }
 
 // CancelVoiceChatMicApplyReq 取消上麦申请

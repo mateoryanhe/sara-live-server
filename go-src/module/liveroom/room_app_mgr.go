@@ -46,7 +46,12 @@ func voiceChatMicModeForRoom(roomId uint64) uint8 {
 	if cfg == nil || normalizeLiveRoomCategory(cfg.Category) != liveentity.LiveRoomCategoryVoiceChat {
 		return 0
 	}
-	return cfg.VoiceChatMicMode
+	mode := cfg.VoiceChatMicMode
+	if mode == 0 || !liveentity.IsValidVoiceChatMicMode(mode) {
+		// 与 applyVoiceChatMicModeToCfg 一致:未配置时默认自由上麦,避免 apply/list 对 0 语义分裂
+		return liveentity.VoiceChatMicModeFree
+	}
+	return mode
 }
 
 func applyRoomPricing(cfg *liveentity.LiveRoomCfg, ticket, billing float64) {

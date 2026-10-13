@@ -58,6 +58,7 @@ func waitHTTPServerReadyAndLogStartupEnd() {
 	}
 	startup.LogEnd(ctx)
 	event.Pub(event.HotStart, nil)
+	hotrestart.NotifyChildStartupComplete()
 }
 
 func GetAuthId(ctx context.Context) uint64 {

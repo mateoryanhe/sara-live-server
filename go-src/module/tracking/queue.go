@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/container/gqueue"
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/event"
+	"xr-game-server/core/hotrestart"
 	"xr-game-server/core/xrtimer"
 	"xr-game-server/gameevent"
 )
@@ -39,6 +40,7 @@ var (
 )
 
 func initTrackingQueue() {
+	hotrestart.RegisterTrackingQueueFlush(drainTrackingQueue, trackingQueueIdle)
 	event.Sub(event.HotStart, onTrackingHotStart)
 	event.Sub(event.PrepareRestart, onTrackingPrepareRestart)
 	event.Sub(gameevent.ShowcaseLiveRoomJoinTrackingEvent, onShowcaseLiveRoomJoinTrackingEvent)

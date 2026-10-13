@@ -406,6 +406,7 @@ func UpsertActiveVoiceChatMicApply(roomId, userId, liveRecordId uint64, appliedA
 	if row == nil || row.ID == "" {
 		row = liveentity.NewVoiceChatMicApply(roomId, userId, liveRecordId, appliedAt)
 	} else {
+		row.SetUserId(userId)
 		row.SetLiveRecordId(liveRecordId)
 		row.SetStatus(liveentity.VoiceChatMicApplyStatusActive)
 		row.SetAppliedAt(&appliedAt)
