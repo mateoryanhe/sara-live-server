@@ -65,7 +65,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('UserList') || hasMenuPermission('RechargeOrderList') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('SimulatorDeviceWhitelistManagement') || hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList')"
+            v-if="hasMenuPermission('UserList') || hasMenuPermission('RechargeOrderList') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('SimulatorDeviceWhitelistManagement') || hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList') || hasMenuPermission('UserWithdrawLogList')"
             index="/user/account">
           <template #title>
             <el-icon>
@@ -114,6 +114,12 @@
               <Money/>
             </el-icon>
             <span>{{ t('menu.DiamondCurrencyLogList') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('UserWithdrawLogList')" index="/log/user/user-withdraw-log-list">
+            <el-icon>
+              <Wallet/>
+            </el-icon>
+            <span>{{ t('menu.UserWithdrawLogList') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -701,7 +707,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('TextModerationCfgManagement')"
+              v-if="hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('UserWithdrawCfgManagement') || hasMenuPermission('TextModerationCfgManagement')"
               index="/config/group/security">
             <template #title>
               <el-icon>
@@ -720,6 +726,12 @@
                 <Iphone/>
               </el-icon>
               <span>{{ t('menu.DeviceRegisterRiskCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('UserWithdrawCfgManagement')" index="/config/user-withdraw-cfg">
+              <el-icon>
+                <Wallet/>
+              </el-icon>
+              <span>{{ t('menu.UserWithdrawCfgManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('TextModerationCfgManagement')" index="/config/text-moderation">
               <el-icon>

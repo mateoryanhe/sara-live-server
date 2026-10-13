@@ -53,6 +53,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '设备码注册风控'},
         },
         {
+            path: 'user-withdraw-cfg',
+            name: 'UserWithdrawCfgManagement',
+            component: () => import('@/views/config/user-withdraw-cfg.vue'),
+            meta: {title: '用户提现'},
+        },
+        {
             path: 'text-moderation',
             name: 'TextModerationCfgManagement',
             component: () => import('@/views/config/text-moderation.vue'),
@@ -122,7 +128,7 @@ export const configRoutes: RouteRecordRaw = {
             path: 'coin-merchant-deploy',
             name: 'CoinMerchantDeployManagement',
             component: () => import('@/views/config/coin-merchant-deploy.vue'),
-            meta: {title: '币商H5部署'},
+            meta: {title: '经销商H5部署'},
         },
         {
             path: 'country-flag-deploy',

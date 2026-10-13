@@ -7,7 +7,7 @@ const zh = {
   panelEnterDesc:
       '统计充值/礼物面板曝光：POST /rechargeOrder/reportChargePanelEnter（Sofie /sofie/topup/notifyChargePanelEnter），登录即可、暂不要求 body，+1（event charge_panel_enter）。',
   chargeClickDesc:
-      '统计确认充值档位/自定义金额建单：App createRechargeOrder / createChannelRechargeOrder / 币商渠道建单成功 +1（event charge_click）。',
+      '统计确认充值档位/自定义金额建单：App createRechargeOrder / createChannelRechargeOrder / 经销商渠道建单成功 +1（event charge_click）。',
   chargeResultDesc:
       '统计支付回调到账成功：订单首次 completeOrder 发放金币成功 +1（event charge_result_server）。',
   todayTotal: '今日',
@@ -35,7 +35,7 @@ export const trackingRechargeMessages = definePageMessagesFromEn(zh, {
   panelEnterDesc:
       'Recharge/gift panel views: POST /rechargeOrder/reportChargePanelEnter (Sofie notifyChargePanelEnter), login only (+1, charge_panel_enter).',
   chargeClickDesc:
-      'Confirm tier/custom amount order created: createRechargeOrder / channel / coin-merchant order success (+1, charge_click).',
+      'Confirm tier/custom amount order created: createRechargeOrder / channel / dealer order success (+1, charge_click).',
   chargeResultDesc:
       'Payment callback first success: completeOrder grants gold (+1, charge_result_server).',
   todayTotal: 'Today',

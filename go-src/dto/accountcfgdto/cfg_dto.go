@@ -13,8 +13,10 @@ type AccountCfgItem struct {
 	EnvType                    uint8  `json:"envType"`
 	DeviceRegisterRiskEnabled  bool   `json:"deviceRegisterRiskEnabled"`
 	DeviceAccountMaxCount      int    `json:"deviceAccountMaxCount"`
-	DeviceCancelDailyLimit     int    `json:"deviceCancelDailyLimit"`
-	CreatedAt                  string `json:"createdAt"`
+	DeviceCancelDailyLimit     int     `json:"deviceCancelDailyLimit"`
+	UserWithdrawEnabled        bool    `json:"userWithdrawEnabled"`
+	UserWithdrawMinUsd         float64 `json:"userWithdrawMinUsd"`
+	CreatedAt                  string  `json:"createdAt"`
 	UpdatedAt                  string `json:"updatedAt"`
 }
 
@@ -30,7 +32,9 @@ type SaveAccountCfgReq struct {
 	EnvType                    uint8  `json:"envType" v:"in:0,1,2#环境类型无效" dc:"环境类型(0正式服,1提审服,2测试服)"`
 	DeviceRegisterRiskEnabled  bool   `json:"deviceRegisterRiskEnabled" dc:"设备码注册风控开关"`
 	DeviceAccountMaxCount      int    `json:"deviceAccountMaxCount" dc:"同设备最大账号数(含已注销)"`
-	DeviceCancelDailyLimit     int    `json:"deviceCancelDailyLimit" dc:"同设备每天最多注销次数"`
+	DeviceCancelDailyLimit     int     `json:"deviceCancelDailyLimit" dc:"同设备每天最多注销次数"`
+	UserWithdrawEnabled        bool    `json:"userWithdrawEnabled" dc:"用户提现开关"`
+	UserWithdrawMinUsd         float64 `json:"userWithdrawMinUsd" dc:"用户最低提现金额(USD)"`
 }
 
 type SaveAccountCfgRes struct {

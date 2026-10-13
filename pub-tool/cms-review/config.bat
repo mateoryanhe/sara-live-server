@@ -2,7 +2,7 @@
 REM CMS 审核服部署配置（使用 PuTTY .ppk 密钥，勿在此文件填写密码）
 
 REM 远程服务器（直播审核服）
-set REMOTE_HOST=18.144.165.177
+set REMOTE_HOST=18.144.161.229
 set REMOTE_USER=ec2-user
 set REMOTE_PORT=22
 

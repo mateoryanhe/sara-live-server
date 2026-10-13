@@ -249,6 +249,8 @@ const (
 	OneToOneRoomCallBothAnchors XRCode = 184
 	// CallTargetUserInCall 对方用户正在通话中(主叫发起时对方忙线)
 	CallTargetUserInCall XRCode = 185
+	// UserWithdrawDisabled 用户提现功能未开启
+	UserWithdrawDisabled XRCode = 186
 )
 
 type XError struct {

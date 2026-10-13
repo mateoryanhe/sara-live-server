@@ -18,4 +18,6 @@ func Init() {
 	initPrivacyPolicyCfg()
 	initAppToken()
 	initUserMaxId()
+	initUserPayoutInfo()
+	initUserWithdrawLog()
 }

@@ -44,14 +44,14 @@ export const operationRoutes: RouteRecordRaw = {
             path: 'guild/coin-merchant-guild-list',
             name: 'CoinMerchantGuildListManagement',
             component: () => import('@/views/operation/guild/coin-merchant-guild-list.vue'),
-            meta: {title: '币商工会列表', parentTitle: '币商管理'},
+            meta: {title: '经销商工会列表', parentTitle: '经销商管理'},
         },
         {
             path: 'guild/coin-merchant-guild-detail',
             name: 'CoinMerchantGuildDetail',
             component: () => import('@/views/operation/guild/coin-merchant-guild-detail.vue'),
             meta: {
-                title: '币商工会详情',
+                title: '经销商工会详情',
                 hidden: true,
                 parentPermission: ['CoinMerchantGuildListManagement'],
             },
@@ -60,14 +60,14 @@ export const operationRoutes: RouteRecordRaw = {
             path: 'guild/coin-merchant-guild-transfer-list',
             name: 'CoinMerchantGuildTransferManagement',
             component: () => import('@/views/operation/guild/coin-merchant-guild-transfer-list.vue'),
-            meta: {title: '币商代付', parentTitle: '币商管理'},
+            meta: {title: '经销商代付', parentTitle: '经销商管理'},
         },
         {
             path: 'guild/coin-merchant-guild-transfer-detail/:id',
             name: 'CoinMerchantGuildTransferDetail',
             component: () => import('@/views/operation/guild/coin-merchant-guild-transfer-detail.vue'),
             meta: {
-                title: '币商工会结算详情',
+                title: '经销商工会结算详情',
                 hidden: true,
                 parentPermission: ['CoinMerchantGuildTransferManagement'],
             },
@@ -76,7 +76,7 @@ export const operationRoutes: RouteRecordRaw = {
             path: 'guild/coin-merchant-payout-detail-list',
             name: 'CoinMerchantPayoutDetailList',
             component: () => import('@/views/operation/salary/coin-merchant-guild-payout-detail-list.vue'),
-            meta: {title: '币商代付详情', parentTitle: '币商管理'},
+            meta: {title: '经销商代付详情', parentTitle: '经销商管理'},
         },
         {
             path: 'guild/guild-transfer-detail/:id',
@@ -192,7 +192,7 @@ export const operationRoutes: RouteRecordRaw = {
             path: 'recharge/coin-merchant-recharge-cfg-list',
             name: 'CoinMerchantRechargeCfgManagement',
             component: () => import('@/views/operation/recharge/coin-merchant-recharge-cfg-list.vue'),
-            meta: {title: '币商充值档位'},
+            meta: {title: '经销商充值档位'},
         },
         {
             path: 'vip/vip-cfg-list',
@@ -258,14 +258,14 @@ export const operationRoutes: RouteRecordRaw = {
             path: 'recharge/coin-merchant-payment-country-cfg',
             name: 'CoinMerchantPaymentCountryCfgManagement',
             component: () => import('@/views/operation/recharge/payment-country-cfg.vue'),
-            meta: {title: '币商代收支付配置', paymentCountryCfgScope: 'coinMerchant'},
+            meta: {title: '经销商代收支付配置', paymentCountryCfgScope: 'coinMerchant'},
         },
         {
             path: 'recharge/coin-merchant-payment-country-cfg/:continent',
             name: 'CoinMerchantPaymentCountryCfgContinent',
             component: () => import('@/views/operation/recharge/payment-country-continent.vue'),
             meta: {
-                title: '币商国家/地区代收配置',
+                title: '经销商国家/地区代收配置',
                 hidden: true,
                 parentPermission: ['CoinMerchantPaymentCountryCfgManagement'],
                 paymentCountryCfgScope: 'coinMerchant',
@@ -276,7 +276,7 @@ export const operationRoutes: RouteRecordRaw = {
             name: 'CoinMerchantPaymentCountryCfgEdit',
             component: () => import('@/views/operation/recharge/payment-country-edit.vue'),
             meta: {
-                title: '币商代收配置编辑',
+                title: '经销商代收配置编辑',
                 hidden: true,
                 parentPermission: ['CoinMerchantPaymentCountryCfgManagement'],
                 paymentCountryCfgScope: 'coinMerchant',
@@ -340,7 +340,7 @@ export const operationRoutes: RouteRecordRaw = {
             path: 'salary/coin-merchant-guild-income-settlement-log-list',
             name: 'CoinMerchantGuildIncomeSettlementLogList',
             component: () => import('@/views/operation/salary/coin-merchant-guild-income-settlement-log-list.vue'),
-            meta: {title: '币商工会结算流水'},
+            meta: {title: '经销商工会结算流水'},
         },
         {
             path: 'salary/guild-payout-detail-list',

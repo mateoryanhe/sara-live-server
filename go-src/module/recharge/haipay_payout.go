@@ -129,7 +129,7 @@ type haiPayPayoutAPIRes struct {
 	} `json:"data"`
 }
 
-type haiPayPayoutQueryData struct {
+type HaiPayPayoutQueryData struct {
 	OrderId  string `json:"orderId"`
 	OrderNo  string `json:"orderNo"`
 	Amount   string `json:"amount"`
@@ -138,6 +138,8 @@ type haiPayPayoutQueryData struct {
 	PayTime  string `json:"payTime"`
 	ErrorMsg string `json:"errorMsg"`
 }
+
+type haiPayPayoutQueryData = HaiPayPayoutQueryData
 
 type haiPayPayoutQueryAPIRes struct {
 	Status string                 `json:"status"`
@@ -256,6 +258,11 @@ func haiPayQueryAnchorPayout(ctx context.Context, row *liveentity.AnchorIncomeSe
 		return nil, fmt.Errorf("empty anchor payout settlement")
 	}
 	return haiPayQueryPayoutOrder(ctx, row.TransferCurrency, row.TransferOrderId, row.TransferPlatformNo, row.TransferLocalAmount)
+}
+
+// HaiPayQueryPayoutOrder 查询代付订单状态(HaiPay /pay/query)
+func HaiPayQueryPayoutOrder(ctx context.Context, transferCurrency, transferOrderId, transferPlatformNo string, transferLocalAmount float64) (*HaiPayPayoutQueryData, error) {
+	return haiPayQueryPayoutOrder(ctx, transferCurrency, transferOrderId, transferPlatformNo, transferLocalAmount)
 }
 
 func haiPayQueryPayoutOrder(ctx context.Context, transferCurrency, transferOrderId, transferPlatformNo string, transferLocalAmount float64) (*haiPayPayoutQueryData, error) {

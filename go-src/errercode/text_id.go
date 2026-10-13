@@ -85,6 +85,7 @@ func init() {
 		ShortVideoMustPayToWatch:        "Video pendek ini memerlukan pembayaran untuk ditonton",
 		CallUserInCall:                  "Anda sedang dalam panggilan",
 		CallTargetUserInCall:            "Pengguna sedang dalam panggilan",
+		UserWithdrawDisabled:            "Penarikan pengguna tidak tersedia",
 		CallOrderNonExist:               "Pesanan panggilan tidak ditemukan",
 		CallOrderStateInvalid:           "Status pesanan panggilan tidak mengizinkan operasi ini",
 		BotAnchorNonExist:               "Anchor bot tidak ditemukan",

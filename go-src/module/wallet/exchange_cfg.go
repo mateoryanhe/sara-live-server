@@ -67,6 +67,23 @@ func CalcGoldToDiamondWithSnapshot(goldAmount float64, snap ExchangeCfgSnapshot)
 	return stdmath.Round(converted*10000) / 10000
 }
 
+// CalcGoldToUsd 金币折算美金(1USD=N金币)
+func CalcGoldToUsd(goldAmount float64) float64 {
+	if goldAmount <= 0 {
+		return 0
+	}
+	snap := GetExchangeCfgSnapshot()
+	return CalcGoldToUsdWithSnapshot(goldAmount, snap)
+}
+
+// CalcGoldToUsdWithSnapshot 使用指定汇率快照将金币折算为 USD。
+func CalcGoldToUsdWithSnapshot(goldAmount float64, snap ExchangeCfgSnapshot) float64 {
+	if goldAmount <= 0 || snap.UsdToGoldRate <= 0 {
+		return 0
+	}
+	return goldAmount / float64(snap.UsdToGoldRate)
+}
+
 // CalcDiamondToUsd 钻石折算美金(按钱包兑换配置: 1USD=N金币, 1金币=M钻石)
 func CalcDiamondToUsd(diamondAmount float64) float64 {
 	if diamondAmount <= 0 {

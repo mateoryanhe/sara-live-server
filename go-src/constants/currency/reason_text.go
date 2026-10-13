@@ -38,6 +38,8 @@ var reasonTextMap = map[Lang]map[Reason]string{
 		ReasonGameBet:                    "游戏消费",
 		ReasonGameBetWin:                 "游戏奖励",
 		ReasonShortVideoAuthorSettlement: "短视频作者结算",
+		ReasonUserWithdraw:               "用户提现",
+		ReasonUserWithdrawRefund:         "用户提现退回",
 	},
 	LangZHTW: {
 		ReasonUnknown:                    "未知",
@@ -74,6 +76,8 @@ var reasonTextMap = map[Lang]map[Reason]string{
 		ReasonGameBet:                    "遊戲消費",
 		ReasonGameBetWin:                 "遊戲獎勵",
 		ReasonShortVideoAuthorSettlement: "短視頻作者結算",
+		ReasonUserWithdraw:               "用戶提現",
+		ReasonUserWithdrawRefund:         "用戶提現退回",
 	},
 	LangEN: {
 		ReasonUnknown:                    "Unknown",
@@ -110,6 +114,8 @@ var reasonTextMap = map[Lang]map[Reason]string{
 		ReasonGameBet:                    "Game Bet",
 		ReasonGameBetWin:                 "Game Bet Win",
 		ReasonShortVideoAuthorSettlement: "Short Video Author Settlement",
+		ReasonUserWithdraw:               "User Withdrawal",
+		ReasonUserWithdrawRefund:         "User Withdrawal Refund",
 	},
 	LangID: {
 		ReasonUnknown:                    "Tidak diketahui",
@@ -146,6 +152,8 @@ var reasonTextMap = map[Lang]map[Reason]string{
 		ReasonGameBet:                    "Taruhan game",
 		ReasonGameBetWin:                 "Kemenangan taruhan game",
 		ReasonShortVideoAuthorSettlement: "Penyelesaian pendapatan video pendek",
+		ReasonUserWithdraw:               "Penarikan pengguna",
+		ReasonUserWithdrawRefund:         "Pengembalian penarikan",
 	},
 }
 

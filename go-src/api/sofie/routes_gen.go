@@ -105,6 +105,13 @@ func Init() {
 	httpserver.RegAppRouteGroup("/sofie/pass", []httpserver.AppRoute{
 		{Path: "/browseTickets", Handler: jsonHandler((&controller.TicketAppController{}).AppTicketList)},
 	})
+	httpserver.RegAppRouteGroup("/sofie/payout", []httpserver.AppRoute{
+		{Path: "/fetchWithdrawPolicy", Handler: jsonHandler((&controller.UserWithdrawAppController{}).GetWithdrawCfg)},
+		{Path: "/fetchPayeeProfile", Handler: jsonHandler((&controller.UserWithdrawAppController{}).GetPayoutInfo)},
+		{Path: "/savePayeeProfile", Handler: jsonHandler((&controller.UserWithdrawAppController{}).SavePayoutInfo)},
+		{Path: "/requestCashOut", Handler: jsonHandler((&controller.UserWithdrawAppController{}).ApplyWithdraw)},
+		{Path: "/browseCashOutLogs", Handler: jsonHandler((&controller.UserWithdrawAppController{}).ListWithdrawLogs)},
+	})
 	httpserver.RegAppRouteGroup("/sofie/play", []httpserver.AppRoute{
 		{Path: "/browseTitles", Handler: jsonHandler((&controller.GameAppController{}).AppGameList)},
 		{Path: "/openTitle", Handler: jsonHandler((&controller.GameAppController{}).AppGameStart)},

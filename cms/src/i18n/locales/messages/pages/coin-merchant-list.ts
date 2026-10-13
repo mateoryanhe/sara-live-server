@@ -1,8 +1,8 @@
 import {definePageMessagesFromEn} from './_define'
 
 const zh = {
-  add: '新建币商',
-  addDialogTitle: '新建币商',
+  add: '新建经销商',
+  addDialogTitle: '新建经销商',
   keywordPlaceholder: '用户ID / 用户名',
   username: '用户名',
   password: '密码',
@@ -26,15 +26,15 @@ const zh = {
   resetPasswordSuccess: '密码已重置',
   resetPasswordFailed: '重置密码失败',
   cancelAccount: '注销',
-  cancelTitle: '注销币商',
-  cancelConfirm: '确定注销币商「{username}」？',
+  cancelTitle: '注销经销商',
+  cancelConfirm: '确定注销经销商「{username}」？',
   cancelSuccess: '已注销',
   cancelFailed: '注销失败',
 } as const
 
 export const coinMerchantListMessages = definePageMessagesFromEn(zh, {
-  add: 'Create Merchant',
-  addDialogTitle: 'Create Coin Merchant',
+  add: 'Create Dealer',
+  addDialogTitle: 'Create Dealer',
   keywordPlaceholder: 'User ID / Username',
   username: 'Username',
   password: 'Password',
@@ -58,8 +58,8 @@ export const coinMerchantListMessages = definePageMessagesFromEn(zh, {
   resetPasswordSuccess: 'Password reset',
   resetPasswordFailed: 'Reset failed',
   cancelAccount: 'Cancel Account',
-  cancelTitle: 'Cancel Merchant',
-  cancelConfirm: 'Cancel merchant "{username}"?',
+  cancelTitle: 'Cancel Dealer',
+  cancelConfirm: 'Cancel dealer "{username}"?',
   cancelSuccess: 'Canceled',
   cancelFailed: 'Cancel failed',
 })

@@ -2,7 +2,7 @@ import {definePageMessages} from './_define'
 
 const zh = {
   noticeTitle: '说明',
-  noticeLine1: '普通用户代收使用全球收银台 /global/cashier/collect/apply；币商代收按国家配置调用本地币种接口。',
+  noticeLine1: '普通用户代收使用全球收银台 /global/cashier/collect/apply；经销商代收按国家配置调用本地币种接口。',
   noticeLine2: '代收和代付回调只触发服务端主动查单；订单状态与金额以 HaiPay 查询接口结果为准。请求签名使用 SHA256WithRSA。',
   noticeLine3: 'AppId 分测试/正式两套，由本页开关选择；正式当前仅 USD 7810 / MYR 7730 / IDR 7724 / 收银台 7545。工会代付不设独立开关，代付标题固定为 GuildSettlement。',
   apiHost: 'API Host',
@@ -42,7 +42,7 @@ const zh = {
 
 const en = {
   noticeTitle: 'Notice',
-  noticeLine1: 'Standard-user collection uses /global/cashier/collect/apply; coin-merchant collection uses the configured local-currency endpoint.',
+  noticeLine1: 'Standard-user collection uses /global/cashier/collect/apply; dealer collection uses the configured local-currency endpoint.',
   noticeLine2: 'Collection and payout callbacks only trigger server-side queries; status and amount come from HaiPay query results. Requests use SHA256WithRSA signatures.',
   noticeLine3: 'AppIds have a test set and a production set, selected by the switch on this page. Production currently covers USD 7810 / MYR 7730 / IDR 7724 / cashier 7545. Guild payout has no separate switch and uses the fixed subject GuildSettlement.',
   apiHost: 'API Host',

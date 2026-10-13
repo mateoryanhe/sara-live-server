@@ -2,9 +2,9 @@ import {definePageMessagesFromEn} from './_define'
 
 const zh = {
   normalLandingNotice: '普通用户代收支付配置：选择一个洲进入国家/地区代收配置。未保存的国家/地区默认不在普通用户 App 展示，也不允许普通用户发起代收下单。',
-  coinMerchantLandingNotice: '币商代收支付配置：选择一个洲进入国家/地区代收配置。未保存的国家/地区默认不在币商 App 展示，也不允许币商发起代收下单。',
+  coinMerchantLandingNotice: '经销商代收支付配置：选择一个洲进入国家/地区代收配置。未保存的国家/地区默认不在经销商 App 展示，也不允许经销商发起代收下单。',
   normalDetailNotice: '本页面只配置普通用户全球收银台代收。App 可见性默认关闭；启用并保存后，普通用户才可查询该国家/地区，服务端按所选币种下单。',
-  coinMerchantDetailNotice: '本页面只配置币商代收。App 可见性默认关闭；启用并保存后，币商才可查询该国家/地区并使用所选代收方式下单。',
+  coinMerchantDetailNotice: '本页面只配置经销商代收。App 可见性默认关闭；启用并保存后，经销商才可查询该国家/地区并使用所选代收方式下单。',
   countryCount: '共 {total} 个国家/地区',
   openContinent: '进入配置',
   backToContinents: '返回洲列表',
@@ -40,7 +40,7 @@ const zh = {
   basicSettings: '基本配置',
   credentialSettings: '币种账号配置',
   methodRequired: '请选择当前代收币种对应的支付类型和支付编码',
-  coinMerchantCombinedTip: '币商代收配置独立保存；服务端按代收币种自动选择固定 AppID，币种、支付类型、支付编码和 App 可见性作为同一条国家配置生效。',
+  coinMerchantCombinedTip: '经销商代收配置独立保存；服务端按代收币种自动选择固定 AppID，币种、支付类型、支付编码和 App 可见性作为同一条国家配置生效。',
   collectionMethods: '代收方式',
   selected: '已选择',
   selectAtLeastOneMethod: 'App 可见开启时，至少需要新增一种代收方式',
@@ -65,14 +65,14 @@ const zh = {
   fetchFailed: '获取代收配置失败',
   noCountries: '没有匹配的国家/地区',
   globalCashierTip: '普通用户 App 只上报国家/地区；服务端读取这里选择的代收币种，并使用固定 CASHIER AppID 调用 /global/cashier/collect/apply。',
-  coinMerchantLocalTip: '币商 App 只上报国家/地区；服务端从缓存读取当前币种和唯一支付方式，按币种选择固定 AppID 后调用对应本地代收接口。',
+  coinMerchantLocalTip: '经销商 App 只上报国家/地区；服务端从缓存读取当前币种和唯一支付方式，按币种选择固定 AppID 后调用对应本地代收接口。',
 }
 
 const en: Record<keyof typeof zh, string> = {
   normalLandingNotice: 'Standard user collection config: select a continent to configure collection by country or region. Unconfigured entries are hidden from the standard user App and cannot create collection orders.',
-  coinMerchantLandingNotice: 'Coin merchant collection config: select a continent to configure collection by country or region. Unconfigured entries are hidden from the coin merchant App and cannot create collection orders.',
+  coinMerchantLandingNotice: 'Dealer collection config: select a continent to configure collection by country or region. Unconfigured entries are hidden from the dealer App and cannot create collection orders.',
   normalDetailNotice: 'This page configures standard-user Global Cashier collection. App visibility is off by default. Once enabled, the server creates orders with the selected currency.',
-  coinMerchantDetailNotice: 'This page configures coin merchant collection only. App visibility is off by default. Enable and save an entry before coin merchants can query it or create collection orders.',
+  coinMerchantDetailNotice: 'This page configures dealer collection only. App visibility is off by default. Enable and save an entry before dealers can query it or create collection orders.',
   countryCount: '{total} countries / regions',
   openContinent: 'Configure',
   backToContinents: 'Back to continents',
@@ -108,7 +108,7 @@ const en: Record<keyof typeof zh, string> = {
   basicSettings: 'Basic settings',
   credentialSettings: 'Currency credentials',
   methodRequired: 'Select the payment type and payment code for the current collection currency',
-  coinMerchantCombinedTip: 'Coin-merchant collection is stored independently. The server selects a fixed AppID by currency; currency, payment type, payment code, and App visibility take effect together.',
+  coinMerchantCombinedTip: 'Dealer collection is stored independently. The server selects a fixed AppID by currency; currency, payment type, payment code, and App visibility take effect together.',
   collectionMethods: 'Collection methods',
   selected: 'Selected',
   selectAtLeastOneMethod: 'Add at least one collection method before enabling App visibility',
@@ -133,7 +133,7 @@ const en: Record<keyof typeof zh, string> = {
   fetchFailed: 'Failed to load collection config',
   noCountries: 'No matching countries or regions',
   globalCashierTip: 'The standard-user App only reports the country or region. The server reads the selected currency and calls /global/cashier/collect/apply with the fixed CASHIER AppID.',
-  coinMerchantLocalTip: 'The coin-merchant App only reports the country or region. The server reads the currency and single method from cache, selects the fixed currency AppID, then calls the matching local endpoint.',
+  coinMerchantLocalTip: 'The dealer App only reports the country or region. The server reads the currency and single method from cache, selects the fixed currency AppID, then calls the matching local endpoint.',
 }
 
 export const paymentCountryCfgMessages = definePageMessagesFromEn(zh, en)

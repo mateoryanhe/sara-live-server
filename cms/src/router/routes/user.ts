@@ -70,7 +70,7 @@ export const userRoutes: RouteRecordRaw = {
             path: 'coin-merchant/coin-merchant-list',
             name: 'CoinMerchantManagement',
             component: () => import('@/views/user/coin-merchant/coin-merchant-list.vue'),
-            meta: {title: '币商列表', parentTitle: '币商管理'},
+            meta: {title: '经销商列表', parentTitle: '经销商管理'},
         },
         {
             path: 'account/ban-user',

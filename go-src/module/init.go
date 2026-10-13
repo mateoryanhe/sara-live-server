@@ -43,6 +43,7 @@ import (
 	"xr-game-server/module/simulatordevicewhitelist"
 	"xr-game-server/module/stat"
 	"xr-game-server/module/tracking"
+	"xr-game-server/module/userwithdraw"
 	"xr-game-server/module/staticcachecfg"
 	"xr-game-server/module/ticket"
 	"xr-game-server/module/upload"
@@ -89,6 +90,7 @@ func Init() {
 	aliyunmoderation.Init()
 	privacypolicy.Init()
 	accountcfg.Init()
+	userwithdraw.Init()
 	appversioncfg.Init()
 	activity.Init()
 	simulatorcpukeyword.Init()

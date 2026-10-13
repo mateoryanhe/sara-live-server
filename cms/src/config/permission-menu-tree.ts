@@ -260,6 +260,16 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             page('CoinMerchantGuildListManagement'),
             page('CoinMerchantRechargeCfgManagement'),
             page('CoinMerchantTransferLogList'),
+            page('UserWithdrawLogList', {
+                buttonGroups: [
+                    {id: 'list', titleKey: 'pages.moduleList.groupAccess', buttonKeys: ['view', 'search']},
+                    {
+                        id: 'audit',
+                        titleKey: 'pages.userWithdrawLogList.auditGroup',
+                        buttonKeys: ['batchApprove', 'batchReject', 'batchSubmitPayout'],
+                    },
+                ],
+            }),
             page('CoinMerchantGuildTransferManagement'),
             page('CoinMerchantGuildIncomeSettlementLogList'),
             page('CoinMerchantPayoutDetailList'),
@@ -352,6 +362,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             group('config-security', 'menu.ConfigSecurityGroup', [
                 page('SimulatorCpuKeywordManagement'),
                 page('DeviceRegisterRiskCfgManagement'),
+                page('UserWithdrawCfgManagement'),
                 page('TextModerationCfgManagement'),
             ]),
             group('config-platform', 'menu.ConfigPlatformGroup', [

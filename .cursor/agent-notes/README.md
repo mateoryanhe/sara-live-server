@@ -18,7 +18,7 @@
 | Host | 用户 | 用途 |
 |------|------|------|
 | `直播测试服` | ec2-user @ 54.241.124.37 | Go、MariaDB |
-| `直播正式服` | ec2-user @ 52.9.70.64 | 正式 Go |
+| `直播正式服` | ec2-user @ **54.177.166.38**（2026-10 迁移；勿改回 52.9.70.64） | 正式 Go / CMS 部署 |
 | `直播审核服` | ec2-user @ 18.144.165.177 | 审核专用（~1GB RAM） |
 | `直播测试服-h5` | h5-live @ 54.241.124.37 | H5/SFTP |
 
@@ -28,6 +28,7 @@
 - 上述 OpenSSH 别名使用私钥 `D:\root\1v1.pem`。
 - PuTTY 部署脚本使用测试服密钥 `D:\tools\ppk\live-test.ppk`；仅运行既有 `plink.exe` / `pscp.exe` 脚本时使用该 PPK。
 - 只读日志查询无需再次询问；部署、重启、删除和数据库写操作仍按 `server-safety.mdc` 执行。
+- **正式服 IP（部署脚本）**：`pub-tool/go-prod/config.bat` 与 `pub-tool/cms-prod/config.bat` 的 `REMOTE_HOST=54.177.166.38` 为用户确认值，Agent **不得**擅自改回旧 IP。
 
 ## 热重启 / restart.bat（2026-10-12）
 

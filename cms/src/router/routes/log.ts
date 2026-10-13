@@ -50,7 +50,13 @@ export const logRoutes: RouteRecordRaw = {
             path: 'user/coin-merchant-transfer-log-list',
             name: 'CoinMerchantTransferLogList',
             component: () => import('@/views/log/user/coin-merchant-transfer-log-list.vue'),
-            meta: {title: '币商转账日志', parentTitle: '币商管理'},
+            meta: {title: '经销商转账日志', parentTitle: '经销商管理'},
+        },
+        {
+            path: 'user/user-withdraw-log-list',
+            name: 'UserWithdrawLogList',
+            component: () => import('@/views/log/user/user-withdraw-log-list.vue'),
+            meta: {title: '用户提现记录', parentTitle: '用户日志'},
         },
         {
             path: 'game/game-bet-log-list',

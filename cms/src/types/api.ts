@@ -808,6 +808,8 @@ export interface AccountCfg {
     deviceRegisterRiskEnabled: boolean
     deviceAccountMaxCount: number
     deviceCancelDailyLimit: number
+    userWithdrawEnabled?: boolean
+    userWithdrawMinUsd?: number
     createdAt?: string
     updatedAt?: string
 }
@@ -847,6 +849,8 @@ export interface SaveAccountCfgReq {
     deviceRegisterRiskEnabled: boolean
     deviceAccountMaxCount: number
     deviceCancelDailyLimit: number
+    userWithdrawEnabled?: boolean
+    userWithdrawMinUsd?: number
 }
 
 export interface SaveAccountCfgRes {
@@ -1149,7 +1153,7 @@ export interface GetAnchorTransferInfoRes {
 
 export interface GuildQuery extends PageQuery {
     name?: string
-    /** 0 普通工会，1 币商工会；不传则不过滤 */
+    /** 0 普通工会，1 经销商工会；不传则不过滤 */
     guildType?: number
 }
 

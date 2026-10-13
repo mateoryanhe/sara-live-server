@@ -24,7 +24,9 @@ type AccountCfg struct {
 	EnvType                    uint8 `gorm:"default:0;comment:环境类型(0正式服,1提审服,2测试服)" json:"envType"`
 	DeviceRegisterRiskEnabled  bool  `gorm:"default:1;comment:设备码注册风控开关(默认开启)" json:"deviceRegisterRiskEnabled"`
 	DeviceAccountMaxCount      int   `gorm:"default:3;comment:同设备最大账号数(含已注销)" json:"deviceAccountMaxCount"`
-	DeviceCancelDailyLimit     int   `gorm:"default:1;comment:同设备每天最多注销次数" json:"deviceCancelDailyLimit"`
+	DeviceCancelDailyLimit     int     `gorm:"default:1;comment:同设备每天最多注销次数" json:"deviceCancelDailyLimit"`
+	UserWithdrawEnabled        bool    `gorm:"default:0;comment:用户提现开关(默认关闭)" json:"userWithdrawEnabled"`
+	UserWithdrawMinUsd         float64 `gorm:"type:decimal(16,2);default:5;comment:用户最低提现金额(USD)" json:"userWithdrawMinUsd"`
 }
 
 func initAccountCfg() {

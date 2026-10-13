@@ -63,6 +63,8 @@ func Init() {
 	initFiatCurrencyCMSController()                  // 法币配置(CMS)
 	initFiatCurrencyAppController()                  // 法币配置(App,无需鉴权)
 	initAccountCfgCMSController()                    // 账号配置(CMS)
+	initUserWithdrawAppController()                  // 用户提现(App)
+	initUserWithdrawCMSController()                  // 用户提现(CMS)
 	initAppVersionCfgCMSController()                 // App版本配置(CMS)
 	initAppVersionAppController()                    // App版本查询(App)
 	initFirstRechargeActivityCMSController()         // 首充活动配置(CMS)

@@ -73,6 +73,8 @@ const formData = reactive({
   deviceRegisterRiskEnabled: true,
   deviceAccountMaxCount: 3,
   deviceCancelDailyLimit: 1,
+  userWithdrawEnabled: false,
+  userWithdrawMinUsd: 5,
 })
 
 const metaInfo = reactive({
@@ -98,6 +100,8 @@ const applyCfg = (cfg: AccountCfg | null | undefined) => {
   formData.deviceRegisterRiskEnabled = cfg?.deviceRegisterRiskEnabled !== false
   formData.deviceAccountMaxCount = normalizePositiveInt(cfg?.deviceAccountMaxCount, 3)
   formData.deviceCancelDailyLimit = normalizePositiveInt(cfg?.deviceCancelDailyLimit, 1)
+  formData.userWithdrawEnabled = !!cfg?.userWithdrawEnabled
+  formData.userWithdrawMinUsd = Number(cfg?.userWithdrawMinUsd) > 0 ? Number(cfg?.userWithdrawMinUsd) : 5
   metaInfo.createdAt = cfg?.createdAt || ''
   metaInfo.updatedAt = cfg?.updatedAt || ''
 }
@@ -125,6 +129,8 @@ const handleSave = async () => {
       deviceRegisterRiskEnabled: formData.deviceRegisterRiskEnabled,
       deviceAccountMaxCount: normalizePositiveInt(formData.deviceAccountMaxCount, 3),
       deviceCancelDailyLimit: normalizePositiveInt(formData.deviceCancelDailyLimit, 1),
+      userWithdrawEnabled: formData.userWithdrawEnabled,
+      userWithdrawMinUsd: formData.userWithdrawMinUsd > 0 ? formData.userWithdrawMinUsd : 5,
     })
     if (response?.success) {
       ElMessage.success(t('pages.accountCfg.saveSuccess'))

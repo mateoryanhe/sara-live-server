@@ -21,6 +21,8 @@ func GetAccountCfg(_ context.Context, _ *accountcfgdto.GetAccountCfgReq) (*accou
 			DeviceRegisterRiskEnabled:  true,
 			DeviceAccountMaxCount:      defaultDeviceAccountMaxCount,
 			DeviceCancelDailyLimit:     defaultDeviceCancelDailyLimit,
+			UserWithdrawEnabled:        false,
+			UserWithdrawMinUsd:         defaultUserWithdrawMinUsd,
 		}}, nil
 	}
 	return &accountcfgdto.GetAccountCfgRes{Cfg: toCfgItem(cfg)}, nil
@@ -41,6 +43,10 @@ func SaveAccountCfg(_ context.Context, req *accountcfgdto.SaveAccountCfgReq) (*a
 		dailyLimit = defaultDeviceCancelDailyLimit
 	}
 	existing := cfgdao.LoadAccountCfg()
+	minUsd := req.UserWithdrawMinUsd
+	if minUsd <= 0 {
+		minUsd = defaultUserWithdrawMinUsd
+	}
 	row := &entity.AccountCfg{
 		CancelAccountByCodeEnabled: req.CancelAccountByCodeEnabled,
 		BlockSimulatorLogin:        req.BlockSimulatorLogin,
@@ -48,6 +54,8 @@ func SaveAccountCfg(_ context.Context, req *accountcfgdto.SaveAccountCfgReq) (*a
 		DeviceRegisterRiskEnabled:  req.DeviceRegisterRiskEnabled,
 		DeviceAccountMaxCount:      maxCount,
 		DeviceCancelDailyLimit:     dailyLimit,
+		UserWithdrawEnabled:        req.UserWithdrawEnabled,
+		UserWithdrawMinUsd:         minUsd,
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -85,6 +93,10 @@ func toCfgItem(cfg *entity.AccountCfg) *accountcfgdto.AccountCfgItem {
 	if dailyLimit <= 0 {
 		dailyLimit = defaultDeviceCancelDailyLimit
 	}
+	minUsd := cfg.UserWithdrawMinUsd
+	if minUsd <= 0 {
+		minUsd = defaultUserWithdrawMinUsd
+	}
 	return &accountcfgdto.AccountCfgItem{
 		ID:                         strconv.FormatUint(cfg.ID, 10),
 		CancelAccountByCodeEnabled: cfg.CancelAccountByCodeEnabled,
@@ -93,6 +105,8 @@ func toCfgItem(cfg *entity.AccountCfg) *accountcfgdto.AccountCfgItem {
 		DeviceRegisterRiskEnabled:  cfg.DeviceRegisterRiskEnabled,
 		DeviceAccountMaxCount:      maxCount,
 		DeviceCancelDailyLimit:     dailyLimit,
+		UserWithdrawEnabled:        cfg.UserWithdrawEnabled,
+		UserWithdrawMinUsd:         minUsd,
 		CreatedAt:                  formatTime(cfg.CreatedAt),
 		UpdatedAt:                  formatTime(cfg.UpdatedAt),
 	}

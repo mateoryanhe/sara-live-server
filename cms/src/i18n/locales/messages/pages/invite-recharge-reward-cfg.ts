@@ -3,7 +3,7 @@ import {definePageMessages} from './_define'
 const zh = {
   tipTitle: '说明',
   tipLine1: '被邀请人完成账号首充后，在有效天数内每次充值，邀请人可获得该笔到账金币按比例返还。',
-  tipLine2: '默认返还 5%、有效 30 天；关闭开关后不再发放。白名单、币商充值不参与；人工确认计入。',
+  tipLine2: '默认返还 5%、有效 30 天；关闭开关后不再发放。白名单、经销商充值不参与；人工确认计入。',
   enabled: '活动开关',
   rewardPercent: '返还比例',
   rewardPercentTip: '按被邀请人该笔订单到账金币计算，例如 5 表示返还 5%。',
@@ -22,7 +22,7 @@ export const inviteRechargeRewardCfgMessages = definePageMessages(
   {
     tipTitle: 'Note',
     tipLine1: 'After an invitee completes first account recharge, within the valid days each of their recharges returns a percent of credited gold to the inviter.',
-    tipLine2: 'Defaults: 5% for 30 days. Disabled switch stops rewards. Whitelist and coin-merchant are excluded; manual confirm counts.',
+    tipLine2: 'Defaults: 5% for 30 days. Disabled switch stops rewards. Whitelist and dealer recharges are excluded; manual confirm counts.',
     enabled: 'Enabled',
     rewardPercent: 'Reward percent',
     rewardPercentTip: 'Based on invitee order credited gold. e.g. 5 means 5%.',
@@ -38,7 +38,7 @@ export const inviteRechargeRewardCfgMessages = definePageMessages(
   {
     tipTitle: 'Nota',
     tipLine1: 'Tras la primera recarga de cuenta del invitado, en los días válidos cada recarga devuelve un % del oro acreditado al invitador.',
-    tipLine2: 'Por defecto: 5% durante 30 días. Apagado no otorga. Whitelist y coin merchant excluidos; confirmación manual cuenta.',
+    tipLine2: 'Por defecto: 5% durante 30 días. Apagado no otorga. Whitelist y dealer excluidos; confirmación manual cuenta.',
     enabled: 'Activado',
     rewardPercent: 'Porcentaje',
     rewardPercentTip: 'Sobre el oro acreditado del pedido. Ej. 5 = 5%.',
@@ -54,7 +54,7 @@ export const inviteRechargeRewardCfgMessages = definePageMessages(
   {
     tipTitle: 'Nota',
     tipLine1: 'Após a 1ª recarga de conta do convidado, nos dias válidos cada recarga devolve % do ouro creditado ao convidante.',
-    tipLine2: 'Padrão: 5% por 30 dias. Desligado não concede. Whitelist e coin merchant excluídos; confirmação manual conta.',
+    tipLine2: 'Padrão: 5% por 30 dias. Desligado não concede. Whitelist e dealer excluídos; confirmação manual conta.',
     enabled: 'Ativado',
     rewardPercent: 'Percentagem',
     rewardPercentTip: 'Sobre o ouro creditado do pedido. Ex.: 5 = 5%.',
@@ -70,7 +70,7 @@ export const inviteRechargeRewardCfgMessages = definePageMessages(
   {
     tipTitle: 'नोट',
     tipLine1: 'आमंत्रित के खाते की पहली रीचार्ज के बाद, वैध दिनों में हर रीचार्ज पर आमंत्रक को जमा गोल्ड का % मिलता है।',
-    tipLine2: 'डिफ़ॉल्ट: 5% / 30 दिन। बंद होने पर नहीं मिलेगा। व्हाइटलिस्ट/कॉइन मर्चेंट शामिल नहीं; मैनुअल कन्फर्म गिना जाता है।',
+    tipLine2: 'डिफ़ॉल्ट: 5% / 30 दिन। बंद होने पर नहीं मिलेगा। व्हाइटलिस्ट/डीलर शामिल नहीं; मैनुअल कन्फर्म गिना जाता है।',
     enabled: 'सक्रिय',
     rewardPercent: 'वापसी %',
     rewardPercentTip: 'ऑर्डर के जमा गोल्ड पर। जैसे 5 = 5%।',
@@ -86,7 +86,7 @@ export const inviteRechargeRewardCfgMessages = definePageMessages(
   {
     tipTitle: 'Catatan',
     tipLine1: 'Setelah undangan menyelesaikan isi ulang akun pertama, dalam hari valid setiap isi ulang mengembalikan % emas ke pengundang.',
-    tipLine2: 'Default: 5% selama 30 hari. Mati = tidak diberi. Whitelist dan coin merchant dikecualikan; konfirmasi manual dihitung.',
+    tipLine2: 'Default: 5% selama 30 hari. Mati = tidak diberi. Whitelist dan dealer dikecualikan; konfirmasi manual dihitung.',
     enabled: 'Aktif',
     rewardPercent: 'Persentase',
     rewardPercentTip: 'Dari emas tercredit order. Mis. 5 = 5%.',

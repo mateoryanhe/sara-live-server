@@ -321,7 +321,7 @@ watch(() => editForm.value?.selectedPayType, (payType) => {
   if (!allowedKeys.has(form.selectedMethodKey)) form.selectedMethodKey = ''
 })
 
-// 普通用户和币商编辑页都会被 keep-alive 缓存，每次打开都重新读取服务器配置。
+// 普通用户和经销商编辑页都会被 keep-alive 缓存，每次打开都重新读取服务器配置。
 onActivated(fetchConfig)
 </script>
 

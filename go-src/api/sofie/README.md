@@ -165,6 +165,11 @@
 | `coin` | 金币兑换钻石 | 需要登录 | `POST /gold/exchangeGoldToDiamond` | `POST /sofie/coin/swapToGem` |
 | `coin` | 转赠金币 | 需要登录 | `POST /gold/transferGold` | `POST /sofie/coin/sendToUser` |
 | `coin` | 币商转账记录 | 需要登录 | `POST /gold/getCoinMerchantTransferRecordList` | `POST /sofie/coin/browseDealerTransfers` |
+| `payout` | 用户提现配置 | 需要登录 | `POST /userWithdraw/getWithdrawCfg` | `POST /sofie/payout/fetchWithdrawPolicy` |
+| `payout` | 用户收款信息 | 需要登录 | `POST /userWithdraw/getPayoutInfo` | `POST /sofie/payout/fetchPayeeProfile` |
+| `payout` | 保存用户收款信息 | 需要登录 | `POST /userWithdraw/savePayoutInfo` | `POST /sofie/payout/savePayeeProfile` |
+| `payout` | 申请提现 | 需要登录 | `POST /userWithdraw/applyWithdraw` | `POST /sofie/payout/requestCashOut` |
+| `payout` | 用户提现记录 | 需要登录 | `POST /userWithdraw/listWithdrawLogs` | `POST /sofie/payout/browseCashOutLogs` |
 | `bonus` | 首充活动配置 | 需要登录 | `POST /firstRechargeActivity/firstRechargeActivityCfgForApp` | `POST /sofie/bonus/fetchFirstPay` |
 | `release` | App版本查询 | 免登录 | `POST /appVersion/appVersionQuery` | `POST /sofie/release/lookupBuild` |
 | `help` | 客服配置 | 免登录 | `POST /customerService/cfg` | `POST /sofie/help/fetchContact` |

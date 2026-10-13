@@ -141,16 +141,8 @@ func GetAppListByUserId(ctx context.Context, req *rechargecfgdto.AppRechargeCfgL
 	}, nil
 }
 
-// appRechargeCfgListCfgTypeForClient App/H5 充值档位列表 cfgType：H5→渠道，其余→Google。
-func appRechargeCfgListCfgTypeForClient(isH5Client bool) uint8 {
-	if isH5Client {
-		return entity.RechargeCfgTypeChannel
-	}
-	return entity.RechargeCfgTypeGoogle
-}
-
 func appRechargeCfgListCfgType(ctx context.Context) uint8 {
-	return appRechargeCfgListCfgTypeForClient(httpserver.IsH5ClientFromContext(ctx))
+	return appRechargeCfgTypeFromContext(ctx)
 }
 
 func buildAppRechargeCfgList(ctx context.Context, userId uint64) []*rechargecfgdto.AppRechargeCfgItem {

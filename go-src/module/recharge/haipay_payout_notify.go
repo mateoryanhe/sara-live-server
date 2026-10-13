@@ -41,7 +41,19 @@ func HandleHaiPayPayoutNotify(r *ghttp.Request) {
 	xrlog.DetailLog.Infof(ctx, "haipay payout notify trigger orderId=%s orderNo=%s notifyStatus=%s",
 		orderId, notifyOrderNo, notifyStatus)
 
-	settlementID, err := strconv.ParseUint(strings.TrimSpace(orderId), 10, 64)
+	orderId = strings.TrimSpace(orderId)
+	if strings.HasPrefix(orderId, "U") {
+		if logID, err := strconv.ParseUint(strings.TrimPrefix(orderId, "U"), 10, 64); err == nil && logID > 0 {
+			lockKey := "haipay:payout-notify:" + orderId
+			gmlock.Lock(lockKey)
+			defer gmlock.Unlock(lockKey)
+			if dispatchUserWithdrawPayoutNotify(r, logID, orderId) {
+				return
+			}
+		}
+	}
+
+	settlementID, err := strconv.ParseUint(orderId, 10, 64)
 	if err != nil || settlementID == 0 {
 		xrlog.DetailLog.Warningf(ctx, "haipay payout notify invalid settlement orderId=%s err=%v", orderId, err)
 		r.Response.WriteStatus(200)

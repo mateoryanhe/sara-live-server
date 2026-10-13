@@ -1,7 +1,7 @@
 @echo off
 set "RESTART_TITLE=XR Game Server Production Restart"
 REM Remote server configuration
-set REMOTE_HOST=52.9.70.64
+set REMOTE_HOST=54.177.166.38
 set REMOTE_USER=ec2-user
 set REMOTE_DIR=/home/ec2-user/xgameserver
 REM Use REMOTE_STAGE on disk; /tmp is small tmpfs on servers

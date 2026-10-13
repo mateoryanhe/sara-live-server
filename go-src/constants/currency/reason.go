@@ -73,6 +73,10 @@ const (
 	ReasonInviteRechargeReward Reason = 34
 	// ReasonGmAdjustReset CMS 后台重置用户金币/钻石余额为 0
 	ReasonGmAdjustReset Reason = 35
+	// ReasonUserWithdraw 用户提现扣减金币
+	ReasonUserWithdraw Reason = 36
+	// ReasonUserWithdrawRefund 用户提现拒绝/失败退回金币
+	ReasonUserWithdrawRefund Reason = 37
 )
 
 // String 返回枚举的英文标识(用于日志/调试,不参与多语言展示;
@@ -145,6 +149,10 @@ func (r Reason) String() string {
 		return "InviteRechargeReward"
 	case ReasonGmAdjustReset:
 		return "GmAdjustReset"
+	case ReasonUserWithdraw:
+		return "UserWithdraw"
+	case ReasonUserWithdrawRefund:
+		return "UserWithdrawRefund"
 	default:
 		return "Unknown"
 	}

@@ -2,8 +2,8 @@ import {definePageMessagesFromEn} from './_define'
 
 const zh = {
   add: '新建档位',
-  addTitle: '新建币商充值档位',
-  editTitle: '修改币商充值档位',
+  addTitle: '新建经销商充值档位',
+  editTitle: '修改经销商充值档位',
   name: '档位名称',
   nameFuzzy: '名称模糊搜索',
   namePlaceholder: '请输入档位名称',
@@ -25,8 +25,8 @@ const zh = {
 
 export const coinMerchantRechargeCfgListMessages = definePageMessagesFromEn(zh, {
   add: 'Add Tier',
-  addTitle: 'Create Coin Merchant Recharge Tier',
-  editTitle: 'Edit Coin Merchant Recharge Tier',
+  addTitle: 'Create Dealer Recharge Tier',
+  editTitle: 'Edit Dealer Recharge Tier',
   name: 'Name',
   nameFuzzy: 'Fuzzy name search',
   namePlaceholder: 'Enter tier name',

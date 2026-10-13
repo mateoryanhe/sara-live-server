@@ -19,7 +19,11 @@ type cfgSnapshot struct {
 	DeviceRegisterRiskEnabled  bool
 	DeviceAccountMaxCount      int
 	DeviceCancelDailyLimit     int
+	UserWithdrawEnabled        bool
+	UserWithdrawMinUsd         float64
 }
+
+const defaultUserWithdrawMinUsd = 5
 
 var cfgCache atomic.Value
 
@@ -59,6 +63,10 @@ func toCfgSnapshot(row *entity.AccountCfg) *cfgSnapshot {
 	if dailyLimit <= 0 {
 		dailyLimit = defaultDeviceCancelDailyLimit
 	}
+	minUsd := row.UserWithdrawMinUsd
+	if minUsd <= 0 {
+		minUsd = defaultUserWithdrawMinUsd
+	}
 	return &cfgSnapshot{
 		CancelAccountByCodeEnabled: row.CancelAccountByCodeEnabled,
 		BlockSimulatorLogin:        row.BlockSimulatorLogin,
@@ -66,6 +74,8 @@ func toCfgSnapshot(row *entity.AccountCfg) *cfgSnapshot {
 		DeviceRegisterRiskEnabled:  row.DeviceRegisterRiskEnabled,
 		DeviceAccountMaxCount:      maxCount,
 		DeviceCancelDailyLimit:     dailyLimit,
+		UserWithdrawEnabled:        row.UserWithdrawEnabled,
+		UserWithdrawMinUsd:         minUsd,
 	}
 }
 
@@ -97,4 +107,18 @@ func GetDeviceAccountMaxCount() int {
 // GetDeviceCancelDailyLimit 同设备每天最多注销次数
 func GetDeviceCancelDailyLimit() int {
 	return getCfgCache().DeviceCancelDailyLimit
+}
+
+// IsUserWithdrawEnabled 用户提现是否开启
+func IsUserWithdrawEnabled() bool {
+	return getCfgCache().UserWithdrawEnabled
+}
+
+// GetUserWithdrawMinUsd 用户最低提现金额(USD)
+func GetUserWithdrawMinUsd() float64 {
+	minUsd := getCfgCache().UserWithdrawMinUsd
+	if minUsd <= 0 {
+		return defaultUserWithdrawMinUsd
+	}
+	return minUsd
 }
