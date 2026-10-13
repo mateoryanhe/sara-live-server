@@ -4,14 +4,14 @@ REM Remote server configuration
 set REMOTE_HOST=18.144.165.177
 set REMOTE_USER=ec2-user
 set REMOTE_DIR=/home/ec2-user/xgameserver
-REM 审核服 /tmp 仅 ~479MB tmpfs,大文件走磁盘 staging(勿用 /tmp)
+REM Review server /tmp is small tmpfs; use REMOTE_STAGE on disk
 set REMOTE_STAGE=/home/ec2-user/staging
 
 REM Local path configuration
 set LOCAL_PROJECT_PATH=D:\company-code\sara-live-server
 set LOCAL_GO_SRC=%LOCAL_PROJECT_PATH%\go-src
 set LOCAL_CONFIG_PATH=%LOCAL_PROJECT_PATH%\config\review\config.yaml
-REM 热重启一/二阶段秒数在 CMS preload_cfgs; deploy/restart 脚本等待默认各 60
+REM Hot restart phase seconds in CMS preload_cfgs; deploy/restart wait default 60+60
 set LOCAL_BUILD_PATH=%LOCAL_PROJECT_PATH%\go-build
 
 REM SSH key configuration

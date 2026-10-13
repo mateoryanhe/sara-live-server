@@ -151,7 +151,7 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-REM Ensure remote directory exists, fix ownership (sudo 启动可能导致目录属主为 root)
+REM Ensure remote directory exists, fix ownership (start.sh may leave root-owned files)
 echo Preparing remote directory...
 plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "sudo mkdir -p %REMOTE_DIR% && sudo chown -R %REMOTE_USER%:%REMOTE_USER% %REMOTE_DIR% && rm -f %REMOTE_DIR%/%APP_NAME% %REMOTE_DIR%/config.yaml %REMOTE_DIR%/%APP_NAME%.log %REMOTE_DIR%/deploy_package.zip"
 if %errorlevel% neq 0 (

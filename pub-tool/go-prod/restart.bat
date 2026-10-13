@@ -11,17 +11,17 @@ if not exist "%PLINK%" if exist "%~dp0..\go-prod\plink.exe" set "PLINK=%~dp0..\g
 if not defined RESTART_TITLE set "RESTART_TITLE=XR Game Server Restart"
 if not defined SSH_HOST_KEY (
     echo ERROR: SSH_HOST_KEY not set in config.bat
-    exit /b 1
+    goto fail_end
 )
 set "PLINK_SSH=%PLINK% -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST%"
 
 if not exist "%SSH_KEY_PATH%" (
     echo ERROR: SSH key missing: %SSH_KEY_PATH%
-    exit /b 1
+    goto fail_end
 )
 if not exist "%PLINK%" (
     echo ERROR: plink.exe missing: %PLINK%
-    exit /b 1
+    goto fail_end
 )
 
 goto :xr_restart_main
@@ -93,6 +93,15 @@ echo Recent hotRestart access log:
 echo.
 echo Recent server error log:
 %PLINK_SSH% "tail -15 /home/ec2-user/log/error.log 2>/dev/null || echo none"
+goto fail_end
+
+:fail_end
+if /i not "%XR_RESTART_NOPAUSE%"=="1" (
+    echo.
+    echo ===== Restart failed ^(see messages above^) =====
+    echo Press any key to close this window...
+    pause
+)
 exit /b 1
 
 :xr_restart_main
@@ -107,17 +116,17 @@ echo [1/4] Testing SSH connection...
 %PLINK_SSH% "echo connected" >nul
 if errorlevel 1 (
     echo ERROR: SSH connection failed.
-    exit /b 1
+    goto fail_end
 )
 
 echo [2/4] Checking the existing server program...
 %PLINK_SSH% "test -x %REMOTE_DIR%/%APP_NAME%"
 if errorlevel 1 (
     echo ERROR: Missing remote binary: %REMOTE_DIR%/%APP_NAME%
-    exit /b 1
+    goto fail_end
 )
 
-REM 热重启一/二阶段秒数见 CMS preload_cfgs,脚本等待默认各 60
+REM Hot restart phase timeouts: CMS preload_cfgs; script wait defaults 60s each
 set HOT_RESTART_FLUSH_TIMEOUT=60
 set HOT_RESTART_EXIT_TIMEOUT=60
 if not defined HOT_FORK_GRACE set HOT_FORK_GRACE=90

@@ -5,5 +5,5 @@ echo.
 echo Starting deployment...
 call deploy.bat
 echo.
-echo ===== finished — close this window when done =====
+echo ===== finished - close this window when done =====
 cmd /k
