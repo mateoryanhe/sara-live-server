@@ -9,4 +9,7 @@ type DeviceInfo struct {
 	AppVersion  string `json:"appVersion" dc:"App/APK版本号"`
 	PackageName string `json:"packageName" dc:"App包名"`
 	DeviceId    string `json:"deviceId" dc:"设备唯一标识"`
+	// Meta Conversions API 归因(可选,App/Web 从 Meta SDK 或 Cookie 采集)
+	MetaFbp string `json:"metaFbp" dc:"Meta _fbp"`
+	MetaFbc string `json:"metaFbc" dc:"Meta _fbc"`
 }

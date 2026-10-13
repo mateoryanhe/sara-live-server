@@ -3,7 +3,7 @@ import {definePageMessagesFromEn} from './_define'
 const zh = {
   noticeTitle: 'Meta Pixel 服务端上报(Conversions API)',
   noticeLine1: '客户端无需接入 Pixel JS；Go 在「用户注册成功」「普通用户充值到账」后向 Meta 上报。',
-  noticeLine2: '注册事件：CompleteRegistration；充值事件：Purchase(USD 为订单配置美金 price)。',
+  noticeLine2: '注册 CompleteRegistration；充值 Purchase 在**用户下单成功**时上报(非入账)，value=档位 USD price；user_data 同前(充值无 fbp/fbc)。',
   noticeLine3: '币商充值、充值白名单虚拟美金不上报。',
   enabled: '启用上报',
   pixelId: 'Pixel ID',
@@ -21,7 +21,7 @@ const zh = {
 export const metaPixelMessages = definePageMessagesFromEn(zh, {
   noticeTitle: 'Meta Pixel server-side (Conversions API)',
   noticeLine1: 'No client Pixel JS; Go sends events after registration and normal-user recharge success.',
-  noticeLine2: 'CompleteRegistration on sign-up; Purchase (USD order price) on recharge.',
+  noticeLine2: 'CompleteRegistration on sign-up; Purchase on order created (not gold credited), value=USD price; same user_data rules (no fbp/fbc on purchase).',
   noticeLine3: 'Coin-merchant and whitelist virtual USD recharges are excluded.',
   enabled: 'Enable reporting',
   pixelId: 'Pixel ID',

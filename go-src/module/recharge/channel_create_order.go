@@ -100,7 +100,11 @@ func createChannelRechargeOrder(ctx context.Context, userId uint64, packageName 
 	rechargeorderdao.AddOrderToCache(order)
 	ScheduleRechargeOrderTimeout(order.ID, order.CreatedAt)
 	pubChargeClickTracking(userId, time.Now())
-	event.Pub(gameevent.RechargeOrderCreatedEvent, gameevent.NewRechargeOrderCreatedEventData(order.ID))
+	event.Pub(gameevent.RechargeOrderCreatedEvent, gameevent.NewRechargeOrderCreatedFromCtx(ctx, order.ID, gameevent.RechargeCheckoutHint{
+		Email: payEmail,
+		Phone: payPhone,
+		Name:  payName,
+	}))
 
 	orderIdStr := strconv.FormatUint(order.ID, 10)
 	if !forcePayUrl && userinfodao.IsRechargeWhitelist(userId) {

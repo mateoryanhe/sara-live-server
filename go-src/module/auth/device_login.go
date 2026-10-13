@@ -75,7 +75,7 @@ func loginByDevice(ctx context.Context, deviceInfo *entity.DeviceInfo, channel u
 	userinfodao.SaveRegisterInfo(account.ID, deviceInfo)
 	userinfodao.SaveCancelCode(account.ID)
 	if isNewUser {
-		event.Pub(gameevent.RegisterEvent, gameevent.NewRegisterEventDataFromCtx(ctx, account.ID, time.Now()))
+		event.Pub(gameevent.RegisterEvent, gameevent.NewRegisterEventDataFromCtxWithDevice(ctx, account.ID, time.Now(), deviceInfo))
 	}
 
 	return &authdto.DeviceLoginRes{

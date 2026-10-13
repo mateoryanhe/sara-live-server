@@ -76,7 +76,7 @@ func EmailLogin(ctx context.Context, req *authdto.EmailLoginReq) (*authdto.Email
 	}
 	userinfodao.SaveCancelCode(account.ID)
 	if isNewUser {
-		event.Pub(gameevent.RegisterEvent, gameevent.NewRegisterEventDataFromCtx(ctx, account.ID, time.Now()))
+		event.Pub(gameevent.RegisterEvent, gameevent.NewRegisterEventDataFromCtxWithDevice(ctx, account.ID, time.Now(), req.DeviceInfo))
 	}
 
 	return &authdto.EmailLoginRes{

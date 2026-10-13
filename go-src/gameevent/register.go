@@ -6,6 +6,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/core/event"
+	userentity "xr-game-server/entity/user"
 	"xr-game-server/module/randomnick"
 )
 
@@ -19,6 +20,7 @@ type RegisterEventData struct {
 	UserId       uint64
 	RegisteredAt time.Time
 	NickLang     uint8 // 随机昵称语言(0=英文默认)
+	Attribution  RegisterAttribution
 }
 
 func NewRegisterEventData(userId uint64, registeredAt time.Time) *RegisterEventData {
@@ -30,6 +32,10 @@ func NewRegisterEventData(userId uint64, registeredAt time.Time) *RegisterEventD
 }
 
 func NewRegisterEventDataFromCtx(ctx context.Context, userId uint64, registeredAt time.Time) *RegisterEventData {
+	return NewRegisterEventDataFromCtxWithDevice(ctx, userId, registeredAt, nil)
+}
+
+func NewRegisterEventDataFromCtxWithDevice(ctx context.Context, userId uint64, registeredAt time.Time, deviceInfo *userentity.DeviceInfo) *RegisterEventData {
 	lang := randomnick.DefaultLang
 	if r := g.RequestFromCtx(ctx); r != nil {
 		lang = randomnick.ParseAcceptLanguage(r.Header.Get("Accept-Language"))
@@ -38,5 +44,6 @@ func NewRegisterEventDataFromCtx(ctx context.Context, userId uint64, registeredA
 		UserId:       userId,
 		RegisteredAt: registeredAt,
 		NickLang:     lang,
+		Attribution:  registerAttributionFromCtx(ctx, deviceInfo),
 	}
 }

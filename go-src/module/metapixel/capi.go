@@ -13,6 +13,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/core/xrlog"
 	sysentity "xr-game-server/entity/sys"
+	"xr-game-server/gameevent"
 )
 
 const metaGraphAPIVersion = "v21.0"
@@ -32,7 +33,15 @@ type capiEvent struct {
 }
 
 type capiUserData struct {
-	ExternalID []string `json:"external_id,omitempty"`
+	ExternalID      []string `json:"external_id,omitempty"`
+	Em              []string `json:"em,omitempty"`
+	Ph              []string `json:"ph,omitempty"`
+	Fn              []string `json:"fn,omitempty"`
+	Country         []string `json:"country,omitempty"`
+	ClientIPAddress string   `json:"client_ip_address,omitempty"`
+	ClientUserAgent string   `json:"client_user_agent,omitempty"`
+	Fbp             string   `json:"fbp,omitempty"`
+	Fbc             string   `json:"fbc,omitempty"`
 }
 
 type capiCustomData struct {
@@ -45,12 +54,31 @@ func hashMetaExternalID(userId uint64) string {
 	if userId == 0 {
 		return ""
 	}
-	raw := strings.TrimSpace(strconv.FormatUint(userId, 10))
-	sum := sha256.Sum256([]byte(raw))
+	return hashMetaSHA256(strings.TrimSpace(strconv.FormatUint(userId, 10)))
+}
+
+func hashMetaSHA256(normalized string) string {
+	normalized = strings.TrimSpace(normalized)
+	if normalized == "" {
+		return ""
+	}
+	sum := sha256.Sum256([]byte(normalized))
 	return hex.EncodeToString(sum[:])
 }
 
-func sendCAPIEvents(ctx context.Context, cfg *sysentity.MetaPixelCfg, events []capiEvent) {
+func formatCAPIExtraLog(ev capiEvent, extra string) string {
+	parts := []string{"user_data=" + formatCAPIUserDataTags(ev.UserData)}
+	if ev.CustomData != nil {
+		parts = append(parts, fmt.Sprintf("custom currency=%s value=%v order_id=%s",
+			ev.CustomData.Currency, ev.CustomData.Value, ev.CustomData.OrderID))
+	}
+	if extra != "" {
+		parts = append(parts, extra)
+	}
+	return strings.Join(parts, " ")
+}
+
+func sendCAPIEvents(ctx context.Context, cfg *sysentity.MetaPixelCfg, events []capiEvent, extraLog string) {
 	if cfg == nil || !cfg.IsActive() || len(events) == 0 {
 		return
 	}
@@ -85,8 +113,8 @@ func sendCAPIEvents(ctx context.Context, cfg *sysentity.MetaPixelCfg, events []c
 		xrlog.DetailLog.Warningf(ctx, "meta pixel capi no events received events=%s messages=%v trace=%s", eventSummary, parsed.Messages, parsed.FBTraceID)
 		return
 	}
-	xrlog.DetailLog.Infof(ctx, "meta pixel capi ok pixelId=%s events=%s received=%d trace=%s messages=%v testMode=%t",
-		strings.TrimSpace(cfg.PixelId), eventSummary, parsed.EventsReceived, parsed.FBTraceID, parsed.Messages, reqBody.TestEventCode != "")
+	xrlog.DetailLog.Infof(ctx, "meta pixel capi ok pixelId=%s events=%s received=%d trace=%s testMode=%t %s messages=%v",
+		strings.TrimSpace(cfg.PixelId), eventSummary, parsed.EventsReceived, parsed.FBTraceID, reqBody.TestEventCode != "", extraLog, parsed.Messages)
 }
 
 func formatCAPIEventSummary(events []capiEvent) string {
@@ -113,53 +141,55 @@ func truncateLog(s string) string {
 	return s[:512] + "..."
 }
 
-func trackCompleteRegistration(ctx context.Context, userId uint64, at time.Time) {
+func trackCompleteRegistration(ctx context.Context, userId uint64, at time.Time, attr gameevent.RegisterAttribution) {
 	cfg := activeCfg()
 	if cfg == nil {
 		return
 	}
-	extID := hashMetaExternalID(userId)
-	if extID == "" {
+	userData := buildCAPIUserData(userId, attr, capiProfileHint{})
+	if len(userData.ExternalID) == 0 {
 		return
 	}
 	eventTime := at.Unix()
 	if eventTime <= 0 {
 		eventTime = time.Now().Unix()
 	}
-	sendCAPIEvents(ctx, cfg, []capiEvent{{
+	ev := capiEvent{
 		EventName:    "CompleteRegistration",
 		EventTime:    eventTime,
 		EventID:      fmt.Sprintf("reg-%d", userId),
 		ActionSource: "system_generated",
-		UserData:     capiUserData{ExternalID: []string{extID}},
-	}})
+		UserData:     userData,
+	}
+	sendCAPIEvents(ctx, cfg, []capiEvent{ev}, formatCAPIExtraLog(ev, ""))
 }
 
-func trackPurchase(ctx context.Context, userId uint64, orderId uint64, usdAmount float64, at time.Time) {
+func trackPurchase(ctx context.Context, userId uint64, orderId uint64, usdAmount float64, at time.Time, attr gameevent.RegisterAttribution, checkout gameevent.RechargeCheckoutHint) {
 	cfg := activeCfg()
 	if cfg == nil || usdAmount <= 0 || orderId == 0 || userId == 0 {
 		return
 	}
-	extID := hashMetaExternalID(userId)
-	if extID == "" {
+	userData := buildCAPIUserData(userId, attr, checkoutHintFromEvent(checkout))
+	if len(userData.ExternalID) == 0 {
 		return
 	}
 	eventTime := at.Unix()
 	if eventTime <= 0 {
 		eventTime = time.Now().Unix()
 	}
-	sendCAPIEvents(ctx, cfg, []capiEvent{{
+	ev := capiEvent{
 		EventName:    "Purchase",
 		EventTime:    eventTime,
 		EventID:      fmt.Sprintf("order-%d", orderId),
 		ActionSource: "system_generated",
-		UserData:     capiUserData{ExternalID: []string{extID}},
+		UserData:     userData,
 		CustomData: &capiCustomData{
 			Currency: "USD",
 			Value:    usdAmount,
 			OrderID:  strconv.FormatUint(orderId, 10),
 		},
-	}})
+	}
+	sendCAPIEvents(ctx, cfg, []capiEvent{ev}, formatCAPIExtraLog(ev, fmt.Sprintf("userId=%d", userId)))
 }
 
 func activeCfg() *sysentity.MetaPixelCfg {

@@ -62,7 +62,7 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 	userlogindevicedao.RefreshLoginDevice(account.ID, req.DeviceInfo)
 	userinfodao.SaveRegisterInfo(account.ID, req.DeviceInfo)
 	now := time.Now()
-	event.Pub(gameevent.RegisterEvent, gameevent.NewRegisterEventDataFromCtx(ctx, account.ID, now))
+	event.Pub(gameevent.RegisterEvent, gameevent.NewRegisterEventDataFromCtxWithDevice(ctx, account.ID, now, req.DeviceInfo))
 	if req.InviteCode != "" {
 		inviterId := userinfo.ResolveInviteCodeToUserId(req.InviteCode)
 		if inviterId == 0 || accountdao.GetAccountById(inviterId) == nil {

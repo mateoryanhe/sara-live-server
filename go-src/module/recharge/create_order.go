@@ -62,7 +62,7 @@ func CreateOrder(ctx context.Context, req *rechargeorderdto.AppCreateRechargeOrd
 	ScheduleRechargeOrderTimeout(order.ID, order.CreatedAt)
 	pubChargeClickTracking(userId, time.Now())
 
-	event.Pub(gameevent.RechargeOrderCreatedEvent, gameevent.NewRechargeOrderCreatedEventData(order.ID))
+	event.Pub(gameevent.RechargeOrderCreatedEvent, gameevent.NewRechargeOrderCreatedFromCtx(ctx, order.ID, gameevent.RechargeCheckoutHint{}))
 
 	if userinfodao.IsRechargeWhitelist(userId) {
 		if _, completeErr := CompleteOrder(order.ID); completeErr == nil {
@@ -126,7 +126,7 @@ func CMSCreateOrder(ctx context.Context, req *rechargeorderdto.CMSCreateRecharge
 
 	rechargeorderdao.AddOrderToCache(order)
 	ScheduleRechargeOrderTimeout(order.ID, order.CreatedAt)
-	event.Pub(gameevent.RechargeOrderCreatedEvent, gameevent.NewRechargeOrderCreatedEventData(order.ID))
+	event.Pub(gameevent.RechargeOrderCreatedEvent, gameevent.NewRechargeOrderCreatedFromCtx(ctx, order.ID, gameevent.RechargeCheckoutHint{}))
 
 	return &rechargeorderdto.CMSCreateRechargeOrderRes{
 		OrderId:  strconv.FormatUint(order.ID, 10),
