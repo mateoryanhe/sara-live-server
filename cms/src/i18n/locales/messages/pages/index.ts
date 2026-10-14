@@ -1,4 +1,5 @@
-import type {CmsLocale} from '../types'
+import type {CmsLocale} from '../../types'
+import {convertLocaleDeep} from '../../zh-tw-convert'
 import {userListMessages} from '../user-list'
 
 import {giftListMessages} from './gift-list'
@@ -220,10 +221,17 @@ const pageMessageBuilders = [
 
 export type PageNamespace = typeof pageMessageBuilders[number][0]
 
+type PageMessageBundle = Record<'zh-CN' | 'en' | 'es' | 'pt' | 'hi' | 'id', Record<string, string>>
+
 export function buildPageMessages(locale: CmsLocale): Record<PageNamespace, Record<string, string>> {
   const pages = {} as Record<PageNamespace, Record<string, string>>
   for (const [key, messages] of pageMessageBuilders) {
-    pages[key] = messages[locale]
+    const bundle = messages as PageMessageBundle
+    if (locale === 'zh-TW') {
+      pages[key] = convertLocaleDeep(bundle['zh-CN'])
+    } else {
+      pages[key] = bundle[locale]
+    }
   }
   return pages
 }

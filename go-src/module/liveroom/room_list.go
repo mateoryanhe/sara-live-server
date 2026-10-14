@@ -510,6 +510,9 @@ func GetOneToOneRoomList(ctx context.Context, req *liveroomdto.GetOneToOneRoomLi
 	total := len(filtered)
 	start, end := roomListPageRange(total, page, pageSize)
 
+	now := time.Now()
+	pubOneToOneRoomListTracking(userID, now)
+
 	return &liveroomdto.GetOneToOneRoomListRes{
 		Total:    total,
 		Page:     page,

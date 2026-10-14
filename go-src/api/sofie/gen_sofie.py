@@ -45,6 +45,7 @@ APIS = [
     ("/liveRoom/reportLiveFirstFrameRendered", "yes", "(&controller.LiveRoomAppController{}).ReportLiveFirstFrameRendered", "上报直播首帧渲染完成", "studio", "notifyLiveFirstFrameReady"),
     ("/liveRoom/reportMiniGameExposure", "yes", "(&controller.LiveRoomAppController{}).ReportMiniGameExposure", "上报半屏游戏窗口曝光", "studio", "notifyMiniGameExposure"),
     ("/liveRoom/reportMiniGameWebViewLoadSuccess", "yes", "(&controller.LiveRoomAppController{}).ReportMiniGameWebViewLoadSuccess", "上报游戏WebView成功加载", "studio", "notifyMiniGameWebViewLoadSuccess"),
+    ("/liveRoom/reportMiniGameControllerClick", "yes", "(&controller.LiveRoomAppController{}).ReportMiniGameControllerClick", "上报点击游戏手柄", "studio", "notifyMiniGameControllerClick"),
     ("/liveRoom/reportVoiceRoomGiftClick", "yes", "(&controller.LiveRoomAppController{}).ReportVoiceRoomGiftClick", "上报语聊房礼物面板点击", "studio", "notifyVoiceRoomGiftClick"),
     ("/liveRoom/reportHotLiveRoomGiftClick", "yes", "(&controller.LiveRoomAppController{}).ReportHotLiveRoomGiftClick", "上报秀场直播间礼物面板点击", "studio", "notifyHotLiveRoomGiftClick"),
     ("/liveRoom/leave", "yes", "(&controller.LiveRoomAppController{}).LeaveRoom", "离开直播间", "studio", "exitHall"),

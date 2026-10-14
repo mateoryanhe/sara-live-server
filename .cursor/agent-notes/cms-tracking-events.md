@@ -63,6 +63,10 @@ App 秀场礼物面板：`POST /liveRoom/reportHotLiveRoomGiftClick`（Sofie `PO
 
 表：`daily_call_1v1_connect_success_stats` / `weekly_*` / `monthly_*`。
 
+| 同上页 **Tab「1v1房间列表」** | `one_to_one_room_list` | App `oneToOneRoomList`（Sofie `browseDirectBooths`）成功返回 +1（含翻页） | `POST /trackingEvent/getOneToOneRoomListTrend` |
+
+表：`daily_one_to_one_room_list_stats` / `weekly_*` / `monthly_*`。
+
 | 页面 | event | 口径 | CMS API |
 |------|-------|------|---------|
 | `TrackingMiniGameRoundStartManagement`（游戏直播间） | `game_live_room_join` | 游戏直播(category=2)；观众 `joinRoom` 成功 +1，不含主播 | `POST /trackingEvent/getGameLiveRoomJoinTrend` |
@@ -86,6 +90,12 @@ App：`POST /liveRoom/reportMiniGameExposure`（Sofie `POST /sofie/studio/notify
 App：`POST /liveRoom/reportMiniGameWebViewLoadSuccess`（Sofie `POST /sofie/studio/notifyMiniGameWebViewLoadSuccess`）。
 
 表：`daily_mini_game_webview_load_stats` / `weekly_*` / `monthly_*`。
+
+| 同上页 **Tab「点击游戏手柄」** | `mini_game_controller_click` | 登录用户 `reportMiniGameControllerClick` 成功 +1（暂不要求 body） | `POST /trackingEvent/getMiniGameControllerClickTrend` |
+
+App：`POST /liveRoom/reportMiniGameControllerClick`（Sofie `POST /sofie/studio/notifyMiniGameControllerClick`）。
+
+表：`daily_mini_game_controller_click_stats` / `weekly_*` / `monthly_*`。
 
 | 页面 | event | 口径 | CMS API |
 |------|-------|------|---------|

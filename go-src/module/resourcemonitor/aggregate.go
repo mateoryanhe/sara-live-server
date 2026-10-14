@@ -50,7 +50,7 @@ func averageFineRows(bucketStart time.Time, rows []*entity.SysResourceMetric) *e
 		procMemMb, procHeapAllocMb, procHeapInuseMb, procHeapSysMb        float64
 		procHeapUsedPercent, procHeapIdlePercent, procCpuPercent          float64
 		sysMemUsedMb, sysMemTotalMb, sysMemUsedPercent, sysCpuPercent float64
-		onlineMax                                                         uint64
+		onlineMax, liveAnchorMax                                          uint64
 	)
 	for _, row := range rows {
 		if row == nil {
@@ -70,12 +70,15 @@ func averageFineRows(bucketStart time.Time, rows []*entity.SysResourceMetric) *e
 		if row.OnlineCount > onlineMax {
 			onlineMax = row.OnlineCount
 		}
+		if row.LiveAnchorCount > liveAnchorMax {
+			liveAnchorMax = row.LiveAnchorCount
+		}
 	}
 	return entity.NewSysResourceMetricAggFromAvg(
 		bucketStart,
 		procMemMb/n, procHeapAllocMb/n, procHeapInuseMb/n, procHeapSysMb/n,
 		procHeapUsedPercent/n, procHeapIdlePercent/n, procCpuPercent/n,
 		sysMemUsedMb/n, sysMemTotalMb/n, sysMemUsedPercent/n, sysCpuPercent/n,
-		onlineMax,
+		onlineMax, liveAnchorMax,
 	)
 }

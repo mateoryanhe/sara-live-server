@@ -202,30 +202,28 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/officialSiteDeploy/deployZip"}
 	case "/thirdPayOfficialSiteDeploy/initFileUpload", "/thirdPayOfficialSiteDeploy/uploadFileChunk", "/thirdPayOfficialSiteDeploy/completeFileUpload", "/thirdPayOfficialSiteDeploy/abortFileUpload":
 		return []string{"/thirdPayOfficialSiteDeploy/deployZip"}
+	case "/sysStat/getSysStat",
+		"/sysStat/getUserStatTrend",
+		"/resourceMetric/getResourceMetricOnlineTrend":
+		return dashboardSysStatTrendAliasPaths()
 	case "/trackingEvent/getHotLiveRoomJoinTrend",
 		"/trackingEvent/getLiveFirstFrameRenderTrend",
 		"/trackingEvent/getHotLiveRoomLeaveTrend",
 		"/trackingEvent/getHotLiveRoomGiftClickTrend":
 		return hotLiveRoomTrackingTrendAliasPaths()
 	case "/trackingEvent/getCall1v1InitiateTrend":
-		return []string{
-			"/trackingEvent/getCall1v1RoomCallTrend",
-			"/trackingEvent/getCall1v1ConnectSuccessTrend",
-		}
+		return call1v1TrackingTrendAliasPaths()
 	case "/trackingEvent/getCall1v1RoomCallTrend":
-		return []string{
-			"/trackingEvent/getCall1v1InitiateTrend",
-			"/trackingEvent/getCall1v1ConnectSuccessTrend",
-		}
+		return call1v1TrackingTrendAliasPaths()
 	case "/trackingEvent/getCall1v1ConnectSuccessTrend":
-		return []string{
-			"/trackingEvent/getCall1v1InitiateTrend",
-			"/trackingEvent/getCall1v1RoomCallTrend",
-		}
+		return call1v1TrackingTrendAliasPaths()
+	case "/trackingEvent/getOneToOneRoomListTrend":
+		return call1v1TrackingTrendAliasPaths()
 	case "/trackingEvent/getMiniGameRoundStartTrend",
 		"/trackingEvent/getMiniGameRoundResultTrend",
 		"/trackingEvent/getMiniGameExposureTrend",
 		"/trackingEvent/getMiniGameWebViewLoadTrend",
+		"/trackingEvent/getMiniGameControllerClickTrend",
 		"/trackingEvent/getGameLiveRoomJoinTrend",
 		"/trackingEvent/getGameLiveWatchStreamTrend":
 		return miniGameTrackingTrendAliasPaths()
@@ -252,6 +250,14 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 	}
 }
 
+func dashboardSysStatTrendAliasPaths() []string {
+	return []string{
+		"/sysStat/getSysStat",
+		"/sysStat/getUserStatTrend",
+		"/resourceMetric/getResourceMetricOnlineTrend",
+	}
+}
+
 func hotLiveRoomTrackingTrendAliasPaths() []string {
 	return []string{
 		"/trackingEvent/getHotLiveRoomJoinTrend",
@@ -261,12 +267,22 @@ func hotLiveRoomTrackingTrendAliasPaths() []string {
 	}
 }
 
+func call1v1TrackingTrendAliasPaths() []string {
+	return []string{
+		"/trackingEvent/getCall1v1InitiateTrend",
+		"/trackingEvent/getCall1v1RoomCallTrend",
+		"/trackingEvent/getCall1v1ConnectSuccessTrend",
+		"/trackingEvent/getOneToOneRoomListTrend",
+	}
+}
+
 func miniGameTrackingTrendAliasPaths() []string {
 	return []string{
 		"/trackingEvent/getMiniGameRoundStartTrend",
 		"/trackingEvent/getMiniGameRoundResultTrend",
 		"/trackingEvent/getMiniGameExposureTrend",
 		"/trackingEvent/getMiniGameWebViewLoadTrend",
+		"/trackingEvent/getMiniGameControllerClickTrend",
 		"/trackingEvent/getGameLiveRoomJoinTrend",
 		"/trackingEvent/getGameLiveWatchStreamTrend",
 	}

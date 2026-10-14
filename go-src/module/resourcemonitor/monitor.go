@@ -17,6 +17,7 @@ import (
 	"xr-game-server/core/push"
 	"xr-game-server/core/xrtimer"
 	"xr-game-server/dao/cfgdao"
+	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/resourcemetricdao"
 	"xr-game-server/entity/sys"
 	"xr-game-server/gameevent"
@@ -155,11 +156,13 @@ func enqueueResourceMetric(now time.Time) {
 	procMemMb, procHeapAllocMb, procHeapInuseMb, procHeapSysMb, procHeapUsedPercent, procHeapIdlePercent := collectProcessMemMetrics()
 	sysMemUsedMb, sysMemTotalMb, sysMemUsedPercent := collectSystemMemMetrics()
 	procCpuPercent, sysCpuPercent := collectCpuPercents(now)
+	onlineTotal := uint64(push.OnlineCount())
+	liveAnchors := liveroomdao.CountLivingAnchors()
 	entity.NewSysResourceMetric(
 		now,
 		procMemMb, procHeapAllocMb, procHeapInuseMb, procHeapSysMb, procHeapUsedPercent, procHeapIdlePercent, procCpuPercent,
 		sysMemUsedMb, sysMemTotalMb, sysMemUsedPercent, sysCpuPercent,
-		uint64(push.OnlineCount()),
+		onlineTotal, liveAnchors,
 	)
 }
 

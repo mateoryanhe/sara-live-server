@@ -55,6 +55,9 @@
       <el-table v-loading="loading" :data="tableData" style="width: 100%">
         <el-table-column fixed label="#" type="index" width="55" :index="formatRowIndex"/>
         <el-table-column :label="t('pages.rechargeOrderList.orderId')" min-width="180" prop="id"/>
+        <el-table-column :label="t('pages.rechargeOrderList.userCountry')" min-width="140" prop="userCountry" show-overflow-tooltip>
+          <template #default="{ row }">{{ row.userCountry || '-' }}</template>
+        </el-table-column>
         <el-table-column :label="t('common.userId')" min-width="180" prop="userId">
           <template #default="{ row }">
             <el-button v-if="canViewUserDetail && row.userId" link type="primary" @click="openUserDetail(row.userId)">

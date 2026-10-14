@@ -260,9 +260,26 @@ const buildHeapRatioOption = (points: ResourceMetricPoint[]): EChartsOption => {
   }
 }
 
+const resolveAudienceCount = (point: ResourceMetricPoint | undefined) => {
+  if (!point) {
+    return 0
+  }
+  if (point.audienceCount !== undefined && point.audienceCount !== '') {
+    return Number(point.audienceCount)
+  }
+  const total = Number(point.onlineCount || 0)
+  const anchors = Number(point.liveAnchorCount || 0)
+  return total > anchors ? total - anchors : 0
+}
+
 const buildOnlineOption = (points: ResourceMetricPoint[]): EChartsOption => {
   const times = points.map(item => item.time)
   const onlineSeries = points.map(item => Number(item.onlineCount || 0))
+  const anchorSeries = points.map(item => Number(item.liveAnchorCount || 0))
+  const audienceSeries = points.map(item => resolveAudienceCount(item))
+  const totalLabel = t('pages.resourceMonitor.onlineCount')
+  const anchorLabel = t('pages.resourceMonitor.liveAnchorOnlineCount')
+  const audienceLabel = t('pages.resourceMonitor.audienceOnlineCount')
 
   return {
     title: props.title
@@ -284,17 +301,19 @@ const buildOnlineOption = (points: ResourceMetricPoint[]): EChartsOption => {
         return [
           items[0].name,
           t('pages.resourceMonitor.onlineCountTooltip', {value: formatCount(point?.onlineCount)}),
+          t('pages.resourceMonitor.liveAnchorOnlineCountTooltip', {value: formatCount(point?.liveAnchorCount)}),
+          t('pages.resourceMonitor.audienceOnlineCountTooltip', {value: formatCount(resolveAudienceCount(point))}),
         ].join('<br/>')
       },
     },
     legend: {
-      data: [t('pages.resourceMonitor.onlineCount')],
+      data: [totalLabel, anchorLabel, audienceLabel],
       top: props.title ? 28 : 0,
     },
     grid: {
       left: 56,
       right: 24,
-      top: props.title ? 72 : 48,
+      top: props.title ? 88 : 64,
       bottom: 32,
     },
     xAxis: {
@@ -311,11 +330,25 @@ const buildOnlineOption = (points: ResourceMetricPoint[]): EChartsOption => {
     },
     series: [
       {
-        name: t('pages.resourceMonitor.onlineCount'),
+        name: totalLabel,
         type: 'line',
         smooth: true,
         data: onlineSeries,
         itemStyle: {color: '#409EFF'},
+      },
+      {
+        name: anchorLabel,
+        type: 'line',
+        smooth: true,
+        data: anchorSeries,
+        itemStyle: {color: '#E6A23C'},
+      },
+      {
+        name: audienceLabel,
+        type: 'line',
+        smooth: true,
+        data: audienceSeries,
+        itemStyle: {color: '#67C23A'},
       },
     ],
   }

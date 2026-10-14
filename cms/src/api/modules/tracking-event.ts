@@ -29,6 +29,9 @@ export const trackingEventApi = {
     getCall1v1ConnectSuccessTrend: () => {
         return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getCall1v1ConnectSuccessTrend', {})
     },
+    getOneToOneRoomListTrend: () => {
+        return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getOneToOneRoomListTrend', {})
+    },
     getMiniGameRoundStartTrend: () => {
         return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getMiniGameRoundStartTrend', {})
     },
@@ -40,6 +43,9 @@ export const trackingEventApi = {
     },
     getMiniGameWebViewLoadTrend: () => {
         return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getMiniGameWebViewLoadTrend', {})
+    },
+    getMiniGameControllerClickTrend: () => {
+        return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getMiniGameControllerClickTrend', {})
     },
     getShortVideoPlayStartTrend: () => {
         return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getShortVideoPlayStartTrend', {})

@@ -21,9 +21,9 @@ const chartRef = ref<HTMLDivElement>()
 let chartInstance: EChartsType | null = null
 
 const activeMetric = computed(() => {
-  const found = USER_STAT_BAR_SERIES.find((s) => s.key === props.metricKey && s.enabled)
-  if (found) {
-    return found
+  const byKey = USER_STAT_BAR_SERIES.find((s) => s.key === props.metricKey)
+  if (byKey) {
+    return byKey
   }
   return getEnabledUserStatBarSeries()[0]
 })

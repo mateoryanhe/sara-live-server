@@ -27,6 +27,9 @@
         <el-tab-pane :label="t('pages.trackingMiniGameRoundStart.tabGameWebViewLoad')" name="gameWebViewLoad">
           <p class="page-desc">{{ t('pages.trackingMiniGameRoundStart.gameWebViewLoadDesc') }}</p>
         </el-tab-pane>
+        <el-tab-pane :label="t('pages.trackingMiniGameRoundStart.tabGameControllerClick')" name="gameControllerClick">
+          <p class="page-desc">{{ t('pages.trackingMiniGameRoundStart.gameControllerClickDesc') }}</p>
+        </el-tab-pane>
       </el-tabs>
 
       <div class="summary-grid">
@@ -82,7 +85,7 @@ import {trackingEventApi} from '@/api/modules/tracking-event'
 import type {HotLiveRoomJoinTrendRes} from '@/types/api'
 import CountTrendChart from './components/count-trend-chart.vue'
 
-type TrackingEventKey = 'gameJoin' | 'firstFrame' | 'roundStart' | 'roundResult' | 'gameExposure' | 'gameWebViewLoad'
+type TrackingEventKey = 'gameJoin' | 'firstFrame' | 'roundStart' | 'roundResult' | 'gameExposure' | 'gameWebViewLoad' | 'gameControllerClick'
 
 const {t, locale} = useI18n()
 const loading = ref(false)
@@ -107,6 +110,7 @@ const roundStartTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 const roundResultTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 const gameExposureTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 const gameWebViewLoadTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
+const gameControllerClickTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 
 const trendByEvent: Record<TrackingEventKey, HotLiveRoomJoinTrendRes> = {
   gameJoin: gameJoinTrend,
@@ -115,6 +119,7 @@ const trendByEvent: Record<TrackingEventKey, HotLiveRoomJoinTrendRes> = {
   roundResult: roundResultTrend,
   gameExposure: gameExposureTrend,
   gameWebViewLoad: gameWebViewLoadTrend,
+  gameControllerClick: gameControllerClickTrend,
 }
 
 const activeTrend = computed(() => trendByEvent[activeEvent.value])
@@ -136,6 +141,9 @@ const activeSeriesName = computed(() => {
   if (key === 'gameWebViewLoad') {
     return t('pages.trackingMiniGameRoundStart.gameWebViewLoadSeriesName')
   }
+  if (key === 'gameControllerClick') {
+    return t('pages.trackingMiniGameRoundStart.gameControllerClickSeriesName')
+  }
   return t('pages.trackingMiniGameRoundStart.seriesName')
 })
 
@@ -155,6 +163,9 @@ const activeChartDaily = computed(() => {
   }
   if (key === 'gameWebViewLoad') {
     return t('pages.trackingMiniGameRoundStart.gameWebViewLoadChartDaily')
+  }
+  if (key === 'gameControllerClick') {
+    return t('pages.trackingMiniGameRoundStart.gameControllerClickChartDaily')
   }
   return t('pages.trackingMiniGameRoundStart.chartDaily')
 })
@@ -176,6 +187,9 @@ const activeChartWeekly = computed(() => {
   if (key === 'gameWebViewLoad') {
     return t('pages.trackingMiniGameRoundStart.gameWebViewLoadChartWeekly')
   }
+  if (key === 'gameControllerClick') {
+    return t('pages.trackingMiniGameRoundStart.gameControllerClickChartWeekly')
+  }
   return t('pages.trackingMiniGameRoundStart.chartWeekly')
 })
 
@@ -195,6 +209,9 @@ const activeChartMonthly = computed(() => {
   }
   if (key === 'gameWebViewLoad') {
     return t('pages.trackingMiniGameRoundStart.gameWebViewLoadChartMonthly')
+  }
+  if (key === 'gameControllerClick') {
+    return t('pages.trackingMiniGameRoundStart.gameControllerClickChartMonthly')
   }
   return t('pages.trackingMiniGameRoundStart.chartMonthly')
 })
@@ -267,6 +284,11 @@ const fetchGameWebViewLoadTrend = async () => {
   assignTrend(gameWebViewLoadTrend, data)
 }
 
+const fetchGameControllerClickTrend = async () => {
+  const data = await trackingEventApi.getMiniGameControllerClickTrend()
+  assignTrend(gameControllerClickTrend, data)
+}
+
 const fetchActiveTrend = async () => {
   loading.value = true
   try {
@@ -280,6 +302,8 @@ const fetchActiveTrend = async () => {
       await fetchGameExposureTrend()
     } else if (activeEvent.value === 'gameWebViewLoad') {
       await fetchGameWebViewLoadTrend()
+    } else if (activeEvent.value === 'gameControllerClick') {
+      await fetchGameControllerClickTrend()
     } else {
       await fetchRoundStartTrend()
     }

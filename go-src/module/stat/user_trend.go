@@ -31,17 +31,22 @@ func GetCMSUserStatTrend(_ context.Context, _ *statdto.CMSUserStatTrendReq) (*st
 	}, nil
 }
 
-// 历史列表走 ListCache; 当前日/周/月数据点用 RowCache 覆盖, 自动刷新不必重复查库也能更新当日曲线.
+// 历史列表走 ListCache; 当前日/周/月数据点用 RowCache 覆盖或追加, 列表缓存不含当天时曲线仍显示当日.
 func overlayCurrentDailyLoginStat(rows []*entity.DailyLoginStat, now time.Time) []*entity.DailyLoginStat {
 	today := entity.FormatDailyLoginStatDate(now)
 	live := statdao.GetDailyLoginStatByDate(today)
 	out := make([]*entity.DailyLoginStat, len(rows))
 	copy(out, rows)
+	found := false
 	for i, row := range out {
 		if row != nil && row.ID == today {
 			out[i] = live
+			found = true
 			break
 		}
+	}
+	if !found && live != nil {
+		out = append(out, live)
 	}
 	return out
 }
@@ -51,11 +56,16 @@ func overlayCurrentWeeklyLoginStat(rows []*entity.WeeklyLoginStat, now time.Time
 	live := statdao.GetWeeklyLoginStatByWeek(week)
 	out := make([]*entity.WeeklyLoginStat, len(rows))
 	copy(out, rows)
+	found := false
 	for i, row := range out {
 		if row != nil && row.ID == week {
 			out[i] = live
+			found = true
 			break
 		}
+	}
+	if !found && live != nil {
+		out = append(out, live)
 	}
 	return out
 }
@@ -65,11 +75,16 @@ func overlayCurrentMonthlyLoginStat(rows []*entity.MonthlyLoginStat, now time.Ti
 	live := statdao.GetMonthlyLoginStatByMonth(month)
 	out := make([]*entity.MonthlyLoginStat, len(rows))
 	copy(out, rows)
+	found := false
 	for i, row := range out {
 		if row != nil && row.ID == month {
 			out[i] = live
+			found = true
 			break
 		}
+	}
+	if !found && live != nil {
+		out = append(out, live)
 	}
 	return out
 }

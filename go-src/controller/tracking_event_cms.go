@@ -52,6 +52,10 @@ func (c *TrackingEventCMSController) GetCall1v1ConnectSuccessTrend(ctx context.C
 	return tracking.GetCMSCall1v1ConnectSuccessTrend(ctx, req)
 }
 
+func (c *TrackingEventCMSController) GetOneToOneRoomListTrend(ctx context.Context, req *trackingdto.CMSOneToOneRoomListTrendReq) (*trackingdto.CMSOneToOneRoomListTrendRes, error) {
+	return tracking.GetCMSOneToOneRoomListTrend(ctx, req)
+}
+
 func (c *TrackingEventCMSController) GetMiniGameRoundStartTrend(ctx context.Context, req *trackingdto.CMSMiniGameRoundStartTrendReq) (*trackingdto.CMSMiniGameRoundStartTrendRes, error) {
 	return tracking.GetCMSMiniGameRoundStartTrend(ctx, req)
 }
@@ -66,6 +70,10 @@ func (c *TrackingEventCMSController) GetMiniGameExposureTrend(ctx context.Contex
 
 func (c *TrackingEventCMSController) GetMiniGameWebViewLoadTrend(ctx context.Context, req *trackingdto.CMSMiniGameWebViewLoadTrendReq) (*trackingdto.CMSMiniGameWebViewLoadTrendRes, error) {
 	return tracking.GetCMSMiniGameWebViewLoadTrend(ctx, req)
+}
+
+func (c *TrackingEventCMSController) GetMiniGameControllerClickTrend(ctx context.Context, req *trackingdto.CMSMiniGameControllerClickTrendReq) (*trackingdto.CMSMiniGameControllerClickTrendRes, error) {
+	return tracking.GetCMSMiniGameControllerClickTrend(ctx, req)
 }
 
 func (c *TrackingEventCMSController) GetShortVideoPlayStartTrend(ctx context.Context, req *trackingdto.CMSShortVideoPlayStartTrendReq) (*trackingdto.CMSShortVideoPlayStartTrendRes, error) {

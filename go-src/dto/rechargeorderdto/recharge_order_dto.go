@@ -44,6 +44,7 @@ type CMSRechargeOrderListReq struct {
 // CMSRechargeOrderListItem CMS充值订单列表项
 type CMSRechargeOrderListItem struct {
 	ID           string  `json:"id"`
+	UserCountry  string  `json:"userCountry" dc:"下单时用户国家(展示名)"`
 	UserId       string  `json:"userId"`
 	Nickname     string  `json:"nickname"`
 	CfgId        string  `json:"cfgId"`

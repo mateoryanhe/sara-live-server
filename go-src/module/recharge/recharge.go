@@ -8,6 +8,7 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/rechargeorderdto"
 	"xr-game-server/entity/recharge"
+	"xr-game-server/module/ipgeo"
 )
 
 // defaultCurrency 默认结算货币
@@ -69,6 +70,7 @@ func toCMSItem(o *entity.RechargeOrder) *rechargeorderdto.CMSRechargeOrderListIt
 	if u := userinfodao.GetUserInfoByUserId(o.UserId); u != nil {
 		item.Nickname = u.Nickname
 	}
+	item.UserCountry = ipgeo.FormatCountryDisplay(o.UserCountry)
 	return item
 }
 

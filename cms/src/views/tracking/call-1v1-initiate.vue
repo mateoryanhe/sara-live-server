@@ -18,6 +18,9 @@
         <el-tab-pane :label="t('pages.trackingCall1v1Initiate.tabConnectSuccess')" name="connectSuccess">
           <p class="page-desc">{{ t('pages.trackingCall1v1Initiate.connectSuccessDesc') }}</p>
         </el-tab-pane>
+        <el-tab-pane :label="t('pages.trackingCall1v1Initiate.tabOneToOneRoomList')" name="oneToOneRoomList">
+          <p class="page-desc">{{ t('pages.trackingCall1v1Initiate.oneToOneRoomListDesc') }}</p>
+        </el-tab-pane>
       </el-tabs>
 
       <div class="summary-grid">
@@ -73,7 +76,7 @@ import {trackingEventApi} from '@/api/modules/tracking-event'
 import type {HotLiveRoomJoinTrendRes} from '@/types/api'
 import CountTrendChart from './components/count-trend-chart.vue'
 
-type TrackingEventKey = 'liveRoom' | 'oneToOneRoom' | 'connectSuccess'
+type TrackingEventKey = 'liveRoom' | 'oneToOneRoom' | 'connectSuccess' | 'oneToOneRoomList'
 
 const {t, locale} = useI18n()
 const loading = ref(false)
@@ -95,11 +98,13 @@ const emptyTrend = (): HotLiveRoomJoinTrendRes => ({
 const liveRoomTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 const oneToOneRoomTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 const connectSuccessTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
+const oneToOneRoomListTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 
 const trendByEvent: Record<TrackingEventKey, HotLiveRoomJoinTrendRes> = {
   liveRoom: liveRoomTrend,
   oneToOneRoom: oneToOneRoomTrend,
   connectSuccess: connectSuccessTrend,
+  oneToOneRoomList: oneToOneRoomListTrend,
 }
 
 const activeTrend = computed(() => trendByEvent[activeEvent.value])
@@ -112,6 +117,9 @@ const activeSeriesName = computed(() => {
   if (key === 'connectSuccess') {
     return t('pages.trackingCall1v1Initiate.connectSuccessSeriesName')
   }
+  if (key === 'oneToOneRoomList') {
+    return t('pages.trackingCall1v1Initiate.oneToOneRoomListSeriesName')
+  }
   return t('pages.trackingCall1v1Initiate.seriesName')
 })
 
@@ -122,6 +130,9 @@ const activeChartDaily = computed(() => {
   }
   if (key === 'connectSuccess') {
     return t('pages.trackingCall1v1Initiate.connectSuccessChartDaily')
+  }
+  if (key === 'oneToOneRoomList') {
+    return t('pages.trackingCall1v1Initiate.oneToOneRoomListChartDaily')
   }
   return t('pages.trackingCall1v1Initiate.chartDaily')
 })
@@ -134,6 +145,9 @@ const activeChartWeekly = computed(() => {
   if (key === 'connectSuccess') {
     return t('pages.trackingCall1v1Initiate.connectSuccessChartWeekly')
   }
+  if (key === 'oneToOneRoomList') {
+    return t('pages.trackingCall1v1Initiate.oneToOneRoomListChartWeekly')
+  }
   return t('pages.trackingCall1v1Initiate.chartWeekly')
 })
 
@@ -144,6 +158,9 @@ const activeChartMonthly = computed(() => {
   }
   if (key === 'connectSuccess') {
     return t('pages.trackingCall1v1Initiate.connectSuccessChartMonthly')
+  }
+  if (key === 'oneToOneRoomList') {
+    return t('pages.trackingCall1v1Initiate.oneToOneRoomListChartMonthly')
   }
   return t('pages.trackingCall1v1Initiate.chartMonthly')
 })
@@ -201,6 +218,11 @@ const fetchConnectSuccessTrend = async () => {
   assignTrend(connectSuccessTrend, data)
 }
 
+const fetchOneToOneRoomListTrend = async () => {
+  const data = await trackingEventApi.getOneToOneRoomListTrend()
+  assignTrend(oneToOneRoomListTrend, data)
+}
+
 const fetchActiveTrend = async () => {
   loading.value = true
   try {
@@ -208,6 +230,8 @@ const fetchActiveTrend = async () => {
       await fetchOneToOneRoomTrend()
     } else if (activeEvent.value === 'connectSuccess') {
       await fetchConnectSuccessTrend()
+    } else if (activeEvent.value === 'oneToOneRoomList') {
+      await fetchOneToOneRoomListTrend()
     } else {
       await fetchLiveRoomTrend()
     }

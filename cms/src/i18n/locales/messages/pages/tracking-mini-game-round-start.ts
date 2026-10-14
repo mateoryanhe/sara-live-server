@@ -7,6 +7,7 @@ const zh = {
   tabRoundResult: '单局游戏结算',
   tabGameExposure: '半屏游戏曝光',
   tabGameWebViewLoad: 'WebView 加载成功',
+  tabGameControllerClick: '点击游戏手柄',
   gameJoinDesc:
       '统计观众进入游戏直播类直播间（category=2）的次数；每次 joinRoom 成功 +1，不含主播本人（含重复进入，event game_live_room_join）。',
   firstFrameDesc:
@@ -19,6 +20,8 @@ const zh = {
       '统计半屏游戏窗口曝光次数：App 调用 POST /liveRoom/reportMiniGameExposure（Sofie POST /sofie/studio/notifyMiniGameExposure），登录即可、无需 body 参数，每次成功 +1（对齐埋点 mini_game_exposure）。',
   gameWebViewLoadDesc:
       '统计游戏 WebView 成功加载次数：App 在 WebView 加载游戏成功后调用 POST /liveRoom/reportMiniGameWebViewLoadSuccess（Sofie POST /sofie/studio/notifyMiniGameWebViewLoadSuccess），登录即可、无需 body，每次成功 +1（对齐埋点 mini_game_webview_load_success）。',
+  gameControllerClickDesc:
+      '统计用户点击游戏手柄次数：App 调用 POST /liveRoom/reportMiniGameControllerClick（Sofie POST /sofie/studio/notifyMiniGameControllerClick），登录即可、无需 body，每次成功 +1（对齐埋点 mini_game_controller_click）。',
   todayTotal: '今日',
   weekTotal: '本周',
   monthTotal: '本月',
@@ -28,6 +31,7 @@ const zh = {
   roundResultSeriesName: '结算次数',
   gameExposureSeriesName: '曝光次数',
   gameWebViewLoadSeriesName: '加载成功次数',
+  gameControllerClickSeriesName: '点击次数',
   gameJoinChartDaily: '进房 · 按日（最近 30 天）',
   gameJoinChartWeekly: '进房 · 按周（最近 12 周）',
   gameJoinChartMonthly: '进房 · 按月（最近 12 月）',
@@ -46,6 +50,9 @@ const zh = {
   gameWebViewLoadChartDaily: 'WebView 加载 · 按日（最近 30 天）',
   gameWebViewLoadChartWeekly: 'WebView 加载 · 按周（最近 12 周）',
   gameWebViewLoadChartMonthly: 'WebView 加载 · 按月（最近 12 月）',
+  gameControllerClickChartDaily: '游戏手柄 · 按日（最近 30 天）',
+  gameControllerClickChartWeekly: '游戏手柄 · 按周（最近 12 周）',
+  gameControllerClickChartMonthly: '游戏手柄 · 按月（最近 12 月）',
   fetchFailed: '加载趋势数据失败',
 }
 
@@ -56,6 +63,7 @@ export const trackingMiniGameRoundStartMessages = definePageMessagesFromEn(zh, {
   tabRoundResult: 'Round settlement',
   tabGameExposure: 'Half-screen exposure',
   tabGameWebViewLoad: 'WebView load success',
+  tabGameControllerClick: 'Game controller tap',
   gameJoinDesc:
       'Join count for game live rooms (category=2); each successful joinRoom +1, excludes anchor (includes re-join, event game_live_room_join).',
   firstFrameDesc:
@@ -68,6 +76,8 @@ export const trackingMiniGameRoundStartMessages = definePageMessagesFromEn(zh, {
       'Half-screen mini-game exposures: POST /liveRoom/reportMiniGameExposure (Sofie /sofie/studio/notifyMiniGameExposure), login only, empty body, +1 per success (event mini_game_exposure).',
   gameWebViewLoadDesc:
       'Game WebView load success: POST /liveRoom/reportMiniGameWebViewLoadSuccess (Sofie /sofie/studio/notifyMiniGameWebViewLoadSuccess) after the game loads in WebView; login only, empty body, +1 (event mini_game_webview_load_success).',
+  gameControllerClickDesc:
+      'Game controller tap: POST /liveRoom/reportMiniGameControllerClick (Sofie /sofie/studio/notifyMiniGameControllerClick); login only, empty body, +1 (event mini_game_controller_click).',
   todayTotal: 'Today',
   weekTotal: 'This week',
   monthTotal: 'This month',
@@ -83,6 +93,7 @@ export const trackingMiniGameRoundStartMessages = definePageMessagesFromEn(zh, {
   roundResultSeriesName: 'Settlement count',
   gameExposureSeriesName: 'Exposure count',
   gameWebViewLoadSeriesName: 'Load success count',
+  gameControllerClickSeriesName: 'Tap count',
   chartDaily: 'Daily trend (last 30 days)',
   chartWeekly: 'Weekly trend (last 12 weeks)',
   chartMonthly: 'Monthly trend (last 12 months)',
@@ -95,5 +106,8 @@ export const trackingMiniGameRoundStartMessages = definePageMessagesFromEn(zh, {
   gameWebViewLoadChartDaily: 'WebView load · daily (last 30 days)',
   gameWebViewLoadChartWeekly: 'WebView load · weekly (last 12 weeks)',
   gameWebViewLoadChartMonthly: 'WebView load · monthly (last 12 months)',
+  gameControllerClickChartDaily: 'Controller tap · daily (last 30 days)',
+  gameControllerClickChartWeekly: 'Controller tap · weekly (last 12 weeks)',
+  gameControllerClickChartMonthly: 'Controller tap · monthly (last 12 months)',
   fetchFailed: 'Failed to load trend data',
 })

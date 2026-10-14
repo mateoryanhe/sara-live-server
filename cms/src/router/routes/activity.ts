@@ -7,6 +7,12 @@ export const activityRoutes: RouteRecordRaw = {
     redirect: '/activity/first-recharge-activity-cfg',
     children: [
         {
+            path: 'banner/banner-list',
+            name: 'BannerManagement',
+            component: () => import('@/views/operation/banner/banner-list.vue'),
+            meta: {title: '首页Banner', parentTitle: '活动管理'},
+        },
+        {
             path: 'first-recharge-activity-cfg',
             name: 'FirstRechargeActivityManagement',
             component: () => import('@/views/activity/first-recharge-activity-cfg.vue'),

@@ -91,6 +91,8 @@ export interface ResourceMetricPoint {
     sysMemUsedPercent: number
     sysCpuPercent: number
     onlineCount: number | string
+    liveAnchorCount?: number | string
+    audienceCount?: number | string
 }
 
 export interface ResourceMetricTrend {

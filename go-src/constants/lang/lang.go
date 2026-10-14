@@ -7,7 +7,7 @@ type Lang string
 
 const (
 	LangZHCN Lang = "zh-CN" // 简体中文
-	LangZHTW Lang = "zh-TW" // 繁体中文(App, CMS 无单独项)
+	LangZHTW Lang = "zh-TW" // 繁体中文(App / CMS)
 	LangEN   Lang = "en"    // 英文
 	LangES   Lang = "es"    // 西班牙语
 	LangPT   Lang = "pt"    // 葡萄牙语
@@ -16,7 +16,7 @@ const (
 )
 
 // CMSLocales 与 cms/src/i18n/locales/types.ts SUPPORTED_LOCALES 一致
-var CMSLocales = []Lang{LangZHCN, LangEN, LangES, LangPT, LangHI, LangID}
+var CMSLocales = []Lang{LangZHCN, LangZHTW, LangEN, LangES, LangPT, LangHI, LangID}
 
 // DefaultLang 默认语言(未识别 Accept-Language 时)
 const DefaultLang = LangEN

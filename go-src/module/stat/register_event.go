@@ -29,6 +29,9 @@ func consumeRegisterJob(job *statJob) {
 	recordDailyRegister(now)
 	recordWeeklyRegister(now)
 	recordMonthlyRegister(now)
+	if sys := statdao.GetSysStat(); sys != nil {
+		sys.AddTotalRegisterUser(1)
+	}
 	if val.PromotionChannelCode > 0 {
 		recordDailyPromotionChannelRegister(now, val.PromotionChannelCode)
 	}

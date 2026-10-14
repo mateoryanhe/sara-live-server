@@ -4,13 +4,11 @@ import type {RouteRecordRaw} from 'vue-router'
 export const operationRoutes: RouteRecordRaw = {
     path: '/operation',
     meta: {title: '运营管理', icon: 'Stamp'},
-    redirect: '/operation/banner/banner-list',
+    redirect: '/operation/guild/guild-list',
     children: [
         {
             path: 'banner/banner-list',
-            name: 'BannerManagement',
-            component: () => import('@/views/operation/banner/banner-list.vue'),
-            meta: {title: '首页Banner', parentTitle: '基础配置'},
+            redirect: '/activity/banner/banner-list',
         },
         {
             path: 'activity-message/activity-message-list',

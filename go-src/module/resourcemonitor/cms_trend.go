@@ -45,6 +45,7 @@ type trendPoint struct {
 	SysMemUsedPercent   float64
 	SysCpuPercent       float64
 	OnlineCount         uint64
+	LiveAnchorCount     uint64
 }
 
 func GetCMSResourceMetricMemoryTrend(_ context.Context, req *resourcemetricdto.CMSResourceMetricMemoryTrendReq) (*resourcemetricdto.CMSResourceMetricMemoryTrendRes, error) {
@@ -122,11 +123,20 @@ func GetCMSResourceMetricOnlineTrend(_ context.Context, req *resourcemetricdto.C
 			continue
 		}
 		points = append(points, &resourcemetricdto.CMSResourceMetricOnlinePoint{
-			Time:        row.RecordedAt.Format(trendTimeLayout),
-			OnlineCount: row.OnlineCount,
+			Time:            row.RecordedAt.Format(trendTimeLayout),
+			OnlineCount:     row.OnlineCount,
+			LiveAnchorCount: row.LiveAnchorCount,
+			AudienceCount:   audienceOnlineCount(row.OnlineCount, row.LiveAnchorCount),
 		})
 	}
 	return &resourcemetricdto.CMSResourceMetricOnlineTrendRes{Points: points}, nil
+}
+
+func audienceOnlineCount(total, liveAnchors uint64) uint64 {
+	if total <= liveAnchors {
+		return 0
+	}
+	return total - liveAnchors
 }
 
 func toTrendQuery(startTime, endTime string, limit int) trendQuery {
@@ -197,6 +207,7 @@ func fineToTrendPoints(rows []*entity.SysResourceMetric) []*trendPoint {
 			SysMemUsedPercent:   row.SysMemUsedPercent,
 			SysCpuPercent:       row.SysCpuPercent,
 			OnlineCount:         row.OnlineCount,
+			LiveAnchorCount:     row.LiveAnchorCount,
 		})
 	}
 	return list
@@ -222,6 +233,7 @@ func aggToTrendPoints(rows []*entity.SysResourceMetricAgg) []*trendPoint {
 			SysMemUsedPercent:   row.SysMemUsedPercent,
 			SysCpuPercent:       row.SysCpuPercent,
 			OnlineCount:         row.OnlineCount,
+			LiveAnchorCount:     row.LiveAnchorCount,
 		})
 	}
 	return list

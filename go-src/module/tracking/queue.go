@@ -21,11 +21,13 @@ var (
 	call1v1InitiateTrackingQueue      = gqueue.NewTQueue[*gameevent.Call1v1InitiateTrackingEventData]()
 	call1v1RoomTrackingQueue              = gqueue.NewTQueue[*gameevent.Call1v1RoomTrackingEventData]()
 	call1v1ConnectSuccessTrackingQueue  = gqueue.NewTQueue[*gameevent.Call1v1ConnectSuccessTrackingEventData]()
+	oneToOneRoomListTrackingQueue       = gqueue.NewTQueue[*gameevent.OneToOneRoomListTrackingEventData]()
 	miniGameRoundStartTrackingQueue     = gqueue.NewTQueue[*gameevent.MiniGameRoundStartTrackingEventData]()
 	miniGameRoundResultTrackingQueue    = gqueue.NewTQueue[*gameevent.MiniGameRoundResultTrackingEventData]()
 	miniGameExposureTrackingQueue       = gqueue.NewTQueue[*gameevent.MiniGameExposureTrackingEventData]()
 	gameLiveRoomJoinTrackingQueue       = gqueue.NewTQueue[*gameevent.GameLiveRoomJoinTrackingEventData]()
-	miniGameWebViewLoadTrackingQueue    = gqueue.NewTQueue[*gameevent.MiniGameWebViewLoadTrackingEventData]()
+	miniGameWebViewLoadTrackingQueue       = gqueue.NewTQueue[*gameevent.MiniGameWebViewLoadTrackingEventData]()
+	miniGameControllerClickTrackingQueue = gqueue.NewTQueue[*gameevent.MiniGameControllerClickTrackingEventData]()
 	shortVideoPlayStartTrackingQueue    = gqueue.NewTQueue[*gameevent.ShortVideoPlayStartTrackingEventData]()
 	shortVideoPaywallClickTrackingQueue = gqueue.NewTQueue[*gameevent.ShortVideoPaywallClickTrackingEventData]()
 	shortVideoPaySuccessTrackingQueue   = gqueue.NewTQueue[*gameevent.ShortVideoPaySuccessTrackingEventData]()
@@ -49,11 +51,13 @@ func initTrackingQueue() {
 	event.Sub(gameevent.Call1v1InitiateTrackingEvent, onCall1v1InitiateTrackingEvent)
 	event.Sub(gameevent.Call1v1RoomTrackingEvent, onCall1v1RoomTrackingEvent)
 	event.Sub(gameevent.Call1v1ConnectSuccessTrackingEvent, onCall1v1ConnectSuccessTrackingEvent)
+	event.Sub(gameevent.OneToOneRoomListTrackingEvent, onOneToOneRoomListTrackingEvent)
 	event.Sub(gameevent.MiniGameRoundStartTrackingEvent, onMiniGameRoundStartTrackingEvent)
 	event.Sub(gameevent.MiniGameRoundResultTrackingEvent, onMiniGameRoundResultTrackingEvent)
 	event.Sub(gameevent.MiniGameExposureTrackingEvent, onMiniGameExposureTrackingEvent)
 	event.Sub(gameevent.GameLiveRoomJoinTrackingEvent, onGameLiveRoomJoinTrackingEvent)
 	event.Sub(gameevent.MiniGameWebViewLoadTrackingEvent, onMiniGameWebViewLoadTrackingEvent)
+	event.Sub(gameevent.MiniGameControllerClickTrackingEvent, onMiniGameControllerClickTrackingEvent)
 	event.Sub(gameevent.ShortVideoPlayStartTrackingEvent, onShortVideoPlayStartTrackingEvent)
 	event.Sub(gameevent.ShortVideoPaywallClickTrackingEvent, onShortVideoPaywallClickTrackingEvent)
 	event.Sub(gameevent.ShortVideoPaySuccessTrackingEvent, onShortVideoPaySuccessTrackingEvent)
@@ -115,6 +119,14 @@ func onCall1v1ConnectSuccessTrackingEvent(data any) {
 	call1v1ConnectSuccessTrackingQueue.Push(ev)
 }
 
+func onOneToOneRoomListTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.OneToOneRoomListTrackingEventData)
+	if !ok || ev == nil || ev.UserId == 0 {
+		return
+	}
+	oneToOneRoomListTrackingQueue.Push(ev)
+}
+
 func onMiniGameRoundStartTrackingEvent(data any) {
 	ev, ok := data.(*gameevent.MiniGameRoundStartTrackingEventData)
 	if !ok || ev == nil || ev.UserId == 0 {
@@ -153,6 +165,14 @@ func onMiniGameWebViewLoadTrackingEvent(data any) {
 		return
 	}
 	miniGameWebViewLoadTrackingQueue.Push(ev)
+}
+
+func onMiniGameControllerClickTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.MiniGameControllerClickTrackingEventData)
+	if !ok || ev == nil || ev.UserId == 0 {
+		return
+	}
+	miniGameControllerClickTrackingQueue.Push(ev)
 }
 
 func onShortVideoPlayStartTrackingEvent(data any) {
@@ -260,11 +280,13 @@ func trackingQueueIdle() bool {
 		call1v1InitiateTrackingQueue.Len() == 0 &&
 		call1v1RoomTrackingQueue.Len() == 0 &&
 		call1v1ConnectSuccessTrackingQueue.Len() == 0 &&
+		oneToOneRoomListTrackingQueue.Len() == 0 &&
 		miniGameRoundStartTrackingQueue.Len() == 0 &&
 		miniGameRoundResultTrackingQueue.Len() == 0 &&
 		miniGameExposureTrackingQueue.Len() == 0 &&
 		gameLiveRoomJoinTrackingQueue.Len() == 0 &&
 		miniGameWebViewLoadTrackingQueue.Len() == 0 &&
+		miniGameControllerClickTrackingQueue.Len() == 0 &&
 		shortVideoPlayStartTrackingQueue.Len() == 0 &&
 		shortVideoPaywallClickTrackingQueue.Len() == 0 &&
 		shortVideoPaySuccessTrackingQueue.Len() == 0 &&
@@ -309,6 +331,9 @@ func drainTrackingQueue() {
 	drainTrackingTQueue(call1v1ConnectSuccessTrackingQueue, func(ev *gameevent.Call1v1ConnectSuccessTrackingEventData) {
 		recordCall1v1ConnectSuccess(ev.Source, ev.CallType, ev.CallerId, ev.ReceiverId, ev.StatAt)
 	})
+	drainTrackingTQueue(oneToOneRoomListTrackingQueue, func(ev *gameevent.OneToOneRoomListTrackingEventData) {
+		recordOneToOneRoomList(ev.UserId, ev.StatAt)
+	})
 	drainTrackingTQueue(miniGameRoundStartTrackingQueue, func(ev *gameevent.MiniGameRoundStartTrackingEventData) {
 		recordMiniGameRoundStart(ev.UserId, ev.StatAt)
 	})
@@ -323,6 +348,9 @@ func drainTrackingQueue() {
 	})
 	drainTrackingTQueue(miniGameWebViewLoadTrackingQueue, func(ev *gameevent.MiniGameWebViewLoadTrackingEventData) {
 		recordMiniGameWebViewLoad(ev.UserId, ev.StatAt)
+	})
+	drainTrackingTQueue(miniGameControllerClickTrackingQueue, func(ev *gameevent.MiniGameControllerClickTrackingEventData) {
+		recordMiniGameControllerClick(ev.UserId, ev.StatAt)
 	})
 	drainTrackingTQueue(shortVideoPlayStartTrackingQueue, func(ev *gameevent.ShortVideoPlayStartTrackingEventData) {
 		recordShortVideoPlayStart(ev.UserId, ev.StatAt)

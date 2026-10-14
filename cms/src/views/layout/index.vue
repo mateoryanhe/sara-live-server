@@ -433,7 +433,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('FirstRechargeActivityManagement') || hasMenuPermission('InviteRechargeRewardManagement')"
+            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('ActivityMessageManagement') || hasMenuPermission('FirstRechargeActivityManagement') || hasMenuPermission('InviteRechargeRewardManagement')"
             index="/activity">
           <template #title>
             <el-icon>
@@ -441,6 +441,12 @@
             </el-icon>
             <span>{{ t('menu.ActivityManagement') }}</span>
           </template>
+          <el-menu-item v-if="hasMenuPermission('BannerManagement')" index="/activity/banner/banner-list">
+            <el-icon>
+              <Picture/>
+            </el-icon>
+            <span>{{ t('menu.BannerManagement') }}</span>
+          </el-menu-item>
           <el-menu-item v-if="hasMenuPermission('ActivityMessageManagement')" index="/operation/activity-message/activity-message-list">
             <el-icon>
               <Bell/>
@@ -680,7 +686,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('MetaPixelCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer') || hasMenuPermission('CfEmailCfgManagement')"
+            v-if="hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('MetaPixelCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer') || hasMenuPermission('CfEmailCfgManagement')"
             index="/config">
           <template #title>
             <el-icon>
@@ -689,7 +695,7 @@
             <span>{{ t('menu.ConfigManagement') }}</span>
           </template>
           <el-sub-menu
-              v-if="hasMenuPermission('BannerManagement') || hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement')"
+              v-if="hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement')"
               index="/config/group/basic">
             <template #title>
               <el-icon>
@@ -697,12 +703,6 @@
               </el-icon>
               <span>{{ t('menu.ConfigBasicGroup') }}</span>
             </template>
-            <el-menu-item v-if="hasMenuPermission('BannerManagement')" index="/operation/banner/banner-list">
-              <el-icon>
-                <Picture/>
-              </el-icon>
-              <span>{{ t('menu.BannerManagement') }}</span>
-            </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('RandomNicknameManagement')" index="/operation/random-nickname/random-nickname-cfg">
               <el-icon>
                 <EditPen/>

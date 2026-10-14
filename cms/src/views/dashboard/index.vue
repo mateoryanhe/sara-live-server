@@ -128,6 +128,38 @@
           </el-tabs>
         </el-tab-pane>
 
+        <el-tab-pane :label="t('pages.dashboard.barMetricRechargeUser')" name="rechargeUser">
+          <div class="tab-toolbar">
+            <el-button :loading="trendLoading" @click="() => void fetchUserStatTrend()">{{ t('common.refresh') }}</el-button>
+          </div>
+          <el-tabs v-model="activeRechargePeriod" lazy @tab-change="handleRechargePeriodTabChange">
+            <el-tab-pane :label="t('pages.dashboard.periodDaily')" name="daily">
+              <UserStatBarChart
+                  ref="rechargeDailyBarChartRef"
+                  :data="userStatTrend.daily"
+                  metric-key="rechargeUser"
+                  :title="rechargeBarChartTitle"
+              />
+            </el-tab-pane>
+            <el-tab-pane :label="t('pages.dashboard.periodWeekly')" name="weekly">
+              <UserStatBarChart
+                  ref="rechargeWeeklyBarChartRef"
+                  :data="userStatTrend.weekly"
+                  metric-key="rechargeUser"
+                  :title="rechargeBarChartTitle"
+              />
+            </el-tab-pane>
+            <el-tab-pane :label="t('pages.dashboard.periodMonthly')" name="monthly">
+              <UserStatBarChart
+                  ref="rechargeMonthlyBarChartRef"
+                  :data="userStatTrend.monthly"
+                  metric-key="rechargeUser"
+                  :title="rechargeBarChartTitle"
+              />
+            </el-tab-pane>
+          </el-tabs>
+        </el-tab-pane>
+
         <el-tab-pane :label="t('pages.dashboard.onlineUsers')" name="online">
           <div class="tab-toolbar">
             <el-button :loading="onlineLoading" @click="() => void fetchResourceMetricTrend()">{{ t('common.refresh') }}</el-button>
@@ -190,8 +222,9 @@ const trendLoading = ref(false)
 const onlineLoading = ref(false)
 const activeMainTab = ref('basic')
 const activePeriod = ref('daily')
+const activeRechargePeriod = ref('daily')
 const enabledBarSeries = getUserStatBarMetricTabs()
-const activeBarMetric = ref(enabledBarSeries[0]?.key ?? 'rechargeUser')
+const activeBarMetric = ref(enabledBarSeries[0]?.key ?? 'goldConsumeUser')
 const autoRefreshMs = ref(readStoredAutoRefreshMs())
 const dashboardRouteActive = ref(false)
 let autoRefreshTimer: ReturnType<typeof setInterval> | null = null
@@ -212,7 +245,7 @@ const pageLoading = computed(() => {
   if (activeMainTab.value === 'basic' || activeMainTab.value === 'anchorPayout') {
     return loading.value
   }
-  if (activeMainTab.value === 'user') {
+  if (activeMainTab.value === 'user' || activeMainTab.value === 'rechargeUser') {
     return trendLoading.value
   }
   return onlineLoading.value
@@ -244,12 +277,32 @@ const barChartTitle = computed(() => {
   })
 })
 
+const rechargeBarChartPeriodSuffix = computed(() => {
+  if (activeRechargePeriod.value === 'weekly') {
+    return t('pages.dashboard.last12Weeks')
+  }
+  if (activeRechargePeriod.value === 'monthly') {
+    return t('pages.dashboard.last12Months')
+  }
+  return t('pages.dashboard.last30Days')
+})
+
+const rechargeBarChartTitle = computed(() =>
+    t('pages.dashboard.chartTitleWithPeriod', {
+      label: t('pages.dashboard.barMetricRechargeUser'),
+      period: rechargeBarChartPeriodSuffix.value,
+    }),
+)
+
 const dailyLineChartRef = ref<InstanceType<typeof UserStatChart>>()
 const weeklyLineChartRef = ref<InstanceType<typeof UserStatChart>>()
 const monthlyLineChartRef = ref<InstanceType<typeof UserStatChart>>()
 const dailyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
 const weeklyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
 const monthlyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
+const rechargeDailyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
+const rechargeWeeklyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
+const rechargeMonthlyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
 const onlineChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
 
 const sysStat = reactive<SysStat>({
@@ -513,6 +566,7 @@ const fetchUserStatTrend = async (silent = false) => {
     await nextTick()
     setTimeout(() => {
       resizeUserCharts()
+      resizeRechargeCharts()
     }, 0)
   } catch (error) {
     console.error('fetch user stat trend failed:', error)
@@ -539,10 +593,26 @@ const resizeUserCharts = () => {
   monthlyBarChartRef.value?.resize()
 }
 
+const resizeRechargeCharts = () => {
+  if (activeRechargePeriod.value === 'daily') {
+    rechargeDailyBarChartRef.value?.resize()
+    return
+  }
+  if (activeRechargePeriod.value === 'weekly') {
+    rechargeWeeklyBarChartRef.value?.resize()
+    return
+  }
+  rechargeMonthlyBarChartRef.value?.resize()
+}
+
 const handleMainTabChange = async () => {
   await nextTick()
   if (activeMainTab.value === 'user') {
     resizeUserCharts()
+    return
+  }
+  if (activeMainTab.value === 'rechargeUser') {
+    resizeRechargeCharts()
     return
   }
   if (activeMainTab.value === 'online') {
@@ -553,6 +623,11 @@ const handleMainTabChange = async () => {
 const handlePeriodTabChange = async () => {
   await nextTick()
   resizeUserCharts()
+}
+
+const handleRechargePeriodTabChange = async () => {
+  await nextTick()
+  resizeRechargeCharts()
 }
 
 const handleBarMetricChange = async () => {

@@ -79,6 +79,17 @@ func ResolveRoom(anchorId uint64) *entity.LiveRoom {
 	return GetRoomFromDB(anchorId)
 }
 
+// CountLivingAnchors 当前开播主播数(live_record_id > 0,走进程内房间缓存).
+func CountLivingAnchors() uint64 {
+	var n uint64
+	for _, room := range roomCacheMgr.Values() {
+		if room != nil && room.LiveRecordId > 0 {
+			n++
+		}
+	}
+	return n
+}
+
 // ListLivingRoomIds 查询正在直播的直播间ID(live_record_id > 0),仅返回 id 列
 func ListLivingRoomIds() []uint64 {
 	type idRow struct {

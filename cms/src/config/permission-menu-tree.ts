@@ -288,6 +288,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
         id: 'activity',
         titleKey: 'menu.ActivityManagement',
         children: [
+            page('BannerManagement'),
             page('ActivityMessageManagement'),
             page('FirstRechargeActivityManagement'),
             page('InviteRechargeRewardManagement'),
@@ -358,7 +359,6 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
         titleKey: 'menu.ConfigManagement',
         children: [
             group('config-basic', 'menu.ConfigBasicGroup', [
-                page('BannerManagement'),
                 page('RandomNicknameManagement'),
                 page('AppTokenConfig'),
                 page('AccountCfgManagement'),

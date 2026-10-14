@@ -4,6 +4,8 @@ import {getPageFromPermissionKey, PERMISSION_SEP} from './page-buttons'
 const PERMISSION_API_PATHS: Record<string, string> = {
     Dashboard: '/sysStat/getSysStat',
     'Dashboard:view': '/sysStat/getSysStat',
+    'Dashboard:userStatTrend': '/sysStat/getUserStatTrend',
+    'Dashboard:onlineTrend': '/resourceMetric/getResourceMetricOnlineTrend',
     'Dashboard:basicDataReset': '/sysStat/resetBasicDashboardStats',
 
     TrackingHotLiveRoomJoinManagement: '/trackingEvent/getHotLiveRoomJoinTrend',
@@ -16,12 +18,14 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'TrackingCall1v1InitiateManagement:view': '/trackingEvent/getCall1v1InitiateTrend',
     'TrackingCall1v1InitiateManagement:roomCallTrend': '/trackingEvent/getCall1v1RoomCallTrend',
     'TrackingCall1v1InitiateManagement:connectSuccessTrend': '/trackingEvent/getCall1v1ConnectSuccessTrend',
+    'TrackingCall1v1InitiateManagement:roomListTrend': '/trackingEvent/getOneToOneRoomListTrend',
 
     TrackingMiniGameRoundStartManagement: '/trackingEvent/getMiniGameRoundStartTrend',
     'TrackingMiniGameRoundStartManagement:view': '/trackingEvent/getMiniGameRoundStartTrend',
     'TrackingMiniGameRoundStartManagement:roundResultTrend': '/trackingEvent/getMiniGameRoundResultTrend',
     'TrackingMiniGameRoundStartManagement:gameExposureTrend': '/trackingEvent/getMiniGameExposureTrend',
     'TrackingMiniGameRoundStartManagement:gameWebViewLoadTrend': '/trackingEvent/getMiniGameWebViewLoadTrend',
+    'TrackingMiniGameRoundStartManagement:gameControllerClickTrend': '/trackingEvent/getMiniGameControllerClickTrend',
     'TrackingMiniGameRoundStartManagement:gameJoinTrend': '/trackingEvent/getGameLiveRoomJoinTrend',
     'TrackingMiniGameRoundStartManagement:firstFrameTrend': '/trackingEvent/getGameLiveWatchStreamTrend',
 

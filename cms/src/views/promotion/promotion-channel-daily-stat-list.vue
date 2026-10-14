@@ -22,12 +22,15 @@
           />
         </el-form-item>
         <el-form-item :label="t('pages.promotionChannelDailyStatList.channelCode')">
-          <el-input
-              v-model="searchForm.channelCode"
-              clearable
-              :placeholder="t('pages.promotionChannelDailyStatList.channelCodePlaceholder')"
-              style="width: 160px"
-          />
+          <div class="channel-code-field">
+            <el-input
+                v-model="searchForm.channelCode"
+                clearable
+                :placeholder="t('pages.promotionChannelDailyStatList.channelCodePlaceholder')"
+                style="width: 160px"
+            />
+            <el-button @click="openChannelPicker">{{ t('pages.promotionChannelDailyStatList.selectChannel') }}</el-button>
+          </div>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
@@ -64,6 +67,55 @@
         />
       </div>
     </el-card>
+
+    <el-dialog
+        v-model="channelPickerVisible"
+        :title="t('pages.promotionChannelDailyStatList.channelPickerTitle')"
+        width="640px"
+        destroy-on-close
+        @open="handleChannelPickerOpen"
+    >
+      <div class="channel-picker-toolbar">
+        <el-input
+            v-model="channelPickerSearchKey"
+            clearable
+            :placeholder="t('pages.promotionChannelDailyStatList.channelPickerSearchPlaceholder')"
+            style="flex: 1"
+            @keyup.enter="fetchChannelPickerList"
+        />
+        <el-button type="primary" @click="fetchChannelPickerList">{{ t('common.search') }}</el-button>
+        <el-button @click="selectChannelCode('')">{{ t('pages.promotionChannelDailyStatList.channelPickerAll') }}</el-button>
+      </div>
+      <el-table
+          v-loading="channelPickerLoading"
+          :data="channelPickerRows"
+          highlight-current-row
+          max-height="420"
+          style="width: 100%; margin-top: 12px"
+          @row-dblclick="(row: PromotionChannelUrl) => selectChannelCode(String(row.channelCode))"
+      >
+        <el-table-column :label="t('pages.promotionChannelDailyStatList.channelName')" min-width="160" prop="channelName"/>
+        <el-table-column :label="t('pages.promotionChannelDailyStatList.channelCode')" prop="channelCode" width="120"/>
+        <el-table-column :label="t('common.actions')" width="100">
+          <template #default="{ row }">
+            <el-button link type="primary" @click="selectChannelCode(String(row.channelCode))">
+              {{ t('pages.promotionChannelDailyStatList.channelPickerSelect') }}
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div class="channel-picker-pagination">
+        <el-pagination
+            v-model:current-page="channelPickerPage"
+            v-model:page-size="channelPickerPageSize"
+            :page-sizes="[10, 20, 50]"
+            :total="channelPickerTotal"
+            layout="total, prev, pager, next"
+            @current-change="fetchChannelPickerList"
+            @size-change="handleChannelPickerSizeChange"
+        />
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -72,7 +124,8 @@ import {useI18n} from 'vue-i18n'
 import {onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {promotionChannelDailyStatApi} from '@/api/modules/promotion-channel-daily-stat'
-import type {PromotionChannelDailyStatRow} from '@/types/api'
+import {promotionChannelUrlApi} from '@/api/modules/promotion-channel-url'
+import type {PromotionChannelDailyStatRow, PromotionChannelUrl} from '@/types/api'
 import {formatServerDateOnly} from '@/utils/server-datetime'
 
 interface SearchForm {
@@ -97,6 +150,52 @@ const searchForm = reactive<SearchForm>({
   dateRange: createDefaultDateRange(),
   channelCode: '',
 })
+
+const channelPickerVisible = ref(false)
+const channelPickerLoading = ref(false)
+const channelPickerRows = ref<PromotionChannelUrl[]>([])
+const channelPickerTotal = ref(0)
+const channelPickerPage = ref(1)
+const channelPickerPageSize = ref(20)
+const channelPickerSearchKey = ref('')
+
+const openChannelPicker = () => {
+  channelPickerVisible.value = true
+}
+
+const handleChannelPickerOpen = () => {
+  channelPickerPage.value = 1
+  channelPickerSearchKey.value = ''
+  void fetchChannelPickerList()
+}
+
+const fetchChannelPickerList = async () => {
+  channelPickerLoading.value = true
+  try {
+    const response = await promotionChannelUrlApi.getList({
+      pageIndex: channelPickerPage.value,
+      pageSize: channelPickerPageSize.value,
+      key: channelPickerSearchKey.value.trim(),
+    })
+    channelPickerRows.value = response.data
+    channelPickerTotal.value = response.total
+  } catch (error) {
+    console.error('fetch channel picker list failed:', error)
+    ElMessage.error(t('pages.promotionChannelDailyStatList.fetchChannelListFailed'))
+  } finally {
+    channelPickerLoading.value = false
+  }
+}
+
+const handleChannelPickerSizeChange = () => {
+  channelPickerPage.value = 1
+  void fetchChannelPickerList()
+}
+
+const selectChannelCode = (code: string) => {
+  searchForm.channelCode = code
+  channelPickerVisible.value = false
+}
 
 const formatUsd = (val: number | undefined) => {
   const n = Number(val ?? 0)
@@ -180,6 +279,25 @@ onMounted(() => {
 
 .pagination-container {
   margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.channel-code-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.channel-picker-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.channel-picker-pagination {
+  margin-top: 12px;
   display: flex;
   justify-content: flex-end;
 }

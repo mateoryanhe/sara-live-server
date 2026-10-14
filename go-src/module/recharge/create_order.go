@@ -58,6 +58,7 @@ func CreateOrder(ctx context.Context, req *rechargeorderdto.AppCreateRechargeOrd
 	}
 
 	order.SetPackageName(packageName)
+	applyOrderUserCountry(ctx, order)
 	rechargeorderdao.AddOrderToCache(order)
 	ScheduleRechargeOrderTimeout(order.ID, order.CreatedAt)
 	pubChargeClickTracking(userId, time.Now())
@@ -124,6 +125,7 @@ func CMSCreateOrder(ctx context.Context, req *rechargeorderdto.CMSCreateRecharge
 		order.SetOperatorId(operatorId)
 	}
 
+	applyOrderUserCountry(ctx, order)
 	rechargeorderdao.AddOrderToCache(order)
 	ScheduleRechargeOrderTimeout(order.ID, order.CreatedAt)
 	event.Pub(gameevent.RechargeOrderCreatedEvent, gameevent.NewRechargeOrderCreatedFromCtx(ctx, order.ID, gameevent.RechargeCheckoutHint{}))

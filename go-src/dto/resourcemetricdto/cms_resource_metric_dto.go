@@ -65,8 +65,10 @@ type CMSResourceMetricCpuPoint struct {
 }
 
 type CMSResourceMetricOnlinePoint struct {
-	Time        string `json:"time"`
-	OnlineCount uint64 `json:"onlineCount,string"`
+	Time            string `json:"time"`
+	OnlineCount     uint64 `json:"onlineCount,string"`
+	LiveAnchorCount uint64 `json:"liveAnchorCount,string"`
+	AudienceCount   uint64 `json:"audienceCount,string"`
 }
 
 type CMSResourceMetricMemoryTrendRes struct {
