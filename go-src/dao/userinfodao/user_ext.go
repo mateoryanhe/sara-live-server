@@ -102,6 +102,31 @@ func SaveRegisterInfo(userId uint64, info *entity.DeviceInfo) {
 	PublishUserExt(ext)
 }
 
+// TrySetPromotionChannelFromDevice 注册时写入推广渠道(仅当尚未绑定时)
+func TrySetPromotionChannelFromDevice(userId uint64, info *entity.DeviceInfo) {
+	if userId == 0 || info == nil {
+		return
+	}
+	code, ok := info.PromotionChannelCode()
+	if !ok {
+		return
+	}
+	ext := GetUserExtByUserId(userId)
+	if ext.PromotionChannelCode != 0 {
+		return
+	}
+	ext.SetPromotionChannelCode(code)
+	PublishUserExt(ext)
+}
+
+// GetPromotionChannelCode 用户注册推广渠道编码(0 表示无)
+func GetPromotionChannelCode(userId uint64) int {
+	if userId == 0 {
+		return 0
+	}
+	return GetUserExtByUserId(userId).PromotionChannelCode
+}
+
 // IsCancelCodeValid 注销码是否存在且在有效期内
 func IsCancelCodeValid(ext *entity.UserExt) bool {
 	if ext == nil || strings.TrimSpace(ext.CancelCode) == "" {

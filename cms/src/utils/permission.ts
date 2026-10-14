@@ -3,7 +3,6 @@ import {
     getPageFromPermissionKey,
     isButtonPermissionKey,
     buttonPermissionKey,
-    pageHasGranularButtons,
     getPageButtons,
 } from '@/config/page-buttons'
 
@@ -60,7 +59,7 @@ export const hasPermission = (pageName: string): boolean => {
     if (isAdmin) {
         return true
     }
-    if (!pageHasGranularButtons(pageName) && permissionModuleSet.has(pageName)) {
+    if (permissionModuleSet.has(pageName)) {
         return true
     }
     for (const module of permissionModuleSet) {
@@ -86,7 +85,7 @@ export const hasButtonPermission = (pageName: string, action: string): boolean =
     if (permissionModuleSet.has(buttonPermissionKey(pageName, action))) {
         return true
     }
-    if (!pageHasGranularButtons(pageName) && permissionModuleSet.has(pageName)) {
+    if (permissionModuleSet.has(pageName)) {
         return true
     }
     return false

@@ -82,6 +82,7 @@ const READONLY_NO_EXPORT_PAGES = new Set([
     'PlatformAnchorPayoutDetailList',
     'CoinMerchantPayoutDetailList',
     'CoinMerchantGuildIncomeSettlementLogList',
+    'PromotionChannelDailyStatManagement',
 ])
 
 const CONFIG_PAGES = new Set([

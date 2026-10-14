@@ -34,6 +34,7 @@ const (
 	UserExtEmail                     db.TbCol = "email"
 	UserExtFirebaseUID               db.TbCol = "firebase_uid"
 	UserExtInviterId                 db.TbCol = "inviter_id"
+	UserExtPromotionChannelCode      db.TbCol = "promotion_channel_code"
 )
 
 // UserExt 用户扩展信息(与用户一一对应,主键ID即用户ID)
@@ -54,6 +55,7 @@ type UserExt struct {
 	Email                     string     `gorm:"size:256;index;default:'';comment:绑定邮箱(规范化小写)" json:"email"`
 	FirebaseUID               string     `gorm:"size:128;index;default:'';comment:绑定Firebase UID" json:"firebaseUid"`
 	InviterId                 uint64     `gorm:"index;default:0;comment:邀请者用户ID(0为无)" json:"inviterId"`
+	PromotionChannelCode      int        `gorm:"index;default:0;comment:注册推广渠道编码(0为无)" json:"promotionChannelCode"`
 }
 
 func NewUserExt(userId uint64) *UserExt {
@@ -176,6 +178,15 @@ func (receiver *UserExt) SetInviterId(inviterId uint64) {
 	})
 }
 
+func (receiver *UserExt) SetPromotionChannelCode(code int) {
+	receiver.PromotionChannelCode = code
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddData(TbUserExt, UserExtPromotionChannelCode, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: code,
+	})
+}
+
 func (receiver *UserExt) AddShortVideoUnsettledIncome(amount float64) {
 	if amount <= 0 {
 		return
@@ -285,6 +296,7 @@ func initUserExt() {
 	syndb.RegQuick(TbUserExt, UserExtEmail)
 	syndb.RegQuick(TbUserExt, UserExtFirebaseUID)
 	syndb.RegQuick(TbUserExt, UserExtInviterId)
+	syndb.RegQuick(TbUserExt, UserExtPromotionChannelCode)
 
 	migrate.AutoMigrate(&UserExt{})
 }

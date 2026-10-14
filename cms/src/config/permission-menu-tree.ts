@@ -46,6 +46,7 @@ export interface PermissionModuleNode {
 }
 
 const DASHBOARD_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
+    {id: 'access', titleKey: 'pages.moduleList.groupAccess', buttonKeys: ['view']},
     {id: 'dashboardStats', titleKey: 'pages.moduleList.groupDashboardStats', buttonKeys: ['basicDataReset']},
 ]
 
@@ -145,12 +146,7 @@ function page(
  * module 存库格式不变。
  */
 export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
-    {
-        kind: 'group',
-        id: 'dashboard',
-        titleKey: 'menu.Dashboard',
-        children: [page('Dashboard', {buttonGroups: DASHBOARD_BUTTON_GROUPS})],
-    },
+    page('Dashboard', {buttonGroups: DASHBOARD_BUTTON_GROUPS}),
     {
         kind: 'group',
         id: 'tracking',
@@ -295,6 +291,15 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             page('ActivityMessageManagement'),
             page('FirstRechargeActivityManagement'),
             page('InviteRechargeRewardManagement'),
+        ],
+    },
+    {
+        kind: 'group',
+        id: 'promotion',
+        titleKey: 'menu.PromotionManagement',
+        children: [
+            page('PromotionChannelUrlListManagement'),
+            page('PromotionChannelDailyStatManagement'),
         ],
     },
     {

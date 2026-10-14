@@ -64,6 +64,7 @@ func consumeRechargeJob(job *statJob) {
 		statAt = time.Now()
 	}
 	recordPeriodRecharge(statAt, amount, isCoinMerchant)
+	recordDailyPromotionChannelRechargeSuccess(statAt, order.UserId, amount)
 
 	if !shouldCountUserStat(order.UserId) {
 		return

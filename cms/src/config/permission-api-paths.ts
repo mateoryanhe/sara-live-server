@@ -540,6 +540,16 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'AppVersionCfgManagement:view': '/appVersionCfg/getAppVersionCfg',
     'AppVersionCfgManagement:save': '/appVersionCfg/saveAppVersionCfg',
 
+    PromotionChannelUrlListManagement: '/promotionChannelUrl/promotionChannelUrlList',
+    'PromotionChannelUrlListManagement:view': '/promotionChannelUrl/promotionChannelUrlList',
+    'PromotionChannelUrlListManagement:search': '/promotionChannelUrl/promotionChannelUrlList',
+    'PromotionChannelUrlListManagement:create': '/promotionChannelUrl/createPromotionChannelUrl',
+    'PromotionChannelUrlListManagement:edit': '/promotionChannelUrl/updatePromotionChannelUrl',
+    'PromotionChannelUrlListManagement:delete': '/promotionChannelUrl/deletePromotionChannelUrl',
+    PromotionChannelDailyStatManagement: '/promotionChannelUrl/promotionChannelDailyStatList',
+    'PromotionChannelDailyStatManagement:view': '/promotionChannelUrl/promotionChannelDailyStatList',
+    'PromotionChannelDailyStatManagement:search': '/promotionChannelUrl/promotionChannelDailyStatList',
+
     SimulatorCpuKeywordManagement: '/simulatorCpuKeyword/simulatorCpuKeywordList',
     'SimulatorCpuKeywordManagement:view': '/simulatorCpuKeyword/simulatorCpuKeywordList',
     'SimulatorCpuKeywordManagement:search': '/simulatorCpuKeyword/simulatorCpuKeywordList',

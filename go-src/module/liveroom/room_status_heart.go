@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	TimeOut             = 30 * time.Minute
+	TimeOut             = 5 * time.Minute
 	CommonPeriod uint64 = 30
 )
 

@@ -17,10 +17,11 @@ const (
 
 // RegisterEventData 用户注册成功事件数据
 type RegisterEventData struct {
-	UserId       uint64
-	RegisteredAt time.Time
-	NickLang     uint8 // 随机昵称语言(0=英文默认)
-	Attribution  RegisterAttribution
+	UserId                uint64
+	RegisteredAt          time.Time
+	NickLang              uint8 // 随机昵称语言(0=英文默认)
+	Attribution           RegisterAttribution
+	PromotionChannelCode  int // deviceInfo.ch 解析出的渠道编码,0 为无
 }
 
 func NewRegisterEventData(userId uint64, registeredAt time.Time) *RegisterEventData {
@@ -40,10 +41,17 @@ func NewRegisterEventDataFromCtxWithDevice(ctx context.Context, userId uint64, r
 	if r := g.RequestFromCtx(ctx); r != nil {
 		lang = randomnick.ParseAcceptLanguage(r.Header.Get("Accept-Language"))
 	}
+	code := 0
+	if deviceInfo != nil {
+		if c, ok := deviceInfo.PromotionChannelCode(); ok {
+			code = c
+		}
+	}
 	return &RegisterEventData{
-		UserId:       userId,
-		RegisteredAt: registeredAt,
-		NickLang:     lang,
-		Attribution:  registerAttributionFromCtx(ctx, deviceInfo),
+		UserId:               userId,
+		RegisteredAt:         registeredAt,
+		NickLang:             lang,
+		Attribution:          registerAttributionFromCtx(ctx, deviceInfo),
+		PromotionChannelCode: code,
 	}
 }

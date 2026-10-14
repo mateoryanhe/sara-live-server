@@ -66,6 +66,8 @@ import {userWithdrawLogListMessages} from './user-withdraw-log-list'
 import {appVersionCfgMessages} from './app-version-cfg'
 import {firstRechargeActivityCfgMessages} from './first-recharge-activity-cfg'
 import {inviteRechargeRewardCfgMessages} from './invite-recharge-reward-cfg'
+import {promotionChannelUrlListMessages} from './promotion-channel-url-list'
+import {promotionChannelDailyStatListMessages} from './promotion-channel-daily-stat-list'
 import {simulatorCpuKeywordListMessages} from './simulator-cpu-keyword-list'
 import {simulatorDeviceWhitelistListMessages} from './simulator-device-whitelist-list'
 import {anchorSalarySocialShareCfgListMessages} from './anchor-salary-social-share-cfg-list'
@@ -174,6 +176,8 @@ const pageMessageBuilders = [
   ['appVersionCfg', appVersionCfgMessages],
   ['firstRechargeActivityCfg', firstRechargeActivityCfgMessages],
   ['inviteRechargeRewardCfg', inviteRechargeRewardCfgMessages],
+  ['promotionChannelUrlList', promotionChannelUrlListMessages],
+  ['promotionChannelDailyStatList', promotionChannelDailyStatListMessages],
   ['simulatorCpuKeywordList', simulatorCpuKeywordListMessages],
   ['simulatorDeviceWhitelistList', simulatorDeviceWhitelistListMessages],
   ['anchorSalarySocialShareCfgList', anchorSalarySocialShareCfgListMessages],

@@ -29,6 +29,9 @@ func consumeRegisterJob(job *statJob) {
 	recordDailyRegister(now)
 	recordWeeklyRegister(now)
 	recordMonthlyRegister(now)
+	if val.PromotionChannelCode > 0 {
+		recordDailyPromotionChannelRegister(now, val.PromotionChannelCode)
+	}
 }
 
 func recordDailyRegister(now time.Time) {

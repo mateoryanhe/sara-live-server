@@ -11,4 +11,5 @@ func Init() {
 	initAppVersionUpdateDetail()
 	initSimulatorCpuKeyword()
 	initSimulatorDeviceWhitelist()
+	initPromotionChannelUrl()
 }

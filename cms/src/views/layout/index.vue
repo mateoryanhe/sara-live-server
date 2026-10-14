@@ -461,6 +461,28 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
+            v-if="hasMenuPermission('PromotionChannelUrlListManagement') || hasMenuPermission('PromotionChannelDailyStatManagement')"
+            index="/promotion">
+          <template #title>
+            <el-icon>
+              <Promotion/>
+            </el-icon>
+            <span>{{ t('menu.PromotionManagement') }}</span>
+          </template>
+          <el-menu-item v-if="hasMenuPermission('PromotionChannelUrlListManagement')" index="/promotion/channel-url-list">
+            <el-icon>
+              <Link/>
+            </el-icon>
+            <span>{{ t('menu.PromotionChannelUrlListManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('PromotionChannelDailyStatManagement')" index="/promotion/channel-daily-stat">
+            <el-icon>
+              <DataLine/>
+            </el-icon>
+            <span>{{ t('menu.PromotionChannelDailyStatManagement') }}</span>
+          </el-menu-item>
+        </el-sub-menu>
+        <el-sub-menu
             v-if="hasMenuPermission('WalletExchangeCfgManagement') || hasMenuPermission('PaymentCountryCfgManagement') || hasMenuPermission('CoinMerchantPaymentCountryCfgManagement') || hasMenuPermission('AnchorSalarySocialShareCfgManagement') || hasMenuPermission('AnchorNoSalaryShareCfgManagement') || hasMenuPermission('AnchorSalaryGameShareCfgManagement') || hasMenuPermission('AnchorNoSalaryGameShareCfgManagement')"
             index="/settlement">
           <template #title>
@@ -898,7 +920,7 @@ import {useI18n} from 'vue-i18n'
 import LayoutTabs from '@/components/layout/LayoutTabs.vue'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import {useLayoutTabs} from '@/composables/useLayoutTabs'
-import {ArrowDown, Bell, Box, Calendar, Coin, Collection, CollectionTag, Cpu, CreditCard, DataLine, Delete, Document, EditPen, Expand, Fold, FolderOpened, Iphone, Key, List, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Promotion, Refresh, Search, Service, Setting, UploadFilled, User, UserFilled, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Bell, Box, Calendar, Coin, Collection, CollectionTag, Cpu, CreditCard, DataLine, Delete, Document, EditPen, Expand, Fold, FolderOpened, Iphone, Key, Link, List, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Promotion, Refresh, Search, Service, Setting, UploadFilled, User, UserFilled, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {getIsAdmin, hasPermission} from '@/utils/permission'
 import {clearAuthSession} from '@/utils/auth'
 

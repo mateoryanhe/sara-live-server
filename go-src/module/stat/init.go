@@ -8,4 +8,5 @@ func Init() {
 	initGuildPayoutEvent()
 	initCurrencyStatEvent()
 	initAudienceEvent()
+	initPromotionChannelOrderEvent()
 }

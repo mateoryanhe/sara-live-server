@@ -826,6 +826,44 @@ export interface SimulatorCpuKeywordQuery extends PageQuery {
     key?: string
 }
 
+export interface PromotionChannelUrl {
+    id: string
+    channelName: string
+    channelCode: number
+    shareUrl: string
+    url: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface PromotionChannelUrlListResponse extends PageResponse<PromotionChannelUrl> {
+    shareBaseHost?: string
+}
+
+export interface PromotionChannelUrlQuery extends PageQuery {
+    key?: string
+}
+
+export interface PromotionChannelDailyStatRow {
+    statDate: string
+    channelName: string
+    channelCode: number
+    registerCount: number
+    orderCount: number
+    payUserCount: number
+    orderTotalAmount: number
+    rechargeSuccessAmount: number
+}
+
+export interface PromotionChannelDailyStatListResponse extends PageResponse<PromotionChannelDailyStatRow> {
+}
+
+export interface PromotionChannelDailyStatQuery extends PageQuery {
+    startDate: string
+    endDate: string
+    channelCode?: number
+}
+
 export interface SimulatorDeviceWhitelist {
     id: string
     deviceId: string

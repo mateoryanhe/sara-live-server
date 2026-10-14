@@ -1,0 +1,43 @@
+import {definePageMessagesFromEn} from './_define'
+
+const zh = {
+  add: '新增渠道',
+  edit: '编辑渠道',
+  channelName: '渠道名称',
+  channelCode: '渠道编码',
+  shareUrl: '分享链接',
+  shareBaseHostHint: '分享域名取自「前端部署 → H5直播部署」中的站点域名，链接格式：https://{域名}?ch={渠道编码}',
+  shareBaseHostEmpty: '未配置 H5 直播域名，请先在 H5直播部署 页保存站点域名后再新建渠道。',
+  shareBaseHostCurrent: '当前分享域名：{host}',
+  copyShareUrl: '复制链接',
+  copyShareUrlSuccess: '分享链接已复制',
+  copyShareUrlFailed: '复制失败',
+  searchPlaceholder: '搜索渠道名称/编码/链接',
+  deleteConfirm: '确定要删除渠道「{name}」吗？',
+  fetchFailed: '获取推广渠道列表失败',
+  channelNameRequired: '请输入渠道名称',
+  channelCodeRequired: '请输入渠道编码',
+  channelCodeMin: '渠道编码须为大于 0 的整数',
+  channelCodeTip: '整数，全局唯一；分享链接自动拼接为 ?ch=编码',
+} as const
+
+export const promotionChannelUrlListMessages = definePageMessagesFromEn(zh, {
+  add: 'Add Channel',
+  edit: 'Edit Channel',
+  channelName: 'Channel Name',
+  channelCode: 'Channel Code',
+  shareUrl: 'Share link',
+  shareBaseHostHint: 'Domain from Frontend deploy → H5 Live Deploy. Format: https://{host}?ch={code}',
+  shareBaseHostEmpty: 'H5 live domain not configured. Save it on H5 Live Deploy first.',
+  shareBaseHostCurrent: 'Share domain: {host}',
+  copyShareUrl: 'Copy link',
+  copyShareUrlSuccess: 'Share link copied',
+  copyShareUrlFailed: 'Copy failed',
+  searchPlaceholder: 'Search name/code/link',
+  deleteConfirm: 'Delete channel "{name}"?',
+  fetchFailed: 'Failed to load promotion channels',
+  channelNameRequired: 'Enter channel name',
+  channelCodeRequired: 'Enter channel code',
+  channelCodeMin: 'Channel code must be a positive integer',
+  channelCodeTip: 'Unique integer; share link uses ?ch=code',
+})

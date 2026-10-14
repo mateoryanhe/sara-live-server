@@ -22,6 +22,7 @@ const (
 	jobCurrency
 	jobAudience
 	jobGuildPayout
+	jobPromotionChannelOrder
 )
 
 // statJob 统计队列任务;Payload 为原始事件数据,校验与清洗在消费端完成.
@@ -88,5 +89,7 @@ func handleStatJob(job *statJob) {
 		consumeAudienceJob(job)
 	case jobGuildPayout:
 		consumeGuildPayoutJob(job)
+	case jobPromotionChannelOrder:
+		consumePromotionChannelOrderJob(job)
 	}
 }

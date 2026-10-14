@@ -89,5 +89,7 @@ func Init() {
 	initDailyChargeResultServerStat()
 	initWeeklyChargeResultServerStat()
 	initMonthlyChargeResultServerStat()
+	initDailyPromotionChannelStat()
+	initDailyPromotionChannelPayUser()
 	initSystemTotalStat()
 }

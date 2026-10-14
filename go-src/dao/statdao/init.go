@@ -89,4 +89,6 @@ func Init() {
 	initDailyChargeResultServerStatDao()
 	initWeeklyChargeResultServerStatDao()
 	initMonthlyChargeResultServerStatDao()
+	initDailyPromotionChannelStatDao()
+	initDailyPromotionChannelPayUserDao()
 }
