@@ -23,6 +23,7 @@ func GetAccountCfg(_ context.Context, _ *accountcfgdto.GetAccountCfgReq) (*accou
 			DeviceCancelDailyLimit:     defaultDeviceCancelDailyLimit,
 			UserWithdrawEnabled:        false,
 			UserWithdrawMinUsd:         defaultUserWithdrawMinUsd,
+			UserWithdrawDailyMaxCount:  defaultUserWithdrawDailyMaxCount,
 		}}, nil
 	}
 	return &accountcfgdto.GetAccountCfgRes{Cfg: toCfgItem(cfg)}, nil
@@ -47,6 +48,10 @@ func SaveAccountCfg(_ context.Context, req *accountcfgdto.SaveAccountCfgReq) (*a
 	if minUsd <= 0 {
 		minUsd = defaultUserWithdrawMinUsd
 	}
+	dailyMax := req.UserWithdrawDailyMaxCount
+	if dailyMax < 0 {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
 	row := &entity.AccountCfg{
 		CancelAccountByCodeEnabled: req.CancelAccountByCodeEnabled,
 		BlockSimulatorLogin:        req.BlockSimulatorLogin,
@@ -56,6 +61,7 @@ func SaveAccountCfg(_ context.Context, req *accountcfgdto.SaveAccountCfgReq) (*a
 		DeviceCancelDailyLimit:     dailyLimit,
 		UserWithdrawEnabled:        req.UserWithdrawEnabled,
 		UserWithdrawMinUsd:         minUsd,
+		UserWithdrawDailyMaxCount:  dailyMax,
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -97,6 +103,10 @@ func toCfgItem(cfg *entity.AccountCfg) *accountcfgdto.AccountCfgItem {
 	if minUsd <= 0 {
 		minUsd = defaultUserWithdrawMinUsd
 	}
+	dailyMax := cfg.UserWithdrawDailyMaxCount
+	if dailyMax < 0 {
+		dailyMax = defaultUserWithdrawDailyMaxCount
+	}
 	return &accountcfgdto.AccountCfgItem{
 		ID:                         strconv.FormatUint(cfg.ID, 10),
 		CancelAccountByCodeEnabled: cfg.CancelAccountByCodeEnabled,
@@ -107,6 +117,7 @@ func toCfgItem(cfg *entity.AccountCfg) *accountcfgdto.AccountCfgItem {
 		DeviceCancelDailyLimit:     dailyLimit,
 		UserWithdrawEnabled:        cfg.UserWithdrawEnabled,
 		UserWithdrawMinUsd:         minUsd,
+		UserWithdrawDailyMaxCount:  dailyMax,
 		CreatedAt:                  formatTime(cfg.CreatedAt),
 		UpdatedAt:                  formatTime(cfg.UpdatedAt),
 	}

@@ -14,6 +14,7 @@ import (
 	callentity "xr-game-server/entity/call"
 	liveentity "xr-game-server/entity/live"
 	"xr-game-server/errercode"
+	"xr-game-server/module/livecfg"
 	"xr-game-server/module/upload"
 )
 
@@ -103,7 +104,7 @@ func buildLiveRoomCallInviteItem(anchorId uint64, cfg *liveentity.LiveRoomCfg) *
 		Message:  liveRoomCallInviteMessage,
 	}
 	if cfg != nil {
-		item.Ticket = cfg.Ticket
+		item.Ticket = livecfg.AppLiveRoomCallTicketPrice(cfg.Ticket)
 		item.Billing = cfg.Billing
 	}
 	if u := userinfodao.GetUserInfoByUserId(anchorId); u != nil {

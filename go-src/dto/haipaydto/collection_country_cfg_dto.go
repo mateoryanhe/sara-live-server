@@ -68,3 +68,17 @@ type SaveCoinMerchantCollectionCountryCfgReq struct {
 	InBankCode   string `json:"inBankCode" v:"required#支付编码不能为空"`
 	Enabled      bool   `json:"enabled"`
 }
+
+// SaveUserWithdrawPayoutCountryCfgReq 保存用户提现代付国家配置(CMS 支付类型/编码字段与代收一致)
+type SaveUserWithdrawPayoutCountryCfgReq struct {
+	g.Meta       `path:"/savePayoutCountryCfg" method:"post" summary:"保存用户提现代付国家配置" tags:"用户提现代付配置"`
+	CountryCode  string `json:"countryCode" v:"required|length:2,8#国家地区不能为空|国家地区编码无效"`
+	CurrencyCode string `json:"currencyCode" v:"required|length:3,8#代付币种不能为空|代付币种无效"`
+	PayType      string `json:"payType" v:"required#支付类型不能为空" dc:"代付账户类型 BANK_ACCOUNT/EWALLET"`
+	InBankCode   string `json:"inBankCode" v:"required#支付编码不能为空" dc:"代付 bankCode"`
+	Enabled      bool   `json:"enabled"`
+}
+
+type GetUserWithdrawPayoutCountryCfgReq struct {
+	g.Meta `path:"/getPayoutCountryCfg" method:"post" summary:"查询用户提现代付国家配置" tags:"用户提现代付配置"`
+}

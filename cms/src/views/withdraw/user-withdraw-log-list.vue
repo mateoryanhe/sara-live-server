@@ -9,38 +9,43 @@
 
       <el-form :model="searchForm" class="search-form" inline label-width="88px">
         <el-form-item :label="t('pages.userWithdrawLogList.userId')">
-          <el-input v-model="searchForm.userId" clearable :placeholder="t('pages.userWithdrawLogList.userIdPlaceholder')"/>
+          <el-input
+              v-model="searchForm.userId"
+              clearable
+              :placeholder="t('pages.userWithdrawLogList.userIdPlaceholder')"
+              style="width: 220px"
+          />
         </el-form-item>
         <el-form-item :label="t('pages.userWithdrawLogList.status')">
           <el-select v-model="searchForm.status" clearable style="width: 160px">
             <el-option v-for="opt in statusOptions" :key="opt.value" :label="opt.label" :value="opt.value"/>
           </el-select>
         </el-form-item>
-        <el-form-item>
+        <el-form-item class="search-form-actions">
           <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
           <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
+          <span v-if="showBatchActions" class="action-divider"/>
+          <el-button
+              v-if="canApprove"
+              type="primary"
+              plain
+              :disabled="!selectedIds.length"
+              @click="handleBatchApprove"
+          >{{ t('pages.userWithdrawLogList.batchApprove') }}</el-button>
+          <el-button
+              v-if="canReject"
+              plain
+              :disabled="!selectedIds.length"
+              @click="openRejectDialog"
+          >{{ t('pages.userWithdrawLogList.batchReject') }}</el-button>
+          <el-button
+              v-if="canSubmitPayout"
+              type="success"
+              :disabled="!selectedIds.length"
+              @click="handleBatchSubmitPayout"
+          >{{ t('pages.userWithdrawLogList.batchSubmitPayout') }}</el-button>
         </el-form-item>
       </el-form>
-
-      <div class="toolbar">
-        <el-button
-            v-if="canApprove"
-            type="primary"
-            :disabled="!selectedIds.length"
-            @click="handleBatchApprove"
-        >{{ t('pages.userWithdrawLogList.batchApprove') }}</el-button>
-        <el-button
-            v-if="canReject"
-            :disabled="!selectedIds.length"
-            @click="openRejectDialog"
-        >{{ t('pages.userWithdrawLogList.batchReject') }}</el-button>
-        <el-button
-            v-if="canSubmitPayout"
-            type="success"
-            :disabled="!selectedIds.length"
-            @click="handleBatchSubmitPayout"
-        >{{ t('pages.userWithdrawLogList.batchSubmitPayout') }}</el-button>
-      </div>
 
       <el-table
           v-loading="loading"
@@ -52,7 +57,15 @@
         <el-table-column :label="t('pages.userWithdrawLogList.id')" min-width="170" prop="id"/>
         <el-table-column :label="t('pages.userWithdrawLogList.userId')" min-width="150" prop="userId"/>
         <el-table-column :label="t('pages.userWithdrawLogList.nickname')" min-width="120" prop="nickname"/>
-        <el-table-column :label="t('pages.userWithdrawLogList.goldAmount')" min-width="110" prop="goldAmount"/>
+        <el-table-column :label="t('pages.userWithdrawLogList.diamondAmount')" min-width="110">
+          <template #default="{ row }">
+            <span v-if="row.diamondAmount > 0">{{ row.diamondAmount }}</span>
+            <span v-else-if="row.goldAmount > 0" class="legacy-gold">
+              {{ row.goldAmount }} ({{ t('pages.userWithdrawLogList.goldAmountLegacy') }})
+            </span>
+            <span v-else>—</span>
+          </template>
+        </el-table-column>
         <el-table-column :label="t('pages.userWithdrawLogList.withdrawUsd')" min-width="110" prop="withdrawUsd"/>
         <el-table-column :label="t('pages.userWithdrawLogList.status')" min-width="120">
           <template #default="{ row }">{{ statusLabel(row.status) }}</template>
@@ -109,6 +122,7 @@ const pagination = reactive({page: 1, pageSize: 20, total: 0})
 const canApprove = computed(() => hasButtonPermission('UserWithdrawLogList', 'batchApprove'))
 const canReject = computed(() => hasButtonPermission('UserWithdrawLogList', 'batchReject'))
 const canSubmitPayout = computed(() => hasButtonPermission('UserWithdrawLogList', 'batchSubmitPayout'))
+const showBatchActions = computed(() => canApprove.value || canReject.value || canSubmitPayout.value)
 
 const statusOptions = computed(() => [
   {value: 0, label: t('pages.userWithdrawLogList.statusPending')},
@@ -195,7 +209,44 @@ onMounted(fetchList)
 </script>
 
 <style scoped>
-.page-container { padding: 16px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
-.pagination-wrap { margin-top: 16px; display: flex; justify-content: flex-end; }
+.page-container {
+  padding: 20px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.search-form {
+  margin-bottom: 16px;
+}
+
+.search-form :deep(.el-form-item) {
+  margin-bottom: 12px;
+  margin-right: 12px;
+}
+
+.search-form-actions :deep(.el-form-item__content) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-divider {
+  display: inline-block;
+  width: 1px;
+  height: 20px;
+  margin: 0 4px;
+  background: var(--el-border-color);
+  vertical-align: middle;
+}
+
+.pagination-wrap {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
 </style>

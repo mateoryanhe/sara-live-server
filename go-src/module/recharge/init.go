@@ -9,6 +9,8 @@ func Init() {
 	cfgdao.InitHaiPayCollectionCountryCfgDao()
 	cfgdao.ReloadHaiPayCollectionCountryCfgCache()
 	cfgdao.InitHaiPayCoinMerchantCollectionCfgDao()
+	cfgdao.InitHaiPayUserWithdrawPayoutCountryCfgDao()
+	cfgdao.ReloadHaiPayUserWithdrawPayoutCountryCfgCache()
 	cfgdao.ReloadHaiPayCoinMerchantCollectionCfgCache()
 	initHaiPayCfg()
 	initRechargeOrderTimeoutWatch()

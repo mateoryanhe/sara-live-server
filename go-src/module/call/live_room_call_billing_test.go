@@ -145,13 +145,12 @@ func TestLiveRoomCallTicketPrice(t *testing.T) {
 		want    float64
 	}{
 		{
-			name:    "source one charges ticket when enabled",
+			name:    "source one never charges ticket",
 			order:   &callentity.CallOrder{Source: callentity.CallOrderSourceLiveRoom, TicketPrice: 8.5},
 			enabled: true,
-			want:    8.5,
 		},
 		{
-			name:    "source one skips ticket when disabled",
+			name:    "source one ignores ticket when disabled",
 			order:   &callentity.CallOrder{Source: callentity.CallOrderSourceLiveRoom, TicketPrice: 8.5},
 			enabled: false,
 		},

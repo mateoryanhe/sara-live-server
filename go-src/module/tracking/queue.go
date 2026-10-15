@@ -28,6 +28,7 @@ var (
 	gameLiveRoomJoinTrackingQueue       = gqueue.NewTQueue[*gameevent.GameLiveRoomJoinTrackingEventData]()
 	miniGameWebViewLoadTrackingQueue       = gqueue.NewTQueue[*gameevent.MiniGameWebViewLoadTrackingEventData]()
 	miniGameControllerClickTrackingQueue = gqueue.NewTQueue[*gameevent.MiniGameControllerClickTrackingEventData]()
+	offlineGameRoomPlayTrackingQueue     = gqueue.NewTQueue[*gameevent.OfflineGameRoomPlayTrackingEventData]()
 	shortVideoPlayStartTrackingQueue    = gqueue.NewTQueue[*gameevent.ShortVideoPlayStartTrackingEventData]()
 	shortVideoPaywallClickTrackingQueue = gqueue.NewTQueue[*gameevent.ShortVideoPaywallClickTrackingEventData]()
 	shortVideoPaySuccessTrackingQueue   = gqueue.NewTQueue[*gameevent.ShortVideoPaySuccessTrackingEventData]()
@@ -58,6 +59,7 @@ func initTrackingQueue() {
 	event.Sub(gameevent.GameLiveRoomJoinTrackingEvent, onGameLiveRoomJoinTrackingEvent)
 	event.Sub(gameevent.MiniGameWebViewLoadTrackingEvent, onMiniGameWebViewLoadTrackingEvent)
 	event.Sub(gameevent.MiniGameControllerClickTrackingEvent, onMiniGameControllerClickTrackingEvent)
+	event.Sub(gameevent.OfflineGameRoomPlayTrackingEvent, onOfflineGameRoomPlayTrackingEvent)
 	event.Sub(gameevent.ShortVideoPlayStartTrackingEvent, onShortVideoPlayStartTrackingEvent)
 	event.Sub(gameevent.ShortVideoPaywallClickTrackingEvent, onShortVideoPaywallClickTrackingEvent)
 	event.Sub(gameevent.ShortVideoPaySuccessTrackingEvent, onShortVideoPaySuccessTrackingEvent)
@@ -263,6 +265,14 @@ func onChargeResultServerTrackingEvent(data any) {
 	chargeResultServerTrackingQueue.Push(ev)
 }
 
+func onOfflineGameRoomPlayTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.OfflineGameRoomPlayTrackingEventData)
+	if !ok || ev == nil || ev.UserId == 0 || ev.RoomId == 0 {
+		return
+	}
+	offlineGameRoomPlayTrackingQueue.Push(ev)
+}
+
 func onTrackingHotStart(_ any) {
 	xrtimer.AddSingleton(gctx.New(), trackingConsumeInterval, func(ctx context.Context) {
 		drainTrackingQueue()
@@ -297,7 +307,8 @@ func trackingQueueIdle() bool {
 		hotLiveRoomGiftClickTrackingQueue.Len() == 0 &&
 		chargePanelEnterTrackingQueue.Len() == 0 &&
 		chargeClickTrackingQueue.Len() == 0 &&
-		chargeResultServerTrackingQueue.Len() == 0
+		chargeResultServerTrackingQueue.Len() == 0 &&
+		offlineGameRoomPlayTrackingQueue.Len() == 0
 }
 
 func drainTrackingTQueue[T any](q *gqueue.TQueue[T], handle func(T)) {
@@ -351,6 +362,9 @@ func drainTrackingQueue() {
 	})
 	drainTrackingTQueue(miniGameControllerClickTrackingQueue, func(ev *gameevent.MiniGameControllerClickTrackingEventData) {
 		recordMiniGameControllerClick(ev.UserId, ev.StatAt)
+	})
+	drainTrackingTQueue(offlineGameRoomPlayTrackingQueue, func(ev *gameevent.OfflineGameRoomPlayTrackingEventData) {
+		recordOfflineGameRoomPlay(ev.UserId, ev.RoomId, ev.StatAt)
 	})
 	drainTrackingTQueue(shortVideoPlayStartTrackingQueue, func(ev *gameevent.ShortVideoPlayStartTrackingEventData) {
 		recordShortVideoPlayStart(ev.UserId, ev.StatAt)

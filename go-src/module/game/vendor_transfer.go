@@ -266,6 +266,9 @@ func recordVendorTransferWinLog(userID uint64, gameCode, nameEn, cover string, p
 		strings.TrimSpace(orderID),
 		amount,
 	)
+	ext := userinfodao.GetUserExtByUserId(userID)
+	ext.AddGameWinCount(1)
+	userinfodao.PublishUserExt(ext)
 }
 
 func vendorTransferLockKey(transactionID string) string {

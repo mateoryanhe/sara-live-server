@@ -135,7 +135,19 @@
             <span v-else>{{ row.receiverNickname || '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="t('pages.revenueLogList.payerUserId')" min-width="180" prop="senderId"/>
+        <el-table-column :label="t('pages.revenueLogList.payerUserId')" min-width="180" prop="senderId">
+          <template #default="{ row }">
+            <el-button
+                v-if="canViewUserDetail && row.senderId"
+                link
+                type="primary"
+                @click="openUserDetail(row.senderId)"
+            >
+              {{ row.senderId }}
+            </el-button>
+            <span v-else>{{ row.senderId || '-' }}</span>
+          </template>
+        </el-table-column>
         <el-table-column
             :label="t('pages.revenueLogList.payerUserAvatar')"
             class-name="col-nowrap"

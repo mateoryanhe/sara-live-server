@@ -18,13 +18,13 @@ const tabs = ref<LayoutTab[]>([
 ])
 
 function resolveTabTitle(route: RouteLocationNormalizedLoaded): string {
-    const name = route.name?.toString()
-    if (name) {
-        return name
-    }
     const title = route.meta?.title
     if (typeof title === 'string' && title) {
         return title
+    }
+    const name = route.name?.toString()
+    if (name) {
+        return name
     }
     return route.path
 }

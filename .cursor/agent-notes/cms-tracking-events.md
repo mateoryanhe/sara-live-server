@@ -97,6 +97,10 @@ App：`POST /liveRoom/reportMiniGameControllerClick`（Sofie `POST /sofie/studio
 
 表：`daily_mini_game_controller_click_stats` / `weekly_*` / `monthly_*`。
 
+| 同上页 **Tab「进入离线房间玩游戏」** | `offline_game_room_play` | 游戏房 category=2、未开播(`liveRecordId=0`)；`appGameStart` 传 `roomId` 且返回有效 link +1，不含主播 | `POST /trackingEvent/getOfflineGameRoomPlayTrend` |
+
+表：`daily_offline_game_room_play_stats` / `weekly_*` / `monthly_*`。
+
 | 页面 | event | 口径 | CMS API |
 |------|-------|------|---------|
 | `TrackingShortVideoManagement`（短视频） | `short_video_play_start` | `watchShortVideoStart` 成功且视频已上架 +1 | `POST /trackingEvent/getShortVideoPlayStartTrend` |

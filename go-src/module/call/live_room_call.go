@@ -55,12 +55,11 @@ func LiveRoomCall(ctx context.Context, req *calldto.LiveRoomCallReq) (*calldto.L
 		return nil, errercode.CreateCode(errercode.NoPermission)
 	}
 
-	requiredDiamond := cfg.Billing
-	if livecfg.IsVideoCallTicketEnabled() {
-		requiredDiamond += cfg.Ticket
-	}
-	if requiredDiamond > 0 {
-		if err := wallet.CanPayWithGoldExchange(callerId, requiredDiamond); err != nil {
+	skipDiamondPrecheck := livecfg.GetOneToOneDailyFreeSeconds() > 0 &&
+		isOrdinaryViewer(callerId) &&
+		liveroomdao.IsOneToOneDailyFreeAvailable(callerId, anchorId)
+	if cfg.Billing > 0 && !skipDiamondPrecheck {
+		if err := wallet.CanPayWithGoldExchange(callerId, cfg.Billing); err != nil {
 			return nil, err
 		}
 	}

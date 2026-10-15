@@ -1,6 +1,8 @@
 package userwithdrawdao
 
 import (
+	"time"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	userentity "xr-game-server/entity/user"
@@ -22,23 +24,17 @@ func GetUserWithdrawLogById(id uint64) *userentity.UserWithdrawLog {
 	if err != nil || row.ID == 0 {
 		return nil
 	}
-	return &row
+	return PreferCachedUserWithdrawLog(&row)
 }
 
-func InsertUserWithdrawLog(row *userentity.UserWithdrawLog) error {
-	if row == nil || row.ID == 0 {
-		return nil
-	}
-	_, err := g.DB().Model(string(userentity.TbUserWithdrawLog)).Ctx(gctx.New()).Data(row).Insert()
-	return err
+// PublishNewUserWithdrawLog 通过 entity setter 已入 syndb 队列, 并刷新 App 列表缓存
+func PublishNewUserWithdrawLog(row *userentity.UserWithdrawLog) {
+	PrependUserWithdrawToAppListCache(row)
 }
 
-func UpdateUserWithdrawLog(row *userentity.UserWithdrawLog) error {
-	if row == nil || row.ID == 0 {
-		return nil
-	}
-	_, err := g.DB().Model(string(userentity.TbUserWithdrawLog)).Ctx(gctx.New()).WherePri(row.ID).Data(row).Update()
-	return err
+// SyncUserWithdrawLogCache 修改后 syndb 已排队; 按 userId 刷新列表缓存并将该单置顶
+func SyncUserWithdrawLogCache(row *userentity.UserWithdrawLog) {
+	PrependUserWithdrawToAppListCache(row)
 }
 
 func ListUserWithdrawLogs(filter *UserWithdrawListFilter) (int, []*userentity.UserWithdrawLog, error) {
@@ -68,11 +64,26 @@ func ListUserWithdrawLogs(filter *UserWithdrawListFilter) (int, []*userentity.Us
 	if err != nil {
 		return 0, nil, err
 	}
-	err = model.OrderDesc("id").
+	err = model.Order(userWithdrawLogListOrder).
 		Page(page, pageSize).
 		Scan(&rows)
 	if err != nil {
 		return 0, nil, err
 	}
+	total, rows = MergeCMSUserWithdrawLogs(filter, total, rows)
 	return total, rows, nil
+}
+
+func CountUserWithdrawLogsSince(userId uint64, since time.Time) (int, error) {
+	if userId == 0 {
+		return 0, nil
+	}
+	n, err := g.DB().Model(string(userentity.TbUserWithdrawLog)).Ctx(gctx.New()).
+		Where(string(userentity.UserWithdrawLogUserId)+" = ?", userId).
+		Where("created_at >= ?", since).
+		Count()
+	if err != nil {
+		return 0, err
+	}
+	return n, nil
 }

@@ -20,4 +20,5 @@ func Init() {
 	initUserMaxId()
 	initUserPayoutInfo()
 	initUserWithdrawLog()
+	initUserWithdrawTierCfg()
 }

@@ -65,7 +65,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('UserList') || hasMenuPermission('RechargeOrderList') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('SimulatorDeviceWhitelistManagement') || hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList') || hasMenuPermission('UserWithdrawLogList')"
+            v-if="hasMenuPermission('UserList') || hasMenuPermission('RechargeOrderList') || hasMenuPermission('RechargeCfgManagement') || hasMenuPermission('VipCfgManagement') || hasMenuPermission('SimulatorDeviceWhitelistManagement') || hasMenuPermission('GoldCurrencyLogList') || hasMenuPermission('DiamondCurrencyLogList')"
             index="/user/account">
           <template #title>
             <el-icon>
@@ -115,11 +115,39 @@
             </el-icon>
             <span>{{ t('menu.DiamondCurrencyLogList') }}</span>
           </el-menu-item>
-          <el-menu-item v-if="hasMenuPermission('UserWithdrawLogList')" index="/log/user/user-withdraw-log-list">
+        </el-sub-menu>
+        <el-sub-menu
+            v-if="hasMenuPermission('UserWithdrawLogList') || hasMenuPermission('UserWithdrawCfgManagement') || hasMenuPermission('UserWithdrawTierListManagement') || hasMenuPermission('UserWithdrawPayoutCountryCfgManagement')"
+            index="/withdraw">
+          <template #title>
             <el-icon>
               <Wallet/>
             </el-icon>
+            <span>{{ t('menu.WithdrawManagement') }}</span>
+          </template>
+          <el-menu-item v-if="hasMenuPermission('UserWithdrawLogList')" index="/withdraw/user-withdraw-log-list">
+            <el-icon>
+              <Document/>
+            </el-icon>
             <span>{{ t('menu.UserWithdrawLogList') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('UserWithdrawCfgManagement')" index="/withdraw/user-withdraw-cfg">
+            <el-icon>
+              <Setting/>
+            </el-icon>
+            <span>{{ t('menu.UserWithdrawCfgManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('UserWithdrawTierListManagement')" index="/withdraw/user-withdraw-tier-list">
+            <el-icon>
+              <List/>
+            </el-icon>
+            <span>{{ t('menu.UserWithdrawTierListManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('UserWithdrawPayoutCountryCfgManagement')" index="/withdraw/user-withdraw-payout-country-cfg">
+            <el-icon>
+              <Setting/>
+            </el-icon>
+            <span>{{ t('menu.UserWithdrawPayoutCountryCfgManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -549,7 +577,7 @@
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('OfficialSiteDeployManagement') || hasMenuPermission('ThirdPayOfficialSiteDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement')"
+            v-if="hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('UserWithdrawDeployManagement') || hasMenuPermission('OfficialSiteDeployManagement') || hasMenuPermission('ThirdPayOfficialSiteDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement')"
             index="/frontend-module">
           <template #title>
             <el-icon>
@@ -610,7 +638,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('OfficialSiteDeployManagement') || hasMenuPermission('ThirdPayOfficialSiteDeployManagement')"
+              v-if="hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('UserWithdrawDeployManagement') || hasMenuPermission('OfficialSiteDeployManagement') || hasMenuPermission('ThirdPayOfficialSiteDeployManagement')"
               index="/frontend-module/deploy">
             <template #title>
               <el-icon>
@@ -635,6 +663,12 @@
                 <UploadFilled/>
               </el-icon>
               <span>{{ t('menu.ThirdPayDeployManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('UserWithdrawDeployManagement')" index="/config/user-withdraw-deploy">
+              <el-icon>
+                <UploadFilled/>
+              </el-icon>
+              <span>{{ t('menu.UserWithdrawDeployManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('OfficialSiteDeployManagement')" index="/config/official-site-deploy">
               <el-icon>
@@ -729,7 +763,7 @@
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('UserWithdrawCfgManagement') || hasMenuPermission('TextModerationCfgManagement')"
+              v-if="hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('TextModerationCfgManagement')"
               index="/config/group/security">
             <template #title>
               <el-icon>
@@ -748,12 +782,6 @@
                 <Iphone/>
               </el-icon>
               <span>{{ t('menu.DeviceRegisterRiskCfgManagement') }}</span>
-            </el-menu-item>
-            <el-menu-item v-if="hasMenuPermission('UserWithdrawCfgManagement')" index="/config/user-withdraw-cfg">
-              <el-icon>
-                <Wallet/>
-              </el-icon>
-              <span>{{ t('menu.UserWithdrawCfgManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('TextModerationCfgManagement')" index="/config/text-moderation">
               <el-icon>

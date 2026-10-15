@@ -28,10 +28,11 @@ func SaveLiveCfg(_ context.Context, req *livecfgdto.SaveLiveCfgReq) (*livecfgdto
 		videoCallTicketEnabled = *req.VideoCallTicketEnabled
 	}
 	row := &entity.LiveCfg{
-		PaidDanmakuPrice:           req.PaidDanmakuPrice,
-		VideoCallTicketEnabled:     videoCallTicketEnabled,
-		AudienceListRefreshSeconds: NormalizeAudienceListRefreshSeconds(req.AudienceListRefreshSeconds),
-		OneToOneDailyFreeSeconds:   NormalizeOneToOneDailyFreeSeconds(req.OneToOneDailyFreeSeconds),
+		PaidDanmakuPrice:                req.PaidDanmakuPrice,
+		VideoCallTicketEnabled:          videoCallTicketEnabled,
+		AudienceListRefreshSeconds:      NormalizeAudienceListRefreshSeconds(req.AudienceListRefreshSeconds),
+		OneToOneDailyFreeSeconds:        NormalizeOneToOneDailyFreeSeconds(req.OneToOneDailyFreeSeconds),
+		LiveRoomCallMinTotalRechargeUsd: NormalizeLiveRoomCallMinTotalRechargeUsd(req.LiveRoomCallMinTotalRechargeUsd),
 	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
@@ -66,8 +67,9 @@ func toLiveCfgItem(cfg *entity.LiveCfg) *livecfgdto.LiveCfgItem {
 		PaidDanmakuPrice:           cfg.PaidDanmakuPrice,
 		VideoCallTicketEnabled:     cfg.VideoCallTicketEnabled,
 		AudienceListRefreshSeconds: NormalizeAudienceListRefreshSeconds(cfg.AudienceListRefreshSeconds),
-		OneToOneDailyFreeSeconds:   NormalizeOneToOneDailyFreeSeconds(cfg.OneToOneDailyFreeSeconds),
-		CreatedAt:                  formatLiveCfgTime(cfg.CreatedAt),
+		OneToOneDailyFreeSeconds:        NormalizeOneToOneDailyFreeSeconds(cfg.OneToOneDailyFreeSeconds),
+		LiveRoomCallMinTotalRechargeUsd: NormalizeLiveRoomCallMinTotalRechargeUsd(cfg.LiveRoomCallMinTotalRechargeUsd),
+		CreatedAt:                       formatLiveCfgTime(cfg.CreatedAt),
 		UpdatedAt:                  formatLiveCfgTime(cfg.UpdatedAt),
 	}
 }

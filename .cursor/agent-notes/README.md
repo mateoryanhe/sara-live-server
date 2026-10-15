@@ -170,8 +170,10 @@
 ## 直播间 1v1 通话充值门槛（2026-09-07）
 
 - `liveRoomCall`：**暂不**校验累计充值满 10 USD（`CanInitiateLiveRoomCall`）
-- `AllowCallIcon` / `ViewerCanUseLiveRoomCall`：仍校验 10 USD（客户端入口隐藏）
-- 常量：`LiveRoomCallMinTotalRechargeUSD = 10`
+- `AllowCallIcon`：**语聊** `category=5` 恒 `false`；**秀场/游戏** `category=1|2`：普通主播或私聊「不接受任何人」→ `false`，否则 `true`（不校验充值）；**其他分类**：Web 跳过充值 / 累计充值门槛 + `canInitiateLiveRoomCallBase`
+- **游戏房下播**：与秀场相同，仅走 `stopLive`（`live_record_id=0`、结束场次、清观众缓存、广播下播）；**不解散** `live_rooms`。主播下播后观众在 App 内继续玩游戏由客户端处理；服务端 `appGameStart` 仍可按 `roomId` 写 `game_live_room_id`，下注 `live_record_id` 可为 0。
+- 秀场 `source=1` 视频通话扣费与 `source=3` 对齐：不扣门票；普通观众(`userType=0`)可用 **直播配置** `oneToOneDailyFreeSeconds`（默认 30s/主播/天）后再按分钟扣费
+- 代码默认常量：`LiveRoomCallMinTotalRechargeUSD = 10`（无配置行或未落库时）
 
 ## 工会可见性（2026-09-07）
 

@@ -16,3 +16,13 @@ func pubMiniGameRoundStartTracking(userId uint64, gameCode string, at time.Time)
 	}
 	event.Pub(gameevent.MiniGameRoundStartTrackingEvent, gameevent.NewMiniGameRoundStartTrackingEventData(userId, gameCode, at))
 }
+
+func pubOfflineGameRoomPlayTracking(userId, roomId uint64, gameCode string, at time.Time) {
+	if userId == 0 || roomId == 0 {
+		return
+	}
+	if at.IsZero() {
+		at = time.Now()
+	}
+	event.Pub(gameevent.OfflineGameRoomPlayTrackingEvent, gameevent.NewOfflineGameRoomPlayTrackingEventData(userId, roomId, gameCode, at))
+}

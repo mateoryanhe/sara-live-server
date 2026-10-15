@@ -21,9 +21,13 @@ type cfgSnapshot struct {
 	DeviceCancelDailyLimit     int
 	UserWithdrawEnabled        bool
 	UserWithdrawMinUsd         float64
+	UserWithdrawDailyMaxCount  int
 }
 
-const defaultUserWithdrawMinUsd = 5
+const (
+	defaultUserWithdrawMinUsd         = 5
+	defaultUserWithdrawDailyMaxCount  = 1
+)
 
 var cfgCache atomic.Value
 
@@ -67,6 +71,10 @@ func toCfgSnapshot(row *entity.AccountCfg) *cfgSnapshot {
 	if minUsd <= 0 {
 		minUsd = defaultUserWithdrawMinUsd
 	}
+	dailyMax := row.UserWithdrawDailyMaxCount
+	if dailyMax < 0 {
+		dailyMax = defaultUserWithdrawDailyMaxCount
+	}
 	return &cfgSnapshot{
 		CancelAccountByCodeEnabled: row.CancelAccountByCodeEnabled,
 		BlockSimulatorLogin:        row.BlockSimulatorLogin,
@@ -76,6 +84,7 @@ func toCfgSnapshot(row *entity.AccountCfg) *cfgSnapshot {
 		DeviceCancelDailyLimit:     dailyLimit,
 		UserWithdrawEnabled:        row.UserWithdrawEnabled,
 		UserWithdrawMinUsd:         minUsd,
+		UserWithdrawDailyMaxCount:  dailyMax,
 	}
 }
 
@@ -118,7 +127,16 @@ func IsUserWithdrawEnabled() bool {
 func GetUserWithdrawMinUsd() float64 {
 	minUsd := getCfgCache().UserWithdrawMinUsd
 	if minUsd <= 0 {
-		return defaultUserWithdrawMinUsd
+	 return defaultUserWithdrawMinUsd
 	}
 	return minUsd
+}
+
+// GetUserWithdrawDailyMaxCount 用户每天最多提现次数(0=不限制)
+func GetUserWithdrawDailyMaxCount() int {
+	n := getCfgCache().UserWithdrawDailyMaxCount
+	if n < 0 {
+		return defaultUserWithdrawDailyMaxCount
+	}
+	return n
 }

@@ -111,6 +111,7 @@ func Init() {
 		{Path: "/savePayeeProfile", Handler: jsonHandler((&controller.UserWithdrawAppController{}).SavePayoutInfo)},
 		{Path: "/requestCashOut", Handler: jsonHandler((&controller.UserWithdrawAppController{}).ApplyWithdraw)},
 		{Path: "/browseCashOutLogs", Handler: jsonHandler((&controller.UserWithdrawAppController{}).ListWithdrawLogs)},
+		{Path: "/browseCashOutTiers", Handler: jsonHandler((&controller.UserWithdrawAppController{}).ListWithdrawTiers)},
 	})
 	httpserver.RegAppRouteGroup("/sofie/play", []httpserver.AppRoute{
 		{Path: "/browseTitles", Handler: jsonHandler((&controller.GameAppController{}).AppGameList)},

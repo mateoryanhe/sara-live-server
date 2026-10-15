@@ -67,11 +67,9 @@ func callDiamondBillingUserId(order *callentity.CallOrder) (uint64, bool) {
 	return payerId, billable
 }
 
-func liveRoomCallTicketPrice(order *callentity.CallOrder, enabled bool) float64 {
-	if !enabled || order == nil || order.Source != callentity.CallOrderSourceLiveRoom || order.TicketPrice <= 0 {
-		return 0
-	}
-	return order.TicketPrice
+func liveRoomCallTicketPrice(_ *callentity.CallOrder, _ bool) float64 {
+	// source=1 与 source=3 一致：直播间视频通话不扣门票(仅按分钟计费 + 每日免费秒数)。
+	return 0
 }
 
 // checkLiveRoomCallDiamondOnAccept 接通时按来源校验付费用户是否可支付门票与首分钟费用。
@@ -93,7 +91,7 @@ func checkLiveRoomCallDiamondOnAccept(order *callentity.CallOrder) error {
 }
 
 // chargeLiveRoomCallOnAccept 双方确认接通后扣费。
-// source=1 按开关扣门票并扣首分钟；source=3 只扣首分钟。
+// source=1/3：每日免费秒数(配置)内不扣费；否则扣首分钟；不扣门票。
 func chargeLiveRoomCallOnAccept(order *callentity.CallOrder, now time.Time) error {
 	if order == nil {
 		return nil

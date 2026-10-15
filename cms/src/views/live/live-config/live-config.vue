@@ -25,6 +25,18 @@
           <span class="form-tip">{{ t('pages.liveConfig.videoCallTicketEnabledTip') }}</span>
         </el-form-item>
 
+        <el-form-item :label="t('pages.liveConfig.liveRoomCallMinTotalRechargeUsd')" prop="liveRoomCallMinTotalRechargeUsd">
+          <el-input-number
+              v-model="formData.liveRoomCallMinTotalRechargeUsd"
+              :min="0"
+              :precision="2"
+              :step="1"
+              controls-position="right"
+              style="width: 220px"
+          />
+          <span class="form-tip">{{ t('pages.liveConfig.liveRoomCallMinTotalRechargeUsdTip') }}</span>
+        </el-form-item>
+
         <el-form-item :label="t('pages.liveConfig.audienceListRefreshSeconds')" prop="audienceListRefreshSeconds">
           <el-input-number
               v-model="formData.audienceListRefreshSeconds"
@@ -80,6 +92,7 @@ const formData = reactive({
 	videoCallTicketEnabled: true,
 	audienceListRefreshSeconds: 300,
 	oneToOneDailyFreeSeconds: 30,
+  liveRoomCallMinTotalRechargeUsd: 10,
 })
 
 const metaInfo = reactive({
@@ -96,6 +109,10 @@ const formRules = computed(() => ({
     {required: true, message: t('pages.liveConfig.audienceListRefreshRequired'), trigger: 'blur'},
     {type: 'number', min: 1, message: t('pages.liveConfig.audienceListRefreshMin'), trigger: 'blur'},
   ],
+  liveRoomCallMinTotalRechargeUsd: [
+    {required: true, message: t('pages.liveConfig.liveRoomCallMinTotalRechargeUsdRequired'), trigger: 'blur'},
+    {type: 'number', min: 0, message: t('pages.liveConfig.liveRoomCallMinTotalRechargeUsdMin'), trigger: 'blur'},
+  ],
 }))
 
 const applyCfg = (cfg: LiveCfg | null | undefined) => {
@@ -105,6 +122,7 @@ const applyCfg = (cfg: LiveCfg | null | undefined) => {
 	formData.videoCallTicketEnabled = true
 	formData.audienceListRefreshSeconds = 300
 	formData.oneToOneDailyFreeSeconds = 30
+  formData.liveRoomCallMinTotalRechargeUsd = 10
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
     return
@@ -114,6 +132,7 @@ const applyCfg = (cfg: LiveCfg | null | undefined) => {
 	formData.videoCallTicketEnabled = cfg.videoCallTicketEnabled ?? true
 	formData.audienceListRefreshSeconds = cfg.audienceListRefreshSeconds || 300
 	formData.oneToOneDailyFreeSeconds = cfg.oneToOneDailyFreeSeconds ?? 30
+  formData.liveRoomCallMinTotalRechargeUsd = truncateNumber(cfg.liveRoomCallMinTotalRechargeUsd ?? 10)
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
 }
@@ -141,6 +160,7 @@ const handleSave = async () => {
 	  videoCallTicketEnabled: formData.videoCallTicketEnabled,
 	  audienceListRefreshSeconds: formData.audienceListRefreshSeconds,
 	  oneToOneDailyFreeSeconds: formData.oneToOneDailyFreeSeconds,
+      liveRoomCallMinTotalRechargeUsd: formData.liveRoomCallMinTotalRechargeUsd,
     })
     if (response?.success) {
       ElMessage.success(t('common.saveConfig'))

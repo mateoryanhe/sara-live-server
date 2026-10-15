@@ -30,6 +30,9 @@
         <el-tab-pane :label="t('pages.trackingMiniGameRoundStart.tabGameControllerClick')" name="gameControllerClick">
           <p class="page-desc">{{ t('pages.trackingMiniGameRoundStart.gameControllerClickDesc') }}</p>
         </el-tab-pane>
+        <el-tab-pane :label="t('pages.trackingMiniGameRoundStart.tabOfflineGameRoomPlay')" name="offlineGameRoomPlay">
+          <p class="page-desc">{{ t('pages.trackingMiniGameRoundStart.offlineGameRoomPlayDesc') }}</p>
+        </el-tab-pane>
       </el-tabs>
 
       <div class="summary-grid">
@@ -85,7 +88,7 @@ import {trackingEventApi} from '@/api/modules/tracking-event'
 import type {HotLiveRoomJoinTrendRes} from '@/types/api'
 import CountTrendChart from './components/count-trend-chart.vue'
 
-type TrackingEventKey = 'gameJoin' | 'firstFrame' | 'roundStart' | 'roundResult' | 'gameExposure' | 'gameWebViewLoad' | 'gameControllerClick'
+type TrackingEventKey = 'gameJoin' | 'firstFrame' | 'roundStart' | 'roundResult' | 'gameExposure' | 'gameWebViewLoad' | 'gameControllerClick' | 'offlineGameRoomPlay'
 
 const {t, locale} = useI18n()
 const loading = ref(false)
@@ -111,6 +114,7 @@ const roundResultTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 const gameExposureTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 const gameWebViewLoadTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 const gameControllerClickTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
+const offlineGameRoomPlayTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 
 const trendByEvent: Record<TrackingEventKey, HotLiveRoomJoinTrendRes> = {
   gameJoin: gameJoinTrend,
@@ -120,6 +124,7 @@ const trendByEvent: Record<TrackingEventKey, HotLiveRoomJoinTrendRes> = {
   gameExposure: gameExposureTrend,
   gameWebViewLoad: gameWebViewLoadTrend,
   gameControllerClick: gameControllerClickTrend,
+  offlineGameRoomPlay: offlineGameRoomPlayTrend,
 }
 
 const activeTrend = computed(() => trendByEvent[activeEvent.value])
@@ -144,6 +149,9 @@ const activeSeriesName = computed(() => {
   if (key === 'gameControllerClick') {
     return t('pages.trackingMiniGameRoundStart.gameControllerClickSeriesName')
   }
+  if (key === 'offlineGameRoomPlay') {
+    return t('pages.trackingMiniGameRoundStart.offlineGameRoomPlaySeriesName')
+  }
   return t('pages.trackingMiniGameRoundStart.seriesName')
 })
 
@@ -166,6 +174,9 @@ const activeChartDaily = computed(() => {
   }
   if (key === 'gameControllerClick') {
     return t('pages.trackingMiniGameRoundStart.gameControllerClickChartDaily')
+  }
+  if (key === 'offlineGameRoomPlay') {
+    return t('pages.trackingMiniGameRoundStart.offlineGameRoomPlayChartDaily')
   }
   return t('pages.trackingMiniGameRoundStart.chartDaily')
 })
@@ -190,6 +201,9 @@ const activeChartWeekly = computed(() => {
   if (key === 'gameControllerClick') {
     return t('pages.trackingMiniGameRoundStart.gameControllerClickChartWeekly')
   }
+  if (key === 'offlineGameRoomPlay') {
+    return t('pages.trackingMiniGameRoundStart.offlineGameRoomPlayChartWeekly')
+  }
   return t('pages.trackingMiniGameRoundStart.chartWeekly')
 })
 
@@ -212,6 +226,9 @@ const activeChartMonthly = computed(() => {
   }
   if (key === 'gameControllerClick') {
     return t('pages.trackingMiniGameRoundStart.gameControllerClickChartMonthly')
+  }
+  if (key === 'offlineGameRoomPlay') {
+    return t('pages.trackingMiniGameRoundStart.offlineGameRoomPlayChartMonthly')
   }
   return t('pages.trackingMiniGameRoundStart.chartMonthly')
 })
@@ -289,6 +306,11 @@ const fetchGameControllerClickTrend = async () => {
   assignTrend(gameControllerClickTrend, data)
 }
 
+const fetchOfflineGameRoomPlayTrend = async () => {
+  const data = await trackingEventApi.getOfflineGameRoomPlayTrend()
+  assignTrend(offlineGameRoomPlayTrend, data)
+}
+
 const fetchActiveTrend = async () => {
   loading.value = true
   try {
@@ -304,6 +326,8 @@ const fetchActiveTrend = async () => {
       await fetchGameWebViewLoadTrend()
     } else if (activeEvent.value === 'gameControllerClick') {
       await fetchGameControllerClickTrend()
+    } else if (activeEvent.value === 'offlineGameRoomPlay') {
+      await fetchOfflineGameRoomPlayTrend()
     } else {
       await fetchRoundStartTrend()
     }

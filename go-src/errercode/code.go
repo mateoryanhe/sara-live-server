@@ -251,6 +251,8 @@ const (
 	CallTargetUserInCall XRCode = 185
 	// UserWithdrawDisabled 用户提现功能未开启
 	UserWithdrawDisabled XRCode = 186
+	// UserWithdrawGameConsumeNotEnough 游戏消费累计未达提现档位要求
+	UserWithdrawGameConsumeNotEnough XRCode = 187
 )
 
 type XError struct {

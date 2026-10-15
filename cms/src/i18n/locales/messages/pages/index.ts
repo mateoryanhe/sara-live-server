@@ -64,6 +64,7 @@ import {accountCfgMessages} from './account-cfg'
 import {deviceRegisterRiskCfgMessages} from './device-register-risk-cfg'
 import {userWithdrawCfgMessages} from './user-withdraw-cfg'
 import {userWithdrawLogListMessages} from './user-withdraw-log-list'
+import {userWithdrawTierListMessages} from './user-withdraw-tier-list'
 import {appVersionCfgMessages} from './app-version-cfg'
 import {firstRechargeActivityCfgMessages} from './first-recharge-activity-cfg'
 import {inviteRechargeRewardCfgMessages} from './invite-recharge-reward-cfg'
@@ -97,6 +98,7 @@ import {h5LiveDeployMessages} from './h5-live-deploy'
 import {coinMerchantDeployMessages} from './coin-merchant-deploy'
 import {countryFlagDeployMessages} from './country-flag-deploy'
 import {thirdPayDeployMessages} from './third-pay-deploy'
+import {userWithdrawDeployMessages} from './user-withdraw-deploy'
 import {officialSiteDeployMessages} from './official-site-deploy'
 import {dataSyncMessages} from './data-sync'
 import {resourceMonitorMessages} from './resource-monitor'
@@ -174,6 +176,7 @@ const pageMessageBuilders = [
   ['deviceRegisterRiskCfg', deviceRegisterRiskCfgMessages],
   ['userWithdrawCfg', userWithdrawCfgMessages],
   ['userWithdrawLogList', userWithdrawLogListMessages],
+  ['userWithdrawTierList', userWithdrawTierListMessages],
   ['appVersionCfg', appVersionCfgMessages],
   ['firstRechargeActivityCfg', firstRechargeActivityCfgMessages],
   ['inviteRechargeRewardCfg', inviteRechargeRewardCfgMessages],
@@ -206,6 +209,7 @@ const pageMessageBuilders = [
   ['coinMerchantDeploy', coinMerchantDeployMessages],
   ['countryFlagDeploy', countryFlagDeployMessages],
   ['thirdPayDeploy', thirdPayDeployMessages],
+  ['userWithdrawDeploy', userWithdrawDeployMessages],
   ['officialSiteDeploy', officialSiteDeployMessages],
   ['dataSync', dataSyncMessages],
   ['resourceMonitor', resourceMonitorMessages],

@@ -212,6 +212,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     ],
     UserDetail: [
         BTN.view,
+        {key: 'rechargeOrderList', label: '查看充值订单'},
         {key: 'goldLog', label: '查看金币流水'},
         {key: 'exportGoldLog', label: '导出金币流水'},
         {key: 'diamondLog', label: '查看钻石流水'},
@@ -423,6 +424,11 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'sync', label: '同步数据'},
     ],
     CoinMerchantRechargeCfgManagement: [...DEFAULT_CRUD_BUTTONS],
+    UserWithdrawTierListManagement: [...DEFAULT_CRUD_BUTTONS],
+    UserWithdrawPayoutCountryCfgManagement: [
+        BTN.view,
+        BTN.edit,
+    ],
     RechargeOrderList: [
         BTN.view,
         BTN.search,
@@ -515,6 +521,11 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'deploy', label: '上传发布'},
     ],
     ThirdPayDeployManagement: [
+        BTN.view,
+        BTN.save,
+        {key: 'deploy', label: '上传部署'},
+    ],
+    UserWithdrawDeployManagement: [
         BTN.view,
         BTN.save,
         {key: 'deploy', label: '上传部署'},

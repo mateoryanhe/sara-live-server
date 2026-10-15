@@ -9,5 +9,6 @@ func Init() {
 	initHaiPayCfg()
 	initHaiPayCollectionCountryCfg()
 	initHaiPayCoinMerchantCollectionCfg()
+	initHaiPayUserWithdrawPayoutCountryCfg()
 	initChannelPayUserProfile()
 }

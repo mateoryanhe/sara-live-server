@@ -17,16 +17,16 @@
           <div class="form-tip">{{ t('pages.userWithdrawCfg.enabledTip') }}</div>
         </el-form-item>
 
-        <el-form-item :label="t('pages.userWithdrawCfg.minUsd')">
+        <el-form-item :label="t('pages.userWithdrawCfg.dailyMaxCount')">
           <el-input-number
-              v-model="formData.userWithdrawMinUsd"
-              :min="0.01"
-              :max="999999"
-              :precision="2"
+              v-model="formData.userWithdrawDailyMaxCount"
+              :min="0"
+              :max="999"
+              :precision="0"
               :step="1"
               :disabled="!formData.userWithdrawEnabled"
           />
-          <div class="form-tip">{{ t('pages.userWithdrawCfg.minUsdTip') }}</div>
+          <div class="form-tip">{{ t('pages.userWithdrawCfg.dailyMaxCountTip') }}</div>
         </el-form-item>
 
         <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.userWithdrawCfg.lastUpdated')">
@@ -61,19 +61,16 @@ const formData = reactive({
   deviceAccountMaxCount: 3,
   deviceCancelDailyLimit: 1,
   userWithdrawEnabled: false,
-  userWithdrawMinUsd: 5,
+  userWithdrawDailyMaxCount: 1,
 })
 
 const metaInfo = reactive({createdAt: '', updatedAt: ''})
+/** 账号配置整表保存，保留服务端原最低提现金额，避免误覆盖 */
+const preservedUserWithdrawMinUsd = ref(5)
 
 const normalizePositiveInt = (v: unknown, fallback: number) => {
   const n = Number(v)
   return Number.isFinite(n) && n >= 1 ? Math.floor(n) : fallback
-}
-
-const normalizeMinUsd = (v: unknown) => {
-  const n = Number(v)
-  return Number.isFinite(n) && n > 0 ? n : 5
 }
 
 const applyCfg = (cfg: AccountCfg | null | undefined) => {
@@ -85,7 +82,10 @@ const applyCfg = (cfg: AccountCfg | null | undefined) => {
   formData.deviceAccountMaxCount = normalizePositiveInt(cfg?.deviceAccountMaxCount, 3)
   formData.deviceCancelDailyLimit = normalizePositiveInt(cfg?.deviceCancelDailyLimit, 1)
   formData.userWithdrawEnabled = !!cfg?.userWithdrawEnabled
-  formData.userWithdrawMinUsd = normalizeMinUsd(cfg?.userWithdrawMinUsd)
+  const dailyMax = Number(cfg?.userWithdrawDailyMaxCount)
+  formData.userWithdrawDailyMaxCount = Number.isFinite(dailyMax) && dailyMax >= 0 ? Math.floor(dailyMax) : 1
+  const minUsd = Number(cfg?.userWithdrawMinUsd)
+  preservedUserWithdrawMinUsd.value = Number.isFinite(minUsd) && minUsd > 0 ? minUsd : 5
   metaInfo.createdAt = cfg?.createdAt || ''
   metaInfo.updatedAt = cfg?.updatedAt || ''
 }
@@ -114,7 +114,8 @@ const handleSave = async () => {
       deviceAccountMaxCount: formData.deviceAccountMaxCount,
       deviceCancelDailyLimit: formData.deviceCancelDailyLimit,
       userWithdrawEnabled: formData.userWithdrawEnabled,
-      userWithdrawMinUsd: normalizeMinUsd(formData.userWithdrawMinUsd),
+      userWithdrawMinUsd: preservedUserWithdrawMinUsd.value,
+      userWithdrawDailyMaxCount: formData.userWithdrawDailyMaxCount,
     })
     if (response?.success) {
       ElMessage.success(t('pages.userWithdrawCfg.saveSuccess'))

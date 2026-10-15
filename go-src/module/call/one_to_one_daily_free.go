@@ -4,7 +4,9 @@ import (
 	"time"
 
 	"xr-game-server/dao/liveroomdao"
+	"xr-game-server/dao/userinfodao"
 	callentity "xr-game-server/entity/call"
+	userentity "xr-game-server/entity/user"
 	"xr-game-server/module/livecfg"
 )
 
@@ -18,8 +20,30 @@ func canSkipOneToOneDiamondPrecheck(payerId, anchorId uint64) bool {
 	return liveroomdao.IsOneToOneDailyFreeAvailable(payerId, anchorId)
 }
 
+func isOrdinaryViewer(userId uint64) bool {
+	if userId == 0 {
+		return false
+	}
+	info := userinfodao.GetUserInfoByUserId(userId)
+	return info != nil && info.UserType == userentity.UserTypeNormal
+}
+
+func orderSupportsDailyFreeCall(order *callentity.CallOrder) bool {
+	if order == nil {
+		return false
+	}
+	switch order.Source {
+	case callentity.CallOrderSourceOneToOneRoom:
+		return true
+	case callentity.CallOrderSourceLiveRoom:
+		return isOrdinaryViewer(order.CallerId)
+	default:
+		return false
+	}
+}
+
 func canSkipOneToOneDiamondPrecheckForOrder(order *callentity.CallOrder) bool {
-	if order == nil || order.Source != callentity.CallOrderSourceOneToOneRoom {
+	if !orderSupportsDailyFreeCall(order) {
 		return false
 	}
 	anchorId, payerId, billable := callDiamondBillingPartyIds(order)
@@ -31,7 +55,7 @@ func canSkipOneToOneDiamondPrecheckForOrder(order *callentity.CallOrder) bool {
 
 // tryApplyOneToOneDailyFreeOnAccept 接通后延迟首分钟扣费并作废当日整段免费额度。
 func tryApplyOneToOneDailyFreeOnAccept(order *callentity.CallOrder, anchorId, payerId uint64, now time.Time) bool {
-	if order == nil || order.Source != callentity.CallOrderSourceOneToOneRoom {
+	if !orderSupportsDailyFreeCall(order) {
 		return false
 	}
 	freeSec := livecfg.GetOneToOneDailyFreeSeconds()

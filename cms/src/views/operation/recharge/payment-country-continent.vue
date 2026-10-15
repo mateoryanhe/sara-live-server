@@ -41,7 +41,7 @@
           <template #default="{ row }"><el-tag effect="plain" type="primary">{{ row.currencyCode }}</el-tag></template>
         </el-table-column>
 
-        <el-table-column v-if="isCoinMerchant" :label="t('pages.paymentCountryCfg.paymentType')" min-width="190">
+        <el-table-column v-if="usesCombinedPaymentFields" :label="t('pages.paymentCountryCfg.paymentType')" min-width="190">
           <template #default="{ row }">
             <div v-if="selectedPayTypes(row).length" class="tag-list">
               <el-tag v-for="type in selectedPayTypes(row)" :key="type" size="small">{{ type }}</el-tag>
@@ -50,7 +50,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column v-if="isCoinMerchant" :label="t('pages.paymentCountryCfg.paymentCode')" min-width="230">
+        <el-table-column v-if="usesCombinedPaymentFields" :label="t('pages.paymentCountryCfg.paymentCode')" min-width="230">
           <template #default="{ row }">
             <div v-if="selectedPaymentMethodsForCurrency(row).length" class="tag-list">
               <el-tag v-for="method in selectedPaymentMethodsForCurrency(row)" :key="methodKey(method)" size="small" type="success">
@@ -89,29 +89,42 @@ import {useI18n} from 'vue-i18n'
 import {useRoute, useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {
-  coinMerchantPaymentCountryCfgApi,
   normalizePaymentCountryCfgGroups,
-  paymentCountryCfgApi,
   type PaymentCountryCfgGroup,
   type PaymentCountryCfgItem,
   type PaymentCountryPaymentMethod,
 } from '@/api/modules/payment-country-cfg'
 import {usePagePermission} from '@/composables/usePagePermission'
+import {usePaymentCountryCfgScope} from '@/composables/usePaymentCountryCfgScope'
 
 const {t} = useI18n()
 const route = useRoute()
 const router = useRouter()
-const isCoinMerchant = route.meta.paymentCountryCfgScope === 'coinMerchant'
-const configApi = isCoinMerchant ? coinMerchantPaymentCountryCfgApi : paymentCountryCfgApi
-const rootRouteName = isCoinMerchant ? 'CoinMerchantPaymentCountryCfgManagement' : 'PaymentCountryCfgManagement'
-const editRouteName = isCoinMerchant ? 'CoinMerchantPaymentCountryCfgEdit' : 'PaymentCountryCfgEdit'
-const permissionPage = isCoinMerchant ? 'CoinMerchantPaymentCountryCfgManagement' : 'PaymentCountryCfgManagement'
-const detailNotice = computed(() => t(isCoinMerchant
-    ? 'pages.paymentCountryCfg.coinMerchantDetailNotice'
-    : 'pages.paymentCountryCfg.normalDetailNotice'))
-const bottomTip = computed(() => t(isCoinMerchant
-    ? 'pages.paymentCountryCfg.coinMerchantLocalTip'
-    : 'pages.paymentCountryCfg.globalCashierTip'))
+const {
+  isCoinMerchant,
+  isUserWithdrawPayout,
+  usesCombinedPaymentFields,
+  configApi,
+  rootRouteName,
+  editRouteName,
+  permissionPage,
+} = usePaymentCountryCfgScope()
+const detailNotice = computed(() => {
+  if (isUserWithdrawPayout.value) {
+    return t('pages.paymentCountryCfg.withdrawPayoutDetailNotice')
+  }
+  return t(isCoinMerchant.value
+      ? 'pages.paymentCountryCfg.coinMerchantDetailNotice'
+      : 'pages.paymentCountryCfg.normalDetailNotice')
+})
+const bottomTip = computed(() => {
+  if (isUserWithdrawPayout.value) {
+    return t('pages.paymentCountryCfg.withdrawPayoutTip')
+  }
+  return t(isCoinMerchant.value
+      ? 'pages.paymentCountryCfg.coinMerchantLocalTip'
+      : 'pages.paymentCountryCfg.globalCashierTip')
+})
 const {can} = usePagePermission(permissionPage)
 const loading = ref(false)
 const keyword = ref('')
@@ -161,15 +174,17 @@ const countries = computed(() => {
 const fetchConfig = async () => {
   loading.value = true
   try {
-    const response = await configApi.getConfig()
+    const response = await configApi.value.getConfig()
     groups.value = normalizePaymentCountryCfgGroups(response.continents)
     if (!groups.value.some((group) => group.continent === continent.value)) {
       ElMessage.error(t('pages.paymentCountryCfg.invalidContinent'))
-      await router.replace({name: rootRouteName})
+      await router.replace({name: rootRouteName.value})
     }
   } catch (error) {
     console.error('fetch collection country config failed:', error)
-    ElMessage.error(t('pages.paymentCountryCfg.fetchFailed'))
+    ElMessage.error(t(isUserWithdrawPayout.value
+        ? 'pages.paymentCountryCfg.withdrawPayoutFetchFailed'
+        : 'pages.paymentCountryCfg.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -177,12 +192,12 @@ const fetchConfig = async () => {
 
 const openEditPage = (row: PaymentCountryCfgItem) => {
   router.push({
-    name: editRouteName,
+    name: editRouteName.value,
     params: {continent: continent.value, countryCode: row.countryCode},
   })
 }
 
-const goBack = () => router.push({name: rootRouteName})
+const goBack = () => router.push({name: rootRouteName.value})
 
 // 页面被 keep-alive 缓存；从编辑页返回时重新读取服务端缓存，立即显示刚保存的币种和可见性。
 onActivated(fetchConfig)

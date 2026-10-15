@@ -54,27 +54,33 @@ import {useI18n} from 'vue-i18n'
 import {useRoute, useRouter} from 'vue-router'
 import {ArrowRight} from '@element-plus/icons-vue'
 import {ElMessage} from 'element-plus'
-import {
-  coinMerchantPaymentCountryCfgApi,
-  normalizePaymentCountryCfgGroups,
-  paymentCountryCfgApi,
-  type PaymentCountryCfgGroup,
-} from '@/api/modules/payment-country-cfg'
+import {normalizePaymentCountryCfgGroups, type PaymentCountryCfgGroup} from '@/api/modules/payment-country-cfg'
+import {usePaymentCountryCfgScope} from '@/composables/usePaymentCountryCfgScope'
 
 const {t} = useI18n()
-const route = useRoute()
 const router = useRouter()
-const isCoinMerchant = computed(() => route.meta.paymentCountryCfgScope === 'coinMerchant')
-const configApi = computed(() => isCoinMerchant.value ? coinMerchantPaymentCountryCfgApi : paymentCountryCfgApi)
-const pageTitle = computed(() => t(isCoinMerchant.value
-    ? 'menu.CoinMerchantPaymentCountryCfgManagement'
-    : 'menu.PaymentCountryCfgManagement'))
-const landingNotice = computed(() => t(isCoinMerchant.value
-    ? 'pages.paymentCountryCfg.coinMerchantLandingNotice'
-    : 'pages.paymentCountryCfg.normalLandingNotice'))
-const continentRouteName = computed(() => isCoinMerchant.value
-    ? 'CoinMerchantPaymentCountryCfgContinent'
-    : 'PaymentCountryCfgContinent')
+const {
+  isCoinMerchant,
+  isUserWithdrawPayout,
+  configApi,
+  continentRouteName,
+} = usePaymentCountryCfgScope()
+const pageTitle = computed(() => {
+  if (isUserWithdrawPayout.value) {
+    return t('menu.UserWithdrawPayoutCountryCfgManagement')
+  }
+  return t(isCoinMerchant.value
+      ? 'menu.CoinMerchantPaymentCountryCfgManagement'
+      : 'menu.PaymentCountryCfgManagement')
+})
+const landingNotice = computed(() => {
+  if (isUserWithdrawPayout.value) {
+    return t('pages.paymentCountryCfg.withdrawPayoutLandingNotice')
+  }
+  return t(isCoinMerchant.value
+      ? 'pages.paymentCountryCfg.coinMerchantLandingNotice'
+      : 'pages.paymentCountryCfg.normalLandingNotice')
+})
 const loading = ref(false)
 const groups = ref<PaymentCountryCfgGroup[]>([])
 

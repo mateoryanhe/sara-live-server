@@ -33,8 +33,10 @@ const (
 	UserExtShortVideoUnsettledIncome db.TbCol = "short_video_unsettled_income"
 	UserExtEmail                     db.TbCol = "email"
 	UserExtFirebaseUID               db.TbCol = "firebase_uid"
+	UserExtGameWinCount              db.TbCol = "game_win_count"
 	UserExtInviterId                 db.TbCol = "inviter_id"
 	UserExtPromotionChannelCode      db.TbCol = "promotion_channel_code"
+	UserExtGameLiveRoomId            db.TbCol = "game_live_room_id"
 )
 
 // UserExt 用户扩展信息(与用户一一对应,主键ID即用户ID)
@@ -54,8 +56,10 @@ type UserExt struct {
 	ShortVideoUnsettledIncome float64    `gorm:"type:decimal(16,4);default:0;comment:短视频未结算收益(非主播作者)" json:"shortVideoUnsettledIncome"`
 	Email                     string     `gorm:"size:256;index;default:'';comment:绑定邮箱(规范化小写)" json:"email"`
 	FirebaseUID               string     `gorm:"size:128;index;default:'';comment:绑定Firebase UID" json:"firebaseUid"`
+	GameWinCount              uint64     `gorm:"default:0;comment:游戏派彩(win)次数(>0提现需满足档位游戏消费累计)" json:"gameWinCount"`
 	InviterId                 uint64     `gorm:"index;default:0;comment:邀请者用户ID(0为无)" json:"inviterId"`
 	PromotionChannelCode      int        `gorm:"index;default:0;comment:注册推广渠道编码(0为无)" json:"promotionChannelCode"`
+	GameLiveRoomId            uint64     `gorm:"index;default:0;comment:玩游戏上下文直播间ID(0大厅无关联,>0写入game_bet_logs)" json:"gameLiveRoomId"`
 }
 
 func NewUserExt(userId uint64) *UserExt {
@@ -169,6 +173,18 @@ func (receiver *UserExt) SetFirebaseUID(firebaseUID string) {
 	})
 }
 
+func (receiver *UserExt) AddGameWinCount(delta uint64) {
+	if delta == 0 {
+		return
+	}
+	receiver.GameWinCount = math.Add(receiver.GameWinCount, delta)
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddData(TbUserExt, UserExtGameWinCount, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: receiver.GameWinCount,
+	})
+}
+
 func (receiver *UserExt) SetInviterId(inviterId uint64) {
 	receiver.InviterId = inviterId
 	receiver.SetUpdatedAt(time.Now())
@@ -184,6 +200,15 @@ func (receiver *UserExt) SetPromotionChannelCode(code int) {
 	syndb.AddData(TbUserExt, UserExtPromotionChannelCode, &syndb.ColData{
 		IdVal:  receiver.ID,
 		ColVal: code,
+	})
+}
+
+func (receiver *UserExt) SetGameLiveRoomId(liveRoomId uint64) {
+	receiver.GameLiveRoomId = liveRoomId
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddData(TbUserExt, UserExtGameLiveRoomId, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: liveRoomId,
 	})
 }
 
@@ -295,8 +320,10 @@ func initUserExt() {
 	syndb.RegQuick(TbUserExt, UserExtShortVideoUnsettledIncome)
 	syndb.RegQuick(TbUserExt, UserExtEmail)
 	syndb.RegQuick(TbUserExt, UserExtFirebaseUID)
+	syndb.RegQuick(TbUserExt, UserExtGameWinCount)
 	syndb.RegQuick(TbUserExt, UserExtInviterId)
 	syndb.RegQuick(TbUserExt, UserExtPromotionChannelCode)
+	syndb.RegQuick(TbUserExt, UserExtGameLiveRoomId)
 
 	migrate.AutoMigrate(&UserExt{})
 }

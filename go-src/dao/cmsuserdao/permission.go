@@ -225,7 +225,8 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		"/trackingEvent/getMiniGameWebViewLoadTrend",
 		"/trackingEvent/getMiniGameControllerClickTrend",
 		"/trackingEvent/getGameLiveRoomJoinTrend",
-		"/trackingEvent/getGameLiveWatchStreamTrend":
+		"/trackingEvent/getGameLiveWatchStreamTrend",
+		"/trackingEvent/getOfflineGameRoomPlayTrend":
 		return miniGameTrackingTrendAliasPaths()
 	case "/trackingEvent/getShortVideoPlayStartTrend":
 		return shortVideoTrackingTrendAliasPaths()
@@ -285,6 +286,7 @@ func miniGameTrackingTrendAliasPaths() []string {
 		"/trackingEvent/getMiniGameControllerClickTrend",
 		"/trackingEvent/getGameLiveRoomJoinTrend",
 		"/trackingEvent/getGameLiveWatchStreamTrend",
+		"/trackingEvent/getOfflineGameRoomPlayTrend",
 	}
 }
 

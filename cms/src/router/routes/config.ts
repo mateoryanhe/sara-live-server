@@ -54,9 +54,7 @@ export const configRoutes: RouteRecordRaw = {
         },
         {
             path: 'user-withdraw-cfg',
-            name: 'UserWithdrawCfgManagement',
-            component: () => import('@/views/config/user-withdraw-cfg.vue'),
-            meta: {title: '用户提现'},
+            redirect: '/withdraw/user-withdraw-cfg',
         },
         {
             path: 'text-moderation',
@@ -141,6 +139,12 @@ export const configRoutes: RouteRecordRaw = {
             name: 'ThirdPayDeployManagement',
             component: () => import('@/views/config/third-pay-deploy.vue'),
             meta: {title: '第三方支付部署'},
+        },
+        {
+            path: 'user-withdraw-deploy',
+            name: 'UserWithdrawDeployManagement',
+            component: () => import('@/views/config/user-withdraw-deploy.vue'),
+            meta: {title: '提现部署'},
         },
         {
             path: 'official-site-deploy',

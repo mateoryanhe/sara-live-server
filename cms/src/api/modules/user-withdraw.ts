@@ -4,7 +4,8 @@ export interface UserWithdrawLogItem {
     id: string
     userId: string
     nickname?: string
-    goldAmount: number
+    diamondAmount?: number
+    goldAmount?: number
     withdrawUsd: number
     status: number
     transferOrderId?: string

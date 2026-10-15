@@ -584,6 +584,7 @@ export interface UserExtDetailItem {
     cancelCodeExpireAt?: string | null
     rechargeWhitelist?: boolean
     shortVideoUnsettledIncome?: number
+    email?: string
     updatedAt?: string | null
 }
 
@@ -606,6 +607,11 @@ export interface UserLoginDeviceDetailItem {
     updatedAt?: string | null
 }
 
+export interface UserChannelPayProfileDetailItem {
+    name?: string
+    email?: string
+}
+
 export interface UserDetail {
     account?: UserAccountDetailItem | null
     profile?: UserProfileDetailItem | null
@@ -613,6 +619,7 @@ export interface UserDetail {
     userExt?: UserExtDetailItem | null
     cumulativeStat?: UserCumulativeStatDetailItem | null
     loginDevice?: UserLoginDeviceDetailItem | null
+    channelPayProfile?: UserChannelPayProfileDetailItem | null
 }
 
 export interface QueryBotAnchorListReq extends PageQuery {
@@ -812,6 +819,7 @@ export interface AccountCfg {
     deviceCancelDailyLimit: number
     userWithdrawEnabled?: boolean
     userWithdrawMinUsd?: number
+    userWithdrawDailyMaxCount?: number
     createdAt?: string
     updatedAt?: string
 }
@@ -891,6 +899,7 @@ export interface SaveAccountCfgReq {
     deviceCancelDailyLimit: number
     userWithdrawEnabled?: boolean
     userWithdrawMinUsd?: number
+    userWithdrawDailyMaxCount?: number
 }
 
 export interface SaveAccountCfgRes {
@@ -1907,6 +1916,7 @@ export interface LiveCfg {
 	videoCallTicketEnabled: boolean
 	audienceListRefreshSeconds: number
 	oneToOneDailyFreeSeconds: number
+    liveRoomCallMinTotalRechargeUsd: number
     createdAt: string
     updatedAt: string
 }
@@ -1921,6 +1931,7 @@ export interface SaveLiveCfgReq {
 	videoCallTicketEnabled: boolean
 	audienceListRefreshSeconds: number
 	oneToOneDailyFreeSeconds: number
+    liveRoomCallMinTotalRechargeUsd: number
 }
 
 export interface SaveLiveCfgRes {

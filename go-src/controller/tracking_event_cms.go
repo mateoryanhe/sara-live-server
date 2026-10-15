@@ -76,6 +76,10 @@ func (c *TrackingEventCMSController) GetMiniGameControllerClickTrend(ctx context
 	return tracking.GetCMSMiniGameControllerClickTrend(ctx, req)
 }
 
+func (c *TrackingEventCMSController) GetOfflineGameRoomPlayTrend(ctx context.Context, req *trackingdto.CMSOfflineGameRoomPlayTrendReq) (*trackingdto.CMSOfflineGameRoomPlayTrendRes, error) {
+	return tracking.GetCMSOfflineGameRoomPlayTrend(ctx, req)
+}
+
 func (c *TrackingEventCMSController) GetShortVideoPlayStartTrend(ctx context.Context, req *trackingdto.CMSShortVideoPlayStartTrendReq) (*trackingdto.CMSShortVideoPlayStartTrendRes, error) {
 	return tracking.GetCMSShortVideoPlayStartTrend(ctx, req)
 }

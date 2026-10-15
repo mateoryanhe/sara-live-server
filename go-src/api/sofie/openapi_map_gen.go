@@ -178,6 +178,7 @@ var openAPIDocRoutes = []openAPIDocRoute{
 	{OldMethod: "post", OldPath: "/userWithdraw/savePayoutInfo", NewPath: "/sofie/payout/savePayeeProfile", Tag: "payout", Summary: "保存用户收款信息"},
 	{OldMethod: "post", OldPath: "/userWithdraw/applyWithdraw", NewPath: "/sofie/payout/requestCashOut", Tag: "payout", Summary: "申请提现"},
 	{OldMethod: "post", OldPath: "/userWithdraw/listWithdrawLogs", NewPath: "/sofie/payout/browseCashOutLogs", Tag: "payout", Summary: "用户提现记录"},
+	{OldMethod: "post", OldPath: "/userWithdraw/listWithdrawTiers", NewPath: "/sofie/payout/browseCashOutTiers", Tag: "payout", Summary: "用户提现档位"},
 	{OldMethod: "post", OldPath: "/firstRechargeActivity/firstRechargeActivityCfgForApp", NewPath: "/sofie/bonus/fetchFirstPay", Tag: "bonus", Summary: "首充活动配置"},
 	{OldMethod: "post", OldPath: "/appVersion/appVersionQuery", NewPath: "/sofie/release/lookupBuild", Tag: "release", Summary: "App版本查询"},
 	{OldMethod: "post", OldPath: "/customerService/cfg", NewPath: "/sofie/help/fetchContact", Tag: "help", Summary: "客服配置"},

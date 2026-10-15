@@ -5,6 +5,7 @@ import (
 
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/userwithdrawdto"
+	"xr-game-server/dto/userwithdrawtiercfgdto"
 	"xr-game-server/module/userwithdraw"
 )
 
@@ -18,6 +19,10 @@ func initUserWithdrawAppController() {
 
 func (c *UserWithdrawAppController) GetWithdrawCfg(ctx context.Context, req *userwithdrawdto.AppGetWithdrawCfgReq) (*userwithdrawdto.AppGetWithdrawCfgRes, error) {
 	return userwithdraw.GetWithdrawCfg(ctx, req)
+}
+
+func (c *UserWithdrawAppController) ListWithdrawCurrencies(ctx context.Context, req *userwithdrawdto.AppListWithdrawCurrenciesReq) (*userwithdrawdto.AppListWithdrawCurrenciesRes, error) {
+	return userwithdraw.AppListWithdrawCurrencies(ctx, req)
 }
 
 func (c *UserWithdrawAppController) GetPayoutInfo(ctx context.Context, req *userwithdrawdto.AppGetPayoutInfoReq) (*userwithdrawdto.AppGetPayoutInfoRes, error) {
@@ -34,4 +39,8 @@ func (c *UserWithdrawAppController) ApplyWithdraw(ctx context.Context, req *user
 
 func (c *UserWithdrawAppController) ListWithdrawLogs(ctx context.Context, req *userwithdrawdto.AppWithdrawLogListReq) (*userwithdrawdto.AppWithdrawLogListRes, error) {
 	return userwithdraw.AppListWithdrawLogs(ctx, req)
+}
+
+func (c *UserWithdrawAppController) ListWithdrawTiers(ctx context.Context, req *userwithdrawtiercfgdto.AppUserWithdrawTierListReq) (*userwithdrawtiercfgdto.AppUserWithdrawTierListRes, error) {
+	return userwithdraw.AppListWithdrawTiers(ctx, req)
 }

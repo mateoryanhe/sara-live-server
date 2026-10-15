@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"xr-game-server/constants/country"
 	"xr-game-server/core/xrlog"
 	"xr-game-server/dao/userwithdrawdao"
 	userentity "xr-game-server/entity/user"
@@ -23,9 +24,16 @@ func submitUserHaiPayPayout(ctx context.Context, row *userentity.UserWithdrawLog
 	if info == nil {
 		return fmt.Errorf("user payout info missing")
 	}
-	currencyCode := strings.ToUpper(strings.TrimSpace(info.Currency))
-	if currencyCode == "" {
-		return fmt.Errorf("transfer currency empty")
+	countryCode := strings.ToUpper(strings.TrimSpace(info.CountryCode))
+	if countryCode == "" {
+		countryCode = country.HaiPayPayoutCountryFromCurrency(strings.ToUpper(strings.TrimSpace(info.Currency)))
+	}
+	currencyCode, accountType, bankCode, err := payoutMethodFromUserWithdrawCountryCfg(countryCode)
+	if err != nil {
+		return fmt.Errorf("payout country cfg invalid")
+	}
+	if err := validateUserPayoutInfoForWithdrawCountry(info, countryCode); err != nil {
+		return fmt.Errorf("user payout info mismatch country cfg")
 	}
 	conversion, err := fxrate.ConvertUSD(ctx, row.WithdrawUsd, currencyCode)
 	if err != nil {
@@ -45,13 +53,13 @@ func submitUserHaiPayPayout(ctx context.Context, row *userentity.UserWithdrawLog
 		OrderID:       orderId,
 		Currency:      currencyCode,
 		Amount:        localAmount,
-		AccountType:   info.AccountType,
-		BankCode:      info.BankCode,
+		AccountType:   accountType,
+		BankCode:      bankCode,
 		AccountNo:     info.AccountNo,
 		Name:          info.PayeeName,
 		Phone:         info.Phone,
 		Email:         info.Email,
-		Country:       info.CountryCode,
+		Country:       countryCode,
 		IdentifyType:  info.IdentifyType,
 		Address1:      info.Address1,
 		Address2:      info.Address2,
@@ -73,5 +81,6 @@ func submitUserHaiPayPayout(ctx context.Context, row *userentity.UserWithdrawLog
 	row.SetTransferPayout(orderId, platformNo, currencyCode, localAmount)
 	row.SetStatus(userentity.UserWithdrawStatusTransferring)
 	row.SetTransferFailMsg("")
-	return userwithdrawdao.UpdateUserWithdrawLog(row)
+	userwithdrawdao.SyncUserWithdrawLogCache(row)
+	return nil
 }

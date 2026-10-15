@@ -14,6 +14,7 @@ const TbUserWithdrawLog db.TbName = "user_withdraw_logs"
 const (
 	UserWithdrawLogUserId               db.TbCol = "user_id"
 	UserWithdrawLogGoldAmount           db.TbCol = "gold_amount"
+	UserWithdrawLogDiamondAmount        db.TbCol = "diamond_amount"
 	UserWithdrawLogWithdrawUsd          db.TbCol = "withdraw_usd"
 	UserWithdrawLogUsdToGoldRate        db.TbCol = "usd_to_gold_rate"
 	UserWithdrawLogStatus               db.TbCol = "status"
@@ -24,6 +25,7 @@ const (
 	UserWithdrawLogTransferAt           db.TbCol = "transfer_at"
 	UserWithdrawLogTransferFailMsg      db.TbCol = "transfer_fail_msg"
 	UserWithdrawLogRejectReason         db.TbCol = "reject_reason"
+	UserWithdrawLogTierId               db.TbCol = "tier_id"
 )
 
 const (
@@ -31,7 +33,7 @@ const (
 	UserWithdrawStatusApproved     uint8 = 1 // 审核通过,待代付
 	UserWithdrawStatusTransferred  uint8 = 2 // 代付成功
 	UserWithdrawStatusTransferring uint8 = 3 // 已提交代付
-	UserWithdrawStatusRejected     uint8 = 4 // 审核拒绝(已退金币)
+	UserWithdrawStatusRejected     uint8 = 4 // 审核拒绝(已退钻石/金币)
 )
 
 // UserWithdrawLog 用户提现单
@@ -39,7 +41,8 @@ type UserWithdrawLog struct {
 	migrate.OneModel
 	CreatedAt              time.Time  `gorm:"index:idx_uwl_user_status_created,priority:3" json:"-"`
 	UserId                 uint64     `gorm:"index:idx_uwl_user_status_created,priority:1;default:0;comment:用户ID" json:"userId"`
-	GoldAmount             float64    `gorm:"type:decimal(20,2);default:0;comment:提现金币数" json:"goldAmount"`
+	GoldAmount             float64    `gorm:"type:decimal(20,2);default:0;comment:提现金币数(旧逻辑)" json:"goldAmount"`
+	DiamondAmount          float64    `gorm:"type:decimal(20,4);default:0;comment:提现扣减钻石数" json:"diamondAmount"`
 	WithdrawUsd            float64    `gorm:"type:decimal(16,4);default:0;comment:折算USD" json:"withdrawUsd"`
 	UsdToGoldRate          int        `gorm:"default:0;comment:申请时1USD兑换金币数快照" json:"usdToGoldRate"`
 	Status                 uint8      `gorm:"index:idx_uwl_user_status_created,priority:2;default:0;comment:状态" json:"status"`
@@ -50,26 +53,31 @@ type UserWithdrawLog struct {
 	TransferAt             *time.Time `gorm:"comment:代付成功时间" json:"transferAt"`
 	TransferFailMsg        string     `gorm:"size:255;default:'';comment:代付失败原因" json:"transferFailMsg"`
 	RejectReason           string     `gorm:"size:255;default:'';comment:审核拒绝原因" json:"rejectReason"`
+	TierId                 uint64     `gorm:"default:0;comment:提现档位ID" json:"tierId"`
 }
 
-func NewUserWithdrawLog(userId uint64, goldAmount, withdrawUsd float64, usdToGoldRate int) *UserWithdrawLog {
+func NewUserWithdrawLog(userId, tierId uint64, diamondAmount, goldAmount, withdrawUsd float64, usdToGoldRate int) *UserWithdrawLog {
 	now := time.Now()
-	return &UserWithdrawLog{
-		OneModel: migrate.OneModel{
-			ID:        snowflake.GetId(),
-			CreatedAt: now,
-			UpdatedAt: now,
-		},
-		UserId:        userId,
-		GoldAmount:    goldAmount,
-		WithdrawUsd:   withdrawUsd,
-		UsdToGoldRate: usdToGoldRate,
-		Status:        UserWithdrawStatusPending,
-	}
+	row := &UserWithdrawLog{}
+	row.ID = snowflake.GetId()
+	row.SetCreatedAt(now)
+	row.SetUpdatedAt(now)
+	row.SetUserId(userId)
+	row.SetGoldAmount(goldAmount)
+	row.SetDiamondAmount(diamondAmount)
+	row.SetWithdrawUsd(withdrawUsd)
+	row.SetUsdToGoldRate(usdToGoldRate)
+	row.SetStatus(UserWithdrawStatusPending)
+	row.SetTierId(tierId)
+	return row
 }
 
 func (r *UserWithdrawLog) queue(column db.TbCol, value any) {
 	syndb.AddData(TbUserWithdrawLog, column, &syndb.ColData{IdVal: r.ID, ColVal: value})
+}
+
+func (r *UserWithdrawLog) touchUpdatedAt() {
+	r.SetUpdatedAt(time.Now())
 }
 
 func (r *UserWithdrawLog) SetCreatedAt(value time.Time) {
@@ -92,6 +100,11 @@ func (r *UserWithdrawLog) SetGoldAmount(value float64) {
 	r.queue(UserWithdrawLogGoldAmount, value)
 }
 
+func (r *UserWithdrawLog) SetDiamondAmount(value float64) {
+	r.DiamondAmount = value
+	r.queue(UserWithdrawLogDiamondAmount, value)
+}
+
 func (r *UserWithdrawLog) SetWithdrawUsd(value float64) {
 	r.WithdrawUsd = value
 	r.queue(UserWithdrawLogWithdrawUsd, value)
@@ -104,6 +117,7 @@ func (r *UserWithdrawLog) SetUsdToGoldRate(value int) {
 
 func (r *UserWithdrawLog) SetStatus(value uint8) {
 	r.Status = value
+	r.touchUpdatedAt()
 	r.queue(UserWithdrawLogStatus, value)
 }
 
@@ -112,6 +126,7 @@ func (r *UserWithdrawLog) SetTransferPayout(orderId, platformNo, currency string
 	r.TransferPlatformNo = platformNo
 	r.TransferCurrency = currency
 	r.TransferLocalAmount = localAmount
+	r.touchUpdatedAt()
 	r.queue(UserWithdrawLogTransferOrderId, orderId)
 	r.queue(UserWithdrawLogTransferPlatformNo, platformNo)
 	r.queue(UserWithdrawLogTransferCurrency, currency)
@@ -120,17 +135,25 @@ func (r *UserWithdrawLog) SetTransferPayout(orderId, platformNo, currency string
 
 func (r *UserWithdrawLog) SetTransferAt(value *time.Time) {
 	r.TransferAt = value
+	r.touchUpdatedAt()
 	r.queue(UserWithdrawLogTransferAt, value)
 }
 
 func (r *UserWithdrawLog) SetTransferFailMsg(value string) {
 	r.TransferFailMsg = value
+	r.touchUpdatedAt()
 	r.queue(UserWithdrawLogTransferFailMsg, value)
 }
 
 func (r *UserWithdrawLog) SetRejectReason(value string) {
 	r.RejectReason = value
+	r.touchUpdatedAt()
 	r.queue(UserWithdrawLogRejectReason, value)
+}
+
+func (r *UserWithdrawLog) SetTierId(value uint64) {
+	r.TierId = value
+	r.queue(UserWithdrawLogTierId, value)
 }
 
 func initUserWithdrawLog() {
@@ -138,6 +161,7 @@ func initUserWithdrawLog() {
 	syndb.RegLazy(TbUserWithdrawLog, db.UpdatedAtName)
 	syndb.RegQuick(TbUserWithdrawLog, UserWithdrawLogUserId)
 	syndb.RegQuick(TbUserWithdrawLog, UserWithdrawLogGoldAmount)
+	syndb.RegQuick(TbUserWithdrawLog, UserWithdrawLogDiamondAmount)
 	syndb.RegQuick(TbUserWithdrawLog, UserWithdrawLogWithdrawUsd)
 	syndb.RegQuick(TbUserWithdrawLog, UserWithdrawLogUsdToGoldRate)
 	syndb.RegQuick(TbUserWithdrawLog, UserWithdrawLogStatus)
@@ -148,5 +172,6 @@ func initUserWithdrawLog() {
 	syndb.RegLazy(TbUserWithdrawLog, UserWithdrawLogTransferAt)
 	syndb.RegLazy(TbUserWithdrawLog, UserWithdrawLogTransferFailMsg)
 	syndb.RegLazy(TbUserWithdrawLog, UserWithdrawLogRejectReason)
+	syndb.RegLazy(TbUserWithdrawLog, UserWithdrawLogTierId)
 	migrate.AutoMigrate(&UserWithdrawLog{})
 }

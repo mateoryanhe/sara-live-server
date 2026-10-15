@@ -137,7 +137,7 @@ func liveRoomHeartTimeUnix(room *liveentity.LiveRoom) int64 {
 	return room.HeartTime.Unix()
 }
 
-func toLiveRoomListItem(room *liveentity.LiveRoom, userId uint64) *liveroomdto.LiveRoomListItem {
+func toLiveRoomListItem(ctx context.Context, room *liveentity.LiveRoom, userId uint64) *liveroomdto.LiveRoomListItem {
 	status := userstatus.LiveRoomStatusClosed
 	if room.LiveRecordId > 0 {
 		status = userstatus.LiveRoomStatusLive
@@ -162,7 +162,7 @@ func toLiveRoomListItem(room *liveentity.LiveRoom, userId uint64) *liveroomdto.L
 	if cfg != nil {
 		item.Category = normalizeLiveRoomCategory(cfg.Category)
 		item.Billing = cfg.Billing
-		item.AllowCallIcon = allowShowCallIcon(room, cfg, userId)
+		item.AllowCallIcon = allowShowCallIcon(ctx, room, cfg, userId)
 		if cfg.TagId > 0 {
 			item.TagId = strconv.FormatUint(cfg.TagId, 10)
 			item.TagName = getRoomTagName(cfg.TagId)
@@ -195,13 +195,13 @@ func toLiveRoomListItem(room *liveentity.LiveRoom, userId uint64) *liveroomdto.L
 	return item
 }
 
-func buildLiveRoomListItems(rooms []*liveentity.LiveRoom, userId uint64) []*liveroomdto.LiveRoomListItem {
+func buildLiveRoomListItems(ctx context.Context, rooms []*liveentity.LiveRoom, userId uint64) []*liveroomdto.LiveRoomListItem {
 	list := make([]*liveroomdto.LiveRoomListItem, 0, len(rooms))
 	for _, room := range rooms {
 		if room == nil {
 			continue
 		}
-		list = append(list, toLiveRoomListItem(room, userId))
+		list = append(list, toLiveRoomListItem(ctx, room, userId))
 	}
 	return list
 }
@@ -424,7 +424,7 @@ func GetRoomList(ctx context.Context, req *liveroomdto.GetLiveRoomListReq) (*liv
 		Total:    total,
 		Page:     page,
 		PageSize: pageSize,
-		List:     buildLiveRoomListItems(filtered[start:end], userId),
+		List:     buildLiveRoomListItems(ctx, filtered[start:end], userId),
 	}, nil
 }
 
@@ -472,7 +472,7 @@ func selectOneToOneRooms(rooms []*liveentity.LiveRoom, statusFilter int) ([]*liv
 	return filtered, onlineByRoomID
 }
 
-func buildOneToOneRoomListItems(rooms []*liveentity.LiveRoom, userID uint64, onlineByRoomID map[uint64]bool) []*liveroomdto.OneToOneRoomListItem {
+func buildOneToOneRoomListItems(ctx context.Context, rooms []*liveentity.LiveRoom, userID uint64, onlineByRoomID map[uint64]bool) []*liveroomdto.OneToOneRoomListItem {
 	list := make([]*liveroomdto.OneToOneRoomListItem, 0, len(rooms))
 	for _, room := range rooms {
 		if room == nil {
@@ -482,7 +482,7 @@ func buildOneToOneRoomListItems(rooms []*liveentity.LiveRoom, userID uint64, onl
 		if onlineByRoomID[room.ID] {
 			onlineStatus = liveroomdto.OneToOneRoomStatusFilterOnline
 		}
-		base := toLiveRoomListItem(room, userID)
+		base := toLiveRoomListItem(ctx, room, userID)
 		if base == nil {
 			continue
 		}
@@ -517,7 +517,7 @@ func GetOneToOneRoomList(ctx context.Context, req *liveroomdto.GetOneToOneRoomLi
 		Total:    total,
 		Page:     page,
 		PageSize: pageSize,
-		List:     buildOneToOneRoomListItems(filtered[start:end], userID, onlineByRoomID),
+		List:     buildOneToOneRoomListItems(ctx, filtered[start:end], userID, onlineByRoomID),
 	}, nil
 }
 
@@ -546,7 +546,7 @@ func GetFollowedRoomList(ctx context.Context, req *liveroomdto.GetFollowedLiveRo
 	total := len(filtered)
 	start, end := roomListPageRange(total, page, pageSize)
 
-	list := buildLiveRoomListItems(filtered[start:end], userId)
+	list := buildLiveRoomListItems(ctx, filtered[start:end], userId)
 	if len(list) == 0 {
 		list = make([]*liveroomdto.LiveRoomListItem, 0)
 	}
@@ -630,7 +630,7 @@ func filterRoomsByCategory(rooms []*liveentity.LiveRoom, category uint8) []*live
 	return filtered
 }
 
-func buildHotLiveRoomListItems(rooms []*liveentity.LiveRoom, userId uint64, startRank int) []*liveroomdto.HotLiveRoomListItem {
+func buildHotLiveRoomListItems(ctx context.Context, rooms []*liveentity.LiveRoom, userId uint64, startRank int) []*liveroomdto.HotLiveRoomListItem {
 	list := make([]*liveroomdto.HotLiveRoomListItem, 0, len(rooms))
 	rank := startRank
 	for _, room := range rooms {
@@ -638,7 +638,7 @@ func buildHotLiveRoomListItems(rooms []*liveentity.LiveRoom, userId uint64, star
 			continue
 		}
 		list = append(list, &liveroomdto.HotLiveRoomListItem{
-			LiveRoomListItem: *toLiveRoomListItem(room, userId),
+			LiveRoomListItem: *toLiveRoomListItem(ctx, room, userId),
 			Rank:             rank,
 		})
 		rank++
@@ -664,7 +664,7 @@ func getCategoryLiveRoomList(ctx context.Context, pageIndex, pageSize int, categ
 	filtered = filterRoomsByBlocked(filtered, userId)
 	total := len(filtered)
 	start, end := roomListPageRange(total, pageIndex, pageSize)
-	list := buildHotLiveRoomListItems(filtered[start:end], userId, start+1)
+	list := buildHotLiveRoomListItems(ctx, filtered[start:end], userId, start+1)
 	if len(list) == 0 {
 		list = make([]*liveroomdto.HotLiveRoomListItem, 0)
 	}
@@ -707,7 +707,7 @@ func GetNearbyLiveRoomList(ctx context.Context, req *liveroomdto.GetNearbyLiveRo
 	currentIdx := findLiveRoomIndex(liveRooms, req.RoomId)
 	nearbyRooms := collectNearbyLiveRooms(liveRooms, currentIdx, req.Direction, count)
 
-	list := buildLiveRoomListItems(nearbyRooms, userId)
+	list := buildLiveRoomListItems(ctx, nearbyRooms, userId)
 	if len(list) == 0 {
 		list = make([]*liveroomdto.LiveRoomListItem, 0)
 	}

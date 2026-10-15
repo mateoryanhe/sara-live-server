@@ -6,13 +6,11 @@ import (
 	"strconv"
 	"strings"
 
-	"xr-game-server/constants/currency"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dao/userwithdrawdao"
 	"xr-game-server/dto/userwithdrawdto"
 	userentity "xr-game-server/entity/user"
 	"xr-game-server/errercode"
-	"xr-game-server/module/wallet"
 )
 
 func CMSListWithdrawLogs(_ context.Context, req *userwithdrawdto.CMSListWithdrawLogsReq) (*userwithdrawdto.CMSListWithdrawLogsRes, error) {
@@ -49,6 +47,7 @@ func CMSListWithdrawLogs(_ context.Context, req *userwithdrawdto.CMSListWithdraw
 			Id:                  strconv.FormatUint(row.ID, 10),
 			UserId:              strconv.FormatUint(row.UserId, 10),
 			Nickname:            nickname,
+			DiamondAmount:       withdrawLogDiamondDisplay(row),
 			GoldAmount:          row.GoldAmount,
 			WithdrawUsd:         row.WithdrawUsd,
 			Status:              row.Status,
@@ -77,10 +76,7 @@ func CMSBatchApproveWithdraw(_ context.Context, req *userwithdrawdto.CMSBatchApp
 			continue
 		}
 		row.SetStatus(userentity.UserWithdrawStatusApproved)
-		if err := userwithdrawdao.UpdateUserWithdrawLog(row); err != nil {
-			res.FailCount++
-			continue
-		}
+		userwithdrawdao.SyncUserWithdrawLogCache(row)
 		res.SuccessCount++
 	}
 	return res, nil
@@ -98,16 +94,13 @@ func CMSBatchRejectWithdraw(_ context.Context, req *userwithdrawdto.CMSBatchReje
 			res.FailCount++
 			continue
 		}
-		if _, err := wallet.GoldAdd(row.UserId, row.GoldAmount, currency.ReasonUserWithdrawRefund); err != nil {
+		if err := refundUserWithdraw(row.UserId, row); err != nil {
 			res.FailCount++
 			continue
 		}
 		row.SetStatus(userentity.UserWithdrawStatusRejected)
 		row.SetRejectReason(reason)
-		if err := userwithdrawdao.UpdateUserWithdrawLog(row); err != nil {
-			res.FailCount++
-			continue
-		}
+		userwithdrawdao.SyncUserWithdrawLogCache(row)
 		res.SuccessCount++
 	}
 	return res, nil
@@ -126,7 +119,7 @@ func CMSBatchSubmitPayout(ctx context.Context, req *userwithdrawdto.CMSBatchSubm
 		}
 		if err := submitUserHaiPayPayout(ctx, row); err != nil {
 			row.SetTransferFailMsg(strings.TrimSpace(err.Error()))
-			_ = userwithdrawdao.UpdateUserWithdrawLog(row)
+			userwithdrawdao.SyncUserWithdrawLogCache(row)
 			res.FailCount++
 			continue
 		}

@@ -54,9 +54,7 @@ export const logRoutes: RouteRecordRaw = {
         },
         {
             path: 'user/user-withdraw-log-list',
-            name: 'UserWithdrawLogList',
-            component: () => import('@/views/log/user/user-withdraw-log-list.vue'),
-            meta: {title: '用户提现记录', parentTitle: '用户日志'},
+            redirect: '/withdraw/user-withdraw-log-list',
         },
         {
             path: 'game/game-bet-log-list',

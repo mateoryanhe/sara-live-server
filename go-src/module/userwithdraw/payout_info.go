@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"xr-game-server/constants/country"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dao/userwithdrawdao"
 	"xr-game-server/dto/userwithdrawdto"
 	userentity "xr-game-server/entity/user"
@@ -48,14 +49,25 @@ func SavePayoutInfo(_ context.Context, userId uint64, req *userwithdrawdto.AppSa
 	if currency == "" || !country.IsHaiPayPayoutCountry(countryCode) {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	accountType := strings.ToUpper(strings.TrimSpace(req.AccountType))
-	method, ok := country.FindHaiPayPayoutMethod(currency, accountType, req.BankCode)
+	cfg, ok := enabledUserWithdrawPayoutCountryCfg(countryCode)
+	if !ok {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	currency = strings.ToUpper(strings.TrimSpace(cfg.CurrencyCode))
+	accountType := strings.ToUpper(strings.TrimSpace(cfg.AccountType))
+	bankCode := strings.TrimSpace(cfg.BankCode)
+	method, ok := country.FindHaiPayPayoutMethod(currency, accountType, bankCode)
 	if !ok {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	if strings.TrimSpace(req.PayeeName) == "" || strings.TrimSpace(req.Phone) == "" ||
-		strings.TrimSpace(req.Email) == "" || strings.TrimSpace(req.AccountNo) == "" ||
-		strings.TrimSpace(req.BankCode) == "" {
+		strings.TrimSpace(req.Email) == "" || strings.TrimSpace(req.AccountNo) == "" {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if reqAccountType := strings.ToUpper(strings.TrimSpace(req.AccountType)); reqAccountType != "" && reqAccountType != accountType {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if reqBank := strings.TrimSpace(req.BankCode); reqBank != "" && !strings.EqualFold(reqBank, bankCode) {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	extraRequirements := country.HaiPayPayoutExtraRequirementsFor(currency, method.BankCode)
@@ -144,7 +156,8 @@ func toPayoutInfoItem(row *userentity.UserPayoutInfo) *userwithdrawdto.AppPayout
 }
 
 func buildPayoutCountryOptions() []*userwithdrawdto.AppPayoutCountryOption {
-	options := country.ListHaiPayPayoutOptions()
+	configured := cfgdao.GetHaiPayUserWithdrawPayoutCountryCfgMapCached()
+	options := listAppVisibleHaiPayPayoutOptions()
 	version := countryflagdeploy.CurrentVersion()
 	out := make([]*userwithdrawdto.AppPayoutCountryOption, 0, len(options))
 	for _, option := range options {
@@ -161,7 +174,14 @@ func buildPayoutCountryOptions() []*userwithdrawdto.AppPayoutCountryOption {
 			walletOptions = append(walletOptions, userwithdrawdto.AppPayoutWalletOption{Code: wallet.Code, Name: wallet.Name})
 		}
 		methodOptions := make([]userwithdrawdto.AppPayoutMethodOption, 0, len(option.Methods))
+		stored := configured[option.CountryCode]
 		for _, method := range option.Methods {
+			if stored != nil && cfgdao.HaiPayUserWithdrawPayoutCountryCfgComplete(stored) {
+				if method.AccountType != strings.ToUpper(strings.TrimSpace(stored.AccountType)) ||
+					!strings.EqualFold(method.BankCode, stored.BankCode) {
+					continue
+				}
+			}
 			extra := country.HaiPayPayoutExtraRequirementsFor(option.Currency, method.BankCode)
 			methodOptions = append(methodOptions, userwithdrawdto.AppPayoutMethodOption{
 				AccountType:          method.AccountType,

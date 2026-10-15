@@ -7,8 +7,27 @@ type AppGetWithdrawCfgReq struct {
 }
 
 type AppGetWithdrawCfgRes struct {
-	Enabled  bool    `json:"enabled"`
-	MinUsd   float64 `json:"minUsd"`
+	Enabled       bool `json:"enabled"`
+	DailyMaxCount int  `json:"dailyMaxCount" dc:"每天最多提现次数(0=不限制)"`
+}
+
+type AppListWithdrawCurrenciesReq struct {
+	g.Meta `path:"/listWithdrawCurrencies" method:"post" summary:"App查询支持的提现币种" tags:"用户提现"`
+}
+
+// AppWithdrawCurrencyItem 提现代付币种(对齐充值 fiatCurrencyListForApp 的区域展示字段)
+type AppWithdrawCurrencyItem struct {
+	CountryCode string `json:"countryCode" dc:"国家/地区简码"`
+	Currency    string `json:"currency" dc:"代付 ISO 4217 币种,保存收款信息与代付使用"`
+	Continent   string `json:"continent" dc:"HaiPay 代付地区分组"`
+	NameEn      string `json:"nameEn"`
+	NameZh      string `json:"nameZh"`
+	Icon        string `json:"icon" dc:"国旗 URL"`
+	Sort        int    `json:"sort"`
+}
+
+type AppListWithdrawCurrenciesRes struct {
+	List []*AppWithdrawCurrencyItem `json:"list"`
 }
 
 type AppGetPayoutInfoReq struct {
@@ -91,14 +110,16 @@ type AppSavePayoutInfoRes struct {
 
 type AppApplyWithdrawReq struct {
 	g.Meta     `path:"/applyWithdraw" method:"post" summary:"申请提现" tags:"用户提现"`
-	GoldAmount float64 `json:"goldAmount" v:"required|min:0.01#金币数量无效"`
+	TierId     uint64  `json:"tierId" v:"required|min:1#请选择提现档位"`
+	Currency   string  `json:"currency" v:"required#请选择提现币种" dc:"代付 ISO 4217 币种,须与收款信息一致且在 CMS 已启用"`
+	GoldAmount float64 `json:"goldAmount" dc:"已废弃,请传 tierId"`
 }
 
 type AppApplyWithdrawRes struct {
-	Id         string  `json:"id"`
-	GoldAmount float64 `json:"goldAmount"`
-	WithdrawUsd float64 `json:"withdrawUsd"`
-	Status     uint8   `json:"status"`
+	Id            string  `json:"id"`
+	DiamondAmount float64 `json:"diamondAmount"`
+	WithdrawUsd   float64 `json:"withdrawUsd"`
+	Status        uint8   `json:"status"`
 }
 
 type AppWithdrawLogListReq struct {
@@ -109,7 +130,7 @@ type AppWithdrawLogListReq struct {
 
 type AppWithdrawLogItem struct {
 	Id                  string  `json:"id"`
-	GoldAmount          float64 `json:"goldAmount"`
+	DiamondAmount       float64 `json:"diamondAmount"`
 	WithdrawUsd         float64 `json:"withdrawUsd"`
 	Status              uint8   `json:"status"`
 	TransferCurrency    string  `json:"transferCurrency"`

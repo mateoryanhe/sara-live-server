@@ -15,6 +15,7 @@ import (
 	userentity "xr-game-server/entity/user"
 	"xr-game-server/errercode"
 	"xr-game-server/module/aliyunmoderation"
+	"xr-game-server/module/livecfg"
 	"xr-game-server/module/upload"
 )
 
@@ -276,7 +277,7 @@ func ViewerCanUseLiveRoomCall(userId uint64) bool {
 		return false
 	}
 	stat := userinfodao.GetUserCumulativeStatByUserId(userId)
-	return stat != nil && stat.TotalRecharge >= liveentity.LiveRoomCallMinTotalRechargeUSD
+	return stat != nil && stat.TotalRecharge >= livecfg.GetLiveRoomCallMinTotalRechargeUSD()
 }
 
 // CanInitiateLiveRoomCall 当前用户是否可向该直播间发起 1v1 通话
@@ -289,6 +290,9 @@ func canInitiateLiveRoomCallBase(room *liveentity.LiveRoom, cfg *liveentity.Live
 	if room == nil || cfg == nil || userId == 0 || userId == room.ID {
 		return false
 	}
+	if normalizeLiveRoomCategory(cfg.Category) == liveentity.LiveRoomCategoryVoiceChat {
+		return false
+	}
 	if anchor := userinfodao.GetUserInfoByUserId(room.ID); anchor == nil || anchor.UserType == userentity.UserTypeAnchor {
 		return false
 	}
@@ -298,9 +302,37 @@ func canInitiateLiveRoomCallBase(room *liveentity.LiveRoom, cfg *liveentity.Live
 	return true
 }
 
-func allowShowCallIcon(room *liveentity.LiveRoom, cfg *liveentity.LiveRoomCfg, userId uint64) bool {
+// allowShowCallIconShowOrGameRoom 秀场/游戏(category=1,2): 普通主播或「不接受任何人」不展示; 其余均展示(不校验充值)
+func allowShowCallIconShowOrGameRoom(room *liveentity.LiveRoom, cfg *liveentity.LiveRoomCfg) bool {
+	anchor := userinfodao.GetUserInfoByUserId(room.ID)
+	if anchor == nil {
+		return false
+	}
+	if anchor.UserType == userentity.UserTypeAnchor {
+		return false
+	}
+	if liveentity.NormalizePrivateInviteType(cfg.PrivateInviteType, cfg.Category) == liveentity.LiveRoomPrivateInviteReject {
+		return false
+	}
+	return true
+}
+
+func allowShowCallIcon(ctx context.Context, room *liveentity.LiveRoom, cfg *liveentity.LiveRoomCfg, userId uint64) bool {
+	if room == nil || cfg == nil || userId == 0 || userId == room.ID {
+		return false
+	}
+	if normalizeLiveRoomCategory(cfg.Category) == liveentity.LiveRoomCategoryVoiceChat {
+		return false
+	}
+	cat := normalizeLiveRoomCategory(cfg.Category)
+	if cat == liveentity.LiveRoomCategoryHot || cat == liveentity.LiveRoomCategoryGame {
+		return allowShowCallIconShowOrGameRoom(room, cfg)
+	}
 	if !canInitiateLiveRoomCallBase(room, cfg, userId) {
 		return false
+	}
+	if httpserver.IsWebClientPlatform(ctx) {
+		return true
 	}
 	return ViewerCanUseLiveRoomCall(userId)
 }
@@ -333,10 +365,10 @@ func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto
 		VoiceChatMicMode:  voiceChatMicModeForRoom(room.ID),
 		TagId:             strconv.FormatUint(cfg.TagId, 10),
 		TagName:           getRoomTagName(cfg.TagId),
-		Ticket:            cfg.Ticket,
+		Ticket:            livecfg.AppLiveRoomCallTicketPrice(cfg.Ticket),
 		Billing:           cfg.Billing,
 		PrivateInviteType: liveentity.NormalizePrivateInviteType(cfg.PrivateInviteType, cfg.Category),
-		AllowCallIcon:     allowShowCallIcon(room, cfg, userId),
+		AllowCallIcon:     allowShowCallIcon(ctx, room, cfg, userId),
 		CreateAt:          room.CreatedAt.Unix(),
 		OnlineCount:       appAudienceOnlineCount(room.ID, room.LiveRecordId),
 	}

@@ -171,6 +171,7 @@
 | `payout` | 保存用户收款信息 | 需要登录 | `POST /userWithdraw/savePayoutInfo` | `POST /sofie/payout/savePayeeProfile` |
 | `payout` | 申请提现 | 需要登录 | `POST /userWithdraw/applyWithdraw` | `POST /sofie/payout/requestCashOut` |
 | `payout` | 用户提现记录 | 需要登录 | `POST /userWithdraw/listWithdrawLogs` | `POST /sofie/payout/browseCashOutLogs` |
+| `payout` | 用户提现档位 | 需要登录 | `POST /userWithdraw/listWithdrawTiers` | `POST /sofie/payout/browseCashOutTiers` |
 | `bonus` | 首充活动配置 | 需要登录 | `POST /firstRechargeActivity/firstRechargeActivityCfgForApp` | `POST /sofie/bonus/fetchFirstPay` |
 | `release` | App版本查询 | 免登录 | `POST /appVersion/appVersionQuery` | `POST /sofie/release/lookupBuild` |
 | `help` | 客服配置 | 免登录 | `POST /customerService/cfg` | `POST /sofie/help/fetchContact` |

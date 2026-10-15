@@ -44,12 +44,7 @@ func handleUserWithdrawPayoutNotify(r *ghttp.Request, logID uint64, orderId stri
 		row.SetStatus(userentity.UserWithdrawStatusTransferred)
 		row.SetTransferAt(&now)
 		row.SetTransferFailMsg("")
-		if err := userwithdrawdao.UpdateUserWithdrawLog(row); err != nil {
-			xrlog.DetailLog.Warningf(ctx, "haipay user withdraw notify persist failed orderId=%s err=%v", orderId, err)
-			r.Response.WriteStatus(500)
-			r.Response.Write([]byte("persist fail"))
-			return
-		}
+		userwithdrawdao.SyncUserWithdrawLogCache(row)
 		recordWithdrawSucceeded(row.UserId, row.WithdrawUsd)
 	case 3:
 		msg := strings.TrimSpace(query.ErrorMsg)
@@ -58,7 +53,7 @@ func handleUserWithdrawPayoutNotify(r *ghttp.Request, logID uint64, orderId stri
 		}
 		row.SetStatus(userentity.UserWithdrawStatusApproved)
 		row.SetTransferFailMsg(msg)
-		_ = userwithdrawdao.UpdateUserWithdrawLog(row)
+		userwithdrawdao.SyncUserWithdrawLogCache(row)
 	default:
 		xrlog.DetailLog.Infof(ctx, "haipay user withdraw notify query pending status=%d orderId=%s", query.Status, orderId)
 	}

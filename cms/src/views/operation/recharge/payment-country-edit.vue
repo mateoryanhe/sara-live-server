@@ -21,9 +21,11 @@
         </div>
 
         <el-tabs v-model="activeEditTab" class="edit-tabs" type="border-card">
-          <el-tab-pane name="config" :label="t(isCoinMerchant
-              ? 'pages.paymentCountryCfg.collectionSettings'
-              : 'pages.paymentCountryCfg.basicSettings')">
+          <el-tab-pane name="config" :label="t(isUserWithdrawPayout
+              ? 'pages.paymentCountryCfg.withdrawPayoutSettings'
+              : isCoinMerchant
+                  ? 'pages.paymentCountryCfg.collectionSettings'
+                  : 'pages.paymentCountryCfg.basicSettings')">
             <el-form class="config-form" label-width="120px">
               <el-form-item :label="t('pages.paymentCountryCfg.supportedCurrencies')">
                 <el-tag v-for="code in editForm.supportedCurrencies" :key="code" class="currency-tag" size="small">
@@ -38,7 +40,7 @@
                 </el-select>
               </el-form-item>
 
-              <template v-if="isCoinMerchant">
+              <template v-if="usesCombinedPaymentFields">
                 <el-form-item :label="t('pages.paymentCountryCfg.paymentType')" required>
                   <el-select v-model="editForm.selectedPayType" clearable filterable
                              :disabled="!can('edit') || saving"
@@ -56,7 +58,9 @@
                   </el-select>
                 </el-form-item>
 
-                <el-alert :closable="false" :title="t('pages.paymentCountryCfg.coinMerchantCombinedTip')"
+                <el-alert v-if="isCoinMerchant" :closable="false" :title="t('pages.paymentCountryCfg.coinMerchantCombinedTip')"
+                          class="credential-tip" show-icon type="info"/>
+                <el-alert v-else-if="isUserWithdrawPayout" :closable="false" :title="t('pages.paymentCountryCfg.withdrawPayoutCombinedTip')"
                           class="credential-tip" show-icon type="info"/>
               </template>
 
@@ -69,7 +73,7 @@
 
               <el-form-item v-if="can('edit')">
                 <el-button type="primary" :loading="saving" @click="saveConfig">
-                  {{ t(isCoinMerchant
+                  {{ t(usesCombinedPaymentFields
                     ? 'pages.paymentCountryCfg.saveCollectionConfig'
                     : 'pages.paymentCountryCfg.saveBasic') }}
                 </el-button>
@@ -113,10 +117,12 @@ import {
   coinMerchantPaymentCountryCfgApi,
   normalizePaymentCountryCfgGroups,
   paymentCountryCfgApi,
+  userWithdrawPayoutCountryCfgApi,
   type PaymentCountryCfgItem,
   type PaymentCountryPaymentMethod,
 } from '@/api/modules/payment-country-cfg'
 import {usePagePermission} from '@/composables/usePagePermission'
+import {usePaymentCountryCfgScope} from '@/composables/usePaymentCountryCfgScope'
 
 type PaymentCountryEditForm = PaymentCountryCfgItem & {
   selectedPayType: string
@@ -126,13 +132,22 @@ type PaymentCountryEditForm = PaymentCountryCfgItem & {
 const {t} = useI18n()
 const route = useRoute()
 const router = useRouter()
-const isCoinMerchant = route.meta.paymentCountryCfgScope === 'coinMerchant'
-const rootRouteName = isCoinMerchant ? 'CoinMerchantPaymentCountryCfgManagement' : 'PaymentCountryCfgManagement'
-const continentRouteName = isCoinMerchant ? 'CoinMerchantPaymentCountryCfgContinent' : 'PaymentCountryCfgContinent'
-const permissionPage = isCoinMerchant ? 'CoinMerchantPaymentCountryCfgManagement' : 'PaymentCountryCfgManagement'
-const detailNotice = computed(() => t(isCoinMerchant
-    ? 'pages.paymentCountryCfg.coinMerchantDetailNotice'
-    : 'pages.paymentCountryCfg.normalDetailNotice'))
+const {
+  isCoinMerchant,
+  isUserWithdrawPayout,
+  usesCombinedPaymentFields,
+  rootRouteName,
+  continentRouteName,
+  permissionPage,
+} = usePaymentCountryCfgScope()
+const detailNotice = computed(() => {
+  if (isUserWithdrawPayout.value) {
+    return t('pages.paymentCountryCfg.withdrawPayoutDetailNotice')
+  }
+  return t(isCoinMerchant.value
+      ? 'pages.paymentCountryCfg.coinMerchantDetailNotice'
+      : 'pages.paymentCountryCfg.normalDetailNotice')
+})
 const {can} = usePagePermission(permissionPage)
 const loading = ref(false)
 const saving = ref(false)
@@ -220,20 +235,22 @@ const fetchConfig = async () => {
   editForm.value = null
   persistedRow.value = null
   try {
-    const response = isCoinMerchant
-        ? await coinMerchantPaymentCountryCfgApi.getConfig()
-        : await paymentCountryCfgApi.getConfig()
+    const response = isUserWithdrawPayout.value
+        ? await userWithdrawPayoutCountryCfgApi.getConfig()
+        : isCoinMerchant.value
+            ? await coinMerchantPaymentCountryCfgApi.getConfig()
+            : await paymentCountryCfgApi.getConfig()
     const groups = normalizePaymentCountryCfgGroups(response.continents)
     const group = groups.find((item) => item.continent === continent.value)
     if (!group) {
       ElMessage.error(t('pages.paymentCountryCfg.invalidContinent'))
-      await router.replace({name: rootRouteName})
+      await router.replace({name: rootRouteName.value})
       return
     }
     const row = group.countries.find((item) => item.countryCode === countryCode.value)
     if (!row) {
       ElMessage.error(t('pages.paymentCountryCfg.invalidCountry'))
-      await router.replace({name: continentRouteName, params: {continent: continent.value}})
+      await router.replace({name: continentRouteName.value, params: {continent: continent.value}})
       return
     }
     persistedRow.value = {
@@ -257,19 +274,22 @@ const saveConfig = async () => {
   saving.value = true
   try {
     let response: {success: boolean; id: string}
-    if (isCoinMerchant) {
+    if (usesCombinedPaymentFields.value) {
       const method = selectedPaymentMethod.value
       if (!method) {
         ElMessage.warning(t('pages.paymentCountryCfg.methodRequired'))
         return
       }
-      response = await coinMerchantPaymentCountryCfgApi.saveConfig({
+      const payload = {
         countryCode: form.countryCode,
         currencyCode: form.currencyCode,
         payType: method.payType,
         inBankCode: method.inBankCode,
         enabled: form.enabled,
-      })
+      }
+      response = isUserWithdrawPayout.value
+          ? await userWithdrawPayoutCountryCfgApi.saveConfig(payload)
+          : await coinMerchantPaymentCountryCfgApi.saveConfig(payload)
       form.selectedPaymentMethods = [{
         currencyCode: form.currencyCode,
         payType: method.payType,
@@ -300,7 +320,7 @@ const saveConfig = async () => {
   }
 }
 
-const goBack = () => router.push({name: continentRouteName, params: {continent: continent.value}})
+const goBack = () => router.push({name: continentRouteName.value, params: {continent: continent.value}})
 
 watch(() => editForm.value?.currencyCode, (currency, previousCurrency) => {
   const form = editForm.value

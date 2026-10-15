@@ -87,6 +87,20 @@
                   </el-descriptions-item>
                 </el-descriptions>
               </el-tab-pane>
+
+              <el-tab-pane :label="t('pages.userList.basicSubTabRechargeInfo')" name="rechargeInfo">
+                <el-descriptions :column="1" border>
+                  <el-descriptions-item :label="t('pages.userList.boundEmail')">
+                    {{ detail.userExt?.email || '-' }}
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.rechargeOrderList.payName')">
+                    {{ detail.channelPayProfile?.name || '-' }}
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.rechargeOrderList.payEmail')">
+                    {{ detail.channelPayProfile?.email || '-' }}
+                  </el-descriptions-item>
+                </el-descriptions>
+              </el-tab-pane>
             </el-tabs>
           </el-tab-pane>
 
@@ -173,6 +187,10 @@
             </el-descriptions>
           </el-tab-pane>
 
+          <el-tab-pane v-if="canViewRechargeOrderList" :label="t('pages.userList.tabRechargeOrder')" name="rechargeOrder">
+            <RechargeOrderPanel :active="activeTab === 'rechargeOrder'" :user-id="userId"/>
+          </el-tab-pane>
+
           <el-tab-pane v-if="canViewGoldLog" :label="t('pages.userList.tabGoldLog')" name="goldLog">
             <CurrencyLogPanel
                 :active="activeTab === 'goldLog'"
@@ -244,6 +262,7 @@ import {useRoute, useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {accountApi} from '@/api'
 import CurrencyLogPanel from './user-detail-currency-log-panel.vue'
+import RechargeOrderPanel from './user-detail-recharge-order-panel.vue'
 import GameLogPanel from './user-detail-game-log-panel.vue'
 import ShortVideoAuthorSettlementLogPanel from './user-detail-short-video-author-settlement-log-panel.vue'
 import ShortVideoWatchPanel from './user-detail-short-video-watch-panel.vue'
@@ -255,6 +274,7 @@ import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 
 const {t} = useI18n()
 const {can} = usePagePermission('UserDetail')
+const canViewRechargeOrderList = computed(() => can('rechargeOrderList'))
 const canViewGoldLog = computed(() => can('goldLog'))
 const canViewDiamondLog = computed(() => can('diamondLog'))
 const canViewGameBetLog = computed(() => can('gameBetLog'))

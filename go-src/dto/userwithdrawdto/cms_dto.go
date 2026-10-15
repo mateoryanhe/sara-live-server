@@ -14,6 +14,7 @@ type CMSWithdrawLogItem struct {
 	Id                  string  `json:"id"`
 	UserId              string  `json:"userId"`
 	Nickname            string  `json:"nickname"`
+	DiamondAmount       float64 `json:"diamondAmount"`
 	GoldAmount          float64 `json:"goldAmount"`
 	WithdrawUsd         float64 `json:"withdrawUsd"`
 	Status              uint8   `json:"status"`

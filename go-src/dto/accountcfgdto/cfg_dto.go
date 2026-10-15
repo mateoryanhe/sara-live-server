@@ -16,6 +16,7 @@ type AccountCfgItem struct {
 	DeviceCancelDailyLimit     int     `json:"deviceCancelDailyLimit"`
 	UserWithdrawEnabled        bool    `json:"userWithdrawEnabled"`
 	UserWithdrawMinUsd         float64 `json:"userWithdrawMinUsd"`
+	UserWithdrawDailyMaxCount  int     `json:"userWithdrawDailyMaxCount"`
 	CreatedAt                  string  `json:"createdAt"`
 	UpdatedAt                  string `json:"updatedAt"`
 }
@@ -35,6 +36,7 @@ type SaveAccountCfgReq struct {
 	DeviceCancelDailyLimit     int     `json:"deviceCancelDailyLimit" dc:"同设备每天最多注销次数"`
 	UserWithdrawEnabled        bool    `json:"userWithdrawEnabled" dc:"用户提现开关"`
 	UserWithdrawMinUsd         float64 `json:"userWithdrawMinUsd" dc:"用户最低提现金额(USD)"`
+	UserWithdrawDailyMaxCount  int     `json:"userWithdrawDailyMaxCount" dc:"用户每天最多提现次数(0=不限制)"`
 }
 
 type SaveAccountCfgRes struct {

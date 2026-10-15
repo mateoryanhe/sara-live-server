@@ -45,7 +45,6 @@ import (
 	"xr-game-server/module/tracking"
 	"xr-game-server/module/userwithdraw"
 	"xr-game-server/module/staticcachecfg"
-	"xr-game-server/module/ticket"
 	"xr-game-server/module/upload"
 	"xr-game-server/module/userinfo"
 	"xr-game-server/module/usermaxid"
@@ -72,7 +71,6 @@ func Init() {
 	gameconsumrank.Init()
 	anchorrank.Init()
 	banner.Init()
-	ticket.Init()
 	privateroombilling.Init()
 	vip.Init()
 	apppkg.Init()

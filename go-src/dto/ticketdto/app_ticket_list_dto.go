@@ -3,7 +3,7 @@ package ticketdto
 import "github.com/gogf/gf/v2/frame/g"
 
 type AppTicketListReq struct {
-	g.Meta `path:"/appTicketList" method:"post" summary:"App查询门票列表(已上架)" tags:"门票"`
+	g.Meta `path:"/appTicketList" method:"post" summary:"[已废弃]固定返回空列表,不再读库" tags:"门票"`
 }
 
 type AppTicketItem struct {

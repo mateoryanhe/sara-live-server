@@ -93,6 +93,22 @@ func CalcDiamondToUsd(diamondAmount float64) float64 {
 	return CalcDiamondToUsdWithSnapshot(diamondAmount, snap)
 }
 
+// CalcUsdToDiamondWithSnapshot 将 USD 折算为钻石(1USD=N金币,1金币=M钻石).
+func CalcUsdToDiamondWithSnapshot(usd float64, snap ExchangeCfgSnapshot) float64 {
+	if usd <= 0 {
+		return 0
+	}
+	factor := float64(snap.GoldToDiamondRate) * float64(snap.UsdToGoldRate)
+	if factor <= 0 || stdmath.IsNaN(factor) || stdmath.IsInf(factor, 0) {
+		return 0
+	}
+	converted := usd * factor
+	if stdmath.IsNaN(converted) || stdmath.IsInf(converted, 0) {
+		return 0
+	}
+	return stdmath.Round(converted*10000) / 10000
+}
+
 // CalcDiamondToUsdWithSnapshot 使用指定的钱包汇率快照换算，供结算审计复用。
 func CalcDiamondToUsdWithSnapshot(diamondAmount float64, snap ExchangeCfgSnapshot) float64 {
 	if diamondAmount <= 0 {

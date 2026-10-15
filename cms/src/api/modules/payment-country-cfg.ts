@@ -65,6 +65,19 @@ export const paymentCountryCfgApi = {
     },
 }
 
+export const userWithdrawPayoutCountryCfgApi = {
+    getConfig: () => request.post<PaymentCountryCfgResponse>(
+        '/userWithdrawPayoutCountryCfg/getPayoutCountryCfg', {},
+    ),
+
+    saveConfig: (data: Pick<PaymentCountryCfgItem, 'countryCode' | 'currencyCode' | 'enabled'> & {
+        payType: string
+        inBankCode: string
+    }) => request.post<{ success: boolean; id: string }>(
+        '/userWithdrawPayoutCountryCfg/savePayoutCountryCfg', data,
+    ),
+}
+
 export const coinMerchantPaymentCountryCfgApi = {
     getConfig: () => request.post<PaymentCountryCfgResponse>(
         '/coinMerchantPaymentCountryCfg/getCollectionCountryCfg', {},

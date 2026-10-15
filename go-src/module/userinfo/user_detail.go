@@ -2,13 +2,16 @@ package userinfo
 
 import (
 	"context"
+	"strings"
 
 	"xr-game-server/dao/accountdao"
+	"xr-game-server/dao/channelpaydao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dao/userlogindevicedao"
 	"xr-game-server/dao/userloginlocationdao"
 	"xr-game-server/dto/accountdto"
+	rechargeentity "xr-game-server/entity/recharge"
 	userentity "xr-game-server/entity/user"
 	"xr-game-server/errercode"
 	"xr-game-server/module/ipgeo"
@@ -28,8 +31,19 @@ func QueryUserDetail(_ context.Context, req *accountdto.GetUserDetailReq) (*acco
 		Wallet:         toUserWalletDetailItem(userInfo),
 		UserExt:        toUserExtDetailItem(userinfodao.GetUserExtFromDB(req.UserId)),
 		CumulativeStat: toUserCumulativeStatDetailItem(userinfodao.GetUserCumulativeStatFromDB(req.UserId)),
-		LoginDevice:    toUserLoginDeviceDetailItem(userlogindevicedao.GetUserLoginDeviceFromDB(req.UserId)),
+		LoginDevice:       toUserLoginDeviceDetailItem(userlogindevicedao.GetUserLoginDeviceFromDB(req.UserId)),
+		ChannelPayProfile: toUserChannelPayProfileDetailItem(channelpaydao.GetExisting(req.UserId)),
 	}, nil
+}
+
+func toUserChannelPayProfileDetailItem(row *rechargeentity.ChannelPayUserProfile) *accountdto.UserChannelPayProfileDetailItem {
+	if row == nil || row.ID == 0 {
+		return &accountdto.UserChannelPayProfileDetailItem{}
+	}
+	return &accountdto.UserChannelPayProfileDetailItem{
+		Name:  strings.TrimSpace(row.Name),
+		Email: strings.TrimSpace(row.Email),
+	}
 }
 
 func toUserAccountDetailItem(account *userentity.Account, location *userentity.UserLoginLocation) *accountdto.UserAccountDetailItem {
@@ -115,6 +129,7 @@ func toUserExtDetailItem(ext *userentity.UserExt) *accountdto.UserExtDetailItem 
 		CancelCodeExpireAt:        ext.CancelCodeExpireAt,
 		RechargeWhitelist:         ext.RechargeWhitelist,
 		ShortVideoUnsettledIncome: ext.ShortVideoUnsettledIncome,
+		Email:                     ext.Email,
 	}
 	if !ext.UpdatedAt.IsZero() {
 		updatedAt := ext.UpdatedAt

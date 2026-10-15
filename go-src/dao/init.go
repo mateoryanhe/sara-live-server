@@ -17,6 +17,7 @@ import (
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dao/userlogindevicedao"
 	"xr-game-server/dao/userloginlocationdao"
+	"xr-game-server/dao/userwithdrawdao"
 )
 
 func Init() {
@@ -27,6 +28,7 @@ func Init() {
 	userloginlocationdao.Init()
 	guilddao.InitGuildDao()
 	gamebetdao.Init()
+	userwithdrawdao.Init()
 	gamevendordao.Init()
 	liveroomdao.Init()
 	livefollowdao.InitLiveFollowDao()

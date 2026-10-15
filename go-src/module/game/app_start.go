@@ -9,6 +9,8 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/core/xrlog"
 	"xr-game-server/dao/cfgdao"
+	"xr-game-server/dao/liveroomdao"
+	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/gameplatformdto"
 	"xr-game-server/errercode"
 )
@@ -31,6 +33,15 @@ func GetAppGameStartLink(ctx context.Context, req *gameplatformdto.AppGameStartR
 		return nil, errercode.CreateCode(errercode.GameCfgNonExist)
 	}
 
+	if req.RoomId > 0 {
+		if liveroomdao.GetRoomById(req.RoomId) == nil {
+			return nil, errercode.CreateCode(errercode.LiveRoomNotExist)
+		}
+	}
+	ext := userinfodao.GetUserExtByUserId(userId)
+	ext.SetGameLiveRoomId(req.RoomId)
+	userinfodao.PublishUserExt(ext)
+
 	platform, err := resolveGameStartPlatform(gameCode)
 	if err != nil {
 		return nil, err
@@ -41,8 +52,15 @@ func GetAppGameStartLink(ctx context.Context, req *gameplatformdto.AppGameStartR
 		xrlog.ErrorWithErr(ctx, "Game", "fetch vendor game start url failed", err)
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
+	at := time.Now()
 	if strings.TrimSpace(link) != "" {
-		pubMiniGameRoundStartTracking(userId, gameCode, time.Now())
+		pubMiniGameRoundStartTracking(userId, gameCode, at)
+		if req.RoomId > 0 {
+			room := liveroomdao.GetRoomById(req.RoomId)
+			if room != nil && room.LiveRecordId == 0 && userId != room.ID {
+				pubOfflineGameRoomPlayTracking(userId, req.RoomId, gameCode, at)
+			}
+		}
 	}
 	return &gameplatformdto.AppGameStartRes{Link: link}, nil
 }

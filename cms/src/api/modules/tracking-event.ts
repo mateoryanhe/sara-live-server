@@ -47,6 +47,9 @@ export const trackingEventApi = {
     getMiniGameControllerClickTrend: () => {
         return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getMiniGameControllerClickTrend', {})
     },
+    getOfflineGameRoomPlayTrend: () => {
+        return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getOfflineGameRoomPlayTrend', {})
+    },
     getShortVideoPlayStartTrend: () => {
         return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getShortVideoPlayStartTrend', {})
     },

@@ -68,6 +68,7 @@ type UserExtDetailItem struct {
 	CancelCodeExpireAt *time.Time `json:"cancelCodeExpireAt"`
 	RechargeWhitelist         bool       `json:"rechargeWhitelist"`
 	ShortVideoUnsettledIncome float64    `json:"shortVideoUnsettledIncome"`
+	Email                     string     `json:"email" dc:"绑定邮箱(user_exts.email)"`
 	UpdatedAt                 *time.Time `json:"updatedAt"`
 }
 
@@ -79,6 +80,12 @@ type UserCumulativeStatDetailItem struct {
 	TotalDiamondConsume float64    `json:"totalDiamondConsume"`
 	TotalGoldConsume    float64    `json:"totalGoldConsume"`
 	UpdatedAt           *time.Time `json:"updatedAt"`
+}
+
+// UserChannelPayProfileDetailItem 渠道付款人资料(channel_pay_user_profiles)
+type UserChannelPayProfileDetailItem struct {
+	Name  string `json:"name" dc:"付款人姓名(HaiPay name)"`
+	Email string `json:"email" dc:"付款人邮箱"`
 }
 
 // UserLoginDeviceDetailItem 登录设备(user_login_devices)
@@ -98,6 +105,7 @@ type GetUserDetailRes struct {
 	Profile        *UserProfileDetailItem        `json:"profile"`
 	Wallet         *UserWalletDetailItem         `json:"wallet"`
 	UserExt        *UserExtDetailItem            `json:"userExt"`
-	CumulativeStat *UserCumulativeStatDetailItem `json:"cumulativeStat"`
-	LoginDevice    *UserLoginDeviceDetailItem    `json:"loginDevice"`
+	CumulativeStat   *UserCumulativeStatDetailItem   `json:"cumulativeStat"`
+	LoginDevice      *UserLoginDeviceDetailItem      `json:"loginDevice"`
+	ChannelPayProfile *UserChannelPayProfileDetailItem `json:"channelPayProfile"`
 }

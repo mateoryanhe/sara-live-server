@@ -413,10 +413,10 @@ type GetLiveRoomRes struct {
 	VoiceChatMicMode            uint8   `json:"voiceChatMicMode" dc:"语聊上麦方式(1=自由,2=申请,3=房主单麦;非语聊房为0)"`
 	TagId                       string  `json:"tagId" dc:"直播间标签ID"`
 	TagName                     string  `json:"tagName" dc:"直播间标签名称"`
-	Ticket                      float64 `json:"ticket" dc:"直播间来源视频通话门票价格(钻石;全局关闭门票时仍返回配置值)"`
+	Ticket                      float64 `json:"ticket" dc:"直播间来源视频通话门票价格(钻石;CMS关闭「视频通话扣门票」时下发的值为0)"`
 	Billing                     float64 `json:"billing" dc:"视频通话价格(每分钟钻石)"`
 	PrivateInviteType           uint8   `json:"privateInviteType" dc:"视频通话邀请类型(1=接受所有人,3=拒绝所有人)"`
-	AllowCallIcon               bool    `json:"allowCallIcon" dc:"是否允许显示电话图标按钮(普通主播不显示;接受所有人且累计充值>=10USD时为true)"`
+	AllowCallIcon               bool    `json:"allowCallIcon" dc:"电话图标;语聊=5恒false;秀场/游戏=1/2普通主播或私聊拒绝=false否则true;其他见Web/充值"`
 	CreateAt                    int64   `json:"createAt" dc:"创建时间(秒)"`
 	OnlineCount                 int     `json:"onlineCount" dc:"在线观众人数(不含主播)"`
 	TotalVideoCallIncome        float64 `json:"totalVideoCallIncome" dc:"累计视频通话收益(仅主播本人查询时返回)"`

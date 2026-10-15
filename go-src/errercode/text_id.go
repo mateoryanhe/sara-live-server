@@ -86,6 +86,7 @@ func init() {
 		CallUserInCall:                  "Anda sedang dalam panggilan",
 		CallTargetUserInCall:            "Pengguna sedang dalam panggilan",
 		UserWithdrawDisabled:            "Penarikan pengguna tidak tersedia",
+		UserWithdrawGameConsumeNotEnough: "Total konsumsi game belum memenuhi persyaratan tier penarikan",
 		CallOrderNonExist:               "Pesanan panggilan tidak ditemukan",
 		CallOrderStateInvalid:           "Status pesanan panggilan tidak mengizinkan operasi ini",
 		BotAnchorNonExist:               "Anchor bot tidak ditemukan",

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/gogf/gf/v2/os/gmlock"
 	"xr-game-server/constants/currency"
@@ -21,10 +23,15 @@ func withdrawLockKey(userId uint64) string {
 	return fmt.Sprintf("user_withdraw_%d", userId)
 }
 
+func startOfLocalDay(t time.Time) time.Time {
+	y, m, d := t.Date()
+	return time.Date(y, m, d, 0, 0, 0, 0, t.Location())
+}
+
 func GetWithdrawCfg(_ context.Context, _ *userwithdrawdto.AppGetWithdrawCfgReq) (*userwithdrawdto.AppGetWithdrawCfgRes, error) {
 	return &userwithdrawdto.AppGetWithdrawCfgRes{
-		Enabled: accountcfg.IsUserWithdrawEnabled(),
-		MinUsd:  accountcfg.GetUserWithdrawMinUsd(),
+		Enabled:           accountcfg.IsUserWithdrawEnabled(),
+		DailyMaxCount:     accountcfg.GetUserWithdrawDailyMaxCount(),
 	}, nil
 }
 
@@ -55,44 +62,57 @@ func AppApplyWithdraw(ctx context.Context, req *userwithdrawdto.AppApplyWithdraw
 	if !accountcfg.IsUserWithdrawEnabled() {
 		return nil, errercode.CreateCode(errercode.UserWithdrawDisabled)
 	}
-	if req == nil {
+	if req == nil || req.TierId == 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	goldAmount := math.Round(req.GoldAmount*100) / 100
-	if goldAmount <= 0 {
-		return nil, errercode.CreateCode(errercode.GoldAmountInvalid)
-	}
-	if userwithdrawdao.GetUserPayoutInfo(userId) == nil {
+	tier := GetUserWithdrawTierFromCacheById(req.TierId)
+	if tier == nil {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	currencyCode := strings.ToUpper(strings.TrimSpace(req.Currency))
+	if err := validateAppWithdrawCurrency(currencyCode); err != nil {
+		return nil, err
+	}
+	payoutInfo := userwithdrawdao.GetUserPayoutInfo(userId)
+	if err := validateUserPayoutInfoForWithdrawCurrency(payoutInfo, currencyCode); err != nil {
+		return nil, err
+	}
+	if dailyMax := accountcfg.GetUserWithdrawDailyMaxCount(); dailyMax > 0 {
+		since := startOfLocalDay(time.Now())
+		cnt, err := userwithdrawdao.CountUserWithdrawLogsSince(userId, since)
+		if err != nil {
+			return nil, err
+		}
+		if cnt >= dailyMax {
+			return nil, errercode.CreateCode(errercode.DailyLimitExceeded)
+		}
+	}
+	if err := checkWithdrawTierGameConsumeGate(userId, tier); err != nil {
+		return nil, err
 	}
 
 	gmlock.Lock(withdrawLockKey(userId))
 	defer gmlock.Unlock(withdrawLockKey(userId))
 
 	snap := wallet.GetExchangeCfgSnapshot()
-	withdrawUsd := wallet.CalcGoldToUsdWithSnapshot(goldAmount, snap)
-	minUsd := accountcfg.GetUserWithdrawMinUsd()
-	if withdrawUsd < minUsd {
+	withdrawUsd := math.Round(tier.WithdrawUsd*10000) / 10000
+	diamondAmount := wallet.CalcUsdToDiamondWithSnapshot(withdrawUsd, snap)
+	if withdrawUsd <= 0 || diamondAmount <= 0 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 
-	if _, err := wallet.GoldSub(userId, goldAmount, currency.ReasonUserWithdraw); err != nil {
+	if _, err := wallet.DiamondSubWithGoldExchange(userId, diamondAmount, currency.ReasonUserWithdraw); err != nil {
 		return nil, err
 	}
 
-	row := userentity.NewUserWithdrawLog(userId, goldAmount, withdrawUsd, snap.UsdToGoldRate)
-	if err := userwithdrawdao.InsertUserWithdrawLog(row); err != nil {
-		if _, refundErr := wallet.GoldAdd(userId, goldAmount, currency.ReasonUserWithdrawRefund); refundErr != nil {
-			return nil, err
-		}
-		return nil, err
-	}
+	row := userentity.NewUserWithdrawLog(userId, req.TierId, diamondAmount, 0, withdrawUsd, snap.UsdToGoldRate)
+	userwithdrawdao.PublishNewUserWithdrawLog(row)
 
 	return &userwithdrawdto.AppApplyWithdrawRes{
-		Id:          strconv.FormatUint(row.ID, 10),
-		GoldAmount:  goldAmount,
-		WithdrawUsd: withdrawUsd,
-		Status:      row.Status,
+		Id:            strconv.FormatUint(row.ID, 10),
+		DiamondAmount: diamondAmount,
+		WithdrawUsd:   withdrawUsd,
+		Status:        row.Status,
 	}, nil
 }
 
@@ -101,17 +121,15 @@ func AppListWithdrawLogs(ctx context.Context, req *userwithdrawdto.AppWithdrawLo
 	if userId == 0 {
 		return nil, errercode.CreateCode(errercode.EmptyUserId)
 	}
-	if req == nil {
-		req = &userwithdrawdto.AppWithdrawLogListReq{}
+	page := 1
+	if req != nil && req.Page > 0 {
+		page = req.Page
 	}
-	total, rows, err := userwithdrawdao.ListUserWithdrawLogs(&userwithdrawdao.UserWithdrawListFilter{
-		UserId:   userId,
-		Page:     req.Page,
-		PageSize: req.PageSize,
-	})
+	total, err := userwithdrawdao.CountUserWithdrawLogsByUser(userId)
 	if err != nil {
 		return nil, err
 	}
+	rows := userwithdrawdao.GetAppUserWithdrawLogsByUser(userId, page, userwithdrawdao.AppUserWithdrawLogListCachePageSize)
 	list := make([]*userwithdrawdto.AppWithdrawLogItem, 0, len(rows))
 	for _, row := range rows {
 		if row == nil {
@@ -119,7 +137,7 @@ func AppListWithdrawLogs(ctx context.Context, req *userwithdrawdto.AppWithdrawLo
 		}
 		list = append(list, &userwithdrawdto.AppWithdrawLogItem{
 			Id:                  strconv.FormatUint(row.ID, 10),
-			GoldAmount:          row.GoldAmount,
+			DiamondAmount:       withdrawLogDiamondDisplay(row),
 			WithdrawUsd:         row.WithdrawUsd,
 			Status:              row.Status,
 			TransferCurrency:    row.TransferCurrency,
