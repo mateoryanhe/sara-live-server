@@ -41,7 +41,8 @@
               </el-form-item>
 
               <template v-if="usesCombinedPaymentFields">
-                <el-form-item :label="t('pages.paymentCountryCfg.paymentType')" required>
+                <el-form-item v-if="!fixedWithdrawPayoutPayType"
+                              :label="t('pages.paymentCountryCfg.paymentType')" required>
                   <el-select v-model="editForm.selectedPayType" clearable filterable
                              :disabled="!can('edit') || saving"
                              :placeholder="t('pages.paymentCountryCfg.paymentTypePlaceholder')" style="width: 100%">
@@ -50,9 +51,16 @@
                 </el-form-item>
 
                 <el-form-item :label="t('pages.paymentCountryCfg.paymentCode')" required>
+                  <div v-if="fixedWithdrawPayoutPayType" class="fixed-pay-type-row">
+                    <el-tag size="large" type="info">{{ fixedWithdrawPayoutPayType }}</el-tag>
+                    <span class="form-tip inline-tip">
+                      {{ t('pages.paymentCountryCfg.withdrawPayoutFixedPayTypeTip') }}
+                    </span>
+                  </div>
                   <el-select v-model="editForm.selectedMethodKey" clearable filterable
-                             :disabled="!can('edit') || saving || !editForm.selectedPayType"
-                             :placeholder="t('pages.paymentCountryCfg.paymentCodePlaceholder')" style="width: 100%">
+                             :disabled="!can('edit') || saving || !effectiveSelectedPayType"
+                             :placeholder="t('pages.paymentCountryCfg.paymentCodePlaceholder')" style="width: 100%"
+                             :class="{ 'pay-code-select': fixedWithdrawPayoutPayType }">
                     <el-option v-for="method in paymentCodeOptions" :key="methodKey(method)"
                                :label="paymentCodeLabel(method)" :value="methodKey(method)"/>
                   </el-select>
@@ -122,7 +130,10 @@ import {
   type PaymentCountryPaymentMethod,
 } from '@/api/modules/payment-country-cfg'
 import {usePagePermission} from '@/composables/usePagePermission'
-import {usePaymentCountryCfgScope} from '@/composables/usePaymentCountryCfgScope'
+import {
+  usePaymentCountryCfgScope,
+  userWithdrawPayoutFixedPayType,
+} from '@/composables/usePaymentCountryCfgScope'
 
 type PaymentCountryEditForm = PaymentCountryCfgItem & {
   selectedPayType: string
@@ -156,6 +167,15 @@ const editForm = ref<PaymentCountryEditForm | null>(null)
 const persistedRow = ref<PaymentCountryCfgItem | null>(null)
 const continent = computed(() => String(route.params.continent || '').trim().toUpperCase())
 const countryCode = computed(() => String(route.params.countryCode || '').trim().toUpperCase())
+const fixedWithdrawPayoutPayType = computed(() => {
+  if (!isUserWithdrawPayout.value) return null
+  const code = String(editForm.value?.countryCode || countryCode.value || '').trim().toUpperCase()
+  return userWithdrawPayoutFixedPayType(code)
+})
+
+const effectiveSelectedPayType = computed(() => (
+    fixedWithdrawPayoutPayType.value || editForm.value?.selectedPayType || ''
+))
 const pageTitle = computed(() => t('pages.paymentCountryCfg.editPageTitle', {
   country: editForm.value?.countryNameZh || editForm.value?.countryNameEn || countryCode.value,
 }))
@@ -167,17 +187,24 @@ const methodKey = (method: Pick<PaymentCountryPaymentMethod, 'currencyCode' | 'p
 const paymentMethodsForCurrency = computed(() => {
   const form = editForm.value
   if (!form) return []
-  return form.paymentMethods.filter((method) => method.available && method.currencyCode === form.currencyCode)
+  let methods = form.paymentMethods.filter((method) => method.available && method.currencyCode === form.currencyCode)
+  const fixed = fixedWithdrawPayoutPayType.value
+  if (fixed) {
+    methods = methods.filter((method) => method.payType === fixed)
+  }
+  return methods
 })
 
-const paymentTypeOptions = computed(() => Array.from(new Set(
-    paymentMethodsForCurrency.value.map((method) => method.payType),
-)))
+const paymentTypeOptions = computed(() => {
+  const fixed = fixedWithdrawPayoutPayType.value
+  if (fixed) return [fixed]
+  return Array.from(new Set(paymentMethodsForCurrency.value.map((method) => method.payType)))
+})
 
 const paymentCodeOptions = computed(() => {
-  const form = editForm.value
-  if (!form?.selectedPayType) return []
-  return paymentMethodsForCurrency.value.filter((method) => method.payType === form.selectedPayType)
+  const payType = effectiveSelectedPayType.value
+  if (!payType) return []
+  return paymentMethodsForCurrency.value.filter((method) => method.payType === payType)
 })
 
 const selectedPaymentMethod = computed(() => {
@@ -209,12 +236,29 @@ const storedMethodForCurrency = (row: PaymentCountryCfgItem, currencyCode: strin
   return row.paymentMethods.find((method) => method.available && methodKey(method) === methodKey(stored)) || null
 }
 
+const methodsForFormCurrency = (form: PaymentCountryEditForm) => (
+    form.paymentMethods.filter((method) => method.available && method.currencyCode === form.currencyCode)
+)
+
+const enforceFixedWithdrawPayoutPayType = (form: PaymentCountryEditForm) => {
+  const fixed = userWithdrawPayoutFixedPayType(form.countryCode)
+  if (!fixed) return
+  form.selectedPayType = fixed
+  const allowedKeys = new Set(methodsForFormCurrency(form)
+      .filter((method) => method.payType === fixed)
+      .map(methodKey))
+  if (form.selectedMethodKey && !allowedKeys.has(form.selectedMethodKey)) {
+    form.selectedMethodKey = ''
+  }
+}
+
 const applyCurrencyDefaults = (form: PaymentCountryEditForm, currencyCode: string) => {
   const stored = persistedRow.value
   const useStored = !!stored?.id && stored.currencyCode === currencyCode
   const method = useStored ? storedMethodForCurrency(stored, currencyCode) : null
   form.selectedPayType = method?.payType || ''
   form.selectedMethodKey = method ? methodKey(method) : ''
+  enforceFixedWithdrawPayoutPayType(form)
 }
 
 const buildEditForm = (row: PaymentCountryCfgItem): PaymentCountryEditForm => {
@@ -275,15 +319,19 @@ const saveConfig = async () => {
   try {
     let response: {success: boolean; id: string}
     if (usesCombinedPaymentFields.value) {
+      if (fixedWithdrawPayoutPayType.value) {
+        enforceFixedWithdrawPayoutPayType(form)
+      }
       const method = selectedPaymentMethod.value
       if (!method) {
         ElMessage.warning(t('pages.paymentCountryCfg.methodRequired'))
         return
       }
+      const payType = fixedWithdrawPayoutPayType.value || method.payType
       const payload = {
         countryCode: form.countryCode,
         currencyCode: form.currencyCode,
-        payType: method.payType,
+        payType,
         inBankCode: method.inBankCode,
         enabled: form.enabled,
       }
@@ -292,7 +340,7 @@ const saveConfig = async () => {
           : await coinMerchantPaymentCountryCfgApi.saveConfig(payload)
       form.selectedPaymentMethods = [{
         currencyCode: form.currencyCode,
-        payType: method.payType,
+        payType,
         inBankCode: method.inBankCode,
       }]
     } else {
@@ -331,6 +379,10 @@ watch(() => editForm.value?.currencyCode, (currency, previousCurrency) => {
 watch(() => editForm.value?.selectedPayType, (payType) => {
   const form = editForm.value
   if (!form) return
+  if (fixedWithdrawPayoutPayType.value) {
+    enforceFixedWithdrawPayoutPayType(form)
+    return
+  }
   if (!payType) {
     form.selectedMethodKey = ''
     return
@@ -339,6 +391,11 @@ watch(() => editForm.value?.selectedPayType, (payType) => {
       .filter((method) => method.payType === payType)
       .map(methodKey))
   if (!allowedKeys.has(form.selectedMethodKey)) form.selectedMethodKey = ''
+})
+
+watch(fixedWithdrawPayoutPayType, () => {
+  const form = editForm.value
+  if (form) enforceFixedWithdrawPayoutPayType(form)
 })
 
 // 普通用户和经销商编辑页都会被 keep-alive 缓存，每次打开都重新读取服务器配置。
@@ -362,6 +419,10 @@ onActivated(fetchConfig)
 .config-form { max-width: 1000px; }
 .currency-tag { margin: 2px 4px 2px 0; }
 .visibility-hint { margin-left: 10px; color: var(--el-text-color-secondary); }
+.form-tip { display: block; margin-top: 6px; color: var(--el-text-color-secondary); font-size: 12px; }
+.fixed-pay-type-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 10px; }
+.inline-tip { display: inline; margin-top: 0; flex: 1; min-width: 200px; }
+.pay-code-select { width: 100%; }
 .credential-tip,
 .currency-context { margin: 0 0 18px; }
 </style>

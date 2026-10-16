@@ -5,6 +5,9 @@ go-build/*
 # Accidental build output (go build -o .../xxx.exe creates literal "..." folder)
 go-src/module/logquery/.../
 
+# Hot restart gateway local secrets
+pub-tool/live-hot-restart-gw/config.json
+
 # Compiled binaries
 *.exe
 *.exe~

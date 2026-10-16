@@ -23,6 +23,11 @@ set "SSH_HOST_KEY=ssh-ed25519 255 SHA256:9+bn/zwcdvzMRcdtGZIwF2wJAdyHjKxdp+q6fLV
 REM Application name
 set APP_NAME=xr-game-server
 
+REM live-hot-restart-gw listens on 18900, deployed next to xr-game-server
+set LOCAL_HR_GW_SRC=%LOCAL_PROJECT_PATH%\pub-tool\live-hot-restart-gw
+set HR_GW_NAME=live-hot-restart-gw
+set HR_GW_LISTEN=0.0.0.0:18900
+
 REM Remote sudo command (not used)
 set SUDO_CMD=
 

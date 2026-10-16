@@ -16,7 +16,7 @@ type HaiPayUserWithdrawPayoutCountryCfg struct {
 	CreatedAt    time.Time `json:"-"`
 	UpdatedAt    time.Time `json:"-"`
 	CurrencyCode string    `gorm:"size:8;not null;comment:代付 ISO 4217 币种" json:"currencyCode"`
-	AppId        int64     `gorm:"not null;comment:服务端按币种自动写入的HaiPay appId" json:"-"`
+	AppId        int64     `gorm:"not null;comment:服务端按币种自动写入的HaiPay appId" json:"appId"`
 	AccountType  string    `gorm:"size:64;not null;comment:账户类型(BANK_ACCOUNT/EWALLET)" json:"accountType"`
 	BankCode     string    `gorm:"size:256;not null;comment:代付支付编码" json:"bankCode"`
 	Enabled      bool      `gorm:"not null;comment:App是否展示该国家/地区" json:"enabled"`

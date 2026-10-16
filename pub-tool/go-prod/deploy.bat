@@ -64,6 +64,22 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 echo Compilation completed!
+
+echo.
+echo Compiling %HR_GW_NAME% for Linux...
+cd /d "%LOCAL_HR_GW_SRC%"
+if not exist "%LOCAL_HR_GW_SRC%\main.go" (
+    echo Error: Hot restart gateway source missing: %LOCAL_HR_GW_SRC%
+    cd /d "%~dp0"
+    exit /b 1
+)
+go build -o "%LOCAL_BUILD_PATH%\%HR_GW_NAME%" .
+if %errorlevel% neq 0 (
+    echo Error: %HR_GW_NAME% compilation failed
+    cd /d "%~dp0"
+    exit /b 1
+)
+echo %HR_GW_NAME% compilation completed!
 cd /d "%~dp0"
 
 echo.
@@ -90,6 +106,19 @@ if not exist "%LOCAL_CONFIG_PATH%" (
 copy /y "%LOCAL_CONFIG_PATH%" "%TEMP_DIR%\config.yaml" >nul
 if not exist "%TEMP_DIR%\config.yaml" (
     echo Error: config.yaml not copied into deployment package
+    rmdir /s /q "%TEMP_DIR%"
+    exit /b 1
+)
+
+copy /y "%LOCAL_BUILD_PATH%\%HR_GW_NAME%" "%TEMP_DIR%\%HR_GW_NAME%" >nul
+if not exist "%TEMP_DIR%\%HR_GW_NAME%" (
+    echo Error: %HR_GW_NAME% not copied into deployment package
+    rmdir /s /q "%TEMP_DIR%"
+    exit /b 1
+)
+powershell -NoProfile -Command "$j=@{listen='%HR_GW_LISTEN%';auth='%HOT_RESTART_AUTH%';hotRestartURL='https://127.0.0.1/internal/hotRestart';minIntervalSec=60}|ConvertTo-Json -Compress; [IO.File]::WriteAllText('%TEMP_DIR%\config.json',$j)"
+if not exist "%TEMP_DIR%\config.json" (
+    echo Error: failed to write %HR_GW_NAME% config.json
     rmdir /s /q "%TEMP_DIR%"
     exit /b 1
 )
@@ -175,7 +204,7 @@ echo Step 3: Hot restart or cold start
 echo ================================
 
 echo Setting execution permissions...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST% "chmod +x %REMOTE_DIR%/%APP_NAME%"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST% "chmod +x %REMOTE_DIR%/%APP_NAME% %REMOTE_DIR%/%HR_GW_NAME%"
 
 echo Creating remote start script...
 plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST% "printf '%%s\n' '#!/bin/sh' 'cd %REMOTE_DIR%' 'nohup ./%APP_NAME% >/dev/null 2>&1 &' > %REMOTE_DIR%/start.sh && chmod +x %REMOTE_DIR%/start.sh"
@@ -190,6 +219,15 @@ if errorlevel 1 (
     exit /b 1
 )
 echo Program start/restart completed.
+
+echo.
+echo ================================
+echo Step 5: Start %HR_GW_NAME% on :18900
+echo ================================
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST% "pkill -x %HR_GW_NAME% 2>/dev/null; sleep 1; cd %REMOTE_DIR% && nohup ./%HR_GW_NAME% >> %REMOTE_DIR%/live-hot-restart-gw.log 2>&1 & sleep 1; pgrep -x %HR_GW_NAME% >/dev/null && echo HR_GW_OK || echo HR_GW_FAIL"
+if errorlevel 1 (
+    echo Warning: %HR_GW_NAME% start check failed - open AWS SG TCP 18900 when needed
+)
 
 echo.
 echo ================================

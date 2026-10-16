@@ -2,10 +2,13 @@ package cfgdao
 
 import (
 	"context"
+	"fmt"
 	"strings"
+	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"xr-game-server/constants/country"
 	"xr-game-server/core/cache"
 	rechargeentity "xr-game-server/entity/recharge"
 )
@@ -70,12 +73,48 @@ func HaiPayUserWithdrawPayoutCountryCfgComplete(row *rechargeentity.HaiPayUserWi
 		strings.TrimSpace(row.AccountType) != "" && strings.TrimSpace(row.BankCode) != ""
 }
 
+func fillHaiPayUserWithdrawPayoutCountryCfgAppID(row *rechargeentity.HaiPayUserWithdrawPayoutCountryCfg) error {
+	if row == nil {
+		return nil
+	}
+	if row.AppId > 0 {
+		return nil
+	}
+	appID, ok := country.LookupHaiPayAppID(row.CurrencyCode, HaiPayUseProdAppID())
+	if !ok {
+		return fmt.Errorf("haipay app_id not found for currency %s", strings.ToUpper(strings.TrimSpace(row.CurrencyCode)))
+	}
+	row.AppId = appID
+	return nil
+}
+
 func SaveHaiPayUserWithdrawPayoutCountryCfg(row *rechargeentity.HaiPayUserWithdrawPayoutCountryCfg) (string, error) {
 	if row == nil {
 		return "", nil
 	}
 	row.Normalize()
-	if _, err := g.DB().Model(string(rechargeentity.TbHaiPayUserWithdrawPayoutCountryCfg)).Save(row); err != nil {
+	if err := fillHaiPayUserWithdrawPayoutCountryCfgAppID(row); err != nil {
+		return "", err
+	}
+	now := time.Now()
+	if existing := GetHaiPayUserWithdrawPayoutCountryCfgCached(row.CountryCode); existing != nil && !existing.CreatedAt.IsZero() {
+		row.CreatedAt = existing.CreatedAt
+	} else if row.CreatedAt.IsZero() {
+		row.CreatedAt = now
+	}
+	row.UpdatedAt = now
+	// 显式列写入，避免 Save(struct) 省略 app_id 导致 NOT NULL 报错
+	_, err := g.DB().Model(string(rechargeentity.TbHaiPayUserWithdrawPayoutCountryCfg)).Data(g.Map{
+		"country_code":  row.CountryCode,
+		"created_at":    row.CreatedAt,
+		"updated_at":    row.UpdatedAt,
+		"currency_code": row.CurrencyCode,
+		"app_id":        row.AppId,
+		"account_type":  row.AccountType,
+		"bank_code":     row.BankCode,
+		"enabled":       row.Enabled,
+	}).Save()
+	if err != nil {
 		return "", err
 	}
 	return row.CountryCode, nil

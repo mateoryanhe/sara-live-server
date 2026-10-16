@@ -70,7 +70,7 @@ func SavePayoutInfo(_ context.Context, userId uint64, req *userwithdrawdto.AppSa
 	if reqBank := strings.TrimSpace(req.BankCode); reqBank != "" && !strings.EqualFold(reqBank, bankCode) {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	extraRequirements := country.HaiPayPayoutExtraRequirementsFor(currency, method.BankCode)
+	extraRequirements := appPayoutExtraRequirementsForUserWithdraw(countryCode, currency, method.BankCode)
 	identifyType := strings.TrimSpace(req.IdentifyType)
 	if len(extraRequirements.IdentifyTypeOptions) > 0 {
 		identifyType = strings.ToUpper(identifyType)
@@ -175,14 +175,18 @@ func buildPayoutCountryOptions() []*userwithdrawdto.AppPayoutCountryOption {
 		}
 		methodOptions := make([]userwithdrawdto.AppPayoutMethodOption, 0, len(option.Methods))
 		stored := configured[option.CountryCode]
+		fixedAccountType, hasFixedAccountType := UserWithdrawPayoutFixedAccountType(option.CountryCode)
 		for _, method := range option.Methods {
+			if !userWithdrawPayoutMethodVisible(option.CountryCode, method.AccountType) {
+				continue
+			}
 			if stored != nil && cfgdao.HaiPayUserWithdrawPayoutCountryCfgComplete(stored) {
 				if method.AccountType != strings.ToUpper(strings.TrimSpace(stored.AccountType)) ||
 					!strings.EqualFold(method.BankCode, stored.BankCode) {
 					continue
 				}
 			}
-			extra := country.HaiPayPayoutExtraRequirementsFor(option.Currency, method.BankCode)
+			extra := appPayoutExtraRequirementsForUserWithdraw(option.CountryCode, option.Currency, method.BankCode)
 			methodOptions = append(methodOptions, userwithdrawdto.AppPayoutMethodOption{
 				AccountType:          method.AccountType,
 				BankCode:             method.BankCode,
@@ -194,17 +198,32 @@ func buildPayoutCountryOptions() []*userwithdrawdto.AppPayoutCountryOption {
 				AddressRequired:      extra.AddressRequired,
 			})
 		}
-		out = append(out, &userwithdrawdto.AppPayoutCountryOption{
+		accountTypes := append([]string(nil), option.AccountTypes...)
+		if hasFixedAccountType {
+			accountTypes = []string{fixedAccountType}
+			walletOptions = walletOptions[:0]
+			for _, method := range methodOptions {
+				walletOptions = append(walletOptions, userwithdrawdto.AppPayoutWalletOption{
+					Code: method.BankCode,
+					Name: method.Description,
+				})
+			}
+		}
+		countryOpt := &userwithdrawdto.AppPayoutCountryOption{
 			CountryCode:  c.Code,
 			NameEn:       c.NameEn,
 			NameZh:       c.NameZh,
 			Currency:     option.Currency,
 			Region:       option.Region,
-			AccountTypes: append([]string(nil), option.AccountTypes...),
+			AccountTypes: accountTypes,
 			Wallets:      walletOptions,
 			Methods:      methodOptions,
 			Icon:         icon,
-		})
+		}
+		if hasFixedAccountType {
+			countryOpt.FixedAccountType = fixedAccountType
+		}
+		out = append(out, countryOpt)
 	}
 	return out
 }

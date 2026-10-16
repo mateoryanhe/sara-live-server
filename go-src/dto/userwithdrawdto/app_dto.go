@@ -54,15 +54,16 @@ type AppPayoutInfoItem struct {
 }
 
 type AppPayoutCountryOption struct {
-	CountryCode  string                      `json:"countryCode"`
-	NameEn       string                      `json:"nameEn"`
-	NameZh       string                      `json:"nameZh"`
-	Currency     string                      `json:"currency"`
-	Region       string                      `json:"region"`
-	AccountTypes []string                    `json:"accountTypes"`
-	Wallets      []AppPayoutWalletOption     `json:"wallets"`
-	Methods      []AppPayoutMethodOption     `json:"methods"`
-	Icon         string                      `json:"icon"`
+	CountryCode      string                  `json:"countryCode"`
+	NameEn           string                  `json:"nameEn"`
+	NameZh           string                  `json:"nameZh"`
+	Currency         string                  `json:"currency"`
+	Region           string                  `json:"region"`
+	FixedAccountType string                  `json:"fixedAccountType,omitempty" dc:"非空时该国仅支持此 accountType(如 EWALLET)"`
+	AccountTypes     []string                `json:"accountTypes"`
+	Wallets          []AppPayoutWalletOption `json:"wallets"`
+	Methods          []AppPayoutMethodOption `json:"methods"`
+	Icon             string                  `json:"icon"`
 }
 
 type AppPayoutWalletOption struct {

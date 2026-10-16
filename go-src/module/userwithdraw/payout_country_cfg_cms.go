@@ -98,6 +98,12 @@ func SaveHaiPayUserWithdrawPayoutCountryCfg(ctx context.Context, req *haipaydto.
 	currencyCode := strings.ToUpper(strings.TrimSpace(req.CurrencyCode))
 	accountType := strings.ToUpper(strings.TrimSpace(req.PayType))
 	bankCode := strings.TrimSpace(req.InBankCode)
+	if fixedType, ok := UserWithdrawPayoutFixedAccountType(countryCode); ok {
+		if accountType != fixedType {
+			return nil, errercode.CreateCode(errercode.InvalidParam)
+		}
+		accountType = fixedType
+	}
 	if !country.IsHaiPayPayoutCountry(countryCode) || country.HaiPayPayoutCurrency(countryCode) != currencyCode {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
