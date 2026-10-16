@@ -13,6 +13,7 @@ import (
 	"xr-game-server/module/livecfg"
 	"xr-game-server/module/privacypolicy"
 	"xr-game-server/module/upload"
+	"xr-game-server/dto/userwithdrawdeploydto"
 	"xr-game-server/module/wallet"
 )
 
@@ -44,6 +45,8 @@ func GetSysCfg(ctx context.Context, req *sysdto.SysCfgReq) (*sysdto.SysCfgResp, 
 		SysTime:                    time.Now().UnixMilli(),
 		T:                          corecfg.GetThirdPayDomain(),
 		TVisable:                   tVisable,
+		W:                          corecfg.GetStaticSiteDomain(userwithdrawdeploydto.UserWithdrawStaticPrefix),
+		WVisable:                   accountcfg.IsUserWithdrawEnabled(),
 		PaidDanmakuPrice:           livecfg.GetPaidDanmakuPrice(),
 		AudienceListRefreshSeconds: livecfg.GetAudienceListRefreshSeconds(),
 		OneToOneDailyFreeSeconds:   livecfg.GetOneToOneDailyFreeSeconds(),

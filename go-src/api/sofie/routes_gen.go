@@ -107,6 +107,7 @@ func Init() {
 	})
 	httpserver.RegAppRouteGroup("/sofie/payout", []httpserver.AppRoute{
 		{Path: "/fetchWithdrawPolicy", Handler: jsonHandler((&controller.UserWithdrawAppController{}).GetWithdrawCfg)},
+		{Path: "/browseWithdrawCurrencies", Handler: jsonHandler((&controller.UserWithdrawAppController{}).ListWithdrawCurrencies)},
 		{Path: "/fetchPayeeProfile", Handler: jsonHandler((&controller.UserWithdrawAppController{}).GetPayoutInfo)},
 		{Path: "/savePayeeProfile", Handler: jsonHandler((&controller.UserWithdrawAppController{}).SavePayoutInfo)},
 		{Path: "/requestCashOut", Handler: jsonHandler((&controller.UserWithdrawAppController{}).ApplyWithdraw)},

@@ -174,6 +174,7 @@ var openAPIDocRoutes = []openAPIDocRoute{
 	{OldMethod: "post", OldPath: "/gold/transferGold", NewPath: "/sofie/coin/sendToUser", Tag: "coin", Summary: "转赠金币"},
 	{OldMethod: "post", OldPath: "/gold/getCoinMerchantTransferRecordList", NewPath: "/sofie/coin/browseDealerTransfers", Tag: "coin", Summary: "币商转账记录"},
 	{OldMethod: "post", OldPath: "/userWithdraw/getWithdrawCfg", NewPath: "/sofie/payout/fetchWithdrawPolicy", Tag: "payout", Summary: "用户提现配置"},
+	{OldMethod: "post", OldPath: "/userWithdraw/listWithdrawCurrencies", NewPath: "/sofie/payout/browseWithdrawCurrencies", Tag: "payout", Summary: "支持的提现币种"},
 	{OldMethod: "post", OldPath: "/userWithdraw/getPayoutInfo", NewPath: "/sofie/payout/fetchPayeeProfile", Tag: "payout", Summary: "用户收款信息"},
 	{OldMethod: "post", OldPath: "/userWithdraw/savePayoutInfo", NewPath: "/sofie/payout/savePayeeProfile", Tag: "payout", Summary: "保存用户收款信息"},
 	{OldMethod: "post", OldPath: "/userWithdraw/applyWithdraw", NewPath: "/sofie/payout/requestCashOut", Tag: "payout", Summary: "申请提现"},

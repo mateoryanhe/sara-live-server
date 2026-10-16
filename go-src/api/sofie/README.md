@@ -167,6 +167,7 @@
 | `coin` | 转赠金币 | 需要登录 | `POST /gold/transferGold` | `POST /sofie/coin/sendToUser` |
 | `coin` | 币商转账记录 | 需要登录 | `POST /gold/getCoinMerchantTransferRecordList` | `POST /sofie/coin/browseDealerTransfers` |
 | `payout` | 用户提现配置 | 需要登录 | `POST /userWithdraw/getWithdrawCfg` | `POST /sofie/payout/fetchWithdrawPolicy` |
+| `payout` | 支持的提现币种 | 需要登录 | `POST /userWithdraw/listWithdrawCurrencies` | `POST /sofie/payout/browseWithdrawCurrencies` |
 | `payout` | 用户收款信息 | 需要登录 | `POST /userWithdraw/getPayoutInfo` | `POST /sofie/payout/fetchPayeeProfile` |
 | `payout` | 保存用户收款信息 | 需要登录 | `POST /userWithdraw/savePayoutInfo` | `POST /sofie/payout/savePayeeProfile` |
 | `payout` | 申请提现 | 需要登录 | `POST /userWithdraw/applyWithdraw` | `POST /sofie/payout/requestCashOut` |
