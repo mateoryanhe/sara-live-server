@@ -51,17 +51,17 @@ App 秀场礼物面板：`POST /liveRoom/reportHotLiveRoomGiftClick`（Sofie `PO
 
 | 页面 | event | 口径 | CMS API |
 |------|-------|------|---------|
-| `TrackingCall1v1InitiateManagement`（1v1视频通话） | `call_1v1_initiate` | 秀场 category=1；`liveRoomCall` 成功且 `call_order.source=1`（直播间来源）+1 | `POST /trackingEvent/getCall1v1InitiateTrend` |
+| `TrackingCall1v1InitiateManagement`（1v1视频通话） | `call_1v1_initiate` | `liveRoomCall` 成功且 `call_order.source=1`（直播间来源）+1，**不区分**直播间 category | `POST /trackingEvent/getCall1v1InitiateTrend` |
 
-表：`daily_call_1v1_initiate_stats` / `weekly_*` / `monthly_*`。
+表：`daily_call1v1_initiate_stats` / `weekly_*` / `monthly_*`（GORM 表名无 `call_` 与 `1v1` 间下划线；`TbName`/syndb/dao 须与此一致，2026-10-19 正式服曾因此全页 0）。
 
 | 同上页 **Tab「1v1房间视频通话」** | `call_1v1_room` | `oneToOneRoomCall` 成功且 `call_order.source=3` +1 | `POST /trackingEvent/getCall1v1RoomCallTrend` |
 
-表：`daily_call_1v1_room_stats` / `weekly_*` / `monthly_*`。
+表：`daily_call1v1_room_stats` / `weekly_*` / `monthly_*`。
 
 | 同上页 **Tab「双方成功接通」** | `call_1v1_connect_success` | 视频通话；双方 `confirmCall` 且首次扣费成功进入通话中 +1；source=1 限秀场 category=1，source=3 含 1v1 房间 | `POST /trackingEvent/getCall1v1ConnectSuccessTrend` |
 
-表：`daily_call_1v1_connect_success_stats` / `weekly_*` / `monthly_*`。
+表：`daily_call1v1_connect_success_stats` / `weekly_*` / `monthly_*`。
 
 | 同上页 **Tab「1v1房间列表」** | `one_to_one_room_list` | App `oneToOneRoomList`（Sofie `browseDirectBooths`）成功返回 +1（含翻页） | `POST /trackingEvent/getOneToOneRoomListTrend` |
 

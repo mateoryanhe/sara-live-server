@@ -8,7 +8,8 @@ import (
 )
 
 const (
-	TbDailyCall1v1RoomStat db.TbName = "daily_call_1v1_room_stats"
+	// 须与 GORM 默认表名一致(DailyCall1v1RoomStat → daily_call1v1_room_stats，勿写成 daily_call_1v1_*)
+	TbDailyCall1v1RoomStat db.TbName = "daily_call1v1_room_stats"
 )
 
 const DailyCall1v1RoomStatCount db.TbCol = "count"

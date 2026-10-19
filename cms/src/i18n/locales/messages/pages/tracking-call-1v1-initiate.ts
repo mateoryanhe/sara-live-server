@@ -6,7 +6,7 @@ const zh = {
   tabConnectSuccess: '双方成功接通',
   tabOneToOneRoomList: '1v1房间列表',
   desc:
-      '统计秀场直播间（category=1）内发起的 1v1 视频通话次数：call_order.source=1（直播间来源），观众调用 liveRoomCall 成功创建通话单并推送呼叫后 +1（对齐埋点 call_1v1_initiate）。',
+      '统计直播间内发起的 1v1 视频通话次数：call_order.source=1（直播间来源，不区分 category），观众调用 liveRoomCall 成功创建通话单并推送呼叫后 +1（对齐埋点 call_1v1_initiate）。',
   oneToOneRoomDesc:
       '统计 1v1 房间内发起的视频通话次数：call_order.source=3（1v1 房间来源），oneToOneRoomCall 成功创建通话单并推送呼叫后 +1（对齐埋点 call_1v1_room）。',
   connectSuccessDesc:
@@ -41,7 +41,7 @@ export const trackingCall1v1InitiateMessages = definePageMessagesFromEn(zh, {
   tabConnectSuccess: 'Both parties connected',
   tabOneToOneRoomList: '1v1 room list',
   desc:
-      '1v1 video call initiations in showcase rooms (category=1): call_order.source=1 (live room); +1 when liveRoomCall succeeds (event call_1v1_initiate).',
+      '1v1 video call initiations from live rooms: call_order.source=1 (any category); +1 when liveRoomCall succeeds (event call_1v1_initiate).',
   oneToOneRoomDesc:
       'Video call count in 1v1 rooms: call_order.source=3; +1 when oneToOneRoomCall succeeds (event call_1v1_room).',
   connectSuccessDesc:

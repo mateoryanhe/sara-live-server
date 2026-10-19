@@ -20,6 +20,7 @@
 | `start-web-audience.bat` | **Web 观众端（8080，常用）** |
 | `start-web-anchor.bat` | Web 主播（8081） |
 | `start-web-config.example.bat` | 示例 → 复制为 `web\start-web-config.bat`（含 `API_BASE`、日志目录） |
+| `dev-usb.bat` | USB 真机 **flutter run**（热重载，日常改 UI 比打 release APK 快） |
 
 根目录同名 `build-apk.bat`、`start-web-*.bat` 等仅为转发到上表，方便在 `flutter-client\` 根下双击。
 

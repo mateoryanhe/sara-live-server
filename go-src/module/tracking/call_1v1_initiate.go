@@ -4,10 +4,8 @@ import (
 	"context"
 	"time"
 
-	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/statdao"
 	"xr-game-server/dto/trackingdto"
-	liveentity "xr-game-server/entity/live"
 	statentity "xr-game-server/entity/stat"
 )
 
@@ -20,13 +18,9 @@ const (
 	EventKeyCall1v1Initiate = "call_1v1_initiate"
 )
 
-// recordCall1v1Initiate 消费埋点:秀场直播间 source=1 视频通话发起 +1.
+// recordCall1v1Initiate 消费埋点:直播间 source=1 视频通话发起 +1(liveRoomCall 成功即计，不区分 category).
 func recordCall1v1Initiate(callerId, anchorId uint64, at time.Time) {
 	if callerId == 0 || anchorId == 0 || callerId == anchorId {
-		return
-	}
-	cfg := liveroomdao.GetLiveRoomCfg(anchorId)
-	if cfg == nil || cfg.Category != liveentity.LiveRoomCategoryHot {
 		return
 	}
 	if at.IsZero() {

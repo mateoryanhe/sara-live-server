@@ -101,16 +101,8 @@ if /I "%MODE%"=="debug" (
 
 call :PrintBanner
 
-echo [1/3] flutter pub get ...
-echo.
-call flutter pub get
-if errorlevel 1 (
-  echo [FAIL] flutter pub get
-  exit /b 1
-)
-echo.
-echo [OK] pub get done.
-echo.
+call :MaybePubGet
+if errorlevel 1 exit /b 1
 
 echo [2/3] Build settings
 if defined API_BASE (
@@ -129,16 +121,17 @@ echo.
 call :PrepareGradle
 if errorlevel 1 exit /b 1
 
-echo [3/3] flutter build apk --%MODE% ^(Gradle assemble, often 5-15 min^)
-echo       First build or after upgrade may take longer. Do not close this window.
+echo [3/3] flutter build apk --%MODE% ^(Gradle assemble; incremental often 1-3 min^)
+echo       First build or after clean may take 5-15 min. Do not close this window.
 echo       Output folder    : %APK_DIR%
 echo       JAVA_HOME        : %JAVA_HOME%
+if "%BUILD_USE_NO_PUB%"=="1" echo       pub get        : skipped ^(deps unchanged, --no-pub^)
 echo.
 
 if /I "%MODE%"=="debug" (
-  call flutter build apk --debug %APK_FLUTTER_FLAGS% %DART_DEFINES%
+  call flutter build apk --debug %BUILD_USE_NO_PUB_FLAG% %APK_FLUTTER_FLAGS% %DART_DEFINES%
 ) else (
-  call flutter build apk --release %APK_FLUTTER_FLAGS% %DART_DEFINES%
+  call flutter build apk --release %BUILD_USE_NO_PUB_FLAG% %APK_FLUTTER_FLAGS% %DART_DEFINES%
 )
 set "BUILD_ERR=%ERRORLEVEL%"
 echo.
@@ -157,19 +150,61 @@ exit /b 0
 
 :PrepareGradle
 echo [2b] Gradle / Kotlin prep ...
-if exist "%CD%\android\gradlew.bat" (
-  pushd "%CD%\android"
-  call gradlew.bat --stop >nul 2>&1
-  popd
-  echo       gradlew --stop done
-) else (
-  echo       gradlew.bat not found, skip --stop
-)
 if "%DO_CLEAN%"=="1" (
+  if exist "%CD%\.apk_build" rmdir /s /q "%CD%\.apk_build" 2>nul
+  if exist "%CD%\android\gradlew.bat" (
+    pushd "%CD%\android"
+    call gradlew.bat --stop >nul 2>&1
+    popd
+    echo       gradlew --stop ^(clean build^)
+  )
   echo       flutter clean ^(requested^) ...
   call flutter clean
   if errorlevel 1 exit /b 1
+) else if /I "%BUILD_GRADLE_STOP%"=="1" (
+  if exist "%CD%\android\gradlew.bat" (
+    pushd "%CD%\android"
+    call gradlew.bat --stop >nul 2>&1
+    popd
+    echo       gradlew --stop ^(BUILD_GRADLE_STOP=1^)
+  )
+) else (
+  echo       Gradle daemon kept ^(faster rebuild; use build.bat clean for full reset^)
 )
+exit /b 0
+
+:MaybePubGet
+set "BUILD_USE_NO_PUB=0"
+set "BUILD_USE_NO_PUB_FLAG="
+set "STAMP_DIR=%CD%\.apk_build"
+set "STAMP_FILE=%STAMP_DIR%\pubget.stamp"
+if /I "%BUILD_FORCE_PUB%"=="1" goto :DoPubGet
+if not exist "%STAMP_FILE%" goto :DoPubGet
+powershell -NoProfile -Command ^
+  "$stamp=Get-Item -LiteralPath '%STAMP_FILE%'; $t=$stamp.LastWriteTimeUtc; " ^
+  "$files=@('pubspec.yaml'); if (Test-Path -LiteralPath 'pubspec.lock') { $files += 'pubspec.lock' }; " ^
+  "$newer=$false; foreach ($f in $files) { if ((Get-Item -LiteralPath $f).LastWriteTimeUtc -gt $t) { $newer=$true; break } }; " ^
+  "if ($newer) { exit 1 } else { exit 0 }"
+if errorlevel 1 goto :DoPubGet
+echo [1/3] flutter pub get ... skipped ^(pubspec unchanged^)
+set "BUILD_USE_NO_PUB=1"
+set "BUILD_USE_NO_PUB_FLAG=--no-pub"
+exit /b 0
+
+:DoPubGet
+echo [1/3] flutter pub get ...
+echo.
+call flutter pub get
+if errorlevel 1 (
+  echo [FAIL] flutter pub get
+  exit /b 1
+)
+if not exist "%STAMP_DIR%" mkdir "%STAMP_DIR%"
+powershell -NoProfile -Command "Set-Content -LiteralPath '%STAMP_FILE%' -Value (Get-Date -Format o) -Encoding utf8"
+echo.
+echo [OK] pub get done.
+set "BUILD_USE_NO_PUB=1"
+set "BUILD_USE_NO_PUB_FLAG=--no-pub"
 exit /b 0
 
 :PrintBanner

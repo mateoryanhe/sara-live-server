@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	TbWeeklyCall1v1ConnectSuccessStat db.TbName = "weekly_call_1v1_connect_success_stats"
+	TbWeeklyCall1v1ConnectSuccessStat db.TbName = "weekly_call1v1_connect_success_stats"
 )
 
 const WeeklyCall1v1ConnectSuccessStatCount db.TbCol = "count"

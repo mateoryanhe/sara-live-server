@@ -8,12 +8,12 @@ import (
 )
 
 const (
-	TbDailyCall1v1InitiateStat db.TbName = "daily_call_1v1_initiate_stats"
+	TbDailyCall1v1InitiateStat db.TbName = "daily_call1v1_initiate_stats"
 )
 
 const DailyCall1v1InitiateStatCount db.TbCol = "count"
 
-// DailyCall1v1InitiateStat 每日 source=1 的 1v1 视频通话发起次数(主键=YYYY-MM-DD)
+// DailyCall1v1InitiateStat 每日 call_order.source=1 的 1v1 视频通话发起次数(主键=YYYY-MM-DD，不区分直播间 category)
 type DailyCall1v1InitiateStat struct {
 	ID    string `gorm:"primaryKey;size:10;comment:日期(YYYY-MM-DD)" json:"date"`
 	Count uint64 `gorm:"default:0;comment:发起次数" json:"count"`

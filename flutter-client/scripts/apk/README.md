@@ -16,6 +16,15 @@
 | 双击安装 Release | `scripts\apk\一键安装.bat` |
 | 双击安装 Debug | `scripts\apk\一键安装-debug.bat` |
 | 打包 + 安装 | `scripts\apk\一键打包并安装.bat` |
+| **USB 日常调试（推荐）** | `scripts\dev-usb.bat` → `flutter run` 热重载，比反复打 release 快 |
+
+### 为什么每次都有 `Flutter assets will be downloaded from https://storage.flutter-io.cn`？
+
+这是 **提示当前用的是国内镜像**（`scripts\env\config.bat` 里 `USE_CN_MIRROR=1` 时会设 `FLUTTER_STORAGE_BASE_URL`），**不是**每次重新下完整 Flutter。引擎与工具链缓存在 `%FLUTTER_HOME%\bin\cache`，只有升级 Flutter 或清缓存后才会大下载。
+
+脚本已优化：**`pub get` 在 pubspec 未改时会跳过**，且 **`flutter build` 带 `--no-pub`**，避免你日志里那种连跑两遍 `Resolving dependencies...`。默认 **不再每次 `gradlew --stop`**，保留 Gradle 守护进程，增量编译通常能到约 1–3 分钟（全量仍可能 5–15 分钟）。
+
+改依赖或怪问题时：`build.bat clean release`，或 `build-config.bat` 里 `BUILD_FORCE_PUB=1` / `BUILD_GRADLE_STOP=1`。
 
 ### 安装到真机（adb）
 
