@@ -9,4 +9,7 @@ func Init() {
 	initCurrencyStatEvent()
 	initAudienceEvent()
 	initPromotionChannelOrderEvent()
+	initGameBetUserStatEvent()
+	initGameOnlineStat()
+	initGameOnlineRecentTrend()
 }

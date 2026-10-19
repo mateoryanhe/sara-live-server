@@ -4,7 +4,10 @@ import "github.com/gogf/gf/v2/frame/g"
 
 // CMSUserStatTrendReq CMS获取用户数据趋势
 type CMSUserStatTrendReq struct {
-	g.Meta `path:"/getUserStatTrend" method:"post" summary:"CMS获取用户数据趋势" tags:"仪表盘"`
+	g.Meta      `path:"/getUserStatTrend" method:"post" summary:"CMS获取用户数据趋势" tags:"仪表盘"`
+	Granularity string `json:"granularity" dc:"折线粒度 daily|weekly|monthly(传 startDate/endDate 时必填)"`
+	StartDate   string `json:"startDate" dc:"开始日期 YYYY-MM-DD(可选)"`
+	EndDate     string `json:"endDate" dc:"结束日期 YYYY-MM-DD(可选, 默认今天)"`
 }
 
 // CMSUserStatTrendPoint 用户数据趋势点(折线图 + 柱形图共用时间轴)
@@ -17,7 +20,9 @@ type CMSUserStatTrendPoint struct {
 
 // CMSUserStatTrendRes CMS用户数据趋势(日/周/月)
 type CMSUserStatTrendRes struct {
-	Daily   []*CMSUserStatTrendPoint `json:"daily"   dc:"按日统计(最近30天)"`
-	Weekly  []*CMSUserStatTrendPoint `json:"weekly"  dc:"按周统计(最近12周)"`
-	Monthly []*CMSUserStatTrendPoint `json:"monthly" dc:"按月统计(最近12月)"`
+	Daily          []*CMSUserStatTrendPoint `json:"daily"   dc:"按日统计(最近30天)"`
+	Weekly         []*CMSUserStatTrendPoint `json:"weekly"  dc:"按周统计(最近12周)"`
+	Monthly        []*CMSUserStatTrendPoint `json:"monthly" dc:"按月统计(最近12月)"`
+	RangeTruncated bool                     `json:"rangeTruncated" dc:"时间范围超出上限, 已截断"`
+	TrendMaxPoints int                      `json:"trendMaxPoints" dc:"当前粒度最大点数"`
 }

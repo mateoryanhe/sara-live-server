@@ -1,5 +1,5 @@
 // live-hot-restart-gw：独立进程，部署在直播服本机。
-// 监听 18900，手机/外网 GET ?auth= 后 curl 本机 https://127.0.0.1/internal/hotRestart 触发热重启。
+// 监听 18900：带 auth 的 HTTP 触发热重启；Go 未运行时走 start.sh 冷启（与 go-prod/restart.bat 一致）。
 package main
 
 import (
@@ -19,10 +19,14 @@ import (
 )
 
 type config struct {
-	Listen         string `json:"listen"`
-	Auth           string `json:"auth"`
-	HotRestartURL  string `json:"hotRestartURL"`
-	MinIntervalSec int    `json:"minIntervalSec"`
+	Listen                 string `json:"listen"`
+	Auth                   string `json:"auth"`
+	HotRestartURL          string `json:"hotRestartURL"`
+	MinIntervalSec         int    `json:"minIntervalSec"`
+	ColdStartScript        string `json:"coldStartScript"`
+	AppName                string `json:"appName"`
+	HotRestartFallbackCold bool   `json:"hotRestartFallbackCold"`
+	ColdStartWaitSec       int    `json:"coldStartWaitSec"`
 }
 
 var (
@@ -49,16 +53,24 @@ func main() {
 	if cfg.MinIntervalSec <= 0 {
 		cfg.MinIntervalSec = 60
 	}
+	if strings.TrimSpace(cfg.AppName) == "" {
+		cfg.AppName = "xr-game-server"
+	}
+	if cfg.HotRestartFallbackCold && strings.TrimSpace(cfg.ColdStartScript) == "" {
+		log.Println("warn: hotRestartFallbackCold=true 但未配置 coldStartScript，进程挂掉时无法冷启")
+	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", handleTrigger)
-	mux.HandleFunc("/hotRestart", handleTrigger)
+	mux.HandleFunc("/", handleSmartRestart)
+	mux.HandleFunc("/hotRestart", handleSmartRestart)
+	mux.HandleFunc("/coldStart", handleColdStartOnly)
 	mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{"ok":true}`))
 	})
 
-	log.Printf("live-hot-restart-gw listen http://%s/  config=%s", cfg.Listen, configPath)
+	log.Printf("live-hot-restart-gw listen http://%s/  config=%s coldStart=%q",
+		cfg.Listen, configPath, cfg.ColdStartScript)
 	if err := http.ListenAndServe(cfg.Listen, mux); err != nil {
 		log.Fatal(err)
 	}
@@ -90,29 +102,137 @@ func loadConfig() error {
 	if v := strings.TrimSpace(os.Getenv("LIVE_HR_GW_HOT_RESTART_URL")); v != "" {
 		cfg.HotRestartURL = v
 	}
+	if v := strings.TrimSpace(os.Getenv("LIVE_HR_GW_COLD_START_SCRIPT")); v != "" {
+		cfg.ColdStartScript = v
+	}
 	return nil
 }
 
 type triggerResp struct {
 	OK       bool   `json:"ok"`
+	Mode     string `json:"mode,omitempty"`
+	PID      int    `json:"pid,omitempty"`
 	Reason   string `json:"reason,omitempty"`
 	Upstream string `json:"upstream,omitempty"`
 }
 
-func handleTrigger(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet && r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+func handleSmartRestart(w http.ResponseWriter, r *http.Request) {
+	if !authorizeRequest(w, r) {
 		return
 	}
+	if !acquireTriggerSlot(w) {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 120*time.Second)
+	defer cancel()
+
+	pid, count, err := pgrepApp(ctx, cfg.AppName)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, triggerResp{OK: false, Reason: err.Error()})
+		return
+	}
+	if count == 0 {
+		respondColdStart(w, r, ctx, false, 0, "no running process")
+		return
+	}
+
+	upstream, hotErr := callGameHotRestart(ctx, requestAuthToken(r))
+	if hotErr == nil {
+		ok := strings.Contains(upstream, `"ok":true`) || strings.Contains(upstream, `"ok": true`)
+		if ok {
+			lastTrigger = time.Now()
+			log.Printf("hot restart ok remote=%s pid=%d", r.RemoteAddr, pid)
+			writeJSON(w, http.StatusOK, triggerResp{OK: true, Mode: "hot", PID: pid, Reason: upstream, Upstream: upstream})
+			return
+		}
+	}
+	if !cfg.HotRestartFallbackCold || strings.TrimSpace(cfg.ColdStartScript) == "" {
+		reason := upstream
+		if hotErr != nil {
+			reason = hotErr.Error()
+		}
+		log.Printf("hot restart failed (no cold fallback): %v upstream=%s", hotErr, upstream)
+		writeJSON(w, http.StatusBadGateway, triggerResp{OK: false, Mode: "hot", Reason: reason, Upstream: upstream})
+		return
+	}
+	if !shouldColdFallbackHot(hotErr, upstream) {
+		reason := upstream
+		if hotErr != nil {
+			reason = hotErr.Error()
+		}
+		writeJSON(w, http.StatusBadGateway, triggerResp{OK: false, Mode: "hot", Reason: reason, Upstream: upstream})
+		return
+	}
+	respondColdStart(w, r, ctx, true, pid, fmt.Sprintf("hot failed: %v", hotErr))
+}
+
+func handleColdStartOnly(w http.ResponseWriter, r *http.Request) {
+	if !authorizeRequest(w, r) {
+		return
+	}
+	if !acquireTriggerSlot(w) {
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), 120*time.Second)
+	defer cancel()
+	pid, count, _ := pgrepApp(ctx, cfg.AppName)
+	kill := count > 0
+	respondColdStart(w, r, ctx, kill, pid, "coldStart endpoint")
+}
+
+func respondColdStart(w http.ResponseWriter, r *http.Request, ctx context.Context, killExisting bool, knownPID int, why string) {
+	if strings.TrimSpace(cfg.ColdStartScript) == "" {
+		writeJSON(w, http.StatusServiceUnavailable, triggerResp{
+			OK:     false,
+			Mode:   "cold",
+			Reason: "coldStartScript not configured",
+		})
+		return
+	}
+	result, err := doColdStart(ctx, killExisting, knownPID)
+	if err != nil {
+		log.Printf("cold start failed (%s): %v output=%s remote=%s", why, err, result.Output, r.RemoteAddr)
+		writeJSON(w, http.StatusBadGateway, triggerResp{
+			OK:     false,
+			Mode:   "cold",
+			Reason: err.Error(),
+			PID:    result.PID,
+		})
+		return
+	}
+	lastTrigger = time.Now()
+	if result.Output == "already running" {
+		log.Printf("cold start skipped (%s): already running pid=%d remote=%s", why, result.PID, r.RemoteAddr)
+		writeJSON(w, http.StatusOK, triggerResp{OK: true, Mode: "cold", PID: result.PID, Reason: "already running"})
+		return
+	}
+	log.Printf("cold start ok (%s) pid=%d remote=%s", why, result.PID, r.RemoteAddr)
+	writeJSON(w, http.StatusOK, triggerResp{OK: true, Mode: "cold", PID: result.PID, Reason: "started"})
+}
+
+func requestAuthToken(r *http.Request) string {
 	token := strings.TrimSpace(r.URL.Query().Get("auth"))
 	if token == "" {
 		token = strings.TrimSpace(r.URL.Query().Get("key"))
 	}
+	return token
+}
+
+func authorizeRequest(w http.ResponseWriter, r *http.Request) bool {
+	if r.Method != http.MethodGet && r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return false
+	}
+	token := requestAuthToken(r)
 	if subtle.ConstantTimeCompare([]byte(token), []byte(cfg.Auth)) != 1 {
 		writeJSON(w, http.StatusForbidden, triggerResp{OK: false, Reason: "unauthorized"})
-		return
+		return false
 	}
+	return true
+}
 
+func acquireTriggerSlot(w http.ResponseWriter) bool {
 	triggerMu.Lock()
 	defer triggerMu.Unlock()
 	if since := time.Since(lastTrigger); since < time.Duration(cfg.MinIntervalSec)*time.Second {
@@ -120,26 +240,9 @@ func handleTrigger(w http.ResponseWriter, r *http.Request) {
 			OK:     false,
 			Reason: fmt.Sprintf("rate limited, retry after %ds", cfg.MinIntervalSec-int(since.Seconds())),
 		})
-		return
+		return false
 	}
-
-	ctx, cancel := context.WithTimeout(r.Context(), 90*time.Second)
-	defer cancel()
-
-	upstream, err := callGameHotRestart(ctx, token)
-	if err != nil {
-		log.Printf("hot restart upstream error: %v body=%s", err, upstream)
-		writeJSON(w, http.StatusBadGateway, triggerResp{OK: false, Reason: err.Error(), Upstream: upstream})
-		return
-	}
-	lastTrigger = time.Now()
-	ok := strings.Contains(upstream, `"ok":true`) || strings.Contains(upstream, `"ok": true`)
-	status := http.StatusOK
-	if !ok {
-		status = http.StatusBadGateway
-	}
-	log.Printf("hot restart trigger ok=%v upstream=%s remote=%s", ok, upstream, r.RemoteAddr)
-	writeJSON(w, status, triggerResp{OK: ok, Reason: upstream, Upstream: upstream})
+	return true
 }
 
 func callGameHotRestart(ctx context.Context, auth string) (string, error) {

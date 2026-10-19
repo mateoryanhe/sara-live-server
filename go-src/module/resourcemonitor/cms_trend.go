@@ -3,6 +3,7 @@ package resourcemonitor
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -46,6 +47,8 @@ type trendPoint struct {
 	SysCpuPercent       float64
 	OnlineCount         uint64
 	LiveAnchorCount     uint64
+	GameOnlineCount     uint64
+	GameBetUserCount    uint64
 }
 
 func GetCMSResourceMetricMemoryTrend(_ context.Context, req *resourcemetricdto.CMSResourceMetricMemoryTrendReq) (*resourcemetricdto.CMSResourceMetricMemoryTrendRes, error) {
@@ -115,8 +118,30 @@ func GetCMSResourceMetricCpuTrend(_ context.Context, req *resourcemetricdto.CMSR
 	return &resourcemetricdto.CMSResourceMetricCpuTrendRes{Points: points}, nil
 }
 
-func GetCMSResourceMetricOnlineTrend(_ context.Context, req *resourcemetricdto.CMSResourceMetricOnlineTrendReq) (*resourcemetricdto.CMSResourceMetricOnlineTrendRes, error) {
+func GetCMSResourceMetricGameStatTrend(_ context.Context, req *resourcemetricdto.CMSResourceMetricGameStatTrendReq) (*resourcemetricdto.CMSResourceMetricGameStatTrendRes, error) {
+	limit := resolveTrendLimit(req.Limit)
 	rows := listTrendPoints(toTrendQuery(req.StartTime, req.EndTime, req.Limit))
+	points := make([]*resourcemetricdto.CMSResourceMetricGameStatPoint, 0, len(rows))
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		points = append(points, &resourcemetricdto.CMSResourceMetricGameStatPoint{
+			Time:        row.RecordedAt.Format(trendTimeLayout),
+			Count:       row.GameBetUserCount,
+			OnlineCount: row.GameOnlineCount,
+		})
+	}
+	return &resourcemetricdto.CMSResourceMetricGameStatTrendRes{
+		Points:         points,
+		RangeTruncated: len(rows) >= limit,
+		TrendMaxPoints: limit,
+	}, nil
+}
+
+func GetCMSResourceMetricOnlineTrend(_ context.Context, req *resourcemetricdto.CMSResourceMetricOnlineTrendReq) (*resourcemetricdto.CMSResourceMetricOnlineTrendRes, error) {
+	limit := resolveTrendLimit(req.Limit)
+	rows := listTrendPoints(toTrendQuery(req.StartTime, req.EndTime, limit))
 	points := make([]*resourcemetricdto.CMSResourceMetricOnlinePoint, 0, len(rows))
 	for _, row := range rows {
 		if row == nil {
@@ -129,7 +154,11 @@ func GetCMSResourceMetricOnlineTrend(_ context.Context, req *resourcemetricdto.C
 			AudienceCount:   audienceOnlineCount(row.OnlineCount, row.LiveAnchorCount),
 		})
 	}
-	return &resourcemetricdto.CMSResourceMetricOnlineTrendRes{Points: points}, nil
+	return &resourcemetricdto.CMSResourceMetricOnlineTrendRes{
+		Points:         points,
+		RangeTruncated: len(rows) >= limit,
+		TrendMaxPoints: limit,
+	}, nil
 }
 
 func audienceOnlineCount(total, liveAnchors uint64) uint64 {
@@ -156,7 +185,65 @@ func loadTrendPointsFromDB(q trendQuery) []*trendPoint {
 	if useFineTrend(start, end) {
 		return fineToTrendPoints(resourcemetricdao.ListFineByTimeRange(start, end, limit))
 	}
+	now := time.Now()
+	fineStart := now.Add(-FineRetention)
+	if end.After(fineStart) && start.Before(fineStart) {
+		coarseEnd := end
+		if coarseEnd.After(fineStart) {
+			coarseEnd = fineStart
+		}
+		coarse := aggToTrendPoints(resourcemetricdao.ListAggByTimeRange(start, coarseEnd, limit))
+		remaining := limit - len(coarse)
+		if remaining < 1 {
+			remaining = 1
+		}
+		fine := fineToTrendPoints(resourcemetricdao.ListFineByTimeRange(fineStart, end, remaining))
+		return capTrendPoints(mergeTrendPointsByTime(coarse, fine), limit)
+	}
 	return aggToTrendPoints(resourcemetricdao.ListAggByTimeRange(start, end, limit))
+}
+
+func mergeTrendPointsByTime(parts ...[]*trendPoint) []*trendPoint {
+	total := 0
+	for _, p := range parts {
+		total += len(p)
+	}
+	if total == 0 {
+		return nil
+	}
+	merged := make([]*trendPoint, 0, total)
+	for _, p := range parts {
+		for _, row := range p {
+			if row != nil {
+				merged = append(merged, row)
+			}
+		}
+	}
+	sort.Slice(merged, func(i, j int) bool {
+		return merged[i].RecordedAt.Before(merged[j].RecordedAt)
+	})
+	if len(merged) <= 1 {
+		return merged
+	}
+	out := make([]*trendPoint, 0, len(merged))
+	var lastAt time.Time
+	for _, row := range merged {
+		if len(out) > 0 && row.RecordedAt.Equal(lastAt) {
+			out[len(out)-1] = row
+			continue
+		}
+		out = append(out, row)
+		lastAt = row.RecordedAt
+	}
+	return out
+}
+
+// capTrendPoints 超出 limit 时保留较早一段，与 DAO 升序 limit 策略一致
+func capTrendPoints(rows []*trendPoint, limit int) []*trendPoint {
+	if limit <= 0 || len(rows) <= limit {
+		return rows
+	}
+	return rows[:limit]
 }
 
 // cmsTrendQueryCacheKey 仪表盘默认查询按 10 分钟分桶(与细采样间隔一致); 自定义时间范围按参数固定缓存.
@@ -208,6 +295,8 @@ func fineToTrendPoints(rows []*entity.SysResourceMetric) []*trendPoint {
 			SysCpuPercent:       row.SysCpuPercent,
 			OnlineCount:         row.OnlineCount,
 			LiveAnchorCount:     row.LiveAnchorCount,
+			GameOnlineCount:     row.GameOnlineCount,
+			GameBetUserCount:    row.GameBetUserCount,
 		})
 	}
 	return list
@@ -234,6 +323,8 @@ func aggToTrendPoints(rows []*entity.SysResourceMetricAgg) []*trendPoint {
 			SysCpuPercent:       row.SysCpuPercent,
 			OnlineCount:         row.OnlineCount,
 			LiveAnchorCount:     row.LiveAnchorCount,
+			GameOnlineCount:     row.GameOnlineCount,
+			GameBetUserCount:    row.GameBetUserCount,
 		})
 	}
 	return list

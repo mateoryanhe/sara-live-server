@@ -2,5 +2,9 @@
   "listen": "0.0.0.0:18900",
   "auth": "与 CMS 服务器运行配置 hotRestartAuth 一致",
   "hotRestartURL": "https://127.0.0.1/internal/hotRestart",
-  "minIntervalSec": 60
+  "minIntervalSec": 60,
+  "coldStartScript": "/home/ec2-user/xgameserver/start.sh",
+  "appName": "xr-game-server",
+  "hotRestartFallbackCold": true,
+  "coldStartWaitSec": 45
 }

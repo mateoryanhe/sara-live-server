@@ -34,3 +34,7 @@ func (c *ResourceMetricController) GetResourceMetricCpuTrend(ctx context.Context
 func (c *ResourceMetricController) GetResourceMetricOnlineTrend(ctx context.Context, req *resourcemetricdto.CMSResourceMetricOnlineTrendReq) (res *resourcemetricdto.CMSResourceMetricOnlineTrendRes, err error) {
 	return resourcemonitor.GetCMSResourceMetricOnlineTrend(ctx, req)
 }
+
+func (c *ResourceMetricController) GetResourceMetricGameStatTrend(ctx context.Context, req *resourcemetricdto.CMSResourceMetricGameStatTrendReq) (res *resourcemetricdto.CMSResourceMetricGameStatTrendRes, err error) {
+	return resourcemonitor.GetCMSResourceMetricGameStatTrend(ctx, req)
+}

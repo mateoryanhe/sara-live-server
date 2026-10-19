@@ -1,0 +1,113 @@
+import type {EChartsOption} from '@/utils/echarts'
+
+/** 至少 2 个点即显示底部滑块（便于浏览 7/30 天等较长范围） */
+export const TREND_CHART_ZOOM_MIN_POINTS = 2
+
+const SLIDER_HEIGHT = 22
+const SLIDER_BOTTOM = 4
+/** 旋转刻度与滑块之间的留白 */
+const LABEL_BAND_ROTATED = 58
+const LABEL_BAND_FLAT = 28
+
+export function trendChartHasZoom(pointCount: number): boolean {
+  return pointCount > TREND_CHART_ZOOM_MIN_POINTS
+}
+
+/** 为 X 轴刻度（及可选底部滑块）留出足够高度 */
+export function trendChartGridBottom(pointCount: number, withSlider = true): number {
+  const labelBand = pointCount > 12 ? LABEL_BAND_ROTATED : LABEL_BAND_FLAT
+  if (!withSlider) {
+    return labelBand + 16
+  }
+  if (!trendChartHasZoom(pointCount)) {
+    return 36
+  }
+  return SLIDER_BOTTOM + SLIDER_HEIGHT + labelBand + 10
+}
+
+export function buildTrendChartXAxisLabel(pointCount: number) {
+  const dense = pointCount > 12
+  const veryDense = pointCount > 36
+  let interval: number | 'auto' = 'auto'
+  if (veryDense) {
+    interval = Math.max(1, Math.floor(pointCount / 8))
+  } else if (pointCount > 20) {
+    interval = Math.max(0, Math.floor(pointCount / 12))
+  }
+  return {
+    rotate: dense ? 35 : 0,
+    align: dense ? 'right' : 'center',
+    hideOverlap: true,
+    showMinLabel: true,
+    showMaxLabel: true,
+    margin: dense ? 12 : 8,
+    fontSize: 11,
+    interval,
+    formatter: (value: string) => formatTrendChartAxisTime(value, veryDense),
+  }
+}
+
+function formatTrendChartAxisTime(value: string, compact: boolean): string {
+  if (!value) {
+    return ''
+  }
+  if (!compact) {
+    return value
+  }
+  const dateTime = value.match(/^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})/)
+  if (dateTime) {
+    return `${dateTime[1].slice(5)}\n${dateTime[2]}`
+  }
+  const timeOnly = value.match(/(\d{2}:\d{2}:\d{2}|\d{2}:\d{2})/)
+  if (timeOnly) {
+    return timeOnly[1].length > 5 ? timeOnly[1].slice(0, 5) : timeOnly[1]
+  }
+  return value.length > 12 ? `${value.slice(0, 12)}…` : value
+}
+
+export type TrendChartDataZoomOptions = {
+  /** 初始窗口为全量（滑块 0–100%） */
+  defaultFullRange?: boolean
+}
+
+export function buildTrendChartDataZoom(
+    pointCount: number,
+    options?: TrendChartDataZoomOptions,
+): EChartsOption['dataZoom'] {
+  if (!trendChartHasZoom(pointCount)) {
+    return undefined
+  }
+  const initialWindow = options?.defaultFullRange
+      ? 100
+      : pointCount > 48
+          ? Math.min(100, (48 / pointCount) * 100)
+          : 100
+  const initialStart = 0
+  return [
+    {type: 'inside', xAxisIndex: 0, start: initialStart, end: initialWindow},
+    {
+      type: 'slider',
+      xAxisIndex: 0,
+      height: SLIDER_HEIGHT,
+      bottom: SLIDER_BOTTOM,
+      start: initialStart,
+      end: initialWindow,
+      show: true,
+      showDetail: false,
+      brushSelect: false,
+      borderColor: '#dcdfe6',
+      fillerColor: 'rgba(64, 158, 255, 0.15)',
+      handleSize: '110%',
+      handleStyle: {color: '#409EFF', borderColor: '#409EFF'},
+      moveHandleSize: 6,
+      dataBackground: {
+        lineStyle: {color: '#c0c4cc', width: 1},
+        areaStyle: {color: 'rgba(144, 147, 153, 0.12)'},
+      },
+      selectedDataBackground: {
+        lineStyle: {color: '#409EFF', width: 1},
+        areaStyle: {color: 'rgba(64, 158, 255, 0.2)'},
+      },
+    },
+  ]
+}

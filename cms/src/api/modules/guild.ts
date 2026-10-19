@@ -18,6 +18,8 @@ import type {
     BatchImportSalaryAnchorsRes,
     BatchImmediateSettleGuildsReq,
     BatchImmediateSettleGuildsRes,
+    BatchResetGuildUnsettledIncomeReq,
+    BatchResetGuildUnsettledIncomeRes,
     JoinGuildAnchorReq,
     JoinGuildAnchorRes,
     SaveGuildTransferInfoReq,
@@ -114,6 +116,10 @@ export const guildApi = {
 
     batchImmediateSettleGuilds: (data: BatchImmediateSettleGuildsReq) => {
         return request.post<BatchImmediateSettleGuildsRes>('/guild/batchImmediateSettleGuilds', data, {timeout: 5 * 60 * 1000})
+    },
+
+    batchResetGuildUnsettledIncome: (data: BatchResetGuildUnsettledIncomeReq) => {
+        return request.post<BatchResetGuildUnsettledIncomeRes>('/guild/batchResetGuildUnsettledIncome', data, {timeout: 5 * 60 * 1000})
     },
 
     joinGuildAnchor: (data: JoinGuildAnchorReq) => {

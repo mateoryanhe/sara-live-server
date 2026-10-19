@@ -79,11 +79,9 @@ func listByTimeRange[T any](table string, start, end time.Time, limit int) []*T 
 	if !end.IsZero() {
 		m = m.Where("recorded_at <= ?", end)
 	}
+	// 按时间升序；触顶 limit 时保留区间靠前（较早）的采样，避免「近 7 天」看不到起始日
 	ret := make([]*T, 0)
-	_ = m.OrderDesc("recorded_at").Limit(limit).Scan(&ret)
-	for i, j := 0, len(ret)-1; i < j; i, j = i+1, j-1 {
-		ret[i], ret[j] = ret[j], ret[i]
-	}
+	_ = m.OrderAsc("recorded_at").Limit(limit).Scan(&ret)
 	return ret
 }
 

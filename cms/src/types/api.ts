@@ -57,10 +57,18 @@ export interface UserStatTrendPoint {
     barMetrics?: Record<string, number>
 }
 
+export interface UserStatTrendQuery {
+    granularity?: 'daily' | 'weekly' | 'monthly'
+    startDate?: string
+    endDate?: string
+}
+
 export interface UserStatTrend {
     daily: UserStatTrendPoint[]
     weekly: UserStatTrendPoint[]
     monthly: UserStatTrendPoint[]
+    rangeTruncated?: boolean
+    trendMaxPoints?: number
 }
 
 export interface TrackingEventTrendPoint {
@@ -75,6 +83,42 @@ export interface HotLiveRoomJoinTrendRes {
     daily: TrackingEventTrendPoint[]
     weekly: TrackingEventTrendPoint[]
     monthly: TrackingEventTrendPoint[]
+}
+
+export interface GameBetUserTrendPoint {
+    time: string
+    count: number
+    onlineCount?: number
+}
+
+export interface GameBetUserTrendQuery {
+    granularity?: 'daily' | 'weekly' | 'monthly'
+    startDate?: string
+    endDate?: string
+}
+
+/** 游戏统计按日折线（与在线趋势同采样/同 limit） */
+export interface GameStatTrend {
+    points: GameBetUserTrendPoint[]
+    rangeTruncated?: boolean
+    trendMaxPoints?: number
+}
+
+/** 游戏统计：下注人数 + 在线峰值 */
+export interface GameBetUserTrendRes {
+    todayCount: number
+    weekCount: number
+    monthCount: number
+    currentOnlineCount: number
+    todayOnlinePeak: number
+    weekOnlinePeak: number
+    monthOnlinePeak: number
+    daily: GameBetUserTrendPoint[]
+    weekly: GameBetUserTrendPoint[]
+    monthly: GameBetUserTrendPoint[]
+    lastHour?: GameBetUserTrendPoint[]
+    rangeTruncated?: boolean
+    trendMaxPoints?: number
 }
 
 export interface ResourceMetricPoint {
@@ -97,6 +141,8 @@ export interface ResourceMetricPoint {
 
 export interface ResourceMetricTrend {
     points: ResourceMetricPoint[]
+    rangeTruncated?: boolean
+    trendMaxPoints?: number
 }
 
 export interface ResourceMetricTrendQuery {
@@ -328,6 +374,17 @@ export interface BatchImmediateSettlePlatformAnchorsReq {
 
 export interface BatchImmediateSettlePlatformAnchorsRes {
     settledCount: number
+    noDataCount: number
+    failCount: number
+    failAnchorIds: string[]
+}
+
+export interface BatchResetPlatformAnchorUnsettledIncomeReq {
+    anchorIds: Array<string | number>
+}
+
+export interface BatchResetPlatformAnchorUnsettledIncomeRes {
+    resetCount: number
     noDataCount: number
     failCount: number
     failAnchorIds: string[]
@@ -1212,6 +1269,17 @@ export interface BatchImmediateSettleGuildsReq {
 
 export interface BatchImmediateSettleGuildsRes {
     settledCount: number
+    noDataCount: number
+    failCount: number
+    failGuildIds: string[]
+}
+
+export interface BatchResetGuildUnsettledIncomeReq {
+    guildIds: Array<string | number>
+}
+
+export interface BatchResetGuildUnsettledIncomeRes {
+    resetCount: number
     noDataCount: number
     failCount: number
     failGuildIds: string[]

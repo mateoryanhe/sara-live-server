@@ -160,15 +160,54 @@
           </el-tabs>
         </el-tab-pane>
 
+        <el-tab-pane :label="t('pages.dashboard.gameStats')" name="gameStats">
+          <div class="tab-toolbar tab-toolbar-trend-range">
+            <DashboardDayNavToolbar
+                :focus-day="dashboardFocusDay"
+                :loading="gameBetLoading"
+                @prev="() => shiftDashboardFocusDayBy(-1)"
+                @next="() => shiftDashboardFocusDayBy(1)"
+                @today="() => goDashboardFocusToday()"
+                @pick="(day) => setDashboardFocusDayAndLoad(day)"
+            />
+            <el-button :loading="gameBetLoading" @click="() => void fetchGameStatTrend()">{{ t('common.refresh') }}</el-button>
+          </div>
+          <p class="game-bet-event-hint">{{ t('pages.dashboard.onlineTrendRetentionHint') }}</p>
+          <p v-if="gameStatRangeTruncated" class="game-bet-range-truncated-hint">
+            {{ t('pages.dashboard.onlineTrendRangeTruncated', {max: DASHBOARD_ONLINE_TREND_POINT_LIMIT}) }}
+          </p>
+          <GameStatsTrendChart
+              ref="gameBetDailyChartRef"
+              :data="gameStatTrend.points"
+              :bet-series-name="t('pages.dashboard.gameBetUserCount')"
+              :online-series-name="t('pages.dashboard.gameOnlineCount')"
+              :title="gameStatChartTitle"
+              class="online-chart"
+          />
+        </el-tab-pane>
+
         <el-tab-pane :label="t('pages.dashboard.onlineUsers')" name="online">
-          <div class="tab-toolbar">
+          <div class="tab-toolbar tab-toolbar-trend-range">
+            <DashboardDayNavToolbar
+                :focus-day="dashboardFocusDay"
+                :loading="onlineLoading"
+                @prev="() => shiftDashboardFocusDayBy(-1)"
+                @next="() => shiftDashboardFocusDayBy(1)"
+                @today="() => goDashboardFocusToday()"
+                @pick="(day) => setDashboardFocusDayAndLoad(day)"
+            />
             <el-button :loading="onlineLoading" @click="() => void fetchResourceMetricTrend()">{{ t('common.refresh') }}</el-button>
           </div>
+          <p class="game-bet-event-hint">{{ t('pages.dashboard.onlineTrendRetentionHint') }}</p>
+          <p v-if="onlineRangeTruncated" class="game-bet-range-truncated-hint">
+            {{ t('pages.dashboard.onlineTrendRangeTruncated', {max: DASHBOARD_ONLINE_TREND_POINT_LIMIT}) }}
+          </p>
           <ResourceMetricChart
               ref="onlineChartRef"
               :data="resourceMetricTrend.points"
               metric-type="online"
-              :title="t('pages.dashboard.onlineChartTitle')"
+              :title="onlineChartTitle"
+              :show-trend-data-zoom="false"
               class="online-chart"
           />
         </el-tab-pane>
@@ -192,20 +231,30 @@ import {
   watch,
 } from 'vue'
 import {ElMessage, ElMessageBox} from 'element-plus'
-import {RESOURCE_METRIC_MAX_POINTS, sysStatApi} from '@/api'
+import {sysStatApi} from '@/api'
 import {usePagePermission} from '@/composables/usePagePermission'
-import type {ResourceMetricTrend, SysStat, UserStatTrend} from '@/types/api'
+import type {GameStatTrend, ResourceMetricTrend, SysStat, UserStatTrend} from '@/types/api'
 import BarMetricSection from './components/bar-metric-section.vue'
+import DashboardDayNavToolbar from './components/dashboard-day-nav-toolbar.vue'
 import {getUserStatBarMetricTabs, USER_STAT_BAR_SERIES} from './user-stat-bar-series'
+import {
+  buildDashboardOnlineMetricQueryForDay,
+  DASHBOARD_ONLINE_TREND_POINT_LIMIT,
+} from './dashboard-trend-range'
+import {
+  formatDashboardFocusDayLabel,
+  getDashboardTodayDateString,
+  shiftDashboardFocusDay,
+} from './dashboard-day-nav'
 import {formatAmount} from '@/utils/number-format'
 
 const UserStatChart = defineAsyncComponent(() => import('./components/user-stat-chart.vue'))
 const UserStatBarChart = defineAsyncComponent(() => import('./components/user-stat-bar-chart.vue'))
 const ResourceMetricChart = defineAsyncComponent(() => import('@/views/config/components/resource-metric-chart.vue'))
+const GameStatsTrendChart = defineAsyncComponent(() => import('./components/game-stats-trend-chart.vue'))
 
 const AUTO_REFRESH_STORAGE_KEY = 'dashboard:autoRefreshMs'
 const DEFAULT_AUTO_REFRESH_MS = 60_000
-
 const AUTO_REFRESH_INTERVALS = [
   {value: 0, labelKey: 'autoRefreshOff'},
   {value: 10_000, labelKey: 'autoRefresh10s'},
@@ -220,9 +269,15 @@ const basicDataResetSubmitting = ref(false)
 const loading = ref(false)
 const trendLoading = ref(false)
 const onlineLoading = ref(false)
+const gameBetLoading = ref(false)
 const activeMainTab = ref('basic')
 const activePeriod = ref('daily')
 const activeRechargePeriod = ref('daily')
+const dashboardFocusDay = ref(getDashboardTodayDateString())
+const onlineRangeTruncated = ref(false)
+const onlineTrendMaxPoints = ref(0)
+const gameStatRangeTruncated = ref(false)
+const gameStatTrendMaxPoints = ref(0)
 const enabledBarSeries = getUserStatBarMetricTabs()
 const activeBarMetric = ref(enabledBarSeries[0]?.key ?? 'goldConsumeUser')
 const autoRefreshMs = ref(readStoredAutoRefreshMs())
@@ -247,6 +302,9 @@ const pageLoading = computed(() => {
   }
   if (activeMainTab.value === 'user' || activeMainTab.value === 'rechargeUser') {
     return trendLoading.value
+  }
+  if (activeMainTab.value === 'gameStats') {
+    return gameBetLoading.value
   }
   return onlineLoading.value
 })
@@ -294,6 +352,18 @@ const rechargeBarChartTitle = computed(() =>
     }),
 )
 
+const onlineChartTitle = computed(() =>
+    t('pages.dashboard.onlineChartTitleWithDay', {
+      day: formatDashboardFocusDayLabel(dashboardFocusDay.value),
+    }),
+)
+
+const gameStatChartTitle = computed(() =>
+    t('pages.dashboard.gameBetUserChartByDay', {
+      day: formatDashboardFocusDayLabel(dashboardFocusDay.value),
+    }),
+)
+
 const dailyLineChartRef = ref<InstanceType<typeof UserStatChart>>()
 const weeklyLineChartRef = ref<InstanceType<typeof UserStatChart>>()
 const monthlyLineChartRef = ref<InstanceType<typeof UserStatChart>>()
@@ -304,6 +374,7 @@ const rechargeDailyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
 const rechargeWeeklyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
 const rechargeMonthlyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
 const onlineChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
+const gameBetDailyChartRef = ref<InstanceType<typeof GameStatsTrendChart>>()
 
 const sysStat = reactive<SysStat>({
   totalGold: 0,
@@ -331,6 +402,10 @@ const userStatTrend = reactive<UserStatTrend>({
   daily: [],
   weekly: [],
   monthly: [],
+})
+
+const gameStatTrend = reactive<GameStatTrend>({
+  points: [],
 })
 
 type BasicStatCardKey = keyof Pick<
@@ -467,6 +542,7 @@ const refreshDashboard = async (silent = false) => {
     await Promise.all([
       fetchSysStat(silent),
       fetchUserStatTrend(silent),
+      fetchGameStatTrend(silent),
       fetchResourceMetricTrend(silent),
     ])
   } finally {
@@ -533,13 +609,31 @@ const fetchSysStat = async (silent = false) => {
   }
 }
 
+const setDashboardFocusDayAndLoad = (day: string) => {
+  dashboardFocusDay.value = day
+  void fetchResourceMetricTrend()
+  void fetchGameStatTrend()
+}
+
+const shiftDashboardFocusDayBy = (delta: number) => {
+  setDashboardFocusDayAndLoad(shiftDashboardFocusDay(dashboardFocusDay.value, delta))
+}
+
+const goDashboardFocusToday = () => {
+  setDashboardFocusDayAndLoad(getDashboardTodayDateString())
+}
+
 const fetchResourceMetricTrend = async (silent = false) => {
   if (!silent) {
     onlineLoading.value = true
   }
   try {
-    const data = await sysStatApi.getResourceMetricOnlineTrend({limit: RESOURCE_METRIC_MAX_POINTS})
+    const data = await sysStatApi.getResourceMetricOnlineTrend(
+        buildDashboardOnlineMetricQueryForDay(dashboardFocusDay.value),
+    )
     resourceMetricTrend.points = data.points || []
+    onlineRangeTruncated.value = Boolean(data.rangeTruncated)
+    onlineTrendMaxPoints.value = data.trendMaxPoints ?? 0
     await nextTick()
     setTimeout(() => {
       onlineChartRef.value?.resize()
@@ -550,6 +644,35 @@ const fetchResourceMetricTrend = async (silent = false) => {
   } finally {
     if (!silent) {
       onlineLoading.value = false
+    }
+  }
+}
+
+const fetchGameStatTrend = async (silent = false) => {
+  if (!silent) {
+    gameBetLoading.value = true
+  }
+  try {
+    const data = await sysStatApi.getResourceMetricGameStatTrend(
+        buildDashboardOnlineMetricQueryForDay(dashboardFocusDay.value),
+    )
+    gameStatTrend.points = (data.points || []).map((item) => ({
+      time: item.time,
+      count: Number(item.count || 0),
+      onlineCount: Number(item.onlineCount || 0),
+    }))
+    gameStatRangeTruncated.value = Boolean(data.rangeTruncated)
+    gameStatTrendMaxPoints.value = data.trendMaxPoints ?? 0
+    await nextTick()
+    setTimeout(() => {
+      resizeGameBetCharts()
+    }, 0)
+  } catch (error) {
+    console.error('fetch game stat trend failed:', error)
+    ElMessage.error(t('pages.dashboard.fetchGameBetUserTrendFailed'))
+  } finally {
+    if (!silent) {
+      gameBetLoading.value = false
     }
   }
 }
@@ -605,6 +728,10 @@ const resizeRechargeCharts = () => {
   rechargeMonthlyBarChartRef.value?.resize()
 }
 
+const resizeGameBetCharts = () => {
+  gameBetDailyChartRef.value?.resize()
+}
+
 const handleMainTabChange = async () => {
   await nextTick()
   if (activeMainTab.value === 'user') {
@@ -613,6 +740,10 @@ const handleMainTabChange = async () => {
   }
   if (activeMainTab.value === 'rechargeUser') {
     resizeRechargeCharts()
+    return
+  }
+  if (activeMainTab.value === 'gameStats') {
+    resizeGameBetCharts()
     return
   }
   if (activeMainTab.value === 'online') {
@@ -772,6 +903,30 @@ onUnmounted(() => {
 
 .anchor-payout-stat-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.game-bet-summary-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 16px;
+}
+
+.game-bet-event-hint {
+  margin: 0 0 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.tab-toolbar-trend-range {
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.game-bet-range-truncated-hint {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #b45309;
 }
 
 .stat-card {

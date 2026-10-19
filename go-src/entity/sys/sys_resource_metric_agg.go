@@ -28,6 +28,8 @@ type SysResourceMetricAgg struct {
 	SysCpuPercent       float64   `gorm:"type:decimal(6,2);default:0;comment:系统CPU使用率均值" json:"sysCpuPercent"`
 	OnlineCount         uint64    `gorm:"default:0;comment:在线人数峰值" json:"onlineCount"`
 	LiveAnchorCount     uint64    `gorm:"default:0;comment:开播主播数峰值" json:"liveAnchorCount"`
+	GameOnlineCount     uint64    `gorm:"default:0;comment:游戏在线人数峰值" json:"gameOnlineCount"`
+	GameBetUserCount    uint64    `gorm:"default:0;comment:游戏下注人数峰值(分钟桶)" json:"gameBetUserCount"`
 }
 
 // NewSysResourceMetricAggFromAvg 由细采样聚合结果构造粗采样行
@@ -35,7 +37,7 @@ func NewSysResourceMetricAggFromAvg(
 	bucketStart time.Time,
 	procMemMb, procHeapAllocMb, procHeapInuseMb, procHeapSysMb, procHeapUsedPercent, procHeapIdlePercent, procCpuPercent float64,
 	sysMemUsedMb, sysMemTotalMb, sysMemUsedPercent, sysCpuPercent float64,
-	onlineCountMax, liveAnchorCountMax uint64,
+	onlineCountMax, liveAnchorCountMax, gameOnlineMax, gameBetUserMax uint64,
 ) *SysResourceMetricAgg {
 	now := time.Now()
 	return &SysResourceMetricAgg{
@@ -58,6 +60,8 @@ func NewSysResourceMetricAggFromAvg(
 		SysCpuPercent:       sysCpuPercent,
 		OnlineCount:         onlineCountMax,
 		LiveAnchorCount:     liveAnchorCountMax,
+		GameOnlineCount:     gameOnlineMax,
+		GameBetUserCount:    gameBetUserMax,
 	}
 }
 

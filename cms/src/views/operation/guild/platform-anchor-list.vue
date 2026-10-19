@@ -21,6 +21,15 @@
             >
               {{ t('pages.platformAnchorImmediateSettlement.button') }}
             </el-button>
+            <el-button
+                v-if="can('batchResetUnsettledIncome')"
+                :disabled="selectedAnchorRows.length === 0"
+                :loading="resettingUnsettledIncome"
+                type="warning"
+                @click="handleBatchResetUnsettledIncome"
+            >
+              {{ t('pages.platformAnchorResetUnsettledIncome.button') }}
+            </el-button>
           </div>
         </div>
       </template>
@@ -336,6 +345,7 @@ const loading = ref(false)
 const tableData = ref<AnchorListItem[]>([])
 const selectedAnchorRows = ref<AnchorListItem[]>([])
 const immediateSettling = ref(false)
+const resettingUnsettledIncome = ref(false)
 const banDialogVisible = ref(false)
 const banSubmitting = ref(false)
 const banFormRef = ref<InstanceType<typeof ElForm>>()
@@ -514,6 +524,52 @@ const openDetail = (row: AnchorListItem) => {
 
 const handleSelectionChange = (rows: AnchorListItem[]) => {
   selectedAnchorRows.value = rows
+}
+
+const handleBatchResetUnsettledIncome = async () => {
+  const rows = selectedAnchorRows.value
+  if (rows.length === 0) {
+    ElMessage.warning(t('pages.platformAnchorResetUnsettledIncome.selectRequired'))
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+      t('pages.platformAnchorResetUnsettledIncome.confirmMessage', {count: rows.length}),
+      t('pages.platformAnchorResetUnsettledIncome.confirmTitle'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        type: 'warning',
+      },
+    )
+    resettingUnsettledIncome.value = true
+    const response = await accountApi.batchResetPlatformAnchorUnsettledIncome({anchorIds: rows.map(row => row.id)})
+    const resultMessage = t('pages.platformAnchorResetUnsettledIncome.result', {
+      reset: response.resetCount ?? 0,
+      noData: response.noDataCount ?? 0,
+      fail: response.failCount ?? 0,
+    })
+    if ((response.failCount ?? 0) > 0) {
+      ElMessage.warning({message: resultMessage, duration: 8000})
+    } else {
+      ElMessage.success(resultMessage)
+    }
+    if (response.failAnchorIds?.length) {
+      ElMessage.warning({
+        message: t('pages.platformAnchorResetUnsettledIncome.failAnchorIds', {ids: response.failAnchorIds.join(', ')}),
+        duration: 8000,
+      })
+    }
+    await fetchList()
+  } catch (error) {
+    if (error === 'cancel' || error === 'close') {
+      return
+    }
+    console.error('batch reset platform anchor unsettled income failed:', error)
+    ElMessage.error(t('pages.platformAnchorResetUnsettledIncome.requestFailed'))
+  } finally {
+    resettingUnsettledIncome.value = false
+  }
 }
 
 const handleBatchImmediateSettlement = async () => {

@@ -21,6 +21,7 @@ import (
 	"xr-game-server/dao/resourcemetricdao"
 	"xr-game-server/entity/sys"
 	"xr-game-server/gameevent"
+	"xr-game-server/module/stat"
 )
 
 var currentProcess *process.Process
@@ -158,11 +159,12 @@ func enqueueResourceMetric(now time.Time) {
 	procCpuPercent, sysCpuPercent := collectCpuPercents(now)
 	onlineTotal := uint64(push.OnlineCount())
 	liveAnchors := liveroomdao.CountLivingAnchors()
+	gameOnline, gameBetUsers := stat.SnapshotGameTrendCountsForMetric(now)
 	entity.NewSysResourceMetric(
 		now,
 		procMemMb, procHeapAllocMb, procHeapInuseMb, procHeapSysMb, procHeapUsedPercent, procHeapIdlePercent, procCpuPercent,
 		sysMemUsedMb, sysMemTotalMb, sysMemUsedPercent, sysCpuPercent,
-		onlineTotal, liveAnchors,
+		onlineTotal, liveAnchors, gameOnline, gameBetUsers,
 	)
 }
 

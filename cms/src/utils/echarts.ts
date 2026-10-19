@@ -1,5 +1,6 @@
 import {BarChart, LineChart} from 'echarts/charts'
 import {
+    DataZoomComponent,
     GridComponent,
     LegendComponent,
     MarkPointComponent,
@@ -10,6 +11,7 @@ import type {ComposeOption} from 'echarts/core'
 import * as echarts from 'echarts/core'
 import type {BarSeriesOption, LineSeriesOption} from 'echarts/charts'
 import type {
+    DataZoomComponentOption,
     GridComponentOption,
     LegendComponentOption,
     MarkPointComponentOption,
@@ -26,6 +28,7 @@ export type EChartsOption = ComposeOption<
     | GridComponentOption
     | LegendComponentOption
     | MarkPointComponentOption
+    | DataZoomComponentOption
 >
 
 echarts.use([
@@ -34,6 +37,7 @@ echarts.use([
     GridComponent,
     LegendComponent,
     MarkPointComponent,
+    DataZoomComponent,
     BarChart,
     LineChart,
     CanvasRenderer,

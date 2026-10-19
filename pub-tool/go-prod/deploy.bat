@@ -116,7 +116,7 @@ if not exist "%TEMP_DIR%\%HR_GW_NAME%" (
     rmdir /s /q "%TEMP_DIR%"
     exit /b 1
 )
-powershell -NoProfile -Command "$j=@{listen='%HR_GW_LISTEN%';auth='%HOT_RESTART_AUTH%';hotRestartURL='https://127.0.0.1/internal/hotRestart';minIntervalSec=60}|ConvertTo-Json -Compress; [IO.File]::WriteAllText('%TEMP_DIR%\config.json',$j)"
+powershell -NoProfile -Command "$j=@{listen='%HR_GW_LISTEN%';auth='%HOT_RESTART_AUTH%';hotRestartURL='https://127.0.0.1/internal/hotRestart';minIntervalSec=60;coldStartScript='%REMOTE_DIR%/start.sh';appName='%APP_NAME%';hotRestartFallbackCold=$true;coldStartWaitSec=45}|ConvertTo-Json -Compress; [IO.File]::WriteAllText('%TEMP_DIR%\config.json',$j)"
 if not exist "%TEMP_DIR%\config.json" (
     echo Error: failed to write %HR_GW_NAME% config.json
     rmdir /s /q "%TEMP_DIR%"

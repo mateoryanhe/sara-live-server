@@ -16,18 +16,43 @@ const (
 )
 
 // GetCMSUserStatTrend CMS获取用户数据趋势
-func GetCMSUserStatTrend(_ context.Context, _ *statdto.CMSUserStatTrendReq) (*statdto.CMSUserStatTrendRes, error) {
+func GetCMSUserStatTrend(_ context.Context, req *statdto.CMSUserStatTrendReq) (*statdto.CMSUserStatTrendRes, error) {
+	if req == nil {
+		req = &statdto.CMSUserStatTrendReq{}
+	}
 	now := time.Now()
+
+	dailyRows := overlayCurrentDailyLoginStat(statdao.ListRecentDailyLoginStats(userStatDailyLimit), now)
+	weeklyRows := overlayCurrentWeeklyLoginStat(statdao.ListRecentWeeklyLoginStats(userStatWeeklyLimit), now)
+	monthlyRows := overlayCurrentMonthlyLoginStat(statdao.ListRecentMonthlyLoginStats(userStatMonthlyLimit), now)
+
+	rangeTruncated := false
+	trendMaxPoints := 0
+	granularity := normalizeDashboardTrendGranularity(req.Granularity)
+	if dashboardTrendUsesCustomRange(req.StartDate, req.EndDate) {
+		trendMaxPoints = dashboardTrendMaxPointsForGranularity(granularity)
+		switch granularity {
+		case "weekly":
+			var truncated bool
+			weeklyRows, truncated = loadWeeklyUserStatTrendByRange(req.StartDate, req.EndDate, now)
+			rangeTruncated = truncated
+		case "monthly":
+			var truncated bool
+			monthlyRows, truncated = loadMonthlyUserStatTrendByRange(req.StartDate, req.EndDate, now)
+			rangeTruncated = truncated
+		default:
+			var truncated bool
+			dailyRows, truncated = loadDailyUserStatTrendByRange(req.StartDate, req.EndDate, now)
+			rangeTruncated = truncated
+		}
+	}
+
 	return &statdto.CMSUserStatTrendRes{
-		Daily: toDailyTrendPoints(
-			overlayCurrentDailyLoginStat(statdao.ListRecentDailyLoginStats(userStatDailyLimit), now),
-		),
-		Weekly: toWeeklyTrendPoints(
-			overlayCurrentWeeklyLoginStat(statdao.ListRecentWeeklyLoginStats(userStatWeeklyLimit), now),
-		),
-		Monthly: toMonthlyTrendPoints(
-			overlayCurrentMonthlyLoginStat(statdao.ListRecentMonthlyLoginStats(userStatMonthlyLimit), now),
-		),
+		Daily:          toDailyTrendPoints(dailyRows),
+		Weekly:         toWeeklyTrendPoints(weeklyRows),
+		Monthly:        toMonthlyTrendPoints(monthlyRows),
+		RangeTruncated: rangeTruncated,
+		TrendMaxPoints: trendMaxPoints,
 	}, nil
 }
 

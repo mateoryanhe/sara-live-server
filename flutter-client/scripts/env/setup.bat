@@ -1,5 +1,6 @@
 @echo off
 setlocal EnableExtensions
+chcp 65001 >nul 2>&1
 cd /d "%~dp0"
 
 REM ------------------------------------------------------------
@@ -53,14 +54,16 @@ if defined http_proxy (
 )
 if not defined NO_PROXY set "NO_PROXY=localhost,127.0.0.1,::1"
 
-echo [OK] 当前会话环境已加载
+if "%SETUP_QUIET%"=="1" exit /b 0
+
+echo [OK] Session env loaded (Flutter / JDK / Android SDK)
 echo FLUTTER_HOME=%FLUTTER_HOME%
 echo JAVA_HOME=%JAVA_HOME%
 echo ANDROID_HOME=%ANDROID_HOME%
 where flutter 2>nul
 where java 2>nul
 echo.
-echo 写入用户永久环境变量请执行: setup.bat install
+echo Permanent user env: setup.bat install
 exit /b 0
 
 :INSTALL

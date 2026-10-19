@@ -156,6 +156,11 @@ func (a *AccountController) BatchImmediateSettlePlatformAnchors(ctx context.Cont
 	return liveroom.BatchImmediateSettlePlatformAnchors(ctx, req)
 }
 
+// BatchResetPlatformAnchorUnsettledIncome CMS批量清零平台主播未结算收益。
+func (a *AccountController) BatchResetPlatformAnchorUnsettledIncome(ctx context.Context, req *accountdto.BatchResetPlatformAnchorUnsettledIncomeReq) (*accountdto.BatchResetPlatformAnchorUnsettledIncomeRes, error) {
+	return liveroom.BatchResetPlatformAnchorUnsettledIncome(ctx, req)
+}
+
 // GetAnchorTransferInfo CMS 获取平台主播转账信息。
 func (a *AccountController) GetAnchorTransferInfo(ctx context.Context, req *accountdto.GetAnchorTransferInfoReq) (*accountdto.GetAnchorTransferInfoRes, error) {
 	return liveroom.GetAnchorTransferInfo(ctx, req)

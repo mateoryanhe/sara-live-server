@@ -12,6 +12,8 @@ import type {
     BatchSetSeniorAnchorReq,
     BatchImmediateSettlePlatformAnchorsReq,
     BatchImmediateSettlePlatformAnchorsRes,
+    BatchResetPlatformAnchorUnsettledIncomeReq,
+    BatchResetPlatformAnchorUnsettledIncomeRes,
     CancelReq,
     ExitGuildReq,
     ExitGuildRes,
@@ -84,6 +86,9 @@ const accountApi = {
 
     batchImmediateSettlePlatformAnchors: (data: BatchImmediateSettlePlatformAnchorsReq) => {
         return request.post<BatchImmediateSettlePlatformAnchorsRes>('/account/batchImmediateSettlePlatformAnchors', data, {timeout: 5 * 60 * 1000})
+    },
+    batchResetPlatformAnchorUnsettledIncome: (data: BatchResetPlatformAnchorUnsettledIncomeReq) => {
+        return request.post<BatchResetPlatformAnchorUnsettledIncomeRes>('/account/batchResetPlatformAnchorUnsettledIncome', data)
     },
 
     getPlatformAnchorListForVisibility: (data: QueryAnchorListReq) => {

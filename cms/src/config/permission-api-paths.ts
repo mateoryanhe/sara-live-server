@@ -5,6 +5,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     Dashboard: '/sysStat/getSysStat',
     'Dashboard:view': '/sysStat/getSysStat',
     'Dashboard:userStatTrend': '/sysStat/getUserStatTrend',
+    'Dashboard:gameBetUserTrend': '/resourceMetric/getResourceMetricGameStatTrend',
     'Dashboard:onlineTrend': '/resourceMetric/getResourceMetricOnlineTrend',
     'Dashboard:basicDataReset': '/sysStat/resetBasicDashboardStats',
 
@@ -113,6 +114,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'PlatformAnchorList:transferInfo': '/account/saveAnchorTransferInfo',
     'PlatformAnchorList:batchImportSalaryAnchor': '/guild/batchImportSalaryAnchors',
     'PlatformAnchorList:batchImmediateSettlement': '/account/batchImmediateSettlePlatformAnchors',
+    'PlatformAnchorList:batchResetUnsettledIncome': '/account/batchResetPlatformAnchorUnsettledIncome',
 
     AnchorDetail: '/account/getAnchorDetail',
     'AnchorDetail:dailyEffectiveLive': '/account/getAnchorDailyEffectiveLiveList',
@@ -258,6 +260,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GuildManagement:batchSetSeniorAnchor': '/guild/importGuildAnchors',
     'GuildManagement:batchImportSalaryAnchor': '/guild/batchImportSalaryAnchors',
     'GuildManagement:batchImmediateSettlement': '/guild/batchImmediateSettleGuilds',
+    'GuildManagement:batchResetUnsettledIncome': '/guild/batchResetGuildUnsettledIncome',
     'GuildManagement:transferInfo': '/guild/saveGuildTransferInfo',
     GuildTransferManagement: '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',
     'GuildTransferManagement:view': '/guildIncomeSettlementLog/cmsGuildIncomeSettlementLogList',

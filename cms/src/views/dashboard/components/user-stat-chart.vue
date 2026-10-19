@@ -8,6 +8,7 @@ import {nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue'
 import type {EChartsType} from 'echarts/core'
 import echarts, {type EChartsOption} from '@/utils/echarts'
 import type {UserStatTrendPoint} from '@/types/api'
+import {buildTrendChartXAxisLabel, trendChartGridBottom} from '@/utils/trend-chart-zoom'
 
 const props = defineProps<{
   data: UserStatTrendPoint[]
@@ -22,6 +23,7 @@ const buildOption = (points: UserStatTrendPoint[]): EChartsOption => {
   const times = points.map(item => item.time)
   const activeSeries = points.map(item => Number(item.activeUserCount || 0))
   const registerSeries = points.map(item => Number(item.registerUserCount || 0))
+  const gridBottom = trendChartGridBottom(times.length, false)
 
   return {
     title: props.title
@@ -45,15 +47,13 @@ const buildOption = (points: UserStatTrendPoint[]): EChartsOption => {
       left: 48,
       right: 24,
       top: props.title ? 72 : 48,
-      bottom: 32,
+      bottom: gridBottom,
     },
     xAxis: {
       type: 'category',
       boundaryGap: false,
       data: times,
-      axisLabel: {
-        rotate: times.length > 10 ? 35 : 0,
-      },
+      axisLabel: buildTrendChartXAxisLabel(times.length),
     },
     yAxis: {
       type: 'value',
@@ -121,6 +121,6 @@ defineExpose({
 <style scoped>
 .user-stat-chart {
   width: 100%;
-  height: 360px;
+  height: 400px;
 }
 </style>

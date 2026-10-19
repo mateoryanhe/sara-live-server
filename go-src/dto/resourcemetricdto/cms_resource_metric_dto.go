@@ -37,6 +37,13 @@ type CMSResourceMetricOnlineTrendReq struct {
 	Limit     int    `json:"limit"`
 }
 
+type CMSResourceMetricGameStatTrendReq struct {
+	g.Meta    `path:"/getResourceMetricGameStatTrend" method:"post" summary:"获取游戏统计趋势(与在线趋势同采样)" tags:"资源监控"`
+	StartTime string `json:"startTime"`
+	EndTime   string `json:"endTime"`
+	Limit     int    `json:"limit"`
+}
+
 type CMSResourceMetricMemoryPoint struct {
 	Time              string  `json:"time"`
 	ProcMemMb         float64 `json:"procMemMb"`
@@ -71,6 +78,12 @@ type CMSResourceMetricOnlinePoint struct {
 	AudienceCount   uint64 `json:"audienceCount,string"`
 }
 
+type CMSResourceMetricGameStatPoint struct {
+	Time        string `json:"time"`
+	Count       uint64 `json:"count,string" dc:"游戏下注人数(分钟桶累计去重)"`
+	OnlineCount uint64 `json:"onlineCount,string" dc:"游戏在线人数(瞬时)"`
+}
+
 type CMSResourceMetricMemoryTrendRes struct {
 	Points []*CMSResourceMetricMemoryPoint `json:"points"`
 }
@@ -88,5 +101,13 @@ type CMSResourceMetricCpuTrendRes struct {
 }
 
 type CMSResourceMetricOnlineTrendRes struct {
-	Points []*CMSResourceMetricOnlinePoint `json:"points"`
+	Points         []*CMSResourceMetricOnlinePoint `json:"points"`
+	RangeTruncated bool                            `json:"rangeTruncated" dc:"达到 limit 上限, 范围内部分采样未加载"`
+	TrendMaxPoints int                             `json:"trendMaxPoints" dc:"本次请求的 limit 上限"`
+}
+
+type CMSResourceMetricGameStatTrendRes struct {
+	Points         []*CMSResourceMetricGameStatPoint `json:"points"`
+	RangeTruncated bool                              `json:"rangeTruncated"`
+	TrendMaxPoints int                               `json:"trendMaxPoints"`
 }

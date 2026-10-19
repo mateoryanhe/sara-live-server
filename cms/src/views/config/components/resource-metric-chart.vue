@@ -4,10 +4,15 @@
 
 <script lang="ts" setup>
 import {useI18n} from 'vue-i18n'
-import {nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue'
+import {computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue'
 import type {EChartsType} from 'echarts/core'
 import echarts, {type EChartsOption} from '@/utils/echarts'
 import type {ResourceMetricPoint} from '@/types/api'
+import {
+  buildTrendChartDataZoom,
+  buildTrendChartXAxisLabel,
+  trendChartGridBottom,
+} from '@/utils/trend-chart-zoom'
 
 type MetricType = 'memory' | 'heap' | 'ratio' | 'cpu' | 'online'
 
@@ -15,7 +20,13 @@ const props = defineProps<{
   data: ResourceMetricPoint[]
   metricType: MetricType
   title?: string
+  /** 是否显示底部趋势滑块（仪表盘在线人数关闭） */
+  showTrendDataZoom?: boolean
+  /** 滑块初始拉满显示全量 */
+  dataZoomDefaultFullRange?: boolean
 }>()
+
+const showTrendDataZoom = computed(() => props.showTrendDataZoom !== false)
 
 const {t, locale} = useI18n()
 const chartRef = ref<HTMLDivElement>()
@@ -280,6 +291,8 @@ const buildOnlineOption = (points: ResourceMetricPoint[]): EChartsOption => {
   const totalLabel = t('pages.resourceMonitor.onlineCount')
   const anchorLabel = t('pages.resourceMonitor.liveAnchorOnlineCount')
   const audienceLabel = t('pages.resourceMonitor.audienceOnlineCount')
+  const withSlider = showTrendDataZoom.value
+  const gridBottom = trendChartGridBottom(times.length, withSlider)
 
   return {
     title: props.title
@@ -314,13 +327,18 @@ const buildOnlineOption = (points: ResourceMetricPoint[]): EChartsOption => {
       left: 56,
       right: 24,
       top: props.title ? 88 : 64,
-      bottom: 32,
+      bottom: gridBottom,
     },
+    dataZoom: withSlider
+        ? buildTrendChartDataZoom(times.length, {
+          defaultFullRange: props.dataZoomDefaultFullRange,
+        })
+        : undefined,
     xAxis: {
       type: 'category',
       boundaryGap: false,
       data: times,
-      axisLabel: {rotate: times.length > 12 ? 35 : 0},
+      axisLabel: buildTrendChartXAxisLabel(times.length),
     },
     yAxis: {
       type: 'value',
@@ -483,6 +501,6 @@ defineExpose({
 <style scoped>
 .resource-metric-chart {
   width: 100%;
-  height: 400px;
+  height: 420px;
 }
 </style>

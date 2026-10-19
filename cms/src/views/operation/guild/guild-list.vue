@@ -25,6 +25,15 @@
           >
             {{ t('pages.guildImmediateSettlement.button') }}
           </el-button>
+          <el-button
+              v-if="can('batchResetUnsettledIncome')"
+              :disabled="selectedGuildRows.length === 0"
+              :loading="resettingUnsettledIncome"
+              type="warning"
+              @click="handleBatchResetUnsettledIncome"
+          >
+            {{ t('pages.guildResetUnsettledIncome.button') }}
+          </el-button>
         </div>
         <el-alert
             :closable="false"
@@ -303,6 +312,7 @@ const hasRowActions = computed(() => canViewDetail.value || GUILD_ROW_ACTION_KEY
 const loading = ref(false)
 const importing = ref(false)
 const immediateSettling = ref(false)
+const resettingUnsettledIncome = ref(false)
 const selectedGuildRows = ref<Guild[]>([])
 const leaderPickerVisible = ref(false)
 const selectedLeader = ref<CMSUser | null>(null)
@@ -511,6 +521,52 @@ const handleBatchImmediateSettlement = async () => {
     ElMessage.error(t('pages.guildImmediateSettlement.requestFailed'))
   } finally {
     immediateSettling.value = false
+  }
+}
+
+const handleBatchResetUnsettledIncome = async () => {
+  const rows = selectedGuildRows.value
+  if (rows.length === 0) {
+    ElMessage.warning(t('pages.guildResetUnsettledIncome.selectRequired'))
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+      t('pages.guildResetUnsettledIncome.confirmMessage', {count: rows.length}),
+      t('pages.guildResetUnsettledIncome.confirmTitle'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        type: 'warning',
+      },
+    )
+    resettingUnsettledIncome.value = true
+    const response = await guildApi.batchResetGuildUnsettledIncome({guildIds: rows.map(row => row.id)})
+    const resultMessage = t('pages.guildResetUnsettledIncome.result', {
+      reset: response.resetCount ?? 0,
+      noData: response.noDataCount ?? 0,
+      fail: response.failCount ?? 0,
+    })
+    if ((response.failCount ?? 0) > 0) {
+      ElMessage.warning({message: resultMessage, duration: 8000})
+    } else {
+      ElMessage.success(resultMessage)
+    }
+    if (response.failGuildIds?.length) {
+      ElMessage.warning({
+        message: t('pages.guildResetUnsettledIncome.failGuildIds', {ids: response.failGuildIds.join(', ')}),
+        duration: 8000,
+      })
+    }
+    await fetchGuildList()
+  } catch (error) {
+    if (error === 'cancel' || error === 'close') {
+      return
+    }
+    console.error('batch reset guild unsettled income failed:', error)
+    ElMessage.error(t('pages.guildResetUnsettledIncome.requestFailed'))
+  } finally {
+    resettingUnsettledIncome.value = false
   }
 }
 

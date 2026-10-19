@@ -174,6 +174,46 @@ func ListLiveRoomIncomeTotalFromDB(roomIds []uint64) map[uint64]*entity.LiveRoom
 	return ret
 }
 
+type ClearUnsettledIncomeOutcome int
+
+const (
+	ClearUnsettledIncomeFailed ClearUnsettledIncomeOutcome = iota
+	ClearUnsettledIncomeAlreadyZero
+	ClearUnsettledIncomeCleared
+)
+
+// ClearLiveRoomIncomeUnsettledForCMS 将未结算收益清零(不写结算/归档日志)
+func ClearLiveRoomIncomeUnsettledForCMS(roomId uint64) ClearUnsettledIncomeOutcome {
+	if roomId == 0 {
+		return ClearUnsettledIncomeFailed
+	}
+	row := ensureLiveRoomIncomeUnsettledInCache(roomId)
+	if row == nil {
+		return ClearUnsettledIncomeFailed
+	}
+	snap := row.Snapshot()
+	if (&snap).IsZero() {
+		return ClearUnsettledIncomeAlreadyZero
+	}
+	row.Clear()
+	return ClearUnsettledIncomeCleared
+}
+
+func ensureLiveRoomIncomeUnsettledInCache(roomId uint64) *entity.LiveRoomIncomeUnsettled {
+	if incomeUnsettledCache.Contains(roomId) {
+		return incomeUnsettledCache.Get(roomId)
+	}
+	if row := GetLiveRoomIncomeUnsettledForCMS(roomId); row != nil {
+		incomeUnsettledCache.Set(roomId, row)
+		return row
+	}
+	AddLiveRoomIncomeToCache(roomId)
+	if incomeUnsettledCache.Contains(roomId) {
+		return incomeUnsettledCache.Get(roomId)
+	}
+	return nil
+}
+
 // GetLiveRoomIncomeUnsettledForCMS 未结算收益(缓存优先,否则直查DB,不新建)
 func GetLiveRoomIncomeUnsettledForCMS(roomId uint64) *entity.LiveRoomIncomeUnsettled {
 	if roomId == 0 {

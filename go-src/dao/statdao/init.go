@@ -100,4 +100,13 @@ func Init() {
 	initMonthlyChargeResultServerStatDao()
 	initDailyPromotionChannelStatDao()
 	initDailyPromotionChannelPayUserDao()
+	initDailyGameBetUserStatDao()
+	initWeeklyGameBetUserStatDao()
+	initMonthlyGameBetUserStatDao()
+	initDailyUserGameBetDao()
+	initWeeklyUserGameBetDao()
+	initMonthlyUserGameBetDao()
+	initDailyGameOnlinePeakStatDao()
+	initWeeklyGameOnlinePeakStatDao()
+	initMonthlyGameOnlinePeakStatDao()
 }

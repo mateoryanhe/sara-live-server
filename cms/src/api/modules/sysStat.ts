@@ -1,9 +1,12 @@
 import {request} from '../request'
 import type {
+    GameStatTrend,
     ResourceMetricPoint,
+    ResourceMetricTrend,
     ResourceMetricTrendQuery,
     SysStat,
     UserStatTrend,
+    UserStatTrendQuery,
 } from '@/types/api'
 
 export const RESOURCE_METRIC_MAX_POINTS = 10000
@@ -21,8 +24,18 @@ export const sysStatApi = {
     resetBasicDashboardStats: () => {
         return request.post<{ success: boolean }>('/sysStat/resetBasicDashboardStats', {})
     },
-    getUserStatTrend: () => {
-        return request.post<UserStatTrend>('/sysStat/getUserStatTrend', {})
+    getUserStatTrend: (params: UserStatTrendQuery = {}) => {
+        return request.post<UserStatTrend>('/sysStat/getUserStatTrend', {
+            granularity: params.granularity || '',
+            startDate: params.startDate || '',
+            endDate: params.endDate || '',
+        })
+    },
+    getResourceMetricGameStatTrend: (params: ResourceMetricTrendQuery = {}) => {
+        return request.post<GameStatTrend>(
+            '/resourceMetric/getResourceMetricGameStatTrend',
+            buildResourceMetricQuery(params),
+        )
     },
     getResourceMetricMemoryTrend: (params: ResourceMetricTrendQuery = {}) => {
         return request.post<{ points: ResourceMetricPoint[] }>(
@@ -49,7 +62,7 @@ export const sysStatApi = {
         )
     },
     getResourceMetricOnlineTrend: (params: ResourceMetricTrendQuery = {}) => {
-        return request.post<{ points: ResourceMetricPoint[] }>(
+        return request.post<ResourceMetricTrend>(
             '/resourceMetric/getResourceMetricOnlineTrend',
             buildResourceMetricQuery(params),
         )

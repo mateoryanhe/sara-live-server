@@ -27,6 +27,8 @@ const (
 	SysResourceMetricSysCpuPercent       db.TbCol = "sys_cpu_percent"
 	SysResourceMetricOnlineCount         db.TbCol = "online_count"
 	SysResourceMetricLiveAnchorCount     db.TbCol = "live_anchor_count"
+	SysResourceMetricGameOnlineCount     db.TbCol = "game_online_count"
+	SysResourceMetricGameBetUserCount    db.TbCol = "game_bet_user_count"
 )
 
 // SysResourceMetric 系统资源细采样(每10秒一条,保留24小时,懒缓冲异步入库)
@@ -46,6 +48,8 @@ type SysResourceMetric struct {
 	SysCpuPercent       float64   `gorm:"type:decimal(6,2);default:0;comment:系统CPU使用率" json:"sysCpuPercent"`
 	OnlineCount         uint64    `gorm:"default:0;comment:在线人数(WebSocket连接数)" json:"onlineCount"`
 	LiveAnchorCount     uint64    `gorm:"default:0;comment:开播主播数" json:"liveAnchorCount"`
+	GameOnlineCount     uint64    `gorm:"default:0;comment:游戏在线人数(瞬时)" json:"gameOnlineCount"`
+	GameBetUserCount    uint64    `gorm:"default:0;comment:游戏下注人数(当前分钟累计去重)" json:"gameBetUserCount"`
 }
 
 // NewSysResourceMetric 创建资源采样记录并推送到懒缓冲队列
@@ -53,7 +57,7 @@ func NewSysResourceMetric(
 	recordedAt time.Time,
 	procMemMb, procHeapAllocMb, procHeapInuseMb, procHeapSysMb, procHeapUsedPercent, procHeapIdlePercent, procCpuPercent float64,
 	sysMemUsedMb, sysMemTotalMb, sysMemUsedPercent, sysCpuPercent float64,
-	onlineCount, liveAnchorCount uint64,
+	onlineCount, liveAnchorCount, gameOnlineCount, gameBetUserCount uint64,
 ) *SysResourceMetric {
 	ret := &SysResourceMetric{}
 	ret.ID = snowflake.GetId()
@@ -73,6 +77,8 @@ func NewSysResourceMetric(
 	ret.SetSysCpuPercent(sysCpuPercent)
 	ret.SetOnlineCount(onlineCount)
 	ret.SetLiveAnchorCount(liveAnchorCount)
+	ret.SetGameOnlineCount(gameOnlineCount)
+	ret.SetGameBetUserCount(gameBetUserCount)
 	return ret
 }
 
@@ -188,6 +194,22 @@ func (receiver *SysResourceMetric) SetLiveAnchorCount(val uint64) {
 	})
 }
 
+func (receiver *SysResourceMetric) SetGameOnlineCount(val uint64) {
+	receiver.GameOnlineCount = val
+	syndb.AddData(TbSysResourceMetric, SysResourceMetricGameOnlineCount, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: val,
+	})
+}
+
+func (receiver *SysResourceMetric) SetGameBetUserCount(val uint64) {
+	receiver.GameBetUserCount = val
+	syndb.AddData(TbSysResourceMetric, SysResourceMetricGameBetUserCount, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: val,
+	})
+}
+
 func (receiver *SysResourceMetric) SetCreatedAt(val time.Time) {
 	receiver.CreatedAt = val
 	syndb.AddData(TbSysResourceMetric, db.CreatedAtName, &syndb.ColData{
@@ -221,6 +243,8 @@ func initSysResourceMetric() {
 	syndb.RegLazy(TbSysResourceMetric, SysResourceMetricSysCpuPercent)
 	syndb.RegLazy(TbSysResourceMetric, SysResourceMetricOnlineCount)
 	syndb.RegLazy(TbSysResourceMetric, SysResourceMetricLiveAnchorCount)
+	syndb.RegLazy(TbSysResourceMetric, SysResourceMetricGameOnlineCount)
+	syndb.RegLazy(TbSysResourceMetric, SysResourceMetricGameBetUserCount)
 
 	migrate.AutoMigrate(&SysResourceMetric{})
 }

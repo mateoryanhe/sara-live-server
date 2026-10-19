@@ -9,6 +9,7 @@ import type {EChartsType} from 'echarts/core'
 import echarts, {type EChartsOption} from '@/utils/echarts'
 import type {UserStatTrendPoint} from '@/types/api'
 import {USER_STAT_BAR_SERIES, getEnabledUserStatBarSeries} from '../user-stat-bar-series'
+import {buildTrendChartXAxisLabel, trendChartGridBottom} from '@/utils/trend-chart-zoom'
 
 const props = defineProps<{
   data: UserStatTrendPoint[]
@@ -42,6 +43,7 @@ const buildOption = (points: UserStatTrendPoint[]): EChartsOption => {
   const times = points.map((item) => item.time)
   const hasTitle = Boolean(props.title)
   const seriesName = activeMetricLabel.value
+  const gridBottom = trendChartGridBottom(times.length, false)
 
   return {
     title: hasTitle
@@ -58,15 +60,13 @@ const buildOption = (points: UserStatTrendPoint[]): EChartsOption => {
       left: 48,
       right: 24,
       top: hasTitle ? 48 : 24,
-      bottom: 32,
+      bottom: gridBottom,
     },
     xAxis: {
       type: 'category',
       boundaryGap: false,
       data: times,
-      axisLabel: {
-        rotate: times.length > 10 ? 35 : 0,
-      },
+      axisLabel: buildTrendChartXAxisLabel(times.length),
     },
     yAxis: {
       type: 'value',

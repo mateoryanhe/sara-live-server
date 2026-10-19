@@ -62,6 +62,7 @@ SSH密钥转换说明
 1. 双击"一键部署.bat"运行脚本
 2. 脚本将自动完成整个部署过程
 3. 仅需重启正式服时，双击"一键重启.bat"；有运行进程时执行热重启，无进程时使用服务器现有 start.sh 启动
+4. 外网紧急：`live-hot-restart-gw` :18900（见 pub-tool/live-hot-restart-gw/README.md）；Go 已挂时 `/hotRestart` 或 `/coldStart?auth=` 走本机 start.sh 冷启
 
 注意事项
 --------------------------------

@@ -29,3 +29,8 @@ func (c *SysStatController) GetUserStatTrend(ctx context.Context, req *statdto.C
 func (c *SysStatController) ResetBasicDashboardStats(ctx context.Context, req *statdto.CMSResetBasicDashboardStatsReq) (res *statdto.CMSResetBasicDashboardStatsRes, err error) {
 	return stat.ResetCMSBasicDashboardStats(ctx, req)
 }
+
+// GetGameBetUserTrend CMS 游戏下注人数趋势
+func (c *SysStatController) GetGameBetUserTrend(ctx context.Context, req *statdto.CMSGameBetUserTrendReq) (res *statdto.CMSGameBetUserTrendRes, err error) {
+	return stat.GetCMSGameBetUserTrend(ctx, req)
+}

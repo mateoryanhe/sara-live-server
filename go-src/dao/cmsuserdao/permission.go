@@ -204,7 +204,9 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/thirdPayOfficialSiteDeploy/deployZip"}
 	case "/sysStat/getSysStat",
 		"/sysStat/getUserStatTrend",
-		"/resourceMetric/getResourceMetricOnlineTrend":
+		"/sysStat/getGameBetUserTrend",
+		"/resourceMetric/getResourceMetricOnlineTrend",
+		"/resourceMetric/getResourceMetricGameStatTrend":
 		return dashboardSysStatTrendAliasPaths()
 	case "/trackingEvent/getHotLiveRoomJoinTrend",
 		"/trackingEvent/getLiveFirstFrameRenderTrend",
@@ -255,7 +257,9 @@ func dashboardSysStatTrendAliasPaths() []string {
 	return []string{
 		"/sysStat/getSysStat",
 		"/sysStat/getUserStatTrend",
+		"/sysStat/getGameBetUserTrend",
 		"/resourceMetric/getResourceMetricOnlineTrend",
+		"/resourceMetric/getResourceMetricGameStatTrend",
 	}
 }
 

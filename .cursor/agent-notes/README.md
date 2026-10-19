@@ -37,6 +37,7 @@
 - **deploy.bat**：打包目录用 `temp_deploy_%RANDOM%` 避免 file-lock 时误打旧 `config.yaml`（曾把正式配置打到提审服）。
 - **提审服 1GB**：CPU 长期 100%、syndb 仅 `force_wait` 时，fork 可能极慢或失败，脚本会等满再冷启；正式服资源充足时以热重启为主。
 - **2026-10-12 热重启卡死**：`tracking.drainTrackingQueue` 空队列时 `default:break` 只跳出 `select` 导致忙等，`PrepareRestart` 同步调用后阶段一永不结束；已改为 `drainTrackingTQueue` 与 stat 一致。
+- **live-hot-restart-gw（18900）**：`pub-tool/live-hot-restart-gw` 与主 Go 分离部署；`/hotRestart` 无进程时 `sudo start.sh` 冷启，热重启连不上时可 fallback 冷启；`/coldStart` 强制冷启。`config.json` 需 `coldStartScript`（同 xgameserver/start.sh）。
 
 ## 审核服 MariaDB（2026-08-28）
 
@@ -155,10 +156,11 @@
 - App 工程：`flutter-client/`（主体 gitignore）
 - Web 本地：`flutter-client\start-web.bat` 或 `pub-tool/flutter-local/一键启动.bat`（`flutter run -d chrome`）
 - **推送规则**：`PushBus` 上 **Repository 与 ViewModel 各自订阅**（失效缓存 / 刷 UI）；见 `.cursor/rules/flutter-push-subscribe.mdc`、`lib/sara_live_core.dart` §6
+- **多语言（2026-10-16）**：`flutter-client/lib/l10n/` — ARB `app_en.arb` / `app_zh.arb`，改文案后 `flutter gen-l10n`；UI 用 `AppLocalizations.of(context)` 或 `context.l10n`；切换与持久化 `LocaleController`（「我的 → 语言」）；新增 key 须中英各写一条
 - **客户端缓存分层（2026-09-10，约定）**：两类分开，勿混用
   - **API 接口数据**：业务 KV（`CacheKey`：`user:{id}:…` / `global:…`）；内存 L1 + 可选磁盘 L2（Hive/文件 JSON 等，设计待定）；推送/登出要打穿失效
   - **文件资源**（图片、礼物动画等 URL 文件）：**统一用同一套文件缓存插件**（`flutter_cache_manager`；图片可用 `cached_network_image` 等基于它的封装，共用/配置同一 CacheManager 实例，勿再拆第二套磁盘文件缓存）
-- **App 统一事件总线（2026-09-10）**：`AppBus`（`lib/core/bus/`）；类型区分 `StartupBusEvent` / `WsBusEvent`；同一套 `add`/`remove`/`publish`。`started` sticky；WS 经 `WsClient`→`WsBusEvent`。例：`ApiDiskCache.bind` 订启动清理 API 磁盘（L2 待落地）。勿再拆 PushBus/AppEventBus
+- **App 统一事件总线（2026-09-10）**：`AppBus`（`lib/core/bus/`）；`AppLifecycleBusEvent`（`started`/`paused`/`resumed`）+ `WsBusEvent`；`started` sticky。冷启动：`BusinessObjectCache.bindAppLifecycle` 订 `started` → `clearAll()`（L1+L2）；`AppScope.create` 在 publish `started` 前也会 `await clearAll()`。勿再拆 PushBus/AppEventBus
 - 注意：本机 `HTTP_PROXY` 若无协议，sdkmanager 会挂；VS 未装不影响 Android APK
 
 ## CMS 本地启动（2026-09-07）

@@ -108,6 +108,11 @@ func (c *GuildController) BatchImmediateSettleGuilds(ctx context.Context, req *g
 	return guild.BatchImmediateSettleGuilds(ctx, req)
 }
 
+// BatchResetGuildUnsettledIncome 批量清零工会及名下主播未结算收益。
+func (c *GuildController) BatchResetGuildUnsettledIncome(ctx context.Context, req *guilddto.BatchResetGuildUnsettledIncomeReq) (*guilddto.BatchResetGuildUnsettledIncomeRes, error) {
+	return guild.BatchResetGuildUnsettledIncome(ctx, req)
+}
+
 // JoinGuildAnchor CMS加入工会主播
 func (c *GuildController) JoinGuildAnchor(ctx context.Context, req *guilddto.SetAnchorGuildReq) (res *guilddto.SetAnchorGuildRes, err error) {
 	return guild.JoinGuildAnchor(ctx, req)

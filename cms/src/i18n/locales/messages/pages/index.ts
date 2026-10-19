@@ -17,6 +17,8 @@ import {activityMessageListMessages} from './activity-message-list'
 import {guildListMessages} from './guild-list'
 import {guildImmediateSettlementMessages} from './guild-immediate-settlement'
 import {platformAnchorImmediateSettlementMessages} from './platform-anchor-immediate-settlement'
+import {platformAnchorResetUnsettledIncomeMessages} from './platform-anchor-reset-unsettled-income'
+import {guildResetUnsettledIncomeMessages} from './guild-reset-unsettled-income'
 import {guildRecycleBinMessages} from './guild-recycle-bin'
 import {guildAnchorDailyLiveListMessages} from './guild-anchor-daily-live-list'
 import {guildAnchorImportResultMessages} from './guild-anchor-import-result'
@@ -128,6 +130,8 @@ const pageMessageBuilders = [
   ['guildList', guildListMessages],
   ['guildImmediateSettlement', guildImmediateSettlementMessages],
   ['platformAnchorImmediateSettlement', platformAnchorImmediateSettlementMessages],
+  ['platformAnchorResetUnsettledIncome', platformAnchorResetUnsettledIncomeMessages],
+  ['guildResetUnsettledIncome', guildResetUnsettledIncomeMessages],
   ['guildRecycleBin', guildRecycleBinMessages],
   ['guildAnchorDailyLiveList', guildAnchorDailyLiveListMessages],
   ['guildAnchorImportResult', guildAnchorImportResultMessages],

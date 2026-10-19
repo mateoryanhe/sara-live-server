@@ -434,6 +434,37 @@ func listGuildIncomeUnsettledFieldForCMS(guildIds []uint64, pick func(row *entit
 	return ret
 }
 
+// ClearGuildIncomeUnsettledForCMS 将工会未结算收益清零(不写结算/归档日志)
+func ClearGuildIncomeUnsettledForCMS(guildId uint64) ClearUnsettledIncomeOutcome {
+	if guildId == 0 {
+		return ClearUnsettledIncomeFailed
+	}
+	row := ensureGuildIncomeUnsettledInCache(guildId)
+	if row == nil {
+		return ClearUnsettledIncomeFailed
+	}
+	snap := row.Snapshot()
+	if (&snap).IsZero() {
+		return ClearUnsettledIncomeAlreadyZero
+	}
+	row.Clear()
+	return ClearUnsettledIncomeCleared
+}
+
+func ensureGuildIncomeUnsettledInCache(guildId uint64) *entity.GuildIncomeUnsettled {
+	if guildIncomeUnsettledCache.Contains(guildId) {
+		return guildIncomeUnsettledCache.Get(guildId)
+	}
+	if row := GetGuildIncomeUnsettledForCMS(guildId); row != nil {
+		guildIncomeUnsettledCache.Set(guildId, row)
+		return row
+	}
+	empty := &entity.GuildIncomeUnsettled{}
+	empty.ID = guildId
+	guildIncomeUnsettledCache.Set(guildId, empty)
+	return empty
+}
+
 // GetGuildIncomeUnsettledForCMS 未结算收益(缓存优先,否则直查DB,不新建)
 func GetGuildIncomeUnsettledForCMS(guildId uint64) *entity.GuildIncomeUnsettled {
 	if guildId == 0 {

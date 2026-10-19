@@ -240,6 +240,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'transferInfo', label: '编辑转账信息'},
         {key: 'batchImportSalaryAnchor', label: '批量导入有底薪主播'},
         {key: 'batchImmediateSettlement', label: '批量立即结算'},
+        {key: 'batchResetUnsettledIncome', label: '批量重置未结算收益'},
     ],
     LiveRoomRecycleBinManagement: [BTN.view, BTN.search, {key: 'onShelf', label: '上架'}],
     OneToOneRoomManagement: [BTN.view, BTN.search, BTN.create, BTN.edit, {key: 'onShelf', label: '上架'}, {key: 'offShelf', label: '下架'}],
@@ -326,6 +327,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'batchSetSeniorAnchor', label: '导入高级主播'},
         {key: 'batchImportSalaryAnchor', label: '批量导入有底薪主播'},
         {key: 'batchImmediateSettlement', label: '批量立即结算'},
+        {key: 'batchResetUnsettledIncome', label: '批量重置未结算'},
         {key: 'transferInfo', label: '转账信息'},
     ],
     GuildTransferManagement: [
