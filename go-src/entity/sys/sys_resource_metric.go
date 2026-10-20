@@ -31,7 +31,7 @@ const (
 	SysResourceMetricGameBetUserCount    db.TbCol = "game_bet_user_count"
 )
 
-// SysResourceMetric 系统资源细采样(每10秒一条,保留24小时,懒缓冲异步入库)
+// SysResourceMetric 系统资源细采样(每10秒一条,保留3天,懒缓冲异步入库)
 type SysResourceMetric struct {
 	migrate.OneModel
 	RecordedAt          time.Time `gorm:"index;comment:采样时间" json:"recordedAt"`

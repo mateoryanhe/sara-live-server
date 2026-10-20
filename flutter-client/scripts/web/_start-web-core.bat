@@ -42,6 +42,8 @@ if errorlevel 1 (
 set "CHROME_PROFILE=%LOCALAPPDATA%\SaraLiveWeb\%PROFILE_NAME%"
 if not exist "%CHROME_PROFILE%" mkdir "%CHROME_PROFILE%" 2>nul
 
+call :ReleaseChromeProfileLock
+
 if not defined API_BASE set "API_BASE=http://127.0.0.1:9443"
 
 if not defined HTTP_LOG_ENABLED set "HTTP_LOG_ENABLED=true"
@@ -104,6 +106,26 @@ if not "%ERR%"=="0" (
   pause
 )
 exit /b %ERR%
+
+REM Close Chrome/Chromium still holding this --user-data-dir (common after crash or double-click).
+:ReleaseChromeProfileLock
+set "CHROME_PROFILE_PS=%CHROME_PROFILE%"
+echo.
+echo Checking Chrome profile lock: %CHROME_PROFILE%
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "$p = $env:CHROME_PROFILE_PS; if (-not $p) { exit 0 };" ^
+  "$names = @('chrome.exe','chromium.exe');" ^
+  "foreach ($n in $names) {" ^
+  "  Get-CimInstance Win32_Process -Filter (\"Name='\" + $n + \"'\") -ErrorAction SilentlyContinue |" ^
+  "    Where-Object { $_.CommandLine -and ($_.CommandLine -like ('*' + $p + '*')) } |" ^
+  "    ForEach-Object { Write-Host ('  Closing ' + $n + ' PID ' + $_.ProcessId); Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }" ^
+  "};" ^
+  "Start-Sleep -Milliseconds 800;" ^
+  "foreach ($f in @('SingletonLock','SingletonCookie','SingletonSocket')) {" ^
+  "  Get-ChildItem -LiteralPath $p -Filter $f -Force -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue" ^
+  "}"
+set "CHROME_PROFILE_PS="
+exit /b 0
 
 :WriteLogReadme
 > "%HTTP_LOG_DIR%\WHERE-TO-SEE-LOGS.txt" (

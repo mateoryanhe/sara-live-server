@@ -67,6 +67,13 @@ func startAnchorLive(ctx context.Context, room *entity.LiveRoom, heartTime time.
 	if IsRoomOffShelf(room) {
 		return 0, errercode.CreateCode(errercode.LiveRoomOffShelf)
 	}
+	// 未下播再次开播时先结束上一场,避免 live_record 缺 end_time
+	if room.LiveRecordId > 0 {
+		stopLive(room.ID)
+		if refreshed := liveroomdao.GetRoomById(room.ID); refreshed != nil {
+			room = refreshed
+		}
+	}
 	addTask(room.ID)
 	initRoomAudienceCaches(room.ID)
 

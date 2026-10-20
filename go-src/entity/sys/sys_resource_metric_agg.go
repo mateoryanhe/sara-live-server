@@ -11,7 +11,7 @@ const (
 	TbSysResourceMetricAgg db.TbName = "sys_resource_metric_aggs"
 )
 
-// SysResourceMetricAgg 系统资源粗采样(5分钟聚合,保留3天,直写DB)
+// SysResourceMetricAgg 系统资源粗采样(已停用,表仅保留历史数据供清理)
 type SysResourceMetricAgg struct {
 	migrate.OneModel
 	RecordedAt          time.Time `gorm:"uniqueIndex;comment:聚合桶起始时间" json:"recordedAt"`

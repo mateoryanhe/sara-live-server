@@ -1,7 +1,7 @@
 import {definePageMessages} from './_define'
 
 const zh = {
-  searchTip: '细采样10秒保留24小时；粗采样5分钟保留3天。查询窗口在24小时内用细数据，否则用粗数据。单次最多 {max} 点',
+  searchTip: '10 秒细采样，服务端保留最近 3 天；超出范围的数据不可用。单次最多 {max} 点',
   tabMemory: '内存',
   tabHeap: '堆内存',
   tabRatio: '比例',
@@ -50,7 +50,7 @@ const zh = {
 }
 
 const en = {
-  searchTip: 'Fine: every 10s for 24h; coarse: every 5min for 3d. Ranges within 24h use fine data, else coarse. Up to {max} points',
+  searchTip: 'Fine sampling every 10s; server retains the last 3 days. Up to {max} points per request',
   tabMemory: 'Memory',
   tabHeap: 'Heap',
   tabRatio: 'Ratio',
@@ -99,7 +99,7 @@ const en = {
 }
 
 const es = {
-  searchTip: 'Fino: cada 10s / 24h; grueso: cada 5min / 3d. ≤24h usa fino, si no grueso. Hasta {max} puntos',
+  searchTip: 'Muestreo fino cada 10s; el servidor conserva 3 días. Hasta {max} puntos',
   tabMemory: 'Memoria',
   tabHeap: 'Heap',
   tabRatio: 'Proporción',
@@ -144,7 +144,7 @@ const es = {
 }
 
 const pt = {
-  searchTip: 'Fino: a cada 10s / 24h; grosso: a cada 5min / 3d. ≤24h usa fino, senão grosso. Até {max} pontos',
+  searchTip: 'Amostragem fina a cada 10s; servidor retém 3 dias. Até {max} pontos',
   tabMemory: 'Memória',
   tabHeap: 'Heap',
   tabRatio: 'Proporção',
@@ -189,7 +189,7 @@ const pt = {
 }
 
 const hi = {
-  searchTip: 'सूक्ष्म: हर 10से / 24घं; मोटा: हर 5मि / 3दिन। ≤24घं सूक्ष्म, अन्यथा मोटा। अधिकतम {max} बिंदु',
+  searchTip: 'हर 10 सेकंड सूक्ष्म नमूना; सर्वर 3 दिन रखता है। अधिकतम {max} बिंदु',
   tabMemory: 'मेमोरी',
   tabHeap: 'Heap',
   tabRatio: 'अनुपात',
@@ -234,7 +234,7 @@ const hi = {
 }
 
 const id = {
-  searchTip: 'Halus: tiap 10d / 24j; kasar: tiap 5m / 3h. ≤24j pakai halus, selain itu kasar. Maks {max} titik',
+  searchTip: 'Sampling halus tiap 10 dtk; server menyimpan 3 hari. Maks {max} titik',
   tabMemory: 'Memori',
   tabHeap: 'Heap',
   tabRatio: 'Rasio',

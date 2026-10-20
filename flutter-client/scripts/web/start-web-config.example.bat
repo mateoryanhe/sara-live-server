@@ -6,7 +6,7 @@ REM ============================================================
 
 REM Backend API root (no trailing slash). Baked into this Web run via --dart-define.
 REM Local Go: http://127.0.0.1:9443   Test: https://www.bigtktool.shop
-set "API_BASE=http://127.0.0.1:9443"
+set "API_BASE=https://www.bigtktool.shop"
 
 REM One dir for both roles (optional):
 REM set "HTTP_LOG_DIR=%~dp0..\..\logs\web-shared"

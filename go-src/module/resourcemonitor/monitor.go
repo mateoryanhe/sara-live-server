@@ -43,9 +43,7 @@ var (
 	collectionTimerMu  sync.Mutex
 	monitorInitialized bool
 	initialMetricEntry *gtimer.Entry
-	backfillEntry      *gtimer.Entry
-	fineMetricEntry    *gtimer.Entry
-	coarseMetricEntry  *gtimer.Entry
+	fineMetricEntry *gtimer.Entry
 )
 
 func initMonitor() {
@@ -104,37 +102,23 @@ func CollectionEnabled() bool {
 }
 
 func startCollectionTimersLocked() {
-	if fineMetricEntry != nil || coarseMetricEntry != nil {
+	if fineMetricEntry != nil {
 		return
 	}
 	// 先采一次基线(不阻塞等待),再按细间隔写入.
 	initialMetricEntry = xrtimer.AddOnce(gctx.New(), 2*time.Second, func(ctx context.Context) {
 		recordResourceMetric()
 	})
-	backfillEntry = xrtimer.AddOnce(gctx.New(), 5*time.Second, func(ctx context.Context) {
-		if CollectionEnabled() {
-			backfillMissingAggs()
-		}
-	})
 	fineMetricEntry = xrtimer.AddSingleton(gctx.New(), FineInterval, func(ctx context.Context) {
 		recordResourceMetric()
-	})
-	coarseMetricEntry = xrtimer.AddSingleton(gctx.New(), CoarseInterval, func(ctx context.Context) {
-		if CollectionEnabled() {
-			rollupLastCompletedBucket()
-		}
 	})
 }
 
 func stopCollectionTimersLocked() {
 	closeTimerEntry(initialMetricEntry)
-	closeTimerEntry(backfillEntry)
 	closeTimerEntry(fineMetricEntry)
-	closeTimerEntry(coarseMetricEntry)
 	initialMetricEntry = nil
-	backfillEntry = nil
 	fineMetricEntry = nil
-	coarseMetricEntry = nil
 }
 
 func closeTimerEntry(entry *gtimer.Entry) {
@@ -150,7 +134,8 @@ func onDayCleanupResourceMetrics(_ any) {
 func cleanupExpiredResourceMetrics() {
 	now := time.Now()
 	resourcemetricdao.DeleteFineBefore(now.Add(-FineRetention))
-	resourcemetricdao.DeleteAggBefore(now.Add(-CoarseRetention))
+	// 粗采样已停用,清理历史 agg 行
+	resourcemetricdao.DeleteAggBefore(now)
 }
 
 func enqueueResourceMetric(now time.Time) {

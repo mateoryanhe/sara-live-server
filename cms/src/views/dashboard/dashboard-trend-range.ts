@@ -1,4 +1,7 @@
-import {formatServerDateStringFromDate} from '@/utils/server-datetime'
+import {formatServerDateStringFromDate, formatServerDateTimeFromDate} from '@/utils/server-datetime'
+
+/** 资源指标(在线/游戏统计)服务端细采样保留天数 */
+export const DASHBOARD_RESOURCE_METRIC_RETENTION_DAYS = 3
 
 /** 仪表盘折线：统一快捷粒度与选手动范围上限（自然日） */
 export const DASHBOARD_TREND_PRESET_DAYS = [1, 7, 30] as const
@@ -7,10 +10,10 @@ export const DASHBOARD_TREND_MAX_CALENDAR_DAYS = 30
 /** @deprecated 使用 DASHBOARD_TREND_MAX_CALENDAR_DAYS */
 export const DASHBOARD_STAT_TREND_MAX_CALENDAR_DAYS = DASHBOARD_TREND_MAX_CALENDAR_DAYS
 
-export const DASHBOARD_ONLINE_TREND_MAX_CALENDAR_DAYS = DASHBOARD_TREND_MAX_CALENDAR_DAYS
+export const DASHBOARD_ONLINE_TREND_MAX_CALENDAR_DAYS = DASHBOARD_RESOURCE_METRIC_RETENTION_DAYS
 
 /** 与后端 resourcemonitor maxTrendPoints 一致 */
-export const DASHBOARD_ONLINE_TREND_POINT_LIMIT = 10_000
+export const DASHBOARD_ONLINE_TREND_POINT_LIMIT = 26_000
 
 /** 服务端单次拉取上限；前端用图表滑块浏览全量点 */
 export function diffDashboardCalendarDays(start: string, end: string) {
@@ -51,12 +54,16 @@ export function matchDashboardTrendPresetDays(range: [string, string] | null): n
   return null
 }
 
-/** 单日在线趋势（00:00–23:59） */
-export function buildDashboardOnlineMetricQueryForDay(day: string) {
-  const d = day.trim()
+/** 最近 N 天资源指标趋势（细采样 10 秒，与后端保留策略一致） */
+export function buildDashboardResourceMetricTrendQuery(
+    days: number = DASHBOARD_RESOURCE_METRIC_RETENTION_DAYS,
+) {
+  const capped = Math.min(Math.max(days, 1), DASHBOARD_RESOURCE_METRIC_RETENTION_DAYS)
+  const end = new Date()
+  const start = new Date(end.getTime() - capped * 24 * 60 * 60 * 1000)
   return {
-    startTime: `${d} 00:00:00`,
-    endTime: `${d} 23:59:59`,
+    startTime: formatServerDateTimeFromDate(start),
+    endTime: formatServerDateTimeFromDate(end),
     limit: DASHBOARD_ONLINE_TREND_POINT_LIMIT,
   }
 }

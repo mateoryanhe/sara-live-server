@@ -5,6 +5,9 @@
       <el-table-column :label="t('pages.anchorList.liveIncome')" align="right" min-width="120">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
       </el-table-column>
+      <el-table-column :label="t('pages.anchorList.gameIncome')" align="right" min-width="120">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameIncome) }}</span></template>
+      </el-table-column>
       <el-table-column :label="t('pages.anchorList.socialIncomeTotal')" align="right" min-width="130">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalSocialIncome) }}</span></template>
       </el-table-column>
@@ -16,9 +19,6 @@
       </el-table-column>
       <el-table-column :label="t('pages.anchorList.videoCallIncome')" align="right" min-width="130">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
-      </el-table-column>
-      <el-table-column :label="t('pages.anchorList.gameIncome')" align="right" min-width="120">
-        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameIncome) }}</span></template>
       </el-table-column>
       <el-table-column :label="t('pages.anchorList.totalLiveDuration')" min-width="120">
         <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>

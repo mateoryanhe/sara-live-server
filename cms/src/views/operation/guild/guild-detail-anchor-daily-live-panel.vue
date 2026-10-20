@@ -78,8 +78,14 @@
       <el-table-column :label="t('pages.anchorList.dailyLiveDuration')" min-width="150">
         <template #default="{ row }">{{ formatLiveDurationMinutes(row.liveDuration, t) }}</template>
       </el-table-column>
+      <el-table-column :label="t('pages.anchorList.dailyReportedLiveDuration')" min-width="150">
+        <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
+      </el-table-column>
       <el-table-column :label="t('pages.anchorList.liveIncome')" align="right" min-width="120">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
+      </el-table-column>
+      <el-table-column :label="t('pages.anchorList.gameIncome')" align="right" min-width="120">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameIncome) }}</span></template>
       </el-table-column>
       <el-table-column :label="t('pages.anchorList.socialIncomeTotal')" align="right" min-width="130">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalSocialIncome) }}</span></template>
@@ -92,9 +98,6 @@
       </el-table-column>
       <el-table-column :label="t('pages.anchorList.videoCallIncome')" align="right" min-width="130">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalVideoCallIncome) }}</span></template>
-      </el-table-column>
-      <el-table-column :label="t('pages.anchorList.gameIncome')" align="right" min-width="120">
-        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameIncome) }}</span></template>
       </el-table-column>
       <el-table-column :label="t('pages.anchorList.dailySettled')" min-width="100">
         <template #default="{ row }">
@@ -112,6 +115,18 @@
     </el-table>
 
     <el-empty v-if="!loading && tableData.length === 0" :description="t('pages.guildList.noAnchorDailyEffectiveLiveData')"/>
+
+    <div v-if="pagination.total > 0" class="pagination">
+      <el-pagination
+          v-model:current-page="pagination.pageIndex"
+          v-model:page-size="pagination.pageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          :total="pagination.total"
+          layout="total, sizes, prev, pager, next, jumper"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
+      />
+    </div>
   </div>
 </template>
 
@@ -151,7 +166,11 @@ const searchForm = reactive({
   dateRange: [] as string[],
 })
 
-const DEFAULT_PAGE_SIZE = 8
+const pagination = reactive({
+  pageIndex: 1,
+  pageSize: 20,
+  total: 0,
+})
 
 const buildFilterParams = () => {
   const [liveDateStart, liveDateEnd] = searchForm.dateRange || []
@@ -160,23 +179,25 @@ const buildFilterParams = () => {
     roomId: searchForm.roomId.trim() || undefined,
     liveDateStart: liveDateStart || undefined,
     liveDateEnd: liveDateEnd || undefined,
-    settled: 0,
+    settled: -1,
   }
 }
 
 const fetchList = async () => {
   if (!props.guildId) {
     tableData.value = []
+    pagination.total = 0
     return
   }
   loading.value = true
   try {
     const response = await guildApi.getGuildAnchorDailyEffectiveLiveList({
       ...buildFilterParams(),
-      pageIndex: 1,
-      pageSize: DEFAULT_PAGE_SIZE,
+      pageIndex: pagination.pageIndex,
+      pageSize: pagination.pageSize,
     })
     tableData.value = response.data || []
+    pagination.total = response.total ?? 0
     loaded.value = true
   } catch (error) {
     console.error('Failed to load guild anchor daily flow list:', error)
@@ -187,13 +208,34 @@ const fetchList = async () => {
 }
 
 const handleSearch = () => {
+  pagination.pageIndex = 1
   fetchList()
 }
 
 const handleReset = () => {
   searchForm.roomId = ''
   searchForm.dateRange = []
+  pagination.pageIndex = 1
   fetchList()
+}
+
+const handlePageChange = () => {
+  fetchList()
+}
+
+const handleSizeChange = () => {
+  pagination.pageIndex = 1
+  fetchList()
+}
+
+const openAnchorDetail = (anchorId: string | number) => {
+  if (!anchorId) {
+    return
+  }
+  router.push({
+    path: '/user/anchor/anchor-detail',
+    query: {id: String(anchorId)},
+  })
 }
 
 const handleExport = async () => {
@@ -217,6 +259,8 @@ const resetState = () => {
   tableData.value = []
   searchForm.roomId = ''
   searchForm.dateRange = []
+  pagination.pageIndex = 1
+  pagination.total = 0
 }
 
 watch(
@@ -251,5 +295,11 @@ watch(
 
 .search-form :deep(.el-form-item__label) {
   white-space: nowrap;
+}
+
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
 }
 </style>

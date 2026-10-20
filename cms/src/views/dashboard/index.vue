@@ -162,14 +162,6 @@
 
         <el-tab-pane :label="t('pages.dashboard.gameStats')" name="gameStats">
           <div class="tab-toolbar tab-toolbar-trend-range">
-            <DashboardDayNavToolbar
-                :focus-day="dashboardFocusDay"
-                :loading="gameBetLoading"
-                @prev="() => shiftDashboardFocusDayBy(-1)"
-                @next="() => shiftDashboardFocusDayBy(1)"
-                @today="() => goDashboardFocusToday()"
-                @pick="(day) => setDashboardFocusDayAndLoad(day)"
-            />
             <el-button :loading="gameBetLoading" @click="() => void fetchGameStatTrend()">{{ t('common.refresh') }}</el-button>
           </div>
           <p class="game-bet-event-hint">{{ t('pages.dashboard.onlineTrendRetentionHint') }}</p>
@@ -188,14 +180,6 @@
 
         <el-tab-pane :label="t('pages.dashboard.onlineUsers')" name="online">
           <div class="tab-toolbar tab-toolbar-trend-range">
-            <DashboardDayNavToolbar
-                :focus-day="dashboardFocusDay"
-                :loading="onlineLoading"
-                @prev="() => shiftDashboardFocusDayBy(-1)"
-                @next="() => shiftDashboardFocusDayBy(1)"
-                @today="() => goDashboardFocusToday()"
-                @pick="(day) => setDashboardFocusDayAndLoad(day)"
-            />
             <el-button :loading="onlineLoading" @click="() => void fetchResourceMetricTrend()">{{ t('common.refresh') }}</el-button>
           </div>
           <p class="game-bet-event-hint">{{ t('pages.dashboard.onlineTrendRetentionHint') }}</p>
@@ -235,17 +219,11 @@ import {sysStatApi} from '@/api'
 import {usePagePermission} from '@/composables/usePagePermission'
 import type {GameStatTrend, ResourceMetricTrend, SysStat, UserStatTrend} from '@/types/api'
 import BarMetricSection from './components/bar-metric-section.vue'
-import DashboardDayNavToolbar from './components/dashboard-day-nav-toolbar.vue'
 import {getUserStatBarMetricTabs, USER_STAT_BAR_SERIES} from './user-stat-bar-series'
 import {
-  buildDashboardOnlineMetricQueryForDay,
+  buildDashboardResourceMetricTrendQuery,
   DASHBOARD_ONLINE_TREND_POINT_LIMIT,
 } from './dashboard-trend-range'
-import {
-  formatDashboardFocusDayLabel,
-  getDashboardTodayDateString,
-  shiftDashboardFocusDay,
-} from './dashboard-day-nav'
 import {formatAmount} from '@/utils/number-format'
 
 const UserStatChart = defineAsyncComponent(() => import('./components/user-stat-chart.vue'))
@@ -273,7 +251,6 @@ const gameBetLoading = ref(false)
 const activeMainTab = ref('basic')
 const activePeriod = ref('daily')
 const activeRechargePeriod = ref('daily')
-const dashboardFocusDay = ref(getDashboardTodayDateString())
 const onlineRangeTruncated = ref(false)
 const onlineTrendMaxPoints = ref(0)
 const gameStatRangeTruncated = ref(false)
@@ -352,17 +329,9 @@ const rechargeBarChartTitle = computed(() =>
     }),
 )
 
-const onlineChartTitle = computed(() =>
-    t('pages.dashboard.onlineChartTitleWithDay', {
-      day: formatDashboardFocusDayLabel(dashboardFocusDay.value),
-    }),
-)
+const onlineChartTitle = computed(() => t('pages.dashboard.onlineChartTitleLast3Days'))
 
-const gameStatChartTitle = computed(() =>
-    t('pages.dashboard.gameBetUserChartByDay', {
-      day: formatDashboardFocusDayLabel(dashboardFocusDay.value),
-    }),
-)
+const gameStatChartTitle = computed(() => t('pages.dashboard.gameStatChartTitleLast3Days'))
 
 const dailyLineChartRef = ref<InstanceType<typeof UserStatChart>>()
 const weeklyLineChartRef = ref<InstanceType<typeof UserStatChart>>()
@@ -609,27 +578,13 @@ const fetchSysStat = async (silent = false) => {
   }
 }
 
-const setDashboardFocusDayAndLoad = (day: string) => {
-  dashboardFocusDay.value = day
-  void fetchResourceMetricTrend()
-  void fetchGameStatTrend()
-}
-
-const shiftDashboardFocusDayBy = (delta: number) => {
-  setDashboardFocusDayAndLoad(shiftDashboardFocusDay(dashboardFocusDay.value, delta))
-}
-
-const goDashboardFocusToday = () => {
-  setDashboardFocusDayAndLoad(getDashboardTodayDateString())
-}
-
 const fetchResourceMetricTrend = async (silent = false) => {
   if (!silent) {
     onlineLoading.value = true
   }
   try {
     const data = await sysStatApi.getResourceMetricOnlineTrend(
-        buildDashboardOnlineMetricQueryForDay(dashboardFocusDay.value),
+        buildDashboardResourceMetricTrendQuery(),
     )
     resourceMetricTrend.points = data.points || []
     onlineRangeTruncated.value = Boolean(data.rangeTruncated)
@@ -654,7 +609,7 @@ const fetchGameStatTrend = async (silent = false) => {
   }
   try {
     const data = await sysStatApi.getResourceMetricGameStatTrend(
-        buildDashboardOnlineMetricQueryForDay(dashboardFocusDay.value),
+        buildDashboardResourceMetricTrendQuery(),
     )
     gameStatTrend.points = (data.points || []).map((item) => ({
       time: item.time,

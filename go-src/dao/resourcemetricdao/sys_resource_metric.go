@@ -8,7 +8,7 @@ import (
 	"xr-game-server/entity/sys"
 )
 
-const maxTrendPoints = 10000
+const maxTrendPoints = 26000
 
 // DeleteFineBefore 删除细采样过期记录
 func DeleteFineBefore(before time.Time) {

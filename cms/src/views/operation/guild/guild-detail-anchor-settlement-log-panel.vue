@@ -85,6 +85,9 @@
       <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalIncome')" align="right" min-width="120">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
       </el-table-column>
+      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalGameIncome')" align="right" min-width="120">
+        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameIncome) }}</span></template>
+      </el-table-column>
       <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalSocialIncome')" align="right" min-width="130">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalSocialIncome) }}</span></template>
       </el-table-column>
@@ -105,9 +108,6 @@
       </el-table-column>
       <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalShortVideoIncome')" align="right" min-width="130">
         <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalShortVideoIncome) }}</span></template>
-      </el-table-column>
-      <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalGameIncome')" align="right" min-width="120">
-        <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameIncome) }}</span></template>
       </el-table-column>
       <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.totalLiveDuration')" min-width="120">
         <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>
@@ -198,6 +198,16 @@ const buildQueryParams = () => ({
   pageIndex: pagination.pageIndex,
   pageSize: pagination.pageSize,
 })
+
+const openAnchorDetail = (anchorId: string | number) => {
+  if (!anchorId) {
+    return
+  }
+  router.push({
+    path: '/user/anchor/anchor-detail',
+    query: {id: String(anchorId)},
+  })
+}
 
 const fetchList = async () => {
   if (!props.guildId) {

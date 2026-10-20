@@ -3,7 +3,6 @@ package resourcemonitor
 import (
 	"context"
 	"fmt"
-	"sort"
 	"strings"
 	"time"
 
@@ -31,7 +30,7 @@ type trendQuery struct {
 	Limit     int
 }
 
-// trendPoint 细/粗采样统一视图,供 CMS 映射
+// trendPoint 细采样 CMS 映射
 type trendPoint struct {
 	RecordedAt          time.Time
 	ProcMemMb           float64
@@ -182,68 +181,7 @@ func listTrendPoints(q trendQuery) []*trendPoint {
 func loadTrendPointsFromDB(q trendQuery) []*trendPoint {
 	start, end := resolveTrendTimeRange(q)
 	limit := resolveTrendLimit(q.Limit)
-	if useFineTrend(start, end) {
-		return fineToTrendPoints(resourcemetricdao.ListFineByTimeRange(start, end, limit))
-	}
-	now := time.Now()
-	fineStart := now.Add(-FineRetention)
-	if end.After(fineStart) && start.Before(fineStart) {
-		coarseEnd := end
-		if coarseEnd.After(fineStart) {
-			coarseEnd = fineStart
-		}
-		coarse := aggToTrendPoints(resourcemetricdao.ListAggByTimeRange(start, coarseEnd, limit))
-		remaining := limit - len(coarse)
-		if remaining < 1 {
-			remaining = 1
-		}
-		fine := fineToTrendPoints(resourcemetricdao.ListFineByTimeRange(fineStart, end, remaining))
-		return capTrendPoints(mergeTrendPointsByTime(coarse, fine), limit)
-	}
-	return aggToTrendPoints(resourcemetricdao.ListAggByTimeRange(start, end, limit))
-}
-
-func mergeTrendPointsByTime(parts ...[]*trendPoint) []*trendPoint {
-	total := 0
-	for _, p := range parts {
-		total += len(p)
-	}
-	if total == 0 {
-		return nil
-	}
-	merged := make([]*trendPoint, 0, total)
-	for _, p := range parts {
-		for _, row := range p {
-			if row != nil {
-				merged = append(merged, row)
-			}
-		}
-	}
-	sort.Slice(merged, func(i, j int) bool {
-		return merged[i].RecordedAt.Before(merged[j].RecordedAt)
-	})
-	if len(merged) <= 1 {
-		return merged
-	}
-	out := make([]*trendPoint, 0, len(merged))
-	var lastAt time.Time
-	for _, row := range merged {
-		if len(out) > 0 && row.RecordedAt.Equal(lastAt) {
-			out[len(out)-1] = row
-			continue
-		}
-		out = append(out, row)
-		lastAt = row.RecordedAt
-	}
-	return out
-}
-
-// capTrendPoints 超出 limit 时保留较早一段，与 DAO 升序 limit 策略一致
-func capTrendPoints(rows []*trendPoint, limit int) []*trendPoint {
-	if limit <= 0 || len(rows) <= limit {
-		return rows
-	}
-	return rows[:limit]
+	return fineToTrendPoints(resourcemetricdao.ListFineByTimeRange(start, end, limit))
 }
 
 // cmsTrendQueryCacheKey 仪表盘默认查询按 10 分钟分桶(与细采样间隔一致); 自定义时间范围按参数固定缓存.
@@ -252,26 +190,8 @@ func cmsTrendQueryCacheKey(q trendQuery) string {
 	if strings.TrimSpace(q.StartTime) != "" || strings.TrimSpace(q.EndTime) != "" {
 		return fmt.Sprintf("custom:%d:%s:%s", limit, strings.TrimSpace(q.StartTime), strings.TrimSpace(q.EndTime))
 	}
-	start, end := resolveTrendTimeRange(q)
-	mode := "agg"
-	if useFineTrend(start, end) {
-		mode = "fine"
-	}
 	bucket := time.Now().Unix() / (10 * 60)
-	return fmt.Sprintf("default:%d:%s:%d", limit, mode, bucket)
-}
-
-// useFineTrend 查询窗口完全落在细采样保留期内时用细数据,否则用粗数据
-func useFineTrend(start, end time.Time) bool {
-	now := time.Now()
-	fineStart := now.Add(-FineRetention)
-	if start.Before(fineStart) {
-		return false
-	}
-	if end.Before(fineStart) {
-		return false
-	}
-	return true
+	return fmt.Sprintf("default:%d:fine:%d", limit, bucket)
 }
 
 func fineToTrendPoints(rows []*entity.SysResourceMetric) []*trendPoint {
@@ -302,38 +222,10 @@ func fineToTrendPoints(rows []*entity.SysResourceMetric) []*trendPoint {
 	return list
 }
 
-func aggToTrendPoints(rows []*entity.SysResourceMetricAgg) []*trendPoint {
-	list := make([]*trendPoint, 0, len(rows))
-	for _, row := range rows {
-		if row == nil {
-			continue
-		}
-		list = append(list, &trendPoint{
-			RecordedAt:          row.RecordedAt,
-			ProcMemMb:           row.ProcMemMb,
-			ProcHeapAllocMb:     row.ProcHeapAllocMb,
-			ProcHeapInuseMb:     row.ProcHeapInuseMb,
-			ProcHeapSysMb:       row.ProcHeapSysMb,
-			ProcHeapUsedPercent: row.ProcHeapUsedPercent,
-			ProcHeapIdlePercent: row.ProcHeapIdlePercent,
-			ProcCpuPercent:      row.ProcCpuPercent,
-			SysMemUsedMb:        row.SysMemUsedMb,
-			SysMemTotalMb:       row.SysMemTotalMb,
-			SysMemUsedPercent:   row.SysMemUsedPercent,
-			SysCpuPercent:       row.SysCpuPercent,
-			OnlineCount:         row.OnlineCount,
-			LiveAnchorCount:     row.LiveAnchorCount,
-			GameOnlineCount:     row.GameOnlineCount,
-			GameBetUserCount:    row.GameBetUserCount,
-		})
-	}
-	return list
-}
-
 func resolveTrendTimeRange(q trendQuery) (start, end time.Time) {
 	now := time.Now()
 	end = now
-	start = now.Add(-CoarseRetention)
+	start = now.Add(-FineRetention)
 	if t, ok := parseTrendTime(q.EndTime); ok {
 		end = t
 	}
@@ -342,6 +234,10 @@ func resolveTrendTimeRange(q trendQuery) (start, end time.Time) {
 	}
 	if end.Before(start) {
 		start, end = end, start
+	}
+	fineStart := now.Add(-FineRetention)
+	if start.Before(fineStart) {
+		start = fineStart
 	}
 	return start, end
 }

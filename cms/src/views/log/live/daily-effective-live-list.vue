@@ -120,6 +120,9 @@
         <el-table-column :label="t('pages.liveDailyEffectiveLiveList.dailyLiveIncome')" align="right" min-width="130">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
         </el-table-column>
+        <el-table-column :label="t('pages.liveDailyEffectiveLiveList.dailyGameIncome')" align="right" min-width="130">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameIncome) }}</span></template>
+        </el-table-column>
         <el-table-column :label="t('pages.liveDailyEffectiveLiveList.dailySocialIncome')" align="right" min-width="140">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalSocialIncome) }}</span></template>
         </el-table-column>
@@ -140,9 +143,6 @@
         </el-table-column>
         <el-table-column :label="t('pages.liveDailyEffectiveLiveList.dailyShortVideoIncome')" align="right" min-width="150">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalShortVideoIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.liveDailyEffectiveLiveList.dailyGameIncome')" align="right" min-width="130">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameIncome) }}</span></template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.dailyReportedLiveDuration')" min-width="150">
           <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>

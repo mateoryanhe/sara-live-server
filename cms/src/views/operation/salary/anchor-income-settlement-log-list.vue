@@ -158,6 +158,9 @@
         <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalIncome')" align="right" min-width="120">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalIncome) }}</span></template>
         </el-table-column>
+        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalGameIncome')" align="right" min-width="120">
+          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameIncome) }}</span></template>
+        </el-table-column>
         <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalSocialIncome')" align="right" min-width="130">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalSocialIncome) }}</span></template>
         </el-table-column>
@@ -178,9 +181,6 @@
         </el-table-column>
         <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalShortVideoIncome')" align="right" min-width="130">
           <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalShortVideoIncome) }}</span></template>
-        </el-table-column>
-        <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalGameIncome')" align="right" min-width="120">
-          <template #default="{ row }"><span class="money-amount">{{ formatWalletBalance(row.totalGameIncome) }}</span></template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorIncomeSettlementLogList.totalLiveDuration')" min-width="120">
           <template #default="{ row }">{{ formatLiveDurationMinutes(row.totalLiveDuration, t) }}</template>

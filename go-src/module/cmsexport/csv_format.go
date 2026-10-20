@@ -55,6 +55,7 @@ func incomeAmountCSVCells(amounts *liveentity.LiveRoomIncomeAmounts) []string {
 	}
 	return []string{
 		formatCSVFloat(amounts.TotalIncome),
+		formatCSVFloat(amounts.TotalGameIncome),
 		formatCSVFloat(amounts.TotalSocialIncome),
 		formatCSVFloat(amounts.TotalGiftIncome),
 		formatCSVFloat(amounts.TotalPaidDanmakuIncome),
@@ -62,7 +63,6 @@ func incomeAmountCSVCells(amounts *liveentity.LiveRoomIncomeAmounts) []string {
 		formatCSVFloat(amounts.TotalVideoCallTicketIncome),
 		formatCSVFloat(amounts.TotalVideoCallBillingIncome),
 		formatCSVFloat(amounts.TotalShortVideoIncome),
-		formatCSVFloat(amounts.TotalGameIncome),
 		formatLiveDurationMinutes(amounts.TotalLiveDuration),
 	}
 }
@@ -70,6 +70,7 @@ func incomeAmountCSVCells(amounts *liveentity.LiveRoomIncomeAmounts) []string {
 func incomeAmountItemCSVCells(item accountdto.LiveRoomIncomeAmountsItem) []string {
 	return []string{
 		formatCSVFloat(item.TotalIncome),
+		formatCSVFloat(item.TotalGameIncome),
 		formatCSVFloat(item.TotalSocialIncome),
 		formatCSVFloat(item.TotalGiftIncome),
 		formatCSVFloat(item.TotalPaidDanmakuIncome),
@@ -77,7 +78,6 @@ func incomeAmountItemCSVCells(item accountdto.LiveRoomIncomeAmountsItem) []strin
 		formatCSVFloat(item.TotalVideoCallTicketIncome),
 		formatCSVFloat(item.TotalVideoCallBillingIncome),
 		formatCSVFloat(item.TotalShortVideoIncome),
-		formatCSVFloat(item.TotalGameIncome),
 		formatLiveDurationMinutes(item.TotalLiveDuration),
 	}
 }

@@ -24,6 +24,7 @@ type TranslateFn = (key: string) => string
 function incomeAmountColumns(t: TranslateFn, ns: string): CsvColumn<SettlementLogCsvRow>[] {
   return [
     {header: t(`${ns}.totalIncome`), value: row => row.totalIncome},
+    {header: t(`${ns}.totalGameIncome`), value: row => row.totalGameIncome},
     {header: t(`${ns}.totalSocialIncome`), value: row => row.totalSocialIncome},
     {header: t(`${ns}.totalGiftIncome`), value: row => row.totalGiftIncome},
     {header: t(`${ns}.totalPaidDanmakuIncome`), value: row => row.totalPaidDanmakuIncome},
@@ -31,7 +32,6 @@ function incomeAmountColumns(t: TranslateFn, ns: string): CsvColumn<SettlementLo
 	{header: t(`${ns}.totalVideoCallTicketIncome`), value: row => row.totalVideoCallTicketIncome},
     {header: t(`${ns}.totalVideoCallBillingIncome`), value: row => row.totalVideoCallBillingIncome},
     {header: t(`${ns}.totalShortVideoIncome`), value: row => row.totalShortVideoIncome},
-    {header: t(`${ns}.totalGameIncome`), value: row => row.totalGameIncome},
     {header: t(`${ns}.totalLiveDuration`), value: row => liveDurationSecondsToMinutes(row.totalLiveDuration) ?? ''},
     {header: t(`${ns}.effectiveLiveDays`), value: row => row.effectiveLiveDays ?? ''},
   ]
