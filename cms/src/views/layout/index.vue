@@ -7,9 +7,8 @@
           ref="sidebarMenuRef"
           :collapse="isCollapse"
           :default-active="activeMenu"
-          :router="true"
-          :unique-opened="true"
           class="sidebar-menu"
+          @select="handleSidebarSelect"
       >
         <!-- 仪表盘 -->
         <el-menu-item v-if="hasMenuPermission('Dashboard')" index="/dashboard">
@@ -211,7 +210,11 @@
             </el-icon>
             <span>{{ t('menu.LiveLogGroup') }}</span>
           </template>
-          <el-menu-item v-if="hasMenuPermission('LiveRecordList')" index="/log/live/live-record-list">
+          <el-menu-item
+              v-if="hasMenuPermission('LiveRecordList')"
+              index="/log/live/live-record-list"
+              @mouseenter="prefetchRouteChunk('/log/live/live-record-list')"
+          >
             <el-icon>
               <Monitor/>
             </el-icon>
@@ -925,7 +928,7 @@
         </div>
       </el-header>
       <LayoutTabs/>
-      <el-main class="main-content">
+      <el-main v-loading="routeNavigating" class="main-content" element-loading-background="rgba(255, 255, 255, 0.65)">
         <router-view v-slot="{ Component, route: currentRoute }">
           <keep-alive :max="15">
             <component :is="Component" v-if="Component" :key="currentRoute.fullPath"/>
@@ -951,6 +954,9 @@ import {useLayoutTabs} from '@/composables/useLayoutTabs'
 import {ArrowDown, Bell, Box, Calendar, Coin, Collection, CollectionTag, Cpu, CreditCard, DataLine, Delete, Document, EditPen, Expand, Fold, FolderOpened, Iphone, Key, Link, List, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Promotion, Refresh, Search, Service, Setting, UploadFilled, User, UserFilled, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
 import {getIsAdmin, hasPermission} from '@/utils/permission'
 import {clearAuthSession} from '@/utils/auth'
+import {routeNavigating} from '@/utils/route-loading'
+import {prefetchRouteChunk} from '@/utils/route-prefetch'
+import {isSidebarRoutableIndex, resolveSidebarSubmenusToOpen} from '@/utils/sidebar-menu-nav'
 
 const route = useRoute()
 const router = useRouter()
@@ -963,21 +969,34 @@ type SidebarMenuInstance = {
 }
 
 const sidebarMenuRef = ref<SidebarMenuInstance | null>(null)
-const settlementMenuPaths = new Set([
-  '/operation/guild/guild-transfer-list',
-  '/operation/salary/platform-anchor-payout-list',
-  '/operation/salary/guild-income-settlement-log-list',
-  '/operation/salary/anchor-income-settlement-log-list',
-  '/operation/salary/guild-payout-detail-list',
-  '/operation/salary/platform-anchor-payout-detail-list',
-])
 
-const syncRouteParentMenu = async () => {
-  if (!settlementMenuPaths.has(route.path) && route.name !== 'PlatformAnchorSettlementDetail') {
+const openSidebarSubmenusForPath = async (path: string) => {
+  const indices = resolveSidebarSubmenusToOpen(path)
+  if (route.name === 'PlatformAnchorSettlementDetail') {
+    indices.push('/log/settlement')
+  }
+  if (indices.length === 0) {
     return
   }
   await nextTick()
-  sidebarMenuRef.value?.open('/log/settlement')
+  for (const index of indices) {
+    sidebarMenuRef.value?.open(index)
+  }
+}
+
+const handleSidebarSelect = (index: string) => {
+  if (!isSidebarRoutableIndex(index, router.resolve)) {
+    return
+  }
+  if (index === route.path) {
+    return
+  }
+  void openSidebarSubmenusForPath(index)
+  void router.push(index)
+}
+
+const syncRouteParentMenu = async () => {
+  await openSidebarSubmenusForPath(route.path)
 }
 
 watch(

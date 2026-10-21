@@ -180,6 +180,34 @@
         <el-table-column :label="t('pages.revenueLogList.count')" prop="count" width="80"/>
         <el-table-column :label="t('pages.revenueLogList.unitPriceDiamond')" prop="unitPrice" width="110"/>
         <el-table-column :label="t('pages.revenueLogList.totalAmountDiamond')" prop="totalAmount" width="120"/>
+        <el-table-column :label="t('pages.revenueLogList.luckyGiftRtp')" min-width="90" prop="luckyGiftRtp">
+          <template #default="{ row }">
+            {{ row.revenueType === 8 && row.luckyGiftRtp != null ? row.luckyGiftRtp : '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('pages.revenueLogList.luckyGiftMultiplier')" min-width="90" prop="luckyGiftMultiplier">
+          <template #default="{ row }">
+            {{ row.revenueType === 8 && row.luckyGiftMultiplier ? row.luckyGiftMultiplier : '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('pages.revenueLogList.luckyGiftPayout')" min-width="100" prop="luckyGiftPayout">
+          <template #default="{ row }">
+            {{ row.revenueType === 8 && row.luckyGiftPayout != null ? row.luckyGiftPayout : '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column
+            :label="t('pages.revenueLogList.luckyGiftSettlementAmount')"
+            min-width="120"
+            prop="luckyGiftSettlementAmount"
+        >
+          <template #default="{ row }">
+            {{
+              row.revenueType === 8 && row.luckyGiftSettlementAmount != null
+                ? row.luckyGiftSettlementAmount
+                : '-'
+            }}
+          </template>
+        </el-table-column>
         <el-table-column :label="t('common.status')" prop="statusText" width="90">
           <template #default="{ row }">
             <el-tag :type="row.status === 1 ? 'warning' : 'success'" size="small">

@@ -26,8 +26,12 @@ const (
 	LiveRevenueLogBizId        db.TbCol = "biz_id"
 	LiveRevenueLogCount        db.TbCol = "count"
 	LiveRevenueLogUnitPrice    db.TbCol = "unit_price"
-	LiveRevenueLogTotalAmount  db.TbCol = "total_amount"
-	LiveRevenueLogStatus       db.TbCol = "status"
+	LiveRevenueLogTotalAmount              db.TbCol = "total_amount"
+	LiveRevenueLogStatus                   db.TbCol = "status"
+	LiveRevenueLogLuckyGiftRtp             db.TbCol = "lucky_gift_rtp"
+	LiveRevenueLogLuckyGiftMultiplier      db.TbCol = "lucky_gift_multiplier"
+	LiveRevenueLogLuckyGiftPayout          db.TbCol = "lucky_gift_payout"
+	LiveRevenueLogLuckyGiftSettlementAmount db.TbCol = "lucky_gift_settlement_amount"
 )
 
 // LiveRevenueLog 直播间社交流水(礼物/付费弹幕/视频通话等钻石消费)
@@ -42,8 +46,12 @@ type LiveRevenueLog struct {
 	BizId        uint64    `gorm:"index:idx_lrl_biz_sender_type_status,priority:1;default:0;comment:业务关联ID(礼物ID/通话订单ID等)" json:"bizId"`
 	Count        int       `gorm:"default:0;comment:数量(礼物件数,其余类型多为0或1)" json:"count"`
 	UnitPrice    float64   `gorm:"default:0;comment:单价(钻石,礼物场景有效)" json:"unitPrice"`
-	TotalAmount  float64   `gorm:"default:0;comment:流水金额(钻石)" json:"totalAmount"`
-	Status       uint8     `gorm:"index:idx_lrl_status_created,priority:1;index:idx_lrl_room_status_created,priority:2;index:idx_lrl_biz_sender_type_status,priority:4;default:0;comment:状态(0正常,1已退款)" json:"status"`
+	TotalAmount                 float64 `gorm:"default:0;comment:流水金额(钻石,付款方消耗)" json:"totalAmount"`
+	Status                      uint8   `gorm:"index:idx_lrl_status_created,priority:1;index:idx_lrl_room_status_created,priority:2;index:idx_lrl_biz_sender_type_status,priority:4;default:0;comment:状态(0正常,1已退款)" json:"status"`
+	LuckyGiftRtp                float64 `gorm:"type:decimal(10,4);default:0;comment:幸运礼物RTP快照(%)" json:"luckyGiftRtp"`
+	LuckyGiftMultiplier         uint32  `gorm:"default:0;comment:幸运礼物返奖倍数" json:"luckyGiftMultiplier"`
+	LuckyGiftPayout             float64 `gorm:"default:0;comment:幸运礼物返奖钻石" json:"luckyGiftPayout"`
+	LuckyGiftSettlementAmount   float64 `gorm:"default:0;comment:幸运礼物折算后计入主播礼物流水" json:"luckyGiftSettlementAmount"`
 }
 
 func NewLiveRevenueLog(id uint64) *LiveRevenueLog {
@@ -140,6 +148,33 @@ func (r *LiveRevenueLog) SetStatus(v uint8) {
 	})
 }
 
+func (r *LiveRevenueLog) SetLuckyGiftRtp(v float64) {
+	r.LuckyGiftRtp = v
+	syndb.AddData(TbLiveRevenueLog, LiveRevenueLogLuckyGiftRtp, &syndb.ColData{IdVal: r.ID, ColVal: v})
+}
+
+func (r *LiveRevenueLog) SetLuckyGiftMultiplier(v uint32) {
+	r.LuckyGiftMultiplier = v
+	syndb.AddData(TbLiveRevenueLog, LiveRevenueLogLuckyGiftMultiplier, &syndb.ColData{IdVal: r.ID, ColVal: v})
+}
+
+func (r *LiveRevenueLog) SetLuckyGiftPayout(v float64) {
+	r.LuckyGiftPayout = v
+	syndb.AddData(TbLiveRevenueLog, LiveRevenueLogLuckyGiftPayout, &syndb.ColData{IdVal: r.ID, ColVal: v})
+}
+
+func (r *LiveRevenueLog) SetLuckyGiftSettlementAmount(v float64) {
+	r.LuckyGiftSettlementAmount = v
+	syndb.AddData(TbLiveRevenueLog, LiveRevenueLogLuckyGiftSettlementAmount, &syndb.ColData{IdVal: r.ID, ColVal: v})
+}
+
+func (r *LiveRevenueLog) ApplyLuckyGiftMeta(rtp float64, multiplier uint32, payout, settlementAmount float64) {
+	r.SetLuckyGiftRtp(rtp)
+	r.SetLuckyGiftMultiplier(multiplier)
+	r.SetLuckyGiftPayout(payout)
+	r.SetLuckyGiftSettlementAmount(settlementAmount)
+}
+
 func (r *LiveRevenueLog) SetCreatedAt(v time.Time) {
 	r.CreatedAt = v
 	syndb.AddData(TbLiveRevenueLog, db.CreatedAtName, &syndb.ColData{
@@ -166,5 +201,9 @@ func initLiveRevenueLog() {
 	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogUnitPrice)
 	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogTotalAmount)
 	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogStatus)
+	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogLuckyGiftRtp)
+	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogLuckyGiftMultiplier)
+	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogLuckyGiftPayout)
+	syndb.RegQuick(TbLiveRevenueLog, LiveRevenueLogLuckyGiftSettlementAmount)
 	migrate.AutoMigrate(&LiveRevenueLog{})
 }

@@ -17,7 +17,7 @@ type CMSLiveRevenueLogListReq struct {
 	ReceiverIds      []string `json:"receiverIds" dc:"收益用户ID列表(可选,多选)"`
 	LiveRecordId     string   `json:"liveRecordId" dc:"直播记录ID(可选)"`
 	Keyword          string   `json:"keyword" dc:"关键字(可选,模糊匹配流水ID/直播记录ID/主播ID/付款用户ID/昵称)"`
-	RevenueType      uint8    `json:"revenueType" dc:"流水类型(0=全部,1礼物,2付费弹幕,7视频通话计费)"`
+	RevenueType      uint8    `json:"revenueType" dc:"流水类型(0=全部,1普通礼物,8幸运礼物,2付费弹幕,7视频通话计费)"`
 	StartTime        int64    `json:"startTime"   dc:"创建时间起(秒, 0=不过滤)"`
 	EndTime          int64    `json:"endTime"     dc:"创建时间止(秒, 0=不过滤)"`
 }
@@ -39,8 +39,12 @@ type CMSLiveRevenueLogItem struct {
 	BizName          string     `json:"bizName"`
 	Count            int        `json:"count"`
 	UnitPrice        float64    `json:"unitPrice"`
-	TotalAmount      float64    `json:"totalAmount"`
-	Status           uint8      `json:"status"`
+	TotalAmount                 float64    `json:"totalAmount"`
+	LuckyGiftRtp                float64    `json:"luckyGiftRtp"`
+	LuckyGiftMultiplier         uint32     `json:"luckyGiftMultiplier"`
+	LuckyGiftPayout             float64    `json:"luckyGiftPayout"`
+	LuckyGiftSettlementAmount   float64    `json:"luckyGiftSettlementAmount"`
+	Status                      uint8      `json:"status"`
 	StatusText       string     `json:"statusText"`
 	CreatedAt        *time.Time `json:"createdAt"`
 }

@@ -1,11 +1,12 @@
 package liveroomdao
 
 import (
-	"github.com/gogf/gf/v2/os/gctx"
 	"context"
 	"strings"
+	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/constants/db"
 	"xr-game-server/core/cache"
 	"xr-game-server/entity/live"
@@ -73,15 +74,56 @@ func ExistsActiveLiveRoomGameRecommend(liveRoomID uint64, gameCode string) bool 
 	return false
 }
 
-func CreateLiveRoomGameRecommend(row *entity.LiveRoomGameRecommend) error {
+func saveLiveRoomGameRecommendRow(row *entity.LiveRoomGameRecommend) error {
 	if row == nil {
 		return nil
 	}
 	_, err := g.DB().Model(string(entity.TbLiveRoomGameRecommend)).Save(row)
-	if err != nil {
+	return err
+}
+
+func CreateLiveRoomGameRecommend(row *entity.LiveRoomGameRecommend) error {
+	if err := saveLiveRoomGameRecommendRow(row); err != nil {
 		return err
 	}
 	refreshLiveRoomGameRecommendCache(row.LiveRoomId)
+	return nil
+}
+
+// ReplaceActiveLiveRoomGameRecommendsByRoomID 覆盖写入: 先清空该直播间全部有效推荐, 再插入 gameCodes(顺序保留).
+func ReplaceActiveLiveRoomGameRecommendsByRoomID(liveRoomID uint64, gameCodes []string) error {
+	if liveRoomID == 0 {
+		return nil
+	}
+	active := GetActiveLiveRoomGameRecommendsByRoomID(liveRoomID)
+	for _, row := range active {
+		if row == nil || row.ID == 0 {
+			continue
+		}
+		fresh := GetLiveRoomGameRecommendByID(row.ID)
+		if fresh == nil {
+			continue
+		}
+		fresh.SetStatus(entity.LiveRoomGameRecommendStatusDeleted)
+	}
+	now := time.Now()
+	for _, raw := range gameCodes {
+		code := strings.TrimSpace(raw)
+		if code == "" {
+			continue
+		}
+		row := &entity.LiveRoomGameRecommend{
+			LiveRoomId: liveRoomID,
+			GameCode:   code,
+			Status:     entity.LiveRoomGameRecommendStatusActive,
+		}
+		row.CreatedAt = now
+		row.UpdatedAt = now
+		if err := saveLiveRoomGameRecommendRow(row); err != nil {
+			return err
+		}
+	}
+	refreshLiveRoomGameRecommendCache(liveRoomID)
 	return nil
 }
 

@@ -166,6 +166,7 @@
     </el-card>
 
     <AnchorPickerDialog
+        v-if="platformAnchorPickerVisible"
         v-model:visible="platformAnchorPickerVisible"
         :initial-anchors="selectedPlatformAnchors"
         multiple
@@ -174,6 +175,7 @@
     />
 
     <GuildAnchorPickerDialog
+        v-if="guildAnchorPickerVisible"
         v-model:visible="guildAnchorPickerVisible"
         :initial-anchors="selectedGuildAnchors"
         @confirm="handleGuildAnchorsPicked"
@@ -183,13 +185,13 @@
 
 <script lang="ts" setup>
 import {useI18n} from 'vue-i18n'
-import {computed, onMounted, reactive, ref} from 'vue'
+import {computed, defineAsyncComponent, onMounted, reactive, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {liveRecordApi} from '@/api'
 import type {AnchorListItem, LiveRecordItem} from '@/types/api'
-import AnchorPickerDialog from '@/components/AnchorPickerDialog.vue'
-import GuildAnchorPickerDialog from '@/components/GuildAnchorPickerDialog.vue'
+const AnchorPickerDialog = defineAsyncComponent(() => import('@/components/AnchorPickerDialog.vue'))
+const GuildAnchorPickerDialog = defineAsyncComponent(() => import('@/components/GuildAnchorPickerDialog.vue'))
 import {usePagePermission} from '@/composables/usePagePermission'
 import {useUserDetailNav} from '@/composables/useUserDetailNav'
 import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'

@@ -15,9 +15,11 @@ type UpdateGiftReq struct {
 	Icon        string  `json:"icon"        v:"max-length:255#图标URL最长255字符" dc:"图标URL"`
 	Animation   string  `json:"animation"   v:"max-length:255#动画URL最长255字符" dc:"动画资源URL"`
 	Price       float64 `json:"price"       v:"min:0#价格不能为负" dc:"钻石单价"`
-	Category    string  `json:"category"    v:"max-length:32#分类最长32字符" dc:"分类"`
-	Sort        int     `json:"sort"          dc:"排序值(越大越靠前)"`
+	CategoryType uint8  `json:"categoryType" v:"in:0,1#礼物分类不合法" dc:"礼物分类(0普通,1幸运礼物)"`
+	Sort         int     `json:"sort"          dc:"排序值(越大越靠前)"`
 	Description string  `json:"description"   v:"max-length:255#描述最长255字符" dc:"描述"`
+	LuckyGiftRtp                    float64                        `json:"luckyGiftRtp" v:"min:0|max:100#幸运礼物RTP不能小于0|幸运礼物RTP不能大于100" dc:"幸运礼物RTP(百分比,仅幸运礼物)"`
+	LuckyGiftMultiplierTiers        []*LuckyGiftMultiplierTierItem `json:"luckyGiftMultiplierTiers" dc:"幸运礼物返奖倍率挡位(仅幸运礼物,至少1挡)"`
 }
 
 type UpdateGiftRes struct {

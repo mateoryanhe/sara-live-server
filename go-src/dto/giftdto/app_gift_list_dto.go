@@ -19,8 +19,9 @@ type AppGiftItem struct {
 	Icon        string  `json:"icon"`
 	Animation   string  `json:"animation"`
 	Price       float64 `json:"price"`
-	Category    string  `json:"category"`
-	Sort        int     `json:"sort"`
+	Category     string `json:"category" dc:"历史分类字段"`
+	CategoryType uint8  `json:"categoryType" dc:"礼物分类(0普通,1幸运礼物)"`
+	Sort         int    `json:"sort"`
 	PublishedAt int64   `json:"publishedAt" dc:"发布时间(秒,0表示未设置)"`
 	Description string  `json:"description"`
 }

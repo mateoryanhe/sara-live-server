@@ -84,7 +84,7 @@ func GetOnShelfGifts() []*entity.LiveGift {
 }
 
 func GetGiftList(req *giftdto.GiftListReq) (int, []*giftdto.GiftListRes) {
-	sql := `select id, name, name_en, name_es, name_pt, name_hi, name_id, icon, animation, price, category, sort, status, published_at, description, created_at, updated_at
+	sql := `select id, name, name_en, name_es, name_pt, name_hi, name_id, icon, animation, price, category, category_type, lucky_gift_rtp, sort, status, published_at, description, created_at, updated_at
             from live_gifts
             where 1=1 `
 	param := make([]any, 0)
@@ -95,9 +95,9 @@ func GetGiftList(req *giftdto.GiftListReq) (int, []*giftdto.GiftListRes) {
 		sql += ` and name LIKE ?`
 		param = append(param, fmt.Sprintf("%%%s%%", req.Name))
 	}
-	if req.Category != "" {
-		sql += ` and category = ?`
-		param = append(param, req.Category)
+	if req.CategoryType != nil {
+		sql += ` and category_type = ?`
+		param = append(param, *req.CategoryType)
 	}
 	switch req.StatusFilter {
 	case 1:

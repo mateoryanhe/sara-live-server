@@ -70,6 +70,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   AnchorNoSalaryGameShareCfgManagement: 'Niveles de juego sin salario',
   LiveManagement: 'En vivo',
   GiftManagement: 'Regalos',
+  LuckyGiftMultiplierCfgManagement: 'Multiplicadores regalo suerte',
   AgoraCfgManagement: 'Config. Agora',
   PrivateRoomBillingManagement: 'Facturación llamada 1v1',
   LiveCfgManagement: 'Config. en vivo',

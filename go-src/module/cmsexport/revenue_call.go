@@ -122,7 +122,7 @@ func liveRevenueLogToCSVRow(v *liveentity.LiveRevenueLog, nicknameMap map[uint64
 		return nil
 	}
 	bizName := ""
-	if v.RevenueType == uint8(liverevenueconst.Gift) {
+	if v.RevenueType == uint8(liverevenueconst.Gift) || v.RevenueType == uint8(liverevenueconst.GiftLucky) {
 		if g := cfgdao.GetGiftById(v.BizId); g != nil {
 			bizName = g.Name
 		}
@@ -147,6 +147,10 @@ func liveRevenueLogToCSVRow(v *liveentity.LiveRevenueLog, nicknameMap map[uint64
 		strconv.Itoa(v.Count),
 		formatCSVFloat(v.UnitPrice),
 		formatCSVFloat(v.TotalAmount),
+		formatCSVFloat(v.LuckyGiftRtp),
+		strconv.FormatUint(uint64(v.LuckyGiftMultiplier), 10),
+		formatCSVFloat(v.LuckyGiftPayout),
+		formatCSVFloat(v.LuckyGiftSettlementAmount),
 		revenueLogStatusText(v.Status),
 		formatCSVTime(v.CreatedAt),
 	}

@@ -63,6 +63,7 @@ const menu = {
   CoinMerchantPaymentCountryCfgManagement: '经销商代收支付配置',
   LiveManagement: '直播管理',
   GiftManagement: '礼物管理',
+  LuckyGiftMultiplierCfgManagement: '幸运礼物返奖倍率',
   AgoraCfgManagement: '声网配置',
   PrivateRoomBillingManagement: '1v1通话计费',
   LiveCfgManagement: '直播配置',

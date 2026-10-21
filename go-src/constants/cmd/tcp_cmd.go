@@ -83,4 +83,6 @@ const (
 	LiveRoomVoiceChatMicKicked = 44
 	//语聊房上麦申请通知(推送给房主:观众提交申请)
 	LiveRoomVoiceChatMicApplyNotify = 45
+	//幸运礼物返奖通知(推送给送礼人,含用户与返奖信息)
+	LiveRoomLuckyGiftPayout = 46
 )

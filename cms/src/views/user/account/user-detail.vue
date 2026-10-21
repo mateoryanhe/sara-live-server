@@ -101,6 +101,75 @@
                   </el-descriptions-item>
                 </el-descriptions>
               </el-tab-pane>
+
+              <el-tab-pane :label="t('pages.userList.basicSubTabWithdrawPayout')" name="withdrawPayout">
+                <el-empty v-if="!detail.withdrawPayout" :description="t('pages.userList.noData')"/>
+                <el-descriptions v-else :column="1" border>
+                  <el-descriptions-item :label="t('pages.guildList.transferCountry')">
+                    {{ detail.withdrawPayout.countryCode || '-' }}
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.guildList.transferCurrency')">
+                    {{ detail.withdrawPayout.currency || '-' }}
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.guildList.transferAccountType')">
+                    {{ detail.withdrawPayout.accountType || '-' }}
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.guildList.transferBankCode')">
+                    {{ detail.withdrawPayout.bankCode || '-' }}
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.guildList.transferBankName')">
+                    {{ detail.withdrawPayout.bankName || '-' }}
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.guildList.transferPayeeName')">
+                    {{ detail.withdrawPayout.payeeName || '-' }}
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.guildList.transferPhone')">
+                    {{ detail.withdrawPayout.phone || '-' }}
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.guildList.transferEmail')">
+                    {{ detail.withdrawPayout.email || '-' }}
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.guildList.transferAccountNo')">
+                    {{ detail.withdrawPayout.accountNo || '-' }}
+                  </el-descriptions-item>
+                  <el-descriptions-item
+                      v-if="detail.withdrawPayout.identifyType"
+                      :label="t('pages.guildList.transferIdentifyType')"
+                  >
+                    {{ detail.withdrawPayout.identifyType }}
+                  </el-descriptions-item>
+                  <el-descriptions-item
+                      v-if="detail.withdrawPayout.address1"
+                      :label="t('pages.guildList.transferAddress1')"
+                  >
+                    {{ detail.withdrawPayout.address1 }}
+                  </el-descriptions-item>
+                  <el-descriptions-item
+                      v-if="detail.withdrawPayout.address2"
+                      :label="t('pages.guildList.transferAddress2')"
+                  >
+                    {{ detail.withdrawPayout.address2 }}
+                  </el-descriptions-item>
+                  <el-descriptions-item
+                      v-if="detail.withdrawPayout.address3"
+                      :label="t('pages.guildList.transferAddress3')"
+                  >
+                    {{ detail.withdrawPayout.address3 }}
+                  </el-descriptions-item>
+                  <el-descriptions-item
+                      v-if="detail.withdrawPayout.postalCode"
+                      :label="t('pages.guildList.transferPostalCode')"
+                  >
+                    {{ detail.withdrawPayout.postalCode }}
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="t('common.remark')">
+                    {{ detail.withdrawPayout.remark || '-' }}
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="t('common.updatedAt')">
+                    {{ detail.withdrawPayout.updatedAt || '-' }}
+                  </el-descriptions-item>
+                </el-descriptions>
+              </el-tab-pane>
             </el-tabs>
           </el-tab-pane>
 
@@ -249,6 +318,7 @@
                 :user-id="userId"
             />
           </el-tab-pane>
+
         </el-tabs>
       </div>
     </el-card>

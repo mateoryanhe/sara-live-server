@@ -23,6 +23,8 @@ const (
 	MaxEffectiveLiveDailyAccumulatedMinutes        = 24 * 60
 	DefaultPlatformAnchorMinimumSettlementUsd = 5.0
 	MaxPlatformAnchorMinimumSettlementUsd     = 1000000.0
+	DefaultLuckyGiftSettlementPercent         = 10.0
+	MaxLuckyGiftSettlementPercent             = 100.0
 )
 
 var walletExchangeCfgCacheMgr *cache.RowCache[*entity.WalletExchangeCfg]
@@ -68,6 +70,7 @@ func UpdateWalletExchangeCfg(expectedID uint64, update func(*entity.WalletExchan
 			UsdToGoldRate:                      DefaultWalletUsdToGoldRate,
 			EffectiveLiveMinSessionMinutes:     DefaultEffectiveLiveMinSessionMinutes,
 			PlatformAnchorMinimumSettlementUsd: DefaultPlatformAnchorMinimumSettlementUsd,
+			LuckyGiftSettlementPercent:         DefaultLuckyGiftSettlementPercent,
 		}
 	} else {
 		copyRow := *existing

@@ -13,6 +13,12 @@ export const liveRoutes: RouteRecordRaw = {
             meta: {title: '礼物管理'},
         },
         {
+            path: 'gift/gift-edit/:id',
+            name: 'GiftManagementEdit',
+            component: () => import('@/views/live/gift/gift-edit.vue'),
+            meta: {title: '礼物编辑', hidden: true, parentPermission: 'GiftManagement'},
+        },
+        {
             path: 'agora-cfg',
             name: 'AgoraCfgManagement',
             component: () => import('@/views/live/agora-cfg.vue'),

@@ -53,7 +53,7 @@ func CMSListWithdrawLogs(_ context.Context, req *userwithdrawdto.CMSListWithdraw
 			Status:              row.Status,
 			TransferOrderId:     row.TransferOrderId,
 			TransferPlatformNo:  row.TransferPlatformNo,
-			TransferCurrency:    row.TransferCurrency,
+			TransferCurrency:    cmsWithdrawLogTransferCurrency(row),
 			TransferLocalAmount: row.TransferLocalAmount,
 			TransferFailMsg:     row.TransferFailMsg,
 			RejectReason:        row.RejectReason,
@@ -100,6 +100,26 @@ func CMSBatchRejectWithdraw(_ context.Context, req *userwithdrawdto.CMSBatchReje
 		}
 		row.SetStatus(userentity.UserWithdrawStatusRejected)
 		row.SetRejectReason(reason)
+		userwithdrawdao.SyncUserWithdrawLogCache(row)
+		res.SuccessCount++
+	}
+	return res, nil
+}
+
+func CMSBatchRevokeWithdrawApproval(_ context.Context, req *userwithdrawdto.CMSBatchRevokeWithdrawApprovalReq) (*userwithdrawdto.CMSBatchRevokeWithdrawApprovalRes, error) {
+	if req == nil {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	res := &userwithdrawdto.CMSBatchRevokeWithdrawApprovalRes{}
+	for _, id := range parseIdList(req.Ids) {
+		row := userwithdrawdao.GetUserWithdrawLogById(id)
+		if row == nil || row.Status != userentity.UserWithdrawStatusApproved {
+			res.FailCount++
+			continue
+		}
+		row.SetStatus(userentity.UserWithdrawStatusPending)
+		row.SetRejectReason("")
+		row.SetTransferFailMsg("")
 		userwithdrawdao.SyncUserWithdrawLogCache(row)
 		res.SuccessCount++
 	}

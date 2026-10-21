@@ -48,6 +48,8 @@ export const userWithdrawApi = {
         request.post<BatchCountRes>('/userWithdrawCms/batchApproveWithdraw', data),
     batchRejectWithdraw: (data: BatchIdsReq) =>
         request.post<BatchCountRes>('/userWithdrawCms/batchRejectWithdraw', data),
+    batchRevokeWithdrawApproval: (data: BatchIdsReq) =>
+        request.post<BatchCountRes>('/userWithdrawCms/batchRevokeWithdrawApproval', data),
     batchSubmitPayout: (data: BatchIdsReq) =>
         request.post<BatchCountRes>('/userWithdrawCms/batchSubmitPayout', data),
 }

@@ -28,6 +28,10 @@ func (c *UserWithdrawCMSController) BatchRejectWithdraw(ctx context.Context, req
 	return userwithdraw.CMSBatchRejectWithdraw(ctx, req)
 }
 
+func (c *UserWithdrawCMSController) BatchRevokeWithdrawApproval(ctx context.Context, req *userwithdrawdto.CMSBatchRevokeWithdrawApprovalReq) (*userwithdrawdto.CMSBatchRevokeWithdrawApprovalRes, error) {
+	return userwithdraw.CMSBatchRevokeWithdrawApproval(ctx, req)
+}
+
 func (c *UserWithdrawCMSController) BatchSubmitPayout(ctx context.Context, req *userwithdrawdto.CMSBatchSubmitPayoutReq) (*userwithdrawdto.CMSBatchSubmitPayoutRes, error) {
 	return userwithdraw.CMSBatchSubmitPayout(ctx, req)
 }

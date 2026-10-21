@@ -38,6 +38,9 @@ func CreateGift(_ context.Context, req *giftdto.CreateGiftReq) (*giftdto.CreateG
 	if existing := cfgdao.GetGiftByName(req.Name); existing != nil {
 		return nil, errercode.CreateCode(errercode.GiftExist)
 	}
+	if err := validateLuckyGiftConfig(req.CategoryType, req.LuckyGiftMultiplierTiers); err != nil {
+		return nil, err
+	}
 
 	g := &entity.LiveGift{
 		Name:        req.Name,
@@ -49,12 +52,15 @@ func CreateGift(_ context.Context, req *giftdto.CreateGiftReq) (*giftdto.CreateG
 		Icon:        req.Icon,
 		Animation:   req.Animation,
 		Price:       req.Price,
-		Category:    req.Category,
-		Sort:        req.Sort,
+		Sort:         req.Sort,
 		Status:      entity.LiveGiftStatusOffShelf, // 新建默认下架,需手动上架
 		Description: req.Description,
 	}
+	applyLuckyGiftFields(g, req.CategoryType, req.LuckyGiftRtp)
 	if err := cfgdao.CreateGift(g); err != nil {
+		return nil, err
+	}
+	if err := saveGiftLuckyConfig(g.ID, req.CategoryType, req.LuckyGiftRtp, req.LuckyGiftMultiplierTiers); err != nil {
 		return nil, err
 	}
 	invalidateGiftCache()
@@ -80,11 +86,17 @@ func UpdateGift(_ context.Context, req *giftdto.UpdateGiftReq) (*giftdto.UpdateG
 	g.Icon = req.Icon
 	g.Animation = req.Animation
 	g.Price = req.Price
-	g.Category = req.Category
 	g.Sort = req.Sort
 	g.Description = req.Description
+	if err := validateLuckyGiftConfig(req.CategoryType, req.LuckyGiftMultiplierTiers); err != nil {
+		return nil, err
+	}
+	applyLuckyGiftFields(g, req.CategoryType, req.LuckyGiftRtp)
 
 	if err := cfgdao.UpdateGift(g); err != nil {
+		return nil, err
+	}
+	if err := saveGiftLuckyConfig(g.ID, req.CategoryType, req.LuckyGiftRtp, req.LuckyGiftMultiplierTiers); err != nil {
 		return nil, err
 	}
 	invalidateGiftCache()
@@ -99,6 +111,7 @@ func DeleteGift(_ context.Context, req *giftdto.DeleteGiftReq) (*giftdto.DeleteG
 	if err := cfgdao.DeleteGift(req.ID); err != nil {
 		return nil, err
 	}
+	_ = cfgdao.DeleteLuckyGiftMultiplierTiersByGiftID(req.ID)
 	invalidateGiftCache()
 	return &giftdto.DeleteGiftRes{Success: true}, nil
 }

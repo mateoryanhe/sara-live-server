@@ -66,8 +66,12 @@ func toCMSItem(v *entity.LiveRevenueLog, profileMap map[uint64]*userentity.UserI
 		BizId:           v.BizId,
 		Count:           v.Count,
 		UnitPrice:       v.UnitPrice,
-		TotalAmount:     v.TotalAmount,
-		Status:          v.Status,
+		TotalAmount:               v.TotalAmount,
+		LuckyGiftRtp:              v.LuckyGiftRtp,
+		LuckyGiftMultiplier:       v.LuckyGiftMultiplier,
+		LuckyGiftPayout:           v.LuckyGiftPayout,
+		LuckyGiftSettlementAmount: v.LuckyGiftSettlementAmount,
+		Status:                    v.Status,
 		StatusText:      revenueLogStatusText(v.Status),
 		CreatedAt:       &v.CreatedAt,
 	}
@@ -81,7 +85,7 @@ func toCMSItem(v *entity.LiveRevenueLog, profileMap map[uint64]*userentity.UserI
 			item.ReceiverAvatar = upload.ResolveAvatarUrlForUser(v.RoomId, receiver.Avatar)
 		}
 	}
-	if v.RevenueType == uint8(liverevenueconst.Gift) {
+	if v.RevenueType == uint8(liverevenueconst.Gift) || v.RevenueType == uint8(liverevenueconst.GiftLucky) {
 		if g := cfgdao.GetGiftById(v.BizId); g != nil {
 			item.BizName = g.Name
 		}

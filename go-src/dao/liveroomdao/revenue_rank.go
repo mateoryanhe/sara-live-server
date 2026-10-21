@@ -39,7 +39,12 @@ SELECT ranked.room_id,
        IFNULL(ui.`+string(userentity.UserInfoGender)+`, 0) AS gender,
        ui.`+string(userentity.UserInfoBirthday)+` AS birthday
 FROM (
-    SELECT rl.room_id, SUM(rl.total_amount) AS total_amount
+    SELECT rl.room_id,
+           SUM(CASE
+               WHEN rl.`+string(entity.LiveRevenueLogRevenueType)+` = 8 AND IFNULL(rl.`+string(entity.LiveRevenueLogLuckyGiftSettlementAmount)+`, 0) > 0
+               THEN rl.`+string(entity.LiveRevenueLogLuckyGiftSettlementAmount)+`
+               ELSE rl.`+string(entity.LiveRevenueLogTotalAmount)+`
+           END) AS total_amount
     FROM `+string(entity.TbLiveRevenueLog)+` rl
     INNER JOIN `+string(userentity.TbAccount)+` a ON a.id = rl.room_id
     LEFT JOIN `+string(userentity.TbUserExt)+` ue ON ue.id = rl.room_id

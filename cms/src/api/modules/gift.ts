@@ -19,9 +19,11 @@ export const giftApi = {
         icon: string
         animation: string
         price: number
-        category: string
+        categoryType: number
         sort: number
         description: string
+        luckyGiftRtp?: number
+        luckyGiftMultiplierTiers?: LuckyGiftMultiplierTierDto[]
     }) => {
         return request.post<{ id: string }>('/gift/createGift', data)
     },
@@ -38,9 +40,11 @@ export const giftApi = {
         icon: string
         animation: string
         price: number
-        category: string
+        categoryType: number
         sort: number
         description: string
+        luckyGiftRtp?: number
+        luckyGiftMultiplierTiers?: LuckyGiftMultiplierTierDto[]
     }) => {
         return request.post<boolean>('/gift/updateGift', data)
     },
@@ -59,4 +63,18 @@ export const giftApi = {
     offShelfGift: (id: string | number) => {
         return request.post<{ success: boolean; status: number }>('/gift/offShelfGift', {id})
     },
+
+    getGiftLuckyCfg: (giftId: string | number) => {
+        return request.post<{ luckyGiftRtp: number; tiers: LuckyGiftMultiplierTierDto[] }>(
+            '/gift/getGiftLuckyCfg',
+            {giftId: Number(giftId)},
+        )
+    },
+}
+
+export interface LuckyGiftMultiplierTierDto {
+    id?: string
+    multiplier: number
+    weight: number
+    type: 'low' | 'medium' | 'high'
 }

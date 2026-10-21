@@ -164,6 +164,11 @@ func (c *PushController) LiveRoomGift(_ context.Context, _ *pushdto.LiveRoomGift
 	return nil, nil
 }
 
+// LiveRoomLuckyGiftPayout cmd=46 幸运礼物返奖
+func (c *PushController) LiveRoomLuckyGiftPayout(_ context.Context, _ *pushdto.LiveRoomLuckyGiftPayoutPushReq) (*pushdto.LiveRoomLuckyGiftPayoutPushResp, error) {
+	return nil, nil
+}
+
 // --- 推送-消息 ---
 
 // ActivityMessage cmd=36 活动消息发布(全服广播)

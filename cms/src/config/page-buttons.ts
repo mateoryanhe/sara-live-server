@@ -125,6 +125,8 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'saveEffectiveLive', label: '保存有效直播时长配置'},
         {key: 'viewPlatformAnchorSettlement', label: '查询平台主播结算配置'},
         {key: 'savePlatformAnchorSettlement', label: '保存平台主播结算配置'},
+        {key: 'viewLuckyGiftSettlement', label: '查询幸运礼物结算配置'},
+        {key: 'saveLuckyGiftSettlement', label: '保存幸运礼物结算配置'},
     ],
 	AnchorIncomeSettlementLogList: [
 		BTN.view,
@@ -308,6 +310,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'sync', label: '同步数据'},
         {key: 'syncAssets', label: '同步图标&动画'},
     ],
+    LuckyGiftMultiplierCfgManagement: DEFAULT_CONFIG_BUTTONS,
     GuildManagement: [
         BTN.view,
         BTN.search,
@@ -483,8 +486,10 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     UserWithdrawLogList: [
         BTN.view,
         BTN.search,
+        {key: 'viewUserDetail', label: '查看用户详情'},
         {key: 'batchApprove', label: '批量通过'},
         {key: 'batchReject', label: '批量拒绝'},
+        {key: 'batchRevokeApprove', label: '驳回到待审'},
         {key: 'batchSubmitPayout', label: '提交代付'},
     ],
     GameBetLogListManagement: [

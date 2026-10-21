@@ -70,6 +70,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   AnchorNoSalaryGameShareCfgManagement: 'Tingkat Pendapatan Game Tanpa Gaji',
   LiveManagement: 'Live',
   GiftManagement: 'Hadiah',
+  LuckyGiftMultiplierCfgManagement: 'Pengali hadiah keberuntungan',
   AgoraCfgManagement: 'Konfigurasi Agora',
   PrivateRoomBillingManagement: 'Tagihan Panggilan 1v1',
   LiveCfgManagement: 'Konfigurasi Live',

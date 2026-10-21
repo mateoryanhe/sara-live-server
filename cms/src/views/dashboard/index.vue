@@ -46,32 +46,11 @@
                   <div class="stat-label">{{ card.label }}</div>
                   <div class="stat-value">
                     {{ card.format === 'count' ? formatCount(card.value) : formatAmount(card.value) }}
+                    <span v-if="card.format === 'amountUsd'" class="stat-unit">USD</span>
                   </div>
                 </div>
               </div>
             </section>
-          </div>
-        </el-tab-pane>
-
-        <el-tab-pane :label="t('pages.dashboard.anchorPayout')" name="anchorPayout">
-          <div class="tab-toolbar">
-            <el-button :loading="loading" @click="() => void fetchSysStat()">{{ t('common.refresh') }}</el-button>
-          </div>
-          <div class="basic-stat-grid anchor-payout-stat-grid">
-            <div class="stat-card tone-teal">
-              <div class="stat-label">{{ t('pages.dashboard.statWeeklyAnchorPayout') }}</div>
-              <div class="stat-value">
-                {{ formatAmount(sysStat.weeklyAnchorPayout) }}
-                <span class="stat-unit">USD</span>
-              </div>
-            </div>
-            <div class="stat-card tone-blue">
-              <div class="stat-label">{{ t('pages.dashboard.statTotalAnchorPayout') }}</div>
-              <div class="stat-value">
-                {{ formatAmount(sysStat.totalAnchorPayout) }}
-                <span class="stat-unit">USD</span>
-              </div>
-            </div>
           </div>
         </el-tab-pane>
 
@@ -232,7 +211,7 @@ const ResourceMetricChart = defineAsyncComponent(() => import('@/views/config/co
 const GameStatsTrendChart = defineAsyncComponent(() => import('./components/game-stats-trend-chart.vue'))
 
 const AUTO_REFRESH_STORAGE_KEY = 'dashboard:autoRefreshMs'
-const DEFAULT_AUTO_REFRESH_MS = 60_000
+const DEFAULT_AUTO_REFRESH_MS = 300_000
 const AUTO_REFRESH_INTERVALS = [
   {value: 0, labelKey: 'autoRefreshOff'},
   {value: 10_000, labelKey: 'autoRefresh10s'},
@@ -263,6 +242,14 @@ let autoRefreshTimer: ReturnType<typeof setInterval> | null = null
 let dashboardRefreshInFlight = false
 let skipNextActivatedRefresh = false
 
+/** 各主 Tab 是否已拉过数据（切换 Tab 时懒加载，避免首屏 4 连请求） */
+const tabDataLoaded = reactive({
+  sysStat: false,
+  userTrend: false,
+  gameTrend: false,
+  onlineTrend: false,
+})
+
 const isDashboardVisible = () =>
     dashboardRouteActive.value && typeof document !== 'undefined' && document.visibilityState === 'visible'
 
@@ -274,7 +261,7 @@ const autoRefreshOptions = computed(() =>
 )
 
 const pageLoading = computed(() => {
-  if (activeMainTab.value === 'basic' || activeMainTab.value === 'anchorPayout') {
+  if (activeMainTab.value === 'basic') {
     return loading.value
   }
   if (activeMainTab.value === 'user' || activeMainTab.value === 'rechargeUser') {
@@ -392,13 +379,15 @@ type BasicStatCardKey = keyof Pick<
     | 'totalGoldConsume'
     | 'totalDiamondConsume'
     | 'totalRegisterUser'
+    | 'weeklyAnchorPayout'
+    | 'totalAnchorPayout'
 >
 
 type BasicStatCardConfig = {
   key: BasicStatCardKey
   labelKey: string
   theme: string
-  format: 'amount' | 'count'
+  format: 'amount' | 'amountUsd' | 'count'
 }
 
 type BasicStatCard = BasicStatCardConfig & {
@@ -428,6 +417,11 @@ const BUSINESS_TOTAL_STAT_CARD_CONFIG: BasicStatCardConfig[] = [
   {key: 'totalRegisterUser', labelKey: 'statTotalRegisterUser', theme: 'tone-indigo', format: 'count'},
 ]
 
+const ANCHOR_PAYOUT_STAT_CARD_CONFIG: BasicStatCardConfig[] = [
+  {key: 'weeklyAnchorPayout', labelKey: 'statWeeklyAnchorPayout', theme: 'tone-teal', format: 'amountUsd'},
+  {key: 'totalAnchorPayout', labelKey: 'statTotalAnchorPayout', theme: 'tone-blue', format: 'amountUsd'},
+]
+
 const toBasicStatCards = (configs: BasicStatCardConfig[]): BasicStatCard[] =>
     configs.map((cfg) => ({
       ...cfg,
@@ -453,6 +447,12 @@ const basicStatSections = computed(() => [
     title: t('pages.dashboard.sectionBusinessTotal'),
     gridClass: 'basic-stat-grid-total',
     cards: toBasicStatCards(BUSINESS_TOTAL_STAT_CARD_CONFIG),
+  },
+  {
+    key: 'anchorPayout',
+    title: t('pages.dashboard.anchorPayout'),
+    gridClass: 'basic-stat-grid-anchor-payout',
+    cards: toBasicStatCards(ANCHOR_PAYOUT_STAT_CARD_CONFIG),
   },
 ])
 
@@ -489,31 +489,53 @@ const restartAutoRefreshTimer = () => {
       clearAutoRefreshTimer()
       return
     }
-    void refreshDashboard(true)
+    void refreshActiveMainTab(true, true)
   }, autoRefreshMs.value)
 }
 
 const handleDocumentVisibilityChange = () => {
   if (isDashboardVisible()) {
-    void refreshDashboard(true)
+    void refreshActiveMainTab(true, true)
     restartAutoRefreshTimer()
     return
   }
   clearAutoRefreshTimer()
 }
 
-const refreshDashboard = async (silent = false) => {
+const refreshActiveMainTab = async (silent = false, force = false) => {
   if (dashboardRefreshInFlight) {
     return
   }
   dashboardRefreshInFlight = true
   try {
-    await Promise.all([
-      fetchSysStat(silent),
-      fetchUserStatTrend(silent),
-      fetchGameStatTrend(silent),
-      fetchResourceMetricTrend(silent),
-    ])
+    const tab = activeMainTab.value
+    if (tab === 'basic') {
+      if (force || !tabDataLoaded.sysStat) {
+        await fetchSysStat(silent)
+        tabDataLoaded.sysStat = true
+      }
+      return
+    }
+    if (tab === 'user' || tab === 'rechargeUser') {
+      if (force || !tabDataLoaded.userTrend) {
+        await fetchUserStatTrend(silent)
+        tabDataLoaded.userTrend = true
+      }
+      return
+    }
+    if (tab === 'gameStats') {
+      if (force || !tabDataLoaded.gameTrend) {
+        await fetchGameStatTrend(silent)
+        tabDataLoaded.gameTrend = true
+      }
+      return
+    }
+    if (tab === 'online') {
+      if (force || !tabDataLoaded.onlineTrend) {
+        await fetchResourceMetricTrend(silent)
+        tabDataLoaded.onlineTrend = true
+      }
+    }
   } finally {
     dashboardRefreshInFlight = false
   }
@@ -688,6 +710,7 @@ const resizeGameBetCharts = () => {
 }
 
 const handleMainTabChange = async () => {
+  await refreshActiveMainTab(false)
   await nextTick()
   if (activeMainTab.value === 'user') {
     resizeUserCharts()
@@ -741,7 +764,7 @@ onMounted(() => {
   dashboardRouteActive.value = true
   skipNextActivatedRefresh = true
   document.addEventListener('visibilitychange', handleDocumentVisibilityChange)
-  void refreshDashboard(false)
+  void refreshActiveMainTab(false)
   restartAutoRefreshTimer()
 })
 
@@ -752,7 +775,7 @@ onActivated(() => {
     restartAutoRefreshTimer()
     return
   }
-  void refreshDashboard(true)
+  void refreshActiveMainTab(true, true)
   restartAutoRefreshTimer()
 })
 
@@ -856,7 +879,7 @@ onUnmounted(() => {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.anchor-payout-stat-grid {
+.basic-stat-grid-anchor-payout {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -990,7 +1013,7 @@ onUnmounted(() => {
 @media (max-width: 1200px) {
   .basic-stat-grid-today,
   .basic-stat-grid-total,
-  .anchor-payout-stat-grid {
+  .basic-stat-grid-anchor-payout {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -998,7 +1021,7 @@ onUnmounted(() => {
 @media (max-width: 768px) {
   .basic-stat-grid-today,
   .basic-stat-grid-total,
-  .anchor-payout-stat-grid {
+  .basic-stat-grid-anchor-payout {
     grid-template-columns: 1fr;
   }
 

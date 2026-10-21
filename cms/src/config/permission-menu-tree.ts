@@ -300,11 +300,11 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
         children: [
             page('UserWithdrawLogList', {
                 buttonGroups: [
-                    {id: 'list', titleKey: 'pages.moduleList.groupAccess', buttonKeys: ['view', 'search']},
+                    {id: 'list', titleKey: 'pages.moduleList.groupAccess', buttonKeys: ['view', 'search', 'viewUserDetail']},
                     {
                         id: 'audit',
                         titleKey: 'pages.userWithdrawLogList.auditGroup',
-                        buttonKeys: ['batchApprove', 'batchReject', 'batchSubmitPayout'],
+                        buttonKeys: ['batchApprove', 'batchReject', 'batchRevokeApprove', 'batchSubmitPayout'],
                     },
                 ],
             }),

@@ -25,6 +25,7 @@ func invalidateGiftCache() {
 	giftCacheSorted = nil
 	giftCacheLoaded = false
 	giftCacheMu.Unlock()
+	reloadLuckyGiftMultiplierMemory()
 }
 
 // loadGiftCache 从 DB 重新加载已上架礼物到缓存
@@ -111,8 +112,9 @@ func toAppGiftItem(g *entity.LiveGift) *giftdto.AppGiftItem {
 		Icon:        upload.GetUrlByName(g.Icon),
 		Animation:   upload.GetUrlByName(g.Animation),
 		Price:       g.Price,
-		Category:    g.Category,
-		Sort:        g.Sort,
+		Category:     g.Category,
+		CategoryType: g.CategoryType,
+		Sort:         g.Sort,
 		PublishedAt: publishedAt,
 		Description: g.Description,
 	}

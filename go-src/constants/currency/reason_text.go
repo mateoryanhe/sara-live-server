@@ -40,6 +40,7 @@ var reasonTextMap = map[Lang]map[Reason]string{
 		ReasonShortVideoAuthorSettlement: "短视频作者结算",
 		ReasonUserWithdraw:               "用户提现",
 		ReasonUserWithdrawRefund:         "用户提现退回",
+		ReasonLuckyGiftPayout:            "幸运礼物返奖",
 	},
 	LangZHTW: {
 		ReasonUnknown:                    "未知",
@@ -78,6 +79,7 @@ var reasonTextMap = map[Lang]map[Reason]string{
 		ReasonShortVideoAuthorSettlement: "短視頻作者結算",
 		ReasonUserWithdraw:               "用戶提現",
 		ReasonUserWithdrawRefund:         "用戶提現退回",
+		ReasonLuckyGiftPayout:            "幸運禮物返獎",
 	},
 	LangEN: {
 		ReasonUnknown:                    "Unknown",
@@ -116,6 +118,7 @@ var reasonTextMap = map[Lang]map[Reason]string{
 		ReasonShortVideoAuthorSettlement: "Short Video Author Settlement",
 		ReasonUserWithdraw:               "User Withdrawal",
 		ReasonUserWithdrawRefund:         "User Withdrawal Refund",
+		ReasonLuckyGiftPayout:            "Lucky Gift Payout",
 	},
 	LangID: {
 		ReasonUnknown:                    "Tidak diketahui",
@@ -154,6 +157,7 @@ var reasonTextMap = map[Lang]map[Reason]string{
 		ReasonShortVideoAuthorSettlement: "Penyelesaian pendapatan video pendek",
 		ReasonUserWithdraw:               "Penarikan pengguna",
 		ReasonUserWithdrawRefund:         "Pengembalian penarikan",
+		ReasonLuckyGiftPayout:            "Hadiah lucky gift",
 	},
 }
 

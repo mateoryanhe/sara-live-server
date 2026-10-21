@@ -91,7 +91,7 @@ func toLiveRoomGameRecommendItem(row *liveentity.LiveRoomGameRecommend, gameCfg 
 	return item
 }
 
-// SyncLiveRoomGameRecommendList 同步直播间推荐游戏列表(仅游戏直播间使用,按上报 gameCode 全量覆盖).
+// SyncLiveRoomGameRecommendList 同步直播间推荐游戏列表(仅游戏直播间使用): gameCodes 非空时先清空有效记录再全量写入; 空列表不改动库内数据.
 func SyncLiveRoomGameRecommendList(liveRoomID uint64, gameCodes []string) error {
 	if liveRoomID == 0 {
 		return errercode.CreateCode(errercode.InvalidParam)
@@ -108,38 +108,7 @@ func SyncLiveRoomGameRecommendList(liveRoomID uint64, gameCodes []string) error 
 			return errercode.CreateCode(errercode.GameCfgNonExist)
 		}
 	}
-
-	current := liveroomdao.GetActiveLiveRoomGameRecommendsByRoomID(liveRoomID)
-	currentMap := make(map[string]*liveentity.LiveRoomGameRecommend, len(current))
-	for _, row := range current {
-		if row == nil || row.GameCode == "" {
-			continue
-		}
-		currentMap[row.GameCode] = row
-	}
-
-	targetSet := make(map[string]struct{}, len(normalized))
-	for _, code := range normalized {
-		targetSet[code] = struct{}{}
-		if _, ok := currentMap[code]; ok {
-			continue
-		}
-		if _, err := AddLiveRoomGameRecommend(liveRoomID, code); err != nil {
-			return err
-		}
-	}
-	for _, row := range current {
-		if row == nil {
-			continue
-		}
-		if _, ok := targetSet[row.GameCode]; ok {
-			continue
-		}
-		if err := DeleteLiveRoomGameRecommend(row.ID); err != nil {
-			return err
-		}
-	}
-	return nil
+	return liveroomdao.ReplaceActiveLiveRoomGameRecommendsByRoomID(liveRoomID, normalized)
 }
 
 func normalizeLiveRoomGameCodes(gameCodes []string) []string {

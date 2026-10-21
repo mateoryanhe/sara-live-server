@@ -34,6 +34,9 @@ func SaveLiveCfg(_ context.Context, req *livecfgdto.SaveLiveCfgReq) (*livecfgdto
 		OneToOneDailyFreeSeconds:        NormalizeOneToOneDailyFreeSeconds(req.OneToOneDailyFreeSeconds),
 		LiveRoomCallMinTotalRechargeUsd: NormalizeLiveRoomCallMinTotalRechargeUsd(req.LiveRoomCallMinTotalRechargeUsd),
 	}
+	if existing != nil {
+		row.LuckyGiftRtp = existing.LuckyGiftRtp
+	}
 	if req.ID > 0 {
 		if existing == nil || existing.ID != req.ID {
 			return nil, errercode.CreateCode(errercode.InvalidParam)

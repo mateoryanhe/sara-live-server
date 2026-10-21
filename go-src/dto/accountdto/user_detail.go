@@ -99,6 +99,26 @@ type UserLoginDeviceDetailItem struct {
 	UpdatedAt   *time.Time `json:"updatedAt"`
 }
 
+// UserWithdrawPayoutDetailItem 用户提现代付收款信息(user_payout_infos)
+type UserWithdrawPayoutDetailItem struct {
+	CountryCode  string `json:"countryCode"`
+	Currency     string `json:"currency"`
+	AccountType  string `json:"accountType"`
+	PayeeName    string `json:"payeeName"`
+	Phone        string `json:"phone"`
+	Email        string `json:"email"`
+	BankName     string `json:"bankName"`
+	AccountNo    string `json:"accountNo"`
+	BankCode     string `json:"bankCode"`
+	IdentifyType string `json:"identifyType"`
+	Address1     string `json:"address1"`
+	Address2     string `json:"address2"`
+	Address3     string `json:"address3"`
+	PostalCode   string `json:"postalCode"`
+	Remark       string `json:"remark"`
+	UpdatedAt    string `json:"updatedAt"`
+}
+
 // GetUserDetailRes CMS用户详情
 type GetUserDetailRes struct {
 	Account        *UserAccountDetailItem        `json:"account"`
@@ -108,4 +128,5 @@ type GetUserDetailRes struct {
 	CumulativeStat   *UserCumulativeStatDetailItem   `json:"cumulativeStat"`
 	LoginDevice      *UserLoginDeviceDetailItem      `json:"loginDevice"`
 	ChannelPayProfile *UserChannelPayProfileDetailItem `json:"channelPayProfile"`
+	WithdrawPayout   *UserWithdrawPayoutDetailItem   `json:"withdrawPayout"`
 }

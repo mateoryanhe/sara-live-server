@@ -62,7 +62,7 @@ func toLiveCfgSnapshot(row *entity.LiveCfg) *liveCfgSnapshot {
 		VideoCallTicketEnabled:            row.VideoCallTicketEnabled,
 		AudienceListRefreshSeconds:        NormalizeAudienceListRefreshSeconds(row.AudienceListRefreshSeconds),
 		OneToOneDailyFreeSeconds:          NormalizeOneToOneDailyFreeSeconds(row.OneToOneDailyFreeSeconds),
-		LiveRoomCallMinTotalRechargeUsd:   NormalizeLiveRoomCallMinTotalRechargeUsd(row.LiveRoomCallMinTotalRechargeUsd),
+		LiveRoomCallMinTotalRechargeUsd: NormalizeLiveRoomCallMinTotalRechargeUsd(row.LiveRoomCallMinTotalRechargeUsd),
 	}
 }
 
@@ -118,3 +118,4 @@ func GetOneToOneDailyFreeSeconds() uint32 {
 func GetLiveRoomCallMinTotalRechargeUSD() float64 {
 	return getLiveCfgCache().LiveRoomCallMinTotalRechargeUsd
 }
+

@@ -24,6 +24,26 @@ export function buildLiveRevenueLogCsvColumns(
     {header: t(`${ns}.unitPriceDiamond`), value: row => row.unitPrice},
     {header: t(`${ns}.totalAmountDiamond`), value: row => row.totalAmount},
     {
+      header: t(`${ns}.luckyGiftRtp`),
+      value: row => (row.revenueType === 8 && row.luckyGiftRtp != null ? row.luckyGiftRtp : ''),
+    },
+    {
+      header: t(`${ns}.luckyGiftMultiplier`),
+      value: row =>
+        row.revenueType === 8 && row.luckyGiftMultiplier ? row.luckyGiftMultiplier : '',
+    },
+    {
+      header: t(`${ns}.luckyGiftPayout`),
+      value: row => (row.revenueType === 8 && row.luckyGiftPayout != null ? row.luckyGiftPayout : ''),
+    },
+    {
+      header: t(`${ns}.luckyGiftSettlementAmount`),
+      value: row =>
+        row.revenueType === 8 && row.luckyGiftSettlementAmount != null
+          ? row.luckyGiftSettlementAmount
+          : '',
+    },
+    {
       header: t('common.status'),
       value: row => row.statusText || (row.status === 1 ? t(`${ns}.refunded`) : t('common.normal')),
     },

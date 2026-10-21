@@ -2,6 +2,7 @@ type TranslateFn = (key: string) => string
 
 export const LIVE_REVENUE_TYPE_OPTIONS = [
   {value: 1, labelKey: 'pages.revenueLogList.revenueGift'},
+  {value: 8, labelKey: 'pages.revenueLogList.revenueGiftLucky'},
   {value: 2, labelKey: 'pages.revenueLogList.revenuePaidDanmaku'},
 	{value: 6, labelKey: 'pages.revenueLogList.revenueLiveRoomVideoCallTicket'},
   {value: 7, labelKey: 'pages.revenueLogList.revenueLiveRoomVideoCallBilling'},

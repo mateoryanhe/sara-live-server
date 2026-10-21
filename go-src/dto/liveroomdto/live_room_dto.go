@@ -189,10 +189,23 @@ type SendGiftReq struct {
 	Count  int    `json:"count"  v:"required|min:1|max:9999#送礼数量不合法|送礼数量需大于0|单次最多9999" dc:"送礼数量"`
 }
 
+// GiftSenderBrief 送礼用户基础信息(App 展示/推送)
+type GiftSenderBrief struct {
+	UserId   uint64 `json:"userId,string" dc:"用户ID"`
+	Nickname string `json:"nickname"      dc:"昵称"`
+	Avatar   string `json:"avatar"        dc:"头像URL"`
+	VipLevel uint32 `json:"vipLevel"      dc:"VIP等级"`
+}
+
 // SendGiftRes App端送礼响应
 type SendGiftRes struct {
-	Cost    float64 `json:"cost"    dc:"本次实际消耗钻石数"`
-	Diamond float64 `json:"diamond" dc:"剩余钻石余额"`
+	Cost                float64          `json:"cost"    dc:"本次实际消耗钻石数"`
+	Diamond             float64          `json:"diamond" dc:"剩余钻石余额"`
+	Sender              *GiftSenderBrief `json:"sender,omitempty" dc:"送礼用户基础信息"`
+	LuckyGiftRtp          float64          `json:"luckyGiftRtp,omitempty" dc:"幸运礼物RTP快照(%)(仅幸运礼物)"`
+	LuckyGiftPayout       float64          `json:"luckyGiftPayout,omitempty" dc:"幸运礼物返奖钻石(仅幸运礼物)"`
+	LuckyGiftMultiplier   uint32           `json:"luckyGiftMultiplier,omitempty" dc:"幸运礼物返奖倍数(仅幸运礼物)"`
+	LuckyGiftTierType     string           `json:"luckyGiftTierType,omitempty" dc:"返奖挡位类型(low/medium/high,未中奖为空)"`
 }
 
 // SendGiftToAnchorReq App端给指定主播送礼
@@ -205,8 +218,13 @@ type SendGiftToAnchorReq struct {
 
 // SendGiftToAnchorRes App端给指定主播送礼响应
 type SendGiftToAnchorRes struct {
-	Cost    float64 `json:"cost"    dc:"本次实际消耗钻石数"`
-	Diamond float64 `json:"diamond" dc:"剩余钻石余额"`
+	Cost                float64          `json:"cost"    dc:"本次实际消耗钻石数"`
+	Diamond             float64          `json:"diamond" dc:"剩余钻石余额"`
+	Sender              *GiftSenderBrief `json:"sender,omitempty" dc:"送礼用户基础信息"`
+	LuckyGiftRtp          float64          `json:"luckyGiftRtp,omitempty" dc:"幸运礼物RTP快照(%)(仅幸运礼物)"`
+	LuckyGiftPayout       float64          `json:"luckyGiftPayout,omitempty" dc:"幸运礼物返奖钻石(仅幸运礼物)"`
+	LuckyGiftMultiplier   uint32           `json:"luckyGiftMultiplier,omitempty" dc:"幸运礼物返奖倍数(仅幸运礼物)"`
+	LuckyGiftTierType     string           `json:"luckyGiftTierType,omitempty" dc:"返奖挡位类型(low/medium/high,未中奖为空)"`
 }
 
 // GiftPushItem 推送给房间在线用户的送礼广播载荷
@@ -216,14 +234,20 @@ type GiftPushItem struct {
 	SenderName   string  `json:"senderName"  dc:"送礼用户昵称"`
 	SenderAvatar string  `json:"senderAvatar" dc:"送礼用户头像"`
 	VipLevel     uint32  `json:"vipLevel"    dc:"VIP等级"`
+	Sender       *GiftSenderBrief `json:"sender,omitempty" dc:"送礼用户基础信息(与上述字段一致)"`
 	GiftId       uint64  `json:"giftId,string"      dc:"礼物ID"`
 	GiftName     string  `json:"giftName"    dc:"礼物名称"`
 	GiftIcon     string  `json:"giftIcon"    dc:"礼物图标"`
 	GiftAnim     string  `json:"giftAnim"    dc:"礼物动画"`
 	UnitPrice    float64 `json:"unitPrice"   dc:"礼物单价"`
-	Count        int     `json:"count"       dc:"赠送数量"`
-	TotalCost    float64 `json:"totalCost"   dc:"总消耗钻石数"`
-	SentAt       int64   `json:"sentAt"      dc:"发送时间(秒)"`
+	Count               int     `json:"count"       dc:"赠送数量"`
+	TotalCost           float64 `json:"totalCost"   dc:"总消耗钻石数"`
+	SentAt              int64   `json:"sentAt"      dc:"发送时间(秒)"`
+	CategoryType        uint8   `json:"categoryType" dc:"礼物分类(0普通,1幸运)"`
+	LuckyGiftRtp          float64 `json:"luckyGiftRtp,omitempty" dc:"幸运礼物RTP快照(%)"`
+	LuckyGiftMultiplier   uint32  `json:"luckyGiftMultiplier,omitempty" dc:"返奖倍数"`
+	LuckyGiftPayout       float64 `json:"luckyGiftPayout,omitempty" dc:"返奖钻石"`
+	LuckyGiftTierType     string  `json:"luckyGiftTierType,omitempty" dc:"返奖挡位类型(low/medium/high)"`
 }
 
 // DirectGiftPushItem 给指定主播送礼推送载荷(仅发送者与主播可见)
@@ -234,14 +258,36 @@ type DirectGiftPushItem struct {
 	SenderName   string  `json:"senderName"  dc:"送礼用户昵称"`
 	SenderAvatar string  `json:"senderAvatar" dc:"送礼用户头像"`
 	VipLevel     uint32  `json:"vipLevel"    dc:"VIP等级"`
+	Sender       *GiftSenderBrief `json:"sender,omitempty" dc:"送礼用户基础信息(与上述字段一致)"`
 	GiftId       uint64  `json:"giftId,string"      dc:"礼物ID"`
 	GiftName     string  `json:"giftName"    dc:"礼物名称"`
 	GiftIcon     string  `json:"giftIcon"    dc:"礼物图标"`
 	GiftAnim     string  `json:"giftAnim"    dc:"礼物动画"`
 	UnitPrice    float64 `json:"unitPrice"   dc:"礼物单价"`
 	Count        int     `json:"count"       dc:"赠送数量"`
-	TotalCost    float64 `json:"totalCost"   dc:"总消耗钻石数"`
-	SentAt       int64   `json:"sentAt"      dc:"发送时间(秒)"`
+	TotalCost           float64 `json:"totalCost"   dc:"总消耗钻石数"`
+	SentAt              int64   `json:"sentAt"      dc:"发送时间(秒)"`
+	CategoryType        uint8   `json:"categoryType" dc:"礼物分类(0普通,1幸运)"`
+	LuckyGiftRtp          float64 `json:"luckyGiftRtp,omitempty" dc:"幸运礼物RTP快照(%)"`
+	LuckyGiftMultiplier   uint32  `json:"luckyGiftMultiplier,omitempty" dc:"返奖倍数"`
+	LuckyGiftPayout       float64 `json:"luckyGiftPayout,omitempty" dc:"返奖钻石"`
+	LuckyGiftTierType     string  `json:"luckyGiftTierType,omitempty" dc:"返奖挡位类型(low/medium/high)"`
+}
+
+// LuckyGiftPayoutPushItem 幸运礼物返奖通知(按挡位 type 路由推送范围)
+type LuckyGiftPayoutPushItem struct {
+	RoomId              uint64           `json:"roomId,string" dc:"直播间ID"`
+	Sender              *GiftSenderBrief `json:"sender" dc:"送礼用户基础信息"`
+	GiftId              uint64           `json:"giftId,string" dc:"礼物ID"`
+	GiftName            string           `json:"giftName" dc:"礼物名称"`
+	GiftIcon            string           `json:"giftIcon" dc:"礼物图标"`
+	Count               int              `json:"count" dc:"赠送数量"`
+	TotalCost           float64          `json:"totalCost" dc:"总消耗钻石"`
+	LuckyGiftRtp        float64          `json:"luckyGiftRtp" dc:"RTP快照(%)"`
+	LuckyGiftMultiplier uint32           `json:"luckyGiftMultiplier" dc:"返奖倍数"`
+	LuckyGiftPayout     float64          `json:"luckyGiftPayout" dc:"返奖钻石"`
+	LuckyGiftTierType   string           `json:"luckyGiftTierType" dc:"返奖挡位类型(low/medium/high,与CMS一致)"`
+	SentAt              int64            `json:"sentAt" dc:"发送时间(秒)"`
 }
 
 // SetAudienceMuteReq 主播对指定观众禁言/解禁

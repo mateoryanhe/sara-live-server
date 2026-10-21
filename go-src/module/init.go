@@ -23,6 +23,7 @@ import (
 	"xr-game-server/module/fiatcurrency"
 	"xr-game-server/module/game"
 	"xr-game-server/module/gameconsumrank"
+	"xr-game-server/module/gift"
 	"xr-game-server/module/h5livedeploy"
 	"xr-game-server/module/ipgeo"
 	"xr-game-server/module/livecfg"
@@ -84,6 +85,7 @@ func Init() {
 	agora.Init()
 	call.Init()
 	livecfg.Init()
+	gift.InitLuckyGiftMultiplier()
 	verification_code.Init()
 	aliyunmoderation.Init()
 	privacypolicy.Init()

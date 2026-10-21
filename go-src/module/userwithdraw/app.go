@@ -106,6 +106,7 @@ func AppApplyWithdraw(ctx context.Context, req *userwithdrawdto.AppApplyWithdraw
 	}
 
 	row := userentity.NewUserWithdrawLog(userId, req.TierId, diamondAmount, 0, withdrawUsd, snap.UsdToGoldRate)
+	row.SetTransferCurrency(currencyCode)
 	userwithdrawdao.PublishNewUserWithdrawLog(row)
 
 	return &userwithdrawdto.AppApplyWithdrawRes{
@@ -140,7 +141,7 @@ func AppListWithdrawLogs(ctx context.Context, req *userwithdrawdto.AppWithdrawLo
 			DiamondAmount:       withdrawLogDiamondDisplay(row),
 			WithdrawUsd:         row.WithdrawUsd,
 			Status:              row.Status,
-			TransferCurrency:    row.TransferCurrency,
+			TransferCurrency:    cmsWithdrawLogTransferCurrency(row),
 			TransferLocalAmount: row.TransferLocalAmount,
 			TransferFailMsg:     row.TransferFailMsg,
 			RejectReason:        row.RejectReason,

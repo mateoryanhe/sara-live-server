@@ -3,6 +3,7 @@ import {convertLocaleDeep} from '../../zh-tw-convert'
 import {userListMessages} from '../user-list'
 
 import {giftListMessages} from './gift-list'
+import {luckyGiftMultiplierCfgMessages} from './lucky-gift-multiplier-cfg'
 import {vipCfgListMessages} from './vip-cfg-list'
 import {anchorListMessages} from './anchor-list'
 import {liveRoomRecycleBinMessages} from './live-room-recycle-bin'
@@ -38,6 +39,7 @@ import {customerServiceCfgMessages} from './customer-service-cfg'
 import {walletExchangeCfgMessages} from './wallet-exchange-cfg'
 import {effectiveLiveCfgMessages} from './effective-live-cfg'
 import {platformAnchorSettlementCfgMessages} from './platform-anchor-settlement-cfg'
+import {luckyGiftSettlementCfgMessages} from './lucky-gift-settlement-cfg'
 import {paymentCountryCfgMessages} from './payment-country-cfg'
 import {agoraCfgMessages} from './agora-cfg'
 import {billingListMessages} from './billing-list'
@@ -116,6 +118,7 @@ import {trackingRechargeMessages} from './tracking-recharge'
 const pageMessageBuilders = [
   ['userList', userListMessages],
   ['giftList', giftListMessages],
+  ['luckyGiftMultiplierCfg', luckyGiftMultiplierCfgMessages],
   ['vipCfgList', vipCfgListMessages],
   ['anchorList', anchorListMessages],
   ['liveRoomRecycleBin', liveRoomRecycleBinMessages],
@@ -152,6 +155,7 @@ const pageMessageBuilders = [
   ['walletExchangeCfg', walletExchangeCfgMessages],
   ['effectiveLiveCfg', effectiveLiveCfgMessages],
   ['platformAnchorSettlementCfg', platformAnchorSettlementCfgMessages],
+  ['luckyGiftSettlementCfg', luckyGiftSettlementCfgMessages],
   ['paymentCountryCfg', paymentCountryCfgMessages],
   ['agoraCfg', agoraCfgMessages],
   ['billingList', billingListMessages],

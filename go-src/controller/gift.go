@@ -47,3 +47,8 @@ func (c *GiftController) OnShelfGift(ctx context.Context, req *giftdto.OnShelfGi
 func (c *GiftController) OffShelfGift(ctx context.Context, req *giftdto.OffShelfGiftReq) (res *giftdto.OffShelfGiftRes, err error) {
 	return gift.OffShelfGift(ctx, req)
 }
+
+// GetGiftLuckyCfg 查询单个幸运礼物 RTP 与倍率挡位(CMS 编辑用)
+func (c *GiftController) GetGiftLuckyCfg(ctx context.Context, req *giftdto.GetGiftLuckyCfgReq) (*giftdto.GetGiftLuckyCfgRes, error) {
+	return gift.GetGiftLuckyCfg(ctx, req)
+}

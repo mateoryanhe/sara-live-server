@@ -121,6 +121,12 @@ func (r *UserWithdrawLog) SetStatus(value uint8) {
 	r.queue(UserWithdrawLogStatus, value)
 }
 
+func (r *UserWithdrawLog) SetTransferCurrency(value string) {
+	r.TransferCurrency = value
+	r.touchUpdatedAt()
+	r.queue(UserWithdrawLogTransferCurrency, value)
+}
+
 func (r *UserWithdrawLog) SetTransferPayout(orderId, platformNo, currency string, localAmount float64) {
 	r.TransferOrderId = orderId
 	r.TransferPlatformNo = platformNo

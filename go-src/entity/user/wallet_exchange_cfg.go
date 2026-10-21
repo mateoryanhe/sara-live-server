@@ -15,7 +15,8 @@ const (
 	WalletExchangeCfgUsdToGoldRate                      db.TbCol = "usd_to_gold_rate"
 	WalletExchangeCfgEffectiveLiveMinSessionMinutes        db.TbCol = "effective_live_min_session_minutes"
 	WalletExchangeCfgEffectiveLiveDailyAccumulatedMinutes db.TbCol = "effective_live_daily_accumulated_minutes"
-	WalletExchangeCfgPlatformAnchorMinimumSettlementUsd    db.TbCol = "platform_anchor_minimum_settlement_usd"
+	WalletExchangeCfgPlatformAnchorMinimumSettlementUsd db.TbCol = "platform_anchor_minimum_settlement_usd"
+	WalletExchangeCfgLuckyGiftSettlementPercent         db.TbCol = "lucky_gift_settlement_percent"
 )
 
 // WalletExchangeCfg 结算基础配置(CMS 管理,通常仅一条)。
@@ -27,7 +28,8 @@ type WalletExchangeCfg struct {
 	UsdToGoldRate                      int     `gorm:"default:100;comment:1美金兑换金币数" json:"usdToGoldRate"`
 	EffectiveLiveMinSessionMinutes        int     `gorm:"default:30;comment:单场直播计入有效时长的门槛(分钟)" json:"effectiveLiveMinSessionMinutes"`
 	EffectiveLiveDailyAccumulatedMinutes int     `gorm:"default:0;comment:每天累计开播时长门槛(分钟,0表示未配置)" json:"effectiveLiveDailyAccumulatedMinutes"`
-	PlatformAnchorMinimumSettlementUsd    float64 `gorm:"type:decimal(16,2);default:5;comment:平台主播生成结算单必须严格超过的最低金额(USD)" json:"platformAnchorMinimumSettlementUsd"`
+	PlatformAnchorMinimumSettlementUsd float64 `gorm:"type:decimal(16,2);default:5;comment:平台主播生成结算单必须严格超过的最低金额(USD)" json:"platformAnchorMinimumSettlementUsd"`
+	LuckyGiftSettlementPercent         float64 `gorm:"type:decimal(10,4);default:10;comment:幸运礼物结算比例(百分比,默认10)" json:"luckyGiftSettlementPercent"`
 }
 
 func initWalletExchangeCfg() {

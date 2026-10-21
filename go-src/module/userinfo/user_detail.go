@@ -4,12 +4,14 @@ import (
 	"context"
 	"strings"
 
+	"xr-game-server/constants/country"
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/channelpaydao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dao/userlogindevicedao"
 	"xr-game-server/dao/userloginlocationdao"
+	"xr-game-server/dao/userwithdrawdao"
 	"xr-game-server/dto/accountdto"
 	rechargeentity "xr-game-server/entity/recharge"
 	userentity "xr-game-server/entity/user"
@@ -33,7 +35,44 @@ func QueryUserDetail(_ context.Context, req *accountdto.GetUserDetailReq) (*acco
 		CumulativeStat: toUserCumulativeStatDetailItem(userinfodao.GetUserCumulativeStatFromDB(req.UserId)),
 		LoginDevice:       toUserLoginDeviceDetailItem(userlogindevicedao.GetUserLoginDeviceFromDB(req.UserId)),
 		ChannelPayProfile: toUserChannelPayProfileDetailItem(channelpaydao.GetExisting(req.UserId)),
+		WithdrawPayout:    toUserWithdrawPayoutDetailItem(userwithdrawdao.GetUserPayoutInfo(req.UserId)),
 	}, nil
+}
+
+func toUserWithdrawPayoutDetailItem(row *userentity.UserPayoutInfo) *accountdto.UserWithdrawPayoutDetailItem {
+	if row == nil || row.ID == 0 {
+		return nil
+	}
+	updatedAt := ""
+	if !row.UpdatedAt.IsZero() {
+		updatedAt = row.UpdatedAt.Format("2006-01-02 15:04:05")
+	}
+	countryCode := strings.ToUpper(strings.TrimSpace(row.CountryCode))
+	currency := strings.ToUpper(strings.TrimSpace(row.Currency))
+	if countryCode == "" && currency != "" {
+		countryCode = country.HaiPayPayoutCountryFromCurrency(currency)
+	}
+	if currency == "" && countryCode != "" {
+		currency = country.HaiPayPayoutCurrency(countryCode)
+	}
+	return &accountdto.UserWithdrawPayoutDetailItem{
+		CountryCode:  countryCode,
+		Currency:     currency,
+		AccountType:  strings.ToUpper(strings.TrimSpace(row.AccountType)),
+		PayeeName:    row.PayeeName,
+		Phone:        row.Phone,
+		Email:        row.Email,
+		BankName:     row.BankName,
+		AccountNo:    row.AccountNo,
+		BankCode:     row.BankCode,
+		IdentifyType: row.IdentifyType,
+		Address1:     row.Address1,
+		Address2:     row.Address2,
+		Address3:     row.Address3,
+		PostalCode:   row.PostalCode,
+		Remark:       row.Remark,
+		UpdatedAt:    updatedAt,
+	}
 }
 
 func toUserChannelPayProfileDetailItem(row *rechargeentity.ChannelPayUserProfile) *accountdto.UserChannelPayProfileDetailItem {

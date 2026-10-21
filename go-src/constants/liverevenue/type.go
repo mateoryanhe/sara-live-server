@@ -4,7 +4,8 @@ package liverevenue
 type Type uint8
 
 const (
-	Gift                     Type = 1 // 礼物
+	Gift                     Type = 1 // 普通礼物
+	GiftLucky                Type = 8 // 幸运礼物
 	PaidDanmaku              Type = 2 // 付费弹幕
 	LiveRoomVideoCallTicket  Type = 6 // 直播间视频通话门票
 	LiveRoomVideoCallBilling Type = 7 // 直播间视频通话计费
@@ -13,7 +14,7 @@ const (
 // IsValid 是否为合法流水类型
 func IsValid(t Type) bool {
 	switch t {
-	case Gift, PaidDanmaku, LiveRoomVideoCallTicket, LiveRoomVideoCallBilling:
+	case Gift, GiftLucky, PaidDanmaku, LiveRoomVideoCallTicket, LiveRoomVideoCallBilling:
 		return true
 	default:
 		return false
@@ -24,7 +25,9 @@ func IsValid(t Type) bool {
 func Text(t Type) string {
 	switch t {
 	case Gift:
-		return "礼物"
+		return "普通礼物"
+	case GiftLucky:
+		return "幸运礼物"
 	case PaidDanmaku:
 		return "付费弹幕"
 	case LiveRoomVideoCallTicket:

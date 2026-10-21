@@ -669,6 +669,25 @@ export interface UserChannelPayProfileDetailItem {
     email?: string
 }
 
+export interface UserWithdrawPayoutDetailItem {
+    countryCode?: string
+    currency?: string
+    accountType?: string
+    payeeName?: string
+    phone?: string
+    email?: string
+    bankName?: string
+    accountNo?: string
+    bankCode?: string
+    identifyType?: string
+    address1?: string
+    address2?: string
+    address3?: string
+    postalCode?: string
+    remark?: string
+    updatedAt?: string
+}
+
 export interface UserDetail {
     account?: UserAccountDetailItem | null
     profile?: UserProfileDetailItem | null
@@ -677,6 +696,7 @@ export interface UserDetail {
     cumulativeStat?: UserCumulativeStatDetailItem | null
     loginDevice?: UserLoginDeviceDetailItem | null
     channelPayProfile?: UserChannelPayProfileDetailItem | null
+    withdrawPayout?: UserWithdrawPayoutDetailItem | null
 }
 
 export interface QueryBotAnchorListReq extends PageQuery {
@@ -1426,6 +1446,8 @@ export interface Gift {
     animationName: string
     price: number
     category: string
+    categoryType: number
+    luckyGiftRtp?: number
     sort: number
     status: number
     publishedAt?: string | null
@@ -1436,7 +1458,7 @@ export interface Gift {
 
 export interface GiftQuery extends PageQuery {
     name?: string
-    category?: string
+    categoryType?: number
     statusFilter?: number
 }
 
@@ -2171,6 +2193,27 @@ export interface SavePlatformAnchorSettlementCfgRes {
     id: string
 }
 
+export interface LuckyGiftSettlementCfg {
+    id: string
+    settlementPercent: number
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetLuckyGiftSettlementCfgRes {
+    cfg: LuckyGiftSettlementCfg | null
+}
+
+export interface SaveLuckyGiftSettlementCfgReq {
+    id?: number
+    settlementPercent: number
+}
+
+export interface SaveLuckyGiftSettlementCfgRes {
+    success: boolean
+    id: string
+}
+
 export interface LiveRevenueShareCfg {
     id: string
     anchorSharePercent: number
@@ -2752,6 +2795,10 @@ export interface LiveRevenueLogItem {
     count: number
     unitPrice: number
     totalAmount: number
+    luckyGiftRtp?: number
+    luckyGiftMultiplier?: number
+    luckyGiftPayout?: number
+    luckyGiftSettlementAmount?: number
     status?: number
     statusText?: string
     createdAt?: string | null

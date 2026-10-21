@@ -307,6 +307,16 @@ type LiveRoomGiftPushResp struct {
 	Data *liveroomdto.GiftPushItem `json:"data"`
 }
 
+// LiveRoomLuckyGiftPayoutPushReq cmd=46 幸运礼物返奖(推送给送礼人)
+type LiveRoomLuckyGiftPayoutPushReq struct {
+	g.Meta `path:"/liveRoomLuckyGiftPayout" method:"post" summary:"推送 cmd=46 幸运礼物返奖(按挡位路由)" description:"RTP中奖且返奖>0时推送;luckyGiftTierType=low仅送礼人,medium当前直播间在线用户,high全服Broadcast;含CMS挡位type与返奖信息" tags:"推送-直播间"`
+}
+
+type LiveRoomLuckyGiftPayoutPushResp struct {
+	Cmd  int                                  `json:"cmd" dc:"命令字 46"`
+	Data *liveroomdto.LuckyGiftPayoutPushItem `json:"data"`
+}
+
 // --- 推送-消息 ---
 
 // ActivityMessagePushReq cmd=36 活动消息发布广播

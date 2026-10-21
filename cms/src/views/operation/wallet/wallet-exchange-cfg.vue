@@ -170,6 +170,57 @@
             </el-form>
           </div>
         </el-tab-pane>
+
+        <el-tab-pane
+            v-if="canViewLuckyGiftSettlement"
+            :label="t('pages.luckyGiftSettlementCfg.tabTitle')"
+            name="luckyGiftSettlement"
+        >
+          <div v-loading="luckyGiftSettlementLoading" class="tab-content">
+            <el-alert
+                :closable="false"
+                class="tip-alert"
+                show-icon
+                :title="t('pages.luckyGiftSettlementCfg.tipTitle')"
+                type="info"
+            >
+              <p>{{ t('pages.luckyGiftSettlementCfg.tipLine1') }}</p>
+              <p>{{ t('pages.luckyGiftSettlementCfg.tipLine2') }}</p>
+            </el-alert>
+
+            <el-form :model="luckyGiftSettlementForm" class="cfg-form" label-width="190px">
+              <el-form-item :label="t('pages.luckyGiftSettlementCfg.settlementPercent')">
+                <el-input-number
+                    v-model="luckyGiftSettlementForm.settlementPercent"
+                    :max="100"
+                    :min="0"
+                    :precision="2"
+                    :step="0.1"
+                    controls-position="right"
+                />
+                <span class="field-unit">{{ t('pages.luckyGiftSettlementCfg.percentUnit') }}</span>
+              </el-form-item>
+
+              <el-form-item
+                  v-if="luckyGiftSettlementMeta.updatedAt"
+                  :label="t('pages.luckyGiftSettlementCfg.lastUpdated')"
+              >
+                <span>{{ luckyGiftSettlementMeta.updatedAt }}</span>
+              </el-form-item>
+
+              <el-form-item>
+                <el-button
+                    v-if="canSaveLuckyGiftSettlement"
+                    type="primary"
+                    @click="handleSaveLuckyGiftSettlement"
+                >
+                  {{ t('common.saveConfig') }}
+                </el-button>
+                <el-button @click="fetchLuckyGiftSettlementCfg">{{ t('common.refresh') }}</el-button>
+              </el-form-item>
+            </el-form>
+          </div>
+        </el-tab-pane>
       </el-tabs>
     </el-card>
   </div>
@@ -182,8 +233,14 @@ import {ElMessage} from 'element-plus'
 import {walletApi} from '@/api/modules/wallet'
 import {effectiveLiveCfgApi} from '@/api/modules/effective-live-cfg'
 import {platformAnchorSettlementCfgApi} from '@/api/modules/platform-anchor-settlement-cfg'
+import {luckyGiftSettlementCfgApi} from '@/api/modules/lucky-gift-settlement-cfg'
 import {hasButtonPermission} from '@/utils/permission'
-import type {EffectiveLiveCfg, PlatformAnchorSettlementCfg, WalletExchangeCfg} from '@/types/api'
+import type {
+  EffectiveLiveCfg,
+  LuckyGiftSettlementCfg,
+  PlatformAnchorSettlementCfg,
+  WalletExchangeCfg,
+} from '@/types/api'
 
 const {t} = useI18n()
 const pageName = 'WalletExchangeCfgManagement'
@@ -194,11 +251,14 @@ const canViewEffectiveLive = computed(() => hasButtonPermission(pageName, 'viewE
 const canSaveEffectiveLive = computed(() => hasButtonPermission(pageName, 'saveEffectiveLive'))
 const canViewPlatformAnchorSettlement = computed(() => hasButtonPermission(pageName, 'viewPlatformAnchorSettlement'))
 const canSavePlatformAnchorSettlement = computed(() => hasButtonPermission(pageName, 'savePlatformAnchorSettlement'))
+const canViewLuckyGiftSettlement = computed(() => hasButtonPermission(pageName, 'viewLuckyGiftSettlement'))
+const canSaveLuckyGiftSettlement = computed(() => hasButtonPermission(pageName, 'saveLuckyGiftSettlement'))
 
 const activeTab = ref('wallet')
 const walletLoading = ref(false)
 const effectiveLiveLoading = ref(false)
 const platformAnchorSettlementLoading = ref(false)
+const luckyGiftSettlementLoading = ref(false)
 
 const walletForm = reactive({
   id: '0',
@@ -220,6 +280,12 @@ const platformAnchorSettlementForm = reactive({
   minimumSettlementUsd: 5,
 })
 const platformAnchorSettlementMeta = reactive({createdAt: '', updatedAt: ''})
+
+const luckyGiftSettlementForm = reactive({
+  id: '0',
+  settlementPercent: 10,
+})
+const luckyGiftSettlementMeta = reactive({createdAt: '', updatedAt: ''})
 
 const applyWalletCfg = (cfg: WalletExchangeCfg | null | undefined) => {
   walletForm.id = cfg?.id || '0'
@@ -243,6 +309,13 @@ const applyPlatformAnchorSettlementCfg = (cfg: PlatformAnchorSettlementCfg | nul
   platformAnchorSettlementForm.minimumSettlementUsd = cfg?.minimumSettlementUsd || 5
   platformAnchorSettlementMeta.createdAt = cfg?.createdAt || ''
   platformAnchorSettlementMeta.updatedAt = cfg?.updatedAt || ''
+}
+
+const applyLuckyGiftSettlementCfg = (cfg: LuckyGiftSettlementCfg | null | undefined) => {
+  luckyGiftSettlementForm.id = cfg?.id || '0'
+  luckyGiftSettlementForm.settlementPercent = cfg?.settlementPercent ?? 10
+  luckyGiftSettlementMeta.createdAt = cfg?.createdAt || ''
+  luckyGiftSettlementMeta.updatedAt = cfg?.updatedAt || ''
 }
 
 const fetchWalletCfg = async () => {
@@ -278,6 +351,18 @@ const fetchPlatformAnchorSettlementCfg = async () => {
     ElMessage.error(t('pages.platformAnchorSettlementCfg.fetchFailed'))
   } finally {
     platformAnchorSettlementLoading.value = false
+  }
+}
+
+const fetchLuckyGiftSettlementCfg = async () => {
+  luckyGiftSettlementLoading.value = true
+  try {
+    applyLuckyGiftSettlementCfg((await luckyGiftSettlementCfgApi.getLuckyGiftSettlementCfg()).cfg)
+  } catch (error) {
+    console.error('fetch lucky gift settlement config failed:', error)
+    ElMessage.error(t('pages.luckyGiftSettlementCfg.fetchFailed'))
+  } finally {
+    luckyGiftSettlementLoading.value = false
   }
 }
 
@@ -354,6 +439,36 @@ const handleSaveEffectiveLive = async () => {
   }
 }
 
+const handleSaveLuckyGiftSettlement = async () => {
+  const settlementPercent = Number(luckyGiftSettlementForm.settlementPercent)
+  if (!Number.isFinite(settlementPercent) || settlementPercent < 0 || settlementPercent > 100) {
+    ElMessage.warning(t('pages.luckyGiftSettlementCfg.rangeWarning'))
+    return
+  }
+
+  luckyGiftSettlementLoading.value = true
+  try {
+    const response = await luckyGiftSettlementCfgApi.saveLuckyGiftSettlementCfg({
+      id: luckyGiftSettlementForm.id === '0' ? 0 : Number(luckyGiftSettlementForm.id),
+      settlementPercent,
+    })
+    if (!response?.success) {
+      ElMessage.error(t('pages.luckyGiftSettlementCfg.saveFailed'))
+      return
+    }
+    ElMessage.success(t('pages.luckyGiftSettlementCfg.saveSuccess'))
+    if (response.id) {
+      luckyGiftSettlementForm.id = response.id
+    }
+    await fetchLuckyGiftSettlementCfg()
+  } catch (error) {
+    console.error('save lucky gift settlement config failed:', error)
+    ElMessage.error(t('pages.luckyGiftSettlementCfg.saveFailed'))
+  } finally {
+    luckyGiftSettlementLoading.value = false
+  }
+}
+
 const handleSavePlatformAnchorSettlement = async () => {
   const minimumSettlementUsd = Number(platformAnchorSettlementForm.minimumSettlementUsd)
   if (!Number.isFinite(minimumSettlementUsd) || minimumSettlementUsd <= 0 || minimumSettlementUsd > 1000000) {
@@ -391,6 +506,8 @@ onActivated(() => {
       activeTab.value = 'effectiveLive'
     } else if (canViewPlatformAnchorSettlement.value) {
       activeTab.value = 'platformAnchorSettlement'
+    } else if (canViewLuckyGiftSettlement.value) {
+      activeTab.value = 'luckyGiftSettlement'
     }
   }
   if (canViewWallet.value) {
@@ -401,6 +518,9 @@ onActivated(() => {
   }
   if (canViewPlatformAnchorSettlement.value) {
     void fetchPlatformAnchorSettlementCfg()
+  }
+  if (canViewLuckyGiftSettlement.value) {
+    void fetchLuckyGiftSettlementCfg()
   }
 })
 </script>

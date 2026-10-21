@@ -54,6 +54,16 @@ type CMSBatchRejectWithdrawRes struct {
 	FailCount    int `json:"failCount"`
 }
 
+type CMSBatchRevokeWithdrawApprovalReq struct {
+	g.Meta `path:"/batchRevokeWithdrawApproval" method:"post" summary:"批量驳回到待审核" tags:"用户提现CMS"`
+	Ids    []string `json:"ids"`
+}
+
+type CMSBatchRevokeWithdrawApprovalRes struct {
+	SuccessCount int `json:"successCount"`
+	FailCount    int `json:"failCount"`
+}
+
 type CMSBatchSubmitPayoutReq struct {
 	g.Meta `path:"/batchSubmitPayout" method:"post" summary:"批量提交HaiPay代付" tags:"用户提现CMS"`
 	Ids    []string `json:"ids"`

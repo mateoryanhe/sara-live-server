@@ -77,6 +77,8 @@ const (
 	ReasonUserWithdraw Reason = 36
 	// ReasonUserWithdrawRefund 用户提现拒绝/失败退回金币
 	ReasonUserWithdrawRefund Reason = 37
+	// ReasonLuckyGiftPayout 幸运礼物返奖
+	ReasonLuckyGiftPayout Reason = 38
 )
 
 // String 返回枚举的英文标识(用于日志/调试,不参与多语言展示;
@@ -153,6 +155,8 @@ func (r Reason) String() string {
 		return "UserWithdraw"
 	case ReasonUserWithdrawRefund:
 		return "UserWithdrawRefund"
+	case ReasonLuckyGiftPayout:
+		return "LuckyGiftPayout"
 	default:
 		return "Unknown"
 	}
