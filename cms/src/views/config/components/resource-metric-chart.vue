@@ -312,6 +312,9 @@ const buildOnlineOption = (points: ResourceMetricPoint[]): EChartsOption => {
     return lines.join('<br/>')
   }
 
+  const audienceLineColor = '#dc2626'
+  const anchorLineColor = '#2563eb'
+
   const series: EChartsOption['series'] = audienceAnchorOnly
       ? [
         {
@@ -319,14 +322,16 @@ const buildOnlineOption = (points: ResourceMetricPoint[]): EChartsOption => {
           type: 'line',
           smooth: true,
           data: audienceSeries,
-          itemStyle: {color: '#67C23A'},
+          itemStyle: {color: audienceLineColor},
+          lineStyle: {color: audienceLineColor},
         },
         {
           name: anchorLabel,
           type: 'line',
           smooth: true,
           data: anchorSeries,
-          itemStyle: {color: '#E6A23C'},
+          itemStyle: {color: anchorLineColor},
+          lineStyle: {color: anchorLineColor},
         },
       ]
       : [
@@ -342,14 +347,16 @@ const buildOnlineOption = (points: ResourceMetricPoint[]): EChartsOption => {
           type: 'line',
           smooth: true,
           data: anchorSeries,
-          itemStyle: {color: '#E6A23C'},
+          itemStyle: {color: anchorLineColor},
+          lineStyle: {color: anchorLineColor},
         },
         {
           name: audienceLabel,
           type: 'line',
           smooth: true,
           data: audienceSeries,
-          itemStyle: {color: '#67C23A'},
+          itemStyle: {color: audienceLineColor},
+          lineStyle: {color: audienceLineColor},
         },
       ]
 

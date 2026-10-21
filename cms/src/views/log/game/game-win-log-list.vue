@@ -12,7 +12,7 @@
           <el-input v-model="searchForm.userId" clearable :placeholder="t('common.pleaseEnter') + ' ' + t('common.userId')"/>
         </el-form-item>
         <el-form-item :label="t('pages.gameWinLogList.gameCode')">
-          <el-input v-model="searchForm.gameCode" clearable :placeholder="t('pages.gameWinLogList.gameCodePlaceholder')"/>
+          <GameCodeMultiSelect v-model="searchForm.gameCodes"/>
         </el-form-item>
         <el-form-item :label="t('pages.gameWinLogList.orderId')">
           <el-input v-model="searchForm.orderId" clearable :placeholder="t('pages.gameWinLogList.orderIdPlaceholder')"/>
@@ -95,6 +95,7 @@ import {useUserDetailNav} from '@/composables/useUserDetailNav'
 import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
 import {CMS_EXPORT_TYPE_GAME_WIN_LOG} from '@/utils/cms-async-export'
 import {buildGameWinLogCsvColumns} from '@/utils/game-log-csv'
+import GameCodeMultiSelect from '@/components/game/GameCodeMultiSelect.vue'
 
 const {t} = useI18n()
 const {can} = usePagePermission('GameWinLogListManagement')
@@ -105,7 +106,7 @@ const tableData = ref<GameWinLogItem[]>([])
 
 const searchForm = reactive({
   userId: '',
-  gameCode: '',
+  gameCodes: [] as string[],
   orderId: '',
   platformType: '',
 })
@@ -118,7 +119,7 @@ const pagination = reactive({
 
 const buildFilterParams = () => ({
   userId: searchForm.userId.trim(),
-  gameCode: searchForm.gameCode.trim(),
+  gameCodes: searchForm.gameCodes.length ? [...searchForm.gameCodes] : undefined,
   orderId: searchForm.orderId.trim(),
   platformType: searchForm.platformType.trim(),
 })
@@ -148,7 +149,7 @@ const handleSearch = () => {
 
 const handleReset = () => {
   searchForm.userId = ''
-  searchForm.gameCode = ''
+  searchForm.gameCodes = []
   searchForm.orderId = ''
   searchForm.platformType = ''
   pagination.pageIndex = 1

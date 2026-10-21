@@ -50,6 +50,8 @@ var openAPIDocRoutes = []openAPIDocRoute{
 	{OldMethod: "post", OldPath: "/liveRoom/reportMiniGameExposure", NewPath: "/sofie/studio/notifyMiniGameExposure", Tag: "studio", Summary: "上报半屏游戏窗口曝光"},
 	{OldMethod: "post", OldPath: "/liveRoom/reportMiniGameWebViewLoadSuccess", NewPath: "/sofie/studio/notifyMiniGameWebViewLoadSuccess", Tag: "studio", Summary: "上报游戏WebView成功加载"},
 	{OldMethod: "post", OldPath: "/liveRoom/reportMiniGameControllerClick", NewPath: "/sofie/studio/notifyMiniGameControllerClick", Tag: "studio", Summary: "上报点击游戏手柄"},
+	{OldMethod: "post", OldPath: "/liveRoom/reportMiniGameSpinClick", NewPath: "/sofie/studio/notifyMiniGameSpinClick", Tag: "studio", Summary: "上报Spin点击"},
+	{OldMethod: "post", OldPath: "/liveRoom/reportMiniGamePlusClick", NewPath: "/sofie/studio/notifyMiniGamePlusClick", Tag: "studio", Summary: "上报游戏+"},
 	{OldMethod: "post", OldPath: "/liveRoom/reportVoiceRoomGiftClick", NewPath: "/sofie/studio/notifyVoiceRoomGiftClick", Tag: "studio", Summary: "上报语聊房礼物面板点击"},
 	{OldMethod: "post", OldPath: "/liveRoom/reportHotLiveRoomGiftClick", NewPath: "/sofie/studio/notifyHotLiveRoomGiftClick", Tag: "studio", Summary: "上报秀场直播间礼物面板点击"},
 	{OldMethod: "post", OldPath: "/liveRoom/leave", NewPath: "/sofie/studio/exitHall", Tag: "studio", Summary: "离开直播间"},

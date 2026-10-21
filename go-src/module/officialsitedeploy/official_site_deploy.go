@@ -11,6 +11,7 @@ import (
 
 	"github.com/gogf/gf/v2/net/ghttp"
 	"xr-game-server/core/cfg"
+	"xr-game-server/core/uploadstaging"
 	"xr-game-server/dto/officialsitedeploydto"
 	"xr-game-server/errercode"
 	"xr-game-server/module/domainsite"
@@ -151,7 +152,7 @@ func deployZipFromRequest(r *ghttp.Request, target deployTarget) (*officialsited
 			part.Close()
 			return nil, fmt.Errorf("file ext not allowed: %s", ext)
 		}
-		tmpFile, err := os.CreateTemp("", target.tmpPattern)
+		tmpFile, err := uploadstaging.CreateTempFile(uploadstaging.SubCMSDeployZip, target.tmpPattern)
 		if err != nil {
 			part.Close()
 			return nil, err

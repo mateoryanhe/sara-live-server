@@ -8,7 +8,7 @@ import (
 )
 
 func pubMiniGameRoundStartTracking(userId uint64, gameCode string, at time.Time) {
-	if userId == 0 {
+	if gameevent.GameLiveRoomTrackingPersistDisabled || userId == 0 {
 		return
 	}
 	if at.IsZero() {
@@ -18,7 +18,7 @@ func pubMiniGameRoundStartTracking(userId uint64, gameCode string, at time.Time)
 }
 
 func pubOfflineGameRoomPlayTracking(userId, roomId uint64, gameCode string, at time.Time) {
-	if userId == 0 || roomId == 0 {
+	if gameevent.GameLiveRoomTrackingPersistDisabled || userId == 0 || roomId == 0 {
 		return
 	}
 	if at.IsZero() {

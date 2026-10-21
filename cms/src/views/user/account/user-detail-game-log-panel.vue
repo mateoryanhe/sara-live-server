@@ -2,7 +2,7 @@
   <div>
     <el-form :model="searchForm" class="search-form" inline label-width="80px">
       <el-form-item :label="t(`${ns}.gameCode`)">
-        <el-input v-model="searchForm.gameCode" clearable :placeholder="t(`${ns}.gameCodePlaceholder`)"/>
+        <GameCodeMultiSelect v-model="searchForm.gameCodes"/>
       </el-form-item>
       <el-form-item :label="t(`${ns}.orderId`)">
         <el-input v-model="searchForm.orderId" clearable :placeholder="t(`${ns}.orderIdPlaceholder`)"/>
@@ -89,6 +89,7 @@ import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExpor
 import {CMS_EXPORT_TYPE_GAME_BET_LOG, CMS_EXPORT_TYPE_GAME_WIN_LOG} from '@/utils/cms-async-export'
 import {buildGameBetLogCsvColumns, buildGameWinLogCsvColumns} from '@/utils/game-log-csv'
 import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
+import GameCodeMultiSelect from '@/components/game/GameCodeMultiSelect.vue'
 
 const props = defineProps<{
   userId: string
@@ -118,7 +119,7 @@ const tableData = ref<Array<GameBetLogItem | GameWinLogItem>>([])
 const loaded = ref(false)
 
 const searchForm = reactive({
-  gameCode: '',
+  gameCodes: [] as string[],
   orderId: '',
   platformType: '',
 })
@@ -131,7 +132,7 @@ const pagination = reactive({
 
 const buildFilterParams = () => ({
   userId: props.userId,
-  gameCode: searchForm.gameCode.trim(),
+  gameCodes: searchForm.gameCodes.length ? [...searchForm.gameCodes] : undefined,
   orderId: searchForm.orderId.trim(),
   platformType: searchForm.platformType.trim(),
 })
@@ -170,7 +171,7 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
-  searchForm.gameCode = ''
+  searchForm.gameCodes = []
   searchForm.orderId = ''
   searchForm.platformType = ''
   pagination.pageIndex = 1
@@ -212,7 +213,7 @@ const handleExport = async () => {
 const resetState = () => {
   loaded.value = false
   tableData.value = []
-  searchForm.gameCode = ''
+  searchForm.gameCodes = []
   searchForm.orderId = ''
   searchForm.platformType = ''
   pagination.pageIndex = 1

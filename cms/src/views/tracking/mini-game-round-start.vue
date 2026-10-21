@@ -9,29 +9,11 @@
       </template>
 
       <el-tabs v-model="activeEvent" class="event-tabs" @tab-change="handleEventChange">
-        <el-tab-pane :label="t('pages.trackingMiniGameRoundStart.tabGameJoin')" name="gameJoin">
-          <p class="page-desc">{{ t('pages.trackingMiniGameRoundStart.gameJoinDesc') }}</p>
+        <el-tab-pane :label="t('pages.trackingMiniGameRoundStart.tabSpinClick')" name="spinClick">
+          <p class="page-desc">{{ t('pages.trackingMiniGameRoundStart.spinClickDesc') }}</p>
         </el-tab-pane>
-        <el-tab-pane :label="t('pages.trackingMiniGameRoundStart.tabFirstFrame')" name="firstFrame">
-          <p class="page-desc">{{ t('pages.trackingMiniGameRoundStart.firstFrameDesc') }}</p>
-        </el-tab-pane>
-        <el-tab-pane :label="t('pages.trackingMiniGameRoundStart.tabRoundStart')" name="roundStart">
-          <p class="page-desc">{{ t('pages.trackingMiniGameRoundStart.desc') }}</p>
-        </el-tab-pane>
-        <el-tab-pane :label="t('pages.trackingMiniGameRoundStart.tabRoundResult')" name="roundResult">
-          <p class="page-desc">{{ t('pages.trackingMiniGameRoundStart.roundResultDesc') }}</p>
-        </el-tab-pane>
-        <el-tab-pane :label="t('pages.trackingMiniGameRoundStart.tabGameExposure')" name="gameExposure">
-          <p class="page-desc">{{ t('pages.trackingMiniGameRoundStart.gameExposureDesc') }}</p>
-        </el-tab-pane>
-        <el-tab-pane :label="t('pages.trackingMiniGameRoundStart.tabGameWebViewLoad')" name="gameWebViewLoad">
-          <p class="page-desc">{{ t('pages.trackingMiniGameRoundStart.gameWebViewLoadDesc') }}</p>
-        </el-tab-pane>
-        <el-tab-pane :label="t('pages.trackingMiniGameRoundStart.tabGameControllerClick')" name="gameControllerClick">
-          <p class="page-desc">{{ t('pages.trackingMiniGameRoundStart.gameControllerClickDesc') }}</p>
-        </el-tab-pane>
-        <el-tab-pane :label="t('pages.trackingMiniGameRoundStart.tabOfflineGameRoomPlay')" name="offlineGameRoomPlay">
-          <p class="page-desc">{{ t('pages.trackingMiniGameRoundStart.offlineGameRoomPlayDesc') }}</p>
+        <el-tab-pane :label="t('pages.trackingMiniGameRoundStart.tabPlusClick')" name="plusClick">
+          <p class="page-desc">{{ t('pages.trackingMiniGameRoundStart.plusClickDesc') }}</p>
         </el-tab-pane>
       </el-tabs>
 
@@ -88,11 +70,11 @@ import {trackingEventApi} from '@/api/modules/tracking-event'
 import type {HotLiveRoomJoinTrendRes} from '@/types/api'
 import CountTrendChart from './components/count-trend-chart.vue'
 
-type TrackingEventKey = 'gameJoin' | 'firstFrame' | 'roundStart' | 'roundResult' | 'gameExposure' | 'gameWebViewLoad' | 'gameControllerClick' | 'offlineGameRoomPlay'
+type TrackingEventKey = 'spinClick' | 'plusClick'
 
 const {t, locale} = useI18n()
 const loading = ref(false)
-const activeEvent = ref<TrackingEventKey>('gameJoin')
+const activeEvent = ref<TrackingEventKey>('spinClick')
 const activePeriod = ref<'daily' | 'weekly' | 'monthly'>('daily')
 const dailyChartRef = ref<InstanceType<typeof CountTrendChart>>()
 const weeklyChartRef = ref<InstanceType<typeof CountTrendChart>>()
@@ -107,130 +89,42 @@ const emptyTrend = (): HotLiveRoomJoinTrendRes => ({
   monthly: [],
 })
 
-const gameJoinTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
-const firstFrameTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
-const roundStartTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
-const roundResultTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
-const gameExposureTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
-const gameWebViewLoadTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
-const gameControllerClickTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
-const offlineGameRoomPlayTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
+const spinClickTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
+const plusClickTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 
 const trendByEvent: Record<TrackingEventKey, HotLiveRoomJoinTrendRes> = {
-  gameJoin: gameJoinTrend,
-  firstFrame: firstFrameTrend,
-  roundStart: roundStartTrend,
-  roundResult: roundResultTrend,
-  gameExposure: gameExposureTrend,
-  gameWebViewLoad: gameWebViewLoadTrend,
-  gameControllerClick: gameControllerClickTrend,
-  offlineGameRoomPlay: offlineGameRoomPlayTrend,
+  spinClick: spinClickTrend,
+  plusClick: plusClickTrend,
 }
 
 const activeTrend = computed(() => trendByEvent[activeEvent.value])
 
 const activeSeriesName = computed(() => {
-  const key = activeEvent.value
-  if (key === 'gameJoin') {
-    return t('pages.trackingMiniGameRoundStart.gameJoinSeriesName')
+  if (activeEvent.value === 'plusClick') {
+    return t('pages.trackingMiniGameRoundStart.plusClickSeriesName')
   }
-  if (key === 'firstFrame') {
-    return t('pages.trackingMiniGameRoundStart.firstFrameSeriesName')
-  }
-  if (key === 'roundResult') {
-    return t('pages.trackingMiniGameRoundStart.roundResultSeriesName')
-  }
-  if (key === 'gameExposure') {
-    return t('pages.trackingMiniGameRoundStart.gameExposureSeriesName')
-  }
-  if (key === 'gameWebViewLoad') {
-    return t('pages.trackingMiniGameRoundStart.gameWebViewLoadSeriesName')
-  }
-  if (key === 'gameControllerClick') {
-    return t('pages.trackingMiniGameRoundStart.gameControllerClickSeriesName')
-  }
-  if (key === 'offlineGameRoomPlay') {
-    return t('pages.trackingMiniGameRoundStart.offlineGameRoomPlaySeriesName')
-  }
-  return t('pages.trackingMiniGameRoundStart.seriesName')
+  return t('pages.trackingMiniGameRoundStart.spinClickSeriesName')
 })
 
 const activeChartDaily = computed(() => {
-  const key = activeEvent.value
-  if (key === 'gameJoin') {
-    return t('pages.trackingMiniGameRoundStart.gameJoinChartDaily')
+  if (activeEvent.value === 'plusClick') {
+    return t('pages.trackingMiniGameRoundStart.plusClickChartDaily')
   }
-  if (key === 'firstFrame') {
-    return t('pages.trackingMiniGameRoundStart.firstFrameChartDaily')
-  }
-  if (key === 'roundResult') {
-    return t('pages.trackingMiniGameRoundStart.roundResultChartDaily')
-  }
-  if (key === 'gameExposure') {
-    return t('pages.trackingMiniGameRoundStart.gameExposureChartDaily')
-  }
-  if (key === 'gameWebViewLoad') {
-    return t('pages.trackingMiniGameRoundStart.gameWebViewLoadChartDaily')
-  }
-  if (key === 'gameControllerClick') {
-    return t('pages.trackingMiniGameRoundStart.gameControllerClickChartDaily')
-  }
-  if (key === 'offlineGameRoomPlay') {
-    return t('pages.trackingMiniGameRoundStart.offlineGameRoomPlayChartDaily')
-  }
-  return t('pages.trackingMiniGameRoundStart.chartDaily')
+  return t('pages.trackingMiniGameRoundStart.spinClickChartDaily')
 })
 
 const activeChartWeekly = computed(() => {
-  const key = activeEvent.value
-  if (key === 'gameJoin') {
-    return t('pages.trackingMiniGameRoundStart.gameJoinChartWeekly')
+  if (activeEvent.value === 'plusClick') {
+    return t('pages.trackingMiniGameRoundStart.plusClickChartWeekly')
   }
-  if (key === 'firstFrame') {
-    return t('pages.trackingMiniGameRoundStart.firstFrameChartWeekly')
-  }
-  if (key === 'roundResult') {
-    return t('pages.trackingMiniGameRoundStart.roundResultChartWeekly')
-  }
-  if (key === 'gameExposure') {
-    return t('pages.trackingMiniGameRoundStart.gameExposureChartWeekly')
-  }
-  if (key === 'gameWebViewLoad') {
-    return t('pages.trackingMiniGameRoundStart.gameWebViewLoadChartWeekly')
-  }
-  if (key === 'gameControllerClick') {
-    return t('pages.trackingMiniGameRoundStart.gameControllerClickChartWeekly')
-  }
-  if (key === 'offlineGameRoomPlay') {
-    return t('pages.trackingMiniGameRoundStart.offlineGameRoomPlayChartWeekly')
-  }
-  return t('pages.trackingMiniGameRoundStart.chartWeekly')
+  return t('pages.trackingMiniGameRoundStart.spinClickChartWeekly')
 })
 
 const activeChartMonthly = computed(() => {
-  const key = activeEvent.value
-  if (key === 'gameJoin') {
-    return t('pages.trackingMiniGameRoundStart.gameJoinChartMonthly')
+  if (activeEvent.value === 'plusClick') {
+    return t('pages.trackingMiniGameRoundStart.plusClickChartMonthly')
   }
-  if (key === 'firstFrame') {
-    return t('pages.trackingMiniGameRoundStart.firstFrameChartMonthly')
-  }
-  if (key === 'roundResult') {
-    return t('pages.trackingMiniGameRoundStart.roundResultChartMonthly')
-  }
-  if (key === 'gameExposure') {
-    return t('pages.trackingMiniGameRoundStart.gameExposureChartMonthly')
-  }
-  if (key === 'gameWebViewLoad') {
-    return t('pages.trackingMiniGameRoundStart.gameWebViewLoadChartMonthly')
-  }
-  if (key === 'gameControllerClick') {
-    return t('pages.trackingMiniGameRoundStart.gameControllerClickChartMonthly')
-  }
-  if (key === 'offlineGameRoomPlay') {
-    return t('pages.trackingMiniGameRoundStart.offlineGameRoomPlayChartMonthly')
-  }
-  return t('pages.trackingMiniGameRoundStart.chartMonthly')
+  return t('pages.trackingMiniGameRoundStart.spinClickChartMonthly')
 })
 
 const formatCount = (value: number | string | null | undefined) => {
@@ -271,65 +165,13 @@ const handleEventChange = () => {
   void fetchActiveTrend()
 }
 
-const fetchGameJoinTrend = async () => {
-  const data = await trackingEventApi.getGameLiveRoomJoinTrend()
-  assignTrend(gameJoinTrend, data)
-}
-
-const fetchFirstFrameTrend = async () => {
-  const data = await trackingEventApi.getGameLiveWatchStreamTrend()
-  assignTrend(firstFrameTrend, data)
-}
-
-const fetchRoundStartTrend = async () => {
-  const data = await trackingEventApi.getMiniGameRoundStartTrend()
-  assignTrend(roundStartTrend, data)
-}
-
-const fetchRoundResultTrend = async () => {
-  const data = await trackingEventApi.getMiniGameRoundResultTrend()
-  assignTrend(roundResultTrend, data)
-}
-
-const fetchGameExposureTrend = async () => {
-  const data = await trackingEventApi.getMiniGameExposureTrend()
-  assignTrend(gameExposureTrend, data)
-}
-
-const fetchGameWebViewLoadTrend = async () => {
-  const data = await trackingEventApi.getMiniGameWebViewLoadTrend()
-  assignTrend(gameWebViewLoadTrend, data)
-}
-
-const fetchGameControllerClickTrend = async () => {
-  const data = await trackingEventApi.getMiniGameControllerClickTrend()
-  assignTrend(gameControllerClickTrend, data)
-}
-
-const fetchOfflineGameRoomPlayTrend = async () => {
-  const data = await trackingEventApi.getOfflineGameRoomPlayTrend()
-  assignTrend(offlineGameRoomPlayTrend, data)
-}
-
 const fetchActiveTrend = async () => {
   loading.value = true
   try {
-    if (activeEvent.value === 'gameJoin') {
-      await fetchGameJoinTrend()
-    } else if (activeEvent.value === 'firstFrame') {
-      await fetchFirstFrameTrend()
-    } else if (activeEvent.value === 'roundResult') {
-      await fetchRoundResultTrend()
-    } else if (activeEvent.value === 'gameExposure') {
-      await fetchGameExposureTrend()
-    } else if (activeEvent.value === 'gameWebViewLoad') {
-      await fetchGameWebViewLoadTrend()
-    } else if (activeEvent.value === 'gameControllerClick') {
-      await fetchGameControllerClickTrend()
-    } else if (activeEvent.value === 'offlineGameRoomPlay') {
-      await fetchOfflineGameRoomPlayTrend()
+    if (activeEvent.value === 'plusClick') {
+      assignTrend(plusClickTrend, await trackingEventApi.getMiniGamePlusClickTrend())
     } else {
-      await fetchRoundStartTrend()
+      assignTrend(spinClickTrend, await trackingEventApi.getMiniGameSpinClickTrend())
     }
     resizeActiveChart()
   } catch (error) {

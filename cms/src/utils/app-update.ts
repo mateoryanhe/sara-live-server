@@ -1,5 +1,6 @@
 import {ElMessageBox} from 'element-plus'
 import {i18n} from '@/i18n'
+import {prepareSoftReload} from '@/utils/soft-reload-overlay'
 
 const CHUNK_RELOAD_KEY = 'cms_chunk_reload_ts'
 const VERSION_PROMPT_KEY = 'cms_version_prompt_ts'
@@ -27,7 +28,10 @@ function versionUrl(): string {
 
 /** Soft reload only; never clears auth/localStorage login session. */
 export function softReload(): void {
-  window.location.reload()
+  prepareSoftReload(t('common.appUpdateReloading'))
+  window.requestAnimationFrame(() => {
+    window.location.reload()
+  })
 }
 
 export function reloadForChunkError(): boolean {

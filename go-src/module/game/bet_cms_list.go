@@ -67,6 +67,7 @@ func GetBetCMSList(_ context.Context, req *gamebetdto.CMSGameBetLogListReq) (*ht
 	total, rows := gamebetdao.CMSList(&gamebetdao.CMSListFilter{
 		UserId:       parseBetCMSUserIdFilter(req.UserId),
 		GameCode:     req.GameCode,
+		GameCodes:    req.GameCodes,
 		OrderId:      req.OrderId,
 		PlatformType: req.PlatformType,
 		PageIndex:    req.PageIndex,

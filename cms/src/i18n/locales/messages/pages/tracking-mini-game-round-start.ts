@@ -1,6 +1,20 @@
 import {definePageMessagesFromEn} from './_define'
 
 const zh = {
+  tabSpinClick: 'Spin点击',
+  tabPlusClick: '游戏+',
+  spinClickDesc:
+      '统计用户点击 Spin 的次数：App POST /liveRoom/reportMiniGameSpinClick（Sofie POST /sofie/studio/notifyMiniGameSpinClick），登录即可，每次成功 +1（event mini_game_spin_click）。',
+  plusClickDesc:
+      '统计用户点击游戏+的次数：App POST /liveRoom/reportMiniGamePlusClick（Sofie POST /sofie/studio/notifyMiniGamePlusClick），登录即可，每次成功 +1（event mini_game_plus_click）。',
+  spinClickSeriesName: 'Spin点击',
+  plusClickSeriesName: '游戏+',
+  spinClickChartDaily: 'Spin点击 · 按日（最近 30 天）',
+  spinClickChartWeekly: 'Spin点击 · 按周（最近 12 周）',
+  spinClickChartMonthly: 'Spin点击 · 按月（最近 12 月）',
+  plusClickChartDaily: '游戏+ · 按日（最近 30 天）',
+  plusClickChartWeekly: '游戏+ · 按周（最近 12 周）',
+  plusClickChartMonthly: '游戏+ · 按月（最近 12 月）',
   tabGameJoin: '进入游戏直播间',
   tabFirstFrame: '直播首帧画面渲染完成',
   tabRoundStart: '点击开始游戏',
@@ -64,6 +78,20 @@ const zh = {
 }
 
 export const trackingMiniGameRoundStartMessages = definePageMessagesFromEn(zh, {
+  tabSpinClick: 'Spin tap',
+  tabPlusClick: 'Game+',
+  spinClickDesc:
+      'Spin tap count: POST /liveRoom/reportMiniGameSpinClick (Sofie notifyMiniGameSpinClick), logged-in, +1 per success (mini_game_spin_click).',
+  plusClickDesc:
+      'Game+ tap count: POST /liveRoom/reportMiniGamePlusClick (Sofie notifyMiniGamePlusClick), logged-in, +1 per success (mini_game_plus_click).',
+  spinClickSeriesName: 'Spin taps',
+  plusClickSeriesName: 'Game+ taps',
+  spinClickChartDaily: 'Spin taps · daily (last 30 days)',
+  spinClickChartWeekly: 'Spin taps · weekly (last 12 weeks)',
+  spinClickChartMonthly: 'Spin taps · monthly (last 12 months)',
+  plusClickChartDaily: 'Game+ taps · daily (last 30 days)',
+  plusClickChartWeekly: 'Game+ taps · weekly (last 12 weeks)',
+  plusClickChartMonthly: 'Game+ taps · monthly (last 12 months)',
   tabGameJoin: 'Enter game live room',
   tabFirstFrame: 'First video frame rendered',
   tabRoundStart: 'Start game',

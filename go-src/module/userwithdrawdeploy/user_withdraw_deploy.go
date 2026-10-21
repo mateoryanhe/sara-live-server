@@ -10,6 +10,7 @@ import (
 
 	"github.com/gogf/gf/v2/net/ghttp"
 	"xr-game-server/core/cfg"
+	"xr-game-server/core/uploadstaging"
 	"xr-game-server/dto/userwithdrawdeploydto"
 	"xr-game-server/module/domainsite"
 	"xr-game-server/module/staticdeploy"
@@ -47,7 +48,7 @@ func DeployZipFromRequest(r *ghttp.Request) (*userwithdrawdeploydto.DeployUserWi
 			part.Close()
 			return nil, fmt.Errorf("file ext not allowed: %s", ext)
 		}
-		tmpFile, err := os.CreateTemp("", "user-withdraw-deploy-*.zip")
+		tmpFile, err := uploadstaging.CreateTempFile(uploadstaging.SubCMSDeployZip, "user-withdraw-deploy-*.zip")
 		if err != nil {
 			part.Close()
 			return nil, err

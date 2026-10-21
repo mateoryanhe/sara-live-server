@@ -27,3 +27,15 @@ func (c *DomainSiteRegistryCMSController) GetCMSDomainSiteMapping(ctx context.Co
 func (c *DomainSiteRegistryCMSController) SaveCMSDomainSiteMapping(ctx context.Context, req *domainsitedto.SaveCMSDomainSiteMappingReq) (*domainsitedto.SaveCMSDomainSiteMappingRes, error) {
 	return domainsite.SaveCMSDomainSiteMapping(ctx, req)
 }
+
+func (c *DomainSiteRegistryCMSController) ListCMSDomainAlias(ctx context.Context, req *domainsitedto.ListCMSDomainAliasReq) (*domainsitedto.ListCMSDomainAliasRes, error) {
+	return domainsite.ListCMSDomainAlias(ctx, req)
+}
+
+func (c *DomainSiteRegistryCMSController) AddCMSDomainAlias(ctx context.Context, req *domainsitedto.AddCMSDomainAliasReq) (*domainsitedto.AddCMSDomainAliasRes, error) {
+	return domainsite.AddCMSDomainAlias(ctx, req)
+}
+
+func (c *DomainSiteRegistryCMSController) DeleteCMSDomainAlias(ctx context.Context, req *domainsitedto.DeleteCMSDomainAliasReq) (*domainsitedto.DeleteCMSDomainAliasRes, error) {
+	return domainsite.DeleteCMSDomainAlias(ctx, req)
+}

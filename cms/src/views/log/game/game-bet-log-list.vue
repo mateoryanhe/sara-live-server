@@ -12,7 +12,7 @@
           <el-input v-model="searchForm.userId" clearable :placeholder="t('common.pleaseEnter') + ' ' + t('common.userId')"/>
         </el-form-item>
         <el-form-item :label="t('pages.gameBetLogList.gameCode')">
-          <el-input v-model="searchForm.gameCode" clearable :placeholder="t('pages.gameBetLogList.gameCodePlaceholder')"/>
+          <GameCodeMultiSelect v-model="searchForm.gameCodes"/>
         </el-form-item>
         <el-form-item :label="t('pages.gameBetLogList.orderId')">
           <el-input v-model="searchForm.orderId" clearable :placeholder="t('pages.gameBetLogList.orderIdPlaceholder')"/>
@@ -107,6 +107,7 @@ import {useUserDetailNav} from '@/composables/useUserDetailNav'
 import {buildCsvHeaders, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
 import {CMS_EXPORT_TYPE_GAME_BET_LOG} from '@/utils/cms-async-export'
 import {buildGameBetLogCsvColumns} from '@/utils/game-log-csv'
+import GameCodeMultiSelect from '@/components/game/GameCodeMultiSelect.vue'
 
 const {t} = useI18n()
 const {can} = usePagePermission('GameBetLogListManagement')
@@ -117,7 +118,7 @@ const tableData = ref<GameBetLogItem[]>([])
 
 const searchForm = reactive({
   userId: '',
-  gameCode: '',
+  gameCodes: [] as string[],
   orderId: '',
   platformType: '',
 })
@@ -130,7 +131,7 @@ const pagination = reactive({
 
 const buildFilterParams = () => ({
   userId: searchForm.userId.trim(),
-  gameCode: searchForm.gameCode.trim(),
+  gameCodes: searchForm.gameCodes.length ? [...searchForm.gameCodes] : undefined,
   orderId: searchForm.orderId.trim(),
   platformType: searchForm.platformType.trim(),
 })
@@ -160,7 +161,7 @@ const handleSearch = () => {
 
 const handleReset = () => {
   searchForm.userId = ''
-  searchForm.gameCode = ''
+  searchForm.gameCodes = []
   searchForm.orderId = ''
   searchForm.platformType = ''
   pagination.pageIndex = 1

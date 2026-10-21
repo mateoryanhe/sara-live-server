@@ -5,8 +5,74 @@
     <link href="/favicon.ico" rel="icon">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Vite App</title>
+    <style>
+        #cms-boot-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.92);
+        }
+
+        #cms-boot-overlay .cms-boot-overlay__panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        #cms-boot-overlay .cms-boot-overlay__spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e4e7ed;
+            border-top-color: #409eff;
+            border-radius: 50%;
+            animation: cms-boot-spin 0.85s linear infinite;
+        }
+
+        #cms-boot-overlay .cms-boot-overlay__text {
+            margin: 0;
+            font: 14px/1.5 system-ui, -apple-system, 'Segoe UI', sans-serif;
+            color: #606266;
+        }
+
+        @keyframes cms-boot-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
 </head>
 <body>
+<div id="cms-boot-overlay" hidden role="status" aria-live="polite">
+    <div class="cms-boot-overlay__panel">
+        <div aria-hidden="true" class="cms-boot-overlay__spinner"></div>
+        <p class="cms-boot-overlay__text">Loading…</p>
+    </div>
+</div>
+<script>
+    (function () {
+        try {
+            if (sessionStorage.getItem('cms_soft_reload') !== '1') {
+                return
+            }
+            var overlay = document.getElementById('cms-boot-overlay')
+            if (!overlay) {
+                return
+            }
+            var msg = sessionStorage.getItem('cms_soft_reload_msg')
+            var textEl = overlay.querySelector('.cms-boot-overlay__text')
+            if (textEl && msg) {
+                textEl.textContent = msg
+            }
+            overlay.hidden = false
+        } catch (e) {
+            /* ignore */
+        }
+    })()
+</script>
 <div id="app"></div>
 <script src="/src/main.ts" type="module"></script>
 </body>

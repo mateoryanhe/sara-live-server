@@ -25,6 +25,7 @@ func GetVendorGameList(_ context.Context, req *gameplatformdto.VendorGameListReq
 		q.PageIndex = pageIndex
 		q.PageSize = pageSize
 		q.GameCode = req.GameCode
+		q.GameCodes = req.GameCodes
 		q.Name = req.Name
 		q.Platform = req.Platform
 		q.Category = req.Category

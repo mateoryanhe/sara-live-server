@@ -28,11 +28,17 @@ func ReportMiniGameExposure(ctx context.Context, _ *trackingdto.ReportMiniGameEx
 	if userId == 0 {
 		return nil, errercode.CreateCode(errercode.EmptyUserId)
 	}
+	if gameLiveRoomTrackingPersistDisabled() {
+		return &trackingdto.ReportMiniGameExposureRes{Success: true}, nil
+	}
 	event.Pub(gameevent.MiniGameExposureTrackingEvent, gameevent.NewMiniGameExposureTrackingEventData(userId, time.Now()))
 	return &trackingdto.ReportMiniGameExposureRes{Success: true}, nil
 }
 
 func recordMiniGameExposure(userId uint64, at time.Time) {
+	if gameLiveRoomTrackingPersistDisabled() {
+		return
+	}
 	if userId == 0 {
 		return
 	}

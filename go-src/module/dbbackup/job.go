@@ -13,6 +13,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/core/event"
+	"xr-game-server/core/uploadstaging"
 	"xr-game-server/dao/cfgdao"
 	sysentity "xr-game-server/entity/sys"
 	"xr-game-server/gameevent"
@@ -23,10 +24,18 @@ var dbNameRe = regexp.MustCompile(`^[A-Za-z0-9_]{1,64}$`)
 
 func stagingDir() string {
 	root := strings.TrimSpace(upload.GetStoragePath())
-	if root == "" {
-		return filepath.Join(os.TempDir(), "sara-db-backup")
+	if root != "" {
+		return filepath.Join(filepath.Dir(root), "staging", "db-backup")
 	}
-	return filepath.Join(filepath.Dir(root), "staging", "db-backup")
+	dir, err := uploadstaging.Subdir(uploadstaging.SubDBBackup)
+	if err != nil {
+		root, rootErr := uploadstaging.Root()
+		if rootErr != nil {
+			return filepath.Join("/home/ec2-user/staging", uploadstaging.SubDBBackup)
+		}
+		return filepath.Join(root, uploadstaging.SubDBBackup)
+	}
+	return dir
 }
 
 func findBinary(names ...string) (string, error) {

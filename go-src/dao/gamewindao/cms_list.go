@@ -5,6 +5,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"xr-game-server/dao/gamequery"
 	"xr-game-server/entity/game"
 )
 
@@ -12,6 +13,7 @@ import (
 type CMSListFilter struct {
 	UserId       uint64
 	GameCode     string
+	GameCodes    []string
 	OrderId      string
 	PlatformType string
 	PageIndex    int
@@ -39,9 +41,7 @@ func CMSList(f *CMSListFilter) (int, []*entity.GameWinLog) {
 	if f.UserId > 0 {
 		m = m.Where(string(entity.GameWinLogUserId)+" = ?", f.UserId)
 	}
-	if gameCode := strings.TrimSpace(f.GameCode); gameCode != "" {
-		m = m.Where(string(entity.GameWinLogGameCode)+" LIKE ?", "%"+gameCode+"%")
-	}
+	m = gamequery.ApplyGameCodeFilter(m, string(entity.GameWinLogGameCode), f.GameCode, f.GameCodes)
 	if orderId := strings.TrimSpace(f.OrderId); orderId != "" {
 		m = m.Where(string(entity.GameWinLogOrderId)+" LIKE ?", "%"+orderId+"%")
 	}

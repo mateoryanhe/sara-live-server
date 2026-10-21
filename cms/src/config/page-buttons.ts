@@ -104,6 +104,7 @@ const CONFIG_PAGES = new Set([
     'DbBackupCfgManagement',
     'UploadResourceCfgManagement',
     'CMSDomainMappingManagement',
+    'CMSDomainAliasManagement',
     'DataSyncCfgManagement',
     'AgoraCfgManagement',
     'LiveCfgManagement',
@@ -118,6 +119,11 @@ const CONFIG_PAGES = new Set([
 
 /** 各页面自定义按钮（未列出的页面按类型使用默认集） */
 export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
+    CMSDomainAliasManagement: [
+        BTN.view,
+        BTN.save,
+        BTN.delete,
+    ],
     WalletExchangeCfgManagement: [
         BTN.view,
         {key: 'save', label: '保存金币兑换配置'},

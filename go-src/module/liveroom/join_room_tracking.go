@@ -16,6 +16,8 @@ func pubLiveRoomJoinTracking(userId, roomId uint64, at time.Time) {
 		at = time.Now()
 	}
 	event.Pub(gameevent.ShowcaseLiveRoomJoinTrackingEvent, gameevent.NewShowcaseLiveRoomJoinTrackingEventData(userId, roomId, at))
-	event.Pub(gameevent.GameLiveRoomJoinTrackingEvent, gameevent.NewGameLiveRoomJoinTrackingEventData(userId, roomId, at))
+	if !gameevent.GameLiveRoomTrackingPersistDisabled {
+		event.Pub(gameevent.GameLiveRoomJoinTrackingEvent, gameevent.NewGameLiveRoomJoinTrackingEventData(userId, roomId, at))
+	}
 	event.Pub(gameevent.VoiceRoomEnterTrackingEvent, gameevent.NewVoiceRoomEnterTrackingEventData(userId, roomId, at))
 }

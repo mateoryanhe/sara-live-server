@@ -43,6 +43,8 @@
 | `studio` | 上报半屏游戏窗口曝光 | 需要登录 | `POST /liveRoom/reportMiniGameExposure` | `POST /sofie/studio/notifyMiniGameExposure` |
 | `studio` | 上报游戏WebView成功加载 | 需要登录 | `POST /liveRoom/reportMiniGameWebViewLoadSuccess` | `POST /sofie/studio/notifyMiniGameWebViewLoadSuccess` |
 | `studio` | 上报点击游戏手柄 | 需要登录 | `POST /liveRoom/reportMiniGameControllerClick` | `POST /sofie/studio/notifyMiniGameControllerClick` |
+| `studio` | 上报Spin点击 | 需要登录 | `POST /liveRoom/reportMiniGameSpinClick` | `POST /sofie/studio/notifyMiniGameSpinClick` |
+| `studio` | 上报游戏+ | 需要登录 | `POST /liveRoom/reportMiniGamePlusClick` | `POST /sofie/studio/notifyMiniGamePlusClick` |
 | `studio` | 上报语聊房礼物面板点击 | 需要登录 | `POST /liveRoom/reportVoiceRoomGiftClick` | `POST /sofie/studio/notifyVoiceRoomGiftClick` |
 | `studio` | 上报秀场直播间礼物面板点击 | 需要登录 | `POST /liveRoom/reportHotLiveRoomGiftClick` | `POST /sofie/studio/notifyHotLiveRoomGiftClick` |
 | `studio` | 离开直播间 | 需要登录 | `POST /liveRoom/leave` | `POST /sofie/studio/exitHall` |

@@ -60,6 +60,7 @@
 - 大文件/压缩包：用 **`/home/ec2-user/staging`** 中转，解压到目标如 **`/home/ec2-user/cdn/images`**
 - 根盘 `/` 约 30G，剩余空间充足；**不宜扩大 /tmp**（受内存限制，扩了易 OOM）
 - Go/CMS 的测试、审核、正式发版脚本均走 staging，解压为非交互模式，并在成功、失败或中断时清理远端包和临时目录
+- Go 进程内 CMS 大文件上传（官网/APK 分片、各静态站 zip 等）走 **`core/uploadstaging`**，默认 **`/home/ec2-user/staging/{official-site-file-upload|cms-deploy-zip}`**；可用环境变量 **`SARA_UPLOAD_STAGING_ROOT`** 覆盖（与 pub-tool `REMOTE_STAGE` 对齐）
 - CMS 的 `D:\root\cms` 位于 Vite 项目根目录之外，必须保持 `emptyOutDir: true`，避免旧 hash 资源累积进发版包
 
 ## 审核服 cdn/images 被秒清（2026-08-31）

@@ -28,6 +28,8 @@ var (
 	gameLiveRoomJoinTrackingQueue       = gqueue.NewTQueue[*gameevent.GameLiveRoomJoinTrackingEventData]()
 	miniGameWebViewLoadTrackingQueue       = gqueue.NewTQueue[*gameevent.MiniGameWebViewLoadTrackingEventData]()
 	miniGameControllerClickTrackingQueue = gqueue.NewTQueue[*gameevent.MiniGameControllerClickTrackingEventData]()
+	miniGameSpinClickTrackingQueue       = gqueue.NewTQueue[*gameevent.MiniGameSpinClickTrackingEventData]()
+	miniGamePlusClickTrackingQueue       = gqueue.NewTQueue[*gameevent.MiniGamePlusClickTrackingEventData]()
 	offlineGameRoomPlayTrackingQueue     = gqueue.NewTQueue[*gameevent.OfflineGameRoomPlayTrackingEventData]()
 	shortVideoPlayStartTrackingQueue    = gqueue.NewTQueue[*gameevent.ShortVideoPlayStartTrackingEventData]()
 	shortVideoPaywallClickTrackingQueue = gqueue.NewTQueue[*gameevent.ShortVideoPaywallClickTrackingEventData]()
@@ -59,6 +61,8 @@ func initTrackingQueue() {
 	event.Sub(gameevent.GameLiveRoomJoinTrackingEvent, onGameLiveRoomJoinTrackingEvent)
 	event.Sub(gameevent.MiniGameWebViewLoadTrackingEvent, onMiniGameWebViewLoadTrackingEvent)
 	event.Sub(gameevent.MiniGameControllerClickTrackingEvent, onMiniGameControllerClickTrackingEvent)
+	event.Sub(gameevent.MiniGameSpinClickTrackingEvent, onMiniGameSpinClickTrackingEvent)
+	event.Sub(gameevent.MiniGamePlusClickTrackingEvent, onMiniGamePlusClickTrackingEvent)
 	event.Sub(gameevent.OfflineGameRoomPlayTrackingEvent, onOfflineGameRoomPlayTrackingEvent)
 	event.Sub(gameevent.ShortVideoPlayStartTrackingEvent, onShortVideoPlayStartTrackingEvent)
 	event.Sub(gameevent.ShortVideoPaywallClickTrackingEvent, onShortVideoPaywallClickTrackingEvent)
@@ -175,6 +179,22 @@ func onMiniGameControllerClickTrackingEvent(data any) {
 		return
 	}
 	miniGameControllerClickTrackingQueue.Push(ev)
+}
+
+func onMiniGameSpinClickTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.MiniGameSpinClickTrackingEventData)
+	if !ok || ev == nil || ev.UserId == 0 {
+		return
+	}
+	miniGameSpinClickTrackingQueue.Push(ev)
+}
+
+func onMiniGamePlusClickTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.MiniGamePlusClickTrackingEventData)
+	if !ok || ev == nil || ev.UserId == 0 {
+		return
+	}
+	miniGamePlusClickTrackingQueue.Push(ev)
 }
 
 func onShortVideoPlayStartTrackingEvent(data any) {
@@ -297,6 +317,8 @@ func trackingQueueIdle() bool {
 		gameLiveRoomJoinTrackingQueue.Len() == 0 &&
 		miniGameWebViewLoadTrackingQueue.Len() == 0 &&
 		miniGameControllerClickTrackingQueue.Len() == 0 &&
+		miniGameSpinClickTrackingQueue.Len() == 0 &&
+		miniGamePlusClickTrackingQueue.Len() == 0 &&
 		shortVideoPlayStartTrackingQueue.Len() == 0 &&
 		shortVideoPaywallClickTrackingQueue.Len() == 0 &&
 		shortVideoPaySuccessTrackingQueue.Len() == 0 &&
@@ -362,6 +384,12 @@ func drainTrackingQueue() {
 	})
 	drainTrackingTQueue(miniGameControllerClickTrackingQueue, func(ev *gameevent.MiniGameControllerClickTrackingEventData) {
 		recordMiniGameControllerClick(ev.UserId, ev.StatAt)
+	})
+	drainTrackingTQueue(miniGameSpinClickTrackingQueue, func(ev *gameevent.MiniGameSpinClickTrackingEventData) {
+		recordMiniGameSpinClick(ev.UserId, ev.StatAt)
+	})
+	drainTrackingTQueue(miniGamePlusClickTrackingQueue, func(ev *gameevent.MiniGamePlusClickTrackingEventData) {
+		recordMiniGamePlusClick(ev.UserId, ev.StatAt)
 	})
 	drainTrackingTQueue(offlineGameRoomPlayTrackingQueue, func(ev *gameevent.OfflineGameRoomPlayTrackingEventData) {
 		recordOfflineGameRoomPlay(ev.UserId, ev.RoomId, ev.StatAt)

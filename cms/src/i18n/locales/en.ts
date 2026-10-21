@@ -130,6 +130,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   DbBackupCfgManagement: 'DB Backup',
   UploadResourceCfgManagement: 'Resource CDN',
   CMSDomainMappingManagement: 'CMS Domain Mapping',
+  CMSDomainAliasManagement: 'CMS Extra Domains',
   H5LiveDeployManagement: 'H5 Live Deploy',
   CoinMerchantDeployManagement: 'Dealer H5 Deploy',
   CountryFlagDeployManagement: 'Country Flag Deploy',

@@ -19,6 +19,7 @@ func exportGameBetLogCSV(ctx context.Context, payload json.RawMessage, onProgres
 		total, rows := gamebetdao.CMSList(&gamebetdao.CMSListFilter{
 			UserId:       parseUint64Filter(req.UserId),
 			GameCode:     req.GameCode,
+			GameCodes:    req.GameCodes,
 			OrderId:      req.OrderId,
 			PlatformType: req.PlatformType,
 			PageIndex:    pageIndex,
@@ -41,6 +42,7 @@ func exportGameWinLogCSV(ctx context.Context, payload json.RawMessage, onProgres
 		total, rows := gamewindao.CMSList(&gamewindao.CMSListFilter{
 			UserId:       parseUint64Filter(req.UserId),
 			GameCode:     req.GameCode,
+			GameCodes:    req.GameCodes,
 			OrderId:      req.OrderId,
 			PlatformType: req.PlatformType,
 			PageIndex:    pageIndex,

@@ -98,6 +98,7 @@ import {cfEmailMessages} from './cf-email'
 import {dbBackupMessages} from './db-backup'
 import {uploadResourceMessages} from './upload-resource'
 import {cmsDomainMappingMessages} from './cms-domain-mapping'
+import {cmsDomainAliasMessages} from './cms-domain-alias'
 import {h5LiveDeployMessages} from './h5-live-deploy'
 import {coinMerchantDeployMessages} from './coin-merchant-deploy'
 import {countryFlagDeployMessages} from './country-flag-deploy'
@@ -213,6 +214,7 @@ const pageMessageBuilders = [
   ['dbBackup', dbBackupMessages],
   ['uploadResource', uploadResourceMessages],
   ['cmsDomainMapping', cmsDomainMappingMessages],
+  ['cmsDomainAlias', cmsDomainAliasMessages],
   ['h5LiveDeploy', h5LiveDeployMessages],
   ['coinMerchantDeploy', coinMerchantDeployMessages],
   ['countryFlagDeploy', countryFlagDeployMessages],

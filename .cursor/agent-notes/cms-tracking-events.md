@@ -69,7 +69,8 @@ App 秀场礼物面板：`POST /liveRoom/reportHotLiveRoomGiftClick`（Sofie `PO
 
 | 页面 | event | 口径 | CMS API |
 |------|-------|------|---------|
-| `TrackingMiniGameRoundStartManagement`（游戏直播间） | `game_live_room_join` | 游戏直播(category=2)；观众 `joinRoom` 成功 +1，不含主播 | `POST /trackingEvent/getGameLiveRoomJoinTrend` |
+| `TrackingMiniGameRoundStartManagement`（游戏直播间） | — | **2026-10-21 起整页停用**：CMS 无 Tab/图表；`gameevent.GameLiveRoomTrackingPersistDisabled=true`，App 上报仍 200/success **不入库** | CMS 趋势接口仍注册，仅读历史 |
+| ~~游戏直播间~~ | `game_live_room_join` | 游戏直播(category=2)；观众 `joinRoom` 成功 +1，不含主播 | `POST /trackingEvent/getGameLiveRoomJoinTrend` |
 | 同上 **Tab「直播首帧画面渲染完成」** | `game_live_watch_stream` | 游戏直播(category=2)；`reportLiveFirstFrameRendered` 成功 +1，不含主播 | `POST /trackingEvent/getGameLiveWatchStreamTrend` |
 | 同上 **Tab「点击开始游戏」** | `mini_game_round_start` | App `appGameStart` 成功返回非空启动 link +1 | `POST /trackingEvent/getMiniGameRoundStartTrend` |
 
@@ -98,6 +99,12 @@ App：`POST /liveRoom/reportMiniGameControllerClick`（Sofie `POST /sofie/studio
 表：`daily_mini_game_controller_click_stats` / `weekly_*` / `monthly_*`。
 
 | 同上页 **Tab「进入离线房间玩游戏」** | `offline_game_room_play` | 游戏房 category=2、未开播(`liveRecordId=0`)；`appGameStart` 传 `roomId` 且返回有效 link +1，不含主播 | `POST /trackingEvent/getOfflineGameRoomPlayTrend` |
+| **游戏直播间页（2026-10）Tab「Spin点击」** | `mini_game_spin_click` | 登录用户 `reportMiniGameSpinClick` 成功 +1 | `POST /trackingEvent/getMiniGameSpinClickTrend` |
+| 同上 **Tab「游戏+」** | `mini_game_plus_click` | 登录用户 `reportMiniGamePlusClick` 成功 +1 | `POST /trackingEvent/getMiniGamePlusClickTrend` |
+
+App：`POST /liveRoom/reportMiniGameSpinClick`、`POST /liveRoom/reportMiniGamePlusClick`（Sofie `notifyMiniGameSpinClick` / `notifyMiniGamePlusClick`）。
+
+表：`daily_mini_game_spin_click_stats` / `weekly_*` / `monthly_*`；`daily_mini_game_plus_click_stats` / `weekly_*` / `monthly_*`。
 
 表：`daily_offline_game_room_play_stats` / `weekly_*` / `monthly_*`。
 

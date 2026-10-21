@@ -7,6 +7,7 @@ import {restoreAuthSession} from '@/utils/auth'
 import {btnPermission} from '@/directives/btn-permission'
 import {i18n} from '@/i18n'
 import {setupAppUpdateWatch, setupRouterChunkReload} from '@/utils/app-update'
+import {clearSoftReloadOverlay} from '@/utils/soft-reload-overlay'
 import 'element-plus/es/components/message/style/css'
 import 'element-plus/es/components/message-box/style/css'
 import 'element-plus/es/components/overlay/style/css'
@@ -21,3 +22,4 @@ app.directive('btn-permission', btnPermission)
 app.use(router)
 app.use(i18n)
 app.mount('#app')
+clearSoftReloadOverlay()

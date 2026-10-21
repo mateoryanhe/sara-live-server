@@ -19,6 +19,9 @@ const (
 )
 
 func recordMiniGameRoundResult(userId uint64, at time.Time) {
+	if gameLiveRoomTrackingPersistDisabled() {
+		return
+	}
 	if userId == 0 {
 		return
 	}

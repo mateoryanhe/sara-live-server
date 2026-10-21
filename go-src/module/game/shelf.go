@@ -9,6 +9,7 @@ import (
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/cfgdao"
+	"xr-game-server/dao/gamequery"
 	"xr-game-server/dto/gameplatformdto"
 	entity "xr-game-server/entity/game"
 	"xr-game-server/errercode"
@@ -271,9 +272,10 @@ func filterGameShelfList(all []*entity.GameCfg, req *gameplatformdto.GameShelfLi
 		return all
 	}
 	gameCode := strings.TrimSpace(req.GameCode)
+	gameCodes := req.GameCodes
 	name := strings.TrimSpace(req.Name)
 	platform := strings.TrimSpace(req.Platform)
-	if gameCode == "" && name == "" && platform == "" {
+	if len(gameCodes) == 0 && gameCode == "" && name == "" && platform == "" {
 		return all
 	}
 
@@ -282,7 +284,7 @@ func filterGameShelfList(all []*entity.GameCfg, req *gameplatformdto.GameShelfLi
 		if row == nil {
 			continue
 		}
-		if gameCode != "" && !strings.Contains(strings.ToLower(row.GameCode), strings.ToLower(gameCode)) {
+		if !gamequery.MatchGameCode(row.GameCode, gameCode, gameCodes) {
 			continue
 		}
 		if platform != "" && !strings.Contains(strings.ToLower(row.Platform), strings.ToLower(platform)) {

@@ -91,6 +91,16 @@ func (c *LiveRoomAppController) ReportMiniGameControllerClick(ctx context.Contex
 	return tracking.ReportMiniGameControllerClick(ctx, req)
 }
 
+// ReportMiniGameSpinClick 上报 Spin 点击
+func (c *LiveRoomAppController) ReportMiniGameSpinClick(ctx context.Context, req *trackingdto.ReportMiniGameSpinClickReq) (*trackingdto.ReportMiniGameSpinClickRes, error) {
+	return tracking.ReportMiniGameSpinClick(ctx, req)
+}
+
+// ReportMiniGamePlusClick 上报游戏+
+func (c *LiveRoomAppController) ReportMiniGamePlusClick(ctx context.Context, req *trackingdto.ReportMiniGamePlusClickReq) (*trackingdto.ReportMiniGamePlusClickRes, error) {
+	return tracking.ReportMiniGamePlusClick(ctx, req)
+}
+
 // ReportVoiceRoomGiftClick 上报语聊房礼物面板点击
 func (c *LiveRoomAppController) ReportVoiceRoomGiftClick(ctx context.Context, req *trackingdto.ReportVoiceRoomGiftClickReq) (*trackingdto.ReportVoiceRoomGiftClickRes, error) {
 	return tracking.ReportVoiceRoomGiftClick(ctx, req)

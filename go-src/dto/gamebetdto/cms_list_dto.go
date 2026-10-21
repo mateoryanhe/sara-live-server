@@ -12,7 +12,8 @@ type CMSGameBetLogListReq struct {
 	g.Meta `path:"/cmsGameBetLogList" method:"post" summary:"CMS查询游戏下注记录" tags:"游戏下注"`
 	httpserver.CMSQueryReq
 	UserId       string `json:"userId" dc:"用户ID(可选)"`
-	GameCode     string `json:"gameCode" dc:"游戏编码(可选,模糊匹配)"`
+	GameCode     string   `json:"gameCode" dc:"游戏编码(可选,模糊匹配)"`
+	GameCodes    []string `json:"gameCodes" dc:"游戏编码(可选,多选精确匹配,优先于 gameCode)"`
 	OrderId      string `json:"orderId" dc:"订单ID(可选,模糊匹配)"`
 	PlatformType string `json:"platformType" dc:"平台类型(可选,模糊匹配)"`
 }

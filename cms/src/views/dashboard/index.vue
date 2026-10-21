@@ -26,8 +26,7 @@
             </el-button>
             <el-button :loading="loading" @click="() => void fetchSysStat()">{{ t('common.refresh') }}</el-button>
           </div>
-          <p v-if="can('basicDataReset')" class="basic-data-reset-hint">{{ t('pages.dashboard.resetBasicDataHint') }}</p>
-          <div class="basic-stat-board">
+          <div class="basic-stat-board basic-stat-board--compact">
             <section
                 v-for="section in basicStatSections"
                 :key="section.key"
@@ -45,7 +44,7 @@
                     :class="card.theme"
                 >
                   <div class="stat-label">{{ card.label }}</div>
-                  <div class="stat-value">
+                  <div class="stat-value" :class="card.valueClass">
                     {{ card.format === 'count' ? formatCount(card.value) : formatAmount(card.value) }}
                     <span v-if="card.format === 'amountUsd'" class="stat-unit">USD</span>
                   </div>
@@ -58,8 +57,24 @@
 
         <el-tab-pane :label="t('pages.dashboard.onlineUsers')" name="online">
           <div v-loading="onlineLoading" class="dashboard-tab-pane-body">
-          <div class="tab-toolbar tab-toolbar-trend-range">
-            <el-button :loading="onlineLoading" @click="() => void fetchResourceMetricTrend()">{{ t('common.refresh') }}</el-button>
+          <div class="tab-toolbar tab-toolbar-trend-range tab-toolbar-online">
+            <el-button :loading="onlineLoading" @click="() => void refreshOnlineTab()">{{ t('common.refresh') }}</el-button>
+          </div>
+          <div class="dashboard-realtime-row">
+            <div class="dashboard-realtime-row-head">
+              <span class="basic-stat-section-title">{{ t('pages.dashboard.sectionOnlineRealtime') }}</span>
+              <span class="basic-stat-section-line"/>
+            </div>
+            <div class="dashboard-realtime-grid">
+              <div class="stat-card tone-rose dashboard-realtime-card">
+                <div class="stat-label">{{ t('pages.dashboard.onlineRealtimeAudienceCount') }}</div>
+                <div class="stat-value">{{ formatCount(onlineRealtime.audienceOnlineCount) }}</div>
+              </div>
+              <div class="stat-card tone-blue dashboard-realtime-card">
+                <div class="stat-label">{{ t('pages.dashboard.onlineRealtimeLiveAnchorCount') }}</div>
+                <div class="stat-value">{{ formatCount(onlineRealtime.liveAnchorCount) }}</div>
+              </div>
+            </div>
           </div>
           <p class="game-bet-event-hint">{{ t('pages.dashboard.onlineTrendRetentionHint') }}</p>
           <p v-if="onlineRangeTruncated" class="game-bet-range-truncated-hint">
@@ -79,8 +94,24 @@
 
         <el-tab-pane :label="t('pages.dashboard.gameStats')" name="gameStats">
           <div v-loading="gameBetLoading" class="dashboard-tab-pane-body">
-          <div class="tab-toolbar tab-toolbar-trend-range">
-            <el-button :loading="gameBetLoading" @click="() => void fetchGameStatTrend()">{{ t('common.refresh') }}</el-button>
+          <div class="tab-toolbar tab-toolbar-trend-range tab-toolbar-online">
+            <el-button :loading="gameBetLoading" @click="() => void refreshGameStatsTab()">{{ t('common.refresh') }}</el-button>
+          </div>
+          <div class="dashboard-realtime-row">
+            <div class="dashboard-realtime-row-head">
+              <span class="basic-stat-section-title">{{ t('pages.dashboard.sectionGameRealtime') }}</span>
+              <span class="basic-stat-section-line"/>
+            </div>
+            <div class="dashboard-realtime-grid">
+              <div class="stat-card tone-violet dashboard-realtime-card">
+                <div class="stat-label">{{ t('pages.dashboard.gameOnlineCount') }}</div>
+                <div class="stat-value">{{ formatCount(gameStatsRealtime.gameOnlineCount) }}</div>
+              </div>
+              <div class="stat-card tone-rose dashboard-realtime-card">
+                <div class="stat-label">{{ t('pages.dashboard.gameBetUserCount') }}</div>
+                <div class="stat-value">{{ formatCount(gameStatsRealtime.gameBetUserCount) }}</div>
+              </div>
+            </div>
           </div>
           <p class="game-bet-event-hint">{{ t('pages.dashboard.onlineTrendRetentionHint') }}</p>
           <p v-if="gameStatRangeTruncated" class="game-bet-range-truncated-hint">
@@ -330,7 +361,19 @@ const rechargeMonthlyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
 const onlineChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
 const gameBetDailyChartRef = ref<InstanceType<typeof GameStatsTrendChart>>()
 
-const sysStat = reactive<SysStat>({
+type BasicTabSysStat = Omit<
+    SysStat,
+    'onlineCount' | 'gameOnlineCount' | 'gameBetUserCount' | 'audienceOnlineCount' | 'liveAnchorCount'
+>
+
+const basicRealtime = reactive({
+  audienceOnlineCount: 0,
+  liveAnchorCount: 0,
+  gameOnlineCount: 0,
+  gameBetUserCount: 0,
+})
+
+const sysStat = reactive<BasicTabSysStat>({
   totalGold: 0,
   totalGoldConsume: 0,
   totalDiamondConsume: 0,
@@ -346,11 +389,16 @@ const sysStat = reactive<SysStat>({
   todayGoldConsume: 0,
   todayDiamondConsume: 0,
   todayRegisterUser: 0,
-  onlineCount: 0,
-  gameOnlineCount: 0,
-  gameBetUserCount: 0,
+})
+
+const onlineRealtime = reactive({
   audienceOnlineCount: 0,
   liveAnchorCount: 0,
+})
+
+const gameStatsRealtime = reactive({
+  gameOnlineCount: 0,
+  gameBetUserCount: 0,
 })
 
 const resourceMetricTrend = reactive<ResourceMetricTrend>({
@@ -384,11 +432,6 @@ type BasicStatCardKey = keyof Pick<
     | 'totalRegisterUser'
     | 'weeklyAnchorPayout'
     | 'totalAnchorPayout'
-    | 'onlineCount'
-    | 'gameOnlineCount'
-    | 'gameBetUserCount'
-    | 'audienceOnlineCount'
-    | 'liveAnchorCount'
 >
 
 type BasicStatCardConfig = {
@@ -401,6 +444,7 @@ type BasicStatCardConfig = {
 type BasicStatCard = BasicStatCardConfig & {
   label: string
   value: number | string
+  valueClass?: string
 }
 
 const TODAY_STAT_CARD_CONFIG: BasicStatCardConfig[] = [
@@ -430,12 +474,18 @@ const ANCHOR_PAYOUT_STAT_CARD_CONFIG: BasicStatCardConfig[] = [
   {key: 'totalAnchorPayout', labelKey: 'statTotalAnchorPayout', theme: 'tone-blue', format: 'amountUsd'},
 ]
 
-const ONLINE_REALTIME_STAT_CARD_CONFIG: BasicStatCardConfig[] = [
-  {key: 'onlineCount', labelKey: 'statOnlineCount', theme: 'tone-sky', format: 'count'},
-  {key: 'gameOnlineCount', labelKey: 'statGameOnlineCount', theme: 'tone-violet', format: 'count'},
-  {key: 'gameBetUserCount', labelKey: 'statGameBetUserCount', theme: 'tone-orange', format: 'count'},
-  {key: 'audienceOnlineCount', labelKey: 'statAudienceOnlineCount', theme: 'tone-pink', format: 'count'},
-  {key: 'liveAnchorCount', labelKey: 'statLiveAnchorCount', theme: 'tone-teal', format: 'count'},
+type BasicRealtimeCardConfig = {
+  key: keyof typeof basicRealtime
+  labelKey: string
+  theme: string
+  valueClass?: string
+}
+
+const BASIC_REALTIME_STAT_CARD_CONFIG: BasicRealtimeCardConfig[] = [
+  {key: 'audienceOnlineCount', labelKey: 'onlineRealtimeAudienceCount', theme: 'tone-neutral', valueClass: 'stat-value--red'},
+  {key: 'liveAnchorCount', labelKey: 'onlineRealtimeLiveAnchorCount', theme: 'tone-neutral', valueClass: 'stat-value--blue'},
+  {key: 'gameOnlineCount', labelKey: 'gameOnlineCount', theme: 'tone-neutral', valueClass: 'stat-value--violet'},
+  {key: 'gameBetUserCount', labelKey: 'gameBetUserCount', theme: 'tone-neutral', valueClass: 'stat-value--orange'},
 ]
 
 const toBasicStatCards = (configs: BasicStatCardConfig[]): BasicStatCard[] =>
@@ -445,12 +495,23 @@ const toBasicStatCards = (configs: BasicStatCardConfig[]): BasicStatCard[] =>
       value: sysStat[cfg.key] ?? 0,
     }))
 
+const toBasicRealtimeCards = () =>
+    BASIC_REALTIME_STAT_CARD_CONFIG.map((cfg) => ({
+      key: cfg.key,
+      labelKey: cfg.labelKey,
+      theme: cfg.theme,
+      valueClass: cfg.valueClass,
+      label: t(`pages.dashboard.${cfg.labelKey}`),
+      value: basicRealtime[cfg.key] ?? 0,
+      format: 'count' as const,
+    }))
+
 const basicStatSections = computed(() => [
   {
-    key: 'onlineRealtime',
-    title: t('pages.dashboard.sectionOnlineRealtime'),
-    gridClass: 'basic-stat-grid-online-realtime',
-    cards: toBasicStatCards(ONLINE_REALTIME_STAT_CARD_CONFIG),
+    key: 'realtimePeople',
+    title: t('pages.dashboard.sectionRealtimePeople'),
+    gridClass: 'basic-stat-grid-realtime',
+    cards: toBasicRealtimeCards(),
   },
   {
     key: 'today',
@@ -550,20 +611,24 @@ const refreshActiveMainTab = async (silent = false, force = false) => {
       return
     }
     if (tab === 'gameStats') {
-      if (force || !tabDataLoaded.gameTrend) {
-        const ok = await fetchGameStatTrend(silent)
-        if (ok) {
-          tabDataLoaded.gameTrend = true
-        }
+      const needTrend = force || !tabDataLoaded.gameTrend
+      const results = await Promise.all([
+        needTrend ? fetchGameStatTrend(silent) : Promise.resolve(true),
+        fetchGameStatsRealtime(silent),
+      ])
+      if (needTrend && results[0]) {
+        tabDataLoaded.gameTrend = true
       }
       return
     }
     if (tab === 'online') {
-      if (force || !tabDataLoaded.onlineTrend) {
-        const ok = await fetchResourceMetricTrend(silent)
-        if (ok) {
-          tabDataLoaded.onlineTrend = true
-        }
+      const needTrend = force || !tabDataLoaded.onlineTrend
+      const results = await Promise.all([
+        needTrend ? fetchResourceMetricTrend(silent) : Promise.resolve(true),
+        fetchOnlineRealtime(silent),
+      ])
+      if (needTrend && results[0]) {
+        tabDataLoaded.onlineTrend = true
       }
     }
   } finally {
@@ -620,11 +685,10 @@ const fetchSysStat = async (silent = false): Promise<boolean> => {
     sysStat.todayGoldConsume = data.todayGoldConsume ?? 0
     sysStat.todayDiamondConsume = data.todayDiamondConsume ?? 0
     sysStat.todayRegisterUser = data.todayRegisterUser ?? 0
-    sysStat.onlineCount = data.onlineCount ?? 0
-    sysStat.gameOnlineCount = data.gameOnlineCount ?? 0
-    sysStat.gameBetUserCount = data.gameBetUserCount ?? 0
-    sysStat.audienceOnlineCount = data.audienceOnlineCount ?? 0
-    sysStat.liveAnchorCount = data.liveAnchorCount ?? 0
+    basicRealtime.audienceOnlineCount = Number(data.audienceOnlineCount ?? 0)
+    basicRealtime.liveAnchorCount = Number(data.liveAnchorCount ?? 0)
+    basicRealtime.gameOnlineCount = Number(data.gameOnlineCount ?? 0)
+    basicRealtime.gameBetUserCount = Number(data.gameBetUserCount ?? 0)
     return true
   } catch (error) {
     console.error('fetch sys stat failed:', error)
@@ -634,6 +698,56 @@ const fetchSysStat = async (silent = false): Promise<boolean> => {
     if (!silent) {
       loading.value = false
     }
+  }
+}
+
+const fetchOnlineRealtime = async (silent = false): Promise<boolean> => {
+  try {
+    const data = await sysStatApi.getSysStat()
+    onlineRealtime.audienceOnlineCount = Number(data.audienceOnlineCount ?? 0)
+    onlineRealtime.liveAnchorCount = Number(data.liveAnchorCount ?? 0)
+    return true
+  } catch (error) {
+    console.error('fetch online realtime failed:', error)
+    if (!silent) {
+      ElMessage.error(t('pages.dashboard.fetchSysStatFailed'))
+    }
+    return false
+  }
+}
+
+const refreshOnlineTab = async () => {
+  onlineLoading.value = true
+  try {
+    await Promise.all([fetchResourceMetricTrend(true), fetchOnlineRealtime(true)])
+    tabDataLoaded.onlineTrend = true
+  } finally {
+    onlineLoading.value = false
+  }
+}
+
+const fetchGameStatsRealtime = async (silent = false): Promise<boolean> => {
+  try {
+    const data = await sysStatApi.getSysStat()
+    gameStatsRealtime.gameOnlineCount = Number(data.gameOnlineCount ?? 0)
+    gameStatsRealtime.gameBetUserCount = Number(data.gameBetUserCount ?? 0)
+    return true
+  } catch (error) {
+    console.error('fetch game stats realtime failed:', error)
+    if (!silent) {
+      ElMessage.error(t('pages.dashboard.fetchSysStatFailed'))
+    }
+    return false
+  }
+}
+
+const refreshGameStatsTab = async () => {
+  gameBetLoading.value = true
+  try {
+    await Promise.all([fetchGameStatTrend(true), fetchGameStatsRealtime(true)])
+    tabDataLoaded.gameTrend = true
+  } finally {
+    gameBetLoading.value = false
   }
 }
 
@@ -874,13 +988,7 @@ onUnmounted(() => {
   justify-content: flex-start;
   flex-wrap: wrap;
   gap: 8px;
-}
-
-.basic-data-reset-hint {
-  margin: 0 0 16px;
-  font-size: 12px;
-  color: #64748b;
-  line-height: 1.5;
+  margin-bottom: 10px;
 }
 
 .online-chart {
@@ -891,6 +999,28 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 28px;
+}
+
+.basic-stat-board--compact {
+  gap: 14px;
+}
+
+.basic-stat-board--compact .basic-stat-section-head {
+  margin-bottom: 8px;
+}
+
+.basic-stat-board--compact .stat-card {
+  min-height: 80px;
+  padding: 12px 14px 12px 16px;
+}
+
+.basic-stat-board--compact .stat-label {
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.basic-stat-board--compact .stat-value {
+  font-size: 22px;
 }
 
 .basic-stat-section-head {
@@ -919,6 +1049,14 @@ onUnmounted(() => {
   gap: 14px;
 }
 
+.basic-stat-board--compact .basic-stat-grid {
+  gap: 10px;
+}
+
+.basic-stat-grid-realtime {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .basic-stat-grid-today {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
@@ -931,8 +1069,37 @@ onUnmounted(() => {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.basic-stat-grid-online-realtime {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+.dashboard-realtime-row {
+  margin-bottom: 18px;
+}
+
+.dashboard-realtime-row-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.dashboard-realtime-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  width: 100%;
+}
+
+.dashboard-realtime-card {
+  min-height: 112px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.dashboard-realtime-card .stat-label {
+  margin-bottom: 10px;
+}
+
+.dashboard-realtime-card .stat-value {
+  font-size: 32px;
 }
 
 .game-bet-summary-grid {
@@ -1004,12 +1171,33 @@ onUnmounted(() => {
   word-break: break-all;
 }
 
+.stat-value--red {
+  color: #dc2626;
+}
+
+.stat-value--blue {
+  color: #2563eb;
+}
+
+.stat-value--violet {
+  color: #7c3aed;
+}
+
+.stat-value--orange {
+  color: #ea580c;
+}
+
 .stat-unit {
   margin-left: 6px;
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.04em;
   color: #64748b;
+}
+
+.tone-neutral {
+  --stat-accent: #cbd5e1;
+  background: #f8fafc;
 }
 
 .tone-teal {
@@ -1066,7 +1254,7 @@ onUnmounted(() => {
   .basic-stat-grid-today,
   .basic-stat-grid-total,
   .basic-stat-grid-anchor-payout,
-  .basic-stat-grid-online-realtime {
+  .basic-stat-grid-realtime {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -1075,7 +1263,11 @@ onUnmounted(() => {
   .basic-stat-grid-today,
   .basic-stat-grid-total,
   .basic-stat-grid-anchor-payout,
-  .basic-stat-grid-online-realtime {
+  .basic-stat-grid-realtime {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-realtime-grid {
     grid-template-columns: 1fr;
   }
 

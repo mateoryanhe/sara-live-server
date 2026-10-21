@@ -21,6 +21,9 @@ const (
 )
 
 func recordGameLiveWatchStream(userId, roomId uint64, at time.Time) {
+	if gameLiveRoomTrackingPersistDisabled() {
+		return
+	}
 	if userId == 0 || roomId == 0 || userId == roomId {
 		return
 	}

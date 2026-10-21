@@ -9,7 +9,8 @@ import (
 type GameShelfListReq struct {
 	g.Meta `path:"/gameShelfList" method:"post" summary:"查询上架游戏列表" tags:"游戏平台配置"`
 	httpserver.CMSQueryReq
-	GameCode string `json:"gameCode" dc:"游戏编码(模糊匹配)"`
+	GameCode  string   `json:"gameCode" dc:"游戏编码(模糊匹配)"`
+	GameCodes []string `json:"gameCodes" dc:"游戏编码(多选精确匹配,优先于 gameCode)"`
 	Name     string `json:"name" dc:"游戏名称(模糊匹配,中/英文)"`
 	Platform string `json:"platform" dc:"平台编码(模糊匹配)"`
 }

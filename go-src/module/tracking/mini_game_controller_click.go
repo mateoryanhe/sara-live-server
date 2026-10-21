@@ -28,11 +28,17 @@ func ReportMiniGameControllerClick(ctx context.Context, _ *trackingdto.ReportMin
 	if userId == 0 {
 		return nil, errercode.CreateCode(errercode.EmptyUserId)
 	}
+	if gameLiveRoomTrackingPersistDisabled() {
+		return &trackingdto.ReportMiniGameControllerClickRes{Success: true}, nil
+	}
 	event.Pub(gameevent.MiniGameControllerClickTrackingEvent, gameevent.NewMiniGameControllerClickTrackingEventData(userId, time.Now()))
 	return &trackingdto.ReportMiniGameControllerClickRes{Success: true}, nil
 }
 
 func recordMiniGameControllerClick(userId uint64, at time.Time) {
+	if gameLiveRoomTrackingPersistDisabled() {
+		return
+	}
 	if userId == 0 {
 		return
 	}

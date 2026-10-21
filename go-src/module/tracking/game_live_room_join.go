@@ -22,6 +22,9 @@ const (
 
 // recordGameLiveRoomJoin 消费埋点事件:游戏直播类(category=2)进房次数 +1(含重复进入,不含主播本人).
 func recordGameLiveRoomJoin(userId, roomId uint64, at time.Time) {
+	if gameLiveRoomTrackingPersistDisabled() {
+		return
+	}
 	if userId == 0 || roomId == 0 || userId == roomId {
 		return
 	}

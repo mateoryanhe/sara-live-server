@@ -21,8 +21,8 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'TrackingCall1v1InitiateManagement:connectSuccessTrend': '/trackingEvent/getCall1v1ConnectSuccessTrend',
     'TrackingCall1v1InitiateManagement:roomListTrend': '/trackingEvent/getOneToOneRoomListTrend',
 
-    TrackingMiniGameRoundStartManagement: '/trackingEvent/getMiniGameRoundStartTrend',
-    'TrackingMiniGameRoundStartManagement:view': '/trackingEvent/getMiniGameRoundStartTrend',
+    TrackingMiniGameRoundStartManagement: '/trackingEvent/getMiniGameSpinClickTrend',
+    'TrackingMiniGameRoundStartManagement:view': '/trackingEvent/getMiniGameSpinClickTrend',
     'TrackingMiniGameRoundStartManagement:roundResultTrend': '/trackingEvent/getMiniGameRoundResultTrend',
     'TrackingMiniGameRoundStartManagement:gameExposureTrend': '/trackingEvent/getMiniGameExposureTrend',
     'TrackingMiniGameRoundStartManagement:gameWebViewLoadTrend': '/trackingEvent/getMiniGameWebViewLoadTrend',
@@ -30,6 +30,8 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'TrackingMiniGameRoundStartManagement:gameJoinTrend': '/trackingEvent/getGameLiveRoomJoinTrend',
     'TrackingMiniGameRoundStartManagement:firstFrameTrend': '/trackingEvent/getGameLiveWatchStreamTrend',
     'TrackingMiniGameRoundStartManagement:offlineGameRoomPlayTrend': '/trackingEvent/getOfflineGameRoomPlayTrend',
+    'TrackingMiniGameRoundStartManagement:spinClickTrend': '/trackingEvent/getMiniGameSpinClickTrend',
+    'TrackingMiniGameRoundStartManagement:plusClickTrend': '/trackingEvent/getMiniGamePlusClickTrend',
 
     TrackingShortVideoManagement: '/trackingEvent/getShortVideoPlayStartTrend',
     'TrackingShortVideoManagement:view': '/trackingEvent/getShortVideoPlayStartTrend',
@@ -692,6 +694,10 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     CMSDomainMappingManagement: '/domainSite/getCMSDomainSiteMapping',
     'CMSDomainMappingManagement:view': '/domainSite/getCMSDomainSiteMapping',
     'CMSDomainMappingManagement:save': '/domainSite/saveCMSDomainSiteMapping',
+    CMSDomainAliasManagement: '/domainSite/listCMSDomainAlias',
+    'CMSDomainAliasManagement:view': '/domainSite/listCMSDomainAlias',
+    'CMSDomainAliasManagement:save': '/domainSite/addCMSDomainAlias',
+    'CMSDomainAliasManagement:delete': '/domainSite/deleteCMSDomainAlias',
 
     DataSyncCfgManagement: '/dataSync/getDataSyncCfg',
     'DataSyncCfgManagement:view': '/dataSync/getDataSyncCfg',

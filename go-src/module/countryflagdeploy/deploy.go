@@ -12,6 +12,7 @@ import (
 
 	"github.com/gogf/gf/v2/net/ghttp"
 	"xr-game-server/constants/country"
+	"xr-game-server/core/uploadstaging"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/countryflagdeploydto"
 	"xr-game-server/entity/sys"
@@ -170,7 +171,7 @@ func saveUploadZip(r *ghttp.Request) (string, error) {
 			part.Close()
 			return "", fmt.Errorf("file ext not allowed: %s", ext)
 		}
-		tmpFile, err := os.CreateTemp("", "country-flag-deploy-*.zip")
+		tmpFile, err := uploadstaging.CreateTempFile(uploadstaging.SubCMSDeployZip, "country-flag-deploy-*.zip")
 		if err != nil {
 			part.Close()
 			return "", err

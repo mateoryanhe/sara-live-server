@@ -234,18 +234,20 @@ type CMSExportCurrencyLogPayload struct {
 
 type CMSExportGameBetLogPayload struct {
 	CMSExportHeadersPayload
-	UserId       string `json:"userId"`
-	GameCode     string `json:"gameCode"`
-	OrderId      string `json:"orderId"`
-	PlatformType string `json:"platformType"`
+	UserId       string   `json:"userId"`
+	GameCode     string   `json:"gameCode"`
+	GameCodes    []string `json:"gameCodes"`
+	OrderId      string   `json:"orderId"`
+	PlatformType string   `json:"platformType"`
 }
 
 type CMSExportGameWinLogPayload struct {
 	CMSExportHeadersPayload
-	UserId       string `json:"userId"`
-	GameCode     string `json:"gameCode"`
-	OrderId      string `json:"orderId"`
-	PlatformType string `json:"platformType"`
+	UserId       string   `json:"userId"`
+	GameCode     string   `json:"gameCode"`
+	GameCodes    []string `json:"gameCodes"`
+	OrderId      string   `json:"orderId"`
+	PlatformType string   `json:"platformType"`
 }
 
 type CMSExportShortVideoAuthorSettlementLogPayload struct {

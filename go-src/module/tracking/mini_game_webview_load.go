@@ -28,11 +28,17 @@ func ReportMiniGameWebViewLoadSuccess(ctx context.Context, _ *trackingdto.Report
 	if userId == 0 {
 		return nil, errercode.CreateCode(errercode.EmptyUserId)
 	}
+	if gameLiveRoomTrackingPersistDisabled() {
+		return &trackingdto.ReportMiniGameWebViewLoadSuccessRes{Success: true}, nil
+	}
 	event.Pub(gameevent.MiniGameWebViewLoadTrackingEvent, gameevent.NewMiniGameWebViewLoadTrackingEventData(userId, time.Now()))
 	return &trackingdto.ReportMiniGameWebViewLoadSuccessRes{Success: true}, nil
 }
 
 func recordMiniGameWebViewLoad(userId uint64, at time.Time) {
+	if gameLiveRoomTrackingPersistDisabled() {
+		return
+	}
 	if userId == 0 {
 		return
 	}

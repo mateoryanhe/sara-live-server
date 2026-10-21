@@ -18,6 +18,7 @@ import (
 
 	"github.com/gogf/gf/v2/net/ghttp"
 	"xr-game-server/core/cfg"
+	"xr-game-server/core/uploadstaging"
 	"xr-game-server/dto/officialsitedeploydto"
 	"xr-game-server/module/domainsite"
 	"xr-game-server/module/staticdeploy"
@@ -346,11 +347,7 @@ func validateOfficialSiteUploadFile(rawFileName string, fileSize int64) (fileNam
 }
 
 func uploadSessionRoot() (string, error) {
-	root := filepath.Join(os.TempDir(), "sara-official-site-file-upload")
-	if err := os.MkdirAll(root, 0700); err != nil {
-		return "", err
-	}
-	return root, nil
+	return uploadstaging.Subdir(uploadstaging.SubOfficialSiteFileUpload)
 }
 
 func saveUploadSession(root string, meta *uploadSessionMeta) error {

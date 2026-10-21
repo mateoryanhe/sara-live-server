@@ -6,12 +6,14 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"xr-game-server/constants/db"
+	"xr-game-server/dao/gamequery"
 	entity "xr-game-server/entity/game"
 )
 
 // VendorGameLibQuery 游戏库表查询条件(CMS).
 type VendorGameLibQuery struct {
 	GameCode  string
+	GameCodes []string
 	Name      string
 	Platform  string
 	Category  string
@@ -35,9 +37,7 @@ func QueryVendorGameLibs(q *VendorGameLibQuery) (int, []*entity.VendorGameLib) {
 	}
 
 	m := g.DB().Model(string(entity.TbVendorGameLib))
-	if gameCode := strings.TrimSpace(q.GameCode); gameCode != "" {
-		m = m.Where("game_code LIKE ?", "%"+gameCode+"%")
-	}
+	m = gamequery.ApplyGameCodeFilter(m, "game_code", q.GameCode, q.GameCodes)
 	if name := strings.TrimSpace(q.Name); name != "" {
 		m = m.Where("(name LIKE ? OR name_en LIKE ?)", "%"+name+"%", "%"+name+"%")
 	}

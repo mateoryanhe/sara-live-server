@@ -195,6 +195,8 @@ func Init() {
 		{Path: "/notifyMiniGameExposure", Handler: jsonHandler((&controller.LiveRoomAppController{}).ReportMiniGameExposure)},
 		{Path: "/notifyMiniGameWebViewLoadSuccess", Handler: jsonHandler((&controller.LiveRoomAppController{}).ReportMiniGameWebViewLoadSuccess)},
 		{Path: "/notifyMiniGameControllerClick", Handler: jsonHandler((&controller.LiveRoomAppController{}).ReportMiniGameControllerClick)},
+		{Path: "/notifyMiniGameSpinClick", Handler: jsonHandler((&controller.LiveRoomAppController{}).ReportMiniGameSpinClick)},
+		{Path: "/notifyMiniGamePlusClick", Handler: jsonHandler((&controller.LiveRoomAppController{}).ReportMiniGamePlusClick)},
 		{Path: "/notifyVoiceRoomGiftClick", Handler: jsonHandler((&controller.LiveRoomAppController{}).ReportVoiceRoomGiftClick)},
 		{Path: "/notifyHotLiveRoomGiftClick", Handler: jsonHandler((&controller.LiveRoomAppController{}).ReportHotLiveRoomGiftClick)},
 		{Path: "/exitHall", Handler: jsonHandler((&controller.LiveRoomAppController{}).LeaveRoom)},

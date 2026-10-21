@@ -776,7 +776,7 @@ const hasMenuPermission = (moduleName: string) => {
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('MetaPixelCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer') || hasMenuPermission('CfEmailCfgManagement')"
+            v-if="hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('MetaPixelCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CMSDomainMappingManagement') || hasMenuPermission('CMSDomainAliasManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer') || hasMenuPermission('CfEmailCfgManagement')"
             index="/config">
           <template #title>
             <el-icon>
@@ -847,7 +847,7 @@ const hasMenuPermission = (moduleName: string) => {
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('MetaPixelCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('CfEmailCfgManagement')"
+              v-if="hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('MetaPixelCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CMSDomainMappingManagement') || hasMenuPermission('CMSDomainAliasManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('CfEmailCfgManagement')"
               index="/config/group/platform">
             <template #title>
               <el-icon>
@@ -884,6 +884,18 @@ const hasMenuPermission = (moduleName: string) => {
                 <Picture/>
               </el-icon>
               <span>{{ t('menu.UploadResourceCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('CMSDomainMappingManagement')" index="/config/cms-domain-mapping">
+              <el-icon>
+                <Link/>
+              </el-icon>
+              <span>{{ t('menu.CMSDomainMappingManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('CMSDomainAliasManagement')" index="/config/cms-domain-alias">
+              <el-icon>
+                <Link/>
+              </el-icon>
+              <span>{{ t('menu.CMSDomainAliasManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('CountryFlagDeployManagement')" index="/config/country-flag-deploy">
               <el-icon>

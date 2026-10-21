@@ -31,7 +31,7 @@
 
       <el-form :model="searchForm" class="search-form" inline>
         <el-form-item :label="t('pages.gameList.gameCode')">
-          <el-input v-model="searchForm.gameCode" clearable :placeholder="t('pages.gameList.gameCodePlaceholder')"/>
+          <GameCodeMultiSelect v-model="searchForm.gameCodes"/>
         </el-form-item>
         <el-form-item :label="t('pages.gameList.gameName')">
           <el-input v-model="searchForm.name" clearable :placeholder="t('pages.gameList.gameNamePlaceholder')"/>
@@ -198,13 +198,14 @@ import {ElMessage, ElMessageBox, type FormInstance} from 'element-plus'
 import {gamePlatformApi} from '@/api/modules/gamePlatform'
 import type {GameShelfItem} from '@/types/api'
 import {usePagePermission} from '@/composables/usePagePermission'
+import GameCodeMultiSelect from '@/components/game/GameCodeMultiSelect.vue'
 
 const {t} = useI18n()
 const router = useRouter()
 const {can} = usePagePermission('GameShelfListManagement')
 
 interface SearchForm {
-  gameCode: string
+  gameCodes: string[]
   name: string
   platform: string
 }
@@ -230,7 +231,7 @@ const currentPage = ref(1)
 const pageSize = ref(20)
 
 const searchForm = reactive<SearchForm>({
-  gameCode: '',
+  gameCodes: [],
   name: '',
   platform: '',
 })
@@ -261,7 +262,7 @@ const fetchList = async () => {
   loading.value = true
   try {
     const response = await gamePlatformApi.getGameShelfList({
-      gameCode: searchForm.gameCode,
+      gameCodes: searchForm.gameCodes.length ? searchForm.gameCodes : undefined,
       name: searchForm.name,
       platform: searchForm.platform,
       pageIndex: currentPage.value,
@@ -287,7 +288,7 @@ const handleSearch = () => {
 }
 
 const resetSearch = () => {
-  searchForm.gameCode = ''
+  searchForm.gameCodes = []
   searchForm.name = ''
   searchForm.platform = ''
   currentPage.value = 1

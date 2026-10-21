@@ -12,6 +12,7 @@ import (
 	"xr-game-server/core/cfg"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/domainsitedao"
+	"xr-game-server/dto/domainsitedto"
 	"xr-game-server/entity/sys"
 )
 
@@ -96,6 +97,9 @@ func SaveStaticSiteMapping(ctx context.Context, siteKey, prefix, domain, root st
 	}
 
 	cfg.RegisterRuntimeStaticSite(prefix, domain, root)
+	if siteKey == domainsitedto.CMSSiteKey {
+		syncCMSAliasRoots(ctx, root)
+	}
 	g.Log().Infof(ctx, "动态站点映射保存并刷新成功 siteKey=%s prefix=%s domain=%s root=%s", siteKey, prefix, domain, root)
 	return row, nil
 }

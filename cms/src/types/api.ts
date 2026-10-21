@@ -828,6 +828,7 @@ export interface CoinMerchantTransferLogItem {
 export interface GameWinLogQuery extends PageQuery {
     userId?: string
     gameCode?: string
+    gameCodes?: string[]
     orderId?: string
     platformType?: string
 }
@@ -848,6 +849,7 @@ export interface GameWinLogItem {
 export interface GameBetLogQuery extends PageQuery {
     userId?: string
     gameCode?: string
+    gameCodes?: string[]
     orderId?: string
     platformType?: string
 }
@@ -2560,6 +2562,7 @@ export interface VendorGame {
 
 export interface VendorGameQuery extends PageQuery {
     gameCode?: string
+    gameCodes?: string[]
     name?: string
     platform?: string
     category?: string
@@ -2609,6 +2612,7 @@ export interface CMSGameStartLinkRes {
 
 export interface GameShelfQuery extends PageQuery {
     gameCode?: string
+    gameCodes?: string[]
     name?: string
     platform?: string
 }

@@ -51,6 +51,7 @@ func GetWinCMSList(_ context.Context, req *gamewindto.CMSGameWinLogListReq) (*ht
 	total, rows := gamewindao.CMSList(&gamewindao.CMSListFilter{
 		UserId:       parseWinCMSUserIdFilter(req.UserId),
 		GameCode:     req.GameCode,
+		GameCodes:    req.GameCodes,
 		OrderId:      req.OrderId,
 		PlatformType: req.PlatformType,
 		PageIndex:    req.PageIndex,

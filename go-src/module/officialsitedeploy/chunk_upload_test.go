@@ -6,12 +6,29 @@ import (
 	"mime/multipart"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"strconv"
 	"testing"
 
 	"github.com/gogf/gf/v2/net/ghttp"
 	"xr-game-server/dto/officialsitedeploydto"
 )
+
+func TestMain(m *testing.M) {
+	cache, err := os.UserCacheDir()
+	if err != nil {
+		cache = "."
+	}
+	dir := filepath.Join(cache, "sara-official-site-upload-test")
+	_ = os.RemoveAll(dir)
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		os.Exit(1)
+	}
+	_ = os.Setenv("SARA_UPLOAD_STAGING_ROOT", dir)
+	code := m.Run()
+	_ = os.RemoveAll(dir)
+	os.Exit(code)
+}
 
 func TestOfficialSiteFileChunkUploadAndAbort(t *testing.T) {
 	fileSize := officialSiteUploadChunkSize + 3
