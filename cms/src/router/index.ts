@@ -4,7 +4,7 @@ import {clearAuthSession, isAuthenticated, restoreAuthSession} from '@/utils/aut
 import {getDefaultHomePath, hasAnyAccessibleRoute, resolveAccessiblePath} from '@/utils/accessible-route'
 import {ElMessage} from 'element-plus'
 import {layoutRouteGroups} from './routes'
-import {finishRouteNavigation, startRouteNavigation} from '@/utils/route-loading'
+import {finishRouteNavigation, notifySidebarRouteEntered} from '@/utils/route-loading'
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -27,10 +27,6 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-    if (to.fullPath !== from.fullPath) {
-        startRouteNavigation()
-    }
-
     document.title = to.meta.title
         ? `后台管理系统 - ${to.meta.title}`
         : '后台管理系统'
@@ -115,12 +111,8 @@ router.beforeEach((to, from, next) => {
     })
 })
 
-router.beforeResolve(() => {
-    finishRouteNavigation()
-})
-
 router.afterEach(() => {
-    finishRouteNavigation()
+    notifySidebarRouteEntered()
 })
 
 router.onError(() => {

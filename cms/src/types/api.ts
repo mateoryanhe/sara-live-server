@@ -47,6 +47,10 @@ export interface SysStat {
     todayDiamondConsume: number
     todayRegisterUser: string | number
     onlineCount: string | number
+    gameOnlineCount?: string | number
+    gameBetUserCount?: string | number
+    audienceOnlineCount?: string | number
+    liveAnchorCount?: string | number
 }
 
 export interface UserStatTrendPoint {

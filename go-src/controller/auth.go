@@ -13,8 +13,16 @@ import (
 type AuthController struct {
 }
 
+// authCMSSessionController 仅挂载需 CMS 鉴权的 /auth 接口,勿 Bind 整个 AuthController(会与 App 路由重复).
+type authCMSSessionController struct{}
+
+func (authCMSSessionController) CMSSessionModules(ctx context.Context, req *authdto.CMSSessionModulesReq) (*authdto.CMSSessionModulesRes, error) {
+	return auth.CMSSessionModules(ctx, req)
+}
+
 func initAuthApi() {
 	httpserver.RegNonAuthAPI("/auth", new(AuthController))
+	httpserver.RegCMS("/auth", new(authCMSSessionController))
 }
 
 func (a *AuthController) TestLogin(ctx context.Context, req *authdto.TestLoginReq) (resp *authdto.TestLoginRes, err error) {

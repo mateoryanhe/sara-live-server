@@ -24,5 +24,9 @@ type CMSSysStatRes struct {
 	TodayGoldConsume          float64 `json:"todayGoldConsume"    dc:"今日金币消费金额"`
 	TodayDiamondConsume       float64 `json:"todayDiamondConsume" dc:"今日钻石消费金额"`
 	TodayRegisterUser         uint64  `json:"todayRegisterUser,string" dc:"今日注册用户数"`
-	OnlineCount               uint64  `json:"onlineCount,string" dc:"在线人数"`
+	OnlineCount               uint64  `json:"onlineCount,string" dc:"在线人数(TCP连接)"`
+	GameOnlineCount           uint64  `json:"gameOnlineCount,string" dc:"游戏在线人数(瞬时)"`
+	GameBetUserCount          uint64  `json:"gameBetUserCount,string" dc:"游戏下注人数(当前分钟累计去重)"`
+	AudienceOnlineCount       uint64  `json:"audienceOnlineCount,string" dc:"观众在线人数"`
+	LiveAnchorCount           uint64  `json:"liveAnchorCount,string" dc:"主播在线人数(开播中)"`
 }

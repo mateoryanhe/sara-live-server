@@ -4,11 +4,18 @@ import axios, {
     type AxiosResponse,
     type InternalAxiosRequestConfig
 } from 'axios'
+
+declare module 'axios' {
+    export interface InternalAxiosRequestConfig {
+        sidebarNavGeneration?: number
+    }
+}
 import envConfig from '@/config/env'
 import {ElMessage} from "element-plus"
 import {redirectToLogin} from '@/utils/auth-redirect'
 import {getAuthId, getToken} from '@/utils/auth'
 import {i18n} from '@/i18n'
+import {trackSidebarNavRequestEnd, trackSidebarNavRequestStart} from '@/utils/route-loading'
 
 const AUTH_ERROR_CODES = new Set([1, 2, 3])
 
@@ -47,6 +54,7 @@ service.interceptors.request.use(
         }
         config.headers!['Accept-Language'] = String(i18n.global.locale.value || 'en')
 
+        config.sidebarNavGeneration = trackSidebarNavRequestStart()
         return config
     },
     (error: any) => {
@@ -59,6 +67,7 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
     (response: AxiosResponse) => {
+        trackSidebarNavRequestEnd(response.config.sidebarNavGeneration ?? 0)
         // 对响应数据做点什么
         const res = response.data
 
@@ -75,6 +84,7 @@ service.interceptors.response.use(
         }
     },
     (error: any) => {
+        trackSidebarNavRequestEnd(error.config?.sidebarNavGeneration ?? 0)
         // 对响应错误做点什么
         console.error('Response Error:', error)
 

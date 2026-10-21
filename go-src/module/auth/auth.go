@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 	"xr-game-server/constants/common"
+	"xr-game-server/core/httpserver"
 	"xr-game-server/core/xrtoken"
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/cmsuserdao"
@@ -47,6 +48,23 @@ func TestLogin(ctx context.Context, req *authdto.TestLoginReq) (res *authdto.Tes
 		AuthId: strconv.FormatUint(data.ID, 10),
 	}
 	return res, nil
+}
+
+func CMSSessionModules(ctx context.Context, _ *authdto.CMSSessionModulesReq) (res *authdto.CMSSessionModulesRes, err error) {
+	userId := httpserver.GetAuthId(ctx)
+	if userId == 0 {
+		return nil, errercode.CreateCode(errercode.EmptyUserId)
+	}
+	data := cmsuserdao.GetCMSUserById(userId)
+	if data == nil || data.Status == common.False {
+		return nil, errercode.CreateCode(errercode.Token)
+	}
+	perm := cmsuserdao.GetGetPermissionList(data.RoleId)
+	return &authdto.CMSSessionModulesRes{
+		Admin:      entity.CMSUserIsAdmin(data),
+		SuperAdmin: entity.CMSUserIsSuperAdmin(data),
+		Modules:    perm,
+	}, nil
 }
 
 func CMSLogin(ctx context.Context, req *authdto.CMSLoginReq) (res *authdto.CMSLoginRes, err error) {

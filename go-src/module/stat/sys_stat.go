@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 	"xr-game-server/core/push"
+	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/statdao"
 	"xr-game-server/dto/statdto"
 	"xr-game-server/entity/stat"
@@ -18,6 +19,15 @@ func GetCMSSysStat(_ context.Context, _ *statdto.CMSSysStatReq) (*statdto.CMSSys
 	now := time.Now()
 	todayStat := statdao.GetDailyLoginStatByDate(entity.FormatDailyLoginStatDate(now))
 	weeklyStat := statdao.GetWeeklyLoginStatByWeek(entity.FormatWeeklyLoginStatKey(now))
+	onlineTotal := uint64(push.OnlineCount())
+	liveAnchors := liveroomdao.CountLivingAnchors()
+	gameOnline, gameBetUsers := SnapshotGameTrendCountsForMetric(now)
+	audienceOnline := onlineTotal
+	if onlineTotal > liveAnchors {
+		audienceOnline = onlineTotal - liveAnchors
+	} else {
+		audienceOnline = 0
+	}
 	return &statdto.CMSSysStatRes{
 		TotalGold:                 stat.TotalGold,
 		TotalGoldConsume:          stat.TotalGoldConsume,
@@ -34,6 +44,10 @@ func GetCMSSysStat(_ context.Context, _ *statdto.CMSSysStatReq) (*statdto.CMSSys
 		TodayGoldConsume:          todayStat.GoldConsumeAmount,
 		TodayDiamondConsume:       todayStat.DiamondConsumeAmount,
 		TodayRegisterUser:         todayStat.RegisterCount,
-		OnlineCount:               uint64(push.OnlineCount()),
+		OnlineCount:         onlineTotal,
+		GameOnlineCount:     gameOnline,
+		GameBetUserCount:    gameBetUsers,
+		AudienceOnlineCount: audienceOnline,
+		LiveAnchorCount:     liveAnchors,
 	}, nil
 }

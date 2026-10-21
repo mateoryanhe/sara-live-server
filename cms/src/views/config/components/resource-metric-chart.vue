@@ -24,6 +24,8 @@ const props = defineProps<{
   showTrendDataZoom?: boolean
   /** 滑块初始拉满显示全量 */
   dataZoomDefaultFullRange?: boolean
+  /** 在线趋势：仅观众 + 开播主播（仪表盘在线 Tab，不含 TCP 总在线） */
+  onlineAudienceAnchorOnly?: boolean
 }>()
 
 const showTrendDataZoom = computed(() => props.showTrendDataZoom !== false)
@@ -285,14 +287,71 @@ const resolveAudienceCount = (point: ResourceMetricPoint | undefined) => {
 
 const buildOnlineOption = (points: ResourceMetricPoint[]): EChartsOption => {
   const times = points.map(item => item.time)
-  const onlineSeries = points.map(item => Number(item.onlineCount || 0))
   const anchorSeries = points.map(item => Number(item.liveAnchorCount || 0))
   const audienceSeries = points.map(item => resolveAudienceCount(item))
+  const audienceAnchorOnly = props.onlineAudienceAnchorOnly === true
   const totalLabel = t('pages.resourceMonitor.onlineCount')
   const anchorLabel = t('pages.resourceMonitor.liveAnchorOnlineCount')
   const audienceLabel = t('pages.resourceMonitor.audienceOnlineCount')
   const withSlider = showTrendDataZoom.value
   const gridBottom = trendChartGridBottom(times.length, withSlider)
+
+  const legendData = audienceAnchorOnly
+      ? [audienceLabel, anchorLabel]
+      : [totalLabel, anchorLabel, audienceLabel]
+
+  const tooltipLines = (point: ResourceMetricPoint | undefined, axisName: string) => {
+    const lines = [axisName]
+    if (!audienceAnchorOnly) {
+      lines.push(t('pages.resourceMonitor.onlineCountTooltip', {value: formatCount(point?.onlineCount)}))
+    }
+    lines.push(
+        t('pages.resourceMonitor.audienceOnlineCountTooltip', {value: formatCount(resolveAudienceCount(point))}),
+        t('pages.resourceMonitor.liveAnchorOnlineCountTooltip', {value: formatCount(point?.liveAnchorCount)}),
+    )
+    return lines.join('<br/>')
+  }
+
+  const series: EChartsOption['series'] = audienceAnchorOnly
+      ? [
+        {
+          name: audienceLabel,
+          type: 'line',
+          smooth: true,
+          data: audienceSeries,
+          itemStyle: {color: '#67C23A'},
+        },
+        {
+          name: anchorLabel,
+          type: 'line',
+          smooth: true,
+          data: anchorSeries,
+          itemStyle: {color: '#E6A23C'},
+        },
+      ]
+      : [
+        {
+          name: totalLabel,
+          type: 'line',
+          smooth: true,
+          data: points.map(item => Number(item.onlineCount || 0)),
+          itemStyle: {color: '#409EFF'},
+        },
+        {
+          name: anchorLabel,
+          type: 'line',
+          smooth: true,
+          data: anchorSeries,
+          itemStyle: {color: '#E6A23C'},
+        },
+        {
+          name: audienceLabel,
+          type: 'line',
+          smooth: true,
+          data: audienceSeries,
+          itemStyle: {color: '#67C23A'},
+        },
+      ]
 
   return {
     title: props.title
@@ -311,16 +370,11 @@ const buildOnlineOption = (points: ResourceMetricPoint[]): EChartsOption => {
         }
         const index = items[0].dataIndex ?? 0
         const point = points[index]
-        return [
-          items[0].name,
-          t('pages.resourceMonitor.onlineCountTooltip', {value: formatCount(point?.onlineCount)}),
-          t('pages.resourceMonitor.liveAnchorOnlineCountTooltip', {value: formatCount(point?.liveAnchorCount)}),
-          t('pages.resourceMonitor.audienceOnlineCountTooltip', {value: formatCount(resolveAudienceCount(point))}),
-        ].join('<br/>')
+        return tooltipLines(point, String(items[0].name ?? ''))
       },
     },
     legend: {
-      data: [totalLabel, anchorLabel, audienceLabel],
+      data: legendData,
       top: props.title ? 28 : 0,
     },
     grid: {
@@ -346,29 +400,7 @@ const buildOnlineOption = (points: ResourceMetricPoint[]): EChartsOption => {
       min: 0,
       minInterval: 1,
     },
-    series: [
-      {
-        name: totalLabel,
-        type: 'line',
-        smooth: true,
-        data: onlineSeries,
-        itemStyle: {color: '#409EFF'},
-      },
-      {
-        name: anchorLabel,
-        type: 'line',
-        smooth: true,
-        data: anchorSeries,
-        itemStyle: {color: '#E6A23C'},
-      },
-      {
-        name: audienceLabel,
-        type: 'line',
-        smooth: true,
-        data: audienceSeries,
-        itemStyle: {color: '#67C23A'},
-      },
-    ],
+    series,
   }
 }
 
@@ -475,7 +507,7 @@ const handleResize = () => {
 }
 
 watch(
-    () => [props.data, props.metricType, props.title, locale.value],
+    () => [props.data, props.metricType, props.title, props.onlineAudienceAnchorOnly, locale.value],
     () => {
       renderChart()
     },

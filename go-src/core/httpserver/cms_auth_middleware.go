@@ -11,7 +11,8 @@ import (
 
 // 公共上传接口,各业务页共用,登录即可访问
 var cmsAuthSkipApiPaths = map[string]struct{}{
-	"/upload/uploadFile": {},
+	"/upload/uploadFile":      {},
+	"/auth/cmsSessionModules": {},
 }
 
 var cmsApiPermissionChecker func(userId uint64, apiPath string) bool

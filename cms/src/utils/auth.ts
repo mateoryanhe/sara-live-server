@@ -1,5 +1,6 @@
 import type {Permission} from '@/types/api'
 import {clearPermissions, setUserPermissions} from '@/utils/permission'
+import {resetLayoutBootstrap} from '@/utils/layout-bootstrap-state'
 
 const TOKEN_KEY = 'token'
 const AUTH_ID_KEY = 'authId'
@@ -94,6 +95,18 @@ export function setAuthSession(session: AuthSession): void {
     setUserPermissions(session.modules || [], session.admin, session.superAdmin)
 }
 
+/** 服务端刷新权限后写回本地与内存（token 不变） */
+export function applySessionModules(modules: {
+    admin: boolean
+    superAdmin: boolean
+    modules: Permission[]
+}): void {
+    localStorage.setItem(ADMIN_KEY, modules.admin ? 'true' : 'false')
+    localStorage.setItem(SUPER_ADMIN_KEY, modules.superAdmin ? 'true' : 'false')
+    localStorage.setItem(PERMISSIONS_KEY, JSON.stringify(modules.modules || []))
+    setUserPermissions(modules.modules || [], modules.admin, modules.superAdmin)
+}
+
 export function clearAuthSession(): void {
     localStorage.removeItem(TOKEN_KEY)
     localStorage.removeItem(AUTH_ID_KEY)
@@ -101,6 +114,7 @@ export function clearAuthSession(): void {
     localStorage.removeItem(ADMIN_KEY)
     localStorage.removeItem(SUPER_ADMIN_KEY)
     clearPermissions()
+    resetLayoutBootstrap()
 }
 
 export function saveLoginCredentials(userName: string, pwd: string): void {
