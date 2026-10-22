@@ -25,6 +25,11 @@
           <span class="form-tip">{{ t('pages.liveConfig.videoCallTicketEnabledTip') }}</span>
         </el-form-item>
 
+        <el-form-item :label="t('pages.liveConfig.showcaseLiveRoomEnabled')">
+          <el-switch v-model="formData.showcaseLiveRoomEnabled"/>
+          <span class="form-tip">{{ t('pages.liveConfig.showcaseLiveRoomEnabledTip') }}</span>
+        </el-form-item>
+
         <el-form-item :label="t('pages.liveConfig.liveRoomCallMinTotalRechargeUsd')" prop="liveRoomCallMinTotalRechargeUsd">
           <el-input-number
               v-model="formData.liveRoomCallMinTotalRechargeUsd"
@@ -90,6 +95,7 @@ const formData = reactive({
   id: '0',
   paidDanmakuPrice: 0,
 	videoCallTicketEnabled: true,
+	showcaseLiveRoomEnabled: false,
 	audienceListRefreshSeconds: 300,
 	oneToOneDailyFreeSeconds: 30,
   liveRoomCallMinTotalRechargeUsd: 10,
@@ -120,6 +126,7 @@ const applyCfg = (cfg: LiveCfg | null | undefined) => {
     formData.id = '0'
     formData.paidDanmakuPrice = 0
 	formData.videoCallTicketEnabled = true
+	formData.showcaseLiveRoomEnabled = false
 	formData.audienceListRefreshSeconds = 300
 	formData.oneToOneDailyFreeSeconds = 30
   formData.liveRoomCallMinTotalRechargeUsd = 10
@@ -130,6 +137,7 @@ const applyCfg = (cfg: LiveCfg | null | undefined) => {
   formData.id = cfg.id || '0'
   formData.paidDanmakuPrice = truncateNumber(cfg.paidDanmakuPrice ?? 0)
 	formData.videoCallTicketEnabled = cfg.videoCallTicketEnabled ?? true
+	formData.showcaseLiveRoomEnabled = cfg.showcaseLiveRoomEnabled ?? false
 	formData.audienceListRefreshSeconds = cfg.audienceListRefreshSeconds || 300
 	formData.oneToOneDailyFreeSeconds = cfg.oneToOneDailyFreeSeconds ?? 30
   formData.liveRoomCallMinTotalRechargeUsd = truncateNumber(cfg.liveRoomCallMinTotalRechargeUsd ?? 10)
@@ -158,6 +166,7 @@ const handleSave = async () => {
       id: formData.id === '0' ? 0 : Number(formData.id),
       paidDanmakuPrice: formData.paidDanmakuPrice,
 	  videoCallTicketEnabled: formData.videoCallTicketEnabled,
+	  showcaseLiveRoomEnabled: formData.showcaseLiveRoomEnabled,
 	  audienceListRefreshSeconds: formData.audienceListRefreshSeconds,
 	  oneToOneDailyFreeSeconds: formData.oneToOneDailyFreeSeconds,
       liveRoomCallMinTotalRechargeUsd: formData.liveRoomCallMinTotalRechargeUsd,

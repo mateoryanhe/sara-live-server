@@ -18,6 +18,7 @@ type liveCfgSnapshot struct {
 	AudienceListRefreshSeconds      uint32
 	OneToOneDailyFreeSeconds        uint32
 	LiveRoomCallMinTotalRechargeUsd float64
+	ShowcaseLiveRoomEnabled         bool
 }
 
 var (
@@ -63,6 +64,7 @@ func toLiveCfgSnapshot(row *entity.LiveCfg) *liveCfgSnapshot {
 		AudienceListRefreshSeconds:        NormalizeAudienceListRefreshSeconds(row.AudienceListRefreshSeconds),
 		OneToOneDailyFreeSeconds:          NormalizeOneToOneDailyFreeSeconds(row.OneToOneDailyFreeSeconds),
 		LiveRoomCallMinTotalRechargeUsd: NormalizeLiveRoomCallMinTotalRechargeUsd(row.LiveRoomCallMinTotalRechargeUsd),
+		ShowcaseLiveRoomEnabled:         row.ShowcaseLiveRoomEnabled,
 	}
 }
 
@@ -117,5 +119,10 @@ func GetOneToOneDailyFreeSeconds() uint32 {
 // GetLiveRoomCallMinTotalRechargeUSD 直播间 allowCallIcon 最低累计充值(USD)
 func GetLiveRoomCallMinTotalRechargeUSD() float64 {
 	return getLiveCfgCache().LiveRoomCallMinTotalRechargeUsd
+}
+
+// IsShowcaseLiveRoomEnabled 秀场直播间(category=1)是否允许开播；未配置时默认关闭。
+func IsShowcaseLiveRoomEnabled() bool {
+	return getLiveCfgCache().ShowcaseLiveRoomEnabled
 }
 

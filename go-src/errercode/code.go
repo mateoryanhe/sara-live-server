@@ -253,6 +253,8 @@ const (
 	UserWithdrawDisabled XRCode = 186
 	// UserWithdrawGameConsumeNotEnough 游戏消费累计未达提现档位要求
 	UserWithdrawGameConsumeNotEnough XRCode = 187
+	// ShowcaseLiveRoomStartDisabled 秀场直播间开播已关闭(需升级 App)
+	ShowcaseLiveRoomStartDisabled XRCode = 188
 )
 
 type XError struct {

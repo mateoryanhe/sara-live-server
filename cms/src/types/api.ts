@@ -2013,6 +2013,7 @@ export interface LiveCfg {
 	audienceListRefreshSeconds: number
 	oneToOneDailyFreeSeconds: number
     liveRoomCallMinTotalRechargeUsd: number
+    showcaseLiveRoomEnabled: boolean
     createdAt: string
     updatedAt: string
 }
@@ -2028,6 +2029,7 @@ export interface SaveLiveCfgReq {
 	audienceListRefreshSeconds: number
 	oneToOneDailyFreeSeconds: number
     liveRoomCallMinTotalRechargeUsd: number
+    showcaseLiveRoomEnabled: boolean
 }
 
 export interface SaveLiveCfgRes {

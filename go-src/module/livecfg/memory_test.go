@@ -30,6 +30,15 @@ func TestToLiveCfgSnapshotAudienceListRefreshDefault(t *testing.T) {
 	}
 }
 
+func TestToLiveCfgSnapshotShowcaseLiveRoomDefault(t *testing.T) {
+	if toLiveCfgSnapshot(nil).ShowcaseLiveRoomEnabled {
+		t.Fatal("missing live config must default showcase live room broadcast to disabled")
+	}
+	if toLiveCfgSnapshot(&liveentity.LiveCfg{ShowcaseLiveRoomEnabled: true}).ShowcaseLiveRoomEnabled != true {
+		t.Fatal("stored enabled showcase switch must remain enabled")
+	}
+}
+
 func TestToLiveCfgSnapshotAudienceListRefreshValue(t *testing.T) {
 	if got := toLiveCfgSnapshot(&liveentity.LiveCfg{AudienceListRefreshSeconds: 60}).AudienceListRefreshSeconds; got != 60 {
 		t.Fatalf("stored refresh seconds = %d, want 60", got)

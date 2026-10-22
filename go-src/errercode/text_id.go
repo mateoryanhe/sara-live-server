@@ -87,6 +87,7 @@ func init() {
 		CallTargetUserInCall:            "Pengguna sedang dalam panggilan",
 		UserWithdrawDisabled:            "Penarikan pengguna tidak tersedia",
 		UserWithdrawGameConsumeNotEnough: "Total konsumsi game belum memenuhi persyaratan tier penarikan",
+		ShowcaseLiveRoomStartDisabled:    "Unduh APK terbaru untuk memulai siaran",
 		CallOrderNonExist:               "Pesanan panggilan tidak ditemukan",
 		CallOrderStateInvalid:           "Status pesanan panggilan tidak mengizinkan operasi ini",
 		BotAnchorNonExist:               "Anchor bot tidak ditemukan",

@@ -12,6 +12,7 @@ import (
 	"xr-game-server/entity/live"
 	"xr-game-server/errercode"
 	"xr-game-server/module/agora"
+	"xr-game-server/module/livecfg"
 )
 
 // StartLive 开播
@@ -67,6 +68,9 @@ func startAnchorLive(ctx context.Context, room *entity.LiveRoom, heartTime time.
 	if IsRoomOffShelf(room) {
 		return 0, errercode.CreateCode(errercode.LiveRoomOffShelf)
 	}
+	if err := checkShowcaseLiveRoomStartAllowed(room.ID); err != nil {
+		return 0, err
+	}
 	// 未下播再次开播时先结束上一场,避免 live_record 缺 end_time
 	if room.LiveRecordId > 0 {
 		stopLive(room.ID)
@@ -94,6 +98,20 @@ func startAnchorLive(ctx context.Context, room *entity.LiveRoom, heartTime time.
 		broadcastVoiceChatMicState(room.ID)
 	}
 	return liveRecordId, nil
+}
+
+func checkShowcaseLiveRoomStartAllowed(roomId uint64) error {
+	if livecfg.IsShowcaseLiveRoomEnabled() {
+		return nil
+	}
+	cfg := liveroomdao.GetLiveRoomCfg(roomId)
+	if cfg == nil {
+		return nil
+	}
+	if normalizeLiveRoomCategory(cfg.Category) != entity.LiveRoomCategoryHot {
+		return nil
+	}
+	return errercode.CreateCode(errercode.ShowcaseLiveRoomStartDisabled)
 }
 
 func broadcastAnchorStartLive(roomId, liveRecordId uint64, startedAt int64) {

@@ -13,6 +13,7 @@ type LiveCfgItem struct {
 	AudienceListRefreshSeconds uint32  `json:"audienceListRefreshSeconds"`
 	OneToOneDailyFreeSeconds        uint32  `json:"oneToOneDailyFreeSeconds" dc:"1v1观众对单主播每日免费通话秒数(0=关闭)"`
 	LiveRoomCallMinTotalRechargeUsd float64 `json:"liveRoomCallMinTotalRechargeUsd" dc:"直播间allowCallIcon最低累计充值(USD)"`
+	ShowcaseLiveRoomEnabled         bool    `json:"showcaseLiveRoomEnabled" dc:"秀场直播间(category=1)是否允许开播"`
 	CreatedAt                       string  `json:"createdAt"`
 	UpdatedAt                  string  `json:"updatedAt"`
 }
@@ -29,6 +30,7 @@ type SaveLiveCfgReq struct {
 	AudienceListRefreshSeconds uint32  `json:"audienceListRefreshSeconds" v:"required|min:1#在线观众列表刷新时间不能为空|在线观众列表刷新时间不能小于1秒" dc:"在线观众列表刷新间隔(秒),默认300"`
 	OneToOneDailyFreeSeconds        uint32  `json:"oneToOneDailyFreeSeconds" dc:"1v1观众对单主播每日免费通话秒数(0=关闭,默认30)"`
 	LiveRoomCallMinTotalRechargeUsd float64 `json:"liveRoomCallMinTotalRechargeUsd" v:"min:0#累计充值门槛不能小于0" dc:"直播间视频通话按钮显示最低累计充值(USD),默认10"`
+	ShowcaseLiveRoomEnabled         *bool   `json:"showcaseLiveRoomEnabled" dc:"秀场直播间(category=1)是否允许开播;不传时保留原值,首次保存默认关闭"`
 }
 
 type SaveLiveCfgRes struct {
