@@ -6,7 +6,8 @@ import "strings"
 type Platform string
 
 const (
-	ZY Platform = "ZY"
+	ZY Platform = "ZY" // 自研/中游等
+	PP Platform = "PP" // Pragmatic Play
 )
 
 func (p Platform) String() string {
@@ -25,7 +26,7 @@ func ParsePlatform(raw string) (Platform, bool) {
 // IsValid 是否为合法平台类型
 func IsValid(p Platform) bool {
 	switch p {
-	case ZY:
+	case ZY, PP:
 		return true
 	default:
 		return false

@@ -54,7 +54,20 @@
           <el-input v-model="searchForm.name" clearable :placeholder="t('pages.gameList.gameNamePlaceholder')"/>
         </el-form-item>
         <el-form-item :label="t('pages.gameList.platform')">
-          <el-input v-model="searchForm.platform" clearable :placeholder="t('pages.gameList.platformPlaceholder')"/>
+          <el-select
+              v-model="searchForm.platform"
+              clearable
+              filterable
+              :placeholder="t('common.all')"
+              style="width: 140px"
+          >
+            <el-option
+                v-for="item in platformOptions"
+                :key="item"
+                :label="item"
+                :value="item"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item :label="t('common.category')">
           <el-input v-model="searchForm.category" clearable :placeholder="t('pages.gameList.categoryPlaceholder')"/>
@@ -157,6 +170,7 @@ const syncing = ref(false)
 const shelfOperating = ref(false)
 const tableData = ref<VendorGame[]>([])
 const selectedRows = ref<VendorGame[]>([])
+const platformOptions = ref<string[]>([])
 const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(20)
@@ -209,6 +223,9 @@ const fetchList = async () => {
     })
     tableData.value = response.data || []
     total.value = response.total || 0
+    if (response.platforms?.length) {
+      platformOptions.value = response.platforms
+    }
   } catch (error) {
     console.error('fetch game list failed:', error)
     ElMessage.error(t('pages.gameList.fetchFailed'))

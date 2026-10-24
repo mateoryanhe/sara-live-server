@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	dailyGameLiveRoomJoinStatCacheMgr     *cache.RowCache[*entity.DailyGameLiveRoomJoinStat]
-	dailyGameLiveRoomJoinStatListCacheMgr *cache.ListCache[*entity.DailyGameLiveRoomJoinStat]
 )
 
 func initDailyGameLiveRoomJoinStatDao() {
 	dailyGameLiveRoomJoinStatCacheMgr = cache.NewRowCache[*entity.DailyGameLiveRoomJoinStat]()
-	dailyGameLiveRoomJoinStatListCacheMgr = cache.NewPermanentListCache[*entity.DailyGameLiveRoomJoinStat]()
 }
 
 func GetDailyGameLiveRoomJoinStatByDate(date string) *entity.DailyGameLiveRoomJoinStat {
@@ -39,10 +35,8 @@ func ListRecentDailyGameLiveRoomJoinStats(limit int) []*entity.DailyGameLiveRoom
 	if limit <= 0 {
 		limit = 30
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatDailyLoginStatDate(time.Now()))
-	return dailyGameLiveRoomJoinStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.DailyGameLiveRoomJoinStat, error) {
-		return loadRecentDailyGameLiveRoomJoinStatsFromDB(limit), nil
-	})
+	// CMS 按日图必须含「今天」:永久列表缓存在当天首条入库前命中后不会再刷新，会缺当天点。
+	return loadRecentDailyGameLiveRoomJoinStatsFromDB(limit)
 }
 
 func loadRecentDailyGameLiveRoomJoinStatsFromDB(limit int) []*entity.DailyGameLiveRoomJoinStat {

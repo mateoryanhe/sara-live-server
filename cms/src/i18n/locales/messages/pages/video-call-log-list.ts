@@ -2,9 +2,11 @@ import {definePageMessages} from './_define'
 
 const zh = {
   callerId: '呼叫者ID',
-  enterCallerId: '请输入呼叫者ID',
   receiverId: '接收者ID',
-  enterReceiverId: '请输入接收者ID',
+  keywordPlaceholder: '呼叫者 / 接收者 ID 或昵称',
+  amountFilter: '金额过滤',
+  amountGtZero: '大于0',
+  amountEqZero: '等于0',
   payerId: '付费者ID',
   source: '来源',
   sourceLiveRoom: '直播间',
@@ -44,9 +46,11 @@ const zh = {
 
 const en: Record<keyof typeof zh, string> = {
   callerId: 'Caller ID',
-  enterCallerId: 'Enter caller ID',
   receiverId: 'Receiver ID',
-  enterReceiverId: 'Enter receiver ID',
+  keywordPlaceholder: 'Caller / receiver ID or nickname',
+  amountFilter: 'Amount filter',
+  amountGtZero: 'Greater than 0',
+  amountEqZero: 'Equal to 0',
   payerId: 'Payer ID',
   source: 'Source',
   sourceLiveRoom: 'Live Room',
@@ -86,9 +90,11 @@ const en: Record<keyof typeof zh, string> = {
 
 const es: Record<keyof typeof zh, string> = {
   callerId: 'ID llamante',
-  enterCallerId: 'Introduzca ID llamante',
   receiverId: 'ID receptor',
-  enterReceiverId: 'Introduzca ID receptor',
+  keywordPlaceholder: 'ID o apodo de llamante / receptor',
+  amountFilter: 'Filtro de importe',
+  amountGtZero: 'Mayor que 0',
+  amountEqZero: 'Igual a 0',
   payerId: 'ID del pagador',
   source: 'Origen',
   sourceLiveRoom: 'Sala en vivo',
@@ -128,9 +134,11 @@ const es: Record<keyof typeof zh, string> = {
 
 const pt: Record<keyof typeof zh, string> = {
   callerId: 'ID chamador',
-  enterCallerId: 'Digite ID chamador',
   receiverId: 'ID receptor',
-  enterReceiverId: 'Digite ID receptor',
+  keywordPlaceholder: 'ID ou apelido de chamador / receptor',
+  amountFilter: 'Filtro de valor',
+  amountGtZero: 'Maior que 0',
+  amountEqZero: 'Igual a 0',
   payerId: 'ID do pagador',
   source: 'Origem',
   sourceLiveRoom: 'Sala ao vivo',
@@ -170,9 +178,11 @@ const pt: Record<keyof typeof zh, string> = {
 
 const hi: Record<keyof typeof zh, string> = {
   callerId: 'कॉलर ID',
-  enterCallerId: 'कॉलर ID दर्ज करें',
   receiverId: 'प्राप्तकर्ता ID',
-  enterReceiverId: 'प्राप्तकर्ता ID दर्ज करें',
+  keywordPlaceholder: 'कॉलर / प्राप्तकर्ता ID या उपनाम',
+  amountFilter: 'राशि फ़िल्टर',
+  amountGtZero: '0 से अधिक',
+  amountEqZero: '0 के बराबर',
   payerId: 'भुगतानकर्ता ID',
   source: 'स्रोत',
   sourceLiveRoom: 'लाइव रूम',
@@ -212,9 +222,11 @@ const hi: Record<keyof typeof zh, string> = {
 
 const id: Record<keyof typeof zh, string> = {
   callerId: 'ID pemanggil',
-  enterCallerId: 'Masukkan ID pemanggil',
   receiverId: 'ID penerima',
-  enterReceiverId: 'Masukkan ID penerima',
+  keywordPlaceholder: 'ID atau nama pemanggil / penerima',
+  amountFilter: 'Filter jumlah',
+  amountGtZero: 'Lebih dari 0',
+  amountEqZero: 'Sama dengan 0',
   payerId: 'ID pembayar',
   source: 'Sumber',
   sourceLiveRoom: 'Ruangan live',

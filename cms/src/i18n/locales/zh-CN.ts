@@ -138,7 +138,7 @@ const menu = {
   DbBackupCfgManagement: '数据库备份',
   UploadResourceCfgManagement: '资源域名',
   CMSDomainMappingManagement: 'CMS域名映射',
-  CMSDomainAliasManagement: 'CMS备用域名',
+  ExtraDomainMappingManagement: '域名映射',
   H5LiveDeployManagement: 'H5直播部署',
   CoinMerchantDeployManagement: '经销商H5部署',
   CountryFlagDeployManagement: '国旗资源部署',

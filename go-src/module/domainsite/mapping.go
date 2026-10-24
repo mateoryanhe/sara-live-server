@@ -9,14 +9,14 @@ import (
 	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gfile"
 	"xr-game-server/core/cfg"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/domainsitedao"
-	"xr-game-server/dto/domainsitedto"
 	"xr-game-server/entity/sys"
 )
 
-// Init 将数据库中的站点映射加载到进程缓存。每个业务站点固定对应一条域名记录。
+// Init 将数据库中的站点映射加载到进程缓存。
 func Init() {
 	for _, row := range domainsitedao.ListMappings() {
 		if row == nil || strings.TrimSpace(row.SiteKey) == "" {
@@ -26,8 +26,72 @@ func Init() {
 	}
 }
 
+// SyncHTTPSRegistryFromDB 按 domain_site_mappings 重建 Host→目录注册表(HTTP 启动前调用)。
+func SyncHTTPSRegistryFromDB(ctx context.Context) error {
+	return syncDomainSiteRegistryFromDB(ctx)
+}
+
+func syncDomainSiteRegistryFromDB(ctx context.Context) error {
+	defaultCert, defaultKey := resolveDefaultTLSFiles(ctx)
+	byDomain := make(map[string]httpserver.DomainSiteRegistration)
+	for _, row := range domainsitedao.ListMappings() {
+		if row == nil {
+			continue
+		}
+		domain, err := normalizeDomain(row.Domain)
+		if err != nil {
+			continue
+		}
+		root, err := normalizeRoot(row.Root)
+		if err != nil {
+			continue
+		}
+		certFile, keyFile := strings.TrimSpace(row.CertFile), strings.TrimSpace(row.KeyFile)
+		if certFile == "" || keyFile == "" || !gfile.Exists(certFile) || !gfile.Exists(keyFile) {
+			certFile, keyFile = defaultCert, defaultKey
+		}
+		byDomain[domain] = httpserver.DomainSiteRegistration{
+			Domain:   domain,
+			Root:     root,
+			CertFile: certFile,
+			KeyFile:  keyFile,
+		}
+	}
+	if len(byDomain) == 0 {
+		return nil
+	}
+	registrations := make([]httpserver.DomainSiteRegistration, 0, len(byDomain))
+	for _, item := range byDomain {
+		registrations = append(registrations, item)
+	}
+	_, err := httpserver.RefreshDomainSiteRegistry(ctx, registrations)
+	return err
+}
+
+func defaultDomainSiteTLSFiles(ctx context.Context) (string, string) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	return strings.TrimSpace(g.Cfg().MustGet(ctx, "server.httpsCertPath").String()),
+		strings.TrimSpace(g.Cfg().MustGet(ctx, "server.httpsKeyPath").String())
+}
+
+// resolveDefaultTLSFiles 读取 config.yaml 中 Cloudflare 源站证书路径;文件不存在则返回空。
+func resolveDefaultTLSFiles(ctx context.Context) (certFile, keyFile string) {
+	certFile, keyFile = defaultDomainSiteTLSFiles(ctx)
+	if certFile == "" || keyFile == "" || !gfile.Exists(certFile) || !gfile.Exists(keyFile) {
+		return "", ""
+	}
+	return certFile, keyFile
+}
+
 // SaveStaticSiteMapping 保存一个业务站点的唯一域名映射，并热刷新当前进程。
 func SaveStaticSiteMapping(ctx context.Context, siteKey, prefix, domain, root string) (*entity.DomainSiteMapping, error) {
+	return SaveStaticSiteMappingWithTLS(ctx, siteKey, prefix, domain, root, "", "")
+}
+
+// SaveStaticSiteMappingWithTLS 同 SaveStaticSiteMapping,可指定证书路径;空则保留已有或回落 config.yaml 默认源站证书。
+func SaveStaticSiteMappingWithTLS(ctx context.Context, siteKey, prefix, domain, root, certFile, keyFile string) (*entity.DomainSiteMapping, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -61,14 +125,26 @@ func SaveStaticSiteMapping(ctx context.Context, siteKey, prefix, domain, root st
 			oldDomainSet[item] = struct{}{}
 		}
 	}
-	var certFile, keyFile string
-	for _, item := range previousSnapshot {
-		if _, ok := oldDomainSet[item.Domain]; !ok {
-			continue
+	certFile = strings.TrimSpace(certFile)
+	keyFile = strings.TrimSpace(keyFile)
+	if certFile == "" || keyFile == "" {
+		if existing != nil {
+			certFile = strings.TrimSpace(existing.CertFile)
+			keyFile = strings.TrimSpace(existing.KeyFile)
 		}
-		certFile = item.CertFile
-		keyFile = item.KeyFile
-		break
+	}
+	if certFile == "" || keyFile == "" {
+		for _, item := range previousSnapshot {
+			if _, ok := oldDomainSet[item.Domain]; !ok {
+				continue
+			}
+			certFile = item.CertFile
+			keyFile = item.KeyFile
+			break
+		}
+	}
+	if certFile == "" || keyFile == "" || !gfile.Exists(certFile) || !gfile.Exists(keyFile) {
+		certFile, keyFile = resolveDefaultTLSFiles(ctx)
 	}
 
 	if _, err = httpserver.ReplaceDomainSiteRegistration(ctx, oldDomains, httpserver.DomainSiteRegistration{
@@ -88,6 +164,8 @@ func SaveStaticSiteMapping(ctx context.Context, siteKey, prefix, domain, root st
 	row.Prefix = prefix
 	row.Domain = domain
 	row.Root = root
+	row.CertFile = certFile
+	row.KeyFile = keyFile
 	row.UpdatedAt = time.Now()
 	if err = domainsitedao.SaveMapping(row); err != nil {
 		if _, rollbackErr := httpserver.RefreshDomainSiteRegistry(ctx, previousSnapshot); rollbackErr != nil {
@@ -97,10 +175,7 @@ func SaveStaticSiteMapping(ctx context.Context, siteKey, prefix, domain, root st
 	}
 
 	cfg.RegisterRuntimeStaticSite(prefix, domain, root)
-	if siteKey == domainsitedto.CMSSiteKey {
-		syncCMSAliasRoots(ctx, root)
-	}
-	g.Log().Infof(ctx, "动态站点映射保存并刷新成功 siteKey=%s prefix=%s domain=%s root=%s", siteKey, prefix, domain, root)
+	g.Log().Infof(ctx, "动态站点映射保存并刷新成功 siteKey=%s prefix=%s domain=%s root=%s cert=%s", siteKey, prefix, domain, root, certFile)
 	return row, nil
 }
 

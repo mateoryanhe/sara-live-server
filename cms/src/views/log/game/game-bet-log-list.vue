@@ -18,7 +18,20 @@
           <el-input v-model="searchForm.orderId" clearable :placeholder="t('pages.gameBetLogList.orderIdPlaceholder')"/>
         </el-form-item>
         <el-form-item :label="t('pages.gameBetLogList.platform')">
-          <el-input v-model="searchForm.platformType" clearable :placeholder="t('pages.gameBetLogList.platformPlaceholder')"/>
+          <el-select
+              v-model="searchForm.platformType"
+              clearable
+              filterable
+              :placeholder="t('common.all')"
+              style="width: 140px"
+          >
+            <el-option
+                v-for="item in platformOptions"
+                :key="item"
+                :label="item"
+                :value="item"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
@@ -62,7 +75,17 @@
         </el-table-column>
         <el-table-column :label="t('pages.gameBetLogList.platform')" prop="platformType" width="100"/>
         <el-table-column :label="t('pages.gameBetLogList.liveRoomId')" min-width="180" prop="liveRoomId">
-          <template #default="{ row }">{{ row.liveRoomId || '-' }}</template>
+          <template #default="{ row }">
+            <el-button
+                v-if="row.liveRoomId && Number(row.liveRoomId) !== 0"
+                link
+                type="primary"
+                @click="openAnchorDetail(row.liveRoomId)"
+            >
+              {{ row.liveRoomId }}
+            </el-button>
+            <span v-else>-</span>
+          </template>
         </el-table-column>
         <el-table-column :label="t('pages.gameBetLogList.liveRoomTitle')" min-width="160" prop="liveRoomTitle" show-overflow-tooltip>
           <template #default="{ row }">{{ row.liveRoomTitle || '-' }}</template>
@@ -97,6 +120,7 @@
 <script lang="ts" setup>
 import {useI18n} from 'vue-i18n'
 import {onMounted, reactive, ref} from 'vue'
+import {useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {gameBetLogApi} from '@/api'
 import type {GameBetLogItem} from '@/types/api'
@@ -110,11 +134,23 @@ import {buildGameBetLogCsvColumns} from '@/utils/game-log-csv'
 import GameCodeMultiSelect from '@/components/game/GameCodeMultiSelect.vue'
 
 const {t} = useI18n()
+const router = useRouter()
 const {can} = usePagePermission('GameBetLogListManagement')
 const {canViewUserDetail, openUserDetail} = useUserDetailNav('GameBetLogListManagement')
 const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
 const tableData = ref<GameBetLogItem[]>([])
+const platformOptions = ref<string[]>([])
+
+const openAnchorDetail = (liveRoomId: string | number) => {
+  if (!liveRoomId || Number(liveRoomId) === 0) {
+    return
+  }
+  router.push({
+    path: '/user/anchor/anchor-detail',
+    query: {id: String(liveRoomId)},
+  })
+}
 
 const searchForm = reactive({
   userId: '',
@@ -146,6 +182,9 @@ const fetchList = async () => {
     })
     tableData.value = response.data || []
     pagination.total = response.total || 0
+    if (response.platforms?.length) {
+      platformOptions.value = response.platforms
+    }
   } catch (error) {
     console.error('fetch game consumption log failed:', error)
     ElMessage.error(t('pages.gameBetLogList.fetchFailed'))

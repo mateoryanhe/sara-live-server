@@ -15,7 +15,14 @@ type CMSGameBetLogListReq struct {
 	GameCode     string   `json:"gameCode" dc:"游戏编码(可选,模糊匹配)"`
 	GameCodes    []string `json:"gameCodes" dc:"游戏编码(可选,多选精确匹配,优先于 gameCode)"`
 	OrderId      string `json:"orderId" dc:"订单ID(可选,模糊匹配)"`
-	PlatformType string `json:"platformType" dc:"平台类型(可选,模糊匹配)"`
+	PlatformType string `json:"platformType" dc:"平台类型(可选,精确匹配,忽略大小写)"`
+}
+
+// CMSGameBetLogListRes CMS 游戏下注记录列表响应
+type CMSGameBetLogListRes struct {
+	Total     int                  `json:"total" dc:"总数"`
+	Data      []*CMSGameBetLogItem `json:"data" dc:"列表"`
+	Platforms []string             `json:"platforms" dc:"平台下拉(来自游戏库,大写)"`
 }
 
 // CMSGameBetLogItem CMS 游戏下注记录项

@@ -290,9 +290,6 @@ func canInitiateLiveRoomCallBase(room *liveentity.LiveRoom, cfg *liveentity.Live
 	if room == nil || cfg == nil || userId == 0 || userId == room.ID {
 		return false
 	}
-	if normalizeLiveRoomCategory(cfg.Category) == liveentity.LiveRoomCategoryVoiceChat {
-		return false
-	}
 	if anchor := userinfodao.GetUserInfoByUserId(room.ID); anchor == nil || anchor.UserType == userentity.UserTypeAnchor {
 		return false
 	}
@@ -302,8 +299,8 @@ func canInitiateLiveRoomCallBase(room *liveentity.LiveRoom, cfg *liveentity.Live
 	return true
 }
 
-// allowShowCallIconShowOrGameRoom 秀场/游戏(category=1,2): 普通主播或「不接受任何人」不展示; 其余均展示(不校验充值)
-func allowShowCallIconShowOrGameRoom(room *liveentity.LiveRoom, cfg *liveentity.LiveRoomCfg) bool {
+// allowShowCallIconForRoom 秀场/游戏/语聊(category=1,2,5): 普通主播或「不接受任何人」不展示; 其余均展示(不校验充值)
+func allowShowCallIconForRoom(room *liveentity.LiveRoom, cfg *liveentity.LiveRoomCfg) bool {
 	anchor := userinfodao.GetUserInfoByUserId(room.ID)
 	if anchor == nil {
 		return false
@@ -321,12 +318,11 @@ func allowShowCallIcon(ctx context.Context, room *liveentity.LiveRoom, cfg *live
 	if room == nil || cfg == nil || userId == 0 || userId == room.ID {
 		return false
 	}
-	if normalizeLiveRoomCategory(cfg.Category) == liveentity.LiveRoomCategoryVoiceChat {
-		return false
-	}
 	cat := normalizeLiveRoomCategory(cfg.Category)
-	if cat == liveentity.LiveRoomCategoryHot || cat == liveentity.LiveRoomCategoryGame {
-		return allowShowCallIconShowOrGameRoom(room, cfg)
+	if cat == liveentity.LiveRoomCategoryHot ||
+		cat == liveentity.LiveRoomCategoryGame ||
+		cat == liveentity.LiveRoomCategoryVoiceChat {
+		return allowShowCallIconForRoom(room, cfg)
 	}
 	if !canInitiateLiveRoomCallBase(room, cfg, userId) {
 		return false

@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 
+	"github.com/gogf/gf/v2/net/ghttp"
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/domainsitedto"
 	"xr-game-server/module/domainsite"
@@ -13,7 +14,17 @@ const DomainSiteRegistryCMSURL = "/domainSite"
 type DomainSiteRegistryCMSController struct{}
 
 func initDomainSiteRegistryCMSController() {
+	httpserver.RegCMSHandler(DomainSiteRegistryCMSURL, "/saveExtraDomainMappingUpload", handleSaveExtraDomainMappingUpload)
 	httpserver.RegCMS(DomainSiteRegistryCMSURL, &DomainSiteRegistryCMSController{})
+}
+
+func handleSaveExtraDomainMappingUpload(r *ghttp.Request) {
+	res, err := domainsite.SaveExtraDomainMappingFromRequest(r)
+	if err != nil {
+		r.SetError(err)
+		return
+	}
+	httpserver.SetHandlerResponseData(r, res)
 }
 
 func (c *DomainSiteRegistryCMSController) RefreshDomainSiteRegistry(ctx context.Context, req *domainsitedto.RefreshDomainSiteRegistryReq) (*domainsitedto.RefreshDomainSiteRegistryRes, error) {
@@ -28,14 +39,14 @@ func (c *DomainSiteRegistryCMSController) SaveCMSDomainSiteMapping(ctx context.C
 	return domainsite.SaveCMSDomainSiteMapping(ctx, req)
 }
 
-func (c *DomainSiteRegistryCMSController) ListCMSDomainAlias(ctx context.Context, req *domainsitedto.ListCMSDomainAliasReq) (*domainsitedto.ListCMSDomainAliasRes, error) {
-	return domainsite.ListCMSDomainAlias(ctx, req)
+func (c *DomainSiteRegistryCMSController) ListExtraDomainMappings(ctx context.Context, req *domainsitedto.ListExtraDomainMappingsReq) (*domainsitedto.ListExtraDomainMappingsRes, error) {
+	return domainsite.ListExtraDomainMappings(ctx, req)
 }
 
-func (c *DomainSiteRegistryCMSController) AddCMSDomainAlias(ctx context.Context, req *domainsitedto.AddCMSDomainAliasReq) (*domainsitedto.AddCMSDomainAliasRes, error) {
-	return domainsite.AddCMSDomainAlias(ctx, req)
+func (c *DomainSiteRegistryCMSController) SaveExtraDomainMapping(ctx context.Context, req *domainsitedto.SaveExtraDomainMappingReq) (*domainsitedto.SaveExtraDomainMappingRes, error) {
+	return domainsite.SaveExtraDomainMapping(ctx, req)
 }
 
-func (c *DomainSiteRegistryCMSController) DeleteCMSDomainAlias(ctx context.Context, req *domainsitedto.DeleteCMSDomainAliasReq) (*domainsitedto.DeleteCMSDomainAliasRes, error) {
-	return domainsite.DeleteCMSDomainAlias(ctx, req)
+func (c *DomainSiteRegistryCMSController) DeleteExtraDomainMapping(ctx context.Context, req *domainsitedto.DeleteExtraDomainMappingReq) (*domainsitedto.DeleteExtraDomainMappingRes, error) {
+	return domainsite.DeleteExtraDomainMapping(ctx, req)
 }

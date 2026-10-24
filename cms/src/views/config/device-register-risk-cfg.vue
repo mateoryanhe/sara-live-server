@@ -76,6 +76,7 @@ const formData = reactive({
   deviceAccountMaxCount: 3,
   deviceCancelDailyLimit: 1,
   userWithdrawEnabled: false,
+  userWithdrawAndroidVisible: false,
   userWithdrawMinUsd: 5,
   userWithdrawDailyMaxCount: 1,
 })
@@ -104,6 +105,7 @@ const applyCfg = (cfg: AccountCfg | null | undefined) => {
   formData.deviceAccountMaxCount = normalizePositiveInt(cfg?.deviceAccountMaxCount, 3)
   formData.deviceCancelDailyLimit = normalizePositiveInt(cfg?.deviceCancelDailyLimit, 1)
   formData.userWithdrawEnabled = !!cfg?.userWithdrawEnabled
+  formData.userWithdrawAndroidVisible = !!cfg?.userWithdrawAndroidVisible
   formData.userWithdrawMinUsd = Number(cfg?.userWithdrawMinUsd) > 0 ? Number(cfg?.userWithdrawMinUsd) : 5
   const dailyMax = Number(cfg?.userWithdrawDailyMaxCount)
   formData.userWithdrawDailyMaxCount = Number.isFinite(dailyMax) && dailyMax >= 0 ? Math.floor(dailyMax) : 1
@@ -135,6 +137,7 @@ const handleSave = async () => {
       deviceAccountMaxCount: normalizePositiveInt(formData.deviceAccountMaxCount, 3),
       deviceCancelDailyLimit: normalizePositiveInt(formData.deviceCancelDailyLimit, 1),
       userWithdrawEnabled: formData.userWithdrawEnabled,
+      userWithdrawAndroidVisible: formData.userWithdrawAndroidVisible,
       userWithdrawMinUsd: formData.userWithdrawMinUsd > 0 ? formData.userWithdrawMinUsd : 5,
       userWithdrawDailyMaxCount: formData.userWithdrawDailyMaxCount,
     })

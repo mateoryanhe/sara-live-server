@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	dailyGameOnlinePeakStatCacheMgr     *cache.RowCache[*entity.DailyGameOnlinePeakStat]
-	dailyGameOnlinePeakStatListCacheMgr *cache.ListCache[*entity.DailyGameOnlinePeakStat]
 )
 
 func initDailyGameOnlinePeakStatDao() {
 	dailyGameOnlinePeakStatCacheMgr = cache.NewRowCache[*entity.DailyGameOnlinePeakStat]()
-	dailyGameOnlinePeakStatListCacheMgr = cache.NewPermanentListCache[*entity.DailyGameOnlinePeakStat]()
 }
 
 func GetDailyGameOnlinePeakStatByDate(date string) *entity.DailyGameOnlinePeakStat {
@@ -39,10 +35,8 @@ func ListRecentDailyGameOnlinePeakStats(limit int) []*entity.DailyGameOnlinePeak
 	if limit <= 0 {
 		limit = 30
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatDailyLoginStatDate(time.Now()))
-	return dailyGameOnlinePeakStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.DailyGameOnlinePeakStat, error) {
-		return loadRecentDailyGameOnlinePeakStatsFromDB(limit), nil
-	})
+	// CMS 按日图必须含「今天」:永久列表缓存在当天首条入库前命中后不会再刷新，会缺当天点。
+	return loadRecentDailyGameOnlinePeakStatsFromDB(limit)
 }
 
 func loadRecentDailyGameOnlinePeakStatsFromDB(limit int) []*entity.DailyGameOnlinePeakStat {

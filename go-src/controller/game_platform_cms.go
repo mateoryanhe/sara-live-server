@@ -24,7 +24,7 @@ func (c *GamePlatformCMSController) SaveGamePlatformCfg(ctx context.Context, req
 	return game.SaveGamePlatformCfg(ctx, req)
 }
 
-func (c *GamePlatformCMSController) VendorGameList(ctx context.Context, req *gameplatformdto.VendorGameListReq) (*httpserver.CMSQueryResp, error) {
+func (c *GamePlatformCMSController) VendorGameList(ctx context.Context, req *gameplatformdto.VendorGameListReq) (*gameplatformdto.VendorGameListRes, error) {
 	return game.GetVendorGameList(ctx, req)
 }
 
@@ -32,7 +32,7 @@ func (c *GamePlatformCMSController) ReloadVendorGameCache(ctx context.Context, r
 	return game.ReloadVendorGameCacheCMS(ctx, req)
 }
 
-func (c *GamePlatformCMSController) GameShelfList(ctx context.Context, req *gameplatformdto.GameShelfListReq) (*httpserver.CMSQueryResp, error) {
+func (c *GamePlatformCMSController) GameShelfList(ctx context.Context, req *gameplatformdto.GameShelfListReq) (*gameplatformdto.GameShelfListRes, error) {
 	return game.GetGameShelfList(ctx, req)
 }
 

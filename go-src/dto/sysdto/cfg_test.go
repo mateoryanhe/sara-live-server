@@ -7,10 +7,11 @@ import (
 
 func TestSysCfgRespThirdPayFieldNames(t *testing.T) {
 	data, err := json.Marshal(SysCfgResp{
-		T:        "third-pay.bigtktool.shop",
-		TVisable: true,
-		W:        "withdraw.example.com",
-		WVisable: true,
+		T:               "third-pay.bigtktool.shop",
+		TVisable:        true,
+		W:               "withdraw.example.com",
+		WVisable:        true,
+		WAndroidVisable: true,
 	})
 	if err != nil {
 		t.Fatalf("json.Marshal() error = %v", err)
@@ -31,5 +32,8 @@ func TestSysCfgRespThirdPayFieldNames(t *testing.T) {
 	}
 	if got := payload["wVisable"]; got != true {
 		t.Fatalf("payload[wVisable] = %v", got)
+	}
+	if got := payload["wAndroidVisable"]; got != true {
+		t.Fatalf("payload[wAndroidVisable] = %v", got)
 	}
 }

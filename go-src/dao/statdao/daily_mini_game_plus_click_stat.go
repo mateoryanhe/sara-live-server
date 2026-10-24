@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	dailyMiniGamePlusClickStatCacheMgr     *cache.RowCache[*entity.DailyMiniGamePlusClickStat]
-	dailyMiniGamePlusClickStatListCacheMgr *cache.ListCache[*entity.DailyMiniGamePlusClickStat]
 )
 
 func initDailyMiniGamePlusClickStatDao() {
 	dailyMiniGamePlusClickStatCacheMgr = cache.NewRowCache[*entity.DailyMiniGamePlusClickStat]()
-	dailyMiniGamePlusClickStatListCacheMgr = cache.NewPermanentListCache[*entity.DailyMiniGamePlusClickStat]()
 }
 
 func GetDailyMiniGamePlusClickStatByDate(date string) *entity.DailyMiniGamePlusClickStat {
@@ -39,10 +35,8 @@ func ListRecentDailyMiniGamePlusClickStats(limit int) []*entity.DailyMiniGamePlu
 	if limit <= 0 {
 		limit = 30
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatDailyLoginStatDate(time.Now()))
-	return dailyMiniGamePlusClickStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.DailyMiniGamePlusClickStat, error) {
-		return loadRecentDailyMiniGamePlusClickStatsFromDB(limit), nil
-	})
+	// CMS 按日图必须含「今天」:永久列表缓存在当天首条入库前命中后不会再刷新，会缺当天点。
+	return loadRecentDailyMiniGamePlusClickStatsFromDB(limit)
 }
 
 func loadRecentDailyMiniGamePlusClickStatsFromDB(limit int) []*entity.DailyMiniGamePlusClickStat {

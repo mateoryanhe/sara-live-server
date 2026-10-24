@@ -388,7 +388,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('DbBackupCfgManagement'),
                 page('UploadResourceCfgManagement'),
                 page('CMSDomainMappingManagement'),
-                page('CMSDomainAliasManagement'),
+                page('ExtraDomainMappingManagement'),
                 page('CountryFlagDeployManagement'),
                 page('DataSyncCfgManagement'),
             ]),

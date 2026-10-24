@@ -17,6 +17,6 @@ func initGameWinLogCMSController() {
 }
 
 // CMSGameWinLogList CMS 分页查询游戏派彩记录
-func (c *GameWinLogCMSController) CMSGameWinLogList(ctx context.Context, req *gamewindto.CMSGameWinLogListReq) (*httpserver.CMSQueryResp, error) {
+func (c *GameWinLogCMSController) CMSGameWinLogList(ctx context.Context, req *gamewindto.CMSGameWinLogListReq) (*gamewindto.CMSGameWinLogListRes, error) {
 	return game.GetWinCMSList(ctx, req)
 }

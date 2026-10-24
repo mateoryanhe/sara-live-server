@@ -36,9 +36,16 @@ func SaveHaiPayCfg(_ context.Context, req *haipaydto.SaveHaiPayCfgReq) (*haipayd
 	}
 
 	existing := cfgdao.GetHaiPayCfgCached()
+	// 可见性改由第三方支付部署页管理;HaiPay 配置保存时保留原值(无记录则默认显示)
+	tVisable, tH5Visable := true, true
+	if existing != nil {
+		tVisable = existing.TVisable
+		tH5Visable = existing.TH5Visable
+	}
 	row := &entity.HaiPayCfg{
 		ApiHost:            apiHost,
-		TVisable:           req.TVisable,
+		TVisable:           tVisable,
+		TH5Visable:         tH5Visable,
 		MerchantSecretKey:  merchantSecret,
 		MerchantPrivateKey: merchantPrivate,
 		CallbackBaseUrl:    callbackBaseURL,
@@ -84,6 +91,7 @@ func toHaiPayCfgItem(cfg *entity.HaiPayCfg) *haipaydto.HaiPayCfgItem {
 		ID:                 strconv.FormatUint(cfg.ID, 10),
 		ApiHost:            cfg.ApiHost,
 		TVisable:           cfg.TVisable,
+		TH5Visable:         cfg.TH5Visable,
 		MerchantSecretKey:  cfg.MerchantSecretKey,
 		MerchantPrivateKey: cfg.MerchantPrivateKey,
 		CallbackBaseUrl:    cfg.CallbackBaseUrl,

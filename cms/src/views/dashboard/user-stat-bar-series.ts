@@ -9,8 +9,6 @@ export interface UserStatBarSeriesItem {
 export const USER_STAT_BAR_SERIES: UserStatBarSeriesItem[] = [
   {key: 'rechargeUser', labelKey: 'barMetricRechargeUser', color: '#409EFF', enabled: false},
   {key: 'vipUser', labelKey: 'barMetricVipUser', color: '#E6A23C', enabled: false},
-  {key: 'goldConsumeUser', labelKey: 'barMetricGoldConsumeUser', color: '#67C23A', enabled: true},
-  {key: 'diamondConsumeUser', labelKey: 'barMetricDiamondConsumeUser', color: '#9f7aea', enabled: true},
 ]
 
 export const getEnabledUserStatBarSeries = () =>

@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	dailyHotLiveRoomGiftClickStatCacheMgr     *cache.RowCache[*entity.DailyHotLiveRoomGiftClickStat]
-	dailyHotLiveRoomGiftClickStatListCacheMgr *cache.ListCache[*entity.DailyHotLiveRoomGiftClickStat]
 )
 
 func initDailyHotLiveRoomGiftClickStatDao() {
 	dailyHotLiveRoomGiftClickStatCacheMgr = cache.NewRowCache[*entity.DailyHotLiveRoomGiftClickStat]()
-	dailyHotLiveRoomGiftClickStatListCacheMgr = cache.NewPermanentListCache[*entity.DailyHotLiveRoomGiftClickStat]()
 }
 
 func GetDailyHotLiveRoomGiftClickStatByDate(date string) *entity.DailyHotLiveRoomGiftClickStat {
@@ -39,10 +35,8 @@ func ListRecentDailyHotLiveRoomGiftClickStats(limit int) []*entity.DailyHotLiveR
 	if limit <= 0 {
 		limit = 30
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatDailyLoginStatDate(time.Now()))
-	return dailyHotLiveRoomGiftClickStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.DailyHotLiveRoomGiftClickStat, error) {
-		return loadRecentDailyHotLiveRoomGiftClickStatsFromDB(limit), nil
-	})
+	// CMS 按日图必须含「今天」:永久列表缓存在当天首条入库前命中后不会再刷新，会缺当天点。
+	return loadRecentDailyHotLiveRoomGiftClickStatsFromDB(limit)
 }
 
 func loadRecentDailyHotLiveRoomGiftClickStatsFromDB(limit int) []*entity.DailyHotLiveRoomGiftClickStat {

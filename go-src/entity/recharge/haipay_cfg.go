@@ -11,7 +11,8 @@ const TbHaiPayCfg db.TbName = "haipay_cfgs"
 type HaiPayCfg struct {
 	migrate.OneModel
 	ApiHost            string `gorm:"size:256;default:'';comment:API Host正式https://api.haipay.top UAT uat-interface.haipay.asia" json:"apiHost"`
-	TVisable           bool   `gorm:"column:t_visable;default:0;comment:App是否显示第三方支付" json:"tVisable"`
+	TVisable           bool   `gorm:"column:t_visable;default:1;comment:安卓端是否显示第三方支付(默认开启)" json:"tVisable"`
+	TH5Visable         bool   `gorm:"column:t_h5_visable;default:1;comment:H5端是否显示第三方支付(默认开启)" json:"tH5Visable"`
 	MerchantSecretKey  string `gorm:"size:256;default:'';comment:签名串末尾key=商户密钥" json:"merchantSecretKey"`
 	MerchantPrivateKey string `gorm:"type:text;comment:商户RSA私钥(PKCS8,可无PEM头)" json:"merchantPrivateKey"`
 	CallbackBaseUrl    string `gorm:"size:512;default:'';comment:回调根地址" json:"callbackBaseUrl"`

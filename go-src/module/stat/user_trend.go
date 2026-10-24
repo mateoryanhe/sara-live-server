@@ -121,12 +121,14 @@ func toDailyTrendPoints(rows []*entity.DailyLoginStat) []*statdto.CMSUserStatTre
 			continue
 		}
 		list = append(list, &statdto.CMSUserStatTrendPoint{
-			Time:              row.ID,
-			ActiveUserCount:   row.Count,
-			RegisterUserCount: row.RegisterCount,
-			BarMetrics: statdto.BuildUserStatBarMetrics(
-				row.RechargeUserCount, row.GoldConsumeUserCount, row.DiamondConsumeUserCount,
-			),
+			Time:                    row.ID,
+			ActiveUserCount:         row.Count,
+			RegisterUserCount:       row.RegisterCount,
+			AppDeviceRechargeAmount: row.AppDeviceRechargeAmount,
+			H5DeviceRechargeAmount:  row.H5DeviceRechargeAmount,
+			AppDeviceLoginCount:     row.AppDeviceLoginCount,
+			H5DeviceLoginCount:      row.H5DeviceLoginCount,
+			BarMetrics:              statdto.BuildUserStatBarMetrics(row.RechargeUserCount),
 		})
 	}
 	return list
@@ -139,12 +141,14 @@ func toWeeklyTrendPoints(rows []*entity.WeeklyLoginStat) []*statdto.CMSUserStatT
 			continue
 		}
 		list = append(list, &statdto.CMSUserStatTrendPoint{
-			Time:              row.ID,
-			ActiveUserCount:   row.Count,
-			RegisterUserCount: row.RegisterCount,
-			BarMetrics: statdto.BuildUserStatBarMetrics(
-				row.RechargeUserCount, row.GoldConsumeUserCount, row.DiamondConsumeUserCount,
-			),
+			Time:                    row.ID,
+			ActiveUserCount:         row.Count,
+			RegisterUserCount:       row.RegisterCount,
+			AppDeviceRechargeAmount: row.AppDeviceRechargeAmount,
+			H5DeviceRechargeAmount:  row.H5DeviceRechargeAmount,
+			AppDeviceLoginCount:     row.AppDeviceLoginCount,
+			H5DeviceLoginCount:      row.H5DeviceLoginCount,
+			BarMetrics:              statdto.BuildUserStatBarMetrics(row.RechargeUserCount),
 		})
 	}
 	return list
@@ -157,12 +161,14 @@ func toMonthlyTrendPoints(rows []*entity.MonthlyLoginStat) []*statdto.CMSUserSta
 			continue
 		}
 		list = append(list, &statdto.CMSUserStatTrendPoint{
-			Time:              row.ID,
-			ActiveUserCount:   row.Count,
-			RegisterUserCount: row.RegisterCount,
-			BarMetrics: statdto.BuildUserStatBarMetrics(
-				row.RechargeUserCount, row.GoldConsumeUserCount, row.DiamondConsumeUserCount,
-			),
+			Time:                    row.ID,
+			ActiveUserCount:         row.Count,
+			RegisterUserCount:       row.RegisterCount,
+			AppDeviceRechargeAmount: row.AppDeviceRechargeAmount,
+			H5DeviceRechargeAmount:  row.H5DeviceRechargeAmount,
+			AppDeviceLoginCount:     row.AppDeviceLoginCount,
+			H5DeviceLoginCount:      row.H5DeviceLoginCount,
+			BarMetrics:              statdto.BuildUserStatBarMetrics(row.RechargeUserCount),
 		})
 	}
 	return list

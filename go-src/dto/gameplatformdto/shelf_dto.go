@@ -12,7 +12,14 @@ type GameShelfListReq struct {
 	GameCode  string   `json:"gameCode" dc:"游戏编码(模糊匹配)"`
 	GameCodes []string `json:"gameCodes" dc:"游戏编码(多选精确匹配,优先于 gameCode)"`
 	Name     string `json:"name" dc:"游戏名称(模糊匹配,中/英文)"`
-	Platform string `json:"platform" dc:"平台编码(模糊匹配)"`
+	Platform string `json:"platform" dc:"平台编码(精确匹配)"`
+}
+
+// GameShelfListRes CMS 上架游戏列表响应
+type GameShelfListRes struct {
+	Total     int                   `json:"total" dc:"总数"`
+	Data      []*GameShelfListItem  `json:"data" dc:"列表"`
+	Platforms []string              `json:"platforms" dc:"游戏库去重平台(下拉用)"`
 }
 
 // GameShelfListItem CMS 上架游戏项
@@ -26,6 +33,7 @@ type GameShelfListItem struct {
 	LiveGameCover    string `json:"liveGameCover"`
 	LiveGameCoverUrl string `json:"liveGameCoverUrl"`
 	Platform         string `json:"platform"`
+	Sort             int    `json:"sort"`
 }
 
 // AddGameShelfReq CMS 添加上架游戏
@@ -90,6 +98,7 @@ type UpdateGameShelfReq struct {
 	GameCode      string `json:"gameCode" v:"required#游戏编码不能为空" dc:"游戏编码"`
 	LiveGameName  string `json:"liveGameName" dc:"直播游戏名称(空则 App 回退英文名称)"`
 	LiveGameCover string `json:"liveGameCover" dc:"直播游戏封面(相对路径或完整 URL, 空则 App 回退默认封面)"`
+	Sort          int    `json:"sort" dc:"排序值(越大越靠前)"`
 }
 
 // UpdateGameShelfRes CMS 更新上架游戏直播展示结果

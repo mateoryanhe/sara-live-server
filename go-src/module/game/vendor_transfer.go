@@ -86,7 +86,8 @@ func HandleVendorTransfer(ctx context.Context, req *gameplatformdto.VendorTransf
 		return resp, nil
 	}
 
-	platformType, _ := gameplatform.ParsePlatform(req.Platform)
+	// platform 按厂商原文落库,不做白名单校验
+	platformType := gameplatform.Platform(strings.ToUpper(strings.TrimSpace(req.Platform)))
 	gameID := strings.TrimSpace(req.GameID)
 	gameName, gameCategory := resolveVendorTransferGameMeta(gameID, req.Platform)
 	nameEn, cover := resolveVendorTransferGameInfo(gameID)
@@ -143,9 +144,6 @@ func validateVendorTransferReq(req *gameplatformdto.VendorTransferReq) *vendorCa
 	}
 	if strings.TrimSpace(req.WalletType) != "C" {
 		return &vendorCallbackFail{Code: vendorCallbackCodeInvalidParam, Message: "invalid wallet_type"}
-	}
-	if _, ok := gameplatform.ParsePlatform(req.Platform); !ok {
-		return &vendorCallbackFail{Code: vendorCallbackCodeInvalidParam, Message: "invalid platform"}
 	}
 	if req.BetAmount < 0 || req.WinAmount < 0 {
 		return &vendorCallbackFail{Code: vendorCallbackCodeInvalidParam, Message: "invalid amount"}
@@ -231,7 +229,7 @@ func resolveVendorTransferGameMeta(gameID, platform string) (gameName, gameCateg
 }
 
 func recordVendorTransferBetLog(userID uint64, gameCode, nameEn, cover string, platformType gameplatform.Platform, orderID string, amount float64) {
-	if userID == 0 || !gameplatform.IsValid(platformType) || strings.TrimSpace(orderID) == "" || amount <= 0 {
+	if userID == 0 || strings.TrimSpace(orderID) == "" || amount <= 0 {
 		return
 	}
 	liveRoomID, liveRecordID := gamebetdao.ResolveAudienceLiveContext(userID)
@@ -254,7 +252,7 @@ func recordVendorTransferBetLog(userID uint64, gameCode, nameEn, cover string, p
 }
 
 func recordVendorTransferWinLog(userID uint64, gameCode, nameEn, cover string, platformType gameplatform.Platform, orderID string, amount float64) {
-	if userID == 0 || !gameplatform.IsValid(platformType) || strings.TrimSpace(orderID) == "" || amount <= 0 {
+	if userID == 0 || strings.TrimSpace(orderID) == "" || amount <= 0 {
 		return
 	}
 	entity.NewGameWinLog(

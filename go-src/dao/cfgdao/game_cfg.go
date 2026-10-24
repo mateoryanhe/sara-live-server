@@ -21,7 +21,10 @@ func InitGameCfgDao() {
 
 func loadAllGameCfgFromDB() []*entity.GameCfg {
 	rows := make([]*entity.GameCfg, 0)
-	_ = g.DB().Model(string(entity.TbGameCfg)).Order(string(db.IdName) + " asc").Scan(&rows)
+	_ = g.DB().Model(string(entity.TbGameCfg)).
+		Order("sort desc").
+		Order(string(db.IdName) + " asc").
+		Scan(&rows)
 	return rows
 }
 
@@ -117,6 +120,7 @@ func CreateGameCfg(row *entity.GameCfg) error {
 		"platform":        row.Platform,
 		"live_game_name":  row.LiveGameName,
 		"live_game_cover": row.LiveGameCover,
+		"sort":            row.Sort,
 		"created_at":      row.CreatedAt,
 		"updated_at":      row.UpdatedAt,
 	}).Insert()
@@ -202,7 +206,7 @@ func DeleteGameCfgByGameCodes(gameCodes []string) (int, error) {
 	return int(affected), nil
 }
 
-func UpdateGameCfgLiveDisplay(gameCode, liveGameName, liveGameCover string) (bool, error) {
+func UpdateGameCfgLiveDisplay(gameCode, liveGameName, liveGameCover string, sort int) (bool, error) {
 	gameCode = strings.TrimSpace(gameCode)
 	if gameCode == "" {
 		return false, nil
@@ -210,6 +214,8 @@ func UpdateGameCfgLiveDisplay(gameCode, liveGameName, liveGameCover string) (boo
 	result, err := g.DB().Model(string(entity.TbGameCfg)).Where("game_code = ?", gameCode).Data(g.Map{
 		"live_game_name":  liveGameName,
 		"live_game_cover": liveGameCover,
+		"sort":            sort,
+		"updated_at":      time.Now(),
 	}).Update()
 	if err != nil {
 		return false, err

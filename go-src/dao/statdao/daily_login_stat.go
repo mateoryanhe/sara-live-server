@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	dailyLoginStatCacheMgr     *cache.RowCache[*entity.DailyLoginStat]
-	dailyLoginStatListCacheMgr *cache.ListCache[*entity.DailyLoginStat]
 )
 
 func initDailyLoginStatDao() {
 	dailyLoginStatCacheMgr = cache.NewRowCache[*entity.DailyLoginStat]()
-	dailyLoginStatListCacheMgr = cache.NewPermanentListCache[*entity.DailyLoginStat]()
 }
 
 // GetDailyLoginStatByDate 按日期获取每日登录统计,不存在则新建内存对象
@@ -41,10 +37,8 @@ func ListRecentDailyLoginStats(limit int) []*entity.DailyLoginStat {
 	if limit <= 0 {
 		limit = 30
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatDailyLoginStatDate(time.Now()))
-	return dailyLoginStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.DailyLoginStat, error) {
-		return loadRecentDailyLoginStatsFromDB(limit), nil
-	})
+	// CMS 按日图必须含「今天」:永久列表缓存在当天首条入库前命中后不会再刷新，会缺当天点。
+	return loadRecentDailyLoginStatsFromDB(limit)
 }
 
 func loadRecentDailyLoginStatsFromDB(limit int) []*entity.DailyLoginStat {

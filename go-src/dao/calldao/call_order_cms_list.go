@@ -1,12 +1,14 @@
 package calldao
 
 import (
+	"strings"
 	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"xr-game-server/entity/call"
 	liveentity "xr-game-server/entity/live"
+	userentity "xr-game-server/entity/user"
 )
 
 // CallOrderCMSListFilter CMS通话订单查询条件
@@ -16,13 +18,15 @@ type CallOrderCMSListFilter struct {
 	ReceiverIds   []uint64
 	GuildIds      []uint64
 	FilterByGuild bool
-	Source        uint8
-	Status        uint8
-	CallType      uint8
-	StartTime     int64
-	EndTime       int64
-	PageIndex     int
-	PageSize      int
+	Keyword    string
+	CostFilter uint8 // 0=全部 1=总费用>0 2=总费用=0
+	Source     uint8
+	Status     uint8
+	CallType   uint8
+	StartTime  int64
+	EndTime    int64
+	PageIndex  int
+	PageSize   int
 }
 
 // CallOrderCMSList CMS分页查询通话订单(按ID倒序)
@@ -41,13 +45,23 @@ func CallOrderCMSList(f *CallOrderCMSListFilter) (int, []*entity.CallOrder) {
 		f.PageSize = 20
 	}
 	ctx := gctx.New()
+	keyword := strings.TrimSpace(f.Keyword)
+	needAlias := keyword != "" || f.FilterByGuild
 	colPrefix := ""
 	m := g.Model(string(entity.TbCallOrder)).Ctx(ctx)
-	if f.FilterByGuild {
+	if needAlias {
 		colPrefix = "c."
-		m = g.Model(string(entity.TbCallOrder)+" c").Ctx(ctx).
-			InnerJoin(string(liveentity.TbLiveRoom)+" r", "r.id = c."+string(entity.CallOrderReceiverId)).
-			WhereIn("r."+string(liveentity.LiveRoomGuildId), f.GuildIds)
+		m = g.Model(string(entity.TbCallOrder) + " c").Ctx(ctx)
+		if keyword != "" {
+			like := "%" + keyword + "%"
+			m = m.LeftJoin(string(userentity.TbUserInfo)+" u_caller", "u_caller.id = c."+string(entity.CallOrderCallerId)).
+				LeftJoin(string(userentity.TbUserInfo)+" u_recv", "u_recv.id = c."+string(entity.CallOrderReceiverId)).
+				Where("(CAST(c."+string(entity.CallOrderCallerId)+" AS CHAR) LIKE ? OR CAST(c."+string(entity.CallOrderReceiverId)+" AS CHAR) LIKE ? OR u_caller."+string(userentity.UserInfoNickname)+" LIKE ? OR u_recv."+string(userentity.UserInfoNickname)+" LIKE ?)", like, like, like, like)
+		}
+		if f.FilterByGuild {
+			m = m.InnerJoin(string(liveentity.TbLiveRoom)+" r", "r.id = c."+string(entity.CallOrderReceiverId)).
+				WhereIn("r."+string(liveentity.LiveRoomGuildId), f.GuildIds)
+		}
 	}
 	if f.CallerId > 0 {
 		m = m.Where(colPrefix+string(entity.CallOrderCallerId)+" = ?", f.CallerId)
@@ -66,6 +80,12 @@ func CallOrderCMSList(f *CallOrderCMSListFilter) (int, []*entity.CallOrder) {
 	if f.CallType > 0 {
 		m = m.Where(colPrefix+string(entity.CallOrderCallType)+" = ?", f.CallType)
 	}
+	switch f.CostFilter {
+	case 1:
+		m = m.Where(colPrefix+string(entity.CallOrderTotalCost)+" > ?", 0)
+	case 2:
+		m = m.Where(colPrefix+string(entity.CallOrderTotalCost)+" = ?", 0)
+	}
 	if f.StartTime > 0 {
 		m = m.Where(colPrefix+string(entity.CallOrderCallStartTime)+" >= ?", time.Unix(f.StartTime, 0))
 	}
@@ -78,7 +98,7 @@ func CallOrderCMSList(f *CallOrderCMSListFilter) (int, []*entity.CallOrder) {
 	}
 	query := m.Clone().Order(colPrefix + "id desc").
 		Limit(f.PageSize).Offset((f.PageIndex - 1) * f.PageSize)
-	if f.FilterByGuild {
+	if needAlias {
 		query = query.Fields("c.*")
 	}
 	_ = query.Scan(&list)

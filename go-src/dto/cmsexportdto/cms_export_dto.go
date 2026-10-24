@@ -108,6 +108,8 @@ type CMSExportVideoCallLogPayload struct {
 	CMSExportHeadersPayload
 	CallerId         string   `json:"callerId"`
 	ReceiverId       string   `json:"receiverId"`
+	Keyword          string   `json:"keyword"`
+	CostFilter       uint8    `json:"costFilter"`
 	PlatformAnchorId string   `json:"platformAnchorId"`
 	GuildAnchorId    string   `json:"guildAnchorId"`
 	ReceiverIds      []string `json:"receiverIds"`

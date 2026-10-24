@@ -7,6 +7,7 @@ import (
 	"xr-game-server/constants/country"
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/channelpaydao"
+	"xr-game-server/dao/guilddao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dao/userlogindevicedao"
@@ -114,9 +115,11 @@ func toUserAccountDetailItem(account *userentity.Account, location *userentity.U
 
 func toUserProfileDetailItem(info *userentity.UserInfo, userId uint64) *accountdto.UserProfileDetailItem {
 	if info == nil || info.ID == 0 {
-		return &accountdto.UserProfileDetailItem{
+		item := &accountdto.UserProfileDetailItem{
 			GuildId: liveroomdao.GetAnchorGuildId(userId),
 		}
+		fillUserProfileGuildName(item)
+		return item
 	}
 	item := &accountdto.UserProfileDetailItem{
 		Nickname:        info.Nickname,
@@ -136,11 +139,23 @@ func toUserProfileDetailItem(info *userentity.UserInfo, userId uint64) *accountd
 		BotAnchorStatus: info.BotAnchorStatus,
 		GuildId:         liveroomdao.GetAnchorGuildId(info.ID),
 	}
+	fillUserProfileGuildName(item)
 	if !info.UpdatedAt.IsZero() {
 		updatedAt := info.UpdatedAt
 		item.UpdatedAt = &updatedAt
 	}
 	return item
+}
+
+func fillUserProfileGuildName(item *accountdto.UserProfileDetailItem) {
+	if item == nil || item.GuildId == 0 {
+		return
+	}
+	guild := guilddao.GetGuildByIdFromDB(item.GuildId)
+	if guild == nil {
+		return
+	}
+	item.GuildName = guild.Name
 }
 
 func toUserWalletDetailItem(info *userentity.UserInfo) *accountdto.UserWalletDetailItem {

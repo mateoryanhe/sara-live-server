@@ -42,7 +42,7 @@ func QueryVendorGameLibs(q *VendorGameLibQuery) (int, []*entity.VendorGameLib) {
 		m = m.Where("(name LIKE ? OR name_en LIKE ?)", "%"+name+"%", "%"+name+"%")
 	}
 	if platform := strings.TrimSpace(q.Platform); platform != "" {
-		m = m.Where("platform LIKE ?", "%"+platform+"%")
+		m = m.Where("platform = ?", platform)
 	}
 	if category := strings.TrimSpace(q.Category); category != "" {
 		m = m.Where("category LIKE ?", "%"+category+"%")
@@ -56,6 +56,50 @@ func QueryVendorGameLibs(q *VendorGameLibQuery) (int, []*entity.VendorGameLib) {
 		Limit(pageSize).Offset((pageIndex - 1) * pageSize).
 		Scan(&list)
 	return total, list
+}
+
+// ListDistinctVendorGamePlatforms 返回游戏库中去重后的平台编码(升序,库内原文).
+func ListDistinctVendorGamePlatforms() []string {
+	type platformRow struct {
+		Platform string `json:"platform"`
+	}
+	rows := make([]*platformRow, 0)
+	_ = g.DB().Model(string(entity.TbVendorGameLib)).
+		Fields("DISTINCT platform").
+		Where("platform <> ?", "").
+		Order("platform asc").
+		Scan(&rows)
+	out := make([]string, 0, len(rows))
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		p := strings.TrimSpace(row.Platform)
+		if p == "" {
+			continue
+		}
+		out = append(out, p)
+	}
+	return out
+}
+
+// ListDistinctVendorGamePlatformsUpper 游戏库平台去重并转大写(下注/派彩日志筛选用).
+func ListDistinctVendorGamePlatformsUpper() []string {
+	raw := ListDistinctVendorGamePlatforms()
+	out := make([]string, 0, len(raw))
+	seen := make(map[string]struct{}, len(raw))
+	for _, p := range raw {
+		u := strings.ToUpper(strings.TrimSpace(p))
+		if u == "" {
+			continue
+		}
+		if _, ok := seen[u]; ok {
+			continue
+		}
+		seen[u] = struct{}{}
+		out = append(out, u)
+	}
+	return out
 }
 
 // GetVendorGameLib 按 game_code + platform 查游戏库(直接读 DB).

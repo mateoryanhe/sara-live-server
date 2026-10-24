@@ -18,7 +18,20 @@
           <el-input v-model="searchForm.orderId" clearable :placeholder="t('pages.gameWinLogList.orderIdPlaceholder')"/>
         </el-form-item>
         <el-form-item :label="t('pages.gameWinLogList.platform')">
-          <el-input v-model="searchForm.platformType" clearable :placeholder="t('pages.gameWinLogList.platformPlaceholder')"/>
+          <el-select
+              v-model="searchForm.platformType"
+              clearable
+              filterable
+              :placeholder="t('common.all')"
+              style="width: 140px"
+          >
+            <el-option
+                v-for="item in platformOptions"
+                :key="item"
+                :label="item"
+                :value="item"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
@@ -40,11 +53,7 @@
         <el-table-column :label="t('pages.gameWinLogList.userNickname')" min-width="140" prop="nickname">
           <template #default="{ row }">{{ row.nickname || '-' }}</template>
         </el-table-column>
-        <el-table-column :label="t('pages.gameWinLogList.gameCode')" min-width="120" prop="gameCode"/>
-        <el-table-column :label="t('pages.gameWinLogList.nameEn')" min-width="140" prop="nameEn" show-overflow-tooltip>
-          <template #default="{ row }">{{ row.nameEn || '-' }}</template>
-        </el-table-column>
-        <el-table-column :label="t('pages.gameWinLogList.cover')" min-width="100">
+        <el-table-column :label="t('pages.gameWinLogList.cover')" width="88" align="center">
           <template #default="{ row }">
             <el-image
                 v-if="row.cover"
@@ -56,6 +65,13 @@
             />
             <span v-else>-</span>
           </template>
+        </el-table-column>
+        <el-table-column :label="t('pages.gameWinLogList.gameCode')" min-width="120" prop="gameCode"/>
+        <el-table-column :label="t('pages.gameWinLogList.nameEn')" min-width="140" prop="nameEn" show-overflow-tooltip>
+          <template #default="{ row }">{{ row.nameEn || '-' }}</template>
+        </el-table-column>
+        <el-table-column :label="t('pages.gameWinLogList.betAmount')" prop="betAmount" width="120">
+          <template #default="{ row }">{{ formatAmount(row.betAmount || 0) }}</template>
         </el-table-column>
         <el-table-column :label="t('pages.gameWinLogList.winAmount')" prop="amount" width="120">
           <template #default="{ row }">{{ formatAmount(row.amount) }}</template>
@@ -103,6 +119,7 @@ const {canViewUserDetail, openUserDetail} = useUserDetailNav('GameWinLogListMana
 const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
 const tableData = ref<GameWinLogItem[]>([])
+const platformOptions = ref<string[]>([])
 
 const searchForm = reactive({
   userId: '',
@@ -134,6 +151,9 @@ const fetchList = async () => {
     })
     tableData.value = response.data || []
     pagination.total = response.total || 0
+    if (response.platforms?.length) {
+      platformOptions.value = response.platforms
+    }
   } catch (error) {
     console.error('fetch game reward log failed:', error)
     ElMessage.error(t('pages.gameWinLogList.fetchFailed'))

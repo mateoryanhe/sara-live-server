@@ -66,7 +66,6 @@ func consumeGoldConsume(ev *gameevent.CurrencyChangeEventData, statAt time.Time)
 		stat.AddTotalGoldConsume(ev.Amount)
 	}
 	recordPeriodGoldConsume(statAt, ev.Amount)
-	recordPeriodGoldConsumeUser(statAt, ev.UserId)
 }
 
 func consumeDiamondConsume(ev *gameevent.CurrencyChangeEventData, statAt time.Time) {
@@ -92,9 +91,6 @@ func consumeDiamondConsume(ev *gameevent.CurrencyChangeEventData, statAt time.Ti
 		stat.AddTotalDiamondConsume(delta)
 	}
 	recordPeriodDiamondConsume(statAt, delta)
-	if delta > 0 {
-		recordPeriodDiamondConsumeUser(statAt, ev.UserId)
-	}
 }
 
 func recordPeriodGoldConsume(statAt time.Time, amount float64) {

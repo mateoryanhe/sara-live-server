@@ -46,7 +46,7 @@ func CMSList(f *CMSListFilter) (int, []*entity.GameBetLog) {
 		m = m.Where(string(entity.GameBetLogOrderId)+" LIKE ?", "%"+orderId+"%")
 	}
 	if platformType := strings.TrimSpace(f.PlatformType); platformType != "" {
-		m = m.Where(string(entity.GameBetLogPlatformType)+" LIKE ?", "%"+platformType+"%")
+		m = m.Where("UPPER("+string(entity.GameBetLogPlatformType)+") = ?", strings.ToUpper(platformType))
 	}
 
 	total, err := m.Clone().Count()

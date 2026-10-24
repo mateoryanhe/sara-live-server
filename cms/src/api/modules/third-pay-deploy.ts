@@ -7,6 +7,8 @@ export interface ThirdPayDeployInfo {
     deployPath: string
     acceptExt: string
     lastUploadAt: string
+    androidVisible: boolean
+    h5Visible: boolean
 }
 
 export interface DeployThirdPayZipRes {
@@ -23,6 +25,8 @@ export interface GetThirdPayDeployInfoRes {
 export interface SaveThirdPayDeployCfgReq {
     domain: string
     deployPath: string
+    androidVisible: boolean
+    h5Visible: boolean
 }
 
 export interface SaveThirdPayDeployCfgRes {

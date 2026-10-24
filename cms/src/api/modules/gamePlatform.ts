@@ -35,11 +35,11 @@ export const gamePlatformApi = {
     },
 
     getVendorGameList: (params: VendorGameQuery) => {
-        return request.post<{ total: number; data: VendorGame[] }>('/gamePlatform/vendorGameList', params)
+        return request.post<{ total: number; data: VendorGame[]; platforms?: string[] }>('/gamePlatform/vendorGameList', params)
     },
 
     getGameShelfList: (params: GameShelfQuery) => {
-        return request.post<{ total: number; data: GameShelfItem[] }>('/gamePlatform/gameShelfList', params)
+        return request.post<{ total: number; data: GameShelfItem[]; platforms?: string[] }>('/gamePlatform/gameShelfList', params)
     },
 
     reloadVendorGameCache: (data: ReloadVendorGameCacheReq = {}) => {

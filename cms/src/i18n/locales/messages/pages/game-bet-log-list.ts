@@ -11,7 +11,7 @@ export const gameBetLogListMessages = definePageMessages(
     recordId: '记录ID',
     userNickname: '用户昵称',
     nameEn: '英文名称',
-    cover: '封面',
+    cover: '游戏封面',
     betAmount: '消费金额',
     liveRoomId: '直播间ID',
     liveRoomTitle: '直播间标题',

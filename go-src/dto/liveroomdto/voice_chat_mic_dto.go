@@ -13,7 +13,7 @@ type VoiceChatMicUserBrief struct {
 
 // VoiceChatMicSeatItem 单个麦位状态(POST /liveRoom/voiceChatMicState 与 WS cmd41 推送结构一致)
 type VoiceChatMicSeatItem struct {
-	SeatIndex int                    `json:"seatIndex" dc:"麦位序号(0=主播位,1~8=观众位)"`
+	SeatIndex int                    `json:"seatIndex" dc:"麦位序号(0=主播位,1~24=观众位)"`
 	Status    uint8                  `json:"status" dc:"麦位状态(App按status选麦位底图/角标):1=空闲(空麦位,可上麦) 2=锁麦(空麦位,主播已锁,不可申请/上麦) 3=在麦(有人,可说话,展示user头像) 4=在麦禁音(有人,被禁音,展示user头像+禁音标识)"`
 	Occupied  bool                   `json:"occupied" dc:"是否有人(true=展示头像;与status=3或4一致,false=status为1或2)"`
 	User      *VoiceChatMicUserBrief `json:"user" dc:"麦上用户(status=3或4时有值;status=1或2时为null)"`
@@ -31,13 +31,13 @@ type VoiceChatMicApplyNotifyPushItem struct {
 type VoiceChatMicApplyResultPushItem struct {
 	RoomId    string `json:"roomId" dc:"直播间ID"`
 	Approved  bool   `json:"approved" dc:"是否同意(true=同意上麦,false=拒绝)"`
-	SeatIndex int    `json:"seatIndex" dc:"同意时占用的麦位(1~8;拒绝时为0)"`
+	SeatIndex int    `json:"seatIndex" dc:"同意时占用的麦位(1~24;拒绝时为0)"`
 }
 
 // VoiceChatMicKickedPushItem 被房主抱下麦推送给该观众(WS cmd44)
 type VoiceChatMicKickedPushItem struct {
 	RoomId    string `json:"roomId" dc:"直播间ID"`
-	SeatIndex int    `json:"seatIndex" dc:"被抱下前所在麦位(1~8)"`
+	SeatIndex int    `json:"seatIndex" dc:"被抱下前所在麦位(1~24)"`
 }
 
 // VoiceChatMicSeatMutePushItem 麦位禁音/解禁推送给麦上用户
@@ -58,7 +58,7 @@ type VoiceChatMicStatePayload struct {
 	RoomId           string                  `json:"roomId" dc:"直播间ID"`
 	VoiceChatMicMode uint8                   `json:"voiceChatMicMode" dc:"上麦方式(1=自由上麦,2=申请上麦,3=房主单麦)"`
 	UpdatedAt        int64                   `json:"updatedAt" dc:"状态更新时间(毫秒)"`
-	Seats            []*VoiceChatMicSeatItem `json:"seats" dc:"麦位列表(固定9项,seatIndex 0~8;每项看status渲染UI)"`
+	Seats            []*VoiceChatMicSeatItem `json:"seats" dc:"麦位列表(固定25项,seatIndex 0~24;每项看status渲染UI)"`
 }
 
 // GetVoiceChatMicStateReq 查询语聊房麦位状态
@@ -73,12 +73,12 @@ type GetVoiceChatMicStateRes = VoiceChatMicStatePayload
 type ApplyVoiceChatMicReq struct {
 	g.Meta    `path:"/applyVoiceChatMic" method:"post" summary:"申请上麦" tags:"语聊房"`
 	RoomId    uint64 `json:"roomId" v:"required|min:1#直播间ID不能为空|直播间ID无效" dc:"直播间ID"`
-	SeatIndex int    `json:"seatIndex" dc:"自由上麦时可指定麦位(1~8,0或不传则自动分配;申请模式忽略)"`
+	SeatIndex int    `json:"seatIndex" dc:"自由上麦时可指定麦位(1~24,0或不传则自动分配;申请模式忽略)"`
 }
 
 type ApplyVoiceChatMicRes struct {
 	Success   bool `json:"success"`
-	SeatIndex int  `json:"seatIndex,omitempty" dc:"自由上麦成功时占用的麦位序号(1~8);申请模式不下发"`
+	SeatIndex int  `json:"seatIndex,omitempty" dc:"自由上麦成功时占用的麦位序号(1~24);申请模式不下发"`
 }
 
 // CancelVoiceChatMicApplyReq 取消上麦申请
@@ -108,7 +108,7 @@ type ApproveVoiceChatMicApplyReq struct {
 	g.Meta    `path:"/approveVoiceChatMicApply" method:"post" summary:"同意上麦申请" tags:"语聊房"`
 	RoomId    uint64 `json:"roomId" v:"required|min:1#直播间ID不能为空|直播间ID无效" dc:"直播间ID"`
 	UserId    uint64 `json:"userId" v:"required|min:1#用户ID不能为空|用户ID无效" dc:"申请用户ID"`
-	SeatIndex int    `json:"seatIndex" dc:"指定麦位(1~8,0或不传则自动分配空位)"`
+	SeatIndex int    `json:"seatIndex" dc:"指定麦位(1~24,0或不传则自动分配空位)"`
 }
 
 type ApproveVoiceChatMicApplyRes struct {
@@ -152,7 +152,7 @@ type KickVoiceChatMicRes struct {
 type LockVoiceChatMicSeatReq struct {
 	g.Meta    `path:"/lockVoiceChatMicSeat" method:"post" summary:"锁麦" tags:"语聊房"`
 	RoomId    uint64 `json:"roomId" v:"required|min:1#直播间ID不能为空|直播间ID无效" dc:"直播间ID"`
-	SeatIndex int    `json:"seatIndex" v:"required|min:1|max:8#麦位序号不能为空|麦位序号无效" dc:"观众麦位序号(1~8)"`
+	SeatIndex int    `json:"seatIndex" v:"required|min:1|max:24#麦位序号不能为空|麦位序号无效" dc:"观众麦位序号(1~24)"`
 }
 
 type LockVoiceChatMicSeatRes struct {
@@ -163,7 +163,7 @@ type LockVoiceChatMicSeatRes struct {
 type UnlockVoiceChatMicSeatReq struct {
 	g.Meta    `path:"/unlockVoiceChatMicSeat" method:"post" summary:"解锁麦位" tags:"语聊房"`
 	RoomId    uint64 `json:"roomId" v:"required|min:1#直播间ID不能为空|直播间ID无效" dc:"直播间ID"`
-	SeatIndex int    `json:"seatIndex" v:"required|min:1|max:8#麦位序号不能为空|麦位序号无效" dc:"观众麦位序号(1~8)"`
+	SeatIndex int    `json:"seatIndex" v:"required|min:1|max:24#麦位序号不能为空|麦位序号无效" dc:"观众麦位序号(1~24)"`
 }
 
 type UnlockVoiceChatMicSeatRes struct {
@@ -174,7 +174,7 @@ type UnlockVoiceChatMicSeatRes struct {
 type MuteVoiceChatMicSeatReq struct {
 	g.Meta    `path:"/muteVoiceChatMicSeat" method:"post" summary:"麦位禁音" tags:"语聊房"`
 	RoomId    uint64 `json:"roomId" v:"required|min:1#直播间ID不能为空|直播间ID无效" dc:"直播间ID"`
-	SeatIndex int    `json:"seatIndex" v:"required|min:0|max:8#麦位序号不能为空|麦位序号无效" dc:"麦位序号(0~8)"`
+	SeatIndex int    `json:"seatIndex" v:"required|min:0|max:24#麦位序号不能为空|麦位序号无效" dc:"麦位序号(0~24)"`
 }
 
 type MuteVoiceChatMicSeatRes struct {
@@ -185,7 +185,7 @@ type MuteVoiceChatMicSeatRes struct {
 type UnmuteVoiceChatMicSeatReq struct {
 	g.Meta    `path:"/unmuteVoiceChatMicSeat" method:"post" summary:"解除麦位禁音" tags:"语聊房"`
 	RoomId    uint64 `json:"roomId" v:"required|min:1#直播间ID不能为空|直播间ID无效" dc:"直播间ID"`
-	SeatIndex int    `json:"seatIndex" v:"required|min:0|max:8#麦位序号不能为空|麦位序号无效" dc:"麦位序号(0~8)"`
+	SeatIndex int    `json:"seatIndex" v:"required|min:0|max:24#麦位序号不能为空|麦位序号无效" dc:"麦位序号(0~24)"`
 }
 
 type UnmuteVoiceChatMicSeatRes struct {
@@ -197,19 +197,19 @@ type InviteVoiceChatMicReq struct {
 	g.Meta    `path:"/inviteVoiceChatMic" method:"post" summary:"抱上麦" tags:"语聊房"`
 	RoomId    uint64 `json:"roomId" v:"required|min:1#直播间ID不能为空|直播间ID无效" dc:"直播间ID"`
 	UserId    uint64 `json:"userId" v:"required|min:1#用户ID不能为空|用户ID无效" dc:"被抱上麦的观众ID"`
-	SeatIndex int    `json:"seatIndex" dc:"指定麦位(1~8,0或不传则自动分配空位)"`
+	SeatIndex int    `json:"seatIndex" dc:"指定麦位(1~24,0或不传则自动分配空位)"`
 }
 
 type InviteVoiceChatMicRes struct {
 	Success   bool `json:"success"`
-	SeatIndex int  `json:"seatIndex" dc:"分配到的麦位序号(1~8)"`
+	SeatIndex int  `json:"seatIndex" dc:"分配到的麦位序号(1~24)"`
 }
 
 // SwitchVoiceChatMicSeatReq 在麦观众换麦位
 type SwitchVoiceChatMicSeatReq struct {
 	g.Meta    `path:"/switchVoiceChatMicSeat" method:"post" summary:"换麦" tags:"语聊房"`
 	RoomId    uint64 `json:"roomId" v:"required|min:1#直播间ID不能为空|直播间ID无效" dc:"直播间ID"`
-	SeatIndex int    `json:"seatIndex" v:"required|min:1|max:8#目标麦位不能为空|目标麦位无效" dc:"目标观众麦位(1~8)"`
+	SeatIndex int    `json:"seatIndex" v:"required|min:1|max:24#目标麦位不能为空|目标麦位无效" dc:"目标观众麦位(1~24)"`
 }
 
 type SwitchVoiceChatMicSeatRes struct {
@@ -222,7 +222,7 @@ type SwitchVoiceChatMicSeatRes struct {
 type BatchLockVoiceChatMicSeatsReq struct {
 	g.Meta      `path:"/batchLockVoiceChatMicSeats" method:"post" summary:"批量锁麦" tags:"语聊房"`
 	RoomId      uint64 `json:"roomId" v:"required|min:1#直播间ID不能为空|直播间ID无效" dc:"直播间ID"`
-	SeatIndexes []int  `json:"seatIndexes" v:"required#麦位列表不能为空" dc:"观众麦位序号列表(1~8,可多个)"`
+	SeatIndexes []int  `json:"seatIndexes" v:"required#麦位列表不能为空" dc:"观众麦位序号列表(1~24,可多个)"`
 }
 
 type BatchLockVoiceChatMicSeatsRes struct {
@@ -234,7 +234,7 @@ type BatchLockVoiceChatMicSeatsRes struct {
 type BatchUnlockVoiceChatMicSeatsReq struct {
 	g.Meta      `path:"/batchUnlockVoiceChatMicSeats" method:"post" summary:"批量解锁麦位" tags:"语聊房"`
 	RoomId      uint64 `json:"roomId" v:"required|min:1#直播间ID不能为空|直播间ID无效" dc:"直播间ID"`
-	SeatIndexes []int  `json:"seatIndexes" v:"required#麦位列表不能为空" dc:"观众麦位序号列表(1~8,可多个)"`
+	SeatIndexes []int  `json:"seatIndexes" v:"required#麦位列表不能为空" dc:"观众麦位序号列表(1~24,可多个)"`
 }
 
 type BatchUnlockVoiceChatMicSeatsRes struct {

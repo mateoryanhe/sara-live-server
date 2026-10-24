@@ -23,7 +23,7 @@ const (
 type VoiceChatMicSeat struct {
 	ID           string    `gorm:"primaryKey;size:64;comment:复合ID(roomId_seatIndex)" json:"id"`
 	RoomId       uint64    `gorm:"index:idx_voice_chat_mic_room_live,priority:1;default:0;comment:直播间ID" json:"roomId"`
-	SeatIndex    uint8     `gorm:"index:idx_voice_chat_mic_room_live,priority:3;default:0;comment:麦位序号(0主播,1~8观众)" json:"seatIndex"`
+	SeatIndex    uint8     `gorm:"index:idx_voice_chat_mic_room_live,priority:3;default:0;comment:麦位序号(0主播,1~24观众)" json:"seatIndex"`
 	UserId       uint64    `gorm:"default:0;comment:麦上用户ID(0表示空位)" json:"userId"`
 	LiveRecordId uint64    `gorm:"index:idx_voice_chat_mic_room_live,priority:2;default:0;comment:本场直播记录ID" json:"liveRecordId"`
 	Status       uint8     `gorm:"default:1;comment:麦位状态(1空闲,2锁麦,3在麦,4在麦禁音)" json:"status"`

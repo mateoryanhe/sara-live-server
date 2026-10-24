@@ -117,10 +117,10 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: 'CMS域名映射'},
         },
         {
-            path: 'cms-domain-alias',
-            name: 'CMSDomainAliasManagement',
-            component: () => import('@/views/config/cms-domain-alias.vue'),
-            meta: {title: 'CMS备用域名'},
+            path: 'extra-domain-mapping',
+            name: 'ExtraDomainMappingManagement',
+            component: () => import('@/views/config/extra-domain-mapping.vue'),
+            meta: {title: '域名映射'},
         },
         {
             path: 'h5-live-deploy',

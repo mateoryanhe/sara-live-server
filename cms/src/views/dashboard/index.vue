@@ -93,38 +93,42 @@
         </el-tab-pane>
 
         <el-tab-pane :label="t('pages.dashboard.gameStats')" name="gameStats">
-          <div v-loading="gameBetLoading" class="dashboard-tab-pane-body">
-          <div class="tab-toolbar tab-toolbar-trend-range tab-toolbar-online">
-            <el-button :loading="gameBetLoading" @click="() => void refreshGameStatsTab()">{{ t('common.refresh') }}</el-button>
-          </div>
-          <div class="dashboard-realtime-row">
-            <div class="dashboard-realtime-row-head">
-              <span class="basic-stat-section-title">{{ t('pages.dashboard.sectionGameRealtime') }}</span>
-              <span class="basic-stat-section-line"/>
+          <div v-loading="gameBetLoading" class="dashboard-tab-pane-body game-stats-pane">
+            <div class="game-stats-toolbar">
+              <div class="dashboard-realtime-row-head game-stats-toolbar-head">
+                <span class="basic-stat-section-title">{{ t('pages.dashboard.sectionGameRealtime') }}</span>
+                <span class="basic-stat-section-line"/>
+              </div>
+              <el-button :loading="gameBetLoading" @click="() => void refreshGameStatsTab()">
+                {{ t('common.refresh') }}
+              </el-button>
             </div>
-            <div class="dashboard-realtime-grid">
-              <div class="stat-card tone-violet dashboard-realtime-card">
+            <div class="dashboard-realtime-grid dashboard-realtime-grid--fit">
+              <div class="stat-card tone-violet dashboard-realtime-card dashboard-realtime-card--compact">
                 <div class="stat-label">{{ t('pages.dashboard.gameOnlineCount') }}</div>
                 <div class="stat-value">{{ formatCount(gameStatsRealtime.gameOnlineCount) }}</div>
               </div>
-              <div class="stat-card tone-rose dashboard-realtime-card">
+              <div class="stat-card tone-rose dashboard-realtime-card dashboard-realtime-card--compact">
                 <div class="stat-label">{{ t('pages.dashboard.gameBetUserCount') }}</div>
                 <div class="stat-value">{{ formatCount(gameStatsRealtime.gameBetUserCount) }}</div>
               </div>
             </div>
-          </div>
-          <p class="game-bet-event-hint">{{ t('pages.dashboard.onlineTrendRetentionHint') }}</p>
-          <p v-if="gameStatRangeTruncated" class="game-bet-range-truncated-hint">
-            {{ t('pages.dashboard.onlineTrendRangeTruncated', {max: DASHBOARD_ONLINE_TREND_POINT_LIMIT}) }}
-          </p>
-          <GameStatsTrendChart
-              ref="gameBetDailyChartRef"
-              :data="gameStatTrend.points"
-              :bet-series-name="t('pages.dashboard.gameBetUserCount')"
-              :online-series-name="t('pages.dashboard.gameOnlineCount')"
-              :title="gameStatChartTitle"
-              class="online-chart"
-          />
+            <div class="game-stats-chart-panel">
+              <div class="game-stats-chart-head">
+                <div class="game-stats-chart-title">{{ gameStatChartTitle }}</div>
+                <p class="game-stats-chart-hint">{{ t('pages.dashboard.onlineTrendRetentionHint') }}</p>
+                <p v-if="gameStatRangeTruncated" class="game-bet-range-truncated-hint">
+                  {{ t('pages.dashboard.onlineTrendRangeTruncated', {max: DASHBOARD_ONLINE_TREND_POINT_LIMIT}) }}
+                </p>
+              </div>
+              <GameStatsTrendChart
+                  ref="gameBetDailyChartRef"
+                  :data="gameStatTrend.points"
+                  :bet-series-name="t('pages.dashboard.gameBetUserCount')"
+                  :online-series-name="t('pages.dashboard.gameOnlineCount')"
+                  class="game-stats-chart"
+              />
+            </div>
           </div>
         </el-tab-pane>
 
@@ -136,48 +140,12 @@
           <el-tabs v-model="activePeriod" lazy @tab-change="handlePeriodTabChange">
             <el-tab-pane :label="t('pages.dashboard.periodDaily')" name="daily">
               <UserStatChart ref="dailyLineChartRef" :data="userStatTrend.daily" :title="t('pages.dashboard.activeRegisterDaily')"/>
-              <BarMetricSection
-                  :metric-key="activeBarMetric"
-                  :metric-tabs="barMetricTabs"
-                  @update:metric-key="(v) => { activeBarMetric = v; handleBarMetricChange() }"
-              >
-                <UserStatBarChart
-                    ref="dailyBarChartRef"
-                    :data="userStatTrend.daily"
-                    :metric-key="activeBarMetric"
-                    :title="barChartTitle"
-                />
-              </BarMetricSection>
             </el-tab-pane>
             <el-tab-pane :label="t('pages.dashboard.periodWeekly')" name="weekly">
               <UserStatChart ref="weeklyLineChartRef" :data="userStatTrend.weekly" :title="t('pages.dashboard.activeRegisterWeekly')"/>
-              <BarMetricSection
-                  :metric-key="activeBarMetric"
-                  :metric-tabs="barMetricTabs"
-                  @update:metric-key="(v) => { activeBarMetric = v; handleBarMetricChange() }"
-              >
-                <UserStatBarChart
-                    ref="weeklyBarChartRef"
-                    :data="userStatTrend.weekly"
-                    :metric-key="activeBarMetric"
-                    :title="barChartTitle"
-                />
-              </BarMetricSection>
             </el-tab-pane>
             <el-tab-pane :label="t('pages.dashboard.periodMonthly')" name="monthly">
               <UserStatChart ref="monthlyLineChartRef" :data="userStatTrend.monthly" :title="t('pages.dashboard.activeRegisterMonthly')"/>
-              <BarMetricSection
-                  :metric-key="activeBarMetric"
-                  :metric-tabs="barMetricTabs"
-                  @update:metric-key="(v) => { activeBarMetric = v; handleBarMetricChange() }"
-              >
-                <UserStatBarChart
-                    ref="monthlyBarChartRef"
-                    :data="userStatTrend.monthly"
-                    :metric-key="activeBarMetric"
-                    :title="barChartTitle"
-                />
-              </BarMetricSection>
             </el-tab-pane>
           </el-tabs>
           </div>
@@ -216,6 +184,70 @@
           </el-tabs>
           </div>
         </el-tab-pane>
+
+        <el-tab-pane :label="t('pages.dashboard.clientRecharge')" name="clientRecharge">
+          <div v-loading="trendLoading" class="dashboard-tab-pane-body">
+          <div class="tab-toolbar">
+            <el-button :loading="trendLoading" @click="() => void fetchUserStatTrend()">{{ t('common.refresh') }}</el-button>
+          </div>
+          <p class="game-bet-event-hint">{{ t('pages.dashboard.clientRechargeHint') }}</p>
+          <el-tabs v-model="activeClientRechargePeriod" lazy @tab-change="handleClientRechargePeriodTabChange">
+            <el-tab-pane :label="t('pages.dashboard.periodDaily')" name="daily">
+              <ClientRechargeTrendChart
+                  ref="clientRechargeDailyChartRef"
+                  :data="userStatTrend.daily"
+                  :title="clientRechargeChartTitle"
+              />
+            </el-tab-pane>
+            <el-tab-pane :label="t('pages.dashboard.periodWeekly')" name="weekly">
+              <ClientRechargeTrendChart
+                  ref="clientRechargeWeeklyChartRef"
+                  :data="userStatTrend.weekly"
+                  :title="clientRechargeChartTitle"
+              />
+            </el-tab-pane>
+            <el-tab-pane :label="t('pages.dashboard.periodMonthly')" name="monthly">
+              <ClientRechargeTrendChart
+                  ref="clientRechargeMonthlyChartRef"
+                  :data="userStatTrend.monthly"
+                  :title="clientRechargeChartTitle"
+              />
+            </el-tab-pane>
+          </el-tabs>
+          </div>
+        </el-tab-pane>
+
+        <el-tab-pane :label="t('pages.dashboard.clientLogin')" name="clientLogin">
+          <div v-loading="trendLoading" class="dashboard-tab-pane-body">
+          <div class="tab-toolbar">
+            <el-button :loading="trendLoading" @click="() => void fetchUserStatTrend()">{{ t('common.refresh') }}</el-button>
+          </div>
+          <p class="game-bet-event-hint">{{ t('pages.dashboard.clientLoginHint') }}</p>
+          <el-tabs v-model="activeClientLoginPeriod" lazy @tab-change="handleClientLoginPeriodTabChange">
+            <el-tab-pane :label="t('pages.dashboard.periodDaily')" name="daily">
+              <ClientLoginTrendChart
+                  ref="clientLoginDailyChartRef"
+                  :data="userStatTrend.daily"
+                  :title="clientLoginChartTitle"
+              />
+            </el-tab-pane>
+            <el-tab-pane :label="t('pages.dashboard.periodWeekly')" name="weekly">
+              <ClientLoginTrendChart
+                  ref="clientLoginWeeklyChartRef"
+                  :data="userStatTrend.weekly"
+                  :title="clientLoginChartTitle"
+              />
+            </el-tab-pane>
+            <el-tab-pane :label="t('pages.dashboard.periodMonthly')" name="monthly">
+              <ClientLoginTrendChart
+                  ref="clientLoginMonthlyChartRef"
+                  :data="userStatTrend.monthly"
+                  :title="clientLoginChartTitle"
+              />
+            </el-tab-pane>
+          </el-tabs>
+          </div>
+        </el-tab-pane>
       </el-tabs>
     </el-card>
   </div>
@@ -239,8 +271,6 @@ import {ElMessage, ElMessageBox} from 'element-plus'
 import {sysStatApi} from '@/api'
 import {usePagePermission} from '@/composables/usePagePermission'
 import type {GameStatTrend, ResourceMetricTrend, SysStat, UserStatTrend} from '@/types/api'
-import BarMetricSection from './components/bar-metric-section.vue'
-import {getUserStatBarMetricTabs, USER_STAT_BAR_SERIES} from './user-stat-bar-series'
 import {
   buildDashboardResourceMetricTrendQuery,
   DASHBOARD_ONLINE_TREND_POINT_LIMIT,
@@ -249,6 +279,8 @@ import {formatAmount} from '@/utils/number-format'
 
 const UserStatChart = defineAsyncComponent(() => import('./components/user-stat-chart.vue'))
 const UserStatBarChart = defineAsyncComponent(() => import('./components/user-stat-bar-chart.vue'))
+const ClientRechargeTrendChart = defineAsyncComponent(() => import('./components/client-recharge-trend-chart.vue'))
+const ClientLoginTrendChart = defineAsyncComponent(() => import('./components/client-login-trend-chart.vue'))
 const ResourceMetricChart = defineAsyncComponent(() => import('@/views/config/components/resource-metric-chart.vue'))
 const GameStatsTrendChart = defineAsyncComponent(() => import('./components/game-stats-trend-chart.vue'))
 
@@ -272,12 +304,12 @@ const gameBetLoading = ref(false)
 const activeMainTab = ref('basic')
 const activePeriod = ref('daily')
 const activeRechargePeriod = ref('daily')
+const activeClientRechargePeriod = ref('daily')
+const activeClientLoginPeriod = ref('daily')
 const onlineRangeTruncated = ref(false)
 const onlineTrendMaxPoints = ref(0)
 const gameStatRangeTruncated = ref(false)
 const gameStatTrendMaxPoints = ref(0)
-const enabledBarSeries = getUserStatBarMetricTabs()
-const activeBarMetric = ref(enabledBarSeries[0]?.key ?? 'goldConsumeUser')
 const autoRefreshMs = ref(readStoredAutoRefreshMs())
 const dashboardRouteActive = ref(false)
 let autoRefreshTimer: ReturnType<typeof setInterval> | null = null
@@ -302,32 +334,6 @@ const autoRefreshOptions = computed(() =>
     })),
 )
 
-const barMetricTabs = computed(() =>
-    enabledBarSeries.map((item) => ({
-      key: item.key,
-      label: t(`pages.dashboard.${item.labelKey}`),
-    })),
-)
-
-const barChartPeriodSuffix = computed(() => {
-  if (activePeriod.value === 'weekly') {
-    return t('pages.dashboard.last12Weeks')
-  }
-  if (activePeriod.value === 'monthly') {
-    return t('pages.dashboard.last12Months')
-  }
-  return t('pages.dashboard.last30Days')
-})
-
-const barChartTitle = computed(() => {
-  const metric = USER_STAT_BAR_SERIES.find((item) => item.key === activeBarMetric.value)
-  const label = metric ? t(`pages.dashboard.${metric.labelKey}`) : ''
-  return t('pages.dashboard.chartTitleWithPeriod', {
-    label,
-    period: barChartPeriodSuffix.value,
-  })
-})
-
 const rechargeBarChartPeriodSuffix = computed(() => {
   if (activeRechargePeriod.value === 'weekly') {
     return t('pages.dashboard.last12Weeks')
@@ -345,6 +351,40 @@ const rechargeBarChartTitle = computed(() =>
     }),
 )
 
+const clientRechargeChartPeriodSuffix = computed(() => {
+  if (activeClientRechargePeriod.value === 'weekly') {
+    return t('pages.dashboard.last12Weeks')
+  }
+  if (activeClientRechargePeriod.value === 'monthly') {
+    return t('pages.dashboard.last12Months')
+  }
+  return t('pages.dashboard.last30Days')
+})
+
+const clientRechargeChartTitle = computed(() =>
+    t('pages.dashboard.chartTitleWithPeriod', {
+      label: t('pages.dashboard.clientRecharge'),
+      period: clientRechargeChartPeriodSuffix.value,
+    }),
+)
+
+const clientLoginChartPeriodSuffix = computed(() => {
+  if (activeClientLoginPeriod.value === 'weekly') {
+    return t('pages.dashboard.last12Weeks')
+  }
+  if (activeClientLoginPeriod.value === 'monthly') {
+    return t('pages.dashboard.last12Months')
+  }
+  return t('pages.dashboard.last30Days')
+})
+
+const clientLoginChartTitle = computed(() =>
+    t('pages.dashboard.chartTitleWithPeriod', {
+      label: t('pages.dashboard.clientLogin'),
+      period: clientLoginChartPeriodSuffix.value,
+    }),
+)
+
 const onlineChartTitle = computed(() => t('pages.dashboard.onlineLiveChartTitleLast3Days'))
 
 const gameStatChartTitle = computed(() => t('pages.dashboard.gameStatChartTitleLast3Days'))
@@ -352,12 +392,15 @@ const gameStatChartTitle = computed(() => t('pages.dashboard.gameStatChartTitleL
 const dailyLineChartRef = ref<InstanceType<typeof UserStatChart>>()
 const weeklyLineChartRef = ref<InstanceType<typeof UserStatChart>>()
 const monthlyLineChartRef = ref<InstanceType<typeof UserStatChart>>()
-const dailyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
-const weeklyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
-const monthlyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
 const rechargeDailyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
 const rechargeWeeklyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
 const rechargeMonthlyBarChartRef = ref<InstanceType<typeof UserStatBarChart>>()
+const clientRechargeDailyChartRef = ref<InstanceType<typeof ClientRechargeTrendChart>>()
+const clientRechargeWeeklyChartRef = ref<InstanceType<typeof ClientRechargeTrendChart>>()
+const clientRechargeMonthlyChartRef = ref<InstanceType<typeof ClientRechargeTrendChart>>()
+const clientLoginDailyChartRef = ref<InstanceType<typeof ClientLoginTrendChart>>()
+const clientLoginWeeklyChartRef = ref<InstanceType<typeof ClientLoginTrendChart>>()
+const clientLoginMonthlyChartRef = ref<InstanceType<typeof ClientLoginTrendChart>>()
 const onlineChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
 const gameBetDailyChartRef = ref<InstanceType<typeof GameStatsTrendChart>>()
 
@@ -601,7 +644,7 @@ const refreshActiveMainTab = async (silent = false, force = false) => {
       }
       return
     }
-    if (tab === 'user' || tab === 'rechargeUser') {
+    if (tab === 'user' || tab === 'rechargeUser' || tab === 'clientRecharge' || tab === 'clientLogin') {
       if (force || !tabDataLoaded.userTrend) {
         const ok = await fetchUserStatTrend(silent)
         if (ok) {
@@ -822,6 +865,8 @@ const fetchUserStatTrend = async (silent = false): Promise<boolean> => {
     setTimeout(() => {
       resizeUserCharts()
       resizeRechargeCharts()
+      resizeClientRechargeCharts()
+      resizeClientLoginCharts()
     }, 0)
     return true
   } catch (error) {
@@ -838,16 +883,13 @@ const fetchUserStatTrend = async (silent = false): Promise<boolean> => {
 const resizeUserCharts = () => {
   if (activePeriod.value === 'daily') {
     dailyLineChartRef.value?.resize()
-    dailyBarChartRef.value?.resize()
     return
   }
   if (activePeriod.value === 'weekly') {
     weeklyLineChartRef.value?.resize()
-    weeklyBarChartRef.value?.resize()
     return
   }
   monthlyLineChartRef.value?.resize()
-  monthlyBarChartRef.value?.resize()
 }
 
 const resizeRechargeCharts = () => {
@@ -860,6 +902,30 @@ const resizeRechargeCharts = () => {
     return
   }
   rechargeMonthlyBarChartRef.value?.resize()
+}
+
+const resizeClientRechargeCharts = () => {
+  if (activeClientRechargePeriod.value === 'daily') {
+    clientRechargeDailyChartRef.value?.resize()
+    return
+  }
+  if (activeClientRechargePeriod.value === 'weekly') {
+    clientRechargeWeeklyChartRef.value?.resize()
+    return
+  }
+  clientRechargeMonthlyChartRef.value?.resize()
+}
+
+const resizeClientLoginCharts = () => {
+  if (activeClientLoginPeriod.value === 'daily') {
+    clientLoginDailyChartRef.value?.resize()
+    return
+  }
+  if (activeClientLoginPeriod.value === 'weekly') {
+    clientLoginWeeklyChartRef.value?.resize()
+    return
+  }
+  clientLoginMonthlyChartRef.value?.resize()
 }
 
 const resizeGameBetCharts = () => {
@@ -875,6 +941,14 @@ const handleMainTabChange = async () => {
   }
   if (activeMainTab.value === 'rechargeUser') {
     resizeRechargeCharts()
+    return
+  }
+  if (activeMainTab.value === 'clientRecharge') {
+    resizeClientRechargeCharts()
+    return
+  }
+  if (activeMainTab.value === 'clientLogin') {
+    resizeClientLoginCharts()
     return
   }
   if (activeMainTab.value === 'gameStats') {
@@ -896,9 +970,14 @@ const handleRechargePeriodTabChange = async () => {
   resizeRechargeCharts()
 }
 
-const handleBarMetricChange = async () => {
+const handleClientRechargePeriodTabChange = async () => {
   await nextTick()
-  resizeUserCharts()
+  resizeClientRechargeCharts()
+}
+
+const handleClientLoginPeriodTabChange = async () => {
+  await nextTick()
+  resizeClientLoginCharts()
 }
 
 const formatCount = (value: string | number | null | undefined) => {
@@ -1087,6 +1166,12 @@ onUnmounted(() => {
   width: 100%;
 }
 
+.dashboard-realtime-grid--fit {
+  grid-template-columns: repeat(2, minmax(160px, 240px));
+  justify-content: start;
+  margin-bottom: 16px;
+}
+
 .dashboard-realtime-card {
   min-height: 112px;
   display: flex;
@@ -1094,12 +1179,76 @@ onUnmounted(() => {
   justify-content: center;
 }
 
+.dashboard-realtime-card--compact {
+  min-height: 88px;
+  padding: 14px 16px 14px 18px;
+}
+
 .dashboard-realtime-card .stat-label {
   margin-bottom: 10px;
 }
 
+.dashboard-realtime-card--compact .stat-label {
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
 .dashboard-realtime-card .stat-value {
   font-size: 32px;
+}
+
+.dashboard-realtime-card--compact .stat-value {
+  font-size: 28px;
+  line-height: 1.15;
+}
+
+.game-stats-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.game-stats-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.game-stats-toolbar-head {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.game-stats-chart-panel {
+  border: 1px solid #e8eef5;
+  border-radius: 14px;
+  background: #fff;
+  padding: 14px 16px 8px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.game-stats-chart-head {
+  margin-bottom: 4px;
+}
+
+.game-stats-chart-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 4px;
+}
+
+.game-stats-chart-hint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #94a3b8;
+}
+
+.game-stats-chart {
+  margin-top: 4px;
 }
 
 .game-bet-summary-grid {

@@ -8,7 +8,20 @@
         <el-input v-model="searchForm.orderId" clearable :placeholder="t(`${ns}.orderIdPlaceholder`)"/>
       </el-form-item>
       <el-form-item :label="t(`${ns}.platform`)">
-        <el-input v-model="searchForm.platformType" clearable :placeholder="t(`${ns}.platformPlaceholder`)"/>
+        <el-select
+            v-model="searchForm.platformType"
+            clearable
+            filterable
+            :placeholder="t('common.all')"
+            style="width: 140px"
+        >
+          <el-option
+              v-for="item in platformOptions"
+              :key="item"
+              :label="item"
+              :value="item"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
@@ -20,11 +33,7 @@
     <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width: 100%">
       <el-table-column fixed label="#" type="index" width="55" :index="formatRowIndex"/>
       <el-table-column :label="t(`${ns}.recordId`)" min-width="180" prop="id"/>
-      <el-table-column :label="t(`${ns}.gameCode`)" min-width="120" prop="gameCode"/>
-      <el-table-column :label="t(`${ns}.nameEn`)" min-width="140" prop="nameEn" show-overflow-tooltip>
-        <template #default="{ row }">{{ row.nameEn || '-' }}</template>
-      </el-table-column>
-      <el-table-column :label="t(`${ns}.cover`)" min-width="100">
+      <el-table-column :label="t(`${ns}.cover`)" width="88" align="center">
         <template #default="{ row }">
           <el-image
               v-if="row.cover"
@@ -36,6 +45,18 @@
           />
           <span v-else>-</span>
         </template>
+      </el-table-column>
+      <el-table-column :label="t(`${ns}.gameCode`)" min-width="120" prop="gameCode"/>
+      <el-table-column :label="t(`${ns}.nameEn`)" min-width="140" prop="nameEn" show-overflow-tooltip>
+        <template #default="{ row }">{{ row.nameEn || '-' }}</template>
+      </el-table-column>
+      <el-table-column
+          v-if="logType === 'win'"
+          :label="t('pages.gameWinLogList.betAmount')"
+          prop="betAmount"
+          width="120"
+      >
+        <template #default="{ row }">{{ formatAmount((row as GameWinLogItem).betAmount || 0) }}</template>
       </el-table-column>
       <el-table-column :label="amountColumnLabel" prop="amount" width="120">
         <template #default="{ row }">{{ formatAmount(row.amount) }}</template>
@@ -116,6 +137,7 @@ const exportFilePrefix = computed(() =>
 const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
 const tableData = ref<Array<GameBetLogItem | GameWinLogItem>>([])
+const platformOptions = ref<string[]>([])
 const loaded = ref(false)
 
 const searchForm = reactive({
@@ -156,6 +178,9 @@ const fetchList = async () => {
         : await gameWinLogApi.getGameWinLogList(buildQueryParams())
     tableData.value = response.data || []
     pagination.total = response.total || 0
+    if (response.platforms?.length) {
+      platformOptions.value = response.platforms
+    }
     loaded.value = true
   } catch (error) {
     console.error('Failed to load user game logs:', error)

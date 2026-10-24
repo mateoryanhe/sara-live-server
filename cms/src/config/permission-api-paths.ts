@@ -694,10 +694,11 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     CMSDomainMappingManagement: '/domainSite/getCMSDomainSiteMapping',
     'CMSDomainMappingManagement:view': '/domainSite/getCMSDomainSiteMapping',
     'CMSDomainMappingManagement:save': '/domainSite/saveCMSDomainSiteMapping',
-    CMSDomainAliasManagement: '/domainSite/listCMSDomainAlias',
-    'CMSDomainAliasManagement:view': '/domainSite/listCMSDomainAlias',
-    'CMSDomainAliasManagement:save': '/domainSite/addCMSDomainAlias',
-    'CMSDomainAliasManagement:delete': '/domainSite/deleteCMSDomainAlias',
+
+    ExtraDomainMappingManagement: '/domainSite/listExtraDomainMappings',
+    'ExtraDomainMappingManagement:view': '/domainSite/listExtraDomainMappings',
+    'ExtraDomainMappingManagement:save': '/domainSite/saveExtraDomainMappingUpload',
+    'ExtraDomainMappingManagement:delete': '/domainSite/deleteExtraDomainMapping',
 
     DataSyncCfgManagement: '/dataSync/getDataSyncCfg',
     'DataSyncCfgManagement:view': '/dataSync/getDataSyncCfg',

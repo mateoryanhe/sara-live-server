@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dao/gamequery"
@@ -16,7 +15,7 @@ import (
 )
 
 // GetGameShelfList CMS 分页查询上架游戏(读内存).
-func GetGameShelfList(_ context.Context, req *gameplatformdto.GameShelfListReq) (*httpserver.CMSQueryResp, error) {
+func GetGameShelfList(_ context.Context, req *gameplatformdto.GameShelfListReq) (*gameplatformdto.GameShelfListRes, error) {
 	all := filterGameShelfList(cfgdao.GetAllGameCfgFromMemory(), req)
 	total := len(all)
 	pageIndex, pageSize := normalizeCMSGameShelfPage(req.PageIndex, req.PageSize)
@@ -29,7 +28,11 @@ func GetGameShelfList(_ context.Context, req *gameplatformdto.GameShelfListReq) 
 		}
 		list = append(list, toGameShelfListItem(row))
 	}
-	return httpserver.NewCMSQueryResp(total, list), nil
+	return &gameplatformdto.GameShelfListRes{
+		Total:     total,
+		Data:      list,
+		Platforms: cfgdao.ListDistinctVendorGamePlatforms(),
+	}, nil
 }
 
 // AddGameShelf CMS 上架游戏: 写 game_cfgs 并刷新永久缓存.
@@ -182,7 +185,7 @@ func UpdateGameShelf(_ context.Context, req *gameplatformdto.UpdateGameShelfReq)
 	if liveGameCover != "" && !strings.HasPrefix(liveGameCover, "http://") && !strings.HasPrefix(liveGameCover, "https://") {
 		liveGameCover = strings.Trim(strings.ReplaceAll(liveGameCover, "\\", "/"), "/")
 	}
-	ok, err := cfgdao.UpdateGameCfgLiveDisplay(gameCode, liveGameName, liveGameCover)
+	ok, err := cfgdao.UpdateGameCfgLiveDisplay(gameCode, liveGameName, liveGameCover, req.Sort)
 	if err != nil {
 		return nil, err
 	}
@@ -287,7 +290,7 @@ func filterGameShelfList(all []*entity.GameCfg, req *gameplatformdto.GameShelfLi
 		if !gamequery.MatchGameCode(row.GameCode, gameCode, gameCodes) {
 			continue
 		}
-		if platform != "" && !strings.Contains(strings.ToLower(row.Platform), strings.ToLower(platform)) {
+		if platform != "" && !strings.EqualFold(strings.TrimSpace(row.Platform), platform) {
 			continue
 		}
 		if name != "" {
@@ -320,6 +323,7 @@ func toGameShelfListItem(row *entity.GameCfg) *gameplatformdto.GameShelfListItem
 		LiveGameCover:    row.LiveGameCover,
 		LiveGameCoverUrl: BuildGameCoverUrl(row.LiveGameCover),
 		Platform:         row.Platform,
+		Sort:             row.Sort,
 	}
 	if vendorGame, ok := GetVendorGameFromLibrary(row.GameCode, row.Platform); ok && vendorGame != nil {
 		item.Name = strings.TrimSpace(vendorGame.Name)

@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -13,13 +11,11 @@ import (
 )
 
 var (
-	dailyCall1v1ConnectSuccessStatCacheMgr     *cache.RowCache[*entity.DailyCall1v1ConnectSuccessStat]
-	dailyCall1v1ConnectSuccessStatListCacheMgr *cache.ListCache[*entity.DailyCall1v1ConnectSuccessStat]
+	dailyCall1v1ConnectSuccessStatCacheMgr *cache.RowCache[*entity.DailyCall1v1ConnectSuccessStat]
 )
 
 func initDailyCall1v1ConnectSuccessStatDao() {
 	dailyCall1v1ConnectSuccessStatCacheMgr = cache.NewRowCache[*entity.DailyCall1v1ConnectSuccessStat]()
-	dailyCall1v1ConnectSuccessStatListCacheMgr = cache.NewPermanentListCache[*entity.DailyCall1v1ConnectSuccessStat]()
 }
 
 func GetDailyCall1v1ConnectSuccessStatByDate(date string) *entity.DailyCall1v1ConnectSuccessStat {
@@ -39,10 +35,8 @@ func ListRecentDailyCall1v1ConnectSuccessStats(limit int) []*entity.DailyCall1v1
 	if limit <= 0 {
 		limit = 30
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatDailyLoginStatDate(time.Now()))
-	return dailyCall1v1ConnectSuccessStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.DailyCall1v1ConnectSuccessStat, error) {
-		return loadRecentDailyCall1v1ConnectSuccessStatsFromDB(limit), nil
-	})
+	// CMS 按日图必须含「今天」:永久列表缓存在当天首条入库前命中后不会再刷新，会缺当天点。
+	return loadRecentDailyCall1v1ConnectSuccessStatsFromDB(limit)
 }
 
 func loadRecentDailyCall1v1ConnectSuccessStatsFromDB(limit int) []*entity.DailyCall1v1ConnectSuccessStat {

@@ -2,9 +2,9 @@ import {definePageMessagesFromEn} from './_define'
 
 const zh = {
   tabLiveRoom: '秀场直播间发起',
-  tabOneToOneRoom: '1v1房间视频通话',
+  tabOneToOneRoom: '1v1列表呼叫',
   tabConnectSuccess: '双方成功接通',
-  tabOneToOneRoomList: '1v1房间列表',
+  tabOneToOneRoomList: '点击1v1房间按钮',
   desc:
       '统计直播间内发起的 1v1 视频通话次数：call_order.source=1（直播间来源，不区分 category），观众调用 liveRoomCall 成功创建通话单并推送呼叫后 +1（对齐埋点 call_1v1_initiate）。',
   oneToOneRoomDesc:
@@ -37,9 +37,9 @@ const zh = {
 
 export const trackingCall1v1InitiateMessages = definePageMessagesFromEn(zh, {
   tabLiveRoom: 'Showcase live room',
-  tabOneToOneRoom: '1v1 room video calls',
+  tabOneToOneRoom: '1v1 list calls',
   tabConnectSuccess: 'Both parties connected',
-  tabOneToOneRoomList: '1v1 room list',
+  tabOneToOneRoomList: 'Click 1v1 room button',
   desc:
       '1v1 video call initiations from live rooms: call_order.source=1 (any category); +1 when liveRoomCall succeeds (event call_1v1_initiate).',
   oneToOneRoomDesc:

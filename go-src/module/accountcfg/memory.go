@@ -20,6 +20,7 @@ type cfgSnapshot struct {
 	DeviceAccountMaxCount      int
 	DeviceCancelDailyLimit     int
 	UserWithdrawEnabled        bool
+	UserWithdrawAndroidVisible bool
 	UserWithdrawMinUsd         float64
 	UserWithdrawDailyMaxCount  int
 }
@@ -83,6 +84,7 @@ func toCfgSnapshot(row *entity.AccountCfg) *cfgSnapshot {
 		DeviceAccountMaxCount:      maxCount,
 		DeviceCancelDailyLimit:     dailyLimit,
 		UserWithdrawEnabled:        row.UserWithdrawEnabled,
+		UserWithdrawAndroidVisible: row.UserWithdrawAndroidVisible,
 		UserWithdrawMinUsd:         minUsd,
 		UserWithdrawDailyMaxCount:  dailyMax,
 	}
@@ -118,9 +120,14 @@ func GetDeviceCancelDailyLimit() int {
 	return getCfgCache().DeviceCancelDailyLimit
 }
 
-// IsUserWithdrawEnabled 用户提现是否开启
+// IsUserWithdrawEnabled 用户提现是否开启(服务端业务校验用)
 func IsUserWithdrawEnabled() bool {
 	return getCfgCache().UserWithdrawEnabled
+}
+
+// IsUserWithdrawAndroidVisible 安卓端是否展示提现入口(仅客户端展示,服务端业务不校验)
+func IsUserWithdrawAndroidVisible() bool {
+	return getCfgCache().UserWithdrawAndroidVisible
 }
 
 // GetUserWithdrawMinUsd 用户最低提现金额(USD)

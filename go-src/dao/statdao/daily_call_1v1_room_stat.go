@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -13,13 +11,11 @@ import (
 )
 
 var (
-	dailyCall1v1RoomStatCacheMgr     *cache.RowCache[*entity.DailyCall1v1RoomStat]
-	dailyCall1v1RoomStatListCacheMgr *cache.ListCache[*entity.DailyCall1v1RoomStat]
+	dailyCall1v1RoomStatCacheMgr *cache.RowCache[*entity.DailyCall1v1RoomStat]
 )
 
 func initDailyCall1v1RoomStatDao() {
 	dailyCall1v1RoomStatCacheMgr = cache.NewRowCache[*entity.DailyCall1v1RoomStat]()
-	dailyCall1v1RoomStatListCacheMgr = cache.NewPermanentListCache[*entity.DailyCall1v1RoomStat]()
 }
 
 func GetDailyCall1v1RoomStatByDate(date string) *entity.DailyCall1v1RoomStat {
@@ -39,10 +35,8 @@ func ListRecentDailyCall1v1RoomStats(limit int) []*entity.DailyCall1v1RoomStat {
 	if limit <= 0 {
 		limit = 30
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatDailyLoginStatDate(time.Now()))
-	return dailyCall1v1RoomStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.DailyCall1v1RoomStat, error) {
-		return loadRecentDailyCall1v1RoomStatsFromDB(limit), nil
-	})
+	// CMS 按日图必须含「今天」:永久列表缓存在当天首条入库前命中后不会再刷新，会缺当天点。
+	return loadRecentDailyCall1v1RoomStatsFromDB(limit)
 }
 
 func loadRecentDailyCall1v1RoomStatsFromDB(limit int) []*entity.DailyCall1v1RoomStat {

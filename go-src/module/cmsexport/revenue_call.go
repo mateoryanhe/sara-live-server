@@ -68,6 +68,8 @@ func exportVideoCallLogCSV(ctx context.Context, cmsUserId uint64, payload json.R
 			ReceiverIds:   receiverIds,
 			GuildIds:      guildIds,
 			FilterByGuild: restrict,
+			Keyword:       req.Keyword,
+			CostFilter:    req.CostFilter,
 			Source:        req.Source,
 			Status:        req.Status,
 			CallType:      callentity.CallOrderTypeVideo,

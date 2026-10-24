@@ -4,10 +4,12 @@ import (
 	"time"
 
 	"xr-game-server/core/event"
+	"xr-game-server/dao/accountdao"
 	"xr-game-server/dao/statdao"
 	rechargeentity "xr-game-server/entity/recharge"
 	statentity "xr-game-server/entity/stat"
 	"xr-game-server/gameevent"
+	"xr-game-server/module/auth"
 )
 
 func initRechargeEvent() {
@@ -64,6 +66,7 @@ func consumeRechargeJob(job *statJob) {
 		statAt = time.Now()
 	}
 	recordPeriodRecharge(statAt, amount, isCoinMerchant)
+	recordPeriodClientRecharge(statAt, order.UserId, amount)
 	recordDailyPromotionChannelRechargeSuccess(statAt, order.UserId, amount)
 
 	if !shouldCountUserStat(order.UserId) {
@@ -105,6 +108,33 @@ func recordPeriodRecharge(statAt time.Time, amount float64, isCoinMerchant bool)
 		monthly.AddCoinMerchantRechargeAmount(amount)
 	} else {
 		monthly.AddNormalUserRechargeAmount(amount)
+	}
+}
+
+// recordPeriodClientRecharge 按账号 channel 累计 App/H5 设备码用户充值(USD)
+func recordPeriodClientRecharge(statAt time.Time, userId uint64, amount float64) {
+	if userId == 0 || amount <= 0 {
+		return
+	}
+	acc := accountdao.GetAccountById(userId)
+	if acc == nil {
+		return
+	}
+	switch acc.Channel {
+	case auth.DeviceChannel:
+		daily := statdao.GetDailyLoginStatByDate(statentity.FormatDailyLoginStatDate(statAt))
+		daily.AddAppDeviceRechargeAmount(amount)
+		weekly := statdao.GetWeeklyLoginStatByWeek(statentity.FormatWeeklyLoginStatKey(statAt))
+		weekly.AddAppDeviceRechargeAmount(amount)
+		monthly := statdao.GetMonthlyLoginStatByMonth(statentity.FormatMonthlyLoginStatKey(statAt))
+		monthly.AddAppDeviceRechargeAmount(amount)
+	case auth.H5DeviceChannel:
+		daily := statdao.GetDailyLoginStatByDate(statentity.FormatDailyLoginStatDate(statAt))
+		daily.AddH5DeviceRechargeAmount(amount)
+		weekly := statdao.GetWeeklyLoginStatByWeek(statentity.FormatWeeklyLoginStatKey(statAt))
+		weekly.AddH5DeviceRechargeAmount(amount)
+		monthly := statdao.GetMonthlyLoginStatByMonth(statentity.FormatMonthlyLoginStatKey(statAt))
+		monthly.AddH5DeviceRechargeAmount(amount)
 	}
 }
 

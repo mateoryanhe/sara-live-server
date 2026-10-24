@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	dailyMiniGameRoundResultStatCacheMgr     *cache.RowCache[*entity.DailyMiniGameRoundResultStat]
-	dailyMiniGameRoundResultStatListCacheMgr *cache.ListCache[*entity.DailyMiniGameRoundResultStat]
 )
 
 func initDailyMiniGameRoundResultStatDao() {
 	dailyMiniGameRoundResultStatCacheMgr = cache.NewRowCache[*entity.DailyMiniGameRoundResultStat]()
-	dailyMiniGameRoundResultStatListCacheMgr = cache.NewPermanentListCache[*entity.DailyMiniGameRoundResultStat]()
 }
 
 func GetDailyMiniGameRoundResultStatByDate(date string) *entity.DailyMiniGameRoundResultStat {
@@ -39,10 +35,8 @@ func ListRecentDailyMiniGameRoundResultStats(limit int) []*entity.DailyMiniGameR
 	if limit <= 0 {
 		limit = 30
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatDailyLoginStatDate(time.Now()))
-	return dailyMiniGameRoundResultStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.DailyMiniGameRoundResultStat, error) {
-		return loadRecentDailyMiniGameRoundResultStatsFromDB(limit), nil
-	})
+	// CMS 按日图必须含「今天」:永久列表缓存在当天首条入库前命中后不会再刷新，会缺当天点。
+	return loadRecentDailyMiniGameRoundResultStatsFromDB(limit)
 }
 
 func loadRecentDailyMiniGameRoundResultStatsFromDB(limit int) []*entity.DailyMiniGameRoundResultStat {

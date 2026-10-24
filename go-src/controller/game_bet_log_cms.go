@@ -17,6 +17,6 @@ func initGameBetLogCMSController() {
 }
 
 // CMSGameBetLogList CMS 分页查询游戏下注记录
-func (c *GameBetLogCMSController) CMSGameBetLogList(ctx context.Context, req *gamebetdto.CMSGameBetLogListReq) (*httpserver.CMSQueryResp, error) {
+func (c *GameBetLogCMSController) CMSGameBetLogList(ctx context.Context, req *gamebetdto.CMSGameBetLogListReq) (*gamebetdto.CMSGameBetLogListRes, error) {
 	return game.GetBetCMSList(ctx, req)
 }

@@ -3,7 +3,8 @@ import {definePageMessagesFromEn} from './_define'
 export const gameShelfListMessages = definePageMessagesFromEn(
   {
     noteTitle: '说明',
-    tipLine1: '展示已上架游戏（读 game_cfgs 永久缓存），App 端仅展示此列表中的游戏。可在「游戏库」中搜索厂商游戏并上架。',
+    tipLine1: '展示已上架游戏（读 game_cfgs 永久缓存），App 端仅展示此列表中的游戏；列表按排序值从大到小展示。可在「游戏库」中搜索厂商游戏并上架。',
+    sortTip: '数值越大越靠前',
     fetchFailed: '获取上架游戏列表失败',
     editTitle: '编辑直播展示',
     liveGameName: '直播游戏名称',
@@ -36,7 +37,8 @@ export const gameShelfListMessages = definePageMessagesFromEn(
   },
   {
     noteTitle: 'Note',
-    tipLine1: 'Shows published games (from game_cfgs permanent cache). The App displays only these games. Search vendor games and publish them in Game Library.',
+    tipLine1: 'Shows published games (from game_cfgs permanent cache). The App displays only these games, ordered by sort descending. Search vendor games and publish them in Game Library.',
+    sortTip: 'Larger value appears first',
     fetchFailed: 'Failed to load published game list',
     editTitle: 'Edit live display',
     liveGameName: 'Live game name',

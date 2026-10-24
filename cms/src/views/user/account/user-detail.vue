@@ -51,7 +51,28 @@
                   </el-descriptions-item>
                   <el-descriptions-item :label="t('pages.userList.inviterId')">{{ detail.profile?.inviterId || '-' }}</el-descriptions-item>
                   <el-descriptions-item :label="t('pages.userList.vipLevel')">{{ detail.profile?.vipLevel ?? '-' }}</el-descriptions-item>
-                  <el-descriptions-item :label="t('pages.userList.guildId')">{{ detail.profile?.guildId || '-' }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.guildId')">
+                    <el-button
+                        v-if="hasGuild"
+                        link
+                        type="primary"
+                        @click="openGuildDetail"
+                    >
+                      {{ detail.profile?.guildId }}
+                    </el-button>
+                    <span v-else>-</span>
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.guildName')">
+                    <el-button
+                        v-if="hasGuild"
+                        link
+                        type="primary"
+                        @click="openGuildDetail"
+                    >
+                      {{ detail.profile?.guildName || '-' }}
+                    </el-button>
+                    <span v-else>-</span>
+                  </el-descriptions-item>
                   <el-descriptions-item v-if="showBotAnchorStatus" :label="t('pages.userList.botAnchorStatus')">
                     {{ botAnchorStatusLabel(detail.profile?.botAnchorStatus) }}
                   </el-descriptions-item>
@@ -368,6 +389,25 @@ const USER_TYPE_BOT_ANCHOR = 2
 const userId = computed(() => String(route.query.id || '').trim())
 
 const showBotAnchorStatus = computed(() => detail.value?.profile?.userType === USER_TYPE_BOT_ANCHOR)
+
+const hasGuild = computed(() => {
+  const guildId = detail.value?.profile?.guildId
+  if (guildId == null || guildId === '') {
+    return false
+  }
+  return Number(guildId) !== 0
+})
+
+const openGuildDetail = () => {
+  const guildId = detail.value?.profile?.guildId
+  if (!guildId || Number(guildId) === 0) {
+    return
+  }
+  router.push({
+    name: 'GuildDetail',
+    query: {id: String(guildId)},
+  })
+}
 
 const cumulativeStat = computed<UserCumulativeStatDetailItem>(() => detail.value?.cumulativeStat ?? {})
 

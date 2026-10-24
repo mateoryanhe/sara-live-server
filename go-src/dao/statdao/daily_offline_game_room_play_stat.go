@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	dailyOfflineGameRoomPlayStatCacheMgr     *cache.RowCache[*entity.DailyOfflineGameRoomPlayStat]
-	dailyOfflineGameRoomPlayStatListCacheMgr *cache.ListCache[*entity.DailyOfflineGameRoomPlayStat]
 )
 
 func initDailyOfflineGameRoomPlayStatDao() {
 	dailyOfflineGameRoomPlayStatCacheMgr = cache.NewRowCache[*entity.DailyOfflineGameRoomPlayStat]()
-	dailyOfflineGameRoomPlayStatListCacheMgr = cache.NewPermanentListCache[*entity.DailyOfflineGameRoomPlayStat]()
 }
 
 func GetDailyOfflineGameRoomPlayStatByDate(date string) *entity.DailyOfflineGameRoomPlayStat {
@@ -39,10 +35,8 @@ func ListRecentDailyOfflineGameRoomPlayStats(limit int) []*entity.DailyOfflineGa
 	if limit <= 0 {
 		limit = 30
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatDailyLoginStatDate(time.Now()))
-	return dailyOfflineGameRoomPlayStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.DailyOfflineGameRoomPlayStat, error) {
-		return loadRecentDailyOfflineGameRoomPlayStatsFromDB(limit), nil
-	})
+	// CMS 按日图必须含「今天」:永久列表缓存在当天首条入库前命中后不会再刷新，会缺当天点。
+	return loadRecentDailyOfflineGameRoomPlayStatsFromDB(limit)
 }
 
 func loadRecentDailyOfflineGameRoomPlayStatsFromDB(limit int) []*entity.DailyOfflineGameRoomPlayStat {

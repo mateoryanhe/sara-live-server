@@ -123,7 +123,7 @@ export function resolveSidebarSubmenusToOpen(path: string): string[] {
             || path === '/config/cf-email'
             || path === '/config/upload-resource'
             || path === '/config/cms-domain-mapping'
-            || path === '/config/cms-domain-alias'
+            || path === '/config/extra-domain-mapping'
             || path === '/config/country-flag-deploy'
             || path === '/config/db-backup'
             || path === '/config/data-sync'

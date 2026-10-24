@@ -3,7 +3,6 @@ package game
 import (
 	"context"
 
-	"xr-game-server/core/httpserver"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/gameplatformdto"
 )
@@ -14,7 +13,7 @@ const (
 )
 
 // GetVendorGameList CMS 分页查询游戏库(读 vendor_game_libs 表).
-func GetVendorGameList(_ context.Context, req *gameplatformdto.VendorGameListReq) (*httpserver.CMSQueryResp, error) {
+func GetVendorGameList(_ context.Context, req *gameplatformdto.VendorGameListReq) (*gameplatformdto.VendorGameListRes, error) {
 	pageIndex, pageSize := normalizeCMSVendorGamePage(1, cmsVendorGameDefaultPageSize)
 	q := &cfgdao.VendorGameLibQuery{
 		PageIndex: pageIndex,
@@ -40,7 +39,11 @@ func GetVendorGameList(_ context.Context, req *gameplatformdto.VendorGameListReq
 		}
 		list = append(list, toVendorGameListItem(toVendorGame(row), shelfSet))
 	}
-	return httpserver.NewCMSQueryResp(total, list), nil
+	return &gameplatformdto.VendorGameListRes{
+		Total:     total,
+		Data:      list,
+		Platforms: cfgdao.ListDistinctVendorGamePlatforms(),
+	}, nil
 }
 
 // ReloadVendorGameCacheCMS 启动后台串行同步，或读取当前同步状态.

@@ -9,9 +9,11 @@ type SysCfgReq struct {
 type SysCfgResp struct {
 	SysTime                    int64   `json:"sysTime"`
 	T                          string  `json:"t" dc:"第三方支付域名"`
-	TVisable                   bool    `json:"tVisable" dc:"是否显示第三方支付"`
+	TVisable                   bool    `json:"tVisable" dc:"安卓端是否显示第三方支付"`
+	TH5Visable                 bool    `json:"tH5Visable" dc:"H5端是否显示第三方支付"`
 	W                          string  `json:"w" dc:"用户提现H5域名(不含协议与路径,来自提现静态部署配置)"`
 	WVisable                   bool    `json:"wVisable" dc:"是否显示用户提现入口(账户配置开关)"`
+	WAndroidVisable            bool    `json:"wAndroidVisable" dc:"安卓端是否显示用户提现入口(仅客户端展示)"`
 	PaidDanmakuPrice           float64 `json:"paidDanmakuPrice" dc:"直播间付费弹幕价格(钻石)"`
 	AudienceListRefreshSeconds uint32  `json:"audienceListRefreshSeconds" dc:"在线观众列表刷新间隔(秒)"`
 	OneToOneDailyFreeSeconds   uint32  `json:"oneToOneDailyFreeSeconds" dc:"1v1观众对单主播每日免费通话秒数(0=关闭)"`

@@ -20,6 +20,7 @@ let chartInstance: EChartsType | null = null
 const buildOption = (points: TrackingEventTrendPoint[]): EChartsOption => {
   const times = points.map(item => item.time)
   const counts = points.map(item => Number(item.count || 0))
+  const rotate = times.length > 8 ? 35 : 0
 
   return {
     title: props.title
@@ -35,16 +36,26 @@ const buildOption = (points: TrackingEventTrendPoint[]): EChartsOption => {
       top: props.title ? 28 : 0,
     },
     grid: {
-      left: 48,
-      right: 24,
+      left: 56,
+      // 末尾 YYYY-MM-DD 完整显示，避免贴边被裁成 2026-10-2
+      right: 72,
       top: props.title ? 72 : 48,
-      bottom: 32,
+      bottom: rotate ? 64 : 48,
     },
     xAxis: {
       type: 'category',
-      boundaryGap: false,
+      // 两端留白，最后一档日期标签不会贴着右边界被裁切
+      boundaryGap: true,
       data: times,
-      axisLabel: {rotate: times.length > 10 ? 35 : 0},
+      axisLabel: {
+        rotate,
+        interval: 0,
+        hideOverlap: false,
+        showMinLabel: true,
+        showMaxLabel: true,
+        margin: 14,
+        formatter: (value: string) => value,
+      },
     },
     yAxis: {type: 'value', minInterval: 1},
     series: [
@@ -95,5 +106,6 @@ defineExpose({resize: renderChart})
 .count-trend-chart {
   width: 100%;
   height: 360px;
+  overflow: visible;
 }
 </style>

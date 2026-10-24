@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	dailyShortVideoPaywallClickStatCacheMgr     *cache.RowCache[*entity.DailyShortVideoPaywallClickStat]
-	dailyShortVideoPaywallClickStatListCacheMgr *cache.ListCache[*entity.DailyShortVideoPaywallClickStat]
 )
 
 func initDailyShortVideoPaywallClickStatDao() {
 	dailyShortVideoPaywallClickStatCacheMgr = cache.NewRowCache[*entity.DailyShortVideoPaywallClickStat]()
-	dailyShortVideoPaywallClickStatListCacheMgr = cache.NewPermanentListCache[*entity.DailyShortVideoPaywallClickStat]()
 }
 
 func GetDailyShortVideoPaywallClickStatByDate(date string) *entity.DailyShortVideoPaywallClickStat {
@@ -39,10 +35,8 @@ func ListRecentDailyShortVideoPaywallClickStats(limit int) []*entity.DailyShortV
 	if limit <= 0 {
 		limit = 30
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatDailyLoginStatDate(time.Now()))
-	return dailyShortVideoPaywallClickStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.DailyShortVideoPaywallClickStat, error) {
-		return loadRecentDailyShortVideoPaywallClickStatsFromDB(limit), nil
-	})
+	// CMS 按日图必须含「今天」:永久列表缓存在当天首条入库前命中后不会再刷新，会缺当天点。
+	return loadRecentDailyShortVideoPaywallClickStatsFromDB(limit)
 }
 
 func loadRecentDailyShortVideoPaywallClickStatsFromDB(limit int) []*entity.DailyShortVideoPaywallClickStat {

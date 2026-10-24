@@ -7,8 +7,9 @@ type AppGetWithdrawCfgReq struct {
 }
 
 type AppGetWithdrawCfgRes struct {
-	Enabled       bool `json:"enabled"`
-	DailyMaxCount int  `json:"dailyMaxCount" dc:"每天最多提现次数(0=不限制)"`
+	Enabled        bool `json:"enabled"`
+	AndroidVisible bool `json:"androidVisible" dc:"安卓端是否展示提现入口(仅客户端展示,服务端业务不校验)"`
+	DailyMaxCount  int  `json:"dailyMaxCount" dc:"每天最多提现次数(0=不限制)"`
 }
 
 type AppListWithdrawCurrenciesReq struct {
@@ -120,7 +121,7 @@ type AppApplyWithdrawRes struct {
 	Id            string  `json:"id"`
 	DiamondAmount float64 `json:"diamondAmount"`
 	WithdrawUsd   float64 `json:"withdrawUsd"`
-	Status        uint8   `json:"status"`
+	Status        uint8   `json:"status" dc:"状态(0待审核,1审核通过待代付,2代付成功,3已提交代付,4审核拒绝已退钻石/金币)"`
 }
 
 type AppWithdrawLogListReq struct {
@@ -133,7 +134,7 @@ type AppWithdrawLogItem struct {
 	Id                  string  `json:"id"`
 	DiamondAmount       float64 `json:"diamondAmount"`
 	WithdrawUsd         float64 `json:"withdrawUsd"`
-	Status              uint8   `json:"status"`
+	Status              uint8   `json:"status" dc:"状态(0待审核,1审核通过待代付,2代付成功,3已提交代付,4审核拒绝已退钻石/金币)"`
 	TransferCurrency    string  `json:"transferCurrency"`
 	TransferLocalAmount float64 `json:"transferLocalAmount"`
 	TransferFailMsg     string  `json:"transferFailMsg"`

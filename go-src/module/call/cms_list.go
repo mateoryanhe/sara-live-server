@@ -127,6 +127,8 @@ func GetCMSVideoCallLogList(ctx context.Context, req *calldto.CMSVideoCallLogLis
 		ReceiverIds:   receiverIds,
 		GuildIds:      guildIds,
 		FilterByGuild: restrict,
+		Keyword:       req.Keyword,
+		CostFilter:    req.CostFilter,
 		Source:        req.Source,
 		Status:        req.Status,
 		CallType:      entity.CallOrderTypeVideo,

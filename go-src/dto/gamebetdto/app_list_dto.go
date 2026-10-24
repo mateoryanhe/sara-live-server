@@ -16,7 +16,7 @@ type AppGameBetListItem struct {
 	NameEn       string  `json:"nameEn" dc:"英文名称"`
 	Cover        string  `json:"cover" dc:"封面完整URL"`
 	Amount       float64 `json:"amount" dc:"下注金额"`
-	PlatformType string  `json:"platformType" dc:"平台类型,枚举: ZY"`
+	PlatformType string  `json:"platformType" dc:"平台类型,枚举: ZY/PP"`
 	OrderId      string  `json:"orderId" dc:"订单ID"`
 	LiveRoomId   string  `json:"liveRoomId" dc:"下注时所在直播间ID"`
 	LiveRecordId string  `json:"liveRecordId" dc:"下注时所在直播记录ID"`

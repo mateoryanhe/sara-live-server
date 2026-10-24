@@ -13,10 +13,12 @@ const (
 // SiteKey 是业务稳定键；Prefix 用于覆盖 config.yaml 中同前缀的静态站点。
 type DomainSiteMapping struct {
 	migrate.OneModel
-	SiteKey string `gorm:"size:64;uniqueIndex;default:'';comment:站点业务键" json:"siteKey"`
-	Prefix  string `gorm:"size:128;uniqueIndex;default:'';comment:静态URL前缀" json:"prefix"`
-	Domain  string `gorm:"size:512;default:'';comment:注册域名,只保存一个Host" json:"domain"`
-	Root    string `gorm:"size:1024;default:'';comment:静态文件物理目录" json:"root"`
+	SiteKey  string `gorm:"size:64;uniqueIndex;default:'';comment:站点业务键" json:"siteKey"`
+	Prefix   string `gorm:"size:128;uniqueIndex;default:'';comment:静态URL前缀" json:"prefix"`
+	Domain   string `gorm:"size:512;default:'';comment:注册域名,只保存一个Host" json:"domain"`
+	Root     string `gorm:"size:1024;default:'';comment:静态文件物理目录" json:"root"`
+	CertFile string `gorm:"size:1024;default:'';comment:HTTPS证书文件路径(可选,如CF橙云源站证书)" json:"certFile"`
+	KeyFile  string `gorm:"size:1024;default:'';comment:HTTPS私钥文件路径(可选)" json:"keyFile"`
 }
 
 func initDomainSiteMapping() {

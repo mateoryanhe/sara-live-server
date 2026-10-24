@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	dailyLiveFirstFrameRenderStatCacheMgr     *cache.RowCache[*entity.DailyLiveFirstFrameRenderStat]
-	dailyLiveFirstFrameRenderStatListCacheMgr *cache.ListCache[*entity.DailyLiveFirstFrameRenderStat]
 )
 
 func initDailyLiveFirstFrameRenderStatDao() {
 	dailyLiveFirstFrameRenderStatCacheMgr = cache.NewRowCache[*entity.DailyLiveFirstFrameRenderStat]()
-	dailyLiveFirstFrameRenderStatListCacheMgr = cache.NewPermanentListCache[*entity.DailyLiveFirstFrameRenderStat]()
 }
 
 func GetDailyLiveFirstFrameRenderStatByDate(date string) *entity.DailyLiveFirstFrameRenderStat {
@@ -39,10 +35,8 @@ func ListRecentDailyLiveFirstFrameRenderStats(limit int) []*entity.DailyLiveFirs
 	if limit <= 0 {
 		limit = 30
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatDailyLoginStatDate(time.Now()))
-	return dailyLiveFirstFrameRenderStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.DailyLiveFirstFrameRenderStat, error) {
-		return loadRecentDailyLiveFirstFrameRenderStatsFromDB(limit), nil
-	})
+	// CMS 按日图必须含「今天」:永久列表缓存在当天首条入库前命中后不会再刷新，会缺当天点。
+	return loadRecentDailyLiveFirstFrameRenderStatsFromDB(limit)
 }
 
 func loadRecentDailyLiveFirstFrameRenderStatsFromDB(limit int) []*entity.DailyLiveFirstFrameRenderStat {

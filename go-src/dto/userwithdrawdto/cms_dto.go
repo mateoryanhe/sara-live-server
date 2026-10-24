@@ -5,7 +5,7 @@ import "github.com/gogf/gf/v2/frame/g"
 type CMSListWithdrawLogsReq struct {
 	g.Meta   `path:"/listWithdrawLogs" method:"post" summary:"用户提现记录" tags:"用户提现CMS"`
 	UserId   string `json:"userId"`
-	Status   *uint8 `json:"status"`
+	Status   *uint8 `json:"status" dc:"状态筛选,不传=全部;0待审核,1审核通过待代付,2代付成功,3已提交代付,4审核拒绝已退钻石/金币"`
 	Page     int    `json:"page"`
 	PageSize int    `json:"pageSize"`
 }
@@ -17,7 +17,7 @@ type CMSWithdrawLogItem struct {
 	DiamondAmount       float64 `json:"diamondAmount"`
 	GoldAmount          float64 `json:"goldAmount"`
 	WithdrawUsd         float64 `json:"withdrawUsd"`
-	Status              uint8   `json:"status"`
+	Status              uint8   `json:"status" dc:"状态(0待审核,1审核通过待代付,2代付成功,3已提交代付,4审核拒绝已退钻石/金币)"`
 	TransferOrderId     string  `json:"transferOrderId"`
 	TransferPlatformNo  string  `json:"transferPlatformNo"`
 	TransferCurrency    string  `json:"transferCurrency"`

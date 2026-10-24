@@ -47,6 +47,7 @@ type UserProfileDetailItem struct {
 	Birthday        *time.Time `json:"birthday"`
 	BotAnchorStatus uint8      `json:"botAnchorStatus"`
 	GuildId         uint64     `json:"guildId,string"`
+	GuildName       string     `json:"guildName" dc:"工会名称"`
 	UpdatedAt       *time.Time `json:"updatedAt"`
 }
 

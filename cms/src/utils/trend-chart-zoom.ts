@@ -47,6 +47,24 @@ export function buildTrendChartXAxisLabel(pointCount: number) {
   }
 }
 
+/**
+ * 配合 dataZoom：刻度按当前可视窗口自适应，勿按全量点数算 interval，
+ * 否则密采样全量时标签会乱、曲线也像「龟缩」在左侧。
+ */
+export function buildTrendChartXAxisLabelZoomFriendly() {
+  return {
+    rotate: 30,
+    align: 'right' as const,
+    hideOverlap: true,
+    showMinLabel: true,
+    showMaxLabel: true,
+    margin: 10,
+    fontSize: 11,
+    interval: 'auto' as const,
+    formatter: (value: string) => formatTrendChartAxisTime(value, true),
+  }
+}
+
 function formatTrendChartAxisTime(value: string, compact: boolean): string {
   if (!value) {
     return ''
@@ -68,7 +86,17 @@ function formatTrendChartAxisTime(value: string, compact: boolean): string {
 export type TrendChartDataZoomOptions = {
   /** 初始窗口为全量（滑块 0–100%） */
   defaultFullRange?: boolean
+  /** 初始窗口对齐到序列末尾（时间序列看最近一段） */
+  alignEnd?: boolean
+  /**
+   * 非全量时，初始可视窗口目标点数（点少则铺满全量，点多则压缩到该数量撑满 X 轴）。
+   * 10 秒采样建议 120–360（约 20 分钟～1 小时）。
+   */
+  initialWindowPoints?: number
 }
+
+/** 密采样折线默认可视点数：约撑满常见 CMS 图表宽度，避免全量 3 天挤成左侧细条 */
+export const TREND_CHART_DENSE_VISIBLE_POINTS = 180
 
 export function buildTrendChartDataZoom(
     pointCount: number,
@@ -77,24 +105,36 @@ export function buildTrendChartDataZoom(
   if (!trendChartHasZoom(pointCount)) {
     return undefined
   }
-  const initialWindow = options?.defaultFullRange
+  const windowPoints = Math.max(2, options?.initialWindowPoints ?? TREND_CHART_DENSE_VISIBLE_POINTS)
+  const windowPct = options?.defaultFullRange
       ? 100
-      : pointCount > 48
-          ? Math.min(100, (48 / pointCount) * 100)
+      : pointCount > windowPoints
+          ? Math.min(100, (windowPoints / pointCount) * 100)
           : 100
-  const initialStart = 0
+  const alignEnd = options?.alignEnd === true && windowPct < 100
+  const initialStart = alignEnd ? Math.max(0, 100 - windowPct) : 0
+  const initialEnd = alignEnd ? 100 : windowPct
   return [
-    {type: 'inside', xAxisIndex: 0, start: initialStart, end: initialWindow},
+    {
+      type: 'inside',
+      xAxisIndex: 0,
+      start: initialStart,
+      end: initialEnd,
+      zoomOnMouseWheel: true,
+      moveOnMouseMove: true,
+      filterMode: 'none',
+    },
     {
       type: 'slider',
       xAxisIndex: 0,
       height: SLIDER_HEIGHT,
       bottom: SLIDER_BOTTOM,
       start: initialStart,
-      end: initialWindow,
+      end: initialEnd,
       show: true,
       showDetail: false,
       brushSelect: false,
+      filterMode: 'none',
       borderColor: '#dcdfe6',
       fillerColor: 'rgba(64, 158, 255, 0.15)',
       handleSize: '110%',

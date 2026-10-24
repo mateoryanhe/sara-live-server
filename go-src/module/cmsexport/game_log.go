@@ -74,7 +74,7 @@ func gameBetLogToCSVRow(row *gameentity.GameBetLog) []string {
 	}
 }
 
-func gameWinLogToCSVRow(row *gameentity.GameWinLog) []string {
+func gameWinLogToCSVRow(row *gamewindao.CMSListItem) []string {
 	if row == nil {
 		return nil
 	}
@@ -83,6 +83,7 @@ func gameWinLogToCSVRow(row *gameentity.GameWinLog) []string {
 		formatCSVUint(row.UserId),
 		row.GameCode,
 		row.NameEn,
+		formatCSVFloat(row.BetAmount),
 		formatCSVFloat(row.Amount),
 		row.PlatformType,
 		row.OrderId,

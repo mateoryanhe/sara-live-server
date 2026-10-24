@@ -24,10 +24,6 @@
           <el-input v-model="formData.apiHost" clearable :placeholder="t('pages.haipay.apiHostPlaceholder')"/>
           <span class="form-tip">{{ t('pages.haipay.apiHostTip') }}</span>
         </el-form-item>
-        <el-form-item :label="t('pages.haipay.thirdPayVisible')" prop="tVisable">
-          <el-switch v-model="formData.tVisable"/>
-          <span class="form-tip">{{ t('pages.haipay.thirdPayVisibleTip') }}</span>
-        </el-form-item>
         <el-form-item :label="t('pages.haipay.useProdAppID')" prop="useProdAppID">
           <el-switch v-model="formData.useProdAppID"/>
           <span class="form-tip">{{ t('pages.haipay.useProdAppIDTip') }}</span>
@@ -85,7 +81,6 @@ const formRef = ref()
 const formData = reactive({
   id: '0',
   apiHost: '',
-  tVisable: false,
   useProdAppID: true,
   merchantSecretKey: '',
   merchantPrivateKey: '',
@@ -113,7 +108,6 @@ const applyCfg = (cfg: HaiPayCfg | null | undefined) => {
   if (!cfg) {
     formData.id = '0'
     formData.apiHost = ''
-    formData.tVisable = false
     formData.useProdAppID = true
     formData.merchantSecretKey = ''
     formData.merchantPrivateKey = ''
@@ -129,7 +123,6 @@ const applyCfg = (cfg: HaiPayCfg | null | undefined) => {
   }
   formData.id = cfg.id || '0'
   formData.apiHost = cfg.apiHost || ''
-  formData.tVisable = !!cfg.tVisable
   formData.useProdAppID = cfg.useProdAppID !== false
   formData.merchantSecretKey = cfg.merchantSecretKey || ''
   formData.merchantPrivateKey = cfg.merchantPrivateKey || ''
@@ -163,7 +156,6 @@ const handleSave = async () => {
     const response = await haipayApi.saveHaiPayCfg({
       id: formData.id && formData.id !== '0' ? Number(formData.id) : undefined,
       apiHost: formData.apiHost.trim(),
-      tVisable: formData.tVisable,
       useProdAppID: formData.useProdAppID,
       merchantSecretKey: formData.merchantSecretKey.trim(),
       merchantPrivateKey: formData.merchantPrivateKey.trim(),

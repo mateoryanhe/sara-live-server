@@ -37,7 +37,20 @@
           <el-input v-model="searchForm.name" clearable :placeholder="t('pages.gameList.gameNamePlaceholder')"/>
         </el-form-item>
         <el-form-item :label="t('pages.gameList.platform')">
-          <el-input v-model="searchForm.platform" clearable :placeholder="t('pages.gameList.platformPlaceholder')"/>
+          <el-select
+              v-model="searchForm.platform"
+              clearable
+              filterable
+              :placeholder="t('common.all')"
+              style="width: 140px"
+          >
+            <el-option
+                v-for="item in platformOptions"
+                :key="item"
+                :label="item"
+                :value="item"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">{{ t('common.search') }}</el-button>
@@ -64,6 +77,7 @@
           <template #default="{ row }">{{ row.nameEn || '-' }}</template>
         </el-table-column>
         <el-table-column :label="t('pages.gameList.platform')" prop="platform" width="100"/>
+        <el-table-column :label="t('common.sort')" prop="sort" width="80"/>
         <el-table-column :label="t('pages.gameShelfList.liveGameCover')" min-width="120">
           <template #default="{ row }">
             <el-image
@@ -158,6 +172,14 @@
           />
           <span v-else>-</span>
         </el-form-item>
+        <el-form-item :label="t('common.sort')">
+          <el-input-number
+              v-model="editForm.sort"
+              :step="1"
+              controls-position="right"
+          />
+          <div class="form-tip">{{ t('pages.gameShelfList.sortTip') }}</div>
+        </el-form-item>
         <el-form-item :label="t('pages.gameShelfList.liveGameName')">
           <el-input
               v-model="editForm.liveGameName"
@@ -217,6 +239,7 @@ interface EditForm {
   liveGameName: string
   liveGameCover: string
   savedLiveCoverUrl: string
+  sort: number
 }
 
 const loading = ref(false)
@@ -226,6 +249,7 @@ const editDialogVisible = ref(false)
 const editFormRef = ref<FormInstance>()
 const tableData = ref<GameShelfItem[]>([])
 const selectedRows = ref<GameShelfItem[]>([])
+const platformOptions = ref<string[]>([])
 const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(20)
@@ -243,6 +267,7 @@ const editForm = reactive<EditForm>({
   liveGameName: '',
   liveGameCover: '',
   savedLiveCoverUrl: '',
+  sort: 0,
 })
 
 const canBatchOffShelf = computed(() => selectedRows.value.length > 0)
@@ -270,6 +295,9 @@ const fetchList = async () => {
     })
     tableData.value = response.data || []
     total.value = response.total || 0
+    if (response.platforms?.length) {
+      platformOptions.value = response.platforms
+    }
   } catch (error) {
     console.error('fetch game shelf list failed:', error)
     ElMessage.error(t('pages.gameShelfList.fetchFailed'))
@@ -312,6 +340,7 @@ const openEditDialog = (row: GameShelfItem) => {
   editForm.liveGameName = row.liveGameName || ''
   editForm.liveGameCover = row.liveGameCover || ''
   editForm.savedLiveCoverUrl = row.liveGameCoverUrl || ''
+  editForm.sort = row.sort ?? 0
   editDialogVisible.value = true
 }
 
@@ -322,6 +351,7 @@ const resetEditForm = () => {
   editForm.liveGameName = ''
   editForm.liveGameCover = ''
   editForm.savedLiveCoverUrl = ''
+  editForm.sort = 0
   editFormRef.value?.clearValidate()
 }
 
@@ -398,6 +428,7 @@ const handleEditSave = async () => {
       gameCode: editForm.gameCode,
       liveGameName: editForm.liveGameName,
       liveGameCover: editForm.liveGameCover,
+      sort: editForm.sort,
     })
     if (response?.success) {
       ElMessage.success(t('pages.gameShelfList.editSuccess'))
@@ -441,6 +472,13 @@ onMounted(() => {
 
 .search-form {
   margin-bottom: 16px;
+}
+
+.form-tip {
+  margin-top: 4px;
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .pagination-container {

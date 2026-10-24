@@ -4,8 +4,10 @@ import (
 	"context"
 
 	"xr-game-server/core/httpserver"
+	"xr-game-server/module/domainsite"
 	"xr-game-server/core/xrpool"
 
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 )
 
@@ -132,6 +134,9 @@ func Init() {
 	initCMSExportController()                        // CMS异步导出
 	httpserver.InitWebsocket()
 	xrpool.AddWithRecover(gctx.New(), func(ctx context.Context) {
+		if err := domainsite.SyncHTTPSRegistryFromDB(ctx); err != nil {
+			g.Log().Errorf(ctx, "按数据库同步域名静态目录注册表失败 err=%v", err)
+		}
 		httpserver.InitHttpServer()
 	})
 }

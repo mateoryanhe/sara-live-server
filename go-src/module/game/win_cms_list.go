@@ -4,11 +4,10 @@ import (
 	"context"
 	"strconv"
 
-	"xr-game-server/core/httpserver"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dao/gamewindao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/gamewindto"
-	"xr-game-server/entity/game"
 )
 
 func parseWinCMSUserIdFilter(val string) uint64 {
@@ -22,7 +21,7 @@ func parseWinCMSUserIdFilter(val string) uint64 {
 	return id
 }
 
-func toCMSWinLogItem(v *entity.GameWinLog) *gamewindto.CMSGameWinLogItem {
+func toCMSWinLogItem(v *gamewindao.CMSListItem) *gamewindto.CMSGameWinLogItem {
 	if v == nil {
 		return nil
 	}
@@ -33,6 +32,7 @@ func toCMSWinLogItem(v *entity.GameWinLog) *gamewindto.CMSGameWinLogItem {
 		NameEn:       v.NameEn,
 		Cover:        BuildGameCoverUrl(v.Cover),
 		Amount:       v.Amount,
+		BetAmount:    v.BetAmount,
 		PlatformType: v.PlatformType,
 		OrderId:      v.OrderId,
 		CreatedAt:    &v.CreatedAt,
@@ -44,9 +44,12 @@ func toCMSWinLogItem(v *entity.GameWinLog) *gamewindto.CMSGameWinLogItem {
 }
 
 // GetWinCMSList CMS 分页查询游戏派彩记录
-func GetWinCMSList(_ context.Context, req *gamewindto.CMSGameWinLogListReq) (*httpserver.CMSQueryResp, error) {
+func GetWinCMSList(_ context.Context, req *gamewindto.CMSGameWinLogListReq) (*gamewindto.CMSGameWinLogListRes, error) {
 	if req == nil {
-		return httpserver.NewCMSQueryResp(0, []*gamewindto.CMSGameWinLogItem{}), nil
+		return &gamewindto.CMSGameWinLogListRes{
+			Data:      []*gamewindto.CMSGameWinLogItem{},
+			Platforms: cfgdao.ListDistinctVendorGamePlatformsUpper(),
+		}, nil
 	}
 	total, rows := gamewindao.CMSList(&gamewindao.CMSListFilter{
 		UserId:       parseWinCMSUserIdFilter(req.UserId),
@@ -61,5 +64,9 @@ func GetWinCMSList(_ context.Context, req *gamewindto.CMSGameWinLogListReq) (*ht
 	for _, row := range rows {
 		list = append(list, toCMSWinLogItem(row))
 	}
-	return httpserver.NewCMSQueryResp(total, list), nil
+	return &gamewindto.CMSGameWinLogListRes{
+		Total:     total,
+		Data:      list,
+		Platforms: cfgdao.ListDistinctVendorGamePlatformsUpper(),
+	}, nil
 }

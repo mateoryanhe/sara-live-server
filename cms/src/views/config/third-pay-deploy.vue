@@ -39,6 +39,19 @@
           />
         </el-form-item>
 
+        <div class="section-title">{{ t('pages.thirdPayDeploy.visibilityTitle') }}</div>
+        <div class="form-tip">{{ t('pages.thirdPayDeploy.visibilityTip') }}</div>
+
+        <el-form-item :label="t('pages.thirdPayDeploy.androidVisible')">
+          <el-switch v-model="formData.androidVisible" :disabled="!can('save')"/>
+          <span class="form-tip inline-tip">{{ t('pages.thirdPayDeploy.androidVisibleTip') }}</span>
+        </el-form-item>
+
+        <el-form-item :label="t('pages.thirdPayDeploy.h5Visible')">
+          <el-switch v-model="formData.h5Visible" :disabled="!can('save')"/>
+          <span class="form-tip inline-tip">{{ t('pages.thirdPayDeploy.h5VisibleTip') }}</span>
+        </el-form-item>
+
         <el-form-item v-if="can('save')">
           <el-button :loading="saving" type="primary" @click="handleSaveMapping">
             {{ t('pages.thirdPayDeploy.saveAndRefresh') }}
@@ -137,6 +150,8 @@ const formRef = ref<FormInstance>()
 const formData = reactive({
   domain: '',
   deployPath: '/home/ec2-user/cdn/third-pay',
+  androidVisible: true,
+  h5Visible: true,
 })
 
 const formRules = computed<FormRules>(() => ({
@@ -150,6 +165,8 @@ const applyDeployInfo = (info: ThirdPayDeployInfo | null | undefined) => {
   deployInfo.value = info ?? null
   formData.domain = info?.domain ?? ''
   formData.deployPath = info?.deployPath ?? '/home/ec2-user/cdn/third-pay'
+  formData.androidVisible = info?.androidVisible !== false
+  formData.h5Visible = info?.h5Visible !== false
 }
 
 const fetchDeployInfo = async () => {
@@ -178,6 +195,8 @@ const handleSaveMapping = async () => {
     await thirdPayDeployApi.saveThirdPayDeployCfg({
       domain: formData.domain.trim(),
       deployPath: formData.deployPath.trim(),
+      androidVisible: formData.androidVisible,
+      h5Visible: formData.h5Visible,
     })
     ElMessage.success(t('pages.thirdPayDeploy.saveSuccess'))
     await fetchDeployInfo()
@@ -264,6 +283,12 @@ onMounted(() => {
   font-size: 13px;
   line-height: 1.6;
   margin-bottom: 12px;
+}
+
+.inline-tip {
+  display: inline-block;
+  margin: 0 0 0 12px;
+  vertical-align: middle;
 }
 
 .zip-uploader {

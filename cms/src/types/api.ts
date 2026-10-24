@@ -57,6 +57,14 @@ export interface UserStatTrendPoint {
     time: string
     activeUserCount: number
     registerUserCount: number
+    /** App 设备码用户充值(USD) */
+    appDeviceRechargeAmount?: number
+    /** H5 设备码用户充值(USD) */
+    h5DeviceRechargeAmount?: number
+    /** App 设备码用户登录人数(去重) */
+    appDeviceLoginCount?: number
+    /** H5 设备码用户登录人数(去重) */
+    h5DeviceLoginCount?: number
     /** 柱形图指标, key 见 user-stat-bar-series.ts */
     barMetrics?: Record<string, number>
 }
@@ -626,6 +634,7 @@ export interface UserProfileDetailItem {
     birthday?: string | null
     botAnchorStatus?: number
     guildId?: string
+    guildName?: string
     updatedAt?: string | null
 }
 
@@ -841,6 +850,7 @@ export interface GameWinLogItem {
     nameEn?: string
     cover?: string
     amount: number
+    betAmount?: number
     platformType: string
     orderId: string
     createdAt?: string | null
@@ -901,6 +911,7 @@ export interface AccountCfg {
     deviceAccountMaxCount: number
     deviceCancelDailyLimit: number
     userWithdrawEnabled?: boolean
+    userWithdrawAndroidVisible?: boolean
     userWithdrawMinUsd?: number
     userWithdrawDailyMaxCount?: number
     createdAt?: string
@@ -981,6 +992,7 @@ export interface SaveAccountCfgReq {
     deviceAccountMaxCount: number
     deviceCancelDailyLimit: number
     userWithdrawEnabled?: boolean
+    userWithdrawAndroidVisible?: boolean
     userWithdrawMinUsd?: number
     userWithdrawDailyMaxCount?: number
 }
@@ -2324,7 +2336,8 @@ export interface SaveMetaPixelCfgRes {
 export interface HaiPayCfg {
     id: string
     apiHost: string
-    tVisable: boolean
+    tVisable?: boolean
+    tH5Visable?: boolean
     merchantSecretKey: string
     merchantPrivateKey: string
     callbackBaseUrl: string
@@ -2345,7 +2358,6 @@ export interface GetHaiPayCfgRes {
 export interface SaveHaiPayCfgReq {
     id?: number
     apiHost: string
-    tVisable: boolean
     merchantSecretKey: string
     merchantPrivateKey: string
     callbackBaseUrl?: string
@@ -2580,12 +2592,14 @@ export interface GameShelfItem {
     liveGameCover: string
     liveGameCoverUrl: string
     platform: string
+    sort: number
 }
 
 export interface UpdateGameShelfReq {
     gameCode: string
     liveGameName?: string
     liveGameCover?: string
+    sort?: number
 }
 
 export interface UpdateGameShelfRes {
@@ -2871,6 +2885,8 @@ export interface LiveRecordItem {
 }
 
 export interface VideoCallLogQuery extends PageQuery {
+    keyword?: string
+    costFilter?: number
     callerId?: string
     receiverId?: string
     receiverIds?: string[]

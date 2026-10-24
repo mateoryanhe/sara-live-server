@@ -31,6 +31,7 @@ export function buildGameWinLogCsvColumns(
     {header: t('common.userId'), value: row => row.userId ?? ''},
     {header: t(`${ns}.gameCode`), value: row => row.gameCode ?? ''},
     {header: t(`${ns}.nameEn`), value: row => row.nameEn ?? ''},
+    {header: t(`${ns}.betAmount`), value: row => row.betAmount ?? ''},
     {header: t(`${ns}.winAmount`), value: row => row.amount ?? ''},
     {header: t(`${ns}.platform`), value: row => row.platformType ?? ''},
     {header: t(`${ns}.orderId`), value: row => row.orderId ?? ''},

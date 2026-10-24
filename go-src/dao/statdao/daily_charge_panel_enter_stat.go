@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	dailyChargePanelEnterStatCacheMgr     *cache.RowCache[*entity.DailyChargePanelEnterStat]
-	dailyChargePanelEnterStatListCacheMgr *cache.ListCache[*entity.DailyChargePanelEnterStat]
 )
 
 func initDailyChargePanelEnterStatDao() {
 	dailyChargePanelEnterStatCacheMgr = cache.NewRowCache[*entity.DailyChargePanelEnterStat]()
-	dailyChargePanelEnterStatListCacheMgr = cache.NewPermanentListCache[*entity.DailyChargePanelEnterStat]()
 }
 
 func GetDailyChargePanelEnterStatByDate(date string) *entity.DailyChargePanelEnterStat {
@@ -39,10 +35,8 @@ func ListRecentDailyChargePanelEnterStats(limit int) []*entity.DailyChargePanelE
 	if limit <= 0 {
 		limit = 30
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatDailyLoginStatDate(time.Now()))
-	return dailyChargePanelEnterStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.DailyChargePanelEnterStat, error) {
-		return loadRecentDailyChargePanelEnterStatsFromDB(limit), nil
-	})
+	// CMS 按日图必须含「今天」:永久列表缓存在当天首条入库前命中后不会再刷新，会缺当天点。
+	return loadRecentDailyChargePanelEnterStatsFromDB(limit)
 }
 
 func loadRecentDailyChargePanelEnterStatsFromDB(limit int) []*entity.DailyChargePanelEnterStat {

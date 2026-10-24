@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 
-	"xr-game-server/core/httpserver"
+	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dao/gamebetdao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
@@ -60,9 +60,12 @@ func fillCMSBetLogLiveRoomFields(item *gamebetdto.CMSGameBetLogItem, liveRoomId 
 }
 
 // GetBetCMSList CMS 分页查询游戏下注记录
-func GetBetCMSList(_ context.Context, req *gamebetdto.CMSGameBetLogListReq) (*httpserver.CMSQueryResp, error) {
+func GetBetCMSList(_ context.Context, req *gamebetdto.CMSGameBetLogListReq) (*gamebetdto.CMSGameBetLogListRes, error) {
 	if req == nil {
-		return httpserver.NewCMSQueryResp(0, []*gamebetdto.CMSGameBetLogItem{}), nil
+		return &gamebetdto.CMSGameBetLogListRes{
+			Data:      []*gamebetdto.CMSGameBetLogItem{},
+			Platforms: cfgdao.ListDistinctVendorGamePlatformsUpper(),
+		}, nil
 	}
 	total, rows := gamebetdao.CMSList(&gamebetdao.CMSListFilter{
 		UserId:       parseBetCMSUserIdFilter(req.UserId),
@@ -77,5 +80,9 @@ func GetBetCMSList(_ context.Context, req *gamebetdto.CMSGameBetLogListReq) (*ht
 	for _, row := range rows {
 		list = append(list, toCMSBetLogItem(row))
 	}
-	return httpserver.NewCMSQueryResp(total, list), nil
+	return &gamebetdto.CMSGameBetLogListRes{
+		Total:     total,
+		Data:      list,
+		Platforms: cfgdao.ListDistinctVendorGamePlatformsUpper(),
+	}, nil
 }

@@ -37,16 +37,20 @@ func GetSysCfg(ctx context.Context, req *sysdto.SysCfgReq) (*sysdto.SysCfgResp, 
 	globalPrivacy := privacypolicy.GetPrivacyPolicyUrl()
 	globalTerms := privacypolicy.GetTermsOfServiceUrl()
 	exchangeCfg := wallet.GetExchangeCfgSnapshot()
-	tVisable := false
+	// 无 HaiPay 配置时默认显示;有配置则读库
+	tVisable, tH5Visable := true, true
 	if haiPayCfg := cfgdao.GetHaiPayCfgCached(); haiPayCfg != nil {
 		tVisable = haiPayCfg.TVisable
+		tH5Visable = haiPayCfg.TH5Visable
 	}
 	resp := &sysdto.SysCfgResp{
 		SysTime:                    time.Now().UnixMilli(),
 		T:                          corecfg.GetThirdPayDomain(),
 		TVisable:                   tVisable,
+		TH5Visable:                 tH5Visable,
 		W:                          corecfg.GetStaticSiteDomain(userwithdrawdeploydto.UserWithdrawStaticPrefix),
 		WVisable:                   accountcfg.IsUserWithdrawEnabled(),
+		WAndroidVisable:            accountcfg.IsUserWithdrawAndroidVisible(),
 		PaidDanmakuPrice:           livecfg.GetPaidDanmakuPrice(),
 		AudienceListRefreshSeconds: livecfg.GetAudienceListRefreshSeconds(),
 		OneToOneDailyFreeSeconds:   livecfg.GetOneToOneDailyFreeSeconds(),

@@ -7,84 +7,97 @@
         </div>
       </template>
 
-      <el-form :model="searchForm" class="search-form" inline label-width="100px">
-        <el-form-item :label="t('pages.videoCallLogList.callerId')">
-          <el-input v-model="searchForm.callerId" clearable :placeholder="t('pages.videoCallLogList.enterCallerId')"/>
-        </el-form-item>
-        <el-form-item :label="t('pages.videoCallLogList.receiverId')">
-          <el-input v-model="searchForm.receiverId" clearable :placeholder="t('pages.videoCallLogList.enterReceiverId')"/>
-        </el-form-item>
-        <el-form-item :label="t('pages.liveRecordList.platformAnchor')">
-          <div class="anchor-filter anchor-filter--compact">
+      <el-form :model="searchForm" class="search-form" label-position="right" label-width="72px">
+        <div class="search-row search-row--filters">
+          <el-form-item class="search-item search-item--keyword" :label="t('common.keyword')">
             <el-input
-                :model-value="platformAnchorInputValue"
-                class="anchor-input"
-                disabled
-                :placeholder="t('pages.liveRecordList.noPlatformAnchorSelected')"
+                v-model="searchForm.keyword"
+                clearable
+                class="ctrl"
+                :placeholder="t('pages.videoCallLogList.keywordPlaceholder')"
             />
-            <el-button size="small" @click="openPlatformAnchorPicker">
-              {{ t('pages.liveRecordList.selectPlatformAnchor') }}
-            </el-button>
-            <el-button v-if="selectedPlatformAnchors.length > 0" link size="small" @click="clearPlatformAnchors">
-              {{ t('pages.liveRecordList.clearPlatformAnchor') }}
-            </el-button>
-          </div>
-        </el-form-item>
-        <el-form-item :label="t('pages.liveRecordList.guildAnchor')">
-          <div class="anchor-filter anchor-filter--compact">
-            <el-input
-                :model-value="guildAnchorInputValue"
-                class="anchor-input"
-                disabled
-                :placeholder="t('pages.liveRecordList.noGuildAnchorSelected')"
+          </el-form-item>
+          <el-form-item class="search-item search-item--anchor" :label="t('pages.liveRecordList.platformAnchor')">
+            <div class="anchor-filter">
+              <el-input
+                  :model-value="platformAnchorInputValue"
+                  class="ctrl"
+                  disabled
+                  :placeholder="t('pages.liveRecordList.noPlatformAnchorSelected')"
+              />
+              <el-button size="small" @click="openPlatformAnchorPicker">
+                {{ t('pages.liveRecordList.selectPlatformAnchor') }}
+              </el-button>
+              <el-button v-if="selectedPlatformAnchors.length > 0" link size="small" type="primary" @click="clearPlatformAnchors">
+                {{ t('pages.liveRecordList.clearPlatformAnchor') }}
+              </el-button>
+            </div>
+          </el-form-item>
+          <el-form-item class="search-item search-item--anchor" :label="t('pages.liveRecordList.guildAnchor')">
+            <div class="anchor-filter">
+              <el-input
+                  :model-value="guildAnchorInputValue"
+                  class="ctrl"
+                  disabled
+                  :placeholder="t('pages.liveRecordList.noGuildAnchorSelected')"
+              />
+              <el-button size="small" @click="openGuildAnchorPicker">
+                {{ t('pages.liveRecordList.selectGuildAnchor') }}
+              </el-button>
+              <el-button v-if="selectedGuildAnchors.length > 0" link size="small" type="primary" @click="clearGuildAnchors">
+                {{ t('pages.liveRecordList.clearGuildAnchor') }}
+              </el-button>
+            </div>
+          </el-form-item>
+          <el-form-item class="search-item search-item--date" :label="t('pages.videoCallLogList.callTime')">
+            <el-date-picker
+                v-model="searchForm.dateRange"
+                clearable
+                class="ctrl"
+                :end-placeholder="t('pages.videoCallLogList.endDate')"
+                format="YYYY-MM-DD"
+                :range-separator="t('pages.videoCallLogList.dateRangeSeparator')"
+                :start-placeholder="t('pages.videoCallLogList.startDate')"
+                type="daterange"
+                value-format="YYYY-MM-DD"
             />
-            <el-button size="small" @click="openGuildAnchorPicker">
-              {{ t('pages.liveRecordList.selectGuildAnchor') }}
-            </el-button>
-            <el-button v-if="selectedGuildAnchors.length > 0" link size="small" @click="clearGuildAnchors">
-              {{ t('pages.liveRecordList.clearGuildAnchor') }}
-            </el-button>
-          </div>
-        </el-form-item>
-        <el-form-item :label="t('pages.videoCallLogList.source')">
-          <el-select v-model="searchForm.source" clearable :placeholder="t('common.all')" style="width: 140px">
-            <el-option :value="0" :label="t('common.all')"/>
-            <el-option :value="1" :label="t('pages.videoCallLogList.sourceLiveRoom')"/>
-            <el-option :value="2" :label="t('pages.videoCallLogList.sourcePrivateMessage')"/>
-            <el-option :value="3" :label="t('pages.videoCallLogList.sourceOneToOneRoom')"/>
-          </el-select>
-        </el-form-item>
-        <el-form-item :label="t('common.status')">
-          <el-select v-model="searchForm.status" clearable :placeholder="t('common.all')" style="width: 160px">
-            <el-option :value="0" :label="t('common.all')"/>
-            <el-option :value="1" :label="t('pages.videoCallLogList.statusCalling')"/>
-            <el-option :value="2" :label="t('pages.videoCallLogList.statusAnswered')"/>
-            <el-option :value="3" :label="t('pages.videoCallLogList.statusInCall')"/>
-            <el-option :value="4" :label="t('pages.videoCallLogList.statusEnded')"/>
-            <el-option :value="5" :label="t('pages.videoCallLogList.statusRejected')"/>
-            <el-option :value="6" :label="t('pages.videoCallLogList.statusCallTimeout')"/>
-            <el-option :value="7" :label="t('pages.videoCallLogList.statusHeartTimeout')"/>
-            <el-option :value="8" :label="t('pages.videoCallLogList.statusInsufficientDiamond')"/>
-          </el-select>
-        </el-form-item>
-        <el-form-item :label="t('pages.videoCallLogList.callTime')">
-          <el-date-picker
-              v-model="searchForm.dateRange"
-              clearable
-              :end-placeholder="t('pages.videoCallLogList.endDate')"
-              format="YYYY-MM-DD"
-              :range-separator="t('pages.videoCallLogList.dateRangeSeparator')"
-              :start-placeholder="t('pages.videoCallLogList.startDate')"
-              style="width: 260px"
-              type="daterange"
-              value-format="YYYY-MM-DD"
-          />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
-          <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
-          <el-button v-if="can('export')" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
-        </el-form-item>
+          </el-form-item>
+          <el-form-item class="search-item search-item--sm" :label="t('pages.videoCallLogList.source')">
+            <el-select v-model="searchForm.source" clearable class="ctrl" :placeholder="t('common.all')">
+              <el-option :value="0" :label="t('common.all')"/>
+              <el-option :value="1" :label="t('pages.videoCallLogList.sourceLiveRoom')"/>
+              <el-option :value="2" :label="t('pages.videoCallLogList.sourcePrivateMessage')"/>
+              <el-option :value="3" :label="t('pages.videoCallLogList.sourceOneToOneRoom')"/>
+            </el-select>
+          </el-form-item>
+          <el-form-item class="search-item search-item--sm" :label="t('common.status')">
+            <el-select v-model="searchForm.status" clearable class="ctrl" :placeholder="t('common.all')">
+              <el-option :value="0" :label="t('common.all')"/>
+              <el-option :value="1" :label="t('pages.videoCallLogList.statusCalling')"/>
+              <el-option :value="2" :label="t('pages.videoCallLogList.statusAnswered')"/>
+              <el-option :value="3" :label="t('pages.videoCallLogList.statusInCall')"/>
+              <el-option :value="4" :label="t('pages.videoCallLogList.statusEnded')"/>
+              <el-option :value="5" :label="t('pages.videoCallLogList.statusRejected')"/>
+              <el-option :value="6" :label="t('pages.videoCallLogList.statusCallTimeout')"/>
+              <el-option :value="7" :label="t('pages.videoCallLogList.statusHeartTimeout')"/>
+              <el-option :value="8" :label="t('pages.videoCallLogList.statusInsufficientDiamond')"/>
+            </el-select>
+          </el-form-item>
+          <el-form-item class="search-item search-item--sm" :label="t('pages.videoCallLogList.amountFilter')">
+            <el-select v-model="searchForm.costFilter" clearable class="ctrl" :placeholder="t('common.all')">
+              <el-option :value="0" :label="t('common.all')"/>
+              <el-option :value="1" :label="t('pages.videoCallLogList.amountGtZero')"/>
+              <el-option :value="2" :label="t('pages.videoCallLogList.amountEqZero')"/>
+            </el-select>
+          </el-form-item>
+        </div>
+        <div class="search-row search-row--actions">
+          <el-form-item label=" ">
+            <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
+            <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
+            <el-button v-if="can('export')" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
+          </el-form-item>
+        </div>
       </el-form>
 
       <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width: 100%">
@@ -253,8 +266,8 @@ const platformAnchorPickerVisible = ref(false)
 const guildAnchorPickerVisible = ref(false)
 
 const searchForm = reactive({
-  callerId: '',
-  receiverId: '',
+  keyword: '',
+  costFilter: 0,
   source: 0,
   status: 0,
   dateRange: [] as string[],
@@ -332,8 +345,8 @@ const buildSelectedReceiverIds = () => {
 const buildFilterParams = () => {
   const [startDate, endDate] = searchForm.dateRange || []
   return {
-    callerId: searchForm.callerId.trim(),
-    receiverId: searchForm.receiverId.trim(),
+    keyword: searchForm.keyword.trim() || undefined,
+    costFilter: searchForm.costFilter || 0,
     receiverIds: buildSelectedReceiverIds(),
     source: searchForm.source || 0,
     status: searchForm.status || 0,
@@ -370,8 +383,8 @@ const handleSearch = () => {
 const handleReset = () => {
   selectedPlatformAnchors.value = []
   selectedGuildAnchors.value = []
-  searchForm.callerId = ''
-  searchForm.receiverId = ''
+  searchForm.keyword = ''
+  searchForm.costFilter = 0
   searchForm.source = 0
   searchForm.status = 0
   searchForm.dateRange = []
@@ -490,19 +503,92 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
-.search-form :deep(.el-form-item) {
-  margin-bottom: 0;
-  margin-right: 12px;
+.search-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
 }
 
-.anchor-filter--compact {
-  display: inline-flex;
-  align-items: center;
+.search-row:last-child {
+  margin-bottom: 0;
+}
+
+.search-row--filters {
+  width: 100%;
+  flex-wrap: nowrap;
   gap: 8px;
 }
 
-.anchor-input {
-  width: 220px;
+.search-row--actions :deep(.el-form-item__label) {
+  visibility: hidden;
+}
+
+.search-form :deep(.el-form-item) {
+  margin: 0;
+}
+
+.search-row--filters :deep(.el-form-item) {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.search-item--keyword {
+  flex: 1.1 1 0;
+}
+
+.search-item--anchor {
+  flex: 1.5 1 0;
+}
+
+.search-item--date {
+  flex: 1.6 1 0;
+}
+
+.search-item--sm {
+  flex: 0.9 1 0;
+}
+
+.search-form :deep(.el-form-item__label) {
+  flex: 0 0 72px;
+  width: 72px !important;
+  height: 32px;
+  line-height: 32px;
+  justify-content: flex-end;
+  text-align: right;
+  padding-right: 8px;
+  box-sizing: border-box;
+}
+
+.search-form :deep(.el-form-item__content) {
+  margin-left: 0 !important;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+  line-height: 32px;
+}
+
+.ctrl {
+  width: 100%;
+}
+
+.anchor-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+
+.anchor-filter .ctrl {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.anchor-filter .el-button {
+  flex: 0 0 auto;
 }
 
 .pagination {

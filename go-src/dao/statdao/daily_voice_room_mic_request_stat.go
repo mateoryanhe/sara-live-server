@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	dailyVoiceRoomMicRequestStatCacheMgr     *cache.RowCache[*entity.DailyVoiceRoomMicRequestStat]
-	dailyVoiceRoomMicRequestStatListCacheMgr *cache.ListCache[*entity.DailyVoiceRoomMicRequestStat]
 )
 
 func initDailyVoiceRoomMicRequestStatDao() {
 	dailyVoiceRoomMicRequestStatCacheMgr = cache.NewRowCache[*entity.DailyVoiceRoomMicRequestStat]()
-	dailyVoiceRoomMicRequestStatListCacheMgr = cache.NewPermanentListCache[*entity.DailyVoiceRoomMicRequestStat]()
 }
 
 func GetDailyVoiceRoomMicRequestStatByDate(date string) *entity.DailyVoiceRoomMicRequestStat {
@@ -39,10 +35,8 @@ func ListRecentDailyVoiceRoomMicRequestStats(limit int) []*entity.DailyVoiceRoom
 	if limit <= 0 {
 		limit = 30
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatDailyLoginStatDate(time.Now()))
-	return dailyVoiceRoomMicRequestStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.DailyVoiceRoomMicRequestStat, error) {
-		return loadRecentDailyVoiceRoomMicRequestStatsFromDB(limit), nil
-	})
+	// CMS 按日图必须含「今天」:永久列表缓存在当天首条入库前命中后不会再刷新，会缺当天点。
+	return loadRecentDailyVoiceRoomMicRequestStatsFromDB(limit)
 }
 
 func loadRecentDailyVoiceRoomMicRequestStatsFromDB(limit int) []*entity.DailyVoiceRoomMicRequestStat {

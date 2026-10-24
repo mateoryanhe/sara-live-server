@@ -246,6 +246,7 @@
 - HaiPay 本地代收国家配置：`App 可见`是国家/地区是否可用及是否下发给 App 的唯一开关；代收币种只决定 `/{currency}/collect/apply` 接口。AppId 或支付方式配置异常不得反向把地区判成关闭，应在创建订单时返回对应配置错误。
 - HaiPay 代收支付方式按 `业务类型 + 国家/地区 + 币种` 隔离保存和缓存；每个币种只允许一条支付方式，同一国家的 USD 与本地币方式不可混用。业务类型是可扩展维度，当前 1普通用户代收、2币商代收、3普通用户代付、4工会代付，共用表结构与 DAO。
 - CMS：`/config/haipay`（`HaiPayCfgManagement`）；表 `haipay_cfgs`
+- 第三方支付入口可见性（2026-10-23）：改在 `/config/third-pay-deploy`——**安卓端显示**=`tVisable`、**H5端可见**=`tH5Visable`（库字段 `haipay_cfgs.t_visable` / `t_h5_visable`，默认开）；HaiPay 页已去掉该开关；`GET /sysInfo/cfg` 下发 `tVisable` + `tH5Visable`
 - 付款人资料：表 `channel_pay_user_profiles`（主键=userId，RowCache）；**需登录** `getChannelPayUserProfile` / `saveChannelPayUserProfile`（userId 取 token）；空则 App 引导填写再下单；CMS 测试走 `*ForTest`
 - 表 `yhpay_cfgs` / 列 `fiat_currency_cfgs.adjust_percent` 可残留库中；不强制 DROP
 - Google Play 不动

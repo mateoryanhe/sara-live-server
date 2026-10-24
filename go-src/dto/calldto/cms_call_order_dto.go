@@ -11,8 +11,10 @@ import (
 type CMSVideoCallLogListReq struct {
 	g.Meta `path:"/cmsVideoCallLogList" method:"post" summary:"CMS查询视频通话日志" tags:"视频通话日志"`
 	httpserver.CMSQueryReq
-	CallerId         string   `json:"callerId"   dc:"呼叫者ID(可选,留空查全部)"`
-	ReceiverId       string   `json:"receiverId" dc:"接收者ID(可选,留空查全部,兼容旧参数)"`
+	CallerId         string   `json:"callerId"   dc:"呼叫者ID(可选,兼容旧参数)"`
+	ReceiverId       string   `json:"receiverId" dc:"接收者ID(可选,兼容旧参数)"`
+	Keyword          string   `json:"keyword"    dc:"关键字(可选,模糊匹配呼叫者/接收者ID与昵称)"`
+	CostFilter       uint8    `json:"costFilter" dc:"金额过滤(0=全部,1=总费用>0,2=总费用=0)"`
 	PlatformAnchorId string   `json:"platformAnchorId" dc:"平台主播ID(可选,兼容旧参数)"`
 	GuildAnchorId    string   `json:"guildAnchorId" dc:"工会主播ID(可选,兼容旧参数)"`
 	ReceiverIds      []string `json:"receiverIds" dc:"接收者ID列表(可选,多选)"`

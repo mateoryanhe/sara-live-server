@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	dailyHotLiveRoomJoinStatCacheMgr     *cache.RowCache[*entity.DailyHotLiveRoomJoinStat]
-	dailyHotLiveRoomJoinStatListCacheMgr *cache.ListCache[*entity.DailyHotLiveRoomJoinStat]
 )
 
 func initDailyHotLiveRoomJoinStatDao() {
 	dailyHotLiveRoomJoinStatCacheMgr = cache.NewRowCache[*entity.DailyHotLiveRoomJoinStat]()
-	dailyHotLiveRoomJoinStatListCacheMgr = cache.NewPermanentListCache[*entity.DailyHotLiveRoomJoinStat]()
 }
 
 func GetDailyHotLiveRoomJoinStatByDate(date string) *entity.DailyHotLiveRoomJoinStat {
@@ -39,10 +35,8 @@ func ListRecentDailyHotLiveRoomJoinStats(limit int) []*entity.DailyHotLiveRoomJo
 	if limit <= 0 {
 		limit = 30
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatDailyLoginStatDate(time.Now()))
-	return dailyHotLiveRoomJoinStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.DailyHotLiveRoomJoinStat, error) {
-		return loadRecentDailyHotLiveRoomJoinStatsFromDB(limit), nil
-	})
+	// CMS 按日图必须含「今天」:永久列表缓存在当天首条入库前命中后不会再刷新，会缺当天点。
+	return loadRecentDailyHotLiveRoomJoinStatsFromDB(limit)
 }
 
 func loadRecentDailyHotLiveRoomJoinStatsFromDB(limit int) []*entity.DailyHotLiveRoomJoinStat {

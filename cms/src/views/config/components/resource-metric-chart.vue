@@ -11,6 +11,8 @@ import type {ResourceMetricPoint} from '@/types/api'
 import {
   buildTrendChartDataZoom,
   buildTrendChartXAxisLabel,
+  buildTrendChartXAxisLabelZoomFriendly,
+  TREND_CHART_DENSE_VISIBLE_POINTS,
   trendChartGridBottom,
 } from '@/utils/trend-chart-zoom'
 
@@ -294,7 +296,10 @@ const buildOnlineOption = (points: ResourceMetricPoint[]): EChartsOption => {
   const anchorLabel = t('pages.resourceMonitor.liveAnchorOnlineCount')
   const audienceLabel = t('pages.resourceMonitor.audienceOnlineCount')
   const withSlider = showTrendDataZoom.value
-  const gridBottom = trendChartGridBottom(times.length, withSlider)
+  const gridBottom = trendChartGridBottom(
+      withSlider ? Math.min(times.length, TREND_CHART_DENSE_VISIBLE_POINTS) : times.length,
+      withSlider,
+  )
 
   const legendData = audienceAnchorOnly
       ? [audienceLabel, anchorLabel]
@@ -393,13 +398,17 @@ const buildOnlineOption = (points: ResourceMetricPoint[]): EChartsOption => {
     dataZoom: withSlider
         ? buildTrendChartDataZoom(times.length, {
           defaultFullRange: props.dataZoomDefaultFullRange,
+          alignEnd: props.dataZoomDefaultFullRange !== true,
+          initialWindowPoints: TREND_CHART_DENSE_VISIBLE_POINTS,
         })
         : undefined,
     xAxis: {
       type: 'category',
       boundaryGap: false,
       data: times,
-      axisLabel: buildTrendChartXAxisLabel(times.length),
+      axisLabel: withSlider
+          ? buildTrendChartXAxisLabelZoomFriendly()
+          : buildTrendChartXAxisLabel(times.length),
     },
     yAxis: {
       type: 'value',

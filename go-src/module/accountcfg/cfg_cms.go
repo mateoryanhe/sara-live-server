@@ -22,6 +22,7 @@ func GetAccountCfg(_ context.Context, _ *accountcfgdto.GetAccountCfgReq) (*accou
 			DeviceAccountMaxCount:      defaultDeviceAccountMaxCount,
 			DeviceCancelDailyLimit:     defaultDeviceCancelDailyLimit,
 			UserWithdrawEnabled:        false,
+			UserWithdrawAndroidVisible: false,
 			UserWithdrawMinUsd:         defaultUserWithdrawMinUsd,
 			UserWithdrawDailyMaxCount:  defaultUserWithdrawDailyMaxCount,
 		}}, nil
@@ -60,6 +61,7 @@ func SaveAccountCfg(_ context.Context, req *accountcfgdto.SaveAccountCfgReq) (*a
 		DeviceAccountMaxCount:      maxCount,
 		DeviceCancelDailyLimit:     dailyLimit,
 		UserWithdrawEnabled:        req.UserWithdrawEnabled,
+		UserWithdrawAndroidVisible: req.UserWithdrawAndroidVisible,
 		UserWithdrawMinUsd:         minUsd,
 		UserWithdrawDailyMaxCount:  dailyMax,
 	}
@@ -116,6 +118,7 @@ func toCfgItem(cfg *entity.AccountCfg) *accountcfgdto.AccountCfgItem {
 		DeviceAccountMaxCount:      maxCount,
 		DeviceCancelDailyLimit:     dailyLimit,
 		UserWithdrawEnabled:        cfg.UserWithdrawEnabled,
+		UserWithdrawAndroidVisible: cfg.UserWithdrawAndroidVisible,
 		UserWithdrawMinUsd:         minUsd,
 		UserWithdrawDailyMaxCount:  dailyMax,
 		CreatedAt:                  formatTime(cfg.CreatedAt),

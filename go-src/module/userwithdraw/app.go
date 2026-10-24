@@ -30,8 +30,9 @@ func startOfLocalDay(t time.Time) time.Time {
 
 func GetWithdrawCfg(_ context.Context, _ *userwithdrawdto.AppGetWithdrawCfgReq) (*userwithdrawdto.AppGetWithdrawCfgRes, error) {
 	return &userwithdrawdto.AppGetWithdrawCfgRes{
-		Enabled:           accountcfg.IsUserWithdrawEnabled(),
-		DailyMaxCount:     accountcfg.GetUserWithdrawDailyMaxCount(),
+		Enabled:        accountcfg.IsUserWithdrawEnabled(),
+		AndroidVisible: accountcfg.IsUserWithdrawAndroidVisible(),
+		DailyMaxCount:  accountcfg.GetUserWithdrawDailyMaxCount(),
 	}, nil
 }
 

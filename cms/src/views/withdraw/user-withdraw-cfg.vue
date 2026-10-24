@@ -17,6 +17,15 @@
           <div class="form-tip">{{ t('pages.userWithdrawCfg.enabledTip') }}</div>
         </el-form-item>
 
+        <el-form-item :label="t('pages.userWithdrawCfg.androidVisible')">
+          <el-switch
+              v-model="formData.userWithdrawAndroidVisible"
+              :active-text="t('common.open')"
+              :inactive-text="t('common.close')"
+          />
+          <div class="form-tip">{{ t('pages.userWithdrawCfg.androidVisibleTip') }}</div>
+        </el-form-item>
+
         <el-form-item :label="t('pages.userWithdrawCfg.dailyMaxCount')">
           <el-input-number
               v-model="formData.userWithdrawDailyMaxCount"
@@ -61,6 +70,7 @@ const formData = reactive({
   deviceAccountMaxCount: 3,
   deviceCancelDailyLimit: 1,
   userWithdrawEnabled: false,
+  userWithdrawAndroidVisible: false,
   userWithdrawDailyMaxCount: 1,
 })
 
@@ -82,6 +92,7 @@ const applyCfg = (cfg: AccountCfg | null | undefined) => {
   formData.deviceAccountMaxCount = normalizePositiveInt(cfg?.deviceAccountMaxCount, 3)
   formData.deviceCancelDailyLimit = normalizePositiveInt(cfg?.deviceCancelDailyLimit, 1)
   formData.userWithdrawEnabled = !!cfg?.userWithdrawEnabled
+  formData.userWithdrawAndroidVisible = !!cfg?.userWithdrawAndroidVisible
   const dailyMax = Number(cfg?.userWithdrawDailyMaxCount)
   formData.userWithdrawDailyMaxCount = Number.isFinite(dailyMax) && dailyMax >= 0 ? Math.floor(dailyMax) : 1
   const minUsd = Number(cfg?.userWithdrawMinUsd)
@@ -114,6 +125,7 @@ const handleSave = async () => {
       deviceAccountMaxCount: formData.deviceAccountMaxCount,
       deviceCancelDailyLimit: formData.deviceCancelDailyLimit,
       userWithdrawEnabled: formData.userWithdrawEnabled,
+      userWithdrawAndroidVisible: formData.userWithdrawAndroidVisible,
       userWithdrawMinUsd: preservedUserWithdrawMinUsd.value,
       userWithdrawDailyMaxCount: formData.userWithdrawDailyMaxCount,
     })

@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	dailyChargeResultServerStatCacheMgr     *cache.RowCache[*entity.DailyChargeResultServerStat]
-	dailyChargeResultServerStatListCacheMgr *cache.ListCache[*entity.DailyChargeResultServerStat]
 )
 
 func initDailyChargeResultServerStatDao() {
 	dailyChargeResultServerStatCacheMgr = cache.NewRowCache[*entity.DailyChargeResultServerStat]()
-	dailyChargeResultServerStatListCacheMgr = cache.NewPermanentListCache[*entity.DailyChargeResultServerStat]()
 }
 
 func GetDailyChargeResultServerStatByDate(date string) *entity.DailyChargeResultServerStat {
@@ -39,10 +35,8 @@ func ListRecentDailyChargeResultServerStats(limit int) []*entity.DailyChargeResu
 	if limit <= 0 {
 		limit = 30
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatDailyLoginStatDate(time.Now()))
-	return dailyChargeResultServerStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.DailyChargeResultServerStat, error) {
-		return loadRecentDailyChargeResultServerStatsFromDB(limit), nil
-	})
+	// CMS 按日图必须含「今天」:永久列表缓存在当天首条入库前命中后不会再刷新，会缺当天点。
+	return loadRecentDailyChargeResultServerStatsFromDB(limit)
 }
 
 func loadRecentDailyChargeResultServerStatsFromDB(limit int) []*entity.DailyChargeResultServerStat {

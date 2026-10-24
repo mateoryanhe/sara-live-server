@@ -12,8 +12,15 @@ type VendorGameListReq struct {
 	GameCode  string   `json:"gameCode" dc:"游戏编码(模糊匹配)"`
 	GameCodes []string `json:"gameCodes" dc:"游戏编码(多选精确匹配,优先于 gameCode)"`
 	Name     string `json:"name" dc:"游戏名称(模糊匹配)"`
-	Platform string `json:"platform" dc:"平台(模糊匹配)"`
+	Platform string `json:"platform" dc:"平台(精确匹配)"`
 	Category string `json:"category" dc:"分类(模糊匹配)"`
+}
+
+// VendorGameListRes CMS 游戏库列表响应
+type VendorGameListRes struct {
+	Total     int                   `json:"total" dc:"总数"`
+	Data      []*VendorGameListItem `json:"data" dc:"列表"`
+	Platforms []string              `json:"platforms" dc:"游戏库去重平台(下拉用)"`
 }
 
 // VendorGameListItem CMS 游戏列表项
