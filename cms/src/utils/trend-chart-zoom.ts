@@ -41,7 +41,9 @@ export function buildTrendChartXAxisLabel(pointCount: number) {
     showMinLabel: true,
     showMaxLabel: true,
     margin: dense ? 12 : 8,
-    fontSize: 11,
+    fontSize: 12,
+    fontWeight: 500,
+    color: '#334155',
     interval,
     formatter: (value: string) => formatTrendChartAxisTime(value, veryDense),
   }
@@ -59,7 +61,9 @@ export function buildTrendChartXAxisLabelZoomFriendly() {
     showMinLabel: true,
     showMaxLabel: true,
     margin: 10,
-    fontSize: 11,
+    fontSize: 12,
+    fontWeight: 500,
+    color: '#334155',
     interval: 'auto' as const,
     formatter: (value: string) => formatTrendChartAxisTime(value, true),
   }
