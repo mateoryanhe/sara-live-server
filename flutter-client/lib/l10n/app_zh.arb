@@ -1,0 +1,108 @@
+{
+  "@@locale": "zh",
+  "appTitle": "Sara Live",
+  "uiRenderErrorTitle": "UI 渲染错误",
+  "commonCancel": "取消",
+  "commonSave": "保存",
+  "commonRetry": "重试",
+  "commonCopied": "已复制",
+  "inviteCodeCopied": "邀请码已复制",
+  "languageTitle": "语言",
+  "languageSubtitle": "中文 / English",
+  "languageEnglish": "English",
+  "languageChinese": "中文",
+  "languagePickerTitle": "语言",
+  "languagePickerHint": "选择后自动保存",
+  "uiStyleTitle": "界面风格",
+  "uiStyleSubtitle": "点击切换主题",
+  "settingsSection": "设置",
+  "accountSection": "账户",
+  "logout": "退出登录",
+  "editNicknameTitle": "修改昵称",
+  "editNicknameHint": "请输入新昵称",
+  "avatarFormatError": "仅支持 jpg/png/webp/gif/bmp",
+  "userDisplayName": "用户{userId}",
+  "@userDisplayName": {
+    "placeholders": {
+      "userId": {
+        "type": "int"
+      }
+    }
+  },
+  "walletGold": "金币",
+  "walletDiamond": "钻石",
+  "walletFollow": "关注",
+  "walletFans": "粉丝",
+  "vipTitle": "VIP",
+  "inviteCodeTitle": "邀请码",
+  "anchorRoleTitle": "主播身份",
+  "anchorRoleEnabled": "已开通",
+  "anchorRoleDisabled": "未开通",
+  "tabOneToOne": "1v1",
+  "tabLive": "直播",
+  "tabGame": "游戏",
+  "tabMine": "我的",
+  "tabOnlineAudience": "1v1",
+  "tabOneToOneRoom": "1v1房",
+  "tabShowLive": "直播",
+  "placeholderLiveTitle": "直播",
+  "placeholderLiveSubtitle": "热门秀场与游戏直播列表稍后接入",
+  "placeholderGameTitle": "游戏",
+  "placeholderGameSubtitle": "游戏货架与半屏玩法稍后接入",
+  "deviceCodeTitle": "设备码",
+  "deviceCodeEditTitle": "编辑设备码",
+  "deviceCodeHint": "用于设备码快捷登录（最多 128 字符）",
+  "deviceCodeWarning": "保存后将使用该设备码重新登录，可能切换到其他账号",
+  "deviceCodeEmpty": "设备码不能为空",
+  "deviceCodeTooLong": "设备码不能超过 128 个字符",
+  "deviceCodeUnchanged": "设备码未变更",
+  "deviceCodeSwitchSuccess": "已切换设备码并登录",
+  "deviceCodeNotSet": "未设置（登录时自动生成）",
+  "apiBaseTitle": "API 服务器",
+  "apiBaseEditTitle": "编辑 API 地址",
+  "apiBaseHint": "例如 http://192.168.2.11:9443",
+  "apiBaseWarning": "保存后会切换服务器并退出登录，需在新地址上重新登录。",
+  "apiBaseResetDefault": "恢复默认",
+  "apiBaseEmpty": "API 地址不能为空",
+  "apiBaseInvalid": "请输入有效的 http 或 https 地址",
+  "apiBaseUnchanged": "API 地址未变更",
+  "apiBaseSwitchSuccess": "已切换 API 服务器，请重新登录",
+  "apiBaseNotSet": "未配置",
+  "apiBaseUsingDefault": "默认：{url}",
+  "@apiBaseUsingDefault": {
+    "placeholders": {
+      "url": { "type": "String" }
+    }
+  },
+  "liveHotListTitle": "正在直播",
+  "liveHotListEmpty": "暂无直播中的房间",
+  "liveBadgeOnAir": "直播中",
+  "liveOnlineCount": "{count} 人在看",
+  "@liveOnlineCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "liveChatHint": "说点什么…",
+  "liveSendGift": "送礼物",
+  "liveGiftListEmpty": "暂无礼物",
+  "liveAnchorEnded": "主播已下播",
+  "liveWatchBlockedInCall": "请先结束通话再观看直播",
+  "liveJoiningRoom": "正在进入直播间…",
+  "liveWatchAudienceTitle": "在线观众",
+  "liveWatchAudienceSubtitle": "当前 {count} 人在看（不含主播）",
+  "@liveWatchAudienceSubtitle": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "liveWatchAudienceEmpty": "暂无在线观众",
+  "liveWatchTapToChat": "聊天",
+  "liveGiftSent": "已送出 {giftName}，余额 {diamond}",
+  "@liveGiftSent": {
+    "placeholders": {
+      "giftName": { "type": "String" },
+      "diamond": { "type": "double" }
+    }
+  }
+}

@@ -19,7 +19,17 @@ pub-tool/live-hot-restart-gw/config.json
 *.test
 *.out
 
-# Flutter client（本地开发暂不入库；scripts 可入库）
-flutter-client/*
-!flutter-client/scripts/
-!flutter-client/scripts/**
+# Flutter client：源码入库；构建/工具缓存忽略（细节见 flutter-client/.gitignore）
+flutter-client/build/
+flutter-client/.dart_tool/
+flutter-client/.idea/
+flutter-client/.apk_build/
+flutter-client/.tmp-agora-logs/
+flutter-client/logs/
+flutter-client/**/*.iml
+flutter-client/.flutter-plugins
+flutter-client/.flutter-plugins-dependencies
+flutter-client/android/.gradle/
+flutter-client/android/local.properties
+flutter-client/android/**/build/
+flutter-client/android/.kotlin/

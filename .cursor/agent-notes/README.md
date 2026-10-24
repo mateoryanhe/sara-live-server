@@ -154,7 +154,7 @@
   - 环境：`flutter-client/scripts/env/` — `config.bat` 填路径；`setup.bat` / `setup.bat install`
   - 打 APK：`flutter-client/scripts/apk/build.bat`（`release` 默认 / `debug`）或双击 `一键打包.bat`
 - 重装脚本：`D:\tools\install-flutter-android.ps1`；补包：`D:\tools\install-android-packages.ps1`
-- App 工程：`flutter-client/`（主体 gitignore）
+- App 工程：`flutter-client/`（源码已入库；`build` / `.dart_tool` 等仍 gitignore）
 - Web 本地：`flutter-client\start-web.bat` 或 `pub-tool/flutter-local/一键启动.bat`（`flutter run -d chrome`）
 - **推送规则**：`PushBus` 上 **Repository 与 ViewModel 各自订阅**（失效缓存 / 刷 UI）；见 `.cursor/rules/flutter-push-subscribe.mdc`、`lib/sara_live_core.dart` §6
 - **多语言（2026-10-16）**：`flutter-client/lib/l10n/` — ARB `app_en.arb` / `app_zh.arb`，改文案后 `flutter gen-l10n`；UI 用 `AppLocalizations.of(context)` 或 `context.l10n`；切换与持久化 `LocaleController`（「我的 → 语言」）；新增 key 须中英各写一条

@@ -1,0 +1,38 @@
+name: sara_live_app
+description: Sara Live Flutter app (Android first) + core HTTP/WS/cache
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  cached_network_image: ^4.0.0
+  device_info_plus: ^13.2.0
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  flutter_cache_manager: ^3.4.2
+  go_router: ^18.0.1
+  google_fonts: ^8.2.1
+  http: ^1.2.2
+  image_picker: ^1.2.3
+  path: ^1.9.1
+  path_provider: ^2.1.5
+  shared_preferences: ^2.5.5
+  uuid: ^4.6.0
+  web: ^1.1.1
+  web_socket_channel: ^3.0.1
+  agora_rtc_engine: ^6.5.0
+  permission_handler: ^11.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true

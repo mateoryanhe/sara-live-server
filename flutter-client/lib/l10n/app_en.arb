@@ -1,0 +1,108 @@
+{
+  "@@locale": "en",
+  "appTitle": "Sara Live",
+  "uiRenderErrorTitle": "UI render error",
+  "commonCancel": "Cancel",
+  "commonSave": "Save",
+  "commonRetry": "Retry",
+  "commonCopied": "Copied",
+  "inviteCodeCopied": "Invite code copied",
+  "languageTitle": "Language",
+  "languageSubtitle": "English or Chinese",
+  "languageEnglish": "English",
+  "languageChinese": "中文",
+  "languagePickerTitle": "Language",
+  "languagePickerHint": "Your choice is saved automatically",
+  "uiStyleTitle": "Appearance",
+  "uiStyleSubtitle": "Tap to change theme",
+  "settingsSection": "Settings",
+  "accountSection": "Account",
+  "logout": "Log out",
+  "editNicknameTitle": "Edit nickname",
+  "editNicknameHint": "Enter a new nickname",
+  "avatarFormatError": "Only jpg, png, webp, gif, or bmp",
+  "userDisplayName": "User {userId}",
+  "@userDisplayName": {
+    "placeholders": {
+      "userId": {
+        "type": "int"
+      }
+    }
+  },
+  "walletGold": "Coins",
+  "walletDiamond": "Diamonds",
+  "walletFollow": "Following",
+  "walletFans": "Followers",
+  "vipTitle": "VIP",
+  "inviteCodeTitle": "Invite code",
+  "anchorRoleTitle": "Host status",
+  "anchorRoleEnabled": "Enabled",
+  "anchorRoleDisabled": "Not enabled",
+  "tabOneToOne": "1v1",
+  "tabLive": "Live",
+  "tabGame": "Games",
+  "tabMine": "Me",
+  "tabOnlineAudience": "1v1",
+  "tabOneToOneRoom": "1v1 room",
+  "tabShowLive": "Go live",
+  "placeholderLiveTitle": "Live",
+  "placeholderLiveSubtitle": "Popular show and game streams coming soon",
+  "placeholderGameTitle": "Games",
+  "placeholderGameSubtitle": "Game catalog and mini-games coming soon",
+  "deviceCodeTitle": "Device ID",
+  "deviceCodeEditTitle": "Edit device ID",
+  "deviceCodeHint": "Used for quick device login (max 128 chars)",
+  "deviceCodeWarning": "Saving will log in with this ID. You may switch to another account.",
+  "deviceCodeEmpty": "Device ID cannot be empty",
+  "deviceCodeTooLong": "Device ID cannot exceed 128 characters",
+  "deviceCodeUnchanged": "Device ID unchanged",
+  "deviceCodeSwitchSuccess": "Device ID updated; logged in",
+  "deviceCodeNotSet": "Not set (auto-generated on login)",
+  "apiBaseTitle": "API server",
+  "apiBaseEditTitle": "Edit API base URL",
+  "apiBaseHint": "e.g. http://192.168.2.11:9443",
+  "apiBaseWarning": "Saving switches the server and logs you out. You will sign in again on the new host.",
+  "apiBaseResetDefault": "Use default",
+  "apiBaseEmpty": "API URL cannot be empty",
+  "apiBaseInvalid": "Enter a valid http or https URL",
+  "apiBaseUnchanged": "API server unchanged",
+  "apiBaseSwitchSuccess": "API server updated; please sign in again",
+  "apiBaseNotSet": "Not configured",
+  "apiBaseUsingDefault": "Default: {url}",
+  "@apiBaseUsingDefault": {
+    "placeholders": {
+      "url": { "type": "String" }
+    }
+  },
+  "liveHotListTitle": "Live now",
+  "liveHotListEmpty": "No live rooms right now",
+  "liveBadgeOnAir": "LIVE",
+  "liveOnlineCount": "{count} watching",
+  "@liveOnlineCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "liveChatHint": "Say something…",
+  "liveSendGift": "Send gift",
+  "liveGiftListEmpty": "No gifts available",
+  "liveAnchorEnded": "The host ended the live stream",
+  "liveWatchBlockedInCall": "Exit the call before watching live",
+  "liveJoiningRoom": "Joining live room…",
+  "liveWatchAudienceTitle": "Viewers online",
+  "liveWatchAudienceSubtitle": "{count} watching (excluding host)",
+  "@liveWatchAudienceSubtitle": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "liveWatchAudienceEmpty": "No viewers yet",
+  "liveWatchTapToChat": "Chat",
+  "liveGiftSent": "Sent {giftName}. Balance: {diamond}",
+  "@liveGiftSent": {
+    "placeholders": {
+      "giftName": { "type": "String" },
+      "diamond": { "type": "double" }
+    }
+  }
+}
