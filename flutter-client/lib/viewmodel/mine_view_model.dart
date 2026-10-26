@@ -160,7 +160,35 @@ class MineViewModel {
     }
   }
 
-  /// 写入新设备码并走 `/auth/deviceLogin`（等同快捷登录另一账号）。
+  /// 退出当前账号并进入设备码登录页。
+  ///
+  /// The old token and the current user's cache are cleared before this
+  /// method completes. The persisted device code remains available as the
+  /// editor's initial value until a new login succeeds.
+  Future<bool> beginDeviceCodeLogin() async {
+    if (_deviceIdSwitchInFlight) {
+      return false;
+    }
+    _deviceIdSwitchInFlight = true;
+    _ui.showMineLoading();
+    try {
+      await _scope.beginDeviceCodeLogin();
+      return true;
+    } on ApiException catch (e) {
+      _ui.showMineError(e.message);
+      return false;
+    } catch (e) {
+      _ui.showMineError(e.toString());
+      return false;
+    } finally {
+      _deviceIdSwitchInFlight = false;
+      _ui.hideMineLoading();
+    }
+  }
+
+  /// Compatibility entry point for callers that still submit the code from
+  /// the old inline editor. New UI should use [beginDeviceCodeLogin] followed
+  /// by the dedicated device-code page.
   ///
   /// [validationError] 由 UI 传入本地化校验文案；为 null 表示校验通过。
   Future<void> applyDeviceIdAndLogin(
@@ -174,61 +202,29 @@ class MineViewModel {
       return;
     }
     final next = deviceId.trim();
-
-    final current = _scope.session.storedDeviceId ??
-        await _scope.session.getOrCreateDeviceId();
-    if (next == current) {
-      _ui.showMineMessage(unchangedMessage);
+    if (next.isEmpty) {
+      _ui.showMineError('设备码不能为空');
       return;
     }
 
-    if (_deviceIdSwitchInFlight) {
-      return;
+    if (!_scope.session.isDeviceCodeLoginPending) {
+      final started = await beginDeviceCodeLogin();
+      if (!started) return;
     }
-    _deviceIdSwitchInFlight = true;
-    final previousDeviceId = current;
 
     _ui.showMineLoading();
     try {
       await _scope.runAccountSwitch(() async {
-        // 先落盘新码，避免并发 Splash deviceLogin 仍用旧 UUID。
-        await _scope.session.setDeviceId(next);
-        await _scope.prepareForAccountSwitch();
-        final deviceInfo =
-            await _scope.deviceInfoBuilder.build(deviceId: next);
-        final result = await _scope.authApi.deviceLogin(deviceInfo);
-        await _scope.session.saveToken(result.token);
-        await _scope.handleLoggedIn();
-        await load(forceRefresh: true, silent: true);
+        await _scope.loginWithDeviceCode(next);
         _ui.onDeviceIdApplied(next);
         _ui.showMineMessage(successMessage);
       });
     } on ApiException catch (e) {
       _ui.showMineError(e.message);
-      await _restoreDeviceSession(previousDeviceId);
     } catch (e) {
       _ui.showMineError(e.toString());
-      await _restoreDeviceSession(previousDeviceId);
     } finally {
-      _deviceIdSwitchInFlight = false;
       _ui.hideMineLoading();
-    }
-  }
-
-  Future<void> _restoreDeviceSession(String deviceId) async {
-    try {
-      await _scope.runAccountSwitch(() async {
-        await _scope.session.setDeviceId(deviceId);
-        final deviceInfo =
-            await _scope.deviceInfoBuilder.build(deviceId: deviceId);
-        final result = await _scope.authApi.deviceLogin(deviceInfo);
-        await _scope.session.saveToken(result.token);
-        await _scope.handleLoggedIn();
-        _ui.onDeviceIdApplied(deviceId);
-        await load(forceRefresh: true, silent: true);
-      });
-    } catch (_) {
-      await _scope.handleLoggedOut();
     }
   }
 

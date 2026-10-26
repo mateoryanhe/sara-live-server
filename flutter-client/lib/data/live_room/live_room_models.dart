@@ -216,6 +216,44 @@ class LiveRoomListItem {
   }
 }
 
+/// 观众端房间列表分页结果。
+///
+/// 直播页使用 `/liveRoom/roomList` 的 `statusFilter=0`，不按开播状态过滤，
+/// 以便完整展示主播房间数据。
+class LiveRoomListPage {
+  LiveRoomListPage({
+    required this.total,
+    required this.page,
+    required this.pageSize,
+    required this.list,
+  });
+
+  final int total;
+  final int page;
+  final int pageSize;
+  final List<LiveRoomListItem> list;
+
+  bool get hasMore => page * pageSize < total;
+
+  factory LiveRoomListPage.fromJson(Map<String, dynamic> json) {
+    final raw = json['list'];
+    final items = <LiveRoomListItem>[];
+    if (raw is List) {
+      for (final e in raw) {
+        if (e is Map) {
+          items.add(LiveRoomListItem.fromJson(Map<String, dynamic>.from(e)));
+        }
+      }
+    }
+    return LiveRoomListPage(
+      total: (json['total'] as num?)?.toInt() ?? items.length,
+      page: (json['page'] as num?)?.toInt() ?? 1,
+      pageSize: (json['pageSize'] as num?)?.toInt() ?? 20,
+      list: items,
+    );
+  }
+}
+
 class HotLiveRoomListPage {
   HotLiveRoomListPage({
     required this.total,

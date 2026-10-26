@@ -273,6 +273,18 @@ class LiveRoomRepository {
     );
   }
 
+  Future<LiveRoomListPage> getLiveRoomList({
+    int page = 1,
+    int pageSize = 20,
+    int statusFilter = 0,
+  }) {
+    return _api.fetchLiveRoomList(
+      page: page,
+      pageSize: pageSize,
+      statusFilter: statusFilter,
+    );
+  }
+
   Future<void> kickAudience({
     required int anchorId,
     required int userId,

@@ -9,13 +9,21 @@ class SessionStore extends ChangeNotifier {
 
   static const _kDeviceId = 'device_id';
   static const _kAuthToken = 'auth_token';
+  static const _kDeviceCodeLoginPending = 'device_code_login_pending';
 
   final SharedPreferences _prefs;
   AuthToken? _token;
+  bool _deviceCodeLoginPending = false;
 
   AuthToken? get token => _token;
 
   bool get isLoggedIn => _token != null;
+
+  /// Whether the user explicitly asked to switch accounts by device code.
+  ///
+  /// This flag is persisted so a process restart cannot silently reuse the
+  /// previous device code while the user is in the middle of a switch.
+  bool get isDeviceCodeLoginPending => _deviceCodeLoginPending;
 
   /// 已保存的设备码（未保存过则为 null）。
   String? get storedDeviceId {
@@ -26,7 +34,16 @@ class SessionStore extends ChangeNotifier {
   }
 
   Future<void> load() async {
+    _deviceCodeLoginPending =
+        _prefs.getBool(_kDeviceCodeLoginPending) ?? false;
     _token = AuthToken.tryParse(_prefs.getString(_kAuthToken));
+    if (_deviceCodeLoginPending) {
+      // A crash can happen after the pending marker is persisted but before
+      // AppScope finishes clearing the old token. Never revive that session
+      // on the next launch; the user must explicitly submit a device code.
+      _token = null;
+      await _prefs.remove(_kAuthToken);
+    }
   }
 
   Future<void> saveToken(AuthToken token) async {
@@ -38,6 +55,46 @@ class SessionStore extends ChangeNotifier {
   Future<void> clearToken() async {
     _token = null;
     await _prefs.remove(_kAuthToken);
+    notifyListeners();
+  }
+
+  /// Mark the account-switch flow as requiring an explicit device-code login.
+  ///
+  /// The current device code is intentionally retained as the initial value
+  /// in the editor. It is only replaced after the new device-code login has
+  /// succeeded.
+  Future<void> beginDeviceCodeLogin() async {
+    if (_deviceCodeLoginPending) return;
+    _deviceCodeLoginPending = true;
+    await _prefs.setBool(_kDeviceCodeLoginPending, true);
+    notifyListeners();
+  }
+
+  /// Persist a successful device-code login as one session transition.
+  ///
+  /// Updating the token, device code and pending marker together prevents the
+  /// router from observing a half-switched session after a successful login.
+  Future<void> completeDeviceCodeLogin({
+    required String deviceId,
+    required AuthToken token,
+  }) async {
+    final id = deviceId.trim();
+    if (id.isEmpty) {
+      throw ArgumentError.value(deviceId, 'deviceId', 'must not be empty');
+    }
+    _token = token;
+    _deviceCodeLoginPending = false;
+    await _prefs.setString(_kDeviceId, id);
+    await _prefs.setString(_kAuthToken, token.headerValue);
+    await _prefs.remove(_kDeviceCodeLoginPending);
+    notifyListeners();
+  }
+
+  /// Leave the explicit device-code editor and return to normal startup.
+  Future<void> cancelDeviceCodeLogin() async {
+    if (!_deviceCodeLoginPending) return;
+    _deviceCodeLoginPending = false;
+    await _prefs.remove(_kDeviceCodeLoginPending);
     notifyListeners();
   }
 

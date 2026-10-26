@@ -35,7 +35,7 @@
 /// 8. **对齐现有 Go App 协议**（见各文件注释），Flutter 不传 `X-H5-Client`
 /// 9. **当前 App 登录**：仅设备码 `POST /auth/deviceLogin`；启动页自动登录后进主壳，「我的」拉 `/userInfo/get` + `/vip/getVipDetail`
 /// 10. **网络图片走 core 磁盘缓存**：`ImageDiskCache`（按档位限对象数）+ `CachedAvatar`，勿直接 `NetworkImage`
-/// 11. **路由用 go_router**：路径见 `AppRoutes`；登录成功 `context.go(main)`，退出 `context.go(splash)`；VIP `AppRoutes.vip`；主壳 [MainShellPage] 按 `UserProfile.isAnchor` 切换观众/主播底部 4 Tab（观众：1v1/直播/游戏/我的，默认 1v1）
+/// 11. **路由用 go_router**：路径见 `AppRoutes`；登录成功 `context.go(main)`，普通退出 `context.go(splash)`，设备码切换进入独立编辑登录页；VIP `AppRoutes.vip`；主壳 [MainShellPage] 按 `UserProfile.isAnchor` 切换观众/主播底部 4 Tab（观众：1v1/直播/游戏/我的，默认 1v1）
 /// 12. **1v1 视频通话**：[CallController] 编排 `POST /call/oneToOneRoomCall` → WS(25–32) → `acceptCall` / `confirmCall` / `callHeart` / `endCall`；RTC：**Web**=`web/agora_rtc_bridge.js`+Agora Web SDK，**Android**=`agora_rtc_engine`+`permission_handler`
 /// 13. **秀场开播**：[ShowLivePublisher] `startLive` 后 `POST /agora/liveRoomToken`(Publisher) → 同套 RTC 推流；下播先 leave 再 `stopLive`
 /// 14. **UI 皮肤可切换**：`UiStyle`，「我的 → 设置 → 界面风格」；无顶栏换肤/刷新，下拉刷新

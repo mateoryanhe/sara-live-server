@@ -15,7 +15,9 @@ class LoginViewModel {
 
   /// 有本地 token 则直接成功；否则走 `/auth/deviceLogin`。
   Future<void> start({bool forceRelogin = false}) async {
-    if (_scope.isAccountSwitchInProgress) {
+    if (_scope.isAccountSwitchInProgress ||
+        _scope.session.isDeviceCodeLoginPending) {
+      _ui.hideLoginLoading();
       return;
     }
     _ui.showLoginLoading();
@@ -32,6 +34,30 @@ class LoginViewModel {
       final result = await _scope.authApi.deviceLogin(deviceInfo);
       await _scope.session.saveToken(result.token);
       await _scope.handleLoggedIn();
+      _ui.onLoginSuccess(isNewUser: result.isNewUser);
+    } on ApiException catch (e) {
+      _ui.showLoginError(e.message);
+    } catch (e) {
+      _ui.showLoginError(e.toString());
+    } finally {
+      _ui.hideLoginLoading();
+    }
+  }
+
+  /// Log in with the device code entered on the explicit account-switch page.
+  Future<void> loginWithDeviceId(String deviceId) async {
+    if (_scope.isAccountSwitchInProgress) {
+      return;
+    }
+    final normalized = deviceId.trim();
+    if (normalized.isEmpty) {
+      _ui.showLoginError('设备码不能为空');
+      return;
+    }
+
+    _ui.showLoginLoading();
+    try {
+      final result = await _scope.loginWithDeviceCode(normalized);
       _ui.onLoginSuccess(isNewUser: result.isNewUser);
     } on ApiException catch (e) {
       _ui.showLoginError(e.message);

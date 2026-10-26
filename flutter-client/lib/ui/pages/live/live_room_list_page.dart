@@ -10,7 +10,7 @@ import 'package:sara_live_app/l10n/app_localizations.dart';
 import 'package:sara_live_app/ui/pages/live/live_room_watch_page.dart';
 import 'package:sara_live_app/ui/widgets/app_page_frame.dart';
 
-/// 观众 Tab：Hot 直播中房间列表。
+/// 观众 Tab：全部主播房间列表。
 class LiveRoomListPage extends StatefulWidget {
   const LiveRoomListPage({super.key, required this.scope});
 
@@ -57,14 +57,15 @@ class _LiveRoomListPageState extends State<LiveRoomListPage>
   Future<void> _loadInitial() async {
     setState(() => _initialLoading = true);
     try {
-      final page = await widget.scope.liveRoomRepository.getHotLiveRoomList(
-        pageIndex: 1,
+      final page = await widget.scope.liveRoomRepository.getLiveRoomList(
+        page: 1,
         pageSize: 20,
+        statusFilter: 0,
       );
       if (!mounted) return;
       setState(() {
         _items = page.list;
-        _pageIndex = page.pageIndex;
+        _pageIndex = page.page;
         _hasMore = page.hasMore;
         _initialLoading = false;
       });
@@ -84,14 +85,15 @@ class _LiveRoomListPageState extends State<LiveRoomListPage>
     setState(() => _loadingMore = true);
     try {
       final next = _pageIndex + 1;
-      final page = await widget.scope.liveRoomRepository.getHotLiveRoomList(
-        pageIndex: next,
+      final page = await widget.scope.liveRoomRepository.getLiveRoomList(
+        page: next,
         pageSize: 20,
+        statusFilter: 0,
       );
       if (!mounted) return;
       setState(() {
         _items = [..._items, ...page.list];
-        _pageIndex = page.pageIndex;
+        _pageIndex = page.page;
         _hasMore = page.hasMore;
         _loadingMore = false;
       });
@@ -112,6 +114,10 @@ class _LiveRoomListPageState extends State<LiveRoomListPage>
   }
 
   Future<void> _openRoom(LiveRoomListItem item) async {
+    if (!item.isLive) {
+      _showError(AppLocalizations.of(context).liveAnchorEnded);
+      return;
+    }
     if (widget.scope.callController.isActive) {
       _showError(AppLocalizations.of(context).liveWatchBlockedInCall);
       return;

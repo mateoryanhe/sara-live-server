@@ -180,6 +180,33 @@ class LiveRoomApi {
     );
   }
 
+  /// 获取全部直播间房间列表。
+  ///
+  /// `statusFilter=0` 表示不按开播状态过滤，适合观众端直播页展示全部主播。
+  Future<LiveRoomListPage> fetchLiveRoomList({
+    int page = 1,
+    int pageSize = 20,
+    int statusFilter = 0,
+  }) async {
+    final res = await _client.post<LiveRoomListPage>(
+      '/liveRoom/roomList',
+      body: {
+        'page': page,
+        'pageSize': pageSize,
+        'statusFilter': statusFilter,
+      },
+      parseData: (raw) {
+        if (raw is! Map) return null;
+        return LiveRoomListPage.fromJson(Map<String, dynamic>.from(raw));
+      },
+    );
+    final data = res.data;
+    if (data == null) {
+      throw StateError('liveRoom/roomList empty data');
+    }
+    return data;
+  }
+
   Future<HotLiveRoomListPage> fetchHotLiveRoomList({
     int pageIndex = 1,
     int pageSize = 20,

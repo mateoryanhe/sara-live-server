@@ -190,30 +190,12 @@ class _MinePageState extends State<MinePage> implements MineUi {
   }
 
   Future<void> _editDeviceCode() async {
-    final l10n = AppLocalizations.of(context);
-    final resolved = _deviceId ??
-        widget.scope.session.storedDeviceId ??
-        await widget.scope.session.getOrCreateDeviceId();
-    if (!mounted) return;
-    final next = await showDialog<String>(
-      context: context,
-      builder: (ctx) => _DeviceCodeEditDialog(initial: resolved),
-    );
-    if (next == null) return;
-
-    String? validationError;
-    if (next.isEmpty) {
-      validationError = l10n.deviceCodeEmpty;
-    } else if (next.length > 128) {
-      validationError = l10n.deviceCodeTooLong;
-    }
-
-    await _vm.applyDeviceIdAndLogin(
-      next,
-      validationError: validationError,
-      successMessage: l10n.deviceCodeSwitchSuccess,
-      unchangedMessage: l10n.deviceCodeUnchanged,
-    );
+    final started = await _vm.beginDeviceCodeLogin();
+    if (!started || !mounted) return;
+    // The VM clears the old token and user-scoped cache before navigation.
+    // The router also enforces this location while the pending flag is set,
+    // including after a process restart.
+    context.go(AppRoutes.deviceCodeLogin);
   }
 
   Future<void> _editNickname() async {
@@ -888,79 +870,6 @@ class _InfoTile extends StatelessWidget {
         ],
       ),
       onTap: onTap,
-    );
-  }
-}
-
-/// 设备码编辑：Controller 随 Dialog 生命周期 dispose，避免键盘收起时断言失败。
-class _DeviceCodeEditDialog extends StatefulWidget {
-  const _DeviceCodeEditDialog({required this.initial});
-
-  final String initial;
-
-  @override
-  State<_DeviceCodeEditDialog> createState() => _DeviceCodeEditDialogState();
-}
-
-class _DeviceCodeEditDialogState extends State<_DeviceCodeEditDialog> {
-  late final TextEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(text: widget.initial);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _submit() {
-    FocusManager.instance.primaryFocus?.unfocus();
-    Navigator.pop(context, _controller.text.trim());
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final muted = Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65);
-    return AlertDialog(
-      scrollable: true,
-      title: Text(l10n.deviceCodeEditTitle),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            l10n.deviceCodeWarning,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: muted),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _controller,
-            autofocus: true,
-            maxLength: 128,
-            decoration: InputDecoration(
-              hintText: l10n.deviceCodeHint,
-              counterText: '',
-            ),
-            textInputAction: TextInputAction.done,
-            onSubmitted: (_) => _submit(),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(l10n.commonCancel),
-        ),
-        FilledButton(
-          onPressed: _submit,
-          child: Text(l10n.commonSave),
-        ),
-      ],
     );
   }
 }

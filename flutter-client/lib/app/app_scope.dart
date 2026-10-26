@@ -91,7 +91,7 @@ class AppScope {
   /// 设备码切换进行中：勿因旧 token 的 `code=3` 清会话并回 Splash（会与 deviceLogin 并发）。
   bool get isAccountSwitchInProgress => _accountSwitchDepth > 0;
 
-  /// 包裹 [applyDeviceIdAndLogin] 等切换流程，抑制 [ApiClient.onUnauthorized]。
+  /// 包裹账号切换流程，抑制 [ApiClient.onUnauthorized]。
   Future<T> runAccountSwitch<T>(Future<T> Function() action) async {
     _accountSwitchDepth++;
     try {
@@ -128,12 +128,24 @@ class AppScope {
       baseUrlProvider: () => serverEndpoint.apiBaseUrl,
       appPackage: AppConfig.appPackage,
       tokenProvider: () => scope.session.token,
-      onUnauthorized: (ApiException _) {
-        if (scope.isAccountSwitchInProgress) {
+      onUnauthorizedWithToken: (ApiException _, String? failedToken) {
+        if (scope.isAccountSwitchInProgress ||
+            scope.session.isDeviceCodeLoginPending) {
+          return;
+        }
+        // Keep the token that failed. The callback is dispatched on a later
+        // microtask, so a device-code switch may complete before it runs;
+        // never log out the newly authenticated account because of an old
+        // request from the previous account.
+        if (failedToken == null) {
           return;
         }
         Future(() async {
-          if (scope.isAccountSwitchInProgress) {
+          if (scope.isAccountSwitchInProgress ||
+              scope.session.isDeviceCodeLoginPending) {
+            return;
+          }
+          if (scope.session.token?.headerValue != failedToken) {
             return;
           }
           await scope.handleLoggedOut();
@@ -224,7 +236,9 @@ class AppScope {
   /// 切换 API 根地址（内网调试）；会清会话，需重新登录。
   Future<void> applyServerEndpointOverride(String? normalizedOverride) async {
     await serverEndpoint.setOverride(normalizedOverride);
-    await handleLoggedOut();
+    // A different server can reuse user IDs with different data, so do not
+    // carry any API object cache across an endpoint change.
+    await handleLoggedOut(clearAllCache: true);
   }
 
   /// 登录成功后连接 WS。
@@ -232,28 +246,92 @@ class AppScope {
     await wsClient.connect();
   }
 
-  /// 应用内切换设备码账号：断 WS / 清缓存 / 退房，但**保留 token**。
+  /// Start an explicit device-code account switch.
   ///
-  /// 避免 [handleLoggedOut] 清 token 触发 GoRouter 回启动页，与
-  /// `deviceLogin` 并发导致 Splash 用旧设备码把会话抢回去（真机必现）。
+  /// The old token is cleared before the editor is shown, and only the cache
+  /// namespace belonging to that user is invalidated. The device code itself
+  /// is retained as the editor's initial value until a replacement login
+  /// succeeds.
+  Future<String> beginDeviceCodeLogin() async {
+    final initialDeviceId =
+        session.storedDeviceId ?? await session.getOrCreateDeviceId();
+    final currentUserId = _currentUserId;
+
+    await runAccountSwitch(() async {
+      await session.beginDeviceCodeLogin();
+      await _tearDownClientSession(userId: currentUserId);
+      await session.clearToken();
+    });
+    return initialDeviceId;
+  }
+
+  /// Authenticate with a device code entered in the account-switch page.
+  Future<DeviceLoginResult> loginWithDeviceCode(String deviceId) async {
+    final normalized = deviceId.trim();
+    if (normalized.isEmpty) {
+      throw ArgumentError.value(deviceId, 'deviceId', 'must not be empty');
+    }
+
+    return runAccountSwitch(() async {
+      // Keep this operation safe if the page was opened directly or restored
+      // from a deep link rather than through [beginDeviceCodeLogin].
+      if (!session.isDeviceCodeLoginPending) {
+        final currentUserId = _currentUserId;
+        await session.beginDeviceCodeLogin();
+        await _tearDownClientSession(userId: currentUserId);
+        if (session.isLoggedIn) {
+          await session.clearToken();
+        }
+      }
+
+      final deviceInfo = await deviceInfoBuilder.build(deviceId: normalized);
+      final result = await authApi.deviceLogin(deviceInfo);
+      await session.completeDeviceCodeLogin(
+        deviceId: normalized,
+        token: result.token,
+      );
+      await handleLoggedIn();
+      return result;
+    });
+  }
+
+  /// Leave the editor without attempting another account login.
+  Future<void> cancelDeviceCodeLogin() async {
+    await session.cancelDeviceCodeLogin();
+  }
+
+  /// Tear down active client sessions while retaining the current token.
+  ///
+  /// Kept for callers that need to perform their own immediate login after
+  /// cleanup; the device-code page uses [beginDeviceCodeLogin] instead.
   Future<void> prepareForAccountSwitch() async {
-    await _tearDownClientSession();
+    await _tearDownClientSession(userId: _currentUserId);
   }
 
   /// 登出 / 鉴权失效：断 WS、清会话与缓存。
-  Future<void> handleLoggedOut() async {
-    await _tearDownClientSession();
+  Future<void> handleLoggedOut({bool clearAllCache = false}) async {
+    final currentUserId = _currentUserId;
+    await _tearDownClientSession(
+      userId: currentUserId,
+      clearAllCache: clearAllCache,
+    );
     try {
       await session.clearToken();
     } catch (_) {}
   }
 
-  Future<void> _tearDownClientSession() async {
+  int? get _currentUserId {
+    final id = int.tryParse(session.token?.userId ?? '');
+    if (id == null || id <= 0) return null;
+    return id;
+  }
+
+  Future<void> _tearDownClientSession({
+    int? userId,
+    bool clearAllCache = false,
+  }) async {
     try {
       await wsClient.disconnect();
-    } catch (_) {}
-    try {
-      await cache.clearAll();
     } catch (_) {}
     try {
       await callController.hangUp();
@@ -264,6 +342,13 @@ class AppScope {
     liveRoomAnchor.exitSession();
     try {
       await liveRoomViewer.leaveRoom();
+    } catch (_) {}
+    try {
+      if (!clearAllCache && userId != null && userId > 0) {
+        await cache.invalidateUser(userId);
+      } else {
+        await cache.clearAll();
+      }
     } catch (_) {}
   }
 

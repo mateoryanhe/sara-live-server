@@ -23,10 +23,13 @@ class ApiClient {
     this.retryDelay = const Duration(milliseconds: 400),
     http.Client? httpClient,
     void Function(ApiException error)? onUnauthorized,
+    void Function(ApiException error, String? failedAuthorization)?
+        onUnauthorizedWithToken,
   })  : _baseUrlProvider = baseUrlProvider,
         _tokenProvider = tokenProvider,
         _http = httpClient ?? http.Client(),
-        _onUnauthorized = onUnauthorized;
+        _onUnauthorized = onUnauthorized,
+        _onUnauthorizedWithToken = onUnauthorizedWithToken;
 
   /// 与 Go `httpserver.ReqId` 对齐。
   static const reqIdHeader = 'reqId';
@@ -43,6 +46,8 @@ class ApiClient {
   final Duration retryDelay;
   final http.Client _http;
   final void Function(ApiException error)? _onUnauthorized;
+  final void Function(ApiException error, String? failedAuthorization)?
+      _onUnauthorizedWithToken;
 
   /// [path] 如 `/auth/emailLogin`。
   Future<ApiResponse<T>> post<T>(
@@ -104,6 +109,7 @@ class ApiClient {
         requestBody: encodedBody,
         elapsed: sw.elapsed,
         parseData: parseData,
+        authorization: headers['Authorization'],
       );
     });
   }
@@ -165,6 +171,7 @@ class ApiClient {
         elapsed: sw.elapsed,
         parseData: parseData,
         note: 'multipart-fields',
+        authorization: reqHeaders['Authorization'],
       );
     });
   }
@@ -237,6 +244,7 @@ class ApiClient {
         elapsed: sw.elapsed,
         parseData: parseData,
         note: 'multipart',
+        authorization: reqHeaders['Authorization'],
       );
     });
   }
@@ -297,6 +305,7 @@ class ApiClient {
     required Duration elapsed,
     T? Function(Object? raw)? parseData,
     String? note,
+    String? authorization,
   }) async {
     final bodyStr = utf8.decode(resp.bodyBytes);
     try {
@@ -304,6 +313,7 @@ class ApiClient {
         statusCode: resp.statusCode,
         bodyStr: bodyStr,
         parseData: parseData,
+        authorization: authorization,
       );
       await HttpLogger.log(
         method: method,
@@ -336,6 +346,7 @@ class ApiClient {
     required int statusCode,
     required String bodyStr,
     T? Function(Object? raw)? parseData,
+    String? authorization,
   }) {
     if (statusCode < 200 || statusCode >= 300) {
       throw ApiException(
@@ -359,6 +370,7 @@ class ApiClient {
         statusCode: statusCode,
       );
       if (err.isUnauthorized) {
+        _onUnauthorizedWithToken?.call(err, authorization);
         _onUnauthorized?.call(err);
       }
       throw err;
