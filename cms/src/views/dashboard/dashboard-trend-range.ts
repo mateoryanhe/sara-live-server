@@ -1,4 +1,4 @@
-import {formatServerDateStringFromDate, formatServerDateTimeFromDate} from '@/utils/server-datetime'
+import {formatServerDateStringFromDate} from '@/utils/server-datetime'
 
 /** 资源指标(在线/游戏统计)服务端细采样保留天数 */
 export const DASHBOARD_RESOURCE_METRIC_RETENTION_DAYS = 3
@@ -54,16 +54,17 @@ export function matchDashboardTrendPresetDays(range: [string, string] | null): n
   return null
 }
 
-/** 最近 N 天资源指标趋势（细采样 10 秒，与后端保留策略一致） */
+/**
+ * 最近 N 天资源指标趋势（细采样 10 秒，与后端保留策略一致）。
+ * 不传 start/end：走服务端默认 FineRetention + 10 分钟分桶缓存。
+ * 切勿每次轮询带「当前秒」的滑动窗口——后端曾按完整时间串永久缓存，会导致数 GB 泄漏。
+ */
 export function buildDashboardResourceMetricTrendQuery(
-    days: number = DASHBOARD_RESOURCE_METRIC_RETENTION_DAYS,
+    _days: number = DASHBOARD_RESOURCE_METRIC_RETENTION_DAYS,
 ) {
-  const capped = Math.min(Math.max(days, 1), DASHBOARD_RESOURCE_METRIC_RETENTION_DAYS)
-  const end = new Date()
-  const start = new Date(end.getTime() - capped * 24 * 60 * 60 * 1000)
   return {
-    startTime: formatServerDateTimeFromDate(start),
-    endTime: formatServerDateTimeFromDate(end),
+    startTime: '',
+    endTime: '',
     limit: DASHBOARD_ONLINE_TREND_POINT_LIMIT,
   }
 }

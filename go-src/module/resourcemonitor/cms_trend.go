@@ -13,11 +13,15 @@ import (
 	"xr-game-server/entity/sys"
 )
 
+// cmsTrendCacheTTL 须覆盖默认分桶(10min),且远短于细采样全量(~26k点/条)永久堆积窗口。
+// 2026-10-25: 曾用 PermanentRowCache + 秒级 custom start/end,仪表盘轮询每分钟新 key→数 GB 泄漏。
+const cmsTrendCacheTTL = 10 * time.Minute
+
 var cmsTrendPointsCacheMgr *cache.RowCache[[]*trendPoint]
 
 func cmsTrendPointsCache() *cache.RowCache[[]*trendPoint] {
 	if cmsTrendPointsCacheMgr == nil {
-		cmsTrendPointsCacheMgr = cache.NewPermanentRowCache[[]*trendPoint]()
+		cmsTrendPointsCacheMgr = cache.NewRowCacheWithTTL[[]*trendPoint](cmsTrendCacheTTL)
 	}
 	return cmsTrendPointsCacheMgr
 }
@@ -172,6 +176,11 @@ func toTrendQuery(startTime, endTime string, limit int) trendQuery {
 }
 
 func listTrendPoints(q trendQuery) []*trendPoint {
+	// 显式时间窗不做缓存:仪表盘曾每轮询带「当前秒」的滑动 start/end,
+	// 若再按完整时间串做永久 key 会每分钟新增大约数 MB 的 26k 点切片.
+	if strings.TrimSpace(q.StartTime) != "" || strings.TrimSpace(q.EndTime) != "" {
+		return loadTrendPointsFromDB(q)
+	}
 	key := cmsTrendQueryCacheKey(q)
 	return cmsTrendPointsCache().MustGetRow(gctx.New(), key, func(ctx context.Context) ([]*trendPoint, error) {
 		return loadTrendPointsFromDB(q), nil
@@ -184,12 +193,9 @@ func loadTrendPointsFromDB(q trendQuery) []*trendPoint {
 	return fineToTrendPoints(resourcemetricdao.ListFineByTimeRange(start, end, limit))
 }
 
-// cmsTrendQueryCacheKey 仪表盘默认查询按 10 分钟分桶(与细采样间隔一致); 自定义时间范围按参数固定缓存.
+// cmsTrendQueryCacheKey 仅默认查询(无 start/end)使用;按 10 分钟分桶,配合 TTL 避免永久堆积.
 func cmsTrendQueryCacheKey(q trendQuery) string {
 	limit := resolveTrendLimit(q.Limit)
-	if strings.TrimSpace(q.StartTime) != "" || strings.TrimSpace(q.EndTime) != "" {
-		return fmt.Sprintf("custom:%d:%s:%s", limit, strings.TrimSpace(q.StartTime), strings.TrimSpace(q.EndTime))
-	}
 	bucket := time.Now().Unix() / (10 * 60)
 	return fmt.Sprintf("default:%d:fine:%d", limit, bucket)
 }

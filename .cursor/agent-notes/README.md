@@ -38,6 +38,11 @@
 - **提审服 1GB**：CPU 长期 100%、syndb 仅 `force_wait` 时，fork 可能极慢或失败，脚本会等满再冷启；正式服资源充足时以热重启为主。
 - **2026-10-12 热重启卡死**：`tracking.drainTrackingQueue` 空队列时 `default:break` 只跳出 `select` 导致忙等，`PrepareRestart` 同步调用后阶段一永不结束；已改为 `drainTrackingTQueue` 与 stat 一致。
 - **live-hot-restart-gw（18900）**：`pub-tool/live-hot-restart-gw` 与主 Go 分离部署；`/hotRestart` 无进程时 `sudo start.sh` 冷启，热重启连不上时可 fallback 冷启；`/coldStart` 强制冷启。`config.json` 需 `coldStartScript`（同 xgameserver/start.sh）。
+- **2026-10-25 正式服宕机（~08:11–09:13 UTC）**：access `08:11:30` 后中断，`09:13:15` 冷启 PID 634870；**非双进程**。
+  - **发版**：`10-24 07:41 UTC`（北京 15:41）`deploy`+热重启成功（采样间断、内存 207→140），对齐本地提交 **`6c990432`**（游戏 CMS/shelf/login·充值分渠道统计等）。**泄漏发生在该版本上**。
+  - **泄漏**：`13:20 UTC`（北京 21:20）起 proc_mem ~20MB/min 涨（流量高峰 hour13≈2.9 万请求；CMS authId=17 在刷游戏统计）；`15:40 UTC` 磁盘再次覆盖二进制但 **access 无 hotRestart**（进程未换码）；`15:42` **CPU 钉死 ~85–92%**；过夜 **7.4GB / 系统内存 98%**，次日 08:11 死。
+  - **恢复**：09:02 热重启 refused；gw 仍是 Oct15 旧进程故冷启 fallback 未生效；09:11 SSH 人工拉起。stdout→`/dev/null`，detail 11:40 重建。
+  - **根因（2026-10-26 已发正式服）**：仪表盘秒级滑动 `start/end` + Go `PermanentRowCache` custom key → 永久堆积 ~26k 点切片。已发：Go custom 不缓存 + TTL；CMS 默认不传起止时间；`start.sh` shebang 用 `\x23\x21`；gw `pkill -f`。发版后 Go PID 675762、gw 676196、CMS `cdn/cms` 已更新。
 
 ## 审核服 MariaDB（2026-08-28）
 

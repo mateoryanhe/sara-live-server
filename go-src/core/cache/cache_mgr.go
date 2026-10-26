@@ -156,8 +156,13 @@ type RowCache[T any] struct {
 }
 
 func NewRowCache[T any]() *RowCache[T] {
+	return NewRowCacheWithTTL[T](CacheTime)
+}
+
+// NewRowCacheWithTTL 带过期的行缓存; ttl<=0 时与 NewPermanentRowCache 相同(永不过期,慎用).
+func NewRowCacheWithTTL[T any](ttl time.Duration) *RowCache[T] {
 	return &RowCache[T]{
-		core: &cacheCore[T]{cache: gcache.New(), ttl: CacheTime},
+		core: &cacheCore[T]{cache: gcache.New(), ttl: ttl},
 	}
 }
 

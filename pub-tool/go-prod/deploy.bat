@@ -207,7 +207,8 @@ echo Setting execution permissions...
 plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST% "chmod +x %REMOTE_DIR%/%APP_NAME% %REMOTE_DIR%/%HR_GW_NAME%"
 
 echo Creating remote start script...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST% "printf '%%s\n' '#!/bin/sh' 'cd %REMOTE_DIR%' 'nohup ./%APP_NAME% >/dev/null 2>&1 &' > %REMOTE_DIR%/start.sh && chmod +x %REMOTE_DIR%/start.sh"
+REM shebang via \x23\x21 so DelayedExpansion cannot strip the bang
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST% "printf '\x23\x21/bin/sh\ncd %REMOTE_DIR%\nnohup ./%APP_NAME% >/dev/null 2>&1 &\n' > %REMOTE_DIR%/start.sh && chmod +x %REMOTE_DIR%/start.sh"
 if %errorlevel% neq 0 (
     echo Error: Failed to create remote start script
     exit /b 1
@@ -224,7 +225,7 @@ echo.
 echo ================================
 echo Step 5: Start %HR_GW_NAME% on :18900
 echo ================================
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST% "pkill -x %HR_GW_NAME% 2>/dev/null; sleep 1; cd %REMOTE_DIR% && nohup ./%HR_GW_NAME% >> %REMOTE_DIR%/live-hot-restart-gw.log 2>&1 & sleep 1; pgrep -x %HR_GW_NAME% >/dev/null && echo HR_GW_OK || echo HR_GW_FAIL"
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T -hostkey "%SSH_HOST_KEY%" %REMOTE_USER%@%REMOTE_HOST% "pkill -f './%HR_GW_NAME%' 2>/dev/null; sleep 1; cd %REMOTE_DIR% && nohup ./%HR_GW_NAME% >> %REMOTE_DIR%/live-hot-restart-gw.log 2>&1 & sleep 1; pgrep -af %HR_GW_NAME% >/dev/null && echo HR_GW_OK || echo HR_GW_FAIL"
 if errorlevel 1 (
     echo Warning: %HR_GW_NAME% start check failed - open AWS SG TCP 18900 when needed
 )

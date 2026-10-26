@@ -165,7 +165,8 @@ echo Setting execution permissions...
 plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "chmod +x %REMOTE_DIR%/%APP_NAME%"
 
 echo Creating remote start script...
-plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "printf '%%s\n' '#!/bin/sh' 'cd %REMOTE_DIR%' 'nohup ./%APP_NAME% >/dev/null 2>&1 &' > %REMOTE_DIR%/start.sh && chmod +x %REMOTE_DIR%/start.sh"
+REM shebang via \x23\x21 so DelayedExpansion cannot strip the bang
+plink.exe -ssh -i "%SSH_KEY_PATH%" -P %REMOTE_PORT% -batch -T %REMOTE_USER%@%REMOTE_HOST% "printf '\x23\x21/bin/sh\ncd %REMOTE_DIR%\nnohup ./%APP_NAME% >/dev/null 2>&1 &\n' > %REMOTE_DIR%/start.sh && chmod +x %REMOTE_DIR%/start.sh"
 if %errorlevel% neq 0 (
     echo Error: Failed to create remote start script
     exit /b 1
