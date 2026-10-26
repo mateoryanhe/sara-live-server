@@ -1,17 +1,23 @@
 package cmsexport
 
 import (
+	"archive/zip"
 	"context"
 	"encoding/json"
+	"fmt"
+	"os"
+	"strings"
 	"time"
 
 	"xr-game-server/core/xrtime"
+	"xr-game-server/dao/guilddao"
 	"xr-game-server/dao/liveroomdao"
 	"xr-game-server/dao/userinfodao"
 	"xr-game-server/dto/cmsexportdto"
 	liveentity "xr-game-server/entity/live"
 	"xr-game-server/errercode"
 	"xr-game-server/module/cmsvis"
+	"xr-game-server/module/fileexport"
 	"xr-game-server/module/guild"
 )
 
@@ -90,13 +96,233 @@ func exportLiveDailyEffectiveLiveCSV(ctx context.Context, cmsUserId uint64, payl
 		})
 		roomIds := collectDailyAnchorRoomIds(rows)
 		nicknameMap := userinfodao.GetNicknameMapByUserIds(roomIds)
-		unsettledIncomeMap := liveroomdao.ListLiveRoomIncomeUnsettledTotalForCMS(roomIds)
 		csvRows := make([][]string, 0, len(rows))
 		for _, row := range rows {
-			csvRows = append(csvRows, liveDailyEffectiveLiveToCSVRow(row, nicknameMap, unsettledIncomeMap, req.SettledYesText, req.SettledNoText))
+			csvRows = append(csvRows, liveDailyEffectiveLiveToCSVRow(row, nicknameMap, req.SettledYesText, req.SettledNoText))
 		}
 		return total, csvRows
 	}, onProgress)
+}
+
+func parseGuildIdFilters(vals []string) []uint64 {
+	if len(vals) == 0 {
+		return nil
+	}
+	seen := make(map[uint64]struct{}, len(vals))
+	ids := make([]uint64, 0, len(vals))
+	for _, val := range vals {
+		id := parseUint64Filter(val)
+		if id == 0 {
+			continue
+		}
+		if _, ok := seen[id]; ok {
+			continue
+		}
+		seen[id] = struct{}{}
+		ids = append(ids, id)
+	}
+	return ids
+}
+
+func resolveRequestedGuildIdsForExport(cmsUserId uint64, requested []uint64) ([]uint64, error) {
+	if len(requested) == 0 {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	visible, restrict, empty := cmsvis.VisibilityGuildFilterForUser(cmsUserId)
+	if empty {
+		return nil, errExportEmpty
+	}
+	if !restrict {
+		return requested, nil
+	}
+	visibleSet := make(map[uint64]struct{}, len(visible))
+	for _, id := range visible {
+		visibleSet[id] = struct{}{}
+	}
+	out := make([]uint64, 0, len(requested))
+	for _, id := range requested {
+		if _, ok := visibleSet[id]; ok {
+			out = append(out, id)
+		}
+	}
+	if len(out) == 0 {
+		return nil, errExportEmpty
+	}
+	return out, nil
+}
+
+func sanitizeExportFilePart(name string) string {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return "guild"
+	}
+	replacer := strings.NewReplacer(
+		"/", "_", "\\", "_", ":", "_", "*", "_", "?", "_",
+		"\"", "_", "<", "_", ">", "_", "|", "_",
+	)
+	name = replacer.Replace(name)
+	name = strings.Trim(name, " .")
+	if name == "" {
+		return "guild"
+	}
+	return name
+}
+
+func writeCSVRowToBuilder(sb *strings.Builder, cells []string) {
+	parts := make([]string, len(cells))
+	for i, cell := range cells {
+		parts[i] = escapeCSVCell(cell)
+	}
+	sb.WriteString(strings.Join(parts, ","))
+	sb.WriteString("\r\n")
+}
+
+func exportLiveDailyEffectiveLiveByGuildZIP(ctx context.Context, cmsUserId uint64, payload json.RawMessage, onProgress func(exportedRows, totalRows int)) (*exportResult, error) {
+	var req cmsexportdto.CMSExportLiveDailyEffectiveLiveByGuildPayload
+	if err := json.Unmarshal(payload, &req); err != nil {
+		return nil, err
+	}
+	if len(req.Headers) == 0 {
+		return nil, errExportEmpty
+	}
+	guildIds, err := resolveRequestedGuildIdsForExport(cmsUserId, parseGuildIdFilters(req.GuildIds))
+	if err != nil {
+		return nil, err
+	}
+
+	nameMap := guilddao.GetNameMapByIds(guildIds)
+	grandTotal := 0
+	for _, guildId := range guildIds {
+		total, _ := liveroomdao.DailyAnchorEffectiveLiveCMSMultiList(&liveroomdao.DailyAnchorEffectiveLiveCMSMultiListFilter{
+			GuildIds:      []uint64{guildId},
+			FilterByGuild: true,
+			LiveDateStart: req.LiveDateStart,
+			LiveDateEnd:   req.LiveDateEnd,
+			Keyword:       req.Keyword,
+			Settled:       req.Settled,
+			PageIndex:     1,
+			PageSize:      1,
+		})
+		grandTotal += total
+	}
+	if grandTotal == 0 {
+		return nil, errExportEmpty
+	}
+
+	record, filePath, err := createExportFile(".zip")
+	if err != nil {
+		return nil, err
+	}
+	file, err := os.Create(filePath)
+	if err != nil {
+		_ = fileexport.Delete(record.ExportID)
+		return nil, err
+	}
+
+	abort := func(cause error) (*exportResult, error) {
+		_ = file.Close()
+		_ = fileexport.Delete(record.ExportID)
+		if cause == nil {
+			cause = errExportEmpty
+		}
+		return nil, cause
+	}
+
+	zw := zip.NewWriter(file)
+	exportedRows := 0
+	if onProgress != nil {
+		onProgress(0, grandTotal)
+	}
+
+	for _, guildId := range guildIds {
+		select {
+		case <-ctx.Done():
+			_ = zw.Close()
+			return abort(ctx.Err())
+		default:
+		}
+
+		guildName := ""
+		if nameMap != nil {
+			guildName = nameMap[guildId]
+		}
+		entryName := fmt.Sprintf("%d_%s.csv", guildId, sanitizeExportFilePart(guildName))
+		entry, createErr := zw.Create(entryName)
+		if createErr != nil {
+			_ = zw.Close()
+			return abort(createErr)
+		}
+		if _, writeErr := entry.Write([]byte("\uFEFF")); writeErr != nil {
+			_ = zw.Close()
+			return abort(writeErr)
+		}
+		headerLine := &strings.Builder{}
+		writeCSVRowToBuilder(headerLine, req.Headers)
+		if _, writeErr := entry.Write([]byte(headerLine.String())); writeErr != nil {
+			_ = zw.Close()
+			return abort(writeErr)
+		}
+
+		pageIndex := 1
+		guildTotal := -1
+		guildExported := 0
+		for {
+			select {
+			case <-ctx.Done():
+				_ = zw.Close()
+				return abort(ctx.Err())
+			default:
+			}
+			total, rows := liveroomdao.DailyAnchorEffectiveLiveCMSMultiList(&liveroomdao.DailyAnchorEffectiveLiveCMSMultiListFilter{
+				GuildIds:      []uint64{guildId},
+				FilterByGuild: true,
+				LiveDateStart: req.LiveDateStart,
+				LiveDateEnd:   req.LiveDateEnd,
+				Keyword:       req.Keyword,
+				Settled:       req.Settled,
+				PageIndex:     pageIndex,
+				PageSize:      defaultExportPageSize,
+			})
+			if guildTotal < 0 {
+				guildTotal = total
+			}
+			if len(rows) == 0 {
+				break
+			}
+			roomIds := collectDailyAnchorRoomIds(rows)
+			nicknameMap := userinfodao.GetNicknameMapByUserIds(roomIds)
+			body := &strings.Builder{}
+			for _, row := range rows {
+				writeCSVRowToBuilder(body, liveDailyEffectiveLiveToCSVRow(row, nicknameMap, req.SettledYesText, req.SettledNoText))
+			}
+			if _, writeErr := entry.Write([]byte(body.String())); writeErr != nil {
+				_ = zw.Close()
+				return abort(writeErr)
+			}
+			guildExported += len(rows)
+			exportedRows += len(rows)
+			if onProgress != nil {
+				onProgress(exportedRows, grandTotal)
+			}
+			if guildExported >= guildTotal {
+				break
+			}
+			pageIndex++
+		}
+	}
+
+	if err := zw.Close(); err != nil {
+		return abort(err)
+	}
+	if err := file.Close(); err != nil {
+		_ = fileexport.Delete(record.ExportID)
+		return nil, err
+	}
+	if err := fileexport.Publish(record); err != nil {
+		_ = fileexport.Delete(record.ExportID)
+		return nil, err
+	}
+	return finalizeExportRecord(record, exportedRows), nil
 }
 
 func exportLiveWeeklyUnsettledLiveCSV(ctx context.Context, cmsUserId uint64, payload json.RawMessage, onProgress func(exportedRows, totalRows int)) (*exportResult, error) {
@@ -292,7 +518,9 @@ func guildAnchorDailyEffectiveLiveToCSVRow(row *liveentity.DailyAnchorEffectiveL
 	return cells
 }
 
-func liveDailyEffectiveLiveToCSVRow(row *liveentity.DailyAnchorEffectiveLive, nicknameMap map[uint64]string, unsettledIncomeMap map[uint64]float64, settledYesText, settledNoText string) []string {
+// liveDailyEffectiveLiveToCSVRow 列顺序须与 CMS buildLiveDailyEffectiveLiveListCsvColumns 表头一致:
+// 日期,直播间ID,昵称,有效时长,心跳时长,9项收益,结算,创建,更新
+func liveDailyEffectiveLiveToCSVRow(row *liveentity.DailyAnchorEffectiveLive, nicknameMap map[uint64]string, settledYesText, settledNoText string) []string {
 	if row == nil {
 		return nil
 	}
@@ -304,17 +532,10 @@ func liveDailyEffectiveLiveToCSVRow(row *liveentity.DailyAnchorEffectiveLive, ni
 		row.LiveDate,
 		formatCSVUint(row.RoomId),
 		roomNickname,
-	}
-	if unsettledIncomeMap != nil {
-		cells = append(cells, formatCSVFloat(unsettledIncomeMap[row.RoomId]))
-	} else {
-		cells = append(cells, "")
-	}
-	cells = append(cells,
 		formatLiveDurationMinutes(row.LiveDuration),
 		formatLiveDurationMinutes(row.TotalLiveDuration),
-	)
-	cells = append(cells, incomeAmountCSVCells(&row.LiveRoomIncomeAmounts)...)
+	}
+	cells = append(cells, incomeAmountOnlyCSVCells(&row.LiveRoomIncomeAmounts)...)
 	cells = append(cells,
 		formatSettledText(row.Settled, settledYesText, settledNoText),
 		formatCSVTime(row.CreatedAt),

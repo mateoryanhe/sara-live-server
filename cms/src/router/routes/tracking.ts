@@ -41,5 +41,11 @@ export const trackingRoutes: RouteRecordRaw = {
             component: () => import('@/views/tracking/recharge.vue'),
             meta: {title: '充值'},
         },
+        {
+            path: 'download',
+            name: 'TrackingDownloadManagement',
+            component: () => import('@/views/tracking/download.vue'),
+            meta: {title: '下载量'},
+        },
     ],
 }

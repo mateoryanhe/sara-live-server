@@ -58,7 +58,7 @@ export async function downloadExportFile(fileUrl: string, fileName: string): Pro
     try {
         const link = document.createElement('a')
         link.href = objectUrl
-        link.download = fileName.endsWith('.csv') ? fileName : `${fileName}.csv`
+        link.download = /\.[a-z0-9]+$/i.test(fileName) ? fileName : `${fileName}.csv`
         document.body.appendChild(link)
         link.click()
         link.remove()
@@ -116,6 +116,7 @@ export const CMS_EXPORT_TYPE_GUILD_DAILY_EFFECTIVE_LIVE = 'guildDailyEffectiveLi
 export const CMS_EXPORT_TYPE_GUILD_ANCHOR_DAILY_EFFECTIVE_LIVE = 'guildAnchorDailyEffectiveLive'
 export const CMS_EXPORT_TYPE_MY_GUILD_ANCHOR_DAILY_EFFECTIVE_LIVE = 'myGuildAnchorDailyEffectiveLive'
 export const CMS_EXPORT_TYPE_LIVE_DAILY_EFFECTIVE_LIVE = 'liveDailyEffectiveLive'
+export const CMS_EXPORT_TYPE_LIVE_DAILY_EFFECTIVE_LIVE_BY_GUILD = 'liveDailyEffectiveLiveByGuild'
 export const CMS_EXPORT_TYPE_LIVE_WEEKLY_UNSETTLED_LIVE = 'liveWeeklyUnsettledLive'
 export const CMS_EXPORT_TYPE_CURRENCY_LOG = 'currencyLog'
 export const CMS_EXPORT_TYPE_GAME_BET_LOG = 'gameBetLog'

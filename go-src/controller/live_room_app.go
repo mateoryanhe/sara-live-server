@@ -169,7 +169,7 @@ func (c *LiveRoomAppController) NearbyRoomList(ctx context.Context, req *liveroo
 	return liveroom.GetNearbyLiveRoomList(ctx, req)
 }
 
-// HotRoomList 分页查询 Hot 分类直播中房间列表
+// HotRoomList 分页查询全部上架直播间(开播优先,不按房间类型过滤)
 func (c *LiveRoomAppController) HotRoomList(ctx context.Context, req *liveroomdto.GetHotLiveRoomListReq) (res *liveroomdto.GetHotLiveRoomListRes, err error) {
 	return liveroom.GetHotLiveRoomList(ctx, req)
 }

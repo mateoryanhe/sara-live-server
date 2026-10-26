@@ -70,6 +70,20 @@
               </div>
             </template>
           </el-table-column>
+          <el-table-column :label="t('pages.userList.inviterId')" prop="inviterId" min-width="180">
+            <template #default="scope">
+              <el-button
+                  v-if="canViewDetail && hasInviterId(scope.row.inviterId)"
+                  link
+                  type="primary"
+                  @click="openUserDetailById(scope.row.inviterId)"
+              >
+                {{ scope.row.inviterId }}
+              </el-button>
+              <span v-else-if="hasInviterId(scope.row.inviterId)">{{ scope.row.inviterId }}</span>
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
           <el-table-column :label="t('common.createdAt')" prop="createdAt" width="200">
             <template #default="scope">
               {{ formatDate(scope.row.createdAt) }}
@@ -880,9 +894,23 @@ const openCurrencyDialog = (row: UserInfo, type: CurrencyType, mode: CurrencyMod
 }
 
 const openDetail = (row: UserInfo) => {
+  openUserDetailById(row.id)
+}
+
+const hasInviterId = (inviterId: string | number | null | undefined) => {
+  if (inviterId == null || inviterId === '') {
+    return false
+  }
+  return String(inviterId) !== '0'
+}
+
+const openUserDetailById = (userId: string | number | null | undefined) => {
+  if (userId == null || userId === '') {
+    return
+  }
   router.push({
     name: 'UserDetail',
-    query: {id: String(row.id)},
+    query: {id: String(userId)},
   })
 }
 

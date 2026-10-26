@@ -42,6 +42,8 @@ var (
 	chargePanelEnterTrackingQueue       = gqueue.NewTQueue[*gameevent.ChargePanelEnterTrackingEventData]()
 	chargeClickTrackingQueue            = gqueue.NewTQueue[*gameevent.ChargeClickTrackingEventData]()
 	chargeResultServerTrackingQueue     = gqueue.NewTQueue[*gameevent.ChargeResultServerTrackingEventData]()
+	h5DownloadTrackingQueue             = gqueue.NewTQueue[*gameevent.H5DownloadTrackingEventData]()
+	officialSiteDownloadTrackingQueue   = gqueue.NewTQueue[*gameevent.OfficialSiteDownloadTrackingEventData]()
 )
 
 func initTrackingQueue() {
@@ -75,6 +77,8 @@ func initTrackingQueue() {
 	event.Sub(gameevent.ChargePanelEnterTrackingEvent, onChargePanelEnterTrackingEvent)
 	event.Sub(gameevent.ChargeClickTrackingEvent, onChargeClickTrackingEvent)
 	event.Sub(gameevent.ChargeResultServerTrackingEvent, onChargeResultServerTrackingEvent)
+	event.Sub(gameevent.H5DownloadTrackingEvent, onH5DownloadTrackingEvent)
+	event.Sub(gameevent.OfficialSiteDownloadTrackingEvent, onOfficialSiteDownloadTrackingEvent)
 }
 
 func onShowcaseLiveRoomJoinTrackingEvent(data any) {
@@ -285,6 +289,22 @@ func onChargeResultServerTrackingEvent(data any) {
 	chargeResultServerTrackingQueue.Push(ev)
 }
 
+func onH5DownloadTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.H5DownloadTrackingEventData)
+	if !ok || ev == nil {
+		return
+	}
+	h5DownloadTrackingQueue.Push(ev)
+}
+
+func onOfficialSiteDownloadTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.OfficialSiteDownloadTrackingEventData)
+	if !ok || ev == nil {
+		return
+	}
+	officialSiteDownloadTrackingQueue.Push(ev)
+}
+
 func onOfflineGameRoomPlayTrackingEvent(data any) {
 	ev, ok := data.(*gameevent.OfflineGameRoomPlayTrackingEventData)
 	if !ok || ev == nil || ev.UserId == 0 || ev.RoomId == 0 {
@@ -330,6 +350,8 @@ func trackingQueueIdle() bool {
 		chargePanelEnterTrackingQueue.Len() == 0 &&
 		chargeClickTrackingQueue.Len() == 0 &&
 		chargeResultServerTrackingQueue.Len() == 0 &&
+		h5DownloadTrackingQueue.Len() == 0 &&
+		officialSiteDownloadTrackingQueue.Len() == 0 &&
 		offlineGameRoomPlayTrackingQueue.Len() == 0
 }
 
@@ -426,5 +448,11 @@ func drainTrackingQueue() {
 	})
 	drainTrackingTQueue(chargeResultServerTrackingQueue, func(ev *gameevent.ChargeResultServerTrackingEventData) {
 		recordChargeResultServer(ev.UserId, ev.StatAt)
+	})
+	drainTrackingTQueue(h5DownloadTrackingQueue, func(ev *gameevent.H5DownloadTrackingEventData) {
+		recordH5Download(ev.StatAt)
+	})
+	drainTrackingTQueue(officialSiteDownloadTrackingQueue, func(ev *gameevent.OfficialSiteDownloadTrackingEventData) {
+		recordOfficialSiteDownload(ev.StatAt)
 	})
 }

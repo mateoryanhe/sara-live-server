@@ -4,11 +4,42 @@
       <template #header>
         <div class="card-header">
           <span>{{ pageTitle }}</span>
-          <el-button @click="goBack">{{ t('pages.guildMembers.back') }}</el-button>
+          <div class="header-actions">
+            <template v-if="!readonly && canBatchShelf">
+              <el-button
+                  :disabled="!canBatchOnShelf"
+                  :loading="shelfOperating"
+                  type="success"
+                  @click="handleBatchOnShelf"
+              >
+                {{ t('common.batchOnShelf') }}
+              </el-button>
+              <el-button
+                  :disabled="!canBatchOffShelf"
+                  :loading="shelfOperating"
+                  type="warning"
+                  @click="handleBatchOffShelf"
+              >
+                {{ t('common.batchOffShelf') }}
+              </el-button>
+            </template>
+            <el-button @click="goBack">{{ t('pages.guildMembers.back') }}</el-button>
+          </div>
         </div>
       </template>
 
-      <el-table v-loading="loading" :data="tableData" style="width: 100%">
+      <div v-if="!readonly && selectedRows.length" class="selection-tip">
+        {{ t('common.selectedCount', {count: selectedRows.length}) }}
+      </div>
+
+      <el-table
+          v-loading="loading"
+          :data="tableData"
+          :row-key="anchorRowKey"
+          style="width: 100%"
+          @selection-change="handleSelectionChange"
+      >
+        <el-table-column v-if="!readonly && canBatchShelf" type="selection" width="48"/>
         <el-table-column :label="t('common.userId')" prop="id" width="180">
           <template #default="{ row }">
             <el-button v-if="canViewDetail" link type="primary" @click="openDetail(row)">
@@ -109,6 +140,12 @@
           <template #default="{ row }">
             <el-tag v-if="row.ban" type="danger">{{ t('common.banned') }}</el-tag>
             <el-tag v-else type="success">{{ t('common.normal') }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('pages.anchorList.shelfStatus')" prop="status" width="100">
+          <template #default="{ row }">
+            <el-tag v-if="Number(row.status) === 1" type="success">{{ t('common.onShelf') }}</el-tag>
+            <el-tag v-else type="info">{{ t('common.offShelf') }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column :label="t('pages.anchorList.banUntil')" prop="banApplyTime" width="170">
@@ -271,6 +308,7 @@ const permissionPage = route.name === 'GuildProfileMembers' ? 'GuildProfileManag
 const {can} = usePagePermission(permissionPage)
 const {canViewUserDetail, openUserDetail} = useUserDetailNav(permissionPage)
 const canViewDetail = computed(() => can('viewDetail'))
+const canBatchShelf = computed(() => can('batchOffShelf') || can('batchOnShelf'))
 const canSetAnchorType = (row: AnchorListItem) => {
   if (!can('setAnchorType')) {
     return false
@@ -280,11 +318,23 @@ const canSetAnchorType = (row: AnchorListItem) => {
 
 const loading = ref(false)
 const tableData = ref<AnchorListItem[]>([])
+const selectedRows = ref<AnchorListItem[]>([])
+const shelfOperating = ref(false)
+const onShelfSelectedRows = computed(() => selectedRows.value.filter(row => Number(row.status) === 1))
+const offShelfSelectedRows = computed(() => selectedRows.value.filter(row => Number(row.status) !== 1))
+const canBatchOnShelf = computed(() => offShelfSelectedRows.value.length > 0 && !shelfOperating.value)
+const canBatchOffShelf = computed(() => onShelfSelectedRows.value.length > 0 && !shelfOperating.value)
 const pagination = reactive({
   pageIndex: 1,
   pageSize: 10,
   total: 0,
 })
+
+const anchorRowKey = (row: AnchorListItem) => String(row.id)
+
+const handleSelectionChange = (rows: AnchorListItem[]) => {
+  selectedRows.value = rows
+}
 
 const banDialogVisible = ref(false)
 const banSubmitting = ref(false)
@@ -402,6 +452,7 @@ const fetchList = async () => {
   if (!guildId.value) {
     tableData.value = []
     pagination.total = 0
+    selectedRows.value = []
     return
   }
   loading.value = true
@@ -413,6 +464,7 @@ const fetchList = async () => {
     })
     tableData.value = response.data || []
     pagination.total = response.total || 0
+    selectedRows.value = []
   } catch (error) {
     console.error('Failed to load guild members:', error)
     ElMessage.error(t('pages.guildMembers.fetchFailed'))
@@ -569,6 +621,98 @@ const handleExitGuild = async (row: AnchorListItem) => {
   }
 }
 
+const applyLiveRoomStatusBatch = async (rows: AnchorListItem[], status: 0 | 1) => {
+  let success = 0
+  let fail = 0
+  for (const row of rows) {
+    try {
+      await accountApi.setLiveRoomStatus({
+        anchorId: row.id,
+        status,
+      })
+      success++
+    } catch (error) {
+      fail++
+      console.error('set live room status failed:', row.id, error)
+    }
+  }
+  return {success, fail}
+}
+
+const handleBatchOnShelf = async () => {
+  const rows = offShelfSelectedRows.value
+  if (!rows.length) {
+    ElMessage.warning(t('pages.anchorList.selectOffShelfAnchors'))
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+        t('pages.anchorList.batchOnShelfConfirm', {count: rows.length}),
+        t('pages.anchorList.batchOnShelfTitle'),
+        {
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning',
+        },
+    )
+  } catch {
+    return
+  }
+  shelfOperating.value = true
+  try {
+    const {success, fail} = await applyLiveRoomStatusBatch(rows, 1)
+    if (fail > 0) {
+      ElMessage.warning(t('pages.anchorList.batchOnShelfPartial', {success, fail}))
+    } else {
+      ElMessage.success(t('pages.anchorList.batchOnShelfSuccess', {count: success}))
+    }
+    selectedRows.value = []
+    await fetchList()
+  } catch (error) {
+    console.error('batch on shelf failed:', error)
+    ElMessage.error(t('pages.anchorList.batchOnShelfFailed'))
+  } finally {
+    shelfOperating.value = false
+  }
+}
+
+const handleBatchOffShelf = async () => {
+  const rows = onShelfSelectedRows.value
+  if (!rows.length) {
+    ElMessage.warning(t('pages.anchorList.selectOnShelfAnchors'))
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+        t('pages.anchorList.batchOffShelfConfirm', {count: rows.length}),
+        t('pages.anchorList.batchOffShelfTitle'),
+        {
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning',
+        },
+    )
+  } catch {
+    return
+  }
+  shelfOperating.value = true
+  try {
+    const {success, fail} = await applyLiveRoomStatusBatch(rows, 0)
+    if (fail > 0) {
+      ElMessage.warning(t('pages.anchorList.batchOffShelfPartial', {success, fail}))
+    } else {
+      ElMessage.success(t('pages.anchorList.batchOffShelfSuccess', {count: success}))
+    }
+    selectedRows.value = []
+    await fetchList()
+  } catch (error) {
+    console.error('batch off shelf failed:', error)
+    ElMessage.error(t('pages.anchorList.batchOffShelfFailed'))
+  } finally {
+    shelfOperating.value = false
+  }
+}
+
 const goBack = () => {
   router.push({name: readonly.value ? 'GuildProfileManagement' : 'GuildManagement'})
 }
@@ -604,6 +748,20 @@ onActivated(() => {
   justify-content: space-between;
   font-size: 16px;
   font-weight: bold;
+  gap: 12px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.selection-tip {
+  margin-bottom: 12px;
+  color: var(--el-text-color-regular);
+  font-size: 13px;
 }
 
 .pagination-container {

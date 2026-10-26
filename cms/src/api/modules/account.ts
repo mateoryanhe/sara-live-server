@@ -26,6 +26,8 @@ import type {
     SetAnchorReq,
     SaveAnchorTransferInfoReq,
     SetCanRankReq,
+    BatchOffShelfShowcaseLiveRoomsRes,
+    BatchOnShelfShowcaseLiveRoomsRes,
     SetLiveRoomStatusReq,
     SetLiveRoomStatusRes,
     SetRechargeWhitelistReq,
@@ -41,7 +43,11 @@ import type {
     UnBanReq,
     UnCancelReq,
     UserDetail,
-    UserInfo
+    UserInfo,
+    CMSInviteeItem,
+    CMSInviteeListQuery,
+    CMSInviteLogItem,
+    CMSInviteLogListQuery,
 } from '@/types/api'
 
 const accountApi = {
@@ -119,6 +125,14 @@ const accountApi = {
         return request.post<UserDetail>('/account/getUserDetail', {userId})
     },
 
+    getInviteeList: (data: CMSInviteeListQuery) => {
+        return request.post<PageResponse<CMSInviteeItem>>('/account/cmsInviteeList', data)
+    },
+
+    getInviteLogList: (data: CMSInviteLogListQuery) => {
+        return request.post<PageResponse<CMSInviteLogItem>>('/account/cmsInviteLogList', data)
+    },
+
     getOffShelfLiveRoomList: (data: QueryOffShelfLiveRoomListReq) => {
         return request.post<PageResponse<OffShelfLiveRoomItem>>('/account/getOffShelfLiveRoomList', data)
     },
@@ -158,6 +172,14 @@ const accountApi = {
     // 上架/下架主播直播间
     setLiveRoomStatus: (data: SetLiveRoomStatusReq) => {
         return request.post<SetLiveRoomStatusRes>('/account/setLiveRoomStatus', data)
+    },
+
+    batchOffShelfShowcaseLiveRooms: () => {
+        return request.post<BatchOffShelfShowcaseLiveRoomsRes>('/account/batchOffShelfShowcaseLiveRooms', {}, {timeout: 5 * 60 * 1000})
+    },
+
+    batchOnShelfShowcaseLiveRooms: () => {
+        return request.post<BatchOnShelfShowcaseLiveRoomsRes>('/account/batchOnShelfShowcaseLiveRooms', {}, {timeout: 5 * 60 * 1000})
     },
 
     setLiveRoomCover: (data: SetLiveRoomCoverReq) => {

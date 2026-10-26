@@ -87,7 +87,7 @@ const GUILD_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
     {
         id: 'members',
         titleKey: 'pages.moduleList.groupGuildMembers',
-        buttonKeys: ['viewDetail', 'viewUserDetail', 'ban', 'unban', 'exitGuild', 'setAnchorType'],
+        buttonKeys: ['viewDetail', 'viewUserDetail', 'ban', 'unban', 'exitGuild', 'setAnchorType', 'batchOffShelf', 'batchOnShelf'],
     },
 ]
 
@@ -158,6 +158,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             page('TrackingShortVideoManagement'),
             page('TrackingVoiceChatRoomManagement'),
             page('TrackingRechargeManagement'),
+            page('TrackingDownloadManagement'),
         ],
     },
     {
@@ -291,6 +292,8 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
         children: [
             page('PromotionChannelUrlListManagement'),
             page('PromotionChannelDailyStatManagement'),
+            page('PromotionInviteLogListManagement'),
+            page('PromotionShareAppDownloadCfgManagement'),
         ],
     },
     {

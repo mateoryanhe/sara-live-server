@@ -71,7 +71,7 @@ const hasMenuPermission = (moduleName: string) => {
           <span>{{ t('menu.Dashboard') }}</span>
         </el-menu-item>
         <el-sub-menu
-            v-if="hasMenuPermission('TrackingHotLiveRoomJoinManagement') || hasMenuPermission('TrackingCall1v1InitiateManagement') || hasMenuPermission('TrackingMiniGameRoundStartManagement') || hasMenuPermission('TrackingShortVideoManagement') || hasMenuPermission('TrackingVoiceChatRoomManagement') || hasMenuPermission('TrackingRechargeManagement')"
+            v-if="hasMenuPermission('TrackingHotLiveRoomJoinManagement') || hasMenuPermission('TrackingCall1v1InitiateManagement') || hasMenuPermission('TrackingMiniGameRoundStartManagement') || hasMenuPermission('TrackingShortVideoManagement') || hasMenuPermission('TrackingVoiceChatRoomManagement') || hasMenuPermission('TrackingRechargeManagement') || hasMenuPermission('TrackingDownloadManagement')"
             index="/tracking">
           <template #title>
             <el-icon>
@@ -114,6 +114,12 @@ const hasMenuPermission = (moduleName: string) => {
               <DataLine/>
             </el-icon>
             <span>{{ t('menu.TrackingRechargeManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('TrackingDownloadManagement')" index="/tracking/download">
+            <el-icon>
+              <DataLine/>
+            </el-icon>
+            <span>{{ t('menu.TrackingDownloadManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
@@ -551,7 +557,7 @@ const hasMenuPermission = (moduleName: string) => {
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('PromotionChannelUrlListManagement') || hasMenuPermission('PromotionChannelDailyStatManagement')"
+            v-if="hasMenuPermission('PromotionChannelUrlListManagement') || hasMenuPermission('PromotionChannelDailyStatManagement') || hasMenuPermission('PromotionInviteLogListManagement') || hasMenuPermission('PromotionShareAppDownloadCfgManagement')"
             index="/promotion">
           <template #title>
             <el-icon>
@@ -570,6 +576,18 @@ const hasMenuPermission = (moduleName: string) => {
               <DataLine/>
             </el-icon>
             <span>{{ t('menu.PromotionChannelDailyStatManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('PromotionInviteLogListManagement')" index="/promotion/invite-log-list">
+            <el-icon>
+              <List/>
+            </el-icon>
+            <span>{{ t('menu.PromotionInviteLogListManagement') }}</span>
+          </el-menu-item>
+          <el-menu-item v-if="hasMenuPermission('PromotionShareAppDownloadCfgManagement')" index="/promotion/share-app-download-cfg">
+            <el-icon>
+              <Link/>
+            </el-icon>
+            <span>{{ t('menu.PromotionShareAppDownloadCfgManagement') }}</span>
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu

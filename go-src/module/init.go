@@ -39,6 +39,7 @@ import (
 	"xr-game-server/module/recharge"
 	"xr-game-server/module/resourcemonitor"
 	"xr-game-server/module/richrank"
+	"xr-game-server/module/shareappdownload"
 	"xr-game-server/module/shortvideo"
 	"xr-game-server/module/simulatorcpukeyword"
 	"xr-game-server/module/simulatordevicewhitelist"
@@ -89,6 +90,7 @@ func Init() {
 	verification_code.Init()
 	aliyunmoderation.Init()
 	privacypolicy.Init()
+	shareappdownload.Init()
 	accountcfg.Init()
 	userwithdraw.Init()
 	appversioncfg.Init()

@@ -5,6 +5,7 @@ type TranslateFn = (key: string) => string
 
 export type CurrencyLogCsvRow = {
   id: string
+  currencyType?: number
   action: number
   amount: number
   before: number
@@ -13,12 +14,25 @@ export type CurrencyLogCsvRow = {
   createdAt?: string | null
 }
 
-export function buildCurrencyLogCsvColumns(t: TranslateFn, currencyType: 1 | 2): CsvColumn<CurrencyLogCsvRow>[] {
+export function buildCurrencyLogCsvColumns(
+    t: TranslateFn,
+    currencyType: 0 | 1 | 2 = 0,
+): CsvColumn<CurrencyLogCsvRow>[] {
   const amountHeader = currencyType === 2
       ? t('pages.currencyLogList.diamondChange')
-      : t('pages.currencyLogList.goldChange')
+      : currencyType === 1
+          ? t('pages.currencyLogList.goldChange')
+          : t('pages.currencyLogList.amountChange')
   return [
     {header: t('pages.currencyLogList.logId'), value: row => row.id},
+    {
+      header: t('pages.currencyLogList.currencyType'),
+      value: row => {
+        if (row.currencyType === 2) return t('pages.currencyLogList.currencyTypeDiamond')
+        if (row.currencyType === 1) return t('pages.currencyLogList.currencyTypeGold')
+        return ''
+      },
+    },
     {
       header: t('pages.currencyLogList.changeType'),
       value: row => {

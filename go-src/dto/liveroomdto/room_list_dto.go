@@ -11,6 +11,7 @@ type GetLiveRoomListReq struct {
 	TagId        uint64 `json:"tagId,string" dc:"标签ID(0=全部)"`
 	Title        string `json:"title" dc:"标题(模糊匹配)"`
 	Notice       string `json:"notice" dc:"公告(模糊匹配)"`
+	Key          string `json:"key" dc:"关键字(模糊匹配主播ID或主播昵称)"`
 }
 
 // LiveRoomListItem 直播间列表条目
@@ -54,9 +55,10 @@ const (
 // GetOneToOneRoomListReq App 分页查询1v1房间列表，在线状态以 WebSocket 连接为准。
 type GetOneToOneRoomListReq struct {
 	g.Meta       `path:"/oneToOneRoomList" method:"post" summary:"查询1v1房间列表" tags:"直播间"`
-	Page         int `json:"page" dc:"页码(从1开始,默认1)"`
-	PageSize     int `json:"pageSize" dc:"每页数量(默认20,最大100)"`
-	StatusFilter int `json:"statusFilter" v:"in:0,1,2#在线状态无效" dc:"在线状态过滤(0=全部,1=在线,2=离线)"`
+	Page         int    `json:"page" dc:"页码(从1开始,默认1)"`
+	PageSize     int    `json:"pageSize" dc:"每页数量(默认20,最大100)"`
+	StatusFilter int    `json:"statusFilter" v:"in:0,1,2#在线状态无效" dc:"在线状态过滤(0=全部,1=在线,2=离线)"`
+	Key          string `json:"key" dc:"关键字(模糊匹配主播ID或主播昵称)"`
 }
 
 // OneToOneRoomListItem 1v1房间列表条目。
@@ -75,9 +77,10 @@ type GetOneToOneRoomListRes struct {
 // GetFollowedLiveRoomListReq App 分页查询当前用户关注的直播间列表
 type GetFollowedLiveRoomListReq struct {
 	g.Meta       `path:"/followedRoomList" method:"post" summary:"查询我关注的直播间列表" tags:"直播间"`
-	Page         int `json:"page" dc:"页码(从1开始,默认1)"`
-	PageSize     int `json:"pageSize" dc:"每页数量(默认20,最大100)"`
-	StatusFilter int `json:"statusFilter" dc:"状态过滤(0=全部,1=仅直播中,2=仅未开播/已下播)"`
+	Page         int    `json:"page" dc:"页码(从1开始,默认1)"`
+	PageSize     int    `json:"pageSize" dc:"每页数量(默认20,最大100)"`
+	StatusFilter int    `json:"statusFilter" dc:"状态过滤(0=全部,1=仅直播中,2=仅未开播/已下播)"`
+	Key          string `json:"key" dc:"关键字(模糊匹配主播ID或主播昵称)"`
 }
 
 const (
@@ -97,11 +100,12 @@ type GetNearbyLiveRoomListRes struct {
 	List []*LiveRoomListItem `json:"list" dc:"相邻直播间列表(不含当前房间,仅直播中)"`
 }
 
-// GetHotLiveRoomListReq App 分页查询 Hot 分类直播中房间列表(走内存缓存排序)
+// GetHotLiveRoomListReq App 分页查询全部上架直播间(开播优先,不按房间类型过滤)
 type GetHotLiveRoomListReq struct {
-	g.Meta    `path:"/hotRoomList" method:"post" summary:"查询Hot直播中房间列表" tags:"直播间"`
-	PageIndex int `json:"pageIndex" dc:"页码(从1开始,默认1)"`
-	PageSize  int `json:"pageSize" dc:"每页数量(默认20,最大100)"`
+	g.Meta    `path:"/hotRoomList" method:"post" summary:"查询上架直播间列表(开播优先,不按类型过滤)" tags:"直播间"`
+	PageIndex int    `json:"pageIndex" dc:"页码(从1开始,默认1)"`
+	PageSize  int    `json:"pageSize" dc:"每页数量(默认20,最大100)"`
+	Key       string `json:"key" dc:"关键字(模糊匹配主播ID或主播昵称)"`
 }
 
 // HotLiveRoomListItem Hot 直播间列表条目(含排名)
@@ -114,14 +118,15 @@ type GetHotLiveRoomListRes struct {
 	Total     int                    `json:"total" dc:"总条数"`
 	PageIndex int                    `json:"pageIndex" dc:"当前页码"`
 	PageSize  int                    `json:"pageSize" dc:"每页数量"`
-	List      []*HotLiveRoomListItem `json:"list" dc:"Hot直播中房间列表"`
+	List      []*HotLiveRoomListItem `json:"list" dc:"上架直播间列表(开播优先)"`
 }
 
 // GetVoiceChatLiveRoomListReq App 分页查询语聊房分类直播间列表(走内存缓存排序,含排名)
 type GetVoiceChatLiveRoomListReq struct {
 	g.Meta    `path:"/voiceChatRoomList" method:"post" summary:"查询语聊房直播间列表" tags:"直播间"`
-	PageIndex int `json:"pageIndex" dc:"页码(从1开始,默认1)"`
-	PageSize  int `json:"pageSize" dc:"每页数量(默认20,最大100)"`
+	PageIndex int    `json:"pageIndex" dc:"页码(从1开始,默认1)"`
+	PageSize  int    `json:"pageSize" dc:"每页数量(默认20,最大100)"`
+	Key       string `json:"key" dc:"关键字(模糊匹配主播ID或主播昵称)"`
 }
 
 type GetVoiceChatLiveRoomListRes = GetHotLiveRoomListRes

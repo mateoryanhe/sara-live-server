@@ -47,6 +47,7 @@ func QueryUserInfo(ctx context.Context, req *accountdto.QueryUserInfoReq) (res *
 			val.Gold = userInfoCache.Gold
 			val.Diamond = userInfoCache.Diamond
 			val.ShareCode = userInfoCache.ShareCode
+			val.InviterId = userInfoCache.InviterId
 			val.UserType = userInfoCache.UserType
 			val.IsAnchor = userInfoCache.IsAnchor()
 			val.VipLevel = userInfoCache.VipLevel

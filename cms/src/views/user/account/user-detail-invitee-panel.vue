@@ -1,0 +1,213 @@
+<template>
+  <div>
+    <el-form :model="searchForm" class="search-form" inline label-width="100px">
+      <el-form-item :label="t('common.createdAt')">
+        <el-date-picker
+            v-model="searchForm.dateRange"
+            clearable
+            :end-placeholder="t('common.endTime')"
+            format="YYYY-MM-DD"
+            :range-separator="t('pages.anchorIncomeSettlementLogList.dateRangeSeparator')"
+            :start-placeholder="t('common.startTime')"
+            style="width: 260px"
+            type="daterange"
+            value-format="YYYY-MM-DD"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
+        <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
+      </el-form-item>
+    </el-form>
+
+    <div class="list-summary">{{ t('pages.userList.inviteeTotal', {count: pagination.total}) }}</div>
+
+    <el-table v-loading="loading" :data="tableData" style="width: 100%">
+      <el-table-column fixed label="#" type="index" width="55" :index="formatRowIndex"/>
+      <el-table-column :label="t('common.userId')" min-width="180" prop="userId">
+        <template #default="{ row }">
+          <el-button link type="primary" @click="openInviteeDetail(row.userId)">
+            {{ row.userId }}
+          </el-button>
+        </template>
+      </el-table-column>
+      <el-table-column :label="t('common.avatar')" width="80">
+        <template #default="{ row }">
+          <el-image
+              v-if="row.avatar"
+              :preview-src-list="[row.avatar]"
+              :src="row.avatar"
+              fit="cover"
+              hide-on-click-modal
+              preview-teleported
+              style="width:40px;height:40px;border-radius:50%"
+          />
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="t('common.nickname')" min-width="140" prop="nickname">
+        <template #default="{ row }">{{ row.nickname || '-' }}</template>
+      </el-table-column>
+      <el-table-column :label="t('common.createdAt')" width="170">
+        <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
+      </el-table-column>
+    </el-table>
+
+    <el-empty v-if="!loading && tableData.length === 0" :description="t('pages.userList.noData')"/>
+
+    <div v-if="pagination.total > 0" class="pagination">
+      <el-pagination
+          v-model:current-page="pagination.pageIndex"
+          v-model:page-size="pagination.pageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          :total="pagination.total"
+          layout="total, sizes, prev, pager, next, jumper"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
+      />
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import {reactive, ref, watch} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {useRouter} from 'vue-router'
+import {ElMessage} from 'element-plus'
+import {accountApi} from '@/api'
+import type {CMSInviteeItem} from '@/types/api'
+import {formatServerDateTime as formatDate, toServerDayStartUnix, toServerDayEndUnix} from '@/utils/server-datetime'
+
+const props = defineProps<{
+  userId: string
+  active: boolean
+}>()
+
+const {t} = useI18n()
+const router = useRouter()
+const loading = ref(false)
+const tableData = ref<CMSInviteeItem[]>([])
+const loaded = ref(false)
+
+const searchForm = reactive({
+  dateRange: [] as string[],
+})
+
+const pagination = reactive({
+  pageIndex: 1,
+  pageSize: 20,
+  total: 0,
+})
+
+const buildQueryParams = () => {
+  const [startDate, endDate] = searchForm.dateRange || []
+  return {
+    inviterId: props.userId,
+    startTime: startDate ? toServerDayStartUnix(startDate) : 0,
+    endTime: endDate ? toServerDayEndUnix(endDate) : 0,
+    pageIndex: pagination.pageIndex,
+    pageSize: pagination.pageSize,
+  }
+}
+
+const fetchList = async () => {
+  if (!props.userId) {
+    tableData.value = []
+    pagination.total = 0
+    return
+  }
+  loading.value = true
+  try {
+    const response = await accountApi.getInviteeList(buildQueryParams())
+    tableData.value = response.data || []
+    pagination.total = response.total || 0
+    loaded.value = true
+  } catch (error) {
+    console.error('Failed to load invitee list:', error)
+    ElMessage.error(t('pages.userList.inviteeFetchFailed'))
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleSearch = () => {
+  pagination.pageIndex = 1
+  fetchList()
+}
+
+const handleReset = () => {
+  searchForm.dateRange = []
+  pagination.pageIndex = 1
+  fetchList()
+}
+
+const handlePageChange = (page: number) => {
+  pagination.pageIndex = page
+  fetchList()
+}
+
+const handleSizeChange = (size: number) => {
+  pagination.pageSize = size
+  pagination.pageIndex = 1
+  fetchList()
+}
+
+const formatRowIndex = (index: number) =>
+    (pagination.pageIndex - 1) * pagination.pageSize + index + 1
+
+const openInviteeDetail = (inviteeId: string | number) => {
+  if (!inviteeId) {
+    return
+  }
+  router.push({
+    name: 'UserDetail',
+    query: {id: String(inviteeId)},
+  })
+}
+
+const resetState = () => {
+  loaded.value = false
+  tableData.value = []
+  searchForm.dateRange = []
+  pagination.pageIndex = 1
+  pagination.total = 0
+}
+
+watch(
+    () => props.userId,
+    () => {
+      resetState()
+      if (props.active) {
+        fetchList()
+      }
+    },
+)
+
+watch(
+    () => props.active,
+    (active) => {
+      if (active && !loaded.value && props.userId) {
+        fetchList()
+      }
+    },
+    {immediate: true},
+)
+</script>
+
+<style scoped>
+.search-form {
+  margin-bottom: 16px;
+}
+
+.list-summary {
+  margin-bottom: 12px;
+  color: var(--el-text-color-regular);
+  font-size: 13px;
+}
+
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+</style>

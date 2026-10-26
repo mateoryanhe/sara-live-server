@@ -127,3 +127,11 @@ func (c *TrackingEventCMSController) GetChargeClickTrend(ctx context.Context, re
 func (c *TrackingEventCMSController) GetChargeResultServerTrend(ctx context.Context, req *trackingdto.CMSChargeResultServerTrendReq) (*trackingdto.CMSChargeResultServerTrendRes, error) {
 	return tracking.GetCMSChargeResultServerTrend(ctx, req)
 }
+
+func (c *TrackingEventCMSController) GetH5DownloadTrend(ctx context.Context, req *trackingdto.CMSH5DownloadTrendReq) (*trackingdto.CMSH5DownloadTrendRes, error) {
+	return tracking.GetCMSH5DownloadTrend(ctx, req)
+}
+
+func (c *TrackingEventCMSController) GetOfficialSiteDownloadTrend(ctx context.Context, req *trackingdto.CMSOfficialSiteDownloadTrendReq) (*trackingdto.CMSOfficialSiteDownloadTrendRes, error) {
+	return tracking.GetCMSOfficialSiteDownloadTrend(ctx, req)
+}

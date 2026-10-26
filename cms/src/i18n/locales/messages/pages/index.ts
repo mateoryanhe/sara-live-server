@@ -74,6 +74,7 @@ import {firstRechargeActivityCfgMessages} from './first-recharge-activity-cfg'
 import {inviteRechargeRewardCfgMessages} from './invite-recharge-reward-cfg'
 import {promotionChannelUrlListMessages} from './promotion-channel-url-list'
 import {promotionChannelDailyStatListMessages} from './promotion-channel-daily-stat-list'
+import {promotionInviteLogListMessages} from './promotion-invite-log-list'
 import {simulatorCpuKeywordListMessages} from './simulator-cpu-keyword-list'
 import {simulatorDeviceWhitelistListMessages} from './simulator-device-whitelist-list'
 import {anchorSalarySocialShareCfgListMessages} from './anchor-salary-social-share-cfg-list'
@@ -115,6 +116,8 @@ import {trackingMiniGameRoundStartMessages} from './tracking-mini-game-round-sta
 import {trackingShortVideoMessages} from './tracking-short-video'
 import {trackingVoiceChatRoomMessages} from './tracking-voice-chat-room'
 import {trackingRechargeMessages} from './tracking-recharge'
+import {trackingDownloadMessages} from './tracking-download'
+import {shareAppDownloadMessages} from './share-app-download'
 
 const pageMessageBuilders = [
   ['userList', userListMessages],
@@ -191,6 +194,7 @@ const pageMessageBuilders = [
   ['inviteRechargeRewardCfg', inviteRechargeRewardCfgMessages],
   ['promotionChannelUrlList', promotionChannelUrlListMessages],
   ['promotionChannelDailyStatList', promotionChannelDailyStatListMessages],
+  ['promotionInviteLogList', promotionInviteLogListMessages],
   ['simulatorCpuKeywordList', simulatorCpuKeywordListMessages],
   ['simulatorDeviceWhitelistList', simulatorDeviceWhitelistListMessages],
   ['anchorSalarySocialShareCfgList', anchorSalarySocialShareCfgListMessages],
@@ -231,6 +235,8 @@ const pageMessageBuilders = [
   ['trackingShortVideo', trackingShortVideoMessages],
   ['trackingVoiceChatRoom', trackingVoiceChatRoomMessages],
   ['trackingRecharge', trackingRechargeMessages],
+  ['trackingDownload', trackingDownloadMessages],
+  ['shareAppDownload', shareAppDownloadMessages],
 ] as const
 
 export type PageNamespace = typeof pageMessageBuilders[number][0]

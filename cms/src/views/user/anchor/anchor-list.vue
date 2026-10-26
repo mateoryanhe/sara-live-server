@@ -12,6 +12,24 @@
 
           <div class="header-actions">
             <el-button
+                v-if="can('batchOnShelfShowcase')"
+                :disabled="shelfOperating || showcaseShelfOperating"
+                :loading="showcaseOnShelfOperating"
+                type="success"
+                @click="handleBatchOnShelfShowcase"
+            >
+              {{ t('pages.anchorList.batchOnShelfShowcase') }}
+            </el-button>
+            <el-button
+                v-if="can('batchOffShelfShowcase')"
+                :disabled="shelfOperating || showcaseShelfOperating"
+                :loading="showcaseOffShelfOperating"
+                type="danger"
+                @click="handleBatchOffShelfShowcase"
+            >
+              {{ t('pages.anchorList.batchOffShelfShowcase') }}
+            </el-button>
+            <el-button
                 v-if="canBatchShelf"
                 :disabled="!canBatchOnShelf"
                 :loading="shelfOperating"
@@ -493,10 +511,13 @@ const loading = ref(false)
 const tableData = ref<AnchorListItem[]>([])
 const selectedRows = ref<AnchorListItem[]>([])
 const shelfOperating = ref(false)
+const showcaseOffShelfOperating = ref(false)
+const showcaseOnShelfOperating = ref(false)
+const showcaseShelfOperating = computed(() => showcaseOffShelfOperating.value || showcaseOnShelfOperating.value)
 const onShelfSelectedRows = computed(() => selectedRows.value.filter(row => Number(row.status) === 1))
 const offShelfSelectedRows = computed(() => selectedRows.value.filter(row => Number(row.status) !== 1))
-const canBatchOnShelf = computed(() => offShelfSelectedRows.value.length > 0 && !shelfOperating.value)
-const canBatchOffShelf = computed(() => onShelfSelectedRows.value.length > 0 && !shelfOperating.value)
+const canBatchOnShelf = computed(() => offShelfSelectedRows.value.length > 0 && !shelfOperating.value && !showcaseShelfOperating.value)
+const canBatchOffShelf = computed(() => onShelfSelectedRows.value.length > 0 && !shelfOperating.value && !showcaseShelfOperating.value)
 
 const anchorRowKey = (row: AnchorListItem) => String(row.id)
 
@@ -992,6 +1013,80 @@ const handleBatchOffShelf = async () => {
     ElMessage.error(t('pages.anchorList.batchOffShelfFailed'))
   } finally {
     shelfOperating.value = false
+  }
+}
+
+const handleBatchOffShelfShowcase = async () => {
+  try {
+    await ElMessageBox.confirm(
+        t('pages.anchorList.batchOffShelfShowcaseConfirm'),
+        t('pages.anchorList.batchOffShelfShowcaseTitle'),
+        {
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning',
+        },
+    )
+  } catch {
+    return
+  }
+  showcaseOffShelfOperating.value = true
+  try {
+    const res = await accountApi.batchOffShelfShowcaseLiveRooms()
+    const success = res?.successCount ?? 0
+    const fail = res?.failCount ?? 0
+    const matched = res?.totalMatched ?? 0
+    if (matched === 0) {
+      ElMessage.info(t('pages.anchorList.batchOffShelfShowcaseEmpty'))
+    } else if (fail > 0) {
+      ElMessage.warning(t('pages.anchorList.batchOffShelfShowcasePartial', {success, fail, matched}))
+    } else {
+      ElMessage.success(t('pages.anchorList.batchOffShelfShowcaseSuccess', {count: success}))
+    }
+    selectedRows.value = []
+    await fetchList()
+  } catch (error) {
+    console.error('batch off shelf showcase failed:', error)
+    ElMessage.error(t('pages.anchorList.batchOffShelfShowcaseFailed'))
+  } finally {
+    showcaseOffShelfOperating.value = false
+  }
+}
+
+const handleBatchOnShelfShowcase = async () => {
+  try {
+    await ElMessageBox.confirm(
+        t('pages.anchorList.batchOnShelfShowcaseConfirm'),
+        t('pages.anchorList.batchOnShelfShowcaseTitle'),
+        {
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning',
+        },
+    )
+  } catch {
+    return
+  }
+  showcaseOnShelfOperating.value = true
+  try {
+    const res = await accountApi.batchOnShelfShowcaseLiveRooms()
+    const success = res?.successCount ?? 0
+    const fail = res?.failCount ?? 0
+    const matched = res?.totalMatched ?? 0
+    if (matched === 0) {
+      ElMessage.info(t('pages.anchorList.batchOnShelfShowcaseEmpty'))
+    } else if (fail > 0) {
+      ElMessage.warning(t('pages.anchorList.batchOnShelfShowcasePartial', {success, fail, matched}))
+    } else {
+      ElMessage.success(t('pages.anchorList.batchOnShelfShowcaseSuccess', {count: success}))
+    }
+    selectedRows.value = []
+    await fetchList()
+  } catch (error) {
+    console.error('batch on shelf showcase failed:', error)
+    ElMessage.error(t('pages.anchorList.batchOnShelfShowcaseFailed'))
+  } finally {
+    showcaseOnShelfOperating.value = false
   }
 }
 

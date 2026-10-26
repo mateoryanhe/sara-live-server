@@ -49,6 +49,7 @@ func toCMSItem(v *entity.CurrencyLog, profileMap map[uint64]*entity.UserInfo, la
 	item := &currencylogdto.CMSCurrencyLogItem{
 		Id:               v.ID,
 		UserId:           v.UserId,
+		CurrencyType:     v.Type,
 		Action:           v.Action,
 		Amount:           v.Amount,
 		Before:           v.Before,

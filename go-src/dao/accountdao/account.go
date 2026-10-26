@@ -31,7 +31,8 @@ func InitAccountDao() {
 func GetUserInfo(req *accountdto.QueryUserInfoReq) (int, []*accountdto.UserInfoDto) {
 	sql := `select  a.*,
                     u.nickname, u.phone, u.avatar, u.remark,
-                    u.gold, u.diamond, u.share_code, IFNULL(r.guild_id, 0) as guild_id, u.user_type, u.vip_level, u.last_login_time,
+                    u.gold, u.diamond, u.share_code, IFNULL(u.inviter_id, 0) as inviter_id,
+                    IFNULL(r.guild_id, 0) as guild_id, u.user_type, u.vip_level, u.last_login_time,
                     d.device_type, e.package_name, e.app_version,
                     IFNULL(e.can_rank, 1) as can_rank,
                     IFNULL(e.recharge_whitelist, 0) as recharge_whitelist

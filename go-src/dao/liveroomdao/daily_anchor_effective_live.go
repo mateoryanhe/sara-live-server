@@ -39,7 +39,8 @@ func GetDailyAnchorEffectiveLive(date string, roomId uint64) *entity.DailyAnchor
 	return v
 }
 
-// ClearRecentUnsettledDailyLiveDuration 主播下架:直查DB取最近8条未结算日表,直播时长置0
+// ClearRecentUnsettledDailyLiveDuration 退出工会等结算边界:直查DB取最近8条未结算日表,有效开播时长置0
+// 注意:普通下架不得调用;下架只改房间 status.
 func ClearRecentUnsettledDailyLiveDuration(roomId uint64) {
 	rows := ListRecentUnsettledDailyEffectiveLives(roomId)
 	for _, row := range rows {

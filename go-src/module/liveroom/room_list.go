@@ -247,10 +247,45 @@ func filterRoomsByStatus(rooms []*liveentity.LiveRoom, statusFilter int) []*live
 	return filtered
 }
 
-func filterRoomsByQuery(rooms []*liveentity.LiveRoom, tagId uint64, title, notice string) []*liveentity.LiveRoom {
+func matchRoomListKey(anchorId uint64, key, likeKey string) bool {
+	if key == "" {
+		return true
+	}
+	if strings.Contains(strconv.FormatUint(anchorId, 10), key) {
+		return true
+	}
+	user := userinfodao.GetUserInfoFromMemory(anchorId)
+	if user == nil {
+		return false
+	}
+	return strings.Contains(strings.ToLower(user.Nickname), likeKey)
+}
+
+// filterRoomsByKey 按主播ID/昵称模糊过滤; key 为空则原样返回
+func filterRoomsByKey(rooms []*liveentity.LiveRoom, key string) []*liveentity.LiveRoom {
+	key = strings.TrimSpace(key)
+	if key == "" {
+		return rooms
+	}
+	likeKey := strings.ToLower(key)
+	filtered := make([]*liveentity.LiveRoom, 0, len(rooms))
+	for _, room := range rooms {
+		if room == nil {
+			continue
+		}
+		if matchRoomListKey(room.ID, key, likeKey) {
+			filtered = append(filtered, room)
+		}
+	}
+	return filtered
+}
+
+func filterRoomsByQuery(rooms []*liveentity.LiveRoom, tagId uint64, title, notice, key string) []*liveentity.LiveRoom {
 	titleKey := strings.ToLower(strings.TrimSpace(title))
 	noticeKey := strings.ToLower(strings.TrimSpace(notice))
-	if tagId == 0 && titleKey == "" && noticeKey == "" {
+	key = strings.TrimSpace(key)
+	likeKey := strings.ToLower(key)
+	if tagId == 0 && titleKey == "" && noticeKey == "" && key == "" {
 		return rooms
 	}
 	filtered := make([]*liveentity.LiveRoom, 0, len(rooms))
@@ -268,6 +303,9 @@ func filterRoomsByQuery(rooms []*liveentity.LiveRoom, tagId uint64, title, notic
 			continue
 		}
 		if noticeKey != "" && !strings.Contains(strings.ToLower(room.Notice), noticeKey) {
+			continue
+		}
+		if key != "" && !matchRoomListKey(room.ID, key, likeKey) {
 			continue
 		}
 		filtered = append(filtered, room)
@@ -414,7 +452,7 @@ func GetRoomList(ctx context.Context, req *liveroomdto.GetLiveRoomListReq) (*liv
 		filtered = filterRoomsByFollowing(filtered, userId)
 		tagId = 0
 	}
-	filtered = filterRoomsByQuery(filtered, tagId, req.Title, req.Notice)
+	filtered = filterRoomsByQuery(filtered, tagId, req.Title, req.Notice, req.Key)
 	filtered = filterRoomsBySeniorAnchor(filtered, userId)
 	filtered = filterRoomsByBlocked(filtered, userId)
 	total := len(filtered)
@@ -504,7 +542,8 @@ func GetOneToOneRoomList(ctx context.Context, req *liveroomdto.GetOneToOneRoomLi
 	page, pageSize := normalizeRoomListPage(req.Page, req.PageSize)
 
 	cached := listOnShelfOneToOneLiveRooms()
-	filtered := filterRoomsBySeniorAnchor(cached, userID)
+	filtered := filterRoomsByKey(cached, req.Key)
+	filtered = filterRoomsBySeniorAnchor(filtered, userID)
 	filtered = filterRoomsByBlocked(filtered, userID)
 	filtered, onlineByRoomID := selectOneToOneRooms(filtered, req.StatusFilter)
 	total := len(filtered)
@@ -541,6 +580,7 @@ func GetFollowedRoomList(ctx context.Context, req *liveroomdto.GetFollowedLiveRo
 	}
 
 	filtered := filterRoomsByStatus(rooms, req.StatusFilter)
+	filtered = filterRoomsByKey(filtered, req.Key)
 	filtered = filterRoomsBySeniorAnchor(filtered, userId)
 	filtered = filterRoomsByBlocked(filtered, userId)
 	total := len(filtered)
@@ -646,7 +686,7 @@ func buildHotLiveRoomListItems(ctx context.Context, rooms []*liveentity.LiveRoom
 	return list
 }
 
-func getCategoryLiveRoomList(ctx context.Context, pageIndex, pageSize int, category uint8, liveOnly bool) (*liveroomdto.GetHotLiveRoomListRes, error) {
+func getCategoryLiveRoomList(ctx context.Context, pageIndex, pageSize int, category uint8, liveOnly bool, key string) (*liveroomdto.GetHotLiveRoomListRes, error) {
 	userId := httpserver.GetAuthId(ctx)
 
 	cached := filterRoomsForApp(getRoomListCache())
@@ -663,6 +703,7 @@ func getCategoryLiveRoomList(ctx context.Context, pageIndex, pageSize int, categ
 	if liveOnly {
 		filtered = filterRoomsByStatus(filtered, int(userstatus.LiveRoomStatusLive))
 	}
+	filtered = filterRoomsByKey(filtered, key)
 	filtered = filterRoomsBySeniorAnchor(filtered, userId)
 	filtered = filterRoomsByBlocked(filtered, userId)
 	total := len(filtered)
@@ -680,16 +721,43 @@ func getCategoryLiveRoomList(ctx context.Context, pageIndex, pageSize int, categ
 	}, nil
 }
 
-// GetHotLiveRoomList App 分页查询 Hot 分类列表(走内存缓存排序,含排名)
+// GetHotLiveRoomList App 分页查询全部上架直播间(不按房间类型过滤;缓存已按开播优先排序,含排名)
 func GetHotLiveRoomList(ctx context.Context, req *liveroomdto.GetHotLiveRoomListReq) (*liveroomdto.GetHotLiveRoomListRes, error) {
 	pageIndex, pageSize := normalizeRoomListPage(req.PageIndex, req.PageSize)
-	return getCategoryLiveRoomList(ctx, pageIndex, pageSize, liveentity.LiveRoomCategoryHot, true)
+	userId := httpserver.GetAuthId(ctx)
+
+	cached := filterRoomsForApp(getRoomListCache())
+	if cached == nil {
+		return &liveroomdto.GetHotLiveRoomListRes{
+			Total:     0,
+			PageIndex: pageIndex,
+			PageSize:  pageSize,
+			List:      make([]*liveroomdto.HotLiveRoomListItem, 0),
+		}, nil
+	}
+
+	filtered := filterRoomsByKey(cached, req.Key)
+	filtered = filterRoomsBySeniorAnchor(filtered, userId)
+	filtered = filterRoomsByBlocked(filtered, userId)
+	total := len(filtered)
+	start, end := roomListPageRange(total, pageIndex, pageSize)
+	list := buildHotLiveRoomListItems(ctx, filtered[start:end], userId, start+1)
+	if len(list) == 0 {
+		list = make([]*liveroomdto.HotLiveRoomListItem, 0)
+	}
+
+	return &liveroomdto.GetHotLiveRoomListRes{
+		Total:     total,
+		PageIndex: pageIndex,
+		PageSize:  pageSize,
+		List:      list,
+	}, nil
 }
 
 // GetVoiceChatLiveRoomList App 分页查询语聊房分类列表(走内存缓存排序,含排名)
 func GetVoiceChatLiveRoomList(ctx context.Context, req *liveroomdto.GetVoiceChatLiveRoomListReq) (*liveroomdto.GetVoiceChatLiveRoomListRes, error) {
 	pageIndex, pageSize := normalizeRoomListPage(req.PageIndex, req.PageSize)
-	return getCategoryLiveRoomList(ctx, pageIndex, pageSize, liveentity.LiveRoomCategoryVoiceChat, false)
+	return getCategoryLiveRoomList(ctx, pageIndex, pageSize, liveentity.LiveRoomCategoryVoiceChat, false, req.Key)
 }
 
 // GetNearbyLiveRoomList App 以当前直播间为锚点,获取列表中相邻的直播中直播间(走内存缓存排序)

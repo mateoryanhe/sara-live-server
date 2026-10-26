@@ -73,11 +73,14 @@
         <el-form-item>
           <el-button type="primary" @click="handleSearch">{{ t('common.query') }}</el-button>
           <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
-          <el-button v-if="can('export')" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
+          <el-button v-if="can('export')" :disabled="exportingByGuild" :loading="exporting" @click="handleExport">{{ t('common.export') }}</el-button>
+          <el-button v-if="can('exportByGuild')" :disabled="exporting" :loading="exportingByGuild" @click="openExportByGuildDialog">
+            {{ t('pages.liveDailyEffectiveLiveList.exportByGuild') }}
+          </el-button>
         </el-form-item>
       </el-form>
 
-      <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width: 100%">
+      <el-table v-loading="loading || exporting || exportingByGuild" :data="tableData" :element-loading-text="exportStatusTip || exportByGuildStatusTip || undefined" style="width: 100%">
         <el-table-column :label="t('pages.anchorList.dailyLiveDate')" min-width="120" prop="liveDate"/>
         <el-table-column :label="t('pages.guildAnchorIncomeSettlementLogList.roomId')" min-width="180" prop="roomId">
           <template #default="{ row }">
@@ -188,6 +191,14 @@
         :initial-anchors="selectedGuildAnchors"
         @confirm="handleGuildAnchorsPicked"
     />
+
+    <GuildPickerDialog
+        v-model:visible="exportByGuildVisible"
+        :initial-guilds="exportSelectedGuilds"
+        :tip="t('pages.liveDailyEffectiveLiveList.exportByGuildTip')"
+        :title="t('pages.liveDailyEffectiveLiveList.exportByGuildTitle')"
+        @confirm="handleExportByGuildConfirm"
+    />
   </div>
 </template>
 
@@ -197,13 +208,17 @@ import {useI18n} from 'vue-i18n'
 import {useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {liveRecordApi} from '@/api'
-import type {AnchorListItem, GuildAnchorDailyEffectiveLiveItem} from '@/types/api'
+import type {AnchorListItem, Guild, GuildAnchorDailyEffectiveLiveItem} from '@/types/api'
 import AnchorPickerDialog from '@/components/AnchorPickerDialog.vue'
 import GuildAnchorPickerDialog from '@/components/GuildAnchorPickerDialog.vue'
+import GuildPickerDialog from '@/components/GuildPickerDialog.vue'
 import {usePagePermission} from '@/composables/usePagePermission'
 import {useUserDetailNav} from '@/composables/useUserDetailNav'
 import {buildCsvHeaders, buildDailyEffectiveLiveExportLabels, useCmsAsyncExport} from '@/composables/useCmsAsyncExport'
-import {CMS_EXPORT_TYPE_LIVE_DAILY_EFFECTIVE_LIVE} from '@/utils/cms-async-export'
+import {
+  CMS_EXPORT_TYPE_LIVE_DAILY_EFFECTIVE_LIVE,
+  CMS_EXPORT_TYPE_LIVE_DAILY_EFFECTIVE_LIVE_BY_GUILD,
+} from '@/utils/cms-async-export'
 import {buildLiveDailyEffectiveLiveListCsvColumns} from '@/utils/daily-effective-live-csv'
 import {formatWalletBalance} from '@/utils/number-format'
 import {formatLiveDurationMinutes} from '@/utils/live-duration-format'
@@ -214,6 +229,11 @@ const router = useRouter()
 const {can} = usePagePermission('LiveDailyEffectiveLiveList')
 const {canViewUserDetail, openUserDetail} = useUserDetailNav('LiveDailyEffectiveLiveList')
 const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
+const {
+  exporting: exportingByGuild,
+  exportStatusTip: exportByGuildStatusTip,
+  runExport: runExportByGuild,
+} = useCmsAsyncExport()
 
 const loading = ref(false)
 const tableData = ref<GuildAnchorDailyEffectiveLiveItem[]>([])
@@ -221,6 +241,8 @@ const selectedPlatformAnchors = ref<AnchorListItem[]>([])
 const selectedGuildAnchors = ref<AnchorListItem[]>([])
 const platformAnchorPickerVisible = ref(false)
 const guildAnchorPickerVisible = ref(false)
+const exportByGuildVisible = ref(false)
+const exportSelectedGuilds = ref<Guild[]>([])
 
 const defaultWeek = getServerWeekDateRange()
 
@@ -376,6 +398,32 @@ const handleExport = async () => {
   )
 }
 
+const openExportByGuildDialog = () => {
+  exportSelectedGuilds.value = []
+  exportByGuildVisible.value = true
+}
+
+const handleExportByGuildConfirm = async (guilds: Guild[]) => {
+  if (!guilds.length) {
+    ElMessage.warning(t('pages.liveDailyEffectiveLiveList.selectGuildRequired'))
+    return
+  }
+  exportSelectedGuilds.value = guilds
+  await runExportByGuild(
+    CMS_EXPORT_TYPE_LIVE_DAILY_EFFECTIVE_LIVE_BY_GUILD,
+    {
+      headers: buildCsvHeaders(buildLiveDailyEffectiveLiveListCsvColumns(t)),
+      guildIds: guilds.map(guild => String(guild.id)),
+      liveDateStart: searchForm.startDate || undefined,
+      liveDateEnd: searchForm.endDate || undefined,
+      keyword: searchForm.keyword.trim() || undefined,
+      settled: -1,
+      ...buildDailyEffectiveLiveExportLabels(t),
+    },
+    `daily-effective-live-by-guild-${Date.now()}.zip`,
+  )
+}
+
 onMounted(() => {
   fetchList()
 })
@@ -416,4 +464,5 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
 }
+
 </style>

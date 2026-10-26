@@ -55,6 +55,32 @@ type SetLiveRoomStatusRes struct {
 	Status  uint8 `json:"status" dc:"当前状态(0-下架,1-上架)"`
 }
 
+// BatchOffShelfShowcaseLiveRoomsReq CMS一键批量下架秀场直播间(category=1)
+type BatchOffShelfShowcaseLiveRoomsReq struct {
+	g.Meta `path:"/batchOffShelfShowcaseLiveRooms" method:"post" summary:"批量下架秀场直播间(category=1)" tags:"账号"`
+}
+
+// BatchOffShelfShowcaseLiveRoomsRes 批量下架秀场直播间结果
+type BatchOffShelfShowcaseLiveRoomsRes struct {
+	SuccessCount int      `json:"successCount" dc:"成功下架数量"`
+	FailCount    int      `json:"failCount" dc:"失败数量"`
+	FailIds      []uint64 `json:"failIds,string" dc:"失败的主播ID"`
+	TotalMatched int      `json:"totalMatched" dc:"匹配到的已上架秀场数量"`
+}
+
+// BatchOnShelfShowcaseLiveRoomsReq CMS一键批量上架秀场直播间(category=1)
+type BatchOnShelfShowcaseLiveRoomsReq struct {
+	g.Meta `path:"/batchOnShelfShowcaseLiveRooms" method:"post" summary:"批量上架秀场直播间(category=1)" tags:"账号"`
+}
+
+// BatchOnShelfShowcaseLiveRoomsRes 批量上架秀场直播间结果
+type BatchOnShelfShowcaseLiveRoomsRes struct {
+	SuccessCount int      `json:"successCount" dc:"成功上架数量"`
+	FailCount    int      `json:"failCount" dc:"失败数量"`
+	FailIds      []uint64 `json:"failIds,string" dc:"失败的主播ID"`
+	TotalMatched int      `json:"totalMatched" dc:"匹配到的已下架秀场数量"`
+}
+
 // SetLiveRoomCoverReq CMS设置直播间封面(cover 为 uploadFile 返回的文件名,空字符串表示清除)
 type SetLiveRoomCoverReq struct {
 	g.Meta   `path:"/setLiveRoomCover" method:"post" summary:"CMS设置直播间封面" tags:"账号"`

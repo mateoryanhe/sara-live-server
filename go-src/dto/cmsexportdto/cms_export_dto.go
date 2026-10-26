@@ -19,6 +19,7 @@ const (
 	ExportTypeGuildAnchorDailyEffectiveLive    = "guildAnchorDailyEffectiveLive"
 	ExportTypeMyGuildAnchorDailyEffectiveLive  = "myGuildAnchorDailyEffectiveLive"
 	ExportTypeLiveDailyEffectiveLive           = "liveDailyEffectiveLive"
+	ExportTypeLiveDailyEffectiveLiveByGuild    = "liveDailyEffectiveLiveByGuild"
 	ExportTypeLiveWeeklyUnsettledLive          = "liveWeeklyUnsettledLive"
 	ExportTypeCurrencyLog                      = "currencyLog"
 	ExportTypeGameBetLog                       = "gameBetLog"
@@ -214,6 +215,17 @@ type CMSExportLiveDailyEffectiveLivePayload struct {
 	LiveDateEnd      string   `json:"liveDateEnd"`
 	Keyword          string   `json:"keyword"`
 	Settled          int8     `json:"settled"`
+}
+
+// CMSExportLiveDailyEffectiveLiveByGuildPayload 按勾选工会分别导出(一个工会一个CSV,打包ZIP)
+type CMSExportLiveDailyEffectiveLiveByGuildPayload struct {
+	CMSExportHeadersPayload
+	CMSExportDailyEffectiveLiveLabels
+	GuildIds      []string `json:"guildIds" dc:"勾选的工会ID列表"`
+	LiveDateStart string   `json:"liveDateStart"`
+	LiveDateEnd   string   `json:"liveDateEnd"`
+	Keyword       string   `json:"keyword"`
+	Settled       int8     `json:"settled"`
 }
 
 type CMSExportLiveWeeklyUnsettledLivePayload struct {

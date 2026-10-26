@@ -83,6 +83,7 @@ const READONLY_NO_EXPORT_PAGES = new Set([
     'CoinMerchantPayoutDetailList',
     'CoinMerchantGuildIncomeSettlementLogList',
     'PromotionChannelDailyStatManagement',
+    'PromotionInviteLogListManagement',
 ])
 
 const CONFIG_PAGES = new Set([
@@ -115,6 +116,7 @@ const CONFIG_PAGES = new Set([
     'GamePlatformCfgManagement',
     'FirstRechargeActivityManagement',
     'InviteRechargeRewardManagement',
+    'PromotionShareAppDownloadCfgManagement',
 ])
 
 /** 各页面自定义按钮（未列出的页面按类型使用默认集） */
@@ -192,6 +194,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     TrackingShortVideoManagement: DEFAULT_VIEW_BUTTONS,
     TrackingVoiceChatRoomManagement: DEFAULT_VIEW_BUTTONS,
     TrackingRechargeManagement: DEFAULT_VIEW_BUTTONS,
+    TrackingDownloadManagement: DEFAULT_VIEW_BUTTONS,
     UserList: [
         BTN.view,
         BTN.search,
@@ -221,21 +224,22 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     UserDetail: [
         BTN.view,
         {key: 'rechargeOrderList', label: '查看充值订单'},
-        {key: 'goldLog', label: '查看金币流水'},
+        {key: 'inviteeList', label: '查看邀请列表'},
+        {key: 'goldLog', label: '查看金币流水(合并表)'},
         {key: 'exportGoldLog', label: '导出金币流水'},
-        {key: 'diamondLog', label: '查看钻石流水'},
+        {key: 'diamondLog', label: '查看钻石流水(合并表)'},
         {key: 'exportDiamondLog', label: '导出钻石流水'},
-        {key: 'gameBetLog', label: '查看游戏消费记录'},
+        {key: 'gameBetLog', label: '查看游戏消费记录(二级页)'},
         {key: 'exportGameBetLog', label: '导出游戏消费记录'},
-        {key: 'gameWinLog', label: '查看游戏奖励记录'},
+        {key: 'gameWinLog', label: '查看游戏奖励记录(二级页)'},
         {key: 'exportGameWinLog', label: '导出游戏奖励记录'},
-        {key: 'shortVideo', label: '查看短视频作品'},
-        {key: 'shortVideoWatch', label: '查看短视频观看记录'},
-        {key: 'shortVideoPurchase', label: '查看短视频购买记录'},
-        {key: 'shortVideoAuthorSettlementLog', label: '查看短视频作者结算日志'},
+        {key: 'shortVideo', label: '查看短视频作品(二级页)'},
+        {key: 'shortVideoWatch', label: '查看短视频观看记录(二级页)'},
+        {key: 'shortVideoPurchase', label: '查看短视频购买记录(二级页)'},
+        {key: 'shortVideoAuthorSettlementLog', label: '查看短视频作者结算日志(二级页)'},
         {key: 'exportShortVideoAuthorSettlementLog', label: '导出短视频作者结算日志'},
     ],
-    AnchorListManagement: [BTN.view, BTN.search, BTN.edit, {key: 'viewDetail', label: '查看详情'}, {key: 'viewUserDetail', label: '查看用户详情'}, {key: 'viewGuildDetail', label: '查看工会详情'}, {key: 'offShelf', label: '下架'}, {key: 'onShelf', label: '上架'}, {key: 'batchOffShelf', label: '批量下架'}, {key: 'batchOnShelf', label: '批量上架'}, {key: 'uploadRoomCover', label: '上传直播间封面'}],
+    AnchorListManagement: [BTN.view, BTN.search, BTN.edit, {key: 'viewDetail', label: '查看详情'}, {key: 'viewUserDetail', label: '查看用户详情'}, {key: 'viewGuildDetail', label: '查看工会详情'}, {key: 'offShelf', label: '下架'}, {key: 'onShelf', label: '上架'}, {key: 'batchOffShelf', label: '批量下架'}, {key: 'batchOnShelf', label: '批量上架'}, {key: 'batchOffShelfShowcase', label: '批量下架秀场'}, {key: 'batchOnShelfShowcase', label: '批量上架秀场'}, {key: 'uploadRoomCover', label: '上传直播间封面'}],
     PlatformAnchorList: [
         BTN.view,
         BTN.search,
@@ -331,6 +335,8 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'unban', label: '解封主播'},
         {key: 'exitGuild', label: '退出工会'},
         {key: 'setAnchorType', label: '设置主播类型'},
+        {key: 'batchOffShelf', label: '批量下架'},
+        {key: 'batchOnShelf', label: '批量上架'},
         {key: 'joinGuildAnchor', label: '加入工会'},
         {key: 'batchSetAnchor', label: '导入普通主播'},
         {key: 'batchSetSeniorAnchor', label: '导入高级主播'},
@@ -458,6 +464,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.view,
         BTN.search,
         BTN.export,
+        {key: 'exportByGuild', label: '按工会导出'},
     ],
     LiveRevenueLogList: [
         BTN.view,

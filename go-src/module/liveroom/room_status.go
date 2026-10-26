@@ -32,6 +32,71 @@ func SetLiveRoomStatus(ctx context.Context, req *accountdto.SetLiveRoomStatusReq
 	return onShelfLiveRoom(ctx, req.AnchorId)
 }
 
+// BatchOffShelfShowcaseLiveRooms CMS一键批量下架已上架的秀场直播间(category=1)
+func BatchOffShelfShowcaseLiveRooms(ctx context.Context, _ *accountdto.BatchOffShelfShowcaseLiveRoomsReq) (*accountdto.BatchOffShelfShowcaseLiveRoomsRes, error) {
+	rooms := getRoomListCache()
+	anchorIds := make([]uint64, 0)
+	for _, room := range rooms {
+		if room == nil || room.ID == 0 {
+			continue
+		}
+		if room.Status != entity.LiveRoomStatusOnShelf {
+			continue
+		}
+		if liveRoomCategoryFromCache(room) != entity.LiveRoomCategoryHot {
+			continue
+		}
+		anchorIds = append(anchorIds, room.ID)
+	}
+	res := &accountdto.BatchOffShelfShowcaseLiveRoomsRes{
+		TotalMatched: len(anchorIds),
+		FailIds:      make([]uint64, 0),
+	}
+	if len(anchorIds) == 0 {
+		return res, nil
+	}
+	changed := false
+	for _, anchorId := range anchorIds {
+		if _, err := doOffShelfLiveRoom(ctx, anchorId); err != nil {
+			res.FailCount++
+			res.FailIds = append(res.FailIds, anchorId)
+			continue
+		}
+		res.SuccessCount++
+		changed = true
+	}
+	if changed {
+		RefreshRoomListCache(ctx)
+	}
+	return res, nil
+}
+
+// BatchOnShelfShowcaseLiveRooms CMS一键批量上架已下架的秀场直播间(category=1,直查DB)
+func BatchOnShelfShowcaseLiveRooms(ctx context.Context, _ *accountdto.BatchOnShelfShowcaseLiveRoomsReq) (*accountdto.BatchOnShelfShowcaseLiveRoomsRes, error) {
+	anchorIds := liveroomdao.ListOffShelfRoomIdsByCategory(entity.LiveRoomCategoryHot)
+	res := &accountdto.BatchOnShelfShowcaseLiveRoomsRes{
+		TotalMatched: len(anchorIds),
+		FailIds:      make([]uint64, 0),
+	}
+	if len(anchorIds) == 0 {
+		return res, nil
+	}
+	changed := false
+	for _, anchorId := range anchorIds {
+		if _, err := doOnShelfLiveRoom(ctx, anchorId); err != nil {
+			res.FailCount++
+			res.FailIds = append(res.FailIds, anchorId)
+			continue
+		}
+		res.SuccessCount++
+		changed = true
+	}
+	if changed {
+		RefreshRoomListCache(ctx)
+	}
+	return res, nil
+}
+
 // OffShelfGuildLiveRooms 下架指定工会下全部主播间(停播+清缓存+写库)
 func OffShelfGuildLiveRooms(ctx context.Context, guildId uint64) {
 	if guildId == 0 {
@@ -81,6 +146,8 @@ func offShelfLiveRoom(ctx context.Context, anchorId uint64) (*accountdto.SetLive
 	return res, err
 }
 
+// doOffShelfLiveRoom 下架主播直播间:只改 status=下架并移出列表缓存.
+// 若正在直播则先停播(写 end_time/有效时长等走既有 stopLive);不归档/不清未结算收益,不清日表有效开播时长.
 func doOffShelfLiveRoom(ctx context.Context, anchorId uint64) (*accountdto.SetLiveRoomStatusRes, error) {
 	room := liveroomdao.GetRoomByAnchor(anchorId)
 	if room == nil {
@@ -96,10 +163,6 @@ func doOffShelfLiveRoom(ctx context.Context, anchorId uint64) (*accountdto.SetLi
 	} else {
 		clearRoomAudienceCaches(anchorId)
 	}
-	// 未结算收益新建归档记录后清零,避免下架丢数据
-	liveroomdao.ArchiveAndClearUnsettledIncome(anchorId, room.GuildId)
-	// 最近未结算日有效直播次数清零(直查DB)
-	liveroomdao.ClearRecentUnsettledDailyLiveDuration(anchorId)
 	room.SetStatus(entity.LiveRoomStatusOffShelf)
 	liveroomdao.FlushRoomCache(room)
 	liveroomdao.RemoveRoomFromCache(anchorId)

@@ -15,9 +15,9 @@ type VendorVerifyReq struct {
 }
 
 type VendorVerifyData struct {
-	PlayerName string  `json:"player_name"`
-	Currency   string  `json:"currency_code"`
-	Balance    float64 `json:"balance"`
+	PlayerName string `json:"player_name"`
+	Currency   string `json:"currency_code"`
+	Balance    float64 `json:"balance" dc:"余额(保留2位小数,超出截断不四舍五入)"`
 }
 
 type VendorVerifyRes struct {
@@ -38,7 +38,7 @@ type VendorBalanceReq struct {
 }
 
 type VendorBalanceData struct {
-	Balance      int64   `json:"balance"`
+	Balance      float64 `json:"balance" dc:"余额(保留2位小数,超出截断不四舍五入)"`
 	CurrencyCode string  `json:"currency_code"`
 	RTP          float64 `json:"rtp"`
 }
@@ -82,7 +82,7 @@ type VendorTransferReq struct {
 }
 
 type VendorTransferData struct {
-	Balance      float64 `json:"balance"`
+	Balance      float64 `json:"balance" dc:"余额(保留2位小数,超出截断不四舍五入)"`
 	CurrencyCode string  `json:"currency_code"`
 	UpdatedTime  int64   `json:"updated_time"`
 }

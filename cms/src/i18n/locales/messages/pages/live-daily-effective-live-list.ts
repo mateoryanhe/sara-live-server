@@ -8,14 +8,21 @@ const zh = {
   dailyGiftIncome: '当天礼物收益',
   dailyPaidDanmakuIncome: '当天付费弹幕收益',
   dailyVideoCallIncome: '当天视频通话收益',
-	dailyVideoTicketIncome: '当天视频门票收益',
+  dailyVideoTicketIncome: '当天视频门票收益',
   dailyVideoBillingIncome: '当天视频通话计费收益',
   dailyShortVideoIncome: '当天短视频收益',
   dailyGameIncome: '当天游戏收益',
   unsettledTotalIncome: '未结算总收益',
-}
+  exportByGuild: '按工会导出',
+  exportByGuildTitle: '按工会导出',
+  exportByGuildTip: '勾选工会后，每个工会导出为一个 CSV 文件，打包成 ZIP 下载。日期筛选与当前查询一致。',
+  selectGuild: '选择工会',
+  selectGuildPlaceholder: '请选择工会（可多选）',
+  selectGuildRequired: '请至少选择一个工会',
+  fetchGuildFailed: '获取工会列表失败',
+} as const
 
-const en = {
+const en: Record<keyof typeof zh, string> = {
   keywordPlaceholder: 'Flow ID / anchor ID / nickname',
   fetchFailed: 'Failed to load daily live flow',
   dailyLiveIncome: 'Daily Live Income',
@@ -23,14 +30,21 @@ const en = {
   dailyGiftIncome: 'Daily Gift Income',
   dailyPaidDanmakuIncome: 'Daily Paid Danmaku Income',
   dailyVideoCallIncome: 'Daily Video Call Income',
-	dailyVideoTicketIncome: 'Daily Video Ticket Income',
+  dailyVideoTicketIncome: 'Daily Video Ticket Income',
   dailyVideoBillingIncome: 'Daily Video Call Billing Income',
   dailyShortVideoIncome: 'Daily Short Video Income',
   dailyGameIncome: 'Daily Game Income',
   unsettledTotalIncome: 'Unsettled Total Income',
+  exportByGuild: 'Export by Guild',
+  exportByGuildTitle: 'Export by Guild',
+  exportByGuildTip: 'Each selected guild becomes one CSV file, packed into a ZIP. Uses the current date filters.',
+  selectGuild: 'Guilds',
+  selectGuildPlaceholder: 'Select guilds (multiple)',
+  selectGuildRequired: 'Select at least one guild',
+  fetchGuildFailed: 'Failed to load guilds',
 }
 
-const es = {
+const es: Record<keyof typeof zh, string> = {
   keywordPlaceholder: 'ID flujo / ID anfitrión / apodo',
   fetchFailed: 'Error al cargar flujo diario en vivo',
   dailyLiveIncome: 'Ingresos en vivo del día',
@@ -38,14 +52,21 @@ const es = {
   dailyGiftIncome: 'Ingresos regalos del día',
   dailyPaidDanmakuIncome: 'Ingresos danmaku de pago del día',
   dailyVideoCallIncome: 'Ingresos videollamada del día',
-	dailyVideoTicketIncome: 'Ingresos entrada video del día',
+  dailyVideoTicketIncome: 'Ingresos entrada video del día',
   dailyVideoBillingIncome: 'Ingresos facturación videollamada del día',
   dailyShortVideoIncome: 'Ingresos videos cortos del día',
   dailyGameIncome: 'Ingresos de juego del día',
   unsettledTotalIncome: 'Ingresos totales no liquidados',
+  exportByGuild: 'Exportar por gremio',
+  exportByGuildTitle: 'Exportar por gremio',
+  exportByGuildTip: 'Cada gremio seleccionado será un CSV, empaquetado en un ZIP. Usa los filtros de fecha actuales.',
+  selectGuild: 'Gremios',
+  selectGuildPlaceholder: 'Seleccione gremios (múltiple)',
+  selectGuildRequired: 'Seleccione al menos un gremio',
+  fetchGuildFailed: 'Error al cargar gremios',
 }
 
-const pt = {
+const pt: Record<keyof typeof zh, string> = {
   keywordPlaceholder: 'ID fluxo / ID apresentador / apelido',
   fetchFailed: 'Falha ao carregar fluxo diário ao vivo',
   dailyLiveIncome: 'Receita ao vivo do dia',
@@ -53,14 +74,21 @@ const pt = {
   dailyGiftIncome: 'Receita de presentes do dia',
   dailyPaidDanmakuIncome: 'Receita danmaku pago do dia',
   dailyVideoCallIncome: 'Receita videochamada do dia',
-	dailyVideoTicketIncome: 'Receita ingresso vídeo do dia',
+  dailyVideoTicketIncome: 'Receita ingresso vídeo do dia',
   dailyVideoBillingIncome: 'Receita cobrança videochamada do dia',
   dailyShortVideoIncome: 'Receita vídeos curtos do dia',
   dailyGameIncome: 'Receita de jogo do dia',
   unsettledTotalIncome: 'Receita total não liquidada',
+  exportByGuild: 'Exportar por sindicato',
+  exportByGuildTitle: 'Exportar por sindicato',
+  exportByGuildTip: 'Cada sindicato selecionado vira um CSV, empacotado em ZIP. Usa os filtros de data atuais.',
+  selectGuild: 'Sindicatos',
+  selectGuildPlaceholder: 'Selecione sindicatos (múltiplo)',
+  selectGuildRequired: 'Selecione pelo menos um sindicato',
+  fetchGuildFailed: 'Falha ao carregar sindicatos',
 }
 
-const hi = {
+const hi: Record<keyof typeof zh, string> = {
   keywordPlaceholder: 'फ्लो ID / एंकर ID / उपनाम',
   fetchFailed: 'दैनिक लाइव फ्लो लोड विफल',
   dailyLiveIncome: 'दिन का लाइव आय',
@@ -68,14 +96,21 @@ const hi = {
   dailyGiftIncome: 'दिन का उपहार आय',
   dailyPaidDanmakuIncome: 'दिन का सशुल्क डैनमाकू आय',
   dailyVideoCallIncome: 'दिन का वीडियो कॉल आय',
-	dailyVideoTicketIncome: 'दिन का वीडियो टिकट आय',
+  dailyVideoTicketIncome: 'दिन का वीडियो टिकट आय',
   dailyVideoBillingIncome: 'दिन का वीडियो कॉल बिलिंग आय',
   dailyShortVideoIncome: 'दिन का शॉर्ट वीडियो आय',
   dailyGameIncome: 'दिन का गेम आय',
   unsettledTotalIncome: 'अनिपटारा कुल आय',
+  exportByGuild: 'गिल्ड अनुसार निर्यात',
+  exportByGuildTitle: 'गिल्ड अनुसार निर्यात',
+  exportByGuildTip: 'प्रत्येक चयनित गिल्ड एक CSV बनेगा, ZIP में पैक। वर्तमान दिनांक फ़िल्टर उपयोग होंगे।',
+  selectGuild: 'गिल्ड',
+  selectGuildPlaceholder: 'गिल्ड चुनें (एकाधिक)',
+  selectGuildRequired: 'कम से कम एक गिल्ड चुनें',
+  fetchGuildFailed: 'गिल्ड लोड विफल',
 }
 
-const id = {
+const id: Record<keyof typeof zh, string> = {
   keywordPlaceholder: 'ID aliran / ID host / nama',
   fetchFailed: 'Gagal memuat aliran live harian',
   dailyLiveIncome: 'Pendapatan live hari ini',
@@ -83,11 +118,18 @@ const id = {
   dailyGiftIncome: 'Pendapatan hadiah hari ini',
   dailyPaidDanmakuIncome: 'Pendapatan danmaku berbayar hari ini',
   dailyVideoCallIncome: 'Pendapatan panggilan video hari ini',
-	dailyVideoTicketIncome: 'Pendapatan tiket video hari ini',
+  dailyVideoTicketIncome: 'Pendapatan tiket video hari ini',
   dailyVideoBillingIncome: 'Pendapatan tagihan panggilan video hari ini',
   dailyShortVideoIncome: 'Pendapatan video pendek hari ini',
   dailyGameIncome: 'Pendapatan game hari ini',
   unsettledTotalIncome: 'Total pendapatan belum diselesaikan',
+  exportByGuild: 'Ekspor per guild',
+  exportByGuildTitle: 'Ekspor per guild',
+  exportByGuildTip: 'Setiap guild terpilih menjadi satu CSV, dikemas ZIP. Menggunakan filter tanggal saat ini.',
+  selectGuild: 'Guild',
+  selectGuildPlaceholder: 'Pilih guild (multi)',
+  selectGuildRequired: 'Pilih setidaknya satu guild',
+  fetchGuildFailed: 'Gagal memuat guild',
 }
 
 export const liveDailyEffectiveLiveListMessages = definePageMessages(zh, en, es, pt, hi, id)

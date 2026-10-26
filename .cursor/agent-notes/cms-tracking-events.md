@@ -139,6 +139,13 @@ App 面板曝光：`POST /rechargeOrder/reportChargePanelEnter`（Sofie `POST /s
 
 表：各事件 `daily_charge_*_stats` / `weekly_*` / `monthly_*`（如 `daily_charge_panel_enter_stats`）。
 
+| 页面 | event | 口径 | CMS API |
+|------|-------|------|---------|
+| `TrackingDownloadManagement`（下载量） | `h5_download` | H5 落地页 `POST /trackingEvent/reportH5Download`（**免登录**）成功 +1 | `POST /trackingEvent/getH5DownloadTrend` |
+| 同上 **Tab「官网下载量」** | `official_site_download` | 官网 `POST /trackingEvent/reportOfficialSiteDownload`（**免登录**）成功 +1 | `POST /trackingEvent/getOfficialSiteDownloadTrend` |
+
+表：`daily_h5_download_stats` / `weekly_*` / `monthly_*`，以及 `daily_official_site_download_stats` 等同系列。不进 Sofie。
+
 ## 新增一个事件的 checklist
 
 1. Go：常量 `event_key` + 业务点 `Incr` +（如需）stat 表/DAO

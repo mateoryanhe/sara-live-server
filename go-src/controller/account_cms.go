@@ -37,6 +37,16 @@ func (a *AccountController) SetLiveRoomStatus(ctx context.Context, req *accountd
 	return liveroom.SetLiveRoomStatus(ctx, req)
 }
 
+// BatchOffShelfShowcaseLiveRooms CMS一键批量下架秀场直播间(category=1)
+func (a *AccountController) BatchOffShelfShowcaseLiveRooms(ctx context.Context, req *accountdto.BatchOffShelfShowcaseLiveRoomsReq) (*accountdto.BatchOffShelfShowcaseLiveRoomsRes, error) {
+	return liveroom.BatchOffShelfShowcaseLiveRooms(ctx, req)
+}
+
+// BatchOnShelfShowcaseLiveRooms CMS一键批量上架秀场直播间(category=1)
+func (a *AccountController) BatchOnShelfShowcaseLiveRooms(ctx context.Context, req *accountdto.BatchOnShelfShowcaseLiveRoomsReq) (*accountdto.BatchOnShelfShowcaseLiveRoomsRes, error) {
+	return liveroom.BatchOnShelfShowcaseLiveRooms(ctx, req)
+}
+
 func (a *AccountController) SetLiveRoomCover(ctx context.Context, req *accountdto.SetLiveRoomCoverReq) (*accountdto.SetLiveRoomCoverRes, error) {
 	return liveroom.SetLiveRoomCover(ctx, req)
 }
@@ -59,6 +69,16 @@ func (a *AccountController) QueryUserInfo(ctx context.Context, req *accountdto.Q
 
 func (a *AccountController) GetUserDetail(ctx context.Context, req *accountdto.GetUserDetailReq) (*accountdto.GetUserDetailRes, error) {
 	return userinfo.QueryUserDetail(ctx, req)
+}
+
+// CMSInviteeList CMS分页查询某用户邀请的下级用户
+func (a *AccountController) CMSInviteeList(ctx context.Context, req *accountdto.CMSInviteeListReq) (*httpserver.CMSQueryResp, error) {
+	return userinfo.GetCMSInviteeList(ctx, req)
+}
+
+// CMSInviteLogList CMS分页查询全局邀请日志
+func (a *AccountController) CMSInviteLogList(ctx context.Context, req *accountdto.CMSInviteLogListReq) (*httpserver.CMSQueryResp, error) {
+	return userinfo.GetCMSInviteLogList(ctx, req)
 }
 
 func (a *AccountController) QueryAnchorList(ctx context.Context, req *accountdto.QueryAnchorListReq) (res *httpserver.CMSQueryResp, err error) {

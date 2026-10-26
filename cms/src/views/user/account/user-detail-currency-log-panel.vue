@@ -1,6 +1,25 @@
 <template>
   <div>
     <el-form :model="searchForm" class="search-form" inline label-width="100px">
+      <el-form-item v-if="showCurrencyTypeFilter" :label="t('pages.currencyLogList.currencyType')">
+        <el-select v-model="searchForm.currencyType" style="width: 140px">
+          <el-option
+              v-if="canViewGold && canViewDiamond"
+              :label="t('pages.currencyLogList.currencyTypeAll')"
+              :value="0"
+          />
+          <el-option
+              v-if="canViewGold"
+              :label="t('pages.currencyLogList.currencyTypeGold')"
+              :value="1"
+          />
+          <el-option
+              v-if="canViewDiamond"
+              :label="t('pages.currencyLogList.currencyTypeDiamond')"
+              :value="2"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item :label="t('common.createdAt')">
         <el-date-picker
             v-model="searchForm.dateRange"
@@ -24,6 +43,13 @@
     <el-table v-loading="loading || exporting" :data="tableData" :element-loading-text="exportStatusTip || undefined" style="width: 100%">
       <el-table-column fixed label="#" type="index" width="55" :index="formatRowIndex"/>
       <el-table-column :label="t('pages.currencyLogList.logId')" min-width="180" prop="id"/>
+      <el-table-column :label="t('pages.currencyLogList.currencyType')" width="100">
+        <template #default="{ row }">
+          <el-tag :type="row.currencyType === 2 ? 'warning' : 'primary'">
+            {{ currencyTypeLabel(row.currencyType) }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column :label="t('pages.currencyLogList.changeType')" width="100">
         <template #default="{ row }">
           <el-tag :type="row.action === 1 ? 'success' : 'danger'">
@@ -80,23 +106,28 @@ import {formatServerDateTime as formatDate, toServerDayStartUnix, toServerDayEnd
 const props = defineProps<{
   userId: string
   active: boolean
-  currencyType: 1 | 2
-  exportPermission: 'exportGoldLog' | 'exportDiamondLog'
 }>()
 
 const {t, locale} = useI18n()
 const {can} = usePagePermission('UserDetail')
-const canExport = computed(() => can(props.exportPermission))
-const amountColumnLabel = computed(() =>
-    props.currencyType === 2
-        ? t('pages.currencyLogList.diamondChange')
-        : t('pages.currencyLogList.goldChange'))
-const fetchFailedMessage = computed(() =>
-    props.currencyType === 2
-        ? t('pages.userList.diamondLogFetchFailed')
-        : t('pages.userList.goldLogFetchFailed'))
-const exportFilePrefix = computed(() =>
-    props.currencyType === 2 ? 'user-diamond-log' : 'user-gold-log')
+const canViewGold = computed(() => can('goldLog'))
+const canViewDiamond = computed(() => can('diamondLog'))
+const canExportGold = computed(() => can('exportGoldLog'))
+const canExportDiamond = computed(() => can('exportDiamondLog'))
+const showCurrencyTypeFilter = computed(() => canViewGold.value && canViewDiamond.value)
+
+const defaultCurrencyType = (): 0 | 1 | 2 => {
+  if (canViewGold.value && canViewDiamond.value) return 0
+  if (canViewDiamond.value) return 2
+  return 1
+}
+
+const resolveQueryCurrencyType = (selected: 0 | 1 | 2): 0 | 1 | 2 => {
+  if (selected === 1 && canViewGold.value) return 1
+  if (selected === 2 && canViewDiamond.value) return 2
+  if (selected === 0 && canViewGold.value && canViewDiamond.value) return 0
+  return defaultCurrencyType()
+}
 
 const {exporting, exportStatusTip, runExport} = useCmsAsyncExport()
 const loading = ref(false)
@@ -104,6 +135,7 @@ const tableData = ref<CurrencyLogItem[]>([])
 const loaded = ref(false)
 
 const searchForm = reactive({
+  currencyType: defaultCurrencyType() as 0 | 1 | 2,
   dateRange: [] as string[],
 })
 
@@ -113,12 +145,25 @@ const pagination = reactive({
   total: 0,
 })
 
+const canExport = computed(() => {
+  const type = resolveQueryCurrencyType(searchForm.currencyType)
+  if (type === 1) return canExportGold.value
+  if (type === 2) return canExportDiamond.value
+  return canExportGold.value || canExportDiamond.value
+})
+
+const amountColumnLabel = computed(() => {
+  const type = resolveQueryCurrencyType(searchForm.currencyType)
+  if (type === 2) return t('pages.currencyLogList.diamondChange')
+  if (type === 1) return t('pages.currencyLogList.goldChange')
+  return t('pages.currencyLogList.amountChange')
+})
 
 const buildFilterParams = () => {
   const [startDate, endDate] = searchForm.dateRange || []
   return {
     userId: props.userId,
-    currencyType: props.currencyType,
+    currencyType: resolveQueryCurrencyType(searchForm.currencyType),
     startTime: startDate ? toServerDayStartUnix(startDate) : 0,
     endTime: endDate ? toServerDayEndUnix(endDate) : 0,
   }
@@ -144,7 +189,7 @@ const fetchList = async () => {
     loaded.value = true
   } catch (error) {
     console.error('Failed to load user currency logs:', error)
-    ElMessage.error(fetchFailedMessage.value)
+    ElMessage.error(t('pages.userList.currencyLogFetchFailed'))
   } finally {
     loading.value = false
   }
@@ -156,6 +201,7 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
+  searchForm.currencyType = defaultCurrencyType()
   searchForm.dateRange = []
   pagination.pageIndex = 1
   fetchList()
@@ -180,15 +226,34 @@ const handleExport = async () => {
     ElMessage.warning(t('common.exportEmpty'))
     return
   }
+  const filters = buildFilterParams()
+  let exportCurrencyType = filters.currencyType as 0 | 1 | 2
+  // 仅有一侧导出权限时，合并视图也只导出有权限的类型
+  if (exportCurrencyType === 0) {
+    if (canExportGold.value && !canExportDiamond.value) exportCurrencyType = 1
+    else if (!canExportGold.value && canExportDiamond.value) exportCurrencyType = 2
+    else if (!canExportGold.value && !canExportDiamond.value) return
+  } else if (exportCurrencyType === 1 && !canExportGold.value) {
+    return
+  } else if (exportCurrencyType === 2 && !canExportDiamond.value) {
+    return
+  }
   await runExport(
       CMS_EXPORT_TYPE_CURRENCY_LOG,
       {
-        headers: buildCsvHeaders(buildCurrencyLogCsvColumns(t, props.currencyType)),
+        headers: buildCsvHeaders(buildCurrencyLogCsvColumns(t, exportCurrencyType)),
         lang: String(locale.value || 'en'),
-        ...buildFilterParams(),
+        ...filters,
+        currencyType: exportCurrencyType,
       },
-      `${exportFilePrefix.value}-${props.userId}-${Date.now()}.csv`,
+      `user-currency-log-${props.userId}-${Date.now()}.csv`,
   )
+}
+
+const currencyTypeLabel = (currencyType: number) => {
+  if (currencyType === 2) return t('pages.currencyLogList.currencyTypeDiamond')
+  if (currencyType === 1) return t('pages.currencyLogList.currencyTypeGold')
+  return '-'
 }
 
 const actionLabel = (action: number) => {
@@ -200,13 +265,14 @@ const actionLabel = (action: number) => {
 const resetState = () => {
   loaded.value = false
   tableData.value = []
+  searchForm.currencyType = defaultCurrencyType()
   searchForm.dateRange = []
   pagination.pageIndex = 1
   pagination.total = 0
 }
 
 watch(
-    () => [props.userId, props.currencyType] as const,
+    () => props.userId,
     () => {
       resetState()
       if (props.active) {

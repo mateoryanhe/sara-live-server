@@ -184,6 +184,7 @@ var openAPIDocRoutes = []openAPIDocRoute{
 	{OldMethod: "post", OldPath: "/userWithdraw/listWithdrawTiers", NewPath: "/sofie/payout/browseCashOutTiers", Tag: "payout", Summary: "用户提现档位"},
 	{OldMethod: "post", OldPath: "/firstRechargeActivity/firstRechargeActivityCfgForApp", NewPath: "/sofie/bonus/fetchFirstPay", Tag: "bonus", Summary: "首充活动配置"},
 	{OldMethod: "post", OldPath: "/appVersion/appVersionQuery", NewPath: "/sofie/release/lookupBuild", Tag: "release", Summary: "App版本查询"},
+	{OldMethod: "post", OldPath: "/shareAppDownload/getApkDownloadUrl", NewPath: "/sofie/release/lookupApkDownload", Tag: "release", Summary: "查询APK下载链接"},
 	{OldMethod: "post", OldPath: "/customerService/cfg", NewPath: "/sofie/help/fetchContact", Tag: "help", Summary: "客服配置"},
 	{OldMethod: "post", OldPath: "/fiatCurrency/fiatCurrencyListForApp", NewPath: "/sofie/money/browseFiats", Tag: "money", Summary: "法币列表"},
 	{OldMethod: "post", OldPath: "/firebase/getClientCfgForApp", NewPath: "/sofie/googleAuth/fetchClientCfg", Tag: "googleAuth", Summary: "Firebase客户端配置"},

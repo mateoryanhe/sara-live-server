@@ -15,6 +15,7 @@ import (
 	"xr-game-server/dto/officialsitedeploydto"
 	"xr-game-server/errercode"
 	"xr-game-server/module/domainsite"
+	"xr-game-server/module/shareappdownload"
 	"xr-game-server/module/staticdeploy"
 )
 
@@ -69,6 +70,7 @@ func SaveOfficialSiteDeployCfg(ctx context.Context, req *officialsitedeploydto.S
 	); err != nil {
 		return nil, err
 	}
+	shareappdownload.RefreshOfficialApkDownloadUrl()
 	return &officialsitedeploydto.SaveOfficialSiteDeployCfgRes{Success: true}, nil
 }
 
@@ -182,6 +184,9 @@ func deployZipFromRequest(r *ghttp.Request, target deployTarget) (*officialsited
 	}
 	if _, err = domainsite.RecordDeploySuccess(r.Context(), target.siteKey); err != nil {
 		return nil, fmt.Errorf("files deployed but record upload time failed: %w", err)
+	}
+	if target.siteKey == officialsitedeploydto.OfficialSiteSiteKey {
+		shareappdownload.RefreshOfficialApkDownloadUrl()
 	}
 	return &officialsitedeploydto.DeploySiteZipRes{
 		FileCount:  fileCount,

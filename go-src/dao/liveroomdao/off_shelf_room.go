@@ -29,6 +29,31 @@ type OffShelfRoomRow struct {
 	CreatedAt    *time.Time `json:"createdAt"`
 }
 
+// ListOffShelfRoomIdsByCategory 直查已下架且分类匹配的直播间ID(cfg 缺失时按 category=1)
+func ListOffShelfRoomIdsByCategory(category uint8) []uint64 {
+	if category == 0 {
+		category = entity.LiveRoomCategoryHot
+	}
+	ctx := gctx.New()
+	type row struct {
+		ID uint64 `json:"id"`
+	}
+	rows := make([]row, 0)
+	_ = g.DB().GetScan(ctx, &rows, `
+SELECT r.id
+FROM live_rooms r
+LEFT JOIN live_room_cfgs c ON c.id = r.id
+WHERE r.status = ? AND IFNULL(c.category, ?) = ?
+ORDER BY r.id DESC`, entity.LiveRoomStatusOffShelf, entity.LiveRoomCategoryHot, category)
+	ids := make([]uint64, 0, len(rows))
+	for _, r := range rows {
+		if r.ID > 0 {
+			ids = append(ids, r.ID)
+		}
+	}
+	return ids
+}
+
 // ListOffShelfRooms 分页查询已下架直播间(直连数据库,不走缓存)
 func ListOffShelfRooms(page, pageSize int, key string) (int, []*OffShelfRoomRow) {
 	if page <= 0 {

@@ -86,6 +86,12 @@ export const trackingEventApi = {
     getChargeResultServerTrend: () => {
         return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getChargeResultServerTrend', {})
     },
+    getH5DownloadTrend: () => {
+        return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getH5DownloadTrend', {})
+    },
+    getOfficialSiteDownloadTrend: () => {
+        return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getOfficialSiteDownloadTrend', {})
+    },
 }
 
 export default trackingEventApi

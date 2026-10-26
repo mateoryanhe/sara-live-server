@@ -288,7 +288,7 @@ func vendorTransferPlayerNameMatch(userInfo *userentity.UserInfo, userID uint64,
 func vendorTransferSuccess(balance float64, updatedTime int64) *gameplatformdto.VendorTransferRes {
 	return &gameplatformdto.VendorTransferRes{
 		Data: &gameplatformdto.VendorTransferData{
-			Balance:      balance,
+			Balance:      vendorBalanceAmount(balance),
 			CurrencyCode: vendorCallbackCurrency,
 			UpdatedTime:  updatedTime,
 		},

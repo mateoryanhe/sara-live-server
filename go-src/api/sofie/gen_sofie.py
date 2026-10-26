@@ -180,6 +180,7 @@ APIS = [
     ("/userWithdraw/listWithdrawTiers", "yes", "(&controller.UserWithdrawAppController{}).ListWithdrawTiers", "用户提现档位", "payout", "browseCashOutTiers"),
     ("/firstRechargeActivity/firstRechargeActivityCfgForApp", "yes", "(&controller.FirstRechargeActivityAppController{}).FirstRechargeActivityCfgForApp", "首充活动配置", "bonus", "fetchFirstPay"),
     ("/appVersion/appVersionQuery", "no", "(&controller.AppVersionAppController{}).AppVersionQuery", "App版本查询", "release", "lookupBuild"),
+    ("/shareAppDownload/getApkDownloadUrl", "no", "(&controller.ShareAppDownloadAppController{}).GetApkDownloadUrl", "查询APK下载链接", "release", "lookupApkDownload"),
     ("/customerService/cfg", "no", "(&controller.CustomerServiceAppController{}).Cfg", "客服配置", "help", "fetchContact"),
     ("/fiatCurrency/fiatCurrencyListForApp", "no", "(&controller.FiatCurrencyAppController{}).FiatCurrencyListForApp", "法币列表", "money", "browseFiats"),
     ("/firebase/getClientCfgForApp", "no", "(&controller.FirebaseAppController{}).GetClientCfgForApp", "Firebase客户端配置", "googleAuth", "fetchClientCfg"),

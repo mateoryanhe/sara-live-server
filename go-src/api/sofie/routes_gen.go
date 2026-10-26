@@ -149,6 +149,7 @@ func Init() {
 	})
 	httpserver.RegNonAuthAppRouteGroup("/sofie/release", []httpserver.AppRoute{
 		{Path: "/lookupBuild", Handler: jsonHandler((&controller.AppVersionAppController{}).AppVersionQuery)},
+		{Path: "/lookupApkDownload", Handler: jsonHandler((&controller.ShareAppDownloadAppController{}).GetApkDownloadUrl)},
 	})
 	httpserver.RegAppRouteGroup("/sofie/rtc", []httpserver.AppRoute{
 		{Path: "/issueChannelToken", Handler: jsonHandler((&controller.AgoraAppController{}).LiveRoomToken)},

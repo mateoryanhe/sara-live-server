@@ -106,10 +106,18 @@ func fillVendorBalanceReq(req *gameplatformdto.VendorBalanceReq, params map[stri
 	}
 }
 
+// vendorBalanceAmount 返回给第三方的余额：与库一致，保留 2 位小数；超出部分直接截断，不四舍五入.
+func vendorBalanceAmount(gold float64) float64 {
+	if gold <= 0 {
+		return 0
+	}
+	return math.Trunc(gold*100) / 100
+}
+
 func vendorBalanceSuccess(gold float64) *gameplatformdto.VendorBalanceRes {
 	return &gameplatformdto.VendorBalanceRes{
 		Data: &gameplatformdto.VendorBalanceData{
-			Balance:      int64(math.Floor(gold)),
+			Balance:      vendorBalanceAmount(gold),
 			CurrencyCode: vendorCallbackCurrency,
 			RTP:          vendorCallbackDefaultRTP,
 		},

@@ -16,7 +16,7 @@ func exportCurrencyLogCSV(ctx context.Context, payload json.RawMessage, onProgre
 	if err := json.Unmarshal(payload, &req); err != nil {
 		return nil, err
 	}
-	if req.CurrencyType == 0 {
+	if req.CurrencyType > 2 {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	userId := parseUint64Filter(req.UserId)
@@ -36,6 +36,27 @@ func exportCurrencyLogCSV(ctx context.Context, payload json.RawMessage, onProgre
 		}
 		return total, csvRows
 	}, onProgress)
+}
+
+func currencyTypeText(currencyType uint8, langCode currency.Lang) string {
+	isDiamond := currencyType == 2
+	switch langCode {
+	case currency.LangZHCN:
+		if isDiamond {
+			return "钻石"
+		}
+		return "金币"
+	case currency.LangZHTW:
+		if isDiamond {
+			return "鑽石"
+		}
+		return "金幣"
+	default:
+		if isDiamond {
+			return "Diamond"
+		}
+		return "Gold"
+	}
 }
 
 func currencyLogToCSVRow(row *userentity.CurrencyLog, langCode currency.Lang) []string {
@@ -59,15 +80,12 @@ func currencyLogToCSVRow(row *userentity.CurrencyLog, langCode currency.Lang) []
 	}
 	return []string{
 		formatCSVUint(row.ID),
+		currencyTypeText(row.Type, langCode),
 		actionText,
 		formatCSVFloat(row.Amount),
 		formatCSVFloat(row.Before),
 		formatCSVFloat(row.After),
 		currency.Reason(row.Reason).Text(langCode),
-		row.GameId,
-		row.GameName,
-		row.GameCategory,
-		currency.BusinessTypeText(row.BusinessType),
 		formatCSVTime(row.CreatedAt),
 	}
 }

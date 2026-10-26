@@ -26,6 +26,7 @@ import {liveRoomTagApi} from './modules/liveRoomTag'
 import {oneToOneRoomApi} from './modules/oneToOneRoom'
 import {textModerationApi} from './modules/text-moderation'
 import {privacyPolicyApi} from './modules/privacy-policy'
+import {shareAppDownloadApi} from './modules/share-app-download'
 import {customerServiceApi} from './modules/customer-service'
 import {walletApi} from './modules/wallet'
 import {uploadResourceApi} from './modules/upload-resource'
@@ -73,6 +74,7 @@ export {
     oneToOneRoomApi,
     textModerationApi,
     privacyPolicyApi,
+    shareAppDownloadApi,
     customerServiceApi,
     walletApi,
     uploadResourceApi,
@@ -122,6 +124,7 @@ export default {
     oneToOneRoomApi,
     textModerationApi,
     privacyPolicyApi,
+    shareAppDownloadApi,
     customerServiceApi,
     walletApi,
     uploadResourceApi,

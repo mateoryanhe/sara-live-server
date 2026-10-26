@@ -18,10 +18,10 @@ type CMSListFilter struct {
 	PageSize     int
 }
 
-// CMSList CMS分页查询货币流水(按ID倒序)
+// CMSList CMS分页查询货币流水(按ID倒序); CurrencyType=0 表示不限货币类型
 func CMSList(f *CMSListFilter) (int, []*entity.CurrencyLog) {
 	list := make([]*entity.CurrencyLog, 0)
-	if f == nil || f.CurrencyType == 0 {
+	if f == nil {
 		return 0, list
 	}
 	pageIndex := f.PageIndex
@@ -33,8 +33,10 @@ func CMSList(f *CMSListFilter) (int, []*entity.CurrencyLog) {
 		pageSize = 20
 	}
 	ctx := gctx.New()
-	m := g.Model(string(entity.TbCurrencyLog)).Ctx(ctx).
-		Where(string(entity.CurrencyLogType)+" = ?", f.CurrencyType)
+	m := g.Model(string(entity.TbCurrencyLog)).Ctx(ctx)
+	if f.CurrencyType > 0 {
+		m = m.Where(string(entity.CurrencyLogType)+" = ?", f.CurrencyType)
+	}
 	if f.UserId > 0 {
 		m = m.Where(string(entity.CurrencyLogUserId)+" = ?", f.UserId)
 	}

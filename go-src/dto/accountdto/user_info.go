@@ -38,6 +38,7 @@ type UserInfoDto struct {
 	Gold              float64    `json:"gold"`
 	Diamond           float64    `json:"diamond"`
 	ShareCode         string     `json:"shareCode"`
+	InviterId         uint64     `json:"inviterId,string"`
 	GuildId           uint64     `json:"guildId"`
 	UserType          uint8      `json:"userType"`
 	IsAnchor          bool       `json:"isAnchor"`

@@ -49,7 +49,17 @@
                       {{ detail.profile?.isAnchor ? t('common.yes') : t('common.no') }}
                     </el-tag>
                   </el-descriptions-item>
-                  <el-descriptions-item :label="t('pages.userList.inviterId')">{{ detail.profile?.inviterId || '-' }}</el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.inviterId')">
+                    <el-button
+                        v-if="hasInviter"
+                        link
+                        type="primary"
+                        @click="openInviterDetail"
+                    >
+                      {{ detail.profile?.inviterId }}
+                    </el-button>
+                    <span v-else>-</span>
+                  </el-descriptions-item>
                   <el-descriptions-item :label="t('pages.userList.vipLevel')">{{ detail.profile?.vipLevel ?? '-' }}</el-descriptions-item>
                   <el-descriptions-item :label="t('pages.userList.guildId')">
                     <el-button
@@ -283,63 +293,90 @@
             <RechargeOrderPanel :active="activeTab === 'rechargeOrder'" :user-id="userId"/>
           </el-tab-pane>
 
-          <el-tab-pane v-if="canViewGoldLog" :label="t('pages.userList.tabGoldLog')" name="goldLog">
+          <el-tab-pane v-if="canViewInviteeList" :label="t('pages.userList.tabInvitee')" name="invitee">
+            <InviteePanel :active="activeTab === 'invitee'" :user-id="userId"/>
+          </el-tab-pane>
+
+          <el-tab-pane v-if="canViewCurrencyLog" :label="t('pages.userList.tabCurrencyLog')" name="currencyLog">
             <CurrencyLogPanel
-                :active="activeTab === 'goldLog'"
-                :currency-type="1"
-                export-permission="exportGoldLog"
+                :active="activeTab === 'currencyLog'"
                 :user-id="userId"
             />
           </el-tab-pane>
 
-          <el-tab-pane v-if="canViewDiamondLog" :label="t('pages.userList.tabDiamondLog')" name="diamondLog">
-            <CurrencyLogPanel
-                :active="activeTab === 'diamondLog'"
-                :currency-type="2"
-                export-permission="exportDiamondLog"
-                :user-id="userId"
-            />
+          <el-tab-pane v-if="canViewGameLogGroup" :label="t('pages.userList.tabGameLogGroup')" name="gameLogGroup">
+            <el-tabs v-model="gameLogSubTab" class="basic-sub-tabs">
+              <el-tab-pane
+                  v-if="canViewGameBetLog"
+                  :label="t('pages.userList.tabGameBetLog')"
+                  name="gameBetLog"
+              >
+                <GameLogPanel
+                    :active="activeTab === 'gameLogGroup' && gameLogSubTab === 'gameBetLog'"
+                    export-permission="exportGameBetLog"
+                    log-type="bet"
+                    :user-id="userId"
+                />
+              </el-tab-pane>
+              <el-tab-pane
+                  v-if="canViewGameWinLog"
+                  :label="t('pages.userList.tabGameWinLog')"
+                  name="gameWinLog"
+              >
+                <GameLogPanel
+                    :active="activeTab === 'gameLogGroup' && gameLogSubTab === 'gameWinLog'"
+                    export-permission="exportGameWinLog"
+                    log-type="win"
+                    :user-id="userId"
+                />
+              </el-tab-pane>
+            </el-tabs>
           </el-tab-pane>
 
-          <el-tab-pane v-if="canViewGameBetLog" :label="t('pages.userList.tabGameBetLog')" name="gameBetLog">
-            <GameLogPanel
-                :active="activeTab === 'gameBetLog'"
-                export-permission="exportGameBetLog"
-                log-type="bet"
-                :user-id="userId"
-            />
-          </el-tab-pane>
-
-          <el-tab-pane v-if="canViewGameWinLog" :label="t('pages.userList.tabGameWinLog')" name="gameWinLog">
-            <GameLogPanel
-                :active="activeTab === 'gameWinLog'"
-                export-permission="exportGameWinLog"
-                log-type="win"
-                :user-id="userId"
-            />
-          </el-tab-pane>
-
-          <el-tab-pane v-if="canViewShortVideo" :label="t('pages.userList.tabShortVideo')" name="shortVideo">
-            <ShortVideoPanel :active="activeTab === 'shortVideo'" :user-id="userId"/>
-          </el-tab-pane>
-
-          <el-tab-pane v-if="canViewShortVideoWatch" :label="t('pages.userList.tabShortVideoWatch')" name="shortVideoWatch">
-            <ShortVideoWatchPanel :active="activeTab === 'shortVideoWatch'" :user-id="userId"/>
-          </el-tab-pane>
-
-          <el-tab-pane v-if="canViewShortVideoPurchase" :label="t('pages.userList.tabShortVideoPurchase')" name="shortVideoPurchase">
-            <ShortVideoWatchPanel :active="activeTab === 'shortVideoPurchase'" only-paid :user-id="userId"/>
-          </el-tab-pane>
-
-          <el-tab-pane
-              v-if="canViewShortVideoAuthorSettlementLog"
-              :label="t('pages.userList.tabShortVideoAuthorSettlementLog')"
-              name="shortVideoAuthorSettlementLog"
-          >
-            <ShortVideoAuthorSettlementLogPanel
-                :active="activeTab === 'shortVideoAuthorSettlementLog'"
-                :user-id="userId"
-            />
+          <el-tab-pane v-if="canViewShortVideoGroup" :label="t('pages.userList.tabShortVideoGroup')" name="shortVideoGroup">
+            <el-tabs v-model="shortVideoSubTab" class="basic-sub-tabs">
+              <el-tab-pane
+                  v-if="canViewShortVideo"
+                  :label="t('pages.userList.tabShortVideo')"
+                  name="shortVideo"
+              >
+                <ShortVideoPanel
+                    :active="activeTab === 'shortVideoGroup' && shortVideoSubTab === 'shortVideo'"
+                    :user-id="userId"
+                />
+              </el-tab-pane>
+              <el-tab-pane
+                  v-if="canViewShortVideoWatch"
+                  :label="t('pages.userList.tabShortVideoWatch')"
+                  name="shortVideoWatch"
+              >
+                <ShortVideoWatchPanel
+                    :active="activeTab === 'shortVideoGroup' && shortVideoSubTab === 'shortVideoWatch'"
+                    :user-id="userId"
+                />
+              </el-tab-pane>
+              <el-tab-pane
+                  v-if="canViewShortVideoPurchase"
+                  :label="t('pages.userList.tabShortVideoPurchase')"
+                  name="shortVideoPurchase"
+              >
+                <ShortVideoWatchPanel
+                    :active="activeTab === 'shortVideoGroup' && shortVideoSubTab === 'shortVideoPurchase'"
+                    only-paid
+                    :user-id="userId"
+                />
+              </el-tab-pane>
+              <el-tab-pane
+                  v-if="canViewShortVideoAuthorSettlementLog"
+                  :label="t('pages.userList.tabShortVideoAuthorSettlementLog')"
+                  name="shortVideoAuthorSettlementLog"
+              >
+                <ShortVideoAuthorSettlementLogPanel
+                    :active="activeTab === 'shortVideoGroup' && shortVideoSubTab === 'shortVideoAuthorSettlementLog'"
+                    :user-id="userId"
+                />
+              </el-tab-pane>
+            </el-tabs>
           </el-tab-pane>
 
         </el-tabs>
@@ -355,6 +392,7 @@ import {useRoute, useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {accountApi} from '@/api'
 import CurrencyLogPanel from './user-detail-currency-log-panel.vue'
+import InviteePanel from './user-detail-invitee-panel.vue'
 import RechargeOrderPanel from './user-detail-recharge-order-panel.vue'
 import GameLogPanel from './user-detail-game-log-panel.vue'
 import ShortVideoAuthorSettlementLogPanel from './user-detail-short-video-author-settlement-log-panel.vue'
@@ -368,14 +406,20 @@ import {formatServerDateTime as formatDate} from '@/utils/server-datetime'
 const {t} = useI18n()
 const {can} = usePagePermission('UserDetail')
 const canViewRechargeOrderList = computed(() => can('rechargeOrderList'))
-const canViewGoldLog = computed(() => can('goldLog'))
-const canViewDiamondLog = computed(() => can('diamondLog'))
+const canViewInviteeList = computed(() => can('inviteeList'))
+const canViewCurrencyLog = computed(() => can('goldLog') || can('diamondLog'))
 const canViewGameBetLog = computed(() => can('gameBetLog'))
 const canViewGameWinLog = computed(() => can('gameWinLog'))
+const canViewGameLogGroup = computed(() => canViewGameBetLog.value || canViewGameWinLog.value)
 const canViewShortVideo = computed(() => can('shortVideo'))
 const canViewShortVideoWatch = computed(() => can('shortVideoWatch'))
 const canViewShortVideoPurchase = computed(() => can('shortVideoPurchase'))
 const canViewShortVideoAuthorSettlementLog = computed(() => can('shortVideoAuthorSettlementLog'))
+const canViewShortVideoGroup = computed(() =>
+    canViewShortVideo.value
+    || canViewShortVideoWatch.value
+    || canViewShortVideoPurchase.value
+    || canViewShortVideoAuthorSettlementLog.value)
 const route = useRoute()
 const router = useRouter()
 
@@ -383,6 +427,26 @@ const loading = ref(false)
 const detail = ref<UserDetail | null>(null)
 const activeTab = ref('basic')
 const basicSubTab = ref('profile')
+
+type GameLogSubTab = 'gameBetLog' | 'gameWinLog'
+
+const defaultGameLogSubTab = (): GameLogSubTab => {
+  if (canViewGameBetLog.value) return 'gameBetLog'
+  return 'gameWinLog'
+}
+
+const gameLogSubTab = ref<GameLogSubTab>(defaultGameLogSubTab())
+
+type ShortVideoSubTab = 'shortVideo' | 'shortVideoWatch' | 'shortVideoPurchase' | 'shortVideoAuthorSettlementLog'
+
+const defaultShortVideoSubTab = (): ShortVideoSubTab => {
+  if (canViewShortVideo.value) return 'shortVideo'
+  if (canViewShortVideoWatch.value) return 'shortVideoWatch'
+  if (canViewShortVideoPurchase.value) return 'shortVideoPurchase'
+  return 'shortVideoAuthorSettlementLog'
+}
+
+const shortVideoSubTab = ref<ShortVideoSubTab>(defaultShortVideoSubTab())
 
 const USER_TYPE_BOT_ANCHOR = 2
 
@@ -397,6 +461,25 @@ const hasGuild = computed(() => {
   }
   return Number(guildId) !== 0
 })
+
+const hasInviter = computed(() => {
+  const inviterId = detail.value?.profile?.inviterId
+  if (inviterId == null || inviterId === '') {
+    return false
+  }
+  return String(inviterId) !== '0'
+})
+
+const openInviterDetail = () => {
+  const inviterId = detail.value?.profile?.inviterId
+  if (!inviterId || String(inviterId) === '0') {
+    return
+  }
+  router.push({
+    name: 'UserDetail',
+    query: {id: String(inviterId)},
+  })
+}
 
 const openGuildDetail = () => {
   const guildId = detail.value?.profile?.guildId
@@ -510,6 +593,8 @@ watch(userId, (_id, prev) => {
   if (prev !== undefined) {
     activeTab.value = 'basic'
     basicSubTab.value = 'profile'
+    gameLogSubTab.value = defaultGameLogSubTab()
+    shortVideoSubTab.value = defaultShortVideoSubTab()
     fetchDetail()
   }
 })

@@ -247,6 +247,7 @@ export interface UserInfo {
     gold?: number
     diamond?: number
     shareCode?: string
+    inviterId?: string
     guildId?: string | number
     userType?: number
     isAnchor?: boolean
@@ -298,6 +299,20 @@ export interface SetLiveRoomStatusReq {
 export interface SetLiveRoomStatusRes {
     success: boolean
     status: number
+}
+
+export interface BatchOffShelfShowcaseLiveRoomsRes {
+    successCount: number
+    failCount: number
+    failIds?: string[]
+    totalMatched: number
+}
+
+export interface BatchOnShelfShowcaseLiveRoomsRes {
+    successCount: number
+    failCount: number
+    failIds?: string[]
+    totalMatched: number
 }
 
 export interface SetUserTypeReq {
@@ -701,6 +716,35 @@ export interface UserWithdrawPayoutDetailItem {
     updatedAt?: string
 }
 
+export interface CMSInviteeListQuery extends PageQuery {
+    inviterId: string
+    startTime?: number
+    endTime?: number
+}
+
+export interface CMSInviteeItem {
+    userId: string
+    nickname?: string
+    avatar?: string
+    createdAt?: string | null
+}
+
+export interface CMSInviteLogListQuery extends PageQuery {
+    keyword?: string
+    startTime?: number
+    endTime?: number
+}
+
+export interface CMSInviteLogItem {
+    userId: string
+    nickname?: string
+    avatar?: string
+    inviterId: string
+    inviterNickname?: string
+    inviterAvatar?: string
+    createdAt?: string | null
+}
+
 export interface UserDetail {
     account?: UserAccountDetailItem | null
     profile?: UserProfileDetailItem | null
@@ -803,6 +847,7 @@ export interface CurrencyLogItem {
     userId: string
     nickname?: string
     avatar?: string
+    currencyType: number
     action: number
     amount: number
     before: number
@@ -2096,6 +2141,28 @@ export interface PrivacyPolicyCfg {
     safetyCenterUrl: string
     createdAt: string
     updatedAt: string
+}
+
+export interface ShareAppDownloadCfg {
+    id: string
+    downloadUrl: string
+    shareText: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface GetShareAppDownloadCfgRes {
+    cfg: ShareAppDownloadCfg | null
+}
+
+export interface SaveShareAppDownloadCfgReq {
+    id?: number
+    shareText: string
+}
+
+export interface SaveShareAppDownloadCfgRes {
+    success: boolean
+    id: string
 }
 
 export interface GetPrivacyPolicyCfgRes {

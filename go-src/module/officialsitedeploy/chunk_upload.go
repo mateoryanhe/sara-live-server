@@ -21,6 +21,7 @@ import (
 	"xr-game-server/core/uploadstaging"
 	"xr-game-server/dto/officialsitedeploydto"
 	"xr-game-server/module/domainsite"
+	"xr-game-server/module/shareappdownload"
 	"xr-game-server/module/staticdeploy"
 )
 
@@ -285,6 +286,9 @@ func completeSiteFileUpload(ctx context.Context, uploadId string, target deployT
 		}
 		res.DeployPath = destination
 		res.DownloadUrl = staticSiteFileURL(target, filepath.ToSlash(filepath.Join(target.apkSubDir, meta.FileName)))
+	}
+	if target.siteKey == officialsitedeploydto.OfficialSiteSiteKey {
+		shareappdownload.RefreshOfficialApkDownloadUrl()
 	}
 	if err := os.RemoveAll(sessionDir); err != nil {
 		return nil, err

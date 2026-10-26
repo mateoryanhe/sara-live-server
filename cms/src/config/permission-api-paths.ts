@@ -49,6 +49,10 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'TrackingRechargeManagement:chargeClickTrend': '/trackingEvent/getChargeClickTrend',
     'TrackingRechargeManagement:chargeResultTrend': '/trackingEvent/getChargeResultServerTrend',
 
+    TrackingDownloadManagement: '/trackingEvent/getH5DownloadTrend',
+    'TrackingDownloadManagement:view': '/trackingEvent/getH5DownloadTrend',
+    'TrackingDownloadManagement:officialSiteTrend': '/trackingEvent/getOfficialSiteDownloadTrend',
+
     UserList: '/account/getUserInfo',
     'UserList:view': '/account/getUserInfo',
     'UserList:search': '/account/getUserInfo',
@@ -77,6 +81,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'RechargeOrderList:channelRechargeTest': '/rechargeOrder/createChannelRechargeOrderTest',
     UserDetail: '/account/getUserDetail',
     'UserDetail:rechargeOrderList': '/rechargeOrder/rechargeOrderList',
+    'UserDetail:inviteeList': '/account/cmsInviteeList',
     'UserDetail:goldLog': '/currencyLog/cmsCurrencyLogList',
     'UserDetail:exportGoldLog': '/cmsExport/submitJob',
     'UserDetail:diamondLog': '/currencyLog/cmsCurrencyLogList',
@@ -102,6 +107,8 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'AnchorListManagement:onShelf': '/account/setLiveRoomStatus',
     'AnchorListManagement:batchOffShelf': '/account/setLiveRoomStatus',
     'AnchorListManagement:batchOnShelf': '/account/setLiveRoomStatus',
+    'AnchorListManagement:batchOffShelfShowcase': '/account/batchOffShelfShowcaseLiveRooms',
+    'AnchorListManagement:batchOnShelfShowcase': '/account/batchOnShelfShowcaseLiveRooms',
     'AnchorListManagement:uploadRoomCover': '/account/setLiveRoomCover',
 
     PlatformAnchorList: '/account/getAnchorList',
@@ -257,6 +264,8 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'GuildManagement:unban': '/account/unBanAnchor',
     'GuildManagement:exitGuild': '/account/exitGuild',
     'GuildManagement:setAnchorType': '/guild/setGuildAnchorType',
+    'GuildManagement:batchOffShelf': '/account/setLiveRoomStatus',
+    'GuildManagement:batchOnShelf': '/account/setLiveRoomStatus',
     'GuildManagement:joinGuildAnchor': '/guild/joinGuildAnchor',
     'GuildManagement:batchSetAnchor': '/guild/importGuildAnchors',
     'GuildManagement:batchSetSeniorAnchor': '/guild/importGuildAnchors',
@@ -447,6 +456,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'LiveDailyEffectiveLiveList:view': '/liveRecord/cmsDailyEffectiveLiveList',
     'LiveDailyEffectiveLiveList:search': '/liveRecord/cmsDailyEffectiveLiveList',
     'LiveDailyEffectiveLiveList:export': '/cmsExport/submitJob',
+    'LiveDailyEffectiveLiveList:exportByGuild': '/cmsExport/submitJob',
 
     VideoCallLogList: '/call/cmsVideoCallLogList',
     'VideoCallLogList:view': '/call/cmsVideoCallLogList',
@@ -574,6 +584,13 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     PromotionChannelDailyStatManagement: '/promotionChannelUrl/promotionChannelDailyStatList',
     'PromotionChannelDailyStatManagement:view': '/promotionChannelUrl/promotionChannelDailyStatList',
     'PromotionChannelDailyStatManagement:search': '/promotionChannelUrl/promotionChannelDailyStatList',
+    PromotionInviteLogListManagement: '/account/cmsInviteLogList',
+    'PromotionInviteLogListManagement:view': '/account/cmsInviteLogList',
+    'PromotionInviteLogListManagement:search': '/account/cmsInviteLogList',
+
+    PromotionShareAppDownloadCfgManagement: '/shareAppDownload/getShareAppDownloadCfg',
+    'PromotionShareAppDownloadCfgManagement:view': '/shareAppDownload/getShareAppDownloadCfg',
+    'PromotionShareAppDownloadCfgManagement:save': '/shareAppDownload/saveShareAppDownloadCfg',
 
     SimulatorCpuKeywordManagement: '/simulatorCpuKeyword/simulatorCpuKeywordList',
     'SimulatorCpuKeywordManagement:view': '/simulatorCpuKeyword/simulatorCpuKeywordList',

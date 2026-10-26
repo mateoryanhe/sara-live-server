@@ -24,6 +24,7 @@ var ErrUnavailable = errors.New("CMS文件导出未配置")
 // 前端主动删除时，若内存记录已丢(重启)，按常见后缀兜底删一次。
 var knownSuffixes = []string{
 	".csv",
+	".zip",
 	".log",
 	".trace.log",
 	".stats.tsv",

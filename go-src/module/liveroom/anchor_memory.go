@@ -18,7 +18,13 @@ import (
 )
 
 func queryAnchorListFromMemory(req *accountdto.QueryAnchorListReq) (int, []*accountdto.AnchorListItem) {
-	rooms := filterAnchorRooms(getRoomListCache(), req.Key, req.GuildId, req.PlatformOnly, req.GuildOnly, req.LiveStatus)
+	var rooms []*liveentity.LiveRoom
+	if req.GuildId > 0 {
+		// 指定工会时含已下架主播间,便于成员页批量上架
+		rooms = filterGuildAnchorRoomsIncludingOffShelf(req.GuildId, req.Key, req.LiveStatus)
+	} else {
+		rooms = filterAnchorRooms(getRoomListCache(), req.Key, req.GuildId, req.PlatformOnly, req.GuildOnly, req.LiveStatus)
+	}
 	total := len(rooms)
 	pageRooms := paginateAnchorRooms(rooms, req.PageIndex, req.PageSize)
 	ret := make([]*accountdto.AnchorListItem, 0, len(pageRooms))
@@ -29,6 +35,38 @@ func queryAnchorListFromMemory(req *accountdto.QueryAnchorListReq) (int, []*acco
 	}
 	fillAnchorListGuildNames(ret)
 	return total, ret
+}
+
+// filterGuildAnchorRoomsIncludingOffShelf 直查工会下全部直播间(含下架),上架优先用缓存实例
+func filterGuildAnchorRoomsIncludingOffShelf(guildId uint64, key string, liveStatus *uint8) []*liveentity.LiveRoom {
+	if guildId == 0 {
+		return nil
+	}
+	dbRooms := liveroomdao.ListRoomsByGuildFromDB(guildId)
+	key = strings.TrimSpace(key)
+	likeKey := strings.ToLower(key)
+	guildNameMap := guilddao.GetNameMapByIds([]uint64{guildId})
+	filtered := make([]*liveentity.LiveRoom, 0, len(dbRooms))
+	for _, room := range dbRooms {
+		if room == nil || room.ID == 0 {
+			continue
+		}
+		if cached := liveroomdao.GetRoomByAnchor(room.ID); cached != nil {
+			room = cached
+		}
+		if !isRegularAnchorRoom(room) {
+			continue
+		}
+		if liveStatus != nil && roomLiveStatus(room) != *liveStatus {
+			continue
+		}
+		if key != "" && !matchAnchorKey(room.ID, room.GuildId, key, likeKey, guildNameMap) {
+			continue
+		}
+		filtered = append(filtered, room)
+	}
+	sort.Slice(filtered, func(i, j int) bool { return filtered[i].ID > filtered[j].ID })
+	return filtered
 }
 
 func fillAnchorListGuildNames(items []*accountdto.AnchorListItem) {

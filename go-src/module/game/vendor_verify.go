@@ -54,7 +54,7 @@ func HandleVendorVerify(ctx context.Context, req *gameplatformdto.VendorVerifyRe
 		Data: &gameplatformdto.VendorVerifyData{
 			PlayerName: resolvePlayerName(userInfo, userID),
 			Currency:   vendorCallbackCurrency,
-			Balance:    userInfo.Gold,
+			Balance:    vendorBalanceAmount(userInfo.Gold),
 		},
 	}
 	vendorDetailLog().Infof(ctx, "vendor verify success user_id=%s player_name=%s balance=%v currency=%s",
