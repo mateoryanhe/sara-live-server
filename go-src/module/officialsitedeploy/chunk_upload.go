@@ -59,6 +59,13 @@ func InitThirdPayOfficialSiteFileUpload(_ context.Context, req *officialsitedepl
 	return initSiteFileUpload(req.FileName, req.FileSize, thirdPayOfficialSiteTarget)
 }
 
+func InitSofieOfficialSiteFileUpload(_ context.Context, req *officialsitedeploydto.InitSofieOfficialSiteFileUploadReq) (*officialsitedeploydto.InitSofieOfficialSiteFileUploadRes, error) {
+	if req == nil {
+		return nil, errors.New("upload request is empty")
+	}
+	return initSiteFileUpload(req.FileName, req.FileSize, sofieOfficialSiteTarget)
+}
+
 func initSiteFileUpload(rawFileName string, fileSize int64, target deployTarget) (*officialsitedeploydto.InitOfficialSiteFileUploadRes, error) {
 	fileName, fileType, err := validateOfficialSiteUploadFile(rawFileName, fileSize)
 	if err != nil {
@@ -101,6 +108,10 @@ func UploadOfficialSiteFileChunkFromRequest(r *ghttp.Request) (*officialsitedepl
 
 func UploadThirdPayOfficialSiteFileChunkFromRequest(r *ghttp.Request) (*officialsitedeploydto.UploadOfficialSiteFileChunkRes, error) {
 	return uploadSiteFileChunkFromRequest(r, thirdPayOfficialSiteTarget)
+}
+
+func UploadSofieOfficialSiteFileChunkFromRequest(r *ghttp.Request) (*officialsitedeploydto.UploadOfficialSiteFileChunkRes, error) {
+	return uploadSiteFileChunkFromRequest(r, sofieOfficialSiteTarget)
 }
 
 func uploadSiteFileChunkFromRequest(r *ghttp.Request, target deployTarget) (*officialsitedeploydto.UploadOfficialSiteFileChunkRes, error) {
@@ -193,6 +204,13 @@ func CompleteThirdPayOfficialSiteFileUpload(ctx context.Context, req *officialsi
 		return nil, errors.New("upload request is empty")
 	}
 	return completeSiteFileUpload(ctx, req.UploadId, thirdPayOfficialSiteTarget)
+}
+
+func CompleteSofieOfficialSiteFileUpload(ctx context.Context, req *officialsitedeploydto.CompleteSofieOfficialSiteFileUploadReq) (*officialsitedeploydto.CompleteSofieOfficialSiteFileUploadRes, error) {
+	if req == nil {
+		return nil, errors.New("upload request is empty")
+	}
+	return completeSiteFileUpload(ctx, req.UploadId, sofieOfficialSiteTarget)
 }
 
 func completeSiteFileUpload(ctx context.Context, uploadId string, target deployTarget) (*officialsitedeploydto.CompleteOfficialSiteFileUploadRes, error) {
@@ -314,6 +332,16 @@ func AbortThirdPayOfficialSiteFileUpload(_ context.Context, req *officialsitedep
 		return nil, err
 	}
 	return &officialsitedeploydto.AbortThirdPayOfficialSiteFileUploadRes{}, nil
+}
+
+func AbortSofieOfficialSiteFileUpload(_ context.Context, req *officialsitedeploydto.AbortSofieOfficialSiteFileUploadReq) (*officialsitedeploydto.AbortSofieOfficialSiteFileUploadRes, error) {
+	if req == nil {
+		return nil, errors.New("invalid upload id")
+	}
+	if err := abortSiteFileUpload(req.UploadId, sofieOfficialSiteTarget); err != nil {
+		return nil, err
+	}
+	return &officialsitedeploydto.AbortSofieOfficialSiteFileUploadRes{}, nil
 }
 
 func abortSiteFileUpload(rawUploadId string, target deployTarget) error {

@@ -17,14 +17,26 @@ import (
 	"xr-game-server/module/wallet"
 )
 
-func resolveAboutSiteUrl() string {
+func resolveAboutSiteUrl(useSofie bool) string {
+	if useSofie {
+		if url := privacypolicy.GetSofieAboutSiteUrl(); url != "" {
+			return url
+		}
+		// Sofie 未填时回落 Sara
+	}
 	if url := privacypolicy.GetAboutSiteUrl(); url != "" {
 		return url
 	}
 	return upload.GetAboutSiteUrl()
 }
 
-func resolveSafetyCenterUrl() string {
+func resolveSafetyCenterUrl(useSofie bool) string {
+	if useSofie {
+		if url := privacypolicy.GetSofieSafetyCenterUrl(); url != "" {
+			return url
+		}
+		// Sofie 未填时回落 Sara
+	}
 	if url := privacypolicy.GetSafetyCenterUrl(); url != "" {
 		return url
 	}
@@ -34,8 +46,40 @@ func resolveSafetyCenterUrl() string {
 func GetSysCfg(ctx context.Context, req *sysdto.SysCfgReq) (*sysdto.SysCfgResp, error) {
 	_ = req
 	packageName := httpserver.GetPackageNameFromContext(ctx)
-	globalPrivacy := privacypolicy.GetPrivacyPolicyUrl()
-	globalTerms := privacypolicy.GetTermsOfServiceUrl()
+	sofie := httpserver.IsSofieAppRequest(ctx)
+	useSofiePrivacy := privacypolicy.UseSofiePrivacyForPackage(sofie, packageName)
+	var (
+		privacyUrl, termsUrl, creatorTerms, roomOwnerTerms, vipDesc string
+	)
+	if useSofiePrivacy {
+		privacyUrl = privacypolicy.GetSofiePrivacyPolicyUrl()
+		termsUrl = privacypolicy.GetSofieTermsOfServiceUrl()
+		creatorTerms = privacypolicy.GetSofieCreatorTermsUrl()
+		roomOwnerTerms = privacypolicy.GetSofieRoomOwnerTermsUrl()
+		vipDesc = privacypolicy.GetSofieVipDescUrl()
+		// 单字段为空时回落 Sara 隐私政策
+		if privacyUrl == "" {
+			privacyUrl = privacypolicy.GetPrivacyPolicyUrl()
+		}
+		if termsUrl == "" {
+			termsUrl = privacypolicy.GetTermsOfServiceUrl()
+		}
+		if creatorTerms == "" {
+			creatorTerms = privacypolicy.GetCreatorTermsUrl()
+		}
+		if roomOwnerTerms == "" {
+			roomOwnerTerms = privacypolicy.GetRoomOwnerTermsUrl()
+		}
+		if vipDesc == "" {
+			vipDesc = privacypolicy.GetVipDescUrl()
+		}
+	} else {
+		privacyUrl = apppkg.ResolvePrivacyPolicyUrl(packageName, privacypolicy.GetPrivacyPolicyUrl())
+		termsUrl = apppkg.ResolveTermsOfServiceUrl(packageName, privacypolicy.GetTermsOfServiceUrl())
+		creatorTerms = privacypolicy.GetCreatorTermsUrl()
+		roomOwnerTerms = privacypolicy.GetRoomOwnerTermsUrl()
+		vipDesc = privacypolicy.GetVipDescUrl()
+	}
 	exchangeCfg := wallet.GetExchangeCfgSnapshot()
 	// 无 HaiPay 配置时默认显示;有配置则读库
 	tVisable, tH5Visable := true, true
@@ -54,17 +98,17 @@ func GetSysCfg(ctx context.Context, req *sysdto.SysCfgReq) (*sysdto.SysCfgResp, 
 		PaidDanmakuPrice:           livecfg.GetPaidDanmakuPrice(),
 		AudienceListRefreshSeconds: livecfg.GetAudienceListRefreshSeconds(),
 		OneToOneDailyFreeSeconds:   livecfg.GetOneToOneDailyFreeSeconds(),
-		PrivacyPolicyUrl:           apppkg.ResolvePrivacyPolicyUrl(packageName, globalPrivacy),
-		TermsOfServiceUrl:          apppkg.ResolveTermsOfServiceUrl(packageName, globalTerms),
-		CreatorTermsUrl:            privacypolicy.GetCreatorTermsUrl(),
-		RoomOwnerTermsUrl:          privacypolicy.GetRoomOwnerTermsUrl(),
-		VipDescUrl:                 privacypolicy.GetVipDescUrl(),
+		PrivacyPolicyUrl:           privacyUrl,
+		TermsOfServiceUrl:          termsUrl,
+		CreatorTermsUrl:            creatorTerms,
+		RoomOwnerTermsUrl:          roomOwnerTerms,
+		VipDescUrl:                 vipDesc,
 		AppImageMaxSize:            upload.GetAppImageMaxSize(),
 		GoldToDiamondRate:          exchangeCfg.GoldToDiamondRate,
 		ExchangeFeePercent:         exchangeCfg.ExchangeFeePercent,
 		UsdToGoldRate:              exchangeCfg.UsdToGoldRate,
-		AboutSiteUrl:               resolveAboutSiteUrl(),
-		SafetyCenterUrl:            resolveSafetyCenterUrl(),
+		AboutSiteUrl:               resolveAboutSiteUrl(useSofiePrivacy),
+		SafetyCenterUrl:            resolveSafetyCenterUrl(useSofiePrivacy),
 		EnvType:                    accountcfg.GetEnvType(),
 	}
 	if pkg := apppkg.GetAppPkgFromMemoryByPackageName(packageName); pkg != nil {

@@ -23,3 +23,22 @@ func SavePrivacyPolicyCfg(row *entity.PrivacyPolicyCfg) error {
 	_, err := g.DB().Model(string(entity.TbPrivacyPolicyCfg)).Save(row)
 	return err
 }
+
+func LoadSofiePrivacyPolicyCfg() *entity.SofiePrivacyPolicyCfg {
+	var row entity.SofiePrivacyPolicyCfg
+	if err := g.DB().Model(string(entity.TbSofiePrivacyPolicyCfg)).Order("id asc").Limit(1).Scan(&row); err != nil {
+		return nil
+	}
+	if row.ID == 0 {
+		return nil
+	}
+	return &row
+}
+
+func SaveSofiePrivacyPolicyCfg(row *entity.SofiePrivacyPolicyCfg) error {
+	if row == nil {
+		return nil
+	}
+	_, err := g.DB().Model(string(entity.TbSofiePrivacyPolicyCfg)).Save(row)
+	return err
+}

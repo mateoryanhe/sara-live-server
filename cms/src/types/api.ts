@@ -2131,6 +2131,7 @@ export interface SaveTextModerationCfgRes {
 
 export interface PrivacyPolicyCfg {
     id: string
+    packageName?: string
     apiBase: string
     privacyPolicyUrl: string
     termsOfServiceUrl: string
@@ -2191,6 +2192,7 @@ export interface GetPrivacyPolicyCfgRes {
 
 export interface SavePrivacyPolicyCfgReq {
     id?: number
+    packageName?: string
     apiBase: string
     privacyPolicyUrl: string
     termsOfServiceUrl: string

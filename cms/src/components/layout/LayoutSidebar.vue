@@ -651,7 +651,7 @@ const hasMenuPermission = (moduleName: string) => {
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('UserWithdrawDeployManagement') || hasMenuPermission('OfficialSiteDeployManagement') || hasMenuPermission('ThirdPayOfficialSiteDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement')"
+            v-if="hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('UserWithdrawDeployManagement') || hasMenuPermission('OfficialSiteDeployManagement') || hasMenuPermission('ThirdPayOfficialSiteDeployManagement') || hasMenuPermission('SofieOfficialSiteDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('SofiePrivacyPolicyCfgManagement') || hasMenuPermission('AuditCodeCfgManagement')"
             index="/frontend-module">
           <template #title>
             <el-icon>
@@ -660,7 +660,7 @@ const hasMenuPermission = (moduleName: string) => {
             <span>{{ t('menu.ConfigDeployGroup') }}</span>
           </template>
           <el-sub-menu
-              v-if="hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement')"
+              v-if="hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('SofiePrivacyPolicyCfgManagement') || hasMenuPermission('AuditCodeCfgManagement')"
               index="/frontend-module/config">
             <template #title>
               <el-icon>
@@ -710,9 +710,21 @@ const hasMenuPermission = (moduleName: string) => {
               </el-icon>
               <span>{{ t('menu.PrivacyPolicyCfgManagement') }}</span>
             </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('SofiePrivacyPolicyCfgManagement')" index="/config/sofie-privacy-policy">
+              <el-icon>
+                <Document/>
+              </el-icon>
+              <span>{{ t('menu.SofiePrivacyPolicyCfgManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('AuditCodeCfgManagement')" index="/config/audit-code">
+              <el-icon>
+                <Key/>
+              </el-icon>
+              <span>{{ t('menu.AuditCodeCfgManagement') }}</span>
+            </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('UserWithdrawDeployManagement') || hasMenuPermission('OfficialSiteDeployManagement') || hasMenuPermission('ThirdPayOfficialSiteDeployManagement')"
+              v-if="hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('UserWithdrawDeployManagement') || hasMenuPermission('OfficialSiteDeployManagement') || hasMenuPermission('ThirdPayOfficialSiteDeployManagement') || hasMenuPermission('SofieOfficialSiteDeployManagement')"
               index="/frontend-module/deploy">
             <template #title>
               <el-icon>
@@ -755,6 +767,12 @@ const hasMenuPermission = (moduleName: string) => {
                 <UploadFilled/>
               </el-icon>
               <span>{{ t('menu.ThirdPayOfficialSiteDeployManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('SofieOfficialSiteDeployManagement')" index="/config/sofie-official-site-deploy">
+              <el-icon>
+                <UploadFilled/>
+              </el-icon>
+              <span>{{ t('menu.SofieOfficialSiteDeployManagement') }}</span>
             </el-menu-item>
           </el-sub-menu>
         </el-sub-menu>

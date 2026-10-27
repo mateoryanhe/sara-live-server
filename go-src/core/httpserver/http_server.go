@@ -106,3 +106,12 @@ func GetPackageNameFromContext(ctx context.Context) string {
 	}
 	return strings.TrimSpace(r.GetHeader(PackageNameHeader, ""))
 }
+
+// IsSofieAppRequest 是否 Sofie 客户端路径(/sofie/...).
+func IsSofieAppRequest(ctx context.Context) bool {
+	r := g.RequestFromCtx(ctx)
+	if r == nil || r.URL == nil {
+		return false
+	}
+	return strings.HasPrefix(r.URL.Path, "/sofie/")
+}

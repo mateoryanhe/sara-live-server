@@ -69,6 +69,18 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '隐私政策'},
         },
         {
+            path: 'sofie-privacy-policy',
+            name: 'SofiePrivacyPolicyCfgManagement',
+            component: () => import('@/views/config/sofie-privacy-policy.vue'),
+            meta: {title: 'Sofie隐私政策'},
+        },
+        {
+            path: 'audit-code',
+            name: 'AuditCodeCfgManagement',
+            component: () => import('@/views/config/audit-code.vue'),
+            meta: {title: '审核码生成'},
+        },
+        {
             path: 'google-play',
             name: 'GooglePlayCfgManagement',
             component: () => import('@/views/config/google-play.vue'),
@@ -163,6 +175,12 @@ export const configRoutes: RouteRecordRaw = {
             name: 'ThirdPayOfficialSiteDeployManagement',
             component: () => import('@/views/config/third-pay-official-site-deploy.vue'),
             meta: {title: '第三方支付官网部署'},
+        },
+        {
+            path: 'sofie-official-site-deploy',
+            name: 'SofieOfficialSiteDeployManagement',
+            component: () => import('@/views/config/sofie-official-site-deploy.vue'),
+            meta: {title: 'Sofie官网部署'},
         },
         {
             path: 'app-pkg-list',

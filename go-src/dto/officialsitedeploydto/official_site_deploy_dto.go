@@ -5,10 +5,13 @@ import "github.com/gogf/gf/v2/frame/g"
 const (
 	OfficialSiteStaticPrefix         = "/web"
 	ThirdPayOfficialSiteStaticPrefix = "/hom"
+	SofieOfficialSiteStaticPrefix    = "/sofie-site"
 	OfficialSiteSiteKey              = "official-site"
 	ThirdPayOfficialSiteSiteKey      = "third-pay-official-site"
+	SofieOfficialSiteSiteKey         = "sofie-official-site"
 	DefaultOfficialSiteDeployPath    = "/home/ec2-user/cdn/official-site"
 	DefaultThirdPayOfficialSitePath  = "/home/ec2-user/cdn/third-pay-official-site"
+	DefaultSofieOfficialSitePath     = "/home/ec2-user/cdn/sofie-official-site"
 )
 
 type SiteDeployInfoItem struct {
@@ -17,6 +20,7 @@ type SiteDeployInfoItem struct {
 	DeployPath   string `json:"deployPath" dc:"解压目标物理目录"`
 	AcceptExt    string `json:"acceptExt" dc:"允许上传的扩展名"`
 	LastUploadAt string `json:"lastUploadAt" dc:"最后一次成功上传并解压时间"`
+	HasTLS       bool   `json:"hasTls" dc:"是否已绑定独立源站证书"`
 }
 
 type GetOfficialSiteDeployInfoReq struct {
@@ -131,3 +135,47 @@ type AbortThirdPayOfficialSiteFileUploadReq struct {
 }
 
 type AbortThirdPayOfficialSiteFileUploadRes = AbortOfficialSiteFileUploadRes
+
+type GetSofieOfficialSiteDeployInfoReq struct {
+	g.Meta `path:"/getSofieOfficialSiteDeployInfo" method:"post" summary:"获取 Sofie 官网部署信息" tags:"Sofie官网部署"`
+}
+
+type GetSofieOfficialSiteDeployInfoRes struct {
+	Info *SiteDeployInfoItem `json:"info"`
+}
+
+type SaveSofieOfficialSiteDeployCfgReq struct {
+	g.Meta     `path:"/saveSofieOfficialSiteDeployCfg" method:"post" summary:"保存 Sofie 官网部署配置" tags:"Sofie官网部署"`
+	Domain     string `json:"domain" v:"required#域名不能为空" dc:"Sofie官网域名,不含协议与路径"`
+	DeployPath string `json:"deployPath" v:"required#部署目录不能为空" dc:"Sofie官网静态文件绝对目录"`
+}
+
+type SaveSofieOfficialSiteDeployCfgRes struct {
+	Success bool `json:"success"`
+}
+
+type DeploySofieOfficialSiteZipReq struct {
+	g.Meta `path:"/deployZip" method:"post" mime:"multipart/form-data" summary:"上传zip并部署 Sofie 官网静态资源" tags:"Sofie官网部署"`
+}
+
+type InitSofieOfficialSiteFileUploadReq struct {
+	g.Meta   `path:"/initFileUpload" method:"post" summary:"初始化 Sofie 官网文件分片上传" tags:"Sofie官网部署"`
+	FileName string `json:"fileName" dc:"文件名称，仅支持.zip或.apk"`
+	FileSize int64  `json:"fileSize" dc:"文件字节数"`
+}
+
+type InitSofieOfficialSiteFileUploadRes = InitOfficialSiteFileUploadRes
+
+type CompleteSofieOfficialSiteFileUploadReq struct {
+	g.Meta   `path:"/completeFileUpload" method:"post" summary:"合并 Sofie 官网文件分片并完成部署" tags:"Sofie官网部署"`
+	UploadId string `json:"uploadId" dc:"上传会话ID"`
+}
+
+type CompleteSofieOfficialSiteFileUploadRes = CompleteOfficialSiteFileUploadRes
+
+type AbortSofieOfficialSiteFileUploadReq struct {
+	g.Meta   `path:"/abortFileUpload" method:"post" summary:"取消 Sofie 官网文件分片上传" tags:"Sofie官网部署"`
+	UploadId string `json:"uploadId" dc:"上传会话ID"`
+}
+
+type AbortSofieOfficialSiteFileUploadRes = AbortOfficialSiteFileUploadRes

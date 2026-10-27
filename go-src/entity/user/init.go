@@ -16,6 +16,7 @@ func Init() {
 	initWalletExchangeCfg()
 	initCustomerServiceCfg()
 	initPrivacyPolicyCfg()
+	initSofiePrivacyPolicyCfg()
 	initShareAppDownloadCfg()
 	initAppToken()
 	initUserMaxId()

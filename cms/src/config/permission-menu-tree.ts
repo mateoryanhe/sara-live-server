@@ -345,6 +345,8 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('AppVersionCfgManagement'),
                 page('FirebaseCfgManagement'),
                 page('PrivacyPolicyCfgManagement'),
+                page('SofiePrivacyPolicyCfgManagement'),
+                page('AuditCodeCfgManagement'),
             ]),
             group('frontend-deploy', 'menu.FrontendDeployGroup', [
                 page('H5LiveDeployManagement'),
@@ -353,6 +355,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('UserWithdrawDeployManagement'),
                 page('OfficialSiteDeployManagement'),
                 page('ThirdPayOfficialSiteDeployManagement'),
+                page('SofieOfficialSiteDeployManagement'),
             ]),
         ],
     },

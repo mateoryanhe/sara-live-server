@@ -91,6 +91,8 @@ import {staticCacheCfgMessages} from './static-cache-cfg'
 import {preloadCfgMessages} from './preload-cfg'
 import {textModerationMessages} from './text-moderation'
 import {privacyPolicyMessages} from './privacy-policy'
+import {sofiePrivacyPolicyMessages} from './sofie-privacy-policy'
+import {auditCodeMessages} from './audit-code'
 import {googlePlayMessages} from './google-play'
 import {firebaseMessages} from './firebase'
 import {metaPixelMessages} from './meta-pixel'
@@ -211,6 +213,8 @@ const pageMessageBuilders = [
   ['staticCacheCfg', staticCacheCfgMessages],
   ['textModeration', textModerationMessages],
   ['privacyPolicy', privacyPolicyMessages],
+  ['sofiePrivacyPolicy', sofiePrivacyPolicyMessages],
+  ['auditCode', auditCodeMessages],
   ['googlePlay', googlePlayMessages],
   ['firebase', firebaseMessages],
   ['haipay', haipayMessages],

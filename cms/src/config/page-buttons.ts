@@ -98,6 +98,8 @@ const CONFIG_PAGES = new Set([
     'PreloadCfgManagement',
     'TextModerationCfgManagement',
     'PrivacyPolicyCfgManagement',
+    'SofiePrivacyPolicyCfgManagement',
+    'AuditCodeCfgManagement',
     'GooglePlayCfgManagement',
     'FirebaseCfgManagement',
     'MetaPixelCfgManagement',
@@ -560,6 +562,15 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.view,
         BTN.save,
         {key: 'deploy', label: '上传部署'},
+    ],
+    SofieOfficialSiteDeployManagement: [
+        BTN.view,
+        BTN.save,
+        {key: 'deploy', label: '上传部署'},
+    ],
+    AuditCodeCfgManagement: [
+        BTN.view,
+        {key: 'generate', label: '生成'},
     ],
     PaymentCountryCfgManagement: [
         BTN.view,

@@ -12,10 +12,12 @@ import (
 const (
 	OfficialSiteDeployCMSUrl         = "/officialSiteDeploy"
 	ThirdPayOfficialSiteDeployCMSUrl = "/thirdPayOfficialSiteDeploy"
+	SofieOfficialSiteDeployCMSUrl    = "/sofieOfficialSiteDeploy"
 )
 
 type OfficialSiteDeployCMSController struct{}
 type ThirdPayOfficialSiteDeployCMSController struct{}
+type SofieOfficialSiteDeployCMSController struct{}
 
 func initOfficialSiteDeployCMSController() {
 	httpserver.RegCMSHandler(OfficialSiteDeployCMSUrl, "/deployZip", handleOfficialSiteDeployZip)
@@ -24,6 +26,10 @@ func initOfficialSiteDeployCMSController() {
 	httpserver.RegCMSHandler(ThirdPayOfficialSiteDeployCMSUrl, "/deployZip", handleThirdPayOfficialSiteDeployZip)
 	httpserver.RegCMSHandler(ThirdPayOfficialSiteDeployCMSUrl, "/uploadFileChunk", handleThirdPayOfficialSiteUploadFileChunk)
 	httpserver.RegCMS(ThirdPayOfficialSiteDeployCMSUrl, &ThirdPayOfficialSiteDeployCMSController{})
+	httpserver.RegCMSHandler(SofieOfficialSiteDeployCMSUrl, "/deployZip", handleSofieOfficialSiteDeployZip)
+	httpserver.RegCMSHandler(SofieOfficialSiteDeployCMSUrl, "/uploadFileChunk", handleSofieOfficialSiteUploadFileChunk)
+	httpserver.RegCMSHandler(SofieOfficialSiteDeployCMSUrl, "/saveOfficialSiteDeployCfgUpload", handleSofieOfficialSiteSaveCfgUpload)
+	httpserver.RegCMS(SofieOfficialSiteDeployCMSUrl, &SofieOfficialSiteDeployCMSController{})
 }
 
 func handleOfficialSiteUploadFileChunk(r *ghttp.Request) {
@@ -55,6 +61,33 @@ func handleThirdPayOfficialSiteDeployZip(r *ghttp.Request) {
 
 func handleThirdPayOfficialSiteUploadFileChunk(r *ghttp.Request) {
 	res, err := officialsitedeploy.UploadThirdPayOfficialSiteFileChunkFromRequest(r)
+	if err != nil {
+		r.SetError(err)
+		return
+	}
+	httpserver.SetHandlerResponseData(r, res)
+}
+
+func handleSofieOfficialSiteDeployZip(r *ghttp.Request) {
+	res, err := officialsitedeploy.DeploySofieOfficialSiteZipFromRequest(r)
+	if err != nil {
+		r.SetError(err)
+		return
+	}
+	httpserver.SetHandlerResponseData(r, res)
+}
+
+func handleSofieOfficialSiteUploadFileChunk(r *ghttp.Request) {
+	res, err := officialsitedeploy.UploadSofieOfficialSiteFileChunkFromRequest(r)
+	if err != nil {
+		r.SetError(err)
+		return
+	}
+	httpserver.SetHandlerResponseData(r, res)
+}
+
+func handleSofieOfficialSiteSaveCfgUpload(r *ghttp.Request) {
+	res, err := officialsitedeploy.SaveSofieOfficialSiteDeployCfgFromRequest(r)
 	if err != nil {
 		r.SetError(err)
 		return
@@ -100,4 +133,24 @@ func (c *ThirdPayOfficialSiteDeployCMSController) CompleteThirdPayOfficialSiteFi
 
 func (c *ThirdPayOfficialSiteDeployCMSController) AbortThirdPayOfficialSiteFileUpload(ctx context.Context, req *officialsitedeploydto.AbortThirdPayOfficialSiteFileUploadReq) (*officialsitedeploydto.AbortThirdPayOfficialSiteFileUploadRes, error) {
 	return officialsitedeploy.AbortThirdPayOfficialSiteFileUpload(ctx, req)
+}
+
+func (c *SofieOfficialSiteDeployCMSController) GetSofieOfficialSiteDeployInfo(ctx context.Context, req *officialsitedeploydto.GetSofieOfficialSiteDeployInfoReq) (*officialsitedeploydto.GetSofieOfficialSiteDeployInfoRes, error) {
+	return officialsitedeploy.GetSofieOfficialSiteDeployInfo(ctx, req)
+}
+
+func (c *SofieOfficialSiteDeployCMSController) SaveSofieOfficialSiteDeployCfg(ctx context.Context, req *officialsitedeploydto.SaveSofieOfficialSiteDeployCfgReq) (*officialsitedeploydto.SaveSofieOfficialSiteDeployCfgRes, error) {
+	return officialsitedeploy.SaveSofieOfficialSiteDeployCfg(ctx, req)
+}
+
+func (c *SofieOfficialSiteDeployCMSController) InitSofieOfficialSiteFileUpload(ctx context.Context, req *officialsitedeploydto.InitSofieOfficialSiteFileUploadReq) (*officialsitedeploydto.InitSofieOfficialSiteFileUploadRes, error) {
+	return officialsitedeploy.InitSofieOfficialSiteFileUpload(ctx, req)
+}
+
+func (c *SofieOfficialSiteDeployCMSController) CompleteSofieOfficialSiteFileUpload(ctx context.Context, req *officialsitedeploydto.CompleteSofieOfficialSiteFileUploadReq) (*officialsitedeploydto.CompleteSofieOfficialSiteFileUploadRes, error) {
+	return officialsitedeploy.CompleteSofieOfficialSiteFileUpload(ctx, req)
+}
+
+func (c *SofieOfficialSiteDeployCMSController) AbortSofieOfficialSiteFileUpload(ctx context.Context, req *officialsitedeploydto.AbortSofieOfficialSiteFileUploadReq) (*officialsitedeploydto.AbortSofieOfficialSiteFileUploadRes, error) {
+	return officialsitedeploy.AbortSofieOfficialSiteFileUpload(ctx, req)
 }

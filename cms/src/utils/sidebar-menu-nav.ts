@@ -83,6 +83,8 @@ export function resolveSidebarSubmenusToOpen(path: string): string[] {
         || path === '/config/app-version-cfg'
         || path === '/config/firebase'
         || path === '/config/privacy-policy'
+        || path === '/config/sofie-privacy-policy'
+        || path === '/config/audit-code'
     ) {
         add('/frontend-module', '/frontend-module/config')
     }
@@ -93,6 +95,7 @@ export function resolveSidebarSubmenusToOpen(path: string): string[] {
         || path === '/config/user-withdraw-deploy'
         || path === '/config/official-site-deploy'
         || path === '/config/third-pay-official-site-deploy'
+        || path === '/config/sofie-official-site-deploy'
     ) {
         add('/frontend-module', '/frontend-module/deploy')
     }

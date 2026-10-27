@@ -18,4 +18,5 @@ func Init() {
 	initSysResourceMetric()
 	initSysResourceMetricAgg()
 	initProcessDownLog()
+	initAuditCodeCfg()
 }

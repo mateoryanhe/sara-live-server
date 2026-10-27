@@ -26,10 +26,15 @@
         <el-descriptions-item :label="t('pages.officialSiteDeploy.lastUploadAt')">
           {{ deployInfo.lastUploadAt || '-' }}
         </el-descriptions-item>
+        <el-descriptions-item v-if="enableTlsUpload" :label="t('pages.officialSiteDeploy.tlsStatus')">
+          <el-tag :type="deployInfo.hasTls ? 'success' : 'info'">
+            {{ deployInfo.hasTls ? t('pages.officialSiteDeploy.tlsBound') : t('pages.officialSiteDeploy.tlsDefault') }}
+          </el-tag>
+        </el-descriptions-item>
       </el-descriptions>
 
       <el-form
-          v-if="deployApi.saveMapping"
+          v-if="deployApi.saveMapping || deployApi.saveMappingWithTLS"
           ref="mappingFormRef"
           :model="mappingForm"
           :rules="mappingRules"
@@ -56,6 +61,38 @@
               :placeholder="t('pages.officialSiteDeploy.deployPathPlaceholder', {path: defaultDeployPath})"
           />
         </el-form-item>
+
+        <template v-if="enableTlsUpload && can('save')">
+          <div class="form-tip">{{ t('pages.officialSiteDeploy.tlsUploadTip') }}</div>
+          <el-form-item :label="t('pages.officialSiteDeploy.certFile')" prop="certFile" required>
+            <el-upload
+                :auto-upload="false"
+                :limit="1"
+                :on-change="handleCertChange"
+                :on-remove="handleCertRemove"
+                :file-list="certFileList"
+                accept=".pem,.crt,.cer,.cert"
+                action="#"
+            >
+              <el-button>{{ t('pages.officialSiteDeploy.selectCert') }}</el-button>
+            </el-upload>
+            <div class="form-tip">{{ t('pages.officialSiteDeploy.certTip') }}</div>
+          </el-form-item>
+          <el-form-item :label="t('pages.officialSiteDeploy.keyFile')" prop="keyFile" required>
+            <el-upload
+                :auto-upload="false"
+                :limit="1"
+                :on-change="handleKeyChange"
+                :on-remove="handleKeyRemove"
+                :file-list="keyFileList"
+                accept=".pem,.key"
+                action="#"
+            >
+              <el-button>{{ t('pages.officialSiteDeploy.selectKey') }}</el-button>
+            </el-upload>
+            <div class="form-tip">{{ t('pages.officialSiteDeploy.keyTip') }}</div>
+          </el-form-item>
+        </template>
 
         <el-form-item v-if="can('save')">
           <el-button :loading="savingMapping" type="primary" @click="handleSaveMapping">
@@ -205,7 +242,7 @@
 <script lang="ts" setup>
 import {computed, onMounted, reactive, ref} from 'vue'
 import {UploadFilled} from '@element-plus/icons-vue'
-import type {FormInstance, FormRules, UploadFile, UploadFiles} from 'element-plus'
+import type {FormInstance, FormRules, UploadFile, UploadFiles, UploadUserFile} from 'element-plus'
 import {ElMessage} from 'element-plus'
 import {useI18n} from 'vue-i18n'
 import type {
@@ -225,6 +262,7 @@ const props = defineProps<{
   apkSubdirectory?: string
   enableApkUpload?: boolean
   enableChunkedZipUpload?: boolean
+  enableTlsUpload?: boolean
 }>()
 
 const {t} = useI18n()
@@ -244,14 +282,45 @@ const apkUploadStatus = ref<'success' | 'exception' | ''>('')
 const selectedApkFile = ref<File | null>(null)
 const apkUploadResult = ref<CompleteStaticSiteFileUploadRes | null>(null)
 const mappingFormRef = ref<FormInstance>()
+const certFileList = ref<UploadUserFile[]>([])
+const keyFileList = ref<UploadUserFile[]>([])
 const mappingForm = reactive({
   domain: '',
   deployPath: props.defaultDeployPath ?? '',
+  certFile: null as File | null,
+  keyFile: null as File | null,
 })
-const mappingRules = computed<FormRules>(() => ({
-  domain: [{required: true, message: t('pages.officialSiteDeploy.domainRequired'), trigger: 'blur'}],
-  deployPath: [{required: true, message: t('pages.officialSiteDeploy.deployPathRequired'), trigger: 'blur'}],
-}))
+const mappingRules = computed<FormRules>(() => {
+  const rules: FormRules = {
+    domain: [{required: true, message: t('pages.officialSiteDeploy.domainRequired'), trigger: 'blur'}],
+    deployPath: [{required: true, message: t('pages.officialSiteDeploy.deployPathRequired'), trigger: 'blur'}],
+  }
+  if (props.enableTlsUpload) {
+    rules.certFile = [{
+      required: true,
+      validator: (_: unknown, __: unknown, callback: (e?: Error) => void) => {
+        if (!mappingForm.certFile) {
+          callback(new Error(t('pages.officialSiteDeploy.certRequired')))
+          return
+        }
+        callback()
+      },
+      trigger: 'change',
+    }]
+    rules.keyFile = [{
+      required: true,
+      validator: (_: unknown, __: unknown, callback: (e?: Error) => void) => {
+        if (!mappingForm.keyFile) {
+          callback(new Error(t('pages.officialSiteDeploy.keyRequired')))
+          return
+        }
+        callback()
+      },
+      trigger: 'change',
+    }]
+  }
+  return rules
+})
 
 const apkDeployPath = computed(() => {
   const deployPath = deployInfo.value?.deployPath?.replace(/[\\/]+$/, '') ?? ''
@@ -280,9 +349,30 @@ const fetchDeployInfo = async () => {
   }
 }
 
+const handleCertChange = (file: UploadFile) => {
+  mappingForm.certFile = file.raw || null
+  certFileList.value = file.raw ? [{name: file.name, status: 'ready'}] : []
+  mappingFormRef.value?.validateField('certFile')
+}
+
+const handleCertRemove = () => {
+  mappingForm.certFile = null
+  certFileList.value = []
+}
+
+const handleKeyChange = (file: UploadFile) => {
+  mappingForm.keyFile = file.raw || null
+  keyFileList.value = file.raw ? [{name: file.name, status: 'ready'}] : []
+  mappingFormRef.value?.validateField('keyFile')
+}
+
+const handleKeyRemove = () => {
+  mappingForm.keyFile = null
+  keyFileList.value = []
+}
+
 const handleSaveMapping = async () => {
-  const saveMapping = props.deployApi.saveMapping
-  if (!saveMapping || !mappingFormRef.value) {
+  if (!mappingFormRef.value) {
     return
   }
   try {
@@ -292,7 +382,27 @@ const handleSaveMapping = async () => {
   }
   savingMapping.value = true
   try {
-    await saveMapping(mappingForm.domain.trim(), mappingForm.deployPath.trim())
+    if (props.enableTlsUpload && props.deployApi.saveMappingWithTLS) {
+      if (!mappingForm.certFile || !mappingForm.keyFile) {
+        ElMessage.warning(t('pages.officialSiteDeploy.certRequired'))
+        return
+      }
+      await props.deployApi.saveMappingWithTLS({
+        domain: mappingForm.domain.trim(),
+        deployPath: mappingForm.deployPath.trim(),
+        cert: mappingForm.certFile,
+        key: mappingForm.keyFile,
+      })
+      mappingForm.certFile = null
+      mappingForm.keyFile = null
+      certFileList.value = []
+      keyFileList.value = []
+    } else if (props.deployApi.saveMapping) {
+      await props.deployApi.saveMapping(mappingForm.domain.trim(), mappingForm.deployPath.trim())
+    } else {
+      ElMessage.error(t('pages.officialSiteDeploy.saveFailed'))
+      return
+    }
     ElMessage.success(t('pages.officialSiteDeploy.saveSuccess'))
     await fetchDeployInfo()
   } catch {

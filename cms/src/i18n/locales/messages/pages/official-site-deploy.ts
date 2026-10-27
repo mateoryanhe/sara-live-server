@@ -40,6 +40,18 @@ const zh = {
   apkResultFile: '文件名称：{file}',
   apkResultSize: '文件大小：{size}',
   apkDownloadUrl: '下载地址',
+  tlsStatus: 'TLS 证书',
+  tlsBound: '已绑定独立源站证书',
+  tlsDefault: '使用默认源站证书',
+  tlsUploadTip: '保存域名映射时请同时上传 Cloudflare Origin 证书与私钥；服务端会落到独立目录并立即用于该域名 HTTPS。',
+  certFile: '证书文件 (.pem)',
+  keyFile: '私钥文件 (.key/.pem)',
+  selectCert: '选择证书',
+  selectKey: '选择私钥',
+  certTip: 'Cloudflare 源站证书正文（fullchain / certificate）。',
+  keyTip: '与证书配对的私钥。',
+  certRequired: '请上传证书文件',
+  keyRequired: '请上传私钥文件',
 }
 
 const en = {
@@ -82,6 +94,18 @@ const en = {
   apkResultFile: 'File name: {file}',
   apkResultSize: 'File size: {size}',
   apkDownloadUrl: 'Download URL',
+  tlsStatus: 'TLS certificate',
+  tlsBound: 'Custom origin cert bound',
+  tlsDefault: 'Using default origin cert',
+  tlsUploadTip: 'Upload Cloudflare Origin cert + private key when saving the domain mapping. Stored under a site-specific path and applied immediately for HTTPS.',
+  certFile: 'Certificate (.pem)',
+  keyFile: 'Private key (.key/.pem)',
+  selectCert: 'Select certificate',
+  selectKey: 'Select private key',
+  certTip: 'Cloudflare Origin Certificate body (fullchain / certificate).',
+  keyTip: 'Private key paired with the certificate.',
+  certRequired: 'Please upload a certificate file',
+  keyRequired: 'Please upload a private key file',
 }
 
 const es = {...en}

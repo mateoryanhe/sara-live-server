@@ -45,6 +45,14 @@ var (
 		apkSubDir:   "assets",
 		defaultPath: officialsitedeploydto.DefaultThirdPayOfficialSitePath,
 	}
+	sofieOfficialSiteTarget = deployTarget{
+		siteKey:     officialsitedeploydto.SofieOfficialSiteSiteKey,
+		prefix:      officialsitedeploydto.SofieOfficialSiteStaticPrefix,
+		tmpPattern:  "sofie-official-site-deploy-*.zip",
+		acceptExt:   ".zip,.apk",
+		apkSubDir:   "assets",
+		defaultPath: officialsitedeploydto.DefaultSofieOfficialSitePath,
+	}
 )
 
 func GetOfficialSiteDeployInfo(ctx context.Context, _ *officialsitedeploydto.GetOfficialSiteDeployInfoReq) (*officialsitedeploydto.GetOfficialSiteDeployInfoRes, error) {
@@ -100,6 +108,68 @@ func SaveThirdPayOfficialSiteDeployCfg(ctx context.Context, req *officialsitedep
 	return &officialsitedeploydto.SaveThirdPayOfficialSiteDeployCfgRes{Success: true}, nil
 }
 
+func GetSofieOfficialSiteDeployInfo(ctx context.Context, _ *officialsitedeploydto.GetSofieOfficialSiteDeployInfoReq) (*officialsitedeploydto.GetSofieOfficialSiteDeployInfoRes, error) {
+	info, err := getDeployInfo(ctx, sofieOfficialSiteTarget)
+	if err != nil {
+		return nil, err
+	}
+	return &officialsitedeploydto.GetSofieOfficialSiteDeployInfoRes{Info: info}, nil
+}
+
+func SaveSofieOfficialSiteDeployCfg(ctx context.Context, req *officialsitedeploydto.SaveSofieOfficialSiteDeployCfgReq) (*officialsitedeploydto.SaveSofieOfficialSiteDeployCfgRes, error) {
+	domain := strings.TrimSpace(req.Domain)
+	deployPath := strings.TrimSpace(req.DeployPath)
+	if domain == "" || deployPath == "" {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if _, err := domainsite.SaveStaticSiteMapping(
+		ctx,
+		officialsitedeploydto.SofieOfficialSiteSiteKey,
+		officialsitedeploydto.SofieOfficialSiteStaticPrefix,
+		domain,
+		deployPath,
+	); err != nil {
+		return nil, err
+	}
+	return &officialsitedeploydto.SaveSofieOfficialSiteDeployCfgRes{Success: true}, nil
+}
+
+// SaveSofieOfficialSiteDeployCfgFromRequest multipart: domain + deployPath + cert + key,保存映射并启用新证书.
+func SaveSofieOfficialSiteDeployCfgFromRequest(r *ghttp.Request) (*officialsitedeploydto.SaveSofieOfficialSiteDeployCfgRes, error) {
+	if r == nil {
+		return nil, errors.New("request is empty")
+	}
+	domain := strings.TrimSpace(r.Get("domain").String())
+	deployPath := strings.TrimSpace(r.Get("deployPath").String())
+	if domain == "" || deployPath == "" {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	certPart := r.GetUploadFile("cert")
+	keyPart := r.GetUploadFile("key")
+	if certPart == nil {
+		certPart = r.GetUploadFile("certFile")
+	}
+	if keyPart == nil {
+		keyPart = r.GetUploadFile("keyFile")
+	}
+	certPath, keyPath, err := domainsite.StoreSiteTLSFiles(officialsitedeploydto.SofieOfficialSiteSiteKey, certPart, keyPart)
+	if err != nil {
+		return nil, err
+	}
+	if _, err = domainsite.SaveStaticSiteMappingWithTLS(
+		r.Context(),
+		officialsitedeploydto.SofieOfficialSiteSiteKey,
+		officialsitedeploydto.SofieOfficialSiteStaticPrefix,
+		domain,
+		deployPath,
+		certPath,
+		keyPath,
+	); err != nil {
+		return nil, err
+	}
+	return &officialsitedeploydto.SaveSofieOfficialSiteDeployCfgRes{Success: true}, nil
+}
+
 func getDeployInfo(ctx context.Context, target deployTarget) (*officialsitedeploydto.SiteDeployInfoItem, error) {
 	deployPath, err := getDeployDir(target)
 	if err != nil {
@@ -111,6 +181,7 @@ func getDeployInfo(ctx context.Context, target deployTarget) (*officialsitedeplo
 		DeployPath:   deployPath,
 		AcceptExt:    target.acceptExt,
 		LastUploadAt: domainsite.GetLastUploadAt(ctx, target.siteKey),
+		HasTLS:       domainsite.HasSiteTLS(target.siteKey),
 	}, nil
 }
 
@@ -120,6 +191,10 @@ func DeployOfficialSiteZipFromRequest(r *ghttp.Request) (*officialsitedeploydto.
 
 func DeployThirdPayOfficialSiteZipFromRequest(r *ghttp.Request) (*officialsitedeploydto.DeploySiteZipRes, error) {
 	return deployZipFromRequest(r, thirdPayOfficialSiteTarget)
+}
+
+func DeploySofieOfficialSiteZipFromRequest(r *ghttp.Request) (*officialsitedeploydto.DeploySiteZipRes, error) {
+	return deployZipFromRequest(r, sofieOfficialSiteTarget)
 }
 
 func deployZipFromRequest(r *ghttp.Request, target deployTarget) (*officialsitedeploydto.DeploySiteZipRes, error) {

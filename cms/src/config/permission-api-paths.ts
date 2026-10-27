@@ -675,6 +675,14 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'PrivacyPolicyCfgManagement:view': '/privacyPolicy/getPrivacyPolicyCfg',
     'PrivacyPolicyCfgManagement:save': '/privacyPolicy/savePrivacyPolicyCfg',
 
+    SofiePrivacyPolicyCfgManagement: '/sofiePrivacyPolicy/getSofiePrivacyPolicyCfg',
+    'SofiePrivacyPolicyCfgManagement:view': '/sofiePrivacyPolicy/getSofiePrivacyPolicyCfg',
+    'SofiePrivacyPolicyCfgManagement:save': '/sofiePrivacyPolicy/saveSofiePrivacyPolicyCfg',
+
+    AuditCodeCfgManagement: '/auditCode/getAuditCodeCfg',
+    'AuditCodeCfgManagement:view': '/auditCode/getAuditCodeCfg',
+    'AuditCodeCfgManagement:generate': '/auditCode/generateAuditCodeCfg',
+
     GooglePlayCfgManagement: '/googlePlay/getGooglePlayCfg',
     'GooglePlayCfgManagement:view': '/googlePlay/getGooglePlayCfg',
     'GooglePlayCfgManagement:save': '/googlePlay/saveGooglePlayCfg',
@@ -754,6 +762,12 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'ThirdPayOfficialSiteDeployManagement:view': '/thirdPayOfficialSiteDeploy/getThirdPayOfficialSiteDeployInfo',
     'ThirdPayOfficialSiteDeployManagement:save': '/thirdPayOfficialSiteDeploy/saveThirdPayOfficialSiteDeployCfg',
     'ThirdPayOfficialSiteDeployManagement:deploy': '/thirdPayOfficialSiteDeploy/deployZip',
+
+    SofieOfficialSiteDeployManagement: '/sofieOfficialSiteDeploy/getSofieOfficialSiteDeployInfo',
+    'SofieOfficialSiteDeployManagement:view': '/sofieOfficialSiteDeploy/getSofieOfficialSiteDeployInfo',
+    'SofieOfficialSiteDeployManagement:save': '/sofieOfficialSiteDeploy/saveSofieOfficialSiteDeployCfg',
+    'SofieOfficialSiteDeployManagement:deploy': '/sofieOfficialSiteDeploy/deployZip',
+    // saveOfficialSiteDeployCfgUpload 通过 permission alias 映射到 save
 
     ResourceMonitor: '/resourceMetric/getResourceMetricMemoryTrend',
     'ResourceMonitor:view': '/resourceMetric/getResourceMetricMemoryTrend',

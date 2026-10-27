@@ -202,6 +202,10 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/officialSiteDeploy/deployZip"}
 	case "/thirdPayOfficialSiteDeploy/initFileUpload", "/thirdPayOfficialSiteDeploy/uploadFileChunk", "/thirdPayOfficialSiteDeploy/completeFileUpload", "/thirdPayOfficialSiteDeploy/abortFileUpload":
 		return []string{"/thirdPayOfficialSiteDeploy/deployZip"}
+	case "/sofieOfficialSiteDeploy/initFileUpload", "/sofieOfficialSiteDeploy/uploadFileChunk", "/sofieOfficialSiteDeploy/completeFileUpload", "/sofieOfficialSiteDeploy/abortFileUpload":
+		return []string{"/sofieOfficialSiteDeploy/deployZip"}
+	case "/sofieOfficialSiteDeploy/saveOfficialSiteDeployCfgUpload":
+		return []string{"/sofieOfficialSiteDeploy/saveSofieOfficialSiteDeployCfg"}
 	case "/sysStat/getSysStat",
 		"/sysStat/getUserStatTrend",
 		"/sysStat/getGameBetUserTrend",

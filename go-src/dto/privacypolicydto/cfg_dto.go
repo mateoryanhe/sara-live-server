@@ -8,6 +8,7 @@ type GetPrivacyPolicyCfgReq struct {
 
 type PrivacyPolicyCfgItem struct {
 	ID                string `json:"id"`
+	PackageName       string `json:"packageName,omitempty"`
 	ApiBase           string `json:"apiBase"`
 	PrivacyPolicyUrl  string `json:"privacyPolicyUrl"`
 	TermsOfServiceUrl string `json:"termsOfServiceUrl"`
@@ -38,6 +39,33 @@ type SavePrivacyPolicyCfgReq struct {
 }
 
 type SavePrivacyPolicyCfgRes struct {
+	Success bool   `json:"success"`
+	ID      string `json:"id"`
+}
+
+type GetSofiePrivacyPolicyCfgReq struct {
+	g.Meta `path:"/getSofiePrivacyPolicyCfg" method:"post" summary:"查询 Sofie 隐私政策配置" tags:"Sofie隐私政策配置"`
+}
+
+type GetSofiePrivacyPolicyCfgRes struct {
+	Cfg *PrivacyPolicyCfgItem `json:"cfg"`
+}
+
+type SaveSofiePrivacyPolicyCfgReq struct {
+	g.Meta            `path:"/saveSofiePrivacyPolicyCfg" method:"post" summary:"保存 Sofie 隐私政策配置" tags:"Sofie隐私政策配置"`
+	ID                uint64 `json:"id" dc:"配置ID,首次保存可为0"`
+	PackageName       string `json:"packageName" v:"max-length:128#包名最长128字符" dc:"适用App包名;匹配时下发本配置,否则回落 Sara 隐私政策"`
+	ApiBase           string `json:"apiBase" v:"max-length:512#API根地址长度不能超过512" dc:"页面URL前缀,相对路径与此拼接"`
+	PrivacyPolicyUrl  string `json:"privacyPolicyUrl" v:"max-length:512#隐私政策URL长度不能超过512" dc:"隐私政策页面URL"`
+	TermsOfServiceUrl string `json:"termsOfServiceUrl" v:"max-length:512#用户服务协议URL长度不能超过512" dc:"用户服务协议页面URL"`
+	CreatorTermsUrl   string `json:"creatorTermsUrl" v:"max-length:512#创作者条款URL长度不能超过512" dc:"短视频创作者上传合规条款URL"`
+	RoomOwnerTermsUrl string `json:"roomOwnerTermsUrl" v:"max-length:512#房主责任条款URL长度不能超过512" dc:"房间房主责任条款URL"`
+	VipDescUrl        string `json:"vipDescUrl" v:"max-length:512#VIP描述文档URL长度不能超过512" dc:"VIP描述文档URL"`
+	AboutSiteUrl      string `json:"aboutSiteUrl" v:"max-length:512#About页面URL长度不能超过512" dc:"About页面URL"`
+	SafetyCenterUrl   string `json:"safetyCenterUrl" v:"max-length:512#安全中心页面URL长度不能超过512" dc:"安全中心页面URL"`
+}
+
+type SaveSofiePrivacyPolicyCfgRes struct {
 	Success bool   `json:"success"`
 	ID      string `json:"id"`
 }
