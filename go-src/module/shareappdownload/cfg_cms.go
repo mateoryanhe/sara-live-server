@@ -18,8 +18,10 @@ func GetShareAppDownloadCfg(_ context.Context, _ *shareappdownloaddto.GetShareAp
 	if item == nil {
 		item = &shareappdownloaddto.ShareAppDownloadCfgItem{ID: "0"}
 	}
-	// 下载链接只读:来自官网 assets 最大 APK 内存值
+	// 下载链接 / 短链 / 最终预览只读
 	item.DownloadUrl = GetDownloadUrl()
+	item.ShortUrl = GetApkShortUrl()
+	item.PreviewShareCode = BuildPreviewShareCode()
 	return &shareappdownloaddto.GetShareAppDownloadCfgRes{Cfg: item}, nil
 }
 

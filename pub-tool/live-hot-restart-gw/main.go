@@ -19,14 +19,18 @@ import (
 )
 
 type config struct {
-	Listen                 string `json:"listen"`
-	Auth                   string `json:"auth"`
-	HotRestartURL          string `json:"hotRestartURL"`
-	MinIntervalSec         int    `json:"minIntervalSec"`
-	ColdStartScript        string `json:"coldStartScript"`
-	AppName                string `json:"appName"`
-	HotRestartFallbackCold bool   `json:"hotRestartFallbackCold"`
-	ColdStartWaitSec       int    `json:"coldStartWaitSec"`
+	Listen                  string `json:"listen"`
+	Auth                    string `json:"auth"`
+	HotRestartURL           string `json:"hotRestartURL"`
+	MinIntervalSec          int    `json:"minIntervalSec"`
+	ColdStartScript         string `json:"coldStartScript"`
+	AppName                 string `json:"appName"`
+	HotRestartFallbackCold  bool   `json:"hotRestartFallbackCold"`
+	ColdStartWaitSec        int    `json:"coldStartWaitSec"`
+	ProcessWatchEnabled     *bool  `json:"processWatchEnabled"`     // nil=auto on when coldStartScript set
+	ProcessWatchIntervalSec int    `json:"processWatchIntervalSec"` // default 3
+	ProcessWatchMissingSec  int    `json:"processWatchMissingSec"`  // default 180 (3min continuous miss → cold)
+	MysqlDSN                string `json:"mysqlDSN"`                // 进程挂掉记录入库; 例 user:pass@tcp(127.0.0.1:13307)/live_db?parseTime=true&loc=Local
 }
 
 var (
@@ -69,6 +73,9 @@ func main() {
 		_, _ = w.Write([]byte(`{"ok":true}`))
 	})
 
+	initProcessDownDB()
+	startProcessWatch()
+
 	log.Printf("live-hot-restart-gw listen http://%s/  config=%s coldStart=%q",
 		cfg.Listen, configPath, cfg.ColdStartScript)
 	if err := http.ListenAndServe(cfg.Listen, mux); err != nil {
@@ -104,6 +111,9 @@ func loadConfig() error {
 	}
 	if v := strings.TrimSpace(os.Getenv("LIVE_HR_GW_COLD_START_SCRIPT")); v != "" {
 		cfg.ColdStartScript = v
+	}
+	if v := strings.TrimSpace(os.Getenv("LIVE_HR_GW_MYSQL_DSN")); v != "" {
+		cfg.MysqlDSN = v
 	}
 	return nil
 }

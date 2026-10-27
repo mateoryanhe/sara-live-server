@@ -17,4 +17,5 @@ func Init() {
 	initDomainSiteDeployState()
 	initSysResourceMetric()
 	initSysResourceMetricAgg()
+	initProcessDownLog()
 }

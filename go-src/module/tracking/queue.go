@@ -42,8 +42,9 @@ var (
 	chargePanelEnterTrackingQueue       = gqueue.NewTQueue[*gameevent.ChargePanelEnterTrackingEventData]()
 	chargeClickTrackingQueue            = gqueue.NewTQueue[*gameevent.ChargeClickTrackingEventData]()
 	chargeResultServerTrackingQueue     = gqueue.NewTQueue[*gameevent.ChargeResultServerTrackingEventData]()
-	h5DownloadTrackingQueue             = gqueue.NewTQueue[*gameevent.H5DownloadTrackingEventData]()
-	officialSiteDownloadTrackingQueue   = gqueue.NewTQueue[*gameevent.OfficialSiteDownloadTrackingEventData]()
+	h5DownloadTrackingQueue               = gqueue.NewTQueue[*gameevent.H5DownloadTrackingEventData]()
+	officialSiteDownloadTrackingQueue     = gqueue.NewTQueue[*gameevent.OfficialSiteDownloadTrackingEventData]()
+	shareShortLinkClickTrackingQueue      = gqueue.NewTQueue[*gameevent.ShareShortLinkClickTrackingEventData]()
 )
 
 func initTrackingQueue() {
@@ -79,6 +80,7 @@ func initTrackingQueue() {
 	event.Sub(gameevent.ChargeResultServerTrackingEvent, onChargeResultServerTrackingEvent)
 	event.Sub(gameevent.H5DownloadTrackingEvent, onH5DownloadTrackingEvent)
 	event.Sub(gameevent.OfficialSiteDownloadTrackingEvent, onOfficialSiteDownloadTrackingEvent)
+	event.Sub(gameevent.ShareShortLinkClickTrackingEvent, onShareShortLinkClickTrackingEvent)
 }
 
 func onShowcaseLiveRoomJoinTrackingEvent(data any) {
@@ -305,6 +307,14 @@ func onOfficialSiteDownloadTrackingEvent(data any) {
 	officialSiteDownloadTrackingQueue.Push(ev)
 }
 
+func onShareShortLinkClickTrackingEvent(data any) {
+	ev, ok := data.(*gameevent.ShareShortLinkClickTrackingEventData)
+	if !ok || ev == nil {
+		return
+	}
+	shareShortLinkClickTrackingQueue.Push(ev)
+}
+
 func onOfflineGameRoomPlayTrackingEvent(data any) {
 	ev, ok := data.(*gameevent.OfflineGameRoomPlayTrackingEventData)
 	if !ok || ev == nil || ev.UserId == 0 || ev.RoomId == 0 {
@@ -352,6 +362,7 @@ func trackingQueueIdle() bool {
 		chargeResultServerTrackingQueue.Len() == 0 &&
 		h5DownloadTrackingQueue.Len() == 0 &&
 		officialSiteDownloadTrackingQueue.Len() == 0 &&
+		shareShortLinkClickTrackingQueue.Len() == 0 &&
 		offlineGameRoomPlayTrackingQueue.Len() == 0
 }
 
@@ -454,5 +465,8 @@ func drainTrackingQueue() {
 	})
 	drainTrackingTQueue(officialSiteDownloadTrackingQueue, func(ev *gameevent.OfficialSiteDownloadTrackingEventData) {
 		recordOfficialSiteDownload(ev.StatAt)
+	})
+	drainTrackingTQueue(shareShortLinkClickTrackingQueue, func(ev *gameevent.ShareShortLinkClickTrackingEventData) {
+		recordShareShortLinkClick(ev.StatAt)
 	})
 }

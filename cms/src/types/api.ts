@@ -2146,9 +2146,29 @@ export interface PrivacyPolicyCfg {
 export interface ShareAppDownloadCfg {
     id: string
     downloadUrl: string
+    shortUrl?: string
     shareText: string
+    previewShareCode?: string
     createdAt: string
     updatedAt: string
+}
+
+export interface CMSProcessDownLogListQuery extends PageQuery {
+    host?: string
+    startTime?: number
+    endTime?: number
+}
+
+export interface CMSProcessDownLogItem {
+    id: number
+    host: string
+    appName: string
+    missingSince: string
+    detectedAt: string
+    coldStartOK: boolean
+    newPid: number
+    detail: string
+    createdAt: string
 }
 
 export interface GetShareAppDownloadCfgRes {

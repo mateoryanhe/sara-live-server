@@ -52,6 +52,7 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     TrackingDownloadManagement: '/trackingEvent/getH5DownloadTrend',
     'TrackingDownloadManagement:view': '/trackingEvent/getH5DownloadTrend',
     'TrackingDownloadManagement:officialSiteTrend': '/trackingEvent/getOfficialSiteDownloadTrend',
+    'TrackingDownloadManagement:shareShortLinkTrend': '/trackingEvent/getShareShortLinkClickTrend',
 
     UserList: '/account/getUserInfo',
     'UserList:view': '/account/getUserInfo',
@@ -758,6 +759,10 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'ResourceMonitor:view': '/resourceMetric/getResourceMetricMemoryTrend',
     'ResourceMonitor:search': '/resourceMetric/getResourceMetricMemoryTrend',
     'ResourceMonitor:export': '/resourceMetric/getResourceMetricMemoryTrend',
+
+    ProcessDownLogListManagement: '/processDownLog/listProcessDownLog',
+    'ProcessDownLogListManagement:view': '/processDownLog/listProcessDownLog',
+    'ProcessDownLogListManagement:search': '/processDownLog/listProcessDownLog',
 
     ServerLogExplorer: '/logQuery/getLogPaths',
     'ServerLogExplorer:view': '/logQuery/getLogPaths',

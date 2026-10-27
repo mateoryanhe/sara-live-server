@@ -7,13 +7,21 @@
         </div>
       </template>
 
-      <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="140px">
+      <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="160px">
         <el-form-item :label="t('pages.shareAppDownload.downloadUrl')">
           <el-input
               :model-value="formData.downloadUrl || t('pages.shareAppDownload.downloadUrlEmpty')"
               readonly
           />
           <div class="form-tip">{{ t('pages.shareAppDownload.downloadUrlTip') }}</div>
+        </el-form-item>
+
+        <el-form-item :label="t('pages.shareAppDownload.shortUrl')">
+          <el-input
+              :model-value="formData.shortUrl || t('pages.shareAppDownload.shortUrlEmpty')"
+              readonly
+          />
+          <div class="form-tip">{{ t('pages.shareAppDownload.shortUrlTip') }}</div>
         </el-form-item>
 
         <el-form-item :label="t('pages.shareAppDownload.shareText')" prop="shareText">
@@ -26,6 +34,27 @@
               :placeholder="t('pages.shareAppDownload.shareTextPlaceholder')"
           />
           <div class="form-tip">{{ t('pages.shareAppDownload.shareTextTip') }}</div>
+        </el-form-item>
+
+        <el-form-item :label="t('pages.shareAppDownload.previewShareCode')">
+          <div class="preview-wrap">
+            <el-input
+                :model-value="previewText || t('pages.shareAppDownload.previewShareCodeEmpty')"
+                type="textarea"
+                :rows="6"
+                readonly
+            />
+            <el-button
+                class="copy-btn"
+                type="primary"
+                plain
+                :disabled="!previewText"
+                @click="handleCopyPreview"
+            >
+              {{ t('pages.shareAppDownload.copyPreview') }}
+            </el-button>
+          </div>
+          <div class="form-tip">{{ t('pages.shareAppDownload.previewShareCodeTip') }}</div>
         </el-form-item>
 
         <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.shareAppDownload.lastUpdated')">
@@ -55,7 +84,9 @@ const formRef = ref()
 const formData = reactive({
   id: '0',
   downloadUrl: '',
+  shortUrl: '',
   shareText: '',
+  previewShareCode: '',
 })
 
 const metaInfo = reactive({
@@ -69,18 +100,38 @@ const formRules = computed(() => ({
   ],
 }))
 
+/** 本地即时预览(与服务端规则一致);保存后仍以接口 previewShareCode 为准刷新 */
+const localPreview = computed(() => {
+  const text = formData.shareText.trim().replaceAll('{inviteCode}', '').replaceAll('{downloadUrl}', '').trim()
+  const parts: string[] = []
+  if (text) {
+    parts.push(text.replace(/\r?\n+$/, ''))
+  }
+  parts.push('Invite Code: YOUR_INVITE_CODE')
+  if (formData.shortUrl) {
+    parts.push(formData.shortUrl)
+  }
+  return parts.join('\n')
+})
+
+const previewText = computed(() => formData.previewShareCode || localPreview.value)
+
 const applyCfg = (cfg: ShareAppDownloadCfg | null | undefined) => {
   if (!cfg) {
     formData.id = '0'
     formData.downloadUrl = ''
+    formData.shortUrl = ''
     formData.shareText = ''
+    formData.previewShareCode = ''
     metaInfo.createdAt = ''
     metaInfo.updatedAt = ''
     return
   }
   formData.id = cfg.id || '0'
   formData.downloadUrl = cfg.downloadUrl || ''
+  formData.shortUrl = cfg.shortUrl || ''
   formData.shareText = cfg.shareText || ''
+  formData.previewShareCode = cfg.previewShareCode || ''
   metaInfo.createdAt = cfg.createdAt || ''
   metaInfo.updatedAt = cfg.updatedAt || ''
 }
@@ -121,6 +172,20 @@ const handleSave = async () => {
   }
 }
 
+const handleCopyPreview = async () => {
+  const text = previewText.value
+  if (!text) {
+    return
+  }
+  try {
+    await navigator.clipboard.writeText(text)
+    ElMessage.success(t('pages.shareAppDownload.copyPreviewSuccess'))
+  } catch (error) {
+    console.error('copy preview failed:', error)
+    ElMessage.error(t('pages.shareAppDownload.copyPreviewFailed'))
+  }
+}
+
 onMounted(() => {
   void fetchCfg()
 })
@@ -138,7 +203,7 @@ onMounted(() => {
 }
 
 .cfg-form {
-  max-width: 720px;
+  max-width: 780px;
 }
 
 .form-tip {
@@ -146,5 +211,16 @@ onMounted(() => {
   font-size: 12px;
   color: #94a3b8;
   line-height: 1.5;
+}
+
+.preview-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.copy-btn {
+  align-self: flex-start;
 }
 </style>

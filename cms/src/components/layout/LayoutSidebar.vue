@@ -2,7 +2,7 @@
 import {useI18n} from 'vue-i18n'
 import {useRoute, useRouter} from 'vue-router'
 import {nextTick, ref} from 'vue'
-import {ArrowDown, Bell, Box, Calendar, Coin, Collection, CollectionTag, Cpu, CreditCard, DataLine, Delete, Document, EditPen, Expand, Fold, FolderOpened, Iphone, Key, Link, List, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Promotion, Refresh, Search, Service, Setting, UploadFilled, User, UserFilled, VideoCamera, VideoPlay, View, Wallet} from '@element-plus/icons-vue'
+import {ArrowDown, Bell, Box, Calendar, Coin, Collection, CollectionTag, Cpu, CreditCard, DataLine, Delete, Document, EditPen, Expand, Fold, FolderOpened, Iphone, Key, Link, List, Lock, Medal, Money, Monitor, Odometer, Picture, Present, Promotion, Refresh, Search, Service, Setting, UploadFilled, User, UserFilled, VideoCamera, VideoPlay, View, Wallet, Warning} from '@element-plus/icons-vue'
 import {getIsAdmin, hasPermission} from '@/utils/permission'
 import {prefetchRouteChunk} from '@/utils/route-prefetch'
 import {isSidebarRoutableIndex, resolveSidebarSubmenusToOpen} from '@/utils/sidebar-menu-nav'
@@ -794,7 +794,7 @@ const hasMenuPermission = (moduleName: string) => {
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('MetaPixelCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CMSDomainMappingManagement') || hasMenuPermission('ExtraDomainMappingManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer') || hasMenuPermission('CfEmailCfgManagement')"
+            v-if="hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('MetaPixelCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CMSDomainMappingManagement') || hasMenuPermission('ExtraDomainMappingManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ProcessDownLogListManagement') || hasMenuPermission('ServerLogExplorer') || hasMenuPermission('CfEmailCfgManagement')"
             index="/config">
           <template #title>
             <el-icon>
@@ -935,7 +935,7 @@ const hasMenuPermission = (moduleName: string) => {
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('ResourceMonitor') || hasMenuPermission('ServerLogExplorer')"
+              v-if="hasMenuPermission('ResourceMonitor') || hasMenuPermission('ProcessDownLogListManagement') || hasMenuPermission('ServerLogExplorer')"
               index="/config/group/ops">
             <template #title>
               <el-icon>
@@ -948,6 +948,12 @@ const hasMenuPermission = (moduleName: string) => {
                 <Monitor/>
               </el-icon>
               <span>{{ t('menu.ResourceMonitor') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('ProcessDownLogListManagement')" index="/config/process-down-log">
+              <el-icon>
+                <Warning/>
+              </el-icon>
+              <span>{{ t('menu.ProcessDownLogListManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('ServerLogExplorer')" index="/config/server-log">
               <el-icon>

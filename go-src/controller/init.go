@@ -133,6 +133,7 @@ func Init() {
 	initRandomNicknameController()                   // 随机昵称库(CMS)
 	initSysStatController()                          // 系统总数据/仪表盘(CMS)
 	initResourceMetricController()                   // 系统资源监控(CMS)
+	initProcessDownLogCMSController()                // 进程挂掉记录(CMS)
 	initLogQueryController()                         // 日志查询(CMS)
 	initCMSExportController()                        // CMS异步导出
 	httpserver.InitWebsocket()

@@ -7,11 +7,13 @@ type GetShareAppDownloadCfgReq struct {
 }
 
 type ShareAppDownloadCfgItem struct {
-	ID          string `json:"id"`
-	DownloadUrl string `json:"downloadUrl" dc:"只读:官网assets下体积最大apk的公开URL"`
-	ShareText   string `json:"shareText"`
-	CreatedAt   string `json:"createdAt"`
-	UpdatedAt   string `json:"updatedAt"`
+	ID               string `json:"id"`
+	DownloadUrl      string `json:"downloadUrl" dc:"只读:官网assets下体积最大apk的公开URL"`
+	ShortUrl         string `json:"shortUrl" dc:"只读:分享短链,GET 302 到 downloadUrl"`
+	ShareText        string `json:"shareText"`
+	PreviewShareCode string `json:"previewShareCode" dc:"只读:下发给App的最终文案预览(邀请码为占位符)"`
+	CreatedAt        string `json:"createdAt"`
+	UpdatedAt        string `json:"updatedAt"`
 }
 
 type GetShareAppDownloadCfgRes struct {

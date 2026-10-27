@@ -108,6 +108,7 @@ import {userWithdrawDeployMessages} from './user-withdraw-deploy'
 import {officialSiteDeployMessages} from './official-site-deploy'
 import {dataSyncMessages} from './data-sync'
 import {resourceMonitorMessages} from './resource-monitor'
+import {processDownLogMessages} from './process-down-log'
 import {serverLogExplorerMessages} from './server-log-explorer'
 import {dashboardMessages} from './dashboard'
 import {trackingHotLiveRoomJoinMessages} from './tracking-hot-live-room-join'
@@ -227,6 +228,7 @@ const pageMessageBuilders = [
   ['officialSiteDeploy', officialSiteDeployMessages],
   ['dataSync', dataSyncMessages],
   ['resourceMonitor', resourceMonitorMessages],
+  ['processDownLog', processDownLogMessages],
   ['serverLogExplorer', serverLogExplorerMessages],
   ['dashboard', dashboardMessages],
   ['trackingHotLiveRoomJoin', trackingHotLiveRoomJoinMessages],

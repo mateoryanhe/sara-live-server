@@ -92,6 +92,9 @@ export const trackingEventApi = {
     getOfficialSiteDownloadTrend: () => {
         return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getOfficialSiteDownloadTrend', {})
     },
+    getShareShortLinkClickTrend: () => {
+        return request.post<HotLiveRoomJoinTrendRes>('/trackingEvent/getShareShortLinkClickTrend', {})
+    },
 }
 
 export default trackingEventApi

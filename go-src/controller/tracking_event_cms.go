@@ -135,3 +135,7 @@ func (c *TrackingEventCMSController) GetH5DownloadTrend(ctx context.Context, req
 func (c *TrackingEventCMSController) GetOfficialSiteDownloadTrend(ctx context.Context, req *trackingdto.CMSOfficialSiteDownloadTrendReq) (*trackingdto.CMSOfficialSiteDownloadTrendRes, error) {
 	return tracking.GetCMSOfficialSiteDownloadTrend(ctx, req)
 }
+
+func (c *TrackingEventCMSController) GetShareShortLinkClickTrend(ctx context.Context, req *trackingdto.CMSShareShortLinkClickTrendReq) (*trackingdto.CMSShareShortLinkClickTrendRes, error) {
+	return tracking.GetCMSShareShortLinkClickTrend(ctx, req)
+}

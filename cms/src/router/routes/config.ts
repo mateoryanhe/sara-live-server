@@ -183,6 +183,12 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '资源监控'},
         },
         {
+            path: 'process-down-log',
+            name: 'ProcessDownLogListManagement',
+            component: () => import('@/views/config/process-down-log-list.vue'),
+            meta: {title: '进程挂掉记录'},
+        },
+        {
             path: 'server-log',
             name: 'ServerLogExplorer',
             component: () => import('@/views/config/server-log-explorer.vue'),

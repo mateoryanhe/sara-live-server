@@ -6,5 +6,9 @@
   "coldStartScript": "/home/ec2-user/xgameserver/start.sh",
   "appName": "xr-game-server",
   "hotRestartFallbackCold": true,
-  "coldStartWaitSec": 45
+  "coldStartWaitSec": 45,
+  "processWatchEnabled": true,
+  "processWatchIntervalSec": 3,
+  "processWatchMissingSec": 180,
+  "mysqlDSN": "root:PASSWORD@tcp(127.0.0.1:13307)/live_db?charset=utf8mb4&parseTime=true&loc=Local"
 }

@@ -151,6 +151,7 @@ const menu = {
   ThirdPayOfficialSiteDeployManagement: '第三方支付官网部署',
   DataSyncCfgManagement: '数据同步',
   ResourceMonitor: '资源监控',
+  ProcessDownLogListManagement: '进程挂掉记录',
   ServerLogExplorer: '服务器日志',
   RoleManagementGroup: '权限管理',
   RoleManagement: '角色权限管理',

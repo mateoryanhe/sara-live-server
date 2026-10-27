@@ -136,6 +136,7 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   ThirdPayOfficialSiteDeployManagement: 'Deploy situs pembayaran pihak ketiga',
   DataSyncCfgManagement: 'Sinkronisasi Data',
   ResourceMonitor: 'Monitor Resource',
+  ProcessDownLogListManagement: 'Log proses down',
   ServerLogExplorer: 'Log Server',
   RoleManagementGroup: 'Manajemen Izin',
   RoleManagement: 'Kelola Peran',

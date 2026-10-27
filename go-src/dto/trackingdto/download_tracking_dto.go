@@ -43,3 +43,16 @@ type CMSOfficialSiteDownloadTrendRes struct {
 	Weekly     []*CMSTrackingEventTrendPoint `json:"weekly"`
 	Monthly    []*CMSTrackingEventTrendPoint `json:"monthly"`
 }
+
+type CMSShareShortLinkClickTrendReq struct {
+	g.Meta `path:"/getShareShortLinkClickTrend" method:"post" summary:"CMS分享短链点击量趋势" tags:"埋点"`
+}
+
+type CMSShareShortLinkClickTrendRes struct {
+	TodayCount uint64                        `json:"todayCount"`
+	WeekCount  uint64                        `json:"weekCount"`
+	MonthCount uint64                        `json:"monthCount"`
+	Daily      []*CMSTrackingEventTrendPoint `json:"daily"`
+	Weekly     []*CMSTrackingEventTrendPoint `json:"weekly"`
+	Monthly    []*CMSTrackingEventTrendPoint `json:"monthly"`
+}

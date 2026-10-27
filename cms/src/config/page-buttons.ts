@@ -71,6 +71,7 @@ const READONLY_PAGES = new Set([
     'GameWinLogListManagement',
     'GameBetLogListManagement',
     'ResourceMonitor',
+    'ProcessDownLogListManagement',
     'ServerLogExplorer',
     'ShortVideoWatchManagement',
 ])

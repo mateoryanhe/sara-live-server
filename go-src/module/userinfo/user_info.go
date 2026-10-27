@@ -49,7 +49,7 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		Remark:        data.Remark,
 		Gold:          data.Gold,
 		Diamond:       data.Diamond,
-		ShareCode:     buildAppShareCode(data.ShareCode),
+		ShareCode:     shareappdownload.BuildAppShareCode(data.ShareCode),
 		VipLevel:      data.VipLevel,
 		IsAnchor:      data.IsAnchor(),
 		UserType:      data.UserType,
@@ -70,27 +70,6 @@ func GetUserInfo(ctx context.Context, req *userinfodto.GetUserInfoReq) (res *use
 		event.Pub(gameevent.LoginEvent, authUserId)
 	}
 	return ret, nil
-}
-
-// buildAppShareCode App getUserInfo 的 shareCode：推广文案 + 邀请码(字段名不变,兼容 App).
-// 文案含 {inviteCode}/{downloadUrl} 时替换；否则在文案后换行追加邀请码；无文案时仍返回原邀请码.
-func buildAppShareCode(inviteCode string) string {
-	inviteCode = strings.TrimSpace(inviteCode)
-	text := strings.TrimSpace(shareappdownload.GetShareText())
-	downloadUrl := strings.TrimSpace(shareappdownload.GetDownloadUrl())
-	if text == "" {
-		return inviteCode
-	}
-	out := text
-	if strings.Contains(out, "{inviteCode}") {
-		out = strings.ReplaceAll(out, "{inviteCode}", inviteCode)
-	} else if inviteCode != "" {
-		out = strings.TrimRight(out, "\r\n") + "\n" + inviteCode
-	}
-	if downloadUrl != "" && strings.Contains(out, "{downloadUrl}") {
-		out = strings.ReplaceAll(out, "{downloadUrl}", downloadUrl)
-	}
-	return out
 }
 
 func resolveFollowStatus(viewerId, targetUserId uint64) uint8 {

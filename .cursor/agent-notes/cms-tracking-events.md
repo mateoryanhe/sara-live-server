@@ -143,8 +143,9 @@ App 面板曝光：`POST /rechargeOrder/reportChargePanelEnter`（Sofie `POST /s
 |------|-------|------|---------|
 | `TrackingDownloadManagement`（下载量） | `h5_download` | H5 落地页 `POST /trackingEvent/reportH5Download`（**免登录**）成功 +1 | `POST /trackingEvent/getH5DownloadTrend` |
 | 同上 **Tab「官网下载量」** | `official_site_download` | 官网 `POST /trackingEvent/reportOfficialSiteDownload`（**免登录**）成功 +1 | `POST /trackingEvent/getOfficialSiteDownloadTrend` |
+| 同上 **Tab「分享短链点击」** | `share_short_link_click` | 分享 `GET /dl` 成功 **302** 到官网最大 APK 时服务端 +1（免登录） | `POST /trackingEvent/getShareShortLinkClickTrend` |
 
-表：`daily_h5_download_stats` / `weekly_*` / `monthly_*`，以及 `daily_official_site_download_stats` 等同系列。不进 Sofie。
+表：`daily_h5_download_stats` / `weekly_*` / `monthly_*`，以及 `daily_official_site_download_stats`、`daily_share_short_link_click_stats` 等同系列。不进 Sofie。
 
 ## 新增一个事件的 checklist
 

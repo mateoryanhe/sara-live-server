@@ -9,6 +9,15 @@
 
 主 Go **进程已挂** 时，热重启接口不可用；走上述 **冷启分支**（与 SSH 执行 `start.sh` 相同）。
 
+## 进程探活（自动冷启）
+
+配置了 `coldStartScript` 时默认开启（可用 `"processWatchEnabled": false` 关闭）：
+
+- 每 `processWatchIntervalSec`（默认 **3s**）用 `pgrep -x` 查 `appName`
+- **连续** `processWatchMissingSec`（默认 **180s / 3 分钟**）都找不到进程 → 自动走与 `/coldStart` 相同的 `sudo start.sh` 冷启
+- 与 HTTP 触发共用 `minIntervalSec` 限流，避免反复拉起
+- 判定挂掉并冷启后，若配置了 `mysqlDSN`，写入表 `process_down_logs`；CMS「运维监控 → 进程挂掉记录」可查
+
 ## 部署（正式服 ec2-user）
 
 1. 本机 `build.bat` 得到 `live-hot-restart-gw`（Linux：`GOOS=linux GOARCH=amd64 go build -o live-hot-restart-gw .`）

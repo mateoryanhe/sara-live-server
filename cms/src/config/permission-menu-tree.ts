@@ -397,6 +397,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             ]),
             group('config-ops', 'menu.ConfigOpsGroup', [
                 page('ResourceMonitor'),
+                page('ProcessDownLogListManagement'),
                 page('ServerLogExplorer'),
             ]),
         ],

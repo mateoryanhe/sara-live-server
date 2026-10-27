@@ -15,6 +15,9 @@
         <el-tab-pane :label="t('pages.trackingDownload.tabOfficial')" name="official">
           <p class="page-desc">{{ t('pages.trackingDownload.officialDesc') }}</p>
         </el-tab-pane>
+        <el-tab-pane :label="t('pages.trackingDownload.tabShareShort')" name="shareShort">
+          <p class="page-desc">{{ t('pages.trackingDownload.shareShortDesc') }}</p>
+        </el-tab-pane>
       </el-tabs>
 
       <div class="summary-grid">
@@ -70,7 +73,7 @@ import {trackingEventApi} from '@/api/modules/tracking-event'
 import type {HotLiveRoomJoinTrendRes} from '@/types/api'
 import CountTrendChart from './components/count-trend-chart.vue'
 
-type TrackingEventKey = 'h5' | 'official'
+type TrackingEventKey = 'h5' | 'official' | 'shareShort'
 
 const {t, locale} = useI18n()
 const loading = ref(false)
@@ -91,10 +94,12 @@ const emptyTrend = (): HotLiveRoomJoinTrendRes => ({
 
 const h5Trend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 const officialTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
+const shareShortTrend = reactive<HotLiveRoomJoinTrendRes>(emptyTrend())
 
 const trendByEvent: Record<TrackingEventKey, HotLiveRoomJoinTrendRes> = {
   h5: h5Trend,
   official: officialTrend,
+  shareShort: shareShortTrend,
 }
 
 const activeTrend = computed(() => trendByEvent[activeEvent.value])
@@ -102,6 +107,9 @@ const activeTrend = computed(() => trendByEvent[activeEvent.value])
 const labelKey = (suffix: string) => {
   if (activeEvent.value === 'official') {
     return `pages.trackingDownload.official${suffix}`
+  }
+  if (activeEvent.value === 'shareShort') {
+    return `pages.trackingDownload.shareShort${suffix}`
   }
   return `pages.trackingDownload.h5${suffix}`
 }
@@ -157,11 +165,17 @@ const fetchOfficialTrend = async () => {
   assignTrend(officialTrend, await trackingEventApi.getOfficialSiteDownloadTrend())
 }
 
+const fetchShareShortTrend = async () => {
+  assignTrend(shareShortTrend, await trackingEventApi.getShareShortLinkClickTrend())
+}
+
 const fetchActiveTrend = async () => {
   loading.value = true
   try {
     if (activeEvent.value === 'official') {
       await fetchOfficialTrend()
+    } else if (activeEvent.value === 'shareShort') {
+      await fetchShareShortTrend()
     } else {
       await fetchH5Trend()
     }

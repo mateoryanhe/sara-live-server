@@ -22,7 +22,7 @@ type GetUserInfoRes struct {
 	Remark        string  `json:"remark"`
 	Gold          float64 `json:"gold"`
 	Diamond       float64 `json:"diamond"`
-	ShareCode     string  `json:"shareCode" dc:"分享内容(推广文案+邀请码;字段名兼容App)"`
+	ShareCode     string  `json:"shareCode" dc:"分享内容(文案\\n邀请码\\n短链;字段名兼容App)"`
 	VipLevel      uint32  `json:"vipLevel"`
 	IsAnchor      bool    `json:"isAnchor" dc:"是否主播"`
 	UserType      uint8   `json:"userType" dc:"用户类型(0普通,1普通主播,2机器人主播,7高级主播)"`

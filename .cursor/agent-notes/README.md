@@ -37,7 +37,8 @@
 - **deploy.bat**：打包目录用 `temp_deploy_%RANDOM%` 避免 file-lock 时误打旧 `config.yaml`（曾把正式配置打到提审服）。
 - **提审服 1GB**：CPU 长期 100%、syndb 仅 `force_wait` 时，fork 可能极慢或失败，脚本会等满再冷启；正式服资源充足时以热重启为主。
 - **2026-10-12 热重启卡死**：`tracking.drainTrackingQueue` 空队列时 `default:break` 只跳出 `select` 导致忙等，`PrepareRestart` 同步调用后阶段一永不结束；已改为 `drainTrackingTQueue` 与 stat 一致。
-- **live-hot-restart-gw（18900）**：`pub-tool/live-hot-restart-gw` 与主 Go 分离部署；`/hotRestart` 无进程时 `sudo start.sh` 冷启，热重启连不上时可 fallback 冷启；`/coldStart` 强制冷启。`config.json` 需 `coldStartScript`（同 xgameserver/start.sh）。
+- **live-hot-restart-gw（18900）**：`pub-tool/live-hot-restart-gw` 与主 Go 分离部署；`/hotRestart` 无进程时 `sudo start.sh` 冷启，热重启连不上时可 fallback 冷启；`/coldStart` 强制冷启。`config.json` 需 `coldStartScript`（同 xgameserver/start.sh）。**进程探活**：默认每 **3s** `pgrep`，连续 **3 分钟**无 `xr-game-server` 则自动冷启（`processWatchIntervalSec=3` / `processWatchMissingSec=180`；可关 `processWatchEnabled`）。冷启后若配置 `mysqlDSN` 写入 `process_down_logs`；CMS「运维监控 → 进程挂掉记录」。**正式服**（2026-10-27）：`mysqlDSN` → `127.0.0.1:14501/live_prod`（与主 Go `config.yaml` 同库）；表已建。停 gw 勿用 `pgrep -x live-hot-restart-gw`（Linux `comm` 截断为 `live-hot-restar`），用 PID 或 `pkill -f live-hot-restart-gw`。
+- **分享下载 shareCode**：`getUserInfo.shareCode` = 文案 + `\n` + `Invite Code: {邀请码}` + `\n` + 短链 `https://{官网域名}/dl`；`GET /dl` 免登录 **302** 到官网 assets 当前最大 APK（成功时埋点 `share_short_link_click`）。CMS「分享下载文案」可预览/复制最终文案（邀请码占位 `YOUR_INVITE_CODE`）；趋势在埋点「下载量」Tab「分享短链点击」。
 - **2026-10-25 正式服宕机（~08:11–09:13 UTC）**：access `08:11:30` 后中断，`09:13:15` 冷启 PID 634870；**非双进程**。
   - **发版**：`10-24 07:41 UTC`（北京 15:41）`deploy`+热重启成功（采样间断、内存 207→140），对齐本地提交 **`6c990432`**（游戏 CMS/shelf/login·充值分渠道统计等）。**泄漏发生在该版本上**。
   - **泄漏**：`13:20 UTC`（北京 21:20）起 proc_mem ~20MB/min 涨（流量高峰 hour13≈2.9 万请求；CMS authId=17 在刷游戏统计）；`15:40 UTC` 磁盘再次覆盖二进制但 **access 无 hotRestart**（进程未换码）；`15:42` **CPU 钉死 ~85–92%**；过夜 **7.4GB / 系统内存 98%**，次日 08:11 死。
