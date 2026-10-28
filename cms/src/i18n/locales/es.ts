@@ -121,6 +121,8 @@ const menu: Record<keyof typeof zhCN.menu, string> = {
   PrivacyPolicyCfgManagement: 'Política de privacidad',
   SofiePrivacyPolicyCfgManagement: 'Política de privacidad Sofie',
   AuditCodeCfgManagement: 'Código de auditoría',
+  UserFeedbackRecordManagement: 'Feedback de usuarios',
+  UserReportRecordManagement: 'Denuncias de usuarios',
   GooglePlayCfgManagement: 'Google Play',
   FirebaseCfgManagement: 'Inicio Firebase',
   MetaPixelCfgManagement: 'Meta Pixel (servidor)',

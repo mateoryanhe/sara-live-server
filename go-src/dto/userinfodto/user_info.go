@@ -153,7 +153,7 @@ type CancelAccountByCodeRes struct {
 	Success bool `json:"success"`
 }
 
-// AppFeedbackReq App端用户反馈(不解析body,占位接口)
+// AppFeedbackReq App端用户反馈(请求体原文入库,不解析 JSON 字段)
 type AppFeedbackReq struct {
 	g.Meta `path:"/feedback" method:"post" summary:"用户反馈" tags:"用户反馈"`
 }
@@ -162,7 +162,7 @@ type AppFeedbackRes struct {
 	Success bool `json:"success"`
 }
 
-// AppReportReq App端用户举报(不解析body,占位接口)
+// AppReportReq App端用户举报(请求体原文入库,不解析 JSON 字段)
 type AppReportReq struct {
 	g.Meta `path:"/report" method:"post" summary:"用户举报" tags:"用户举报"`
 }

@@ -63,7 +63,7 @@ const hasMenuPermission = (moduleName: string) => {
           class="sidebar-menu"
           @select="handleSidebarSelect"
       >
-        <!-- 仪表盘 -->
+        <!-- ??? -->
         <el-menu-item v-if="hasMenuPermission('Dashboard')" index="/dashboard">
           <el-icon>
             <Odometer/>
@@ -651,7 +651,7 @@ const hasMenuPermission = (moduleName: string) => {
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('UserWithdrawDeployManagement') || hasMenuPermission('OfficialSiteDeployManagement') || hasMenuPermission('ThirdPayOfficialSiteDeployManagement') || hasMenuPermission('SofieOfficialSiteDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('SofiePrivacyPolicyCfgManagement') || hasMenuPermission('AuditCodeCfgManagement')"
+            v-if="hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('UserWithdrawDeployManagement') || hasMenuPermission('OfficialSiteDeployManagement') || hasMenuPermission('ThirdPayOfficialSiteDeployManagement') || hasMenuPermission('SofieOfficialSiteDeployManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('SofiePrivacyPolicyCfgManagement') || hasMenuPermission('AuditCodeCfgManagement') || hasMenuPermission('UserFeedbackRecordManagement') || hasMenuPermission('UserReportRecordManagement')"
             index="/frontend-module">
           <template #title>
             <el-icon>
@@ -660,7 +660,7 @@ const hasMenuPermission = (moduleName: string) => {
             <span>{{ t('menu.ConfigDeployGroup') }}</span>
           </template>
           <el-sub-menu
-              v-if="hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('SofiePrivacyPolicyCfgManagement') || hasMenuPermission('AuditCodeCfgManagement')"
+              v-if="hasMenuPermission('AnchorListManagement') || hasMenuPermission('BotAnchorManagement') || hasMenuPermission('StaticCacheCfgManagement') || hasMenuPermission('AppPkgManagement') || hasMenuPermission('AppVersionCfgManagement') || hasMenuPermission('FirebaseCfgManagement') || hasMenuPermission('PrivacyPolicyCfgManagement') || hasMenuPermission('SofiePrivacyPolicyCfgManagement') || hasMenuPermission('AuditCodeCfgManagement') || hasMenuPermission('UserFeedbackRecordManagement') || hasMenuPermission('UserReportRecordManagement')"
               index="/frontend-module/config">
             <template #title>
               <el-icon>
@@ -722,6 +722,18 @@ const hasMenuPermission = (moduleName: string) => {
               </el-icon>
               <span>{{ t('menu.AuditCodeCfgManagement') }}</span>
             </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('UserFeedbackRecordManagement')" index="/config/user-feedback-record">
+              <el-icon>
+                <Document/>
+              </el-icon>
+              <span>{{ t('menu.UserFeedbackRecordManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('UserReportRecordManagement')" index="/config/user-report-record">
+              <el-icon>
+                <Document/>
+              </el-icon>
+              <span>{{ t('menu.UserReportRecordManagement') }}</span>
+            </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
               v-if="hasMenuPermission('H5LiveDeployManagement') || hasMenuPermission('CoinMerchantDeployManagement') || hasMenuPermission('ThirdPayDeployManagement') || hasMenuPermission('UserWithdrawDeployManagement') || hasMenuPermission('OfficialSiteDeployManagement') || hasMenuPermission('ThirdPayOfficialSiteDeployManagement') || hasMenuPermission('SofieOfficialSiteDeployManagement')"
@@ -776,7 +788,7 @@ const hasMenuPermission = (moduleName: string) => {
             </el-menu-item>
           </el-sub-menu>
         </el-sub-menu>
-        <!-- 权限管理菜单 -->
+        <!-- ?????? -->
         <el-sub-menu
             v-if="hasMenuPermission('RoleManagement') || hasMenuPermission('ModuleList') || hasMenuPermission('CMSUserManagement') || hasMenuPermission('GuildVisibilityManagement') || hasMenuPermission('PlatformAnchorVisibilityManagement')"
             index="/role">
@@ -812,7 +824,7 @@ const hasMenuPermission = (moduleName: string) => {
           </el-menu-item>
         </el-sub-menu>
         <el-sub-menu
-            v-if="hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('MetaPixelCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CMSDomainMappingManagement') || hasMenuPermission('ExtraDomainMappingManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ProcessDownLogListManagement') || hasMenuPermission('ServerLogExplorer') || hasMenuPermission('CfEmailCfgManagement')"
+            v-if="hasMenuPermission('RandomNicknameManagement') || hasMenuPermission('AppTokenConfig') || hasMenuPermission('AccountCfgManagement') || hasMenuPermission('SimulatorCpuKeywordManagement') || hasMenuPermission('DeviceRegisterRiskCfgManagement') || hasMenuPermission('ServerRuntimeCfgManagement') || hasMenuPermission('PreloadCfgManagement') || hasMenuPermission('TextModerationCfgManagement') || hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('MetaPixelCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CMSDomainMappingManagement') || hasMenuPermission('ExtraDomainMappingManagement') || hasMenuPermission('HostTlsMappingManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('ResourceMonitor') || hasMenuPermission('ProcessDownLogListManagement') || hasMenuPermission('ServerLogExplorer') || hasMenuPermission('CfEmailCfgManagement')"
             index="/config">
           <template #title>
             <el-icon>
@@ -883,7 +895,7 @@ const hasMenuPermission = (moduleName: string) => {
             </el-menu-item>
           </el-sub-menu>
           <el-sub-menu
-              v-if="hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('MetaPixelCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CMSDomainMappingManagement') || hasMenuPermission('ExtraDomainMappingManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('CfEmailCfgManagement')"
+              v-if="hasMenuPermission('GooglePlayCfgManagement') || hasMenuPermission('MetaPixelCfgManagement') || hasMenuPermission('HaiPayCfgManagement') || hasMenuPermission('UploadResourceCfgManagement') || hasMenuPermission('CMSDomainMappingManagement') || hasMenuPermission('ExtraDomainMappingManagement') || hasMenuPermission('HostTlsMappingManagement') || hasMenuPermission('CountryFlagDeployManagement') || hasMenuPermission('DataSyncCfgManagement') || hasMenuPermission('DbBackupCfgManagement') || hasMenuPermission('CfEmailCfgManagement')"
               index="/config/group/platform">
             <template #title>
               <el-icon>
@@ -932,6 +944,12 @@ const hasMenuPermission = (moduleName: string) => {
                 <Link/>
               </el-icon>
               <span>{{ t('menu.ExtraDomainMappingManagement') }}</span>
+            </el-menu-item>
+            <el-menu-item v-if="hasMenuPermission('HostTlsMappingManagement')" index="/config/host-tls-mapping">
+              <el-icon>
+                <Link/>
+              </el-icon>
+              <span>{{ t('menu.HostTlsMappingManagement') }}</span>
             </el-menu-item>
             <el-menu-item v-if="hasMenuPermission('CountryFlagDeployManagement')" index="/config/country-flag-deploy">
               <el-icon>

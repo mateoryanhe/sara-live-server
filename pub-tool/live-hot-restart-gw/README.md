@@ -18,7 +18,16 @@
 - 与 HTTP 触发共用 `minIntervalSec` 限流，避免反复拉起
 - 判定挂掉并冷启后，若配置了 `mysqlDSN`，写入表 `process_down_logs`；CMS「运维监控 → 进程挂掉记录」可查
 
-## 部署（正式服 ec2-user）
+## 部署（正式服 ec2-user）— 与 Go 发版独立
+
+**`pub-tool/go-prod/deploy.bat` 不再编译/上传/启停 gw。** 只用：
+
+| 脚本 | 作用 |
+|------|------|
+| `pub-tool/go-prod/deploy-hr-gw.bat` | 单独编译上传 gw + `config.json` 并重启 |
+| `pub-tool/go-prod/restart-hr-gw.bat` | 仅重启本机已有 gw |
+
+手工步骤（等价）：
 
 1. 本机 `build.bat` 得到 `live-hot-restart-gw`（Linux：`GOOS=linux GOARCH=amd64 go build -o live-hot-restart-gw .`）
 2. 上传到 `/home/ec2-user/xgameserver/live-hot-restart-gw` + 同目录 `config.json`（从 `config.example.json` 复制）

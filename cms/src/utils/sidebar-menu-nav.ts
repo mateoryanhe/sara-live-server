@@ -85,6 +85,8 @@ export function resolveSidebarSubmenusToOpen(path: string): string[] {
         || path === '/config/privacy-policy'
         || path === '/config/sofie-privacy-policy'
         || path === '/config/audit-code'
+        || path === '/config/user-feedback-record'
+        || path === '/config/user-report-record'
     ) {
         add('/frontend-module', '/frontend-module/config')
     }
@@ -127,6 +129,7 @@ export function resolveSidebarSubmenusToOpen(path: string): string[] {
             || path === '/config/upload-resource'
             || path === '/config/cms-domain-mapping'
             || path === '/config/extra-domain-mapping'
+            || path === '/config/host-tls-mapping'
             || path === '/config/country-flag-deploy'
             || path === '/config/db-backup'
             || path === '/config/data-sync'

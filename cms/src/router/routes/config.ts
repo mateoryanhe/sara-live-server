@@ -81,6 +81,18 @@ export const configRoutes: RouteRecordRaw = {
             meta: {title: '审核码生成'},
         },
         {
+            path: 'user-feedback-record',
+            name: 'UserFeedbackRecordManagement',
+            component: () => import('@/views/config/user-feedback-record-list.vue'),
+            meta: {title: '用户反馈记录'},
+        },
+        {
+            path: 'user-report-record',
+            name: 'UserReportRecordManagement',
+            component: () => import('@/views/config/user-report-record-list.vue'),
+            meta: {title: '用户举报记录'},
+        },
+        {
             path: 'google-play',
             name: 'GooglePlayCfgManagement',
             component: () => import('@/views/config/google-play.vue'),
@@ -133,6 +145,12 @@ export const configRoutes: RouteRecordRaw = {
             name: 'ExtraDomainMappingManagement',
             component: () => import('@/views/config/extra-domain-mapping.vue'),
             meta: {title: '域名映射'},
+        },
+        {
+            path: 'host-tls-mapping',
+            name: 'HostTlsMappingManagement',
+            component: () => import('@/views/config/host-tls-mapping.vue'),
+            meta: {title: 'Host证书映射'},
         },
         {
             path: 'h5-live-deploy',

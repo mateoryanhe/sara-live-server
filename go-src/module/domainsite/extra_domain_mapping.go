@@ -60,6 +60,9 @@ func SaveExtraDomainMapping(ctx context.Context, req *domainsitedto.SaveExtraDom
 	if domainUsedByOtherMapping(domain, siteKey) {
 		return nil, fmt.Errorf("域名已被其他映射使用: %s", domain)
 	}
+	if domainUsedByHostTLS(domain, 0) {
+		return nil, fmt.Errorf("域名已被纯Host证书映射占用: %s", domain)
+	}
 	row, err := SaveStaticSiteMapping(ctx, siteKey, extraDomainURLPrefix(domain), domain, root)
 	if err != nil {
 		return nil, err
@@ -86,6 +89,9 @@ func SaveExtraDomainMappingFromRequest(r *ghttp.Request) (*domainsitedto.SaveExt
 	siteKey := extraDomainSiteKey(domain)
 	if domainUsedByOtherMapping(domain, siteKey) {
 		return nil, fmt.Errorf("域名已被其他映射使用: %s", domain)
+	}
+	if domainUsedByHostTLS(domain, 0) {
+		return nil, fmt.Errorf("域名已被纯Host证书映射占用: %s", domain)
 	}
 	certPart := r.GetUploadFile("cert")
 	keyPart := r.GetUploadFile("key")

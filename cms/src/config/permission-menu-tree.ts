@@ -347,6 +347,8 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('PrivacyPolicyCfgManagement'),
                 page('SofiePrivacyPolicyCfgManagement'),
                 page('AuditCodeCfgManagement'),
+                page('UserFeedbackRecordManagement'),
+                page('UserReportRecordManagement'),
             ]),
             group('frontend-deploy', 'menu.FrontendDeployGroup', [
                 page('H5LiveDeployManagement'),
@@ -395,6 +397,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                 page('UploadResourceCfgManagement'),
                 page('CMSDomainMappingManagement'),
                 page('ExtraDomainMappingManagement'),
+                page('HostTlsMappingManagement'),
                 page('CountryFlagDeployManagement'),
                 page('DataSyncCfgManagement'),
             ]),

@@ -15,11 +15,21 @@ type DomainSiteRegistryCMSController struct{}
 
 func initDomainSiteRegistryCMSController() {
 	httpserver.RegCMSHandler(DomainSiteRegistryCMSURL, "/saveExtraDomainMappingUpload", handleSaveExtraDomainMappingUpload)
+	httpserver.RegCMSHandler(DomainSiteRegistryCMSURL, "/saveHostTlsMappingUpload", handleSaveHostTlsMappingUpload)
 	httpserver.RegCMS(DomainSiteRegistryCMSURL, &DomainSiteRegistryCMSController{})
 }
 
 func handleSaveExtraDomainMappingUpload(r *ghttp.Request) {
 	res, err := domainsite.SaveExtraDomainMappingFromRequest(r)
+	if err != nil {
+		r.SetError(err)
+		return
+	}
+	httpserver.SetHandlerResponseData(r, res)
+}
+
+func handleSaveHostTlsMappingUpload(r *ghttp.Request) {
+	res, err := domainsite.SaveHostTlsMappingFromRequest(r)
 	if err != nil {
 		r.SetError(err)
 		return
@@ -49,4 +59,12 @@ func (c *DomainSiteRegistryCMSController) SaveExtraDomainMapping(ctx context.Con
 
 func (c *DomainSiteRegistryCMSController) DeleteExtraDomainMapping(ctx context.Context, req *domainsitedto.DeleteExtraDomainMappingReq) (*domainsitedto.DeleteExtraDomainMappingRes, error) {
 	return domainsite.DeleteExtraDomainMapping(ctx, req)
+}
+
+func (c *DomainSiteRegistryCMSController) ListHostTlsMappings(ctx context.Context, req *domainsitedto.ListHostTlsMappingsReq) (*domainsitedto.ListHostTlsMappingsRes, error) {
+	return domainsite.ListHostTlsMappings(ctx, req)
+}
+
+func (c *DomainSiteRegistryCMSController) DeleteHostTlsMapping(ctx context.Context, req *domainsitedto.DeleteHostTlsMappingReq) (*domainsitedto.DeleteHostTlsMappingRes, error) {
+	return domainsite.DeleteHostTlsMapping(ctx, req)
 }

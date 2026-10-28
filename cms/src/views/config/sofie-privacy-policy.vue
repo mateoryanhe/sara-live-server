@@ -95,6 +95,9 @@
 
         <el-form-item>
           <el-button type="primary" @click="handleSave">{{ t('common.saveConfig') }}</el-button>
+          <el-button :loading="syncing" @click="handleSyncFromSara">
+            {{ t('pages.sofiePrivacyPolicy.syncFromSara') }}
+          </el-button>
           <el-button @click="fetchCfg">{{ t('common.refresh') }}</el-button>
         </el-form-item>
       </el-form>
@@ -105,12 +108,14 @@
 <script lang="ts" setup>
 import {useI18n} from 'vue-i18n'
 import {computed, onMounted, reactive, ref} from 'vue'
-import {ElMessage} from 'element-plus'
+import {ElMessage, ElMessageBox} from 'element-plus'
+import {privacyPolicyApi} from '@/api/modules/privacy-policy'
 import {sofiePrivacyPolicyApi} from '@/api/modules/sofie-privacy-policy'
 import type {PrivacyPolicyCfg} from '@/types/api'
 
 const {t} = useI18n()
 const loading = ref(false)
+const syncing = ref(false)
 const formRef = ref()
 
 const formData = reactive({
@@ -255,6 +260,60 @@ const handleSave = async () => {
     console.error('save sofie privacy policy cfg failed:', error)
   } finally {
     loading.value = false
+  }
+}
+
+/** 从「隐私政策」页拉取 URL 配置填入本页(保留包名)，并立即保存 */
+const handleSyncFromSara = async () => {
+  try {
+    await ElMessageBox.confirm(
+        t('pages.sofiePrivacyPolicy.syncConfirm'),
+        t('pages.sofiePrivacyPolicy.syncTitle'),
+        {type: 'warning'},
+    )
+  } catch {
+    return
+  }
+  syncing.value = true
+  try {
+    const response = await privacyPolicyApi.getPrivacyPolicyCfg()
+    const cfg = response.cfg
+    if (!cfg) {
+      ElMessage.warning(t('pages.sofiePrivacyPolicy.syncEmpty'))
+      return
+    }
+    const keepPackage = formData.packageName
+    const keepId = formData.id
+    applyCfg(cfg)
+    formData.packageName = keepPackage
+    formData.id = keepId
+    await formRef.value.validate()
+    const saveRes = await sofiePrivacyPolicyApi.saveSofiePrivacyPolicyCfg({
+      id: formData.id === '0' ? 0 : Number(formData.id),
+      packageName: formData.packageName.trim(),
+      apiBase: formData.apiBase.trim(),
+      privacyPolicyUrl: formData.privacyPolicyUrl.trim(),
+      termsOfServiceUrl: formData.termsOfServiceUrl.trim(),
+      creatorTermsUrl: formData.creatorTermsUrl.trim(),
+      roomOwnerTermsUrl: formData.roomOwnerTermsUrl.trim(),
+      vipDescUrl: formData.vipDescUrl.trim(),
+      aboutSiteUrl: formData.aboutSiteUrl.trim(),
+      safetyCenterUrl: formData.safetyCenterUrl.trim(),
+    })
+    if (saveRes?.success) {
+      ElMessage.success(t('pages.sofiePrivacyPolicy.syncSuccess'))
+      if (saveRes.id) {
+        formData.id = saveRes.id
+      }
+      await fetchCfg()
+    } else {
+      ElMessage.error(t('pages.sofiePrivacyPolicy.syncFailed'))
+    }
+  } catch (error) {
+    console.error('sync sofie privacy from sara failed:', error)
+    ElMessage.error(t('pages.sofiePrivacyPolicy.syncFailed'))
+  } finally {
+    syncing.value = false
   }
 }
 

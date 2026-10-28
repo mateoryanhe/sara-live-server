@@ -102,6 +102,7 @@ import {dbBackupMessages} from './db-backup'
 import {uploadResourceMessages} from './upload-resource'
 import {cmsDomainMappingMessages} from './cms-domain-mapping'
 import {extraDomainMappingMessages} from './extra-domain-mapping'
+import {hostTlsMappingMessages} from './host-tls-mapping'
 import {h5LiveDeployMessages} from './h5-live-deploy'
 import {coinMerchantDeployMessages} from './coin-merchant-deploy'
 import {countryFlagDeployMessages} from './country-flag-deploy'
@@ -111,6 +112,9 @@ import {officialSiteDeployMessages} from './official-site-deploy'
 import {dataSyncMessages} from './data-sync'
 import {resourceMonitorMessages} from './resource-monitor'
 import {processDownLogMessages} from './process-down-log'
+import {userAppSubmissionRecordMessages} from './user-app-submission-record'
+import {userFeedbackRecordMessages} from './user-feedback-record'
+import {userReportRecordMessages} from './user-report-record'
 import {serverLogExplorerMessages} from './server-log-explorer'
 import {dashboardMessages} from './dashboard'
 import {trackingHotLiveRoomJoinMessages} from './tracking-hot-live-room-join'
@@ -224,6 +228,7 @@ const pageMessageBuilders = [
   ['uploadResource', uploadResourceMessages],
   ['cmsDomainMapping', cmsDomainMappingMessages],
   ['extraDomainMapping', extraDomainMappingMessages],
+  ['hostTlsMapping', hostTlsMappingMessages],
   ['h5LiveDeploy', h5LiveDeployMessages],
   ['coinMerchantDeploy', coinMerchantDeployMessages],
   ['countryFlagDeploy', countryFlagDeployMessages],
@@ -233,6 +238,9 @@ const pageMessageBuilders = [
   ['dataSync', dataSyncMessages],
   ['resourceMonitor', resourceMonitorMessages],
   ['processDownLog', processDownLogMessages],
+  ['userAppSubmissionRecord', userAppSubmissionRecordMessages],
+  ['userFeedbackRecord', userFeedbackRecordMessages],
+  ['userReportRecord', userReportRecordMessages],
   ['serverLogExplorer', serverLogExplorerMessages],
   ['dashboard', dashboardMessages],
   ['trackingHotLiveRoomJoin', trackingHotLiveRoomJoinMessages],

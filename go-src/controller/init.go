@@ -136,12 +136,16 @@ func Init() {
 	initSysStatController()                          // 系统总数据/仪表盘(CMS)
 	initResourceMetricController()                   // 系统资源监控(CMS)
 	initProcessDownLogCMSController()                // 进程挂掉记录(CMS)
+	initUserAppSubmissionCMSController()             // 用户反馈/举报记录(CMS)
 	initLogQueryController()                         // 日志查询(CMS)
 	initCMSExportController()                        // CMS异步导出
 	httpserver.InitWebsocket()
 	xrpool.AddWithRecover(gctx.New(), func(ctx context.Context) {
 		if err := domainsite.SyncHTTPSRegistryFromDB(ctx); err != nil {
 			g.Log().Errorf(ctx, "按数据库同步域名静态目录注册表失败 err=%v", err)
+		}
+		if err := domainsite.SyncHostTLSRegistryFromDB(ctx); err != nil {
+			g.Log().Errorf(ctx, "按数据库同步纯Host证书注册表失败 err=%v", err)
 		}
 		httpserver.InitHttpServer()
 	})

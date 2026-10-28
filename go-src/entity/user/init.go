@@ -12,6 +12,8 @@ func Init() {
 	initCurrencyLog()
 	initCoinMerchantGoldTransferLog()
 	initUserAttributionReport()
+	initUserFeedbackRecord()
+	initUserReportRecord()
 	initRandomNickname()
 	initWalletExchangeCfg()
 	initCustomerServiceCfg()

@@ -726,6 +726,11 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'ExtraDomainMappingManagement:save': '/domainSite/saveExtraDomainMappingUpload',
     'ExtraDomainMappingManagement:delete': '/domainSite/deleteExtraDomainMapping',
 
+    HostTlsMappingManagement: '/domainSite/listHostTlsMappings',
+    'HostTlsMappingManagement:view': '/domainSite/listHostTlsMappings',
+    'HostTlsMappingManagement:save': '/domainSite/saveHostTlsMappingUpload',
+    'HostTlsMappingManagement:delete': '/domainSite/deleteHostTlsMapping',
+
     DataSyncCfgManagement: '/dataSync/getDataSyncCfg',
     'DataSyncCfgManagement:view': '/dataSync/getDataSyncCfg',
     'DataSyncCfgManagement:save': '/dataSync/saveDataSyncCfg',
@@ -773,6 +778,14 @@ const PERMISSION_API_PATHS: Record<string, string> = {
     'ResourceMonitor:view': '/resourceMetric/getResourceMetricMemoryTrend',
     'ResourceMonitor:search': '/resourceMetric/getResourceMetricMemoryTrend',
     'ResourceMonitor:export': '/resourceMetric/getResourceMetricMemoryTrend',
+
+    UserFeedbackRecordManagement: '/userFeedbackRecord/listUserFeedbackRecord',
+    'UserFeedbackRecordManagement:view': '/userFeedbackRecord/listUserFeedbackRecord',
+    'UserFeedbackRecordManagement:search': '/userFeedbackRecord/listUserFeedbackRecord',
+
+    UserReportRecordManagement: '/userReportRecord/listUserReportRecord',
+    'UserReportRecordManagement:view': '/userReportRecord/listUserReportRecord',
+    'UserReportRecordManagement:search': '/userReportRecord/listUserReportRecord',
 
     ProcessDownLogListManagement: '/processDownLog/listProcessDownLog',
     'ProcessDownLogListManagement:view': '/processDownLog/listProcessDownLog',

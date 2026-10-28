@@ -26,7 +26,7 @@ const props = defineProps<{
   showTrendDataZoom?: boolean
   /** 滑块初始拉满显示全量 */
   dataZoomDefaultFullRange?: boolean
-  /** 在线趋势：仅观众 + 开播主播（仪表盘在线 Tab，不含 TCP 总在线） */
+  /** 在线趋势：观众 + 开播主播两条线（仪表盘）；默认仅在线总数一条线（资源监控页） */
   onlineAudienceAnchorOnly?: boolean
 }>()
 
@@ -303,17 +303,18 @@ const buildOnlineOption = (points: ResourceMetricPoint[]): EChartsOption => {
 
   const legendData = audienceAnchorOnly
       ? [audienceLabel, anchorLabel]
-      : [totalLabel, anchorLabel, audienceLabel]
+      : [totalLabel]
 
   const tooltipLines = (point: ResourceMetricPoint | undefined, axisName: string) => {
     const lines = [axisName]
-    if (!audienceAnchorOnly) {
+    if (audienceAnchorOnly) {
+      lines.push(
+          t('pages.resourceMonitor.audienceOnlineCountTooltip', {value: formatCount(resolveAudienceCount(point))}),
+          t('pages.resourceMonitor.liveAnchorOnlineCountTooltip', {value: formatCount(point?.liveAnchorCount)}),
+      )
+    } else {
       lines.push(t('pages.resourceMonitor.onlineCountTooltip', {value: formatCount(point?.onlineCount)}))
     }
-    lines.push(
-        t('pages.resourceMonitor.audienceOnlineCountTooltip', {value: formatCount(resolveAudienceCount(point))}),
-        t('pages.resourceMonitor.liveAnchorOnlineCountTooltip', {value: formatCount(point?.liveAnchorCount)}),
-    )
     return lines.join('<br/>')
   }
 
@@ -346,22 +347,6 @@ const buildOnlineOption = (points: ResourceMetricPoint[]): EChartsOption => {
           smooth: true,
           data: points.map(item => Number(item.onlineCount || 0)),
           itemStyle: {color: '#409EFF'},
-        },
-        {
-          name: anchorLabel,
-          type: 'line',
-          smooth: true,
-          data: anchorSeries,
-          itemStyle: {color: anchorLineColor},
-          lineStyle: {color: anchorLineColor},
-        },
-        {
-          name: audienceLabel,
-          type: 'line',
-          smooth: true,
-          data: audienceSeries,
-          itemStyle: {color: audienceLineColor},
-          lineStyle: {color: audienceLineColor},
         },
       ]
 

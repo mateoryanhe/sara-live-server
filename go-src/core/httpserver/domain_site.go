@@ -424,12 +424,18 @@ func buildDomainTLSConfig(ctx context.Context) *tls.Config {
 				return nil, fmt.Errorf("empty tls client hello")
 			}
 			name := strings.ToLower(strings.TrimSuffix(strings.TrimSpace(info.ServerName), "."))
+			// 1) 纯 Host→证书(API 多域名)
+			if cert := lookupHostTLSCertificate(name); cert != nil {
+				return cert, nil
+			}
+			// 2) 域名静态站绑定证书
 			current := domainSiteRegistry.Load()
 			if current != nil {
 				if cert := current.certificates[name]; cert != nil {
 					return cert, nil
 				}
 			}
+			// 3) config.yaml 默认证
 			if defaultTLSCertificate != nil {
 				return defaultTLSCertificate, nil
 			}

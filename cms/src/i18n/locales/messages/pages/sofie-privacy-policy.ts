@@ -37,6 +37,12 @@ const zh = {
   fetchCfgFailed: '获取配置失败',
   saveSuccess: '保存成功',
   saveFailed: '保存失败',
+  syncFromSara: '同步数据',
+  syncTitle: '从隐私政策同步',
+  syncConfirm: '将用「隐私政策」页的 URL 配置覆盖本页（保留包名）并立即保存。是否继续？',
+  syncEmpty: '隐私政策页尚无配置可同步',
+  syncSuccess: '已从隐私政策同步并保存',
+  syncFailed: '同步失败',
 }
 
 const en = {
@@ -76,6 +82,12 @@ const en = {
   fetchCfgFailed: 'Failed to load config',
   saveSuccess: 'Saved',
   saveFailed: 'Save failed',
+  syncFromSara: 'Sync data',
+  syncTitle: 'Sync from Privacy Policy',
+  syncConfirm: 'Overwrite this page with Privacy Policy URLs (keep package name) and save now. Continue?',
+  syncEmpty: 'Privacy Policy page has no config to sync',
+  syncSuccess: 'Synced from Privacy Policy and saved',
+  syncFailed: 'Sync failed',
 }
 
 const es = {
@@ -115,6 +127,12 @@ const es = {
   fetchCfgFailed: 'Error al cargar la configuración',
   saveSuccess: 'Guardado',
   saveFailed: 'Error al guardar',
+  syncFromSara: 'Sincronizar',
+  syncTitle: 'Sincronizar desde Política de privacidad',
+  syncConfirm: 'Sobrescribirá las URL con la Política de privacidad (conserva el paquete) y guardará. ¿Continuar?',
+  syncEmpty: 'No hay configuración en Política de privacidad',
+  syncSuccess: 'Sincronizado y guardado',
+  syncFailed: 'Error al sincronizar',
 }
 
 const pt = {
@@ -154,6 +172,12 @@ const pt = {
   fetchCfgFailed: 'Falha ao carregar configuração',
   saveSuccess: 'Salvo',
   saveFailed: 'Falha ao salvar',
+  syncFromSara: 'Sincronizar',
+  syncTitle: 'Sincronizar da Política de privacidade',
+  syncConfirm: 'Sobrescreverá as URLs com a Política de privacidade (mantém o pacote) e salvará. Continuar?',
+  syncEmpty: 'Política de privacidade sem configuração',
+  syncSuccess: 'Sincronizado e salvo',
+  syncFailed: 'Falha ao sincronizar',
 }
 
 const hi = {
@@ -193,6 +217,12 @@ const hi = {
   fetchCfgFailed: 'कॉन्फ़िग लोड विफल',
   saveSuccess: 'सहेजा गया',
   saveFailed: 'सहेजना विफल',
+  syncFromSara: 'डेटा सिंक',
+  syncTitle: 'गोपनीयता नीति से सिंक',
+  syncConfirm: 'गोपनीयता नीति के URL से ओवरराइट (पैकेज रखें) और तुरंत सेव। जारी?',
+  syncEmpty: 'गोपनीयता नीति में सिंक करने को कुछ नहीं',
+  syncSuccess: 'सिंक करके सेव किया',
+  syncFailed: 'सिंक विफल',
 }
 
 const id = {
@@ -232,6 +262,12 @@ const id = {
   fetchCfgFailed: 'Gagal memuat konfigurasi',
   saveSuccess: 'Tersimpan',
   saveFailed: 'Gagal menyimpan',
+  syncFromSara: 'Sinkron data',
+  syncTitle: 'Sinkron dari Kebijakan privasi',
+  syncConfirm: 'Menimpa URL dari Kebijakan privasi (paket tetap) lalu simpan. Lanjutkan?',
+  syncEmpty: 'Kebijakan privasi belum ada data',
+  syncSuccess: 'Disinkronkan dan disimpan',
+  syncFailed: 'Gagal sinkron',
 }
 
 export const sofiePrivacyPolicyMessages = definePageMessages(zh, en, es, pt, hi, id)

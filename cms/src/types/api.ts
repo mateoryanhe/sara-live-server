@@ -2154,6 +2154,19 @@ export interface ShareAppDownloadCfg {
     updatedAt: string
 }
 
+export interface CMSUserAppSubmissionRecordListQuery extends PageQuery {
+    userId?: number
+    startTime?: number
+    endTime?: number
+}
+
+export interface CMSUserAppSubmissionRecordItem {
+    id: number
+    userId: number
+    content: string
+    createdAt: string
+}
+
 export interface CMSProcessDownLogListQuery extends PageQuery {
     host?: string
     startTime?: number

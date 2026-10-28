@@ -14,6 +14,7 @@ func Init() {
 	initDbBackupCfg()
 	initStaticCacheRule()
 	initDomainSiteMapping()
+	initHostTlsMapping()
 	initDomainSiteDeployState()
 	initSysResourceMetric()
 	initSysResourceMetricAgg()
