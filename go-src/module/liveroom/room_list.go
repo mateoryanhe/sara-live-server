@@ -19,6 +19,7 @@ import (
 	liveentity "xr-game-server/entity/live"
 	userentity "xr-game-server/entity/user"
 	"xr-game-server/module/agora"
+	"xr-game-server/module/livecfg"
 	"xr-game-server/module/upload"
 
 	"github.com/gogf/gf/v2/os/gctx"
@@ -82,7 +83,7 @@ func isDisabledBotAnchorRoom(room *liveentity.LiveRoom) bool {
 	return user != nil && user.IsBotAnchor() && user.BotAnchorStatus != userentity.BotAnchorStatusEnabled
 }
 
-// filterRoomsForApp App 端列表查询时过滤不可见直播间
+// filterRoomsForApp App 端列表查询时过滤不可见直播间(封禁/下架/禁用机器人/入口已关闭的房间类型)
 func filterRoomsForApp(rooms []*liveentity.LiveRoom) []*liveentity.LiveRoom {
 	if len(rooms) == 0 {
 		return rooms
@@ -90,6 +91,9 @@ func filterRoomsForApp(rooms []*liveentity.LiveRoom) []*liveentity.LiveRoom {
 	filtered := make([]*liveentity.LiveRoom, 0, len(rooms))
 	for _, room := range rooms {
 		if room == nil || IsRoomBanned(room) || IsRoomOffShelf(room) || isDisabledBotAnchorRoom(room) {
+			continue
+		}
+		if !isRoomVisibleInAppRoomList(room) {
 			continue
 		}
 		filtered = append(filtered, room)
@@ -161,6 +165,7 @@ func toLiveRoomListItem(ctx context.Context, room *liveentity.LiveRoom, userId u
 	}
 	if cfg != nil {
 		item.Category = normalizeLiveRoomCategory(cfg.Category)
+		item.VoiceChatMicSeatCount = voiceChatMicSeatCountForAPI(cfg)
 		item.Billing = cfg.Billing
 		item.AllowCallIcon = allowShowCallIcon(ctx, room, cfg, userId)
 		if cfg.TagId > 0 {
@@ -540,6 +545,14 @@ func buildOneToOneRoomListItems(ctx context.Context, rooms []*liveentity.LiveRoo
 func GetOneToOneRoomList(ctx context.Context, req *liveroomdto.GetOneToOneRoomListReq) (*liveroomdto.GetOneToOneRoomListRes, error) {
 	userID := httpserver.GetAuthId(ctx)
 	page, pageSize := normalizeRoomListPage(req.Page, req.PageSize)
+	if !livecfg.IsOneToOneLiveRoomEnabled() {
+		return &liveroomdto.GetOneToOneRoomListRes{
+			Total:    0,
+			Page:     page,
+			PageSize: pageSize,
+			List:     make([]*liveroomdto.OneToOneRoomListItem, 0),
+		}, nil
+	}
 
 	cached := listOnShelfOneToOneLiveRooms()
 	filtered := filterRoomsByKey(cached, req.Key)
@@ -574,6 +587,9 @@ func GetFollowedRoomList(ctx context.Context, req *liveroomdto.GetFollowedLiveRo
 		}
 		room := liveroomdao.GetRoomById(f.AnchorId)
 		if room == nil || IsRoomBanned(room) || IsRoomOffShelf(room) || isDisabledBotAnchorRoom(room) {
+			continue
+		}
+		if !isRoomVisibleInAppRoomList(room) {
 			continue
 		}
 		rooms = append(rooms, room)
@@ -654,6 +670,27 @@ func liveRoomCategoryFromCache(room *liveentity.LiveRoom) uint8 {
 	return normalizeLiveRoomCategory(cfg.Category)
 }
 
+// liveRoomCategoryAppEntryEnabled 与 /sysInfo/cfg 四类 App 入口开关一致；关闭的类型不在 App 房间列表展示。
+func liveRoomCategoryAppEntryEnabled(category uint8) bool {
+	switch normalizeLiveRoomCategory(category) {
+	case liveentity.LiveRoomCategoryHot:
+		return livecfg.IsShowcaseLiveRoomEnabled()
+	case liveentity.LiveRoomCategoryGame:
+		return livecfg.IsGameLiveRoomEnabled()
+	case liveentity.LiveRoomCategoryVoiceChat:
+		return livecfg.IsVoiceChatLiveRoomEnabled()
+	default:
+		return true
+	}
+}
+
+func isRoomVisibleInAppRoomList(room *liveentity.LiveRoom) bool {
+	if room == nil {
+		return false
+	}
+	return liveRoomCategoryAppEntryEnabled(liveRoomCategoryFromCache(room))
+}
+
 func filterRoomsByCategory(rooms []*liveentity.LiveRoom, category uint8) []*liveentity.LiveRoom {
 	if len(rooms) == 0 {
 		return rooms
@@ -688,6 +725,14 @@ func buildHotLiveRoomListItems(ctx context.Context, rooms []*liveentity.LiveRoom
 
 func getCategoryLiveRoomList(ctx context.Context, pageIndex, pageSize int, category uint8, liveOnly bool, key string) (*liveroomdto.GetHotLiveRoomListRes, error) {
 	userId := httpserver.GetAuthId(ctx)
+	if !liveRoomCategoryAppEntryEnabled(category) {
+		return &liveroomdto.GetHotLiveRoomListRes{
+			Total:     0,
+			PageIndex: pageIndex,
+			PageSize:  pageSize,
+			List:      make([]*liveroomdto.HotLiveRoomListItem, 0),
+		}, nil
+	}
 
 	cached := filterRoomsForApp(getRoomListCache())
 	if cached == nil {

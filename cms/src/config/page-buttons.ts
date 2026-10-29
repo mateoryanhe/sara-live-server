@@ -195,6 +195,11 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'sync', label: '同步数据'},
         {key: 'sendTest', label: '发送测试验证码'},
     ],
+    SofiePrivacyPolicyCfgManagement: [
+        BTN.view,
+        BTN.save,
+        {key: 'sync', label: '同步数据'},
+    ],
     Dashboard: [
         BTN.view,
         {key: 'basicDataReset', label: '重置基础数据统计'},
@@ -251,6 +256,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         {key: 'exportShortVideoAuthorSettlementLog', label: '导出短视频作者结算日志'},
     ],
     AnchorListManagement: [BTN.view, BTN.search, BTN.edit, {key: 'viewDetail', label: '查看详情'}, {key: 'viewUserDetail', label: '查看用户详情'}, {key: 'viewGuildDetail', label: '查看工会详情'}, {key: 'offShelf', label: '下架'}, {key: 'onShelf', label: '上架'}, {key: 'batchOffShelf', label: '批量下架'}, {key: 'batchOnShelf', label: '批量上架'}, {key: 'batchOffShelfShowcase', label: '批量下架秀场'}, {key: 'batchOnShelfShowcase', label: '批量上架秀场'}, {key: 'uploadRoomCover', label: '上传直播间封面'}],
+    GuildAnchorListManagement: [BTN.view, BTN.search, BTN.edit, {key: 'viewDetail', label: '查看详情'}, {key: 'viewUserDetail', label: '查看用户详情'}, {key: 'viewGuildDetail', label: '查看工会详情'}, {key: 'offShelf', label: '下架'}, {key: 'onShelf', label: '上架'}, {key: 'batchOffShelf', label: '批量下架'}, {key: 'batchOnShelf', label: '批量上架'}, {key: 'batchOffShelfShowcase', label: '批量下架秀场'}, {key: 'batchOnShelfShowcase', label: '批量上架秀场'}, {key: 'uploadRoomCover', label: '上传直播间封面'}],
     PlatformAnchorList: [
         BTN.view,
         BTN.search,
@@ -453,6 +459,7 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     ],
     CoinMerchantRechargeCfgManagement: [...DEFAULT_CRUD_BUTTONS],
     UserWithdrawTierListManagement: [...DEFAULT_CRUD_BUTTONS],
+    VoiceChatMicSeatTierManagement: [...DEFAULT_CRUD_BUTTONS, {key: 'sync', label: '同步数据'}],
     UserWithdrawPayoutCountryCfgManagement: [
         BTN.view,
         BTN.edit,

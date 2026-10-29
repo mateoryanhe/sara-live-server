@@ -1,7 +1,7 @@
 import {definePageMessages} from './_define'
 
 const zh = {
-  tip: '按指定位数生成小写 guid（无下划线），写入库并覆盖旧码。App 上报主播码时每次读库校验，无缓存。',
+  tip: '按指定位数随机生成数字+字母审核码（去掉易混淆字符），写入库并覆盖旧码。App 上报主播码时每次读库校验，无缓存。',
   codeLength: '位数',
   codeLengthTip: '默认 8，范围 4–32',
   codeLengthInvalid: '位数需在 4–32 之间',
@@ -20,7 +20,7 @@ const zh = {
 }
 
 const en = {
-  tip: 'Generate a lowercase guid (no underscores) with the chosen length, overwrite the DB row. App validates against DB each time (no cache).',
+  tip: 'Random alphanumeric code (ambiguous chars omitted) at the chosen length, saved to DB. App validates against DB each time (no cache).',
   codeLength: 'Length',
   codeLengthTip: 'Default 8, range 4–32',
   codeLengthInvalid: 'Length must be between 4 and 32',
@@ -39,7 +39,7 @@ const en = {
 }
 
 const es = {
-  tip: 'Genera un guid en minúsculas (sin guiones bajos) con la longitud elegida y sobrescribe en BD. App valida leyendo BD cada vez (sin caché).',
+  tip: 'Código alfanumérico aleatorio (sin caracteres ambiguos) con la longitud elegida, guardado en BD. App valida leyendo BD (sin caché).',
   codeLength: 'Longitud',
   codeLengthTip: 'Por defecto 8, rango 4–32',
   codeLengthInvalid: 'La longitud debe estar entre 4 y 32',
@@ -58,7 +58,7 @@ const es = {
 }
 
 const pt = {
-  tip: 'Gera um guid em minúsculas (sem underscore) com o comprimento escolhido e sobrescreve no banco. App valida lendo o banco a cada vez (sem cache).',
+  tip: 'Código alfanumérico aleatório (sem caracteres ambíguos) com o comprimento escolhido, salvo no banco. App valida lendo o banco (sem cache).',
   codeLength: 'Comprimento',
   codeLengthTip: 'Padrão 8, intervalo 4–32',
   codeLengthInvalid: 'O comprimento deve estar entre 4 e 32',
@@ -77,7 +77,7 @@ const pt = {
 }
 
 const hi = {
-  tip: 'चुनी लंबाई का lowercase guid (बिना underscore) बनाकर DB में ओवरराइट। App हर बार DB से जाँच (कोई कैश नहीं)।',
+  tip: 'चुनी लंबाई का यादृच्छिक अक्षर+अंक कोड (भ्रामक अक्षर हटाए), DB में सेव। App हर बार DB से जाँच (कोई कैश नहीं)।',
   codeLength: 'लंबाई',
   codeLengthTip: 'डिफ़ॉल्ट 8, सीमा 4–32',
   codeLengthInvalid: 'लंबाई 4–32 के बीच होनी चाहिए',
@@ -96,7 +96,7 @@ const hi = {
 }
 
 const id = {
-  tip: 'Buat guid lowercase (tanpa underscore) sesuai panjang yang dipilih dan timpa di DB. App validasi baca DB setiap kali (tanpa cache).',
+  tip: 'Kode alfanumerik acak (karakter membingungkan dihilangkan) sesuai panjang, disimpan di DB. App validasi baca DB (tanpa cache).',
   codeLength: 'Panjang',
   codeLengthTip: 'Default 8, rentang 4–32',
   codeLengthInvalid: 'Panjang harus antara 4–32',

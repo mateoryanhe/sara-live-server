@@ -55,10 +55,11 @@ type VoiceChatMicApplyItem struct {
 
 // VoiceChatMicStatePayload 麦位全量状态(接口响应与推送共用)
 type VoiceChatMicStatePayload struct {
-	RoomId           string                  `json:"roomId" dc:"直播间ID"`
-	VoiceChatMicMode uint8                   `json:"voiceChatMicMode" dc:"上麦方式(1=自由上麦,2=申请上麦,3=房主单麦)"`
-	UpdatedAt        int64                   `json:"updatedAt" dc:"状态更新时间(毫秒)"`
-	Seats            []*VoiceChatMicSeatItem `json:"seats" dc:"麦位列表(固定25项,seatIndex 0~24;每项看status渲染UI)"`
+	RoomId                 string                  `json:"roomId" dc:"直播间ID"`
+	VoiceChatMicMode       uint8                   `json:"voiceChatMicMode" dc:"上麦方式(1=自由上麦,2=申请上麦,3=房主单麦)"`
+	VoiceChatMicSeatCount  uint8                   `json:"voiceChatMicSeatCount" dc:"麦位总数(含主播位)"`
+	UpdatedAt              int64                   `json:"updatedAt" dc:"状态更新时间(毫秒)"`
+	Seats                  []*VoiceChatMicSeatItem `json:"seats" dc:"麦位列表(seatIndex 0=主播位;长度与 voiceChatMicSeatCount 一致)"`
 }
 
 // GetVoiceChatMicStateReq 查询语聊房麦位状态

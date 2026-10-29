@@ -119,4 +119,5 @@ func Init() {
 	initWeeklyGameOnlinePeakStat()
 	initMonthlyGameOnlinePeakStat()
 	initSystemTotalStat()
+	initMinuteLiveActivityStat()
 }

@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	monthlyOneToOneRoomListStatCacheMgr     *cache.RowCache[*entity.MonthlyOneToOneRoomListStat]
-	monthlyOneToOneRoomListStatListCacheMgr *cache.ListCache[*entity.MonthlyOneToOneRoomListStat]
 )
 
 func initMonthlyOneToOneRoomListStatDao() {
 	monthlyOneToOneRoomListStatCacheMgr = cache.NewRowCache[*entity.MonthlyOneToOneRoomListStat]()
-	monthlyOneToOneRoomListStatListCacheMgr = cache.NewPermanentListCache[*entity.MonthlyOneToOneRoomListStat]()
 }
 
 func GetMonthlyOneToOneRoomListStatByMonth(month string) *entity.MonthlyOneToOneRoomListStat {
@@ -39,10 +35,7 @@ func ListRecentMonthlyOneToOneRoomListStats(limit int) []*entity.MonthlyOneToOne
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatMonthlyOneToOneRoomListStatKey(time.Now()))
-	return monthlyOneToOneRoomListStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.MonthlyOneToOneRoomListStat, error) {
-		return loadRecentMonthlyOneToOneRoomListStatsFromDB(limit), nil
-	})
+	return loadRecentMonthlyOneToOneRoomListStatsFromDB(limit)
 }
 
 func loadRecentMonthlyOneToOneRoomListStatsFromDB(limit int) []*entity.MonthlyOneToOneRoomListStat {

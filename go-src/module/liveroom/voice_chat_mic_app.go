@@ -17,7 +17,7 @@ import (
 )
 
 func voiceChatMicSwitchAudienceSeatErr(roomId, liveRecordId uint64, targetSeat int) errercode.XRCode {
-	if !voiceChatMicIsValidAudienceSeat(targetSeat) {
+	if !voiceChatMicIsValidAudienceSeat(roomId, targetSeat) {
 		return errercode.VoiceChatMicSeatInvalid
 	}
 	seat := liveroomdao.GetVoiceChatMicSeat(roomId, targetSeat)
@@ -27,14 +27,14 @@ func voiceChatMicSwitchAudienceSeatErr(roomId, liveRecordId uint64, targetSeat i
 	return errercode.VoiceChatMicSeatTaken
 }
 
-func dedupeAudienceSeatIndexes(indexes []int) []int {
+func dedupeAudienceSeatIndexes(roomId uint64, indexes []int) []int {
 	if len(indexes) == 0 {
 		return nil
 	}
 	seen := make(map[int]struct{}, len(indexes))
 	out := make([]int, 0, len(indexes))
 	for _, idx := range indexes {
-		if !voiceChatMicIsValidAudienceSeat(idx) {
+		if !voiceChatMicIsValidAudienceSeat(roomId, idx) {
 			continue
 		}
 		if _, ok := seen[idx]; ok {
@@ -47,7 +47,7 @@ func dedupeAudienceSeatIndexes(indexes []int) []int {
 }
 
 func voiceChatMicAssignAudienceSeatErr(roomId, liveRecordId uint64, preferredSeat int) errercode.XRCode {
-	if preferredSeat != 0 && voiceChatMicIsValidAudienceSeat(preferredSeat) {
+	if preferredSeat != 0 && voiceChatMicIsValidAudienceSeat(roomId, preferredSeat) {
 		seat := liveroomdao.GetVoiceChatMicSeat(roomId, preferredSeat)
 		if seat != nil && seat.LiveRecordId == liveRecordId && seat.UserId == 0 && liveentity.IsVoiceChatMicSeatLocked(seat) {
 			return errercode.VoiceChatMicSeatLocked
@@ -123,9 +123,10 @@ func toVoiceChatMicUserBrief(userId uint64) *liveroomdto.VoiceChatMicUserBrief {
 
 func buildVoiceChatMicStatePayload(roomId uint64) *liveroomdto.VoiceChatMicStatePayload {
 	seats, _ := voiceChatMicSnapshot(roomId)
-	items := make([]*liveroomdto.VoiceChatMicSeatItem, 0, liveentity.VoiceChatSeatCount)
+	seatCount := len(seats)
+	items := make([]*liveroomdto.VoiceChatMicSeatItem, 0, seatCount)
 	liveRecordId := voiceChatMicLiveRecordId(roomId)
-	for i := 0; i < liveentity.VoiceChatSeatCount; i++ {
+	for i := 0; i < seatCount; i++ {
 		userId := seats[i]
 		status := liveentity.VoiceChatMicSeatStatusIdle
 		seat := liveroomdao.GetVoiceChatMicSeat(roomId, i)
@@ -143,10 +144,11 @@ func buildVoiceChatMicStatePayload(roomId uint64) *liveroomdto.VoiceChatMicState
 		items = append(items, item)
 	}
 	return &liveroomdto.VoiceChatMicStatePayload{
-		RoomId:           strconv.FormatUint(roomId, 10),
-		VoiceChatMicMode: voiceChatMicModeForRoom(roomId),
-		UpdatedAt:        time.Now().UnixMilli(),
-		Seats:            items,
+		RoomId:                 strconv.FormatUint(roomId, 10),
+		VoiceChatMicMode:       voiceChatMicModeForRoom(roomId),
+		VoiceChatMicSeatCount:  uint8(seatCount),
+		UpdatedAt:              time.Now().UnixMilli(),
+		Seats:                  items,
 	}
 }
 
@@ -192,7 +194,7 @@ func ApplyVoiceChatMic(ctx context.Context, req *liveroomdto.ApplyVoiceChatMicRe
 			return nil, errercode.CreateCode(errercode.VoiceChatMicApplyExist)
 		}
 		preferredSeat := req.SeatIndex
-		if preferredSeat != 0 && !voiceChatMicIsValidAudienceSeat(preferredSeat) {
+		if preferredSeat != 0 && !voiceChatMicIsValidAudienceSeat(room.ID, preferredSeat) {
 			return nil, errercode.CreateCode(errercode.VoiceChatMicSeatInvalid)
 		}
 		seatIndex, ok := voiceChatMicAssignAudienceSeat(room.ID, userId, preferredSeat)
@@ -302,7 +304,7 @@ func ApproveVoiceChatMicApply(ctx context.Context, req *liveroomdto.ApproveVoice
 		return nil, errercode.CreateCode(errercode.VoiceChatMicAlreadyOn)
 	}
 	preferredSeat := req.SeatIndex
-	if preferredSeat != 0 && !voiceChatMicIsValidAudienceSeat(preferredSeat) {
+	if preferredSeat != 0 && !voiceChatMicIsValidAudienceSeat(room.ID, preferredSeat) {
 		return nil, errercode.CreateCode(errercode.VoiceChatMicSeatInvalid)
 	}
 	seatIndex, ok := voiceChatMicAssignAudienceSeat(room.ID, req.UserId, preferredSeat)
@@ -318,7 +320,7 @@ func setVoiceChatMicSeatLockedByAnchor(room *liveentity.LiveRoom, anchorId uint6
 	if anchorId != room.ID {
 		return errercode.CreateCode(errercode.NoPermission)
 	}
-	if !voiceChatMicIsValidAudienceSeat(seatIndex) {
+	if !voiceChatMicIsValidAudienceSeat(room.ID, seatIndex) {
 		return errercode.CreateCode(errercode.VoiceChatMicSeatInvalid)
 	}
 	changed := false
@@ -407,7 +409,7 @@ func setVoiceChatMicSeatMutedByAnchor(room *liveentity.LiveRoom, anchorId uint64
 	if anchorId != room.ID {
 		return errercode.CreateCode(errercode.NoPermission)
 	}
-	if !voiceChatMicIsValidSeatIndex(seatIndex) {
+	if !voiceChatMicIsValidSeatIndex(room.ID, seatIndex) {
 		return errercode.CreateCode(errercode.VoiceChatMicSeatInvalid)
 	}
 	changed := false
@@ -502,7 +504,7 @@ func InviteVoiceChatMic(ctx context.Context, req *liveroomdto.InviteVoiceChatMic
 		return nil, errercode.CreateCode(errercode.VoiceChatMicAlreadyOn)
 	}
 	preferredSeat := req.SeatIndex
-	if preferredSeat != 0 && !voiceChatMicIsValidAudienceSeat(preferredSeat) {
+	if preferredSeat != 0 && !voiceChatMicIsValidAudienceSeat(room.ID, preferredSeat) {
 		return nil, errercode.CreateCode(errercode.VoiceChatMicSeatInvalid)
 	}
 	seatIndex, ok := voiceChatMicAssignAudienceSeat(room.ID, req.UserId, preferredSeat)
@@ -542,7 +544,7 @@ func batchSetVoiceChatMicSeatsLockedByAnchor(room *liveentity.LiveRoom, anchorId
 	if anchorId != room.ID {
 		return 0, errercode.CreateCode(errercode.NoPermission)
 	}
-	indexes := dedupeAudienceSeatIndexes(seatIndexes)
+	indexes := dedupeAudienceSeatIndexes(room.ID, seatIndexes)
 	if len(indexes) == 0 {
 		return 0, errercode.CreateCode(errercode.VoiceChatMicSeatInvalid)
 	}

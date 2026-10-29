@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	monthlyHotLiveRoomLeaveStatCacheMgr     *cache.RowCache[*entity.MonthlyHotLiveRoomLeaveStat]
-	monthlyHotLiveRoomLeaveStatListCacheMgr *cache.ListCache[*entity.MonthlyHotLiveRoomLeaveStat]
 )
 
 func initMonthlyHotLiveRoomLeaveStatDao() {
 	monthlyHotLiveRoomLeaveStatCacheMgr = cache.NewRowCache[*entity.MonthlyHotLiveRoomLeaveStat]()
-	monthlyHotLiveRoomLeaveStatListCacheMgr = cache.NewPermanentListCache[*entity.MonthlyHotLiveRoomLeaveStat]()
 }
 
 func GetMonthlyHotLiveRoomLeaveStatByMonth(month string) *entity.MonthlyHotLiveRoomLeaveStat {
@@ -39,10 +35,7 @@ func ListRecentMonthlyHotLiveRoomLeaveStats(limit int) []*entity.MonthlyHotLiveR
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatMonthlyHotLiveRoomLeaveStatKey(time.Now()))
-	return monthlyHotLiveRoomLeaveStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.MonthlyHotLiveRoomLeaveStat, error) {
-		return loadRecentMonthlyHotLiveRoomLeaveStatsFromDB(limit), nil
-	})
+	return loadRecentMonthlyHotLiveRoomLeaveStatsFromDB(limit)
 }
 
 func loadRecentMonthlyHotLiveRoomLeaveStatsFromDB(limit int) []*entity.MonthlyHotLiveRoomLeaveStat {

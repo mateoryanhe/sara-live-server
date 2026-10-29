@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	monthlyLiveFirstFrameRenderStatCacheMgr     *cache.RowCache[*entity.MonthlyLiveFirstFrameRenderStat]
-	monthlyLiveFirstFrameRenderStatListCacheMgr *cache.ListCache[*entity.MonthlyLiveFirstFrameRenderStat]
 )
 
 func initMonthlyLiveFirstFrameRenderStatDao() {
 	monthlyLiveFirstFrameRenderStatCacheMgr = cache.NewRowCache[*entity.MonthlyLiveFirstFrameRenderStat]()
-	monthlyLiveFirstFrameRenderStatListCacheMgr = cache.NewPermanentListCache[*entity.MonthlyLiveFirstFrameRenderStat]()
 }
 
 func GetMonthlyLiveFirstFrameRenderStatByMonth(month string) *entity.MonthlyLiveFirstFrameRenderStat {
@@ -39,10 +35,7 @@ func ListRecentMonthlyLiveFirstFrameRenderStats(limit int) []*entity.MonthlyLive
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatMonthlyLiveFirstFrameRenderStatKey(time.Now()))
-	return monthlyLiveFirstFrameRenderStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.MonthlyLiveFirstFrameRenderStat, error) {
-		return loadRecentMonthlyLiveFirstFrameRenderStatsFromDB(limit), nil
-	})
+	return loadRecentMonthlyLiveFirstFrameRenderStatsFromDB(limit)
 }
 
 func loadRecentMonthlyLiveFirstFrameRenderStatsFromDB(limit int) []*entity.MonthlyLiveFirstFrameRenderStat {

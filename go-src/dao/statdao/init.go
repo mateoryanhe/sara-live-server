@@ -118,4 +118,5 @@ func Init() {
 	initDailyGameOnlinePeakStatDao()
 	initWeeklyGameOnlinePeakStatDao()
 	initMonthlyGameOnlinePeakStatDao()
+	initMinuteLiveActivityStatDao()
 }

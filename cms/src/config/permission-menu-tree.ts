@@ -191,6 +191,9 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
                     {pageName: 'GuildAnchorImportResult'},
                 ],
             }),
+            page('GuildAnchorListManagement', {
+                subPages: [{pageName: 'AnchorDetail'}, {pageName: 'AnchorLiveRecordDetail'}],
+            }),
             page('PlatformAnchorList'),
             page('OneToOneRoomManagement'),
             page('GuildCMSUserManagement', {buttonGroups: GUILD_CMS_USER_BUTTON_GROUPS}),
@@ -234,6 +237,7 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
             page('PrivateRoomBillingManagement'),
             page('LiveCfgManagement'),
             page('LiveRoomTagManagement'),
+            page('VoiceChatMicSeatTierManagement'),
         ],
     },
     {

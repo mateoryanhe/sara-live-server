@@ -53,3 +53,15 @@ func (c *DataSyncReceiveController) ReceiveFiatCurrency(ctx context.Context, req
 func (c *DataSyncReceiveController) ReceiveFirstRechargeActivityCfg(ctx context.Context, req *datasyncdto.ReceiveFirstRechargeActivityCfgReq) (*datasyncdto.ReceiveFirstRechargeActivityCfgRes, error) {
 	return datasync.ReceiveFirstRechargeActivityCfg(ctx, req)
 }
+
+func (c *DataSyncReceiveController) ReceiveCfEmailCfg(ctx context.Context, req *datasyncdto.ReceiveCfEmailCfgReq) (*datasyncdto.ReceiveBatchRes, error) {
+	return datasync.ReceiveCfEmailCfg(ctx, req)
+}
+
+func (c *DataSyncReceiveController) ReceiveSofiePrivacyPolicyCfg(ctx context.Context, req *datasyncdto.ReceiveSofiePrivacyPolicyCfgReq) (*datasyncdto.ReceiveBatchRes, error) {
+	return datasync.ReceiveSofiePrivacyPolicyCfg(ctx, req)
+}
+
+func (c *DataSyncReceiveController) ReceiveVoiceChatMicSeatTier(ctx context.Context, req *datasyncdto.ReceiveVoiceChatMicSeatTierReq) (*datasyncdto.ReceiveBatchRes, error) {
+	return datasync.ReceiveVoiceChatMicSeatTier(ctx, req)
+}

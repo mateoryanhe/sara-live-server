@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	weeklyCall1v1ConnectSuccessStatCacheMgr     *cache.RowCache[*entity.WeeklyCall1v1ConnectSuccessStat]
-	weeklyCall1v1ConnectSuccessStatListCacheMgr *cache.ListCache[*entity.WeeklyCall1v1ConnectSuccessStat]
 )
 
 func initWeeklyCall1v1ConnectSuccessStatDao() {
 	weeklyCall1v1ConnectSuccessStatCacheMgr = cache.NewRowCache[*entity.WeeklyCall1v1ConnectSuccessStat]()
-	weeklyCall1v1ConnectSuccessStatListCacheMgr = cache.NewPermanentListCache[*entity.WeeklyCall1v1ConnectSuccessStat]()
 }
 
 func GetWeeklyCall1v1ConnectSuccessStatByWeek(week string) *entity.WeeklyCall1v1ConnectSuccessStat {
@@ -39,10 +35,7 @@ func ListRecentWeeklyCall1v1ConnectSuccessStats(limit int) []*entity.WeeklyCall1
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatWeeklyCall1v1ConnectSuccessStatKey(time.Now()))
-	return weeklyCall1v1ConnectSuccessStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.WeeklyCall1v1ConnectSuccessStat, error) {
-		return loadRecentWeeklyCall1v1ConnectSuccessStatsFromDB(limit), nil
-	})
+	return loadRecentWeeklyCall1v1ConnectSuccessStatsFromDB(limit)
 }
 
 func loadRecentWeeklyCall1v1ConnectSuccessStatsFromDB(limit int) []*entity.WeeklyCall1v1ConnectSuccessStat {

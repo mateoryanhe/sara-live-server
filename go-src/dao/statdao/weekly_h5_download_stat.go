@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	weeklyH5DownloadStatCacheMgr     *cache.RowCache[*entity.WeeklyH5DownloadStat]
-	weeklyH5DownloadStatListCacheMgr *cache.ListCache[*entity.WeeklyH5DownloadStat]
 )
 
 func initWeeklyH5DownloadStatDao() {
 	weeklyH5DownloadStatCacheMgr = cache.NewRowCache[*entity.WeeklyH5DownloadStat]()
-	weeklyH5DownloadStatListCacheMgr = cache.NewPermanentListCache[*entity.WeeklyH5DownloadStat]()
 }
 
 func GetWeeklyH5DownloadStatByWeek(week string) *entity.WeeklyH5DownloadStat {
@@ -39,10 +35,7 @@ func ListRecentWeeklyH5DownloadStats(limit int) []*entity.WeeklyH5DownloadStat {
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatWeeklyH5DownloadStatKey(time.Now()))
-	return weeklyH5DownloadStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.WeeklyH5DownloadStat, error) {
-		return loadRecentWeeklyH5DownloadStatsFromDB(limit), nil
-	})
+	return loadRecentWeeklyH5DownloadStatsFromDB(limit)
 }
 
 func loadRecentWeeklyH5DownloadStatsFromDB(limit int) []*entity.WeeklyH5DownloadStat {

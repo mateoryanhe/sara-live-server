@@ -3,10 +3,11 @@ package resourcemetricdto
 import "github.com/gogf/gf/v2/frame/g"
 
 type CMSResourceMetricMemoryTrendReq struct {
-	g.Meta    `path:"/getResourceMetricMemoryTrend" method:"post" summary:"获取内存资源趋势" tags:"资源监控"`
-	StartTime string `json:"startTime" dc:"开始时间 YYYY-MM-DD HH:mm:ss,空则默认最近3天(粗采样)"`
-	EndTime   string `json:"endTime" dc:"结束时间 YYYY-MM-DD HH:mm:ss,空则默认当前时间"`
-	Limit     int    `json:"limit" dc:"最多返回条数,默认10000,最大10000"`
+	g.Meta               `path:"/getResourceMetricMemoryTrend" method:"post" summary:"获取内存资源趋势" tags:"资源监控"`
+	StartTime            string `json:"startTime" dc:"开始时间 YYYY-MM-DD HH:mm:ss,空则默认最近3天(粗采样)"`
+	EndTime              string `json:"endTime" dc:"结束时间 YYYY-MM-DD HH:mm:ss,空则默认当前时间"`
+	Limit                int    `json:"limit" dc:"最多返回条数,默认10000,最大10000"`
+	BypassDashboardCache bool   `json:"bypassDashboardCache" dc:"true 时跳过仪表盘读缓存, 重新查库"`
 }
 
 type CMSResourceMetricHeapTrendReq struct {
@@ -31,17 +32,19 @@ type CMSResourceMetricCpuTrendReq struct {
 }
 
 type CMSResourceMetricOnlineTrendReq struct {
-	g.Meta    `path:"/getResourceMetricOnlineTrend" method:"post" summary:"获取在线人数资源趋势" tags:"资源监控"`
-	StartTime string `json:"startTime"`
-	EndTime   string `json:"endTime"`
-	Limit     int    `json:"limit"`
+	g.Meta               `path:"/getResourceMetricOnlineTrend" method:"post" summary:"获取在线人数资源趋势" tags:"资源监控"`
+	StartTime            string `json:"startTime"`
+	EndTime              string `json:"endTime"`
+	Limit                int    `json:"limit"`
+	BypassDashboardCache bool   `json:"bypassDashboardCache" dc:"true 时跳过仪表盘读缓存, 重新查库"`
 }
 
 type CMSResourceMetricGameStatTrendReq struct {
-	g.Meta    `path:"/getResourceMetricGameStatTrend" method:"post" summary:"获取游戏统计趋势(与在线趋势同采样)" tags:"资源监控"`
-	StartTime string `json:"startTime"`
-	EndTime   string `json:"endTime"`
-	Limit     int    `json:"limit"`
+	g.Meta               `path:"/getResourceMetricGameStatTrend" method:"post" summary:"获取游戏统计趋势(与在线趋势同采样)" tags:"资源监控"`
+	StartTime            string `json:"startTime"`
+	EndTime              string `json:"endTime"`
+	Limit                int    `json:"limit"`
+	BypassDashboardCache bool   `json:"bypassDashboardCache" dc:"true 时跳过仪表盘读缓存, 重新查库"`
 }
 
 type CMSResourceMetricMemoryPoint struct {

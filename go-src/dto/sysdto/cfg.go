@@ -17,6 +17,10 @@ type SysCfgResp struct {
 	PaidDanmakuPrice           float64 `json:"paidDanmakuPrice" dc:"直播间付费弹幕价格(钻石)"`
 	AudienceListRefreshSeconds uint32  `json:"audienceListRefreshSeconds" dc:"在线观众列表刷新间隔(秒)"`
 	OneToOneDailyFreeSeconds   uint32  `json:"oneToOneDailyFreeSeconds" dc:"1v1观众对单主播每日免费通话秒数(0=关闭)"`
+	ShowcaseLiveRoomEnabled    bool    `json:"showcaseLiveRoomEnabled" dc:"App是否展示秀场直播间入口(category=1)，/cfg下发"`
+	GameLiveRoomEnabled        bool    `json:"gameLiveRoomEnabled" dc:"App是否展示游戏直播间入口(category=2)，/cfg下发"`
+	VoiceChatLiveRoomEnabled   bool    `json:"voiceChatLiveRoomEnabled" dc:"App是否展示语聊房入口(category=5)，/cfg下发"`
+	OneToOneLiveRoomEnabled    bool    `json:"oneToOneLiveRoomEnabled" dc:"App是否展示1v1房间页面/入口，/cfg下发"`
 	PrivacyPolicyUrl           string  `json:"privacyPolicyUrl" dc:"隐私政策页面URL"`
 	TermsOfServiceUrl          string  `json:"termsOfServiceUrl" dc:"用户服务协议页面URL"`
 	CreatorTermsUrl            string  `json:"creatorTermsUrl" dc:"短视频创作者上传合规条款URL"`

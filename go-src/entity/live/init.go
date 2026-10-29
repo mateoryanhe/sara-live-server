@@ -16,6 +16,7 @@ func Init() {
 	initLiveRoomOnline()
 	initVoiceChatMicSeat()
 	initVoiceChatMicApply()
+	initVoiceChatMicSeatTier()
 	initDailyAnchorEffectiveLive()
 	initDailyGuildEffectiveLive()
 	initLiveRecord()

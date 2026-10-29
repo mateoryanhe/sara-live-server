@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	monthlyShareShortLinkClickStatCacheMgr     *cache.RowCache[*entity.MonthlyShareShortLinkClickStat]
-	monthlyShareShortLinkClickStatListCacheMgr *cache.ListCache[*entity.MonthlyShareShortLinkClickStat]
 )
 
 func initMonthlyShareShortLinkClickStatDao() {
 	monthlyShareShortLinkClickStatCacheMgr = cache.NewRowCache[*entity.MonthlyShareShortLinkClickStat]()
-	monthlyShareShortLinkClickStatListCacheMgr = cache.NewPermanentListCache[*entity.MonthlyShareShortLinkClickStat]()
 }
 
 func GetMonthlyShareShortLinkClickStatByMonth(month string) *entity.MonthlyShareShortLinkClickStat {
@@ -39,10 +35,7 @@ func ListRecentMonthlyShareShortLinkClickStats(limit int) []*entity.MonthlyShare
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatMonthlyShareShortLinkClickStatKey(time.Now()))
-	return monthlyShareShortLinkClickStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.MonthlyShareShortLinkClickStat, error) {
-		return loadRecentMonthlyShareShortLinkClickStatsFromDB(limit), nil
-	})
+	return loadRecentMonthlyShareShortLinkClickStatsFromDB(limit)
 }
 
 func loadRecentMonthlyShareShortLinkClickStatsFromDB(limit int) []*entity.MonthlyShareShortLinkClickStat {

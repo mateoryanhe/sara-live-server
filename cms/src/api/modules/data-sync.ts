@@ -68,6 +68,14 @@ export const dataSyncApi = {
     syncCfEmailCfg: () => {
         return request.post<SyncBatchRes>('/dataSync/syncCfEmailCfg', {})
     },
+
+    syncSofiePrivacyPolicyCfg: () => {
+        return request.post<SyncBatchRes>('/dataSync/syncSofiePrivacyPolicyCfg', {})
+    },
+
+    syncVoiceChatMicSeatTier: () => {
+        return request.post<SyncBatchRes>('/dataSync/syncVoiceChatMicSeatTier', {})
+    },
 }
 
 export default dataSyncApi

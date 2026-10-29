@@ -19,7 +19,7 @@ var (
 
 func initMonthlyGameBetUserStatDao() {
 	monthlyGameBetUserStatCacheMgr = cache.NewRowCache[*entity.MonthlyGameBetUserStat]()
-	monthlyGameBetUserStatListCacheMgr = cache.NewPermanentListCache[*entity.MonthlyGameBetUserStat]()
+	monthlyGameBetUserStatListCacheMgr = cache.NewDashboardListCache[*entity.MonthlyGameBetUserStat]()
 }
 
 func GetMonthlyGameBetUserStatByMonth(month string) *entity.MonthlyGameBetUserStat {

@@ -24,6 +24,11 @@ var (
 	emptySofieCfgSnapshot = &sofieCfgSnapshot{}
 )
 
+// ReloadSofieCfgMemory 从 DB 刷新 Sofie 隐私政策内存(数据同步接收等场景).
+func ReloadSofieCfgMemory() {
+	reloadSofieCfgMemory()
+}
+
 func reloadSofieCfgMemory() {
 	sofieCfgCache.Store(toSofieCfgSnapshot(cfgdao.LoadSofiePrivacyPolicyCfg()))
 }

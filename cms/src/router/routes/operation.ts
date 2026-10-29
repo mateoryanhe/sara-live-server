@@ -117,7 +117,16 @@ export const operationRoutes: RouteRecordRaw = {
             meta: {
                 title: '工会详情',
                 hidden: true,
-                parentPermission: ['GuildManagement', 'GuildTransferManagement', 'CoinMerchantGuildTransferManagement', 'CoinMerchantGuildListManagement', 'GuildProfileManagement', 'AnchorListManagement'],
+                parentPermission: ['GuildManagement', 'GuildTransferManagement', 'CoinMerchantGuildTransferManagement', 'CoinMerchantGuildListManagement', 'GuildProfileManagement', 'AnchorListManagement', 'GuildAnchorListManagement'],
+            },
+        },
+        {
+            path: 'guild/guild-anchor-list',
+            name: 'GuildAnchorListManagement',
+            component: () => import('@/views/user/anchor/anchor-list.vue'),
+            meta: {
+                title: '主播列表',
+                visibilityScoped: true,
             },
         },
         {

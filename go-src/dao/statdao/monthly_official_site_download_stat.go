@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	monthlyOfficialSiteDownloadStatCacheMgr     *cache.RowCache[*entity.MonthlyOfficialSiteDownloadStat]
-	monthlyOfficialSiteDownloadStatListCacheMgr *cache.ListCache[*entity.MonthlyOfficialSiteDownloadStat]
 )
 
 func initMonthlyOfficialSiteDownloadStatDao() {
 	monthlyOfficialSiteDownloadStatCacheMgr = cache.NewRowCache[*entity.MonthlyOfficialSiteDownloadStat]()
-	monthlyOfficialSiteDownloadStatListCacheMgr = cache.NewPermanentListCache[*entity.MonthlyOfficialSiteDownloadStat]()
 }
 
 func GetMonthlyOfficialSiteDownloadStatByMonth(month string) *entity.MonthlyOfficialSiteDownloadStat {
@@ -39,10 +35,7 @@ func ListRecentMonthlyOfficialSiteDownloadStats(limit int) []*entity.MonthlyOffi
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatMonthlyOfficialSiteDownloadStatKey(time.Now()))
-	return monthlyOfficialSiteDownloadStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.MonthlyOfficialSiteDownloadStat, error) {
-		return loadRecentMonthlyOfficialSiteDownloadStatsFromDB(limit), nil
-	})
+	return loadRecentMonthlyOfficialSiteDownloadStatsFromDB(limit)
 }
 
 func loadRecentMonthlyOfficialSiteDownloadStatsFromDB(limit int) []*entity.MonthlyOfficialSiteDownloadStat {

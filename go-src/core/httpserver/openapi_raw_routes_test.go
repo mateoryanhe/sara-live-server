@@ -34,6 +34,9 @@ func TestMergeOpenApiRawHandlerRoutes_createLiveRoom(t *testing.T) {
 	if props["voiceChatMicMode"] == nil {
 		t.Fatal("CreateLiveRoomReq missing voiceChatMicMode")
 	}
+	if props["voiceChatMicSeatCount"] == nil {
+		t.Fatal("CreateLiveRoomReq missing voiceChatMicSeatCount")
+	}
 	raw, err := json.Marshal(doc)
 	if err != nil {
 		t.Fatal(err)

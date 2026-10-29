@@ -46,10 +46,11 @@ func voiceChatMicOnUserLeave(roomId, userId uint64) {
 	if liveRecordId == 0 {
 		return
 	}
+	seatCount := voiceChatMicSeatCountForRoom(roomId)
 	changed := false
 	mu := voiceChatMicRoomLock(roomId)
 	mu.Lock()
-	for i := 0; i < liveentity.VoiceChatSeatCount; i++ {
+	for i := 0; i < seatCount; i++ {
 		if i == liveentity.VoiceChatHostSeatIndex {
 			continue
 		}
@@ -75,7 +76,8 @@ func voiceChatMicUserOnSeat(roomId, userId uint64) (seatIndex int, ok bool) {
 	if liveRecordId == 0 || userId == 0 {
 		return 0, false
 	}
-	for i := 0; i < liveentity.VoiceChatSeatCount; i++ {
+	seatCount := voiceChatMicSeatCountForRoom(roomId)
+	for i := 0; i < seatCount; i++ {
 		seat := liveroomdao.GetVoiceChatMicSeat(roomId, i)
 		if seat != nil && seat.LiveRecordId == liveRecordId && seat.UserId == userId {
 			return i, true
@@ -89,13 +91,14 @@ func voiceChatMicHasApply(roomId, userId uint64) bool {
 	return liveroomdao.HasActiveVoiceChatMicApply(roomId, userId, liveRecordId)
 }
 
-func voiceChatMicSnapshot(roomId uint64) ([liveentity.VoiceChatSeatCount]uint64, []*liveentity.VoiceChatMicApply) {
-	var seats [liveentity.VoiceChatSeatCount]uint64
+func voiceChatMicSnapshot(roomId uint64) ([]uint64, []*liveentity.VoiceChatMicApply) {
+	seatCount := voiceChatMicSeatCountForRoom(roomId)
+	seats := make([]uint64, seatCount)
 	liveRecordId := voiceChatMicLiveRecordId(roomId)
 	if liveRecordId == 0 {
 		return seats, nil
 	}
-	for i := 0; i < liveentity.VoiceChatSeatCount; i++ {
+	for i := 0; i < seatCount; i++ {
 		seat := liveroomdao.GetVoiceChatMicSeat(roomId, i)
 		if seat != nil && seat.LiveRecordId == liveRecordId {
 			seats[i] = seat.UserId
@@ -105,7 +108,8 @@ func voiceChatMicSnapshot(roomId uint64) ([liveentity.VoiceChatSeatCount]uint64,
 }
 
 func voiceChatMicFirstEmptyAudienceSeat(roomId uint64, liveRecordId uint64) int {
-	for i := liveentity.VoiceChatHostSeatIndex + 1; i < liveentity.VoiceChatSeatCount; i++ {
+	seatCount := voiceChatMicSeatCountForRoom(roomId)
+	for i := liveentity.VoiceChatHostSeatIndex + 1; i < seatCount; i++ {
 		seat := liveroomdao.GetVoiceChatMicSeat(roomId, i)
 		if seat != nil && seat.LiveRecordId == liveRecordId && seat.UserId == 0 &&
 			liveentity.VoiceChatMicSeatStatusAllowsAudienceTake(seat.Status) {
@@ -115,12 +119,14 @@ func voiceChatMicFirstEmptyAudienceSeat(roomId uint64, liveRecordId uint64) int 
 	return -1
 }
 
-func voiceChatMicIsValidAudienceSeat(seatIndex int) bool {
-	return seatIndex > liveentity.VoiceChatHostSeatIndex && seatIndex < liveentity.VoiceChatSeatCount
+func voiceChatMicIsValidAudienceSeat(roomId uint64, seatIndex int) bool {
+	seatCount := voiceChatMicSeatCountForRoom(roomId)
+	return seatIndex > liveentity.VoiceChatHostSeatIndex && seatIndex < seatCount
 }
 
-func voiceChatMicIsValidSeatIndex(seatIndex int) bool {
-	return seatIndex >= liveentity.VoiceChatHostSeatIndex && seatIndex < liveentity.VoiceChatSeatCount
+func voiceChatMicIsValidSeatIndex(roomId uint64, seatIndex int) bool {
+	seatCount := voiceChatMicSeatCountForRoom(roomId)
+	return seatIndex >= liveentity.VoiceChatHostSeatIndex && seatIndex < seatCount
 }
 
 func voiceChatMicAssignAudienceSeat(roomId, userId uint64, preferredSeat int) (seatIndex int, ok bool) {
@@ -139,7 +145,7 @@ func voiceChatMicAssignAudienceSeat(roomId, userId uint64, preferredSeat int) (s
 	seatIndex = preferredSeat
 	if seatIndex == 0 {
 		seatIndex = voiceChatMicFirstEmptyAudienceSeat(roomId, liveRecordId)
-	} else if !voiceChatMicIsValidAudienceSeat(seatIndex) {
+	} else if !voiceChatMicIsValidAudienceSeat(roomId, seatIndex) {
 		return 0, false
 	}
 	if seatIndex < 0 {
@@ -161,15 +167,16 @@ func voiceChatMicSwitchAudienceSeat(roomId, userId uint64, targetSeat int) (from
 	if liveRecordId == 0 || userId == 0 {
 		return 0, 0, false
 	}
-	if targetSeat != 0 && !voiceChatMicIsValidAudienceSeat(targetSeat) {
+	if targetSeat != 0 && !voiceChatMicIsValidAudienceSeat(roomId, targetSeat) {
 		return 0, 0, false
 	}
 	mu := voiceChatMicRoomLock(roomId)
 	mu.Lock()
 	defer mu.Unlock()
 
+	seatCount := voiceChatMicSeatCountForRoom(roomId)
 	fromSeat = -1
-	for i := 0; i < liveentity.VoiceChatSeatCount; i++ {
+	for i := 0; i < seatCount; i++ {
 		if i == liveentity.VoiceChatHostSeatIndex {
 			continue
 		}
@@ -213,10 +220,11 @@ func voiceChatMicClearUserFromSeat(roomId, liveRecordId, userId uint64) bool {
 	if roomId == 0 || userId == 0 {
 		return false
 	}
+	seatCount := voiceChatMicSeatCountForRoom(roomId)
 	mu := voiceChatMicRoomLock(roomId)
 	mu.Lock()
 	defer mu.Unlock()
-	for i := 0; i < liveentity.VoiceChatSeatCount; i++ {
+	for i := 0; i < seatCount; i++ {
 		if i == liveentity.VoiceChatHostSeatIndex {
 			continue
 		}

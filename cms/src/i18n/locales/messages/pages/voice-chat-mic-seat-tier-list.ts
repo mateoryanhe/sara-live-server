@@ -1,0 +1,41 @@
+import {definePageMessagesFromEn} from './_define'
+
+const zh = {
+  addTier: '新建挡位',
+  editTier: '编辑挡位',
+  seatCount: '麦位总数(含主播位)',
+  seatCountRangeHint: 'App 仅展示已上架挡位；麦位总数 2~25',
+  seatCountFormHint: '含主播 0 号位，与创建/修改语聊房麦位数量一致',
+  seatCountRequired: '请填写麦位总数',
+  sortHigherFirst: '排序值越大越靠前',
+  fetchFailed: '获取列表失败',
+  saveFailed: '保存失败',
+  deleteConfirm: '确定删除麦位总数 {seatCount} 的挡位？',
+  onShelfSuccess: '上架成功',
+  offShelfSuccess: '下架成功',
+  operationFailed: '操作失败',
+  syncToTargetConfirm: '将把当前环境全部语聊麦位挡位（含上下架状态）同步到目标环境；目标环境中不在本次列表内的挡位将被删除。确定继续？',
+  syncToTargetSuccess: '同步成功',
+  syncToTargetFailed: '同步失败',
+  syncToTargetFailedCheckConfig: '同步失败，请检查「数据同步」配置与目标服连通性',
+} as const
+
+export const voiceChatMicSeatTierListMessages = definePageMessagesFromEn(zh, {
+  addTier: 'Add Tier',
+  editTier: 'Edit Tier',
+  seatCount: 'Total mic seats (incl. host)',
+  seatCountRangeHint: 'App shows on-shelf tiers only; seat count 2–25',
+  seatCountFormHint: 'Includes host seat 0; same as voice chat room seat count',
+  seatCountRequired: 'Enter total seat count',
+  sortHigherFirst: 'Higher sort value appears first',
+  fetchFailed: 'Failed to load list',
+  saveFailed: 'Save failed',
+  deleteConfirm: 'Delete tier with {seatCount} seats?',
+  onShelfSuccess: 'Published',
+  offShelfSuccess: 'Unpublished',
+  operationFailed: 'Operation failed',
+  syncToTargetConfirm: 'Sync all voice chat mic seat tiers from this environment (including on/off shelf) to the target. Tiers on the target not in this list will be removed. Continue?',
+  syncToTargetSuccess: 'Sync completed',
+  syncToTargetFailed: 'Sync failed',
+  syncToTargetFailedCheckConfig: 'Sync failed. Check Data Sync settings and target server connectivity.',
+})

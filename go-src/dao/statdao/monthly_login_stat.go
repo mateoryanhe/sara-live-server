@@ -19,7 +19,7 @@ var (
 
 func initMonthlyLoginStatDao() {
 	monthlyLoginStatCacheMgr = cache.NewRowCache[*entity.MonthlyLoginStat]()
-	monthlyLoginStatListCacheMgr = cache.NewPermanentListCache[*entity.MonthlyLoginStat]()
+	monthlyLoginStatListCacheMgr = cache.NewDashboardListCache[*entity.MonthlyLoginStat]()
 }
 
 // GetMonthlyLoginStatByMonth 按月标识获取每月登录统计,不存在则新建内存对象
@@ -37,9 +37,12 @@ func GetMonthlyLoginStatByMonth(month string) *entity.MonthlyLoginStat {
 }
 
 // ListRecentMonthlyLoginStats 查询最近N月登录统计(按时间正序). 同一自然月内仅首次查库.
-func ListRecentMonthlyLoginStats(limit int) []*entity.MonthlyLoginStat {
+func ListRecentMonthlyLoginStats(limit int, bypassDashboardCache bool) []*entity.MonthlyLoginStat {
 	if limit <= 0 {
 		limit = 12
+	}
+	if bypassDashboardCache {
+		return loadRecentMonthlyLoginStatsFromDB(limit)
 	}
 	key := fmt.Sprintf("%d:%s", limit, entity.FormatMonthlyLoginStatKey(time.Now()))
 	return monthlyLoginStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.MonthlyLoginStat, error) {

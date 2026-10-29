@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	monthlyOfflineGameRoomPlayStatCacheMgr     *cache.RowCache[*entity.MonthlyOfflineGameRoomPlayStat]
-	monthlyOfflineGameRoomPlayStatListCacheMgr *cache.ListCache[*entity.MonthlyOfflineGameRoomPlayStat]
 )
 
 func initMonthlyOfflineGameRoomPlayStatDao() {
 	monthlyOfflineGameRoomPlayStatCacheMgr = cache.NewRowCache[*entity.MonthlyOfflineGameRoomPlayStat]()
-	monthlyOfflineGameRoomPlayStatListCacheMgr = cache.NewPermanentListCache[*entity.MonthlyOfflineGameRoomPlayStat]()
 }
 
 func GetMonthlyOfflineGameRoomPlayStatByMonth(month string) *entity.MonthlyOfflineGameRoomPlayStat {
@@ -39,10 +35,7 @@ func ListRecentMonthlyOfflineGameRoomPlayStats(limit int) []*entity.MonthlyOffli
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatMonthlyOfflineGameRoomPlayStatKey(time.Now()))
-	return monthlyOfflineGameRoomPlayStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.MonthlyOfflineGameRoomPlayStat, error) {
-		return loadRecentMonthlyOfflineGameRoomPlayStatsFromDB(limit), nil
-	})
+	return loadRecentMonthlyOfflineGameRoomPlayStatsFromDB(limit)
 }
 
 func loadRecentMonthlyOfflineGameRoomPlayStatsFromDB(limit int) []*entity.MonthlyOfflineGameRoomPlayStat {

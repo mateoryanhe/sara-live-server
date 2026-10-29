@@ -19,6 +19,7 @@ import (
 	"xr-game-server/errercode"
 	"xr-game-server/gameevent"
 	"xr-game-server/module/aliyunmoderation"
+	"xr-game-server/module/minuteactivity"
 	"xr-game-server/module/livecfg"
 	"xr-game-server/module/upload"
 	"xr-game-server/module/wallet"
@@ -106,6 +107,7 @@ func SendPaidDanmaku(ctx context.Context, req *liveroomdto.SendPaidDanmakuReq) (
 		liveroomdao.PublishLiveRoomOnline(online)
 	}
 	refreshRoomAudienceCaches(req.RoomId)
+	minuteactivity.RecordChat(time.Now())
 
 	return &liveroomdto.SendPaidDanmakuRes{
 		Success: true,

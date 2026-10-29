@@ -20,7 +20,7 @@ var (
 func initLiveRoomVoiceChatMicDao() {
 	voiceChatMicSeatCacheMgr = cache.NewRowCache[*liveentity.VoiceChatMicSeat]()
 	voiceChatMicApplyRowCacheMgr = cache.NewRowCache[*liveentity.VoiceChatMicApply]()
-	voiceChatMicApplyCacheMgr = cache.NewPermanentListCache[*liveentity.VoiceChatMicApply]()
+	voiceChatMicApplyCacheMgr = cache.NewListCache[*liveentity.VoiceChatMicApply]()
 }
 
 func isVoiceChatRoomCfg(roomId uint64) bool {
@@ -29,6 +29,18 @@ func isVoiceChatRoomCfg(roomId uint64) bool {
 		cfg = GetLiveRoomCfg(roomId)
 	}
 	return cfg != nil && cfg.Category == liveentity.LiveRoomCategoryVoiceChat
+}
+
+// VoiceChatMicSeatCountForRoom 语聊麦位总数(含主播位);非语聊或未配置时仍返回默认 25 供占位上限。
+func VoiceChatMicSeatCountForRoom(roomId uint64) int {
+	cfg := GetLiveRoomCfgFromCache(roomId)
+	if cfg == nil {
+		cfg = GetLiveRoomCfg(roomId)
+	}
+	if cfg == nil {
+		return int(liveentity.DefaultVoiceChatMicSeatCount)
+	}
+	return cfg.EffectiveVoiceChatMicSeatCount()
 }
 
 // PreloadVoiceChatMicLiveSessionsFromDB 热重启/冷启动:恢复进行中语聊场麦位与申请(不触发重新开播).
@@ -71,7 +83,7 @@ func placeholderVoiceChatMicSeat(roomId uint64, seatIndex int) *liveentity.Voice
 }
 
 func GetVoiceChatMicSeat(roomId uint64, seatIndex int) *liveentity.VoiceChatMicSeat {
-	if roomId == 0 || seatIndex < 0 || seatIndex >= liveentity.VoiceChatSeatCount {
+	if roomId == 0 || seatIndex < 0 || seatIndex >= liveentity.MaxVoiceChatMicSeatCount {
 		return nil
 	}
 	id := liveentity.BuildVoiceChatMicSeatId(roomId, seatIndex)
@@ -123,7 +135,8 @@ func RestoreVoiceChatMicSessionFromDB(roomId, liveRecordId, anchorId uint64) {
 	if len(dbSeats) == 0 {
 		bootstrapVoiceChatMicSessionRows(roomId, liveRecordId, anchorId)
 	} else {
-		for i := 0; i < liveentity.VoiceChatSeatCount; i++ {
+		seatCount := VoiceChatMicSeatCountForRoom(roomId)
+		for i := 0; i < seatCount; i++ {
 			if seat := byIndex[i]; seat != nil {
 				publishVoiceChatMicSeatSnapshot(seat)
 				continue
@@ -145,7 +158,8 @@ func RestoreVoiceChatMicSessionFromDB(roomId, liveRecordId, anchorId uint64) {
 }
 
 func bootstrapVoiceChatMicSessionRows(roomId, liveRecordId, anchorId uint64) {
-	for i := 0; i < liveentity.VoiceChatSeatCount; i++ {
+	seatCount := VoiceChatMicSeatCountForRoom(roomId)
+	for i := 0; i < seatCount; i++ {
 		userId := uint64(0)
 		if i == liveentity.VoiceChatHostSeatIndex {
 			userId = anchorId
@@ -338,7 +352,8 @@ func InitVoiceChatMicSession(roomId, liveRecordId, anchorId uint64) {
 	if roomId == 0 || liveRecordId == 0 {
 		return
 	}
-	for i := 0; i < liveentity.VoiceChatSeatCount; i++ {
+	seatCount := VoiceChatMicSeatCountForRoom(roomId)
+	for i := 0; i < seatCount; i++ {
 		userId := uint64(0)
 		if i == liveentity.VoiceChatHostSeatIndex {
 			userId = anchorId
@@ -367,7 +382,8 @@ func ClearVoiceChatMicSession(roomId, liveRecordId uint64) {
 	if roomId == 0 {
 		return
 	}
-	for i := 0; i < liveentity.VoiceChatSeatCount; i++ {
+	seatCount := VoiceChatMicSeatCountForRoom(roomId)
+	for i := 0; i < seatCount; i++ {
 		seat := GetVoiceChatMicSeat(roomId, i)
 		if seat == nil {
 			continue

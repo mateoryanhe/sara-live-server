@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	monthlyCall1v1ConnectSuccessStatCacheMgr     *cache.RowCache[*entity.MonthlyCall1v1ConnectSuccessStat]
-	monthlyCall1v1ConnectSuccessStatListCacheMgr *cache.ListCache[*entity.MonthlyCall1v1ConnectSuccessStat]
 )
 
 func initMonthlyCall1v1ConnectSuccessStatDao() {
 	monthlyCall1v1ConnectSuccessStatCacheMgr = cache.NewRowCache[*entity.MonthlyCall1v1ConnectSuccessStat]()
-	monthlyCall1v1ConnectSuccessStatListCacheMgr = cache.NewPermanentListCache[*entity.MonthlyCall1v1ConnectSuccessStat]()
 }
 
 func GetMonthlyCall1v1ConnectSuccessStatByMonth(month string) *entity.MonthlyCall1v1ConnectSuccessStat {
@@ -39,10 +35,7 @@ func ListRecentMonthlyCall1v1ConnectSuccessStats(limit int) []*entity.MonthlyCal
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatMonthlyCall1v1ConnectSuccessStatKey(time.Now()))
-	return monthlyCall1v1ConnectSuccessStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.MonthlyCall1v1ConnectSuccessStat, error) {
-		return loadRecentMonthlyCall1v1ConnectSuccessStatsFromDB(limit), nil
-	})
+	return loadRecentMonthlyCall1v1ConnectSuccessStatsFromDB(limit)
 }
 
 func loadRecentMonthlyCall1v1ConnectSuccessStatsFromDB(limit int) []*entity.MonthlyCall1v1ConnectSuccessStat {

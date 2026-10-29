@@ -20,11 +20,23 @@ func GetCMSUserStatTrend(_ context.Context, req *statdto.CMSUserStatTrendReq) (*
 	if req == nil {
 		req = &statdto.CMSUserStatTrendReq{}
 	}
+	if dashboardTrendUsesCustomRange(req.StartDate, req.EndDate) {
+		return buildCMSUserStatTrend(req)
+	}
+	bypass := req.BypassDashboardCache
+	return getCachedDashboardUserStatTrend(bypass, func() (*statdto.CMSUserStatTrendRes, error) {
+		return buildCMSUserStatTrend(req)
+	})
+}
+
+func buildCMSUserStatTrend(req *statdto.CMSUserStatTrendReq) (*statdto.CMSUserStatTrendRes, error) {
 	now := time.Now()
+	// 本函数仅在外层 5 分钟整包 miss / bypass / 自定义时间窗时调用；ListRecent 直查库，不再叠 Dashboard ListCache.
+	const reloadListsFromDB = true
 
 	dailyRows := overlayCurrentDailyLoginStat(statdao.ListRecentDailyLoginStats(userStatDailyLimit), now)
-	weeklyRows := overlayCurrentWeeklyLoginStat(statdao.ListRecentWeeklyLoginStats(userStatWeeklyLimit), now)
-	monthlyRows := overlayCurrentMonthlyLoginStat(statdao.ListRecentMonthlyLoginStats(userStatMonthlyLimit), now)
+	weeklyRows := overlayCurrentWeeklyLoginStat(statdao.ListRecentWeeklyLoginStats(userStatWeeklyLimit, reloadListsFromDB), now)
+	monthlyRows := overlayCurrentMonthlyLoginStat(statdao.ListRecentMonthlyLoginStats(userStatMonthlyLimit, reloadListsFromDB), now)
 
 	rangeTruncated := false
 	trendMaxPoints := 0
@@ -59,7 +71,7 @@ func GetCMSUserStatTrend(_ context.Context, req *statdto.CMSUserStatTrendReq) (*
 // 历史列表走 ListCache; 当前日/周/月数据点用 RowCache 覆盖或追加, 列表缓存不含当天时曲线仍显示当日.
 func overlayCurrentDailyLoginStat(rows []*entity.DailyLoginStat, now time.Time) []*entity.DailyLoginStat {
 	today := entity.FormatDailyLoginStatDate(now)
-	live := statdao.GetDailyLoginStatByDate(today)
+	live := statdao.ScanDailyLoginStatByDate(today)
 	out := make([]*entity.DailyLoginStat, len(rows))
 	copy(out, rows)
 	found := false
@@ -78,7 +90,7 @@ func overlayCurrentDailyLoginStat(rows []*entity.DailyLoginStat, now time.Time) 
 
 func overlayCurrentWeeklyLoginStat(rows []*entity.WeeklyLoginStat, now time.Time) []*entity.WeeklyLoginStat {
 	week := entity.FormatWeeklyLoginStatKey(now)
-	live := statdao.GetWeeklyLoginStatByWeek(week)
+	live := statdao.ScanWeeklyLoginStatByWeek(week)
 	out := make([]*entity.WeeklyLoginStat, len(rows))
 	copy(out, rows)
 	found := false
@@ -97,7 +109,7 @@ func overlayCurrentWeeklyLoginStat(rows []*entity.WeeklyLoginStat, now time.Time
 
 func overlayCurrentMonthlyLoginStat(rows []*entity.MonthlyLoginStat, now time.Time) []*entity.MonthlyLoginStat {
 	month := entity.FormatMonthlyLoginStatKey(now)
-	live := statdao.GetMonthlyLoginStatByMonth(month)
+	live := statdao.ScanMonthlyLoginStatByMonth(month)
 	out := make([]*entity.MonthlyLoginStat, len(rows))
 	copy(out, rows)
 	found := false

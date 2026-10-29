@@ -19,7 +19,7 @@ var (
 
 func initWeeklyGameBetUserStatDao() {
 	weeklyGameBetUserStatCacheMgr = cache.NewRowCache[*entity.WeeklyGameBetUserStat]()
-	weeklyGameBetUserStatListCacheMgr = cache.NewPermanentListCache[*entity.WeeklyGameBetUserStat]()
+	weeklyGameBetUserStatListCacheMgr = cache.NewDashboardListCache[*entity.WeeklyGameBetUserStat]()
 }
 
 func GetWeeklyGameBetUserStatByWeek(week string) *entity.WeeklyGameBetUserStat {

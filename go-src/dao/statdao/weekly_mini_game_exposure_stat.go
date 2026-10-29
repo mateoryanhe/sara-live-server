@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	weeklyMiniGameExposureStatCacheMgr     *cache.RowCache[*entity.WeeklyMiniGameExposureStat]
-	weeklyMiniGameExposureStatListCacheMgr *cache.ListCache[*entity.WeeklyMiniGameExposureStat]
 )
 
 func initWeeklyMiniGameExposureStatDao() {
 	weeklyMiniGameExposureStatCacheMgr = cache.NewRowCache[*entity.WeeklyMiniGameExposureStat]()
-	weeklyMiniGameExposureStatListCacheMgr = cache.NewPermanentListCache[*entity.WeeklyMiniGameExposureStat]()
 }
 
 func GetWeeklyMiniGameExposureStatByWeek(week string) *entity.WeeklyMiniGameExposureStat {
@@ -39,10 +35,7 @@ func ListRecentWeeklyMiniGameExposureStats(limit int) []*entity.WeeklyMiniGameEx
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatWeeklyMiniGameExposureStatKey(time.Now()))
-	return weeklyMiniGameExposureStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.WeeklyMiniGameExposureStat, error) {
-		return loadRecentWeeklyMiniGameExposureStatsFromDB(limit), nil
-	})
+	return loadRecentWeeklyMiniGameExposureStatsFromDB(limit)
 }
 
 func loadRecentWeeklyMiniGameExposureStatsFromDB(limit int) []*entity.WeeklyMiniGameExposureStat {

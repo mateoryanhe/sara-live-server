@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	weeklyOneToOneRoomListStatCacheMgr     *cache.RowCache[*entity.WeeklyOneToOneRoomListStat]
-	weeklyOneToOneRoomListStatListCacheMgr *cache.ListCache[*entity.WeeklyOneToOneRoomListStat]
 )
 
 func initWeeklyOneToOneRoomListStatDao() {
 	weeklyOneToOneRoomListStatCacheMgr = cache.NewRowCache[*entity.WeeklyOneToOneRoomListStat]()
-	weeklyOneToOneRoomListStatListCacheMgr = cache.NewPermanentListCache[*entity.WeeklyOneToOneRoomListStat]()
 }
 
 func GetWeeklyOneToOneRoomListStatByWeek(week string) *entity.WeeklyOneToOneRoomListStat {
@@ -39,10 +35,7 @@ func ListRecentWeeklyOneToOneRoomListStats(limit int) []*entity.WeeklyOneToOneRo
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatWeeklyOneToOneRoomListStatKey(time.Now()))
-	return weeklyOneToOneRoomListStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.WeeklyOneToOneRoomListStat, error) {
-		return loadRecentWeeklyOneToOneRoomListStatsFromDB(limit), nil
-	})
+	return loadRecentWeeklyOneToOneRoomListStatsFromDB(limit)
 }
 
 func loadRecentWeeklyOneToOneRoomListStatsFromDB(limit int) []*entity.WeeklyOneToOneRoomListStat {

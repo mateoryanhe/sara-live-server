@@ -14,6 +14,7 @@ import (
 	"xr-game-server/entity/live"
 	"xr-game-server/errercode"
 	"xr-game-server/module/aliyunmoderation"
+	"xr-game-server/module/minuteactivity"
 	"xr-game-server/module/upload"
 )
 
@@ -47,6 +48,7 @@ func SendChat(ctx context.Context, req *liveroomdto.SendChatReq) (*liveroomdto.S
 	}
 
 	pushRoomChat(req.RoomId, senderId, content)
+	minuteactivity.RecordChat(time.Now())
 	return &liveroomdto.SendChatRes{Success: true}, nil
 }
 

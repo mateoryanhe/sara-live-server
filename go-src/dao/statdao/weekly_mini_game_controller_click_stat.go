@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	weeklyMiniGameControllerClickStatCacheMgr     *cache.RowCache[*entity.WeeklyMiniGameControllerClickStat]
-	weeklyMiniGameControllerClickStatListCacheMgr *cache.ListCache[*entity.WeeklyMiniGameControllerClickStat]
 )
 
 func initWeeklyMiniGameControllerClickStatDao() {
 	weeklyMiniGameControllerClickStatCacheMgr = cache.NewRowCache[*entity.WeeklyMiniGameControllerClickStat]()
-	weeklyMiniGameControllerClickStatListCacheMgr = cache.NewPermanentListCache[*entity.WeeklyMiniGameControllerClickStat]()
 }
 
 func GetWeeklyMiniGameControllerClickStatByWeek(week string) *entity.WeeklyMiniGameControllerClickStat {
@@ -39,10 +35,7 @@ func ListRecentWeeklyMiniGameControllerClickStats(limit int) []*entity.WeeklyMin
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatWeeklyMiniGameControllerClickStatKey(time.Now()))
-	return weeklyMiniGameControllerClickStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.WeeklyMiniGameControllerClickStat, error) {
-		return loadRecentWeeklyMiniGameControllerClickStatsFromDB(limit), nil
-	})
+	return loadRecentWeeklyMiniGameControllerClickStatsFromDB(limit)
 }
 
 func loadRecentWeeklyMiniGameControllerClickStatsFromDB(limit int) []*entity.WeeklyMiniGameControllerClickStat {

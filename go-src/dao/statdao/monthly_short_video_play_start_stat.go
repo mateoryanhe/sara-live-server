@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	monthlyShortVideoPlayStartStatCacheMgr     *cache.RowCache[*entity.MonthlyShortVideoPlayStartStat]
-	monthlyShortVideoPlayStartStatListCacheMgr *cache.ListCache[*entity.MonthlyShortVideoPlayStartStat]
 )
 
 func initMonthlyShortVideoPlayStartStatDao() {
 	monthlyShortVideoPlayStartStatCacheMgr = cache.NewRowCache[*entity.MonthlyShortVideoPlayStartStat]()
-	monthlyShortVideoPlayStartStatListCacheMgr = cache.NewPermanentListCache[*entity.MonthlyShortVideoPlayStartStat]()
 }
 
 func GetMonthlyShortVideoPlayStartStatByMonth(month string) *entity.MonthlyShortVideoPlayStartStat {
@@ -39,10 +35,7 @@ func ListRecentMonthlyShortVideoPlayStartStats(limit int) []*entity.MonthlyShort
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatMonthlyShortVideoPlayStartStatKey(time.Now()))
-	return monthlyShortVideoPlayStartStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.MonthlyShortVideoPlayStartStat, error) {
-		return loadRecentMonthlyShortVideoPlayStartStatsFromDB(limit), nil
-	})
+	return loadRecentMonthlyShortVideoPlayStartStatsFromDB(limit)
 }
 
 func loadRecentMonthlyShortVideoPlayStartStatsFromDB(limit int) []*entity.MonthlyShortVideoPlayStartStat {

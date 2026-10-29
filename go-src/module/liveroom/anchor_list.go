@@ -11,6 +11,9 @@ import (
 // QueryAnchorList CMS分页查询主播列表(基于 roomListCache)
 
 func QueryAnchorList(ctx context.Context, req *accountdto.QueryAnchorListReq) (*httpserver.CMSQueryResp, error) {
+	if req != nil && req.VisibilityScoped {
+		return queryAnchorListVisibilityScoped(ctx, req)
+	}
 	if req.PlatformOnly {
 		visibleAnchorIds, filter := cmsvis.ResolvePlatformAnchorListVisibility(ctx)
 		if filter {
@@ -25,5 +28,28 @@ func QueryAnchorList(ctx context.Context, req *accountdto.QueryAnchorListReq) (*
 // QueryAnchorListByGuildIds CMS分页查询指定多个工会名下主播列表
 func QueryAnchorListByGuildIds(_ context.Context, guildIds []uint64, req *accountdto.QueryAnchorListReq) (*httpserver.CMSQueryResp, error) {
 	total, data := queryAnchorListByGuildIdsFromMemory(guildIds, req)
+	return httpserver.NewCMSQueryResp(total, data), nil
+}
+
+func queryAnchorListVisibilityScoped(ctx context.Context, req *accountdto.QueryAnchorListReq) (*httpserver.CMSQueryResp, error) {
+	guildIds, guildRestrict, guildEmpty := cmsvis.VisibilityGuildFilter(ctx)
+	platformIds, platformRestrict, platformEmpty := cmsvis.PlatformAnchorVisibilityFilter(ctx)
+	if !guildRestrict && !platformRestrict {
+		total, data := queryAnchorListFromMemory(req)
+		return httpserver.NewCMSQueryResp(total, data), nil
+	}
+	hasGuild := !guildEmpty && len(guildIds) > 0
+	hasPlatform := !platformEmpty && len(platformIds) > 0
+	if !hasGuild && !hasPlatform {
+		return httpserver.NewCMSQueryResp(0, make([]*accountdto.AnchorListItem, 0)), nil
+	}
+	var gIds, pIds []uint64
+	if hasGuild {
+		gIds = guildIds
+	}
+	if hasPlatform {
+		pIds = platformIds
+	}
+	total, data := queryAnchorListVisibilityScopedFromMemory(gIds, pIds, req)
 	return httpserver.NewCMSQueryResp(total, data), nil
 }

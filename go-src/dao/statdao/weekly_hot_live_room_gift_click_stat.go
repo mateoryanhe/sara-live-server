@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	weeklyHotLiveRoomGiftClickStatCacheMgr     *cache.RowCache[*entity.WeeklyHotLiveRoomGiftClickStat]
-	weeklyHotLiveRoomGiftClickStatListCacheMgr *cache.ListCache[*entity.WeeklyHotLiveRoomGiftClickStat]
 )
 
 func initWeeklyHotLiveRoomGiftClickStatDao() {
 	weeklyHotLiveRoomGiftClickStatCacheMgr = cache.NewRowCache[*entity.WeeklyHotLiveRoomGiftClickStat]()
-	weeklyHotLiveRoomGiftClickStatListCacheMgr = cache.NewPermanentListCache[*entity.WeeklyHotLiveRoomGiftClickStat]()
 }
 
 func GetWeeklyHotLiveRoomGiftClickStatByWeek(week string) *entity.WeeklyHotLiveRoomGiftClickStat {
@@ -39,10 +35,7 @@ func ListRecentWeeklyHotLiveRoomGiftClickStats(limit int) []*entity.WeeklyHotLiv
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatWeeklyHotLiveRoomGiftClickStatKey(time.Now()))
-	return weeklyHotLiveRoomGiftClickStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.WeeklyHotLiveRoomGiftClickStat, error) {
-		return loadRecentWeeklyHotLiveRoomGiftClickStatsFromDB(limit), nil
-	})
+	return loadRecentWeeklyHotLiveRoomGiftClickStatsFromDB(limit)
 }
 
 func loadRecentWeeklyHotLiveRoomGiftClickStatsFromDB(limit int) []*entity.WeeklyHotLiveRoomGiftClickStat {

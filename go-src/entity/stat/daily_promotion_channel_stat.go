@@ -22,6 +22,7 @@ const (
 	DailyPromotionChannelStatPayUserCount          db.TbCol = "pay_user_count"
 	DailyPromotionChannelStatOrderTotalAmount      db.TbCol = "order_total_amount"
 	DailyPromotionChannelStatRechargeSuccessAmount db.TbCol = "recharge_success_amount"
+	DailyPromotionChannelStatH5DownloadApkCount    db.TbCol = "h5_download_apk_count"
 )
 
 // DailyPromotionChannelStat 推广渠道日统计(主键=YYYY-MM-DD_渠道编码)
@@ -35,6 +36,7 @@ type DailyPromotionChannelStat struct {
 	PayUserCount          uint64  `gorm:"default:0;comment:支付人次(去重)" json:"payUserCount"`
 	OrderTotalAmount      float64 `gorm:"type:decimal(10,4);default:0;comment:下单总金额(USD)" json:"orderTotalAmount"`
 	RechargeSuccessAmount float64 `gorm:"type:decimal(10,4);default:0;comment:成功充值总金额(USD)" json:"rechargeSuccessAmount"`
+	H5DownloadApkCount    uint64  `gorm:"default:0;comment:H5下载APK次数" json:"h5DownloadApkCount"`
 }
 
 func BuildDailyPromotionChannelStatId(date string, channelCode int) string {
@@ -106,6 +108,13 @@ func (r *DailyPromotionChannelStat) AddRechargeSuccessAmount(amount float64) {
 	})
 }
 
+func (r *DailyPromotionChannelStat) AddH5DownloadApkCount(n uint64) {
+	r.H5DownloadApkCount = math.Add(r.H5DownloadApkCount, n)
+	syndb.AddData(TbDailyPromotionChannelStat, DailyPromotionChannelStatH5DownloadApkCount, &syndb.ColData{
+		IdVal: r.ID, ColVal: r.H5DownloadApkCount,
+	})
+}
+
 func initDailyPromotionChannelStat() {
 	syndb.RegLazy(TbDailyPromotionChannelStat, DailyPromotionChannelStatStatDate)
 	syndb.RegLazy(TbDailyPromotionChannelStat, DailyPromotionChannelStatChannelName)
@@ -115,5 +124,6 @@ func initDailyPromotionChannelStat() {
 	syndb.RegLazy(TbDailyPromotionChannelStat, DailyPromotionChannelStatPayUserCount)
 	syndb.RegLazy(TbDailyPromotionChannelStat, DailyPromotionChannelStatOrderTotalAmount)
 	syndb.RegLazy(TbDailyPromotionChannelStat, DailyPromotionChannelStatRechargeSuccessAmount)
+	syndb.RegLazy(TbDailyPromotionChannelStat, DailyPromotionChannelStatH5DownloadApkCount)
 	migrate.AutoMigrate(&DailyPromotionChannelStat{})
 }

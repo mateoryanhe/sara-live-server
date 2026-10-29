@@ -41,6 +41,7 @@ APIS = [
     ("/liveRoom/stopLive", "yes", "(&controller.LiveRoomAppController{}).StopLive", "下播", "studio", "endBroadcast"),
     ("/liveRoom/updateCover", "yes", "(&controller.LiveRoomAppController{}).UpdateCover", "修改封面", "studio", "replaceCover"),
     ("/liveRoom/updateNotice", "yes", "(&controller.LiveRoomAppController{}).UpdateNotice", "修改公告", "studio", "replaceNotice"),
+    ("/voiceChatMicSeatTier/appTierList", "yes", "(&controller.VoiceChatMicSeatTierAppController{}).AppTierList", "语聊麦位挡位", "studio", "browseVoiceChatMicSeatTiers"),
     ("/liveRoom/join", "yes", "(&controller.LiveRoomAppController{}).JoinRoom", "加入直播间", "studio", "enterHall"),
     ("/liveRoom/reportLiveFirstFrameRendered", "yes", "(&controller.LiveRoomAppController{}).ReportLiveFirstFrameRendered", "上报直播首帧渲染完成", "studio", "notifyLiveFirstFrameReady"),
     ("/liveRoom/reportMiniGameExposure", "yes", "(&controller.LiveRoomAppController{}).ReportMiniGameExposure", "上报半屏游戏窗口曝光", "studio", "notifyMiniGameExposure"),

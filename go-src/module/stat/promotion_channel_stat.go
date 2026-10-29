@@ -22,6 +22,16 @@ func recordDailyPromotionChannelRegister(at time.Time, channelCode int) {
 	statdao.PublishDailyPromotionChannelStat(stat)
 }
 
+func recordDailyPromotionChannelH5DownloadApk(at time.Time, channelCode int) {
+	if channelCode <= 0 || promotionchannelurldao.GetByChannelCode(channelCode) == nil {
+		return
+	}
+	date := statentity.FormatDailyLoginStatDate(at)
+	stat := statdao.GetDailyPromotionChannelStat(date, channelCode)
+	stat.AddH5DownloadApkCount(1)
+	statdao.PublishDailyPromotionChannelStat(stat)
+}
+
 func recordDailyPromotionChannelOrder(at time.Time, userId uint64, price float64) {
 	channelCode := userinfodao.GetPromotionChannelCode(userId)
 	if channelCode <= 0 || price <= 0 {

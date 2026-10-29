@@ -6,8 +6,9 @@ import "github.com/gogf/gf/v2/frame/g"
 type CMSUserStatTrendReq struct {
 	g.Meta      `path:"/getUserStatTrend" method:"post" summary:"CMS获取用户数据趋势" tags:"仪表盘"`
 	Granularity string `json:"granularity" dc:"折线粒度 daily|weekly|monthly(传 startDate/endDate 时必填)"`
-	StartDate   string `json:"startDate" dc:"开始日期 YYYY-MM-DD(可选)"`
-	EndDate     string `json:"endDate" dc:"结束日期 YYYY-MM-DD(可选, 默认今天)"`
+	StartDate            string `json:"startDate" dc:"开始日期 YYYY-MM-DD(可选)"`
+	EndDate              string `json:"endDate" dc:"结束日期 YYYY-MM-DD(可选, 默认今天)"`
+	BypassDashboardCache bool   `json:"bypassDashboardCache" dc:"true 时跳过仪表盘读缓存, 重新查库/组装"`
 }
 
 // CMSUserStatTrendPoint 用户数据趋势点(折线图 + 柱形图共用时间轴)

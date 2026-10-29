@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	monthlyMiniGameSpinClickStatCacheMgr     *cache.RowCache[*entity.MonthlyMiniGameSpinClickStat]
-	monthlyMiniGameSpinClickStatListCacheMgr *cache.ListCache[*entity.MonthlyMiniGameSpinClickStat]
 )
 
 func initMonthlyMiniGameSpinClickStatDao() {
 	monthlyMiniGameSpinClickStatCacheMgr = cache.NewRowCache[*entity.MonthlyMiniGameSpinClickStat]()
-	monthlyMiniGameSpinClickStatListCacheMgr = cache.NewPermanentListCache[*entity.MonthlyMiniGameSpinClickStat]()
 }
 
 func GetMonthlyMiniGameSpinClickStatByMonth(month string) *entity.MonthlyMiniGameSpinClickStat {
@@ -39,10 +35,7 @@ func ListRecentMonthlyMiniGameSpinClickStats(limit int) []*entity.MonthlyMiniGam
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatMonthlyMiniGameSpinClickStatKey(time.Now()))
-	return monthlyMiniGameSpinClickStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.MonthlyMiniGameSpinClickStat, error) {
-		return loadRecentMonthlyMiniGameSpinClickStatsFromDB(limit), nil
-	})
+	return loadRecentMonthlyMiniGameSpinClickStatsFromDB(limit)
 }
 
 func loadRecentMonthlyMiniGameSpinClickStatsFromDB(limit int) []*entity.MonthlyMiniGameSpinClickStat {

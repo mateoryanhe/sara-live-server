@@ -45,6 +45,7 @@
         </el-table-column>
         <el-table-column :label="t('pages.promotionChannelDailyStatList.channelCode')" prop="channelCode" width="110"/>
         <el-table-column :label="t('pages.promotionChannelDailyStatList.registerCount')" prop="registerCount" width="100"/>
+        <el-table-column :label="t('pages.promotionChannelDailyStatList.h5DownloadApkCount')" prop="h5DownloadApkCount" width="130"/>
         <el-table-column :label="t('pages.promotionChannelDailyStatList.orderCount')" prop="orderCount" width="100"/>
         <el-table-column :label="t('pages.promotionChannelDailyStatList.payUserCount')" prop="payUserCount" width="100"/>
         <el-table-column :label="t('pages.promotionChannelDailyStatList.orderTotalAmount')" min-width="130" prop="orderTotalAmount">

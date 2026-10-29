@@ -7,6 +7,7 @@ import {giftApi} from './modules/gift'
 import {bannerApi} from './modules/banner'
 import {activityMessageApi} from './modules/activityMessage'
 import {privateRoomBillingApi} from './modules/privateRoomBilling'
+import {voiceChatMicSeatTierApi} from './modules/voice-chat-mic-seat-tier'
 import {shortVideoApi} from './modules/shortVideo'
 import {rechargeCfgApi} from './modules/rechargeCfg'
 import {vipCfgApi} from './modules/vipCfg'
@@ -55,6 +56,7 @@ export {
     bannerApi,
     activityMessageApi,
     privateRoomBillingApi,
+    voiceChatMicSeatTierApi,
     shortVideoApi,
     rechargeCfgApi,
     vipCfgApi,
@@ -105,6 +107,7 @@ export default {
     bannerApi,
     activityMessageApi,
     privateRoomBillingApi,
+    voiceChatMicSeatTierApi,
     shortVideoApi,
     rechargeCfgApi,
     vipCfgApi,

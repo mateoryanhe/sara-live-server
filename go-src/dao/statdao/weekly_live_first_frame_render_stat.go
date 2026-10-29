@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	weeklyLiveFirstFrameRenderStatCacheMgr     *cache.RowCache[*entity.WeeklyLiveFirstFrameRenderStat]
-	weeklyLiveFirstFrameRenderStatListCacheMgr *cache.ListCache[*entity.WeeklyLiveFirstFrameRenderStat]
 )
 
 func initWeeklyLiveFirstFrameRenderStatDao() {
 	weeklyLiveFirstFrameRenderStatCacheMgr = cache.NewRowCache[*entity.WeeklyLiveFirstFrameRenderStat]()
-	weeklyLiveFirstFrameRenderStatListCacheMgr = cache.NewPermanentListCache[*entity.WeeklyLiveFirstFrameRenderStat]()
 }
 
 func GetWeeklyLiveFirstFrameRenderStatByWeek(week string) *entity.WeeklyLiveFirstFrameRenderStat {
@@ -39,10 +35,7 @@ func ListRecentWeeklyLiveFirstFrameRenderStats(limit int) []*entity.WeeklyLiveFi
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatWeeklyLiveFirstFrameRenderStatKey(time.Now()))
-	return weeklyLiveFirstFrameRenderStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.WeeklyLiveFirstFrameRenderStat, error) {
-		return loadRecentWeeklyLiveFirstFrameRenderStatsFromDB(limit), nil
-	})
+	return loadRecentWeeklyLiveFirstFrameRenderStatsFromDB(limit)
 }
 
 func loadRecentWeeklyLiveFirstFrameRenderStatsFromDB(limit int) []*entity.WeeklyLiveFirstFrameRenderStat {

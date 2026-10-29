@@ -42,5 +42,11 @@ export const liveRoutes: RouteRecordRaw = {
             component: () => import('@/views/live/live-room-tag/live-room-tag-list.vue'),
             meta: {title: '直播间标签'},
         },
+        {
+            path: 'voice-chat-mic-seat-tier/tier-list',
+            name: 'VoiceChatMicSeatTierManagement',
+            component: () => import('@/views/live/voice-chat-mic-seat-tier/tier-list.vue'),
+            meta: {title: '麦位挡位'},
+        },
     ],
 }

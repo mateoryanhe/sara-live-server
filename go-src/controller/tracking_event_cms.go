@@ -5,6 +5,7 @@ import (
 
 	"xr-game-server/core/httpserver"
 	"xr-game-server/dto/trackingdto"
+	"xr-game-server/module/minuteactivity"
 	"xr-game-server/module/tracking"
 )
 
@@ -138,4 +139,8 @@ func (c *TrackingEventCMSController) GetOfficialSiteDownloadTrend(ctx context.Co
 
 func (c *TrackingEventCMSController) GetShareShortLinkClickTrend(ctx context.Context, req *trackingdto.CMSShareShortLinkClickTrendReq) (*trackingdto.CMSShareShortLinkClickTrendRes, error) {
 	return tracking.GetCMSShareShortLinkClickTrend(ctx, req)
+}
+
+func (c *TrackingEventCMSController) GetMinuteLiveActivityTrend(ctx context.Context, req *trackingdto.CMSMinuteLiveActivityTrendReq) (*trackingdto.CMSMinuteLiveActivityTrendRes, error) {
+	return minuteactivity.GetCMSMinuteLiveActivityTrend(ctx, req)
 }

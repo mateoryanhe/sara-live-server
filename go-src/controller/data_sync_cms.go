@@ -76,6 +76,10 @@ func (c *DataSyncCMSController) SyncCfEmailCfg(ctx context.Context, req *datasyn
 	return datasync.SyncCfEmailCfg(ctx, req)
 }
 
-func (c *DataSyncCMSController) ReceiveCfEmailCfg(ctx context.Context, req *datasyncdto.ReceiveCfEmailCfgReq) (*datasyncdto.ReceiveBatchRes, error) {
-	return datasync.ReceiveCfEmailCfg(ctx, req)
+func (c *DataSyncCMSController) SyncSofiePrivacyPolicyCfg(ctx context.Context, req *datasyncdto.SyncSofiePrivacyPolicyCfgReq) (*datasyncdto.SyncBatchRes, error) {
+	return datasync.SyncSofiePrivacyPolicyCfg(ctx, req)
+}
+
+func (c *DataSyncCMSController) SyncVoiceChatMicSeatTier(ctx context.Context, req *datasyncdto.SyncVoiceChatMicSeatTierReq) (*datasyncdto.SyncBatchRes, error) {
+	return datasync.SyncVoiceChatMicSeatTier(ctx, req)
 }

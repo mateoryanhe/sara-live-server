@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	weeklyChargeClickStatCacheMgr     *cache.RowCache[*entity.WeeklyChargeClickStat]
-	weeklyChargeClickStatListCacheMgr *cache.ListCache[*entity.WeeklyChargeClickStat]
 )
 
 func initWeeklyChargeClickStatDao() {
 	weeklyChargeClickStatCacheMgr = cache.NewRowCache[*entity.WeeklyChargeClickStat]()
-	weeklyChargeClickStatListCacheMgr = cache.NewPermanentListCache[*entity.WeeklyChargeClickStat]()
 }
 
 func GetWeeklyChargeClickStatByWeek(week string) *entity.WeeklyChargeClickStat {
@@ -39,10 +35,7 @@ func ListRecentWeeklyChargeClickStats(limit int) []*entity.WeeklyChargeClickStat
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatWeeklyChargeClickStatKey(time.Now()))
-	return weeklyChargeClickStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.WeeklyChargeClickStat, error) {
-		return loadRecentWeeklyChargeClickStatsFromDB(limit), nil
-	})
+	return loadRecentWeeklyChargeClickStatsFromDB(limit)
 }
 
 func loadRecentWeeklyChargeClickStatsFromDB(limit int) []*entity.WeeklyChargeClickStat {

@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	weeklyShortVideoPlayStartStatCacheMgr     *cache.RowCache[*entity.WeeklyShortVideoPlayStartStat]
-	weeklyShortVideoPlayStartStatListCacheMgr *cache.ListCache[*entity.WeeklyShortVideoPlayStartStat]
 )
 
 func initWeeklyShortVideoPlayStartStatDao() {
 	weeklyShortVideoPlayStartStatCacheMgr = cache.NewRowCache[*entity.WeeklyShortVideoPlayStartStat]()
-	weeklyShortVideoPlayStartStatListCacheMgr = cache.NewPermanentListCache[*entity.WeeklyShortVideoPlayStartStat]()
 }
 
 func GetWeeklyShortVideoPlayStartStatByWeek(week string) *entity.WeeklyShortVideoPlayStartStat {
@@ -39,10 +35,7 @@ func ListRecentWeeklyShortVideoPlayStartStats(limit int) []*entity.WeeklyShortVi
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatWeeklyShortVideoPlayStartStatKey(time.Now()))
-	return weeklyShortVideoPlayStartStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.WeeklyShortVideoPlayStartStat, error) {
-		return loadRecentWeeklyShortVideoPlayStartStatsFromDB(limit), nil
-	})
+	return loadRecentWeeklyShortVideoPlayStartStatsFromDB(limit)
 }
 
 func loadRecentWeeklyShortVideoPlayStartStatsFromDB(limit int) []*entity.WeeklyShortVideoPlayStartStat {

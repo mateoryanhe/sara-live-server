@@ -14,7 +14,8 @@ import (
 func ListDailyPromotionChannelStats(req *promotionchannelurldto.PromotionChannelDailyStatListReq) (int, []*promotionchannelurldto.PromotionChannelDailyStatItem) {
 	sql := `select stat_date as statDate, channel_name as channelName, channel_code as channelCode,
 register_count as registerCount, order_count as orderCount, pay_user_count as payUserCount,
-order_total_amount as orderTotalAmount, recharge_success_amount as rechargeSuccessAmount
+order_total_amount as orderTotalAmount, recharge_success_amount as rechargeSuccessAmount,
+h5_download_apk_count as h5DownloadApkCount
 from daily_promotion_channel_stats where stat_date >= ? and stat_date <= ? `
 	param := []any{strings.TrimSpace(req.StartDate), strings.TrimSpace(req.EndDate)}
 	if req.ChannelCode > 0 {

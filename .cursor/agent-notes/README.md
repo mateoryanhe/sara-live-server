@@ -42,7 +42,7 @@
 - **Sofie 官网部署**（2026-10-27）：CMS「配置部署 → Sofie官网部署」`/config/sofie-official-site-deploy`；独立站点 `siteKey=sofie-official-site`、前缀 **`/sofie-site`**（勿用 `/sofie`，与 Sofie App API `/sofie/...` 冲突）、默认目录 `/home/ec2-user/cdn/sofie-official-site`、示例域名 `sofielive.net`。保存映射可上传 **pem+key**（multipart `saveOfficialSiteDeployCfgUpload`），证书落到 `/home/ec2-user/ssl/site-tls/sofie-official-site/` 并写入 `domain_site_mappings`，立即用于该域名 HTTPS。
 - **纯 Host→证书**（2026-10-27）：CMS「Host证书映射」`/config/host-tls-mapping`；表 `host_tls_mappings`（仅 Domain+Cert+Key，**无静态目录**）。证书目录 `/home/ec2-user/ssl/host-tls/`；SNI：精确 Host → 单级泛域名 `*.example.com` → 静态站证 → `config.yaml` 默认证。`*.sofielive.net` 匹配 `v1.`/`api.` 一级子域，不匹配 apex / 多级。与「域名映射」同 Host 互斥。
 - **Sofie 隐私政策**（2026-10-27）：CMS「Sofie隐私政策」`/config/sofie-privacy-policy`；表 `sofie_privacy_policy_cfgs`（含 `packageName`）。`POST /sofie/boot/loadConfig`：请求头 `X-App-Package` 与配置包名一致时下发 Sofie 配置（单字段空则回落 Sara）；否则回落「隐私政策」`privacy_policy_cfgs`。旧 `GET/POST /sysInfo/cfg` 仍走 Sara。
-- **审核码生成**（2026-10-27）：CMS「前端配置 → 审核码生成」`/config/audit-code`；表 `audit_code_cfgs` 单行覆盖；`guid.S()` 小写、去 `_`；`POST /liveRoom/reportAnchorCode`（Sofie `/sofie/studio/submitHostCode`）每次读库校验，无缓存；库空时兼容旧码 `971200`。
+- **审核码生成**（2026-10-27）：CMS「前端配置 → 审核码生成」`/config/audit-code`；表 `audit_code_cfgs` 单行覆盖；`crypto/rand` 数字+字母（与 CMS 随机密码同字符集,去易混淆）；`POST /liveRoom/reportAnchorCode`（Sofie `/sofie/studio/submitHostCode`）每次读库校验，无缓存；库空时兼容旧码 `971200`。
 - **2026-10-25 正式服宕机（~08:11–09:13 UTC）**：access `08:11:30` 后中断，`09:13:15` 冷启 PID 634870；**非双进程**。
   - **发版**：`10-24 07:41 UTC`（北京 15:41）`deploy`+热重启成功（采样间断、内存 207→140），对齐本地提交 **`6c990432`**（游戏 CMS/shelf/login·充值分渠道统计等）。**泄漏发生在该版本上**。
   - **泄漏**：`13:20 UTC`（北京 21:20）起 proc_mem ~20MB/min 涨（流量高峰 hour13≈2.9 万请求；CMS authId=17 在刷游戏统计）；`15:40 UTC` 磁盘再次覆盖二进制但 **access 无 hotRestart**（进程未换码）；`15:42` **CPU 钉死 ~85–92%**；过夜 **7.4GB / 系统内存 98%**，次日 08:11 死。
@@ -105,6 +105,7 @@
 - 登录：`SetLastLoginTime` 同步；日/周/月统计入队
 - 观众：`gameevent.ValidAudienceEvent`（`join_room` Pub）
 - 热重启：`PrepareRestart` 排空 + `hotrestart.RegisterStatQueueFlush` 与 syndb 同阶段刷盘
+- **推广渠道日统计 H5下载APK量**（2026-10-28）：`stat` 订 `H5DownloadTrackingEvent`；`reportH5Download` 请求体带 `channelCode>0` 且渠道已配置才 +1 `h5_download_apk_count`；CMS「推广渠道日统计」列 `h5DownloadApkCount`
 
 ## 货币流水 reason 多语言（2026-09-08）
 

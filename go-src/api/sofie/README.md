@@ -38,6 +38,7 @@
 | `studio` | 下播 | 需要登录 | `POST /liveRoom/stopLive` | `POST /sofie/studio/endBroadcast` |
 | `studio` | 修改封面 | 需要登录 | `POST /liveRoom/updateCover` | `POST /sofie/studio/replaceCover` |
 | `studio` | 修改公告 | 需要登录 | `POST /liveRoom/updateNotice` | `POST /sofie/studio/replaceNotice` |
+| `studio` | 语聊麦位挡位 | 需要登录 | `POST /voiceChatMicSeatTier/appTierList` | `POST /sofie/studio/browseVoiceChatMicSeatTiers` |
 | `studio` | 加入直播间 | 需要登录 | `POST /liveRoom/join` | `POST /sofie/studio/enterHall` |
 | `studio` | 上报直播首帧渲染完成 | 需要登录 | `POST /liveRoom/reportLiveFirstFrameRendered` | `POST /sofie/studio/notifyLiveFirstFrameReady` |
 | `studio` | 上报半屏游戏窗口曝光 | 需要登录 | `POST /liveRoom/reportMiniGameExposure` | `POST /sofie/studio/notifyMiniGameExposure` |

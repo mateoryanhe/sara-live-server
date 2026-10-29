@@ -159,6 +159,7 @@ func createRoomWithStoredCover(ctx context.Context, req *liveroomdto.CreateLiveR
 			applyRoomPricing(cfg, req.Ticket, req.Billing)
 			applyPrivateInviteType(cfg, req.PrivateInviteType)
 			applyVoiceChatMicModeToCfg(cfg, category, req.VoiceChatMicMode)
+			applyVoiceChatMicSeatCountToCfg(cfg, category, req.VoiceChatMicSeatCount)
 		}
 		if err := applyLiveRoomGameRecommends(existing.ID, category, req.GameCodes); err != nil {
 			return nil, err
@@ -187,6 +188,7 @@ func createRoomWithStoredCover(ctx context.Context, req *liveroomdto.CreateLiveR
 		cfg.SetBilling(req.Billing)
 		applyPrivateInviteType(cfg, req.PrivateInviteType)
 		applyVoiceChatMicModeToCfg(cfg, category, req.VoiceChatMicMode)
+		applyVoiceChatMicSeatCountToCfg(cfg, category, req.VoiceChatMicSeatCount)
 	}
 	if err := applyLiveRoomGameRecommends(room.ID, category, req.GameCodes); err != nil {
 		return nil, err
@@ -358,7 +360,8 @@ func GetRoom(ctx context.Context, req *liveroomdto.GetLiveRoomReq) (*liveroomdto
 		Notice:            room.Notice,
 		Status:            status,
 		Category:          normalizeLiveRoomCategory(cfg.Category),
-		VoiceChatMicMode:  voiceChatMicModeForRoom(room.ID),
+		VoiceChatMicMode:      voiceChatMicModeForRoom(room.ID),
+		VoiceChatMicSeatCount: voiceChatMicSeatCountForAPI(cfg),
 		TagId:             strconv.FormatUint(cfg.TagId, 10),
 		TagName:           getRoomTagName(cfg.TagId),
 		Ticket:            livecfg.AppLiveRoomCallTicketPrice(cfg.Ticket),

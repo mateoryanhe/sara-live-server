@@ -194,6 +194,72 @@ func queryAnchorListByGuildIdsFromMemory(guildIds []uint64, req *accountdto.Quer
 	return total, ret
 }
 
+func filterVisibilityScopedAnchorRooms(rooms []*liveentity.LiveRoom, guildIds, platformAnchorIds []uint64, key string, liveStatus *uint8) []*liveentity.LiveRoom {
+	guildIdSet := make(map[uint64]struct{})
+	for _, guildId := range guildIds {
+		if guildId > 0 {
+			guildIdSet[guildId] = struct{}{}
+		}
+	}
+	platformIdSet := make(map[uint64]struct{})
+	for _, anchorId := range platformAnchorIds {
+		if anchorId > 0 {
+			platformIdSet[anchorId] = struct{}{}
+		}
+	}
+	if len(guildIdSet) == 0 && len(platformIdSet) == 0 {
+		return nil
+	}
+	key = strings.TrimSpace(key)
+	likeKey := strings.ToLower(key)
+	guildNameMap := guilddao.GetNameMapByIds(collectRoomGuildIds(rooms))
+	filtered := make([]*liveentity.LiveRoom, 0, len(rooms))
+	seen := make(map[uint64]struct{})
+	for _, room := range rooms {
+		if room == nil || room.ID == 0 || !isRegularAnchorRoom(room) {
+			continue
+		}
+		match := false
+		if room.GuildId > 0 {
+			if _, ok := guildIdSet[room.GuildId]; ok {
+				match = true
+			}
+		} else if _, ok := platformIdSet[room.ID]; ok {
+			match = true
+		}
+		if !match {
+			continue
+		}
+		if liveStatus != nil && roomLiveStatus(room) != *liveStatus {
+			continue
+		}
+		if key != "" && !matchAnchorKey(room.ID, room.GuildId, key, likeKey, guildNameMap) {
+			continue
+		}
+		if _, dup := seen[room.ID]; dup {
+			continue
+		}
+		seen[room.ID] = struct{}{}
+		filtered = append(filtered, room)
+	}
+	sort.Slice(filtered, func(i, j int) bool { return filtered[i].ID > filtered[j].ID })
+	return filtered
+}
+
+func queryAnchorListVisibilityScopedFromMemory(guildIds, platformAnchorIds []uint64, req *accountdto.QueryAnchorListReq) (int, []*accountdto.AnchorListItem) {
+	rooms := filterVisibilityScopedAnchorRooms(getRoomListCache(), guildIds, platformAnchorIds, req.Key, req.LiveStatus)
+	total := len(rooms)
+	pageRooms := paginateAnchorRooms(rooms, req.PageIndex, req.PageSize)
+	ret := make([]*accountdto.AnchorListItem, 0, len(pageRooms))
+	for _, room := range pageRooms {
+		if item := buildAnchorListItem(room); item != nil {
+			ret = append(ret, item)
+		}
+	}
+	fillAnchorListGuildNames(ret)
+	return total, ret
+}
+
 func filterPlatformAnchorRoomsByAnchorIds(rooms []*liveentity.LiveRoom, anchorIds []uint64, key string, liveStatus *uint8) []*liveentity.LiveRoom {
 	if len(anchorIds) == 0 {
 		return nil

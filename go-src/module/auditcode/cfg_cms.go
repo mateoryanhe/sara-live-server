@@ -2,11 +2,11 @@ package auditcode
 
 import (
 	"context"
+	"crypto/rand"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/gogf/gf/v2/util/guid"
 	"xr-game-server/dao/cfgdao"
 	"xr-game-server/dto/auditcodedto"
 	"xr-game-server/entity/sys"
@@ -33,7 +33,10 @@ func GenerateAuditCodeCfg(_ context.Context, req *auditcodedto.GenerateAuditCode
 	if length < minAuditCodeLen || length > maxAuditCodeLen {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
-	code := newAuditCode(length)
+	code, err := newAuditCode(length)
+	if err != nil {
+		return nil, err
+	}
 	existing := cfgdao.LoadAuditCodeCfg()
 	row := &entity.AuditCodeCfg{Code: code}
 	now := time.Now()
@@ -53,15 +56,22 @@ func GenerateAuditCodeCfg(_ context.Context, req *auditcodedto.GenerateAuditCode
 	}, nil
 }
 
-// newAuditCode 生成小写、无下划线的 guid 片段,长度为 length.
-func newAuditCode(length int) string {
-	var b strings.Builder
-	b.Grow(length)
-	for b.Len() < length {
-		part := strings.ToLower(strings.ReplaceAll(guid.S(), "_", ""))
-		b.WriteString(part)
+// auditCodeAlphabet 数字+字母(去掉易混淆 0/O、1/l/I 等),便于 App 手工输入.
+const auditCodeAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"
+
+// newAuditCode 密码学随机,长度为 length.
+func newAuditCode(length int) (string, error) {
+	if length <= 0 {
+		return "", errercode.CreateCode(errercode.InvalidParam)
 	}
-	return b.String()[:length]
+	buf := make([]byte, length)
+	if _, err := rand.Read(buf); err != nil {
+		return "", err
+	}
+	for i := range buf {
+		buf[i] = auditCodeAlphabet[int(buf[i])%len(auditCodeAlphabet)]
+	}
+	return string(buf), nil
 }
 
 // CurrentAuditCode 每次从库读取当前审核码(无缓存);库空则兼容旧默认码.

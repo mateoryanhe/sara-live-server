@@ -13,6 +13,8 @@ import (
 )
 
 func GetSofiePrivacyPolicyCfg(_ context.Context, _ *privacypolicydto.GetSofiePrivacyPolicyCfgReq) (*privacypolicydto.GetSofiePrivacyPolicyCfgRes, error) {
+	// CMS 打开页时会查询; 与库对齐并刷新 App 侧内存(运维直改库后无需热重启)
+	reloadSofieCfgMemory()
 	cfg := cfgdao.LoadSofiePrivacyPolicyCfg()
 	if cfg == nil {
 		return &privacypolicydto.GetSofiePrivacyPolicyCfgRes{Cfg: nil}, nil

@@ -32,7 +32,21 @@
 - **不写** Firebase/第三方 SDK 配置页；埋点 = **服务端计数 + CMS 只读报表**。
 - 事件标识：稳定字符串 `event_key`（如 `video_call_initiated`），代码常量 + 文档表。
 - 写入：业务成功路径 **同步或 `xrpool.AddWithRecover` 入队**（高 QPS 用队列 + 定时刷盘，参考 `module/stat` 登录/观众统计）。
-- 存储：按事件 **日 / 周 / 月** 聚合表或通用表 + `event_key` + `period_bucket`（与 `statdao` 日/周/月 login 类似）；热数据可 RowCache，CMS 读趋势接口可短 TTL 缓存。
+- 存储：按事件 **日 / 周 / 月** 聚合表；写入用 RowCache（默认 TTL）+ syndb，埋点不必极准。
+- **CMS 埋点趋势读**：`ListRecent*` **直接查库**，不要 ListCache / 永久缓存。
+- **仪表盘**自动刷新固定 **5 分钟**（CMS 下拉仅展示）；Go `cache.DashboardCacheTTL` + **墙钟分桶** `DashboardCMSCacheBucketKey(suffix)`（`GetOrSetFuncLock` 同桶并发只打一次库）。**同一 5 分钟窗口内**多 Tab/多次定时刷新 **只读内存整包**；**换桶或手动刷新** `bypassDashboardCache: true` → 查库并 `SetRow` 回写。
+- **仪表盘 CMS 读接口一览**（默认时间窗，非埋点菜单页）：
+
+| 接口 | cache suffix | miss/bypass 查库 | 每请求不加缓存的字段 |
+|------|--------------|------------------|----------------------|
+| `POST /sysStat/getSysStat` | `sysStat` | `system_total_stats` + 当日/当周 login 聚合 | 在线/主播/游戏在线/下注人数 `overlayCMSSysStatLiveCounts` |
+| `POST /sysStat/getUserStatTrend` | `userTrend` | 日/周/月 `ListRecent*` 直查 + 当前日周月 `Scan*` | — |
+| `POST /resourceMetric/getResourceMetricOnlineTrend` | `default:{limit}:fine:{bucket}` | `sys_resource_metrics` 细采样 | — |
+| `POST /resourceMetric/getResourceMetricGameStatTrend` | 同上（与在线共用 fine 点缓存） | 同上 | — |
+| `POST /trackingEvent/getMinuteLiveActivityTrend` | `userEvents` | `minute_live_activity_stats` 区间列表 | — |
+
+- CMS 请求约定：`bypassDashboardCache: false`（定时器/自动刷新）；**刷新按钮**传 `true`。
+- **`getSysStat` 累计** miss 时 `ScanSystemTotalStatForCMS`（不覆盖进程内 `GetSysStat()` 写路径）。在线等见上表 overlay。
 - API（CMS）：`POST /trackingEvent/getVideoCallInitiatedTrend` 或通用 `POST /trackingEvent/getEventTrend` + `eventKey`（**每事件单独接口** 更易做权限映射时，优先 per-event）。
 - **不进 Sofie**（纯 CMS 运营数据）；App 只负责触发业务，不上报埋点到 CMS API。
 

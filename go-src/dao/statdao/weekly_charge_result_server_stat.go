@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	weeklyChargeResultServerStatCacheMgr     *cache.RowCache[*entity.WeeklyChargeResultServerStat]
-	weeklyChargeResultServerStatListCacheMgr *cache.ListCache[*entity.WeeklyChargeResultServerStat]
 )
 
 func initWeeklyChargeResultServerStatDao() {
 	weeklyChargeResultServerStatCacheMgr = cache.NewRowCache[*entity.WeeklyChargeResultServerStat]()
-	weeklyChargeResultServerStatListCacheMgr = cache.NewPermanentListCache[*entity.WeeklyChargeResultServerStat]()
 }
 
 func GetWeeklyChargeResultServerStatByWeek(week string) *entity.WeeklyChargeResultServerStat {
@@ -39,10 +35,7 @@ func ListRecentWeeklyChargeResultServerStats(limit int) []*entity.WeeklyChargeRe
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatWeeklyChargeResultServerStatKey(time.Now()))
-	return weeklyChargeResultServerStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.WeeklyChargeResultServerStat, error) {
-		return loadRecentWeeklyChargeResultServerStatsFromDB(limit), nil
-	})
+	return loadRecentWeeklyChargeResultServerStatsFromDB(limit)
 }
 
 func loadRecentWeeklyChargeResultServerStatsFromDB(limit int) []*entity.WeeklyChargeResultServerStat {

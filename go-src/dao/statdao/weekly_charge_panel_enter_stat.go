@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	weeklyChargePanelEnterStatCacheMgr     *cache.RowCache[*entity.WeeklyChargePanelEnterStat]
-	weeklyChargePanelEnterStatListCacheMgr *cache.ListCache[*entity.WeeklyChargePanelEnterStat]
 )
 
 func initWeeklyChargePanelEnterStatDao() {
 	weeklyChargePanelEnterStatCacheMgr = cache.NewRowCache[*entity.WeeklyChargePanelEnterStat]()
-	weeklyChargePanelEnterStatListCacheMgr = cache.NewPermanentListCache[*entity.WeeklyChargePanelEnterStat]()
 }
 
 func GetWeeklyChargePanelEnterStatByWeek(week string) *entity.WeeklyChargePanelEnterStat {
@@ -39,10 +35,7 @@ func ListRecentWeeklyChargePanelEnterStats(limit int) []*entity.WeeklyChargePane
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatWeeklyChargePanelEnterStatKey(time.Now()))
-	return weeklyChargePanelEnterStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.WeeklyChargePanelEnterStat, error) {
-		return loadRecentWeeklyChargePanelEnterStatsFromDB(limit), nil
-	})
+	return loadRecentWeeklyChargePanelEnterStatsFromDB(limit)
 }
 
 func loadRecentWeeklyChargePanelEnterStatsFromDB(limit int) []*entity.WeeklyChargePanelEnterStat {

@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	monthlyShortVideoPaySuccessStatCacheMgr     *cache.RowCache[*entity.MonthlyShortVideoPaySuccessStat]
-	monthlyShortVideoPaySuccessStatListCacheMgr *cache.ListCache[*entity.MonthlyShortVideoPaySuccessStat]
 )
 
 func initMonthlyShortVideoPaySuccessStatDao() {
 	monthlyShortVideoPaySuccessStatCacheMgr = cache.NewRowCache[*entity.MonthlyShortVideoPaySuccessStat]()
-	monthlyShortVideoPaySuccessStatListCacheMgr = cache.NewPermanentListCache[*entity.MonthlyShortVideoPaySuccessStat]()
 }
 
 func GetMonthlyShortVideoPaySuccessStatByMonth(month string) *entity.MonthlyShortVideoPaySuccessStat {
@@ -39,10 +35,7 @@ func ListRecentMonthlyShortVideoPaySuccessStats(limit int) []*entity.MonthlyShor
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatMonthlyShortVideoPaySuccessStatKey(time.Now()))
-	return monthlyShortVideoPaySuccessStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.MonthlyShortVideoPaySuccessStat, error) {
-		return loadRecentMonthlyShortVideoPaySuccessStatsFromDB(limit), nil
-	})
+	return loadRecentMonthlyShortVideoPaySuccessStatsFromDB(limit)
 }
 
 func loadRecentMonthlyShortVideoPaySuccessStatsFromDB(limit int) []*entity.MonthlyShortVideoPaySuccessStat {

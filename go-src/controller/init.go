@@ -97,6 +97,8 @@ func Init() {
 	initTicketAppController()                        // 门票(App)
 	initPrivateRoomBillingController()               // 1v1视频通话计费(CMS)
 	initPrivateRoomBillingAppController()            // 1v1视频通话计费(App)
+	initVoiceChatMicSeatTierCMSController()          // 语聊麦位挡位(CMS)
+	initVoiceChatMicSeatTierAppController()          // 语聊麦位挡位(App)
 	initShortVideoController()                       // 短视频(CMS)
 	initShortVideoAppController()                    // 短视频(App)
 	initLiveFollowAppController()                    // 关注主播(App)

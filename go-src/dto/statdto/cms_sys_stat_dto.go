@@ -4,7 +4,8 @@ import "github.com/gogf/gf/v2/frame/g"
 
 // CMSSysStatReq CMS获取系统总数据
 type CMSSysStatReq struct {
-	g.Meta `path:"/getSysStat" method:"post" summary:"CMS获取系统总数据" tags:"仪表盘"`
+	g.Meta               `path:"/getSysStat" method:"post" summary:"CMS获取系统总数据" tags:"仪表盘"`
+	BypassDashboardCache bool `json:"bypassDashboardCache" dc:"true 时跳过仪表盘读缓存, 重新查库/组装"`
 }
 
 // CMSSysStatRes CMS系统总数据

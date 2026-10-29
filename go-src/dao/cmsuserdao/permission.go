@@ -210,7 +210,8 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		"/sysStat/getUserStatTrend",
 		"/sysStat/getGameBetUserTrend",
 		"/resourceMetric/getResourceMetricOnlineTrend",
-		"/resourceMetric/getResourceMetricGameStatTrend":
+		"/resourceMetric/getResourceMetricGameStatTrend",
+		"/trackingEvent/getMinuteLiveActivityTrend":
 		return dashboardSysStatTrendAliasPaths()
 	case "/trackingEvent/getHotLiveRoomJoinTrend",
 		"/trackingEvent/getLiveFirstFrameRenderTrend",
@@ -254,6 +255,10 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		"/trackingEvent/getChargeClickTrend",
 		"/trackingEvent/getChargeResultServerTrend":
 		return rechargeTrackingTrendAliasPaths()
+	case "/trackingEvent/getH5DownloadTrend",
+		"/trackingEvent/getOfficialSiteDownloadTrend",
+		"/trackingEvent/getShareShortLinkClickTrend":
+		return downloadTrackingTrendAliasPaths()
 	default:
 		return nil
 	}
@@ -266,6 +271,7 @@ func dashboardSysStatTrendAliasPaths() []string {
 		"/sysStat/getGameBetUserTrend",
 		"/resourceMetric/getResourceMetricOnlineTrend",
 		"/resourceMetric/getResourceMetricGameStatTrend",
+		"/trackingEvent/getMinuteLiveActivityTrend",
 	}
 }
 
@@ -324,6 +330,14 @@ func rechargeTrackingTrendAliasPaths() []string {
 		"/trackingEvent/getChargePanelEnterTrend",
 		"/trackingEvent/getChargeClickTrend",
 		"/trackingEvent/getChargeResultServerTrend",
+	}
+}
+
+func downloadTrackingTrendAliasPaths() []string {
+	return []string{
+		"/trackingEvent/getH5DownloadTrend",
+		"/trackingEvent/getOfficialSiteDownloadTrend",
+		"/trackingEvent/getShareShortLinkClickTrend",
 	}
 }
 

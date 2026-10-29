@@ -24,7 +24,7 @@
             >
               {{ t('pages.dashboard.resetBasicData') }}
             </el-button>
-            <el-button :loading="loading" @click="() => void fetchSysStat()">{{ t('common.refresh') }}</el-button>
+            <el-button :loading="loading" @click="() => void fetchSysStat(false, true)">{{ t('common.refresh') }}</el-button>
           </div>
           <div class="basic-stat-board basic-stat-board--compact">
             <section
@@ -132,10 +132,39 @@
           </div>
         </el-tab-pane>
 
+        <el-tab-pane :label="t('pages.dashboard.userEvents')" name="userEvents">
+          <div v-loading="userEventsLoading" class="dashboard-tab-pane-body game-stats-pane">
+            <div class="game-stats-toolbar">
+              <div class="dashboard-realtime-row-head game-stats-toolbar-head">
+                <span class="basic-stat-section-title">{{ t('pages.dashboard.userEvents') }}</span>
+                <span class="basic-stat-section-line"/>
+              </div>
+              <el-button :loading="userEventsLoading" @click="() => void refreshUserEventsTab()">
+                {{ t('common.refresh') }}
+              </el-button>
+            </div>
+            <div class="game-stats-chart-panel">
+              <div class="game-stats-chart-head">
+                <div class="game-stats-chart-title">{{ userEventsChartTitle }}</div>
+                <p class="game-stats-chart-hint">{{ t('pages.trackingMinuteLiveActivity.chartHint') }}</p>
+                <p v-if="userEventsRangeTruncated" class="game-bet-range-truncated-hint">
+                  {{ t('pages.trackingMinuteLiveActivity.rangeTruncated', {max: userEventsTrendMaxPoints}) }}
+                </p>
+              </div>
+              <MinuteLiveActivityTrendChart
+                  ref="userEventsChartRef"
+                  :data="userEventsTrend.points"
+                  :title="userEventsChartTitle"
+                  class="game-stats-chart"
+              />
+            </div>
+          </div>
+        </el-tab-pane>
+
         <el-tab-pane :label="t('pages.dashboard.userData')" name="user">
           <div v-loading="trendLoading" class="dashboard-tab-pane-body">
           <div class="tab-toolbar">
-            <el-button :loading="trendLoading" @click="() => void fetchUserStatTrend()">{{ t('common.refresh') }}</el-button>
+            <el-button :loading="trendLoading" @click="() => void fetchUserStatTrend(false, true)">{{ t('common.refresh') }}</el-button>
           </div>
           <el-tabs v-model="activePeriod" lazy @tab-change="handlePeriodTabChange">
             <el-tab-pane :label="t('pages.dashboard.periodDaily')" name="daily">
@@ -154,7 +183,7 @@
         <el-tab-pane :label="t('pages.dashboard.barMetricRechargeUser')" name="rechargeUser">
           <div v-loading="trendLoading" class="dashboard-tab-pane-body">
           <div class="tab-toolbar">
-            <el-button :loading="trendLoading" @click="() => void fetchUserStatTrend()">{{ t('common.refresh') }}</el-button>
+            <el-button :loading="trendLoading" @click="() => void fetchUserStatTrend(false, true)">{{ t('common.refresh') }}</el-button>
           </div>
           <el-tabs v-model="activeRechargePeriod" lazy @tab-change="handleRechargePeriodTabChange">
             <el-tab-pane :label="t('pages.dashboard.periodDaily')" name="daily">
@@ -188,7 +217,7 @@
         <el-tab-pane :label="t('pages.dashboard.clientRecharge')" name="clientRecharge">
           <div v-loading="trendLoading" class="dashboard-tab-pane-body">
           <div class="tab-toolbar">
-            <el-button :loading="trendLoading" @click="() => void fetchUserStatTrend()">{{ t('common.refresh') }}</el-button>
+            <el-button :loading="trendLoading" @click="() => void fetchUserStatTrend(false, true)">{{ t('common.refresh') }}</el-button>
           </div>
           <p class="game-bet-event-hint">{{ t('pages.dashboard.clientRechargeHint') }}</p>
           <el-tabs v-model="activeClientRechargePeriod" lazy @tab-change="handleClientRechargePeriodTabChange">
@@ -220,7 +249,7 @@
         <el-tab-pane :label="t('pages.dashboard.clientLogin')" name="clientLogin">
           <div v-loading="trendLoading" class="dashboard-tab-pane-body">
           <div class="tab-toolbar">
-            <el-button :loading="trendLoading" @click="() => void fetchUserStatTrend()">{{ t('common.refresh') }}</el-button>
+            <el-button :loading="trendLoading" @click="() => void fetchUserStatTrend(false, true)">{{ t('common.refresh') }}</el-button>
           </div>
           <p class="game-bet-event-hint">{{ t('pages.dashboard.clientLoginHint') }}</p>
           <el-tabs v-model="activeClientLoginPeriod" lazy @tab-change="handleClientLoginPeriodTabChange">
@@ -265,15 +294,22 @@ import {
   onUnmounted,
   reactive,
   ref,
-  watch,
 } from 'vue'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {sysStatApi} from '@/api'
+import {trackingEventApi} from '@/api/modules/tracking-event'
 import {usePagePermission} from '@/composables/usePagePermission'
-import type {GameStatTrend, ResourceMetricTrend, SysStat, UserStatTrend} from '@/types/api'
+import type {
+  GameStatTrend,
+  MinuteLiveActivityTrendRes,
+  ResourceMetricTrend,
+  SysStat,
+  UserStatTrend,
+} from '@/types/api'
 import {
   buildDashboardResourceMetricTrendQuery,
   DASHBOARD_ONLINE_TREND_POINT_LIMIT,
+  DASHBOARD_RESOURCE_METRIC_RETENTION_DAYS,
 } from './dashboard-trend-range'
 import {formatAmount} from '@/utils/number-format'
 
@@ -283,9 +319,16 @@ const ClientRechargeTrendChart = defineAsyncComponent(() => import('./components
 const ClientLoginTrendChart = defineAsyncComponent(() => import('./components/client-login-trend-chart.vue'))
 const ResourceMetricChart = defineAsyncComponent(() => import('@/views/config/components/resource-metric-chart.vue'))
 const GameStatsTrendChart = defineAsyncComponent(() => import('./components/game-stats-trend-chart.vue'))
+const MinuteLiveActivityTrendChart = defineAsyncComponent(
+    () => import('@/views/tracking/components/minute-live-activity-trend-chart.vue'),
+)
 
-const AUTO_REFRESH_STORAGE_KEY = 'dashboard:autoRefreshMs'
-const DEFAULT_AUTO_REFRESH_MS = 300_000
+/** 3 天 × 1440 分钟，与后端 retention / maxTrendPoints 一致 */
+const USER_EVENTS_TREND_MAX_POINTS = 4320
+
+/** 与后端 DashboardCacheTTL 一致，实际自动刷新间隔固定 5 分钟（下拉仅展示，改选项不影响刷新） */
+const DASHBOARD_AUTO_REFRESH_MS = 300_000
+
 const AUTO_REFRESH_INTERVALS = [
   {value: 0, labelKey: 'autoRefreshOff'},
   {value: 10_000, labelKey: 'autoRefresh10s'},
@@ -301,6 +344,7 @@ const loading = ref(false)
 const trendLoading = ref(false)
 const onlineLoading = ref(false)
 const gameBetLoading = ref(false)
+const userEventsLoading = ref(false)
 const activeMainTab = ref('basic')
 const activePeriod = ref('daily')
 const activeRechargePeriod = ref('daily')
@@ -310,7 +354,10 @@ const onlineRangeTruncated = ref(false)
 const onlineTrendMaxPoints = ref(0)
 const gameStatRangeTruncated = ref(false)
 const gameStatTrendMaxPoints = ref(0)
-const autoRefreshMs = ref(readStoredAutoRefreshMs())
+const userEventsRangeTruncated = ref(false)
+const userEventsTrendMaxPoints = ref(USER_EVENTS_TREND_MAX_POINTS)
+/** 下拉展示用；定时器始终 DASHBOARD_AUTO_REFRESH_MS */
+const autoRefreshMs = ref(DASHBOARD_AUTO_REFRESH_MS)
 const dashboardRouteActive = ref(false)
 let autoRefreshTimer: ReturnType<typeof setInterval> | null = null
 let dashboardRefreshInFlight = false
@@ -321,6 +368,7 @@ const tabDataLoaded = reactive({
   sysStat: false,
   userTrend: false,
   gameTrend: false,
+  userEventsTrend: false,
   onlineTrend: false,
 })
 
@@ -388,6 +436,7 @@ const clientLoginChartTitle = computed(() =>
 const onlineChartTitle = computed(() => t('pages.dashboard.onlineLiveChartTitleLast3Days'))
 
 const gameStatChartTitle = computed(() => t('pages.dashboard.gameStatChartTitleLast3Days'))
+const userEventsChartTitle = computed(() => t('pages.trackingMinuteLiveActivity.chartTitleLast3Days'))
 
 const dailyLineChartRef = ref<InstanceType<typeof UserStatChart>>()
 const weeklyLineChartRef = ref<InstanceType<typeof UserStatChart>>()
@@ -403,6 +452,7 @@ const clientLoginWeeklyChartRef = ref<InstanceType<typeof ClientLoginTrendChart>
 const clientLoginMonthlyChartRef = ref<InstanceType<typeof ClientLoginTrendChart>>()
 const onlineChartRef = ref<InstanceType<typeof ResourceMetricChart>>()
 const gameBetDailyChartRef = ref<InstanceType<typeof GameStatsTrendChart>>()
+const userEventsChartRef = ref<InstanceType<typeof MinuteLiveActivityTrendChart>>()
 
 type BasicTabSysStat = Omit<
     SysStat,
@@ -455,6 +505,10 @@ const userStatTrend = reactive<UserStatTrend>({
 })
 
 const gameStatTrend = reactive<GameStatTrend>({
+  points: [],
+})
+
+const userEventsTrend = reactive<MinuteLiveActivityTrendRes>({
   points: [],
 })
 
@@ -582,22 +636,6 @@ const basicStatSections = computed(() => [
   },
 ])
 
-function readStoredAutoRefreshMs() {
-  try {
-    const raw = localStorage.getItem(AUTO_REFRESH_STORAGE_KEY)
-    if (raw == null || raw === '') {
-      return DEFAULT_AUTO_REFRESH_MS
-    }
-    const parsed = Number(raw)
-    if (parsed === 1000) {
-      return 0
-    }
-    return AUTO_REFRESH_INTERVALS.some((item) => item.value === parsed) ? parsed : DEFAULT_AUTO_REFRESH_MS
-  } catch {
-    return DEFAULT_AUTO_REFRESH_MS
-  }
-}
-
 const clearAutoRefreshTimer = () => {
   if (autoRefreshTimer != null) {
     clearInterval(autoRefreshTimer)
@@ -605,9 +643,32 @@ const clearAutoRefreshTimer = () => {
   }
 }
 
+let visibilityListenerBound = false
+
+const bindDocumentVisibilityListener = () => {
+  if (visibilityListenerBound || typeof document === 'undefined') {
+    return
+  }
+  document.addEventListener('visibilitychange', handleDocumentVisibilityChange)
+  visibilityListenerBound = true
+}
+
+const unbindDocumentVisibilityListener = () => {
+  if (!visibilityListenerBound || typeof document === 'undefined') {
+    return
+  }
+  document.removeEventListener('visibilitychange', handleDocumentVisibilityChange)
+  visibilityListenerBound = false
+}
+
+const stopDashboardAutoRefresh = () => {
+  clearAutoRefreshTimer()
+  unbindDocumentVisibilityListener()
+}
+
 const restartAutoRefreshTimer = () => {
   clearAutoRefreshTimer()
-  if (!isDashboardVisible() || autoRefreshMs.value <= 0) {
+  if (!isDashboardVisible()) {
     return
   }
   autoRefreshTimer = setInterval(() => {
@@ -616,7 +677,7 @@ const restartAutoRefreshTimer = () => {
       return
     }
     void refreshActiveMainTab(true, true)
-  }, autoRefreshMs.value)
+  }, DASHBOARD_AUTO_REFRESH_MS)
 }
 
 const handleDocumentVisibilityChange = () => {
@@ -625,10 +686,16 @@ const handleDocumentVisibilityChange = () => {
     restartAutoRefreshTimer()
     return
   }
+  // 浏览器标签隐藏 / 最小化：立刻停掉定时刷新
   clearAutoRefreshTimer()
 }
 
 const refreshActiveMainTab = async (silent = false, force = false) => {
+  // 路由已切走（keep-alive 失活）或浏览器页不可见时，不发起任何刷新
+  if (!isDashboardVisible()) {
+    clearAutoRefreshTimer()
+    return
+  }
   if (dashboardRefreshInFlight) {
     return
   }
@@ -661,6 +728,15 @@ const refreshActiveMainTab = async (silent = false, force = false) => {
       ])
       if (needTrend && results[0]) {
         tabDataLoaded.gameTrend = true
+      }
+      return
+    }
+    if (tab === 'userEvents') {
+      if (force || !tabDataLoaded.userEventsTrend) {
+        const ok = await fetchUserEventsTrend(silent)
+        if (ok) {
+          tabDataLoaded.userEventsTrend = true
+        }
       }
       return
     }
@@ -698,7 +774,7 @@ const handleBasicDashboardReset = async () => {
   try {
     await sysStatApi.resetBasicDashboardStats()
     ElMessage.success(t('pages.dashboard.resetBasicDataSuccess'))
-    await fetchSysStat(true)
+    await fetchSysStat(true, true)
   } catch (error) {
     console.error('reset basic dashboard stats failed:', error)
     ElMessage.error(t('pages.dashboard.resetBasicDataFailed'))
@@ -707,12 +783,12 @@ const handleBasicDashboardReset = async () => {
   }
 }
 
-const fetchSysStat = async (silent = false): Promise<boolean> => {
+const fetchSysStat = async (silent = false, bypassDashboardCache = false): Promise<boolean> => {
   if (!silent) {
     loading.value = true
   }
   try {
-    const data = await sysStatApi.getSysStat()
+    const data = await sysStatApi.getSysStat({ bypassDashboardCache })
     sysStat.totalGold = data.totalGold ?? 0
     sysStat.totalGoldConsume = data.totalGoldConsume ?? 0
     sysStat.totalDiamondConsume = data.totalDiamondConsume ?? 0
@@ -744,9 +820,9 @@ const fetchSysStat = async (silent = false): Promise<boolean> => {
   }
 }
 
-const fetchOnlineRealtime = async (silent = false): Promise<boolean> => {
+const fetchOnlineRealtime = async (silent = false, bypassDashboardCache = false): Promise<boolean> => {
   try {
-    const data = await sysStatApi.getSysStat()
+    const data = await sysStatApi.getSysStat({ bypassDashboardCache })
     onlineRealtime.audienceOnlineCount = Number(data.audienceOnlineCount ?? 0)
     onlineRealtime.liveAnchorCount = Number(data.liveAnchorCount ?? 0)
     return true
@@ -762,16 +838,19 @@ const fetchOnlineRealtime = async (silent = false): Promise<boolean> => {
 const refreshOnlineTab = async () => {
   onlineLoading.value = true
   try {
-    await Promise.all([fetchResourceMetricTrend(true), fetchOnlineRealtime(true)])
+    await Promise.all([
+      fetchResourceMetricTrend(true, true),
+      fetchOnlineRealtime(true, true),
+    ])
     tabDataLoaded.onlineTrend = true
   } finally {
     onlineLoading.value = false
   }
 }
 
-const fetchGameStatsRealtime = async (silent = false): Promise<boolean> => {
+const fetchGameStatsRealtime = async (silent = false, bypassDashboardCache = false): Promise<boolean> => {
   try {
-    const data = await sysStatApi.getSysStat()
+    const data = await sysStatApi.getSysStat({ bypassDashboardCache })
     gameStatsRealtime.gameOnlineCount = Number(data.gameOnlineCount ?? 0)
     gameStatsRealtime.gameBetUserCount = Number(data.gameBetUserCount ?? 0)
     return true
@@ -787,20 +866,60 @@ const fetchGameStatsRealtime = async (silent = false): Promise<boolean> => {
 const refreshGameStatsTab = async () => {
   gameBetLoading.value = true
   try {
-    await Promise.all([fetchGameStatTrend(true), fetchGameStatsRealtime(true)])
+    await Promise.all([
+      fetchGameStatTrend(true, true),
+      fetchGameStatsRealtime(true, true),
+    ])
     tabDataLoaded.gameTrend = true
   } finally {
     gameBetLoading.value = false
   }
 }
 
-const fetchResourceMetricTrend = async (silent = false): Promise<boolean> => {
+const refreshUserEventsTab = async () => {
+  const ok = await fetchUserEventsTrend(false, true)
+  if (ok) {
+    tabDataLoaded.userEventsTrend = true
+  }
+}
+
+const fetchUserEventsTrend = async (silent = false, bypassDashboardCache = false): Promise<boolean> => {
+  if (!silent) {
+    userEventsLoading.value = true
+  }
+  try {
+    const data = await trackingEventApi.getMinuteLiveActivityTrend({
+      startTime: 0,
+      endTime: 0,
+      limit: USER_EVENTS_TREND_MAX_POINTS,
+      bypassDashboardCache,
+    })
+    userEventsTrend.points = data.points || []
+    userEventsRangeTruncated.value = Boolean(data.rangeTruncated)
+    userEventsTrendMaxPoints.value = data.trendMaxPoints || USER_EVENTS_TREND_MAX_POINTS
+    await nextTick()
+    setTimeout(() => {
+      userEventsChartRef.value?.resize()
+    }, 0)
+    return true
+  } catch (error) {
+    console.error('fetch user events trend failed:', error)
+    ElMessage.error(t('pages.trackingMinuteLiveActivity.fetchFailed'))
+    return false
+  } finally {
+    if (!silent) {
+      userEventsLoading.value = false
+    }
+  }
+}
+
+const fetchResourceMetricTrend = async (silent = false, bypassDashboardCache = false): Promise<boolean> => {
   if (!silent) {
     onlineLoading.value = true
   }
   try {
     const data = await sysStatApi.getResourceMetricOnlineTrend(
-        buildDashboardResourceMetricTrendQuery(),
+        buildDashboardResourceMetricTrendQuery(DASHBOARD_RESOURCE_METRIC_RETENTION_DAYS, bypassDashboardCache),
     )
     resourceMetricTrend.points = data.points || []
     onlineRangeTruncated.value = Boolean(data.rangeTruncated)
@@ -821,13 +940,13 @@ const fetchResourceMetricTrend = async (silent = false): Promise<boolean> => {
   }
 }
 
-const fetchGameStatTrend = async (silent = false): Promise<boolean> => {
+const fetchGameStatTrend = async (silent = false, bypassDashboardCache = false): Promise<boolean> => {
   if (!silent) {
     gameBetLoading.value = true
   }
   try {
     const data = await sysStatApi.getResourceMetricGameStatTrend(
-        buildDashboardResourceMetricTrendQuery(),
+        buildDashboardResourceMetricTrendQuery(DASHBOARD_RESOURCE_METRIC_RETENTION_DAYS, bypassDashboardCache),
     )
     gameStatTrend.points = (data.points || []).map((item) => ({
       time: item.time,
@@ -852,12 +971,12 @@ const fetchGameStatTrend = async (silent = false): Promise<boolean> => {
   }
 }
 
-const fetchUserStatTrend = async (silent = false): Promise<boolean> => {
+const fetchUserStatTrend = async (silent = false, bypassDashboardCache = false): Promise<boolean> => {
   if (!silent) {
     trendLoading.value = true
   }
   try {
-    const data = await sysStatApi.getUserStatTrend()
+    const data = await sysStatApi.getUserStatTrend({ bypassDashboardCache })
     userStatTrend.daily = data.daily || []
     userStatTrend.weekly = data.weekly || []
     userStatTrend.monthly = data.monthly || []
@@ -955,6 +1074,10 @@ const handleMainTabChange = async () => {
     resizeGameBetCharts()
     return
   }
+  if (activeMainTab.value === 'userEvents') {
+    userEventsChartRef.value?.resize()
+    return
+  }
   if (activeMainTab.value === 'online') {
     onlineChartRef.value?.resize()
   }
@@ -987,19 +1110,10 @@ const formatCount = (value: string | number | null | undefined) => {
   return Number(value).toLocaleString(locale.value)
 }
 
-watch(autoRefreshMs, (ms) => {
-  try {
-    localStorage.setItem(AUTO_REFRESH_STORAGE_KEY, String(ms))
-  } catch {
-    // ignore quota / private mode
-  }
-  restartAutoRefreshTimer()
-})
-
 onMounted(() => {
   dashboardRouteActive.value = true
   skipNextActivatedRefresh = true
-  document.addEventListener('visibilitychange', handleDocumentVisibilityChange)
+  bindDocumentVisibilityListener()
   // 首屏仅拉「基础数据」；其余主 Tab 在 @tab-change 时懒加载
   void refreshActiveMainTab(false)
   restartAutoRefreshTimer()
@@ -1007,6 +1121,7 @@ onMounted(() => {
 
 onActivated(() => {
   dashboardRouteActive.value = true
+  bindDocumentVisibilityListener()
   if (skipNextActivatedRefresh) {
     skipNextActivatedRefresh = false
     restartAutoRefreshTimer()
@@ -1018,13 +1133,12 @@ onActivated(() => {
 
 onDeactivated(() => {
   dashboardRouteActive.value = false
-  clearAutoRefreshTimer()
+  stopDashboardAutoRefresh()
 })
 
 onUnmounted(() => {
   dashboardRouteActive.value = false
-  document.removeEventListener('visibilitychange', handleDocumentVisibilityChange)
-  clearAutoRefreshTimer()
+  stopDashboardAutoRefresh()
 })
 </script>
 
@@ -1225,7 +1339,7 @@ onUnmounted(() => {
   border: 1px solid #e8eef5;
   border-radius: 14px;
   background: #fff;
-  padding: 14px 16px 8px;
+  padding: 14px 16px 14px;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 

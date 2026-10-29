@@ -8,63 +8,84 @@
       </template>
 
       <el-form ref="formRef" :model="formData" :rules="formRules" class="cfg-form" label-width="180px">
-        <el-form-item :label="t('pages.liveConfig.paidDanmakuPrice')" prop="paidDanmakuPrice">
-          <el-input-number
-              v-model="formData.paidDanmakuPrice"
-              :min="0"
-              :precision="NUMBER_INPUT_DECIMALS"
-              :step="0.0001"
-              controls-position="right"
-              style="width: 220px"
-          />
-          <span class="form-tip">{{ t('pages.liveConfig.paidDanmakuTip') }}</span>
-        </el-form-item>
+        <el-tabs v-model="activeTab">
+          <el-tab-pane :label="t('pages.liveConfig.tabBasic')" name="basic">
+            <el-form-item :label="t('pages.liveConfig.paidDanmakuPrice')" prop="paidDanmakuPrice">
+              <el-input-number
+                  v-model="formData.paidDanmakuPrice"
+                  :min="0"
+                  :precision="NUMBER_INPUT_DECIMALS"
+                  :step="0.0001"
+                  controls-position="right"
+                  style="width: 220px"
+              />
+              <span class="form-tip">{{ t('pages.liveConfig.paidDanmakuTip') }}</span>
+            </el-form-item>
 
-        <el-form-item :label="t('pages.liveConfig.videoCallTicketEnabled')">
-          <el-switch v-model="formData.videoCallTicketEnabled"/>
-          <span class="form-tip">{{ t('pages.liveConfig.videoCallTicketEnabledTip') }}</span>
-        </el-form-item>
+            <el-form-item :label="t('pages.liveConfig.videoCallTicketEnabled')">
+              <el-switch v-model="formData.videoCallTicketEnabled"/>
+              <span class="form-tip">{{ t('pages.liveConfig.videoCallTicketEnabledTip') }}</span>
+            </el-form-item>
 
-        <el-form-item :label="t('pages.liveConfig.showcaseLiveRoomEnabled')">
-          <el-switch v-model="formData.showcaseLiveRoomEnabled"/>
-          <span class="form-tip">{{ t('pages.liveConfig.showcaseLiveRoomEnabledTip') }}</span>
-        </el-form-item>
+            <el-form-item :label="t('pages.liveConfig.liveRoomCallMinTotalRechargeUsd')" prop="liveRoomCallMinTotalRechargeUsd">
+              <el-input-number
+                  v-model="formData.liveRoomCallMinTotalRechargeUsd"
+                  :min="0"
+                  :precision="2"
+                  :step="1"
+                  controls-position="right"
+                  style="width: 220px"
+              />
+              <span class="form-tip">{{ t('pages.liveConfig.liveRoomCallMinTotalRechargeUsdTip') }}</span>
+            </el-form-item>
 
-        <el-form-item :label="t('pages.liveConfig.liveRoomCallMinTotalRechargeUsd')" prop="liveRoomCallMinTotalRechargeUsd">
-          <el-input-number
-              v-model="formData.liveRoomCallMinTotalRechargeUsd"
-              :min="0"
-              :precision="2"
-              :step="1"
-              controls-position="right"
-              style="width: 220px"
-          />
-          <span class="form-tip">{{ t('pages.liveConfig.liveRoomCallMinTotalRechargeUsdTip') }}</span>
-        </el-form-item>
+            <el-form-item :label="t('pages.liveConfig.audienceListRefreshSeconds')" prop="audienceListRefreshSeconds">
+              <el-input-number
+                  v-model="formData.audienceListRefreshSeconds"
+                  :min="1"
+                  :precision="0"
+                  :step="1"
+                  controls-position="right"
+                  style="width: 220px"
+              />
+              <span class="form-tip">{{ t('pages.liveConfig.audienceListRefreshTip') }}</span>
+            </el-form-item>
 
-        <el-form-item :label="t('pages.liveConfig.audienceListRefreshSeconds')" prop="audienceListRefreshSeconds">
-          <el-input-number
-              v-model="formData.audienceListRefreshSeconds"
-              :min="1"
-              :precision="0"
-              :step="1"
-              controls-position="right"
-              style="width: 220px"
-          />
-          <span class="form-tip">{{ t('pages.liveConfig.audienceListRefreshTip') }}</span>
-        </el-form-item>
+            <el-form-item :label="t('pages.liveConfig.oneToOneDailyFreeSeconds')">
+              <el-input-number
+                  v-model="formData.oneToOneDailyFreeSeconds"
+                  :min="0"
+                  :precision="0"
+                  :step="1"
+                  controls-position="right"
+                  style="width: 220px"
+              />
+              <span class="form-tip">{{ t('pages.liveConfig.oneToOneDailyFreeSecondsTip') }}</span>
+            </el-form-item>
+          </el-tab-pane>
 
-        <el-form-item :label="t('pages.liveConfig.oneToOneDailyFreeSeconds')">
-          <el-input-number
-              v-model="formData.oneToOneDailyFreeSeconds"
-              :min="0"
-              :precision="0"
-              :step="1"
-              controls-position="right"
-              style="width: 220px"
-          />
-          <span class="form-tip">{{ t('pages.liveConfig.oneToOneDailyFreeSecondsTip') }}</span>
-        </el-form-item>
+          <el-tab-pane :label="t('pages.liveConfig.tabStartLive')" name="startLive">
+            <el-form-item :label="t('pages.liveConfig.showcaseLiveRoomEnabled')">
+              <el-switch v-model="formData.showcaseLiveRoomEnabled"/>
+              <span class="form-tip">{{ t('pages.liveConfig.showcaseLiveRoomEnabledTip') }}</span>
+            </el-form-item>
+
+            <el-form-item :label="t('pages.liveConfig.gameLiveRoomEnabled')">
+              <el-switch v-model="formData.gameLiveRoomEnabled"/>
+              <span class="form-tip">{{ t('pages.liveConfig.gameLiveRoomEnabledTip') }}</span>
+            </el-form-item>
+
+            <el-form-item :label="t('pages.liveConfig.oneToOneLiveRoomEnabled')">
+              <el-switch v-model="formData.oneToOneLiveRoomEnabled"/>
+              <span class="form-tip">{{ t('pages.liveConfig.oneToOneLiveRoomEnabledTip') }}</span>
+            </el-form-item>
+
+            <el-form-item :label="t('pages.liveConfig.voiceChatLiveRoomEnabled')">
+              <el-switch v-model="formData.voiceChatLiveRoomEnabled"/>
+              <span class="form-tip">{{ t('pages.liveConfig.voiceChatLiveRoomEnabledTip') }}</span>
+            </el-form-item>
+          </el-tab-pane>
+        </el-tabs>
 
         <el-form-item v-if="metaInfo.updatedAt" :label="t('pages.liveConfig.lastUpdated')">
           <span>{{ metaInfo.updatedAt }}</span>
@@ -90,12 +111,16 @@ import {NUMBER_INPUT_DECIMALS, truncateNumber} from '@/utils/number-format'
 const {t} = useI18n()
 const loading = ref(false)
 const formRef = ref()
+const activeTab = ref('basic')
 
 const formData = reactive({
   id: '0',
   paidDanmakuPrice: 0,
 	videoCallTicketEnabled: true,
 	showcaseLiveRoomEnabled: false,
+	gameLiveRoomEnabled: false,
+	voiceChatLiveRoomEnabled: false,
+	oneToOneLiveRoomEnabled: false,
 	audienceListRefreshSeconds: 300,
 	oneToOneDailyFreeSeconds: 30,
   liveRoomCallMinTotalRechargeUsd: 10,
@@ -127,6 +152,9 @@ const applyCfg = (cfg: LiveCfg | null | undefined) => {
     formData.paidDanmakuPrice = 0
 	formData.videoCallTicketEnabled = true
 	formData.showcaseLiveRoomEnabled = false
+	formData.gameLiveRoomEnabled = false
+	formData.voiceChatLiveRoomEnabled = false
+	formData.oneToOneLiveRoomEnabled = false
 	formData.audienceListRefreshSeconds = 300
 	formData.oneToOneDailyFreeSeconds = 30
   formData.liveRoomCallMinTotalRechargeUsd = 10
@@ -138,6 +166,9 @@ const applyCfg = (cfg: LiveCfg | null | undefined) => {
   formData.paidDanmakuPrice = truncateNumber(cfg.paidDanmakuPrice ?? 0)
 	formData.videoCallTicketEnabled = cfg.videoCallTicketEnabled ?? true
 	formData.showcaseLiveRoomEnabled = cfg.showcaseLiveRoomEnabled ?? false
+	formData.gameLiveRoomEnabled = cfg.gameLiveRoomEnabled ?? false
+	formData.voiceChatLiveRoomEnabled = cfg.voiceChatLiveRoomEnabled ?? false
+	formData.oneToOneLiveRoomEnabled = cfg.oneToOneLiveRoomEnabled ?? false
 	formData.audienceListRefreshSeconds = cfg.audienceListRefreshSeconds || 300
 	formData.oneToOneDailyFreeSeconds = cfg.oneToOneDailyFreeSeconds ?? 30
   formData.liveRoomCallMinTotalRechargeUsd = truncateNumber(cfg.liveRoomCallMinTotalRechargeUsd ?? 10)
@@ -167,6 +198,9 @@ const handleSave = async () => {
       paidDanmakuPrice: formData.paidDanmakuPrice,
 	  videoCallTicketEnabled: formData.videoCallTicketEnabled,
 	  showcaseLiveRoomEnabled: formData.showcaseLiveRoomEnabled,
+	  gameLiveRoomEnabled: formData.gameLiveRoomEnabled,
+	  voiceChatLiveRoomEnabled: formData.voiceChatLiveRoomEnabled,
+	  oneToOneLiveRoomEnabled: formData.oneToOneLiveRoomEnabled,
 	  audienceListRefreshSeconds: formData.audienceListRefreshSeconds,
 	  oneToOneDailyFreeSeconds: formData.oneToOneDailyFreeSeconds,
       liveRoomCallMinTotalRechargeUsd: formData.liveRoomCallMinTotalRechargeUsd,

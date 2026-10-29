@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	monthlyGameLiveRoomJoinStatCacheMgr     *cache.RowCache[*entity.MonthlyGameLiveRoomJoinStat]
-	monthlyGameLiveRoomJoinStatListCacheMgr *cache.ListCache[*entity.MonthlyGameLiveRoomJoinStat]
 )
 
 func initMonthlyGameLiveRoomJoinStatDao() {
 	monthlyGameLiveRoomJoinStatCacheMgr = cache.NewRowCache[*entity.MonthlyGameLiveRoomJoinStat]()
-	monthlyGameLiveRoomJoinStatListCacheMgr = cache.NewPermanentListCache[*entity.MonthlyGameLiveRoomJoinStat]()
 }
 
 func GetMonthlyGameLiveRoomJoinStatByMonth(month string) *entity.MonthlyGameLiveRoomJoinStat {
@@ -39,10 +35,7 @@ func ListRecentMonthlyGameLiveRoomJoinStats(limit int) []*entity.MonthlyGameLive
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatMonthlyGameLiveRoomJoinStatKey(time.Now()))
-	return monthlyGameLiveRoomJoinStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.MonthlyGameLiveRoomJoinStat, error) {
-		return loadRecentMonthlyGameLiveRoomJoinStatsFromDB(limit), nil
-	})
+	return loadRecentMonthlyGameLiveRoomJoinStatsFromDB(limit)
 }
 
 func loadRecentMonthlyGameLiveRoomJoinStatsFromDB(limit int) []*entity.MonthlyGameLiveRoomJoinStat {

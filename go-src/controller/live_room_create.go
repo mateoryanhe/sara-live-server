@@ -14,6 +14,7 @@ import (
 	"xr-game-server/core/xrjson"
 	"xr-game-server/core/xrlog"
 	"xr-game-server/dto/liveroomdto"
+	liveentity "xr-game-server/entity/live"
 	"xr-game-server/errercode"
 	"xr-game-server/module/upload"
 )
@@ -135,6 +136,12 @@ func bindCreateRoomMultipartFields(fields map[string][]string) (*liveroomdto.Cre
 		return nil, err
 	}
 	if req.VoiceChatMicMode != 0 && req.VoiceChatMicMode != 1 && req.VoiceChatMicMode != 2 && req.VoiceChatMicMode != 3 {
+		return nil, errercode.CreateCode(errercode.InvalidParam)
+	}
+	if req.VoiceChatMicSeatCount, err = parseCreateRoomUint8(createRoomLastField(fields, "voiceChatMicSeatCount")); err != nil {
+		return nil, err
+	}
+	if req.VoiceChatMicSeatCount != 0 && (req.VoiceChatMicSeatCount < liveentity.MinVoiceChatMicSeatCount || req.VoiceChatMicSeatCount > liveentity.MaxVoiceChatMicSeatCount) {
 		return nil, errercode.CreateCode(errercode.InvalidParam)
 	}
 	if req.TagId, err = parseCreateRoomUint64(createRoomLastField(fields, "tagId")); err != nil {

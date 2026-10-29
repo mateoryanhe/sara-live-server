@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	weeklyMiniGameWebViewLoadStatCacheMgr     *cache.RowCache[*entity.WeeklyMiniGameWebViewLoadStat]
-	weeklyMiniGameWebViewLoadStatListCacheMgr *cache.ListCache[*entity.WeeklyMiniGameWebViewLoadStat]
 )
 
 func initWeeklyMiniGameWebViewLoadStatDao() {
 	weeklyMiniGameWebViewLoadStatCacheMgr = cache.NewRowCache[*entity.WeeklyMiniGameWebViewLoadStat]()
-	weeklyMiniGameWebViewLoadStatListCacheMgr = cache.NewPermanentListCache[*entity.WeeklyMiniGameWebViewLoadStat]()
 }
 
 func GetWeeklyMiniGameWebViewLoadStatByWeek(week string) *entity.WeeklyMiniGameWebViewLoadStat {
@@ -39,10 +35,7 @@ func ListRecentWeeklyMiniGameWebViewLoadStats(limit int) []*entity.WeeklyMiniGam
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatWeeklyMiniGameWebViewLoadStatKey(time.Now()))
-	return weeklyMiniGameWebViewLoadStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.WeeklyMiniGameWebViewLoadStat, error) {
-		return loadRecentWeeklyMiniGameWebViewLoadStatsFromDB(limit), nil
-	})
+	return loadRecentWeeklyMiniGameWebViewLoadStatsFromDB(limit)
 }
 
 func loadRecentWeeklyMiniGameWebViewLoadStatsFromDB(limit int) []*entity.WeeklyMiniGameWebViewLoadStat {

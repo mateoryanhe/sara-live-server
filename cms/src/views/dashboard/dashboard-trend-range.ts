@@ -61,11 +61,13 @@ export function matchDashboardTrendPresetDays(range: [string, string] | null): n
  */
 export function buildDashboardResourceMetricTrendQuery(
     _days: number = DASHBOARD_RESOURCE_METRIC_RETENTION_DAYS,
+    bypassDashboardCache = false,
 ) {
   return {
     startTime: '',
     endTime: '',
     limit: DASHBOARD_ONLINE_TREND_POINT_LIMIT,
+    bypassDashboardCache,
   }
 }
 

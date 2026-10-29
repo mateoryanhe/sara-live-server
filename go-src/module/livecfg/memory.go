@@ -19,6 +19,9 @@ type liveCfgSnapshot struct {
 	OneToOneDailyFreeSeconds        uint32
 	LiveRoomCallMinTotalRechargeUsd float64
 	ShowcaseLiveRoomEnabled         bool
+	GameLiveRoomEnabled             bool
+	VoiceChatLiveRoomEnabled        bool
+	OneToOneLiveRoomEnabled         bool
 }
 
 var (
@@ -32,6 +35,7 @@ var (
 )
 
 func reloadLiveCfgMemory() {
+	// 启动与 CMS saveLiveCfg 后：从 live_cfgs 表加载并写入进程内快照
 	liveCfgCache.Store(toLiveCfgSnapshot(cfgdao.LoadLiveCfg()))
 }
 
@@ -65,6 +69,9 @@ func toLiveCfgSnapshot(row *entity.LiveCfg) *liveCfgSnapshot {
 		OneToOneDailyFreeSeconds:          NormalizeOneToOneDailyFreeSeconds(row.OneToOneDailyFreeSeconds),
 		LiveRoomCallMinTotalRechargeUsd: NormalizeLiveRoomCallMinTotalRechargeUsd(row.LiveRoomCallMinTotalRechargeUsd),
 		ShowcaseLiveRoomEnabled:         row.ShowcaseLiveRoomEnabled,
+		GameLiveRoomEnabled:             row.GameLiveRoomEnabled,
+		VoiceChatLiveRoomEnabled:        row.VoiceChatLiveRoomEnabled,
+		OneToOneLiveRoomEnabled:         row.OneToOneLiveRoomEnabled,
 	}
 }
 
@@ -121,8 +128,23 @@ func GetLiveRoomCallMinTotalRechargeUSD() float64 {
 	return getLiveCfgCache().LiveRoomCallMinTotalRechargeUsd
 }
 
-// IsShowcaseLiveRoomEnabled 秀场直播间(category=1)是否允许开播；未配置时默认关闭。
+// IsShowcaseLiveRoomEnabled App 是否展示秀场直播间入口；未配置时默认关闭。
 func IsShowcaseLiveRoomEnabled() bool {
 	return getLiveCfgCache().ShowcaseLiveRoomEnabled
+}
+
+// IsGameLiveRoomEnabled App 是否展示游戏直播间入口；未配置时默认关闭。
+func IsGameLiveRoomEnabled() bool {
+	return getLiveCfgCache().GameLiveRoomEnabled
+}
+
+// IsVoiceChatLiveRoomEnabled App 是否展示语聊房入口；未配置时默认关闭。
+func IsVoiceChatLiveRoomEnabled() bool {
+	return getLiveCfgCache().VoiceChatLiveRoomEnabled
+}
+
+// IsOneToOneLiveRoomEnabled App 是否展示 1v1 房间页面/入口；未配置时默认关闭。
+func IsOneToOneLiveRoomEnabled() bool {
+	return getLiveCfgCache().OneToOneLiveRoomEnabled
 }
 

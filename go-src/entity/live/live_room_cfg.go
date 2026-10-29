@@ -15,6 +15,7 @@ const (
 	LiveRoomCfgPrivateInviteType        db.TbCol = "private_invite_type"
 	LiveRoomCfgCategory                 db.TbCol = "category"
 	LiveRoomCfgVoiceChatMicMode         db.TbCol = "voice_chat_mic_mode"
+	LiveRoomCfgVoiceChatMicSeatCount   db.TbCol = "voice_chat_mic_seat_count"
 	LiveRoomCfgTagId                    db.TbCol = "tag_id"
 	LiveRoomCfgTicket                   db.TbCol = "ticket"
 	LiveRoomCfgBilling                  db.TbCol = "billing"
@@ -42,6 +43,7 @@ type LiveRoomCfg struct {
 	PrivateInviteType        uint8      `gorm:"default:1;comment:视频通话邀请类型(1=接受所有人,3=拒绝所有人)" json:"privateInviteType"`
 	Category                 uint8      `gorm:"default:1;comment:分类(1=hot,2=game,5=voice chat)" json:"category"`
 	VoiceChatMicMode         uint8      `gorm:"default:0;comment:语聊上麦方式(1=自由,2=申请,3=房主单麦)" json:"voiceChatMicMode"`
+	VoiceChatMicSeatCount    uint8      `gorm:"default:0;comment:语聊麦位总数(含主播位,0=默认25)" json:"voiceChatMicSeatCount"`
 	TagId                    uint64     `gorm:"default:0;comment:直播间标签ID" json:"tagId"`
 	Ticket                   float64    `gorm:"type:decimal(10,4);default:0;comment:直播间视频通话门票价格(钻石)" json:"ticket"`
 	Billing                  float64    `gorm:"type:decimal(10,4);default:0;comment:视频通话价格(每分钟钻石)" json:"billing"`
@@ -175,6 +177,45 @@ func (r *LiveRoomCfg) SetVoiceChatMicMode(v uint8) {
 	syndb.AddData(TbLiveRoomCfg, LiveRoomCfgVoiceChatMicMode, &syndb.ColData{IdVal: r.ID, ColVal: v})
 }
 
+// NormalizeVoiceChatMicSeatCount 语聊麦位总数(含主播位);库中 0 表示默认 25。
+func NormalizeVoiceChatMicSeatCount(v uint8) uint8 {
+	if v == 0 {
+		return DefaultVoiceChatMicSeatCount
+	}
+	if v < MinVoiceChatMicSeatCount {
+		return MinVoiceChatMicSeatCount
+	}
+	if v > MaxVoiceChatMicSeatCount {
+		return MaxVoiceChatMicSeatCount
+	}
+	return v
+}
+
+func clampVoiceChatMicSeatCountStored(v uint8) uint8 {
+	if v == 0 {
+		return 0
+	}
+	return NormalizeVoiceChatMicSeatCount(v)
+}
+
+// EffectiveVoiceChatMicSeatCount 当前房间语聊麦位总数(含主播位)。
+func (r *LiveRoomCfg) EffectiveVoiceChatMicSeatCount() int {
+	if r == nil {
+		return int(DefaultVoiceChatMicSeatCount)
+	}
+	return int(NormalizeVoiceChatMicSeatCount(r.VoiceChatMicSeatCount))
+}
+
+func (r *LiveRoomCfg) SetVoiceChatMicSeatCount(v uint8) {
+	v = clampVoiceChatMicSeatCountStored(v)
+	if r.VoiceChatMicSeatCount == v {
+		return
+	}
+	r.VoiceChatMicSeatCount = v
+	r.touchUpdatedAt()
+	syndb.AddData(TbLiveRoomCfg, LiveRoomCfgVoiceChatMicSeatCount, &syndb.ColData{IdVal: r.ID, ColVal: v})
+}
+
 func (r *LiveRoomCfg) SetTagId(v uint64) {
 	r.TagId = v
 	r.touchUpdatedAt()
@@ -256,6 +297,8 @@ func initLiveRoomCfg() {
 	syndb.RegQuick(TbLiveRoomCfg, db.UpdatedAtName)
 	syndb.RegQuick(TbLiveRoomCfg, LiveRoomCfgPrivateInviteType)
 	syndb.RegQuick(TbLiveRoomCfg, LiveRoomCfgCategory)
+	syndb.RegQuick(TbLiveRoomCfg, LiveRoomCfgVoiceChatMicMode)
+	syndb.RegQuick(TbLiveRoomCfg, LiveRoomCfgVoiceChatMicSeatCount)
 	syndb.RegQuick(TbLiveRoomCfg, LiveRoomCfgTagId)
 	syndb.RegQuick(TbLiveRoomCfg, LiveRoomCfgTicket)
 	syndb.RegQuick(TbLiveRoomCfg, LiveRoomCfgBilling)

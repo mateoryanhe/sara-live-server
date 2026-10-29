@@ -11,7 +11,8 @@ const OfficialSiteDownloadTrackingEvent event.Type = "OfficialSiteDownloadTracki
 const ShareShortLinkClickTrackingEvent event.Type = "ShareShortLinkClickTrackingEvent"
 
 type H5DownloadTrackingEventData struct {
-	StatAt time.Time
+	StatAt      time.Time
+	ChannelCode int // 推广渠道编码(>0 时计入渠道日统计)
 }
 
 type OfficialSiteDownloadTrackingEventData struct {
@@ -22,8 +23,8 @@ type ShareShortLinkClickTrackingEventData struct {
 	StatAt time.Time
 }
 
-func NewH5DownloadTrackingEventData(statAt time.Time) *H5DownloadTrackingEventData {
-	return &H5DownloadTrackingEventData{StatAt: statAt}
+func NewH5DownloadTrackingEventData(statAt time.Time, channelCode int) *H5DownloadTrackingEventData {
+	return &H5DownloadTrackingEventData{StatAt: statAt, ChannelCode: channelCode}
 }
 
 func NewOfficialSiteDownloadTrackingEventData(statAt time.Time) *OfficialSiteDownloadTrackingEventData {

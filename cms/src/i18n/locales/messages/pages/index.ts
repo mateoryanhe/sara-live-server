@@ -43,6 +43,7 @@ import {luckyGiftSettlementCfgMessages} from './lucky-gift-settlement-cfg'
 import {paymentCountryCfgMessages} from './payment-country-cfg'
 import {agoraCfgMessages} from './agora-cfg'
 import {billingListMessages} from './billing-list'
+import {voiceChatMicSeatTierListMessages} from './voice-chat-mic-seat-tier-list'
 import {liveConfigMessages} from './live-config'
 import {liveRoomTagListMessages} from './live-room-tag-list'
 import {revenueLogListMessages} from './revenue-log-list'
@@ -124,6 +125,7 @@ import {trackingShortVideoMessages} from './tracking-short-video'
 import {trackingVoiceChatRoomMessages} from './tracking-voice-chat-room'
 import {trackingRechargeMessages} from './tracking-recharge'
 import {trackingDownloadMessages} from './tracking-download'
+import {trackingMinuteLiveActivityMessages} from './tracking-minute-live-activity'
 import {shareAppDownloadMessages} from './share-app-download'
 
 const pageMessageBuilders = [
@@ -170,6 +172,7 @@ const pageMessageBuilders = [
   ['paymentCountryCfg', paymentCountryCfgMessages],
   ['agoraCfg', agoraCfgMessages],
   ['billingList', billingListMessages],
+  ['voiceChatMicSeatTierList', voiceChatMicSeatTierListMessages],
   ['liveConfig', liveConfigMessages],
   ['liveRoomTagList', liveRoomTagListMessages],
   ['revenueLogList', revenueLogListMessages],
@@ -250,6 +253,7 @@ const pageMessageBuilders = [
   ['trackingVoiceChatRoom', trackingVoiceChatRoomMessages],
   ['trackingRecharge', trackingRechargeMessages],
   ['trackingDownload', trackingDownloadMessages],
+  ['trackingMinuteLiveActivity', trackingMinuteLiveActivityMessages],
   ['shareAppDownload', shareAppDownloadMessages],
 ] as const
 

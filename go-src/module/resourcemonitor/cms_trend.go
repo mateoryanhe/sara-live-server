@@ -13,9 +13,8 @@ import (
 	"xr-game-server/entity/sys"
 )
 
-// cmsTrendCacheTTL 须覆盖默认分桶(10min),且远短于细采样全量(~26k点/条)永久堆积窗口。
-// 2026-10-25: 曾用 PermanentRowCache + 秒级 custom start/end,仪表盘轮询每分钟新 key→数 GB 泄漏。
-const cmsTrendCacheTTL = 10 * time.Minute
+// cmsTrendCacheTTL 与仪表盘 CMS 固定 5 分钟刷新对齐; 默认查询先读内存, 过期再查库.
+const cmsTrendCacheTTL = cache.DashboardCacheTTL
 
 var cmsTrendPointsCacheMgr *cache.RowCache[[]*trendPoint]
 
@@ -29,9 +28,10 @@ func cmsTrendPointsCache() *cache.RowCache[[]*trendPoint] {
 const trendTimeLayout = "2006-01-02 15:04:05"
 
 type trendQuery struct {
-	StartTime string
-	EndTime   string
-	Limit     int
+	StartTime            string
+	EndTime              string
+	Limit                int
+	BypassDashboardCache bool
 }
 
 // trendPoint 细采样 CMS 映射
@@ -55,7 +55,7 @@ type trendPoint struct {
 }
 
 func GetCMSResourceMetricMemoryTrend(_ context.Context, req *resourcemetricdto.CMSResourceMetricMemoryTrendReq) (*resourcemetricdto.CMSResourceMetricMemoryTrendRes, error) {
-	rows := listTrendPoints(toTrendQuery(req.StartTime, req.EndTime, req.Limit))
+	rows := listTrendPoints(toTrendQuery(req.StartTime, req.EndTime, req.Limit, req.BypassDashboardCache))
 	points := make([]*resourcemetricdto.CMSResourceMetricMemoryPoint, 0, len(rows))
 	for _, row := range rows {
 		if row == nil {
@@ -73,7 +73,7 @@ func GetCMSResourceMetricMemoryTrend(_ context.Context, req *resourcemetricdto.C
 }
 
 func GetCMSResourceMetricHeapTrend(_ context.Context, req *resourcemetricdto.CMSResourceMetricHeapTrendReq) (*resourcemetricdto.CMSResourceMetricHeapTrendRes, error) {
-	rows := listTrendPoints(toTrendQuery(req.StartTime, req.EndTime, req.Limit))
+	rows := listTrendPoints(toTrendQuery(req.StartTime, req.EndTime, req.Limit, false))
 	points := make([]*resourcemetricdto.CMSResourceMetricHeapPoint, 0, len(rows))
 	for _, row := range rows {
 		if row == nil {
@@ -90,7 +90,7 @@ func GetCMSResourceMetricHeapTrend(_ context.Context, req *resourcemetricdto.CMS
 }
 
 func GetCMSResourceMetricRatioTrend(_ context.Context, req *resourcemetricdto.CMSResourceMetricRatioTrendReq) (*resourcemetricdto.CMSResourceMetricRatioTrendRes, error) {
-	rows := listTrendPoints(toTrendQuery(req.StartTime, req.EndTime, req.Limit))
+	rows := listTrendPoints(toTrendQuery(req.StartTime, req.EndTime, req.Limit, false))
 	points := make([]*resourcemetricdto.CMSResourceMetricRatioPoint, 0, len(rows))
 	for _, row := range rows {
 		if row == nil {
@@ -106,7 +106,7 @@ func GetCMSResourceMetricRatioTrend(_ context.Context, req *resourcemetricdto.CM
 }
 
 func GetCMSResourceMetricCpuTrend(_ context.Context, req *resourcemetricdto.CMSResourceMetricCpuTrendReq) (*resourcemetricdto.CMSResourceMetricCpuTrendRes, error) {
-	rows := listTrendPoints(toTrendQuery(req.StartTime, req.EndTime, req.Limit))
+	rows := listTrendPoints(toTrendQuery(req.StartTime, req.EndTime, req.Limit, false))
 	points := make([]*resourcemetricdto.CMSResourceMetricCpuPoint, 0, len(rows))
 	for _, row := range rows {
 		if row == nil {
@@ -123,7 +123,7 @@ func GetCMSResourceMetricCpuTrend(_ context.Context, req *resourcemetricdto.CMSR
 
 func GetCMSResourceMetricGameStatTrend(_ context.Context, req *resourcemetricdto.CMSResourceMetricGameStatTrendReq) (*resourcemetricdto.CMSResourceMetricGameStatTrendRes, error) {
 	limit := resolveTrendLimit(req.Limit)
-	rows := listTrendPoints(toTrendQuery(req.StartTime, req.EndTime, req.Limit))
+	rows := listTrendPoints(toTrendQuery(req.StartTime, req.EndTime, req.Limit, req.BypassDashboardCache))
 	points := make([]*resourcemetricdto.CMSResourceMetricGameStatPoint, 0, len(rows))
 	for _, row := range rows {
 		if row == nil {
@@ -144,7 +144,7 @@ func GetCMSResourceMetricGameStatTrend(_ context.Context, req *resourcemetricdto
 
 func GetCMSResourceMetricOnlineTrend(_ context.Context, req *resourcemetricdto.CMSResourceMetricOnlineTrendReq) (*resourcemetricdto.CMSResourceMetricOnlineTrendRes, error) {
 	limit := resolveTrendLimit(req.Limit)
-	rows := listTrendPoints(toTrendQuery(req.StartTime, req.EndTime, limit))
+	rows := listTrendPoints(toTrendQuery(req.StartTime, req.EndTime, limit, req.BypassDashboardCache))
 	points := make([]*resourcemetricdto.CMSResourceMetricOnlinePoint, 0, len(rows))
 	for _, row := range rows {
 		if row == nil {
@@ -171,8 +171,13 @@ func audienceOnlineCount(total, liveAnchors uint64) uint64 {
 	return total - liveAnchors
 }
 
-func toTrendQuery(startTime, endTime string, limit int) trendQuery {
-	return trendQuery{StartTime: startTime, EndTime: endTime, Limit: limit}
+func toTrendQuery(startTime, endTime string, limit int, bypassDashboardCache bool) trendQuery {
+	return trendQuery{
+		StartTime:            startTime,
+		EndTime:              endTime,
+		Limit:                limit,
+		BypassDashboardCache: bypassDashboardCache,
+	}
 }
 
 func listTrendPoints(q trendQuery) []*trendPoint {
@@ -182,7 +187,15 @@ func listTrendPoints(q trendQuery) []*trendPoint {
 		return loadTrendPointsFromDB(q)
 	}
 	key := cmsTrendQueryCacheKey(q)
-	return cmsTrendPointsCache().MustGetRow(gctx.New(), key, func(ctx context.Context) ([]*trendPoint, error) {
+	mgr := cmsTrendPointsCache()
+	if q.BypassDashboardCache {
+		rows := loadTrendPointsFromDB(q)
+		if mgr != nil {
+			_ = mgr.SetRow(gctx.New(), key, rows)
+		}
+		return rows
+	}
+	return mgr.MustGetRow(gctx.New(), key, func(ctx context.Context) ([]*trendPoint, error) {
 		return loadTrendPointsFromDB(q), nil
 	})
 }
@@ -193,10 +206,10 @@ func loadTrendPointsFromDB(q trendQuery) []*trendPoint {
 	return fineToTrendPoints(resourcemetricdao.ListFineByTimeRange(start, end, limit))
 }
 
-// cmsTrendQueryCacheKey 仅默认查询(无 start/end)使用;按 10 分钟分桶,配合 TTL 避免永久堆积.
+// cmsTrendQueryCacheKey 仅默认查询(无 start/end)使用;按 5 分钟分桶,配合 TTL.
 func cmsTrendQueryCacheKey(q trendQuery) string {
 	limit := resolveTrendLimit(q.Limit)
-	bucket := time.Now().Unix() / (10 * 60)
+	bucket := time.Now().Unix() / int64(cache.DashboardCacheTTL/time.Second)
 	return fmt.Sprintf("default:%d:fine:%d", limit, bucket)
 }
 

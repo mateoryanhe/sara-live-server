@@ -18,7 +18,10 @@ type LiveCfg struct {
 	OneToOneDailyFreeSeconds          uint32  `gorm:"default:30;comment:1v1观众对单主播每日免费通话秒数(0=关闭)" json:"oneToOneDailyFreeSeconds"`
 	LiveRoomCallMinTotalRechargeUsd   float64 `gorm:"type:decimal(16,2);default:10;comment:直播间视频通话按钮显示最低累计充值(USD)" json:"liveRoomCallMinTotalRechargeUsd"`
 	LuckyGiftRtp                      float64 `gorm:"type:decimal(10,4);default:0;comment:幸运礼物RTP(百分比,0-100)" json:"luckyGiftRtp"`
-	ShowcaseLiveRoomEnabled           bool    `gorm:"default:0;comment:秀场直播间(category=1)是否允许开播" json:"showcaseLiveRoomEnabled"`
+	ShowcaseLiveRoomEnabled           bool    `gorm:"default:0;comment:App是否展示秀场直播间入口(category=1)" json:"showcaseLiveRoomEnabled"`
+	GameLiveRoomEnabled               bool    `gorm:"default:0;comment:App是否展示游戏直播间入口(category=2)" json:"gameLiveRoomEnabled"`
+	VoiceChatLiveRoomEnabled          bool    `gorm:"default:0;comment:App是否展示语聊房入口(category=5)" json:"voiceChatLiveRoomEnabled"`
+	OneToOneLiveRoomEnabled           bool    `gorm:"default:0;comment:App是否展示1v1房间页面/入口" json:"oneToOneLiveRoomEnabled"`
 }
 
 func initLiveCfg() {

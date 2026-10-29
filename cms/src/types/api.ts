@@ -73,6 +73,7 @@ export interface UserStatTrendQuery {
     granularity?: 'daily' | 'weekly' | 'monthly'
     startDate?: string
     endDate?: string
+    bypassDashboardCache?: boolean
 }
 
 export interface UserStatTrend {
@@ -95,6 +96,30 @@ export interface HotLiveRoomJoinTrendRes {
     daily: TrackingEventTrendPoint[]
     weekly: TrackingEventTrendPoint[]
     monthly: TrackingEventTrendPoint[]
+}
+
+export interface MinuteLiveActivityTrendQuery {
+    startTime?: number
+    endTime?: number
+    limit?: number
+    bypassDashboardCache?: boolean
+}
+
+export interface MinuteLiveActivityTrendPoint {
+    time: string
+    joinCount: number
+    leaveCount: number
+    giftCount: number
+    chatCount: number
+    betCount: number
+    call1v1Count: number
+    rechargeOrderCount: number
+}
+
+export interface MinuteLiveActivityTrendRes {
+    points: MinuteLiveActivityTrendPoint[]
+    rangeTruncated?: boolean
+    trendMaxPoints?: number
 }
 
 export interface GameBetUserTrendPoint {
@@ -161,6 +186,7 @@ export interface ResourceMetricTrendQuery {
     startTime?: string
     endTime?: string
     limit?: number
+    bypassDashboardCache?: boolean
 }
 
 // 登录请求类型
@@ -355,6 +381,8 @@ export interface QueryAnchorListReq extends PageQuery {
     guildId?: string | number
     platformOnly?: boolean
     guildOnly?: boolean
+    /** 工会可见性 + 平台主播可见性（非管理员） */
+    visibilityScoped?: boolean
     liveStatus?: number
 }
 
@@ -998,6 +1026,7 @@ export interface PromotionChannelDailyStatRow {
     channelName: string
     channelCode: number
     registerCount: number
+    h5DownloadApkCount: number
     orderCount: number
     payUserCount: number
     orderTotalAmount: number
@@ -2071,6 +2100,9 @@ export interface LiveCfg {
 	oneToOneDailyFreeSeconds: number
     liveRoomCallMinTotalRechargeUsd: number
     showcaseLiveRoomEnabled: boolean
+    gameLiveRoomEnabled: boolean
+    voiceChatLiveRoomEnabled: boolean
+    oneToOneLiveRoomEnabled: boolean
     createdAt: string
     updatedAt: string
 }
@@ -2087,6 +2119,9 @@ export interface SaveLiveCfgReq {
 	oneToOneDailyFreeSeconds: number
     liveRoomCallMinTotalRechargeUsd: number
     showcaseLiveRoomEnabled: boolean
+    gameLiveRoomEnabled: boolean
+    voiceChatLiveRoomEnabled: boolean
+    oneToOneLiveRoomEnabled: boolean
 }
 
 export interface SaveLiveCfgRes {

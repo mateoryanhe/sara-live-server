@@ -37,12 +37,11 @@ const zh = {
   fetchCfgFailed: '获取配置失败',
   saveSuccess: '保存成功',
   saveFailed: '保存失败',
-  syncFromSara: '同步数据',
-  syncTitle: '从隐私政策同步',
-  syncConfirm: '将用「隐私政策」页的 URL 配置覆盖本页（保留包名）并立即保存。是否继续？',
-  syncEmpty: '隐私政策页尚无配置可同步',
-  syncSuccess: '已从隐私政策同步并保存',
-  syncFailed: '同步失败',
+  syncToTargetConfirm: '确定将当前 Sofie 隐私政策配置同步到「数据同步配置」中的目标环境（如测试服）？',
+  syncNeedSave: '请先保存配置后再同步到目标环境',
+  syncToTargetSuccess: '已同步到目标环境',
+  syncToTargetFailed: '同步到目标环境失败',
+  syncToTargetFailedCheckConfig: '同步失败，请检查「数据同步配置」中的目标地址与 Token',
 }
 
 const en = {
@@ -82,12 +81,11 @@ const en = {
   fetchCfgFailed: 'Failed to load config',
   saveSuccess: 'Saved',
   saveFailed: 'Save failed',
-  syncFromSara: 'Sync data',
-  syncTitle: 'Sync from Privacy Policy',
-  syncConfirm: 'Overwrite this page with Privacy Policy URLs (keep package name) and save now. Continue?',
-  syncEmpty: 'Privacy Policy page has no config to sync',
-  syncSuccess: 'Synced from Privacy Policy and saved',
-  syncFailed: 'Sync failed',
+  syncToTargetConfirm: 'Sync current Sofie privacy policy config to the target in Data Sync settings (e.g. test server)?',
+  syncNeedSave: 'Save config before syncing to target',
+  syncToTargetSuccess: 'Synced to target environment',
+  syncToTargetFailed: 'Failed to sync to target',
+  syncToTargetFailedCheckConfig: 'Sync failed; check target URL and token in Data Sync settings',
 }
 
 const es = {
@@ -127,12 +125,11 @@ const es = {
   fetchCfgFailed: 'Error al cargar la configuración',
   saveSuccess: 'Guardado',
   saveFailed: 'Error al guardar',
-  syncFromSara: 'Sincronizar',
-  syncTitle: 'Sincronizar desde Política de privacidad',
-  syncConfirm: 'Sobrescribirá las URL con la Política de privacidad (conserva el paquete) y guardará. ¿Continuar?',
-  syncEmpty: 'No hay configuración en Política de privacidad',
-  syncSuccess: 'Sincronizado y guardado',
-  syncFailed: 'Error al sincronizar',
+  syncToTargetConfirm: '¿Sincronizar la config de privacidad Sofie al entorno destino (p. ej. pruebas)?',
+  syncNeedSave: 'Guarde la configuración antes de sincronizar al destino',
+  syncToTargetSuccess: 'Sincronizado al entorno destino',
+  syncToTargetFailed: 'Error al sincronizar al destino',
+  syncToTargetFailedCheckConfig: 'Error al sincronizar; revise URL destino y token en Sincronización de datos',
 }
 
 const pt = {
@@ -172,12 +169,11 @@ const pt = {
   fetchCfgFailed: 'Falha ao carregar configuração',
   saveSuccess: 'Salvo',
   saveFailed: 'Falha ao salvar',
-  syncFromSara: 'Sincronizar',
-  syncTitle: 'Sincronizar da Política de privacidade',
-  syncConfirm: 'Sobrescreverá as URLs com a Política de privacidade (mantém o pacote) e salvará. Continuar?',
-  syncEmpty: 'Política de privacidade sem configuração',
-  syncSuccess: 'Sincronizado e salvo',
-  syncFailed: 'Falha ao sincronizar',
+  syncToTargetConfirm: 'Sincronizar config de privacidade Sofie para o ambiente de destino (ex.: teste)?',
+  syncNeedSave: 'Salve a configuração antes de sincronizar ao destino',
+  syncToTargetSuccess: 'Sincronizado ao ambiente de destino',
+  syncToTargetFailed: 'Falha ao sincronizar ao destino',
+  syncToTargetFailedCheckConfig: 'Falha ao sincronizar; verifique URL e token em Sincronização de dados',
 }
 
 const hi = {
@@ -217,12 +213,11 @@ const hi = {
   fetchCfgFailed: 'कॉन्फ़िग लोड विफल',
   saveSuccess: 'सहेजा गया',
   saveFailed: 'सहेजना विफल',
-  syncFromSara: 'डेटा सिंक',
-  syncTitle: 'गोपनीयता नीति से सिंक',
-  syncConfirm: 'गोपनीयता नीति के URL से ओवरराइट (पैकेज रखें) और तुरंत सेव। जारी?',
-  syncEmpty: 'गोपनीयता नीति में सिंक करने को कुछ नहीं',
-  syncSuccess: 'सिंक करके सेव किया',
-  syncFailed: 'सिंक विफल',
+  syncToTargetConfirm: 'वर्तमान Sofie गोपनीयता कॉन्फ़िग लक्ष्य पर सिंक करें (जैसे टेस्ट)?',
+  syncNeedSave: 'लक्ष्य पर सिंक से पहले कॉन्फ़िग सेव करें',
+  syncToTargetSuccess: 'लक्ष्य पर सिंक हो गया',
+  syncToTargetFailed: 'लक्ष्य पर सिंक विफल',
+  syncToTargetFailedCheckConfig: 'सिंक विफल; डेटा सिंक में URL और टोकन जाँचें',
 }
 
 const id = {
@@ -262,12 +257,11 @@ const id = {
   fetchCfgFailed: 'Gagal memuat konfigurasi',
   saveSuccess: 'Tersimpan',
   saveFailed: 'Gagal menyimpan',
-  syncFromSara: 'Sinkron data',
-  syncTitle: 'Sinkron dari Kebijakan privasi',
-  syncConfirm: 'Menimpa URL dari Kebijakan privasi (paket tetap) lalu simpan. Lanjutkan?',
-  syncEmpty: 'Kebijakan privasi belum ada data',
-  syncSuccess: 'Disinkronkan dan disimpan',
-  syncFailed: 'Gagal sinkron',
+  syncToTargetConfirm: 'Sinkronkan config kebijakan privasi Sofie ke lingkungan target (mis. uji)?',
+  syncNeedSave: 'Simpan config sebelum sinkron ke target',
+  syncToTargetSuccess: 'Tersinkron ke lingkungan target',
+  syncToTargetFailed: 'Gagal sinkron ke target',
+  syncToTargetFailedCheckConfig: 'Gagal sinkron; periksa URL target dan token di Sync Data',
 }
 
 export const sofiePrivacyPolicyMessages = definePageMessages(zh, en, es, pt, hi, id)

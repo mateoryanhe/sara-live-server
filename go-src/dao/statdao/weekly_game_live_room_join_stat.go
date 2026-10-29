@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	weeklyGameLiveRoomJoinStatCacheMgr     *cache.RowCache[*entity.WeeklyGameLiveRoomJoinStat]
-	weeklyGameLiveRoomJoinStatListCacheMgr *cache.ListCache[*entity.WeeklyGameLiveRoomJoinStat]
 )
 
 func initWeeklyGameLiveRoomJoinStatDao() {
 	weeklyGameLiveRoomJoinStatCacheMgr = cache.NewRowCache[*entity.WeeklyGameLiveRoomJoinStat]()
-	weeklyGameLiveRoomJoinStatListCacheMgr = cache.NewPermanentListCache[*entity.WeeklyGameLiveRoomJoinStat]()
 }
 
 func GetWeeklyGameLiveRoomJoinStatByWeek(week string) *entity.WeeklyGameLiveRoomJoinStat {
@@ -39,10 +35,7 @@ func ListRecentWeeklyGameLiveRoomJoinStats(limit int) []*entity.WeeklyGameLiveRo
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatWeeklyGameLiveRoomJoinStatKey(time.Now()))
-	return weeklyGameLiveRoomJoinStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.WeeklyGameLiveRoomJoinStat, error) {
-		return loadRecentWeeklyGameLiveRoomJoinStatsFromDB(limit), nil
-	})
+	return loadRecentWeeklyGameLiveRoomJoinStatsFromDB(limit)
 }
 
 func loadRecentWeeklyGameLiveRoomJoinStatsFromDB(limit int) []*entity.WeeklyGameLiveRoomJoinStat {

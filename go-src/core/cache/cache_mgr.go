@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/gogf/gf/v2/os/gcache"
@@ -10,7 +11,20 @@ import (
 
 const (
 	CacheTime = 30 * time.Minute
+	// DashboardCacheTTL 仪表盘 CMS 读库结果缓存(与前端固定 5 分钟自动刷新对齐)
+	DashboardCacheTTL = 5 * time.Minute
 )
+
+// DashboardCMSCacheBucketKey 墙钟分桶缓存 key。
+// RowCache.GetRow 命中后会 UpdateExpire，若 key 固定则 5 分钟轮询会滑动续期、几乎永不 rebuild；
+// 分桶后每个墙钟窗口独立 key，到期自然 miss 并重新组装/查库。
+func DashboardCMSCacheBucketKey(suffix string) string {
+	if suffix == "" {
+		suffix = "default"
+	}
+	bucket := time.Now().Unix() / int64(DashboardCacheTTL/time.Second)
+	return fmt.Sprintf("%s:%d", suffix, bucket)
+}
 
 // Loader 缓存未命中时加载数据.
 type Loader[T any] func(ctx context.Context) (T, error)
@@ -241,9 +255,18 @@ type ListCache[T any] struct {
 }
 
 func NewListCache[T any]() *ListCache[T] {
+	return NewListCacheWithTTL[T](CacheTime)
+}
+
+func NewListCacheWithTTL[T any](ttl time.Duration) *ListCache[T] {
 	return &ListCache[T]{
-		core: &cacheCore[[]T]{cache: gcache.New(), ttl: CacheTime},
+		core: &cacheCore[[]T]{cache: gcache.New(), ttl: ttl},
 	}
+}
+
+// NewDashboardListCache 仪表盘周/月 ListRecent 查库结果缓存
+func NewDashboardListCache[T any]() *ListCache[T] {
+	return NewListCacheWithTTL[T](DashboardCacheTTL)
 }
 
 func NewPermanentListCache[T any]() *ListCache[T] {

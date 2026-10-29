@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	weeklyVoiceRoomMicRequestStatCacheMgr     *cache.RowCache[*entity.WeeklyVoiceRoomMicRequestStat]
-	weeklyVoiceRoomMicRequestStatListCacheMgr *cache.ListCache[*entity.WeeklyVoiceRoomMicRequestStat]
 )
 
 func initWeeklyVoiceRoomMicRequestStatDao() {
 	weeklyVoiceRoomMicRequestStatCacheMgr = cache.NewRowCache[*entity.WeeklyVoiceRoomMicRequestStat]()
-	weeklyVoiceRoomMicRequestStatListCacheMgr = cache.NewPermanentListCache[*entity.WeeklyVoiceRoomMicRequestStat]()
 }
 
 func GetWeeklyVoiceRoomMicRequestStatByWeek(week string) *entity.WeeklyVoiceRoomMicRequestStat {
@@ -39,10 +35,7 @@ func ListRecentWeeklyVoiceRoomMicRequestStats(limit int) []*entity.WeeklyVoiceRo
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatWeeklyVoiceRoomMicRequestStatKey(time.Now()))
-	return weeklyVoiceRoomMicRequestStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.WeeklyVoiceRoomMicRequestStat, error) {
-		return loadRecentWeeklyVoiceRoomMicRequestStatsFromDB(limit), nil
-	})
+	return loadRecentWeeklyVoiceRoomMicRequestStatsFromDB(limit)
 }
 
 func loadRecentWeeklyVoiceRoomMicRequestStatsFromDB(limit int) []*entity.WeeklyVoiceRoomMicRequestStat {

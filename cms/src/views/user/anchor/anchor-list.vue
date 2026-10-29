@@ -8,7 +8,7 @@
 
         <div class="card-header">
 
-          <span>{{ t('menu.AnchorListManagement') }}</span>
+          <span>{{ visibilityScoped ? t('menu.GuildAnchorListManagement') : t('menu.AnchorListManagement') }}</span>
 
           <div class="header-actions">
             <el-button
@@ -482,7 +482,7 @@ import {computed, onMounted, reactive, ref} from 'vue'
 
 import {useI18n} from 'vue-i18n'
 
-import {useRouter} from 'vue-router'
+import {useRoute, useRouter} from 'vue-router'
 
 import {ElForm, ElMessage, ElMessageBox, type FormRules, type UploadRequestOptions} from 'element-plus'
 
@@ -499,9 +499,14 @@ import {formatServerDateTime as formatDate, formatServerNowPlusDays} from '@/uti
 
 const {t} = useI18n()
 
+const route = useRoute()
 const router = useRouter()
-const {can} = usePagePermission('AnchorListManagement')
-const {canViewUserDetail, openUserDetail} = useUserDetailNav('AnchorListManagement')
+const visibilityScoped = computed(() => Boolean(route.meta.visibilityScoped))
+const pagePermissionName = computed(() =>
+    visibilityScoped.value ? 'GuildAnchorListManagement' : String(route.name ?? 'AnchorListManagement'),
+)
+const {can} = usePagePermission(pagePermissionName)
+const {canViewUserDetail, openUserDetail} = useUserDetailNav(pagePermissionName)
 const canViewDetail = computed(() => can('viewDetail'))
 const canViewGuildDetail = computed(() => can('viewGuildDetail'))
 const canBatchShelf = computed(() => can('offShelf') || can('onShelf') || can('batchOffShelf') || can('batchOnShelf'))
@@ -662,6 +667,8 @@ const fetchList = async () => {
       pageSize: pagination.pageSize,
 
       key: searchForm.key,
+
+      ...(visibilityScoped.value ? {visibilityScoped: true} : {}),
 
     })
 

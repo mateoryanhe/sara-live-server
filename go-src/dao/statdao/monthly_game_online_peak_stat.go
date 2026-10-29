@@ -19,7 +19,7 @@ var (
 
 func initMonthlyGameOnlinePeakStatDao() {
 	monthlyGameOnlinePeakStatCacheMgr = cache.NewRowCache[*entity.MonthlyGameOnlinePeakStat]()
-	monthlyGameOnlinePeakStatListCacheMgr = cache.NewPermanentListCache[*entity.MonthlyGameOnlinePeakStat]()
+	monthlyGameOnlinePeakStatListCacheMgr = cache.NewDashboardListCache[*entity.MonthlyGameOnlinePeakStat]()
 }
 
 func GetMonthlyGameOnlinePeakStatByMonth(month string) *entity.MonthlyGameOnlinePeakStat {

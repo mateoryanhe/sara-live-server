@@ -309,7 +309,7 @@ type LiveRoomGiftPushResp struct {
 
 // LiveRoomLuckyGiftPayoutPushReq cmd=46 幸运礼物返奖(推送给送礼人)
 type LiveRoomLuckyGiftPayoutPushReq struct {
-	g.Meta `path:"/liveRoomLuckyGiftPayout" method:"post" summary:"推送 cmd=46 幸运礼物返奖(按挡位路由)" description:"RTP中奖且返奖>0时推送;luckyGiftTierType=low仅送礼人,medium当前直播间在线用户,high全服Broadcast;含CMS挡位type与返奖信息" tags:"推送-直播间"`
+	g.Meta `path:"/liveRoomLuckyGiftPayout" method:"post" summary:"推送 cmd=46 幸运礼物返奖(按挡位路由)" description:"有返奖时推送一次; luckyGiftTierSummary 为连抽各挡位 winCount/totalPayout/maxMultiplier/multiplierItems 累加; luckyGiftTierType 为飘屏路由(取最高挡位): low仅送礼人, medium本房, high全服" tags:"推送-直播间"`
 }
 
 type LiveRoomLuckyGiftPayoutPushResp struct {

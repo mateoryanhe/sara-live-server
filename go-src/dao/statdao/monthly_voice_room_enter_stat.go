@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	monthlyVoiceRoomEnterStatCacheMgr     *cache.RowCache[*entity.MonthlyVoiceRoomEnterStat]
-	monthlyVoiceRoomEnterStatListCacheMgr *cache.ListCache[*entity.MonthlyVoiceRoomEnterStat]
 )
 
 func initMonthlyVoiceRoomEnterStatDao() {
 	monthlyVoiceRoomEnterStatCacheMgr = cache.NewRowCache[*entity.MonthlyVoiceRoomEnterStat]()
-	monthlyVoiceRoomEnterStatListCacheMgr = cache.NewPermanentListCache[*entity.MonthlyVoiceRoomEnterStat]()
 }
 
 func GetMonthlyVoiceRoomEnterStatByMonth(month string) *entity.MonthlyVoiceRoomEnterStat {
@@ -39,10 +35,7 @@ func ListRecentMonthlyVoiceRoomEnterStats(limit int) []*entity.MonthlyVoiceRoomE
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatMonthlyVoiceRoomEnterStatKey(time.Now()))
-	return monthlyVoiceRoomEnterStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.MonthlyVoiceRoomEnterStat, error) {
-		return loadRecentMonthlyVoiceRoomEnterStatsFromDB(limit), nil
-	})
+	return loadRecentMonthlyVoiceRoomEnterStatsFromDB(limit)
 }
 
 func loadRecentMonthlyVoiceRoomEnterStatsFromDB(limit int) []*entity.MonthlyVoiceRoomEnterStat {

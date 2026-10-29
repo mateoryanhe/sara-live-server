@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	weeklyOfflineGameRoomPlayStatCacheMgr     *cache.RowCache[*entity.WeeklyOfflineGameRoomPlayStat]
-	weeklyOfflineGameRoomPlayStatListCacheMgr *cache.ListCache[*entity.WeeklyOfflineGameRoomPlayStat]
 )
 
 func initWeeklyOfflineGameRoomPlayStatDao() {
 	weeklyOfflineGameRoomPlayStatCacheMgr = cache.NewRowCache[*entity.WeeklyOfflineGameRoomPlayStat]()
-	weeklyOfflineGameRoomPlayStatListCacheMgr = cache.NewPermanentListCache[*entity.WeeklyOfflineGameRoomPlayStat]()
 }
 
 func GetWeeklyOfflineGameRoomPlayStatByWeek(week string) *entity.WeeklyOfflineGameRoomPlayStat {
@@ -39,10 +35,7 @@ func ListRecentWeeklyOfflineGameRoomPlayStats(limit int) []*entity.WeeklyOffline
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatWeeklyOfflineGameRoomPlayStatKey(time.Now()))
-	return weeklyOfflineGameRoomPlayStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.WeeklyOfflineGameRoomPlayStat, error) {
-		return loadRecentWeeklyOfflineGameRoomPlayStatsFromDB(limit), nil
-	})
+	return loadRecentWeeklyOfflineGameRoomPlayStatsFromDB(limit)
 }
 
 func loadRecentWeeklyOfflineGameRoomPlayStatsFromDB(limit int) []*entity.WeeklyOfflineGameRoomPlayStat {

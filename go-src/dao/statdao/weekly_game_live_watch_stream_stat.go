@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	weeklyGameLiveWatchStreamStatCacheMgr     *cache.RowCache[*entity.WeeklyGameLiveWatchStreamStat]
-	weeklyGameLiveWatchStreamStatListCacheMgr *cache.ListCache[*entity.WeeklyGameLiveWatchStreamStat]
 )
 
 func initWeeklyGameLiveWatchStreamStatDao() {
 	weeklyGameLiveWatchStreamStatCacheMgr = cache.NewRowCache[*entity.WeeklyGameLiveWatchStreamStat]()
-	weeklyGameLiveWatchStreamStatListCacheMgr = cache.NewPermanentListCache[*entity.WeeklyGameLiveWatchStreamStat]()
 }
 
 func GetWeeklyGameLiveWatchStreamStatByWeek(week string) *entity.WeeklyGameLiveWatchStreamStat {
@@ -39,10 +35,7 @@ func ListRecentWeeklyGameLiveWatchStreamStats(limit int) []*entity.WeeklyGameLiv
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatWeeklyGameLiveWatchStreamStatKey(time.Now()))
-	return weeklyGameLiveWatchStreamStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.WeeklyGameLiveWatchStreamStat, error) {
-		return loadRecentWeeklyGameLiveWatchStreamStatsFromDB(limit), nil
-	})
+	return loadRecentWeeklyGameLiveWatchStreamStatsFromDB(limit)
 }
 
 func loadRecentWeeklyGameLiveWatchStreamStatsFromDB(limit int) []*entity.WeeklyGameLiveWatchStreamStat {

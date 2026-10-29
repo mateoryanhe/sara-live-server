@@ -45,6 +45,7 @@ var openAPIDocRoutes = []openAPIDocRoute{
 	{OldMethod: "post", OldPath: "/liveRoom/stopLive", NewPath: "/sofie/studio/endBroadcast", Tag: "studio", Summary: "下播"},
 	{OldMethod: "post", OldPath: "/liveRoom/updateCover", NewPath: "/sofie/studio/replaceCover", Tag: "studio", Summary: "修改封面"},
 	{OldMethod: "post", OldPath: "/liveRoom/updateNotice", NewPath: "/sofie/studio/replaceNotice", Tag: "studio", Summary: "修改公告"},
+	{OldMethod: "post", OldPath: "/voiceChatMicSeatTier/appTierList", NewPath: "/sofie/studio/browseVoiceChatMicSeatTiers", Tag: "studio", Summary: "语聊麦位挡位"},
 	{OldMethod: "post", OldPath: "/liveRoom/join", NewPath: "/sofie/studio/enterHall", Tag: "studio", Summary: "加入直播间"},
 	{OldMethod: "post", OldPath: "/liveRoom/reportLiveFirstFrameRendered", NewPath: "/sofie/studio/notifyLiveFirstFrameReady", Tag: "studio", Summary: "上报直播首帧渲染完成"},
 	{OldMethod: "post", OldPath: "/liveRoom/reportMiniGameExposure", NewPath: "/sofie/studio/notifyMiniGameExposure", Tag: "studio", Summary: "上报半屏游戏窗口曝光"},

@@ -14,6 +14,7 @@ type CreateLiveRoomReq struct {
 	Notice            string            `json:"notice" dc:"公告"`
 	Category          uint8             `json:"category"  dc:"分类(1=hot,2=game,5=语聊房,默认1)"`
 	VoiceChatMicMode  uint8             `json:"voiceChatMicMode" dc:"语聊上麦方式(1=自由,2=申请,3=房主单麦;category=5时有效,默认1)"`
+	VoiceChatMicSeatCount uint8         `json:"voiceChatMicSeatCount" dc:"语聊麦位总数(含主播位;category=5时有效,2~25,0或不传=默认25)"`
 	TagId             uint64            `json:"tagId,string"  dc:"直播间标签ID"`
 	GameCodes         []string          `json:"gameCodes" p:"gameCodes" dc:"推荐游戏编码列表(仅游戏直播间category=2时有效)"`
 	Ticket            float64           `json:"ticket" v:"min:0#视频通话门票价格不能小于0" dc:"直播间来源视频通话门票价格(钻石)"`
@@ -206,6 +207,7 @@ type SendGiftRes struct {
 	LuckyGiftPayout       float64          `json:"luckyGiftPayout,omitempty" dc:"幸运礼物返奖钻石(仅幸运礼物)"`
 	LuckyGiftMultiplier   uint32           `json:"luckyGiftMultiplier,omitempty" dc:"幸运礼物返奖倍数(仅幸运礼物)"`
 	LuckyGiftTierType     string           `json:"luckyGiftTierType,omitempty" dc:"返奖挡位类型(low/medium/high,未中奖为空)"`
+	LuckyGiftTierSummary  *LuckyGiftBatchSummary `json:"luckyGiftTierSummary,omitempty" dc:"连抽各挡位累加(独立判奖)"`
 }
 
 // SendGiftToAnchorReq App端给指定主播送礼
@@ -225,6 +227,7 @@ type SendGiftToAnchorRes struct {
 	LuckyGiftPayout       float64          `json:"luckyGiftPayout,omitempty" dc:"幸运礼物返奖钻石(仅幸运礼物)"`
 	LuckyGiftMultiplier   uint32           `json:"luckyGiftMultiplier,omitempty" dc:"幸运礼物返奖倍数(仅幸运礼物)"`
 	LuckyGiftTierType     string           `json:"luckyGiftTierType,omitempty" dc:"返奖挡位类型(low/medium/high,未中奖为空)"`
+	LuckyGiftTierSummary  *LuckyGiftBatchSummary `json:"luckyGiftTierSummary,omitempty" dc:"连抽各挡位累加(独立判奖)"`
 }
 
 // GiftPushItem 推送给房间在线用户的送礼广播载荷
@@ -248,6 +251,30 @@ type GiftPushItem struct {
 	LuckyGiftMultiplier   uint32  `json:"luckyGiftMultiplier,omitempty" dc:"返奖倍数"`
 	LuckyGiftPayout       float64 `json:"luckyGiftPayout,omitempty" dc:"返奖钻石"`
 	LuckyGiftTierType     string  `json:"luckyGiftTierType,omitempty" dc:"返奖挡位类型(low/medium/high)"`
+	LuckyGiftTierSummary  *LuckyGiftBatchSummary `json:"luckyGiftTierSummary,omitempty" dc:"连抽各挡位累加(独立判奖)"`
+}
+
+// LuckyGiftTierWinSummaryDTO 某一挡位中奖次数与返奖合计
+type LuckyGiftTierWinSummaryDTO struct {
+	WinCount        int                              `json:"winCount" dc:"该挡位中奖次数"`
+	TotalPayout     float64                          `json:"totalPayout" dc:"该挡位返奖钻石合计"`
+	MaxMultiplier   uint32                           `json:"maxMultiplier,omitempty" dc:"该挡位最高中奖倍数"`
+	MultiplierItems []*LuckyGiftTierMultiplierItemDTO `json:"multiplierItems,omitempty" dc:"该挡位按倍数明细"`
+}
+
+// LuckyGiftTierMultiplierItemDTO 挡位内单一倍数的中奖累加
+type LuckyGiftTierMultiplierItemDTO struct {
+	Multiplier  uint32  `json:"multiplier" dc:"返奖倍数"`
+	WinCount    int     `json:"winCount" dc:"该倍数中奖次数"`
+	TotalPayout float64 `json:"totalPayout" dc:"该倍数返奖钻石合计"`
+}
+
+// LuckyGiftBatchSummary 幸运礼物连抽累加(HTTP/推送共用)
+type LuckyGiftBatchSummary struct {
+	TotalPayout float64                     `json:"totalPayout" dc:"返奖钻石合计"`
+	Low         *LuckyGiftTierWinSummaryDTO `json:"low,omitempty" dc:"低档"`
+	Medium      *LuckyGiftTierWinSummaryDTO `json:"medium,omitempty" dc:"中档"`
+	High        *LuckyGiftTierWinSummaryDTO `json:"high,omitempty" dc:"高档"`
 }
 
 // DirectGiftPushItem 给指定主播送礼推送载荷(仅发送者与主播可见)
@@ -272,6 +299,7 @@ type DirectGiftPushItem struct {
 	LuckyGiftMultiplier   uint32  `json:"luckyGiftMultiplier,omitempty" dc:"返奖倍数"`
 	LuckyGiftPayout       float64 `json:"luckyGiftPayout,omitempty" dc:"返奖钻石"`
 	LuckyGiftTierType     string  `json:"luckyGiftTierType,omitempty" dc:"返奖挡位类型(low/medium/high)"`
+	LuckyGiftTierSummary  *LuckyGiftBatchSummary `json:"luckyGiftTierSummary,omitempty" dc:"连抽各挡位累加(独立判奖)"`
 }
 
 // LuckyGiftPayoutPushItem 幸运礼物返奖通知(按挡位 type 路由推送范围)
@@ -286,7 +314,8 @@ type LuckyGiftPayoutPushItem struct {
 	LuckyGiftRtp        float64          `json:"luckyGiftRtp" dc:"RTP快照(%)"`
 	LuckyGiftMultiplier uint32           `json:"luckyGiftMultiplier" dc:"返奖倍数"`
 	LuckyGiftPayout     float64          `json:"luckyGiftPayout" dc:"返奖钻石"`
-	LuckyGiftTierType   string           `json:"luckyGiftTierType" dc:"返奖挡位类型(low/medium/high,与CMS一致)"`
+	LuckyGiftTierType   string           `json:"luckyGiftTierType" dc:"飘屏路由挡位(取本次最高中奖挡位)"`
+	LuckyGiftTierSummary *LuckyGiftBatchSummary `json:"luckyGiftTierSummary,omitempty" dc:"各挡位中奖次数与返奖合计(有返奖才推送)"`
 	SentAt              int64            `json:"sentAt" dc:"发送时间(秒)"`
 }
 
@@ -457,6 +486,7 @@ type GetLiveRoomRes struct {
 	Status                      uint8   `json:"status"   dc:"状态(0未开播,1直播中)"`
 	Category                    uint8   `json:"category" dc:"分类(1=hot,2=game,3=语聊房)"`
 	VoiceChatMicMode            uint8   `json:"voiceChatMicMode" dc:"语聊上麦方式(1=自由,2=申请,3=房主单麦;非语聊房为0)"`
+	VoiceChatMicSeatCount       uint8   `json:"voiceChatMicSeatCount" dc:"语聊麦位总数(含主播位;非语聊房为0)"`
 	TagId                       string  `json:"tagId" dc:"直播间标签ID"`
 	TagName                     string  `json:"tagName" dc:"直播间标签名称"`
 	Ticket                      float64 `json:"ticket" dc:"直播间来源视频通话门票价格(钻石;CMS关闭「视频通话扣门票」时下发的值为0)"`

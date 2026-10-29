@@ -19,7 +19,7 @@ var (
 
 func initWeeklyLoginStatDao() {
 	weeklyLoginStatCacheMgr = cache.NewRowCache[*entity.WeeklyLoginStat]()
-	weeklyLoginStatListCacheMgr = cache.NewPermanentListCache[*entity.WeeklyLoginStat]()
+	weeklyLoginStatListCacheMgr = cache.NewDashboardListCache[*entity.WeeklyLoginStat]()
 }
 
 // GetWeeklyLoginStatByWeek 按周标识获取每周登录统计,不存在则新建内存对象
@@ -37,9 +37,12 @@ func GetWeeklyLoginStatByWeek(week string) *entity.WeeklyLoginStat {
 }
 
 // ListRecentWeeklyLoginStats 查询最近N周登录统计(按时间正序). 同一 ISO 周内仅首次查库.
-func ListRecentWeeklyLoginStats(limit int) []*entity.WeeklyLoginStat {
+func ListRecentWeeklyLoginStats(limit int, bypassDashboardCache bool) []*entity.WeeklyLoginStat {
 	if limit <= 0 {
 		limit = 12
+	}
+	if bypassDashboardCache {
+		return loadRecentWeeklyLoginStatsFromDB(limit)
 	}
 	key := fmt.Sprintf("%d:%s", limit, entity.FormatWeeklyLoginStatKey(time.Now()))
 	return weeklyLoginStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.WeeklyLoginStat, error) {

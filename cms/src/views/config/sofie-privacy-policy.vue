@@ -4,6 +4,14 @@
       <template #header>
         <div class="card-header">
           <span>{{ t('menu.SofiePrivacyPolicyCfgManagement') }}</span>
+          <el-button
+              v-if="can('sync')"
+              :loading="syncingToTarget"
+              type="warning"
+              @click="handleSyncToTarget"
+          >
+            {{ t('common.syncData') }}
+          </el-button>
         </div>
       </template>
 
@@ -95,9 +103,6 @@
 
         <el-form-item>
           <el-button type="primary" @click="handleSave">{{ t('common.saveConfig') }}</el-button>
-          <el-button :loading="syncing" @click="handleSyncFromSara">
-            {{ t('pages.sofiePrivacyPolicy.syncFromSara') }}
-          </el-button>
           <el-button @click="fetchCfg">{{ t('common.refresh') }}</el-button>
         </el-form-item>
       </el-form>
@@ -108,14 +113,17 @@
 <script lang="ts" setup>
 import {useI18n} from 'vue-i18n'
 import {computed, onMounted, reactive, ref} from 'vue'
-import {ElMessage, ElMessageBox} from 'element-plus'
-import {privacyPolicyApi} from '@/api/modules/privacy-policy'
+import {ElMessage} from 'element-plus'
+import {dataSyncApi} from '@/api/modules/data-sync'
 import {sofiePrivacyPolicyApi} from '@/api/modules/sofie-privacy-policy'
+import {confirmDataSync} from '@/utils/confirm-data-sync'
+import {usePagePermission} from '@/composables/usePagePermission'
 import type {PrivacyPolicyCfg} from '@/types/api'
 
 const {t} = useI18n()
+const {can} = usePagePermission('SofiePrivacyPolicyCfgManagement')
 const loading = ref(false)
-const syncing = ref(false)
+const syncingToTarget = ref(false)
 const formRef = ref()
 
 const formData = reactive({
@@ -263,57 +271,32 @@ const handleSave = async () => {
   }
 }
 
-/** 从「隐私政策」页拉取 URL 配置填入本页(保留包名)，并立即保存 */
-const handleSyncFromSara = async () => {
+const handleSyncToTarget = async () => {
+  if (!formData.id || formData.id === '0') {
+    ElMessage.warning(t('pages.sofiePrivacyPolicy.syncNeedSave'))
+    return
+  }
   try {
-    await ElMessageBox.confirm(
-        t('pages.sofiePrivacyPolicy.syncConfirm'),
-        t('pages.sofiePrivacyPolicy.syncTitle'),
-        {type: 'warning'},
-    )
+    await confirmDataSync({
+      detail: t('pages.sofiePrivacyPolicy.syncToTargetConfirm'),
+      title: t('common.syncData'),
+    })
   } catch {
     return
   }
-  syncing.value = true
+  syncingToTarget.value = true
   try {
-    const response = await privacyPolicyApi.getPrivacyPolicyCfg()
-    const cfg = response.cfg
-    if (!cfg) {
-      ElMessage.warning(t('pages.sofiePrivacyPolicy.syncEmpty'))
-      return
-    }
-    const keepPackage = formData.packageName
-    const keepId = formData.id
-    applyCfg(cfg)
-    formData.packageName = keepPackage
-    formData.id = keepId
-    await formRef.value.validate()
-    const saveRes = await sofiePrivacyPolicyApi.saveSofiePrivacyPolicyCfg({
-      id: formData.id === '0' ? 0 : Number(formData.id),
-      packageName: formData.packageName.trim(),
-      apiBase: formData.apiBase.trim(),
-      privacyPolicyUrl: formData.privacyPolicyUrl.trim(),
-      termsOfServiceUrl: formData.termsOfServiceUrl.trim(),
-      creatorTermsUrl: formData.creatorTermsUrl.trim(),
-      roomOwnerTermsUrl: formData.roomOwnerTermsUrl.trim(),
-      vipDescUrl: formData.vipDescUrl.trim(),
-      aboutSiteUrl: formData.aboutSiteUrl.trim(),
-      safetyCenterUrl: formData.safetyCenterUrl.trim(),
-    })
-    if (saveRes?.success) {
-      ElMessage.success(t('pages.sofiePrivacyPolicy.syncSuccess'))
-      if (saveRes.id) {
-        formData.id = saveRes.id
-      }
-      await fetchCfg()
+    const response = await dataSyncApi.syncSofiePrivacyPolicyCfg()
+    if (response?.success) {
+      ElMessage.success(response.message || t('pages.sofiePrivacyPolicy.syncToTargetSuccess'))
     } else {
-      ElMessage.error(t('pages.sofiePrivacyPolicy.syncFailed'))
+      ElMessage.error(t('pages.sofiePrivacyPolicy.syncToTargetFailed'))
     }
   } catch (error) {
-    console.error('sync sofie privacy from sara failed:', error)
-    ElMessage.error(t('pages.sofiePrivacyPolicy.syncFailed'))
+    console.error('sync sofie privacy policy to target failed:', error)
+    ElMessage.error(t('pages.sofiePrivacyPolicy.syncToTargetFailedCheckConfig'))
   } finally {
-    syncing.value = false
+    syncingToTarget.value = false
   }
 }
 
@@ -331,6 +314,8 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  font-size: 16px;
+  font-weight: bold;
 }
 
 .cfg-form {

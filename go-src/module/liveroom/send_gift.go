@@ -19,6 +19,7 @@ import (
 	"xr-game-server/errercode"
 	"xr-game-server/gameevent"
 	"xr-game-server/module/gift"
+	"xr-game-server/module/minuteactivity"
 	"xr-game-server/module/upload"
 	"xr-game-server/module/wallet"
 )
@@ -78,6 +79,7 @@ type sendGiftResult struct {
 	remaining float64
 	payload   *liveroomdto.GiftPushItem
 	eventData *entity.LiveRevenueLog
+	luckyBatch gift.LuckyGiftBatchResult
 }
 
 func prepareSendGift(ctx context.Context, roomId, giftId uint64, count int) (*sendGiftResult, error) {
@@ -112,14 +114,14 @@ func prepareSendGift(ctx context.Context, roomId, giftId uint64, count int) (*se
 
 	revenueType := uint8(liverevenue.Gift)
 	giftEarn := totalCost
-	var luckyDraw gift.LuckyGiftDrawResult
+	var luckyBatch gift.LuckyGiftBatchResult
 
 	if gift.IsLuckyGiftCategory(giftItem.CategoryType) {
 		revenueType = uint8(liverevenue.GiftLucky)
-		luckyDraw = gift.ResolveLuckyGiftPayout(giftId, totalCost)
+		luckyBatch = gift.ResolveLuckyGiftPayoutBatch(giftId, giftItem.Price, count)
 		giftEarn = gift.CalcLuckyGiftAnchorSettlementEarn(totalCost)
-		if luckyDraw.Payout > 0 {
-			remaining, err = wallet.DiamondAdd(senderId, luckyDraw.Payout, currency.ReasonLuckyGiftPayout)
+		if luckyBatch.TotalPayout > 0 {
+			remaining, err = wallet.DiamondAdd(senderId, luckyBatch.TotalPayout, currency.ReasonLuckyGiftPayout)
 			if err != nil {
 				return nil, err
 			}
@@ -128,9 +130,13 @@ func prepareSendGift(ctx context.Context, roomId, giftId uint64, count int) (*se
 
 	eventData := entity.NewLiveRevenueLogRecord(room.ID, room.LiveRecordId, senderId, giftId, count, giftItem.Price, totalCost, revenueType)
 	if revenueType == uint8(liverevenue.GiftLucky) {
-		eventData.ApplyLuckyGiftMeta(luckyDraw.Rtp, luckyDraw.Multiplier, luckyDraw.Payout, giftEarn)
+		eventData.ApplyLuckyGiftMeta(luckyBatch.Rtp, luckyBatch.MaxWinMultiplier, luckyBatch.TotalPayout, giftEarn)
 	}
 
+	tierSummary := luckyGiftBatchToDTO(luckyBatch)
+	if revenueType != uint8(liverevenue.GiftLucky) {
+		tierSummary = nil
+	}
 	sender := userinfodao.GetUserInfoByUserId(senderId)
 	payload := &liveroomdto.GiftPushItem{
 		RoomId:              roomId,
@@ -144,22 +150,24 @@ func prepareSendGift(ctx context.Context, roomId, giftId uint64, count int) (*se
 		TotalCost:           totalCost,
 		SentAt:              time.Now().Unix(),
 		CategoryType:        giftItem.CategoryType,
-		LuckyGiftRtp:        luckyDraw.Rtp,
-		LuckyGiftMultiplier: luckyDraw.Multiplier,
-		LuckyGiftPayout:     luckyDraw.Payout,
-		LuckyGiftTierType:   luckyDraw.TierType,
+		LuckyGiftRtp:        luckyBatch.Rtp,
+		LuckyGiftMultiplier: luckyBatch.MaxWinMultiplier,
+		LuckyGiftPayout:     luckyBatch.TotalPayout,
+		LuckyGiftTierType:   luckyBatch.PushRouteTierType(),
+		LuckyGiftTierSummary: tierSummary,
 	}
 	applyGiftSenderProfile(payload, senderId, sender)
 
 	return &sendGiftResult{
-		senderId:  senderId,
-		room:      room,
-		giftId:    giftId,
-		totalCost: totalCost,
-		giftEarn:  giftEarn,
-		remaining: remaining,
-		payload:   payload,
-		eventData: eventData,
+		senderId:   senderId,
+		room:       room,
+		giftId:     giftId,
+		totalCost:  totalCost,
+		giftEarn:   giftEarn,
+		remaining:  remaining,
+		payload:    payload,
+		eventData:  eventData,
+		luckyBatch: luckyBatch,
 	}, nil
 }
 
@@ -196,6 +204,7 @@ func recordSendGiftStats(result *sendGiftResult) {
 		liveroomdao.PublishLiveRoomOnline(online)
 	}
 	refreshRoomAudienceCaches(result.room.ID)
+	minuteactivity.RecordGift(time.Now())
 }
 
 func calcSendGiftTotalCost(unitPrice float64, count int) (float64, error) {
@@ -246,6 +255,7 @@ func buildSendGiftRes(result *sendGiftResult) *liveroomdto.SendGiftRes {
 		res.LuckyGiftPayout = result.payload.LuckyGiftPayout
 		res.LuckyGiftMultiplier = result.payload.LuckyGiftMultiplier
 		res.LuckyGiftTierType = result.payload.LuckyGiftTierType
+		res.LuckyGiftTierSummary = result.payload.LuckyGiftTierSummary
 	}
 	return res
 }
@@ -264,6 +274,7 @@ func buildSendGiftToAnchorRes(result *sendGiftResult) *liveroomdto.SendGiftToAnc
 		res.LuckyGiftPayout = result.payload.LuckyGiftPayout
 		res.LuckyGiftMultiplier = result.payload.LuckyGiftMultiplier
 		res.LuckyGiftTierType = result.payload.LuckyGiftTierType
+		res.LuckyGiftTierSummary = result.payload.LuckyGiftTierSummary
 	}
 	return res
 }
@@ -284,11 +295,45 @@ func buildLuckyGiftPayoutPushItem(payload *liveroomdto.GiftPushItem) *liveroomdt
 		LuckyGiftMultiplier: payload.LuckyGiftMultiplier,
 		LuckyGiftPayout:     payload.LuckyGiftPayout,
 		LuckyGiftTierType:   payload.LuckyGiftTierType,
+		LuckyGiftTierSummary: payload.LuckyGiftTierSummary,
 		SentAt:              payload.SentAt,
 	}
 }
 
-// pushLuckyGiftWinByTier 按 CMS 挡位 type 路由返奖展示推送：low 仅本人，medium 本房，high 全服
+func luckyGiftBatchToDTO(b gift.LuckyGiftBatchResult) *liveroomdto.LuckyGiftBatchSummary {
+	if b.Rtp == 0 && b.TotalPayout == 0 && b.Low == nil && b.Medium == nil && b.High == nil {
+		return nil
+	}
+	out := &liveroomdto.LuckyGiftBatchSummary{TotalPayout: b.TotalPayout}
+	out.Low = luckyGiftTierWinToDTO(b.Low)
+	out.Medium = luckyGiftTierWinToDTO(b.Medium)
+	out.High = luckyGiftTierWinToDTO(b.High)
+	return out
+}
+
+func luckyGiftTierWinToDTO(s *gift.LuckyGiftTierWinSummary) *liveroomdto.LuckyGiftTierWinSummaryDTO {
+	if s == nil || s.WinCount <= 0 || s.TotalPayout <= 0 {
+		return nil
+	}
+	dto := &liveroomdto.LuckyGiftTierWinSummaryDTO{
+		WinCount:      s.WinCount,
+		TotalPayout:   s.TotalPayout,
+		MaxMultiplier: s.MaxMultiplier,
+	}
+	for _, line := range gift.LuckyGiftTierMultiplierLines(s) {
+		if line == nil || line.WinCount <= 0 {
+			continue
+		}
+		dto.MultiplierItems = append(dto.MultiplierItems, &liveroomdto.LuckyGiftTierMultiplierItemDTO{
+			Multiplier:  line.Multiplier,
+			WinCount:    line.WinCount,
+			TotalPayout: line.TotalPayout,
+		})
+	}
+	return dto
+}
+
+// pushLuckyGiftWinByTier 连抽累加后按最高中奖挡位路由飘屏(cmd=46), 整单只推一次
 func pushLuckyGiftWinByTier(senderId, roomId uint64, payload *liveroomdto.GiftPushItem) {
 	if senderId == 0 || payload == nil || payload.LuckyGiftPayout <= 0 {
 		return
@@ -327,6 +372,7 @@ func giftPushPayloadForRoomAudience(src *liveroomdto.GiftPushItem) *liveroomdto.
 		out.LuckyGiftMultiplier = 0
 		out.LuckyGiftPayout = 0
 		out.LuckyGiftTierType = ""
+		out.LuckyGiftTierSummary = nil
 	}
 	return &out
 }
@@ -340,6 +386,7 @@ func directGiftPushPayloadForRoomAudience(src *liveroomdto.DirectGiftPushItem) *
 		out.LuckyGiftMultiplier = 0
 		out.LuckyGiftPayout = 0
 		out.LuckyGiftTierType = ""
+		out.LuckyGiftTierSummary = nil
 	}
 	return &out
 }
@@ -369,5 +416,6 @@ func buildDirectGiftPushItem(gift *liveroomdto.GiftPushItem, anchorId uint64) *l
 		LuckyGiftMultiplier:   gift.LuckyGiftMultiplier,
 		LuckyGiftPayout:       gift.LuckyGiftPayout,
 		LuckyGiftTierType:     gift.LuckyGiftTierType,
+		LuckyGiftTierSummary:  gift.LuckyGiftTierSummary,
 	}
 }

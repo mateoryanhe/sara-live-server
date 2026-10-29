@@ -5,8 +5,8 @@ export const TREND_CHART_ZOOM_MIN_POINTS = 2
 
 const SLIDER_HEIGHT = 22
 const SLIDER_BOTTOM = 4
-/** 旋转刻度与滑块之间的留白 */
-const LABEL_BAND_ROTATED = 58
+/** 双行日期+时间（不旋转）占用高度 */
+const LABEL_BAND_TWO_LINE = 52
 const LABEL_BAND_FLAT = 28
 
 export function trendChartHasZoom(pointCount: number): boolean {
@@ -15,9 +15,9 @@ export function trendChartHasZoom(pointCount: number): boolean {
 
 /** 为 X 轴刻度（及可选底部滑块）留出足够高度 */
 export function trendChartGridBottom(pointCount: number, withSlider = true): number {
-  const labelBand = pointCount > 12 ? LABEL_BAND_ROTATED : LABEL_BAND_FLAT
+  const labelBand = pointCount > 12 ? LABEL_BAND_TWO_LINE : LABEL_BAND_FLAT
   if (!withSlider) {
-    return labelBand + 16
+    return labelBand + 20
   }
   if (!trendChartHasZoom(pointCount)) {
     return 36
@@ -35,17 +35,19 @@ export function buildTrendChartXAxisLabel(pointCount: number) {
     interval = Math.max(0, Math.floor(pointCount / 12))
   }
   return {
-    rotate: dense ? 35 : 0,
-    align: dense ? 'right' : 'center',
+    rotate: 0,
+    align: 'center',
     hideOverlap: true,
     showMinLabel: true,
     showMaxLabel: true,
-    margin: dense ? 12 : 8,
+    margin: dense ? 10 : 8,
+    lineHeight: dense ? 16 : 14,
+    overflow: 'none',
     fontSize: 12,
     fontWeight: 500,
     color: '#334155',
     interval,
-    formatter: (value: string) => formatTrendChartAxisTime(value, veryDense),
+    formatter: (value: string) => formatTrendChartAxisTime(value, dense, veryDense),
   }
 }
 
@@ -55,30 +57,37 @@ export function buildTrendChartXAxisLabel(pointCount: number) {
  */
 export function buildTrendChartXAxisLabelZoomFriendly() {
   return {
-    rotate: 30,
-    align: 'right' as const,
+    rotate: 0,
+    align: 'center' as const,
     hideOverlap: true,
     showMinLabel: true,
     showMaxLabel: true,
     margin: 10,
+    lineHeight: 16,
+    overflow: 'none' as const,
     fontSize: 12,
     fontWeight: 500,
     color: '#334155',
     interval: 'auto' as const,
-    formatter: (value: string) => formatTrendChartAxisTime(value, true),
+    formatter: (value: string) => formatTrendChartAxisTime(value, true, true),
   }
 }
 
-function formatTrendChartAxisTime(value: string, compact: boolean): string {
+/** 密刻度：日期与时间分两行，避免旋转长串被裁切；极密时省略年份 */
+function formatTrendChartAxisTime(value: string, twoLine: boolean, dropYear: boolean): string {
   if (!value) {
     return ''
   }
-  if (!compact) {
-    return value
-  }
   const dateTime = value.match(/^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})/)
   if (dateTime) {
-    return `${dateTime[1].slice(5)}\n${dateTime[2]}`
+    if (twoLine) {
+      const datePart = dropYear ? dateTime[1].slice(5).replace(/^-/, '') : dateTime[1]
+      return `${datePart}\n${dateTime[2]}`
+    }
+    return value
+  }
+  if (!twoLine) {
+    return value
   }
   const timeOnly = value.match(/(\d{2}:\d{2}:\d{2}|\d{2}:\d{2})/)
   if (timeOnly) {

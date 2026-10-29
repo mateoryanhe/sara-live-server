@@ -31,6 +31,7 @@ import (
 	"xr-game-server/module/liveroom"
 	"xr-game-server/module/logquery"
 	"xr-game-server/module/message"
+	"xr-game-server/module/minuteactivity"
 	"xr-game-server/module/metapixel"
 	"xr-game-server/module/preload"
 	"xr-game-server/module/privacypolicy"
@@ -52,6 +53,7 @@ import (
 	"xr-game-server/module/usermaxid"
 	"xr-game-server/module/verification_code"
 	"xr-game-server/module/vip"
+	"xr-game-server/module/voicechatmicseattier"
 	"xr-game-server/module/wallet"
 )
 
@@ -74,6 +76,7 @@ func Init() {
 	anchorrank.Init()
 	banner.Init()
 	privateroombilling.Init()
+	voicechatmicseattier.Init()
 	vip.Init()
 	apppkg.Init()
 	fiatcurrency.Init()
@@ -107,6 +110,7 @@ func Init() {
 	botanchor.Init()
 	stat.Init()
 	tracking.Init()
+	minuteactivity.Init()
 	resourcemonitor.Init()
 	shortvideo.Init()
 }

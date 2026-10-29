@@ -191,6 +191,7 @@ func Init() {
 		{Path: "/endBroadcast", Handler: jsonHandler((&controller.LiveRoomAppController{}).StopLive)},
 		{Path: "/replaceCover", Handler: jsonHandler((&controller.LiveRoomAppController{}).UpdateCover)},
 		{Path: "/replaceNotice", Handler: jsonHandler((&controller.LiveRoomAppController{}).UpdateNotice)},
+		{Path: "/browseVoiceChatMicSeatTiers", Handler: jsonHandler((&controller.VoiceChatMicSeatTierAppController{}).AppTierList)},
 		{Path: "/enterHall", Handler: jsonHandler((&controller.LiveRoomAppController{}).JoinRoom)},
 		{Path: "/notifyLiveFirstFrameReady", Handler: jsonHandler((&controller.LiveRoomAppController{}).ReportLiveFirstFrameRendered)},
 		{Path: "/notifyMiniGameExposure", Handler: jsonHandler((&controller.LiveRoomAppController{}).ReportMiniGameExposure)},

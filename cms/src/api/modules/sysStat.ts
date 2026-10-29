@@ -15,11 +15,14 @@ const buildResourceMetricQuery = (params: ResourceMetricTrendQuery = {}) => ({
     startTime: params.startTime || '',
     endTime: params.endTime || '',
     limit: params.limit ?? RESOURCE_METRIC_MAX_POINTS,
+    bypassDashboardCache: params.bypassDashboardCache ?? false,
 })
 
 export const sysStatApi = {
-    getSysStat: () => {
-        return request.post<SysStat>('/sysStat/getSysStat', {})
+    getSysStat: (params?: { bypassDashboardCache?: boolean }) => {
+        return request.post<SysStat>('/sysStat/getSysStat', {
+            bypassDashboardCache: params?.bypassDashboardCache ?? false,
+        })
     },
     resetBasicDashboardStats: () => {
         return request.post<{ success: boolean }>('/sysStat/resetBasicDashboardStats', {})
@@ -29,6 +32,7 @@ export const sysStatApi = {
             granularity: params.granularity || '',
             startDate: params.startDate || '',
             endDate: params.endDate || '',
+            bypassDashboardCache: params.bypassDashboardCache ?? false,
         })
     },
     getResourceMetricGameStatTrend: (params: ResourceMetricTrendQuery = {}) => {

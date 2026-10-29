@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	monthlyGameLiveWatchStreamStatCacheMgr     *cache.RowCache[*entity.MonthlyGameLiveWatchStreamStat]
-	monthlyGameLiveWatchStreamStatListCacheMgr *cache.ListCache[*entity.MonthlyGameLiveWatchStreamStat]
 )
 
 func initMonthlyGameLiveWatchStreamStatDao() {
 	monthlyGameLiveWatchStreamStatCacheMgr = cache.NewRowCache[*entity.MonthlyGameLiveWatchStreamStat]()
-	monthlyGameLiveWatchStreamStatListCacheMgr = cache.NewPermanentListCache[*entity.MonthlyGameLiveWatchStreamStat]()
 }
 
 func GetMonthlyGameLiveWatchStreamStatByMonth(month string) *entity.MonthlyGameLiveWatchStreamStat {
@@ -39,10 +35,7 @@ func ListRecentMonthlyGameLiveWatchStreamStats(limit int) []*entity.MonthlyGameL
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatMonthlyGameLiveWatchStreamStatKey(time.Now()))
-	return monthlyGameLiveWatchStreamStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.MonthlyGameLiveWatchStreamStat, error) {
-		return loadRecentMonthlyGameLiveWatchStreamStatsFromDB(limit), nil
-	})
+	return loadRecentMonthlyGameLiveWatchStreamStatsFromDB(limit)
 }
 
 func loadRecentMonthlyGameLiveWatchStreamStatsFromDB(limit int) []*entity.MonthlyGameLiveWatchStreamStat {

@@ -23,6 +23,7 @@ type LiveRoomListItem struct {
 	Notice             string  `json:"notice" dc:"公告"`
 	Status             uint8   `json:"status" dc:"状态(0未开播,1直播中)"`
 	Category           uint8   `json:"category" dc:"分类(1=hot,2=game,5=语聊房)"`
+	VoiceChatMicSeatCount uint8 `json:"voiceChatMicSeatCount" dc:"语聊麦位总数(含主播位;非语聊房为0)"`
 	TagId              string  `json:"tagId" dc:"直播间标签ID"`
 	TagName            string  `json:"tagName" dc:"直播间标签名称"`
 	Billing            float64 `json:"billing" dc:"视频通话价格(每分钟钻石)"`

@@ -74,6 +74,7 @@ type PromotionChannelDailyStatItem struct {
 	PayUserCount          uint64  `json:"payUserCount"`
 	OrderTotalAmount      float64 `json:"orderTotalAmount"`
 	RechargeSuccessAmount float64 `json:"rechargeSuccessAmount"`
+	H5DownloadApkCount    uint64  `json:"h5DownloadApkCount" dc:"H5下载APK次数"`
 }
 
 type PromotionChannelDailyStatListRes struct {

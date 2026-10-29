@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	monthlyChargeResultServerStatCacheMgr     *cache.RowCache[*entity.MonthlyChargeResultServerStat]
-	monthlyChargeResultServerStatListCacheMgr *cache.ListCache[*entity.MonthlyChargeResultServerStat]
 )
 
 func initMonthlyChargeResultServerStatDao() {
 	monthlyChargeResultServerStatCacheMgr = cache.NewRowCache[*entity.MonthlyChargeResultServerStat]()
-	monthlyChargeResultServerStatListCacheMgr = cache.NewPermanentListCache[*entity.MonthlyChargeResultServerStat]()
 }
 
 func GetMonthlyChargeResultServerStatByMonth(month string) *entity.MonthlyChargeResultServerStat {
@@ -39,10 +35,7 @@ func ListRecentMonthlyChargeResultServerStats(limit int) []*entity.MonthlyCharge
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatMonthlyChargeResultServerStatKey(time.Now()))
-	return monthlyChargeResultServerStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.MonthlyChargeResultServerStat, error) {
-		return loadRecentMonthlyChargeResultServerStatsFromDB(limit), nil
-	})
+	return loadRecentMonthlyChargeResultServerStatsFromDB(limit)
 }
 
 func loadRecentMonthlyChargeResultServerStatsFromDB(limit int) []*entity.MonthlyChargeResultServerStat {

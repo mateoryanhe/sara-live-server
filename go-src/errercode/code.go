@@ -253,8 +253,18 @@ const (
 	UserWithdrawDisabled XRCode = 186
 	// UserWithdrawGameConsumeNotEnough 游戏消费累计未达提现档位要求
 	UserWithdrawGameConsumeNotEnough XRCode = 187
-	// ShowcaseLiveRoomStartDisabled 秀场直播间开播已关闭(需升级 App)
+	// ShowcaseLiveRoomStartDisabled 秀场直播间入口未开放(App 展示开关，保留错误码供兼容)
 	ShowcaseLiveRoomStartDisabled XRCode = 188
+	// GameLiveRoomStartDisabled 游戏直播间入口未开放(App 展示开关)
+	GameLiveRoomStartDisabled XRCode = 189
+	// VoiceChatLiveRoomStartDisabled 语聊房入口未开放(App 展示开关)
+	VoiceChatLiveRoomStartDisabled XRCode = 190
+	// OneToOneLiveRoomStartDisabled 1v1 房间入口未开放(App 展示开关)
+	OneToOneLiveRoomStartDisabled XRCode = 191
+	// VoiceChatMicSeatTierNonExist 语聊麦位挡位不存在
+	VoiceChatMicSeatTierNonExist XRCode = 192
+	// VoiceChatMicSeatTierSeatCountExist 语聊麦位挡位麦位数已存在
+	VoiceChatMicSeatTierSeatCountExist XRCode = 193
 )
 
 type XError struct {

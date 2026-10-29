@@ -2,8 +2,6 @@ package statdao
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -14,12 +12,10 @@ import (
 
 var (
 	monthlyCall1v1RoomStatCacheMgr     *cache.RowCache[*entity.MonthlyCall1v1RoomStat]
-	monthlyCall1v1RoomStatListCacheMgr *cache.ListCache[*entity.MonthlyCall1v1RoomStat]
 )
 
 func initMonthlyCall1v1RoomStatDao() {
 	monthlyCall1v1RoomStatCacheMgr = cache.NewRowCache[*entity.MonthlyCall1v1RoomStat]()
-	monthlyCall1v1RoomStatListCacheMgr = cache.NewPermanentListCache[*entity.MonthlyCall1v1RoomStat]()
 }
 
 func GetMonthlyCall1v1RoomStatByMonth(month string) *entity.MonthlyCall1v1RoomStat {
@@ -39,10 +35,7 @@ func ListRecentMonthlyCall1v1RoomStats(limit int) []*entity.MonthlyCall1v1RoomSt
 	if limit <= 0 {
 		limit = 12
 	}
-	key := fmt.Sprintf("%d:%s", limit, entity.FormatMonthlyCall1v1RoomStatKey(time.Now()))
-	return monthlyCall1v1RoomStatListCacheMgr.MustGetList(gctx.New(), key, func(ctx context.Context) ([]*entity.MonthlyCall1v1RoomStat, error) {
-		return loadRecentMonthlyCall1v1RoomStatsFromDB(limit), nil
-	})
+	return loadRecentMonthlyCall1v1RoomStatsFromDB(limit)
 }
 
 func loadRecentMonthlyCall1v1RoomStatsFromDB(limit int) []*entity.MonthlyCall1v1RoomStat {
