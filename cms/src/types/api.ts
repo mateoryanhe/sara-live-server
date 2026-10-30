@@ -1241,8 +1241,6 @@ export interface SaveInviteRechargeRewardCfgRes {
 export interface PreloadCfg {
     id?: string
     recentLoginLimit: number
-    initGold?: number
-    initDiamond?: number
     hotRestartAuth?: string
     hotRestartFlushTimeout?: number
     hotRestartExitTimeout?: number
@@ -1260,8 +1258,6 @@ export interface GetPreloadCfgRes {
 export interface SavePreloadCfgReq {
     id?: string | number
     recentLoginLimit: number
-    initGold: number
-    initDiamond: number
     hotRestartAuth: string
     hotRestartFlushTimeout: number
     hotRestartExitTimeout: number

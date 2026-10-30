@@ -72,6 +72,12 @@ func GetLuckyGiftRtpByGiftID(giftID uint64) float64 {
 	if giftID == 0 {
 		return 0
 	}
+	if rtp, ok := getLuckyGiftRtpFromCache(giftID); ok {
+		return rtp
+	}
+	if item := GetGiftFromCacheById(giftID); item != nil {
+		return 0
+	}
 	g := cfgdao.GetGiftById(giftID)
 	if g == nil || g.CategoryType != liveentity.LiveGiftCategoryTypeLucky {
 		return 0

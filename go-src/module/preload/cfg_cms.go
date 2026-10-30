@@ -30,8 +30,6 @@ func SavePreloadCfg(_ context.Context, req *preloadcfgdto.SavePreloadCfgReq) (*p
 		HotRestartExitTimeout:           req.HotRestartExitTimeout,
 		MemoryLimitM:                    req.MemoryLimitM,
 		IpGeoDbPath:                     strings.TrimSpace(req.IpGeoDbPath),
-		InitGold:                        req.InitGold,
-		InitDiamond:                     req.InitDiamond,
 		ResourceMetricCollectionEnabled: req.ResourceMetricCollectionEnabled,
 	}
 	if req.ID > 0 {
@@ -66,8 +64,6 @@ func defaultPreloadCfgItem() *preloadcfgdto.PreloadCfgItem {
 		HotRestartExitTimeout:           cfgdao.DefaultHotRestartExitTimeout,
 		MemoryLimitM:                    cfgdao.DefaultMemoryLimitM,
 		IpGeoDbPath:                     cfgdao.DefaultIpGeoDbPath,
-		InitGold:                        cfgdao.DefaultInitGold,
-		InitDiamond:                     cfgdao.DefaultInitDiamond,
 		ResourceMetricCollectionEnabled: cfgdao.DefaultResourceMetricCollectionEnabled,
 	}
 }
@@ -108,8 +104,6 @@ func toPreloadCfgItem(cfg *entity.PreloadCfg) *preloadcfgdto.PreloadCfgItem {
 		HotRestartExitTimeout:           exitSec,
 		MemoryLimitM:                    memoryM,
 		IpGeoDbPath:                     ipGeoPath,
-		InitGold:                        cfg.InitGold,
-		InitDiamond:                     cfg.InitDiamond,
 		CreatedAt:                       formatPreloadCfgTime(cfg.CreatedAt),
 		ResourceMetricCollectionEnabled: cfg.ResourceMetricCollectionEnabled,
 		UpdatedAt:                       formatPreloadCfgTime(cfg.UpdatedAt),

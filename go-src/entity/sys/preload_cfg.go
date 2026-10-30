@@ -18,8 +18,6 @@ type PreloadCfg struct {
 	HotRestartExitTimeout           int     `gorm:"default:60;comment:热重启第二阶段固定等待秒" json:"hotRestartExitTimeout"`
 	MemoryLimitM                    int     `gorm:"default:300;comment:Go堆内存软上限MB" json:"memoryLimitM"`
 	IpGeoDbPath                     string  `gorm:"size:512;comment:GeoLite2-Country.mmdb路径" json:"ipGeoDbPath"`
-	InitGold                        float64 `gorm:"default:0;comment:新用户初始金币" json:"initGold"`
-	InitDiamond                     float64 `gorm:"default:0;comment:新用户初始钻石" json:"initDiamond"`
 	ResourceMetricCollectionEnabled bool    `gorm:"default:true;comment:是否采集服务器资源指标" json:"resourceMetricCollectionEnabled"`
 }
 

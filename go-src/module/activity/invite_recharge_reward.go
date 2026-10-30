@@ -23,7 +23,7 @@ func onInviteRechargeGoldArrived(val any) {
 
 // tryGrantInviteRechargeReward 被邀请人充值金币到账后,按配置给邀请人返还金币。
 // 条件:活动开启、邀请关系存在、被邀请人已完成账号首充、在首充完成后 ValidDays 内。
-// 排除:白名单、币商。含人工确认。返还基数为本次最终到账金币 CreditedGold。
+// 排除:白名单、币商。含人工确认。返还基数为 BaseGold(档位金币,不含首充加赠)。
 func tryGrantInviteRechargeReward(data *gameevent.RechargeGoldArrivedEventData) {
 	if data == nil || data.Order == nil {
 		return
@@ -36,11 +36,8 @@ func tryGrantInviteRechargeReward(data *gameevent.RechargeGoldArrivedEventData) 
 		return
 	}
 
-	creditedGold := data.CreditedGold
-	if creditedGold <= 0 {
-		creditedGold = order.Gold
-	}
-	if creditedGold <= 0 {
+	rewardBaseGold := inviteRechargeRewardBaseGold(data)
+	if rewardBaseGold <= 0 {
 		return
 	}
 
@@ -84,7 +81,7 @@ func tryGrantInviteRechargeReward(data *gameevent.RechargeGoldArrivedEventData) 
 		return
 	}
 
-	bonus := creditedGold * snap.RewardPercent / 100
+	bonus := rewardBaseGold * snap.RewardPercent / 100
 	if bonus <= 0 {
 		return
 	}
@@ -96,6 +93,26 @@ func tryGrantInviteRechargeReward(data *gameevent.RechargeGoldArrivedEventData) 
 	inviteeExt.AddInviterInviteRechargeRewardGold(bonus)
 	userinfodao.PublishUserExt(inviteeExt)
 	userinfodao.UpdateAppInviteeListRewardGoldInCache(inviterId, order.UserId, inviteeExt.InviterInviteRechargeRewardGold)
+}
+
+// inviteRechargeRewardBaseGold 邀请返还计佣基数:充值档位金币,不含档位首充等活动加赠。
+func inviteRechargeRewardBaseGold(data *gameevent.RechargeGoldArrivedEventData) float64 {
+	if data == nil {
+		return 0
+	}
+	if data.BaseGold > 0 {
+		return data.BaseGold
+	}
+	if data.CreditedGold > 0 {
+		base := data.CreditedGold - data.BonusGold
+		if base > 0 {
+			return base
+		}
+	}
+	if data.Order != nil && data.Order.Gold > 0 {
+		return data.Order.Gold
+	}
+	return 0
 }
 
 func shouldSkipInviteRewardKind(kind gameevent.UsdIncomeKind, order *entity.RechargeOrder) bool {

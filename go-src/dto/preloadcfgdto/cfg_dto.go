@@ -14,8 +14,6 @@ type PreloadCfgItem struct {
 	HotRestartExitTimeout           int     `json:"hotRestartExitTimeout"`
 	MemoryLimitM                    int     `json:"memoryLimitM"`
 	IpGeoDbPath                     string  `json:"ipGeoDbPath"`
-	InitGold                        float64 `json:"initGold"`
-	InitDiamond                     float64 `json:"initDiamond"`
 	ResourceMetricCollectionEnabled bool    `json:"resourceMetricCollectionEnabled"`
 	CreatedAt                       string  `json:"createdAt"`
 	UpdatedAt                       string  `json:"updatedAt"`
@@ -34,8 +32,6 @@ type SavePreloadCfgReq struct {
 	HotRestartExitTimeout           int     `json:"hotRestartExitTimeout" v:"required|min:1|max:3600#第二阶段时间不能为空|第二阶段时间最小1秒|第二阶段时间最大3600秒" dc:"热重启第二阶段固定等待秒"`
 	MemoryLimitM                    int     `json:"memoryLimitM" v:"required|min:64|max:32768#内存上限不能为空|内存上限最小64MB|内存上限最大32768MB" dc:"Go堆内存软上限MB"`
 	IpGeoDbPath                     string  `json:"ipGeoDbPath" v:"required|length:1,512#IP库路径不能为空|IP库路径过长" dc:"GeoLite2-Country.mmdb绝对路径"`
-	InitGold                        float64 `json:"initGold" v:"min:0#初始化金币不能为负数" dc:"新用户初始金币"`
-	InitDiamond                     float64 `json:"initDiamond" v:"min:0#初始化钻石不能为负数" dc:"新用户初始钻石"`
 	ResourceMetricCollectionEnabled bool    `json:"resourceMetricCollectionEnabled" dc:"是否采集服务器资源指标"`
 }
 

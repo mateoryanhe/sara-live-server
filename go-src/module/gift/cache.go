@@ -15,6 +15,7 @@ var (
 	giftCacheMu     sync.RWMutex
 	giftCacheMap    map[uint64]*giftdto.AppGiftItem // id -> item
 	giftCacheSorted []*giftdto.AppGiftItem          // 按 price asc 排序的列表
+	giftLuckyRtpMap map[uint64]float64              // 已上架幸运礼物 id -> 归一化 RTP
 	giftCacheLoaded bool
 )
 
@@ -23,6 +24,7 @@ func invalidateGiftCache() {
 	giftCacheMu.Lock()
 	giftCacheMap = nil
 	giftCacheSorted = nil
+	giftLuckyRtpMap = nil
 	giftCacheLoaded = false
 	giftCacheMu.Unlock()
 	reloadLuckyGiftMultiplierMemory()
@@ -32,17 +34,22 @@ func invalidateGiftCache() {
 func loadGiftCache() []*giftdto.AppGiftItem {
 	rows := cfgdao.GetOnShelfGifts()
 	m := make(map[uint64]*giftdto.AppGiftItem, len(rows))
+	rtpMap := make(map[uint64]float64)
 	list := make([]*giftdto.AppGiftItem, 0, len(rows))
 	for _, r := range rows {
 		item := toAppGiftItem(r)
 		m[r.ID] = item
 		list = append(list, item)
+		if r.CategoryType == entity.LiveGiftCategoryTypeLucky {
+			rtpMap[r.ID] = NormalizeLuckyGiftRtp(r.LuckyGiftRtp)
+		}
 	}
 	sortAppGiftItemsByPriceAsc(list)
 
 	giftCacheMu.Lock()
 	giftCacheMap = m
 	giftCacheSorted = list
+	giftLuckyRtpMap = rtpMap
 	giftCacheLoaded = true
 	giftCacheMu.Unlock()
 	return list
@@ -81,6 +88,25 @@ func GetGiftFromCacheById(id uint64) *giftdto.AppGiftItem {
 	item := giftCacheMap[id]
 	giftCacheMu.RUnlock()
 	return item
+}
+
+// getLuckyGiftRtpFromCache 已上架幸运礼物 RTP(须已 loadGiftCache); 非幸运或未命中 ok=false
+func getLuckyGiftRtpFromCache(giftID uint64) (float64, bool) {
+	if giftID == 0 {
+		return 0, false
+	}
+	giftCacheMu.RLock()
+	if !giftCacheLoaded {
+		giftCacheMu.RUnlock()
+		loadGiftCache()
+		giftCacheMu.RLock()
+	}
+	rtp, ok := giftLuckyRtpMap[giftID]
+	giftCacheMu.RUnlock()
+	if !ok {
+		return 0, false
+	}
+	return rtp, true
 }
 
 func sortAppGiftItemsByPriceAsc(list []*giftdto.AppGiftItem) {

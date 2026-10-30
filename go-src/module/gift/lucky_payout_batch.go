@@ -38,7 +38,7 @@ func ResolveLuckyGiftPayoutBatch(giftID uint64, unitPrice float64, count int) Lu
 	rtp := GetLuckyGiftRtpByGiftID(giftID)
 	draws := make([]LuckyGiftDrawResult, 0, count)
 	for i := 0; i < count; i++ {
-		draws = append(draws, ResolveLuckyGiftPayout(giftID, unitPrice))
+		draws = append(draws, resolveLuckyGiftPayoutWithRtp(giftID, unitPrice, rtp))
 	}
 	return AggregateLuckyGiftDraws(rtp, draws)
 }

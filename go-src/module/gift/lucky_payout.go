@@ -19,6 +19,10 @@ type LuckyGiftDrawResult struct {
 // ResolveLuckyGiftPayout 幸运礼物返奖：先 RTP 判中奖，中奖再抽倍数(含 CMS 挡位 type)
 func ResolveLuckyGiftPayout(giftID uint64, totalCost float64) LuckyGiftDrawResult {
 	rtp := GetLuckyGiftRtpByGiftID(giftID)
+	return resolveLuckyGiftPayoutWithRtp(giftID, totalCost, rtp)
+}
+
+func resolveLuckyGiftPayoutWithRtp(giftID uint64, totalCost float64, rtp float64) LuckyGiftDrawResult {
 	if !RollLuckyGiftWin(rtp) {
 		return LuckyGiftDrawResult{Rtp: rtp}
 	}

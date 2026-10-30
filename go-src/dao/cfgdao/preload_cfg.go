@@ -14,8 +14,6 @@ const (
 	DefaultHotRestartExitTimeout           = 60
 	DefaultMemoryLimitM                    = 300
 	DefaultIpGeoDbPath                     = "/home/ec2-user/xgameserver/GeoLite2-Country.mmdb"
-	DefaultInitGold                        = 0
-	DefaultInitDiamond                     = 0
 	DefaultResourceMetricCollectionEnabled = true
 )
 
@@ -89,22 +87,6 @@ func GetIpGeoDbPath() string {
 		}
 	}
 	return DefaultIpGeoDbPath
-}
-
-func GetInitGold() float64 {
-	cfg := LoadPreloadCfg()
-	if cfg == nil || cfg.InitGold < 0 {
-		return DefaultInitGold
-	}
-	return cfg.InitGold
-}
-
-func GetInitDiamond() float64 {
-	cfg := LoadPreloadCfg()
-	if cfg == nil || cfg.InitDiamond < 0 {
-		return DefaultInitDiamond
-	}
-	return cfg.InitDiamond
 }
 
 // GetResourceMetricCollectionEnabled 读取服务器资源指标采集开关,未配置时默认开启.

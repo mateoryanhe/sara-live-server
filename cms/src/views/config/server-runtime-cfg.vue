@@ -18,26 +18,6 @@
                 <el-input-number v-model="formData.recentLoginLimit" :min="1" :max="10000" controls-position="right"/>
                 <div class="form-tip">{{ t('pages.serverRuntimeCfg.recentLoginLimitTip') }}</div>
               </el-form-item>
-              <el-form-item :label="t('pages.serverRuntimeCfg.initGold')" prop="initGold">
-                <el-input-number
-                    v-model="formData.initGold"
-                    :min="0"
-                    :precision="NUMBER_INPUT_DECIMALS"
-                    :step="1"
-                    controls-position="right"
-                />
-                <div class="form-tip">{{ t('pages.serverRuntimeCfg.initGoldTip') }}</div>
-              </el-form-item>
-              <el-form-item :label="t('pages.serverRuntimeCfg.initDiamond')" prop="initDiamond">
-                <el-input-number
-                    v-model="formData.initDiamond"
-                    :min="0"
-                    :precision="NUMBER_INPUT_DECIMALS"
-                    :step="1"
-                    controls-position="right"
-                />
-                <div class="form-tip">{{ t('pages.serverRuntimeCfg.initDiamondTip') }}</div>
-              </el-form-item>
             </div>
           </el-tab-pane>
 
@@ -97,7 +77,6 @@ import {computed, onMounted, reactive, ref} from 'vue'
 import {ElMessage, type FormInstance, type FormRules} from 'element-plus'
 import preloadCfgApi from '@/api/modules/preload-cfg'
 import type {PreloadCfg} from '@/types/api'
-import {NUMBER_INPUT_DECIMALS} from '@/utils/number-format'
 
 const {t} = useI18n()
 const loading = ref(false)
@@ -107,8 +86,6 @@ const activeTab = ref<'preload' | 'runtime' | 'hotRestart'>('preload')
 const formData = reactive({
   id: '0',
   recentLoginLimit: 100,
-  initGold: 0,
-  initDiamond: 0,
   hotRestartAuth: '',
   hotRestartFlushTimeout: 60,
   hotRestartExitTimeout: 60,
@@ -126,14 +103,6 @@ const formRules = computed<FormRules>(() => ({
   recentLoginLimit: [
     {required: true, message: t('pages.serverRuntimeCfg.preloadCountRequired'), trigger: 'change'},
     {type: 'number', min: 1, max: 10000, message: t('pages.serverRuntimeCfg.preloadCountRange'), trigger: 'change'},
-  ],
-  initGold: [
-    {required: true, message: t('pages.serverRuntimeCfg.initGoldRequired'), trigger: 'change'},
-    {type: 'number', min: 0, message: t('pages.serverRuntimeCfg.initGoldMin'), trigger: 'change'},
-  ],
-  initDiamond: [
-    {required: true, message: t('pages.serverRuntimeCfg.initDiamondRequired'), trigger: 'change'},
-    {type: 'number', min: 0, message: t('pages.serverRuntimeCfg.initDiamondMin'), trigger: 'change'},
   ],
   hotRestartAuth: [
     {required: true, message: t('pages.serverRuntimeCfg.hotRestartAuthRequired'), trigger: 'blur'},
@@ -160,8 +129,6 @@ const formRules = computed<FormRules>(() => ({
 const applyCfg = (cfg: PreloadCfg | null | undefined) => {
   formData.id = cfg?.id || '0'
   formData.recentLoginLimit = Number(cfg?.recentLoginLimit) || 100
-  formData.initGold = Number(cfg?.initGold) || 0
-  formData.initDiamond = Number(cfg?.initDiamond) || 0
   formData.hotRestartAuth = cfg?.hotRestartAuth || ''
   formData.hotRestartFlushTimeout = Number(cfg?.hotRestartFlushTimeout) || 60
   formData.hotRestartExitTimeout = Number(cfg?.hotRestartExitTimeout) || 60
@@ -204,8 +171,6 @@ const handleSave = async () => {
       const response = await preloadCfgApi.savePreloadCfg({
         id: formData.id === '0' ? 0 : Number(formData.id),
         recentLoginLimit: formData.recentLoginLimit,
-        initGold: formData.initGold,
-        initDiamond: formData.initDiamond,
         hotRestartAuth: formData.hotRestartAuth.trim(),
         hotRestartFlushTimeout: formData.hotRestartFlushTimeout,
         hotRestartExitTimeout: formData.hotRestartExitTimeout,
