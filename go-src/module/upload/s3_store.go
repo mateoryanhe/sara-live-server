@@ -30,6 +30,7 @@ const (
 	StoreCatShortVideo = "shortvideo"
 	StoreCatCMS        = "cms"
 	StoreCatExport     = "export"
+	StoreCatApkPromotionChannel = "apk-promotion-channel"
 )
 
 // S3ObjectInfo 云对象元信息(StoredName 为业务相对路径,不含环境 s3KeyPrefix)

@@ -19,6 +19,18 @@ export const promotionRoutes: RouteRecordRaw = {
             meta: {title: '推广渠道日统计'},
         },
         {
+            path: 'apk-channel-list',
+            name: 'ApkPromotionChannelListManagement',
+            component: () => import('@/views/promotion/apk-promotion-channel-list.vue'),
+            meta: {title: 'APK推广渠道'},
+        },
+        {
+            path: 'apk-channel-daily-stat',
+            name: 'ApkPromotionChannelDailyStatManagement',
+            component: () => import('@/views/promotion/apk-promotion-channel-daily-stat-list.vue'),
+            meta: {title: 'APK推广渠道日统计'},
+        },
+        {
             path: 'invite-log-list',
             name: 'PromotionInviteLogListManagement',
             component: () => import('@/views/promotion/promotion-invite-log-list.vue'),

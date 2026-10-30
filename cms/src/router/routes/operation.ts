@@ -123,10 +123,9 @@ export const operationRoutes: RouteRecordRaw = {
         {
             path: 'guild/guild-anchor-list',
             name: 'GuildAnchorListManagement',
-            component: () => import('@/views/user/anchor/anchor-list.vue'),
+            component: () => import('@/views/operation/guild/guild-anchor-list.vue'),
             meta: {
                 title: '主播列表',
-                visibilityScoped: true,
             },
         },
         {

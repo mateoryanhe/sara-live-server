@@ -24,5 +24,6 @@ type CMSInviteLogItem struct {
 	InviterId        uint64     `json:"inviterId,string" dc:"邀请人用户ID"`
 	InviterNickname  string     `json:"inviterNickname" dc:"邀请人昵称"`
 	InviterAvatar    string     `json:"inviterAvatar" dc:"邀请人头像URL"`
+	InviterRewardGold float64   `json:"inviterRewardGold" dc:"邀请人因该被邀请人充值获得的返现金币累计"`
 	CreatedAt        *time.Time `json:"createdAt" dc:"被邀请人资料创建时间"`
 }

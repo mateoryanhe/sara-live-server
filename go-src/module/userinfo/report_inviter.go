@@ -58,14 +58,19 @@ func ReportInviter(ctx context.Context, req *userinfodto.ReportInviterReq) (*use
 	}
 
 	ext := userinfodao.GetUserExtByUserId(userId)
-	if ext.InviterId == 0 {
+	hadInviter := ext.InviterId != 0
+	if !hadInviter {
 		ext.SetInviterId(inviterId)
+		userinfodao.PublishUserExt(ext)
 	}
 	// 与历史 user_infos.inviter_id 保持一致(仅空时写入)
 	info := userinfodao.GetUserInfoByUserId(userId)
 	if info.InviterId == 0 {
 		info.SetInviterId(ext.InviterId)
 		userinfodao.PublishUserInfo(info)
+	}
+	if !hadInviter && ext.InviterId != 0 {
+		userinfodao.NotifyAppInviteeBound(ext.InviterId, info)
 	}
 
 	return &userinfodto.ReportInviterRes{

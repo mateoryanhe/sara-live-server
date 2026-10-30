@@ -82,6 +82,7 @@ func Init() {
 	initSimulatorCpuKeywordCMSController()           // 模拟器CPU关键词(CMS)
 	initSimulatorDeviceWhitelistCMSController()      // 模拟器设备白名单(CMS)
 	initPromotionChannelUrlCMSController()           // 推广渠道URL(CMS)
+	initApkPromotionChannelCMSController()           // APK推广渠道(CMS)
 	initAnchorSalarySocialShareCfgCMSController()    // 有底薪社交流水分佣配置(CMS)
 	initAnchorNoSalaryShareCfgCMSController()        // 无底薪社交流水分佣配置(CMS)
 	initAnchorGameShareCfgCMSController()            // 游戏流水档位分佣配置(CMS)

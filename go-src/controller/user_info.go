@@ -75,3 +75,7 @@ func (c *UserInfoController) GetUserInfoByInviteCode(ctx context.Context, req *u
 func (c *UserInfoController) ReportInviter(ctx context.Context, req *userinfodto.ReportInviterReq) (res *userinfodto.ReportInviterRes, err error) {
 	return userinfo.ReportInviter(ctx, req)
 }
+
+func (c *UserInfoController) InviteeList(ctx context.Context, req *userinfodto.InviteeListReq) (res *userinfodto.InviteeListRes, err error) {
+	return userinfo.InviteeList(ctx, req)
+}

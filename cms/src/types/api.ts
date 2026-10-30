@@ -698,6 +698,8 @@ export interface UserExtDetailItem {
     rechargeWhitelist?: boolean
     shortVideoUnsettledIncome?: number
     email?: string
+    apkPromotionChannel?: string
+    apkPromotionChannelName?: string
     updatedAt?: string | null
 }
 
@@ -770,6 +772,7 @@ export interface CMSInviteLogItem {
     inviterId: string
     inviterNickname?: string
     inviterAvatar?: string
+    inviterRewardGold?: number
     createdAt?: string | null
 }
 
@@ -1040,6 +1043,46 @@ export interface PromotionChannelDailyStatQuery extends PageQuery {
     startDate: string
     endDate: string
     channelCode?: number
+}
+
+export interface ApkPromotionChannel {
+    id: string
+    channelName: string
+    channelCode: string
+    apkFileName: string
+    apkDownloadUrl: string
+    shareUrl: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface ApkPromotionChannelListResponse extends PageResponse<ApkPromotionChannel> {
+    shareBaseHost?: string
+}
+
+export interface ApkPromotionChannelQuery extends PageQuery {
+    key?: string
+}
+
+export interface ApkPromotionChannelDailyStatRow {
+    statDate: string
+    channelName: string
+    channelCode: string
+    registerCount: number
+    downloadClickCount: number
+    orderCount: number
+    payUserCount: number
+    orderTotalAmount: number
+    rechargeSuccessAmount: number
+}
+
+export interface ApkPromotionChannelDailyStatListResponse extends PageResponse<ApkPromotionChannelDailyStatRow> {
+}
+
+export interface ApkPromotionChannelDailyStatQuery extends PageQuery {
+    startDate: string
+    endDate: string
+    channelCode?: string
 }
 
 export interface SimulatorDeviceWhitelist {
@@ -2310,6 +2353,7 @@ export interface EffectiveLiveCfg {
     id: string
     minSessionMinutes: number
     dailyAccumulatedMinutes: number
+    cameraOffCountsAsEffectiveLive?: boolean
     createdAt: string
     updatedAt: string
 }
@@ -2322,6 +2366,7 @@ export interface SaveEffectiveLiveCfgReq {
     id?: number
     minSessionMinutes: number
     dailyAccumulatedMinutes: number
+    cameraOffCountsAsEffectiveLive?: boolean
 }
 
 export interface SaveEffectiveLiveCfgRes {

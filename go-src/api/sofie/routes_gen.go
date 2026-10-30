@@ -139,6 +139,7 @@ func Init() {
 		{Path: "/submitAttribution", Handler: jsonHandler((&controller.UserInfoController{}).ReportAttribution)},
 		{Path: "/lookupByInvite", Handler: jsonHandler((&controller.UserInfoController{}).GetUserInfoByInviteCode)},
 		{Path: "/submitInviter", Handler: jsonHandler((&controller.UserInfoController{}).ReportInviter)},
+		{Path: "/browseInvitees", Handler: jsonHandler((&controller.UserInfoController{}).InviteeList)},
 		{Path: "/changePhoto", Handler: controller.HandleUploadAvatar},
 	})
 	httpserver.RegNonAuthAppRouteGroup("/sofie/profile", []httpserver.AppRoute{
@@ -189,6 +190,7 @@ func Init() {
 		{Path: "/fetchDirectBooth", Handler: jsonHandler((&controller.LiveRoomAppController{}).GetOneToOneRoom)},
 		{Path: "/beginBroadcast", Handler: jsonHandler((&controller.LiveRoomAppController{}).StartLive)},
 		{Path: "/endBroadcast", Handler: jsonHandler((&controller.LiveRoomAppController{}).StopLive)},
+		{Path: "/setBroadcastCamera", Handler: jsonHandler((&controller.LiveRoomAppController{}).SetLiveCameraEnabled)},
 		{Path: "/replaceCover", Handler: jsonHandler((&controller.LiveRoomAppController{}).UpdateCover)},
 		{Path: "/replaceNotice", Handler: jsonHandler((&controller.LiveRoomAppController{}).UpdateNotice)},
 		{Path: "/browseVoiceChatMicSeatTiers", Handler: jsonHandler((&controller.VoiceChatMicSeatTierAppController{}).AppTierList)},

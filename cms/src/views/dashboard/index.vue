@@ -11,6 +11,14 @@
               :value="item.value"
           />
         </el-select>
+        <el-button
+            v-if="canExport"
+            class="page-toolbar-export-all"
+            :loading="exportAllLoading"
+            @click="() => void handleExportAllDashboard()"
+        >
+          {{ t('pages.dashboard.exportAll') }}
+        </el-button>
       </div>
       <el-tabs v-model="activeMainTab" lazy @tab-change="handleMainTabChange">
         <el-tab-pane :label="t('pages.dashboard.basicData')" name="basic">
@@ -25,6 +33,7 @@
               {{ t('pages.dashboard.resetBasicData') }}
             </el-button>
             <el-button :loading="loading" @click="() => void fetchSysStat(false, true)">{{ t('common.refresh') }}</el-button>
+            <el-button v-if="canExport" @click="handleExportDashboard">{{ t('common.export') }}</el-button>
           </div>
           <div class="basic-stat-board basic-stat-board--compact">
             <section
@@ -59,6 +68,7 @@
           <div v-loading="onlineLoading" class="dashboard-tab-pane-body">
           <div class="tab-toolbar tab-toolbar-trend-range tab-toolbar-online">
             <el-button :loading="onlineLoading" @click="() => void refreshOnlineTab()">{{ t('common.refresh') }}</el-button>
+            <el-button v-if="canExport" @click="handleExportDashboard">{{ t('common.export') }}</el-button>
           </div>
           <div class="dashboard-realtime-row">
             <div class="dashboard-realtime-row-head">
@@ -102,6 +112,7 @@
               <el-button :loading="gameBetLoading" @click="() => void refreshGameStatsTab()">
                 {{ t('common.refresh') }}
               </el-button>
+              <el-button v-if="canExport" @click="handleExportDashboard">{{ t('common.export') }}</el-button>
             </div>
             <div class="dashboard-realtime-grid dashboard-realtime-grid--fit">
               <div class="stat-card tone-violet dashboard-realtime-card dashboard-realtime-card--compact">
@@ -142,8 +153,9 @@
               <el-button :loading="userEventsLoading" @click="() => void refreshUserEventsTab()">
                 {{ t('common.refresh') }}
               </el-button>
+              <el-button v-if="canExport" @click="handleExportDashboard">{{ t('common.export') }}</el-button>
             </div>
-            <div class="game-stats-chart-panel">
+            <div class="game-stats-chart-panel user-events-chart-panel">
               <div class="game-stats-chart-head">
                 <div class="game-stats-chart-title">{{ userEventsChartTitle }}</div>
                 <p class="game-stats-chart-hint">{{ t('pages.trackingMinuteLiveActivity.chartHint') }}</p>
@@ -151,12 +163,27 @@
                   {{ t('pages.trackingMinuteLiveActivity.rangeTruncated', {max: userEventsTrendMaxPoints}) }}
                 </p>
               </div>
-              <MinuteLiveActivityTrendChart
-                  ref="userEventsChartRef"
-                  :data="userEventsTrend.points"
-                  :title="userEventsChartTitle"
-                  class="game-stats-chart"
-              />
+              <el-tabs
+                  v-model="activeUserEventMetric"
+                  class="user-events-metric-tabs"
+                  lazy
+                  @tab-change="handleUserEventMetricTabChange"
+              >
+                <el-tab-pane
+                    v-for="tab in userEventSeriesTabs"
+                    :key="tab.key"
+                    :label="tab.label"
+                    :name="tab.key"
+                >
+                  <MinuteLiveActivityTrendChart
+                      ref="userEventsChartRef"
+                      :data="userEventsTrend.points"
+                      :series-key="tab.key"
+                      :title="tab.chartTitle"
+                      class="game-stats-chart"
+                  />
+                </el-tab-pane>
+              </el-tabs>
             </div>
           </div>
         </el-tab-pane>
@@ -165,6 +192,7 @@
           <div v-loading="trendLoading" class="dashboard-tab-pane-body">
           <div class="tab-toolbar">
             <el-button :loading="trendLoading" @click="() => void fetchUserStatTrend(false, true)">{{ t('common.refresh') }}</el-button>
+            <el-button v-if="canExport" @click="handleExportDashboard">{{ t('common.export') }}</el-button>
           </div>
           <el-tabs v-model="activePeriod" lazy @tab-change="handlePeriodTabChange">
             <el-tab-pane :label="t('pages.dashboard.periodDaily')" name="daily">
@@ -184,6 +212,7 @@
           <div v-loading="trendLoading" class="dashboard-tab-pane-body">
           <div class="tab-toolbar">
             <el-button :loading="trendLoading" @click="() => void fetchUserStatTrend(false, true)">{{ t('common.refresh') }}</el-button>
+            <el-button v-if="canExport" @click="handleExportDashboard">{{ t('common.export') }}</el-button>
           </div>
           <el-tabs v-model="activeRechargePeriod" lazy @tab-change="handleRechargePeriodTabChange">
             <el-tab-pane :label="t('pages.dashboard.periodDaily')" name="daily">
@@ -218,6 +247,7 @@
           <div v-loading="trendLoading" class="dashboard-tab-pane-body">
           <div class="tab-toolbar">
             <el-button :loading="trendLoading" @click="() => void fetchUserStatTrend(false, true)">{{ t('common.refresh') }}</el-button>
+            <el-button v-if="canExport" @click="handleExportDashboard">{{ t('common.export') }}</el-button>
           </div>
           <p class="game-bet-event-hint">{{ t('pages.dashboard.clientRechargeHint') }}</p>
           <el-tabs v-model="activeClientRechargePeriod" lazy @tab-change="handleClientRechargePeriodTabChange">
@@ -250,6 +280,7 @@
           <div v-loading="trendLoading" class="dashboard-tab-pane-body">
           <div class="tab-toolbar">
             <el-button :loading="trendLoading" @click="() => void fetchUserStatTrend(false, true)">{{ t('common.refresh') }}</el-button>
+            <el-button v-if="canExport" @click="handleExportDashboard">{{ t('common.export') }}</el-button>
           </div>
           <p class="game-bet-event-hint">{{ t('pages.dashboard.clientLoginHint') }}</p>
           <el-tabs v-model="activeClientLoginPeriod" lazy @tab-change="handleClientLoginPeriodTabChange">
@@ -312,6 +343,36 @@ import {
   DASHBOARD_RESOURCE_METRIC_RETENTION_DAYS,
 } from './dashboard-trend-range'
 import {formatAmount} from '@/utils/number-format'
+import {
+  buildDashboardBasicCsvContent,
+  buildDashboardClientLoginCsvContent,
+  buildDashboardClientRechargeCsvContent,
+  buildDashboardExportFilename,
+  buildDashboardExportStamp,
+  buildDashboardGameStatsCsvContent,
+  buildDashboardOnlineCsvContent,
+  buildDashboardRechargeUserBarCsvContent,
+  buildDashboardUserEventsCsvContent,
+  buildDashboardUserTrendCsvContent,
+  downloadDashboardCsvBundle,
+  exportDashboardBasicCsv,
+  exportDashboardClientLoginCsv,
+  exportDashboardClientRechargeCsv,
+  exportDashboardGameStatsCsv,
+  exportDashboardOnlineCsv,
+  exportDashboardRechargeUserBarCsv,
+  exportDashboardUserEventsCsv,
+  exportDashboardUserTrendCsv,
+  type DashboardExportLabels,
+} from '@/utils/dashboard-export'
+import {
+  buildDashboardTrackingExportCsvFiles,
+  fetchAllTrackingTrendsForDashboardExport,
+} from '@/utils/dashboard-tracking-export'
+import {
+  MINUTE_LIVE_ACTIVITY_SERIES_KEYS,
+  type MinuteLiveActivitySeriesKey,
+} from '@/views/tracking/minute-live-activity-series'
 
 const UserStatChart = defineAsyncComponent(() => import('./components/user-stat-chart.vue'))
 const UserStatBarChart = defineAsyncComponent(() => import('./components/user-stat-bar-chart.vue'))
@@ -339,6 +400,8 @@ const AUTO_REFRESH_INTERVALS = [
 
 const {t, locale} = useI18n()
 const {can} = usePagePermission('Dashboard')
+const canExport = computed(() => can('export'))
+const exportAllLoading = ref(false)
 const basicDataResetSubmitting = ref(false)
 const loading = ref(false)
 const trendLoading = ref(false)
@@ -356,6 +419,7 @@ const gameStatRangeTruncated = ref(false)
 const gameStatTrendMaxPoints = ref(0)
 const userEventsRangeTruncated = ref(false)
 const userEventsTrendMaxPoints = ref(USER_EVENTS_TREND_MAX_POINTS)
+const activeUserEventMetric = ref<MinuteLiveActivitySeriesKey>('joinCount')
 /** 下拉展示用；定时器始终 DASHBOARD_AUTO_REFRESH_MS */
 const autoRefreshMs = ref(DASHBOARD_AUTO_REFRESH_MS)
 const dashboardRouteActive = ref(false)
@@ -437,6 +501,38 @@ const onlineChartTitle = computed(() => t('pages.dashboard.onlineLiveChartTitleL
 
 const gameStatChartTitle = computed(() => t('pages.dashboard.gameStatChartTitleLast3Days'))
 const userEventsChartTitle = computed(() => t('pages.trackingMinuteLiveActivity.chartTitleLast3Days'))
+
+const userEventSeriesLabel = (key: MinuteLiveActivitySeriesKey) => {
+  switch (key) {
+    case 'joinCount':
+      return t('pages.trackingMinuteLiveActivity.join')
+    case 'leaveCount':
+      return t('pages.trackingMinuteLiveActivity.leave')
+    case 'giftCount':
+      return t('pages.trackingMinuteLiveActivity.gift')
+    case 'chatCount':
+      return t('pages.trackingMinuteLiveActivity.chat')
+    case 'betCount':
+      return t('pages.trackingMinuteLiveActivity.bet')
+    case 'call1v1Count':
+      return t('pages.trackingMinuteLiveActivity.call1v1')
+    case 'rechargeOrderCount':
+      return t('pages.trackingMinuteLiveActivity.rechargeOrder')
+    default:
+      return key
+  }
+}
+
+const userEventSeriesTabs = computed(() =>
+    MINUTE_LIVE_ACTIVITY_SERIES_KEYS.map((key) => {
+      const label = userEventSeriesLabel(key)
+      return {
+        key,
+        label,
+        chartTitle: `${userEventsChartTitle.value} · ${label}`,
+      }
+    }),
+)
 
 const dailyLineChartRef = ref<InstanceType<typeof UserStatChart>>()
 const weeklyLineChartRef = ref<InstanceType<typeof UserStatChart>>()
@@ -635,6 +731,189 @@ const basicStatSections = computed(() => [
     cards: toBasicStatCards(ANCHOR_PAYOUT_STAT_CARD_CONFIG),
   },
 ])
+
+const dashboardExportLabels = computed((): DashboardExportLabels => ({
+  section: t('pages.dashboard.exportCsvSection'),
+  metric: t('pages.dashboard.exportCsvMetric'),
+  value: t('pages.dashboard.exportCsvValue'),
+  time: t('pages.dashboard.exportCsvTime'),
+  audienceOnline: t('pages.dashboard.onlineRealtimeAudienceCount'),
+  liveAnchorOnline: t('pages.dashboard.onlineRealtimeLiveAnchorCount'),
+  gameOnline: t('pages.dashboard.gameOnlineCount'),
+  gameBetUser: t('pages.dashboard.gameBetUserCount'),
+  activeUsers: t('pages.dashboard.activeUsers'),
+  registerUsers: t('pages.dashboard.registerUsers'),
+  rechargeUser: t('pages.dashboard.barMetricRechargeUser'),
+  appRecharge: t('pages.dashboard.clientRechargeApp'),
+  h5Recharge: t('pages.dashboard.clientRechargeH5'),
+  appLogin: t('pages.dashboard.clientLoginApp'),
+  h5Login: t('pages.dashboard.clientLoginH5'),
+  join: t('pages.trackingMinuteLiveActivity.join'),
+  leave: t('pages.trackingMinuteLiveActivity.leave'),
+  gift: t('pages.trackingMinuteLiveActivity.gift'),
+  chat: t('pages.trackingMinuteLiveActivity.chat'),
+  bet: t('pages.trackingMinuteLiveActivity.bet'),
+  call1v1: t('pages.trackingMinuteLiveActivity.call1v1'),
+  rechargeOrder: t('pages.trackingMinuteLiveActivity.rechargeOrder'),
+}))
+
+const pickUserTrendPoints = (period: string) => {
+  if (period === 'weekly') {
+    return userStatTrend.weekly
+  }
+  if (period === 'monthly') {
+    return userStatTrend.monthly
+  }
+  return userStatTrend.daily
+}
+
+const handleExportDashboard = () => {
+  const labels = dashboardExportLabels.value
+  let ok = false
+  const tab = activeMainTab.value
+  if (tab === 'basic') {
+    ok = exportDashboardBasicCsv(
+        buildDashboardExportFilename('basic'),
+        basicStatSections.value.map((section) => ({
+          title: section.title,
+          cards: section.cards.map((card) => ({label: card.label, value: card.value})),
+        })),
+        labels,
+    )
+  } else if (tab === 'online') {
+    ok = exportDashboardOnlineCsv(
+        buildDashboardExportFilename('online'),
+        {...onlineRealtime},
+        resourceMetricTrend.points,
+        labels,
+    )
+  } else if (tab === 'gameStats') {
+    ok = exportDashboardGameStatsCsv(
+        buildDashboardExportFilename('game-stats'),
+        {...gameStatsRealtime},
+        gameStatTrend.points,
+        labels,
+    )
+  } else if (tab === 'userEvents') {
+    ok = exportDashboardUserEventsCsv(
+        buildDashboardExportFilename('user-events'),
+        userEventsTrend.points,
+        labels,
+    )
+  } else if (tab === 'user') {
+    ok = exportDashboardUserTrendCsv(
+        buildDashboardExportFilename('user', activePeriod.value),
+        pickUserTrendPoints(activePeriod.value),
+        labels,
+    )
+  } else if (tab === 'rechargeUser') {
+    ok = exportDashboardRechargeUserBarCsv(
+        buildDashboardExportFilename('recharge-user', activeRechargePeriod.value),
+        pickUserTrendPoints(activeRechargePeriod.value),
+        'rechargeUser',
+        labels,
+    )
+  } else if (tab === 'clientRecharge') {
+    ok = exportDashboardClientRechargeCsv(
+        buildDashboardExportFilename('client-recharge', activeClientRechargePeriod.value),
+        pickUserTrendPoints(activeClientRechargePeriod.value),
+        labels,
+    )
+  } else if (tab === 'clientLogin') {
+    ok = exportDashboardClientLoginCsv(
+        buildDashboardExportFilename('client-login', activeClientLoginPeriod.value),
+        pickUserTrendPoints(activeClientLoginPeriod.value),
+        labels,
+    )
+  }
+  if (ok) {
+    ElMessage.success(t('common.exportSuccess'))
+  } else {
+    ElMessage.warning(t('common.exportEmpty'))
+  }
+}
+
+const fetchAllDashboardDataForExport = async (): Promise<boolean> => {
+  const results = await Promise.all([
+    fetchSysStat(true, true),
+    fetchUserStatTrend(true, true),
+    fetchGameStatTrend(true, true),
+    fetchGameStatsRealtime(true, true),
+    fetchUserEventsTrend(true, true),
+    fetchResourceMetricTrend(true, true),
+    fetchOnlineRealtime(true, true),
+  ])
+  tabDataLoaded.sysStat = results[0] || tabDataLoaded.sysStat
+  tabDataLoaded.userTrend = results[1] || tabDataLoaded.userTrend
+  tabDataLoaded.gameTrend = results[2] || tabDataLoaded.gameTrend
+  tabDataLoaded.userEventsTrend = results[4] || tabDataLoaded.userEventsTrend
+  tabDataLoaded.onlineTrend = results[5] || tabDataLoaded.onlineTrend
+  return results.some(Boolean)
+}
+
+const handleExportAllDashboard = async () => {
+  if (exportAllLoading.value) {
+    return
+  }
+  exportAllLoading.value = true
+  try {
+    const [, trackingTrends] = await Promise.all([
+      fetchAllDashboardDataForExport(),
+      fetchAllTrackingTrendsForDashboardExport(),
+    ])
+    const labels = dashboardExportLabels.value
+    const stamp = buildDashboardExportStamp()
+    const basicSections = basicStatSections.value.map((section) => ({
+      title: section.title,
+      cards: section.cards.map((card) => ({label: card.label, value: card.value})),
+    }))
+    const periods = ['daily', 'weekly', 'monthly'] as const
+    const trendByPeriod = {
+      daily: userStatTrend.daily,
+      weekly: userStatTrend.weekly,
+      monthly: userStatTrend.monthly,
+    }
+    const files = [
+      {filename: buildDashboardExportFilename('basic', undefined, stamp), content: buildDashboardBasicCsvContent(basicSections, labels)},
+      {filename: buildDashboardExportFilename('online', undefined, stamp), content: buildDashboardOnlineCsvContent({...onlineRealtime}, resourceMetricTrend.points, labels)},
+      {filename: buildDashboardExportFilename('game-stats', undefined, stamp), content: buildDashboardGameStatsCsvContent({...gameStatsRealtime}, gameStatTrend.points, labels)},
+      {filename: buildDashboardExportFilename('user-events', undefined, stamp), content: buildDashboardUserEventsCsvContent(userEventsTrend.points, labels)},
+      ...periods.map((period) => ({
+        filename: buildDashboardExportFilename('user', period, stamp),
+        content: buildDashboardUserTrendCsvContent(trendByPeriod[period], labels),
+      })),
+      ...periods.map((period) => ({
+        filename: buildDashboardExportFilename('recharge-user', period, stamp),
+        content: buildDashboardRechargeUserBarCsvContent(trendByPeriod[period], 'rechargeUser', labels),
+      })),
+      ...periods.map((period) => ({
+        filename: buildDashboardExportFilename('client-recharge', period, stamp),
+        content: buildDashboardClientRechargeCsvContent(trendByPeriod[period], labels),
+      })),
+      ...periods.map((period) => ({
+        filename: buildDashboardExportFilename('client-login', period, stamp),
+        content: buildDashboardClientLoginCsvContent(trendByPeriod[period], labels),
+      })),
+      ...buildDashboardTrackingExportCsvFiles(
+          t,
+          stamp,
+          t('pages.dashboard.exportCsvTime'),
+          trackingTrends,
+      ),
+    ]
+    const count = await downloadDashboardCsvBundle(files)
+    if (count > 0) {
+      ElMessage.success(t('pages.dashboard.exportAllSuccess', {count}))
+    } else {
+      ElMessage.warning(t('common.exportEmpty'))
+    }
+  } catch (error) {
+    console.error('export all dashboard data failed:', error)
+    ElMessage.error(t('pages.dashboard.exportAllFailed'))
+  } finally {
+    exportAllLoading.value = false
+  }
+}
 
 const clearAutoRefreshTimer = () => {
   if (autoRefreshTimer != null) {
@@ -1103,6 +1382,11 @@ const handleClientLoginPeriodTabChange = async () => {
   resizeClientLoginCharts()
 }
 
+const handleUserEventMetricTabChange = async () => {
+  await nextTick()
+  userEventsChartRef.value?.resize()
+}
+
 const formatCount = (value: string | number | null | undefined) => {
   if (value === null || value === undefined || value === '') {
     return '-'
@@ -1162,6 +1446,10 @@ onUnmounted(() => {
 .page-toolbar-label {
   font-size: 13px;
   color: #64748b;
+}
+
+.page-toolbar-export-all {
+  margin-left: 8px;
 }
 
 .auto-refresh-select {
@@ -1363,6 +1651,14 @@ onUnmounted(() => {
 
 .game-stats-chart {
   margin-top: 4px;
+}
+
+.user-events-metric-tabs :deep(.el-tabs__header) {
+  margin-bottom: 8px;
+}
+
+.user-events-metric-tabs :deep(.el-tabs__content) {
+  padding-top: 4px;
 }
 
 .game-bet-summary-grid {

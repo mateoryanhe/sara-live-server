@@ -8,6 +8,7 @@ const zh = {
   inviter: '邀请人',
   inviterId: '邀请人ID',
   inviteTime: '邀请时间',
+  inviterRewardGold: '邀请人返现金币',
   fetchFailed: '获取邀请列表失败',
 } as const
 
@@ -19,5 +20,6 @@ export const promotionInviteLogListMessages = definePageMessagesFromEn(zh, {
   inviter: 'Inviter',
   inviterId: 'Inviter ID',
   inviteTime: 'Invite time',
+  inviterRewardGold: 'Inviter cashback gold',
   fetchFailed: 'Failed to load invite list',
 })

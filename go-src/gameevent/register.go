@@ -22,6 +22,7 @@ type RegisterEventData struct {
 	NickLang              uint8 // 随机昵称语言(0=英文默认)
 	Attribution           RegisterAttribution
 	PromotionChannelCode  int // deviceInfo.ch 解析出的渠道编码,0 为无
+	ApkPromotionChannel   string // deviceInfo.apkCh,空为无
 }
 
 func NewRegisterEventData(userId uint64, registeredAt time.Time) *RegisterEventData {
@@ -42,9 +43,13 @@ func NewRegisterEventDataFromCtxWithDevice(ctx context.Context, userId uint64, r
 		lang = randomnick.ParseAcceptLanguage(r.Header.Get("Accept-Language"))
 	}
 	code := 0
+	apkCh := ""
 	if deviceInfo != nil {
 		if c, ok := deviceInfo.PromotionChannelCode(); ok {
 			code = c
+		}
+		if c, ok := deviceInfo.ApkPromotionChannel(); ok {
+			apkCh = c
 		}
 	}
 	return &RegisterEventData{
@@ -53,5 +58,6 @@ func NewRegisterEventDataFromCtxWithDevice(ctx context.Context, userId uint64, r
 		NickLang:             lang,
 		Attribution:          registerAttributionFromCtx(ctx, deviceInfo),
 		PromotionChannelCode: code,
+		ApkPromotionChannel:  apkCh,
 	}
 }

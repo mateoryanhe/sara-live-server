@@ -9,6 +9,7 @@ import type {EChartsType} from 'echarts/core'
 import echarts, {type EChartsOption} from '@/utils/echarts'
 import type {MinuteLiveActivityTrendPoint} from '@/types/api'
 import {buildTrendChartXAxisLabel, trendChartGridBottom} from '@/utils/trend-chart-zoom'
+import type {MinuteLiveActivitySeriesKey} from '@/views/tracking/minute-live-activity-series'
 
 /** 与仪表盘游戏统计一致：点多按桶压缩，仍覆盖整段 3 天 */
 const MAX_DISPLAY_POINTS = 360
@@ -16,6 +17,8 @@ const MAX_DISPLAY_POINTS = 360
 const props = defineProps<{
   data: MinuteLiveActivityTrendPoint[]
   title?: string
+  /** 仅展示单一事件；不传则展示全部曲线(埋点页等) */
+  seriesKey?: MinuteLiveActivitySeriesKey
 }>()
 
 const {t, locale} = useI18n()
@@ -75,8 +78,9 @@ function toDisplayPoints(points: MinuteLiveActivityTrendPoint[]): MinuteLiveActi
 const buildOption = (rawPoints: MinuteLiveActivityTrendPoint[]): EChartsOption => {
   const points = toDisplayPoints(rawPoints || [])
   const times = points.map(item => item.time)
-  const defs = seriesDefs()
+  const defs = seriesDefs().filter(item => !props.seriesKey || item.key === props.seriesKey)
   const gridBottom = trendChartGridBottom(times.length, false)
+  const showLegend = !props.seriesKey && defs.length > 1
 
   return {
     animation: times.length < 500,
@@ -94,17 +98,19 @@ const buildOption = (rawPoints: MinuteLiveActivityTrendPoint[]): EChartsOption =
       textStyle: {color: '#f8fafc', fontSize: 12},
       axisPointer: {type: 'line', lineStyle: {color: '#94a3b8', type: 'dashed'}},
     },
-    legend: {
-      data: defs.map(item => item.label),
-      top: props.title ? 30 : 4,
-      itemWidth: 14,
-      itemHeight: 8,
-      textStyle: {color: '#64748b', fontSize: 12},
-    },
+    legend: showLegend
+        ? {
+          data: defs.map(item => item.label),
+          top: props.title ? 30 : 4,
+          itemWidth: 14,
+          itemHeight: 8,
+          textStyle: {color: '#64748b', fontSize: 12},
+        }
+        : undefined,
     grid: {
       left: 52,
       right: 28,
-      top: props.title ? 88 : 56,
+      top: props.title ? (showLegend ? 88 : 64) : showLegend ? 56 : 40,
       bottom: gridBottom,
       containLabel: false,
     },
@@ -155,7 +161,7 @@ const renderChart = () => {
   chartInstance.resize()
 }
 
-watch(() => [props.data, props.title, locale.value], () => {
+watch(() => [props.data, props.title, props.seriesKey, locale.value], () => {
   void nextTick(renderChart)
 }, {deep: true})
 

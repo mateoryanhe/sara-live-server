@@ -2,6 +2,7 @@ package entity
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"xr-game-server/constants/db"
@@ -36,6 +37,8 @@ const (
 	UserExtGameWinCount              db.TbCol = "game_win_count"
 	UserExtInviterId                 db.TbCol = "inviter_id"
 	UserExtPromotionChannelCode      db.TbCol = "promotion_channel_code"
+	UserExtApkPromotionChannel       db.TbCol = "apk_promotion_channel"
+	UserExtInviterInviteRechargeRewardGold db.TbCol = "inviter_invite_recharge_reward_gold"
 	UserExtGameLiveRoomId            db.TbCol = "game_live_room_id"
 )
 
@@ -59,6 +62,8 @@ type UserExt struct {
 	GameWinCount              uint64     `gorm:"default:0;comment:游戏派彩(win)次数(>0提现需满足档位游戏消费累计)" json:"gameWinCount"`
 	InviterId                 uint64     `gorm:"index;default:0;comment:邀请者用户ID(0为无)" json:"inviterId"`
 	PromotionChannelCode      int        `gorm:"index;default:0;comment:注册推广渠道编码(0为无)" json:"promotionChannelCode"`
+	ApkPromotionChannel       string     `gorm:"size:64;index;default:'';comment:APK推广渠道编码(空为无)" json:"apkPromotionChannel"`
+	InviterInviteRechargeRewardGold float64    `gorm:"type:decimal(16,4);default:0;comment:因该用户充值已发放给邀请人的返现金币累计" json:"inviterInviteRechargeRewardGold"`
 	GameLiveRoomId            uint64     `gorm:"index;default:0;comment:玩游戏上下文直播间ID(0大厅无关联,>0写入game_bet_logs)" json:"gameLiveRoomId"`
 }
 
@@ -203,6 +208,28 @@ func (receiver *UserExt) SetPromotionChannelCode(code int) {
 	})
 }
 
+func (receiver *UserExt) SetApkPromotionChannel(code string) {
+	code = strings.TrimSpace(code)
+	receiver.ApkPromotionChannel = code
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddData(TbUserExt, UserExtApkPromotionChannel, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: code,
+	})
+}
+
+func (receiver *UserExt) AddInviterInviteRechargeRewardGold(amount float64) {
+	if amount <= 0 {
+		return
+	}
+	receiver.InviterInviteRechargeRewardGold = math.AddFloat64(receiver.InviterInviteRechargeRewardGold, amount)
+	receiver.SetUpdatedAt(time.Now())
+	syndb.AddData(TbUserExt, UserExtInviterInviteRechargeRewardGold, &syndb.ColData{
+		IdVal:  receiver.ID,
+		ColVal: receiver.InviterInviteRechargeRewardGold,
+	})
+}
+
 func (receiver *UserExt) SetGameLiveRoomId(liveRoomId uint64) {
 	receiver.GameLiveRoomId = liveRoomId
 	receiver.SetUpdatedAt(time.Now())
@@ -323,6 +350,8 @@ func initUserExt() {
 	syndb.RegQuick(TbUserExt, UserExtGameWinCount)
 	syndb.RegQuick(TbUserExt, UserExtInviterId)
 	syndb.RegQuick(TbUserExt, UserExtPromotionChannelCode)
+	syndb.RegQuick(TbUserExt, UserExtApkPromotionChannel)
+	syndb.RegQuick(TbUserExt, UserExtInviterInviteRechargeRewardGold)
 	syndb.RegQuick(TbUserExt, UserExtGameLiveRoomId)
 
 	migrate.AutoMigrate(&UserExt{})

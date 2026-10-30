@@ -19,6 +19,7 @@ var userExtCacheMgr *cache.RowCache[*entity.UserExt]
 
 func initUserExtDao() {
 	userExtCacheMgr = cache.NewRowCache[*entity.UserExt]()
+	initAppInviteeListCache()
 }
 
 // GetUserExtByUserId 获取用户扩展信息,不存在则新建内存对象(异步入库,默认允许上排行榜)
@@ -117,6 +118,31 @@ func TrySetPromotionChannelFromDevice(userId uint64, info *entity.DeviceInfo) {
 	}
 	ext.SetPromotionChannelCode(code)
 	PublishUserExt(ext)
+}
+
+// TrySetApkPromotionChannelFromDevice 注册/首次登录写入 APK 推广渠道(仅当尚未绑定时)
+func TrySetApkPromotionChannelFromDevice(userId uint64, info *entity.DeviceInfo) {
+	if userId == 0 || info == nil {
+		return
+	}
+	code, ok := info.ApkPromotionChannel()
+	if !ok {
+		return
+	}
+	ext := GetUserExtByUserId(userId)
+	if strings.TrimSpace(ext.ApkPromotionChannel) != "" {
+		return
+	}
+	ext.SetApkPromotionChannel(code)
+	PublishUserExt(ext)
+}
+
+// GetApkPromotionChannel 用户 APK 推广渠道编码(空表示无)
+func GetApkPromotionChannel(userId uint64) string {
+	if userId == 0 {
+		return ""
+	}
+	return strings.TrimSpace(GetUserExtByUserId(userId).ApkPromotionChannel)
 }
 
 // GetPromotionChannelCode 用户注册推广渠道编码(0 表示无)
@@ -243,4 +269,44 @@ func DecFollowCount(userId, anchorId uint64) {
 	anchorExt := GetUserExtByUserId(anchorId)
 	anchorExt.SubFollowerCount(1)
 	PublishUserExt(anchorExt)
+}
+
+type userExtInviteRewardGoldRow struct {
+	ID                              uint64  `json:"id"`
+	InviterInviteRechargeRewardGold float64 `json:"inviterInviteRechargeRewardGold"`
+}
+
+// GetInviterInviteRechargeRewardGoldMap 被邀请人 userId -> 已发放给邀请人的邀请充值返现金币累计
+func GetInviterInviteRechargeRewardGoldMap(userIds []uint64) map[uint64]float64 {
+	out := make(map[uint64]float64, len(userIds))
+	if len(userIds) == 0 {
+		return out
+	}
+	ids := make([]uint64, 0, len(userIds))
+	seen := make(map[uint64]struct{}, len(userIds))
+	for _, id := range userIds {
+		if id == 0 {
+			continue
+		}
+		if _, ok := seen[id]; ok {
+			continue
+		}
+		seen[id] = struct{}{}
+		ids = append(ids, id)
+	}
+	if len(ids) == 0 {
+		return out
+	}
+	var rows []userExtInviteRewardGoldRow
+	_ = g.Model(string(entity.TbUserExt)).Ctx(gctx.New()).
+		Fields(string(db.IdName), string(entity.UserExtInviterInviteRechargeRewardGold)).
+		WhereIn(string(db.IdName), ids).
+		Scan(&rows)
+	for _, row := range rows {
+		if row.ID == 0 {
+			continue
+		}
+		out[row.ID] = row.InviterInviteRechargeRewardGold
+	}
+	return out
 }

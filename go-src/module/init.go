@@ -7,6 +7,7 @@ import (
 	"xr-game-server/module/aliyunmoderation"
 	"xr-game-server/module/anchornosalarysharecfg"
 	"xr-game-server/module/anchorrank"
+	"xr-game-server/module/apkpromotionchannel"
 	"xr-game-server/module/apppkg"
 	"xr-game-server/module/appversioncfg"
 	"xr-game-server/module/auth"
@@ -60,6 +61,7 @@ import (
 func Init() {
 	staticcachecfg.Init()
 	upload.Init()
+	apkpromotionchannel.Init()
 	domainsite.Init()
 	randomnick.Init()
 	usermaxid.Init()

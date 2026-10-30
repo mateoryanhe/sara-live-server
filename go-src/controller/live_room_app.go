@@ -302,6 +302,11 @@ func (c *LiveRoomAppController) ReportLiveStartStatus(ctx context.Context, req *
 	return liveroom.ReportLiveStartStatus(ctx, req)
 }
 
+// SetLiveCameraEnabled 主播开关摄像头
+func (c *LiveRoomAppController) SetLiveCameraEnabled(ctx context.Context, req *liveroomdto.SetLiveCameraEnabledReq) (res *liveroomdto.SetLiveCameraEnabledRes, err error) {
+	return liveroom.SetLiveCameraEnabled(ctx, req)
+}
+
 // GameRecommendList 查询直播间推荐游戏列表
 func (c *LiveRoomAppController) GameRecommendList(ctx context.Context, req *liveroomdto.GetLiveRoomGameRecommendListReq) (*liveroomdto.GetLiveRoomGameRecommendListRes, error) {
 	return liveroom.GetLiveRoomGameRecommendList(ctx, req)

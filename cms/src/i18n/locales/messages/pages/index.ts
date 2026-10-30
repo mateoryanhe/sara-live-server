@@ -74,6 +74,8 @@ import {appVersionCfgMessages} from './app-version-cfg'
 import {firstRechargeActivityCfgMessages} from './first-recharge-activity-cfg'
 import {inviteRechargeRewardCfgMessages} from './invite-recharge-reward-cfg'
 import {promotionChannelUrlListMessages} from './promotion-channel-url-list'
+import {apkPromotionChannelListMessages} from './apk-promotion-channel-list'
+import {apkPromotionChannelDailyStatListMessages} from './apk-promotion-channel-daily-stat-list'
 import {promotionChannelDailyStatListMessages} from './promotion-channel-daily-stat-list'
 import {promotionInviteLogListMessages} from './promotion-invite-log-list'
 import {simulatorCpuKeywordListMessages} from './simulator-cpu-keyword-list'
@@ -203,6 +205,8 @@ const pageMessageBuilders = [
   ['firstRechargeActivityCfg', firstRechargeActivityCfgMessages],
   ['inviteRechargeRewardCfg', inviteRechargeRewardCfgMessages],
   ['promotionChannelUrlList', promotionChannelUrlListMessages],
+  ['apkPromotionChannelList', apkPromotionChannelListMessages],
+  ['apkPromotionChannelDailyStatList', apkPromotionChannelDailyStatListMessages],
   ['promotionChannelDailyStatList', promotionChannelDailyStatListMessages],
   ['promotionInviteLogList', promotionInviteLogListMessages],
   ['simulatorCpuKeywordList', simulatorCpuKeywordListMessages],

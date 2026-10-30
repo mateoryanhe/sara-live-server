@@ -52,6 +52,7 @@ func StopLiveForBotAnchor(ctx context.Context, anchorId uint64) error {
 func stopLive(anchorId uint64) *entity.LiveRecord {
 	// 先移出开播任务,避免贡献榜定时刷新把已下播房间重新装回缓存
 	taskMap.Remove(anchorId)
+	clearLiveCameraState(anchorId)
 	// 移除在线名单 / 观众列表 / 贡献榜缓存
 	clearRoomAudienceCaches(anchorId)
 

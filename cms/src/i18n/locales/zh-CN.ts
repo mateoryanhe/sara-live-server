@@ -102,6 +102,8 @@ const menu = {
   PromotionManagement: '推广',
   PromotionChannelUrlListManagement: '推广渠道URL列表',
   PromotionChannelDailyStatManagement: '推广渠道日统计',
+  ApkPromotionChannelListManagement: 'APK推广渠道',
+  ApkPromotionChannelDailyStatManagement: 'APK推广渠道日统计',
   PromotionInviteLogListManagement: '邀请列表',
   PromotionShareAppDownloadCfgManagement: '分享下载文案',
   ConfigManagement: '系统配置',

@@ -85,4 +85,5 @@ func consumePromotionChannelOrderJob(job *statJob) {
 		at = time.Now()
 	}
 	recordDailyPromotionChannelOrder(at, order.UserId, order.Price)
+	recordDailyApkPromotionChannelOrder(at, order.UserId, order.Price)
 }

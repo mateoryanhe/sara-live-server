@@ -24,6 +24,7 @@ const (
 	jobGuildPayout
 	jobPromotionChannelOrder
 	jobPromotionChannelH5Download
+	jobApkPromotionChannelDownload
 )
 
 // statJob 统计队列任务;Payload 为原始事件数据,校验与清洗在消费端完成.
@@ -94,5 +95,7 @@ func handleStatJob(job *statJob) {
 		consumePromotionChannelOrderJob(job)
 	case jobPromotionChannelH5Download:
 		consumePromotionChannelH5DownloadJob(job)
+	case jobApkPromotionChannelDownload:
+		consumeApkPromotionChannelDownloadJob(job)
 	}
 }

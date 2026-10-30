@@ -80,6 +80,9 @@
             </div>
           </template>
         </el-table-column>
+        <el-table-column :label="t('pages.promotionInviteLogList.inviterRewardGold')" width="140" align="right">
+          <template #default="{ row }">{{ formatAmount(row.inviterRewardGold ?? 0) }}</template>
+        </el-table-column>
         <el-table-column :label="t('pages.promotionInviteLogList.inviteTime')" width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>
@@ -108,6 +111,7 @@ import {ElMessage} from 'element-plus'
 import {accountApi} from '@/api'
 import type {CMSInviteLogItem} from '@/types/api'
 import {formatServerDateTime as formatDate, toServerDayEndUnix, toServerDayStartUnix} from '@/utils/server-datetime'
+import {formatAmount} from '@/utils/number-format'
 
 const {t} = useI18n()
 const router = useRouter()

@@ -70,6 +70,8 @@ type UserExtDetailItem struct {
 	RechargeWhitelist         bool       `json:"rechargeWhitelist"`
 	ShortVideoUnsettledIncome float64    `json:"shortVideoUnsettledIncome"`
 	Email                     string     `json:"email" dc:"绑定邮箱(user_exts.email)"`
+	ApkPromotionChannel       string     `json:"apkPromotionChannel" dc:"APK推广渠道编码(空为无)"`
+	ApkPromotionChannelName   string     `json:"apkPromotionChannelName" dc:"APK推广渠道名称(CMS配置)"`
 	UpdatedAt                 *time.Time `json:"updatedAt"`
 }
 

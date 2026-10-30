@@ -76,6 +76,9 @@ func EmailLogin(ctx context.Context, req *authdto.EmailLoginReq) (*authdto.Email
 	}
 	userinfodao.SaveCancelCode(account.ID)
 	if isNewUser {
+		if req.DeviceInfo != nil {
+			userinfodao.TrySetApkPromotionChannelFromDevice(account.ID, req.DeviceInfo)
+		}
 		event.Pub(gameevent.RegisterEvent, gameevent.NewRegisterEventDataFromCtxWithDevice(ctx, account.ID, time.Now(), req.DeviceInfo))
 	}
 

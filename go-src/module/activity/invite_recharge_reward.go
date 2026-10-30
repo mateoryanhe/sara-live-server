@@ -91,7 +91,11 @@ func tryGrantInviteRechargeReward(data *gameevent.RechargeGoldArrivedEventData) 
 	if _, err := wallet.GoldAdd(inviterId, bonus, currency.ReasonInviteRechargeReward); err != nil {
 		g.Log().Errorf(gctx.New(), "invite recharge reward GoldAdd failed inviter=%d invitee=%d order=%d bonus=%v err=%v",
 			inviterId, order.UserId, order.ID, bonus, err)
+		return
 	}
+	inviteeExt.AddInviterInviteRechargeRewardGold(bonus)
+	userinfodao.PublishUserExt(inviteeExt)
+	userinfodao.UpdateAppInviteeListRewardGoldInCache(inviterId, order.UserId, inviteeExt.InviterInviteRechargeRewardGold)
 }
 
 func shouldSkipInviteRewardKind(kind gameevent.UsdIncomeKind, order *entity.RechargeOrder) bool {

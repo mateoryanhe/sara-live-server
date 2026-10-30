@@ -109,6 +109,8 @@ func Init() {
 	initMonthlyShareShortLinkClickStat()
 	initDailyPromotionChannelStat()
 	initDailyPromotionChannelPayUser()
+	initDailyApkPromotionChannelStat()
+	initDailyApkPromotionChannelPayUser()
 	initDailyGameBetUserStat()
 	initWeeklyGameBetUserStat()
 	initMonthlyGameBetUserStat()

@@ -29,6 +29,7 @@
 | `profile` | 上报归因 | 需要登录 | `POST /userInfo/reportAttribution` | `POST /sofie/profile/submitAttribution` |
 | `profile` | 按邀请码查用户 | 需要登录 | `POST /userInfo/getByInviteCode` | `POST /sofie/profile/lookupByInvite` |
 | `profile` | 上报邀请人 | 需要登录 | `POST /userInfo/reportInviter` | `POST /sofie/profile/submitInviter` |
+| `profile` | 名下邀请人列表 | 需要登录 | `POST /userInfo/inviteeList` | `POST /sofie/profile/browseInvitees` |
 | `profile` | 官网验证码销户 | 免登录 | `POST /userInfo/cancelAccountByCode` | `POST /sofie/profile/closeAccountByOtp` |
 | `profile` | 上传头像 | 需要登录 | `POST /userInfo/uploadAvatar` | `POST /sofie/profile/changePhoto` |
 | `studio` | 创建/更新直播间 | 需要登录 | `POST /liveRoom/create` | `POST /sofie/studio/openBooth` |
@@ -36,6 +37,7 @@
 | `studio` | 查询1v1房间配置 | 需要登录 | `POST /liveRoom/getOneToOne` | `POST /sofie/studio/fetchDirectBooth` |
 | `studio` | 开播 | 需要登录 | `POST /liveRoom/startLive` | `POST /sofie/studio/beginBroadcast` |
 | `studio` | 下播 | 需要登录 | `POST /liveRoom/stopLive` | `POST /sofie/studio/endBroadcast` |
+| `studio` | 开关摄像头 | 需要登录 | `POST /liveRoom/setLiveCameraEnabled` | `POST /sofie/studio/setBroadcastCamera` |
 | `studio` | 修改封面 | 需要登录 | `POST /liveRoom/updateCover` | `POST /sofie/studio/replaceCover` |
 | `studio` | 修改公告 | 需要登录 | `POST /liveRoom/updateNotice` | `POST /sofie/studio/replaceNotice` |
 | `studio` | 语聊麦位挡位 | 需要登录 | `POST /voiceChatMicSeatTier/appTierList` | `POST /sofie/studio/browseVoiceChatMicSeatTiers` |

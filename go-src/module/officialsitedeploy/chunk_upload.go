@@ -43,6 +43,8 @@ type uploadSessionMeta struct {
 	ChunkSize    int64  `json:"chunkSize"`
 	TotalChunk   int64  `json:"totalChunk"`
 	CreatedAt    int64  `json:"createdAt"`
+	// ApkPromotionChannelCode 非空时 APK 写入渠道独立静态目录(见 apkPromotionChannelTarget),非官网 assets
+	ApkPromotionChannelCode string `json:"apkPromotionChannelCode,omitempty"`
 }
 
 func InitOfficialSiteFileUpload(_ context.Context, req *officialsitedeploydto.InitOfficialSiteFileUploadReq) (*officialsitedeploydto.InitOfficialSiteFileUploadRes, error) {

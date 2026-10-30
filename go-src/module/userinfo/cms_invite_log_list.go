@@ -21,9 +21,11 @@ func GetCMSInviteLogList(ctx context.Context, req *accountdto.CMSInviteLogListRe
 	})
 	inviterIds := collectInviteLogInviterIds(rows)
 	inviterMap := userinfodao.GetUserProfileMapByUserIds(inviterIds)
+	inviteeIds := collectInviteLogInviteeIds(rows)
+	rewardGoldMap := userinfodao.GetInviterInviteRechargeRewardGoldMap(inviteeIds)
 	list := make([]*accountdto.CMSInviteLogItem, 0, len(rows))
 	for _, row := range rows {
-		if item := toCMSInviteLogItem(row, inviterMap); item != nil {
+		if item := toCMSInviteLogItem(row, inviterMap, rewardGoldMap); item != nil {
 			list = append(list, item)
 		}
 	}
@@ -49,7 +51,21 @@ func collectInviteLogInviterIds(rows []*userentity.UserInfo) []uint64 {
 	return ids
 }
 
-func toCMSInviteLogItem(v *userentity.UserInfo, inviterMap map[uint64]*userentity.UserInfo) *accountdto.CMSInviteLogItem {
+func collectInviteLogInviteeIds(rows []*userentity.UserInfo) []uint64 {
+	if len(rows) == 0 {
+		return nil
+	}
+	ids := make([]uint64, 0, len(rows))
+	for _, row := range rows {
+		if row == nil || row.ID == 0 {
+			continue
+		}
+		ids = append(ids, row.ID)
+	}
+	return ids
+}
+
+func toCMSInviteLogItem(v *userentity.UserInfo, inviterMap map[uint64]*userentity.UserInfo, rewardGoldMap map[uint64]float64) *accountdto.CMSInviteLogItem {
 	if v == nil {
 		return nil
 	}
@@ -66,6 +82,9 @@ func toCMSInviteLogItem(v *userentity.UserInfo, inviterMap map[uint64]*userentit
 			item.InviterNickname = inv.Nickname
 			item.InviterAvatar = upload.ResolveAvatarUrlForUser(inv.ID, inv.Avatar)
 		}
+	}
+	if rewardGoldMap != nil {
+		item.InviterRewardGold = rewardGoldMap[v.ID]
 	}
 	return item
 }

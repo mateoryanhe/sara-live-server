@@ -70,19 +70,24 @@ func flushAnchorId(room *entity.LiveRoom) {
 	room.SetHeartTime(&now)
 	liveroomdao.FlushRoomCache(room)
 	sec := float64(CommonPeriod)
+	countLiveDuration := ShouldAccumulateEffectiveLiveDuration(room.ID)
 	//记录本次直播
 	liveRecord := liveroomdao.GetLiveRecordById(room.LiveRecordId)
-	liveRecord.AddTotalLiveDuration(sec)
+	if countLiveDuration {
+		liveRecord.AddTotalLiveDuration(sec)
+	}
 	liveroomdao.PublishLiveRecord(liveRecord)
 	//直播间未结算+生涯累计时长
-	if unsettled := liveroomdao.GetLiveRoomIncomeUnsettled(room.ID); unsettled != nil {
-		unsettled.AddTotalLiveDuration(sec)
+	if countLiveDuration {
+		if unsettled := liveroomdao.GetLiveRoomIncomeUnsettled(room.ID); unsettled != nil {
+			unsettled.AddTotalLiveDuration(sec)
+		}
+		if total := liveroomdao.GetLiveRoomIncomeTotal(room.ID); total != nil {
+			total.AddTotalLiveDuration(sec)
+		}
+		liveroomdao.MirrorGuildLiveDuration(room.ID, sec)
+		liveroomdao.MirrorDailyAnchorLiveDuration(room.ID, now, sec)
 	}
-	if total := liveroomdao.GetLiveRoomIncomeTotal(room.ID); total != nil {
-		total.AddTotalLiveDuration(sec)
-	}
-	liveroomdao.MirrorGuildLiveDuration(room.ID, sec)
-	liveroomdao.MirrorDailyAnchorLiveDuration(room.ID, now, sec)
 }
 
 func flushAudience(userId uint64, room *entity.LiveRoom) {

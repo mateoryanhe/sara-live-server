@@ -27,3 +27,12 @@ func EffectiveLiveMinSessionMinutes() int {
 func EffectiveLiveDailyAccumulatedMinutes() int {
 	return resolveEffectiveLiveDailyAccumulatedMinutes(GetWalletExchangeCfgCached())
 }
+
+// CameraOffCountsAsEffectiveLive 关摄像头期间是否仍累计有效直播时长;默认 false.
+func CameraOffCountsAsEffectiveLive() bool {
+	cfg := GetWalletExchangeCfgCached()
+	if cfg == nil {
+		return false
+	}
+	return cfg.CameraOffCountsAsEffectiveLive
+}

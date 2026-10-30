@@ -76,6 +76,7 @@ func loginByDevice(ctx context.Context, deviceInfo *entity.DeviceInfo, channel u
 	userinfodao.SaveCancelCode(account.ID)
 	if isNewUser {
 		userinfodao.TrySetPromotionChannelFromDevice(account.ID, deviceInfo)
+		userinfodao.TrySetApkPromotionChannelFromDevice(account.ID, deviceInfo)
 		event.Pub(gameevent.RegisterEvent, gameevent.NewRegisterEventDataFromCtxWithDevice(ctx, account.ID, time.Now(), deviceInfo))
 	}
 

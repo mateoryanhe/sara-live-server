@@ -6,6 +6,7 @@ import (
 
 	"xr-game-server/constants/country"
 	"xr-game-server/dao/accountdao"
+	"xr-game-server/dao/apkpromotionchanneldao"
 	"xr-game-server/dao/channelpaydao"
 	"xr-game-server/dao/guilddao"
 	"xr-game-server/dao/liveroomdao"
@@ -184,12 +185,26 @@ func toUserExtDetailItem(ext *userentity.UserExt) *accountdto.UserExtDetailItem 
 		RechargeWhitelist:         ext.RechargeWhitelist,
 		ShortVideoUnsettledIncome: ext.ShortVideoUnsettledIncome,
 		Email:                     ext.Email,
+		ApkPromotionChannel:       strings.TrimSpace(ext.ApkPromotionChannel),
+		ApkPromotionChannelName:   resolveApkPromotionChannelName(ext.ApkPromotionChannel),
 	}
 	if !ext.UpdatedAt.IsZero() {
 		updatedAt := ext.UpdatedAt
 		item.UpdatedAt = &updatedAt
 	}
 	return item
+}
+
+func resolveApkPromotionChannelName(code string) string {
+	code = strings.TrimSpace(code)
+	if code == "" {
+		return ""
+	}
+	row := apkpromotionchanneldao.GetByChannelCode(code)
+	if row == nil {
+		return ""
+	}
+	return strings.TrimSpace(row.ChannelName)
 }
 
 func toUserCumulativeStatDetailItem(stat *userentity.UserCumulativeStat) *accountdto.UserCumulativeStatDetailItem {

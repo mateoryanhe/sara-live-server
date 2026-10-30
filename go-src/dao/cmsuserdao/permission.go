@@ -206,6 +206,10 @@ func cmsApiPermissionAliasPaths(apiPath string) []string {
 		return []string{"/sofieOfficialSiteDeploy/deployZip"}
 	case "/sofieOfficialSiteDeploy/saveOfficialSiteDeployCfgUpload":
 		return []string{"/sofieOfficialSiteDeploy/saveSofieOfficialSiteDeployCfg"}
+	case "/apkPromotionChannel/uploadApkFileChunk",
+		"/apkPromotionChannel/completeApkPromotionChannelApkUpload",
+		"/apkPromotionChannel/abortApkPromotionChannelApkUpload":
+		return []string{"/apkPromotionChannel/initApkPromotionChannelApkUpload"}
 	case "/sysStat/getSysStat",
 		"/sysStat/getUserStatTrend",
 		"/sysStat/getGameBetUserTrend",

@@ -55,6 +55,9 @@ export const DEFAULT_CONFIG_BUTTONS: PageButtonDef[] = [
 /** 仅访问 */
 export const DEFAULT_VIEW_BUTTONS: PageButtonDef[] = [BTN.view]
 
+/** 埋点趋势页：访问 + 导出当前 Tab 已加载数据 */
+export const TRACKING_TREND_PAGE_BUTTONS: PageButtonDef[] = [BTN.view, BTN.export]
+
 const READONLY_PAGES = new Set([
     'GoldCurrencyLogList',
     'DiamondCurrencyLogList',
@@ -203,14 +206,15 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
     Dashboard: [
         BTN.view,
         {key: 'basicDataReset', label: '重置基础数据统计'},
+        BTN.export,
     ],
-    TrackingHotLiveRoomJoinManagement: DEFAULT_VIEW_BUTTONS,
-    TrackingCall1v1InitiateManagement: DEFAULT_VIEW_BUTTONS,
-    TrackingMiniGameRoundStartManagement: DEFAULT_VIEW_BUTTONS,
-    TrackingShortVideoManagement: DEFAULT_VIEW_BUTTONS,
-    TrackingVoiceChatRoomManagement: DEFAULT_VIEW_BUTTONS,
-    TrackingRechargeManagement: DEFAULT_VIEW_BUTTONS,
-    TrackingDownloadManagement: DEFAULT_VIEW_BUTTONS,
+    TrackingHotLiveRoomJoinManagement: TRACKING_TREND_PAGE_BUTTONS,
+    TrackingCall1v1InitiateManagement: TRACKING_TREND_PAGE_BUTTONS,
+    TrackingMiniGameRoundStartManagement: TRACKING_TREND_PAGE_BUTTONS,
+    TrackingShortVideoManagement: TRACKING_TREND_PAGE_BUTTONS,
+    TrackingVoiceChatRoomManagement: TRACKING_TREND_PAGE_BUTTONS,
+    TrackingRechargeManagement: TRACKING_TREND_PAGE_BUTTONS,
+    TrackingDownloadManagement: TRACKING_TREND_PAGE_BUTTONS,
     UserList: [
         BTN.view,
         BTN.search,
@@ -582,6 +586,14 @@ export const PAGE_BUTTON_OVERRIDES: Record<string, PageButtonDef[]> = {
         BTN.view,
         BTN.save,
         {key: 'deploy', label: '上传部署'},
+    ],
+    ApkPromotionChannelListManagement: [
+        BTN.view,
+        BTN.search,
+        BTN.create,
+        BTN.edit,
+        BTN.delete,
+        {key: 'uploadApk', label: '上传APK'},
     ],
     AuditCodeCfgManagement: [
         BTN.view,

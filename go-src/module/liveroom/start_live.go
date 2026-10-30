@@ -76,6 +76,7 @@ func startAnchorLive(ctx context.Context, room *entity.LiveRoom, heartTime time.
 	}
 	addTask(room.ID)
 	initRoomAudienceCaches(room.ID)
+	resetLiveCameraEnabled(room.ID)
 
 	liveRecordId := snowflake.GetId()
 	room.SetLiveRecordId(liveRecordId)

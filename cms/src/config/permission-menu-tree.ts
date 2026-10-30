@@ -47,7 +47,7 @@ export interface PermissionModuleNode {
 
 const DASHBOARD_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
     {id: 'access', titleKey: 'pages.moduleList.groupAccess', buttonKeys: ['view']},
-    {id: 'dashboardStats', titleKey: 'pages.moduleList.groupDashboardStats', buttonKeys: ['basicDataReset']},
+    {id: 'dashboardStats', titleKey: 'pages.moduleList.groupDashboardStats', buttonKeys: ['basicDataReset', 'export']},
 ]
 
 const USER_LIST_BUTTON_GROUPS: readonly PermissionButtonGroupDef[] = [
@@ -296,6 +296,8 @@ export const PERMISSION_MENU_TREE: PermissionMenuNode[] = [
         children: [
             page('PromotionChannelUrlListManagement'),
             page('PromotionChannelDailyStatManagement'),
+            page('ApkPromotionChannelListManagement'),
+            page('ApkPromotionChannelDailyStatManagement'),
             page('PromotionInviteLogListManagement'),
             page('PromotionShareAppDownloadCfgManagement'),
         ],

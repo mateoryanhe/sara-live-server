@@ -109,6 +109,9 @@ const zh = {
   autoRefresh30s: '30 秒',
   autoRefresh60s: '60 秒',
   autoRefresh5m: '5 分钟',
+  exportAll: '一键导出全部数据（含埋点趋势）',
+  exportAllSuccess: '已导出 {count} 个 CSV 文件',
+  exportAllFailed: '一键导出失败，请稍后重试',
   walletResetUserIdPlaceholder: '用户 ID（仅重置该用户金币/钻石钱包）',
   walletResetUserIdRequired: '请输入用户 ID',
   walletResetUserNotFound: '未找到该用户',
@@ -120,6 +123,10 @@ const zh = {
   resetBasicDataConfirm2: '此操作仅重置服务端统计计数，不可自动恢复。确定执行？',
   resetBasicDataSuccess: '基础数据统计已归零',
   resetBasicDataFailed: '重置基础数据统计失败',
+  exportCsvSection: '分组',
+  exportCsvMetric: '指标',
+  exportCsvValue: '数值',
+  exportCsvTime: '时间',
 }
 
 const en = {
@@ -231,6 +238,9 @@ const en = {
   autoRefresh30s: '30s',
   autoRefresh60s: '60s',
   autoRefresh5m: '5m',
+  exportAll: 'Export all data (incl. tracking trends)',
+  exportAllSuccess: 'Exported {count} CSV file(s)',
+  exportAllFailed: 'Bulk export failed. Please try again.',
   walletResetUserIdPlaceholder: 'User ID (reset that user’s gold/diamond wallet only)',
   walletResetUserIdRequired: 'Enter a user ID',
   walletResetUserNotFound: 'User not found',
@@ -242,6 +252,10 @@ const en = {
   resetBasicDataConfirm2: 'This only resets server-side counters and cannot be undone automatically. Proceed?',
   resetBasicDataSuccess: 'Overview stats reset to zero',
   resetBasicDataFailed: 'Failed to reset overview stats',
+  exportCsvSection: 'Section',
+  exportCsvMetric: 'Metric',
+  exportCsvValue: 'Value',
+  exportCsvTime: 'Time',
 }
 
 const es = {
@@ -364,6 +378,13 @@ const es = {
   resetBasicDataConfirm2: 'Solo contadores del servidor; no se puede deshacer automáticamente. ¿Continuar?',
   resetBasicDataSuccess: 'Estadísticas básicas restablecidas',
   resetBasicDataFailed: 'Error al restablecer estadísticas básicas',
+  exportAll: 'Exportar todos los datos (incl. tendencias de tracking)',
+  exportAllSuccess: 'Se exportaron {count} archivos CSV',
+  exportAllFailed: 'Error al exportar todo. Inténtelo de nuevo.',
+  exportCsvSection: 'Sección',
+  exportCsvMetric: 'Métrica',
+  exportCsvValue: 'Valor',
+  exportCsvTime: 'Hora',
 }
 
 const pt = {
@@ -475,6 +496,9 @@ const pt = {
   autoRefresh30s: '30 s',
   autoRefresh60s: '60 s',
   autoRefresh5m: '5 min',
+  exportAll: 'Exportar todos os dados (incl. tendências de tracking)',
+  exportAllSuccess: '{count} arquivo(s) CSV exportado(s)',
+  exportAllFailed: 'Falha na exportação em lote. Tente novamente.',
   walletResetUserIdPlaceholder: 'ID do usuário (reset ouro/berlian)',
   walletResetUserIdRequired: 'Informe o ID do usuário',
   walletResetUserNotFound: 'Usuário não encontrado',
@@ -486,6 +510,10 @@ const pt = {
   resetBasicDataConfirm2: 'This only resets server-side counters and cannot be undone automatically. Proceed?',
   resetBasicDataSuccess: 'Overview stats reset to zero',
   resetBasicDataFailed: 'Failed to reset overview stats',
+  exportCsvSection: 'Section',
+  exportCsvMetric: 'Metric',
+  exportCsvValue: 'Value',
+  exportCsvTime: 'Time',
 }
 
 const hi = {
@@ -597,6 +625,9 @@ const hi = {
   autoRefresh30s: '30 से',
   autoRefresh60s: '60 से',
   autoRefresh5m: '5 मि',
+  exportAll: 'Export all data (incl. tracking trends)',
+  exportAllSuccess: 'Exported {count} CSV file(s)',
+  exportAllFailed: 'Bulk export failed. Please try again.',
   walletResetUserIdPlaceholder: 'उपयोगकर्ता ID (गोल्ड/डायमंड रीसेट)',
   walletResetUserIdRequired: 'उपयोगकर्ता ID दर्ज करें',
   walletResetUserNotFound: 'उपयोगकर्ता नहीं मिला',
@@ -608,6 +639,10 @@ const hi = {
   resetBasicDataConfirm2: 'This only resets server-side counters and cannot be undone automatically. Proceed?',
   resetBasicDataSuccess: 'Overview stats reset to zero',
   resetBasicDataFailed: 'Failed to reset overview stats',
+  exportCsvSection: 'Section',
+  exportCsvMetric: 'Metric',
+  exportCsvValue: 'Value',
+  exportCsvTime: 'Time',
 }
 
 const id = {
@@ -719,6 +754,9 @@ const id = {
   autoRefresh30s: '30 dtk',
   autoRefresh60s: '60 dtk',
   autoRefresh5m: '5 mnt',
+  exportAll: 'Export all data (incl. tracking trends)',
+  exportAllSuccess: 'Exported {count} CSV file(s)',
+  exportAllFailed: 'Bulk export failed. Please try again.',
   walletResetUserIdPlaceholder: 'ID pengguna (reset emas/berlian)',
   walletResetUserIdRequired: 'Masukkan ID pengguna',
   walletResetUserNotFound: 'Pengguna tidak ditemukan',
@@ -730,6 +768,10 @@ const id = {
   resetBasicDataConfirm2: 'This only resets server-side counters and cannot be undone automatically. Proceed?',
   resetBasicDataSuccess: 'Overview stats reset to zero',
   resetBasicDataFailed: 'Failed to reset overview stats',
+  exportCsvSection: 'Section',
+  exportCsvMetric: 'Metric',
+  exportCsvValue: 'Value',
+  exportCsvTime: 'Time',
 }
 
 export const dashboardMessages = definePageMessages(zh, en, es, pt, hi, id)

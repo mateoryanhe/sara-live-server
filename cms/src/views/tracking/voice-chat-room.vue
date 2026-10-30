@@ -4,7 +4,10 @@
       <template #header>
         <div class="card-header">
           <span>{{ t('menu.TrackingVoiceChatRoomManagement') }}</span>
-          <el-button :loading="loading" @click="fetchActiveTrend">{{ t('common.refresh') }}</el-button>
+          <div class="card-header-actions">
+            <el-button :loading="loading" @click="fetchActiveTrend">{{ t('common.refresh') }}</el-button>
+            <el-button v-if="canExport" @click="handleExport">{{ t('common.export') }}</el-button>
+          </div>
         </div>
       </template>
 
@@ -70,7 +73,9 @@ import {useI18n} from 'vue-i18n'
 import {computed, nextTick, onMounted, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {trackingEventApi} from '@/api/modules/tracking-event'
+import {useTrackingTrendExport} from '@/composables/useTrackingTrendExport'
 import type {HotLiveRoomJoinTrendRes} from '@/types/api'
+import {pickTrackingTrendPeriodPoints} from '@/utils/tracking-trend-export'
 import CountTrendChart from './components/count-trend-chart.vue'
 
 type TrackingEventKey = 'enter' | 'micRequest' | 'giftClick'
@@ -119,6 +124,26 @@ const activeSeriesName = computed(() => t(labelKey('SeriesName')))
 const activeChartDaily = computed(() => t(labelKey('ChartDaily')))
 const activeChartWeekly = computed(() => t(labelKey('ChartWeekly')))
 const activeChartMonthly = computed(() => t(labelKey('ChartMonthly')))
+
+const {canExport, handleExport} = useTrackingTrendExport('TrackingVoiceChatRoomManagement', () => {
+  const trend = activeTrend.value
+  const period = activePeriod.value
+  return {
+    fileSlug: 'voice-chat-room',
+    eventSlug: activeEvent.value,
+    period,
+    todayCount: Number(trend.todayCount) || 0,
+    weekCount: Number(trend.weekCount) || 0,
+    monthCount: Number(trend.monthCount) || 0,
+    points: pickTrackingTrendPeriodPoints(trend, period),
+    countColumnHeader: activeSeriesName.value,
+    summaryLabels: {
+      today: t('pages.trackingVoiceChatRoom.todayTotal'),
+      week: t('pages.trackingVoiceChatRoom.weekTotal'),
+      month: t('pages.trackingVoiceChatRoom.monthTotal'),
+    },
+  }
+})
 
 const formatCount = (value: number | string | null | undefined) => {
   if (value == null || value === '') {
@@ -203,6 +228,12 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.card-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .event-tabs {

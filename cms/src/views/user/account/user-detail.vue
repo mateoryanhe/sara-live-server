@@ -96,6 +96,9 @@
                   <el-descriptions-item :label="t('pages.userList.registerLoginChannel')">
                     {{ channelLabel(detail.account?.channel) }}
                   </el-descriptions-item>
+                  <el-descriptions-item :label="t('pages.userList.apkPromotionChannel')">
+                    {{ apkPromotionChannelLabel }}
+                  </el-descriptions-item>
                   <el-descriptions-item :label="t('pages.userList.lastLoginTime')">{{ formatDate(detail.profile?.lastLoginTime) }}</el-descriptions-item>
                   <el-descriptions-item :label="t('pages.userList.ip')">{{ detail.account?.ip || '-' }}</el-descriptions-item>
                   <el-descriptions-item :label="t('pages.userList.loginCountry')">{{ detail.account?.loginCountry || '-' }}</el-descriptions-item>
@@ -451,6 +454,18 @@ const shortVideoSubTab = ref<ShortVideoSubTab>(defaultShortVideoSubTab())
 const USER_TYPE_BOT_ANCHOR = 2
 
 const userId = computed(() => String(route.query.id || '').trim())
+
+const apkPromotionChannelLabel = computed(() => {
+  const code = detail.value?.userExt?.apkPromotionChannel?.trim()
+  if (!code) {
+    return '-'
+  }
+  const name = detail.value?.userExt?.apkPromotionChannelName?.trim()
+  if (name) {
+    return `${name} (${code})`
+  }
+  return code
+})
 
 const showBotAnchorStatus = computed(() => detail.value?.profile?.userType === USER_TYPE_BOT_ANCHOR)
 

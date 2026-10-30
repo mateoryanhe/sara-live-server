@@ -74,6 +74,7 @@ func PhoneRegister(ctx context.Context, req *authdto.PhoneRegisterReq) (res *aut
 		if data.InviterId == 0 {
 			data.SetInviterId(inviterId)
 			userinfodao.PublishUserInfo(data)
+			userinfodao.NotifyAppInviteeBound(inviterId, data)
 		}
 		ext := userinfodao.GetUserExtByUserId(account.ID)
 		if ext.InviterId == 0 {

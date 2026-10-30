@@ -106,6 +106,11 @@
                 <span class="field-unit">{{ t('pages.effectiveLiveCfg.minutes') }}</span>
               </el-form-item>
 
+              <el-form-item :label="t('pages.effectiveLiveCfg.cameraOffCountsAsEffectiveLive')">
+                <el-switch v-model="effectiveLiveForm.cameraOffCountsAsEffectiveLive"/>
+                <span class="field-tip">{{ t('pages.effectiveLiveCfg.cameraOffCountsAsEffectiveLiveTip') }}</span>
+              </el-form-item>
+
               <el-form-item v-if="effectiveLiveMeta.updatedAt" :label="t('pages.effectiveLiveCfg.lastUpdated')">
                 <span>{{ effectiveLiveMeta.updatedAt }}</span>
               </el-form-item>
@@ -272,6 +277,7 @@ const effectiveLiveForm = reactive({
   id: '0',
   minSessionMinutes: 30,
   dailyAccumulatedMinutes: 0,
+  cameraOffCountsAsEffectiveLive: false,
 })
 const effectiveLiveMeta = reactive({createdAt: '', updatedAt: ''})
 
@@ -300,6 +306,7 @@ const applyEffectiveLiveCfg = (cfg: EffectiveLiveCfg | null | undefined) => {
   effectiveLiveForm.id = cfg?.id || '0'
   effectiveLiveForm.minSessionMinutes = cfg?.minSessionMinutes || 30
   effectiveLiveForm.dailyAccumulatedMinutes = cfg?.dailyAccumulatedMinutes ?? 0
+  effectiveLiveForm.cameraOffCountsAsEffectiveLive = cfg?.cameraOffCountsAsEffectiveLive ?? false
   effectiveLiveMeta.createdAt = cfg?.createdAt || ''
   effectiveLiveMeta.updatedAt = cfg?.updatedAt || ''
 }
@@ -421,6 +428,7 @@ const handleSaveEffectiveLive = async () => {
       id: effectiveLiveForm.id === '0' ? 0 : Number(effectiveLiveForm.id),
       minSessionMinutes: effectiveLiveForm.minSessionMinutes,
       dailyAccumulatedMinutes: effectiveLiveForm.dailyAccumulatedMinutes,
+      cameraOffCountsAsEffectiveLive: effectiveLiveForm.cameraOffCountsAsEffectiveLive,
     })
     if (!response?.success) {
       ElMessage.error(t('pages.effectiveLiveCfg.saveFailed'))

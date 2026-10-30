@@ -21,3 +21,8 @@ func DailyAccumulatedMinutes() int {
 func DailyAccumulatedSeconds() float64 {
 	return float64(DailyAccumulatedMinutes() * 60)
 }
+
+// CameraOffCountsAsEffectiveLive 关摄像头期间是否仍累计有效直播时长;默认 false.
+func CameraOffCountsAsEffectiveLive() bool {
+	return cfgdao.CameraOffCountsAsEffectiveLive()
+}
